@@ -45,11 +45,6 @@ include_directories(
 )
 
 collect_sources(SOURCES "${CMAKE_CURRENT_SOURCE_DIR}")
-if (NOT REMOTE_CONTROL)
-  list (REMOVE_ITEM SOURCES
-    ${CMAKE_CURRENT_SOURCE_DIR}/access_remote_impl_test.cc
-  )
-endif ()
 
 set(LIBRARIES
   gmock

@@ -119,6 +119,9 @@ class MockMessageHelper {
                     ApplicationManager& application_manager,
                     hmi_apis::Common_HMILevel::eType level,
                     bool send_policy_priority));
+  MOCK_METHOD2(CreateMessageForHMI,
+               smart_objects::SmartObjectSPtr(hmi_apis::messageType::eType,
+                                              const uint32_t));
   MOCK_METHOD2(SendHMIStatusNotification,
                void(const Application& application_impl,
                     ApplicationManager& application_manager));
@@ -174,8 +177,6 @@ class MockMessageHelper {
   MOCK_METHOD1(CreateAddVRCommandRequestFromChoiceToHMI,
                smart_objects::SmartObjectList(ApplicationConstSharedPtr app));
   MOCK_METHOD1(SendGlobalPropertiesToHMI, void(ApplicationConstSharedPtr app));
-  MOCK_METHOD1(GetIVISubscriptionRequests,
-               smart_objects::SmartObjectList(ApplicationSharedPtr app));
   MOCK_METHOD3(VerifyTtsFiles,
                mobile_apis::Result::eType(smart_objects::SmartObject& message,
                                           ApplicationConstSharedPtr app,
@@ -296,10 +297,6 @@ class MockMessageHelper {
                     ApplicationManager& app_mngr));
   MOCK_METHOD3(SendUnsubscribeButtonNotification,
                void(mobile_apis::ButtonName::eType button,
-                    ApplicationSharedPtr application,
-                    ApplicationManager& app_mngr));
-  MOCK_METHOD3(SendUnsubscribeIVIRequest,
-               void(int32_t ivi_id,
                     ApplicationSharedPtr application,
                     ApplicationManager& app_mngr));
 

@@ -255,6 +255,7 @@ extern const char* fuel_level_state;
 extern const char* instant_fuel_consumption;
 extern const char* fuel_range;
 extern const char* external_temp;
+extern const char* turn_signal;
 extern const char* vin;
 extern const char* prndl;
 extern const char* tire_pressure;

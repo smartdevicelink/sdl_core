@@ -105,6 +105,7 @@ ApplicationImpl::ApplicationImpl(
     , active_message_(NULL)
     , is_media_(false)
     , is_navi_(false)
+    , is_remote_control_supported_(false)
     , mobile_projection_enabled_(false)
     , video_streaming_approved_(false)
     , audio_streaming_approved_(false)
@@ -172,7 +173,6 @@ ApplicationImpl::~ApplicationImpl() {
   }
 
   subscribed_buttons_.clear();
-  subscribed_vehicle_info_.clear();
   if (is_perform_interaction_active()) {
     set_perform_interaction_active(0);
     set_perform_interaction_mode(-1);
@@ -222,6 +222,14 @@ void ApplicationImpl::ChangeSupportingAppHMIType() {
 
 void ApplicationImpl::set_is_navi(bool allow) {
   is_navi_ = allow;
+}
+
+bool ApplicationImpl::is_remote_control_supported() const {
+  return is_remote_control_supported_;
+}
+
+void ApplicationImpl::set_remote_control_supported(const bool allow) {
+  is_remote_control_supported_ = allow;
 }
 
 bool ApplicationImpl::is_voice_communication_supported() const {
@@ -785,27 +793,6 @@ bool ApplicationImpl::UnsubscribeFromButton(
   return subscribed_buttons_.erase(btn_name);
 }
 
-bool ApplicationImpl::SubscribeToIVI(uint32_t vehicle_info_type) {
-  sync_primitives::AutoLock lock(vi_lock_ptr_);
-  return subscribed_vehicle_info_
-      .insert(
-           static_cast<mobile_apis::VehicleDataType::eType>(vehicle_info_type))
-      .second;
-}
-
-bool ApplicationImpl::IsSubscribedToIVI(uint32_t vehicle_info_type) const {
-  sync_primitives::AutoLock lock(vi_lock_ptr_);
-  VehicleInfoSubscriptions::const_iterator it = subscribed_vehicle_info_.find(
-      static_cast<mobile_apis::VehicleDataType::eType>(vehicle_info_type));
-  return (subscribed_vehicle_info_.end() != it);
-}
-
-bool ApplicationImpl::UnsubscribeFromIVI(uint32_t vehicle_info_type) {
-  sync_primitives::AutoLock lock(vi_lock_ptr_);
-  return subscribed_vehicle_info_.erase(
-      static_cast<mobile_apis::VehicleDataType::eType>(vehicle_info_type));
-}
-
 UsageStatistics& ApplicationImpl::usage_report() {
   return usage_report_;
 }
@@ -914,11 +901,6 @@ bool ApplicationImpl::AreCommandLimitsExceeded(
 DataAccessor<ButtonSubscriptions> ApplicationImpl::SubscribedButtons() const {
   return DataAccessor<ButtonSubscriptions>(subscribed_buttons_,
                                            button_lock_ptr_);
-}
-
-DataAccessor<VehicleInfoSubscriptions> ApplicationImpl::SubscribedIVI() const {
-  return DataAccessor<VehicleInfoSubscriptions>(subscribed_vehicle_info_,
-                                                vi_lock_ptr_);
 }
 
 const std::string& ApplicationImpl::curHash() const {
@@ -1096,8 +1078,6 @@ void ApplicationImpl::UnsubscribeFromSoftButtons(int32_t cmd_id) {
   }
 }
 
-#ifdef SDL_REMOTE_CONTROL
-
 void ApplicationImpl::set_system_context(
     const mobile_api::SystemContext::eType& system_context) {
   const HmiStatePtr hmi_state = CurrentHmiState();
@@ -1133,10 +1113,6 @@ void ApplicationImpl::set_hmi_level(
   usage_report_.RecordHmiStateChanged(new_hmi_level);
 }
 
-const VehicleInfoSubscriptions& ApplicationImpl::SubscribesIVI() const {
-  return subscribed_vehicle_info_;
-}
-
 AppExtensionPtr ApplicationImpl::QueryInterface(AppExtensionUID uid) {
   std::list<AppExtensionPtr>::const_iterator it = extensions_.begin();
   for (; it != extensions_.end(); ++it) {
@@ -1157,21 +1133,17 @@ bool ApplicationImpl::AddExtension(AppExtensionPtr extension) {
 }
 
 bool ApplicationImpl::RemoveExtension(AppExtensionUID uid) {
-  for (std::list<AppExtensionPtr>::iterator it = extensions_.begin();
-       extensions_.end() != it;
-       ++it) {
-    if ((*it)->uid() == uid) {
-      extensions_.erase(it);
-      return true;
-    }
-  }
-  return false;
+  auto it = std::find_if(
+      extensions_.begin(),
+      extensions_.end(),
+      [uid](AppExtensionPtr extension) { return extension->uid() == uid; });
+
+  return it != extensions_.end();
 }
 
-void ApplicationImpl::RemoveExtensions() {
-  application_manager_.GetPluginManager().RemoveAppExtension(app_id_);
+const std::list<AppExtensionPtr>& ApplicationImpl::Extensions() const {
+  return extensions_;
 }
-#endif  // SDL_REMOTE_CONTROL
 
 void ApplicationImpl::PushMobileMessage(
     smart_objects::SmartObjectSPtr mobile_message) {

@@ -34,7 +34,7 @@
 
 #include "application_manager/request_controller.h"
 #include "application_manager/commands/command_request_impl.h"
-#include "application_manager/commands/hmi/request_to_hmi.h"
+#include "application_manager/commands/request_to_hmi.h"
 #include "utils/make_shared.h"
 #include "utils/timer_task_impl.h"
 

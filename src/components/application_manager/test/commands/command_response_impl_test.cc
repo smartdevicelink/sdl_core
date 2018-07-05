@@ -78,7 +78,7 @@ TEST_F(CommandResponseImplTest, SendResponse_MessageWithResultCode_SUCCESS) {
   // then send message to mobile.
   (*msg)[strings::msg_params][strings::result_code] = kResultCode;
 
-  EXPECT_CALL(app_mngr_, SendMessageToMobile(msg, kFinalResponse));
+  EXPECT_CALL(mock_rpc_service_, SendMessageToMobile(msg, kFinalResponse));
 
   command->SendResponse(kSuccess, kResultCode, kFinalResponse);
 }
@@ -94,7 +94,7 @@ TEST_F(CommandResponseImplTest,
       mobile_apis::Result::eType::SUCCESS;
   const bool kFinalResponse = true;
 
-  EXPECT_CALL(app_mngr_, SendMessageToMobile(msg, kFinalResponse));
+  EXPECT_CALL(mock_rpc_service_, SendMessageToMobile(msg, kFinalResponse));
 
   // If `msg_params->result_code` does not exist in message
   // and arg `result_code` not equals `INVALID_ENUM`,
@@ -122,7 +122,7 @@ TEST_F(CommandResponseImplTest,
   // then set it to `msg_params->result_code` and send message to mobile.
   (*msg)[strings::params][hmi_response::code] = mobile_apis::Result::SUCCESS;
 
-  EXPECT_CALL(app_mngr_, SendMessageToMobile(msg, kFinalResponse));
+  EXPECT_CALL(mock_rpc_service_, SendMessageToMobile(msg, kFinalResponse));
 
   command->SendResponse(kSuccess, kResultCode, kFinalResponse);
 
@@ -147,7 +147,7 @@ TEST_F(CommandResponseImplTest,
   // then `msg_params->result_code` will be `SUCCESS`
   const bool kSuccess = true;
 
-  EXPECT_CALL(app_mngr_, SendMessageToMobile(msg, kFinalResponse));
+  EXPECT_CALL(mock_rpc_service_, SendMessageToMobile(msg, kFinalResponse));
 
   command->SendResponse(kSuccess, kResultCode, kFinalResponse);
 
@@ -172,7 +172,7 @@ TEST_F(CommandResponseImplTest,
   // then `msg_params->result_code` will be `INVALID_ENUM`
   const bool kSuccess = false;
 
-  EXPECT_CALL(app_mngr_, SendMessageToMobile(msg, kFinalResponse));
+  EXPECT_CALL(mock_rpc_service_, SendMessageToMobile(msg, kFinalResponse));
 
   command->SendResponse(kSuccess, kResultCode, kFinalResponse);
 
