@@ -115,19 +115,19 @@ void GetInteriorVehicleDataRequest::Execute() {
   auto app_should_be_unsubscribed = [this]() {
     const auto& msg_params = (*message_)[app_mngr::strings::msg_params];
     if (msg_params.keyExists(message_params::kSubscribe)) {
-      return msg_params[message_params::kSubscribe].asBool();
+      return !msg_params[message_params::kSubscribe].asBool();
     }
     return false;
   };
 
-  bool force_transfer_to_hmi = true;
+  bool force_transfer_to_hmi = false;
 
   if (app_should_be_unsubscribed()) {
     const auto subscribed_to_module_type =
         AppsSubscribedToModuleType(ModuleType());
     if (subscribed_to_module_type.size() == 1 &&
         subscribed_to_module_type.front() == app) {
-      force_transfer_to_hmi = false;
+      force_transfer_to_hmi = true;
     }
   }
 
