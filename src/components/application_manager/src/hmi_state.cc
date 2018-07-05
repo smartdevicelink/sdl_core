@@ -321,7 +321,8 @@ std::ostream& operator<<(std::ostream& os, const HmiState::StateID src) {
 std::ostream& operator<<(std::ostream& os, const HmiState& src) {
   const ApplicationSharedPtr app =
       src.app_mngr_.application_by_hmi_app(src.hmi_app_id_);
-  os << "HMIState(app id:" << app->app_id() << ", state:" << src.state_id()
+  os << "HMIState(app id:" << app->app_id()
+     << ", hmi app id:" << src.hmi_app_id_ << ", state:" << src.state_id()
      << ", hmi_level:" << src.hmi_level()
      << ", audio:" << src.audio_streaming_state()
      << ", video:" << src.video_streaming_state()
