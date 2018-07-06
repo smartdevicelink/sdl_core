@@ -1171,9 +1171,19 @@ MessageHelper::CreateGlobalPropertiesRequestsToHMI(
     return requests;
   }
 
+  auto& help_prompt_manager =
+      const_cast<Application*>(app.get())->help_prompt_manager();
+
+  const bool can_send_ui = helpers::Compare<HelpPromptManager::SendingType,
+                                            helpers::EQ,
+                                            helpers::ONE>(
+      help_prompt_manager.GetSendingType(),
+      HelpPromptManager::SendingType::kSendVRHelp,
+      HelpPromptManager::SendingType::kSendBoth);
+
   // UI global properties
 
-  if (app->vr_help_title() || app->vr_help()) {
+  if (can_send_ui && (app->vr_help_title() || app->vr_help())) {
     smart_objects::SmartObjectSPtr ui_global_properties =
         CreateMessageForHMI(hmi_apis::messageType::request, correlation_id);
     if (!ui_global_properties) {
@@ -1207,8 +1217,15 @@ MessageHelper::CreateGlobalPropertiesRequestsToHMI(
     requests.push_back(ui_global_properties);
   }
 
+  const bool can_send_vr = helpers::Compare<HelpPromptManager::SendingType,
+                                            helpers::EQ,
+                                            helpers::ONE>(
+      help_prompt_manager.GetSendingType(),
+      HelpPromptManager::SendingType::kSendHelpPrompt,
+      HelpPromptManager::SendingType::kSendBoth);
+
   // TTS global properties
-  if (app->help_prompt() || app->timeout_prompt()) {
+  if (can_send_vr && (app->help_prompt() || app->timeout_prompt())) {
     smart_objects::SmartObjectSPtr tts_global_properties =
         CreateMessageForHMI(hmi_apis::messageType::request, correlation_id);
     if (!tts_global_properties) {

@@ -61,59 +61,49 @@ HelpPromptManagerImpl::~HelpPromptManagerImpl() {
   LOG4CXX_AUTO_TRACE(logger_);
 }
 
-void HelpPromptManagerImpl::OnVrCommandAdded(
-    const uint32_t cmd_id, const smart_objects::SmartObject& command) {
-  LOG4CXX_AUTO_TRACE(logger_);
-  if (SendingType::kNoneSend == sending_type_) {
-    LOG4CXX_DEBUG(logger_,
-                  "SendingType::kNoneSend"
-                      << " commands with id:" << cmd_id
-                      << " will not be added");
-    return;
-  }
-  AddCommand(cmd_id, command);
-  SendRequests();
-}
-
-void HelpPromptManagerImpl::AddCommand(
+bool HelpPromptManagerImpl::AddCommand(
     const uint32_t cmd_id, const smart_objects::SmartObject& command) {
   sync_primitives::AutoLock lock(vr_commands_lock_);
   auto it = vr_commands_.find(cmd_id);
   if (vr_commands_.end() != it) {
     LOG4CXX_DEBUG(logger_, "Commands with id:" << cmd_id << " already exists");
-    return;
+    return false;
   }
 
   if (false == command.keyExists(strings::vr_commands)) {
     LOG4CXX_DEBUG(logger_, "vr_commands does`t present");
-    return;
+    return false;
   }
   const smart_objects::SmartObject& commands = command[strings::vr_commands];
-  /**
-   * The remaining number of commands for adding
-   */
-  std::size_t limit = kLimitCommand - count_requests_commands_;
-  LOG4CXX_DEBUG(logger_, "Remaining number of commands" << limit);
+
+  const std::size_t limit = kLimitCommand - count_requests_commands_;
+  const std::size_t count_new_commands = commands.length();
+
+  LOG4CXX_DEBUG(logger_,
+                "Remaining number of commands: "
+                    << limit << "; commands to add: " << count_new_commands);
   if (0 == limit || limit > kLimitCommand) {
     LOG4CXX_DEBUG(logger_, "Commands limit is exceeded");
-    return;
+    return false;
   }
 
-  std::size_t count_new_commands = commands.length();
-
-  LOG4CXX_DEBUG(logger_, "Adding " << count_new_commands << " commands");
+  const std::size_t count_to_add =
+      limit > count_new_commands ? count_new_commands : limit;
+  LOG4CXX_DEBUG(logger_, "Adding " << count_to_add << " commands");
 
   vr_commands_[cmd_id] = utils::MakeShared<smart_objects::SmartObject>(
       smart_objects::SmartType_Array);
   smart_objects::SmartArray& ar_vr_cmd = *(vr_commands_[cmd_id]->asArray());
   smart_objects::SmartArray& ar_cmd = *(commands.asArray());
-  ar_vr_cmd.reserve(count_new_commands);
+  ar_vr_cmd.reserve(count_requests_commands_ + count_to_add);
   ar_vr_cmd.insert(
-      ar_vr_cmd.end(), ar_cmd.begin(), ar_cmd.begin() + count_new_commands);
+      ar_vr_cmd.end(), ar_cmd.begin(), ar_cmd.begin() + count_to_add);
+
   LOG4CXX_DEBUG(logger_,
                 "VR commands with id: " << cmd_id << " added for appID: "
                                         << app_.app_id());
-  count_requests_commands_ += count_new_commands;
+  count_requests_commands_ += count_to_add;
+  return true;
 }
 
 bool HelpPromptManagerImpl::DeleteCommand(const uint32_t cmd_id) {
@@ -126,17 +116,36 @@ bool HelpPromptManagerImpl::DeleteCommand(const uint32_t cmd_id) {
     return false;
   }
 
-  count_requests_commands_ -=
-      kLimitCommand == count_requests_commands_ ? 0 : it->second->length();
+  count_requests_commands_ -= it->second->length();
 
   vr_commands_.erase(it);
-  LOG4CXX_DEBUG(logger_,
-                "VR command with id: " << cmd_id << " deleted for appID: "
-                                       << app_.app_id());
+  LOG4CXX_DEBUG(
+      logger_,
+      "VR command with id: "
+          << cmd_id << " deleted for appID: " << app_.app_id()
+          << ". Remaining number of commands: " << count_requests_commands_);
   return true;
 }
 
-void HelpPromptManagerImpl::OnVrCommandDeleted(const uint32_t cmd_id) {
+void HelpPromptManagerImpl::OnVrCommandAdded(
+    const uint32_t cmd_id,
+    const smart_objects::SmartObject& command,
+    const bool is_resumption) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  if (SendingType::kNoneSend == sending_type_) {
+    LOG4CXX_DEBUG(logger_,
+                  "SendingType::kNoneSend"
+                      << " commands with id:" << cmd_id
+                      << " will not be added");
+    return;
+  }
+  if (AddCommand(cmd_id, command) && !is_resumption) {
+    SendRequests();
+  }
+}
+
+void HelpPromptManagerImpl::OnVrCommandDeleted(const uint32_t cmd_id,
+                                               const bool is_resumption) {
   LOG4CXX_AUTO_TRACE(logger_);
   if (SendingType::kNoneSend == sending_type_) {
     LOG4CXX_DEBUG(logger_,
@@ -145,7 +154,7 @@ void HelpPromptManagerImpl::OnVrCommandDeleted(const uint32_t cmd_id) {
                       << " will not be deleted");
     return;
   }
-  if (DeleteCommand(cmd_id)) {
+  if (DeleteCommand(cmd_id) && !is_resumption) {
     SendRequests();
   }
 }
@@ -159,46 +168,38 @@ void HelpPromptManagerImpl::OnSetGlobalPropertiesReceived(
                   " do not track SetGlobalProperties");
     return;
   }
-  sending_type_ = GetSendingType(msg, is_response);
-  LOG4CXX_DEBUG(logger_, "Set sending type to:" << unsigned(sending_type_));
-}
 
-void HelpPromptManagerImpl::OnAppActivated(const bool is_restore) {
-  LOG4CXX_AUTO_TRACE(logger_);
-  LOG4CXX_DEBUG(logger_, "Activated for appID:" << app_.app_id());
+  if (!is_response) {
+    if (msg.keyExists(strings::help_prompt)) {
+      is_tts_send_ = true;
+    }
+    if (msg.keyExists(strings::vr_help)) {
+      is_ui_send_ = true;
+    }
 
-  if (is_restore) {
-    LOG4CXX_DEBUG(logger_, "restoring");
-    is_tts_send_ = (app_.help_prompt() && app_.help_prompt()->length());
-    is_ui_send_ = (app_.vr_help() && app_.vr_help()->length());
     LOG4CXX_DEBUG(logger_, "is_tts_send_:" << is_tts_send_);
     LOG4CXX_DEBUG(logger_, "is_ui_send_:" << is_ui_send_);
-    if (is_tts_send_ && is_ui_send_) {
-      sending_type_ = SendingType::kNoneSend;
-      LOG4CXX_DEBUG(logger_,
-                    "SetGlobalProperties RPC"
-                    " with the vrHelp and helpPrompt"
-                    " has been sent");
-      return;
-    } else {
-      sending_type_ = is_tts_send_ ? SendingType::kSendVRHelp : sending_type_;
-      sending_type_ =
-          is_ui_send_ ? SendingType::kSendHelpPrompt : sending_type_;
-      is_tts_send_ = false;
-      is_ui_send_ = false;
-      const DataAccessor<CommandsMap> accessor = app_.commands_map();
-      const CommandsMap& commands = accessor.GetData();
-      for (auto& command : commands) {
-        AddCommand(command.first, *command.second);
-      }
-    }
+    return;
   }
-  SendRequests();
+
+  SetSendingType(msg);
 }
 
-void HelpPromptManagerImpl::OnAppUnregistered() {
-  LOG4CXX_AUTO_TRACE(logger_);
-  LOG4CXX_DEBUG(logger_, "Unregisted for appID:" << app_.app_id());
+HelpPromptManagerImpl::SendingType HelpPromptManagerImpl::GetSendingType()
+    const {
+  if (is_tts_send_ && is_ui_send_) {
+    return sending_type_;
+  } else if (is_tts_send_) {
+    return SendingType::kSendHelpPrompt == sending_type_
+               ? SendingType::kNoneSend
+               : SendingType::kSendVRHelp;
+  } else if (is_ui_send_) {
+    return SendingType::kSendVRHelp == sending_type_
+               ? SendingType::kNoneSend
+               : SendingType::kSendHelpPrompt;
+  }
+
+  return sending_type_;
 }
 
 void HelpPromptManagerImpl::SendTTSRequest() {
@@ -236,6 +237,7 @@ void HelpPromptManagerImpl::SendTTSRequest() {
     so_to_send[strings::msg_params] = msg_params;
     app_manager_.GetRPCService().ManageHMICommand(tts_global_properties);
   }
+  is_tts_send_ = false;
 }
 
 void HelpPromptManagerImpl::SendUIRequest() {
@@ -273,6 +275,7 @@ void HelpPromptManagerImpl::SendUIRequest() {
     so_to_send[strings::msg_params] = msg_params;
     app_manager_.GetRPCService().ManageHMICommand(ui_global_properties);
   }
+  is_ui_send_ = false;
 }
 
 void HelpPromptManagerImpl::SendBothRequests() {
@@ -304,7 +307,7 @@ void HelpPromptManagerImpl::SendRequests() {
       break;
   }
   LOG4CXX_DEBUG(logger_,
-                "SendingType:" << (unsigned)sending_type_
+                "SendingType:" << static_cast<uint32_t>(sending_type_)
                                << " request not sending");
 }
 
@@ -361,20 +364,10 @@ void HelpPromptManagerImpl::CreateVRMsg(
   app_.set_vr_help(out_msg_params[strings::vr_help]);
 }
 
-HelpPromptManagerImpl::SendingType HelpPromptManagerImpl::GetSendingType(
-    const smart_objects::SmartObject& msg, const bool is_response) {
+void HelpPromptManagerImpl::SetSendingType(
+    const smart_objects::SmartObject& msg) {
   LOG4CXX_AUTO_TRACE(logger_);
-  if (!is_response) {
-    if (msg.keyExists(strings::help_prompt)) {
-      is_tts_send_ = true;
-    }
-    if (msg.keyExists(strings::vr_help)) {
-      is_ui_send_ = true;
-    }
-    LOG4CXX_DEBUG(logger_, "is_tts_send_:" << is_tts_send_);
-    LOG4CXX_DEBUG(logger_, "is_ui_send_:" << is_ui_send_);
-    return sending_type_;
-  }
+
   hmi_apis::Common_Result::eType result =
       static_cast<hmi_apis::Common_Result::eType>(
           msg[strings::params][hmi_response::code].asInt());
@@ -385,27 +378,30 @@ HelpPromptManagerImpl::SendingType HelpPromptManagerImpl::GetSendingType(
             msg[strings::params][strings::function_id].asUInt());
     LOG4CXX_DEBUG(logger_, "Function id:" << function_id);
     switch (function_id) {
-      case hmi_apis::FunctionID::TTS_SetGlobalProperties:
+      case hmi_apis::FunctionID::TTS_SetGlobalProperties: {
         if (is_tts_send_) {
           is_tts_send_ = false;
-          return (SendingType::kSendHelpPrompt == sending_type_)
-                     ? SendingType::kNoneSend
-                     : SendingType::kSendVRHelp;
+          sending_type_ = SendingType::kSendHelpPrompt == sending_type_
+                              ? SendingType::kNoneSend
+                              : SendingType::kSendVRHelp;
         }
         break;
-      case hmi_apis::FunctionID::UI_SetGlobalProperties:
+      }
+      case hmi_apis::FunctionID::UI_SetGlobalProperties: {
         if (is_ui_send_) {
           is_ui_send_ = false;
-          return (SendingType::kSendVRHelp == sending_type_)
-                     ? SendingType::kNoneSend
-                     : SendingType::kSendHelpPrompt;
+          sending_type_ = SendingType::kSendVRHelp == sending_type_
+                              ? SendingType::kNoneSend
+                              : SendingType::kSendHelpPrompt;
         }
         break;
-      default:
-        return sending_type_;
+      }
+      default: { break; }
     }
+    LOG4CXX_DEBUG(
+        logger_,
+        "Sending type set to:" << static_cast<uint32_t>(sending_type_));
   }
-  return sending_type_;
 }
 
 }  //  namespace application_manager

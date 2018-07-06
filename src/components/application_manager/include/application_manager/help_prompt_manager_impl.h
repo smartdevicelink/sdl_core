@@ -54,31 +54,40 @@ class HelpPromptManagerImpl : public HelpPromptManager {
    * @brief Continer for buffering VR help commands
   */
   typedef std::map<uint32_t, smart_objects::SmartObjectSPtr> VRCommandsMap;
+
   /**
    * @brief Class constructor
    * @param app owner for this class
    */
   HelpPromptManagerImpl(Application& app, ApplicationManager& app_manager);
+
   /**
    * @brief Class destructor
    */
   ~HelpPromptManagerImpl();
-  /**
-   * @brief The type sends info to HMI
-   */
-  enum class SendingType { kNoneSend, kSendHelpPrompt, kSendVRHelp, kSendBoth };
 
   /**
-   * @brief Adds command to constructed values, and send SetGlobalProperties if
+   * @brief Adds command to constructed values, and sends SetGlobalProperties if
    * required
+   * @param cmd_id command unique ID
+   * @param command smart object with commands to add
+   * @param is_resumption flag for identifying if command was added during data
+   * resumption process
    */
   void OnVrCommandAdded(const uint32_t cmd_id,
-                        const smart_objects::SmartObject& command) OVERRIDE;
+                        const smart_objects::SmartObject& command,
+                        const bool is_resumption) OVERRIDE;
+
   /**
    * @brief Removes command from constructed values, and send
    * SetGlobalProperties if required
+   * @param cmd_id command unique ID
+   * @param is_resumption flag for identifying if command was added during data
+   * resumption process
    */
-  void OnVrCommandDeleted(const uint32_t cmd_id) OVERRIDE;
+  void OnVrCommandDeleted(const uint32_t cmd_id,
+                          const bool is_resumption) OVERRIDE;
+
   /**
      * @brief Stop constructing vrHelp and/or helpPrompt if they are present in
      * message
@@ -88,25 +97,23 @@ class HelpPromptManagerImpl : public HelpPromptManager {
      */
   void OnSetGlobalPropertiesReceived(const smart_objects::SmartObject& msg,
                                      const bool is_response) OVERRIDE;
+
   /**
-    * @brief Starts mechanism for handling "help" requests
-    * @param is_restore determines the need to restore commands
-    * after resuming
-    */
-  void OnAppActivated(const bool is_restore) OVERRIDE;
-  /**
-    * @brief Stop mechanism for handling "help" requests
-    */
-  void OnAppUnregistered() OVERRIDE;
+   * @brief Get current sending type
+   * @return current sending type
+   */
+  SendingType GetSendingType() const OVERRIDE;
 
  private:
   DISALLOW_COPY_AND_ASSIGN(HelpPromptManagerImpl);
+
   /**
    * @brief Add new smart object with VR command to the map
    * @param cmd_id ID of VR command
    * @param command smart object containing VR command structure
+   * @return true if command was added successfully otherwise returns false
    */
-  void AddCommand(const uint32_t cmd_id,
+  bool AddCommand(const uint32_t cmd_id,
                   const smart_objects::SmartObject& command);
   /**
    * @brief Delete VR command from map by its cmd_id
@@ -114,40 +121,43 @@ class HelpPromptManagerImpl : public HelpPromptManager {
    * @return true if command was successfully deleted otherwise returns false
    */
   bool DeleteCommand(const uint32_t cmd_id);
+
   /**
    * @brief Send TTS request to HMI
    */
   void SendTTSRequest();
+
   /**
    * @brief Send UI request to HMI
    */
   void SendUIRequest();
+
   /**
    * @brief Send TTS and UI requests to HMI
    */
   void SendBothRequests();
+
   /**
    * @brief Send TTS or UI or both Requests
    */
   void SendRequests();
+
   /**
    * @brief Construct the helpPrompt parameter
    */
   void CreatePromptMsg(smart_objects::SmartObject& out_msg_params);
+
   /**
    * @brief Construct the vrHelp parameter
    */
   void CreateVRMsg(smart_objects::SmartObject& out_msg_params);
+
   /**
-   * @brief Getting request type to send HMI
+   * @brief Setting request type to send HMI
    * @param msg containing request or response for the
    * SetGlobalPropertiesRequest
-   * @param is_response determines is the request or response for the for
-   * the SetGlobalPropertiesRequest
-   * @return SendingType
    */
-  SendingType GetSendingType(const smart_objects::SmartObject& msg,
-                             const bool is_response);
+  void SetSendingType(const smart_objects::SmartObject& msg);
 
   Application& app_;
   ApplicationManager& app_manager_;

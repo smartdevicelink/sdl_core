@@ -162,17 +162,7 @@ bool ResumeCtrlImpl::RestoreAppHMIState(ApplicationSharedPtr application) {
           static_cast<mobile_apis::HMILevel::eType>(
               saved_app[strings::hmi_level].asInt());
       LOG4CXX_DEBUG(logger_, "Saved HMI Level is : " << saved_hmi_level);
-      result = SetAppHMIState(application, saved_hmi_level, true);
-      if (result) {
-        const HMILevel::eType def_hmi_level =
-            application_manager_.GetDefaultHmiLevel(application);
-        if (def_hmi_level != saved_hmi_level) {
-          auto& help_prompt_manager = application->help_prompt_manager();
-          const bool is_restore = true;
-          help_prompt_manager.OnAppActivated(is_restore);
-        }
-      }
-      return result;
+      return SetAppHMIState(application, saved_hmi_level, true);
     } else {
       result = false;
       LOG4CXX_ERROR(logger_, "saved app data corrupted");
@@ -555,8 +545,12 @@ void ResumeCtrlImpl::AddCommands(ApplicationSharedPtr application,
         saved_app[strings::application_commands];
     for (size_t i = 0; i < app_commands.length(); ++i) {
       const smart_objects::SmartObject& command = app_commands[i];
+      const uint32_t cmd_id = command[strings::cmd_id].asUInt();
+      const bool is_resumption = true;
 
-      application->AddCommand(command[strings::cmd_id].asUInt(), command);
+      application->AddCommand(cmd_id, command);
+      application->help_prompt_manager().OnVrCommandAdded(
+          cmd_id, command, is_resumption);
     }
     ProcessHMIRequests(MessageHelper::CreateAddCommandRequestToHMI(
         application, application_manager_));

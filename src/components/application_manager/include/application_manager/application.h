@@ -639,6 +639,7 @@ class Application : public virtual InitialApplicationData,
    * @return object for recording statistics
    */
   virtual UsageStatistics& usage_report() = 0;
+
   /**
    * @brief Access to HelpPromptManager interface
    * @return object for Handling VR help

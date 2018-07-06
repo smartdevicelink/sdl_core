@@ -46,17 +46,29 @@ class HelpPromptManager {
    * @brief Class destructor
    */
   virtual ~HelpPromptManager() {}
+
   /**
    * @brief Adds command to constructed values, and sends SetGlobalProperties if
    * required
+   * @param cmd_id command unique ID
+   * @param command smart object with commands to add
+   * @param is_resumption flag for identifying if command was added during data
+   * resumption process
    */
   virtual void OnVrCommandAdded(const uint32_t cmd_id,
-                                const smart_objects::SmartObject& command) = 0;
+                                const smart_objects::SmartObject& command,
+                                const bool is_resumption) = 0;
+
   /**
    * @brief Removes command from constructed values, and send
    * SetGlobalProperties if required
+   * @param cmd_id command unique ID
+   * @param is_resumption flag for identifying if command was added during data
+   * resumption process
    */
-  virtual void OnVrCommandDeleted(const uint32_t cmd_id) = 0;
+  virtual void OnVrCommandDeleted(const uint32_t cmd_id,
+                                  const bool is_resumption) = 0;
+
   /**
    * @brief Stop constructing vrHelp and/or helpPrompt if they are present in
    * message
@@ -66,16 +78,17 @@ class HelpPromptManager {
    */
   virtual void OnSetGlobalPropertiesReceived(
       const smart_objects::SmartObject& msg, const bool is_response) = 0;
+
   /**
-   * @brief Starts mechanism for handling "help" requests
-   * @param is_restore determines the need to restore commands
-   * after resuming
+   * @brief Requests sending type behavior
    */
-  virtual void OnAppActivated(const bool is_restore) = 0;
+  enum class SendingType { kNoneSend, kSendHelpPrompt, kSendVRHelp, kSendBoth };
+
   /**
-   * @brief Stop mechanism for handling "help" requests
+   * @brief Get current sending type
+   * @return current sending type
    */
-  virtual void OnAppUnregistered() = 0;
+  virtual SendingType GetSendingType() const = 0;
 };
 
 }  //  namespace application_manager

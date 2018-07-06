@@ -21,6 +21,7 @@ void DeleteCommands(ApplicationSharedPtr app, ApplicationManager& app_manager) {
   for (auto cmd : cmap) {
     MessageHelper::SendDeleteCommandRequest(cmd.second, app, app_manager);
     app->RemoveCommand(cmd.first);
+    app->help_prompt_manager().OnVrCommandDeleted(cmd.first, true);
   }
 }
 

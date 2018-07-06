@@ -662,10 +662,6 @@ bool ApplicationManagerImpl::ActivateApplication(ApplicationSharedPtr app) {
   LOG4CXX_AUTO_TRACE(logger_);
   DCHECK_OR_RETURN(app, false);
 
-  auto& help_prompt_manager = app->help_prompt_manager();
-  const bool is_restore = false;
-  help_prompt_manager.OnAppActivated(is_restore);
-
   LOG4CXX_DEBUG(logger_, "Activating application with id:" << app->app_id());
 
   // remove from resumption if app was activated by user
@@ -2469,9 +2465,6 @@ void ApplicationManagerImpl::UnregisterApplication(
       SendUpdateAppList();
     }
   }
-
-  auto& help_prompt_manager = app_to_remove->help_prompt_manager();
-  help_prompt_manager.OnAppUnregistered();
 
   commands_holder_->Clear(app_to_remove);
 

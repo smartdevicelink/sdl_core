@@ -247,6 +247,7 @@ class ApplicationImpl : public virtual Application,
   void SetHashChangedDuringSuspend(const bool state) OVERRIDE;
 
   UsageStatistics& usage_report();
+
   /**
    * @brief Access to HelpPromptManager interface
    * @return object for Handling VR help
