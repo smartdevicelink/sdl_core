@@ -109,7 +109,7 @@ class ResumeCtrlTest : public ::testing::Test {
         .WillByDefault(ReturnRef(mock_state_controller_));
     ON_CALL(mock_app_mngr_, get_settings())
         .WillByDefault(ReturnRef(mock_application_manager_settings_));
-    EXPECT_CALL(app_mngr_, CheckResumptionRequiredTransportAvailable(_))
+    EXPECT_CALL(mock_app_mngr_, CheckResumptionRequiredTransportAvailable(_))
         .Times(AtLeast(0))
         .WillRepeatedly(Return(true));
 
@@ -132,7 +132,7 @@ class ResumeCtrlTest : public ::testing::Test {
         .Times(AtLeast(0))
         .WillRepeatedly(ReturnRef(kMediaLowbandwidthLevel_));
 
-    EXPECT_CALL(*app_mock_, deferred_resumption_hmi_level())
+    EXPECT_CALL(*mock_app_, deferred_resumption_hmi_level())
         .Times(AtLeast(0))
         .WillRepeatedly(Return(kDefaultDeferredTestLevel_));
   }
@@ -579,8 +579,8 @@ TEST_F(ResumeCtrlTest, StartResumptionOnlyHMILevel) {
 TEST_F(ResumeCtrlTest, RetryResumption) {
   const uint32_t app_id = 1;
 
-  EXPECT_CALL(app_mngr_, application(app_id)).WillOnce(Return(app_mock_));
-  EXPECT_CALL(*app_mock_, deferred_resumption_hmi_level())
+  EXPECT_CALL(mock_app_mngr_, application(app_id)).WillOnce(Return(mock_app_));
+  EXPECT_CALL(*mock_app_, deferred_resumption_hmi_level())
       .WillOnce(Return(eType::HMI_FULL));
 
   res_ctrl_->RetryResumption(app_id);
@@ -592,8 +592,8 @@ TEST_F(ResumeCtrlTest, RetryResumption) {
 TEST_F(ResumeCtrlTest, RetryResumption_NotDeferred) {
   const uint32_t app_id = 1;
 
-  EXPECT_CALL(app_mngr_, application(app_id)).WillOnce(Return(app_mock_));
-  EXPECT_CALL(*app_mock_, deferred_resumption_hmi_level())
+  EXPECT_CALL(mock_app_mngr_, application(app_id)).WillOnce(Return(mock_app_));
+  EXPECT_CALL(*mock_app_, deferred_resumption_hmi_level())
       .WillOnce(Return(eType::INVALID_ENUM));
 
   res_ctrl_->RetryResumption(app_id);
@@ -651,7 +651,7 @@ TEST_F(ResumeCtrlTest, StartAppHmiStateResumption_AppHasDeferredResumption) {
   saved_app[application_manager::strings::hmi_level] = restored_test_type;
 
   // resume into deferred level instead of restored level
-  EXPECT_CALL(state_controller_, SetRegularState(_, deferred_level))
+  EXPECT_CALL(mock_state_controller_, SetRegularState(_, deferred_level))
       .Times(AtLeast(1));
   GetInfoFromApp();
   ON_CALL(*mock_storage_,
@@ -659,9 +659,9 @@ TEST_F(ResumeCtrlTest, StartAppHmiStateResumption_AppHasDeferredResumption) {
       .WillByDefault(DoAll(SetArgReferee<2>(saved_app), Return(true)));
 
   mobile_apis::HMILevel::eType app_deferred_level = deferred_level;
-  EXPECT_CALL(*app_mock_, deferred_resumption_hmi_level())
+  EXPECT_CALL(*mock_app_, deferred_resumption_hmi_level())
       .WillRepeatedly(ReturnPointee(&app_deferred_level));
-  EXPECT_CALL(*app_mock_,
+  EXPECT_CALL(*mock_app_,
               set_deferred_resumption_hmi_level(eType::INVALID_ENUM))
       .WillOnce(SaveArg<0>(&app_deferred_level));
 
@@ -669,9 +669,9 @@ TEST_F(ResumeCtrlTest, StartAppHmiStateResumption_AppHasDeferredResumption) {
               RemoveApplicationFromSaved(kTestPolicyAppId_, kMacAddress_))
       .WillOnce(Return(true));
 
-  ON_CALL(app_mngr_, GetUserConsentForDevice("12345"))
+  ON_CALL(mock_app_mngr_, GetUserConsentForDevice("12345"))
       .WillByDefault(Return(policy::kDeviceAllowed));
-  res_ctrl_->StartAppHmiStateResumption(app_mock_);
+  res_ctrl_->StartAppHmiStateResumption(mock_app_);
 }
 
 TEST_F(ResumeCtrlTest,
@@ -682,23 +682,23 @@ TEST_F(ResumeCtrlTest,
   saved_app[application_manager::strings::ign_off_count] = ign_off_count;
   saved_app[application_manager::strings::hmi_level] = restored_test_type;
 
-  EXPECT_CALL(state_controller_, SetRegularState(_, eType::HMI_LIMITED))
+  EXPECT_CALL(mock_state_controller_, SetRegularState(_, eType::HMI_LIMITED))
       .Times(AtLeast(1));
   GetInfoFromApp();
   ON_CALL(*mock_storage_,
           GetSavedApplication(kTestPolicyAppId_, kMacAddress_, _))
       .WillByDefault(DoAll(SetArgReferee<2>(saved_app), Return(true)));
 
-  EXPECT_CALL(app_mngr_, CheckResumptionRequiredTransportAvailable(_))
+  EXPECT_CALL(mock_app_mngr_, CheckResumptionRequiredTransportAvailable(_))
       .WillOnce(Return(false));
 
-  EXPECT_CALL(*app_mock_, is_navi()).WillRepeatedly(Return(true));
-  EXPECT_CALL(*app_mock_, mobile_projection_enabled())
+  EXPECT_CALL(*mock_app_, is_navi()).WillRepeatedly(Return(true));
+  EXPECT_CALL(*mock_app_, mobile_projection_enabled())
       .WillRepeatedly(Return(false));
-  EXPECT_CALL(*app_mock_, is_media_application()).WillRepeatedly(Return(false));
+  EXPECT_CALL(*mock_app_, is_media_application()).WillRepeatedly(Return(false));
 
   // if resumption is deferred ...
-  EXPECT_CALL(*app_mock_, deferred_resumption_hmi_level())
+  EXPECT_CALL(*mock_app_, deferred_resumption_hmi_level())
       .WillRepeatedly(Return(restored_test_type));
 
   // ... then RemoveApplicationFromSaved() will not be called
@@ -706,9 +706,9 @@ TEST_F(ResumeCtrlTest,
               RemoveApplicationFromSaved(kTestPolicyAppId_, kMacAddress_))
       .Times(0);
 
-  ON_CALL(app_mngr_, GetUserConsentForDevice("12345"))
+  ON_CALL(mock_app_mngr_, GetUserConsentForDevice("12345"))
       .WillByDefault(Return(policy::kDeviceAllowed));
-  res_ctrl_->StartAppHmiStateResumption(app_mock_);
+  res_ctrl_->StartAppHmiStateResumption(mock_app_);
 }
 
 TEST_F(
@@ -722,20 +722,20 @@ TEST_F(
 
   // in this test, it is expected that the app will resume into LIMITED, which
   // is the higher level among NONE and LIMITED
-  EXPECT_CALL(state_controller_, SetRegularState(_, eType::HMI_LIMITED))
+  EXPECT_CALL(mock_state_controller_, SetRegularState(_, eType::HMI_LIMITED))
       .Times(AtLeast(1));
   GetInfoFromApp();
   ON_CALL(*mock_storage_,
           GetSavedApplication(kTestPolicyAppId_, kMacAddress_, _))
       .WillByDefault(DoAll(SetArgReferee<2>(saved_app), Return(true)));
 
-  EXPECT_CALL(app_mngr_, CheckResumptionRequiredTransportAvailable(_))
+  EXPECT_CALL(mock_app_mngr_, CheckResumptionRequiredTransportAvailable(_))
       .WillOnce(Return(false));
 
-  EXPECT_CALL(*app_mock_, is_navi()).WillRepeatedly(Return(true));
-  EXPECT_CALL(*app_mock_, mobile_projection_enabled())
+  EXPECT_CALL(*mock_app_, is_navi()).WillRepeatedly(Return(true));
+  EXPECT_CALL(*mock_app_, mobile_projection_enabled())
       .WillRepeatedly(Return(false));
-  EXPECT_CALL(*app_mock_, is_media_application()).WillRepeatedly(Return(true));
+  EXPECT_CALL(*mock_app_, is_media_application()).WillRepeatedly(Return(true));
 
   std::string navi_lowbandwidth_level("NONE");
   std::string projection_lowbandwidth_level("BACKGROUND");
@@ -750,16 +750,16 @@ TEST_F(
               media_lowbandwidth_resumption_level())
       .WillRepeatedly(ReturnRef(media_lowbandwidth_level));
 
-  EXPECT_CALL(*app_mock_, deferred_resumption_hmi_level())
+  EXPECT_CALL(*mock_app_, deferred_resumption_hmi_level())
       .WillRepeatedly(Return(restored_test_type));
 
   EXPECT_CALL(*mock_storage_,
               RemoveApplicationFromSaved(kTestPolicyAppId_, kMacAddress_))
       .Times(0);
 
-  ON_CALL(app_mngr_, GetUserConsentForDevice("12345"))
+  ON_CALL(mock_app_mngr_, GetUserConsentForDevice("12345"))
       .WillByDefault(Return(policy::kDeviceAllowed));
-  res_ctrl_->StartAppHmiStateResumption(app_mock_);
+  res_ctrl_->StartAppHmiStateResumption(mock_app_);
 }
 
 /**
@@ -814,27 +814,27 @@ TEST_F(ResumeCtrlTest,
 
   saved_app[application_manager::strings::hmi_level] = kDefaultTestLevel_;
 
-  ON_CALL(app_mngr_, GetDefaultHmiLevel(const_app_))
+  ON_CALL(mock_app_mngr_, GetDefaultHmiLevel(const_app_))
       .WillByDefault(Return(kDefaultTestLevel_));
   GetInfoFromApp();
-  EXPECT_CALL(app_mngr_, GetUserConsentForDevice("12345")).Times(0);
+  EXPECT_CALL(mock_app_mngr_, GetUserConsentForDevice("12345")).Times(0);
 
-  ON_CALL(app_mngr_, GetDefaultHmiLevel(const_app_))
+  ON_CALL(mock_app_mngr_, GetDefaultHmiLevel(const_app_))
       .WillByDefault(Return(kDefaultTestLevel_));
 
-  EXPECT_CALL(app_mngr_, CheckResumptionRequiredTransportAvailable(_))
+  EXPECT_CALL(mock_app_mngr_, CheckResumptionRequiredTransportAvailable(_))
       .WillRepeatedly(Return(false));
 
-  EXPECT_CALL(*app_mock_, is_navi()).WillRepeatedly(Return(false));
-  EXPECT_CALL(*app_mock_, mobile_projection_enabled())
+  EXPECT_CALL(*mock_app_, is_navi()).WillRepeatedly(Return(false));
+  EXPECT_CALL(*mock_app_, mobile_projection_enabled())
       .WillRepeatedly(Return(true));
-  EXPECT_CALL(*app_mock_, is_media_application()).WillRepeatedly(Return(false));
+  EXPECT_CALL(*mock_app_, is_media_application()).WillRepeatedly(Return(false));
 
   // SetRegularState() should be called with kProjectionLowbandwidthLevel_
-  EXPECT_CALL(state_controller_, SetRegularState(_, eType::HMI_NONE))
+  EXPECT_CALL(mock_state_controller_, SetRegularState(_, eType::HMI_NONE))
       .Times(AtLeast(1));
 
-  res_ctrl_->SetupDefaultHMILevel(app_mock_);
+  res_ctrl_->SetupDefaultHMILevel(mock_app_);
 }
 
 TEST_F(ResumeCtrlTest, ApplicationResumptiOnTimer_AppInFull) {
