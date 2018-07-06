@@ -36,7 +36,7 @@
 #include "utils/lock.h"
 #include "utils/shared_ptr.h"
 
-// This class is for thread-safe access to data
+// This class is for thread-safe const access to data
 template <class T>
 class DataAccessor {
  public:

@@ -218,6 +218,7 @@ extern const char* did_location;
 extern const char* app_list;
 extern const char* device_list;
 extern const char* device_info;
+extern const char* secondary_device_info;
 extern const char* name;
 extern const char* id;
 extern const char* isSDLAllowed;

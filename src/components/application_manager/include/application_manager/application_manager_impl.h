@@ -671,6 +671,10 @@ class ApplicationManagerImpl
       const int32_t& session_key,
       const protocol_handler::ServiceType& type,
       const connection_handler::CloseSessionReason& close_reason) OVERRIDE;
+  void OnSecondaryTransportStartedCallback(
+      const connection_handler::DeviceHandle device_handle,
+      const int32_t session_key) OVERRIDE;
+  void OnSecondaryTransportEndedCallback(const int32_t session_key) OVERRIDE;
 
   /**
    * @brief Check if application with specified app_id has NAVIGATION HMI type
@@ -815,6 +819,18 @@ class ApplicationManagerImpl
                       bool state) OVERRIDE;
 
   mobile_api::HMILevel::eType GetDefaultHmiLevel(
+      ApplicationConstSharedPtr application) const;
+
+  /**
+   * @brief Checks if required transport for resumption is available
+   *
+   * The required transport can be configured through smartDeviceLink.ini file.
+   *
+   * @param application an instance of the app to check
+   * @return true if the app is connected through one of the required
+   *         transports, false otherwise
+   */
+  bool CheckResumptionRequiredTransportAvailable(
       ApplicationConstSharedPtr application) const;
 
   /**
@@ -1140,6 +1156,14 @@ class ApplicationManagerImpl
   mobile_apis::AppHMIType::eType StringToAppHMIType(std::string str);
 
   /**
+   * @brief Returns a string representation of AppHMIType
+   * @param type an enum value of AppHMIType
+   * @return string representation of the enum value
+   */
+  const std::string AppHMITypeToString(
+      mobile_apis::AppHMIType::eType type) const;
+
+  /**
    * @brief Method compares arrays of app HMI type
    * @param from_policy contains app HMI type from policy
    * @param from_application contains app HMI type from application
@@ -1396,6 +1420,15 @@ class ApplicationManagerImpl
                          const std::string& mac_address);
 
   /**
+   * @brief Converts device handle to transport type string used in
+   * smartDeviceLink.ini file, e.g. "TCP_WIFI"
+   * @param device_handle A device handle
+   * @return string representation of the transport of the device
+   */
+  const std::string GetTransportTypeProfileString(
+      connection_handler::DeviceHandle device_handle) const;
+
+  /**
    * @brief Converts BSON object containing video parameters to
    * smart object's map object
    * @param output the smart object to add video parameters
@@ -1522,6 +1555,12 @@ class ApplicationManagerImpl
   ReregisterWaitList reregister_wait_list_;
 
   mutable sync_primitives::Lock reregister_wait_list_lock_;
+
+  // This is a cache to remember DeviceHandle of secondary transports. Only used
+  // during RegisterApplication().
+  typedef std::map<int32_t, connection_handler::DeviceHandle> DeviceMap;
+
+  DeviceMap secondary_transport_devices_cache_;
 
 #ifdef TELEMETRY_MONITOR
   AMTelemetryObserver* metric_observer_;

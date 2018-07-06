@@ -1323,6 +1323,29 @@ TEST_F(TransportManagerImplTest,
   tm_.OnDeviceListUpdated(mock_adapter_);
 }
 
+TEST_F(TransportManagerImplTest, OnTransportConfigUpdated) {
+  TransportAdapterEvent test_event(EventTypeEnum::ON_TRANSPORT_CONFIG_UPDATED,
+                                   mock_adapter_,
+                                   "",
+                                   0,
+                                   test_message_,
+                                   error_);
+
+  transport_adapter::TransportConfig config;
+  config[transport_manager::transport_adapter::tc_enabled] =
+      std::string("true");
+  config[transport_manager::transport_adapter::tc_tcp_ip_address] =
+      std::string("192.168.1.1");
+  config[transport_manager::transport_adapter::tc_tcp_port] =
+      std::string("12345");
+
+  EXPECT_CALL(*mock_adapter_, GetTransportConfiguration())
+      .WillOnce(Return(config));
+
+  EXPECT_CALL(*tm_listener_, OnTransportConfigUpdated(config));
+  tm_.TestHandle(test_event);
+}
+
 }  // namespace transport_manager_test
 }  // namespace components
 }  // namespace test

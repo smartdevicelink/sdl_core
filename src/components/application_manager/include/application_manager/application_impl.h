@@ -175,6 +175,7 @@ class ApplicationImpl : public virtual Application,
       const;
   const std::string& app_icon_path() const;
   connection_handler::DeviceHandle device() const;
+  connection_handler::DeviceHandle secondary_device() const;
   const std::string& mac_address() const OVERRIDE;
   const std::string& bundle_id() const OVERRIDE;
   void set_bundle_id(const std::string& bundle_id) OVERRIDE;
@@ -191,6 +192,7 @@ class ApplicationImpl : public virtual Application,
   bool set_app_icon_path(const std::string& path);
   void set_app_allowed(const bool allowed);
   void set_device(connection_handler::DeviceHandle device);
+  void set_secondary_device(connection_handler::DeviceHandle secondary_device);
   virtual uint32_t get_grammar_id() const;
   virtual void set_grammar_id(uint32_t value);
   bool is_audio() const OVERRIDE;
@@ -201,6 +203,24 @@ class ApplicationImpl : public virtual Application,
 
   virtual void set_is_resuming(bool is_resuming);
   virtual bool is_resuming() const;
+
+  /**
+   * @brief Remembers the HMI level which the app would resume into if high-
+   * bandwidth transport were available.
+   * @param level The HMI level which the app would resume into. Specify
+   * INVALID_ENUM to clear the state.
+   */
+  void set_deferred_resumption_hmi_level(
+      mobile_api::HMILevel::eType level) OVERRIDE;
+  /**
+   * @brief Returns the HMI level which the app would resume into if high-
+   * bandwidth transport were available.
+   *
+   * A value of INVALID_ENUM indicates that the app does not have deferred
+   * HMI level.
+   * @return HMI level which the app would resume into
+   */
+  mobile_api::HMILevel::eType deferred_resumption_hmi_level() const OVERRIDE;
 
   bool AddFile(const AppFile& file);
   bool UpdateFile(const AppFile& file);
@@ -449,6 +469,7 @@ class ApplicationImpl : public virtual Application,
   bool audio_streaming_suspended_;
   sync_primitives::Lock video_streaming_suspended_lock_;
   sync_primitives::Lock audio_streaming_suspended_lock_;
+  sync_primitives::Lock streaming_stop_lock_;
 
   bool is_app_allowed_;
   bool has_been_activated_;
@@ -462,6 +483,7 @@ class ApplicationImpl : public virtual Application,
   std::string app_icon_path_;
   std::string mac_address_;
   connection_handler::DeviceHandle device_id_;
+  connection_handler::DeviceHandle secondary_device_id_;
   std::string bundle_id_;
   AppFilesMap app_files_;
   std::set<mobile_apis::ButtonName::eType> subscribed_buttons_;
@@ -469,6 +491,7 @@ class ApplicationImpl : public virtual Application,
   protocol_handler::MajorProtocolVersion protocol_version_;
   bool is_voice_communication_application_;
   sync_primitives::atomic_bool is_resuming_;
+  mobile_api::HMILevel::eType deferred_resumption_hmi_level_;
   bool is_hash_changed_during_suspend_;
 
   uint32_t video_stream_retry_number_;

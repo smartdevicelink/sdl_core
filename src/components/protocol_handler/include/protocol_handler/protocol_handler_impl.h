@@ -44,6 +44,7 @@
 #include "utils/threads/message_loop_thread.h"
 #include "utils/shared_ptr.h"
 #include "utils/messagemeter.h"
+#include "utils/custom_string.h"
 
 #include "protocol_handler/protocol_handler.h"
 #include "protocol_handler/protocol_packet.h"
@@ -55,6 +56,7 @@
 #include "transport_manager/common.h"
 #include "transport_manager/transport_manager.h"
 #include "transport_manager/transport_manager_listener_empty.h"
+#include "transport_manager/transport_adapter/transport_adapter.h"
 #include "connection_handler/connection_handler.h"
 #include "application_manager/policies/policy_handler_observer.h"
 
@@ -131,6 +133,30 @@ typedef threads::MessageLoopThread<
     utils::PrioritizedQueue<RawFordMessageFromMobile> > FromMobileQueue;
 typedef threads::MessageLoopThread<
     utils::PrioritizedQueue<RawFordMessageToMobile> > ToMobileQueue;
+
+// Type to allow easy mapping between a device type and transport
+// characteristics
+typedef enum {
+  TT_NONE = -1,
+  TT_USB = 0,
+  TT_BLUETOOTH = 1,
+  TT_WIFI = 2
+} TransportType;
+
+struct TransportDescription {
+  TransportDescription(const TransportType transport_type,
+                       const bool ios_transport,
+                       const bool android_transport)
+      : transport_type_(transport_type)
+      , ios_transport_(ios_transport)
+      , android_transport_(android_transport) {}
+
+  TransportType transport_type_;
+  bool ios_transport_;
+  bool android_transport_;
+};
+
+typedef std::map<std::string, TransportDescription> TransportTypes;
 }  // namespace impl
 
 /**
@@ -231,7 +257,15 @@ class ProtocolHandlerImpl
     */
   void SendEndSession(int32_t connection_id, uint8_t session_id);
 
-  void SendEndService(int32_t connection_id,
+  /**
+    * \brief Sends ending session to mobile application
+    * \param primary_connection_id Identifier of connection within which
+    * service exists
+    * \param connection_id Identifier of the actual transport for the service
+    * \param session_id ID of session to be ended
+    */
+  void SendEndService(int32_t primary_connection_id,
+                      int32_t connection_id,
                       uint8_t session_id,
                       uint8_t service_type);
 
@@ -422,10 +456,19 @@ class ProtocolHandlerImpl
   const impl::ToMobileQueue& get_to_mobile_queue() const {
     return raw_ford_messages_to_mobile_;
   }
+
+  void set_tcp_config(bool tcp_enabled,
+                      std::string tcp_address,
+                      std::string tcp_port) {
+    tcp_enabled_ = tcp_enabled;
+    tcp_ip_address_ = tcp_address;
+    tcp_port_ = tcp_port;
+  }
 #endif
 
  private:
-  void SendEndServicePrivate(int32_t connection_id,
+  void SendEndServicePrivate(int32_t primary_connection_id,
+                             int32_t connection_id,
                              uint8_t session_id,
                              uint8_t service_type);
 
@@ -435,6 +478,28 @@ class ProtocolHandlerImpl
   RESULT_CODE SendHeartBeatAck(ConnectionID connection_id,
                                uint8_t session_id,
                                uint32_t message_id);
+
+  /*
+   * Prepare and send TransportUpdateEvent message
+   */
+  void SendTransportUpdateEvent(ConnectionID connection_id, uint8_t session_id);
+
+  /*
+   * Prepare and send RegisterSecondaryTransportAck message
+   */
+  RESULT_CODE SendRegisterSecondaryTransportAck(
+      ConnectionID connection_id,
+      ConnectionID primary_transport_connection_id,
+      uint8_t session_id);
+
+  /*
+   * Prepare and send RegisterSecondaryTransportNAck message
+   */
+  RESULT_CODE SendRegisterSecondaryTransportNAck(
+      ConnectionID connection_id,
+      ConnectionID primary_transport_connection_id,
+      uint8_t session_id,
+      BsonObject* reason = NULL);
 
   /**
    * @brief Notifies about receiving message from TM.
@@ -473,6 +538,19 @@ class ProtocolHandlerImpl
 
   void OnConnectionClosed(
       const transport_manager::ConnectionUID connection_id) OVERRIDE;
+
+  void OnUnexpectedDisconnect(
+      const transport_manager::ConnectionUID connection_id,
+      const transport_manager::CommunicationError& error) OVERRIDE;
+
+  /**
+   * @brief Notifies that configuration of a transport has been updated.
+   *
+   * @param configs pairs of key and value that represent configuration.
+   */
+  void OnTransportConfigUpdated(
+      const transport_manager::transport_adapter::TransportConfig& configs)
+      OVERRIDE;
 
   /**
    * @brief Notifies subscribers about message
@@ -575,6 +653,9 @@ class ProtocolHandlerImpl
 
   RESULT_CODE HandleControlMessageStartSession(const ProtocolFramePtr packet);
 
+  RESULT_CODE HandleControlMessageRegisterSecondaryTransport(
+      const ProtocolFramePtr packet);
+
   RESULT_CODE HandleControlMessageHeartBeat(const ProtocolPacket& packet);
 
   void PopValideAndExpirateMultiframes();
@@ -602,6 +683,32 @@ class ProtocolHandlerImpl
    * @brief Function returns supported SDL Protocol Version,
    */
   uint8_t SupportedSDLProtocolVersion() const;
+
+  const impl::TransportDescription GetTransportTypeFromConnectionType(
+      const std::string& device_type) const;
+
+  const bool ParseSecondaryTransportConfiguration(
+      const ConnectionID connection_id,
+      std::vector<std::string>& secondaryTransports,
+      std::vector<int32_t>& audioServiceTransports,
+      std::vector<int32_t>& videoServiceTransports) const;
+
+  void GenerateSecondaryTransportsForStartSessionAck(
+      const std::vector<std::string>& secondary_transport_types,
+      bool device_is_ios,
+      bool device_is_android,
+      std::vector<std::string>& secondaryTransports) const;
+
+  void GenerateServiceTransportsForStartSessionAck(
+      bool secondary_enabled,
+      const std::vector<std::string>& service_transports,
+      const std::string& primary_connection_type,
+      const impl::TransportType primary_transport_type,
+      const std::vector<std::string>& secondary_transport_types,
+      std::vector<int32_t>& serviceTransports) const;
+
+  const std::string TransportTypeFromTransport(
+      const utils::custom_string::CustomString& transport) const;
 
   const ProtocolHandlerSettings& settings_;
 
@@ -688,6 +795,10 @@ class ProtocolHandlerImpl
 
   sync_primitives::Lock start_session_frame_map_lock_;
   StartSessionFrameMap start_session_frame_map_;
+
+  bool tcp_enabled_;
+  std::string tcp_port_;
+  std::string tcp_ip_address_;
 
 #ifdef TELEMETRY_MONITOR
   PHTelemetryObserver* metric_observer_;

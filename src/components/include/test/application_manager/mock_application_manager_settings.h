@@ -95,6 +95,13 @@ class MockApplicationManagerSettings
   MOCK_CONST_METHOD0(app_resuming_timeout, const uint32_t&());
   MOCK_CONST_METHOD0(attempts_to_open_resumption_db, uint16_t());
   MOCK_CONST_METHOD0(open_attempt_timeout_ms_resumption_db, uint16_t());
+  MOCK_CONST_METHOD0(transport_required_for_resumption_map,
+                     std::map<std::string, std::vector<std::string> >&());
+  MOCK_CONST_METHOD0(navigation_lowbandwidth_resumption_level,
+                     const std::string&());
+  MOCK_CONST_METHOD0(projection_lowbandwidth_resumption_level,
+                     const std::string&());
+  MOCK_CONST_METHOD0(media_lowbandwidth_resumption_level, const std::string&());
   MOCK_METHOD1(set_config_file_name, void(const std::string& fileName));
   // The following line won't really compile, as the return
   // type has multiple template arguments.  To fix it, use a

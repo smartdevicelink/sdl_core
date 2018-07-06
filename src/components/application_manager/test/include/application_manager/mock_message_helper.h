@@ -230,6 +230,12 @@ class MockMessageHelper {
   MOCK_METHOD2(SendUIChangeRegistrationRequestToHMI,
                void(ApplicationConstSharedPtr app,
                     ApplicationManager& app_mngr));
+  MOCK_METHOD5(CreateDeviceInfo,
+               bool(connection_handler::DeviceHandle device_handle,
+                    const protocol_handler::SessionObserver& session_observer,
+                    const policy::PolicyHandlerInterface& policy_handler,
+                    ApplicationManager& app_mngr,
+                    smart_objects::SmartObject* output));
   MOCK_METHOD5(CreateHMIApplicationStruct,
                bool(ApplicationConstSharedPtr app,
                     const protocol_handler::SessionObserver& session_observer,

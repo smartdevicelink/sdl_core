@@ -423,6 +423,16 @@ void MessageHelper::SendUIChangeRegistrationRequestToHMI(
       ->SendUIChangeRegistrationRequestToHMI(app, app_mngr);
 }
 
+bool MessageHelper::CreateDeviceInfo(
+    connection_handler::DeviceHandle device_handle,
+    const protocol_handler::SessionObserver& session_observer,
+    const policy::PolicyHandlerInterface& policy_handler,
+    ApplicationManager& app_mngr,
+    smart_objects::SmartObject* output) {
+  return MockMessageHelper::message_helper_mock()->CreateDeviceInfo(
+      device_handle, session_observer, policy_handler, app_mngr, output);
+}
+
 bool MessageHelper::CreateHMIApplicationStruct(
     ApplicationConstSharedPtr app,
     const protocol_handler::SessionObserver& session_observer,

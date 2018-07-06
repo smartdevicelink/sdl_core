@@ -64,6 +64,7 @@ using namespace mobile_apis;
 namespace custom_str = utils::custom_string;
 
 using ::testing::_;
+using ::testing::Mock;
 using ::testing::Return;
 using ::testing::ReturnRef;
 using ::testing::AtLeast;
@@ -106,6 +107,11 @@ class ApplicationImplTest : public ::testing::Test {
     HmiStatePtr initial_state = CreateTestHmiState();
     app_impl->SetInitialState(initial_state);
   }
+
+  virtual void TearDown() OVERRIDE {
+    Mock::VerifyAndClearExpectations(MockMessageHelper::message_helper_mock());
+  }
+
   HmiStatePtr CreateTestHmiState();
 
   HmiStatePtr TestAddHmiState(HMILevel::eType hmi_lvl,
@@ -825,6 +831,29 @@ TEST_F(ApplicationImplTest, PushPopMobileMessage) {
 
   app_impl->SwapMobileMessageQueue(messages);
   EXPECT_TRUE(messages.empty());
+}
+
+TEST_F(ApplicationImplTest, SetSecondaryDeviceTest) {
+  connection_handler::DeviceHandle initial_device =
+      app_impl->secondary_device();
+  EXPECT_EQ(0u, initial_device);
+
+  connection_handler::DeviceHandle device = 123;
+  app_impl->set_secondary_device(device);
+
+  EXPECT_EQ(device, app_impl->secondary_device());
+}
+
+TEST_F(ApplicationImplTest, SetDeferredResumptionHMILevelTest) {
+  using namespace mobile_api::HMILevel;
+  HMILevel::eType initial_deferred_level =
+      app_impl->deferred_resumption_hmi_level();
+  EXPECT_EQ(HMILevel::eType::INVALID_ENUM, initial_deferred_level);
+
+  HMILevel::eType deferred_level = HMILevel::eType::HMI_FULL;
+  app_impl->set_deferred_resumption_hmi_level(deferred_level);
+
+  EXPECT_EQ(deferred_level, app_impl->deferred_resumption_hmi_level());
 }
 
 }  // namespace application_manager_test

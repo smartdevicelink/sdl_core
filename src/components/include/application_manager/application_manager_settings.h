@@ -38,6 +38,8 @@
 
 #include <stdint.h>
 #include <string>
+#include <map>
+#include <vector>
 
 namespace application_manager {
 class ApplicationManagerSettings : public RequestControlerSettings,
@@ -87,6 +89,13 @@ class ApplicationManagerSettings : public RequestControlerSettings,
   virtual const uint32_t& app_resuming_timeout() const = 0;
   virtual uint16_t attempts_to_open_resumption_db() const = 0;
   virtual uint16_t open_attempt_timeout_ms_resumption_db() const = 0;
+  virtual const std::map<std::string, std::vector<std::string> >&
+  transport_required_for_resumption_map() const = 0;
+  virtual const std::string& navigation_lowbandwidth_resumption_level()
+      const = 0;
+  virtual const std::string& projection_lowbandwidth_resumption_level()
+      const = 0;
+  virtual const std::string& media_lowbandwidth_resumption_level() const = 0;
   virtual void set_config_file_name(const std::string& fileName) = 0;
   virtual const std::pair<uint32_t, int32_t>& start_stream_retry_amount()
       const = 0;
