@@ -320,9 +320,13 @@ TEST_F(ResumeCtrlTest, StartResumption_AppWithCommands) {
       .WillByDefault(DoAll(SetArgReferee<2>(saved_app), Return(true)));
   EXPECT_CALL(*mock_app_, UpdateHash());
   EXPECT_CALL(*mock_app_, set_grammar_id(kTestGrammarId_));
+  ON_CALL(*mock_app_, help_prompt_manager())
+      .WillByDefault(ReturnRef(*mock_help_prompt_manager_));
 
   for (uint32_t i = 0; i < count_of_commands; ++i) {
     EXPECT_CALL(*mock_app_, AddCommand(i, test_application_commands[i]));
+    EXPECT_CALL(*mock_help_prompt_manager_,
+                OnVrCommandAdded(i, test_application_commands[i], true));
   }
 
   smart_objects::SmartObjectList requests;
@@ -575,9 +579,6 @@ TEST_F(ResumeCtrlTest, StartAppHmiStateResumption_AppInFull) {
 
   ON_CALL(mock_app_mngr_, GetUserConsentForDevice("12345"))
       .WillByDefault(Return(policy::kDeviceAllowed));
-  EXPECT_CALL(*mock_app_, help_prompt_manager())
-      .WillOnce(ReturnRef(*mock_help_prompt_manager_.get()));
-  EXPECT_CALL(*mock_help_prompt_manager_, OnAppActivated(true));
   res_ctrl_->StartAppHmiStateResumption(mock_app_);
 }
 
@@ -627,9 +628,6 @@ TEST_F(ResumeCtrlTest, RestoreAppHMIState_RestoreHMILevelFull) {
   ON_CALL(mock_app_mngr_, GetUserConsentForDevice("12345"))
       .WillByDefault(Return(policy::kDeviceAllowed));
   EXPECT_CALL(*mock_app_, set_is_resuming(true));
-  EXPECT_CALL(*mock_app_, help_prompt_manager())
-      .WillOnce(ReturnRef(*mock_help_prompt_manager_.get()));
-  EXPECT_CALL(*mock_help_prompt_manager_, OnAppActivated(true));
 
   const bool res = res_ctrl_->RestoreAppHMIState(mock_app_);
   EXPECT_TRUE(res);
@@ -687,9 +685,6 @@ TEST_F(ResumeCtrlTest, ApplicationResumptiOnTimer_AppInFull) {
 
   ON_CALL(mock_app_mngr_, GetUserConsentForDevice(kMacAddress_))
       .WillByDefault(Return(policy::kDeviceAllowed));
-  EXPECT_CALL(*mock_app_, help_prompt_manager())
-      .WillOnce(ReturnRef(*mock_help_prompt_manager_.get()));
-  EXPECT_CALL(*mock_help_prompt_manager_, OnAppActivated(true));
   res_ctrl_->StartAppHmiStateResumption(mock_app_);
 }
 

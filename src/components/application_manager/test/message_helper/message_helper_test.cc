@@ -38,6 +38,7 @@
 #include "utils/make_shared.h"
 #include "application_manager/policies/policy_handler.h"
 #include "application_manager/mock_application.h"
+#include "application_manager/mock_help_prompt_manager.h"
 #include "utils/custom_string.h"
 #include "utils/lock.h"
 #include "policy/mock_policy_settings.h"
@@ -148,6 +149,13 @@ TEST(MessageHelperTestCreate,
   EXPECT_CALL(*appSharedMock, help_prompt()).Times(AtLeast(1));
   EXPECT_CALL(*appSharedMock, timeout_prompt()).Times(AtLeast(1));
 
+  std::shared_ptr<MockHelpPromptManager> mock_help_prompt_manager =
+      std::make_shared<MockHelpPromptManager>();
+  EXPECT_CALL(*appSharedMock, help_prompt_manager())
+      .WillRepeatedly(ReturnRef(*mock_help_prompt_manager));
+  EXPECT_CALL(*mock_help_prompt_manager, GetSendingType())
+      .WillRepeatedly(Return(HelpPromptManager::SendingType::kSendBoth));
+
   smart_objects::SmartObjectList ptr =
       MessageHelper::CreateGlobalPropertiesRequestsToHMI(appSharedMock, 0u);
 
@@ -190,6 +198,13 @@ TEST(MessageHelperTestCreate,
       .Times(AtLeast(2))
       .WillRepeatedly(Return(&(*objPtr)[4]));
   EXPECT_CALL(*appSharedMock, app_id()).WillRepeatedly(Return(0));
+
+  std::shared_ptr<MockHelpPromptManager> mock_help_prompt_manager =
+      std::make_shared<MockHelpPromptManager>();
+  EXPECT_CALL(*appSharedMock, help_prompt_manager())
+      .WillRepeatedly(ReturnRef(*mock_help_prompt_manager));
+  EXPECT_CALL(*mock_help_prompt_manager, GetSendingType())
+      .WillRepeatedly(Return(HelpPromptManager::SendingType::kSendBoth));
 
   smart_objects::SmartObjectList ptr =
       MessageHelper::CreateGlobalPropertiesRequestsToHMI(appSharedMock, 0u);

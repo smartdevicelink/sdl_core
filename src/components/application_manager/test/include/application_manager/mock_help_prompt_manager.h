@@ -43,14 +43,15 @@ using namespace application_manager;
 class MockHelpPromptManager : public ::application_manager::HelpPromptManager {
  public:
   MockHelpPromptManager() {}
-  MOCK_METHOD2(OnVrCommandAdded,
+  MOCK_METHOD3(OnVrCommandAdded,
                void(uint32_t cmd_id,
-                    const smart_objects::SmartObject& command));
-  MOCK_METHOD1(OnVrCommandDeleted, void(uint32_t cmd_id));
+                    const smart_objects::SmartObject& command,
+                    const bool should_send_requests));
+  MOCK_METHOD2(OnVrCommandDeleted,
+               void(uint32_t cmd_id, const bool should_send_requests));
   MOCK_METHOD2(OnSetGlobalPropertiesReceived,
                void(const smart_objects::SmartObject& msg, bool is_response));
-  MOCK_METHOD1(OnAppActivated, void(bool is_restore));
-  MOCK_METHOD0(OnAppUnregistered, void());
+  MOCK_CONST_METHOD0(GetSendingType, SendingType());
 };
 
 }  // namespace application_manager_test

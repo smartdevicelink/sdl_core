@@ -157,6 +157,8 @@ class MockApplication : public ::application_manager::Application {
   MOCK_METHOD0(usage_report, ::application_manager::UsageStatistics&());
   MOCK_METHOD0(help_prompt_manager,
                ::application_manager::HelpPromptManager&());
+  MOCK_CONST_METHOD0(help_prompt_manager,
+                     const ::application_manager::HelpPromptManager&());
   MOCK_METHOD1(SetInitialState, void(::application_manager::HmiStatePtr state));
   MOCK_METHOD1(SetRegularState, void(::application_manager::HmiStatePtr state));
   MOCK_METHOD1(SetPostponedState,

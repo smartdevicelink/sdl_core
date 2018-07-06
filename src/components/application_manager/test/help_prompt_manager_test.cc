@@ -259,9 +259,6 @@ TEST_F(HelpPromptManagerTest, AddCommand_OnVrCommandAdded) {
       hmi_apis::Common_Result::SUCCESS;
   (*msg)[strings::msg_params][strings::cmd_id] = kCmdId;
 
-  EXPECT_CALL(*mock_help_prompt_manager_,
-              OnVrCommandAdded(kCmdId, (*msg)[strings::msg_params]));
-
   app_impl_->AddCommand(kCmdId, (*msg)[strings::msg_params]);
 }
 
@@ -273,10 +270,6 @@ TEST_F(HelpPromptManagerTest, RemoveCommand_OnVrCommandDeleted) {
   (*msg)[strings::params][hmi_response::code] =
       hmi_apis::Common_Result::SUCCESS;
   (*msg)[strings::msg_params][strings::cmd_id] = kCmdId;
-
-  EXPECT_CALL(*mock_help_prompt_manager_,
-              OnVrCommandAdded(kCmdId, (*msg)[strings::msg_params]));
-  EXPECT_CALL(*mock_help_prompt_manager_, OnVrCommandDeleted(kCmdId));
 
   app_impl_->AddCommand(kCmdId, (*msg)[strings::msg_params]);
   app_impl_->RemoveCommand(kCmdId);

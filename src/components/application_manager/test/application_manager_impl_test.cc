@@ -41,7 +41,6 @@
 #include "application_manager/application_impl.h"
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/mock_application.h"
-#include "application_manager/mock_help_prompt_manager.h"
 #include "application_manager/mock_application_manager_settings.h"
 #include "application_manager/mock_resumption_data.h"
 #include "application_manager/mock_rpc_service.h"
@@ -152,8 +151,6 @@ class ApplicationManagerImplTest : public ::testing::Test {
     app_manager_impl_.reset(new am::ApplicationManagerImpl(
         mock_application_manager_settings_, mock_policy_settings_));
     mock_app_ptr_ = utils::SharedPtr<MockApplication>(new MockApplication());
-    mock_help_prompt_manager_ =
-        utils::SharedPtr<MockHelpPromptManager>(new MockHelpPromptManager());
     app_manager_impl_->set_protocol_handler(&mock_protocol_handler_);
     ASSERT_TRUE(app_manager_impl_.get());
     ASSERT_TRUE(mock_app_ptr_.get());
@@ -202,7 +199,6 @@ class ApplicationManagerImplTest : public ::testing::Test {
   application_manager::MockMessageHelper* mock_message_helper_;
 
   utils::SharedPtr<MockApplication> mock_app_ptr_;
-  utils::SharedPtr<MockHelpPromptManager> mock_help_prompt_manager_;
   NiceMock<protocol_handler_test::MockProtocolHandler> mock_protocol_handler_;
 };
 
@@ -811,10 +807,6 @@ TEST_F(ApplicationManagerImplTest,
 
   EXPECT_TRUE(app_manager_impl_->IsAppInReconnectMode(policy_app_id_switch));
 
-  EXPECT_CALL(*switching_app_ptr, help_prompt_manager())
-      .WillOnce(ReturnRef(*mock_help_prompt_manager_.get()));
-  EXPECT_CALL(*mock_help_prompt_manager_, OnAppUnregistered());
-
   app_manager_impl_->OnDeviceSwitchingFinish(switching_device_id);
   EXPECT_FALSE(
       app_manager_impl_->application_by_policy_id(policy_app_id_switch));
@@ -958,10 +950,6 @@ TEST_F(ApplicationManagerImplTest, UnregisterAnotherAppDuringAudioPassThru) {
                                                 bits_per_sample,
                                                 audio_type);
   }
-
-  EXPECT_CALL(*mock_app_1, help_prompt_manager())
-      .WillOnce(ReturnRef(*mock_help_prompt_manager_.get()));
-  EXPECT_CALL(*mock_help_prompt_manager_, OnAppUnregistered());
 
   // while running APT, app 1 is unregistered
   app_manager_impl_->UnregisterApplication(
