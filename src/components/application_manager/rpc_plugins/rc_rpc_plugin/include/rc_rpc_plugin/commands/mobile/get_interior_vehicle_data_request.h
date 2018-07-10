@@ -95,8 +95,10 @@ class GetInteriorVehicleDataRequest : public RCCommandRequest {
 
   std::string ModuleType() FINAL;
   bool excessive_subscription_occured_;
+  uint32_t max_request_in_time_frame_;
   bool ProcessCapabilities();
   void ProcessResponseToMobileFromCache(app_mngr::ApplicationSharedPtr app);
+  bool CheckRateLimits();
   bool AppShouldBeUnsubscribed();
   bool TheLastAppShouldBeUnsubscribed(app_mngr::ApplicationSharedPtr app);
 };
