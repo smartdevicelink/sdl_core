@@ -61,7 +61,12 @@ GetInteriorVehicleDataRequest::GetInteriorVehicleDataRequest(
                        policy_handle,
                        resource_allocation_manager,
                        interior_data_cache)
-    , excessive_subscription_occured_(false) {}
+
+    , excessive_subscription_occured_(false) {
+    const auto& settings = application_manager.get_settings();
+    const auto frequency = settings.get_vehicle_data_frequency();
+    max_request_in_time_frame_ = frequency.first;
+}
 
 bool CheckIfModuleTypeExistInCapabilities(
     const smart_objects::SmartObject& rc_capabilities,
@@ -132,6 +137,20 @@ void GetInteriorVehicleDataRequest::ProcessResponseToMobileFromCache(
   }
 }
 
+bool GetInteriorVehicleDataRequest::CheckRateLimits() {
+  LOG4CXX_AUTO_TRACE(logger_);
+  const uint32_t current_requests_amount =
+      interior_data_cache_.GetCurrentAmountOfRequests();
+  LOG4CXX_DEBUG(logger_,
+                "Current amount of requests in the same time frame is: "
+                    << current_requests_amount);
+  if (current_requests_amount < max_request_in_time_frame_) {
+    interior_data_cache_.IncrementAmountOfRequests();
+    return true;
+  }
+  return false;
+}
+
 bool GetInteriorVehicleDataRequest::AppShouldBeUnsubscribed() {
   LOG4CXX_AUTO_TRACE(logger_);
   const auto& msg_params = (*message_)[app_mngr::strings::msg_params];
@@ -161,6 +180,12 @@ void GetInteriorVehicleDataRequest::Execute() {
   LOG4CXX_AUTO_TRACE(logger_);
 
   if (!ProcessCapabilities()) {
+    return;
+  }
+
+  if (!CheckRateLimits()) {
+    LOG4CXX_WARN(logger_, "GetInteriorVehicleData frequency is too high.");
+    SendResponse(false, mobile_apis::Result::REJECTED);
     return;
   }
 

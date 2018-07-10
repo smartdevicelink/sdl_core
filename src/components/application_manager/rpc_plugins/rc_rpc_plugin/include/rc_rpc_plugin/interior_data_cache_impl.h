@@ -34,23 +34,36 @@
 #define SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_RC_RPC_PLUGIN_INCLUDE_RC_RPC_PLUGIN_INTERIOR_DATA_CACHE_IMPL_H_
 
 #include <map>
+#include <atomic>
+
 #include "utils/macro.h"
 #include "utils/lock.h"
 #include "rc_rpc_plugin/interior_data_cache.h"
+#include "utils/timer.h"
+#include "utils/timer_task_impl.h"
+
 namespace rc_rpc_plugin {
 class InteriorDataCacheImpl : public InteriorDataCache {
  public:
-  InteriorDataCacheImpl();
+  InteriorDataCacheImpl() = delete;
+  InteriorDataCacheImpl(const uint32_t time_frame_of_allowed_requests);
   void Add(const std::string& module_type,
            const smart_objects::SmartObject& module_data) OVERRIDE;
   smart_objects::SmartObject Retrieve(
       const std::string& module_type) const OVERRIDE;
   bool Contains(const std::string& module_type) const OVERRIDE;
   void ClearCache() OVERRIDE;
+  uint32_t GetCurrentAmountOfRequests() const OVERRIDE;
+  void IncrementAmountOfRequests() OVERRIDE;
 
  private:
+  void ResetRequestCountOnTimer() OVERRIDE;
+
   std::map<std::string, smart_objects::SmartObject> subscriptions_;
   mutable sync_primitives::Lock subscriptions_lock_;
+
+  timer::Timer reset_request_count_timer_;
+  std::atomic<uint32_t> amount_of_request_in_this_time_frame_;
 };
 
 }  // rc_rpc_plugin

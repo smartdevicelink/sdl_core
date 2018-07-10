@@ -69,6 +69,23 @@ class InteriorDataCache {
    * @brief ClearCache clear all cached data
    */
   virtual void ClearCache() = 0;
+
+  /**
+   * @brief Get current value of requests in time frame
+   */
+  virtual uint32_t GetCurrentAmountOfRequests() const = 0;
+
+  /**
+   * @brief Do increment of request in time frame
+   */
+  virtual void IncrementAmountOfRequests() = 0;
+
+ private:
+  /**
+   * @brief Callback function for timer
+   * Timer need for reset curent value of request when new time frame start
+   */
+  virtual void ResetRequestCountOnTimer() = 0;
 };
 }  // rc_rpc_plugin
 
