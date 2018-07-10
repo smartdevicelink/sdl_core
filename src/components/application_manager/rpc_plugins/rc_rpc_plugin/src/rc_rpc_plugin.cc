@@ -50,7 +50,7 @@ bool RCRPCPlugin::Init(
     application_manager::HMICapabilities& hmi_capabilities,
     policy::PolicyHandlerInterface& policy_handler) {
   const auto& settings = app_manager.get_settings();
-  const auto frequency = settings.get_vehicle_data_frequency();
+  const auto frequency = settings.get_interior_vehicle_data_frequency();
   interior_data_cache_.reset(new InteriorDataCacheImpl(
       frequency.second * date_time::DateTime::MILLISECONDS_IN_SECOND));
 
