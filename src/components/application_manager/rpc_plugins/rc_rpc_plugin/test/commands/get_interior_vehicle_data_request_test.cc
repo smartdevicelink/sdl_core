@@ -350,7 +350,6 @@ TEST_F(
           mobile_message);
 
   ON_CALL(mock_policy_handler_, CheckModule(_, _)).WillByDefault(Return(true));
-  // Used empty rc capabilities
 
   // Expectations
   EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_)).Times(0);
