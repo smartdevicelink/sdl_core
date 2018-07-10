@@ -95,6 +95,10 @@ class GetInteriorVehicleDataRequest : public RCCommandRequest {
 
   std::string ModuleType() FINAL;
   bool excessive_subscription_occured_;
+  bool ProcessCapabilities();
+  void ProcessResponseToMobileFromCache(app_mngr::ApplicationSharedPtr app);
+  bool AppShouldBeUnsubscribed();
+  bool TheLastAppShouldBeUnsubscribed(app_mngr::ApplicationSharedPtr app);
 };
 }  // namespace commands
 }  // namespace rc_rpc_plugin
