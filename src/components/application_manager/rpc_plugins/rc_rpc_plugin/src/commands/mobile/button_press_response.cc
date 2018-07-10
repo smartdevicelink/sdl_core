@@ -50,6 +50,7 @@ ButtonPressResponse::ButtonPressResponse(
                                                          hmi_capabilities,
                                                          policy_handle) {
   UNUSED(resource_allocation_manager);
+  UNUSED(interior_data_cache);
 }
 ButtonPressResponse::~ButtonPressResponse() {}
 

@@ -37,7 +37,15 @@ namespace rc_rpc_plugin {
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "RemoteControlModule");
 
-InteriorDataCacheImpl::InteriorDataCacheImpl() {}
+InteriorDataCacheImpl::InteriorDataCacheImpl(
+    const uint32_t time_frame_of_allowed_requests)
+    : reset_request_count_timer_(
+          "InteriorDataCacheImplResetRequests",
+          new timer::TimerTaskImpl<InteriorDataCacheImpl>(
+              this, &InteriorDataCacheImpl::ResetRequestCountOnTimer)) {
+  reset_request_count_timer_.Start(time_frame_of_allowed_requests,
+                                   timer::kPeriodic);
+}
 
 void InteriorDataCacheImpl::Add(const std::string& module_type,
                                 const smart_objects::SmartObject& module_data) {
@@ -75,5 +83,18 @@ void InteriorDataCacheImpl::ClearCache() {
   LOG4CXX_AUTO_TRACE(logger_);
   sync_primitives::AutoLock autolock(subscriptions_lock_);
   subscriptions_.clear();
+}
+
+void InteriorDataCacheImpl::ResetRequestCountOnTimer() {
+  LOG4CXX_AUTO_TRACE(logger_);
+  amount_of_request_in_this_time_frame_ = 0;
+}
+
+uint32_t InteriorDataCacheImpl::GetCurrentAmountOfRequests() const {
+  return amount_of_request_in_this_time_frame_;
+}
+
+void InteriorDataCacheImpl::IncrementAmountOfRequests() {
+  ++amount_of_request_in_this_time_frame_;
 }
 }
