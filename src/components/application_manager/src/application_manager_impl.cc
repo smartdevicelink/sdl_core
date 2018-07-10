@@ -2283,15 +2283,11 @@ void ApplicationManagerImpl::SendOnSDLClose() {
       logger_,
       "Attached schema to message, result if valid: " << msg->isValid());
 
-#ifdef HMI_DBUS_API
-  message_to_send->set_smart_object(*msg);
-#else
   if (!ConvertSOtoMessage(*msg, *message_to_send)) {
     LOG4CXX_WARN(logger_,
                  "Cannot send message to HMI: failed to create string");
     return;
   }
-#endif  // HMI_DBUS_API
 
   if (!hmi_handler_) {
     LOG4CXX_WARN(logger_, "No HMI Handler set");

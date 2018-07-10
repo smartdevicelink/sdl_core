@@ -91,8 +91,3 @@ add_subdirectory(./media_manager)
 if(TELEMETRY_MONITOR)
   add_subdirectory(./telemetry_monitor)
 endif()
-
-# --- DBus
-if(HMI_DBUS_API)
-  add_subdirectory(./dbus)
-endif()

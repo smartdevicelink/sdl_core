@@ -62,7 +62,6 @@ include_directories(
   ${POLICY_GLOBAL_INCLUDE_PATH}/
   ${COMPONENTS_DIR}/rpc_base/include
   ${COMPONENTS_DIR}/resumption/include
-  ${COMPONENTS_DIR}/dbus/include
   ${CMAKE_BINARY_DIR}/src/components
   ${JSONCPP_INCLUDE_DIRECTORY}
   ${LOG4CXX_INCLUDE_DIRECTORY}

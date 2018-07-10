@@ -39,9 +39,6 @@
 
 #include "config_profile/profile.h"
 #include "hmi_message_handler/hmi_message_handler_impl.h"
-#ifdef DBUS_HMIADAPTER
-#include "hmi_message_handler/dbus_message_adapter.h"
-#endif  // DBUS_HMIADAPTER
 #if (defined(MESSAGEBROKER_HMIADAPTER) || defined(PASA_HMI))
 #include "hmi_message_handler/messagebroker_adapter.h"
 #endif  // #if ( defined (MESSAGEBROKER_HMIADAPTER) || defined(PASA_HMI)  )
@@ -99,10 +96,6 @@ class LifeCycle {
 #ifdef TELEMETRY_MONITOR
   telemetry_monitor::TelemetryMonitor* telemetry_monitor_;
 #endif  // TELEMETRY_MONITOR
-#ifdef DBUS_HMIADAPTER
-  hmi_message_handler::DBusMessageAdapter* dbus_adapter_;
-  std::thread* dbus_adapter_thread_;
-#endif  // DBUS_HMIADAPTER
 
 #ifdef MESSAGEBROKER_HMIADAPTER
   hmi_message_handler::MessageBrokerAdapter* mb_adapter_;

@@ -44,17 +44,14 @@ if(FORCE_3RD_PARTY)
   	message(FATAL_ERROR "Please don't turn on both FORCE_3RD_PARTY and NO_REBUILD_3RD_PARTY at the same time.")
   else()
 	set(FORCE_3RD_PARTY_LOGGER ON)
-	set(FORCE_3RD_PARTY_DBUS ON)
   endif()
 endif()
 
-if(ENABLE_LOG OR HMI_DBUS_API)
+if(ENABLE_LOG)
   # --- libexpat
   add_subdirectory(expat-2.1.0)
   set(EXPAT_LIBS_DIRECTORY ${3RD_PARTY_INSTALL_PREFIX_ARCH}/lib PARENT_SCOPE)
-endif()
 
-if(ENABLE_LOG)
   if(NO_REBUILD_3RD_PARTY_LOGGER)
     message(STATUS "Not rebuilding logger.")
   else()
