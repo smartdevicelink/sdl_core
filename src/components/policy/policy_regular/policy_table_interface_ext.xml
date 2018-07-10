@@ -39,6 +39,7 @@
         <element name="vin" />
         <element name="accPedalPosition" />
         <element name="beltStatus" />
+        <element name="electronicParkBrakeStatus" />
         <element name="driverBraking" />
         <element name="prndl" />
         <element name="rpm" />

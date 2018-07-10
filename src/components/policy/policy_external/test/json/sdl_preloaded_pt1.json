@@ -2051,6 +2051,7 @@
             [
               "accPedalPosition",
               "beltStatus",
+              "electronicParkBrakeStatus",
               "driverBraking",
               "myKey",
               "prndl",
@@ -2065,6 +2066,7 @@
             [
               "accPedalPosition",
               "beltStatus",
+              "electronicParkBrakeStatus",
               "driverBraking",
               "myKey",
               "prndl",
@@ -2079,6 +2081,7 @@
             [
               "accPedalPosition",
               "beltStatus",
+              "electronicParkBrakeStatus",
               "driverBraking",
               "myKey",
               "prndl",
@@ -2093,6 +2096,7 @@
             [
               "accPedalPosition",
               "beltStatus",
+              "electronicParkBrakeStatus",
               "driverBraking",
               "myKey",
               "prndl",

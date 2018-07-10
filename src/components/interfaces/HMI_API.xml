@@ -730,6 +730,33 @@
 </enum>
 
 <!--IVI part-->
+<enum name="ElectronicParkBrakeStatus">
+  <element name="CLOSED">
+    <description>
+      Park brake actuators have been fully applied.
+    </description>
+  </element>
+  <element name="TRANSITION">
+    <description>
+      Park brake actuators are transitioning to either Apply/Closed or Release/Open state.
+    </description>
+  </element>
+  <element name="OPEN">
+    <description>
+      Park brake actuators are released.
+    </description>
+  </element>
+  <element name="DRIVE_ACTIVE">
+    <description>
+      When driver pulls the Electronic Park Brake switch while driving "at speed".
+    </description>
+  </element>
+ <element name="FAULT">
+    <description>
+      When system has a fault or is under maintenance.
+    </description>
+ </element>
+</enum>
 <enum name="FuelType">
     <element name="GASOLINE" />
     <element name="DIESEL" />
@@ -1042,6 +1069,7 @@
   <element name="VEHICLEDATA_STEERINGWHEEL" />
   <element name="VEHICLEDATA_FUELRANGE" />
   <element name="VEHICLEDATA_ENGINEOILLIFE" />
+  <element name="VEHICLEDATA_ELECTRONICPARKBRAKESTATUS" />
 </enum>
 
 <enum name="WiperStatus">
@@ -1454,21 +1482,21 @@
     <element name="UPDATING" />
     <element name="UPDATE_NEEDED"/>
   </enum>
-  
+
   <enum name="SystemError">
     <element name="SYNC_REBOOTED"/>
     <element name="SYNC_OUT_OF_MEMMORY" />
   </enum>
-  
+
   <enum name="StatisticsType">
     <element name="iAPP_BUFFER_FULL"/>
   </enum>
-  
+
   <enum name="ConsentSource">
     <element name="GUI"/>
     <element name="VUI" />
   </enum>
-  
+
   <enum name="DeviceState">
     <element name="UNKNOWN"/>
     <element name="UNPAIRED"/>
@@ -1481,7 +1509,7 @@
     <param name="line2" type="String" mandatory="false"/>
     <param name="textBody" type="String" mandatory="false"/>
   </struct>
-  
+
   <struct name="PermissionItem">
     <param name="name" type="String" mandatory="true">
       <description>Code of message of user-friendly text about functional group to be allowed/disallowed</description>
@@ -1492,7 +1520,7 @@
     <param name="allowed" type="Boolean" mandatory="false">
       <description>Specifies whether functionality was allowed/disallowed. If ommited - no information about User Consent is yet found for app.</description>
     </param>
-  </struct>  
+  </struct>
   <struct name="ServiceInfo">
     <param name="url" type="String" mandatory="true">
       <description>Get URL based on service type.</description>
@@ -2028,7 +2056,7 @@
         </description>
     </param>
     <param name="dayColorScheme" type="Common.TemplateColorScheme" mandatory="false"></param>
-    <param name="nightColorScheme" type="Common.TemplateColorScheme" mandatory="false"></param> 
+    <param name="nightColorScheme" type="Common.TemplateColorScheme" mandatory="false"></param>
 </struct>
 
 <struct name="MenuParams">
@@ -2622,7 +2650,7 @@
 
 <struct name="DateTime">
   <param name="millisecond" type="Integer" minvalue="0" maxvalue="999" mandatory="false">
-    <description>Milliseconds </description>     
+    <description>Milliseconds </description>
   </param>
   <param name="second" type="Integer" minvalue="0" maxvalue="60" mandatory="false">
     <description>Seconds part of time</description>
@@ -3822,7 +3850,7 @@
       <description>ID of application related to this RPC.</description>
     </param>
     <param name="dayColorScheme" type="Common.TemplateColorScheme" mandatory="false"></param>
-    <param name="nightColorScheme" type="Common.TemplateColorScheme" mandatory="false"></param> 
+    <param name="nightColorScheme" type="Common.TemplateColorScheme" mandatory="false"></param>
   </function>
   <function name="SetDisplayLayout" messagetype="response">
     <param name="displayCapabilities" type="Common.DisplayCapabilities" mandatory="false">
@@ -4017,7 +4045,7 @@
   </function>
 </interface>
 
-<interface name="Navigation" version="1.5.0" date="2017-08-15"> 
+<interface name="Navigation" version="1.5.0" date="2017-08-15">
 
   <function name="IsReady" messagetype="request">
     <description>Method is invoked at system startup. Response must provide the information about presence of UI Navigation module and its readiness to cooperate with SDL.</description>
@@ -4396,6 +4424,9 @@
     <param name="engineOilLife" type="Boolean" mandatory="false">
       <description>The estimated percentage of remaining oil life of the engine.</description>
     </param>
+    <param name="electronicParkBrakeStatus" type="Boolean" mandatory="false">
+      <description>The status of the park brake as provided by Electric Park Brake (EPB) system.</description>
+    </param>
         <!-- Ford Specific Data Items -->
     <param name="eCallInfo" type="Boolean" mandatory="false">
       <description>Emergency Call notification and confirmation data</description>
@@ -4480,6 +4511,9 @@
     </param>
     <param name="engineOilLife" type="Common.VehicleDataResult" mandatory="false">
       <description>The estimated percentage of remaining oil life of the engine.</description>
+    </param>
+    <param name="electronicParkBrakeStatus" type="Common.VehicleDataResult" mandatory="false">
+      <description>The status of the park brake as provided by Electric Park Brake (EPB) system.</description>
     </param>
         <!-- Ford Specific Data Items -->
     <param name="eCallInfo" type="Common.VehicleDataResult" mandatory="false">
@@ -4572,6 +4606,9 @@
     <param name="engineOilLife" type="Boolean" mandatory="false">
       <description>The estimated percentage of remaining oil life of the engine.</description>
     </param>
+    <param name="electronicParkBrakeStatus" type="Boolean" mandatory="false">
+      <description>The status of the park brake as provided by Electric Park Brake (EPB) system.</description>
+    </param>
         <!-- Ford Specific Data Items -->
     <param name="eCallInfo" type="Boolean" mandatory="false">
       <description>Emergency Call notification and confirmation data</description>
@@ -4656,6 +4693,9 @@
     </param>
     <param name="engineOilLife" type="Common.VehicleDataResult" mandatory="false">
       <description>The estimated percentage of remaining oil life of the engine.</description>
+    </param>
+    <param name="electronicParkBrakeStatus" type="Common.VehicleDataResult" mandatory="false">
+      <description>The status of the park brake as provided by Electric Park Brake (EPB) system.</description>
     </param>
         <!-- Ford Specific Data Items -->
     <param name="eCallInfo" type="Common.VehicleDataResult" mandatory="false">
@@ -4746,6 +4786,9 @@
     <param name="engineOilLife" type="Boolean" mandatory="false">
       <description>The estimated percentage of remaining oil life of the engine.</description>
     </param>
+    <param name="electronicParkBrakeStatus" type="Boolean" mandatory="false">
+      <description>The status of the park brake as provided by Electric Park Brake (EPB) system.</description>
+    </param>
     <param name="eCallInfo" type="Boolean" mandatory="false">
       <description>Emergency Call notification and confirmation data</description>
     </param>
@@ -4832,6 +4875,9 @@
     <param name="engineOilLife" type="Float" minvalue="0" maxvalue="100" mandatory="false">
       <description>The estimated percentage of remaining oil life of the engine.</description>
     </param>
+    <param name="electronicParkBrakeStatus" type="Common.ElectronicParkBrakeStatus" mandatory="false">
+      <description>The status of the park brake as provided by Electric Park Brake (EPB) system.</description>
+    </param>
     <param name="eCallInfo" type="Common.ECallInfo" mandatory="false">
       <description>Emergency Call notification and confirmation data</description>
     </param>
@@ -4869,7 +4915,7 @@
       <description>The instantaneous fuel consumption in microlitres</description>
     </param>
     <param name="fuelRange" type="Common.FuelRange" minsize="0" maxsize="100" array="true" mandatory="false">
-        <description>The estimate range in KM the vehicle can travel based on fuel level and consumption</description>
+      <description>The estimate range in KM the vehicle can travel based on fuel level and consumption</description>
     </param>
     <param name="externalTemperature" type="Float" minvalue="-40" maxvalue="100" mandatory="false">
       <description>The external temperature in degrees celsius</description>
@@ -4891,6 +4937,9 @@
     </param>
     <param name="beltStatus" type="Common.BeltStatus" mandatory="false">
       <description>The status of the seat belts</description>
+    </param>
+    <param name="electronicParkBrakeStatus" type="Common.ElectronicParkBrakeStatus" mandatory="false">
+      <description>The status of the park brake as provided by Electric Park Brake (EPB) system.</description>
     </param>
     <param name="bodyInformation" type="Common.BodyInformation" mandatory="false">
       <description>The body information including power modes</description>

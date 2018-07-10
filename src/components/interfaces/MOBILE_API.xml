@@ -526,6 +526,7 @@
         <element name="VEHICLEDATA_STEERINGWHEEL" />
         <element name="VEHICLEDATA_FUELRANGE" />
         <element name="VEHICLEDATA_ENGINEOILLIFE" />
+        <element name="VEHICLEDATA_ELECTRONICPARKBRAKESTATUS" />
     </enum>
     
     <enum name="ButtonName">
@@ -1128,6 +1129,34 @@
         <element name="NOT_TRAINED">
             <description>TPMS reports the tire is not trained.</description>
         </element>
+    </enum>
+    
+    <enum name="ElectronicParkBrakeStatus">
+      <element name="CLOSED">
+        <description>
+          Park brake actuators have been fully applied.
+        </description>		
+      </element>
+      <element name="TRANSITION">
+        <description>
+          Park brake actuators are transitioning to either Apply/Closed or Release/Open state.
+        </description>
+      </element>
+      <element name="OPEN">
+        <description>
+          Park brake actuators are released.
+        </description>		
+      </element>
+      <element name="DRIVE_ACTIVE">
+        <description>
+          When driver pulls the Electronic Park Brake switch while driving "at speed".
+        </description>
+      </element>
+     <element name="FAULT">
+        <description>
+          When system has a fault or is under maintenance.
+        </description>
+     </element>
     </enum>
     
     <enum name="FuelType">
@@ -4239,6 +4268,10 @@
         <param name="engineOilLife" type="Boolean" mandatory="false">
             <description>The estimated percentage of remaining oil life of the engine.</description>
         </param>
+        <param name="electronicParkBrakeStatus" type="Boolean" mandatory="false">
+          <description>The status of the park brake as provided by Electric Park Brake (EPB) system.</description>
+        </param>
+
         
         <!-- Ford Specific Data Items -->
         <param name="eCallInfo" type="Boolean" mandatory="false">
@@ -4351,6 +4384,10 @@
         <param name="engineOilLife" type="VehicleDataResult" mandatory="false">
             <description>The estimated percentage of remaining oil life of the engine.</description>
         </param>
+        <param name="electronicParkBrakeStatus" type="VehicleDataResult" mandatory="false">
+          <description>The status of the park brake as provided by Electric Park Brake (EPB) system.</description>
+        </param>
+
         
         <!-- Ford Specific Data Items -->
         <param name="eCallInfo" type="VehicleDataResult" mandatory="false">
@@ -4441,6 +4478,10 @@
         <param name="engineOilLife" type="Boolean" mandatory="false">
             <description>The estimated percentage of remaining oil life of the engine.</description>
         </param>
+        <param name="electronicParkBrakeStatus" type="Boolean" mandatory="false">
+          <description>The status of the park brake as provided by Electric Park Brake (EPB) system.</description>
+        </param>
+
         
         <!-- Ford Specific Data Items -->
         <param name="eCallInfo" type="Boolean" mandatory="false">
@@ -4551,6 +4592,10 @@
         <param name="engineOilLife" type="VehicleDataResult" mandatory="false">
             <description>The estimated percentage of remaining oil life of the engine.</description>
         </param>
+        <param name="electronicParkBrakeStatus" type="VehicleDataResult" mandatory="false">
+          <description>The status of the park brake as provided by Electric Park Brake (EPB) system.</description>
+        </param>
+
         
         <!-- Ford Specific Data Items -->
         <param name="eCallInfo" type="VehicleDataResult" mandatory="false">
@@ -4644,6 +4689,10 @@
         <param name="engineOilLife" type="Boolean" mandatory="false">
             <description>The estimated percentage of remaining oil life of the engine.</description>
         </param>
+        <param name="electronicParkBrakeStatus" type="Boolean" mandatory="false">
+          <description>The status of the park brake as provided by Electric Park Brake (EPB) system.</description>
+        </param>
+
         
         <!-- Ford Specific Data Items -->
         <param name="eCallInfo" type="Boolean" mandatory="false">
@@ -4758,6 +4807,10 @@
         <param name="engineOilLife" type="Float" minvalue="0" maxvalue="100" mandatory="false">
             <description>The estimated percentage of remaining oil life of the engine.</description>
         </param>
+        <param name="electronicParkBrakeStatus" type="ElectronicParkBrakeStatus" mandatory="false">
+          <description>The status of the park brake as provided by Electric Park Brake (EPB) system.</description>
+        </param>
+
         
         <!-- Ford Specific Data Items -->
         <param name="eCallInfo" type="ECallInfo" mandatory="false">
@@ -6000,6 +6053,10 @@
         <param name="engineOilLife" type="Float" minvalue="0" maxvalue="100" mandatory="false">
             <description>The estimated percentage of remaining oil life of the engine.</description>
         </param>
+        <param name="electronicParkBrakeStatus" type="ElectronicParkBrakeStatus" mandatory="false">
+          <description>The status of the park brake as provided by Electric Park Brake (EPB) system.</description>
+        </param>
+
         
         <!-- Ford Specific Vehicle Data -->
         <param name="eCallInfo" type="ECallInfo" mandatory="false">

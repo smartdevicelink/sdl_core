@@ -415,6 +415,7 @@
             "parameters": [
               "accPedalPosition",
               "beltStatus",
+              "electronicParkBrakeStatus",
               "driverBraking",
               "myKey",
               "prndl",
@@ -431,6 +432,7 @@
             "parameters": [
               "accPedalPosition",
               "beltStatus",
+              "electronicParkBrakeStatus",
               "driverBraking",
               "myKey",
               "prndl",
@@ -447,6 +449,7 @@
             "parameters": [
               "accPedalPosition",
               "beltStatus",
+              "electronicParkBrakeStatus",
               "driverBraking",
               "myKey",
               "prndl",
@@ -463,6 +466,7 @@
             "parameters": [
               "accPedalPosition",
               "beltStatus",
+              "electronicParkBrakeStatus",
               "driverBraking",
               "myKey",
               "prndl",
