@@ -189,6 +189,8 @@ const char* kAckMQKey = "AckMQ";
 const char* kApplicationListUpdateTimeoutKey = "ApplicationListUpdateTimeout";
 const char* kReadDIDFrequencykey = "ReadDIDRequest";
 const char* kGetVehicleDataFrequencyKey = "GetVehicleDataRequest";
+const char* kGetInteriorVehicleDataFrequencyKey =
+    "GetInteriorVehicleDataRequest";
 const char* kLegacyProtocolMaskKey = "LegacyProtocol";
 const char* kHubProtocolMaskKey = "HubProtocol";
 const char* kPoolProtocolMaskKey = "PoolProtocol";
@@ -339,6 +341,7 @@ const uint32_t kDefaultTransportManagerDisconnectTimeout = 0;
 const uint32_t kDefaultApplicationListUpdateTimeout = 1;
 const std::pair<uint32_t, uint32_t> kReadDIDFrequency = {5, 1};
 const std::pair<uint32_t, uint32_t> kGetVehicleDataFrequency = {5, 1};
+const std::pair<uint32_t, uint32_t> kGetInteriorVehicleDataFrequency = {20, 1};
 const std::pair<uint32_t, uint32_t> kStartStreamRetryAmount = {3, 1};
 const uint32_t kDefaultMaxThreadPoolSize = 2;
 const int kDefaultIAP2HubConnectAttempts = 0;
@@ -788,6 +791,11 @@ const std::pair<uint32_t, int32_t>& Profile::read_did_frequency() const {
 const std::pair<uint32_t, int32_t>& Profile::get_vehicle_data_frequency()
     const {
   return get_vehicle_data_frequency_;
+}
+
+const std::pair<uint32_t, int32_t>&
+Profile::get_interior_vehicle_data_frequency() const {
+  return get_interior_vehicle_data_frequency_;
 }
 
 const std::pair<uint32_t, int32_t>& Profile::start_stream_retry_amount() const {
@@ -1862,6 +1870,11 @@ void Profile::UpdateValues() {
                        kGetVehicleDataFrequency,
                        kMainSection,
                        kGetVehicleDataFrequencyKey);
+
+  ReadUintIntPairValue(&get_interior_vehicle_data_frequency_,
+                       kGetInteriorVehicleDataFrequency,
+                       kMainSection,
+                       kGetInteriorVehicleDataFrequencyKey);
 
   ReadUIntValue(&max_thread_pool_size_,
                 kDefaultMaxThreadPoolSize,
