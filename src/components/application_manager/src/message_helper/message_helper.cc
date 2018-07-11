@@ -1203,9 +1203,20 @@ smart_objects::SmartObjectSPtr MessageHelper::CreateAppVrHelp(
     return NULL;
   }
   smart_objects::SmartObject& vr_help = *result;
-  vr_help[strings::vr_help_title] = app->name();
+  const smart_objects::SmartObject* vr_help_title = app->vr_help_title();
+  if (vr_help_title &&
+      vr_help_title->keyExists(strings::vr_help_title)) {
+    vr_help[strings::vr_help_title] =
+        (*vr_help_title)[strings::vr_help_title].asString();
+  }
 
   int32_t index = 0;
+
+  smart_objects::SmartObject so_vr_help(smart_objects::SmartType_Map);
+  so_vr_help[strings::position] = index + 1;
+  so_vr_help[strings::text] = app->name();
+  vr_help[strings::vr_help][index++] = so_vr_help;
+
   if (app->vr_synonyms()) {
     smart_objects::SmartObject item(smart_objects::SmartType_Map);
     item[strings::text] = (*(app->vr_synonyms())).getElement(0);
