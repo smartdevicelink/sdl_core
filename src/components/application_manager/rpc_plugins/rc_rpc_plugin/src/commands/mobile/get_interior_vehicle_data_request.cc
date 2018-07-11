@@ -106,10 +106,18 @@ bool GetInteriorVehicleDataRequest::ProcessCapabilities() {
 void GetInteriorVehicleDataRequest::ProcessResponseToMobileFromCache(
     app_mngr::ApplicationSharedPtr app) {
   LOG4CXX_AUTO_TRACE(logger_);
+  const auto& data_mapping = RCHelpers::GetModuleTypeToDataMapping();
   auto data = interior_data_cache_.Retrieve(ModuleType());
-  auto msg_params = smart_objects::SmartObject(smart_objects::SmartType_Map);
-  msg_params[message_params::kModuleData] = data;
-  SendResponse(true, mobile_apis::Result::SUCCESS, nullptr, &msg_params);
+  auto response_msg_params = smart_objects::SmartObject(smart_objects::SmartType_Map);
+  response_msg_params[message_params::kModuleData][data_mapping.at(ModuleType())] = data;
+  response_msg_params[message_params::kModuleData][message_params::kModuleType] = ModuleType();
+
+  const auto& request_msg_params = (*message_)[app_mngr::strings::msg_params];
+  LOG4CXX_DEBUG(logger_, "kSubscribe exist" << request_msg_params.keyExists(message_params::kSubscribe));
+  if (request_msg_params.keyExists(message_params::kSubscribe)) {
+    response_msg_params[message_params::kIsSubscribed] = request_msg_params[message_params::kSubscribe].asBool();
+  }
+  SendResponse(true, mobile_apis::Result::SUCCESS, nullptr, &response_msg_params);
   if (AppShouldBeUnsubscribed()) {
     auto extension = application_manager::AppExtensionPtr::static_pointer_cast<
         RCAppExtension>(app->QueryInterface(RCRPCPlugin::kRCPluginID));
@@ -152,6 +160,14 @@ void GetInteriorVehicleDataRequest::Execute() {
   app_mngr::ApplicationSharedPtr app =
       application_manager_.application(connection_key());
 
+  if (TheLastAppShouldBeUnsubscribed(app) ||
+      !interior_data_cache_.Contains(ModuleType())) {
+    SendHMIRequest(hmi_apis::FunctionID::RC_GetInteriorVehicleData,
+                   &(*message_)[app_mngr::strings::msg_params],
+                   true);
+    return;
+  }
+
   if (HasRequestExcessiveSubscription()) {
     excessive_subscription_occured_ = true;
     is_subscribed =
@@ -160,13 +176,6 @@ void GetInteriorVehicleDataRequest::Execute() {
     RemoveExcessiveSubscription();
   }
 
-  if (TheLastAppShouldBeUnsubscribed(app) ||
-      !interior_data_cache_.Contains(ModuleType())) {
-    SendHMIRequest(hmi_apis::FunctionID::RC_GetInteriorVehicleData,
-                   &(*message_)[app_mngr::strings::msg_params],
-                   true);
-    return;
-  }
   ProcessResponseToMobileFromCache(app);
 }
 
