@@ -118,6 +118,7 @@ void GetInteriorVehicleDataRequest::ProcessResponseToMobileFromCache(
 }
 
 bool GetInteriorVehicleDataRequest::AppShouldBeUnsubscribed() {
+  LOG4CXX_AUTO_TRACE(logger_);
   const auto& msg_params = (*message_)[app_mngr::strings::msg_params];
   if (msg_params.keyExists(message_params::kSubscribe)) {
     return !(msg_params[message_params::kSubscribe].asBool());
@@ -127,6 +128,7 @@ bool GetInteriorVehicleDataRequest::AppShouldBeUnsubscribed() {
 
 bool GetInteriorVehicleDataRequest::TheLastAppShouldBeUnsubscribed(
     app_mngr::ApplicationSharedPtr app) {
+  LOG4CXX_AUTO_TRACE(logger_);
   if (AppShouldBeUnsubscribed()) {
     const auto subscribed_to_module_type =
         AppsSubscribedToModuleType(ModuleType());
