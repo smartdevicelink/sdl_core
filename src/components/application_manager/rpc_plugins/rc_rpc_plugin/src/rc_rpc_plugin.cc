@@ -45,6 +45,7 @@ bool RCRPCPlugin::Init(
     application_manager::rpc_service::RPCService& rpc_service,
     application_manager::HMICapabilities& hmi_capabilities,
     policy::PolicyHandlerInterface& policy_handler) {
+  interior_data_cache_.reset(new InteriorDataCacheImpl());
   resource_allocation_manager_.reset(
       new ResourceAllocationManagerImpl(app_manager, rpc_service));
   command_factory_.reset(
@@ -54,7 +55,6 @@ bool RCRPCPlugin::Init(
                                           policy_handler,
                                           *resource_allocation_manager_,
                                           *interior_data_cache_));
-  interior_data_cache_.reset(new InteriorDataCacheImpl());
   return true;
 }
 
