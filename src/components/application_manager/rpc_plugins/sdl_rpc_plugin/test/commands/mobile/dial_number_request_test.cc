@@ -138,6 +138,51 @@ TEST_F(DialNumberRequestTest, Run_SUCCESS) {
   command->Run();
 }
 
+TEST_F(DialNumberRequestTest, OnEvent_UnknownEvent_UNSUCCESS) {
+ MessageSharedPtr command_msg(CreateMessage(smart_objects::SmartType_Map));
+ (*command_msg)[am::strings::params][am::strings::connection_key] =
+     kConnectionKey;
+
+ DialNumberRequestPtr
+ command(CreateCommand<DialNumberRequest>(command_msg));
+
+ MockAppPtr app(CreateMockApp());
+ EXPECT_CALL(app_mngr_, application(kConnectionKey)).WillOnce(Return(app));
+
+ Event event(hmi_apis::FunctionID::INVALID_ENUM);
+ EXPECT_CALL(mock_rpc_service_, ManageMobileCommand(_, _)).Times(0);
+
+  command->on_event(event);
+}
+
+TEST_F(DialNumberRequestTest, OnEvent_SUCCESS) {
+   MessageSharedPtr event_msg(CreateMessage(smart_objects::SmartType_Map));
+   (*event_msg)[am::strings::params][am::hmi_response::code] =
+       mobile_apis::Result::SUCCESS;
+   (*event_msg)[am::strings::params][am::strings::info] = "test_info";
+
+   Event event(hmi_apis::FunctionID::BasicCommunication_DialNumber);
+   event.set_smart_object(*event_msg);
+
+   MockAppPtr app(CreateMockApp());
+   EXPECT_CALL(app_mngr_, application(kConnectionKey))
+       .WillRepeatedly(Return(app));
+   ON_CALL(app_mngr_,
+   GetRPCService()).WillByDefault(ReturnRef(mock_rpc_service_));
+   EXPECT_CALL(
+       mock_rpc_service_,
+       ManageMobileCommand(MobileResultCodeIs(mobile_apis::Result::SUCCESS),
+       _));
+
+   MessageSharedPtr command_msg(CreateMessage(smart_objects::SmartType_Map));
+   (*command_msg)[am::strings::params][am::strings::connection_key] =
+       kConnectionKey;
+
+   DialNumberRequestPtr
+   command(CreateCommand<DialNumberRequest>(command_msg));
+   command->on_event(event);
+}
+
 }  // namespace dial_number_request
 }  // namespace mobile_commands_test
 }  // namespace commands_test
