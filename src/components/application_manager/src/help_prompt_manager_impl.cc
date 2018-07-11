@@ -53,7 +53,7 @@ HelpPromptManagerImpl::HelpPromptManagerImpl(Application& app,
     : app_(app)
     , app_manager_(app_manager)
     , sending_type_(SendingType::kSendBoth)
-    , count_requests_commands_(0)
+    , count_vr_commands_(0)
     , is_tts_send_(false)
     , is_ui_send_(false) {}
 
@@ -75,34 +75,32 @@ bool HelpPromptManagerImpl::AddCommand(
     return false;
   }
   const smart_objects::SmartObject& commands = command[strings::vr_commands];
-
-  const std::size_t limit = kLimitCommand - count_requests_commands_;
   const std::size_t count_new_commands = commands.length();
 
-  LOG4CXX_DEBUG(logger_,
-                "Remaining number of commands: "
-                    << limit << "; commands to add: " << count_new_commands);
-  if (0 == limit || limit > kLimitCommand) {
+  LOG4CXX_DEBUG(logger_, "Commands to add: " << count_new_commands);
+  if (count_vr_commands_ >= kLimitCommand) {
     LOG4CXX_DEBUG(logger_, "Commands limit is exceeded");
     return false;
   }
 
-  const std::size_t count_to_add =
-      limit > count_new_commands ? count_new_commands : limit;
-  LOG4CXX_DEBUG(logger_, "Adding " << count_to_add << " commands");
+  const std::size_t available_count = kLimitCommand - count_vr_commands_;
+  const std::size_t count_to_add = available_count > count_new_commands
+                                       ? count_new_commands
+                                       : available_count;
+  LOG4CXX_DEBUG(logger_, "Will be added " << count_to_add << " commands");
 
   vr_commands_[cmd_id] = utils::MakeShared<smart_objects::SmartObject>(
       smart_objects::SmartType_Array);
   smart_objects::SmartArray& ar_vr_cmd = *(vr_commands_[cmd_id]->asArray());
   smart_objects::SmartArray& ar_cmd = *(commands.asArray());
-  ar_vr_cmd.reserve(count_requests_commands_ + count_to_add);
+  ar_vr_cmd.reserve(count_vr_commands_ + count_to_add);
   ar_vr_cmd.insert(
       ar_vr_cmd.end(), ar_cmd.begin(), ar_cmd.begin() + count_to_add);
 
   LOG4CXX_DEBUG(logger_,
                 "VR commands with id: " << cmd_id << " added for appID: "
                                         << app_.app_id());
-  count_requests_commands_ += count_to_add;
+  count_vr_commands_ += count_to_add;
   return true;
 }
 
@@ -116,14 +114,14 @@ bool HelpPromptManagerImpl::DeleteCommand(const uint32_t cmd_id) {
     return false;
   }
 
-  count_requests_commands_ -= it->second->length();
+  count_vr_commands_ -= it->second->length();
 
   vr_commands_.erase(it);
   LOG4CXX_DEBUG(
       logger_,
       "VR command with id: "
           << cmd_id << " deleted for appID: " << app_.app_id()
-          << ". Remaining number of commands: " << count_requests_commands_);
+          << ". Remaining number of commands: " << count_vr_commands_);
   return true;
 }
 

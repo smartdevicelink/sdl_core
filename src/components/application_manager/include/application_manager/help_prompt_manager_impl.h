@@ -164,7 +164,7 @@ class HelpPromptManagerImpl : public HelpPromptManager {
   VRCommandsMap vr_commands_;
   sync_primitives::Lock vr_commands_lock_;
   SendingType sending_type_;
-  std::size_t count_requests_commands_;
+  std::size_t count_vr_commands_;
   bool is_tts_send_;
   bool is_ui_send_;
 };
