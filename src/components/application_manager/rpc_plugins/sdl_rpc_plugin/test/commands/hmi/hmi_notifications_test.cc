@@ -42,27 +42,6 @@
 #include "sdl_rpc_plugin/commands/hmi/on_ui_command_notification.h"
 #include "sdl_rpc_plugin/commands/hmi/on_ui_keyboard_input_notification.h"
 #include "sdl_rpc_plugin/commands/hmi/on_ui_touch_event_notification.h"
-#include "sdl_rpc_plugin/commands/hmi/on_vi_acc_pedal_position_notification.h"
-#include "sdl_rpc_plugin/commands/hmi/on_vi_belt_status_notification.h"
-#include "sdl_rpc_plugin/commands/hmi/on_vi_body_information_notification.h"
-#include "sdl_rpc_plugin/commands/hmi/on_vi_device_status_notification.h"
-#include "sdl_rpc_plugin/commands/hmi/on_vi_driver_braking_notification.h"
-#include "sdl_rpc_plugin/commands/hmi/on_vi_engine_torque_notification.h"
-#include "sdl_rpc_plugin/commands/hmi/on_vi_external_temperature_notification.h"
-#include "sdl_rpc_plugin/commands/hmi/on_vi_fuel_level_notification.h"
-#include "sdl_rpc_plugin/commands/hmi/on_vi_fuel_level_state_notification.h"
-#include "sdl_rpc_plugin/commands/hmi/on_vi_gps_data_notification.h"
-#include "sdl_rpc_plugin/commands/hmi/on_vi_head_lamp_status_notification.h"
-#include "sdl_rpc_plugin/commands/hmi/on_vi_instant_fuel_consumption_notification.h"
-#include "sdl_rpc_plugin/commands/hmi/on_vi_my_key_notification.h"
-#include "sdl_rpc_plugin/commands/hmi/on_vi_odometer_notification.h"
-#include "sdl_rpc_plugin/commands/hmi/on_vi_prndl_notification.h"
-#include "sdl_rpc_plugin/commands/hmi/on_vi_rpm_notification.h"
-#include "sdl_rpc_plugin/commands/hmi/on_vi_speed_notification.h"
-#include "sdl_rpc_plugin/commands/hmi/on_vi_steering_wheel_angle_notification.h"
-#include "sdl_rpc_plugin/commands/hmi/on_vi_tire_pressure_notification.h"
-#include "sdl_rpc_plugin/commands/hmi/on_vi_vin_notification.h"
-#include "sdl_rpc_plugin/commands/hmi/on_vi_wiper_status_notification.h"
 #include "sdl_rpc_plugin/commands/hmi/on_app_permission_changed_notification.h"
 #include "sdl_rpc_plugin/commands/hmi/on_app_registered_notification.h"
 #include "sdl_rpc_plugin/commands/hmi/on_audio_data_streaming_notification.h"
@@ -310,12 +289,6 @@ void sig_handler(int sig) {
   }
 }
 }  //  namespace
-
-template <class Command>
-class HMIOnViNotifications : public commands_test::CommandsTest<kIsNice> {
- public:
-  typedef Command CommandType;
-};
 
 template <class Command>
 class HMIOnNotificationsListToHMI

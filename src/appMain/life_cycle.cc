@@ -70,10 +70,6 @@ LifeCycle::LifeCycle(const profile::Profile& profile)
 #ifdef TELEMETRY_MONITOR
     , telemetry_monitor_(NULL)
 #endif  // TELEMETRY_MONITOR
-#ifdef DBUS_HMIADAPTER
-    , dbus_adapter_(NULL)
-    , dbus_adapter_thread_(NULL)
-#endif  // DBUS_HMIADAPTER
 #ifdef MESSAGEBROKER_HMIADAPTER
     , mb_adapter_(NULL)
     , mb_adapter_thread_(NULL)
@@ -189,30 +185,6 @@ bool LifeCycle::InitMessageSystem() {
 }
 #endif  // MESSAGEBROKER_HMIADAPTER
 
-#ifdef DBUS_HMIADAPTER
-/**
- * Initialize DBus component
- * @return true if success otherwise false.
- */
-bool LifeCycle::InitMessageSystem() {
-  dbus_adapter_ = new hmi_message_handler::DBusMessageAdapter(hmi_handler_);
-
-  hmi_handler_->AddHMIMessageAdapter(dbus_adapter_);
-  if (!dbus_adapter_->Init()) {
-    LOG4CXX_FATAL(logger_, "Cannot init DBus service!");
-    return false;
-  }
-
-  dbus_adapter_->SubscribeTo();
-
-  LOG4CXX_INFO(logger_, "Start DBusMessageAdapter thread!");
-  dbus_adapter_thread_ = new std::thread(
-      &hmi_message_handler::DBusMessageAdapter::Run, dbus_adapter_);
-
-  return true;
-}
-#endif  // DBUS_HMIADAPTER
-
 namespace {
 void sig_handler(int sig) {
   switch (sig) {
@@ -314,21 +286,6 @@ void LifeCycle::StopComponents() {
   app_manager_ = NULL;
 
   LOG4CXX_INFO(logger_, "Destroying HMI Message Handler and MB adapter.");
-
-#ifdef DBUS_HMIADAPTER
-  if (dbus_adapter_) {
-    DCHECK_OR_RETURN_VOID(hmi_handler_);
-    hmi_handler_->RemoveHMIMessageAdapter(dbus_adapter_);
-    dbus_adapter_->Shutdown();
-    if (dbus_adapter_thread_ != NULL) {
-      dbus_adapter_thread_->join();
-    }
-    delete dbus_adapter_;
-    dbus_adapter_ = NULL;
-    delete dbus_adapter_thread_;
-    dbus_adapter_thread_ = NULL;
-  }
-#endif  // DBUS_HMIADAPTER
 
 #ifdef MESSAGEBROKER_HMIADAPTER
   if (mb_adapter_) {
