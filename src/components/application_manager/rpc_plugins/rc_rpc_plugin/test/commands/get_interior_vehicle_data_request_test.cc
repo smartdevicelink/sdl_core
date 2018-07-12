@@ -116,6 +116,12 @@ class GetInteriorVehicleDataRequestTest
   }
 
   void SetUp() OVERRIDE {
+    std::pair<uint32_t, int32_t> frequency;
+    frequency.first = 5;
+    frequency.second = 1;
+    ON_CALL(app_mngr_settings_, get_vehicle_data_frequency())
+        .WillByDefault(ReturnRef(frequency));
+
     ON_CALL(app_mngr_, hmi_interfaces())
         .WillByDefault(ReturnRef(mock_hmi_interfaces_));
     ON_CALL(
@@ -178,6 +184,7 @@ TEST_F(GetInteriorVehicleDataRequestTest,
       rc_rpc_plugin::commands::GetInteriorVehicleDataRequest> command =
       CreateRCCommand<rc_rpc_plugin::commands::GetInteriorVehicleDataRequest>(
           mobile_message);
+
   // Expectations
   EXPECT_CALL(mock_rpc_service_,
               ManageHMICommand(HMIResultCodeIs(
@@ -201,6 +208,7 @@ TEST_F(GetInteriorVehicleDataRequestTest,
       rc_rpc_plugin::commands::GetInteriorVehicleDataRequest> command =
       CreateRCCommand<rc_rpc_plugin::commands::GetInteriorVehicleDataRequest>(
           mobile_message);
+
   // Expectations
   EXPECT_CALL(mock_rpc_service_,
               ManageHMICommand(HMIResultCodeIs(
@@ -236,8 +244,10 @@ TEST_F(
       mock_rpc_service_,
       ManageMobileCommand(MobileResultCodeIs(mobile_apis::Result::SUCCESS), _))
       .WillOnce(DoAll(SaveArg<0>(&command_result), Return(true)));
+
   // Act
   command->Run();
+
   // Assert
   EXPECT_EQ((*command_result)[application_manager::strings::msg_params]
                              [message_params::kModuleData]
@@ -266,6 +276,7 @@ TEST_F(
   apps_.insert(mock_app_);
   rc_app_extention_->SubscribeToInteriorVehicleData(enums_value::kRadio);
   ON_CALL(app_mngr_, applications()).WillByDefault(Return(apps_da_));
+
   // Expectations
   EXPECT_CALL(mock_rpc_service_,
               ManageHMICommand(HMIResultCodeIs(
@@ -277,6 +288,7 @@ TEST_F(
       .WillOnce(Return(true));
 
   EXPECT_CALL(mock_interior_data_cache_, ClearCache());
+
   // Act
   application_manager::SharedPtr<
       rc_rpc_plugin::commands::GetInteriorVehicleDataRequest> command =
@@ -352,6 +364,7 @@ TEST_F(
   smart_objects::SmartObject rc_capabilities;
   ON_CALL(mock_hmi_capabilities_, rc_capability())
       .WillByDefault(Return(&rc_capabilities));
+
   // Expectations
   EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_)).Times(0);
   EXPECT_CALL(mock_rpc_service_,
@@ -375,12 +388,14 @@ TEST_F(
       CreateRCCommand<rc_rpc_plugin::commands::GetInteriorVehicleDataRequest>(
           mobile_message);
   ON_CALL(mock_policy_handler_, CheckModule(_, _)).WillByDefault(Return(false));
+
   // Expectations
   EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_)).Times(0);
   EXPECT_CALL(mock_rpc_service_,
               ManageMobileCommand(
                   MobileResultCodeIs(mobile_apis::Result::DISALLOWED), _))
       .WillOnce((Return(true)));
+
   // Act
   command->Run();
 }
@@ -479,6 +494,7 @@ TEST_F(GetInteriorVehicleDataRequestTest,
   apps_.insert(mock_app_);
   rc_app_extention_->SubscribeToInteriorVehicleData(enums_value::kRadio);
   ON_CALL(app_mngr_, applications()).WillByDefault(Return(apps_da_));
+
   // Expectations
   EXPECT_CALL(mock_rpc_service_,
               ManageHMICommand(HMIResultCodeIs(
