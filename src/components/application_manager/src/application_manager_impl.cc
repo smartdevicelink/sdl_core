@@ -147,8 +147,7 @@ ApplicationManagerImpl::ApplicationManagerImpl(
     , apps_to_register_list_lock_ptr_(std::make_shared<sync_primitives::Lock>())
     , audio_pass_thru_active_(false)
     , audio_pass_thru_app_id_(0)
-    , driver_distraction_state_(
-          hmi_apis::Common_DriverDistractionState::INVALID_ENUM)
+    , driver_distraction_state_(hmi_apis::Common_DriverDistractionState::DD_OFF)
     , is_vr_session_strated_(false)
     , hmi_cooperating_(false)
     , is_all_apps_allowed_(true)
@@ -635,8 +634,6 @@ ApplicationSharedPtr ApplicationManagerImpl::RegisterApplication(
   if (file_system::FileExists(full_icon_path)) {
     application->set_app_icon_path(full_icon_path);
   }
-
-  PutDriverDistractionMessageToPostponed(application);
 
   // Stops timer of saving data to resumption in order to
   // doesn't erase data from resumption storage.
@@ -3515,8 +3512,8 @@ void ApplicationManagerImpl::OnPTUFinished(const bool ptu_result) {
   plugin_manager_->ForEachPlugin(on_app_policy_updated);
 }
 
-void ApplicationManagerImpl::PutDriverDistractionMessageToPostponed(
-    ApplicationSharedPtr application) const {
+void ApplicationManagerImpl::SendDriverDistractionState(
+    ApplicationSharedPtr application) {
   LOG4CXX_AUTO_TRACE(logger_);
   if (hmi_apis::Common_DriverDistractionState::INVALID_ENUM ==
       driver_distraction_state()) {
@@ -3534,7 +3531,20 @@ void ApplicationManagerImpl::PutDriverDistractionMessageToPostponed(
       driver_distraction_state();
   (*on_driver_distraction)[strings::params][strings::connection_key] =
       application->app_id();
-  application->PushMobileMessage(on_driver_distraction);
+
+  const std::string function_id = MessageHelper::StringifiedFunctionID(
+      static_cast<mobile_apis::FunctionID::eType>(
+          (*on_driver_distraction)[strings::params][strings::function_id]
+              .asUInt()));
+  const RPCParams params;
+  const mobile_apis::Result::eType check_result =
+      CheckPolicyPermissions(application, function_id, params);
+  if (mobile_api::Result::SUCCESS == check_result) {
+    rpc_service_->ManageMobileCommand(on_driver_distraction,
+                                      commands::Command::SOURCE_SDL);
+  } else {
+    application->PushMobileMessage(on_driver_distraction);
+  }
 }
 
 protocol_handler::MajorProtocolVersion

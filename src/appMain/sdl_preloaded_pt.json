@@ -141,7 +141,8 @@
                     "OnDriverDistraction": {
                         "hmi_levels": ["BACKGROUND",
                         "FULL",
-                        "LIMITED"]
+                        "LIMITED",
+                        "NONE"]
                     },
                     "OnEncodedSyncPData": {
                         "hmi_levels": ["BACKGROUND",
@@ -713,7 +714,8 @@
                     "OnDriverDistraction": {
                         "hmi_levels": ["BACKGROUND",
                         "FULL",
-                        "LIMITED"]
+                        "LIMITED",
+                        "NONE"]
                     },
                     "OnEncodedSyncPData": {
                         "hmi_levels": ["BACKGROUND",
