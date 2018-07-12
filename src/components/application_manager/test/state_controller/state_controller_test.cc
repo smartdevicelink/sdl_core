@@ -54,6 +54,7 @@
 #include "application_manager/mock_event_dispatcher.h"
 #include "application_manager/resumption/resume_ctrl.h"
 #include "application_manager/mock_application_manager.h"
+#include "application_manager/mock_rpc_service.h"
 
 namespace am = application_manager;
 using am::HmiState;
@@ -76,7 +77,7 @@ namespace state_controller_test {
 namespace constants {
 const uint32_t kCorrID = 314u;
 const uint32_t kHMIAppID = 2718u;
-}
+}  // namespace constants
 
 struct HmiStatesComparator {
   mobile_apis::HMILevel::eType hmi_level_;
@@ -139,7 +140,8 @@ class StateControllerImplTest : public ::testing::Test {
       , usage_stat("0",
                    utils::SharedPtr<usage_statistics::StatisticsManager>(
                        new usage_statistics_test::MockStatisticsManager))
-      , applications_(application_set_, applications_lock_)
+      , applications_lock_ptr_(std::make_shared<sync_primitives::Lock>())
+      , applications_(application_set_, applications_lock_ptr_)
       , message_helper_mock_(
             *application_manager::MockMessageHelper::message_helper_mock()) {
     Mock::VerifyAndClearExpectations(&message_helper_mock_);
@@ -150,6 +152,7 @@ class StateControllerImplTest : public ::testing::Test {
   }
 
   NiceMock<application_manager_test::MockApplicationManager> app_manager_mock_;
+  NiceMock<application_manager_test::MockRPCService> mock_rpc_service_;
   NiceMock<policy_test::MockPolicyHandlerInterface> policy_interface_;
   NiceMock<connection_handler_test::MockConnectionHandler>
       mock_connection_handler_;
@@ -159,7 +162,7 @@ class StateControllerImplTest : public ::testing::Test {
   NiceMock<event_engine_test::MockEventDispatcher> mock_event_dispatcher_;
 
   am::ApplicationSet application_set_;
-  mutable sync_primitives::Lock applications_lock_;
+  mutable std::shared_ptr<sync_primitives::Lock> applications_lock_ptr_;
   DataAccessor<am::ApplicationSet> applications_;
   utils::SharedPtr<am::StateControllerImpl> state_ctrl_;
 
@@ -987,8 +990,9 @@ class StateControllerImplTest : public ::testing::Test {
     ON_CALL(message_helper_mock_,
             GetBCActivateAppRequestToHMI(_, _, _, hmi_lvl, _, _))
         .WillByDefault(Return(bc_activate_app_request));
-
-    ON_CALL(app_manager_mock_, ManageHMICommand(bc_activate_app_request))
+    ON_CALL(app_manager_mock_, GetRPCService())
+        .WillByDefault(ReturnRef(mock_rpc_service_));
+    ON_CALL(mock_rpc_service_, ManageHMICommand(bc_activate_app_request))
         .WillByDefault(Return(true));
   }
 
@@ -1077,8 +1081,8 @@ class StateControllerImplTest : public ::testing::Test {
       am::ApplicationSharedPtr app,
       NiceMock<application_manager_test::MockApplication>& app_mock,
       std::vector<am::HmiState::StateID>& state_ids) {
-    using smart_objects::SmartObject;
     using am::event_engine::Event;
+    using smart_objects::SmartObject;
     namespace FunctionID = hmi_apis::FunctionID;
 
     EXPECT_CALL(app_mock, CurrentHmiState())
@@ -1136,8 +1140,8 @@ class StateControllerImplTest : public ::testing::Test {
       am::ApplicationSharedPtr app,
       NiceMock<application_manager_test::MockApplication>& app_mock,
       std::vector<am::HmiState::StateID>& state_ids) {
-    using smart_objects::SmartObject;
     using am::event_engine::Event;
+    using smart_objects::SmartObject;
     namespace FunctionID = hmi_apis::FunctionID;
 
     EXPECT_CALL(app_mock, CurrentHmiState())
@@ -1935,7 +1939,9 @@ TEST_F(StateControllerImplTest, DISABLED_ActivateAppSuccessReceivedFromHMI) {
     Common_HMILevel::eType hmi_level = it->second;
 
     SetBCActivateAppRequestToHMI(hmi_level, corr_id);
-    ON_CALL(app_manager_mock_, ManageHMICommand(bc_activate_app_request))
+    ON_CALL(app_manager_mock_, GetRPCService())
+        .WillByDefault(ReturnRef(mock_rpc_service_));
+    ON_CALL(mock_rpc_service_, ManageHMICommand(bc_activate_app_request))
         .WillByDefault(Return(true));
 
     EXPECT_CALL(app_manager_mock_, application_id(corr_id))

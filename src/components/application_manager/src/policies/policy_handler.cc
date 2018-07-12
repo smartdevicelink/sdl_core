@@ -42,6 +42,7 @@
 #include "application_manager/application_manager.h"
 #include "application_manager/state_controller.h"
 #include "application_manager/message_helper.h"
+#include "application_manager/rpc_service.h"
 #include "policy/policy_manager_impl.h"
 #include "connection_handler/connection_handler.h"
 #include "utils/macro.h"
@@ -56,9 +57,6 @@
 #include "utils/make_shared.h"
 #include "utils/helpers.h"
 #include "policy/policy_manager.h"
-#ifdef SDL_REMOTE_CONTROL
-#include "functional_module/plugin_manager.h"
-#endif  // SDL_REMOTE_CONTROL
 
 namespace policy {
 
@@ -1018,11 +1016,11 @@ void PolicyHandler::OnPendingPermissionChange(
       MessageHelper::SendOnAppPermissionsChangedNotification(
           app->app_id(), permissions, application_manager_);
     }
-    application_manager_.ManageMobileCommand(
+    application_manager_.GetRPCService().ManageMobileCommand(
         MessageHelper::GetOnAppInterfaceUnregisteredNotificationToMobile(
             app->app_id(),
             mobile_api::AppInterfaceUnregisteredReason::APP_UNAUTHORIZED),
-        commands::Command::ORIGIN_SDL);
+        commands::Command::SOURCE_SDL);
 
     application_manager_.OnAppUnauthorized(app->app_id());
 
@@ -1085,12 +1083,7 @@ bool PolicyHandler::ReceiveMessageFromSDK(const std::string& file,
     SetDaysAfterEpoch();
 
     event_observer_->subscribe_on_event(
-#ifdef HMI_DBUS_API
-        hmi_apis::FunctionID::VehicleInfo_GetOdometer, correlation_id
-#else
-        hmi_apis::FunctionID::VehicleInfo_GetVehicleData, correlation_id
-#endif
-        );
+        hmi_apis::FunctionID::VehicleInfo_GetVehicleData, correlation_id);
     std::vector<std::string> vehicle_data_args;
     vehicle_data_args.push_back(strings::odometer);
     MessageHelper::CreateGetVehicleDataRequest(
@@ -1198,10 +1191,6 @@ void PolicyHandler::OnAllowSDLFunctionalityNotification(
             accessor.GetData().end(),
             DeactivateApplication(device_handle,
                                   application_manager_.state_controller()));
-#ifdef SDL_REMOTE_CONTROL
-        application_manager_.GetPluginManager().OnPolicyEvent(
-            functional_modules::PolicyEvent::kApplicationsDisabled);
-#endif  // SDL_REMOTE_CONTROL
       } else {
         std::for_each(
             accessor.GetData().begin(),
@@ -1250,12 +1239,15 @@ void PolicyHandler::OnAllowSDLFunctionalityNotification(
     if (is_allowed) {
       // Send HMI status notification to mobile
       // Put application in full
-      AudioStreamingState::eType state = app->is_audio()
-                                             ? AudioStreamingState::AUDIBLE
-                                             : AudioStreamingState::NOT_AUDIBLE;
+      AudioStreamingState::eType audio_state =
+          app->IsAudioApplication() ? AudioStreamingState::AUDIBLE
+                                    : AudioStreamingState::NOT_AUDIBLE;
+      VideoStreamingState::eType video_state =
+          app->IsVideoApplication() ? VideoStreamingState::STREAMABLE
+                                    : VideoStreamingState::NOT_STREAMABLE;
 
       application_manager_.state_controller().SetRegularState(
-          app, mobile_apis::HMILevel::HMI_FULL, state, true);
+          app, mobile_apis::HMILevel::HMI_FULL, audio_state, video_state, true);
       last_activated_app_id_ = 0;
     } else {
       DeactivateApplication deactivate_notification(
@@ -1524,6 +1516,13 @@ void PolicyHandler::CheckPermissions(
   POLICY_LIB_CHECK_VOID();
   const std::string hmi_level =
       MessageHelper::StringifiedHMILevel(app->hmi_level());
+  if (hmi_level.empty()) {
+    LOG4CXX_WARN(logger_,
+                 "HMI level for " << app->policy_app_id() << " is invalid, rpc "
+                                  << rpc << " is not allowed.");
+    result.hmi_level_permitted = policy::kRpcDisallowed;
+    return;
+  }
   const std::string device_id = MessageHelper::GetDeviceMacAddressForHandle(
       app->device(), application_manager_);
   LOG4CXX_INFO(logger_,
@@ -2033,8 +2032,6 @@ bool PolicyHandler::IsUrlAppIdValid(const uint32_t app_idx,
   return ((is_registered && !is_empty_urls) || is_default);
 }
 
-#ifdef SDL_REMOTE_CONTROL
-
 std::vector<std::string> PolicyHandler::GetDevicesIds(
     const std::string& policy_app_id) {
   return application_manager_.devices(policy_app_id);
@@ -2168,5 +2165,4 @@ void PolicyHandler::OnUpdateHMILevel(const std::string& device_id,
   }
   UpdateHMILevel(app, level);
 }
-#endif  // SDL_REMOTE_CONTROL
 }  //  namespace policy

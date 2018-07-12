@@ -143,6 +143,7 @@ MobileMessageHandler::HandleIncomingMessageProtocolV1(
               message->service_type()));
   if (!message) {
     NOTREACHED();
+    delete outgoing_message;
     return NULL;
   }
 

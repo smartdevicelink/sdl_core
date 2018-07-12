@@ -35,6 +35,12 @@
 
 #include "utils/shared_ptr.h"
 
+namespace NsSmartDeviceLink {
+namespace NsSmartObjects {
+class SmartObject;
+}
+}
+
 namespace application_manager {
 
 typedef int AppExtensionUID;
@@ -46,6 +52,23 @@ class AppExtension {
   AppExtensionUID uid() const {
     return kUid_;
   }
+
+  /**
+   * @brief SaveResumptionData method called by SDL when it saves resumption
+   * data.
+   * @param resumption_data data reference to data, that will be appended by
+   * plugin
+   */
+  virtual void SaveResumptionData(
+      NsSmartDeviceLink::NsSmartObjects::SmartObject& resumption_data) = 0;
+
+  /**
+   * @brief ProcessResumption Method called by SDL during resumption.
+   * @param resumption_data list of resumption data
+   */
+  virtual void ProcessResumption(
+      const NsSmartDeviceLink::NsSmartObjects::SmartObject&
+          resumption_data) = 0;
 
  private:
   const AppExtensionUID kUid_;

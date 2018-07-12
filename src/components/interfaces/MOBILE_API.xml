@@ -447,6 +447,7 @@
         <element name="LHPLUS_PHONEMES" />
         <element name="PRE_RECORDED" />
         <element name="SILENCE" />
+        <element name="FILE" />
     </enum>
     
     <enum name="VrCapabilities">
@@ -503,6 +504,7 @@
         <element name="VEHICLEDATA_FUELLEVEL_STATE" />
         <element name="VEHICLEDATA_FUELCONSUMPTION" />
         <element name="VEHICLEDATA_EXTERNTEMP" />
+        <element name="VEHICLEDATA_TURNSIGNAL" />
         <element name="VEHICLEDATA_VIN" />
         <element name="VEHICLEDATA_PRNDL" />
         <element name="VEHICLEDATA_TIREPRESSURE" />
@@ -524,6 +526,7 @@
         <element name="VEHICLEDATA_STEERINGWHEEL" />
         <element name="VEHICLEDATA_FUELRANGE" />
         <element name="VEHICLEDATA_ENGINEOILLIFE" />
+        <element name="VEHICLEDATA_ELECTRONICPARKBRAKESTATUS" />
     </enum>
     
     <enum name="ButtonName">
@@ -1126,6 +1129,34 @@
         <element name="NOT_TRAINED">
             <description>TPMS reports the tire is not trained.</description>
         </element>
+    </enum>
+    
+    <enum name="ElectronicParkBrakeStatus">
+      <element name="CLOSED">
+        <description>
+          Park brake actuators have been fully applied.
+        </description>		
+      </element>
+      <element name="TRANSITION">
+        <description>
+          Park brake actuators are transitioning to either Apply/Closed or Release/Open state.
+        </description>
+      </element>
+      <element name="OPEN">
+        <description>
+          Park brake actuators are released.
+        </description>		
+      </element>
+      <element name="DRIVE_ACTIVE">
+        <description>
+          When driver pulls the Electronic Park Brake switch while driving "at speed".
+        </description>
+      </element>
+     <element name="FAULT">
+        <description>
+          When system has a fault or is under maintenance.
+        </description>
+     </element>
     </enum>
     
     <enum name="FuelType">
@@ -1763,6 +1794,23 @@
         </param>
     </struct>
     
+    
+    <enum name="TurnSignal">
+        <description>Enumeration that describes the status of the turn light indicator.</description>
+        <element name="OFF">
+            <description>Turn signal is OFF</description>
+        </element>
+        <element name="LEFT">
+            <description>Left turn signal is on</description>
+        </element>
+        <element name="RIGHT">
+            <description>Right turn signal is on</description>
+        </element>
+        <element name="BOTH">
+            <description>Both signals (left and right) are on.</description>
+        </element>
+    </enum>
+    
     <struct name="GPSData">
         <description>Struct with the GPS data.</description>
         <param name="longitudeDegrees" type="Float" minvalue="-180" maxvalue="180" mandatory="true">
@@ -2103,15 +2151,15 @@
         </param>
     </struct>         
     <struct name="TTSChunk">
-        <description>A TTS chunk, that consists of the text/phonemes to speak and the type (like text or SAPI)</description>
+        <description>A TTS chunk, that consists of text/phonemes to speak or the name of a file to play, and a TTS type (like text or SAPI)</description>
         <param name="text" minlength="0" maxlength="500" type="String" mandatory="true">
             <description>
-                The text or phonemes to speak.
+                The text or phonemes to speak, or the name of the audio file to play.
                 May not be empty.
             </description>
         </param>
         <param name="type" type="SpeechCapabilities" mandatory="true">
-            <description>Describes, whether it is text or a specific phoneme set. See SpeechCapabilities</description>
+            <description>Describes whether the TTS chunk is plain text, a specific phoneme set, or an audio file. See SpeechCapabilities</description>
         </param>
     </struct>         
     <struct name="Turn">
@@ -2446,7 +2494,8 @@
         <element name="OnHashChangeID" value="32782" hexvalue="800E" />
         <element name="OnInteriorVehicleDataID" value="32783" hexvalue="800F" />
         <element name="OnWayPointChangeID" value="32784" hexvalue="8010" />
-        
+        <element name="OnRCStatusID" value="32785" hexvalue="8011" />
+
         <!--
          Ford Specific Request / Response RPCs
          Range = 0x 0001 0000 - 0x 0001 7FFF
@@ -3452,6 +3501,9 @@
         <param name="menuName" maxlength="500" type="String" mandatory="true">
             <description>Text to show in the menu for this sub menu.</description>
         </param>
+        <param name="menuIcon" type="Image" mandatory="false">
+            <description>The image field for AddSubMenu</description>
+        </param>
     </function>
     
     <function name="AddSubMenu" functionID="AddSubMenuID" messagetype="response">
@@ -4175,6 +4227,9 @@
         <param name="externalTemperature" type="Boolean" mandatory="false">
             <description>The external temperature in degrees celsius</description>
         </param>
+        <param name="turnSignal" type="Boolean" mandatory="false">
+            <description>See TurnSignal</description>
+        </param>
         <param name="prndl" type="Boolean" mandatory="false">
             <description>See PRNDL</description>
         </param>
@@ -4214,6 +4269,10 @@
         <param name="engineOilLife" type="Boolean" mandatory="false">
             <description>The estimated percentage of remaining oil life of the engine.</description>
         </param>
+        <param name="electronicParkBrakeStatus" type="Boolean" mandatory="false">
+          <description>The status of the park brake as provided by Electric Park Brake (EPB) system.</description>
+        </param>
+
         
         <!-- Ford Specific Data Items -->
         <param name="eCallInfo" type="Boolean" mandatory="false">
@@ -4284,6 +4343,9 @@
         <param name="externalTemperature" type="VehicleDataResult" mandatory="false">
             <description>The external temperature in degrees celsius.</description>
         </param>
+        <param name="turnSignal" type="VehicleDataResult" mandatory="false">
+            <description>See TurnSignal</description>
+        </param>
         <param name="prndl" type="VehicleDataResult" mandatory="false">
             <description>See PRNDL</description>
         </param>
@@ -4323,6 +4385,10 @@
         <param name="engineOilLife" type="VehicleDataResult" mandatory="false">
             <description>The estimated percentage of remaining oil life of the engine.</description>
         </param>
+        <param name="electronicParkBrakeStatus" type="VehicleDataResult" mandatory="false">
+          <description>The status of the park brake as provided by Electric Park Brake (EPB) system.</description>
+        </param>
+
         
         <!-- Ford Specific Data Items -->
         <param name="eCallInfo" type="VehicleDataResult" mandatory="false">
@@ -4371,6 +4437,9 @@
         <param name="externalTemperature" type="Boolean" mandatory="false">
             <description>The external temperature in degrees celsius.</description>
         </param>
+        <param name="turnSignal" type="Boolean" mandatory="false">
+            <description>See TurnSignal</description>
+        </param>
         <param name="prndl" type="Boolean" mandatory="false">
             <description>See PRNDL</description>
         </param>
@@ -4410,6 +4479,10 @@
         <param name="engineOilLife" type="Boolean" mandatory="false">
             <description>The estimated percentage of remaining oil life of the engine.</description>
         </param>
+        <param name="electronicParkBrakeStatus" type="Boolean" mandatory="false">
+          <description>The status of the park brake as provided by Electric Park Brake (EPB) system.</description>
+        </param>
+
         
         <!-- Ford Specific Data Items -->
         <param name="eCallInfo" type="Boolean" mandatory="false">
@@ -4478,6 +4551,9 @@
         <param name="externalTemperature" type="VehicleDataResult" mandatory="false">
             <description>The external temperature in degrees celsius</description>
         </param>
+        <param name="turnSignal" type="VehicleDataResult" mandatory="false">
+            <description>See TurnSignal</description>
+        </param>
         <param name="prndl" type="VehicleDataResult" mandatory="false">
             <description>See PRNDL</description>
         </param>
@@ -4517,6 +4593,10 @@
         <param name="engineOilLife" type="VehicleDataResult" mandatory="false">
             <description>The estimated percentage of remaining oil life of the engine.</description>
         </param>
+        <param name="electronicParkBrakeStatus" type="VehicleDataResult" mandatory="false">
+          <description>The status of the park brake as provided by Electric Park Brake (EPB) system.</description>
+        </param>
+
         
         <!-- Ford Specific Data Items -->
         <param name="eCallInfo" type="VehicleDataResult" mandatory="false">
@@ -4565,6 +4645,9 @@
         <param name="externalTemperature" type="Boolean" mandatory="false">
             <description>The external temperature in degrees celsius</description>
         </param>
+        <param name="turnSignal" type="Boolean" mandatory="false">
+            <description>See TurnSignal</description>
+        </param>
         <param name="vin" type="Boolean" mandatory="false">
             <description>Vehicle identification number</description>
         </param>
@@ -4607,6 +4690,10 @@
         <param name="engineOilLife" type="Boolean" mandatory="false">
             <description>The estimated percentage of remaining oil life of the engine.</description>
         </param>
+        <param name="electronicParkBrakeStatus" type="Boolean" mandatory="false">
+          <description>The status of the park brake as provided by Electric Park Brake (EPB) system.</description>
+        </param>
+
         
         <!-- Ford Specific Data Items -->
         <param name="eCallInfo" type="Boolean" mandatory="false">
@@ -4676,6 +4763,9 @@
         <param name="externalTemperature" type="Float" minvalue="-40" maxvalue="100" mandatory="false">
             <description>The external temperature in degrees celsius</description>
         </param>
+        <param name="turnSignal" type="TurnSignal" mandatory="false">
+            <description>See TurnSignal</description>
+        </param>
         <param name="vin" type="String" maxlength="17" mandatory="false">
             <description>Vehicle identification number</description>
         </param>
@@ -4718,6 +4808,10 @@
         <param name="engineOilLife" type="Float" minvalue="0" maxvalue="100" mandatory="false">
             <description>The estimated percentage of remaining oil life of the engine.</description>
         </param>
+        <param name="electronicParkBrakeStatus" type="ElectronicParkBrakeStatus" mandatory="false">
+          <description>The status of the park brake as provided by Electric Park Brake (EPB) system.</description>
+        </param>
+
         
         <!-- Ford Specific Data Items -->
         <param name="eCallInfo" type="ECallInfo" mandatory="false">
@@ -5632,7 +5726,7 @@
                 In the future, this should be the Identification of a module.
             </description>
         </param>
-        <param name="subscribe" type="Boolean" mandatory="false" defvalue="false">
+        <param name="subscribe" type="Boolean" mandatory="false">
             <description>
                 If subscribe is true, the head unit will register onInteriorVehicleData notifications for the requested moduelType.
                 If subscribe is false, the head unit will unregister onInteriorVehicleData notifications for the requested moduelType.
@@ -5915,6 +6009,9 @@
         <param name="externalTemperature" type="Float" minvalue="-40" maxvalue="100" mandatory="false">
             <description>The external temperature in degrees celsius</description>
         </param>
+        <param name="turnSignal" type="TurnSignal" mandatory="false">
+            <description>See TurnSignal</description>
+        </param>
         <param name="vin" type="String" maxlength="17" mandatory="false">
             <description>Vehicle identification number.</description>
         </param>
@@ -5957,6 +6054,10 @@
         <param name="engineOilLife" type="Float" minvalue="0" maxvalue="100" mandatory="false">
             <description>The estimated percentage of remaining oil life of the engine.</description>
         </param>
+        <param name="electronicParkBrakeStatus" type="ElectronicParkBrakeStatus" mandatory="false">
+          <description>The status of the park brake as provided by Electric Park Brake (EPB) system.</description>
+        </param>
+
         
         <!-- Ford Specific Vehicle Data -->
         <param name="eCallInfo" type="ECallInfo" mandatory="false">
@@ -6107,6 +6208,16 @@
     <function name="OnInteriorVehicleData" functionID="OnInteriorVehicleDataID" messagetype="notification">
         <param name="moduleData" type="ModuleData"  mandatory="true">
         </param>
+    </function>
+
+    <function name="OnRCStatus" functionID="OnRCStatusID" messagetype="notification">
+      <description>Issued by SDL to notify the application about remote control status change on SDL</description>
+      <param name="allocatedModules" type="ModuleData" minsize="0" maxsize="100" array="true" mandatory="true">
+        <description>Contains a list (zero or more) of module types that are allocated to the application.</description>
+      </param>
+      <param name="freeModules" type="ModuleData" minsize="0" maxsize="100" array="true" mandatory="true">
+        <description>Contains a list (zero or more) of module types that are free to access for the application.</description>
+      </param>
     </function>
     
     <!-- ~~~~~~~~~~~~~~~~~~ -->

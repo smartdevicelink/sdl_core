@@ -39,6 +39,18 @@
 
 namespace application_manager {
 
+smart_objects::SmartObjectSPtr MessageHelper::CreateNotification(
+    mobile_apis::FunctionID::eType function_id, uint32_t app_id) {
+  return MockMessageHelper::message_helper_mock()->CreateNotification(
+      function_id, app_id);
+}
+
+smart_objects::SmartObjectSPtr MessageHelper::CreateHMINotification(
+    hmi_apis::FunctionID::eType function_id) {
+  return MockMessageHelper::message_helper_mock()->CreateHMINotification(
+      function_id);
+}
+
 void MessageHelper::SendHashUpdateNotification(uint32_t const app_id,
                                                ApplicationManager& app_mngr) {
   MockMessageHelper::message_helper_mock()->SendHashUpdateNotification(
@@ -230,7 +242,6 @@ void MessageHelper::SendPolicyUpdate(const std::string& file_path,
       file_path, timeout, retries, app_mngr);
 }
 
-#ifdef SDL_REMOTE_CONTROL
 void MessageHelper::SendActivateAppToHMI(
     uint32_t const app_id,
     ApplicationManager& application_manager,
@@ -240,14 +251,18 @@ void MessageHelper::SendActivateAppToHMI(
       app_id, application_manager, level, send_policy_priority);
 }
 
+smart_objects::SmartObjectSPtr MessageHelper::CreateMessageForHMI(
+    hmi_apis::messageType::eType message_type, const uint32_t correlation_id) {
+  return MockMessageHelper::message_helper_mock()->CreateMessageForHMI(
+      message_type, correlation_id);
+}
+
 void MessageHelper::SendHMIStatusNotification(
     const Application& application_impl,
     ApplicationManager& application_manager) {
   MockMessageHelper::message_helper_mock()->SendHMIStatusNotification(
       application_impl, application_manager);
 }
-
-#endif  // SDL_REMOTE_CONTROL
 
 void MessageHelper::SendUpdateSDLResponse(const std::string& result,
                                           uint32_t correlation_id,
@@ -309,10 +324,12 @@ void MessageHelper::SendGlobalPropertiesToHMI(ApplicationConstSharedPtr app,
       app);
 }
 
-smart_objects::SmartObjectList MessageHelper::GetIVISubscriptionRequests(
-    ApplicationSharedPtr app, ApplicationManager& app_mngr) {
-  return MockMessageHelper::message_helper_mock()->GetIVISubscriptionRequests(
-      app);
+mobile_apis::Result::eType MessageHelper::VerifyTtsFiles(
+    smart_objects::SmartObject& message,
+    ApplicationConstSharedPtr app,
+    ApplicationManager& app_mngr) {
+  return MockMessageHelper::message_helper_mock()->VerifyTtsFiles(
+      message, app, app_mngr);
 }
 
 mobile_apis::Result::eType MessageHelper::VerifyImage(
@@ -416,6 +433,16 @@ void MessageHelper::SendUIChangeRegistrationRequestToHMI(
     ApplicationConstSharedPtr app, ApplicationManager& app_mngr) {
   MockMessageHelper::message_helper_mock()
       ->SendUIChangeRegistrationRequestToHMI(app, app_mngr);
+}
+
+bool MessageHelper::CreateDeviceInfo(
+    connection_handler::DeviceHandle device_handle,
+    const protocol_handler::SessionObserver& session_observer,
+    const policy::PolicyHandlerInterface& policy_handler,
+    ApplicationManager& app_mngr,
+    smart_objects::SmartObject* output) {
+  return MockMessageHelper::message_helper_mock()->CreateDeviceInfo(
+      device_handle, session_observer, policy_handler, app_mngr, output);
 }
 
 bool MessageHelper::CreateHMIApplicationStruct(
@@ -536,13 +563,6 @@ void MessageHelper::SendUnsubscribeButtonNotification(
     ApplicationManager& app_mngr) {
   return MockMessageHelper::message_helper_mock()
       ->SendUnsubscribeButtonNotification(button, application, app_mngr);
-}
-
-void MessageHelper::SendUnsubscribeIVIRequest(int32_t ivi_id,
-                                              ApplicationSharedPtr application,
-                                              ApplicationManager& app_mngr) {
-  return MockMessageHelper::message_helper_mock()->SendUnsubscribeIVIRequest(
-      ivi_id, application, app_mngr);
 }
 
 }  // namespace application_manager

@@ -230,12 +230,12 @@ TEST_F(ProtocolHeaderValidatorTest, Malformed_FrameType) {
   }
 }
 
-// For Control frames Frame info value shall be from 0x00 to 0x06 or 0xFE(Data
-// Ack), 0xFF(HB Ack)
+// For Control frames Frame info value shall be from 0x00 to 0x09 or 0xFD
+// (Transport Update Event), 0xFE(Data Ack), 0xFF(HB Ack)
 TEST_F(ProtocolHeaderValidatorTest, Malformed_ControlFrame) {
   std::vector<uint8_t> malformed_frame_data;
-  for (uint8_t frame_type = FRAME_DATA_END_SERVICE_NACK + 1;
-       frame_type < FRAME_DATA_SERVICE_DATA_ACK;
+  for (uint8_t frame_type = FRAME_DATA_REGISTER_SECONDARY_TRANSPORT_NACK + 1;
+       frame_type < FRAME_DATA_TRANSPORT_EVENT_UPDATE;
        ++frame_type) {
     malformed_frame_data.push_back(frame_type);
   }

@@ -371,6 +371,7 @@
   <element name="LHPLUS_PHONEMES" />
   <element name="PRE_RECORDED" />
   <element name="SILENCE" />
+  <element name="FILE" />
 </enum>
 
 <enum name="VrCapabilities">
@@ -729,6 +730,33 @@
 </enum>
 
 <!--IVI part-->
+<enum name="ElectronicParkBrakeStatus">
+  <element name="CLOSED">
+    <description>
+      Park brake actuators have been fully applied.
+    </description>
+  </element>
+  <element name="TRANSITION">
+    <description>
+      Park brake actuators are transitioning to either Apply/Closed or Release/Open state.
+    </description>
+  </element>
+  <element name="OPEN">
+    <description>
+      Park brake actuators are released.
+    </description>
+  </element>
+  <element name="DRIVE_ACTIVE">
+    <description>
+      When driver pulls the Electronic Park Brake switch while driving "at speed".
+    </description>
+  </element>
+ <element name="FAULT">
+    <description>
+      When system has a fault or is under maintenance.
+    </description>
+ </element>
+</enum>
 <enum name="FuelType">
     <element name="GASOLINE" />
     <element name="DIESEL" />
@@ -1019,6 +1047,7 @@
   <element name="VEHICLEDATA_FUELLEVEL_STATE" />
   <element name="VEHICLEDATA_FUELCONSUMPTION" />
   <element name="VEHICLEDATA_EXTERNTEMP" />
+  <element name="VEHICLEDATA_TURNSIGNAL" />
   <element name="VEHICLEDATA_VIN" />
   <element name="VEHICLEDATA_PRNDL" />
   <element name="VEHICLEDATA_TIREPRESSURE" />
@@ -1040,6 +1069,7 @@
   <element name="VEHICLEDATA_STEERINGWHEEL" />
   <element name="VEHICLEDATA_FUELRANGE" />
   <element name="VEHICLEDATA_ENGINEOILLIFE" />
+  <element name="VEHICLEDATA_ELECTRONICPARKBRAKESTATUS" />
 </enum>
 
 <enum name="WiperStatus">
@@ -1452,21 +1482,21 @@
     <element name="UPDATING" />
     <element name="UPDATE_NEEDED"/>
   </enum>
-  
+
   <enum name="SystemError">
     <element name="SYNC_REBOOTED"/>
     <element name="SYNC_OUT_OF_MEMMORY" />
   </enum>
-  
+
   <enum name="StatisticsType">
     <element name="iAPP_BUFFER_FULL"/>
   </enum>
-  
+
   <enum name="ConsentSource">
     <element name="GUI"/>
     <element name="VUI" />
   </enum>
-  
+
   <enum name="DeviceState">
     <element name="UNKNOWN"/>
     <element name="UNPAIRED"/>
@@ -1479,7 +1509,7 @@
     <param name="line2" type="String" mandatory="false"/>
     <param name="textBody" type="String" mandatory="false"/>
   </struct>
-  
+
   <struct name="PermissionItem">
     <param name="name" type="String" mandatory="true">
       <description>Code of message of user-friendly text about functional group to be allowed/disallowed</description>
@@ -1490,7 +1520,7 @@
     <param name="allowed" type="Boolean" mandatory="false">
       <description>Specifies whether functionality was allowed/disallowed. If ommited - no information about User Consent is yet found for app.</description>
     </param>
-  </struct>  
+  </struct>
   <struct name="ServiceInfo">
     <param name="url" type="String" mandatory="true">
       <description>Get URL based on service type.</description>
@@ -1927,12 +1957,12 @@
  </struct>
 
 <struct name="TTSChunk">
-    <description>A TTS chunk, that consists of the text/phonemes to be spoken</description>
+    <description>A TTS chunk, that consists of text/phonemes to speak or the name of a file to play, and a TTS type (like text or SAPI)</description>
     <param name="text" type="String" mandatory="true" maxlength="500">
-        <description>The text or phonemes to be spoken.</description>
+        <description>The text or phonemes to be spoken, or the name of an audio file to play.</description>
     </param>
     <param name="type" type="Common.SpeechCapabilities" mandatory="true">
-      <description>Describes, whether it is text or a specific phoneme set. See SpeechCapabilities.</description>
+      <description>Describes whether the TTS chunk is plain text, a specific phoneme set, or an audio file. See SpeechCapabilities.</description>
     </param>
 </struct>
 
@@ -1971,6 +2001,9 @@
     </param>
     <param name="deviceInfo" type="Common.DeviceInfo" mandatory="true">
        <description>The ID, serial number, transport type the named-app's-device is connected over to HU.</description>
+    </param>
+    <param name="secondaryDeviceInfo" type="Common.DeviceInfo" mandatory="false">
+       <description>The ID, serial number, transport type that are acquired through Secondary Transport.</description>
     </param>
     <param name="policyAppID" type="String" maxlength="50" minlength="1" mandatory="true">
       <description>Policy ID(=the appID the application registers with) of registered application.</description>
@@ -2023,7 +2056,7 @@
         </description>
     </param>
     <param name="dayColorScheme" type="Common.TemplateColorScheme" mandatory="false"></param>
-    <param name="nightColorScheme" type="Common.TemplateColorScheme" mandatory="false"></param> 
+    <param name="nightColorScheme" type="Common.TemplateColorScheme" mandatory="false"></param>
 </struct>
 
 <struct name="MenuParams">
@@ -2291,6 +2324,22 @@
 </struct>
 
 <!--IVI part-->
+<enum name="TurnSignal">
+  <description>Enumeration that describes the status of the turn light indicator.</description>
+  <element name="OFF">
+    <description>Turn signal is OFF</description>
+  </element>
+  <element name="LEFT">
+    <description>Left turn signal is on</description>
+  </element>
+  <element name="RIGHT">
+    <description>Right turn signal is on</description>
+  </element>
+  <element name="BOTH">
+    <description>Both signals (left and right) are on.</description>
+  </element>
+</enum>
+
 <struct name="GPSData">
   <description>Struct with the GPS data.</description>
   <param name="longitudeDegrees" type="Float" minvalue="-180" maxvalue="180" mandatory="false">
@@ -2601,7 +2650,7 @@
 
 <struct name="DateTime">
   <param name="millisecond" type="Integer" minvalue="0" maxvalue="999" mandatory="false">
-    <description>Milliseconds </description>     
+    <description>Milliseconds </description>
   </param>
   <param name="second" type="Integer" minvalue="0" maxvalue="60" mandatory="false">
     <description>Seconds part of time</description>
@@ -2853,6 +2902,17 @@
 </interface>
 
 <interface name="BasicCommunication" version="1.2.1" date="2017-08-02">
+    <function name="GetSystemTime" messagetype="request">
+      <description>Request from SDL to HMI to obtain current UTC time.</description>
+    </function>
+    <function name="GetSystemTime" messagetype="response">
+      <param name="systemTime" type="Common.DateTime" mandatory="true">
+        <description>Current UTC system time</description>
+      </param>
+    </function>
+    <function name="OnSystemTimeReady" messagetype="notification">
+      <description>HMI must notify SDL about readiness to provide system time.</description>
+    </function>
     <function name="OnReady" messagetype="notification">
       <description>HMI must notify SDL about its readiness to start communication. In fact, this has to be the first message between SDL and HMI.</description>
     </function>
@@ -3348,10 +3408,10 @@
     <description>Method is invoked at system start-up. SDL requests the information about all supported hardware and their capabilities</description>
   </function>
   <function name="GetCapabilities" messagetype="response">
-    <param name="speechCapabilities" type="Common.SpeechCapabilities" minsize="1" maxsize="5" array="true" mandatory="true">
+    <param name="speechCapabilities" type="Common.SpeechCapabilities" minsize="1" maxsize="100" array="true" mandatory="true">
       <description>See SpeechCapabilities</description>
     </param>
-    <param name="prerecordedSpeechCapabilities" type="Common.PrerecordedSpeech" minsize="1" maxsize="5" array="true" mandatory="true">
+    <param name="prerecordedSpeechCapabilities" type="Common.PrerecordedSpeech" minsize="1" maxsize="100" array="true" mandatory="true">
       <description>See PrerecordedSpeech</description>
     </param>
   </function>
@@ -3571,6 +3631,9 @@
     <param name="menuParams" type="Common.MenuParams" mandatory="true">
       <description>Position and name of menu to be added. 'parent' field is omitted for this RPC.  </description>
     </param>
+    <param name="menuIcon" type="Common.Image" mandatory="false">
+      <description>The image field for AddSubMenu</description>
+    </param>
     <param name="appID" type="Integer" mandatory="true">
       <description>ID of application that requested this RPC.</description>
     </param>
@@ -3787,7 +3850,7 @@
       <description>ID of application related to this RPC.</description>
     </param>
     <param name="dayColorScheme" type="Common.TemplateColorScheme" mandatory="false"></param>
-    <param name="nightColorScheme" type="Common.TemplateColorScheme" mandatory="false"></param> 
+    <param name="nightColorScheme" type="Common.TemplateColorScheme" mandatory="false"></param>
   </function>
   <function name="SetDisplayLayout" messagetype="response">
     <param name="displayCapabilities" type="Common.DisplayCapabilities" mandatory="false">
@@ -3982,7 +4045,7 @@
   </function>
 </interface>
 
-<interface name="Navigation" version="1.5.0" date="2017-08-15"> 
+<interface name="Navigation" version="1.5.0" date="2017-08-15">
 
   <function name="IsReady" messagetype="request">
     <description>Method is invoked at system startup. Response must provide the information about presence of UI Navigation module and its readiness to cooperate with SDL.</description>
@@ -4319,6 +4382,9 @@
     <param name="externalTemperature" type="Boolean" mandatory="false">
       <description>The external temperature in degrees celsius</description>
     </param>
+    <param name="turnSignal" type="Boolean" mandatory="false">
+        <description>See TurnSignal</description>
+    </param>
     <param name="prndl" type="Boolean" mandatory="false">
       <description>See PRNDL</description>
     </param>
@@ -4357,6 +4423,9 @@
     </param>
     <param name="engineOilLife" type="Boolean" mandatory="false">
       <description>The estimated percentage of remaining oil life of the engine.</description>
+    </param>
+    <param name="electronicParkBrakeStatus" type="Boolean" mandatory="false">
+      <description>The status of the park brake as provided by Electric Park Brake (EPB) system.</description>
     </param>
         <!-- Ford Specific Data Items -->
     <param name="eCallInfo" type="Boolean" mandatory="false">
@@ -4401,6 +4470,9 @@
     <param name="externalTemperature" type="Common.VehicleDataResult" mandatory="false">
       <description>The external temperature in degrees celsius.</description>
     </param>
+    <param name="turnSignal" type="Common.VehicleDataResult" mandatory="false">
+        <description>See TurnSignal</description>
+    </param>
     <param name="prndl" type="Common.VehicleDataResult" mandatory="false">
       <description>See PRNDL</description>
     </param>
@@ -4439,6 +4511,9 @@
     </param>
     <param name="engineOilLife" type="Common.VehicleDataResult" mandatory="false">
       <description>The estimated percentage of remaining oil life of the engine.</description>
+    </param>
+    <param name="electronicParkBrakeStatus" type="Common.VehicleDataResult" mandatory="false">
+      <description>The status of the park brake as provided by Electric Park Brake (EPB) system.</description>
     </param>
         <!-- Ford Specific Data Items -->
     <param name="eCallInfo" type="Common.VehicleDataResult" mandatory="false">
@@ -4489,6 +4564,9 @@
     <param name="externalTemperature" type="Boolean" mandatory="false">
       <description>The external temperature in degrees celsius.</description>
     </param>
+    <param name="turnSignal" type="Boolean" mandatory="false">
+        <description>See TurnSignal</description>
+    </param>
     <param name="prndl" type="Boolean" mandatory="false">
       <description>See PRNDL</description>
     </param>
@@ -4527,6 +4605,9 @@
     </param>
     <param name="engineOilLife" type="Boolean" mandatory="false">
       <description>The estimated percentage of remaining oil life of the engine.</description>
+    </param>
+    <param name="electronicParkBrakeStatus" type="Boolean" mandatory="false">
+      <description>The status of the park brake as provided by Electric Park Brake (EPB) system.</description>
     </param>
         <!-- Ford Specific Data Items -->
     <param name="eCallInfo" type="Boolean" mandatory="false">
@@ -4571,6 +4652,9 @@
     <param name="externalTemperature" type="Common.VehicleDataResult" mandatory="false">
       <description>The external temperature in degrees celsius</description>
     </param>
+    <param name="turnSignal" type="Common.VehicleDataResult" mandatory="false">
+        <description>See TurnSignal</description>
+    </param>
     <param name="prndl" type="Common.VehicleDataResult" mandatory="false">
       <description>See PRNDL</description>
     </param>
@@ -4609,6 +4693,9 @@
     </param>
     <param name="engineOilLife" type="Common.VehicleDataResult" mandatory="false">
       <description>The estimated percentage of remaining oil life of the engine.</description>
+    </param>
+    <param name="electronicParkBrakeStatus" type="Common.VehicleDataResult" mandatory="false">
+      <description>The status of the park brake as provided by Electric Park Brake (EPB) system.</description>
     </param>
         <!-- Ford Specific Data Items -->
     <param name="eCallInfo" type="Common.VehicleDataResult" mandatory="false">
@@ -4654,6 +4741,9 @@
     <param name="externalTemperature" type="Boolean" mandatory="false">
       <description>The external temperature in degrees celsius</description>
     </param>
+    <param name="turnSignal" type="Boolean" mandatory="false">
+        <description>See TurnSignal</description>
+    </param>
     <param name="vin" type="Boolean" mandatory="false">
       <description>Vehicle identification number</description>
     </param>
@@ -4696,6 +4786,9 @@
     <param name="engineOilLife" type="Boolean" mandatory="false">
       <description>The estimated percentage of remaining oil life of the engine.</description>
     </param>
+    <param name="electronicParkBrakeStatus" type="Boolean" mandatory="false">
+      <description>The status of the park brake as provided by Electric Park Brake (EPB) system.</description>
+    </param>
     <param name="eCallInfo" type="Boolean" mandatory="false">
       <description>Emergency Call notification and confirmation data</description>
     </param>
@@ -4736,6 +4829,9 @@
     </param>
     <param name="externalTemperature" type="Float" minvalue="-40" maxvalue="100" mandatory="false">
       <description>The external temperature in degrees celsius</description>
+    </param>
+    <param name="turnSignal" type="Common.TurnSignal" mandatory="false">
+        <description>See TurnSignal</description>
     </param>
     <param name="vin" type="String" maxlength="17" mandatory="false">
       <description>Vehicle identification number</description>
@@ -4779,6 +4875,9 @@
     <param name="engineOilLife" type="Float" minvalue="0" maxvalue="100" mandatory="false">
       <description>The estimated percentage of remaining oil life of the engine.</description>
     </param>
+    <param name="electronicParkBrakeStatus" type="Common.ElectronicParkBrakeStatus" mandatory="false">
+      <description>The status of the park brake as provided by Electric Park Brake (EPB) system.</description>
+    </param>
     <param name="eCallInfo" type="Common.ECallInfo" mandatory="false">
       <description>Emergency Call notification and confirmation data</description>
     </param>
@@ -4816,10 +4915,13 @@
       <description>The instantaneous fuel consumption in microlitres</description>
     </param>
     <param name="fuelRange" type="Common.FuelRange" minsize="0" maxsize="100" array="true" mandatory="false">
-        <description>The estimate range in KM the vehicle can travel based on fuel level and consumption</description>
+      <description>The estimate range in KM the vehicle can travel based on fuel level and consumption</description>
     </param>
     <param name="externalTemperature" type="Float" minvalue="-40" maxvalue="100" mandatory="false">
       <description>The external temperature in degrees celsius</description>
+    </param>
+    <param name="turnSignal" type="Common.TurnSignal" mandatory="false">
+        <description>See TurnSignal</description>
     </param>
     <param name="vin" type="String" maxlength="17" mandatory="false">
       <description>Vehicle identification number.</description>
@@ -4835,6 +4937,9 @@
     </param>
     <param name="beltStatus" type="Common.BeltStatus" mandatory="false">
       <description>The status of the seat belts</description>
+    </param>
+    <param name="electronicParkBrakeStatus" type="Common.ElectronicParkBrakeStatus" mandatory="false">
+      <description>The status of the park brake as provided by Electric Park Brake (EPB) system.</description>
     </param>
     <param name="bodyInformation" type="Common.BodyInformation" mandatory="false">
       <description>The body information including power modes</description>
@@ -5090,7 +5195,7 @@
   <param name="moduleType" type="Common.ModuleType" mandatory="true" >
     <description>The module data to retrieve from the vehicle for that type</description>
   </param>
-  <param name="subscribe" type="Boolean" mandatory="false" defvalue="false">
+  <param name="subscribe" type="Boolean" mandatory="false">
     <description>If subscribe is true, the head unit will send onInteriorVehicleData notifications for the module type</description>
   </param>
   <param name="appID" type="Integer" mandatory="true">
@@ -5140,5 +5245,19 @@
     <description>The remote control access mode specified by the driver via HMI.</description>
   </param>
 </function>
+
+<function name="OnRCStatus" messagetype="notification">
+  <description>Issued by SDL to notify HMI about remote control status change on SDL</description>
+  <param name="appID" type="Integer" mandatory="true">
+    <description>ID of selected application.</description>
+  </param>
+  <param name="allocatedModules" type="Common.ModuleData" minsize="0" maxsize="100" array="true" mandatory="true">
+    <description>Contains a list (zero or more) of module types that are allocated to the application.</description>
+  </param>
+  <param name="freeModules" type="Common.ModuleData" minsize="0" maxsize="100" array="true" mandatory="true">
+    <description>Contains a list (zero or more) of module types that are free to access for the application.</description>
+  </param>
+</function>
+
 </interface>
 </interfaces>

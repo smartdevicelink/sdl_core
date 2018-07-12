@@ -345,6 +345,7 @@
                         "LIMITED"],
                         "parameters": ["accPedalPosition",
                         "beltStatus",
+                        "electronicParkBrakeStatus",
                         "driverBraking",
                         "myKey",
                         "prndl",
@@ -357,6 +358,7 @@
                         "LIMITED"],
                         "parameters": ["accPedalPosition",
                         "beltStatus",
+                        "electronicParkBrakeStatus",
                         "driverBraking",
                         "myKey",
                         "prndl",
@@ -369,6 +371,7 @@
                         "LIMITED"],
                         "parameters": ["accPedalPosition",
                         "beltStatus",
+                        "electronicParkBrakeStatus",
                         "driverBraking",
                         "myKey",
                         "prndl",
@@ -381,6 +384,7 @@
                         "LIMITED"],
                         "parameters": ["accPedalPosition",
                         "beltStatus",
+                        "electronicParkBrakeStatus",
                         "driverBraking",
                         "myKey",
                         "prndl",
@@ -401,6 +405,7 @@
                         "engineOilLife",
                         "engineTorque",
                         "externalTemperature",
+                        "turnSignal",
                         "fuelLevel",
                         "fuelLevel_State",
                         "headLampStatus",
@@ -420,6 +425,7 @@
                         "engineOilLife",
                         "engineTorque",
                         "externalTemperature",
+                        "turnSignal",
                         "fuelLevel",
                         "fuelLevel_State",
                         "headLampStatus",
@@ -439,6 +445,7 @@
                         "engineOilLife",
                         "engineTorque",
                         "externalTemperature",
+                        "turnSignal",
                         "fuelLevel",
                         "fuelLevel_State",
                         "headLampStatus",
@@ -457,6 +464,7 @@
                         "engineOilLife",
                         "engineTorque",
                         "externalTemperature",
+                        "turnSignal",
                         "fuelLevel",
                         "fuelLevel_State",
                         "headLampStatus",
@@ -543,6 +551,12 @@
                         "LIMITED"]
                     },
                     "SystemRequest": {
+                        "hmi_levels": ["BACKGROUND",
+                        "FULL",
+                        "LIMITED",
+                        "NONE"]
+                    },
+                    "OnRCStatus": {
                         "hmi_levels": ["BACKGROUND",
                         "FULL",
                         "LIMITED",
@@ -2374,4 +2388,3 @@
         }
     }
 }
-

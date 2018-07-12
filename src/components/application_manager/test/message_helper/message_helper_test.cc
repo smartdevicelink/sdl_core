@@ -39,9 +39,11 @@
 #include "application_manager/policies/policy_handler.h"
 #include "application_manager/mock_application.h"
 #include "utils/custom_string.h"
+#include "utils/lock.h"
 #include "policy/mock_policy_settings.h"
 #include "application_manager/policies/policy_handler.h"
 #include "application_manager/mock_application_manager.h"
+#include "application_manager/mock_rpc_service.h"
 #include "application_manager/event_engine/event_dispatcher.h"
 #include "application_manager/state_controller.h"
 #include "application_manager/resumption/resume_ctrl.h"
@@ -236,7 +238,8 @@ TEST(MessageHelperTestCreate,
      CreateAddCommandRequestToHMI_SendSmartObject_Empty) {
   MockApplicationSharedPtr appSharedMock = utils::MakeShared<MockApplication>();
   ::application_manager::CommandsMap vis;
-  DataAccessor<application_manager::CommandsMap> data_accessor(vis, true);
+  DataAccessor<application_manager::CommandsMap> data_accessor(
+      vis, std::make_shared<sync_primitives::Lock>(true));
 
   EXPECT_CALL(*appSharedMock, commands_map()).WillOnce(Return(data_accessor));
   application_manager_test::MockApplicationManager mock_application_manager;
@@ -251,7 +254,8 @@ TEST(MessageHelperTestCreate,
      CreateAddCommandRequestToHMI_SendSmartObject_Equal) {
   MockApplicationSharedPtr appSharedMock = utils::MakeShared<MockApplication>();
   CommandsMap vis;
-  DataAccessor<CommandsMap> data_accessor(vis, true);
+  DataAccessor<CommandsMap> data_accessor(
+      vis, std::make_shared<sync_primitives::Lock>(true));
   smart_objects::SmartObjectSPtr smartObjectPtr =
       utils::MakeShared<smart_objects::SmartObject>();
 
@@ -292,7 +296,8 @@ TEST(MessageHelperTestCreate,
      CreateAddVRCommandRequestFromChoiceToHMI_SendEmptyData_EmptyList) {
   MockApplicationSharedPtr appSharedMock = utils::MakeShared<MockApplication>();
   application_manager::ChoiceSetMap vis;
-  DataAccessor< ::application_manager::ChoiceSetMap> data_accessor(vis, true);
+  DataAccessor< ::application_manager::ChoiceSetMap> data_accessor(
+      vis, std::make_shared<sync_primitives::Lock>(true));
 
   EXPECT_CALL(*appSharedMock, choice_set_map()).WillOnce(Return(data_accessor));
   application_manager_test::MockApplicationManager mock_application_manager;
@@ -307,7 +312,8 @@ TEST(MessageHelperTestCreate,
      CreateAddVRCommandRequestFromChoiceToHMI_SendObject_EqualList) {
   MockApplicationSharedPtr appSharedMock = utils::MakeShared<MockApplication>();
   application_manager::ChoiceSetMap vis;
-  DataAccessor< ::application_manager::ChoiceSetMap> data_accessor(vis, true);
+  DataAccessor< ::application_manager::ChoiceSetMap> data_accessor(
+      vis, std::make_shared<sync_primitives::Lock>(true));
   smart_objects::SmartObjectSPtr smartObjectPtr =
       utils::MakeShared<smart_objects::SmartObject>();
 
@@ -353,7 +359,8 @@ TEST(MessageHelperTestCreate,
 TEST(MessageHelperTestCreate, CreateAddSubMenuRequestToHMI_SendObject_Equal) {
   MockApplicationSharedPtr appSharedMock = utils::MakeShared<MockApplication>();
   application_manager::SubMenuMap vis;
-  DataAccessor< ::application_manager::SubMenuMap> data_accessor(vis, true);
+  DataAccessor< ::application_manager::SubMenuMap> data_accessor(
+      vis, std::make_shared<sync_primitives::Lock>(true));
   smart_objects::SmartObjectSPtr smartObjectPtr =
       utils::MakeShared<smart_objects::SmartObject>();
 
@@ -392,7 +399,8 @@ TEST(MessageHelperTestCreate,
      CreateAddSubMenuRequestToHMI_SendEmptyMap_EmptySmartObjectList) {
   MockApplicationSharedPtr appSharedMock = utils::MakeShared<MockApplication>();
   application_manager::SubMenuMap vis;
-  DataAccessor< ::application_manager::SubMenuMap> data_accessor(vis, true);
+  DataAccessor< ::application_manager::SubMenuMap> data_accessor(
+      vis, std::make_shared<sync_primitives::Lock>(true));
 
   EXPECT_CALL(*appSharedMock, sub_menu_map()).WillOnce(Return(data_accessor));
 
@@ -571,6 +579,7 @@ class MessageHelperTest : public ::testing::Test {
 
  protected:
   application_manager_test::MockApplicationManager mock_application_manager;
+  application_manager_test::MockRPCService mock_rpc_service_;
   const StringArray language_strings;
   const StringArray hmi_result_strings;
   const StringArray mobile_result_strings;
@@ -704,25 +713,6 @@ TEST_F(MessageHelperTest, VerifySoftButtonString_CorrectStrings_True) {
   for (size_t i = 0; i < wrong_strings.size(); ++i) {
     EXPECT_TRUE(MessageHelper::VerifySoftButtonString(wrong_strings[i]));
   }
-}
-
-TEST_F(MessageHelperTest,
-       GetIVISubscriptionRequests_ValidApplication_HmiRequestNotEmpty) {
-  // Creating sharedPtr to MockApplication
-  MockApplicationSharedPtr appSharedMock = utils::MakeShared<MockApplication>();
-  // Creating data acessor
-  application_manager::VehicleInfoSubscriptions vis;
-  DataAccessor<application_manager::VehicleInfoSubscriptions> data_accessor(
-      vis, true);
-  // Calls for ApplicationManager
-  EXPECT_CALL(*appSharedMock, app_id()).WillOnce(Return(1u));
-  EXPECT_CALL(*appSharedMock, SubscribedIVI()).WillOnce(Return(data_accessor));
-
-  smart_objects::SmartObjectList outList =
-      MessageHelper::GetIVISubscriptionRequests(appSharedMock,
-                                                mock_application_manager);
-  // Expect not empty request
-  EXPECT_FALSE(outList.empty());
 }
 
 TEST_F(MessageHelperTest,
@@ -950,7 +940,10 @@ TEST_F(MessageHelperTest, SendGetListOfPermissionsResponse_SUCCESS) {
   permissions.push_back(permission);
 
   smart_objects::SmartObjectSPtr result;
-  EXPECT_CALL(mock_application_manager, ManageHMICommand(_))
+
+  ON_CALL(mock_application_manager, GetRPCService())
+      .WillByDefault(ReturnRef(mock_rpc_service_));
+  EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_))
       .WillOnce(DoAll(SaveArg<0>(&result), Return(true)));
 
   const uint32_t correlation_id = 0u;
@@ -987,7 +980,10 @@ TEST_F(MessageHelperTest,
       entity_type_2, entity_id_2, entity_status_2));
 
   smart_objects::SmartObjectSPtr result;
-  EXPECT_CALL(mock_application_manager, ManageHMICommand(_))
+
+  ON_CALL(mock_application_manager, GetRPCService())
+      .WillByDefault(ReturnRef(mock_rpc_service_));
+  EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_))
       .WillOnce(DoAll(SaveArg<0>(&result), Return(true)));
 
   const uint32_t correlation_id = 0u;
@@ -1031,7 +1027,9 @@ TEST_F(MessageHelperTest,
 
 TEST_F(MessageHelperTest, SendNaviSetVideoConfigRequest) {
   smart_objects::SmartObjectSPtr result;
-  EXPECT_CALL(mock_application_manager, ManageHMICommand(_))
+  ON_CALL(mock_application_manager, GetRPCService())
+      .WillByDefault(ReturnRef(mock_rpc_service_));
+  EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_))
       .WillOnce(DoAll(SaveArg<0>(&result), Return(true)));
 
   int32_t app_id = 123;

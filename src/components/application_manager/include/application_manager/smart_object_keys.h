@@ -218,6 +218,7 @@ extern const char* did_location;
 extern const char* app_list;
 extern const char* device_list;
 extern const char* device_info;
+extern const char* secondary_device_info;
 extern const char* name;
 extern const char* id;
 extern const char* isSDLAllowed;
@@ -254,11 +255,13 @@ extern const char* fuel_level_state;
 extern const char* instant_fuel_consumption;
 extern const char* fuel_range;
 extern const char* external_temp;
+extern const char* turn_signal;
 extern const char* vin;
 extern const char* prndl;
 extern const char* tire_pressure;
 extern const char* odometer;
 extern const char* belt_status;
+extern const char* electronic_park_brake_status;
 extern const char* body_information;
 extern const char* device_status;
 extern const char* driver_braking;
@@ -422,7 +425,19 @@ extern const char* kFull;
 extern const char* kLimited;
 extern const char* kBackground;
 extern const char* kNone;
-}
+}  // namespace hmi_levels
+
+namespace time_keys {
+extern const char* millisecond;
+extern const char* second;
+extern const char* minute;
+extern const char* hour;
+extern const char* day;
+extern const char* month;
+extern const char* year;
+extern const char* tz_hour;
+extern const char* tz_minute;
+}  // namespace time_keys
 
 namespace hmi_request {
 extern const char* parent_id;
@@ -495,7 +510,7 @@ extern const char* num_custom_presets_available;
 extern const char* urls;
 extern const char* policy_app_id;
 extern const char* enabled;
-
+extern const char* system_time;
 }  // namespace hmi_response
 
 namespace hmi_notification {

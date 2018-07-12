@@ -61,14 +61,14 @@ class HandshakeHandler : public security_manager::SecurityManagerListener {
                               const std::vector<int>& force_protected_service,
                               const bool is_new_service,
                               ProtocolPacket::ProtocolVersion& full_version,
-                              std::shared_ptr<uint8_t> payload);
+                              std::shared_ptr<BsonObject> payload);
 
   HandshakeHandler(ProtocolHandlerImpl& protocol_handler,
                    SessionObserver& session_observer,
                    ProtocolPacket::ProtocolVersion& full_version,
                    const SessionContext& context,
                    const uint8_t protocol_version,
-                   std::shared_ptr<uint8_t> payload);
+                   std::shared_ptr<BsonObject> payload);
 
   ~HandshakeHandler();
 
@@ -88,6 +88,12 @@ class HandshakeHandler : public security_manager::SecurityManagerListener {
   bool OnHandshakeDone(
       uint32_t connection_key,
       security_manager::SSLContext::HandshakeResult result) OVERRIDE;
+
+  /**
+   * @brief Notification about handshake failure
+   * @return true on success notification handling or false otherwise
+   */
+  bool OnHandshakeFailed() OVERRIDE;
 
   /**
    * @brief Notification that certificate update is required.
@@ -120,7 +126,7 @@ class HandshakeHandler : public security_manager::SecurityManagerListener {
   SessionContext context_;
   ProtocolPacket::ProtocolVersion full_version_;
   const uint8_t protocol_version_;
-  std::shared_ptr<uint8_t> payload_;
+  std::shared_ptr<BsonObject> payload_;
 };
 
 }  // namespace protocol_handler

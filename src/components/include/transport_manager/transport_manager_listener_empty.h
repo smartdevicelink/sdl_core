@@ -2,6 +2,9 @@
  * Copyright (c) 2014, Ford Motor Company
  * All rights reserved.
  *
+ * Copyright (c) 2018 Xevo Inc.
+ * All rights reserved.
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *
@@ -13,7 +16,7 @@
  * disclaimer in the documentation and/or other materials provided with the
  * distribution.
  *
- * Neither the name of the Ford Motor Company nor the names of its contributors
+ * Neither the name of the copyright holders nor the names of its contributors
  * may be used to endorse or promote products derived from this software
  * without specific prior written permission.
  *
@@ -187,6 +190,14 @@ class TransportManagerListenerEmpty : public TransportManagerListener {
   void OnTMMessageSendFailed(
       const DataSendError& error,
       const ::protocol_handler::RawMessagePtr message) OVERRIDE {}
+
+  /**
+   * @brief Notifies that configuration of a transport has been updated.
+   *
+   * @param configs pairs of key and value that represent configuration.
+   */
+  void OnTransportConfigUpdated(
+      const std::map<std::string, std::string>& configs) OVERRIDE {}
 };
 }  // namespace transport_manager
 #endif  // SRC_COMPONENTS_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_MANAGER_LISTENER_EMPTY_H_

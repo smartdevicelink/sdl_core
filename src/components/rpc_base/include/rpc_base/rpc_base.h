@@ -42,11 +42,6 @@ namespace Json {
 class Value;
 }  // namespace Json
 
-namespace dbus {
-class MessageReader;
-class MessageWriter;
-}  // namespace dbus
-
 namespace rpc {
 class ValidationReport;
 
@@ -173,12 +168,10 @@ class Boolean : public PrimitiveType {
   Boolean();
   explicit Boolean(bool value);
   explicit Boolean(const Json::Value* value);
-  explicit Boolean(dbus::MessageReader* reader);
   Boolean(const Json::Value* value, bool def_value);
   Boolean& operator=(bool new_val);
   operator bool() const;
   Json::Value ToJsonValue() const;
-  void ToDbusWriter(dbus::MessageWriter* writer) const;
 
  private:
   // Fields
@@ -197,7 +190,6 @@ class Integer : public PrimitiveType {
   explicit Integer(IntType value);
   Integer(const Integer& value);
   explicit Integer(const Json::Value* value);
-  explicit Integer(dbus::MessageReader* reader);
   Integer(const Json::Value* value, IntType def_value);
   Integer& operator=(IntType new_val);
   Integer& operator=(const Integer& new_val);
@@ -205,7 +197,6 @@ class Integer : public PrimitiveType {
   Integer& operator+=(int value);
   operator IntType() const;
   Json::Value ToJsonValue() const;
-  void ToDbusWriter(dbus::MessageWriter* writer) const;
 
  private:
   IntType value_;
@@ -219,12 +210,10 @@ class Float : public PrimitiveType {
   Float();
   explicit Float(double value);
   explicit Float(const Json::Value* value);
-  explicit Float(dbus::MessageReader* reader);
   Float(const Json::Value* value, double def_value);
   Float& operator=(double new_val);
   operator double() const;
   Json::Value ToJsonValue() const;
-  void ToDbusWriter(dbus::MessageWriter* writer) const;
 
  private:
   double value_;
@@ -239,7 +228,6 @@ class String : public PrimitiveType {
   explicit String(const std::string& value);
   explicit String(const char* value);
   explicit String(const Json::Value* value);
-  explicit String(dbus::MessageReader* reader);
   String(const Json::Value* value, const std::string& def_value);
   bool operator<(const String& new_val) const;
   String& operator=(const std::string& new_val);
@@ -247,7 +235,6 @@ class String : public PrimitiveType {
   bool operator==(const String& rhs) const;
   operator const std::string&() const;
   Json::Value ToJsonValue() const;
-  void ToDbusWriter(dbus::MessageWriter* writer) const;
 
  private:
   std::string value_;
@@ -265,12 +252,10 @@ class Enum : public PrimitiveType {
   Enum();
   explicit Enum(EnumType value);
   explicit Enum(const Json::Value* value);
-  explicit Enum(dbus::MessageReader* reader);
   Enum(const Json::Value* value, EnumType def_value);
   Enum& operator=(const EnumType& new_val);
   operator EnumType() const;
   Json::Value ToJsonValue() const;
-  void ToDbusWriter(dbus::MessageWriter* writer) const;
 
  private:
   // Fields
@@ -289,7 +274,6 @@ class Array : public std::vector<T>, public CompositeType {
   // Need const and non-const versions to beat all-type accepting constructor
   explicit Array(Json::Value* value);
   explicit Array(const Json::Value* value);
-  explicit Array(dbus::MessageReader* reader);
   template <typename U>
   explicit Array(const U& value);
   template <typename U>
@@ -298,7 +282,6 @@ class Array : public std::vector<T>, public CompositeType {
   template <typename U>
   void push_back(const U& value);
   Json::Value ToJsonValue() const;
-  void ToDbusWriter(dbus::MessageWriter* writer) const;
 
   virtual bool is_valid() const;
   bool is_initialized() const;
@@ -320,7 +303,6 @@ class Map : public std::map<std::string, T>, public CompositeType {
   // Need const and non-const versions to beat all-type accepting constructor
   explicit Map(Json::Value* value);
   explicit Map(const Json::Value* value);
-  explicit Map(dbus::MessageReader* reader);
   template <typename U>
   explicit Map(const U& value);
   template <typename U>
@@ -329,7 +311,6 @@ class Map : public std::map<std::string, T>, public CompositeType {
   template <typename U>
   void insert(const std::pair<std::string, U>& value);
   Json::Value ToJsonValue() const;
-  void ToDbusWriter(dbus::MessageWriter* writer) const;
 
   bool is_valid() const;
   bool is_initialized() const;
@@ -343,7 +324,6 @@ class Nullable : public T {
  public:
   // Methods
   Nullable();
-  explicit Nullable(dbus::MessageReader* reader);
   // Need const and non-const versions to beat all-type accepting constructor
   explicit Nullable(Json::Value* value);
   explicit Nullable(const Json::Value* value);
@@ -370,7 +350,6 @@ class Stringifyable : public T {
  public:
   // Methods
   Stringifyable();
-  explicit Stringifyable(dbus::MessageReader* reader);
   // Need const and non-const versions to beat all-type accepting constructor
   explicit Stringifyable(Json::Value* value);
   explicit Stringifyable(const Json::Value* value);
@@ -398,14 +377,11 @@ class Optional {
  public:
   // Methods
   Optional();
-  explicit Optional(dbus::MessageReader* reader);
   template <typename U>
   explicit Optional(const U& value);
   template <typename U>
   Optional(const Json::Value* value, const U& def_value);
   Json::Value ToJsonValue() const;
-
-  void ToDbusWriter(dbus::MessageWriter* writer) const;
 
   // Pointer semantics
   T& operator*();

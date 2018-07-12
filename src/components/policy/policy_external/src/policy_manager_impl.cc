@@ -50,11 +50,8 @@
 #include "policy/update_status_manager.h"
 #include "config_profile/profile.h"
 #include "utils/make_shared.h"
-
-#ifdef SDL_REMOTE_CONTROL
 #include "policy/access_remote.h"
 #include "policy/access_remote_impl.h"
-#endif  // SDL_REMOTE_CONTROL
 
 policy::PolicyManager* CreateManager() {
   return new policy::PolicyManagerImpl();
@@ -216,32 +213,26 @@ PolicyManagerImpl::PolicyManagerImpl()
     : PolicyManager()
     , listener_(NULL)
     , cache_(new CacheManager)
-#ifdef SDL_REMOTE_CONTROL
     , access_remote_(new AccessRemoteImpl(
           CacheManagerInterfaceSPtr::static_pointer_cast<CacheManager>(cache_)))
-#endif  // SDL_REMOTE_CONTROL
     , retry_sequence_timeout_(60)
     , retry_sequence_index_(0)
     , ignition_check(true)
-    , retry_sequence_url_(0, 0, "") {
-}
+    , retry_sequence_url_(0, 0, "") {}
 
 PolicyManagerImpl::PolicyManagerImpl(bool in_memory)
     : PolicyManager()
     , listener_(NULL)
     , cache_(new CacheManager(in_memory))
-#ifdef SDL_REMOTE_CONTROL
     , access_remote_(new AccessRemoteImpl(
           CacheManagerInterfaceSPtr::static_pointer_cast<CacheManager>(cache_)))
-#endif  // SDL_REMOTE_CONTROL
     , retry_sequence_timeout_(60)
     , retry_sequence_index_(0)
     , ignition_check(true)
     , retry_sequence_url_(0, 0, "")
     , wrong_ptu_update_received_(false)
     , send_on_update_sent_out_(false)
-    , trigger_ptu_(false) {
-}
+    , trigger_ptu_(false) {}
 
 void PolicyManagerImpl::set_listener(PolicyListener* listener) {
   listener_ = listener;
@@ -792,13 +783,11 @@ void PolicyManagerImpl::SendNotificationOnPermissionsUpdated(
   LOG4CXX_INFO(logger_,
                "Send notification for application_id:" << application_id);
 
-#ifdef SDL_REMOTE_CONTROL
   const ApplicationOnDevice who = {device_id, application_id};
   if (access_remote_->IsAppRemoteControl(who)) {
     listener()->OnPermissionsUpdated(application_id, notification_data);
     return;
   }
-#endif  // SDL_REMOTE_CONTROL
 
   std::string default_hmi;
   GetDefaultHmi(application_id, &default_hmi);
@@ -1790,11 +1779,6 @@ StatusNotifier PolicyManagerImpl::AddApplication(
                                                device_consent);
   } else {
     PromoteExistedApplication(application_id, device_consent);
-    if (helpers::in_range(hmi_types, policy_table::AHT_NAVIGATION) &&
-        !HasCertificate()) {
-      LOG4CXX_DEBUG(logger_, "Certificate does not exist, scheduling update.");
-      update_status_manager_.ScheduleUpdate();
-    }
     return utils::MakeShared<utils::CallNothing>();
   }
 }
@@ -1938,7 +1922,6 @@ std::ostream& operator<<(std::ostream& output,
   return output;
 }
 
-#ifdef SDL_REMOTE_CONTROL
 void PolicyManagerImpl::SetDefaultHmiTypes(const std::string& application_id,
                                            const std::vector<int>& hmi_types) {
   LOG4CXX_INFO(logger_, "SetDefaultHmiTypes");
@@ -2044,6 +2027,5 @@ void PolicyManagerImpl::set_access_remote(
     utils::SharedPtr<AccessRemote> access_remote) {
   access_remote_ = access_remote;
 }
-#endif  // SDL_REMOTE_CONTROL
 
 }  //  namespace policy
