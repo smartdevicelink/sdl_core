@@ -149,7 +149,7 @@ bool GetInteriorVehicleDataRequest::CheckRateLimits() {
   LOG4CXX_DEBUG(logger_,
                 "Current amount of requests in the same time frame is: "
                     << current_requests_amount);
-  if (current_requests_amount < max_request_in_time_frame_) {
+  if (current_requests_amount <= max_request_in_time_frame_) {
     interior_data_cache_.IncrementAmountOfRequests();
     return true;
   }
