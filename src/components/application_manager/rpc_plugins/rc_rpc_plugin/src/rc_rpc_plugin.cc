@@ -91,6 +91,9 @@ void RCRPCPlugin::OnApplicationEvent(
   switch (event) {
     case plugins::kApplicationRegistered: {
       application->AddExtension(new RCAppExtension(kRCPluginID));
+      if (resource_allocation_manager_->is_rc_enabled()) {
+        resource_allocation_manager_->SendOnRCStatusNotification();
+      }
       break;
     }
     case plugins::kApplicationExit: {
@@ -125,4 +128,4 @@ RCRPCPlugin::Apps RCRPCPlugin::GetRCApplications(
 
 extern "C" application_manager::plugin_manager::RPCPlugin* Create() {
   return new rc_rpc_plugin::RCRPCPlugin();
-}
+}  // namespace rc_rpc_plugin

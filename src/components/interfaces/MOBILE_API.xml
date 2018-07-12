@@ -2494,7 +2494,8 @@
         <element name="OnHashChangeID" value="32782" hexvalue="800E" />
         <element name="OnInteriorVehicleDataID" value="32783" hexvalue="800F" />
         <element name="OnWayPointChangeID" value="32784" hexvalue="8010" />
-        
+        <element name="OnRCStatusID" value="32785" hexvalue="8011" />
+
         <!--
          Ford Specific Request / Response RPCs
          Range = 0x 0001 0000 - 0x 0001 7FFF
@@ -6207,6 +6208,16 @@
     <function name="OnInteriorVehicleData" functionID="OnInteriorVehicleDataID" messagetype="notification">
         <param name="moduleData" type="ModuleData"  mandatory="true">
         </param>
+    </function>
+
+    <function name="OnRCStatus" functionID="OnRCStatusID" messagetype="notification">
+      <description>Issued by SDL to notify the application about remote control status change on SDL</description>
+      <param name="allocatedModules" type="ModuleData" minsize="0" maxsize="100" array="true" mandatory="true">
+        <description>Contains a list (zero or more) of module types that are allocated to the application.</description>
+      </param>
+      <param name="freeModules" type="ModuleData" minsize="0" maxsize="100" array="true" mandatory="true">
+        <description>Contains a list (zero or more) of module types that are free to access for the application.</description>
+      </param>
     </function>
     
     <!-- ~~~~~~~~~~~~~~~~~~ -->

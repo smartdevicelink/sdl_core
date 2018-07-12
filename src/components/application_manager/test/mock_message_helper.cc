@@ -39,6 +39,18 @@
 
 namespace application_manager {
 
+smart_objects::SmartObjectSPtr MessageHelper::CreateNotification(
+    mobile_apis::FunctionID::eType function_id, uint32_t app_id) {
+  return MockMessageHelper::message_helper_mock()->CreateNotification(
+      function_id, app_id);
+}
+
+smart_objects::SmartObjectSPtr MessageHelper::CreateHMINotification(
+    hmi_apis::FunctionID::eType function_id) {
+  return MockMessageHelper::message_helper_mock()->CreateHMINotification(
+      function_id);
+}
+
 void MessageHelper::SendHashUpdateNotification(uint32_t const app_id,
                                                ApplicationManager& app_mngr) {
   MockMessageHelper::message_helper_mock()->SendHashUpdateNotification(

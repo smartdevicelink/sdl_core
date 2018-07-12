@@ -91,6 +91,8 @@ class RAManagerTest : public ::testing::Test {
     auto plugin_id = rc_rpc_plugin::RCRPCPlugin::kRCPluginID;
     app_ext_ptr_ = utils::MakeShared<rc_rpc_plugin::RCAppExtension>(plugin_id);
     ON_CALL(*mock_app_1_, app_id()).WillByDefault(Return(kAppId1));
+
+    OnRCStatusNotificationExpectations();
   }
 
   void CheckResultWithHMILevelAndAccessMode(
@@ -98,6 +100,8 @@ class RAManagerTest : public ::testing::Test {
       mobile_apis::HMILevel::eType app_level,
       const rc_rpc_plugin::AcquireResult::eType expected_result,
       const hmi_apis::Common_RCAccessMode::eType access_mode);
+
+  void OnRCStatusNotificationExpectations();
 
  protected:
   NiceMock<MockApplicationManager> mock_app_mngr_;
@@ -134,6 +138,15 @@ void RAManagerTest::CheckResultWithHMILevelAndAccessMode(
   EXPECT_EQ(expected_result, ra_manager.AcquireResource(kModuleType1, kAppId2));
 }
 
+void RAManagerTest::OnRCStatusNotificationExpectations() {
+  ON_CALL(mock_app_mngr_, application(kAppId1))
+      .WillByDefault(Return(mock_app_1_));
+  ON_CALL(*mock_app_1_, QueryInterface(rc_rpc_plugin::RCRPCPlugin::kRCPluginID))
+      .WillByDefault(Return(app_ext_ptr_));
+  apps_.insert(mock_app_1_);
+  ON_CALL(mock_app_mngr_, applications()).WillByDefault(Return(apps_da_));
+}
+
 TEST_F(RAManagerTest, AcquireResource_NoAppRegistered_Expect_InUse) {
   // Arrange
   EXPECT_CALL(mock_app_mngr_, application(kAppId1))
@@ -147,8 +160,6 @@ TEST_F(RAManagerTest, AcquireResource_NoAppRegistered_Expect_InUse) {
 TEST_F(RAManagerTest,
        AcquireResource_AppRegisteredAnyHmiLevelResourceFree_Expect_Allowed) {
   // Arrange
-  EXPECT_CALL(mock_app_mngr_, application(kAppId1))
-      .WillOnce(Return(mock_app_1_));
   ResourceAllocationManagerImpl ra_manager(mock_app_mngr_, mock_rpc_service_);
   // Act & Assert
   EXPECT_EQ(rc_rpc_plugin::AcquireResult::ALLOWED,
@@ -258,13 +269,6 @@ TEST_F(RAManagerTest, AppExit_ReleaseResource) {
   EXPECT_CALL(mock_app_mngr_, application(kAppId1))
       .WillRepeatedly(Return(mock_app_1_));
 
-  RCAppExtensionPtr rc_extention_ptr =
-      utils::MakeShared<RCAppExtension>(application_manager::AppExtensionUID(
-          rc_rpc_plugin::RCRPCPlugin::kRCPluginID));
-
-  EXPECT_CALL(*mock_app_1_, QueryInterface(_))
-      .WillOnce(Return(rc_extention_ptr));
-
   EXPECT_EQ(rc_rpc_plugin::AcquireResult::ALLOWED,
             ra_manager.AcquireResource(kModuleType1, kAppId1));
 
@@ -322,12 +326,6 @@ TEST_F(RAManagerTest, AppUnregistered_ReleaseResource) {
   RCAppExtensionPtr rc_extention_ptr =
       utils::MakeShared<RCAppExtension>(application_manager::AppExtensionUID(
           rc_rpc_plugin::RCRPCPlugin::kRCPluginID));
-
-  EXPECT_CALL(*mock_app_1_, QueryInterface(_))
-      .WillOnce(Return(rc_extention_ptr));
-
-  EXPECT_CALL(mock_app_mngr_, application(kAppId1))
-      .WillRepeatedly(Return(mock_app_1_));
 
   EXPECT_EQ(rc_rpc_plugin::AcquireResult::ALLOWED,
             ra_manager.AcquireResource(kModuleType1, kAppId1));
