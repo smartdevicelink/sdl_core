@@ -36,6 +36,7 @@
 #include "rc_rpc_plugin/resource_allocation_manager_impl.h"
 #include "rc_rpc_plugin/interior_data_cache_impl.h"
 #include "utils/helpers.h"
+#include "utils/date_time.h"
 
 namespace rc_rpc_plugin {
 namespace plugins = application_manager::plugin_manager;
@@ -47,7 +48,8 @@ bool RCRPCPlugin::Init(
     policy::PolicyHandlerInterface& policy_handler) {
   const auto& settings = app_manager.get_settings();
   const auto frequency = settings.get_vehicle_data_frequency();
-  interior_data_cache_.reset(new InteriorDataCacheImpl(frequency.second));
+  interior_data_cache_.reset(new InteriorDataCacheImpl(
+      frequency.second * date_time::DateTime::MILLISECONDS_IN_SECOND));
 
   resource_allocation_manager_.reset(
       new ResourceAllocationManagerImpl(app_manager, rpc_service));
