@@ -34,6 +34,10 @@
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_HELP_PROMPT_MANAGER_IMPL_H_
 
 #include "application_manager/help_prompt_manager.h"
+
+#include <algorithm>
+#include <vector>
+
 #include "utils/lock.h"
 #include "utils/timer.h"
 
@@ -51,9 +55,10 @@ class ApplicationManager;
 class HelpPromptManagerImpl : public HelpPromptManager {
  public:
   /**
-   * @brief Continer for buffering VR help commands
+   * @brief Container for buffering VR help commands
   */
-  typedef std::map<uint32_t, smart_objects::SmartObjectSPtr> VRCommandsMap;
+  typedef std::pair<uint32_t, smart_objects::SmartObjectSPtr> VRCommandPair;
+  typedef std::vector<VRCommandPair> VRCommandPairs;
 
   /**
    * @brief Class constructor
@@ -111,14 +116,16 @@ class HelpPromptManagerImpl : public HelpPromptManager {
    * @brief Add new smart object with VR command to the map
    * @param cmd_id ID of VR command
    * @param command smart object containing VR command structure
-   * @return true if command was added successfully otherwise returns false
+   * @return true if first kLimitCommand commands was changed after adding
+   * of the current command otherwise returns false
    */
   bool AddCommand(const uint32_t cmd_id,
                   const smart_objects::SmartObject& command);
   /**
    * @brief Delete VR command from map by its cmd_id
    * @param cmd_id ID of VR command
-   * @return true if command was successfully deleted otherwise returns false
+   * @return true if first kLimitCommand commands was changed after deleting
+   * of the current command otherwise returns false
    */
   bool DeleteCommand(const uint32_t cmd_id);
 
@@ -159,12 +166,19 @@ class HelpPromptManagerImpl : public HelpPromptManager {
    */
   void SetSendingType(const smart_objects::SmartObject& msg);
 
+  /**
+   * @brief Get the total count of commands in VRCommand pairs
+   * @param end_element pointer to VRCommandPairs element to which commands
+   * should be counted
+   * @return total count of commands
+   */
+  size_t GetCommandsCount(VRCommandPairs::const_iterator end_element) const;
+
   Application& app_;
   ApplicationManager& app_manager_;
-  VRCommandsMap vr_commands_;
+  VRCommandPairs vr_commands_;
   sync_primitives::Lock vr_commands_lock_;
   SendingType sending_type_;
-  std::size_t count_vr_commands_;
   bool is_tts_send_;
   bool is_ui_send_;
 };
