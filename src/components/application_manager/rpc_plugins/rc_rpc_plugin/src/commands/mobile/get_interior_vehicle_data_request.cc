@@ -63,9 +63,9 @@ GetInteriorVehicleDataRequest::GetInteriorVehicleDataRequest(
                        interior_data_cache)
 
     , excessive_subscription_occured_(false) {
-    const auto& settings = application_manager.get_settings();
-    const auto frequency = settings.get_vehicle_data_frequency();
-    max_request_in_time_frame_ = frequency.first;
+  const auto& settings = application_manager.get_settings();
+  const auto frequency = settings.get_vehicle_data_frequency();
+  max_request_in_time_frame_ = frequency.first;
 }
 
 bool CheckIfModuleTypeExistInCapabilities(
