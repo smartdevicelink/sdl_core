@@ -62,8 +62,8 @@ RCOnRemoteControlSettingsNotification::RCOnRemoteControlSettingsNotification(
                                                          hmi_capabilities,
                                                          policy_handle)
     , resource_allocation_manager_(resource_allocation_manager) {
-      UNUSED(interior_data_cache);
-    }
+  UNUSED(interior_data_cache);
+}
 
 RCOnRemoteControlSettingsNotification::
     ~RCOnRemoteControlSettingsNotification() {}
