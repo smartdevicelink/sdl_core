@@ -247,6 +247,14 @@ void GetInteriorVehicleDataRequest::on_event(
       interior_data_cache_.ClearCache();
     }
     ProccessSubscription(hmi_response);
+    if (is_subscribed) {
+      const auto& data_mapping = RCHelpers::GetModuleTypeToDataMapping();
+      const auto module_data =
+          hmi_response[app_mngr::strings::msg_params]
+                      [message_params::kModuleData][data_mapping.at(
+                          ModuleType())];
+      interior_data_cache_.Add(ModuleType(), module_data);
+    }
   } else {
     hmi_response[app_mngr::strings::msg_params].erase(
         message_params::kIsSubscribed);
