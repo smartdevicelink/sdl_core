@@ -167,16 +167,16 @@ void GetInteriorVehicleDataRequest::Execute() {
   app_mngr::ApplicationSharedPtr app =
       application_manager_.application(connection_key());
 
-  if (HasRequestExcessiveSubscription()) {
-    excessive_subscription_occured_ = true;
-    is_subscribed =
-        (*message_)[app_mngr::strings::msg_params][message_params::kSubscribe]
-            .asBool();
-    RemoveExcessiveSubscription();
-  }
-
   if (TheLastAppShouldBeUnsubscribed(app) ||
       !interior_data_cache_.Contains(ModuleType())) {
+    if (HasRequestExcessiveSubscription()) {
+      excessive_subscription_occured_ = true;
+      is_subscribed =
+          (*message_)[app_mngr::strings::msg_params][message_params::kSubscribe]
+              .asBool();
+      RemoveExcessiveSubscription();
+    }
+
     SendHMIRequest(hmi_apis::FunctionID::RC_GetInteriorVehicleData,
                    &(*message_)[app_mngr::strings::msg_params],
                    true);
