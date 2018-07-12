@@ -7,6 +7,7 @@
 #include "rc_rpc_plugin/rc_app_extension.h"
 
 namespace rc_rpc_plugin {
+class RCRPCPlugin;
 
 /**
  * @brief The RCHelpers class this contains frequently used static data
@@ -30,6 +31,13 @@ class RCHelpers {
    */
   static RCAppExtensionPtr GetRCExtension(
       application_manager::Application& app);
+
+  static smart_objects::SmartObjectSPtr CreateUnsubscribeRequestToHMI(
+      const std::string& module_type, const uint32_t correlation_id);
+
+  static std::vector<application_manager::ApplicationSharedPtr>
+  AppsSubscribedTo(application_manager::ApplicationManager& app_mngr,
+                   const std::string& module_type);
 };
 
 }  // rc_rpc_plugin

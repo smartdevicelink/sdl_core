@@ -67,6 +67,12 @@ class RCAppExtension : public application_manager::AppExtension {
    */
   bool IsSubscibedToInteriorVehicleData(const std::string& module_type);
 
+  /**
+   * @brief get list of subscriptions of application
+   * @return list of subscriptions of application
+   */
+  std::set<std::string> InteriorVehicleDataSubscriptions() const;
+
  private:
   std::set<std::string> subscribed_interior_vehicle_data_;
 
