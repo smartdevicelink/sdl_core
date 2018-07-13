@@ -41,11 +41,14 @@ namespace rc_rpc_plugin {
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "RemoteControlModule");
 
-InteriorDataCacheImpl::InteriorDataCacheImpl()
+InteriorDataCacheImpl::InteriorDataCacheImpl(
+    const uint32_t time_frame_of_allowed_requests)
     : reset_request_count_timer_(
           "InteriorDataCacheImplResetRequests",
           new timer::TimerTaskImpl<InteriorDataCacheImpl>(
-              this, &InteriorDataCacheImpl::ResetRequestCountOnTimer)) {}
+              this, &InteriorDataCacheImpl::ResetRequestCountOnTimer)) {
+  StartRequestResetTimer(time_frame_of_allowed_requests);
+}
 
 InteriorDataCacheImpl::~InteriorDataCacheImpl() {
   LOG4CXX_AUTO_TRACE(logger_);

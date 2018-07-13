@@ -83,13 +83,12 @@ class InteriorDataCache {
    */
   virtual void IncrementAmountOfRequests(const std::string& module_type) = 0;
 
+ private:
   /**
    * @brief Start timer which will resetting requests in time frame
    */
   virtual void StartRequestResetTimer(
       const uint32_t time_frame_of_allowed_requests) = 0;
-
- private:
   /**
    * @brief Callback function for timer
    * Timer need for reset curent value of request when new time frame start
