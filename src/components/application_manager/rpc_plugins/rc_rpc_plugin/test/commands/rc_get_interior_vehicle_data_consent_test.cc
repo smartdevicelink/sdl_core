@@ -150,13 +150,14 @@ class RCGetInteriorVehicleDataConsentTest
   application_manager::SharedPtr<Command> CreateRCCommand(
       MessageSharedPtr& msg) {
     InitCommand(kDefaultTimeout_);
+    RCCommandParams params{app_mngr_,
+                           mock_rpc_service_,
+                           mock_hmi_capabilities_,
+                           mock_policy_handler_,
+                           mock_allocation_manager_,
+                           mock_interior_data_cache_};
     return ::utils::MakeShared<Command>(msg ? msg : msg = CreateMessage(),
-                                        app_mngr_,
-                                        rpc_service,
-                                        mock_hmi_capabilities_,
-                                        mock_policy_handler_,
-                                        mock_allocation_manager_,
-                                        mock_interior_data_cache_);
+                                        params);
   }
 
   MessageSharedPtr CreateBasicMessage() {

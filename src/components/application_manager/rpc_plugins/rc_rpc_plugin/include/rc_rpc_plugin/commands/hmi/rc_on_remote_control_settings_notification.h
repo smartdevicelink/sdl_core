@@ -34,6 +34,7 @@
 #define SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_RC_RPC_PLUGIN_INCLUDE_COMMANDS_HMI_RC_ON_REMOTE_CONTROL_SETTINGS_NOTIFICATION_H
 
 #include "application_manager/commands/notification_from_hmi.h"
+#include "rc_rpc_plugin/commands/rc_command_request.h"
 #include "rc_rpc_plugin/interior_data_cache.h"
 #include "rc_rpc_plugin/resource_allocation_manager.h"
 #include "utils/macro.h"
@@ -55,13 +56,8 @@ class RCOnRemoteControlSettingsNotification
    * @param resource_allocation_manager ResourceAllocationManager
    **/
   RCOnRemoteControlSettingsNotification(
-      const app_mngr::commands::MessageSharedPtr& message,
-      app_mngr::ApplicationManager& application_manager,
-      app_mngr::rpc_service::RPCService& rpc_service,
-      app_mngr::HMICapabilities& hmi_capabilities,
-      policy::PolicyHandlerInterface& policy_handle,
-      rc_rpc_plugin::ResourceAllocationManager& resource_allocation_manager,
-      InteriorDataCache& interior_data_cache);
+      const application_manager::commands::MessageSharedPtr& message,
+      const RCCommandParams& params);
   /**
    * @brief Execute command
    **/

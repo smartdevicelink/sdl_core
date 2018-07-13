@@ -76,6 +76,7 @@ class RCRPCPlugin : public plugins::RPCPlugin {
    * @return plugins command factory
    */
   app_mngr::CommandFactory& GetCommandFactory() OVERRIDE;
+
   /**
    * @brief OnPolicyEvent Processes policy related events
    * @param event Policy event

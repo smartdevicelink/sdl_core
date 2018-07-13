@@ -39,19 +39,13 @@ namespace commands {
 
 RCOnInteriorVehicleDataNotification::RCOnInteriorVehicleDataNotification(
     const app_mngr::commands::MessageSharedPtr& message,
-    app_mngr::ApplicationManager& application_manager,
-    app_mngr::rpc_service::RPCService& rpc_service,
-    app_mngr::HMICapabilities& hmi_capabilities,
-    policy::PolicyHandlerInterface& policy_handle,
-    ResourceAllocationManager& resource_allocation_manager,
-    InteriorDataCache& interior_data_cache)
-    : application_manager::commands::NotificationFromHMI(message,
-                                                         application_manager,
-                                                         rpc_service,
-                                                         hmi_capabilities,
-                                                         policy_handle) {
-  UNUSED(resource_allocation_manager);
-}
+    const RCCommandParams& params)
+    : application_manager::commands::NotificationFromHMI(
+          message,
+          params.application_manager_,
+          params.rpc_service_,
+          params.hmi_capabilities_,
+          params.policy_handler_) {}
 
 RCOnInteriorVehicleDataNotification::~RCOnInteriorVehicleDataNotification() {}
 
