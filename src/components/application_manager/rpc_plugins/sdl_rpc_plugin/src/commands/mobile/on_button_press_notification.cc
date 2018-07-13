@@ -108,11 +108,10 @@ void OnButtonPressNotification::Run() {
     app->hmi_level(mobile_apis::PredefinedWindows::DEFAULT_WINDOW);
     (*message_)[strings::msg_params][strings::window_id] = window_id;
     const auto window_hmi_level = app->hmi_level(window_id);
-    if ((mobile_api::HMILevel::HMI_FULL != window_hmi_level) &&
-        (mobile_api::HMILevel::HMI_LIMITED != window_hmi_level)) {
+    if ((mobile_api::HMILevel::HMI_NONE == window_hmi_level)) {
       LOG4CXX_WARN(logger_,
                    "CUSTOM_BUTTON OnButtonPress notification is allowed only "
-                       << "in FULL or LIMITED hmi level");
+                       << "in FULL, LIMITED or BACKGROUND hmi level");
       return;
     }
 
