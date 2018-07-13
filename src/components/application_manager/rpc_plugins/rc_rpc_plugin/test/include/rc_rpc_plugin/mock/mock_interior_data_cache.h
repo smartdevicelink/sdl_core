@@ -33,19 +33,21 @@
 #ifndef SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_RC_RPC_PLUGIN_TEST_INCLUDE_RC_RPC_PLUGIN_MOCK_MOCK_INTERIOR_DATA_CACHE_H_
 #define SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_RC_RPC_PLUGIN_TEST_INCLUDE_RC_RPC_PLUGIN_MOCK_MOCK_INTERIOR_DATA_CACHE_H_
 
+#include <string>
 #include "gmock/gmock.h"
 #include "rc_rpc_plugin/interior_data_cache.h"
-
 namespace rc_rpc_plugin_test {
 
 class MockInteriorDataCache : public rc_rpc_plugin::InteriorDataCache {
  public:
   MOCK_METHOD2(Add,
-               void(const std::string&,
-                    const NsSmartDeviceLink::NsSmartObjects::SmartObject&));
+               void(const std::string&, const smart_objects::SmartObject&));
   MOCK_CONST_METHOD1(Retrieve, smart_objects::SmartObject(const std::string&));
   MOCK_CONST_METHOD1(Contains, bool(const std::string&));
   MOCK_METHOD0(ClearCache, void());
+
+  MOCK_CONST_METHOD1(GetCurrentAmountOfRequests, uint32_t(const std::string&));
+  MOCK_METHOD1(IncrementAmountOfRequests, void(const std::string&));
 };
 
 }  // namespace rc_rpc_plugin_test
