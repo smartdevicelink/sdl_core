@@ -72,13 +72,16 @@ class InteriorDataCache {
 
   /**
    * @brief Get current value of requests in time frame
+   * @param module_type - module type for calculation statistic
    */
-  virtual uint32_t GetCurrentAmountOfRequests() const = 0;
+  virtual uint32_t GetCurrentAmountOfRequests(
+      const std::string& module_type) const = 0;
 
   /**
    * @brief Do increment of request in time frame
+   * @param module_type - module type for calculation statistic
    */
-  virtual void IncrementAmountOfRequests() = 0;
+  virtual void IncrementAmountOfRequests(const std::string& module_type) = 0;
 
  private:
   /**
