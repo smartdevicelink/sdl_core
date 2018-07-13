@@ -42,7 +42,7 @@ const uint32_t time_frame_alowed_requests = 1;
 
 TEST_F(InteriorDataCacheTest,
        InteriorDataCacheDoesNotContainRandomDataInitialy) {
-  const rc_rpc_plugin::InteriorDataCacheImpl cache(time_frame_alowed_requests);
+  rc_rpc_plugin::InteriorDataCacheImpl cache(time_frame_alowed_requests);
   std::string module_type_key = "random_module_type";
   EXPECT_FALSE(cache.Contains(module_type_key));
   auto retrieved_data = cache.Retrieve(module_type_key);
@@ -63,6 +63,7 @@ TEST_F(InteriorDataCacheTest, CheckThatCacheContansDataAfterAdding) {
 
 TEST_F(InteriorDataCacheTest, DataDoesNotExistAfterClear) {
   rc_rpc_plugin::InteriorDataCacheImpl cache(time_frame_alowed_requests);
+  cache.StartRequestResetTimer(time_frame_alowed_requests);
   const std::string module_type_key = "random_module_type";
   smart_objects::SmartObject data;
   data["key"] = "value";
@@ -79,6 +80,7 @@ TEST_F(InteriorDataCacheTest, DataDoesNotExistAfterClear) {
 
 TEST_F(InteriorDataCacheTest, MultipleDataCached) {
   rc_rpc_plugin::InteriorDataCacheImpl cache(time_frame_alowed_requests);
+  cache.StartRequestResetTimer(time_frame_alowed_requests);
 
   const std::string module_type_key1 = "random_module_type";
   smart_objects::SmartObject data1;
