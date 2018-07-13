@@ -74,7 +74,11 @@ void OnInteriorVehicleDataNotification::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
 
   const std::string module_type = ModuleType();
-  AddDataToCache(module_type);
+  auto apps_subscribed =
+      RCHelpers::AppsSubscribedTo(application_manager_, module_type);
+  if (!apps_subscribed.empty()) {
+    AddDataToCache(module_type);
+  }
   typedef std::vector<application_manager::ApplicationSharedPtr> AppPtrs;
   AppPtrs apps = RCRPCPlugin::GetRCApplications(application_manager_);
 
