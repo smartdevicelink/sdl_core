@@ -32,19 +32,25 @@
 
 #include "utils/logger.h"
 #include "rc_rpc_plugin/interior_data_cache_impl.h"
+#include <iostream>
+#include <thread>
+#include <chrono>
 
 namespace rc_rpc_plugin {
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "RemoteControlModule");
 
-InteriorDataCacheImpl::InteriorDataCacheImpl(
-    const uint32_t time_frame_of_allowed_requests)
+InteriorDataCacheImpl::InteriorDataCacheImpl()
     : reset_request_count_timer_(
           "InteriorDataCacheImplResetRequests",
           new timer::TimerTaskImpl<InteriorDataCacheImpl>(
-              this, &InteriorDataCacheImpl::ResetRequestCountOnTimer)) {
-  reset_request_count_timer_.Start(time_frame_of_allowed_requests,
-                                   timer::kPeriodic);
+              this, &InteriorDataCacheImpl::ResetRequestCountOnTimer)) {}
+
+InteriorDataCacheImpl::~InteriorDataCacheImpl() {
+  LOG4CXX_AUTO_TRACE(logger_);
+  if (!reset_request_count_timer_.is_running()) {
+    reset_request_count_timer_.Stop();
+  }
 }
 
 void InteriorDataCacheImpl::Add(const std::string& module_type,
@@ -87,8 +93,23 @@ void InteriorDataCacheImpl::ClearCache() {
 
 void InteriorDataCacheImpl::ResetRequestCountOnTimer() {
   LOG4CXX_AUTO_TRACE(logger_);
-  sync_primitives::AutoLock autolock(amount_of_requests_lock_);
-  amount_of_request_in_this_time_frame_.clear();
+  amount_of_request_in_this_time_frame_ = 0;
+  std::this_thread::sleep_for(
+      std::chrono::seconds(time_frame_of_allowed_requests_));
+}
+
+void InteriorDataCacheImpl::StartRequestResetTimer(
+    const uint32_t time_frame_of_allowed_requests) {
+  if (!reset_request_count_timer_.is_running()) {
+    reset_request_count_timer_.Stop();
+  }
+
+  time_frame_of_allowed_requests_ = time_frame_of_allowed_requests;
+  const uint32_t translate_msec_to_sec = 1000;
+
+  reset_request_count_timer_.Start(
+      time_frame_of_allowed_requests_ * translate_msec_to_sec,
+      timer::kPeriodic);
 }
 
 uint32_t InteriorDataCacheImpl::GetCurrentAmountOfRequests(
