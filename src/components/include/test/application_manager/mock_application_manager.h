@@ -122,6 +122,8 @@ class MockApplicationManager : public application_manager::ApplicationManager {
   MOCK_METHOD1(
       SendHMIStatusNotification,
       void(const utils::SharedPtr<application_manager::Application> app));
+  MOCK_METHOD1(SendDriverDistractionState,
+               void(application_manager::ApplicationSharedPtr app));
   MOCK_METHOD1(RemoveHMIFakeParameters,
                void(application_manager::commands::MessageSharedPtr& message));
   MOCK_CONST_METHOD1(

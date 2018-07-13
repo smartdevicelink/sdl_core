@@ -411,6 +411,7 @@ void RegisterAppInterfaceRequest::Run() {
   smart_objects::SmartObjectSPtr so =
       GetLockScreenIconUrlNotification(connection_key(), application);
   rpc_service_.ManageMobileCommand(so, SOURCE_SDL);
+  application_manager_.SendDriverDistractionState(application);
 }
 
 smart_objects::SmartObjectSPtr

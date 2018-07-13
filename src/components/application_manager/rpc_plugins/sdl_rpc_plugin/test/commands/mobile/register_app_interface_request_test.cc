@@ -295,6 +295,7 @@ TEST_F(RegisterAppInterfaceRequestTest, Run_MinimalData_SUCCESS) {
   EXPECT_CALL(mock_rpc_service_,
               ManageMobileCommand(_, am::commands::Command::SOURCE_SDL))
       .Times(2);
+  EXPECT_CALL(app_mngr_, SendDriverDistractionState(_));
   command_->Run();
 }
 
@@ -408,6 +409,7 @@ TEST_F(RegisterAppInterfaceRequestTest,
   EXPECT_CALL(mock_rpc_service_,
               ManageMobileCommand(_, am::commands::Command::SOURCE_SDL))
       .Times(2);
+  EXPECT_CALL(app_mngr_, SendDriverDistractionState(_));
 
   command_->Run();
 }

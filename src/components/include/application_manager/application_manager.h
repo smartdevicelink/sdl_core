@@ -263,6 +263,14 @@ class ApplicationManager {
       const utils::SharedPtr<Application> app) = 0;
 
   /**
+   * @brief Checks if driver distraction state is valid, creates message
+   * which is sent to the application if allowed, otherwise it is added
+   * to a list of postponed messages.
+   * @param application contains registered application.
+   */
+  virtual void SendDriverDistractionState(ApplicationSharedPtr application) = 0;
+
+  /**
    * DEPRECATED
    * @brief Checks if Application is subscribed for way points
    * @param Application AppID

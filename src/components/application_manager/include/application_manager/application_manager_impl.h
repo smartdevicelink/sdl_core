@@ -188,6 +188,8 @@ class ApplicationManagerImpl
   void SendHMIStatusNotification(
       const utils::SharedPtr<Application> app) OVERRIDE;
 
+  void SendDriverDistractionState(ApplicationSharedPtr application);
+
   ApplicationSharedPtr application(
       const std::string& device_id,
       const std::string& policy_app_id) const OVERRIDE;
@@ -1347,14 +1349,6 @@ class ApplicationManagerImpl
    * @param app_id Application to proceed
    */
   void DisallowStreaming(uint32_t app_id);
-
-  /**
-   * @brief Checks if driver distraction state is valid, creates message
-   * and puts it to postponed message.
-   * @param application contains registered application.
-   */
-  void PutDriverDistractionMessageToPostponed(
-      ApplicationSharedPtr application) const;
 
   /**
    * @brief Types of directories used by Application Manager
