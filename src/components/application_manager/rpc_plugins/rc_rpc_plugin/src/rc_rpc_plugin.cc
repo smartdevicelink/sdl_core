@@ -37,7 +37,6 @@
 #include "rc_rpc_plugin/interior_data_cache_impl.h"
 #include "rc_rpc_plugin/rc_helpers.h"
 #include "utils/helpers.h"
-#include "utils/date_time.h"
 
 namespace rc_rpc_plugin {
 CREATE_LOGGERPTR_GLOBAL(logger_, "RemoteControlModule");

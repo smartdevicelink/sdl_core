@@ -30,11 +30,12 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "utils/logger.h"
-#include "rc_rpc_plugin/interior_data_cache_impl.h"
 #include <iostream>
 #include <thread>
 #include <chrono>
+#include "rc_rpc_plugin/interior_data_cache_impl.h"
+#include "utils/date_time.h"
+#include "utils/logger.h"
 
 namespace rc_rpc_plugin {
 
@@ -93,9 +94,8 @@ void InteriorDataCacheImpl::ClearCache() {
 
 void InteriorDataCacheImpl::ResetRequestCountOnTimer() {
   LOG4CXX_AUTO_TRACE(logger_);
-  amount_of_request_in_this_time_frame_ = 0;
-  std::this_thread::sleep_for(
-      std::chrono::seconds(time_frame_of_allowed_requests_));
+  sync_primitives::AutoLock autolock(amount_of_requests_lock_);
+  amount_of_request_in_this_time_frame_.clear();
 }
 
 void InteriorDataCacheImpl::StartRequestResetTimer(
@@ -105,10 +105,9 @@ void InteriorDataCacheImpl::StartRequestResetTimer(
   }
 
   time_frame_of_allowed_requests_ = time_frame_of_allowed_requests;
-  const uint32_t translate_msec_to_sec = 1000;
-
   reset_request_count_timer_.Start(
-      time_frame_of_allowed_requests_ * translate_msec_to_sec,
+      time_frame_of_allowed_requests_ *
+          date_time::DateTime::MILLISECONDS_IN_SECOND,
       timer::kPeriodic);
 }
 
