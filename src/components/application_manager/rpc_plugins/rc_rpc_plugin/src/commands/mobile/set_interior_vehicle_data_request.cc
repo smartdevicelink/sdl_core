@@ -105,8 +105,10 @@ const std::map<std::string, std::string> GetModuleDataToCapabilitiesMapping() {
   mapping["frontVerticalPosition"] = "frontVerticalPositionAvailable";
   mapping["backVerticalPosition"] = "backVerticalPositionAvailable";
   mapping["backTiltAngle"] = "backTiltAngleAvailable";
-  mapping["headSupportHorizontalPosition"] = "headSupportHorizontalPositionAvailable";
-  mapping["headSupportVerticalPosition"] = "headSupportVerticalPositionAvailable";
+  mapping["headSupportHorizontalPosition"] =
+      "headSupportHorizontalPositionAvailable";
+  mapping["headSupportVerticalPosition"] =
+      "headSupportVerticalPositionAvailable";
   mapping["massageEnabled"] = "massageEnabledAvailable";
   mapping["massageMode"] = "massageModeAvailable";
   mapping["massageCushionFirmness"] = "massageCushionFirmnessAvailable";
