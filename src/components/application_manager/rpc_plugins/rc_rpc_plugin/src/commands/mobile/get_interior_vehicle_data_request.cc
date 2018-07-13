@@ -188,12 +188,6 @@ void GetInteriorVehicleDataRequest::Execute() {
     return;
   }
 
-  if (!CheckRateLimits()) {
-    LOG4CXX_WARN(logger_, "GetInteriorVehicleData frequency is too high.");
-    SendResponse(false, mobile_apis::Result::REJECTED);
-    return;
-  }
-
   app_mngr::ApplicationSharedPtr app =
       application_manager_.application(connection_key());
 
@@ -206,7 +200,11 @@ void GetInteriorVehicleDataRequest::Execute() {
               .asBool();
       RemoveExcessiveSubscription();
     }
-
+    if (!CheckRateLimits()) {
+      LOG4CXX_WARN(logger_, "GetInteriorVehicleData frequency is too high.");
+      SendResponse(false, mobile_apis::Result::REJECTED);
+      return;
+    }
     SendHMIRequest(hmi_apis::FunctionID::RC_GetInteriorVehicleData,
                    &(*message_)[app_mngr::strings::msg_params],
                    true);
