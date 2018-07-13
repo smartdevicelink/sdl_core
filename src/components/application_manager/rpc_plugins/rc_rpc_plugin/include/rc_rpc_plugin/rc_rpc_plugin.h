@@ -45,8 +45,13 @@ namespace rc_rpc_plugin {
 namespace plugins = application_manager::plugin_manager;
 namespace app_mngr = application_manager;
 
+/**
+ * @brief The RCRPCPlugin class are manage commands during remote controling
+ */
 class RCRPCPlugin : public plugins::RPCPlugin {
  public:
+  typedef std::vector<application_manager::ApplicationSharedPtr> Apps;
+
   /**
     * @brief Command initialization function
     * @param app_manager ApplicationManager
@@ -59,6 +64,7 @@ class RCRPCPlugin : public plugins::RPCPlugin {
             app_mngr::rpc_service::RPCService& rpc_service,
             app_mngr::HMICapabilities& hmi_capabilities,
             policy::PolicyHandlerInterface& policy_handler) OVERRIDE;
+
   /**
   * @param int32_t command id
   * @param CommandSource source
@@ -67,11 +73,13 @@ class RCRPCPlugin : public plugins::RPCPlugin {
   bool IsAbleToProcess(
       const int32_t function_id,
       const app_mngr::commands::Command::CommandSource message_source) OVERRIDE;
+
   /**
    * @brief PluginName plugin name
    * @return plugin name
    */
   std::string PluginName() OVERRIDE;
+
   /**
    * @brief GetCommandFactory get that is able to generate command
    * from message
@@ -84,6 +92,7 @@ class RCRPCPlugin : public plugins::RPCPlugin {
    * @param event Policy event
    */
   void OnPolicyEvent(app_mngr::plugin_manager::PolicyEvent event) OVERRIDE;
+
   /**
     * @brief OnApplicationEvent Notifies modules on certain application events
     * @param event Event
@@ -92,13 +101,21 @@ class RCRPCPlugin : public plugins::RPCPlugin {
   void OnApplicationEvent(plugins::ApplicationEvent event,
                           app_mngr::ApplicationSharedPtr application) OVERRIDE;
 
-  static const uint32_t kRCPluginID = 153;
-
-  typedef std::vector<application_manager::ApplicationSharedPtr> Apps;
+  /**
+    * @brief Search and return application which are remote control supported
+    * @param application manager in order to get applications
+    * @return remote control supported application
+    */
   static Apps GetRCApplications(
       application_manager::ApplicationManager& app_mngr);
 
+  static const uint32_t kRCPluginID = 153;
+
  private:
+  /**
+   * @brief When app unregistered this method is updating HMI subscriptors
+   * @param Application in order to get RC extension and hmi api id
+   */
   void UpdateHMISubscriptionsOnAppUnregistered(
       application_manager::Application& app);
 

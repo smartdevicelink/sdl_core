@@ -49,16 +49,20 @@ class RCSetInteriorVehicleDataRequest
   /**
    * @brief RCSetInteriorVehicleDataRequest class constructor
    * @param message MessageSharedPtr
-   * @param application_manager ApplicationManager
-   * @param rpc_service RPCService
-   * @param hmi_capabilities HMICapabilities
-   * @param policy_handle PolicyHandlerInterface
-   * @param resource_allocation_manager ResourceAllocationManager
+   * @param params RCCommandParams
    **/
   RCSetInteriorVehicleDataRequest(
       const application_manager::commands::MessageSharedPtr& message,
       const RCCommandParams& params);
+
+  /**
+   * @brief Execute command
+   */
   void Run() OVERRIDE;
+
+  /**
+   * @brief RCSetInteriorVehicleDataRequest destructor
+   */
   ~RCSetInteriorVehicleDataRequest();
 };
 

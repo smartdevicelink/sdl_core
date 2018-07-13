@@ -58,8 +58,14 @@ class RCButtonPressResponse
   RCButtonPressResponse(const app_mngr::commands::MessageSharedPtr& message,
                         const RCCommandParams& params);
 
+  /**
+   * @brief Execute command
+   */
   void Run() OVERRIDE;
 
+  /**
+   * @brief RCButtonPressResponse destructor
+   */
   ~RCButtonPressResponse();
 };
 }  // namespace commands

@@ -44,10 +44,18 @@ typedef std::vector<application_manager::ApplicationSharedPtr> Apps;
 
 class ResourceAllocationManagerImpl : public ResourceAllocationManager {
  public:
+  /**
+   * @brief Constructor with parameters
+   * @param application manager
+   * @param rpc service
+   */
   ResourceAllocationManagerImpl(
       application_manager::ApplicationManager& app_mngr,
       application_manager::rpc_service::RPCService& rpc_service);
 
+  /**
+   * @brief Destructor for ResourceAllocationManagerImpl
+   */
   ~ResourceAllocationManagerImpl();
 
   /**
@@ -84,11 +92,23 @@ class ResourceAllocationManagerImpl : public ResourceAllocationManager {
    */
   bool IsResourceFree(const std::string& module_type) const FINAL;
 
+  /**
+   * @brief Set new access mode and clear rejected resources for application
+   * if access mode isn't ASK_DRIVER
+   */
   void SetAccessMode(
       const hmi_apis::Common_RCAccessMode::eType access_mode) FINAL;
 
+  /**
+   * @brief Get the current access mode
+   */
   hmi_apis::Common_RCAccessMode::eType GetAccessMode() const FINAL;
 
+  /**
+   * @brief OnDriverDisallowed callback for rejecting acquiring resource
+   * @param module_type resource type
+   * @param app_id application id
+   */
   void OnDriverDisallowed(const std::string& module_type,
                           const uint32_t app_id) FINAL;
 
@@ -108,6 +128,9 @@ class ResourceAllocationManagerImpl : public ResourceAllocationManager {
   void OnPolicyEvent(
       application_manager::plugin_manager::PolicyEvent event) FINAL;
 
+  /**
+     * @brief Remove all information about all allocations
+     */
   void ResetAllAllocations() FINAL;
 
   void SendOnRCStatusNotification() FINAL;
@@ -181,7 +204,11 @@ class ResourceAllocationManagerImpl : public ResourceAllocationManager {
    */
   void SetResourceFree(const std::string& module_type, const uint32_t app_id);
 
+  /**
+   * @brief Collection of all supported modules
+   */
   std::vector<std::string> all_supported_modules();
+
   /**
    * @brief AllocatedResources contains link between resource and application
    * owning that resource

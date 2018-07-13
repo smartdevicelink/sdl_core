@@ -59,8 +59,14 @@ class RCSetInteriorVehicleDataResponse
       const application_manager::commands::MessageSharedPtr& message,
       const RCCommandParams& params);
 
+  /**
+   * @brief Execute command
+   */
   void Run() OVERRIDE;
 
+  /**
+   * @brief RCSetInteriorVehicleDataResponse destructor
+   */
   ~RCSetInteriorVehicleDataResponse();
 };
 }  // namespace commands

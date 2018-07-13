@@ -48,22 +48,31 @@
 namespace rc_rpc_plugin {
 namespace app_mngr = application_manager;
 using policy::PolicyHandlerInterface;
+
+/**
+* @brief The RCCommandFactory class for creating and processing RC commands
+**/
 class RCCommandFactory : public application_manager::CommandFactory {
  public:
   /**
-   * @brief RCCommandFactory class constructor
-   * @param app_manager ApplicationManager
-   * @param rpc_service RPCService
-   * @param hmi_capabilities HMICapabilities
-   * @param policy_handler PolicyHandlerInterface
-   * @param allocation_manager ResourceAllocationManager
+   * @brief RCCommandFactory copy constructor
+   * @param params RCCommandParams
+
    **/
   RCCommandFactory(const RCCommandParams& params);
+
+  /**
+  * @brief Method for create RC command
+  * @param message MessageSharedPtr
+  * @param source  CommandSource
+  * @return CommandSharedPtr (pointer to command)
+  **/
   application_manager::CommandSharedPtr CreateCommand(
       const app_mngr::commands::MessageSharedPtr& message,
       app_mngr::commands::Command::CommandSource source) OVERRIDE;
 
   /**
+    @brief Method for check is command can be proccessed
   * @param int32_t command id
   * @param CommandSource source
   * @return return true if command can be create, else return false
@@ -74,10 +83,22 @@ class RCCommandFactory : public application_manager::CommandFactory {
       const OVERRIDE;
 
  private:
+  /**
+    @brief Get the mobile creator factory
+  * @param id FunctionID::eType id
+  * @param message_type messageType::eType
+  * @return reference to CommandCreator
+  **/
   app_mngr::CommandCreator& get_mobile_creator_factory(
       mobile_apis::FunctionID::eType id,
       mobile_apis::messageType::eType message_type) const;
 
+  /**
+    @brief Get the hmi creator factory
+  * @param id FunctionID::eType id
+  * @param message_type messageType::eType
+  * @return reference to CommandCreator
+  **/
   app_mngr::CommandCreator& get_hmi_creator_factory(
       hmi_apis::FunctionID::eType id,
       hmi_apis::messageType::eType message_type) const;

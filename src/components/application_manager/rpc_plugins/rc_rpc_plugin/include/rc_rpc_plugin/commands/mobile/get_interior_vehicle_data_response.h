@@ -46,12 +46,23 @@ namespace commands {
 class GetInteriorVehicleDataResponse
     : public application_manager::commands::CommandResponseImpl {
  public:
+  /**
+   * @brief Constructor of GetInteriorVehicleDataResponse
+   * @param message MessageSharedPtr
+   * @param params RCCommandParams
+   */
   GetInteriorVehicleDataResponse(
       const application_manager::commands::MessageSharedPtr& message,
       const RCCommandParams& params);
 
+  /**
+   * @brief Run GetInteriorVehicleDataResponse command
+   */
   void Run() OVERRIDE;
 
+  /**
+   * @brief GetInteriorVehicleDataResponse class destructor
+   */
   ~GetInteriorVehicleDataResponse();
 };
 }  // namespace commands

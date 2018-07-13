@@ -38,9 +38,19 @@
 #include "application_manager/app_extension.h"
 
 namespace rc_rpc_plugin {
+/**
+ * @brief The RCAppExtension class of RC application extension
+ */
 class RCAppExtension : public application_manager::AppExtension {
  public:
+  /**
+   * @brief explicit constructor of RCAppExtension
+   */
   explicit RCAppExtension(application_manager::AppExtensionUID uid);
+
+  /**
+   * @brief destructor of RCAppExtension
+   */
   ~RCAppExtension();
 
   /**

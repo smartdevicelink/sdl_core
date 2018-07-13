@@ -60,6 +60,10 @@ class RCButtonPressRequest : public app_mngr::commands::RequestToHMI {
    * @brief Execute command
    */
   void Run() OVERRIDE;
+
+  /**
+   * @brief RCButtonPressRequest destructor
+   */
   ~RCButtonPressRequest();
 };
 }  // namespace commands
