@@ -61,6 +61,14 @@ std::vector<std::string> GetModuleReadOnlyParams(
   return module_ro_params;
 }
 
+const std::map<std::string, std::string> GetModuleTypeToDataMapping() {
+  std::map<std::string, std::string> mapping = {
+      {enums_value::kRadio, message_params::kRadioControlData},
+      {enums_value::kClimate, message_params::kClimateControlData},
+      {enums_value::kSeat, message_params::kSeatControlData}};
+  return mapping;
+}
+
 const std::map<std::string, std::string> GetModuleDataToCapabilitiesMapping() {
   std::map<std::string, std::string> mapping;
   // climate
@@ -86,6 +94,25 @@ const std::map<std::string, std::string> GetModuleDataToCapabilitiesMapping() {
   mapping["signalChangeThreshold"] = "signalChangeThresholdAvailable";
   mapping["radioEnable"] = "radioEnableAvailable";
   mapping["state"] = "stateAvailable";
+
+  // seat
+  mapping["heatingEnabled"] = "heatingEnabledAvailable";
+  mapping["coolingEnabled"] = "coolingEnabledAvailable";
+  mapping["heatingLevel"] = "heatingLevelAvailable";
+  mapping["coolingLevel"] = "coolingLevelAvailable";
+  mapping["horizontalPosition"] = "horizontalPositionAvailable";
+  mapping["verticalPosition"] = "verticalPositionAvailable";
+  mapping["frontVerticalPosition"] = "frontVerticalPositionAvailable";
+  mapping["backVerticalPosition"] = "backVerticalPositionAvailable";
+  mapping["backTiltAngle"] = "backTiltAngleAvailable";
+  mapping["headSupportHorizontalPosition"] =
+      "headSupportHorizontalPositionAvailable";
+  mapping["headSupportVerticalPosition"] =
+      "headSupportVerticalPositionAvailable";
+  mapping["massageEnabled"] = "massageEnabledAvailable";
+  mapping["massageMode"] = "massageModeAvailable";
+  mapping["massageCushionFirmness"] = "massageCushionFirmnessAvailable";
+  mapping["memory"] = "memoryAvailable";
 
   return mapping;
 }
@@ -114,12 +141,14 @@ bool CheckControlDataByCapabilities(
     const smart_objects::SmartObject& control_data) {
   std::map<std::string, std::string> mapping =
       GetModuleDataToCapabilitiesMapping();
-
+  const smart_objects::SmartObject& capabilities_status = module_caps[0];
   auto it = control_data.map_begin();
   for (; it != control_data.map_end(); ++it) {
     const std::string& request_parameter = it->first;
+    if (message_params::kId == request_parameter) {
+      continue;
+    }
     const std::string& caps_key = mapping[request_parameter];
-    const smart_objects::SmartObject& capabilities_status = module_caps[0];
     LOG4CXX_DEBUG(logger_,
                   "Checking request parameter "
                       << request_parameter
@@ -146,30 +175,39 @@ bool CheckIfModuleDataExistInCapabilities(
     const smart_objects::SmartObject& rc_capabilities,
     const smart_objects::SmartObject& module_data) {
   LOG4CXX_AUTO_TRACE(logger_);
-  bool is_radio_data_valid = true;
-  bool is_climate_data_valid = true;
-  if (module_data.keyExists(message_params::kRadioControlData)) {
-    if (!rc_capabilities.keyExists(strings::kradioControlCapabilities)) {
-      LOG4CXX_DEBUG(logger_, " Radio control capabilities not present");
-      return false;
+  const std::map<std::string, std::string> params = {
+      {message_params::kRadioControlData, strings::kradioControlCapabilities},
+      {message_params::kClimateControlData,
+       strings::kclimateControlCapabilities},
+      {message_params::kSeatControlData, strings::kseatControlCapabilities}};
+  bool is_module_data_valid = false;
+  for (const auto& param : params) {
+    if (module_data.keyExists(param.first)) {
+      if (!rc_capabilities.keyExists(param.second)) {
+        LOG4CXX_DEBUG(logger_, param.first << " capabilities not present");
+        return false;
+      }
+      const smart_objects::SmartObject& caps = rc_capabilities[param.second];
+      is_module_data_valid =
+          CheckControlDataByCapabilities(caps, module_data[param.first]);
     }
-    const smart_objects::SmartObject& radio_caps =
-        rc_capabilities[strings::kradioControlCapabilities];
-    is_radio_data_valid = CheckControlDataByCapabilities(
-        radio_caps, module_data[strings::kRadioControlData]);
   }
-  if (module_data.keyExists(message_params::kClimateControlData)) {
-    if (!rc_capabilities.keyExists(strings::kclimateControlCapabilities)) {
-      LOG4CXX_DEBUG(logger_, " Climate control capabilities not present");
-      return false;
-    }
-    const smart_objects::SmartObject& climate_caps =
-        rc_capabilities[strings::kclimateControlCapabilities];
-    is_climate_data_valid = CheckControlDataByCapabilities(
-        climate_caps, module_data[strings::kClimateControlData]);
-  }
+  return is_module_data_valid;
+}
 
-  return is_radio_data_valid && is_climate_data_valid;
+bool isModuleTypeAndDataMatch(const std::string& module_type,
+                              const smart_objects::SmartObject& module_data) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  std::map<std::string, std::string> data_mapping =
+      GetModuleTypeToDataMapping();
+  bool module_type_and_data_match = false;
+  for (const auto& data : data_mapping) {
+    if (data.first == module_type) {
+      module_type_and_data_match = module_data.keyExists(data.second);
+      break;
+    }
+  }
+  return module_type_and_data_match;
 }
 
 void SetInteriorVehicleDataRequest::Execute() {
@@ -178,19 +216,8 @@ void SetInteriorVehicleDataRequest::Execute() {
   smart_objects::SmartObject& module_data =
       (*message_)[app_mngr::strings::msg_params][message_params::kModuleData];
   const std::string module_type = ModuleType();
-  bool module_type_and_data_match = true;
 
-  if (enums_value::kRadio == module_type) {
-    module_type_and_data_match =
-        !(module_data.keyExists(message_params::kClimateControlData));
-  }
-
-  if (enums_value::kClimate == module_type) {
-    module_type_and_data_match =
-        !(module_data.keyExists(message_params::kRadioControlData));
-  }
-
-  if (module_type_and_data_match) {
+  if (isModuleTypeAndDataMatch(module_type, module_data)) {
     const smart_objects::SmartObject* rc_capabilities =
         hmi_capabilities_.rc_capability();
     if (rc_capabilities &&
@@ -266,13 +293,16 @@ void SetInteriorVehicleDataRequest::on_event(
 
 const smart_objects::SmartObject& SetInteriorVehicleDataRequest::ControlData(
     const smart_objects::SmartObject& module_data) {
-  const std::string module = ModuleType();
-
-  if (enums_value::kRadio == module) {
-    return module_data[message_params::kRadioControlData];
-  } else {
-    return module_data[message_params::kClimateControlData];
+  const std::string module_type = ModuleType();
+  std::map<std::string, std::string> data_mapping =
+      GetModuleTypeToDataMapping();
+  for (const auto& data : data_mapping) {
+    if (data.first == module_type) {
+      return module_data[data.second];
+    }
   }
+  NOTREACHED();
+  return module_data[0];
 }
 
 bool SetInteriorVehicleDataRequest::AreAllParamsReadOnly(

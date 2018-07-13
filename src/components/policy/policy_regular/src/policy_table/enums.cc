@@ -641,6 +641,8 @@ bool IsValidEnum(ModuleType val) {
       return true;
     case MT_RADIO:
       return true;
+    case MT_SEAT:
+      return true;
     default:
       return false;
   }
@@ -651,6 +653,8 @@ const char* EnumToJsonString(ModuleType val) {
       return "CLIMATE";
     case MT_RADIO:
       return "RADIO";
+    case MT_SEAT:
+      return "SEAT";
     default:
       return "";
   }
@@ -662,6 +666,9 @@ bool EnumFromJsonString(const std::string& literal, ModuleType* result) {
     return true;
   } else if ("RADIO" == literal) {
     *result = MT_RADIO;
+    return true;
+  } else if ("SEAT" == literal) {
+    *result = MT_SEAT;
     return true;
   } else {
     return false;
