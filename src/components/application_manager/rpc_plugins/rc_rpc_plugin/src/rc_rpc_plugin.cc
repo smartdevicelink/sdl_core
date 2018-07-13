@@ -37,7 +37,6 @@
 #include "rc_rpc_plugin/interior_data_cache_impl.h"
 #include "rc_rpc_plugin/rc_helpers.h"
 #include "utils/helpers.h"
-#include "utils/date_time.h"
 
 namespace rc_rpc_plugin {
 CREATE_LOGGERPTR_GLOBAL(logger_, "RemoteControlModule");
@@ -51,8 +50,7 @@ bool RCRPCPlugin::Init(
     policy::PolicyHandlerInterface& policy_handler) {
   const auto& settings = app_manager.get_settings();
   const auto frequency = settings.get_interior_vehicle_data_frequency();
-  interior_data_cache_.reset(new InteriorDataCacheImpl(
-      frequency.second * date_time::DateTime::MILLISECONDS_IN_SECOND));
+  interior_data_cache_.reset(new InteriorDataCacheImpl(frequency.second));
 
   resource_allocation_manager_.reset(
       new ResourceAllocationManagerImpl(app_manager, rpc_service));

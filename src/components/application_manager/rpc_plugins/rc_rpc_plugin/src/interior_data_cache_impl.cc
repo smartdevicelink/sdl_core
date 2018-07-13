@@ -30,8 +30,12 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "utils/logger.h"
+#include <iostream>
+#include <thread>
+#include <chrono>
 #include "rc_rpc_plugin/interior_data_cache_impl.h"
+#include "utils/date_time.h"
+#include "utils/logger.h"
 
 namespace rc_rpc_plugin {
 
@@ -43,8 +47,14 @@ InteriorDataCacheImpl::InteriorDataCacheImpl(
           "InteriorDataCacheImplResetRequests",
           new timer::TimerTaskImpl<InteriorDataCacheImpl>(
               this, &InteriorDataCacheImpl::ResetRequestCountOnTimer)) {
-  reset_request_count_timer_.Start(time_frame_of_allowed_requests,
-                                   timer::kPeriodic);
+  StartRequestResetTimer(time_frame_of_allowed_requests);
+}
+
+InteriorDataCacheImpl::~InteriorDataCacheImpl() {
+  LOG4CXX_AUTO_TRACE(logger_);
+  if (!reset_request_count_timer_.is_running()) {
+    reset_request_count_timer_.Stop();
+  }
 }
 
 void InteriorDataCacheImpl::Add(const std::string& module_type,
@@ -89,6 +99,19 @@ void InteriorDataCacheImpl::ResetRequestCountOnTimer() {
   LOG4CXX_AUTO_TRACE(logger_);
   sync_primitives::AutoLock autolock(amount_of_requests_lock_);
   amount_of_request_in_this_time_frame_.clear();
+}
+
+void InteriorDataCacheImpl::StartRequestResetTimer(
+    const uint32_t time_frame_of_allowed_requests) {
+  if (!reset_request_count_timer_.is_running()) {
+    reset_request_count_timer_.Stop();
+  }
+
+  time_frame_of_allowed_requests_ = time_frame_of_allowed_requests;
+  reset_request_count_timer_.Start(
+      time_frame_of_allowed_requests_ *
+          date_time::DateTime::MILLISECONDS_IN_SECOND,
+      timer::kPeriodic);
 }
 
 uint32_t InteriorDataCacheImpl::GetCurrentAmountOfRequests(
