@@ -43,7 +43,7 @@ namespace rc_rpc_plugin {
 class InteriorDataCache {
  public:
   /**
-   * @brief Add add module data to cache
+   * @brief Add module data to cache
    * @param module_type module type name
    * @param module_data data to be cached
    */
@@ -82,6 +82,12 @@ class InteriorDataCache {
    * @param module_type - module type for calculation statistic
    */
   virtual void IncrementAmountOfRequests(const std::string& module_type) = 0;
+
+  /**
+   * @brief Start timer which will resetting requests in time frame
+   */
+  virtual void StartRequestResetTimer(
+      const uint32_t time_frame_of_allowed_requests) = 0;
 
  private:
   /**
