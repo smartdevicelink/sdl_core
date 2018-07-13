@@ -50,8 +50,7 @@ bool RCRPCPlugin::Init(
     policy::PolicyHandlerInterface& policy_handler) {
   const auto& settings = app_manager.get_settings();
   const auto frequency = settings.get_interior_vehicle_data_frequency();
-  interior_data_cache_.reset(new InteriorDataCacheImpl());
-  interior_data_cache_->StartRequestResetTimer(frequency.second);
+  interior_data_cache_.reset(new InteriorDataCacheImpl(frequency.second));
 
   resource_allocation_manager_.reset(
       new ResourceAllocationManagerImpl(app_manager, rpc_service));
