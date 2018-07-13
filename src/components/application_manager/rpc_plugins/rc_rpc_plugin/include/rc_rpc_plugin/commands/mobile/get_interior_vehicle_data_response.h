@@ -45,6 +45,16 @@ namespace commands {
 class GetInteriorVehicleDataResponse
     : public application_manager::commands::CommandResponseImpl {
  public:
+  /**
+   * @brief Constructor of GetInteriorVehicleDataResponse
+   * @param message MessageSharedPtr
+   * @param application_manager ApplicationManager
+   * @param rpc_service RPCService
+   * @param hmi_capabilities HMICapabilities
+   * @param policy_handle PolicyHandlerInterface
+   * @param resource_allocation_manager ResourceAllocationManager
+   * @param interior_data_cache InteriorDataCache
+   */
   GetInteriorVehicleDataResponse(
       const app_mngr::commands::MessageSharedPtr& message,
       app_mngr::ApplicationManager& application_manager,
@@ -54,8 +64,14 @@ class GetInteriorVehicleDataResponse
       ResourceAllocationManager& resource_allocation_manager,
       InteriorDataCache& interior_data_cache);
 
+  /**
+   * @brief Run GetInteriorVehicleDataResponse command
+   */
   void Run() OVERRIDE;
 
+  /**
+   * @brief GetInteriorVehicleDataResponse class destructor
+   */
   ~GetInteriorVehicleDataResponse();
 };
 }  // namespace commands

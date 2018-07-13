@@ -43,21 +43,65 @@
 #include "utils/timer_task_impl.h"
 
 namespace rc_rpc_plugin {
+/**
+ * @brief The InteriorDataCacheImpl implementation of interface for caching data
+ * class
+ * Provide ability to cache module data by module type name and clear cache
+ */
 class InteriorDataCacheImpl : public InteriorDataCache {
  public:
+  /**
+   * @brief Constructor of InteriorDataCacheImpl which initialize the timer
+   */
   InteriorDataCacheImpl() = delete;
+
   InteriorDataCacheImpl(const uint32_t time_frame_of_allowed_requests);
+
+  /**
+   * @brief Method of adding new subscriber
+   * @param module_type
+   * @param module_data SmartObject
+   */
   void Add(const std::string& module_type,
            const smart_objects::SmartObject& module_data) OVERRIDE;
+
+  /**
+   * @brief Method of retrieve the cache for modeule
+   * @param module_type
+   * @return SmartObject (pointer to cache data for module)
+   */
   smart_objects::SmartObject Retrieve(
       const std::string& module_type) const OVERRIDE;
+
+  /**
+   * @brief Method of check is module is subscribed
+   * @param module_type
+   * @return bool
+   */
   bool Contains(const std::string& module_type) const OVERRIDE;
+
+  /**
+   * @brief Method of cache clearing
+   */
   void ClearCache() OVERRIDE;
+
+  /**
+   * @brief Get current amount of request in time frame for concrate module
+   * @param module_type
+   * @return uint32_t number of request in time frame
+   */
   uint32_t GetCurrentAmountOfRequests(
       const std::string& module_type) const OVERRIDE;
+
+  /**
+   * @brief Atomic method of incrementing count of request for concrate module
+   */
   void IncrementAmountOfRequests(const std::string& module_type) OVERRIDE;
 
  private:
+  /**
+   * @brief Callback timer function for reset count of request in time frame
+   */
   void ResetRequestCountOnTimer() OVERRIDE;
 
   std::map<std::string, smart_objects::SmartObject> subscriptions_;

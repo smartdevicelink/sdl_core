@@ -65,6 +65,10 @@ class RCButtonPressRequest
    * @brief Execute command
    */
   void Run() OVERRIDE;
+
+  /**
+   * @brief RCButtonPressRequest destructor
+   */
   ~RCButtonPressRequest();
 };
 }  // namespace commands
