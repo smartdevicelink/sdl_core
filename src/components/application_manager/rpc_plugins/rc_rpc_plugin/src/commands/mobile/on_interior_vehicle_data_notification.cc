@@ -44,20 +44,13 @@ CREATE_LOGGERPTR_GLOBAL(logger_, "RemoteControlModule")
 
 OnInteriorVehicleDataNotification::OnInteriorVehicleDataNotification(
     const app_mngr::commands::MessageSharedPtr& message,
-    app_mngr::ApplicationManager& application_manager,
-    app_mngr::rpc_service::RPCService& rpc_service,
-    app_mngr::HMICapabilities& hmi_capabilities,
-    policy::PolicyHandlerInterface& policy_handler,
-    ResourceAllocationManager& resource_allocation_manager,
-    InteriorDataCache& interior_data_cache)
+    const RCCommandParams& params)
     : app_mngr::commands::CommandNotificationImpl(message,
-                                                  application_manager,
-                                                  rpc_service,
-                                                  hmi_capabilities,
-                                                  policy_handler)
-    , interior_data_cache_(interior_data_cache) {
-  UNUSED(resource_allocation_manager);
-}
+                                                  params.application_manager_,
+                                                  params.rpc_service_,
+                                                  params.hmi_capabilities_,
+                                                  params.policy_handler_)
+    , interior_data_cache_(params.interior_data_cache_) {}
 
 OnInteriorVehicleDataNotification::~OnInteriorVehicleDataNotification() {}
 

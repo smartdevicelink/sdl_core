@@ -29,6 +29,7 @@
  ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  POSSIBILITY OF SUCH DAMAGE.
  */
+#include <iostream>
 
 #include "rc_rpc_plugin/rc_command_factory.h"
 #include "rc_rpc_plugin/commands/mobile/button_press_request.h"
@@ -59,22 +60,12 @@ CREATE_LOGGERPTR_GLOBAL(logger_, "RemoteControlModule")
 namespace application_manager {
 using rc_rpc_plugin::ResourceAllocationManager;
 using rc_rpc_plugin::InteriorDataCache;
+using rc_rpc_plugin::RCCommandParams;
 
 template <typename RCCommandType>
 class RCCommandCreator : public CommandCreator {
  public:
-  RCCommandCreator(ApplicationManager& application_manager,
-                   rpc_service::RPCService& rpc_service,
-                   HMICapabilities& hmi_capabilities,
-                   PolicyHandlerInterface& policy_handler,
-                   ResourceAllocationManager& resource_allocation_manager,
-                   InteriorDataCache& interior_data_cache)
-      : application_manager_(application_manager)
-      , rpc_service_(rpc_service)
-      , hmi_capabilities_(hmi_capabilities)
-      , policy_handler_(policy_handler)
-      , resource_allocation_manager_(resource_allocation_manager)
-      , interior_data_cache_(interior_data_cache) {}
+  RCCommandCreator(const RCCommandParams& params) : params_(params) {}
 
  private:
   bool CanBeCreated() const override {
@@ -83,22 +74,11 @@ class RCCommandCreator : public CommandCreator {
 
   CommandSharedPtr create(
       const commands::MessageSharedPtr& message) const override {
-    CommandSharedPtr command(new RCCommandType(message,
-                                               application_manager_,
-                                               rpc_service_,
-                                               hmi_capabilities_,
-                                               policy_handler_,
-                                               resource_allocation_manager_,
-                                               interior_data_cache_));
+    CommandSharedPtr command(new RCCommandType(message, params_));
     return command;
   }
 
-  ApplicationManager& application_manager_;
-  RPCService& rpc_service_;
-  HMICapabilities& hmi_capabilities_;
-  PolicyHandlerInterface& policy_handler_;
-  ResourceAllocationManager& resource_allocation_manager_;
-  InteriorDataCache& interior_data_cache_;
+  RCCommandParams params_;
 };
 
 struct RCInvalidCommand {};
@@ -106,18 +86,8 @@ struct RCInvalidCommand {};
 template <>
 class RCCommandCreator<RCInvalidCommand> : public CommandCreator {
  public:
-  RCCommandCreator(ApplicationManager& application_manager,
-                   RPCService& rpc_service,
-                   HMICapabilities& hmi_capabilities,
-                   PolicyHandlerInterface& policy_handler,
-                   ResourceAllocationManager& resource_allocation_manager,
-                   InteriorDataCache& interior_data_cache) {
-    UNUSED(application_manager);
-    UNUSED(rpc_service);
-    UNUSED(hmi_capabilities);
-    UNUSED(policy_handler);
-    UNUSED(resource_allocation_manager);
-    UNUSED(interior_data_cache);
+  RCCommandCreator(const RCCommandParams& params) {
+    UNUSED(params);
   }
 
  private:
@@ -133,55 +103,23 @@ class RCCommandCreator<RCInvalidCommand> : public CommandCreator {
 };
 
 struct RCCommandCreatorFactory {
-  RCCommandCreatorFactory(
-      ApplicationManager& application_manager,
-      rpc_service::RPCService& rpc_service,
-      HMICapabilities& hmi_capabilities,
-      PolicyHandlerInterface& policy_handler,
-      ResourceAllocationManager& resource_allocation_manager,
-      InteriorDataCache& interior_data_cache)
-      : application_manager_(application_manager)
-      , rpc_service_(rpc_service)
-      , hmi_capabilities_(hmi_capabilities)
-      , policy_handler_(policy_handler)
-      , resource_allocation_manager_(resource_allocation_manager)
-      , interior_data_cache_(interior_data_cache) {}
+  RCCommandCreatorFactory(const RCCommandParams& params) : params_(params) {}
 
   template <typename RCCommandType>
   CommandCreator& GetCreator() {
-    static RCCommandCreator<RCCommandType> res(application_manager_,
-                                               rpc_service_,
-                                               hmi_capabilities_,
-                                               policy_handler_,
-                                               resource_allocation_manager_,
-                                               interior_data_cache_);
+    LOG4CXX_AUTO_TRACE(logger_);
+    static RCCommandCreator<RCCommandType> res(params_);
     return res;
   }
-  ApplicationManager& application_manager_;
-  RPCService& rpc_service_;
-  HMICapabilities& hmi_capabilities_;
-  PolicyHandlerInterface& policy_handler_;
-  ResourceAllocationManager& resource_allocation_manager_;
-  InteriorDataCache& interior_data_cache_;
+  const RCCommandParams params_;
 };
 }
 
 namespace rc_rpc_plugin {
 using namespace application_manager;
 
-RCCommandFactory::RCCommandFactory(
-    app_mngr::ApplicationManager& app_manager,
-    app_mngr::rpc_service::RPCService& rpc_service,
-    app_mngr::HMICapabilities& hmi_capabilities,
-    policy::PolicyHandlerInterface& policy_handler,
-    ResourceAllocationManager& allocation_manager,
-    InteriorDataCache& interior_data_cache)
-    : app_manager_(app_manager)
-    , rpc_service_(rpc_service)
-    , hmi_capabilities_(hmi_capabilities)
-    , policy_handler_(policy_handler)
-    , allocation_manager_(allocation_manager)
-    , interior_data_cache_(interior_data_cache) {}
+RCCommandFactory::RCCommandFactory(const RCCommandParams& params)
+    : params_(params) {}
 
 CommandSharedPtr RCCommandFactory::CreateCommand(
     const app_mngr::commands::MessageSharedPtr& message,
@@ -232,12 +170,7 @@ CommandCreator& RCCommandFactory::get_mobile_creator_factory(
   LOG4CXX_DEBUG(logger_,
                 "CreateMobileCommand function_id: " << id << " message_type: "
                                                     << message_type);
-  RCCommandCreatorFactory rc_factory(app_manager_,
-                                     rpc_service_,
-                                     hmi_capabilities_,
-                                     policy_handler_,
-                                     allocation_manager_,
-                                     interior_data_cache_);
+  RCCommandCreatorFactory rc_factory(params_);
 
   switch (id) {
     case mobile_apis::FunctionID::ButtonPressID: {
@@ -274,12 +207,7 @@ CommandCreator& RCCommandFactory::get_hmi_creator_factory(
                 "CreateHMICommand function_id: " << id << " message_type: "
                                                  << message_type);
 
-  RCCommandCreatorFactory rc_factory(app_manager_,
-                                     rpc_service_,
-                                     hmi_capabilities_,
-                                     policy_handler_,
-                                     allocation_manager_,
-                                     interior_data_cache_);
+  RCCommandCreatorFactory rc_factory(params_);
 
   switch (id) {
     case hmi_apis::FunctionID::Buttons_ButtonPress: {
