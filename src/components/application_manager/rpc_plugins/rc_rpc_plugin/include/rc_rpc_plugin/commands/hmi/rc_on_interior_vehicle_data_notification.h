@@ -63,12 +63,15 @@ class RCOnInteriorVehicleDataNotification
       ResourceAllocationManager& resource_allocation_manager,
       InteriorDataCache& interior_data_cache);
 
-  ~RCOnInteriorVehicleDataNotification();
-
   /**
    * @brief Execute command
    **/
   void Run() OVERRIDE;
+
+  /**
+   * @brief RCOnInteriorVehicleDataNotification destructor
+   */
+  ~RCOnInteriorVehicleDataNotification();
 };
 }  // namespace commands
 }  // namespace rc_rpc_plugin

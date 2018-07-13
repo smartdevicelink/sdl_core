@@ -67,6 +67,9 @@ class RCOnRemoteControlSettingsNotification
    **/
   void Run() OVERRIDE;
 
+  /**
+   * @brief RCOnRemoteControlSettingsNotification destructor
+   */
   ~RCOnRemoteControlSettingsNotification();
 
  private:

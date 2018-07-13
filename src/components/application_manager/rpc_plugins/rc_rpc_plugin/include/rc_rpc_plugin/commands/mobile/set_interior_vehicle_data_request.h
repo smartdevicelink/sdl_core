@@ -41,6 +41,16 @@ namespace app_mngr = application_manager;
 namespace commands {
 class SetInteriorVehicleDataRequest : public RCCommandRequest {
  public:
+  /**
+   * @brief Constructor of SetInteriorVehicleDataRequest
+   * @param message MessageSharedPtr
+   * @param application_manager ApplicationManager
+   * @param rpc_service RPCService
+   * @param hmi_capabilities HMICapabilities
+   * @param policy_handle PolicyHandlerInterface
+   * @param resource_allocation_manager ResourceAllocationManager
+   * @param interior_data_cache InteriorDataCache
+   */
   SetInteriorVehicleDataRequest(
       const app_mngr::commands::MessageSharedPtr& message,
       app_mngr::ApplicationManager& application_manager,

@@ -62,8 +62,14 @@ class RCButtonPressResponse
                         ResourceAllocationManager& resource_allocation_manager,
                         InteriorDataCache& interior_data_cache);
 
+  /**
+   * @brief Execute command
+   */
   void Run() OVERRIDE;
 
+  /**
+   * @brief RCButtonPressResponse destructor
+   */
   ~RCButtonPressResponse();
 };
 }  // namespace commands

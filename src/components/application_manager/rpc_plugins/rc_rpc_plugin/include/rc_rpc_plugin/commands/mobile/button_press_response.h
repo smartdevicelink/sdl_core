@@ -45,6 +45,16 @@ namespace commands {
 class ButtonPressResponse
     : public application_manager::commands::CommandResponseImpl {
  public:
+  /**
+   * @brief Constructor of ButtonPressResponse
+   * @param message MessageSharedPtr
+   * @param application_manager ApplicationManager
+   * @param rpc_service RPCService
+   * @param hmi_capabilities HMICapabilities
+   * @param policy_handle PolicyHandlerInterface
+   * @param resource_allocation_manager ResourceAllocationManager
+   * @param interior_data_cache InteriorDataCache
+   */
   ButtonPressResponse(const app_mngr::commands::MessageSharedPtr& message,
                       app_mngr::ApplicationManager& application_manager,
                       app_mngr::rpc_service::RPCService& rpc_service,
@@ -52,7 +62,12 @@ class ButtonPressResponse
                       policy::PolicyHandlerInterface& policy_handle,
                       ResourceAllocationManager& resource_allocation_manager,
                       InteriorDataCache& interior_data_cache);
+
+  /**
+   * @brief Run ButtonPressResponse command
+   */
   void Run() OVERRIDE;
+
   /**
    * @brief ButtonPressResponse class destructor
    */

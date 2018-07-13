@@ -42,6 +42,16 @@ namespace app_mngr = application_manager;
 namespace commands {
 class GetInteriorVehicleDataRequest : public RCCommandRequest {
  public:
+  /**
+   * @brief Constructor of GetInteriorVehicleDataRequest
+   * @param message MessageSharedPtr
+   * @param application_manager ApplicationManager
+   * @param rpc_service RPCService
+   * @param hmi_capabilities HMICapabilities
+   * @param policy_handle PolicyHandlerInterface
+   * @param resource_allocation_manager ResourceAllocationManager
+   * @param interior_data_cache InteriorDataCache
+   */
   GetInteriorVehicleDataRequest(
       const app_mngr::commands::MessageSharedPtr& message,
       app_mngr::ApplicationManager& application_manager,
@@ -93,13 +103,43 @@ class GetInteriorVehicleDataRequest : public RCCommandRequest {
    */
   void RemoveExcessiveSubscription();
 
+  /**
+   * @brief Get the module type
+   * @return module type - std::string
+   */
   std::string ModuleType() FINAL;
   bool excessive_subscription_occured_;
   uint32_t max_request_in_time_frame_;
+
+  /**
+   * @brief Process the capabilities
+   * @return bool - result of processing
+   */
   bool ProcessCapabilities();
+
+  /**
+   * @brief Process the responce from cache to mobile
+   * @param app ApplicationSharedPtr
+   */
   void ProcessResponseToMobileFromCache(app_mngr::ApplicationSharedPtr app);
+
+  /**
+   * @brief Check rate limits. When the requests in time frame more then
+   * allowed, send REJECTED responce to mobile
+   * @return bool - result of check
+   */
   bool CheckRateLimits();
+
+  /**
+   * @brief Check is app should be unsubscribed
+   * @param bool - result of check
+   */
   bool AppShouldBeUnsubscribed();
+
+  /**
+   * @brief Check if the subscribed on module app is the last
+   * @param bool - result of check
+   */
   bool TheLastAppShouldBeUnsubscribed(app_mngr::ApplicationSharedPtr app);
 };
 }  // namespace commands

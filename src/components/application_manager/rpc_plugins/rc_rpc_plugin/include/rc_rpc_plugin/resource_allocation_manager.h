@@ -141,6 +141,9 @@ class ResourceAllocationManager {
    */
   virtual void ResetAllAllocations() = 0;
 
+  /**
+   * @brief Destructor for correct polimorph destroying object
+   */
   virtual ~ResourceAllocationManager() {}
 };
 

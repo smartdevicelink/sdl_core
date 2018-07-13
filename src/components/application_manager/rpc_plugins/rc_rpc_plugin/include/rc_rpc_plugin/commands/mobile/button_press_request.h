@@ -41,6 +41,16 @@ namespace app_mngr = application_manager;
 namespace commands {
 class ButtonPressRequest : public RCCommandRequest {
  public:
+  /**
+   * @brief Constructor of ButtonPressRequest
+   * @param message MessageSharedPtr
+   * @param application_manager ApplicationManager
+   * @param rpc_service RPCService
+   * @param hmi_capabilities HMICapabilities
+   * @param policy_handle PolicyHandlerInterface
+   * @param resource_allocation_manager ResourceAllocationManager
+   * @param interior_data_cache InteriorDataCache
+   */
   ButtonPressRequest(const app_mngr::commands::MessageSharedPtr& message,
                      app_mngr::ApplicationManager& application_manager,
                      app_mngr::rpc_service::RPCService& rpc_service,
@@ -86,6 +96,10 @@ class ButtonPressRequest : public RCCommandRequest {
    */
   void on_event(const app_mngr::event_engine::Event& event) FINAL;
 
+  /**
+   * @brief Get the module type
+   * @return module type - std::string
+   */
   std::string ModuleType() FINAL;
 
   /**

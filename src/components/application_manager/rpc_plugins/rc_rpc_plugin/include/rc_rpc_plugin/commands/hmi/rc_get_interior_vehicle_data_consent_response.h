@@ -63,8 +63,14 @@ class RCGetInteriorVehicleDataConsentResponse
       ResourceAllocationManager& resource_allocation_manager,
       InteriorDataCache& interior_data_cache);
 
+  /**
+   * @brief Execute command
+   */
   void Run() OVERRIDE;
 
+  /**
+   * @brief RCGetInteriorVehicleDataConsentResponse destructor
+   */
   ~RCGetInteriorVehicleDataConsentResponse();
 };
 

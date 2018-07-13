@@ -65,12 +65,24 @@ class RCCommandRequest : public app_mngr::commands::CommandRequestImpl {
       rc_rpc_plugin::ResourceAllocationManager& resource_allocation_manager,
       rc_rpc_plugin::InteriorDataCache& interior_data_cache);
 
+  /**
+   * @brief destructor of RCCommandRequest
+   */
   virtual ~RCCommandRequest();
 
+  /**
+   * @brief Send to mobile GENERIC_ERROR when reques timeout expired
+   */
   void onTimeOut() OVERRIDE;
 
+  /**
+   * @brief Run the command request
+   */
   void Run() OVERRIDE;
 
+  /**
+   * @brief Run the command request
+   */
   virtual void on_event(const app_mngr::event_engine::Event& event) OVERRIDE;
 
  protected:
@@ -115,7 +127,7 @@ class RCCommandRequest : public app_mngr::commands::CommandRequestImpl {
                                 const ResourceState::eType) {}
 
   /**
-   * Checks if module for application is present in policy table
+   * @brief Checks if module for application is present in policy table
    * @param app_id id of application
    * @param module type Resource name
    * @return kAllowed if module is present, otherwise - kDisallowed
@@ -123,10 +135,18 @@ class RCCommandRequest : public app_mngr::commands::CommandRequestImpl {
   TypeAccess CheckModule(const std::string& module_type,
                          application_manager::ApplicationSharedPtr app);
 
+  /**
+   * @brief Is auto is allowed
+   * @return bool
+   */
   bool auto_allowed() const {
     return auto_allowed_;
   }
 
+  /**
+   * @brief Set Is auto is allowed
+   * @param bool
+   */
   void set_auto_allowed(const bool value) {
     auto_allowed_ = value;
   }
@@ -136,10 +156,18 @@ class RCCommandRequest : public app_mngr::commands::CommandRequestImpl {
    */
   void virtual Execute() = 0;
 
+  /**
+   * @brief Set the disalowed info
+   * @param disallowed info
+   */
   void set_disallowed_info(const std::string& info) {
     disallowed_info_ = info;
   }
 
+  /**
+   * @brief Get the module type
+   * @return std::string
+   */
   virtual std::string ModuleType() = 0;
 
  private:
@@ -157,6 +185,11 @@ class RCCommandRequest : public app_mngr::commands::CommandRequestImpl {
    * otherwise false
    */
   bool AcquireResources();
+
+  /**
+   * @brief Send responce DISALLOWED to mobile
+   * @param access TypeAccess
+   */
   void SendDisallowed(TypeAccess access);
 
   /**
@@ -164,7 +197,17 @@ class RCCommandRequest : public app_mngr::commands::CommandRequestImpl {
    * @param module_type Resource name
    */
   void SendGetUserConsent(const std::string& module_type);
+
+  /**
+   * @brief Processing the access responce
+   * @param event event_engine::Even
+   */
   void ProcessAccessResponse(const app_mngr::event_engine::Event& event);
+
+  /**
+   * @brief Check if interface is available
+   * @param bool
+   */
   bool IsInterfaceAvailable(
       const app_mngr::HmiInterfaces::InterfaceID interface) const;
 
