@@ -35,6 +35,7 @@
 
 #include "application_manager/commands/command_response_impl.h"
 #include "rc_rpc_plugin/resource_allocation_manager.h"
+#include "rc_rpc_plugin/commands/rc_command_request.h"
 #include "rc_rpc_plugin/interior_data_cache.h"
 #include "utils/macro.h"
 
@@ -45,13 +46,9 @@ namespace commands {
 class ButtonPressResponse
     : public application_manager::commands::CommandResponseImpl {
  public:
-  ButtonPressResponse(const app_mngr::commands::MessageSharedPtr& message,
-                      app_mngr::ApplicationManager& application_manager,
-                      app_mngr::rpc_service::RPCService& rpc_service,
-                      app_mngr::HMICapabilities& hmi_capabilities,
-                      policy::PolicyHandlerInterface& policy_handle,
-                      ResourceAllocationManager& resource_allocation_manager,
-                      InteriorDataCache& interior_data_cache);
+  ButtonPressResponse(
+      const application_manager::commands::MessageSharedPtr& message,
+      const RCCommandParams& params);
   void Run() OVERRIDE;
   /**
    * @brief ButtonPressResponse class destructor

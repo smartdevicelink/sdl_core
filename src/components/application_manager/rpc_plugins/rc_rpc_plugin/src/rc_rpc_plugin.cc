@@ -54,13 +54,13 @@ bool RCRPCPlugin::Init(
 
   resource_allocation_manager_.reset(
       new ResourceAllocationManagerImpl(app_manager, rpc_service));
-  command_factory_.reset(
-      new rc_rpc_plugin::RCCommandFactory(app_manager,
-                                          rpc_service,
-                                          hmi_capabilities,
-                                          policy_handler,
-                                          *resource_allocation_manager_,
-                                          *interior_data_cache_));
+  RCCommandParams params{app_manager,
+                         rpc_service,
+                         hmi_capabilities,
+                         policy_handler,
+                         *(resource_allocation_manager_.get()),
+                         *(interior_data_cache_.get())};
+  command_factory_.reset(new rc_rpc_plugin::RCCommandFactory(params));
   rpc_service_ = &rpc_service;
   app_mngr_ = &app_manager;
   return true;

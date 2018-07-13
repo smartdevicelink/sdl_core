@@ -48,22 +48,11 @@ CREATE_LOGGERPTR_GLOBAL(logger_, "RemoteControlModule")
 
 GetInteriorVehicleDataRequest::GetInteriorVehicleDataRequest(
     const app_mngr::commands::MessageSharedPtr& message,
-    app_mngr::ApplicationManager& application_manager,
-    app_mngr::rpc_service::RPCService& rpc_service,
-    app_mngr::HMICapabilities& hmi_capabilities,
-    policy::PolicyHandlerInterface& policy_handle,
-    ResourceAllocationManager& resource_allocation_manager,
-    InteriorDataCache& interior_data_cache)
-    : RCCommandRequest(message,
-                       application_manager,
-                       rpc_service,
-                       hmi_capabilities,
-                       policy_handle,
-                       resource_allocation_manager,
-                       interior_data_cache)
+    const RCCommandParams& params)
+    : RCCommandRequest(message, params)
 
     , excessive_subscription_occured_(false) {
-  const auto& settings = application_manager.get_settings();
+  const auto& settings = params.application_manager_.get_settings();
   const auto frequency = settings.get_interior_vehicle_data_frequency();
   max_request_in_time_frame_ = frequency.first;
 }
