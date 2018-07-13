@@ -61,6 +61,7 @@ class InteriorDataCacheImpl : public InteriorDataCache {
 
   void StartRequestResetTimer(
       const uint32_t time_frame_of_allowed_requests) OVERRIDE;
+
  private:
   void ResetRequestCountOnTimer() OVERRIDE;
 
