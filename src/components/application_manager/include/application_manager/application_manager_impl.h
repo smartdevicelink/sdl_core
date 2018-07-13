@@ -1485,7 +1485,7 @@ class ApplicationManagerImpl
 
   hmi_message_handler::HMIMessageHandler* hmi_handler_;
   connection_handler::ConnectionHandler* connection_handler_;
-  std::auto_ptr<policy::PolicyHandlerInterface> policy_handler_;
+  std::unique_ptr<policy::PolicyHandlerInterface> policy_handler_;
   protocol_handler::ProtocolHandler* protocol_handler_;
   request_controller::RequestController request_ctrl_;
   std::unique_ptr<plugin_manager::RPCPluginManager> plugin_manager_;
@@ -1514,7 +1514,7 @@ class ApplicationManagerImpl
   static uint32_t corelation_id_;
   static const uint32_t max_corelation_id_;
 
-  std::auto_ptr<HMICapabilities> hmi_capabilities_;
+  std::unique_ptr<HMICapabilities> hmi_capabilities_;
   // The reason of HU shutdown
   mobile_api::AppInterfaceUnregisteredReason::eType unregister_reason_;
 
@@ -1523,7 +1523,7 @@ class ApplicationManagerImpl
    * about persistent application data on disk, and save session ID for resuming
    * application in case INGITION_OFF or MASTER_RESSET
    */
-  std::auto_ptr<resumption::ResumeCtrl> resume_ctrl_;
+  std::unique_ptr<resumption::ResumeCtrl> resume_ctrl_;
 
   HmiInterfacesImpl hmi_interfaces_;
 
@@ -1538,8 +1538,8 @@ class ApplicationManagerImpl
   sync_primitives::Lock timer_pool_lock_;
   mutable sync_primitives::Lock stopping_application_mng_lock_;
   StateControllerImpl state_ctrl_;
-  std::auto_ptr<app_launch::AppLaunchData> app_launch_dto_;
-  std::auto_ptr<app_launch::AppLaunchCtrl> app_launch_ctrl_;
+  std::unique_ptr<app_launch::AppLaunchData> app_launch_dto_;
+  std::unique_ptr<app_launch::AppLaunchCtrl> app_launch_ctrl_;
 
   /**
    * @brief ReregisterWaitList is list of applications expected to be
