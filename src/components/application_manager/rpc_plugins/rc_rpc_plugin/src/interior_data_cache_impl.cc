@@ -56,12 +56,29 @@ InteriorDataCacheImpl::~InteriorDataCacheImpl() {
     reset_request_count_timer_.Stop();
   }
 }
+smart_objects::SmartObject MergeModuleData(
+    const smart_objects::SmartObject& data1,
+    const smart_objects::SmartObject& data2) {
+  smart_objects::SmartObject result = data1;
+  auto it = data2.map_begin();
+  for (; it != data2.map_end(); ++it) {
+    const std::string& key = it->first;
+    const smart_objects::SmartObject& value = it->second;
+    result[key] = value;
+  }
+  return result;
+}
 
 void InteriorDataCacheImpl::Add(const std::string& module_type,
                                 const smart_objects::SmartObject& module_data) {
   LOG4CXX_TRACE(logger_, "module_type : " << module_type);
   sync_primitives::AutoLock autolock(subscriptions_lock_);
-  subscriptions_[module_type] = module_data;
+  auto it = subscriptions_.find(module_type);
+  if (subscriptions_.end() == it) {
+    subscriptions_[module_type] = module_data;
+    return;
+  }
+  subscriptions_[module_type] = MergeModuleData(it->second, module_data);
 }
 
 smart_objects::SmartObject InteriorDataCacheImpl::Retrieve(
