@@ -38,6 +38,15 @@ class RCHelpers {
   static std::vector<application_manager::ApplicationSharedPtr>
   AppsSubscribedTo(application_manager::ApplicationManager& app_mngr,
                    const std::string& module_type);
+
+  typedef std::map<application_manager::ApplicationSharedPtr,
+                   std::vector<std::string> > AppsModules;
+  static AppsModules GetApplicaitonsAllowedModules(
+      application_manager::ApplicationManager& app_mngr);
+
+  static std::vector<application_manager::ApplicationSharedPtr>
+  AppsSubscribedToModuleType(const std::string& module_type,
+                             application_manager::ApplicationManager& app_mngr);
 };
 
 }  // rc_rpc_plugin

@@ -35,6 +35,7 @@
 #include "rc_rpc_plugin/rc_app_extension.h"
 #include "rc_rpc_plugin/resource_allocation_manager_impl.h"
 #include "rc_rpc_plugin/interior_data_cache_impl.h"
+#include "rc_rpc_plugin/interior_data_manager_impl.h"
 #include "rc_rpc_plugin/rc_helpers.h"
 #include "utils/helpers.h"
 
@@ -51,6 +52,8 @@ bool RCRPCPlugin::Init(
   const auto& settings = app_manager.get_settings();
   const auto frequency = settings.get_interior_vehicle_data_frequency();
   interior_data_cache_.reset(new InteriorDataCacheImpl(frequency.second));
+  interior_data_manager_.reset(new InteriorDataManagerImpl(
+      *this, *interior_data_cache_, app_manager, rpc_service));
 
   resource_allocation_manager_.reset(
       new ResourceAllocationManagerImpl(app_manager, rpc_service));
@@ -59,7 +62,8 @@ bool RCRPCPlugin::Init(
                          hmi_capabilities,
                          policy_handler,
                          *(resource_allocation_manager_.get()),
-                         *(interior_data_cache_.get())};
+                         *(interior_data_cache_.get()),
+                         *(interior_data_manager_.get())};
   command_factory_.reset(new rc_rpc_plugin::RCCommandFactory(params));
   rpc_service_ = &rpc_service;
   app_mngr_ = &app_manager;
@@ -83,14 +87,8 @@ application_manager::CommandFactory& RCRPCPlugin::GetCommandFactory() {
 
 void RCRPCPlugin::OnPolicyEvent(
     application_manager::plugin_manager::PolicyEvent event) {
-  switch (event) {
-    case plugins::kApplicationPolicyUpdated: {
-      resource_allocation_manager_->OnPolicyEvent(event);
-      break;
-    }
-    default:
-      break;
-  }
+  resource_allocation_manager_->OnPolicyEvent(event);
+  interior_data_manager_->OnPolicyEvent(event);
 }
 
 void RCRPCPlugin::OnApplicationEvent(
@@ -105,13 +103,13 @@ void RCRPCPlugin::OnApplicationEvent(
       break;
     }
     case plugins::kApplicationExit: {
-      UpdateHMISubscriptionsOnAppUnregistered(*application);
       resource_allocation_manager_->OnApplicationEvent(event, application);
+      interior_data_manager_->OnApplicationEvent(event, application);
       break;
     }
     case plugins::kApplicationUnregistered: {
-      UpdateHMISubscriptionsOnAppUnregistered(*application);
       resource_allocation_manager_->OnApplicationEvent(event, application);
+      interior_data_manager_->OnApplicationEvent(event, application);
       break;
     }
     default:
@@ -132,32 +130,6 @@ RCRPCPlugin::Apps RCRPCPlugin::GetRCApplications(
     }
   }
   return result;
-}
-
-void RCRPCPlugin::UpdateHMISubscriptionsOnAppUnregistered(
-    application_manager::Application& app) {
-  LOG4CXX_AUTO_TRACE(logger_);
-
-  auto unsubscribe_from_interior_data = [this](const std::string& module_type) {
-    auto unsubscribe_request = RCHelpers::CreateUnsubscribeRequestToHMI(
-        module_type, app_mngr_->GetNextHMICorrelationID());
-    DCHECK_OR_RETURN_VOID(rpc_service_);
-    LOG4CXX_DEBUG(logger_, "Send Unsubscribe from " << module_type);
-    rpc_service_->ManageHMICommand(unsubscribe_request);
-  };
-
-  auto rc_extension = RCHelpers::GetRCExtension(app);
-  auto subscribed_data = rc_extension->InteriorVehicleDataSubscriptions();
-  for (auto& data : subscribed_data) {
-    auto apps_subscribed = RCHelpers::AppsSubscribedTo(*app_mngr_, data);
-    if (apps_subscribed.empty()) {
-      unsubscribe_from_interior_data(data);
-    }
-    if (apps_subscribed.size() == 1 &&
-        apps_subscribed.front()->hmi_app_id() == app.hmi_app_id()) {
-      unsubscribe_from_interior_data(data);
-    }
-  }
 }
 
 }  // namespace rc_rpc_plugin

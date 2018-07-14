@@ -171,24 +171,6 @@ void ResourceAllocationManagerImpl::ProcessApplicationPolicyUpdate() {
     Resources::const_iterator module = disallowed_modules.begin();
     for (; disallowed_modules.end() != module; ++module) {
       ReleaseResource(*module, application_id);
-      if (rc_extention) {
-        rc_extention->UnsubscribeFromInteriorVehicleData(*module);
-      }
-    }
-  }
-}
-
-void ResourceAllocationManagerImpl::RemoveAppsSubscriptions(const Apps& apps) {
-  LOG4CXX_AUTO_TRACE(logger_);
-  Apps::const_iterator app = apps.begin();
-  for (; apps.end() != app; ++app) {
-    application_manager::ApplicationSharedPtr app_ptr = *app;
-    if (!app_ptr) {
-      continue;
-    }
-    auto extention = RCHelpers::GetRCExtension(*app_ptr);
-    if (extention) {
-      extention->UnsubscribeFromInteriorVehicleData();
     }
   }
 }
@@ -355,7 +337,6 @@ void ResourceAllocationManagerImpl::OnApplicationEvent(
 
     Apps app_list;
     app_list.push_back(application);
-    RemoveAppsSubscriptions(app_list);
   }
 }
 
@@ -367,13 +348,6 @@ void ResourceAllocationManagerImpl::OnPolicyEvent(
 
   if (PolicyEvent::kApplicationPolicyUpdated == event) {
     ProcessApplicationPolicyUpdate();
-    return;
-  }
-
-  if (PolicyEvent::kApplicationsDisabled == event) {
-    ResetAllAllocations();
-    Apps app_list = RCRPCPlugin::GetRCApplications(app_mngr_);
-    RemoveAppsSubscriptions(app_list);
     return;
   }
 }

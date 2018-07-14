@@ -47,6 +47,7 @@
 #include "rc_rpc_plugin/rc_module_constants.h"
 #include "rc_rpc_plugin/mock/mock_resource_allocation_manager.h"
 #include "rc_rpc_plugin/mock/mock_interior_data_cache.h"
+#include "rc_rpc_plugin/mock/mock_interior_data_manager.h"
 #include "rc_rpc_plugin/commands/mobile/button_press_request.h"
 #include "rc_rpc_plugin/commands/hmi/rc_get_interior_vehicle_data_consent_response.h"
 #include "rc_rpc_plugin/commands/hmi/rc_get_interior_vehicle_data_consent_request.h"
@@ -155,7 +156,8 @@ class RCGetInteriorVehicleDataConsentTest
                            mock_hmi_capabilities_,
                            mock_policy_handler_,
                            mock_allocation_manager_,
-                           mock_interior_data_cache_};
+                           mock_interior_data_cache_,
+                           mock_interior_data_manager_};
     return ::utils::MakeShared<Command>(msg ? msg : msg = CreateMessage(),
                                         params);
   }
@@ -182,6 +184,8 @@ class RCGetInteriorVehicleDataConsentTest
       mock_allocation_manager_;
   testing::NiceMock<rc_rpc_plugin_test::MockInteriorDataCache>
       mock_interior_data_cache_;
+  testing::NiceMock<rc_rpc_plugin_test::MockInteriorDataManager>
+      mock_interior_data_manager_;
   smart_objects::SmartObject rc_capabilities_;
   MockRPCPlugin mock_rpc_plugin;
   MockCommandFactory mock_command_factory;
