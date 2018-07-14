@@ -100,7 +100,7 @@ class RCRPCPlugin : public plugins::RPCPlugin {
   void UpdateHMISubscriptionsOnAppUnregistered(
       application_manager::Application& app);
 
-  application_manager::RPCService* rpc_service_;
+  application_manager::rpc_service::RPCService* rpc_service_;
   application_manager::ApplicationManager* app_mngr_;
   std::unique_ptr<application_manager::CommandFactory> command_factory_;
   std::unique_ptr<ResourceAllocationManager> resource_allocation_manager_;
