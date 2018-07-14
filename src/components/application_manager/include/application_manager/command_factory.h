@@ -40,7 +40,6 @@
 #include "utils/macro.h"
 
 namespace application_manager {
-using rpc_service::RPCService;
 using policy::PolicyHandlerInterface;
 typedef utils::SharedPtr<commands::Command> CommandSharedPtr;
 
@@ -105,7 +104,7 @@ class DefaultCommandCreator : public CommandCreator {
    * @param  policy_handler PolicyHandlerInterface.
    */
   DefaultCommandCreator(ApplicationManager& application_manager,
-                        RPCService& rpc_service,
+                        rpc_service::RPCService& rpc_service,
                         HMICapabilities& hmi_capabilities,
                         PolicyHandlerInterface& policy_handler)
       : application_manager_(application_manager)
@@ -137,7 +136,7 @@ class DefaultCommandCreator : public CommandCreator {
   }
 
   ApplicationManager& application_manager_;
-  RPCService& rpc_service_;
+  rpc_service::RPCService& rpc_service_;
   HMICapabilities& hmi_capabilities_;
   PolicyHandlerInterface& policy_handler_;
 };
@@ -158,7 +157,7 @@ class DefaultCommandCreator<InvalidCommand> : public CommandCreator {
    * @param  policy_handler PolicyHandlerInterface.
    */
   DefaultCommandCreator(ApplicationManager& application_manager,
-                        RPCService& rpc_service,
+                        rpc_service::RPCService& rpc_service,
                         HMICapabilities& hmi_capabilities,
                         PolicyHandlerInterface& policy_handler) {
     UNUSED(application_manager);
@@ -203,7 +202,7 @@ struct CommandCreatorFactory {
     return res;
   }
   ApplicationManager& application_manager_;
-  RPCService& rpc_service_;
+  rpc_service::RPCService& rpc_service_;
   HMICapabilities& hmi_capabilities_;
   PolicyHandlerInterface& policy_handler_;
 };
