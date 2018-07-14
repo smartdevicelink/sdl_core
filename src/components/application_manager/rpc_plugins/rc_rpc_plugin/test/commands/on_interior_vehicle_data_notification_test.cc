@@ -71,6 +71,7 @@ class OnInteriorVehicleDataNotificationTest
   OnInteriorVehicleDataNotificationTest()
       : mock_app_(utils::MakeShared<NiceMock<MockApplication> >())
       , rc_app_extention_(utils::MakeShared<RCAppExtension>(kModuleId))
+      , apps_lock_(std::make_shared<sync_primitives::Lock>())
       , apps_da_(apps_, apps_lock_) {
     ON_CALL(*mock_app_, app_id()).WillByDefault(Return(kAppId));
     ON_CALL(*mock_app_, is_remote_control_supported())
@@ -120,7 +121,7 @@ class OnInteriorVehicleDataNotificationTest
   testing::NiceMock<rc_rpc_plugin_test::MockInteriorDataManager>
       mock_interior_data_manager_;
   application_manager::ApplicationSet apps_;
-  const sync_primitives::Lock apps_lock_;
+  const std::shared_ptr<sync_primitives::Lock> apps_lock_;
   DataAccessor<application_manager::ApplicationSet> apps_da_;
 };
 
