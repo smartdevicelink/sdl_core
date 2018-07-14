@@ -1,5 +1,5 @@
-#ifndef RC_COMMAND_PARAMS_H
-#define RC_COMMAND_PARAMS_H
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_RC_RPC_PLUGIN_INCLUDE_RC_RPC_PLUGIN_COMMANDS_RC_COMMAND_PARAMS_H
+#define SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_RC_RPC_PLUGIN_INCLUDE_RC_RPC_PLUGIN_COMMANDS_RC_COMMAND_PARAMS_H
 
 namespace application_manager {
 class ApplicationManager;
@@ -20,7 +20,6 @@ class InteriorDataCache;
 class InteriorDataManager;
 
 struct RCCommandParams {
-  //    const application_manager::commands::MessageSharedPtr& message_;
   application_manager::ApplicationManager& application_manager_;
   application_manager::rpc_service::RPCService& rpc_service_;
   application_manager::HMICapabilities& hmi_capabilities_;
@@ -30,4 +29,4 @@ struct RCCommandParams {
   rc_rpc_plugin::InteriorDataManager& interior_data_manager_;
 };
 }
-#endif  // RC_COMMAND_PARAMS_H
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_RC_RPC_PLUGIN_INCLUDE_RC_RPC_PLUGIN_COMMANDS_RC_COMMAND_PARAMS_H
