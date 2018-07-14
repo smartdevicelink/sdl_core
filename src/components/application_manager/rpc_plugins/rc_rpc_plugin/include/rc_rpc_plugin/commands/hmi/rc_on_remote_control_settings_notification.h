@@ -41,6 +41,7 @@
 
 namespace rc_rpc_plugin {
 namespace app_mngr = application_manager;
+class InteriorDataManager;
 
 namespace commands {
 class RCOnRemoteControlSettingsNotification
@@ -67,7 +68,7 @@ class RCOnRemoteControlSettingsNotification
 
  private:
   ResourceAllocationManager& resource_allocation_manager_;
-
+  InteriorDataManager& interior_data_manager_;
   /**
    * @brief Disalows RC functionality for all RC apps
    * All registered apps will be unsubsribed from OnInteriorVehicleData

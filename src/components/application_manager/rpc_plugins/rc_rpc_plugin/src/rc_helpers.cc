@@ -63,4 +63,32 @@ RCHelpers::AppsSubscribedTo(application_manager::ApplicationManager& app_mngr,
   }
   return result;
 }
+
+RCHelpers::AppsModules RCHelpers::GetApplicaitonsAllowedModules(
+    app_mngr::ApplicationManager& app_mngr) {
+  auto apps_list = RCRPCPlugin::GetRCApplications(app_mngr);
+  RCHelpers::AppsModules result;
+  for (auto& app_ptr : apps_list) {
+    std::vector<std::string> allowed_modules;
+    app_mngr.GetPolicyHandler().GetModuleTypes(app_ptr->policy_app_id(),
+                                               &allowed_modules);
+    std::sort(allowed_modules.begin(), allowed_modules.end());
+    result[app_ptr] = allowed_modules;
+  }
+  return result;
+}
+
+std::vector<application_manager::ApplicationSharedPtr>
+RCHelpers::AppsSubscribedToModuleType(const std::string& module_type,
+                                      app_mngr::ApplicationManager& app_mngr) {
+  std::vector<application_manager::ApplicationSharedPtr> result;
+  auto apps_list = RCRPCPlugin::GetRCApplications(app_mngr);
+  for (auto& app : apps_list) {
+    auto extension = RCHelpers::GetRCExtension(*app);
+    if (extension->IsSubscibedToInteriorVehicleData(module_type)) {
+      result.push_back(app);
+    }
+  }
+  return result;
+}
 }

@@ -166,13 +166,6 @@ class ResourceAllocationManagerImpl : public ResourceAllocationManager {
   void ProcessApplicationPolicyUpdate();
 
   /**
-   * @brief RemoveAppsSubscriptions Removes subscriptions for interior data for
-   * applications in the list
-   * @param apps Application list
-   */
-  void RemoveAppsSubscriptions(const Apps& apps);
-
-  /**
    * @brief SetResourceAquired mark resourse as aquired and process logic of
    * changing state of aquired resources
    * @param module_type resource name

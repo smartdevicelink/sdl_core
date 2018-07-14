@@ -32,6 +32,7 @@
 
 #include "rc_rpc_plugin/commands/hmi/rc_on_remote_control_settings_notification.h"
 #include "rc_rpc_plugin/rc_rpc_plugin.h"
+#include "rc_rpc_plugin/interior_data_manager.h"
 #include "rc_rpc_plugin/rc_module_constants.h"
 #include "rc_rpc_plugin/rc_helpers.h"
 #include "utils/macro.h"
@@ -57,7 +58,8 @@ RCOnRemoteControlSettingsNotification::RCOnRemoteControlSettingsNotification(
           params.rpc_service_,
           params.hmi_capabilities_,
           params.policy_handler_)
-    , resource_allocation_manager_(params.resource_allocation_manager_) {}
+    , resource_allocation_manager_(params.resource_allocation_manager_)
+    , interior_data_manager_(params.interior_data_manager_) {}
 
 RCOnRemoteControlSettingsNotification::
     ~RCOnRemoteControlSettingsNotification() {}
@@ -85,13 +87,6 @@ std::string AccessModeToString(
   return error;
 }
 
-void UnsubscribeFromInteriorVehicleDataForAllModules(
-    RCAppExtensionPtr extension) {
-  LOG4CXX_AUTO_TRACE(logger_);
-  extension->UnsubscribeFromInteriorVehicleData(enums_value::kClimate);
-  extension->UnsubscribeFromInteriorVehicleData(enums_value::kRadio);
-}
-
 void RCOnRemoteControlSettingsNotification::DisallowRCFunctionality() {
   LOG4CXX_AUTO_TRACE(logger_);
   typedef std::vector<application_manager::ApplicationSharedPtr> Apps;
@@ -101,12 +96,8 @@ void RCOnRemoteControlSettingsNotification::DisallowRCFunctionality() {
     DCHECK(app);
     application_manager_.ChangeAppsHMILevel(
         app->app_id(), mobile_apis::HMILevel::eType::HMI_NONE);
-
-    const auto extension = RCHelpers::GetRCExtension(*app);
-    if (extension) {
-      UnsubscribeFromInteriorVehicleDataForAllModules(extension);
-    }
   }
+  interior_data_manager_.OnDisablingRC();
 }
 
 void RCOnRemoteControlSettingsNotification::Run() {
