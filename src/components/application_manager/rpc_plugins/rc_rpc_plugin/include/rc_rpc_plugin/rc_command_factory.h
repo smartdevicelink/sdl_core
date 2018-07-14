@@ -82,7 +82,7 @@ class RCCommandFactory : public application_manager::CommandFactory {
       hmi_apis::FunctionID::eType id,
       hmi_apis::messageType::eType message_type) const;
 
-   RCCommandParams params_;
+  RCCommandParams params_;
 };
 }  // namespace rc_rpc_plugin
 #endif  // SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_RC_RPC_PLUGIN_INCLUDE_RC_RPC_PLUGIN_RC_COMMAND_FACTORY_H
