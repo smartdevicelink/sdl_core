@@ -38,6 +38,7 @@
 #include "rc_rpc_plugin/rc_module_constants.h"
 #include "rc_rpc_plugin/mock/mock_resource_allocation_manager.h"
 #include "rc_rpc_plugin/mock/mock_interior_data_cache.h"
+#include "rc_rpc_plugin/mock/mock_interior_data_manager.h"
 #include "gtest/gtest.h"
 #include "interfaces/MOBILE_API.h"
 
@@ -103,7 +104,8 @@ class OnInteriorVehicleDataNotificationTest
                            mock_hmi_capabilities_,
                            mock_policy_handler_,
                            mock_allocation_manager_,
-                           mock_interior_data_cache_};
+                           mock_interior_data_cache_,
+                           mock_interior_data_manager_};
     return ::utils::MakeShared<Command>(msg ? msg : msg = CreateMessage(),
                                         params);
   }
@@ -115,6 +117,8 @@ class OnInteriorVehicleDataNotificationTest
       mock_allocation_manager_;
   testing::NiceMock<rc_rpc_plugin_test::MockInteriorDataCache>
       mock_interior_data_cache_;
+  testing::NiceMock<rc_rpc_plugin_test::MockInteriorDataManager>
+      mock_interior_data_manager_;
   application_manager::ApplicationSet apps_;
   const sync_primitives::Lock apps_lock_;
   DataAccessor<application_manager::ApplicationSet> apps_da_;

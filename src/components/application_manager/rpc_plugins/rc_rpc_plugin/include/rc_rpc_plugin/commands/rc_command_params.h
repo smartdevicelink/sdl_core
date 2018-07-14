@@ -17,6 +17,7 @@ namespace rc_rpc_plugin {
 
 class ResourceAllocationManager;
 class InteriorDataCache;
+class InteriorDataManager;
 
 struct RCCommandParams {
   //    const application_manager::commands::MessageSharedPtr& message_;
@@ -26,6 +27,7 @@ struct RCCommandParams {
   policy::PolicyHandlerInterface& policy_handler_;
   rc_rpc_plugin::ResourceAllocationManager& resource_allocation_manager_;
   rc_rpc_plugin::InteriorDataCache& interior_data_cache_;
+  rc_rpc_plugin::InteriorDataManager& interior_data_manager_;
 };
 }
 #endif  // RC_COMMAND_PARAMS_H
