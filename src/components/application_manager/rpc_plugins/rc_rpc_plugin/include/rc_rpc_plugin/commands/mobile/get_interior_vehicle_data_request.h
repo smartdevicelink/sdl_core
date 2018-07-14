@@ -79,8 +79,7 @@ class GetInteriorVehicleDataRequest : public RCCommandRequest {
     * @brief Handle subscription to vehicle data
     * @param hmi_response json message with response from HMI
     */
-  void ProccessSubscription(
-      const NsSmartDeviceLink::NsSmartObjects::SmartObject& hmi_response);
+  void ProccessSubscription(const smart_objects::SmartObject& hmi_response);
 
   /**
    * @brief Cuts off subscribe parameter
