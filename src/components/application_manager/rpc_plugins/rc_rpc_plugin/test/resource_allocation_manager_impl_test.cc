@@ -297,13 +297,6 @@ TEST_F(RAManagerTest, AnotherAppExit_NoReleaseResource) {
   EXPECT_CALL(mock_app_mngr_, application(kAppId2))
       .WillRepeatedly(Return(mock_app_2_));
 
-  RCAppExtensionPtr rc_extention_ptr =
-      utils::MakeShared<RCAppExtension>(application_manager::AppExtensionUID(
-          rc_rpc_plugin::RCRPCPlugin::kRCPluginID));
-
-  EXPECT_CALL(*mock_app_2_, QueryInterface(_))
-      .WillOnce(Return(rc_extention_ptr));
-
   // Act
   application_manager::ApplicationSharedPtr app_ptr(mock_app_2_);
   EXPECT_CALL(*mock_app_2_, app_id()).WillRepeatedly(Return(kAppId2));
@@ -322,10 +315,6 @@ TEST_F(RAManagerTest, AppUnregistered_ReleaseResource) {
   // Arrange
   ResourceAllocationManagerImpl ra_manager(mock_app_mngr_, mock_rpc_service_);
   ra_manager.SetAccessMode(hmi_apis::Common_RCAccessMode::eType::AUTO_DENY);
-
-  RCAppExtensionPtr rc_extention_ptr =
-      utils::MakeShared<RCAppExtension>(application_manager::AppExtensionUID(
-          rc_rpc_plugin::RCRPCPlugin::kRCPluginID));
 
   EXPECT_EQ(rc_rpc_plugin::AcquireResult::ALLOWED,
             ra_manager.AcquireResource(kModuleType1, kAppId1));
@@ -357,13 +346,6 @@ TEST_F(RAManagerTest, AnotherAppUnregistered_NoReleaseResource) {
   EXPECT_CALL(mock_app_mngr_, application(kAppId1))
       .WillRepeatedly(Return(mock_app_2_));
 
-  RCAppExtensionPtr rc_extention_ptr =
-      utils::MakeShared<RCAppExtension>(application_manager::AppExtensionUID(
-          rc_rpc_plugin::RCRPCPlugin::kRCPluginID));
-
-  EXPECT_CALL(*mock_app_2_, QueryInterface(_))
-      .WillOnce(Return(rc_extention_ptr));
-
   // Act
   application_manager::ApplicationSharedPtr app_ptr(mock_app_2_);
   EXPECT_CALL(*mock_app_2_, app_id()).WillRepeatedly(Return(kAppId2));
@@ -377,49 +359,6 @@ TEST_F(RAManagerTest, AnotherAppUnregistered_NoReleaseResource) {
       .WillOnce(Return(mobile_apis::HMILevel::HMI_FULL));
   EXPECT_EQ(rc_rpc_plugin::AcquireResult::IN_USE,
             ra_manager.AcquireResource(kModuleType1, kAppId2));
-}
-
-TEST_F(RAManagerTest, AppsDisallowed_ReleaseAllResources) {
-  // Arrange
-  ResourceAllocationManagerImpl ra_manager(mock_app_mngr_, mock_rpc_service_);
-  ra_manager.SetAccessMode(hmi_apis::Common_RCAccessMode::eType::AUTO_DENY);
-
-  EXPECT_CALL(mock_app_mngr_, application(kAppId1))
-      .WillRepeatedly(Return(mock_app_1_));
-
-  EXPECT_EQ(rc_rpc_plugin::AcquireResult::ALLOWED,
-            ra_manager.AcquireResource(kModuleType1, kAppId1));
-  EXPECT_EQ(rc_rpc_plugin::AcquireResult::ALLOWED,
-            ra_manager.AcquireResource(kModuleType2, kAppId1));
-
-  application_manager::ApplicationSet apps;
-  apps.insert(mock_app_1_);
-  std::shared_ptr<sync_primitives::Lock> apps_lock =
-      std::make_shared<sync_primitives::Lock>();
-  DataAccessor<application_manager::ApplicationSet> apps_da(apps, apps_lock);
-
-  EXPECT_CALL(mock_app_mngr_, applications()).WillRepeatedly(Return(apps_da));
-
-  RCAppExtensionPtr rc_extention_ptr =
-      utils::MakeShared<RCAppExtension>(application_manager::AppExtensionUID(
-          rc_rpc_plugin::RCRPCPlugin::kRCPluginID));
-
-  EXPECT_CALL(*mock_app_1_, QueryInterface(RCRPCPlugin::kRCPluginID))
-      .WillRepeatedly(Return(rc_extention_ptr));
-
-  // Act
-  ra_manager.OnPolicyEvent(
-      application_manager::plugin_manager::PolicyEvent::kApplicationsDisabled);
-
-  EXPECT_CALL(mock_app_mngr_, application(kAppId2))
-      .WillRepeatedly(Return(mock_app_2_));
-  EXPECT_CALL(*mock_app_2_, hmi_level())
-      .WillRepeatedly(Return(mobile_apis::HMILevel::HMI_FULL));
-  EXPECT_EQ(rc_rpc_plugin::AcquireResult::ALLOWED,
-            ra_manager.AcquireResource(kModuleType1, kAppId2));
-  EXPECT_EQ(rc_rpc_plugin::AcquireResult::ALLOWED,
-            ra_manager.AcquireResource(kModuleType2, kAppId2));
-  Mock::VerifyAndClearExpectations(&mock_app_mngr_);
 }
 
 TEST_F(RAManagerTest, AppGotRevokedModulesWithPTU_ReleaseRevokedResource) {
