@@ -78,14 +78,14 @@ class UsageStatisticsTest : public testing::Test {
 
  protected:
   utils::SharedPtr<MockStatisticsManager> mock_statistics_manager_sptr_;
-  std::auto_ptr<application_manager::UsageStatistics>
+  std::unique_ptr<application_manager::UsageStatistics>
       usage_statistics_test_object1_sptr_;
   const std::string language_;
 };
 
 TEST_F(UsageStatisticsTest, RecordHmiStateChanged_CallMethod_ExpectMethodCall) {
   // Arrange
-  std::auto_ptr<MockAppStopwatch> mock_app_stopwatch_object(
+  std::unique_ptr<MockAppStopwatch> mock_app_stopwatch_object(
       new MockAppStopwatch);
 
   // Checks
@@ -93,7 +93,7 @@ TEST_F(UsageStatisticsTest, RecordHmiStateChanged_CallMethod_ExpectMethodCall) {
   EXPECT_CALL(*mock_app_stopwatch_object, Switch(kTestAppStopwatchId));
 
   // Act
-  std::auto_ptr<application_manager::UsageStatistics>
+  std::unique_ptr<application_manager::UsageStatistics>
       usage_statistics_test_object2_sptr_(
           new application_manager::UsageStatistics(
               kAppId,

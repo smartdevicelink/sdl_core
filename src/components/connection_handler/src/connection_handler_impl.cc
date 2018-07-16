@@ -1591,7 +1591,7 @@ void ConnectionHandlerImpl::OnConnectionEnded(
     connection_list_lock_.Release();
     return;
   }
-  std::auto_ptr<Connection> connection(itr->second);
+  std::unique_ptr<Connection> connection(itr->second);
   connection_list_.erase(itr);
   connection_list_lock_.Release();
 

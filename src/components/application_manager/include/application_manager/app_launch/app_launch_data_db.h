@@ -153,7 +153,7 @@ class AppLaunchDataDB : public AppLaunchDataImpl {
   /**
   * @brief returns pointer to data base
   */
-  std::auto_ptr<utils::dbms::SQLDatabase> db_;
+  std::unique_ptr<utils::dbms::SQLDatabase> db_;
 
   /**
   * @brief indicate initializing status of DB

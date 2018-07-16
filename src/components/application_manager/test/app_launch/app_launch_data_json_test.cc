@@ -67,7 +67,7 @@ class AppLaunchDataJsonTest : public ::testing::Test {
  private:
   virtual void SetUp() {
     ::file_system::DeleteFile(kAppStorageFile);
-    test_last_state_ = std::auto_ptr<resumption::LastState>(
+    test_last_state_ = std::unique_ptr<resumption::LastState>(
         new resumption::LastStateImpl(kAppStorageFolder, kAppInfoStorage));
     ASSERT_TRUE(::file_system::CreateFile(kAppStorageFile));
 
@@ -102,8 +102,8 @@ class AppLaunchDataJsonTest : public ::testing::Test {
   void GetApplicationData_EXPECT_FALSE(const ApplicationData& in_data);
   std::string AddCounter(const std::string& inp, int32_t val);
 
-  std::auto_ptr<resumption::LastState> test_last_state_;
-  std::auto_ptr<AppLaunchDataJson> res_json_;
+  std::unique_ptr<resumption::LastState> test_last_state_;
+  std::unique_ptr<AppLaunchDataJson> res_json_;
   void SetTimestamp(const ApplicationData& in_data, TimevalStruct& timestamp);
 };
 
