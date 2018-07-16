@@ -666,7 +666,7 @@ TEST_F(RAManagerTest, OnRCStatus_ModuleAllocation) {
   auto msg_to_hmi_params =
       (*message_to_hmi)[application_manager::strings::msg_params];
   // Assert
-  EXPECT_EQ(msg_to_mob_params.keyExists(message_params::kAllowed), false);
+  EXPECT_EQ(msg_to_mob_params[message_params::kAllowed].asBool(), true);
   EXPECT_EQ(
       msg_to_mob_params[message_params::kAllocatedModules].asArray()->size(),
       1u);

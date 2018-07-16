@@ -6348,8 +6348,6 @@
       <param name="allowed" type="Boolean" mandatory="false">
         <description>
             If "true" - RC is allowed; if "false" - RC is disallowed.
-            Not present in notification in case by module allocation/deallocation.
-            Present in notification in cases enabling/disabling RC or RC-app registration.
         </description>
       </param>
       <param name="allocatedModules" type="ModuleData" minsize="0" maxsize="100" array="true" mandatory="true">
