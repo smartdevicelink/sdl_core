@@ -55,9 +55,6 @@ class ButtonPressResponse
       const application_manager::commands::MessageSharedPtr& message,
       const RCCommandParams& params);
 
-  /**
-   * @brief Run ButtonPressResponse command
-   */
   void Run() OVERRIDE;
 
   /**

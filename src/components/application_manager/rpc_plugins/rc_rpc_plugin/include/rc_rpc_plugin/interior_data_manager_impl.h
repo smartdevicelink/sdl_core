@@ -20,16 +20,8 @@ class InteriorDataManagerImpl : public InteriorDataManager {
       application_manager::ApplicationManager& app_mngr,
       application_manager::rpc_service::RPCService& rpc_service);
 
-  /**
-   * @brief OnPolicyEvent Processes policy related events
-   * @param event Policy event
-   */
   void OnPolicyEvent(app_mngr::plugin_manager::PolicyEvent event) OVERRIDE;
-  /**
-    * @brief OnApplicationEvent Notifies modules on certain application events
-    * @param event Event
-    * @param application Pointer to application struct
-    */
+
   void OnApplicationEvent(plugins::ApplicationEvent event,
                           app_mngr::ApplicationSharedPtr application) OVERRIDE;
 

@@ -25,6 +25,9 @@ class InteriorDataManager {
       plugins::ApplicationEvent event,
       app_mngr::ApplicationSharedPtr application) = 0;
 
+  /**
+   * @brief OnDisablingRC Processes policy related events
+   */
   virtual void OnDisablingRC() = 0;
 };
 

@@ -56,9 +56,6 @@ class OnInteriorVehicleDataNotification
       const application_manager::commands::MessageSharedPtr& message,
       const RCCommandParams& params);
 
-  /**
-   * @brief Run OnInteriorVehicleDataNotification command
-   */
   void Run() OVERRIDE;
 
   std::string ModuleType();

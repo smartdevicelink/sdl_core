@@ -62,19 +62,10 @@ class RCCommandRequest : public app_mngr::commands::CommandRequestImpl {
    */
   virtual ~RCCommandRequest();
 
-  /**
-   * @brief Send to mobile GENERIC_ERROR when reques timeout expired
-   */
   void onTimeOut() OVERRIDE;
 
-  /**
-   * @brief Run the command request
-   */
   void Run() OVERRIDE;
 
-  /**
-   * @brief Run the command request
-   */
   virtual void on_event(const app_mngr::event_engine::Event& event) OVERRIDE;
 
  protected:

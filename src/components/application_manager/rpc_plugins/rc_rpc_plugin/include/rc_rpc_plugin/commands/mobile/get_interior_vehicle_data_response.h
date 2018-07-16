@@ -55,9 +55,6 @@ class GetInteriorVehicleDataResponse
       const application_manager::commands::MessageSharedPtr& message,
       const RCCommandParams& params);
 
-  /**
-   * @brief Run GetInteriorVehicleDataResponse command
-   */
   void Run() OVERRIDE;
 
   /**

@@ -59,9 +59,6 @@ class RCOnInteriorVehicleDataNotification
       const application_manager::commands::MessageSharedPtr& message,
       const RCCommandParams& params);
 
-  /**
-   * @brief Execute command
-   **/
   void Run() OVERRIDE;
 
   /**

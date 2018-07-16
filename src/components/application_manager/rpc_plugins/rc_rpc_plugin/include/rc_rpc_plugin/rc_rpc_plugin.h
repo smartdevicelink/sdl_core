@@ -52,52 +52,21 @@ class RCRPCPlugin : public plugins::RPCPlugin {
  public:
   typedef std::vector<application_manager::ApplicationSharedPtr> Apps;
 
-  /**
-    * @brief Command initialization function
-    * @param app_manager ApplicationManager
-    * @param rpc_service RPCService
-    * @param hmi_capabilities HMICapabilities
-    * @param policy_handler PolicyHandlerInterface
-    * @return true in case initialization was succesful, false otherwise.
-    **/
   bool Init(app_mngr::ApplicationManager& app_manager,
             app_mngr::rpc_service::RPCService& rpc_service,
             app_mngr::HMICapabilities& hmi_capabilities,
             policy::PolicyHandlerInterface& policy_handler) OVERRIDE;
 
-  /**
-  * @param int32_t command id
-  * @param CommandSource source
-  * @return return true if command can be create, else return false
-  **/
   bool IsAbleToProcess(
       const int32_t function_id,
       const app_mngr::commands::Command::CommandSource message_source) OVERRIDE;
 
-  /**
-   * @brief PluginName plugin name
-   * @return plugin name
-   */
   std::string PluginName() OVERRIDE;
 
-  /**
-   * @brief GetCommandFactory get that is able to generate command
-   * from message
-   * @return plugins command factory
-   */
   app_mngr::CommandFactory& GetCommandFactory() OVERRIDE;
 
-  /**
-   * @brief OnPolicyEvent Processes policy related events
-   * @param event Policy event
-   */
   void OnPolicyEvent(app_mngr::plugin_manager::PolicyEvent event) OVERRIDE;
 
-  /**
-    * @brief OnApplicationEvent Notifies modules on certain application events
-    * @param event Event
-    * @param application Pointer to application struct
-    */
   void OnApplicationEvent(plugins::ApplicationEvent event,
                           app_mngr::ApplicationSharedPtr application) OVERRIDE;
 
