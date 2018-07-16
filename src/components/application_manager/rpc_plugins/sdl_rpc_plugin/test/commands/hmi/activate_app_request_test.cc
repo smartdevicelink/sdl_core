@@ -105,8 +105,7 @@ TEST_F(ActivateAppRequestTest, Run_SUCCESS) {
   EXPECT_CALL(mock_rpc_service_,
               SendMessageToHMI(CheckMessage(mobile_apis::HMILevel::HMI_FULL)));
 #else
-  EXPECT_CALL(mock_rpc_service_,
-              SendMessageToHMI(msg)));
+  EXPECT_CALL(mock_rpc_service_, SendMessageToHMI(msg));
 #endif
   command->Run();
 

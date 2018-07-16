@@ -263,6 +263,14 @@ class ApplicationManager {
       const utils::SharedPtr<Application> app) = 0;
 
   /**
+   * @brief Checks if driver distraction state is valid, creates message
+   * which is sent to the application if allowed, otherwise it is added
+   * to a list of postponed messages.
+   * @param application contains registered application.
+   */
+  virtual void SendDriverDistractionState(ApplicationSharedPtr application) = 0;
+
+  /**
    * DEPRECATED
    * @brief Checks if Application is subscribed for way points
    * @param Application AppID
@@ -322,6 +330,19 @@ class ApplicationManager {
 
   virtual mobile_api::HMILevel::eType GetDefaultHmiLevel(
       ApplicationConstSharedPtr application) const = 0;
+
+  /**
+   * @brief Checks if required transport for resumption is available
+   *
+   * The required transport can be configured through smartDeviceLink.ini file.
+   *
+   * @param application an instance of the app to check
+   * @return true if the app is connected through one of the required
+   *         transports, false otherwise
+   */
+  virtual bool CheckResumptionRequiredTransportAvailable(
+      ApplicationConstSharedPtr application) const = 0;
+
   /**
    * @brief hmi_capabilities return capabilities of hmi
    * @return capabilities of hmi

@@ -178,6 +178,13 @@ class ResumeCtrlImpl : public ResumeCtrl,
       app_mngr::ApplicationSharedPtr application) OVERRIDE;
 
   /**
+   * @brief Retry resumption of an app if it has been disabled or limited
+   *        due to absence of high-bandwidth transport.
+   * @param app_id ID of the app to resume
+   */
+  void RetryResumption(const uint32_t app_id) OVERRIDE;
+
+  /**
    * @brief Check if there are all files need for resumption
    * @param application that is need to be restored
    * @return true if it all files exist, otherwise return false
@@ -298,6 +305,8 @@ class ResumeCtrlImpl : public ResumeCtrl,
 #ifdef BUILD_TESTS
   void set_resumption_storage(
       utils::SharedPtr<ResumptionData> mock_storage) OVERRIDE;
+
+  bool get_resumption_active() const OVERRIDE;
 #endif  // BUILD_TESTS
  private:
   /**
@@ -498,6 +507,19 @@ class ResumeCtrlImpl : public ResumeCtrl,
    */
   bool IsResumeAllowed(
       const application_manager::ApplicationSharedPtr application) const;
+
+  /**
+   * @brief Retrieve the HMI level of the app when high-bandwidth transport
+   *isn't available
+   *
+   * The value is configured through smartDeviceLink.ini file
+   *
+   * @param application an instance of the app
+   * @return HMI level that the app is allowed when high-bandwidth transport
+   *isn't available
+   */
+  mobile_apis::HMILevel::eType GetHmiLevelOnLowBandwidthTransport(
+      app_mngr::ApplicationConstSharedPtr application) const;
 
   /**
    *@brief Mapping applications to time_stamps

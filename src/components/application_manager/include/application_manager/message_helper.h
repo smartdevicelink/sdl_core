@@ -72,7 +72,23 @@ typedef std::map<std::string, mobile_apis::VehicleDataType::eType> VehicleData;
 class MessageHelper {
  public:
   /**
-   * @brief Creates request for different interfaces(JSON, DBUS)
+ * @brief CreateNotification creates basic mobile notification smart object
+ * @param function_id Notification function ID
+ * @param app_id application to send notification
+ * @return basic mobile notification smart object
+ */
+  static smart_objects::SmartObjectSPtr CreateNotification(
+      mobile_apis::FunctionID::eType function_id, uint32_t app_id);
+  /**
+ * @brief CreateHMINotification creates basic hmi notification smart object
+ * @param function_id Notification function ID
+ * @return basic hmi notification smart object
+ */
+  static smart_objects::SmartObjectSPtr CreateHMINotification(
+      hmi_apis::FunctionID::eType function_id);
+
+  /**
+   * @brief Creates request for different interfaces(JSON)
    * @param correlation_id unique ID
    * @param params Vector of arguments that we need in GetVehicleData request
    * (e.g. gps, odometer, fuel_level)
@@ -284,6 +300,24 @@ class MessageHelper {
       const smart_objects::SmartObject& vr_commands,
       const uint32_t app_id,
       ApplicationManager& app_mngr);
+
+  /*
+   * @brief Create Common.DeviceInfo struct from device handle
+   * @param device_handle device handle of the app
+   * @param session_observer instance of SessionObserver to retrieve device
+   * information
+   * @param policy_handler instance of PolicyHandlerInterface to get the value
+   * of 'isSDLAllowed'
+   * @param app_mngr instance of ApplicationManager
+   * @param output smart object to store created Common.DeviceInfo struct
+   * @return true on success, false otherwise
+   */
+  static bool CreateDeviceInfo(
+      connection_handler::DeviceHandle device_handle,
+      const protocol_handler::SessionObserver& session_observer,
+      const policy::PolicyHandlerInterface& policy_handler,
+      ApplicationManager& app_mngr,
+      smart_objects::SmartObject* output);
 
   /*
    * @brief Create Common.HMIApplication struct application instance

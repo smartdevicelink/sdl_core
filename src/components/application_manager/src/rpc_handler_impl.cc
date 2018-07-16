@@ -100,9 +100,6 @@ void RPCHandlerImpl::ProcessMessageFromHMI(
     return;
   }
 
-#ifdef HMI_DBUS_API
-  *smart_object = message->smart_object();
-#else
   if (!ConvertMessageToSO(*message, *smart_object)) {
     if (application_manager::MessageType::kResponse ==
         (*smart_object)[strings::params][strings::message_type].asInt()) {
@@ -116,7 +113,6 @@ void RPCHandlerImpl::ProcessMessageFromHMI(
       return;
     }
   }
-#endif  // HMI_DBUS_API
 
   LOG4CXX_DEBUG(logger_, "Converted message, trying to create hmi command");
   if (!app_manager_.GetRPCService().ManageHMICommand(smart_object)) {

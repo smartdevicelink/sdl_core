@@ -223,27 +223,6 @@
 #include "hmi/on_tts_reset_timeout_notification.h"
 #include "hmi/dial_number_request.h"
 #include "hmi/dial_number_response.h"
-#include "hmi/on_vi_gps_data_notification.h"
-#include "hmi/on_vi_speed_notification.h"
-#include "hmi/on_vi_rpm_notification.h"
-#include "hmi/on_vi_fuel_level_notification.h"
-#include "hmi/on_vi_fuel_level_state_notification.h"
-#include "hmi/on_vi_instant_fuel_consumption_notification.h"
-#include "hmi/on_vi_external_temperature_notification.h"
-#include "hmi/on_vi_vin_notification.h"
-#include "hmi/on_vi_prndl_notification.h"
-#include "hmi/on_vi_tire_pressure_notification.h"
-#include "hmi/on_vi_odometer_notification.h"
-#include "hmi/on_vi_belt_status_notification.h"
-#include "hmi/on_vi_body_information_notification.h"
-#include "hmi/on_vi_device_status_notification.h"
-#include "hmi/on_vi_driver_braking_notification.h"
-#include "hmi/on_vi_wiper_status_notification.h"
-#include "hmi/on_vi_head_lamp_status_notification.h"
-#include "hmi/on_vi_engine_torque_notification.h"
-#include "hmi/on_vi_acc_pedal_position_notification.h"
-#include "hmi/on_vi_steering_wheel_angle_notification.h"
-#include "hmi/on_vi_my_key_notification.h"
 #include "hmi/ui_set_icon_request.h"
 
 #include "application_manager/commands/commands_test.h"
@@ -515,28 +494,7 @@ typedef Types<commands::hmi::OnButtonEventNotification,
               commands::OnVRLanguageChangeNotification,
               commands::OnTTSLanguageChangeNotification> HMICommandsListFourth;
 
-typedef Types<commands::OnVIGpsDataNotification,
-              commands::OnVISpeedNotification,
-              commands::OnVIRpmNotification,
-              commands::OnVIFuelLevelNotification,
-              commands::OnVIFuelLevelStateNotification,
-              commands::OnVIInstantFuelConsumptionNotification,
-              commands::OnVIExternalTemperatureNotification,
-              commands::OnVIVinNotification,
-              commands::OnVIPrndlNotification,
-              commands::OnVITirePressureNotification,
-              commands::OnVIOdometerNotification,
-              commands::OnVIBeltStatusNotification,
-              commands::OnVIBodyInformationNotification,
-              commands::OnVIDeviceStatusNotification,
-              commands::OnVIDriverBrakingNotification,
-              commands::OnVIWiperStatusNotification,
-              commands::OnVIHeadLampStatusNotification,
-              commands::OnVIEngineTorqueNotification,
-              commands::OnVIAccPedalPositionNotification,
-              commands::OnVISteeringWheelAngleNotification,
-              commands::OnVIMyKeyNotification,
-              commands::AllowAllAppsRequest,
+typedef Types<commands::AllowAllAppsRequest,
               commands::AllowAllAppsResponse,
               commands::AllowAppRequest,
               commands::AllowAppResponse> HMICommandsListFifth;

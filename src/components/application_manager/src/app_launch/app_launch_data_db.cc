@@ -384,7 +384,7 @@ bool AppLaunchDataDB::WriteDb() {
 
 utils::dbms::SQLDatabase* AppLaunchDataDB::db() const {
 #ifdef __QNX__
-  std::auto_ptr<utils::dbms::SQLDatabase> db_qnx(
+  std::unique_ptr<utils::dbms::SQLDatabase> db_qnx(
       new utils::dbms::SQLDatabase(kDatabaseName));
   db_qnx.get()->Open();
   return db_qnx.get();

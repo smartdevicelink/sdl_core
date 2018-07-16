@@ -304,8 +304,8 @@ RESULT_CODE ProtocolPacket::ProtocolHeaderValidator::validate(
   // Check frame info for each frame type
   // Frame type shall be 0x00 (Control), 0x01 (Single), 0x02 (First), 0x03
   // (Consecutive)
-  // For Control frames Frame info value shall be from 0x00 to 0x06 or 0xFE(Data
-  // Ack), 0xFF(HB Ack)
+  // For Control frames Frame info value shall be from 0x00 to 0x09 or
+  // 0xFD(Transport Event Update), 0xFE(Data Ack), 0xFF(HB Ack)
   // For Single and First frames Frame info value shall be equal 0x00
   switch (header.frameType) {
     case FRAME_TYPE_CONTROL: {
@@ -317,6 +317,10 @@ RESULT_CODE ProtocolPacket::ProtocolHeaderValidator::validate(
         case FRAME_DATA_END_SERVICE:
         case FRAME_DATA_END_SERVICE_ACK:
         case FRAME_DATA_END_SERVICE_NACK:
+        case FRAME_DATA_REGISTER_SECONDARY_TRANSPORT:
+        case FRAME_DATA_REGISTER_SECONDARY_TRANSPORT_ACK:
+        case FRAME_DATA_REGISTER_SECONDARY_TRANSPORT_NACK:
+        case FRAME_DATA_TRANSPORT_EVENT_UPDATE:
         case FRAME_DATA_SERVICE_DATA_ACK:
         case FRAME_DATA_HEART_BEAT_ACK:
           break;
@@ -640,6 +644,10 @@ uint32_t ProtocolPacket::total_data_bytes() const {
 
 ConnectionID ProtocolPacket::connection_id() const {
   return connection_id_;
+}
+
+void ProtocolPacket::set_connection_id(ConnectionID connection_id) {
+  connection_id_ = connection_id;
 }
 
 uint32_t ProtocolPacket::payload_size() const {

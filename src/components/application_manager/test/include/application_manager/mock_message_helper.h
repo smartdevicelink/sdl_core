@@ -46,6 +46,12 @@ namespace application_manager {
 
 class MockMessageHelper {
  public:
+  MOCK_METHOD2(CreateNotification,
+               smart_objects::SmartObjectSPtr(mobile_apis::FunctionID::eType,
+                                              uint32_t));
+  MOCK_METHOD1(CreateHMINotification,
+               smart_objects::SmartObjectSPtr(hmi_apis::FunctionID::eType));
+
   MOCK_METHOD1(GetHashUpdateNotification,
                smart_objects::SmartObjectSPtr(const uint32_t app_id));
   MOCK_METHOD2(SendHashUpdateNotification,
@@ -230,6 +236,12 @@ class MockMessageHelper {
   MOCK_METHOD2(SendUIChangeRegistrationRequestToHMI,
                void(ApplicationConstSharedPtr app,
                     ApplicationManager& app_mngr));
+  MOCK_METHOD5(CreateDeviceInfo,
+               bool(connection_handler::DeviceHandle device_handle,
+                    const protocol_handler::SessionObserver& session_observer,
+                    const policy::PolicyHandlerInterface& policy_handler,
+                    ApplicationManager& app_mngr,
+                    smart_objects::SmartObject* output));
   MOCK_METHOD5(CreateHMIApplicationStruct,
                bool(ApplicationConstSharedPtr app,
                     const protocol_handler::SessionObserver& session_observer,

@@ -113,7 +113,7 @@ class AppLaunchDataDBTest : public ::testing::Test {
     return test_db_;
   }
 
-  static std::auto_ptr<AppLaunchDataDB> res_db_;
+  static std::unique_ptr<AppLaunchDataDB> res_db_;
 
   AppLaunchDataDB* res_db() {
     return res_db_.get();
@@ -145,7 +145,7 @@ class AppLaunchDataDBTest : public ::testing::Test {
 };
 
 utils::dbms::SQLDatabase* AppLaunchDataDBTest::test_db_ = NULL;
-std::auto_ptr<AppLaunchDataDB> AppLaunchDataDBTest::res_db_;
+std::unique_ptr<AppLaunchDataDB> AppLaunchDataDBTest::res_db_;
 
 void AppLaunchDataDBTest::AddApplicationDataWithIncreaseTable(
     const ApplicationData& data) {

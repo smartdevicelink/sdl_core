@@ -1,8 +1,5 @@
 /*
- * \file test_dbus_adapter.cc
- * \brief
- *
- * Copyright (c) 2013, Ford Motor Company
+ * Copyright (c) 2018 Xevo Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -16,7 +13,7 @@
  * disclaimer in the documentation and/or other materials provided with the
  * distribution.
  *
- * Neither the name of the Ford Motor Company nor the names of its contributors
+ * Neither the name of the copyright holders nor the names of its contributors
  * may be used to endorse or promote products derived from this software
  * without specific prior written permission.
  *
@@ -33,27 +30,60 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <gtest/gtest.h>
-#include "dbus/dbus_adapter.h"
+#include <arpa/inet.h>
+#include <net/if.h>
+#include <time.h>
 
-using ::dbus::DBusAdapter;
+#include "gtest/gtest.h"
+#include "transport_manager/tcp/network_interface_listener_impl.h"
+#include "transport_manager/tcp/mock_tcp_client_listener.h"
+#include "utils/test_async_waiter.h"
+#include "utils/threads/thread.h"
 
 namespace test {
 namespace components {
-namespace dbus {
+namespace transport_manager_test {
 
-class DBusAdapterTest : public ::testing::Test {};
-
-TEST_F(DBusAdapterTest, Initialization) {
-  const std::string kSdlServiceName = "test.ford.sdl.core";
-  const std::string kSdlObjectPath = "/";
-  const std::string kHmiServiceName = "test.ford.sdl.hmi";
-  const std::string kHmiObjectPath = "/";
-  ::dbus::DBusAdapter adapter(
-      kSdlServiceName, kSdlObjectPath, kHmiServiceName, kHmiObjectPath);
-  EXPECT_TRUE(adapter.Init());
+namespace {
+const long kThreadStartWaitMsec = 10;
+const uint32_t kStartNotificationTimeoutMsec = 500;
 }
 
-}  // namespace dbus
+using ::testing::_;
+using ::testing::AtLeast;
+using ::testing::SaveArg;
+
+class NetworkInterfaceListenerTest : public ::testing::Test {
+ public:
+  NetworkInterfaceListenerTest()
+      : interface_listener_impl_(NULL)
+      , mock_tcp_client_listener_(NULL, 0, false, "") {}
+
+  virtual ~NetworkInterfaceListenerTest() {}
+
+ protected:
+  struct InterfaceEntry {
+    const char* name;
+    const char* ipv4_address;
+    const char* ipv6_address;
+    unsigned int flags;
+  };
+
+  void Deinit() {
+    delete interface_listener_impl_;
+  }
+
+  void SleepFor(long msec) const {
+    if (msec > 0) {
+      struct timespec ts = {0, msec * 1000 * 1000};
+      nanosleep(&ts, NULL);
+    }
+  }
+
+  NetworkInterfaceListenerImpl* interface_listener_impl_;
+  MockTcpClientListener mock_tcp_client_listener_;
+};
+
+}  // namespace transport_manager_test
 }  // namespace components
 }  // namespace test

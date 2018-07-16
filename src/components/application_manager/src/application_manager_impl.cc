@@ -93,7 +93,13 @@ DeviceTypes devicesType = {
                    hmi_apis::Common_TransportType::BLUETOOTH),
     std::make_pair(std::string("BLUETOOTH_IOS"),
                    hmi_apis::Common_TransportType::BLUETOOTH),
-    std::make_pair(std::string("WIFI"), hmi_apis::Common_TransportType::WIFI)};
+    std::make_pair(std::string("WIFI"), hmi_apis::Common_TransportType::WIFI),
+    std::make_pair(std::string("USB_IOS_HOST_MODE"),
+                   hmi_apis::Common_TransportType::USB_IOS),
+    std::make_pair(std::string("USB_IOS_DEVICE_MODE"),
+                   hmi_apis::Common_TransportType::USB_IOS),
+    std::make_pair(std::string("CARPLAY_WIRELESS_IOS"),
+                   hmi_apis::Common_TransportType::WIFI)};
 }
 
 /**
@@ -141,8 +147,7 @@ ApplicationManagerImpl::ApplicationManagerImpl(
     , apps_to_register_list_lock_ptr_(std::make_shared<sync_primitives::Lock>())
     , audio_pass_thru_active_(false)
     , audio_pass_thru_app_id_(0)
-    , driver_distraction_state_(
-          hmi_apis::Common_DriverDistractionState::INVALID_ENUM)
+    , driver_distraction_state_(hmi_apis::Common_DriverDistractionState::DD_OFF)
     , is_vr_session_strated_(false)
     , hmi_cooperating_(false)
     , is_all_apps_allowed_(true)
@@ -222,6 +227,8 @@ ApplicationManagerImpl::~ApplicationManagerImpl() {
 
   navi_app_to_stop_.clear();
   navi_app_to_end_stream_.clear();
+
+  secondary_transport_devices_cache_.clear();
 }
 
 DataAccessor<ApplicationSet> ApplicationManagerImpl::applications() const {
@@ -629,8 +636,6 @@ ApplicationSharedPtr ApplicationManagerImpl::RegisterApplication(
     application->set_app_icon_path(full_icon_path);
   }
 
-  PutDriverDistractionMessageToPostponed(application);
-
   // Stops timer of saving data to resumption in order to
   // doesn't erase data from resumption storage.
   // Timer will be started after hmi level resumption.
@@ -644,6 +649,18 @@ ApplicationSharedPtr ApplicationManagerImpl::RegisterApplication(
   applications_.insert(application);
   apps_size_ = applications_.size();
   applications_list_lock_ptr_->Release();
+
+  // It is possible that secondary transport of this app has been already
+  // established. Make sure that the information is reflected to application
+  // instance.
+  // Also, make sure that this is done *after* we updated applications_ list to
+  // avoid timing issues.
+  DeviceMap::iterator itr =
+      secondary_transport_devices_cache_.find(connection_key);
+  if (secondary_transport_devices_cache_.end() != itr) {
+    connection_handler::DeviceHandle secondary_device_handle = itr->second;
+    application->set_secondary_device(secondary_device_handle);
+  }
 
   return application;
 }
@@ -1197,6 +1214,79 @@ mobile_apis::HMILevel::eType ApplicationManagerImpl::GetDefaultHmiLevel(
   return default_hmi;
 }
 
+bool ApplicationManagerImpl::CheckResumptionRequiredTransportAvailable(
+    ApplicationConstSharedPtr application) const {
+  using namespace mobile_apis;
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  const std::map<std::string, std::vector<std::string> >& transport_map =
+      get_settings().transport_required_for_resumption_map();
+
+  // retrieve transport type string used in .ini file
+  const std::string transport_type =
+      GetTransportTypeProfileString(application->device());
+  const std::string secondary_transport_type =
+      GetTransportTypeProfileString(application->secondary_device());
+
+  const smart_objects::SmartObject* app_types_array = application->app_types();
+  if (app_types_array == NULL || app_types_array->length() == 0) {
+    // This app does not have any AppHMIType. In this case, check "EMPTY_APP"
+    // entry
+    std::map<std::string, std::vector<std::string> >::const_iterator it =
+        transport_map.find(std::string("EMPTY_APP"));
+    if (it == transport_map.end()) {
+      // if "EMPTY_APP" is not specified, resumption is always enabled
+      return true;
+    }
+    const std::vector<std::string>& required_transport_list = it->second;
+
+    for (std::vector<std::string>::const_iterator itr =
+             required_transport_list.begin();
+         itr != required_transport_list.end();
+         ++itr) {
+      if (transport_type == *itr || secondary_transport_type == *itr) {
+        return true;
+      }
+    }
+    return false;
+  } else {
+    // check all AppHMITypes that the app has
+    for (size_t i = 0; i < app_types_array->length(); i++) {
+      const std::string app_type_string =
+          AppHMITypeToString(static_cast<mobile_apis::AppHMIType::eType>(
+              app_types_array->getElement(i).asUInt()));
+      bool transport_is_found = false;
+
+      std::map<std::string, std::vector<std::string> >::const_iterator it =
+          transport_map.find(app_type_string);
+      if (it == transport_map.end()) {
+        // this AppHMIType is not listed in .ini file, so resumption is always
+        // enabled
+        continue;
+      }
+
+      const std::vector<std::string>& required_transport_list = it->second;
+      for (std::vector<std::string>::const_iterator itr =
+               required_transport_list.begin();
+           itr != required_transport_list.end();
+           ++itr) {
+        if (transport_type == *itr || secondary_transport_type == *itr) {
+          transport_is_found = true;
+          break;
+        }
+      }
+
+      // if neither primary or secondary transport type is included in the list,
+      // then resumption will be disabled
+      if (!transport_is_found) {
+        return false;
+      }
+    }
+
+    return true;
+  }
+}
+
 uint32_t ApplicationManagerImpl::GenerateGrammarID() {
   return rand();
 }
@@ -1619,6 +1709,79 @@ void ApplicationManagerImpl::OnServiceEndedCallback(
           type, ServiceType::kMobileNav, ServiceType::kAudio)) {
     StopNaviService(session_key, type);
   }
+}
+
+void ApplicationManagerImpl::OnSecondaryTransportStartedCallback(
+    const connection_handler::DeviceHandle device_handle,
+    const int32_t session_key) {
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  if (device_handle == 0) {
+    LOG4CXX_WARN(logger_,
+                 "Invalid device handle passed for secondary transport of app "
+                     << session_key);
+    return;
+  }
+
+  secondary_transport_devices_cache_[session_key] = device_handle;
+
+  {
+    sync_primitives::AutoLock auto_lock(applications_list_lock_ptr_);
+    ApplicationSharedPtr app = application(session_key);
+    if (!app) {
+      // It is possible that secondary transport is established prior to
+      // RegisterAppInterface request being processed. In this case, we will
+      // update the app's information during RegisterApplication().
+      LOG4CXX_DEBUG(logger_,
+                    "Application with id: " << session_key << " is not found");
+      return;
+    }
+    app->set_secondary_device(device_handle);
+  }
+
+  // notify the event to HMI through BC.UpdateAppList request
+  SendUpdateAppList();
+
+  // if resumption has not been enabled, run it now
+  resume_controller().RetryResumption(session_key);
+}
+
+void ApplicationManagerImpl::OnSecondaryTransportEndedCallback(
+    const int32_t session_key) {
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  DeviceMap::iterator it = secondary_transport_devices_cache_.find(session_key);
+  if (it == secondary_transport_devices_cache_.end()) {
+    LOG4CXX_WARN(
+        logger_,
+        "Unknown session_key specified while removing secondary transport: "
+            << session_key);
+  } else {
+    secondary_transport_devices_cache_.erase(it);
+  }
+
+  {
+    sync_primitives::AutoLock auto_lock(applications_list_lock_ptr_);
+    ApplicationSharedPtr app = application(session_key);
+    if (!app) {
+      LOG4CXX_DEBUG(logger_,
+                    "Application with id: " << session_key << " is not found");
+      return;
+    }
+
+    connection_handler::DeviceHandle device_handle = app->secondary_device();
+    if (device_handle == 0) {
+      LOG4CXX_WARN(logger_,
+                   "Secondary transport of app " << session_key
+                                                 << " is not found");
+      return;
+    }
+
+    app->set_secondary_device(0);
+  }
+
+  // notify the event to HMI through BC.UpdateAppList request
+  SendUpdateAppList();
 }
 
 bool ApplicationManagerImpl::CheckAppIsNavi(const uint32_t app_id) const {
@@ -2299,15 +2462,11 @@ void ApplicationManagerImpl::SendOnSDLClose() {
       logger_,
       "Attached schema to message, result if valid: " << msg->isValid());
 
-#ifdef HMI_DBUS_API
-  message_to_send->set_smart_object(*msg);
-#else
   if (!ConvertSOtoMessage(*msg, *message_to_send)) {
     LOG4CXX_WARN(logger_,
                  "Cannot send message to HMI: failed to create string");
     return;
   }
-#endif  // HMI_DBUS_API
 
   if (!hmi_handler_) {
     LOG4CXX_WARN(logger_, "No HMI Handler set");
@@ -3195,6 +3354,39 @@ mobile_apis::AppHMIType::eType ApplicationManagerImpl::StringToAppHMIType(
   }
 }
 
+const std::string ApplicationManagerImpl::AppHMITypeToString(
+    mobile_apis::AppHMIType::eType type) const {
+  LOG4CXX_AUTO_TRACE(logger_);
+  switch (type) {
+    case mobile_apis::AppHMIType::DEFAULT:
+      return "DEFAULT";
+    case mobile_apis::AppHMIType::COMMUNICATION:
+      return "COMMUNICATION";
+    case mobile_apis::AppHMIType::MEDIA:
+      return "MEDIA";
+    case mobile_apis::AppHMIType::MESSAGING:
+      return "MESSAGING";
+    case mobile_apis::AppHMIType::NAVIGATION:
+      return "NAVIGATION";
+    case mobile_apis::AppHMIType::INFORMATION:
+      return "INFORMATION";
+    case mobile_apis::AppHMIType::SOCIAL:
+      return "SOCIAL";
+    case mobile_apis::AppHMIType::BACKGROUND_PROCESS:
+      return "BACKGROUND_PROCESS";
+    case mobile_apis::AppHMIType::TESTING:
+      return "TESTING";
+    case mobile_apis::AppHMIType::SYSTEM:
+      return "SYSTEM";
+    case mobile_apis::AppHMIType::PROJECTION:
+      return "PROJECTION";
+    case mobile_apis::AppHMIType::REMOTE_CONTROL:
+      return "REMOTE_CONTROL";
+    default:
+      return "INVALID_ENUM";
+  }
+}
+
 bool ApplicationManagerImpl::CompareAppHMIType(
     const smart_objects::SmartObject& from_policy,
     const smart_objects::SmartObject& from_application) {
@@ -3332,8 +3524,8 @@ void ApplicationManagerImpl::OnPTUFinished(const bool ptu_result) {
   plugin_manager_->ForEachPlugin(on_app_policy_updated);
 }
 
-void ApplicationManagerImpl::PutDriverDistractionMessageToPostponed(
-    ApplicationSharedPtr application) const {
+void ApplicationManagerImpl::SendDriverDistractionState(
+    ApplicationSharedPtr application) {
   LOG4CXX_AUTO_TRACE(logger_);
   if (hmi_apis::Common_DriverDistractionState::INVALID_ENUM ==
       driver_distraction_state()) {
@@ -3351,7 +3543,20 @@ void ApplicationManagerImpl::PutDriverDistractionMessageToPostponed(
       driver_distraction_state();
   (*on_driver_distraction)[strings::params][strings::connection_key] =
       application->app_id();
-  application->PushMobileMessage(on_driver_distraction);
+
+  const std::string function_id = MessageHelper::StringifiedFunctionID(
+      static_cast<mobile_apis::FunctionID::eType>(
+          (*on_driver_distraction)[strings::params][strings::function_id]
+              .asUInt()));
+  const RPCParams params;
+  const mobile_apis::Result::eType check_result =
+      CheckPolicyPermissions(application, function_id, params);
+  if (mobile_api::Result::SUCCESS == check_result) {
+    rpc_service_->ManageMobileCommand(on_driver_distraction,
+                                      commands::Command::SOURCE_SDL);
+  } else {
+    application->PushMobileMessage(on_driver_distraction);
+  }
 }
 
 protocol_handler::MajorProtocolVersion
@@ -3492,6 +3697,16 @@ const std::set<int32_t> ApplicationManagerImpl::GetAppsSubscribedForWayPoints()
   LOG4CXX_AUTO_TRACE(logger_);
   sync_primitives::AutoLock lock(subscribed_way_points_apps_lock_);
   return subscribed_way_points_apps_list_;
+}
+
+// retrieve transport type string used in .ini file, e.g. "TCP_WIFI"
+const std::string ApplicationManagerImpl::GetTransportTypeProfileString(
+    connection_handler::DeviceHandle device_handle) const {
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  return connection_handler()
+      .get_session_observer()
+      .TransportTypeProfileStringFromDeviceHandle(device_handle);
 }
 
 static hmi_apis::Common_VideoStreamingProtocol::eType ConvertVideoProtocol(

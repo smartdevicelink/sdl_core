@@ -180,6 +180,8 @@ std::pair<std::string,
                    mobile_apis::VehicleDataType::VEHICLEDATA_FUELRANGE),
     std::make_pair(strings::external_temp,
                    mobile_apis::VehicleDataType::VEHICLEDATA_EXTERNTEMP),
+    std::make_pair(strings::turn_signal,
+                   mobile_apis::VehicleDataType::VEHICLEDATA_TURNSIGNAL),
     std::make_pair(strings::vin, mobile_apis::VehicleDataType::VEHICLEDATA_VIN),
     std::make_pair(strings::prndl,
                    mobile_apis::VehicleDataType::VEHICLEDATA_PRNDL),
@@ -189,6 +191,9 @@ std::pair<std::string,
                    mobile_apis::VehicleDataType::VEHICLEDATA_ODOMETER),
     std::make_pair(strings::belt_status,
                    mobile_apis::VehicleDataType::VEHICLEDATA_BELTSTATUS),
+    std::make_pair(
+        strings::electronic_park_brake_status,
+        mobile_apis::VehicleDataType::VEHICLEDATA_ELECTRONICPARKBRAKESTATUS),
     std::make_pair(strings::body_information,
                    mobile_apis::VehicleDataType::VEHICLEDATA_BODYINFO),
     std::make_pair(strings::device_status,
@@ -227,58 +232,44 @@ const VehicleData MessageHelper::vehicle_data_(
     kVehicleDataInitializer,
     kVehicleDataInitializer + ARRAYSIZE(kVehicleDataInitializer));
 
-#ifdef HMI_DBUS_API
-namespace {
-struct VehicleInfo_Requests {
-  hmi_apis::FunctionID::eType func_id;
-  const char* str;
-};
-static VehicleInfo_Requests ivi_subrequests[] = {
-    {hmi_apis::FunctionID::VehicleInfo_SubscribeGps, strings::gps},
-    {hmi_apis::FunctionID::VehicleInfo_SubscribeSpeed, strings::speed},
-    {hmi_apis::FunctionID::VehicleInfo_SubscribeRpm, strings::rpm},
-    {hmi_apis::FunctionID::VehicleInfo_SubscribeFuelLevel, strings::fuel_level},
-    {hmi_apis::FunctionID::VehicleInfo_SubscribeFuelLevel_State,
-     strings::fuel_level_state},
-    {hmi_apis::FunctionID::VehicleInfo_SubscribeInstantFuelConsumption,
-     strings::instant_fuel_consumption},
-    {hmi_apis::FunctionID::VehicleInfo_SubscribeExternalTemperature,
-     strings::external_temp},
-    {hmi_apis::FunctionID::VehicleInfo_SubscribeVin, strings::vin},
-    {hmi_apis::FunctionID::VehicleInfo_SubscribePrndl, strings::prndl},
-    {hmi_apis::FunctionID::VehicleInfo_SubscribeTirePressure,
-     strings::tire_pressure},
-    {hmi_apis::FunctionID::VehicleInfo_SubscribeOdometer, strings::odometer},
-    {hmi_apis::FunctionID::VehicleInfo_SubscribeBeltStatus,
-     strings::belt_status},
-    {hmi_apis::FunctionID::VehicleInfo_SubscribeBodyInformation,
-     strings::body_information},
-    {hmi_apis::FunctionID::VehicleInfo_SubscribeDeviceStatus,
-     strings::device_status},
-    {hmi_apis::FunctionID::VehicleInfo_SubscribeDriverBraking,
-     strings::driver_braking},
-    {hmi_apis::FunctionID::VehicleInfo_SubscribeWiperStatus,
-     strings::wiper_status},
-    {hmi_apis::FunctionID::VehicleInfo_SubscribeHeadLampStatus,
-     strings::head_lamp_status},
-    {hmi_apis::FunctionID::VehicleInfo_SubscribeEngineTorque,
-     strings::engine_torque},
-    {hmi_apis::FunctionID::VehicleInfo_SubscribeAccPedalPosition,
-     strings::acc_pedal_pos},
-    {hmi_apis::FunctionID::VehicleInfo_SubscribeSteeringWheelAngle,
-     strings::steering_wheel_angle},
-    {hmi_apis::FunctionID::VehicleInfo_SubscribeECallInfo,
-     strings::e_call_info},
-    {hmi_apis::FunctionID::VehicleInfo_SubscribeAirbagStatus,
-     strings::airbag_status},
-    {hmi_apis::FunctionID::VehicleInfo_SubscribeEmergencyEvent,
-     strings::emergency_event},
-    {hmi_apis::FunctionID::VehicleInfo_SubscribeClusterModeStatus,
-     strings::cluster_mode_status},
-    {hmi_apis::FunctionID::VehicleInfo_SubscribeMyKey, strings::my_key},
-};
+smart_objects::SmartObjectSPtr MessageHelper::CreateNotification(
+    mobile_apis::FunctionID::eType function_id, uint32_t app_id) {
+  using smart_objects::SmartObject;
+  LOG4CXX_AUTO_TRACE(logger_);
+  smart_objects::SmartObjectSPtr object(
+      new SmartObject(smart_objects::SmartType_Map));
+  (*object)[strings::params][strings::message_type] =
+      static_cast<int>(kNotification);
+  (*object)[strings::params][strings::function_id] = function_id;
+  (*object)[strings::params][strings::connection_key] = app_id;
+  (*object)[strings::params][strings::protocol_version] =
+      commands::CommandImpl::protocol_version_;
+  (*object)[strings::params][strings::protocol_type] =
+      commands::CommandImpl::mobile_protocol_type_;
+  (*object)[strings::msg_params] =
+      smart_objects::SmartObject(smart_objects::SmartType_Map);
+  return object;
 }
-#endif  // #ifdef HMI_DBUS_API
+
+NsSmartDeviceLink::NsSmartObjects::SmartObjectSPtr
+MessageHelper::CreateHMINotification(hmi_apis::FunctionID::eType function_id) {
+  using smart_objects::SmartObject;
+  using smart_objects::SmartObjectSPtr;
+  using smart_objects::SmartType_Map;
+  LOG4CXX_AUTO_TRACE(logger_);
+  SmartObjectSPtr notification_ptr =
+      utils::MakeShared<SmartObject>(SmartType_Map);
+  SmartObject& notification = *notification_ptr;
+  notification[strings::params][strings::message_type] =
+      static_cast<int32_t>(kNotification);
+  notification[strings::params][strings::protocol_version] =
+      commands::CommandImpl::protocol_version_;
+  notification[strings::params][strings::protocol_type] =
+      commands::CommandImpl::hmi_protocol_type_;
+  notification[strings::params][strings::function_id] = function_id;
+
+  return notification_ptr;
+}
 
 const uint32_t MessageHelper::GetPriorityCode(const std::string& priority) {
   CommonAppPriorityMap::const_iterator it = app_priority_values.find(priority);
@@ -828,101 +819,11 @@ std::string MessageHelper::StringifiedFunctionID(
   return std::string();
 }
 
-#ifdef HMI_DBUS_API
-namespace {
-const std::map<std::string, uint16_t> create_get_vehicle_data_args() {
-  std::map<std::string, uint16_t> rc;
-  rc.insert(std::make_pair(strings::gps,
-                           hmi_apis::FunctionID::VehicleInfo_GetGpsData));
-  rc.insert(std::make_pair(strings::speed,
-                           hmi_apis::FunctionID::VehicleInfo_GetSpeed));
-  rc.insert(
-      std::make_pair(strings::rpm, hmi_apis::FunctionID::VehicleInfo_GetRpm));
-  rc.insert(std::make_pair(strings::fuel_level,
-                           hmi_apis::FunctionID::VehicleInfo_GetFuelLevel));
-  rc.insert(
-      std::make_pair(strings::fuel_level_state,
-                     hmi_apis::FunctionID::VehicleInfo_GetFuelLevelState));
-  rc.insert(std::make_pair(
-      strings::instant_fuel_consumption,
-      hmi_apis::FunctionID::VehicleInfo_GetInstantFuelConsumption));
-  rc.insert(
-      std::make_pair(strings::external_temp,
-                     hmi_apis::FunctionID::VehicleInfo_GetExternalTemperature));
-  rc.insert(
-      std::make_pair(strings::vin, hmi_apis::FunctionID::VehicleInfo_GetVin));
-  rc.insert(std::make_pair(strings::prndl,
-                           hmi_apis::FunctionID::VehicleInfo_GetPrndl));
-  rc.insert(std::make_pair(strings::tire_pressure,
-                           hmi_apis::FunctionID::VehicleInfo_GetTirePressure));
-  rc.insert(std::make_pair(strings::odometer,
-                           hmi_apis::FunctionID::VehicleInfo_GetOdometer));
-  rc.insert(std::make_pair(strings::belt_status,
-                           hmi_apis::FunctionID::VehicleInfo_GetBeltStatus));
-  rc.insert(
-      std::make_pair(strings::body_information,
-                     hmi_apis::FunctionID::VehicleInfo_GetBodyInformation));
-  rc.insert(std::make_pair(strings::device_status,
-                           hmi_apis::FunctionID::VehicleInfo_GetDeviceStatus));
-  rc.insert(std::make_pair(strings::driver_braking,
-                           hmi_apis::FunctionID::VehicleInfo_GetDriverBraking));
-  rc.insert(std::make_pair(strings::wiper_status,
-                           hmi_apis::FunctionID::VehicleInfo_GetWiperStatus));
-  rc.insert(
-      std::make_pair(strings::head_lamp_status,
-                     hmi_apis::FunctionID::VehicleInfo_GetHeadLampStatus));
-  rc.insert(std::make_pair(strings::engine_torque,
-                           hmi_apis::FunctionID::VehicleInfo_GetEngineTorque));
-  rc.insert(
-      std::make_pair(strings::acc_pedal_pos,
-                     hmi_apis::FunctionID::VehicleInfo_GetAccPedalPosition));
-  rc.insert(
-      std::make_pair(strings::steering_wheel_angle,
-                     hmi_apis::FunctionID::VehicleInfo_GetSteeringWheelAngle));
-  rc.insert(std::make_pair(strings::e_call_info,
-                           hmi_apis::FunctionID::VehicleInfo_GetECallInfo));
-  rc.insert(std::make_pair(strings::airbag_status,
-                           hmi_apis::FunctionID::VehicleInfo_GetAirbagStatus));
-  rc.insert(
-      std::make_pair(strings::emergency_event,
-                     hmi_apis::FunctionID::VehicleInfo_GetEmergencyEvent));
-  rc.insert(
-      std::make_pair(strings::cluster_mode_status,
-                     hmi_apis::FunctionID::VehicleInfo_GetClusterModeStatus));
-  rc.insert(std::make_pair(strings::my_key,
-                           hmi_apis::FunctionID::VehicleInfo_GetMyKey));
-  return rc;
-}
-static std::map<std::string, uint16_t> vehicle_data_args =
-    create_get_vehicle_data_args();
-}
-#endif
-
 void MessageHelper::CreateGetVehicleDataRequest(
     const uint32_t correlation_id,
     const std::vector<std::string>& params,
     ApplicationManager& app_mngr) {
   LOG4CXX_AUTO_TRACE(logger_);
-#ifdef HMI_DBUS_API
-  for (std::vector<std::string>::const_iterator it = params.begin();
-       it != params.end();
-       it++) {
-    smart_objects::SmartObjectSPtr request =
-        utils::MakeShared<smart_objects::SmartObject>();
-
-    (*request)[strings::params][strings::message_type] =
-        static_cast<int>(kRequest);
-    (*request)[strings::params][strings::correlation_id] = correlation_id;
-    (*request)[strings::params][strings::protocol_version] =
-        commands::CommandImpl::protocol_version_;
-    (*request)[strings::params][strings::protocol_type] =
-        commands::CommandImpl::hmi_protocol_type_;
-    (*request)[strings::params][strings::function_id] =
-        static_cast<int>(vehicle_data_args[*it]);
-    app_mngr.GetRPCService().ManageHMICommand(request);
-  }
-#else
-
   smart_objects::SmartObjectSPtr request =
       utils::MakeShared<smart_objects::SmartObject>();
 
@@ -943,7 +844,6 @@ void MessageHelper::CreateGetVehicleDataRequest(
     (*request)[strings::msg_params][*it] = true;
   }
   app_mngr.GetRPCService().ManageHMICommand(request);
-#endif
 }
 
 smart_objects::SmartObjectSPtr MessageHelper::CreateBlockedByPoliciesResponse(
@@ -1564,6 +1464,40 @@ smart_objects::SmartObjectSPtr MessageHelper::CreateAddVRCommandToHMI(
   return vr_command;
 }
 
+bool MessageHelper::CreateDeviceInfo(
+    connection_handler::DeviceHandle device_handle,
+    const protocol_handler::SessionObserver& session_observer,
+    const policy::PolicyHandlerInterface& policy_handler,
+    ApplicationManager& app_mngr,
+    smart_objects::SmartObject* output) {
+  DCHECK_OR_RETURN(output, false);
+
+  std::string device_name;
+  std::string mac_address;
+  std::string transport_type;
+  if (-1 ==
+      session_observer.GetDataOnDeviceID(
+          device_handle, &device_name, NULL, &mac_address, &transport_type)) {
+    LOG4CXX_ERROR(logger_,
+                  "Failed to extract information for device " << device_handle);
+  }
+
+  smart_objects::SmartObject& device_info_map = *output;
+  device_info_map = smart_objects::SmartObject(smart_objects::SmartType_Map);
+
+  device_info_map[strings::name] = device_name;
+  device_info_map[strings::id] = mac_address;
+  device_info_map[strings::transport_type] =
+      app_mngr.GetDeviceTransportType(transport_type);
+
+  const policy::DeviceConsent device_consent =
+      policy_handler.GetUserConsentForDevice(mac_address);
+  device_info_map[strings::isSDLAllowed] =
+      policy::DeviceConsent::kDeviceAllowed == device_consent;
+
+  return true;
+}
+
 bool MessageHelper::CreateHMIApplicationStruct(
     ApplicationConstSharedPtr app,
     const protocol_handler::SessionObserver& session_observer,
@@ -1585,15 +1519,6 @@ bool MessageHelper::CreateHMIApplicationStruct(
   const smart_objects::SmartObject* day_color_scheme = app->day_color_scheme();
   const smart_objects::SmartObject* night_color_scheme =
       app->night_color_scheme();
-  std::string device_name;
-  std::string mac_address;
-  std::string transport_type;
-  if (-1 ==
-      session_observer.GetDataOnDeviceID(
-          app->device(), &device_name, NULL, &mac_address, &transport_type)) {
-    LOG4CXX_ERROR(logger_,
-                  "Failed to extract information for device " << app->device());
-  }
 
   message = smart_objects::SmartObject(smart_objects::SmartType_Map);
   message[strings::app_name] = app->name();
@@ -1632,15 +1557,22 @@ bool MessageHelper::CreateHMIApplicationStruct(
 
   message[strings::device_info] =
       smart_objects::SmartObject(smart_objects::SmartType_Map);
-  message[strings::device_info][strings::name] = device_name;
-  message[strings::device_info][strings::id] = mac_address;
-  const policy::DeviceConsent device_consent =
-      policy_handler.GetUserConsentForDevice(mac_address);
-  message[strings::device_info][strings::isSDLAllowed] =
-      policy::DeviceConsent::kDeviceAllowed == device_consent;
+  smart_objects::SmartObject& device_info = message[strings::device_info];
+  CreateDeviceInfo(
+      app->device(), session_observer, policy_handler, app_mngr, &device_info);
 
-  message[strings::device_info][strings::transport_type] =
-      app_mngr.GetDeviceTransportType(transport_type);
+  if (app->secondary_device() != 0) {
+    message[strings::secondary_device_info] =
+        smart_objects::SmartObject(smart_objects::SmartType_Map);
+    smart_objects::SmartObject& secondary_device_info =
+        message[strings::secondary_device_info];
+    CreateDeviceInfo(app->secondary_device(),
+                     session_observer,
+                     policy_handler,
+                     app_mngr,
+                     &secondary_device_info);
+  }
+
   return true;
 }
 

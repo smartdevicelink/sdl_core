@@ -418,6 +418,7 @@ void RegisterAppInterfaceRequest::Run() {
   smart_objects::SmartObjectSPtr so =
       GetLockScreenIconUrlNotification(connection_key(), application);
   rpc_service_.ManageMobileCommand(so, SOURCE_SDL);
+  application_manager_.SendDriverDistractionState(application);
 }
 
 smart_objects::SmartObjectSPtr
@@ -945,31 +946,27 @@ void RegisterAppInterfaceRequest::SendOnAppRegisteredNotificationToHMI(
     application[strings::request_subtype] = SmartObject(SmartType_Array);
   }
 
-  application[strings::device_info] = SmartObject(SmartType_Map);
-  smart_objects::SmartObject& device_info = application[strings::device_info];
   const protocol_handler::SessionObserver& session_observer =
       application_manager_.connection_handler().get_session_observer();
-  std::string device_name;
-  std::string mac_address;
-  std::string transport_type;
-  const connection_handler::DeviceHandle handle = application_impl.device();
-  if (-1 ==
-      session_observer.GetDataOnDeviceID(
-          handle, &device_name, NULL, &mac_address, &transport_type)) {
-    LOG4CXX_ERROR(logger_,
-                  "Failed to extract information for device " << handle);
+
+  application[strings::device_info] = SmartObject(SmartType_Map);
+  smart_objects::SmartObject& device_info = application[strings::device_info];
+  MessageHelper::CreateDeviceInfo(application_impl.device(),
+                                  session_observer,
+                                  GetPolicyHandler(),
+                                  application_manager_,
+                                  &device_info);
+
+  if (application_impl.secondary_device() != 0) {
+    application[strings::secondary_device_info] = SmartObject(SmartType_Map);
+    smart_objects::SmartObject& secondary_device_info =
+        application[strings::secondary_device_info];
+    MessageHelper::CreateDeviceInfo(application_impl.secondary_device(),
+                                    session_observer,
+                                    GetPolicyHandler(),
+                                    application_manager_,
+                                    &secondary_device_info);
   }
-
-  device_info[strings::name] = device_name;
-  device_info[strings::id] = mac_address;
-
-  const policy::DeviceConsent device_consent =
-      GetPolicyHandler().GetUserConsentForDevice(mac_address);
-  device_info[strings::isSDLAllowed] =
-      policy::DeviceConsent::kDeviceAllowed == device_consent;
-
-  device_info[strings::transport_type] =
-      application_manager_.GetDeviceTransportType(transport_type);
 
   const smart_objects::SmartObject* day_color_scheme =
       application_impl.day_color_scheme();

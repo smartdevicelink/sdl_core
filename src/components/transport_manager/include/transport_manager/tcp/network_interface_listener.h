@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, Ford Motor Company
+ * Copyright (c) 2018 Xevo Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -13,7 +13,7 @@
  * disclaimer in the documentation and/or other materials provided with the
  * distribution.
  *
- * Neither the name of the Ford Motor Company nor the names of its contributors
+ * Neither the names of the copyright holders nor the names of its contributors
  * may be used to endorse or promote products derived from this software
  * without specific prior written permission.
  *
@@ -29,45 +29,45 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-#ifndef SRC_COMPONENTS_DBUS_INCLUDE_DBUS_MESSAGE_DESCRIPTIONS_H_
-#define SRC_COMPONENTS_DBUS_INCLUDE_DBUS_MESSAGE_DESCRIPTIONS_H_
 
-#include <stdint.h>
-#include <stdlib.h>
-#include "interfaces/HMI_API.h"
+#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TCP_NETWORK_INTERFACE_LISTENER_H_
+#define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TCP_NETWORK_INTERFACE_LISTENER_H_
 
-namespace ford_message_descriptions {
+namespace transport_manager {
+namespace transport_adapter {
 
-enum ParameterType { Integer, Boolean, Float, String, Struct, Enum, Array };
+/**
+ * @brief Listener to detect various events on network interfaces
+ */
+class NetworkInterfaceListener {
+ public:
+  /**
+   * @brief Destructor
+   */
+  virtual ~NetworkInterfaceListener() {}
 
-struct ParameterDescription {
-  const char* name;
-  const ParameterType type;
-  const bool obligatory;  // TODO (dchmerev@luxoft.com): rename to 'mandatory'
-                          // as in HMI API description
+  /**
+   * @brief Initialize this listener
+   */
+  virtual bool Init() = 0;
+
+  /**
+   * @brief Deinitialize this listener
+   */
+  virtual void Deinit() = 0;
+
+  /**
+   * @brief Start this listener
+   */
+  virtual bool Start() = 0;
+
+  /**
+   * @brief Stop this listener
+   */
+  virtual bool Stop() = 0;
 };
 
-struct ArrayDescription {
-  const ParameterDescription base;
-  const ParameterDescription* element;
-  const char* element_dbus_signature;
-};
+}  // namespace transport_adapter
+}  // namespace transport_manager
 
-struct StructDescription {
-  const ParameterDescription base;
-  const ParameterDescription** parameters;
-};
-
-struct MessageDescription {
-  const char* interface;
-  const char* name;
-  const hmi_apis::messageType::eType message_type;
-  const hmi_apis::FunctionID::eType function_id;
-  const ParameterDescription** parameters;
-};
-
-extern const MessageDescription* message_descriptions[];
-
-}  // namespace ford_message_descriptions
-
-#endif  // SRC_COMPONENTS_DBUS_INCLUDE_DBUS_MESSAGE_DESCRIPTIONS_H_
+#endif  // SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TCP_NETWORK_INTERFACE_LISTENER_H_

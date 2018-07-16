@@ -2,6 +2,9 @@
  * Copyright (c) 2014, Ford Motor Company
  * All rights reserved.
  *
+ * Copyright (c) 2018 Xevo Inc.
+ * All rights reserved.
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *
@@ -13,7 +16,7 @@
  * disclaimer in the documentation and/or other materials provided with the
  * distribution.
  *
- * Neither the name of the Ford Motor Company nor the names of its contributors
+ * Neither the name of the copyright holders nor the names of its contributors
  * may be used to endorse or promote products derived from this software
  * without specific prior written permission.
  *
@@ -204,6 +207,13 @@ class TransportAdapterController {
                               const ApplicationHandle& app_handle,
                               ::protocol_handler::RawMessagePtr message,
                               const DataSendError&) = 0;
+
+  /**
+   * @brief Notification that transport's configuration is updated
+   *
+   * @param new_config The new configuration of the transport
+   */
+  virtual void TransportConfigUpdated(const TransportConfig& new_config) = 0;
 };
 
 }  // namespace transport_adapter

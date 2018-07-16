@@ -44,21 +44,18 @@ namespace codegen {
 
 TypePreferences::TypePreferences(int minimum_interger_size,
                                  bool avoid_unsigned,
-                                 bool generate_json,
-                                 bool generate_dbus)
+                                 bool generate_json)
     : minimum_interger_size(minimum_interger_size),
       avoid_unsigned(avoid_unsigned),
-      generate_json(generate_json),
-      generate_dbus(generate_dbus) {
+      generate_json(generate_json) {
 }
 
 Preferences::Preferences(int minimum_interger_size,
                          bool avoid_unsigned,
                          bool generate_json,
-                         bool generate_dbus,
                          const std::set<std::string>& requested_interfaces)
     : type_preferences(minimum_interger_size, avoid_unsigned,
-                       generate_json, generate_dbus),
+                       generate_json),
       requested_interfaces(requested_interfaces) {
 }
 

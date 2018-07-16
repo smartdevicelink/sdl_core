@@ -12,6 +12,12 @@ const char* height = "height";
 const char* width = "width";
 const char* video_protocol = "videoProtocol";
 const char* video_codec = "videoCodec";
+const char* secondary_transports = "secondaryTransports";
+const char* audio_service_transports = "audioServiceTransports";
+const char* video_service_transports = "videoServiceTransports";
+const char* tcp_ip_address = "tcpIpAddress";
+const char* tcp_port = "tcpPort";
+const char* reason = "reason";
 
 }  // namespace strings
 

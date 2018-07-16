@@ -188,6 +188,8 @@ class ApplicationManagerImpl
   void SendHMIStatusNotification(
       const utils::SharedPtr<Application> app) OVERRIDE;
 
+  void SendDriverDistractionState(ApplicationSharedPtr application);
+
   ApplicationSharedPtr application(
       const std::string& device_id,
       const std::string& policy_app_id) const OVERRIDE;
@@ -671,6 +673,10 @@ class ApplicationManagerImpl
       const int32_t& session_key,
       const protocol_handler::ServiceType& type,
       const connection_handler::CloseSessionReason& close_reason) OVERRIDE;
+  void OnSecondaryTransportStartedCallback(
+      const connection_handler::DeviceHandle device_handle,
+      const int32_t session_key) OVERRIDE;
+  void OnSecondaryTransportEndedCallback(const int32_t session_key) OVERRIDE;
 
   /**
    * @brief Check if application with specified app_id has NAVIGATION HMI type
@@ -815,6 +821,18 @@ class ApplicationManagerImpl
                       bool state) OVERRIDE;
 
   mobile_api::HMILevel::eType GetDefaultHmiLevel(
+      ApplicationConstSharedPtr application) const;
+
+  /**
+   * @brief Checks if required transport for resumption is available
+   *
+   * The required transport can be configured through smartDeviceLink.ini file.
+   *
+   * @param application an instance of the app to check
+   * @return true if the app is connected through one of the required
+   *         transports, false otherwise
+   */
+  bool CheckResumptionRequiredTransportAvailable(
       ApplicationConstSharedPtr application) const;
 
   /**
@@ -1142,6 +1160,14 @@ class ApplicationManagerImpl
   mobile_apis::AppHMIType::eType StringToAppHMIType(std::string str);
 
   /**
+   * @brief Returns a string representation of AppHMIType
+   * @param type an enum value of AppHMIType
+   * @return string representation of the enum value
+   */
+  const std::string AppHMITypeToString(
+      mobile_apis::AppHMIType::eType type) const;
+
+  /**
    * @brief Method compares arrays of app HMI type
    * @param from_policy contains app HMI type from policy
    * @param from_application contains app HMI type from application
@@ -1327,14 +1353,6 @@ class ApplicationManagerImpl
   void DisallowStreaming(uint32_t app_id);
 
   /**
-   * @brief Checks if driver distraction state is valid, creates message
-   * and puts it to postponed message.
-   * @param application contains registered application.
-   */
-  void PutDriverDistractionMessageToPostponed(
-      ApplicationSharedPtr application) const;
-
-  /**
    * @brief Types of directories used by Application Manager
    */
   enum DirectoryType { TYPE_STORAGE, TYPE_SYSTEM, TYPE_ICONS };
@@ -1398,6 +1416,15 @@ class ApplicationManagerImpl
                          const std::string& mac_address);
 
   /**
+   * @brief Converts device handle to transport type string used in
+   * smartDeviceLink.ini file, e.g. "TCP_WIFI"
+   * @param device_handle A device handle
+   * @return string representation of the transport of the device
+   */
+  const std::string GetTransportTypeProfileString(
+      connection_handler::DeviceHandle device_handle) const;
+
+  /**
    * @brief Converts BSON object containing video parameters to
    * smart object's map object
    * @param output the smart object to add video parameters
@@ -1459,7 +1486,7 @@ class ApplicationManagerImpl
 
   hmi_message_handler::HMIMessageHandler* hmi_handler_;
   connection_handler::ConnectionHandler* connection_handler_;
-  std::auto_ptr<policy::PolicyHandlerInterface> policy_handler_;
+  std::unique_ptr<policy::PolicyHandlerInterface> policy_handler_;
   protocol_handler::ProtocolHandler* protocol_handler_;
   request_controller::RequestController request_ctrl_;
   std::unique_ptr<plugin_manager::RPCPluginManager> plugin_manager_;
@@ -1488,7 +1515,7 @@ class ApplicationManagerImpl
   static uint32_t corelation_id_;
   static const uint32_t max_corelation_id_;
 
-  std::auto_ptr<HMICapabilities> hmi_capabilities_;
+  std::unique_ptr<HMICapabilities> hmi_capabilities_;
   // The reason of HU shutdown
   mobile_api::AppInterfaceUnregisteredReason::eType unregister_reason_;
 
@@ -1497,7 +1524,7 @@ class ApplicationManagerImpl
    * about persistent application data on disk, and save session ID for resuming
    * application in case INGITION_OFF or MASTER_RESSET
    */
-  std::auto_ptr<resumption::ResumeCtrl> resume_ctrl_;
+  std::unique_ptr<resumption::ResumeCtrl> resume_ctrl_;
 
   HmiInterfacesImpl hmi_interfaces_;
 
@@ -1512,8 +1539,8 @@ class ApplicationManagerImpl
   sync_primitives::Lock timer_pool_lock_;
   mutable sync_primitives::Lock stopping_application_mng_lock_;
   StateControllerImpl state_ctrl_;
-  std::auto_ptr<app_launch::AppLaunchData> app_launch_dto_;
-  std::auto_ptr<app_launch::AppLaunchCtrl> app_launch_ctrl_;
+  std::unique_ptr<app_launch::AppLaunchData> app_launch_dto_;
+  std::unique_ptr<app_launch::AppLaunchCtrl> app_launch_ctrl_;
 
   /**
    * @brief ReregisterWaitList is list of applications expected to be
@@ -1523,6 +1550,12 @@ class ApplicationManagerImpl
   ReregisterWaitList reregister_wait_list_;
 
   mutable sync_primitives::Lock reregister_wait_list_lock_;
+
+  // This is a cache to remember DeviceHandle of secondary transports. Only used
+  // during RegisterApplication().
+  typedef std::map<int32_t, connection_handler::DeviceHandle> DeviceMap;
+
+  DeviceMap secondary_transport_devices_cache_;
 
 #ifdef TELEMETRY_MONITOR
   AMTelemetryObserver* metric_observer_;

@@ -39,6 +39,18 @@
 
 namespace application_manager {
 
+smart_objects::SmartObjectSPtr MessageHelper::CreateNotification(
+    mobile_apis::FunctionID::eType function_id, uint32_t app_id) {
+  return MockMessageHelper::message_helper_mock()->CreateNotification(
+      function_id, app_id);
+}
+
+smart_objects::SmartObjectSPtr MessageHelper::CreateHMINotification(
+    hmi_apis::FunctionID::eType function_id) {
+  return MockMessageHelper::message_helper_mock()->CreateHMINotification(
+      function_id);
+}
+
 void MessageHelper::SendHashUpdateNotification(uint32_t const app_id,
                                                ApplicationManager& app_mngr) {
   MockMessageHelper::message_helper_mock()->SendHashUpdateNotification(
@@ -421,6 +433,16 @@ void MessageHelper::SendUIChangeRegistrationRequestToHMI(
     ApplicationConstSharedPtr app, ApplicationManager& app_mngr) {
   MockMessageHelper::message_helper_mock()
       ->SendUIChangeRegistrationRequestToHMI(app, app_mngr);
+}
+
+bool MessageHelper::CreateDeviceInfo(
+    connection_handler::DeviceHandle device_handle,
+    const protocol_handler::SessionObserver& session_observer,
+    const policy::PolicyHandlerInterface& policy_handler,
+    ApplicationManager& app_mngr,
+    smart_objects::SmartObject* output) {
+  return MockMessageHelper::message_helper_mock()->CreateDeviceInfo(
+      device_handle, session_observer, policy_handler, app_mngr, output);
 }
 
 bool MessageHelper::CreateHMIApplicationStruct(
