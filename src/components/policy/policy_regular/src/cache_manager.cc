@@ -1031,7 +1031,6 @@ bool CacheManager::IsPermissionsCalculated(const std::string& device_id,
 
 utils::SharedPtr<policy_table::Table> CacheManager::GenerateSnapshot() {
   CACHE_MANAGER_CHECK(snapshot_);
-  printf("Generating snapshot!\n" );
 
   snapshot_ = new policy_table::Table();
 

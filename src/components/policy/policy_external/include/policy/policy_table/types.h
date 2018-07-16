@@ -303,7 +303,6 @@ struct ModuleConfig : CompositeType {
   Optional<String<0, 10> > preloaded_date;
   Optional<String<0, 65535> > certificate;
   Optional<Boolean> preloaded_pt;
-  Optional<Boolean> full_app_id_supported;
 
  public:
   ModuleConfig();
