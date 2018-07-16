@@ -987,19 +987,26 @@ const ApplicationManagerSettings& ApplicationManagerImpl::get_settings() const {
 // Extract the app ID to use internally based on the UseFullAppID .ini setting
 std::string ApplicationManagerImpl::GetCorrectMobileIDFromMessage(
     const commands::MessageSharedPtr& message) const {
-  std::string app_id_short =
-      (*message)[strings::msg_params][strings::app_id].asString();
-  std::string app_id_full =
-      (*message)[strings::msg_params][strings::full_app_id].asString();
+  // If we're expecting the full app id
+  if (get_settings().use_full_app_id()) {
+    // we got the full app id, use it
+    if ((*message)[strings::msg_params].keyExists(strings::full_app_id)) {
+      // temporary debug printing
+      std::string app_id_short =
+          (*message)[strings::msg_params][strings::app_id].asString();
+      std::string app_id_full =
+          (*message)[strings::msg_params][strings::full_app_id].asString();
 
-  printf("getting correct id, short is %s, long is %s, use full is %d\n",
-         app_id_short.c_str(),
-         app_id_full.c_str(),
-         get_settings().use_full_app_id());
-  // Get the correct policy id
-  std::string chosen_app_id =
-      get_settings().use_full_app_id() ? app_id_full : app_id_short;
-  return chosen_app_id;
+      printf("getting full id, short is %s, long is %s, use full is %d\n",
+             app_id_short.c_str(),
+             app_id_full.c_str());
+      return (*message)[strings::msg_params][strings::full_app_id].asString();
+    } else {
+      LOG4CXX_DEBUG("UseFullAppID is on but only short ID given!");
+    }
+  }
+  // if we're not using full or no full given, use regular appID
+  return (*message)[strings::msg_params][strings::app_id].asString();
 }
 
 void application_manager::ApplicationManagerImpl::MarkAppsGreyOut(
