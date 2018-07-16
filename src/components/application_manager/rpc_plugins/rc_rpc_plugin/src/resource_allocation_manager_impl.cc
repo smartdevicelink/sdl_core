@@ -174,7 +174,11 @@ void ResourceAllocationManagerImpl::ProcessApplicationPolicyUpdate() {
       if (rc_extention) {
         rc_extention->UnsubscribeFromInteriorVehicleData(*module);
       }
-      SendOnRCStatusNotification();
+    }
+    if (!disallowed_modules.empty()) {
+      SendOnRCStatusNotifications(
+          NotificationTrigger::MODULE_ALLOCATION,
+          utils::SharedPtr<application_manager::Application>());
     }
   }
 }
@@ -234,7 +238,6 @@ void ConstructOnRCStatusNotificationParams(
   using smart_objects::SmartType_Map;
   using smart_objects::SmartType_Array;
   LOG4CXX_AUTO_TRACE(logger_);
-
   auto modules_inserter = [](SmartObject& result_modules) {
     return [&result_modules](const std::string& module_name) {
       smart_objects::SmartObject module_data =
@@ -257,6 +260,7 @@ void ConstructOnRCStatusNotificationParams(
       modules_inserter(free_modules)(module);
     }
   }
+
   msg_params[message_params::kAllocatedModules] = allocated_modules;
   msg_params[message_params::kFreeModules] = free_modules;
 }
@@ -269,8 +273,17 @@ ResourceAllocationManagerImpl::CreateOnRCStatusNotificationToMobile(
   auto msg_to_mobile = MessageHelper::CreateNotification(
       mobile_apis::FunctionID::OnRCStatusID, app->app_id());
   auto& msg_params = (*msg_to_mobile)[application_manager::strings::msg_params];
-  ConstructOnRCStatusNotificationParams(
-      msg_params, allocated_resources_, all_supported_modules(), app->app_id());
+  if (is_rc_enabled()) {
+    ConstructOnRCStatusNotificationParams(msg_params,
+                                          allocated_resources_,
+                                          all_supported_modules(),
+                                          app->app_id());
+  } else {
+    msg_params[message_params::kAllocatedModules] =
+        smart_objects::SmartObject(smart_objects::SmartType_Array);
+    msg_params[message_params::kFreeModules] =
+        smart_objects::SmartObject(smart_objects::SmartType_Array);
+  }
   return msg_to_mobile;
 }
 
@@ -292,17 +305,33 @@ void ResourceAllocationManagerImpl::SetResourceAquired(
     const std::string& module_type, const uint32_t app_id) {
   LOG4CXX_AUTO_TRACE(logger_);
   allocated_resources_[module_type] = app_id;
-  SendOnRCStatusNotification();
+  SendOnRCStatusNotifications(
+      NotificationTrigger::MODULE_ALLOCATION,
+      utils::SharedPtr<application_manager::Application>());
 }
 
-void ResourceAllocationManagerImpl::SendOnRCStatusNotification() {
+void ResourceAllocationManagerImpl::SendOnRCStatusNotifications(
+    NotificationTrigger::eType event,
+    application_manager::ApplicationSharedPtr application) {
   LOG4CXX_AUTO_TRACE(logger_);
-  auto rc_apps = RCRPCPlugin::GetRCApplications(app_mngr_);
-  for (const auto& rc_app : rc_apps) {
-    auto msg_to_mobile = CreateOnRCStatusNotificationToMobile(rc_app);
+  smart_objects::SmartObjectSPtr msg_to_mobile;
+  smart_objects::SmartObjectSPtr msg_to_hmi;
+  if (NotificationTrigger::APP_REGISTRATION == event) {
+    DCHECK(application);
+    msg_to_mobile = CreateOnRCStatusNotificationToMobile(application);
+    (*msg_to_mobile)[application_manager::strings::msg_params]
+                    [message_params::kAllowed] = is_rc_enabled();
     rpc_service_.SendMessageToMobile(msg_to_mobile);
-    auto msg_to_hmi = CreateOnRCStatusNotificationToHmi(rc_app);
-    rpc_service_.SendMessageToHMI(msg_to_hmi);
+  } else {
+    auto rc_apps = RCRPCPlugin::GetRCApplications(app_mngr_);
+    for (const auto& rc_app : rc_apps) {
+      msg_to_mobile = CreateOnRCStatusNotificationToMobile(rc_app);
+      (*msg_to_mobile)[application_manager::strings::msg_params]
+                      [message_params::kAllowed] = is_rc_enabled();
+      rpc_service_.SendMessageToMobile(msg_to_mobile);
+      msg_to_hmi = CreateOnRCStatusNotificationToHmi(rc_app);
+      rpc_service_.SendMessageToHMI(msg_to_hmi);
+    }
   }
 }
 
@@ -312,6 +341,9 @@ bool ResourceAllocationManagerImpl::is_rc_enabled() const {
 
 void ResourceAllocationManagerImpl::set_rc_enabled(const bool value) {
   is_rc_enabled_ = value;
+  SendOnRCStatusNotifications(
+      NotificationTrigger::RC_STATE_CHANGING,
+      utils::SharedPtr<application_manager::Application>());
 }
 
 void ResourceAllocationManagerImpl::SetResourceFree(
@@ -476,7 +508,9 @@ void ResourceAllocationManagerImpl::OnApplicationEvent(
       ReleaseResource(*module, application->app_id());
     }
     if (!acquired_modules.empty()) {
-      SendOnRCStatusNotification();
+      SendOnRCStatusNotifications(
+          NotificationTrigger::MODULE_ALLOCATION,
+          utils::SharedPtr<application_manager::Application>());
     }
     Apps app_list;
     app_list.push_back(application);

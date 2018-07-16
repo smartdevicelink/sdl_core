@@ -150,8 +150,8 @@ void RCOnRemoteControlSettingsNotification::Run() {
   } else {
     LOG4CXX_DEBUG(logger_, "Disallowing RC Functionality");
     DisallowRCFunctionality();
-    resource_allocation_manager_.set_rc_enabled(false);
     resource_allocation_manager_.ResetAllAllocations();
+    resource_allocation_manager_.set_rc_enabled(false);
   }
 }
 
