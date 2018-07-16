@@ -911,7 +911,8 @@ bool CommandRequestImpl::IsHMIResultSuccess(
       hmi_apis::Common_Result::WARNINGS,
       hmi_apis::Common_Result::WRONG_LANGUAGE,
       hmi_apis::Common_Result::RETRY,
-      hmi_apis::Common_Result::SAVED);
+      hmi_apis::Common_Result::SAVED,
+      hmi_apis::Common_Result::TRUNCATED_DATA);
 }
 
 bool CommandRequestImpl::PrepareResultForMobileResponse(
