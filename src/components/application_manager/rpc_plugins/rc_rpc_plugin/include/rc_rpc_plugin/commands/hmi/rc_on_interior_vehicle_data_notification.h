@@ -59,12 +59,12 @@ class RCOnInteriorVehicleDataNotification
       const application_manager::commands::MessageSharedPtr& message,
       const RCCommandParams& params);
 
-  ~RCOnInteriorVehicleDataNotification();
+  void Run() OVERRIDE;
 
   /**
-   * @brief Execute command
-   **/
-  void Run() OVERRIDE;
+   * @brief RCOnInteriorVehicleDataNotification destructor
+   */
+  ~RCOnInteriorVehicleDataNotification();
 };
 }  // namespace commands
 }  // namespace rc_rpc_plugin

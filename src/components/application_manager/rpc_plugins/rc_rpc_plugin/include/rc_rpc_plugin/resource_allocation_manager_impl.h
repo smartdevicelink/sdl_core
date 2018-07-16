@@ -44,67 +44,45 @@ typedef std::vector<application_manager::ApplicationSharedPtr> Apps;
 
 class ResourceAllocationManagerImpl : public ResourceAllocationManager {
  public:
+  /**
+   * @brief Constructor with parameters
+   * @param application manager
+   * @param rpc service
+   */
   ResourceAllocationManagerImpl(
       application_manager::ApplicationManager& app_mngr,
       application_manager::rpc_service::RPCService& rpc_service);
 
+  /**
+   * @brief Destructor for ResourceAllocationManagerImpl
+   */
   ~ResourceAllocationManagerImpl();
 
-  /**
-   * @brief AcquireResource forces acquiring resource by application
-   * @param module_type resource to acquire
-   * @param app_id application that acquire resourc
-   * @return result of acauiring resources
-   */
   AcquireResult::eType AcquireResource(const std::string& module_type,
                                        const uint32_t app_id) OVERRIDE FINAL;
-  /**
-   * @brief ForceAcquireResource forces acquiring resource by application
-   * @param module_type resource to acquire
-   * @param app_id application that acquire resource
-   */
+
   void ForceAcquireResource(const std::string& module_type,
                             const uint32_t app_id) FINAL;
 
-  /**
-    * @brief SetResourceState changes resource state. Resource must be acquired
-    * beforehand.
-    * @param module_type Resource to change its state
-    * @param app_id Application aquired resource before
-    * @param state State to set for resource
-    */
   void SetResourceState(const std::string& module_type,
                         const uint32_t app_id,
                         const ResourceState::eType state) FINAL;
 
-  /**
-   * @brief IsResourceFree check resource state
-   * @param module_type Resource name
-   * @return True if free, otherwise - false
-   */
   bool IsResourceFree(const std::string& module_type) const FINAL;
 
   void SetAccessMode(
       const hmi_apis::Common_RCAccessMode::eType access_mode) FINAL;
+
 
   hmi_apis::Common_RCAccessMode::eType GetAccessMode() const FINAL;
 
   void OnDriverDisallowed(const std::string& module_type,
                           const uint32_t app_id) FINAL;
 
-  /**
-   * @brief OnApplicationEvent Notifies modules on certain application events
-   * @param event Event
-   * @param application Pointer to application struct
-   */
   void OnApplicationEvent(
       application_manager::plugin_manager::ApplicationEvent event,
       application_manager::ApplicationSharedPtr application) FINAL;
 
-  /**
-   * @brief OnPolicyEvent Processes policy related events
-   * @param event Policy event
-   */
   void OnPolicyEvent(
       application_manager::plugin_manager::PolicyEvent event) FINAL;
 
@@ -181,7 +159,11 @@ class ResourceAllocationManagerImpl : public ResourceAllocationManager {
    */
   void SetResourceFree(const std::string& module_type, const uint32_t app_id);
 
+  /**
+   * @brief Collection of all supported modules
+   */
   std::vector<std::string> all_supported_modules();
+
   /**
    * @brief AllocatedResources contains link between resource and application
    * owning that resource

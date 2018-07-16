@@ -51,6 +51,10 @@ class RCGetInteriorVehicleDataRequest
       const RCCommandParams& params);
 
   void Run() OVERRIDE;
+
+  /**
+   * @brief RCGetInteriorVehicleDataRequest destructor
+   */
   ~RCGetInteriorVehicleDataRequest();
 };
 

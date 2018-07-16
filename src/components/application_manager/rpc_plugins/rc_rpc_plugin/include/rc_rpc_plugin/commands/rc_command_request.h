@@ -51,16 +51,15 @@ class RCCommandRequest : public app_mngr::commands::CommandRequestImpl {
   /**
    * @brief RCCommandRequest class constructor
    * @param message MessageSharedPtr
-   * @param application_manager ApplicationManager
-   * @param rpc_service RPCService
-   * @param hmi_capabilities HMICapabilities
-   * @param policy_handle PolicyHandlerInterface
-   * @param resource_allocation_manager ResourceAllocationManager
+   * @param params RCCommandParams
    **/
   RCCommandRequest(
       const application_manager::commands::MessageSharedPtr& message,
       const RCCommandParams& params);
 
+  /**
+   * @brief destructor of RCCommandRequest
+   */
   virtual ~RCCommandRequest();
 
   void onTimeOut() OVERRIDE;
@@ -111,18 +110,26 @@ class RCCommandRequest : public app_mngr::commands::CommandRequestImpl {
                                 const ResourceState::eType) {}
 
   /**
-   * Checks if module for application is present in policy table
-   * @param app_id id of application
+   * @brief Checks if module for application is present in policy table
    * @param module type Resource name
+   * @param app_id id of application
    * @return kAllowed if module is present, otherwise - kDisallowed
    */
   TypeAccess CheckModule(const std::string& module_type,
                          application_manager::ApplicationSharedPtr app);
 
+  /**
+   * @brief Is auto is allowed
+   * @return bool
+   */
   bool auto_allowed() const {
     return auto_allowed_;
   }
 
+  /**
+   * @brief Set Is auto is allowed
+   * @param bool
+   */
   void set_auto_allowed(const bool value) {
     auto_allowed_ = value;
   }
@@ -132,10 +139,18 @@ class RCCommandRequest : public app_mngr::commands::CommandRequestImpl {
    */
   void virtual Execute() = 0;
 
+  /**
+   * @brief Set the disalowed info
+   * @param disallowed info
+   */
   void set_disallowed_info(const std::string& info) {
     disallowed_info_ = info;
   }
 
+  /**
+   * @brief Get the module type
+   * @return std::string
+   */
   virtual std::string ModuleType() = 0;
 
  private:
@@ -153,6 +168,11 @@ class RCCommandRequest : public app_mngr::commands::CommandRequestImpl {
    * otherwise false
    */
   bool AcquireResources();
+
+  /**
+   * @brief Send responce DISALLOWED to mobile
+   * @param access TypeAccess
+   */
   void SendDisallowed(TypeAccess access);
 
   /**
@@ -160,7 +180,17 @@ class RCCommandRequest : public app_mngr::commands::CommandRequestImpl {
    * @param module_type Resource name
    */
   void SendGetUserConsent(const std::string& module_type);
+
+  /**
+   * @brief Processing the access responce
+   * @param event event_engine::Even
+   */
   void ProcessAccessResponse(const app_mngr::event_engine::Event& event);
+
+  /**
+   * @brief Check if interface is available
+   * @param bool
+   */
   bool IsInterfaceAvailable(
       const app_mngr::HmiInterfaces::InterfaceID interface) const;
 

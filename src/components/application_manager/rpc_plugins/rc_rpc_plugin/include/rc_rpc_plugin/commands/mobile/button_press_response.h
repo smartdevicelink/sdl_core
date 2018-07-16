@@ -46,10 +46,17 @@ namespace commands {
 class ButtonPressResponse
     : public application_manager::commands::CommandResponseImpl {
  public:
+  /**
+   * @brief Constructor of ButtonPressResponse
+   * @param message MessageSharedPtr
+   * @param params RCCommandParams
+   */
   ButtonPressResponse(
       const application_manager::commands::MessageSharedPtr& message,
       const RCCommandParams& params);
+
   void Run() OVERRIDE;
+
   /**
    * @brief ButtonPressResponse class destructor
    */

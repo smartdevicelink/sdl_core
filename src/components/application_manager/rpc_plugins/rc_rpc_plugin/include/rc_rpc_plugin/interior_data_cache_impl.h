@@ -43,20 +43,33 @@
 #include "utils/timer_task_impl.h"
 
 namespace rc_rpc_plugin {
+/**
+ * @brief The InteriorDataCacheImpl implementation of interface for caching data
+ * class
+ * Provide ability to cache module data by module type name and clear cache
+ */
 class InteriorDataCacheImpl : public InteriorDataCache {
  public:
+  /**
+   * @brief Constructor of InteriorDataCacheImpl which initialize the timer
+   */
   InteriorDataCacheImpl(const uint32_t time_frame_of_allowed_requests);
 
   ~InteriorDataCacheImpl();
 
   void Add(const std::string& module_type,
            const smart_objects::SmartObject& module_data) OVERRIDE;
+
   smart_objects::SmartObject Retrieve(
       const std::string& module_type) const OVERRIDE;
+
   bool Contains(const std::string& module_type) const OVERRIDE;
+
   void ClearCache() OVERRIDE;
+
   uint32_t GetCurrentAmountOfRequests(
       const std::string& module_type) const OVERRIDE;
+
   void IncrementAmountOfRequests(const std::string& module_type) OVERRIDE;
 
   void StartRequestResetTimer(

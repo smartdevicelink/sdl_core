@@ -41,6 +41,11 @@ namespace app_mngr = application_manager;
 namespace commands {
 class ButtonPressRequest : public RCCommandRequest {
  public:
+  /**
+   * @brief Constructor of ButtonPressRequest
+   * @param message MessageSharedPtr
+   * @param params RCCommandParams
+   */
   ButtonPressRequest(
       const application_manager::commands::MessageSharedPtr& message,
       const RCCommandParams& params);
@@ -82,6 +87,10 @@ class ButtonPressRequest : public RCCommandRequest {
    */
   void on_event(const app_mngr::event_engine::Event& event) FINAL;
 
+  /**
+   * @brief Get the module type
+   * @return module type - std::string
+   */
   std::string ModuleType() FINAL;
 
   /**

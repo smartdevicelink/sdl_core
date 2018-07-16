@@ -60,6 +60,9 @@ class RCButtonPressResponse
 
   void Run() OVERRIDE;
 
+  /**
+   * @brief RCButtonPressResponse destructor
+   */
   ~RCButtonPressResponse();
 };
 }  // namespace commands

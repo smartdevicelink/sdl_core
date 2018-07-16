@@ -59,11 +59,12 @@ class RCOnRemoteControlSettingsNotification
   RCOnRemoteControlSettingsNotification(
       const application_manager::commands::MessageSharedPtr& message,
       const RCCommandParams& params);
-  /**
-   * @brief Execute command
-   **/
+
   void Run() OVERRIDE;
 
+  /**
+   * @brief RCOnRemoteControlSettingsNotification destructor
+   */
   ~RCOnRemoteControlSettingsNotification();
 
  private:

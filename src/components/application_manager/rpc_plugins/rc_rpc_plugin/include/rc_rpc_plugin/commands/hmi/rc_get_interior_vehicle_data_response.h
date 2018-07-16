@@ -52,6 +52,9 @@ class RCGetInteriorVehicleDataResponse
 
   void Run() OVERRIDE;
 
+  /**
+   * @brief RCGetInteriorVehicleDataResponse destructor
+   */
   ~RCGetInteriorVehicleDataResponse();
 };
 }  // namespace commands

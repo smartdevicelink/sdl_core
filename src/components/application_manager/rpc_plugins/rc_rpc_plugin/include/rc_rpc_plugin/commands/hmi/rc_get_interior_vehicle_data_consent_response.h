@@ -61,6 +61,9 @@ class RCGetInteriorVehicleDataConsentResponse
 
   void Run() OVERRIDE;
 
+  /**
+   * @brief RCGetInteriorVehicleDataConsentResponse destructor
+   */
   ~RCGetInteriorVehicleDataConsentResponse();
 };
 

@@ -143,14 +143,23 @@ class ResourceAllocationManager {
 
   /**
    * @brief Create and send OnRCStatusNotification to mobile and HMI
-   * @param application
    */
   virtual void SendOnRCStatusNotification() = 0;
 
+  /**
+   * @brief Return Is RC enabled
+   * @return bool
+   */
   virtual bool is_rc_enabled() const = 0;
 
+  /**
+   * @brief Set the flag is RC enabled
+   */
   virtual void set_rc_enabled(const bool value) = 0;
 
+  /**
+     * @brief Destructor for correct polimorph destroying object
+     */
   virtual ~ResourceAllocationManager() {}
 };
 

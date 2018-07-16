@@ -47,6 +47,11 @@ namespace commands {
 class OnInteriorVehicleDataNotification
     : public application_manager::commands::CommandNotificationImpl {
  public:
+  /**
+   * @brief Constructor of OnInteriorVehicleDataNotification
+   * @param message MessageSharedPtr
+   * @param params RCCommandParams
+   */
   OnInteriorVehicleDataNotification(
       const application_manager::commands::MessageSharedPtr& message,
       const RCCommandParams& params);
@@ -55,10 +60,18 @@ class OnInteriorVehicleDataNotification
 
   std::string ModuleType();
 
+  /**
+   * @brief OnInteriorVehicleDataNotification class destructor
+   */
   ~OnInteriorVehicleDataNotification();
 
  private:
   InteriorDataCache& interior_data_cache_;
+
+  /**
+   * @brief Method of adding data to cache
+   * @param module_type std::string
+   */
   void AddDataToCache(const std::string& module_type);
 };
 }  // namespace commands
