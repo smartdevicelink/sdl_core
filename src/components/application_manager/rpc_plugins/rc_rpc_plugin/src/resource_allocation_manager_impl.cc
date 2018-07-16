@@ -369,6 +369,7 @@ ResourceAllocationManagerImpl::all_supported_modules() {
   std::vector<std::string> result;
   result.push_back(enums_value::kClimate);
   result.push_back(enums_value::kRadio);
+  result.push_back(enums_value::kSeat);
   return result;
 }
 
