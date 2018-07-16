@@ -326,10 +326,8 @@ void ResourceAllocationManagerImpl::SendOnRCStatusNotifications(
     auto rc_apps = RCRPCPlugin::GetRCApplications(app_mngr_);
     for (const auto& rc_app : rc_apps) {
       msg_to_mobile = CreateOnRCStatusNotificationToMobile(rc_app);
-      if (NotificationTrigger::RC_STATE_CHANGING == event) {
-        (*msg_to_mobile)[application_manager::strings::msg_params]
-                        [message_params::kAllowed] = is_rc_enabled();
-      }
+      (*msg_to_mobile)[application_manager::strings::msg_params]
+                      [message_params::kAllowed] = is_rc_enabled();
       rpc_service_.SendMessageToMobile(msg_to_mobile);
       msg_to_hmi = CreateOnRCStatusNotificationToHmi(rc_app);
       rpc_service_.SendMessageToHMI(msg_to_hmi);
