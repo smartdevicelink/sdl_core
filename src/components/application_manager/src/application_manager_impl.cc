@@ -499,7 +499,8 @@ ApplicationSharedPtr ApplicationManagerImpl::RegisterApplication(
   }
 
   smart_objects::SmartObject& params = message[strings::msg_params];
-  const std::string& policy_app_id = GetCorrectMobileIDFromMessage(request_for_registration);
+  const std::string& policy_app_id =
+      GetCorrectMobileIDFromMessage(request_for_registration);
   const custom_str::CustomString& app_name =
       message[strings::msg_params][strings::app_name].asCustomString();
   std::string device_mac;
@@ -511,7 +512,10 @@ ApplicationSharedPtr ApplicationManagerImpl::RegisterApplication(
     LOG4CXX_DEBUG(logger_,
                   "Device mac for id" << device_id << " is " << device_mac);
   }
-  printf("device id is %lu, app id is %u, policy_app_id is %s, \n", device_id, app_id, policy_app_id.c_str());
+  printf("device id is %lu, app id is %u, policy_app_id is %s, \n",
+         device_id,
+         app_id,
+         policy_app_id.c_str());
 
   LOG4CXX_DEBUG(logger_, "Restarting application list update timer");
   GetPolicyHandler().OnAppsSearchStarted();
@@ -983,12 +987,15 @@ const ApplicationManagerSettings& ApplicationManagerImpl::get_settings() const {
 // Extract the app ID to use internally based on the UseFullAppID .ini setting
 std::string ApplicationManagerImpl::GetCorrectMobileIDFromMessage(
     const commands::MessageSharedPtr& message) const {
-   std::string app_id_short =
+  std::string app_id_short =
       (*message)[strings::msg_params][strings::app_id].asString();
-   std::string app_id_full =
+  std::string app_id_full =
       (*message)[strings::msg_params][strings::full_app_id].asString();
-      
-      printf("getting correct id, short is %s, long is %s\n",app_id_short.c_str(), app_id_full.c_str() );
+
+  printf("getting correct id, short is %s, long is %s, use full is %d\n",
+         app_id_short.c_str(),
+         app_id_full.c_str(),
+         get_settings().use_full_app_id());
   // Get the correct policy id
   std::string chosen_app_id =
       get_settings().use_full_app_id() ? app_id_full : app_id_short;

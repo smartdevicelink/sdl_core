@@ -2,6 +2,7 @@
     "policy_table": {
         "module_config": {
             "preloaded_pt": true,
+            "full_app_id_supported": true,
             "preloaded_date": "2015-02-12",
             "exchange_after_x_ignition_cycles": 100,
             "exchange_after_x_kilometers": 1800,

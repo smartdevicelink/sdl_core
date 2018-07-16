@@ -34,6 +34,7 @@ BEGIN TRANSACTION;
     VALUES (0, 0, 0, 0); 
   CREATE TABLE IF NOT EXISTS `module_config`( 
     `preloaded_pt` BOOL NOT NULL, 
+    `full_app_id_supported` BOOL NOT NULL, 
     `is_first_run` BOOL NOT NULL,
     `exchange_after_x_ignition_cycles` INTEGER NOT NULL, 
     `exchange_after_x_kilometers` INTEGER NOT NULL, 
@@ -43,10 +44,10 @@ BEGIN TRANSACTION;
     `vehicle_model` VARCHAR(45), 
     `vehicle_year` VARCHAR(4)  
   ); 
-  INSERT OR IGNORE INTO `module_config` (`preloaded_pt`, `is_first_run`,
+  INSERT OR IGNORE INTO `module_config` (`preloaded_pt`, `full_app_id_supported`, `is_first_run`,
     `exchange_after_x_ignition_cycles`, `exchange_after_x_kilometers`, 
     `exchange_after_x_days`, `timeout_after_x_seconds`) 
-    VALUES(1, 1, 0, 0, 0, 0); 
+    VALUES(1, 1, 1, 0, 0, 0, 0); 
   CREATE TABLE IF NOT EXISTS `functional_group`( 
     `id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, 
     `user_consent_prompt` TEXT UNIQUE ON CONFLICT REPLACE, 
