@@ -997,12 +997,12 @@ std::string ApplicationManagerImpl::GetCorrectMobileIDFromMessage(
       std::string app_id_full =
           (*message)[strings::msg_params][strings::full_app_id].asString();
 
-      printf("getting full id, short is %s, long is %s, use full is %d\n",
+      printf("getting full id, short is %s, long is %s\n",
              app_id_short.c_str(),
              app_id_full.c_str());
       return (*message)[strings::msg_params][strings::full_app_id].asString();
     } else {
-      LOG4CXX_DEBUG("UseFullAppID is on but only short ID given!");
+      LOG4CXX_DEBUG(logger_, "UseFullAppID is on but only short ID given!");
     }
   }
   // if we're not using full or no full given, use regular appID
