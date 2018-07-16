@@ -78,17 +78,8 @@ void OnHMIStatusNotification::Run() {
   mobile_apis::HMILevel::eType hmi_level =
       static_cast<mobile_apis::HMILevel::eType>(
           (*message_)[strings::msg_params][strings::hmi_level].asInt());
-  if ((mobile_apis::HMILevel::HMI_BACKGROUND == hmi_level) ||
-      (mobile_apis::HMILevel::HMI_NONE == hmi_level)) {
-    if (!(app->tts_properties_in_none())) {
-      app->set_tts_properties_in_none(true);
-      LOG4CXX_INFO(logger_,
-                   "OnHMIStatusNotification::Send TTS GlobalProperties"
-                   " with empty array to HMI");
-      MessageHelper::SendTTSGlobalProperties(app, false, application_manager_);
-    }
-  } else if ((mobile_apis::HMILevel::HMI_FULL == hmi_level) ||
-             (mobile_apis::HMILevel::HMI_LIMITED == hmi_level)) {
+  if ((mobile_apis::HMILevel::HMI_FULL == hmi_level) ||
+      (mobile_apis::HMILevel::HMI_LIMITED == hmi_level)) {
     if (!(app->tts_properties_in_full())) {
       app->set_tts_properties_in_full(true);
       LOG4CXX_INFO(logger_,

@@ -625,8 +625,12 @@ void ResumeCtrlImpl::AddCommands(ApplicationSharedPtr application,
         saved_app[strings::application_commands];
     for (size_t i = 0; i < app_commands.length(); ++i) {
       const smart_objects::SmartObject& command = app_commands[i];
+      const uint32_t cmd_id = command[strings::cmd_id].asUInt();
+      const bool is_resumption = true;
 
-      application->AddCommand(command[strings::cmd_id].asUInt(), command);
+      application->AddCommand(cmd_id, command);
+      application->help_prompt_manager().OnVrCommandAdded(
+          cmd_id, command, is_resumption);
     }
     ProcessHMIRequests(MessageHelper::CreateAddCommandRequestToHMI(
         application, application_manager_));

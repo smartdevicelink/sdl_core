@@ -49,6 +49,7 @@
 #include "application_manager/mock_message_helper.h"
 #include "application_manager/event_engine/event.h"
 #include "application_manager/mock_hmi_interface.h"
+#include "application_manager/mock_help_prompt_manager.h"
 
 namespace test {
 namespace components {
@@ -57,6 +58,7 @@ namespace mobile_commands_test {
 namespace add_command_request {
 
 namespace am = application_manager;
+namespace am_test = application_manager_test;
 using am::commands::CommandImpl;
 using am::ApplicationManager;
 using am::commands::MessageSharedPtr;
@@ -104,6 +106,8 @@ class AddCommandRequestTest
       : msg_(CreateMessage())
       , default_app_name_("test_default_app_name_")
       , lock_ptr_(std::make_shared<sync_primitives::Lock>())
+      , mock_help_prompt_manager_(
+            std::make_shared<am_test::MockHelpPromptManager>())
       , mock_app_(CreateMockApp()) {
     EXPECT_CALL(app_mngr_, application(kConnectionKey))
         .WillRepeatedly(Return(mock_app_));
@@ -226,6 +230,7 @@ class AddCommandRequestTest
   SmartObjectSPtr so_ptr_;
   const utils::custom_string::CustomString default_app_name_;
   std::shared_ptr<sync_primitives::Lock> lock_ptr_;
+  std::shared_ptr<am_test::MockHelpPromptManager> mock_help_prompt_manager_;
   MockAppPtr mock_app_;
 };
 
@@ -524,6 +529,12 @@ TEST_F(AddCommandRequestTest, OnEvent_UI_SUCCESS) {
       mock_rpc_service_,
       ManageHMICommand(HMIResultCodeIs(hmi_apis::FunctionID::UI_AddCommand)))
       .WillOnce(Return(true));
+
+  EXPECT_CALL(*mock_app_, help_prompt_manager())
+      .WillOnce(ReturnRef(*mock_help_prompt_manager_));
+  EXPECT_CALL(*mock_help_prompt_manager_,
+              OnVrCommandAdded(kCmdId, (*msg_)[msg_params], false));
+
   utils::SharedPtr<AddCommandRequest> request_ptr =
       CreateCommand<AddCommandRequest>(msg_);
   request_ptr->Run();
@@ -549,6 +560,12 @@ TEST_F(AddCommandRequestTest, OnEvent_VR_SUCCESS) {
       mock_rpc_service_,
       ManageHMICommand(HMIResultCodeIs(hmi_apis::FunctionID::VR_AddCommand)))
       .WillOnce(Return(true));
+
+  EXPECT_CALL(*mock_app_, help_prompt_manager())
+      .WillOnce(ReturnRef(*mock_help_prompt_manager_));
+  EXPECT_CALL(*mock_help_prompt_manager_,
+              OnVrCommandAdded(kCmdId, (*msg_)[msg_params], false));
+
   utils::SharedPtr<AddCommandRequest> request_ptr =
       CreateCommand<AddCommandRequest>(msg_);
   request_ptr->Run();
@@ -665,6 +682,11 @@ TEST_F(AddCommandRequestTest,
   EXPECT_CALL(mock_rpc_service_,
               ManageMobileCommand(
                   MobileResultCodeIs(mobile_apis::Result::WARNINGS), _));
+
+  EXPECT_CALL(*mock_app_, help_prompt_manager())
+      .WillOnce(ReturnRef(*mock_help_prompt_manager_));
+  EXPECT_CALL(*mock_help_prompt_manager_, OnVrCommandAdded(kCmdId, _, false));
+
   utils::SharedPtr<AddCommandRequest> request_ptr =
       CreateCommand<AddCommandRequest>(msg_);
   request_ptr->Run();

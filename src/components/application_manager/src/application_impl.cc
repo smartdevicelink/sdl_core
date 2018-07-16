@@ -126,6 +126,7 @@ ApplicationImpl::ApplicationImpl(
     , device_id_(device_id)
     , secondary_device_id_(0)
     , usage_report_(mobile_app_id, statistics_manager)
+    , help_prompt_manager_impl_(*this, application_manager)
     , protocol_version_(
           protocol_handler::MajorProtocolVersion::PROTOCOL_VERSION_3)
     , is_voice_communication_application_(false)
@@ -795,6 +796,10 @@ bool ApplicationImpl::UnsubscribeFromButton(
 
 UsageStatistics& ApplicationImpl::usage_report() {
   return usage_report_;
+}
+
+HelpPromptManager& ApplicationImpl::help_prompt_manager() {
+  return help_prompt_manager_impl_;
 }
 
 bool ApplicationImpl::AreCommandLimitsExceeded(
