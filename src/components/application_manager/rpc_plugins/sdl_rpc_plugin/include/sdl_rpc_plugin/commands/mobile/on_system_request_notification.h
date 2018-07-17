@@ -78,8 +78,9 @@ class OnSystemRequestNotification
   /**
    * @brief Adds HTTP header to message
    * @param message Message
+   * @param useFullAppID adds the full_app_id_supported field to the message if we support full app IDs
    */
-  void AddHeader(BinaryMessage& message) const;
+  void AddHeader(BinaryMessage& message, bool useFullAppID) const;
   size_t ParsePTString(std::string& pt_string) const;
 #endif  // PROPRIETARY_MODE
 
