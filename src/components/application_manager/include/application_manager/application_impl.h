@@ -50,7 +50,7 @@
 
 #include "connection_handler/device.h"
 #include "utils/lock.h"
-#include "utils/atomic_object.h"
+#include <atomic>
 #include "utils/custom_string.h"
 #include "utils/timer.h"
 #include "utils/macro.h"
@@ -499,7 +499,7 @@ class ApplicationImpl : public virtual Application,
   HelpPromptManagerImpl help_prompt_manager_impl_;
   protocol_handler::MajorProtocolVersion protocol_version_;
   bool is_voice_communication_application_;
-  sync_primitives::atomic_bool is_resuming_;
+  std::atomic_bool is_resuming_;
   mobile_api::HMILevel::eType deferred_resumption_hmi_level_;
   bool is_hash_changed_during_suspend_;
 
