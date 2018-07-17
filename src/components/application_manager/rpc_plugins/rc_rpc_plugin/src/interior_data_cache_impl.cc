@@ -56,6 +56,14 @@ InteriorDataCacheImpl::~InteriorDataCacheImpl() {
     reset_request_count_timer_.Stop();
   }
 }
+
+/**
+ * @brief MergeModuleData key all keys and values from first parameter and
+ * update and append keys and values from the second
+ * @param data1 - initial data
+ * @param data2 - updated data
+ * @return updated data1 with data2 keys and values
+ */
 smart_objects::SmartObject MergeModuleData(
     const smart_objects::SmartObject& data1,
     const smart_objects::SmartObject& data2) {
