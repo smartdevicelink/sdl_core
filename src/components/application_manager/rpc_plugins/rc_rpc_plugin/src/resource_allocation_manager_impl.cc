@@ -173,6 +173,9 @@ void ResourceAllocationManagerImpl::ProcessApplicationPolicyUpdate() {
     for (; disallowed_modules.end() != module; ++module) {
       ReleaseResource(*module, application_id);
     }
+    if (!disallowed_modules.empty()) {
+      SendOnRCStatusNotification();
+    }
   }
 }
 
@@ -435,6 +438,9 @@ void ResourceAllocationManagerImpl::OnApplicationEvent(
     Resources::const_iterator module = acquired_modules.begin();
     for (; acquired_modules.end() != module; ++module) {
       ReleaseResource(*module, application->app_id());
+    }
+    if (!acquired_modules.empty()) {
+      SendOnRCStatusNotification();
     }
 
     Apps app_list;
