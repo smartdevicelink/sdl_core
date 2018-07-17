@@ -1441,6 +1441,7 @@ class ApplicationManagerImpl
    */
   static std::vector<std::string> ConvertRejectedParamList(
       const std::vector<std::string>& input);
+
  private:
   const ApplicationManagerSettings& settings_;
   /**

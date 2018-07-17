@@ -368,7 +368,7 @@ class Profile : public protocol_handler::ProtocolHandlerSettings,
    * @return Flag
    */
   bool enable_policy() const;
-  
+
   /**
    * @brief Should core use fullAppID internally instead of appID (Default true)
    * @return Flag

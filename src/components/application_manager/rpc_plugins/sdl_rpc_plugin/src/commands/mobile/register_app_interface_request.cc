@@ -229,7 +229,6 @@ void RegisterAppInterfaceRequest::Run() {
     return;
   }
 
-
   ApplicationSharedPtr application =
       application_manager_.application(connection_key());
 
@@ -237,7 +236,8 @@ void RegisterAppInterfaceRequest::Run() {
     SendResponse(false, mobile_apis::Result::APPLICATION_REGISTERED_ALREADY);
     return;
   }
-  const std::string policy_app_id = application_manager_.GetCorrectMobileIDFromMessage(message_);
+  const std::string policy_app_id =
+      application_manager_.GetCorrectMobileIDFromMessage(message_);
 
   const smart_objects::SmartObject& msg_params =
       (*message_)[strings::msg_params];
@@ -1291,10 +1291,11 @@ bool RegisterAppInterfaceRequest::IsWhiteSpaceExist() {
       return true;
     }
   }
-  
+
   if (application_manager_.get_settings().use_full_app_id()) {
     if ((*message_)[strings::msg_params].keyExists(strings::full_app_id)) {
-      str = (*message_)[strings::msg_params][strings::full_app_id].asCharArray();
+      str =
+          (*message_)[strings::msg_params][strings::full_app_id].asCharArray();
       if (!CheckSyntax(str)) {
         LOG4CXX_ERROR(logger_, "Invalid app_id syntax check failed");
         return true;
@@ -1334,8 +1335,8 @@ void RegisterAppInterfaceRequest::SendSubscribeCustomButtonNotification() {
 }
 
 bool RegisterAppInterfaceRequest::IsApplicationSwitched() {
-
-  const std::string& policy_app_id = application_manager_.GetCorrectMobileIDFromMessage(message_);
+  const std::string& policy_app_id =
+      application_manager_.GetCorrectMobileIDFromMessage(message_);
 
   LOG4CXX_DEBUG(logger_, "Looking for application id " << policy_app_id);
 

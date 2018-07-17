@@ -1834,7 +1834,7 @@ void Profile::UpdateValues() {
   } else {
     enable_policy_ = false;
   }
-  
+
   // Use full app ID internally?
   std::string use_full_id_string;
   if (ReadValue(&use_full_id_string, kPolicySection, kUseFullAppID) &&
