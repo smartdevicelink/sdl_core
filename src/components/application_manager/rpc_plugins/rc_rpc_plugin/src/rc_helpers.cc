@@ -9,12 +9,20 @@
 namespace rc_rpc_plugin {
 CREATE_LOGGERPTR_GLOBAL(logger_, "RemoteControlModule");
 
-const std::map<std::string, std::string>&
+const std::function<std::string(const std::string& module_type)>&
 RCHelpers::GetModuleTypeToDataMapping() {
-  static std::map<std::string, std::string> mapping = {
-      {enums_value::kRadio, message_params::kRadioControlData},
-      {enums_value::kClimate, message_params::kClimateControlData}};
-  return mapping;
+  static auto mapping_lambda = [](const std::string& module_type) {
+    static std::map<std::string, std::string> mapping = {
+        {enums_value::kRadio, message_params::kRadioControlData},
+        {enums_value::kClimate, message_params::kClimateControlData}};
+    auto it = mapping.find(module_type);
+    if (mapping.end() == ) {
+      return "";
+    }
+    return *it;
+  };
+
+  return mapping_lambda;
 }
 
 RCAppExtensionPtr RCHelpers::GetRCExtension(

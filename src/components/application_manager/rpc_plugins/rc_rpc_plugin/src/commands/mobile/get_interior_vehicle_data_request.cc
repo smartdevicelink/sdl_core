@@ -102,8 +102,8 @@ void GetInteriorVehicleDataRequest::ProcessResponseToMobileFromCache(
   auto data = interior_data_cache_.Retrieve(ModuleType());
   auto response_msg_params =
       smart_objects::SmartObject(smart_objects::SmartType_Map);
-  response_msg_params[message_params::kModuleData][data_mapping.at(
-      ModuleType())] = data;
+  response_msg_params[message_params::kModuleData][data_mapping(ModuleType())] =
+      data;
   response_msg_params[message_params::kModuleData]
                      [message_params::kModuleType] = ModuleType();
 
@@ -241,8 +241,7 @@ void GetInteriorVehicleDataRequest::on_event(
       const auto& data_mapping = RCHelpers::GetModuleTypeToDataMapping();
       const auto module_data =
           hmi_response[app_mngr::strings::msg_params]
-                      [message_params::kModuleData][data_mapping.at(
-                          ModuleType())];
+                      [message_params::kModuleData][data_mapping(ModuleType())];
       interior_data_cache_.Add(ModuleType(), module_data);
     }
   } else {

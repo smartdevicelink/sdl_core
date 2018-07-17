@@ -53,7 +53,8 @@ class RCHelpers {
   * actual module data filed name
   * @return module mapping from enum naming to filed name
   */
-  static const std::map<std::string, std::string>& GetModuleTypeToDataMapping();
+  static const std::function<std::string(const std::string& module_type)>&
+  GetModuleTypeToDataMapping();
 
   /**
    * @brief GetRCExtension extract RC extension from application
