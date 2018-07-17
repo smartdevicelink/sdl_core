@@ -162,14 +162,6 @@ class CommandRequestImpl : public CommandImpl,
                     const char* info = NULL,
                     const smart_objects::SmartObject* response_params = NULL);
 
-  /**
-   * @brief Check syntax of string from mobile
-   * @param str - string that need to be checked
-   * @param allow_empty_string if true methods allow empty sting
-   * @return true if success otherwise return false
-   */
-  bool CheckSyntax(const std::string& str, bool allow_empty_line = false);
-
   /*
    * @brief Sends HMI request
    *

@@ -318,25 +318,6 @@ void CommandRequestImpl::SendResponse(
   rpc_service_.ManageMobileCommand(result, SOURCE_SDL);
 }
 
-bool CommandRequestImpl::CheckSyntax(const std::string& str,
-                                     bool allow_empty_line) {
-  if (std::string::npos != str.find_first_of("\t\n")) {
-    LOG4CXX_ERROR(logger_, "CheckSyntax failed! :" << str);
-    return false;
-  }
-  if (std::string::npos != str.find("\\n") ||
-      std::string::npos != str.find("\\t")) {
-    LOG4CXX_ERROR(logger_, "CheckSyntax failed! :" << str);
-    return false;
-  }
-  if (!allow_empty_line) {
-    if ((std::string::npos == str.find_first_not_of(' '))) {
-      return false;
-    }
-  }
-  return true;
-}
-
 smart_objects::SmartObject CreateUnsupportedResourceResponse(
     const hmi_apis::FunctionID::eType function_id,
     const uint32_t hmi_correlation_id,

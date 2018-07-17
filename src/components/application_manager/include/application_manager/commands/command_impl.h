@@ -138,6 +138,14 @@ class CommandImpl : public Command {
   */
   void SetAllowedToTerminate(const bool allowed) OVERRIDE;
 
+  /**
+   * @brief Check syntax of string from mobile
+   * @param str - string that need to be checked
+   * @param allow_empty_string if true methods allow empty sting
+   * @return true if success otherwise return false
+   */
+  bool CheckSyntax(const std::string& str, bool allow_empty_line = false);
+
   // members
   static const int32_t hmi_protocol_type_;
   static const int32_t mobile_protocol_type_;
