@@ -42,7 +42,7 @@ namespace rc_rpc_plugin {
 class RCRPCPlugin;
 
 /**
- * @brief The RCHelpers class this contains frequently used static data
+ * @brief The RCHelpers class contains frequently used static data
  * structures related strictly to RC
  * Converters, mapping, factory functions
  */
