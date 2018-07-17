@@ -170,6 +170,11 @@ void OnSystemRequestNotification::AddHeader(BinaryMessage& message,
     if (policy_table_json["policy_table"].isMember("module_config")) {
       policy_table_json["policy_table"]["module_config"]
                        ["full_app_id_supported"] = useFullAppID;
+      LOG4CXX_DEBUG(logger_, "Successfully annotated full_App_id_supported!\n");
+      Json::FastWriter writer;
+
+      // Write back modified snapshot
+      policy_table_string = writer.write(policy_table_json);
     }
   }
 
