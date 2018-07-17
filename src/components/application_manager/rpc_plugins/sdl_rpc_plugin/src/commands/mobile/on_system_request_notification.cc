@@ -141,7 +141,6 @@ void OnSystemRequestNotification::Run() {
 #ifdef PROPRIETARY_MODE
 void OnSystemRequestNotification::AddHeader(BinaryMessage& message,
                                             bool useFullAppID) const {
-  std::cout << "ADDING HEADER HEERE!\n";
   LOG4CXX_AUTO_TRACE(logger_);
   const uint32_t timeout = policy_handler_.TimeoutExchangeSec();
 
@@ -167,15 +166,10 @@ void OnSystemRequestNotification::AddHeader(BinaryMessage& message,
         "PT snapshot is corrupted: " << reader.getFormattedErrorMessages());
   }
 
-  std::cout << "PT str is " << policy_table_string << std::endl;
-
   if (policy_table_json.isMember("policy_table")) {
     if (policy_table_json["policy_table"].isMember("module_config")) {
-      std::cout << "mc is \n" << policy_table_json["policy_table"]["module_config"] << std::endl;
       policy_table_json["policy_table"]["module_config"]
                        ["full_app_id_supported"] = useFullAppID;
-                       std::cout << "new mc is \n" << policy_table_json["policy_table"]["module_config"] << std::endl;
-                       
     }
   }
 
