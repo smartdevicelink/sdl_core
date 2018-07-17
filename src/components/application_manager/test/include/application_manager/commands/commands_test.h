@@ -42,9 +42,12 @@
 #include "utils/make_shared.h"
 #include "application_manager/mock_application_manager.h"
 #include "test/application_manager/mock_application_manager_settings.h"
-#include "application_manager/mock_hmi_interface.h"
-#include "application_manager/mock_application.h"
-#include "application_manager/mock_message_helper.h"
+#include "application_manager/test/include/application_manager/mock_hmi_interface.h"
+#include "application_manager/test/include/application_manager/mock_application.h"
+#include "application_manager/test/include/application_manager/mock_message_helper.h"
+#include "application_manager/mock_rpc_service.h"
+#include "application_manager/mock_hmi_capabilities.h"
+#include "application_manager/policies/mock_policy_handler_interface.h"
 namespace test {
 namespace components {
 namespace commands_test {
@@ -94,6 +97,7 @@ class CommandsTest : public ::testing::Test {
   enum { kMocksAreNice = kIsNice };
 
   typedef NiceMock<MockApplicationManagerSettings> MockAppManagerSettings;
+  typedef NiceMock<application_manager_test::MockRPCService> MockRPCService;
   typedef typename TypeIf<kIsNice,
                           NiceMock<MockApplicationManager>,
                           MockApplicationManager>::Result MockAppManager;
@@ -120,7 +124,10 @@ class CommandsTest : public ::testing::Test {
                                    MessageSharedPtr& msg) {
     InitCommand(timeout);
     return ::utils::MakeShared<Command>((msg ? msg : msg = CreateMessage()),
-                                        app_mngr_);
+                                        app_mngr_,
+                                        mock_rpc_service_,
+                                        mock_hmi_capabilities_,
+                                        mock_policy_handler_);
   }
 
   template <class Command>
@@ -132,26 +139,35 @@ class CommandsTest : public ::testing::Test {
   SharedPtr<Command> CreateCommand(const uint32_t timeout = kDefaultTimeout_) {
     InitCommand(timeout);
     MessageSharedPtr msg = CreateMessage();
-    return ::utils::MakeShared<Command>(msg, app_mngr_);
+    return ::utils::MakeShared<Command>(msg,
+                                        app_mngr_,
+                                        mock_rpc_service_,
+                                        mock_hmi_capabilities_,
+                                        mock_policy_handler_);
   }
 
   enum { kDefaultTimeout_ = 100 };
 
   MockAppManager app_mngr_;
+  MockRPCService mock_rpc_service_;
+  application_manager_test::MockHMICapabilities mock_hmi_capabilities_;
+  policy_test::MockPolicyHandlerInterface mock_policy_handler_;
   MockAppManagerSettings app_mngr_settings_;
   MOCK(am::MockHmiInterfaces) mock_hmi_interfaces_;
   am::MockMessageHelper& mock_message_helper_;
 
  protected:
   virtual void InitCommand(const uint32_t& timeout) {
+    timeout_ = timeout;
     ON_CALL(app_mngr_, get_settings())
         .WillByDefault(ReturnRef(app_mngr_settings_));
     ON_CALL(app_mngr_settings_, default_timeout())
-        .WillByDefault(ReturnRef(timeout));
+        .WillByDefault(ReturnRef(timeout_));
   }
 
   CommandsTest()
-      : mock_message_helper_(*am::MockMessageHelper::message_helper_mock()) {
+      : mock_message_helper_(*am::MockMessageHelper::message_helper_mock())
+      , timeout_(0) {
     ON_CALL(app_mngr_, hmi_interfaces())
         .WillByDefault(ReturnRef(mock_hmi_interfaces_));
     ON_CALL(mock_hmi_interfaces_, GetInterfaceFromFunction(_))
@@ -209,6 +225,9 @@ class CommandsTest : public ::testing::Test {
                            MobileResult::DATA_NOT_AVAILABLE);
     link_hmi_to_mob_result(HMIResult::READ_ONLY, MobileResult::READ_ONLY);
   }
+
+ private:
+  uint32_t timeout_;
 };
 
 MATCHER_P(MobileResultCodeIs, result_code, "") {

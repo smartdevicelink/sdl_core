@@ -61,8 +61,8 @@ class ConditionalVariableTest : public ::testing::Test {
 
  protected:
   std::string test_value_;
-  sync_primitives::ConditionalVariable cond_var_;
   sync_primitives::Lock test_mutex_;
+  sync_primitives::ConditionalVariable cond_var_;
   unsigned counter_;
 };
 
@@ -116,6 +116,8 @@ TEST_F(ConditionalVariableTest,
   ASSERT_FALSE(thread_created) << "thread2 is not created!";
   check_counter();
   EXPECT_EQ(2u, counter_);
+  pthread_join(thread1, NULL);
+  pthread_join(thread2, NULL);
 }
 
 TEST_F(

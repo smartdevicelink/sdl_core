@@ -239,7 +239,6 @@ class MockPolicyHandlerInterface : public policy::PolicyHandlerInterface {
                void(const std::string& service_type,
                     policy::EndpointUrls& end_points));
 
-#ifdef SDL_REMOTE_CONTROL
   MOCK_METHOD3(OnUpdateHMILevel,
                void(const std::string& device_id,
                     const std::string& policy_app_id,
@@ -270,7 +269,6 @@ class MockPolicyHandlerInterface : public policy::PolicyHandlerInterface {
   MOCK_METHOD2(OnDeviceSwitching,
                void(const std::string& device_id_from,
                     const std::string& device_id_to));
-#endif  // SDL_REMOTE_CONTROL
 
  private:
 #ifdef EXTERNAL_PROPRIETARY_MODE

@@ -54,11 +54,14 @@
 #include "utils/stl_utils.h"
 #include "utils/rwlock.h"
 
+const transport_manager::ConnectionUID kDisabledSecondary = 0xFFFFFFFF;
+
 /**
  * \namespace connection_handler
  * \brief SmartDeviceLink connection_handler namespace.
  */
 namespace connection_handler {
+
 /**
  * \class ConnectionHandlerImpl
  * \brief SmartDeviceLink connection_handler main class
@@ -272,6 +275,24 @@ class ConnectionHandlerImpl
    * \param connection_key  used by other components as application identifier
    */
   void OnMalformedMessageCallback(const uint32_t& connection_key) OVERRIDE;
+
+  /**
+   * @brief Converts connection handle to transport type string used in
+   * smartDeviceLink.ini file, e.g. "TCP_WIFI"
+   * @param connection_handle A connection identifier
+   * @return string representation of the transport of the device
+   */
+  const std::string TransportTypeProfileStringFromConnHandle(
+      transport_manager::ConnectionUID connection_handle) const;
+
+  /**
+   * @brief Converts device handle to transport type string used in
+   * smartDeviceLink.ini file, e.g. "TCP_WIFI"
+   * @param device_handle A device handle
+   * @return string representation of the transport of the device
+   */
+  const std::string TransportTypeProfileStringFromDeviceHandle(
+      DeviceHandle device_handle) const;
 
   /**
    * \brief Creates unique identifier of session (can be used as hash)
@@ -509,6 +530,43 @@ class ConnectionHandlerImpl
   DevicesDiscoveryStarter& get_device_discovery_starter();
 
   /**
+   * \brief Add a session. This is meant to be called from Connection class.
+   * \param primary_transport_id the primary connection ID to associate with the
+   * newly created session
+   * \return new session id, or 0 if failed
+   **/
+  uint32_t AddSession(
+      const transport_manager::ConnectionUID primary_transport_id) OVERRIDE;
+
+  /**
+   * \brief Remove a session. This is meant to be called from Connection class.
+   * \param session_id ID of the session to remove
+   * \return true if successful, false otherwise
+   **/
+  bool RemoveSession(uint8_t session_id) OVERRIDE;
+
+  DataAccessor<SessionConnectionMap> session_connection_map() OVERRIDE;
+
+  /**
+   * \brief Associate a secondary transport ID with a session
+   * \param session_id the session ID
+   * \param connection_id the new secondary connection ID to associate with the
+   * session
+   * \return the SessionTransports (newly) associated with the session
+   **/
+  SessionTransports SetSecondaryTransportID(
+      uint8_t session_id,
+      transport_manager::ConnectionUID secondary_transport_id) OVERRIDE;
+
+  /**
+   * \brief Retrieve the session transports associated with a session
+   * \param session_id the session ID
+   * \return the SessionTransports associated with the session
+   **/
+  const SessionTransports GetSessionTransports(
+      uint8_t session_id) const OVERRIDE;
+
+  /**
    * \brief Invoked when observer's OnServiceStartedCallback is completed
    * \param session_key the key of started session passed to
    * OnServiceStartedCallback().
@@ -524,6 +582,28 @@ class ConnectionHandlerImpl
       bool result,
       std::vector<std::string>& rejected_params);
 
+  /**
+   * \brief Called when secondary transport with given session ID is established
+   * \param primary_connection_handle Set to identifier of primary connection
+   * \param secondary_connection_handle Identifier of secondary connection
+   * \param sessionid session ID taken from Register Secondary Transport frame
+   **/
+  bool OnSecondaryTransportStarted(
+      transport_manager::ConnectionUID& primary_connection_handle,
+      const transport_manager::ConnectionUID secondary_connection_handle,
+      const uint8_t session_id) OVERRIDE;
+
+  /**
+   * \brief Called when secondary transport shuts down
+   * \param primary_connection_handle Identifier of primary connection
+   * \param secondary_connection_handle Identifier of secondary connection
+   * transport
+   **/
+  void OnSecondaryTransportEnded(
+      const transport_manager::ConnectionUID primary_connection_handle,
+      const transport_manager::ConnectionUID secondary_connection_handle)
+      OVERRIDE;
+
  private:
   /**
    * \brief Disconnect application.
@@ -534,6 +614,9 @@ class ConnectionHandlerImpl
   void RemoveConnection(const ConnectionHandle connection_handle);
 
   void OnConnectionEnded(const transport_manager::ConnectionUID connection_id);
+
+  const uint8_t GetSessionIdFromSecondaryTransport(
+      transport_manager::ConnectionUID secondary_transport_id) const;
 
   const ConnectionHandlerSettings& settings_;
   /**
@@ -552,6 +635,13 @@ class ConnectionHandlerImpl
    * \brief List of devices
    */
   DeviceMap device_list_;
+
+  /**
+   * @brief session/connection map
+   */
+  SessionConnectionMap session_connection_map_;
+  mutable std::shared_ptr<sync_primitives::Lock>
+      session_connection_map_lock_ptr_;
 
   /**
    * \brief List of connections
@@ -573,6 +663,11 @@ class ConnectionHandlerImpl
   std::map<uint32_t, protocol_handler::SessionContext>
       start_service_context_map_;
 
+  /**
+   * @brief connection object as it's being closed
+   */
+  Connection* ending_connection_;
+
 #ifdef BUILD_TESTS
   // Methods for test usage
  public:
@@ -581,6 +676,9 @@ class ConnectionHandlerImpl
   void addDeviceConnection(
       const transport_manager::DeviceInfo& device_info,
       const transport_manager::ConnectionUID connection_id);
+  SessionConnectionMap& getSessionConnectionMap() {
+    return session_connection_map_;
+  }
 #endif
  private:
   DISALLOW_COPY_AND_ASSIGN(ConnectionHandlerImpl);

@@ -69,6 +69,7 @@
 #include "application_manager/mock_event_dispatcher.h"
 #include "application_manager/mock_state_controller.h"
 #include "application_manager/mock_hmi_capabilities.h"
+#include "application_manager/mock_rpc_service.h"
 #include "policy/mock_policy_manager.h"
 #include "policy/usage_statistics/mock_statistics_manager.h"
 
@@ -90,6 +91,8 @@ using ::testing::DoAll;
 using ::testing::SetArgReferee;
 using ::testing::Mock;
 
+typedef NiceMock<application_manager_test::MockRPCService> MockRPCService;
+
 const std::string kDummyData = "some_data";
 
 class PolicyHandlerTest : public ::testing::Test {
@@ -105,7 +108,8 @@ class PolicyHandlerTest : public ::testing::Test {
       , default_hmi_("fake_hmi")
       , kPreloadPTFile_("sdl_preloaded_pt.json")
       , kAppStorageFolder_("storage")
-      , app_set(test_app, app_lock)
+      , app_lock_(std::make_shared<sync_primitives::Lock>())
+      , app_set(test_app, app_lock_)
       , kAppId1_(10u)
       , kAppId2_(11u)
       , kConnectionKey_(1u)
@@ -149,7 +153,7 @@ class PolicyHandlerTest : public ::testing::Test {
   const std::string kPreloadPTFile_;
   const std::string kAppStorageFolder_;
   ApplicationSet test_app;
-  sync_primitives::Lock app_lock;
+  std::shared_ptr<sync_primitives::Lock> app_lock_;
   DataAccessor<ApplicationSet> app_set;
   const uint32_t kAppId1_;
   const uint32_t kAppId2_;
@@ -164,6 +168,7 @@ class PolicyHandlerTest : public ::testing::Test {
   const uint32_t kCallsCount_;
   const uint32_t kTimeout_;
   application_manager::MockMessageHelper& mock_message_helper_;
+  MockRPCService mock_rpc_service_;
 
   virtual void SetUp() OVERRIDE {
     Mock::VerifyAndClearExpectations(&mock_message_helper_);
@@ -297,7 +302,7 @@ class WaitAsync {
   const uint32_t timeout_;
   sync_primitives::ConditionalVariable cond_var_;
 };
-}
+}  // namespace
 
 TEST_F(PolicyHandlerTest, LoadPolicyLibrary_Method_ExpectLibraryLoaded) {
   // Check before policy enabled from ini file
@@ -1006,8 +1011,10 @@ TEST_F(PolicyHandlerTest,
                   kAppId1_,
                   mobile_api::AppInterfaceUnregisteredReason::APP_UNAUTHORIZED))
       .WillOnce(Return(message));
-  EXPECT_CALL(app_manager_,
-              ManageMobileCommand(_, commands::Command::ORIGIN_SDL));
+  ON_CALL(app_manager_, GetRPCService())
+      .WillByDefault(ReturnRef(mock_rpc_service_));
+  EXPECT_CALL(mock_rpc_service_,
+              ManageMobileCommand(_, commands::Command::SOURCE_SDL));
 
   EXPECT_CALL(*mock_policy_manager_,
               RemovePendingPermissionChanges(kPolicyAppId_));
@@ -1058,8 +1065,10 @@ TEST_F(PolicyHandlerTest,
                   kAppId1_,
                   mobile_api::AppInterfaceUnregisteredReason::APP_UNAUTHORIZED))
       .WillOnce(Return(message));
-  EXPECT_CALL(app_manager_,
-              ManageMobileCommand(_, commands::Command::ORIGIN_SDL));
+  ON_CALL(app_manager_, GetRPCService())
+      .WillByDefault(ReturnRef(mock_rpc_service_));
+  EXPECT_CALL(mock_rpc_service_,
+              ManageMobileCommand(_, commands::Command::SOURCE_SDL));
 
   EXPECT_CALL(*mock_policy_manager_,
               RemovePendingPermissionChanges(kPolicyAppId_));

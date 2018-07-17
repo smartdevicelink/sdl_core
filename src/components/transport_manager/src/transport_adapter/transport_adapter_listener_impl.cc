@@ -2,6 +2,9 @@
  * Copyright (c) 2014, Ford Motor Company
  * All rights reserved.
  *
+ * Copyright (c) 2018 Xevo Inc.
+ * All rights reserved.
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *
@@ -13,7 +16,7 @@
  * disclaimer in the documentation and/or other materials provided with the
  * distribution.
  *
- * Neither the name of the Ford Motor Company nor the names of its contributors
+ * Neither the name of the copyright holders nor the names of its contributors
  * may be used to endorse or promote products derived from this software
  * without specific prior written permission.
  *
@@ -376,4 +379,23 @@ void TransportAdapterListenerImpl::OnTransportSwitchRequested(
     LOG4CXX_WARN(logger_, "Failed to receive event from device");
   }
 }
+
+void TransportAdapterListenerImpl::OnTransportConfigUpdated(
+    const transport_adapter::TransportAdapter* adapter) {
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  const TransportAdapterEvent event(EventTypeEnum::ON_TRANSPORT_CONFIG_UPDATED,
+                                    transport_adapter_,
+                                    "",
+                                    0,
+                                    ::protocol_handler::RawMessagePtr(),
+                                    BaseErrorPtr());
+
+  if (transport_manager_ != NULL &&
+      transport_manager::E_SUCCESS !=
+          transport_manager_->ReceiveEventFromDevice(event)) {
+    LOG4CXX_WARN(logger_, "Failed to receive event from device");
+  }
+}
+
 }  // namespace transport_manager

@@ -809,6 +809,35 @@ TEST_F(TransportAdapterTest, StopDevice) {
   transport_adapter.StopDevice(uniq_id);
 }
 
+TEST_F(TransportAdapterTest, TransportConfigUpdated) {
+  MockTransportAdapterImpl transport_adapter(
+      NULL, NULL, NULL, last_state_, transport_manager_settings);
+  EXPECT_CALL(transport_adapter, Restore()).WillOnce(Return(true));
+  transport_adapter.Init();
+
+  MockTransportAdapterListener mock_listener;
+  transport_adapter.AddListener(&mock_listener);
+
+  TransportConfig config;
+  config[tc_enabled] = std::string("true");
+  config[tc_tcp_ip_address] = std::string("192.168.1.1");
+  config[tc_tcp_port] = std::string("12345");
+
+  EXPECT_CALL(mock_listener, OnTransportConfigUpdated(_));
+  transport_adapter.TransportConfigUpdated(config);
+}
+
+TEST_F(TransportAdapterTest, GetTransportConfigration) {
+  MockTransportAdapterImpl transport_adapter(
+      NULL, NULL, NULL, last_state_, transport_manager_settings);
+  EXPECT_CALL(transport_adapter, Restore()).WillOnce(Return(true));
+  transport_adapter.Init();
+
+  TransportConfig empty_config;
+
+  EXPECT_EQ(empty_config, transport_adapter.GetTransportConfiguration());
+}
+
 }  // namespace transport_manager_test
 }  // namespace components
 }  // namespace test

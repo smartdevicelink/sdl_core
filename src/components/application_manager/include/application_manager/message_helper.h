@@ -72,7 +72,23 @@ typedef std::map<std::string, mobile_apis::VehicleDataType::eType> VehicleData;
 class MessageHelper {
  public:
   /**
-   * @brief Creates request for different interfaces(JSON, DBUS)
+ * @brief CreateNotification creates basic mobile notification smart object
+ * @param function_id Notification function ID
+ * @param app_id application to send notification
+ * @return basic mobile notification smart object
+ */
+  static smart_objects::SmartObjectSPtr CreateNotification(
+      mobile_apis::FunctionID::eType function_id, uint32_t app_id);
+  /**
+ * @brief CreateHMINotification creates basic hmi notification smart object
+ * @param function_id Notification function ID
+ * @return basic hmi notification smart object
+ */
+  static smart_objects::SmartObjectSPtr CreateHMINotification(
+      hmi_apis::FunctionID::eType function_id);
+
+  /**
+   * @brief Creates request for different interfaces(JSON)
    * @param correlation_id unique ID
    * @param params Vector of arguments that we need in GetVehicleData request
    * (e.g. gps, odometer, fuel_level)
@@ -226,20 +242,6 @@ class MessageHelper {
   static smart_objects::SmartObjectSPtr CreateSetAppIcon(
       const std::string& path_to_icon, uint32_t app_id);
 
-  DEPRECATED static bool SendIVISubscribtions(const uint32_t app_id,
-                                              ApplicationManager& app_mngr);
-  /**
-   * @brief Sends IVI subscription requests
-   */
-  static bool SendIVISubscriptions(const uint32_t app_id,
-                                   ApplicationManager& app_mngr);
-
-  /**
-   * @brief Returns IVI subscription requests
-   */
-  static smart_objects::SmartObjectList GetIVISubscriptionRequests(
-      ApplicationSharedPtr app, ApplicationManager& app_mngr);
-
   /**
    * @brief Sends button subscription notification
    */
@@ -298,6 +300,24 @@ class MessageHelper {
       const smart_objects::SmartObject& vr_commands,
       const uint32_t app_id,
       ApplicationManager& app_mngr);
+
+  /*
+   * @brief Create Common.DeviceInfo struct from device handle
+   * @param device_handle device handle of the app
+   * @param session_observer instance of SessionObserver to retrieve device
+   * information
+   * @param policy_handler instance of PolicyHandlerInterface to get the value
+   * of 'isSDLAllowed'
+   * @param app_mngr instance of ApplicationManager
+   * @param output smart object to store created Common.DeviceInfo struct
+   * @return true on success, false otherwise
+   */
+  static bool CreateDeviceInfo(
+      connection_handler::DeviceHandle device_handle,
+      const protocol_handler::SessionObserver& session_observer,
+      const policy::PolicyHandlerInterface& policy_handler,
+      ApplicationManager& app_mngr,
+      smart_objects::SmartObject* output);
 
   /*
    * @brief Create Common.HMIApplication struct application instance
@@ -803,18 +823,6 @@ class MessageHelper {
       ApplicationManager& app_mngr);
 
   /**
-   * @brief SendUnsubscribeIVIRequest sends request to HMI to remove vehicle
-   * data subscription for application
-   * @param ivi_id Vehicle data item id
-   * @param application Application to unsubscribe
-   * @param app_mngr Application manager
-   */
-  static void SendUnsubscribeIVIRequest(int32_t ivi_id,
-                                        ApplicationSharedPtr application,
-                                        ApplicationManager& app_mngr);
-
-#ifdef SDL_REMOTE_CONTROL
-  /**
    * @brief Sends HMI status notification to mobile
    * @param application_impl application with changed HMI status
    **/
@@ -836,9 +844,7 @@ class MessageHelper {
       ApplicationManager& application_manager,
       hmi_apis::Common_HMILevel::eType level = hmi_apis::Common_HMILevel::FULL,
       bool send_policy_priority = true);
-#endif  // SDL_REMOTE_CONTROL
 
- private:
   /**
    * @brief CreateMessageForHMI Creates HMI message with prepared header
    * acccoring to message type
@@ -849,6 +855,7 @@ class MessageHelper {
   static smart_objects::SmartObjectSPtr CreateMessageForHMI(
       hmi_apis::messageType::eType message_type, const uint32_t correlation_id);
 
+ private:
   /**
    * @brief Allows to fill SO according to the  current permissions.
    * @param permissions application permissions.

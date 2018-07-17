@@ -48,6 +48,7 @@ namespace components {
 namespace transport_manager_test {
 
 using ::testing::Return;
+using ::testing::ReturnRef;
 using ::testing::_;
 
 using namespace ::protocol_handler;
@@ -61,6 +62,13 @@ class TcpAdapterTest : public ::testing::Test {
   resumption::LastStateImpl last_state_;
   const uint32_t port = 12345;
   const std::string string_port = "12345";
+  std::string network_interface = "";
+
+  void SetUp() OVERRIDE {
+    EXPECT_CALL(transport_manager_settings,
+                transport_manager_tcp_adapter_network_interface())
+        .WillRepeatedly(ReturnRef(network_interface));
+  }
 };
 
 TEST_F(TcpAdapterTest, StoreDataWithOneDeviceAndOneApplication) {
@@ -337,6 +345,37 @@ TEST_F(TcpAdapterTest, StoreDataWithSeveralDevices_RestoreData) {
   for (uint32_t i = 0; i < count_dev; i++) {
     EXPECT_EQ(uniq_id[i], devList[i]);
   }
+}
+
+TEST_F(TcpAdapterTest, NotifyTransportConfigUpdated) {
+  MockTransportAdapterListener mock_adapter_listener;
+
+  MockTCPTransportAdapter transport_adapter(
+      port, last_state_, transport_manager_settings);
+  transport_adapter.AddListener(&mock_adapter_listener);
+
+  TransportConfig config;
+  config[tc_enabled] = std::string("true");
+  config[tc_tcp_ip_address] = std::string("192.168.1.1");
+  config[tc_tcp_port] = std::string("12345");
+
+  EXPECT_CALL(mock_adapter_listener, OnTransportConfigUpdated(_)).Times(1);
+
+  transport_adapter.TransportConfigUpdated(config);
+}
+
+TEST_F(TcpAdapterTest, GetTransportConfiguration) {
+  MockTCPTransportAdapter transport_adapter(
+      port, last_state_, transport_manager_settings);
+
+  TransportConfig config;
+  config[tc_enabled] = std::string("true");
+  config[tc_tcp_ip_address] = std::string("192.168.1.1");
+  config[tc_tcp_port] = std::string("12345");
+
+  transport_adapter.TransportConfigUpdated(config);
+
+  EXPECT_EQ(config, transport_adapter.GetTransportConfiguration());
 }
 
 }  // namespace transport_manager_test
