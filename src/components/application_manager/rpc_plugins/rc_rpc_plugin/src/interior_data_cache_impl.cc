@@ -106,6 +106,17 @@ bool InteriorDataCacheImpl::Contains(const std::string& module_type) const {
   return contains;
 }
 
+void InteriorDataCacheImpl::Remove(const std::string& module_type) {
+  LOG4CXX_TRACE(logger_, "module_type : " << module_type);
+  sync_primitives::AutoLock autolock(subscriptions_lock_);
+  auto it = subscriptions_.find(module_type);
+  if (subscriptions_.end() == it) {
+    LOG4CXX_TRACE(logger_, "Not existing module_type : " << module_type);
+    return;
+  }
+  subscriptions_.erase(it);
+}
+
 void InteriorDataCacheImpl::ClearCache() {
   LOG4CXX_AUTO_TRACE(logger_);
   sync_primitives::AutoLock autolock(subscriptions_lock_);

@@ -302,7 +302,7 @@ TEST_F(
       ManageMobileCommand(MobileResultCodeIs(mobile_apis::Result::SUCCESS), _))
       .WillOnce(Return(true));
 
-  EXPECT_CALL(mock_interior_data_cache_, ClearCache());
+  EXPECT_CALL(mock_interior_data_cache_, Remove(enums_value::kRadio));
 
   // Act
   application_manager::SharedPtr<

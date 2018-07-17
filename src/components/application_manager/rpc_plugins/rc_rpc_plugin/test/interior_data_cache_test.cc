@@ -103,4 +103,61 @@ TEST_F(InteriorDataCacheTest, MultipleDataCached) {
   EXPECT_TRUE(data1 != retrieved_data2);
 }
 
+TEST_F(InteriorDataCacheTest, RemoveFromChacheSuccessful) {
+  rc_rpc_plugin::InteriorDataCacheImpl cache(time_frame_alowed_requests);
+
+  const std::string module_type = "random_module_type";
+  smart_objects::SmartObject data;
+  data["key"] = "value1";
+  cache.Add(module_type, data);
+  EXPECT_TRUE(cache.Contains(module_type));
+  auto retrieved_data1 = cache.Retrieve(module_type);
+  EXPECT_EQ(data, retrieved_data1);
+
+  cache.Remove(module_type);
+  EXPECT_FALSE(cache.Contains(module_type));
+  auto retreived = cache.Retrieve(module_type);
+  EXPECT_EQ(smart_objects::SmartType_Null, retreived.getType());
+}
+
+TEST_F(InteriorDataCacheTest, RemoveNotExistingNoSideEffects) {
+  rc_rpc_plugin::InteriorDataCacheImpl cache(time_frame_alowed_requests);
+  const std::string module_type_key = "random_module_type";
+  smart_objects::SmartObject data;
+  data["key"] = "value";
+
+  cache.Add(module_type_key, data);
+  cache.Remove("some other module_type");
+
+  EXPECT_TRUE(cache.Contains(module_type_key));
+  auto retrieved_data = cache.Retrieve(module_type_key);
+  EXPECT_EQ(data, retrieved_data);
+}
+
+TEST_F(InteriorDataCacheTest, Exist2ModuleTypesRemoveOneAnotherOneLeft) {
+  rc_rpc_plugin::InteriorDataCacheImpl cache(time_frame_alowed_requests);
+  cache.StartRequestResetTimer(time_frame_alowed_requests);
+
+  const std::string module_type_key1 = "random_module_type";
+  smart_objects::SmartObject data1;
+  data1["key"] = "value1";
+  cache.Add(module_type_key1, data1);
+
+  std::string module_type_key2 = "random_module_type2";
+  smart_objects::SmartObject data2;
+  data2["key"] = "value2";
+  cache.Add(module_type_key2, data2);
+
+  ASSERT_TRUE(data1 != data2);
+
+  cache.Remove(module_type_key1);
+  EXPECT_FALSE(cache.Contains(module_type_key1));
+  EXPECT_TRUE(cache.Contains(module_type_key2));
+
+  auto retrieved_data1 = cache.Retrieve(module_type_key1);
+  EXPECT_EQ(smart_objects::SmartType_Null, retrieved_data1.getType());
+  auto retrieved_data2 = cache.Retrieve(module_type_key2);
+  EXPECT_EQ(data2, retrieved_data2);
+}
+
 }  // rc_rpc_plugin_test
