@@ -98,6 +98,12 @@ class InteriorDataCache {
   virtual bool Contains(const std::string& module_type) const = 0;
 
   /**
+   * @brief Remove cached data
+   * @param module_type data type to remove from cache
+   */
+  virtual void Remove(const std::string& module_type) = 0;
+
+  /**
    * @brief ClearCache clear all cached data
    */
   virtual void ClearCache() = 0;

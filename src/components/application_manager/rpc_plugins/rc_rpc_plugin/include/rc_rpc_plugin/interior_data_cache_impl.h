@@ -54,6 +54,7 @@ class InteriorDataCacheImpl : public InteriorDataCache {
   smart_objects::SmartObject Retrieve(
       const std::string& module_type) const OVERRIDE;
   bool Contains(const std::string& module_type) const OVERRIDE;
+  void Remove(const std::string& module_type) OVERRIDE;
   void ClearCache() OVERRIDE;
   uint32_t GetCurrentAmountOfRequests(
       const std::string& module_type) const OVERRIDE;

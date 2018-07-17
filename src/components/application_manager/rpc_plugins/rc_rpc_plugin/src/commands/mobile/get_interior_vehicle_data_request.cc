@@ -234,7 +234,7 @@ void GetInteriorVehicleDataRequest::on_event(
 
     DCHECK_OR_RETURN_VOID(app);
     if (TheLastAppShouldBeUnsubscribed(app)) {
-      interior_data_cache_.ClearCache();
+      interior_data_cache_.Remove(ModuleType());
     }
     ProccessSubscription(hmi_response);
     if (is_subscribed) {
