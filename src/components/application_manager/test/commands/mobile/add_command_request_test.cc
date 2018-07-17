@@ -37,7 +37,7 @@
 #include "application_manager/commands/mobile/add_command_request.h"
 
 #include "gtest/gtest.h"
-#include "utils/shared_ptr.h"
+#include "utils/shared_ptr_helpers.h"
 #include "utils/helpers.h"
 #include <memory>
 #include "smart_objects/smart_object.h"
@@ -62,7 +62,7 @@ using am::ApplicationManager;
 using am::commands::MessageSharedPtr;
 using am::ApplicationSharedPtr;
 using ::testing::_;
-using ::std::shared_ptr;
+
 using ::testing::Return;
 using ::testing::InSequence;
 using am::commands::AddCommandRequest;

@@ -34,7 +34,7 @@
 #include <string>
 
 #include "gtest/gtest.h"
-#include "utils/shared_ptr.h"
+#include "utils/shared_ptr_helpers.h"
 #include "smart_objects/smart_object.h"
 #include "application_manager/smart_object_keys.h"
 #include "commands/commands_test.h"
@@ -47,7 +47,7 @@ namespace commands_test {
 namespace hmi_commands_test {
 namespace update_sdl_response {
 
-using ::std::shared_ptr;
+
 namespace am = ::application_manager;
 namespace strings = ::application_manager::strings;
 using am::commands::UpdateSDLResponse;

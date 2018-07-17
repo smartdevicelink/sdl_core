@@ -41,7 +41,7 @@
 #include <list>
 #include <map>
 
-#include "utils/shared_ptr.h"
+#include "utils/shared_ptr_helpers.h"
 
 #include "transport_manager/transport_adapter/device.h"
 #include "transport_manager/common.h"

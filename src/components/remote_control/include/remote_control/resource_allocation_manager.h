@@ -2,7 +2,7 @@
 #define SRC_COMPONENTS_REMOTE_CONTROL_INCLUDE_REMOTE_CONTROL_RESOURCE_ALLOCATION_H
 #include <string>
 #include "utils/macro.h"
-#include "utils/shared_ptr.h"
+#include "utils/shared_ptr_helpers.h"
 #include "interfaces/HMI_API.h"
 #include "remote_control/event_engine/event.h"
 #include "functional_module/generic_module.h"

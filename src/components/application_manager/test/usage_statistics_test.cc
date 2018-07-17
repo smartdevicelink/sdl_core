@@ -37,7 +37,7 @@
 #include "policy/usage_statistics/mock_statistics_manager.h"
 #include "policy/usage_statistics/mock_app_stopwatch.h"
 #include <memory>
-#include "utils/shared_ptr.h"
+#include "utils/shared_ptr_helpers.h"
 
 namespace test {
 namespace components {

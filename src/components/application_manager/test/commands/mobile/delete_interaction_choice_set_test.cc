@@ -37,7 +37,7 @@
 #include "mobile/delete_interaction_choice_set_response.h"
 
 #include "gtest/gtest.h"
-#include "utils/shared_ptr.h"
+#include "utils/shared_ptr_helpers.h"
 #include "smart_objects/smart_object.h"
 #include "application_manager/smart_object_keys.h"
 #include "application_manager/commands/commands_test.h"

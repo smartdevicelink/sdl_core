@@ -32,7 +32,7 @@
 
 #include "gtest/gtest.h"
 #include "application_manager/commands/hmi/button_get_capabilities_response.h"
-#include "utils/shared_ptr.h"
+#include "utils/shared_ptr_helpers.h"
 #include "smart_objects/smart_object.h"
 #include "application_manager/mock_hmi_capabilities.h"
 #include "commands/commands_test.h"

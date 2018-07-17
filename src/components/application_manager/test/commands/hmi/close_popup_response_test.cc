@@ -34,7 +34,7 @@
 #include <string>
 
 #include "gtest/gtest.h"
-#include "utils/shared_ptr.h"
+#include "utils/shared_ptr_helpers.h"
 #include "smart_objects/smart_object.h"
 #include "application_manager/smart_object_keys.h"
 #include "application_manager/commands/command.h"
@@ -48,7 +48,7 @@ namespace commands_test {
 namespace hmi_commands_test {
 namespace close_popup_response {
 
-using ::std::shared_ptr;
+
 namespace am = ::application_manager;
 using am::commands::ResponseFromHMI;
 using am::commands::ClosePopupResponse;

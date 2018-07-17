@@ -33,7 +33,7 @@
 #define SRC_COMPONENTS_SMART_OBJECTS_INCLUDE_SMART_OBJECTS_SCHEMA_ITEM_H_
 
 #include <stdlib.h>
-#include "utils/shared_ptr.h"
+#include "utils/shared_ptr_helpers.h"
 #include "rpc_base/validation_report.h"
 
 #include "smart_objects/errors.h"

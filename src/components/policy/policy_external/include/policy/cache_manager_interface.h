@@ -38,7 +38,7 @@
 
 #include "policy/policy_table/types.h"
 #include "policy/pt_representation.h"
-#include "utils/shared_ptr.h"
+#include "utils/shared_ptr_helpers.h"
 #include "policy/usage_statistics/counter.h"
 #include "policy/policy_types.h"
 #include "policy/policy_settings.h"

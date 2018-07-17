@@ -36,7 +36,7 @@
 #include <string>
 #include <vector>
 
-#include "utils/shared_ptr.h"
+#include "utils/shared_ptr_helpers.h"
 #include "protocol/message_priority.h"
 #include "protocol/rpc_type.h"
 #include "protocol/common.h"

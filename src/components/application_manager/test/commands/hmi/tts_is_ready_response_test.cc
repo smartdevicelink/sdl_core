@@ -34,7 +34,7 @@
 #include <string>
 
 #include "gtest/gtest.h"
-#include "utils/shared_ptr.h"
+#include "utils/shared_ptr_helpers.h"
 #include "smart_objects/smart_object.h"
 #include "application_manager/smart_object_keys.h"
 #include "commands/commands_test.h"
@@ -55,7 +55,7 @@ namespace tts_is_ready_response {
 
 using ::testing::_;
 using ::testing::Return;
-using ::std::shared_ptr;
+
 using ::testing::NiceMock;
 namespace am = ::application_manager;
 namespace strings = ::application_manager::strings;

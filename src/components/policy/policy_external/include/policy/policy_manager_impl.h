@@ -34,7 +34,7 @@
 #define SRC_COMPONENTS_POLICY_POLICY_EXTERNAL_INCLUDE_POLICY_POLICY_MANAGER_IMPL_H_
 
 #include <list>
-#include "utils/shared_ptr.h"
+#include "utils/shared_ptr_helpers.h"
 #include "utils/lock.h"
 #include "policy/policy_manager.h"
 #include "policy/policy_table.h"

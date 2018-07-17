@@ -36,7 +36,7 @@
 #include "gtest/gtest.h"
 #include "mobile/unsubscribe_way_points_request.h"
 #include "interfaces/MOBILE_API.h"
-#include "utils/shared_ptr.h"
+#include "utils/shared_ptr_helpers.h"
 #include "smart_objects/smart_object.h"
 #include "commands/commands_test.h"
 #include "commands/command_request_test.h"

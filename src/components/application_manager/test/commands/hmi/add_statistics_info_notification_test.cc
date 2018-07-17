@@ -32,7 +32,7 @@
 
 #include "gtest/gtest.h"
 #include "application_manager/commands/hmi/add_statistics_info_notification.h"
-#include "utils/shared_ptr.h"
+#include "utils/shared_ptr_helpers.h"
 #include "smart_objects/smart_object.h"
 #include "application_manager/mock_application.h"
 #include "application_manager/smart_object_keys.h"

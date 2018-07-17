@@ -41,7 +41,7 @@
 #include "application_manager/application.h"
 #include "smart_objects/smart_object.h"
 #include "utils/lock.h"
-#include "utils/shared_ptr.h"
+#include "utils/shared_ptr_helpers.h"
 #include "utils/macro.h"
 
 namespace application_manager {

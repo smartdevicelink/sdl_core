@@ -40,7 +40,7 @@
 #include "application_manager/commands/commands_test.h"
 #include "application_manager/commands/command_request_test.h"
 #include "utils/lock.h"
-#include "utils/shared_ptr.h"
+#include "utils/shared_ptr_helpers.h"
 #include "utils/data_accessor.h"
 #include "smart_objects/smart_object.h"
 #include "application_manager/smart_object_keys.h"
@@ -65,7 +65,7 @@ using ::testing::Return;
 using ::testing::SaveArg;
 using ::testing::DoAll;
 
-using ::std::shared_ptr;
+
 using am::commands::MessageSharedPtr;
 using am::CommandParametersPermissions;
 using am::event_engine::EventObserver;

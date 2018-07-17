@@ -34,7 +34,7 @@
 #define SRC_COMPONENTS_INCLUDE_TRANSPORT_MANAGER_ERROR_H_
 
 #include <string>
-#include <utils/shared_ptr.h>
+#include <utils/shared_ptr_helpers.h>
 
 namespace transport_manager {
 

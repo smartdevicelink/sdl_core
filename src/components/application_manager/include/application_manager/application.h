@@ -38,7 +38,7 @@
 #include <set>
 #include <list>
 #include <vector>
-#include "utils/shared_ptr.h"
+#include "utils/shared_ptr_helpers.h"
 #include "utils/data_accessor.h"
 #include "interfaces/MOBILE_API.h"
 #include "connection_handler/device.h"

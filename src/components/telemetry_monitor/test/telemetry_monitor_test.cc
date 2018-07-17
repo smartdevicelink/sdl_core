@@ -40,7 +40,7 @@
 #include "connection_handler/mock_connection_handler.h"
 #include "transport_manager/mock_transport_manager.h"
 #include "telemetry_monitor/mock_telemetry_observable.h"
-#include "utils/shared_ptr.h"
+#include "utils/shared_ptr_helpers.h"
 #include <memory>
 
 using testing::Return;

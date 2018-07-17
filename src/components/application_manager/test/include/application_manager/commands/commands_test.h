@@ -36,7 +36,7 @@
 #include <stdint.h>
 #include "gtest/gtest.h"
 
-#include "utils/shared_ptr.h"
+#include "utils/shared_ptr_helpers.h"
 #include "smart_objects/smart_object.h"
 #include "application_manager/commands/command.h"
 #include <memory>
@@ -57,7 +57,7 @@ using ::testing::NiceMock;
 using ::testing::Mock;
 using ::testing::_;
 
-using ::std::shared_ptr;
+
 using ::smart_objects::SmartObject;
 using am::commands::MessageSharedPtr;
 using ::test::components::application_manager_test::MockApplicationManager;

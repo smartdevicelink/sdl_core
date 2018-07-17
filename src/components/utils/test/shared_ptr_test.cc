@@ -34,7 +34,7 @@
 #include <vector>
 #include <iostream>
 #include "gmock/gmock.h"
-#include "utils/shared_ptr.h"
+#include "utils/shared_ptr_helpers.h"
 
 namespace test {
 namespace components {

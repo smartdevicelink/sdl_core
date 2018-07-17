@@ -36,7 +36,7 @@
 #include <stdint.h>
 
 #include "gtest/gtest.h"
-#include "utils/shared_ptr.h"
+#include "utils/shared_ptr_helpers.h"
 #include <memory>
 #include "smart_objects/smart_object.h"
 #include "interfaces/MOBILE_API.h"
@@ -52,7 +52,7 @@ namespace commands_test {
 namespace hmi_commands_test {
 namespace ui_get_capabilities_response {
 
-using ::std::shared_ptr;
+
 using ::testing::NiceMock;
 namespace am = ::application_manager;
 namespace strings = am::strings;

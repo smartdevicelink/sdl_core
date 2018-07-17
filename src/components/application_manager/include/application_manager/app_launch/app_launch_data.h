@@ -36,7 +36,7 @@
 #include <stdint.h>
 #include <vector>
 #include <string>
-#include "utils/shared_ptr.h"
+#include "utils/shared_ptr_helpers.h"
 
 namespace app_launch {
 

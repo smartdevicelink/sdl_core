@@ -37,7 +37,7 @@
 #include <set>
 
 #include "gtest/gtest.h"
-#include "utils/shared_ptr.h"
+#include "utils/shared_ptr_helpers.h"
 #include "smart_objects/smart_object.h"
 #include "application_manager/smart_object_keys.h"
 #include "application_manager/commands/commands_test.h"
@@ -55,7 +55,7 @@ using ::testing::Return;
 using ::testing::AtLeast;
 using ::testing::_;
 
-using ::std::shared_ptr;
+
 namespace strings = ::application_manager::strings;
 using ::application_manager::commands::CommandImpl;
 using ::application_manager::ApplicationManager;

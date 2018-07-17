@@ -35,7 +35,7 @@
 
 #include <typeinfo>
 #include <limits>
-#include "utils/shared_ptr.h"
+#include "utils/shared_ptr_helpers.h"
 #include "smart_objects/default_shema_item.h"
 #include "smart_objects/schema_item_parameter.h"
 #include "utils/convert_utils.h"

@@ -35,7 +35,7 @@
 #include <map>
 #include "policy/policy_table/types.h"
 #include "utils/macro.h"
-#include "utils/shared_ptr.h"
+#include "utils/shared_ptr_helpers.h"
 #include "policy/access_remote.h"
 #include "policy/cache_manager.h"
 

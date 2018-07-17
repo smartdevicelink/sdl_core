@@ -43,7 +43,7 @@
 #include "transport_manager/transport_manager_default.h"
 #include "utils/resource_usage.h"
 #include <memory>
-#include "utils/shared_ptr.h"
+#include "utils/shared_ptr_helpers.h"
 #include "telemetry_monitor/telemetry_observable.h"
 
 namespace telemetry_monitor {

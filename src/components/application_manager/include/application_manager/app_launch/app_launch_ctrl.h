@@ -33,7 +33,7 @@
 #ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_APP_LAUNCH_APP_LAUNCH_CTRL_H_
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_APP_LAUNCH_APP_LAUNCH_CTRL_H_
 #include <string>
-#include "utils/shared_ptr.h"
+#include "utils/shared_ptr_helpers.h"
 
 namespace application_manager {
 class Application;

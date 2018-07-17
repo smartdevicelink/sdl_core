@@ -34,7 +34,7 @@
 
 #include <stddef.h>
 
-#include "utils/shared_ptr.h"
+#include "utils/shared_ptr_helpers.h"
 #include "smart_objects/schema_item.h"
 #include "smart_objects/always_true_schema_item.h"
 #include "smart_objects/schema_item_parameter.h"

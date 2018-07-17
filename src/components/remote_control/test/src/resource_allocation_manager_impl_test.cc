@@ -40,7 +40,7 @@
 #include "functional_module/module_observer.h"
 #include "application_manager/mock_application.h"
 #include "include/mock_service.h"
-#include "utils/shared_ptr.h"
+#include "utils/shared_ptr_helpers.h"
 #include <memory>
 #include "interfaces/HMI_API.h"
 #include "interfaces/MOBILE_API.h"

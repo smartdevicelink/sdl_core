@@ -34,7 +34,7 @@
 #include <string>
 
 #include "gtest/gtest.h"
-#include "utils/shared_ptr.h"
+#include "utils/shared_ptr_helpers.h"
 #include "smart_objects/smart_object.h"
 #include "application_manager/test/include/application_manager/commands/commands_test.h"
 #include "application_manager/test/include/application_manager/commands/command_request_test.h"
@@ -62,7 +62,7 @@ namespace am = ::application_manager;
 using am::commands::ReadDIDRequest;
 using am::commands::MessageSharedPtr;
 using am::event_engine::Event;
-using ::std::shared_ptr;
+
 
 class ReadDIDRequestTest
     : public CommandRequestTest<CommandsTestMocks::kIsNice> {};

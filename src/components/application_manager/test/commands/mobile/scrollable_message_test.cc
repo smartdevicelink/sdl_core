@@ -61,7 +61,7 @@ using am::commands::ScrollableMessageRequest;
 using am::commands::CommandImpl;
 using am::commands::MessageSharedPtr;
 using am::MockMessageHelper;
-using ::std::shared_ptr;
+
 using ::testing::_;
 using ::testing::Eq;
 using ::testing::Ref;

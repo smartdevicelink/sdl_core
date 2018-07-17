@@ -44,7 +44,7 @@
 #include "remote_control/rc_module_constants.h"
 #include "functional_module/function_ids.h"
 #include "include/mock_service.h"
-#include "utils/shared_ptr.h"
+#include "utils/shared_ptr_helpers.h"
 #include <memory>
 
 using functional_modules::RCFunctionID;

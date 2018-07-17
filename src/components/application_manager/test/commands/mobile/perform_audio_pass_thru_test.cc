@@ -55,7 +55,7 @@ using am::commands::PerformAudioPassThruRequest;
 using am::commands::CommandImpl;
 using am::commands::MessageSharedPtr;
 using am::MockMessageHelper;
-using ::std::shared_ptr;
+
 using ::testing::_;
 using ::testing::Return;
 using ::testing::ReturnRef;

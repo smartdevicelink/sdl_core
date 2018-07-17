@@ -32,7 +32,7 @@
 
 #include "gtest/gtest.h"
 #include "application_manager/commands/hmi/allow_app_response.h"
-#include "utils/shared_ptr.h"
+#include "utils/shared_ptr_helpers.h"
 #include "application_manager/mock_application.h"
 #include "commands/commands_test.h"
 

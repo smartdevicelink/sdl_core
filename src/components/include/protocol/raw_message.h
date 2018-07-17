@@ -33,7 +33,7 @@
 #define SRC_COMPONENTS_INCLUDE_PROTOCOL_RAW_MESSAGE_H_
 
 #include "utils/macro.h"
-#include "utils/shared_ptr.h"
+#include "utils/shared_ptr_helpers.h"
 #include "protocol/service_type.h"
 #include "protocol/message_priority.h"
 

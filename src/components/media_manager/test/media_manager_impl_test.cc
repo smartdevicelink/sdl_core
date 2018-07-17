@@ -45,7 +45,7 @@
 #include "protocol_handler/mock_protocol_handler.h"
 #include "protocol/common.h"
 #include <memory>
-#include "utils/shared_ptr.h"
+#include "utils/shared_ptr_helpers.h"
 #include "utils/file_system.h"
 #include "utils/scope_guard.h"
 
@@ -58,7 +58,6 @@ using namespace ::media_manager;
 using ::testing::_;
 using ::testing::Return;
 using ::testing::ReturnRef;
-using ::std::shared_ptr;
 using ::utils::ScopeGuard;
 using ::utils::MakeGuard;
 using ::testing::NiceMock;

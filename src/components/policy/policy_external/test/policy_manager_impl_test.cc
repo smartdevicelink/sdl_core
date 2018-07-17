@@ -38,7 +38,7 @@
 
 #include "policy/policy_manager_impl_test_base.h"
 #include <memory>
-#include "utils/shared_ptr.h"
+#include "utils/shared_ptr_helpers.h"
 
 using ::testing::_;
 using ::testing::Return;

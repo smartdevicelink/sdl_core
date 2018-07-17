@@ -35,7 +35,7 @@
 
 #include "gmock/gmock.h"
 #include "protocol_handler/time_metric_observer.h"
-#include "utils/shared_ptr.h"
+#include "utils/shared_ptr_helpers.h"
 
 namespace test {
 namespace components {

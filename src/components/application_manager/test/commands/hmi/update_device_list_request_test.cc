@@ -33,7 +33,7 @@
 #include <stdint.h>
 
 #include "gtest/gtest.h"
-#include "utils/shared_ptr.h"
+#include "utils/shared_ptr_helpers.h"
 #include "smart_objects/smart_object.h"
 #include "interfaces/HMI_API.h"
 #include "application_manager/smart_object_keys.h"
@@ -54,7 +54,7 @@ namespace commands_test {
 namespace hmi_commands_test {
 namespace update_device_list_request {
 
-using ::std::shared_ptr;
+
 using testing::_;
 using testing::ReturnRef;
 using testing::Return;

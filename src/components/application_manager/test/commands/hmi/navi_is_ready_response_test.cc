@@ -51,7 +51,7 @@ namespace am = ::application_manager;
 namespace commands = am::commands;
 
 using ::testing::ReturnRef;
-using ::std::shared_ptr;
+
 using commands::ResponseFromHMI;
 using test::components::event_engine_test::MockEventDispatcher;
 

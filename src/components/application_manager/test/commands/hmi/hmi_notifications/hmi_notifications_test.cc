@@ -112,7 +112,7 @@
 #include "utils/lock.h"
 #include "utils/data_accessor.h"
 #include "utils/signals.h"
-#include "utils/shared_ptr.h"
+#include "utils/shared_ptr_helpers.h"
 #include <memory>
 #include "utils/file_system.h"
 #include "smart_objects/smart_object.h"
@@ -151,7 +151,7 @@ using ::testing::Return;
 using ::testing::ReturnRef;
 using ::testing::NiceMock;
 using ::testing::InSequence;
-using ::std::shared_ptr;
+
 using ::smart_objects::SmartObject;
 using ::application_manager::commands::MessageSharedPtr;
 using ::test::components::application_manager_test::MockApplicationManager;

@@ -34,7 +34,7 @@
 #include <string>
 
 #include "gtest/gtest.h"
-#include "utils/shared_ptr.h"
+#include "utils/shared_ptr_helpers.h"
 #include "smart_objects/smart_object.h"
 #include "application_manager/smart_object_keys.h"
 #include "application_manager/commands/command.h"
@@ -52,7 +52,7 @@ namespace get_urls_response {
 
 using ::testing::_;
 using ::testing::Return;
-using ::std::shared_ptr;
+
 namespace am = ::application_manager;
 namespace strings = ::application_manager::strings;
 using am::commands::ResponseToHMI;

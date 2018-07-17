@@ -37,7 +37,7 @@
 #include "gmock/gmock.h"
 #include "telemetry_monitor/telemetry_monitor.h"
 #include "telemetry_monitor/metric_wrapper.h"
-#include "utils/shared_ptr.h"
+#include "utils/shared_ptr_helpers.h"
 
 namespace test {
 namespace components {

@@ -32,7 +32,7 @@
 
 #include "gtest/gtest.h"
 #include "application_manager/commands/hmi/activate_app_request.h"
-#include "utils/shared_ptr.h"
+#include "utils/shared_ptr_helpers.h"
 #include "smart_objects/smart_object.h"
 #include "application_manager/commands/command_impl.h"
 #include "commands/commands_test.h"
@@ -45,7 +45,7 @@ namespace hmi_commands_test {
 namespace activate_app_request {
 
 using ::testing::_;
-using ::std::shared_ptr;
+
 namespace am = ::application_manager;
 namespace strings = ::application_manager::strings;
 using am::commands::MessageSharedPtr;

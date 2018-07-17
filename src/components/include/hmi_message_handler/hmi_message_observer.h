@@ -33,7 +33,7 @@
 #ifndef SRC_COMPONENTS_INCLUDE_HMI_MESSAGE_HANDLER_HMI_MESSAGE_OBSERVER_H_
 #define SRC_COMPONENTS_INCLUDE_HMI_MESSAGE_HANDLER_HMI_MESSAGE_OBSERVER_H_
 
-#include "utils/shared_ptr.h"
+#include "utils/shared_ptr_helpers.h"
 
 namespace application_manager {
 class Message;

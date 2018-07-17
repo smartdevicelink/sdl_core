@@ -35,7 +35,7 @@
 
 #include <map>
 
-#include "utils/shared_ptr.h"
+#include "utils/shared_ptr_helpers.h"
 #include "policy/pt_representation.h"
 #include "policy/pt_ext_representation.h"
 #include "policy/usage_statistics/statistics_manager.h"

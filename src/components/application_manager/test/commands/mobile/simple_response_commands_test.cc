@@ -35,7 +35,7 @@
 
 #include "gtest/gtest.h"
 #include "utils/helpers.h"
-#include "utils/shared_ptr.h"
+#include "utils/shared_ptr_helpers.h"
 #include "commands/commands_test.h"
 #include "application_manager/mock_application_manager.h"
 #include "mobile/read_did_response.h"

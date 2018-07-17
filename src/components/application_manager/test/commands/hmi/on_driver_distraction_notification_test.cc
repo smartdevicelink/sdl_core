@@ -36,7 +36,7 @@
 #include "gtest/gtest.h"
 #include "smart_objects/smart_object.h"
 #include "application_manager/smart_object_keys.h"
-#include "utils/shared_ptr.h"
+#include "utils/shared_ptr_helpers.h"
 #include "utils/lock.h"
 #include <memory>
 #include "utils/data_accessor.h"
@@ -56,7 +56,7 @@ namespace on_driver_distraction_notification {
 using ::testing::_;
 using ::testing::Return;
 using ::testing::Eq;
-using ::std::shared_ptr;
+
 
 namespace am = ::application_manager;
 using am::commands::MessageSharedPtr;

@@ -35,7 +35,6 @@
 #include <limits>
 
 #include "utils/logger.h"
-#include <memory>
 #include "utils/lock.h"
 #include "utils/date_time.h"
 

@@ -37,7 +37,7 @@
 #include <cstddef>
 #include <vector>
 #include <string>
-#include "utils/shared_ptr.h"
+#include "utils/shared_ptr_helpers.h"
 
 namespace security_manager {
 /**

@@ -33,7 +33,7 @@
 #ifndef SRC_COMPONENTS_REMOTE_CONTROL_INCLUDE_REMOTE_CONTROL_RC_COMMAND_FACTORY_H_
 #define SRC_COMPONENTS_REMOTE_CONTROL_INCLUDE_REMOTE_CONTROL_RC_COMMAND_FACTORY_H_
 
-#include "utils/shared_ptr.h"
+#include "utils/shared_ptr_helpers.h"
 #include "remote_control/commands/command.h"
 #include "remote_control/remote_control_plugin.h"
 #include "application_manager/message.h"

@@ -35,7 +35,7 @@
 
 #include <list>
 #include "interfaces/MOBILE_API.h"
-#include "utils/shared_ptr.h"
+#include "utils/shared_ptr_helpers.h"
 #include "utils/macro.h"
 
 namespace application_manager {

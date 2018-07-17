@@ -39,7 +39,7 @@
 #include "remote_control/request_controller.h"
 #include "remote_control/event_engine/event_dispatcher.h"
 #include "utils/threads/message_loop_thread.h"
-#include "utils/shared_ptr.h"
+#include "utils/shared_ptr_helpers.h"
 
 namespace remote_control {
 

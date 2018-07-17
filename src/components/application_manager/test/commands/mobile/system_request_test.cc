@@ -58,7 +58,7 @@ using am::MockHmiInterfaces;
 using am::event_engine::Event;
 using am::MessageType;
 using policy_test::MockPolicyHandlerInterface;
-using ::std::shared_ptr;
+
 using ::testing::_;
 using ::testing::DoAll;
 using ::testing::Return;

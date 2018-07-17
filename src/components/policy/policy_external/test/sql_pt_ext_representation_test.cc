@@ -44,7 +44,7 @@
 #include "rpc_base/rpc_base.h"
 #include "policy/policy_table/types.h"
 #include "policy/mock_policy_settings.h"
-#include "utils/shared_ptr.h"
+#include "utils/shared_ptr_helpers.h"
 #include <memory>
 
 using namespace ::policy;

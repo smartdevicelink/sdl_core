@@ -31,7 +31,7 @@
  */
 
 #include "gtest/gtest.h"
-#include "utils/shared_ptr.h"
+#include "utils/shared_ptr_helpers.h"
 #include <memory>
 
 #include "hmi_message_handler/hmi_message_handler_impl.h"

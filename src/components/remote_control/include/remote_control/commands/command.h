@@ -33,7 +33,7 @@
 #ifndef SRC_COMPONENTS_REMOTE_CONTROL_INCLUDE_REMOTE_CONTROL_COMMANDS_COMMAND_H_
 #define SRC_COMPONENTS_REMOTE_CONTROL_INCLUDE_REMOTE_CONTROL_COMMANDS_COMMAND_H_
 
-#include "utils/shared_ptr.h"
+#include "utils/shared_ptr_helpers.h"
 #include "remote_control/remote_plugin_interface.h"
 #include "remote_control/event_engine/event.h"
 

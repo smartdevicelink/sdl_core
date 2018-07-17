@@ -46,7 +46,7 @@
 
 #include "utils/macro.h"
 #include "utils/lock.h"
-#include "utils/shared_ptr.h"
+#include "utils/shared_ptr_helpers.h"
 
 namespace security_manager {
 class CryptoManagerImpl : public CryptoManager {

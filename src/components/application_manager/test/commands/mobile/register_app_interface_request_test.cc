@@ -36,7 +36,7 @@
 
 #include "gtest/gtest.h"
 #include "mobile/register_app_interface_request.h"
-#include "utils/shared_ptr.h"
+#include "utils/shared_ptr_helpers.h"
 #include "smart_objects/smart_object.h"
 #include "application_manager/commands/commands_test.h"
 #include "application_manager/commands/command_request_test.h"
@@ -70,7 +70,7 @@ using ::testing::DoAll;
 
 namespace am = ::application_manager;
 
-using ::std::shared_ptr;
+
 using am::commands::MessageSharedPtr;
 using am::commands::RegisterAppInterfaceRequest;
 

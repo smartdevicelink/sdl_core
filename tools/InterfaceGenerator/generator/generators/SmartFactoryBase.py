@@ -1283,7 +1283,7 @@ class CodeGenerator(object):
         u'''#include "formatters/CSmartFactory.h"\n'''
         u'''#include "smart_objects/smart_schema.h"\n'''
         u'''#include "smart_objects/schema_item.h"\n'''
-        u'''#include "utils/shared_ptr.h"\n'''
+        u'''#include "utils/shared_ptr_helpers.h"\n'''
         u'''#include "$header_file_name"\n'''
         u'''\n'''
         u'''$namespace_open'''

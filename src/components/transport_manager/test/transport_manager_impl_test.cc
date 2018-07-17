@@ -42,7 +42,7 @@
 #include "transport_manager/mock_transport_manager_impl.h"
 #include "transport_manager/mock_transport_manager_settings.h"
 #include "resumption/last_state_impl.h"
-#include "utils/shared_ptr.h"
+#include "utils/shared_ptr_helpers.h"
 #include <memory>
 #include "utils/test_async_waiter.h"
 

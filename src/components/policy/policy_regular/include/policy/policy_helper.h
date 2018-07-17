@@ -34,7 +34,7 @@
 #define SRC_COMPONENTS_POLICY_POLICY_REGULAR_INCLUDE_POLICY_POLICY_HELPER_H_
 
 #include "policy/policy_table/functions.h"
-#include "utils/shared_ptr.h"
+#include "utils/shared_ptr_helpers.h"
 #include "policy/policy_types.h"
 
 namespace policy {

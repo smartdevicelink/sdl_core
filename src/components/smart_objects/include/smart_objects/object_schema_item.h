@@ -37,7 +37,7 @@
 #include <set>
 
 #include "utils/macro.h"
-#include "utils/shared_ptr.h"
+#include "utils/shared_ptr_helpers.h"
 
 #include "smart_objects/schema_item.h"
 #include "smart_objects/schema_item_parameter.h"

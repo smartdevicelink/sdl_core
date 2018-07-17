@@ -37,7 +37,7 @@
 #include <list>
 #include <cstdint>
 
-#include "utils/shared_ptr.h"
+#include "utils/shared_ptr_helpers.h"
 #include "utils/lock.h"
 #include "policy/policy_manager.h"
 #include "policy/policy_table.h"

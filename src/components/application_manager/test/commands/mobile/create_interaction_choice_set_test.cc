@@ -38,7 +38,7 @@
 #include "application_manager/commands/mobile/create_interaction_choice_set_response.h"
 
 #include "gtest/gtest.h"
-#include "utils/shared_ptr.h"
+#include "utils/shared_ptr_helpers.h"
 #include "utils/helpers.h"
 #include <memory>
 #include "smart_objects/smart_object.h"
@@ -65,7 +65,7 @@ using am::commands::MessageSharedPtr;
 using am::ApplicationSharedPtr;
 using am::MockMessageHelper;
 using ::testing::_;
-using ::std::shared_ptr;
+
 using ::testing::Return;
 using ::testing::ReturnRef;
 using ::testing::AtLeast;

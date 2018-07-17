@@ -36,7 +36,7 @@
 #include <ctime>
 #include "policy/usage_statistics/statistics_manager.h"
 #include "policy/usage_statistics/app_stopwatch.h"
-#include "utils/shared_ptr.h"
+#include "utils/shared_ptr_helpers.h"
 #include "utils/timer.h"
 #include "utils/macro.h"
 

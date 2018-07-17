@@ -1066,7 +1066,7 @@ void TransportManagerImpl::Handle(TransportAdapterEvent event) {
       LOG4CXX_ERROR(logger_, "Transport adapter failed to send data");
       // TODO(YK): potential error case -> thread unsafe
       // update of message content
-      if (event.event_data && event.event_data.use_count() > 0) {
+      if (utils::ValidSPtr(event.event_data)) {
         event.event_data->set_waiting(true);
       } else {
         LOG4CXX_DEBUG(logger_, "Data is invalid");

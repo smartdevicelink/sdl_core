@@ -36,7 +36,7 @@
 
 #include "gmock/gmock.h"
 
-#include "utils/shared_ptr.h"
+#include "utils/shared_ptr_helpers.h"
 
 #include "smart_objects/smart_object.h"
 #include "smart_objects/smart_schema.h"

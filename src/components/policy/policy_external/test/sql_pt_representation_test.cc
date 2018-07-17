@@ -49,7 +49,7 @@
 #include "policy/policy_table/enums.h"
 #include "rpc_base/rpc_base.h"
 #include "policy/mock_policy_settings.h"
-#include "utils/shared_ptr.h"
+#include "utils/shared_ptr_helpers.h"
 
 namespace policy_table = rpc::policy_table_interface_base;
 using policy::SQLPTRepresentation;

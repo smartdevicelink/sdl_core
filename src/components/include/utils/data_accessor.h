@@ -33,7 +33,7 @@
 #define SRC_COMPONENTS_INCLUDE_UTILS_DATA_ACCESSOR_H_
 
 #include "utils/lock.h"
-#include "utils/shared_ptr.h"
+#include "utils/shared_ptr_helpers.h"
 
 // This class is for thread-safe access to data
 template <class T>

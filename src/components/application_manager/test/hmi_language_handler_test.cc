@@ -44,7 +44,7 @@
 #include "application_manager/mock_application.h"
 #include "application_manager/smart_object_keys.h"
 #include "test/resumption/mock_last_state.h"
-#include "utils/shared_ptr.h"
+#include "utils/shared_ptr_helpers.h"
 #include <memory>
 #include "utils/lock.h"
 

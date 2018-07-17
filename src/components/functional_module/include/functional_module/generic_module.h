@@ -37,7 +37,7 @@
 #include <string>
 #include "functional_module/module_observer.h"
 #include "functional_module/function_ids.h"
-#include "utils/shared_ptr.h"
+#include "utils/shared_ptr_helpers.h"
 #include "application_manager/service.h"
 
 namespace functional_modules {

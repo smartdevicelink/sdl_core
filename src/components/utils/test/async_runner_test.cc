@@ -36,7 +36,7 @@
 #include "utils/lock.h"
 #include "utils/threads/async_runner.h"
 #include "utils/conditional_variable.h"
-#include "utils/shared_ptr.h"
+#include "utils/shared_ptr_helpers.h"
 #include <memory>
 
 #include "gtest/gtest.h"

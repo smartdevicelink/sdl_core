@@ -34,12 +34,11 @@
 #include <string>
 #include "gtest/gtest.h"
 #include "mobile/speak_request.h"
-#include "utils/shared_ptr.h"
+#include "utils/shared_ptr_helpers.h"
 #include "commands/commands_test.h"
 #include "commands/command_request_test.h"
 #include "interfaces/HMI_API.h"
 #include "interfaces/MOBILE_API.h"
-#include "utils/shared_ptr.h"
 #include "utils/helpers.h"
 #include <memory>
 #include "smart_objects/smart_object.h"
@@ -68,7 +67,7 @@ using am::commands::MessageSharedPtr;
 using am::ApplicationSharedPtr;
 using am::MockMessageHelper;
 using ::testing::_;
-using ::std::shared_ptr;
+
 using ::testing::Return;
 using ::testing::ReturnRef;
 using am::commands::SpeakRequest;

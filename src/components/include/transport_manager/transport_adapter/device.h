@@ -37,7 +37,7 @@
 #include <vector>
 
 #include "transport_manager/common.h"
-#include "utils/shared_ptr.h"
+#include "utils/shared_ptr_helpers.h"
 #include "utils/macro.h"
 
 namespace transport_manager {

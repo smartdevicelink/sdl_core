@@ -38,7 +38,7 @@
 #include "utils/threads/thread.h"
 #include "utils/threads/thread_delegate.h"
 #include "utils/atomic_object.h"
-#include "utils/shared_ptr.h"
+#include "utils/shared_ptr_helpers.h"
 #include "protocol/raw_message.h"
 
 namespace media_manager {

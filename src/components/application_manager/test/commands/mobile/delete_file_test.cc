@@ -39,7 +39,7 @@
 #include "mobile/delete_file_response.h"
 
 #include "gtest/gtest.h"
-#include "utils/shared_ptr.h"
+#include "utils/shared_ptr_helpers.h"
 #include "utils/file_system.h"
 #include "smart_objects/smart_object.h"
 #include "application_manager/smart_object_keys.h"

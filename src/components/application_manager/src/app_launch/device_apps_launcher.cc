@@ -6,7 +6,7 @@
 #include "application_manager/app_launch/app_launch_data.h"
 #include "application_manager/app_launch/apps_launcher.h"
 #include "application_manager/resumption/resume_ctrl.h"
-#include "utils/shared_ptr.h"
+#include "utils/shared_ptr_helpers.h"
 #include <memory>
 #include "utils/timer.h"
 #include "utils/timer_task_impl.h"

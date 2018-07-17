@@ -34,7 +34,7 @@
 #include <string>
 
 #include "gtest/gtest.h"
-#include "utils/shared_ptr.h"
+#include "utils/shared_ptr_helpers.h"
 #include "application_manager/message.h"
 #include "application_manager/mock_application.h"
 #include "application_manager/mock_application_manager.h"
@@ -58,7 +58,7 @@ namespace get_urls {
 
 using namespace hmi_apis;
 using namespace policy;
-using ::std::shared_ptr;
+
 using ::testing::NiceMock;
 using ::testing::SetArgReferee;
 using ::test::components::application_manager_test::MockApplication;

@@ -30,7 +30,7 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "utils/shared_ptr.h"
+#include "utils/shared_ptr_helpers.h"
 #include <memory>
 #include "remote_control/rc_command_factory.h"
 #include "functional_module/function_ids.h"

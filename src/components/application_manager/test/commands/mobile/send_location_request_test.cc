@@ -36,7 +36,7 @@
 #include "application_manager/commands/mobile/send_location_request.h"
 #include "application_manager/mock_hmi_capabilities.h"
 #include "application_manager/mock_message_helper.h"
-#include "utils/shared_ptr.h"
+#include "utils/shared_ptr_helpers.h"
 #include "commands/command_request_test.h"
 
 namespace test {

@@ -35,7 +35,7 @@
 
 #include <string>
 #include "remote_control/event_engine/event_dispatcher.h"
-#include "utils/shared_ptr.h"
+#include "utils/shared_ptr_helpers.h"
 #include "application_manager/message.h"
 
 namespace rc_event_engine {

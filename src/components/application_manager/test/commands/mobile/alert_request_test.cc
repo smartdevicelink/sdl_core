@@ -56,7 +56,7 @@ using am::commands::AlertRequest;
 using am::commands::CommandImpl;
 using am::commands::MessageSharedPtr;
 using am::MockMessageHelper;
-using ::std::shared_ptr;
+
 using am::event_engine::Event;
 using policy_test::MockPolicyHandlerInterface;
 using ::testing::_;

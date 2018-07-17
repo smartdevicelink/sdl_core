@@ -36,7 +36,7 @@
 
 #include "gtest/gtest.h"
 #include "application_manager/commands/mobile/on_vehicle_data_notification.h"
-#include "utils/shared_ptr.h"
+#include "utils/shared_ptr_helpers.h"
 #include "utils/custom_string.h"
 #include "smart_objects/smart_object.h"
 #include "application_manager/smart_object_keys.h"

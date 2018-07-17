@@ -30,8 +30,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_INCLUDE_UTILS_SHARED_PTR_H_
-#define SRC_COMPONENTS_INCLUDE_UTILS_SHARED_PTR_H_
+#ifndef SRC_COMPONENTS_INCLUDE_UTILS_SHARED_PTR_HELPERS_H_
+#define SRC_COMPONENTS_INCLUDE_UTILS_SHARED_PTR_HELPERS_H_
 
 #include <assert.h>
 #include <stddef.h>
@@ -50,6 +50,6 @@ bool ValidSPtr(std::shared_ptr<T> ptr) {
 }
 }  // namespace utils
 
-#endif  // SRC_COMPONENTS_INCLUDE_UTILS_SHARED_PTR_H_
+#endif  // SRC_COMPONENTS_INCLUDE_UTILS_SHARED_PTR_HELPERS_H_
 
 // vim: set ts=2 sw=2 et:

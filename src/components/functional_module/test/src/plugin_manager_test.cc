@@ -4,7 +4,7 @@
 #include "mock_generic_module.h"
 #include "mock_service.h"
 #include "application_manager/mock_application.h"
-#include "utils/shared_ptr.h"
+#include "utils/shared_ptr_helpers.h"
 #include <memory>
 
 using application_manager::Message;

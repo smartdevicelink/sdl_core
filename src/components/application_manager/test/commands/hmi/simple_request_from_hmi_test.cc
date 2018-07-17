@@ -31,7 +31,7 @@
  */
 
 #include "gtest/gtest.h"
-#include "utils/shared_ptr.h"
+#include "utils/shared_ptr_helpers.h"
 #include "smart_objects/smart_object.h"
 #include "application_manager/smart_object_keys.h"
 #include "application_manager/commands/commands_test.h"
@@ -51,7 +51,7 @@ using ::testing::Types;
 using ::testing::NotNull;
 using ::testing::NiceMock;
 
-using ::std::shared_ptr;
+
 namespace commands = ::application_manager::commands;
 using commands::MessageSharedPtr;
 using ::application_manager::event_engine::EventObserver;

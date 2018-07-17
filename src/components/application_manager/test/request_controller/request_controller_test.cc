@@ -36,7 +36,7 @@
 #include "application_manager/request_controller.h"
 #include "application_manager/request_info.h"
 #include "application_manager/mock_request.h"
-#include "utils/shared_ptr.h"
+#include "utils/shared_ptr_helpers.h"
 #include "smart_objects/smart_object.h"
 #include "application_manager/commands/command_request_impl.h"
 #include "application_manager/message_helper.h"

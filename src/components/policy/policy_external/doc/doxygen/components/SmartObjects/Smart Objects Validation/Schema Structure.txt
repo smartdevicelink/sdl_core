@@ -57,17 +57,17 @@ Example:
 //
 // true, if successful
 // false, if failed
-Tshared_ptr<ISchemaItem> success_SchemaItem = CBoolSchemaItem::create(TSchemaItemParameter<bool>());
+TSharedPtr<ISchemaItem> success_SchemaItem = CBoolSchemaItem::create(TSchemaItemParameter<bool>());
 
 // Function parameter resultCode.
 //
 // See Result
-Tshared_ptr<ISchemaItem> resultCode_SchemaItem = TEnumSchemaItem<Result::eType>::create(resultCode_allowedEnumSubsetValues, TSchemaItemParameter<Result::eType>());
+TSharedPtr<ISchemaItem> resultCode_SchemaItem = TEnumSchemaItem<Result::eType>::create(resultCode_allowedEnumSubsetValues, TSchemaItemParameter<Result::eType>());
 
 // Function parameter info.
 //
 // Provides additional human readable info regarding the result.
-Tshared_ptr<ISchemaItem> info_SchemaItem = CStringSchemaItem::create(TSchemaItemParameter<size_t>(1000), TSchemaItemParameter<std::string>());
+TSharedPtr<ISchemaItem> info_SchemaItem = CStringSchemaItem::create(TSchemaItemParameter<size_t>(1000), TSchemaItemParameter<std::string>());
 
 schemaMembersMap["success"] = CObjectSchemaItem::SMember(success_SchemaItem, true);
 

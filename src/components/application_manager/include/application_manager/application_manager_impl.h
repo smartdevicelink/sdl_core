@@ -84,7 +84,7 @@
 #endif  // TELEMETRY_MONITOR
 
 #include "utils/macro.h"
-#include "utils/shared_ptr.h"
+#include "utils/shared_ptr_helpers.h"
 #include "utils/message_queue.h"
 #include "utils/prioritized_queue.h"
 #include "utils/threads/thread.h"

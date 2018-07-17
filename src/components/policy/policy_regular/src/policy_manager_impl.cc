@@ -49,7 +49,6 @@
 #include "policy/update_status_manager.h"
 #include "config_profile/profile.h"
 #include "utils/timer_task_impl.h"
-#include <memory>
 
 #ifdef SDL_REMOTE_CONTROL
 #include "policy/access_remote.h"

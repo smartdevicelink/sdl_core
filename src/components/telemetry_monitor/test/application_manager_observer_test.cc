@@ -35,7 +35,7 @@
 #include "application_manager/telemetry_observer.h"
 #include "telemetry_monitor/application_manager_metric_wrapper.h"
 #include "telemetry_monitor/application_manager_observer.h"
-#include "utils/shared_ptr.h"
+#include "utils/shared_ptr_helpers.h"
 #include "telemetry_monitor/telemetry_monitor.h"
 
 namespace test {

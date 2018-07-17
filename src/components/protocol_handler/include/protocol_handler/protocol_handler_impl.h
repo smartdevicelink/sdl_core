@@ -42,7 +42,7 @@
 #include "utils/prioritized_queue.h"
 #include "utils/message_queue.h"
 #include "utils/threads/message_loop_thread.h"
-#include "utils/shared_ptr.h"
+#include "utils/shared_ptr_helpers.h"
 #include "utils/messagemeter.h"
 
 #include "protocol_handler/protocol_handler.h"

@@ -69,7 +69,7 @@ XXX::YYY::ZZZ::Test::Test()
   InitFunctionSchemes(struct_schema_items, function_id_items, message_type_items);
 }
 
-Tshared_ptr<ISchemaItem> XXX::YYY::ZZZ::Test::ProvideObjectSchemaItemForStruct(
+TSharedPtr<ISchemaItem> XXX::YYY::ZZZ::Test::ProvideObjectSchemaItemForStruct(
     const TStructsSchemaItems &struct_schema_items,
     const StructIdentifiers::eType struct_id) {
   const TStructsSchemaItems::const_iterator it = struct_schema_items.find(struct_id);
@@ -82,11 +82,11 @@ Tshared_ptr<ISchemaItem> XXX::YYY::ZZZ::Test::ProvideObjectSchemaItemForStruct(
 
 void XXX::YYY::ZZZ::Test::InitStructSchemes(
     TStructsSchemaItems &struct_schema_items) {
-  Tshared_ptr<ISchemaItem> struct_schema_item_Struct2 = InitStructSchemaItem_Struct2(struct_schema_items);
+  TSharedPtr<ISchemaItem> struct_schema_item_Struct2 = InitStructSchemaItem_Struct2(struct_schema_items);
   struct_schema_items.insert(std::make_pair(StructIdentifiers::Struct2, struct_schema_item_Struct2));
   structs_schemes_.insert(std::make_pair(StructIdentifiers::Struct2, CSmartSchema(struct_schema_item_Struct2)));
 
-  Tshared_ptr<ISchemaItem> struct_schema_item_Struct1 = InitStructSchemaItem_Struct1(struct_schema_items);
+  TSharedPtr<ISchemaItem> struct_schema_item_Struct1 = InitStructSchemaItem_Struct1(struct_schema_items);
   struct_schema_items.insert(std::make_pair(StructIdentifiers::Struct1, struct_schema_item_Struct1));
   structs_schemes_.insert(std::make_pair(StructIdentifiers::Struct1, CSmartSchema(struct_schema_item_Struct1)));
 }
@@ -142,10 +142,10 @@ CSmartSchema XXX::YYY::ZZZ::Test::InitFunction_name1_request(
   //
   // ToDo: Do1
   // ToDo: Do2
-  Tshared_ptr<ISchemaItem> param1_SchemaItem = TEnumSchemaItem<Enum_new4::eType>::create(Enum_new4_all_enum_values, TSchemaItemParameter<Enum_new4::eType>(Enum_new4::_11));
+  TSharedPtr<ISchemaItem> param1_SchemaItem = TEnumSchemaItem<Enum_new4::eType>::create(Enum_new4_all_enum_values, TSchemaItemParameter<Enum_new4::eType>(Enum_new4::_11));
 
   // Function parameter param2.
-  Tshared_ptr<ISchemaItem> param2_SchemaItem = TEnumSchemaItem<Enum1::eType>::create(param2_allowed_enum_subset_values, TSchemaItemParameter<Enum1::eType>(name1));
+  TSharedPtr<ISchemaItem> param2_SchemaItem = TEnumSchemaItem<Enum1::eType>::create(param2_allowed_enum_subset_values, TSchemaItemParameter<Enum1::eType>(name1));
 
   std::map<std::string, CObjectSchemaItem::SMember> schema_members;
 
@@ -208,7 +208,7 @@ CSmartSchema XXX::YYY::ZZZ::Test::InitFunction_val_2_notification(
 
 //----------- Structs schema items initialization ------------
 
-Tshared_ptr<ISchemaItem> XXX::YYY::ZZZ::Test::InitStructSchemaItem_Struct1(
+TSharedPtr<ISchemaItem> XXX::YYY::ZZZ::Test::InitStructSchemaItem_Struct1(
     const TStructsSchemaItems &struct_schema_items) {
   std::set<Enum1::eType> Enum1_all_enum_values;
   Enum1_all_enum_values.insert(Enum1::name1);
@@ -232,43 +232,43 @@ Tshared_ptr<ISchemaItem> XXX::YYY::ZZZ::Test::InitStructSchemaItem_Struct1(
   sub3_allowed_enum_subset_values.insert(Enum_new4::_22);
 
   // Struct member intParam.
-  Tshared_ptr<ISchemaItem> intParam_SchemaItem = TNumberSchemaItem<int>::create(TSchemaItemParameter<int>(), TSchemaItemParameter<int>(2), TSchemaItemParameter<int>());
+  TSharedPtr<ISchemaItem> intParam_SchemaItem = TNumberSchemaItem<int>::create(TSchemaItemParameter<int>(), TSchemaItemParameter<int>(2), TSchemaItemParameter<int>());
 
   // Struct member doubleParam.
-  Tshared_ptr<ISchemaItem> doubleParam_SchemaItem = TNumberSchemaItem<double>::create(TSchemaItemParameter<double>(0.333), TSchemaItemParameter<double>(), TSchemaItemParameter<double>());
+  TSharedPtr<ISchemaItem> doubleParam_SchemaItem = TNumberSchemaItem<double>::create(TSchemaItemParameter<double>(0.333), TSchemaItemParameter<double>(), TSchemaItemParameter<double>());
 
   // Struct member boolParam.
-  Tshared_ptr<ISchemaItem> boolParam_SchemaItem = CBoolSchemaItem::create(TSchemaItemParameter<bool>());
+  TSharedPtr<ISchemaItem> boolParam_SchemaItem = CBoolSchemaItem::create(TSchemaItemParameter<bool>());
 
   // Struct member structParam.
-  Tshared_ptr<ISchemaItem> structParam_SchemaItem = ProvideObjectSchemaItemForStruct(struct_schema_items, StructIdentifiers::Struct2);
+  TSharedPtr<ISchemaItem> structParam_SchemaItem = ProvideObjectSchemaItemForStruct(struct_schema_items, StructIdentifiers::Struct2);
 
   // Struct member enumParam.
-  Tshared_ptr<ISchemaItem> enumParam_SchemaItem = TEnumSchemaItem<Enum1::eType>::create(Enum1_all_enum_values, TSchemaItemParameter<Enum1::eType>());
+  TSharedPtr<ISchemaItem> enumParam_SchemaItem = TEnumSchemaItem<Enum1::eType>::create(Enum1_all_enum_values, TSchemaItemParameter<Enum1::eType>());
 
   // Struct member enumParam1.
-  Tshared_ptr<ISchemaItem> enumParam1_SchemaItem = TEnumSchemaItem<Enum1::eType>::create(Enum1_all_enum_values, TSchemaItemParameter<Enum1::eType>());
+  TSharedPtr<ISchemaItem> enumParam1_SchemaItem = TEnumSchemaItem<Enum1::eType>::create(Enum1_all_enum_values, TSchemaItemParameter<Enum1::eType>());
 
   // Struct member enumSubset1.
-  Tshared_ptr<ISchemaItem> enumSubset1_SchemaItem = TEnumSchemaItem<Enum1::eType>::create(enumSubset1_allowed_enum_subset_values, TSchemaItemParameter<Enum1::eType>());
+  TSharedPtr<ISchemaItem> enumSubset1_SchemaItem = TEnumSchemaItem<Enum1::eType>::create(enumSubset1_allowed_enum_subset_values, TSchemaItemParameter<Enum1::eType>());
 
   // Struct member arrayOfInt.
-  Tshared_ptr<ISchemaItem> arrayOfInt_SchemaItem = CArraySchemaItem::create(CBoolSchemaItem::create(TSchemaItemParameter<bool>()), TSchemaItemParameter<size_t>(0), TSchemaItemParameter<size_t>(20));
+  TSharedPtr<ISchemaItem> arrayOfInt_SchemaItem = CArraySchemaItem::create(CBoolSchemaItem::create(TSchemaItemParameter<bool>()), TSchemaItemParameter<size_t>(0), TSchemaItemParameter<size_t>(20));
 
   // Struct member arrayOfEnum1.
-  Tshared_ptr<ISchemaItem> arrayOfEnum1_SchemaItem = CArraySchemaItem::create(TEnumSchemaItem<Enum1::eType>::create(Enum1_all_enum_values, TSchemaItemParameter<Enum1::eType>()), TSchemaItemParameter<size_t>(0), TSchemaItemParameter<size_t>(20));
+  TSharedPtr<ISchemaItem> arrayOfEnum1_SchemaItem = CArraySchemaItem::create(TEnumSchemaItem<Enum1::eType>::create(Enum1_all_enum_values, TSchemaItemParameter<Enum1::eType>()), TSchemaItemParameter<size_t>(0), TSchemaItemParameter<size_t>(20));
 
   // Struct member arrayOfEnum3.
-  Tshared_ptr<ISchemaItem> arrayOfEnum3_SchemaItem = CArraySchemaItem::create(TEnumSchemaItem<Enum_new2::eType>::create(Enum_new2_all_enum_values, TSchemaItemParameter<Enum_new2::eType>()), TSchemaItemParameter<size_t>(10), TSchemaItemParameter<size_t>(40));
+  TSharedPtr<ISchemaItem> arrayOfEnum3_SchemaItem = CArraySchemaItem::create(TEnumSchemaItem<Enum_new2::eType>::create(Enum_new2_all_enum_values, TSchemaItemParameter<Enum_new2::eType>()), TSchemaItemParameter<size_t>(10), TSchemaItemParameter<size_t>(40));
 
   // Struct member arrayOfEnum4.
-  Tshared_ptr<ISchemaItem> arrayOfEnum4_SchemaItem = CArraySchemaItem::create(TEnumSchemaItem<Enum1::eType>::create(sub1_allowed_enum_subset_values, TSchemaItemParameter<Enum1::eType>()), TSchemaItemParameter<size_t>(10), TSchemaItemParameter<size_t>(41));
+  TSharedPtr<ISchemaItem> arrayOfEnum4_SchemaItem = CArraySchemaItem::create(TEnumSchemaItem<Enum1::eType>::create(sub1_allowed_enum_subset_values, TSchemaItemParameter<Enum1::eType>()), TSchemaItemParameter<size_t>(10), TSchemaItemParameter<size_t>(41));
 
   // Struct member arrayOfEnum5.
-  Tshared_ptr<ISchemaItem> arrayOfEnum5_SchemaItem = CArraySchemaItem::create(TEnumSchemaItem<Enum1::eType>::create(sub2_allowed_enum_subset_values, TSchemaItemParameter<Enum1::eType>()), TSchemaItemParameter<size_t>(10), TSchemaItemParameter<size_t>(42));
+  TSharedPtr<ISchemaItem> arrayOfEnum5_SchemaItem = CArraySchemaItem::create(TEnumSchemaItem<Enum1::eType>::create(sub2_allowed_enum_subset_values, TSchemaItemParameter<Enum1::eType>()), TSchemaItemParameter<size_t>(10), TSchemaItemParameter<size_t>(42));
 
   // Struct member arrayOfEnum6.
-  Tshared_ptr<ISchemaItem> arrayOfEnum6_SchemaItem = CArraySchemaItem::create(TEnumSchemaItem<Enum_new4::eType>::create(sub3_allowed_enum_subset_values, TSchemaItemParameter<Enum_new4::eType>()), TSchemaItemParameter<size_t>(10), TSchemaItemParameter<size_t>(43));
+  TSharedPtr<ISchemaItem> arrayOfEnum6_SchemaItem = CArraySchemaItem::create(TEnumSchemaItem<Enum_new4::eType>::create(sub3_allowed_enum_subset_values, TSchemaItemParameter<Enum_new4::eType>()), TSchemaItemParameter<size_t>(10), TSchemaItemParameter<size_t>(43));
 
   std::map<std::string, CObjectSchemaItem::SMember> schema_members;
 
@@ -289,7 +289,7 @@ Tshared_ptr<ISchemaItem> XXX::YYY::ZZZ::Test::InitStructSchemaItem_Struct1(
   return CObjectSchemaItem::create(schema_members);
 }
 
-Tshared_ptr<ISchemaItem> XXX::YYY::ZZZ::Test::InitStructSchemaItem_Struct2(
+TSharedPtr<ISchemaItem> XXX::YYY::ZZZ::Test::InitStructSchemaItem_Struct2(
     const TStructsSchemaItems &struct_schema_items) {
   std::map<std::string, CObjectSchemaItem::SMember> schema_members;
 

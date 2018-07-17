@@ -38,7 +38,6 @@
 #include "application_manager/mock_event_observer.h"
 #include "application_manager/mock_event_dispatcher.h"
 #include "smart_objects/smart_object.h"
-#include <memory>
 #include "interfaces/HMI_API.h"
 
 namespace test {

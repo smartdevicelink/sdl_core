@@ -39,7 +39,7 @@
 #include <map>
 #include <set>
 #include <utility>
-#include "utils/shared_ptr.h"
+#include "utils/shared_ptr_helpers.h"
 #include "utils/helpers.h"
 #include "transport_manager/common.h"
 

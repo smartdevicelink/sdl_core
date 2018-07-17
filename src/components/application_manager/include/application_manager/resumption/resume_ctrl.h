@@ -34,7 +34,7 @@
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_RESUMPTION_RESUME_CTRL_H_
 
 #include <stdint.h>
-#include "utils/shared_ptr.h"
+#include "utils/shared_ptr_helpers.h"
 #include "application_manager/resumption/resumption_data.h"
 
 namespace application_manager {

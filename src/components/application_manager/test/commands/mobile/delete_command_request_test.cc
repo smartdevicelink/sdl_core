@@ -36,7 +36,7 @@
 #include "application_manager/commands/mobile/delete_command_request.h"
 
 #include "gtest/gtest.h"
-#include "utils/shared_ptr.h"
+#include "utils/shared_ptr_helpers.h"
 #include "smart_objects/smart_object.h"
 #include "application_manager/smart_object_keys.h"
 #include "application_manager/test/include/application_manager/commands/command_request_test.h"

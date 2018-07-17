@@ -35,7 +35,7 @@
 #include "application_manager/command_holder_impl.h"
 #include "application_manager/commands/command.h"
 #include "smart_objects/smart_object.h"
-#include "utils/shared_ptr.h"
+#include "utils/shared_ptr_helpers.h"
 #include <memory>
 
 #include "application_manager/mock_application_manager.h"

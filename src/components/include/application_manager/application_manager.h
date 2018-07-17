@@ -41,7 +41,7 @@
 #include "application_manager/commands/command.h"
 #include "connection_handler/connection_handler.h"
 #include "utils/data_accessor.h"
-#include "utils/shared_ptr.h"
+#include "utils/shared_ptr_helpers.h"
 #include "telemetry_monitor/telemetry_observable.h"
 #include "application_manager/policies/policy_handler_interface.h"
 #include "application_manager/application_manager_settings.h"

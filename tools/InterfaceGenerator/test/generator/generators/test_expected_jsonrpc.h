@@ -234,7 +234,7 @@ class Test : public NsSmartDeviceLink::NsJSONHandler::CSmartFactory<FunctionID::
   /**
    * @brief Type that maps of struct IDs to schema items.
    */
-  typedef std::map<const StructIdentifiers::eType, NsSmartDeviceLink::NsSmartObjects::Tshared_ptr<NsSmartDeviceLink::NsSmartObjects::ISchemaItem> > TStructsSchemaItems;
+  typedef std::map<const StructIdentifiers::eType, NsSmartDeviceLink::NsSmartObjects::TSharedPtr<NsSmartDeviceLink::NsSmartObjects::ISchemaItem> > TStructsSchemaItems;
 
   /**
    * @brief Helper that allows to make reference to struct
@@ -244,7 +244,7 @@ class Test : public NsSmartDeviceLink::NsJSONHandler::CSmartFactory<FunctionID::
    *
    * @return TSharedPtr of strucute
    */
-  static NsSmartDeviceLink::NsSmartObjects::Tshared_ptr<NsSmartDeviceLink::NsSmartObjects::ISchemaItem> ProvideObjectSchemaItemForStruct(
+  static NsSmartDeviceLink::NsSmartObjects::TSharedPtr<NsSmartDeviceLink::NsSmartObjects::ISchemaItem> ProvideObjectSchemaItemForStruct(
         const TStructsSchemaItems &struct_schema_items,
         const StructIdentifiers::eType struct_id);
 
@@ -304,7 +304,7 @@ class Test : public NsSmartDeviceLink::NsJSONHandler::CSmartFactory<FunctionID::
    * @note Issue2
    * @note Issue3
    */
-  static NsSmartDeviceLink::NsSmartObjects::Tshared_ptr<NsSmartDeviceLink::NsSmartObjects::ISchemaItem> InitStructSchemaItem_Struct1(
+  static NsSmartDeviceLink::NsSmartObjects::TSharedPtr<NsSmartDeviceLink::NsSmartObjects::ISchemaItem> InitStructSchemaItem_Struct1(
       const TStructsSchemaItems &struct_schema_items);
 
   /**
@@ -314,7 +314,7 @@ class Test : public NsSmartDeviceLink::NsJSONHandler::CSmartFactory<FunctionID::
    * @note Issue2
    * @note Issue3
    */
-  static NsSmartDeviceLink::NsSmartObjects::Tshared_ptr<NsSmartDeviceLink::NsSmartObjects::ISchemaItem> InitStructSchemaItem_Struct2(
+  static NsSmartDeviceLink::NsSmartObjects::TSharedPtr<NsSmartDeviceLink::NsSmartObjects::ISchemaItem> InitStructSchemaItem_Struct2(
       const TStructsSchemaItems &struct_schema_items);
 };
 

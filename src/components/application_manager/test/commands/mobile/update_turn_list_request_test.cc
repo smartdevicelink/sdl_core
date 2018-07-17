@@ -36,7 +36,7 @@
 #include "gtest/gtest.h"
 #include "application_manager/commands/mobile/update_turn_list_request.h"
 #include "interfaces/MOBILE_API.h"
-#include "utils/shared_ptr.h"
+#include "utils/shared_ptr_helpers.h"
 #include "smart_objects/smart_object.h"
 #include "application_manager/commands/commands_test.h"
 #include "application_manager/commands/command_request_test.h"
