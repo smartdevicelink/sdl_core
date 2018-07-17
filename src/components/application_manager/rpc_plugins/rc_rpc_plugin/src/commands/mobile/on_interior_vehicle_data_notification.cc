@@ -59,7 +59,7 @@ void OnInteriorVehicleDataNotification::AddDataToCache(
   const auto& data_mapping = RCHelpers::GetModuleTypeToDataMapping();
   const auto module_data =
       (*message_)[app_mngr::strings::msg_params][message_params::kModuleData]
-                 [data_mapping.at(module_type)];
+                 [data_mapping(module_type)];
   interior_data_cache_.Add(module_type, module_data);
 }
 
