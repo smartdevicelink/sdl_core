@@ -14,7 +14,8 @@ RCHelpers::GetModuleTypeToDataMapping() {
   auto mapping_lambda = [](const std::string& module_type) -> std::string {
     static std::map<std::string, std::string> mapping = {
         {enums_value::kRadio, message_params::kRadioControlData},
-        {enums_value::kClimate, message_params::kClimateControlData}};
+        {enums_value::kClimate, message_params::kClimateControlData},
+        {enums_value::kSeat, message_params::kSeatControlData}};
     auto it = mapping.find(module_type);
     if (mapping.end() == it) {
       return std::string();
