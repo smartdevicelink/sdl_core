@@ -42,7 +42,6 @@
 #include "application_manager/message.h"
 #include "protocol/raw_message.h"
 
-
 namespace test {
 namespace components {
 namespace application_manager_test {
@@ -107,11 +106,11 @@ class MobileMessageHandlerTest : public testing::Test {
     size_t full_size = sizeof(uint8_t) * full_data.size();
 
     message_ptr_ = std::make_shared<RawMessage>(connection_key_,
-                                                 protocol_version,
-                                                 &full_data[0],
-                                                 full_size,
-                                                 ServiceType::kRpc,
-                                                 payload_size);
+                                                protocol_version,
+                                                &full_data[0],
+                                                full_size,
+                                                ServiceType::kRpc,
+                                                payload_size);
 
     return MobileMessageHandler::HandleIncomingMessageProtocol(message_ptr_);
   }

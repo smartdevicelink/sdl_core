@@ -35,8 +35,6 @@
 
 #include <stdint.h>
 
-
-
 #if defined(__QNXNTO__)
 #include "transport_manager/usb/qnx/usb_handler.h"
 #else

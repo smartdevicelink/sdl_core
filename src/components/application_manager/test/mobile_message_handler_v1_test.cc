@@ -41,7 +41,6 @@
 #include "application_manager/message.h"
 #include "protocol/raw_message.h"
 
-
 using protocol_handler::RawMessage;
 using protocol_handler::RawMessagePtr;
 using protocol_handler::PROTOCOL_HEADER_V1_SIZE;

@@ -47,7 +47,6 @@
 #include "utils/macro.h"
 #include "utils/lock.h"
 
-
 namespace security_manager {
 class CryptoManagerImpl : public CryptoManager {
  private:

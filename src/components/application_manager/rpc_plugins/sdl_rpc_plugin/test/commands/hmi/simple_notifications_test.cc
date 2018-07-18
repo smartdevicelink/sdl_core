@@ -62,7 +62,8 @@ TYPED_TEST_CASE(SimpleNotificationsTest, CommandsList);
 TYPED_TEST(SimpleNotificationsTest, Run_SendMessageToHMI_SUCCESS) {
   typedef typename TestFixture::CommandType CommandType;
 
-  std::shared_ptr<CommandType> command = this->template CreateCommand<CommandType>();
+  std::shared_ptr<CommandType> command =
+      this->template CreateCommand<CommandType>();
 
   // Current implementation always return `true`
   EXPECT_TRUE(command->Init());

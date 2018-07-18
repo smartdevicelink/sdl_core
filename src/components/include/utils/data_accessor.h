@@ -35,7 +35,6 @@
 #include <iostream>
 #include "utils/lock.h"
 
-
 // This class is for thread-safe const access to data
 template <class T>
 class DataAccessor {

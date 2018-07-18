@@ -146,8 +146,7 @@ class ApplicationManagerImplMockHmiTest : public ::testing::Test {
                         Return(0)));
   }
 
-  std::shared_ptr<NiceMock<resumption_test::MockResumptionData> >
-      mock_storage_;
+  std::shared_ptr<NiceMock<resumption_test::MockResumptionData> > mock_storage_;
   application_manager_test::MockApplicationManager mock_app_mngr_;
   NiceMock<policy_handler_test::MockPolicySettings> mock_policy_settings_;
   NiceMock<connection_handler_test::MockConnectionHandler>
@@ -214,13 +213,13 @@ TEST_F(ApplicationManagerImplMockHmiTest,
   const uint32_t correlation_id_3 = 3u;
   std::shared_ptr<NiceMock<MockRequest> > cmd_1 =
       std::make_shared<NiceMock<MockRequest> >(connection_key,
-                                                correlation_id_1);
+                                               correlation_id_1);
   std::shared_ptr<NiceMock<MockRequest> > cmd_2 =
       std::make_shared<NiceMock<MockRequest> >(connection_key,
-                                                correlation_id_2);
+                                               correlation_id_2);
   std::shared_ptr<NiceMock<MockRequest> > cmd_3 =
       std::make_shared<NiceMock<MockRequest> >(connection_key,
-                                                correlation_id_3);
+                                               correlation_id_3);
 
   EXPECT_CALL(mock_command_factory, CreateCommand(_, _))
       .WillOnce(Return(cmd_1))

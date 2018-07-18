@@ -196,8 +196,7 @@ class ApplicationManagerImplTest : public ::testing::Test {
 
   uint32_t app_id_;
   NiceMock<policy_test::MockPolicySettings> mock_policy_settings_;
-  std::shared_ptr<NiceMock<resumption_test::MockResumptionData> >
-      mock_storage_;
+  std::shared_ptr<NiceMock<resumption_test::MockResumptionData> > mock_storage_;
 
   std::unique_ptr<rpc_service::RPCService> mock_rpc_service_;
   NiceMock<con_test::MockConnectionHandler> mock_connection_handler_;
@@ -232,16 +231,14 @@ TEST_F(ApplicationManagerImplTest, ProcessQueryApp_ExpectSuccess) {
 
 TEST_F(ApplicationManagerImplTest,
        SubscribeAppForWayPoints_ExpectSubscriptionApp) {
-  auto app_ptr =
-      std::static_pointer_cast<am::Application>(mock_app_ptr_);
+  auto app_ptr = std::static_pointer_cast<am::Application>(mock_app_ptr_);
   app_manager_impl_->SubscribeAppForWayPoints(app_ptr);
   EXPECT_TRUE(app_manager_impl_->IsAppSubscribedForWayPoints(app_ptr));
 }
 
 TEST_F(ApplicationManagerImplTest,
        UnsubscribeAppForWayPoints_ExpectUnsubscriptionApp) {
-  auto app_ptr =
-      std::static_pointer_cast<am::Application>(mock_app_ptr_);
+  auto app_ptr = std::static_pointer_cast<am::Application>(mock_app_ptr_);
   app_manager_impl_->SubscribeAppForWayPoints(app_ptr);
   EXPECT_TRUE(app_manager_impl_->IsAppSubscribedForWayPoints(app_ptr));
   app_manager_impl_->UnsubscribeAppFromWayPoints(app_ptr);
@@ -262,8 +259,7 @@ TEST_F(
 TEST_F(
     ApplicationManagerImplTest,
     GetAppsSubscribedForWayPoints_SubcribeAppForWayPoints_ExpectCorrectResult) {
-  auto app_ptr =
-      std::static_pointer_cast<am::Application>(mock_app_ptr_);
+  auto app_ptr = std::static_pointer_cast<am::Application>(mock_app_ptr_);
   app_manager_impl_->SubscribeAppForWayPoints(app_ptr);
   std::set<int32_t> result = app_manager_impl_->GetAppsSubscribedForWayPoints();
   EXPECT_EQ(1u, result.size());

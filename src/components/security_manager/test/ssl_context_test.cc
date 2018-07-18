@@ -42,8 +42,6 @@
 #include "utils/custom_string.h"
 #include "security_manager/mock_security_manager_settings.h"
 
-
-
 using ::testing::Return;
 using ::testing::ReturnRef;
 using ::testing::NiceMock;

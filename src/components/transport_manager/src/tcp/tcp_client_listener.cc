@@ -306,8 +306,8 @@ void TcpClientListener::Loop() {
       auto tcp_device = std::make_shared<TcpDevice>(
           client_address.sin_addr.s_addr, device_uid, device_name);
 #else
-      auto tcp_device =
-          std::make_shared<TcpDevice>(client_address.sin_addr.s_addr, device_uid);
+      auto tcp_device = std::make_shared<TcpDevice>(
+          client_address.sin_addr.s_addr, device_uid);
 #endif  // BUILD_TESTS
 
       DeviceSptr device = controller_->AddDevice(tcp_device);

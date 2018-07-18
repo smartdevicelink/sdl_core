@@ -65,7 +65,6 @@ using ::testing::Return;
 using ::testing::SaveArg;
 using ::testing::DoAll;
 
-
 using am::commands::MessageSharedPtr;
 using am::CommandParametersPermissions;
 using am::event_engine::EventObserver;

@@ -39,7 +39,6 @@
 #include <set>
 #include <string>
 
-
 #include "smart_objects/default_shema_item.h"
 
 namespace NsSmartDeviceLink {
@@ -208,10 +207,11 @@ class EnumConversionHelper {
 };
 
 template <typename EnumType>
-std::shared_ptr<TEnumSchemaItem<EnumType>> TEnumSchemaItem<EnumType>::create(
+std::shared_ptr<TEnumSchemaItem<EnumType> > TEnumSchemaItem<EnumType>::create(
     const std::set<EnumType>& AllowedElements,
     const TSchemaItemParameter<EnumType>& DefaultValue) {
-  return std::shared_ptr<TEnumSchemaItem<EnumType>> (new TEnumSchemaItem<EnumType>(AllowedElements, DefaultValue));
+  return std::shared_ptr<TEnumSchemaItem<EnumType> >(
+      new TEnumSchemaItem<EnumType>(AllowedElements, DefaultValue));
 }
 
 template <typename EnumType>

@@ -91,7 +91,8 @@ void RCRPCPlugin::OnApplicationEvent(
   }
   switch (event) {
     case plugins::kApplicationRegistered: {
-      application->AddExtension(std::shared_ptr<RCAppExtension>(new RCAppExtension(kRCPluginID)));
+      application->AddExtension(
+          std::shared_ptr<RCAppExtension>(new RCAppExtension(kRCPluginID)));
       resource_allocation_manager_->SendOnRCStatusNotifications(
           NotificationTrigger::APP_REGISTRATION, application);
       break;

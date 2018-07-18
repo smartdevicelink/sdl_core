@@ -34,7 +34,6 @@
 #include "policy/policy_listener.h"
 #include "utils/logger.h"
 
-
 namespace policy {
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "Policy")

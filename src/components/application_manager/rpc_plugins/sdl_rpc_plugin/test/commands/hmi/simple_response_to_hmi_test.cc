@@ -52,7 +52,6 @@ using ::testing::_;
 using ::testing::Types;
 using ::testing::NotNull;
 
-
 namespace commands = sdl_rpc_plugin::commands;
 using application_manager::commands::MessageSharedPtr;
 
@@ -73,7 +72,8 @@ TYPED_TEST_CASE(ResponseToHMICommandsTest, ResponseCommandsList);
 TYPED_TEST(ResponseToHMICommandsTest, Run_SendMessageToHMI_SUCCESS) {
   typedef typename TestFixture::CommandType CommandType;
 
-  std::shared_ptr<CommandType> command = this->template CreateCommand<CommandType>();
+  std::shared_ptr<CommandType> command =
+      this->template CreateCommand<CommandType>();
   EXPECT_CALL(this->mock_rpc_service_, SendMessageToHMI(NotNull()));
 
   command->Run();

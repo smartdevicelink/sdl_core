@@ -48,7 +48,6 @@ namespace commands_test {
 namespace hmi_commands_test {
 namespace rc_get_capabilities_response {
 
-
 using ::testing::NiceMock;
 namespace am = ::application_manager;
 namespace strings = am::strings;

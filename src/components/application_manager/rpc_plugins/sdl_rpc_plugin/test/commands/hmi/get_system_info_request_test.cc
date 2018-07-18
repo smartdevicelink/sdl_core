@@ -49,7 +49,6 @@ namespace commands_test {
 namespace hmi_commands_test {
 namespace get_system_info_request {
 
-
 namespace am = ::application_manager;
 namespace strings = ::application_manager::strings;
 using am::commands::RequestToHMI;

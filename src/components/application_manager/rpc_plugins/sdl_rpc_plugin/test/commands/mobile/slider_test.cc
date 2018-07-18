@@ -140,8 +140,7 @@ TEST_F(SliderRequestTest, OnEvent_UI_UNSUPPORTED_RESOURCE) {
   MessageSharedPtr msg_ui = CreateFullParamsUISO();
   (*msg_ui)[am::strings::params][am::strings::connection_key] = kConnectionKey;
 
-  std::shared_ptr<SliderRequest> command =
-      CreateCommand<SliderRequest>(msg_ui);
+  std::shared_ptr<SliderRequest> command = CreateCommand<SliderRequest>(msg_ui);
 
   MockAppPtr mock_app = CreateMockApp();
   ON_CALL(app_mngr_, application(kConnectionKey))

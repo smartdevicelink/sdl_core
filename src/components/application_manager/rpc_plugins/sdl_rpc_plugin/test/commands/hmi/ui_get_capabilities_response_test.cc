@@ -34,7 +34,6 @@
 
 #include "gtest/gtest.h"
 
-
 #include "smart_objects/smart_object.h"
 #include "interfaces/MOBILE_API.h"
 #include "application_manager/mock_hmi_capabilities.h"
@@ -48,7 +47,6 @@ namespace components {
 namespace commands_test {
 namespace hmi_commands_test {
 namespace ui_get_capabilities_response {
-
 
 using ::testing::NiceMock;
 namespace am = ::application_manager;

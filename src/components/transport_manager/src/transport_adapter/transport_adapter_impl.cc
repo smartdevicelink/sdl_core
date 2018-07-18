@@ -833,9 +833,9 @@ ApplicationList TransportAdapterImpl::GetApplicationList(
                       << lst.size() << " Condition: device.use_count() != 0");
     return lst;
   }
-  LOG4CXX_TRACE(
-      logger_,
-      "exit with empty ApplicationList. Condition: NOT device.use_count() != 0");
+  LOG4CXX_TRACE(logger_,
+                "exit with empty ApplicationList. Condition: NOT "
+                "device.use_count() != 0");
   return ApplicationList();
 }
 

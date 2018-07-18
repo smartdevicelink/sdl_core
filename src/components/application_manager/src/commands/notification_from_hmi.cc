@@ -76,7 +76,8 @@ void NotificationFromHMI::SendNotificationToMobile(
 void NotificationFromHMI::CreateHMIRequest(
     const hmi_apis::FunctionID::eType& function_id,
     const smart_objects::SmartObject& msg_params) const {
-  smart_objects::SmartObjectSPtr result = std::make_shared<smart_objects::SmartObject>();
+  smart_objects::SmartObjectSPtr result =
+      std::make_shared<smart_objects::SmartObject>();
   if (!result) {
     LOG4CXX_ERROR(logger_, "Memory allocation failed.");
     return;

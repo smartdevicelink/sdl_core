@@ -61,7 +61,6 @@ using ::testing::_;
 using ::testing::Types;
 using ::testing::Return;
 
-
 using am::commands::MessageSharedPtr;
 
 namespace {

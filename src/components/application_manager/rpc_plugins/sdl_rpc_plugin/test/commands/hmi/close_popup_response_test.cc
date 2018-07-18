@@ -49,7 +49,6 @@ namespace commands_test {
 namespace hmi_commands_test {
 namespace close_popup_response {
 
-
 namespace am = ::application_manager;
 using application_manager::commands::ResponseFromHMI;
 using sdl_rpc_plugin::commands::ClosePopupResponse;

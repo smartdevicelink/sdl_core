@@ -34,7 +34,6 @@
 
 #include "utils/macro.h"
 
-
 #include "smart_objects/schema_item.h"
 #include "smart_objects/schema_item_parameter.h"
 #include "smart_objects/smart_object.h"

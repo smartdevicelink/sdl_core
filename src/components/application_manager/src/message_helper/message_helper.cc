@@ -62,7 +62,6 @@
 #include "utils/macro.h"
 #include "utils/logger.h"
 
-
 #include "formatters/formatter_json_rpc.h"
 #include "formatters/CFormatterJsonSDLRPCv2.h"
 #include "formatters/CFormatterJsonSDLRPCv1.h"
@@ -698,7 +697,8 @@ void MessageHelper::SendHMIStatusNotification(
     const Application& application_impl,
     ApplicationManager& application_manager) {
   LOG4CXX_AUTO_TRACE(logger_);
-  smart_objects::SmartObjectSPtr notification = std::make_shared<smart_objects::SmartObject>();
+  smart_objects::SmartObjectSPtr notification =
+      std::make_shared<smart_objects::SmartObject>();
   if (!notification) {
     LOG4CXX_ERROR(logger_, "Failed to create smart object");
     return;
@@ -740,7 +740,8 @@ void MessageHelper::SendActivateAppToHMI(
   }
 
   std::shared_ptr<smart_objects::SmartObject> message =
-      std::make_shared<smart_objects::SmartObject>(smart_objects::SmartType_Map);
+      std::make_shared<smart_objects::SmartObject>(
+          smart_objects::SmartType_Map);
 
   (*message)[strings::params][strings::function_id] =
       hmi_apis::FunctionID::BasicCommunication_ActivateApp;
@@ -1833,7 +1834,8 @@ void MessageHelper::SendGetUserFriendlyMessageResponse(
     ApplicationManager& app_mngr) {
   LOG4CXX_AUTO_TRACE(logger_);
   smart_objects::SmartObjectSPtr message =
-      std::make_shared<smart_objects::SmartObject>(smart_objects::SmartType_Map);
+      std::make_shared<smart_objects::SmartObject>(
+          smart_objects::SmartType_Map);
   if (!message) {
     return;
   }

@@ -38,7 +38,8 @@ std::shared_ptr<CArraySchemaItem> CArraySchemaItem::create(
     const ISchemaItemPtr ElementSchemaItem,
     const TSchemaItemParameter<size_t>& MinSize,
     const TSchemaItemParameter<size_t>& MaxSize) {
-  return std::shared_ptr<CArraySchemaItem>(new CArraySchemaItem(ElementSchemaItem, MinSize, MaxSize));
+  return std::shared_ptr<CArraySchemaItem>(
+      new CArraySchemaItem(ElementSchemaItem, MinSize, MaxSize));
 }
 
 Errors::eType CArraySchemaItem::validate(const SmartObject& Object) {

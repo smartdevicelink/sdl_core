@@ -1021,7 +1021,8 @@ void ApplicationManagerImpl::OnDeviceListUpdated(
     return;
   }
 
-  smart_objects::SmartObjectSPtr update_list = std::make_shared<smart_objects::SmartObject>();
+  smart_objects::SmartObjectSPtr update_list =
+      std::make_shared<smart_objects::SmartObject>();
   smart_objects::SmartObject& so_to_send = *update_list;
   so_to_send[jhs::S_PARAMS][jhs::S_FUNCTION_ID] =
       hmi_apis::FunctionID::BasicCommunication_UpdateDeviceList;
@@ -2421,7 +2422,8 @@ void ApplicationManagerImpl::SendOnSDLClose() {
 
   // must be sent to PASA HMI on shutdown synchronously
   smart_objects::SmartObjectSPtr msg =
-      std::make_shared<smart_objects::SmartObject>(smart_objects::SmartType_Map);
+      std::make_shared<smart_objects::SmartObject>(
+          smart_objects::SmartType_Map);
 
   (*msg)[strings::params][strings::function_id] =
       hmi_apis::FunctionID::BasicCommunication_OnSDLClose;

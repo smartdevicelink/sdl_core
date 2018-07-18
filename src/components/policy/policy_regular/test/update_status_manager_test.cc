@@ -35,7 +35,6 @@
 #include "policy/policy_manager_impl.h"
 #include "policy/update_status_manager.h"
 
-
 namespace test {
 namespace components {
 namespace policy_test {

@@ -37,8 +37,6 @@
 #include <limits>
 #include "gmock/gmock.h"
 
-
-
 namespace request_info = application_manager::request_controller;
 
 namespace test {

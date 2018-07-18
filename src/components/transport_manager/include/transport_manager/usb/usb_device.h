@@ -55,8 +55,8 @@ class UsbDevice : public Device {
   }
 
   virtual ~UsbDevice() {}
- protected:
 
+ protected:
   virtual bool IsSameAs(const Device* other_device) const {
     return unique_device_id() == other_device->unique_device_id();
   }
@@ -69,7 +69,6 @@ class UsbDevice : public Device {
 
  private:
   PlatformUsbDevice* usb_device_;
-
 };
 
 }  // namespace transport_adapter

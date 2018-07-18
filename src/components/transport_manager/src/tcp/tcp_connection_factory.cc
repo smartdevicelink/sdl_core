@@ -36,7 +36,6 @@
 
 #include "utils/logger.h"
 
-
 namespace transport_manager {
 namespace transport_adapter {
 

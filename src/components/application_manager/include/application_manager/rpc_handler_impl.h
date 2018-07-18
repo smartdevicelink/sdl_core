@@ -58,8 +58,6 @@
 
 #include "utils/threads/message_loop_thread.h"
 
-
-
 namespace application_manager {
 namespace rpc_handler {
 

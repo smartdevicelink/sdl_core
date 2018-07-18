@@ -38,7 +38,6 @@
 #include "interfaces/MOBILE_API.h"
 #include "interfaces/HMI_API.h"
 
-
 namespace sdl_rpc_plugin {
 using namespace application_manager;
 

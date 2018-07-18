@@ -158,8 +158,7 @@ class ResumeCtrlTest : public ::testing::Test {
       mock_app_extension_;
   MockStateController mock_state_controller_;
   std::shared_ptr<ResumeCtrl> res_ctrl_;
-  std::shared_ptr<NiceMock<resumption_test::MockResumptionData> >
-      mock_storage_;
+  std::shared_ptr<NiceMock<resumption_test::MockResumptionData> > mock_storage_;
   std::shared_ptr<NiceMock<MockApplication> > mock_app_;
   std::shared_ptr<MockHelpPromptManager> mock_help_prompt_manager_;
   application_manager::ApplicationConstSharedPtr const_app_;

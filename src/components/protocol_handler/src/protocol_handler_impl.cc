@@ -925,8 +925,7 @@ void ProtocolHandlerImpl::SendMessageToMobileApp(const RawMessagePtr message,
   }
 #ifdef TELEMETRY_MONITOR
   if (metric_observer_) {
-    auto metric =
-        std::make_shared<PHTelemetryObserver::MessageMetric>();
+    auto metric = std::make_shared<PHTelemetryObserver::MessageMetric>();
     metric->message_id = message_id;
     metric->connection_key = message->connection_key();
     metric->raw_msg = message;
@@ -1384,8 +1383,7 @@ RESULT_CODE ProtocolHandlerImpl::HandleSingleFrameMessage(
   }
 #ifdef TELEMETRY_MONITOR
   if (metric_observer_) {
-    auto metric =
-        std::make_shared<PHTelemetryObserver::MessageMetric>();
+    auto metric = std::make_shared<PHTelemetryObserver::MessageMetric>();
     metric->message_id = packet->message_id();
     metric->connection_key = connection_key;
     metric->raw_msg = rawMessage;
@@ -2054,8 +2052,7 @@ void ProtocolHandlerImpl::PopValideAndExpirateMultiframes() {
 
 #ifdef TELEMETRY_MONITOR
     if (metric_observer_) {
-      auto metric =
-          std::make_shared<PHTelemetryObserver::MessageMetric>();
+      auto metric = std::make_shared<PHTelemetryObserver::MessageMetric>();
       metric->raw_msg = rawMessage;
       metric_observer_->EndMessageProcess(metric);
     }

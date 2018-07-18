@@ -7,7 +7,6 @@
 #include "application_manager/app_launch/apps_launcher.h"
 #include "application_manager/resumption/resume_ctrl.h"
 
-
 #include "utils/timer.h"
 #include "utils/timer_task_impl.h"
 #include <iostream>
@@ -107,8 +106,7 @@ struct LauncherGenerator {
       , apps_launcher_(apps_launcher) {}
 
   LauncherPtr operator()() const {
-    return std::make_shared<Launcher>(
-        resume_ctrl_, interface_, apps_launcher_);
+    return std::make_shared<Launcher>(resume_ctrl_, interface_, apps_launcher_);
   }
 
   resumption::ResumeCtrl& resume_ctrl_;

@@ -32,8 +32,6 @@
 
 #include "gtest/gtest.h"
 
-
-
 #include "hmi_message_handler/hmi_message_handler_impl.h"
 #include "hmi_message_handler/mock_hmi_message_adapter_impl.h"
 #include "hmi_message_handler/mock_hmi_message_handler_settings.h"

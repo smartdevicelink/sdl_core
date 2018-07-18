@@ -39,7 +39,6 @@
 
 #include "gtest/gtest.h"
 
-
 #include "smart_objects/smart_object.h"
 #include "interfaces/HMI_API.h"
 #include "interfaces/MOBILE_API.h"
@@ -69,7 +68,8 @@ using am::commands::MessageSharedPtr;
 using am::event_engine::Event;
 using am::MockMessageHelper;
 
-typedef std::shared_ptr<ResetGlobalPropertiesRequest> ResetGlobalPropertiesRequestPtr;
+typedef std::shared_ptr<ResetGlobalPropertiesRequest>
+    ResetGlobalPropertiesRequestPtr;
 typedef std::shared_ptr<ResetGlobalPropertiesResponse>
     ResetGlobalPropertiesResponsePtr;
 

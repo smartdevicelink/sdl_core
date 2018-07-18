@@ -73,8 +73,8 @@ PolicyManagerImpl::PolicyManagerImpl()
     : PolicyManager()
     , listener_(NULL)
     , cache_(new CacheManager)
-    , access_remote_(new AccessRemoteImpl(
-          std::static_pointer_cast<CacheManager>(cache_)))
+    , access_remote_(
+          new AccessRemoteImpl(std::static_pointer_cast<CacheManager>(cache_)))
     , retry_sequence_timeout_(kDefaultRetryTimeoutInMSec)
     , retry_sequence_index_(0)
     , timer_retry_sequence_("Retry sequence timer",
@@ -1067,7 +1067,7 @@ StatusNotifier PolicyManagerImpl::AddApplication(
   if (IsNewApplication(application_id)) {
     AddNewApplication(application_id, device_consent);
     return std::make_shared<CallStatusChange>(update_status_manager_,
-                                               device_consent);
+                                              device_consent);
   } else {
     PromoteExistedApplication(application_id, device_consent);
     return std::make_shared<utils::CallNothing>();
@@ -1164,7 +1164,7 @@ void PolicyManagerImpl::SaveUpdateStatusRequired(bool is_update_needed) {
 }
 
 void PolicyManagerImpl::set_cache_manager(
-  CacheManagerInterface* cache_manager) {
+    CacheManagerInterface* cache_manager) {
   cache_ = std::shared_ptr<CacheManagerInterface>(cache_manager);
 }
 

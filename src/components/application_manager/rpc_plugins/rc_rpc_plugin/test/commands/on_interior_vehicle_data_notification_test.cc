@@ -85,15 +85,14 @@ class OnInteriorVehicleDataNotificationTest
   }
 
   template <class Command>
-  std::shared_ptr<Command> CreateRCCommand(
-      MessageSharedPtr& msg) {
+  std::shared_ptr<Command> CreateRCCommand(MessageSharedPtr& msg) {
     InitCommand(kDefaultTimeout_);
     return std::make_shared<Command>(msg ? msg : msg = CreateMessage(),
-                                        app_mngr_,
-                                        mock_rpc_service_,
-                                        mock_hmi_capabilities_,
-                                        mock_policy_handler_,
-                                        mock_allocation_manager_);
+                                     app_mngr_,
+                                     mock_rpc_service_,
+                                     mock_hmi_capabilities_,
+                                     mock_policy_handler_,
+                                     mock_allocation_manager_);
   }
 
  protected:
@@ -126,9 +125,8 @@ TEST_F(OnInteriorVehicleDataNotificationTest,
   EXPECT_CALL(mock_rpc_service_, SendMessageToMobile(_, false))
       .WillOnce(SaveArg<0>(&message));
   // Act
-  std::shared_ptr<
-      rc_rpc_plugin::commands::OnInteriorVehicleDataNotification> command =
-      CreateRCCommand<
+  std::shared_ptr<rc_rpc_plugin::commands::OnInteriorVehicleDataNotification>
+      command = CreateRCCommand<
           rc_rpc_plugin::commands::OnInteriorVehicleDataNotification>(
           mobile_message);
   command->Run();

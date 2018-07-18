@@ -93,7 +93,8 @@ void RPCHandlerImpl::ProcessMessageFromMobile(
 void RPCHandlerImpl::ProcessMessageFromHMI(
     const std::shared_ptr<Message> message) {
   LOG4CXX_AUTO_TRACE(logger_);
-  smart_objects::SmartObjectSPtr smart_object = std::make_shared<smart_objects::SmartObject>();
+  smart_objects::SmartObjectSPtr smart_object =
+      std::make_shared<smart_objects::SmartObject>();
 
   if (!smart_object) {
     LOG4CXX_ERROR(logger_, "Null pointer");

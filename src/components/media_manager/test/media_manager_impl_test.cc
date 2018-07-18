@@ -45,7 +45,6 @@
 #include "protocol_handler/mock_protocol_handler.h"
 #include "protocol/common.h"
 
-
 #include "utils/file_system.h"
 #include "utils/scope_guard.h"
 
@@ -106,8 +105,7 @@ class MediaManagerImplTest : public ::testing::Test {
  public:
   // media_adapter_mock_ will be deleted in media_manager_impl (dtor)
   MediaManagerImplTest() : media_adapter_mock_(new MockMediaAdapter()) {
-    media_adapter_listener_mock_ =
-        std::make_shared<MockMediaAdapterListener>();
+    media_adapter_listener_mock_ = std::make_shared<MockMediaAdapterListener>();
     ON_CALL(mock_media_manager_settings_, video_server_type())
         .WillByDefault(ReturnRef(kDefaultValue));
     ON_CALL(mock_media_manager_settings_, audio_server_type())

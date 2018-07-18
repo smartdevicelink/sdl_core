@@ -39,7 +39,6 @@
 #include "smart_objects/smart_object.h"
 #include "utils/logger.h"
 
-
 CREATE_LOGGERPTR_GLOBAL(logger_, "HelpPromptManagerImpl")
 
 namespace {

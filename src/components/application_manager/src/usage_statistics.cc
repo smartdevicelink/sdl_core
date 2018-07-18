@@ -36,7 +36,6 @@
 #include "policy/usage_statistics/statistics_manager.h"
 #include "utils/macro.h"
 
-
 using namespace mobile_apis;
 using namespace NsSmartDeviceLink::NsSmartObjects;
 using namespace usage_statistics;

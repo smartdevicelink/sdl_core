@@ -70,7 +70,6 @@ using ::testing::DoAll;
 
 namespace am = ::application_manager;
 
-
 using am::commands::MessageSharedPtr;
 using sdl_rpc_plugin::commands::RegisterAppInterfaceRequest;
 
@@ -217,11 +216,10 @@ class RegisterAppInterfaceRequestTest
                 ManageHMICommand(HMIResultCodeIs(
                     hmi_apis::FunctionID::VR_ChangeRegistration))).Times(0);
 
-    EXPECT_CALL(
-        app_mngr_,
-        OnApplicationSwitched(
-            std::static_pointer_cast<application_manager::Application>(
-                mock_app)));
+    EXPECT_CALL(app_mngr_,
+                OnApplicationSwitched(
+                    std::static_pointer_cast<application_manager::Application>(
+                        mock_app)));
   }
 
   MessageSharedPtr msg_;
@@ -434,8 +432,7 @@ TEST_F(RegisterAppInterfaceRequestTest,
   EXPECT_CALL(
       mock_resume_crt_,
       CheckApplicationHash(
-          std::static_pointer_cast<application_manager::Application>(
-              mock_app),
+          std::static_pointer_cast<application_manager::Application>(mock_app),
           request_hash_id)).WillOnce(Return(true));
 
   EXPECT_CALL(mock_resume_crt_, RemoveApplicationFromSaved(_)).Times(0);
@@ -469,15 +466,13 @@ TEST_F(RegisterAppInterfaceRequestTest,
   EXPECT_CALL(
       mock_resume_crt_,
       CheckApplicationHash(
-          std::static_pointer_cast<application_manager::Application>(
-              mock_app),
+          std::static_pointer_cast<application_manager::Application>(mock_app),
           request_hash_id)).WillOnce(Return(false));
 
   EXPECT_CALL(
       mock_application_helper_,
       RecallApplicationData(
-          std::static_pointer_cast<application_manager::Application>(
-              mock_app),
+          std::static_pointer_cast<application_manager::Application>(mock_app),
           _));
 
   EXPECT_CALL(app_mngr_, RegisterApplication(msg_)).Times(0);
@@ -506,8 +501,7 @@ TEST_F(RegisterAppInterfaceRequestTest,
   EXPECT_CALL(
       mock_application_helper_,
       RecallApplicationData(
-          std::static_pointer_cast<application_manager::Application>(
-              mock_app),
+          std::static_pointer_cast<application_manager::Application>(mock_app),
           _));
 
   EXPECT_CALL(app_mngr_, RegisterApplication(msg_)).Times(0);

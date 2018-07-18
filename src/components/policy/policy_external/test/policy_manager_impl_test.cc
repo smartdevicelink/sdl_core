@@ -38,8 +38,6 @@
 
 #include "policy/policy_manager_impl_test_base.h"
 
-
-
 using ::testing::_;
 using ::testing::Return;
 using ::testing::SetArgReferee;

@@ -57,8 +57,8 @@ TEST(ApplicationManagerMetricWrapper, GetJsonMetric) {
   TimevalStruct end_time;
   end_time.tv_sec = 10;
   end_time.tv_usec = 0;
-  metric_test.message_metric =
-      std::make_shared<application_manager::AMTelemetryObserver::MessageMetric>();
+  metric_test.message_metric = std::make_shared<
+      application_manager::AMTelemetryObserver::MessageMetric>();
   metric_test.message_metric->begin = start_time;
   metric_test.message_metric->end = end_time;
   NsSmartDeviceLink::NsSmartObjects::SmartObject obj;
@@ -98,8 +98,8 @@ TEST(ApplicationManagerMetricWrapper, GetJsonMetricWithGrabResources) {
   end_time.tv_sec = 10;
   end_time.tv_usec = 0;
 
-  metric_test.message_metric =
-      std::make_shared<application_manager::AMTelemetryObserver::MessageMetric>();
+  metric_test.message_metric = std::make_shared<
+      application_manager::AMTelemetryObserver::MessageMetric>();
   metric_test.message_metric->begin = start_time;
   metric_test.message_metric->end = end_time;
   NsSmartDeviceLink::NsSmartObjects::SmartObject obj;

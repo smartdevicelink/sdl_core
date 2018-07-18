@@ -38,7 +38,6 @@
 #include "application_manager/smart_object_keys.h"
 #include "application_manager/message_helper.h"
 
-
 namespace app_launch {
 CREATE_LOGGERPTR_GLOBAL(logger_, "AppLaunch")
 

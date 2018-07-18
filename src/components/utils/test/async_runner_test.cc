@@ -37,8 +37,6 @@
 #include "utils/threads/async_runner.h"
 #include "utils/conditional_variable.h"
 
-
-
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
 

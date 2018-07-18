@@ -129,8 +129,7 @@ class SpeakRequestTest : public CommandRequestTest<CommandsTestMocks::kIsNice> {
 };
 
 TEST_F(SpeakRequestTest, OnEvent_SUCCESS_Expect_true) {
-  std::shared_ptr<SpeakRequest> command =
-      CreateCommand<SpeakRequest>(request_);
+  std::shared_ptr<SpeakRequest> command = CreateCommand<SpeakRequest>(request_);
 
   (*response_)[strings::params][hmi_response::code] =
       hmi_apis::Common_Result::SUCCESS;

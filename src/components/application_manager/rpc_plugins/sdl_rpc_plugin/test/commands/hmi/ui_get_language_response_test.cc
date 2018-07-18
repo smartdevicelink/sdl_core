@@ -44,7 +44,6 @@ namespace commands_test {
 namespace hmi_commands_test {
 namespace ui_get_language_response {
 
-
 using sdl_rpc_plugin::commands::UIGetLanguageResponse;
 using test::components::event_engine_test::MockEventDispatcher;
 using testing::_;

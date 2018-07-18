@@ -54,7 +54,6 @@
 #include "include/test/protocol_handler/mock_protocol_handler.h"
 #include "test/application_manager/mock_application_manager_settings.h"
 
-
 using ::testing::_;
 using ::testing::Return;
 using ::testing::ReturnRef;
@@ -146,15 +145,14 @@ class RCGetInteriorVehicleDataConsentTest
   }
 
   template <class Command>
-  std::shared_ptr<Command> CreateRCCommand(
-      MessageSharedPtr& msg) {
+  std::shared_ptr<Command> CreateRCCommand(MessageSharedPtr& msg) {
     InitCommand(kDefaultTimeout_);
     return std::make_shared<Command>(msg ? msg : msg = CreateMessage(),
-                                        app_mngr_,
-                                        rpc_service,
-                                        mock_hmi_capabilities_,
-                                        mock_policy_handler_,
-                                        mock_allocation_manager_);
+                                     app_mngr_,
+                                     rpc_service,
+                                     mock_hmi_capabilities_,
+                                     mock_policy_handler_,
+                                     mock_allocation_manager_);
   }
 
   MessageSharedPtr CreateBasicMessage() {

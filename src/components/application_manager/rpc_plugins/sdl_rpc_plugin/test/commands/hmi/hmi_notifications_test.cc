@@ -91,7 +91,6 @@
 #include "utils/data_accessor.h"
 #include "utils/signals.h"
 
-
 #include "utils/file_system.h"
 #include "smart_objects/smart_object.h"
 #include "application_manager/smart_object_keys.h"

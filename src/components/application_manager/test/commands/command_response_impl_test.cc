@@ -57,7 +57,8 @@ class CommandResponseImplTest
     : public CommandsTest<CommandsTestMocks::kIsNice> {};
 
 TEST_F(CommandResponseImplTest, BasicMethodsOverloads_SUCCESS) {
-  std::shared_ptr<CommandResponseImpl> command = CreateCommand<CommandResponseImpl>();
+  std::shared_ptr<CommandResponseImpl> command =
+      CreateCommand<CommandResponseImpl>();
   // Current implementation always return `true`
   EXPECT_TRUE(command->Init());
   EXPECT_TRUE(command->CleanUp());
@@ -108,7 +109,7 @@ TEST_F(CommandResponseImplTest,
 TEST_F(CommandResponseImplTest,
        SendResponse_EmptyMessageInvalidResultCode_SUCCESS) {
   MessageSharedPtr msg;
-   std::shared_ptr<CommandResponseImpl> command =
+  std::shared_ptr<CommandResponseImpl> command =
       CreateCommand<CommandResponseImpl>(msg);
 
   const bool kSuccess = true;

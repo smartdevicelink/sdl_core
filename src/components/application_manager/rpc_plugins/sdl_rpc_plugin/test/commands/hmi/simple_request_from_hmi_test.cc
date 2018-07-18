@@ -51,7 +51,6 @@ using ::testing::Types;
 using ::testing::NotNull;
 using ::testing::NiceMock;
 
-
 namespace commands = ::application_manager::commands;
 using commands::MessageSharedPtr;
 using ::application_manager::event_engine::EventObserver;

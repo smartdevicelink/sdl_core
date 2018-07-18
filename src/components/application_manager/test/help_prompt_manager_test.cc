@@ -126,10 +126,10 @@ class HelpPromptManagerTest : public ::testing::Test {
   template <class Command>
   std::shared_ptr<Command> CreateCommand(MessageSharedPtr& msg) {
     return std::make_shared<Command>(msg,
-                                        app_mngr_,
-                                        mock_rpc_service_,
-                                        mock_hmi_capabilities_,
-                                        mock_policy_handler_);
+                                     app_mngr_,
+                                     mock_rpc_service_,
+                                     mock_hmi_capabilities_,
+                                     mock_policy_handler_);
   }
 
  protected:

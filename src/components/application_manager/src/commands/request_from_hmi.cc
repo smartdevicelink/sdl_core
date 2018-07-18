@@ -34,7 +34,6 @@
 #include "application_manager/application_manager.h"
 #include "application_manager/rpc_service.h"
 
-
 namespace application_manager {
 
 namespace commands {

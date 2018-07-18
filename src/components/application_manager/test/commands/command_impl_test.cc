@@ -55,7 +55,6 @@ using ::testing::Return;
 using ::testing::AtLeast;
 using ::testing::_;
 
-
 namespace strings = ::application_manager::strings;
 using ::application_manager::commands::CommandImpl;
 using ::application_manager::ApplicationManager;

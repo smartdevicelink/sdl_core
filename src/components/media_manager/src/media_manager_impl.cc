@@ -120,29 +120,36 @@ void MediaManagerImpl::Init() {
 #endif
 
   if ("socket" == settings().video_server_type()) {
-    streamer_[ServiceType::kMobileNav]= std::make_shared<SocketVideoStreamerAdapter>(
-        settings().server_address(), settings().video_streaming_port());
+    streamer_[ServiceType::kMobileNav] =
+        std::make_shared<SocketVideoStreamerAdapter>(
+            settings().server_address(), settings().video_streaming_port());
   } else if ("pipe" == settings().video_server_type()) {
-    streamer_[ServiceType::kMobileNav]= std::make_shared<PipeVideoStreamerAdapter>(
-        settings().named_video_pipe_path(), settings().app_storage_folder());
+    streamer_[ServiceType::kMobileNav] =
+        std::make_shared<PipeVideoStreamerAdapter>(
+            settings().named_video_pipe_path(),
+            settings().app_storage_folder());
   } else if ("file" == settings().video_server_type()) {
-    streamer_[ServiceType::kMobileNav]= std::make_shared<FileVideoStreamerAdapter>(
-        settings().video_stream_file(), settings().app_storage_folder());
+    streamer_[ServiceType::kMobileNav] =
+        std::make_shared<FileVideoStreamerAdapter>(
+            settings().video_stream_file(), settings().app_storage_folder());
   }
 
   if ("socket" == settings().audio_server_type()) {
-    streamer_[ServiceType::kAudio]= std::make_shared<SocketAudioStreamerAdapter>(
-        settings().server_address(), settings().audio_streaming_port());
+    streamer_[ServiceType::kAudio] =
+        std::make_shared<SocketAudioStreamerAdapter>(
+            settings().server_address(), settings().audio_streaming_port());
   } else if ("pipe" == settings().audio_server_type()) {
-    streamer_[ServiceType::kAudio]= std::make_shared<PipeAudioStreamerAdapter>(
+    streamer_[ServiceType::kAudio] = std::make_shared<PipeAudioStreamerAdapter>(
         settings().named_audio_pipe_path(), settings().app_storage_folder());
   } else if ("file" == settings().audio_server_type()) {
-    streamer_[ServiceType::kAudio]= std::make_shared<FileAudioStreamerAdapter>(
+    streamer_[ServiceType::kAudio] = std::make_shared<FileAudioStreamerAdapter>(
         settings().audio_stream_file(), settings().app_storage_folder());
   }
 
-  streamer_listener_[ServiceType::kMobileNav] = std::make_shared<StreamerListener>(*this);
-  streamer_listener_[ServiceType::kAudio] = std::make_shared<StreamerListener>(*this);
+  streamer_listener_[ServiceType::kMobileNav] =
+      std::make_shared<StreamerListener>(*this);
+  streamer_listener_[ServiceType::kAudio] =
+      std::make_shared<StreamerListener>(*this);
 
   if (streamer_[ServiceType::kMobileNav]) {
     streamer_[ServiceType::kMobileNav]->AddListener(
@@ -187,8 +194,8 @@ void MediaManagerImpl::StartMicrophoneRecording(int32_t application_key,
   std::string file_path = settings().app_storage_folder();
   file_path += "/";
   file_path += output_file;
-  from_mic_listener_ =
-      std::make_shared<FromMicRecorderListener>(file_path, application_manager_);
+  from_mic_listener_ = std::make_shared<FromMicRecorderListener>(
+      file_path, application_manager_);
 #ifdef EXTENDED_MEDIA_MODE
   if (from_mic_recorder_) {
     from_mic_recorder_->AddListener(from_mic_listener_);

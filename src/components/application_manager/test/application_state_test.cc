@@ -41,8 +41,6 @@
 #include "application_manager/state_controller.h"
 #include "application_manager/resumption/resume_ctrl.h"
 
-
-
 namespace test {
 namespace components {
 namespace application_manager_test {

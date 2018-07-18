@@ -37,7 +37,6 @@
 #include <list>
 #include <cstdint>
 
-
 #include "utils/lock.h"
 #include "policy/policy_manager.h"
 #include "policy/policy_table.h"

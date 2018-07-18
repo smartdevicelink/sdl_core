@@ -45,8 +45,6 @@
 #include "policy/policy_table/types.h"
 #include "policy/mock_policy_settings.h"
 
-
-
 using namespace ::policy;
 namespace policy_table = rpc::policy_table_interface_base;
 using std::string;

@@ -553,7 +553,8 @@ TEST_F(TransportAdapterTest, SendData) {
 
   const unsigned int kSize = 3;
   unsigned char data[kSize] = {0x20, 0x07, 0x01};
-  const RawMessagePtr kMessage = std::make_shared<RawMessage>(1, 1, data, kSize);
+  const RawMessagePtr kMessage =
+      std::make_shared<RawMessage>(1, 1, data, kSize);
 
   EXPECT_CALL(*mock_connection, SendData(kMessage))
       .WillOnce(Return(TransportAdapter::OK));
@@ -591,7 +592,8 @@ TEST_F(TransportAdapterTest, SendData_ConnectionNotEstablished) {
 
   const unsigned int kSize = 3;
   unsigned char data[kSize] = {0x20, 0x07, 0x01};
-  const RawMessagePtr kMessage = std::make_shared<RawMessage>(1, 1, data, kSize);
+  const RawMessagePtr kMessage =
+      std::make_shared<RawMessage>(1, 1, data, kSize);
 
   EXPECT_CALL(*mock_connection, SendData(kMessage)).Times(0);
   res = transport_adapter.SendData(dev_id, app_handle, kMessage);

@@ -36,8 +36,6 @@
 
 #include "gmock/gmock.h"
 
-
-
 #include "smart_objects/smart_object.h"
 #include "smart_objects/smart_schema.h"
 #include "smart_objects/schema_item.h"

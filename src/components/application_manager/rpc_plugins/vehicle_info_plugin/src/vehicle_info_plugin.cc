@@ -74,7 +74,8 @@ void VehicleInfoPlugin::OnApplicationEvent(
     plugins::ApplicationEvent event,
     app_mngr::ApplicationSharedPtr application) {
   if (plugins::ApplicationEvent::kApplicationRegistered == event) {
-    application->AddExtension(std::make_shared<VehicleInfoAppExtension>(*this, *application));
+    application->AddExtension(
+        std::make_shared<VehicleInfoAppExtension>(*this, *application));
   }
 }
 

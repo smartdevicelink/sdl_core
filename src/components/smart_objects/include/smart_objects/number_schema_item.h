@@ -112,11 +112,12 @@ class TNumberSchemaItem : public CDefaultSchemaItem<NumberType> {
 };
 
 template <typename NumberType>
-std::shared_ptr<TNumberSchemaItem<NumberType>> TNumberSchemaItem<
+std::shared_ptr<TNumberSchemaItem<NumberType> > TNumberSchemaItem<
     NumberType>::create(const TSchemaItemParameter<NumberType>& MinValue,
                         const TSchemaItemParameter<NumberType>& MaxValue,
                         const TSchemaItemParameter<NumberType>& DefaultValue) {
-  return std::shared_ptr<TNumberSchemaItem<NumberType>>(new TNumberSchemaItem<NumberType>(MinValue, MaxValue, DefaultValue));
+  return std::shared_ptr<TNumberSchemaItem<NumberType> >(
+      new TNumberSchemaItem<NumberType>(MinValue, MaxValue, DefaultValue));
 }
 
 template <typename NumberType>

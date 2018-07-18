@@ -57,7 +57,6 @@ using ::testing::_;
 using ::testing::Return;
 using ::testing::Eq;
 
-
 namespace am = ::application_manager;
 using am::commands::MessageSharedPtr;
 using sdl_rpc_plugin::commands::hmi::OnDriverDistractionNotification;

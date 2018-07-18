@@ -39,7 +39,6 @@
 #include "application_manager/application.h"
 #include "utils/timer_task_impl.h"
 
-
 namespace app_launch {
 CREATE_LOGGERPTR_GLOBAL(logger_, "AppLaunch")
 

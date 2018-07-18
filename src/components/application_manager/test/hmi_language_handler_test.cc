@@ -46,7 +46,6 @@
 #include "application_manager/smart_object_keys.h"
 #include "test/resumption/mock_last_state.h"
 
-
 #include "utils/lock.h"
 
 namespace test {
@@ -57,7 +56,6 @@ namespace am = ::application_manager;
 
 using am::event_engine::Event;
 using am::ApplicationSet;
-
 
 using ::testing::Return;
 using ::testing::ReturnRef;

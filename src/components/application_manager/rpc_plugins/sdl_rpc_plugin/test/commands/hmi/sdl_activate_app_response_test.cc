@@ -47,7 +47,6 @@ namespace commands_test {
 namespace hmi_commands_test {
 namespace sdl_activate_app_response {
 
-
 namespace am = ::application_manager;
 namespace strings = ::application_manager::strings;
 using sdl_rpc_plugin::commands::SDLActivateAppResponse;

@@ -42,7 +42,6 @@
 #include "utils/logger.h"
 #include "utils/gen_hash.h"
 
-
 #include "utils/timer_task_impl.h"
 #include "application_manager/policies/policy_handler_interface.h"
 #include "application_manager/resumption/resume_ctrl.h"

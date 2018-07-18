@@ -39,7 +39,6 @@
 #include "application_manager/hmi_state.h"
 #include "utils/file_system.h"
 
-
 #include "application_manager/mock_message_helper.h"
 #include "utils/custom_string.h"
 #include "application_manager/mock_application_manager.h"

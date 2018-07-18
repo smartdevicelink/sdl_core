@@ -36,7 +36,6 @@
 #include "gmock/gmock.h"
 #include "protocol_handler/time_metric_observer.h"
 
-
 namespace test {
 namespace components {
 namespace protocol_handler_test {

@@ -63,7 +63,6 @@ using vehicle_info_plugin::commands::ReadDIDRequest;
 using am::commands::MessageSharedPtr;
 using am::event_engine::Event;
 
-
 class ReadDIDRequestTest
     : public CommandRequestTest<CommandsTestMocks::kIsNice> {};
 

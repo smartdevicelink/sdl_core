@@ -1214,8 +1214,8 @@ TransportManagerImpl::ConnectionInternal::ConnectionInternal(
     : transport_manager(transport_manager)
     , transport_adapter(transport_adapter)
     , timer(std::make_shared<timer::Timer,
-                              const char*,
-                              ::timer::TimerTaskImpl<ConnectionInternal>*>(
+                             const char*,
+                             ::timer::TimerTaskImpl<ConnectionInternal>*>(
           "TM DiscRoutine",
           new ::timer::TimerTaskImpl<ConnectionInternal>(
               this, &ConnectionInternal::DisconnectFailedRoutine)))

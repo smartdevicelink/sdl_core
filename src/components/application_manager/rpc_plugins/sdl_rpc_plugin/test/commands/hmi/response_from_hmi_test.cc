@@ -51,7 +51,6 @@ using ::testing::Return;
 using ::testing::SaveArg;
 using ::testing::DoAll;
 
-
 using ::test::components::event_engine_test::MockEventDispatcher;
 
 namespace am = ::application_manager;

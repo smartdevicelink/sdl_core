@@ -41,8 +41,6 @@
 #include "transport_manager/mock_transport_manager.h"
 #include "telemetry_monitor/mock_telemetry_observable.h"
 
-
-
 using testing::Return;
 using testing::_;
 

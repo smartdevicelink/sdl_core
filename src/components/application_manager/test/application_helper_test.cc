@@ -51,7 +51,6 @@
 #include "utils/custom_string.h"
 #include "utils/macro.h"
 
-
 #include "test/resumption/mock_last_state.h"
 #include "media_manager/mock_media_manager.h"
 

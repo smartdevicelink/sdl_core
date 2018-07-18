@@ -42,7 +42,6 @@
 #include "json/json.h"
 #include "utils/helpers.h"
 
-
 namespace rc_rpc_plugin {
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "RemoteControlModule")
@@ -197,9 +196,7 @@ RCAppExtensionPtr ResourceAllocationManagerImpl::GetApplicationExtention(
     return rc_app_extension;
   }
 
-  rc_app_extension =
-      std::static_pointer_cast<RCAppExtension>(
-          app_extension);
+  rc_app_extension = std::static_pointer_cast<RCAppExtension>(app_extension);
 
   return rc_app_extension;
 }

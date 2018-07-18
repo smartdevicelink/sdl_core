@@ -36,8 +36,6 @@
 #include <stddef.h>
 #include <string>
 
-
-
 #include "smart_objects/default_shema_item.h"
 #include "smart_objects/schema_item_parameter.h"
 

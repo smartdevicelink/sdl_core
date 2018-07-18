@@ -44,7 +44,6 @@ namespace commands_test {
 namespace hmi_commands_test {
 namespace tts_get_language_response {
 
-
 using sdl_rpc_plugin::commands::TTSGetLanguageResponse;
 using test::components::application_manager_test::MockHMICapabilities;
 using test::components::event_engine_test::MockEventDispatcher;

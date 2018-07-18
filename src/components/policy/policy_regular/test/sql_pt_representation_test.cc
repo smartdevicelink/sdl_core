@@ -48,7 +48,6 @@
 #include "json/reader.h"
 #include "rpc_base/rpc_base.h"
 
-
 #include "utils/file_system.h"
 #include "utils/sqlite_wrapper/sql_database.h"
 

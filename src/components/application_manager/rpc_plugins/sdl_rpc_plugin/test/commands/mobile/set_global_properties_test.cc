@@ -126,8 +126,9 @@ class SetGlobalPropertiesRequestTest
         .WillOnce(Return(mock_app_));
   }
 
-  void OnEventUISetupHelper(MessageSharedPtr msg,
-                            std::shared_ptr<SetGlobalPropertiesRequest> command) {
+  void OnEventUISetupHelper(
+      MessageSharedPtr msg,
+      std::shared_ptr<SetGlobalPropertiesRequest> command) {
     SmartObject vr_help_title("yes");
     SmartObject vr_help_array(smart_objects::SmartType_Array);
     VRArraySetupHelper(msg, vr_help_title, vr_help_array);
@@ -153,8 +154,9 @@ class SetGlobalPropertiesRequestTest
     command->Run();
   }
 
-  void OnEventTTSSetupHelper(MessageSharedPtr msg,
-                             std::shared_ptr<SetGlobalPropertiesRequest> command) {
+  void OnEventTTSSetupHelper(
+      MessageSharedPtr msg,
+      std::shared_ptr<SetGlobalPropertiesRequest> command) {
     SmartObject help_prompt(smart_objects::SmartType_Array);
     help_prompt[0][am::strings::text] = "Help_Prompt_One";
     (*msg)[am::strings::msg_params][am::strings::help_prompt] = help_prompt;

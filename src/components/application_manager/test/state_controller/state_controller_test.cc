@@ -646,8 +646,7 @@ class StateControllerImplTest : public ::testing::Test {
       app_id = (*it_begin)->app_id();
       app_type = AppType(app_id);
       app = (*it_begin);
-      am::HmiStatePtr state_first =
-          std::make_shared<T>(app, app_manager_mock_);
+      am::HmiStatePtr state_first = std::make_shared<T>(app, app_manager_mock_);
       am::HmiStatePtr state_second =
           std::make_shared<Q>(app, app_manager_mock_);
       TestSetSeveralState(
@@ -2223,7 +2222,7 @@ TEST_F(StateControllerImplTest,
 TEST_F(StateControllerImplTest, SetNaviStreamingStateForNonMediaApplication) {
   am::HmiStatePtr state_navi_streming =
       std::make_shared<am::VideoStreamingHmiState>(simple_app_,
-                                                    app_manager_mock_);
+                                                   app_manager_mock_);
   TestSetState(simple_app_,
                state_navi_streming,
                APP_TYPE_NON_MEDIA,
@@ -2234,7 +2233,7 @@ TEST_F(StateControllerImplTest,
        DISABLED_SetNaviStreamingStateMediaApplicationAttenuatedNotSupported) {
   am::HmiStatePtr state_navi_streming =
       std::make_shared<am::VideoStreamingHmiState>(media_app_,
-                                                    app_manager_mock_);
+                                                   app_manager_mock_);
   EXPECT_CALL(app_manager_mock_, is_attenuated_supported())
       .WillRepeatedly(Return(false));
   TestSetState(media_app_,
@@ -2247,7 +2246,7 @@ TEST_F(StateControllerImplTest,
        DISABLED_SetNaviStreamingStateMediaApplicationAttenuatedSupported) {
   am::HmiStatePtr state_navi_streming =
       std::make_shared<am::VideoStreamingHmiState>(media_app_,
-                                                    app_manager_mock_);
+                                                   app_manager_mock_);
   EXPECT_CALL(app_manager_mock_, is_attenuated_supported())
       .WillRepeatedly(Return(true));
   TestSetState(media_app_,
@@ -2283,7 +2282,7 @@ TEST_F(StateControllerImplTest,
 TEST_F(StateControllerImplTest, DISABLED_SetNaviStreamingStateNaviApplication) {
   am::HmiStatePtr state_navi_streming =
       std::make_shared<am::VideoStreamingHmiState>(navi_app_,
-                                                    app_manager_mock_);
+                                                   app_manager_mock_);
   TestSetState(navi_app_,
                state_navi_streming,
                APP_TYPE_NAVI,
@@ -2294,7 +2293,7 @@ TEST_F(StateControllerImplTest,
        DISABLED_SetNaviStreamingStateMediaNaviApplication) {
   am::HmiStatePtr state_navi_streming =
       std::make_shared<am::VideoStreamingHmiState>(media_navi_app_,
-                                                    app_manager_mock_);
+                                                   app_manager_mock_);
   TestSetState(media_navi_app_,
                state_navi_streming,
                APP_TYPE_NAVI,

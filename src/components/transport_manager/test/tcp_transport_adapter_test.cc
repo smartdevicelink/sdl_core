@@ -41,8 +41,6 @@
 #include "transport_manager/tcp/mock_tcp_transport_adapter.h"
 #include "transport_manager/mock_transport_manager_settings.h"
 
-
-
 namespace test {
 namespace components {
 namespace transport_manager_test {
@@ -76,7 +74,8 @@ TEST_F(TcpAdapterTest, StoreDataWithOneDeviceAndOneApplication) {
   MockTCPTransportAdapter transport_adapter(
       port, last_state_, transport_manager_settings);
   std::string uniq_id = "unique_device_name";
-  std::shared_ptr<MockTCPDevice> mockdev = std::make_shared<MockTCPDevice>(port, uniq_id);
+  std::shared_ptr<MockTCPDevice> mockdev =
+      std::make_shared<MockTCPDevice>(port, uniq_id);
   transport_adapter.AddDevice(mockdev);
 
   std::vector<std::string> devList = transport_adapter.GetDeviceList();
@@ -265,7 +264,8 @@ TEST_F(TcpAdapterTest, StoreDataWithOneDevice_RestoreData) {
   MockTCPTransportAdapter transport_adapter(
       port, last_state_, transport_manager_settings);
   std::string uniq_id = "unique_device_name";
-  std::shared_ptr<MockTCPDevice> mockdev = std::make_shared<MockTCPDevice>(port, uniq_id);
+  std::shared_ptr<MockTCPDevice> mockdev =
+      std::make_shared<MockTCPDevice>(port, uniq_id);
   transport_adapter.AddDevice(mockdev);
 
   std::vector<std::string> devList = transport_adapter.GetDeviceList();

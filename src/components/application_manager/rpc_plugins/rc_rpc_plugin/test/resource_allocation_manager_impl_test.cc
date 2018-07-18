@@ -40,7 +40,6 @@
 #include "application_manager/mock_rpc_service.h"
 #include "application_manager/policies/mock_policy_handler_interface.h"
 
-
 #include "interfaces/HMI_API.h"
 #include "interfaces/MOBILE_API.h"
 

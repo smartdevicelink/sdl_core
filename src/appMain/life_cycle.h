@@ -36,7 +36,6 @@
 #include <unistd.h>
 #include "utils/macro.h"
 
-
 #include "config_profile/profile.h"
 #include "hmi_message_handler/hmi_message_handler_impl.h"
 #if (defined(MESSAGEBROKER_HMIADAPTER) || defined(PASA_HMI))

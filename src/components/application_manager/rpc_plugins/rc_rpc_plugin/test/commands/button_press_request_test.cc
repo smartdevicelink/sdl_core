@@ -42,7 +42,6 @@
 #include "application_manager/commands/command_request_test.h"
 #include "application_manager/policies/mock_policy_handler_interface.h"
 
-
 #include "interfaces/HMI_API.h"
 #include "interfaces/MOBILE_API.h"
 
@@ -147,15 +146,14 @@ class ButtonPressRequestTest
   }
 
   template <class Command>
-  std::shared_ptr<Command> CreateRCCommand(
-      MessageSharedPtr& msg) {
+  std::shared_ptr<Command> CreateRCCommand(MessageSharedPtr& msg) {
     InitCommand(kDefaultTimeout_);
     return std::make_shared<Command>(msg ? msg : msg = CreateMessage(),
-                                        app_mngr_,
-                                        mock_rpc_service_,
-                                        mock_hmi_capabilities_,
-                                        mock_policy_handler_,
-                                        mock_allocation_manager_);
+                                     app_mngr_,
+                                     mock_rpc_service_,
+                                     mock_hmi_capabilities_,
+                                     mock_policy_handler_,
+                                     mock_allocation_manager_);
   }
 
  protected:
@@ -195,8 +193,8 @@ TEST_F(ButtonPressRequestTest,
       .WillOnce(Return(true));
 
   // Act
-  std::shared_ptr<rc_rpc_plugin::commands::ButtonPressRequest>
-      command = CreateRCCommand<rc_rpc_plugin::commands::ButtonPressRequest>(
+  std::shared_ptr<rc_rpc_plugin::commands::ButtonPressRequest> command =
+      CreateRCCommand<rc_rpc_plugin::commands::ButtonPressRequest>(
           mobile_message);
   ASSERT_TRUE(command->Init());
   command->Run();
@@ -234,8 +232,8 @@ TEST_F(
       .WillOnce(DoAll(SaveArg<0>(&command_result), Return(true)));
 
   // Act
-  std::shared_ptr<rc_rpc_plugin::commands::ButtonPressRequest>
-      command = CreateRCCommand<rc_rpc_plugin::commands::ButtonPressRequest>(
+  std::shared_ptr<rc_rpc_plugin::commands::ButtonPressRequest> command =
+      CreateRCCommand<rc_rpc_plugin::commands::ButtonPressRequest>(
           mobile_message);
   ASSERT_TRUE(command->Init());
   command->Run();
@@ -273,8 +271,8 @@ TEST_F(ButtonPressRequestTest, OnEvent_ExpectSuccessfullResponseSentToMobile) {
   application_manager::event_engine::Event event(
       hmi_apis::FunctionID::Buttons_ButtonPress);
   event.set_smart_object(*hmi_message);
-  std::shared_ptr<rc_rpc_plugin::commands::ButtonPressRequest>
-      command = CreateRCCommand<rc_rpc_plugin::commands::ButtonPressRequest>(
+  std::shared_ptr<rc_rpc_plugin::commands::ButtonPressRequest> command =
+      CreateRCCommand<rc_rpc_plugin::commands::ButtonPressRequest>(
           mobile_message);
   command->on_event(event);
 }
@@ -312,8 +310,8 @@ TEST_F(ButtonPressRequestTest,
   application_manager::event_engine::Event event(
       hmi_apis::FunctionID::Buttons_ButtonPress);
   event.set_smart_object(*hmi_message);
-  std::shared_ptr<rc_rpc_plugin::commands::ButtonPressRequest>
-      command = CreateRCCommand<rc_rpc_plugin::commands::ButtonPressRequest>(
+  std::shared_ptr<rc_rpc_plugin::commands::ButtonPressRequest> command =
+      CreateRCCommand<rc_rpc_plugin::commands::ButtonPressRequest>(
           mobile_message);
   command->on_event(event);
 }

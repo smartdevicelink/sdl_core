@@ -44,8 +44,6 @@
 #include <list>
 #include <map>
 
-
-
 #include "transport_manager/transport_adapter/device.h"
 #include "transport_manager/common.h"
 #include "transport_manager/error.h"

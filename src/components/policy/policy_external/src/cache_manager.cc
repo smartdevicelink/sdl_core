@@ -2237,8 +2237,7 @@ bool CacheManager::Init(const std::string& file_name,
   LOG4CXX_AUTO_TRACE(logger_);
   settings_ = settings;
   InitResult init_result = backup_->Init(settings);
-  ex_backup_ = std::dynamic_pointer_cast<
-      PTExtRepresentation>(backup_);
+  ex_backup_ = std::dynamic_pointer_cast<PTExtRepresentation>(backup_);
 
   bool result = true;
   switch (init_result) {

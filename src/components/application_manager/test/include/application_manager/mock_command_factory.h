@@ -38,7 +38,6 @@
 #include "application_manager/commands/command.h"
 #include "smart_objects/smart_object.h"
 
-
 namespace test {
 namespace components {
 namespace application_manager_test {

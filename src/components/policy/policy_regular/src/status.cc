@@ -33,7 +33,6 @@
 #include "policy/status.h"
 #include "policy/update_status_manager_interface.h"
 
-
 policy::UpToDateStatus::UpToDateStatus()
     : Status("UP_TO_DATE", policy::PolicyTableStatus::StatusUpToDate) {}
 

@@ -36,7 +36,6 @@
 #include <string>
 #include <vector>
 
-
 #include "protocol/message_priority.h"
 #include "protocol/rpc_type.h"
 #include "protocol/common.h"

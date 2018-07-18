@@ -41,8 +41,6 @@
 #include "application_manager/commands/command_request_test.h"
 #include "rc_rpc_plugin/mock/mock_resource_allocation_manager.h"
 
-
-
 using ::testing::_;
 using ::testing::Mock;
 using ::testing::NiceMock;
@@ -116,15 +114,14 @@ class GetInteriorVehicleDataRequestTest
     return message;
   }
   template <class Command>
-  std::shared_ptr<Command> CreateRCCommand(
-      MessageSharedPtr& msg) {
+  std::shared_ptr<Command> CreateRCCommand(MessageSharedPtr& msg) {
     InitCommand(kDefaultTimeout_);
     return std::make_shared<Command>(msg ? msg : msg = CreateMessage(),
-                                        app_mngr_,
-                                        mock_rpc_service_,
-                                        mock_hmi_capabilities_,
-                                        mock_policy_handler_,
-                                        mock_allocation_manager_);
+                                     app_mngr_,
+                                     mock_rpc_service_,
+                                     mock_hmi_capabilities_,
+                                     mock_policy_handler_,
+                                     mock_allocation_manager_);
   }
 
  protected:

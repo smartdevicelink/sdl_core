@@ -37,8 +37,6 @@
 #include "policy/usage_statistics/mock_statistics_manager.h"
 #include "policy/usage_statistics/mock_app_stopwatch.h"
 
-
-
 namespace test {
 namespace components {
 namespace usage_statistics_test {
@@ -69,8 +67,7 @@ const std::string kAppId = "SPT";
 class UsageStatisticsTest : public testing::Test {
  public:
   UsageStatisticsTest()
-      : mock_statistics_manager_sptr_(
-            std::make_shared<MockStatisticsManager>())
+      : mock_statistics_manager_sptr_(std::make_shared<MockStatisticsManager>())
       , usage_statistics_test_object1_sptr_(
             new application_manager::UsageStatistics(
                 kAppId, mock_statistics_manager_sptr_))

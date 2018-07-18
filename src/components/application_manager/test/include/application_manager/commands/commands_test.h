@@ -36,7 +36,6 @@
 #include <stdint.h>
 #include "gtest/gtest.h"
 
-
 #include "smart_objects/smart_object.h"
 #include "application_manager/commands/command.h"
 
@@ -59,7 +58,6 @@ using ::testing::Return;
 using ::testing::NiceMock;
 using ::testing::Mock;
 using ::testing::_;
-
 
 using ::smart_objects::SmartObject;
 using am::commands::MessageSharedPtr;
@@ -121,13 +119,13 @@ class CommandsTest : public ::testing::Test {
 
   template <class Command>
   std::shared_ptr<Command> CreateCommand(const uint32_t timeout,
-                                   MessageSharedPtr& msg) {
+                                         MessageSharedPtr& msg) {
     InitCommand(timeout);
     return std::make_shared<Command>((msg ? msg : msg = CreateMessage()),
-                                        app_mngr_,
-                                        mock_rpc_service_,
-                                        mock_hmi_capabilities_,
-                                        mock_policy_handler_);
+                                     app_mngr_,
+                                     mock_rpc_service_,
+                                     mock_hmi_capabilities_,
+                                     mock_policy_handler_);
   }
 
   template <class Command>
@@ -136,14 +134,15 @@ class CommandsTest : public ::testing::Test {
   }
 
   template <class Command>
-  std::shared_ptr<Command> CreateCommand(const uint32_t timeout = kDefaultTimeout_) {
+  std::shared_ptr<Command> CreateCommand(
+      const uint32_t timeout = kDefaultTimeout_) {
     InitCommand(timeout);
     MessageSharedPtr msg = CreateMessage();
     return std::make_shared<Command>(msg,
-                                        app_mngr_,
-                                        mock_rpc_service_,
-                                        mock_hmi_capabilities_,
-                                        mock_policy_handler_);
+                                     app_mngr_,
+                                     mock_rpc_service_,
+                                     mock_hmi_capabilities_,
+                                     mock_policy_handler_);
   }
 
   enum { kDefaultTimeout_ = 100 };

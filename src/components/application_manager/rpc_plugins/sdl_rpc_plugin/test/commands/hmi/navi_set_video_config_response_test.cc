@@ -44,7 +44,6 @@ namespace commands_test {
 namespace hmi_commands_test {
 namespace navi_set_video_config_response {
 
-
 using sdl_rpc_plugin::commands::NaviSetVideoConfigResponse;
 using test::components::event_engine_test::MockEventDispatcher;
 using testing::_;

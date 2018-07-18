@@ -44,8 +44,7 @@ using namespace media_manager;
 
 class MockMediaAdapterImpl : public ::media_manager::MediaAdapterImpl {
  public:
-  MOCK_METHOD1(AddListener,
-               void(const std::shared_ptr<MediaAdapterListener>&));
+  MOCK_METHOD1(AddListener, void(const std::shared_ptr<MediaAdapterListener>&));
   MOCK_METHOD1(RemoveListener,
                void(const std::shared_ptr<MediaAdapterListener>&));
   MOCK_METHOD2(SendData,

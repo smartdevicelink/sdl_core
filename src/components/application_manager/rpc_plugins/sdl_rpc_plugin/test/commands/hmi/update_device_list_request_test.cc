@@ -54,7 +54,6 @@ namespace commands_test {
 namespace hmi_commands_test {
 namespace update_device_list_request {
 
-
 using testing::_;
 using testing::ReturnRef;
 using testing::Return;

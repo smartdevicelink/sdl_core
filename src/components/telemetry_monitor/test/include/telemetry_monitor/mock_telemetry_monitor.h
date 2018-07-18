@@ -38,7 +38,6 @@
 #include "telemetry_monitor/telemetry_monitor.h"
 #include "telemetry_monitor/metric_wrapper.h"
 
-
 namespace test {
 namespace components {
 namespace telemetry_monitor_test {

@@ -109,7 +109,6 @@ using ::testing::ReturnRef;
 using ::testing::Types;
 using ::testing::Eq;
 
-
 using ::test::components::event_engine_test::MockEventDispatcher;
 
 namespace am = ::application_manager;
@@ -244,7 +243,8 @@ TYPED_TEST(ResponseFromHMICommandsTest, Run_SendMessageToHMI_SUCCESS) {
   typedef typename TestFixture::CommandData CommandData;
   typedef typename CommandData::CommandType CommandType;
 
-  std::shared_ptr<CommandType> command = this->template CreateCommand<CommandType>();
+  std::shared_ptr<CommandType> command =
+      this->template CreateCommand<CommandType>();
 
   EXPECT_CALL(this->event_dispatcher_,
               raise_event(EventIdIsEqualTo(CommandData::kEventId)));
@@ -255,7 +255,8 @@ TYPED_TEST(ResponseFromHMICommandsTest, Run_SendMessageToHMI_SUCCESS) {
 TYPED_TEST(EmptyResponseFromHMICommandsTest, Run_SUCCESS) {
   typedef typename TestFixture::CommandType CommandType;
 
-  std::shared_ptr<CommandType> command = this->template CreateCommand<CommandType>();
+  std::shared_ptr<CommandType> command =
+      this->template CreateCommand<CommandType>();
 
   command->Run();
 }
