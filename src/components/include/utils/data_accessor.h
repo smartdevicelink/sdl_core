@@ -35,15 +35,14 @@
 #include "utils/lock.h"
 #include "utils/shared_ptr.h"
 
-// This class is for thread-safe access to data
+// This class is for thread-safe const access to data
 template <class T>
 class DataAccessor {
  public:
-  DataAccessor(const T& data, const sync_primitives::BaseLock& lock)
-      : data_(data)
-      , lock_(const_cast<sync_primitives::BaseLock&>(lock))
-      , counter_(new uint32_t(0)) {
-    lock_.Acquire();
+  DataAccessor(const T& data,
+               const std::shared_ptr<sync_primitives::BaseLock>& lock)
+      : data_(data), lock_(lock), counter_(new uint32_t(0)) {
+    lock_->Acquire();
   }
 
   DataAccessor(const DataAccessor<T>& other)
@@ -52,10 +51,8 @@ class DataAccessor {
   }
 
   ~DataAccessor() {
-    // std::cerr << "destructing accessor, counter is " << *counter_ << "for lock "
-    //           << &lock_ << "\n";
     if (0 == *counter_) {
-      lock_.Release();
+      lock_->Release();
     } else {
       --(*counter_);
     }
@@ -67,7 +64,8 @@ class DataAccessor {
  private:
   void* operator new(size_t size);
   const T& data_;
-  sync_primitives::BaseLock& lock_;
+  // Require that the lock lives at least as long as the DataAccessor
+  const std::shared_ptr<sync_primitives::BaseLock> lock_;
   utils::SharedPtr<uint32_t> counter_;
 };
 

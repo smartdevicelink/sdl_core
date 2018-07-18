@@ -58,7 +58,7 @@ std::vector<StateID> GenerateCurrentStates() {
   states.push_back(StateID::STATE_ID_SAFETY_MODE);
   states.push_back(StateID::STATE_ID_VR_SESSION);
   states.push_back(StateID::STATE_ID_TTS_SESSION);
-  states.push_back(StateID::STATE_ID_NAVI_STREAMING);
+  states.push_back(StateID::STATE_ID_VIDEO_STREAMING);
   states.push_back(StateID::STATE_ID_DEACTIVATE_HMI);
   return states;
 }

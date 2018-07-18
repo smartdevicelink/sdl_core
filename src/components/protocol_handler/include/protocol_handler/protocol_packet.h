@@ -252,6 +252,12 @@ class ProtocolPacket {
                                 const size_t messageSize);
 
   /**
+   * @brief Calculates FIRST_FRAME data for further handling of consecutive
+   * frames
+   */
+  void HandleRawFirstFrameData(const uint8_t* message);
+
+  /**
    * \brief Getter of protocol version.
    */
   uint8_t protocol_version() const;
@@ -324,6 +330,11 @@ class ProtocolPacket {
     * \brief Getter for Connection Identifier
     */
   ConnectionID connection_id() const;
+
+  /**
+   * \brief Setter of Connection Identifier
+   */
+  void set_connection_id(ConnectionID connection_id);
 
   /**
     * \brief Getter for data payload size

@@ -81,14 +81,14 @@ class SQLPTRepresentationTest : public SQLPTRepresentation,
   static const std::string kDatabaseName;
   static utils::dbms::SQLQuery* query_wrapper_;
   // Gtest can show message that this object doesn't destroyed
-  static std::auto_ptr<policy_handler_test::MockPolicySettings>
+  static std::unique_ptr<policy_handler_test::MockPolicySettings>
       policy_settings_;
 
   static void SetUpTestCase() {
     const std::string kAppStorageFolder = "storage_SQLPTRepresentationTest";
     reps = new SQLPTRepresentation(in_memory_);
     ASSERT_TRUE(reps != NULL);
-    policy_settings_ = std::auto_ptr<policy_handler_test::MockPolicySettings>(
+    policy_settings_ = std::unique_ptr<policy_handler_test::MockPolicySettings>(
         new policy_handler_test::MockPolicySettings());
     ON_CALL(*policy_settings_, app_storage_folder())
         .WillByDefault(ReturnRef(kAppStorageFolder));
@@ -348,7 +348,7 @@ SQLPTRepresentation* SQLPTRepresentationTest::reps = 0;
 utils::dbms::SQLQuery* SQLPTRepresentationTest::query_wrapper_ = 0;
 const std::string SQLPTRepresentationTest::kDatabaseName = ":memory:";
 const bool SQLPTRepresentationTest::in_memory_ = true;
-std::auto_ptr<policy_handler_test::MockPolicySettings>
+std::unique_ptr<policy_handler_test::MockPolicySettings>
     SQLPTRepresentationTest::policy_settings_;
 
 class SQLPTRepresentationTest2 : public ::testing::Test {
@@ -407,7 +407,8 @@ TEST_F(SQLPTRepresentationTest,
   query.Prepare(query_select);
   query.Next();
 
-  const int policy_tables_number = 32;
+  // 33 - is current total tables number created by schema
+  const int policy_tables_number = 33;
   ASSERT_EQ(policy_tables_number, query.GetInteger(0));
 
   const std::string query_select_count_of_iap_buffer_full =

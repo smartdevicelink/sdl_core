@@ -35,6 +35,8 @@
 
 #include <list>
 #include <string>
+#include <set>
+#include <memory>
 
 #include "utils/macro.h"
 #include "utils/message_queue.h"
@@ -44,6 +46,7 @@
 #include "security_manager/security_query.h"
 #include "protocol_handler/protocol_handler.h"
 #include "protocol/common.h"
+#include "utils/system_time_handler.h"
 
 namespace security_manager {
 /**
@@ -67,12 +70,21 @@ typedef threads::MessageLoopThread<SecurityMessageQueue> SecurityMessageLoop;
  * \brief SecurityManagerImpl class implements SecurityManager interface
  */
 class SecurityManagerImpl : public SecurityManager,
-                            public SecurityMessageLoop::Handler {
+                            public SecurityMessageLoop::Handler,
+                            public utils::SystemTimeListener {
  public:
   /**
    * \brief Constructor
+   * \param system_time_handler allows to work with system time.
    */
-  SecurityManagerImpl();
+  explicit SecurityManagerImpl(
+      std::unique_ptr<utils::SystemTimeHandler>&& system_time_handler);
+
+  /**
+   * \brief Destructor
+   */
+  ~SecurityManagerImpl();
+
   /**
    * \brief Add received from Mobile Application message
    * Overriden ProtocolObserver::OnMessageReceived method
@@ -131,9 +143,11 @@ class SecurityManagerImpl : public SecurityManager,
    * Do not notify listeners, send security error on occure
    * \param connection_key Unique key used by other components as session
    * identifier
+   * @param cc_strategy - SSL context creation strategy
    * @return new \c  SSLContext or \c NULL on any error
    */
-  SSLContext* CreateSSLContext(const uint32_t& connection_key) OVERRIDE;
+  SSLContext* CreateSSLContext(const uint32_t& connection_key,
+                               ContextCreationStrategy cc_strategy) OVERRIDE;
 
   /**
    * \brief Start handshake as SSL client
@@ -141,16 +155,33 @@ class SecurityManagerImpl : public SecurityManager,
   void StartHandshake(uint32_t connection_key) OVERRIDE;
 
   /**
+   * @brief PostponeHandshake allows to postpone handshake. It notifies
+   * cryptomanager that certificate should be updated and adds specified
+   * connection key to the list of the certificate awaiting connections.
+   * @param connection_key the identifier for connection to postpone handshake.
+   */
+  void PostponeHandshake(const uint32_t connection_key) OVERRIDE;
+
+  /**
    * @brief Checks whether certificate should be updated
+   * @param connection_key the connection identifier to check certificate for.
    * @return true if certificate should be updated otherwise false
    */
-  bool IsCertificateUpdateRequired() OVERRIDE;
+  bool IsCertificateUpdateRequired(const uint32_t connection_key) OVERRIDE;
+
+  /**
+   * @brief Checks whether system time ready notification
+   * was received from hmi
+   * @return true if received otherwise false
+   */
+  bool IsSystemTimeProviderReady() const OVERRIDE;
 
   /**
    * \brief Add/Remove for SecurityManagerListener
    */
   void AddListener(SecurityManagerListener* const listener) OVERRIDE;
   void RemoveListener(SecurityManagerListener* const listener) OVERRIDE;
+
   /**
    * \brief Notifiers for listeners
    * \param connection_key Unique key used by other components as session
@@ -171,6 +202,11 @@ class SecurityManagerImpl : public SecurityManager,
    * Allows to notify that certificate should be updated
    */
   void NotifyOnCertificateUpdateRequired() OVERRIDE;
+
+  /**
+   * @brief Notify all listeners that handshake was failed
+   */
+  void NotifyListenersOnHandshakeFailed() OVERRIDE;
 
   /**
    * @brief Check is policy certificate data is empty
@@ -217,6 +253,39 @@ class SecurityManagerImpl : public SecurityManager,
    */
   void SendQuery(const SecurityQuery& query, const uint32_t connection_key);
 
+  /**
+   * @brief OnCertificateUpdated allows to obtain notification when certificate
+   * has been updated with policy table update. Pass this certificate to crypto
+   * manager for further processing. Also process postopnes handshake for the
+   * certain connection key.
+   *
+   * @param data the certificates content.
+   * @return always true.
+   */
+  bool OnCertificateUpdated(const std::string& data) OVERRIDE;
+
+  /**
+   * @brief ResumeHandshake allows to resume handshake after certificate has
+   * been updated.
+   * @param connection_key the connection identifier to start handshake.
+   */
+  void ResumeHandshake(uint32_t connection_key);
+
+  /**
+   * @brief ProceedHandshake starts the handshake process.
+   * @param ssl_context ssl context for the handshake. COntains certificate,
+   * keys, etc.
+   * @param connection_key the connection identifier to process handshake.
+   */
+  void ProceedHandshake(SSLContext* ssl_context, uint32_t connection_key);
+
+  /**
+   * @brief OnSystemTimeArrived method which notifies
+   * crypto manager with updated time in order to check certificate validity
+   * @param utc_time the current system time.
+   */
+  void OnSystemTimeArrived(const time_t utc_time) OVERRIDE;
+
   // Thread that pumps handshake data
   SecurityMessageLoop security_messages_;
 
@@ -235,7 +304,17 @@ class SecurityManagerImpl : public SecurityManager,
   /**
    *\brief List of listeners for notify handshake done result
    */
+
   std::list<SecurityManagerListener*> listeners_;
+
+  std::unique_ptr<utils::SystemTimeHandler> system_time_handler_;
+  sync_primitives::Lock connections_lock_;
+  std::set<uint32_t> awaiting_certificate_connections_;
+  std::set<uint32_t> awaiting_time_connections_;
+
+  mutable sync_primitives::Lock waiters_lock_;
+  volatile bool waiting_for_certificate_;
+  volatile bool waiting_for_time_;
   DISALLOW_COPY_AND_ASSIGN(SecurityManagerImpl);
 };
 }  // namespace security_manager

@@ -5,6 +5,9 @@
  * Copyright (c) 2016, Ford Motor Company
  * All rights reserved.
  *
+ * Copyright (c) 2018 Xevo Inc.
+ * All rights reserved.
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *
@@ -16,7 +19,7 @@
  * disclaimer in the documentation and/or other materials provided with the
  * distribution.
  *
- * Neither the name of the Ford Motor Company nor the names of its contributors
+ * Neither the name of the copyright holders nor the names of its contributors
  * may be used to endorse or promote products derived from this software
  * without specific prior written permission.
  *
@@ -70,6 +73,9 @@ enum DeviceType {
   IOS_BT,
   IOS_USB,
   TCP,
+  IOS_USB_HOST_MODE,
+  IOS_USB_DEVICE_MODE,
+  IOS_CARPLAY_WIRELESS,  // running on iAP over Carplay wireless transport
   UNKNOWN
 };
 
@@ -85,6 +91,18 @@ typedef std::map<DeviceUID, DeviceSptr> DeviceMap;
  * adapter listeners
  */
 typedef std::list<TransportAdapterListener*> TransportAdapterListenerList;
+
+/**
+ * @brief Type definition for transport's configuration information
+ */
+typedef std::map<std::string, std::string> TransportConfig;
+
+/**
+ * @brief TransportConfig keys
+ */
+extern const char* tc_enabled;
+extern const char* tc_tcp_port;
+extern const char* tc_tcp_ip_address;
 
 class TransportAdapter {
  public:
@@ -312,6 +330,12 @@ class TransportAdapter {
   virtual void DeviceSwitched(const DeviceUID& device_handle) = 0;
 
   virtual SwitchableDevices GetSwitchableDevices() const = 0;
+
+  /**
+   * @brief Returns the transport's configuration information
+   */
+  virtual TransportConfig GetTransportConfiguration() const = 0;
+
 #ifdef TELEMETRY_MONITOR
   /**
    * @brief Return Time metric observer

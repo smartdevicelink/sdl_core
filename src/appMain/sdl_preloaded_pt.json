@@ -28,6 +28,7 @@
             "notifications_per_minute_by_priority": {
                 "EMERGENCY": 60,
                 "NAVIGATION": 15,
+                "PROJECTION": 15,
                 "VOICECOM": 20,
                 "COMMUNICATION": 6,
                 "NORMAL": 4,
@@ -140,7 +141,8 @@
                     "OnDriverDistraction": {
                         "hmi_levels": ["BACKGROUND",
                         "FULL",
-                        "LIMITED"]
+                        "LIMITED",
+                        "NONE"]
                     },
                     "OnEncodedSyncPData": {
                         "hmi_levels": ["BACKGROUND",
@@ -344,6 +346,7 @@
                         "LIMITED"],
                         "parameters": ["accPedalPosition",
                         "beltStatus",
+                        "electronicParkBrakeStatus",
                         "driverBraking",
                         "myKey",
                         "prndl",
@@ -356,6 +359,7 @@
                         "LIMITED"],
                         "parameters": ["accPedalPosition",
                         "beltStatus",
+                        "electronicParkBrakeStatus",
                         "driverBraking",
                         "myKey",
                         "prndl",
@@ -368,6 +372,7 @@
                         "LIMITED"],
                         "parameters": ["accPedalPosition",
                         "beltStatus",
+                        "electronicParkBrakeStatus",
                         "driverBraking",
                         "myKey",
                         "prndl",
@@ -380,6 +385,7 @@
                         "LIMITED"],
                         "parameters": ["accPedalPosition",
                         "beltStatus",
+                        "electronicParkBrakeStatus",
                         "driverBraking",
                         "myKey",
                         "prndl",
@@ -400,6 +406,7 @@
                         "engineOilLife",
                         "engineTorque",
                         "externalTemperature",
+                        "turnSignal",
                         "fuelLevel",
                         "fuelLevel_State",
                         "headLampStatus",
@@ -419,6 +426,7 @@
                         "engineOilLife",
                         "engineTorque",
                         "externalTemperature",
+                        "turnSignal",
                         "fuelLevel",
                         "fuelLevel_State",
                         "headLampStatus",
@@ -438,6 +446,7 @@
                         "engineOilLife",
                         "engineTorque",
                         "externalTemperature",
+                        "turnSignal",
                         "fuelLevel",
                         "fuelLevel_State",
                         "headLampStatus",
@@ -456,6 +465,7 @@
                         "engineOilLife",
                         "engineTorque",
                         "externalTemperature",
+                        "turnSignal",
                         "fuelLevel",
                         "fuelLevel_State",
                         "headLampStatus",
@@ -542,6 +552,12 @@
                         "LIMITED"]
                     },
                     "SystemRequest": {
+                        "hmi_levels": ["BACKGROUND",
+                        "FULL",
+                        "LIMITED",
+                        "NONE"]
+                    },
+                    "OnRCStatus": {
                         "hmi_levels": ["BACKGROUND",
                         "FULL",
                         "LIMITED",
@@ -704,7 +720,8 @@
                     "OnDriverDistraction": {
                         "hmi_levels": ["BACKGROUND",
                         "FULL",
-                        "LIMITED"]
+                        "LIMITED",
+                        "NONE"]
                     },
                     "OnEncodedSyncPData": {
                         "hmi_levels": ["BACKGROUND",
@@ -2352,7 +2369,9 @@
                 "steal_focus": false,
                 "priority": "NONE",
                 "default_hmi": "NONE",
-                "groups": ["Base-4"]
+                "groups": ["Base-4"],
+                "RequestType": [],
+                "RequestSubType": []
             },
             "device": {
                 "keep_context": false,
@@ -2371,4 +2390,3 @@
         }
     }
 }
-

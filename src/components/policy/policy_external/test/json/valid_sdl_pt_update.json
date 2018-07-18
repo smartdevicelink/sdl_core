@@ -1431,6 +1431,7 @@
                   "parameters" : [
                      "accPedalPosition",
                      "beltStatus",
+                     "electronicParkBrakeStatus",
                      "driverBraking",
                      "myKey",
                      "prndl",
@@ -1443,6 +1444,7 @@
                   "parameters" : [
                      "accPedalPosition",
                      "beltStatus",
+                     "electronicParkBrakeStatus",
                      "driverBraking",
                      "myKey",
                      "prndl",
@@ -1455,6 +1457,7 @@
                   "parameters" : [
                      "accPedalPosition",
                      "beltStatus",
+                     "electronicParkBrakeStatus",
                      "driverBraking",
                      "myKey",
                      "prndl",
@@ -1467,6 +1470,7 @@
                   "parameters" : [
                      "accPedalPosition",
                      "beltStatus",
+                     "electronicParkBrakeStatus",
                      "driverBraking",
                      "myKey",
                      "prndl",
@@ -1588,6 +1592,7 @@
                      "engineOilLife",
                      "engineTorque",
                      "externalTemperature",
+                     "turnSignal",
                      "fuelLevel",
                      "fuelLevel_State",
                      "headLampStatus",
@@ -1605,6 +1610,7 @@
                      "engineOilLife",
                      "engineTorque",
                      "externalTemperature",
+                     "turnSignal",
                      "fuelLevel",
                      "fuelLevel_State",
                      "headLampStatus",
@@ -1622,6 +1628,7 @@
                      "engineOilLife",
                      "engineTorque",
                      "externalTemperature",
+                     "turnSignal",
                      "fuelLevel",
                      "fuelLevel_State",
                      "headLampStatus",
@@ -1638,6 +1645,7 @@
                      "engineOilLife",
                      "engineTorque",
                      "externalTemperature",
+                     "turnSignal",
                      "fuelLevel",
                      "fuelLevel_State",
                      "headLampStatus",

@@ -36,6 +36,7 @@
 #include <boost/thread/mutex.hpp>
 #include <boost/thread/recursive_mutex.hpp>
 #include <iostream>
+#include <memory>
 #include "utils/atomic.h"
 #include "utils/macro.h"
 #include "utils/memory_barrier.h"
@@ -177,7 +178,7 @@ class AutoLock {
   friend class ConditionalVariable;
   DISALLOW_COPY_AND_ASSIGN(AutoLock);
 };
-/*   Please use AutoLock to ackquire and (automatically) release it
+/*   Please use AutoLock to acquire and (automatically) release it
  * It eases balancing of multple lock taking/releasing and makes it
  * Impossible to forget to release the lock:
  *   ...
@@ -192,6 +193,9 @@ class AutoLock {
 // This class is used to temporarly unlock autolocked lock
 class AutoUnlock {
  public:
+  explicit AutoUnlock(const std::shared_ptr<BaseLock>& lock) : lock_(*lock) {
+    lock_.Release();
+  }
   explicit AutoUnlock(BaseLock& lock) : lock_(lock) {
     lock_.Release();
   }

@@ -64,6 +64,7 @@ using namespace mobile_apis;
 namespace custom_str = utils::custom_string;
 
 using ::testing::_;
+using ::testing::Mock;
 using ::testing::Return;
 using ::testing::ReturnRef;
 using ::testing::AtLeast;
@@ -106,6 +107,11 @@ class ApplicationImplTest : public ::testing::Test {
     HmiStatePtr initial_state = CreateTestHmiState();
     app_impl->SetInitialState(initial_state);
   }
+
+  virtual void TearDown() OVERRIDE {
+    Mock::VerifyAndClearExpectations(MockMessageHelper::message_helper_mock());
+  }
+
   HmiStatePtr CreateTestHmiState();
 
   HmiStatePtr TestAddHmiState(HMILevel::eType hmi_lvl,
@@ -179,7 +185,7 @@ TEST_F(ApplicationImplTest, AddStateAddRegularState_GetCurrentState) {
                   HmiState::STATE_ID_REGULAR,
                   &ApplicationImpl::SetRegularState);
   TestAddHmiState(HMILevel::HMI_LIMITED,
-                  HmiState::STATE_ID_NAVI_STREAMING,
+                  HmiState::STATE_ID_VIDEO_STREAMING,
                   &ApplicationImpl::AddHMIState);
 
   CheckCurrentHMIState();
@@ -191,7 +197,7 @@ TEST_F(ApplicationImplTest, AddStateAddRegularState_GetRegularState) {
                   HmiState::STATE_ID_REGULAR,
                   &ApplicationImpl::SetRegularState);
   TestAddHmiState(HMILevel::HMI_LIMITED,
-                  HmiState::STATE_ID_NAVI_STREAMING,
+                  HmiState::STATE_ID_VIDEO_STREAMING,
                   &ApplicationImpl::AddHMIState);
 
   HmiStatePtr current_state = app_impl->RegularHmiState();
@@ -206,7 +212,7 @@ TEST_F(ApplicationImplTest, AddStates_RemoveLastState) {
                   HmiState::STATE_ID_PHONE_CALL,
                   &ApplicationImpl::AddHMIState);
   HmiStatePtr state2 = TestAddHmiState(HMILevel::HMI_NONE,
-                                       HmiState::STATE_ID_NAVI_STREAMING,
+                                       HmiState::STATE_ID_VIDEO_STREAMING,
                                        &ApplicationImpl::AddHMIState);
   HmiStatePtr state3 = TestAddHmiState(HMILevel::HMI_LIMITED,
                                        HmiState::STATE_ID_TTS_SESSION,
@@ -219,7 +225,7 @@ TEST_F(ApplicationImplTest, AddStates_RemoveLastState) {
   HmiStatePtr current_state = app_impl->CurrentHmiState();
   EXPECT_EQ(state2, current_state);
   EXPECT_EQ(HMILevel::HMI_NONE, current_state->hmi_level());
-  EXPECT_EQ(HmiState::STATE_ID_NAVI_STREAMING, current_state->state_id());
+  EXPECT_EQ(HmiState::STATE_ID_VIDEO_STREAMING, current_state->state_id());
 }
 
 TEST_F(ApplicationImplTest, AddStates_RemoveNotLastNotFirstState) {
@@ -227,7 +233,7 @@ TEST_F(ApplicationImplTest, AddStates_RemoveNotLastNotFirstState) {
                                        HmiState::STATE_ID_PHONE_CALL,
                                        &ApplicationImpl::AddHMIState);
   HmiStatePtr state2 = TestAddHmiState(HMILevel::HMI_NONE,
-                                       HmiState::STATE_ID_NAVI_STREAMING,
+                                       HmiState::STATE_ID_VIDEO_STREAMING,
                                        &ApplicationImpl::AddHMIState);
   HmiStatePtr state3 = TestAddHmiState(HMILevel::HMI_LIMITED,
                                        HmiState::STATE_ID_TTS_SESSION,
@@ -251,7 +257,7 @@ TEST_F(ApplicationImplTest, AddStates_RemoveFirstState) {
                                        &ApplicationImpl::AddHMIState);
   // Second state
   TestAddHmiState(HMILevel::HMI_NONE,
-                  HmiState::STATE_ID_NAVI_STREAMING,
+                  HmiState::STATE_ID_VIDEO_STREAMING,
                   &ApplicationImpl::AddHMIState);
   HmiStatePtr state3 = TestAddHmiState(HMILevel::HMI_LIMITED,
                                        HmiState::STATE_ID_TTS_SESSION,
@@ -270,7 +276,7 @@ TEST_F(ApplicationImplTest, AddStates_RemoveFirstState) {
 
 TEST_F(ApplicationImplTest, SetRegularState_RemoveFirstState) {
   HmiStatePtr state1 = TestAddHmiState(HMILevel::HMI_NONE,
-                                       HmiState::STATE_ID_NAVI_STREAMING,
+                                       HmiState::STATE_ID_VIDEO_STREAMING,
                                        &ApplicationImpl::AddHMIState);
   // Set regular state
   HmiStatePtr state2 = TestAddHmiState(HMILevel::HMI_FULL,
@@ -321,7 +327,7 @@ TEST_F(ApplicationImplTest, AddStateAddRegularState_GetHmiLvlAudioSystemState) {
   audiostate = AudioStreamingState::AUDIBLE;
   syst_context = SystemContext::SYSCTXT_MENU;
   TestAddHmiState(HMILevel::HMI_LIMITED,
-                  HmiState::STATE_ID_NAVI_STREAMING,
+                  HmiState::STATE_ID_VIDEO_STREAMING,
                   &ApplicationImpl::AddHMIState);
 
   EXPECT_EQ(test_lvl, app_impl->hmi_level());
@@ -825,6 +831,29 @@ TEST_F(ApplicationImplTest, PushPopMobileMessage) {
 
   app_impl->SwapMobileMessageQueue(messages);
   EXPECT_TRUE(messages.empty());
+}
+
+TEST_F(ApplicationImplTest, SetSecondaryDeviceTest) {
+  connection_handler::DeviceHandle initial_device =
+      app_impl->secondary_device();
+  EXPECT_EQ(0u, initial_device);
+
+  connection_handler::DeviceHandle device = 123;
+  app_impl->set_secondary_device(device);
+
+  EXPECT_EQ(device, app_impl->secondary_device());
+}
+
+TEST_F(ApplicationImplTest, SetDeferredResumptionHMILevelTest) {
+  using namespace mobile_api::HMILevel;
+  HMILevel::eType initial_deferred_level =
+      app_impl->deferred_resumption_hmi_level();
+  EXPECT_EQ(HMILevel::eType::INVALID_ENUM, initial_deferred_level);
+
+  HMILevel::eType deferred_level = HMILevel::eType::HMI_FULL;
+  app_impl->set_deferred_resumption_hmi_level(deferred_level);
+
+  EXPECT_EQ(deferred_level, app_impl->deferred_resumption_hmi_level());
 }
 
 }  // namespace application_manager_test

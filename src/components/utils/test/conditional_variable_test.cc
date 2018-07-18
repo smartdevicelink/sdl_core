@@ -61,8 +61,8 @@ class ConditionalVariableTest : public ::testing::Test {
 
  protected:
   std::string test_value_;
-  sync_primitives::ConditionalVariable cond_var_;
   sync_primitives::Lock test_mutex_;
+  sync_primitives::ConditionalVariable cond_var_;
   unsigned counter_;
 };
 
