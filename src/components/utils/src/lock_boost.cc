@@ -51,11 +51,10 @@ Lock::~Lock() {
 
 void Lock::Acquire() {
   try {
-  mutex_.lock();
+    mutex_.lock();
   } catch (std::exception err) {
     LOG4CXX_FATAL(logger_,
-                  "Failed to acquire mutex " << &mutex_ << ": " <<
-                  err.what());
+                  "Failed to acquire mutex " << &mutex_ << ": " << err.what());
     NOTREACHED();
   }
   AssertFreeAndMarkTaken();
@@ -103,18 +102,16 @@ RecursiveLock::~RecursiveLock() {
 
 void RecursiveLock::Acquire() {
   try {
-  mutex_.lock();
+    mutex_.lock();
   } catch (std::exception err) {
     LOG4CXX_FATAL(logger_,
-                  "Failed to acquire mutex " << &mutex_ << ": " <<
-                  err.what());
+                  "Failed to acquire mutex " << &mutex_ << ": " << err.what());
     NOTREACHED();
   }
   AssertFreeAndMarkTaken();
 }
 
 void RecursiveLock::Release() {
-
   AssertTakenAndMarkFree();
   mutex_.unlock();
 }

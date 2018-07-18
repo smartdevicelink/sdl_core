@@ -1450,7 +1450,8 @@ class ApplicationManagerImpl
   ForbiddenApps forbidden_applications;
 
   // Lock for applications list
-  mutable std::shared_ptr<sync_primitives::RecursiveLock> applications_list_lock_ptr_;
+  mutable std::shared_ptr<sync_primitives::RecursiveLock>
+      applications_list_lock_ptr_;
   mutable std::shared_ptr<sync_primitives::Lock>
       apps_to_register_list_lock_ptr_;
   mutable sync_primitives::Lock subscribed_way_points_apps_lock_;

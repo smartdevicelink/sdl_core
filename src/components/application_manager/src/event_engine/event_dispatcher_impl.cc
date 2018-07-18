@@ -39,8 +39,7 @@ namespace application_manager {
 namespace event_engine {
 using namespace sync_primitives;
 
-EventDispatcherImpl::EventDispatcherImpl()
-    :  observers_event_() {}
+EventDispatcherImpl::EventDispatcherImpl() : observers_event_() {}
 
 EventDispatcherImpl::~EventDispatcherImpl() {}
 
