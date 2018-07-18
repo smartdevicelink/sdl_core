@@ -37,8 +37,7 @@
 #include "utils/message_queue.h"
 #include "utils/threads/thread.h"
 #include "utils/threads/thread_delegate.h"
-#include "utils/atomic_object.h"
-
+#include <atomic>
 #include "protocol/raw_message.h"
 
 namespace media_manager {
@@ -80,7 +79,7 @@ class StreamerAdapter : public MediaAdapterImpl {
     virtual bool Send(protocol_handler::RawMessagePtr msg) = 0;
 
    private:
-    sync_primitives::atomic_bool stop_flag_;
+    std::atomic_bool stop_flag_;
     StreamerAdapter* adapter_;
 
     DISALLOW_COPY_AND_ASSIGN(Streamer);
