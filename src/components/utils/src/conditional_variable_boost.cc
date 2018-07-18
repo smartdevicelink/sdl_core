@@ -64,30 +64,30 @@ bool ConditionalVariable::Wait(BaseLock& lock) {
   // superclass
 
   lock.AssertTakenAndMarkFree();
-  // try {
-  // What kind of lock are we ?
-  if (Lock* test_lock = dynamic_cast<Lock*>(&lock)) {
-    // Regular lock
-    cond_var_.wait<boost::mutex>(test_lock->mutex_);
-  } else if (RecursiveLock* test_rec_lock =
-                 dynamic_cast<RecursiveLock*>(&lock)) {
-    // Recursive lock
-    cond_var_.wait<boost::recursive_mutex>(test_rec_lock->mutex_);
-  } else {
-    // unknown
+  try {
+    // What kind of lock are we ?
+    if (Lock* test_lock = dynamic_cast<Lock*>(&lock)) {
+      // Regular lock
+      cond_var_.wait<boost::mutex>(test_lock->mutex_);
+    } else if (RecursiveLock* test_rec_lock =
+                   dynamic_cast<RecursiveLock*>(&lock)) {
+      // Recursive lock
+      cond_var_.wait<boost::recursive_mutex>(test_rec_lock->mutex_);
+    } else {
+      // unknown
+      lock.AssertFreeAndMarkTaken();
+
+      LOG4CXX_ERROR(logger_, "Unknown lock type!");
+      return false;
+    }
+  } catch (std::exception err) {
     lock.AssertFreeAndMarkTaken();
 
-    LOG4CXX_ERROR(logger_, "Unknown lock type!");
+    LOG4CXX_ERROR(
+        logger_,
+        "Failed to wait for conditional variable, exception:" << err.what());
     return false;
   }
-  // } catch (std::exception err) {
-  //   lock.AssertFreeAndMarkTaken();
-  //
-  //   LOG4CXX_ERROR(
-  //       logger_,
-  //       "Failed to wait for conditional variable, exception:" << err.what());
-  //   return false;
-  // }
   lock.AssertFreeAndMarkTaken();
 
   return true;
@@ -129,13 +129,12 @@ ConditionalVariable::WaitStatus ConditionalVariable::WaitFor(
     }
   } catch (boost::thread_interrupted inter) {
     wait_status = kNoTimeout;
+  } catch (std::exception err) {
+    LOG4CXX_ERROR(
+        logger_,
+        "Failed to timewait for conditional variable timedwait_status: "
+            << err.what());
   }
-  // catch (std::exception err) {
-  //   LOG4CXX_ERROR(
-  //       logger_,
-  //       "Failed to timewait for conditional variable timedwait_status: "
-  //           << err.what());
-  // }
   lock.AssertFreeAndMarkTaken();
 
   return wait_status;
