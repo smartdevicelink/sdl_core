@@ -312,7 +312,7 @@ TEST(MessageHelperTestCreate,
   MockApplicationSharedPtr appSharedMock = utils::MakeShared<MockApplication>();
   application_manager::ChoiceSetMap vis;
   DataAccessor< ::application_manager::ChoiceSetMap> data_accessor(
-      vis, std::make_shared<sync_primitives::RecursiveLock>(true));
+      vis, std::make_shared<sync_primitives::RecursiveLock>());
 
   EXPECT_CALL(*appSharedMock, choice_set_map()).WillOnce(Return(data_accessor));
   application_manager_test::MockApplicationManager mock_application_manager;
@@ -328,7 +328,7 @@ TEST(MessageHelperTestCreate,
   MockApplicationSharedPtr appSharedMock = utils::MakeShared<MockApplication>();
   application_manager::ChoiceSetMap vis;
   DataAccessor< ::application_manager::ChoiceSetMap> data_accessor(
-      vis, std::make_shared<sync_primitives::RecursiveLock>(true));
+      vis, std::make_shared<sync_primitives::RecursiveLock>());
   smart_objects::SmartObjectSPtr smartObjectPtr =
       utils::MakeShared<smart_objects::SmartObject>();
 
@@ -375,7 +375,7 @@ TEST(MessageHelperTestCreate, CreateAddSubMenuRequestToHMI_SendObject_Equal) {
   MockApplicationSharedPtr appSharedMock = utils::MakeShared<MockApplication>();
   application_manager::SubMenuMap vis;
   DataAccessor< ::application_manager::SubMenuMap> data_accessor(
-      vis, std::make_shared<sync_primitives::RecursiveLock>(true));
+      vis, std::make_shared<sync_primitives::RecursiveLock>());
   smart_objects::SmartObjectSPtr smartObjectPtr =
       utils::MakeShared<smart_objects::SmartObject>();
 
@@ -415,7 +415,7 @@ TEST(MessageHelperTestCreate,
   MockApplicationSharedPtr appSharedMock = utils::MakeShared<MockApplication>();
   application_manager::SubMenuMap vis;
   DataAccessor< ::application_manager::SubMenuMap> data_accessor(
-      vis, std::make_shared<sync_primitives::RecursiveLock>(true));
+      vis, std::make_shared<sync_primitives::RecursiveLock>());
 
   EXPECT_CALL(*appSharedMock, sub_menu_map()).WillOnce(Return(data_accessor));
 
