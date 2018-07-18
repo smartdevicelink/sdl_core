@@ -24,7 +24,8 @@ void InteriorDataManagerImpl::OnPolicyEvent(plugins::PolicyEvent event) {
 void InteriorDataManagerImpl::OnApplicationEvent(
     plugins::ApplicationEvent event,
     app_mngr::ApplicationSharedPtr application) {
-  if (plugins::ApplicationEvent::kApplicationUnregistered == event) {
+  if (plugins::ApplicationEvent::kApplicationUnregistered == event ||
+      plugins::ApplicationEvent::kApplicationExit == event) {
     UpdateHMISubscriptionsOnAppUnregistered(*application);
   }
 }
@@ -83,6 +84,7 @@ void InteriorDataManagerImpl::UpdateHMISubscriptionsOnAppUnregistered(
   LOG4CXX_AUTO_TRACE(logger_);
   auto rc_extension = RCHelpers::GetRCExtension(app);
   auto subscribed_data = rc_extension->InteriorVehicleDataSubscriptions();
+  rc_extension->UnsubscribeFromInteriorVehicleData();
   for (auto& data : subscribed_data) {
     auto apps_subscribed = RCHelpers::AppsSubscribedTo(app_mngr_, data);
     if (apps_subscribed.empty()) {
@@ -97,6 +99,7 @@ void InteriorDataManagerImpl::UpdateHMISubscriptionsOnAppUnregistered(
 
 void InteriorDataManagerImpl::UnsubscribeFromInteriorVehicleData(
     const std::string& module_type) {
+  cache_.Remove(module_type);
   auto unsubscribe_request = RCHelpers::CreateUnsubscribeRequestToHMI(
       module_type, app_mngr_.GetNextHMICorrelationID());
   LOG4CXX_DEBUG(logger_, "Send Unsubscribe from " << module_type);

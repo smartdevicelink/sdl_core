@@ -73,6 +73,10 @@ class InteriorDataManagerImpl : public InteriorDataManager {
   void UpdateHMISubscriptionsOnAppUnregistered(
       application_manager::Application& app);
 
+  /**
+   * @brief UnsubscribeFromInteriorVehicleData remove module_type from cache and send RC.GetInteriorVehicleData(subscribe=false) to HMI
+   * @param module_type module type that need to be unsubscribed
+   */
   void UnsubscribeFromInteriorVehicleData(const std::string& module_type);
   typedef std::map<application_manager::ApplicationSharedPtr,
                    std::vector<std::string> > AppsModules;
