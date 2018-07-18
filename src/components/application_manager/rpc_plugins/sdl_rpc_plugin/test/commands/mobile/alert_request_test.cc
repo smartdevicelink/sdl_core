@@ -56,14 +56,14 @@ using sdl_rpc_plugin::commands::AlertRequest;
 using am::commands::CommandImpl;
 using am::commands::MessageSharedPtr;
 using am::MockMessageHelper;
-using ::utils::SharedPtr;
+
 using am::event_engine::Event;
 using policy_test::MockPolicyHandlerInterface;
 using ::testing::_;
 using ::testing::Return;
 using ::testing::ReturnRef;
 
-typedef SharedPtr<AlertRequest> CommandPtr;
+typedef std::shared_ptr<AlertRequest> CommandPtr;
 
 namespace {
 const int32_t kCommandId = 1;
@@ -192,7 +192,7 @@ TEST_F(AlertRequestTest, OnTimeout_GENERIC_ERROR) {
   (*command_msg)[am::strings::params][am::strings::connection_key] =
       kConnectionKey;
 
-  utils::SharedPtr<AlertRequest> command = CreateCommand<AlertRequest>();
+  std::shared_ptr<AlertRequest> command = CreateCommand<AlertRequest>();
 
   EXPECT_CALL(
       mock_message_helper_,
@@ -223,7 +223,7 @@ TEST_F(AlertRequestTest, OnEvent_UI_HmiSendSuccess_UNSUPPORTED_RESOURCE) {
   (*command_msg)[am::strings::msg_params][am::strings::menu_params]
                 [am::strings::menu_name] = "menu_name";
 
-  utils::SharedPtr<AlertRequest> command =
+  std::shared_ptr<AlertRequest> command =
       CreateCommand<AlertRequest>(command_msg);
 
   MessageSharedPtr msg = CreateMessage(smart_objects::SmartType_Map);

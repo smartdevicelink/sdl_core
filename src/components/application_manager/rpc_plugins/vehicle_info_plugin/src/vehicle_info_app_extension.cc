@@ -118,7 +118,7 @@ VehicleInfoAppExtension& VehicleInfoAppExtension::ExtractVIExtension(
   DCHECK(ext_ptr);
   DCHECK(dynamic_cast<VehicleInfoAppExtension*>(ext_ptr.get()));
   auto vi_app_extension =
-      application_manager::AppExtensionPtr::static_pointer_cast<
+      std::static_pointer_cast<
           VehicleInfoAppExtension>(ext_ptr);
   DCHECK(vi_app_extension);
   return *vi_app_extension;

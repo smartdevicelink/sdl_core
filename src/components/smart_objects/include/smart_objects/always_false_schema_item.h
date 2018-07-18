@@ -33,7 +33,7 @@
 #ifndef SRC_COMPONENTS_SMART_OBJECTS_INCLUDE_SMART_OBJECTS_ALWAYS_FALSE_SCHEMA_ITEM_H_
 #define SRC_COMPONENTS_SMART_OBJECTS_INCLUDE_SMART_OBJECTS_ALWAYS_FALSE_SCHEMA_ITEM_H_
 
-#include "utils/shared_ptr.h"
+
 #include "smart_objects/schema_item.h"
 
 namespace NsSmartDeviceLink {
@@ -47,7 +47,7 @@ class CAlwaysFalseSchemaItem : public ISchemaItem {
    * @brief Create a new schema item.
    * @return Shared pointer to a new schema item.
    **/
-  static utils::SharedPtr<CAlwaysFalseSchemaItem> create();
+  static std::shared_ptr<CAlwaysFalseSchemaItem> create();
   /**
    * @deprecated
    * @brief Validate smart object.

@@ -45,8 +45,8 @@
 #include "application_manager/mock_rpc_service.h"
 #include "application_manager/smart_object_keys.h"
 #include "test/resumption/mock_last_state.h"
-#include "utils/shared_ptr.h"
-#include "utils/make_shared.h"
+
+
 #include "utils/lock.h"
 
 namespace test {
@@ -57,7 +57,7 @@ namespace am = ::application_manager;
 
 using am::event_engine::Event;
 using am::ApplicationSet;
-using ::utils::SharedPtr;
+
 
 using ::testing::Return;
 using ::testing::ReturnRef;
@@ -75,7 +75,7 @@ typedef NiceMock< ::test::components::event_engine_test::MockEventDispatcher>
 typedef NiceMock<application_manager_test::MockApplication> MockApp;
 typedef NiceMock<application_manager_test::MockRPCService> MockRPCService;
 
-typedef SharedPtr<MockApp> ApplicationSharedPtr;
+typedef std::shared_ptr<MockApp> ApplicationSharedPtr;
 typedef am::HMILanguageHandler::Apps Apps;
 
 namespace {
@@ -89,7 +89,7 @@ class HmiLanguageHandlerTest : public ::testing::Test {
     EXPECT_CALL(app_manager_, event_dispatcher())
         .WillOnce(ReturnRef(event_dispatcher_));
     hmi_language_handler_ =
-        ::utils::MakeShared<am::HMILanguageHandler>(app_manager_);
+        std::make_shared<am::HMILanguageHandler>(app_manager_);
   }
 
   void InitHMIActiveLanguages(hmi_apis::Common_Language::eType ui_language,
@@ -114,7 +114,7 @@ class HmiLanguageHandlerTest : public ::testing::Test {
 
   ApplicationSharedPtr CreateMockApp(const uint32_t app_id,
                                      bool expect_call = false) const {
-    ApplicationSharedPtr app = ::utils::MakeShared<MockApp>();
+    ApplicationSharedPtr app = std::make_shared<MockApp>();
     if (expect_call) {
       EXPECT_CALL(*app, app_id()).WillRepeatedly(Return(app_id));
     } else {
@@ -135,7 +135,7 @@ class HmiLanguageHandlerTest : public ::testing::Test {
   MockApplicationManager app_manager_;
   MockHMICapabilities hmi_capabilities_;
   MockEventDispatcher event_dispatcher_;
-  SharedPtr<am::HMILanguageHandler> hmi_language_handler_;
+  std::shared_ptr<am::HMILanguageHandler> hmi_language_handler_;
   std::shared_ptr<sync_primitives::Lock> app_set_lock_;
   resumption_test::MockLastState last_state_;
   MockRPCService mock_rpc_service_;
@@ -317,7 +317,7 @@ TEST_F(HmiLanguageHandlerTest,
   // Needed to call of `ManageMobileCommand` method
   ON_CALL(*am::MockMessageHelper::message_helper_mock(),
           GetOnAppInterfaceUnregisteredNotificationToMobile(_, _))
-      .WillByDefault(Return(::utils::MakeShared<smart_objects::SmartObject>()));
+      .WillByDefault(Return(std::make_shared<smart_objects::SmartObject>()));
 
   // Wait for `ManageMobileCommand` call twice.
   // First time in `SendOnLanguageChangeToMobile`

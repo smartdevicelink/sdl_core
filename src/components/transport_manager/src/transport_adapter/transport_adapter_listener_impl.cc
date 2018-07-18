@@ -278,7 +278,7 @@ void TransportAdapterListenerImpl::OnDataSendDone(
                                     device,
                                     app_id,
                                     data_container,
-                                    new BaseError());
+                                    std::make_shared<BaseError>());
   if (transport_manager_ != NULL &&
       transport_manager::E_SUCCESS !=
           transport_manager_->ReceiveEventFromDevice(event)) {

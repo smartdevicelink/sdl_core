@@ -61,7 +61,7 @@
 #include "utils/file_system.h"
 #include "utils/macro.h"
 #include "utils/logger.h"
-#include "utils/make_shared.h"
+
 
 #include "formatters/formatter_json_rpc.h"
 #include "formatters/CFormatterJsonSDLRPCv2.h"
@@ -258,7 +258,7 @@ MessageHelper::CreateHMINotification(hmi_apis::FunctionID::eType function_id) {
   using smart_objects::SmartType_Map;
   LOG4CXX_AUTO_TRACE(logger_);
   SmartObjectSPtr notification_ptr =
-      utils::MakeShared<SmartObject>(SmartType_Map);
+      std::make_shared<SmartObject>(SmartType_Map);
   SmartObject& notification = *notification_ptr;
   notification[strings::params][strings::message_type] =
       static_cast<int32_t>(kNotification);
@@ -315,7 +315,7 @@ smart_objects::SmartObjectSPtr MessageHelper::CreateMessageForHMI(
     hmi_apis::messageType::eType message_type, const uint32_t correlation_id) {
   using namespace smart_objects;
 
-  SmartObjectSPtr message = utils::MakeShared<SmartObject>(SmartType_Map);
+  SmartObjectSPtr message = std::make_shared<SmartObject>(SmartType_Map);
   SmartObject& ref = *message;
 
   ref[strings::params][strings::message_type] = static_cast<int>(message_type);
@@ -331,7 +331,7 @@ smart_objects::SmartObjectSPtr MessageHelper::CreateHashUpdateNotification(
     const uint32_t app_id) {
   LOG4CXX_AUTO_TRACE(logger_);
   smart_objects::SmartObjectSPtr message =
-      utils::MakeShared<smart_objects::SmartObject>(
+      std::make_shared<smart_objects::SmartObject>(
           smart_objects::SmartType_Map);
   (*message)[strings::params][strings::function_id] =
       mobile_apis::FunctionID::OnHashChangeID;
@@ -399,7 +399,7 @@ MessageHelper::GetOnAppInterfaceUnregisteredNotificationToMobile(
   LOG4CXX_AUTO_TRACE(logger_);
 
   smart_objects::SmartObjectSPtr notification =
-      utils::MakeShared<smart_objects::SmartObject>();
+      std::make_shared<smart_objects::SmartObject>();
   smart_objects::SmartObject& message = *notification;
 
   message[strings::params][strings::function_id] = static_cast<int32_t>(
@@ -698,7 +698,7 @@ void MessageHelper::SendHMIStatusNotification(
     const Application& application_impl,
     ApplicationManager& application_manager) {
   LOG4CXX_AUTO_TRACE(logger_);
-  smart_objects::SmartObjectSPtr notification = new smart_objects::SmartObject;
+  smart_objects::SmartObjectSPtr notification = std::make_shared<smart_objects::SmartObject>();
   if (!notification) {
     LOG4CXX_ERROR(logger_, "Failed to create smart object");
     return;
@@ -739,8 +739,8 @@ void MessageHelper::SendActivateAppToHMI(
     return;
   }
 
-  utils::SharedPtr<smart_objects::SmartObject> message =
-      new smart_objects::SmartObject(smart_objects::SmartType_Map);
+  std::shared_ptr<smart_objects::SmartObject> message =
+      std::make_shared<smart_objects::SmartObject>(smart_objects::SmartType_Map);
 
   (*message)[strings::params][strings::function_id] =
       hmi_apis::FunctionID::BasicCommunication_ActivateApp;
@@ -825,7 +825,7 @@ void MessageHelper::CreateGetVehicleDataRequest(
     ApplicationManager& app_mngr) {
   LOG4CXX_AUTO_TRACE(logger_);
   smart_objects::SmartObjectSPtr request =
-      utils::MakeShared<smart_objects::SmartObject>();
+      std::make_shared<smart_objects::SmartObject>();
 
   (*request)[strings::params][strings::message_type] =
       static_cast<int>(kRequest);
@@ -853,7 +853,7 @@ smart_objects::SmartObjectSPtr MessageHelper::CreateBlockedByPoliciesResponse(
     uint32_t connection_key) {
   LOG4CXX_AUTO_TRACE(logger_);
   smart_objects::SmartObjectSPtr response =
-      utils::MakeShared<smart_objects::SmartObject>();
+      std::make_shared<smart_objects::SmartObject>();
 
   (*response)[strings::params][strings::function_id] =
       static_cast<int>(function_id);
@@ -877,7 +877,7 @@ smart_objects::SmartObjectSPtr MessageHelper::CreateDeviceListSO(
     ApplicationManager& app_mngr) {
   LOG4CXX_AUTO_TRACE(logger_);
   smart_objects::SmartObjectSPtr device_list_so =
-      utils::MakeShared<smart_objects::SmartObject>(
+      std::make_shared<smart_objects::SmartObject>(
           smart_objects::SmartType_Map);
 
   (*device_list_so)[strings::device_list] =
@@ -911,7 +911,7 @@ smart_objects::SmartObjectSPtr MessageHelper::CreateModuleInfoSO(
     uint32_t function_id, ApplicationManager& app_mngr) {
   LOG4CXX_AUTO_TRACE(logger_);
   smart_objects::SmartObjectSPtr module_info =
-      utils::MakeShared<smart_objects::SmartObject>(
+      std::make_shared<smart_objects::SmartObject>(
           smart_objects::SmartType_Map);
   smart_objects::SmartObject& object = *module_info;
   object[strings::params][strings::message_type] = static_cast<int>(kRequest);
@@ -927,7 +927,7 @@ smart_objects::SmartObjectSPtr MessageHelper::CreateSetAppIcon(
     const std::string& path_to_icon, uint32_t app_id) {
   LOG4CXX_AUTO_TRACE(logger_);
   smart_objects::SmartObjectSPtr set_icon =
-      utils::MakeShared<smart_objects::SmartObject>(
+      std::make_shared<smart_objects::SmartObject>(
           smart_objects::SmartType_Map);
 
   if (!set_icon) {
@@ -954,7 +954,7 @@ void MessageHelper::SendOnButtonSubscriptionNotification(
   LOG4CXX_AUTO_TRACE(logger_);
 
   SmartObjectSPtr notification_ptr =
-      utils::MakeShared<SmartObject>(SmartType_Map);
+      std::make_shared<SmartObject>(SmartType_Map);
   if (!notification_ptr) {
     LOG4CXX_ERROR(logger_, "Memory allocation failed.");
     return;
@@ -988,7 +988,7 @@ void MessageHelper::SendAllOnButtonSubscriptionNotificationsForApp(
   using namespace mobile_apis;
   LOG4CXX_AUTO_TRACE(logger_);
 
-  if (!app.valid()) {
+  if (app.use_count() == 0) {
     LOG4CXX_ERROR(logger_, "Invalid application pointer ");
     return;
   }
@@ -1044,7 +1044,7 @@ void MessageHelper::SendAppDataToHMI(ApplicationConstSharedPtr app,
 
 void MessageHelper::SendGlobalPropertiesToHMI(ApplicationConstSharedPtr app,
                                               ApplicationManager& app_mngr) {
-  if (!app.valid()) {
+  if (app.use_count() == 0) {
     LOG4CXX_ERROR(logger_, "Invalid application");
     return;
   }
@@ -1064,7 +1064,7 @@ MessageHelper::CreateGlobalPropertiesRequestsToHMI(
   LOG4CXX_AUTO_TRACE(logger_);
 
   smart_objects::SmartObjectList requests;
-  if (!app.valid()) {
+  if (app.use_count() == 0) {
     LOG4CXX_ERROR(logger_, "Invalid application");
     return requests;
   }
@@ -1197,7 +1197,7 @@ void MessageHelper::SendTTSGlobalProperties(ApplicationSharedPtr app,
 smart_objects::SmartObjectSPtr MessageHelper::CreateAppVrHelp(
     ApplicationConstSharedPtr app) {
   smart_objects::SmartObjectSPtr result =
-      utils::MakeShared<smart_objects::SmartObject>(
+      std::make_shared<smart_objects::SmartObject>(
           smart_objects::SmartType_Map);
   if (!result) {
     return NULL;
@@ -1420,7 +1420,7 @@ smart_objects::SmartObjectSPtr MessageHelper::CreateChangeRegistration(
 
 void MessageHelper::SendUIChangeRegistrationRequestToHMI(
     ApplicationConstSharedPtr app, ApplicationManager& app_mngr) {
-  if (!app.valid()) {
+  if (app.use_count() == 0) {
     LOG4CXX_ERROR(logger_, "Application is not valid");
     return;
   }
@@ -1595,7 +1595,7 @@ bool MessageHelper::CreateHMIApplicationStruct(
 
 void MessageHelper::SendAddSubMenuRequestToHMI(ApplicationConstSharedPtr app,
                                                ApplicationManager& app_mngr) {
-  if (!app.valid()) {
+  if (app.use_count() == 0) {
     LOG4CXX_ERROR(logger_, "Invalid application");
     return;
   }
@@ -1651,7 +1651,7 @@ void MessageHelper::SendOnAppUnregNotificationToHMI(
     bool is_unexpected_disconnect,
     ApplicationManager& app_mngr) {
   smart_objects::SmartObjectSPtr notification =
-      utils::MakeShared<smart_objects::SmartObject>(
+      std::make_shared<smart_objects::SmartObject>(
           smart_objects::SmartType_Map);
 
   smart_objects::SmartObject& message = *notification;
@@ -1681,7 +1681,7 @@ smart_objects::SmartObjectSPtr MessageHelper::GetBCActivateAppRequestToHMI(
 
   const uint32_t correlation_id = app_mngr.GetNextHMICorrelationID();
   smart_objects::SmartObjectSPtr message =
-      utils::MakeShared<smart_objects::SmartObject>(
+      std::make_shared<smart_objects::SmartObject>(
           smart_objects::SmartType_Map);
   (*message)[strings::params][strings::function_id] =
       hmi_apis::FunctionID::BasicCommunication_ActivateApp;
@@ -1724,8 +1724,8 @@ void MessageHelper::SendOnResumeAudioSourceToHMI(const uint32_t app_id,
     return;
   }
 
-  utils::SharedPtr<smart_objects::SmartObject> message =
-      utils::MakeShared<smart_objects::SmartObject>(
+  std::shared_ptr<smart_objects::SmartObject> message =
+      std::make_shared<smart_objects::SmartObject>(
           smart_objects::SmartType_Map);
 
   (*message)[strings::params][strings::function_id] =
@@ -1744,7 +1744,7 @@ void MessageHelper::SendSDLActivateAppResponse(
     const uint32_t correlation_id,
     ApplicationManager& app_mngr) {
   smart_objects::SmartObjectSPtr message =
-      utils::MakeShared<smart_objects::SmartObject>(
+      std::make_shared<smart_objects::SmartObject>(
           smart_objects::SmartType_Map);
 
   (*message)[strings::params][strings::function_id] =
@@ -1793,7 +1793,7 @@ void MessageHelper::SendSDLActivateAppResponse(
 void MessageHelper::SendOnSDLConsentNeeded(
     const policy::DeviceParams& device_info, ApplicationManager& app_man) {
   smart_objects::SmartObjectSPtr message =
-      utils::MakeShared<smart_objects::SmartObject>(
+      std::make_shared<smart_objects::SmartObject>(
           smart_objects::SmartType_Map);
 
   (*message)[strings::params][strings::function_id] =
@@ -1833,7 +1833,7 @@ void MessageHelper::SendGetUserFriendlyMessageResponse(
     ApplicationManager& app_mngr) {
   LOG4CXX_AUTO_TRACE(logger_);
   smart_objects::SmartObjectSPtr message =
-      new smart_objects::SmartObject(smart_objects::SmartType_Map);
+      std::make_shared<smart_objects::SmartObject>(smart_objects::SmartType_Map);
   if (!message) {
     return;
   }
@@ -1903,7 +1903,7 @@ void MessageHelper::SendGetListOfPermissionsResponse(
   using namespace smart_objects;
   using namespace hmi_apis;
 
-  SmartObjectSPtr message = utils::MakeShared<SmartObject>(SmartType_Map);
+  SmartObjectSPtr message = std::make_shared<SmartObject>(SmartType_Map);
   DCHECK_OR_RETURN_VOID(message);
 
   SmartObject& params = (*message)[strings::params];
@@ -1945,7 +1945,7 @@ void MessageHelper::SendGetListOfPermissionsResponse(
   using namespace smart_objects;
   using namespace hmi_apis;
 
-  SmartObjectSPtr message = utils::MakeShared<SmartObject>(SmartType_Map);
+  SmartObjectSPtr message = std::make_shared<SmartObject>(SmartType_Map);
   DCHECK_OR_RETURN_VOID(message);
 
   SmartObject& params = (*message)[strings::params];
@@ -1986,7 +1986,7 @@ smart_objects::SmartObjectSPtr MessageHelper::CreateNegativeResponse(
   response_data[strings::msg_params][strings::success] = false;
   response_data[strings::params][strings::connection_key] = connection_key;
 
-  return utils::MakeShared<smart_objects::SmartObject>(response_data);
+  return std::make_shared<smart_objects::SmartObject>(response_data);
 }
 
 void MessageHelper::SendNaviSetVideoConfig(
@@ -2136,7 +2136,7 @@ void MessageHelper::SendOnDataStreaming(
   }
 
   smart_objects::SmartObjectSPtr notification =
-      utils::MakeShared<smart_objects::SmartObject>(
+      std::make_shared<smart_objects::SmartObject>(
           smart_objects::SmartType_Map);
 
   (*notification)[strings::params][strings::function_id] =
@@ -2226,7 +2226,7 @@ void MessageHelper::SendSystemRequestNotification(
 #endif
 
   DCHECK(app_mngr.GetRPCService().ManageMobileCommand(
-      utils::MakeShared<smart_objects::SmartObject>(content),
+      std::make_shared<smart_objects::SmartObject>(content),
       commands::Command::SOURCE_SDL));
 }
 
@@ -2394,7 +2394,7 @@ void MessageHelper::SendOnPermissionsChangeNotification(
   }
 
   app_mngr.GetRPCService().ManageMobileCommand(
-      utils::MakeShared<smart_objects::SmartObject>(content),
+      std::make_shared<smart_objects::SmartObject>(content),
       commands::Command::SOURCE_SDL);
 }
 
@@ -2479,14 +2479,14 @@ void MessageHelper::SendOnAppPermissionsChangedNotification(
   }
 
   app_mngr.GetRPCService().ManageHMICommand(
-      utils::MakeShared<smart_objects::SmartObject>(message));
+      std::make_shared<smart_objects::SmartObject>(message));
 }
 
 void MessageHelper::SendGetStatusUpdateResponse(const std::string& status,
                                                 const uint32_t correlation_id,
                                                 ApplicationManager& app_mngr) {
   smart_objects::SmartObjectSPtr message =
-      utils::MakeShared<smart_objects::SmartObject>(
+      std::make_shared<smart_objects::SmartObject>(
           smart_objects::SmartType_Map);
   if (!message) {
     return;
@@ -2507,7 +2507,7 @@ void MessageHelper::SendUpdateSDLResponse(const std::string& result,
                                           const uint32_t correlation_id,
                                           ApplicationManager& app_mngr) {
   smart_objects::SmartObjectSPtr message =
-      utils::MakeShared<smart_objects::SmartObject>(
+      std::make_shared<smart_objects::SmartObject>(
           smart_objects::SmartType_Map);
   DCHECK(message);
 
@@ -2525,7 +2525,7 @@ void MessageHelper::SendUpdateSDLResponse(const std::string& result,
 void MessageHelper::SendOnStatusUpdate(const std::string& status,
                                        ApplicationManager& app_mngr) {
   smart_objects::SmartObjectSPtr message =
-      utils::MakeShared<smart_objects::SmartObject>(
+      std::make_shared<smart_objects::SmartObject>(
           smart_objects::SmartType_Map);
   if (!message) {
     return;

@@ -40,7 +40,7 @@
 #include "application_manager/application.h"
 #include "utils/data_accessor.h"
 #include "application_manager/message_helper.h"
-#include "utils/make_shared.h"
+
 
 #include "application_manager/resumption_data_test.h"
 
@@ -322,7 +322,7 @@ void ResumptionDataTest::CheckVRTitle(
 }
 
 void ResumptionDataTest::PrepareData() {
-  mock_app_extension_ = utils::MakeShared<
+  mock_app_extension_ = std::make_shared<
       NiceMock<application_manager_test::MockAppExtension> >();
   extensions_.insert(extensions_.begin(), mock_app_extension_);
   ON_CALL(*app_mock, Extensions()).WillByDefault(ReturnRef(extensions_));

@@ -60,7 +60,7 @@ using ::testing::ReturnRef;
 
 namespace UpdateMode = mobile_apis::UpdateMode;
 
-typedef SharedPtr<SetMediaClockRequest> SetMediaClockRequestPtr;
+typedef std::shared_ptr<SetMediaClockRequest> SetMediaClockRequestPtr;
 
 namespace {
 const uint32_t kConnectionKey = 2u;
@@ -116,7 +116,7 @@ TEST_F(SetMediaClockRequestTest,
   MessageSharedPtr msg = CreateMessage(smart_objects::SmartType_Map);
   (*msg)[am::strings::params][am::strings::connection_key] = kConnectionKey;
 
-  utils::SharedPtr<SetMediaClockRequest> command =
+  std::shared_ptr<SetMediaClockRequest> command =
       CreateCommand<SetMediaClockRequest>(msg);
 
   MessageSharedPtr ev_msg = CreateMessage(smart_objects::SmartType_Map);
@@ -160,7 +160,7 @@ TEST_F(SetMediaClockRequestTest, Run_UpdateCountUp_SUCCESS) {
   (*msg)[am::strings::msg_params][am::strings::end_time][am::strings::seconds] =
       kSeconds;
 
-  SharedPtr<SetMediaClockRequest> command(
+  std::shared_ptr<SetMediaClockRequest> command(
       CreateCommand<SetMediaClockRequest>(msg));
 
   EXPECT_CALL(app_mngr_, application(kConnectionKey))
@@ -196,7 +196,7 @@ TEST_F(SetMediaClockRequestTest, Run_UpdateCountDown_SUCCESS) {
   (*msg)[am::strings::msg_params][am::strings::end_time][am::strings::minutes] =
       kMinutes;
 
-  SharedPtr<SetMediaClockRequest> command(
+  std::shared_ptr<SetMediaClockRequest> command(
       CreateCommand<SetMediaClockRequest>(msg));
 
   EXPECT_CALL(app_mngr_, application(kConnectionKey))
@@ -232,7 +232,7 @@ TEST_F(SetMediaClockRequestTest, Run_UpdateCountUpWrongTime_Canceled) {
   (*msg)[am::strings::msg_params][am::strings::end_time][am::strings::minutes] =
       kMinutes;
 
-  SharedPtr<SetMediaClockRequest> command(
+  std::shared_ptr<SetMediaClockRequest> command(
       CreateCommand<SetMediaClockRequest>(msg));
 
   ExpectationsSetupHelper(true);
@@ -255,7 +255,7 @@ TEST_F(SetMediaClockRequestTest, Run_UpdateCountDownWrongTime_Canceled) {
   (*msg)[am::strings::msg_params][am::strings::end_time][am::strings::seconds] =
       kSeconds;
 
-  SharedPtr<SetMediaClockRequest> command(
+  std::shared_ptr<SetMediaClockRequest> command(
       CreateCommand<SetMediaClockRequest>(msg));
 
   EXPECT_CALL(app_mngr_, application(kConnectionKey))
@@ -273,7 +273,7 @@ TEST_F(SetMediaClockRequestTest, Run_NoStartTime_Canceled) {
   (*msg)[am::strings::msg_params][am::strings::update_mode] =
       UpdateMode::COUNTDOWN;
 
-  SharedPtr<SetMediaClockRequest> command(
+  std::shared_ptr<SetMediaClockRequest> command(
       CreateCommand<SetMediaClockRequest>(msg));
 
   ExpectationsSetupHelper(true);
@@ -284,7 +284,7 @@ TEST_F(SetMediaClockRequestTest, Run_NoStartTime_Canceled) {
 TEST_F(SetMediaClockRequestTest, Run_NoUpdateMode_Canceled) {
   MessageSharedPtr msg = CreateMsgParams();
 
-  SharedPtr<SetMediaClockRequest> command(
+  std::shared_ptr<SetMediaClockRequest> command(
       CreateCommand<SetMediaClockRequest>(msg));
 
   ExpectationsSetupHelper(true);
@@ -295,7 +295,7 @@ TEST_F(SetMediaClockRequestTest, Run_NoUpdateMode_Canceled) {
 TEST_F(SetMediaClockRequestTest, Run_NotMediaApp_Canceled) {
   MessageSharedPtr msg = CreateMsgParams();
 
-  SharedPtr<SetMediaClockRequest> command(
+  std::shared_ptr<SetMediaClockRequest> command(
       CreateCommand<SetMediaClockRequest>(msg));
 
   ExpectationsSetupHelper(false);
@@ -306,7 +306,7 @@ TEST_F(SetMediaClockRequestTest, Run_NotMediaApp_Canceled) {
 TEST_F(SetMediaClockRequestTest, Run_InvalidApp_Canceled) {
   MessageSharedPtr msg = CreateMsgParams();
 
-  SharedPtr<SetMediaClockRequest> command(
+  std::shared_ptr<SetMediaClockRequest> command(
       CreateCommand<SetMediaClockRequest>(msg));
 
   EXPECT_CALL(app_mngr_, application(kConnectionKey))
@@ -332,7 +332,7 @@ TEST_F(SetMediaClockRequestTest, OnEvent_Success) {
 
   Event event(hmi_apis::FunctionID::UI_SetMediaClockTimer);
   event.set_smart_object(*msg);
-  SharedPtr<SetMediaClockRequest> command(
+  std::shared_ptr<SetMediaClockRequest> command(
       CreateCommand<SetMediaClockRequest>(msg));
   command->on_event(event);
 }
@@ -340,7 +340,7 @@ TEST_F(SetMediaClockRequestTest, OnEvent_Success) {
 TEST_F(SetMediaClockRequestTest, OnEvent_Canceled) {
   MessageSharedPtr msg = CreateMessage();
 
-  SharedPtr<SetMediaClockRequest> command(
+  std::shared_ptr<SetMediaClockRequest> command(
       CreateCommand<SetMediaClockRequest>(msg));
   EXPECT_CALL(mock_rpc_service_, ManageMobileCommand(_, _)).Times(0);
   Event event(hmi_apis::FunctionID::UI_Slider);

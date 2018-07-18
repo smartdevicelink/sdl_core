@@ -47,7 +47,7 @@ namespace tts_get_capabilities_response {
 using application_manager::commands::MessageSharedPtr;
 using sdl_rpc_plugin::commands::TTSGetCapabilitiesResponse;
 using test::components::application_manager_test::MockHMICapabilities;
-using utils::SharedPtr;
+
 using testing::_;
 
 namespace strings = ::application_manager::strings;
@@ -71,7 +71,7 @@ TEST_F(TTSGetCapabilitiesResponseTest, Run_BothExist_SUCCESS) {
   EXPECT_CALL(mock_hmi_capabilities_,
               set_prerecorded_speech(SmartObject(kText)));
 
-  SharedPtr<TTSGetCapabilitiesResponse> command(
+  std::shared_ptr<TTSGetCapabilitiesResponse> command(
       CreateCommand<TTSGetCapabilitiesResponse>(msg));
 
   command->Run();
@@ -85,7 +85,7 @@ TEST_F(TTSGetCapabilitiesResponseTest, Run_OnlySpeech_SUCCESS) {
               set_speech_capabilities(SmartObject(kText)));
   EXPECT_CALL(mock_hmi_capabilities_, set_prerecorded_speech(_)).Times(0);
 
-  SharedPtr<TTSGetCapabilitiesResponse> command(
+  std::shared_ptr<TTSGetCapabilitiesResponse> command(
       CreateCommand<TTSGetCapabilitiesResponse>(msg));
 
   command->Run();
@@ -100,7 +100,7 @@ TEST_F(TTSGetCapabilitiesResponseTest, Run_OnlyPrerecorded_SUCCESS) {
   EXPECT_CALL(mock_hmi_capabilities_,
               set_prerecorded_speech(SmartObject(kText)));
 
-  SharedPtr<TTSGetCapabilitiesResponse> command(
+  std::shared_ptr<TTSGetCapabilitiesResponse> command(
       CreateCommand<TTSGetCapabilitiesResponse>(msg));
 
   command->Run();
@@ -112,7 +112,7 @@ TEST_F(TTSGetCapabilitiesResponseTest, Run_Nothing_SUCCESS) {
   EXPECT_CALL(mock_hmi_capabilities_, set_speech_capabilities(_)).Times(0);
   EXPECT_CALL(mock_hmi_capabilities_, set_prerecorded_speech(_)).Times(0);
 
-  SharedPtr<TTSGetCapabilitiesResponse> command(
+  std::shared_ptr<TTSGetCapabilitiesResponse> command(
       CreateCommand<TTSGetCapabilitiesResponse>(msg));
 
   command->Run();

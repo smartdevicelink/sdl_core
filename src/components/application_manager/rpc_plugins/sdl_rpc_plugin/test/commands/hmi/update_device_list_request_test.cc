@@ -33,7 +33,7 @@
 #include <stdint.h>
 
 #include "gtest/gtest.h"
-#include "utils/shared_ptr.h"
+
 #include "smart_objects/smart_object.h"
 #include "interfaces/HMI_API.h"
 #include "application_manager/smart_object_keys.h"
@@ -54,7 +54,7 @@ namespace commands_test {
 namespace hmi_commands_test {
 namespace update_device_list_request {
 
-using ::utils::SharedPtr;
+
 using testing::_;
 using testing::ReturnRef;
 using testing::Return;
@@ -68,7 +68,7 @@ using am::event_engine::Event;
 using sdl_rpc_plugin::commands::UpdateDeviceListRequest;
 using am::commands::CommandImpl;
 
-typedef SharedPtr<UpdateDeviceListRequest> UpdateDeviceListRequestPtr;
+typedef std::shared_ptr<UpdateDeviceListRequest> UpdateDeviceListRequestPtr;
 
 namespace {
 const uint32_t kConnectionKey = 2u;

@@ -35,7 +35,7 @@
 #include "application_manager/request_controller.h"
 #include "application_manager/commands/command_request_impl.h"
 #include "application_manager/commands/request_to_hmi.h"
-#include "utils/make_shared.h"
+
 #include "utils/timer_task_impl.h"
 
 namespace application_manager {
@@ -176,7 +176,7 @@ RequestController::TResult RequestController::addHMIRequest(
     const RequestPtr request) {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  if (!request.valid()) {
+  if (request.use_count() == 0) {
     LOG4CXX_ERROR(logger_, "HMI request pointer is invalid");
     return RequestController::INVALID_DATA;
   }
@@ -185,7 +185,7 @@ RequestController::TResult RequestController::addHMIRequest(
   const uint64_t timeout_in_mseconds =
       static_cast<uint64_t>(request->default_timeout());
   RequestInfoPtr request_info_ptr =
-      utils::MakeShared<HMIRequestInfo>(request, timeout_in_mseconds);
+      std::make_shared<HMIRequestInfo>(request, timeout_in_mseconds);
 
   if (0 == timeout_in_mseconds) {
     LOG4CXX_DEBUG(logger_,
@@ -287,7 +287,7 @@ void RequestController::terminateWaitingForExecutionAppRequests(
   std::list<RequestPtr>::iterator request_it = mobile_request_list_.begin();
   while (mobile_request_list_.end() != request_it) {
     RequestPtr request = (*request_it);
-    if ((request.valid()) && (request->connection_key() == app_id)) {
+    if ((request.use_count() != 0) && (request->connection_key() == app_id)) {
       mobile_request_list_.erase(request_it++);
     } else {
       ++request_it;
@@ -488,7 +488,7 @@ void RequestController::Worker::threadMain() {
 
     const uint32_t timeout_in_mseconds = request_ptr->default_timeout();
     RequestInfoPtr request_info_ptr =
-        utils::MakeShared<MobileRequestInfo>(request_ptr, timeout_in_mseconds);
+        std::make_shared<MobileRequestInfo>(request_ptr, timeout_in_mseconds);
 
     if (!request_controller_->waiting_for_response_.Add(request_info_ptr)) {
       commands::CommandRequestImpl* cmd_request =

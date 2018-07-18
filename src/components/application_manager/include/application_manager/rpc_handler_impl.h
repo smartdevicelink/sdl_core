@@ -57,26 +57,26 @@
 #include "interfaces/v4_protocol_v1_2_no_extra_schema.h"
 
 #include "utils/threads/message_loop_thread.h"
-#include "utils/shared_ptr.h"
-#include "utils/make_shared.h"
+
+
 
 namespace application_manager {
 namespace rpc_handler {
 
 namespace impl {
-struct MessageFromMobile : public utils::SharedPtr<Message> {
+struct MessageFromMobile : public std::shared_ptr<Message> {
   MessageFromMobile() {}
-  explicit MessageFromMobile(const utils::SharedPtr<Message>& message)
-      : utils::SharedPtr<Message>(message) {}
+  explicit MessageFromMobile(const std::shared_ptr<Message>& message)
+      : std::shared_ptr<Message>(message) {}
   // PrioritizedQueue requires this method to decide which priority to assign
   size_t PriorityOrder() const {
     return (*this)->Priority().OrderingValue();
   }
 };
-struct MessageFromHmi : public utils::SharedPtr<Message> {
+struct MessageFromHmi : public std::shared_ptr<Message> {
   MessageFromHmi() {}
-  explicit MessageFromHmi(const utils::SharedPtr<Message>& message)
-      : utils::SharedPtr<Message>(message) {}
+  explicit MessageFromHmi(const std::shared_ptr<Message>& message)
+      : std::shared_ptr<Message>(message) {}
   // PrioritizedQueue requires this method to decide which priority to assign
   size_t PriorityOrder() const {
     return (*this)->Priority().OrderingValue();
@@ -145,11 +145,11 @@ class RPCHandlerImpl : public RPCHandler,
 #endif  // TELEMETRY_MONITOR
 
  private:
-  void ProcessMessageFromMobile(const utils::SharedPtr<Message> message);
-  void ProcessMessageFromHMI(const utils::SharedPtr<Message> message);
+  void ProcessMessageFromMobile(const std::shared_ptr<Message> message);
+  void ProcessMessageFromHMI(const std::shared_ptr<Message> message);
   bool ConvertMessageToSO(const Message& message,
                           smart_objects::SmartObject& output);
-  utils::SharedPtr<Message> ConvertRawMsgToMessage(
+  std::shared_ptr<Message> ConvertRawMsgToMessage(
       const ::protocol_handler::RawMessagePtr message);
   hmi_apis::HMI_API& hmi_so_factory();
   mobile_apis::MOBILE_API& mobile_so_factory();

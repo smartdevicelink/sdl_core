@@ -34,7 +34,7 @@
 #include <string>
 
 #include "gtest/gtest.h"
-#include "utils/shared_ptr.h"
+
 #include "application_manager/message.h"
 #include "application_manager/commands/commands_test.h"
 #include "application_manager/mock_application.h"
@@ -58,7 +58,7 @@ namespace get_urls {
 
 using namespace hmi_apis;
 using namespace policy;
-using ::utils::SharedPtr;
+
 using ::testing::NiceMock;
 using ::testing::_;
 using ::testing::SetArgReferee;
@@ -71,7 +71,7 @@ using am::commands::CommandImpl;
 using policy::PolicyHandler;
 using policy_test::MockPolicyHandlerInterface;
 
-typedef SharedPtr<RequestFromHMI> RequestFromHMIPtr;
+typedef std::shared_ptr<RequestFromHMI> RequestFromHMIPtr;
 
 namespace {
 const uint32_t kInvalidAppId_ = 0u;

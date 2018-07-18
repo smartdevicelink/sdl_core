@@ -6,8 +6,8 @@
 #include "application_manager/app_launch/app_launch_data.h"
 #include "application_manager/app_launch/apps_launcher.h"
 #include "application_manager/resumption/resume_ctrl.h"
-#include "utils/shared_ptr.h"
-#include "utils/make_shared.h"
+
+
 #include "utils/timer.h"
 #include "utils/timer_task_impl.h"
 #include <iostream>
@@ -16,7 +16,7 @@ namespace app_launch {
 CREATE_LOGGERPTR_GLOBAL(logger_, "AppLaunch")
 
 typedef std::pair<std::string, std::vector<ApplicationDataPtr> > AppsOnDevice;
-typedef utils::SharedPtr<AppsOnDevice> AppsOnDevicePtr;
+typedef std::shared_ptr<AppsOnDevice> AppsOnDevicePtr;
 
 class Launcher {
  public:
@@ -95,7 +95,7 @@ class Launcher {
   AppsOnDevicePtr apps_on_device_;
 };
 
-typedef utils::SharedPtr<Launcher> LauncherPtr;
+typedef std::shared_ptr<Launcher> LauncherPtr;
 typedef std::vector<LauncherPtr> Launchers;
 
 struct LauncherGenerator {
@@ -107,7 +107,7 @@ struct LauncherGenerator {
       , apps_launcher_(apps_launcher) {}
 
   LauncherPtr operator()() const {
-    return utils::MakeShared<Launcher>(
+    return std::make_shared<Launcher>(
         resume_ctrl_, interface_, apps_launcher_);
   }
 
@@ -130,7 +130,7 @@ DeviceAppsLauncherImpl::DeviceAppsLauncherImpl(DeviceAppsLauncher& interface,
 }
 
 bool DeviceAppsLauncherImpl::LauncherFinder::operator()(
-    const utils::SharedPtr<Launcher>& launcher) const {
+    const std::shared_ptr<Launcher>& launcher) const {
   return device_mac_ == launcher->apps_on_device_->first;
 }
 
@@ -142,7 +142,7 @@ bool DeviceAppsLauncherImpl::LaunchAppsOnDevice(
                 "On Device " << device_mac << " will be launched "
                              << applications_to_launch.size() << " apps");
   AppsOnDevicePtr apps_on_device =
-      utils::MakeShared<AppsOnDevice>(device_mac, applications_to_launch);
+      std::make_shared<AppsOnDevice>(device_mac, applications_to_launch);
   sync_primitives::AutoLock lock(launchers_lock_);
   DCHECK_OR_RETURN(!free_launchers_.empty(), false)
   const Launchers::iterator it = free_launchers_.begin();

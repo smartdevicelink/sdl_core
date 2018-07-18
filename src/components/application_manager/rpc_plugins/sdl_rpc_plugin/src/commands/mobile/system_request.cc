@@ -452,7 +452,7 @@ void SystemRequest::Run() {
   ApplicationSharedPtr application =
       application_manager_.application(connection_key());
 
-  if (!(application.valid())) {
+  if (application.use_count() == 0) {
     LOG4CXX_ERROR(logger_, "NULL pointer");
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     return;
@@ -655,7 +655,7 @@ void SystemRequest::on_event(const event_engine::Event& event) {
       ApplicationSharedPtr application =
           application_manager_.application(connection_key());
 
-      if (!(application.valid())) {
+      if (application.use_count() == 0) {
         LOG4CXX_ERROR(logger_, "NULL pointer");
         return;
       }

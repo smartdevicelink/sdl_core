@@ -34,7 +34,7 @@
 #include <string>
 
 #include "gtest/gtest.h"
-#include "utils/shared_ptr.h"
+
 #include "smart_objects/smart_object.h"
 #include "application_manager/commands/commands_test.h"
 #include "application_manager/mock_hmi_capabilities.h"
@@ -48,7 +48,7 @@ namespace hmi_commands_test {
 namespace ui_is_ready_response {
 
 using ::testing::Return;
-using ::utils::SharedPtr;
+
 using ::testing::NiceMock;
 namespace am = ::application_manager;
 namespace strings = ::application_manager::strings;
@@ -56,7 +56,7 @@ namespace hmi_response = am::hmi_response;
 using sdl_rpc_plugin::commands::UIIsReadyResponse;
 using test::components::event_engine_test::MockEventDispatcher;
 
-typedef SharedPtr<UIIsReadyResponse> UIIsReadyResponsePtr;
+typedef std::shared_ptr<UIIsReadyResponse> UIIsReadyResponsePtr;
 typedef NiceMock<
     ::test::components::application_manager_test::MockHMICapabilities>
     MockHMICapabilities;

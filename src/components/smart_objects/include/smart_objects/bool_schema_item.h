@@ -33,7 +33,7 @@
 #ifndef SRC_COMPONENTS_SMART_OBJECTS_INCLUDE_SMART_OBJECTS_BOOL_SCHEMA_ITEM_H_
 #define SRC_COMPONENTS_SMART_OBJECTS_INCLUDE_SMART_OBJECTS_BOOL_SCHEMA_ITEM_H_
 
-#include "utils/shared_ptr.h"
+
 
 #include "smart_objects/default_shema_item.h"
 
@@ -49,7 +49,7 @@ class CBoolSchemaItem : public CDefaultSchemaItem<bool> {
    * @param DefaultValue Default value of a parameter.
    * @return Shared pointer to a new schema item.
    **/
-  static utils::SharedPtr<CBoolSchemaItem> create(
+  static std::shared_ptr<CBoolSchemaItem> create(
       const TSchemaItemParameter<bool>& DefaultValue =
           TSchemaItemParameter<bool>());
 

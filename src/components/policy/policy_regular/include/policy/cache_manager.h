@@ -35,7 +35,7 @@
 
 #include <map>
 
-#include "utils/shared_ptr.h"
+
 #include "policy/pt_representation.h"
 #include "policy/pt_ext_representation.h"
 #include "policy/usage_statistics/statistics_manager.h"
@@ -216,7 +216,7 @@ class CacheManager : public CacheManagerInterface {
    * device_info, statistics, excluding user messages
    * @return Generated structure for obtaining Json string.
    */
-  virtual utils::SharedPtr<policy_table::Table> GenerateSnapshot();
+  virtual std::shared_ptr<policy_table::Table> GenerateSnapshot();
 
   /**
    * Applies policy table to the current table
@@ -723,7 +723,7 @@ class CacheManager : public CacheManagerInterface {
 
   const PolicySettings& get_settings() const;
 
-  utils::SharedPtr<policy_table::Table> pt() const {
+  std::shared_ptr<policy_table::Table> pt() const {
     return pt_;
   }
 
@@ -775,9 +775,9 @@ class CacheManager : public CacheManagerInterface {
                                policy::Permissions& permission);
 
  private:
-  utils::SharedPtr<policy_table::Table> pt_;
-  utils::SharedPtr<policy_table::Table> snapshot_;
-  utils::SharedPtr<PTRepresentation> backup_;
+  std::shared_ptr<policy_table::Table> pt_;
+  std::shared_ptr<policy_table::Table> snapshot_;
+  std::shared_ptr<PTRepresentation> backup_;
   bool update_required;
   typedef std::set<std::string> UnpairedDevices;
   UnpairedDevices is_unpaired_;

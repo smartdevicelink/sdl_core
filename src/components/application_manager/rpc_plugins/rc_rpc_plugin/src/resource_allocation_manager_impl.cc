@@ -41,7 +41,7 @@
 #include "rc_rpc_plugin/rc_module_constants.h"
 #include "json/json.h"
 #include "utils/helpers.h"
-#include "utils/make_shared.h"
+
 
 namespace rc_rpc_plugin {
 
@@ -178,7 +178,7 @@ void ResourceAllocationManagerImpl::ProcessApplicationPolicyUpdate() {
     if (!disallowed_modules.empty()) {
       SendOnRCStatusNotifications(
           NotificationTrigger::MODULE_ALLOCATION,
-          utils::SharedPtr<application_manager::Application>());
+          std::shared_ptr<application_manager::Application>());
     }
   }
 }
@@ -198,7 +198,7 @@ RCAppExtensionPtr ResourceAllocationManagerImpl::GetApplicationExtention(
   }
 
   rc_app_extension =
-      application_manager::AppExtensionPtr::static_pointer_cast<RCAppExtension>(
+      std::static_pointer_cast<RCAppExtension>(
           app_extension);
 
   return rc_app_extension;
@@ -307,7 +307,7 @@ void ResourceAllocationManagerImpl::SetResourceAquired(
   allocated_resources_[module_type] = app_id;
   SendOnRCStatusNotifications(
       NotificationTrigger::MODULE_ALLOCATION,
-      utils::SharedPtr<application_manager::Application>());
+      std::shared_ptr<application_manager::Application>());
 }
 
 void ResourceAllocationManagerImpl::SendOnRCStatusNotifications(
@@ -343,7 +343,7 @@ void ResourceAllocationManagerImpl::set_rc_enabled(const bool value) {
   is_rc_enabled_ = value;
   SendOnRCStatusNotifications(
       NotificationTrigger::RC_STATE_CHANGING,
-      utils::SharedPtr<application_manager::Application>());
+      std::shared_ptr<application_manager::Application>());
 }
 
 void ResourceAllocationManagerImpl::SetResourceFree(
@@ -511,7 +511,7 @@ void ResourceAllocationManagerImpl::OnApplicationEvent(
     if (!acquired_modules.empty()) {
       SendOnRCStatusNotifications(
           NotificationTrigger::MODULE_ALLOCATION,
-          utils::SharedPtr<application_manager::Application>());
+          std::shared_ptr<application_manager::Application>());
     }
     Apps app_list;
     app_list.push_back(application);

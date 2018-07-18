@@ -36,7 +36,7 @@
 #include <string>
 #include "application_manager/application.h"
 #include "smart_objects/smart_object.h"
-#include "utils/shared_ptr.h"
+
 
 namespace application_manager {
 /**

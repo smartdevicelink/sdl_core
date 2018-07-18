@@ -58,7 +58,7 @@ using am::MockHmiInterfaces;
 using am::event_engine::Event;
 using am::MessageType;
 using policy_test::MockPolicyHandlerInterface;
-using ::utils::SharedPtr;
+
 using ::testing::_;
 using ::testing::DoAll;
 using ::testing::Return;
@@ -126,7 +126,7 @@ TEST_F(SystemRequestTest, Run_HTTP_FileName_no_binary_data_REJECTED) {
 
   ExpectManageMobileCommandWithResultCode(mobile_apis::Result::REJECTED);
 
-  SharedPtr<SystemRequest> command(CreateCommand<SystemRequest>(msg));
+  std::shared_ptr<SystemRequest> command(CreateCommand<SystemRequest>(msg));
   command->Run();
 }
 
@@ -163,7 +163,7 @@ TEST_F(SystemRequestTest,
   EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_))
       .WillOnce(DoAll(SaveArg<0>(&result), Return(true)));
 
-  SharedPtr<SystemRequest> command(CreateCommand<SystemRequest>(msg));
+  std::shared_ptr<SystemRequest> command(CreateCommand<SystemRequest>(msg));
   ASSERT_TRUE(command->Init());
   command->Run();
 
@@ -203,7 +203,7 @@ TEST_F(
   ExpectManageMobileCommandWithResultCode(mobile_apis::Result::DISALLOWED);
   EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_)).Times(0);
 
-  SharedPtr<SystemRequest> command(CreateCommand<SystemRequest>(msg));
+  std::shared_ptr<SystemRequest> command(CreateCommand<SystemRequest>(msg));
   ASSERT_TRUE(command->Init());
   command->Run();
 }
@@ -224,7 +224,7 @@ TEST_F(SystemRequestTest, Run_RequestTypeDisallowed_SendDisallowedResponse) {
   ExpectManageMobileCommandWithResultCode(mobile_apis::Result::DISALLOWED);
   EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_)).Times(0);
 
-  SharedPtr<SystemRequest> command(CreateCommand<SystemRequest>(msg));
+  std::shared_ptr<SystemRequest> command(CreateCommand<SystemRequest>(msg));
   ASSERT_TRUE(command->Init());
   command->Run();
 }

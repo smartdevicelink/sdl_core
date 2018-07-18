@@ -44,7 +44,7 @@ namespace commands_test {
 namespace hmi_commands_test {
 namespace ui_get_language_response {
 
-using utils::SharedPtr;
+
 using sdl_rpc_plugin::commands::UIGetLanguageResponse;
 using test::components::event_engine_test::MockEventDispatcher;
 using testing::_;
@@ -70,7 +70,7 @@ TEST_F(UIGetLanguageResponseTest, Run_LanguageSet_SUCCESS) {
   MessageSharedPtr msg = CreateMessage();
   (*msg)[strings::msg_params][hmi_response::language] = kLanguage;
 
-  SharedPtr<UIGetLanguageResponse> command(
+  std::shared_ptr<UIGetLanguageResponse> command(
       CreateCommand<UIGetLanguageResponse>(msg));
 
   EXPECT_CALL(mock_hmi_capabilities_, set_active_ui_language(kLanguage));
@@ -86,7 +86,7 @@ TEST_F(UIGetLanguageResponseTest, Run_LanguageSet_SUCCESS) {
 TEST_F(UIGetLanguageResponseTest, Run_LanguageNotSet_SUCCESS) {
   MessageSharedPtr msg = CreateMessage();
 
-  SharedPtr<UIGetLanguageResponse> command(
+  std::shared_ptr<UIGetLanguageResponse> command(
       CreateCommand<UIGetLanguageResponse>(msg));
 
   EXPECT_CALL(mock_hmi_capabilities_,

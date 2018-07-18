@@ -37,7 +37,7 @@
 #include "transport_manager/bluetooth/bluetooth_connection_factory.h"
 #include "transport_manager/bluetooth/bluetooth_socket_connection.h"
 #include "utils/logger.h"
-#include "utils/make_shared.h"
+
 
 namespace transport_manager {
 namespace transport_adapter {
@@ -55,8 +55,8 @@ TransportAdapter::Error BluetoothConnectionFactory::Init() {
 TransportAdapter::Error BluetoothConnectionFactory::CreateConnection(
     const DeviceUID& device_uid, const ApplicationHandle& app_handle) {
   LOG4CXX_AUTO_TRACE(logger_);
-  utils::SharedPtr<BluetoothSocketConnection> connection =
-      utils::MakeShared<BluetoothSocketConnection>(
+  std::shared_ptr<BluetoothSocketConnection> connection =
+      std::make_shared<BluetoothSocketConnection>(
           device_uid, app_handle, controller_);
   controller_->ConnectionCreated(connection, device_uid, app_handle);
   TransportAdapter::Error error = connection->Start();

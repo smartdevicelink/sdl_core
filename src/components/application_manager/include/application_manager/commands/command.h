@@ -34,7 +34,7 @@
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_COMMAND_H_
 #include <stdint.h>
 #include "smart_objects/smart_object.h"
-#include "utils/shared_ptr.h"
+
 
 namespace application_manager {
 

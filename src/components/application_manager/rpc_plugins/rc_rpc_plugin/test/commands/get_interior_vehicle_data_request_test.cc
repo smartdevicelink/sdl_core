@@ -40,8 +40,8 @@
 #include "application_manager/event_engine/event_dispatcher.h"
 #include "application_manager/commands/command_request_test.h"
 #include "rc_rpc_plugin/mock/mock_resource_allocation_manager.h"
-#include "utils/shared_ptr.h"
-#include "utils/make_shared.h"
+
+
 
 using ::testing::_;
 using ::testing::Mock;
@@ -76,8 +76,8 @@ class GetInteriorVehicleDataRequestTest
     : public CommandRequestTest<CommandsTestMocks::kIsNice> {
  public:
   GetInteriorVehicleDataRequestTest()
-      : mock_app_(utils::MakeShared<NiceMock<MockApplication> >())
-      , rc_app_extention_(utils::MakeShared<RCAppExtension>(kModuleId)) {
+      : mock_app_(std::make_shared<NiceMock<MockApplication> >())
+      , rc_app_extention_(std::make_shared<RCAppExtension>(kModuleId)) {
     ON_CALL(*mock_app_, app_id()).WillByDefault(Return(kAppId));
     ON_CALL(app_mngr_, hmi_interfaces())
         .WillByDefault(ReturnRef(mock_hmi_interfaces_));
@@ -116,10 +116,10 @@ class GetInteriorVehicleDataRequestTest
     return message;
   }
   template <class Command>
-  application_manager::SharedPtr<Command> CreateRCCommand(
+  std::shared_ptr<Command> CreateRCCommand(
       MessageSharedPtr& msg) {
     InitCommand(kDefaultTimeout_);
-    return ::utils::MakeShared<Command>(msg ? msg : msg = CreateMessage(),
+    return std::make_shared<Command>(msg ? msg : msg = CreateMessage(),
                                         app_mngr_,
                                         mock_rpc_service_,
                                         mock_hmi_capabilities_,
@@ -129,8 +129,8 @@ class GetInteriorVehicleDataRequestTest
 
  protected:
   smart_objects::SmartObject rc_capabilities_;
-  utils::SharedPtr<MockApplication> mock_app_;
-  utils::SharedPtr<RCAppExtension> rc_app_extention_;
+  std::shared_ptr<MockApplication> mock_app_;
+  std::shared_ptr<RCAppExtension> rc_app_extention_;
   testing::NiceMock<rc_rpc_plugin_test::MockResourceAllocationManager>
       mock_allocation_manager_;
 };
@@ -145,7 +145,7 @@ TEST_F(GetInteriorVehicleDataRequestTest,
                   hmi_apis::FunctionID::RC_GetInteriorVehicleData)))
       .WillOnce(Return(true));
   MessageSharedPtr mobile_message = CreateBasicMessage();
-  application_manager::SharedPtr<
+  std::shared_ptr<
       rc_rpc_plugin::commands::GetInteriorVehicleDataRequest> command =
       CreateRCCommand<rc_rpc_plugin::commands::GetInteriorVehicleDataRequest>(
           mobile_message);
@@ -170,7 +170,7 @@ TEST_F(
       ManageMobileCommand(
           MobileResultCodeIs(mobile_apis::Result::UNSUPPORTED_RESOURCE), _))
       .WillOnce(DoAll(SaveArg<0>(&command_result), Return(true)));
-  application_manager::SharedPtr<
+  std::shared_ptr<
       rc_rpc_plugin::commands::GetInteriorVehicleDataRequest> command =
       CreateRCCommand<rc_rpc_plugin::commands::GetInteriorVehicleDataRequest>(
           mobile_message);
@@ -201,7 +201,7 @@ TEST_F(GetInteriorVehicleDataRequestTest,
   application_manager::event_engine::Event event(
       hmi_apis::FunctionID::RC_GetInteriorVehicleData);
   event.set_smart_object(*hmi_message);
-  application_manager::SharedPtr<
+  std::shared_ptr<
       rc_rpc_plugin::commands::GetInteriorVehicleDataRequest> command =
       CreateRCCommand<rc_rpc_plugin::commands::GetInteriorVehicleDataRequest>(
           mobile_message);
@@ -231,7 +231,7 @@ TEST_F(GetInteriorVehicleDataRequestTest,
   application_manager::event_engine::Event event(
       hmi_apis::FunctionID::RC_GetInteriorVehicleData);
   event.set_smart_object(*hmi_message);
-  application_manager::SharedPtr<
+  std::shared_ptr<
       rc_rpc_plugin::commands::GetInteriorVehicleDataRequest> command =
       CreateRCCommand<rc_rpc_plugin::commands::GetInteriorVehicleDataRequest>(
           mobile_message);

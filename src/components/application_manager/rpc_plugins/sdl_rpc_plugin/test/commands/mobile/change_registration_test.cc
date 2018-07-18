@@ -37,9 +37,9 @@
 #include "mobile/change_registration_request.h"
 
 #include "gtest/gtest.h"
-#include "utils/shared_ptr.h"
+
 #include "utils/helpers.h"
-#include "utils/make_shared.h"
+
 #include "utils/custom_string.h"
 #include "smart_objects/smart_object.h"
 #include "application_manager/commands/command_request_test.h"
@@ -66,7 +66,7 @@ using am::commands::MessageSharedPtr;
 using am::ApplicationSharedPtr;
 using am::MockMessageHelper;
 using ::testing::_;
-using ::utils::SharedPtr;
+
 using ::testing::Return;
 using ::testing::ReturnRef;
 using ::testing::SetArgPointee;
@@ -149,7 +149,7 @@ class ChangeRegistrationRequestTest
                              hmi_apis::Common_Result::UNSUPPORTED_RESOURCE) {
     MessageSharedPtr msg_from_mobile = CreateMsgFromMobile();
 
-    utils::SharedPtr<ChangeRegistrationRequest> command =
+    std::shared_ptr<ChangeRegistrationRequest> command =
         CreateCommand<ChangeRegistrationRequest>(msg_from_mobile);
     MockAppPtr mock_app = CreateMockApp();
     ON_CALL(app_mngr_, application(_)).WillByDefault(Return(mock_app));
@@ -279,7 +279,7 @@ typedef ChangeRegistrationRequestTest::MockHMICapabilities MockHMICapabilities;
 TEST_F(ChangeRegistrationRequestTest,
        OnEvent_VRHmiSendSuccess_UNSUPPORTED_RESOURCE) {
   MessageSharedPtr msg_from_mobile = CreateMsgFromMobile();
-  utils::SharedPtr<ChangeRegistrationRequest> command =
+  std::shared_ptr<ChangeRegistrationRequest> command =
       CreateCommand<ChangeRegistrationRequest>(msg_from_mobile);
 
   am::ApplicationSet application_set;
@@ -367,7 +367,7 @@ TEST_F(ChangeRegistrationRequestTest,
 TEST_F(ChangeRegistrationRequestTest,
        OnEvent_TTS_UNSUPPORTED_RESOURCE_STATE_NOT_AVAILABLE_Expect_false) {
   MessageSharedPtr msg_from_mobile = CreateMsgFromMobile();
-  utils::SharedPtr<ChangeRegistrationRequest> command =
+  std::shared_ptr<ChangeRegistrationRequest> command =
       CreateCommand<ChangeRegistrationRequest>(msg_from_mobile);
   MockAppPtr mock_app = CreateMockApp();
   ON_CALL(app_mngr_, application(_)).WillByDefault(Return(mock_app));
@@ -472,7 +472,7 @@ TEST_F(ChangeRegistrationRequestTest,
        OnEvent_UIHmiSendSuccess_UNSUPPORTED_RESOURCE) {
   MessageSharedPtr msg_from_mobile = CreateMsgFromMobile();
 
-  utils::SharedPtr<ChangeRegistrationRequest> command =
+  std::shared_ptr<ChangeRegistrationRequest> command =
       CreateCommand<ChangeRegistrationRequest>(msg_from_mobile);
 
   am::ApplicationSet application_set;

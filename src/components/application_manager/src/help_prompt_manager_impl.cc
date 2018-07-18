@@ -38,7 +38,7 @@
 #include "application_manager/smart_object_keys.h"
 #include "smart_objects/smart_object.h"
 #include "utils/logger.h"
-#include "utils/make_shared.h"
+
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "HelpPromptManagerImpl")
 
@@ -86,7 +86,7 @@ bool HelpPromptManagerImpl::AddCommand(
   LOG4CXX_DEBUG(logger_, "Will be added " << count_new_commands << " commands");
 
   smart_objects::SmartObjectSPtr vr_item =
-      utils::MakeShared<smart_objects::SmartObject>(
+      std::make_shared<smart_objects::SmartObject>(
           smart_objects::SmartType_Array);
   smart_objects::SmartArray& ar_vr_cmd = *(vr_item->asArray());
   smart_objects::SmartArray& ar_cmd = *(commands.asArray());
@@ -207,7 +207,7 @@ void HelpPromptManagerImpl::SendTTSRequest() {
   LOG4CXX_AUTO_TRACE(logger_);
   LOG4CXX_DEBUG(logger_, "TTS request for appID:" << app_.app_id());
   smart_objects::SmartObjectSPtr tts_global_properties =
-      utils::MakeShared<smart_objects::SmartObject>(
+      std::make_shared<smart_objects::SmartObject>(
           smart_objects::SmartType_Map);
   if (tts_global_properties) {
     smart_objects::SmartObject& ref = *tts_global_properties;
@@ -241,7 +241,7 @@ void HelpPromptManagerImpl::SendUIRequest() {
   LOG4CXX_AUTO_TRACE(logger_);
   LOG4CXX_DEBUG(logger_, "UI request for appID:" << app_.app_id());
   smart_objects::SmartObjectSPtr ui_global_properties =
-      utils::MakeShared<smart_objects::SmartObject>(
+      std::make_shared<smart_objects::SmartObject>(
           smart_objects::SmartType_Map);
   if (ui_global_properties) {
     smart_objects::SmartObject& ref = *ui_global_properties;

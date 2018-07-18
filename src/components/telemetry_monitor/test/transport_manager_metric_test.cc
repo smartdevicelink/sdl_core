@@ -59,7 +59,7 @@ TEST(TransportManagerMetricWrapper, GetJsonMetric) {
   end_time.tv_sec = 10;
   end_time.tv_usec = 0;
   metric_test.message_metric =
-      new transport_manager::TMTelemetryObserver::MessageMetric();
+      std::make_shared<transport_manager::TMTelemetryObserver::MessageMetric>();
   metric_test.message_metric->begin = start_time;
   metric_test.message_metric->end = end_time;
   metric_test.message_metric->data_size = 1000;
@@ -90,7 +90,7 @@ TEST(TransportManagerMetricWrapper, GetJsonMetricWithGrabResources) {
   end_time.tv_sec = 10;
   end_time.tv_usec = 0;
   metric_test.message_metric =
-      new transport_manager::TMTelemetryObserver::MessageMetric();
+      std::make_shared<transport_manager::TMTelemetryObserver::MessageMetric>();
   metric_test.message_metric->begin = start_time;
   metric_test.message_metric->end = end_time;
 

@@ -40,7 +40,7 @@
 #include <string>
 #include "policy/policy_types.h"
 #include "smart_objects/smart_object.h"
-#include "utils/make_shared.h"
+
 
 namespace {
 

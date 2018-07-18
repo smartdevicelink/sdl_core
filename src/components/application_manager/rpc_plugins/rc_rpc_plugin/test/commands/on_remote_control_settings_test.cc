@@ -67,7 +67,7 @@ class RCOnRemoteControlSettingsNotificationTest
     : public CommandsTest<CommandsTestMocks::kIsNice> {
  public:
   RCOnRemoteControlSettingsNotificationTest()
-      : mock_app_(utils::MakeShared<NiceMock<MockApplication> >()) {}
+      : mock_app_(std::make_shared<NiceMock<MockApplication> >()) {}
   MessageSharedPtr CreateBasicMessage() {
     MessageSharedPtr message = CreateMessage();
     (*message)[application_manager::strings::params]
@@ -85,10 +85,10 @@ class RCOnRemoteControlSettingsNotificationTest
   }
 
   template <class Command>
-  application_manager::SharedPtr<Command> CreateRCCommand(
+  std::shared_ptr<Command> CreateRCCommand(
       MessageSharedPtr& msg) {
     InitCommand(kDefaultTimeout_);
-    return ::utils::MakeShared<Command>(msg ? msg : msg = CreateMessage(),
+    return std::make_shared<Command>(msg ? msg : msg = CreateMessage(),
                                         app_mngr_,
                                         mock_rpc_service_,
                                         mock_hmi_capabilities_,
@@ -97,7 +97,7 @@ class RCOnRemoteControlSettingsNotificationTest
   }
 
  protected:
-  utils::SharedPtr<MockApplication> mock_app_;
+  std::shared_ptr<MockApplication> mock_app_;
   testing::NiceMock<rc_rpc_plugin_test::MockResourceAllocationManager>
       mock_allocation_manager_;
 };
@@ -116,7 +116,7 @@ TEST_F(RCOnRemoteControlSettingsNotificationTest,
   EXPECT_CALL(mock_allocation_manager_,
               SetAccessMode(hmi_apis::Common_RCAccessMode::ASK_DRIVER));
   // Act
-  application_manager::SharedPtr<
+  std::shared_ptr<
       rc_rpc_plugin::commands::RCOnRemoteControlSettingsNotification> command =
       CreateRCCommand<
           rc_rpc_plugin::commands::RCOnRemoteControlSettingsNotification>(
@@ -141,7 +141,7 @@ TEST_F(RCOnRemoteControlSettingsNotificationTest,
   EXPECT_CALL(app_mngr_, applications()).WillOnce(Return(accessor));
 
   RCAppExtensionPtr rc_extention_ptr =
-      utils::MakeShared<RCAppExtension>(application_manager::AppExtensionUID(
+      std::make_shared<RCAppExtension>(application_manager::AppExtensionUID(
           rc_rpc_plugin::RCRPCPlugin::kRCPluginID));
   rc_extention_ptr->SubscribeToInteriorVehicleData(enums_value::kClimate);
   ON_CALL(*mock_app_, QueryInterface(_))
@@ -150,7 +150,7 @@ TEST_F(RCOnRemoteControlSettingsNotificationTest,
   EXPECT_CALL(mock_allocation_manager_, ResetAllAllocations());
 
   // Act
-  application_manager::SharedPtr<
+  std::shared_ptr<
       rc_rpc_plugin::commands::RCOnRemoteControlSettingsNotification> command =
       CreateRCCommand<
           rc_rpc_plugin::commands::RCOnRemoteControlSettingsNotification>(

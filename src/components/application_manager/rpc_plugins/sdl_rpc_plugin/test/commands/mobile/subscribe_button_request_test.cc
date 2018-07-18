@@ -34,7 +34,7 @@
 #include <string>
 
 #include "gtest/gtest.h"
-#include "utils/shared_ptr.h"
+
 #include "smart_objects/smart_object.h"
 #include "application_manager/commands/commands_test.h"
 #include "application_manager/commands/command_request_test.h"
@@ -61,7 +61,7 @@ namespace am = ::application_manager;
 using sdl_rpc_plugin::commands::SubscribeButtonRequest;
 using am::commands::MessageSharedPtr;
 
-typedef SharedPtr<SubscribeButtonRequest> CommandPtr;
+typedef std::shared_ptr<SubscribeButtonRequest> CommandPtr;
 
 class SubscribeButtonRequestTest
     : public CommandRequestTest<CommandsTestMocks::kIsNice> {
@@ -78,7 +78,7 @@ TEST_F(SubscribeButtonRequestTest, Run_AppNotRegistered_UNSUCCESS) {
   CommandPtr command(CreateCommand<SubscribeButtonRequest>());
 
   ON_CALL(app_mngr_, application(_))
-      .WillByDefault(Return(SharedPtr<am::Application>()));
+      .WillByDefault(Return(std::shared_ptr<am::Application>()));
 
   MessageSharedPtr result_msg(CatchMobileCommandResult(CallRun(*command)));
   EXPECT_EQ(mobile_apis::Result::APPLICATION_NOT_REGISTERED,

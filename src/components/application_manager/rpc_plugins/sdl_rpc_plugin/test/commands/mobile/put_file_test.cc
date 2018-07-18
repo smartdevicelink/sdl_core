@@ -42,7 +42,7 @@
 #include "mobile/put_file_response.h"
 #include "mobile/put_file_request.h"
 
-#include "utils/make_shared.h"
+
 #include "utils/file_system.h"
 #include "smart_objects/smart_object.h"
 #include "interfaces/MOBILE_API.h"
@@ -68,8 +68,8 @@ using sdl_rpc_plugin::commands::PutFileResponse;
 using am::commands::MessageSharedPtr;
 using policy_test::MockPolicyHandlerInterface;
 
-typedef SharedPtr<PutFileRequest> PutFileRequestPtr;
-typedef SharedPtr<PutFileResponse> PutFileResponsePtr;
+typedef std::shared_ptr<PutFileRequest> PutFileRequestPtr;
+typedef std::shared_ptr<PutFileResponse> PutFileResponsePtr;
 
 namespace {
 const uint32_t kConnectionKey = 1u;
@@ -131,7 +131,7 @@ class PutFileResponceTest : public CommandsTest<CommandsTestMocks::kIsNice> {
   }
 
   MessageSharedPtr message_;
-  SharedPtr<PutFileResponse> command_sptr_;
+  std::shared_ptr<PutFileResponse> command_sptr_;
 };
 
 TEST_F(PutFileResponceTest, Run_InvalidApp_ApplicationNotRegisteredResponce) {
@@ -140,7 +140,7 @@ TEST_F(PutFileResponceTest, Run_InvalidApp_ApplicationNotRegisteredResponce) {
   message_ref[am::strings::params][am::strings::connection_key] =
       kConnectionKey;
 
-  utils::SharedPtr<am::Application> null_application_sptr;
+  std::shared_ptr<am::Application> null_application_sptr;
   EXPECT_CALL(app_mngr_, application(kConnectionKey))
       .WillOnce(Return(null_application_sptr));
   EXPECT_CALL(
@@ -158,8 +158,8 @@ TEST_F(PutFileResponceTest, Run_ApplicationRegistered_Success) {
       kConnectionKey;
   message_ref[am::strings::msg_params][am::strings::success] = true;
 
-  utils::SharedPtr<am::Application> application_sptr =
-      utils::MakeShared<MockApplication>();
+  std::shared_ptr<am::Application> application_sptr =
+      std::make_shared<MockApplication>();
 
   EXPECT_CALL(app_mngr_, application(kConnectionKey))
       .WillOnce(Return(application_sptr));

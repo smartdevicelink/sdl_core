@@ -71,7 +71,7 @@ void OnInteriorVehicleDataNotification::Run() {
     application_manager::Application& app = **it;
 
     RCAppExtensionPtr extension =
-        application_manager::AppExtensionPtr::static_pointer_cast<
+        std::static_pointer_cast<
             RCAppExtension>(app.QueryInterface(RCRPCPlugin::kRCPluginID));
     DCHECK(extension);
     LOG4CXX_TRACE(logger_,

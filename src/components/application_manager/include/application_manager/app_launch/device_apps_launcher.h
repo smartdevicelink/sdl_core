@@ -29,7 +29,7 @@ class DeviceAppsLauncherImpl {
   struct LauncherFinder {
     LauncherFinder(const std::string& device_mac) : device_mac_(device_mac) {}
 
-    bool operator()(const utils::SharedPtr<Launcher>& launcher) const;
+    bool operator()(const std::shared_ptr<Launcher>& launcher) const;
 
     std::string device_mac_;
   };
@@ -38,8 +38,8 @@ class DeviceAppsLauncherImpl {
 
  private:
   sync_primitives::Lock launchers_lock_;
-  std::vector<utils::SharedPtr<Launcher> > free_launchers_;
-  std::vector<utils::SharedPtr<Launcher> > works_launchers_;
+  std::vector<std::shared_ptr<Launcher> > free_launchers_;
+  std::vector<std::shared_ptr<Launcher> > works_launchers_;
   DeviceAppsLauncher& interface_;
 };
 

@@ -934,8 +934,8 @@ void CacheManager::CheckSnapshotInitialization() {
 
 void CacheManager::PersistData() {
   LOG4CXX_AUTO_TRACE(logger_);
-  if (backup_.valid()) {
-    if (pt_.valid()) {
+  if (backup_.use_count() != 0) {
+    if (pt_.use_count() != 0) {
       // Comma expression is used to hold the lock only during the constructor
       // call
       policy_table::Table copy_pt(
@@ -1029,10 +1029,10 @@ bool CacheManager::IsPermissionsCalculated(const std::string& device_id,
   return false;
 }
 
-utils::SharedPtr<policy_table::Table> CacheManager::GenerateSnapshot() {
+std::shared_ptr<policy_table::Table> CacheManager::GenerateSnapshot() {
   CACHE_MANAGER_CHECK(snapshot_);
 
-  snapshot_ = new policy_table::Table();
+  snapshot_ = std::make_shared<policy_table::Table>();
 
   // Copy all members of policy table except messages in consumer friendly
   // messages
@@ -1426,7 +1426,7 @@ bool CacheManager::Init(const std::string& file_name,
 
       result = LoadFromFile(file_name, *pt_);
 
-      utils::SharedPtr<policy_table::Table> snapshot = GenerateSnapshot();
+      std::shared_ptr<policy_table::Table> snapshot = GenerateSnapshot();
       result &= snapshot->is_valid();
       LOG4CXX_DEBUG(logger_,
                     "Check if snapshot is valid: " << std::boolalpha << result);

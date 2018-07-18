@@ -33,7 +33,7 @@
 #define SRC_COMPONENTS_SMART_OBJECTS_INCLUDE_SMART_OBJECTS_DEFAULT_SHEMA_ITEM_H_
 
 #include "utils/macro.h"
-#include "utils/shared_ptr.h"
+
 
 #include "smart_objects/schema_item.h"
 #include "smart_objects/schema_item_parameter.h"

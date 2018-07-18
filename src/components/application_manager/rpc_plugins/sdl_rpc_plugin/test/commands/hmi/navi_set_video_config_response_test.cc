@@ -44,7 +44,7 @@ namespace commands_test {
 namespace hmi_commands_test {
 namespace navi_set_video_config_response {
 
-using utils::SharedPtr;
+
 using sdl_rpc_plugin::commands::NaviSetVideoConfigResponse;
 using test::components::event_engine_test::MockEventDispatcher;
 using testing::_;
@@ -61,7 +61,7 @@ class NaviSetVideoConfigResponseTest
 TEST_F(NaviSetVideoConfigResponseTest, RUN_SUCCESS) {
   MessageSharedPtr msg = CreateMessage();
 
-  SharedPtr<NaviSetVideoConfigResponse> command(
+  std::shared_ptr<NaviSetVideoConfigResponse> command(
       CreateCommand<NaviSetVideoConfigResponse>(msg));
 
   MockEventDispatcher mock_event_dispatcher;

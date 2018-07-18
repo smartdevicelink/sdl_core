@@ -48,7 +48,7 @@
 #endif  // ENABLE_SECURITY
 #include "transport_manager/mock_transport_manager.h"
 #include "utils/mock_system_time_handler.h"
-#include "utils/make_shared.h"
+
 #include "utils/test_async_waiter.h"
 #include <bson_object.h>
 
@@ -243,7 +243,7 @@ class ProtocolHandlerImplTest : public ::testing::Test {
                                             protection_flag);
   }
 
-  void AddSession(const ::utils::SharedPtr<TestAsyncWaiter>& waiter,
+  void AddSession(const std::shared_ptr<TestAsyncWaiter>& waiter,
                   uint32_t& times) {
     using namespace protocol_handler;
     ASSERT_TRUE(NULL != waiter.get());
@@ -368,7 +368,7 @@ class ProtocolHandlerImplTest : public ::testing::Test {
       const std::vector<int32_t>& expected_video_service_transports);
 
   testing::NiceMock<MockProtocolHandlerSettings> protocol_handler_settings_mock;
-  ::utils::SharedPtr<ProtocolHandlerImpl> protocol_handler_impl;
+  std::shared_ptr<ProtocolHandlerImpl> protocol_handler_impl;
   TransportManagerListener* tm_listener;
   // Uniq connection
   ::transport_manager::ConnectionUID connection_id;
@@ -621,8 +621,8 @@ TEST_F(ProtocolHandlerImplTest,
 TEST_F(ProtocolHandlerImplTest, StartSession_Protected_SessionObserverAccept) {
   SetProtocolVersion2();
 
-  ::utils::SharedPtr<TestAsyncWaiter> waiter =
-      utils::MakeShared<TestAsyncWaiter>();
+  std::shared_ptr<TestAsyncWaiter> waiter =
+      std::make_shared<TestAsyncWaiter>();
   uint32_t times = 0;
 
   AddSession(waiter, times);
@@ -836,8 +836,8 @@ TEST_F(ProtocolHandlerImplTest,
  * ProtocolHandler shall send NAck on session_observer rejection
  */
 TEST_F(ProtocolHandlerImplTest, EndSession_SessionObserverReject) {
-  ::utils::SharedPtr<TestAsyncWaiter> waiter =
-      utils::MakeShared<TestAsyncWaiter>();
+  std::shared_ptr<TestAsyncWaiter> waiter =
+      std::make_shared<TestAsyncWaiter>();
   uint32_t times = 0;
 
   AddSession(waiter, times);
@@ -870,8 +870,8 @@ TEST_F(ProtocolHandlerImplTest, EndSession_SessionObserverReject) {
  * ProtocolHandler shall send NAck on wrong hash code
  */
 TEST_F(ProtocolHandlerImplTest, EndSession_Success) {
-  ::utils::SharedPtr<TestAsyncWaiter> waiter =
-      utils::MakeShared<TestAsyncWaiter>();
+  std::shared_ptr<TestAsyncWaiter> waiter =
+      std::make_shared<TestAsyncWaiter>();
   uint32_t times = 0;
 
   AddSession(waiter, times);
@@ -904,8 +904,8 @@ TEST_F(ProtocolHandlerImplTest, EndSession_Success) {
 #ifdef ENABLE_SECURITY
 TEST_F(ProtocolHandlerImplTest, SecurityEnable_StartSessionProtocoloV1) {
   using namespace protocol_handler;
-  ::utils::SharedPtr<TestAsyncWaiter> waiter =
-      utils::MakeShared<TestAsyncWaiter>();
+  std::shared_ptr<TestAsyncWaiter> waiter =
+      std::make_shared<TestAsyncWaiter>();
   uint32_t times = 0;
 
   AddSession(waiter, times);
@@ -2653,8 +2653,8 @@ TEST_F(ProtocolHandlerImplTest, DISABLED_FloodVerification) {
   InitProtocolHandlerImpl(period_msec, max_messages);
   AddConnection();
 
-  ::utils::SharedPtr<TestAsyncWaiter> waiter =
-      utils::MakeShared<TestAsyncWaiter>();
+  std::shared_ptr<TestAsyncWaiter> waiter =
+      std::make_shared<TestAsyncWaiter>();
   uint32_t times = 0;
 
   AddSession(waiter, times);
@@ -2691,8 +2691,8 @@ TEST_F(ProtocolHandlerImplTest, DISABLED_FloodVerification_ThresholdValue) {
   InitProtocolHandlerImpl(period_msec, max_messages);
   AddConnection();
 
-  ::utils::SharedPtr<TestAsyncWaiter> waiter =
-      utils::MakeShared<TestAsyncWaiter>();
+  std::shared_ptr<TestAsyncWaiter> waiter =
+      std::make_shared<TestAsyncWaiter>();
   uint32_t times = 0;
 
   AddSession(waiter, times);
@@ -2728,8 +2728,8 @@ TEST_F(ProtocolHandlerImplTest, DISABLED_FloodVerification_VideoFrameSkip) {
   InitProtocolHandlerImpl(period_msec, max_messages);
   AddConnection();
 
-  ::utils::SharedPtr<TestAsyncWaiter> waiter =
-      utils::MakeShared<TestAsyncWaiter>();
+  std::shared_ptr<TestAsyncWaiter> waiter =
+      std::make_shared<TestAsyncWaiter>();
   uint32_t times = 0;
 
   AddSession(waiter, times);
@@ -2757,8 +2757,8 @@ TEST_F(ProtocolHandlerImplTest, DISABLED_FloodVerification_AudioFrameSkip) {
   InitProtocolHandlerImpl(period_msec, max_messages);
   AddConnection();
 
-  ::utils::SharedPtr<TestAsyncWaiter> waiter =
-      utils::MakeShared<TestAsyncWaiter>();
+  std::shared_ptr<TestAsyncWaiter> waiter =
+      std::make_shared<TestAsyncWaiter>();
   uint32_t times = 0;
 
   AddSession(waiter, times);
@@ -2786,8 +2786,8 @@ TEST_F(ProtocolHandlerImplTest, DISABLED_FloodVerificationDisable) {
   InitProtocolHandlerImpl(period_msec, max_messages);
   AddConnection();
 
-  ::utils::SharedPtr<TestAsyncWaiter> waiter =
-      utils::MakeShared<TestAsyncWaiter>();
+  std::shared_ptr<TestAsyncWaiter> waiter =
+      std::make_shared<TestAsyncWaiter>();
   uint32_t times = 0;
 
   AddSession(waiter, times);
@@ -2815,8 +2815,8 @@ TEST_F(ProtocolHandlerImplTest, MalformedVerificationDisable) {
   InitProtocolHandlerImpl(0u, 0u, false, period_msec, max_messages);
   AddConnection();
 
-  ::utils::SharedPtr<TestAsyncWaiter> waiter =
-      utils::MakeShared<TestAsyncWaiter>();
+  std::shared_ptr<TestAsyncWaiter> waiter =
+      std::make_shared<TestAsyncWaiter>();
   uint32_t times = 0;
 
   AddSession(waiter, times);
@@ -2848,8 +2848,8 @@ TEST_F(ProtocolHandlerImplTest, DISABLED_MalformedLimitVerification) {
   InitProtocolHandlerImpl(0u, 0u, true, period_msec, max_messages);
   AddConnection();
 
-  ::utils::SharedPtr<TestAsyncWaiter> waiter =
-      utils::MakeShared<TestAsyncWaiter>();
+  std::shared_ptr<TestAsyncWaiter> waiter =
+      std::make_shared<TestAsyncWaiter>();
   uint32_t times = 0;
 
   AddSession(waiter, times);
@@ -2896,8 +2896,8 @@ TEST_F(ProtocolHandlerImplTest,
   InitProtocolHandlerImpl(0u, 0u, true, period_msec, max_messages);
   AddConnection();
 
-  ::utils::SharedPtr<TestAsyncWaiter> waiter =
-      utils::MakeShared<TestAsyncWaiter>();
+  std::shared_ptr<TestAsyncWaiter> waiter =
+      std::make_shared<TestAsyncWaiter>();
   uint32_t times = 0;
 
   AddSession(waiter, times);
@@ -2968,8 +2968,8 @@ TEST_F(ProtocolHandlerImplTest, MalformedLimitVerification_MalformedOnly) {
   InitProtocolHandlerImpl(0u, 0u, true, period_msec, max_messages);
   AddConnection();
 
-  ::utils::SharedPtr<TestAsyncWaiter> waiter =
-      utils::MakeShared<TestAsyncWaiter>();
+  std::shared_ptr<TestAsyncWaiter> waiter =
+      std::make_shared<TestAsyncWaiter>();
   uint32_t times = 0;
 
   AddSession(waiter, times);
@@ -3029,8 +3029,8 @@ TEST_F(ProtocolHandlerImplTest, MalformedLimitVerification_NullTimePeriod) {
   InitProtocolHandlerImpl(0u, 0u, true, period_msec, max_messages);
   AddConnection();
 
-  ::utils::SharedPtr<TestAsyncWaiter> waiter =
-      utils::MakeShared<TestAsyncWaiter>();
+  std::shared_ptr<TestAsyncWaiter> waiter =
+      std::make_shared<TestAsyncWaiter>();
   uint32_t times = 0;
 
   AddSession(waiter, times);
@@ -3063,8 +3063,8 @@ TEST_F(ProtocolHandlerImplTest, MalformedLimitVerification_NullCount) {
   InitProtocolHandlerImpl(0u, 0u, true, period_msec, max_messages);
   AddConnection();
 
-  ::utils::SharedPtr<TestAsyncWaiter> waiter =
-      utils::MakeShared<TestAsyncWaiter>();
+  std::shared_ptr<TestAsyncWaiter> waiter =
+      std::make_shared<TestAsyncWaiter>();
   uint32_t times = 0;
 
   AddSession(waiter, times);
@@ -3107,8 +3107,8 @@ TEST_F(ProtocolHandlerImplTest,
 TEST_F(ProtocolHandlerImplTest,
        DISABLED_SendEndServicePrivate_EndSession_MessageSent) {
   // Arrange
-  ::utils::SharedPtr<TestAsyncWaiter> waiter =
-      utils::MakeShared<TestAsyncWaiter>();
+  std::shared_ptr<TestAsyncWaiter> waiter =
+      std::make_shared<TestAsyncWaiter>();
   uint32_t times = 0;
 
   AddSession(waiter, times);
@@ -3132,8 +3132,8 @@ TEST_F(ProtocolHandlerImplTest,
 TEST_F(ProtocolHandlerImplTest,
        SendEndServicePrivate_ServiceTypeControl_MessageSent) {
   // Arrange
-  ::utils::SharedPtr<TestAsyncWaiter> waiter =
-      utils::MakeShared<TestAsyncWaiter>();
+  std::shared_ptr<TestAsyncWaiter> waiter =
+      std::make_shared<TestAsyncWaiter>();
   uint32_t times = 0;
 
   AddSession(waiter, times);
@@ -3172,8 +3172,8 @@ TEST_F(ProtocolHandlerImplTest, SendHeartBeat_NoConnection_NotSent) {
 
 TEST_F(ProtocolHandlerImplTest, SendHeartBeat_Successful) {
   // Arrange
-  ::utils::SharedPtr<TestAsyncWaiter> waiter =
-      utils::MakeShared<TestAsyncWaiter>();
+  std::shared_ptr<TestAsyncWaiter> waiter =
+      std::make_shared<TestAsyncWaiter>();
   uint32_t times = 0;
 
   AddSession(waiter, times);
@@ -3198,8 +3198,8 @@ TEST_F(ProtocolHandlerImplTest, SendHeartBeat_Successful) {
 
 TEST_F(ProtocolHandlerImplTest, SendHeartBeatAck_Successful) {
   // Arrange
-  ::utils::SharedPtr<TestAsyncWaiter> waiter =
-      utils::MakeShared<TestAsyncWaiter>();
+  std::shared_ptr<TestAsyncWaiter> waiter =
+      std::make_shared<TestAsyncWaiter>();
   uint32_t times = 0;
 
   AddSession(waiter, times);
@@ -3228,8 +3228,8 @@ TEST_F(ProtocolHandlerImplTest, SendHeartBeatAck_Successful) {
 TEST_F(ProtocolHandlerImplTest,
        DISABLED_SendHeartBeatAck_WrongProtocolVersion_NotSent) {
   // Arrange
-  ::utils::SharedPtr<TestAsyncWaiter> waiter =
-      utils::MakeShared<TestAsyncWaiter>();
+  std::shared_ptr<TestAsyncWaiter> waiter =
+      std::make_shared<TestAsyncWaiter>();
   uint32_t times = 0;
 
   AddSession(waiter, times);
@@ -3258,8 +3258,8 @@ TEST_F(ProtocolHandlerImplTest,
 TEST_F(ProtocolHandlerImplTest,
        SendMessageToMobileApp_SendSingleControlMessage) {
   // Arrange
-  ::utils::SharedPtr<TestAsyncWaiter> waiter =
-      utils::MakeShared<TestAsyncWaiter>();
+  std::shared_ptr<TestAsyncWaiter> waiter =
+      std::make_shared<TestAsyncWaiter>();
   uint32_t times = 0;
 
   AddSession(waiter, times);
@@ -3267,7 +3267,7 @@ TEST_F(ProtocolHandlerImplTest,
   const bool is_final = true;
   const uint32_t total_data_size = 1;
   UCharDataVector data(total_data_size);
-  RawMessagePtr message = utils::MakeShared<RawMessage>(
+  RawMessagePtr message = std::make_shared<RawMessage>(
       connection_key, PROTOCOL_VERSION_3, &data[0], total_data_size, kControl);
   // Expect getting pair from key from session observer
   EXPECT_CALL(session_observer_mock,
@@ -3297,8 +3297,8 @@ TEST_F(ProtocolHandlerImplTest,
 TEST_F(ProtocolHandlerImplTest,
        SendMessageToMobileApp_SendSingleNonControlMessage) {
   // Arrange
-  ::utils::SharedPtr<TestAsyncWaiter> waiter =
-      utils::MakeShared<TestAsyncWaiter>();
+  std::shared_ptr<TestAsyncWaiter> waiter =
+      std::make_shared<TestAsyncWaiter>();
   uint32_t times = 0;
 
   AddSession(waiter, times);
@@ -3306,7 +3306,7 @@ TEST_F(ProtocolHandlerImplTest,
   const bool is_final = true;
   const uint32_t total_data_size = 1;
   UCharDataVector data(total_data_size);
-  RawMessagePtr message = utils::MakeShared<RawMessage>(
+  RawMessagePtr message = std::make_shared<RawMessage>(
       connection_key, PROTOCOL_VERSION_3, &data[0], total_data_size, kRpc);
   // Expect getting pair from key from session observer
   EXPECT_CALL(session_observer_mock,
@@ -3340,8 +3340,8 @@ TEST_F(ProtocolHandlerImplTest,
 
 TEST_F(ProtocolHandlerImplTest, SendMessageToMobileApp_SendMultiframeMessage) {
   // Arrange
-  ::utils::SharedPtr<TestAsyncWaiter> waiter =
-      utils::MakeShared<TestAsyncWaiter>();
+  std::shared_ptr<TestAsyncWaiter> waiter =
+      std::make_shared<TestAsyncWaiter>();
   uint32_t times = 0;
 
   AddSession(waiter, times);
@@ -3350,7 +3350,7 @@ TEST_F(ProtocolHandlerImplTest, SendMessageToMobileApp_SendMultiframeMessage) {
   const uint32_t total_data_size = MAXIMUM_FRAME_DATA_V2_SIZE * 2;
   UCharDataVector data(total_data_size);
   const uint8_t first_consecutive_frame = 0x01;
-  RawMessagePtr message = utils::MakeShared<RawMessage>(
+  RawMessagePtr message = std::make_shared<RawMessage>(
       connection_key, PROTOCOL_VERSION_3, &data[0], total_data_size, kBulk);
   // Expect getting pair from key from session observer
   EXPECT_CALL(session_observer_mock,
@@ -3395,8 +3395,8 @@ TEST_F(ProtocolHandlerImplTest, SendMessageToMobileApp_SendMultiframeMessage) {
 }
 
 TEST_F(ProtocolHandlerImplTest, SendServiceDataAck_PreVersion5) {
-  ::utils::SharedPtr<TestAsyncWaiter> waiter =
-      utils::MakeShared<TestAsyncWaiter>();
+  std::shared_ptr<TestAsyncWaiter> waiter =
+      std::make_shared<TestAsyncWaiter>();
   uint32_t times = 0;
 
   AddSession(waiter, times);
@@ -3422,8 +3422,8 @@ TEST_F(ProtocolHandlerImplTest, SendServiceDataAck_PreVersion5) {
 }
 
 TEST_F(ProtocolHandlerImplTest, SendServiceDataAck_AfterVersion5) {
-  ::utils::SharedPtr<TestAsyncWaiter> waiter =
-      utils::MakeShared<TestAsyncWaiter>();
+  std::shared_ptr<TestAsyncWaiter> waiter =
+      std::make_shared<TestAsyncWaiter>();
   uint32_t times = 0;
 
   AddSession(waiter, times);

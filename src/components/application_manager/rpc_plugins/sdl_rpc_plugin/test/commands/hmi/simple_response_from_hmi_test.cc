@@ -33,7 +33,7 @@
 #include <stdint.h>
 
 #include "gtest/gtest.h"
-#include "utils/shared_ptr.h"
+
 #include "smart_objects/smart_object.h"
 #include "application_manager/smart_object_keys.h"
 #include "application_manager/commands/commands_test.h"
@@ -109,7 +109,7 @@ using ::testing::ReturnRef;
 using ::testing::Types;
 using ::testing::Eq;
 
-using ::utils::SharedPtr;
+
 using ::test::components::event_engine_test::MockEventDispatcher;
 
 namespace am = ::application_manager;
@@ -244,7 +244,7 @@ TYPED_TEST(ResponseFromHMICommandsTest, Run_SendMessageToHMI_SUCCESS) {
   typedef typename TestFixture::CommandData CommandData;
   typedef typename CommandData::CommandType CommandType;
 
-  SharedPtr<CommandType> command = this->template CreateCommand<CommandType>();
+  std::shared_ptr<CommandType> command = this->template CreateCommand<CommandType>();
 
   EXPECT_CALL(this->event_dispatcher_,
               raise_event(EventIdIsEqualTo(CommandData::kEventId)));
@@ -255,7 +255,7 @@ TYPED_TEST(ResponseFromHMICommandsTest, Run_SendMessageToHMI_SUCCESS) {
 TYPED_TEST(EmptyResponseFromHMICommandsTest, Run_SUCCESS) {
   typedef typename TestFixture::CommandType CommandType;
 
-  SharedPtr<CommandType> command = this->template CreateCommand<CommandType>();
+  std::shared_ptr<CommandType> command = this->template CreateCommand<CommandType>();
 
   command->Run();
 }
@@ -277,7 +277,7 @@ class NotificationFromHMITest
     : public CommandsTest<CommandsTestMocks::kIsNice> {};
 
 TEST_F(NotificationFromHMITest, BasicMethodsOverloads_SUCCESS) {
-  SharedPtr<application_manager::commands::NotificationFromHMI> command(
+  std::shared_ptr<application_manager::commands::NotificationFromHMI> command(
       CreateCommand<application_manager::commands::NotificationFromHMI>());
   // Current implementation always return `true`
   EXPECT_TRUE(command->Init());
@@ -290,7 +290,7 @@ TEST_F(NotificationFromHMITest, SendNotificationToMobile_SUCCESS) {
   (*command_msg)[am::strings::params][am::strings::message_type] =
       static_cast<int32_t>(am::MessageType::kNotification);
 
-  SharedPtr<application_manager::commands::NotificationFromHMI> command(
+  std::shared_ptr<application_manager::commands::NotificationFromHMI> command(
       CreateCommand<application_manager::commands::NotificationFromHMI>());
   EXPECT_CALL(
       mock_rpc_service_,
@@ -303,7 +303,7 @@ TEST_F(NotificationFromHMITest, SendNotificationToMobile_SUCCESS) {
 TEST_F(NotificationFromHMITest, CreateHMIRequest_UNSUCCESS) {
   MessageSharedPtr command_msg(CreateMessage(smart_objects::SmartType_Map));
   (*command_msg)[am::strings::msg_params] = 0;
-  SharedPtr<application_manager::commands::NotificationFromHMI> command(
+  std::shared_ptr<application_manager::commands::NotificationFromHMI> command(
       CreateCommand<application_manager::commands::NotificationFromHMI>(
           command_msg));
 

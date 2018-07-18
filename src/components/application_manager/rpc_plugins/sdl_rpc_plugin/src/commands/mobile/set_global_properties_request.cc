@@ -284,7 +284,7 @@ void SetGlobalPropertiesRequest::on_event(const event_engine::Event& event) {
       ui_result_ = static_cast<hmi_apis::Common_Result::eType>(
           message[strings::params][hmi_response::code].asInt());
       GetInfo(message, ui_response_info_);
-      if (application.valid()) {
+      if (application.use_count() != 0) {
         auto& help_prompt_manager = application->help_prompt_manager();
         help_prompt_manager.OnSetGlobalPropertiesReceived(message, true);
       }
@@ -297,7 +297,7 @@ void SetGlobalPropertiesRequest::on_event(const event_engine::Event& event) {
       tts_result_ = static_cast<hmi_apis::Common_Result::eType>(
           message[strings::params][hmi_response::code].asInt());
       GetInfo(message, tts_response_info_);
-      if (application.valid()) {
+      if (application.use_count() != 0) {
         auto& help_prompt_manager = application->help_prompt_manager();
         help_prompt_manager.OnSetGlobalPropertiesReceived(message, true);
       }

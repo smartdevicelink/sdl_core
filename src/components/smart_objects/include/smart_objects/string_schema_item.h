@@ -36,7 +36,7 @@
 #include <stddef.h>
 #include <string>
 
-#include "utils/shared_ptr.h"
+
 
 #include "smart_objects/default_shema_item.h"
 #include "smart_objects/schema_item_parameter.h"
@@ -54,7 +54,7 @@ class CStringSchemaItem : public CDefaultSchemaItem<std::string> {
    * @param DefaultValue Default value.
    * @return Shared pointer to a new schema item.
    **/
-  static utils::SharedPtr<CStringSchemaItem> create(
+  static std::shared_ptr<CStringSchemaItem> create(
       const TSchemaItemParameter<size_t>& MinLength =
           TSchemaItemParameter<size_t>(),
       const TSchemaItemParameter<size_t>& MaxLength =

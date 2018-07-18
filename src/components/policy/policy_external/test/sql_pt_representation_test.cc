@@ -49,7 +49,7 @@
 #include "policy/policy_table/enums.h"
 #include "rpc_base/rpc_base.h"
 #include "policy/mock_policy_settings.h"
-#include "utils/shared_ptr.h"
+
 
 namespace policy_table = rpc::policy_table_interface_base;
 using policy::SQLPTRepresentation;
@@ -1585,7 +1585,7 @@ TEST_F(SQLPTRepresentationTest,
   ASSERT_TRUE(reps->Save(update));
 
   // Act
-  utils::SharedPtr<policy_table::Table> snapshot = reps->GenerateSnapshot();
+  std::shared_ptr<policy_table::Table> snapshot = reps->GenerateSnapshot();
   snapshot->SetPolicyTableType(rpc::policy_table_interface_base::PT_SNAPSHOT);
   // Remove fields which must be absent in snapshot
   table["policy_table"]["consumer_friendly_messages"].removeMember("messages");

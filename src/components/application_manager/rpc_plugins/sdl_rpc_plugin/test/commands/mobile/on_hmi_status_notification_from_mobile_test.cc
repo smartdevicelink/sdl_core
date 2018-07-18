@@ -78,7 +78,7 @@ TEST_F(OnHMIStatusNotificationFromMobileTest,
        Run_CurrentStateForeground_SUCCESS) {
   MessageSharedPtr msg = CreateMsgParams(mobile_apis::HMILevel::HMI_FULL);
 
-  SharedPtr<OnHMIStatusNotificationFromMobile> command =
+  std::shared_ptr<OnHMIStatusNotificationFromMobile> command =
       CreateCommand<OnHMIStatusNotificationFromMobile>(msg);
 
   MockAppPtr mock_app = CreateMockApp();
@@ -106,7 +106,7 @@ TEST_F(OnHMIStatusNotificationFromMobileTest,
 TEST_F(OnHMIStatusNotificationFromMobileTest, Run_InvalidApp_NoNotification) {
   MessageSharedPtr msg = CreateMsgParams(mobile_apis::HMILevel::HMI_FULL);
 
-  SharedPtr<OnHMIStatusNotificationFromMobile> command =
+  std::shared_ptr<OnHMIStatusNotificationFromMobile> command =
       CreateCommand<OnHMIStatusNotificationFromMobile>(msg);
 
   MockAppPtr mock_app = CreateMockApp();
@@ -132,7 +132,7 @@ TEST_F(OnHMIStatusNotificationFromMobileTest,
        Run_CurrentStateNotForeground_SUCCESS) {
   MessageSharedPtr msg = CreateMsgParams(mobile_apis::HMILevel::HMI_BACKGROUND);
 
-  SharedPtr<OnHMIStatusNotificationFromMobile> command =
+  std::shared_ptr<OnHMIStatusNotificationFromMobile> command =
       CreateCommand<OnHMIStatusNotificationFromMobile>(msg);
 
   MockAppPtr mock_app = CreateMockApp();
@@ -161,7 +161,7 @@ TEST_F(OnHMIStatusNotificationFromMobileTest,
        Run_ProtocolVersionKV3_NoNotification) {
   MessageSharedPtr msg = CreateMsgParams(mobile_apis::HMILevel::HMI_BACKGROUND);
 
-  SharedPtr<OnHMIStatusNotificationFromMobile> command =
+  std::shared_ptr<OnHMIStatusNotificationFromMobile> command =
       CreateCommand<OnHMIStatusNotificationFromMobile>(msg);
 
   MockAppPtr mock_app = CreateMockApp();
@@ -190,7 +190,7 @@ TEST_F(OnHMIStatusNotificationFromMobileTest,
        Run_AppNotRequestedBeforeAndKV3_NoNotification) {
   MessageSharedPtr msg = CreateMsgParams(mobile_apis::HMILevel::HMI_FULL);
 
-  SharedPtr<OnHMIStatusNotificationFromMobile> command =
+  std::shared_ptr<OnHMIStatusNotificationFromMobile> command =
       CreateCommand<OnHMIStatusNotificationFromMobile>(msg);
 
   MockAppPtr mock_app = CreateMockApp();
@@ -218,7 +218,7 @@ TEST_F(OnHMIStatusNotificationFromMobileTest,
        Run_AppNotRequestedBefore_SUCCESS) {
   MessageSharedPtr msg = CreateMsgParams(mobile_apis::HMILevel::HMI_FULL);
 
-  SharedPtr<OnHMIStatusNotificationFromMobile> command =
+  std::shared_ptr<OnHMIStatusNotificationFromMobile> command =
       CreateCommand<OnHMIStatusNotificationFromMobile>(msg);
 
   MockAppPtr mock_app = CreateMockApp();
@@ -249,7 +249,7 @@ TEST_F(OnHMIStatusNotificationFromMobileTest,
        Run_AnotherForegroundSDLApp_SUCCESS) {
   MessageSharedPtr msg = CreateMsgParams(mobile_apis::HMILevel::HMI_FULL);
 
-  SharedPtr<OnHMIStatusNotificationFromMobile> command =
+  std::shared_ptr<OnHMIStatusNotificationFromMobile> command =
       CreateCommand<OnHMIStatusNotificationFromMobile>(msg);
 
   MockAppPtr mock_app = CreateMockApp();

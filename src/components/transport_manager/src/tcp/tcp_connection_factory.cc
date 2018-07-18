@@ -35,7 +35,7 @@
 #include "transport_manager/tcp/tcp_server_originated_socket_connection.h"
 
 #include "utils/logger.h"
-#include "utils/make_shared.h"
+
 
 namespace transport_manager {
 namespace transport_adapter {
@@ -56,8 +56,8 @@ TransportAdapter::Error TcpConnectionFactory::CreateConnection(
   LOG4CXX_DEBUG(logger_,
                 "DeviceUID: " << &device_uid
                               << ", ApplicationHandle: " << &app_handle);
-  utils::SharedPtr<TcpServerOriginatedSocketConnection> connection =
-      utils::MakeShared<TcpServerOriginatedSocketConnection>(
+  std::shared_ptr<TcpServerOriginatedSocketConnection> connection =
+      std::make_shared<TcpServerOriginatedSocketConnection>(
           device_uid, app_handle, controller_);
   controller_->ConnectionCreated(connection, device_uid, app_handle);
   const TransportAdapter::Error error = connection->Start();

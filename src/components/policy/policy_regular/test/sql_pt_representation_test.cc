@@ -47,8 +47,8 @@
 #include "json/writer.h"
 #include "json/reader.h"
 #include "rpc_base/rpc_base.h"
-#include "utils/shared_ptr.h"
-#include "utils/make_shared.h"
+
+
 #include "utils/file_system.h"
 #include "utils/sqlite_wrapper/sql_database.h"
 
@@ -1517,7 +1517,7 @@ TEST_F(SQLPTRepresentationTest,
   ASSERT_TRUE(reps->Save(update));
 
   // Act
-  utils::SharedPtr<policy_table::Table> snapshot = reps->GenerateSnapshot();
+  std::shared_ptr<policy_table::Table> snapshot = reps->GenerateSnapshot();
   snapshot->SetPolicyTableType(rpc::policy_table_interface_base::PT_SNAPSHOT);
   // Remove fields which must be absent in snapshot
   table["policy_table"]["consumer_friendly_messages"].removeMember("messages");

@@ -36,10 +36,10 @@
 #include <stdint.h>
 #include "gtest/gtest.h"
 
-#include "utils/shared_ptr.h"
+
 #include "smart_objects/smart_object.h"
 #include "application_manager/commands/command.h"
-#include "utils/make_shared.h"
+
 #include "application_manager/mock_application_manager.h"
 #include "test/application_manager/mock_application_manager_settings.h"
 #include "application_manager/test/include/application_manager/mock_hmi_interface.h"
@@ -60,7 +60,7 @@ using ::testing::NiceMock;
 using ::testing::Mock;
 using ::testing::_;
 
-using ::utils::SharedPtr;
+
 using ::smart_objects::SmartObject;
 using am::commands::MessageSharedPtr;
 using ::test::components::application_manager_test::MockApplicationManager;
@@ -104,7 +104,7 @@ class CommandsTest : public ::testing::Test {
   typedef typename TypeIf<kIsNice,
                           NiceMock<MockApplication>,
                           MockApplication>::Result MockApp;
-  typedef SharedPtr<MockApp> MockAppPtr;
+  typedef std::shared_ptr<MockApp> MockAppPtr;
 
   virtual ~CommandsTest() {
     Mock::VerifyAndClearExpectations(&mock_message_helper_);
@@ -112,18 +112,18 @@ class CommandsTest : public ::testing::Test {
 
   static MessageSharedPtr CreateMessage(
       const smart_objects::SmartType type = smart_objects::SmartType_Null) {
-    return ::utils::MakeShared<SmartObject>(type);
+    return std::make_shared<SmartObject>(type);
   }
 
   static MockAppPtr CreateMockApp() {
-    return ::utils::MakeShared<MockApp>();
+    return std::make_shared<MockApp>();
   }
 
   template <class Command>
-  SharedPtr<Command> CreateCommand(const uint32_t timeout,
+  std::shared_ptr<Command> CreateCommand(const uint32_t timeout,
                                    MessageSharedPtr& msg) {
     InitCommand(timeout);
-    return ::utils::MakeShared<Command>((msg ? msg : msg = CreateMessage()),
+    return std::make_shared<Command>((msg ? msg : msg = CreateMessage()),
                                         app_mngr_,
                                         mock_rpc_service_,
                                         mock_hmi_capabilities_,
@@ -131,15 +131,15 @@ class CommandsTest : public ::testing::Test {
   }
 
   template <class Command>
-  SharedPtr<Command> CreateCommand(MessageSharedPtr& msg) {
+  std::shared_ptr<Command> CreateCommand(MessageSharedPtr& msg) {
     return CreateCommand<Command>(kDefaultTimeout_, msg);
   }
 
   template <class Command>
-  SharedPtr<Command> CreateCommand(const uint32_t timeout = kDefaultTimeout_) {
+  std::shared_ptr<Command> CreateCommand(const uint32_t timeout = kDefaultTimeout_) {
     InitCommand(timeout);
     MessageSharedPtr msg = CreateMessage();
-    return ::utils::MakeShared<Command>(msg,
+    return std::make_shared<Command>(msg,
                                         app_mngr_,
                                         mock_rpc_service_,
                                         mock_hmi_capabilities_,

@@ -69,7 +69,7 @@ class ResumptionDataJsonTest : public ResumptionDataTest {
       : last_state_("app_storage_folder", "app_info_storage")
       , res_json(last_state_, mock_application_manager_) {}
   virtual void SetUp() {
-    app_mock = new NiceMock<application_manager_test::MockApplication>();
+    app_mock = std::make_shared<NiceMock<application_manager_test::MockApplication>>();
 
     policy_app_id_ = "test_policy_app_id";
     app_id_ = 10;

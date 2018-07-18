@@ -38,7 +38,7 @@
 #include "utils/threads/thread.h"
 #include "utils/threads/thread_delegate.h"
 #include "utils/atomic_object.h"
-#include "utils/shared_ptr.h"
+
 #include "protocol/raw_message.h"
 
 namespace media_manager {
@@ -96,7 +96,7 @@ class StreamerAdapter : public MediaAdapterImpl {
   DISALLOW_COPY_AND_ASSIGN(StreamerAdapter);
 };
 
-typedef utils::SharedPtr<StreamerAdapter> StreamerAdapterPtr;
+typedef std::shared_ptr<StreamerAdapter> StreamerAdapterPtr;
 
 }  // namespace media_manager
 

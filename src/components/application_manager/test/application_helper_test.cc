@@ -50,8 +50,8 @@
 #include "smart_objects/smart_object.h"
 #include "utils/custom_string.h"
 #include "utils/macro.h"
-#include "utils/shared_ptr.h"
-#include "utils/make_shared.h"
+
+
 #include "test/resumption/mock_last_state.h"
 #include "media_manager/mock_media_manager.h"
 
@@ -121,13 +121,13 @@ class ApplicationHelperTest : public testing::Test {
         .WillOnce(ReturnRef(path_to_plagin));
     app_manager_impl_.Init(mock_last_state_, &mock_media_manager_);
 
-    app_impl_ = new ApplicationImpl(
+    app_impl_ = std::make_shared<ApplicationImpl>(
         application_id,
         policy_app_id,
         mac_address,
         device_id,
         app_name,
-        utils::MakeShared<usage_statistics_test::MockStatisticsManager>(),
+        std::make_shared<usage_statistics_test::MockStatisticsManager>(),
         app_manager_impl_);
   }
 

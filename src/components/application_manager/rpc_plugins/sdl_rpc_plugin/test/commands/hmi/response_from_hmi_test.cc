@@ -33,7 +33,7 @@
 #include <stdint.h>
 
 #include "gtest/gtest.h"
-#include "utils/shared_ptr.h"
+
 #include "smart_objects/smart_object.h"
 #include "application_manager/smart_object_keys.h"
 #include "application_manager/test/include/application_manager/commands/commands_test.h"
@@ -51,13 +51,13 @@ using ::testing::Return;
 using ::testing::SaveArg;
 using ::testing::DoAll;
 
-using ::utils::SharedPtr;
+
 using ::test::components::event_engine_test::MockEventDispatcher;
 
 namespace am = ::application_manager;
 using application_manager::commands::ResponseFromHMI;
 
-typedef SharedPtr<ResponseFromHMI> ResponseFromHMIPtr;
+typedef std::shared_ptr<ResponseFromHMI> ResponseFromHMIPtr;
 
 class ResponseFromHMITest : public CommandsTest<CommandsTestMocks::kIsNice> {};
 
@@ -97,7 +97,7 @@ TEST_F(ResponseFromHMITest, CreateHMIRequest_SUCCESS) {
   MessageSharedPtr dummy_msg_params = CreateMessage();
   command->CreateHMIRequest(posted_function_id, *dummy_msg_params);
 
-  ASSERT_TRUE(result_msg);
+  ASSERT_TRUE((bool)result_msg);
 
   const application_manager::MessageType received_message_tipe =
       static_cast<application_manager::MessageType>(

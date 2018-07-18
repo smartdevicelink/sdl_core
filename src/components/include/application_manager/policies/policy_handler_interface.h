@@ -52,7 +52,7 @@
 
 using namespace ::rpc::policy_table_interface_base;
 namespace policy {
-typedef utils::SharedPtr<utils::Callable> StatusNotifier;
+typedef std::shared_ptr<utils::Callable> StatusNotifier;
 
 class PolicyHandlerInterface {
  public:
@@ -124,7 +124,7 @@ class PolicyHandlerInterface {
   virtual void add_listener(PolicyHandlerObserver* listener) = 0;
   virtual void remove_listener(PolicyHandlerObserver* listener) = 0;
 
-  virtual utils::SharedPtr<usage_statistics::StatisticsManager>
+  virtual std::shared_ptr<usage_statistics::StatisticsManager>
   GetStatisticManager() const = 0;
 
   virtual void SendOnAppPermissionsChanged(

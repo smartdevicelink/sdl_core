@@ -301,7 +301,7 @@ void PutFileRequest::Run() {
 void PutFileRequest::SendOnPutFileNotification() {
   LOG4CXX_INFO(logger_, "SendOnPutFileNotification");
   smart_objects::SmartObjectSPtr notification =
-      new smart_objects::SmartObject(smart_objects::SmartType_Map);
+      std::make_shared<smart_objects::SmartObject>(smart_objects::SmartType_Map);
 
   smart_objects::SmartObject& message = *notification;
   message[strings::params][strings::function_id] =
