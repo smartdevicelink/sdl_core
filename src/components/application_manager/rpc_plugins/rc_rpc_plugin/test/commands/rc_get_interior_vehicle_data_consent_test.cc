@@ -61,7 +61,6 @@ using ::testing::NiceMock;
 using ::testing::SaveArg;
 using ::testing::Mock;
 using ::testing::NiceMock;
-
 namespace am = ::application_manager;
 using am::ApplicationSet;
 using am::commands::MessageSharedPtr;

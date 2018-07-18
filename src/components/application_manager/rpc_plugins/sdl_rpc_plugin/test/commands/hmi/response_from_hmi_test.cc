@@ -33,7 +33,6 @@
 #include <stdint.h>
 
 #include "gtest/gtest.h"
-
 #include "smart_objects/smart_object.h"
 #include "application_manager/smart_object_keys.h"
 #include "application_manager/test/include/application_manager/commands/commands_test.h"
@@ -50,7 +49,6 @@ using ::testing::_;
 using ::testing::Return;
 using ::testing::SaveArg;
 using ::testing::DoAll;
-
 using ::test::components::event_engine_test::MockEventDispatcher;
 
 namespace am = ::application_manager;

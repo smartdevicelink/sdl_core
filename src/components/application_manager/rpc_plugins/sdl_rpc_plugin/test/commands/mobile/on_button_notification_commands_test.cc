@@ -34,7 +34,6 @@
 #include <string>
 
 #include "gtest/gtest.h"
-
 #include "smart_objects/smart_object.h"
 #include "application_manager/smart_object_keys.h"
 
@@ -60,7 +59,6 @@ using sdl_rpc_plugin::commands::mobile::OnButtonPressNotification;
 using ::testing::_;
 using ::testing::Types;
 using ::testing::Return;
-
 using am::commands::MessageSharedPtr;
 
 namespace {

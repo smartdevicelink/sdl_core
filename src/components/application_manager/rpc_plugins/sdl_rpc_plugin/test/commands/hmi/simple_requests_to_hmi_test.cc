@@ -31,7 +31,6 @@
  */
 
 #include "gtest/gtest.h"
-
 #include "smart_objects/smart_object.h"
 #include "application_manager/smart_object_keys.h"
 #include "application_manager/commands/commands_test.h"
@@ -119,7 +118,6 @@ namespace simple_requests_to_hmi_test {
 using ::testing::_;
 using ::testing::Types;
 using ::testing::NotNull;
-
 namespace am_commands = application_manager::commands;
 using am_commands::MessageSharedPtr;
 using event_engine_test::MockEventDispatcher;

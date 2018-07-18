@@ -58,7 +58,6 @@ using am::commands::MessageSharedPtr;
 using am::MockMessageHelper;
 using am::CommandsMap;
 using utils::custom_string::CustomString;
-
 using ::testing::_;
 using ::testing::Return;
 using ::testing::ReturnRef;

@@ -60,7 +60,6 @@ using am::MockMessageHelper;
 using am::MockHmiInterfaces;
 using test::components::protocol_handler_test::MockProtocolHandler;
 using test::components::protocol_handler_test::MockProtocolHandlerSettings;
-
 using ::testing::_;
 using ::testing::Return;
 using ::testing::ReturnRef;

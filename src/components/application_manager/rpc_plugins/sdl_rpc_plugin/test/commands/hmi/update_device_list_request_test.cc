@@ -33,7 +33,6 @@
 #include <stdint.h>
 
 #include "gtest/gtest.h"
-
 #include "smart_objects/smart_object.h"
 #include "interfaces/HMI_API.h"
 #include "application_manager/smart_object_keys.h"

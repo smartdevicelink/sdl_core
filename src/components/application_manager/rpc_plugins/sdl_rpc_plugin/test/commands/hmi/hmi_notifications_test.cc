@@ -35,7 +35,6 @@
 #include <vector>
 #include "gtest/gtest.h"
 #include "application_manager/commands/commands_test.h"
-
 #include "sdl_rpc_plugin/commands/hmi/on_button_event_notification.h"
 #include "sdl_rpc_plugin/commands/hmi/on_navi_tbt_client_state_notification.h"
 #include "sdl_rpc_plugin/commands/hmi/on_navi_way_point_change_notification.h"
@@ -125,7 +124,6 @@ using ::testing::Return;
 using ::testing::ReturnRef;
 using ::testing::NiceMock;
 using ::testing::InSequence;
-
 using ::smart_objects::SmartObject;
 using ::application_manager::commands::MessageSharedPtr;
 using ::test::components::application_manager_test::MockApplicationManager;

@@ -34,7 +34,6 @@
 #include <string>
 
 #include "gtest/gtest.h"
-
 #include "smart_objects/smart_object.h"
 #include "application_manager/smart_object_keys.h"
 #include "application_manager/application.h"
@@ -52,7 +51,6 @@ namespace hmi_commands_test {
 namespace get_system_info_response {
 
 using ::testing::Return;
-
 using ::testing::NiceMock;
 namespace am = ::application_manager;
 namespace strings = ::application_manager::strings;

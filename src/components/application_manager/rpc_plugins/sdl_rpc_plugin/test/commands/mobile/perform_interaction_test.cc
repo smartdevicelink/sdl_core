@@ -37,9 +37,7 @@
 #include "mobile/perform_interaction_request.h"
 
 #include "gtest/gtest.h"
-
 #include "utils/helpers.h"
-
 #include "smart_objects/smart_object.h"
 #include "utils/custom_string.h"
 #include "application_manager/commands/command_request_test.h"
@@ -63,7 +61,6 @@ using am::commands::MessageSharedPtr;
 using am::ApplicationSharedPtr;
 using am::MockMessageHelper;
 using ::testing::_;
-
 using ::testing::Return;
 using ::testing::ReturnRef;
 using sdl_rpc_plugin::commands::PerformInteractionRequest;

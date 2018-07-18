@@ -46,7 +46,6 @@ namespace components {
 namespace commands_test {
 namespace hmi_commands_test {
 namespace navi_is_ready_responce {
-
 namespace am = ::application_manager;
 namespace commands = sdl_rpc_plugin::commands;
 

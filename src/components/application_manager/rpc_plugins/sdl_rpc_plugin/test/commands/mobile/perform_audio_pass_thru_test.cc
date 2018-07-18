@@ -55,7 +55,6 @@ using sdl_rpc_plugin::commands::PerformAudioPassThruRequest;
 using am::commands::CommandImpl;
 using am::commands::MessageSharedPtr;
 using am::MockMessageHelper;
-
 using ::testing::_;
 using ::testing::Return;
 using ::testing::ReturnRef;

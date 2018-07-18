@@ -34,7 +34,6 @@
 #include <string>
 
 #include "gtest/gtest.h"
-
 #include "smart_objects/smart_object.h"
 #include "application_manager/smart_object_keys.h"
 #include "application_manager/commands/commands_test.h"

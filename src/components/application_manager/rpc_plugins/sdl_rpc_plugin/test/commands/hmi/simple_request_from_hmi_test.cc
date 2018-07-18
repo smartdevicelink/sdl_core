@@ -31,7 +31,6 @@
  */
 
 #include "gtest/gtest.h"
-
 #include "smart_objects/smart_object.h"
 #include "application_manager/smart_object_keys.h"
 #include "application_manager/commands/commands_test.h"
@@ -50,7 +49,6 @@ using ::testing::_;
 using ::testing::Types;
 using ::testing::NotNull;
 using ::testing::NiceMock;
-
 namespace commands = ::application_manager::commands;
 using commands::MessageSharedPtr;
 using ::application_manager::event_engine::EventObserver;

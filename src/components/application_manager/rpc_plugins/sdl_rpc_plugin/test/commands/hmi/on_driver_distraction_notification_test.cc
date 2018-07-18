@@ -36,9 +36,7 @@
 #include "gtest/gtest.h"
 #include "smart_objects/smart_object.h"
 #include "application_manager/smart_object_keys.h"
-
 #include "utils/lock.h"
-
 #include "utils/data_accessor.h"
 #include "application_manager/commands/commands_test.h"
 #include "application_manager/mock_application.h"
@@ -56,7 +54,6 @@ namespace on_driver_distraction_notification {
 using ::testing::_;
 using ::testing::Return;
 using ::testing::Eq;
-
 namespace am = ::application_manager;
 using am::commands::MessageSharedPtr;
 using sdl_rpc_plugin::commands::hmi::OnDriverDistractionNotification;

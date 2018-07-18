@@ -34,7 +34,6 @@
 #include <string>
 
 #include "gtest/gtest.h"
-
 #include "application_manager/message.h"
 #include "application_manager/commands/commands_test.h"
 #include "application_manager/mock_application.h"
@@ -58,7 +57,6 @@ namespace get_urls {
 
 using namespace hmi_apis;
 using namespace policy;
-
 using ::testing::NiceMock;
 using ::testing::_;
 using ::testing::SetArgReferee;

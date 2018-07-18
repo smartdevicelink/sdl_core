@@ -41,7 +41,6 @@
 #include "application_manager/mock_application_manager.h"
 #include "application_manager/commands/command_request_test.h"
 #include "application_manager/policies/mock_policy_handler_interface.h"
-
 #include "interfaces/HMI_API.h"
 #include "interfaces/MOBILE_API.h"
 

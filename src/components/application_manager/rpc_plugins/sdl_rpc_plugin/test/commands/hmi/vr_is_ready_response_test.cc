@@ -34,7 +34,6 @@
 #include <string>
 
 #include "gtest/gtest.h"
-
 #include "smart_objects/smart_object.h"
 #include "application_manager/commands/commands_test.h"
 #include "application_manager/mock_hmi_capabilities.h"
@@ -48,7 +47,6 @@ namespace hmi_commands_test {
 namespace vr_is_ready_response {
 
 using ::testing::Return;
-
 using ::testing::NiceMock;
 namespace am = ::application_manager;
 namespace strings = ::application_manager::strings;

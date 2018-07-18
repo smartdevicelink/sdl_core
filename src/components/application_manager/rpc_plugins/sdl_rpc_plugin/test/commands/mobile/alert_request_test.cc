@@ -56,7 +56,6 @@ using sdl_rpc_plugin::commands::AlertRequest;
 using am::commands::CommandImpl;
 using am::commands::MessageSharedPtr;
 using am::MockMessageHelper;
-
 using am::event_engine::Event;
 using policy_test::MockPolicyHandlerInterface;
 using ::testing::_;

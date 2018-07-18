@@ -61,7 +61,6 @@ using sdl_rpc_plugin::commands::ScrollableMessageRequest;
 using am::commands::CommandImpl;
 using am::commands::MessageSharedPtr;
 using am::MockMessageHelper;
-
 using ::testing::_;
 using ::testing::Eq;
 using ::testing::Ref;

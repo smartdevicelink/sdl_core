@@ -34,7 +34,6 @@
 #include <string>
 
 #include "gtest/gtest.h"
-
 #include "smart_objects/smart_object.h"
 #include "application_manager/smart_object_keys.h"
 #include "application_manager/commands/command.h"
@@ -52,7 +51,6 @@ namespace get_urls_response {
 
 using ::testing::_;
 using ::testing::Return;
-
 namespace am = ::application_manager;
 namespace strings = ::application_manager::strings;
 using sdl_rpc_plugin::commands::GetUrlsResponse;

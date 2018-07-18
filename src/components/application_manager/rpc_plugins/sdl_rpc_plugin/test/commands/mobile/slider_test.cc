@@ -57,7 +57,6 @@ using am::commands::CommandImpl;
 using am::commands::MessageSharedPtr;
 using am::MockMessageHelper;
 using policy_test::MockPolicyHandlerInterface;
-
 using ::testing::_;
 using ::testing::Return;
 using ::testing::ReturnRef;

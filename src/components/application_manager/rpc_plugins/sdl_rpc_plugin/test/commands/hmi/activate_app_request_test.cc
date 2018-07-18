@@ -32,7 +32,6 @@
 
 #include "gtest/gtest.h"
 #include "hmi/activate_app_request.h"
-
 #include "smart_objects/smart_object.h"
 #include "application_manager/commands/command_impl.h"
 #include "application_manager/commands/commands_test.h"

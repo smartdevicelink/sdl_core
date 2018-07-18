@@ -33,7 +33,6 @@
 #include <stdint.h>
 
 #include "gtest/gtest.h"
-
 #include "smart_objects/smart_object.h"
 #include "interfaces/MOBILE_API.h"
 #include "application_manager/mock_hmi_capabilities.h"
