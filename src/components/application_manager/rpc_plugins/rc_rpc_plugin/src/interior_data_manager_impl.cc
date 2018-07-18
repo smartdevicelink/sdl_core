@@ -35,10 +35,10 @@ void InteriorDataManagerImpl::OnDisablingRC() {
   std::set<std::string> subscribed_modules;
   for (auto& pair : existing_subscription) {
     auto& app = pair.first;
-    auto rc_extention = RCHelpers::GetRCExtension(*app);
+    auto rc_extension = RCHelpers::GetRCExtension(*app);
     for (const auto& module : pair.second) {
       subscribed_modules.insert(module);
-      rc_extention->UnsubscribeFromInteriorVehicleData(module);
+      rc_extension->UnsubscribeFromInteriorVehicleData(module);
     }
   }
   for (auto& module : subscribed_modules) {
@@ -66,9 +66,9 @@ void InteriorDataManagerImpl::UpdateHMISubscriptionsOnPolicyUpdated() {
 
   for (auto& pair : apps_disallowed_modules) {
     auto& app = pair.first;
-    auto rc_extention = RCHelpers::GetRCExtension(*app);
+    auto rc_extension = RCHelpers::GetRCExtension(*app);
     for (const auto& module : pair.second) {
-      rc_extention->UnsubscribeFromInteriorVehicleData(module);
+      rc_extension->UnsubscribeFromInteriorVehicleData(module);
       auto apps_subscribed =
           RCHelpers::AppsSubscribedToModuleType(module, app_mngr_);
       if (apps_subscribed.empty()) {
