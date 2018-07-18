@@ -114,8 +114,10 @@ if(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
 endif()
 
 add_library("Utils" ${SOURCES})
-list(APPEND LIBRARIES -lboost_system -lboost_filesystem -lboost_thread)
+list(APPEND LIBRARIES -lboost_system -lboost_thread)
 target_link_libraries("Utils" ${LIBRARIES})
+add_dependencies("Utils" Boost)
+
 
 if(ENABLE_LOG)
   add_dependencies("Utils" install-3rd_party_logger)

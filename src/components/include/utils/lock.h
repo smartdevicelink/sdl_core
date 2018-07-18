@@ -159,6 +159,9 @@ class RecursiveLock : public BaseLock {
 // This class is used to automatically acquire and release the a lock
 class AutoLock {
  public:
+  explicit AutoLock(const std::shared_ptr<BaseLock>& lock) : lock_(*lock) {
+    lock_.Acquire();
+  }
   explicit AutoLock(BaseLock& lock) : lock_(lock) {
     // std::cerr << "lock is at " << &lock << std::endl;
     lock_.Acquire();
