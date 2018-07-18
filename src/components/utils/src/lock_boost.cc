@@ -32,7 +32,6 @@
 
 #include <errno.h>
 #include <stdint.h>
-#include <stdio.h>
 #include <string.h>
 #include <cstring>
 #include "utils/lock.h"
@@ -45,39 +44,30 @@ CREATE_LOGGERPTR_GLOBAL(logger_, "Utils")
 Lock::Lock() : lock_taken_(0) {}
 
 Lock::~Lock() {
-  // std::cerr << "destructing lock " << &mutex_ << " with lock count "
-  //           << lock_taken_ << '\n';
   if (lock_taken_ > 0) {
     LOG4CXX_FATAL(logger_, "Destroying non-released regular mutex " << &mutex_);
   }
 }
 
 void Lock::Acquire() {
-  // try {
+  try {
   mutex_.lock();
-  // std::cerr << "acquiring lock " << &mutex_ << " with lock count "
-  //           << lock_taken_ << '\n';
-  // } catch (std::exception err) {
-  //   LOG4CXX_FATAL(logger_,
-  //                 "Failed to acquire mutex " << &mutex_ << ": " <<
-  //                 err.what());
-  //   NOTREACHED();
-  // }
+  } catch (std::exception err) {
+    LOG4CXX_FATAL(logger_,
+                  "Failed to acquire mutex " << &mutex_ << ": " <<
+                  err.what());
+    NOTREACHED();
+  }
   AssertFreeAndMarkTaken();
 }
 
 void Lock::Release() {
-  // std::cerr << "releasing lock " << &mutex_ << " with lock count "
-  //           << lock_taken_ << '\n';
   AssertTakenAndMarkFree();
-
   mutex_.unlock();
 }
 
 bool Lock::Try() {
   bool status = mutex_.try_lock();
-  // std::cerr << "trying lock " << &mutex_ << " with lock count " << lock_taken_
-  //           << " status was " << status << '\n';
   if (status) {
     AssertFreeAndMarkTaken();
   }
@@ -89,7 +79,6 @@ void Lock::AssertFreeAndMarkTaken() {
     LOG4CXX_FATAL(logger_, "Locking already taken not recursive mutex");
     NOTREACHED();
   }
-
   lock_taken_++;
 }
 
@@ -106,8 +95,6 @@ void Lock::AssertTakenAndMarkFree() {
 RecursiveLock::RecursiveLock() : lock_taken_(0) {}
 
 RecursiveLock::~RecursiveLock() {
-  // std::cerr << "destructing recursive lock " << &mutex_ << " with lock count "
-  //           << lock_taken_ << '\n';
   if (lock_taken_ > 0) {
     LOG4CXX_FATAL(logger_,
                   "Destroying non-released recursive mutex " << &mutex_);
@@ -115,31 +102,25 @@ RecursiveLock::~RecursiveLock() {
 }
 
 void RecursiveLock::Acquire() {
-  // try {
+  try {
   mutex_.lock();
-  // std::cerr << "acquiring recursive lock " << &mutex_ << " with lock count "
-  //   << lock_taken_ << '\n';
-  // } catch (std::exception err) {
-  //   LOG4CXX_FATAL(logger_,
-  //                 "Failed to acquire mutex " << &mutex_ << ": " <<
-  //                 err.what());
-  //   NOTREACHED();
-  // }
-
+  } catch (std::exception err) {
+    LOG4CXX_FATAL(logger_,
+                  "Failed to acquire mutex " << &mutex_ << ": " <<
+                  err.what());
+    NOTREACHED();
+  }
   AssertFreeAndMarkTaken();
 }
 
 void RecursiveLock::Release() {
-  std::cerr << "releasing recursive lock " << &mutex_ << " with lock count "
-            << lock_taken_ << '\n';
+
   AssertTakenAndMarkFree();
   mutex_.unlock();
 }
 
 bool RecursiveLock::Try() {
   bool status = mutex_.try_lock();
-  // std::cerr << "trying recursive lock " << &mutex_ << " with lock count "
-    //           << lock_taken_ << " status was " << status << '\n';
   if (status) {
     AssertFreeAndMarkTaken();
   }
