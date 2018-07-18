@@ -65,22 +65,49 @@ class InteriorDataManagerImpl : public InteriorDataManager {
   void OnApplicationEvent(plugins::ApplicationEvent event,
                           app_mngr::ApplicationSharedPtr application) OVERRIDE;
 
+  /**
+   * @brief OnDisablingRC process disable RC event. UNsubscribe from all modules
+   * and clear cache
+   */
   void OnDisablingRC() OVERRIDE;
 
  private:
+  /**
+   * @brief UpdateHMISubscriptionsOnPolicyUpdated process policy update event.
+   * If some modules was disabeled by policies and there are no applications
+   * that subscribed to them - send  RC.GetInteriorVehicleData(subscribe=false)
+   * and clear cache
+   */
   void UpdateHMISubscriptionsOnPolicyUpdated();
 
+  /**
+   * @brief UpdateHMISubscriptionsOnAppUnregistered process AppUnregistered
+   * event and  unsubscribed from not actual module types
+   * @param app application that was unregistered
+   */
   void UpdateHMISubscriptionsOnAppUnregistered(
       application_manager::Application& app);
 
   /**
-   * @brief UnsubscribeFromInteriorVehicleData remove module_type from cache and send RC.GetInteriorVehicleData(subscribe=false) to HMI
+   * @brief UnsubscribeFromInteriorVehicleData remove module_type from cache and
+   * send RC.GetInteriorVehicleData(subscribe=false) to HMI
    * @param module_type module type that need to be unsubscribed
    */
   void UnsubscribeFromInteriorVehicleData(const std::string& module_type);
+
+  /**
+   * @brief AppsModules mapping from applications to list of modules
+   */
   typedef std::map<application_manager::ApplicationSharedPtr,
                    std::vector<std::string> > AppsModules;
+
+  /**
+   * @brief AppsSubscribedModules get mapping of application to list of
+   * subscribed modules
+   * @return map of applications to list of subscribed modules
+   */
   AppsModules AppsSubscribedModules();
+
   RCRPCPlugin& rc_plugin_;
   InteriorDataCache& cache_;
   application_manager::ApplicationManager& app_mngr_;
