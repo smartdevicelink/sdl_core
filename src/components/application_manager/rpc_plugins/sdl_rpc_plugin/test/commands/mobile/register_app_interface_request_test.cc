@@ -425,6 +425,8 @@ TEST_F(RegisterAppInterfaceRequestTest,
   EXPECT_CALL(app_mngr_, application_by_policy_id(kAppId))
       .WillRepeatedly(Return(mock_app));
 
+  EXPECT_CALL(*mock_app, app_id()).WillOnce(Return(kConnectionKey));
+
   EXPECT_CALL(app_mngr_, IsAppInReconnectMode(kAppId)).WillOnce(Return(true));
 
   EXPECT_CALL(app_mngr_, ProcessReconnection(_, kConnectionKey));
@@ -462,6 +464,8 @@ TEST_F(RegisterAppInterfaceRequestTest,
   EXPECT_CALL(app_mngr_, application_by_policy_id(kAppId))
       .WillRepeatedly(Return(mock_app));
 
+  EXPECT_CALL(*mock_app, app_id()).WillOnce(Return(kConnectionKey));
+
   EXPECT_CALL(app_mngr_, IsAppInReconnectMode(kAppId)).WillOnce(Return(true));
 
   EXPECT_CALL(app_mngr_, ProcessReconnection(_, kConnectionKey));
@@ -498,6 +502,8 @@ TEST_F(RegisterAppInterfaceRequestTest,
   MockAppPtr mock_app = CreateBasicMockedApp();
   EXPECT_CALL(app_mngr_, application_by_policy_id(kAppId))
       .WillRepeatedly(Return(mock_app));
+
+  EXPECT_CALL(*mock_app, app_id()).WillOnce(Return(kConnectionKey));
 
   EXPECT_CALL(app_mngr_, IsAppInReconnectMode(kAppId)).WillOnce(Return(true));
 

@@ -1335,6 +1335,20 @@ bool RegisterAppInterfaceRequest::IsApplicationSwitched() {
 
   LOG4CXX_DEBUG(logger_,
                 "Application with policy id " << policy_app_id << " is found.");
+  // Check if there is no other application with the same app id and app name
+  if (app->app_id() != connection_key()) {
+    const custom_str::CustomString& app_name =
+        msg_params[strings::app_name].asCustomString();
+
+    if (app->name() == app_name) {
+      LOG4CXX_ERROR(logger_,
+                    "Other application with the same app id and app name is "
+                    "trying to register");
+      SendResponse(false, mobile_apis::Result::DUPLICATE_NAME);
+      return false;
+    }
+  }
+
   if (!application_manager_.IsAppInReconnectMode(policy_app_id)) {
     LOG4CXX_DEBUG(logger_,
                   "Policy id " << policy_app_id
