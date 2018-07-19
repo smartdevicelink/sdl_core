@@ -53,7 +53,8 @@ RCCommandRequest::RCCommandRequest(
           params.policy_handler_)
     , is_subscribed(false)
     , resource_allocation_manager_(params.resource_allocation_manager_)
-    , interior_data_cache_(params.interior_data_cache_) {}
+    , interior_data_cache_(params.interior_data_cache_)
+    , interior_data_manager_(params.interior_data_manager_) {}
 
 RCCommandRequest::~RCCommandRequest() {}
 

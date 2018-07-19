@@ -33,6 +33,8 @@
 #ifndef SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_RC_RPC_PLUGIN_INCLUDE_RC_RPC_PLUGIN_INTERIOR_DATA_MANAGER_IMPL_H_
 #define SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_RC_RPC_PLUGIN_INCLUDE_RC_RPC_PLUGIN_INTERIOR_DATA_MANAGER_IMPL_H_
 #include "rc_rpc_plugin/interior_data_manager.h"
+#include "utils/date_time.h"
+
 namespace application_manager {
 class ApplicationManager;
 namespace rpc_service {
@@ -71,6 +73,11 @@ class InteriorDataManagerImpl : public InteriorDataManager {
    */
   void OnDisablingRC() OVERRIDE;
 
+  void StoreInteriorDataSubscriptionTime(
+      const std::string& module_type) OVERRIDE;
+
+  bool CheckSubscriptionsFrequency(const std::string& module_type) OVERRIDE;
+
  private:
   /**
    * @brief UpdateHMISubscriptionsOnPolicyUpdated process policy update event.
@@ -95,6 +102,7 @@ class InteriorDataManagerImpl : public InteriorDataManager {
    */
   void UnsubscribeFromInteriorVehicleData(const std::string& module_type);
 
+  void ClearOldSubscriptionsHistory();
   /**
    * @brief AppsModules mapping from applications to list of modules
    */
@@ -107,6 +115,15 @@ class InteriorDataManagerImpl : public InteriorDataManager {
    * @return map of applications to list of subscribed modules
    */
   AppsModules AppsSubscribedModules();
+
+  /**
+   * @brief SubscriptionsHistory mapping from module type to vector of time
+   * stamps
+   */
+  typedef std::map<std::string, std::deque<TimevalStruct> >
+      SubscriptionsHistory;
+  SubscriptionsHistory subscriptions_history_;
+  mutable sync_primitives::Lock subscriptions_history_lock_;
 
   RCRPCPlugin& rc_plugin_;
   InteriorDataCache& cache_;

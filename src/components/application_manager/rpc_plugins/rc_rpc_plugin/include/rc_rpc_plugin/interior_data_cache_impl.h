@@ -56,23 +56,10 @@ class InteriorDataCacheImpl : public InteriorDataCache {
   bool Contains(const std::string& module_type) const OVERRIDE;
   void Remove(const std::string& module_type) OVERRIDE;
   void ClearCache() OVERRIDE;
-  uint32_t GetCurrentAmountOfRequests(
-      const std::string& module_type) const OVERRIDE;
-  void IncrementAmountOfRequests(const std::string& module_type) OVERRIDE;
-
-  void StartRequestResetTimer(
-      const uint32_t time_frame_of_allowed_requests) OVERRIDE;
 
  private:
-  void ResetRequestCountOnTimer() OVERRIDE;
-
   std::map<std::string, smart_objects::SmartObject> subscriptions_;
   mutable sync_primitives::Lock subscriptions_lock_;
-
-  timer::Timer reset_request_count_timer_;
-  mutable sync_primitives::Lock amount_of_requests_lock_;
-  std::map<std::string, uint32_t> amount_of_request_in_this_time_frame_;
-  uint32_t time_frame_of_allowed_requests_;
 };
 
 }  // rc_rpc_plugin

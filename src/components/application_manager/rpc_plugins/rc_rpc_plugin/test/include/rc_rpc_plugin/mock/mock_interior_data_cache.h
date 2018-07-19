@@ -46,11 +46,6 @@ class MockInteriorDataCache : public rc_rpc_plugin::InteriorDataCache {
   MOCK_CONST_METHOD1(Contains, bool(const std::string&));
   MOCK_METHOD1(Remove, void(const std::string&));
   MOCK_METHOD0(ClearCache, void());
-
-  MOCK_METHOD0(ResetRequestCountOnTimer, void());
-  MOCK_METHOD1(StartRequestResetTimer, void(const uint32_t));
-  MOCK_METHOD1(IncrementAmountOfRequests, void(const std::string&));
-  MOCK_CONST_METHOD1(GetCurrentAmountOfRequests, uint32_t(const std::string&));
 };
 
 }  // namespace rc_rpc_plugin_test

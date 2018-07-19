@@ -107,31 +107,6 @@ class InteriorDataCache {
    * @brief ClearCache clear all cached data
    */
   virtual void ClearCache() = 0;
-
-  /**
-   * @brief Get current value of requests in time frame
-   * @param module_type - module type for calculation statistic
-   */
-  virtual uint32_t GetCurrentAmountOfRequests(
-      const std::string& module_type) const = 0;
-
-  /**
-   * @brief Do increment of request in time frame
-   * @param module_type - module type for calculation statistic
-   */
-  virtual void IncrementAmountOfRequests(const std::string& module_type) = 0;
-
- private:
-  /**
-   * @brief Start timer which will resetting requests in time frame
-   */
-  virtual void StartRequestResetTimer(
-      const uint32_t time_frame_of_allowed_requests) = 0;
-  /**
-   * @brief Callback function for timer
-   * Timer need for reset curent value of request when new time frame start
-   */
-  virtual void ResetRequestCountOnTimer() = 0;
 };
 }  // rc_rpc_plugin
 

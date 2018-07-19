@@ -42,20 +42,9 @@ namespace rc_rpc_plugin {
 CREATE_LOGGERPTR_GLOBAL(logger_, "RemoteControlModule");
 
 InteriorDataCacheImpl::InteriorDataCacheImpl(
-    const uint32_t time_frame_of_allowed_requests)
-    : reset_request_count_timer_(
-          "InteriorDataCacheImplResetRequests",
-          new timer::TimerTaskImpl<InteriorDataCacheImpl>(
-              this, &InteriorDataCacheImpl::ResetRequestCountOnTimer)) {
-  StartRequestResetTimer(time_frame_of_allowed_requests);
-}
+    const uint32_t time_frame_of_allowed_requests) {}
 
-InteriorDataCacheImpl::~InteriorDataCacheImpl() {
-  LOG4CXX_AUTO_TRACE(logger_);
-  if (!reset_request_count_timer_.is_running()) {
-    reset_request_count_timer_.Stop();
-  }
-}
+InteriorDataCacheImpl::~InteriorDataCacheImpl() {}
 
 /**
  * @brief MergeModuleData key all keys and values from first parameter and
@@ -129,39 +118,5 @@ void InteriorDataCacheImpl::ClearCache() {
   LOG4CXX_AUTO_TRACE(logger_);
   sync_primitives::AutoLock autolock(subscriptions_lock_);
   subscriptions_.clear();
-}
-
-void InteriorDataCacheImpl::ResetRequestCountOnTimer() {
-  LOG4CXX_AUTO_TRACE(logger_);
-  sync_primitives::AutoLock autolock(amount_of_requests_lock_);
-  amount_of_request_in_this_time_frame_.clear();
-}
-
-void InteriorDataCacheImpl::StartRequestResetTimer(
-    const uint32_t time_frame_of_allowed_requests) {
-  if (!reset_request_count_timer_.is_running()) {
-    reset_request_count_timer_.Stop();
-  }
-
-  time_frame_of_allowed_requests_ = time_frame_of_allowed_requests;
-  reset_request_count_timer_.Start(
-      time_frame_of_allowed_requests_ *
-          date_time::DateTime::MILLISECONDS_IN_SECOND,
-      timer::kPeriodic);
-}
-
-uint32_t InteriorDataCacheImpl::GetCurrentAmountOfRequests(
-    const std::string& module_type) const {
-  sync_primitives::AutoLock autolock(amount_of_requests_lock_);
-  auto it = amount_of_request_in_this_time_frame_.find(module_type);
-  auto amount =
-      amount_of_request_in_this_time_frame_.end() != it ? it->second : 0;
-  return amount;
-}
-
-void InteriorDataCacheImpl::IncrementAmountOfRequests(
-    const std::string& module_type) {
-  sync_primitives::AutoLock autolock(amount_of_requests_lock_);
-  (amount_of_request_in_this_time_frame_[module_type])++;
 }
 }

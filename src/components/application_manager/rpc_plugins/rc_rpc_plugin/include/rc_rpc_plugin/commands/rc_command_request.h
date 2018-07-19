@@ -75,7 +75,7 @@ class RCCommandRequest : public app_mngr::commands::CommandRequestImpl {
 
   ResourceAllocationManager& resource_allocation_manager_;
   InteriorDataCache& interior_data_cache_;
-
+  InteriorDataManager& interior_data_manager_;
   /**
    * @brief AcquireResource try to allocate resource for application
    * In case if allocation of resource is not required, return ALLOWED by

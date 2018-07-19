@@ -48,6 +48,26 @@ void InteriorDataManagerImpl::OnDisablingRC() {
   }
 }
 
+void InteriorDataManagerImpl::StoreInteriorDataSubscriptionTime(
+    const std::string& module_type) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  sync_primitives::AutoLock autolock(subscriptions_history_lock_);
+  subscriptions_history_[module_type].push_back(
+      date_time::DateTime::getCurrentTime());
+}
+
+bool InteriorDataManagerImpl::CheckSubscriptionsFrequency(
+    const std::string& module_type) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  sync_primitives::AutoLock autolock(subscriptions_history_lock_);
+  ClearOldSubscriptionsHistory();
+  const auto& history = subscriptions_history_[module_type];
+  const auto limit =
+      app_mngr_.get_settings().get_interior_vehicle_data_frequency().first;
+  LOG4CXX_DEBUG(logger_, "History size " << history.size());
+  return history.size() < limit;
+}
+
 void InteriorDataManagerImpl::UpdateHMISubscriptionsOnPolicyUpdated() {
   auto apps_allowed_modules =
       RCHelpers::GetApplicaitonsAllowedModules(app_mngr_);
@@ -104,6 +124,22 @@ void InteriorDataManagerImpl::UnsubscribeFromInteriorVehicleData(
       module_type, app_mngr_.GetNextHMICorrelationID());
   LOG4CXX_DEBUG(logger_, "Send Unsubscribe from " << module_type);
   rpc_service_.ManageHMICommand(unsubscribe_request);
+}
+
+void InteriorDataManagerImpl::ClearOldSubscriptionsHistory() {
+  auto limit =
+      app_mngr_.get_settings().get_interior_vehicle_data_frequency().second;
+  uint32_t time_frame = limit * date_time::DateTime::MILLISECONDS_IN_SECOND;
+  auto lest_that_time_frame_ago = [time_frame](TimevalStruct time) {
+    auto span = date_time::DateTime::calculateTimeSpan(time);
+    return span < time_frame;
+  };
+  for (auto& it : subscriptions_history_) {
+    auto& history = it.second;
+    auto first_actual =
+        std::find_if(history.begin(), history.end(), lest_that_time_frame_ago);
+    history.erase(history.begin(), first_actual);
+  }
 }
 
 InteriorDataManagerImpl::AppsModules

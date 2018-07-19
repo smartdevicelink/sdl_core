@@ -48,6 +48,7 @@ class InteriorDataManager {
    * @param event Policy event
    */
   virtual void OnPolicyEvent(app_mngr::plugin_manager::PolicyEvent event) = 0;
+
   /**
     * @brief OnApplicationEvent Notifies modules on certain application events
     * @param event Event
@@ -57,7 +58,28 @@ class InteriorDataManager {
       plugins::ApplicationEvent event,
       app_mngr::ApplicationSharedPtr application) = 0;
 
+  /**
+   * @brief OnDisablingRC process disable RC event. Unsubscribe from all modules
+   * and clear cache
+   */
   virtual void OnDisablingRC() = 0;
+
+  /**
+   * @brief StoreInteriorDataSubscriptionTime save information and time stamp of
+   * current interior data subscriptions
+   */
+  virtual void StoreInteriorDataSubscriptionTime(
+      const std::string& module_type) = 0;
+
+  /**
+ * @brief CheckSubscriptionsFrequency check that rate limits are not allowed of
+ * bounce during current time frame.
+ * calculate amount of requests per module type in time frame and checks if it
+ * bigger then allowed by ini file
+ * @param module_type moduletype to calculate frequency on
+ * @return true if amount of requests was not exceeded, otherwise return false.
+ */
+  virtual bool CheckSubscriptionsFrequency(const std::string& module_type) = 0;
 };
 
 }  // namespace rc_rpc_plugin
