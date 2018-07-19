@@ -31,7 +31,6 @@
  */
 
 #include "gtest/gtest.h"
-#include "utils/shared_ptr.h"
 #include "smart_objects/smart_object.h"
 #include "application_manager/smart_object_keys.h"
 #include "application_manager/commands/commands_test.h"
@@ -119,9 +118,6 @@ namespace simple_requests_to_hmi_test {
 using ::testing::_;
 using ::testing::Types;
 using ::testing::NotNull;
-
-using ::utils::SharedPtr;
-
 namespace am_commands = application_manager::commands;
 using am_commands::MessageSharedPtr;
 using event_engine_test::MockEventDispatcher;
@@ -129,7 +125,7 @@ using event_engine_test::MockEventDispatcher;
 class RequestToHMITest : public CommandsTest<CommandsTestMocks::kIsNice> {};
 
 TEST_F(RequestToHMITest, BasicMethodsOverloads_SUCCESS) {
-  SharedPtr<am_commands::RequestToHMI> command(
+  std::shared_ptr<am_commands::RequestToHMI> command(
       CreateCommand<am_commands::RequestToHMI>());
 
   // Current implementation always return `true`
@@ -139,7 +135,7 @@ TEST_F(RequestToHMITest, BasicMethodsOverloads_SUCCESS) {
 }
 
 TEST_F(RequestToHMITest, SendRequest_SUCCESS) {
-  SharedPtr<am_commands::RequestToHMI> command(
+  std::shared_ptr<am_commands::RequestToHMI> command(
       CreateCommand<am_commands::RequestToHMI>());
   EXPECT_CALL(mock_rpc_service_, SendMessageToHMI(NotNull()));
 
@@ -235,7 +231,8 @@ TYPED_TEST_CASE(RequestToHMICommandsTest3, RequestCommandsList3);
 TYPED_TEST(RequestToHMICommandsTest, Run_SendMessageToHMI_SUCCESS) {
   typedef typename TestFixture::CommandType CommandType;
 
-  SharedPtr<CommandType> command = this->template CreateCommand<CommandType>();
+  std::shared_ptr<CommandType> command =
+      this->template CreateCommand<CommandType>();
 
   EXPECT_CALL(this->mock_rpc_service_, SendMessageToHMI(NotNull()));
 
@@ -245,7 +242,8 @@ TYPED_TEST(RequestToHMICommandsTest, Run_SendMessageToHMI_SUCCESS) {
 TYPED_TEST(RequestToHMICommandsTest2, Run_SendMessageToHMI_SUCCESS) {
   typedef typename TestFixture::CommandType CommandType;
 
-  SharedPtr<CommandType> command = this->template CreateCommand<CommandType>();
+  std::shared_ptr<CommandType> command =
+      this->template CreateCommand<CommandType>();
   EXPECT_CALL(this->mock_rpc_service_, SendMessageToHMI(NotNull()));
 
   command->Run();
@@ -254,7 +252,8 @@ TYPED_TEST(RequestToHMICommandsTest2, Run_SendMessageToHMI_SUCCESS) {
 TYPED_TEST(RequestToHMICommandsTest3, Run_SendMessageToHMI_SUCCESS) {
   typedef typename TestFixture::CommandType CommandType;
 
-  SharedPtr<CommandType> command = this->template CreateCommand<CommandType>();
+  std::shared_ptr<CommandType> command =
+      this->template CreateCommand<CommandType>();
   EXPECT_CALL(this->mock_rpc_service_, SendMessageToHMI(NotNull()));
 
   command->Run();

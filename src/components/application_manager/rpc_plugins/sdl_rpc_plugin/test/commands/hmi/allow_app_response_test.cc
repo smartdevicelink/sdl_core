@@ -32,7 +32,7 @@
 
 #include "gtest/gtest.h"
 #include "hmi/allow_app_response.h"
-#include "utils/shared_ptr.h"
+
 #include "application_manager/commands/commands_test.h"
 #include "application_manager/mock_application.h"
 
@@ -55,7 +55,7 @@ const uint32_t kConnectionKey = 1u;
 const bool kIsResponseAllowed = true;
 }
 
-typedef ::utils::SharedPtr<AllowAppResponse> ResponsePtr;
+typedef std::shared_ptr<AllowAppResponse> ResponsePtr;
 
 class AllowAppResponseTest : public CommandsTest<CommandsTestMocks::kIsNice> {};
 

@@ -35,7 +35,7 @@
 #include <vector>
 
 #include "gtest/gtest.h"
-#include "utils/shared_ptr.h"
+
 #include "smart_objects/smart_object.h"
 #include "application_manager/smart_object_keys.h"
 #include "application_manager/commands/commands_test.h"
@@ -61,7 +61,7 @@ using sdl_rpc_plugin::commands::DialNumberRequest;
 using am::event_engine::Event;
 namespace mobile_result = mobile_apis::Result;
 
-typedef SharedPtr<DialNumberRequest> DialNumberRequestPtr;
+typedef std::shared_ptr<DialNumberRequest> DialNumberRequestPtr;
 
 namespace {
 const uint32_t kConnectionKey = 2u;

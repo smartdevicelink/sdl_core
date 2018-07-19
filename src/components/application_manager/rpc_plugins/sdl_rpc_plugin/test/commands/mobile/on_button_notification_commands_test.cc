@@ -34,7 +34,6 @@
 #include <string>
 
 #include "gtest/gtest.h"
-#include "utils/shared_ptr.h"
 #include "smart_objects/smart_object.h"
 #include "application_manager/smart_object_keys.h"
 
@@ -60,8 +59,6 @@ using sdl_rpc_plugin::commands::mobile::OnButtonPressNotification;
 using ::testing::_;
 using ::testing::Types;
 using ::testing::Return;
-
-using ::utils::SharedPtr;
 using am::commands::MessageSharedPtr;
 
 namespace {
@@ -131,7 +128,7 @@ TYPED_TEST(OnButtonNotificationCommandsTest,
   (*notification_msg)[am::strings::msg_params][am::hmi_response::button_name] =
       mobile_apis::ButtonName::CUSTOM_BUTTON;
 
-  SharedPtr<Notification> command(
+  std::shared_ptr<Notification> command(
       this->template CreateCommand<Notification>(notification_msg));
 
   command->Run();
@@ -148,7 +145,7 @@ TYPED_TEST(OnButtonNotificationCommandsTest,
       mobile_apis::ButtonName::CUSTOM_BUTTON;
   (*notification_msg)[am::strings::msg_params][am::strings::app_id] = kAppId;
 
-  SharedPtr<Notification> command(
+  std::shared_ptr<Notification> command(
       this->template CreateCommand<Notification>(notification_msg));
 
   typename TestFixture::MockAppPtr mock_app = this->CreateMockApp();
@@ -170,7 +167,7 @@ TYPED_TEST(OnButtonNotificationCommandsTest,
   (*notification_msg)[am::strings::msg_params]
                      [am::hmi_response::custom_button_id] = kCustomButtonId;
 
-  SharedPtr<Notification> command(
+  std::shared_ptr<Notification> command(
       this->template CreateCommand<Notification>(notification_msg));
 
   EXPECT_CALL(this->app_mngr_, application(kAppId))
@@ -192,7 +189,7 @@ TYPED_TEST(OnButtonNotificationCommandsTest,
   (*notification_msg)[am::strings::msg_params]
                      [am::hmi_response::custom_button_id] = kCustomButtonId;
 
-  SharedPtr<Notification> command(
+  std::shared_ptr<Notification> command(
       this->template CreateCommand<Notification>(notification_msg));
 
   typename TestFixture::MockAppPtr mock_app = this->CreateMockApp();
@@ -216,7 +213,7 @@ TYPED_TEST(OnButtonNotificationCommandsTest, Run_CustomButton_SUCCESS) {
   (*notification_msg)[am::strings::msg_params]
                      [am::hmi_response::custom_button_id] = kCustomButtonId;
 
-  SharedPtr<Notification> command(
+  std::shared_ptr<Notification> command(
       this->template CreateCommand<Notification>(notification_msg));
 
   typename TestFixture::MockAppPtr mock_app = this->CreateMockApp();
@@ -241,7 +238,7 @@ TYPED_TEST(OnButtonNotificationCommandsTest, Run_NoSubscribedApps_UNSUCCESS) {
   (*notification_msg)[am::strings::msg_params][am::hmi_response::button_name] =
       kButtonName;
 
-  SharedPtr<Notification> command(
+  std::shared_ptr<Notification> command(
       this->template CreateCommand<Notification>(notification_msg));
 
   const std::vector<ApplicationSharedPtr> empty_subscribed_apps_list;
@@ -260,7 +257,7 @@ TYPED_TEST(OnButtonNotificationCommandsTest, Run_InvalidHmiLevel_UNSUCCESS) {
   (*notification_msg)[am::strings::msg_params][am::hmi_response::button_name] =
       kButtonName;
 
-  SharedPtr<Notification> command(
+  std::shared_ptr<Notification> command(
       this->template CreateCommand<Notification>(notification_msg));
 
   typename TestFixture::MockAppPtr mock_app = this->CreateMockApp();
@@ -286,7 +283,7 @@ TYPED_TEST(OnButtonNotificationCommandsTest,
   (*notification_msg)[am::strings::msg_params][am::hmi_response::button_name] =
       kButtonName;
 
-  SharedPtr<Notification> command(
+  std::shared_ptr<Notification> command(
       this->template CreateCommand<Notification>(notification_msg));
 
   typename TestFixture::MockAppPtr mock_app = this->CreateMockApp();
@@ -312,7 +309,7 @@ TYPED_TEST(OnButtonNotificationCommandsTest, Run_SUCCESS) {
   (*notification_msg)[am::strings::msg_params][am::hmi_response::button_name] =
       kButtonName;
 
-  SharedPtr<Notification> command(
+  std::shared_ptr<Notification> command(
       this->template CreateCommand<Notification>(notification_msg));
 
   typename TestFixture::MockAppPtr mock_app = this->CreateMockApp();

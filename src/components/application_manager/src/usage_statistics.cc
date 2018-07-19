@@ -35,7 +35,6 @@
 #include "smart_objects/enum_schema_item.h"
 #include "policy/usage_statistics/statistics_manager.h"
 #include "utils/macro.h"
-#include "utils/make_shared.h"
 
 using namespace mobile_apis;
 using namespace NsSmartDeviceLink::NsSmartObjects;
@@ -56,7 +55,7 @@ std::string LanguageIdToString(Language::eType lang_id) {
 
 UsageStatistics::UsageStatistics(
     const std::string& app_id,
-    utils::SharedPtr<StatisticsManager> statistics_manager)
+    std::shared_ptr<StatisticsManager> statistics_manager)
     : time_in_hmi_state_sptr_(
           new usage_statistics::AppStopwatchImpl(statistics_manager, app_id))
     , app_registration_language_gui_(statistics_manager, app_id, LANGUAGE_GUI)
@@ -78,7 +77,7 @@ UsageStatistics::UsageStatistics(
 
 UsageStatistics::UsageStatistics(
     const std::string& app_id,
-    utils::SharedPtr<StatisticsManager> statistics_manager,
+    std::shared_ptr<StatisticsManager> statistics_manager,
     AppStopwatch* time_in_hmi_state_ptr)
     : time_in_hmi_state_sptr_(time_in_hmi_state_ptr)
     , app_registration_language_gui_(statistics_manager, app_id, LANGUAGE_GUI)

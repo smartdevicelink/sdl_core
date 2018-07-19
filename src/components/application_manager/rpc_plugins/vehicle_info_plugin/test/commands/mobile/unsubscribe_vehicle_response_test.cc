@@ -34,7 +34,7 @@
 #include <stdint.h>
 #include <string>
 #include "gtest/gtest.h"
-#include "utils/shared_ptr.h"
+
 #include "application_manager/commands/commands_test.h"
 #include "application_manager/mock_application_manager.h"
 
@@ -66,10 +66,10 @@ MATCHER_P(ResultCodeIs, result_code, "") {
 TEST_F(UnsubscribeVehicleResponseTest,
        Run_SendFalseResponseToMobile_SendInvalidEnum) {
   MessageSharedPtr command_msg =
-      ::utils::MakeShared<SmartObject>(smart_objects::SmartType_Map);
+      std::make_shared<SmartObject>(smart_objects::SmartType_Map);
   (*command_msg)[am::strings::msg_params][am::strings::success] = false;
 
-  ::utils::SharedPtr<UnsubscribeVehicleDataResponse> command =
+  std::shared_ptr<UnsubscribeVehicleDataResponse> command =
       CreateCommand<UnsubscribeVehicleDataResponse>(command_msg);
 
   EXPECT_CALL(
@@ -81,9 +81,9 @@ TEST_F(UnsubscribeVehicleResponseTest,
 TEST_F(UnsubscribeVehicleResponseTest,
        Run_SendSuccessfulResponseToMobile_SUCCESS) {
   MessageSharedPtr command_msg =
-      ::utils::MakeShared<SmartObject>(smart_objects::SmartType_Map);
+      std::make_shared<SmartObject>(smart_objects::SmartType_Map);
   (*command_msg)[am::strings::msg_params][am::strings::success] = true;
-  ::utils::SharedPtr<UnsubscribeVehicleDataResponse> command =
+  std::shared_ptr<UnsubscribeVehicleDataResponse> command =
       CreateCommand<UnsubscribeVehicleDataResponse>(command_msg);
 
   EXPECT_CALL(
@@ -95,13 +95,13 @@ TEST_F(UnsubscribeVehicleResponseTest,
 TEST_F(UnsubscribeVehicleResponseTest,
        Run_SendResponseToMobile_SendCodeToMobile) {
   MessageSharedPtr command_msg =
-      ::utils::MakeShared<SmartObject>(smart_objects::SmartType_Map);
+      std::make_shared<SmartObject>(smart_objects::SmartType_Map);
   (*command_msg)[am::strings::msg_params][am::strings::success] = true;
 
   mobile_apis::Result::eType result_type = mobile_apis::Result::WARNINGS;
   (*command_msg)[am::strings::msg_params][am::strings::result_code] =
       result_type;
-  ::utils::SharedPtr<UnsubscribeVehicleDataResponse> command =
+  std::shared_ptr<UnsubscribeVehicleDataResponse> command =
       CreateCommand<UnsubscribeVehicleDataResponse>(command_msg);
 
   command->Run();

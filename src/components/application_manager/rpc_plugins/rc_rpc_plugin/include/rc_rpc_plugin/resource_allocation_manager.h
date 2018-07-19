@@ -34,7 +34,7 @@
 #define SRC_COMPONENTS_REMOTE_CONTROL_INCLUDE_REMOTE_CONTROL_RESOURCE_ALLOCATION_H
 #include <string>
 #include "utils/macro.h"
-#include "utils/shared_ptr.h"
+
 #include "interfaces/HMI_API.h"
 #include "application_manager/plugin_manager/rpc_plugin.h"
 #include "rc_rpc_plugin/rc_app_extension.h"

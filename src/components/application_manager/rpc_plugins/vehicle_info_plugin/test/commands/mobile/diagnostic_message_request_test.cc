@@ -35,7 +35,7 @@
 #include <vector>
 
 #include "gtest/gtest.h"
-#include "utils/shared_ptr.h"
+
 #include "smart_objects/smart_object.h"
 #include "application_manager/smart_object_keys.h"
 #include "application_manager/commands/commands_test.h"
@@ -63,7 +63,7 @@ using vehicle_info_plugin::commands::DiagnosticMessageRequest;
 using am::event_engine::Event;
 namespace mobile_result = mobile_apis::Result;
 
-typedef SharedPtr<DiagnosticMessageRequest> DiagnosticMessageRequestPtr;
+typedef std::shared_ptr<DiagnosticMessageRequest> DiagnosticMessageRequestPtr;
 
 namespace {
 const uint32_t kConnectionKey = 2u;

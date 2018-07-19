@@ -89,7 +89,7 @@ class ApplicationImplTest : public ApplicationImpl {
       const std::string& mac_address,
       const connection_handler::DeviceHandle device_id,
       const custom_str::CustomString& app_name,
-      utils::SharedPtr<usage_statistics::StatisticsManager> statistics_manager,
+      std::shared_ptr<usage_statistics::StatisticsManager> statistics_manager,
       ApplicationManager& application_manager,
       MockHelpPromptManager& mock_help_prompt_manager)
       : ApplicationImpl(application_id,
@@ -124,29 +124,29 @@ class HelpPromptManagerTest : public ::testing::Test {
   HmiStatePtr CreateTestHmiState();
 
   template <class Command>
-  SharedPtr<Command> CreateCommand(MessageSharedPtr& msg) {
-    return ::utils::MakeShared<Command>(msg,
-                                        app_mngr_,
-                                        mock_rpc_service_,
-                                        mock_hmi_capabilities_,
-                                        mock_policy_handler_);
+  std::shared_ptr<Command> CreateCommand(MessageSharedPtr& msg) {
+    return std::make_shared<Command>(msg,
+                                     app_mngr_,
+                                     mock_rpc_service_,
+                                     mock_hmi_capabilities_,
+                                     mock_policy_handler_);
   }
 
  protected:
   typedef CommandsTest<CommandsTestMocks::kIsNice>::MockAppManager
       MockAppManager;
   MockAppManager app_mngr_;
-  utils::SharedPtr<ApplicationImplTest> app_impl_;
+  std::shared_ptr<ApplicationImplTest> app_impl_;
   MockHmiInterfaces mock_hmi_interfaces_;
   NiceMock<event_engine_test::MockEventDispatcher> mock_event_dispatcher_;
   NiceMock<MockApplicationManagerSettings> app_mngr_settings_;
-  utils::SharedPtr<application_manager_test::MockApplication> mock_app_;
+  std::shared_ptr<application_manager_test::MockApplication> mock_app_;
   sync_primitives::Lock app_lock_;
   MockRPCService mock_rpc_service_;
   application_manager_test::MockHMICapabilities mock_hmi_capabilities_;
   policy_test::MockPolicyHandlerInterface mock_policy_handler_;
   MockMessageHelper& mock_message_helper_;
-  utils::SharedPtr<MockHelpPromptManager> mock_help_prompt_manager_;
+  std::shared_ptr<MockHelpPromptManager> mock_help_prompt_manager_;
 };
 
 void HelpPromptManagerTest::SetUp() {
@@ -173,17 +173,17 @@ void HelpPromptManagerTest::SetUp() {
       .WillByDefault(Return(0));
 
   mock_help_prompt_manager_ =
-      utils::SharedPtr<MockHelpPromptManager>(new MockHelpPromptManager());
+      std::shared_ptr<MockHelpPromptManager>(new MockHelpPromptManager());
 
-  HmiStatePtr state = utils::MakeShared<HmiState>(
-      static_cast<utils::SharedPtr<Application> >(mock_app_),
+  HmiStatePtr state = std::make_shared<HmiState>(
+      static_cast<std::shared_ptr<Application> >(mock_app_),
       app_mngr_,
       HmiState::STATE_ID_REGULAR);
 
   std::string path = file_system::CreateDirectory("storage");
   file_system::CreateFile(path + "/" + "certificate");
 
-  mock_app_ = utils::MakeShared<application_manager_test::MockApplication>();
+  mock_app_ = std::make_shared<application_manager_test::MockApplication>();
 }
 
 void HelpPromptManagerTest::TearDown() {
@@ -192,7 +192,7 @@ void HelpPromptManagerTest::TearDown() {
 
 MessageSharedPtr HelpPromptManagerTest::CreateMsgParams() {
   MessageSharedPtr msg =
-      ::utils::MakeShared<SmartObject>(smart_objects::SmartType_Map);
+      std::make_shared<SmartObject>(smart_objects::SmartType_Map);
   (*msg)[am::strings::params][am::strings::connection_key] = kConnectionKey;
   (*msg)[am::strings::msg_params][am::strings::app_id] = kAppId;
   return msg;
@@ -220,8 +220,8 @@ void HelpPromptManagerTest::CreateBasicParamsVRRequest(MessageSharedPtr msg) {
 }
 
 HmiStatePtr HelpPromptManagerTest::CreateTestHmiState() {
-  HmiStatePtr testState = utils::MakeShared<HmiState>(
-      static_cast<utils::SharedPtr<Application> >(app_impl_),
+  HmiStatePtr testState = std::make_shared<HmiState>(
+      static_cast<std::shared_ptr<Application> >(app_impl_),
       app_mngr_,
       HmiState::STATE_ID_REGULAR);
   testState->set_hmi_level(HMILevel::INVALID_ENUM);
@@ -243,7 +243,7 @@ void HelpPromptManagerTest::CreateApplication(
                               mac_address,
                               device_id,
                               app_name,
-                              utils::MakeShared<MockStatisticsManager>(),
+                              std::make_shared<MockStatisticsManager>(),
                               app_mngr_,
                               mock_help_prompt_manager));
   HmiStatePtr initial_state = CreateTestHmiState();
@@ -253,7 +253,7 @@ void HelpPromptManagerTest::CreateApplication(
 TEST_F(HelpPromptManagerTest, AddCommand_OnVrCommandAdded) {
   CreateApplication(*mock_help_prompt_manager_.get());
   MessageSharedPtr msg =
-      ::utils::MakeShared<SmartObject>(smart_objects::SmartType_Map);
+      std::make_shared<SmartObject>(smart_objects::SmartType_Map);
   CreateBasicParamsVRRequest(msg);
   (*msg)[strings::params][hmi_response::code] =
       hmi_apis::Common_Result::SUCCESS;
@@ -265,7 +265,7 @@ TEST_F(HelpPromptManagerTest, AddCommand_OnVrCommandAdded) {
 TEST_F(HelpPromptManagerTest, RemoveCommand_OnVrCommandDeleted) {
   CreateApplication(*mock_help_prompt_manager_.get());
   MessageSharedPtr msg =
-      ::utils::MakeShared<SmartObject>(smart_objects::SmartType_Map);
+      std::make_shared<SmartObject>(smart_objects::SmartType_Map);
   CreateBasicParamsVRRequest(msg);
   (*msg)[strings::params][hmi_response::code] =
       hmi_apis::Common_Result::SUCCESS;
@@ -310,7 +310,7 @@ TEST_F(HelpPromptManagerTest,
   EXPECT_CALL(*mock_help_prompt_manager_,
               OnSetGlobalPropertiesReceived(_, false));
 
-  SharedPtr<SetGlobalPropertiesRequest> command(
+  std::shared_ptr<SetGlobalPropertiesRequest> command(
       CreateCommand<SetGlobalPropertiesRequest>(msg));
 
   command->Run();
@@ -358,7 +358,7 @@ TEST_F(HelpPromptManagerTest,
   EXPECT_CALL(*mock_help_prompt_manager_,
               OnSetGlobalPropertiesReceived(_, false));
 
-  SharedPtr<SetGlobalPropertiesRequest> command(
+  std::shared_ptr<SetGlobalPropertiesRequest> command(
       CreateCommand<SetGlobalPropertiesRequest>(msg));
 
   command->Run();

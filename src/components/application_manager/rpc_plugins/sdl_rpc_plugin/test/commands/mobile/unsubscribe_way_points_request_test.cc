@@ -36,7 +36,7 @@
 #include "gtest/gtest.h"
 #include "mobile/unsubscribe_way_points_request.h"
 #include "interfaces/MOBILE_API.h"
-#include "utils/shared_ptr.h"
+
 #include "smart_objects/smart_object.h"
 #include "application_manager/commands/commands_test.h"
 #include "application_manager/commands/command_request_test.h"
@@ -78,7 +78,7 @@ class UnSubscribeWayPointsRequestTest
   }
 
   MessageSharedPtr command_msg_;
-  ::utils::SharedPtr<UnSubscribeWayPointsRequest> command_;
+  std::shared_ptr<UnSubscribeWayPointsRequest> command_;
 };
 
 TEST_F(UnSubscribeWayPointsRequestTest,

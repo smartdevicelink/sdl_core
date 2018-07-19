@@ -38,7 +38,7 @@
 #include "interfaces/MOBILE_API.h"
 #include "utils/sqlite_wrapper/sql_database.h"
 #include "utils/sqlite_wrapper/sql_query.h"
-#include "utils/make_shared.h"
+
 #include "utils/file_system.h"
 #include "application_manager/resumption_data_test.h"
 #include "application_manager/test_resumption_data_db.h"
@@ -68,7 +68,7 @@ const std::string kPath =
 class ResumptionDataDBTest : public ResumptionDataTest {
  protected:
   void SetUp() OVERRIDE {
-    app_mock = utils::MakeShared<NiceMock<MockApplication> >();
+    app_mock = std::make_shared<NiceMock<MockApplication> >();
     policy_app_id_ = "test_policy_app_id";
     app_id_ = 10;
     is_audio_ = true;

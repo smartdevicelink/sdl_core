@@ -138,7 +138,7 @@ void OnButtonPressNotification::Run() {
     }
     // if "appID" is present, send it to named app only if its FULL or
     // LIMITED
-    if (app.valid()) {
+    if (app.use_count() != 0) {
       if (app->app_id() == subscribed_app->app_id()) {
         SendButtonPress(subscribed_app);
       }
@@ -156,7 +156,7 @@ void OnButtonPressNotification::SendButtonPress(ApplicationConstSharedPtr app) {
   }
 
   smart_objects::SmartObjectSPtr on_btn_press =
-      new smart_objects::SmartObject();
+      std::make_shared<smart_objects::SmartObject>();
 
   if (!on_btn_press) {
     LOG4CXX_ERROR(logger_, "OnButtonPress NULL pointer");

@@ -33,7 +33,7 @@
 #include <stdint.h>
 
 #include "gtest/gtest.h"
-#include "utils/shared_ptr.h"
+
 #include "smart_objects/smart_object.h"
 #include "interfaces/MOBILE_API.h"
 #include "application_manager/mock_hmi_capabilities.h"
@@ -48,7 +48,6 @@ namespace commands_test {
 namespace hmi_commands_test {
 namespace rc_get_capabilities_response {
 
-using ::utils::SharedPtr;
 using ::testing::NiceMock;
 namespace am = ::application_manager;
 namespace strings = am::strings;
@@ -56,7 +55,7 @@ namespace hmi_response = am::hmi_response;
 using sdl_rpc_plugin::commands::RCGetCapabilitiesResponse;
 using am::commands::CommandImpl;
 
-typedef SharedPtr<RCGetCapabilitiesResponse> RCGetCapabilitiesResponsePtr;
+typedef std::shared_ptr<RCGetCapabilitiesResponse> RCGetCapabilitiesResponsePtr;
 typedef NiceMock<
     ::test::components::application_manager_test::MockHMICapabilities>
     MockHMICapabilities;

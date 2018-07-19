@@ -69,7 +69,7 @@ void SecurityManagerImpl::OnMessageReceived(
     return;
   }
 
-  SecurityMessage securityMessagePtr(new SecurityQuery());
+  SecurityMessage securityMessagePtr(std::make_shared<SecurityQuery>());
   const bool result =
       securityMessagePtr->SerializeQuery(message->data(), message->data_size());
   if (!result) {

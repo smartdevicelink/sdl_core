@@ -46,7 +46,7 @@
 
 namespace policy {
 class PolicySettings;
-typedef utils::SharedPtr<utils::Callable> StatusNotifier;
+typedef std::shared_ptr<utils::Callable> StatusNotifier;
 
 class PolicyManager : public usage_statistics::StatisticsManager {
  public:
@@ -589,7 +589,7 @@ class PolicyManager : public usage_statistics::StatisticsManager {
    * @param access_remote pointer to new access_remote instance
    */
   virtual void set_access_remote(
-      utils::SharedPtr<AccessRemote> access_remote) = 0;
+      std::shared_ptr<AccessRemote> access_remote) = 0;
 
   /**
    * @brief Checks if there is existing URL in the EndpointUrls vector with

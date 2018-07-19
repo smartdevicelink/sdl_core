@@ -35,7 +35,7 @@
 #include <vector>
 
 #include "gtest/gtest.h"
-#include "utils/shared_ptr.h"
+
 #include "smart_objects/smart_object.h"
 #include "application_manager/smart_object_keys.h"
 #include "application_manager/commands/commands_test.h"
@@ -64,7 +64,7 @@ using am::MockMessageHelper;
 using testing::Mock;
 namespace mobile_result = mobile_apis::Result;
 
-typedef SharedPtr<GetDTCsRequest> GetDTCsRequestPtr;
+typedef std::shared_ptr<GetDTCsRequest> GetDTCsRequestPtr;
 
 class GetDTCsRequestTest
     : public CommandRequestTest<CommandsTestMocks::kIsNice> {

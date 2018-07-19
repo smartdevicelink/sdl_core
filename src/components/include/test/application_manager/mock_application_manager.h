@@ -121,7 +121,7 @@ class MockApplicationManager : public application_manager::ApplicationManager {
                     mobile_apis::HMILevel::eType to));
   MOCK_METHOD1(
       SendHMIStatusNotification,
-      void(const utils::SharedPtr<application_manager::Application> app));
+      void(const std::shared_ptr<application_manager::Application> app));
   MOCK_METHOD1(SendDriverDistractionState,
                void(application_manager::ApplicationSharedPtr app));
   MOCK_METHOD1(RemoveHMIFakeParameters,
@@ -171,7 +171,7 @@ class MockApplicationManager : public application_manager::ApplicationManager {
                void(mobile_apis::VehicleDataType::eType vehicle_info,
                     int value));
   MOCK_METHOD1(RegisterApplication,
-               application_manager::ApplicationSharedPtr(const utils::SharedPtr<
+               application_manager::ApplicationSharedPtr(const std::shared_ptr<
                    smart_objects::SmartObject>& request_for_registration));
   MOCK_METHOD0(SendUpdateAppList, void());
   MOCK_METHOD2(MarkAppsGreyOut,

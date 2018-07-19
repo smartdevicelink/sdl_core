@@ -86,7 +86,7 @@
 #endif  // TELEMETRY_MONITOR
 
 #include "utils/macro.h"
-#include "utils/shared_ptr.h"
+
 #include "utils/message_queue.h"
 #include "utils/prioritized_queue.h"
 #include "utils/threads/thread.h"
@@ -118,7 +118,7 @@ typedef std::map<std::string, hmi_apis::Common_TransportType::eType>
     DeviceTypes;
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "ApplicationManager")
-typedef utils::SharedPtr<timer::Timer> TimerSPtr;
+typedef std::shared_ptr<timer::Timer> TimerSPtr;
 
 class ApplicationManagerImpl
     : public ApplicationManager,
@@ -186,7 +186,7 @@ class ApplicationManagerImpl
                          mobile_apis::HMILevel::eType to) OVERRIDE;
 
   void SendHMIStatusNotification(
-      const utils::SharedPtr<Application> app) OVERRIDE;
+      const std::shared_ptr<Application> app) OVERRIDE;
 
   void SendDriverDistractionState(ApplicationSharedPtr application);
 
@@ -321,7 +321,7 @@ class ApplicationManagerImpl
   void SetTelemetryObserver(AMTelemetryObserver* observer) OVERRIDE;
 #endif  // TELEMETRY_MONITOR
 
-  ApplicationSharedPtr RegisterApplication(const utils::SharedPtr<
+  ApplicationSharedPtr RegisterApplication(const std::shared_ptr<
       smart_objects::SmartObject>& request_for_registration) OVERRIDE;
   /*
    * @brief Closes application by id
@@ -475,7 +475,7 @@ class ApplicationManagerImpl
    * @return new regular HMI state
    */
   HmiStatePtr CreateRegularState(
-      utils::SharedPtr<Application> app,
+      std::shared_ptr<Application> app,
       mobile_apis::HMILevel::eType hmi_level,
       mobile_apis::AudioStreamingState::eType audio_state,
       mobile_apis::VideoStreamingState::eType video_state,
@@ -1190,7 +1190,7 @@ class ApplicationManagerImpl
     uint32_t app_count = NULL == app_array ? 0 : app_array->size();
     typename ApplicationList::const_iterator it;
     for (it = app_list.begin(); it != app_list.end(); ++it) {
-      if (!it->valid()) {
+      if (it->use_count() == 0) {
         LOG4CXX_ERROR(logger_, "Application not found ");
         continue;
       }

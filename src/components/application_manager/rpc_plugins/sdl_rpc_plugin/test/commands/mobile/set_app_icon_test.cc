@@ -60,7 +60,6 @@ using am::MockMessageHelper;
 using am::MockHmiInterfaces;
 using test::components::protocol_handler_test::MockProtocolHandler;
 using test::components::protocol_handler_test::MockProtocolHandlerSettings;
-using ::utils::SharedPtr;
 using ::testing::_;
 using ::testing::Return;
 using ::testing::ReturnRef;
@@ -110,7 +109,7 @@ TEST_F(SetAppIconRequestTest, OnEvent_UI_UNSUPPORTED_RESOURCE) {
   ON_CALL(app_mngr_settings_, app_icons_folder())
       .WillByDefault(ReturnRef(dir_path));
 
-  utils::SharedPtr<SetAppIconRequest> req_vr =
+  std::shared_ptr<SetAppIconRequest> req_vr =
       CreateCommand<SetAppIconRequest>(msg_vr);
 
   MockAppPtr mock_app = CreateMockApp();

@@ -47,7 +47,7 @@
 
 #include "utils/macro.h"
 #include "utils/logger.h"
-#include "utils/make_shared.h"
+
 #include "utils/timer_task_impl.h"
 #include "transport_manager/common.h"
 #include "transport_manager/transport_manager_listener.h"
@@ -1069,7 +1069,7 @@ void TransportManagerImpl::Handle(TransportAdapterEvent event) {
       LOG4CXX_ERROR(logger_, "Transport adapter failed to send data");
       // TODO(YK): potential error case -> thread unsafe
       // update of message content
-      if (event.event_data.valid()) {
+      if (event.event_data.use_count() != 0) {
         event.event_data->set_waiting(true);
       } else {
         LOG4CXX_DEBUG(logger_, "Data is invalid");
@@ -1213,9 +1213,9 @@ TransportManagerImpl::ConnectionInternal::ConnectionInternal(
     const DeviceHandle device_handle)
     : transport_manager(transport_manager)
     , transport_adapter(transport_adapter)
-    , timer(utils::MakeShared<timer::Timer,
-                              const char*,
-                              ::timer::TimerTaskImpl<ConnectionInternal>*>(
+    , timer(std::make_shared<timer::Timer,
+                             const char*,
+                             ::timer::TimerTaskImpl<ConnectionInternal>*>(
           "TM DiscRoutine",
           new ::timer::TimerTaskImpl<ConnectionInternal>(
               this, &ConnectionInternal::DisconnectFailedRoutine)))

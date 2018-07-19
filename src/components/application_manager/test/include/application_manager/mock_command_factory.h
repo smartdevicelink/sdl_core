@@ -37,7 +37,6 @@
 #include "application_manager/command_factory.h"
 #include "application_manager/commands/command.h"
 #include "smart_objects/smart_object.h"
-#include "utils/shared_ptr.h"
 
 namespace test {
 namespace components {

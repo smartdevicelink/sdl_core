@@ -33,7 +33,6 @@
 #define SRC_COMPONENTS_INCLUDE_UTILS_DATA_ACCESSOR_H_
 
 #include "utils/lock.h"
-#include "utils/shared_ptr.h"
 
 // This class is for thread-safe const access to data
 template <class T>
@@ -66,7 +65,7 @@ class DataAccessor {
   const T& data_;
   // Require that the lock lives at least as long as the DataAccessor
   const std::shared_ptr<sync_primitives::BaseLock> lock_;
-  utils::SharedPtr<uint32_t> counter_;
+  std::shared_ptr<uint32_t> counter_;
 };
 
 #endif  // SRC_COMPONENTS_INCLUDE_UTILS_DATA_ACCESSOR_H_

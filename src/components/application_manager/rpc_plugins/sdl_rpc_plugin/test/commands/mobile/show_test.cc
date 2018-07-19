@@ -57,7 +57,6 @@ using am::commands::CommandImpl;
 using am::commands::MessageSharedPtr;
 using am::MockMessageHelper;
 using test::components::policy_test::MockPolicyHandlerInterface;
-using ::utils::SharedPtr;
 using ::testing::_;
 using ::testing::Return;
 using ::testing::ReturnRef;
@@ -211,7 +210,7 @@ TEST_F(ShowRequestTest, OnEvent_UI_UNSUPPORTED_RESOURCE) {
   (*msg_vr)[am::strings::msg_params][am::strings::menu_params]
            [am::strings::menu_name] = "menu_name";
 
-  utils::SharedPtr<ShowRequest> command = CreateCommand<ShowRequest>(msg_vr);
+  std::shared_ptr<ShowRequest> command = CreateCommand<ShowRequest>(msg_vr);
 
   MockAppPtr mock_app = CreateMockApp();
   ON_CALL(app_mngr_, application(kConnectionKey))
@@ -257,7 +256,7 @@ TEST_F(ShowRequestTest, Run_SoftButtonExists_SUCCESS) {
   msg_params[am::strings::soft_buttons] = "Soft_Buttons";
   (*msg)[am::strings::msg_params] = msg_params;
   SmartObject creation_msg_params(msg_params);
-  SharedPtr<ShowRequest> command(CreateCommand<ShowRequest>(msg));
+  std::shared_ptr<ShowRequest> command(CreateCommand<ShowRequest>(msg));
 
   EXPECT_CALL(app_mngr_, application(kConnectionKey))
       .WillOnce(Return(mock_app_));
@@ -284,7 +283,7 @@ TEST_F(ShowRequestTest, Run_SoftButtonNotExists_SUCCESS) {
   SmartObject msg_params(smart_objects::SmartType_Map);
   msg_params[am::strings::soft_buttons] = "";
   (*msg)[am::strings::msg_params] = msg_params;
-  SharedPtr<ShowRequest> command(CreateCommand<ShowRequest>(msg));
+  std::shared_ptr<ShowRequest> command(CreateCommand<ShowRequest>(msg));
 
   EXPECT_CALL(app_mngr_, application(kConnectionKey))
       .WillOnce(Return(mock_app_));
@@ -309,7 +308,7 @@ TEST_F(ShowRequestTest, Run_SoftButtonExists_Canceled) {
   msg_params[am::strings::soft_buttons] = "Soft_Buttons";
   (*msg)[am::strings::msg_params] = msg_params;
 
-  SharedPtr<ShowRequest> command(CreateCommand<ShowRequest>(msg));
+  std::shared_ptr<ShowRequest> command(CreateCommand<ShowRequest>(msg));
 
   EXPECT_CALL(app_mngr_, application(kConnectionKey))
       .WillOnce(Return(mock_app_));
@@ -336,7 +335,7 @@ TEST_F(ShowRequestTest, Run_Graphic_SUCCESS) {
   msg_params[am::strings::graphic] = graphic;
   (*msg)[am::strings::msg_params] = msg_params;
 
-  SharedPtr<ShowRequest> command(CreateCommand<ShowRequest>(msg));
+  std::shared_ptr<ShowRequest> command(CreateCommand<ShowRequest>(msg));
 
   EXPECT_CALL(app_mngr_, application(kConnectionKey))
       .WillOnce(Return(mock_app_));
@@ -363,7 +362,7 @@ TEST_F(ShowRequestTest, Run_Graphic_Canceled) {
   msg_params[am::strings::graphic] = graphic;
   (*msg)[am::strings::msg_params] = msg_params;
 
-  SharedPtr<ShowRequest> command(CreateCommand<ShowRequest>(msg));
+  std::shared_ptr<ShowRequest> command(CreateCommand<ShowRequest>(msg));
 
   EXPECT_CALL(app_mngr_, application(kConnectionKey))
       .WillOnce(Return(mock_app_));
@@ -386,7 +385,7 @@ TEST_F(ShowRequestTest, Run_Graphic_WrongSyntax) {
   msg_params[am::strings::graphic] = graphic;
   (*msg)[am::strings::msg_params] = msg_params;
 
-  SharedPtr<ShowRequest> command(CreateCommand<ShowRequest>(msg));
+  std::shared_ptr<ShowRequest> command(CreateCommand<ShowRequest>(msg));
 
   EXPECT_CALL(app_mngr_, application(kConnectionKey))
       .WillOnce(Return(mock_app_));
@@ -409,7 +408,7 @@ TEST_F(ShowRequestTest, Run_SecondaryGraphic_SUCCESS) {
   msg_params[am::strings::secondary_graphic] = graphic;
   (*msg)[am::strings::msg_params] = msg_params;
 
-  SharedPtr<ShowRequest> command(CreateCommand<ShowRequest>(msg));
+  std::shared_ptr<ShowRequest> command(CreateCommand<ShowRequest>(msg));
 
   EXPECT_CALL(app_mngr_, application(kConnectionKey))
       .WillOnce(Return(mock_app_));
@@ -435,7 +434,7 @@ TEST_F(ShowRequestTest, Run_SecondaryGraphic_Canceled) {
   msg_params[am::strings::secondary_graphic] = graphic;
   (*msg)[am::strings::msg_params] = msg_params;
 
-  SharedPtr<ShowRequest> command(CreateCommand<ShowRequest>(msg));
+  std::shared_ptr<ShowRequest> command(CreateCommand<ShowRequest>(msg));
 
   EXPECT_CALL(app_mngr_, application(kConnectionKey))
       .WillOnce(Return(mock_app_));
@@ -459,7 +458,7 @@ TEST_F(ShowRequestTest, Run_SecondaryGraphic_WrongSyntax) {
   msg_params[am::strings::secondary_graphic] = graphic;
   (*msg)[am::strings::msg_params] = msg_params;
 
-  SharedPtr<ShowRequest> command(CreateCommand<ShowRequest>(msg));
+  std::shared_ptr<ShowRequest> command(CreateCommand<ShowRequest>(msg));
 
   EXPECT_CALL(app_mngr_, application(kConnectionKey))
       .WillOnce(Return(mock_app_));
@@ -476,7 +475,7 @@ TEST_F(ShowRequestTest, Run_SecondaryGraphic_WrongSyntax) {
 TEST_F(ShowRequestTest, Run_MainField1_SUCCESS) {
   MessageSharedPtr msg = CreateMsgParams();
 
-  SharedPtr<ShowRequest> command(CreateCommand<ShowRequest>(msg));
+  std::shared_ptr<ShowRequest> command(CreateCommand<ShowRequest>(msg));
 
   text_field_ = "Main_Field_1";
   TestSetupHelper(msg,
@@ -489,7 +488,7 @@ TEST_F(ShowRequestTest, Run_MainField1_SUCCESS) {
 TEST_F(ShowRequestTest, Run_MainField1_WrongSyntax) {
   MessageSharedPtr msg = CreateMessage();
 
-  SharedPtr<ShowRequest> command(CreateCommand<ShowRequest>(msg));
+  std::shared_ptr<ShowRequest> command(CreateCommand<ShowRequest>(msg));
 
   text_field_ = "Main_Field_1\\n";
   TestSetupHelperWrongSyntax(msg,
@@ -502,7 +501,7 @@ TEST_F(ShowRequestTest, Run_MainField1_WrongSyntax) {
 TEST_F(ShowRequestTest, Run_MainField2_SUCCESS) {
   MessageSharedPtr msg = CreateMsgParams();
 
-  SharedPtr<ShowRequest> command(CreateCommand<ShowRequest>(msg));
+  std::shared_ptr<ShowRequest> command(CreateCommand<ShowRequest>(msg));
 
   text_field_ = "Main_Field_2";
   TestSetupHelper(msg,
@@ -514,7 +513,7 @@ TEST_F(ShowRequestTest, Run_MainField2_SUCCESS) {
 TEST_F(ShowRequestTest, Run_MainField2_WrongSyntax) {
   MessageSharedPtr msg = CreateMessage();
 
-  SharedPtr<ShowRequest> command(CreateCommand<ShowRequest>(msg));
+  std::shared_ptr<ShowRequest> command(CreateCommand<ShowRequest>(msg));
 
   text_field_ = "Main_Field_2\\n";
   TestSetupHelperWrongSyntax(msg,
@@ -526,7 +525,7 @@ TEST_F(ShowRequestTest, Run_MainField2_WrongSyntax) {
 TEST_F(ShowRequestTest, Run_MainField3_SUCCESS) {
   MessageSharedPtr msg = CreateMsgParams();
 
-  SharedPtr<ShowRequest> command(CreateCommand<ShowRequest>(msg));
+  std::shared_ptr<ShowRequest> command(CreateCommand<ShowRequest>(msg));
 
   text_field_ = "Main_Field_3";
   TestSetupHelper(msg,
@@ -538,7 +537,7 @@ TEST_F(ShowRequestTest, Run_MainField3_SUCCESS) {
 TEST_F(ShowRequestTest, Run_MainField3_WrongSyntax) {
   MessageSharedPtr msg = CreateMessage();
 
-  SharedPtr<ShowRequest> command(CreateCommand<ShowRequest>(msg));
+  std::shared_ptr<ShowRequest> command(CreateCommand<ShowRequest>(msg));
 
   text_field_ = "Main_Field_3\\n";
   TestSetupHelperWrongSyntax(msg,
@@ -550,7 +549,7 @@ TEST_F(ShowRequestTest, Run_MainField3_WrongSyntax) {
 TEST_F(ShowRequestTest, Run_MainField4_SUCCESS) {
   MessageSharedPtr msg = CreateMsgParams();
 
-  SharedPtr<ShowRequest> command(CreateCommand<ShowRequest>(msg));
+  std::shared_ptr<ShowRequest> command(CreateCommand<ShowRequest>(msg));
 
   text_field_ = "Main_Field_4";
   TestSetupHelper(msg,
@@ -562,7 +561,7 @@ TEST_F(ShowRequestTest, Run_MainField4_SUCCESS) {
 TEST_F(ShowRequestTest, Run_MainField4_WrongSyntax) {
   MessageSharedPtr msg = CreateMessage();
 
-  SharedPtr<ShowRequest> command(CreateCommand<ShowRequest>(msg));
+  std::shared_ptr<ShowRequest> command(CreateCommand<ShowRequest>(msg));
 
   text_field_ = "Main_Field_4\\n";
   TestSetupHelperWrongSyntax(msg,
@@ -574,7 +573,7 @@ TEST_F(ShowRequestTest, Run_MainField4_WrongSyntax) {
 TEST_F(ShowRequestTest, Run_MainField1_MetadataTag) {
   MessageSharedPtr msg = CreateMsgParams();
 
-  SharedPtr<ShowRequest> command(CreateCommand<ShowRequest>(msg));
+  std::shared_ptr<ShowRequest> command(CreateCommand<ShowRequest>(msg));
 
   text_field_ = "Main_Field_1";
   const size_t num_tags = 1;
@@ -590,7 +589,7 @@ TEST_F(ShowRequestTest, Run_MainField1_MetadataTag) {
 TEST_F(ShowRequestTest, Run_MainField1_MultipleMetadataTags) {
   MessageSharedPtr msg = CreateMsgParams();
 
-  SharedPtr<ShowRequest> command(CreateCommand<ShowRequest>(msg));
+  std::shared_ptr<ShowRequest> command(CreateCommand<ShowRequest>(msg));
 
   text_field_ = "Main_Field_1";
   const size_t num_tags = 5;
@@ -610,7 +609,7 @@ TEST_F(ShowRequestTest, Run_MainField1_MultipleMetadataTags) {
 TEST_F(ShowRequestTest, Run_MainField2_MetadataTag) {
   MessageSharedPtr msg = CreateMsgParams();
 
-  SharedPtr<ShowRequest> command(CreateCommand<ShowRequest>(msg));
+  std::shared_ptr<ShowRequest> command(CreateCommand<ShowRequest>(msg));
 
   text_field_ = "Main_Field_2";
   const size_t num_tags = 1;
@@ -626,7 +625,7 @@ TEST_F(ShowRequestTest, Run_MainField2_MetadataTag) {
 TEST_F(ShowRequestTest, Run_MainField3_MetadataTag) {
   MessageSharedPtr msg = CreateMsgParams();
 
-  SharedPtr<ShowRequest> command(CreateCommand<ShowRequest>(msg));
+  std::shared_ptr<ShowRequest> command(CreateCommand<ShowRequest>(msg));
 
   text_field_ = "Main_Field_3";
   const size_t num_tags = 1;
@@ -642,7 +641,7 @@ TEST_F(ShowRequestTest, Run_MainField3_MetadataTag) {
 TEST_F(ShowRequestTest, Run_MainField4_MetadataTag) {
   MessageSharedPtr msg = CreateMsgParams();
 
-  SharedPtr<ShowRequest> command(CreateCommand<ShowRequest>(msg));
+  std::shared_ptr<ShowRequest> command(CreateCommand<ShowRequest>(msg));
 
   text_field_ = "Main_Field_4";
   const size_t num_tags = 1;
@@ -658,7 +657,7 @@ TEST_F(ShowRequestTest, Run_MainField4_MetadataTag) {
 TEST_F(ShowRequestTest, Run_MainField1_MetadataTagWithNoFieldData) {
   MessageSharedPtr msg = CreateMsgParams();
 
-  SharedPtr<ShowRequest> command(CreateCommand<ShowRequest>(msg));
+  std::shared_ptr<ShowRequest> command(CreateCommand<ShowRequest>(msg));
 
   text_field_ = "Main_Field_1";
   const size_t num_tags = 1;
@@ -700,7 +699,7 @@ TEST_F(ShowRequestTest, Run_MainField1_MetadataTagWithNoFieldData) {
 TEST_F(ShowRequestTest, Run_MediaClock_SUCCESS) {
   MessageSharedPtr msg = CreateMsgParams();
 
-  SharedPtr<ShowRequest> command(CreateCommand<ShowRequest>(msg));
+  std::shared_ptr<ShowRequest> command(CreateCommand<ShowRequest>(msg));
 
   text_field_ = "Media_Clock";
   TestSetupHelper(msg,
@@ -712,7 +711,7 @@ TEST_F(ShowRequestTest, Run_MediaClock_SUCCESS) {
 TEST_F(ShowRequestTest, Run_MediaClock_WrongSyntax) {
   MessageSharedPtr msg = CreateMessage();
 
-  SharedPtr<ShowRequest> command(CreateCommand<ShowRequest>(msg));
+  std::shared_ptr<ShowRequest> command(CreateCommand<ShowRequest>(msg));
 
   text_field_ = "Media_Clock\\n";
   TestSetupHelperWrongSyntax(msg,
@@ -724,7 +723,7 @@ TEST_F(ShowRequestTest, Run_MediaClock_WrongSyntax) {
 TEST_F(ShowRequestTest, Run_MediaTrack_SUCCESS) {
   MessageSharedPtr msg = CreateMsgParams();
 
-  SharedPtr<ShowRequest> command(CreateCommand<ShowRequest>(msg));
+  std::shared_ptr<ShowRequest> command(CreateCommand<ShowRequest>(msg));
 
   text_field_ = "Media_Track";
   TestSetupHelper(msg,
@@ -736,7 +735,7 @@ TEST_F(ShowRequestTest, Run_MediaTrack_SUCCESS) {
 TEST_F(ShowRequestTest, Run_MediaTrack_WrongSyntax) {
   MessageSharedPtr msg = CreateMessage();
 
-  SharedPtr<ShowRequest> command(CreateCommand<ShowRequest>(msg));
+  std::shared_ptr<ShowRequest> command(CreateCommand<ShowRequest>(msg));
 
   text_field_ = "Media_Track\\n";
   TestSetupHelperWrongSyntax(msg,
@@ -748,7 +747,7 @@ TEST_F(ShowRequestTest, Run_MediaTrack_WrongSyntax) {
 TEST_F(ShowRequestTest, Run_StatusBar_SUCCESS) {
   MessageSharedPtr msg = CreateMsgParams();
 
-  SharedPtr<ShowRequest> command(CreateCommand<ShowRequest>(msg));
+  std::shared_ptr<ShowRequest> command(CreateCommand<ShowRequest>(msg));
 
   text_field_ = "Status_Bar";
   TestSetupHelper(
@@ -759,7 +758,7 @@ TEST_F(ShowRequestTest, Run_StatusBar_SUCCESS) {
 TEST_F(ShowRequestTest, Run_StatusBar_WrongSyntax) {
   MessageSharedPtr msg = CreateMessage();
 
-  SharedPtr<ShowRequest> command(CreateCommand<ShowRequest>(msg));
+  std::shared_ptr<ShowRequest> command(CreateCommand<ShowRequest>(msg));
 
   text_field_ = "Status_Bar\\n";
   TestSetupHelperWrongSyntax(
@@ -773,7 +772,7 @@ TEST_F(ShowRequestTest, Run_Alignment_SUCCESS) {
   msg_params[am::strings::alignment] = "Alignment";
   (*msg)[am::strings::msg_params] = msg_params;
 
-  SharedPtr<ShowRequest> command(CreateCommand<ShowRequest>(msg));
+  std::shared_ptr<ShowRequest> command(CreateCommand<ShowRequest>(msg));
 
   EXPECT_CALL(app_mngr_, application(kConnectionKey))
       .WillOnce(Return(mock_app_));
@@ -797,7 +796,7 @@ TEST_F(ShowRequestTest, Run_CustomPresets_SUCCESS) {
   msg_params[am::strings::custom_presets] = custom_presets;
   (*msg)[am::strings::msg_params] = msg_params;
 
-  SharedPtr<ShowRequest> command(CreateCommand<ShowRequest>(msg));
+  std::shared_ptr<ShowRequest> command(CreateCommand<ShowRequest>(msg));
 
   EXPECT_CALL(app_mngr_, application(kConnectionKey))
       .WillOnce(Return(mock_app_));
@@ -820,7 +819,7 @@ TEST_F(ShowRequestTest, Run_CustomPresets_WrongSyntax) {
   msg_params[am::strings::custom_presets] = custom_presets;
   (*msg)[am::strings::msg_params] = msg_params;
 
-  SharedPtr<ShowRequest> command(CreateCommand<ShowRequest>(msg));
+  std::shared_ptr<ShowRequest> command(CreateCommand<ShowRequest>(msg));
 
   EXPECT_CALL(app_mngr_, application(kConnectionKey))
       .WillOnce(Return(mock_app_));
@@ -836,7 +835,7 @@ TEST_F(ShowRequestTest, Run_CustomPresets_WrongSyntax) {
 TEST_F(ShowRequestTest, Run_InvalidApp_Canceled) {
   MessageSharedPtr msg = CreateMsgParams();
 
-  SharedPtr<ShowRequest> command(CreateCommand<ShowRequest>(msg));
+  std::shared_ptr<ShowRequest> command(CreateCommand<ShowRequest>(msg));
 
   EXPECT_CALL(app_mngr_, application(kConnectionKey))
       .WillOnce(Return(MockAppPtr()));
@@ -851,7 +850,7 @@ TEST_F(ShowRequestTest, Run_InvalidApp_Canceled) {
 TEST_F(ShowRequestTest, Run_EmptyParams_Canceled) {
   MessageSharedPtr msg = CreateMsgParams();
 
-  SharedPtr<ShowRequest> command(CreateCommand<ShowRequest>(msg));
+  std::shared_ptr<ShowRequest> command(CreateCommand<ShowRequest>(msg));
 
   EXPECT_CALL(app_mngr_, application(kConnectionKey))
       .WillOnce(Return(mock_app_));
@@ -869,7 +868,7 @@ TEST_F(ShowRequestTest, OnEvent_SuccessResultCode_SUCCESS) {
       hmi_apis::Common_Result::eType::SUCCESS;
   (*msg)[am::strings::msg_params] = SmartObject(smart_objects::SmartType_Map);
 
-  SharedPtr<ShowRequest> command(CreateCommand<ShowRequest>(msg));
+  std::shared_ptr<ShowRequest> command(CreateCommand<ShowRequest>(msg));
   EXPECT_CALL(mock_rpc_service_,
               ManageMobileCommand(
                   MobileResultCodeIs(mobile_apis::Result::eType::SUCCESS), _));
@@ -889,7 +888,7 @@ TEST_F(ShowRequestTest, OnEvent_WarningsResultCode_SUCCESS) {
   (*msg)[am::strings::params][am::hmi_response::message] = "Response Info";
   (*msg)[am::strings::msg_params] = SmartObject(smart_objects::SmartType_Map);
 
-  SharedPtr<ShowRequest> command(CreateCommand<ShowRequest>(msg));
+  std::shared_ptr<ShowRequest> command(CreateCommand<ShowRequest>(msg));
   EXPECT_CALL(mock_rpc_service_, ManageMobileCommand(_, _));
 
   Event event(hmi_apis::FunctionID::UI_Show);
@@ -905,7 +904,7 @@ TEST_F(ShowRequestTest, OnEvent_WrongFunctionID_Canceled) {
   (*msg)[am::strings::params][am::hmi_response::code] =
       mobile_apis::Result::SUCCESS;
 
-  SharedPtr<ShowRequest> command(CreateCommand<ShowRequest>(msg));
+  std::shared_ptr<ShowRequest> command(CreateCommand<ShowRequest>(msg));
   EXPECT_CALL(mock_rpc_service_, ManageMobileCommand(_, _)).Times(0);
 
   Event event(hmi_apis::FunctionID::UI_Alert);

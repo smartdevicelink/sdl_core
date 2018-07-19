@@ -134,7 +134,7 @@ TEST_F(SDLActivateAppRequestTest, Run_ActivateApp_SUCCESS) {
   MessageSharedPtr msg = CreateMessage();
   SetCorrelationAndAppID(msg);
 
-  SharedPtr<SDLActivateAppRequest> command(
+  std::shared_ptr<SDLActivateAppRequest> command(
       CreateCommand<SDLActivateAppRequest>(msg));
 
   EXPECT_CALL(app_mngr_, state_controller())
@@ -154,7 +154,7 @@ TEST_F(SDLActivateAppRequestTest, DISABLED_Run_DactivateApp_REJECTED) {
   (*msg)[strings::msg_params][strings::function_id] =
       hmi_apis::FunctionID::SDL_ActivateApp;
 
-  SharedPtr<SDLActivateAppRequest> command(
+  std::shared_ptr<SDLActivateAppRequest> command(
       CreateCommand<SDLActivateAppRequest>(msg));
 
   EXPECT_CALL(app_mngr_, state_controller())
@@ -176,7 +176,7 @@ TEST_F(SDLActivateAppRequestTest, FindAppToRegister_SUCCESS) {
   MessageSharedPtr msg = CreateMessage();
   SetCorrelationAndAppID(msg);
 
-  SharedPtr<SDLActivateAppRequest> command(
+  std::shared_ptr<SDLActivateAppRequest> command(
       CreateCommand<SDLActivateAppRequest>(msg));
 
   MockAppPtr mock_app(CreateMockApp());
@@ -222,7 +222,7 @@ TEST_F(SDLActivateAppRequestTest, AppIdNotFound_SUCCESS) {
   MessageSharedPtr msg = CreateMessage();
   SetCorrelationAndAppID(msg);
 
-  SharedPtr<SDLActivateAppRequest> command(
+  std::shared_ptr<SDLActivateAppRequest> command(
       CreateCommand<SDLActivateAppRequest>(msg));
 
   EXPECT_CALL(app_mngr_, application(kAppID))
@@ -237,7 +237,7 @@ TEST_F(SDLActivateAppRequestTest, DevicesAppsEmpty_SUCCESS) {
   MessageSharedPtr msg = CreateMessage();
   SetCorrelationAndAppID(msg);
 
-  SharedPtr<SDLActivateAppRequest> command(
+  std::shared_ptr<SDLActivateAppRequest> command(
       CreateCommand<SDLActivateAppRequest>(msg));
 
   MockAppPtr mock_app(CreateMockApp());
@@ -263,7 +263,7 @@ TEST_F(SDLActivateAppRequestTest, FirstAppActive_SUCCESS) {
   MessageSharedPtr msg = CreateMessage();
   SetCorrelationAndAppID(msg);
 
-  SharedPtr<SDLActivateAppRequest> command(
+  std::shared_ptr<SDLActivateAppRequest> command(
       CreateCommand<SDLActivateAppRequest>(msg));
 
   MockAppPtr mock_app(CreateMockApp());
@@ -301,7 +301,7 @@ TEST_F(SDLActivateAppRequestTest, FirstAppNotActive_SUCCESS) {
   MessageSharedPtr msg = CreateMessage();
   SetCorrelationAndAppID(msg);
 
-  SharedPtr<SDLActivateAppRequest> command(
+  std::shared_ptr<SDLActivateAppRequest> command(
       CreateCommand<SDLActivateAppRequest>(msg));
 
   MockAppPtr mock_app(CreateMockApp());
@@ -322,7 +322,7 @@ TEST_F(SDLActivateAppRequestTest, FirstAppIsForeground_SUCCESS) {
   MessageSharedPtr msg = CreateMessage();
   SetCorrelationAndAppID(msg);
 
-  SharedPtr<SDLActivateAppRequest> command(
+  std::shared_ptr<SDLActivateAppRequest> command(
       CreateCommand<SDLActivateAppRequest>(msg));
 
   MockAppPtr mock_app(CreateMockApp());
@@ -362,7 +362,7 @@ TEST_F(SDLActivateAppRequestTest, FirstAppNotRegisteredAndEmpty_SUCCESS) {
   MessageSharedPtr msg = CreateMessage();
   SetCorrelationAndAppID(msg);
 
-  SharedPtr<SDLActivateAppRequest> command(
+  std::shared_ptr<SDLActivateAppRequest> command(
       CreateCommand<SDLActivateAppRequest>(msg));
 
   MockAppPtr mock_app(CreateMockApp());
@@ -395,7 +395,7 @@ TEST_F(SDLActivateAppRequestTest, FirstAppNotRegistered_SUCCESS) {
   MessageSharedPtr msg = CreateMessage();
   SetCorrelationAndAppID(msg);
 
-  SharedPtr<SDLActivateAppRequest> command(
+  std::shared_ptr<SDLActivateAppRequest> command(
       CreateCommand<SDLActivateAppRequest>(msg));
 
   MockAppPtr mock_app(CreateMockApp());
@@ -431,7 +431,7 @@ TEST_F(SDLActivateAppRequestTest, OnTimeout_SUCCESS) {
   MessageSharedPtr msg = CreateMessage();
   SetCorrelationAndAppID(msg);
 
-  SharedPtr<SDLActivateAppRequest> command(
+  std::shared_ptr<SDLActivateAppRequest> command(
       CreateCommand<SDLActivateAppRequest>(msg));
   ON_CALL(mock_event_dispatcher_, remove_observer(_, _));
   EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_)).WillOnce(Return(true));
@@ -443,7 +443,7 @@ TEST_F(SDLActivateAppRequestTest, OnEvent_InvalidEventId_UNSUCCESS) {
   MessageSharedPtr event_msg = CreateMessage();
   (*event_msg)[strings::params][strings::correlation_id] = kCorrelationID;
 
-  SharedPtr<SDLActivateAppRequest> command(
+  std::shared_ptr<SDLActivateAppRequest> command(
       CreateCommand<SDLActivateAppRequest>());
 
   Event event(hmi_apis::FunctionID::INVALID_ENUM);
@@ -458,7 +458,7 @@ TEST_F(SDLActivateAppRequestTest, OnEvent_InvalidAppId_UNSUCCESS) {
   (*event_msg)[strings::msg_params][strings::application][strings::app_id] =
       kAppID;
 
-  SharedPtr<SDLActivateAppRequest> command(
+  std::shared_ptr<SDLActivateAppRequest> command(
       CreateCommand<SDLActivateAppRequest>());
 
   Event event(hmi_apis::FunctionID::BasicCommunication_OnAppRegistered);
@@ -474,7 +474,7 @@ TEST_F(SDLActivateAppRequestTest, OnEvent_InvalidAppId_UNSUCCESS) {
 TEST_F(SDLActivateAppRequestTest, OnEvent_SUCCESS) {
   MessageSharedPtr msg = CreateMessage();
   (*msg)[strings::params][strings::correlation_id] = kCorrelationID;
-  SharedPtr<SDLActivateAppRequest> command(
+  std::shared_ptr<SDLActivateAppRequest> command(
       CreateCommand<SDLActivateAppRequest>(msg));
 
   MessageSharedPtr event_msg = CreateMessage();

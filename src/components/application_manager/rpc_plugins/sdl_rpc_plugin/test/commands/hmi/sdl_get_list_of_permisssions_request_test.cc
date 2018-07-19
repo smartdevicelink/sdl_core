@@ -82,7 +82,7 @@ TEST_F(SDLGetListOfPermissionsRequestTest, Run_SUCCESS) {
   EXPECT_CALL(app_mngr_, application_by_hmi_app(kAppID))
       .WillOnce(Return(mock_app_));
 
-  SharedPtr<SDLGetListOfPermissionsRequest> command(
+  std::shared_ptr<SDLGetListOfPermissionsRequest> command(
       CreateCommand<SDLGetListOfPermissionsRequest>(msg));
 
   EXPECT_CALL(mock_policy_handler_,
@@ -95,7 +95,7 @@ TEST_F(SDLGetListOfPermissionsRequestTest, Run_KeyDoesntExist_SUCCESS) {
   MessageSharedPtr msg = CreateMessage(smart_objects::SmartType_Binary);
   (*msg)[strings::params][strings::correlation_id] = kCorrelationID;
 
-  SharedPtr<SDLGetListOfPermissionsRequest> command(
+  std::shared_ptr<SDLGetListOfPermissionsRequest> command(
       CreateCommand<SDLGetListOfPermissionsRequest>(msg));
 
   EXPECT_CALL(mock_policy_handler_,

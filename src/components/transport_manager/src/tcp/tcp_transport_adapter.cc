@@ -103,8 +103,8 @@ void TcpTransportAdapter::Store() const {
     if (!device) {  // device could have been disconnected
       continue;
     }
-    utils::SharedPtr<TcpDevice> tcp_device =
-        DeviceSptr::static_pointer_cast<TcpDevice>(device);
+    std::shared_ptr<TcpDevice> tcp_device =
+        std::static_pointer_cast<TcpDevice>(device);
     Json::Value device_dictionary;
     device_dictionary["name"] = tcp_device->name();
     struct in_addr address;

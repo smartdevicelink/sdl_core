@@ -64,7 +64,7 @@ TEST_F(SDLGetStatusUpdateRequestTest, Run_SUCCESS) {
   MessageSharedPtr msg = CreateMessage();
   (*msg)[strings::params][strings::correlation_id] = kCorrelationID;
 
-  SharedPtr<SDLGetStatusUpdateRequest> command(
+  std::shared_ptr<SDLGetStatusUpdateRequest> command(
       CreateCommand<SDLGetStatusUpdateRequest>(msg));
 
   EXPECT_CALL(mock_policy_handler_, OnGetStatusUpdate(kCorrelationID));

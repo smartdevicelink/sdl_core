@@ -53,7 +53,6 @@
 #include "interfaces/MOBILE_API.h"
 #include "include/test/protocol_handler/mock_protocol_handler.h"
 #include "test/application_manager/mock_application_manager_settings.h"
-#include "utils/make_shared.h"
 
 using ::testing::_;
 using ::testing::Return;
@@ -62,7 +61,6 @@ using ::testing::NiceMock;
 using ::testing::SaveArg;
 using ::testing::Mock;
 using ::testing::NiceMock;
-using ::utils::SharedPtr;
 namespace am = ::application_manager;
 using am::ApplicationSet;
 using am::commands::MessageSharedPtr;
@@ -99,7 +97,7 @@ class RCGetInteriorVehicleDataConsentTest
     : public CommandRequestTest<CommandsTestMocks::kIsNice> {
  public:
   RCGetInteriorVehicleDataConsentTest()
-      : mock_app_(utils::MakeShared<NiceMock<MockApplication> >())
+      : mock_app_(std::make_shared<NiceMock<MockApplication> >())
       , command_holder(app_mngr_)
       , request_controller(mock_request_controler)
       , rpc_service(app_mngr_,
@@ -107,9 +105,9 @@ class RCGetInteriorVehicleDataConsentTest
                     &mock_protocol_handler,
                     &mock_hmi_handler,
                     command_holder)
-      , rc_app_extention_(utils::MakeShared<RCAppExtension>(kPluginID))
+      , rc_app_extention_(std::make_shared<RCAppExtension>(kPluginID))
       , mock_rpc_plugin_manager(
-            utils::MakeShared<NiceMock<MockRPCPluginManager> >())
+            std::make_shared<NiceMock<MockRPCPluginManager> >())
       , rpc_plugin(mock_rpc_plugin)
       , optional_mock_rpc_plugin(mock_rpc_plugin) {
     ON_CALL(*mock_app_, app_id()).WillByDefault(Return(kAppId));
@@ -146,15 +144,14 @@ class RCGetInteriorVehicleDataConsentTest
   }
 
   template <class Command>
-  application_manager::SharedPtr<Command> CreateRCCommand(
-      MessageSharedPtr& msg) {
+  std::shared_ptr<Command> CreateRCCommand(MessageSharedPtr& msg) {
     InitCommand(kDefaultTimeout_);
-    return ::utils::MakeShared<Command>(msg ? msg : msg = CreateMessage(),
-                                        app_mngr_,
-                                        rpc_service,
-                                        mock_hmi_capabilities_,
-                                        mock_policy_handler_,
-                                        mock_allocation_manager_);
+    return std::make_shared<Command>(msg ? msg : msg = CreateMessage(),
+                                     app_mngr_,
+                                     rpc_service,
+                                     mock_hmi_capabilities_,
+                                     mock_policy_handler_,
+                                     mock_allocation_manager_);
   }
 
   MessageSharedPtr CreateBasicMessage() {
@@ -170,7 +167,7 @@ class RCGetInteriorVehicleDataConsentTest
   }
 
  protected:
-  utils::SharedPtr<MockApplication> mock_app_;
+  std::shared_ptr<MockApplication> mock_app_;
   MockRequestControlerSettings mock_request_controler;
   MockProtocolHandler mock_protocol_handler;
   MockHMIMessageHandler mock_hmi_handler;
@@ -182,8 +179,8 @@ class RCGetInteriorVehicleDataConsentTest
   MockCommandFactory mock_command_factory;
   am::request_controller::RequestController request_controller;
   am::rpc_service::RPCServiceImpl rpc_service;
-  utils::SharedPtr<RCAppExtension> rc_app_extention_;
-  utils::SharedPtr<am::plugin_manager::MockRPCPluginManager>
+  std::shared_ptr<RCAppExtension> rc_app_extention_;
+  std::shared_ptr<am::plugin_manager::MockRPCPluginManager>
       mock_rpc_plugin_manager;
   utils::Optional<RPCPlugin> rpc_plugin;
   utils::Optional<MockRPCPlugin> optional_mock_rpc_plugin;
