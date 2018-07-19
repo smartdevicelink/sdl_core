@@ -302,6 +302,20 @@
             <description>Clears the media clock timer (previously done through Show->mediaClock)</description>
         </element>
     </enum>
+    <enum name="AudioStreamingIndicator">
+		<element name="PLAY_PAUSE">
+    		<description>Default playback indicator.</description>
+  		</element>
+  		<element name="PLAY">
+    		<description>Indicates that a button press of the Play/Pause button would start the playback.</description>
+  		</element>
+  		<element name="PAUSE">
+    		<description>Indicates that a button press of the Play/Pause button would pause the current playback.</description>
+  		</element>
+  		<element name="STOP">
+    		<description>Indicates that a button press of the Play/Pause button would stop the current playback.</description>
+  		</element>
+	</enum> 
     
     <enum name="TimerMode">
         <element name="UP" >
@@ -4151,6 +4165,9 @@
                 In case of pause, resume, or clear, the start time value is ignored and shall be left out.  For resume, the time continues with the same value as it was when paused.
             </description>
         </param>
+       <param name="audioStreamingIndicator" type="AudioStreamingIndicator" mandatory="false">
+      		<description>Indicates that a button press of the Play/Pause button would play, pause or Stop the current playback.</description>
+    	</param>
     </function>
     
     <function name="SetMediaClockTimer" functionID="SetMediaClockTimerID" messagetype="response">
