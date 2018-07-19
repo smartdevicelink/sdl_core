@@ -55,7 +55,7 @@ class InteriorDataCacheImpl : public InteriorDataCache {
       const std::string& module_type) const OVERRIDE;
   bool Contains(const std::string& module_type) const OVERRIDE;
   void Remove(const std::string& module_type) OVERRIDE;
-  void ClearCache() OVERRIDE;
+  void Clear() OVERRIDE;
 
  private:
   std::map<std::string, smart_objects::SmartObject> subscriptions_;

@@ -532,7 +532,7 @@ TEST_F(GetInteriorVehicleDataRequestTest,
                   MobileResultCodeIs(mobile_apis::Result::GENERIC_ERROR), _))
       .WillOnce(Return(true));
 
-  EXPECT_CALL(mock_interior_data_cache_, ClearCache()).Times(0);
+  EXPECT_CALL(mock_interior_data_cache_, Clear()).Times(0);
 
   // Act
   application_manager::SharedPtr<

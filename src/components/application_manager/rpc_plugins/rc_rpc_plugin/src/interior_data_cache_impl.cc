@@ -114,7 +114,7 @@ void InteriorDataCacheImpl::Remove(const std::string& module_type) {
   subscriptions_.erase(it);
 }
 
-void InteriorDataCacheImpl::ClearCache() {
+void InteriorDataCacheImpl::Clear() {
   LOG4CXX_AUTO_TRACE(logger_);
   sync_primitives::AutoLock autolock(subscriptions_lock_);
   subscriptions_.clear();

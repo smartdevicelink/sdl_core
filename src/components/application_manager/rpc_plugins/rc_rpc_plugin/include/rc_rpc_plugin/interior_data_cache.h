@@ -104,9 +104,9 @@ class InteriorDataCache {
   virtual void Remove(const std::string& module_type) = 0;
 
   /**
-   * @brief ClearCache clear all cached data
+   * @brief Clear clear all cached data
    */
-  virtual void ClearCache() = 0;
+  virtual void Clear() = 0;
 };
 }  // rc_rpc_plugin
 

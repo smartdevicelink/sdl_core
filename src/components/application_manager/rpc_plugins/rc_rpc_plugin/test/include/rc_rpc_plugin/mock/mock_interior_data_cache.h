@@ -45,7 +45,7 @@ class MockInteriorDataCache : public rc_rpc_plugin::InteriorDataCache {
   MOCK_CONST_METHOD1(Retrieve, smart_objects::SmartObject(const std::string&));
   MOCK_CONST_METHOD1(Contains, bool(const std::string&));
   MOCK_METHOD1(Remove, void(const std::string&));
-  MOCK_METHOD0(ClearCache, void());
+  MOCK_METHOD0(Clear, void());
 };
 
 }  // namespace rc_rpc_plugin_test

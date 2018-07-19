@@ -71,7 +71,7 @@ TEST_F(InteriorDataCacheTest, DataDoesNotExistAfterClear) {
   EXPECT_TRUE(cache.Contains(module_type_key));
   auto Retrieved_data = cache.Retrieve(module_type_key);
   EXPECT_EQ(Retrieved_data, data);
-  cache.ClearCache();
+  cache.Clear();
   auto Retrieved_data_after_clear = cache.Retrieve(module_type_key);
   EXPECT_EQ(smart_objects::SmartType_Null,
             Retrieved_data_after_clear.getType());
