@@ -32,7 +32,6 @@
 
 #include "life_cycle.h"
 #include "utils/signals.h"
-
 #include "config_profile/profile.h"
 #include "application_manager/system_time/system_time_handler_impl.h"
 #include "resumption/last_state_impl.h"
