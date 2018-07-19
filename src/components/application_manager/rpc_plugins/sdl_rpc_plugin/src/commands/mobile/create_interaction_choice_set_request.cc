@@ -124,10 +124,19 @@ void CreateInteractionChoiceSetRequest::Run() {
     SendResponse(false, result);
     return;
   }
-  uint32_t grammar_id = application_manager_.GenerateGrammarID();
-  (*message_)[strings::msg_params][strings::grammar_id] = grammar_id;
+  int vr_status = MessageHelper::CheckChoiceSet_VRCommands((*message_)[strings::msg_params][strings::choice_set]);
+  if (vr_status == -1) {
+    // this is an error
+    SendResponse(false, Result::INVALID_DATA, "Some choices don't contain VR commands.");
+    
+  } else if (vr_status == 0) {
+    // everyone had a vr command, setup the grammar
+    uint32_t grammar_id = application_manager_.GenerateGrammarID();
+    (*message_)[strings::msg_params][strings::grammar_id] = grammar_id;
+    SendVRAddCommandRequests(app);
+  }
+  // continue on as usual
   app->AddChoiceSet(choice_set_id_, (*message_)[strings::msg_params]);
-  SendVRAddCommandRequests(app);
 }
 
 mobile_apis::Result::eType CreateInteractionChoiceSetRequest::CheckChoiceSet(
