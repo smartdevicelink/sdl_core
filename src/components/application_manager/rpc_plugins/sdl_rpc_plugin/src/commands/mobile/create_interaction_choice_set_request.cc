@@ -124,16 +124,24 @@ void CreateInteractionChoiceSetRequest::Run() {
     SendResponse(false, result);
     return;
   }
+  std::cerr << "checking choice set\n";
   int vr_status = MessageHelper::CheckChoiceSet_VRCommands((*message_)[strings::msg_params][strings::choice_set]);
   if (vr_status == -1) {
+    std::cerr << "choice set has invalid MIXED set of VR parameters" << '\n';
     // this is an error
     SendResponse(false, Result::INVALID_DATA, "Some choices don't contain VR commands.");
+    return; // exit now, this is a bad set
     
   } else if (vr_status == 0) {
+    std::cerr << "choice set has valid FULL set of VR parameters" << '\n';
+    
     // everyone had a vr command, setup the grammar
     uint32_t grammar_id = application_manager_.GenerateGrammarID();
     (*message_)[strings::msg_params][strings::grammar_id] = grammar_id;
     SendVRAddCommandRequests(app);
+  } else {
+    std::cerr << "choice set has valid EMPTY set of VR parameters" << '\n';
+    
   }
   // continue on as usual
   app->AddChoiceSet(choice_set_id_, (*message_)[strings::msg_params]);
@@ -158,7 +166,7 @@ mobile_apis::Result::eType CreateInteractionChoiceSetRequest::CheckChoiceSet(
             (*current_choice_set_it)[strings::choice_id].asInt());
     if (!ins_res.second) {
       LOG4CXX_ERROR(logger_,
-                    "Choise with ID "
+                    "Choice with ID "
                         << (*current_choice_set_it)[strings::choice_id].asInt()
                         << " already exists");
       return mobile_apis::Result::INVALID_ID;
