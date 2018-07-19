@@ -33,7 +33,7 @@
 #include "hmi/ui_is_ready_request.h"
 
 #include "gtest/gtest.h"
-#include "utils/shared_ptr.h"
+
 #include "smart_objects/smart_object.h"
 #include "application_manager/smart_object_keys.h"
 #include "application_manager/commands/command_request_test.h"
@@ -60,7 +60,7 @@ using am::commands::MessageSharedPtr;
 using sdl_rpc_plugin::commands::UIIsReadyRequest;
 using am::event_engine::Event;
 
-typedef SharedPtr<UIIsReadyRequest> UIIsReadyRequestPtr;
+typedef std::shared_ptr<UIIsReadyRequest> UIIsReadyRequestPtr;
 
 class UIIsReadyRequestTest
     : public CommandRequestTest<CommandsTestMocks::kIsNice> {

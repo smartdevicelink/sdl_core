@@ -1283,7 +1283,6 @@ class CodeGenerator(object):
         u'''#include "formatters/CSmartFactory.h"\n'''
         u'''#include "smart_objects/smart_schema.h"\n'''
         u'''#include "smart_objects/schema_item.h"\n'''
-        u'''#include "utils/shared_ptr.h"\n'''
         u'''#include "$header_file_name"\n'''
         u'''\n'''
         u'''$namespace_open'''
@@ -1386,7 +1385,7 @@ class CodeGenerator(object):
         u'''message_type_items);\n'''
         u'''}\n'''
         u'''\n'''
-        u'''utils::SharedPtr<ISchemaItem> $namespace::$class_name::'''
+        u'''std::shared_ptr<ISchemaItem> $namespace::$class_name::'''
         u'''ProvideObjectSchemaItemForStruct(\n'''
         u'''    const TStructsSchemaItems &struct_schema_items,\n'''
         u'''    const StructIdentifiers::eType struct_id) {\n'''
@@ -1465,7 +1464,7 @@ class CodeGenerator(object):
         u'''\n''')
 
     _struct_schema_item_template = string.Template(
-        u'''utils::SharedPtr<ISchemaItem> struct_schema_item_${name} = '''
+        u'''std::shared_ptr<ISchemaItem> struct_schema_item_${name} = '''
         u'''InitStructSchemaItem_${name}(struct_schema_items);\n'''
         u'''struct_schema_items.insert(std::make_pair('''
         u'''StructIdentifiers::${name}, struct_schema_item_${name}));\n'''
@@ -1482,7 +1481,7 @@ class CodeGenerator(object):
         u'''struct_schema_items, function_id_items, message_type_items)));''')
 
     _struct_impl_template = string.Template(
-        u'''utils::SharedPtr<ISchemaItem> $namespace::$class_name::'''
+        u'''std::shared_ptr<ISchemaItem> $namespace::$class_name::'''
         u'''InitStructSchemaItem_${struct_name}(\n'''
         u'''    const TStructsSchemaItems &struct_schema_items) {\n'''
         u'''$code'''
@@ -1504,7 +1503,7 @@ class CodeGenerator(object):
 
     _impl_code_item_decl_temlate = string.Template(
         u'''${comment}'''
-        u'''utils::SharedPtr<ISchemaItem> ${var_name} = ${item_decl};''')
+        u'''std::shared_ptr<ISchemaItem> ${var_name} = ${item_decl};''')
 
     _impl_code_integer_item_template = string.Template(
         u'''TNumberSchemaItem<${type}>::create(${params})''')
@@ -1580,7 +1579,7 @@ class CodeGenerator(object):
         u'''   * @brief Type that maps of struct IDs to schema items.\n'''
         u'''   */\n'''
         u'''  typedef std::map<const StructIdentifiers::eType, '''
-        u'''utils::SharedPtr<NsSmartDeviceLink::NsSmartObjects::'''
+        u'''std::shared_ptr<NsSmartDeviceLink::NsSmartObjects::'''
         u'''ISchemaItem> > TStructsSchemaItems;\n'''
         u'''\n'''
         u'''  /**\n'''
@@ -1589,10 +1588,10 @@ class CodeGenerator(object):
         u'''   * @param struct_schema_items Struct schema items.\n'''
         u'''   * @param struct_id ID of structure to provide.\n'''
         u'''   *\n'''
-        u'''   * @return utils::SharedPtr of strucute\n'''
+        u'''   * @return std::shared_ptr of strucute\n'''
         u'''   */\n'''
         u'''  static '''
-        u'''utils::SharedPtr<NsSmartDeviceLink::NsSmartObjects::ISchemaItem> '''
+        u'''std::shared_ptr<NsSmartDeviceLink::NsSmartObjects::ISchemaItem> '''
         u'''ProvideObjectSchemaItemForStruct(\n'''
         u'''        const TStructsSchemaItems &struct_schema_items,\n'''
         u'''        const StructIdentifiers::eType struct_id);\n'''
@@ -1637,7 +1636,7 @@ class CodeGenerator(object):
     _struct_decl_template = string.Template(
         u'''$comment\n'''
         u'''static '''
-        u'''utils::SharedPtr<NsSmartDeviceLink::NsSmartObjects::ISchemaItem> '''
+        u'''std::shared_ptr<NsSmartDeviceLink::NsSmartObjects::ISchemaItem> '''
         u'''InitStructSchemaItem_${struct_name}(\n'''
         u'''    const TStructsSchemaItems &struct_schema_items);''')
 

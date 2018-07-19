@@ -36,7 +36,7 @@
 #include "mobile/delete_command_request.h"
 
 #include "gtest/gtest.h"
-#include "utils/shared_ptr.h"
+
 #include "smart_objects/smart_object.h"
 #include "application_manager/smart_object_keys.h"
 #include "application_manager/commands/command_request_test.h"
@@ -64,7 +64,7 @@ using am::event_engine::Event;
 using am::MockMessageHelper;
 using am::MockHmiInterfaces;
 
-typedef SharedPtr<DeleteCommandRequest> DeleteCommandPtr;
+typedef std::shared_ptr<DeleteCommandRequest> DeleteCommandPtr;
 
 namespace {
 const int32_t kCommandId = 1;
@@ -260,7 +260,7 @@ TEST_F(DeleteCommandRequestTest,
   MessageSharedPtr result_msg(
       CatchMobileCommandResult(CallOnEvent(*command, event_ui)));
 
-  ASSERT_TRUE(result_msg);
+  ASSERT_TRUE((bool)result_msg);
 
   ResultCommandExpectations(result_msg, "UI is not supported by system");
 }

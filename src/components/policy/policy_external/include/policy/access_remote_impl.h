@@ -35,7 +35,7 @@
 #include <map>
 #include "policy/policy_table/types.h"
 #include "utils/macro.h"
-#include "utils/shared_ptr.h"
+
 #include "policy/access_remote.h"
 #include "policy/cache_manager.h"
 
@@ -46,7 +46,7 @@ namespace policy {
 class AccessRemoteImpl : public AccessRemote {
  public:
   AccessRemoteImpl();
-  explicit AccessRemoteImpl(utils::SharedPtr<CacheManager> cache);
+  explicit AccessRemoteImpl(std::shared_ptr<CacheManager> cache);
   /**
    * @brief CheckModuleType check if module type is allowed for application
    * @param app_id application id
@@ -144,7 +144,7 @@ class AccessRemoteImpl : public AccessRemote {
   /**
    * @brief cache_ contains pointer to cache manager instance
    */
-  utils::SharedPtr<CacheManager> cache_;
+  std::shared_ptr<CacheManager> cache_;
 
   /**
    * @brief hmi_types_ contains list of default HMI types for applications

@@ -46,16 +46,15 @@ namespace components {
 namespace commands_test {
 namespace hmi_commands_test {
 namespace navi_is_ready_responce {
-
 namespace am = ::application_manager;
 namespace commands = sdl_rpc_plugin::commands;
 
 using ::testing::ReturnRef;
-using ::utils::SharedPtr;
+
 using application_manager::commands::ResponseFromHMI;
 using test::components::event_engine_test::MockEventDispatcher;
 
-typedef SharedPtr<ResponseFromHMI> ResponseFromHMIPtr;
+typedef std::shared_ptr<ResponseFromHMI> ResponseFromHMIPtr;
 
 class NaviIsReadyResponseTest
     : public CommandRequestTest<CommandsTestMocks::kIsNice> {};

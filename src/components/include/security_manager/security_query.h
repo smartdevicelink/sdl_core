@@ -37,7 +37,7 @@
 #include <cstddef>
 #include <vector>
 #include <string>
-#include "utils/shared_ptr.h"
+#include <memory>
 
 namespace security_manager {
 /**
@@ -189,6 +189,6 @@ class SecurityQuery {
 /**
 *\brief SmartPointer wrapper
 */
-typedef utils::SharedPtr<SecurityQuery> SecurityQueryPtr;
+typedef std::shared_ptr<SecurityQuery> SecurityQueryPtr;
 }  // namespace security_manager
 #endif  // SRC_COMPONENTS_INCLUDE_SECURITY_MANAGER_SECURITY_QUERY_H_

@@ -66,14 +66,14 @@ class UpdateStatusManager {
    * @brief Set next status during event processing
    * @param status Status shared pointer
    */
-  void SetNextStatus(utils::SharedPtr<Status> status);
+  void SetNextStatus(std::shared_ptr<Status> status);
 
   /**
    * @brief Set postponed status (will be set after next status) during event
    * processing
    * @param status Status shared pointer
    */
-  void SetPostponedStatus(utils::SharedPtr<Status> status);
+  void SetPostponedStatus(std::shared_ptr<Status> status);
 
   /**
    * @brief Sets listener pointer
@@ -199,17 +199,17 @@ class UpdateStatusManager {
   /**
    * @brief Current update status
    */
-  utils::SharedPtr<Status> current_status_;
+  std::shared_ptr<Status> current_status_;
 
   /**
    * @brief Next status after current to be set
    */
-  utils::SharedPtr<Status> next_status_;
+  std::shared_ptr<Status> next_status_;
 
   /**
    * @brief Status to be set after 'next' status
    */
-  utils::SharedPtr<Status> postponed_status_;
+  std::shared_ptr<Status> postponed_status_;
   sync_primitives::Lock status_lock_;
 
   UpdateEvent last_processed_event_;

@@ -37,7 +37,7 @@
 #include "mobile/delete_interaction_choice_set_response.h"
 
 #include "gtest/gtest.h"
-#include "utils/shared_ptr.h"
+
 #include "smart_objects/smart_object.h"
 #include "application_manager/smart_object_keys.h"
 #include "application_manager/commands/commands_test.h"
@@ -63,9 +63,9 @@ using sdl_rpc_plugin::commands::DeleteInteractionChoiceSetResponse;
 using am::commands::MessageSharedPtr;
 using am::event_engine::Event;
 
-typedef SharedPtr<DeleteInteractionChoiceSetRequest>
+typedef std::shared_ptr<DeleteInteractionChoiceSetRequest>
     DeleteInteractionChoiceSetRequestPtr;
-typedef SharedPtr<DeleteInteractionChoiceSetResponse>
+typedef std::shared_ptr<DeleteInteractionChoiceSetResponse>
     DeleteInteractionChoiceSetResponsePtr;
 
 MATCHER_P(CheckMessageSuccess, success, "") {

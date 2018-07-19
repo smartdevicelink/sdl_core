@@ -36,7 +36,7 @@
 #include "json/json.h"
 #include "gtest/gtest.h"
 #include "utils/macro.h"
-#include "utils/make_shared.h"
+
 #include "utils/file_system.h"
 #include "utils/date_time.h"
 #include "resumption/last_state_impl.h"
@@ -301,7 +301,7 @@ TEST_F(AppLaunchDataJsonTest, SelectMultipleData) {
     const std::string mobile_app_id = AddCounter("d1_mobile_app_id_", i);
     const std::string bundle_id = AddCounter("d1_bundle_id_", i);
 
-    ApplicationDataPtr app_data = utils::MakeShared<ApplicationData>(
+    ApplicationDataPtr app_data = std::make_shared<ApplicationData>(
         mobile_app_id, bundle_id, device_mac_1);
     AddApplicationDataWithIncreaseTable(*app_data);
     input_data1.push_back(app_data);
@@ -311,7 +311,7 @@ TEST_F(AppLaunchDataJsonTest, SelectMultipleData) {
     const std::string mobile_app_id = AddCounter("d2_mobile_app_id_", i);
     const std::string bundle_id = AddCounter("d2_bundle_id_", i);
 
-    ApplicationDataPtr app_data = utils::MakeShared<ApplicationData>(
+    ApplicationDataPtr app_data = std::make_shared<ApplicationData>(
         mobile_app_id, bundle_id, device_mac_2);
     AddApplicationDataWithIncreaseTable(*app_data);
     input_data2.push_back(app_data);

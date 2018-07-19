@@ -188,7 +188,7 @@ void GetUrls::ProcessPolicyServiceURLs(const policy::EndpointUrls& endpoints) {
   ApplicationSharedPtr app =
       application_manager_.application(app_id_to_send_to);
 
-  if (!app.valid()) {
+  if (app.use_count() == 0) {
     LOG4CXX_WARN(logger_,
                  "There is no registered application with "
                  "connection key '"

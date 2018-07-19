@@ -109,7 +109,8 @@ void OnExitAllApplicationsNotification::SendOnSDLPersistenceComplete() {
   LOG4CXX_AUTO_TRACE(logger_);
 
   smart_objects::SmartObjectSPtr message =
-      new smart_objects::SmartObject(smart_objects::SmartType_Map);
+      std::make_shared<smart_objects::SmartObject>(
+          smart_objects::SmartType_Map);
   (*message)[strings::params][strings::function_id] =
       hmi_apis::FunctionID::BasicCommunication_OnSDLPersistenceComplete;
   (*message)[strings::params][strings::message_type] =

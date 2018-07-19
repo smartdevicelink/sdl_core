@@ -34,7 +34,6 @@
 #include <string>
 
 #include "gtest/gtest.h"
-#include "utils/shared_ptr.h"
 #include "smart_objects/smart_object.h"
 #include "application_manager/smart_object_keys.h"
 #include "application_manager/application.h"
@@ -51,14 +50,13 @@ namespace hmi_commands_test {
 namespace ui_get_supported_languages_response {
 
 using ::testing::Return;
-using ::utils::SharedPtr;
 using ::testing::NiceMock;
 namespace am = ::application_manager;
 namespace strings = ::application_manager::strings;
 namespace hmi_response = am::hmi_response;
 using sdl_rpc_plugin::commands::UIGetSupportedLanguagesResponse;
 
-typedef SharedPtr<UIGetSupportedLanguagesResponse>
+typedef std::shared_ptr<UIGetSupportedLanguagesResponse>
     UIGetSupportedLanguagesResponsePtr;
 typedef NiceMock<
     ::test::components::application_manager_test::MockHMICapabilities>

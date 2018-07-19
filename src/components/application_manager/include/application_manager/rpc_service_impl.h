@@ -58,11 +58,11 @@ namespace rpc_service {
 
 namespace impl {
 
-struct MessageToMobile : public utils::SharedPtr<Message> {
+struct MessageToMobile : public std::shared_ptr<Message> {
   MessageToMobile() : is_final(false) {}
-  explicit MessageToMobile(const utils::SharedPtr<Message>& message,
+  explicit MessageToMobile(const std::shared_ptr<Message>& message,
                            bool final_message)
-      : utils::SharedPtr<Message>(message), is_final(final_message) {}
+      : std::shared_ptr<Message>(message), is_final(final_message) {}
   // PrioritizedQueue requires this method to decide which priority to assign
   size_t PriorityOrder() const {
     return (*this)->Priority().OrderingValue();
@@ -71,10 +71,10 @@ struct MessageToMobile : public utils::SharedPtr<Message> {
   bool is_final;
 };
 
-struct MessageToHmi : public utils::SharedPtr<Message> {
+struct MessageToHmi : public std::shared_ptr<Message> {
   MessageToHmi() {}
-  explicit MessageToHmi(const utils::SharedPtr<Message>& message)
-      : utils::SharedPtr<Message>(message) {}
+  explicit MessageToHmi(const std::shared_ptr<Message>& message)
+      : std::shared_ptr<Message>(message) {}
   // PrioritizedQueue requires this method to decide which priority to assign
   size_t PriorityOrder() const {
     return (*this)->Priority().OrderingValue();

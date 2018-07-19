@@ -43,7 +43,7 @@ CommandHolderImpl::CommandHolderImpl(ApplicationManager& app_manager)
 void CommandHolderImpl::Suspend(
     ApplicationSharedPtr application,
     CommandType type,
-    utils::SharedPtr<smart_objects::SmartObject> command) {
+    std::shared_ptr<smart_objects::SmartObject> command) {
   LOG4CXX_AUTO_TRACE(logger_);
   DCHECK_OR_RETURN_VOID(application);
   LOG4CXX_DEBUG(logger_,

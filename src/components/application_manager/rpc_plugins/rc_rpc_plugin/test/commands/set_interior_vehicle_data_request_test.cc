@@ -64,8 +64,8 @@ class SetInteriorVehicleDataRequestTest
     : public CommandRequestTest<CommandsTestMocks::kIsNice> {
  public:
   SetInteriorVehicleDataRequestTest()
-      : mock_app_(utils::MakeShared<NiceMock<MockApplication> >())
-      , rc_app_extention_(utils::MakeShared<RCAppExtension>(kModuleId)) {}
+      : mock_app_(std::make_shared<NiceMock<MockApplication> >())
+      , rc_app_extention_(std::make_shared<RCAppExtension>(kModuleId)) {}
 
   void SetUp() OVERRIDE {
     ON_CALL(app_mngr_, hmi_interfaces())
@@ -106,22 +106,21 @@ class SetInteriorVehicleDataRequestTest
   }
 
   template <class Command>
-  application_manager::SharedPtr<Command> CreateRCCommand(
-      MessageSharedPtr& msg) {
+  std::shared_ptr<Command> CreateRCCommand(MessageSharedPtr& msg) {
     InitCommand(kDefaultTimeout_);
-    return ::utils::MakeShared<Command>(msg ? msg : msg = CreateMessage(),
-                                        app_mngr_,
-                                        mock_rpc_service_,
-                                        mock_hmi_capabilities_,
-                                        mock_policy_handler_,
-                                        mock_allocation_manager_);
+    return std::make_shared<Command>(msg ? msg : msg = CreateMessage(),
+                                     app_mngr_,
+                                     mock_rpc_service_,
+                                     mock_hmi_capabilities_,
+                                     mock_policy_handler_,
+                                     mock_allocation_manager_);
   }
 
  protected:
   testing::NiceMock<rc_rpc_plugin_test::MockResourceAllocationManager>
       mock_allocation_manager_;
-  utils::SharedPtr<MockApplication> mock_app_;
-  utils::SharedPtr<RCAppExtension> rc_app_extention_;
+  std::shared_ptr<MockApplication> mock_app_;
+  std::shared_ptr<RCAppExtension> rc_app_extention_;
 };
 
 TEST_F(SetInteriorVehicleDataRequestTest,
@@ -147,7 +146,7 @@ TEST_F(SetInteriorVehicleDataRequestTest,
                               mobile_apis::Result::READ_ONLY),
                           application_manager::commands::Command::SOURCE_SDL));
   // Act
-  application_manager::SharedPtr<
+  std::shared_ptr<
       rc_rpc_plugin::commands::SetInteriorVehicleDataRequest> command =
       CreateRCCommand<rc_rpc_plugin::commands::SetInteriorVehicleDataRequest>(
           mobile_message);
@@ -186,7 +185,7 @@ TEST_F(
                           application_manager::commands::Command::SOURCE_SDL));
 
   // Act
-  application_manager::SharedPtr<
+  std::shared_ptr<
       rc_rpc_plugin::commands::SetInteriorVehicleDataRequest> command =
       CreateRCCommand<rc_rpc_plugin::commands::SetInteriorVehicleDataRequest>(
           mobile_message);
@@ -217,7 +216,7 @@ TEST_F(
                           application_manager::commands::Command::SOURCE_SDL));
 
   // Act
-  application_manager::SharedPtr<
+  std::shared_ptr<
       rc_rpc_plugin::commands::SetInteriorVehicleDataRequest> command =
       CreateRCCommand<rc_rpc_plugin::commands::SetInteriorVehicleDataRequest>(
           mobile_message);

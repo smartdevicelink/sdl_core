@@ -38,7 +38,7 @@
 #include "policy/usage_statistics/counter.h"
 #include "policy/usage_statistics/app_stopwatch.h"
 #include "utils/macro.h"
-#include "utils/shared_ptr.h"
+
 #include "interfaces/MOBILE_API.h"
 
 namespace application_manager {
@@ -47,10 +47,10 @@ class UsageStatistics {
  public:
   UsageStatistics(
       const std::string& app_id,
-      utils::SharedPtr<usage_statistics::StatisticsManager> statistics_manager);
+      std::shared_ptr<usage_statistics::StatisticsManager> statistics_manager);
   UsageStatistics(
       const std::string& app_id,
-      utils::SharedPtr<usage_statistics::StatisticsManager> statistics_manager,
+      std::shared_ptr<usage_statistics::StatisticsManager> statistics_manager,
       usage_statistics::AppStopwatch* time_in_hmi_state_ptr);
   void RecordHmiStateChanged(mobile_apis::HMILevel::eType new_hmi_level);
   void RecordAppRegistrationGuiLanguage(

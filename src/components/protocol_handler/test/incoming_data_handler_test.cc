@@ -74,7 +74,7 @@ class IncomingDataHandlerTest : public ::testing::Test {
 
   void AppendPacketToTMData(const ProtocolPacket& packet) {
     const RawMessagePtr msg = packet.serializePacket();
-    EXPECT_TRUE(msg.valid());
+    EXPECT_TRUE(msg.use_count() != 0);
     EXPECT_GT(msg->data_size(), 0u);
     tm_data.insert(tm_data.end(), msg->data(), msg->data() + msg->data_size());
   }
@@ -192,49 +192,51 @@ TEST_F(IncomingDataHandlerTest, Heartbeat_pack) {
 TEST_F(IncomingDataHandlerTest, MixedPayloadData_TwoConnections) {
   FrameList mobile_packets;
   // single packet RPC
-  mobile_packets.push_back(new ProtocolPacket(uid1,
-                                              PROTOCOL_VERSION_1,
-                                              PROTECTION_OFF,
-                                              FRAME_TYPE_SINGLE,
-                                              kRpc,
-                                              FRAME_DATA_SINGLE,
-                                              some_session_id,
-                                              some_data_size,
-                                              protov1_message_id,
-                                              some_data));
+  mobile_packets.push_back(std::make_shared<ProtocolPacket>(uid1,
+                                                            PROTOCOL_VERSION_1,
+                                                            PROTECTION_OFF,
+                                                            FRAME_TYPE_SINGLE,
+                                                            kRpc,
+                                                            FRAME_DATA_SINGLE,
+                                                            some_session_id,
+                                                            some_data_size,
+                                                            protov1_message_id,
+                                                            some_data));
   // consecutive packet Audio
-  mobile_packets.push_back(new ProtocolPacket(uid1,
-                                              PROTOCOL_VERSION_2,
-                                              PROTECTION_ON,
-                                              FRAME_TYPE_CONSECUTIVE,
-                                              kAudio,
-                                              FRAME_DATA_LAST_CONSECUTIVE,
-                                              ++some_session_id,
-                                              some_data2_size,
-                                              some_message_id,
-                                              some_data2));
+  mobile_packets.push_back(
+      std::make_shared<ProtocolPacket>(uid1,
+                                       PROTOCOL_VERSION_2,
+                                       PROTECTION_ON,
+                                       FRAME_TYPE_CONSECUTIVE,
+                                       kAudio,
+                                       FRAME_DATA_LAST_CONSECUTIVE,
+                                       ++some_session_id,
+                                       some_data2_size,
+                                       some_message_id,
+                                       some_data2));
   // single packet Nav
-  mobile_packets.push_back(new ProtocolPacket(uid1,
-                                              PROTOCOL_VERSION_3,
-                                              PROTECTION_ON,
-                                              FRAME_TYPE_SINGLE,
-                                              kMobileNav,
-                                              FRAME_DATA_SINGLE,
-                                              ++some_session_id,
-                                              some_data_size,
-                                              ++some_message_id,
-                                              some_data));
+  mobile_packets.push_back(std::make_shared<ProtocolPacket>(uid1,
+                                                            PROTOCOL_VERSION_3,
+                                                            PROTECTION_ON,
+                                                            FRAME_TYPE_SINGLE,
+                                                            kMobileNav,
+                                                            FRAME_DATA_SINGLE,
+                                                            ++some_session_id,
+                                                            some_data_size,
+                                                            ++some_message_id,
+                                                            some_data));
   // consecutive packet Bulk
-  mobile_packets.push_back(new ProtocolPacket(uid1,
-                                              PROTOCOL_VERSION_3,
-                                              PROTECTION_ON,
-                                              FRAME_TYPE_CONSECUTIVE,
-                                              kBulk,
-                                              FRAME_DATA_LAST_CONSECUTIVE,
-                                              ++some_session_id,
-                                              some_data2_size,
-                                              ++some_message_id,
-                                              some_data2));
+  mobile_packets.push_back(
+      std::make_shared<ProtocolPacket>(uid1,
+                                       PROTOCOL_VERSION_3,
+                                       PROTECTION_ON,
+                                       FRAME_TYPE_CONSECUTIVE,
+                                       kBulk,
+                                       FRAME_DATA_LAST_CONSECUTIVE,
+                                       ++some_session_id,
+                                       some_data2_size,
+                                       ++some_message_id,
+                                       some_data2));
   for (FrameList::iterator it = mobile_packets.begin();
        it != mobile_packets.end();
        ++it) {
@@ -268,16 +270,17 @@ TEST_F(IncomingDataHandlerTest, MalformedPacket_Version) {
     malformed_versions.push_back(version);
   }
   for (size_t i = 0; i < malformed_versions.size(); ++i) {
-    malformed_packets.push_back(new ProtocolPacket(uid1,
-                                                   malformed_versions[i],
-                                                   PROTECTION_OFF,
-                                                   FRAME_TYPE_CONTROL,
-                                                   kControl,
-                                                   FRAME_DATA_HEART_BEAT,
-                                                   some_session_id,
-                                                   0u,
-                                                   some_message_id,
-                                                   NULL));
+    malformed_packets.push_back(
+        std::make_shared<ProtocolPacket>(uid1,
+                                         malformed_versions[i],
+                                         PROTECTION_OFF,
+                                         FRAME_TYPE_CONTROL,
+                                         kControl,
+                                         FRAME_DATA_HEART_BEAT,
+                                         some_session_id,
+                                         0u,
+                                         some_message_id,
+                                         nullptr));
   }
 
   // We count malformed only first time when it occurs after correct message
@@ -316,16 +319,17 @@ TEST_F(IncomingDataHandlerTest, MalformedPacket_ServiceType) {
   malformed_serv_types.push_back(0x0D);
   malformed_serv_types.push_back(0x0E);
   for (size_t i = 0; i < malformed_serv_types.size(); ++i) {
-    malformed_packets.push_back(new ProtocolPacket(uid1,
-                                                   PROTOCOL_VERSION_3,
-                                                   PROTECTION_OFF,
-                                                   FRAME_TYPE_CONTROL,
-                                                   malformed_serv_types[i],
-                                                   FRAME_DATA_HEART_BEAT,
-                                                   some_session_id,
-                                                   0u,
-                                                   some_message_id,
-                                                   NULL));
+    malformed_packets.push_back(
+        std::make_shared<ProtocolPacket>(uid1,
+                                         PROTOCOL_VERSION_3,
+                                         PROTECTION_OFF,
+                                         FRAME_TYPE_CONTROL,
+                                         malformed_serv_types[i],
+                                         FRAME_DATA_HEART_BEAT,
+                                         some_session_id,
+                                         0u,
+                                         some_message_id,
+                                         nullptr));
   }
 
   // We count malformed only first time when it occurs after correct message
@@ -360,16 +364,17 @@ TEST_F(IncomingDataHandlerTest, MalformedPacket_FrameType) {
     malformed_frame_types.push_back(frame_type);
   }
   for (size_t i = 0; i < malformed_frame_types.size(); ++i) {
-    malformed_packets.push_back(new ProtocolPacket(uid1,
-                                                   PROTOCOL_VERSION_3,
-                                                   PROTECTION_OFF,
-                                                   malformed_frame_types[i],
-                                                   kControl,
-                                                   FRAME_DATA_HEART_BEAT,
-                                                   some_session_id,
-                                                   0u,
-                                                   some_message_id,
-                                                   NULL));
+    malformed_packets.push_back(
+        std::make_shared<ProtocolPacket>(uid1,
+                                         PROTOCOL_VERSION_3,
+                                         PROTECTION_OFF,
+                                         malformed_frame_types[i],
+                                         kControl,
+                                         FRAME_DATA_HEART_BEAT,
+                                         some_session_id,
+                                         0u,
+                                         some_message_id,
+                                         nullptr));
   }
 
   // We count malformed only first time when it occurs after correct message
@@ -404,16 +409,17 @@ TEST_F(IncomingDataHandlerTest, MalformedPacket_ControlFrame) {
     malformed_frame_data.push_back(frame_type);
   }
   for (size_t i = 0; i < malformed_frame_data.size(); ++i) {
-    malformed_packets.push_back(new ProtocolPacket(uid1,
-                                                   PROTOCOL_VERSION_3,
-                                                   PROTECTION_OFF,
-                                                   FRAME_TYPE_CONTROL,
-                                                   kControl,
-                                                   malformed_frame_data[i],
-                                                   some_session_id,
-                                                   0u,
-                                                   some_message_id,
-                                                   NULL));
+    malformed_packets.push_back(
+        std::make_shared<ProtocolPacket>(uid1,
+                                         PROTOCOL_VERSION_3,
+                                         PROTECTION_OFF,
+                                         FRAME_TYPE_CONTROL,
+                                         kControl,
+                                         malformed_frame_data[i],
+                                         some_session_id,
+                                         0u,
+                                         some_message_id,
+                                         nullptr));
   }
 
   // We count malformed only first time when it occurs after correct message
@@ -448,16 +454,17 @@ TEST_F(IncomingDataHandlerTest, MalformedPacket_SingleFrame) {
   }
   malformed_frame_data.push_back(FRAME_DATA_MAX_VALUE);
   for (size_t i = 0; i < malformed_frame_data.size(); ++i) {
-    malformed_packets.push_back(new ProtocolPacket(uid1,
-                                                   PROTOCOL_VERSION_3,
-                                                   PROTECTION_OFF,
-                                                   FRAME_TYPE_SINGLE,
-                                                   kControl,
-                                                   malformed_frame_data[i],
-                                                   some_session_id,
-                                                   0u,
-                                                   some_message_id,
-                                                   NULL));
+    malformed_packets.push_back(
+        std::make_shared<ProtocolPacket>(uid1,
+                                         PROTOCOL_VERSION_3,
+                                         PROTECTION_OFF,
+                                         FRAME_TYPE_SINGLE,
+                                         kControl,
+                                         malformed_frame_data[i],
+                                         some_session_id,
+                                         0u,
+                                         some_message_id,
+                                         nullptr));
   }
 
   // We count malformed only first time when it occurs after correct message
@@ -492,16 +499,17 @@ TEST_F(IncomingDataHandlerTest, MalformedPacket_FirstFrame) {
   }
   malformed_frame_data.push_back(FRAME_DATA_MAX_VALUE);
   for (size_t i = 0; i < malformed_frame_data.size(); ++i) {
-    malformed_packets.push_back(new ProtocolPacket(uid1,
-                                                   PROTOCOL_VERSION_3,
-                                                   PROTECTION_OFF,
-                                                   FRAME_TYPE_SINGLE,
-                                                   kControl,
-                                                   malformed_frame_data[i],
-                                                   some_session_id,
-                                                   0u,
-                                                   some_message_id,
-                                                   NULL));
+    malformed_packets.push_back(
+        std::make_shared<ProtocolPacket>(uid1,
+                                         PROTOCOL_VERSION_3,
+                                         PROTECTION_OFF,
+                                         FRAME_TYPE_SINGLE,
+                                         kControl,
+                                         malformed_frame_data[i],
+                                         some_session_id,
+                                         0u,
+                                         some_message_id,
+                                         nullptr));
   }
 
   // We count malformed only first time when it occurs after correct message
@@ -529,106 +537,110 @@ TEST_F(IncomingDataHandlerTest, MalformedPacket_FirstFrame) {
 TEST_F(IncomingDataHandlerTest, MalformedPacket_AdditionalByte) {
   FrameList mobile_packets;
   // single packet RPC
-  mobile_packets.push_back(new ProtocolPacket(uid1,
-                                              PROTOCOL_VERSION_1,
-                                              PROTECTION_OFF,
-                                              FRAME_TYPE_SINGLE,
-                                              kRpc,
-                                              FRAME_DATA_SINGLE,
-                                              some_session_id,
-                                              some_data_size,
-                                              protov1_message_id,
-                                              some_data));
+  mobile_packets.push_back(std::make_shared<ProtocolPacket>(uid1,
+                                                            PROTOCOL_VERSION_1,
+                                                            PROTECTION_OFF,
+                                                            FRAME_TYPE_SINGLE,
+                                                            kRpc,
+                                                            FRAME_DATA_SINGLE,
+                                                            some_session_id,
+                                                            some_data_size,
+                                                            protov1_message_id,
+                                                            some_data));
   AppendPacketToTMData(*mobile_packets.back());
   // Add malformed byte
   tm_data.insert(tm_data.end(), 1, 0x1);
 
   // consecutive packet Audio
-  mobile_packets.push_back(new ProtocolPacket(uid1,
-                                              PROTOCOL_VERSION_2,
-                                              PROTECTION_ON,
-                                              FRAME_TYPE_CONSECUTIVE,
-                                              kAudio,
-                                              FRAME_DATA_LAST_CONSECUTIVE,
-                                              ++some_session_id,
-                                              some_data2_size,
-                                              some_message_id,
-                                              some_data2));
+  mobile_packets.push_back(
+      std::make_shared<ProtocolPacket>(uid1,
+                                       PROTOCOL_VERSION_2,
+                                       PROTECTION_ON,
+                                       FRAME_TYPE_CONSECUTIVE,
+                                       kAudio,
+                                       FRAME_DATA_LAST_CONSECUTIVE,
+                                       ++some_session_id,
+                                       some_data2_size,
+                                       some_message_id,
+                                       some_data2));
   AppendPacketToTMData(*mobile_packets.back());
   // Add malformed bytes
   tm_data.insert(tm_data.end(), 2, 0x2);
 
   // single packet Nav
-  mobile_packets.push_back(new ProtocolPacket(uid1,
-                                              PROTOCOL_VERSION_3,
-                                              PROTECTION_ON,
-                                              FRAME_TYPE_SINGLE,
-                                              kMobileNav,
-                                              FRAME_DATA_SINGLE,
-                                              ++some_session_id,
-                                              some_data_size,
-                                              ++some_message_id,
-                                              some_data));
+  mobile_packets.push_back(std::make_shared<ProtocolPacket>(uid1,
+                                                            PROTOCOL_VERSION_3,
+                                                            PROTECTION_ON,
+                                                            FRAME_TYPE_SINGLE,
+                                                            kMobileNav,
+                                                            FRAME_DATA_SINGLE,
+                                                            ++some_session_id,
+                                                            some_data_size,
+                                                            ++some_message_id,
+                                                            some_data));
   AppendPacketToTMData(*mobile_packets.back());
   // Add malformed bytes
   tm_data.insert(tm_data.end(), 3, 0x3);
 
   // consecutive packet Bulk
-  mobile_packets.push_back(new ProtocolPacket(uid1,
-                                              PROTOCOL_VERSION_3,
-                                              PROTECTION_ON,
-                                              FRAME_TYPE_CONSECUTIVE,
-                                              kBulk,
-                                              FRAME_DATA_LAST_CONSECUTIVE,
-                                              ++some_session_id,
-                                              some_data2_size,
-                                              ++some_message_id,
-                                              some_data2));
+  mobile_packets.push_back(
+      std::make_shared<ProtocolPacket>(uid1,
+                                       PROTOCOL_VERSION_3,
+                                       PROTECTION_ON,
+                                       FRAME_TYPE_CONSECUTIVE,
+                                       kBulk,
+                                       FRAME_DATA_LAST_CONSECUTIVE,
+                                       ++some_session_id,
+                                       some_data2_size,
+                                       ++some_message_id,
+                                       some_data2));
   AppendPacketToTMData(*mobile_packets.back());
   // Add malformed bytes
   tm_data.insert(tm_data.end(), 4, 0x4);
 
   // single packet RPC
-  mobile_packets.push_back(new ProtocolPacket(uid1,
-                                              PROTOCOL_VERSION_1,
-                                              PROTECTION_OFF,
-                                              FRAME_TYPE_CONTROL,
-                                              kRpc,
-                                              FRAME_DATA_HEART_BEAT,
-                                              some_session_id,
-                                              some_data_size,
-                                              protov1_message_id,
-                                              some_data));
+  mobile_packets.push_back(
+      std::make_shared<ProtocolPacket>(uid1,
+                                       PROTOCOL_VERSION_1,
+                                       PROTECTION_OFF,
+                                       FRAME_TYPE_CONTROL,
+                                       kRpc,
+                                       FRAME_DATA_HEART_BEAT,
+                                       some_session_id,
+                                       some_data_size,
+                                       protov1_message_id,
+                                       some_data));
   AppendPacketToTMData(*mobile_packets.back());
   // Add malformed bytes
   tm_data.insert(tm_data.end(), 5, 0x5);
 
   // single packet Audio
-  mobile_packets.push_back(new ProtocolPacket(uid1,
-                                              PROTOCOL_VERSION_1,
-                                              PROTECTION_OFF,
-                                              FRAME_TYPE_CONTROL,
-                                              kAudio,
-                                              FRAME_DATA_HEART_BEAT,
-                                              some_session_id,
-                                              some_data_size,
-                                              protov1_message_id,
-                                              some_data));
+  mobile_packets.push_back(
+      std::make_shared<ProtocolPacket>(uid1,
+                                       PROTOCOL_VERSION_1,
+                                       PROTECTION_OFF,
+                                       FRAME_TYPE_CONTROL,
+                                       kAudio,
+                                       FRAME_DATA_HEART_BEAT,
+                                       some_session_id,
+                                       some_data_size,
+                                       protov1_message_id,
+                                       some_data));
   AppendPacketToTMData(*mobile_packets.back());
   // Add malformed bytes
   tm_data.insert(tm_data.end(), 6, 0x6);
 
   // single packet RPC
-  mobile_packets.push_back(new ProtocolPacket(uid1,
-                                              PROTOCOL_VERSION_1,
-                                              PROTECTION_OFF,
-                                              FRAME_TYPE_SINGLE,
-                                              kRpc,
-                                              FRAME_DATA_SINGLE,
-                                              some_session_id,
-                                              some_data_size,
-                                              protov1_message_id,
-                                              some_data));
+  mobile_packets.push_back(std::make_shared<ProtocolPacket>(uid1,
+                                                            PROTOCOL_VERSION_1,
+                                                            PROTECTION_OFF,
+                                                            FRAME_TYPE_SINGLE,
+                                                            kRpc,
+                                                            FRAME_DATA_SINGLE,
+                                                            some_session_id,
+                                                            some_data_size,
+                                                            protov1_message_id,
+                                                            some_data));
   AppendPacketToTMData(*mobile_packets.back());
 
   ProcessData(uid1, &tm_data[0], tm_data.size());
@@ -651,29 +663,30 @@ TEST_F(IncomingDataHandlerTest, MalformedPacket_AdditionalByte) {
 TEST_F(IncomingDataHandlerTest, MalformedPacket_Mix) {
   FrameList mobile_packets;
   // single packet RPC
-  mobile_packets.push_back(new ProtocolPacket(uid1,
-                                              PROTOCOL_VERSION_1,
-                                              PROTECTION_OFF,
-                                              FRAME_TYPE_SINGLE,
-                                              kRpc,
-                                              FRAME_DATA_SINGLE,
-                                              some_session_id,
-                                              some_data_size,
-                                              protov1_message_id,
-                                              some_data));
+  mobile_packets.push_back(std::make_shared<ProtocolPacket>(uid1,
+                                                            PROTOCOL_VERSION_1,
+                                                            PROTECTION_OFF,
+                                                            FRAME_TYPE_SINGLE,
+                                                            kRpc,
+                                                            FRAME_DATA_SINGLE,
+                                                            some_session_id,
+                                                            some_data_size,
+                                                            protov1_message_id,
+                                                            some_data));
   AppendPacketToTMData(*mobile_packets.back());
 
   // consecutive packet Audio
-  mobile_packets.push_back(new ProtocolPacket(uid1,
-                                              PROTOCOL_VERSION_2,
-                                              PROTECTION_ON,
-                                              FRAME_TYPE_CONSECUTIVE,
-                                              kAudio,
-                                              FRAME_DATA_LAST_CONSECUTIVE,
-                                              ++some_session_id,
-                                              some_data2_size,
-                                              some_message_id,
-                                              some_data2));
+  mobile_packets.push_back(
+      std::make_shared<ProtocolPacket>(uid1,
+                                       PROTOCOL_VERSION_2,
+                                       PROTECTION_ON,
+                                       FRAME_TYPE_CONSECUTIVE,
+                                       kAudio,
+                                       FRAME_DATA_LAST_CONSECUTIVE,
+                                       ++some_session_id,
+                                       some_data2_size,
+                                       some_message_id,
+                                       some_data2));
   AppendPacketToTMData(*mobile_packets.back());
 
   // Malformed packet 1
@@ -691,16 +704,17 @@ TEST_F(IncomingDataHandlerTest, MalformedPacket_Mix) {
   AppendPacketToTMData(malformed_packet1);
 
   // consecutive packet Bulk
-  mobile_packets.push_back(new ProtocolPacket(uid1,
-                                              PROTOCOL_VERSION_3,
-                                              PROTECTION_ON,
-                                              FRAME_TYPE_CONSECUTIVE,
-                                              kBulk,
-                                              FRAME_DATA_LAST_CONSECUTIVE,
-                                              ++some_session_id,
-                                              some_data2_size,
-                                              ++some_message_id,
-                                              some_data2));
+  mobile_packets.push_back(
+      std::make_shared<ProtocolPacket>(uid1,
+                                       PROTOCOL_VERSION_3,
+                                       PROTECTION_ON,
+                                       FRAME_TYPE_CONSECUTIVE,
+                                       kBulk,
+                                       FRAME_DATA_LAST_CONSECUTIVE,
+                                       ++some_session_id,
+                                       some_data2_size,
+                                       ++some_message_id,
+                                       some_data2));
   AppendPacketToTMData(*mobile_packets.back());
 
   // Malformed packet 2
@@ -718,16 +732,17 @@ TEST_F(IncomingDataHandlerTest, MalformedPacket_Mix) {
   AppendPacketToTMData(malformed_packet2);
 
   // Audio packet
-  mobile_packets.push_back(new ProtocolPacket(uid1,
-                                              PROTOCOL_VERSION_3,
-                                              PROTECTION_OFF,
-                                              FRAME_TYPE_CONTROL,
-                                              kAudio,
-                                              FRAME_DATA_HEART_BEAT,
-                                              some_session_id,
-                                              some_data_size,
-                                              protov1_message_id,
-                                              some_data));
+  mobile_packets.push_back(
+      std::make_shared<ProtocolPacket>(uid1,
+                                       PROTOCOL_VERSION_3,
+                                       PROTECTION_OFF,
+                                       FRAME_TYPE_CONTROL,
+                                       kAudio,
+                                       FRAME_DATA_HEART_BEAT,
+                                       some_session_id,
+                                       some_data_size,
+                                       protov1_message_id,
+                                       some_data));
   AppendPacketToTMData(*mobile_packets.back());
 
   ProcessData(uid1, &tm_data[0], tm_data.size());

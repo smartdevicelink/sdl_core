@@ -42,7 +42,7 @@ namespace application_manager {
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "HmiState")
 
-HmiState::HmiState(utils::SharedPtr<Application> app,
+HmiState::HmiState(std::shared_ptr<Application> app,
                    const ApplicationManager& app_mngr,
                    StateID state_id)
     : app_(app)
@@ -55,7 +55,7 @@ HmiState::HmiState(utils::SharedPtr<Application> app,
   LOG4CXX_DEBUG(logger_, *this);
 }
 
-HmiState::HmiState(utils::SharedPtr<Application> app,
+HmiState::HmiState(std::shared_ptr<Application> app,
                    const ApplicationManager& app_mngr)
     : app_(app)
     , state_id_(STATE_ID_REGULAR)
@@ -115,7 +115,7 @@ mobile_apis::AudioStreamingState::eType VRHmiState::audio_streaming_state()
   return AudioStreamingState::NOT_AUDIBLE;
 }
 
-VRHmiState::VRHmiState(utils::SharedPtr<Application> app,
+VRHmiState::VRHmiState(std::shared_ptr<Application> app,
                        const ApplicationManager& app_mngr)
     : HmiState(app, app_mngr, STATE_ID_VR_SESSION) {}
 
@@ -123,7 +123,7 @@ DEPRECATED VRHmiState::VRHmiState(uint32_t app_id,
                                   const ApplicationManager& app_mngr)
     : HmiState(app_id, app_mngr, STATE_ID_VR_SESSION) {}
 
-TTSHmiState::TTSHmiState(utils::SharedPtr<Application> app,
+TTSHmiState::TTSHmiState(std::shared_ptr<Application> app,
                          const ApplicationManager& app_mngr)
     : HmiState(app, app_mngr, STATE_ID_TTS_SESSION) {}
 
@@ -147,7 +147,7 @@ mobile_apis::AudioStreamingState::eType TTSHmiState::audio_streaming_state()
 }
 
 VideoStreamingHmiState::VideoStreamingHmiState(
-    utils::SharedPtr<Application> app, const ApplicationManager& app_mngr)
+    std::shared_ptr<Application> app, const ApplicationManager& app_mngr)
     : HmiState(app, app_mngr, STATE_ID_VIDEO_STREAMING) {}
 
 mobile_apis::VideoStreamingState::eType
@@ -159,7 +159,7 @@ VideoStreamingHmiState::video_streaming_state() const {
   return mobile_apis::VideoStreamingState::NOT_STREAMABLE;
 }
 
-NaviStreamingHmiState::NaviStreamingHmiState(utils::SharedPtr<Application> app,
+NaviStreamingHmiState::NaviStreamingHmiState(std::shared_ptr<Application> app,
                                              const ApplicationManager& app_mngr)
     : VideoStreamingHmiState(app, app_mngr) {
   set_state_id(STATE_ID_NAVI_STREAMING);
@@ -185,7 +185,7 @@ NaviStreamingHmiState::audio_streaming_state() const {
   return expected_state;
 }
 
-PhoneCallHmiState::PhoneCallHmiState(utils::SharedPtr<Application> app,
+PhoneCallHmiState::PhoneCallHmiState(std::shared_ptr<Application> app,
                                      const ApplicationManager& app_mngr)
     : HmiState(app, app_mngr, STATE_ID_PHONE_CALL) {}
 
@@ -210,7 +210,7 @@ mobile_apis::HMILevel::eType PhoneCallHmiState::hmi_level() const {
   return HMILevel::HMI_BACKGROUND;
 }
 
-SafetyModeHmiState::SafetyModeHmiState(utils::SharedPtr<Application> app,
+SafetyModeHmiState::SafetyModeHmiState(std::shared_ptr<Application> app,
                                        const ApplicationManager& app_mngr)
     : HmiState(app, app_mngr, STATE_ID_SAFETY_MODE) {}
 
@@ -218,7 +218,7 @@ DEPRECATED SafetyModeHmiState::SafetyModeHmiState(
     uint32_t app_id, const ApplicationManager& app_mngr)
     : HmiState(app_id, app_mngr, STATE_ID_SAFETY_MODE) {}
 
-DeactivateHMI::DeactivateHMI(utils::SharedPtr<Application> app,
+DeactivateHMI::DeactivateHMI(std::shared_ptr<Application> app,
                              const ApplicationManager& app_mngr)
     : HmiState(app, app_mngr, STATE_ID_DEACTIVATE_HMI) {}
 
@@ -238,7 +238,7 @@ mobile_apis::HMILevel::eType DeactivateHMI::hmi_level() const {
   return HMILevel::HMI_BACKGROUND;
 }
 
-AudioSource::AudioSource(utils::SharedPtr<Application> app,
+AudioSource::AudioSource(std::shared_ptr<Application> app,
                          const ApplicationManager& app_mngr)
     : HmiState(app, app_mngr, STATE_ID_AUDIO_SOURCE) {}
 
@@ -256,7 +256,7 @@ mobile_apis::HMILevel::eType AudioSource::hmi_level() const {
   return mobile_apis::HMILevel::HMI_BACKGROUND;
 }
 
-EmbeddedNavi::EmbeddedNavi(utils::SharedPtr<Application> app,
+EmbeddedNavi::EmbeddedNavi(std::shared_ptr<Application> app,
                            const ApplicationManager& app_mngr)
     : HmiState(app, app_mngr, STATE_ID_EMBEDDED_NAVI) {}
 

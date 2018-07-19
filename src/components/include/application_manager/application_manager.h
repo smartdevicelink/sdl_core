@@ -42,7 +42,7 @@
 #include "application_manager/command_factory.h"
 #include "connection_handler/connection_handler.h"
 #include "utils/data_accessor.h"
-#include "utils/shared_ptr.h"
+
 #include "telemetry_monitor/telemetry_observable.h"
 #include "application_manager/policies/policy_handler_interface.h"
 #include "application_manager/application_manager_settings.h"
@@ -260,7 +260,7 @@ class ApplicationManager {
    *
    **/
   virtual void SendHMIStatusNotification(
-      const utils::SharedPtr<Application> app) = 0;
+      const std::shared_ptr<Application> app) = 0;
 
   /**
    * @brief Checks if driver distraction state is valid, creates message
@@ -457,7 +457,7 @@ class ApplicationManager {
   virtual void IviInfoUpdated(mobile_apis::VehicleDataType::eType vehicle_info,
                               int value) = 0;
 
-  virtual ApplicationSharedPtr RegisterApplication(const utils::SharedPtr<
+  virtual ApplicationSharedPtr RegisterApplication(const std::shared_ptr<
       smart_objects::SmartObject>& request_for_registration) = 0;
 
   virtual void SendUpdateAppList() = 0;
@@ -697,7 +697,7 @@ class ApplicationManager {
    * @return new regular HMI state
    */
   virtual HmiStatePtr CreateRegularState(
-      utils::SharedPtr<Application> app,
+      std::shared_ptr<Application> app,
       mobile_apis::HMILevel::eType hmi_level,
       mobile_apis::AudioStreamingState::eType audio_state,
       mobile_apis::VideoStreamingState::eType video_state,

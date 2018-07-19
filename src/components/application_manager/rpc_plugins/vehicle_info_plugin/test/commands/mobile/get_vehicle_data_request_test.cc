@@ -35,7 +35,7 @@
 #include <vector>
 
 #include "gtest/gtest.h"
-#include "utils/shared_ptr.h"
+
 #include "smart_objects/smart_object.h"
 #include "application_manager/smart_object_keys.h"
 #include "application_manager/commands/commands_test.h"
@@ -63,7 +63,7 @@ using vehicle_info_plugin::commands::GetVehicleDataRequest;
 using am::event_engine::Event;
 namespace mobile_result = mobile_apis::Result;
 
-typedef SharedPtr<GetVehicleDataRequest> GetVehicleDataRequestPtr;
+typedef std::shared_ptr<GetVehicleDataRequest> GetVehicleDataRequestPtr;
 
 namespace {
 const uint32_t kConnectionKey = 2u;
@@ -160,7 +160,7 @@ TEST_F(GetVehicleDataRequestTest,
   (*command_msg)[am::strings::params][am::strings::connection_key] =
       kConnectionKey;
 
-  SharedPtr<UnwrappedGetVehicleDataRequest> command(
+  std::shared_ptr<UnwrappedGetVehicleDataRequest> command(
       CreateCommand<UnwrappedGetVehicleDataRequest>(command_msg));
 
   const am::VehicleData kEmptyVehicleData;
@@ -212,7 +212,7 @@ TEST_F(GetVehicleDataRequestTest, OnEvent_UnknownEvent_UNSUCCESS) {
   (*command_msg)[am::strings::params][am::strings::connection_key] =
       kConnectionKey;
 
-  SharedPtr<UnwrappedGetVehicleDataRequest> command(
+  std::shared_ptr<UnwrappedGetVehicleDataRequest> command(
       CreateCommand<UnwrappedGetVehicleDataRequest>(command_msg));
 
   Event event(hmi_apis::FunctionID::INVALID_ENUM);
@@ -232,7 +232,7 @@ TEST_F(GetVehicleDataRequestTest, OnEvent_DataNotAvailable_SUCCESS) {
   (*command_msg)[am::strings::params][am::strings::connection_key] =
       kConnectionKey;
 
-  SharedPtr<UnwrappedGetVehicleDataRequest> command(
+  std::shared_ptr<UnwrappedGetVehicleDataRequest> command(
       CreateCommand<UnwrappedGetVehicleDataRequest>(command_msg));
 
   MessageSharedPtr event_msg(CreateMessage(smart_objects::SmartType_Map));

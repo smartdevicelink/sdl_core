@@ -99,7 +99,7 @@ TEST_F(SDLGetUserFriendlyMessageRequestTest, Run_LanguageSet_SUCCESS) {
 
   (*msg)[strings::msg_params][strings::language] = kLanguage;
 
-  SharedPtr<SDLGetUserFriendlyMessageRequest> command(
+  std::shared_ptr<SDLGetUserFriendlyMessageRequest> command(
       CreateCommand<SDLGetUserFriendlyMessageRequest>(msg));
 
   EXPECT_CALL(mock_message_helper_, CommonLanguageToString(kLanguage))
@@ -123,7 +123,7 @@ TEST_F(SDLGetUserFriendlyMessageRequestTest, Run_LanguageNotSet_SUCCESS) {
   (*msg)[strings::msg_params][kMessageCodes][0] = SmartObject(kLanguageDe);
   (*msg)[strings::msg_params][kMessageCodes][1] = SmartObject(kLanguageEn);
 
-  SharedPtr<SDLGetUserFriendlyMessageRequest> command(
+  std::shared_ptr<SDLGetUserFriendlyMessageRequest> command(
       CreateCommand<SDLGetUserFriendlyMessageRequest>(msg));
 
   EXPECT_CALL(mock_hmi_capabilities_, active_ui_language())
@@ -144,7 +144,7 @@ TEST_F(SDLGetUserFriendlyMessageRequestTest, Run_NoMsgCodes_Canceled) {
   (*msg)[strings::params][strings::correlation_id] = kCorrelationID;
   (*msg)[strings::msg_params][strings::app_id] = kAppID;
 
-  SharedPtr<SDLGetUserFriendlyMessageRequest> command(
+  std::shared_ptr<SDLGetUserFriendlyMessageRequest> command(
       CreateCommand<SDLGetUserFriendlyMessageRequest>(msg));
 
   EXPECT_CALL(mock_message_helper_, CommonLanguageToString(_)).Times(0);

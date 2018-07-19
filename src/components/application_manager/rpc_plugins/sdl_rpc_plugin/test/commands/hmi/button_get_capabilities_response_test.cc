@@ -32,7 +32,7 @@
 
 #include "gtest/gtest.h"
 #include "hmi/button_get_capabilities_response.h"
-#include "utils/shared_ptr.h"
+
 #include "smart_objects/smart_object.h"
 #include "application_manager/commands/commands_test.h"
 #include "application_manager/mock_application.h"
@@ -51,7 +51,7 @@ using ::testing::NiceMock;
 namespace strings = ::application_manager::strings;
 namespace hmi_response = ::application_manager::hmi_response;
 
-typedef ::utils::SharedPtr<ButtonGetCapabilitiesResponse> ResponsePtr;
+typedef std::shared_ptr<ButtonGetCapabilitiesResponse> ResponsePtr;
 
 typedef NiceMock<
     ::test::components::application_manager_test::MockHMICapabilities>

@@ -38,7 +38,7 @@
 #include "application_manager/application_impl.h"
 #include "application_manager/application_manager_impl.h"
 #include "utils/custom_string.h"
-#include "utils/make_shared.h"
+
 #include "encryption/hashing.h"
 
 #include "application_manager/mock_application_manager_settings.h"
@@ -87,7 +87,7 @@ class ApplicationManagerImplMockHmiTest : public ::testing::Test {
  public:
   ApplicationManagerImplMockHmiTest()
       : mock_storage_(
-            ::utils::MakeShared<NiceMock<resumption_test::MockResumptionData> >(
+            std::make_shared<NiceMock<resumption_test::MockResumptionData> >(
                 mock_app_mngr_)) {}
 
  protected:
@@ -146,8 +146,7 @@ class ApplicationManagerImplMockHmiTest : public ::testing::Test {
                         Return(0)));
   }
 
-  utils::SharedPtr<NiceMock<resumption_test::MockResumptionData> >
-      mock_storage_;
+  std::shared_ptr<NiceMock<resumption_test::MockResumptionData> > mock_storage_;
   application_manager_test::MockApplicationManager mock_app_mngr_;
   NiceMock<policy_handler_test::MockPolicySettings> mock_policy_settings_;
   NiceMock<connection_handler_test::MockConnectionHandler>
@@ -168,13 +167,13 @@ TEST_F(ApplicationManagerImplMockHmiTest,
   plugin_manager::MockRPCPluginManager* mock_rpc_plugin_manager =
       new plugin_manager::MockRPCPluginManager;
 
-  utils::SharedPtr<ApplicationImpl> app_impl = new ApplicationImpl(
+  std::shared_ptr<ApplicationImpl> app_impl = std::make_shared<ApplicationImpl>(
       application_id,
       policy_app_id,
       encryption::MakeHash(mac_address),
       device_id,
       app_name,
-      utils::SharedPtr<usage_statistics::StatisticsManager>(
+      std::shared_ptr<usage_statistics::StatisticsManager>(
           new usage_statistics_test::MockStatisticsManager()),
       *app_manager_impl_);
   std::unique_ptr<plugin_manager::RPCPluginManager> mock_rpc_plugin_manager_ptr(
@@ -195,7 +194,7 @@ TEST_F(ApplicationManagerImplMockHmiTest,
   //  // Skip sending notification on device switching as it is not the goal
   //  here
   EXPECT_CALL(mock_command_factory, CreateCommand(_, _))
-      .WillOnce(Return(utils::SharedPtr<commands::Command>()));
+      .WillOnce(Return(std::shared_ptr<commands::Command>()));
 
   plugin_manager::MockRPCPlugin mock_rpc_plugin;
   utils::Optional<plugin_manager::RPCPlugin> mock_rpc_plugin_opt =
@@ -212,15 +211,15 @@ TEST_F(ApplicationManagerImplMockHmiTest,
   const uint32_t correlation_id_1 = 1u;
   const uint32_t correlation_id_2 = 2u;
   const uint32_t correlation_id_3 = 3u;
-  utils::SharedPtr<NiceMock<MockRequest> > cmd_1 =
-      utils::MakeShared<NiceMock<MockRequest> >(connection_key,
-                                                correlation_id_1);
-  utils::SharedPtr<NiceMock<MockRequest> > cmd_2 =
-      utils::MakeShared<NiceMock<MockRequest> >(connection_key,
-                                                correlation_id_2);
-  utils::SharedPtr<NiceMock<MockRequest> > cmd_3 =
-      utils::MakeShared<NiceMock<MockRequest> >(connection_key,
-                                                correlation_id_3);
+  std::shared_ptr<NiceMock<MockRequest> > cmd_1 =
+      std::make_shared<NiceMock<MockRequest> >(connection_key,
+                                               correlation_id_1);
+  std::shared_ptr<NiceMock<MockRequest> > cmd_2 =
+      std::make_shared<NiceMock<MockRequest> >(connection_key,
+                                               correlation_id_2);
+  std::shared_ptr<NiceMock<MockRequest> > cmd_3 =
+      std::make_shared<NiceMock<MockRequest> >(connection_key,
+                                               correlation_id_3);
 
   EXPECT_CALL(mock_command_factory, CreateCommand(_, _))
       .WillOnce(Return(cmd_1))
@@ -228,11 +227,11 @@ TEST_F(ApplicationManagerImplMockHmiTest,
       .WillOnce(Return(cmd_3));
 
   commands::MessageSharedPtr hmi_msg_1 =
-      utils::MakeShared<smart_objects::SmartObject>();
+      std::make_shared<smart_objects::SmartObject>();
   commands::MessageSharedPtr hmi_msg_2 =
-      utils::MakeShared<smart_objects::SmartObject>();
+      std::make_shared<smart_objects::SmartObject>();
   commands::MessageSharedPtr hmi_msg_3 =
-      utils::MakeShared<smart_objects::SmartObject>();
+      std::make_shared<smart_objects::SmartObject>();
 
   (*hmi_msg_1)[strings::msg_params][strings::app_id] =
       (*hmi_msg_2)[strings::msg_params][strings::app_id] =
