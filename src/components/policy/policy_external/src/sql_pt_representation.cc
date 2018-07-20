@@ -516,7 +516,7 @@ bool SQLPTRepresentation::RefreshDB() {
 std::shared_ptr<policy_table::Table> SQLPTRepresentation::GenerateSnapshot()
     const {
   LOG4CXX_AUTO_TRACE(logger_);
-  std::shared_ptr<policy_table::Table> table = new policy_table::Table();
+  auto table = std::make_shared<policy_table::Table>();
   GatherModuleMeta(&*table->policy_table.module_meta);
   GatherModuleConfig(&table->policy_table.module_config);
   GatherUsageAndErrorCounts(&*table->policy_table.usage_and_error_counts);

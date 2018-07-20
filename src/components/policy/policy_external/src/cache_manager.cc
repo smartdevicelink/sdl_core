@@ -1752,7 +1752,7 @@ bool CacheManager::IsPermissionsCalculated(const std::string& device_id,
 
 std::shared_ptr<policy_table::Table> CacheManager::GenerateSnapshot() {
   CACHE_MANAGER_CHECK(snapshot_);
-  snapshot_ = new policy_table::Table();
+  snapshot_ = std::make_shared<policy_table::Table>();
   sync_primitives::AutoLock auto_lock(cache_lock_);
   snapshot_->policy_table = pt_->policy_table;
 
