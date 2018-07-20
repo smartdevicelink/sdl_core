@@ -79,12 +79,6 @@ bool RCCommandRequest::CheckDriverConsent() {
   LOG4CXX_AUTO_TRACE(logger_);
   app_mngr::ApplicationSharedPtr app =
       application_manager_.application(CommandRequestImpl::connection_key());
-  RCAppExtensionPtr extension =
-      resource_allocation_manager_.GetApplicationExtention(app);
-  if (!extension) {
-    LOG4CXX_ERROR(logger_, "NULL pointer.");
-    return false;
-  }
 
   const std::string module_type = ModuleType();
   rc_rpc_plugin::TypeAccess access = CheckModule(module_type, app);
