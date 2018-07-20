@@ -33,6 +33,7 @@
 #include "rc_rpc_plugin/commands/mobile/on_interior_vehicle_data_notification.h"
 #include "rc_rpc_plugin/rc_rpc_plugin.h"
 #include "rc_rpc_plugin/rc_module_constants.h"
+#include "rc_rpc_plugin/rc_helpers.h"
 #include "smart_objects/enum_schema_item.h"
 #include "utils/macro.h"
 
@@ -43,18 +44,13 @@ CREATE_LOGGERPTR_GLOBAL(logger_, "RemoteControlModule")
 
 OnInteriorVehicleDataNotification::OnInteriorVehicleDataNotification(
     const app_mngr::commands::MessageSharedPtr& message,
-    app_mngr::ApplicationManager& application_manager,
-    app_mngr::rpc_service::RPCService& rpc_service,
-    app_mngr::HMICapabilities& hmi_capabilities,
-    policy::PolicyHandlerInterface& policy_handler,
-    ResourceAllocationManager& resource_allocation_manager)
+    const RCCommandParams& params)
     : app_mngr::commands::CommandNotificationImpl(message,
-                                                  application_manager,
-                                                  rpc_service,
-                                                  hmi_capabilities,
-                                                  policy_handler) {
-  UNUSED(resource_allocation_manager);
-}
+                                                  params.application_manager_,
+                                                  params.rpc_service_,
+                                                  params.hmi_capabilities_,
+                                                  params.policy_handler_)
+    , interior_data_cache_(params.interior_data_cache_) {}
 
 OnInteriorVehicleDataNotification::~OnInteriorVehicleDataNotification() {}
 

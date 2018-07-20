@@ -32,6 +32,8 @@
 
 #include "rc_rpc_plugin/commands/mobile/get_interior_vehicle_data_request.h"
 #include "rc_rpc_plugin/rc_module_constants.h"
+#include "rc_rpc_plugin/rc_helpers.h"
+#include "rc_rpc_plugin/rc_rpc_plugin.h"
 #include "smart_objects/enum_schema_item.h"
 #include "utils/macro.h"
 #include "interfaces/MOBILE_API.h"
@@ -46,17 +48,9 @@ CREATE_LOGGERPTR_GLOBAL(logger_, "RemoteControlModule")
 
 GetInteriorVehicleDataRequest::GetInteriorVehicleDataRequest(
     const app_mngr::commands::MessageSharedPtr& message,
-    app_mngr::ApplicationManager& application_manager,
-    app_mngr::rpc_service::RPCService& rpc_service,
-    app_mngr::HMICapabilities& hmi_capabilities,
-    policy::PolicyHandlerInterface& policy_handle,
-    ResourceAllocationManager& resource_allocation_manager)
-    : RCCommandRequest(message,
-                       application_manager,
-                       rpc_service,
-                       hmi_capabilities,
-                       policy_handle,
-                       resource_allocation_manager)
+    const RCCommandParams& params)
+    : RCCommandRequest(message, params)
+
     , excessive_subscription_occured_(false) {}
 
 bool CheckIfModuleTypeExistInCapabilities(

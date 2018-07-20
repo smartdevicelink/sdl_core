@@ -30,42 +30,35 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "rc_rpc_plugin/rc_module_constants.h"
-#include "rc_rpc_plugin/commands/hmi/rc_on_interior_vehicle_data_notification.h"
-#include "utils/macro.h"
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_RC_RPC_PLUGIN_INCLUDE_RC_RPC_PLUGIN_COMMANDS_RC_COMMAND_PARAMS_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_RC_RPC_PLUGIN_INCLUDE_RC_RPC_PLUGIN_COMMANDS_RC_COMMAND_PARAMS_H_
 
-namespace rc_rpc_plugin {
-namespace commands {
-
-RCOnInteriorVehicleDataNotification::RCOnInteriorVehicleDataNotification(
-    const app_mngr::commands::MessageSharedPtr& message,
-    const RCCommandParams& params)
-    : application_manager::commands::NotificationFromHMI(
-          message,
-          params.application_manager_,
-          params.rpc_service_,
-          params.hmi_capabilities_,
-          params.policy_handler_) {}
-
-RCOnInteriorVehicleDataNotification::~RCOnInteriorVehicleDataNotification() {}
-
-void RCOnInteriorVehicleDataNotification::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
-  (*message_)[app_mngr::strings::params][app_mngr::strings::function_id] =
-      static_cast<int>(mobile_apis::FunctionID::eType::OnInteriorVehicleDataID);
-
-  smart_objects::SmartObject& module_data = (*message_)
-      [application_manager::strings::msg_params][message_params::kModuleData];
-  if (module_data.keyExists(rc_rpc_plugin::message_params::kAudioControlData)) {
-    smart_objects::SmartObject& audio_control_data =
-        module_data[message_params::kAudioControlData];
-    if (audio_control_data.keyExists(message_params::kKeepContext)) {
-      audio_control_data.erase(message_params::kKeepContext);
-    }
-  }
-
-  SendNotificationToMobile(message_);
+namespace application_manager {
+class ApplicationManager;
+namespace rpc_service {
+class RPCService;
+}
+class HMICapabilities;
 }
 
-}  // namespace commands
-}  // namespace rc_rpc_plugin
+namespace policy {
+class PolicyHandlerInterface;
+}
+
+namespace rc_rpc_plugin {
+
+class ResourceAllocationManager;
+class InteriorDataCache;
+class InteriorDataManager;
+
+struct RCCommandParams {
+  application_manager::ApplicationManager& application_manager_;
+  application_manager::rpc_service::RPCService& rpc_service_;
+  application_manager::HMICapabilities& hmi_capabilities_;
+  policy::PolicyHandlerInterface& policy_handler_;
+  rc_rpc_plugin::ResourceAllocationManager& resource_allocation_manager_;
+  rc_rpc_plugin::InteriorDataCache& interior_data_cache_;
+  rc_rpc_plugin::InteriorDataManager& interior_data_manager_;
+};
+}
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_RC_RPC_PLUGIN_INCLUDE_RC_RPC_PLUGIN_COMMANDS_RC_COMMAND_PARAMS_H_
