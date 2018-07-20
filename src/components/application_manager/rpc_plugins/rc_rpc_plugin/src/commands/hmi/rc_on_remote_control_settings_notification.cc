@@ -87,13 +87,6 @@ std::string AccessModeToString(
   return error;
 }
 
-void UnsubscribeFromInteriorVehicleDataForAllModules(
-    RCAppExtensionPtr extension) {
-  LOG4CXX_AUTO_TRACE(logger_);
-  extension->UnsubscribeFromInteriorVehicleData(enums_value::kClimate);
-  extension->UnsubscribeFromInteriorVehicleData(enums_value::kRadio);
-}
-
 void RCOnRemoteControlSettingsNotification::DisallowRCFunctionality() {
   LOG4CXX_AUTO_TRACE(logger_);
   typedef std::vector<application_manager::ApplicationSharedPtr> Apps;
@@ -103,14 +96,8 @@ void RCOnRemoteControlSettingsNotification::DisallowRCFunctionality() {
     DCHECK(app);
     application_manager_.ChangeAppsHMILevel(
         app->app_id(), mobile_apis::HMILevel::eType::HMI_NONE);
-
-    const RCAppExtensionPtr extension =
-        std::static_pointer_cast<RCAppExtension>(
-            app->QueryInterface(RCRPCPlugin::kRCPluginID));
-    if (extension) {
-      UnsubscribeFromInteriorVehicleDataForAllModules(extension);
-    }
   }
+  interior_data_manager_.OnDisablingRC();
 }
 
 void RCOnRemoteControlSettingsNotification::Run() {
