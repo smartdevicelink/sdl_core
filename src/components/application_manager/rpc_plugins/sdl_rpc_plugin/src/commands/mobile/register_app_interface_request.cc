@@ -242,22 +242,24 @@ void RegisterAppInterfaceRequest::Run() {
   const smart_objects::SmartObject& msg_params =
       (*message_)[strings::msg_params];
 
-  const std::string app_id_short = msg_params[strings::app_id].asString();
-  const std::string app_id_full = msg_params[strings::full_app_id].asString();
   // transform the given ids to lower case for later use I guess?
+  const std::string app_id_short = msg_params[strings::app_id].asString();
   std::string new_app_id_short = app_id_short;
-  std::string new_app_id_full = app_id_full;
   std::transform(app_id_short.begin(),
                  app_id_short.end(),
                  new_app_id_short.begin(),
                  ::tolower);
-  std::transform(app_id_full.begin(),
-                 app_id_full.end(),
-                 new_app_id_full.begin(),
-                 ::tolower);
   (*message_)[strings::msg_params][strings::app_id] = new_app_id_short;
-  (*message_)[strings::msg_params][strings::full_app_id] = new_app_id_full;
-
+  // If full ID is present, shift that to lowercase too
+  if (msg_params.keyExists(strings::full_app_id)) {
+    const std::string app_id_full = msg_params[strings::full_app_id].asString();
+    std::string new_app_id_full = app_id_full;
+    std::transform(app_id_full.begin(),
+                   app_id_full.end(),
+                   new_app_id_full.begin(),
+                   ::tolower);
+    (*message_)[strings::msg_params][strings::full_app_id] = new_app_id_full;
+  }
   if (application_manager_.IsApplicationForbidden(connection_key(),
                                                   policy_app_id)) {
     SendResponse(false, mobile_apis::Result::TOO_MANY_PENDING_REQUESTS);
