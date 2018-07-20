@@ -255,8 +255,26 @@ struct FillNotificationData {
                              const std::set<Parameter>& target);
   void InitRpcKeys(const std::string& rpc_name);
   bool RpcParametersEmpty(RpcPermissions& rpc);
-  bool IsSectionEmpty(ParameterPermissions& permissions,
-                      const std::string& section);
+
+  /**
+   * @brief Checks if specific section in specified permissions is empty
+   * @param permissions reference to the permissions structure
+   * @param section reference to the section name
+   * @return true if specified section in permissions is empty otherwise returns
+   * false
+   */
+  bool IsSectionEmpty(const ParameterPermissions& permissions,
+                      const std::string& section) const;
+
+  /**
+   * @brief Checks if at least one parameter is allowed for the specified
+   * permissions
+   * @param permissions reference to the permissions structure
+   * @return true if at least one parameter is allowed for the specified
+   * permissions otherwise returns false
+   */
+  bool IsSomeParametersAllowed(const ParameterPermissions& permissions) const;
+
   std::string current_key_;
   Permissions& data_;
   const bool does_require_user_consent_;
