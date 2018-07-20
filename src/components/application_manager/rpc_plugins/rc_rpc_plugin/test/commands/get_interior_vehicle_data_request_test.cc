@@ -43,6 +43,7 @@
 #include "rc_rpc_plugin/mock/mock_resource_allocation_manager.h"
 #include "rc_rpc_plugin/mock/mock_interior_data_cache.h"
 #include "rc_rpc_plugin/mock/mock_interior_data_manager.h"
+
 #include <thread>
 #include <chrono>
 

@@ -63,6 +63,9 @@ class GetInteriorVehicleDataRequest : public RCCommandRequest {
   ~GetInteriorVehicleDataRequest();
 
  private:
+  std::vector<application_manager::ApplicationSharedPtr>
+  AppsSubscribedToModuleType(const std::string& module_type);
+
   /**
    * @brief Check if app wants to proceed with already setup subscription
    * @param request_params request parameters to check
@@ -86,6 +89,11 @@ class GetInteriorVehicleDataRequest : public RCCommandRequest {
 
   std::string ModuleType() FINAL;
   bool excessive_subscription_occured_;
+  bool ProcessCapabilities();
+  void ProcessResponseToMobileFromCache(app_mngr::ApplicationSharedPtr app);
+  bool CheckRateLimits();
+  bool AppShouldBeUnsubscribed();
+  bool TheLastAppShouldBeUnsubscribed(app_mngr::ApplicationSharedPtr app);
 };
 }  // namespace commands
 }  // namespace rc_rpc_plugin

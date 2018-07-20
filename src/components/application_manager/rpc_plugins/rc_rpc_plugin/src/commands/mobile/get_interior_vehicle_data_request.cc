@@ -76,9 +76,8 @@ bool CheckIfModuleTypeExistInCapabilities(
   return is_module_type_valid;
 }
 
-void GetInteriorVehicleDataRequest::Execute() {
+bool GetInteriorVehicleDataRequest::ProcessCapabilities() {
   LOG4CXX_AUTO_TRACE(logger_);
-
   const smart_objects::SmartObject* rc_capabilities =
       hmi_capabilities_.rc_capability();
 
@@ -90,26 +89,107 @@ void GetInteriorVehicleDataRequest::Execute() {
     SendResponse(false,
                  mobile_apis::Result::UNSUPPORTED_RESOURCE,
                  "Accessing not supported module data");
+    return false;
+  }
+  return true;
+}
+
+void GetInteriorVehicleDataRequest::ProcessResponseToMobileFromCache(
+    app_mngr::ApplicationSharedPtr app) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  const auto& data_mapping = RCHelpers::GetModuleTypeToDataMapping();
+  auto data = interior_data_cache_.Retrieve(ModuleType());
+  auto response_msg_params =
+      smart_objects::SmartObject(smart_objects::SmartType_Map);
+  response_msg_params[message_params::kModuleData][data_mapping(ModuleType())] =
+      data;
+  response_msg_params[message_params::kModuleData]
+                     [message_params::kModuleType] = ModuleType();
+
+  const auto& request_msg_params = (*message_)[app_mngr::strings::msg_params];
+  LOG4CXX_DEBUG(logger_,
+                "kSubscribe exist" << request_msg_params.keyExists(
+                    message_params::kSubscribe));
+  if (request_msg_params.keyExists(message_params::kSubscribe)) {
+    response_msg_params[message_params::kIsSubscribed] =
+        request_msg_params[message_params::kSubscribe].asBool();
+    if (request_msg_params[message_params::kSubscribe].asBool()) {
+      auto extension = RCHelpers::GetRCExtension(*app);
+      DCHECK(extension);
+      extension->SubscribeToInteriorVehicleData(ModuleType());
+    }
+  }
+  SendResponse(
+      true, mobile_apis::Result::SUCCESS, nullptr, &response_msg_params);
+  if (AppShouldBeUnsubscribed()) {
+    auto extension = RCHelpers::GetRCExtension(*app);
+    DCHECK(extension);
+    extension->UnsubscribeFromInteriorVehicleData(ModuleType());
+  }
+}
+
+bool GetInteriorVehicleDataRequest::CheckRateLimits() {
+  LOG4CXX_AUTO_TRACE(logger_);
+  return interior_data_manager_.CheckRequestsToHMIFrequency(ModuleType());
+}
+
+bool GetInteriorVehicleDataRequest::AppShouldBeUnsubscribed() {
+  LOG4CXX_AUTO_TRACE(logger_);
+  const auto& msg_params = (*message_)[app_mngr::strings::msg_params];
+  if (msg_params.keyExists(message_params::kSubscribe)) {
+    return !(msg_params[message_params::kSubscribe].asBool());
+  }
+  return false;
+}
+
+bool GetInteriorVehicleDataRequest::TheLastAppShouldBeUnsubscribed(
+    app_mngr::ApplicationSharedPtr app) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  if (AppShouldBeUnsubscribed()) {
+    const auto subscribed_to_module_type =
+        RCHelpers::AppsSubscribedToModuleType(application_manager_,
+                                              ModuleType());
+    if (subscribed_to_module_type.size() == 1 &&
+        subscribed_to_module_type.front() == app) {
+      LOG4CXX_DEBUG(logger_,
+                    "The last application unsubscribes from " << ModuleType());
+      return true;
+    }
+  }
+  return false;
+}
+
+void GetInteriorVehicleDataRequest::Execute() {
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  if (!ProcessCapabilities()) {
     return;
   }
 
   app_mngr::ApplicationSharedPtr app =
       application_manager_.application(connection_key());
 
-  if (HasRequestExcessiveSubscription()) {
-    excessive_subscription_occured_ = true;
-    is_subscribed =
-        (*message_)[app_mngr::strings::msg_params][message_params::kSubscribe]
-            .asBool();
-    RemoveExcessiveSubscription();
+  if (TheLastAppShouldBeUnsubscribed(app) ||
+      !interior_data_cache_.Contains(ModuleType())) {
+    if (HasRequestExcessiveSubscription()) {
+      excessive_subscription_occured_ = true;
+      is_subscribed =
+          (*message_)[app_mngr::strings::msg_params][message_params::kSubscribe]
+              .asBool();
+      RemoveExcessiveSubscription();
+    }
+    if (!CheckRateLimits()) {
+      LOG4CXX_WARN(logger_, "GetInteriorVehicleData frequency is too high.");
+      SendResponse(false, mobile_apis::Result::REJECTED);
+      return;
+    }
+    interior_data_manager_.StoreRequestToHMITime(ModuleType());
+    SendHMIRequest(hmi_apis::FunctionID::RC_GetInteriorVehicleData,
+                   &(*message_)[app_mngr::strings::msg_params],
+                   true);
+    return;
   }
-
-  (*message_)[app_mngr::strings::msg_params][app_mngr::strings::app_id] =
-      app->app_id();
-
-  SendHMIRequest(hmi_apis::FunctionID::RC_GetInteriorVehicleData,
-                 &(*message_)[app_mngr::strings::msg_params],
-                 true);
+  ProcessResponseToMobileFromCache(app);
 }
 
 void GetInteriorVehicleDataRequest::on_event(
@@ -141,7 +221,21 @@ void GetInteriorVehicleDataRequest::on_event(
   }
 
   if (result) {
+    app_mngr::ApplicationSharedPtr app =
+        application_manager_.application(connection_key());
+
+    DCHECK_OR_RETURN_VOID(app);
+    if (TheLastAppShouldBeUnsubscribed(app)) {
+      interior_data_cache_.Remove(ModuleType());
+    }
     ProccessSubscription(hmi_response);
+    if (is_subscribed) {
+      const auto& data_mapping = RCHelpers::GetModuleTypeToDataMapping();
+      const auto module_data =
+          hmi_response[app_mngr::strings::msg_params]
+                      [message_params::kModuleData][data_mapping(ModuleType())];
+      interior_data_cache_.Add(ModuleType(), module_data);
+    }
   } else {
     hmi_response[app_mngr::strings::msg_params].erase(
         message_params::kIsSubscribed);
@@ -149,6 +243,7 @@ void GetInteriorVehicleDataRequest::on_event(
   std::string response_info;
   GetInfo(hmi_response, response_info);
   SetResourceState(ModuleType(), ResourceState::FREE);
+
   SendResponse(result,
                result_code,
                response_info.c_str(),
@@ -175,8 +270,7 @@ void GetInteriorVehicleDataRequest::ProccessSubscription(
 
   app_mngr::ApplicationSharedPtr app =
       application_manager_.application(CommandRequestImpl::connection_key());
-  RCAppExtensionPtr extension =
-      resource_allocation_manager_.GetApplicationExtention(app);
+  const auto extension = RCHelpers::GetRCExtension(*app);
   const char* module_type;
   NsSmartDeviceLink::NsSmartObjects::
       EnumConversionHelper<mobile_apis::ModuleType::eType>::EnumToCString(
@@ -255,8 +349,7 @@ bool GetInteriorVehicleDataRequest::HasRequestExcessiveSubscription() {
   if (is_subscribe_present_in_request) {
     app_mngr::ApplicationSharedPtr app =
         application_manager_.application(CommandRequestImpl::connection_key());
-    RCAppExtensionPtr extension =
-        resource_allocation_manager_.GetApplicationExtention(app);
+    const auto extension = RCHelpers::GetRCExtension(*app);
 
     const bool is_app_already_subscribed =
         extension->IsSubscibedToInteriorVehicleData(ModuleType());
