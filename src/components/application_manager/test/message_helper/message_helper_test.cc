@@ -967,7 +967,7 @@ TEST_F(MessageHelperTest, SendGetListOfPermissionsResponse_SUCCESS) {
                                                   correlation_id,
                                                   mock_application_manager);
 
-  ASSERT_TRUE(result);
+  ASSERT_TRUE(result.get());
 
   EXPECT_EQ(hmi_apis::FunctionID::SDL_GetListOfPermissions,
             (*result)[strings::params][strings::function_id].asInt());
@@ -1007,7 +1007,7 @@ TEST_F(MessageHelperTest,
                                                   correlation_id,
                                                   mock_application_manager);
 
-  ASSERT_TRUE(result);
+  ASSERT_TRUE(result.get());
 
   smart_objects::SmartObject& msg_params = (*result)[strings::msg_params];
   const std::string external_consent_status_key = "externalConsentStatus";

@@ -245,9 +245,9 @@ std::shared_ptr<policy_table::Table> PolicyManagerImpl::Parse(
   Json::Value value;
   Json::Reader reader;
   if (reader.parse(json.c_str(), value)) {
-    return new policy_table::Table(&value);
+    return std::make_shared<policy_table::Table>(&value);
   } else {
-    return std::shared_ptr<policy_table::Table>();
+    return std::make_shared<policy_table::Table>();
   }
 }
 
@@ -1909,7 +1909,7 @@ void PolicyManagerImpl::SaveUpdateStatusRequired(bool is_update_needed) {
 
 void PolicyManagerImpl::set_cache_manager(
     CacheManagerInterface* cache_manager) {
-  cache_ = cache_manager;
+  cache_ = std::shared_ptr<CacheManagerInterface>(cache_manager);
 }
 
 std::ostream& operator<<(std::ostream& output,

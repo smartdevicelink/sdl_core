@@ -147,7 +147,7 @@ TEST_F(PolicyManagerImplTest, LoadPT_SetPT_PTIsLoaded) {
   ::policy::BinaryMessage msg(json.begin(), json.end());
 
   std::shared_ptr<policy_table::Table> snapshot =
-      new policy_table::Table(update.policy_table);
+      std::make_shared<policy_table::Table>(update.policy_table);
   // Assert
   EXPECT_CALL(*cache_manager_, GenerateSnapshot()).WillOnce(Return(snapshot));
   EXPECT_CALL(*cache_manager_, ApplyUpdate(_)).WillOnce(Return(true));
@@ -236,7 +236,7 @@ TEST_F(PolicyManagerImplTest,
   Json::Value table = createPTforLoad();
   std::shared_ptr<policy_table::Table> p_table =
       std::make_shared<policy_table::Table>(&table);
-  ASSERT_TRUE(p_table);
+  ASSERT_TRUE(p_table.get());
   p_table->SetPolicyTableType(rpc::policy_table_interface_base::PT_UPDATE);
   EXPECT_TRUE(IsValid(*p_table));
 
@@ -249,7 +249,7 @@ TEST_F(PolicyManagerImplTest,
 TEST_F(PolicyManagerImplTest, RequestPTUpdate_InvalidPT_PTUpdateFail) {
   std::shared_ptr<policy_table::Table> p_table =
       std::make_shared<policy_table::Table>();
-  ASSERT_TRUE(p_table);
+  ASSERT_TRUE(p_table.get());
   EXPECT_FALSE(IsValid(*p_table));
 
   EXPECT_CALL(listener_, OnSnapshotCreated(_, _, _)).Times(0);

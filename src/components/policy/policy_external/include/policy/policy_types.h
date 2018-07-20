@@ -39,6 +39,7 @@
 #include <map>
 #include <set>
 #include <utility>
+#include <memory>
 
 #include "utils/helpers.h"
 #include "transport_manager/common.h"
