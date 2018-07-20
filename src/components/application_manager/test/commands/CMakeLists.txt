@@ -36,9 +36,6 @@ include_directories(
   ${COMPONENTS_DIR}/application_manager/include/application_manager/
   ${COMPONENTS_DIR}/application_manager/include/application_manager/commands/
 )
-#${COMPONENTS_DIR}/application_manager/test/include/
-#${COMPONENTS_DIR}/application_manager/test/include/application_manager/
-#${COMPONENTS_DIR}/application_manager/src/commands/
 
 set(COMMANDS_TEST_DIR ${AM_TEST_DIR}/commands)
 
@@ -51,8 +48,6 @@ file(GLOB SOURCES
   ${COMPONENTS_DIR}/application_manager/test/commands/command_response_impl_test.cc
 )
 
-#${COMPONENTS_DIR}/application_manager/src/smart_object_keys.cc
-#${COMPONENTS_DIR}/application_manager/src/message.cc
 set(LIBRARIES
   gmock
   Utils
@@ -66,9 +61,3 @@ set(LIBRARIES
 )
 
 create_test("commands_test" "${SOURCES}" "${LIBRARIES}")
-#${COMMANDS_TEST_DIR}/hmi/*
-#${COMMANDS_TEST_DIR}/hmi/hmi_notifications/*
-#${COMMANDS_TEST_DIR}/mobile/*
-#ApplicationManager
-#AMHMICommandsLibrary
-#AMMobileCommandsLibrary

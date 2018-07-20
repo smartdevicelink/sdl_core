@@ -135,7 +135,6 @@ set(CMAKE_EXE_LINKER_FLAGS
 )
 create_test("application_manager_test" "${testSources}" "${LIBRARIES}")
 create_test("application_manager_mock_hmi_test" "${testSourcesMockHmi}" "${LIBRARIES}")
-#add_dependencies("application_manager_test" libbson)
 
 create_test("help_prompt_manager_test" "${testSourcesHelpPromptManager}" "${LIBRARIES}")
 
