@@ -195,7 +195,7 @@ TEST_F(GetInteriorVehicleDataRequestTest,
                    [message_params::kModuleType] = module_type;
   ON_CALL(mock_interior_data_cache_, Contains(enums_value::kRadio))
       .WillByDefault(Return(false));
-  ON_CALL(mock_interior_data_manager_, CheckSubscriptionsFrequency(_))
+  ON_CALL(mock_interior_data_manager_, CheckRequestsToHMIFrequency(_))
       .WillByDefault(Return(true));
   application_manager::SharedPtr<
       rc_rpc_plugin::commands::GetInteriorVehicleDataRequest> command =
@@ -221,7 +221,7 @@ TEST_F(GetInteriorVehicleDataRequestTest,
                    [message_params::kSubscribe] = true;
   ON_CALL(mock_interior_data_cache_, Contains(enums_value::kRadio))
       .WillByDefault(Return(false));
-  ON_CALL(mock_interior_data_manager_, CheckSubscriptionsFrequency(_))
+  ON_CALL(mock_interior_data_manager_, CheckRequestsToHMIFrequency(_))
       .WillByDefault(Return(true));
   application_manager::SharedPtr<
       rc_rpc_plugin::commands::GetInteriorVehicleDataRequest> command =
@@ -295,7 +295,7 @@ TEST_F(
   apps_.insert(mock_app_);
   rc_app_extention_->SubscribeToInteriorVehicleData(enums_value::kRadio);
   ON_CALL(app_mngr_, applications()).WillByDefault(Return(apps_da_));
-  ON_CALL(mock_interior_data_manager_, CheckSubscriptionsFrequency(_))
+  ON_CALL(mock_interior_data_manager_, CheckRequestsToHMIFrequency(_))
       .WillByDefault(Return(true));
 
   // Expectations
@@ -438,7 +438,7 @@ TEST_F(GetInteriorVehicleDataRequestTest,
   hmi_response_params[strings::connection_key] = kConnectionKey;
 
   ON_CALL(mock_interior_data_cache_, Contains(_)).WillByDefault(Return(false));
-  ON_CALL(mock_interior_data_manager_, CheckSubscriptionsFrequency(_))
+  ON_CALL(mock_interior_data_manager_, CheckRequestsToHMIFrequency(_))
       .WillByDefault(Return(true));
 
   // Expectations
@@ -478,7 +478,7 @@ TEST_F(GetInteriorVehicleDataRequestTest,
   hmi_msg_params[hmi_response::code] = hmi_apis::Common_Result::READ_ONLY;
   hmi_msg_params[strings::connection_key] = kConnectionKey;
   ON_CALL(mock_interior_data_cache_, Contains(_)).WillByDefault(Return(false));
-  ON_CALL(mock_interior_data_manager_, CheckSubscriptionsFrequency(_))
+  ON_CALL(mock_interior_data_manager_, CheckRequestsToHMIFrequency(_))
       .WillByDefault(Return(true));
 
   // Expectations
@@ -519,7 +519,7 @@ TEST_F(GetInteriorVehicleDataRequestTest,
   apps_.insert(mock_app_);
   rc_app_extention_->SubscribeToInteriorVehicleData(enums_value::kRadio);
   ON_CALL(app_mngr_, applications()).WillByDefault(Return(apps_da_));
-  ON_CALL(mock_interior_data_manager_, CheckSubscriptionsFrequency(_))
+  ON_CALL(mock_interior_data_manager_, CheckRequestsToHMIFrequency(_))
       .WillByDefault(Return(true));
 
   // Expectations
@@ -567,10 +567,10 @@ TEST_F(GetInteriorVehicleDataRequestTest,
   for (; i <= max_request_in_time_frame; ++i) {
     // Expectations
     EXPECT_CALL(mock_interior_data_manager_,
-                CheckSubscriptionsFrequency(enums_value::kRadio))
+                CheckRequestsToHMIFrequency(enums_value::kRadio))
         .WillOnce(Return(true));
     EXPECT_CALL(mock_interior_data_manager_,
-                StoreInteriorDataSubscriptionTime(enums_value::kRadio));
+                StoreRequestToHMITime(enums_value::kRadio));
     EXPECT_CALL(mock_interior_data_cache_, Contains(enums_value::kRadio))
         .WillRepeatedly(Return(false));
     EXPECT_CALL(mock_rpc_service_,
@@ -583,7 +583,7 @@ TEST_F(GetInteriorVehicleDataRequestTest,
 
   // Expectations
   EXPECT_CALL(mock_interior_data_manager_,
-              CheckSubscriptionsFrequency(enums_value::kRadio))
+              CheckRequestsToHMIFrequency(enums_value::kRadio))
       .WillOnce(Return(false));
   EXPECT_CALL(
       mock_rpc_service_,

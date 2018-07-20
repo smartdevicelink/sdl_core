@@ -41,8 +41,7 @@ namespace rc_rpc_plugin {
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "RemoteControlModule");
 
-InteriorDataCacheImpl::InteriorDataCacheImpl(
-    const uint32_t time_frame_of_allowed_requests) {}
+InteriorDataCacheImpl::InteriorDataCacheImpl() {}
 
 InteriorDataCacheImpl::~InteriorDataCacheImpl() {}
 

@@ -48,23 +48,22 @@ void InteriorDataManagerImpl::OnDisablingRC() {
   }
 }
 
-void InteriorDataManagerImpl::StoreInteriorDataSubscriptionTime(
+void InteriorDataManagerImpl::StoreRequestToHMITime(
     const std::string& module_type) {
   LOG4CXX_AUTO_TRACE(logger_);
-  sync_primitives::AutoLock autolock(subscriptions_history_lock_);
-  subscriptions_history_[module_type].push_back(
+  sync_primitives::AutoLock autolock(requests_to_hmi_history_lock_);
+  requests_to_hmi_history_[module_type].push_back(
       date_time::DateTime::getCurrentTime());
 }
 
-bool InteriorDataManagerImpl::CheckSubscriptionsFrequency(
+bool InteriorDataManagerImpl::CheckRequestsToHMIFrequency(
     const std::string& module_type) {
   LOG4CXX_AUTO_TRACE(logger_);
-  sync_primitives::AutoLock autolock(subscriptions_history_lock_);
-  ClearOldSubscriptionsHistory();
-  const auto& history = subscriptions_history_[module_type];
+  sync_primitives::AutoLock autolock(requests_to_hmi_history_lock_);
+  ClearOldRequestsToHMIHistory();
+  const auto& history = requests_to_hmi_history_[module_type];
   const auto limit =
       app_mngr_.get_settings().get_interior_vehicle_data_frequency().first;
-  LOG4CXX_DEBUG(logger_, "History size " << history.size());
   return history.size() < limit;
 }
 
@@ -126,7 +125,7 @@ void InteriorDataManagerImpl::UnsubscribeFromInteriorVehicleData(
   rpc_service_.ManageHMICommand(unsubscribe_request);
 }
 
-void InteriorDataManagerImpl::ClearOldSubscriptionsHistory() {
+void InteriorDataManagerImpl::ClearOldRequestsToHMIHistory() {
   auto limit =
       app_mngr_.get_settings().get_interior_vehicle_data_frequency().second;
   uint32_t time_frame = limit * date_time::DateTime::MILLISECONDS_IN_SECOND;
@@ -134,7 +133,7 @@ void InteriorDataManagerImpl::ClearOldSubscriptionsHistory() {
     auto span = date_time::DateTime::calculateTimeSpan(time);
     return span < time_frame;
   };
-  for (auto& it : subscriptions_history_) {
+  for (auto& it : requests_to_hmi_history_) {
     auto& history = it.second;
     auto first_actual =
         std::find_if(history.begin(), history.end(), lest_that_time_frame_ago);

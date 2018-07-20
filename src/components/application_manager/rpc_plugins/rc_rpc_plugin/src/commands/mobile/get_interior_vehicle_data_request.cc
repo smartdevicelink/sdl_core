@@ -131,7 +131,7 @@ void GetInteriorVehicleDataRequest::ProcessResponseToMobileFromCache(
 
 bool GetInteriorVehicleDataRequest::CheckRateLimits() {
   LOG4CXX_AUTO_TRACE(logger_);
-  return interior_data_manager_.CheckSubscriptionsFrequency(ModuleType());
+  return interior_data_manager_.CheckRequestsToHMIFrequency(ModuleType());
 }
 
 bool GetInteriorVehicleDataRequest::AppShouldBeUnsubscribed() {
@@ -183,7 +183,7 @@ void GetInteriorVehicleDataRequest::Execute() {
       SendResponse(false, mobile_apis::Result::REJECTED);
       return;
     }
-    interior_data_manager_.StoreInteriorDataSubscriptionTime(ModuleType());
+    interior_data_manager_.StoreRequestToHMITime(ModuleType());
     SendHMIRequest(hmi_apis::FunctionID::RC_GetInteriorVehicleData,
                    &(*message_)[app_mngr::strings::msg_params],
                    true);

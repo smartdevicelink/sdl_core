@@ -45,7 +45,7 @@
 namespace rc_rpc_plugin {
 class InteriorDataCacheImpl : public InteriorDataCache {
  public:
-  InteriorDataCacheImpl(const uint32_t time_frame_of_allowed_requests);
+  InteriorDataCacheImpl();
 
   ~InteriorDataCacheImpl();
 

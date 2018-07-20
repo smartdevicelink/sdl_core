@@ -49,9 +49,7 @@ bool RCRPCPlugin::Init(
     application_manager::rpc_service::RPCService& rpc_service,
     application_manager::HMICapabilities& hmi_capabilities,
     policy::PolicyHandlerInterface& policy_handler) {
-  const auto& settings = app_manager.get_settings();
-  const auto frequency = settings.get_interior_vehicle_data_frequency();
-  interior_data_cache_.reset(new InteriorDataCacheImpl(frequency.second));
+  interior_data_cache_.reset(new InteriorDataCacheImpl());
   interior_data_manager_.reset(new InteriorDataManagerImpl(
       *this, *interior_data_cache_, app_manager, rpc_service));
 

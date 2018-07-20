@@ -65,21 +65,20 @@ class InteriorDataManager {
   virtual void OnDisablingRC() = 0;
 
   /**
-   * @brief StoreInteriorDataSubscriptionTime save information and time stamp of
+   * @brief StoreRequestToHMITime save information and time stamp of
    * current interior data subscriptions
    */
-  virtual void StoreInteriorDataSubscriptionTime(
-      const std::string& module_type) = 0;
+  virtual void StoreRequestToHMITime(const std::string& module_type) = 0;
 
   /**
- * @brief CheckSubscriptionsFrequency check that rate limits are not allowed of
+ * @brief CheckRequestsToHMIFrequency check that rate limits are not allowed of
  * bounce during current time frame.
  * calculate amount of requests per module type in time frame and checks if it
  * bigger then allowed by ini file
  * @param module_type moduletype to calculate frequency on
  * @return true if amount of requests was not exceeded, otherwise return false.
  */
-  virtual bool CheckSubscriptionsFrequency(const std::string& module_type) = 0;
+  virtual bool CheckRequestsToHMIFrequency(const std::string& module_type) = 0;
 };
 
 }  // namespace rc_rpc_plugin

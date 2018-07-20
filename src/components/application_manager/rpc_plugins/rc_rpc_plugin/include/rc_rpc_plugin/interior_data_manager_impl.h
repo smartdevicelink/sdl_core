@@ -61,10 +61,9 @@ class InteriorDataManagerImpl : public InteriorDataManager {
 
   void OnDisablingRC() OVERRIDE;
 
-  void StoreInteriorDataSubscriptionTime(
-      const std::string& module_type) OVERRIDE;
+  void StoreRequestToHMITime(const std::string& module_type) OVERRIDE;
 
-  bool CheckSubscriptionsFrequency(const std::string& module_type) OVERRIDE;
+  bool CheckRequestsToHMIFrequency(const std::string& module_type) OVERRIDE;
 
  private:
   /**
@@ -90,7 +89,7 @@ class InteriorDataManagerImpl : public InteriorDataManager {
    */
   void UnsubscribeFromInteriorVehicleData(const std::string& module_type);
 
-  void ClearOldSubscriptionsHistory();
+  void ClearOldRequestsToHMIHistory();
   /**
    * @brief AppsModules mapping from applications to list of modules
    */
@@ -105,13 +104,13 @@ class InteriorDataManagerImpl : public InteriorDataManager {
   AppsModules AppsSubscribedModules();
 
   /**
-   * @brief SubscriptionsHistory mapping from module type to vector of time
+   * @brief RequestsToHMIHistory mapping from module type to vector of time
    * stamps
    */
   typedef std::map<std::string, std::deque<TimevalStruct> >
-      SubscriptionsHistory;
-  SubscriptionsHistory subscriptions_history_;
-  mutable sync_primitives::Lock subscriptions_history_lock_;
+      RequestsToHMIHistory;
+  RequestsToHMIHistory requests_to_hmi_history_;
+  mutable sync_primitives::Lock requests_to_hmi_history_lock_;
 
   RCRPCPlugin& rc_plugin_;
   InteriorDataCache& cache_;
