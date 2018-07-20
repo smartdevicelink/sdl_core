@@ -61,9 +61,6 @@ class MockResourceAllocationManager
                     const uint32_t app_id,
                     const rc_rpc_plugin::ResourceState::eType state));
   MOCK_CONST_METHOD1(IsResourceFree, bool(const std::string& module_type));
-  MOCK_METHOD1(GetApplicationExtention,
-               rc_rpc_plugin::RCAppExtensionPtr(
-                   application_manager::ApplicationSharedPtr application));
   MOCK_METHOD0(ResetAllAllocations, void());
   MOCK_METHOD2(SendOnRCStatusNotifications,
                void(rc_rpc_plugin::NotificationTrigger::eType,

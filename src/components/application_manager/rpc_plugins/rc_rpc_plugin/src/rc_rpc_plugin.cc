@@ -86,14 +86,8 @@ application_manager::CommandFactory& RCRPCPlugin::GetCommandFactory() {
 
 void RCRPCPlugin::OnPolicyEvent(
     application_manager::plugin_manager::PolicyEvent event) {
-  switch (event) {
-    case plugins::kApplicationPolicyUpdated: {
-      resource_allocation_manager_->OnPolicyEvent(event);
-      break;
-    }
-    default:
-      break;
-  }
+  resource_allocation_manager_->OnPolicyEvent(event);
+  interior_data_manager_->OnPolicyEvent(event);
 }
 
 void RCRPCPlugin::OnApplicationEvent(
@@ -112,10 +106,12 @@ void RCRPCPlugin::OnApplicationEvent(
     }
     case plugins::kApplicationExit: {
       resource_allocation_manager_->OnApplicationEvent(event, application);
+      interior_data_manager_->OnApplicationEvent(event, application);
       break;
     }
     case plugins::kApplicationUnregistered: {
       resource_allocation_manager_->OnApplicationEvent(event, application);
+      interior_data_manager_->OnApplicationEvent(event, application);
       break;
     }
     default:

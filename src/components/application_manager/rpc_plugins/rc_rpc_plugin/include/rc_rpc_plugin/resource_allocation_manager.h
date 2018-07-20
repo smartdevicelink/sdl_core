@@ -154,9 +154,6 @@ class ResourceAllocationManager {
    */
   virtual void ResetAllAllocations() = 0;
 
-  virtual RCAppExtensionPtr GetApplicationExtention(
-      application_manager::ApplicationSharedPtr application) = 0;
-
   /**
    * @brief Create and send OnRCStatusNotification to mobile and HMI
    * @param event trigger for notification sending
