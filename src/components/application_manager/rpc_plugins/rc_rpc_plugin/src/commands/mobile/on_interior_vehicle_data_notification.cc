@@ -54,11 +54,24 @@ OnInteriorVehicleDataNotification::OnInteriorVehicleDataNotification(
 
 OnInteriorVehicleDataNotification::~OnInteriorVehicleDataNotification() {}
 
+void OnInteriorVehicleDataNotification::AddDataToCache(
+    const std::string& module_type) {
+  const auto& data_mapping = RCHelpers::GetModuleTypeToDataMapping();
+  const auto module_data =
+      (*message_)[app_mngr::strings::msg_params][message_params::kModuleData]
+                 [data_mapping(module_type)];
+  interior_data_cache_.Add(module_type, module_data);
+}
+
 void OnInteriorVehicleDataNotification::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
 
   const std::string module_type = ModuleType();
-
+  auto apps_subscribed =
+      RCHelpers::AppsSubscribedToModuleType(application_manager_, module_type);
+  if (!apps_subscribed.empty()) {
+    AddDataToCache(module_type);
+  }
   typedef std::vector<application_manager::ApplicationSharedPtr> AppPtrs;
   AppPtrs apps = RCRPCPlugin::GetRCApplications(application_manager_);
 
@@ -66,8 +79,7 @@ void OnInteriorVehicleDataNotification::Run() {
     DCHECK(*it);
     application_manager::Application& app = **it;
 
-    RCAppExtensionPtr extension = std::static_pointer_cast<RCAppExtension>(
-        app.QueryInterface(RCRPCPlugin::kRCPluginID));
+    const auto extension = RCHelpers::GetRCExtension(app);
     DCHECK(extension);
     LOG4CXX_TRACE(logger_,
                   "Check subscription for "
