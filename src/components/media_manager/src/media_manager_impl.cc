@@ -116,7 +116,7 @@ void MediaManagerImpl::Init() {
 
 #if defined(EXTENDED_MEDIA_MODE)
   LOG4CXX_INFO(logger_, "Called Init with default configuration.");
-  from_mic_recorder_ = std::make_shared<FromMicRecorderAdapter>();
+  from_mic_recorder_ = new FromMicRecorderAdapter();
 #endif
 
   if ("socket" == settings().video_server_type()) {
