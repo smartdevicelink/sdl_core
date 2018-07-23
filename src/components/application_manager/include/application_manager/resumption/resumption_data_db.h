@@ -111,6 +111,30 @@ class ResumptionDataDB : public ResumptionData {
                                        const std::string& device_id) const;
 
   /**
+   * @brief Increments global ignition on counter
+   * by 1
+   */
+  void IncrementGlobalIgnOnCounter() OVERRIDE;
+
+  /**
+   * @brief Get the global ignition on counter
+   * @return the global ignition on counter
+   */
+  virtual uint32_t GetGlobalIgnOnCounter() const OVERRIDE;
+
+  /**
+   * @brief Increments global ignition off counter
+   * by 1
+   */
+  virtual void IncrementGlobalIgnOffCounter() OVERRIDE;
+
+  /**
+   * @brief Get the global ignition off counter
+   * @return the global ignition off counter
+   */
+  virtual uint32_t GetGlobalIgnOffCounter() const OVERRIDE;
+
+  /**
    * @brief Increments ignition counter for all registered applications
    * and remember ign_off time stamp
    */

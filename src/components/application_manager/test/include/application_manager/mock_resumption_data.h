@@ -66,6 +66,11 @@ class MockResumptionData : public ::resumption::ResumptionData {
                           const std::string& device_id,
                           std::string& hash_id));
   MOCK_METHOD0(OnAwake, void());
+  MOCK_METHOD0(IncrementGlobalIgnOnCounter, void());
+  MOCK_CONST_METHOD0(GetGlobalIgnOnCounter, uint32_t());
+  MOCK_METHOD0(IncrementGlobalIgnOffCounter, void());
+  MOCK_CONST_METHOD0(GetGlobalIgnOffCounter, uint32_t());
+
   MOCK_METHOD0(DecrementIgnOffCount, void());
   MOCK_CONST_METHOD3(GetSavedApplication,
                      bool(const std::string& policy_app_id,

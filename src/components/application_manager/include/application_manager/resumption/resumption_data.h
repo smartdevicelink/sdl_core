@@ -111,6 +111,30 @@ class ResumptionData {
   DEPRECATED virtual void OnAwake() = 0;
 
   /**
+   * @brief Increments global ignition on counter
+   * by 1
+   */
+  virtual void IncrementGlobalIgnOnCounter() = 0;
+
+  /**
+   * @brief Get the global ignition on counter
+   * @return the global ignition on counter
+   */
+  virtual uint32_t GetGlobalIgnOnCounter() const = 0;
+
+  /**
+   * @brief Increments global ignition off counter
+   * by 1
+   */
+  virtual void IncrementGlobalIgnOffCounter() = 0;
+
+  /**
+   * @brief Get the global ignition off counter
+   * @return the global ignition off counter
+   */
+  virtual uint32_t GetGlobalIgnOffCounter() const = 0;
+
+  /**
    * @brief Retrieves hash ID for the given mobile app ID
    * and device ID from stored information.
    * @param policy_app_id - mobile application id

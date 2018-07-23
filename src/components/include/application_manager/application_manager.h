@@ -33,6 +33,7 @@
 #ifndef SRC_COMPONENTS_INCLUDE_APPLICATION_MANAGER_APPLICATION_MANAGER_H_
 #define SRC_COMPONENTS_INCLUDE_APPLICATION_MANAGER_APPLICATION_MANAGER_H_
 
+#include <ctime>
 #include <string>
 #include <vector>
 #include <set>
@@ -424,6 +425,11 @@ class ApplicationManager {
    */
   virtual void EndNaviServices(uint32_t app_id) = 0;
 
+  /**
+   * @brief returns true if low voltage state is active
+   */
+  virtual bool IsLowVoltage() const = 0;
+
   /* @brief Starts audio passthru process
    * @deprecated Use BeginAudioPassThru(uint32_t app_id) instead
    *
@@ -497,8 +503,6 @@ class ApplicationManager {
       const connection_handler::DeviceHandle handle) const = 0;
 
   virtual bool IsStopping() const = 0;
-
-  virtual bool IsLowVoltage() = 0;
 
   virtual void RemoveAppFromTTSGlobalPropertiesList(const uint32_t app_id) = 0;
 

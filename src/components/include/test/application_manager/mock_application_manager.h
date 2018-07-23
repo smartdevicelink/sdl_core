@@ -140,6 +140,7 @@ class MockApplicationManager : public application_manager::ApplicationManager {
                void(const smart_objects::SmartObject& sm_object,
                     const uint32_t connection_key));
   MOCK_CONST_METHOD0(is_attenuated_supported, bool());
+  MOCK_CONST_METHOD0(IsLowVoltage, bool());
   MOCK_CONST_METHOD1(IsAppTypeExistsInFullOrLimited,
                      bool(application_manager::ApplicationConstSharedPtr app));
   MOCK_METHOD1(OnApplicationRegistered,
@@ -180,7 +181,6 @@ class MockApplicationManager : public application_manager::ApplicationManager {
   MOCK_CONST_METHOD1(IsAppsQueriedFrom,
                      bool(const connection_handler::DeviceHandle handle));
   MOCK_CONST_METHOD0(IsStopping, bool());
-  MOCK_METHOD0(IsLowVoltage, bool());
   MOCK_METHOD1(RemoveAppFromTTSGlobalPropertiesList,
                void(const uint32_t app_id));
   MOCK_METHOD4(

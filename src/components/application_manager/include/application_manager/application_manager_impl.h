@@ -1238,10 +1238,10 @@ class ApplicationManagerImpl
    */
   void SendOnSDLClose();
 
-  /*
+  /**
    * @brief returns true if low voltage state is active
    */
-  bool IsLowVoltage();
+  bool IsLowVoltage() const OVERRIDE;
 
   /**
    * @brief Allows to process postponed commands for application
