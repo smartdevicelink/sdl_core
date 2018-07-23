@@ -119,12 +119,7 @@ void CreateInteractionChoiceSetRequest::Run() {
     return;
   }
 
-  Result::eType result = CheckChoiceSet(app);
-  if (Result::SUCCESS != result) {
-    SendResponse(false, result);
-    return;
-  }
-  std::cerr << "checking choice set\n";
+
   int vr_status = MessageHelper::CheckChoiceSet_VRCommands((*message_)[strings::msg_params][strings::choice_set]);
   if (vr_status == -1) {
     std::cerr << "choice set has invalid MIXED set of VR parameters" << '\n';
@@ -134,14 +129,20 @@ void CreateInteractionChoiceSetRequest::Run() {
     
   } else if (vr_status == 0) {
     std::cerr << "choice set has valid FULL set of VR parameters" << '\n';
-    
+  } else {
+    std::cerr << "choice set has valid EMPTY set of VR parameters" << '\n';
+  }
+  
+  Result::eType result = CheckChoiceSet(app);
+  if (Result::SUCCESS != result) {
+    SendResponse(false, result);
+    return;
+  }
+  if (vr_status == 0) {
     // everyone had a vr command, setup the grammar
     uint32_t grammar_id = application_manager_.GenerateGrammarID();
     (*message_)[strings::msg_params][strings::grammar_id] = grammar_id;
     SendVRAddCommandRequests(app);
-  } else {
-    std::cerr << "choice set has valid EMPTY set of VR parameters" << '\n';
-    
   }
   // continue on as usual
   app->AddChoiceSet(choice_set_id_, (*message_)[strings::msg_params]);
