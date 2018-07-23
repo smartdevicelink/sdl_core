@@ -146,6 +146,30 @@ class ResumptionDataJson : public ResumptionData {
   virtual uint32_t GetIgnOffTime() const;
 
   /**
+   * @brief Increments global ignition on counter
+   * by 1
+   */
+  void IncrementGlobalIgnOnCounter() OVERRIDE;
+
+  /**
+   * @brief Get the global ignition on counter
+   * @return the global ignition on counter
+   */
+  virtual uint32_t GetGlobalIgnOnCounter() const OVERRIDE;
+
+  /**
+   * @brief Increments global ignition off counter
+   * by 1
+   */
+  virtual void IncrementGlobalIgnOffCounter() OVERRIDE;
+
+  /**
+   * @brief Get the global ignition off counter
+   * @return the global ignition off counter
+   */
+  virtual uint32_t GetGlobalIgnOffCounter() const OVERRIDE;
+
+  /**
    * @brief Checks if saved data have application
    * @param policy_app_id - mobile application id
    * @param device_id - contains id of device on which is running application
