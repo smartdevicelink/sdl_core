@@ -110,6 +110,7 @@ TEST_F(SDLGetUserFriendlyMessageRequestTest, Run_LanguageSet_SUCCESS) {
   EXPECT_CALL(mock_policy_handler_,
               OnGetUserFriendlyMessage(msg_codes, kLanguageEn, kCorrelationID));
 
+  command->Init();
   command->Run();
 }
 
@@ -136,6 +137,7 @@ TEST_F(SDLGetUserFriendlyMessageRequestTest, Run_LanguageNotSet_SUCCESS) {
   EXPECT_CALL(mock_policy_handler_,
               OnGetUserFriendlyMessage(msg_codes, kLanguageEn, kCorrelationID));
 
+  command->Init();
   command->Run();
 }
 
@@ -150,6 +152,38 @@ TEST_F(SDLGetUserFriendlyMessageRequestTest, Run_NoMsgCodes_Canceled) {
   EXPECT_CALL(mock_message_helper_, CommonLanguageToString(_)).Times(0);
   EXPECT_CALL(mock_policy_handler_, OnGetUserFriendlyMessage(_, _, _)).Times(0);
 
+  command->Init();
+  command->Run();
+}
+
+MATCHER_P(HMIRequestResultCodeIs, result_code, "") {
+  return result_code ==
+         static_cast<hmi_apis::Common_Result::eType>(
+             (*arg)[strings::params][am::hmi_response::code].asInt());
+}
+
+TEST_F(
+    SDLGetUserFriendlyMessageRequestTest,
+    RUN_InvalidRequestInvalidSymbolsStringMandatoryParam_SendInvalidDataErrorResponse) {
+  const std::string kInvalidSyntaxString = "\n\t ";
+  MessageSharedPtr msg = CreateMessage();
+  (*msg)[strings::params][strings::correlation_id] = kCorrelationID;
+  (*msg)[strings::msg_params][strings::app_id] = kAppID;
+
+  (*msg)[strings::msg_params][kMessageCodes] =
+      SmartObject(smart_objects::SmartType_Array);
+  (*msg)[strings::msg_params][kMessageCodes][0] = SmartObject(kInvalidSyntaxString);
+  (*msg)[strings::msg_params][kMessageCodes][1] = SmartObject(kLanguageEn);
+
+  (*msg)[strings::msg_params][strings::language] = kLanguage;
+
+  std::shared_ptr<SDLGetUserFriendlyMessageRequest> command(
+      CreateCommand<SDLGetUserFriendlyMessageRequest>(msg));
+
+  EXPECT_CALL(mock_message_helper_, CommonLanguageToString(_)).Times(0);
+  EXPECT_CALL(mock_policy_handler_, OnGetUserFriendlyMessage(_, _, _)).Times(0);
+
+  command->Init();
   command->Run();
 }
 
