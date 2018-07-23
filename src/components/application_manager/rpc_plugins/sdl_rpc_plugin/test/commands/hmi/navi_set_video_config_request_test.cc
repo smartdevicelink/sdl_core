@@ -35,7 +35,7 @@
 #include "hmi/navi_set_video_config_request.h"
 
 #include "gtest/gtest.h"
-#include "utils/shared_ptr.h"
+
 #include "smart_objects/smart_object.h"
 #include "application_manager/smart_object_keys.h"
 #include "application_manager/commands/command_request_test.h"
@@ -65,7 +65,7 @@ const hmi_apis::FunctionID::eType kEventID =
     hmi_apis::FunctionID::Navigation_SetVideoConfig;
 }  // namespace
 
-typedef SharedPtr<NaviSetVideoConfigRequest> NaviSetVideoConfigRequestPtr;
+typedef std::shared_ptr<NaviSetVideoConfigRequest> NaviSetVideoConfigRequestPtr;
 
 class NaviSetVideoConfigRequestTest
     : public CommandRequestTest<CommandsTestMocks::kIsNice> {

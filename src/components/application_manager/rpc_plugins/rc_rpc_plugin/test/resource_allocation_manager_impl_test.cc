@@ -39,8 +39,6 @@
 #include "application_manager/mock_application_manager.h"
 #include "application_manager/mock_rpc_service.h"
 #include "application_manager/policies/mock_policy_handler_interface.h"
-#include "utils/shared_ptr.h"
-#include "utils/make_shared.h"
 #include "interfaces/HMI_API.h"
 #include "interfaces/MOBILE_API.h"
 
@@ -83,16 +81,16 @@ using namespace rc_rpc_plugin;
 class RAManagerTest : public ::testing::Test {
  public:
   RAManagerTest()
-      : message_(utils::MakeShared<Message>(MessagePriority::FromServiceType(
+      : message_(std::make_shared<Message>(MessagePriority::FromServiceType(
             protocol_handler::ServiceType::kRpc)))
-      , mock_app_1_(utils::MakeShared<NiceMock<MockApplication> >())
-      , mock_app_2_(utils::MakeShared<NiceMock<MockApplication> >())
+      , mock_app_1_(std::make_shared<NiceMock<MockApplication> >())
+      , mock_app_2_(std::make_shared<NiceMock<MockApplication> >())
       , apps_lock_ptr_(std::make_shared<sync_primitives::Lock>())
       , apps_da_(apps_, apps_lock_ptr_) {
     ON_CALL(mock_app_mngr_, GetPolicyHandler())
         .WillByDefault(ReturnRef(mock_policy_handler_));
     auto plugin_id = rc_rpc_plugin::RCRPCPlugin::kRCPluginID;
-    app_ext_ptr_ = utils::MakeShared<rc_rpc_plugin::RCAppExtension>(plugin_id);
+    app_ext_ptr_ = std::make_shared<rc_rpc_plugin::RCAppExtension>(plugin_id);
     ON_CALL(*mock_app_1_, app_id()).WillByDefault(Return(kAppId1));
 
     OnRCStatusNotificationExpectations();
@@ -114,8 +112,8 @@ class RAManagerTest : public ::testing::Test {
   application_manager::MessagePtr message_;
 
   application_manager::AppExtensionPtr app_ext_ptr_;
-  utils::SharedPtr<NiceMock<MockApplication> > mock_app_1_;
-  utils::SharedPtr<NiceMock<MockApplication> > mock_app_2_;
+  std::shared_ptr<NiceMock<MockApplication> > mock_app_1_;
+  std::shared_ptr<NiceMock<MockApplication> > mock_app_2_;
   application_manager::ApplicationSet apps_;
   std::shared_ptr<sync_primitives::Lock> apps_lock_ptr_;
   DataAccessor<application_manager::ApplicationSet> apps_da_;
@@ -301,7 +299,7 @@ TEST_F(RAManagerTest, AnotherAppExit_NoReleaseResource) {
       .WillRepeatedly(Return(mock_app_2_));
 
   RCAppExtensionPtr rc_extention_ptr =
-      utils::MakeShared<RCAppExtension>(application_manager::AppExtensionUID(
+      std::make_shared<RCAppExtension>(application_manager::AppExtensionUID(
           rc_rpc_plugin::RCRPCPlugin::kRCPluginID));
 
   EXPECT_CALL(*mock_app_2_, QueryInterface(_))
@@ -327,7 +325,7 @@ TEST_F(RAManagerTest, AppUnregistered_ReleaseResource) {
   ra_manager.SetAccessMode(hmi_apis::Common_RCAccessMode::eType::AUTO_DENY);
 
   RCAppExtensionPtr rc_extention_ptr =
-      utils::MakeShared<RCAppExtension>(application_manager::AppExtensionUID(
+      std::make_shared<RCAppExtension>(application_manager::AppExtensionUID(
           rc_rpc_plugin::RCRPCPlugin::kRCPluginID));
 
   EXPECT_EQ(rc_rpc_plugin::AcquireResult::ALLOWED,
@@ -361,7 +359,7 @@ TEST_F(RAManagerTest, AnotherAppUnregistered_NoReleaseResource) {
       .WillRepeatedly(Return(mock_app_2_));
 
   RCAppExtensionPtr rc_extention_ptr =
-      utils::MakeShared<RCAppExtension>(application_manager::AppExtensionUID(
+      std::make_shared<RCAppExtension>(application_manager::AppExtensionUID(
           rc_rpc_plugin::RCRPCPlugin::kRCPluginID));
 
   EXPECT_CALL(*mock_app_2_, QueryInterface(_))
@@ -404,7 +402,7 @@ TEST_F(RAManagerTest, AppsDisallowed_ReleaseAllResources) {
   EXPECT_CALL(mock_app_mngr_, applications()).WillRepeatedly(Return(apps_da));
 
   RCAppExtensionPtr rc_extention_ptr =
-      utils::MakeShared<RCAppExtension>(application_manager::AppExtensionUID(
+      std::make_shared<RCAppExtension>(application_manager::AppExtensionUID(
           rc_rpc_plugin::RCRPCPlugin::kRCPluginID));
 
   EXPECT_CALL(*mock_app_1_, QueryInterface(RCRPCPlugin::kRCPluginID))
@@ -434,7 +432,7 @@ TEST_F(RAManagerTest, AppGotRevokedModulesWithPTU_ReleaseRevokedResource) {
       .WillRepeatedly(Return(mock_app_1_));
 
   RCAppExtensionPtr rc_extention_ptr =
-      utils::MakeShared<rc_rpc_plugin::RCAppExtension>(
+      std::make_shared<rc_rpc_plugin::RCAppExtension>(
           application_manager::AppExtensionUID(
               rc_rpc_plugin::RCRPCPlugin::kRCPluginID));
 
@@ -659,7 +657,7 @@ TEST_F(RAManagerTest, OnRCStatus_ModuleAllocation) {
   // Act
   ra_manager.SendOnRCStatusNotifications(
       NotificationTrigger::MODULE_ALLOCATION,
-      utils::SharedPtr<application_manager::Application>());
+      std::shared_ptr<application_manager::Application>());
 
   auto msg_to_mob_params =
       (*message_to_mob)[application_manager::strings::msg_params];

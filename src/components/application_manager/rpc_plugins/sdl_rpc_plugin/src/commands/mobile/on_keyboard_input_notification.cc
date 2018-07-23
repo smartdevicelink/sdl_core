@@ -82,7 +82,7 @@ void OnKeyBoardInputNotification::Run() {
     }
   }
 
-  if (app_to_notify.valid()) {
+  if (app_to_notify.use_count() != 0) {
     (*message_)[strings::params][strings::connection_key] =
         app_to_notify->app_id();
     SendNotification();

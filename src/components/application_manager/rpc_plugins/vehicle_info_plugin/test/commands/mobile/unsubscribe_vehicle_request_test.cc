@@ -34,7 +34,7 @@
 #include <string>
 
 #include "gtest/gtest.h"
-#include "utils/shared_ptr.h"
+
 #include "application_manager/commands/command_request_test.h"
 #include "application_manager/mock_application_manager.h"
 #include "application_manager/mock_message_helper.h"
@@ -56,7 +56,7 @@ using ::testing::_;
 using vehicle_info_plugin::commands::UnsubscribeVehicleDataRequest;
 using am::commands::MessageSharedPtr;
 
-typedef ::utils::SharedPtr<UnsubscribeVehicleDataRequest> CommandPtr;
+typedef std::shared_ptr<UnsubscribeVehicleDataRequest> CommandPtr;
 
 namespace {
 const uint32_t kConnectionKey = 1u;
@@ -71,7 +71,7 @@ class UnsubscribeVehicleRequestTest
   UnsubscribeVehicleRequestTest()
       : mock_app_(CreateMockApp())
       , vi_app_extension_ptr_(
-            utils::MakeShared<vehicle_info_plugin::VehicleInfoAppExtension>(
+            std::make_shared<vehicle_info_plugin::VehicleInfoAppExtension>(
                 vi_plugin_, *mock_app_))
       , app_set_lock_ptr_(std::make_shared<sync_primitives::Lock>()) {}
 

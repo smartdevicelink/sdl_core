@@ -34,7 +34,7 @@
 #include <string>
 
 #include "gtest/gtest.h"
-#include "utils/shared_ptr.h"
+
 #include "smart_objects/smart_object.h"
 #include "application_manager/smart_object_keys.h"
 #include "application_manager/mock_message_helper.h"
@@ -85,7 +85,7 @@ MATCHER(CheckNotificationMessage, "") {
 TYPED_TEST_CASE(MobileNotificationCommandsTest, NotificationCommandsList);
 
 TYPED_TEST(MobileNotificationCommandsTest, Run_SendMessageToMobile_SUCCESS) {
-  ::utils::SharedPtr<typename TestFixture::CommandType> command =
+  std::shared_ptr<typename TestFixture::CommandType> command =
       this->template CreateCommand<typename TestFixture::CommandType>();
   EXPECT_CALL(this->mock_rpc_service_,
               SendMessageToMobile(CheckNotificationMessage(), _));

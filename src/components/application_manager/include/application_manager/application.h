@@ -38,7 +38,8 @@
 #include <set>
 #include <list>
 #include <vector>
-#include "utils/shared_ptr.h"
+#include <memory>
+
 #include "utils/data_accessor.h"
 #include "interfaces/MOBILE_API.h"
 #include "connection_handler/device.h"
@@ -948,8 +949,8 @@ class Application : public virtual InitialApplicationData,
   bool is_greyed_out_;
 };
 
-typedef utils::SharedPtr<Application> ApplicationSharedPtr;
-typedef utils::SharedPtr<const Application> ApplicationConstSharedPtr;
+typedef std::shared_ptr<Application> ApplicationSharedPtr;
+typedef std::shared_ptr<const Application> ApplicationConstSharedPtr;
 typedef uint32_t ApplicationId;
 
 }  // namespace application_manager

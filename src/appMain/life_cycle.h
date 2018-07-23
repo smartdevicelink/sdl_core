@@ -35,7 +35,6 @@
 #include <thread>
 #include <unistd.h>
 #include "utils/macro.h"
-#include "utils/shared_ptr.h"
 
 #include "config_profile/profile.h"
 #include "hmi_message_handler/hmi_message_handler_impl.h"

@@ -60,7 +60,7 @@ using sdl_rpc_plugin::commands::EndAudioPassThruRequest;
 using am::event_engine::Event;
 using am::MockMessageHelper;
 
-typedef SharedPtr<EndAudioPassThruRequest> EndAudioPassThruRequestPtr;
+typedef std::shared_ptr<EndAudioPassThruRequest> EndAudioPassThruRequestPtr;
 
 class EndAudioPassThruRequestTest
     : public CommandRequestTest<CommandsTestMocks::kIsNice> {};

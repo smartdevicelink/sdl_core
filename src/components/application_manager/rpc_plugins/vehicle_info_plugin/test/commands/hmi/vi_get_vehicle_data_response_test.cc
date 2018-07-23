@@ -35,7 +35,7 @@
 #include <vector>
 
 #include "gtest/gtest.h"
-#include "utils/shared_ptr.h"
+
 #include "smart_objects/smart_object.h"
 #include "application_manager/smart_object_keys.h"
 #include "application_manager/commands/commands_test.h"
@@ -65,7 +65,7 @@ using vehicle_info_plugin::commands::VIGetVehicleDataResponse;
 using am::event_engine::Event;
 using test::components::event_engine_test::MockEventDispatcher;
 
-typedef SharedPtr<VIGetVehicleDataResponse> VIGetVehicleDataResponsePtr;
+typedef std::shared_ptr<VIGetVehicleDataResponse> VIGetVehicleDataResponsePtr;
 
 namespace {
 const uint32_t kConnectionKey = 2u;

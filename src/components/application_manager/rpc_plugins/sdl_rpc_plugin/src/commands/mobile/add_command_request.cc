@@ -592,7 +592,7 @@ const std::string AddCommandRequest::GenerateMobileResponseInfo() {
 void AddCommandRequest::RemoveCommand() {
   LOG4CXX_AUTO_TRACE(logger_);
   ApplicationSharedPtr app = application_manager_.application(connection_key());
-  if (!app.valid()) {
+  if (app.use_count() == 0) {
     LOG4CXX_ERROR(logger_, "No application associated with session key");
     return;
   }

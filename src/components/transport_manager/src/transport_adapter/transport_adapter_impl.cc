@@ -826,16 +826,16 @@ ApplicationList TransportAdapterImpl::GetApplicationList(
     const DeviceUID& device_id) const {
   LOG4CXX_TRACE(logger_, "enter. device_id: " << &device_id);
   DeviceSptr device = FindDevice(device_id);
-  if (device.valid()) {
+  if (device.use_count() != 0) {
     ApplicationList lst = device->GetApplicationList();
     LOG4CXX_TRACE(logger_,
                   "exit with ApplicationList. It's size = "
-                      << lst.size() << " Condition: device.valid()");
+                      << lst.size() << " Condition: device.use_count() != 0");
     return lst;
   }
-  LOG4CXX_TRACE(
-      logger_,
-      "exit with empty ApplicationList. Condition: NOT device.valid()");
+  LOG4CXX_TRACE(logger_,
+                "exit with empty ApplicationList. Condition: NOT "
+                "device.use_count() != 0");
   return ApplicationList();
 }
 
@@ -898,7 +898,7 @@ bool TransportAdapterImpl::IsInitialised() const {
 
 std::string TransportAdapterImpl::DeviceName(const DeviceUID& device_id) const {
   DeviceSptr device = FindDevice(device_id);
-  if (device.valid()) {
+  if (device.use_count() != 0) {
     return device->name();
   } else {
     return "";

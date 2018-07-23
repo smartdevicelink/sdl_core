@@ -276,7 +276,7 @@ void ShowRequest::Run() {
   SendHMIRequest(hmi_apis::FunctionID::UI_Show, &msg_params, true);
 
   app_mngr::commands::MessageSharedPtr persistentData =
-      new smart_objects::SmartObject(msg_params);
+      std::make_shared<smart_objects::SmartObject>(msg_params);
   app->set_show_command(*persistentData);
 }
 

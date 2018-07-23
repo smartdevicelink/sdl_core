@@ -35,9 +35,10 @@
 
 #include <string>
 #include <vector>
+#include <memory>
 
 #include "transport_manager/common.h"
-#include "utils/shared_ptr.h"
+
 #include "utils/macro.h"
 
 namespace transport_manager {
@@ -160,7 +161,7 @@ class Device {
    **/
   bool keep_on_disconnect_;
 };
-typedef utils::SharedPtr<Device> DeviceSptr;
+typedef std::shared_ptr<Device> DeviceSptr;
 typedef std::vector<DeviceSptr> DeviceVector;
 }  // namespace transport_adapter
 }  // namespace transport_manager

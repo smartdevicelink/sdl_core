@@ -34,7 +34,7 @@
 #include <string>
 
 #include "gtest/gtest.h"
-#include "utils/shared_ptr.h"
+
 #include "application_manager/commands/command_request_test.h"
 #include "application_manager/mock_application_manager.h"
 #include "application_manager/mock_message_helper.h"
@@ -54,7 +54,7 @@ using ::testing::_;
 using sdl_rpc_plugin::commands::UnregisterAppInterfaceRequest;
 using am::commands::MessageSharedPtr;
 
-typedef ::utils::SharedPtr<UnregisterAppInterfaceRequest> CommandPtr;
+typedef std::shared_ptr<UnregisterAppInterfaceRequest> CommandPtr;
 
 class UnregisterAppInterfaceRequestTest
     : public CommandRequestTest<CommandsTestMocks::kIsNice> {};

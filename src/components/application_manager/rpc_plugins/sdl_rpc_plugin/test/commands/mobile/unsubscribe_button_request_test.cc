@@ -2,7 +2,7 @@
 #include <string>
 
 #include "gtest/gtest.h"
-#include "utils/shared_ptr.h"
+
 #include "application_manager/commands/command_request_test.h"
 #include "application_manager/mock_application_manager.h"
 #include "application_manager/mock_message_helper.h"
@@ -23,7 +23,7 @@ using ::testing::_;
 using sdl_rpc_plugin::commands::UnsubscribeButtonRequest;
 using am::commands::MessageSharedPtr;
 
-typedef ::utils::SharedPtr<UnsubscribeButtonRequest> CommandPtr;
+typedef std::shared_ptr<UnsubscribeButtonRequest> CommandPtr;
 
 namespace {
 const uint32_t kConnectionKey = 1u;

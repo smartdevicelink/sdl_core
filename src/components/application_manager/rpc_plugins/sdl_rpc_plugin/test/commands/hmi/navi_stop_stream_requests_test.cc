@@ -34,7 +34,7 @@
 #include "hmi/navi_audio_stop_stream_request.h"
 
 #include "gtest/gtest.h"
-#include "utils/shared_ptr.h"
+
 #include "smart_objects/smart_object.h"
 #include "application_manager/smart_object_keys.h"
 #include "application_manager/commands/command_request_test.h"
@@ -72,7 +72,7 @@ class NaviStopStreamRequestsTest
   }
 
   MessageSharedPtr msg_;
-  SharedPtr<Command> command_;
+  std::shared_ptr<Command> command_;
 };
 
 typedef testing::Types<commands::AudioStopStreamRequest,

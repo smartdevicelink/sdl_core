@@ -125,7 +125,6 @@
 #include "sdl_rpc_plugin/commands/mobile/send_haptic_data_request.h"
 #include "sdl_rpc_plugin/commands/mobile/send_haptic_data_response.h"
 #include "interfaces/MOBILE_API.h"
-#include "utils/make_shared.h"
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "ApplicationManager")
 namespace sdl_rpc_plugin {

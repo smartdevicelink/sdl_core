@@ -35,7 +35,7 @@
 
 #include "gtest/gtest.h"
 #include "utils/helpers.h"
-#include "utils/shared_ptr.h"
+
 #include "application_manager/commands/commands_test.h"
 #include "application_manager/mock_application_manager.h"
 #include "mobile/delete_command_response.h"
@@ -125,7 +125,7 @@ typedef Types<commands::ListFilesResponse,
 TYPED_TEST_CASE(MobileResponseCommandsTest, ResponseCommandsList);
 
 TYPED_TEST(MobileResponseCommandsTest, Run_SendResponseToMobile_SUCCESS) {
-  ::utils::SharedPtr<typename TestFixture::CommandType> command =
+  std::shared_ptr<typename TestFixture::CommandType> command =
       this->template CreateCommand<typename TestFixture::CommandType>();
   EXPECT_CALL(this->mock_rpc_service_, SendMessageToMobile(NotNull(), _));
   command->Run();
@@ -154,7 +154,7 @@ MATCHER_P2(CheckMessageParams, success, result, "") {
 TEST_F(GenericResponseFromHMICommandsTest, Run_SUCCESS) {
   MessageSharedPtr command_msg(CreateMessage(smart_objects::SmartType_Map));
 
-  SharedPtr<commands::GenericResponse> command(
+  std::shared_ptr<commands::GenericResponse> command(
       CreateCommand<commands::GenericResponse>(command_msg));
 
   EXPECT_CALL(
@@ -175,7 +175,7 @@ TEST_F(ScrollableMessageResponseTest, Run_SUCCESS) {
 
   MockAppPtr app(CreateMockApp());
 
-  SharedPtr<commands::ScrollableMessageResponse> command(
+  std::shared_ptr<commands::ScrollableMessageResponse> command(
       CreateCommand<commands::ScrollableMessageResponse>(message));
   EXPECT_CALL(app_mngr_, application(_)).WillOnce(Return(app));
   EXPECT_CALL(*app, UnsubscribeFromSoftButtons(_));

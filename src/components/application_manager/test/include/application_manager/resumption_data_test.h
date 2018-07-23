@@ -79,7 +79,7 @@ class ResumptionDataTest : public ::testing::Test {
   void CheckSavedApp(sm::SmartObject& saved_data);
   // Set data for resumption
   virtual void PrepareData();
-  utils::SharedPtr<NiceMock<application_manager_test::MockApplication> >
+  std::shared_ptr<NiceMock<application_manager_test::MockApplication> >
       app_mock;
 
   profile::Profile profile_;
@@ -152,7 +152,7 @@ class ResumptionDataTest : public ::testing::Test {
   application_manager_test::MockApplicationManagerSettings
       mock_application_manager_settings_;
   application_manager_test::MockApplicationManager mock_application_manager_;
-  utils::SharedPtr<NiceMock<application_manager_test::MockAppExtension> >
+  std::shared_ptr<NiceMock<application_manager_test::MockAppExtension> >
       mock_app_extension_;
   std::list<application_manager::AppExtensionPtr> extensions_;
 };

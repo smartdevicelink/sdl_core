@@ -46,7 +46,6 @@
 
 #include "utils/macro.h"
 #include "utils/lock.h"
-#include "utils/shared_ptr.h"
 
 namespace security_manager {
 class CryptoManagerImpl : public CryptoManager {
@@ -138,7 +137,7 @@ class CryptoManagerImpl : public CryptoManager {
 
  public:
   explicit CryptoManagerImpl(
-      const utils::SharedPtr<const CryptoManagerSettings> set);
+      const std::shared_ptr<const CryptoManagerSettings> set);
   ~CryptoManagerImpl();
 
   bool Init() OVERRIDE;
@@ -203,7 +202,7 @@ class CryptoManagerImpl : public CryptoManager {
    */
   bool SaveModuleKeyToFile(EVP_PKEY* key) const;
 
-  const utils::SharedPtr<const CryptoManagerSettings> settings_;
+  const std::shared_ptr<const CryptoManagerSettings> settings_;
   SSL_CTX* context_;
   static uint32_t instance_count_;
   static sync_primitives::Lock instance_lock_;

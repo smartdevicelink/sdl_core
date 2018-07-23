@@ -46,7 +46,7 @@
 #include "transport_manager/mock_transport_manager.h"
 #include "transport_manager/transport_adapter/transport_adapter_controller.h"
 #include "transport_manager/transport_adapter/mock_device.h"
-#include "utils/make_shared.h"
+
 #include "utils/test_async_waiter.h"
 #include "utils/threads/thread.h"
 
@@ -310,7 +310,7 @@ TEST_P(TcpClientListenerTest, ClientConnection) {
   TestAsyncWaiter waiter;
 
   // controller should be notified of AddDevice event
-  DeviceSptr mock_device = utils::MakeShared<MockTCPDevice>(
+  DeviceSptr mock_device = std::make_shared<MockTCPDevice>(
       htonl(INADDR_LOOPBACK), "dummy_tcp_device");
   EXPECT_CALL(adapter_controller_mock_, AddDevice(_))
       .WillOnce(Return(mock_device));

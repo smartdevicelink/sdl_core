@@ -39,7 +39,7 @@
 #include "mobile/delete_file_response.h"
 
 #include "gtest/gtest.h"
-#include "utils/shared_ptr.h"
+
 #include "utils/file_system.h"
 #include "smart_objects/smart_object.h"
 #include "application_manager/smart_object_keys.h"
@@ -77,8 +77,8 @@ using am::commands::MessageSharedPtr;
 using am::event_engine::Event;
 using am::MockMessageHelper;
 
-typedef SharedPtr<DeleteFileRequest> DeleteFileRequestPtr;
-typedef SharedPtr<DeleteFileResponse> DeleteFileResponsePtr;
+typedef std::shared_ptr<DeleteFileRequest> DeleteFileRequestPtr;
+typedef std::shared_ptr<DeleteFileResponse> DeleteFileResponsePtr;
 typedef NiceMock<
     ::test::components::application_manager_test::MockHMICapabilities>
     MockHMICapabilities;

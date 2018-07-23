@@ -93,18 +93,18 @@ void UIIsReadyRequest::onTimeOut() {
 }
 
 void UIIsReadyRequest::SendMessageToHMI() {
-  utils::SharedPtr<smart_objects::SmartObject> get_language(
+  std::shared_ptr<smart_objects::SmartObject> get_language(
       MessageHelper::CreateModuleInfoSO(hmi_apis::FunctionID::UI_GetLanguage,
                                         application_manager_));
   HMICapabilities& hmi_capabilities = hmi_capabilities_;
   hmi_capabilities.set_handle_response_for(*get_language);
   rpc_service_.ManageHMICommand(get_language);
-  utils::SharedPtr<smart_objects::SmartObject> get_all_languages(
+  std::shared_ptr<smart_objects::SmartObject> get_all_languages(
       MessageHelper::CreateModuleInfoSO(
           hmi_apis::FunctionID::UI_GetSupportedLanguages,
           application_manager_));
   rpc_service_.ManageHMICommand(get_all_languages);
-  utils::SharedPtr<smart_objects::SmartObject> get_capabilities(
+  std::shared_ptr<smart_objects::SmartObject> get_capabilities(
       MessageHelper::CreateModuleInfoSO(
           hmi_apis::FunctionID::UI_GetCapabilities, application_manager_));
   rpc_service_.ManageHMICommand(get_capabilities);

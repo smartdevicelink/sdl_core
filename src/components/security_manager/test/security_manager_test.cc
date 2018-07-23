@@ -45,7 +45,7 @@
 #include "security_manager/mock_crypto_manager.h"
 #include "security_manager/mock_security_manager_listener.h"
 #include "utils/mock_system_time_handler.h"
-#include "utils/make_shared.h"
+
 #include "utils/test_async_waiter.h"
 
 namespace test {
@@ -120,7 +120,7 @@ class SecurityManagerTest : public ::testing::Test {
   void call_OnMessageReceived(const uint8_t* const data,
                               uint32_t dataSize,
                               const ServiceType serviceType) {
-    const RawMessagePtr rawMessagePtr(utils::MakeShared<RawMessage>(
+    const RawMessagePtr rawMessagePtr(std::make_shared<RawMessage>(
         kKey, kProtocolVersion, data, dataSize, serviceType));
     security_manager_->OnMessageReceived(rawMessagePtr);
   }
@@ -305,7 +305,7 @@ TEST_F(SecurityManagerTest, SecurityManager_NULLCryptoManager) {
 TEST_F(SecurityManagerTest, OnMobileMessageSent) {
   const uint8_t* data_param = NULL;
   const RawMessagePtr rawMessagePtr(
-      utils::MakeShared<RawMessage>(kKey, kProtocolVersion, data_param, 0));
+      std::make_shared<RawMessage>(kKey, kProtocolVersion, data_param, 0));
   security_manager_->OnMobileMessageSent(rawMessagePtr);
 }
 /*

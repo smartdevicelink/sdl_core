@@ -145,7 +145,7 @@ void AudioStreamSenderThread::SendAudioPassThroughNotification(
   data.binary_data = binary_data;
 
   smart_objects::SmartObjectSPtr on_audio_pass =
-      new smart_objects::SmartObject();
+      std::make_shared<smart_objects::SmartObject>();
 
   if (!on_audio_pass) {
     LOG4CXX_ERROR(logger_, "OnAudioPassThru NULL pointer");

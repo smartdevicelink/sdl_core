@@ -38,6 +38,7 @@
 #include "resumption/last_state.h"
 #include "utils/lock.h"
 #include "utils/macro.h"
+#include <memory>
 
 namespace app_launch {
 

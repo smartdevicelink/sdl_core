@@ -42,7 +42,7 @@
 namespace application_manager {
 using rpc_service::RPCService;
 using policy::PolicyHandlerInterface;
-typedef utils::SharedPtr<commands::Command> CommandSharedPtr;
+typedef std::shared_ptr<commands::Command> CommandSharedPtr;
 
 /**
  * @brief Factory class for command creation
