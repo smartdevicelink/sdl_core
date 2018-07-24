@@ -69,7 +69,7 @@ ConnectionHandlerImpl::ConnectionHandlerImpl(
     , transport_manager_(tm)
     , protocol_handler_(NULL)
     , session_connection_map_lock_ptr_(
-          std::make_shared<sync_primitives::Lock>(true))
+          std::make_shared<sync_primitives::RecursiveLock>())
     , connection_list_lock_()
     , connection_handler_observer_lock_()
     , connection_list_deleter_(&connection_list_)

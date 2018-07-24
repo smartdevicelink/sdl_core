@@ -254,7 +254,7 @@ TEST(MessageHelperTestCreate,
   MockApplicationSharedPtr appSharedMock = std::make_shared<MockApplication>();
   ::application_manager::CommandsMap vis;
   DataAccessor<application_manager::CommandsMap> data_accessor(
-      vis, std::make_shared<sync_primitives::Lock>(true));
+      vis, std::make_shared<sync_primitives::RecursiveLock>());
 
   EXPECT_CALL(*appSharedMock, commands_map()).WillOnce(Return(data_accessor));
   application_manager_test::MockApplicationManager mock_application_manager;
@@ -270,7 +270,7 @@ TEST(MessageHelperTestCreate,
   MockApplicationSharedPtr appSharedMock = std::make_shared<MockApplication>();
   CommandsMap vis;
   DataAccessor<CommandsMap> data_accessor(
-      vis, std::make_shared<sync_primitives::Lock>(true));
+      vis, std::make_shared<sync_primitives::RecursiveLock>());
   smart_objects::SmartObjectSPtr smartObjectPtr =
       std::make_shared<smart_objects::SmartObject>();
 
@@ -312,7 +312,7 @@ TEST(MessageHelperTestCreate,
   MockApplicationSharedPtr appSharedMock = std::make_shared<MockApplication>();
   application_manager::ChoiceSetMap vis;
   DataAccessor< ::application_manager::ChoiceSetMap> data_accessor(
-      vis, std::make_shared<sync_primitives::Lock>(true));
+      vis, std::make_shared<sync_primitives::RecursiveLock>());
 
   EXPECT_CALL(*appSharedMock, choice_set_map()).WillOnce(Return(data_accessor));
   application_manager_test::MockApplicationManager mock_application_manager;
@@ -328,7 +328,7 @@ TEST(MessageHelperTestCreate,
   MockApplicationSharedPtr appSharedMock = std::make_shared<MockApplication>();
   application_manager::ChoiceSetMap vis;
   DataAccessor< ::application_manager::ChoiceSetMap> data_accessor(
-      vis, std::make_shared<sync_primitives::Lock>(true));
+      vis, std::make_shared<sync_primitives::RecursiveLock>());
   smart_objects::SmartObjectSPtr smartObjectPtr =
       std::make_shared<smart_objects::SmartObject>();
 
@@ -375,7 +375,7 @@ TEST(MessageHelperTestCreate, CreateAddSubMenuRequestToHMI_SendObject_Equal) {
   MockApplicationSharedPtr appSharedMock = std::make_shared<MockApplication>();
   application_manager::SubMenuMap vis;
   DataAccessor< ::application_manager::SubMenuMap> data_accessor(
-      vis, std::make_shared<sync_primitives::Lock>(true));
+      vis, std::make_shared<sync_primitives::RecursiveLock>());
   smart_objects::SmartObjectSPtr smartObjectPtr =
       std::make_shared<smart_objects::SmartObject>();
 
@@ -415,7 +415,7 @@ TEST(MessageHelperTestCreate,
   MockApplicationSharedPtr appSharedMock = std::make_shared<MockApplication>();
   application_manager::SubMenuMap vis;
   DataAccessor< ::application_manager::SubMenuMap> data_accessor(
-      vis, std::make_shared<sync_primitives::Lock>(true));
+      vis, std::make_shared<sync_primitives::RecursiveLock>());
 
   EXPECT_CALL(*appSharedMock, sub_menu_map()).WillOnce(Return(data_accessor));
 

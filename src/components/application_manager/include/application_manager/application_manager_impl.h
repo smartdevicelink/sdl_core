@@ -1450,7 +1450,8 @@ class ApplicationManagerImpl
   ForbiddenApps forbidden_applications;
 
   // Lock for applications list
-  mutable std::shared_ptr<sync_primitives::Lock> applications_list_lock_ptr_;
+  mutable std::shared_ptr<sync_primitives::RecursiveLock>
+      applications_list_lock_ptr_;
   mutable std::shared_ptr<sync_primitives::Lock>
       apps_to_register_list_lock_ptr_;
   mutable sync_primitives::Lock subscribed_way_points_apps_lock_;
@@ -1536,7 +1537,7 @@ class ApplicationManagerImpl
 
   std::vector<TimerSPtr> timer_pool_;
   sync_primitives::Lock timer_pool_lock_;
-  mutable sync_primitives::Lock stopping_application_mng_lock_;
+  mutable sync_primitives::RecursiveLock stopping_application_mng_lock_;
   StateControllerImpl state_ctrl_;
   std::unique_ptr<app_launch::AppLaunchData> app_launch_dto_;
   std::unique_ptr<app_launch::AppLaunchCtrl> app_launch_ctrl_;

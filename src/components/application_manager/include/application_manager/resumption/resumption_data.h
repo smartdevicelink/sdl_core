@@ -276,7 +276,7 @@ class ResumptionData {
       ++first;
     }
   }
-  mutable sync_primitives::Lock resumption_lock_;
+  mutable sync_primitives::RecursiveLock resumption_lock_;
   const application_manager::ApplicationManager& application_manager_;
 };
 }  // namespace resumption
