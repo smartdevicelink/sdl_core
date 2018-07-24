@@ -163,18 +163,6 @@ void PerformInteractionRequest::Run() {
     SendResponse(false, mobile_apis::Result::INVALID_ID);
     return;
   }
-  if (!CheckChoiceSetList_VRCommands(
-          app,
-          choice_set_id_list_length,
-          msg_params[strings::interaction_choice_set_id_list])) {
-    LOG4CXX_ERROR(logger_,
-                  "PerformInteraction has choice sets with "
-                  "missing vrCommands");
-    SendResponse(false,
-                 mobile_apis::Result::INVALID_DATA,
-                 "Some choices don't contain VR commands.");
-    return;
-  }
   if (msg_params.keyExists(strings::vr_help)) {
     if (mobile_apis::Result::SUCCESS !=
         MessageHelper::VerifyImageVrHelpItems(
@@ -197,7 +185,7 @@ void PerformInteractionRequest::Run() {
     case mobile_apis::InteractionMode::BOTH: {
       LOG4CXX_DEBUG(logger_, "Interaction Mode: BOTH");
       if (!CheckChoiceSetVRSynonyms(app) || !CheckChoiceSetMenuNames(app) ||
-          !CheckVrHelpItemPositions(app)) {
+          !CheckVrHelpItemPositions(app) || !CheckChoiceSetList_VRCommands(app)) {
         return;
       }
       break;
@@ -212,7 +200,8 @@ void PerformInteractionRequest::Run() {
     }
     case mobile_apis::InteractionMode::VR_ONLY: {
       LOG4CXX_DEBUG(logger_, "Interaction Mode: VR_ONLY");
-      if (!CheckChoiceSetVRSynonyms(app) || !CheckVrHelpItemPositions(app)) {
+      if (!CheckChoiceSetVRSynonyms(app) || !CheckVrHelpItemPositions(app) ||
+          !CheckChoiceSetList_VRCommands(app)) {
         return;
       }
       break;
@@ -757,6 +746,15 @@ bool PerformInteractionRequest::CheckChoiceSetVRSynonyms(
       size_t jj = 0;
       for (; ii < (*i_choice_set)[strings::choice_set].length(); ++ii) {
         for (; jj < (*j_choice_set)[strings::choice_set].length(); ++jj) {
+        if (!((*i_choice_set)[strings::choice_set][ii].keyExists(
+                  strings::vr_commands) &&
+              (*j_choice_set)[strings::choice_set][jj].keyExists(
+                  strings::vr_commands))) {
+          LOG4CXX_DEBUG(
+              logger_,
+              "One or both sets has missing vr commands, skipping synonym check");
+          return true;
+        }
           // choice_set pointer contains SmartObject msg_params
           smart_objects::SmartObject& ii_vr_commands =
               (*i_choice_set)[strings::choice_set][ii][strings::vr_commands];
@@ -955,36 +953,42 @@ bool PerformInteractionRequest::CheckChoiceIDFromResponse(
 
 
 bool PerformInteractionRequest::CheckChoiceSetList_VRCommands(
-    ApplicationSharedPtr app,
-    const size_t choice_set_id_list_length,
-    const smart_objects::SmartObject& choice_set_id_list) const {
+    ApplicationSharedPtr app) {
   LOG4CXX_AUTO_TRACE(logger_);
+  
+  const smart_objects::SmartObject& choice_set_id_list =
+      (*message_)[strings::msg_params][strings::interaction_choice_set_id_list];
 
-  smart_objects::SmartObject* choice_set = 0;
-  std::pair<std::set<uint32_t>::iterator, bool> ins_res;
+  smart_objects::SmartObject* choice_set = nullptr;
 
-  for (size_t i = 0; i < choice_set_id_list_length; ++i) {
-    // std::cerr << "loop entered!\n";
+  for (size_t i = 0; i < choice_set_id_list.length(); ++i) {
+    std::cerr << "loop entered!\n";
     choice_set = app->FindChoiceSet(choice_set_id_list[i].asInt());
-    // std::cerr << "set found!!\n";
+    std::cerr << "set found!!\n";
   
     // this should never ever happen
     if (choice_set == nullptr) {
       std::cerr << "bad choice set list!\n";
       return false;
     }
-    // std::cerr<< "SMARTTYPE is " << choice_set->getType() << std::endl;
+    std::cerr<< "SMARTTYPE is " << choice_set->getType() << std::endl;
     
-    // std::cerr << "checking status!!!\n";
+    std::cerr << "checking status!!!\n";
     
     const smart_objects::SmartObject& choices_list =
         (*choice_set)[strings::choice_set];
     int vr_status = MessageHelper::CheckChoiceSet_VRCommands(choices_list);
-    // std::cerr << "status checked!!!!\n";
+    std::cerr << "status checked!!!!\n";
     
     // if not all choices have vr commands
     if (vr_status != 0) {
       std::cerr << "choice set has member missing vr commands\n";
+      LOG4CXX_ERROR(logger_,
+                    "PerformInteraction has choice sets with "
+                    "missing vrCommands, not in MANUAL_ONLY mode");
+      SendResponse(false,
+                   mobile_apis::Result::INVALID_DATA,
+                   "Some choices don't contain VR commands.");
       return false;
     }
   }

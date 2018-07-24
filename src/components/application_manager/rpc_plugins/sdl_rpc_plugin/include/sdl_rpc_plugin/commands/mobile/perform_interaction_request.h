@@ -222,9 +222,7 @@ class PerformInteractionRequest
    * @return returns false request has choice sets with no vrCommands
    */
   bool CheckChoiceSetList_VRCommands(
-      app_mngr::ApplicationSharedPtr app,
-      const size_t choice_set_id_list_length,
-      const smart_objects::SmartObject& choice_set_id_list) const;
+      app_mngr::ApplicationSharedPtr app);
 
   /**
    * @brief Tells if there are sent requests without responses

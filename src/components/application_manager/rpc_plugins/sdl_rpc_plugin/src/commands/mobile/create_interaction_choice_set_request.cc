@@ -124,7 +124,7 @@ void CreateInteractionChoiceSetRequest::Run() {
   if (vr_status == -1) {
     std::cerr << "choice set has invalid MIXED set of VR parameters" << '\n';
     // this is an error
-    SendResponse(false, Result::INVALID_DATA, "Some choices don't contain VR commands.");
+    SendResponse(false, Result::INVALID_DATA, "Some choices don't contain VR commands. Either all or none must have voice commands.");
     return; // exit now, this is a bad set
     
   } else if (vr_status == 0) {
@@ -139,13 +139,23 @@ void CreateInteractionChoiceSetRequest::Run() {
     return;
   }
   if (vr_status == 0) {
+    std::cerr << "creating grammar\n";
     // everyone had a vr command, setup the grammar
     uint32_t grammar_id = application_manager_.GenerateGrammarID();
     (*message_)[strings::msg_params][strings::grammar_id] = grammar_id;
-    SendVRAddCommandRequests(app);
   }
   // continue on as usual
+  std::cerr << "adding choice set\n";
   app->AddChoiceSet(choice_set_id_, (*message_)[strings::msg_params]);
+  std::cerr << "added! choice set\n";
+  
+  if (vr_status == 0) {
+    SendVRAddCommandRequests(app);
+    std::cerr << "requests sent!!!!\n";  
+  } else {
+    SendResponse(true, Result::SUCCESS);
+    
+  }
 }
 
 mobile_apis::Result::eType CreateInteractionChoiceSetRequest::CheckChoiceSet(
@@ -191,12 +201,14 @@ mobile_apis::Result::eType CreateInteractionChoiceSetRequest::CheckChoiceSet(
 bool CreateInteractionChoiceSetRequest::compareSynonyms(
     const NsSmartDeviceLink::NsSmartObjects::SmartObject& choice1,
     const NsSmartDeviceLink::NsSmartObjects::SmartObject& choice2) {
-  smart_objects::SmartArray* vr_cmds_1 =
-      choice1[strings::vr_commands].asArray();
-  DCHECK(vr_cmds_1 != NULL);
-  smart_objects::SmartArray* vr_cmds_2 =
-      choice2[strings::vr_commands].asArray();
-  DCHECK(vr_cmds_2 != NULL);
+      // only compare if they both have vr commands
+  if (!(choice1.keyExists(strings::vr_commands) &&
+        choice2.keyExists(strings::vr_commands))) {
+    std::cerr << "someone is empty!\n";
+    return false;  // clearly there isn't a duplicate if one of them is null
+  }
+  smart_objects::SmartArray* vr_cmds_1 = choice1[strings::vr_commands].asArray();
+  smart_objects::SmartArray* vr_cmds_2 = choice2[strings::vr_commands].asArray();
 
   smart_objects::SmartArray::iterator it;
   it = std::find_first_of(vr_cmds_1->begin(),
