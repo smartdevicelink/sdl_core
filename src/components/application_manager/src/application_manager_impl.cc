@@ -166,7 +166,6 @@ ApplicationManagerImpl::ApplicationManagerImpl(
     , resume_ctrl_(new resumption::ResumeCtrlImpl(*this))
     , navi_close_app_timeout_(am_settings.stop_streaming_timeout())
     , navi_end_stream_timeout_(am_settings.stop_streaming_timeout())
-    , stopping_application_mng_lock_()
     , state_ctrl_(*this)
     , application_list_update_timer_(
           "AM ListUpdater",
