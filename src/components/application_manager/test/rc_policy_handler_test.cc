@@ -46,7 +46,7 @@
 #include "json/writer.h"
 #include "json/value.h"
 #include "smart_objects/smart_object.h"
-#include "utils/make_shared.h"
+
 #include "utils/custom_string.h"
 #include "interfaces/MOBILE_API.h"
 #include "policy/mock_policy_settings.h"
@@ -67,11 +67,11 @@ using namespace application_manager;
 using namespace policy;
 using namespace utils::custom_string;
 using testing::_;
+using ::testing::DoAll;
 using ::testing::Mock;
+using ::testing::NiceMock;
 using ::testing::Return;
 using ::testing::ReturnRef;
-using ::testing::NiceMock;
-using ::testing::DoAll;
 using ::testing::SetArgPointee;
 
 class RCPolicyHandlerTest : public ::testing::Test {
@@ -83,7 +83,8 @@ class RCPolicyHandlerTest : public ::testing::Test {
       , kDeviceId_("fake_device_id")
       , kHmiLevel_("NONE")
       , default_hmi_("fake_hmi")
-      , app_set(test_app, app_lock)
+      , app_lock_ptr_(std::make_shared<sync_primitives::Lock>())
+      , app_set(test_app, app_lock_ptr_)
       , kAppId1_(10u)
       , kAppId2_(11u)
       , kConnectionKey_(1u)
@@ -93,13 +94,13 @@ class RCPolicyHandlerTest : public ::testing::Test {
 
  protected:
   NiceMock<policy_handler_test::MockPolicySettings> policy_settings_;
-  utils::SharedPtr<application_manager_test::MockApplication> mock_app_;
+  std::shared_ptr<application_manager_test::MockApplication> mock_app_;
   connection_handler_test::MockConnectionHandler conn_handler;
   protocol_handler_test::MockSessionObserver mock_session_observer;
   components::usage_statistics_test::MockStatisticsManager
       mock_statistics_manager_;
   PolicyHandler policy_handler_;
-  utils::SharedPtr<policy_manager_test::MockPolicyManager> mock_policy_manager_;
+  std::shared_ptr<policy_manager_test::MockPolicyManager> mock_policy_manager_;
   application_manager_test::MockApplicationManager app_manager_;
   const std::string kPolicyAppId_;
   const std::string kMacAddr_;
@@ -107,7 +108,7 @@ class RCPolicyHandlerTest : public ::testing::Test {
   const std::string kHmiLevel_;
   std::string default_hmi_;
   ApplicationSet test_app;
-  sync_primitives::Lock app_lock;
+  std::shared_ptr<sync_primitives::Lock> app_lock_ptr_;
   DataAccessor<ApplicationSet> app_set;
   const uint32_t kAppId1_;
   const uint32_t kAppId2_;
@@ -121,15 +122,15 @@ class RCPolicyHandlerTest : public ::testing::Test {
     ON_CALL(app_manager_, applications()).WillByDefault(Return(app_set));
     ON_CALL(policy_settings_, enable_policy()).WillByDefault(Return(true));
     mock_policy_manager_ =
-        utils::MakeShared<policy_manager_test::MockPolicyManager>();
-    ASSERT_TRUE(mock_policy_manager_.valid());
+        std::make_shared<policy_manager_test::MockPolicyManager>();
+    ASSERT_TRUE(mock_policy_manager_.use_count() != 0);
 
     ON_CALL(app_manager_, connection_handler())
         .WillByDefault(ReturnRef(conn_handler));
     ON_CALL(conn_handler, get_session_observer())
         .WillByDefault(ReturnRef(mock_session_observer));
 
-    mock_app_ = utils::MakeShared<application_manager_test::MockApplication>();
+    mock_app_ = std::make_shared<application_manager_test::MockApplication>();
   }
 
   virtual void TearDown() OVERRIDE {
@@ -205,7 +206,7 @@ TEST_F(RCPolicyHandlerTest, SendMessageToSDK_RemoteControl_SUCCESS) {
 TEST_F(RCPolicyHandlerTest, OnUpdateHMILevel_InvalidApp_UNSUCCESS) {
   EnablePolicyAndPolicyManagerMock();
 
-  utils::SharedPtr<application_manager_test::MockApplication> invalid_app;
+  std::shared_ptr<application_manager_test::MockApplication> invalid_app;
   EXPECT_CALL(app_manager_, application(kDeviceId_, kPolicyAppId_))
       .WillOnce(Return(invalid_app));
   EXPECT_CALL(mock_message_helper_, StringToHMILevel(_)).Times(0);
@@ -292,7 +293,7 @@ TEST_F(RCPolicyHandlerTest,
 
 TEST_F(RCPolicyHandlerTest, OnUpdateHMIStatus_InvalidApp_UNSUCCESS) {
   EnablePolicyAndPolicyManagerMock();
-  utils::SharedPtr<application_manager_test::MockApplication> invalid_app;
+  std::shared_ptr<application_manager_test::MockApplication> invalid_app;
   EXPECT_CALL(app_manager_, application(_, _)).WillOnce(Return(invalid_app));
   EXPECT_CALL(app_manager_, ChangeAppsHMILevel(_, _)).Times(0);
 
@@ -378,7 +379,7 @@ TEST_F(RCPolicyHandlerTest, CheckHMIType_ValidTypes_SUCCESS) {
   mobile_apis::AppHMIType::eType hmi = mobile_apis::AppHMIType::MEDIA;
 
   const smart_objects::SmartObjectSPtr app_types =
-      utils::MakeShared<smart_objects::SmartObject>(
+      std::make_shared<smart_objects::SmartObject>(
           smart_objects::SmartType_Array);
   (*app_types)[strings::app_hmi_type][0] = mobile_apis::AppHMIType::MEDIA;
   (*app_types)[strings::app_hmi_type][1] =

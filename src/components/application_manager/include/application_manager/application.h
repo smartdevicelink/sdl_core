@@ -38,7 +38,8 @@
 #include <set>
 #include <list>
 #include <vector>
-#include "utils/shared_ptr.h"
+#include <memory>
+
 #include "utils/data_accessor.h"
 #include "interfaces/MOBILE_API.h"
 #include "connection_handler/device.h"
@@ -46,6 +47,7 @@
 #include "application_manager/message.h"
 #include "application_manager/hmi_state.h"
 #include "application_manager/application_state.h"
+#include "application_manager/help_prompt_manager.h"
 #include "protocol_handler/protocol_handler.h"
 #include "smart_objects/smart_object.h"
 #include "utils/macro.h"
@@ -160,11 +162,6 @@ typedef std::map<uint32_t, PerformChoice> PerformChoiceSetMap;
 typedef std::set<uint32_t> SoftButtonID;
 
 /**
- * @brief Defines set of vehicle info types
- */
-typedef std::set<mobile_apis::VehicleDataType::eType> VehicleInfoSubscriptions;
-
-/**
  * @brief Defines set of buttons subscription
  */
 typedef std::set<mobile_apis::ButtonName::eType> ButtonSubscriptions;
@@ -185,7 +182,6 @@ class DynamicApplicationData {
   virtual const smart_objects::SmartObject* show_command() const = 0;
   virtual const smart_objects::SmartObject* tbt_show_command() const = 0;
   virtual DataAccessor<ButtonSubscriptions> SubscribedButtons() const = 0;
-  virtual DataAccessor<VehicleInfoSubscriptions> SubscribedIVI() const = 0;
   virtual const smart_objects::SmartObject* keyboard_props() const = 0;
   virtual const smart_objects::SmartObject* menu_title() const = 0;
   virtual const smart_objects::SmartObject* menu_icon() const = 0;
@@ -457,6 +453,20 @@ class Application : public virtual InitialApplicationData,
   virtual bool is_navi() const = 0;
   virtual void set_is_navi(bool allow) = 0;
 
+  /**
+   * @brief Returns is_remote_control_supported_
+   * @return true if app supports remote control, else false
+   */
+  virtual bool is_remote_control_supported() const = 0;
+
+  /**
+   * @brief Sets remote control supported,
+   * which is used to determine app with remote control
+   * @param allow, if true - remote control is supported,
+   * else remote control is disable
+   */
+  virtual void set_remote_control_supported(const bool allow) = 0;
+
   virtual void set_mobile_projection_enabled(bool option) = 0;
   virtual bool mobile_projection_enabled() const = 0;
 
@@ -543,6 +553,12 @@ class Application : public virtual InitialApplicationData,
       const = 0;
   virtual const std::string& app_icon_path() const = 0;
   virtual connection_handler::DeviceHandle device() const = 0;
+  /**
+   * @brief Returns handle of the device on which secondary transport of this
+   * app is running
+   * @return handle of the device on which secondary transport is running
+   */
+  virtual connection_handler::DeviceHandle secondary_device() const = 0;
 
   /**
    * @brief sets true if application has sent TTS GlobalProperties
@@ -580,6 +596,13 @@ class Application : public virtual InitialApplicationData,
   virtual void set_app_allowed(const bool allowed) = 0;
   DEPRECATED virtual void set_device(
       connection_handler::DeviceHandle device) = 0;
+  /**
+   * @brief Sets the handle of the device on which secondary transport of this
+   * app is running
+   * @param handle of the device on which secondary transport is running
+   */
+  virtual void set_secondary_device(
+      connection_handler::DeviceHandle secondary_device) = 0;
   virtual uint32_t get_grammar_id() const = 0;
   virtual void set_grammar_id(uint32_t value) = 0;
 
@@ -589,6 +612,24 @@ class Application : public virtual InitialApplicationData,
 
   virtual void set_is_resuming(bool is_resuming) = 0;
   virtual bool is_resuming() const = 0;
+
+  /**
+   * @brief Remembers the HMI level which the app would resume into if high-
+   * bandwidth transport were available.
+   * @param level The HMI level which the app would resume into. Specify
+   * INVALID_ENUM to clear the state.
+   */
+  virtual void set_deferred_resumption_hmi_level(
+      mobile_api::HMILevel::eType level) = 0;
+  /**
+   * @brief Returns the HMI level which the app would resume into if high-
+   * bandwidth transport were available.
+   *
+   * A value of INVALID_ENUM indicates that the app does not have deferred
+   * HMI level.
+   * @return HMI level which the app would resume into
+   */
+  virtual mobile_api::HMILevel::eType deferred_resumption_hmi_level() const = 0;
 
   virtual bool AddFile(const AppFile& file) = 0;
   virtual const AppFilesMap& getAppFiles() const = 0;
@@ -611,10 +652,6 @@ class Application : public virtual InitialApplicationData,
   virtual bool UnsubscribeFromButton(
       mobile_apis::ButtonName::eType btn_name) = 0;
 
-  virtual bool SubscribeToIVI(uint32_t vehicle_info_type) = 0;
-  virtual bool IsSubscribedToIVI(uint32_t vehicle_info_type) const = 0;
-  virtual bool UnsubscribeFromIVI(uint32_t vehicle_info_type) = 0;
-
   /**
    * @brief ResetDataInNone reset data counters in NONE
    */
@@ -634,6 +671,12 @@ class Application : public virtual InitialApplicationData,
    * @return object for recording statistics
    */
   virtual UsageStatistics& usage_report() = 0;
+
+  /**
+   * @brief Access to HelpPromptManager interface
+   * @return object for Handling VR help
+   */
+  virtual HelpPromptManager& help_prompt_manager() = 0;
 
   /**
    * @brief SetInitialState sets initial HMI state for application on
@@ -847,7 +890,6 @@ class Application : public virtual InitialApplicationData,
    */
   virtual void SwapMobileMessageQueue(MobileMessageQueue& mobile_messages) = 0;
 
-#ifdef SDL_REMOTE_CONTROL
   /**
    * @brief set_system_context Set system context for application
    * @param system_context Current context
@@ -890,16 +932,10 @@ class Application : public virtual InitialApplicationData,
   virtual bool RemoveExtension(AppExtensionUID uid) = 0;
 
   /**
-   * @brief Removes all extensions
+   * @brief Get list of available application extensions
+   * @return application extensions
    */
-  virtual void RemoveExtensions() = 0;
-
-  /**
-   * @brief Get list of subscriptions to vehicle info notifications
-   * @return list of subscriptions to vehicle info notifications
-   */
-  virtual const VehicleInfoSubscriptions& SubscribesIVI() const = 0;
-#endif  // SDL_REMOTE_CONTROL
+  virtual const std::list<AppExtensionPtr>& Extensions() const = 0;
 
  protected:
   mutable sync_primitives::Lock hmi_states_lock_;
@@ -913,8 +949,8 @@ class Application : public virtual InitialApplicationData,
   bool is_greyed_out_;
 };
 
-typedef utils::SharedPtr<Application> ApplicationSharedPtr;
-typedef utils::SharedPtr<const Application> ApplicationConstSharedPtr;
+typedef std::shared_ptr<Application> ApplicationSharedPtr;
+typedef std::shared_ptr<const Application> ApplicationConstSharedPtr;
 typedef uint32_t ApplicationId;
 
 }  // namespace application_manager

@@ -38,7 +38,7 @@
 #include "interfaces/MOBILE_API.h"
 #include "utils/sqlite_wrapper/sql_database.h"
 #include "utils/sqlite_wrapper/sql_query.h"
-#include "utils/make_shared.h"
+
 #include "utils/file_system.h"
 #include "application_manager/resumption_data_test.h"
 #include "application_manager/test_resumption_data_db.h"
@@ -52,6 +52,7 @@ namespace resumption_test {
 
 using ::testing::NiceMock;
 using ::testing::ReturnRef;
+using ::testing::_;
 using application_manager_test::MockApplication;
 
 namespace am = application_manager;
@@ -67,7 +68,7 @@ const std::string kPath =
 class ResumptionDataDBTest : public ResumptionDataTest {
  protected:
   void SetUp() OVERRIDE {
-    app_mock = utils::MakeShared<NiceMock<MockApplication> >();
+    app_mock = std::make_shared<NiceMock<MockApplication> >();
     policy_app_id_ = "test_policy_app_id";
     app_id_ = 10;
     is_audio_ = true;
@@ -563,6 +564,7 @@ TEST_F(ResumptionDataDBTest, Init) {
 TEST_F(ResumptionDataDBTest, SaveApplication) {
   PrepareData();
   EXPECT_TRUE(res_db()->Init());
+  EXPECT_CALL(*mock_app_extension_, SaveResumptionData(_));
   res_db()->SaveApplication(app_mock);
   CheckSavedDB();
 }
@@ -570,6 +572,7 @@ TEST_F(ResumptionDataDBTest, SaveApplication) {
 TEST_F(ResumptionDataDBTest, RemoveApplicationFromSaved) {
   PrepareData();
   EXPECT_TRUE(res_db()->Init());
+  EXPECT_CALL(*mock_app_extension_, SaveResumptionData(_));
   res_db()->SaveApplication(app_mock);
   CheckSavedDB();
   EXPECT_TRUE(
@@ -584,6 +587,7 @@ TEST_F(ResumptionDataDBTest, RemoveApplicationFromSaved) {
 TEST_F(ResumptionDataDBTest, RemoveApplicationFromSaved_AppNotSaved) {
   PrepareData();
   EXPECT_TRUE(res_db()->Init());
+  EXPECT_CALL(*mock_app_extension_, SaveResumptionData(_));
   res_db()->SaveApplication(app_mock);
 
   sm::SmartObject saved_app;
@@ -595,6 +599,7 @@ TEST_F(ResumptionDataDBTest, RemoveApplicationFromSaved_AppNotSaved) {
 TEST_F(ResumptionDataDBTest, SavedApplicationTwice) {
   PrepareData();
   EXPECT_TRUE(res_db()->Init());
+  EXPECT_CALL(*mock_app_extension_, SaveResumptionData(_)).Times(2);
   res_db()->SaveApplication(app_mock);
   CheckSavedDB();
   res_db()->SaveApplication(app_mock);
@@ -604,6 +609,7 @@ TEST_F(ResumptionDataDBTest, SavedApplicationTwice) {
 TEST_F(ResumptionDataDBTest, SavedApplicationTwice_UpdateApp) {
   PrepareData();
   EXPECT_TRUE(res_db()->Init());
+  EXPECT_CALL(*mock_app_extension_, SaveResumptionData(_)).Times(2);
   res_db()->SaveApplication(app_mock);
   CheckSavedDB();
   (*vr_help_)[0][am::strings::position] = 2;
@@ -615,6 +621,7 @@ TEST_F(ResumptionDataDBTest, SavedApplicationTwice_UpdateApp) {
 TEST_F(ResumptionDataDBTest, IsApplicationSaved_ApplicationSaved) {
   PrepareData();
   EXPECT_TRUE(res_db()->Init());
+  EXPECT_CALL(*mock_app_extension_, SaveResumptionData(_));
   res_db()->SaveApplication(app_mock);
   ssize_t result = res_db()->IsApplicationSaved(policy_app_id_, kMacAddress_);
   EXPECT_EQ(0, result);
@@ -623,6 +630,7 @@ TEST_F(ResumptionDataDBTest, IsApplicationSaved_ApplicationSaved) {
 TEST_F(ResumptionDataDBTest, IsApplicationSaved_ApplicationRemoved) {
   PrepareData();
   EXPECT_TRUE(res_db()->Init());
+  EXPECT_CALL(*mock_app_extension_, SaveResumptionData(_));
   res_db()->SaveApplication(app_mock);
   EXPECT_TRUE(
       res_db()->RemoveApplicationFromSaved(policy_app_id_, kMacAddress_));
@@ -633,6 +641,7 @@ TEST_F(ResumptionDataDBTest, IsApplicationSaved_ApplicationRemoved) {
 TEST_F(ResumptionDataDBTest, GetSavedApplication) {
   PrepareData();
   EXPECT_TRUE(res_db()->Init());
+  EXPECT_CALL(*mock_app_extension_, SaveResumptionData(_));
   res_db()->SaveApplication(app_mock);
   CheckSavedDB();
 
@@ -654,6 +663,7 @@ TEST_F(ResumptionDataDBTest, GetSavedApplication_AppNotSaved) {
 TEST_F(ResumptionDataDBTest, GetDataForLoadResumeData) {
   PrepareData();
   EXPECT_TRUE(res_db()->Init());
+  EXPECT_CALL(*mock_app_extension_, SaveResumptionData(_));
   res_db()->SaveApplication(app_mock);
   CheckSavedDB();
   sm::SmartObject saved_app;
@@ -672,6 +682,7 @@ TEST_F(ResumptionDataDBTest, GetDataForLoadResumeData_AppRemove) {
 
   PrepareData();
   EXPECT_TRUE(res_db()->Init());
+  EXPECT_CALL(*mock_app_extension_, SaveResumptionData(_));
   res_db()->SaveApplication(app_mock);
   CheckSavedDB();
   EXPECT_TRUE(
@@ -683,6 +694,7 @@ TEST_F(ResumptionDataDBTest, GetDataForLoadResumeData_AppRemove) {
 TEST_F(ResumptionDataDBTest, UpdateHmiLevel) {
   PrepareData();
   EXPECT_TRUE(res_db()->Init());
+  EXPECT_CALL(*mock_app_extension_, SaveResumptionData(_));
   res_db()->SaveApplication(app_mock);
   CheckSavedDB();
   HMILevel::eType new_hmi_level = HMILevel::HMI_LIMITED;
@@ -694,6 +706,7 @@ TEST_F(ResumptionDataDBTest, UpdateHmiLevel) {
 TEST_F(ResumptionDataDBTest, IsHMIApplicationIdExist_AppIsSaved) {
   PrepareData();
   EXPECT_TRUE(res_db()->Init());
+  EXPECT_CALL(*mock_app_extension_, SaveResumptionData(_));
   res_db()->SaveApplication(app_mock);
   CheckSavedDB();
   EXPECT_TRUE(res_db()->IsHMIApplicationIdExist(hmi_app_id_));
@@ -702,6 +715,7 @@ TEST_F(ResumptionDataDBTest, IsHMIApplicationIdExist_AppIsSaved) {
 TEST_F(ResumptionDataDBTest, IsHMIApplicationIdExist_AppNotSaved) {
   PrepareData();
   EXPECT_TRUE(res_db()->Init());
+  EXPECT_CALL(*mock_app_extension_, SaveResumptionData(_));
   res_db()->SaveApplication(app_mock);
   CheckSavedDB();
   uint32_t new_hmi_app_id_ = hmi_app_id_ + 10;
@@ -711,6 +725,7 @@ TEST_F(ResumptionDataDBTest, IsHMIApplicationIdExist_AppNotSaved) {
 TEST_F(ResumptionDataDBTest, GetHMIApplicationID) {
   PrepareData();
   EXPECT_TRUE(res_db()->Init());
+  EXPECT_CALL(*mock_app_extension_, SaveResumptionData(_));
   res_db()->SaveApplication(app_mock);
   CheckSavedDB();
   EXPECT_EQ(hmi_app_id_,
@@ -720,6 +735,7 @@ TEST_F(ResumptionDataDBTest, GetHMIApplicationID) {
 TEST_F(ResumptionDataDBTest, GetHMIApplicationID_AppNotSaved) {
   PrepareData();
   EXPECT_TRUE(res_db()->Init());
+  EXPECT_CALL(*mock_app_extension_, SaveResumptionData(_));
   res_db()->SaveApplication(app_mock);
   CheckSavedDB();
   EXPECT_EQ(0u, res_db()->GetHMIApplicationID(policy_app_id_, "other_dev_id"));
@@ -729,6 +745,7 @@ TEST_F(ResumptionDataDBTest, OnSuspend) {
   PrepareData();
   EXPECT_TRUE(res_db()->Init());
   SetZeroIgnOffTime();
+  EXPECT_CALL(*mock_app_extension_, SaveResumptionData(_));
   res_db()->SaveApplication(app_mock);
   CheckSavedDB();
 
@@ -741,6 +758,7 @@ TEST_F(ResumptionDataDBTest, OnSuspendFourTimes) {
   PrepareData();
   EXPECT_TRUE(res_db()->Init());
   SetZeroIgnOffTime();
+  EXPECT_CALL(*mock_app_extension_, SaveResumptionData(_));
   res_db()->SaveApplication(app_mock);
   CheckSavedDB();
 
@@ -766,6 +784,7 @@ TEST_F(ResumptionDataDBTest, OnSuspendOnAwake) {
   EXPECT_TRUE(res_db()->Init());
   SetZeroIgnOffTime();
 
+  EXPECT_CALL(*mock_app_extension_, SaveResumptionData(_));
   res_db()->SaveApplication(app_mock);
   CheckSavedDB();
 
@@ -783,6 +802,7 @@ TEST_F(ResumptionDataDBTest, Awake_AppNotSuspended) {
   EXPECT_TRUE(res_db()->Init());
   SetZeroIgnOffTime();
 
+  EXPECT_CALL(*mock_app_extension_, SaveResumptionData(_));
   res_db()->SaveApplication(app_mock);
   CheckSavedDB();
 
@@ -796,6 +816,7 @@ TEST_F(ResumptionDataDBTest, TwiceAwake_AppNotSuspended) {
   EXPECT_TRUE(res_db()->Init());
   SetZeroIgnOffTime();
 
+  EXPECT_CALL(*mock_app_extension_, SaveResumptionData(_));
   res_db()->SaveApplication(app_mock);
   CheckSavedDB();
 
@@ -812,6 +833,7 @@ TEST_F(ResumptionDataDBTest, GetHashId) {
   PrepareData();
   EXPECT_TRUE(res_db()->Init());
 
+  EXPECT_CALL(*mock_app_extension_, SaveResumptionData(_));
   res_db()->SaveApplication(app_mock);
 
   std::string test_hash;
@@ -825,6 +847,7 @@ TEST_F(ResumptionDataDBTest, GetIgnOffTime_AfterSuspendAndAwake) {
   SetZeroIgnOffTime();
   uint32_t last_ign_off_time;
 
+  EXPECT_CALL(*mock_app_extension_, SaveResumptionData(_));
   res_db()->SaveApplication(app_mock);
 
   last_ign_off_time = res_db()->GetIgnOffTime();
@@ -848,6 +871,7 @@ TEST_F(ResumptionDataDBTest, DropAppResumptionData) {
   EXPECT_TRUE(res_db()->Init());
   SetZeroIgnOffTime();
 
+  EXPECT_CALL(*mock_app_extension_, SaveResumptionData(_));
   res_db()->SaveApplication(app_mock);
 
   EXPECT_TRUE(res_db()->DropAppDataResumption(kMacAddress_, policy_app_id_));

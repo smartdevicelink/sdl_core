@@ -34,9 +34,10 @@
 #include <numeric>
 #include <string>
 #include "utils/macro.h"
-#include "utils/make_shared.h"
+
 #include "application_manager/commands/command_request_impl.h"
 #include "application_manager/application_manager.h"
+#include "application_manager/rpc_service.h"
 #include "application_manager/message_helper.h"
 #include "smart_objects/smart_object.h"
 
@@ -144,7 +145,8 @@ struct DisallowedParamsInserter {
     VehicleData::const_iterator it = vehicle_data.find(param);
     if (vehicle_data.end() != it) {
       smart_objects::SmartObjectSPtr disallowed_param =
-          new smart_objects::SmartObject(smart_objects::SmartType_Map);
+          std::make_shared<smart_objects::SmartObject>(
+              smart_objects::SmartType_Map);
       (*disallowed_param)[strings::data_type] = (*it).second;
       (*disallowed_param)[strings::result_code] = code_;
       response_[strings::msg_params][param.c_str()] = *disallowed_param;
@@ -194,9 +196,17 @@ ResponseInfo::ResponseInfo(const hmi_apis::Common_Result::eType result,
       hmi_apis::Common_Result::UNSUPPORTED_RESOURCE == result_code;
 }
 
-CommandRequestImpl::CommandRequestImpl(const MessageSharedPtr& message,
-                                       ApplicationManager& application_manager)
-    : CommandImpl(message, application_manager)
+CommandRequestImpl::CommandRequestImpl(
+    const MessageSharedPtr& message,
+    ApplicationManager& application_manager,
+    rpc_service::RPCService& rpc_service,
+    HMICapabilities& hmi_capabilities,
+    policy::PolicyHandlerInterface& policy_handler)
+    : CommandImpl(message,
+                  application_manager,
+                  rpc_service,
+                  hmi_capabilities,
+                  policy_handler)
     , EventObserver(application_manager.event_dispatcher())
     , current_state_(kAwaitingHMIResponse)
     , hash_update_mode_(kSkipHashUpdate)
@@ -242,7 +252,7 @@ void CommandRequestImpl::onTimeOut() {
                                             correlation_id(),
                                             mobile_api::Result::GENERIC_ERROR);
   AddTimeOutComponentInfoToMessage(*response);
-  application_manager_.ManageMobileCommand(response, ORIGIN_SDL);
+  rpc_service_.ManageMobileCommand(response, SOURCE_SDL);
 }
 
 void CommandRequestImpl::on_event(const event_engine::Event& event) {}
@@ -264,7 +274,7 @@ void CommandRequestImpl::SendResponse(
   }
 
   smart_objects::SmartObjectSPtr result =
-      utils::MakeShared<smart_objects::SmartObject>();
+      std::make_shared<smart_objects::SmartObject>();
 
   smart_objects::SmartObject& response = *result;
 
@@ -305,7 +315,7 @@ void CommandRequestImpl::SendResponse(
 
   is_success_result_ = success;
 
-  application_manager_.ManageMobileCommand(result, ORIGIN_SDL);
+  rpc_service_.ManageMobileCommand(result, SOURCE_SDL);
 }
 
 bool CommandRequestImpl::CheckSyntax(const std::string& str,
@@ -408,7 +418,8 @@ uint32_t CommandRequestImpl::SendHMIRequest(
     const hmi_apis::FunctionID::eType& function_id,
     const smart_objects::SmartObject* msg_params,
     bool use_events) {
-  smart_objects::SmartObjectSPtr result = new smart_objects::SmartObject;
+  smart_objects::SmartObjectSPtr result =
+      std::make_shared<smart_objects::SmartObject>();
 
   const uint32_t hmi_correlation_id =
       application_manager_.GetNextHMICorrelationID();
@@ -433,7 +444,7 @@ uint32_t CommandRequestImpl::SendHMIRequest(
     subscribe_on_event(function_id, hmi_correlation_id);
   }
   if (ProcessHMIInterfacesAvailability(hmi_correlation_id, function_id)) {
-    if (!application_manager_.ManageHMICommand(result)) {
+    if (!rpc_service_.ManageHMICommand(result)) {
       LOG4CXX_ERROR(logger_, "Unable to send request");
       SendResponse(false, mobile_apis::Result::OUT_OF_MEMORY);
     }
@@ -446,7 +457,8 @@ uint32_t CommandRequestImpl::SendHMIRequest(
 void CommandRequestImpl::CreateHMINotification(
     const hmi_apis::FunctionID::eType& function_id,
     const NsSmart::SmartObject& msg_params) const {
-  smart_objects::SmartObjectSPtr result = new smart_objects::SmartObject;
+  smart_objects::SmartObjectSPtr result =
+      std::make_shared<smart_objects::SmartObject>();
   if (!result) {
     LOG4CXX_ERROR(logger_, "Memory allocation failed.");
     return;
@@ -462,7 +474,7 @@ void CommandRequestImpl::CreateHMINotification(
   notify[strings::params][strings::function_id] = function_id;
   notify[strings::msg_params] = msg_params;
 
-  if (!application_manager_.ManageHMICommand(result)) {
+  if (!rpc_service_.ManageHMICommand(result)) {
     LOG4CXX_ERROR(logger_, "Unable to send HMI notification");
   }
 }
@@ -571,6 +583,10 @@ mobile_apis::Result::eType CommandRequestImpl::GetMobileResultCode(
       mobile_result = mobile_apis::Result::SAVED;
       break;
     }
+    case hmi_apis::Common_Result::READ_ONLY: {
+      mobile_result = mobile_apis::Result::READ_ONLY;
+      break;
+    }
     default: {
       LOG4CXX_ERROR(logger_, "Unknown HMI result code " << hmi_code);
       break;
@@ -627,7 +643,7 @@ bool CommandRequestImpl::CheckAllowedParameters() {
             correlation_id(),
             app->app_id());
 
-    application_manager_.SendMessageToMobile(response);
+    rpc_service_.SendMessageToMobile(response);
     return false;
   }
 
@@ -651,15 +667,13 @@ bool CommandRequestImpl::CheckHMICapabilities(
   using namespace smart_objects;
   using namespace mobile_apis;
 
-  const HMICapabilities& hmi_capabilities =
-      application_manager_.hmi_capabilities();
-  if (!hmi_capabilities.is_ui_cooperating()) {
+  if (!hmi_capabilities_.is_ui_cooperating()) {
     LOG4CXX_ERROR(logger_, "UI is not supported by HMI");
     return false;
   }
 
   const SmartObject* button_capabilities_so =
-      hmi_capabilities.button_capabilities();
+      hmi_capabilities_.button_capabilities();
   if (!button_capabilities_so) {
     LOG4CXX_ERROR(logger_, "Invalid button capabilities object");
     return false;

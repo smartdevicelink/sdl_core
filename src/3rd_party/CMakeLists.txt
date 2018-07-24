@@ -44,17 +44,14 @@ if(FORCE_3RD_PARTY)
   	message(FATAL_ERROR "Please don't turn on both FORCE_3RD_PARTY and NO_REBUILD_3RD_PARTY at the same time.")
   else()
 	set(FORCE_3RD_PARTY_LOGGER ON)
-	set(FORCE_3RD_PARTY_DBUS ON)
   endif()
 endif()
 
-if(ENABLE_LOG OR HMI_DBUS_API)
+if(ENABLE_LOG)
   # --- libexpat
   add_subdirectory(expat-2.1.0)
   set(EXPAT_LIBS_DIRECTORY ${3RD_PARTY_INSTALL_PREFIX_ARCH}/lib PARENT_SCOPE)
-endif()
 
-if(ENABLE_LOG)
   if(NO_REBUILD_3RD_PARTY_LOGGER)
     message(STATUS "Not rebuilding logger.")
   else()
@@ -205,9 +202,15 @@ else()
   get_filename_component(EMHASHMAP_LIBS_DIRECTORY ${EMHASHMAP_LIB} DIRECTORY)
   set(BSON_LIBS_DIRECTORY ${BSON_LIBS_DIRECTORY} CACHE INTERNAL "Installation path of bson libraries" FORCE)
   set(EMHASHMAP_LIBS_DIRECTORY ${BSON_LIBS_DIRECTORY} CACHE INTERNAL "Installation path of emashmap libraries" FORCE)
+  add_custom_target(
+      libbson
+      DEPENDS ${BSON_LIBS_DIRECTORY}
+      DEPENDS ${EMHASHMAP_LIBS_DIRECTORY}
+      )
 endif()
 
-find_package(Boost 1.66.0 COMPONENTS system filesystem)
+
+find_package(Boost 1.66.0 COMPONENTS system thread filesystem) 
 set(BOOST_LIB_SOURCE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/boost_src)
 set(BOOST_LIBS_DIRECTORY ${3RD_PARTY_INSTALL_PREFIX}/lib)
 SET_PROPERTY(GLOBAL PROPERTY GLOBAL_BOOST_LIBS ${BOOST_LIBS_DIRECTORY})
@@ -224,15 +227,17 @@ if (NOT ${Boost_FOUND})
     URL https://dl.bintray.com/boostorg/release/1.66.0/source/boost_1_66_0.tar.gz
     DOWNLOAD_DIR ${BOOST_LIB_SOURCE_DIRECTORY}
     SOURCE_DIR ${BOOST_LIB_SOURCE_DIRECTORY}
-    CONFIGURE_COMMAND ./bootstrap.sh --with-libraries=system,filesystem --prefix=${3RD_PARTY_INSTALL_PREFIX}
+    CONFIGURE_COMMAND ./bootstrap.sh --with-libraries=system,filesystem,thread --prefix=${3RD_PARTY_INSTALL_PREFIX}
     BUILD_COMMAND ./b2
-    INSTALL_COMMAND ${BOOST_INSTALL_COMMAND} --with-system --with-filesystem --prefix=${3RD_PARTY_INSTALL_PREFIX} > boost_install.log
+    INSTALL_COMMAND ${BOOST_INSTALL_COMMAND} --with-system --with-filesystem --with-thread --prefix=${3RD_PARTY_INSTALL_PREFIX} > boost_install.log
     INSTALL_DIR ${3RD_PARTY_INSTALL_PREFIX}
     BUILD_IN_SOURCE true
   )
 
   set(BOOST_INCLUDE_DIR ${BOOST_ROOT_DIR}/Boost-prefix/src/Boost)
   set(BOOST_LIB_DIR ${BOOST_ROOT_DIR}/Boost-prefix/src/Boost/stage/lib/)
+else()
+add_custom_target(Boost) # empty target, Boost is already installed
 endif()
 
 add_custom_target(install-3rd_party

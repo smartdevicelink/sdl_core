@@ -40,7 +40,7 @@
 #include "application_manager/commands/commands_test.h"
 #include "application_manager/commands/command_request_test.h"
 #include "utils/lock.h"
-#include "utils/shared_ptr.h"
+
 #include "utils/data_accessor.h"
 #include "smart_objects/smart_object.h"
 #include "application_manager/smart_object_keys.h"
@@ -65,7 +65,6 @@ using ::testing::Return;
 using ::testing::SaveArg;
 using ::testing::DoAll;
 
-using ::utils::SharedPtr;
 using am::commands::MessageSharedPtr;
 using am::CommandParametersPermissions;
 using am::event_engine::EventObserver;
@@ -96,6 +95,9 @@ const std::string kMissedParam = "missed_param";
 class CommandRequestImplTest
     : public CommandRequestTest<CommandsTestMocks::kIsNice> {
  public:
+  CommandRequestImplTest()
+      : app_set_lock_ptr_(std::make_shared<sync_primitives::Lock>()) {}
+
   class UnwrappedCommandRequestImpl : public CommandRequestImpl {
    public:
     using CommandRequestImpl::CheckAllowedParameters;
@@ -104,8 +106,12 @@ class CommandRequestImplTest
     using CommandRequestImpl::HasDisallowedParams;
 
     UnwrappedCommandRequestImpl(const MessageSharedPtr& message,
-                                ApplicationManager& am)
-        : CommandRequestImpl(message, am) {}
+                                ApplicationManager& am,
+                                app_mngr::rpc_service::RPCService& rpc_service,
+                                app_mngr::HMICapabilities& hmi_capabilities,
+                                policy::PolicyHandlerInterface& policy_handler)
+        : CommandRequestImpl(
+              message, am, rpc_service, hmi_capabilities, policy_handler) {}
 
     const RequestState current_state() const {
       return current_state_;
@@ -127,21 +133,21 @@ class CommandRequestImplTest
     }
   };
 
-  MockAppPtr InitAppSetDataAccessor(SharedPtr<ApplicationSet>& app_set) {
-    app_set = (!app_set ? ::utils::MakeShared<ApplicationSet>() : app_set);
+  MockAppPtr InitAppSetDataAccessor(std::shared_ptr<ApplicationSet>& app_set) {
+    app_set = (!app_set ? std::make_shared<ApplicationSet>() : app_set);
     MockAppPtr app(CreateMockApp());
     app_set->insert(app);
     EXPECT_CALL(app_mngr_, applications())
         .WillOnce(
-            Return(DataAccessor<ApplicationSet>(*app_set, app_set_lock_)));
+            Return(DataAccessor<ApplicationSet>(*app_set, app_set_lock_ptr_)));
     return app;
   }
 
-  sync_primitives::Lock app_set_lock_;
+  std::shared_ptr<sync_primitives::Lock> app_set_lock_ptr_;
 };
 
 typedef CommandRequestImplTest::UnwrappedCommandRequestImpl UCommandRequestImpl;
-typedef SharedPtr<UCommandRequestImpl> CommandPtr;
+typedef std::shared_ptr<UCommandRequestImpl> CommandPtr;
 
 TEST_F(CommandRequestImplTest, OnTimeOut_StateCompleted_UNSUCCESS) {
   CommandPtr command = CreateCommand<UCommandRequestImpl>();
@@ -150,7 +156,8 @@ TEST_F(CommandRequestImplTest, OnTimeOut_StateCompleted_UNSUCCESS) {
   // First -- on `onTimeOut` method call
   // Second -- on destruction;
   EXPECT_CALL(event_dispatcher_, remove_observer(_)).Times(2);
-  EXPECT_CALL(app_mngr_, ManageMobileCommand(_, _)).Times(0);
+
+  EXPECT_CALL(mock_rpc_service_, ManageMobileCommand(_, _)).Times(0);
 
   // If `command` already done, then state should change to `kCompleted`.
   command->set_current_state(RequestState::kCompleted);
@@ -171,9 +178,10 @@ TEST_F(CommandRequestImplTest, OnTimeOut_StateAwaitingHMIResponse_SUCCESS) {
   MessageSharedPtr dummy_msg(CreateMessage());
   EXPECT_CALL(mock_message_helper_, CreateNegativeResponse(_, _, _, _))
       .WillOnce(Return(dummy_msg));
+
   EXPECT_CALL(
-      app_mngr_,
-      ManageMobileCommand(dummy_msg, Command::CommandOrigin::ORIGIN_SDL));
+      mock_rpc_service_,
+      ManageMobileCommand(dummy_msg, Command::CommandSource::SOURCE_SDL));
 
   command->onTimeOut();
 
@@ -250,7 +258,7 @@ TEST_F(CommandRequestImplTest, CreateHMINotification_SUCCESS) {
 
   MessageSharedPtr result;
 
-  EXPECT_CALL(app_mngr_, ManageHMICommand(_))
+  EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_))
       .WillOnce(DoAll(SaveArg<0>(&result), Return(true)));
 
   command->CreateHMINotification(kInvalidFunctionId, *msg_params);
@@ -271,7 +279,8 @@ TEST_F(CommandRequestImplTest, SendHMIRequest_NoUseEvent_SUCCESS) {
   EXPECT_CALL(mock_hmi_interfaces_, GetInterfaceState(_))
       .WillRepeatedly(Return(am::HmiInterfaces::STATE_AVAILABLE));
   // Return `true` prevents call of `SendResponse` method;
-  EXPECT_CALL(app_mngr_, ManageHMICommand(_)).WillOnce(Return(true));
+
+  EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_)).WillOnce(Return(true));
 
   EXPECT_EQ(kCorrelationId,
             command->SendHMIRequest(kInvalidFunctionId, NULL, false));
@@ -288,8 +297,8 @@ TEST_F(CommandRequestImplTest, SendHMIRequest_UseEvent_SUCCESS) {
   EXPECT_CALL(mock_hmi_interfaces_, GetInterfaceState(_))
       .WillRepeatedly(Return(am::HmiInterfaces::STATE_AVAILABLE));
   // Return `true` prevents call of `SendResponse` method;
-  EXPECT_CALL(app_mngr_, ManageHMICommand(_)).WillOnce(Return(true));
 
+  EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_)).WillOnce(Return(true));
   EXPECT_CALL(event_dispatcher_, add_observer(_, _, _));
 
   EXPECT_EQ(kCorrelationId,
@@ -386,7 +395,7 @@ TEST_F(CommandRequestImplTest,
   EXPECT_CALL(mock_message_helper_, CreateBlockedByPoliciesResponse(_, _, _, _))
       .WillOnce(Return(smart_objects::SmartObjectSPtr()));
 
-  EXPECT_CALL(app_mngr_, SendMessageToMobile(_, _));
+  EXPECT_CALL(mock_rpc_service_, SendMessageToMobile(_, _));
   EXPECT_FALSE(command->CheckPermissions());
 }
 
@@ -438,7 +447,7 @@ TEST_F(CommandRequestImplTest, SendResponse_TimedOut_UNSUCCESS) {
 
   command->set_current_state(RequestState::kTimedOut);
 
-  EXPECT_CALL(app_mngr_, ManageMobileCommand(_, _)).Times(0);
+  EXPECT_CALL(mock_rpc_service_, ManageMobileCommand(_, _)).Times(0);
 
   // Args do not affect on anything in this case;
   command->SendResponse(true, kMobResultSuccess, NULL, NULL);
@@ -453,7 +462,8 @@ TEST_F(CommandRequestImplTest, SendResponse_SUCCESS) {
   EXPECT_TRUE(smart_objects::SmartType_Null == (*msg).getType());
 
   MessageSharedPtr result;
-  EXPECT_CALL(app_mngr_, ManageMobileCommand(_, _))
+
+  EXPECT_CALL(mock_rpc_service_, ManageMobileCommand(_, _))
       .WillOnce(DoAll(SaveArg<0>(&result), Return(true)));
 
   // Args do not affect on anything in this case;
@@ -483,7 +493,8 @@ TEST_F(CommandRequestImplTest,
       kDisallowedParam1);
 
   MessageSharedPtr result;
-  EXPECT_CALL(app_mngr_, ManageMobileCommand(_, _))
+
+  EXPECT_CALL(mock_rpc_service_, ManageMobileCommand(_, _))
       .WillOnce(DoAll(SaveArg<0>(&result), Return(true)));
 
   command->SendResponse(true, kMobResultSuccess, NULL, NULL);
@@ -501,7 +512,8 @@ TEST_F(CommandRequestImplTest, HashUpdateAllowed_UpdateExpected) {
   command->SetHashUpdateMode(CommandRequestImpl::HashUpdateMode::kDoHashUpdate);
 
   MessageSharedPtr result;
-  EXPECT_CALL(app_mngr_, ManageMobileCommand(_, _))
+
+  EXPECT_CALL(mock_rpc_service_, ManageMobileCommand(_, _))
       .WillOnce(DoAll(SaveArg<0>(&result), Return(true)));
 
   const bool is_succedeed = true;
@@ -521,7 +533,8 @@ TEST_F(CommandRequestImplTest, HashUpdateDisallowed_HashUpdateNotExpected) {
       CommandRequestImpl::HashUpdateMode::kSkipHashUpdate);
 
   MessageSharedPtr result;
-  EXPECT_CALL(app_mngr_, ManageMobileCommand(_, _))
+
+  EXPECT_CALL(mock_rpc_service_, ManageMobileCommand(_, _))
       .WillOnce(DoAll(SaveArg<0>(&result), Return(true)));
 
   const bool is_succedeed = true;
@@ -539,7 +552,8 @@ TEST_F(CommandRequestImplTest, RequestFailed_HashUpdateNotExpected) {
   command->SetHashUpdateMode(CommandRequestImpl::HashUpdateMode::kDoHashUpdate);
 
   MessageSharedPtr result;
-  EXPECT_CALL(app_mngr_, ManageMobileCommand(_, _))
+
+  EXPECT_CALL(mock_rpc_service_, ManageMobileCommand(_, _))
       .WillOnce(DoAll(SaveArg<0>(&result), Return(true)));
 
   const bool is_succedeed = false;
@@ -557,7 +571,8 @@ TEST_F(CommandRequestImplTest, AppNotFound_HashUpdateNotExpected) {
   command->SetHashUpdateMode(CommandRequestImpl::HashUpdateMode::kDoHashUpdate);
 
   MessageSharedPtr result;
-  EXPECT_CALL(app_mngr_, ManageMobileCommand(_, _))
+
+  EXPECT_CALL(mock_rpc_service_, ManageMobileCommand(_, _))
       .WillOnce(DoAll(SaveArg<0>(&result), Return(true)));
 
   const bool is_succedeed = true;

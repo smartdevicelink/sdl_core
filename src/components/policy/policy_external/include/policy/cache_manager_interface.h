@@ -38,7 +38,7 @@
 
 #include "policy/policy_table/types.h"
 #include "policy/pt_representation.h"
-#include "utils/shared_ptr.h"
+
 #include "policy/usage_statistics/counter.h"
 #include "policy/policy_types.h"
 #include "policy/policy_settings.h"
@@ -237,7 +237,7 @@ class CacheManagerInterface {
    * device_info, statistics, excluding user messages
    * @return Generated structure for obtaining Json string.
    */
-  virtual utils::SharedPtr<policy_table::Table> GenerateSnapshot() = 0;
+  virtual std::shared_ptr<policy_table::Table> GenerateSnapshot() = 0;
 
   /**
    * Applies policy table to the current table
@@ -823,16 +823,16 @@ class CacheManagerInterface {
 
 #ifdef BUILD_TESTS
   /**
-   * @brief GetPT allows to obtain SharedPtr to PT.
+   * @brief GetPT allows to obtain std::shared_ptr to PT.
    * Used ONLY in Unit tests
-   * @return SharedPTR to PT
+   * @return std::shared_ptr to PT
    *
    */
-  virtual utils::SharedPtr<policy_table::Table> GetPT() const = 0;
+  virtual std::shared_ptr<policy_table::Table> GetPT() const = 0;
 #endif
 };
 
-typedef utils::SharedPtr<CacheManagerInterface> CacheManagerInterfaceSPtr;
+typedef std::shared_ptr<CacheManagerInterface> CacheManagerInterfaceSPtr;
 
 }  // namespace policy
 

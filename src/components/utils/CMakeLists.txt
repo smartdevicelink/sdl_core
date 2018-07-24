@@ -38,6 +38,7 @@ include_directories (
   ${COMPONENTS_DIR}/config_profile/include
   ${COMPONENTS_DIR}/media_manager/include
   ${COMPONENTS_DIR}/protocol_handler/include
+  ${JSONCPP_INCLUDE_DIRECTORY}
   ${LOG4CXX_INCLUDE_DIRECTORY}
 )
 
@@ -113,9 +114,11 @@ if(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
 endif()
 
 add_library("Utils" ${SOURCES})
-# Add boost libraries to link
-list(APPEND LIBRARIES -lboost_system -lboost_filesystem)
+
+list(APPEND LIBRARIES -lboost_system -lboost_thread -lboost_filesystem)
 target_link_libraries("Utils" ${LIBRARIES})
+add_dependencies("Utils" Boost)
+
 
 if(ENABLE_LOG)
   add_dependencies("Utils" install-3rd_party_logger Boost)

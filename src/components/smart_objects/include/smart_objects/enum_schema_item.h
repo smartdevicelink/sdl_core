@@ -39,7 +39,6 @@
 #include <set>
 #include <string>
 
-#include "utils/shared_ptr.h"
 #include "smart_objects/default_shema_item.h"
 
 namespace NsSmartDeviceLink {
@@ -60,7 +59,7 @@ class TEnumSchemaItem : public CDefaultSchemaItem<EnumType> {
    * @param DefaultValue Default value.
    * @return Shared pointer to a new schema item.
    **/
-  static utils::SharedPtr<TEnumSchemaItem> create(
+  static std::shared_ptr<TEnumSchemaItem> create(
       const std::set<EnumType>& AllowedElements,
       const TSchemaItemParameter<EnumType>& DefaultValue =
           TSchemaItemParameter<EnumType>());
@@ -208,10 +207,11 @@ class EnumConversionHelper {
 };
 
 template <typename EnumType>
-utils::SharedPtr<TEnumSchemaItem<EnumType> > TEnumSchemaItem<EnumType>::create(
+std::shared_ptr<TEnumSchemaItem<EnumType> > TEnumSchemaItem<EnumType>::create(
     const std::set<EnumType>& AllowedElements,
     const TSchemaItemParameter<EnumType>& DefaultValue) {
-  return new TEnumSchemaItem<EnumType>(AllowedElements, DefaultValue);
+  return std::shared_ptr<TEnumSchemaItem<EnumType> >(
+      new TEnumSchemaItem<EnumType>(AllowedElements, DefaultValue));
 }
 
 template <typename EnumType>

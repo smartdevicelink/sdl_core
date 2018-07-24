@@ -483,10 +483,10 @@ bool SQLPTRepresentation::RefreshDB() {
   return true;
 }
 
-utils::SharedPtr<policy_table::Table> SQLPTRepresentation::GenerateSnapshot()
+std::shared_ptr<policy_table::Table> SQLPTRepresentation::GenerateSnapshot()
     const {
   LOG4CXX_AUTO_TRACE(logger_);
-  utils::SharedPtr<policy_table::Table> table = new policy_table::Table();
+  auto table = std::make_shared<policy_table::Table>();
   GatherModuleMeta(&*table->policy_table.module_meta);
   GatherModuleConfig(&table->policy_table.module_config);
   GatherUsageAndErrorCounts(&*table->policy_table.usage_and_error_counts);
@@ -723,7 +723,6 @@ bool SQLPTRepresentation::GatherApplicationPoliciesSection(
     if (!GatherAppGroup(app_id, &params.groups)) {
       return false;
     }
-#ifdef SDL_REMOTE_CONTROL
     bool denied = false;
     if (!GatherRemoteControlDenied(app_id, &denied)) {
       return false;
@@ -733,7 +732,6 @@ bool SQLPTRepresentation::GatherApplicationPoliciesSection(
         return false;
       }
     }
-#endif  // SDL_REMOTE_CONTROL
     if (!GatherNickName(app_id, &*params.nicknames)) {
       return false;
     }
@@ -905,12 +903,10 @@ bool SQLPTRepresentation::SaveApplicationPoliciesSection(
     LOG4CXX_WARN(logger_, "Incorrect delete from app_group.");
     return false;
   }
-#ifdef SDL_REMOTE_CONTROL
   if (!query_delete.Exec(sql_pt::kDeleteModuleTypes)) {
     LOG4CXX_WARN(logger_, "Incorrect delete from module_type.");
     return false;
   }
-#endif  // SDL_REMOTE_CONTROL
   if (!query_delete.Exec(sql_pt::kDeleteApplication)) {
     LOG4CXX_WARN(logger_, "Incorrect delete from application.");
     return false;
@@ -998,13 +994,11 @@ bool SQLPTRepresentation::SaveSpecificAppPolicy(
   if (!SaveAppGroup(app.first, app.second.groups)) {
     return false;
   }
-#ifdef SDL_REMOTE_CONTROL
   bool denied = !app.second.moduleType->is_initialized();
   if (!SaveRemoteControlDenied(app.first, denied) ||
       !SaveModuleType(app.first, *app.second.moduleType)) {
     return false;
   }
-#endif  // SDL_REMOTE_CONTROL
   if (!SaveNickname(app.first, *app.second.nicknames)) {
     return false;
   }
@@ -1671,8 +1665,6 @@ bool SQLPTRepresentation::GatherAppGroup(
   return true;
 }
 
-#ifdef SDL_REMOTE_CONTROL
-
 bool SQLPTRepresentation::GatherRemoteControlDenied(const std::string& app_id,
                                                     bool* denied) const {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -1862,7 +1854,6 @@ bool SQLPTRepresentation::GatherRemoteRpc(
   }
   return true;
 }
-#endif  // SDL_REMOTE_CONTROL
 
 bool SQLPTRepresentation::SaveApplicationCustomData(const std::string& app_id,
                                                     bool is_revoked,

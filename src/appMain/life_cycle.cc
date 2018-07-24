@@ -32,8 +32,8 @@
 
 #include "life_cycle.h"
 #include "utils/signals.h"
-#include "utils/make_shared.h"
 #include "config_profile/profile.h"
+#include "application_manager/system_time/system_time_handler_impl.h"
 #include "resumption/last_state_impl.h"
 
 #ifdef ENABLE_SECURITY
@@ -69,10 +69,6 @@ LifeCycle::LifeCycle(const profile::Profile& profile)
 #ifdef TELEMETRY_MONITOR
     , telemetry_monitor_(NULL)
 #endif  // TELEMETRY_MONITOR
-#ifdef DBUS_HMIADAPTER
-    , dbus_adapter_(NULL)
-    , dbus_adapter_thread_(NULL)
-#endif  // DBUS_HMIADAPTER
 #ifdef MESSAGEBROKER_HMIADAPTER
     , mb_adapter_(NULL)
     , mb_adapter_thread_(NULL)
@@ -108,7 +104,7 @@ bool LifeCycle::StartComponents() {
   DCHECK(!hmi_handler_);
   hmi_handler_ = new hmi_message_handler::HMIMessageHandlerImpl(profile_);
 
-  hmi_handler_->set_message_observer(app_manager_);
+  hmi_handler_->set_message_observer(&(app_manager_->GetRPCHandler()));
   app_manager_->set_hmi_message_handler(hmi_handler_);
 
   media_manager_ = new media_manager::MediaManagerImpl(*app_manager_, profile_);
@@ -119,9 +115,13 @@ bool LifeCycle::StartComponents() {
   }
 
 #ifdef ENABLE_SECURITY
-  security_manager_ = new security_manager::SecurityManagerImpl();
+  auto system_time_handler =
+      std::unique_ptr<application_manager::SystemTimeHandlerImpl>(
+          new application_manager::SystemTimeHandlerImpl(*app_manager_));
+  security_manager_ =
+      new security_manager::SecurityManagerImpl(std::move(system_time_handler));
   crypto_manager_ = new security_manager::CryptoManagerImpl(
-      utils::MakeShared<security_manager::CryptoManagerSettingsImpl>(
+      std::make_shared<security_manager::CryptoManagerSettingsImpl>(
           profile_, app_manager_->GetPolicyHandler().RetrieveCertificate()));
   protocol_handler_->AddProtocolObserver(security_manager_);
   protocol_handler_->set_security_manager(security_manager_);
@@ -131,7 +131,7 @@ bool LifeCycle::StartComponents() {
   security_manager_->set_crypto_manager(crypto_manager_);
   security_manager_->AddListener(app_manager_);
 
-  app_manager_->AddPolicyObserver(crypto_manager_);
+  app_manager_->AddPolicyObserver(security_manager_);
   app_manager_->AddPolicyObserver(protocol_handler_);
   if (!crypto_manager_->Init()) {
     LOG4CXX_ERROR(logger_, "CryptoManager initialization fail.");
@@ -143,7 +143,7 @@ bool LifeCycle::StartComponents() {
   transport_manager_->AddEventListener(connection_handler_);
 
   protocol_handler_->AddProtocolObserver(media_manager_);
-  protocol_handler_->AddProtocolObserver(app_manager_);
+  protocol_handler_->AddProtocolObserver(&(app_manager_->GetRPCHandler()));
 
   media_manager_->SetProtocolHandler(protocol_handler_);
 
@@ -161,7 +161,6 @@ bool LifeCycle::StartComponents() {
   // It's important to initialise TM after setting up listener chain
   // [TM -> CH -> AM], otherwise some events from TM could arrive at nowhere
   app_manager_->set_protocol_handler(protocol_handler_);
-
   transport_manager_->Init(*last_state_);
   // start transport manager
   transport_manager_->Visibility(true);
@@ -184,30 +183,6 @@ bool LifeCycle::InitMessageSystem() {
   return true;
 }
 #endif  // MESSAGEBROKER_HMIADAPTER
-
-#ifdef DBUS_HMIADAPTER
-/**
- * Initialize DBus component
- * @return true if success otherwise false.
- */
-bool LifeCycle::InitMessageSystem() {
-  dbus_adapter_ = new hmi_message_handler::DBusMessageAdapter(hmi_handler_);
-
-  hmi_handler_->AddHMIMessageAdapter(dbus_adapter_);
-  if (!dbus_adapter_->Init()) {
-    LOG4CXX_FATAL(logger_, "Cannot init DBus service!");
-    return false;
-  }
-
-  dbus_adapter_->SubscribeTo();
-
-  LOG4CXX_INFO(logger_, "Start DBusMessageAdapter thread!");
-  dbus_adapter_thread_ = new std::thread(
-      &hmi_message_handler::DBusMessageAdapter::Run, dbus_adapter_);
-
-  return true;
-}
-#endif  // DBUS_HMIADAPTER
 
 namespace {
 void sig_handler(int sig) {
@@ -250,7 +225,7 @@ void LifeCycle::StopComponents() {
   connection_handler_->set_connection_handler_observer(NULL);
 
   DCHECK_OR_RETURN_VOID(protocol_handler_);
-  protocol_handler_->RemoveProtocolObserver(app_manager_);
+  protocol_handler_->RemoveProtocolObserver(&(app_manager_->GetRPCHandler()));
 
   DCHECK_OR_RETURN_VOID(app_manager_);
   app_manager_->Stop();
@@ -310,21 +285,6 @@ void LifeCycle::StopComponents() {
   app_manager_ = NULL;
 
   LOG4CXX_INFO(logger_, "Destroying HMI Message Handler and MB adapter.");
-
-#ifdef DBUS_HMIADAPTER
-  if (dbus_adapter_) {
-    DCHECK_OR_RETURN_VOID(hmi_handler_);
-    hmi_handler_->RemoveHMIMessageAdapter(dbus_adapter_);
-    dbus_adapter_->Shutdown();
-    if (dbus_adapter_thread_ != NULL) {
-      dbus_adapter_thread_->join();
-    }
-    delete dbus_adapter_;
-    dbus_adapter_ = NULL;
-    delete dbus_adapter_thread_;
-    dbus_adapter_thread_ = NULL;
-  }
-#endif  // DBUS_HMIADAPTER
 
 #ifdef MESSAGEBROKER_HMIADAPTER
   if (mb_adapter_) {

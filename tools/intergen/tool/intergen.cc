@@ -54,7 +54,6 @@ struct Options {
   char* interface_xml;
   bool  auto_generate_function_ids;
   bool  generate_json_code;
-  bool  generate_dbus_code;
   std::set<std::string> requested_interfaces;
   std::set<std::string> excluded_scopes;
   bool  avoid_unsigned;
@@ -63,7 +62,6 @@ struct Options {
       : interface_xml(NULL),
         auto_generate_function_ids(false),
         generate_json_code(false),
-        generate_dbus_code(false),
         avoid_unsigned(false),
         minimum_word_size(8) {
   }
@@ -138,10 +136,6 @@ int main(int argc, char* argv[]) {
         options.generate_json_code = true;
         break;
       }
-      case 'd': {
-        options.generate_dbus_code = true;
-        break;
-      }
       default: {
         cerr << "Invalid option: '" << opt << "'" << '\n';
         return EXIT_FAILURE;
@@ -165,7 +159,6 @@ int main(int argc, char* argv[]) {
             codegen::Preferences(options.minimum_word_size,
                                  options.avoid_unsigned,
                                  options.generate_json_code,
-                                 options.generate_dbus_code,
                                  options.requested_interfaces));
       if (bad.empty()) {
         return EXIT_SUCCESS;
