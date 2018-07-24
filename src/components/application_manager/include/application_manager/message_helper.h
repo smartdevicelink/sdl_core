@@ -855,23 +855,25 @@ class MessageHelper {
    */
   static smart_objects::SmartObjectSPtr CreateMessageForHMI(
       hmi_apis::messageType::eType message_type, const uint32_t correlation_id);
-      
-      
+
   // Check whether each choice has the vrCommands field
-  // returns -1 for failure, 0 if all choice include vrCommands, and 1 if none do
+  // returns -1 for failure, 0 if all choice include vrCommands, and 1 if none
+  // do
   // vrCommands is an all-or-none deal
   static int CheckChoiceSet_VRCommands(
       const smart_objects::SmartObject& choice_set) {
-
     // if this becomes true, someone doesn't have vrCommands
     bool all_have = true;
     // if this is true, no one has vrCommands
     bool none_have = true;
-    smart_objects::SmartArray::const_iterator current_choice_set_it = choice_set.asArray()->begin();
+    smart_objects::SmartArray::const_iterator current_choice_set_it =
+        choice_set.asArray()->begin();
     // Iterate through choices
-    for (; choice_set.asArray()->end() != current_choice_set_it; ++current_choice_set_it) {
+    for (; choice_set.asArray()->end() != current_choice_set_it;
+         ++current_choice_set_it) {
       // if the vrCommands is present
-      if (current_choice_set_it->keyExists(application_manager::strings::vr_commands)) {
+      if (current_choice_set_it->keyExists(
+              application_manager::strings::vr_commands)) {
         // this one has the parameter
         none_have = false;
       } else {

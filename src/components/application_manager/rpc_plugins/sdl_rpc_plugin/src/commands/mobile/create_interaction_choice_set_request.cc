@@ -118,18 +118,21 @@ void CreateInteractionChoiceSetRequest::Run() {
     return;
   }
 
-
   Result::eType result = CheckChoiceSet(app);
   if (Result::SUCCESS != result) {
     SendResponse(false, result);
     return;
   }
-  int vr_status = MessageHelper::CheckChoiceSet_VRCommands((*message_)[strings::msg_params][strings::choice_set]);
+  int vr_status = MessageHelper::CheckChoiceSet_VRCommands(
+      (*message_)[strings::msg_params][strings::choice_set]);
   if (vr_status == -1) {
     // this is an error
-    SendResponse(false, Result::INVALID_DATA, "Some choices don't contain VR commands. Either all or none must have voice commands.");
-    return; // exit now, this is a bad set
-    
+    SendResponse(false,
+                 Result::INVALID_DATA,
+                 "Some choices don't contain VR commands. Either all or none "
+                 "must have voice commands.");
+    return;  // exit now, this is a bad set
+
   } else if (vr_status == 0) {
     // everyone had a vr command, setup the grammar
     uint32_t grammar_id = application_manager_.GenerateGrammarID();
@@ -137,7 +140,7 @@ void CreateInteractionChoiceSetRequest::Run() {
   }
   // continue on as usual
   app->AddChoiceSet(choice_set_id_, (*message_)[strings::msg_params]);
-  
+
   if (vr_status == 0) {
     // we have VR commands
     SendVRAddCommandRequests(app);
@@ -189,13 +192,15 @@ mobile_apis::Result::eType CreateInteractionChoiceSetRequest::CheckChoiceSet(
 bool CreateInteractionChoiceSetRequest::compareSynonyms(
     const NsSmartDeviceLink::NsSmartObjects::SmartObject& choice1,
     const NsSmartDeviceLink::NsSmartObjects::SmartObject& choice2) {
-      // only compare if they both have vr commands
+  // only compare if they both have vr commands
   if (!(choice1.keyExists(strings::vr_commands) &&
         choice2.keyExists(strings::vr_commands))) {
     return false;  // clearly there isn't a duplicate if one of them is null
   }
-  smart_objects::SmartArray* vr_cmds_1 = choice1[strings::vr_commands].asArray();
-  smart_objects::SmartArray* vr_cmds_2 = choice2[strings::vr_commands].asArray();
+  smart_objects::SmartArray* vr_cmds_1 =
+      choice1[strings::vr_commands].asArray();
+  smart_objects::SmartArray* vr_cmds_2 =
+      choice2[strings::vr_commands].asArray();
 
   smart_objects::SmartArray::iterator it;
   it = std::find_first_of(vr_cmds_1->begin(),

@@ -197,10 +197,10 @@ TEST_F(CreateInteractionChoiceSetRequestTest, OnEvent_VR_UNSUPPORTED_RESOURCE) {
   MessageSharedPtr msg_vr = CreateFullParamsVRSO();
   (*msg_vr)[strings::msg_params][strings::choice_set][0][strings::choice_id] =
       10;
-(*msg_vr)[strings::msg_params][strings::choice_set][0][strings::menu_name] =
-    "menu_name";
-(*msg_vr)[strings::msg_params][strings::choice_set][0][strings::vr_commands][0] =
-    kVrCommands1;
+  (*msg_vr)[strings::msg_params][strings::choice_set][0][strings::menu_name] =
+      "menu_name";
+  (*msg_vr)[strings::msg_params][strings::choice_set][0][strings::vr_commands]
+           [0] = kVrCommands1;
   (*msg_vr)[strings::msg_params][strings::interaction_choice_set_id] = 11;
   std::shared_ptr<CreateInteractionChoiceSetRequest> req_vr =
       CreateCommand<CreateInteractionChoiceSetRequest>(msg_vr);
