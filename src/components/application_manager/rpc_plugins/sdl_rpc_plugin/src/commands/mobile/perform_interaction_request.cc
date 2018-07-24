@@ -163,18 +163,18 @@ void PerformInteractionRequest::Run() {
     SendResponse(false, mobile_apis::Result::INVALID_ID);
     return;
   }
-  // if (!CheckChoiceSetList_VRCommands(
-  //         app,
-  //         choice_set_id_list_length,
-  //         msg_params[strings::interaction_choice_set_id_list])) {
-  //   LOG4CXX_ERROR(logger_,
-  //                 "PerformInteraction has choice sets with "
-  //                 "missing vrCommands");
-  //   SendResponse(false,
-  //                mobile_apis::Result::INVALID_DATA,
-  //                "Some choices don't contain VR commands.");
-  //   return;
-  // }
+  if (!CheckChoiceSetList_VRCommands(
+          app,
+          choice_set_id_list_length,
+          msg_params[strings::interaction_choice_set_id_list])) {
+    LOG4CXX_ERROR(logger_,
+                  "PerformInteraction has choice sets with "
+                  "missing vrCommands");
+    SendResponse(false,
+                 mobile_apis::Result::INVALID_DATA,
+                 "Some choices don't contain VR commands.");
+    return;
+  }
   if (msg_params.keyExists(strings::vr_help)) {
     if (mobile_apis::Result::SUCCESS !=
         MessageHelper::VerifyImageVrHelpItems(
@@ -964,17 +964,24 @@ bool PerformInteractionRequest::CheckChoiceSetList_VRCommands(
   std::pair<std::set<uint32_t>::iterator, bool> ins_res;
 
   for (size_t i = 0; i < choice_set_id_list_length; ++i) {
+    // std::cerr << "loop entered!\n";
     choice_set = app->FindChoiceSet(choice_set_id_list[i].asInt());
+    // std::cerr << "set found!!\n";
+  
     // this should never ever happen
-    // if (!choice_set) {
-    //   LOG4CXX_ERROR(
-    //       logger_,
-    //       "Couldn't find choiceset_id = " << choice_set_id_list[i].asInt());
-    //   return false;
-    // }
+    if (choice_set == nullptr) {
+      std::cerr << "bad choice set list!\n";
+      return false;
+    }
+    // std::cerr<< "SMARTTYPE is " << choice_set->getType() << std::endl;
     
+    // std::cerr << "checking status!!!\n";
     
-    int vr_status = MessageHelper::CheckChoiceSet_VRCommands(*choice_set);
+    const smart_objects::SmartObject& choices_list =
+        (*choice_set)[strings::choice_set];
+    int vr_status = MessageHelper::CheckChoiceSet_VRCommands(choices_list);
+    // std::cerr << "status checked!!!!\n";
+    
     // if not all choices have vr commands
     if (vr_status != 0) {
       std::cerr << "choice set has member missing vr commands\n";
@@ -1005,11 +1012,6 @@ bool PerformInteractionRequest::CheckChoiceIDFromRequest(
     }
     
     
-    int vr_status = MessageHelper::CheckChoiceSet_VRCommands(*choice_set);
-    // if not all choices have vr commands
-    if (vr_status != 0) {
-      
-    }
     choice_list_length = (*choice_set)[strings::choice_set].length();
     const smart_objects::SmartObject& choices_list =
         (*choice_set)[strings::choice_set];
