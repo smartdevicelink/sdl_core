@@ -120,41 +120,30 @@ void CreateInteractionChoiceSetRequest::Run() {
   }
 
 
-  int vr_status = MessageHelper::CheckChoiceSet_VRCommands((*message_)[strings::msg_params][strings::choice_set]);
-  if (vr_status == -1) {
-    std::cerr << "choice set has invalid MIXED set of VR parameters" << '\n';
-    // this is an error
-    SendResponse(false, Result::INVALID_DATA, "Some choices don't contain VR commands. Either all or none must have voice commands.");
-    return; // exit now, this is a bad set
-    
-  } else if (vr_status == 0) {
-    std::cerr << "choice set has valid FULL set of VR parameters" << '\n';
-  } else {
-    std::cerr << "choice set has valid EMPTY set of VR parameters" << '\n';
-  }
-  
   Result::eType result = CheckChoiceSet(app);
   if (Result::SUCCESS != result) {
     SendResponse(false, result);
     return;
   }
-  if (vr_status == 0) {
-    std::cerr << "creating grammar\n";
+  int vr_status = MessageHelper::CheckChoiceSet_VRCommands((*message_)[strings::msg_params][strings::choice_set]);
+  if (vr_status == -1) {
+    // this is an error
+    SendResponse(false, Result::INVALID_DATA, "Some choices don't contain VR commands. Either all or none must have voice commands.");
+    return; // exit now, this is a bad set
+    
+  } else if (vr_status == 0) {
     // everyone had a vr command, setup the grammar
     uint32_t grammar_id = application_manager_.GenerateGrammarID();
     (*message_)[strings::msg_params][strings::grammar_id] = grammar_id;
   }
   // continue on as usual
-  std::cerr << "adding choice set\n";
   app->AddChoiceSet(choice_set_id_, (*message_)[strings::msg_params]);
-  std::cerr << "added! choice set\n";
   
   if (vr_status == 0) {
+    // we have VR commands
     SendVRAddCommandRequests(app);
-    std::cerr << "requests sent!!!!\n";  
   } else {
     SendResponse(true, Result::SUCCESS);
-    
   }
 }
 
@@ -204,7 +193,6 @@ bool CreateInteractionChoiceSetRequest::compareSynonyms(
       // only compare if they both have vr commands
   if (!(choice1.keyExists(strings::vr_commands) &&
         choice2.keyExists(strings::vr_commands))) {
-    std::cerr << "someone is empty!\n";
     return false;  // clearly there isn't a duplicate if one of them is null
   }
   smart_objects::SmartArray* vr_cmds_1 = choice1[strings::vr_commands].asArray();

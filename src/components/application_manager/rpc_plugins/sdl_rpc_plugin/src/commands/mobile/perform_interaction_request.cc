@@ -354,15 +354,15 @@ bool PerformInteractionRequest::ProcessVRResponse(
 
   const SmartObject& hmi_msg_params = message[strings::msg_params];
   if (hmi_msg_params.keyExists(strings::choice_id)) {
-    const int choise_id = hmi_msg_params[strings::choice_id].asInt();
-    if (!CheckChoiceIDFromResponse(app, choise_id)) {
+    const int choice_id = hmi_msg_params[strings::choice_id].asInt();
+    if (!CheckChoiceIDFromResponse(app, choice_id)) {
       LOG4CXX_ERROR(logger_, "Wrong choiceID was received from HMI");
       TerminatePerformInteraction();
       SendResponse(
           false, Result::GENERIC_ERROR, "Wrong choiceID was received from HMI");
       return true;
     }
-    msg_params[strings::choice_id] = choise_id;
+    msg_params[strings::choice_id] = choice_id;
   }
   return false;
 }
@@ -538,7 +538,7 @@ void PerformInteractionRequest::SendVRPerformInteractionRequest(
       smart_objects::SmartObject* choice_set =
           app->FindChoiceSet(choice_list[i].asInt());
       if (!choice_set) {
-        LOG4CXX_WARN(logger_, "Couldn't found choiset");
+        LOG4CXX_WARN(logger_, "Couldn't found choiceset");
         continue;
       }
       msg_params[strings::grammar_id][grammar_id_index++] =
@@ -962,27 +962,23 @@ bool PerformInteractionRequest::CheckChoiceSetList_VRCommands(
   smart_objects::SmartObject* choice_set = nullptr;
 
   for (size_t i = 0; i < choice_set_id_list.length(); ++i) {
-    std::cerr << "loop entered!\n";
     choice_set = app->FindChoiceSet(choice_set_id_list[i].asInt());
-    std::cerr << "set found!!\n";
   
-    // this should never ever happen
+    // this should never ever happen since this was already checked
     if (choice_set == nullptr) {
-      std::cerr << "bad choice set list!\n";
+      LOG4CXX_ERROR(
+          logger_,
+          "Couldn't find choiceset_id = " << choice_set_id_list[i].asInt());
       return false;
     }
-    std::cerr<< "SMARTTYPE is " << choice_set->getType() << std::endl;
     
-    std::cerr << "checking status!!!\n";
     
     const smart_objects::SmartObject& choices_list =
         (*choice_set)[strings::choice_set];
     int vr_status = MessageHelper::CheckChoiceSet_VRCommands(choices_list);
-    std::cerr << "status checked!!!!\n";
     
     // if not all choices have vr commands
     if (vr_status != 0) {
-      std::cerr << "choice set has member missing vr commands\n";
       LOG4CXX_ERROR(logger_,
                     "PerformInteraction has choice sets with "
                     "missing vrCommands, not in MANUAL_ONLY mode");
@@ -1011,7 +1007,7 @@ bool PerformInteractionRequest::CheckChoiceIDFromRequest(
     if (!choice_set) {
       LOG4CXX_ERROR(
           logger_,
-          "Couldn't find choiset_id = " << choice_set_id_list[i].asInt());
+          "Couldn't find choiceset_id = " << choice_set_id_list[i].asInt());
       return false;
     }
     
@@ -1024,7 +1020,7 @@ bool PerformInteractionRequest::CheckChoiceIDFromRequest(
           choice_id_set.insert(choices_list[k][strings::choice_id].asInt());
       if (!ins_res.second) {
         LOG4CXX_ERROR(logger_,
-                      "Choise with ID "
+                      "choice with ID "
                           << choices_list[k][strings::choice_id].asInt()
                           << " already exists");
         return false;
