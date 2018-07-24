@@ -30,94 +30,51 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "utils/lock.h"
 #include <errno.h>
 #include <stdint.h>
-#include <stdio.h>
 #include <string.h>
 #include <cstring>
+#include "utils/lock.h"
 #include "utils/logger.h"
 
 namespace sync_primitives {
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "Utils")
 
-Lock::Lock()
-#ifndef NDEBUG
-    : lock_taken_(0)
-    , is_mutex_recursive_(false)
-#endif  // NDEBUG
-{
-  Init(false);
-}
-
-Lock::Lock(bool is_recursive)
-#ifndef NDEBUG
-    : lock_taken_(0)
-    , is_mutex_recursive_(is_recursive)
-#endif  // NDEBUG
-{
-  Init(is_recursive);
-}
+Lock::Lock() : lock_taken_(0) {}
 
 Lock::~Lock() {
-#ifndef NDEBUG
   if (lock_taken_ > 0) {
-    LOG4CXX_FATAL(logger_, "Destroying non-released mutex " << &mutex_);
-    NOTREACHED();
-  }
-#endif
-  int32_t status = pthread_mutex_destroy(&mutex_);
-  if (status != 0) {
-    LOG4CXX_FATAL(logger_,
-                  "Failed to destroy mutex " << &mutex_ << ": "
-                                             << strerror(status));
-    NOTREACHED();
+    LOG4CXX_FATAL(logger_, "Destroying non-released regular mutex " << &mutex_);
   }
 }
 
 void Lock::Acquire() {
-  const int32_t status = pthread_mutex_lock(&mutex_);
-  if (status != 0) {
-    LOG4CXX_FATAL(logger_,
-                  "Failed to acquire mutex " << &mutex_ << ": "
-                                             << strerror(status));
-    NOTREACHED();
-  } else {
-    AssertFreeAndMarkTaken();
-  }
+  mutex_.lock();
+  AssertFreeAndMarkTaken();
 }
 
 void Lock::Release() {
   AssertTakenAndMarkFree();
-  const int32_t status = pthread_mutex_unlock(&mutex_);
-  if (status != 0) {
-    LOG4CXX_FATAL(logger_,
-                  "Failed to unlock mutex" << &mutex_ << ": "
-                                           << strerror(status));
-    NOTREACHED();
-  }
+  mutex_.unlock();
 }
 
 bool Lock::Try() {
-  const int32_t status = pthread_mutex_trylock(&mutex_);
-  if (status == 0) {
-#ifndef NDEBUG
-    lock_taken_++;
-#endif
-    return true;
+  bool status = mutex_.try_lock();
+  if (status) {
+    AssertFreeAndMarkTaken();
   }
-  return false;
+  return status;
 }
 
-#ifndef NDEBUG
 void Lock::AssertFreeAndMarkTaken() {
-  if ((lock_taken_ > 0) && !is_mutex_recursive_) {
+  if (lock_taken_ != 0) {
     LOG4CXX_FATAL(logger_, "Locking already taken not recursive mutex");
     NOTREACHED();
   }
   lock_taken_++;
 }
+
 void Lock::AssertTakenAndMarkFree() {
   if (lock_taken_ == 0) {
     LOG4CXX_FATAL(logger_, "Unlocking a mutex that is not taken");
@@ -125,25 +82,46 @@ void Lock::AssertTakenAndMarkFree() {
   }
   lock_taken_--;
 }
-#endif
 
-void Lock::Init(bool is_recursive) {
-  pthread_mutexattr_t attr;
-  pthread_mutexattr_init(&attr);
+// Recursive lock looks the same on the surface, some code duplication is
+// necessary since they don't have a shared parent superclass
+RecursiveLock::RecursiveLock() : lock_taken_(0) {}
 
-  const int32_t mutex_type =
-      is_recursive ? PTHREAD_MUTEX_RECURSIVE : PTHREAD_MUTEX_ERRORCHECK;
-
-  pthread_mutexattr_settype(&attr, mutex_type);
-  const int32_t status = pthread_mutex_init(&mutex_, &attr);
-
-  pthread_mutexattr_destroy(&attr);
-
-  if (status != 0) {
+RecursiveLock::~RecursiveLock() {
+  if (lock_taken_ > 0) {
     LOG4CXX_FATAL(logger_,
-                  "Failed to initialize mutex. " << std::strerror(status));
-    DCHECK(status != 0);
+                  "Destroying non-released recursive mutex " << &mutex_);
   }
+}
+
+void RecursiveLock::Acquire() {
+  mutex_.lock();
+  AssertFreeAndMarkTaken();
+}
+
+void RecursiveLock::Release() {
+  AssertTakenAndMarkFree();
+  mutex_.unlock();
+}
+
+bool RecursiveLock::Try() {
+  bool status = mutex_.try_lock();
+  if (status) {
+    AssertFreeAndMarkTaken();
+  }
+  return status;
+}
+
+void RecursiveLock::AssertFreeAndMarkTaken() {
+  lock_taken_++;
+}
+
+void RecursiveLock::AssertTakenAndMarkFree() {
+  if (lock_taken_ == 0) {
+    LOG4CXX_FATAL(logger_, "Unlocking a recursive mutex that is not taken");
+    NOTREACHED();
+  }
+  lock_taken_--;
 }
 
 }  // namespace sync_primitives

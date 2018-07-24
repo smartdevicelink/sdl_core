@@ -142,7 +142,7 @@ class AppLaunchDataJson : public AppLaunchDataImpl {
   /**
    * @brief lock to protected common data
    */
-  mutable sync_primitives::Lock app_launch_json_lock_;
+  mutable sync_primitives::RecursiveLock app_launch_json_lock_;
 
   /**
    * @brief ponter to Last State object
