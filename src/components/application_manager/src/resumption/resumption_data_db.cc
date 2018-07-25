@@ -380,6 +380,20 @@ uint32_t ResumptionDataDB::GetIgnOffTime() const {
   return SelectIgnOffTime();
 }
 
+uint32_t ResumptionDataDB::GetGlobalIgnOnCounter() const {
+  return 0;
+}
+
+uint32_t ResumptionDataDB::GetGlobalIgnOffCounter() const {
+  return 0;
+}
+
+void ResumptionDataDB::IncrementGlobalIgnOffCounter() {
+}
+
+void ResumptionDataDB::IncrementGlobalIgnOnCounter() {
+}
+
 ssize_t ResumptionDataDB::IsApplicationSaved(
     const std::string& policy_app_id, const std::string& device_id) const {
   LOG4CXX_AUTO_TRACE(logger_);
