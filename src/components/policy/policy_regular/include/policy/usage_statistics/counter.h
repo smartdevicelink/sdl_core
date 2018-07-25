@@ -36,7 +36,7 @@
 #include <ctime>
 #include "policy/usage_statistics/statistics_manager.h"
 #include "policy/usage_statistics/app_stopwatch.h"
-#include "utils/shared_ptr.h"
+
 #include "utils/timer.h"
 #include "utils/macro.h"
 
@@ -46,18 +46,18 @@ using timer::Timer;
 
 class GlobalCounter {
  public:
-  GlobalCounter(utils::SharedPtr<StatisticsManager> statistics_manager,
+  GlobalCounter(std::shared_ptr<StatisticsManager> statistics_manager,
                 GlobalCounterId counter_type);
   void operator++() const;
 
  private:
   GlobalCounterId counter_type_;
-  utils::SharedPtr<StatisticsManager> statistics_manager_;
+  std::shared_ptr<StatisticsManager> statistics_manager_;
 };
 
 class AppCounter {
  public:
-  AppCounter(utils::SharedPtr<StatisticsManager> statistics_manager,
+  AppCounter(std::shared_ptr<StatisticsManager> statistics_manager,
              const std::string& app_id,
              AppCounterId counter_type);
   void operator++() const;
@@ -65,12 +65,12 @@ class AppCounter {
  private:
   std::string app_id_;
   AppCounterId counter_type_;
-  utils::SharedPtr<StatisticsManager> statistics_manager_;
+  std::shared_ptr<StatisticsManager> statistics_manager_;
 };
 
 class AppInfo {
  public:
-  AppInfo(utils::SharedPtr<StatisticsManager> statistics_manager,
+  AppInfo(std::shared_ptr<StatisticsManager> statistics_manager,
           const std::string& app_id,
           AppInfoId info_type);
   void Update(const std::string& new_info) const;
@@ -78,14 +78,14 @@ class AppInfo {
  private:
   std::string app_id_;
   AppInfoId info_type_;
-  utils::SharedPtr<StatisticsManager> statistics_manager_;
+  std::shared_ptr<StatisticsManager> statistics_manager_;
 };
 
 class AppStopwatchImpl : public AppStopwatch {
  public:
-  AppStopwatchImpl(utils::SharedPtr<StatisticsManager> statistics_manager,
+  AppStopwatchImpl(std::shared_ptr<StatisticsManager> statistics_manager,
                    const std::string& app_id);
-  AppStopwatchImpl(utils::SharedPtr<StatisticsManager> statistics_manager,
+  AppStopwatchImpl(std::shared_ptr<StatisticsManager> statistics_manager,
                    const std::string& app_id,
                    std::uint32_t timeout);
   void Start(AppStopwatchId stopwatch_type) OVERRIDE;
@@ -96,7 +96,7 @@ class AppStopwatchImpl : public AppStopwatch {
   // Fields
   std::string app_id_;
   AppStopwatchId stopwatch_type_;
-  utils::SharedPtr<StatisticsManager> statistics_manager_;
+  std::shared_ptr<StatisticsManager> statistics_manager_;
   timer::Timer timer_;
   const std::uint32_t time_out_;
   DISALLOW_COPY_AND_ASSIGN(AppStopwatchImpl);

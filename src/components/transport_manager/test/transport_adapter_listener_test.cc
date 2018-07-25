@@ -129,7 +129,7 @@ TEST_F(TransportAdapterListenerTest, OnDataReceiveFailed) {
 TEST_F(TransportAdapterListenerTest, OnDataSendDone) {
   unsigned char data[3] = {0x20, 0x07, 0x01};
   ::protocol_handler::RawMessagePtr data_container =
-      new ::protocol_handler::RawMessage(1, 1, data, 3);
+      std::make_shared< ::protocol_handler::RawMessage>(1, 1, data, 3);
 
   EXPECT_CALL(tr_mock,
               ReceiveEventFromDevice(IsEvent(EventTypeEnum::ON_SEND_DONE,
@@ -145,7 +145,7 @@ TEST_F(TransportAdapterListenerTest, OnDataSendDone) {
 TEST_F(TransportAdapterListenerTest, OnDataSendFailed) {
   unsigned char data[3] = {0x20, 0x07, 0x01};
   ::protocol_handler::RawMessagePtr data_container =
-      new ::protocol_handler::RawMessage(1, 1, data, 3);
+      std::make_shared< ::protocol_handler::RawMessage>(1, 1, data, 3);
   DataSendError err;
 
   EXPECT_CALL(tr_mock,

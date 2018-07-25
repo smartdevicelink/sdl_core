@@ -40,7 +40,7 @@ namespace {
 struct AppExtensionPredicate {
   AppExtensionUID uid;
   bool operator()(const ApplicationSharedPtr app) {
-    return app ? app->QueryInterface(uid).valid() : false;
+    return app ? (app->QueryInterface(uid).use_count() != 0) : false;
   }
 };
 }

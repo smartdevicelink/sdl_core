@@ -91,7 +91,7 @@ void OnSystemRequestNotification::Run() {
     app = application_manager_.application(selected_app_id);
   }
 
-  if (!app.valid()) {
+  if (app.use_count() == 0) {
     LOG4CXX_WARN(logger_,
                  "No valid application found to forward OnSystemRequest.");
     return;

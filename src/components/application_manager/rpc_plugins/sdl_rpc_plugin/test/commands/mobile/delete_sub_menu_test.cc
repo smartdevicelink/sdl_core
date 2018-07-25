@@ -43,6 +43,7 @@
 #include "application_manager/mock_message_helper.h"
 #include "application_manager/event_engine/event.h"
 #include "application_manager/mock_hmi_interface.h"
+#include "application_manager/mock_help_prompt_manager.h"
 
 namespace test {
 namespace components {
@@ -55,6 +56,7 @@ using ::testing::Return;
 using ::testing::ReturnRef;
 using ::testing::InSequence;
 namespace am = ::application_manager;
+namespace am_test = application_manager_test;
 using am::commands::MessageSharedPtr;
 using am::event_engine::Event;
 using am::MockHmiInterfaces;
@@ -63,8 +65,8 @@ using am::MockMessageHelper;
 using sdl_rpc_plugin::commands::DeleteSubMenuRequest;
 using sdl_rpc_plugin::commands::DeleteSubMenuResponse;
 
-typedef SharedPtr<DeleteSubMenuRequest> DeleteSubMenuRequestPtr;
-typedef SharedPtr<DeleteSubMenuResponse> DeleteSubMenuResponsePtr;
+typedef std::shared_ptr<DeleteSubMenuRequest> DeleteSubMenuRequestPtr;
+typedef std::shared_ptr<DeleteSubMenuResponse> DeleteSubMenuResponsePtr;
 
 MATCHER_P(CheckMessageResultCode, result_code, "") {
   return (*arg)[am::strings::msg_params][am::strings::result_code].asInt() ==
@@ -99,6 +101,8 @@ class DeleteSubMenuRequestTest
       , accessor_(commands_map_, commands_lock_)
       , message_(CreateMessage())
       , command_(CreateCommand<DeleteSubMenuRequest>(message_))
+      , mock_help_prompt_manager_(
+            std::make_shared<am_test::MockHelpPromptManager>())
       , app_(CreateMockApp()) {}
 
   am::CommandsMap commands_map_;
@@ -107,6 +111,7 @@ class DeleteSubMenuRequestTest
 
   MessageSharedPtr message_;
   DeleteSubMenuRequestPtr command_;
+  std::shared_ptr<am_test::MockHelpPromptManager> mock_help_prompt_manager_;
   MockAppPtr app_;
 };
 
@@ -118,7 +123,7 @@ TEST_F(DeleteSubMenuRequestTest, DISABLED_OnEvent_UI_UNSUPPORTED_RESOURCE) {
   (*msg)[am::strings::params][am::strings::connection_key] = kConnectionKey;
   (*msg)[am::strings::msg_params][am::strings::menu_id] = 10u;
 
-  utils::SharedPtr<DeleteSubMenuRequest> command =
+  std::shared_ptr<DeleteSubMenuRequest> command =
       CreateCommand<DeleteSubMenuRequest>(msg);
 
   MockAppPtr mock_app = CreateMockApp();
@@ -276,6 +281,9 @@ TEST_F(DeleteSubMenuRequestTest, OnEvent_DeleteSubmenu_SUCCESS) {
   EXPECT_CALL(*app_, commands_map()).WillOnce(Return(accessor_));
   EXPECT_CALL(*app_, app_id()).WillOnce(Return(kConnectionKey));
   EXPECT_CALL(*app_, RemoveCommand(_)).WillOnce(DeleteCommand(&commands_map_));
+  EXPECT_CALL(*app_, help_prompt_manager())
+      .WillOnce(ReturnRef(*mock_help_prompt_manager_));
+  EXPECT_CALL(*mock_help_prompt_manager_, OnVrCommandDeleted(kCmdId, false));
   EXPECT_CALL(
       mock_rpc_service_,
       ManageHMICommand(HMIResultCodeIs(hmi_apis::FunctionID::UI_DeleteCommand)))
@@ -287,6 +295,7 @@ TEST_F(DeleteSubMenuRequestTest, OnEvent_DeleteSubmenu_SUCCESS) {
       ManageMobileCommand(MobileResultCodeIs(mobile_apis::Result::SUCCESS),
                           am::commands::Command::SOURCE_SDL));
   EXPECT_CALL(*app_, UpdateHash());
+
   DeleteSubMenuRequestPtr command =
       CreateCommand<DeleteSubMenuRequest>(message_);
 

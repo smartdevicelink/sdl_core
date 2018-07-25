@@ -41,8 +41,7 @@
 #include "utils/file_system.h"
 #include "utils/logger.h"
 #include "utils/gen_hash.h"
-#include "utils/shared_ptr.h"
-#include "utils/make_shared.h"
+
 #include "utils/timer_task_impl.h"
 #include "application_manager/policies/policy_handler_interface.h"
 #include "application_manager/resumption/resume_ctrl.h"
@@ -83,8 +82,8 @@ void SwitchApplicationParameters(ApplicationSharedPtr app,
                                  const size_t device_id,
                                  const std::string& mac_address) {
   LOG4CXX_AUTO_TRACE(logger_);
-  utils::SharedPtr<ApplicationImpl> application =
-      ApplicationSharedPtr::dynamic_pointer_cast<ApplicationImpl>(app);
+  std::shared_ptr<ApplicationImpl> application =
+      std::dynamic_pointer_cast<ApplicationImpl>(app);
   DCHECK_OR_RETURN_VOID(application);
   application->app_id_ = app_id;
   application->device_id_ = device_id;
@@ -97,7 +96,7 @@ ApplicationImpl::ApplicationImpl(
     const std::string& mac_address,
     const connection_handler::DeviceHandle device_id,
     const custom_str::CustomString& app_name,
-    utils::SharedPtr<usage_statistics::StatisticsManager> statistics_manager,
+    std::shared_ptr<usage_statistics::StatisticsManager> statistics_manager,
     ApplicationManager& application_manager)
     : grammar_id_(0)
     , hmi_app_id_(0)
@@ -126,6 +125,7 @@ ApplicationImpl::ApplicationImpl(
     , device_id_(device_id)
     , secondary_device_id_(0)
     , usage_report_(mobile_app_id, statistics_manager)
+    , help_prompt_manager_impl_(*this, application_manager)
     , protocol_version_(
           protocol_handler::MajorProtocolVersion::PROTOCOL_VERSION_3)
     , is_voice_communication_application_(false)
@@ -795,6 +795,10 @@ bool ApplicationImpl::UnsubscribeFromButton(
 
 UsageStatistics& ApplicationImpl::usage_report() {
   return usage_report_;
+}
+
+HelpPromptManager& ApplicationImpl::help_prompt_manager() {
+  return help_prompt_manager_impl_;
 }
 
 bool ApplicationImpl::AreCommandLimitsExceeded(

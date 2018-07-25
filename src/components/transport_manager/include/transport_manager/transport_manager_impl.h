@@ -64,7 +64,7 @@ typedef threads::MessageLoopThread<std::queue<protocol_handler::RawMessagePtr> >
     RawMessageLoopThread;
 typedef threads::MessageLoopThread<std::queue<TransportAdapterEvent> >
     TransportAdapterEventLoopThread;
-typedef utils::SharedPtr<timer::Timer> TimerSPtr;
+typedef std::shared_ptr<timer::Timer> TimerSPtr;
 typedef std::map<DeviceUID, TransportAdapter*> DeviceToAdapterMap;
 
 /**

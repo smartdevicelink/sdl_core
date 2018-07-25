@@ -33,7 +33,7 @@
 #include "hmi/basic_communication_get_system_time_request.h"
 
 #include "gtest/gtest.h"
-#include "utils/shared_ptr.h"
+
 #include "application_manager/commands/command_request_test.h"
 #include "protocol_handler/mock_protocol_handler.h"
 

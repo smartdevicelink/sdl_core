@@ -87,14 +87,14 @@ class SSLHandshakeTest : public testing::TestWithParam<Protocol> {
         security_manager_test::MockCryptoManagerSettings>();
 
     server_manager_ = new security_manager::CryptoManagerImpl(
-        utils::SharedPtr<security_manager::CryptoManagerSettings>(
+        std::shared_ptr<security_manager::CryptoManagerSettings>(
             mock_server_manager_settings_));
     ASSERT_TRUE(server_manager_);
     mock_client_manager_settings_ = new testing::NiceMock<
         security_manager_test::MockCryptoManagerSettings>();
 
     client_manager_ = new security_manager::CryptoManagerImpl(
-        utils::SharedPtr<security_manager::CryptoManagerSettings>(
+        std::shared_ptr<security_manager::CryptoManagerSettings>(
             mock_client_manager_settings_));
     ASSERT_TRUE(client_manager_);
     server_ctx_ = NULL;

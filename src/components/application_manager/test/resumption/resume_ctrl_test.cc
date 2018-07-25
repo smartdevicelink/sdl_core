@@ -38,12 +38,13 @@
 #include "application_manager/usage_statistics.h"
 #include "application_manager/mock_application.h"
 #include "application_manager/mock_app_extension.h"
+#include "application_manager/mock_help_prompt_manager.h"
 #include "application_manager/mock_resumption_data.h"
 #include "interfaces/MOBILE_API.h"
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/application.h"
 #include "utils/data_accessor.h"
-#include "utils/make_shared.h"
+
 #include "application_manager/mock_message_helper.h"
 #include "application_manager/mock_application_manager.h"
 #include "application_manager/mock_application_manager_settings.h"
@@ -95,14 +96,16 @@ class ResumeCtrlTest : public ::testing::Test {
     ON_CALL(mock_app_mngr_, event_dispatcher())
         .WillByDefault(ReturnRef(mock_event_dispatcher_));
     mock_storage_ =
-        ::utils::MakeShared<NiceMock<resumption_test::MockResumptionData> >(
+        std::make_shared<NiceMock<resumption_test::MockResumptionData> >(
             mock_app_mngr_);
-    mock_app_ = utils::MakeShared<NiceMock<MockApplication> >();
-    mock_app_extension_ = utils::MakeShared<
+    mock_app_ = std::make_shared<NiceMock<MockApplication> >();
+    mock_help_prompt_manager_ =
+        std::shared_ptr<MockHelpPromptManager>(new MockHelpPromptManager());
+    mock_app_extension_ = std::make_shared<
         NiceMock<application_manager_test::MockAppExtension> >();
     const_app_ =
         static_cast<application_manager::ApplicationConstSharedPtr>(mock_app_);
-    res_ctrl_ = utils::MakeShared<ResumeCtrlImpl>(mock_app_mngr_);
+    res_ctrl_ = std::make_shared<ResumeCtrlImpl>(mock_app_mngr_);
     res_ctrl_->set_resumption_storage(mock_storage_);
 
     ON_CALL(mock_app_mngr_, state_controller())
@@ -151,13 +154,13 @@ class ResumeCtrlTest : public ::testing::Test {
   application_manager_test::MockApplicationManagerSettings
       mock_application_manager_settings_;
   application_manager_test::MockApplicationManager mock_app_mngr_;
-  utils::SharedPtr<NiceMock<application_manager_test::MockAppExtension> >
+  std::shared_ptr<NiceMock<application_manager_test::MockAppExtension> >
       mock_app_extension_;
   MockStateController mock_state_controller_;
-  utils::SharedPtr<ResumeCtrl> res_ctrl_;
-  utils::SharedPtr<NiceMock<resumption_test::MockResumptionData> >
-      mock_storage_;
-  utils::SharedPtr<NiceMock<MockApplication> > mock_app_;
+  std::shared_ptr<ResumeCtrl> res_ctrl_;
+  std::shared_ptr<NiceMock<resumption_test::MockResumptionData> > mock_storage_;
+  std::shared_ptr<NiceMock<MockApplication> > mock_app_;
+  std::shared_ptr<MockHelpPromptManager> mock_help_prompt_manager_;
   application_manager::ApplicationConstSharedPtr const_app_;
   const uint32_t kTestAppId_;
   const std::string kTestPolicyAppId_;
@@ -348,9 +351,13 @@ TEST_F(ResumeCtrlTest, StartResumption_AppWithCommands) {
       .WillByDefault(DoAll(SetArgReferee<2>(saved_app), Return(true)));
   EXPECT_CALL(*mock_app_, UpdateHash());
   EXPECT_CALL(*mock_app_, set_grammar_id(kTestGrammarId_));
+  ON_CALL(*mock_app_, help_prompt_manager())
+      .WillByDefault(ReturnRef(*mock_help_prompt_manager_));
 
   for (uint32_t i = 0; i < count_of_commands; ++i) {
     EXPECT_CALL(*mock_app_, AddCommand(i, test_application_commands[i]));
+    EXPECT_CALL(*mock_help_prompt_manager_,
+                OnVrCommandAdded(i, test_application_commands[i], true));
   }
 
   smart_objects::SmartObjectList requests;
@@ -609,9 +616,16 @@ TEST_F(ResumeCtrlTest, StartAppHmiStateResumption_AppInFull) {
   saved_app[application_manager::strings::ign_off_count] = ign_off_count;
   saved_app[application_manager::strings::hmi_level] = restored_test_type;
 
+  application_manager::CommandsMap command;
+  DataAccessor<application_manager::CommandsMap> data_accessor(
+      command, app_set_lock_ptr_);
+
   EXPECT_CALL(mock_state_controller_, SetRegularState(_, restored_test_type))
       .Times(AtLeast(1));
   GetInfoFromApp();
+  EXPECT_CALL(mock_app_mngr_, GetDefaultHmiLevel(const_app_))
+      .WillRepeatedly(Return(kDefaultTestLevel_));
+  EXPECT_CALL(*mock_app_, commands_map()).WillRepeatedly(Return(data_accessor));
   ON_CALL(*mock_storage_,
           GetSavedApplication(kTestPolicyAppId_, kMacAddress_, _))
       .WillByDefault(DoAll(SetArgReferee<2>(saved_app), Return(true)));
@@ -769,6 +783,10 @@ TEST_F(
 TEST_F(ResumeCtrlTest, RestoreAppHMIState_RestoreHMILevelFull) {
   mobile_apis::HMILevel::eType restored_test_type = eType::HMI_FULL;
 
+  ::application_manager::CommandsMap command;
+  DataAccessor<application_manager::CommandsMap> data_accessor(
+      command, app_set_lock_ptr_);
+
   smart_objects::SmartObject saved_app;
   saved_app[application_manager::strings::hash_id] = kHash_;
   saved_app[application_manager::strings::grammar_id] = kTestGrammarId_;
@@ -777,6 +795,9 @@ TEST_F(ResumeCtrlTest, RestoreAppHMIState_RestoreHMILevelFull) {
   EXPECT_CALL(mock_state_controller_, SetRegularState(_, restored_test_type))
       .Times(AtLeast(1));
   GetInfoFromApp();
+  EXPECT_CALL(mock_app_mngr_, GetDefaultHmiLevel(const_app_))
+      .WillRepeatedly(Return(kDefaultTestLevel_));
+  EXPECT_CALL(*mock_app_, commands_map()).WillRepeatedly(Return(data_accessor));
   ON_CALL(*mock_storage_,
           GetSavedApplication(kTestPolicyAppId_, kMacAddress_, _))
       .WillByDefault(DoAll(SetArgReferee<2>(saved_app), Return(true)));
@@ -841,6 +862,10 @@ TEST_F(ResumeCtrlTest, ApplicationResumptiOnTimer_AppInFull) {
   ON_CALL(mock_app_mngr_, application(kTestAppId_))
       .WillByDefault(Return(mock_app_));
 
+  ::application_manager::CommandsMap command;
+  DataAccessor<application_manager::CommandsMap> data_accessor(
+      command, app_set_lock_ptr_);
+
   mobile_apis::HMILevel::eType restored_test_type = eType::HMI_FULL;
   const uint32_t ign_off_count = 0u;
   smart_objects::SmartObject saved_app;
@@ -853,6 +878,9 @@ TEST_F(ResumeCtrlTest, ApplicationResumptiOnTimer_AppInFull) {
   EXPECT_CALL(state_controller, SetRegularState(_, restored_test_type))
       .Times(AtLeast(1));
   GetInfoFromApp();
+  EXPECT_CALL(mock_app_mngr_, GetDefaultHmiLevel(const_app_))
+      .WillRepeatedly(Return(kDefaultTestLevel_));
+  EXPECT_CALL(*mock_app_, commands_map()).WillRepeatedly(Return(data_accessor));
   ON_CALL(*mock_storage_,
           GetSavedApplication(kTestPolicyAppId_, kMacAddress_, _))
       .WillByDefault(DoAll(SetArgReferee<2>(saved_app), Return(true)));
@@ -942,8 +970,8 @@ TEST_F(ResumeCtrlTest, SetAppHMIState_HMIFull_WithPolicy_DevDisallowed) {
 }
 
 TEST_F(ResumeCtrlTest, SaveAllApplications) {
-  utils::SharedPtr<application_manager_test::MockApplication> test_app =
-      ::utils::MakeShared<application_manager_test::MockApplication>();
+  std::shared_ptr<application_manager_test::MockApplication> test_app =
+      std::make_shared<application_manager_test::MockApplication>();
   EXPECT_CALL(*test_app, app_id()).WillRepeatedly(Return(kTestAppId_));
 
   application_manager::ApplicationSet app_set;
@@ -958,8 +986,8 @@ TEST_F(ResumeCtrlTest, SaveAllApplications) {
 }
 
 TEST_F(ResumeCtrlTest, SaveAllApplications_EmptyApplicationlist) {
-  utils::SharedPtr<application_manager::Application> mock_app =
-      ::utils::MakeShared<application_manager_test::MockApplication>();
+  std::shared_ptr<application_manager::Application> mock_app =
+      std::make_shared<application_manager_test::MockApplication>();
 
   application_manager::ApplicationSet app_set;
 
@@ -972,8 +1000,8 @@ TEST_F(ResumeCtrlTest, SaveAllApplications_EmptyApplicationlist) {
 }
 
 TEST_F(ResumeCtrlTest, SaveApplication) {
-  utils::SharedPtr<application_manager::Application> app_sh_mock =
-      ::utils::MakeShared<application_manager_test::MockApplication>();
+  std::shared_ptr<application_manager::Application> app_sh_mock =
+      std::make_shared<application_manager_test::MockApplication>();
 
   EXPECT_CALL(*mock_storage_, SaveApplication(app_sh_mock));
   res_ctrl_->SaveApplication(app_sh_mock);
@@ -993,16 +1021,16 @@ TEST_F(ResumeCtrlTest, OnAppActivated_ResumptionHasStarted) {
   const bool res = res_ctrl_->StartResumptionOnlyHMILevel(mock_app_);
   EXPECT_TRUE(res);
 
-  utils::SharedPtr<application_manager_test::MockApplication> app_sh_mock =
-      ::utils::MakeShared<application_manager_test::MockApplication>();
+  std::shared_ptr<application_manager_test::MockApplication> app_sh_mock =
+      std::make_shared<application_manager_test::MockApplication>();
 
   EXPECT_CALL(*app_sh_mock, app_id()).WillOnce(Return(kTestAppId_));
   res_ctrl_->OnAppActivated(app_sh_mock);
 }
 
 TEST_F(ResumeCtrlTest, OnAppActivated_ResumptionNotActive) {
-  utils::SharedPtr<application_manager_test::MockApplication> app_sh_mock =
-      ::utils::MakeShared<application_manager_test::MockApplication>();
+  std::shared_ptr<application_manager_test::MockApplication> app_sh_mock =
+      std::make_shared<application_manager_test::MockApplication>();
   EXPECT_CALL(*app_sh_mock, app_id()).Times(0);
   res_ctrl_->OnAppActivated(app_sh_mock);
 }
@@ -1108,8 +1136,8 @@ TEST_F(ResumeCtrlTest, DISABLED_OnSuspend) {
 }
 
 TEST_F(ResumeCtrlTest, OnSuspend_EmptyApplicationlist) {
-  utils::SharedPtr<application_manager::Application> mock_app =
-      ::utils::MakeShared<application_manager_test::MockApplication>();
+  std::shared_ptr<application_manager::Application> mock_app =
+      std::make_shared<application_manager_test::MockApplication>();
 
   application_manager::ApplicationSet app_set;
 

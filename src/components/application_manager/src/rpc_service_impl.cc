@@ -327,8 +327,8 @@ void RPCServiceImpl::Handle(const impl::MessageToMobile message) {
     return;
   }
 
-  utils::SharedPtr<protocol_handler::RawMessage> rawMessage =
-      MobileMessageHandler::HandleOutgoingMessageProtocol(message);
+  std::shared_ptr<protocol_handler::RawMessage> rawMessage(
+      MobileMessageHandler::HandleOutgoingMessageProtocol(message));
 
   if (!rawMessage) {
     LOG4CXX_ERROR(logger_, "Failed to create raw message.");
@@ -404,7 +404,7 @@ void RPCServiceImpl::SendMessageToMobile(
       "Attached schema to message, result if valid: " << message->isValid());
 
   // Messages to mobile are not yet prioritized so use default priority value
-  utils::SharedPtr<Message> message_to_send(
+  std::shared_ptr<Message> message_to_send(
       new Message(protocol_handler::MessagePriority::kDefault));
   if (!ConvertSOtoMessage((*message), (*message_to_send))) {
     LOG4CXX_WARN(logger_, "Can't send msg to Mobile: failed to create string");
@@ -486,7 +486,7 @@ void RPCServiceImpl::SendMessageToHMI(
   }
 
   // SmartObject |message| has no way to declare priority for now
-  utils::SharedPtr<Message> message_to_send(
+  std::shared_ptr<Message> message_to_send(
       new Message(protocol_handler::MessagePriority::kDefault));
   if (!message_to_send) {
     LOG4CXX_ERROR(logger_, "Null pointer");

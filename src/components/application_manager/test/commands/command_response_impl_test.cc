@@ -34,7 +34,7 @@
 #include <string>
 
 #include "gtest/gtest.h"
-#include "utils/shared_ptr.h"
+
 #include "smart_objects/smart_object.h"
 #include "application_manager/smart_object_keys.h"
 #include "application_manager/commands/commands_test.h"
@@ -49,7 +49,7 @@ namespace command_response_impl {
 
 namespace strings = ::application_manager::strings;
 namespace hmi_response = ::application_manager::hmi_response;
-using ::utils::SharedPtr;
+
 using ::application_manager::commands::MessageSharedPtr;
 using ::application_manager::commands::CommandResponseImpl;
 
@@ -57,7 +57,8 @@ class CommandResponseImplTest
     : public CommandsTest<CommandsTestMocks::kIsNice> {};
 
 TEST_F(CommandResponseImplTest, BasicMethodsOverloads_SUCCESS) {
-  SharedPtr<CommandResponseImpl> command = CreateCommand<CommandResponseImpl>();
+  std::shared_ptr<CommandResponseImpl> command =
+      CreateCommand<CommandResponseImpl>();
   // Current implementation always return `true`
   EXPECT_TRUE(command->Init());
   EXPECT_TRUE(command->CleanUp());
@@ -66,7 +67,7 @@ TEST_F(CommandResponseImplTest, BasicMethodsOverloads_SUCCESS) {
 
 TEST_F(CommandResponseImplTest, SendResponse_MessageWithResultCode_SUCCESS) {
   MessageSharedPtr msg;
-  SharedPtr<CommandResponseImpl> command =
+  std::shared_ptr<CommandResponseImpl> command =
       CreateCommand<CommandResponseImpl>(msg);
   // Do not have a weight in this case
   const bool kSuccess = true;
@@ -86,7 +87,7 @@ TEST_F(CommandResponseImplTest, SendResponse_MessageWithResultCode_SUCCESS) {
 TEST_F(CommandResponseImplTest,
        SendResponse_EmptyMessageValidResultCode_SUCCESS) {
   MessageSharedPtr msg;
-  SharedPtr<CommandResponseImpl> command =
+  std::shared_ptr<CommandResponseImpl> command =
       CreateCommand<CommandResponseImpl>(msg);
 
   const bool kSuccess = true;
@@ -108,7 +109,7 @@ TEST_F(CommandResponseImplTest,
 TEST_F(CommandResponseImplTest,
        SendResponse_EmptyMessageInvalidResultCode_SUCCESS) {
   MessageSharedPtr msg;
-  SharedPtr<CommandResponseImpl> command =
+  std::shared_ptr<CommandResponseImpl> command =
       CreateCommand<CommandResponseImpl>(msg);
 
   const bool kSuccess = true;
@@ -133,7 +134,7 @@ TEST_F(CommandResponseImplTest,
 TEST_F(CommandResponseImplTest,
        SendResponse_EmptyMessageInvalidResultCodeNoHmiResponse_SUCCESS) {
   MessageSharedPtr msg;
-  SharedPtr<CommandResponseImpl> command =
+  std::shared_ptr<CommandResponseImpl> command =
       CreateCommand<CommandResponseImpl>(msg);
 
   const mobile_apis::Result::eType kResultCode =
@@ -158,7 +159,7 @@ TEST_F(CommandResponseImplTest,
 TEST_F(CommandResponseImplTest,
        SendResponse_EmptyMessageInvalidResultCodeNoHmiResponse_INVALID_ENUM) {
   MessageSharedPtr msg;
-  SharedPtr<CommandResponseImpl> command =
+  std::shared_ptr<CommandResponseImpl> command =
       CreateCommand<CommandResponseImpl>(msg);
 
   const mobile_apis::Result::eType kResultCode =

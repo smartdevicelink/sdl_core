@@ -36,7 +36,7 @@
 #include "mobile/delete_command_request.h"
 
 #include "gtest/gtest.h"
-#include "utils/shared_ptr.h"
+
 #include "smart_objects/smart_object.h"
 #include "application_manager/smart_object_keys.h"
 #include "application_manager/commands/command_request_test.h"
@@ -44,6 +44,7 @@
 #include "application_manager/mock_application.h"
 #include "application_manager/mock_message_helper.h"
 #include "application_manager/mock_hmi_interface.h"
+#include "application_manager/mock_help_prompt_manager.h"
 #include "application_manager/event_engine/event.h"
 
 namespace test {
@@ -56,13 +57,14 @@ using ::testing::_;
 using ::testing::Return;
 using ::testing::ReturnRef;
 namespace am = ::application_manager;
+namespace am_test = application_manager_test;
 using sdl_rpc_plugin::commands::DeleteCommandRequest;
 using am::commands::MessageSharedPtr;
 using am::event_engine::Event;
 using am::MockMessageHelper;
 using am::MockHmiInterfaces;
 
-typedef SharedPtr<DeleteCommandRequest> DeleteCommandPtr;
+typedef std::shared_ptr<DeleteCommandRequest> DeleteCommandPtr;
 
 namespace {
 const int32_t kCommandId = 1;
@@ -74,7 +76,10 @@ const uint32_t kConnectionKey = 2u;
 class DeleteCommandRequestTest
     : public CommandRequestTest<CommandsTestMocks::kIsNice> {
  public:
-  DeleteCommandRequestTest() : mock_app_(CreateMockApp()) {}
+  DeleteCommandRequestTest()
+      : mock_help_prompt_manager_(
+            std::make_shared<am_test::MockHelpPromptManager>())
+      , mock_app_(CreateMockApp()) {}
   MessageSharedPtr CreateFullParamsUISO() {
     MessageSharedPtr msg = CreateMessage(smart_objects::SmartType_Map);
     (*msg)[am::strings::params][am::strings::connection_key] = kConnectionKey;
@@ -132,6 +137,7 @@ class DeleteCommandRequestTest
   }
 
   NiceMock<MockHmiInterfaces> hmi_interfaces_;
+  std::shared_ptr<am_test::MockHelpPromptManager> mock_help_prompt_manager_;
   MockAppPtr mock_app_;
 };
 
@@ -188,6 +194,11 @@ TEST_F(DeleteCommandRequestTest,
       ManageMobileCommand(_, am::commands::Command::CommandSource::SOURCE_SDL))
       .WillOnce(DoAll(SaveArg<0>(&vr_command_result), Return(true)));
 
+  EXPECT_CALL(*mock_app_, help_prompt_manager())
+      .WillOnce(ReturnRef(*mock_help_prompt_manager_));
+  EXPECT_CALL(*mock_help_prompt_manager_,
+              OnVrCommandDeleted(kCommandId, false));
+
   command->on_event(event_vr);
 
   ResultCommandExpectations(vr_command_result, "VR is not supported by system");
@@ -241,10 +252,15 @@ TEST_F(DeleteCommandRequestTest,
 
   EXPECT_CALL(*app, UpdateHash());
 
+  EXPECT_CALL(*app, help_prompt_manager())
+      .WillOnce(ReturnRef(*mock_help_prompt_manager_));
+  EXPECT_CALL(*mock_help_prompt_manager_,
+              OnVrCommandDeleted(kCommandId, false));
+
   MessageSharedPtr result_msg(
       CatchMobileCommandResult(CallOnEvent(*command, event_ui)));
 
-  ASSERT_TRUE(result_msg);
+  ASSERT_TRUE((bool)result_msg);
 
   ResultCommandExpectations(result_msg, "UI is not supported by system");
 }

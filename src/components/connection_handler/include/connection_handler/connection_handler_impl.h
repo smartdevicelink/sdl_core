@@ -640,7 +640,7 @@ class ConnectionHandlerImpl
    * @brief session/connection map
    */
   SessionConnectionMap session_connection_map_;
-  mutable std::shared_ptr<sync_primitives::Lock>
+  mutable std::shared_ptr<sync_primitives::RecursiveLock>
       session_connection_map_lock_ptr_;
 
   /**

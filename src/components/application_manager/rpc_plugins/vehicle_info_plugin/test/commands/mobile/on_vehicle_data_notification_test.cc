@@ -36,7 +36,7 @@
 
 #include "gtest/gtest.h"
 #include "mobile/on_vehicle_data_notification.h"
-#include "utils/shared_ptr.h"
+
 #include "utils/custom_string.h"
 #include "smart_objects/smart_object.h"
 #include "application_manager/smart_object_keys.h"
@@ -61,7 +61,7 @@ using ::testing::ReturnRef;
 using am::commands::MessageSharedPtr;
 using vehicle_info_plugin::commands::OnVehicleDataNotification;
 
-typedef ::utils::SharedPtr<OnVehicleDataNotification> NotificationPtr;
+typedef std::shared_ptr<OnVehicleDataNotification> NotificationPtr;
 
 namespace {
 const uint32_t kAppId = 1u;

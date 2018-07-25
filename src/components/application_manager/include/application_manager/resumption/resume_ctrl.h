@@ -34,14 +34,14 @@
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_RESUMPTION_RESUME_CTRL_H_
 
 #include <stdint.h>
-#include "utils/shared_ptr.h"
+
 #include "application_manager/resumption/resumption_data.h"
 
 namespace application_manager {
 class ApplicationManager;
 class Application;
-typedef utils::SharedPtr<Application> ApplicationSharedPtr;
-typedef utils::SharedPtr<const Application> ApplicationConstSharedPtr;
+typedef std::shared_ptr<Application> ApplicationSharedPtr;
+typedef std::shared_ptr<const Application> ApplicationConstSharedPtr;
 }
 namespace app_mngr = application_manager;
 
@@ -270,7 +270,7 @@ class ResumeCtrl {
 
 #ifdef BUILD_TESTS
   virtual void set_resumption_storage(
-      utils::SharedPtr<ResumptionData> mock_storage) = 0;
+      std::shared_ptr<ResumptionData> mock_storage) = 0;
 
   virtual bool get_resumption_active() const = 0;
 #endif  // BUILD_TESTS

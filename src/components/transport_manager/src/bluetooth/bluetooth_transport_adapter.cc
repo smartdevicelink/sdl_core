@@ -80,8 +80,8 @@ void BluetoothTransportAdapter::Store() const {
     if (!device) {  // device could have been disconnected
       continue;
     }
-    utils::SharedPtr<BluetoothDevice> bluetooth_device =
-        DeviceSptr::static_pointer_cast<BluetoothDevice>(device);
+    std::shared_ptr<BluetoothDevice> bluetooth_device =
+        std::static_pointer_cast<BluetoothDevice>(device);
     Json::Value device_dictionary;
     device_dictionary["name"] = bluetooth_device->name();
     char address[18];

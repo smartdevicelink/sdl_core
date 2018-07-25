@@ -320,9 +320,10 @@ void AddCommandRequest::on_event(const event_engine::Event& event) {
     return;
   }
 
+  const uint32_t cmd_id =
+      (*message_)[strings::msg_params][strings::cmd_id].asUInt();
   smart_objects::SmartObject msg_param(smart_objects::SmartType_Map);
-  msg_param[strings::cmd_id] =
-      (*message_)[strings::msg_params][strings::cmd_id];
+  msg_param[strings::cmd_id] = cmd_id;
   msg_param[strings::app_id] = application->app_id();
 
   switch (event.id()) {
@@ -458,8 +459,7 @@ void AddCommandRequest::on_event(const event_engine::Event& event) {
       msg_params[strings::type] = hmi_apis::Common_VRCommandType::Command;
 
       SendHMIRequest(hmi_apis::FunctionID::VR_DeleteCommand, &msg_params);
-      application->RemoveCommand(
-          (*message_)[strings::msg_params][strings::cmd_id].asUInt());
+      application->RemoveCommand(cmd_id);
       result = false;
       LOG4CXX_DEBUG(logger_, "Result " << result);
     }
@@ -474,8 +474,7 @@ void AddCommandRequest::on_event(const event_engine::Event& event) {
 
     SendHMIRequest(hmi_apis::FunctionID::UI_DeleteCommand, &msg_params);
 
-    application->RemoveCommand(
-        (*message_)[strings::msg_params][strings::cmd_id].asUInt());
+    application->RemoveCommand(cmd_id);
     result = false;
     LOG4CXX_DEBUG(logger_, "Result " << result);
   }
@@ -501,7 +500,10 @@ void AddCommandRequest::on_event(const event_engine::Event& event) {
     result = false;
   }
 
-  if (!result) {
+  if (result) {
+    application->help_prompt_manager().OnVrCommandAdded(
+        cmd_id, (*message_)[strings::msg_params], false);
+  } else {
     RemoveCommand();
   }
 
@@ -590,18 +592,18 @@ const std::string AddCommandRequest::GenerateMobileResponseInfo() {
 void AddCommandRequest::RemoveCommand() {
   LOG4CXX_AUTO_TRACE(logger_);
   ApplicationSharedPtr app = application_manager_.application(connection_key());
-  if (!app.valid()) {
+  if (app.use_count() == 0) {
     LOG4CXX_ERROR(logger_, "No application associated with session key");
     return;
   }
 
+  const uint32_t cmd_id =
+      (*message_)[strings::msg_params][strings::cmd_id].asUInt();
   smart_objects::SmartObject msg_params(smart_objects::SmartType_Map);
-  msg_params[strings::cmd_id] =
-      (*message_)[strings::msg_params][strings::cmd_id];
+  msg_params[strings::cmd_id] = cmd_id;
   msg_params[strings::app_id] = app->app_id();
 
-  app->RemoveCommand(
-      (*message_)[strings::msg_params][strings::cmd_id].asUInt());
+  app->RemoveCommand(cmd_id);
 
   if (BothSend() && !(is_vr_received_ || is_ui_received_)) {
     // in case we have send bth UI and VR and no one respond

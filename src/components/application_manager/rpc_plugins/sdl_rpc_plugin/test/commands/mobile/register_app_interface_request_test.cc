@@ -36,7 +36,6 @@
 
 #include "gtest/gtest.h"
 #include "mobile/register_app_interface_request.h"
-#include "utils/shared_ptr.h"
 #include "smart_objects/smart_object.h"
 #include "application_manager/commands/commands_test.h"
 #include "application_manager/commands/command_request_test.h"
@@ -70,7 +69,6 @@ using ::testing::DoAll;
 
 namespace am = ::application_manager;
 
-using ::utils::SharedPtr;
 using am::commands::MessageSharedPtr;
 using sdl_rpc_plugin::commands::RegisterAppInterfaceRequest;
 
@@ -221,15 +219,14 @@ class RegisterAppInterfaceRequestTest
                 ManageHMICommand(HMIResultCodeIs(
                     hmi_apis::FunctionID::VR_ChangeRegistration))).Times(0);
 
-    EXPECT_CALL(
-        app_mngr_,
-        OnApplicationSwitched(
-            MockAppPtr::static_pointer_cast<application_manager::Application>(
-                mock_app)));
+    EXPECT_CALL(app_mngr_,
+                OnApplicationSwitched(
+                    std::static_pointer_cast<application_manager::Application>(
+                        mock_app)));
   }
 
   MessageSharedPtr msg_;
-  SharedPtr<RegisterAppInterfaceRequest> command_;
+  std::shared_ptr<RegisterAppInterfaceRequest> command_;
 
   const utils::custom_string::CustomString app_name_;
   std::shared_ptr<sync_primitives::Lock> lock_ptr_;
@@ -283,7 +280,7 @@ TEST_F(RegisterAppInterfaceRequestTest, Run_MinimalData_SUCCESS) {
   ON_CALL(mock_policy_handler_, GetInitialAppData(kAppId, _, _))
       .WillByDefault(Return(true));
   policy::StatusNotifier notify_upd_manager =
-      utils::MakeShared<utils::CallNothing>();
+      std::make_shared<utils::CallNothing>();
   ON_CALL(mock_policy_handler_, AddApplication(_, _))
       .WillByDefault(Return(notify_upd_manager));
 
@@ -381,7 +378,7 @@ TEST_F(RegisterAppInterfaceRequestTest,
   ON_CALL(mock_policy_handler_, GetInitialAppData(kAppId, _, _))
       .WillByDefault(Return(true));
   policy::StatusNotifier notify_upd_manager =
-      utils::MakeShared<utils::CallNothing>();
+      std::make_shared<utils::CallNothing>();
   ON_CALL(mock_policy_handler_, AddApplication(_, _))
       .WillByDefault(Return(notify_upd_manager));
 
@@ -438,8 +435,7 @@ TEST_F(RegisterAppInterfaceRequestTest,
   EXPECT_CALL(
       mock_resume_crt_,
       CheckApplicationHash(
-          MockAppPtr::static_pointer_cast<application_manager::Application>(
-              mock_app),
+          std::static_pointer_cast<application_manager::Application>(mock_app),
           request_hash_id)).WillOnce(Return(true));
 
   EXPECT_CALL(mock_resume_crt_, RemoveApplicationFromSaved(_)).Times(0);
@@ -473,15 +469,13 @@ TEST_F(RegisterAppInterfaceRequestTest,
   EXPECT_CALL(
       mock_resume_crt_,
       CheckApplicationHash(
-          MockAppPtr::static_pointer_cast<application_manager::Application>(
-              mock_app),
+          std::static_pointer_cast<application_manager::Application>(mock_app),
           request_hash_id)).WillOnce(Return(false));
 
   EXPECT_CALL(
       mock_application_helper_,
       RecallApplicationData(
-          MockAppPtr::static_pointer_cast<application_manager::Application>(
-              mock_app),
+          std::static_pointer_cast<application_manager::Application>(mock_app),
           _));
 
   EXPECT_CALL(app_mngr_, RegisterApplication(msg_)).Times(0);
@@ -510,8 +504,7 @@ TEST_F(RegisterAppInterfaceRequestTest,
   EXPECT_CALL(
       mock_application_helper_,
       RecallApplicationData(
-          MockAppPtr::static_pointer_cast<application_manager::Application>(
-              mock_app),
+          std::static_pointer_cast<application_manager::Application>(mock_app),
           _));
 
   EXPECT_CALL(app_mngr_, RegisterApplication(msg_)).Times(0);

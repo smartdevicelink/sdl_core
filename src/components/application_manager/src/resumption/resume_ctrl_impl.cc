@@ -48,7 +48,7 @@
 #include "utils/helpers.h"
 #include "application_manager/resumption/resumption_data_db.h"
 #include "application_manager/resumption/resumption_data_json.h"
-#include "utils/make_shared.h"
+
 #include "utils/timer_task_impl.h"
 
 namespace resumption {
@@ -64,7 +64,6 @@ CREATE_LOGGERPTR_GLOBAL(logger_, "Resumption")
 
 ResumeCtrlImpl::ResumeCtrlImpl(ApplicationManager& application_manager)
     : event_engine::EventObserver(application_manager.event_dispatcher())
-    , queue_lock_(false)
     , restore_hmi_level_timer_(
           "RsmCtrlRstore",
           new timer::TimerTaskImpl<ResumeCtrlImpl>(
@@ -79,7 +78,7 @@ ResumeCtrlImpl::ResumeCtrlImpl(ApplicationManager& application_manager)
     , application_manager_(application_manager) {}
 #ifdef BUILD_TESTS
 void ResumeCtrlImpl::set_resumption_storage(
-    utils::SharedPtr<ResumptionData> mock_storage) {
+    std::shared_ptr<ResumptionData> mock_storage) {
   resumption_storage_ = mock_storage;
 }
 
@@ -625,8 +624,12 @@ void ResumeCtrlImpl::AddCommands(ApplicationSharedPtr application,
         saved_app[strings::application_commands];
     for (size_t i = 0; i < app_commands.length(); ++i) {
       const smart_objects::SmartObject& command = app_commands[i];
+      const uint32_t cmd_id = command[strings::cmd_id].asUInt();
+      const bool is_resumption = true;
 
-      application->AddCommand(command[strings::cmd_id].asUInt(), command);
+      application->AddCommand(cmd_id, command);
+      application->help_prompt_manager().OnVrCommandAdded(
+          cmd_id, command, is_resumption);
     }
     ProcessHMIRequests(MessageHelper::CreateAddCommandRequestToHMI(
         application, application_manager_));

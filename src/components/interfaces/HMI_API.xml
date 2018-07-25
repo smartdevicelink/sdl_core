@@ -335,6 +335,20 @@
   <element name="CLEAR" />
   <description>Clears the media clock timer (previously done through Show->mediaClock)</description>
 </enum>
+<enum name="AudioStreamingIndicator">
+  <element name="PLAY_PAUSE">
+    <description>Default playback indicator.</description>
+  </element>
+  <element name="PLAY">
+    <description>Indicates that a button press of the Play/Pause button would start the playback.</description>
+  </element>
+  <element name="PAUSE">
+    <description>Indicates that a button press of the Play/Pause button would pause the current playback.</description>
+  </element>
+  <element name="STOP">
+    <description>Indicates that a button press of the Play/Pause button would stop the current playback.</description>
+  </element>
+</enum> 
 
 <enum name="SystemContext">
   <description>Enumeration that describes possible contexts the application might be in on HU.</description>
@@ -1123,21 +1137,35 @@
 
 <enum name="SamplingRate">
   <description>Describes different sampling options for PerformAudioPassThru.</description>
-  <element name="8KHZ" internal_name="RATE_8KHZ"/>
-  <element name="16KHZ" internal_name="RATE_16KHZ"/>
-  <element name="22KHZ" internal_name="RATE_22KHZ"/>
-  <element name="44KHZ" internal_name="RATE_44KHZ"/>
+  <element name="8KHZ" internal_name="RATE_8KHZ">
+    <description>Sampling rate of 8000 Hz.</description>
+  </element>
+  <element name="16KHZ" internal_name="RATE_16KHZ">
+    <description>Sampling rate of 16000 Hz.</description>
+  </element>
+  <element name="22KHZ" internal_name="RATE_22KHZ">
+    <description>Sampling rate of 22050 Hz.</description>
+  </element>
+  <element name="44KHZ" internal_name="RATE_44KHZ">
+    <description>Sampling rate of 44100 Hz.</description>
+  </element>
 </enum>
 
 <enum name="BitsPerSample">
   <description>Describes different quality options for PerformAudioPassThru.</description>
-  <element name="8_BIT" internal_name="RATE_8_BIT"/>
-  <element name="16_BIT" internal_name="RATE_16_BIT"/>
+  <element name="8_BIT" internal_name="RATE_8_BIT">
+    <description>Audio sample is 8 bits wide, unsigned.</description>
+  </element>
+  <element name="16_BIT" internal_name="RATE_16_BIT">
+    <description>Audio sample is 16 bits wide, signed, and in little endian.</description>
+  </element>
 </enum>
 
 <enum name="AudioType">
   <description>Describes different audio type options for PerformAudioPassThru.</description>
-  <element name="PCM" />
+  <element name="PCM">
+    <description>Linear PCM.</description>
+  </element>
 </enum>
 
 <enum name="KeyboardLayout">
@@ -2382,6 +2410,7 @@
   <description>
     Describes different audio type configurations for PerformAudioPassThru.
     e.g. 8kHz,8-bit,PCM
+    The audio is recorded in monaural.
   </description>
   <param name="samplingRate" type="Common.SamplingRate" mandatory="true"/>
   <param name="bitsPerSample" type="Common.BitsPerSample" mandatory="true"/>
@@ -3836,6 +3865,9 @@
     <param name="updateMode" type="Common.ClockUpdateMode" mandatory="true">
       <description>The update method of the media clock.</description>
       <description>In case of pause, resume, or clear, the start time value is ignored and shall be left out.  For resume, the time continues with the same value as it was when paused.</description>
+    </param>
+    <param name="audioStreamingIndicator" type="Common.AudioStreamingIndicator" mandatory="false">
+      <description>Indicates that a button press of the Play/Pause button would play, pause or Stop the current playback.</description>
     </param>
     <param name="appID" type="Integer" mandatory="true">
       <description>ID of application that requested this RPC.</description>

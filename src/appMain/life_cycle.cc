@@ -32,7 +32,6 @@
 
 #include "life_cycle.h"
 #include "utils/signals.h"
-#include "utils/make_shared.h"
 #include "config_profile/profile.h"
 #include "application_manager/system_time/system_time_handler_impl.h"
 #include "resumption/last_state_impl.h"
@@ -122,7 +121,7 @@ bool LifeCycle::StartComponents() {
   security_manager_ =
       new security_manager::SecurityManagerImpl(std::move(system_time_handler));
   crypto_manager_ = new security_manager::CryptoManagerImpl(
-      utils::MakeShared<security_manager::CryptoManagerSettingsImpl>(
+      std::make_shared<security_manager::CryptoManagerSettingsImpl>(
           profile_, app_manager_->GetPolicyHandler().RetrieveCertificate()));
   protocol_handler_->AddProtocolObserver(security_manager_);
   protocol_handler_->set_security_manager(security_manager_);

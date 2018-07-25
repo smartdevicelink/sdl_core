@@ -44,12 +44,13 @@
 #include "application_manager/application.h"
 #include "application_manager/application_data_impl.h"
 #include "application_manager/usage_statistics.h"
+#include "application_manager/help_prompt_manager_impl.h"
 #include "application_manager/hmi_state.h"
 #include "protocol_handler/protocol_handler.h"
 
 #include "connection_handler/device.h"
 #include "utils/lock.h"
-#include "utils/atomic_object.h"
+#include <atomic>
 #include "utils/custom_string.h"
 #include "utils/timer.h"
 #include "utils/macro.h"
@@ -90,7 +91,7 @@ class ApplicationImpl : public virtual Application,
       const std::string& mac_address,
       const connection_handler::DeviceHandle device_id,
       const custom_str::CustomString& app_name,
-      utils::SharedPtr<usage_statistics::StatisticsManager> statistics_manager,
+      std::shared_ptr<usage_statistics::StatisticsManager> statistics_manager,
       ApplicationManager& application_manager);
 
   DEPRECATED ApplicationImpl(
@@ -98,7 +99,7 @@ class ApplicationImpl : public virtual Application,
       const std::string& policy_app_id,
       const std::string& mac_address,
       const custom_str::CustomString& app_name,
-      utils::SharedPtr<usage_statistics::StatisticsManager> statistics_manager,
+      std::shared_ptr<usage_statistics::StatisticsManager> statistics_manager,
       ApplicationManager& application_manager);
 
   ~ApplicationImpl();
@@ -267,6 +268,12 @@ class ApplicationImpl : public virtual Application,
   void SetHashChangedDuringSuspend(const bool state) OVERRIDE;
 
   UsageStatistics& usage_report();
+
+  /**
+   * @brief Access to HelpPromptManager interface
+   * @return object for Handling VR help
+   */
+  HelpPromptManager& help_prompt_manager() OVERRIDE;
 
   bool AreCommandLimitsExceeded(mobile_apis::FunctionID::eType cmd_id,
                                 TLimitSource source);
@@ -489,9 +496,10 @@ class ApplicationImpl : public virtual Application,
   AppFilesMap app_files_;
   std::set<mobile_apis::ButtonName::eType> subscribed_buttons_;
   UsageStatistics usage_report_;
+  HelpPromptManagerImpl help_prompt_manager_impl_;
   protocol_handler::MajorProtocolVersion protocol_version_;
   bool is_voice_communication_application_;
-  sync_primitives::atomic_bool is_resuming_;
+  std::atomic_bool is_resuming_;
   mobile_api::HMILevel::eType deferred_resumption_hmi_level_;
   bool is_hash_changed_during_suspend_;
 

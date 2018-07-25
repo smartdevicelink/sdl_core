@@ -35,6 +35,8 @@
 
 #include <string>
 #include <set>
+#include <memory>
+#include "utils/macro.h"
 #include "application_manager/app_extension.h"
 
 namespace rc_rpc_plugin {
@@ -78,7 +80,7 @@ class RCAppExtension : public application_manager::AppExtension {
                              resumption_data) OVERRIDE;
 };
 
-typedef utils::SharedPtr<RCAppExtension> RCAppExtensionPtr;
+typedef std::shared_ptr<RCAppExtension> RCAppExtensionPtr;
 
 }  //  namespace rc_rpc_plugin
 

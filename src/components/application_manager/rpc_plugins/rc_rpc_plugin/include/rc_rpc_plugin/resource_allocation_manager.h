@@ -34,7 +34,7 @@
 #define SRC_COMPONENTS_REMOTE_CONTROL_INCLUDE_REMOTE_CONTROL_RESOURCE_ALLOCATION_H
 #include <string>
 #include "utils/macro.h"
-#include "utils/shared_ptr.h"
+
 #include "interfaces/HMI_API.h"
 #include "application_manager/plugin_manager/rpc_plugin.h"
 #include "rc_rpc_plugin/rc_app_extension.h"
@@ -53,6 +53,19 @@ enum eType { ALLOWED = 0, IN_USE, ASK_DRIVER, REJECTED };
  */
 namespace ResourceState {
 enum eType { FREE = 0, BUSY };
+}
+
+/**
+ * Defines triggers for OnRCStatus notification sending
+ */
+namespace NotificationTrigger {
+/**
+ * @brief The eType
+ * APP_REGISTRATION RC app registation event
+ * RC_STATE_CHANGING enabling/disabling RC on HMI event
+ * MODULE_ALLOCATION module allocation/deallocation event
+ */
+enum eType { APP_REGISTRATION = 0, MODULE_ALLOCATION, RC_STATE_CHANGING };
 }
 
 /**
@@ -146,9 +159,16 @@ class ResourceAllocationManager {
 
   /**
    * @brief Create and send OnRCStatusNotification to mobile and HMI
-   * @param application
+   * @param event trigger for notification sending
+   * @param application - app that should receive notification
+   * in case of registration; in cases of RC enabling/disabling
+   * or module allocation - application is just empty shared ptr,
+   * because in these cases all registered RC apps should
+   * receive a notification
    */
-  virtual void SendOnRCStatusNotification() = 0;
+  virtual void SendOnRCStatusNotifications(
+      NotificationTrigger::eType event,
+      application_manager::ApplicationSharedPtr application) = 0;
 
   virtual bool is_rc_enabled() const = 0;
 

@@ -32,7 +32,7 @@
 
 #include "gtest/gtest.h"
 #include "hmi/add_statistics_info_notification.h"
-#include "utils/shared_ptr.h"
+
 #include "smart_objects/smart_object.h"
 #include "application_manager/commands/commands_test.h"
 #include "application_manager/mock_application.h"
@@ -58,7 +58,7 @@ using ::testing::_;
 using ::testing::Return;
 using ::testing::ReturnRef;
 
-typedef ::utils::SharedPtr<AddStatisticsInfoNotification> NotificationPtr;
+typedef std::shared_ptr<AddStatisticsInfoNotification> NotificationPtr;
 
 namespace {
 const uint32_t kStatisticType = 1u;

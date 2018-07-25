@@ -57,7 +57,7 @@ using am::event_engine::Event;
 using ::testing::_;
 using ::testing::Return;
 
-typedef SharedPtr<AddSubMenuRequest> AddSubMenuPtr;
+typedef std::shared_ptr<AddSubMenuRequest> AddSubMenuPtr;
 
 namespace {
 const uint32_t kConnectionKey = 2u;
@@ -98,7 +98,7 @@ TEST_F(AddSubMenuRequestTest, Run_ImageVerificationFailed_EXPECT_INVALID_DATA) {
   EXPECT_CALL(mock_rpc_service_,
               ManageMobileCommand(
                   MobileResultCodeIs(mobile_apis::Result::INVALID_DATA), _));
-  utils::SharedPtr<AddSubMenuRequest> request_ptr =
+  std::shared_ptr<AddSubMenuRequest> request_ptr =
       CreateCommand<AddSubMenuRequest>(msg);
 
   request_ptr->Run();
@@ -110,7 +110,7 @@ TEST_F(AddSubMenuRequestTest, OnEvent_UI_UNSUPPORTED_RESOURCE) {
   (*msg)[am::strings::params][am::strings::connection_key] = kConnectionKey;
   (*msg)[am::strings::msg_params][am::strings::menu_id] = menu_id;
 
-  utils::SharedPtr<AddSubMenuRequest> command =
+  std::shared_ptr<AddSubMenuRequest> command =
       CreateCommand<AddSubMenuRequest>(msg);
 
   ON_CALL(app_mngr_, application(kConnectionKey))

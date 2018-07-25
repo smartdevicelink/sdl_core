@@ -38,7 +38,8 @@
 #include <set>
 #include <list>
 #include <vector>
-#include "utils/shared_ptr.h"
+#include <memory>
+
 #include "utils/data_accessor.h"
 #include "interfaces/MOBILE_API.h"
 #include "connection_handler/device.h"
@@ -46,6 +47,7 @@
 #include "application_manager/message.h"
 #include "application_manager/hmi_state.h"
 #include "application_manager/application_state.h"
+#include "application_manager/help_prompt_manager.h"
 #include "protocol_handler/protocol_handler.h"
 #include "smart_objects/smart_object.h"
 #include "utils/macro.h"
@@ -671,6 +673,12 @@ class Application : public virtual InitialApplicationData,
   virtual UsageStatistics& usage_report() = 0;
 
   /**
+   * @brief Access to HelpPromptManager interface
+   * @return object for Handling VR help
+   */
+  virtual HelpPromptManager& help_prompt_manager() = 0;
+
+  /**
    * @brief SetInitialState sets initial HMI state for application on
    * registration
    * @param state Hmi state value
@@ -941,8 +949,8 @@ class Application : public virtual InitialApplicationData,
   bool is_greyed_out_;
 };
 
-typedef utils::SharedPtr<Application> ApplicationSharedPtr;
-typedef utils::SharedPtr<const Application> ApplicationConstSharedPtr;
+typedef std::shared_ptr<Application> ApplicationSharedPtr;
+typedef std::shared_ptr<const Application> ApplicationConstSharedPtr;
 typedef uint32_t ApplicationId;
 
 }  // namespace application_manager

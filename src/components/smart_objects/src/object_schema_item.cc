@@ -51,9 +51,9 @@ CObjectSchemaItem::SMember::SMember(const ISchemaItemPtr SchemaItem,
                                     const bool IsMandatory)
     : mSchemaItem(SchemaItem), mIsMandatory(IsMandatory) {}
 
-utils::SharedPtr<CObjectSchemaItem> CObjectSchemaItem::create(
+std::shared_ptr<CObjectSchemaItem> CObjectSchemaItem::create(
     const Members& members) {
-  return new CObjectSchemaItem(members);
+  return std::shared_ptr<CObjectSchemaItem>(new CObjectSchemaItem(members));
 }
 
 Errors::eType CObjectSchemaItem::validate(const SmartObject& object) {

@@ -30,26 +30,72 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "utils/atomic_object.h"
 #include "gtest/gtest.h"
+#include "utils/lock.h"
 
 namespace test {
 namespace components {
 namespace utils_test {
 
-TEST(AtomicObjectTest, Construct) {
-  sync_primitives::atomic_int var(5);
-  EXPECT_EQ(5, var);
+using sync_primitives::Lock;
+using sync_primitives::RecursiveLock;
 
-  var = 8;
-  EXPECT_EQ(8, var);
+TEST(LockBoostTest, TestNonRecursive) {
+  // Create Lock object
+  Lock test_mutex;
+  // Lock mutex
+  test_mutex.Acquire();
+  // Check if created mutex is non-recursive
+  EXPECT_FALSE(test_mutex.Try());
+  // Release mutex before destroy
+  test_mutex.Release();
+}
 
-  sync_primitives::atomic_bool flag = true;
+TEST(LockBoostTest, TestRecursive) {
+  // Create Lock object
+  RecursiveLock test_mutex;
+  // Lock mutex
+  test_mutex.Acquire();
+  // Check if created mutex is recursive
+  EXPECT_TRUE(test_mutex.Try());
+  // Release mutex before destroy
+  test_mutex.Release();
+  test_mutex.Release();
+}
 
-  EXPECT_TRUE(flag == true);
+TEST(LockBoostTest, ReleaseMutex_ExpectMutexReleased) {
+  // Create Lock object (non-recursive mutex)
+  Lock test_mutex;
+  // Lock mutex
+  test_mutex.Acquire();
+  // Release mutex
+  test_mutex.Release();
+  // Try to lock it again. If released expect true
+  EXPECT_TRUE(test_mutex.Try());
+  test_mutex.Release();
+}
 
-  flag = false;
-  EXPECT_FALSE(flag == true);
+TEST(LockBoostTest, TryLockNonRecursiveMutex_ExpectMutexNotLockedTwice) {
+  // Create Lock object (non-recursive mutex)
+  Lock test_mutex;
+  // Lock mutex
+  test_mutex.Try();
+  // Try to lock it again. If locked expect false
+  EXPECT_FALSE(test_mutex.Try());
+  test_mutex.Release();
+}
+
+TEST(LockBoostTest, TryLockRecursiveMutex_ExpectMutexLockedTwice) {
+  // Create Lock object (recursive mutex)
+  RecursiveLock test_mutex;
+  // Lock mutex
+  test_mutex.Try();
+  // Try to lock it again. Expect true and internal counter increase
+  EXPECT_TRUE(test_mutex.Try());
+  // Release mutex twice as was locked twice.
+  // Every Release() will decrement internal counter
+  test_mutex.Release();
+  test_mutex.Release();
 }
 
 }  // namespace utils_test

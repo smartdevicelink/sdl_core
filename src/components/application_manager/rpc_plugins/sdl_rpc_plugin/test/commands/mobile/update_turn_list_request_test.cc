@@ -36,7 +36,7 @@
 #include "gtest/gtest.h"
 #include "mobile/update_turn_list_request.h"
 #include "interfaces/MOBILE_API.h"
-#include "utils/shared_ptr.h"
+
 #include "smart_objects/smart_object.h"
 #include "application_manager/commands/commands_test.h"
 #include "application_manager/commands/command_request_test.h"
@@ -88,7 +88,7 @@ class UpdateTurnListRequestTest
   }
 
   MessageSharedPtr command_msg_;
-  ::utils::SharedPtr<UpdateTurnListRequest> command_;
+  std::shared_ptr<UpdateTurnListRequest> command_;
 };
 
 TEST_F(UpdateTurnListRequestTest, Run_ApplicationIsNotRegistered_UNSUCCESS) {
@@ -214,7 +214,7 @@ TEST_F(UpdateTurnListRequestTest, Run_ValidTurnList_SUCCESS) {
               SubscribeApplicationToSoftButton(_, _, kFunctionId));
 
   MessageSharedPtr result_msg(CatchHMICommandResult(CallRun(*command_)));
-  ASSERT_TRUE(result_msg);
+  ASSERT_TRUE((bool)result_msg);
   EXPECT_EQ(
       hmi_apis::FunctionID::Navigation_UpdateTurnList,
       (*result_msg)[am::strings::params][am::strings::function_id].asInt());

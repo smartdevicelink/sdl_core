@@ -32,7 +32,7 @@
 
 #include "gtest/gtest.h"
 #include "hmi/allow_all_apps_response.h"
-#include "utils/shared_ptr.h"
+
 #include "smart_objects/smart_object.h"
 #include "application_manager/commands/command_impl.h"
 #include "application_manager/commands/commands_test.h"
@@ -49,7 +49,7 @@ using sdl_rpc_plugin::commands::AllowAllAppsResponse;
 namespace strings = ::application_manager::strings;
 namespace hmi_response = ::application_manager::hmi_response;
 
-typedef ::utils::SharedPtr<AllowAllAppsResponse> ResponsePtr;
+typedef std::shared_ptr<AllowAllAppsResponse> ResponsePtr;
 
 namespace {
 const bool kResponseIsAllowed = true;

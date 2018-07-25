@@ -66,7 +66,7 @@ class OnInteriorVehicleDataNotificationTest
     : public CommandsTest<CommandsTestMocks::kIsNice> {
  public:
   OnInteriorVehicleDataNotificationTest()
-      : mock_app_(utils::MakeShared<NiceMock<MockApplication> >()) {}
+      : mock_app_(std::make_shared<NiceMock<MockApplication> >()) {}
 
   MessageSharedPtr CreateBasicMessage() {
     MessageSharedPtr message = CreateMessage();
@@ -85,19 +85,18 @@ class OnInteriorVehicleDataNotificationTest
   }
 
   template <class Command>
-  application_manager::SharedPtr<Command> CreateRCCommand(
-      MessageSharedPtr& msg) {
+  std::shared_ptr<Command> CreateRCCommand(MessageSharedPtr& msg) {
     InitCommand(kDefaultTimeout_);
-    return ::utils::MakeShared<Command>(msg ? msg : msg = CreateMessage(),
-                                        app_mngr_,
-                                        mock_rpc_service_,
-                                        mock_hmi_capabilities_,
-                                        mock_policy_handler_,
-                                        mock_allocation_manager_);
+    return std::make_shared<Command>(msg ? msg : msg = CreateMessage(),
+                                     app_mngr_,
+                                     mock_rpc_service_,
+                                     mock_hmi_capabilities_,
+                                     mock_policy_handler_,
+                                     mock_allocation_manager_);
   }
 
  protected:
-  utils::SharedPtr<MockApplication> mock_app_;
+  std::shared_ptr<MockApplication> mock_app_;
   testing::NiceMock<rc_rpc_plugin_test::MockResourceAllocationManager>
       mock_allocation_manager_;
 };
@@ -115,7 +114,7 @@ TEST_F(OnInteriorVehicleDataNotificationTest,
   EXPECT_CALL(app_mngr_, applications()).WillOnce(Return(accessor));
 
   RCAppExtensionPtr rc_extention_ptr =
-      utils::MakeShared<RCAppExtension>(application_manager::AppExtensionUID(
+      std::make_shared<RCAppExtension>(application_manager::AppExtensionUID(
           rc_rpc_plugin::RCRPCPlugin::kRCPluginID));
   rc_extention_ptr->SubscribeToInteriorVehicleData(enums_value::kClimate);
   ON_CALL(*mock_app_, QueryInterface(_))
@@ -126,14 +125,13 @@ TEST_F(OnInteriorVehicleDataNotificationTest,
   EXPECT_CALL(mock_rpc_service_, SendMessageToMobile(_, false))
       .WillOnce(SaveArg<0>(&message));
   // Act
-  application_manager::SharedPtr<
-      rc_rpc_plugin::commands::OnInteriorVehicleDataNotification> command =
-      CreateRCCommand<
+  std::shared_ptr<rc_rpc_plugin::commands::OnInteriorVehicleDataNotification>
+      command = CreateRCCommand<
           rc_rpc_plugin::commands::OnInteriorVehicleDataNotification>(
           mobile_message);
   command->Run();
   // Assertions
-  ASSERT_TRUE(message);
+  ASSERT_TRUE((bool)message);
   Mock::VerifyAndClearExpectations(&app_mngr_);
 }
 

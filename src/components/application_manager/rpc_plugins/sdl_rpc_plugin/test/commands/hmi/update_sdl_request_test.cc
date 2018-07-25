@@ -34,7 +34,6 @@
 #include <string>
 
 #include "gtest/gtest.h"
-#include "utils/shared_ptr.h"
 #include "smart_objects/smart_object.h"
 #include "application_manager/smart_object_keys.h"
 #include "application_manager/commands/commands_test.h"
@@ -48,14 +47,13 @@ namespace commands_test {
 namespace hmi_commands_test {
 namespace update_sdl_request {
 
-using ::utils::SharedPtr;
 using ::testing::ReturnRef;
 using ::testing::NiceMock;
 namespace am = ::application_manager;
 namespace strings = ::application_manager::strings;
 using sdl_rpc_plugin::commands::UpdateSDLRequest;
 
-typedef SharedPtr<UpdateSDLRequest> UpdateSDLRequestPtr;
+typedef std::shared_ptr<UpdateSDLRequest> UpdateSDLRequestPtr;
 
 namespace {
 const uint32_t kConnectionKey = 2u;

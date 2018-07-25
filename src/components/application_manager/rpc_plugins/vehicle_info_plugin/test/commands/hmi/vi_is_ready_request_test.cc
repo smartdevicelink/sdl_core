@@ -33,7 +33,7 @@
 #include "hmi/vi_is_ready_request.h"
 
 #include "gtest/gtest.h"
-#include "utils/shared_ptr.h"
+
 #include "smart_objects/smart_object.h"
 #include "application_manager/smart_object_keys.h"
 #include "application_manager/commands/command_request_test.h"
@@ -59,7 +59,7 @@ using am::commands::MessageSharedPtr;
 using vehicle_info_plugin::commands::VIIsReadyRequest;
 using am::event_engine::Event;
 
-typedef SharedPtr<VIIsReadyRequest> VIIsReadyRequestPtr;
+typedef std::shared_ptr<VIIsReadyRequest> VIIsReadyRequestPtr;
 
 class VIIsReadyRequestTest
     : public CommandRequestTest<CommandsTestMocks::kIsNice> {

@@ -198,7 +198,7 @@ void DeleteCommandRequest::on_event(const event_engine::Event& event) {
   }
   smart_objects::SmartObject& msg_params = (*message_)[strings::msg_params];
 
-  const int32_t cmd_id = msg_params[strings::cmd_id].asInt();
+  const uint32_t cmd_id = msg_params[strings::cmd_id].asUInt();
 
   smart_objects::SmartObject* command = application->FindCommand(cmd_id);
 
@@ -213,7 +213,8 @@ void DeleteCommandRequest::on_event(const event_engine::Event& event) {
   std::string info;
   const bool result = PrepareResponseParameters(result_code, info);
   if (result) {
-    application->RemoveCommand(msg_params[strings::cmd_id].asInt());
+    application->RemoveCommand(cmd_id);
+    application->help_prompt_manager().OnVrCommandDeleted(cmd_id, false);
   }
   SendResponse(
       result, result_code, info.empty() ? NULL : info.c_str(), &msg_params);

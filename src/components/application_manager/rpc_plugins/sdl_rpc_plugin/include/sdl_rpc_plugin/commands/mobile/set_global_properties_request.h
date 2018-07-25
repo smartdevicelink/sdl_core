@@ -83,18 +83,10 @@ class SetGlobalPropertiesRequest
   bool Init() FINAL;
 
  private:
-  // Verify correctness VrHelptitle value
-  static bool ValidateVRHelpTitle(
-      const smart_objects::SmartObject* const vr_help_so_ptr);
-
   // prepare UI sending data (VrHelps, Menus, Keyboard) to SmartObject
   static void PrepareUIRequestVRHelpData(
       const app_mngr::ApplicationSharedPtr app,
       const smart_objects::SmartObject& msg_params,
-      smart_objects::SmartObject& out_params);
-
-  static bool PrepareUIRequestDefaultVRHelpData(
-      const app_mngr::ApplicationSharedPtr app,
       smart_objects::SmartObject& out_params);
 
   static void PrepareUIRequestMenuAndKeyboardData(

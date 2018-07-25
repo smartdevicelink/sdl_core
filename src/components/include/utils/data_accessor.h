@@ -32,16 +32,14 @@
 #ifndef SRC_COMPONENTS_INCLUDE_UTILS_DATA_ACCESSOR_H_
 #define SRC_COMPONENTS_INCLUDE_UTILS_DATA_ACCESSOR_H_
 
-#include <iostream>
 #include "utils/lock.h"
-#include "utils/shared_ptr.h"
 
 // This class is for thread-safe const access to data
 template <class T>
 class DataAccessor {
  public:
   DataAccessor(const T& data,
-               const std::shared_ptr<sync_primitives::Lock>& lock)
+               const std::shared_ptr<sync_primitives::BaseLock>& lock)
       : data_(data), lock_(lock), counter_(new uint32_t(0)) {
     lock_->Acquire();
   }
@@ -66,8 +64,8 @@ class DataAccessor {
   void* operator new(size_t size);
   const T& data_;
   // Require that the lock lives at least as long as the DataAccessor
-  const std::shared_ptr<sync_primitives::Lock> lock_;
-  utils::SharedPtr<uint32_t> counter_;
+  const std::shared_ptr<sync_primitives::BaseLock> lock_;
+  std::shared_ptr<uint32_t> counter_;
 };
 
 #endif  // SRC_COMPONENTS_INCLUDE_UTILS_DATA_ACCESSOR_H_

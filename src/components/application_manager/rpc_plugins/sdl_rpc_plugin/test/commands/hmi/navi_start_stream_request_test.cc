@@ -35,7 +35,7 @@
 #include "hmi/navi_start_stream_request.h"
 
 #include "gtest/gtest.h"
-#include "utils/shared_ptr.h"
+
 #include "smart_objects/smart_object.h"
 #include "application_manager/smart_object_keys.h"
 #include "application_manager/commands/command_request_test.h"
@@ -75,7 +75,7 @@ class NaviStartStreamRequestTest
 
   std::pair<uint32_t, int32_t> start_stream_retry_amount_;
   MessageSharedPtr msg_;
-  SharedPtr<NaviStartStreamRequest> command_;
+  std::shared_ptr<NaviStartStreamRequest> command_;
 };
 
 TEST_F(NaviStartStreamRequestTest, Run_HmiInterfaceNotAvailable_NoRequest) {

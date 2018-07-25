@@ -68,7 +68,7 @@ void OnSystemRequestNotification::Run() {
 
   ApplicationSharedPtr app = application_manager_.application(connection_key());
 
-  if (!app.valid()) {
+  if (app.use_count() == 0) {
     LOG4CXX_ERROR(logger_,
                   "Application with connection key " << connection_key()
                                                      << " is not registered.");

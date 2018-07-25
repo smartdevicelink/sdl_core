@@ -340,7 +340,7 @@ class Connection {
    */
   SessionMap session_map_;
 
-  mutable sync_primitives::Lock session_map_lock_;
+  mutable sync_primitives::RecursiveLock session_map_lock_;
 
   /**
    * @brief primary connection handle for secondary connections

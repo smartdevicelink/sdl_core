@@ -375,7 +375,7 @@ class ProtocolPacket {
     * @brief Type definition for variable that hold shared pointer to protocolol
     * packet
     */
-typedef utils::SharedPtr<protocol_handler::ProtocolPacket> ProtocolFramePtr;
+typedef std::shared_ptr<protocol_handler::ProtocolPacket> ProtocolFramePtr;
 typedef std::list<ProtocolFramePtr> ProtocolFramePtrList;
 
 template <typename _CharT>

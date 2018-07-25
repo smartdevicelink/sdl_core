@@ -34,7 +34,6 @@
 #include <string>
 
 #include "gtest/gtest.h"
-#include "utils/shared_ptr.h"
 #include "smart_objects/smart_object.h"
 #include "application_manager/smart_object_keys.h"
 #include "application_manager/commands/commands_test.h"
@@ -50,14 +49,13 @@ namespace mixing_audio_supported_request {
 
 using ::testing::_;
 using ::testing::Return;
-using ::utils::SharedPtr;
 namespace am = ::application_manager;
 namespace strings = ::application_manager::strings;
 using am::commands::RequestToHMI;
 using sdl_rpc_plugin::commands::MixingAudioSupportedRequest;
 using am::commands::CommandImpl;
 
-typedef SharedPtr<RequestToHMI> RequestToHMIPtr;
+typedef std::shared_ptr<RequestToHMI> RequestToHMIPtr;
 
 namespace {
 const uint32_t kConnectionKey = 2u;

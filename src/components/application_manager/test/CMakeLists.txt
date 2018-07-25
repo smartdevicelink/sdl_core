@@ -45,6 +45,7 @@ include_directories(
   ${COMPONENTS_DIR}/media_manager/include/
   ${COMPONENTS_DIR}/security_manager/include/
   ${COMPONENTS_DIR}/application_manager/test/include/
+  ${COMPONENTS_DIR}/application_manager/rpc_plugins/sdl_rpc_plugin/include/
   ${BSON_INCLUDE_DIRECTORY}
 )
 
@@ -72,6 +73,10 @@ set(testSourcesMockHmi
   ${AM_TEST_DIR}/application_manager_impl_mock_hmi_test.cc
 )
 
+set(testSourcesHelpPromptManager
+  ${AM_TEST_DIR}/help_prompt_manager_test.cc
+  ${AM_TEST_DIR}/mock_message_helper.cc
+)
 set (RequestController_SOURCES
   ${AM_TEST_DIR}/request_controller/request_controller_test.cc
   ${AM_TEST_DIR}/mock_message_helper.cc
@@ -80,6 +85,7 @@ set (RequestController_SOURCES
 set(LIBRARIES
   Utils
   ApplicationManager
+  sdl_rpc_plugin
   jsoncpp
   Policy
   connectionHandler
@@ -129,7 +135,8 @@ set(CMAKE_EXE_LINKER_FLAGS
 )
 create_test("application_manager_test" "${testSources}" "${LIBRARIES}")
 create_test("application_manager_mock_hmi_test" "${testSourcesMockHmi}" "${LIBRARIES}")
-#add_dependencies("application_manager_test" libbson)
+
+create_test("help_prompt_manager_test" "${testSourcesHelpPromptManager}" "${LIBRARIES}")
 
 create_test("request_controller_test" "${RequestController_SOURCES}" "${LIBRARIES}")
 

@@ -41,7 +41,7 @@ namespace telemetry_monitor {
 
 class TransportManagerMecticWrapper : public MetricWrapper {
  public:
-  utils::SharedPtr<transport_manager::TMTelemetryObserver::MessageMetric>
+  std::shared_ptr<transport_manager::TMTelemetryObserver::MessageMetric>
       message_metric;
   virtual Json::Value GetJsonMetric();
 };

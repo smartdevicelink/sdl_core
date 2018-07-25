@@ -37,7 +37,6 @@
 #include "application_manager/message_helper.h"
 #include "interfaces/MOBILE_API.h"
 #include "interfaces/HMI_API.h"
-#include "utils/make_shared.h"
 
 namespace sdl_rpc_plugin {
 using namespace application_manager;
@@ -115,7 +114,7 @@ void OnDriverDistractionNotification::Run() {
   application_manager_.set_driver_distraction_state(state);
 
   smart_objects::SmartObjectSPtr on_driver_distraction =
-      utils::MakeShared<smart_objects::SmartObject>();
+      std::make_shared<smart_objects::SmartObject>();
 
   if (!on_driver_distraction) {
     LOG4CXX_ERROR(logger_, "NULL pointer");

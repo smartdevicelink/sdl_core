@@ -105,8 +105,8 @@ void RCOnRemoteControlSettingsNotification::DisallowRCFunctionality() {
         app->app_id(), mobile_apis::HMILevel::eType::HMI_NONE);
 
     const RCAppExtensionPtr extension =
-        application_manager::AppExtensionPtr::static_pointer_cast<
-            RCAppExtension>(app->QueryInterface(RCRPCPlugin::kRCPluginID));
+        std::static_pointer_cast<RCAppExtension>(
+            app->QueryInterface(RCRPCPlugin::kRCPluginID));
     if (extension) {
       UnsubscribeFromInteriorVehicleDataForAllModules(extension);
     }
@@ -150,8 +150,8 @@ void RCOnRemoteControlSettingsNotification::Run() {
   } else {
     LOG4CXX_DEBUG(logger_, "Disallowing RC Functionality");
     DisallowRCFunctionality();
-    resource_allocation_manager_.set_rc_enabled(false);
     resource_allocation_manager_.ResetAllAllocations();
+    resource_allocation_manager_.set_rc_enabled(false);
   }
 }
 

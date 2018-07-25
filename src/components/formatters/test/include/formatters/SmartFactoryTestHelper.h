@@ -107,9 +107,9 @@ class CSmartFactoryTest : public CSmartFactory<FunctionIdTest::eType,
 
  protected:
   typedef std::map<const StructIdentifiersTest::eType,
-                   utils::SharedPtr<ISchemaItem> > TStructsSchemaItems;
+                   std::shared_ptr<ISchemaItem> > TStructsSchemaItems;
 
-  static utils::SharedPtr<ISchemaItem> ProvideObjectSchemaItemForStruct(
+  static std::shared_ptr<ISchemaItem> ProvideObjectSchemaItemForStruct(
       TStructsSchemaItems& struct_schema_items,
       const StructIdentifiersTest::eType struct_id);
 
@@ -147,10 +147,10 @@ class CSmartFactoryTest : public CSmartFactory<FunctionIdTest::eType,
       const std::set<FunctionIdTest::eType>& function_id_items,
       const std::set<MessageTypeTest::eType>& message_type_items);
 
-  static utils::SharedPtr<ISchemaItem> InitStructSchemaItem_Common_1(
+  static std::shared_ptr<ISchemaItem> InitStructSchemaItem_Common_1(
       TStructsSchemaItems& struct_schema_items);
 
-  static utils::SharedPtr<ISchemaItem> InitStructSchemaItem_Common_2();
+  static std::shared_ptr<ISchemaItem> InitStructSchemaItem_Common_2();
 };
 
 }  // namespace formatters

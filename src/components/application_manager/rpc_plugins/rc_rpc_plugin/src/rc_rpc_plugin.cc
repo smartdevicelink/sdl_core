@@ -35,6 +35,7 @@
 #include "rc_rpc_plugin/rc_app_extension.h"
 #include "rc_rpc_plugin/resource_allocation_manager_impl.h"
 #include "utils/helpers.h"
+#include <memory>
 
 namespace rc_rpc_plugin {
 namespace plugins = application_manager::plugin_manager;
@@ -90,10 +91,10 @@ void RCRPCPlugin::OnApplicationEvent(
   }
   switch (event) {
     case plugins::kApplicationRegistered: {
-      application->AddExtension(new RCAppExtension(kRCPluginID));
-      if (resource_allocation_manager_->is_rc_enabled()) {
-        resource_allocation_manager_->SendOnRCStatusNotification();
-      }
+      application->AddExtension(
+          std::shared_ptr<RCAppExtension>(new RCAppExtension(kRCPluginID)));
+      resource_allocation_manager_->SendOnRCStatusNotifications(
+          NotificationTrigger::APP_REGISTRATION, application);
       break;
     }
     case plugins::kApplicationExit: {
