@@ -31,6 +31,7 @@
  */
 
 #include <stdint.h>
+#include <memory>
 #include <string>
 #include <set>
 
@@ -362,7 +363,7 @@ TEST_F(ShowRequestTest, Run_Graphic_WARNINGS) {
   msg_params[am::strings::graphic] = graphic;
   (*msg)[am::strings::msg_params] = msg_params;
 
-  SharedPtr<ShowRequest> command(CreateCommand<ShowRequest>(msg));
+  std::shared_ptr<ShowRequest> command(CreateCommand<ShowRequest>(msg));
 
   EXPECT_CALL(app_mngr_, application(kConnectionKey))
       .WillOnce(Return(mock_app_));
@@ -461,7 +462,7 @@ TEST_F(ShowRequestTest, Run_SecondaryGraphic_WARNINGS) {
   msg_params[am::strings::secondary_graphic] = graphic;
   (*msg)[am::strings::msg_params] = msg_params;
 
-  SharedPtr<ShowRequest> command(CreateCommand<ShowRequest>(msg));
+  std::shared_ptr<ShowRequest> command(CreateCommand<ShowRequest>(msg));
 
   EXPECT_CALL(app_mngr_, application(kConnectionKey))
       .WillOnce(Return(mock_app_));

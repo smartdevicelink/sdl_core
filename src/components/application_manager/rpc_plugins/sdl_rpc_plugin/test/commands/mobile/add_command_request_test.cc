@@ -31,6 +31,7 @@
  */
 
 #include <stdint.h>
+#include <memory>
 #include <string>
 #include <set>
 
@@ -64,7 +65,6 @@ using am::ApplicationManager;
 using am::commands::MessageSharedPtr;
 using am::ApplicationSharedPtr;
 using ::testing::_;
-
 using ::testing::Return;
 using ::testing::InSequence;
 using sdl_rpc_plugin::commands::AddCommandRequest;
@@ -278,7 +278,7 @@ TEST_F(AddCommandRequestTest, Run_ImageVerificationFailed_EXPECT_WARNINGS) {
       mock_rpc_service_,
       ManageHMICommand(HMIResultCodeIs(hmi_apis::FunctionID::UI_AddCommand)))
       .WillOnce(Return(true));
-  utils::SharedPtr<AddCommandRequest> request_ptr =
+  std::shared_ptr<AddCommandRequest> request_ptr =
       CreateCommand<AddCommandRequest>(msg_);
   request_ptr->Run();
 }

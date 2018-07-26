@@ -274,7 +274,7 @@ TEST_F(UpdateTurnListRequestTest, Run_ValidTurnList_WARNINGS) {
               SubscribeApplicationToSoftButton(_, _, kFunctionId));
 
   MessageSharedPtr result_msg(CatchHMICommandResult(CallRun(*command_)));
-  ASSERT_TRUE(result_msg);
+  ASSERT_TRUE(result_msg != nullptr);
   EXPECT_EQ(
       hmi_apis::FunctionID::Navigation_UpdateTurnList,
       (*result_msg)[am::strings::params][am::strings::function_id].asInt());

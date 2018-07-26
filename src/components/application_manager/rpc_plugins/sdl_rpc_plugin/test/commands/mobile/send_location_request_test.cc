@@ -335,7 +335,7 @@ TEST_F(SendLocationRequestTest, Run_LocationImageInvalid_Cancelled) {
   (*message_)[strings::msg_params][strings::location_image] =
       SmartObject(smart_objects::SmartType_Map);
   (*message_)[strings::msg_params][strings::location_image][strings::value] =
-      " 1";
+      "1";
   EXPECT_CALL(
       mock_message_helper_,
       VerifyImage(
