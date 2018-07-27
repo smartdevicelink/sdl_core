@@ -74,46 +74,12 @@ class LifeCycleImpl : public LifeCycle {
  public:
   explicit LifeCycleImpl(const profile::Profile& profile);
 
-  /**
-   * Creates and starts all system components
-   * @return true if all components started successfully
-   * otherwise false.
-   */
   bool StartComponents() OVERRIDE;
-
-  /**
-   * Initialize MessageBroker component
-   * @return true if success otherwise false.
-   */
   bool InitMessageSystem() OVERRIDE;
-  /**
-   * @brief Main loop
-   */
   void Run() OVERRIDE;
-
-  /**
-   * Stops all system components
-   */
   void StopComponents() OVERRIDE;
-
-  /**
-   * Makes appropriate actions when Low Voltage signal received:
-   * Stops all SDL activities except of waiting of UNIX signals
-   * from HMI
-   */
   void LowVoltage() OVERRIDE;
-
-  /**
-   * Makes appropriate actions when Wake Up signal received:
-   * Restores all SDL activities stopped due to LOW VOLTAGE
-   * from HMI
-   */
   void WakeUp() OVERRIDE;
-
-  /**
-   * Makes appropriate actions when Ignition Off signal received:
-   * Triggers all SDL components stop and deletion
-   */
   void IgnitionOff() OVERRIDE;
 
  private:
