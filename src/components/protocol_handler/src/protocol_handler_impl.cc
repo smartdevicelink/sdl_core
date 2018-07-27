@@ -596,6 +596,12 @@ void ProtocolHandlerImpl::SendEndServicePrivate(int32_t primary_connection_id,
                                                 uint8_t session_id,
                                                 uint8_t service_type) {
   LOG4CXX_AUTO_TRACE(logger_);
+  if (0 == connection_id) {
+    LOG4CXX_WARN(logger_,
+                 "Secondary connection id is unknown. Will be used"
+                 " primary_connection_id");
+    connection_id = primary_connection_id;
+  }
 
   uint8_t protocol_version;
   if (session_observer_.ProtocolVersionUsed(
