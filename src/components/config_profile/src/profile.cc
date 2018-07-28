@@ -2169,7 +2169,7 @@ void Profile::UpdateValues() {
   LOG_UPDATED_VALUE(
       ignition_off_signal_offset_, kIgnitionOffSignalOffsetKey, kMainSection);
 
- ReadBoolValue(&multiple_transports_enabled_,
+  ReadBoolValue(&multiple_transports_enabled_,
                 kDefaultMultipleTransportsEnabled,
                 kMultipleTransportsSection,
                 kMultipleTransportsEnabledKey);

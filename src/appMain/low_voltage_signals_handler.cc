@@ -33,7 +33,13 @@
 #include "appMain/low_voltage_signals_handler.h"
 
 #include <signal.h>
+#include <fcntl.h>
+#include <sys/types.h>
+#include <sys/wait.h>
+#include <unistd.h>
+#include <iostream>
 #include "appMain/life_cycle.h"
+#include "utils/signals.h"
 #include "utils/logger.h"
 #include "utils/typed_enum_print.h"
 #include "config_profile/profile.h"
@@ -44,19 +50,21 @@ CREATE_LOGGERPTR_GLOBAL(logger_, "LowVoltageSignalsHandler")
 
 LowVoltageSignalsHandler::LowVoltageSignalsHandler(
     LifeCycle& life_cycle, const LowVoltageSignalsOffset& offset_data)
-    : state_(SDLState::kRun)
-    , notifications_delegate_(new NotificationThreadDelegate(*this))
+    : notifications_delegate_(new NotificationThreadDelegate(*this))
     , signals_handler_thread_(threads::CreateThread(
           "LV_SIGNALS_HANDLER_THREAD", notifications_delegate_.get()))
     , life_cycle_(life_cycle)
     , SIGLOWVOLTAGE_(offset_data.low_voltage_signal_offset + SIGRTMIN)
     , SIGWAKEUP_(offset_data.wake_up_signal_offset + SIGRTMIN)
-    , SIGIGNOFF_(offset_data.ignition_off_signal_offset + SIGRTMIN) {
+    , SIGIGNOFF_(offset_data.ignition_off_signal_offset + SIGRTMIN)
+    , cpid_(-1) {
+  sigemptyset(&lv_mask_);
+  sigaddset(&lv_mask_, SIGLOWVOLTAGE_);
   signals_handler_thread_->start();
 }
 
-SDLState LowVoltageSignalsHandler::get_current_sdl_state() const {
-  return state_;
+sigset_t LowVoltageSignalsHandler::LowVoltageSignalsMask() const {
+  return lv_mask_;
 }
 
 int LowVoltageSignalsHandler::low_voltage_signo() const {
@@ -72,7 +80,6 @@ int LowVoltageSignalsHandler::ignition_off_signo() const {
 }
 
 void LowVoltageSignalsHandler::Destroy() {
-  state_ = SDLState::kStop;
   if (signals_handler_thread_) {
     signals_handler_thread_->join();
   }
@@ -85,87 +92,60 @@ LowVoltageSignalsHandler::~LowVoltageSignalsHandler() {
 }
 
 void LowVoltageSignalsHandler::HandleSignal(const int signo) {
-  using utils::operator<<;
-  LOG4CXX_DEBUG(logger_, "Received Signal: " << signo);
-  LOG4CXX_DEBUG(logger_, "Current state is : " << get_current_sdl_state());
+  if (SIGLOWVOLTAGE_ == signo) {
+    LOG4CXX_DEBUG(logger_, "Received LOW_VOLTAGE signal");
 
-  auto handle_run_state = [this, signo]() {
+    life_cycle_.LowVoltage();
+    cpid_ = utils::Signals::Fork();
 
-    if (SIGLOWVOLTAGE_ == signo) {
-      LOG4CXX_DEBUG(logger_, "Received LOW_VOLTAGE signal");
-      state_ = SDLState::kSleep;
-      life_cycle_.LowVoltage();
-      return;
+    if (0 > cpid_) {
+      LOG4CXX_FATAL(logger_,
+                    "Error due fork() call. Error: " << strerror(errno));
+      utils::Signals::ExitProcess(EXIT_FAILURE);
     }
 
-    if (SIGIGNOFF_ == signo) {
-      LOG4CXX_DEBUG(logger_,
-                    "Received IGNITION_OFF signal. But SDL is in active state");
-      // Do nothing
-      return;
-    }
-
-    if (SIGWAKEUP_ == signo) {
-      LOG4CXX_DEBUG(logger_,
-                    "Received WAKE_UP signal. But SDL is in active state");
-      // Do nothing
-      return;
-    }
-    LOG4CXX_DEBUG(logger_, "Received UNKNOWN signal");
-  };
-
-  auto handle_sleep_state = [this, signo]() {
-
-    if (SIGWAKEUP_ == signo) {
-      LOG4CXX_DEBUG(logger_, "Received WAKE UP signal");
-      state_ = SDLState::kRun;
+    if (0 != cpid_) {
+      // In Parent process
+      LOG4CXX_DEBUG(logger_, "Child PID: " << cpid_);
+      utils::Signals::WaitPid(cpid_, nullptr, 0);
+      LOG4CXX_DEBUG(logger_, "Child process: " << cpid_ << " is stopped");
       life_cycle_.WakeUp();
-      return;
+    } else {
+      // In Child process
+      sigset_t signal_set;
+      sigfillset(&signal_set);
+      pthread_sigmask(SIG_BLOCK, &signal_set, nullptr);
+      sigemptyset(&lv_mask_);
+      sigaddset(&lv_mask_, SIGWAKEUP_);
+      sigaddset(&lv_mask_, SIGIGNOFF_);
+      std::cout << "Stopping parent process: " << getppid() << std::endl;
+      utils::Signals::SendSignal(SIGSTOP, getppid());
+      std::cout << "SIGSTOP signal sent to " << getppid() << std::endl;
     }
+    return;
+  }
 
-    if (SIGIGNOFF_ == signo) {
-      LOG4CXX_DEBUG(logger_, "Received IGNITION_OFF signal");
-      state_ = SDLState::kStop;
-      life_cycle_.IgnitionOff();
-      return;
-    }
+  if (SIGWAKEUP_ == signo) {
+    std::cout << "Received WAKE UP signal" << std::endl;
+    std::cout << "Waking Up parent process: " << getppid() << std::endl;
+    utils::Signals::SendSignal(SIGCONT, getppid());
+    std::cout << "Stopping child process: " << getpid() << std::endl;
+    utils::Signals::ExitProcess(0);
+  }
 
-    if (SIGLOWVOLTAGE_ == signo) {
-      LOG4CXX_DEBUG(
-          logger_,
-          "Received LOW VOLTAGE signal. But SDL is already in sleep state");
-      // Do nothing
-      return;
-    }
-    LOG4CXX_DEBUG(logger_, "Received UNKNOWN signal");
-  };
-
-  switch (state_) {
-    case SDLState::kRun:
-      handle_run_state();
-      break;
-    case SDLState::kSleep:
-      handle_sleep_state();
-      break;
-    case SDLState::kStop: /* nothing to do here */
-      LOG4CXX_DEBUG(logger_, "SDL is in stopping state");
-      break;
+  if (SIGIGNOFF_ == signo) {
+    std::cout << "Received IGNITION_OFF signal" << std::endl;
+    std::cout << "Stopping all SDL processes..." << std::endl;
+    utils::Signals::SendSignal(SIGKILL, getppid());
+    utils::Signals::ExitProcess(0);
   }
 }
 
-bool LowVoltageSignalsHandler::IsActive() const {
-  return SDLState::kStop != state_;
-}
-
 void NotificationThreadDelegate::threadMain() {
-  sigset_t lv_mask;
-  sigemptyset(&lv_mask);
-  sigaddset(&lv_mask, low_voltage_signals_handler_.low_voltage_signo());
-  sigaddset(&lv_mask, low_voltage_signals_handler_.wake_up_signo());
-  sigaddset(&lv_mask, low_voltage_signals_handler_.ignition_off_signo());
-
-  while (low_voltage_signals_handler_.IsActive()) {
+  while (true) {
     int signo = 0;
+    const sigset_t lv_mask =
+        low_voltage_signals_handler_.LowVoltageSignalsMask();
     const int err = sigwait(&lv_mask, &signo);
     if (0 != err) {
       LOG4CXX_ERROR(
