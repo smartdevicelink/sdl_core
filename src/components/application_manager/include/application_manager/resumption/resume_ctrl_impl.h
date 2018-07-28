@@ -336,16 +336,6 @@ class ResumeCtrlImpl : public ResumeCtrl,
   time_t WakeUpTime() const;
 
   /**
-   * @brief Resets Low Voltage signal timestamp to zero
-   */
-  void ResetLowVoltageTime();
-
-  /**
-   * @brief Resets Wake Up signal timestamp to zero
-   */
-  void ResetWakeUpTime();
-
-  /**
    * @brief restores saved data of application
    * @param application contains application for which restores data
    * @return true if success, otherwise return false
