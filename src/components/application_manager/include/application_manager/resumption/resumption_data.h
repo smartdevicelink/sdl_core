@@ -123,16 +123,9 @@ class ResumptionData {
   virtual uint32_t GetGlobalIgnOnCounter() const = 0;
 
   /**
-   * @brief Increments global ignition off counter
-   * by 1
+   * @brief Resets global ignition on counter
    */
-  virtual void IncrementGlobalIgnOffCounter() = 0;
-
-  /**
-   * @brief Get the global ignition off counter
-   * @return the global ignition off counter
-   */
-  virtual uint32_t GetGlobalIgnOffCounter() const = 0;
+  virtual void ResetGlobalIgnOnCount() = 0;
 
   /**
    * @brief Retrieves hash ID for the given mobile app ID

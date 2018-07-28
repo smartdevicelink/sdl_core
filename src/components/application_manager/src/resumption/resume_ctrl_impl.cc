@@ -131,6 +131,8 @@ bool ResumeCtrlImpl::Init(resumption::LastState& last_state) {
       application_manager_.get_settings()
           .app_resumption_save_persistent_data_timeout(),
       timer::kPeriodic);
+
+  resumption_storage_->IncrementGlobalIgnOnCounter();
   return true;
 }
 
@@ -336,6 +338,7 @@ void ResumeCtrlImpl::OnIgnitionOff() {
   LOG4CXX_AUTO_TRACE(logger_);
   if (!application_manager_.IsLowVoltage()) {
     resumption_storage_->IncrementIgnOffCount();
+    resumption_storage_->ResetGlobalIgnOnCount();
     FinalPersistData();
   }
 }
@@ -348,26 +351,14 @@ void ResumeCtrlImpl::OnAwake() {
 }
 
 void ResumeCtrlImpl::SaveLowVoltageTime() {
-  ResetLowVoltageTime();
   low_voltage_time_ = time(nullptr);
   LOG4CXX_DEBUG(logger_,
                 "Low Voltage timestamp : " << low_voltage_time_ << " saved");
 }
 
-void ResumeCtrlImpl::ResetLowVoltageTime() {
-  low_voltage_time_ = 0;
-  LOG4CXX_DEBUG(logger_, "Resetting Low Voltage timestamp");
-}
-
 void ResumeCtrlImpl::SaveWakeUpTime() {
-  ResetWakeUpTime();
   wake_up_time_ = std::time(nullptr);
   LOG4CXX_DEBUG(logger_, "Wake Up timestamp : " << wake_up_time_ << " saved");
-}
-
-void ResumeCtrlImpl::ResetWakeUpTime() {
-  wake_up_time_ = 0;
-  LOG4CXX_DEBUG(logger_, "Resetting Wake Up timestamp");
 }
 
 time_t ResumeCtrlImpl::LowVoltageTime() const {
@@ -968,15 +959,14 @@ bool ResumeCtrlImpl::CheckIcons(ApplicationSharedPtr application,
 
 bool ResumeCtrlImpl::CheckIgnCyclesData() const {
   LOG4CXX_AUTO_TRACE(logger_);
-  const uint32_t global_ign_off_count =
-      resumption_storage_->GetGlobalIgnOffCounter();
   const uint32_t global_ign_on_count =
       resumption_storage_->GetGlobalIgnOnCounter();
-  const uint32_t diff = global_ign_on_count - global_ign_off_count;
-  const bool is_ign_off_record_missed = diff >= 2;
-  if (is_ign_off_record_missed) {
+  const uint32_t allowed_ign_on_value = 2;
+  const bool is_emergency_ign_off_occurred =
+      global_ign_on_count >= allowed_ign_on_value;
+  if (is_emergency_ign_off_occurred) {
     LOG4CXX_WARN(logger_,
-                 "Some IGN OFF records missed. Possibly due to Low Voltage");
+                 "Emergency IGN OFF occurred. Possibly after Low Voltage");
     return false;
   }
   return true;
@@ -988,8 +978,7 @@ bool ResumeCtrlImpl::CheckDelayAfterIgnOn() const {
   const time_t ign_off_time = GetIgnOffTime();
 
   if (CheckIgnCyclesData() && 0 == ign_off_time) {
-    LOG4CXX_DEBUG(
-        logger_, "No IGNITION OFF records found: This is first Ignition cycle");
+    LOG4CXX_DEBUG(logger_, "This is first Ignition cycle");
     return true;
   }
   const time_t curr_time = time(nullptr);

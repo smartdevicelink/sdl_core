@@ -376,22 +376,20 @@ bool ResumptionDataDB::RemoveApplicationFromSaved(
 
 uint32_t ResumptionDataDB::GetIgnOffTime() const {
   LOG4CXX_AUTO_TRACE(logger_);
-
   return SelectIgnOffTime();
 }
 
 uint32_t ResumptionDataDB::GetGlobalIgnOnCounter() const {
-  return 0;
-}
-
-uint32_t ResumptionDataDB::GetGlobalIgnOffCounter() const {
-  return 0;
-}
-
-void ResumptionDataDB::IncrementGlobalIgnOffCounter() {
+  // To be implemented
+  return 1;
 }
 
 void ResumptionDataDB::IncrementGlobalIgnOnCounter() {
+  // To be implemented
+}
+
+void ResumptionDataDB::ResetGlobalIgnOnCount() {
+  // To be implemented
 }
 
 ssize_t ResumptionDataDB::IsApplicationSaved(
@@ -571,7 +569,6 @@ void ResumptionDataDB::SelectDataForLoadResumeData(
   using namespace app_mngr;
   using namespace smart_objects;
   LOG4CXX_AUTO_TRACE(logger_);
-
   utils::dbms::SQLQuery select_data(db());
   utils::dbms::SQLQuery count_application(db());
   if (!select_data.Prepare(kSelectDataForLoadResumeData) ||

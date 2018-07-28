@@ -149,7 +149,6 @@ void ResumptionDataJson::IncrementIgnOffCount() {
   using namespace app_mngr;
   LOG4CXX_AUTO_TRACE(logger_);
   sync_primitives::AutoLock autolock(resumption_lock_);
-  IncrementGlobalIgnOffCounter();
   Json::Value to_save = Json::arrayValue;
   for (Json::Value::iterator it = GetSavedApplications().begin();
        it != GetSavedApplications().end();
@@ -290,40 +289,12 @@ uint32_t ResumptionDataJson::GetGlobalIgnOnCounter() const {
   sync_primitives::AutoLock autolock(resumption_lock_);
   Json::Value& resumption = GetResumptionData();
   if (resumption.isMember(strings::global_ign_on_counter)) {
-    return resumption[strings::global_ign_on_counter].asUInt();
+    const uint32_t global_ign_on_counter =
+        resumption[strings::global_ign_on_counter].asUInt();
+    LOG4CXX_DEBUG(logger_, "Global Ign On Counter = " << global_ign_on_counter);
+    return global_ign_on_counter;
   }
   return 1;
-}
-
-uint32_t ResumptionDataJson::GetGlobalIgnOffCounter() const {
-  using namespace app_mngr;
-  LOG4CXX_AUTO_TRACE(logger_);
-  sync_primitives::AutoLock autolock(resumption_lock_);
-  Json::Value& resumption = GetResumptionData();
-  if (resumption.isMember(strings::global_ign_off_counter)) {
-    return resumption[strings::global_ign_off_counter].asUInt();
-  }
-  return 0;
-}
-
-void ResumptionDataJson::IncrementGlobalIgnOffCounter() {
-  using namespace app_mngr;
-  LOG4CXX_AUTO_TRACE(logger_);
-  sync_primitives::AutoLock autolock(resumption_lock_);
-  Json::Value& resumption = GetResumptionData();
-  if (resumption.isMember(strings::global_ign_off_counter)) {
-    const uint32_t global_ign_off_counter =
-        resumption[strings::global_ign_off_counter].asUInt();
-    LOG4CXX_DEBUG(logger_,
-                  "Global IGN OFF counter in resumption data: "
-                      << global_ign_off_counter);
-    resumption[strings::global_ign_off_counter] = global_ign_off_counter + 1;
-    LOG4CXX_DEBUG(logger_,
-                  "Global IGN OFF counter new value: "
-                      << resumption[strings::global_ign_off_counter].asUInt());
-  } else {
-    resumption[strings::global_ign_off_counter] = 1;
-  }
 }
 
 void ResumptionDataJson::IncrementGlobalIgnOnCounter() {
@@ -345,6 +316,16 @@ void ResumptionDataJson::IncrementGlobalIgnOnCounter() {
     resumption[strings::global_ign_on_counter] = 1;
   }
   last_state().SaveStateToFileSystem();
+}
+
+void ResumptionDataJson::ResetGlobalIgnOnCount() {
+  using namespace app_mngr;
+  LOG4CXX_AUTO_TRACE(logger_);
+  sync_primitives::AutoLock autolock(resumption_lock_);
+  Json::Value& resumption = GetResumptionData();
+
+  resumption[strings::global_ign_on_counter] = 0;
+  LOG4CXX_DEBUG(logger_, "Global IGN ON counter resetting");
 }
 
 ssize_t ResumptionDataJson::IsApplicationSaved(
@@ -518,7 +499,6 @@ void ResumptionDataJson::SetLastIgnOffTime(time_t ign_off_time) {
 
 bool ResumptionDataJson::Init() {
   LOG4CXX_AUTO_TRACE(logger_);
-  IncrementGlobalIgnOnCounter();
   return true;
 }
 
