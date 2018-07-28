@@ -50,14 +50,6 @@ class LifeCycle;
 class NotificationThreadDelegate;
 
 /**
- * @brief The SDLState enum defines current Smartdevicelink app state
- * which can be changed due to received UNIX RT signals dedicated for
- * Low Voltage functionality handling
- * e.g. LowVoltage, WakeUp, IgnitionOff signals
- */
-enum class SDLState { kRun, kSleep, kStop };
-
-/**
  * @brief Class which handles real-time POSIX signals
  * dedicated for LOW VOLTAGE functionality
  */
@@ -74,19 +66,15 @@ class LowVoltageSignalsHandler {
                            const LowVoltageSignalsOffset& offset_data);
   /**
    * @brief Handles RT signals related to Low Voltage functionality
+   * @param signal number to handle
    */
   void HandleSignal(const int signo);
 
   /**
-   * @brief Checks if SDL is in active state
-   * therefore not yet in sleep state due to Low Voltage event
+   * @brief Returns signals mask required for handlning
+   * LOW VOLTAGE functionality
    */
-  bool IsActive() const;
-
-  /**
-   * @brief Returns current LOW VOLTAGE SDL state
-   */
-  SDLState get_current_sdl_state() const;
+  sigset_t LowVoltageSignalsMask() const;
 
   /**
    * @brief Returns LOW VOLTAGE signal number
@@ -114,13 +102,14 @@ class LowVoltageSignalsHandler {
    * Invoked from destructor
    */
   void Destroy();
-  SDLState state_;
   std::unique_ptr<NotificationThreadDelegate> notifications_delegate_;
   threads::Thread* signals_handler_thread_;
   LifeCycle& life_cycle_;
   int SIGLOWVOLTAGE_;
   int SIGWAKEUP_;
   int SIGIGNOFF_;
+  pid_t cpid_;
+  sigset_t lv_mask_;
 };
 
 class NotificationThreadDelegate : public threads::ThreadDelegate {

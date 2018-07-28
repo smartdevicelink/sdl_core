@@ -265,7 +265,7 @@ void LifeCycleImpl::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
   // Register signal handlers and wait sys signals
   // from OS
-  if (!utils::WaitTerminationSignals(&sig_handler)) {
+  if (!utils::Signals::WaitTerminationSignals(&sig_handler)) {
     LOG4CXX_FATAL(logger_, "Fail to catch system signal!");
   }
 }

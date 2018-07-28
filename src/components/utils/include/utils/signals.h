@@ -42,10 +42,57 @@ typedef void (*sighandler_t)(int);
 
 namespace utils {
 
-bool UnsubscribeFromTermination();
-bool WaitTerminationSignals(sighandler_t sig_handler);
-bool UnsubscribeFromLowVoltageSignals(
-    const main_namespace::LowVoltageSignalsOffset& offset_data);
+class Signals {
+ public:
+  /**
+   * @brief Unsubscribe thread from termination signals SIGINT and SIGTERM
+   * @return True if thread unsubscribed successfuly, otherwise false
+   */
+  static bool UnsubscribeFromTermination();
+
+  /**
+   * @brief Triggers thread to wait for termination signals SIGINT and SIGTERM
+   * @param sig_handler - handler to work with signals specidied above
+   * @return True if handler handles signals successfuly, otherwise false
+   */
+  static bool WaitTerminationSignals(sighandler_t sig_handler);
+
+  /**
+   * @brief Unsubscribe thread from low voltage signals
+   *  SIGLOWVOLTAGE, SIGWAKEUP and SIGIGNOFF
+   * @return True if thread unsubscribed successfuly, otherwise false
+   */
+  static bool UnsubscribeFromLowVoltageSignals(
+      const main_namespace::LowVoltageSignalsOffset& offset_data);
+
+  /**
+   * @brief Sends signal to specified process
+   * @param signal to send
+   * @param destination process signal to be sent to
+   */
+  static void SendSignal(const int signo, const pid_t pid);
+
+  /**
+   * @brief Creates child process
+   * @return created process id or -1 in case of error
+   */
+  static pid_t Fork();
+
+  /**
+   * @brief Wait for child process to be terminated
+   * @param cpid - process to wait for termination
+   * @param status store status information in the int to which it points
+   * @param options - options for exit form function
+   * detailed options can be found here: https://linux.die.net/man/2/waitpid
+   */
+  static void WaitPid(pid_t cpid, int* status, int options);
+
+  /**
+   * @brief Exits for process
+   * @param status - exit status code
+   */
+  static void ExitProcess(const int status);
+};
 
 }  //  namespace utils
 

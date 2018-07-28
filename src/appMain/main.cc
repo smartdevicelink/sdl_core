@@ -96,7 +96,7 @@ bool InitHmi(std::string hmi_link) {
  */
 int32_t main(int32_t argc, char** argv) {
   // Unsubscribe once for all threads
-  if (!utils::UnsubscribeFromTermination()) {
+  if (!utils::Signals::UnsubscribeFromTermination()) {
     // Can't use internal logger here
     exit(EXIT_FAILURE);
   }
@@ -124,7 +124,7 @@ int32_t main(int32_t argc, char** argv) {
   // except specific thread dedicated for
   // Low Voltage signals handling
   // Thread will be created later
-  if (!utils::UnsubscribeFromLowVoltageSignals(signals_offset)) {
+  if (!utils::Signals::UnsubscribeFromLowVoltageSignals(signals_offset)) {
     // Can't use internal logger here
     exit(EXIT_FAILURE);
   }
