@@ -186,7 +186,7 @@ void PerformInteractionRequest::Run() {
       LOG4CXX_DEBUG(logger_, "Interaction Mode: BOTH");
       if (!CheckChoiceSetVRSynonyms(app) || !CheckChoiceSetMenuNames(app) ||
           !CheckVrHelpItemPositions(app) ||
-          !CheckChoiceSetList_VRCommands(app)) {
+          !CheckChoiceSetListVRCommands(app)) {
         return;
       }
       break;
@@ -202,7 +202,7 @@ void PerformInteractionRequest::Run() {
     case mobile_apis::InteractionMode::VR_ONLY: {
       LOG4CXX_DEBUG(logger_, "Interaction Mode: VR_ONLY");
       if (!CheckChoiceSetVRSynonyms(app) || !CheckVrHelpItemPositions(app) ||
-          !CheckChoiceSetList_VRCommands(app)) {
+          !CheckChoiceSetListVRCommands(app)) {
         return;
       }
       break;
@@ -952,7 +952,7 @@ bool PerformInteractionRequest::CheckChoiceIDFromResponse(
   return false;
 }
 
-bool PerformInteractionRequest::CheckChoiceSetList_VRCommands(
+bool PerformInteractionRequest::CheckChoiceSetListVRCommands(
     ApplicationSharedPtr app) {
   LOG4CXX_AUTO_TRACE(logger_);
 
@@ -974,10 +974,10 @@ bool PerformInteractionRequest::CheckChoiceSetList_VRCommands(
 
     const smart_objects::SmartObject& choices_list =
         (*choice_set)[strings::choice_set];
-    int vr_status = MessageHelper::CheckChoiceSet_VRCommands(choices_list);
+    auto vr_status = MessageHelper::CheckChoiceSetVRCommands(choices_list);
 
     // if not all choices have vr commands
-    if (vr_status != 0) {
+    if (vr_status != MessageHelper::ChoiceSetVRCommandsStatus::ALL) {
       LOG4CXX_ERROR(logger_,
                     "PerformInteraction has choice sets with "
                     "missing vrCommands, not in MANUAL_ONLY mode");

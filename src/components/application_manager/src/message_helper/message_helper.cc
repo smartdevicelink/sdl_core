@@ -326,6 +326,38 @@ smart_objects::SmartObjectSPtr MessageHelper::CreateMessageForHMI(
   return message;
 }
 
+MessageHelper::ChoiceSetVRCommandsStatus MessageHelper::CheckChoiceSetVRCommands(const smart_objects::SmartObject& choice_set) {
+  // if this is false, someone doesn't have vrCommands
+  bool all_have = true;
+  // if this is false, someone has vrCommands
+  bool none_have = true;
+  smart_objects::SmartArray::const_iterator current_choice_set_it =
+      choice_set.asArray()->begin();
+  // Iterate through choices
+  for (; choice_set.asArray()->end() != current_choice_set_it;
+       ++current_choice_set_it) {
+    // if the vrCommands is present
+    if (current_choice_set_it->keyExists(
+            application_manager::strings::vr_commands)) {
+      // this one has the parameter
+      none_have = false;
+    } else {
+      // this one doesn't
+      all_have = false;
+    }
+  }
+  // everyone has it
+  if (all_have) {
+    return MessageHelper::ChoiceSetVRCommandsStatus::ALL;
+  }
+  // No one has it
+  if (none_have) {
+    return MessageHelper::ChoiceSetVRCommandsStatus::NONE;
+  }
+  // mix-and-match, this is an error
+  return MessageHelper::ChoiceSetVRCommandsStatus::MIXED;
+}
+
 smart_objects::SmartObjectSPtr MessageHelper::CreateHashUpdateNotification(
     const uint32_t app_id) {
   LOG4CXX_AUTO_TRACE(logger_);

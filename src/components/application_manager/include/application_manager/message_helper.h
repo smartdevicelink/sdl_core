@@ -855,43 +855,19 @@ class MessageHelper {
    */
   static smart_objects::SmartObjectSPtr CreateMessageForHMI(
       hmi_apis::messageType::eType message_type, const uint32_t correlation_id);
+      
+  enum ChoiceSetVRCommandsStatus {
+    MIXED, ALL, NONE
+  };
 
-  // Check whether each choice has the vrCommands field
-  // returns -1 for failure, 0 if all choice include vrCommands, and 1 if none
-  // do
-  // vrCommands is an all-or-none deal
-  static int CheckChoiceSet_VRCommands(
-      const smart_objects::SmartObject& choice_set) {
-    // if this becomes true, someone doesn't have vrCommands
-    bool all_have = true;
-    // if this is true, no one has vrCommands
-    bool none_have = true;
-    smart_objects::SmartArray::const_iterator current_choice_set_it =
-        choice_set.asArray()->begin();
-    // Iterate through choices
-    for (; choice_set.asArray()->end() != current_choice_set_it;
-         ++current_choice_set_it) {
-      // if the vrCommands is present
-      if (current_choice_set_it->keyExists(
-              application_manager::strings::vr_commands)) {
-        // this one has the parameter
-        none_have = false;
-      } else {
-        // this one doesn't
-        all_have = false;
-      }
-    }
-    // everyone has it
-    if (all_have) {
-      return 0;
-    }
-    // No one has it
-    if (none_have) {
-      return 1;
-    }
-    // mix-and-match, this is an error
-    return -1;
-  }
+  /** 
+  * @brief Check whether each choice in the set has the vrCommands parameter
+  * vrCommands is an all-or-none deal
+  * @param choice set to check
+  * @return -1 for mixed, 0 if all choice include vrCommands, and 1 if none do
+  */
+  static ChoiceSetVRCommandsStatus CheckChoiceSetVRCommands(
+      const smart_objects::SmartObject& choice_set);
 
  private:
   /**

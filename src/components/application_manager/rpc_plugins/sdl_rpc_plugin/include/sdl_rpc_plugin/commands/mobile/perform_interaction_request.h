@@ -220,7 +220,7 @@ class PerformInteractionRequest
    * @param choice_set_id_list array of choice set ids
    * @return returns false request has choice sets with no vrCommands
    */
-  bool CheckChoiceSetList_VRCommands(app_mngr::ApplicationSharedPtr app);
+  bool CheckChoiceSetListVRCommands(app_mngr::ApplicationSharedPtr app);
 
   /**
    * @brief Tells if there are sent requests without responses

@@ -123,17 +123,16 @@ void CreateInteractionChoiceSetRequest::Run() {
     SendResponse(false, result);
     return;
   }
-  int vr_status = MessageHelper::CheckChoiceSet_VRCommands(
+  auto vr_status = MessageHelper::CheckChoiceSetVRCommands(
       (*message_)[strings::msg_params][strings::choice_set]);
-  if (vr_status == -1) {
+  if (vr_status == MessageHelper::ChoiceSetVRCommandsStatus::MIXED) {
     // this is an error
     SendResponse(false,
                  Result::INVALID_DATA,
                  "Some choices don't contain VR commands. Either all or none "
                  "must have voice commands.");
     return;  // exit now, this is a bad set
-
-  } else if (vr_status == 0) {
+  } else if (vr_status == MessageHelper::ChoiceSetVRCommandsStatus::ALL) {
     // everyone had a vr command, setup the grammar
     uint32_t grammar_id = application_manager_.GenerateGrammarID();
     (*message_)[strings::msg_params][strings::grammar_id] = grammar_id;
@@ -141,10 +140,11 @@ void CreateInteractionChoiceSetRequest::Run() {
   // continue on as usual
   app->AddChoiceSet(choice_set_id_, (*message_)[strings::msg_params]);
 
-  if (vr_status == 0) {
+  if (vr_status == MessageHelper::ChoiceSetVRCommandsStatus::ALL) {
     // we have VR commands
     SendVRAddCommandRequests(app);
   } else {
+    // we have none, just return with success
     SendResponse(true, Result::SUCCESS);
   }
 }
