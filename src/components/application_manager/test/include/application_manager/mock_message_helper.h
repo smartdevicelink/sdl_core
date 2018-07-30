@@ -223,6 +223,12 @@ class MockMessageHelper {
                                               int32_t function_id,
                                               const uint32_t correlation_id,
                                               int32_t result_code));
+  MOCK_METHOD4(CreateNegativeResponseToHMI,
+               smart_objects::SmartObjectSPtr(const int32_t function_id,
+                                              const uint32_t correlation_id,
+                                              const int32_t result_code,
+                                              const std::string& error_message));
+                                              
   MOCK_METHOD4(
       CreateBlockedByPoliciesResponse,
       smart_objects::SmartObjectSPtr(mobile_apis::FunctionID::eType function_id,

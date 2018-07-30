@@ -286,14 +286,23 @@ bool RPCHandlerImpl::ConvertMessageToSO(
       rpc::ValidationReport report("RPC");
 
       if (output.validate(&report) != smart_objects::Errors::OK) {
+        const std::string formatted_report = rpc::PrettyFormat(report);
         LOG4CXX_ERROR(logger_,
-                      "Incorrect parameter from HMI"
-                          << rpc::PrettyFormat(report));
+                      "Incorrect parameter from HMI "
+                          << formatted_report);
 
-        output.erase(strings::msg_params);
-        output[strings::params][hmi_response::code] =
-            hmi_apis::Common_Result::INVALID_DATA;
-        output[strings::msg_params][strings::info] = rpc::PrettyFormat(report);
+        const int32_t function_id = static_cast<int32_t>(output[strings::params][strings::function_id].asUInt());
+        const uint32_t correlation_id = static_cast<uint32_t>(output[strings::params][strings::correlation_id].asUInt());
+
+        std::shared_ptr<smart_objects::SmartObject> response(
+               MessageHelper::CreateNegativeResponseToHMI(
+               function_id,
+               correlation_id,
+               hmi_apis::Common_Result::INVALID_DATA,
+               formatted_report));
+
+        app_manager_.GetRPCService().ManageHMICommand(
+             response);
         return false;
       }
       break;

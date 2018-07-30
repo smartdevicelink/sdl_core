@@ -1991,6 +1991,26 @@ smart_objects::SmartObjectSPtr MessageHelper::CreateNegativeResponse(
   return std::make_shared<smart_objects::SmartObject>(response_data);
 }
 
+smart_objects::SmartObjectSPtr MessageHelper::CreateNegativeResponseToHMI(
+    const int32_t function_id,
+    const uint32_t correlation_id,
+    const hmi_apis::Common_Result::eType result_code,
+    const std::string & error_message) {
+  smart_objects::SmartObject response_data(smart_objects::SmartType_Map);
+
+  response_data[strings::params][strings::function_id] = function_id;
+  response_data[strings::params][strings::correlation_id] = correlation_id;
+  response_data[strings::params][strings::protocol_type] = commands::CommandImpl::hmi_protocol_type_;
+  response_data[strings::params][strings::protocol_version] = commands::CommandImpl::protocol_version_;
+
+  response_data[strings::params][strings::message_type] =
+      MessageType::kErrorResponse;
+  response_data[strings::params][hmi_response::code] = result_code;
+  response_data[strings::params][strings::error_msg] = error_message;
+
+  return std::make_shared<smart_objects::SmartObject>(response_data);
+}
+
 void MessageHelper::SendNaviSetVideoConfig(
     int32_t app_id,
     ApplicationManager& app_mngr,

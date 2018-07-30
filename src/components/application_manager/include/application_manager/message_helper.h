@@ -577,6 +577,12 @@ class MessageHelper {
       const uint32_t correlation_id,
       int32_t result_code);
 
+  static smart_objects::SmartObjectSPtr CreateNegativeResponseToHMI(
+      const int32_t function_id,
+      const uint32_t correlation_id,
+      const hmi_apis::Common_Result::eType result_code,
+      const std::string& error_message);
+
   /**
    * @brief Get the full file path of an app file
    *

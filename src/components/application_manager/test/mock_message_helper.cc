@@ -404,6 +404,15 @@ smart_objects::SmartObjectSPtr MessageHelper::CreateNegativeResponse(
       connection_key, function_id, correlation_id, result_code);
 }
 
+smart_objects::SmartObjectSPtr MessageHelper::CreateNegativeResponseToHMI(
+    const int32_t function_id,
+    const uint32_t correlation_id,
+    const hmi_apis::Common_Result::eType result_code,
+    const std::string& error_message) {
+  return MockMessageHelper::message_helper_mock()->CreateNegativeResponseToHMI(
+      function_id, correlation_id, result_code, error_message);
+}
+
 smart_objects::SmartObjectSPtr MessageHelper::CreateBlockedByPoliciesResponse(
     mobile_apis::FunctionID::eType function_id,
     mobile_apis::Result::eType result,
