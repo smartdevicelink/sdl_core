@@ -39,6 +39,25 @@
 namespace application_manager {
 CREATE_LOGGERPTR_GLOBAL(logger_, "ApplicationManager")
 
+namespace {
+struct CommandIdComparator {
+  CommandIdComparator(const std::string& key, const uint32_t id)
+      : key_(key), target_id_(id) {}
+
+  bool operator()(const CommandsMap::value_type& new_command) const {
+    smart_objects::SmartObject& command = *(new_command.second);
+    if (command.keyExists(key_)) {
+      return command[key_].asUInt() == target_id_;
+    }
+    return false;
+  }
+
+ private:
+  std::string key_;
+  uint32_t target_id_;
+};
+}  // namespace
+
 InitialApplicationDataImpl::InitialApplicationDataImpl()
     : app_types_(NULL)
     , vr_synonyms_(NULL)
@@ -724,28 +743,53 @@ void DynamicApplicationDataImpl::SetGlobalProperties(
 }
 
 void DynamicApplicationDataImpl::AddCommand(
-    uint32_t cmd_id, const smart_objects::SmartObject& command) {
+    const uint32_t internal_id, const smart_objects::SmartObject& command) {
   sync_primitives::AutoLock lock(commands_lock_ptr_);
-  CommandsMap::const_iterator it = commands_.find(cmd_id);
+
+  CommandsMap::const_iterator it = commands_.find(internal_id);
   if (commands_.end() == it) {
-    commands_[cmd_id] = new smart_objects::SmartObject(command);
+    commands_[internal_id] = new smart_objects::SmartObject(command);
+    LOG4CXX_DEBUG(logger_,
+                  "Command with internal number "
+                      << internal_id << " and id "
+                      << (*commands_[internal_id])[strings::cmd_id].asUInt()
+                      << " is added.");
   }
 }
 
-void DynamicApplicationDataImpl::RemoveCommand(uint32_t cmd_id) {
+void DynamicApplicationDataImpl::RemoveCommand(const uint32_t cmd_id) {
   sync_primitives::AutoLock lock(commands_lock_ptr_);
-  CommandsMap::iterator it = commands_.find(cmd_id);
-  if (commands_.end() != it) {
+
+  CommandIdComparator is_id_equal(strings::cmd_id, cmd_id);
+  CommandsMap::iterator it =
+      find_if(commands_.begin(), commands_.end(), is_id_equal);
+
+  if (it != commands_.end()) {
     delete it->second;
+    LOG4CXX_DEBUG(logger_,
+                  "Command with internal number " << (it->first) << " and id "
+                                                  << cmd_id << " is removed.");
     commands_.erase(it);
+
+    return;
   }
+  LOG4CXX_WARN(logger_,
+               "Command with id " << cmd_id
+                                  << " is not found. Removal skipped.");
 }
 
 smart_objects::SmartObject* DynamicApplicationDataImpl::FindCommand(
-    uint32_t cmd_id) {
+    const uint32_t cmd_id) {
   sync_primitives::AutoLock lock(commands_lock_ptr_);
-  CommandsMap::const_iterator it = commands_.find(cmd_id);
+
+  CommandIdComparator is_id_equal(strings::cmd_id, cmd_id);
+  CommandsMap::const_iterator it =
+      find_if(commands_.begin(), commands_.end(), is_id_equal);
+
   if (it != commands_.end()) {
+    LOG4CXX_DEBUG(logger_,
+                  "Command with internal number " << (it->first) << " and id "
+                                                  << cmd_id << " is found.");
     return it->second;
   }
 
