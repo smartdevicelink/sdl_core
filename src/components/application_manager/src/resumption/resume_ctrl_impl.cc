@@ -545,13 +545,15 @@ bool ResumeCtrlImpl::CheckApplicationHash(ApplicationSharedPtr application,
                                           const std::string& hash) {
   LOG4CXX_AUTO_TRACE(logger_);
   DCHECK_OR_RETURN(application, false);
-  LOG4CXX_DEBUG(logger_,
-                "app_id : " << application->app_id() << " hash : " << hash);
   smart_objects::SmartObject saved_app;
   const std::string& device_mac = application->mac_address();
   bool result = resumption_storage_->GetSavedApplication(
       application->policy_app_id(), device_mac, saved_app);
-  return result ? saved_app[strings::hash_id].asString() == hash : false;
+  const auto& saved_hash = saved_app[strings::hash_id].asString();
+  LOG4CXX_DEBUG(logger_,
+                "app_id : " << application->app_id() << " hash : " << hash
+                            << "; saved hash = " << saved_hash);
+  return result ? saved_hash == hash : false;
 }
 
 void ResumeCtrlImpl::SaveDataOnTimer() {
