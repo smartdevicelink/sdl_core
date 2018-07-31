@@ -91,6 +91,14 @@ class RegisterAppInterfaceRequest
 
  private:
   /**
+   * @brief FillApplicationParams set app application attributes from the RAI
+   * request
+   * @param application applicaiton to fill params
+   */
+  void FillApplicationParams(
+      application_manager::ApplicationSharedPtr application);
+
+  /**
    * @brief The AppicationType enum defines whether application is newly
    * registered or existing and being switched over another transport
    */
@@ -105,7 +113,9 @@ class RegisterAppInterfaceRequest
    * considering application type
    * @param app_type Type of application
    **/
-  void SendRegisterAppInterfaceResponseToMobile(ApplicationType app_type);
+  void SendRegisterAppInterfaceResponseToMobile(ApplicationType app_type,
+                                                const std::string& add_info,
+                                                bool need_restore_vr);
 
   smart_objects::SmartObjectSPtr GetLockScreenIconUrlNotification(
       const uint32_t connection_key, app_mngr::ApplicationSharedPtr app);
@@ -135,16 +145,15 @@ class RegisterAppInterfaceRequest
    **/
   void SendOnAppRegisteredNotificationToHMI(
       const app_mngr::Application& application_impl,
-      bool resumption = false,
       bool need_restore_vr = false);
-  /*
+  /**
    * @brief Check new ID along with known mobile application ID
    *
    * return TRUE if ID is known already, otherwise - FALSE
    */
   bool IsApplicationWithSameAppIdRegistered();
 
-  /*
+  /**
    * @brief Check new application parameters (name, tts, vr) for
    * coincidence with already known parameters of registered applications
    *
@@ -153,7 +162,7 @@ class RegisterAppInterfaceRequest
   */
   mobile_apis::Result::eType CheckCoincidence();
 
-  /*
+  /**
   * @brief Predicate for using with CheckCoincidence method to compare with VR
   * synonym SO
   *
@@ -215,11 +224,76 @@ class RegisterAppInterfaceRequest
    */
   bool IsApplicationSwitched();
 
- private:
+  /**
+   * @brief TransformPolicyAppIdToUpper make policy app_id  in msg_params
+   * uppercase.
+   * SDL compare policy appid in not case sensitive mode.
+   */
+  void TransformPolicyAppIdToUpper();
+
+  /**
+   * @brief WaitForHMIIsReady blocking function. Waits for HMI be ready for
+   * requests processing
+   */
+  void WaitForHMIIsReady();
+
+  /**
+   * @brief IsApplicationForbidden check if application is in list of forbidden
+   * applications
+   * @return true if application os not allowed to register, othervise return
+   * false.
+   */
+  bool IsApplicationForbidden();
+
+  /**
+   * @brief ProcessApplicationTransportSwitching process checking if application
+   * is switching transport.
+   * If applicaiton is in switching mode, function will send response to mobile
+   * If no switching required response wont be send
+   * @return true if response to mobile was sent, otherwise return false.
+   */
+  bool ProcessApplicationTransportSwitching();
+
+  /**
+   * @brief IncrementDuplicateNameCounter increments internal counter of
+   * duplicate name during registration
+   * @param coincidence_result result of name checking
+   */
+  void IncrementDuplicateNameCounter(
+      mobile_apis::Result::eType coincidence_result);
+
+  /**
+   * @brief SetupAppDeviceInfo add applicaiton device information to policies
+   * @param application applicaiton to process
+   */
+  void SetupAppDeviceInfo(
+      application_manager::ApplicationSharedPtr application);
+
+  /**
+   * @brief The DataResumeResult enum relust of resumption data check
+   * RESUME_DATA : applicaiton data should be resumed
+   * NO_HASH : hash_id is ommited in RAI. No data resumption required
+   * WRONG_HASH : hash_id frim RAI does not match to savedhash id, resumption
+   * should be failed.
+   * MISSED_DATA : Some data was missed on SDL side.
+   */
+  enum class DataResumeResult { RESUME_DATA, NO_HASH, WRONG_HASH, MISSED_DATA };
+
+  /**
+   * @brief ApplicationDataShouldBeResumed check if application data should be
+   * resumed
+   * @return result of possible conditions for resumptions
+   */
+  DataResumeResult ApplicationDataShouldBeResumed();
+
+  /**
+   * @brief CheckLanguage check if language in RAI matches hmi_capabilities
+   * Setup result_code variable in case of does not match
+   */
+  void CheckLanguage();
+
   std::string response_info_;
   mobile_apis::Result::eType result_code_;
-
-  policy::PolicyHandlerInterface& GetPolicyHandler();
   DISALLOW_COPY_AND_ASSIGN(RegisterAppInterfaceRequest);
 };
 
