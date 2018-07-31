@@ -635,22 +635,20 @@ class MessageHelper {
       smart_objects::SmartObject& image,
       ApplicationConstSharedPtr app,
       ApplicationManager& app_mngr);
-      
+
   /**
   * @brief Stores whether a choice set has correct VRCommands
   * MIXED means some choices have VRCommands and others don't
   * ALL means all do, NONE means none do
-  */  
-  enum ChoiceSetVRCommandsStatus {
-    MIXED, ALL, NONE
-  };
+  */
+  enum ChoiceSetVRCommandsStatus { MIXED, ALL, NONE };
 
-      
   /**
    * @brief Check whether each choice in the set has the vrCommands parameter
    * vrCommands is an all-or-none deal
    * @param choice set to check
-   * @return a ChoiceSetVRCommandsStatus representing the state of the choice set
+   * @return a ChoiceSetVRCommandsStatus representing the state of the choice
+   * set
    */
   static ChoiceSetVRCommandsStatus CheckChoiceSetVRCommands(
       const smart_objects::SmartObject& choice_set);

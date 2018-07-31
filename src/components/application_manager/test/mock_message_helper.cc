@@ -343,7 +343,8 @@ mobile_apis::Result::eType MessageHelper::VerifyImage(
 MessageHelper::ChoiceSetVRCommandsStatus
 MessageHelper::CheckChoiceSetVRCommands(
     const smart_objects::SmartObject& choice_set) {
-  return MockMessageHelper::message_helper_mock()->CheckChoiceSetVRCommands(choice_set);
+  return MockMessageHelper::message_helper_mock()->CheckChoiceSetVRCommands(
+      choice_set);
 }
 
 mobile_apis::Result::eType MessageHelper::VerifyImageFiles(
