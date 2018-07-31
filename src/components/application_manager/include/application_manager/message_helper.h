@@ -635,6 +635,25 @@ class MessageHelper {
       smart_objects::SmartObject& image,
       ApplicationConstSharedPtr app,
       ApplicationManager& app_mngr);
+      
+  /**
+  * @brief Stores whether a choice set has correct VRCommands
+  * MIXED means some choices have VRCommands and others don't
+  * ALL means all do, NONE means none do
+  */  
+  enum ChoiceSetVRCommandsStatus {
+    MIXED, ALL, NONE
+  };
+
+      
+  /**
+   * @brief Check whether each choice in the set has the vrCommands parameter
+   * vrCommands is an all-or-none deal
+   * @param choice set to check
+   * @return a ChoiceSetVRCommandsStatus representing the state of the choice set
+   */
+  static ChoiceSetVRCommandsStatus CheckChoiceSetVRCommands(
+      const smart_objects::SmartObject& choice_set);
 
   /*
    * @brief Finds "Image" structure in request and verify image file presence
@@ -855,19 +874,6 @@ class MessageHelper {
    */
   static smart_objects::SmartObjectSPtr CreateMessageForHMI(
       hmi_apis::messageType::eType message_type, const uint32_t correlation_id);
-      
-  enum ChoiceSetVRCommandsStatus {
-    MIXED, ALL, NONE
-  };
-
-  /** 
-  * @brief Check whether each choice in the set has the vrCommands parameter
-  * vrCommands is an all-or-none deal
-  * @param choice set to check
-  * @return -1 for mixed, 0 if all choice include vrCommands, and 1 if none do
-  */
-  static ChoiceSetVRCommandsStatus CheckChoiceSetVRCommands(
-      const smart_objects::SmartObject& choice_set);
 
  private:
   /**
