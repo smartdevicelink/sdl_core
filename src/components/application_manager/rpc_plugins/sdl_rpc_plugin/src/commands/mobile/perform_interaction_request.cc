@@ -165,7 +165,7 @@ void PerformInteractionRequest::Run() {
   }
 
   if (msg_params.keyExists(strings::vr_help)) {
-    if (mobile_apis::Result::SUCCESS !=
+    if (mobile_apis::Result::INVALID_DATA ==
         MessageHelper::VerifyImageVrHelpItems(
             msg_params[strings::vr_help], app, application_manager_)) {
       LOG4CXX_ERROR(logger_,
@@ -343,27 +343,31 @@ bool PerformInteractionRequest::ProcessVRResponse(
     return false;
   }
 
-  if (Common_Result::SUCCESS == vr_result_code_ &&
-      InteractionMode::MANUAL_ONLY == interaction_mode_) {
-    LOG4CXX_DEBUG(logger_,
-                  "VR response SUCCESS in MANUAL_ONLY mode "
-                      << "Wait for UI response");
-    // in case MANUAL_ONLY mode VR.PI SUCCESS just return
-    return false;
-  }
-
   const SmartObject& hmi_msg_params = message[strings::msg_params];
   if (hmi_msg_params.keyExists(strings::choice_id)) {
-    const int choise_id = hmi_msg_params[strings::choice_id].asInt();
-    if (!CheckChoiceIDFromResponse(app, choise_id)) {
+    const int choice_id = hmi_msg_params[strings::choice_id].asInt();
+    if (!CheckChoiceIDFromResponse(app, choice_id)) {
       LOG4CXX_ERROR(logger_, "Wrong choiceID was received from HMI");
       TerminatePerformInteraction();
       SendResponse(
           false, Result::GENERIC_ERROR, "Wrong choiceID was received from HMI");
       return true;
     }
-    msg_params[strings::choice_id] = choise_id;
+    msg_params[strings::choice_id] = choice_id;
   }
+
+  const bool is_vr_result_success = Compare<Common_Result::eType, EQ, ONE>(
+      vr_result_code_, Common_Result::SUCCESS, Common_Result::WARNINGS);
+
+  if (is_vr_result_success &&
+      InteractionMode::MANUAL_ONLY == interaction_mode_) {
+    LOG4CXX_DEBUG(logger_,
+                  "VR response is successfull in MANUAL_ONLY mode "
+                      << "Wait for UI response");
+    // in case MANUAL_ONLY mode VR.PI SUCCESS just return
+    return false;
+  }
+
   return false;
 }
 
@@ -401,19 +405,19 @@ void PerformInteractionRequest::ProcessUIResponse(
           ui_result_code_, hmi_apis::Common_Result::UNSUPPORTED_RESOURCE);
 
   if (result) {
-    if (is_pi_warning) {
-      ui_result_code_ = hmi_apis::Common_Result::WARNINGS;
-      ui_info_ = message[strings::msg_params][strings::info].asString();
-      if (message.keyExists(strings::params) &&
-          message[strings::params].keyExists(strings::data)) {
-        msg_params = message[strings::params][strings::data];
-      }
-    } else if (is_pi_unsupported) {
+    if (is_pi_unsupported) {
       ui_result_code_ = hmi_apis::Common_Result::UNSUPPORTED_RESOURCE;
       ui_info_ = message[strings::msg_params][strings::info].asString();
-    } else if (message.keyExists(strings::msg_params)) {
-      msg_params = message[strings::msg_params];
+    } else {
+      if (message.keyExists(strings::msg_params)) {
+        msg_params = message[strings::msg_params];
+      }
+      if (is_pi_warning) {
+        ui_result_code_ = hmi_apis::Common_Result::WARNINGS;
+        ui_info_ = message[strings::msg_params][strings::info].asString();
+      }
     }
+
     // result code must be GENERIC_ERROR in case wrong choice_id
     if (msg_params.keyExists(strings::choice_id)) {
       if (!CheckChoiceIDFromResponse(app,
