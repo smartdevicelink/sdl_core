@@ -98,8 +98,7 @@
 
     <typedef name="HmiLevels" type="HmiLevel" array="true"
         maxsize="4" />
-    <typedef name="Parameters" type="Parameter" array="true"
-        maxsize="24" />
+    <typedef name="Parameters" type="Parameter" array="true"/>
 
     <struct name="RpcParameters">
         <!-- maxsizes are equal to number of currently known elements of
