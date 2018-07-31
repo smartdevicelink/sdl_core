@@ -253,8 +253,7 @@ CacheManager::CacheManager()
     : CacheManagerInterface()
     , pt_(new policy_table::Table)
     , backup_(new SQLPTExtRepresentation())
-    , update_required(false)
-    , cache_lock_(true) {
+    , update_required(false) {
   InitBackupThread();
 }
 
@@ -262,8 +261,7 @@ CacheManager::CacheManager(bool in_memory)
     : CacheManagerInterface()
     , pt_(new policy_table::Table)
     , backup_(new SQLPTExtRepresentation(in_memory))
-    , update_required(false)
-    , cache_lock_(true) {
+    , update_required(false) {
   InitBackupThread();
 }
 

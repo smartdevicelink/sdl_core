@@ -616,10 +616,9 @@ class MessageHelper {
     * @param app current application
     * @return verification result
     */
-  static mobile_apis::Result::eType VerifyImageApplyPath(
-      smart_objects::SmartObject& image,
-      ApplicationConstSharedPtr app,
-      ApplicationManager& app_mngr);
+  static void ApplyImagePath(smart_objects::SmartObject& image,
+                             ApplicationConstSharedPtr app,
+                             ApplicationManager& app_mngr);
 
   /*
    * @brief Verify image and add image file full path
@@ -681,7 +680,7 @@ class MessageHelper {
    * @return returns FALSE if string contains incorrect character or
    * string is empty otherwise returns TRUE
    */
-  static bool VerifySoftButtonString(const std::string& str);
+  static bool VerifyString(const std::string& str);
 
   static mobile_apis::Result::eType ProcessSoftButtons(
       smart_objects::SmartObject& message_params,

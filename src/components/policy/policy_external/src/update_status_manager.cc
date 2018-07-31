@@ -209,7 +209,6 @@ UpdateStatusManager::UpdateThreadDelegate::UpdateThreadDelegate(
     UpdateStatusManager* update_status_manager)
     : timeout_(0)
     , stop_flag_(false)
-    , state_lock_(true)
     , update_status_manager_(update_status_manager) {
   LOG4CXX_AUTO_TRACE(logger_);
   LOG4CXX_DEBUG(logger_, "Create UpdateThreadDelegate");

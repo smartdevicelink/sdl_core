@@ -76,7 +76,7 @@ void AddSubMenuRequest::Run() {
     verification_result = MessageHelper::VerifyImage(
         received_msg_params[strings::menu_icon], app, application_manager_);
 
-    if (mobile_apis::Result::SUCCESS != verification_result) {
+    if (mobile_apis::Result::INVALID_DATA == verification_result) {
       LOG4CXX_ERROR(
           logger_, "MessageHelper::VerifyImage return " << verification_result);
       SendResponse(false, verification_result);
@@ -117,10 +117,7 @@ void AddSubMenuRequest::Run() {
   msg_params[strings::menu_params][strings::menu_name] =
       received_msg_params[strings::menu_name];
   msg_params[strings::app_id] = app->app_id();
-
-  if (mobile_apis::Result::SUCCESS == verification_result) {
-    msg_params[strings::menu_icon] = received_msg_params[strings::menu_icon];
-  }
+  msg_params[strings::menu_icon] = received_msg_params[strings::menu_icon];
 
   StartAwaitForInterface(HmiInterfaces::HMI_INTERFACE_UI);
   SendHMIRequest(hmi_apis::FunctionID::UI_AddSubMenu, &msg_params, true);
