@@ -311,7 +311,17 @@ void RegisterAppInterfaceRequest::Run() {
     return;
   }
 
-  application->set_msg_version(major, minor, patch);
+  //Version negotiation
+  utils::SemanticVersion mobile_version(major, minor, patch);
+  utils::SemanticVersion module_version(major_version, minor_version, patch_version);
+  if (mobile_version < module_version) {
+    //Use mobile RPC version as negotiated version
+    application->set_msg_version(major, minor, patch);
+  } else {
+    //Use module version as negotiated version
+    application->set_msg_version(major_version, minor_version, patch_version);
+  }
+
   
   // For resuming application need to restore hmi_app_id from resumeCtrl
   resumption::ResumeCtrl& resumer = application_manager_.resume_controller();
@@ -599,12 +609,15 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile(
     return;
   }
 
+
+  utils::SemanticVersion negotiated_version = application->msg_version();
+
   response_params[strings::sync_msg_version][strings::major_version] =
-      major_version;  // From generated file interfaces/generated_msg_version.h
+      negotiated_version.major_version;
   response_params[strings::sync_msg_version][strings::minor_version] =
-      minor_version;  // From generated file interfaces/generated_msg_version.h
+      negotiated_version.minor_version;
   response_params[strings::sync_msg_version][strings::patch_version] =
-      patch_version;  // From generated file interfaces/generated_msg_version.h
+      negotiated_version.patch_version;
 
   const smart_objects::SmartObject& msg_params =
       (*message_)[strings::msg_params];
