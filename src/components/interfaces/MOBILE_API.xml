@@ -772,6 +772,13 @@
             <description> Optional text to label an app menu button (for certain touchscreen platforms).</description>
         </element>
         
+        <element name="navigationText">
+            <description>Navigation text for UpdateTurnList.</description>
+        </element>
+        <element name="notificationText">
+            <description>Text of notification to be displayed on screen.</description>
+        </element>
+
         <element name="locationName">
             <description> Optional name / title of intended location for SendLocation.</description>
         </element>
@@ -788,6 +795,7 @@
             <description> Optional hone number of intended location / establishment (if applicable) for SendLocation.</description>
         </element>
         
+        <element name="timeToDestination"/>
     </enum>
     
     <enum name="ImageFieldName">
@@ -2074,6 +2082,8 @@
         </param>
         <param name="mediaClockFormats" type="MediaClockFormat" minsize="0" maxsize="100" array="true" mandatory="true">
             <description>A set of all supported formats of the media clock. See MediaClockFormat</description>
+        </param>
+        <param name="imageCapabilities" type="ImageType" array="true" minsize="0" maxsize="2" mandatory="false">
         </param>
         <param name="graphicSupported" type="Boolean" mandatory="true">
             <description>The display's persistent screen supports referencing a static or dynamic image.</description>
