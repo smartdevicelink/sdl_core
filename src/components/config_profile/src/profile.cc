@@ -309,7 +309,7 @@ const uint32_t kDefaultBeforeUpdateHours = 24;
 #endif  // ENABLE_SECURITY
 
 const uint32_t kDefaultHubProtocolIndex = 0;
-const uint32_t kDefaultHeartBeatTimeout = 0;
+const uint32_t kDefaultHeartBeatTimeout = 5000;
 const uint16_t kDefaultMaxSupportedProtocolVersion = 5;
 const uint16_t kDefautTransportManagerTCPPort = 12345;
 const uint16_t kDefaultServerPort = 8087;
