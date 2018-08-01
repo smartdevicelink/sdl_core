@@ -775,6 +775,7 @@
         <element name="navigationText">
             <description>Navigation text for UpdateTurnList.</description>
         </element>
+
         <element name="notificationText">
             <description>Text of notification to be displayed on screen.</description>
         </element>
@@ -795,7 +796,9 @@
             <description> Optional hone number of intended location / establishment (if applicable) for SendLocation.</description>
         </element>
         
-        <element name="timeToDestination"/>
+        <element name="timeToDestination">
+            <description>Text of time to reach destination to be displayed on screen.</description>
+        </element>
     </enum>
     
     <enum name="ImageFieldName">
