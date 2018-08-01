@@ -1583,8 +1583,14 @@ bool SQLPTRepresentation::GatherRequestType(
     return false;
   }
 
+  LOG4CXX_DEBUG(logger_, "Gathering request types for app id: " << app_id);
   query.Bind(0, app_id);
   while (query.Next()) {
+    const std::string request_type = query.GetString(0);
+    if (request_type.empty()) {
+      LOG4CXX_DEBUG(logger_, "Request types is omitted for app id: " << app_id);
+      return true;
+    }
     policy_table::RequestType type;
     if (!policy_table::EnumFromJsonString(query.GetString(0), &type)) {
       return false;
@@ -1606,10 +1612,15 @@ bool SQLPTRepresentation::GatherRequestSubType(
     LOG4CXX_WARN(logger_, "Incorrect select from request subtypes.");
     return false;
   }
-
+  LOG4CXX_DEBUG(logger_, "Gathering request subtypes for app id: " << app_id);
   query.Bind(0, app_id);
   while (query.Next()) {
     const std::string request_subtype = query.GetString(0);
+    if (request_subtype.empty()) {
+      LOG4CXX_DEBUG(logger_,
+                    "Request subtypes is omitted for app id: " << app_id);
+      return true;
+    }
     if ("EMPTY" == request_subtype) {
       request_subtypes->mark_initialized();
       continue;
