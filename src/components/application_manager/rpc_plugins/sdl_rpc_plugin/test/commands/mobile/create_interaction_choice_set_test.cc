@@ -514,16 +514,17 @@ TEST_F(CreateInteractionChoiceSetRequestTest, Run_WithoutVrCommands_SUCCESS) {
   smart_objects::SmartObject* choice_set_id = NULL;
   EXPECT_CALL(*mock_app_, FindChoiceSet(kChoiceSetId))
       .WillOnce(Return(choice_set_id));
-      
-  // No VR commands 
-  EXPECT_CALL(app_mngr_, GenerateGrammarID()).Times(0); 
+
+  // No VR commands
+  EXPECT_CALL(app_mngr_, GenerateGrammarID()).Times(0);
 
   EXPECT_CALL(*mock_app_, AddChoiceSet(kChoiceSetId, _));
 
   command_->Run();
 }
 
-TEST_F(CreateInteractionChoiceSetRequestTest, Run_WithMixedVrCommands_UNSUCCESS) {
+TEST_F(CreateInteractionChoiceSetRequestTest,
+       Run_WithMixedVrCommands_UNSUCCESS) {
   (*message_)[am::strings::msg_params][am::strings::choice_set][0]
              [am::strings::menu_name] = kMenuName;
   (*message_)[am::strings::msg_params][am::strings::choice_set][0]
@@ -551,10 +552,10 @@ TEST_F(CreateInteractionChoiceSetRequestTest, Run_WithMixedVrCommands_UNSUCCESS)
   smart_objects::SmartObject* choice_set_id = NULL;
   EXPECT_CALL(*mock_app_, FindChoiceSet(kChoiceSetId))
       .WillOnce(Return(choice_set_id));
-      
+
   EXPECT_CALL(app_mngr_, GenerateGrammarID()).Times(0);
 
-  EXPECT_CALL(*mock_app_, AddChoiceSet(kChoiceSetId, _)).Times(0);;
+  EXPECT_CALL(*mock_app_, AddChoiceSet(kChoiceSetId, _)).Times(0);
 
   command_->Run();
 }

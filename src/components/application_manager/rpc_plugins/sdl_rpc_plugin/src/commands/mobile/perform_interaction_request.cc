@@ -163,7 +163,7 @@ void PerformInteractionRequest::Run() {
     SendResponse(false, mobile_apis::Result::INVALID_ID);
     return;
   }
-  
+
   if (msg_params.keyExists(strings::vr_help)) {
     if (mobile_apis::Result::INVALID_DATA ==
         MessageHelper::VerifyImageVrHelpItems(
