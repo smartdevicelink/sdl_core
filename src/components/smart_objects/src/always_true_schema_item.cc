@@ -48,5 +48,10 @@ Errors::eType CAlwaysTrueSchemaItem::validate(const SmartObject& object,
   return Errors::OK;
 }
 
+Errors::eType CAlwaysTrueSchemaItem::validate(
+    const SmartObject& Object, rpc::ValidationReport* report__, const utils::SemanticVersion& MessageVersion) {
+  return Errors::OK;
+}
+
 }  // namespace NsSmartObjects
 }  // namespace NsSmartDeviceLink

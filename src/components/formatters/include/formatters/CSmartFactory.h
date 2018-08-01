@@ -82,6 +82,10 @@ extern const std::string S_PROTOCOL_TYPE;
 extern const std::string S_CORRELATION_ID;
 
 /**
+ * @brief String constant for RPC_MSG_VERSION.
+ */
+extern const std::string S_RPC_MSG_VERSION;
+/**
  * @brief String constant for "code" param name.
  */
 extern const std::string kCode;
@@ -295,7 +299,13 @@ bool CSmartFactory<FunctionIdEnum, MessageTypeEnum, StructIdEnum>::attachSchema(
   }
 
   object.setSchema(schemaIterator->second);
-  schemaIterator->second.applySchema(object, RemoveFakeParameters);
+  
+  utils::SemanticVersion msg_version;
+  if (object[NsSmartDeviceLink::NsJSONHandler::strings::S_PARAMS].keyExists(NsSmartDeviceLink::NsJSONHandler::strings::S_RPC_MSG_VERSION)) {
+    msg_version = object[NsSmartDeviceLink::NsJSONHandler::strings::S_PARAMS][NsSmartDeviceLink::NsJSONHandler::strings::S_RPC_MSG_VERSION].asString();
+  }
+
+  schemaIterator->second.applySchema(object, RemoveFakeParameters, msg_version);
 
   return true;
 }

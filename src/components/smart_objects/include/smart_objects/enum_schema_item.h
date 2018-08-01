@@ -41,6 +41,8 @@
 
 #include "smart_objects/default_shema_item.h"
 
+#include "utils/semantic_version.h"
+
 namespace NsSmartDeviceLink {
 namespace NsSmartObjects {
 
@@ -78,6 +80,16 @@ class TEnumSchemaItem : public CDefaultSchemaItem<EnumType> {
    **/
   Errors::eType validate(const SmartObject& Object,
                          rpc::ValidationReport* report__) OVERRIDE;
+
+  /**
+   * @brief Validate smart object.
+   * @param Object Object to validate.
+   * @param report__ object for reporting errors during validation
+   * @param MessageVersion to check mobile RPC version against RPC Spec History
+   * @return NsSmartObjects::Errors::eType
+   **/
+  Errors::eType validate(const SmartObject& Object,
+                         rpc::ValidationReport* report__, const utils::SemanticVersion& MessageVersion) OVERRIDE;
   /**
    * @brief Apply schema.
    * This implementation checks if enumeration is represented as string
@@ -88,7 +100,7 @@ class TEnumSchemaItem : public CDefaultSchemaItem<EnumType> {
    * from smart object otherwise contains false.
    **/
   void applySchema(SmartObject& Object,
-                   const bool RemoveFakeParameters) OVERRIDE;
+                   const bool RemoveFakeParameters, const utils::SemanticVersion& MessageVersion = utils::SemanticVersion()) OVERRIDE;
   /**
    * @brief Unapply schema.
    * @param Object Object to unapply schema.
@@ -248,8 +260,14 @@ Errors::eType TEnumSchemaItem<EnumType>::validate(
 }
 
 template <typename EnumType>
+Errors::eType TEnumSchemaItem<EnumType>::validate(
+    const SmartObject& Object, rpc::ValidationReport* report__, const utils::SemanticVersion& MessageVersion) {
+  return validate(Object, report__);
+}
+
+template <typename EnumType>
 void TEnumSchemaItem<EnumType>::applySchema(SmartObject& Object,
-                                            const bool RemoveFakeParameters) {
+                                            const bool RemoveFakeParameters, const utils::SemanticVersion& MessageVersion) {
   if (SmartType_String == Object.getType()) {
     EnumType enum_val = static_cast<EnumType>(-1);
     if (ConversionHelper::StringToEnum(Object.asString(), &enum_val)) {

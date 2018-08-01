@@ -33,6 +33,8 @@
 
 #include <algorithm>
 
+#include <boost/algorithm/string.hpp>
+
 #include "smart_objects/always_false_schema_item.h"
 #include "smart_objects/smart_object.h"
 
@@ -48,8 +50,66 @@ CObjectSchemaItem::SMember::SMember()
     : mSchemaItem(CAlwaysFalseSchemaItem::create()), mIsMandatory(true) {}
 
 CObjectSchemaItem::SMember::SMember(const ISchemaItemPtr SchemaItem,
-                                    const bool IsMandatory)
-    : mSchemaItem(SchemaItem), mIsMandatory(IsMandatory) {}
+                                    const bool IsMandatory,
+                                    const std::string& Since,
+                                    const std::string& Until,
+                                    const bool IsDeprecated,
+                                    const bool IsRemoved)
+    : mSchemaItem(SchemaItem), mIsMandatory(IsMandatory) {
+  
+      if (Since.size() > 0) {
+        utils::SemanticVersion since_struct;
+        std::vector<std::string> since_fields;
+        boost::split(since_fields, Since, boost::is_any_of("."));
+        if(since_fields.size() == 3) {
+          since_struct.major_version = atoi(since_fields[0].c_str());
+          since_struct.minor_version = atoi(since_fields[1].c_str());
+          since_struct.patch_version = atoi(since_fields[2].c_str());
+          mSince = since_struct;           
+        }
+      }
+
+      if (Until.size() > 0) {
+        utils::SemanticVersion until_struct;
+        std::vector<std::string> until_fields;
+        boost::split(until_fields, Until, boost::is_any_of("."));
+        if(until_fields.size() == 3) {
+          until_struct.major_version = atoi(until_fields[0].c_str());
+          until_struct.minor_version = atoi(until_fields[1].c_str());
+          until_struct.patch_version = atoi(until_fields[2].c_str());
+          mUntil = until_struct; 
+        }
+      }
+
+      mIsDeprecated = IsDeprecated;
+      mIsRemoved = IsRemoved;
+
+    }
+
+bool CObjectSchemaItem::SMember::CheckHistoryFieldVersion(const utils::SemanticVersion& MessageVersion) const {
+  if (MessageVersion.isValid()) {
+    if (mSince.is_initialized()) {
+      if (MessageVersion < mSince.get()) {
+        return false; //Msg version predates `since` field
+      } else {
+        if (mUntil.is_initialized() && (MessageVersion >= mUntil.get())) {
+          return false; //Msg version newer than `until` field
+        } else {
+          return true; //Mobile msg version falls within specified version range
+        }
+      }
+    }
+      
+    if (mUntil.is_initialized() && (MessageVersion >= mUntil.get())) {
+      return false; //Msg version newer than `until` field
+    } else {
+      return true; //Mobile msg version falls within specified version range
+    }
+  }
+
+  printf("Final true of check history version\n");
+  return true; //Not enough version information. Default true.
+}
 
 std::shared_ptr<CObjectSchemaItem> CObjectSchemaItem::create(
     const Members& members) {
@@ -99,14 +159,52 @@ Errors::eType CObjectSchemaItem::validate(const SmartObject& object,
   return Errors::OK;
 }
 
+Errors::eType CObjectSchemaItem::validate(const SmartObject& object,
+                                          rpc::ValidationReport* report__, const utils::SemanticVersion& MessageVersion) {
+  if (SmartType_Map != object.getType()) {
+    std::string validation_info = "Incorrect type, expected: " +
+                                  SmartObject::typeToString(SmartType_Map) +
+                                  ", got: " +
+                                  SmartObject::typeToString(object.getType());
+    report__->set_validation_info(validation_info);
+    return Errors::INVALID_VALUE;
+  }
+
+  std::set<std::string> object_keys = object.enumerate();
+
+  for (Members::const_iterator it = mMembers.begin(); it != mMembers.end();
+       ++it) {
+    const std::string& key = it->first;
+    const SMember& member = it->second;
+    printf("key: %s\n", key.c_str());
+    std::set<std::string>::const_iterator key_it = object_keys.find(key);
+    if (object_keys.end() == key_it) {
+      if (member.mIsMandatory && member.CheckHistoryFieldVersion(MessageVersion)) {
+        std::string validation_info = "Missing mandatory parameter: " + key;
+        report__->set_validation_info(validation_info);
+        return Errors::MISSING_MANDATORY_PARAMETER;
+      }
+      continue;
+    }
+    const SmartObject& field = object.getElement(key);
+    const Errors::eType result =
+        member.mSchemaItem->validate(field, &report__->ReportSubobject(key), MessageVersion);
+    if (Errors::OK != result) {
+      return result;
+    }
+    object_keys.erase(key_it);
+  }
+  return Errors::OK;
+}
+
 void CObjectSchemaItem::applySchema(SmartObject& Object,
-                                    const bool RemoveFakeParameters) {
+                                    const bool RemoveFakeParameters, const utils::SemanticVersion& MessageVersion) {
   if (SmartType_Map != Object.getType()) {
     return;
   }
 
   if (RemoveFakeParameters) {
-    RemoveFakeParams(Object);
+    RemoveFakeParams(Object, MessageVersion);
   }
 
   SmartObject default_value;
@@ -117,10 +215,10 @@ void CObjectSchemaItem::applySchema(SmartObject& Object,
     if (!Object.keyExists(key)) {
       if (member.mSchemaItem->setDefaultValue(default_value)) {
         Object[key] = default_value;
-        member.mSchemaItem->applySchema(Object[key], RemoveFakeParameters);
+        member.mSchemaItem->applySchema(Object[key], RemoveFakeParameters, MessageVersion);
       }
     } else {
-      member.mSchemaItem->applySchema(Object[key], RemoveFakeParameters);
+      member.mSchemaItem->applySchema(Object[key], RemoveFakeParameters, MessageVersion);
     }
   }
 }
@@ -173,21 +271,29 @@ size_t CObjectSchemaItem::GetMemberSize() {
 CObjectSchemaItem::CObjectSchemaItem(const Members& members)
     : mMembers(members) {}
 
-void CObjectSchemaItem::RemoveFakeParams(SmartObject& Object) {
+void CObjectSchemaItem::RemoveFakeParams(SmartObject& Object, const utils::SemanticVersion& MessageVersion) {
   for (SmartMap::const_iterator it = Object.map_begin();
        it != Object.map_end();) {
     const std::string& key = it->first;
-    if (mMembers.end() == mMembers.find(key)
+    std::map<std::string, SMember>::const_iterator members_it = mMembers.find(key);
+    if (mMembers.end() == members_it
         // FIXME(EZamakhov): Remove illegal usage of filed in AM
         &&
         key.compare(connection_key) != 0 && key.compare(binary_data) != 0 &&
         key.compare(app_id) != 0) {
       ++it;
       Object.erase(key);
+    } else if (members_it->second.mIsRemoved && members_it->second.CheckHistoryFieldVersion(MessageVersion)) {
+      ++it;
+      Object.erase(key);
     } else {
       it++;
     }
   }
+}
+
+bool CObjectSchemaItem::IsMandatory(const SMember& member) {
+  return true;
 }
 
 }  // namespace NsSmartObjects

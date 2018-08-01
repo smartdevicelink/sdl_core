@@ -293,12 +293,26 @@ void RegisterAppInterfaceRequest::Run() {
     return;
   }
 
+  uint16_t major = msg_params[strings::sync_msg_version][strings::major_version].asUInt();
+  uint16_t minor = msg_params[strings::sync_msg_version][strings::minor_version].asUInt();
+  uint16_t patch = 0;
+  if(msg_params[strings::sync_msg_version].keyExists(strings::patch_version)) {
+    patch = msg_params[strings::sync_msg_version][strings::patch_version].asUInt();
+  }
+  if (major < minimum_major_version || (major == minimum_major_version && minor < minimum_minor_version) 
+    || (major == minimum_major_version && minor == minimum_minor_version && patch < minimum_patch_version)) {
+    SendResponse(false, mobile_apis::Result::REJECTED);
+  }
+
   application = application_manager_.RegisterApplication(message_);
 
   if (!application) {
     LOG4CXX_ERROR(logger_, "Application hasn't been registered!");
     return;
   }
+
+  application->set_msg_version(major, minor, patch);
+  
   // For resuming application need to restore hmi_app_id from resumeCtrl
   resumption::ResumeCtrl& resumer = application_manager_.resume_controller();
   const std::string& device_mac = application->mac_address();

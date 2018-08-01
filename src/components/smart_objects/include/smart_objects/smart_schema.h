@@ -83,6 +83,17 @@ class CSmartSchema FINAL {
                          rpc::ValidationReport* report__) const;
 
   /**
+   * @brief Validate smart object.
+   *
+   * @param Object Object to validate.
+   * @param report__ object for reporting errors during validation
+   * @param MessageVersion to check mobile RPC version against RPC Spec History
+   * @return NsSmartObjects::Errors::eType
+   **/
+  Errors::eType validate(const SmartObject& Object,
+                         rpc::ValidationReport* report__, const utils::SemanticVersion& messageVersion) const;
+
+  /**
    * @brief Set new root schema item.
    *
    * @param SchemaItem Root schema item.
@@ -97,7 +108,7 @@ class CSmartSchema FINAL {
    * @param RemoveFakeParameters contains true if need to remove fake parameters
    * from smart object otherwise contains false.
    **/
-  void applySchema(SmartObject& Object, const bool RemoveFakeParameters);
+  void applySchema(SmartObject& Object, const bool RemoveFakeParameters, const utils::SemanticVersion& MessageVersion = utils::SemanticVersion());
 
   /**
    * @brief The reverse SmartObject conversion using schema.

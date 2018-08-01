@@ -505,7 +505,8 @@ class CodeGenerator(object):
         String with structs implementation source code.
 
         """
-
+        #print struct.name
+        #print struct.since
         processed_enums = []
         return self._struct_impl_template.substitute(
             namespace=namespace,
@@ -518,7 +519,7 @@ class CodeGenerator(object):
                     schema_items_decl=self._gen_schema_items_decls(
                         struct.members.values()),
                     schema_item_fill=self._gen_schema_items_fill(
-                        struct.members.values())),
+                        struct.members.values(), struct.since, struct.until, struct.deprecated, struct.removed)),
                 1))
 
     def _gen_schema_loc_decls(self, members, processed_enums):
@@ -746,7 +747,7 @@ class CodeGenerator(object):
 
         return result
 
-    def _gen_schema_items_fill(self, members):
+    def _gen_schema_items_fill(self, members=None, since=None, until=None, deprecated=None, removed=None):
         """Generate schema items fill code.
 
         Generates source code that fills new schema with items.
@@ -760,7 +761,7 @@ class CodeGenerator(object):
         """
 
         result = u"\n".join(
-            [self._gen_schema_item_fill(x) for x in members])
+            [self._gen_schema_item_fill(x, since, until, deprecated, removed) for x in members])
 
         return u"".join([result, u"\n\n"]) if result else u""
 
@@ -781,7 +782,7 @@ class CodeGenerator(object):
 
         raise GenerateError("Unexpected call to the unimplemented function.")
 
-    def _gen_schema_item_fill(self, member):
+    def _gen_schema_item_fill(self, member, since, until, deprecated, removed):
         """Generate schema item fill code.
 
         Generates source code that fills new schema with item.
@@ -793,11 +794,29 @@ class CodeGenerator(object):
         String with schema item fill code.
 
         """
-
-        return self._impl_code_item_fill_template.substitute(
-            name=member.name,
-            var_name=self._gen_schema_item_var_name(member),
-            is_mandatory=u"true" if member.is_mandatory is True else u"false")
+        #print(member.since)
+        #print member.name
+        if (since is not None or 
+            until is not None or 
+            deprecated is not None or
+            removed is not None or
+            member.since is not None or 
+            member.until is not None or 
+            member.deprecated is not None or
+            member.removed is not None):
+            return self._impl_code_item_fill_template_with_version.substitute(
+                name=member.name,
+                var_name=self._gen_schema_item_var_name(member),
+                is_mandatory=u"true" if member.is_mandatory is True else u"false",
+                since=member.since if member.since is not None else since if since is not None else "", 
+                until=member.until if member.until is not None else until if until is not None else "", 
+                deprecated=member.deprecated if member.deprecated is not None else deprecated if deprecated is not None else u"false", 
+                removed=member.removed if member.removed is not None else removed if removed is not None else u"false")
+        else:
+            return self._impl_code_item_fill_template.substitute(
+                name=member.name,
+                var_name=self._gen_schema_item_var_name(member),
+                is_mandatory=u"true" if member.is_mandatory is True else u"false")            
 
     @staticmethod
     def _gen_schema_item_var_name(member):
@@ -899,7 +918,7 @@ class CodeGenerator(object):
                     schema_items_decl=self._gen_schema_items_decls(
                         function.params.values()),
                     schema_item_fill=self._gen_schema_items_fill(
-                        function.params.values()),
+                        function.params.values(), function.since, function.until, function.deprecated, function.removed),
                     schema_params_fill=self._gen_schema_params_fill(
                         function.message_type.name)),
                 1))
@@ -1530,6 +1549,10 @@ class CodeGenerator(object):
     _impl_code_item_fill_template = string.Template(
         u'''schema_members["${name}"] = CObjectSchemaItem::'''
         u'''SMember(${var_name}, ${is_mandatory});''')
+
+    _impl_code_item_fill_template_with_version = string.Template(
+        u'''schema_members["${name}"] = CObjectSchemaItem::'''
+        u'''SMember(${var_name}, ${is_mandatory}, "${since}", "${until}", ${deprecated}, ${removed});''')
 
     _function_impl_template = string.Template(
         u'''CSmartSchema $namespace::$class_name::'''

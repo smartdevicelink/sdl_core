@@ -84,6 +84,11 @@ Errors::eType CStringSchemaItem::validate(const SmartObject& Object,
   return Errors::OK;
 }
 
+Errors::eType CStringSchemaItem::validate(
+    const SmartObject& Object, rpc::ValidationReport* report__, const utils::SemanticVersion& MessageVersion) {
+  return validate(Object, report__);
+}
+
 SmartType CStringSchemaItem::getSmartType() const {
   return SmartType_String;
 }

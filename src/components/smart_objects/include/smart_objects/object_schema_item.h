@@ -37,6 +37,8 @@
 #include <set>
 
 #include "utils/macro.h"
+#include "utils/semantic_version.h"
+#include <boost/optional.hpp>
 
 #include "smart_objects/schema_item.h"
 #include "smart_objects/schema_item_parameter.h"
@@ -62,7 +64,20 @@ class CObjectSchemaItem : public ISchemaItem {
      * @param IsMandatory true if member is mandatory, false
      *                    otherwise. Defaults to true.
      **/
-    SMember(const ISchemaItemPtr SchemaItem, const bool IsMandatory = true);
+    //SMember(const ISchemaItemPtr SchemaItem, const bool IsMandatory = true);
+
+    SMember(const ISchemaItemPtr SchemaItem,
+                                        const bool IsMandatory = true,
+                                        const std::string& Since = "",
+                                        const std::string& Until = "",
+                                        const bool IsDeprecated = false,
+                                        const bool IsRemoved = false);
+    /**
+     * @brief Checks the version a parameter was removed (until)
+     * If the mobile's msg version is greater than or
+     **/
+    bool CheckHistoryFieldVersion(const utils::SemanticVersion& MessageVersion) const;
+
     /**
      * @brief Member schema item.
      **/
@@ -71,6 +86,11 @@ class CObjectSchemaItem : public ISchemaItem {
      * @brief true if member is mandatory, false otherwise.
      **/
     bool mIsMandatory;
+    boost::optional<utils::SemanticVersion> mSince;
+    boost::optional<utils::SemanticVersion> mUntil;
+    bool mIsDeprecated;
+    bool mIsRemoved;
+
   };
   typedef std::map<std::string, SMember> Members;
   /**
@@ -98,13 +118,22 @@ class CObjectSchemaItem : public ISchemaItem {
   Errors::eType validate(const SmartObject& Object,
                          rpc::ValidationReport* report__) OVERRIDE;
   /**
+   * @brief Validate smart object.
+   * @param Object Object to validate.
+   * @param report__ object for reporting errors during validation
+   * @param MessageVersion to check mobile RPC version against RPC Spec History
+   * @return NsSmartObjects::Errors::eType
+   **/
+  Errors::eType validate(const SmartObject& Object,
+                         rpc::ValidationReport* report__, const utils::SemanticVersion& MessageVersion) OVERRIDE;
+  /**
    * @brief Apply schema.
    * @param Object Object to apply schema.
    * @param RemoveFakeParameters contains true if need to remove fake parameters
    * from smart object otherwise contains false.
    **/
   void applySchema(SmartObject& Object,
-                   const bool RemoveFakeParameters) OVERRIDE;
+                   const bool RemoveFakeParameters, const utils::SemanticVersion& MessageVersion = utils::SemanticVersion()) OVERRIDE;
   /**
    * @brief Unapply schema.
    * @param Object Object to unapply schema.
@@ -136,7 +165,14 @@ class CObjectSchemaItem : public ISchemaItem {
    * @brief Removes fake parameters from object.
    * @param Object Object to remove fake parameters.
    **/
-  void RemoveFakeParams(SmartObject& Object);
+  void RemoveFakeParams(SmartObject& Object, const utils::SemanticVersion& MessageVersion);
+
+  /**
+   * @brief Checks mandatory and version fields to see 
+   * if a member is required.
+   * @param Object Object to remove fake parameters.
+   **/
+  bool IsMandatory(const SMember& member);
 
   /**
    * @brief Map of member name to SMember structure describing the object
