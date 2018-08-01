@@ -163,6 +163,7 @@ void PerformInteractionRequest::Run() {
     SendResponse(false, mobile_apis::Result::INVALID_ID);
     return;
   }
+  
   if (msg_params.keyExists(strings::vr_help)) {
     if (mobile_apis::Result::INVALID_DATA ==
         MessageHelper::VerifyImageVrHelpItems(
@@ -973,6 +974,7 @@ bool PerformInteractionRequest::CheckChoiceSetListVRCommands(
       LOG4CXX_ERROR(
           logger_,
           "Couldn't find choiceset_id = " << choice_set_id_list[i].asInt());
+      SendResponse(false, mobile_apis::Result::INVALID_ID);
       return false;
     }
 

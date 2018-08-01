@@ -215,10 +215,7 @@ class PerformInteractionRequest
   /**
    * @brief Checks each choice in each set for having a VRcommands parameter
    * @param app contains pointer to application.
-   * @param choice_set_id_list_length contains amount
-   * of choice set ids.
-   * @param choice_set_id_list array of choice set ids
-   * @return returns false request has choice sets with no vrCommands
+   * @return returns false if request has choice sets with no vrCommands
    */
   bool CheckChoiceSetListVRCommands(app_mngr::ApplicationSharedPtr app);
 

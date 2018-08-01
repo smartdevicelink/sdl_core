@@ -514,8 +514,47 @@ TEST_F(CreateInteractionChoiceSetRequestTest, Run_WithoutVrCommands_SUCCESS) {
   smart_objects::SmartObject* choice_set_id = NULL;
   EXPECT_CALL(*mock_app_, FindChoiceSet(kChoiceSetId))
       .WillOnce(Return(choice_set_id));
+      
+  // No VR commands 
+  EXPECT_CALL(app_mngr_, GenerateGrammarID()).Times(0); 
 
   EXPECT_CALL(*mock_app_, AddChoiceSet(kChoiceSetId, _));
+
+  command_->Run();
+}
+
+TEST_F(CreateInteractionChoiceSetRequestTest, Run_WithMixedVrCommands_UNSUCCESS) {
+  (*message_)[am::strings::msg_params][am::strings::choice_set][0]
+             [am::strings::menu_name] = kMenuName;
+  (*message_)[am::strings::msg_params][am::strings::choice_set][0]
+             [am::strings::image][am::strings::value] = kImage;
+  (*message_)[am::strings::msg_params][am::strings::choice_set][0]
+             [am::strings::choice_id] = kChoiceId1;
+  (*message_)[am::strings::msg_params][am::strings::choice_set][0]
+             [am::strings::secondary_image][am::strings::value] = kSecondImage;
+  (*message_)[am::strings::msg_params][am::strings::choice_set][0]
+             [am::strings::vr_commands][0] = kVrCommands1;
+  (*message_)[am::strings::msg_params][am::strings::choice_set][1]
+             [am::strings::choice_id] = kChoiceId2;
+  (*message_)[am::strings::msg_params][am::strings::choice_set][1]
+             [am::strings::menu_name] = kMenuName;
+  (*message_)[am::strings::msg_params][am::strings::interaction_choice_set_id] =
+      kChoiceSetId;
+  EXPECT_CALL(app_mngr_, application(_)).WillOnce(Return(mock_app_));
+
+  EXPECT_CALL(mock_message_helper_, VerifyImage(_, _, _))
+      .WillRepeatedly(Return(mobile_apis::Result::SUCCESS));
+
+  EXPECT_CALL(mock_message_helper_, CheckChoiceSetVRCommands(_))
+      .WillOnce(Return(am::MessageHelper::ChoiceSetVRCommandsStatus::MIXED));
+
+  smart_objects::SmartObject* choice_set_id = NULL;
+  EXPECT_CALL(*mock_app_, FindChoiceSet(kChoiceSetId))
+      .WillOnce(Return(choice_set_id));
+      
+  EXPECT_CALL(app_mngr_, GenerateGrammarID()).Times(0);
+
+  EXPECT_CALL(*mock_app_, AddChoiceSet(kChoiceSetId, _)).Times(0);;
 
   command_->Run();
 }
