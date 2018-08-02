@@ -45,6 +45,7 @@
 #include "smart_objects/smart_object.h"
 #include "application_manager/application.h"
 #include "application_manager/resumption/resumption_data.h"
+#include "application_manager/resumption/resumption_data_processor.h"
 #include "application_manager/resumption/resume_ctrl.h"
 #include "utils/timer.h"
 
@@ -453,6 +454,7 @@ class ResumeCtrlImpl : public ResumeCtrl {
   time_t launch_time_;
   std::shared_ptr<ResumptionData> resumption_storage_;
   application_manager::ApplicationManager& application_manager_;
+  ResumptionDataProcessor resumption_data_processor_;
 };
 
 }  // namespace resumption
