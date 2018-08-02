@@ -59,10 +59,14 @@ bool RCAppExtension::IsSubscibedToInteriorVehicleData(
 }
 
 void RCAppExtension::SaveResumptionData(
-    NsSmartDeviceLink::NsSmartObjects::SmartObject& resumption_data) {}
+    smart_objects::SmartObject& resumption_data) {}
 
 void RCAppExtension::ProcessResumption(
-    const NsSmartDeviceLink::NsSmartObjects::SmartObject& resumption_data) {}
+    const smart_objects::SmartObject& saved_app,
+    resumption::Subscriber subscriber) {}
+
+void RCAppExtension::RevertResumption(
+    const smart_objects::SmartObject& subscriptions) {}
 
 RCAppExtension::~RCAppExtension() {}
 }  //  namespace rc_rpc_plugin
