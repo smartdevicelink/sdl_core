@@ -237,7 +237,7 @@ class RegisterAppInterfaceRequest
    * @return true if application os not allowed to register, othervise return
    * false.
    */
-  bool IsApplicationForbidden();
+  bool IsApplicationForbidden() const;
 
   /**
    * @brief ProcessApplicationTransportSwitching process checking if application
