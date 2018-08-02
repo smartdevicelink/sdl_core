@@ -65,6 +65,7 @@ void OnWayPointChangeNotification::Run() {
     (*message_)[strings::params][strings::connection_key] = *app_id;
     SendNotification();
   }
+  application_manager_.SaveWayPointsMessage(message_);
 }
 }  // namespace commands
 }  // namespace application_manager

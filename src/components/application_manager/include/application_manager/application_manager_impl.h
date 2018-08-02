@@ -235,6 +235,9 @@ class ApplicationManagerImpl
    */
   bool IsAppSubscribedForWayPoints(ApplicationSharedPtr app) const OVERRIDE;
 
+  void SaveWayPointsMessage(
+      smart_objects::SmartObjectSPtr way_points_message) OVERRIDE;
+
   /**
    * @brief Subscribe Application for way points
    * @param Application pointer
@@ -1356,6 +1359,8 @@ class ApplicationManagerImpl
    * @brief Set AppIDs of subscribed apps for way points
    */
   std::set<uint32_t> subscribed_way_points_apps_list_;
+
+  smart_objects::SmartObjectSPtr way_points_data_;
 
   /**
    * @brief Map contains applications which

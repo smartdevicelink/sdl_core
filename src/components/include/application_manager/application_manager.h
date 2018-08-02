@@ -310,6 +310,13 @@ class ApplicationManager {
   virtual bool IsAnyAppSubscribedForWayPoints() const = 0;
 
   /**
+   * @brief Save message after OnWayPointsChangeNotification reception
+   * @param way_points_message pointer to the smartobject
+   */
+  virtual void SaveWayPointsMessage(
+      smart_objects::SmartObjectSPtr way_points_message) = 0;
+
+  /**
    * @brief Get subscribed for way points
    * @return reference to set of subscribed apps for way points
    */
