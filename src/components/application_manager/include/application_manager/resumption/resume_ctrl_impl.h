@@ -42,7 +42,6 @@
 #include "interfaces/HMI_API.h"
 #include "interfaces/HMI_API_schema.h"
 #include "interfaces/MOBILE_API_schema.h"
-#include "application_manager/event_engine/event_observer.h"
 #include "smart_objects/smart_object.h"
 #include "application_manager/application.h"
 #include "application_manager/resumption/resumption_data.h"
@@ -57,8 +56,7 @@ class LastState;
  * @brief Contains logic for storage/restore data of applications.
  */
 
-class ResumeCtrlImpl : public ResumeCtrl,
-                       public app_mngr::event_engine::EventObserver {
+class ResumeCtrlImpl : public ResumeCtrl {
  public:
   /**
    * @brief allows to create ResumeCtrlImpl object
@@ -69,12 +67,6 @@ class ResumeCtrlImpl : public ResumeCtrl,
    * @brief allows to destroy ResumeCtrlImpl object
    */
   ~ResumeCtrlImpl();
-
-  /**
-   * @brief Event, that raised if application get resumption response from HMI
-   * @param event : event object, that contains smart_object with HMI message
-   */
-  void on_event(const app_mngr::event_engine::Event& event) OVERRIDE;
 
   /**
    * @brief Save all applications info to the file system
@@ -329,67 +321,6 @@ class ResumeCtrlImpl : public ResumeCtrl,
    */
   void FinalPersistData();
 
-  /**
-   * @brief AddFiles allows to add files for the application
-   * which should be resumed
-   * @param application application which will be resumed
-   * @param saved_app application specific section from backup file
-   */
-  void AddFiles(app_mngr::ApplicationSharedPtr application,
-                const smart_objects::SmartObject& saved_app);
-
-  /**
-   * @brief AddSubmenues allows to add sub menues for the application
-   * which should be resumed
-   * @param application application which will be resumed
-   * @param saved_app application specific section from backup file
-   */
-  void AddSubmenues(app_mngr::ApplicationSharedPtr application,
-                    const smart_objects::SmartObject& saved_app);
-
-  /**
-   * @brief AddCommands allows to add commands for the application
-   * which should be resumed
-   * @param application application which will be resumed
-   * @param saved_app application specific section from backup file
-   */
-  void AddCommands(app_mngr::ApplicationSharedPtr application,
-                   const smart_objects::SmartObject& saved_app);
-
-  /**
-   * @brief AddChoicesets allows to add choice sets for the application
-   * which should be resumed
-   * @param application application which will be resumed
-   * @param saved_app application specific section from backup file
-   */
-  void AddChoicesets(app_mngr::ApplicationSharedPtr application,
-                     const smart_objects::SmartObject& saved_app);
-
-  /**
-   * @brief SetGlobalProperties allows to restore global properties.
-   * @param application application which will be resumed
-   * @param saved_app application specific section from backup file
-   */
-  void SetGlobalProperties(app_mngr::ApplicationSharedPtr application,
-                           const smart_objects::SmartObject& saved_app);
-
-  /**
-   * @brief AddSubscriptions allows to restore subscriptions
-   * @param application application which will be resumed
-   * @param saved_app application specific section from backup file
-   */
-  void AddSubscriptions(app_mngr::ApplicationSharedPtr application,
-                        const smart_objects::SmartObject& saved_app);
-
-  /**
-   * @brief AddWayPointsSubscription allows to restore subscription
-   * for WayPoints
-   * @param application application which will be resumed
-   * @param saved_app application specific section from backup file
-   */
-  void AddWayPointsSubscription(app_mngr::ApplicationSharedPtr application,
-                                const smart_objects::SmartObject& saved_app);
-
   bool CheckIgnCycleRestrictions(const smart_objects::SmartObject& saved_app);
 
   bool DisconnectedJustBeforeIgnOff(
@@ -454,21 +385,6 @@ class ResumeCtrlImpl : public ResumeCtrl,
    * @param ign_off_time - igition off time
    */
   void SetLastIgnOffTime(time_t ign_off_time);
-
-  /**
-   * @brief Process specified HMI request
-   * @param request Request to process
-   * @param use_events Process request events or not flag
-   * @return TRUE on success, otherwise FALSE
-   */
-  bool ProcessHMIRequest(smart_objects::SmartObjectSPtr request = NULL,
-                         bool use_events = false);
-
-  /**
-   * @brief Process list of HMI requests using ProcessHMIRequest method
-   * @param requests List of requests to process
-   */
-  void ProcessHMIRequests(const smart_objects::SmartObjectList& requests);
 
   void InsertToTimerQueue(uint32_t app_id, uint32_t time_stamp);
 
