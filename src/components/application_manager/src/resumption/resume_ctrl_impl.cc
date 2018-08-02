@@ -74,7 +74,8 @@ ResumeCtrlImpl::ResumeCtrlImpl(ApplicationManager& application_manager)
     , is_data_saved_(false)
     , is_suspended_(false)
     , launch_time_(time(NULL))
-    , application_manager_(application_manager) {}
+    , application_manager_(application_manager)
+    , resumption_data_processor_(application_manager) {}
 #ifdef BUILD_TESTS
 void ResumeCtrlImpl::set_resumption_storage(
     std::shared_ptr<ResumptionData> mock_storage) {
@@ -545,6 +546,9 @@ bool ResumeCtrlImpl::RestoreApplicationData(ApplicationSharedPtr application) {
     if (saved_app.keyExists(strings::grammar_id)) {
       const uint32_t app_grammar_id = saved_app[strings::grammar_id].asUInt();
       application->set_grammar_id(app_grammar_id);
+
+      resumption_data_processor_.Restore(application, saved_app);
+
       result = true;
     } else {
       LOG4CXX_WARN(logger_,

@@ -1335,10 +1335,11 @@ smart_objects::SmartObjectList MessageHelper::CreateAddCommandRequestToHMI(
 
     // VR Interface
     if ((*i->second).keyExists(strings::vr_commands)) {
-      SendAddVRCommandToHMI(i->first,
-                            (*i->second)[strings::vr_commands],
-                            app->app_id(),
-                            app_mngr);
+      requests.push_back(
+          CreateAddVRCommandToHMI(/*cmd_id = */ i->first,
+                                  (*i->second)[strings::vr_commands],
+                                  app->app_id(),
+                                  app_mngr));
     }
   }
   return requests;
