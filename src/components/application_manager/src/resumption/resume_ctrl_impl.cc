@@ -594,6 +594,7 @@ bool ResumeCtrlImpl::RestoreApplicationData(ApplicationSharedPtr application) {
     if (saved_app.keyExists(strings::grammar_id)) {
       const uint32_t app_grammar_id = saved_app[strings::grammar_id].asUInt();
       application->set_grammar_id(app_grammar_id);
+      resumption_data_processor_.Restore(application, saved_app);
       result = true;
     } else {
       LOG4CXX_WARN(logger_,
@@ -1002,4 +1003,4 @@ static mobile_api::HMILevel::eType ConvertHmiLevelString(
   }
 }
 
-}  // namespce resumption
+}  // namespace resumption
