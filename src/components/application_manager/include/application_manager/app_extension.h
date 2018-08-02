@@ -33,11 +33,20 @@
 #ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_APP_EXTENSION_H_
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_APP_EXTENSION_H_
 
+#include <functional>
+
 namespace ns_smart_device_link {
 namespace ns_smart_objects {
 class SmartObject;
 }
 }
+
+namespace smart_objects = ns_smart_device_link::ns_smart_objects;
+
+namespace resumption {
+struct ResumptionRequest;
+using Subscriber = std::function<void(const int32_t, const ResumptionRequest)>;
+}  // namespace resumption
 
 namespace application_manager {
 
@@ -58,15 +67,23 @@ class AppExtension {
    * plugin
    */
   virtual void SaveResumptionData(
-      ns_smart_device_link::ns_smart_objects::SmartObject& resumption_data) = 0;
+      smart_objects::SmartObject& resumption_data) = 0;
 
   /**
    * @brief ProcessResumption Method called by SDL during resumption.
    * @param resumption_data list of resumption data
+   * @param subscriber callbacks for subscribing
    */
   virtual void ProcessResumption(
-      const ns_smart_device_link::ns_smart_objects::SmartObject&
-          resumption_data) = 0;
+      const smart_objects::SmartObject& resumption_data,
+      resumption::Subscriber subscriber) = 0;
+
+  /**
+   * @brief RevertResumption Method called by SDL during revert resumption.
+   * @param subscriptions Subscriptions from which must discard
+   */
+  virtual void RevertResumption(
+      const smart_objects::SmartObject& subscriptions) = 0;
 
  private:
   const AppExtensionUID kUid_;

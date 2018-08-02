@@ -40,6 +40,8 @@ class VehicleInfoAppExtension;
 namespace app_mngr = application_manager;
 namespace plugins = application_manager::plugin_manager;
 
+enum SubscribeStatus { SUBSCRIBE, UNSUBSCRIBE };
+
 class VehicleInfoPlugin : public plugins::RPCPlugin {
  public:
   VehicleInfoPlugin();
@@ -65,9 +67,23 @@ class VehicleInfoPlugin : public plugins::RPCPlugin {
    * to HMI
    * @param app application for subscription
    * @param ext application extension
+   * @param subscriber callback for subscription
    */
   void ProcessResumptionSubscription(app_mngr::Application& app,
-                                     VehicleInfoAppExtension& ext);
+                                     VehicleInfoAppExtension& ext,
+                                     resumption::Subscriber subscriber);
+
+  /**
+   * @brief Revert the data to the state before Resumption.
+   * @param subscriptions Subscriptions to be returned
+   **/
+  void RevertResumption(app_mngr::Application& app,
+                        VehicleInfoAppExtension& ext);
+
+  smart_objects::SmartObjectSPtr CreateSubscriptionRequest(
+      const uint32_t app_id,
+      VehicleInfoAppExtension& ext,
+      const SubscribeStatus subscribe_status);
 
  private:
   void DeleteSubscriptions(app_mngr::ApplicationSharedPtr app);
