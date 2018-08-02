@@ -282,6 +282,8 @@ class MockApplicationManager : public application_manager::ApplicationManager {
                void(application_manager::ApplicationSharedPtr));
   MOCK_CONST_METHOD0(IsAnyAppSubscribedForWayPoints, bool());
   MOCK_CONST_METHOD0(GetAppsSubscribedForWayPoints, const std::set<uint32_t>());
+  MOCK_METHOD1(SaveWayPointsMessage,
+               void(std::shared_ptr<smart_objects::SmartObject>));
   MOCK_CONST_METHOD1(
       WaitingApplicationByID,
       application_manager::ApplicationConstSharedPtr(const uint32_t));
