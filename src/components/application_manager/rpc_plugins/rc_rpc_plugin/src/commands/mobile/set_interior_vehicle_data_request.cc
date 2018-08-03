@@ -98,6 +98,7 @@ const std::map<std::string, std::string> GetModuleDataToCapabilitiesMapping() {
   mapping["rdsData"] = "rdsDataAvailable";
   mapping["availableHDs"] = "availableHDsAvailable";
   mapping["hdChannel"] = "availableHDsAvailable";
+  mapping["hdRadioEnable"] = "hdRadioEnableAvailable";
   mapping["signalStrength"] = "signalStrengthAvailable";
   mapping["signalChangeThreshold"] = "signalChangeThresholdAvailable";
   mapping["radioEnable"] = "radioEnableAvailable";
@@ -221,6 +222,30 @@ bool CheckLightNameByCapabilities(
   return false;
 }
 
+bool CheckRadioBandByCapabilities(
+    const smart_objects::SmartObject& capabilities_status,
+    const smart_objects::SmartObject& request_parameter) {
+  mobile_apis::RadioBand::eType radio_band =
+      static_cast<mobile_apis::RadioBand::eType>(request_parameter.asUInt());
+  if (mobile_apis::RadioBand::XM == radio_band) {
+    if (!capabilities_status.keyExists(strings::kSiriusxmRadioAvailable)) {
+      LOG4CXX_DEBUG(logger_,
+                    "Capability "
+                        << strings::kSiriusxmRadioAvailable
+                        << " is missed in RemoteControl capabilities");
+      return false;
+    }
+    if (!capabilities_status[strings::kSiriusxmRadioAvailable].asBool()) {
+      LOG4CXX_DEBUG(logger_,
+                    "Capability "
+                        << strings::kSiriusxmRadioAvailable
+                        << " is switched off in RemoteControl capabilities");
+      return false;
+    }
+  }
+  return true;
+}
+
 bool CheckControlDataByCapabilities(
     const smart_objects::SmartObject& module_caps,
     const smart_objects::SmartObject& control_data) {
@@ -260,6 +285,11 @@ bool CheckControlDataByCapabilities(
                     "Capability "
                         << caps_key
                         << " is switched off in RemoteControl capabilities");
+      return false;
+    }
+    if (message_params::kBand == request_parameter &&
+        !CheckRadioBandByCapabilities(capabilities_status,
+                                      control_data[request_parameter])) {
       return false;
     }
   }
