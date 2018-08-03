@@ -2974,6 +2974,54 @@ void ApplicationManagerImpl::ProcessApp(const uint32_t app_id,
   }
 }
 
+bool ApplicationManagerImpl::ResetHelpPromt(ApplicationSharedPtr app) {
+  if (!app) {
+    LOG4CXX_ERROR(logger_, "Null pointer");
+    return false;
+  }
+  smart_objects::SmartObject so_help_prompt =
+      smart_objects::SmartObject(smart_objects::SmartType_Array);
+  app->set_help_prompt(so_help_prompt);
+  return true;
+}
+
+bool ApplicationManagerImpl::ResetTimeoutPromt(ApplicationSharedPtr const app) {
+  if (!app) {
+    LOG4CXX_ERROR(logger_, "Null pointer");
+    return false;
+  }
+
+  const std::vector<std::string>& time_out_promt =
+      get_settings().time_out_promt();
+
+  smart_objects::SmartObject so_time_out_promt =
+      smart_objects::SmartObject(smart_objects::SmartType_Array);
+
+  for (uint32_t i = 0; i < time_out_promt.size(); ++i) {
+    smart_objects::SmartObject timeoutPrompt =
+        smart_objects::SmartObject(smart_objects::SmartType_Map);
+    timeoutPrompt[strings::text] = time_out_promt[i];
+    timeoutPrompt[strings::type] = hmi_apis::Common_SpeechCapabilities::SC_TEXT;
+    so_time_out_promt[i] = timeoutPrompt;
+  }
+
+  app->set_timeout_prompt(so_time_out_promt);
+
+  return true;
+}
+
+bool ApplicationManagerImpl::ResetVrHelpTitleItems(
+    ApplicationSharedPtr const app) {
+  if (!app) {
+    LOG4CXX_ERROR(logger_, "Null pointer");
+    return false;
+  }
+  app->reset_vr_help_title();
+  app->reset_vr_help();
+
+  return true;
+}
+
 void ApplicationManagerImpl::SendHMIStatusNotification(
     const std::shared_ptr<Application> app) {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -3308,6 +3356,98 @@ void ApplicationManagerImpl::RemoveAppFromTTSGlobalPropertiesList(
     }
   }
   tts_global_properties_app_list_lock_.Release();
+}
+
+ResetGlobalPropertiesResult ApplicationManagerImpl::ResetGlobalProperties(
+    const smart_objects::SmartObject& global_properties_ids,
+    const uint32_t app_id) {
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  ApplicationSharedPtr application =
+      ApplicationManagerImpl::application(app_id);
+  // if application waits for sending ttsGlobalProperties need to remove this
+  // application from tts_global_properties_app_list_
+  LOG4CXX_INFO(logger_, "RemoveAppFromTTSGlobalPropertiesList");
+  RemoveAppFromTTSGlobalPropertiesList(app_id);
+
+  ResetGlobalPropertiesResult result;
+
+  for (size_t i = 0; i < global_properties_ids.length(); ++i) {
+    int64_t global_property = static_cast<mobile_apis::GlobalProperty::eType>(
+        global_properties_ids[i].asInt());
+    switch (global_property) {
+      case mobile_apis::GlobalProperty::HELPPROMPT: {
+        result.help_prompt = ResetHelpPromt(application);
+        break;
+      }
+      case mobile_apis::GlobalProperty::TIMEOUTPROMPT: {
+        result.timeout_prompt = ResetTimeoutPromt(application);
+        break;
+      }
+      case mobile_apis::GlobalProperty::VRHELPTITLE:
+      case mobile_apis::GlobalProperty::VRHELPITEMS: {
+        if (0 == result.number_of_reset_vr) {
+          result.number_of_reset_vr++;
+          result.vr_help_title_items = ResetVrHelpTitleItems(application);
+        }
+        break;
+      }
+      case mobile_apis::GlobalProperty::MENUNAME: {
+        result.menu_name = true;
+        break;
+      }
+      case mobile_apis::GlobalProperty::MENUICON: {
+        result.menu_icon = true;
+        break;
+      }
+      case mobile_apis::GlobalProperty::KEYBOARDPROPERTIES: {
+        result.keyboard_properties = true;
+        break;
+      }
+      default: {
+        LOG4CXX_TRACE(logger_, "Unknown global property: " << global_property);
+        break;
+      }
+    }
+  }
+
+  return result;
+}
+
+ResetGlobalPropertiesResult
+ApplicationManagerImpl::ResetAllApplicationGlobalProperties(
+    const uint32_t app_id) {
+  const smart_objects::SmartObjectSPtr application_gl_props =
+      CreateAllAppGlobalPropsIDList(app_id);
+  return ResetGlobalProperties(*application_gl_props, app_id);
+}
+
+const smart_objects::SmartObjectSPtr
+ApplicationManagerImpl::CreateAllAppGlobalPropsIDList(
+    const uint32_t app_id) const {
+  smart_objects::SmartObjectSPtr ret_gl_props =
+      std::make_shared<smart_objects::SmartObject>(
+          smart_objects::SmartType_Array);
+  using namespace mobile_apis;
+
+  ApplicationConstSharedPtr application =
+      ApplicationManagerImpl::application(app_id);
+  int32_t i = 0;
+
+  if (application->help_prompt())
+    (*ret_gl_props)[i++] = GlobalProperty::HELPPROMPT;
+  if (application->timeout_prompt())
+    (*ret_gl_props)[i++] = GlobalProperty::TIMEOUTPROMPT;
+  if (application->vr_help_title())
+    (*ret_gl_props)[i++] = GlobalProperty::VRHELPTITLE;
+  if (application->menu_title())
+    (*ret_gl_props)[i++] = GlobalProperty::MENUNAME;
+  if (application->menu_icon())
+    (*ret_gl_props)[i++] = GlobalProperty::MENUICON;
+  if (application->keyboard_props())
+    (*ret_gl_props)[i++] = GlobalProperty::KEYBOARDPROPERTIES;
+
+  return ret_gl_props;
 }
 
 mobile_apis::AppHMIType::eType ApplicationManagerImpl::StringToAppHMIType(

@@ -90,6 +90,7 @@ class RPCHandler;
 class Application;
 class StateControllerImpl;
 struct CommandParametersPermissions;
+struct ResetGlobalPropertiesResult;
 using policy::RPCParams;
 typedef std::vector<ApplicationSharedPtr> AppSharedPtrs;
 struct ApplicationsAppIdSorter {
@@ -489,6 +490,27 @@ class ApplicationManager {
   virtual bool IsLowVoltage() = 0;
 
   virtual void RemoveAppFromTTSGlobalPropertiesList(const uint32_t app_id) = 0;
+
+  /**
+   * @brief Resets application's global properties to default values
+   * @param container with global properties IDs to reset
+   * @param id of app which properties to reset
+   * @return struct with flags indicating success global properties reset
+   */
+  virtual ResetGlobalPropertiesResult ResetGlobalProperties(
+      const smart_objects::SmartObject& global_properties_ids,
+      const uint32_t app_id) = 0;
+
+  /**
+   * @brief Resets all application's global properties to default values
+   * returning struct that indicates which properties have been
+   * successfully reset.
+   * @param container with global properties to reset
+   * @param id of app which properties to reset
+   * @return struct with flags indicating global properties reset
+   */
+  virtual ResetGlobalPropertiesResult ResetAllApplicationGlobalProperties(
+      const uint32_t app_id) = 0;
 
   virtual mobile_apis::Result::eType SaveBinary(
       const std::vector<uint8_t>& binary_data,
