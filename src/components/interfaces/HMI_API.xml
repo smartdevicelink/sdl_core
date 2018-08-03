@@ -2499,9 +2499,9 @@
 
 <struct name="GPSData">
   <description>Struct with the GPS data.</description>
-  <param name="longitudeDegrees" type="Float" minvalue="-180" maxvalue="180" mandatory="false">
+  <param name="longitudeDegrees" type="Float" minvalue="-180" maxvalue="180" mandatory="true">
   </param>
-  <param name="latitudeDegrees" type="Float" minvalue="-90" maxvalue="90" mandatory="false">
+  <param name="latitudeDegrees" type="Float" minvalue="-90" maxvalue="90" mandatory="true">
   </param>
   <param name="utcYear" type="Integer" minvalue="2010" maxvalue="2100" mandatory="false">
     <description>The current UTC year.</description>

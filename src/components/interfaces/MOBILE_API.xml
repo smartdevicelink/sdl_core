@@ -1847,55 +1847,55 @@
         </param>
         <param name="latitudeDegrees" type="Float" minvalue="-90" maxvalue="90" mandatory="true">
         </param>
-        <param name="utcYear" type="Integer" minvalue="2010" maxvalue="2100" mandatory="true">
+        <param name="utcYear" type="Integer" minvalue="2010" maxvalue="2100" mandatory="false">
             <description>The current UTC year.</description>
         </param>
-        <param name="utcMonth" type="Integer" minvalue="1" maxvalue="12" mandatory="true">
+        <param name="utcMonth" type="Integer" minvalue="1" maxvalue="12" mandatory="false">
             <description>The current UTC month.</description>
         </param>
-        <param name="utcDay" type="Integer" minvalue="1" maxvalue="31" mandatory="true">
+        <param name="utcDay" type="Integer" minvalue="1" maxvalue="31" mandatory="false">
             <description>The current UTC day.</description>
         </param>
-        <param name="utcHours" type="Integer" minvalue="0" maxvalue="23" mandatory="true">
+        <param name="utcHours" type="Integer" minvalue="0" maxvalue="23" mandatory="false">
             <description>The current UTC hour.</description>
         </param>
-        <param name="utcMinutes" type="Integer" minvalue="0" maxvalue="59" mandatory="true">
+        <param name="utcMinutes" type="Integer" minvalue="0" maxvalue="59" mandatory="false">
             <description>The current UTC minute.</description>
         </param>
-        <param name="utcSeconds" type="Integer" minvalue="0" maxvalue="59" mandatory="true">
+        <param name="utcSeconds" type="Integer" minvalue="0" maxvalue="59" mandatory="false">
             <description>The current UTC second.</description>
         </param>
-        <param name="compassDirection" type="CompassDirection" mandatory="true">
+        <param name="compassDirection" type="CompassDirection" mandatory="false">
             <description>See CompassDirection.</description>
         </param>
-        <param name="pdop" type="Float" minvalue="0" maxvalue="10" defvalue="0" mandatory="true">
-            <description>PDOP.  If undefined or unavailable, then value shall be set to 0.</description>
+        <param name="pdop" type="Float" minvalue="0" maxvalue="10" mandatory="false">
+            <description>PDOP.</description>
         </param>
-        <param name="hdop" type="Float" minvalue="0" maxvalue="10" defvalue="0" mandatory="true">
-            <description>HDOP.  If value is unknown, value shall be set to 0.</description>
+        <param name="hdop" type="Float" minvalue="0" maxvalue="10" mandatory="false">
+            <description>HDOP.</description>
         </param>
-        <param name="vdop" type="Float" minvalue="0" maxvalue="10" defvalue="0" mandatory="true">
-            <description>VDOP.  If value is unknown, value shall be set to 0.</description>
+        <param name="vdop" type="Float" minvalue="0" maxvalue="10" mandatory="false">
+            <description>VDOP.</description>
         </param>
-        <param name="actual" type="Boolean" mandatory="true">
+        <param name="actual" type="Boolean" mandatory="false">
             <description>
                 True, if actual.
                 False, if inferred.
             </description>
         </param>
-        <param name="satellites" type="Integer" minvalue="0" maxvalue="31" mandatory="true">
+        <param name="satellites" type="Integer" minvalue="0" maxvalue="31" mandatory="false">
             <description>Number of satellites in view</description>
         </param>
-        <param name="dimension" type="Dimension" mandatory="true">
+        <param name="dimension" type="Dimension" mandatory="false">
             <description>See Dimension</description>
         </param>
-        <param name="altitude" type="Float" minvalue="-10000" maxvalue="10000" mandatory="true">
+        <param name="altitude" type="Float" minvalue="-10000" maxvalue="10000" mandatory="false">
             <description>Altitude in meters</description>
         </param>
-        <param name="heading" type="Float" minvalue="0" maxvalue="359.99" mandatory="true">
+        <param name="heading" type="Float" minvalue="0" maxvalue="359.99" mandatory="false">
             <description>The heading. North is 0. Resolution is 0.01</description>
         </param>
-        <param name="speed" type="Float" minvalue="0" maxvalue="500" mandatory="true">
+        <param name="speed" type="Float" minvalue="0" maxvalue="500" mandatory="false">
             <description>The speed in KPH</description>
         </param>
     </struct>
