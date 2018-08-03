@@ -125,117 +125,50 @@ TEST_F(ResetGlobalPropertiesRequestTest, Run_InvalidApp_UNSUCCESS) {
 }
 
 TEST_F(ResetGlobalPropertiesRequestTest, Run_InvalidVrHelp_UNSUCCESS) {
-  (*msg_)[am::strings::msg_params][am::strings::properties][0] =
-      mobile_apis::GlobalProperty::HELPPROMPT;
-  (*msg_)[am::strings::msg_params][am::strings::properties][1] =
-      mobile_apis::GlobalProperty::TIMEOUTPROMPT;
-  (*msg_)[am::strings::msg_params][am::strings::properties][2] =
-      mobile_apis::GlobalProperty::VRHELPTITLE;
-  (*msg_)[am::strings::msg_params][am::strings::properties][3] =
-      mobile_apis::GlobalProperty::MENUNAME;
-  (*msg_)[am::strings::msg_params][am::strings::properties][4] =
-      mobile_apis::GlobalProperty::MENUICON;
-  (*msg_)[am::strings::msg_params][am::strings::properties][5] =
-      mobile_apis::GlobalProperty::KEYBOARDPROPERTIES;
+  am::ResetGlobalPropertiesResult result;
+  result.help_prompt = true;
+  result.timeout_prompt = true;
+  result.vr_help_title_items = true;
+  result.menu_name = true;
+  result.menu_icon = true;
+  result.keyboard_properties = true;
 
-  EXPECT_CALL(app_mngr_, RemoveAppFromTTSGlobalPropertiesList(kConnectionKey));
-  smart_objects::SmartObject so_prompt =
-      smart_objects::SmartObject(smart_objects::SmartType_Array);
-  EXPECT_CALL(*mock_app_, set_help_prompt(so_prompt));
+  EXPECT_CALL(app_mngr_, ResetGlobalProperties(_, _)).WillOnce(Return(result));
 
-  std::vector<std::string> time_out_prompt;
-  time_out_prompt.push_back("time_out");
-  EXPECT_CALL(app_mngr_settings_, time_out_promt())
-      .WillOnce(ReturnRef(time_out_prompt));
+  EXPECT_CALL(mock_message_helper_, CreateUIResetGlobalPropertiesRequest(_, _))
+      .WillOnce(Return(smart_objects::SmartObjectSPtr()));
 
-  smart_objects::SmartObject timeout_prompt =
-      smart_objects::SmartObject(smart_objects::SmartType_Map);
-  timeout_prompt[am::strings::text] = time_out_prompt[0];
-  timeout_prompt[am::strings::type] =
-      hmi_apis::Common_SpeechCapabilities::SC_TEXT;
+  ON_CALL(mock_message_helper_, CreateTTSResetGlobalPropertiesRequest(_, _))
+      .WillByDefault(Return(std::make_shared<smart_objects::SmartObject>(
+          smart_objects::SmartType_Map)));
 
-  smart_objects::SmartObject so_time_out_prompt =
-      smart_objects::SmartObject(smart_objects::SmartType_Array);
-
-  so_time_out_prompt[0] = timeout_prompt;
-
-  EXPECT_CALL(*mock_app_, set_timeout_prompt(so_time_out_prompt));
-
-  EXPECT_CALL(*mock_app_, reset_vr_help_title());
-  EXPECT_CALL(*mock_app_, reset_vr_help());
-
-  EXPECT_CALL(*mock_app_, set_reset_global_properties_active(true));
-
-  smart_objects::SmartObjectSPtr vr_help;  // = NULL;
-  EXPECT_CALL(mock_message_helper_, CreateAppVrHelp(_))
-      .WillOnce(Return(vr_help));
-
-  EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_)).Times(0);
+  EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_)).Times(1);
 
   command_->Run();
 }
 
 TEST_F(ResetGlobalPropertiesRequestTest, Run_SUCCESS) {
-  (*msg_)[am::strings::msg_params][am::strings::properties][0] =
-      mobile_apis::GlobalProperty::HELPPROMPT;
-  (*msg_)[am::strings::msg_params][am::strings::properties][1] =
-      mobile_apis::GlobalProperty::TIMEOUTPROMPT;
-  (*msg_)[am::strings::msg_params][am::strings::properties][2] =
-      mobile_apis::GlobalProperty::VRHELPTITLE;
-  (*msg_)[am::strings::msg_params][am::strings::properties][3] =
-      mobile_apis::GlobalProperty::MENUNAME;
-  (*msg_)[am::strings::msg_params][am::strings::properties][4] =
-      mobile_apis::GlobalProperty::MENUICON;
-  (*msg_)[am::strings::msg_params][am::strings::properties][5] =
-      mobile_apis::GlobalProperty::KEYBOARDPROPERTIES;
+  am::ResetGlobalPropertiesResult result;
+  result.help_prompt = true;
+  result.timeout_prompt = true;
+  result.vr_help_title_items = true;
+  result.menu_name = true;
+  result.menu_icon = true;
+  result.keyboard_properties = true;
+  result.number_of_reset_vr = 1;
 
-  EXPECT_CALL(app_mngr_, RemoveAppFromTTSGlobalPropertiesList(kConnectionKey));
-  smart_objects::SmartObject so_prompt =
-      smart_objects::SmartObject(smart_objects::SmartType_Array);
-  EXPECT_CALL(*mock_app_, set_help_prompt(so_prompt));
-
-  std::vector<std::string> time_out_prompt;
-  time_out_prompt.push_back("time_out");
-  EXPECT_CALL(app_mngr_settings_, time_out_promt())
-      .WillOnce(ReturnRef(time_out_prompt));
-
-  smart_objects::SmartObject timeout_prompt =
-      smart_objects::SmartObject(smart_objects::SmartType_Map);
-  timeout_prompt[am::strings::text] = time_out_prompt[0];
-  timeout_prompt[am::strings::type] =
-      hmi_apis::Common_SpeechCapabilities::SC_TEXT;
-
-  smart_objects::SmartObject so_time_out_prompt =
-      smart_objects::SmartObject(smart_objects::SmartType_Array);
-
-  so_time_out_prompt[0] = timeout_prompt;
-
-  EXPECT_CALL(*mock_app_, set_timeout_prompt(so_time_out_prompt));
-
-  EXPECT_CALL(*mock_app_, reset_vr_help_title());
-  EXPECT_CALL(*mock_app_, reset_vr_help());
+  ON_CALL(app_mngr_, ResetGlobalProperties(_, _)).WillByDefault(Return(result));
 
   EXPECT_CALL(*mock_app_, set_reset_global_properties_active(true));
 
-  smart_objects::SmartObjectSPtr vr_help =
+  smart_objects::SmartObjectSPtr msg_params =
       std::make_shared<smart_objects::SmartObject>(
           smart_objects::SmartType_Map);
-  EXPECT_CALL(mock_message_helper_, CreateAppVrHelp(_))
-      .WillOnce(Return(vr_help));
 
-  smart_objects::SmartObject msg_params =
-      smart_objects::SmartObject(smart_objects::SmartType_Map);
-  msg_params[am::hmi_request::menu_title] = "";
-
-  EXPECT_CALL(*mock_app_,
-              set_menu_title(msg_params[am::hmi_request::menu_title]));
-
-  const smart_objects::SmartObjectSPtr so_help_prompt =
-      std::make_shared<smart_objects::SmartObject>(
-          smart_objects::SmartType_Map);
-  EXPECT_CALL(*mock_app_, help_prompt()).WillOnce(Return(so_help_prompt.get()));
-  EXPECT_CALL(*mock_app_, timeout_prompt())
-      .WillOnce(Return(so_help_prompt.get()));
+  EXPECT_CALL(mock_message_helper_, CreateTTSResetGlobalPropertiesRequest(_, _))
+      .WillOnce(Return(msg_params));
+  EXPECT_CALL(mock_message_helper_, CreateUIResetGlobalPropertiesRequest(_, _))
+      .WillOnce(Return(msg_params));
 
   EXPECT_CALL(mock_rpc_service_,
               ManageHMICommand(HMIResultCodeIs(
@@ -262,18 +195,25 @@ TEST_F(ResetGlobalPropertiesRequestTest,
       hmi_apis::Common_Result::SUCCESS;
   (*msg_)[am::strings::params][am::hmi_response::code] = result_code;
 
-  (*msg_)[am::strings::msg_params][am::strings::properties][0] =
-      mobile_apis::GlobalProperty::VRHELPTITLE;
+  am::ResetGlobalPropertiesResult result;
+  result.vr_help_title_items = true;
 
-  EXPECT_CALL(*mock_app_, reset_vr_help_title());
-  EXPECT_CALL(*mock_app_, reset_vr_help());
-  EXPECT_CALL(*mock_app_, set_reset_global_properties_active(true));
+  EXPECT_CALL(app_mngr_, ResetGlobalProperties(_, _)).WillOnce(Return(result));
+
+  smart_objects::SmartObjectSPtr msg_params =
+      std::make_shared<smart_objects::SmartObject>(
+          smart_objects::SmartType_Map);
+
+  ON_CALL(mock_message_helper_, CreateTTSResetGlobalPropertiesRequest(_, _))
+      .WillByDefault(Return(msg_params));
+
+  EXPECT_CALL(mock_message_helper_, CreateUIResetGlobalPropertiesRequest(_, _))
+      .WillOnce(Return(msg_params));
 
   smart_objects::SmartObjectSPtr vr_help =
       std::make_shared<smart_objects::SmartObject>(
           smart_objects::SmartType_Map);
-  EXPECT_CALL(mock_message_helper_, CreateAppVrHelp(_))
-      .WillOnce(Return(vr_help));
+
   EXPECT_CALL(mock_rpc_service_,
               ManageHMICommand(HMIResultCodeIs(
                   hmi_apis::FunctionID::UI_SetGlobalProperties)))
@@ -301,20 +241,22 @@ TEST_F(ResetGlobalPropertiesRequestTest,
   (*msg_)[am::strings::msg_params][am::strings::properties][1] =
       mobile_apis::GlobalProperty::MENUICON;
 
-  std::vector<std::string> time_out_prompt;
-  time_out_prompt.push_back("time_out");
-  EXPECT_CALL(app_mngr_settings_, time_out_promt())
-      .WillOnce(ReturnRef(time_out_prompt));
+  am::ResetGlobalPropertiesResult result;
+  result.timeout_prompt = true;
+  result.menu_icon = true;
 
-  EXPECT_CALL(*mock_app_, set_timeout_prompt(_));
-
-  smart_objects::SmartObjectSPtr prompt =
-      std::make_shared<smart_objects::SmartObject>();
-  *prompt = "prompt";
-
-  EXPECT_CALL(*mock_app_, timeout_prompt()).WillOnce(Return(prompt.get()));
+  EXPECT_CALL(app_mngr_, ResetGlobalProperties(_, _)).WillOnce(Return(result));
 
   EXPECT_CALL(*mock_app_, set_reset_global_properties_active(true));
+
+  smart_objects::SmartObjectSPtr msg_params =
+      std::make_shared<smart_objects::SmartObject>(
+          smart_objects::SmartType_Map);
+
+  EXPECT_CALL(mock_message_helper_, CreateTTSResetGlobalPropertiesRequest(_, _))
+      .WillOnce(Return(msg_params));
+  EXPECT_CALL(mock_message_helper_, CreateUIResetGlobalPropertiesRequest(_, _))
+      .WillOnce(Return(msg_params));
 
   MessageSharedPtr ui_msg = CreateMessage();
   (*ui_msg)[am::strings::params][am::strings::correlation_id] = kCorrelationId;
@@ -358,10 +300,22 @@ TEST_F(ResetGlobalPropertiesRequestTest, OnEvent_InvalidApp_NoHashUpdate) {
   (*msg_)[am::strings::msg_params][am::strings::properties][0] =
       mobile_apis::GlobalProperty::VRHELPTITLE;
 
-  EXPECT_CALL(*mock_app_, reset_vr_help_title());
-  EXPECT_CALL(*mock_app_, reset_vr_help());
+  am::ResetGlobalPropertiesResult result;
+  result.vr_help_title_items = true;
+
+  EXPECT_CALL(app_mngr_, ResetGlobalProperties(_, _)).WillOnce(Return(result));
 
   EXPECT_CALL(*mock_app_, set_reset_global_properties_active(true));
+
+  smart_objects::SmartObjectSPtr msg_params =
+      std::make_shared<smart_objects::SmartObject>(
+          smart_objects::SmartType_Map);
+
+  EXPECT_CALL(mock_message_helper_, CreateTTSResetGlobalPropertiesRequest(_, _))
+      .Times(0);
+  EXPECT_CALL(mock_message_helper_, CreateUIResetGlobalPropertiesRequest(_, _))
+      .WillOnce(Return(msg_params));
+
   EXPECT_CALL(mock_rpc_service_,
               ManageHMICommand(HMIResultCodeIs(
                   hmi_apis::FunctionID::UI_SetGlobalProperties)))
@@ -369,8 +323,6 @@ TEST_F(ResetGlobalPropertiesRequestTest, OnEvent_InvalidApp_NoHashUpdate) {
   smart_objects::SmartObjectSPtr vr_help =
       std::make_shared<smart_objects::SmartObject>(
           smart_objects::SmartType_Map);
-  EXPECT_CALL(mock_message_helper_, CreateAppVrHelp(_))
-      .WillOnce(Return(vr_help));
 
   EXPECT_CALL(*mock_app_, UpdateHash()).Times(0);
 
@@ -397,20 +349,22 @@ TEST_F(ResetGlobalPropertiesRequestTest,
   (*msg_)[am::strings::msg_params][am::strings::properties][1] =
       mobile_apis::GlobalProperty::MENUICON;
 
-  std::vector<std::string> time_out_prompt;
-  time_out_prompt.push_back("time_out");
-  EXPECT_CALL(app_mngr_settings_, time_out_promt())
-      .WillOnce(ReturnRef(time_out_prompt));
+  am::ResetGlobalPropertiesResult result;
+  result.timeout_prompt = true;
+  result.menu_icon = true;
 
-  EXPECT_CALL(*mock_app_, set_timeout_prompt(_));
-
-  smart_objects::SmartObjectSPtr prompt =
-      std::make_shared<smart_objects::SmartObject>();
-  *prompt = "prompt";
-
-  EXPECT_CALL(*mock_app_, timeout_prompt()).WillOnce(Return(prompt.get()));
+  EXPECT_CALL(app_mngr_, ResetGlobalProperties(_, _)).WillOnce(Return(result));
 
   EXPECT_CALL(*mock_app_, set_reset_global_properties_active(true));
+
+  smart_objects::SmartObjectSPtr msg_params =
+      std::make_shared<smart_objects::SmartObject>(
+          smart_objects::SmartType_Map);
+
+  EXPECT_CALL(mock_message_helper_, CreateTTSResetGlobalPropertiesRequest(_, _))
+      .WillOnce(Return(msg_params));
+  EXPECT_CALL(mock_message_helper_, CreateUIResetGlobalPropertiesRequest(_, _))
+      .WillOnce(Return(msg_params));
 
   EXPECT_CALL(mock_rpc_service_,
               ManageHMICommand(HMIResultCodeIs(
@@ -462,18 +416,20 @@ TEST_F(ResetGlobalPropertiesRequestTest,
   (*msg_)[am::strings::msg_params][am::strings::properties][1] =
       mobile_apis::GlobalProperty::MENUICON;
 
-  std::vector<std::string> time_out_prompt;
-  time_out_prompt.push_back("time_out");
-  EXPECT_CALL(app_mngr_settings_, time_out_promt())
-      .WillOnce(ReturnRef(time_out_prompt));
+  am::ResetGlobalPropertiesResult result;
+  result.timeout_prompt = true;
+  result.menu_icon = true;
 
-  EXPECT_CALL(*mock_app_, set_timeout_prompt(_));
+  EXPECT_CALL(app_mngr_, ResetGlobalProperties(_, _)).WillOnce(Return(result));
 
-  smart_objects::SmartObjectSPtr prompt =
-      std::make_shared<smart_objects::SmartObject>();
-  *prompt = "prompt";
+  smart_objects::SmartObjectSPtr msg_params =
+      std::make_shared<smart_objects::SmartObject>(
+          smart_objects::SmartType_Map);
 
-  EXPECT_CALL(*mock_app_, timeout_prompt()).WillOnce(Return(prompt.get()));
+  EXPECT_CALL(mock_message_helper_, CreateTTSResetGlobalPropertiesRequest(_, _))
+      .WillOnce(Return(msg_params));
+  EXPECT_CALL(mock_message_helper_, CreateUIResetGlobalPropertiesRequest(_, _))
+      .WillOnce(Return(msg_params));
 
   EXPECT_CALL(*mock_app_, set_reset_global_properties_active(true));
 
@@ -526,18 +482,20 @@ TEST_F(ResetGlobalPropertiesRequestTest,
   (*msg_)[am::strings::msg_params][am::strings::properties][1] =
       mobile_apis::GlobalProperty::MENUICON;
 
-  std::vector<std::string> time_out_prompt;
-  time_out_prompt.push_back("time_out");
-  EXPECT_CALL(app_mngr_settings_, time_out_promt())
-      .WillOnce(ReturnRef(time_out_prompt));
+  am::ResetGlobalPropertiesResult result;
+  result.timeout_prompt = true;
+  result.menu_icon = true;
 
-  EXPECT_CALL(*mock_app_, set_timeout_prompt(_));
+  EXPECT_CALL(app_mngr_, ResetGlobalProperties(_, _)).WillOnce(Return(result));
 
-  smart_objects::SmartObjectSPtr prompt =
-      std::make_shared<smart_objects::SmartObject>();
-  *prompt = "prompt";
+  smart_objects::SmartObjectSPtr msg_params =
+      std::make_shared<smart_objects::SmartObject>(
+          smart_objects::SmartType_Map);
 
-  EXPECT_CALL(*mock_app_, timeout_prompt()).WillOnce(Return(prompt.get()));
+  EXPECT_CALL(mock_message_helper_, CreateTTSResetGlobalPropertiesRequest(_, _))
+      .WillOnce(Return(msg_params));
+  EXPECT_CALL(mock_message_helper_, CreateUIResetGlobalPropertiesRequest(_, _))
+      .WillOnce(Return(msg_params));
 
   EXPECT_CALL(*mock_app_, set_reset_global_properties_active(true));
 

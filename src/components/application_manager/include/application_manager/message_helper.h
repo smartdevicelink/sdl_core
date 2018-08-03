@@ -57,8 +57,41 @@ class PolicyHandlerInterface;
 }
 
 namespace application_manager {
-namespace mobile_api = mobile_apis;
 
+/**
+ * @brief ResetGlobalPropertiesResult
+ * contains flags indicating success of
+ * ResetGlobalProperties operation.
+ * Used in MessageHelper functions
+ * to construct relevant requests
+ **/
+struct ResetGlobalPropertiesResult {
+  bool help_prompt;
+  bool timeout_prompt;
+  bool vr_help_title_items;
+  bool menu_name;
+  bool menu_icon;
+  bool keyboard_properties;
+  int number_of_reset_vr;
+
+  ResetGlobalPropertiesResult()
+      : help_prompt(false)
+      , timeout_prompt(false)
+      , vr_help_title_items(false)
+      , menu_name(false)
+      , menu_icon(false)
+      , keyboard_properties(false)
+      , number_of_reset_vr(0) {}
+  bool HasUIPropertiesReset() const {
+    return vr_help_title_items || menu_name || menu_icon || keyboard_properties;
+  }
+
+  bool HasTTSPropertiesReset() const {
+    return timeout_prompt || help_prompt;
+  }
+};
+
+namespace mobile_api = mobile_apis;
 /*
  * @brief Typedef for VehicleData
  *
@@ -877,6 +910,28 @@ class MessageHelper {
    */
   static smart_objects::SmartObjectSPtr CreateMessageForHMI(
       hmi_apis::messageType::eType message_type, const uint32_t correlation_id);
+
+  /**
+   * @brief CreateUIResetGlobalPropertiesRequest Creates request
+   * to reset global properties for UI
+   * @param struct containing result of global properties reset procedure
+   * @param application which properties are to be reset
+   * @return filled smart object with relevant request data
+   */
+  static smart_objects::SmartObjectSPtr CreateUIResetGlobalPropertiesRequest(
+      const ResetGlobalPropertiesResult& reset_result,
+      const ApplicationSharedPtr application);
+
+  /**
+   * @brief CreateTTSResetGlobalPropertiesRequest Creates request
+   * to reset global properties for TTS
+   * @param struct containing result of global properties reset procedure
+   * @param application which properties are to be reset
+   * @return filled smart object with relevant request data
+   */
+  static smart_objects::SmartObjectSPtr CreateTTSResetGlobalPropertiesRequest(
+      const ResetGlobalPropertiesResult& reset_result,
+      const ApplicationSharedPtr application);
 
  private:
   /**

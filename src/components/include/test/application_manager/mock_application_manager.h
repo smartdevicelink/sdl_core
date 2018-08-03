@@ -254,7 +254,7 @@ class MockApplicationManager : public application_manager::ApplicationManager {
                          mobile_apis::AudioStreamingState::eType audio_state,
                          mobile_apis::VideoStreamingState::eType video_state,
                          mobile_apis::SystemContext::eType system_context));
-
+ 
   MOCK_METHOD2(SendAudioPassThroughNotification,
                void(uint32_t session_key, std::vector<uint8_t>& binary_data));
   MOCK_CONST_METHOD2(CanAppStream,
@@ -310,6 +310,13 @@ class MockApplicationManager : public application_manager::ApplicationManager {
   MOCK_CONST_METHOD0(GetCommandFactory, application_manager::CommandFactory&());
   MOCK_CONST_METHOD0(get_current_audio_source, uint32_t());
   MOCK_METHOD1(set_current_audio_source, void(const uint32_t));
+  MOCK_METHOD1(
+      ResetAllApplicationGlobalProperties,
+      application_manager::ResetGlobalPropertiesResult(const uint32_t app_id));
+  MOCK_METHOD2(ResetGlobalProperties,
+               application_manager::ResetGlobalPropertiesResult(
+                   const smart_objects::SmartObject& global_properties,
+                   const uint32_t app_id));
 };
 
 }  // namespace application_manager_test

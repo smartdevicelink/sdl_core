@@ -162,11 +162,11 @@ void ResumptionDataProcessor::ProcessHMIRequest(
 
 void ResumptionDataProcessor::ProcessHMIRequests(
     const smart_objects::SmartObjectList& requests) {
-  LOG4CXX_AUTO_TRACE(logger_);    
-  if(requests.empty()){
-    LOG4CXX_DEBUG(logger_,"requests list is empty");
+  LOG4CXX_AUTO_TRACE(logger_);
+  if (requests.empty()) {
+    LOG4CXX_DEBUG(logger_, "requests list is empty");
     return;
-  } 
+  }
 
   for (const auto& it : requests) {
     ProcessHMIRequest(it, /*subscribe_on_response = */ true);
@@ -417,6 +417,26 @@ void ResumptionDataProcessor::SetGlobalProperties(
 
 void ResumptionDataProcessor::DeleteGlobalProperties(const int32_t app_id) {
   LOG4CXX_AUTO_TRACE(logger_);
+
+  const auto application = application_manager_.application(app_id);
+
+  const auto result =
+      application_manager_.ResetAllApplicationGlobalProperties(app_id);
+
+  if (result.HasUIPropertiesReset()) {
+    smart_objects::SmartObjectSPtr ui_gl_props_reset_req =
+        MessageHelper::CreateUIResetGlobalPropertiesRequest(result,
+                                                            application);
+
+    ProcessHMIRequest(ui_gl_props_reset_req, false);
+  }
+  if (result.HasTTSPropertiesReset()) {
+    smart_objects::SmartObjectSPtr tts_gl_props_reset_req =
+        MessageHelper::CreateUIResetGlobalPropertiesRequest(result,
+                                                            application);
+
+    ProcessHMIRequest(tts_gl_props_reset_req, false);
+  }
 }
 
 void ResumptionDataProcessor::AddWayPointsSubscription(
