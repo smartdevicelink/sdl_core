@@ -846,6 +846,70 @@ void MessageHelper::CreateGetVehicleDataRequest(
   app_mngr.GetRPCService().ManageHMICommand(request);
 }
 
+smart_objects::SmartObjectSPtr
+MessageHelper::CreateTTSResetGlobalPropertiesRequest(
+    const ResetGlobalPropertiesResult& reset_result,
+    const ApplicationSharedPtr application) {
+  smart_objects::SmartObjectSPtr ui_reset_global_prop_request =
+      std::make_shared<smart_objects::SmartObject>(
+          smart_objects::SmartType_Map);
+
+  if (reset_result.help_prompt) {
+    (*ui_reset_global_prop_request)[strings::help_prompt] =
+        application->help_prompt();
+  }
+
+  if (reset_result.timeout_prompt) {
+    (*ui_reset_global_prop_request)[strings::timeout_prompt] =
+        application->timeout_prompt();
+  }
+
+  (*ui_reset_global_prop_request)[strings::app_id] = application->app_id();
+
+  return ui_reset_global_prop_request;
+}
+
+smart_objects::SmartObjectSPtr
+MessageHelper::CreateUIResetGlobalPropertiesRequest(
+    const ResetGlobalPropertiesResult& reset_result,
+    const ApplicationSharedPtr application) {
+  smart_objects::SmartObjectSPtr tts_reset_global_prop_request =
+      std::make_shared<smart_objects::SmartObject>(
+          smart_objects::SmartType_Map);
+
+  if (reset_result.vr_help_title_items) {
+    smart_objects::SmartObjectSPtr vr_help = CreateAppVrHelp(application);
+    if (!vr_help.get()) {
+      LOG4CXX_WARN(logger_, "Failed to create vr_help");
+      return smart_objects::SmartObjectSPtr();
+    } else {
+      tts_reset_global_prop_request = vr_help;
+    }
+  }
+  if (reset_result.menu_name) {
+    (*tts_reset_global_prop_request)[hmi_request::menu_title] = "";
+    application->set_menu_title(
+        (*tts_reset_global_prop_request)[hmi_request::menu_title]);
+  }
+
+  if (reset_result.keyboard_properties) {
+    smart_objects::SmartObject key_board_properties =
+        smart_objects::SmartObject(smart_objects::SmartType_Map);
+    key_board_properties[strings::language] =
+        static_cast<int32_t>(hmi_apis::Common_Language::EN_US);
+    key_board_properties[hmi_request::keyboard_layout] =
+        static_cast<int32_t>(hmi_apis::Common_KeyboardLayout::QWERTY);
+
+    key_board_properties[hmi_request::auto_complete_text] = "";
+    (*tts_reset_global_prop_request)[hmi_request::keyboard_properties] =
+        key_board_properties;
+  }
+
+  (*tts_reset_global_prop_request)[strings::app_id] = application->app_id();
+
+  return tts_reset_global_prop_request;
+}
+
 smart_objects::SmartObjectSPtr MessageHelper::CreateBlockedByPoliciesResponse(
     mobile_apis::FunctionID::eType function_id,
     mobile_apis::Result::eType result,

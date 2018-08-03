@@ -497,7 +497,7 @@ TEST_F(ResumeCtrlTest, StartResumption_AppWithSubscribeOnButtons) {
 
   EXPECT_CALL(*mock_app_, Extensions()).WillOnce(ReturnRef(extensions));
 
-  EXPECT_CALL(*mock_app_extension_, ProcessResumption(test_subscriptions));
+  EXPECT_CALL(*mock_app_extension_, ProcessResumption(test_subscriptions, _));
 
   EXPECT_CALL(*application_manager::MockMessageHelper::message_helper_mock(),
               SendAllOnButtonSubscriptionNotificationsForApp(_, _)).Times(2);
@@ -546,7 +546,7 @@ TEST_F(ResumeCtrlTest, StartResumption_AppWithSubscriptionToIVI) {
 
   EXPECT_CALL(*mock_app_, Extensions()).WillOnce(ReturnRef(extensions));
 
-  EXPECT_CALL(*mock_app_extension_, ProcessResumption(test_subscriptions));
+  EXPECT_CALL(*mock_app_extension_, ProcessResumption(test_subscriptions, _));
   const bool res = res_ctrl_->StartResumption(mock_app_, kHash_);
   EXPECT_TRUE(res);
 }

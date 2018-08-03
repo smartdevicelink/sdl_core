@@ -57,7 +57,39 @@ class PolicyHandlerInterface;
 }
 
 namespace application_manager {
-namespace mobile_api = mobile_apis;
+
+/**
+ * @brief ResetGlobalPropertiesResult
+ * contains flags indicating success of
+ * ResetGlobalProperties operation.
+ * Used in MessageHelper functions
+ * to construct relevant requests
+ **/
+struct ResetGlobalPropertiesResult {
+  bool help_prompt;
+  bool timeout_prompt;
+  bool vr_help_title_items;
+  bool menu_name;
+  bool menu_icon;
+  bool keyboard_properties;
+  int number_of_reset_vr;
+
+  ResetGlobalPropertiesResult()
+      : help_prompt(false)
+      , timeout_prompt(false)
+      , vr_help_title_items(false)
+      , menu_name(false)
+      , menu_icon(false)
+      , keyboard_properties(false)
+      , number_of_reset_vr(0) {}
+  bool HasUIPropertiesReset() const {
+    return vr_help_title_items || menu_name || menu_icon || keyboard_properties;
+  }
+
+  bool HasTTSPropertiesReset() const {
+    return timeout_prompt || help_prompt;
+  }
+};
 
 /*
  * @brief Typedef for VehicleData
@@ -175,7 +207,7 @@ class MessageHelper {
    * @return mobile Result enum value if succedeed, otherwise - INVALID_ENUM
    * value
    */
-  static mobile_api::Result::eType MobileResultFromString(
+  static mobile_apis::Result::eType MobileResultFromString(
       const std::string& mobile_result);
 
   /**
@@ -184,7 +216,7 @@ class MessageHelper {
    * @return mobile Result enum value if succedeed, otherwise - INVALID_ENUM
    * value
    */
-  static mobile_api::Result::eType HMIToMobileResult(
+  static mobile_apis::Result::eType HMIToMobileResult(
       const hmi_apis::Common_Result::eType hmi_result);
 
   /**
@@ -193,7 +225,7 @@ class MessageHelper {
    * @return HMI Result enum value
    */
   static hmi_apis::Common_Result::eType MobileToHMIResult(
-      const mobile_api::Result::eType mobile_result);
+      const mobile_apis::Result::eType mobile_result);
 
   /**
    * @brief Convert string to HMI level, if possible
@@ -201,7 +233,7 @@ class MessageHelper {
    * @return Appropriate enum from HMI level, or INVALID_ENUM, if conversiion
    * is not possible
    */
-  static mobile_api::HMILevel::eType StringToHMILevel(
+  static mobile_apis::HMILevel::eType StringToHMILevel(
       const std::string& hmi_level);
 
   /*
@@ -789,7 +821,7 @@ class MessageHelper {
   static smart_objects::SmartObjectSPtr
   GetOnAppInterfaceUnregisteredNotificationToMobile(
       int32_t connection_key,
-      mobile_api::AppInterfaceUnregisteredReason::eType reason);
+      mobile_apis::AppInterfaceUnregisteredReason::eType reason);
 
   /**
    * @brief SendDeleteCommandRequest sends requests to HMI to remove UI/VR
@@ -877,6 +909,28 @@ class MessageHelper {
    */
   static smart_objects::SmartObjectSPtr CreateMessageForHMI(
       hmi_apis::messageType::eType message_type, const uint32_t correlation_id);
+
+  /**
+   * @brief CreateUIResetGlobalPropertiesRequest Creates request
+   * to reset global properties for UI
+   * @param struct containing result of global properties reset procedure
+   * @param application which properties are to be reset
+   * @return filled smart object with relevant request data
+   */
+  static smart_objects::SmartObjectSPtr CreateUIResetGlobalPropertiesRequest(
+      const ResetGlobalPropertiesResult& reset_result,
+      const ApplicationSharedPtr application);
+
+  /**
+   * @brief CreateTTSResetGlobalPropertiesRequest Creates request
+   * to reset global properties for TTS
+   * @param struct containing result of global properties reset procedure
+   * @param application which properties are to be reset
+   * @return filled smart object with relevant request data
+   */
+  static smart_objects::SmartObjectSPtr CreateTTSResetGlobalPropertiesRequest(
+      const ResetGlobalPropertiesResult& reset_result,
+      const ApplicationSharedPtr application);
 
  private:
   /**
