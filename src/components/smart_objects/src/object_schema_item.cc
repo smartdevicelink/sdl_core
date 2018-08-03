@@ -54,7 +54,8 @@ CObjectSchemaItem::SMember::SMember(const ISchemaItemPtr SchemaItem,
                                     const std::string& Since,
                                     const std::string& Until,
                                     const bool IsDeprecated,
-                                    const bool IsRemoved)
+                                    const bool IsRemoved,
+                                    const std::vector<CObjectSchemaItem::SMember>& history_vector)
     : mSchemaItem(SchemaItem), mIsMandatory(IsMandatory) {
   
       if (Since.size() > 0) {
@@ -83,6 +84,7 @@ CObjectSchemaItem::SMember::SMember(const ISchemaItemPtr SchemaItem,
 
       mIsDeprecated = IsDeprecated;
       mIsRemoved = IsRemoved;
+      mHistoryVector = history_vector;
 
     }
 
@@ -107,7 +109,6 @@ bool CObjectSchemaItem::SMember::CheckHistoryFieldVersion(const utils::SemanticV
     }
   }
 
-  printf("Final true of check history version\n");
   return true; //Not enough version information. Default true.
 }
 
@@ -176,10 +177,33 @@ Errors::eType CObjectSchemaItem::validate(const SmartObject& object,
        ++it) {
     const std::string& key = it->first;
     const SMember& member = it->second;
-    printf("key: %s\n", key.c_str());
     std::set<std::string>::const_iterator key_it = object_keys.find(key);
     if (object_keys.end() == key_it) {
-      if (member.mIsMandatory && member.CheckHistoryFieldVersion(MessageVersion)) {
+      if(member.mSince.is_initialized() && MessageVersion < member.mSince.get() && member.mHistoryVector.size() > 0) {
+        //Message version predates parameter and a history vector exists.
+        for (uint i=0; i<member.mHistoryVector.size(); i++) {
+          if (member.mHistoryVector[i].mSince.is_initialized() && MessageVersion >= member.mHistoryVector[i].mSince.get()) {
+            if (member.mHistoryVector[i].mUntil.is_initialized() && MessageVersion >= member.mHistoryVector[i].mUntil.get()) {
+              //MessageVersion is newer than the specified "Until" version
+              continue;
+            } else {
+              if (member.mHistoryVector[i].mIsMandatory == true && (member.mHistoryVector[i].mIsRemoved == false)) {
+                std::string validation_info = "Missing mandatory parameter since and until: " + key;
+                report__->set_validation_info(validation_info);
+                return Errors::MISSING_MANDATORY_PARAMETER;                
+              }
+              break;
+            }            
+          } else if (member.mHistoryVector[i].mSince.is_initialized() == false && member.mHistoryVector[i].mUntil.is_initialized() && MessageVersion < member.mHistoryVector[i].mUntil.get()){
+            if (member.mHistoryVector[i].mIsMandatory == true && (member.mHistoryVector[i].mIsRemoved == false)) {
+              std::string validation_info = "Missing mandatory parameter until: " + key;
+              report__->set_validation_info(validation_info);
+              return Errors::MISSING_MANDATORY_PARAMETER;                
+            }
+            break;
+          }
+        }
+      } else if (member.mIsMandatory && member.CheckHistoryFieldVersion(MessageVersion) && (member.mIsMandatory == false)) {
         std::string validation_info = "Missing mandatory parameter: " + key;
         report__->set_validation_info(validation_info);
         return Errors::MISSING_MANDATORY_PARAMETER;
@@ -286,8 +310,18 @@ void CObjectSchemaItem::RemoveFakeParams(SmartObject& Object, const utils::Seman
     } else if (members_it->second.mIsRemoved && members_it->second.CheckHistoryFieldVersion(MessageVersion)) {
       ++it;
       Object.erase(key);
-    } else {
-      it++;
+    } else if (members_it->second.mHistoryVector.size() > 0) {
+      for (uint i=0; i<members_it->second.mHistoryVector.size(); i++) {
+        if (members_it->second.mHistoryVector[i].CheckHistoryFieldVersion(MessageVersion) && members_it->second.mHistoryVector[i].mIsRemoved) {
+          ++it;
+          Object.erase(key);
+          break;
+        }
+      }
+      ++it;
+    }
+    else {
+      ++it;
     }
   }
 }

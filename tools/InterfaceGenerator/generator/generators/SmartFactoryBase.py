@@ -600,10 +600,43 @@ class CodeGenerator(object):
 
         """
 
-        result = u"\n\n".join(
-            [self._gen_schema_item_decl(x) for x in members])
+        result_array = []
+        for x in members:
+            result_array.append(self._gen_schema_item_decl(x))
+            count = 0
+            if x.history is not None:
+                history_list = x.history
+                for item in history_list:
+                    item.name += "_history_v" + str(len(history_list)-count)
+                    result_array.append(self._gen_schema_item_decl(item))
+                    count += 1
+                result_array.append(self._gen_history_vector_decl(history_list, x.name))
 
-        return u"".join([result, u"\n\n"]) if result else u""
+        result = u"\n\n".join(result_array)
+        return result
+
+    def _gen_history_vector_decl(self, history_list, name):
+        """Generate History Vector Declaration.
+
+            Generates the declaration and initialization
+            of a vector of schema items
+
+            Arguments:
+            history_list -> list of history items
+            name -> name of parent parameter name
+
+            Returns:
+            String with history array code.
+        """
+        result_array = []
+        result_array.append(self._impl_code_shared_ptr_vector_template.substitute(var_name = name))
+        '''for item in history_list:
+            result_array.append(self._impl_code_append_history_vector_template.substitute(vector_name=name, item_name=item.name))
+'''
+        result = u"\n".join(result_array)
+        return result
+
+
 
     def _gen_schema_item_decl(self, member):
         """Generate schema item declaration.
@@ -759,10 +792,16 @@ class CodeGenerator(object):
         String with function schema items fill code.
 
         """
+        result_array = []
+        for x in members:
+            #If history, create Smember History vector first
+            if x.history is not None:
+                history_list = x.history
+                for item in history_list:
+                    result_array.append(self._gen_history_vector_item_fill(item, x.name))
+            result_array.append(self._gen_schema_item_fill(x, since, until, deprecated, removed))
 
-        result = u"\n".join(
-            [self._gen_schema_item_fill(x, since, until, deprecated, removed) for x in members])
-
+        result = u"\n".join(result_array)
         return u"".join([result, u"\n\n"]) if result else u""
 
     def _gen_schema_params_fill(self, message_type_name):
@@ -804,19 +843,58 @@ class CodeGenerator(object):
             member.until is not None or 
             member.deprecated is not None or
             member.removed is not None):
-            return self._impl_code_item_fill_template_with_version.substitute(
-                name=member.name,
-                var_name=self._gen_schema_item_var_name(member),
-                is_mandatory=u"true" if member.is_mandatory is True else u"false",
-                since=member.since if member.since is not None else since if since is not None else "", 
-                until=member.until if member.until is not None else until if until is not None else "", 
-                deprecated=member.deprecated if member.deprecated is not None else deprecated if deprecated is not None else u"false", 
-                removed=member.removed if member.removed is not None else removed if removed is not None else u"false")
+            if member.history is not None:
+                return self._impl_code_item_fill_template_with_version_and_history_vector.substitute(
+                    name=member.name,
+                    var_name=self._gen_schema_item_var_name(member),
+                    is_mandatory=u"true" if member.is_mandatory is True else u"false",
+                    since=member.since if member.since is not None else since if since is not None else "", 
+                    until=member.until if member.until is not None else until if until is not None else "", 
+                    deprecated=member.deprecated if member.deprecated is not None else deprecated if deprecated is not None else u"false", 
+                    removed=member.removed if member.removed is not None else removed if removed is not None else u"false",
+                    vector_name=member.name)
+            else:
+                return self._impl_code_item_fill_template_with_version.substitute(
+                    name=member.name,
+                    var_name=self._gen_schema_item_var_name(member),
+                    is_mandatory=u"true" if member.is_mandatory is True else u"false",
+                    since=member.since if member.since is not None else since if since is not None else "", 
+                    until=member.until if member.until is not None else until if until is not None else "", 
+                    deprecated=member.deprecated if member.deprecated is not None else deprecated if deprecated is not None else u"false", 
+                    removed=member.removed if member.removed is not None else removed if removed is not None else u"false")
         else:
             return self._impl_code_item_fill_template.substitute(
                 name=member.name,
                 var_name=self._gen_schema_item_var_name(member),
                 is_mandatory=u"true" if member.is_mandatory is True else u"false")            
+
+    def _gen_history_vector_item_fill(self, member, vector_name):
+        """Generate schema item fill code.
+
+        Generates source code that fills history vector with item.
+
+        Keyword arguments:
+        member -- struct member/function parameter to process.
+
+        Returns:
+        String with schema item fill code.
+
+        """
+
+        if (member.since is not None or 
+            member.until is not None or 
+            member.deprecated is not None or
+            member.removed is not None):
+            return self._impl_code_append_history_vector_template.substitute(
+                vector_name=vector_name,
+                name=member.name,
+                mandatory=u"true" if member.is_mandatory is True else u"false",
+                since=member.since if member.since is not None else "", 
+                until=member.until if member.until is not None else "", 
+                deprecated=member.deprecated if member.deprecated is not None else u"false", 
+                removed=member.removed if member.removed is not None else u"false")
+        else:
+            print "Warning! History item does not have any version history. Omitting %s" % member.name      
 
     @staticmethod
     def _gen_schema_item_var_name(member):
@@ -1524,6 +1602,12 @@ class CodeGenerator(object):
         u'''${comment}'''
         u'''std::shared_ptr<ISchemaItem> ${var_name} = ${item_decl};''')
 
+    _impl_code_shared_ptr_vector_template = string.Template(
+        u'''std::vector<CObjectSchemaItem::SMember> ${var_name}_history_vector;''')
+
+    _impl_code_append_history_vector_template = string.Template(
+        u'''${vector_name}_history_vector.push_back(CObjectSchemaItem::SMember(${name}_SchemaItem, ${mandatory}, "${since}", "${until}", ${deprecated}, ${removed}));''')
+
     _impl_code_integer_item_template = string.Template(
         u'''TNumberSchemaItem<${type}>::create(${params})''')
 
@@ -1553,6 +1637,10 @@ class CodeGenerator(object):
     _impl_code_item_fill_template_with_version = string.Template(
         u'''schema_members["${name}"] = CObjectSchemaItem::'''
         u'''SMember(${var_name}, ${is_mandatory}, "${since}", "${until}", ${deprecated}, ${removed});''')
+
+    _impl_code_item_fill_template_with_version_and_history_vector = string.Template(
+        u'''schema_members["${name}"] = CObjectSchemaItem::'''
+        u'''SMember(${var_name}, ${is_mandatory}, "${since}", "${until}", ${deprecated}, ${removed}, ${vector_name}_history_vector);''')
 
     _function_impl_template = string.Template(
         u'''CSmartSchema $namespace::$class_name::'''

@@ -71,7 +71,8 @@ class CObjectSchemaItem : public ISchemaItem {
                                         const std::string& Since = "",
                                         const std::string& Until = "",
                                         const bool IsDeprecated = false,
-                                        const bool IsRemoved = false);
+                                        const bool IsRemoved = false,
+                                        const std::vector<CObjectSchemaItem::SMember>& history_vector = {});
     /**
      * @brief Checks the version a parameter was removed (until)
      * If the mobile's msg version is greater than or
@@ -90,6 +91,7 @@ class CObjectSchemaItem : public ISchemaItem {
     boost::optional<utils::SemanticVersion> mUntil;
     bool mIsDeprecated;
     bool mIsRemoved;
+    std::vector<CObjectSchemaItem::SMember> mHistoryVector;
 
   };
   typedef std::map<std::string, SMember> Members;

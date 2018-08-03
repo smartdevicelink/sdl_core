@@ -125,7 +125,7 @@ class InterfaceItemBase(object):
 
     def __init__(self, name, description=None, design_description=None,
                  issues=None, todos=None, platform=None, default_value=None, scope=None,
-                 since=None, until=None, deprecated=None, removed=None):
+                 since=None, until=None, deprecated=None, removed=None, history=None):
         self.name = name
         self.description = description if description is not None else []
         self.design_description = \
@@ -139,6 +139,7 @@ class InterfaceItemBase(object):
         self.until = until
         self.deprecated = deprecated
         self.removed = removed
+        self.history = history
 
 
 class EnumElement(InterfaceItemBase):
@@ -154,11 +155,11 @@ class EnumElement(InterfaceItemBase):
 
     def __init__(self, name, description=None, design_description=None,
                  issues=None, todos=None, platform=None, internal_name=None,
-                 value=None, since=None, until=None, deprecated=None, removed=None):
+                 value=None, since=None, until=None, deprecated=None, removed=None, history=None):
         super(EnumElement, self).__init__(
             name, description=description,
             design_description=design_description, issues=issues, todos=todos,
-            platform=platform)
+            platform=platform, history=history)
         self.internal_name = internal_name
         self.value = value
         self.since = since
@@ -190,11 +191,11 @@ class Enum(InterfaceItemBase):
 
     def __init__(self, name, description=None, design_description=None,
                  issues=None, todos=None, platform=None, internal_scope=None,
-                 elements=None, scope=None, since=None, until=None, deprecated=None, removed=None):
+                 elements=None, scope=None, since=None, until=None, deprecated=None, removed=None, history=None):
         super(Enum, self).__init__(
             name, description=description,
             design_description=design_description, issues=issues, todos=todos,
-            platform=platform, scope=scope)
+            platform=platform, scope=scope, history=history)
 
         self.internal_scope = internal_scope
         self.elements = \
@@ -218,11 +219,11 @@ class EnumSubset(InterfaceItemBase):
 
     def __init__(self, name, enum, description=None, design_description=None,
                  issues=None, todos=None, platform=None,
-                 allowed_elements=None, since=None, until=None, deprecated=None, removed=None):
+                 allowed_elements=None, since=None, until=None, deprecated=None, removed=None, history=None):
         super(EnumSubset, self).__init__(
             name, description=description,
             design_description=design_description, issues=issues, todos=todos,
-            platform=platform)
+            platform=platform, history=history)
 
         self.enum = enum
         self.allowed_elements = \
@@ -248,11 +249,11 @@ class Param(InterfaceItemBase):
     def __init__(self, name, param_type, description=None,
                  design_description=None, issues=None, todos=None,
                  platform=None, is_mandatory=True, default_value=None, scope=None,
-                 since=None, until=None, deprecated=None, removed=None):
+                 since=None, until=None, deprecated=None, removed=None, history=None):
         super(Param, self).__init__(
             name, description=description,
             design_description=design_description, issues=issues, todos=todos,
-            platform=platform, default_value=default_value, scope=scope)
+            platform=platform, default_value=default_value, scope=scope, history=history)
 
         self.is_mandatory = is_mandatory
         self.param_type = param_type
@@ -275,12 +276,12 @@ class FunctionParam(Param):
     def __init__(self, name, param_type, description=None,
                  design_description=None, issues=None, todos=None,
                  platform=None, is_mandatory=True, default_value=None, scope=None,
-                 since=None, until=None, deprecated=None, removed=None):
+                 since=None, until=None, deprecated=None, removed=None, history=None):
         super(FunctionParam, self).__init__(
             name, param_type=param_type, description=description,
             design_description=design_description, issues=issues, todos=todos,
             platform=platform, is_mandatory=is_mandatory, default_value=default_value, 
-            scope=scope, since=since, until=until, deprecated=deprecated, removed=removed)
+            scope=scope, since=since, until=until, deprecated=deprecated, removed=removed, history=history)
 
         self.default_value = default_value
 
@@ -296,12 +297,12 @@ class Struct(InterfaceItemBase):
 
     def __init__(self, name, description=None, design_description=None,
                  issues=None, todos=None, platform=None, members=None, scope=None, 
-                 since=None, until=None, deprecated=None, removed=None):
+                 since=None, until=None, deprecated=None, removed=None, history=None):
         super(Struct, self).__init__(
             name, description=description,
             design_description=design_description, issues=issues, todos=todos,
             platform=platform, scope=scope, since=since, until=until,
-            deprecated=deprecated, removed=removed)
+            deprecated=deprecated, removed=removed, history=history)
 
         print since
         self.members = \
@@ -321,11 +322,11 @@ class Function(InterfaceItemBase):
 
     def __init__(self, name, function_id, message_type, description=None,
                  design_description=None, issues=None, todos=None,
-                 platform=None, params=None, scope=None, since=None, until=None, deprecated=None, removed=None):
+                 platform=None, params=None, scope=None, since=None, until=None, deprecated=None, removed=None, history=None):
         super(Function, self).__init__(
             name, description=description,
             design_description=design_description, issues=issues, todos=todos,
-            platform=platform, scope=scope, since=None, until=None, deprecated=None, removed=None)
+            platform=platform, scope=scope, since=since, until=until, deprecated=deprecated, removed=removed, history=history)
 
         self.function_id = function_id
         self.message_type = message_type

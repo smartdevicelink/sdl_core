@@ -416,6 +416,8 @@ class Parser(object):
         issues = []
         todos = []
         subelements = []
+        history = None
+        warnings = []
 
         if "name" not in element.attrib:
             raise ParseError("Name is not specified for " + element.tag)
@@ -436,6 +438,12 @@ class Parser(object):
                 todos.append(self._parse_simple_element(subelement))
             elif subelement.tag == "issue":
                 issues.append(self._parse_issue(subelement))
+            elif subelement.tag == "history":
+                if history is not None:
+                    raise ParseError("Elements can only have one history tag: " + element.tag)
+                history = self._parse_history(subelement, prefix, element)
+            elif subelement.tag == "warning":
+                warnings.append(self._parse_warning(subelement))
             else:
                 subelements.append(subelement)
 
@@ -443,6 +451,7 @@ class Parser(object):
         params["design_description"] = design_description
         params["issues"] = issues
         params["todos"] = todos
+        params["history"] = history
 
         return params, subelements, attrib
 
@@ -640,8 +649,6 @@ class Parser(object):
         removed = self._extract_attrib(attrib, "removed")
         if removed is not None:
             params["removed"] = removed
-            print("FOUND REMOVED!!!!!")
-            print(params["name"])
 
 
         is_mandatory = self._extract_attrib(attrib, "mandatory")
@@ -880,3 +887,34 @@ class Parser(object):
             version_array.append("0")
         dot_str = "."
         return dot_str.join(version_array)
+
+    def _parse_history(self, history, prefix, parent):
+        print "Pare History of Size: %d" % len(history)
+        if history.tag != "history":
+            raise ParseError("Invalid history tag: " + interface.tag)
+        
+        items = []
+
+        for subelement in history:
+            if subelement.tag == "enum" and parent.tag == "enum":
+                items.append(self._parse_enum(subelement, prefix))
+            elif subelement.tag == "element" and parent.tag == "element":
+                items.append(self._parse_enum_element(subelement))
+            elif subelement.tag == "description" and parent.tag == "description":
+                items.append(self._parse_simple_element(subelement))
+            elif subelement.tag == "struct" and parent.tag == "struct":
+                items.append(self._parse_struct(subelement, prefix))
+            elif subelement.tag == "param" and parent.tag == "param":
+                items.append(self._parse_function_param(subelement, prefix))
+            elif subelement.tag == "function" and parent.tag == "function":
+                items.append(self.__parse_function(subelement, prefix))
+            else: 
+                print subelement.tag
+                print parent.tag
+                raise ParseError("A history tag must be nested within the element it notes the history for. Fix item: '" +
+                 parent.attrib["name"] + "'")
+
+        return items
+    def _parse_warning(self, warning):
+        print "Parse warning"
+
