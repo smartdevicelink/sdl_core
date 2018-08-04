@@ -104,7 +104,7 @@ class TEnumSchemaItem : public CDefaultSchemaItem<EnumType> {
    **/
   static std::shared_ptr<TEnumSchemaItem> createWithSignatures(
       const std::set<EnumType>& AllowedElements,
-      const std::set<ElementSignature>& ElementSignatures,
+      const std::map<EnumType, std::vector<ElementSignature>>& ElementSignatures,
       const TSchemaItemParameter<EnumType>& DefaultValue =
           TSchemaItemParameter<EnumType>());
   /**
@@ -160,14 +160,14 @@ class TEnumSchemaItem : public CDefaultSchemaItem<EnumType> {
 
   TEnumSchemaItem(const std::set<EnumType>& AllowedElements,
                   const TSchemaItemParameter<EnumType>& DefaultValue,
-                  const std::set<ElementSignature>& ElementSignatures);
+                  const std::map<EnumType, std::vector<ElementSignature>>& ElementSignatures);
   SmartType getSmartType() const OVERRIDE;
   EnumType getDefaultValue() const OVERRIDE;
   /**
    * @brief Set of allowed enumeration elements.
    **/
   const std::set<EnumType> mAllowedElements;
-  const std::set<ElementSignature> mElementSignatures;
+  const std::map<EnumType, std::vector<ElementSignature>> mElementSignatures;
   /**
    * @brief Default value.
    **/
@@ -276,7 +276,7 @@ std::shared_ptr<TEnumSchemaItem<EnumType> > TEnumSchemaItem<EnumType>::create(
 template <typename EnumType>
 std::shared_ptr<TEnumSchemaItem<EnumType> > TEnumSchemaItem<EnumType>::createWithSignatures(
     const std::set<EnumType>& AllowedElements,
-    const std::set<ElementSignature>& ElementSignatures,
+    const std::map<EnumType, std::vector<ElementSignature>>& ElementSignatures,
     const TSchemaItemParameter<EnumType>& DefaultValue ) {
   return std::shared_ptr<TEnumSchemaItem<EnumType> >(
       new TEnumSchemaItem<EnumType>(AllowedElements, DefaultValue, ElementSignatures));
@@ -363,7 +363,7 @@ template <typename EnumType>
 TEnumSchemaItem<EnumType>::TEnumSchemaItem(
     const std::set<EnumType>& AllowedElements,
     const TSchemaItemParameter<EnumType>& DefaultValue,
-    const std::set<ElementSignature>& ElementSignatures)
+    const std::map<EnumType, std::vector<ElementSignature>>& ElementSignatures)
     : CDefaultSchemaItem<EnumType>(DefaultValue)
     , mAllowedElements(AllowedElements)
     , mElementSignatures(mElementSignatures) {}

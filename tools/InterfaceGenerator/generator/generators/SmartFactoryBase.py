@@ -544,6 +544,18 @@ class CodeGenerator(object):
             return True        
         return False
 
+    def _enum_param_type_has_history_present(self, param_type):
+        '''
+        Check if any elements in an enum has history signature
+        '''
+        for element in param_type.elements.values():
+            if ( element.history is not None or
+                element.since is not None or
+                element.until is not None or
+                element.removed is not None ):
+                return True
+        return False
+
 
     def _gen_schema_loc_decls(self, members, processed_enums):
         """Generate local declarations of variables for schema.
@@ -794,16 +806,30 @@ class CodeGenerator(object):
             code = self._impl_code_struct_item_template.substitute(
                 name=param.name)
         elif type(param) is Model.Enum:
-            code = self._impl_code_enum_item_template.substitute(
-                type=param.name,
-                params=u"".join(
-                    [self._gen_schema_loc_emum_var_name(param),
-                     u", ",
-                     self._gen_schema_item_param_values(
-                         [[u"".join([param.name, u"::eType"]),
-                          u"".join([param.name, u"::",
-                                    default_value.primary_name]) if
-                           default_value is not None else None]])]))
+            if self._enum_param_type_has_history_present(param):
+                code = self._impl_code_enum_item_with_history_template.substitute(
+                    type=param.name,
+                    params=u"".join(
+                        [self._gen_schema_loc_emum_var_name(param),
+                         u", ",
+                         self._impl_gen_schema_enum_history_map_template.substitute(name=param.name),
+                         u", ",
+                         self._gen_schema_item_param_values(
+                             [[u"".join([param.name, u"::eType"]),
+                              u"".join([param.name, u"::",
+                                        default_value.primary_name]) if
+                               default_value is not None else None]])]))
+            else:
+                code = self._impl_code_enum_item_template.substitute(
+                    type=param.name,
+                    params=u"".join(
+                        [self._gen_schema_loc_emum_var_name(param),
+                         u", ",
+                         self._gen_schema_item_param_values(
+                             [[u"".join([param.name, u"::eType"]),
+                              u"".join([param.name, u"::",
+                                        default_value.primary_name]) if
+                               default_value is not None else None]])]))
         elif type(param) is Model.EnumSubset:
             code = self._impl_code_enum_item_template.substitute(
                 type=param.enum.name,
@@ -1670,6 +1696,9 @@ class CodeGenerator(object):
     _impl_code_loc_decl_enum_history_set_insert_template = string.Template(
         u'''${enum}_element_signatures[${enum}::${value}].push_back(ElementSignature("${since}", "${until}", ${removed}));''')
 
+    _impl_gen_schema_enum_history_map_template = string.Template(
+        u'''${name}_element_signatures''')
+
     _impl_code_item_decl_temlate = string.Template(
         u'''${comment}'''
         u'''std::shared_ptr<ISchemaItem> ${var_name} = ${item_decl};''')
@@ -1698,6 +1727,9 @@ class CodeGenerator(object):
 
     _impl_code_enum_item_template = string.Template(
         u'''TEnumSchemaItem<${type}::eType>::create(${params})''')
+
+    _impl_code_enum_item_with_history_template = string.Template(
+        u'''TEnumSchemaItem<${type}::eType>::createWithSignatures(${params})''')
 
     _impl_code_item_param_value_template = string.Template(
         u'''TSchemaItemParameter<$type>($value)''')
