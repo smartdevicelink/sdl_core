@@ -211,8 +211,19 @@ Errors::eType CObjectSchemaItem::validate(const SmartObject& object,
       continue;
     }
     const SmartObject& field = object.getElement(key);
-    const Errors::eType result =
-        member.mSchemaItem->validate(field, &report__->ReportSubobject(key), MessageVersion);
+
+    Errors::eType result = Errors::OK;
+    // Check if MessageVersion matches schema version
+    if (member.CheckHistoryFieldVersion(MessageVersion) || member.mHistoryVector.empty()) {
+        result = member.mSchemaItem->validate(field, &report__->ReportSubobject(key), MessageVersion);
+    } else if(member.mHistoryVector.size() > 0){ //Check for history
+      for (uint i=0; i<member.mHistoryVector.size(); i++) {
+        if(member.mHistoryVector[i].CheckHistoryFieldVersion(MessageVersion)) {
+          //Found the correct history schema. Call validate
+          result = member.mHistoryVector[i].mSchemaItem->validate(field, &report__->ReportSubobject(key), MessageVersion);
+        }
+      }
+    }
     if (Errors::OK != result) {
       return result;
     }
