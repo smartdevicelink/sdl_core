@@ -909,8 +909,6 @@ class Parser(object):
             elif subelement.tag == "function" and parent.tag == "function":
                 items.append(self.__parse_function(subelement, prefix))
             else: 
-                print subelement.tag
-                print parent.tag
                 raise ParseError("A history tag must be nested within the element it notes the history for. Fix item: '" +
                  parent.attrib["name"] + "'")
 

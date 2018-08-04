@@ -505,8 +505,6 @@ class CodeGenerator(object):
         String with structs implementation source code.
 
         """
-        #print struct.name
-        #print struct.since
         processed_enums = []
         return self._struct_impl_template.substitute(
             namespace=namespace,
@@ -521,6 +519,31 @@ class CodeGenerator(object):
                     schema_item_fill=self._gen_schema_items_fill(
                         struct.members.values(), struct.since, struct.until, struct.deprecated, struct.removed)),
                 1))
+
+    
+    def _enum_has_history_present(self, enum):
+        '''
+        Check if any elements in an enum has history signature
+        '''
+        for element in enum.param_type.elements.values():
+            if ( element.history is not None or
+                element.since is not None or
+                element.until is not None or
+                element.removed is not None ):
+                return True
+        return False
+
+    def _element_has_history_present(self, element):
+        '''
+        Check if a specific element has a history signature
+        '''
+        if ( element.history is not None or
+            element.since is not None or
+            element.until is not None or
+            element.removed is not None ):
+            return True        
+        return False
+
 
     def _gen_schema_loc_decls(self, members, processed_enums):
         """Generate local declarations of variables for schema.
@@ -541,6 +564,7 @@ class CodeGenerator(object):
         for member in members:
             if type(member.param_type) is Model.Enum and \
                member.param_type.name not in processed_enums:
+                has_history = self._enum_has_history_present(member)
                 local_var = self._gen_schema_loc_emum_var_name(
                     member.param_type)
                 result = u"\n".join(
@@ -556,6 +580,46 @@ class CodeGenerator(object):
                                     enum=member.param_type.name,
                                     value=x.primary_name)
                              for x in member.param_type.elements.values()])])
+
+                if has_history == True:
+                    history_result = u"\n"
+                    history_result += self._impl_code_loc_decl_enum_history_set_template.substitute(
+                        type=member.param_type.name)
+                    history_result += u"\n"
+                    history_result += u"\n".join(
+                        [self._impl_code_loc_decl_enum_history_set_value_init_template.substitute(
+                            enum=member.param_type.name,
+                            value=x.primary_name) 
+                            for x in member.param_type.elements.values() if self._element_has_history_present(x)])
+                    history_result += u"\n"
+                    history_map_result = []
+
+                    for x in member.param_type.elements.values(): 
+                        if self._element_has_history_present(x):
+                            history_map_result.append(
+                                self._impl_code_loc_decl_enum_history_set_insert_template.
+                                    substitute(
+                                        enum=member.param_type.name,
+                                        value=x.primary_name,
+                                        since=x.since if x.since is not None else "",
+                                        until=x.until if x.until is not None else "",
+                                        removed=x.removed if x.removed is not None else u"false"))
+                            if(x.history is not None) :
+                                history_list = x.history
+                                for item in history_list:                            
+                                    history_map_result.append(
+                                        self._impl_code_loc_decl_enum_history_set_insert_template.
+                                            substitute(
+                                                enum=member.param_type.name,
+                                                value=x.primary_name,
+                                                since=item.since if item.since is not None else "",
+                                                until=item.until if item.until is not None else "",
+                                                removed=item.removed if item.removed is not None else u"false"))
+
+                    history_result += u"\n".join(history_map_result)
+                    result += "\n"
+                    result += history_result
+
                 processed_enums.append(member.param_type.name)
                 result = u"".join([result, u"\n\n"]) if result else u""
             elif type(member.param_type) is Model.EnumSubset:
@@ -833,8 +897,6 @@ class CodeGenerator(object):
         String with schema item fill code.
 
         """
-        #print(member.since)
-        #print member.name
         if (since is not None or 
             until is not None or 
             deprecated is not None or
@@ -1595,8 +1657,18 @@ class CodeGenerator(object):
     _impl_code_loc_decl_enum_template = string.Template(
         u'''std::set<${type}::eType> ${var_name};''')
 
+    _impl_code_loc_decl_enum_history_set_template = string.Template(
+        u'''std::map<${type}::eType, std::vector<ElementSignature>> ${type}_element_signatures;''')
+
     _impl_code_loc_decl_enum_insert_template = string.Template(
         u'''${var_name}.insert(${enum}::${value});''')
+
+    _impl_code_loc_decl_enum_history_set_value_init_template = string.Template(
+        u'''${enum}_element_signatures[${enum}::${value}] = std::vector<ElementSignature>();'''
+        )
+
+    _impl_code_loc_decl_enum_history_set_insert_template = string.Template(
+        u'''${enum}_element_signatures[${enum}::${value}].push_back(ElementSignature("${since}", "${until}", ${removed}));''')
 
     _impl_code_item_decl_temlate = string.Template(
         u'''${comment}'''

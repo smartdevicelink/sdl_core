@@ -304,7 +304,6 @@ class Struct(InterfaceItemBase):
             platform=platform, scope=scope, since=since, until=until,
             deprecated=deprecated, removed=removed, history=history)
 
-        print since
         self.members = \
             members if members is not None else collections.OrderedDict()
 

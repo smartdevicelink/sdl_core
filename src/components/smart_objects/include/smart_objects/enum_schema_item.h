@@ -42,9 +42,39 @@
 #include "smart_objects/default_shema_item.h"
 
 #include "utils/semantic_version.h"
+#include <boost/optional.hpp>
 
 namespace NsSmartDeviceLink {
 namespace NsSmartObjects {
+
+//Element Signature for enums. Fields represent "since", "until", and "removed"
+//typedef boost::optional<std::string> OptionalString;
+//typedef boost::optional<bool> OptionalBool;
+//typedef std::tuple<OptionalString, OptionalString, OptionalBool> ElementSignature;
+
+struct ElementSignature {
+  boost::optional<utils::SemanticVersion> mSince;
+  boost::optional<utils::SemanticVersion> mUntil;
+  bool mRemoved;
+
+  ElementSignature(std::string since="", std::string until="", bool removed=false) {
+    utils::SemanticVersion since_struct(since);
+    utils::SemanticVersion until_struct(until);
+
+    if(since_struct.isValid()) {
+      mSince = since_struct;
+    }
+
+    if(until_struct.isValid()) {
+      mUntil = until_struct;
+    }
+
+    mRemoved = removed;
+  }
+};
+
+//typedef std::map<OptionalString, OptionalString, OptionalBool> ElementSignature;
+
 
 template <typename EnumType>
 class EnumConversionHelper;
@@ -63,6 +93,18 @@ class TEnumSchemaItem : public CDefaultSchemaItem<EnumType> {
    **/
   static std::shared_ptr<TEnumSchemaItem> create(
       const std::set<EnumType>& AllowedElements,
+      const TSchemaItemParameter<EnumType>& DefaultValue =
+          TSchemaItemParameter<EnumType>());
+
+  /**
+   * @brief Create a new schema item.
+   * @param AllowedElements Set of allowed enumeration elements.
+   * @param DefaultValue Default value.
+   * @return Shared pointer to a new schema item.
+   **/
+  static std::shared_ptr<TEnumSchemaItem> createWithSignatures(
+      const std::set<EnumType>& AllowedElements,
+      const std::set<ElementSignature>& ElementSignatures,
       const TSchemaItemParameter<EnumType>& DefaultValue =
           TSchemaItemParameter<EnumType>());
   /**
@@ -115,12 +157,17 @@ class TEnumSchemaItem : public CDefaultSchemaItem<EnumType> {
    **/
   TEnumSchemaItem(const std::set<EnumType>& AllowedElements,
                   const TSchemaItemParameter<EnumType>& DefaultValue);
+
+  TEnumSchemaItem(const std::set<EnumType>& AllowedElements,
+                  const TSchemaItemParameter<EnumType>& DefaultValue,
+                  const std::set<ElementSignature>& ElementSignatures);
   SmartType getSmartType() const OVERRIDE;
   EnumType getDefaultValue() const OVERRIDE;
   /**
    * @brief Set of allowed enumeration elements.
    **/
   const std::set<EnumType> mAllowedElements;
+  const std::set<ElementSignature> mElementSignatures;
   /**
    * @brief Default value.
    **/
@@ -227,6 +274,15 @@ std::shared_ptr<TEnumSchemaItem<EnumType> > TEnumSchemaItem<EnumType>::create(
 }
 
 template <typename EnumType>
+std::shared_ptr<TEnumSchemaItem<EnumType> > TEnumSchemaItem<EnumType>::createWithSignatures(
+    const std::set<EnumType>& AllowedElements,
+    const std::set<ElementSignature>& ElementSignatures,
+    const TSchemaItemParameter<EnumType>& DefaultValue ) {
+  return std::shared_ptr<TEnumSchemaItem<EnumType> >(
+      new TEnumSchemaItem<EnumType>(AllowedElements, DefaultValue, ElementSignatures));
+}
+
+template <typename EnumType>
 Errors::eType TEnumSchemaItem<EnumType>::validate(const SmartObject& Object) {
   rpc::ValidationReport report("RPC");
   return validate(Object, &report);
@@ -302,6 +358,15 @@ TEnumSchemaItem<EnumType>::TEnumSchemaItem(
     const TSchemaItemParameter<EnumType>& DefaultValue)
     : CDefaultSchemaItem<EnumType>(DefaultValue)
     , mAllowedElements(AllowedElements) {}
+
+template <typename EnumType>
+TEnumSchemaItem<EnumType>::TEnumSchemaItem(
+    const std::set<EnumType>& AllowedElements,
+    const TSchemaItemParameter<EnumType>& DefaultValue,
+    const std::set<ElementSignature>& ElementSignatures)
+    : CDefaultSchemaItem<EnumType>(DefaultValue)
+    , mAllowedElements(AllowedElements)
+    , mElementSignatures(mElementSignatures) {}
 
 }  // namespace NsSmartObjects
 }  // namespace NsSmartDeviceLink

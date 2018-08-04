@@ -53,7 +53,10 @@ struct SemanticVersion {
         minor_version = atoi(str_array[1].c_str());
         patch_version = atoi(str_array[2].c_str());
     } else {
-      exit(1);
+      //Invalid case
+      major_version = 0;
+      minor_version = 0;
+      patch_version = 0;
     }
   }
 
