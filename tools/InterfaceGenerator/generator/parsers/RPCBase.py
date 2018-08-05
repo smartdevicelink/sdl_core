@@ -443,7 +443,7 @@ class Parser(object):
                     raise ParseError("Elements can only have one history tag: " + element.tag)
                 history = self._parse_history(subelement, prefix, element)
             elif subelement.tag == "warning":
-                warnings.append(self._parse_warning(subelement))
+                warnings.append(self._parse_simple_element(subelement))
             else:
                 subelements.append(subelement)
 
@@ -913,6 +913,4 @@ class Parser(object):
                  parent.attrib["name"] + "'")
 
         return items
-    def _parse_warning(self, warning):
-        print "Parse warning"
 
