@@ -100,7 +100,7 @@ struct SemanticVersion {
     }
   }
 
-  const std::string toString() {
+  const std::string toString() const{
     std::string result = "";
     result += std::to_string(major_version);
     result += ".";
