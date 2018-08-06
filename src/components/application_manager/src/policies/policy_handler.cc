@@ -327,7 +327,6 @@ PolicyHandler::PolicyHandler(const PolicySettings& settings,
     : AsyncRunner("PolicyHandler async runner thread")
     , dl_handle_(0)
     , last_activated_app_id_(0)
-    , app_to_device_link_lock_(true)
     , statistic_manager_impl_(std::make_shared<StatisticManagerImpl>(this))
     , settings_(settings)
     , application_manager_(application_manager) {}

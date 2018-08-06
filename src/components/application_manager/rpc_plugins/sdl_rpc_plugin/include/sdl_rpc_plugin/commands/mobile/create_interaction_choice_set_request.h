@@ -128,6 +128,7 @@ class CreateInteractionChoiceSetRequest
   int32_t choice_set_id_;
   size_t expected_chs_count_;
   size_t received_chs_count_;
+  bool should_send_warnings;
 
   /**
    * @brief Flag for stop sending VR commands to HMI, in case one of responses
@@ -142,7 +143,7 @@ class CreateInteractionChoiceSetRequest
   volatile bool is_timed_out_;
   sync_primitives::Lock is_timed_out_lock_;
 
-  sync_primitives::Lock vr_commands_lock_;
+  sync_primitives::RecursiveLock vr_commands_lock_;
   /*
    * @brief Sends VR AddCommand request to HMI
    *

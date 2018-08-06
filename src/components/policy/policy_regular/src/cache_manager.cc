@@ -103,8 +103,7 @@ CacheManager::CacheManager()
     : CacheManagerInterface()
     , pt_(new policy_table::Table)
     , backup_(new SQLPTRepresentation())
-    , update_required(false)
-    , cache_lock_(true) {
+    , update_required(false) {
   LOG4CXX_AUTO_TRACE(logger_);
   backuper_ = new BackgroundBackuper(this);
   backup_thread_ = threads::CreateThread("Backup thread", backuper_);

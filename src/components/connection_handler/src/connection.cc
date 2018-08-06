@@ -81,7 +81,6 @@ Connection::Connection(ConnectionHandle connection_handle,
     : connection_handler_(connection_handler)
     , connection_handle_(connection_handle)
     , connection_device_handle_(connection_device_handle)
-    , session_map_lock_(true)
     , primary_connection_handle_(0)
     , heartbeat_timeout_(heartbeat_timeout) {
   LOG4CXX_AUTO_TRACE(logger_);
