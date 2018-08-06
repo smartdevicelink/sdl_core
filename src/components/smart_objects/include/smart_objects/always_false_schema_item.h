@@ -70,7 +70,8 @@ class CAlwaysFalseSchemaItem : public ISchemaItem {
    * @return NsSmartObjects::Errors::eType
    **/
   Errors::eType validate(const SmartObject& Object,
-                         rpc::ValidationReport* report__, const utils::SemanticVersion& MessageVersion) OVERRIDE;
+                         rpc::ValidationReport* report__,
+                         const utils::SemanticVersion& MessageVersion) OVERRIDE;
 
  private:
   CAlwaysFalseSchemaItem();

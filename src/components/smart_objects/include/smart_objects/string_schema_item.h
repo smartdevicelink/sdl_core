@@ -82,7 +82,9 @@ class CStringSchemaItem : public CDefaultSchemaItem<std::string> {
    * @return NsSmartObjects::Errors::eType
    **/
   Errors::eType validate(const SmartObject& Object,
-                         rpc::ValidationReport* report__, const utils::SemanticVersion& MessageVersion) OVERRIDE;
+                         rpc::ValidationReport* report__,
+                         const utils::SemanticVersion& MessageVersion) OVERRIDE;
+
  private:
   /**
    * @brief Constructor.

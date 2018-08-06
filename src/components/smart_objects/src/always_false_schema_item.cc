@@ -53,7 +53,9 @@ Errors::eType CAlwaysFalseSchemaItem::validate(
 }
 
 Errors::eType CAlwaysFalseSchemaItem::validate(
-    const SmartObject& Object, rpc::ValidationReport* report__, const utils::SemanticVersion& MessageVersion) {
+    const SmartObject& Object,
+    rpc::ValidationReport* report__,
+    const utils::SemanticVersion& MessageVersion) {
   report__->set_validation_info("Generic error");
   return Errors::ERROR;
 }

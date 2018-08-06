@@ -127,7 +127,9 @@ class InitialApplicationData {
   virtual void set_language(const mobile_api::Language::eType& language) = 0;
   virtual void set_ui_language(
       const mobile_api::Language::eType& ui_language) = 0;
-  virtual void set_msg_version(const uint16_t major, const uint16_t minor, const uint16_t patch) = 0;
+  virtual void set_msg_version(const uint16_t major,
+                               const uint16_t minor,
+                               const uint16_t patch) = 0;
 };
 
 /*

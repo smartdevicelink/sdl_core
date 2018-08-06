@@ -84,7 +84,8 @@ class ISchemaItem {
    * @return NsSmartObjects::Errors::eType
    **/
   virtual Errors::eType validate(const SmartObject& Object,
-                                 rpc::ValidationReport* report__, const utils::SemanticVersion& MessageVersion);
+                                 rpc::ValidationReport* report__,
+                                 const utils::SemanticVersion& MessageVersion);
 
   /**
    * @brief Set default value to an object.
@@ -113,7 +114,8 @@ class ISchemaItem {
    **/
   virtual void applySchema(
       NsSmartDeviceLink::NsSmartObjects::SmartObject& Object,
-      const bool RemoveFakeParameters, const utils::SemanticVersion& MessageVersion = utils::SemanticVersion());
+      const bool RemoveFakeParameters,
+      const utils::SemanticVersion& MessageVersion = utils::SemanticVersion());
 
   /**
    * @brief Unapply schema.

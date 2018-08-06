@@ -89,7 +89,8 @@ class TNumberSchemaItem : public CDefaultSchemaItem<NumberType> {
    * @return NsSmartObjects::Errors::eType
    **/
   Errors::eType validate(const SmartObject& Object,
-                         rpc::ValidationReport* report__, const utils::SemanticVersion& MessageVersion) OVERRIDE;
+                         rpc::ValidationReport* report__,
+                         const utils::SemanticVersion& MessageVersion) OVERRIDE;
 
  private:
   /**
@@ -205,7 +206,9 @@ Errors::eType TNumberSchemaItem<NumberType>::validate(
 
 template <typename NumberType>
 Errors::eType TNumberSchemaItem<NumberType>::validate(
-    const SmartObject& Object, rpc::ValidationReport* report__, const utils::SemanticVersion& MessageVersion) {
+    const SmartObject& Object,
+    rpc::ValidationReport* report__,
+    const utils::SemanticVersion& MessageVersion) {
   return validate(Object, report__);
 }
 

@@ -218,23 +218,30 @@ bool RPCHandlerImpl::ConvertMessageToSO(
 
       rpc::ValidationReport report("RPC");
 
-      //Attach RPC version to SmartObject if it does not exist yet. 
+      // Attach RPC version to SmartObject if it does not exist yet.
       auto app_ptr = app_manager_.application(message.connection_key());
       utils::SemanticVersion msg_version(2, 0, 0);
-      if (app_ptr && (output[NsSmartDeviceLink::NsJSONHandler::strings::S_PARAMS].keyExists(NsSmartDeviceLink::NsJSONHandler::strings::S_RPC_MSG_VERSION) == false)) {
-        printf("Getting app msg version\n");
+      if (app_ptr &&
+          (output[NsSmartDeviceLink::NsJSONHandler::strings::S_PARAMS]
+               .keyExists(NsSmartDeviceLink::NsJSONHandler::strings::
+                              S_RPC_MSG_VERSION) == false)) {
         msg_version = app_ptr->msg_version();
-        output[NsSmartDeviceLink::NsJSONHandler::strings::S_PARAMS][NsSmartDeviceLink::NsJSONHandler::strings::S_RPC_MSG_VERSION] = msg_version.toString();
-      } else if (mobile_apis::FunctionID::RegisterAppInterfaceID == static_cast<mobile_apis::FunctionID::eType>(output[strings::params][strings::function_id].asInt())) {
-        //Assume default version 1.0.0 until properly set in RAI
-        printf("Setting default msg version\n");
-        output[NsSmartDeviceLink::NsJSONHandler::strings::S_PARAMS][NsSmartDeviceLink::NsJSONHandler::strings::S_RPC_MSG_VERSION] = msg_version.toString();
-        printf("%s\n", output[NsSmartDeviceLink::NsJSONHandler::strings::S_PARAMS][NsSmartDeviceLink::NsJSONHandler::strings::S_RPC_MSG_VERSION].asString().c_str());
+        output[NsSmartDeviceLink::NsJSONHandler::strings::S_PARAMS]
+              [NsSmartDeviceLink::NsJSONHandler::strings::S_RPC_MSG_VERSION] =
+                  msg_version.toString();
+      } else if (mobile_apis::FunctionID::RegisterAppInterfaceID ==
+                 static_cast<mobile_apis::FunctionID::eType>(
+                     output[strings::params][strings::function_id].asInt())) {
+        // Assume default version 1.0.0 until properly set in RAI
+        output[NsSmartDeviceLink::NsJSONHandler::strings::S_PARAMS]
+              [NsSmartDeviceLink::NsJSONHandler::strings::S_RPC_MSG_VERSION] =
+                  msg_version.toString();
       }
 
       if (!conversion_result ||
           !mobile_so_factory().attachSchema(output, true) ||
-          ((output.validate(&report, msg_version) != smart_objects::Errors::OK))) {
+          ((output.validate(&report, msg_version) !=
+            smart_objects::Errors::OK))) {
         LOG4CXX_WARN(logger_,
                      "Failed to parse string to smart object :"
                          << message.json_message());

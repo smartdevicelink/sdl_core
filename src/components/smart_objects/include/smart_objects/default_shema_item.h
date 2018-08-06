@@ -72,7 +72,8 @@ class CDefaultSchemaItem : public ISchemaItem {
    * @return NsSmartObjects::Errors::eType
    **/
   Errors::eType validate(const SmartObject& Object,
-                         rpc::ValidationReport* report__, const utils::SemanticVersion& MessageVersion) OVERRIDE;
+                         rpc::ValidationReport* report__,
+                         const utils::SemanticVersion& MessageVersion) OVERRIDE;
 
   /**
    * @brief Set default value to an object.
@@ -138,7 +139,9 @@ Errors::eType CDefaultSchemaItem<Type>::validate(
 
 template <typename Type>
 Errors::eType CDefaultSchemaItem<Type>::validate(
-    const SmartObject& Object, rpc::ValidationReport* report__, const utils::SemanticVersion& MessageVersion) {
+    const SmartObject& Object,
+    rpc::ValidationReport* report__,
+    const utils::SemanticVersion& MessageVersion) {
   return validate(Object, report__);
 }
 

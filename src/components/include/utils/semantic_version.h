@@ -38,7 +38,6 @@
 namespace utils {
 
 struct SemanticVersion {
-
   SemanticVersion(uint16_t major = 0, uint16_t minor = 0, uint16_t patch = 0) {
     major_version = major;
     minor_version = minor;
@@ -48,12 +47,12 @@ struct SemanticVersion {
   SemanticVersion(const std::string& str_version) {
     std::vector<std::string> str_array;
     boost::split(str_array, str_version, boost::is_any_of("."));
-    if(str_array.size() == 3) {
-        major_version = atoi(str_array[0].c_str());
-        minor_version = atoi(str_array[1].c_str());
-        patch_version = atoi(str_array[2].c_str());
+    if (str_array.size() == 3) {
+      major_version = atoi(str_array[0].c_str());
+      minor_version = atoi(str_array[1].c_str());
+      patch_version = atoi(str_array[2].c_str());
     } else {
-      //Invalid case
+      // Invalid case
       major_version = 0;
       minor_version = 0;
       patch_version = 0;
@@ -61,7 +60,9 @@ struct SemanticVersion {
   }
 
   bool operator==(const SemanticVersion& version) const {
-    if (major_version == version.major_version && minor_version == version.minor_version && patch_version == version.patch_version) {
+    if (major_version == version.major_version &&
+        minor_version == version.minor_version &&
+        patch_version == version.patch_version) {
       return true;
     } else {
       return false;
@@ -69,9 +70,12 @@ struct SemanticVersion {
   }
 
   bool operator<(const SemanticVersion& version) const {
-    return (major_version < version.major_version) || 
-      ((major_version == version.major_version) && (minor_version < version.minor_version)) ||
-      ((major_version == version.major_version) && (minor_version == version.minor_version) && (patch_version < version.patch_version));
+    return (major_version < version.major_version) ||
+           ((major_version == version.major_version) &&
+            (minor_version < version.minor_version)) ||
+           ((major_version == version.major_version) &&
+            (minor_version == version.minor_version) &&
+            (patch_version < version.patch_version));
   }
 
   bool operator<=(const SemanticVersion& version) const {
@@ -85,9 +89,12 @@ struct SemanticVersion {
   }
 
   bool operator>(const SemanticVersion& version) const {
-    return (major_version > version.major_version) || 
-      ((major_version == version.major_version) && (minor_version > version.minor_version)) ||
-      ((major_version == version.major_version) && (minor_version == version.minor_version) && (patch_version > version.patch_version));
+    return (major_version > version.major_version) ||
+           ((major_version == version.major_version) &&
+            (minor_version > version.minor_version)) ||
+           ((major_version == version.major_version) &&
+            (minor_version == version.minor_version) &&
+            (patch_version > version.patch_version));
   }
 
   bool operator>=(const SemanticVersion& version) const {
@@ -100,27 +107,24 @@ struct SemanticVersion {
     }
   }
 
-  const std::string toString() const{
+  const std::string toString() const {
     std::string result = "";
     result += std::to_string(major_version);
     result += ".";
     result += std::to_string(minor_version);
     result += ".";
     result += std::to_string(patch_version);
-    printf("toString Result!!!: %s\n", result.c_str());
     return result;
   }
 
-  bool isValid() const{
+  bool isValid() const {
     return major_version > 0 || minor_version > 0 || patch_version > 0;
   }
 
   uint16_t major_version = 0;
   uint16_t minor_version = 0;
   uint16_t patch_version = 0;
-
 };
-
 }
 
 #endif  // SRC_COMPONENTS_INCLUDE_UTILS_CALLABLE_H

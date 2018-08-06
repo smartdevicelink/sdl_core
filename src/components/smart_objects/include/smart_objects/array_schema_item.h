@@ -93,7 +93,8 @@ class CArraySchemaItem : public ISchemaItem {
    * @return NsSmartObjects::Errors::eType
    **/
   Errors::eType validate(const SmartObject& Object,
-                         rpc::ValidationReport* report__, const utils::SemanticVersion& MessageVersion) OVERRIDE;
+                         rpc::ValidationReport* report__,
+                         const utils::SemanticVersion& MessageVersion) OVERRIDE;
 
   /**
    * @brief Apply schema.
@@ -104,7 +105,9 @@ class CArraySchemaItem : public ISchemaItem {
    * from smart object otherwise contains false.
    **/
   void applySchema(SmartObject& Object,
-                   const bool RemoveFakeParameters, const utils::SemanticVersion& MessageVersion = utils::SemanticVersion()) OVERRIDE;
+                   const bool RemoveFakeParameters,
+                   const utils::SemanticVersion& MessageVersion =
+                       utils::SemanticVersion()) OVERRIDE;
 
   /**
    * @brief Unapply schema.

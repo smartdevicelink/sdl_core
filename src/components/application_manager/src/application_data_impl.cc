@@ -103,11 +103,9 @@ const mobile_api::Language::eType& InitialApplicationDataImpl::ui_language()
   return ui_language_;
 }
 
-const utils::SemanticVersion& InitialApplicationDataImpl::msg_version()
-    const {
+const utils::SemanticVersion& InitialApplicationDataImpl::msg_version() const {
   return msg_version_;
 }
-
 
 void InitialApplicationDataImpl::set_app_types(
     const smart_objects::SmartObject& app_types) {
@@ -159,8 +157,9 @@ void InitialApplicationDataImpl::set_ui_language(
   ui_language_ = ui_language;
 }
 
-void InitialApplicationDataImpl::set_msg_version(
-    const uint16_t major, const uint16_t minor, const uint16_t patch) {
+void InitialApplicationDataImpl::set_msg_version(const uint16_t major,
+                                                 const uint16_t minor,
+                                                 const uint16_t patch) {
   msg_version_.major_version = major;
   msg_version_.minor_version = minor;
   msg_version_.patch_version = patch;

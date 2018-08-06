@@ -299,10 +299,14 @@ bool CSmartFactory<FunctionIdEnum, MessageTypeEnum, StructIdEnum>::attachSchema(
   }
 
   object.setSchema(schemaIterator->second);
-  
+
   utils::SemanticVersion msg_version;
-  if (object[NsSmartDeviceLink::NsJSONHandler::strings::S_PARAMS].keyExists(NsSmartDeviceLink::NsJSONHandler::strings::S_RPC_MSG_VERSION)) {
-    msg_version = object[NsSmartDeviceLink::NsJSONHandler::strings::S_PARAMS][NsSmartDeviceLink::NsJSONHandler::strings::S_RPC_MSG_VERSION].asString();
+  if (object[NsSmartDeviceLink::NsJSONHandler::strings::S_PARAMS].keyExists(
+          NsSmartDeviceLink::NsJSONHandler::strings::S_RPC_MSG_VERSION)) {
+    msg_version =
+        object[NsSmartDeviceLink::NsJSONHandler::strings::S_PARAMS]
+              [NsSmartDeviceLink::NsJSONHandler::strings::S_RPC_MSG_VERSION]
+                  .asString();
   }
 
   schemaIterator->second.applySchema(object, RemoveFakeParameters, msg_version);

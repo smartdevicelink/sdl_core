@@ -49,7 +49,9 @@ Errors::eType CAlwaysTrueSchemaItem::validate(const SmartObject& object,
 }
 
 Errors::eType CAlwaysTrueSchemaItem::validate(
-    const SmartObject& Object, rpc::ValidationReport* report__, const utils::SemanticVersion& MessageVersion) {
+    const SmartObject& Object,
+    rpc::ValidationReport* report__,
+    const utils::SemanticVersion& MessageVersion) {
   return Errors::OK;
 }
 
