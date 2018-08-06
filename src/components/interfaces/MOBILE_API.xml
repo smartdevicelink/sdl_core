@@ -6117,7 +6117,7 @@
         <param name="systemContext" type="SystemContext" mandatory="true">
             <description>See SystemContext</description>
         </param>
-        <param name="videoStreamingState" type="VideoStreamingState" mandatory="true">
+        <param name="videoStreamingState" type="VideoStreamingState" mandatory="false" defvalue="STREAMABLE">
             <description>See VideoStreamingState. If it is NOT_STREAMABLE, the app must stop streaming video to SDL.</description>
         </param>
     </function>
