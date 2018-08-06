@@ -235,13 +235,14 @@ void RegisterAppInterfaceRequest::Run() {
     SendResponse(false, mobile_apis::Result::APPLICATION_REGISTERED_ALREADY);
     return;
   }
+  // cache the original app ID (for legacy behavior)
   const std::string policy_app_id =
       application_manager_.GetCorrectMobileIDFromMessage(message_);
 
   const smart_objects::SmartObject& msg_params =
       (*message_)[strings::msg_params];
 
-  // transform the given ids to lower case for later use I guess?
+  // transform app IDs to lowercase for usage in policy checks later
   const std::string app_id_short = msg_params[strings::app_id].asString();
   std::string new_app_id_short = app_id_short;
   std::transform(app_id_short.begin(),
@@ -315,6 +316,7 @@ void RegisterAppInterfaceRequest::Run() {
       (major == minimum_major_version && minor < minimum_minor_version) ||
       (major == minimum_major_version && minor == minimum_minor_version &&
        patch < minimum_patch_version)) {
+    LOG4CXX_ERROR(logger_, "Version Negotiation failed, mobile version is too low");
     SendResponse(false, mobile_apis::Result::REJECTED);
   }
 

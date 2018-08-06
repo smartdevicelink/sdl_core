@@ -980,24 +980,19 @@ const ApplicationManagerSettings& ApplicationManagerImpl::get_settings() const {
   return settings_;
 }
 
-// Extract the app ID to use internally based on the UseFullAppID .ini setting
+// Extract the app ID to use for policy based on the UseFullAppID .ini setting
 std::string ApplicationManagerImpl::GetCorrectMobileIDFromMessage(
     const commands::MessageSharedPtr& message) const {
-  // If we're expecting the full app id
+  // If core is expecting a fullAppID
   if (get_settings().use_full_app_id()) {
-    // we got the full app id, use it
+    // fullAppID is present and core is configured to use it
     if ((*message)[strings::msg_params].keyExists(strings::full_app_id)) {
-      // temporary debug printing
-      std::string app_id_short =
-          (*message)[strings::msg_params][strings::app_id].asString();
-      std::string app_id_full =
-          (*message)[strings::msg_params][strings::full_app_id].asString();
       return (*message)[strings::msg_params][strings::full_app_id].asString();
     } else {
       LOG4CXX_DEBUG(logger_, "UseFullAppID is on but only short ID given!");
     }
   }
-  // if we're not using full or no full given, use regular appID
+  // If core isn't using full or no full given, use regular appID
   return (*message)[strings::msg_params][strings::app_id].asString();
 }
 
