@@ -6,7 +6,7 @@ Contains base parser for SDLRPC v1/v2 and JSON RPC XML format.
 
 import collections
 import xml.etree.ElementTree
-
+import re
 from generator import Model
 
 
@@ -203,16 +203,35 @@ class Parser(object):
 
         internal_scope = None
         scope = None
+        since = None
+        until = None
+        deprecated = None
+        removed = None
+        result = None
         for attribute in attributes:
             if attribute == "internal_scope":
                 internal_scope = attributes[attribute]
             elif attribute == "scope":
                 scope = attributes[attribute]
+            elif attribute == "since":
+                result = self._parse_version(attributes[attribute])
+                since = result
+            elif attribute == "until":
+                result = self._parse_version(attributes[attribute])
+                until = result
+            elif attribute == "deprecated":
+                deprecated = attributes[attribute]
+            elif attribute == "removed":
+                removed = attributes[attribute]
             else:
                 raise ParseError("Unexpected attribute '" + attribute +
                                  "' in enum '" + params["name"] + "'")
         params["internal_scope"] = internal_scope
         params["scope"] = scope
+        params["since"] = since
+        params["until"] = until
+        params["deprecated"] = deprecated
+        params["removed"] = removed
 
         elements = collections.OrderedDict()
         for subelement in subelements:
@@ -236,13 +255,32 @@ class Parser(object):
         params, subelements, attrib = self._parse_base_item(element, prefix)
 
         scope = None
+        since = None
+        until = None
+        deprecated = None
+        removed = None
+        result = None
         for attribute in attrib:
             if attribute == "scope":
                 scope = attrib[attribute]
+            elif attribute == "since":
+                result = self._parse_version(attrib[attribute])
+                since = result
+            elif attribute == "until":
+                result = self._parse_version(attrib[attribute])
+                until = result
+            elif attribute == "deprecated":
+                deprecated = attributes[attribute]
+            elif attribute == "removed":
+                removed = attrib[attribute]
             else:
                 raise ParseError("Unexpected attribute '" + attribute +
                                  "' in struct '" + params["name"] + "'")
         params["scope"] = scope
+        params["since"] = since
+        params["until"] = until
+        params["deprecated"] = deprecated
+        params["removed"] = removed
 
         members = collections.OrderedDict()
         for subelement in subelements:
@@ -271,13 +309,32 @@ class Parser(object):
             attributes)
 
         scope = None
+        since = None
+        until = None
+        deprecated = None
+        removed = None
+        result = None
         for attribute in attributes:
             if attribute == "scope":
                 scope = attributes[attribute]
+            elif attribute == "since":
+                result = self._parse_version(attributes[attribute])
+                since = result
+            elif attribute == "until":
+                result = self._parse_version(attributes[attribute])
+                until = result
+            elif attribute == "deprecated":
+                deprecated = attributes[attribute]
+            elif attribute == "removed":
+                removed = attributes[attribute]
 
         params["function_id"] = function_id
         params["message_type"] = message_type
         params["scope"] = scope
+        params["since"] = since
+        params["until"] = until
+        params["deprecated"] = deprecated
+        params["removed"] = removed
 
         function_params = collections.OrderedDict()
         for subelement in subelements:
@@ -359,6 +416,8 @@ class Parser(object):
         issues = []
         todos = []
         subelements = []
+        history = None
+        warnings = []
 
         if "name" not in element.attrib:
             raise ParseError("Name is not specified for " + element.tag)
@@ -379,6 +438,12 @@ class Parser(object):
                 todos.append(self._parse_simple_element(subelement))
             elif subelement.tag == "issue":
                 issues.append(self._parse_issue(subelement))
+            elif subelement.tag == "history":
+                if history is not None:
+                    raise ParseError("Elements can only have one history tag: " + element.tag)
+                history = self._parse_history(subelement, prefix, element)
+            elif subelement.tag == "warning":
+                warnings.append(self._parse_simple_element(subelement))
             else:
                 subelements.append(subelement)
 
@@ -386,6 +451,7 @@ class Parser(object):
         params["design_description"] = design_description
         params["issues"] = issues
         params["todos"] = todos
+        params["history"] = history
 
         return params, subelements, attrib
 
@@ -443,6 +509,11 @@ class Parser(object):
 
         internal_name = None
         value = None
+        since = None
+        until = None
+        deprecated = None
+        removed = None
+        result = None
         for attribute in attributes:
             if attribute == "internal_name":
                 internal_name = attributes[attribute]
@@ -452,9 +523,22 @@ class Parser(object):
                 except:
                     raise ParseError("Invalid value for enum element: '" +
                                      attributes[attribute] + "'")
+            elif attribute == "since":
+                result = self._parse_version(attributes[attribute])
+                since = result
+            elif attribute == "until":
+                result = self._parse_version(attributes[attribute])
+                until = result
+            elif attribute == "deprecated":
+                deprecated = attributes[attribute]
+            elif attribute == "removed":
+                removed = attributes[attribute]
         params["internal_name"] = internal_name
         params["value"] = value
-
+        params["since"] = since
+        params["until"] = until
+        params["deprecated"] = deprecated
+        params["removed"] = removed
         # Magic usage is correct
         # pylint: disable=W0142
         return Model.EnumElement(**params)
@@ -547,6 +631,25 @@ class Parser(object):
 
         """
         params, subelements, attrib = self._parse_base_item(element, "")
+
+        since_version = self._extract_attrib(attrib, "since")
+        if since_version is not None:
+            result = self._parse_version(since_version)
+            params["since"] = result
+
+        until_version = self._extract_attrib(attrib, "until")
+        if until_version is not None:
+            result = self._parse_version(until_version)
+            params["until"] = result
+
+        deprecated = self._extract_attrib(attrib, "deprecated")
+        if deprecated is not None:
+            params["deprecated"] = deprecated
+
+        removed = self._extract_attrib(attrib, "removed")
+        if removed is not None:
+            params["removed"] = removed
+
 
         is_mandatory = self._extract_attrib(attrib, "mandatory")
         if is_mandatory is None:
@@ -765,3 +868,49 @@ class Parser(object):
             print ("Ignoring attribute '" +
                    name + "'")
         return True
+
+    def _parse_version(self, version):
+        """
+            Validates if a version supplied is in the correct
+            format of Major.Minor.Patch. If Major.Minor format
+            is supplied, a patch version of 0 will be added to
+            the end.
+        """
+        p = re.compile('\d+\\.\d+\\.\d+|\d+\\.\d+')
+        result = p.match(version)
+        if result == None or (result.end() != len(version)):
+            raise RPCBase.ParseError("Incorrect format of version please check MOBILE_API.xml. "
+                                     "Need format of major_version.minor_version or major_version.minor_version.patch_version")
+
+        version_array = version.split(".")
+        if (len(version_array) == 2):
+            version_array.append("0")
+        dot_str = "."
+        return dot_str.join(version_array)
+
+    def _parse_history(self, history, prefix, parent):
+        print "Pare History of Size: %d" % len(history)
+        if history.tag != "history":
+            raise ParseError("Invalid history tag: " + interface.tag)
+        
+        items = []
+
+        for subelement in history:
+            if subelement.tag == "enum" and parent.tag == "enum":
+                items.append(self._parse_enum(subelement, prefix))
+            elif subelement.tag == "element" and parent.tag == "element":
+                items.append(self._parse_enum_element(subelement))
+            elif subelement.tag == "description" and parent.tag == "description":
+                items.append(self._parse_simple_element(subelement))
+            elif subelement.tag == "struct" and parent.tag == "struct":
+                items.append(self._parse_struct(subelement, prefix))
+            elif subelement.tag == "param" and parent.tag == "param":
+                items.append(self._parse_function_param(subelement, prefix))
+            elif subelement.tag == "function" and parent.tag == "function":
+                items.append(self.__parse_function(subelement, prefix))
+            else: 
+                raise ParseError("A history tag must be nested within the element it notes the history for. Fix item: '" +
+                 parent.attrib["name"] + "'")
+
+        return items
+

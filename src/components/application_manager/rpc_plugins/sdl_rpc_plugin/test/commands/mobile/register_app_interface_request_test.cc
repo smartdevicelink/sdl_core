@@ -55,6 +55,7 @@
 #include "utils/custom_string.h"
 #include "utils/lock.h"
 #include "utils/macro.h"
+#include "utils/semantic_version.h"
 
 namespace test {
 namespace components {
@@ -83,6 +84,7 @@ const std::string kAppId = "test_app_id";
 const std::string kFullAppId = "test_app_id_long";
 const std::string kDummyString = "test_string";
 const std::vector<uint32_t> kDummyDiagModes;
+const utils::SemanticVersion mock_semantic_version(1, 0, 0);
 }  // namespace
 
 class RegisterAppInterfaceRequestTest
@@ -117,6 +119,12 @@ class RegisterAppInterfaceRequestTest
         kHmiLanguage;
     (*msg_)[am::strings::msg_params]
            [am::strings::hmi_display_language_desired] = kHmiLanguage;
+    (*msg_)[am::strings::msg_params][am::strings::sync_msg_version]
+           [am::strings::major_version] = 4;
+    (*msg_)[am::strings::msg_params][am::strings::sync_msg_version]
+           [am::strings::minor_version] = 0;
+    (*msg_)[am::strings::msg_params][am::strings::sync_msg_version]
+           [am::strings::patch_version] = 0;
   }
 
   MockAppPtr CreateBasicMockedApp() {
@@ -127,6 +135,10 @@ class RegisterAppInterfaceRequestTest
     ON_CALL(*mock_app, language()).WillByDefault(ReturnRef(kMobileLanguage));
     ON_CALL(*mock_app, ui_language()).WillByDefault(ReturnRef(kMobileLanguage));
     ON_CALL(*mock_app, policy_app_id()).WillByDefault(Return(kAppId));
+    ON_CALL(*mock_app, msg_version())
+        .WillByDefault(ReturnRef(mock_semantic_version));
+    // EXPECT_CALL(*mock_app,
+    // msg_version()).WillOnce(Return(mock_semantic_version));
     return mock_app;
   }
 
@@ -285,6 +297,7 @@ TEST_F(RegisterAppInterfaceRequestTest, Run_MinimalData_SUCCESS) {
       .WillByDefault(Return(notify_upd_manager));
 
   EXPECT_CALL(app_mngr_, RegisterApplication(msg_)).WillOnce(Return(mock_app));
+
   EXPECT_CALL(mock_rpc_service_,
               ManageHMICommand(HMIResultCodeIs(
                   hmi_apis::FunctionID::BasicCommunication_OnAppRegistered)))

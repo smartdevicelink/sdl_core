@@ -50,13 +50,21 @@ Errors::eType CSmartSchema::validate(const SmartObject& object,
   return mSchemaItem->validate(object, report__);
 }
 
+Errors::eType CSmartSchema::validate(
+    const SmartObject& object,
+    rpc::ValidationReport* report__,
+    const utils::SemanticVersion& MessageVersion) const {
+  return mSchemaItem->validate(object, report__, MessageVersion);
+}
+
 void CSmartSchema::setSchemaItem(const ISchemaItemPtr schemaItem) {
   mSchemaItem = schemaItem;
 }
 
 void CSmartSchema::applySchema(SmartObject& Object,
-                               const bool RemoveFakeParameters) {
-  mSchemaItem->applySchema(Object, RemoveFakeParameters);
+                               const bool RemoveFakeParameters,
+                               const utils::SemanticVersion& MessageVersion) {
+  mSchemaItem->applySchema(Object, RemoveFakeParameters, MessageVersion);
 }
 
 void CSmartSchema::unapplySchema(SmartObject& Object) {

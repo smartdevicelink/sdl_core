@@ -81,6 +81,17 @@ class TNumberSchemaItem : public CDefaultSchemaItem<NumberType> {
   Errors::eType validate(const SmartObject& Object,
                          rpc::ValidationReport* report__) OVERRIDE;
 
+  /**
+   * @brief Validate smart object.
+   * @param Object Object to validate.
+   * @param report__ object for reporting errors during validation
+   * @param MessageVersion to check mobile RPC version against RPC Spec History
+   * @return NsSmartObjects::Errors::eType
+   **/
+  Errors::eType validate(const SmartObject& Object,
+                         rpc::ValidationReport* report__,
+                         const utils::SemanticVersion& MessageVersion) OVERRIDE;
+
  private:
   /**
    * @brief Get smart type for this NumberType.
@@ -191,6 +202,14 @@ Errors::eType TNumberSchemaItem<NumberType>::validate(
     return Errors::OUT_OF_RANGE;
   }
   return Errors::OK;
+}
+
+template <typename NumberType>
+Errors::eType TNumberSchemaItem<NumberType>::validate(
+    const SmartObject& Object,
+    rpc::ValidationReport* report__,
+    const utils::SemanticVersion& MessageVersion) {
+  return validate(Object, report__);
 }
 
 template <typename NumberType>

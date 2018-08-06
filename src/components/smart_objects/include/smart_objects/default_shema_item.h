@@ -65,6 +65,17 @@ class CDefaultSchemaItem : public ISchemaItem {
                          rpc::ValidationReport* report__) OVERRIDE;
 
   /**
+   * @brief Validate smart object.
+   * @param Object Object to validate.
+   * @param report__ object for reporting errors during validation
+   * @param MessageVersion to check mobile RPC version against RPC Spec History
+   * @return NsSmartObjects::Errors::eType
+   **/
+  Errors::eType validate(const SmartObject& Object,
+                         rpc::ValidationReport* report__,
+                         const utils::SemanticVersion& MessageVersion) OVERRIDE;
+
+  /**
    * @brief Set default value to an object.
    * @param Object Object to set default value.
    * @return true if default value was successfully set, false otherwise.
@@ -124,6 +135,14 @@ Errors::eType CDefaultSchemaItem<Type>::validate(
   } else {
     return Errors::OK;
   }
+}
+
+template <typename Type>
+Errors::eType CDefaultSchemaItem<Type>::validate(
+    const SmartObject& Object,
+    rpc::ValidationReport* report__,
+    const utils::SemanticVersion& MessageVersion) {
+  return validate(Object, report__);
 }
 
 template <typename Type>

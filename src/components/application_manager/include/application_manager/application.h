@@ -51,6 +51,7 @@
 #include "protocol_handler/protocol_handler.h"
 #include "smart_objects/smart_object.h"
 #include "utils/macro.h"
+#include "utils/semantic_version.h"
 
 namespace application_manager {
 
@@ -115,6 +116,7 @@ class InitialApplicationData {
   virtual const smart_objects::SmartObject* ngn_media_screen_name() const = 0;
   virtual const mobile_api::Language::eType& language() const = 0;
   virtual const mobile_api::Language::eType& ui_language() const = 0;
+  virtual const utils::SemanticVersion& msg_version() const = 0;
   virtual void set_app_types(const smart_objects::SmartObject& app_types) = 0;
   virtual void set_vr_synonyms(
       const smart_objects::SmartObject& vr_synonyms) = 0;
@@ -125,6 +127,9 @@ class InitialApplicationData {
   virtual void set_language(const mobile_api::Language::eType& language) = 0;
   virtual void set_ui_language(
       const mobile_api::Language::eType& ui_language) = 0;
+  virtual void set_msg_version(const uint16_t major,
+                               const uint16_t minor,
+                               const uint16_t patch) = 0;
 };
 
 /*
