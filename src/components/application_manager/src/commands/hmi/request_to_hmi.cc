@@ -31,7 +31,7 @@
  */
 
 #include "application_manager/commands/hmi/request_to_hmi.h"
-
+#include "utils/helpers.h"
 namespace application_manager {
 
 namespace commands {
@@ -55,6 +55,27 @@ bool ChangeInterfaceState(ApplicationManager& application_manager,
     application_manager.hmi_interfaces().SetInterfaceState(interface,
                                                            interface_state);
     return is_available;
+  }
+  if (response_from_hmi[strings::params].keyExists(hmi_response::code)) {
+    hmi_apis::Common_Result::eType response_code =
+        static_cast<hmi_apis::Common_Result::eType>(
+            response_from_hmi[strings::params][hmi_response::code].asInt());
+
+    using helpers::Compare;
+    using helpers::EQ;
+    using helpers::ONE;
+
+    if (!Compare<hmi_apis::Common_Result::eType, EQ, ONE>(
+            response_code,
+            hmi_apis::Common_Result::SUCCESS,
+            hmi_apis::Common_Result::WARNINGS)) {
+      application_manager.hmi_interfaces().SetInterfaceState(
+          interface, HmiInterfaces::STATE_NOT_AVAILABLE);
+      return false;
+    }
+    application_manager.hmi_interfaces().SetInterfaceState(
+        interface, HmiInterfaces::STATE_AVAILABLE);
+    return true;
   }
   return false;
 }
