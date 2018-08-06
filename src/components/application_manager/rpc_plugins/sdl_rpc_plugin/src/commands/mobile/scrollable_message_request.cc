@@ -65,13 +65,9 @@ ScrollableMessageRequest::~ScrollableMessageRequest() {}
 bool ScrollableMessageRequest::Init() {
   /* Timeout in milliseconds.
      If omitted a standard value of 10000 milliseconds is used.*/
-  if ((*message_)[strings::msg_params].keyExists(strings::timeout)) {
-    default_timeout_ =
-        (*message_)[strings::msg_params][strings::timeout].asUInt();
-  } else {
-    const int32_t def_value = 30000;
-    default_timeout_ = def_value;
-  }
+  uint32_t request_timeout =
+      (*message_)[strings::msg_params][strings::timeout].asUInt();
+  default_timeout_ += request_timeout;
 
   return true;
 }

@@ -82,17 +82,18 @@ PerformInteractionRequest::~PerformInteractionRequest() {}
 bool PerformInteractionRequest::Init() {
   /* Timeout in milliseconds.
      If omitted a standard value of 10000 milliseconds is used.*/
-  if ((*message_)[strings::msg_params].keyExists(strings::timeout)) {
-    default_timeout_ =
-        (*message_)[strings::msg_params][strings::timeout].asUInt();
-  }
+  const auto& msg_params = (*message_)[strings::msg_params];
+  uint32_t request_timeout = msg_params[strings::timeout].asUInt();
 
   interaction_mode_ = static_cast<mobile_apis::InteractionMode::eType>(
-      (*message_)[strings::msg_params][strings::interaction_mode].asInt());
+      msg_params[strings::interaction_mode].asInt());
 
   if (mobile_apis::InteractionMode::BOTH == interaction_mode_ ||
       mobile_apis::InteractionMode::MANUAL_ONLY == interaction_mode_) {
-    default_timeout_ *= 2;
+    const uint32_t increase_value = 2;
+    default_timeout_ += request_timeout * increase_value;
+  } else {
+    default_timeout_ += request_timeout;
   }
   return true;
 }
@@ -284,7 +285,7 @@ void PerformInteractionRequest::onTimeOut() {
         CommandRequestImpl::onTimeOut();
       } else {
         application_manager_.updateRequestTimeout(
-            connection_key(), correlation_id(), default_timeout());
+            connection_key(), correlation_id(), default_timeout_);
       }
       break;
     }
@@ -341,7 +342,7 @@ bool PerformInteractionRequest::ProcessVRResponse(
     }
     LOG4CXX_DEBUG(logger_, "Update timeout for UI");
     application_manager_.updateRequestTimeout(
-        connection_key(), correlation_id(), default_timeout());
+        connection_key(), correlation_id(), default_timeout_);
     return false;
   }
 
@@ -356,6 +357,13 @@ bool PerformInteractionRequest::ProcessVRResponse(
       return true;
     }
     msg_params[strings::choice_id] = choice_id;
+  }
+
+  if (mobile_apis::InteractionMode::BOTH == interaction_mode_ ||
+      mobile_apis::InteractionMode::MANUAL_ONLY == interaction_mode_) {
+    LOG4CXX_DEBUG(logger_, "Update timeout for UI");
+    application_manager_.updateRequestTimeout(
+        connection_key(), correlation_id(), default_timeout_);
   }
 
   const bool is_vr_result_success = Compare<Common_Result::eType, EQ, ONE>(
@@ -471,12 +479,7 @@ void PerformInteractionRequest::SendUIPerformInteractionRequest(
     }
   }
 
-  if (mobile_apis::InteractionMode::BOTH == mode ||
-      mobile_apis::InteractionMode::MANUAL_ONLY == mode) {
-    msg_params[strings::timeout] = default_timeout_ / 2;
-  } else {
-    msg_params[strings::timeout] = default_timeout_;
-  }
+    msg_params[strings::timeout] = (*message_)[strings::msg_params][strings::timeout].asUInt();
   msg_params[strings::app_id] = app->app_id();
   if (mobile_apis::InteractionMode::VR_ONLY != mode) {
     msg_params[strings::choice_set] =
@@ -652,16 +655,7 @@ void PerformInteractionRequest::SendVRPerformInteractionRequest(
     return;
   }
 
-  mobile_apis::InteractionMode::eType mode =
-      static_cast<mobile_apis::InteractionMode::eType>(
-          (*message_)[strings::msg_params][strings::interaction_mode].asInt());
-
-  if (mobile_apis::InteractionMode::BOTH == mode ||
-      mobile_apis::InteractionMode::MANUAL_ONLY == mode) {
-    msg_params[strings::timeout] = default_timeout_ / 2;
-  } else {
-    msg_params[strings::timeout] = default_timeout_;
-  }
+    msg_params[strings::timeout] = (*message_)[strings::msg_params][strings::timeout].asUInt();;
   msg_params[strings::app_id] = app->app_id();
   StartAwaitForInterface(HmiInterfaces::HMI_INTERFACE_VR);
   SendHMIRequest(

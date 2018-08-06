@@ -73,18 +73,15 @@ AlertRequest::~AlertRequest() {}
 
 bool AlertRequest::Init() {
   /* Timeout in milliseconds.
-     If omitted a standard value of 10000 milliseconds is used.*/
-  if ((*message_)[strings::msg_params].keyExists(strings::duration)) {
-    default_timeout_ =
-        (*message_)[strings::msg_params][strings::duration].asUInt();
-  } else {
-    const int32_t def_value = 5000;
-    default_timeout_ = def_value;
-  }
+    If omitted a standard value of 10000 milliseconds is used.*/
+  auto& msg_params = (*message_)[strings::msg_params];
+  uint32_t duration_timeout = msg_params[strings::duration].asUInt();
+
+  default_timeout_ += duration_timeout;
 
   // If soft buttons are present, SDL will not use initiate timeout tracking for
   // response.
-  if ((*message_)[strings::msg_params].keyExists(strings::soft_buttons)) {
+  if (msg_params.keyExists(strings::soft_buttons)) {
     LOG4CXX_INFO(logger_,
                  "Request contains soft buttons - request timeout "
                  "will be set to 0.");
@@ -352,7 +349,8 @@ void AlertRequest::SendAlertRequest(int32_t app_id) {
   }
   // app_id
   msg_params[strings::app_id] = app_id;
-  msg_params[strings::duration] = default_timeout_;
+  msg_params[strings::duration] =
+      (*message_)[strings::msg_params][strings::duration].asUInt();
 
   // NAVI platform progressIndicator
   if ((*message_)[strings::msg_params].keyExists(strings::progress_indicator)) {
