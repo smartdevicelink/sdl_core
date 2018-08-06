@@ -74,6 +74,16 @@ class CStringSchemaItem : public CDefaultSchemaItem<std::string> {
    **/
   Errors::eType validate(const SmartObject& Object,
                          rpc::ValidationReport* report__) OVERRIDE;
+  /**
+   * @brief Validate smart object.
+   * @param Object Object to validate.
+   * @param report__ object for reporting errors during validation
+   * @param MessageVersion to check mobile RPC version against RPC Spec History
+   * @return NsSmartObjects::Errors::eType
+   **/
+  Errors::eType validate(const SmartObject& Object,
+                         rpc::ValidationReport* report__,
+                         const utils::SemanticVersion& MessageVersion) OVERRIDE;
 
  private:
   /**

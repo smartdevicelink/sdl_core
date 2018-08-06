@@ -57,6 +57,7 @@
 #include "interfaces/v4_protocol_v1_2_no_extra_schema.h"
 
 #include "utils/threads/message_loop_thread.h"
+#include "utils/semantic_version.h"
 
 namespace application_manager {
 namespace rpc_handler {
