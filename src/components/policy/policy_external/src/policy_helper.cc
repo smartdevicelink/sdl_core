@@ -630,26 +630,24 @@ void FillNotificationData::UpdateParameters(
   // amongst all of the possible allowed permissions scenarios for the RPC (and
   // parameter/or HMI level) defined by each of the functional groups.
 
-  if (!IsSomeParametersAllowed(out_parameter)) {
-    // Due to APPLINK-24201 SDL must consider cases when 'parameters' section is
-    // not present for RPC or present, but is empty.
+  // Due to requirements SDL must consider cases when 'parameters' section is
+  // not present for RPC or present, but is empty.
 
-    // If 'parameters' section is like: 'parameters' : []
-    if (in_parameters.is_initialized() && in_parameters.empty()) {
-      if (!does_require_user_consent_) {
-        out_parameter.any_parameter_disallowed_by_policy = true;
-      }
-      if (does_require_user_consent_ && kAllowedKey == current_key_) {
-        out_parameter.any_parameter_disallowed_by_user = true;
-      }
+  // If 'parameters' section is like: 'parameters' : []
+  if (in_parameters.is_initialized() && in_parameters.empty()) {
+    if (!does_require_user_consent_) {
+      out_parameter.any_parameter_disallowed_by_policy = true;
     }
+    if (does_require_user_consent_ && kAllowedKey == current_key_) {
+      out_parameter.any_parameter_disallowed_by_user = true;
+    }
+  }
 
-    // If 'parameters' section is omitted
-    if (!in_parameters.is_initialized()) {
-      if (!does_require_user_consent_ ||
-          (does_require_user_consent_ && kAllowedKey == current_key_)) {
-        out_parameter.any_parameter_allowed = true;
-      }
+  // If 'parameters' section is omitted
+  if (!in_parameters.is_initialized()) {
+    if (!does_require_user_consent_ ||
+        (does_require_user_consent_ && kAllowedKey == current_key_)) {
+      out_parameter.any_parameter_allowed = true;
     }
   }
 
@@ -660,7 +658,7 @@ void FillNotificationData::UpdateParameters(
 
   // We should reset ALL DISALLOWED flags if at least one parameter is allowed
   // due to a logical OR permissions check
-  if (IsSomeParametersAllowed(out_parameter)) {
+  if (IsSomeParameterAllowed(out_parameter)) {
     out_parameter.any_parameter_disallowed_by_policy = false;
     out_parameter.any_parameter_disallowed_by_user = false;
   }
@@ -796,11 +794,12 @@ bool FillNotificationData::IsSectionEmpty(
   return true;
 }
 
-bool FillNotificationData::IsSomeParametersAllowed(
+bool FillNotificationData::IsSomeParameterAllowed(
     const ParameterPermissions& permissions) const {
+  const bool are_any_consented_parameters_allowed =
+      kAllowedKey == current_key_ && !IsSectionEmpty(permissions, current_key_);
   return permissions.any_parameter_allowed ||
-         (kAllowedKey == current_key_ &&
-          !IsSectionEmpty(permissions, kAllowedKey));
+         are_any_consented_parameters_allowed;
 }
 
 ProcessFunctionalGroup::ProcessFunctionalGroup(

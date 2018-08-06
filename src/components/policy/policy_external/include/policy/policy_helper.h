@@ -273,7 +273,7 @@ struct FillNotificationData {
    * @return true if at least one parameter is allowed for the specified
    * permissions otherwise returns false
    */
-  bool IsSomeParametersAllowed(const ParameterPermissions& permissions) const;
+  bool IsSomeParameterAllowed(const ParameterPermissions& permissions) const;
 
   std::string current_key_;
   Permissions& data_;
