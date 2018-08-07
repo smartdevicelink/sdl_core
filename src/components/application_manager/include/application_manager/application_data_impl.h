@@ -65,9 +65,7 @@ class InitialApplicationDataImpl : public virtual Application {
   void set_ngn_media_screen_name(const smart_objects::SmartObject& ngn_name);
   void set_language(const mobile_api::Language::eType& language);
   void set_ui_language(const mobile_api::Language::eType& ui_language);
-  void set_msg_version(const uint16_t major,
-                       const uint16_t minor,
-                       const uint16_t patch);
+  void set_msg_version(const utils::SemanticVersion& version);
 
   void set_perform_interaction_layout(
       mobile_api::LayoutMode::eType layout) OVERRIDE;

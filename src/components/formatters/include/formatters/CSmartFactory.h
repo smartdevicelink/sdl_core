@@ -300,7 +300,8 @@ bool CSmartFactory<FunctionIdEnum, MessageTypeEnum, StructIdEnum>::attachSchema(
 
   object.setSchema(schemaIterator->second);
 
-  utils::SemanticVersion msg_version;
+  // Initialize msg_version to 0.0.0, an invalid value until properly set.
+  utils::SemanticVersion msg_version(0, 0, 0);
   if (object[NsSmartDeviceLink::NsJSONHandler::strings::S_PARAMS].keyExists(
           NsSmartDeviceLink::NsJSONHandler::strings::S_RPC_MSG_VERSION)) {
     msg_version =
