@@ -60,13 +60,9 @@ struct SemanticVersion {
   }
 
   bool operator==(const SemanticVersion& version) const {
-    if (major_version == version.major_version &&
-        minor_version == version.minor_version &&
-        patch_version == version.patch_version) {
-      return true;
-    } else {
-      return false;
-    }
+    return (major_version == version.major_version &&
+            minor_version == version.minor_version &&
+            patch_version == version.patch_version);
   }
 
   bool operator<(const SemanticVersion& version) const {

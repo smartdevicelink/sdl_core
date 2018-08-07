@@ -141,7 +141,8 @@ add_executable(${PROJECT} ${SOURCES})
 
 if (HMIADAPTER STREQUAL "messagebroker")
   add_dependencies(${PROJECT} Boost)
-  list(APPEND LIBRARIES libboost_system.so)
+  GET_PROPERTY(BOOST_LIBS_DIRECTORY GLOBAL PROPERTY GLOBAL_BOOST_LIBS)
+  list(APPEND LIBRARIES boost_system -L${BOOST_LIBS_DIRECTORY})
 endif()
 
 target_link_libraries(${PROJECT} ${LIBRARIES})

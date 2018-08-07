@@ -135,8 +135,6 @@ class RegisterAppInterfaceRequestTest
     ON_CALL(*mock_app, policy_app_id()).WillByDefault(Return(kAppId));
     ON_CALL(*mock_app, msg_version())
         .WillByDefault(ReturnRef(mock_semantic_version));
-    // EXPECT_CALL(*mock_app,
-    // msg_version()).WillOnce(Return(mock_semantic_version));
     return mock_app;
   }
 

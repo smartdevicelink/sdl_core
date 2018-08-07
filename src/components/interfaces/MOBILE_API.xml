@@ -3410,9 +3410,11 @@
         <param name="systemSoftwareVersion" type="String" maxlength="100" mandatory="false" platform="documentation">
             <description>The software version of the system that implements the SmartDeviceLink core.</description>
         </param>
-        <param name="iconResumed" type="Boolean" mandatory="true">
-            <description>Existence of apps icon at system. If true, apps icon
-            was resumed at system. If false, apps icon is not resumed at system</description>
+        <param name="iconResumed" type="Boolean" mandatory="false">
+            <description>
+                Existence of apps icon at system. If true, apps icon
+                was resumed at system. If false, apps icon is not resumed at system
+            </description>
         </param>
     </function>
     
@@ -6115,7 +6117,7 @@
         <param name="systemContext" type="SystemContext" mandatory="true">
             <description>See SystemContext</description>
         </param>
-        <param name="videoStreamingState" type="VideoStreamingState" mandatory="true">
+        <param name="videoStreamingState" type="VideoStreamingState" mandatory="false" defvalue="STREAMABLE">
             <description>See VideoStreamingState. If it is NOT_STREAMABLE, the app must stop streaming video to SDL.</description>
         </param>
     </function>

@@ -33,8 +33,6 @@
 
 #include <algorithm>
 
-#include <boost/algorithm/string.hpp>
-
 #include "smart_objects/always_false_schema_item.h"
 #include "smart_objects/smart_object.h"
 
@@ -59,24 +57,14 @@ CObjectSchemaItem::SMember::SMember(
     const std::vector<CObjectSchemaItem::SMember>& history_vector)
     : mSchemaItem(SchemaItem), mIsMandatory(IsMandatory) {
   if (Since.size() > 0) {
-    utils::SemanticVersion since_struct;
-    std::vector<std::string> since_fields;
-    boost::split(since_fields, Since, boost::is_any_of("."));
-    if (since_fields.size() == 3) {
-      since_struct.major_version = atoi(since_fields[0].c_str());
-      since_struct.minor_version = atoi(since_fields[1].c_str());
-      since_struct.patch_version = atoi(since_fields[2].c_str());
+    utils::SemanticVersion since_struct(Since);
+    if (since_struct.isValid()) {
       mSince = since_struct;
     }
   }
   if (Until.size() > 0) {
-    utils::SemanticVersion until_struct;
-    std::vector<std::string> until_fields;
-    boost::split(until_fields, Until, boost::is_any_of("."));
-    if (until_fields.size() == 3) {
-      until_struct.major_version = atoi(until_fields[0].c_str());
-      until_struct.minor_version = atoi(until_fields[1].c_str());
-      until_struct.patch_version = atoi(until_fields[2].c_str());
+    utils::SemanticVersion until_struct(Until);
+    if (until_struct.isValid()) {
       mUntil = until_struct;
     }
   }

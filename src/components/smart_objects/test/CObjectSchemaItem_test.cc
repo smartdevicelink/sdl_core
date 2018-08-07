@@ -140,12 +140,32 @@ class ObjectSchemaItemTest : public ::testing::Test {
     // Create fake param that has breaking history changes
     std::vector<CObjectSchemaItem::SMember> fake_param_history_vector;
 
-    std::shared_ptr<ISchemaItem> fake_param_SchemaItem = CArraySchemaItem::create(CStringSchemaItem::create(TSchemaItemParameter<size_t>(1), TSchemaItemParameter<size_t>(99), TSchemaItemParameter<std::string>()), TSchemaItemParameter<size_t>(1), TSchemaItemParameter<size_t>(100));
+    std::shared_ptr<ISchemaItem> fake_param_SchemaItem =
+        CArraySchemaItem::create(
+            CStringSchemaItem::create(TSchemaItemParameter<size_t>(1),
+                                      TSchemaItemParameter<size_t>(99),
+                                      TSchemaItemParameter<std::string>()),
+            TSchemaItemParameter<size_t>(1),
+            TSchemaItemParameter<size_t>(100));
 
-    std::shared_ptr<ISchemaItem> fake_param_history_v1_SchemaItem = CArraySchemaItem::create(CStringSchemaItem::create(TSchemaItemParameter<size_t>(1), TSchemaItemParameter<size_t>(99), TSchemaItemParameter<std::string>()), TSchemaItemParameter<size_t>(1), TSchemaItemParameter<size_t>(100));
+    std::shared_ptr<ISchemaItem> fake_param_history_v1_SchemaItem =
+        CArraySchemaItem::create(
+            CStringSchemaItem::create(TSchemaItemParameter<size_t>(1),
+                                      TSchemaItemParameter<size_t>(99),
+                                      TSchemaItemParameter<std::string>()),
+            TSchemaItemParameter<size_t>(1),
+            TSchemaItemParameter<size_t>(100));
 
-    fake_param_history_vector.push_back(CObjectSchemaItem::SMember(fake_param_history_v1_SchemaItem, true, "", "4.5.0", false, false));
-    schemaMembersMap["fakeParam"] = CObjectSchemaItem::SMember(fake_param_SchemaItem, false, "4.5.0", "", false, false, fake_param_history_vector);
+    fake_param_history_vector.push_back(CObjectSchemaItem::SMember(
+        fake_param_history_v1_SchemaItem, true, "", "4.5.0", false, false));
+    schemaMembersMap["fakeParam"] =
+        CObjectSchemaItem::SMember(fake_param_SchemaItem,
+                                   false,
+                                   "4.5.0",
+                                   "",
+                                   false,
+                                   false,
+                                   fake_param_history_vector);
 
     CObjectSchemaItem::Members rootMembersMap;
     rootMembersMap[S_PARAMS] = CObjectSchemaItem::SMember(
@@ -180,7 +200,7 @@ TEST_F(ObjectSchemaItemTest, validation_correct_with_new_version) {
   obj[S_MSG_PARAMS][Keys::INFO] = "0123456789";
   obj[S_MSG_PARAMS][Keys::SUCCESS] = true;
 
-  utils::SemanticVersion messageVersion(4,5,0);
+  utils::SemanticVersion messageVersion(4, 5, 0);
   rpc::ValidationReport report("RPC");
   EXPECT_EQ(Errors::OK, schema_item->validate(obj, &report, messageVersion));
   EXPECT_EQ(std::string(""), rpc::PrettyFormat(report));
@@ -195,9 +215,10 @@ TEST_F(ObjectSchemaItemTest, validation_invalid_data_with_old_version) {
   obj[S_MSG_PARAMS][Keys::INFO] = "0123456789";
   obj[S_MSG_PARAMS][Keys::SUCCESS] = true;
 
-  utils::SemanticVersion messageVersion(3,0,0);
+  utils::SemanticVersion messageVersion(3, 0, 0);
   rpc::ValidationReport report("RPC");
-  EXPECT_EQ(Errors::MISSING_MANDATORY_PARAMETER, schema_item->validate(obj, &report, messageVersion));
+  EXPECT_EQ(Errors::MISSING_MANDATORY_PARAMETER,
+            schema_item->validate(obj, &report, messageVersion));
 }
 
 TEST_F(ObjectSchemaItemTest, validation_correct_skip_not_mandatory) {
