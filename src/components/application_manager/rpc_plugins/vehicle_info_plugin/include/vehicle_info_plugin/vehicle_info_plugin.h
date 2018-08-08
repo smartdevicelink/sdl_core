@@ -40,6 +40,8 @@ class VehicleInfoAppExtension;
 namespace app_mngr = application_manager;
 namespace plugins = application_manager::plugin_manager;
 
+typedef std::set<mobile_apis::VehicleDataType::eType> VehicleInfoSubscriptions;
+
 class VehicleInfoPlugin : public plugins::RPCPlugin {
  public:
   VehicleInfoPlugin();
@@ -71,6 +73,9 @@ class VehicleInfoPlugin : public plugins::RPCPlugin {
 
  private:
   void DeleteSubscriptions(app_mngr::ApplicationSharedPtr app);
+  void SelectVehicleDataForUbsubscribe(
+      const app_mngr::ApplicationSharedPtr& app,
+      VehicleInfoSubscriptions& vd_for_unscribe);
 
   std::unique_ptr<app_mngr::CommandFactory> command_factory_;
   app_mngr::ApplicationManager* application_manager_;

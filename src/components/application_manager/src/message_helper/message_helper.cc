@@ -1344,6 +1344,29 @@ smart_objects::SmartObjectList MessageHelper::CreateAddCommandRequestToHMI(
   return requests;
 }
 
+void MessageHelper::CreateUbsubscriveVehicleDataMessageForHMI(
+    smart_objects::SmartObjectSPtr& message_to_hmi,
+    const VehicleInfoSubscriptions& vehicle_data,
+    const application_manager::ApplicationSharedPtr& app) {
+  message_to_hmi =
+      CreateMessageForHMI(hmi_apis::messageType::request, app->app_id());
+  (*message_to_hmi)[strings::params][strings::function_id] =
+      hmi_apis::FunctionID::VehicleInfo_UnsubscribeVehicleData;
+  smart_objects::SmartObject msg_params =
+      smart_objects::SmartObject(smart_objects::SmartType_Map);
+  const VehicleData& v_data = MessageHelper::vehicle_data();
+  auto vehicle_data_setter =
+      [&msg_params, &v_data](const mobile_apis::VehicleDataType::eType v_type) {
+        for (const auto& item : v_data) {
+          if (item.second == v_type) {
+            msg_params[item.first] = true;
+          }
+        }
+      };
+  std::for_each(vehicle_data.begin(), vehicle_data.end(), vehicle_data_setter);
+  (*message_to_hmi)[strings::msg_params] = msg_params;
+}
+
 smart_objects::SmartObjectList
 MessageHelper::CreateAddVRCommandRequestFromChoiceToHMI(
     ApplicationConstSharedPtr app, ApplicationManager& app_mngr) {

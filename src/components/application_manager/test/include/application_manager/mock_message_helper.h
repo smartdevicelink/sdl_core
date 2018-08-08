@@ -180,6 +180,11 @@ class MockMessageHelper {
   MOCK_METHOD2(CreateAddCommandRequestToHMI,
                smart_objects::SmartObjectList(ApplicationConstSharedPtr app,
                                               ApplicationManager& app_mngr));
+  MOCK_METHOD3(
+      CreateUbsubscriveVehicleDataMessageForHMI,
+      void(smart_objects::SmartObjectSPtr& message_to_hmi,
+           const application_manager::VehicleInfoSubscriptions& vehicle_data,
+           const application_manager::ApplicationSharedPtr& app));
   MOCK_METHOD1(CreateAddVRCommandRequestFromChoiceToHMI,
                smart_objects::SmartObjectList(ApplicationConstSharedPtr app));
   MOCK_METHOD1(SendGlobalPropertiesToHMI, void(ApplicationConstSharedPtr app));

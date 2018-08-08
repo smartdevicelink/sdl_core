@@ -311,6 +311,15 @@ smart_objects::SmartObjectList MessageHelper::CreateAddCommandRequestToHMI(
       app, app_mngr);
 }
 
+void MessageHelper::CreateUbsubscriveVehicleDataMessageForHMI(
+    NsSmartDeviceLink::NsSmartObjects::SmartObjectSPtr& message_to_hmi,
+    const application_manager::VehicleInfoSubscriptions& vehicle_data,
+    const application_manager::ApplicationSharedPtr& app) {
+  MockMessageHelper::message_helper_mock()
+      ->CreateUbsubscriveVehicleDataMessageForHMI(
+          message_to_hmi, vehicle_data, app);
+}
+
 smart_objects::SmartObjectList
 MessageHelper::CreateAddVRCommandRequestFromChoiceToHMI(
     ApplicationConstSharedPtr app, ApplicationManager& app_mngr) {

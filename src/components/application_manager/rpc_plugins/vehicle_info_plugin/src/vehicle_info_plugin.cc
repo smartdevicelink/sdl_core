@@ -35,7 +35,6 @@
 #include "vehicle_info_plugin/vehicle_info_app_extension.h"
 #include "application_manager/smart_object_keys.h"
 #include "application_manager/message_helper.h"
-#include "application_manager/message_helper.h"
 
 namespace vehicle_info_plugin {
 CREATE_LOGGERPTR_GLOBAL(logger_, "VehicleInfoPlugin")
@@ -76,6 +75,22 @@ void VehicleInfoPlugin::OnApplicationEvent(
   if (plugins::ApplicationEvent::kApplicationRegistered == event) {
     application->AddExtension(
         std::make_shared<VehicleInfoAppExtension>(*this, *application));
+  } else if (plugins::ApplicationEvent::kApplicationUnregistered == event) {
+    DCHECK_OR_RETURN_VOID(application);
+    VehicleInfoSubscriptions vd_for_unscribe;
+    SelectVehicleDataForUbsubscribe(application, vd_for_unscribe);
+    if (!vd_for_unscribe.empty()) {
+      commands::MessageSharedPtr message_to_hmi;
+      application_manager::MessageHelper::
+          CreateUbsubscriveVehicleDataMessageForHMI(
+              message_to_hmi, vd_for_unscribe, application);
+      LOG4CXX_DEBUG(
+          logger_,
+          "Vehicle data was successfully collected and sending to HMI.");
+      application_manager_->GetRPCService().SendMessageToHMI(message_to_hmi);
+    } else {
+      LOG4CXX_DEBUG(logger_, "Application not has vehicle data for unscribe.");
+    }
   }
 }
 
@@ -158,7 +173,32 @@ void VehicleInfoPlugin::DeleteSubscriptions(
     }
   }
 }
+
+void VehicleInfoPlugin::SelectVehicleDataForUbsubscribe(
+    const app_mngr::ApplicationSharedPtr& app,
+    VehicleInfoSubscriptions& vd_for_unscribe) {
+  VehicleInfoAppExtension& vehicle_extension =
+      VehicleInfoAppExtension::ExtractVIExtension(*app);
+  vd_for_unscribe = vehicle_extension.Subscriptions();
+  application_manager::ApplicationSet applications =
+      application_manager_->applications().GetData();
+  if (!applications.empty()) {
+    auto ubsubscriber =
+        [&applications, &vd_for_unscribe](const VehicleDataType vehicle_data) {
+          for (auto app_it = applications.begin(); app_it != applications.end();
+               ++app_it) {
+            application_manager::ApplicationSharedPtr application(*app_it);
+            auto v_ext =
+                VehicleInfoAppExtension::ExtractVIExtension(*application);
+            if (v_ext.isSubscribedToVehicleInfo(vehicle_data)) {
+              vd_for_unscribe.erase(vehicle_data);
+            }
+          }
+        };
+    std::for_each(vd_for_unscribe.begin(), vd_for_unscribe.end(), ubsubscriber);
+  }
 }
+}  // namespace vehicle_info_plugin
 
 extern "C" application_manager::plugin_manager::RPCPlugin* Create() {
   return new vehicle_info_plugin::VehicleInfoPlugin();

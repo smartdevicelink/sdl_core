@@ -67,6 +67,11 @@ namespace mobile_api = mobile_apis;
 typedef std::map<std::string, mobile_apis::VehicleDataType::eType> VehicleData;
 
 /**
+ * @brief Defines set of vehicle info types
+ */
+typedef std::set<mobile_apis::VehicleDataType::eType> VehicleInfoSubscriptions;
+
+/**
  * @brief MessageHelper class
  **/
 class MessageHelper {
@@ -279,6 +284,16 @@ class MessageHelper {
   static smart_objects::SmartObjectList CreateAddCommandRequestToHMI(
       ApplicationConstSharedPtr app, ApplicationManager& app_mngr);
 
+  /**
+   * @brief Creates Message for sending to HMI for unsubscribe from specified
+   * VehicleData. Puts in vehicle data types into message according to keys.
+   * @param message_to_hmi - message for sending.
+   * @param vehicle_data - collection with vehicle data types for ubsubscribe.
+   */
+  static void CreateUbsubscriveVehicleDataMessageForHMI(
+      smart_objects::SmartObjectSPtr& message_to_hmi,
+      const VehicleInfoSubscriptions& vehicle_data,
+      const application_manager::ApplicationSharedPtr& app);
   static smart_objects::SmartObjectList
   CreateAddVRCommandRequestFromChoiceToHMI(ApplicationConstSharedPtr app,
                                            ApplicationManager& app_mngr);
