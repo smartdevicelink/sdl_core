@@ -158,6 +158,8 @@ TEST_F(MessageQueueTest,
   ASSERT_EQ(test_val_1, test_line);
   // Check the size of queue after 1 element was removed
   ASSERT_EQ(0u, test_queue.size());
+  pthread_join(thread1, NULL);
+  pthread_join(thread2, NULL);
 }
 
 TEST_F(MessageQueueTest,
@@ -169,6 +171,7 @@ TEST_F(MessageQueueTest,
   test_queue.wait();
   check_value = true;
   ASSERT_TRUE(check_value);
+  pthread_join(thread1, NULL);
 }
 
 }  // namespace utils_test

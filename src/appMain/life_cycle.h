@@ -33,22 +33,15 @@
 #ifndef SRC_APPMAIN_LIFE_CYCLE_H_
 #define SRC_APPMAIN_LIFE_CYCLE_H_
 #include <thread>
+#include <unistd.h>
 #include "utils/macro.h"
-#include "unistd.h"
 
 #include "config_profile/profile.h"
 #include "hmi_message_handler/hmi_message_handler_impl.h"
-#ifdef DBUS_HMIADAPTER
-#include "hmi_message_handler/dbus_message_adapter.h"
-#endif  // DBUS_HMIADAPTER
 #if (defined(MESSAGEBROKER_HMIADAPTER) || defined(PASA_HMI))
 #include "hmi_message_handler/messagebroker_adapter.h"
 #endif  // #if ( defined (MESSAGEBROKER_HMIADAPTER) || defined(PASA_HMI)  )
 #include "application_manager/application_manager_impl.h"
-#ifdef SDL_REMOTE_CONTROL
-#include "application_manager/core_service.h"
-#include "functional_module/plugin_manager.h"
-#endif  // SDL_REMOTE_CONTROL
 #include "connection_handler/connection_handler_impl.h"
 #include "protocol_handler/protocol_handler_impl.h"
 #include "transport_manager/transport_manager.h"
@@ -64,6 +57,10 @@ class CryptoManager;
 class SecurityManagerImpl;
 }  // namespace security_manager
 #endif  // ENABLE_SECURITY
+
+namespace utils {
+class SystemTimeHandler;
+}  // namespace utils
 
 namespace main_namespace {
 class LifeCycle {
@@ -98,10 +95,6 @@ class LifeCycle {
 #ifdef TELEMETRY_MONITOR
   telemetry_monitor::TelemetryMonitor* telemetry_monitor_;
 #endif  // TELEMETRY_MONITOR
-#ifdef DBUS_HMIADAPTER
-  hmi_message_handler::DBusMessageAdapter* dbus_adapter_;
-  std::thread* dbus_adapter_thread_;
-#endif  // DBUS_HMIADAPTER
 
 #ifdef MESSAGEBROKER_HMIADAPTER
   hmi_message_handler::MessageBrokerAdapter* mb_adapter_;

@@ -57,6 +57,7 @@ class MockResumeCtrl : public resumption::ResumeCtrl {
                     const std::string& hash));
   MOCK_METHOD1(StartResumptionOnlyHMILevel,
                bool(app_mngr::ApplicationSharedPtr application));
+  MOCK_METHOD1(RetryResumption, void(const uint32_t app_id));
   MOCK_METHOD1(CheckPersistenceFilesForResumption,
                bool(app_mngr::ApplicationSharedPtr application));
   MOCK_METHOD2(CheckApplicationHash,
@@ -95,7 +96,8 @@ class MockResumeCtrl : public resumption::ResumeCtrl {
 
 #ifdef BUILD_TESTS
   MOCK_METHOD1(set_resumption_storage,
-               void(utils::SharedPtr<resumption::ResumptionData> mock_storage));
+               void(std::shared_ptr<resumption::ResumptionData> mock_storage));
+  MOCK_CONST_METHOD0(get_resumption_active, bool());
 #endif  // BUILD_TESTS
 };
 

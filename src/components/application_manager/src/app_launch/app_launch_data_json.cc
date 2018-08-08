@@ -33,7 +33,7 @@
 #include "application_manager/app_launch/app_launch_data_json.h"
 #include "application_manager/smart_object_keys.h"
 #include "smart_objects/smart_object.h"
-#include "utils/make_shared.h"
+
 #include "utils/date_time.h"
 #include "json/json.h"
 
@@ -43,9 +43,7 @@ CREATE_LOGGERPTR_GLOBAL(logger_, "AppLaunch")
 
 AppLaunchDataJson::AppLaunchDataJson(const AppLaunchSettings& settings,
                                      resumption::LastState& last_state)
-    : AppLaunchDataImpl(settings)
-    , app_launch_json_lock_(true)
-    , last_state_(last_state) {}
+    : AppLaunchDataImpl(settings), last_state_(last_state) {}
 
 AppLaunchDataJson::~AppLaunchDataJson() {}
 
@@ -185,7 +183,7 @@ std::vector<ApplicationDataPtr> AppLaunchDataJson::GetAppDataByDevMac(
 
       if (deviceMac == dev_mac) {
         dev_apps.push_back(
-            utils::MakeShared<ApplicationData>(appID, bundleID, deviceMac));
+            std::make_shared<ApplicationData>(appID, bundleID, deviceMac));
       }
     }
   }

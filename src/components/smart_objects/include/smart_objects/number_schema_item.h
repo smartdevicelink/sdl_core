@@ -35,10 +35,11 @@
 
 #include <typeinfo>
 #include <limits>
-#include "utils/shared_ptr.h"
+
 #include "smart_objects/default_shema_item.h"
 #include "smart_objects/schema_item_parameter.h"
 #include "utils/convert_utils.h"
+#include "utils/helpers.h"
 
 namespace NsSmartDeviceLink {
 namespace NsSmartObjects {
@@ -56,7 +57,7 @@ class TNumberSchemaItem : public CDefaultSchemaItem<NumberType> {
    * @param DefaultValue Default value.
    * @return Shared pointer to a new schema item.
    **/
-  static utils::SharedPtr<TNumberSchemaItem> create(
+  static std::shared_ptr<TNumberSchemaItem> create(
       const TSchemaItemParameter<NumberType>& MinValue =
           TSchemaItemParameter<NumberType>(),
       const TSchemaItemParameter<NumberType>& MaxValue =
@@ -111,11 +112,12 @@ class TNumberSchemaItem : public CDefaultSchemaItem<NumberType> {
 };
 
 template <typename NumberType>
-utils::SharedPtr<TNumberSchemaItem<NumberType> > TNumberSchemaItem<
+std::shared_ptr<TNumberSchemaItem<NumberType> > TNumberSchemaItem<
     NumberType>::create(const TSchemaItemParameter<NumberType>& MinValue,
                         const TSchemaItemParameter<NumberType>& MaxValue,
                         const TSchemaItemParameter<NumberType>& DefaultValue) {
-  return new TNumberSchemaItem<NumberType>(MinValue, MaxValue, DefaultValue);
+  return std::shared_ptr<TNumberSchemaItem<NumberType> >(
+      new TNumberSchemaItem<NumberType>(MinValue, MaxValue, DefaultValue));
 }
 
 template <typename NumberType>
@@ -123,15 +125,16 @@ bool TNumberSchemaItem<NumberType>::isValidNumberType(SmartType type) {
   NumberType value(0);
   if ((SmartType_Double == type) && (typeid(double) == typeid(value))) {
     return true;
-  } else if ((SmartType_Integer == type) &&
-             (typeid(int32_t) == typeid(value) ||
-              typeid(uint32_t) == typeid(value) ||
-              typeid(int64_t) == typeid(value) ||
-              typeid(double) == typeid(value))) {
+  } else if (((SmartType_Integer == type) || (SmartType_UInteger == type)) &&
+             helpers::Compare<const std::type_info&, helpers::EQ, helpers::ONE>(
+                 typeid(value),
+                 typeid(int32_t),
+                 typeid(uint32_t),
+                 typeid(int64_t),
+                 typeid(double))) {
     return true;
-  } else {
-    return false;
   }
+  return false;
 }
 
 template <typename NumberType>

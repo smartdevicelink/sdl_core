@@ -135,6 +135,9 @@
         <element name="READ_ONLY">
             <description>The value being set is read only</description>
         </element>
+        <element name="CORRUPTED_DATA">
+            <description>The data sent failed to pass CRC check in receiver end</description>
+        </element>
     </enum>
     
     <enum name="ButtonPressMode">
@@ -299,6 +302,20 @@
             <description>Clears the media clock timer (previously done through Show->mediaClock)</description>
         </element>
     </enum>
+    <enum name="AudioStreamingIndicator">
+		<element name="PLAY_PAUSE">
+    		<description>Default playback indicator.</description>
+  		</element>
+  		<element name="PLAY">
+    		<description>Indicates that a button press of the Play/Pause button would start the playback.</description>
+  		</element>
+  		<element name="PAUSE">
+    		<description>Indicates that a button press of the Play/Pause button would pause the current playback.</description>
+  		</element>
+  		<element name="STOP">
+    		<description>Indicates that a button press of the Play/Pause button would stop the current playback.</description>
+  		</element>
+	</enum> 
     
     <enum name="TimerMode">
         <element name="UP" >
@@ -357,6 +374,12 @@
         <element name="AUDIBLE" />
         <element name="ATTENUATED" />
         <element name="NOT_AUDIBLE" />
+    </enum>
+
+    <enum name="VideoStreamingState">
+        <description>Enumeration that describes possible states of video streaming. </description>
+        <element name="STREAMABLE" />
+        <element name="NOT_STREAMABLE" />
     </enum>
     
     <enum name="SystemAction">
@@ -438,6 +461,7 @@
         <element name="LHPLUS_PHONEMES" />
         <element name="PRE_RECORDED" />
         <element name="SILENCE" />
+        <element name="FILE" />
     </enum>
     
     <enum name="VrCapabilities">
@@ -456,27 +480,42 @@
     
     <enum name="SamplingRate">
         <description>Describes different sampling options for PerformAudioPassThru.</description>
-        <element name="8KHZ" internal_name="SamplingRate_8KHZ"/>
-        <element name="16KHZ" internal_name="SamplingRate_16KHZ"/>
-        <element name="22KHZ" internal_name="SamplingRate_22KHZ"/>
-        <element name="44KHZ" internal_name="SamplingRate_44KHZ"/>
+        <element name="8KHZ" internal_name="SamplingRate_8KHZ">
+            <description>Sampling rate of 8000 Hz.</description>
+        </element>
+        <element name="16KHZ" internal_name="SamplingRate_16KHZ">
+            <description>Sampling rate of 16000 Hz.</description>
+        </element>
+        <element name="22KHZ" internal_name="SamplingRate_22KHZ">
+            <description>Sampling rate of 22050 Hz.</description>
+        </element>
+        <element name="44KHZ" internal_name="SamplingRate_44KHZ">
+            <description>Sampling rate of 44100 Hz.</description>
+        </element>
     </enum>
     
     <enum name="BitsPerSample">
         <description>Describes different quality options for PerformAudioPassThru.</description>
-        <element name="8_BIT" internal_name="BitsPerSample_8_BIT"/>
-        <element name="16_BIT" internal_name="BitsPerSample_16_BIT"/>
+        <element name="8_BIT" internal_name="BitsPerSample_8_BIT">
+            <description>Audio sample is 8 bits wide, unsigned.</description>
+        </element>
+        <element name="16_BIT" internal_name="BitsPerSample_16_BIT">
+            <description>Audio sample is 16 bits wide, signed, and in little endian.</description>
+        </element>
     </enum>
     
     <enum name="AudioType">
         <description>Describes different audio type options for PerformAudioPassThru.</description>
-        <element name="PCM" />
+        <element name="PCM">
+            <description>Linear PCM.</description>
+        </element>
     </enum>
     
     <struct name="AudioPassThruCapabilities">
         <description>
             Describes different audio type configurations for PerformAudioPassThru.
             e.g. {8kHz,8-bit,PCM}
+            The audio is recorded in monaural.
         </description>
         <param name="samplingRate" type="SamplingRate" mandatory="true"/>
         <param name="bitsPerSample" type="BitsPerSample" mandatory="true"/>
@@ -494,6 +533,7 @@
         <element name="VEHICLEDATA_FUELLEVEL_STATE" />
         <element name="VEHICLEDATA_FUELCONSUMPTION" />
         <element name="VEHICLEDATA_EXTERNTEMP" />
+        <element name="VEHICLEDATA_TURNSIGNAL" />
         <element name="VEHICLEDATA_VIN" />
         <element name="VEHICLEDATA_PRNDL" />
         <element name="VEHICLEDATA_TIREPRESSURE" />
@@ -513,6 +553,9 @@
         <element name="VEHICLEDATA_ENGINETORQUE" />
         <element name="VEHICLEDATA_ACCPEDAL" />
         <element name="VEHICLEDATA_STEERINGWHEEL" />
+        <element name="VEHICLEDATA_FUELRANGE" />
+        <element name="VEHICLEDATA_ENGINEOILLIFE" />
+        <element name="VEHICLEDATA_ELECTRONICPARKBRAKESTATUS" />
     </enum>
     
     <enum name="ButtonName">
@@ -781,7 +824,11 @@
         </element>
         
         <element name="graphic">
-            <description>The image field for Show</description>
+            <description>The primary image field for Show</description>
+        </element>
+        
+        <element name="secondaryGraphic">
+            <description>The secondary image field for Show</description>
         </element>
         
         <element name="showConstantTBTIcon">
@@ -898,6 +945,9 @@
         </param>
         <param name="imageType" type="ImageType" mandatory="true">
             <description>Describes, whether it is a static or dynamic image.</description>
+        </param>
+        <param name="isTemplate" type="Boolean" mandatory="false">
+            <description>Optional value to specify whether it's a template image. A template image can be (re)colored by the HMI as needed by using an image pattern</description>
         </param>
     </struct>
     
@@ -1082,10 +1132,101 @@
         <element name="NOT_SUPPORTED" internal_name="CVS_NOT_SUPPORTED">
         </element>
     </enum>
+
+    <enum name="TPMS">
+        <element name="UNKNOWN">
+            <description>If set the status of the tire is not known.</description>
+        </element>
+        <element name="SYSTEM_FAULT">
+            <description>TPMS does not function.</description>
+        </element>
+        <element name="SENSOR_FAULT">
+            <description>The sensor of the tire does not function.</description>
+        </element>
+        <element name="LOW">
+            <description>TPMS is reporting a low tire pressure for the tire.</description>
+        </element>
+        <element name="SYSTEM_ACTIVE">
+            <description>TPMS is active and the tire pressure is monitored.</description>
+        </element>
+        <element name="TRAIN">
+            <description>TPMS is reporting that the tire must be trained.</description>
+        </element>
+        <element name="TRAINING_COMPLETE">
+            <description>TPMS reports the training for the tire is completed.</description>
+        </element>
+        <element name="NOT_TRAINED">
+            <description>TPMS reports the tire is not trained.</description>
+        </element>
+    </enum>
     
+    <enum name="ElectronicParkBrakeStatus">
+      <element name="CLOSED">
+        <description>
+          Park brake actuators have been fully applied.
+        </description>		
+      </element>
+      <element name="TRANSITION">
+        <description>
+          Park brake actuators are transitioning to either Apply/Closed or Release/Open state.
+        </description>
+      </element>
+      <element name="OPEN">
+        <description>
+          Park brake actuators are released.
+        </description>		
+      </element>
+      <element name="DRIVE_ACTIVE">
+        <description>
+          When driver pulls the Electronic Park Brake switch while driving "at speed".
+        </description>
+      </element>
+     <element name="FAULT">
+        <description>
+          When system has a fault or is under maintenance.
+        </description>
+     </element>
+    </enum>
+    
+    <enum name="FuelType">
+        <element name="GASOLINE" />
+        <element name="DIESEL" />
+        <element name="CNG">
+            <description>
+                For vehicles using compressed natural gas.
+            </description>
+        </element>
+        <element name="LPG">
+            <description>
+                For vehicles using liquefied petroleum gas.
+            </description>
+        </element>
+        <element name="HYDROGEN">
+            <description>For FCEV (fuel cell electric vehicle).</description>
+        </element>
+        <element name="BATTERY">
+            <description>For BEV (Battery Electric Vehicle), PHEV (Plug-in Hybrid Electric Vehicle), solar vehicles and other vehicles which run on a battery.</description>
+        </element>
+    </enum>
+
+    <struct name="FuelRange">
+        <param name="type" type="FuelType" mandatory="false"/>
+        <param name="range" type="Float" minvalue="0" maxvalue="10000" mandatory="false">
+            <description>
+                The estimate range in KM the vehicle can travel based on fuel level and consumption.
+            </description>
+        </param>
+    </struct>
+
     <struct name="SingleTireStatus">
         <param name="status" type="ComponentVolumeStatus" mandatory="true">
             <description>See ComponentVolumeStatus.</description>
+        </param>
+        <param name="tpms" type="TPMS" mandatory="false">
+            <description>The status of TPMS according to the particular tire.</description>
+        </param>
+        <param name="pressure" type="Float" mandatory="false" minvalue="0" maxvalue="2000">
+            <description>The pressure value of the particular tire in kilo pascal.</description>
         </param>
     </struct>
     
@@ -1257,6 +1398,7 @@
     <enum name="ModuleType">
         <element name="CLIMATE"/>
         <element name="RADIO"/>
+        <element name="SEAT"/>
     </enum>
     
     <enum name="DefrostZone">
@@ -1682,6 +1824,23 @@
         </param>
     </struct>
     
+    
+    <enum name="TurnSignal">
+        <description>Enumeration that describes the status of the turn light indicator.</description>
+        <element name="OFF">
+            <description>Turn signal is OFF</description>
+        </element>
+        <element name="LEFT">
+            <description>Left turn signal is on</description>
+        </element>
+        <element name="RIGHT">
+            <description>Right turn signal is on</description>
+        </element>
+        <element name="BOTH">
+            <description>Both signals (left and right) are on.</description>
+        </element>
+    </enum>
+    
     <struct name="GPSData">
         <description>Struct with the GPS data.</description>
         <param name="longitudeDegrees" type="Float" minvalue="-180" maxvalue="180" mandatory="true">
@@ -1904,6 +2063,9 @@
         <param name="displayType" type="DisplayType" mandatory="true">
             <description>The type of the display. See DisplayType</description>
         </param>
+        <param name="displayName" type="String" mandatory="false">
+            <description>The name of the display the app is connected to.</description>
+        </param>
         <param name="textFields" type="TextField" minsize="1" maxsize="100" array="true" mandatory="true">
             <description>A set of all fields that support text data. See TextField</description>
         </param>
@@ -2019,15 +2181,15 @@
         </param>
     </struct>         
     <struct name="TTSChunk">
-        <description>A TTS chunk, that consists of the text/phonemes to speak and the type (like text or SAPI)</description>
+        <description>A TTS chunk, that consists of text/phonemes to speak or the name of a file to play, and a TTS type (like text or SAPI)</description>
         <param name="text" minlength="0" maxlength="500" type="String" mandatory="true">
             <description>
-                The text or phonemes to speak.
+                The text or phonemes to speak, or the name of the audio file to play.
                 May not be empty.
             </description>
         </param>
         <param name="type" type="SpeechCapabilities" mandatory="true">
-            <description>Describes, whether it is text or a specific phoneme set. See SpeechCapabilities</description>
+            <description>Describes whether the TTS chunk is plain text, a specific phoneme set, or an audio file. See SpeechCapabilities</description>
         </param>
     </struct>         
     <struct name="Turn">
@@ -2144,6 +2306,7 @@
         <element name="EMERGENCY" />
         <element name="MEDIA" />
         <element name="FOTA" />
+        <element name="OEM_SPECIFIC" />
     </enum>         
     <enum name="AppHMIType">
         <description>Enumeration listing possible app types.</description>
@@ -2361,7 +2524,8 @@
         <element name="OnHashChangeID" value="32782" hexvalue="800E" />
         <element name="OnInteriorVehicleDataID" value="32783" hexvalue="800F" />
         <element name="OnWayPointChangeID" value="32784" hexvalue="8010" />
-        
+        <element name="OnRCStatusID" value="32785" hexvalue="8011" />
+
         <!--
          Ford Specific Request / Response RPCs
          Range = 0x 0001 0000 - 0x 0001 7FFF
@@ -2540,7 +2704,132 @@
     </struct>
     
     <!---Remote control  -->
-    
+
+    <enum name="MassageZone">
+      <description>List possible zones of a multi-contour massage seat.</description>
+      <element name="LUMBAR">
+        <description>The back of a multi-contour massage seat. or SEAT_BACK</description>
+      </element>
+      <element name="SEAT_CUSHION">
+        <description>The bottom a multi-contour massage seat. or SEAT_BOTTOM </description>
+      </element>
+    </enum>
+
+    <enum name="MassageMode">
+      <description>List possible modes of a massage zone.</description>
+      <element name="OFF"/>
+      <element name="LOW"/>
+      <element name="HIGH"/>
+    </enum>
+
+    <struct name="MassageModeData">
+      <description>Specify the mode of a massage zone.</description>
+      <param name="massageZone" type="MassageZone" mandatory="true"></param>
+      <param name="massageMode" type="MassageMode" mandatory="true"></param>
+    </struct>
+
+    <enum name="MassageCushion">
+      <description>List possible cushions of a multi-contour massage seat.</description>
+      <element name="TOP_LUMBAR"/>
+      <element name="MIDDLE_LUMBAR"/>
+      <element name="BOTTOM_LUMBAR"/>
+      <element name="BACK_BOLSTERS"/>
+      <element name="SEAT_BOLSTERS"/>
+    </enum>
+
+    <struct name="MassageCushionFirmness">
+      <description>The intensity or firmness of a cushion.</description>
+      <param name="cushion" type="MassageCushion" mandatory="true"></param>
+      <param name="firmness" type="Integer" minvalue="0" maxvalue="100" mandatory="true"></param>
+    </struct>
+
+    <enum name="SeatMemoryActionType">
+      <element name="SAVE">
+        <description>Save current seat postions and settings to seat memory.</description>
+      </element>
+      <element name="RESTORE">
+        <description>Restore / apply the seat memory settings to the current seat. </description>
+      </element>
+      <element name="NONE">
+        <description>No action to be performed.</description>
+      </element>
+    </enum>
+
+    <struct name="SeatMemoryAction">
+      <param name="id" type="Integer" minvalue="1" maxvalue="10" mandatory="true"/>
+      <param name="label" type="String" maxlength="100" mandatory="false"/>
+      <param name="action" type="SeatMemoryActionType" mandatory="true"/>
+    </struct>
+
+    <enum name="SupportedSeat">
+      <description>List possible seats that is a remote controllable seat.</description>
+      <element name="DRIVER"/>
+      <element name="FRONT_PASSENGER"/>
+    </enum>
+
+    <struct name="SeatControlData">
+      <description>Seat control data corresponds to "SEAT" ModuleType. </description>
+      <param name="id" type="SupportedSeat" mandatory="true"></param>
+
+      <param name="heatingEnabled" type="Boolean" mandatory="false"></param>
+      <param name="coolingEnabled" type="Boolean" mandatory="false"></param>
+      <param name="heatingLevel" type="Integer" minvalue="0" maxvalue="100" mandatory="false"></param>
+      <param name="coolingLevel" type="Integer" minvalue="0" maxvalue="100" mandatory="false"></param>
+
+      <param name="horizontalPosition" type="Integer" minvalue="0" maxvalue="100" mandatory="false"></param>
+      <param name="verticalPosition" type="Integer" minvalue="0" maxvalue="100" mandatory="false"></param>
+      <param name="frontVerticalPosition" type="Integer" minvalue="0" maxvalue="100" mandatory="false"></param>
+      <param name="backVerticalPosition" type="Integer" minvalue="0" maxvalue="100" mandatory="false"></param>
+      <param name="backTiltAngle" type="Integer" minvalue="0" maxvalue="100" mandatory="false"></param>
+
+      <param name="headSupportHorizontalPosition" type="Integer" minvalue="0" maxvalue="100" mandatory="false"></param>
+      <param name="headSupportVerticalPosition" type="Integer" minvalue="0" maxvalue="100" mandatory="false"></param>
+
+      <param name="massageEnabled" type="Boolean" mandatory="false"></param>
+      <param name="massageMode" type="MassageModeData" minsize="1" maxsize="2" array="true" mandatory="false"></param>
+      <param name="massageCushionFirmness" type="MassageCushionFirmness" minsize="1" maxsize="5" array="true" mandatory="false"></param>
+      <param name="memory" type="SeatMemoryAction" mandatory="false"></param>
+    </struct>
+
+    <struct name="SeatControlCapabilities">
+      <param name="moduleName" type="String" maxlength="100"  mandatory="true">
+        <description>
+        The short friendly name of the light control module.
+        It should not be used to identify a module by mobile application.
+        </description>
+      </param>
+      <param name="heatingEnabledAvailable" type="Boolean" mandatory="false">
+      </param>
+      <param name="coolingEnabledAvailable" type="Boolean" mandatory="false">
+      </param>
+      <param name="heatingLevelAvailable" type="Boolean" mandatory="false">
+      </param>
+      <param name="coolingLevelAvailable" type="Boolean" mandatory="false">
+      </param>
+      <param name="horizontalPositionAvailable" type="Boolean" mandatory="false">
+      </param>
+      <param name="verticalPositionAvailable" type="Boolean" mandatory="false">
+      </param>
+      <param name="frontVerticalPositionAvailable" type="Boolean" mandatory="false">
+      </param>
+      <param name="backVerticalPositionAvailable" type="Boolean" mandatory="false">
+      </param>
+      <param name="backTiltAngleAvailable" type="Boolean" mandatory="false">
+      </param>
+      <param name="headSupportHorizontalPositionAvailable" type="Boolean" mandatory="false">
+      </param>
+      <param name="headSupportVerticalPositionAvailable" type="Boolean" mandatory="false">
+      </param>
+      <param name="massageEnabledAvailable" type="Boolean" mandatory="false">
+      </param>
+      <param name="massageModeAvailable" type="Boolean" mandatory="false">
+      </param>
+      <param name="massageCushionFirmnessAvailable" type="Boolean" mandatory="false">
+      </param>
+      <param name="memoryAvailable" type="Boolean" mandatory="false">
+      </param>
+    </struct>
+
     <struct name="Temperature">
         <param name="unit" type="TemperatureUnit" mandatory="true">
             <description>Temperature Unit</description>
@@ -2626,16 +2915,6 @@
         <param name="acMaxEnable" type="Boolean" mandatory="false">
         </param>
         <param name="ventilationMode" type="VentilationMode" mandatory="false">
-        </param>
-    </struct>
-    
-    <struct name="ModuleData">
-        <description>The moduleType indicates which type of data should be changed and identifies which data object exists in this struct. For example, if the moduleType is CLIMATE then a "climateControlData" should exist</description>
-        <param name="moduleType" type="ModuleType" mandatory="true">
-        </param>
-        <param name="radioControlData" type="RadioControlData" mandatory="false">
-        </param>
-        <param name="climateControlData" type="ClimateControlData" mandatory="false">
         </param>
     </struct>
     
@@ -2777,6 +3056,18 @@
         </param>
     </struct>
     
+    <struct name="ModuleData">
+        <description>The moduleType indicates which type of data should be changed and identifies which data object exists in this struct. For example, if the moduleType is CLIMATE then a "climateControlData" should exist</description>
+        <param name="moduleType" type="ModuleType" mandatory="true">
+        </param>
+        <param name="radioControlData" type="RadioControlData" mandatory="false">
+        </param>
+        <param name="climateControlData" type="ClimateControlData" mandatory="false">
+        </param>
+        <param name="seatControlData" type="SeatControlData" mandatory="false">
+        </param>
+    </struct>
+
     <struct name="RemoteControlCapabilities">
         <param name="climateControlCapabilities" type="ClimateControlCapabilities" mandatory="false" minsize="1" maxsize="100" array="true">
             <description>If included, the platform supports RC climate controls. For this baseline version, maxsize=1. i.e. only one climate control module is supported.</description >
@@ -2786,6 +3077,11 @@
         </param>
         <param name="buttonCapabilities" type="ButtonCapabilities"  mandatory="false" minsize="1" maxsize="100" array="true" >
             <description>If included, the platform supports RC button controls with the included button names.</description >
+        </param>
+        <param name="seatControlCapabilities" type="SeatControlCapabilities" mandatory="false" minsize="1" maxsize="100" array="true">
+            <description>
+                If included, the platform supports seat controls.
+            </description >
         </param>
     </struct>
     
@@ -2887,7 +3183,27 @@
             <description>The position of the haptic rectangle to be highlighted. The center of this rectangle will be "touched" when a press occurs.</description>
         </param>
     </struct>
-    
+
+    <struct name="RGBColor">
+        <param name="red" type="Integer" minvalue="0" maxvalue="255" mandatory="true" />
+        <param name="green" type="Integer" minvalue="0" maxvalue="255" mandatory="true" />
+        <param name="blue" type="Integer" minvalue="0" maxvalue="255" mandatory="true" />
+    </struct>
+
+    <struct name="TemplateColorScheme">
+        <description>
+            A color scheme for all display layout templates.
+        </description>
+        <param name="primaryColor" type="RGBColor" mandatory="false">
+            <description>The primary "accent" color</description>
+        </param>
+        <param name="secondaryColor" type="RGBColor" mandatory="false">
+            <description>The secondary "accent" color</description>
+        </param>
+        <param name="backgroundColor" type="RGBColor" mandatory="false">
+            <description>The color of the background</description>
+        </param>
+    </struct>
     <!-- Requests/Responses -->
     
     <function name="RegisterAppInterface" functionID="RegisterAppInterfaceID" messagetype="request">
@@ -2988,6 +3304,10 @@
                 See AppInfo.
             </description>
         </param>
+
+        <param name="dayColorScheme" type="TemplateColorScheme" mandatory="false"/>
+
+        <param name="nightColorScheme" type="TemplateColorScheme" mandatory="false"/>
     </function>
     
     <function name="RegisterAppInterface" functionID="RegisterAppInterfaceID" messagetype="response">
@@ -3089,6 +3409,10 @@
         
         <param name="systemSoftwareVersion" type="String" maxlength="100" mandatory="false" platform="documentation">
             <description>The software version of the system that implements the SmartDeviceLink core.</description>
+        </param>
+        <param name="iconResumed" type="Boolean" mandatory="true">
+            <description>Existence of apps icon at system. If true, apps icon
+            was resumed at system. If false, apps icon is not resumed at system</description>
         </param>
     </function>
     
@@ -3338,6 +3662,9 @@
         
         <param name="menuName" maxlength="500" type="String" mandatory="true">
             <description>Text to show in the menu for this sub menu.</description>
+        </param>
+        <param name="menuIcon" type="Image" mandatory="false">
+            <description>The image field for AddSubMenu</description>
         </param>
     </function>
     
@@ -3853,6 +4180,9 @@
                 In case of pause, resume, or clear, the start time value is ignored and shall be left out.  For resume, the time continues with the same value as it was when paused.
             </description>
         </param>
+       <param name="audioStreamingIndicator" type="AudioStreamingIndicator" mandatory="false">
+      		<description>Indicates that a button press of the Play/Pause button would play, pause or Stop the current playback.</description>
+    	</param>
     </function>
     
     <function name="SetMediaClockTimer" functionID="SetMediaClockTimerID" messagetype="response">
@@ -4056,8 +4386,14 @@
         <param name="instantFuelConsumption" type="Boolean" mandatory="false">
             <description>The instantaneous fuel consumption in microlitres</description>
         </param>
+        <param name="fuelRange" type="Boolean" mandatory="false">
+            <description>The estimate range in KM the vehicle can travel based on fuel level and consumption</description>
+        </param>
         <param name="externalTemperature" type="Boolean" mandatory="false">
             <description>The external temperature in degrees celsius</description>
+        </param>
+        <param name="turnSignal" type="Boolean" mandatory="false">
+            <description>See TurnSignal</description>
         </param>
         <param name="prndl" type="Boolean" mandatory="false">
             <description>See PRNDL</description>
@@ -4095,6 +4431,13 @@
         <param name="steeringWheelAngle" type="Boolean" mandatory="false">
             <description>Current angle of the steering wheel (in deg)</description>
         </param>
+        <param name="engineOilLife" type="Boolean" mandatory="false">
+            <description>The estimated percentage of remaining oil life of the engine.</description>
+        </param>
+        <param name="electronicParkBrakeStatus" type="Boolean" mandatory="false">
+          <description>The status of the park brake as provided by Electric Park Brake (EPB) system.</description>
+        </param>
+
         
         <!-- Ford Specific Data Items -->
         <param name="eCallInfo" type="Boolean" mandatory="false">
@@ -4159,8 +4502,14 @@
         <param name="instantFuelConsumption" type="VehicleDataResult" mandatory="false">
             <description>The instantaneous fuel consumption in microlitres</description>
         </param>
+        <param name="fuelRange" type="VehicleDataResult" mandatory="false">
+            <description>The estimate range in KM the vehicle can travel based on fuel level and consumption</description>
+        </param>
         <param name="externalTemperature" type="VehicleDataResult" mandatory="false">
             <description>The external temperature in degrees celsius.</description>
+        </param>
+        <param name="turnSignal" type="VehicleDataResult" mandatory="false">
+            <description>See TurnSignal</description>
         </param>
         <param name="prndl" type="VehicleDataResult" mandatory="false">
             <description>See PRNDL</description>
@@ -4198,6 +4547,13 @@
         <param name="steeringWheelAngle" type="VehicleDataResult" mandatory="false">
             <description>Current angle of the steering wheel (in deg)</description>
         </param>
+        <param name="engineOilLife" type="VehicleDataResult" mandatory="false">
+            <description>The estimated percentage of remaining oil life of the engine.</description>
+        </param>
+        <param name="electronicParkBrakeStatus" type="VehicleDataResult" mandatory="false">
+          <description>The status of the park brake as provided by Electric Park Brake (EPB) system.</description>
+        </param>
+
         
         <!-- Ford Specific Data Items -->
         <param name="eCallInfo" type="VehicleDataResult" mandatory="false">
@@ -4240,8 +4596,14 @@
         <param name="instantFuelConsumption" type="Boolean" mandatory="false">
             <description>The instantaneous fuel consumption in microlitres</description>
         </param>
+        <param name="fuelRange" type="Boolean" mandatory="false">
+            <description>The estimate range in KM the vehicle can travel based on fuel level and consumption</description>
+        </param>
         <param name="externalTemperature" type="Boolean" mandatory="false">
             <description>The external temperature in degrees celsius.</description>
+        </param>
+        <param name="turnSignal" type="Boolean" mandatory="false">
+            <description>See TurnSignal</description>
         </param>
         <param name="prndl" type="Boolean" mandatory="false">
             <description>See PRNDL</description>
@@ -4279,6 +4641,13 @@
         <param name="steeringWheelAngle" type="Boolean" mandatory="false">
             <description>Current angle of the steering wheel (in deg)</description>
         </param>
+        <param name="engineOilLife" type="Boolean" mandatory="false">
+            <description>The estimated percentage of remaining oil life of the engine.</description>
+        </param>
+        <param name="electronicParkBrakeStatus" type="Boolean" mandatory="false">
+          <description>The status of the park brake as provided by Electric Park Brake (EPB) system.</description>
+        </param>
+
         
         <!-- Ford Specific Data Items -->
         <param name="eCallInfo" type="Boolean" mandatory="false">
@@ -4341,8 +4710,14 @@
         <param name="instantFuelConsumption" type="VehicleDataResult" mandatory="false">
             <description>The instantaneous fuel consumption in microlitres</description>
         </param>
+        <param name="fuelRange" type="VehicleDataResult" mandatory="false">
+            <description>The estimate range in KM the vehicle can travel based on fuel level and consumption</description>
+        </param>
         <param name="externalTemperature" type="VehicleDataResult" mandatory="false">
             <description>The external temperature in degrees celsius</description>
+        </param>
+        <param name="turnSignal" type="VehicleDataResult" mandatory="false">
+            <description>See TurnSignal</description>
         </param>
         <param name="prndl" type="VehicleDataResult" mandatory="false">
             <description>See PRNDL</description>
@@ -4380,6 +4755,13 @@
         <param name="steeringWheelAngle" type="VehicleDataResult" mandatory="false">
             <description>Current angle of the steering wheel (in deg)</description>
         </param>
+        <param name="engineOilLife" type="VehicleDataResult" mandatory="false">
+            <description>The estimated percentage of remaining oil life of the engine.</description>
+        </param>
+        <param name="electronicParkBrakeStatus" type="VehicleDataResult" mandatory="false">
+          <description>The status of the park brake as provided by Electric Park Brake (EPB) system.</description>
+        </param>
+
         
         <!-- Ford Specific Data Items -->
         <param name="eCallInfo" type="VehicleDataResult" mandatory="false">
@@ -4422,8 +4804,14 @@
         <param name="instantFuelConsumption" type="Boolean" mandatory="false">
             <description>The instantaneous fuel consumption in microlitres</description>
         </param>
+        <param name="fuelRange" type="Boolean" mandatory="false">
+            <description>The estimate range in KM the vehicle can travel based on fuel level and consumption</description>
+        </param>
         <param name="externalTemperature" type="Boolean" mandatory="false">
             <description>The external temperature in degrees celsius</description>
+        </param>
+        <param name="turnSignal" type="Boolean" mandatory="false">
+            <description>See TurnSignal</description>
         </param>
         <param name="vin" type="Boolean" mandatory="false">
             <description>Vehicle identification number</description>
@@ -4464,6 +4852,13 @@
         <param name="steeringWheelAngle" type="Boolean" mandatory="false">
             <description>Current angle of the steering wheel (in deg)</description>
         </param>
+        <param name="engineOilLife" type="Boolean" mandatory="false">
+            <description>The estimated percentage of remaining oil life of the engine.</description>
+        </param>
+        <param name="electronicParkBrakeStatus" type="Boolean" mandatory="false">
+          <description>The status of the park brake as provided by Electric Park Brake (EPB) system.</description>
+        </param>
+
         
         <!-- Ford Specific Data Items -->
         <param name="eCallInfo" type="Boolean" mandatory="false">
@@ -4527,8 +4922,14 @@
         <param name="instantFuelConsumption" type="Float" minvalue="0" maxvalue="25575" mandatory="false">
             <description>The instantaneous fuel consumption in microlitres</description>
         </param>
+        <param name="fuelRange" type="FuelRange" minsize="0" maxsize="100" array="true" mandatory="false">
+            <description>The estimate range in KM the vehicle can travel based on fuel level and consumption</description>
+        </param>
         <param name="externalTemperature" type="Float" minvalue="-40" maxvalue="100" mandatory="false">
             <description>The external temperature in degrees celsius</description>
+        </param>
+        <param name="turnSignal" type="TurnSignal" mandatory="false">
+            <description>See TurnSignal</description>
         </param>
         <param name="vin" type="String" maxlength="17" mandatory="false">
             <description>Vehicle identification number</description>
@@ -4569,6 +4970,13 @@
         <param name="steeringWheelAngle" type="Float" minvalue="-2000" maxvalue="2000" mandatory="false">
             <description>Current angle of the steering wheel (in deg)</description>
         </param>
+        <param name="engineOilLife" type="Float" minvalue="0" maxvalue="100" mandatory="false">
+            <description>The estimated percentage of remaining oil life of the engine.</description>
+        </param>
+        <param name="electronicParkBrakeStatus" type="ElectronicParkBrakeStatus" mandatory="false">
+          <description>The status of the park brake as provided by Electric Park Brake (EPB) system.</description>
+        </param>
+
         
         <!-- Ford Specific Data Items -->
         <param name="eCallInfo" type="ECallInfo" mandatory="false">
@@ -5073,6 +5481,9 @@
                 If offset is set to 0, then length is the total length of the file to be downloaded
             </description>
         </param>
+        <param name="crc" type="Integer" minvalue="0" maxvalue="4294967295" mandatory="false">
+            <description> Additional CRC32 checksum to protect data integrity up to 512 Mbits . </description>
+        </param>
     </function>
     
     <function name="PutFile" functionID="PutFileID" messagetype="response">
@@ -5092,6 +5503,7 @@
             <element name="GENERIC_ERROR"/>
             <element name="REJECTED"/>
             <element name="UNSUPPORTED_REQUEST"/>
+            <element name="CORRUPTED_DATA"/>
         </param>
         
         <param name="spaceAvailable" type="Integer" minvalue="0" maxvalue="2000000000" mandatory="true">
@@ -5245,6 +5657,9 @@
             </description>
         </param>
         
+        <param name="dayColorScheme" type="TemplateColorScheme" mandatory="false"/>
+
+        <param name="nightColorScheme" type="TemplateColorScheme" mandatory="false"/>
     </function>
     
     <function name="SetDisplayLayout" functionID="SetDisplayLayoutID" messagetype="response">
@@ -5293,6 +5708,11 @@
             <description>
                 The type of system request.
                 Note that Proprietary requests should forward the binary data to the known proprietary module on the system.
+            </description>
+        </param>
+        <param name="requestSubType" type="String" maxlength="255" mandatory="false">
+            <description>
+                This parameter is filled for supporting OEM proprietary data exchanges.
             </description>
         </param>
         <param name="fileName" type="String" maxlength="255" mandatory="false">
@@ -5471,7 +5891,7 @@
                 In the future, this should be the Identification of a module.
             </description>
         </param>
-        <param name="subscribe" type="Boolean" mandatory="false" defvalue="false">
+        <param name="subscribe" type="Boolean" mandatory="false">
             <description>
                 If subscribe is true, the head unit will register onInteriorVehicleData notifications for the requested moduelType.
                 If subscribe is false, the head unit will unregister onInteriorVehicleData notifications for the requested moduelType.
@@ -5695,6 +6115,9 @@
         <param name="systemContext" type="SystemContext" mandatory="true">
             <description>See SystemContext</description>
         </param>
+        <param name="videoStreamingState" type="VideoStreamingState" mandatory="true">
+            <description>See VideoStreamingState. If it is NOT_STREAMABLE, the app must stop streaming video to SDL.</description>
+        </param>
     </function>
     
     <function name="OnAppInterfaceUnregistered" functionID="OnAppInterfaceUnregisteredID" messagetype="notification">
@@ -5745,8 +6168,14 @@
         <param name="instantFuelConsumption" type="Float" minvalue="0" maxvalue="25575" mandatory="false">
             <description>The instantaneous fuel consumption in microlitres</description>
         </param>
+        <param name="fuelRange" type="FuelRange" minsize="0" maxsize="100" array="true" mandatory="false">
+            <description>The estimate range in KM the vehicle can travel based on fuel level and consumption</description>
+        </param>
         <param name="externalTemperature" type="Float" minvalue="-40" maxvalue="100" mandatory="false">
             <description>The external temperature in degrees celsius</description>
+        </param>
+        <param name="turnSignal" type="TurnSignal" mandatory="false">
+            <description>See TurnSignal</description>
         </param>
         <param name="vin" type="String" maxlength="17" mandatory="false">
             <description>Vehicle identification number.</description>
@@ -5787,6 +6216,13 @@
         <param name="steeringWheelAngle" type="Float" minvalue="-2000" maxvalue="2000" mandatory="false">
             <description>Current angle of the steering wheel (in deg)</description>
         </param>
+        <param name="engineOilLife" type="Float" minvalue="0" maxvalue="100" mandatory="false">
+            <description>The estimated percentage of remaining oil life of the engine.</description>
+        </param>
+        <param name="electronicParkBrakeStatus" type="ElectronicParkBrakeStatus" mandatory="false">
+          <description>The status of the park brake as provided by Electric Park Brake (EPB) system.</description>
+        </param>
+
         
         <!-- Ford Specific Vehicle Data -->
         <param name="eCallInfo" type="ECallInfo" mandatory="false">
@@ -5888,6 +6324,11 @@
         <param name="requestType" type="RequestType" mandatory="true">
             <description>The type of system request.</description>
         </param>
+        <param name="requestSubType" type="String" maxlength="255" mandatory="false">
+            <description>
+                This parameter is filled for supporting OEM proprietary data exchanges.
+            </description>
+        </param>
         <param name="url" type="String" maxlength="1000" mandatory="false">
             <description>
                 Optional URL for HTTP requests.
@@ -5932,6 +6373,21 @@
     <function name="OnInteriorVehicleData" functionID="OnInteriorVehicleDataID" messagetype="notification">
         <param name="moduleData" type="ModuleData"  mandatory="true">
         </param>
+    </function>
+
+    <function name="OnRCStatus" functionID="OnRCStatusID" messagetype="notification">
+      <description>Issued by SDL to notify the application about remote control status change on SDL</description>
+      <param name="allowed" type="Boolean" mandatory="false">
+        <description>
+            If "true" - RC is allowed; if "false" - RC is disallowed.
+        </description>
+      </param>
+      <param name="allocatedModules" type="ModuleData" minsize="0" maxsize="100" array="true" mandatory="true">
+        <description>Contains a list (zero or more) of module types that are allocated to the application.</description>
+      </param>
+      <param name="freeModules" type="ModuleData" minsize="0" maxsize="100" array="true" mandatory="true">
+        <description>Contains a list (zero or more) of module types that are free to access for the application.</description>
+      </param>
     </function>
     
     <!-- ~~~~~~~~~~~~~~~~~~ -->

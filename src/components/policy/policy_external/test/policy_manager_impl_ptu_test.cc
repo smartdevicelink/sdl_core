@@ -574,8 +574,7 @@ TEST_F(PolicyManagerImplTest2, GetUpdateUrl) {
   CreateLocalPT(preloaded_pt_filename_);
   GetPTU(kValidSdlPtUpdateJson);
   // Check expectations
-  const std::string update_url(
-      "http://policies.telematics.ford.com/api/policies");
+  const std::string update_url("http://x.x.x.x:3000/api/1/policies");
   EXPECT_EQ(update_url, policy_manager_->GetUpdateUrl(7));
   EXPECT_EQ("", policy_manager_->GetUpdateUrl(4));
 }
@@ -1093,7 +1092,7 @@ TEST_F(PolicyManagerImplTest2,
   // Arrange
   CreateLocalPT(preloaded_pt_filename_);
   GetPTU(kValidSdlPtUpdateJson);
-  utils::SharedPtr<policy_table::Table> pt =
+  std::shared_ptr<policy_table::Table> pt =
       (policy_manager_->GetCache())->GetPT();
   policy_table::ModuleConfig& module_config = pt->policy_table.module_config;
   ::policy::VehicleInfo vehicle_info = policy_manager_->GetVehicleInfo();
@@ -1203,7 +1202,7 @@ TEST_F(
     HertBeatTimeout_AddApp_UpdateAppPolicies_ExpectReceivedHertBeatTimeoutCorrect) {
   // Arrange
   CreateLocalPT(preloaded_pt_filename_);
-  utils::SharedPtr<policy_table::Table> pt =
+  std::shared_ptr<policy_table::Table> pt =
       (policy_manager_->GetCache())->GetPT();
   ::policy_table::PolicyTableType type1 =
       ::policy_table::PolicyTableType::PT_PRELOADED;
@@ -1303,7 +1302,7 @@ TEST_F(PolicyManagerImplTest2,
             actual_groups_permissions[index].group_name);
   EXPECT_EQ(group1_perm.group_id, actual_groups_permissions[index].group_id);
   EXPECT_EQ(group1_perm.state, actual_groups_permissions[index].state);
-  utils::SharedPtr<policy_table::Table> pt =
+  std::shared_ptr<policy_table::Table> pt =
       (policy_manager_->GetCache())->GetPT();
   uint32_t ucr_size = 0;
   ::policy_table::DeviceData& device_data = *pt->policy_table.device_data;

@@ -37,7 +37,6 @@
 #include <set>
 
 #include "utils/macro.h"
-#include "utils/shared_ptr.h"
 
 #include "smart_objects/schema_item.h"
 #include "smart_objects/schema_item_parameter.h"
@@ -82,7 +81,7 @@ class CObjectSchemaItem : public ISchemaItem {
    *
    * @return Shared pointer to a new schema item.
    **/
-  static utils::SharedPtr<CObjectSchemaItem> create(const Members& Members);
+  static std::shared_ptr<CObjectSchemaItem> create(const Members& Members);
   /**
    * @deprecated
    * @brief Validate smart object.

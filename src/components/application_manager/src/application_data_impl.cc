@@ -44,6 +44,7 @@ InitialApplicationDataImpl::InitialApplicationDataImpl()
     , vr_synonyms_(NULL)
     , tts_name_(NULL)
     , ngn_media_screen_name_(NULL)
+
     , language_(mobile_api::Language::INVALID_ENUM)
     , ui_language_(mobile_api::Language::INVALID_ENUM) {}
 
@@ -173,12 +174,18 @@ DynamicApplicationDataImpl::DynamicApplicationDataImpl()
     , menu_title_(NULL)
     , menu_icon_(NULL)
     , tbt_show_command_(NULL)
+    , day_color_scheme_(NULL)
+    , night_color_scheme_(NULL)
+    , display_layout_("")
     , commands_()
-    , commands_lock_(true)
+    , commands_lock_ptr_(std::make_shared<sync_primitives::RecursiveLock>())
     , sub_menu_()
+    , sub_menu_lock_ptr_(std::make_shared<sync_primitives::Lock>())
     , choice_set_map_()
+    , choice_set_map_lock_ptr_(std::make_shared<sync_primitives::Lock>())
     , performinteraction_choice_set_map_()
-    , performinteraction_choice_set_lock_(true)
+    , performinteraction_choice_set_lock_ptr_(
+          std::make_shared<sync_primitives::RecursiveLock>())
     , is_perform_interaction_active_(false)
     , is_reset_global_properties_active_(false)
     , perform_interaction_mode_(-1) {}
@@ -212,6 +219,16 @@ DynamicApplicationDataImpl::~DynamicApplicationDataImpl() {
   if (tbt_show_command_) {
     delete tbt_show_command_;
     tbt_show_command_ = NULL;
+  }
+
+  if (day_color_scheme_) {
+    delete day_color_scheme_;
+    day_color_scheme_ = NULL;
+  }
+
+  if (night_color_scheme_) {
+    delete night_color_scheme_;
+    night_color_scheme_ = NULL;
   }
 
   for (CommandsMap::iterator command_it = commands_.begin();
@@ -288,6 +305,20 @@ const smart_objects::SmartObject* DynamicApplicationDataImpl::menu_title()
 const smart_objects::SmartObject* DynamicApplicationDataImpl::menu_icon()
     const {
   return menu_icon_;
+}
+
+const smart_objects::SmartObject* DynamicApplicationDataImpl::day_color_scheme()
+    const {
+  return day_color_scheme_;
+}
+
+const smart_objects::SmartObject*
+DynamicApplicationDataImpl::night_color_scheme() const {
+  return night_color_scheme_;
+}
+
+const std::string& DynamicApplicationDataImpl::display_layout() const {
+  return display_layout_;
 }
 
 void DynamicApplicationDataImpl::load_global_properties(
@@ -405,6 +436,28 @@ void DynamicApplicationDataImpl::set_menu_icon(
   menu_icon_ = new smart_objects::SmartObject(menu_icon);
 }
 
+void DynamicApplicationDataImpl::set_day_color_scheme(
+    const smart_objects::SmartObject& color_scheme) {
+  if (day_color_scheme_) {
+    delete day_color_scheme_;
+  }
+
+  day_color_scheme_ = new smart_objects::SmartObject(color_scheme);
+}
+
+void DynamicApplicationDataImpl::set_night_color_scheme(
+    const smart_objects::SmartObject& color_scheme) {
+  if (night_color_scheme_) {
+    delete night_color_scheme_;
+  }
+
+  night_color_scheme_ = new smart_objects::SmartObject(color_scheme);
+}
+
+void DynamicApplicationDataImpl::set_display_layout(const std::string& layout) {
+  display_layout_ = layout;
+}
+
 void DynamicApplicationDataImpl::SetGlobalProperties(
     const smart_objects::SmartObject& param,
     void (DynamicApplicationData::*callback)(
@@ -422,7 +475,7 @@ void DynamicApplicationDataImpl::SetGlobalProperties(
 
 void DynamicApplicationDataImpl::AddCommand(
     uint32_t cmd_id, const smart_objects::SmartObject& command) {
-  sync_primitives::AutoLock lock(commands_lock_);
+  sync_primitives::AutoLock lock(commands_lock_ptr_);
   CommandsMap::const_iterator it = commands_.find(cmd_id);
   if (commands_.end() == it) {
     commands_[cmd_id] = new smart_objects::SmartObject(command);
@@ -430,7 +483,7 @@ void DynamicApplicationDataImpl::AddCommand(
 }
 
 void DynamicApplicationDataImpl::RemoveCommand(uint32_t cmd_id) {
-  sync_primitives::AutoLock lock(commands_lock_);
+  sync_primitives::AutoLock lock(commands_lock_ptr_);
   CommandsMap::iterator it = commands_.find(cmd_id);
   if (commands_.end() != it) {
     delete it->second;
@@ -440,7 +493,7 @@ void DynamicApplicationDataImpl::RemoveCommand(uint32_t cmd_id) {
 
 smart_objects::SmartObject* DynamicApplicationDataImpl::FindCommand(
     uint32_t cmd_id) {
-  sync_primitives::AutoLock lock(commands_lock_);
+  sync_primitives::AutoLock lock(commands_lock_ptr_);
   CommandsMap::const_iterator it = commands_.find(cmd_id);
   if (it != commands_.end()) {
     return it->second;
@@ -452,7 +505,7 @@ smart_objects::SmartObject* DynamicApplicationDataImpl::FindCommand(
 // TODO(VS): Create common functions for processing collections
 void DynamicApplicationDataImpl::AddSubMenu(
     uint32_t menu_id, const smart_objects::SmartObject& menu) {
-  sync_primitives::AutoLock lock(sub_menu_lock_);
+  sync_primitives::AutoLock lock(sub_menu_lock_ptr_);
   SubMenuMap::const_iterator it = sub_menu_.find(menu_id);
   if (sub_menu_.end() == it) {
     sub_menu_[menu_id] = new smart_objects::SmartObject(menu);
@@ -460,7 +513,7 @@ void DynamicApplicationDataImpl::AddSubMenu(
 }
 
 void DynamicApplicationDataImpl::RemoveSubMenu(uint32_t menu_id) {
-  sync_primitives::AutoLock lock(sub_menu_lock_);
+  sync_primitives::AutoLock lock(sub_menu_lock_ptr_);
   SubMenuMap::iterator it = sub_menu_.find(menu_id);
 
   if (sub_menu_.end() != it) {
@@ -471,7 +524,7 @@ void DynamicApplicationDataImpl::RemoveSubMenu(uint32_t menu_id) {
 
 smart_objects::SmartObject* DynamicApplicationDataImpl::FindSubMenu(
     uint32_t menu_id) const {
-  sync_primitives::AutoLock lock(sub_menu_lock_);
+  sync_primitives::AutoLock lock(sub_menu_lock_ptr_);
   SubMenuMap::const_iterator it = sub_menu_.find(menu_id);
   if (it != sub_menu_.end()) {
     return it->second;
@@ -482,7 +535,7 @@ smart_objects::SmartObject* DynamicApplicationDataImpl::FindSubMenu(
 
 bool DynamicApplicationDataImpl::IsSubMenuNameAlreadyExist(
     const std::string& name) {
-  sync_primitives::AutoLock lock(sub_menu_lock_);
+  sync_primitives::AutoLock lock(sub_menu_lock_ptr_);
   for (SubMenuMap::iterator it = sub_menu_.begin(); sub_menu_.end() != it;
        ++it) {
     smart_objects::SmartObject* menu = it->second;
@@ -495,7 +548,7 @@ bool DynamicApplicationDataImpl::IsSubMenuNameAlreadyExist(
 
 void DynamicApplicationDataImpl::AddChoiceSet(
     uint32_t choice_set_id, const smart_objects::SmartObject& choice_set) {
-  sync_primitives::AutoLock lock(choice_set_map_lock_);
+  sync_primitives::AutoLock lock(choice_set_map_lock_ptr_);
   ChoiceSetMap::const_iterator it = choice_set_map_.find(choice_set_id);
   if (choice_set_map_.end() == it) {
     choice_set_map_[choice_set_id] = new smart_objects::SmartObject(choice_set);
@@ -503,7 +556,7 @@ void DynamicApplicationDataImpl::AddChoiceSet(
 }
 
 void DynamicApplicationDataImpl::RemoveChoiceSet(uint32_t choice_set_id) {
-  sync_primitives::AutoLock lock(choice_set_map_lock_);
+  sync_primitives::AutoLock lock(choice_set_map_lock_ptr_);
   ChoiceSetMap::iterator it = choice_set_map_.find(choice_set_id);
 
   if (choice_set_map_.end() != it) {
@@ -514,7 +567,7 @@ void DynamicApplicationDataImpl::RemoveChoiceSet(uint32_t choice_set_id) {
 
 smart_objects::SmartObject* DynamicApplicationDataImpl::FindChoiceSet(
     uint32_t choice_set_id) {
-  sync_primitives::AutoLock lock(choice_set_map_lock_);
+  sync_primitives::AutoLock lock(choice_set_map_lock_ptr_);
   ChoiceSetMap::const_iterator it = choice_set_map_.find(choice_set_id);
   if (it != choice_set_map_.end()) {
     return it->second;
@@ -527,14 +580,14 @@ void DynamicApplicationDataImpl::AddPerformInteractionChoiceSet(
     uint32_t correlation_id,
     uint32_t choice_set_id,
     const smart_objects::SmartObject& vr_commands) {
-  sync_primitives::AutoLock lock(performinteraction_choice_set_lock_);
+  sync_primitives::AutoLock lock(performinteraction_choice_set_lock_ptr_);
   performinteraction_choice_set_map_[correlation_id].insert(std::make_pair(
       choice_set_id, new smart_objects::SmartObject(vr_commands)));
 }
 
 void DynamicApplicationDataImpl::DeletePerformInteractionChoiceSet(
     uint32_t correlation_id) {
-  sync_primitives::AutoLock lock(performinteraction_choice_set_lock_);
+  sync_primitives::AutoLock lock(performinteraction_choice_set_lock_ptr_);
   PerformChoice::iterator it =
       performinteraction_choice_set_map_[correlation_id].begin();
   for (; performinteraction_choice_set_map_[correlation_id].end() != it; ++it) {

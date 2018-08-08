@@ -37,7 +37,7 @@ namespace policy {
 
 TEST(AccessRemoteImplTest, CheckModuleType) {
   AccessRemoteImpl access_remote;
-  access_remote.cache_->pt_ = new policy_table::Table();
+  access_remote.cache_->pt_ = std::make_shared<policy_table::Table>();
 
   // No application
   EXPECT_FALSE(access_remote.CheckModuleType("1234", policy_table::MT_RADIO));
@@ -81,7 +81,7 @@ TEST(AccessRemoteImplTest, GetGroups) {
   ApplicationOnDevice who = {"dev1", "1234"};
   access_remote.hmi_types_[who].push_back(policy_table::AHT_REMOTE_CONTROL);
 
-  access_remote.cache_->pt_ = new policy_table::Table();
+  access_remote.cache_->pt_ = std::make_shared<policy_table::Table>();
   policy_table::ApplicationPolicies& apps =
       access_remote.cache_->pt_->policy_table.app_policies_section.apps;
   apps["1234"].groups.push_back("group_default");

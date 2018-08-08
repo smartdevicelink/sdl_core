@@ -27,7 +27,6 @@ set (SOURCES
   src/cppgen/namespace.cc
   src/cppgen/naming_convention.cc
   src/cppgen/struct_type_constructor.cc
-  src/cppgen/struct_type_dbus_serializer.cc
   src/cppgen/struct_type_from_json_method.cc
   src/cppgen/struct_type_is_initialized_method.cc
   src/cppgen/struct_type_is_valid_method.cc
@@ -58,7 +57,6 @@ set (HEADERS
   include/cppgen/namespace.h
   include/cppgen/naming_convention.h
   include/cppgen/struct_type_constructor.h
-  include/cppgen/struct_type_dbus_serializer.h
   include/cppgen/struct_type_from_json_method.h
   include/cppgen/struct_type_is_initialized_method.h
   include/cppgen/struct_type_is_valid_method.h

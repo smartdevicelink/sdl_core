@@ -76,6 +76,12 @@ class MockSessionObserver : public ::protocol_handler::SessionObserver {
                void(const uint32_t& connection_key));
   MOCK_METHOD1(OnMalformedMessageCallback,
                void(const uint32_t& connection_key));
+  MOCK_CONST_METHOD1(
+      TransportTypeProfileStringFromConnHandle,
+      const std::string(transport_manager::ConnectionUID connection_handle));
+  MOCK_CONST_METHOD1(
+      TransportTypeProfileStringFromDeviceHandle,
+      const std::string(transport_manager::DeviceHandle device_handle));
   MOCK_CONST_METHOD2(
       KeyFromPair,
       uint32_t(transport_manager::ConnectionUID connection_handle,
@@ -89,11 +95,6 @@ class MockSessionObserver : public ::protocol_handler::SessionObserver {
                              uint32_t* app_id,
                              std::list<int32_t>* sessions_list,
                              transport_manager::DeviceHandle* device_id));
-  DEPRECATED MOCK_CONST_METHOD4(GetDataOnSessionKey,
-                                int32_t(uint32_t key,
-                                        uint32_t* app_id,
-                                        std::list<int32_t>* sessions_list,
-                                        uint32_t* device_id));
 
   MOCK_CONST_METHOD5(GetDataOnDeviceID,
                      int32_t(transport_manager::DeviceHandle device_handle,

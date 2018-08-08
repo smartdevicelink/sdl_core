@@ -7,6 +7,7 @@
         ],
         "displayCapabilities": {
             "displayType": "GEN2_8_DMA",
+            "displayName": "GENERIC_DISPLAY",
             "textFields": [{
                     "name": "mainField1",
                     "characterSet": "TYPE2SET",
@@ -178,7 +179,6 @@
             ],
             "imageFields": [{
                     "name": "softButtonImage",
-                    "imageTypeSupported": [],
                     "imageResolution": {
                         "resolutionWidth": 35,
                         "resolutionHeight": 35
@@ -186,7 +186,6 @@
                 },
                 {
                     "name": "choiceImage",
-                    "imageTypeSupported": [],
                     "imageResolution": {
                         "resolutionWidth": 35,
                         "resolutionHeight": 35
@@ -194,7 +193,6 @@
                 },
                 {
                     "name": "choiceSecondaryImage",
-                    "imageTypeSupported": [],
                     "imageResolution": {
                         "resolutionWidth": 35,
                         "resolutionHeight": 35
@@ -202,7 +200,6 @@
                 },
                 {
                     "name": "menuIcon",
-                    "imageTypeSupported": [],
                     "imageResolution": {
                         "resolutionWidth": 35,
                         "resolutionHeight": 35
@@ -210,7 +207,6 @@
                 },
                 {
                     "name": "cmdIcon",
-                    "imageTypeSupported": [],
                     "imageResolution": {
                         "resolutionWidth": 35,
                         "resolutionHeight": 35
@@ -218,7 +214,6 @@
                 },
                 {
                     "name": "appIcon",
-                    "imageTypeSupported": [],
                     "imageResolution": {
                         "resolutionWidth": 35,
                         "resolutionHeight": 35
@@ -226,9 +221,13 @@
                 },
                 {
                     "name": "graphic",
-                    "imageTypeSupported": [
-
-                    ],
+                    "imageResolution": {
+                        "resolutionWidth": 35,
+                        "resolutionHeight": 35
+                    }
+                },
+                {
+                    "name": "secondaryGraphic",
                     "imageResolution": {
                         "resolutionWidth": 35,
                         "resolutionHeight": 35
@@ -251,7 +250,6 @@
             ],
             "graphicSupported": true,
             "templatesAvailable": [
-
                 "DEFAULT", "MEDIA", "NON-MEDIA", "ONSCREEN_PRESETS", "NAV_FULLSCREEN_MAP", "NAV_KEYBOARD",
                 "GRAPHIC_WITH_TEXT", "TEXT_WITH_GRAPHIC", "TILES_ONLY", "TEXTBUTTONS_ONLY",
                 "GRAPHIC_WITH_TILES", "TILES_WITH_GRAPHIC", "GRAPHIC_WITH_TEXT_AND_SOFTBUTTONS",
@@ -463,6 +461,26 @@
                         "signalChangeThresholdAvailable": true,
                         "signalStrengthAvailable": true,
                         "stateAvailable": true
+                    }
+                ],
+				"seatControlCapabilities": [
+                {
+                        "moduleName": "driver_seat",
+                        "heatingEnabledAvailable" : true,
+                        "coolingEnabledAvailable": true,
+                        "heatingLevelAvailable": true,
+                        "coolingLevelAvailable": true,
+                        "horizontalPositionAvailable": true,
+                        "verticalPositionAvailable" : true,
+                        "frontVerticalPositionAvailable": true,
+                        "backVerticalPositionAvailable": true,
+                        "backTiltAngleAvailable": true,
+                        "headSupportHorizontalPositionAvailable": true,
+                        "headSupportVerticalPositionAvailable" : true,
+                        "massageEnabledAvailable": true,
+                        "massageModeAvailable": true,
+                        "massageCushionFirmnessAvailable": true,
+                        "memoryAvailable": true
                     }
                 ]
             }

@@ -2,6 +2,9 @@
  Copyright (c) 2015, Ford Motor Company
  All rights reserved.
 
+ Copyright (c) 2017, Livio, Inc.
+ All rights reserved.
+
  Redistribution and use in source and binary forms, with or without
  modification, are permitted provided that the following conditions are met:
 
@@ -64,12 +67,33 @@ namespace mobile_api = mobile_apis;
 typedef std::map<std::string, mobile_apis::VehicleDataType::eType> VehicleData;
 
 /**
+ * @brief Defines set of vehicle info types
+ */
+typedef std::set<mobile_apis::VehicleDataType::eType> VehicleInfoSubscriptions;
+
+/**
  * @brief MessageHelper class
  **/
 class MessageHelper {
  public:
   /**
-   * @brief Creates request for different interfaces(JSON, DBUS)
+ * @brief CreateNotification creates basic mobile notification smart object
+ * @param function_id Notification function ID
+ * @param app_id application to send notification
+ * @return basic mobile notification smart object
+ */
+  static smart_objects::SmartObjectSPtr CreateNotification(
+      mobile_apis::FunctionID::eType function_id, uint32_t app_id);
+  /**
+ * @brief CreateHMINotification creates basic hmi notification smart object
+ * @param function_id Notification function ID
+ * @return basic hmi notification smart object
+ */
+  static smart_objects::SmartObjectSPtr CreateHMINotification(
+      hmi_apis::FunctionID::eType function_id);
+
+  /**
+   * @brief Creates request for different interfaces(JSON)
    * @param correlation_id unique ID
    * @param params Vector of arguments that we need in GetVehicleData request
    * (e.g. gps, odometer, fuel_level)
@@ -103,6 +127,15 @@ class MessageHelper {
     */
   static void SendDecryptCertificateToHMI(const std::string& file_name,
                                           ApplicationManager& app_mngr);
+
+  /**
+    * @brief SendGetSystemTimeRequest sends mentioned request to HMI.
+    * @param correlation_id the message correlation id, required for proper
+    * response processing.
+    * @param app_mngr
+    */
+  static void SendGetSystemTimeRequest(const uint32_t correlation_id,
+                                       ApplicationManager& app_mngr);
 
   /*
    * @brief Retrieve vehicle data map for param name in mobile request
@@ -215,18 +248,6 @@ class MessageHelper {
       const std::string& path_to_icon, uint32_t app_id);
 
   /**
-   * @brief Sends IVI subscription requests
-   */
-  static bool SendIVISubscribtions(const uint32_t app_id,
-                                   ApplicationManager& app_mngr);
-
-  /**
-   * @brief Returns IVI subscription requests
-   */
-  static smart_objects::SmartObjectList GetIVISubscriptionRequests(
-      ApplicationSharedPtr app, ApplicationManager& app_mngr);
-
-  /**
    * @brief Sends button subscription notification
    */
   static void SendOnButtonSubscriptionNotification(
@@ -263,6 +284,16 @@ class MessageHelper {
   static smart_objects::SmartObjectList CreateAddCommandRequestToHMI(
       ApplicationConstSharedPtr app, ApplicationManager& app_mngr);
 
+  /**
+   * @brief Creates Message for sending to HMI for unsubscribe from specified
+   * VehicleData. Puts in vehicle data types into message according to keys.
+   * @param message_to_hmi - message for sending.
+   * @param vehicle_data - collection with vehicle data types for ubsubscribe.
+   */
+  static void CreateUbsubscriveVehicleDataMessageForHMI(
+      smart_objects::SmartObjectSPtr& message_to_hmi,
+      const VehicleInfoSubscriptions& vehicle_data,
+      const application_manager::ApplicationSharedPtr& app);
   static smart_objects::SmartObjectList
   CreateAddVRCommandRequestFromChoiceToHMI(ApplicationConstSharedPtr app,
                                            ApplicationManager& app_mngr);
@@ -284,6 +315,24 @@ class MessageHelper {
       const smart_objects::SmartObject& vr_commands,
       const uint32_t app_id,
       ApplicationManager& app_mngr);
+
+  /*
+   * @brief Create Common.DeviceInfo struct from device handle
+   * @param device_handle device handle of the app
+   * @param session_observer instance of SessionObserver to retrieve device
+   * information
+   * @param policy_handler instance of PolicyHandlerInterface to get the value
+   * of 'isSDLAllowed'
+   * @param app_mngr instance of ApplicationManager
+   * @param output smart object to store created Common.DeviceInfo struct
+   * @return true on success, false otherwise
+   */
+  static bool CreateDeviceInfo(
+      connection_handler::DeviceHandle device_handle,
+      const protocol_handler::SessionObserver& session_observer,
+      const policy::PolicyHandlerInterface& policy_handler,
+      ApplicationManager& app_mngr,
+      smart_objects::SmartObject* output);
 
   /*
    * @brief Create Common.HMIApplication struct application instance
@@ -544,16 +593,46 @@ class MessageHelper {
       int32_t result_code);
 
   /**
+   * @brief Get the full file path of an app file
+   *
+   * @param file_name The relative path of an application file
+   * @param app Current application
+   * @param app_mngr Application manager
+   *
+   * @return The full file path of the application file if valid,
+   * empty string otherwise
+   */
+  static std::string GetAppFilePath(std::string file_name,
+                                    ApplicationConstSharedPtr app,
+                                    ApplicationManager& app_mngr);
+
+  /**
+   * @brief Verify that all ttsChunks with FILE type
+   * in an array include an existing file and set full path
+   *
+   * @param tts_chunks SmartObject with an array of TTSChunks
+   * @param app Current application
+   * @param app_mngr Application manager
+   *
+   * @return FILE_NOT_FOUND if one of the TTSChunks
+   * included a file which wasn't present on disk,
+   * SUCCESS otherwise
+   */
+  static mobile_apis::Result::eType VerifyTtsFiles(
+      smart_objects::SmartObject& tts_chunks,
+      ApplicationConstSharedPtr app,
+      ApplicationManager& app_mngr);
+
+  /**
     * @brief Verify image and add image file full path
     * and add path, although the image doesn't exist
     * @param SmartObject with image
     * @param app current application
     * @return verification result
     */
-  static mobile_apis::Result::eType VerifyImageApplyPath(
-      smart_objects::SmartObject& image,
-      ApplicationConstSharedPtr app,
-      ApplicationManager& app_mngr);
+  static void ApplyImagePath(smart_objects::SmartObject& image,
+                             ApplicationConstSharedPtr app,
+                             ApplicationManager& app_mngr);
 
   /*
    * @brief Verify image and add image file full path
@@ -598,7 +677,7 @@ class MessageHelper {
    * @return returns FALSE if string contains incorrect character or
    * string is empty otherwise returns TRUE
    */
-  static bool VerifySoftButtonString(const std::string& str);
+  static bool VerifyString(const std::string& str);
 
   static mobile_apis::Result::eType ProcessSoftButtons(
       smart_objects::SmartObject& message_params,
@@ -758,18 +837,6 @@ class MessageHelper {
       ApplicationManager& app_mngr);
 
   /**
-   * @brief SendUnsubscribeIVIRequest sends request to HMI to remove vehicle
-   * data subscription for application
-   * @param ivi_id Vehicle data item id
-   * @param application Application to unsubscribe
-   * @param app_mngr Application manager
-   */
-  static void SendUnsubscribeIVIRequest(int32_t ivi_id,
-                                        ApplicationSharedPtr application,
-                                        ApplicationManager& app_mngr);
-
-#ifdef SDL_REMOTE_CONTROL
-  /**
    * @brief Sends HMI status notification to mobile
    * @param application_impl application with changed HMI status
    **/
@@ -791,9 +858,7 @@ class MessageHelper {
       ApplicationManager& application_manager,
       hmi_apis::Common_HMILevel::eType level = hmi_apis::Common_HMILevel::FULL,
       bool send_policy_priority = true);
-#endif  // SDL_REMOTE_CONTROL
 
- private:
   /**
    * @brief CreateMessageForHMI Creates HMI message with prepared header
    * acccoring to message type
@@ -804,6 +869,7 @@ class MessageHelper {
   static smart_objects::SmartObjectSPtr CreateMessageForHMI(
       hmi_apis::messageType::eType message_type, const uint32_t correlation_id);
 
+ private:
   /**
    * @brief Allows to fill SO according to the  current permissions.
    * @param permissions application permissions.

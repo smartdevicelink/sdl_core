@@ -44,7 +44,6 @@ endif()
 include_directories(
   ${COMPONENTS_DIR}/protocol_handler/include
   ${COMPONENTS_DIR}/application_manager/include
-  ${COMPONENTS_DIR}/remote_control/include
   ${COMPONENTS_DIR}/formatters/include
   ${COMPONENTS_DIR}/transport_manager/include
   ${COMPONENTS_DIR}/security_manager/include
@@ -63,7 +62,6 @@ include_directories(
   ${POLICY_GLOBAL_INCLUDE_PATH}/
   ${COMPONENTS_DIR}/rpc_base/include
   ${COMPONENTS_DIR}/resumption/include
-  ${COMPONENTS_DIR}/dbus/include
   ${CMAKE_BINARY_DIR}/src/components
   ${JSONCPP_INCLUDE_DIRECTORY}
   ${LOG4CXX_INCLUDE_DIRECTORY}
@@ -109,13 +107,8 @@ set(LIBRARIES
   jsoncpp
   ConfigProfile
   Resumption
+  SystemTimeLibrary
 )
-if(REMOTE_CONTROL)
-    SET (LIBRARIES
-      ${LIBRARIES}
-      FunctionalModule
-    )
-endif(REMOTE_CONTROL)
 
 if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
   list(APPEND LIBRARIES pthread)
@@ -154,7 +147,7 @@ endif()
 target_link_libraries(${PROJECT} ${LIBRARIES})
 
 add_dependencies(${PROJECT} Policy)
-
+file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/build_config.txt DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/log4cxx.properties DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/audio.8bit.wav DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/test.txt DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
@@ -212,7 +205,7 @@ endif ()
 # Install rules
 install(TARGETS ${PROJECT} DESTINATION bin)
 install(
-  FILES log4cxx.properties audio.8bit.wav test.txt smartDeviceLink.ini
+  FILES build_config.txt log4cxx.properties audio.8bit.wav test.txt smartDeviceLink.ini
     hmi_capabilities.json sdl_preloaded_pt.json sample_policy_manager.py
     ${CMAKE_SOURCE_DIR}/mycert.pem ${CMAKE_SOURCE_DIR}/mykey.pem
   DESTINATION bin

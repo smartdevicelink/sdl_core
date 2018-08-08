@@ -40,7 +40,6 @@
 #include <queue>
 #include "interfaces/MOBILE_API.h"
 #include "application_manager/policies/policy_handler_observer.h"
-#include "application_manager/core_service.h"
 #include "application_manager/application.h"
 #include "policy/usage_statistics/statistics_manager.h"
 #include "utils/custom_string.h"
@@ -49,10 +48,11 @@
 #include "smart_objects/smart_object.h"
 #include "policy/policy_types.h"
 #include "policy/policy_table/types.h"
+#include "policy/cache_manager_interface.h"
 
 using namespace ::rpc::policy_table_interface_base;
 namespace policy {
-typedef utils::SharedPtr<utils::Callable> StatusNotifier;
+typedef std::shared_ptr<utils::Callable> StatusNotifier;
 
 class PolicyHandlerInterface {
  public:
@@ -124,7 +124,7 @@ class PolicyHandlerInterface {
   virtual void add_listener(PolicyHandlerObserver* listener) = 0;
   virtual void remove_listener(PolicyHandlerObserver* listener) = 0;
 
-  virtual utils::SharedPtr<usage_statistics::StatisticsManager>
+  virtual std::shared_ptr<usage_statistics::StatisticsManager>
   GetStatisticManager() const = 0;
 
   virtual void SendOnAppPermissionsChanged(
@@ -391,11 +391,45 @@ class PolicyHandlerInterface {
       mobile_apis::RequestType::eType type) const = 0;
 
   /**
+   * @brief Checks if certain request subtype is allowed for application
+   * @param policy_app_id Unique applicaion id
+   * @param request_subtype Request subtype
+   * @return true, if allowed, otherwise - false
+   */
+  virtual bool IsRequestSubTypeAllowed(
+      const std::string& policy_app_id,
+      const std::string& request_subtype) const = 0;
+
+  /**
+   * @brief Gets application request types state
+   * @param policy_app_id Unique application id
+   * @return request types state
+   */
+  virtual RequestType::State GetAppRequestTypeState(
+      const std::string& policy_app_id) const = 0;
+
+  /**
+   * @brief Gets application request subtypes state
+   * @param policy_app_id Unique application id
+   * @return request subtypes state
+   */
+  virtual RequestSubType::State GetAppRequestSubTypeState(
+      const std::string& policy_app_id) const = 0;
+
+  /**
    * @brief Gets application request types
    * @param policy_app_id Unique application id
    * @return request types
    */
   virtual const std::vector<std::string> GetAppRequestTypes(
+      const std::string& policy_app_id) const = 0;
+
+  /**
+   * @brief Gets application request subtypes
+   * @param policy_app_id Unique application id
+   * @return app request subtypes
+   */
+  virtual const std::vector<std::string> GetAppRequestSubTypes(
       const std::string& policy_app_id) const = 0;
 
   /**
@@ -436,7 +470,6 @@ class PolicyHandlerInterface {
   virtual void OnDeviceSwitching(const std::string& device_id_from,
                                  const std::string& device_id_to) = 0;
 
-#ifdef SDL_REMOTE_CONTROL
   /**
    * @brief Sets HMI default type for specified application
    * @param application_id ID application
@@ -501,7 +534,6 @@ class PolicyHandlerInterface {
    */
   virtual bool GetModuleTypes(const std::string& policy_app_id,
                               std::vector<std::string>* modules) const = 0;
-#endif  // SDL_REMOTE_CONTROL
 
  private:
 /**

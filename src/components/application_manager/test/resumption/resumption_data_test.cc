@@ -50,6 +50,7 @@ namespace custom_str = utils::custom_string;
 using ::testing::Return;
 using ::testing::ReturnRef;
 using ::testing::ReturnPointee;
+using ::testing::_;
 
 void ResumptionDataTest::CheckSavedApp(sm::SmartObject& resume_app_list) {
   EXPECT_EQ(policy_app_id_, resume_app_list[am::strings::app_id].asString());
@@ -72,7 +73,7 @@ void ResumptionDataTest::CheckSavedApp(sm::SmartObject& resume_app_list) {
 
   CheckGlobalProporties(
       resume_app_list[am::strings::application_global_properties]);
-  CheckSubscriptions(resume_app_list[am::strings::application_subscribtions]);
+  CheckSubscriptions(resume_app_list[am::strings::application_subscriptions]);
 }
 
 void ResumptionDataTest::CheckCommands(sm::SmartObject& res_list) {
@@ -137,8 +138,6 @@ void ResumptionDataTest::CheckSubscriptions(sm::SmartObject& res_list) {
             res_list[am::strings::application_buttons][0].asUInt());
   EXPECT_EQ(static_cast<uint32_t>(ButtonName::eType::CUSTOM_BUTTON),
             res_list[am::strings::application_buttons][1].asUInt());
-  EXPECT_EQ(0u, res_list[am::strings::application_vehicle_info][0].asUInt());
-  EXPECT_EQ(5u, res_list[am::strings::application_vehicle_info][1].asUInt());
 }
 
 void ResumptionDataTest::CheckChoiceSet(sm::SmartObject& res_list) {
@@ -322,19 +321,22 @@ void ResumptionDataTest::CheckVRTitle(
 }
 
 void ResumptionDataTest::PrepareData() {
+  mock_app_extension_ =
+      std::make_shared<NiceMock<application_manager_test::MockAppExtension> >();
+  extensions_.insert(extensions_.begin(), mock_app_extension_);
+  ON_CALL(*app_mock, Extensions()).WillByDefault(ReturnRef(extensions_));
   SetGlobalProporties();
   SetCommands();
   SetSubmenues();
   SetChoiceSet();
   SetAppFiles();
 
-  DataAccessor<am::SubMenuMap> sub_menu_m(test_submenu_map, sublock_);
-  DataAccessor<am::CommandsMap> commands_m(test_commands_map, comlock_);
-  DataAccessor<am::ChoiceSetMap> choice_set_m(test_choiceset_map, setlock_);
+  DataAccessor<am::SubMenuMap> sub_menu_m(test_submenu_map, sublock_ptr_);
+  DataAccessor<am::CommandsMap> commands_m(test_commands_map, comlock_ptr_);
+  DataAccessor<am::ChoiceSetMap> choice_set_m(test_choiceset_map, setlock_ptr_);
 
   SetSubscriptions();
-  DataAccessor<am::ButtonSubscriptions> btn_sub(btn_subscr, btnlock_);
-  DataAccessor<am::VehicleInfoSubscriptions> ivi_access(ivi, ivilock_);
+  DataAccessor<am::ButtonSubscriptions> btn_sub(btn_subscr, btnlock_ptr_);
 
   ON_CALL(*app_mock, is_application_data_changed()).WillByDefault(Return(true));
 
@@ -364,7 +366,6 @@ void ResumptionDataTest::PrepareData() {
   ON_CALL(*app_mock, menu_icon()).WillByDefault(ReturnPointee(&menu_icon_));
 
   ON_CALL(*app_mock, SubscribedButtons()).WillByDefault(Return(btn_sub));
-  ON_CALL(*app_mock, SubscribedIVI()).WillByDefault(Return(ivi_access));
 
   ON_CALL(*app_mock, getAppFiles()).WillByDefault(ReturnRef(app_files_map_));
 }
@@ -381,6 +382,7 @@ void ResumptionDataTest::SetMenuTitleAndIcon() {
   sm::SmartObject sm_icon;
   sm_icon[am::strings::value] = "test icon";
   sm_icon[am::strings::image_type] = ImageType::STATIC;
+  sm_icon[am::strings::is_template] = false;
 
   sm::SmartObject sm_title;
   sm_title = "test title";
@@ -539,8 +541,6 @@ void ResumptionDataTest::SetKeyboardProperties() {
 void ResumptionDataTest::SetSubscriptions() {
   btn_subscr.insert(ButtonName::eType::CUSTOM_BUTTON);
   btn_subscr.insert(ButtonName::eType::OK);
-  ivi.insert(static_cast<mobile_apis::VehicleDataType::eType>(0));
-  ivi.insert(static_cast<mobile_apis::VehicleDataType::eType>(5));
 }
 
 }  // namespace resumption_test

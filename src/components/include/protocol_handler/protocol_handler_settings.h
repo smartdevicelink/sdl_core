@@ -51,6 +51,28 @@ class ProtocolHandlerSettings {
    */
   virtual const std::vector<int>& force_unprotected_service() const = 0;
 #endif  // ENABLE_SECURITY
+
+  /**
+   * @brief Returns true multiple transports is enabled
+   */
+  virtual const bool multiple_transports_enabled() const = 0;
+
+  /**
+   * @brief Returns list of secondary transports available
+   * for the named primary transport
+   */
+  virtual const std::vector<std::string>& secondary_transports_for_bluetooth()
+      const = 0;
+  virtual const std::vector<std::string>& secondary_transports_for_usb()
+      const = 0;
+  virtual const std::vector<std::string>& secondary_transports_for_wifi()
+      const = 0;
+
+  /**
+   * @brief Returns list of allowed transports for the named service
+   */
+  virtual const std::vector<std::string>& audio_service_transports() const = 0;
+  virtual const std::vector<std::string>& video_service_transports() const = 0;
 };
 }  // namespace protocol_handler
 #endif  // SRC_COMPONENTS_INCLUDE_PROTOCOL_HANDLER_PROTOCOL_HANDLER_SETTINGS_H_
