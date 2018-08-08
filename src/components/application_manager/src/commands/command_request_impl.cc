@@ -45,6 +45,27 @@ namespace application_manager {
 
 namespace commands {
 
+namespace {
+/**
+ * @brief Functor for build info string
+ */
+struct InfoAdder : std::unary_function<const RPCParams::value_type&, void> {
+  explicit InfoAdder(std::string& info) : info_(info) {}
+
+  void operator()(const RPCParams::value_type& parameter) {
+    if (info_.empty()) {
+      info_ = "\'" + parameter + "\'";
+      return;
+    }
+
+    info_ = info_ + ", \'" + parameter + "\'";
+  }
+
+ private:
+  std::string& info_;
+};
+}  // namespace
+
 std::string MergeInfos(const ResponseInfo& first_info,
                        const std::string& first_str,
                        const ResponseInfo& second_info,
@@ -257,6 +278,11 @@ void CommandRequestImpl::onTimeOut() {
 
 void CommandRequestImpl::on_event(const event_engine::Event& event) {}
 
+void CommandRequestImpl::FormatResponse(smart_objects::SmartObject& response) {
+  AddDisallowedParametersToInfo(response);
+  AddDisallowedParameters(response);
+}
+
 void CommandRequestImpl::SendResponse(
     const bool success,
     const mobile_apis::Result::eType& result_code,
@@ -299,15 +325,7 @@ void CommandRequestImpl::SendResponse(
   // appropriate
   // reasons (VehicleData result codes)
   if (result_code != mobile_apis::Result::APPLICATION_NOT_REGISTERED) {
-    const mobile_apis::FunctionID::eType& id =
-        static_cast<mobile_apis::FunctionID::eType>(function_id());
-    if ((id == mobile_apis::FunctionID::SubscribeVehicleDataID) ||
-        (id == mobile_apis::FunctionID::UnsubscribeVehicleDataID)) {
-      AddDisallowedParameters(response);
-      AddDisallowedParametersToInfo(response);
-    } else if (id == mobile_apis::FunctionID::GetVehicleDataID) {
-      AddDisallowedParametersToInfo(response);
-    }
+    FormatResponse(response);
   }
 
   response[strings::msg_params][strings::success] = success;
@@ -643,6 +661,24 @@ bool CommandRequestImpl::CheckAllowedParameters() {
             correlation_id(),
             app->app_id());
 
+    if (!params.empty()) {
+      if (parameters_permissions_.DisallowedInclude(params)) {
+        const std::string info = "RPC is disallowed by the user";
+        LOG4CXX_DEBUG(logger_, info);
+        (*response)[strings::msg_params][strings::info] = info;
+        AddDisallowedParameters(*response);
+      } else if (parameters_permissions_.UndefindedInclude(params)) {
+        const std::string info =
+            "Requested parameters are disallowed by Policies";
+
+        LOG4CXX_DEBUG(logger_, info);
+        (*response)[strings::msg_params][strings::info] = info;
+        AddDisallowedParameters(*response);
+      } else {
+        FormatResponse(*response);
+      }
+    }
+
     rpc_service_.SendMessageToMobile(response);
     return false;
   }
@@ -765,30 +801,72 @@ void CommandRequestImpl::AddDissalowedParameterToInfoString(
 
 void CommandRequestImpl::AddDisallowedParametersToInfo(
     smart_objects::SmartObject& response) const {
-  std::string info;
+  const mobile_apis::FunctionID::eType id =
+      static_cast<mobile_apis::FunctionID::eType>(function_id());
 
-  RPCParams::const_iterator it =
-      removed_parameters_permissions_.disallowed_params.begin();
-  for (; it != removed_parameters_permissions_.disallowed_params.end(); ++it) {
-    AddDissalowedParameterToInfoString(info, (*it));
+  if (!helpers::Compare<mobile_apis::FunctionID::eType,
+                        helpers::EQ,
+                        helpers::ONE>(
+          id,
+          mobile_apis::FunctionID::SubscribeVehicleDataID,
+          mobile_apis::FunctionID::UnsubscribeVehicleDataID,
+          mobile_apis::FunctionID::GetVehicleDataID,
+          mobile_apis::FunctionID::SendLocationID)) {
+    return;
   }
 
-  it = removed_parameters_permissions_.undefined_params.begin();
-  for (; it != removed_parameters_permissions_.undefined_params.end(); ++it) {
-    AddDissalowedParameterToInfoString(info, (*it));
+  std::string disallowed_by_user_info;
+  InfoAdder user_info_adder(disallowed_by_user_info);
+
+  std::for_each(removed_parameters_permissions_.disallowed_params.begin(),
+                removed_parameters_permissions_.disallowed_params.end(),
+                user_info_adder);
+
+  const uint32_t min_number_of_disallowed_params = 1;
+  if (!disallowed_by_user_info.empty()) {
+    disallowed_by_user_info +=
+        min_number_of_disallowed_params <
+                removed_parameters_permissions_.disallowed_params.size()
+            ? " are"
+            : " is";
+    disallowed_by_user_info += " disallowed by user";
   }
 
-  if (!info.empty()) {
-    info += " disallowed by policies.";
+  std::string disallowed_by_policy_info;
+  InfoAdder policy_info_adder(disallowed_by_policy_info);
 
-    if (!response[strings::msg_params][strings::info].asString().empty()) {
-      // If we already have info add info about disallowed params to it
-      response[strings::msg_params][strings::info] =
-          response[strings::msg_params][strings::info].asString() + " " + info;
-    } else {
-      response[strings::msg_params][strings::info] = info;
-    }
+  std::for_each(removed_parameters_permissions_.undefined_params.begin(),
+                removed_parameters_permissions_.undefined_params.end(),
+                policy_info_adder);
+
+  const uint32_t min_number_of_undefined_params = 1;
+  if (!disallowed_by_policy_info.empty()) {
+    disallowed_by_policy_info +=
+        min_number_of_undefined_params <
+                removed_parameters_permissions_.undefined_params.size()
+            ? " are"
+            : " is";
+    disallowed_by_policy_info += " disallowed by policies";
   }
+
+  if (disallowed_by_user_info.empty() && disallowed_by_policy_info.empty()) {
+    return;
+  }
+
+  smart_objects::SmartObject& info =
+      response[strings::msg_params][strings::info];
+
+  std::string summary;
+  if (!disallowed_by_policy_info.empty()) {
+    summary += disallowed_by_policy_info;
+  }
+
+  if (!disallowed_by_user_info.empty()) {
+    summary = summary.empty() ? disallowed_by_user_info
+                              : summary + ", " + disallowed_by_user_info;
+  }
+
+  info = info.asString().empty() ? summary : info.asString() + " " + summary;
 }
 
 void CommandRequestImpl::AddDisallowedParameters(

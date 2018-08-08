@@ -49,6 +49,20 @@ struct CommandParametersPermissions {
   RPCParams allowed_params;
   RPCParams disallowed_params;
   RPCParams undefined_params;
+
+  bool DisallowedInclude(const RPCParams& parameters) {
+    return std::includes(disallowed_params.begin(),
+                         disallowed_params.end(),
+                         parameters.begin(),
+                         parameters.end());
+  }
+
+  bool UndefindedInclude(const RPCParams& parameters) {
+    return std::includes(undefined_params.begin(),
+                         undefined_params.end(),
+                         parameters.begin(),
+                         parameters.end());
+  }
 };
 
 namespace commands {

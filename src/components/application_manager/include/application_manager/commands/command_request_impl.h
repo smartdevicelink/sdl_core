@@ -367,6 +367,13 @@ class CommandRequestImpl : public CommandImpl,
       const hmi_apis::FunctionID::eType& function_id);
 
   /**
+   * @brief Adds disallowed parameters to info string, sets result codes if
+   * necessary
+   * @param response Command smart object
+   */
+  void FormatResponse(smart_objects::SmartObject& response);
+
+  /**
     * @brief UpdateHash updates hash field for application and sends
     * OnHashChanged notification to mobile side in case of approriate hash mode
     * is set
