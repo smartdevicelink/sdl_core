@@ -111,28 +111,45 @@ void GetVehicleDataRequest::on_event(const event_engine::Event& event) {
   switch (event.id()) {
     case hmi_apis::FunctionID::VehicleInfo_GetVehicleData: {
       EndAwaitForInterface(HmiInterfaces::HMI_INTERFACE_VehicleInfo);
+
+      smart_objects::SmartObject& incoming_msg_params =
+          message[strings::msg_params];
+
+      if (incoming_msg_params.keyExists(strings::gps) &&
+          incoming_msg_params[strings::gps].empty()) {
+        LOG4CXX_ERROR(logger_, "Invalid response received from system");
+
+        SendResponse(false,
+                     mobile_apis::Result::GENERIC_ERROR,
+                     "Invalid response received from system");
+
+        return;
+      }
+
       hmi_apis::Common_Result::eType result_code =
           static_cast<hmi_apis::Common_Result::eType>(
               message[strings::params][hmi_response::code].asInt());
       bool result = PrepareResultForMobileResponse(
           result_code, HmiInterfaces::HMI_INTERFACE_VehicleInfo);
+
       std::string response_info;
       GetInfo(message, response_info);
       result = result ||
                ((hmi_apis::Common_Result::DATA_NOT_AVAILABLE == result_code) &&
-                (message[strings::msg_params].length() > 1));
+                (!incoming_msg_params.empty()));
 
-      if (true ==
-          message[strings::msg_params].keyExists(hmi_response::method)) {
-        message[strings::msg_params].erase(hmi_response::method);
+      if (incoming_msg_params.keyExists(hmi_response::method)) {
+        incoming_msg_params.erase(hmi_response::method);
       }
-      if (true == message[strings::params].keyExists(strings::error_msg)) {
+
+      if (message[strings::params].keyExists(strings::error_msg)) {
         response_info = message[strings::params][strings::error_msg].asString();
       }
+
       SendResponse(result,
                    MessageHelper::HMIToMobileResult(result_code),
                    response_info.empty() ? NULL : response_info.c_str(),
-                   &(message[strings::msg_params]));
+                   &incoming_msg_params);
       break;
     }
     default: {

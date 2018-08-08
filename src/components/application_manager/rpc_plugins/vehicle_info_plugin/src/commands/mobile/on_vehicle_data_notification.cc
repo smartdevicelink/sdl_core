@@ -68,48 +68,47 @@ void OnVehicleDataNotification::Run() {
   std::vector<smart_objects::SmartObject> appSO;
 
   const VehicleData& vehicle_data = MessageHelper::vehicle_data();
+  const smart_objects::SmartObject& incoming_msg_params =
+      (*message_)[strings::msg_params];
   VehicleData::const_iterator it = vehicle_data.begin();
 
   for (; vehicle_data.end() != it; ++it) {
-    if (true == (*message_)[strings::msg_params].keyExists(it->first)) {
-      LOG4CXX_ERROR(logger_, "vehicle_data nanme" << it->first);
-      auto vehicle_data_value =
-          (*message_)[strings::msg_params][it->first].asInt();
-
-      application_manager_.IviInfoUpdated(it->second, vehicle_data_value);
-
+    const std::string& key = it->first;
+    if (incoming_msg_params.keyExists(key)) {
+      if (strings::gps == key && incoming_msg_params[key].empty()) {
+        LOG4CXX_ERROR(logger_, "Invalid response received from system");
+        continue;
+      }
+      application_manager_.IviInfoUpdated(it->second,
+                                          incoming_msg_params[key].asInt());
       auto subscribed_to_ivi_predicate = [&it](const ApplicationSharedPtr app) {
         DCHECK_OR_RETURN(app, false);
         auto& ext = VehicleInfoAppExtension::ExtractVIExtension(*app);
         return ext.isSubscribedToVehicleInfo(it->second);
       };
-
       const std::vector<ApplicationSharedPtr>& applications =
           application_manager::FindAllApps(application_manager_.applications(),
                                            subscribed_to_ivi_predicate);
-
       std::vector<ApplicationSharedPtr>::const_iterator app_it =
           applications.begin();
-
       for (; applications.end() != app_it; ++app_it) {
         const ApplicationSharedPtr app = *app_it;
         if (!app) {
           LOG4CXX_ERROR(logger_, "NULL pointer");
           continue;
         }
-
         appNotification_it =
             find(appNotification.begin(), appNotification.end(), app);
         if (appNotification_it == appNotification.end()) {
           appNotification.push_back(app);
           smart_objects::SmartObject msg_param =
               smart_objects::SmartObject(smart_objects::SmartType_Map);
-          msg_param[it->first] = (*message_)[strings::msg_params][it->first];
+          msg_param[key] = incoming_msg_params[key];
           appSO.push_back(msg_param);
         } else {
           size_t idx =
               std::distance(appNotification.begin(), appNotification_it);
-          appSO[idx][it->first] = (*message_)[strings::msg_params][it->first];
+          appSO[idx][key] = incoming_msg_params[key];
         }
       }
     }
