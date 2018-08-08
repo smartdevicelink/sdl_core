@@ -74,12 +74,21 @@ class OnSystemRequestNotification
   void Run() OVERRIDE;
 
  private:
+   
+#if defined(PROPRIETARY_MODE) || defined(EXTERNAL_PROPRIETARY_MODE)
+/**
+ * @brief Adds the full_app_id_supported to a string, allows attaching this flag to a PT snapshot
+ * @param policy_table_string PT snapshot string
+ * @param useFullAppID what to set full_app_id_supported to in the snapshot
+\ */
+void AttachFullAppIdSupport(std::string& policy_table_string, bool useFullAppID) const;
+#endif  
+
 #ifdef PROPRIETARY_MODE
   /**
    * @brief Adds HTTP header to message
    * @param message Message
-   * @param useFullAppID adds the full_app_id_supported field to the message if
-   * we support full app IDs
+   * @param useFullAppID what to set full_app_id_supported to in the snapshot
    */
   void AddHeader(BinaryMessage& message, bool useFullAppID) const;
   size_t ParsePTString(std::string& pt_string) const;
