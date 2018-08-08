@@ -100,7 +100,7 @@ void UpdateTurnListRequest::Run() {
         ((*message_)[strings::msg_params][strings::turn_list]);
     for (uint32_t i = 0; i < turn_list_array.length(); ++i) {
       if ((turn_list_array[i].keyExists(strings::turn_icon)) &&
-          (mobile_apis::Result::SUCCESS !=
+          (mobile_apis::Result::INVALID_DATA ==
            MessageHelper::VerifyImage(turn_list_array[i][strings::turn_icon],
                                       app,
                                       application_manager_))) {

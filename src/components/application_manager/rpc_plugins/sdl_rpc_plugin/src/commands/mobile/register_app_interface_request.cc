@@ -308,15 +308,19 @@ void RegisterAppInterfaceRequest::Run() {
   uint16_t minor =
       msg_params[strings::sync_msg_version][strings::minor_version].asUInt();
   uint16_t patch = 0;
+  // Check if patch exists since it is not mandatory.
   if (msg_params[strings::sync_msg_version].keyExists(strings::patch_version)) {
     patch =
         msg_params[strings::sync_msg_version][strings::patch_version].asUInt();
   }
-  if (major < minimum_major_version ||
-      (major == minimum_major_version && minor < minimum_minor_version) ||
-      (major == minimum_major_version && minor == minimum_minor_version &&
-       patch < minimum_patch_version)) {
-    LOG4CXX_ERROR(logger_, "Version Negotiation failed, mobile version is too low");
+
+  utils::SemanticVersion mobile_version(major, minor, patch);
+  utils::SemanticVersion min_module_version(
+      minimum_major_version, minimum_minor_version, minimum_patch_version);
+
+  if (mobile_version < min_module_version) {
+    LOG4CXX_WARN(logger_,
+                 "Application RPC Version does not meet minimum requirement");
     SendResponse(false, mobile_apis::Result::REJECTED);
   }
 
@@ -328,15 +332,14 @@ void RegisterAppInterfaceRequest::Run() {
   }
 
   // Version negotiation
-  utils::SemanticVersion mobile_version(major, minor, patch);
   utils::SemanticVersion module_version(
       major_version, minor_version, patch_version);
   if (mobile_version < module_version) {
     // Use mobile RPC version as negotiated version
-    application->set_msg_version(major, minor, patch);
+    application->set_msg_version(mobile_version);
   } else {
     // Use module version as negotiated version
-    application->set_msg_version(major_version, minor_version, patch_version);
+    application->set_msg_version(module_version);
   }
 
   // For resuming application need to restore hmi_app_id from resumeCtrl

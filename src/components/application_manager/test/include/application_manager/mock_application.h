@@ -205,10 +205,7 @@ class MockApplication : public ::application_manager::Application {
                void(const mobile_apis::Language::eType& language));
   MOCK_METHOD1(set_ui_language,
                void(const mobile_apis::Language::eType& ui_language));
-  MOCK_METHOD3(set_msg_version,
-               void(const uint16_t major,
-                    const uint16_t minor,
-                    const uint16_t patch));
+  MOCK_METHOD1(set_msg_version, void(const utils::SemanticVersion& version));
   // DynamicApplicationData methods
   MOCK_CONST_METHOD0(help_prompt, const smart_objects::SmartObject*());
   MOCK_CONST_METHOD0(timeout_prompt, const smart_objects::SmartObject*());

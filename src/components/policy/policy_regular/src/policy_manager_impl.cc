@@ -116,9 +116,9 @@ std::shared_ptr<policy_table::Table> PolicyManagerImpl::ParseArray(
     // For PT Update received from SDL Server.
     if (value["data"].size() != 0) {
       Json::Value data = value["data"];
-      return new policy_table::Table(&data[0]);
+      return std::make_shared<policy_table::Table>(&data[0]);
     } else {
-      return new policy_table::Table(&value);
+      return std::make_shared<policy_table::Table>(&value);
     }
   } else {
     return std::shared_ptr<policy_table::Table>();

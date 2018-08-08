@@ -227,7 +227,7 @@ class UpdateStatusManager {
 
     volatile uint32_t timeout_;
     volatile bool stop_flag_;
-    sync_primitives::Lock state_lock_;
+    sync_primitives::RecursiveLock state_lock_;
     sync_primitives::ConditionalVariable termination_condition_;
     UpdateStatusManager* update_status_manager_;
   };

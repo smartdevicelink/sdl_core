@@ -42,10 +42,12 @@
 #include "utils/gen_hash.h"
 #include "utils/helpers.h"
 
-namespace sdl_rpc_plugin {
-using namespace application_manager;
+const char* kInvalidImageWarningInfo = "Requested image(s) not found.";
 
+namespace sdl_rpc_plugin {
 namespace commands {
+
+using namespace application_manager;
 
 CreateInteractionChoiceSetRequest::CreateInteractionChoiceSetRequest(
     const application_manager::commands::MessageSharedPtr& message,
@@ -78,6 +80,7 @@ void CreateInteractionChoiceSetRequest::Run() {
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     return;
   }
+  should_send_warnings = false;
   for (uint32_t i = 0;
        i < (*message_)[strings::msg_params][strings::choice_set].length();
        ++i) {
@@ -104,6 +107,10 @@ void CreateInteractionChoiceSetRequest::Run() {
       LOG4CXX_ERROR(logger_, "Image verification failed.");
       SendResponse(false, Result::INVALID_DATA);
       return;
+    } else if (verification_result_image == Result::WARNINGS ||
+               verification_result_secondary_image == Result::WARNINGS) {
+      should_send_warnings = true;
+      break;
     }
   }
 
@@ -435,7 +442,9 @@ void CreateInteractionChoiceSetRequest::DeleteChoices() {
 void CreateInteractionChoiceSetRequest::OnAllHMIResponsesReceived() {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  if (!error_from_hmi_) {
+  if (!error_from_hmi_ && should_send_warnings) {
+    SendResponse(true, mobile_apis::Result::WARNINGS, kInvalidImageWarningInfo);
+  } else if (!error_from_hmi_) {
     SendResponse(true, mobile_apis::Result::SUCCESS);
   } else {
     DeleteChoices();

@@ -33,8 +33,6 @@
 
 #include <algorithm>
 
-#include <boost/algorithm/string.hpp>
-
 #include "smart_objects/always_false_schema_item.h"
 #include "smart_objects/smart_object.h"
 
@@ -59,24 +57,14 @@ CObjectSchemaItem::SMember::SMember(
     const std::vector<CObjectSchemaItem::SMember>& history_vector)
     : mSchemaItem(SchemaItem), mIsMandatory(IsMandatory) {
   if (Since.size() > 0) {
-    utils::SemanticVersion since_struct;
-    std::vector<std::string> since_fields;
-    boost::split(since_fields, Since, boost::is_any_of("."));
-    if (since_fields.size() == 3) {
-      since_struct.major_version = atoi(since_fields[0].c_str());
-      since_struct.minor_version = atoi(since_fields[1].c_str());
-      since_struct.patch_version = atoi(since_fields[2].c_str());
+    utils::SemanticVersion since_struct(Since);
+    if (since_struct.isValid()) {
       mSince = since_struct;
     }
   }
   if (Until.size() > 0) {
-    utils::SemanticVersion until_struct;
-    std::vector<std::string> until_fields;
-    boost::split(until_fields, Until, boost::is_any_of("."));
-    if (until_fields.size() == 3) {
-      until_struct.major_version = atoi(until_fields[0].c_str());
-      until_struct.minor_version = atoi(until_fields[1].c_str());
-      until_struct.patch_version = atoi(until_fields[2].c_str());
+    utils::SemanticVersion until_struct(Until);
+    if (until_struct.isValid()) {
       mUntil = until_struct;
     }
   }
@@ -88,11 +76,11 @@ CObjectSchemaItem::SMember::SMember(
 bool CObjectSchemaItem::SMember::CheckHistoryFieldVersion(
     const utils::SemanticVersion& MessageVersion) const {
   if (MessageVersion.isValid()) {
-    if (mSince.is_initialized()) {
+    if (mSince != boost::none) {
       if (MessageVersion < mSince.get()) {
         return false;  // Msg version predates `since` field
       } else {
-        if (mUntil.is_initialized() && (MessageVersion >= mUntil.get())) {
+        if (mUntil != boost::none && (MessageVersion >= mUntil.get())) {
           return false;  // Msg version newer than `until` field
         } else {
           return true;  // Mobile msg version falls within specified version
@@ -101,7 +89,7 @@ bool CObjectSchemaItem::SMember::CheckHistoryFieldVersion(
       }
     }
 
-    if (mUntil.is_initialized() && (MessageVersion >= mUntil.get())) {
+    if (mUntil != boost::none && (MessageVersion >= mUntil.get())) {
       return false;  // Msg version newer than `until` field
     } else {
       return true;  // Mobile msg version falls within specified version range
@@ -180,14 +168,14 @@ Errors::eType CObjectSchemaItem::validate(
     const SMember& member = it->second;
     std::set<std::string>::const_iterator key_it = object_keys.find(key);
     if (object_keys.end() == key_it) {
-      if (member.mSince.is_initialized() &&
+      if (member.mSince != boost::none &&
           MessageVersion < member.mSince.get() &&
           member.mHistoryVector.size() > 0) {
         // Message version predates parameter and a history vector exists.
         for (uint i = 0; i < member.mHistoryVector.size(); i++) {
-          if (member.mHistoryVector[i].mSince.is_initialized() &&
+          if (member.mHistoryVector[i].mSince != boost::none &&
               MessageVersion >= member.mHistoryVector[i].mSince.get()) {
-            if (member.mHistoryVector[i].mUntil.is_initialized() &&
+            if (member.mHistoryVector[i].mUntil != boost::none &&
                 MessageVersion >= member.mHistoryVector[i].mUntil.get()) {
               // MessageVersion is newer than the specified "Until" version
               continue;
@@ -201,9 +189,8 @@ Errors::eType CObjectSchemaItem::validate(
               }
               break;
             }
-          } else if (member.mHistoryVector[i].mSince.is_initialized() ==
-                         false &&
-                     member.mHistoryVector[i].mUntil.is_initialized() &&
+          } else if (member.mHistoryVector[i].mSince == boost::none &&
+                     member.mHistoryVector[i].mUntil != boost::none &&
                      MessageVersion < member.mHistoryVector[i].mUntil.get()) {
             if (member.mHistoryVector[i].mIsMandatory == true &&
                 (member.mHistoryVector[i].mIsRemoved == false)) {
@@ -341,11 +328,12 @@ void CObjectSchemaItem::RemoveFakeParams(
         key.compare(app_id) != 0) {
       ++it;
       Object.erase(key);
-    } else if (members_it->second.mIsRemoved &&
+    } else if (mMembers.end() != members_it && members_it->second.mIsRemoved &&
                members_it->second.CheckHistoryFieldVersion(MessageVersion)) {
       ++it;
       Object.erase(key);
-    } else if (members_it->second.mHistoryVector.size() > 0) {
+    } else if (mMembers.end() != members_it &&
+               members_it->second.mHistoryVector.size() > 0) {
       for (uint i = 0; i < members_it->second.mHistoryVector.size(); i++) {
         if (members_it->second.mHistoryVector[i].CheckHistoryFieldVersion(
                 MessageVersion) &&
