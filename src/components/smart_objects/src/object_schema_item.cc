@@ -328,11 +328,12 @@ void CObjectSchemaItem::RemoveFakeParams(
         key.compare(app_id) != 0) {
       ++it;
       Object.erase(key);
-    } else if (members_it->second.mIsRemoved &&
+    } else if (mMembers.end() != members_it && members_it->second.mIsRemoved &&
                members_it->second.CheckHistoryFieldVersion(MessageVersion)) {
       ++it;
       Object.erase(key);
-    } else if (members_it->second.mHistoryVector.size() > 0) {
+    } else if (mMembers.end() != members_it &&
+               members_it->second.mHistoryVector.size() > 0) {
       for (uint i = 0; i < members_it->second.mHistoryVector.size(); i++) {
         if (members_it->second.mHistoryVector[i].CheckHistoryFieldVersion(
                 MessageVersion) &&
