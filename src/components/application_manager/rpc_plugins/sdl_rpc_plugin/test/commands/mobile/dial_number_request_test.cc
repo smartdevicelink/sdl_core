@@ -180,6 +180,38 @@ TEST_F(DialNumberRequestTest, OnEvent_SUCCESS) {
   command->on_event(event);
 }
 
+MATCHER_P(CheckMobileResultAndInfo, result_code, "") {
+  const bool is_info_present =
+      (*arg)[am::strings::msg_params].keyExists(am::strings::info);
+  const bool is_result_code_correct =
+      result_code ==
+      static_cast<mobile_apis::Result::eType>(
+          (*arg)[am::strings::msg_params][am::strings::result_code].asInt());
+
+  return !is_info_present && is_result_code_correct;
+}
+
+TEST_F(DialNumberRequestTest, OnEvent_InfoIsNotString_InfoDropped) {
+  MessageSharedPtr command_msg(CreateMessage(smart_objects::SmartType_Map));
+  (*command_msg)[am::strings::params][am::strings::connection_key] =
+      kConnectionKey;
+  DialNumberRequestPtr command(CreateCommand<DialNumberRequest>(command_msg));
+  MockAppPtr mock_app(CreateMockApp());
+  EXPECT_CALL(app_mngr_, application(kConnectionKey))
+      .WillOnce(Return(mock_app));
+  MessageSharedPtr event_msg(CreateMessage(smart_objects::SmartType_Map));
+  (*event_msg)[am::strings::params][am::hmi_response::code] =
+      mobile_result::SUCCESS;
+  const int32_t invalid_info_value = 1111;
+  (*event_msg)[am::strings::msg_params][am::strings::info] = invalid_info_value;
+  Event event(hmi_apis::FunctionID::BasicCommunication_DialNumber);
+  event.set_smart_object(*event_msg);
+  EXPECT_CALL(
+      mock_rpc_service_,
+      ManageMobileCommand(CheckMobileResultAndInfo(mobile_result::SUCCESS), _));
+  command->on_event(event);
+}
+
 }  // namespace dial_number_request
 }  // namespace mobile_commands_test
 }  // namespace commands_test
