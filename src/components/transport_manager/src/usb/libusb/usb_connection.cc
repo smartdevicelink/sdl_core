@@ -205,7 +205,15 @@ bool UsbConnection::PostOutTransfer() {
 }
 
 void UsbConnection::OnOutTransfer(libusb_transfer* transfer) {
-  LOG4CXX_TRACE(logger_, "enter with  Libusb_transfer*: " << transfer);
+  LOG4CXX_AUTO_TRACE(logger_);
+  LOG4CXX_DEBUG(logger_,"enter with Libusb_transfer*: " << transfer);
+
+  if (transfer->status == LIBUSB_TRANSFER_CANCELLED) {
+    LOG4CXX_DEBUG(logger_,"Free already canceled transfer.");
+    libusb_free_transfer(transfer);
+    return;
+  }
+
   sync_primitives::AutoLock locker(out_messages_mutex_);
   if (transfer->status == LIBUSB_TRANSFER_COMPLETED) {
     bytes_sent_ += transfer->actual_length;
