@@ -226,4 +226,4 @@ size_t OnSystemRequestNotification::ParsePTString(
 
 }  // namespace commands
 
-}  // namespace sdl_rpc_plugin
+}  // namespace application_manager
