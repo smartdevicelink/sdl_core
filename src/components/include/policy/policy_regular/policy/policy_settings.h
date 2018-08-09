@@ -35,6 +35,8 @@ class PolicySettings {
     * @brief Returns system files folder path
     */
   virtual const std::string& system_files_path() const = 0;
+  
+  virtual bool use_full_app_id() const = 0;
 
   virtual ~PolicySettings() {}
 };

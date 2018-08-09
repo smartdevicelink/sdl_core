@@ -118,14 +118,7 @@ void OnSystemRequestNotification::Run() {
     BinaryMessage binary_data;
     file_system::ReadBinaryFile(filename, binary_data);
 #if defined(PROPRIETARY_MODE)
-// Make the policy table the body of the request and add a header
-    AddHeader(binary_data,
-              application_manager_.get_settings().use_full_app_id());
-#elif defined(EXTERNAL_PROPRIETARY_MODE)
-  // add the full_app_id_supported flag to the policy table snapshot    
-  std::string policy_table_string = std::string(binary_data.begin(), binary_data.end());
-  AttachFullAppIdSupport(policy_table_string, application_manager_.get_settings().use_full_app_id());
-  binary_data.assign(policy_table_string.begin(), policy_table_string.end());
+    AddHeader(binary_data);
 #endif  // PROPRIETARY_MODE
 
 #if defined(PROPRIETARY_MODE) || defined(EXTERNAL_PROPRIETARY_MODE)
@@ -144,34 +137,8 @@ void OnSystemRequestNotification::Run() {
   SendNotification();
 }
 
-void OnSystemRequestNotification::AttachFullAppIdSupport(std::string& policy_table_string, bool useFullAppID) const {
-  Json::Reader reader;
-  Json::Value policy_table_json;
-  if (!reader.parse(policy_table_string.c_str(), policy_table_json)) {
-    LOG4CXX_FATAL(
-        logger_,
-        "PT snapshot is corrupted: " << reader.getFormattedErrorMessages());
-  }
-
-  if (policy_table_json.isMember("policy_table") && policy_table_json["policy_table"].isMember("module_config")) {
-      policy_table_json["policy_table"]["module_config"]
-                       ["full_app_id_supported"] = useFullAppID;
-      LOG4CXX_DEBUG(logger_, "Successfully annotated full_app_id_supported!\n");
-      Json::FastWriter writer;
-
-      // Write back modified snapshot
-      policy_table_string = writer.write(policy_table_json);
-    
-  } else {
-    LOG4CXX_FATAL(
-        logger_,
-        "PT snapshot is missing [\"policy_table\"][\"module_config\"] field");
-  }
-}
-
 #ifdef PROPRIETARY_MODE
-void OnSystemRequestNotification::AddHeader(BinaryMessage& message,
-                                            bool useFullAppID) const {
+void OnSystemRequestNotification::AddHeader(BinaryMessage& message) const {
   LOG4CXX_AUTO_TRACE(logger_);
   const uint32_t timeout = policy_handler_.TimeoutExchangeSec();
 
@@ -188,9 +155,6 @@ void OnSystemRequestNotification::AddHeader(BinaryMessage& message,
   }
 
   std::string policy_table_string = std::string(message.begin(), message.end());
-  
-  // add the full_app_id_supported flag to the policy table snapshot string  
-  AttachFullAppIdSupport(policy_table_string, useFullAppID);
 
   /* The Content-Length to be sent in the HTTP Request header should be
   calculated before additional escape characters are added to the

@@ -88,17 +88,4 @@ void AttachFullAppIdSupport(std::string& policy_table_string, bool useFullAppID)
   /**
    * @brief Adds HTTP header to message
    * @param message Message
-   * @param useFullAppID what to set full_app_id_supported to in the snapshot
-   */
-  void AddHeader(BinaryMessage& message, bool useFullAppID) const;
-  size_t ParsePTString(std::string& pt_string) const;
-#endif  // PROPRIETARY_MODE
-
-  DISALLOW_COPY_AND_ASSIGN(OnSystemRequestNotification);
-};
-
-}  // namespace mobile
-}  // namespace commands
-}  // namespace application_manager
-
-#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_MOBILE_ON_SYSTEM_REQUEST_NOTIFICATION_H_
+   * @param useFullAppID 
