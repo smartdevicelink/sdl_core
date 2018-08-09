@@ -41,13 +41,13 @@ namespace app_mngr = application_manager;
 namespace commands {
 
 /**
- * @brief NaviUnSubscribeWaypoints command class
+ * @brief NaviUnsubscribeWaypoints command class
  **/
 class NaviUnsubscribeWayPointsResponse
     : public app_mngr::commands::ResponseFromHMI {
  public:
   /**
-   * @brief NaviUnSubscribeWaypoints class constructor
+   * @brief NaviUnsubscribeWaypoints class constructor
    *
    * @param message Incoming SmartObject message
    **/
@@ -59,7 +59,7 @@ class NaviUnsubscribeWayPointsResponse
       policy::PolicyHandlerInterface& policy_handle);
 
   /**
-   * @brief NaviUnSubscribeWaypoints class destructor
+   * @brief NaviUnsubscribeWaypoints class destructor
    **/
   virtual ~NaviUnsubscribeWayPointsResponse();
 

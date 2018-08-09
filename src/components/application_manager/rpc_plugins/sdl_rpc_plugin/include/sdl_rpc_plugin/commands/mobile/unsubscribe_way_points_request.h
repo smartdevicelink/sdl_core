@@ -40,13 +40,13 @@ namespace app_mngr = application_manager;
 
 namespace commands {
 
-class UnSubscribeWayPointsRequest
+class UnsubscribeWayPointsRequest
     : public app_mngr::commands::CommandRequestImpl {
  public:
   /**
-   * \brief UnSubscribeWayPointsRequest class constructor
+   * \brief UnsubscribeWayPointsRequest class constructor
    **/
-  UnSubscribeWayPointsRequest(
+  UnsubscribeWayPointsRequest(
       const app_mngr::commands::MessageSharedPtr& message,
       app_mngr::ApplicationManager& application_manager,
       app_mngr::rpc_service::RPCService& rpc_service,
@@ -54,9 +54,9 @@ class UnSubscribeWayPointsRequest
       policy::PolicyHandlerInterface& policy_handler);
 
   /**
-   * \brief UnSubscribeWayPointsRequest class destructor
+   * \brief UnsubscribeWayPointsRequest class destructor
    **/
-  ~UnSubscribeWayPointsRequest();
+  ~UnsubscribeWayPointsRequest();
 
   /**
    * @brief Execute command
@@ -76,7 +76,7 @@ class UnSubscribeWayPointsRequest
   bool Init() FINAL;
 
  private:
-  DISALLOW_COPY_AND_ASSIGN(UnSubscribeWayPointsRequest);
+  DISALLOW_COPY_AND_ASSIGN(UnsubscribeWayPointsRequest);
 };
 
 }  // commands

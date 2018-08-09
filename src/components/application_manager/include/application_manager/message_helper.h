@@ -567,7 +567,7 @@ class MessageHelper {
 
   /**
    * @brief Sends UnsubscribeWayPoints request
-   * @return true if UnSubscribedWayPoints is send otherwise false
+   * @return true if UnsubscribedWayPoints is send otherwise false
    */
   static bool SendUnsubscribedWayPoints(ApplicationManager& app_mngr);
 

@@ -282,7 +282,7 @@ typedef Types<commands::OnWayPointChangeNotification,
               commands::UnsubscribeButtonRequest,
               commands::UnsubscribeButtonResponse> MobileCommandsListSecond;
 
-typedef Types<commands::UnSubscribeWayPointsRequest,
+typedef Types<commands::UnsubscribeWayPointsRequest,
               commands::UnsubscribeWayPointsResponse,
               commands::UpdateTurnListRequest,
               commands::UpdateTurnListResponse> MobileCommandsListThird;
