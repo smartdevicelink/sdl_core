@@ -209,7 +209,7 @@ void RegisterAppInterfaceRequest::WaitForHMIIsReady() {
   }
 }
 
-bool RegisterAppInterfaceRequest::IsApplicationForbidden() {
+bool RegisterAppInterfaceRequest::IsApplicationForbidden() const {
   const auto& msg_params = (*message_)[strings::msg_params];
   const std::string policy_app_id = msg_params[strings::app_id].asString();
   return application_manager_.IsApplicationForbidden(connection_key(),
