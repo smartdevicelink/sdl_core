@@ -640,7 +640,7 @@ class Application : public virtual InitialApplicationData,
    * @param is_persistent Bollean describes is file persistent?
    * @param is_download_complete Bollean describes is file downloaded fully on
    * need to finish downloading?
-   * @return TRUE if file exist and updated sucsesfuly, othervise return false
+   * @return TRUE if file exist and updated sucsesfuly, otherwise return false
    */
   virtual bool UpdateFile(const AppFile& file) = 0;
   virtual bool DeleteFile(const std::string& file_name) = 0;
