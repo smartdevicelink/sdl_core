@@ -495,7 +495,8 @@ void ModuleConfig::SafeCopyFrom(const ModuleConfig& from) {
 Json::Value ModuleConfig::ToJsonValue() const {
   Json::Value result__(Json::objectValue);
   impl::WriteJsonField("preloaded_pt", preloaded_pt, &result__);
-  impl::WriteJsonField("full_app_id_supported", full_app_id_supported, &result__);
+  impl::WriteJsonField(
+      "full_app_id_supported", full_app_id_supported, &result__);
   impl::WriteJsonField("exchange_after_x_ignition_cycles",
                        exchange_after_x_ignition_cycles,
                        &result__);
@@ -572,7 +573,7 @@ bool ModuleConfig::is_initialized() const {
 bool ModuleConfig::struct_empty() const {
   if (preloaded_pt.is_initialized()) {
     return false;
-  }  
+  }
   if (full_app_id_supported.is_initialized()) {
     return false;
   }
@@ -626,7 +627,8 @@ void ModuleConfig::ReportErrors(rpc::ValidationReport* report__) const {
     preloaded_pt.ReportErrors(&report__->ReportSubobject("preloaded_pt"));
   }
   if (!full_app_id_supported.is_valid()) {
-    full_app_id_supported.ReportErrors(&report__->ReportSubobject("full_app_id_supported"));
+    full_app_id_supported.ReportErrors(
+        &report__->ReportSubobject("full_app_id_supported"));
   }
   if (!exchange_after_x_ignition_cycles.is_valid()) {
     exchange_after_x_ignition_cycles.ReportErrors(

@@ -1516,8 +1516,9 @@ void CacheManager::CheckSnapshotInitialization() {
   }
 
   *(snapshot_->policy_table.module_config.preloaded_pt) = false;
-  
-  *(snapshot_->policy_table.module_config.full_app_id_supported) = settings_->use_full_app_id();
+
+  *(snapshot_->policy_table.module_config.full_app_id_supported) =
+      settings_->use_full_app_id();
 
   // SDL must not send certificate in snapshot
   snapshot_->policy_table.module_config.certificate =

@@ -30,7 +30,7 @@ class PolicySettings {
    * @return file path
    */
   virtual const std::string& policies_snapshot_file_name() const = 0;
-  
+
   virtual bool use_full_app_id() const = 0;
 
   /**
