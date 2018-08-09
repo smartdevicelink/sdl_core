@@ -209,6 +209,72 @@ void RegisterAppInterfaceRequest::WaitForHMIIsReady() {
   }
 }
 
+<<<<<<< HEAD
+=======
+bool RegisterAppInterfaceRequest::IsApplicationForbidden() const {
+  const auto& msg_params = (*message_)[strings::msg_params];
+  const std::string policy_app_id = msg_params[strings::app_id].asString();
+  return application_manager_.IsApplicationForbidden(connection_key(),
+                                                     policy_app_id);
+}
+
+bool RegisterAppInterfaceRequest::ProcessApplicationTransportSwitching() {
+  LOG4CXX_AUTO_TRACE(logger_);
+  if (!IsApplicationSwitched()) {
+    return false;
+  }
+  const auto& msg_params = (*message_)[strings::msg_params];
+
+  const auto& policy_app_id = msg_params[strings::app_id].asString();
+  auto app = application_manager_.application_by_policy_id(policy_app_id);
+  DCHECK_OR_RETURN(app, false);
+  if (!application_manager_.IsAppInReconnectMode(policy_app_id)) {
+    LOG4CXX_DEBUG(logger_,
+                  "Policy id " << policy_app_id
+                               << " is not found in reconnection list.");
+    SendResponse(false, mobile_apis::Result::APPLICATION_REGISTERED_ALREADY);
+    return true;
+  }
+
+  LOG4CXX_DEBUG(logger_, "Application is found in reconnection list.");
+
+  auto app_type = ApplicationType::kSwitchedApplicationWrongHashId;
+  if ((*message_)[strings::msg_params].keyExists(strings::hash_id)) {
+    const auto hash_id =
+        (*message_)[strings::msg_params][strings::hash_id].asString();
+
+    auto& resume_ctrl = application_manager_.resume_controller();
+    if (resume_ctrl.CheckApplicationHash(app, hash_id)) {
+      app_type = ApplicationType::kSwitchedApplicationHashOk;
+    }
+  }
+
+  application_manager_.ProcessReconnection(app, connection_key());
+  result_code_ = mobile_apis::Result::SUCCESS;
+  SendRegisterAppInterfaceResponseToMobile(app_type, "", false);
+
+  application_manager_.SendHMIStatusNotification(app);
+
+  application_manager_.OnApplicationSwitched(app);
+
+  return true;
+}
+
+void RegisterAppInterfaceRequest::IncrementDuplicateNameCounter(
+    mobile_apis::Result::eType coincidence_result) {
+  const smart_objects::SmartObject& msg_params =
+      (*message_)[strings::msg_params];
+  const std::string& policy_app_id = msg_params[strings::app_id].asString();
+  if (mobile_apis::Result::DUPLICATE_NAME == coincidence_result) {
+    usage_statistics::AppCounter count_of_rejections_duplicate_name(
+        policy_handler_.GetStatisticManager(),
+        policy_app_id,
+        usage_statistics::REJECTIONS_DUPLICATE_NAME);
+    ++count_of_rejections_duplicate_name;
+  }
+}
+
+>>>>>>> fixup! Refactor register app interface request logic
 void RegisterAppInterfaceRequest::FillApplicationParams(
     ApplicationSharedPtr application) {
   LOG4CXX_AUTO_TRACE(logger_);
