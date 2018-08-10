@@ -56,7 +56,7 @@ TEST(ProtocolHandlerMetricTest, GetJsonMetric) {
   date_time::TimeDuration end_time = date_time::seconds(10);
 
   metric_test.message_metric =
-      new protocol_handler::PHTelemetryObserver::MessageMetric();
+      std::make_shared<protocol_handler::PHTelemetryObserver::MessageMetric>();
   metric_test.message_metric->begin = start_time;
   metric_test.message_metric->end = end_time;
   metric_test.message_metric->message_id = 5;
@@ -85,7 +85,7 @@ TEST(ProtocolHandlerMetricTest, GetJsonMetricWithGrabResources) {
   date_time::TimeDuration end_time = date_time::seconds(10);
 
   metric_test.message_metric =
-      new protocol_handler::PHTelemetryObserver::MessageMetric();
+      std::make_shared<protocol_handler::PHTelemetryObserver::MessageMetric>();
   metric_test.message_metric->begin = start_time;
   metric_test.message_metric->end = end_time;
   metric_test.message_metric->message_id = 5;

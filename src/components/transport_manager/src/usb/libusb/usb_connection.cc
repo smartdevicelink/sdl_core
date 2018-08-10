@@ -224,7 +224,7 @@ void UsbConnection::OnOutTransfer(libusb_transfer* transfer) {
         device_uid_, app_handle_, current_out_message_, DataSendError());
     PopOutMessage();
   }
-  if (!current_out_message_.valid()) {
+  if (current_out_message_.use_count() == 0) {
     libusb_free_transfer(transfer);
     out_transfer_ = NULL;
     waiting_out_transfer_cancel_ = false;
@@ -242,7 +242,7 @@ TransportAdapter::Error UsbConnection::SendData(
     return TransportAdapter::BAD_STATE;
   }
   sync_primitives::AutoLock locker(out_messages_mutex_);
-  if (current_out_message_.valid()) {
+  if (current_out_message_.use_count() != 0) {
     out_messages_.push_back(message);
   } else {
     current_out_message_ = message;

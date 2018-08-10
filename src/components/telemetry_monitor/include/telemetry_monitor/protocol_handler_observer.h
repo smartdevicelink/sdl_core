@@ -47,7 +47,7 @@ class ProtocolHandlerObserver : public protocol_handler::PHTelemetryObserver {
   virtual void StartMessageProcess(uint32_t message_id,
                                    const date_time::TimeDuration& start_time);
 
-  virtual void EndMessageProcess(utils::SharedPtr<MessageMetric> m);
+  virtual void EndMessageProcess(std::shared_ptr<MessageMetric> m);
 
  private:
   TelemetryMonitor* telemetry_monitor_;

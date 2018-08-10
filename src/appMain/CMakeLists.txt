@@ -44,7 +44,6 @@ endif()
 include_directories(
   ${COMPONENTS_DIR}/protocol_handler/include
   ${COMPONENTS_DIR}/application_manager/include
-  ${COMPONENTS_DIR}/remote_control/include
   ${COMPONENTS_DIR}/formatters/include
   ${COMPONENTS_DIR}/transport_manager/include
   ${COMPONENTS_DIR}/security_manager/include
@@ -63,7 +62,6 @@ include_directories(
   ${POLICY_GLOBAL_INCLUDE_PATH}/
   ${COMPONENTS_DIR}/rpc_base/include
   ${COMPONENTS_DIR}/resumption/include
-  ${COMPONENTS_DIR}/dbus/include
   ${CMAKE_BINARY_DIR}/src/components
   ${JSONCPP_INCLUDE_DIRECTORY}
   ${LOG4CXX_INCLUDE_DIRECTORY}
@@ -112,13 +110,6 @@ set(LIBRARIES
   SystemTimeLibrary
 )
 
-if(REMOTE_CONTROL)
-    SET (LIBRARIES
-      ${LIBRARIES}
-      FunctionalModule
-    )
-endif(REMOTE_CONTROL)
-
 if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
   list(APPEND LIBRARIES pthread)
   list(APPEND LIBRARIES dl)
@@ -150,7 +141,8 @@ add_executable(${PROJECT} ${SOURCES})
 
 if (HMIADAPTER STREQUAL "messagebroker")
   add_dependencies(${PROJECT} Boost)
-  list(APPEND LIBRARIES libboost_system.so)
+  GET_PROPERTY(BOOST_LIBS_DIRECTORY GLOBAL PROPERTY GLOBAL_BOOST_LIBS)
+  list(APPEND LIBRARIES boost_system -L${BOOST_LIBS_DIRECTORY})
 endif()
 
 target_link_libraries(${PROJECT} ${LIBRARIES})

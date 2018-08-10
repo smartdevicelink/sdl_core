@@ -45,9 +45,9 @@ class MockHMIMessageObserver : public hmi_message_handler::HMIMessageObserver,
                                public utils::Singleton<MockHMIMessageObserver> {
  public:
   MOCK_METHOD1(OnMessageReceived,
-               void(utils::SharedPtr<application_manager::Message> message));
+               void(std::shared_ptr<application_manager::Message> message));
   MOCK_METHOD1(OnErrorSending,
-               void(utils::SharedPtr<application_manager::Message> message));
+               void(std::shared_ptr<application_manager::Message> message));
   virtual ~MockHMIMessageObserver() {}
 };
 

@@ -49,12 +49,9 @@
 #include "policy/cache_manager.h"
 #include "policy/update_status_manager.h"
 #include "config_profile/profile.h"
-#include "utils/make_shared.h"
 
-#ifdef SDL_REMOTE_CONTROL
 #include "policy/access_remote.h"
 #include "policy/access_remote_impl.h"
-#endif  // SDL_REMOTE_CONTROL
 
 policy::PolicyManager* CreateManager() {
   return new policy::PolicyManagerImpl();
@@ -216,47 +213,41 @@ PolicyManagerImpl::PolicyManagerImpl()
     : PolicyManager()
     , listener_(NULL)
     , cache_(new CacheManager)
-#ifdef SDL_REMOTE_CONTROL
-    , access_remote_(new AccessRemoteImpl(
-          CacheManagerInterfaceSPtr::static_pointer_cast<CacheManager>(cache_)))
-#endif  // SDL_REMOTE_CONTROL
+    , access_remote_(
+          new AccessRemoteImpl(std::static_pointer_cast<CacheManager>(cache_)))
     , retry_sequence_timeout_(60)
     , retry_sequence_index_(0)
     , ignition_check(true)
-    , retry_sequence_url_(0, 0, "") {
-}
+    , retry_sequence_url_(0, 0, "") {}
 
 PolicyManagerImpl::PolicyManagerImpl(bool in_memory)
     : PolicyManager()
     , listener_(NULL)
     , cache_(new CacheManager(in_memory))
-#ifdef SDL_REMOTE_CONTROL
-    , access_remote_(new AccessRemoteImpl(
-          CacheManagerInterfaceSPtr::static_pointer_cast<CacheManager>(cache_)))
-#endif  // SDL_REMOTE_CONTROL
+    , access_remote_(
+          new AccessRemoteImpl(std::static_pointer_cast<CacheManager>(cache_)))
     , retry_sequence_timeout_(60)
     , retry_sequence_index_(0)
     , ignition_check(true)
     , retry_sequence_url_(0, 0, "")
     , wrong_ptu_update_received_(false)
     , send_on_update_sent_out_(false)
-    , trigger_ptu_(false) {
-}
+    , trigger_ptu_(false) {}
 
 void PolicyManagerImpl::set_listener(PolicyListener* listener) {
   listener_ = listener;
   update_status_manager_.set_listener(listener);
 }
 
-utils::SharedPtr<policy_table::Table> PolicyManagerImpl::Parse(
+std::shared_ptr<policy_table::Table> PolicyManagerImpl::Parse(
     const BinaryMessage& pt_content) {
   std::string json(pt_content.begin(), pt_content.end());
   Json::Value value;
   Json::Reader reader;
   if (reader.parse(json.c_str(), value)) {
-    return new policy_table::Table(&value);
+    return std::make_shared<policy_table::Table>(&value);
   } else {
-    return utils::SharedPtr<policy_table::Table>();
+    return std::make_shared<policy_table::Table>();
   }
 }
 
@@ -288,7 +279,7 @@ bool PolicyManagerImpl::LoadPT(const std::string& file,
       "PTU content is: " << std::string(pt_content.begin(), pt_content.end()));
 
   // Parse message into table struct
-  utils::SharedPtr<policy_table::Table> pt_update = Parse(pt_content);
+  std::shared_ptr<policy_table::Table> pt_update = Parse(pt_content);
   if (!pt_update) {
     LOG4CXX_WARN(logger_, "Parsed table pointer is NULL.");
     update_status_manager_.OnWrongUpdateReceived();
@@ -310,7 +301,7 @@ bool PolicyManagerImpl::LoadPT(const std::string& file,
     sync_primitives::AutoLock lock(apps_registration_lock_);
 
     // Get current DB data, since it could be updated during awaiting of PTU
-    utils::SharedPtr<policy_table::Table> policy_table_snapshot =
+    std::shared_ptr<policy_table::Table> policy_table_snapshot =
         cache_->GenerateSnapshot();
     if (!policy_table_snapshot) {
       LOG4CXX_ERROR(
@@ -372,8 +363,8 @@ bool PolicyManagerImpl::LoadPT(const std::string& file,
 }
 
 CheckAppPolicyResults PolicyManagerImpl::CheckPermissionsChanges(
-    const utils::SharedPtr<policy_table::Table> pt_update,
-    const utils::SharedPtr<policy_table::Table> snapshot) {
+    const std::shared_ptr<policy_table::Table> pt_update,
+    const std::shared_ptr<policy_table::Table> snapshot) {
   LOG4CXX_INFO(logger_, "Checking incoming permissions.");
 
   // Replace predefined policies with its actual setting, e.g. "123":"default"
@@ -477,7 +468,7 @@ void PolicyManagerImpl::GetUpdateUrls(const uint32_t service_type,
 
 void PolicyManagerImpl::RequestPTUpdate() {
   LOG4CXX_AUTO_TRACE(logger_);
-  utils::SharedPtr<policy_table::Table> policy_table_snapshot =
+  std::shared_ptr<policy_table::Table> policy_table_snapshot =
       cache_->GenerateSnapshot();
   if (!policy_table_snapshot) {
     LOG4CXX_ERROR(logger_, "Failed to create snapshot of policy table");
@@ -792,13 +783,11 @@ void PolicyManagerImpl::SendNotificationOnPermissionsUpdated(
   LOG4CXX_INFO(logger_,
                "Send notification for application_id:" << application_id);
 
-#ifdef SDL_REMOTE_CONTROL
   const ApplicationOnDevice who = {device_id, application_id};
   if (access_remote_->IsAppRemoteControl(who)) {
     listener()->OnPermissionsUpdated(application_id, notification_data);
     return;
   }
-#endif  // SDL_REMOTE_CONTROL
 
   std::string default_hmi;
   GetDefaultHmi(application_id, &default_hmi);
@@ -1287,7 +1276,7 @@ bool PolicyManagerImpl::ExceededIgnitionCycles() {
 }
 
 bool PolicyManagerImpl::IsPTValid(
-    utils::SharedPtr<policy_table::Table> policy_table,
+    std::shared_ptr<policy_table::Table> policy_table,
     policy_table::PolicyTableType type) const {
   policy_table->SetPolicyTableType(type);
   if (!policy_table->is_valid()) {
@@ -1378,7 +1367,7 @@ void PolicyManagerImpl::SendPermissionsToApp(
   Permissions notification_data;
 
   // Need to get rid of this call
-  utils::SharedPtr<policy_table::Table> policy_table_snapshot =
+  std::shared_ptr<policy_table::Table> policy_table_snapshot =
       cache_->GenerateSnapshot();
 
   PrepareNotificationData(
@@ -1786,11 +1775,11 @@ StatusNotifier PolicyManagerImpl::AddApplication(
   sync_primitives::AutoLock lock(apps_registration_lock_);
   if (IsNewApplication(application_id)) {
     AddNewApplication(application_id, device_consent);
-    return utils::MakeShared<CallStatusChange>(update_status_manager_,
-                                               device_consent);
+    return std::make_shared<CallStatusChange>(update_status_manager_,
+                                              device_consent);
   } else {
     PromoteExistedApplication(application_id, device_consent);
-    return utils::MakeShared<utils::CallNothing>();
+    return std::make_shared<utils::CallNothing>();
   }
 }
 
@@ -1920,7 +1909,7 @@ void PolicyManagerImpl::SaveUpdateStatusRequired(bool is_update_needed) {
 
 void PolicyManagerImpl::set_cache_manager(
     CacheManagerInterface* cache_manager) {
-  cache_ = cache_manager;
+  cache_ = std::shared_ptr<CacheManagerInterface>(cache_manager);
 }
 
 std::ostream& operator<<(std::ostream& output,
@@ -1933,7 +1922,6 @@ std::ostream& operator<<(std::ostream& output,
   return output;
 }
 
-#ifdef SDL_REMOTE_CONTROL
 void PolicyManagerImpl::SetDefaultHmiTypes(const std::string& application_id,
                                            const std::vector<int>& hmi_types) {
   LOG4CXX_INFO(logger_, "SetDefaultHmiTypes");
@@ -2036,9 +2024,8 @@ bool PolicyManagerImpl::GetModuleTypes(
 }
 
 void PolicyManagerImpl::set_access_remote(
-    utils::SharedPtr<AccessRemote> access_remote) {
+    std::shared_ptr<AccessRemote> access_remote) {
   access_remote_ = access_remote;
 }
-#endif  // SDL_REMOTE_CONTROL
 
 }  //  namespace policy

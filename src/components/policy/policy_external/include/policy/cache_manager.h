@@ -35,7 +35,6 @@
 
 #include <map>
 
-#include "utils/shared_ptr.h"
 #include "policy/pt_representation.h"
 #include "policy/pt_ext_representation.h"
 #include "policy/usage_statistics/statistics_manager.h"
@@ -232,7 +231,7 @@ class CacheManager : public CacheManagerInterface {
    * device_info, statistics, excluding user messages
    * @return Generated structure for obtaining Json string.
    */
-  virtual utils::SharedPtr<policy_table::Table> GenerateSnapshot();
+  virtual std::shared_ptr<policy_table::Table> GenerateSnapshot();
 
   /**
    * Applies policy table to the current table
@@ -720,7 +719,7 @@ class CacheManager : public CacheManagerInterface {
   void SetExternalConsentForApp(const PermissionConsent& permissions) OVERRIDE;
 
 #ifdef BUILD_TESTS
-  utils::SharedPtr<policy_table::Table> GetPT() const {
+  std::shared_ptr<policy_table::Table> GetPT() const {
     return pt_;
   }
 #endif
@@ -782,15 +781,15 @@ class CacheManager : public CacheManagerInterface {
                                policy::Permissions& permission);
 
  private:
-  utils::SharedPtr<policy_table::Table> pt_;
-  utils::SharedPtr<policy_table::Table> snapshot_;
-  utils::SharedPtr<PTRepresentation> backup_;
-  utils::SharedPtr<PTExtRepresentation> ex_backup_;
+  std::shared_ptr<policy_table::Table> pt_;
+  std::shared_ptr<policy_table::Table> snapshot_;
+  std::shared_ptr<PTRepresentation> backup_;
+  std::shared_ptr<PTExtRepresentation> ex_backup_;
   bool update_required;
   typedef std::set<std::string> UnpairedDevices;
   UnpairedDevices is_unpaired_;
 
-  mutable sync_primitives::Lock cache_lock_;
+  mutable sync_primitives::RecursiveLock cache_lock_;
   sync_primitives::Lock unpaired_lock_;
 
   typedef std::map<std::string, Permissions> AppCalculatedPermissions;

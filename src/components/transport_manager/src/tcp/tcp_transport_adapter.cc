@@ -2,6 +2,9 @@
  * Copyright (c) 2017, Ford Motor Company
  * All rights reserved.
  *
+ * Copyright (c) 2018 Xevo Inc.
+ * All rights reserved.
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *
@@ -13,7 +16,7 @@
  * disclaimer in the documentation and/or other materials provided with the
  * distribution.
  *
- * Neither the name of the Ford Motor Company nor the names of its contributors
+ * Neither the name of the copyright holders nor the names of its contributors
  * may be used to endorse or promote products derived from this software
  * without specific prior written permission.
  *
@@ -55,13 +58,34 @@ TcpTransportAdapter::TcpTransportAdapter(
     const uint16_t port,
     resumption::LastState& last_state,
     const TransportManagerSettings& settings)
-    : TransportAdapterImpl(NULL,
-                           new TcpConnectionFactory(this),
-                           new TcpClientListener(this, port, true),
-                           last_state,
-                           settings) {}
+    : TransportAdapterImpl(
+          NULL,
+          new TcpConnectionFactory(this),
+          new TcpClientListener(
+              this,
+              port,
+              true,
+              settings.transport_manager_tcp_adapter_network_interface()),
+          last_state,
+          settings) {}
 
 TcpTransportAdapter::~TcpTransportAdapter() {}
+
+void TcpTransportAdapter::TransportConfigUpdated(
+    const TransportConfig& new_config) {
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  transport_config_ = new_config;
+
+  // call the method of parent class to trigger OnTransportConfigUpdated() for
+  // the listeners
+  TransportAdapterImpl::TransportConfigUpdated(new_config);
+}
+
+TransportConfig TcpTransportAdapter::GetTransportConfiguration() const {
+  LOG4CXX_AUTO_TRACE(logger_);
+  return transport_config_;
+}
 
 DeviceType TcpTransportAdapter::GetDeviceType() const {
   return TCP;
@@ -79,8 +103,8 @@ void TcpTransportAdapter::Store() const {
     if (!device) {  // device could have been disconnected
       continue;
     }
-    utils::SharedPtr<TcpDevice> tcp_device =
-        DeviceSptr::static_pointer_cast<TcpDevice>(device);
+    std::shared_ptr<TcpDevice> tcp_device =
+        std::static_pointer_cast<TcpDevice>(device);
     Json::Value device_dictionary;
     device_dictionary["name"] = tcp_device->name();
     struct in_addr address;

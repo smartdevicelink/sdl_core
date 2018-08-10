@@ -33,11 +33,11 @@
 #ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_APP_LAUNCH_APP_LAUNCH_CTRL_H_
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_APP_LAUNCH_APP_LAUNCH_CTRL_H_
 #include <string>
-#include "utils/shared_ptr.h"
+#include <memory>
 
 namespace application_manager {
 class Application;
-typedef utils::SharedPtr<const Application> ApplicationConstSharedPtr;
+typedef std::shared_ptr<const Application> ApplicationConstSharedPtr;
 }  // namespace application_manager
 
 namespace app_launch {

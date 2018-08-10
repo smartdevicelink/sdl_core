@@ -50,7 +50,7 @@ class PHTelemetryObserver {
   };
   virtual void StartMessageProcess(
       uint32_t message_id, const date_time::TimeDuration& start_time) = 0;
-  virtual void EndMessageProcess(utils::SharedPtr<MessageMetric> m) = 0;
+  virtual void EndMessageProcess(std::shared_ptr<MessageMetric> m) = 0;
   virtual ~PHTelemetryObserver() {}
 };
 }  // protocol_handler

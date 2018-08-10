@@ -54,15 +54,15 @@ TEST(ApplicationManagerMetricWrapper, GetJsonMetric) {
 
   date_time::TimeDuration end_time = date_time::seconds(10);
 
-  metric_test.message_metric =
-      new application_manager::AMTelemetryObserver::MessageMetric();
+  metric_test.message_metric = std::make_shared<
+      application_manager::AMTelemetryObserver::MessageMetric>();
   metric_test.message_metric->begin = start_time;
   metric_test.message_metric->end = end_time;
   NsSmartDeviceLink::NsSmartObjects::SmartObject obj;
   obj["params"][application_manager::strings::correlation_id] = 11;
   obj["params"][application_manager::strings::connection_key] = 12;
   metric_test.message_metric->message =
-      new NsSmartDeviceLink::NsSmartObjects::SmartObject(obj);
+      std::make_shared<NsSmartDeviceLink::NsSmartObjects::SmartObject>(obj);
   Json::Value jvalue = metric_test.GetJsonMetric();
 
   EXPECT_EQ("null\n",
@@ -91,20 +91,20 @@ TEST(ApplicationManagerMetricWrapper, GetJsonMetricWithGrabResources) {
 
   date_time::TimeDuration end_time = date_time::seconds(10);
 
-  metric_test.message_metric =
-      new application_manager::AMTelemetryObserver::MessageMetric();
+  metric_test.message_metric = std::make_shared<
+      application_manager::AMTelemetryObserver::MessageMetric>();
   metric_test.message_metric->begin = start_time;
   metric_test.message_metric->end = end_time;
   NsSmartDeviceLink::NsSmartObjects::SmartObject obj;
   obj["params"][application_manager::strings::correlation_id] = 11;
   obj["params"][application_manager::strings::connection_key] = 12;
   metric_test.message_metric->message =
-      new NsSmartDeviceLink::NsSmartObjects::SmartObject(obj);
+      std::make_shared<NsSmartDeviceLink::NsSmartObjects::SmartObject>(obj);
   Json::Value jvalue = metric_test.GetJsonMetric();
 
-  EXPECT_EQ(date_time::getuSecs(start_time),
+  EXPECT_EQ(date_time::DateTime::getuSecs(start_time),
             jvalue[telemetry_monitor::strings::begin].asInt64());
-  EXPECT_EQ(date_time::getuSecs(end_time),
+  EXPECT_EQ(date_time::DateTime::getuSecs(end_time),
             jvalue[telemetry_monitor::strings::end].asInt64());
   EXPECT_EQ(obj["params"][application_manager::strings::correlation_id].asInt(),
             jvalue[telemetry_monitor::strings::correlation_id].asInt64());

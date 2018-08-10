@@ -47,7 +47,6 @@ HeartBeatMonitor::HeartBeatMonitor(uint32_t heartbeat_timeout_mseconds,
                                    Connection* connection)
     : default_heartbeat_timeout_(heartbeat_timeout_mseconds)
     , connection_(connection)
-    , sessions_list_lock_(true)
     , run_(true) {}
 
 void HeartBeatMonitor::Process() {

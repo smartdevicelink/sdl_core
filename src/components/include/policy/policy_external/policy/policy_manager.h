@@ -42,14 +42,11 @@
 #include "policy/policy_listener.h"
 #include "policy/usage_statistics/statistics_manager.h"
 #include "policy/cache_manager_interface.h"
-
-#ifdef SDL_REMOTE_CONTROL
 #include "policy/access_remote.h"
-#endif  // SDL_REMOTE_CONTROL
 
 namespace policy {
 class PolicySettings;
-typedef utils::SharedPtr<utils::Callable> StatusNotifier;
+typedef std::shared_ptr<utils::Callable> StatusNotifier;
 
 class PolicyManager : public usage_statistics::StatisticsManager {
  public:
@@ -565,7 +562,6 @@ class PolicyManager : public usage_statistics::StatisticsManager {
    */
   virtual AppIdURL GetNextUpdateUrl(const EndpointUrls& urls) = 0;
 
-#ifdef SDL_REMOTE_CONTROL
   /**
    * @brief Assigns new HMI types for specified application
    * @param application_id Unique application id
@@ -613,8 +609,7 @@ class PolicyManager : public usage_statistics::StatisticsManager {
    * @param access_remote pointer to new access_remote instance
    */
   virtual void set_access_remote(
-      utils::SharedPtr<AccessRemote> access_remote) = 0;
-#endif  // SDL_REMOTE_CONTROL
+      std::shared_ptr<AccessRemote> access_remote) = 0;
 
   /**
    * @brief Checks if there is existing URL in the EndpointUrls vector with

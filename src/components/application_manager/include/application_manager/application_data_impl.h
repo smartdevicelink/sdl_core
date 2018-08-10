@@ -275,13 +275,14 @@ class DynamicApplicationDataImpl : public virtual Application {
   std::string display_layout_;
 
   CommandsMap commands_;
-  mutable sync_primitives::Lock commands_lock_;
+  mutable std::shared_ptr<sync_primitives::RecursiveLock> commands_lock_ptr_;
   SubMenuMap sub_menu_;
-  mutable sync_primitives::Lock sub_menu_lock_;
+  mutable std::shared_ptr<sync_primitives::Lock> sub_menu_lock_ptr_;
   ChoiceSetMap choice_set_map_;
-  mutable sync_primitives::Lock choice_set_map_lock_;
+  mutable std::shared_ptr<sync_primitives::Lock> choice_set_map_lock_ptr_;
   PerformChoiceSetMap performinteraction_choice_set_map_;
-  mutable sync_primitives::Lock performinteraction_choice_set_lock_;
+  mutable std::shared_ptr<sync_primitives::RecursiveLock>
+      performinteraction_choice_set_lock_ptr_;
   uint32_t is_perform_interaction_active_;
   bool is_reset_global_properties_active_;
   int32_t perform_interaction_mode_;
@@ -295,21 +296,22 @@ class DynamicApplicationDataImpl : public virtual Application {
 };
 
 DataAccessor<CommandsMap> DynamicApplicationDataImpl::commands_map() const {
-  return DataAccessor<CommandsMap>(commands_, commands_lock_);
+  return DataAccessor<CommandsMap>(commands_, commands_lock_ptr_);
 }
 
 DataAccessor<SubMenuMap> DynamicApplicationDataImpl::sub_menu_map() const {
-  return DataAccessor<SubMenuMap>(sub_menu_, sub_menu_lock_);
+  return DataAccessor<SubMenuMap>(sub_menu_, sub_menu_lock_ptr_);
 }
 
 DataAccessor<ChoiceSetMap> DynamicApplicationDataImpl::choice_set_map() const {
-  return DataAccessor<ChoiceSetMap>(choice_set_map_, choice_set_map_lock_);
+  return DataAccessor<ChoiceSetMap>(choice_set_map_, choice_set_map_lock_ptr_);
 }
 
 DataAccessor<PerformChoiceSetMap>
 DynamicApplicationDataImpl::performinteraction_choice_set_map() const {
-  return DataAccessor<PerformChoiceSetMap>(performinteraction_choice_set_map_,
-                                           performinteraction_choice_set_lock_);
+  return DataAccessor<PerformChoiceSetMap>(
+      performinteraction_choice_set_map_,
+      performinteraction_choice_set_lock_ptr_);
 }
 
 uint32_t DynamicApplicationDataImpl::is_perform_interaction_active() const {

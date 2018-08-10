@@ -253,8 +253,7 @@ CacheManager::CacheManager()
     : CacheManagerInterface()
     , pt_(new policy_table::Table)
     , backup_(new SQLPTExtRepresentation())
-    , update_required(false)
-    , cache_lock_(true) {
+    , update_required(false) {
   InitBackupThread();
 }
 
@@ -262,8 +261,7 @@ CacheManager::CacheManager(bool in_memory)
     : CacheManagerInterface()
     , pt_(new policy_table::Table)
     , backup_(new SQLPTExtRepresentation(in_memory))
-    , update_required(false)
-    , cache_lock_(true) {
+    , update_required(false) {
   InitBackupThread();
 }
 
@@ -1627,8 +1625,8 @@ void CacheManager::CheckSnapshotInitialization() {
 
 void CacheManager::PersistData() {
   LOG4CXX_AUTO_TRACE(logger_);
-  if (backup_.valid()) {
-    if (pt_.valid()) {
+  if (backup_.use_count() != 0) {
+    if (pt_.use_count() != 0) {
       // Comma expression is used to hold the lock only during the constructor
       // call
       policy_table::Table copy_pt(
@@ -1670,7 +1668,7 @@ void CacheManager::PersistData() {
       }
 
       // In case of extended policy the meta info should be backuped as well.
-      if (ex_backup_.valid()) {
+      if (ex_backup_.use_count() != 0) {
         ex_backup_->SetMetaInfo(
             *(*copy_pt.policy_table.module_meta).ccpu_version,
             *(*copy_pt.policy_table.module_meta).wers_country_code,
@@ -1750,9 +1748,9 @@ bool CacheManager::IsPermissionsCalculated(const std::string& device_id,
   return false;
 }
 
-utils::SharedPtr<policy_table::Table> CacheManager::GenerateSnapshot() {
+std::shared_ptr<policy_table::Table> CacheManager::GenerateSnapshot() {
   CACHE_MANAGER_CHECK(snapshot_);
-  snapshot_ = new policy_table::Table();
+  snapshot_ = std::make_shared<policy_table::Table>();
   sync_primitives::AutoLock auto_lock(cache_lock_);
   snapshot_->policy_table = pt_->policy_table;
 
@@ -2237,8 +2235,7 @@ bool CacheManager::Init(const std::string& file_name,
   LOG4CXX_AUTO_TRACE(logger_);
   settings_ = settings;
   InitResult init_result = backup_->Init(settings);
-  ex_backup_ = utils::SharedPtr<PTRepresentation>::dynamic_pointer_cast<
-      PTExtRepresentation>(backup_);
+  ex_backup_ = std::dynamic_pointer_cast<PTExtRepresentation>(backup_);
 
   bool result = true;
   switch (init_result) {
@@ -2261,7 +2258,7 @@ bool CacheManager::Init(const std::string& file_name,
     case InitResult::SUCCESS: {
       LOG4CXX_INFO(logger_, "Policy Table was inited successfully");
       result = LoadFromFile(file_name, *pt_);
-      utils::SharedPtr<policy_table::Table> snapshot = GenerateSnapshot();
+      std::shared_ptr<policy_table::Table> snapshot = GenerateSnapshot();
 
       result &= snapshot->is_valid();
       LOG4CXX_DEBUG(logger_,

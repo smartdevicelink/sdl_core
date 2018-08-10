@@ -332,6 +332,11 @@ class ProtocolPacket {
   ConnectionID connection_id() const;
 
   /**
+   * \brief Setter of Connection Identifier
+   */
+  void set_connection_id(ConnectionID connection_id);
+
+  /**
     * \brief Getter for data payload size
     */
   uint32_t payload_size() const;
@@ -370,7 +375,7 @@ class ProtocolPacket {
     * @brief Type definition for variable that hold shared pointer to protocolol
     * packet
     */
-typedef utils::SharedPtr<protocol_handler::ProtocolPacket> ProtocolFramePtr;
+typedef std::shared_ptr<protocol_handler::ProtocolPacket> ProtocolFramePtr;
 typedef std::list<ProtocolFramePtr> ProtocolFramePtrList;
 
 template <typename _CharT>

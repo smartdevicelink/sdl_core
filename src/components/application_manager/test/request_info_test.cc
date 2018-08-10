@@ -36,8 +36,6 @@
 #include <vector>
 #include <limits>
 #include "gmock/gmock.h"
-#include "utils/shared_ptr.h"
-#include "utils/make_shared.h"
 
 namespace request_info = application_manager::request_controller;
 
@@ -76,26 +74,26 @@ class RequestInfoTest : public ::testing::Test {
   uint32_t default_timeout_;
   uint32_t mobile_correlation_id;
 
-  utils::SharedPtr<TestRequestInfo> CreateTestInfo(
+  std::shared_ptr<TestRequestInfo> CreateTestInfo(
       uint32_t connection_key,
       uint32_t correlation_id,
       request_info::RequestInfo::RequestType requst_type,
       const date_time::TimeDuration& start_time,
       uint64_t timeout_msec) {
-    utils::SharedPtr<MockRequest> mock_request =
-        utils::MakeShared<MockRequest>(connection_key, correlation_id);
-    utils::SharedPtr<TestRequestInfo> request =
-        utils::MakeShared<TestRequestInfo>(
+    std::shared_ptr<MockRequest> mock_request =
+        std::make_shared<MockRequest>(connection_key, correlation_id);
+    std::shared_ptr<TestRequestInfo> request =
+        std::make_shared<TestRequestInfo>(
             mock_request, requst_type, start_time, timeout_msec);
     return request;
   }
 };
 
 TEST_F(RequestInfoTest, RequestInfoEqualEndTime) {
-  std::vector<utils::SharedPtr<TestRequestInfo> > requests;
+  std::vector<std::shared_ptr<TestRequestInfo> > requests;
   const date_time::TimeDuration& time = date_time::getCurrentTime();
   for (uint32_t i = 0; i < count_of_requests_for_test_; ++i) {
-    utils::SharedPtr<TestRequestInfo> request = CreateTestInfo(
+    std::shared_ptr<TestRequestInfo> request = CreateTestInfo(
         i, i, request_info::RequestInfo::MobileRequest, time, default_timeout_);
     request->SetEndTime(time);
     EXPECT_TRUE(request_info_set_.Add(request));
@@ -105,7 +103,7 @@ TEST_F(RequestInfoTest, RequestInfoEqualEndTime) {
 
 TEST_F(RequestInfoTest, AddRemoveHMIRequests) {
   for (uint32_t i = 0; i < count_of_requests_for_test_; ++i) {
-    utils::SharedPtr<TestRequestInfo> request =
+    std::shared_ptr<TestRequestInfo> request =
         CreateTestInfo(hmi_connection_key_,
                        i,
                        request_info::RequestInfo::HMIRequest,
@@ -119,11 +117,11 @@ TEST_F(RequestInfoTest, AddRemoveHMIRequests) {
 }
 
 TEST_F(RequestInfoTest, AddHMIRequests_RemoveAllRequests) {
-  std::vector<utils::SharedPtr<TestRequestInfo> > requests;
+  std::vector<std::shared_ptr<TestRequestInfo> > requests;
 
   // Add hmi requests
   for (uint32_t i = 0; i < count_of_requests_for_test_; ++i) {
-    utils::SharedPtr<TestRequestInfo> request =
+    std::shared_ptr<TestRequestInfo> request =
         CreateTestInfo(hmi_connection_key_,
                        i,
                        request_info::RequestInfo::HMIRequest,
@@ -135,7 +133,7 @@ TEST_F(RequestInfoTest, AddHMIRequests_RemoveAllRequests) {
   EXPECT_EQ(count_of_requests_for_test_, request_info_set_.Size());
 
   // Delete every request
-  std::vector<utils::SharedPtr<TestRequestInfo> >::iterator req_it =
+  std::vector<std::shared_ptr<TestRequestInfo> >::iterator req_it =
       requests.begin();
 
   for (; req_it != requests.end(); ++req_it) {
@@ -155,14 +153,14 @@ TEST_F(RequestInfoTest, AddHMIRequests_RemoveAllRequests) {
 }
 
 TEST_F(RequestInfoTest, AddMobileRequests_RemoveMobileRequests) {
-  utils::SharedPtr<TestRequestInfo> mobile_request1 =
+  std::shared_ptr<TestRequestInfo> mobile_request1 =
       CreateTestInfo(mobile_connection_key1_,
                      12345,
                      request_info::RequestInfo::MobileRequest,
                      date_time::getCurrentTime(),
                      default_timeout_);
   EXPECT_TRUE(request_info_set_.Add(mobile_request1));
-  utils::SharedPtr<TestRequestInfo> mobile_request2 =
+  std::shared_ptr<TestRequestInfo> mobile_request2 =
       CreateTestInfo(mobile_connection_key2_,
                      54321,
                      request_info::RequestInfo::MobileRequest,
@@ -175,15 +173,15 @@ TEST_F(RequestInfoTest, AddMobileRequests_RemoveMobileRequests) {
 }
 
 TEST_F(RequestInfoTest, AddMobileRequests_RemoveMobileRequestsByConnectionKey) {
-  std::vector<utils::SharedPtr<TestRequestInfo> > requests;
+  std::vector<std::shared_ptr<TestRequestInfo> > requests;
   const uint32_t count_of_mobile_request1 = 200;
   const uint32_t count_of_mobile_request2 = 100;
   for (uint32_t i = 0; i < count_of_mobile_request1; ++i) {
-    utils::SharedPtr<TestRequestInfo> mobile_request1 =
+    std::shared_ptr<TestRequestInfo> mobile_request1 =
         CreateTestInfo(mobile_connection_key1_,
                        i,
                        request_info::RequestInfo::MobileRequest,
-                       date_time::getCurrentTime(),
+                       date_time::DateTime::getCurrentTime(),
                        default_timeout_);
 
     requests.push_back(mobile_request1);
@@ -192,7 +190,7 @@ TEST_F(RequestInfoTest, AddMobileRequests_RemoveMobileRequestsByConnectionKey) {
   EXPECT_EQ(count_of_mobile_request1, request_info_set_.Size());
 
   for (uint32_t i = 0; i < count_of_mobile_request2; ++i) {
-    utils::SharedPtr<TestRequestInfo> mobile_request2 =
+    std::shared_ptr<TestRequestInfo> mobile_request2 =
         CreateTestInfo(mobile_connection_key2_,
                        i,
                        request_info::RequestInfo::MobileRequest,
@@ -214,7 +212,7 @@ TEST_F(RequestInfoTest, AddMobileRequests_RemoveMobileRequestsByConnectionKey) {
 
 TEST_F(RequestInfoTest, RequestInfoSetFront) {
   for (uint32_t i = 0; i < count_of_requests_for_test_; ++i) {
-    utils::SharedPtr<TestRequestInfo> request =
+    std::shared_ptr<TestRequestInfo> request =
         CreateTestInfo(mobile_connection_key1_,
                        i,
                        request_info::RequestInfo::HMIRequest,
@@ -225,9 +223,9 @@ TEST_F(RequestInfoTest, RequestInfoSetFront) {
 
   for (uint32_t i = 1; i < count_of_requests_for_test_; ++i) {
     request_info::RequestInfoPtr request_info = request_info_set_.Front();
-    EXPECT_TRUE(request_info.valid());
+    EXPECT_TRUE(request_info.use_count() != 0);
     request_info = request_info_set_.FrontWithNotNullTimeout();
-    EXPECT_TRUE(request_info.valid());
+    EXPECT_TRUE(request_info.use_count() != 0);
     EXPECT_TRUE(request_info_set_.RemoveRequest(request_info));
   }
   EXPECT_EQ(1u, request_info_set_.Size());
@@ -248,7 +246,7 @@ TEST_F(RequestInfoTest, RequestInfoSetFind) {
       appid_connection_id.end();
 
   for (; req_it != end; ++req_it) {
-    utils::SharedPtr<TestRequestInfo> request =
+    std::shared_ptr<TestRequestInfo> request =
         CreateTestInfo(req_it->first,
                        req_it->second,
                        request_info::RequestInfo::HMIRequest,
@@ -259,16 +257,16 @@ TEST_F(RequestInfoTest, RequestInfoSetFind) {
 
   request_info::RequestInfoPtr request = request_info_set_.Find(
       count_of_requests_for_test_, count_of_requests_for_test_);
-  EXPECT_FALSE(request.valid());
+  EXPECT_FALSE(request.use_count() != 0);
 
   req_it = appid_connection_id.begin();
   for (; req_it != end; ++req_it) {
     request_info::RequestInfoPtr request =
         request_info_set_.Find(req_it->first, req_it->second);
-    EXPECT_TRUE(request.valid());
+    EXPECT_TRUE(request.use_count() != 0);
     EXPECT_TRUE(request_info_set_.RemoveRequest(request));
     request = request_info_set_.Find(req_it->first, req_it->second);
-    EXPECT_FALSE(request.valid());
+    EXPECT_FALSE(request.use_count() != 0);
   }
   EXPECT_EQ(0u, request_info_set_.Size());
 }
@@ -277,7 +275,7 @@ TEST_F(RequestInfoTest, RequestInfoSetEqualHash) {
   request_info::RequestInfoSet request_info_set;
   const uint32_t connection_key = 65483;
   const uint32_t corr_id = 65483;
-  utils::SharedPtr<TestRequestInfo> request =
+  std::shared_ptr<TestRequestInfo> request =
       CreateTestInfo(connection_key,
                      corr_id,
                      request_info::RequestInfo::HMIRequest,
@@ -289,18 +287,18 @@ TEST_F(RequestInfoTest, RequestInfoSetEqualHash) {
   EXPECT_EQ(1u, request_info_set.Size());
   request_info::RequestInfoPtr found =
       request_info_set.Find(connection_key, corr_id);
-  EXPECT_TRUE(found.valid());
+  EXPECT_TRUE(found.use_count() != 0);
   EXPECT_TRUE(request_info_set.RemoveRequest(found));
   EXPECT_EQ(0u, request_info_set.Size());
   EXPECT_TRUE(request_info_set.Add(request));
   EXPECT_FALSE(request_info_set.Add(request));
   found = request_info_set.FrontWithNotNullTimeout();
-  EXPECT_TRUE(found.valid());
+  EXPECT_TRUE(found.use_count() != 0);
   EXPECT_TRUE(request_info_set.RemoveRequest(found));
   found = request_info_set.FrontWithNotNullTimeout();
-  EXPECT_FALSE(found.valid());
+  EXPECT_FALSE(found.use_count() != 0);
   found = request_info_set.Front();
-  EXPECT_FALSE(found.valid());
+  EXPECT_FALSE(found.use_count() != 0);
   EXPECT_EQ(0u, request_info_set.Size());
 }
 
@@ -315,7 +313,7 @@ TEST_F(RequestInfoTest, EndTimeisExpired) {
       date_time::seconds(date_time::getSecs(date_time::getCurrentTime()));
   expired += date_time::microseconds(std::numeric_limits<time_t>::max());
 
-  utils::SharedPtr<TestRequestInfo> request =
+  std::shared_ptr<TestRequestInfo> request =
       CreateTestInfo(mobile_connection_key1_,
                      mobile_correlation_id,
                      request_info::RequestInfo::MobileRequest,
@@ -331,7 +329,7 @@ TEST_F(RequestInfoTest, EndTimeisExpired) {
 
 TEST_F(RequestInfoTest, UpdateEndTime) {
   date_time::TimeDuration time = date_time::getCurrentTime();
-  utils::SharedPtr<TestRequestInfo> request =
+  std::shared_ptr<TestRequestInfo> request =
       CreateTestInfo(mobile_connection_key1_,
                      mobile_correlation_id,
                      request_info::RequestInfo::MobileRequest,
@@ -345,7 +343,7 @@ TEST_F(RequestInfoTest, UpdateEndTime) {
 
 TEST_F(RequestInfoTest, UpdateTimeOut) {
   date_time::TimeDuration time = date_time::getCurrentTime();
-  utils::SharedPtr<TestRequestInfo> request =
+  std::shared_ptr<TestRequestInfo> request =
       CreateTestInfo(mobile_connection_key1_,
                      mobile_correlation_id,
                      request_info::RequestInfo::MobileRequest,

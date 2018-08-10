@@ -114,11 +114,16 @@ if(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
 endif()
 
 add_library("Utils" ${SOURCES})
-list(APPEND LIBRARIES -lboost_system -lboost_thread -lboost_date_time)
+GET_PROPERTY(BOOST_LIBS_DIRECTORY GLOBAL PROPERTY GLOBAL_BOOST_LIBS)
+list(APPEND LIBRARIES boost_system -L${BOOST_LIBS_DIRECTORY})
+list(APPEND LIBRARIES boost_thread -L${BOOST_LIBS_DIRECTORY})
+list(APPEND LIBRARIES boost_date_time -L${BOOST_LIBS_DIRECTORY})
 target_link_libraries("Utils" ${LIBRARIES})
+add_dependencies("Utils" Boost)
+
 
 if(ENABLE_LOG)
-  add_dependencies("Utils" install-3rd_party_logger Boost)
+  add_dependencies("Utils" install-3rd_party_logger)
 endif()
 
 if(BUILD_TESTS)

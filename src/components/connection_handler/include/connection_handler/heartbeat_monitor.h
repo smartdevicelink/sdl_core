@@ -111,7 +111,7 @@ class HeartBeatMonitor : public threads::ThreadDelegate {
   typedef std::map<uint8_t, SessionState> SessionMap;
   SessionMap sessions_;
 
-  sync_primitives::Lock sessions_list_lock_;  // recurcive
+  sync_primitives::RecursiveLock sessions_list_lock_;  // recurcive
   sync_primitives::Lock main_thread_lock_;
   mutable sync_primitives::Lock heartbeat_timeout_seconds_lock_;
   sync_primitives::ConditionalVariable heartbeat_monitor_;

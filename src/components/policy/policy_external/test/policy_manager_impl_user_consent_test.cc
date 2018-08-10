@@ -395,7 +395,7 @@ TEST_F(PolicyManagerImplTest2,
   uint32_t size = result.size();
   EXPECT_GT(size, 0u);
   std::vector< ::policy::UserFriendlyMessage>::iterator result_iter;
-  utils::SharedPtr<policy_table::Table> pt =
+  std::shared_ptr<policy_table::Table> pt =
       (policy_manager_->GetCache())->GetPT();
 
   policy_table::ConsumerFriendlyMessages& consumer_friendly_messages =
@@ -456,7 +456,7 @@ TEST_F(PolicyManagerImplTest2,
 TEST_F(PolicyManagerImplTest2, SetDeviceInfo_ExpectDevInfoAddedToPT) {
   // Arrange
   ::policy::DeviceInfo dev_info;
-  utils::SharedPtr<policy_table::Table> pt =
+  std::shared_ptr<policy_table::Table> pt =
       (policy_manager_->GetCache())->GetPT();
   dev_info.hardware = "hardware IPX";
   dev_info.firmware_rev = "v.8.0.1";
