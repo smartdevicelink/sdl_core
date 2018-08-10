@@ -933,7 +933,7 @@ class ApplicationManagerImpl
    * @param container with global properties to reset
    * @return struct with flags indicating global properties reset
    */
-  virtual ResetGlobalPropertiesResult ResetGlobalProperties(
+  ResetGlobalPropertiesResult ResetGlobalProperties(
       const smart_objects::SmartObject& global_properties_ids,
       const uint32_t app_id) OVERRIDE;
 
@@ -942,7 +942,7 @@ class ApplicationManagerImpl
     * @param id of app which properties to reset
     * @return struct with flags indicating success global properties reset
     */
-  virtual ResetGlobalPropertiesResult ResetAllApplicationGlobalProperties(
+  ResetGlobalPropertiesResult ResetAllApplicationGlobalProperties(
       const uint32_t app_id) OVERRIDE;
 
   /**
@@ -1294,7 +1294,7 @@ class ApplicationManagerImpl
    *
    * @return TRUE on success, otherwise FALSE
    */
-  bool ResetHelpPromt(ApplicationSharedPtr app);
+  bool ResetHelpPromt(ApplicationSharedPtr app) const;
 
   /*
    * @brief  Sets default value of the TIMEOUTPROMT global property
@@ -1304,7 +1304,7 @@ class ApplicationManagerImpl
    *
    * @return TRUE on success, otherwise FALSE
    */
-  bool ResetTimeoutPromt(ApplicationSharedPtr const app);
+  bool ResetTimeoutPromt(ApplicationSharedPtr app) const;
 
   /*
    * @brief Sets default value of the VRHELPTITLE global property
@@ -1315,7 +1315,7 @@ class ApplicationManagerImpl
    *
    * @return TRUE on success, otherwise FALSE
    */
-  bool ResetVrHelpTitleItems(ApplicationSharedPtr const app);
+  bool ResetVrHelpTitleItems(ApplicationSharedPtr app) const;
 
  private:
   /*
@@ -1345,7 +1345,7 @@ class ApplicationManagerImpl
    * global properties IDs. Used as utility to call
    * ApplicationManger::ResetGlobalProperties
    * with all global properties.
-   * @return unique aplication identifier.
+   * @return array smart object with global properties identifiers.
    */
   const smart_objects::SmartObjectSPtr CreateAllAppGlobalPropsIDList(
       const uint32_t app_id) const;
