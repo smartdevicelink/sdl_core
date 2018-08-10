@@ -510,9 +510,11 @@ void SystemRequest::Run() {
     return;
   }
 
+  const uint16_t query_apps_min_version = 4;
+
   if (mobile_apis::RequestType::QUERY_APPS == request_type &&
       application_manager_.get_settings().max_supported_protocol_version() <
-          4) {
+          query_apps_min_version) {
     SendResponse(false, mobile_apis::Result::UNSUPPORTED_RESOURCE);
     return;
   }
