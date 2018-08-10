@@ -59,7 +59,7 @@ void RPCHandlerImpl::ProcessMessageFromMobile(
 #ifdef TELEMETRY_MONITOR
   AMTelemetryObserver::MessageMetricSharedPtr metric(
       new AMTelemetryObserver::MessageMetric());
-  metric->begin = date_time::DateTime::getCurrentTime();
+  metric->begin = date_time::getCurrentTime();
 #endif  // TELEMETRY_MONITOR
   smart_objects::SmartObjectSPtr so_from_mobile =
       std::make_shared<smart_objects::SmartObject>();
@@ -83,7 +83,7 @@ void RPCHandlerImpl::ProcessMessageFromMobile(
     LOG4CXX_ERROR(logger_, "Received command didn't run successfully");
   }
 #ifdef TELEMETRY_MONITOR
-  metric->end = date_time::DateTime::getCurrentTime();
+  metric->end = date_time::getCurrentTime();
   if (metric_observer_) {
     metric_observer_->OnMessage(metric);
   }

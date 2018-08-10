@@ -181,7 +181,7 @@ TEST_F(RequestInfoTest, AddMobileRequests_RemoveMobileRequestsByConnectionKey) {
         CreateTestInfo(mobile_connection_key1_,
                        i,
                        request_info::RequestInfo::MobileRequest,
-                       date_time::DateTime::getCurrentTime(),
+                       date_time::getCurrentTime(),
                        default_timeout_);
 
     requests.push_back(mobile_request1);

@@ -102,9 +102,9 @@ TEST(ApplicationManagerMetricWrapper, GetJsonMetricWithGrabResources) {
       std::make_shared<NsSmartDeviceLink::NsSmartObjects::SmartObject>(obj);
   Json::Value jvalue = metric_test.GetJsonMetric();
 
-  EXPECT_EQ(date_time::DateTime::getuSecs(start_time),
+  EXPECT_EQ(date_time::getuSecs(start_time),
             jvalue[telemetry_monitor::strings::begin].asInt64());
-  EXPECT_EQ(date_time::DateTime::getuSecs(end_time),
+  EXPECT_EQ(date_time::getuSecs(end_time),
             jvalue[telemetry_monitor::strings::end].asInt64());
   EXPECT_EQ(obj["params"][application_manager::strings::correlation_id].asInt(),
             jvalue[telemetry_monitor::strings::correlation_id].asInt64());
