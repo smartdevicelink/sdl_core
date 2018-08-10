@@ -2822,7 +2822,7 @@ void ApplicationManagerImpl::ProcessApp(const uint32_t app_id,
   }
 }
 
-bool ApplicationManagerImpl::ResetHelpPromt(ApplicationSharedPtr app) {
+bool ApplicationManagerImpl::ResetHelpPromt(ApplicationSharedPtr app) const {
   if (!app) {
     LOG4CXX_ERROR(logger_, "Null pointer");
     return false;
@@ -2833,7 +2833,7 @@ bool ApplicationManagerImpl::ResetHelpPromt(ApplicationSharedPtr app) {
   return true;
 }
 
-bool ApplicationManagerImpl::ResetTimeoutPromt(ApplicationSharedPtr const app) {
+bool ApplicationManagerImpl::ResetTimeoutPromt(ApplicationSharedPtr app) const {
   if (!app) {
     LOG4CXX_ERROR(logger_, "Null pointer");
     return false;
@@ -2859,7 +2859,7 @@ bool ApplicationManagerImpl::ResetTimeoutPromt(ApplicationSharedPtr const app) {
 }
 
 bool ApplicationManagerImpl::ResetVrHelpTitleItems(
-    ApplicationSharedPtr const app) {
+    ApplicationSharedPtr app) const {
   if (!app) {
     LOG4CXX_ERROR(logger_, "Null pointer");
     return false;

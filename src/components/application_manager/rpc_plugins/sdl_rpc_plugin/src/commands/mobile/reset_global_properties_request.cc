@@ -159,41 +159,43 @@ void ResetGlobalPropertiesRequest::ResetGlobalProperties() {
       (*message_)[strings::params][strings::connection_key].asUInt();
   ApplicationSharedPtr app = application_manager_.application(app_id);
 
-  const smart_objects::SmartObject& global_properties =
-      (*message_)[strings::msg_params][strings::properties];
-
   if (!app) {
     LOG4CXX_ERROR(logger_, "No application associated with session key");
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     return;
   }
 
-  auto result =
+  const auto& global_properties =
+      (*message_)[strings::msg_params][strings::properties];
+
+  auto reset_global_props_result =
       application_manager_.ResetGlobalProperties(global_properties, app_id);
 
-  if (result.HasUIPropertiesReset()) {
+  if (reset_global_props_result.HasUIPropertiesReset()) {
     StartAwaitForInterface(HmiInterfaces::HMI_INTERFACE_UI);
   }
 
-  if (result.HasTTSPropertiesReset()) {
+  if (reset_global_props_result.HasTTSPropertiesReset()) {
     StartAwaitForInterface(HmiInterfaces::HMI_INTERFACE_TTS);
   }
 
   app->set_reset_global_properties_active(true);
 
-  if (result.HasUIPropertiesReset()) {
+  if (reset_global_props_result.HasUIPropertiesReset()) {
     // create ui request
     smart_objects::SmartObjectSPtr msg_params =
-        MessageHelper::CreateUIResetGlobalPropertiesRequest(result, app);
+        MessageHelper::CreateUIResetGlobalPropertiesRequest(
+            reset_global_props_result, app);
     if (msg_params.get()) {
       SendHMIRequest(
           hmi_apis::FunctionID::UI_SetGlobalProperties, msg_params.get(), true);
     }
   }
 
-  if (result.HasTTSPropertiesReset()) {
+  if (reset_global_props_result.HasTTSPropertiesReset()) {
     smart_objects::SmartObjectSPtr msg_params =
-        MessageHelper::CreateTTSResetGlobalPropertiesRequest(result, app);
+        MessageHelper::CreateTTSResetGlobalPropertiesRequest(
+            reset_global_props_result, app);
 
     SendHMIRequest(
         hmi_apis::FunctionID::TTS_SetGlobalProperties, msg_params.get(), true);
