@@ -891,7 +891,7 @@ MessageHelper::CreateUIResetGlobalPropertiesRequest(
     application->set_menu_title(
         (*tts_reset_global_prop_request)[hmi_request::menu_title]);
   }
-  
+
   if (reset_result.keyboard_properties) {
     smart_objects::SmartObject key_board_properties =
         smart_objects::SmartObject(smart_objects::SmartType_Map);
