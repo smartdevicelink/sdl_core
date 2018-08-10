@@ -103,7 +103,8 @@ class AppLaunchDataJsonTest : public ::testing::Test {
 
   std::unique_ptr<resumption::LastState> test_last_state_;
   std::unique_ptr<AppLaunchDataJson> res_json_;
-  void SetTimestamp(const ApplicationData& in_data, date_time::TimeDuration& timestamp);
+  void SetTimestamp(const ApplicationData& in_data,
+                    date_time::TimeDuration& timestamp);
 };
 
 void AppLaunchDataJsonTest::AddApplicationDataWithIncreaseTable(
