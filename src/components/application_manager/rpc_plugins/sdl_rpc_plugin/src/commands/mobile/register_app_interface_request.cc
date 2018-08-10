@@ -621,11 +621,11 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile(
   utils::SemanticVersion negotiated_version = application->msg_version();
 
   response_params[strings::sync_msg_version][strings::major_version] =
-      negotiated_version.major_version;
+      negotiated_version.majorVersion;
   response_params[strings::sync_msg_version][strings::minor_version] =
-      negotiated_version.minor_version;
+      negotiated_version.minorVersion;
   response_params[strings::sync_msg_version][strings::patch_version] =
-      negotiated_version.patch_version;
+      negotiated_version.patchVersion;
 
   const smart_objects::SmartObject& msg_params =
       (*message_)[strings::msg_params];

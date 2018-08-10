@@ -232,7 +232,7 @@ bool RPCHandlerImpl::ConvertMessageToSO(
       } else if (mobile_apis::FunctionID::RegisterAppInterfaceID ==
                  static_cast<mobile_apis::FunctionID::eType>(
                      output[strings::params][strings::function_id].asInt())) {
-        // Assume default version 1.0.0 until properly set in RAI
+        // Assume default version 2.0.0 until properly set in RAI
         output[NsSmartDeviceLink::NsJSONHandler::strings::S_PARAMS]
               [NsSmartDeviceLink::NsJSONHandler::strings::S_RPC_MSG_VERSION] =
                   msg_version.toString();

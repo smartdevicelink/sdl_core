@@ -68,52 +68,53 @@ class ProtocolPacket {
    * \brief Used for storing the full protocol version of a service
    *        (major.minor.patch).
    */
-  class ProtocolVersion {
-   public:
-    ProtocolVersion();
-    ProtocolVersion(uint8_t majorVersion,
-                    uint8_t minorVersion,
-                    uint8_t patchVersion);
-    ProtocolVersion(ProtocolVersion& other);
-    ProtocolVersion(std::string versionString);
-    uint8_t majorVersion;
-    uint8_t minorVersion;
-    uint8_t patchVersion;
-    static inline int16_t cmp(const ProtocolVersion& version1,
-                              const ProtocolVersion& version2) {
-      int16_t diff =
-          static_cast<int16_t>(version1.majorVersion - version2.majorVersion);
-      if (diff == 0) {
-        diff =
-            static_cast<int16_t>(version1.minorVersion - version2.minorVersion);
+  /*  class ProtocolVersion {
+     public:
+      ProtocolVersion();
+      ProtocolVersion(uint8_t majorVersion,
+                      uint8_t minorVersion,
+                      uint8_t patchVersion);
+      ProtocolVersion(ProtocolVersion& other);
+      ProtocolVersion(std::string versionString);
+      uint8_t majorVersion;
+      uint8_t minorVersion;
+      uint8_t patchVersion;
+      static inline int16_t cmp(const ProtocolVersion& version1,
+                                const ProtocolVersion& version2) {
+        int16_t diff =
+            static_cast<int16_t>(version1.majorVersion - version2.majorVersion);
         if (diff == 0) {
-          diff = static_cast<int16_t>(version1.patchVersion -
-                                      version2.patchVersion);
+          diff =
+              static_cast<int16_t>(version1.minorVersion -
+    version2.minorVersion);
+          if (diff == 0) {
+            diff = static_cast<int16_t>(version1.patchVersion -
+                                        version2.patchVersion);
+          }
         }
+        return diff;
       }
-      return diff;
-    }
-    inline bool operator==(const ProtocolVersion& other) {
-      return ProtocolVersion::cmp(*this, other) == 0;
-    }
-    inline bool operator<(const ProtocolVersion& other) {
-      return ProtocolVersion::cmp(*this, other) < 0;
-    }
-    bool operator>(const ProtocolVersion& other) {
-      return ProtocolVersion::cmp(*this, other) > 0;
-    }
-    inline bool operator<=(const ProtocolVersion& other) {
-      return ProtocolVersion::cmp(*this, other) <= 0;
-    }
-    bool operator>=(const ProtocolVersion& other) {
-      return ProtocolVersion::cmp(*this, other) >= 0;
-    }
-    static inline ProtocolVersion* min(ProtocolVersion& version1,
-                                       ProtocolVersion& version2) {
-      return (version1 < version2) ? &version1 : &version2;
-    }
-    std::string to_string();
-  };
+      inline bool operator==(const ProtocolVersion& other) {
+        return ProtocolVersion::cmp(*this, other) == 0;
+      }
+      inline bool operator<(const ProtocolVersion& other) {
+        return ProtocolVersion::cmp(*this, other) < 0;
+      }
+      bool operator>(const ProtocolVersion& other) {
+        return ProtocolVersion::cmp(*this, other) > 0;
+      }
+      inline bool operator<=(const ProtocolVersion& other) {
+        return ProtocolVersion::cmp(*this, other) <= 0;
+      }
+      bool operator>=(const ProtocolVersion& other) {
+        return ProtocolVersion::cmp(*this, other) >= 0;
+      }
+      static inline ProtocolVersion* min(ProtocolVersion& version1,
+                                         ProtocolVersion& version2) {
+        return (version1 < version2) ? &version1 : &version2;
+      }
+      std::string to_string();
+    };*/
 
   /**
    * \class ProtocolHeader

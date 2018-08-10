@@ -54,7 +54,7 @@ HandshakeHandler::HandshakeHandler(
     ServiceType service_type,
     const std::vector<int>& force_protected_service,
     const bool is_new_service,
-    ProtocolPacket::ProtocolVersion& full_version,
+    utils::SemanticVersion& full_version,
     std::shared_ptr<BsonObject> payload)
     : protocol_handler_(protocol_handler)
     , session_observer_(session_observer)
@@ -63,13 +63,12 @@ HandshakeHandler::HandshakeHandler(
     , protocol_version_(protocol_version)
     , payload_(payload) {}
 
-HandshakeHandler::HandshakeHandler(
-    ProtocolHandlerImpl& protocol_handler,
-    SessionObserver& session_observer,
-    ProtocolPacket::ProtocolVersion& full_version,
-    const SessionContext& context,
-    const uint8_t protocol_version,
-    std::shared_ptr<BsonObject> payload)
+HandshakeHandler::HandshakeHandler(ProtocolHandlerImpl& protocol_handler,
+                                   SessionObserver& session_observer,
+                                   utils::SemanticVersion& full_version,
+                                   const SessionContext& context,
+                                   const uint8_t protocol_version,
+                                   std::shared_ptr<BsonObject> payload)
     : protocol_handler_(protocol_handler)
     , session_observer_(session_observer)
     , context_(context)
