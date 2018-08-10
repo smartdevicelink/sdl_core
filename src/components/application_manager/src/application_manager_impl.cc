@@ -3373,8 +3373,9 @@ ResetGlobalPropertiesResult ApplicationManagerImpl::ResetGlobalProperties(
   ResetGlobalPropertiesResult result;
 
   for (size_t i = 0; i < global_properties_ids.length(); ++i) {
-    int64_t global_property = static_cast<mobile_apis::GlobalProperty::eType>(
-        global_properties_ids[i].asInt());
+    mobile_apis::GlobalProperty::eType global_property =
+        static_cast<mobile_apis::GlobalProperty::eType>(
+            global_properties_ids[i].asInt());
     switch (global_property) {
       case mobile_apis::GlobalProperty::HELPPROMPT: {
         result.help_prompt = ResetHelpPromt(application);
