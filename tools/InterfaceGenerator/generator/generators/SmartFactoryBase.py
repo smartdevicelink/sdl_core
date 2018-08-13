@@ -935,10 +935,10 @@ class CodeGenerator(object):
         if (member.deprecated is not None and member.removed is not None):
             raise GenerateError("Error: Deprecated and removed should not be present together for " + member.name)
 
-        for item in member.history:
-            if item.since is None or item.until is None:
-                raise GenerateError("Error: History items require since and until parameters for " + member.name)
-        return
+        if(member.history is not None):
+            for item in member.history:
+                if item.since is None or item.until is None:
+                    raise GenerateError("Error: History items require since and until parameters for " + member.name)
 
     def _gen_schema_item_fill(self, member, since, until, deprecated, removed):
         """Generate schema item fill code.
