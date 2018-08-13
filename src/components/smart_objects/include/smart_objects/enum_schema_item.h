@@ -297,7 +297,8 @@ TEnumSchemaItem<EnumType>::createWithSignatures(
     const std::map<EnumType, std::vector<ElementSignature> >& ElementSignatures,
     const TSchemaItemParameter<EnumType>& DefaultValue) {
   return std::shared_ptr<TEnumSchemaItem<EnumType> >(
-      new TEnumSchemaItem<EnumType>(AllowedElements, DefaultValue, ElementSignatures));
+      new TEnumSchemaItem<EnumType>(
+          AllowedElements, DefaultValue, ElementSignatures));
 }
 
 template <typename EnumType>
