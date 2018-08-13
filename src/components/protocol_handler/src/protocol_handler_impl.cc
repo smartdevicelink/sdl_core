@@ -61,8 +61,8 @@ std::string ConvertPacketDataToString(const uint8_t* data,
 
 const size_t kStackSize = 65536;
 
-ProtocolPacket::ProtocolVersion defaultProtocolVersion(5, 1, 0);
-ProtocolPacket::ProtocolVersion minMultipleTransportsVersion(5, 1, 0);
+utils::SemanticVersion defaultProtocolVersion(5, 1, 0);
+utils::SemanticVersion minMultipleTransportsVersion(5, 1, 0);
 
 ProtocolHandlerImpl::ProtocolHandlerImpl(
     const ProtocolHandlerSettings& settings,
@@ -199,7 +199,7 @@ void ProtocolHandlerImpl::SendStartSessionAck(ConnectionID connection_id,
                                               uint8_t service_type,
                                               bool protection) {
   LOG4CXX_AUTO_TRACE(logger_);
-  ProtocolPacket::ProtocolVersion fullVersion;
+  utils::SemanticVersion fullVersion;
   SendStartSessionAck(connection_id,
                       session_id,
                       input_protocol_version,
@@ -216,7 +216,7 @@ void ProtocolHandlerImpl::SendStartSessionAck(
     uint32_t hash_id,
     uint8_t service_type,
     bool protection,
-    ProtocolPacket::ProtocolVersion& full_version) {
+    utils::SemanticVersion& full_version) {
   LOG4CXX_AUTO_TRACE(logger_);
 
   BsonObject empty_param;
@@ -241,7 +241,7 @@ void ProtocolHandlerImpl::SendStartSessionAck(
     uint32_t hash_id,
     uint8_t service_type,
     bool protection,
-    ProtocolPacket::ProtocolVersion& full_version,
+    utils::SemanticVersion& full_version,
     BsonObject& params) {
   LOG4CXX_AUTO_TRACE(logger_);
 
@@ -307,13 +307,13 @@ void ProtocolHandlerImpl::SendStartSessionAck(
                                &params, strings::hash_id)));
 
       // Minimum protocol version supported by both
-      ProtocolPacket::ProtocolVersion* minVersion =
+      utils::SemanticVersion* minVersion =
           (full_version.majorVersion < PROTOCOL_VERSION_5)
               ? &defaultProtocolVersion
-              : ProtocolPacket::ProtocolVersion::min(full_version,
-                                                     defaultProtocolVersion);
+              : utils::SemanticVersion::min(full_version,
+                                            defaultProtocolVersion);
       char protocolVersionString[256];
-      strncpy(protocolVersionString, (*minVersion).to_string().c_str(), 255);
+      strncpy(protocolVersionString, (*minVersion).toString().c_str(), 255);
 
       const bool protocol_ver_written = bson_object_put_string(
           &params, strings::protocol_version, protocolVersionString);
@@ -1608,14 +1608,14 @@ RESULT_CODE ProtocolHandlerImpl::HandleControlMessageStartSession(
                           PROTECTION_OFF);
       return RESULT_OK;
     }
-    ProtocolPacket::ProtocolVersion* fullVersion;
+    utils::SemanticVersion* fullVersion;
     std::vector<std::string> rejectedParams(0, std::string(""));
     // Can't check protocol_version because the first packet is v1, but there
     // could still be a payload, in which case we can get the real protocol
     // version
     if (packet.service_type() == kRpc && packet.data_size() != 0) {
       BsonObject obj = bson_object_from_bytes(packet.data());
-      fullVersion = new ProtocolPacket::ProtocolVersion(
+      fullVersion = new utils::SemanticVersion(
           std::string(bson_object_get_string(&obj, "protocolVersion")));
       bson_object_deinitialize(&obj);
       // Constructed payloads added in Protocol v5
@@ -1623,7 +1623,7 @@ RESULT_CODE ProtocolHandlerImpl::HandleControlMessageStartSession(
         rejectedParams.push_back(std::string("protocolVersion"));
       }
     } else {
-      fullVersion = new ProtocolPacket::ProtocolVersion();
+      fullVersion = new utils::SemanticVersion();
     }
     if (!rejectedParams.empty()) {
       SendStartSessionNAck(connection_id,
@@ -1670,7 +1670,7 @@ RESULT_CODE ProtocolHandlerImpl::HandleControlMessageStartSession(
 #endif  // ENABLE_SECURITY
   if (packet.service_type() == kRpc && packet.data_size() != 0) {
     BsonObject obj = bson_object_from_bytes(packet.data());
-    ProtocolPacket::ProtocolVersion fullVersion(
+    utils::SemanticVersion fullVersion(
         bson_object_get_string(&obj, "protocolVersion"));
     bson_object_deinitialize(&obj);
 
@@ -1880,7 +1880,7 @@ void ProtocolHandlerImpl::NotifySessionStarted(
     bson_object_deinitialize(&req_param);
   }
 
-  std::shared_ptr<ProtocolPacket::ProtocolVersion> fullVersion;
+  std::shared_ptr<utils::SemanticVersion> fullVersion;
 
   // Can't check protocol_version because the first packet is v1, but there
   // could still be a payload, in which case we can get the real protocol
@@ -1890,15 +1890,14 @@ void ProtocolHandlerImpl::NotifySessionStarted(
     char* version_param =
         bson_object_get_string(&request_params, strings::protocol_version);
     std::string version_string(version_param == NULL ? "" : version_param);
-    fullVersion =
-        std::make_shared<ProtocolPacket::ProtocolVersion>(version_string);
+    fullVersion = std::make_shared<utils::SemanticVersion>(version_string);
     // Constructed payloads added in Protocol v5
     if (fullVersion->majorVersion < PROTOCOL_VERSION_5) {
       rejected_params.push_back(std::string(strings::protocol_version));
     }
     bson_object_deinitialize(&request_params);
   } else {
-    fullVersion = std::make_shared<ProtocolPacket::ProtocolVersion>();
+    fullVersion = std::make_shared<utils::SemanticVersion>();
   }
 
 #ifdef ENABLE_SECURITY

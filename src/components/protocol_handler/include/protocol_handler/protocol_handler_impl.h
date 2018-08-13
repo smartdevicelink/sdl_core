@@ -45,6 +45,7 @@
 
 #include "utils/messagemeter.h"
 #include "utils/custom_string.h"
+#include "utils/semantic_version.h"
 
 #include "protocol_handler/protocol_handler.h"
 #include "protocol_handler/protocol_packet.h"
@@ -313,7 +314,7 @@ class ProtocolHandlerImpl
                            uint32_t hash_code,
                            uint8_t service_type,
                            bool protection,
-                           ProtocolPacket::ProtocolVersion& full_version);
+                           utils::SemanticVersion& full_version);
 
   /**
    * \brief Sends acknowledgement of starting session to mobile application
@@ -337,7 +338,7 @@ class ProtocolHandlerImpl
                            uint32_t hash_code,
                            uint8_t service_type,
                            bool protection,
-                           ProtocolPacket::ProtocolVersion& full_version,
+                           utils::SemanticVersion& full_version,
                            BsonObject& params);
 
   const ProtocolHandlerSettings& get_settings() const OVERRIDE {

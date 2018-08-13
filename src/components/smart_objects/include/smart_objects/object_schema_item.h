@@ -64,7 +64,6 @@ class CObjectSchemaItem : public ISchemaItem {
      * @param IsMandatory true if member is mandatory, false
      *                    otherwise. Defaults to true.
      **/
-    // SMember(const ISchemaItemPtr SchemaItem, const bool IsMandatory = true);
 
     SMember(const ISchemaItemPtr SchemaItem,
             const bool IsMandatory = true,
@@ -174,11 +173,12 @@ class CObjectSchemaItem : public ISchemaItem {
                         const utils::SemanticVersion& MessageVersion);
 
   /**
-   * @brief Checks mandatory and version fields to see
-   * if a member is required.
-   * @param Object Object to remove fake parameters.
+   * @brief Returns the correct schema item based on messge version.
+   * @param member Schema member
+   * @param MmessageVersion Semantic Version of mobile message.
    **/
-  bool IsMandatory(const SMember& member);
+  const CObjectSchemaItem::SMember& GetCorrectMember(
+      const SMember& member, const utils::SemanticVersion& messageVersion);
 
   /**
    * @brief Map of member name to SMember structure describing the object

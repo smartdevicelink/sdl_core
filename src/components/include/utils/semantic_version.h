@@ -33,93 +33,88 @@
 #ifndef SRC_COMPONENTS_INCLUDE_UTILS_SEMANTIC_VERSION_H_
 #define SRC_COMPONENTS_INCLUDE_UTILS_SEMANTIC_VERSION_H_
 
-#include <boost/algorithm/string.hpp>
-
 namespace utils {
 
 struct SemanticVersion {
   SemanticVersion(uint16_t major = 0, uint16_t minor = 0, uint16_t patch = 0) {
-    major_version = major;
-    minor_version = minor;
-    patch_version = patch;
+    majorVersion = major;
+    minorVersion = minor;
+    patchVersion = patch;
   }
 
-  SemanticVersion(const std::string& str_version) {
-    std::vector<std::string> str_array;
-    boost::split(str_array, str_version, boost::is_any_of("."));
-    if (str_array.size() == 3) {
-      major_version = atoi(str_array[0].c_str());
-      minor_version = atoi(str_array[1].c_str());
-      patch_version = atoi(str_array[2].c_str());
+  SemanticVersion(const SemanticVersion& other) {
+    majorVersion = other.majorVersion;
+    minorVersion = other.minorVersion;
+    patchVersion = other.patchVersion;
+  }
+
+  SemanticVersion(const std::string& versionString)
+      : majorVersion(0), minorVersion(0), patchVersion(0) {
+    unsigned int majorInt, minorInt, patchInt;
+    int readElements = sscanf(
+        versionString.c_str(), "%u.%u.%u", &majorInt, &minorInt, &patchInt);
+    if (readElements != 3) {
+      // LOG4CXX_WARN(logger_,
+      //             "Error while parsing version string: " << versionString);
     } else {
-      // Invalid case
-      major_version = 0;
-      minor_version = 0;
-      patch_version = 0;
+      majorVersion = static_cast<uint8_t>(majorInt);
+      minorVersion = static_cast<uint8_t>(minorInt);
+      patchVersion = static_cast<uint8_t>(patchInt);
     }
   }
 
-  bool operator==(const SemanticVersion& version) const {
-    return (major_version == version.major_version &&
-            minor_version == version.minor_version &&
-            patch_version == version.patch_version);
-  }
-
-  bool operator<(const SemanticVersion& version) const {
-    return (major_version < version.major_version) ||
-           ((major_version == version.major_version) &&
-            (minor_version < version.minor_version)) ||
-           ((major_version == version.major_version) &&
-            (minor_version == version.minor_version) &&
-            (patch_version < version.patch_version));
-  }
-
-  bool operator<=(const SemanticVersion& version) const {
-    if (this->operator==(version)) {
-      return true;
-    } else if (this->operator<(version)) {
-      return true;
-    } else {
-      return false;
+  static inline int16_t cmp(const SemanticVersion& version1,
+                            const SemanticVersion& version2) {
+    int16_t diff =
+        static_cast<int16_t>(version1.majorVersion - version2.majorVersion);
+    if (diff == 0) {
+      diff =
+          static_cast<int16_t>(version1.minorVersion - version2.minorVersion);
+      if (diff == 0) {
+        diff =
+            static_cast<int16_t>(version1.patchVersion - version2.patchVersion);
+      }
     }
+    return diff;
   }
 
-  bool operator>(const SemanticVersion& version) const {
-    return (major_version > version.major_version) ||
-           ((major_version == version.major_version) &&
-            (minor_version > version.minor_version)) ||
-           ((major_version == version.major_version) &&
-            (minor_version == version.minor_version) &&
-            (patch_version > version.patch_version));
+  bool operator==(const SemanticVersion& other) const {
+    return SemanticVersion::cmp(*this, other) == 0;
   }
-
-  bool operator>=(const SemanticVersion& version) const {
-    if (this->operator==(version)) {
-      return true;
-    } else if (this->operator>(version)) {
-      return true;
-    } else {
-      return false;
-    }
+  bool operator<(const SemanticVersion& other) const {
+    return SemanticVersion::cmp(*this, other) < 0;
+  }
+  bool operator>(const SemanticVersion& other) const {
+    return SemanticVersion::cmp(*this, other) > 0;
+  }
+  bool operator<=(const SemanticVersion& other) const {
+    return SemanticVersion::cmp(*this, other) <= 0;
+  }
+  bool operator>=(const SemanticVersion& other) const {
+    return SemanticVersion::cmp(*this, other) >= 0;
+  }
+  static inline SemanticVersion* min(SemanticVersion& version1,
+                                     SemanticVersion& version2) {
+    return (version1 < version2) ? &version1 : &version2;
   }
 
   const std::string toString() const {
     std::string result = "";
-    result += std::to_string(major_version);
+    result += std::to_string(majorVersion);
     result += ".";
-    result += std::to_string(minor_version);
+    result += std::to_string(minorVersion);
     result += ".";
-    result += std::to_string(patch_version);
+    result += std::to_string(patchVersion);
     return result;
   }
 
   bool isValid() const {
-    return major_version > 0 || minor_version > 0 || patch_version > 0;
+    return majorVersion > 0 || minorVersion > 0 || patchVersion > 0;
   }
 
-  uint16_t major_version = 0;
-  uint16_t minor_version = 0;
-  uint16_t patch_version = 0;
+  uint16_t majorVersion = 0;
+  uint16_t minorVersion = 0;
+  uint16_t patchVersion = 0;
 };
 }
 

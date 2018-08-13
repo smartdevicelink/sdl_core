@@ -706,9 +706,6 @@ class CodeGenerator(object):
         """
         result_array = []
         result_array.append(self._impl_code_shared_ptr_vector_template.substitute(var_name = name))
-        '''for item in history_list:
-            result_array.append(self._impl_code_append_history_vector_template.substitute(vector_name=name, item_name=item.name))
-'''
         result = u"\n".join(result_array)
         return result
 
@@ -911,6 +908,38 @@ class CodeGenerator(object):
 
         raise GenerateError("Unexpected call to the unimplemented function.")
 
+    def _check_member_history(self, member):
+        """
+            Checks set of rules that history items are valid
+            Raises error if rules are violated
+        """
+        if (member.since is None and 
+            member.until is None and 
+            member.deprecated is None and 
+            member.removed is None and 
+            member.history is None):
+            return
+
+        if (member.history is not None and member.since is None):
+             raise GenerateError("Error: Missing since version parameter for " + member.name)
+
+        if (member.until is not None): 
+            raise GenerateError("Error: Until should only exist in history tag for " + member.name)
+
+        if (member.history is None):
+            if(member.until is not None or 
+                member.deprecated is not None or 
+                member.removed is not None):
+                raise GenerateError("Error: No history present for " + member.name)
+
+        if (member.deprecated is not None and member.removed is not None):
+            raise GenerateError("Error: Deprecated and removed should not be present together for " + member.name)
+
+        for item in member.history:
+            if item.since is None or item.until is None:
+                raise GenerateError("Error: History items require since and until parameters for " + member.name)
+        return
+
     def _gen_schema_item_fill(self, member, since, until, deprecated, removed):
         """Generate schema item fill code.
 
@@ -923,14 +952,10 @@ class CodeGenerator(object):
         String with schema item fill code.
 
         """
+        self._check_member_history(member)
+
         if (since is not None or 
-            until is not None or 
-            deprecated is not None or
-            removed is not None or
-            member.since is not None or 
-            member.until is not None or 
-            member.deprecated is not None or
-            member.removed is not None):
+            member.since is not None):
             if member.history is not None:
                 return self._impl_code_item_fill_template_with_version_and_history_vector.substitute(
                     name=member.name,
