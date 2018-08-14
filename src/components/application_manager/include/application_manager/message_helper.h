@@ -571,6 +571,9 @@ class MessageHelper {
    */
   static bool SendUnsubscribedWayPoints(ApplicationManager& app_mngr);
 
+  static smart_objects::SmartObjectSPtr CreateSubscribeWayPointsMessageToHMI(
+      const uint32_t correlation_id);
+
   static smart_objects::SmartObjectSPtr CreateNegativeResponse(
       uint32_t connection_key,
       int32_t function_id,

@@ -259,6 +259,9 @@ class MockMessageHelper {
                     ApplicationManager& app_man));
   MOCK_METHOD1(SendUnsubscribedWayPoints, bool(ApplicationManager& app_mngr));
 
+  MOCK_METHOD1(CreateSubscribeWayPointsMessageToHMI,
+               smart_objects::SmartObjectSPtr(const uint32_t correlation_id));
+
   MOCK_METHOD2(SendQueryApps,
                void(const uint32_t connection_key,
                     ApplicationManager& app_man));

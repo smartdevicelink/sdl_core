@@ -50,6 +50,7 @@
 #include "application_manager/mock_application_manager_settings.h"
 #include "application_manager/mock_event_dispatcher.h"
 #include "application_manager/mock_state_controller.h"
+#include "application_manager/mock_rpc_service.h"
 
 namespace test {
 namespace components {
@@ -556,6 +557,14 @@ TEST_F(ResumeCtrlTest, StartResumption_AppWithSubscriptionToWayPoints) {
   ON_CALL(*mock_storage_,
           GetSavedApplication(kTestPolicyAppId_, kMacAddress_, _))
       .WillByDefault(DoAll(SetArgReferee<2>(saved_app), Return(true)));
+  smart_objects::SmartObjectSPtr msg =
+      std::make_shared<smart_objects::SmartObject>(
+          smart_objects::SmartType_Map);
+  EXPECT_CALL(*application_manager::MockMessageHelper::message_helper_mock(),
+              CreateSubscribeWayPointsMessageToHMI(_)).WillOnce(Return(msg));
+  MockRPCService mock_rpc_service;
+  ON_CALL(mock_app_mngr_, GetRPCService())
+      .WillByDefault(ReturnRef(mock_rpc_service));
   EXPECT_CALL(*mock_app_, set_grammar_id(kTestGrammarId_));
   EXPECT_CALL(
       mock_app_mngr_,
