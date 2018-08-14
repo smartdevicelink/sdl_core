@@ -41,8 +41,34 @@
 
 #include "smart_objects/default_shema_item.h"
 
+#include "utils/semantic_version.h"
+#include <boost/optional.hpp>
+
 namespace NsSmartDeviceLink {
 namespace NsSmartObjects {
+
+struct ElementSignature {
+  boost::optional<utils::SemanticVersion> mSince;
+  boost::optional<utils::SemanticVersion> mUntil;
+  bool mRemoved;
+
+  ElementSignature(std::string since = "",
+                   std::string until = "",
+                   bool removed = false) {
+    utils::SemanticVersion since_struct(since);
+    utils::SemanticVersion until_struct(until);
+
+    if (since_struct.isValid()) {
+      mSince = since_struct;
+    }
+
+    if (until_struct.isValid()) {
+      mUntil = until_struct;
+    }
+
+    mRemoved = removed;
+  }
+};
 
 template <typename EnumType>
 class EnumConversionHelper;
@@ -63,6 +89,19 @@ class TEnumSchemaItem : public CDefaultSchemaItem<EnumType> {
       const std::set<EnumType>& AllowedElements,
       const TSchemaItemParameter<EnumType>& DefaultValue =
           TSchemaItemParameter<EnumType>());
+
+  /**
+   * @brief Create a new schema item.
+   * @param AllowedElements Set of allowed enumeration elements.
+   * @param DefaultValue Default value.
+   * @return Shared pointer to a new schema item.
+   **/
+  static std::shared_ptr<TEnumSchemaItem> createWithSignatures(
+      const std::set<EnumType>& AllowedElements,
+      const std::map<EnumType, std::vector<ElementSignature> >&
+          ElementSignatures,
+      const TSchemaItemParameter<EnumType>& DefaultValue =
+          TSchemaItemParameter<EnumType>());
   /**
    * @deprecated
    * @brief Validate smart object.
@@ -70,14 +109,27 @@ class TEnumSchemaItem : public CDefaultSchemaItem<EnumType> {
    * @return NsSmartObjects::Errors::eType
    **/
   Errors::eType validate(const SmartObject& Object) OVERRIDE;
+
   /**
    * @brief Validate smart object.
    * @param Object Object to validate.
    * @param report__ object for reporting errors during validation
+   * @param MessageVersion to check mobile RPC version against RPC Spec History
    * @return NsSmartObjects::Errors::eType
    **/
   Errors::eType validate(const SmartObject& Object,
-                         rpc::ValidationReport* report__) OVERRIDE;
+                         rpc::ValidationReport* report__,
+                         const utils::SemanticVersion& MessageVersion =
+                             utils::SemanticVersion()) OVERRIDE;
+  /**
+   * @brief Return the correct history signature based on message version.
+   * @param signatures Vector reference of enums history items.
+   * @param MessageVersion RPC Version of mobile app.
+   **/
+  const ElementSignature getSignature(
+      const std::vector<ElementSignature>& signatures,
+      const utils::SemanticVersion& MessageVersion);
+
   /**
    * @brief Apply schema.
    * This implementation checks if enumeration is represented as string
@@ -88,7 +140,9 @@ class TEnumSchemaItem : public CDefaultSchemaItem<EnumType> {
    * from smart object otherwise contains false.
    **/
   void applySchema(SmartObject& Object,
-                   const bool RemoveFakeParameters) OVERRIDE;
+                   const bool RemoveFakeParameters,
+                   const utils::SemanticVersion& MessageVersion =
+                       utils::SemanticVersion()) OVERRIDE;
   /**
    * @brief Unapply schema.
    * @param Object Object to unapply schema.
@@ -103,12 +157,18 @@ class TEnumSchemaItem : public CDefaultSchemaItem<EnumType> {
    **/
   TEnumSchemaItem(const std::set<EnumType>& AllowedElements,
                   const TSchemaItemParameter<EnumType>& DefaultValue);
+
+  TEnumSchemaItem(const std::set<EnumType>& AllowedElements,
+                  const TSchemaItemParameter<EnumType>& DefaultValue,
+                  const std::map<EnumType, std::vector<ElementSignature> >&
+                      ElementSignatures);
   SmartType getSmartType() const OVERRIDE;
   EnumType getDefaultValue() const OVERRIDE;
   /**
    * @brief Set of allowed enumeration elements.
    **/
   const std::set<EnumType> mAllowedElements;
+  std::map<EnumType, std::vector<ElementSignature> > mElementSignatures;
   /**
    * @brief Default value.
    **/
@@ -215,14 +275,52 @@ std::shared_ptr<TEnumSchemaItem<EnumType> > TEnumSchemaItem<EnumType>::create(
 }
 
 template <typename EnumType>
+std::shared_ptr<TEnumSchemaItem<EnumType> >
+TEnumSchemaItem<EnumType>::createWithSignatures(
+    const std::set<EnumType>& AllowedElements,
+    const std::map<EnumType, std::vector<ElementSignature> >& ElementSignatures,
+    const TSchemaItemParameter<EnumType>& DefaultValue) {
+  return std::shared_ptr<TEnumSchemaItem<EnumType> >(
+      new TEnumSchemaItem<EnumType>(
+          AllowedElements, DefaultValue, ElementSignatures));
+}
+
+template <typename EnumType>
 Errors::eType TEnumSchemaItem<EnumType>::validate(const SmartObject& Object) {
   rpc::ValidationReport report("RPC");
   return validate(Object, &report);
 }
 
 template <typename EnumType>
+const ElementSignature TEnumSchemaItem<EnumType>::getSignature(
+    const std::vector<ElementSignature>& signatures,
+    const utils::SemanticVersion& MessageVersion) {
+  for (uint i = 0; i < signatures.size(); i++) {
+    ElementSignature signature = signatures[i];
+    // Check if signature matches message version
+    if (signature.mSince != boost::none &&
+        MessageVersion < signature.mSince.get()) {
+      // Msg version predates 'since' field, check next entry
+      continue;
+    }
+    if (signature.mUntil != boost::none &&
+        (MessageVersion >= signature.mUntil.get())) {
+      continue;  // Msg version newer than `until` field, check next entry
+    }
+    // Found correct signature
+    return signature;
+  }
+
+  // Could not match msg version to element siganture
+  ElementSignature ret;
+  return ret;
+}
+
+template <typename EnumType>
 Errors::eType TEnumSchemaItem<EnumType>::validate(
-    const SmartObject& Object, rpc::ValidationReport* report__) {
+    const SmartObject& Object,
+    rpc::ValidationReport* report__,
+    const utils::SemanticVersion& MessageVersion) {
   if (SmartType_Integer != Object.getType()) {
     std::string validation_info;
     if (SmartType_String == Object.getType()) {
@@ -236,20 +334,53 @@ Errors::eType TEnumSchemaItem<EnumType>::validate(
     report__->set_validation_info(validation_info);
     return Errors::INVALID_VALUE;
   }
-  if (mAllowedElements.find(static_cast<EnumType>(Object.asInt())) ==
-      mAllowedElements.end()) {
+
+  auto elements_it =
+      mAllowedElements.find(static_cast<EnumType>(Object.asInt()));
+
+  if (elements_it == mAllowedElements.end()) {
     std::stringstream stream;
     stream << "Invalid enum value: " << Object.asInt();
     std::string validation_info = stream.str();
     report__->set_validation_info(validation_info);
     return Errors::OUT_OF_RANGE;
   }
+
+  // Element exists in schema. Check if version is also valid.
+  if (MessageVersion.isValid()) {
+    EnumType value = *elements_it;
+    auto signatures_it = mElementSignatures.find(value);
+    if (signatures_it != mElementSignatures.end()) {
+      if (!signatures_it->second.empty()) {
+        ElementSignature signature =
+            getSignature(signatures_it->second, MessageVersion);
+        if (signature.mRemoved) {
+          // Element was removed for this version
+          std::string validation_info = "Enum value : " + Object.asString() +
+                                        " removed for SyncMsgVersion " +
+                                        MessageVersion.toString();
+          report__->set_validation_info(validation_info);
+          return Errors::INVALID_VALUE;
+        } else if (signature.mSince == boost::none &&
+                   signature.mUntil == boost::none) {
+          // Element does not exist for this version
+          std::string validation_info = "Enum value : " + Object.asString() +
+                                        " does not exist for SyncMsgVersion " +
+                                        MessageVersion.toString();
+          report__->set_validation_info(validation_info);
+          return Errors::INVALID_VALUE;
+        }
+      }
+    }
+  }
   return Errors::OK;
 }
 
 template <typename EnumType>
-void TEnumSchemaItem<EnumType>::applySchema(SmartObject& Object,
-                                            const bool RemoveFakeParameters) {
+void TEnumSchemaItem<EnumType>::applySchema(
+    SmartObject& Object,
+    const bool RemoveFakeParameters,
+    const utils::SemanticVersion& MessageVersion) {
   if (SmartType_String == Object.getType()) {
     EnumType enum_val = static_cast<EnumType>(-1);
     if (ConversionHelper::StringToEnum(Object.asString(), &enum_val)) {
@@ -284,6 +415,15 @@ TEnumSchemaItem<EnumType>::TEnumSchemaItem(
     const TSchemaItemParameter<EnumType>& DefaultValue)
     : CDefaultSchemaItem<EnumType>(DefaultValue)
     , mAllowedElements(AllowedElements) {}
+
+template <typename EnumType>
+TEnumSchemaItem<EnumType>::TEnumSchemaItem(
+    const std::set<EnumType>& AllowedElements,
+    const TSchemaItemParameter<EnumType>& DefaultValue,
+    const std::map<EnumType, std::vector<ElementSignature> >& ElementSignatures)
+    : CDefaultSchemaItem<EnumType>(DefaultValue)
+    , mAllowedElements(AllowedElements)
+    , mElementSignatures(ElementSignatures) {}
 
 }  // namespace NsSmartObjects
 }  // namespace NsSmartDeviceLink

@@ -682,9 +682,12 @@ class SmartObject FINAL {
    * @brief Validates object according to attached schema.
    *
    * @param report__ object for reporting errors during validation
+   * @param messageVersion of the mobile app to check against RPC Spec Schema
    * @return Result of validation.
    */
-  Errors::eType validate(rpc::ValidationReport* report__);
+  Errors::eType validate(
+      rpc::ValidationReport* report__,
+      const utils::SemanticVersion& MessageVersion = utils::SemanticVersion());
 
   /**
    * @brief Sets new schema

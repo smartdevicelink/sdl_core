@@ -40,6 +40,7 @@
 
 #include <memory>
 #include "utils/macro.h"
+#include "utils/semantic_version.h"
 
 namespace NsSmartDeviceLink {
 namespace NsSmartObjects {
@@ -67,11 +68,13 @@ class ISchemaItem {
    * @param Object Object to validate.
    * @param report__ object for reporting errors during validation
    * message if an error occurs
-   *
+   * @param MessageVersion to check mobile RPC version against RPC Spec Histor
    * @return NsSmartObjects::Errors::eType
    **/
-  virtual Errors::eType validate(const SmartObject& Object,
-                                 rpc::ValidationReport* report__);
+  virtual Errors::eType validate(
+      const SmartObject& Object,
+      rpc::ValidationReport* report__,
+      const utils::SemanticVersion& MessageVersion = utils::SemanticVersion());
 
   /**
    * @brief Set default value to an object.
@@ -100,7 +103,8 @@ class ISchemaItem {
    **/
   virtual void applySchema(
       NsSmartDeviceLink::NsSmartObjects::SmartObject& Object,
-      const bool RemoveFakeParameters);
+      const bool RemoveFakeParameters,
+      const utils::SemanticVersion& MessageVersion = utils::SemanticVersion());
 
   /**
    * @brief Unapply schema.

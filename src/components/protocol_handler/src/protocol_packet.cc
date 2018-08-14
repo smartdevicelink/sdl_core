@@ -41,6 +41,7 @@
 #include "protocol_handler/protocol_packet.h"
 #include "utils/macro.h"
 #include "utils/byte_order.h"
+#include "utils/semantic_version.h"
 
 namespace protocol_handler {
 
@@ -50,48 +51,6 @@ ProtocolPacket::ProtocolData::ProtocolData() : data(NULL), totalDataBytes(0u) {}
 
 ProtocolPacket::ProtocolData::~ProtocolData() {
   delete[] data;
-}
-
-ProtocolPacket::ProtocolVersion::ProtocolVersion()
-    : majorVersion(0), minorVersion(0), patchVersion(0) {}
-
-ProtocolPacket::ProtocolVersion::ProtocolVersion(uint8_t majorVersion,
-                                                 uint8_t minorVersion,
-                                                 uint8_t patchVersion)
-    : majorVersion(majorVersion)
-    , minorVersion(minorVersion)
-    , patchVersion(patchVersion) {}
-
-ProtocolPacket::ProtocolVersion::ProtocolVersion(ProtocolVersion& other) {
-  this->majorVersion = other.majorVersion;
-  this->minorVersion = other.minorVersion;
-  this->patchVersion = other.patchVersion;
-}
-
-ProtocolPacket::ProtocolVersion::ProtocolVersion(std::string versionString)
-    : majorVersion(0), minorVersion(0), patchVersion(0) {
-  unsigned int majorInt, minorInt, patchInt;
-  int readElements = sscanf(
-      versionString.c_str(), "%u.%u.%u", &majorInt, &minorInt, &patchInt);
-  if (readElements != 3) {
-    LOG4CXX_WARN(logger_,
-                 "Error while parsing version string: " << versionString);
-  } else {
-    majorVersion = static_cast<uint8_t>(majorInt);
-    minorVersion = static_cast<uint8_t>(minorInt);
-    patchVersion = static_cast<uint8_t>(patchInt);
-  }
-}
-
-std::string ProtocolPacket::ProtocolVersion::to_string() {
-  char versionString[256];
-  snprintf(versionString,
-           255,
-           "%u.%u.%u",
-           static_cast<unsigned int>(majorVersion),
-           static_cast<unsigned int>(minorVersion),
-           static_cast<unsigned int>(patchVersion));
-  return std::string(versionString);
 }
 
 ProtocolPacket::ProtocolHeader::ProtocolHeader()

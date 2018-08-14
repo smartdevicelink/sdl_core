@@ -47,9 +47,12 @@ Errors::eType CAlwaysFalseSchemaItem::validate(const SmartObject& object) {
 }
 
 Errors::eType CAlwaysFalseSchemaItem::validate(
-    const SmartObject& object, rpc::ValidationReport* report__) {
+    const SmartObject& Object,
+    rpc::ValidationReport* report__,
+    const utils::SemanticVersion& MessageVersion) {
   report__->set_validation_info("Generic error");
   return Errors::ERROR;
 }
+
 }  // namespace NsSmartObjects
 }  // namespace NsSmartDeviceLink

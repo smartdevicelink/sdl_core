@@ -51,8 +51,10 @@ Errors::eType CStringSchemaItem::validate(const SmartObject& Object) {
   return validate(Object, &report);
 }
 
-Errors::eType CStringSchemaItem::validate(const SmartObject& Object,
-                                          rpc::ValidationReport* report__) {
+Errors::eType CStringSchemaItem::validate(
+    const SmartObject& Object,
+    rpc::ValidationReport* report__,
+    const utils::SemanticVersion& MessageVersion) {
   if (SmartType_String != Object.getType()) {
     std::string validation_info = "Incorrect type, expected: " +
                                   SmartObject::typeToString(SmartType_String) +
