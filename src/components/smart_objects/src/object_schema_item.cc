@@ -109,44 +109,6 @@ Errors::eType CObjectSchemaItem::validate(const SmartObject& object) {
   return validate(object, &report);
 }
 
-Errors::eType CObjectSchemaItem::validate(const SmartObject& object,
-                                          rpc::ValidationReport* report__) {
-  if (SmartType_Map != object.getType()) {
-    std::string validation_info = "Incorrect type, expected: " +
-                                  SmartObject::typeToString(SmartType_Map) +
-                                  ", got: " +
-                                  SmartObject::typeToString(object.getType());
-    report__->set_validation_info(validation_info);
-    return Errors::INVALID_VALUE;
-  }
-
-  std::set<std::string> object_keys = object.enumerate();
-
-  for (Members::const_iterator it = mMembers.begin(); it != mMembers.end();
-       ++it) {
-    const std::string& key = it->first;
-    const SMember& member = it->second;
-
-    std::set<std::string>::const_iterator key_it = object_keys.find(key);
-    if (object_keys.end() == key_it) {
-      if (member.mIsMandatory) {
-        std::string validation_info = "Missing mandatory parameter: " + key;
-        report__->set_validation_info(validation_info);
-        return Errors::MISSING_MANDATORY_PARAMETER;
-      }
-      continue;
-    }
-    const SmartObject& field = object.getElement(key);
-    const Errors::eType result =
-        member.mSchemaItem->validate(field, &report__->ReportSubobject(key));
-    if (Errors::OK != result) {
-      return result;
-    }
-    object_keys.erase(key_it);
-  }
-  return Errors::OK;
-}
-
 Errors::eType CObjectSchemaItem::validate(
     const SmartObject& object,
     rpc::ValidationReport* report__,

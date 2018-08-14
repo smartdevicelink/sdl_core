@@ -43,11 +43,6 @@ Errors::eType CAlwaysTrueSchemaItem::validate(const SmartObject& object) {
   return Errors::OK;
 }
 
-Errors::eType CAlwaysTrueSchemaItem::validate(const SmartObject& object,
-                                              rpc::ValidationReport* report__) {
-  return Errors::OK;
-}
-
 Errors::eType CAlwaysTrueSchemaItem::validate(
     const SmartObject& Object,
     rpc::ValidationReport* report__,

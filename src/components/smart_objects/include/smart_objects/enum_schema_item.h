@@ -109,14 +109,6 @@ class TEnumSchemaItem : public CDefaultSchemaItem<EnumType> {
    * @return NsSmartObjects::Errors::eType
    **/
   Errors::eType validate(const SmartObject& Object) OVERRIDE;
-  /**
-   * @brief Validate smart object.
-   * @param Object Object to validate.
-   * @param report__ object for reporting errors during validation
-   * @return NsSmartObjects::Errors::eType
-   **/
-  Errors::eType validate(const SmartObject& Object,
-                         rpc::ValidationReport* report__) OVERRIDE;
 
   /**
    * @brief Validate smart object.
@@ -127,7 +119,8 @@ class TEnumSchemaItem : public CDefaultSchemaItem<EnumType> {
    **/
   Errors::eType validate(const SmartObject& Object,
                          rpc::ValidationReport* report__,
-                         const utils::SemanticVersion& MessageVersion) OVERRIDE;
+                         const utils::SemanticVersion& MessageVersion =
+                             utils::SemanticVersion()) OVERRIDE;
   /**
    * @brief Return the correct history signature based on message version.
    * @param signatures Vector reference of enums history items.
@@ -296,33 +289,6 @@ template <typename EnumType>
 Errors::eType TEnumSchemaItem<EnumType>::validate(const SmartObject& Object) {
   rpc::ValidationReport report("RPC");
   return validate(Object, &report);
-}
-
-template <typename EnumType>
-Errors::eType TEnumSchemaItem<EnumType>::validate(
-    const SmartObject& Object, rpc::ValidationReport* report__) {
-  if (SmartType_Integer != Object.getType()) {
-    std::string validation_info;
-    if (SmartType_String == Object.getType()) {
-      validation_info = "Invalid enum value: " + Object.asString();
-    } else {
-      validation_info = "Incorrect type, expected: " +
-                        SmartObject::typeToString(SmartType_Integer) +
-                        " (enum), got: " +
-                        SmartObject::typeToString(Object.getType());
-    }
-    report__->set_validation_info(validation_info);
-    return Errors::INVALID_VALUE;
-  }
-  if (mAllowedElements.find(static_cast<EnumType>(Object.asInt())) ==
-      mAllowedElements.end()) {
-    std::stringstream stream;
-    stream << "Invalid enum value: " << Object.asInt();
-    std::string validation_info = stream.str();
-    report__->set_validation_info(validation_info);
-    return Errors::OUT_OF_RANGE;
-  }
-  return Errors::OK;
 }
 
 template <typename EnumType>
