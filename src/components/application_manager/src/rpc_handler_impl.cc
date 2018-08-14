@@ -220,26 +220,32 @@ bool RPCHandlerImpl::ConvertMessageToSO(
 
       // Attach RPC version to SmartObject if it does not exist yet.
       auto app_ptr = app_manager_.application(message.connection_key());
-      utils::SemanticVersion msg_version(2, 0, 0);
+      utils::SemanticVersion msg_version(0, 0, 0);
       if (app_ptr &&
           (output[NsSmartDeviceLink::NsJSONHandler::strings::S_PARAMS]
                .keyExists(NsSmartDeviceLink::NsJSONHandler::strings::
                               S_RPC_MSG_VERSION) == false)) {
         msg_version = app_ptr->msg_version();
-        output[NsSmartDeviceLink::NsJSONHandler::strings::S_PARAMS]
-              [NsSmartDeviceLink::NsJSONHandler::strings::S_RPC_MSG_VERSION] =
-                  msg_version.toString();
       } else if (mobile_apis::FunctionID::RegisterAppInterfaceID ==
                  static_cast<mobile_apis::FunctionID::eType>(
                      output[strings::params][strings::function_id].asInt())) {
-        // Assume default version 2.0.0 until properly set in RAI
-        output[NsSmartDeviceLink::NsJSONHandler::strings::S_PARAMS]
-              [NsSmartDeviceLink::NsJSONHandler::strings::S_RPC_MSG_VERSION] =
-                  msg_version.toString();
+        if (output.keyExists(
+                NsSmartDeviceLink::NsJSONHandler::strings::S_MSG_PARAMS) &&
+                output[NsSmartDeviceLink::NsJSONHandler::strings::S_MSG_PARAMS]
+                    .keyExists(strings::sync_msg_version)) {
+          // SyncMsgVersion exists, check if it is valid.
+          std::string str_msg_version =
+              output[NsSmartDeviceLink::NsJSONHandler::strings::S_MSG_PARAMS]
+                    [strings::sync_msg_version].asString();
+          utils::SemanticVersion temp_version(str_msg_version);
+          if (temp_version.isValid()) {
+            msg_version = temp_version;
+          }
+        }
       }
 
       if (!conversion_result ||
-          !mobile_so_factory().attachSchema(output, true) ||
+          !mobile_so_factory().attachSchema(output, true, msg_version) ||
           ((output.validate(&report, msg_version) !=
             smart_objects::Errors::OK))) {
         LOG4CXX_WARN(logger_,

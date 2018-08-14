@@ -173,7 +173,7 @@ class CObjectSchemaItem : public ISchemaItem {
                         const utils::SemanticVersion& MessageVersion);
 
   /**
-   * @brief Returns the correct schema item based on messge version.
+   * @brief Returns the correct schema item based on message version.
    * @param member Schema member
    * @param MmessageVersion Semantic Version of mobile message.
    **/

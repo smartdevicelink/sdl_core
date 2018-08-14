@@ -47,12 +47,6 @@
 namespace NsSmartDeviceLink {
 namespace NsSmartObjects {
 
-// Element Signature for enums. Fields represent "since", "until", and "removed"
-// typedef boost::optional<std::string> OptionalString;
-// typedef boost::optional<bool> OptionalBool;
-// typedef std::tuple<OptionalString, OptionalString, OptionalBool>
-// ElementSignature;
-
 struct ElementSignature {
   boost::optional<utils::SemanticVersion> mSince;
   boost::optional<utils::SemanticVersion> mUntil;
@@ -75,9 +69,6 @@ struct ElementSignature {
     mRemoved = removed;
   }
 };
-
-// typedef std::map<OptionalString, OptionalString, OptionalBool>
-// ElementSignature;
 
 template <typename EnumType>
 class EnumConversionHelper;
@@ -341,30 +332,21 @@ const ElementSignature TEnumSchemaItem<EnumType>::getSignature(
   for (uint i = 0; i < signatures.size(); i++) {
     ElementSignature signature = signatures[i];
     // Check if signature matches message version
-    if (signature.mSince != boost::none) {
-      if (MessageVersion < signature.mSince.get()) {
-        // Msg version predates 'since' field, check next entry
-        continue;
-      }
-
-      if (signature.mUntil != boost::none &&
-          (MessageVersion >= signature.mUntil.get())) {
-        continue;  // Msg version newer than `until` field
-      }
-
-      return signature;
+    if (signature.mSince != boost::none &&
+        MessageVersion < signature.mSince.get()) {
+      // Msg version predates 'since' field, check next entry
+      continue;
     }
-
     if (signature.mUntil != boost::none &&
         (MessageVersion >= signature.mUntil.get())) {
       continue;  // Msg version newer than `until` field, check next entry
     }
-
+    // Found correct signature
     return signature;
   }
 
   // Could not match msg version to element siganture
-  ElementSignature ret("", "", true);
+  ElementSignature ret("", "", false);
   return ret;
 }
 
@@ -404,10 +386,20 @@ Errors::eType TEnumSchemaItem<EnumType>::validate(
     auto signatures_it = mElementSignatures.find(value);
     if (signatures_it != mElementSignatures.end()) {
       if (!signatures_it->second.empty()) {
-        if (getSignature(signatures_it->second, MessageVersion).mRemoved) {
+        ElementSignature signature =
+            getSignature(signatures_it->second, MessageVersion);
+        if (signature.mRemoved) {
           // Element was removed for this version
           std::string validation_info = "Enum value : " + Object.asString() +
                                         " removed for SyncMsgVersion " +
+                                        MessageVersion.toString();
+          report__->set_validation_info(validation_info);
+          return Errors::INVALID_VALUE;
+        } else if (signature.mSince == boost::none &&
+                   signature.mUntil == boost::none) {
+          // Element does not exist for this version
+          std::string validation_info = "Enum value : " + Object.asString() +
+                                        " does not exist for SyncMsgVersion " +
                                         MessageVersion.toString();
           report__->set_validation_info(validation_info);
           return Errors::INVALID_VALUE;

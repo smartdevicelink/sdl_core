@@ -919,22 +919,17 @@ class CodeGenerator(object):
             member.removed is None and 
             member.history is None):
             return
-
         if (member.history is not None and member.since is None):
              raise GenerateError("Error: Missing since version parameter for " + member.name)
-
         if (member.until is not None): 
             raise GenerateError("Error: Until should only exist in history tag for " + member.name)
-
         if (member.history is None):
             if(member.until is not None or 
                 member.deprecated is not None or 
                 member.removed is not None):
                 raise GenerateError("Error: No history present for " + member.name)
-
         if (member.deprecated is not None and member.removed is not None):
             raise GenerateError("Error: Deprecated and removed should not be present together for " + member.name)
-
         if(member.history is not None):
             for item in member.history:
                 if item.since is None or item.until is None:
