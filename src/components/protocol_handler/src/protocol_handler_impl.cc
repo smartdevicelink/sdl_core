@@ -252,7 +252,7 @@ void ProtocolHandlerImpl::SendStartSessionAck(
   const bool proxy_supports_v5_protocol =
       input_protocol_version >= PROTOCOL_VERSION_5 ||
       (ServiceTypeFromByte(service_type) == kRpc &&
-       full_version.majorVersion >= PROTOCOL_VERSION_5);
+       full_version.major_version_ >= PROTOCOL_VERSION_5);
 
   if (kRpc != service_type) {
     // In case if input protocol version os bigger then supported, SDL should
@@ -308,7 +308,7 @@ void ProtocolHandlerImpl::SendStartSessionAck(
 
       // Minimum protocol version supported by both
       utils::SemanticVersion* minVersion =
-          (full_version.majorVersion < PROTOCOL_VERSION_5)
+          (full_version.major_version_ < PROTOCOL_VERSION_5)
               ? &defaultProtocolVersion
               : utils::SemanticVersion::min(full_version,
                                             defaultProtocolVersion);
@@ -1619,7 +1619,7 @@ RESULT_CODE ProtocolHandlerImpl::HandleControlMessageStartSession(
           std::string(bson_object_get_string(&obj, "protocolVersion")));
       bson_object_deinitialize(&obj);
       // Constructed payloads added in Protocol v5
-      if (fullVersion->majorVersion < PROTOCOL_VERSION_5) {
+      if (fullVersion->major_version_ < PROTOCOL_VERSION_5) {
         rejectedParams.push_back(std::string("protocolVersion"));
       }
     } else {
@@ -1674,7 +1674,7 @@ RESULT_CODE ProtocolHandlerImpl::HandleControlMessageStartSession(
         bson_object_get_string(&obj, "protocolVersion"));
     bson_object_deinitialize(&obj);
 
-    if (fullVersion.majorVersion >= PROTOCOL_VERSION_5) {
+    if (fullVersion.major_version_ >= PROTOCOL_VERSION_5) {
       // Start service without protection
       SendStartSessionAck(connection_id,
                           session_id,
@@ -1892,7 +1892,7 @@ void ProtocolHandlerImpl::NotifySessionStarted(
     std::string version_string(version_param == NULL ? "" : version_param);
     fullVersion = std::make_shared<utils::SemanticVersion>(version_string);
     // Constructed payloads added in Protocol v5
-    if (fullVersion->majorVersion < PROTOCOL_VERSION_5) {
+    if (fullVersion->major_version_ < PROTOCOL_VERSION_5) {
       rejected_params.push_back(std::string(strings::protocol_version));
     }
     bson_object_deinitialize(&request_params);

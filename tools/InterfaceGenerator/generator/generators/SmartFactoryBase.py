@@ -920,7 +920,7 @@ class CodeGenerator(object):
             member.history is None):
             return
         if (member.history is not None and member.since is None):
-             raise GenerateError("Error: Missing since version parameter for " + member.name)
+            raise GenerateError("Error: Missing since version parameter for " + member.name)
         if (member.until is not None): 
             raise GenerateError("Error: Until should only exist in history tag for " + member.name)
         if (member.history is None):

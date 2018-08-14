@@ -194,6 +194,36 @@ void RPCHandlerImpl::SetTelemetryObserver(AMTelemetryObserver* observer) {
 
 #endif  // TELEMETRY_MONITOR
 
+void RPCHandlerImpl::GetMessageVersion(
+    NsSmartDeviceLink::NsSmartObjects::SmartObject& output,
+    utils::SemanticVersion& message_version) {
+  if (output.keyExists(
+          NsSmartDeviceLink::NsJSONHandler::strings::S_MSG_PARAMS) &&
+      output[NsSmartDeviceLink::NsJSONHandler::strings::S_MSG_PARAMS].keyExists(
+          strings::sync_msg_version)) {
+    // SyncMsgVersion exists, check if it is valid.
+    auto sync_msg_version =
+        output[NsSmartDeviceLink::NsJSONHandler::strings::S_MSG_PARAMS]
+              [strings::sync_msg_version];
+    uint16_t major = 0;
+    uint16_t minor = 0;
+    uint16_t patch = 0;
+    if (sync_msg_version.keyExists(strings::major_version)) {
+      major = sync_msg_version[strings::major_version].asUInt();
+    }
+    if (sync_msg_version.keyExists(strings::minor_version)) {
+      minor = sync_msg_version[strings::minor_version].asUInt();
+    }
+    if (sync_msg_version.keyExists(strings::patch_version)) {
+      patch = sync_msg_version[strings::patch_version].asUInt();
+    }
+    utils::SemanticVersion temp_version(major, minor, patch);
+    if (temp_version.isValid()) {
+      message_version = temp_version;
+    }
+  }
+}
+
 bool RPCHandlerImpl::ConvertMessageToSO(
     const Message& message,
     NsSmartDeviceLink::NsSmartObjects::SmartObject& output) {
@@ -229,19 +259,7 @@ bool RPCHandlerImpl::ConvertMessageToSO(
       } else if (mobile_apis::FunctionID::RegisterAppInterfaceID ==
                  static_cast<mobile_apis::FunctionID::eType>(
                      output[strings::params][strings::function_id].asInt())) {
-        if (output.keyExists(
-                NsSmartDeviceLink::NsJSONHandler::strings::S_MSG_PARAMS) &&
-                output[NsSmartDeviceLink::NsJSONHandler::strings::S_MSG_PARAMS]
-                    .keyExists(strings::sync_msg_version)) {
-          // SyncMsgVersion exists, check if it is valid.
-          std::string str_msg_version =
-              output[NsSmartDeviceLink::NsJSONHandler::strings::S_MSG_PARAMS]
-                    [strings::sync_msg_version].asString();
-          utils::SemanticVersion temp_version(str_msg_version);
-          if (temp_version.isValid()) {
-            msg_version = temp_version;
-          }
-        }
+        GetMessageVersion(output, msg_version);
       }
 
       if (!conversion_result ||

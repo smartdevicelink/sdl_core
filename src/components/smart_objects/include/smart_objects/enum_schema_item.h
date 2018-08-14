@@ -346,7 +346,7 @@ const ElementSignature TEnumSchemaItem<EnumType>::getSignature(
   }
 
   // Could not match msg version to element siganture
-  ElementSignature ret("", "", false);
+  ElementSignature ret;
   return ret;
 }
 
