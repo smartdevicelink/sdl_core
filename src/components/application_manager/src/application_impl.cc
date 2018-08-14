@@ -314,6 +314,13 @@ const HmiStatePtr ApplicationImpl::RegularHmiState() const {
   return state_.GetState(HmiState::STATE_ID_REGULAR);
 }
 
+bool ApplicationImpl::IsAllowedToChangeAudioSource() const {
+  if (is_remote_control_supported() && is_media_application()) {
+    return true;
+  }
+  return false;
+}
+
 const HmiStatePtr ApplicationImpl::PostponedHmiState() const {
   return state_.GetState(HmiState::STATE_ID_POSTPONED);
 }

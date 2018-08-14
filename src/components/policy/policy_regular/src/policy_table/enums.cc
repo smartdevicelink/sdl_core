@@ -643,6 +643,12 @@ bool IsValidEnum(ModuleType val) {
       return true;
     case MT_SEAT:
       return true;
+    case MT_AUDIO:
+      return true;
+    case MT_LIGHT:
+      return true;
+    case MT_HMI_SETTINGS:
+      return true;
     default:
       return false;
   }
@@ -655,6 +661,12 @@ const char* EnumToJsonString(ModuleType val) {
       return "RADIO";
     case MT_SEAT:
       return "SEAT";
+    case MT_AUDIO:
+      return "AUDIO";
+    case MT_LIGHT:
+      return "LIGHT";
+    case MT_HMI_SETTINGS:
+      return "HMI_SETTINGS";
     default:
       return "";
   }
@@ -669,10 +681,17 @@ bool EnumFromJsonString(const std::string& literal, ModuleType* result) {
     return true;
   } else if ("SEAT" == literal) {
     *result = MT_SEAT;
+  } else if ("AUDIO" == literal) {
+    *result = MT_AUDIO;
     return true;
-  } else {
-    return false;
+  } else if ("LIGHT" == literal) {
+    *result = MT_LIGHT;
+    return true;
+  } else if ("HMI_SETTINGS" == literal) {
+    *result = MT_HMI_SETTINGS;
+    return true;
   }
+  return false;
 }
 
 const std::string kDefaultApp = "default";
