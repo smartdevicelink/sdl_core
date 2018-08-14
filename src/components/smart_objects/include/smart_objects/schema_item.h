@@ -68,24 +68,13 @@ class ISchemaItem {
    * @param Object Object to validate.
    * @param report__ object for reporting errors during validation
    * message if an error occurs
-   *
-   * @return NsSmartObjects::Errors::eType
-   **/
-  virtual Errors::eType validate(const SmartObject& Object,
-                                 rpc::ValidationReport* report__);
-
-  /**
-   * @brief Validate smart object.
-   *
-   * @param Object Object to validate.
-   * @param report__ object for reporting errors during validation
-   * message if an error occurs
    * @param MessageVersion to check mobile RPC version against RPC Spec Histor
    * @return NsSmartObjects::Errors::eType
    **/
-  virtual Errors::eType validate(const SmartObject& Object,
-                                 rpc::ValidationReport* report__,
-                                 const utils::SemanticVersion& MessageVersion);
+  virtual Errors::eType validate(
+      const SmartObject& Object,
+      rpc::ValidationReport* report__,
+      const utils::SemanticVersion& MessageVersion = utils::SemanticVersion());
 
   /**
    * @brief Set default value to an object.

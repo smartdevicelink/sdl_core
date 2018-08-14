@@ -37,42 +37,42 @@ namespace utils {
 
 struct SemanticVersion {
   SemanticVersion(uint16_t major = 0, uint16_t minor = 0, uint16_t patch = 0) {
-    majorVersion = major;
-    minorVersion = minor;
-    patchVersion = patch;
+    major_version_ = major;
+    minor_version_ = minor;
+    patch_version_ = patch;
   }
 
   SemanticVersion(const SemanticVersion& other) {
-    majorVersion = other.majorVersion;
-    minorVersion = other.minorVersion;
-    patchVersion = other.patchVersion;
+    major_version_ = other.major_version_;
+    minor_version_ = other.minor_version_;
+    patch_version_ = other.patch_version_;
   }
 
   SemanticVersion(const std::string& versionString)
-      : majorVersion(0), minorVersion(0), patchVersion(0) {
-    unsigned int majorInt, minorInt, patchInt;
+      : major_version_(0), minor_version_(0), patch_version_(0) {
+    unsigned int major_int, minor_int, patch_int;
     int readElements = sscanf(
-        versionString.c_str(), "%u.%u.%u", &majorInt, &minorInt, &patchInt);
+        versionString.c_str(), "%u.%u.%u", &major_int, &minor_int, &patch_int);
     if (readElements != 3) {
       // LOG4CXX_WARN(logger_,
       //             "Error while parsing version string: " << versionString);
     } else {
-      majorVersion = static_cast<uint8_t>(majorInt);
-      minorVersion = static_cast<uint8_t>(minorInt);
-      patchVersion = static_cast<uint8_t>(patchInt);
+      major_version_ = static_cast<uint8_t>(major_int);
+      minor_version_ = static_cast<uint8_t>(minor_int);
+      patch_version_ = static_cast<uint8_t>(patch_int);
     }
   }
 
   static inline int16_t cmp(const SemanticVersion& version1,
                             const SemanticVersion& version2) {
     int16_t diff =
-        static_cast<int16_t>(version1.majorVersion - version2.majorVersion);
+        static_cast<int16_t>(version1.major_version_ - version2.major_version_);
     if (diff == 0) {
-      diff =
-          static_cast<int16_t>(version1.minorVersion - version2.minorVersion);
+      diff = static_cast<int16_t>(version1.minor_version_ -
+                                  version2.minor_version_);
       if (diff == 0) {
-        diff =
-            static_cast<int16_t>(version1.patchVersion - version2.patchVersion);
+        diff = static_cast<int16_t>(version1.patch_version_ -
+                                    version2.patch_version_);
       }
     }
     return diff;
@@ -100,21 +100,21 @@ struct SemanticVersion {
 
   const std::string toString() const {
     std::string result = "";
-    result += std::to_string(majorVersion);
+    result += std::to_string(major_version_);
     result += ".";
-    result += std::to_string(minorVersion);
+    result += std::to_string(minor_version_);
     result += ".";
-    result += std::to_string(patchVersion);
+    result += std::to_string(patch_version_);
     return result;
   }
 
   bool isValid() const {
-    return majorVersion > 0 || minorVersion > 0 || patchVersion > 0;
+    return major_version_ > 0 || minor_version_ > 0 || patch_version_ > 0;
   }
 
-  uint16_t majorVersion = 0;
-  uint16_t minorVersion = 0;
-  uint16_t patchVersion = 0;
+  uint16_t major_version_ = 0;
+  uint16_t minor_version_ = 0;
+  uint16_t patch_version_ = 0;
 };
 }
 

@@ -55,14 +55,6 @@ class CDefaultSchemaItem : public ISchemaItem {
    * @return Errors::ERROR
    **/
   Errors::eType validate(const SmartObject& Object) OVERRIDE;
-  /**
-   * @brief Validate smart object.
-   * @param Object Object to validate.
-   * @param report__ object for reporting errors during validation
-   * @return Errors::ERROR
-   **/
-  Errors::eType validate(const SmartObject& Object,
-                         rpc::ValidationReport* report__) OVERRIDE;
 
   /**
    * @brief Validate smart object.
@@ -73,7 +65,8 @@ class CDefaultSchemaItem : public ISchemaItem {
    **/
   Errors::eType validate(const SmartObject& Object,
                          rpc::ValidationReport* report__,
-                         const utils::SemanticVersion& MessageVersion) OVERRIDE;
+                         const utils::SemanticVersion& MessageVersion =
+                             utils::SemanticVersion()) OVERRIDE;
 
   /**
    * @brief Set default value to an object.
@@ -124,7 +117,9 @@ Errors::eType CDefaultSchemaItem<Type>::validate(const SmartObject& Object) {
 
 template <typename Type>
 Errors::eType CDefaultSchemaItem<Type>::validate(
-    const SmartObject& Object, rpc::ValidationReport* report__) {
+    const SmartObject& Object,
+    rpc::ValidationReport* report__,
+    const utils::SemanticVersion& MessageVersion) {
   if (getSmartType() != Object.getType()) {
     std::string validation_info = "Incorrect type, expected: " +
                                   SmartObject::typeToString(getSmartType()) +
@@ -135,14 +130,6 @@ Errors::eType CDefaultSchemaItem<Type>::validate(
   } else {
     return Errors::OK;
   }
-}
-
-template <typename Type>
-Errors::eType CDefaultSchemaItem<Type>::validate(
-    const SmartObject& Object,
-    rpc::ValidationReport* report__,
-    const utils::SemanticVersion& MessageVersion) {
-  return validate(Object, report__);
 }
 
 template <typename Type>

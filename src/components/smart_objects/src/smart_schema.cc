@@ -45,11 +45,6 @@ Errors::eType CSmartSchema::validate(const SmartObject& Object) const {
   return validate(Object, &report);
 }
 
-Errors::eType CSmartSchema::validate(const SmartObject& object,
-                                     rpc::ValidationReport* report__) const {
-  return mSchemaItem->validate(object, report__);
-}
-
 Errors::eType CSmartSchema::validate(
     const SmartObject& object,
     rpc::ValidationReport* report__,

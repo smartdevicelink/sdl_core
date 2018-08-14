@@ -153,8 +153,10 @@ class CSmartFactory {
    *
    * @return True if operation was successful or false otherwise.
    */
-  bool attachSchema(NsSmartDeviceLink::NsSmartObjects::SmartObject& object,
-                    const bool RemoveFakeParameters);
+  bool attachSchema(
+      NsSmartDeviceLink::NsSmartObjects::SmartObject& object,
+      const bool RemoveFakeParameters,
+      const utils::SemanticVersion& MessageVersion = utils::SemanticVersion());
 
   /**
    * @brief Attach schema to the struct SmartObject.
@@ -273,7 +275,8 @@ CSmartFactory<FunctionIdEnum, MessageTypeEnum, StructIdEnum>::CSmartFactory(
 template <class FunctionIdEnum, class MessageTypeEnum, class StructIdEnum>
 bool CSmartFactory<FunctionIdEnum, MessageTypeEnum, StructIdEnum>::attachSchema(
     NsSmartDeviceLink::NsSmartObjects::SmartObject& object,
-    const bool RemoveFakeParameters) {
+    const bool RemoveFakeParameters,
+    const utils::SemanticVersion& MessageVersion) {
   if (false == object.keyExists(strings::S_PARAMS))
     return false;
   if (false == object[strings::S_PARAMS].keyExists(strings::S_MESSAGE_TYPE))
@@ -300,17 +303,8 @@ bool CSmartFactory<FunctionIdEnum, MessageTypeEnum, StructIdEnum>::attachSchema(
 
   object.setSchema(schemaIterator->second);
 
-  // Initialize msg_version to 0.0.0, an invalid value until properly set.
-  utils::SemanticVersion msg_version(0, 0, 0);
-  if (object[NsSmartDeviceLink::NsJSONHandler::strings::S_PARAMS].keyExists(
-          NsSmartDeviceLink::NsJSONHandler::strings::S_RPC_MSG_VERSION)) {
-    msg_version =
-        object[NsSmartDeviceLink::NsJSONHandler::strings::S_PARAMS]
-              [NsSmartDeviceLink::NsJSONHandler::strings::S_RPC_MSG_VERSION]
-                  .asString();
-  }
-
-  schemaIterator->second.applySchema(object, RemoveFakeParameters, msg_version);
+  schemaIterator->second.applySchema(
+      object, RemoveFakeParameters, MessageVersion);
 
   return true;
 }

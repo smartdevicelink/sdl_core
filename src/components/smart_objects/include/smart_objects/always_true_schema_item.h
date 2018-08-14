@@ -54,14 +54,6 @@ class CAlwaysTrueSchemaItem : public ISchemaItem {
    * @return NsSmartObjects::Errors::eType
    **/
   Errors::eType validate(const SmartObject& Object) OVERRIDE;
-  /**
-   * @brief Validate smart object.
-   * @param Object Object to validate.
-   * @param report__ object for reporting errors during validation
-   * @return NsSmartObjects::Errors::eType
-   **/
-  Errors::eType validate(const SmartObject& Object,
-                         rpc::ValidationReport* report__) OVERRIDE;
 
   /**
    * @brief Validate smart object.
@@ -72,7 +64,8 @@ class CAlwaysTrueSchemaItem : public ISchemaItem {
    **/
   Errors::eType validate(const SmartObject& Object,
                          rpc::ValidationReport* report__,
-                         const utils::SemanticVersion& MessageVersion) OVERRIDE;
+                         const utils::SemanticVersion& MessageVersion =
+                             utils::SemanticVersion()) OVERRIDE;
 
  private:
   CAlwaysTrueSchemaItem();
