@@ -483,6 +483,13 @@ bool MessageHelper::SendUnsubscribedWayPoints(ApplicationManager& app_mngr) {
       app_mngr);
 }
 
+smart_objects::SmartObjectSPtr
+MessageHelper::CreateSubscribeWayPointsMessageToHMI(
+    const uint32_t correlation_id) {
+  return MockMessageHelper::message_helper_mock()
+      ->CreateSubscribeWayPointsMessageToHMI(correlation_id);
+}
+
 void MessageHelper::SendQueryApps(const uint32_t connection_key,
                                   ApplicationManager& app_man) {
   MockMessageHelper::message_helper_mock()->SendQueryApps(connection_key,
