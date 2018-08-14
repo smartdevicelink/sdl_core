@@ -51,6 +51,7 @@ LogMessageLoopThread::~LogMessageLoopThread() {
   // we'll have to drop messages
   // while deleting logger thread
   logger_status = DeletingLoggerThread;
+  LogMessageLoopThreadTemplate::Shutdown();
   delete handler_;
 }
 
