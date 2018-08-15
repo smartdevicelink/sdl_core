@@ -64,7 +64,6 @@ class CObjectSchemaItem : public ISchemaItem {
      * @param IsMandatory true if member is mandatory, false
      *                    otherwise. Defaults to true.
      **/
-    // SMember(const ISchemaItemPtr SchemaItem, const bool IsMandatory = true);
 
     SMember(const ISchemaItemPtr SchemaItem,
             const bool IsMandatory = true,
@@ -111,14 +110,7 @@ class CObjectSchemaItem : public ISchemaItem {
    * @return NsSmartObjects::Errors::eType
    **/
   Errors::eType validate(const SmartObject& Object) OVERRIDE;
-  /**
-   * @brief Validate smart object.
-   * @param Object Object to validate.
-   * @param report__ object for reporting errors during validation
-   * @return NsSmartObjects::Errors::eType
-   **/
-  Errors::eType validate(const SmartObject& Object,
-                         rpc::ValidationReport* report__) OVERRIDE;
+
   /**
    * @brief Validate smart object.
    * @param Object Object to validate.
@@ -128,7 +120,8 @@ class CObjectSchemaItem : public ISchemaItem {
    **/
   Errors::eType validate(const SmartObject& Object,
                          rpc::ValidationReport* report__,
-                         const utils::SemanticVersion& MessageVersion) OVERRIDE;
+                         const utils::SemanticVersion& MessageVersion =
+                             utils::SemanticVersion()) OVERRIDE;
   /**
    * @brief Apply schema.
    * @param Object Object to apply schema.
@@ -174,11 +167,12 @@ class CObjectSchemaItem : public ISchemaItem {
                         const utils::SemanticVersion& MessageVersion);
 
   /**
-   * @brief Checks mandatory and version fields to see
-   * if a member is required.
-   * @param Object Object to remove fake parameters.
+   * @brief Returns the correct schema item based on message version.
+   * @param member Schema member
+   * @param MmessageVersion Semantic Version of mobile message.
    **/
-  bool IsMandatory(const SMember& member);
+  const CObjectSchemaItem::SMember& GetCorrectMember(
+      const SMember& member, const utils::SemanticVersion& messageVersion);
 
   /**
    * @brief Map of member name to SMember structure describing the object

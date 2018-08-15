@@ -72,14 +72,6 @@ class TNumberSchemaItem : public CDefaultSchemaItem<NumberType> {
    * @return Errors::ERROR
    **/
   Errors::eType validate(const SmartObject& Object) OVERRIDE;
-  /**
-   * @brief Validate smart object.
-   * @param Object Object to validate.
-   * @param report__ object for reporting errors during validation
-   * @return Errors::ERROR
-   **/
-  Errors::eType validate(const SmartObject& Object,
-                         rpc::ValidationReport* report__) OVERRIDE;
 
   /**
    * @brief Validate smart object.
@@ -90,7 +82,8 @@ class TNumberSchemaItem : public CDefaultSchemaItem<NumberType> {
    **/
   Errors::eType validate(const SmartObject& Object,
                          rpc::ValidationReport* report__,
-                         const utils::SemanticVersion& MessageVersion) OVERRIDE;
+                         const utils::SemanticVersion& MessageVersion =
+                             utils::SemanticVersion()) OVERRIDE;
 
  private:
   /**
@@ -157,7 +150,9 @@ Errors::eType TNumberSchemaItem<NumberType>::validate(
 
 template <typename NumberType>
 Errors::eType TNumberSchemaItem<NumberType>::validate(
-    const SmartObject& Object, rpc::ValidationReport* report__) {
+    const SmartObject& Object,
+    rpc::ValidationReport* report__,
+    const utils::SemanticVersion& MessageVersion) {
   if (!isValidNumberType(Object.getType())) {
     SmartType expectedType = (typeid(double) == typeid(Object.getType()))
                                  ? SmartType_Double
@@ -202,14 +197,6 @@ Errors::eType TNumberSchemaItem<NumberType>::validate(
     return Errors::OUT_OF_RANGE;
   }
   return Errors::OK;
-}
-
-template <typename NumberType>
-Errors::eType TNumberSchemaItem<NumberType>::validate(
-    const SmartObject& Object,
-    rpc::ValidationReport* report__,
-    const utils::SemanticVersion& MessageVersion) {
-  return validate(Object, report__);
 }
 
 template <typename NumberType>

@@ -1851,56 +1851,104 @@
         </param>
         <param name="latitudeDegrees" type="Float" minvalue="-90" maxvalue="90" mandatory="true">
         </param>
-        <param name="utcYear" type="Integer" minvalue="2010" maxvalue="2100" mandatory="true">
+        <param name="utcYear" type="Integer" minvalue="2010" maxvalue="2100" mandatory="false" since="5.0">
             <description>The current UTC year.</description>
+            <history>
+                <param name="utcYear" type="Integer" minvalue="2010" maxvalue="2100" mandatory="true" since="2.0" until="5.0"/>
+            </history>
         </param>
-        <param name="utcMonth" type="Integer" minvalue="1" maxvalue="12" mandatory="true">
+        <param name="utcMonth" type="Integer" minvalue="1" maxvalue="12" mandatory="false" since="5.0">
             <description>The current UTC month.</description>
+            <history>
+                <param name="utcMonth" type="Integer" minvalue="1" maxvalue="12" mandatory="true" since="2.0" until="5.0"/>
+            </history>
         </param>
-        <param name="utcDay" type="Integer" minvalue="1" maxvalue="31" mandatory="true">
+        <param name="utcDay" type="Integer" minvalue="1" maxvalue="31" mandatory="false" since="5.0">
             <description>The current UTC day.</description>
+            <history>
+                <param name="utcDay" type="Integer" minvalue="1" maxvalue="31" mandatory="true" since="2.0" until="5.0"/>
+            </history>
         </param>
-        <param name="utcHours" type="Integer" minvalue="0" maxvalue="23" mandatory="true">
+        <param name="utcHours" type="Integer" minvalue="0" maxvalue="23" mandatory="false" since="5.0">
             <description>The current UTC hour.</description>
+            <history>
+                <param name="utcHours" type="Integer" minvalue="0" maxvalue="23" mandatory="true" since="2.0" until="5.0"/>
+            </history>
         </param>
-        <param name="utcMinutes" type="Integer" minvalue="0" maxvalue="59" mandatory="true">
+        <param name="utcMinutes" type="Integer" minvalue="0" maxvalue="59" mandatory="false" since="5.0">
             <description>The current UTC minute.</description>
+            <history>
+                <param name="utcMinutes" type="Integer" minvalue="0" maxvalue="59" mandatory="true" since="2.0" until="5.0"/>
+            </history>
         </param>
-        <param name="utcSeconds" type="Integer" minvalue="0" maxvalue="59" mandatory="true">
+        <param name="utcSeconds" type="Integer" minvalue="0" maxvalue="59" mandatory="false" since="5.0">
             <description>The current UTC second.</description>
+            <history>
+                <param name="utcSeconds" type="Integer" minvalue="0" maxvalue="59" mandatory="true" since="2.0" until="5.0"/>
+            </history>
         </param>
-        <param name="compassDirection" type="CompassDirection" mandatory="true">
+        <param name="compassDirection" type="CompassDirection" mandatory="false" since="5.0">
             <description>See CompassDirection.</description>
+            <history>
+                <param name="compassDirection" type="CompassDirection" mandatory="true" since="2.0" until="5.0"/>
+            </history>
         </param>
-        <param name="pdop" type="Float" minvalue="0" maxvalue="10" defvalue="0" mandatory="true">
-            <description>PDOP.  If undefined or unavailable, then value shall be set to 0.</description>
+        <param name="pdop" type="Float" minvalue="0" maxvalue="1000" mandatory="false" since="5.0">
+            <description>PDOP.</description>
+            <history>
+                <param name="pdop" type="Float" minvalue="0" maxvalue="10" defvalue="0" mandatory="true" since="2.0" until="5.0"/>
+            </history>
         </param>
-        <param name="hdop" type="Float" minvalue="0" maxvalue="10" defvalue="0" mandatory="true">
-            <description>HDOP.  If value is unknown, value shall be set to 0.</description>
+        <param name="hdop" type="Float" minvalue="0" maxvalue="1000" mandatory="false" since="5.0">
+            <description>HDOP.</description>
+            <history>
+                <param name="hdop" type="Float" minvalue="0" maxvalue="10" defvalue="0" mandatory="true" since="2.0" until="5.0"/>
+            </history>
         </param>
-        <param name="vdop" type="Float" minvalue="0" maxvalue="10" defvalue="0" mandatory="true">
-            <description>VDOP.  If value is unknown, value shall be set to 0.</description>
+        <param name="vdop" type="Float" minvalue="0" maxvalue="1000" mandatory="false" since="5.0">
+            <description>VDOP.</description>
+            <history>
+                <param name="vdop" type="Float" minvalue="0" maxvalue="10" defvalue="0" mandatory="true" since="2.0" until="5.0"/>
+            </history>
         </param>
-        <param name="actual" type="Boolean" mandatory="true">
+        <param name="actual" type="Boolean" mandatory="false" since="5.0">
             <description>
                 True, if actual.
                 False, if inferred.
             </description>
+            <history>
+                <param name="actual" type="Boolean" mandatory="true" since="2.0" until="5.0"/>
+            </history>
         </param>
-        <param name="satellites" type="Integer" minvalue="0" maxvalue="31" mandatory="true">
+        <param name="satellites" type="Integer" minvalue="0" maxvalue="31" mandatory="false" since="5.0">
             <description>Number of satellites in view</description>
+            <history>
+                <param name="satellites" type="Integer" minvalue="0" maxvalue="31" mandatory="true" since="2.0" until="5.0"/>
+            </history>
         </param>
-        <param name="dimension" type="Dimension" mandatory="true">
+        <param name="dimension" type="Dimension" mandatory="false" since="5.0">
             <description>See Dimension</description>
+            <history>
+                <param name="dimension" type="Dimension" mandatory="true" since="2.0" until="5.0"/>
+            </history>
         </param>
-        <param name="altitude" type="Float" minvalue="-10000" maxvalue="10000" mandatory="true">
+        <param name="altitude" type="Float" minvalue="-10000" maxvalue="10000" mandatory="false" since="5.0">
             <description>Altitude in meters</description>
+            <history>
+                <param name="altitude" type="Float" minvalue="-10000" maxvalue="10000" mandatory="true" since="2.0" until="5.0"/>
+            </history>
         </param>
-        <param name="heading" type="Float" minvalue="0" maxvalue="359.99" mandatory="true">
+        <param name="heading" type="Float" minvalue="0" maxvalue="359.99" mandatory="false" since="5.0">
             <description>The heading. North is 0. Resolution is 0.01</description>
+            <history>
+                <param name="heading" type="Float" minvalue="0" maxvalue="359.99" mandatory="true" since="2.0" until="5.0"/>
+            </history>
         </param>
-        <param name="speed" type="Float" minvalue="0" maxvalue="500" mandatory="true">
+        <param name="speed" type="Float" minvalue="0" maxvalue="500" mandatory="false" since="5.0">
             <description>The speed in KPH</description>
+            <history>
+                <param name="speed" type="Float" minvalue="0" maxvalue="500" mandatory="true" since="2.0" until="5.0"/>
+            </history>
         </param>
     </struct>
     

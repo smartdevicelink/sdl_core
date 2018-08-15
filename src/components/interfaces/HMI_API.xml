@@ -2499,9 +2499,9 @@
 
 <struct name="GPSData">
   <description>Struct with the GPS data.</description>
-  <param name="longitudeDegrees" type="Float" minvalue="-180" maxvalue="180" mandatory="false">
+  <param name="longitudeDegrees" type="Float" minvalue="-180" maxvalue="180" mandatory="true">
   </param>
-  <param name="latitudeDegrees" type="Float" minvalue="-90" maxvalue="90" mandatory="false">
+  <param name="latitudeDegrees" type="Float" minvalue="-90" maxvalue="90" mandatory="true">
   </param>
   <param name="utcYear" type="Integer" minvalue="2010" maxvalue="2100" mandatory="false">
     <description>The current UTC year.</description>
@@ -2524,13 +2524,13 @@
   <param name="compassDirection" type="Common.CompassDirection" mandatory="false">
     <description>See CompassDirection.</description>
   </param>
-  <param name="pdop" type="Float" minvalue="0" maxvalue="10" mandatory="false">
+  <param name="pdop" type="Float" minvalue="0" maxvalue="1000" mandatory="false">
     <description>PDOP.</description>
   </param>
-  <param name="hdop" type="Float" minvalue="0" maxvalue="10" mandatory="false">
+  <param name="hdop" type="Float" minvalue="0" maxvalue="1000" mandatory="false">
     <description>HDOP.</description>
   </param>
-  <param name="vdop" type="Float" minvalue="0" maxvalue="10" mandatory="false">
+  <param name="vdop" type="Float" minvalue="0" maxvalue="1000" mandatory="false">
     <description>VDOP.</description>
   </param>
   <param name="actual" type="Boolean" mandatory="false">

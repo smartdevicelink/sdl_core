@@ -143,6 +143,16 @@ class RPCHandlerImpl : public RPCHandler,
   void SetTelemetryObserver(AMTelemetryObserver* observer) OVERRIDE;
 #endif  // TELEMETRY_MONITOR
 
+  /**
+   * @brief Extracts and validates the syncMsgVersion included in
+   * a RegisterAppInterfaceRequest
+   *
+   * @param output - SmartObject Message received from mobile
+   * @param messageVersion - message version to be updated
+   */
+  void GetMessageVersion(NsSmartDeviceLink::NsSmartObjects::SmartObject& output,
+                         utils::SemanticVersion& message_version);
+
  private:
   void ProcessMessageFromMobile(const std::shared_ptr<Message> message);
   void ProcessMessageFromHMI(const std::shared_ptr<Message> message);

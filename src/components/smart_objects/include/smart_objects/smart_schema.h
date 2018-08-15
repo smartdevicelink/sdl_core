@@ -76,23 +76,13 @@ class CSmartSchema FINAL {
    *
    * @param Object Object to validate.
    * @param report__ object for reporting errors during validation
-   *
-   * @return NsSmartObjects::Errors::eType
-   **/
-  Errors::eType validate(const SmartObject& Object,
-                         rpc::ValidationReport* report__) const;
-
-  /**
-   * @brief Validate smart object.
-   *
-   * @param Object Object to validate.
-   * @param report__ object for reporting errors during validation
    * @param MessageVersion to check mobile RPC version against RPC Spec History
    * @return NsSmartObjects::Errors::eType
    **/
   Errors::eType validate(const SmartObject& Object,
                          rpc::ValidationReport* report__,
-                         const utils::SemanticVersion& messageVersion) const;
+                         const utils::SemanticVersion& messageVersion =
+                             utils::SemanticVersion()) const;
 
   /**
    * @brief Set new root schema item.
