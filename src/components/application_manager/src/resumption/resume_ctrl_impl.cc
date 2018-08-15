@@ -795,29 +795,6 @@ bool ResumeCtrlImpl::CheckLowVoltageRestrictions(
   return true;
 }
 
-DEPRECATED bool ResumeCtrlImpl::DisconnectedJustBeforeIgnOff(
-    const smart_objects::SmartObject& saved_app) {
-  using namespace date_time;
-  LOG4CXX_AUTO_TRACE(logger_);
-  DCHECK_OR_RETURN(saved_app.keyExists(strings::time_stamp), false);
-
-  const time_t time_stamp =
-      static_cast<time_t>(saved_app[strings::time_stamp].asInt());
-  const time_t ign_off_time =
-      static_cast<time_t>(resumption_storage_->GetIgnOffTime());
-
-  const uint32_t sec_spent_before_ign = labs(ign_off_time - time_stamp);
-  LOG4CXX_DEBUG(
-      logger_,
-      "ign_off_time "
-          << ign_off_time << "; app_disconnect_time " << time_stamp
-          << "; sec_spent_before_ign " << sec_spent_before_ign
-          << "; resumption_delay_before_ign "
-          << application_manager_.get_settings().resumption_delay_before_ign());
-  return sec_spent_before_ign <=
-         application_manager_.get_settings().resumption_delay_before_ign();
-}
-
 bool ResumeCtrlImpl::CheckDelayBeforeIgnOff(
     const smart_objects::SmartObject& saved_app) const {
   using namespace date_time;

@@ -432,9 +432,6 @@ class ResumeCtrlImpl : public ResumeCtrl,
    */
   bool CheckLowVoltageRestrictions(const smart_objects::SmartObject& saved_app);
 
-  DEPRECATED bool DisconnectedJustBeforeIgnOff(
-      const smart_objects::SmartObject& saved_app);
-
   /**
    * @brief Checks if saved HMI level is applicable for resumption
    * @param saved_app application specific section from backup file
