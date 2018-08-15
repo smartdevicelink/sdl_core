@@ -2259,7 +2259,7 @@
            Indicates if the light's density can be set remotely (similar to a dimmer).
          </description>
      </param>
-     <param name="rgbColorSpaceAvailable" type="Boolean" mandatory="false">
+     <param name="RGBColorSpaceAvailable" type="Boolean" mandatory="false">
          <description>
            Indicates if the light's color can be set remotely by using the RGB color space.
          </description>
