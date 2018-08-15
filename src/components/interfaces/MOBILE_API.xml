@@ -2,7 +2,7 @@
 <?xml-stylesheet type="text/xml" href="protocol2html.xsl"?>
 
 <interface name="SmartDeviceLink RAPI" version="5.0.0" minVersion="1.0.0" date="2018-08-17">
-    <enum name="Result" internal_scope="base">
+    <enum name="Result" internal_scope="base" since="1.0">
         <element name="SUCCESS">
             <description>The request succeeded</description>
         </element>
