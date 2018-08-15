@@ -199,6 +199,8 @@ TEST_F(CreateInteractionChoiceSetRequestTest, OnEvent_VR_UNSUPPORTED_RESOURCE) {
       10;
   (*msg_vr)[strings::msg_params][strings::choice_set][0][strings::menu_name] =
       "menu_name";
+  (*msg_vr)[strings::msg_params][strings::choice_set][0][strings::vr_commands]
+           [0] = kVrCommands1;
   (*msg_vr)[strings::msg_params][strings::interaction_choice_set_id] = 11;
   std::shared_ptr<CreateInteractionChoiceSetRequest> req_vr =
       CreateCommand<CreateInteractionChoiceSetRequest>(msg_vr);
@@ -231,7 +233,8 @@ TEST_F(CreateInteractionChoiceSetRequestTest, OnEvent_VR_UNSUPPORTED_RESOURCE) {
           Return(am::HmiInterfaces::HMI_INTERFACE_BasicCommunication));
 
   EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_)).WillOnce(Return(true));
-
+  ON_CALL(mock_message_helper_, CheckChoiceSetVRCommands(_))
+      .WillByDefault(Return(am::MessageHelper::ChoiceSetVRCommandsStatus::ALL));
   req_vr->Run();
 
   MessageSharedPtr vr_command_result;
@@ -436,6 +439,9 @@ TEST_F(CreateInteractionChoiceSetRequestTest,
   EXPECT_CALL(*mock_app_, FindChoiceSet(kChoiceSetId))
       .WillOnce(Return(choice_set_id));
 
+  ON_CALL(mock_message_helper_, CheckChoiceSetVRCommands(_))
+      .WillByDefault(Return(am::MessageHelper::ChoiceSetVRCommandsStatus::ALL));
+
   EXPECT_CALL(app_mngr_, GenerateGrammarID()).WillOnce(Return(kGrammarId));
   EXPECT_CALL(*mock_app_, AddChoiceSet(kChoiceSetId, _));
   EXPECT_CALL(app_mngr_, GetNextHMICorrelationID())
@@ -477,6 +483,79 @@ TEST_F(CreateInteractionChoiceSetRequestTest,
       .WillOnce(Return(choice_set_id));
 
   EXPECT_CALL(*mock_app_, AddChoiceSet(kChoiceSetId, _));
+
+  command_->Run();
+}
+
+TEST_F(CreateInteractionChoiceSetRequestTest, Run_WithoutVrCommands_SUCCESS) {
+  (*message_)[am::strings::msg_params][am::strings::choice_set][0]
+             [am::strings::menu_name] = kMenuName;
+  (*message_)[am::strings::msg_params][am::strings::choice_set][0]
+             [am::strings::image][am::strings::value] = kImage;
+  (*message_)[am::strings::msg_params][am::strings::choice_set][0]
+             [am::strings::choice_id] = kChoiceId1;
+  (*message_)[am::strings::msg_params][am::strings::choice_set][0]
+             [am::strings::secondary_image][am::strings::value] = kSecondImage;
+  (*message_)[am::strings::msg_params][am::strings::choice_set][1]
+             [am::strings::choice_id] = kChoiceId2;
+  (*message_)[am::strings::msg_params][am::strings::choice_set][1]
+             [am::strings::menu_name] = kMenuName;
+  (*message_)[am::strings::msg_params][am::strings::interaction_choice_set_id] =
+      kChoiceSetId;
+
+  EXPECT_CALL(app_mngr_, application(_)).WillOnce(Return(mock_app_));
+
+  EXPECT_CALL(mock_message_helper_, VerifyImage(_, _, _))
+      .WillRepeatedly(Return(mobile_apis::Result::SUCCESS));
+
+  EXPECT_CALL(mock_message_helper_, CheckChoiceSetVRCommands(_))
+      .WillOnce(Return(am::MessageHelper::ChoiceSetVRCommandsStatus::NONE));
+
+  smart_objects::SmartObject* choice_set_id = NULL;
+  EXPECT_CALL(*mock_app_, FindChoiceSet(kChoiceSetId))
+      .WillOnce(Return(choice_set_id));
+
+  // No VR commands
+  EXPECT_CALL(app_mngr_, GenerateGrammarID()).Times(0);
+
+  EXPECT_CALL(*mock_app_, AddChoiceSet(kChoiceSetId, _));
+
+  command_->Run();
+}
+
+TEST_F(CreateInteractionChoiceSetRequestTest,
+       Run_WithMixedVrCommands_UNSUCCESS) {
+  (*message_)[am::strings::msg_params][am::strings::choice_set][0]
+             [am::strings::menu_name] = kMenuName;
+  (*message_)[am::strings::msg_params][am::strings::choice_set][0]
+             [am::strings::image][am::strings::value] = kImage;
+  (*message_)[am::strings::msg_params][am::strings::choice_set][0]
+             [am::strings::choice_id] = kChoiceId1;
+  (*message_)[am::strings::msg_params][am::strings::choice_set][0]
+             [am::strings::secondary_image][am::strings::value] = kSecondImage;
+  (*message_)[am::strings::msg_params][am::strings::choice_set][0]
+             [am::strings::vr_commands][0] = kVrCommands1;
+  (*message_)[am::strings::msg_params][am::strings::choice_set][1]
+             [am::strings::choice_id] = kChoiceId2;
+  (*message_)[am::strings::msg_params][am::strings::choice_set][1]
+             [am::strings::menu_name] = kMenuName;
+  (*message_)[am::strings::msg_params][am::strings::interaction_choice_set_id] =
+      kChoiceSetId;
+  EXPECT_CALL(app_mngr_, application(_)).WillOnce(Return(mock_app_));
+
+  EXPECT_CALL(mock_message_helper_, VerifyImage(_, _, _))
+      .WillRepeatedly(Return(mobile_apis::Result::SUCCESS));
+
+  EXPECT_CALL(mock_message_helper_, CheckChoiceSetVRCommands(_))
+      .WillOnce(Return(am::MessageHelper::ChoiceSetVRCommandsStatus::MIXED));
+
+  smart_objects::SmartObject* choice_set_id = NULL;
+  EXPECT_CALL(*mock_app_, FindChoiceSet(kChoiceSetId))
+      .WillOnce(Return(choice_set_id));
+
+  EXPECT_CALL(app_mngr_, GenerateGrammarID()).Times(0);
+
+  EXPECT_CALL(*mock_app_, AddChoiceSet(kChoiceSetId, _)).Times(0);
 
   command_->Run();
 }
@@ -523,6 +602,9 @@ TEST_F(CreateInteractionChoiceSetRequestTest, OnEvent_ValidVrNoError_SUCCESS) {
   EXPECT_CALL(*mock_app_, FindChoiceSet(kChoiceSetId))
       .WillOnce(Return(choice_set_id));
 
+  ON_CALL(mock_message_helper_, CheckChoiceSetVRCommands(_))
+      .WillByDefault(Return(am::MessageHelper::ChoiceSetVRCommandsStatus::ALL));
+
   EXPECT_CALL(app_mngr_, GenerateGrammarID()).WillOnce(Return(kGrammarId));
   EXPECT_CALL(*mock_app_, AddChoiceSet(kChoiceSetId, _));
   ON_CALL(app_mngr_, GetNextHMICorrelationID())
@@ -556,6 +638,9 @@ TEST_F(CreateInteractionChoiceSetRequestTest,
   smart_objects::SmartObject* choice_set_id = NULL;
   EXPECT_CALL(*mock_app_, FindChoiceSet(kChoiceSetId))
       .WillOnce(Return(choice_set_id));
+
+  ON_CALL(mock_message_helper_, CheckChoiceSetVRCommands(_))
+      .WillByDefault(Return(am::MessageHelper::ChoiceSetVRCommandsStatus::ALL));
 
   EXPECT_CALL(app_mngr_, GenerateGrammarID()).WillOnce(Return(kGrammarId));
   EXPECT_CALL(*mock_app_, AddChoiceSet(kChoiceSetId, _));
@@ -591,6 +676,9 @@ TEST_F(CreateInteractionChoiceSetRequestTest,
   smart_objects::SmartObject* choice_set_id = NULL;
   EXPECT_CALL(*mock_app_, FindChoiceSet(kChoiceSetId))
       .WillOnce(Return(choice_set_id));
+
+  ON_CALL(mock_message_helper_, CheckChoiceSetVRCommands(_))
+      .WillByDefault(Return(am::MessageHelper::ChoiceSetVRCommandsStatus::ALL));
 
   EXPECT_CALL(app_mngr_, GenerateGrammarID()).WillOnce(Return(kGrammarId));
   EXPECT_CALL(*mock_app_, AddChoiceSet(kChoiceSetId, _));
@@ -640,6 +728,9 @@ TEST_F(CreateInteractionChoiceSetRequestTest,
   EXPECT_CALL(*mock_app_, FindChoiceSet(kChoiceSetId))
       .WillOnce(Return(choice_set_id));
 
+  ON_CALL(mock_message_helper_, CheckChoiceSetVRCommands(_))
+      .WillByDefault(Return(am::MessageHelper::ChoiceSetVRCommandsStatus::ALL));
+
   EXPECT_CALL(app_mngr_, GenerateGrammarID()).WillOnce(Return(kGrammarId));
   EXPECT_CALL(*mock_app_, AddChoiceSet(kChoiceSetId, _));
   ON_CALL(app_mngr_, GetNextHMICorrelationID())
@@ -682,6 +773,9 @@ TEST_F(CreateInteractionChoiceSetRequestTest, OnTimeOut_InvalidApp_UNSUCCESS) {
   EXPECT_CALL(*mock_app_, FindChoiceSet(kChoiceSetId))
       .WillOnce(Return(choice_set_id));
 
+  ON_CALL(mock_message_helper_, CheckChoiceSetVRCommands(_))
+      .WillByDefault(Return(am::MessageHelper::ChoiceSetVRCommandsStatus::ALL));
+
   EXPECT_CALL(app_mngr_, GenerateGrammarID()).WillOnce(Return(kGrammarId));
   EXPECT_CALL(*mock_app_, AddChoiceSet(kChoiceSetId, _));
   ON_CALL(app_mngr_, GetNextHMICorrelationID())
@@ -723,6 +817,9 @@ TEST_F(CreateInteractionChoiceSetRequestTest,
 
   EXPECT_CALL(app_mngr_, application(kConnectionKey))
       .WillOnce(Return(mock_app_));
+
+  ON_CALL(mock_message_helper_, CheckChoiceSetVRCommands(_))
+      .WillByDefault(Return(am::MessageHelper::ChoiceSetVRCommandsStatus::ALL));
   EXPECT_CALL(app_mngr_, GenerateGrammarID()).WillOnce(Return(kGrammarId));
   ON_CALL(app_mngr_, GetNextHMICorrelationID())
       .WillByDefault(Return(kCorrelationId));
@@ -795,6 +892,9 @@ TEST_F(CreateInteractionChoiceSetRequestTest, Run_ErrorFromHmiFalse_UNSUCCESS) {
   smart_objects::SmartObject* choice_set_id = NULL;
   EXPECT_CALL(*mock_app_, FindChoiceSet(kChoiceSetId))
       .WillRepeatedly(Return(choice_set_id));
+
+  ON_CALL(mock_message_helper_, CheckChoiceSetVRCommands(_))
+      .WillByDefault(Return(am::MessageHelper::ChoiceSetVRCommandsStatus::ALL));
 
   EXPECT_CALL(app_mngr_, GenerateGrammarID())
       .WillRepeatedly(Return(kGrammarId));

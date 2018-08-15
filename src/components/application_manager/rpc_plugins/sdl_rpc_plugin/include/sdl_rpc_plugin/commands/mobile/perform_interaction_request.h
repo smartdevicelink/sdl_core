@@ -213,6 +213,13 @@ class PerformInteractionRequest
       const smart_objects::SmartObject& choice_set_id_list) const;
 
   /**
+   * @brief Checks each choice in each set for having a VRcommands parameter
+   * @param app contains pointer to application.
+   * @return returns false if request has choice sets with no vrCommands
+   */
+  bool CheckChoiceSetListVRCommands(app_mngr::ApplicationSharedPtr app);
+
+  /**
    * @brief Tells if there are sent requests without responses
    * @return If there is request without response method returns TRUE
    * otherwise returns FALSE

@@ -983,7 +983,11 @@
         <description>A choice is an option given to the user, which can be selected either by menu, or through voice recognition system.</description>
         <param name="choiceID" type="Integer" minvalue="0" maxvalue="65535"  mandatory="true"/>
         <param name="menuName" type="String" maxlength="500"  mandatory="true"/>
-        <param name="vrCommands" type="String" minsize="1" maxsize="100" maxlength="99" array="true"  mandatory="true"/>
+        <param name="vrCommands" type="String" minsize="1" maxsize="100" maxlength="99" array="true" mandatory="false" since="5.0">
+            <history>
+                <param name="vrCommands" type="String" minsize="1" maxsize="100" maxlength="99" array="true" mandatory="true" since="1.0" until="5.0"/>
+            </history>
+        </param>
         <param name="image" type="Image" mandatory="false" since="2.0" />
         <param name="secondaryText" maxlength="500" type="String" mandatory="false" since="3.0">
             <description>Optional secondary text to display; e.g. address of POI in a search result entry</description>
