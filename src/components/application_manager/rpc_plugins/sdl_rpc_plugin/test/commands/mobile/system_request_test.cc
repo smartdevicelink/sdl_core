@@ -229,6 +229,125 @@ TEST_F(SystemRequestTest, Run_RequestTypeDisallowed_SendDisallowedResponse) {
   command->Run();
 }
 
+TEST_F(SystemRequestTest, Run_FileWithBinaryDataSaveUnsuccessful_GenericError) {
+  am::BinaryData binary_data;
+  binary_data.push_back(0x1);
+  binary_data.push_back(0x2);
+  binary_data.push_back(0x4);
+
+  const std::string file_name = "file_name";
+  MessageSharedPtr msg = CreateIVSUMessage();
+  const mobile_apis::RequestType::eType request_type =
+      mobile_apis::RequestType::CLIMATE;
+  (*msg)[am::strings::msg_params][am::strings::request_type] = request_type;
+  (*msg)[am::strings::msg_params][am::strings::file_name] = file_name;
+  (*msg)[am::strings::params][am::strings::binary_data] = binary_data;
+
+  PreConditions();
+
+  ON_CALL(mock_policy_handler_,
+              IsRequestTypeAllowed(kAppPolicyId, request_type))
+      .WillByDefault(Return(true));
+
+  const std::string binary_folder = "test_binary_folder";
+  EXPECT_CALL(app_mngr_settings_, system_files_path())
+      .WillRepeatedly(ReturnRef(binary_folder));
+  EXPECT_CALL(app_mngr_, SaveBinary(binary_data, binary_folder, file_name, 0))
+      .WillOnce(Return((mobile_apis::Result::INVALID_DATA)));
+
+  const std::string info;
+  EXPECT_CALL(
+      mock_rpc_service_,
+      ManageMobileCommand(
+          MobileResponseIs(mobile_apis::Result::GENERIC_ERROR, info, false),
+          _));
+
+  std::shared_ptr<SystemRequest> command(CreateCommand<SystemRequest>(msg));
+  ASSERT_TRUE(command->Init());
+  command->Run();
+}
+
+TEST_F(SystemRequestTest,
+       Run_FileWithoutBinaryDataNotHTTPTypeNotSystemFile_Rejected) {
+  const std::string storage_folder2 = "test_storage_folder2";
+  const std::string file_name = "file_name";
+  MessageSharedPtr msg = CreateIVSUMessage();
+  const mobile_apis::RequestType::eType request_type =
+      mobile_apis::RequestType::CLIMATE;
+  (*msg)[am::strings::msg_params][am::strings::request_type] = request_type;
+  (*msg)[am::strings::msg_params][am::strings::file_name] = file_name;
+
+  PreConditions();
+
+  ON_CALL(mock_policy_handler_,
+              IsRequestTypeAllowed(kAppPolicyId, request_type))
+      .WillByDefault(Return(true));
+
+  EXPECT_CALL(app_mngr_, SaveBinary(_, _, _, _)).Times(0);
+
+  const std::string info;
+  am::AppFile ap_file;
+  ON_CALL(*mock_app_, folder_name()).WillByDefault(Return(storage_folder2));
+  ap_file.is_download_complete = false;
+  EXPECT_CALL(*mock_app_,
+              GetFile(kAppStorageFolder + "/" + storage_folder2 + "/" +
+                      file_name)).WillRepeatedly(Return(&ap_file));
+  EXPECT_CALL(
+      mock_rpc_service_,
+      ManageMobileCommand(
+          MobileResponseIs(mobile_apis::Result::REJECTED, info, false), _));
+
+  std::shared_ptr<SystemRequest> command(CreateCommand<SystemRequest>(msg));
+  ASSERT_TRUE(command->Init());
+  command->Run();
+}
+
+TEST_F(SystemRequestTest, Run_TypeDisallowed_DisallowedResult) {
+  MessageSharedPtr msg = CreateIVSUMessage();
+  const mobile_apis::RequestType::eType request_type =
+      mobile_apis::RequestType::CLIMATE;
+  (*msg)[am::strings::msg_params][am::strings::request_type] = request_type;
+
+  PreConditions();
+
+  ON_CALL(mock_policy_handler_,
+              IsRequestTypeAllowed(kAppPolicyId, request_type))
+      .WillByDefault(Return(false));
+
+  const std::string info;
+  EXPECT_CALL(
+      mock_rpc_service_,
+      ManageMobileCommand(
+          MobileResponseIs(mobile_apis::Result::DISALLOWED, info, false), _));
+  std::shared_ptr<SystemRequest> command(CreateCommand<SystemRequest>(msg));
+  ASSERT_TRUE(command->Init());
+  command->Run();
+}
+
+TEST_F(SystemRequestTest, Run_FileNameContainSlash_InvalidData) {
+  MessageSharedPtr msg = CreateIVSUMessage();
+  const mobile_apis::RequestType::eType request_type =
+      mobile_apis::RequestType::CLIMATE;
+  (*msg)[am::strings::msg_params][am::strings::request_type] = request_type;
+  (*msg)[am::strings::msg_params][am::strings::file_name] = "file_name/";
+
+  PreConditions();
+
+  ON_CALL(mock_policy_handler_,
+              IsRequestTypeAllowed(kAppPolicyId, request_type))
+      .WillByDefault(Return(true));
+
+  const std::string info = "Sync file name contains forbidden symbols.";
+  EXPECT_CALL(
+      mock_rpc_service_,
+      ManageMobileCommand(
+          MobileResponseIs(mobile_apis::Result::INVALID_DATA, info, false),
+          _));
+  std::shared_ptr<SystemRequest> command(CreateCommand<SystemRequest>(msg));
+  ASSERT_TRUE(command->Init());
+  command->Run();
+}
+
 }  // namespace system_request
 }  // namespace mobile_commands_test
 }  // namespace commands_test

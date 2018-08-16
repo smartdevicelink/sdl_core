@@ -106,7 +106,7 @@ void OnSystemRequestNotification::Run() {
     }
   }
 
-  const std::string filename =
+  const std::string file_name =
       (*message_)[strings::msg_params][strings::file_name].asString();
   if (mobile_apis::RequestType::PROPRIETARY == request_type) {
     /* According to requirements:
