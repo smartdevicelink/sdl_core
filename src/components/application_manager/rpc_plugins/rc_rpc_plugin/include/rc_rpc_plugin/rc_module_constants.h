@@ -53,7 +53,7 @@ const char kSupportedLights[] = "supportedLights";
 // LightControlCapabilities
 const char kName[] = "name";
 const char kDensityAvailable[] = "densityAvailable";
-const char krgbColorSpaceAvailable[] = "rgbColorSpaceAvailable";
+const char kRGBColorSpaceAvailable[] = "rgbColorSpaceAvailable";
 }  //  strings
 
 namespace result_codes {

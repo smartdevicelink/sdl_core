@@ -2009,6 +2009,12 @@
    <param name="moduleName" type="String" maxlength="100" mandatory="true" >
      <description>The short name or a short description of the climate control module.</description>
    </param>
+   <param name="currentTemperatureAvailable" type="Boolean" mandatory="false">
+     <description>
+       Availability of the reading of current temperature.
+       True: Available, False: Not Available, Not present: Not Available.
+     </description>
+   </param>
    <param name="fanSpeedAvailable" type="Boolean" mandatory="false">
      <description>
        Availability of the control of fan speed.
@@ -2128,7 +2134,7 @@
      <param name="volume" type="Integer" mandatory="false" minvalue="0" maxvalue="100">
          <description>Reflects the volume of audio, from 0%-100%.</description>
      </param>
-     <param name="equalizerSettings" type="EqualizerSettings" minsize="1" maxsize="100" mandatory="false" array ="true">
+     <param name="equalizerSettings" type="EqualizerSettings" minsize="1" maxsize="100" mandatory="false" array="true">
          <description>Defines the list of supported channels (band) and their current/desired settings on HMI</description>
      </param>
  </struct>

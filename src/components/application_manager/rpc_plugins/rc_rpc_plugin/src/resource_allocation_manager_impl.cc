@@ -367,6 +367,9 @@ ResourceAllocationManagerImpl::all_supported_modules() {
   result.push_back(enums_value::kClimate);
   result.push_back(enums_value::kRadio);
   result.push_back(enums_value::kSeat);
+  result.push_back(enums_value::kAudio);
+  result.push_back(enums_value::kLight);
+  result.push_back(enums_value::kHmiSettings);
   return result;
 }
 

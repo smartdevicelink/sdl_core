@@ -3155,8 +3155,8 @@
         </param>
         <param name="sisDataAvailable" type="Boolean" mandatory="false" since="5.0">
             <description>
-              Availability of the getting HD radio Station Information Service (SIS) data.
-              True: Available, False: Not Available, Not present: Not Available.
+                Availability of the getting HD radio Station Information Service (SIS) data.
+                True: Available, False: Not Available, Not present: Not Available.
             </description>
         </param>
     </struct>
@@ -3240,20 +3240,20 @@
         </param>
         <param name="heatedWindshieldAvailable" type="Boolean" mandatory="false" since="5.0">
             <description>
-              Availability of the control (enable/disable) of heated Windshield.
-              True: Available, False: Not Available, Not present: Not Available.
+                Availability of the control (enable/disable) of heated Windshield.
+                True: Available, False: Not Available, Not present: Not Available.
             </description>
         </param>
         <param name="heatedRearWindowAvailable" type="Boolean" mandatory="false" since="5.0">
             <description>
-              Availability of the control (enable/disable) of heated Rear Window.
-              True: Available, False: Not Available, Not present: Not Available.
+                Availability of the control (enable/disable) of heated Rear Window.
+                True: Available, False: Not Available, Not present: Not Available.
             </description>
         </param>
         <param name="heatedMirrorsAvailable" type="Boolean" mandatory="false" since="5.0">
             <description>
-              Availability of the control (enable/disable) of heated Mirrors.
-              True: Available, False: Not Available, Not present: Not Available.
+                Availability of the control (enable/disable) of heated Mirrors.
+                True: Available, False: Not Available, Not present: Not Available.
             </description>
         </param>
     </struct>
@@ -3270,24 +3270,24 @@
     <struct name="AudioControlData" since="5.0">
         <param name="source" type="PrimaryAudioSource" mandatory="false">
             <description>
-              In a getter response or a notification, it is the current primary audio source of the system.
-              In a setter request, it is the target audio source that the system shall switch to.
-              If the value is MOBILE_APP, the system shall switch to the mobile media app that issues the setter RPC.
+                In a getter response or a notification, it is the current primary audio source of the system.
+                In a setter request, it is the target audio source that the system shall switch to.
+                If the value is MOBILE_APP, the system shall switch to the mobile media app that issues the setter RPC.
             </description>
         </param>
         <param name="keepContext" type="Boolean" mandatory="false">
             <description>
-              This parameter shall not be present in any getter responses or notifications.
-              This parameter is optional in a setter request. The default value is false.
-              If it is false, the system not only changes the audio source but also brings the default application
-              or system UI associated with the audio source to foreground.
-              If it is true, the system changes the audio source, but still keeps the current application in foreground.
+                This parameter shall not be present in any getter responses or notifications.
+                This parameter is optional in a setter request. The default value is false.
+                If it is false, the system not only changes the audio source but also brings the default application
+                or system UI associated with the audio source to foreground.
+                If it is true, the system changes the audio source, but still keeps the current application in foreground.
             </description>
         </param>
         <param name="volume" type="Integer" mandatory="false" minvalue="0" maxvalue="100">
             <description>Reflects the volume of audio, from 0%-100%.</description>
         </param>
-        <param name="equalizerSettings" type="EqualizerSettings" minsize="1" maxsize="100" mandatory="false" array ="true">
+        <param name="equalizerSettings" type="EqualizerSettings" minsize="1" maxsize="100" mandatory="false" array="true">
             <description>Defines the list of supported channels (band) and their current/desired settings on HMI</description>
         </param>
     </struct>
@@ -3295,8 +3295,8 @@
     <struct name="AudioControlCapabilities" since="5.0">
         <param name="moduleName" type="String" maxlength="100" mandatory="true">
             <description>
-            The short friendly name of the light control module.
-            It should not be used to identify a module by mobile application.
+                The short friendly name of the light control module.
+                It should not be used to identify a module by mobile application.
             </description>
         </param>
         <param name="sourceAvailable" type="Boolean" mandatory="false">
@@ -3402,12 +3402,12 @@
         <!-- Assuming light ON/OFF status is always available -->
         <param name="densityAvailable" type="Boolean" mandatory="false">
             <description>
-            Indicates if the light's density can be set remotely (similar to a dimmer).
+                Indicates if the light's density can be set remotely (similar to a dimmer).
             </description>
         </param>
         <param name="rgbColorSpaceAvailable" type="Boolean" mandatory="false">
             <description>
-            Indicates if the light's color can be set remotely by using the RGB color space.
+                Indicates if the light's color can be set remotely by using the RGB color space.
             </description>
         </param>
     </struct>
@@ -3415,8 +3415,8 @@
     <struct name="LightControlCapabilities" since="5.0">
         <param name="moduleName" type="String" maxlength="100" mandatory="true">
             <description>
-            The short friendly name of the light control module.
-            It should not be used to identify a module by mobile application.
+                The short friendly name of the light control module.
+                It should not be used to identify a module by mobile application.
             </description>
         </param>
         <param name="supportedLights" type="LightCapabilities" minsize="1" maxsize="100" array="true" mandatory="true">
@@ -3616,7 +3616,7 @@
             <description>The position of the haptic rectangle to be highlighted. The center of this rectangle will be "touched" when a press occurs.</description>
         </param>
     </struct>
-
+    
     <!-- Requests/Responses -->
     
     <function name="RegisterAppInterface" functionID="RegisterAppInterfaceID" messagetype="request" since="1.0">
