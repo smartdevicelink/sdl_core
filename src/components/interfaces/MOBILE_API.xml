@@ -3370,6 +3370,27 @@
         <element name="HAZARD_LIGHTS" value="511">
             <description>Include all hazard lights: front_left, front_right, rear_left and rear_right.</description>
         </element>
+        <element name="REAR_CARGO_LIGHTS" value="512">
+            <description>Cargo lamps illuminate the cargo area.</description>
+        </element>
+        <element name="REAR_TRUCK_BED_LIGHTS" value="513">
+            <description>Truck bed lamps light up the bed of the truck.</description>
+        </element>
+        <element name="REAR_TRAILER_LIGHTS" value="514">
+            <description>Trailer lights are lamps mounted on a trailer hitch.</description>
+        </element>
+        <element name="LEFT_SPOT_LIGHTS" value="515">
+            <description>It is the spotlights mounted on the left side of a vehicle.</description>
+        </element>
+        <element name="RIGHT_SPOT_LIGHTS" value="516">
+            <description>It is the spotlights mounted on the right side of a vehicle.</description>
+        </element>
+        <element name="LEFT_PUDDLE_LIGHTS" value="517">
+            <description>Puddle lamps illuminate the ground beside the door as the customer is opening or approaching the door.</description>
+        </element>
+        <element name="RIGHT_PUDDLE_LIGHTS" value="518">
+            <description>Puddle lamps illuminate the ground beside the door as the customer is opening or approaching the door.</description>
+        </element>
 
         <!-- Interior Lights by common function groups 801~900 -->
         <element name="AMBIENT_LIGHTS" value="801"/>
@@ -3390,22 +3411,33 @@
         <element name="EXTERIOR_RIGHT_LIGHTS" value="904">
             <description>Include exterior lights located at the right side of the vehicle. For example, right puddle lights and spot lights.</description>
         </element>
+        <element name="EXTERIOR_ALL_LIGHTS" value="905">
+            <description> Include all exterior lights around the vehicle.</description>
+        </element>
     </enum>
 
     <enum name="LightStatus" since="5.0">
         <element name="ON"/>
         <element name="OFF"/>
+        <element name="RAMP_UP"/>
+        <element name="RAMP_DOWN"/>
+        <element name="UNKNOWN"/>
+        <element name="INVALID"/>
     </enum>
 
     <struct name="LightCapabilities" since="5.0">
         <param name="name" type="LightName" mandatory="true" />
-        <!-- Assuming light ON/OFF status is always available -->
+        <param name="statusAvailable" type="Boolean" mandatory="false">
+          <description>
+            Indicates if the status (ON/OFF) can be set remotely. App shall not use read-only values (RAMP_UP/RAMP_DOWN/UNKNOWN/INVALID) in a setInteriorVehicleData request.
+          </description>
+        </param>
         <param name="densityAvailable" type="Boolean" mandatory="false">
             <description>
                 Indicates if the light's density can be set remotely (similar to a dimmer).
             </description>
         </param>
-        <param name="rgbColorSpaceAvailable" type="Boolean" mandatory="false">
+        <param name="RGBColorSpaceAvailable" type="Boolean" mandatory="false">
             <description>
                 Indicates if the light's color can be set remotely by using the RGB color space.
             </description>
