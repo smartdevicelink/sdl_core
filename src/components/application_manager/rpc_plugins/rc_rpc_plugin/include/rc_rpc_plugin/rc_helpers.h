@@ -74,7 +74,7 @@ class RCHelpers {
 
   typedef std::map<application_manager::ApplicationSharedPtr,
                    std::vector<std::string> > AppsModules;
-  static AppsModules GetApplicaitonsAllowedModules(
+  static AppsModules GetApplicationsAllowedModules(
       application_manager::ApplicationManager& app_mngr);
 };
 

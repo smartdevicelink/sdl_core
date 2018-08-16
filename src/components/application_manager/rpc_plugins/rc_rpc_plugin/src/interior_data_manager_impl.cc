@@ -69,7 +69,7 @@ bool InteriorDataManagerImpl::CheckRequestsToHMIFrequency(
 
 void InteriorDataManagerImpl::UpdateHMISubscriptionsOnPolicyUpdated() {
   auto apps_allowed_modules =
-      RCHelpers::GetApplicaitonsAllowedModules(app_mngr_);
+      RCHelpers::GetApplicationsAllowedModules(app_mngr_);
   auto apps_subscribed_modules = AppsSubscribedModules();
   InteriorDataManagerImpl::AppsModules apps_disallowed_modules;
   for (auto& pair : apps_subscribed_modules) {

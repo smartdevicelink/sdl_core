@@ -72,7 +72,7 @@ RCHelpers::AppsSubscribedToModuleType(
   return result;
 }
 
-RCHelpers::AppsModules RCHelpers::GetApplicaitonsAllowedModules(
+RCHelpers::AppsModules RCHelpers::GetApplicationsAllowedModules(
     app_mngr::ApplicationManager& app_mngr) {
   auto apps_list = RCRPCPlugin::GetRCApplications(app_mngr);
   RCHelpers::AppsModules result;
