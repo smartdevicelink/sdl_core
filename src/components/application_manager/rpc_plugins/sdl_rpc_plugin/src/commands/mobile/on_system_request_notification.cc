@@ -106,6 +106,8 @@ void OnSystemRequestNotification::Run() {
     }
   }
 
+  const std::string filename =
+      (*message_)[strings::msg_params][strings::file_name].asString();
   if (mobile_apis::RequestType::PROPRIETARY == request_type) {
     /* According to requirements:
        "If the requestType = PROPRIETARY, add to mobile API fileType = JSON
@@ -113,10 +115,9 @@ void OnSystemRequestNotification::Run() {
        Also in Genivi SDL we don't save the PT to file - we put it directly in
        binary_data */
 
-    const std::string filename =
-        (*message_)[strings::msg_params][strings::file_name].asString();
     BinaryMessage binary_data;
-    file_system::ReadBinaryFile(filename, binary_data);
+    file_system::ReadBinaryFile(file_name, binary_data);
+
 #if defined(PROPRIETARY_MODE)
     AddHeader(binary_data);
 #endif  // PROPRIETARY_MODE
@@ -132,6 +133,10 @@ void OnSystemRequestNotification::Run() {
       (*message_)[strings::msg_params][strings::timeout] =
           policy_handler.TimeoutExchangeSec();
     }
+  } else {
+    BinaryMessage binary_data;
+    file_system::ReadBinaryFile(file_name, binary_data);
+    (*message_)[strings::params][strings::binary_data] = binary_data;
   }
 
   SendNotification();
