@@ -71,7 +71,7 @@ const uint32_t kAppId1 = 11u;
 const uint32_t kHMIAppId1 = 1u;
 const uint32_t kAppId2 = 22u;
 const std::string policy_app_id_1_ = "policy_id_1";
-const uint32_t kSizeOfModules = 3u;
+const uint32_t kSizeOfModules = 6u;
 }
 
 namespace rc_rpc_plugin_test {

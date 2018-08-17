@@ -66,7 +66,10 @@ bool CheckIfModuleTypeExistInCapabilities(
   const std::map<std::string, std::string> params = {
       {enums_value::kRadio, strings::kradioControlCapabilities},
       {enums_value::kClimate, strings::kclimateControlCapabilities},
-      {enums_value::kSeat, strings::kseatControlCapabilities}};
+      {enums_value::kAudio, strings::kaudioControlCapabilities},
+      {enums_value::kLight, strings::klightControlCapabilities},
+      {enums_value::kSeat, strings::kseatControlCapabilities},
+      {enums_value::kHmiSettings, strings::khmiSettingsControlCapabilities}};
   bool is_module_type_valid = false;
   for (const auto& param : params) {
     if (param.first == module_type) {

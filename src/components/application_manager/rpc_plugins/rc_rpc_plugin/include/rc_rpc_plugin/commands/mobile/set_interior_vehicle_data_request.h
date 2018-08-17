@@ -118,6 +118,15 @@ class SetInteriorVehicleDataRequest : public RCCommandRequest {
    */
   const smart_objects::SmartObject& ControlData(
       const smart_objects::SmartObject& module_data);
+
+  /**
+   * @brief CheckAudioSource check that if app wants to change
+   * the audio source from MOBILE_APP to other types of audio
+   * source without keepContext parameter or with keepContext=false
+   * then this app will go to HMI level 'BACKGROUND'
+   * @param module_data received params
+   */
+  void CheckAudioSource(const smart_objects::SmartObject& audio_data);
 };
 }  // namespace commands
 }  // namespace rc_rpc_plugin
