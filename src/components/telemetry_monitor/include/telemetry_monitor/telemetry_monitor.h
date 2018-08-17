@@ -87,7 +87,6 @@ class TelemetryMonitor {
   virtual void Stop();
   virtual void Start();
   virtual void SendMetric(std::shared_ptr<MetricWrapper> metric);
-  DEPRECATED void set_streamer(Streamer* streamer);
   void set_streamer(std::shared_ptr<Streamer> streamer);
   const std::string& ip() const;
   int16_t port() const;

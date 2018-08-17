@@ -61,17 +61,6 @@ class CSmartSchema FINAL {
   explicit CSmartSchema(const ISchemaItemPtr SchemaItem);
 
   /**
-   * @deprecated
-   *
-   * @brief Validate smart object.
-   *
-   * @param Object Object to validate.
-   *
-   * @return NsSmartObjects::Errors::eType
-   **/
-  DEPRECATED Errors::eType validate(const SmartObject& Object) const;
-
-  /**
    * @brief Validate smart object.
    *
    * @param Object Object to validate.

@@ -102,13 +102,6 @@ class TEnumSchemaItem : public CDefaultSchemaItem<EnumType> {
           ElementSignatures,
       const TSchemaItemParameter<EnumType>& DefaultValue =
           TSchemaItemParameter<EnumType>());
-  /**
-   * @deprecated
-   * @brief Validate smart object.
-   * @param Object Object to validate.
-   * @return NsSmartObjects::Errors::eType
-   **/
-  Errors::eType validate(const SmartObject& Object) OVERRIDE;
 
   /**
    * @brief Validate smart object.
@@ -283,12 +276,6 @@ TEnumSchemaItem<EnumType>::createWithSignatures(
   return std::shared_ptr<TEnumSchemaItem<EnumType> >(
       new TEnumSchemaItem<EnumType>(
           AllowedElements, DefaultValue, ElementSignatures));
-}
-
-template <typename EnumType>
-Errors::eType TEnumSchemaItem<EnumType>::validate(const SmartObject& Object) {
-  rpc::ValidationReport report("RPC");
-  return validate(Object, &report);
 }
 
 template <typename EnumType>

@@ -671,14 +671,6 @@ class SmartObject FINAL {
   bool isValid() const;
 
   /**
-   * @deprecated
-   * @brief Validates object according to attached schema.
-   *
-   * @return Result of validation.
-   */
-  DEPRECATED Errors::eType validate();
-
-  /**
    * @brief Validates object according to attached schema.
    *
    * @param report__ object for reporting errors during validation

@@ -52,19 +52,6 @@ class ProtocolHandlerImpl;
  */
 class HandshakeHandler : public security_manager::SecurityManagerListener {
  public:
-  DEPRECATED HandshakeHandler(ProtocolHandlerImpl& protocol_handler,
-                              SessionObserver& session_observer,
-                              uint32_t connection_key,
-                              ConnectionID connection_id,
-                              uint8_t session_id,
-                              uint8_t protocol_version,
-                              uint32_t hash_id,
-                              ServiceType service_type,
-                              const std::vector<int>& force_protected_service,
-                              const bool is_new_service,
-                              utils::SemanticVersion& full_version,
-                              std::shared_ptr<BsonObject> payload);
-
   HandshakeHandler(ProtocolHandlerImpl& protocol_handler,
                    SessionObserver& session_observer,
                    utils::SemanticVersion& full_version,

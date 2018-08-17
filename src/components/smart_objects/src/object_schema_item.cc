@@ -104,11 +104,6 @@ std::shared_ptr<CObjectSchemaItem> CObjectSchemaItem::create(
   return std::shared_ptr<CObjectSchemaItem>(new CObjectSchemaItem(members));
 }
 
-Errors::eType CObjectSchemaItem::validate(const SmartObject& object) {
-  rpc::ValidationReport report("RPC");
-  return validate(object, &report);
-}
-
 Errors::eType CObjectSchemaItem::validate(
     const SmartObject& object,
     rpc::ValidationReport* report__,

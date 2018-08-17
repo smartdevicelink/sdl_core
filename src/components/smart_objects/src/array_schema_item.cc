@@ -42,11 +42,6 @@ std::shared_ptr<CArraySchemaItem> CArraySchemaItem::create(
       new CArraySchemaItem(ElementSchemaItem, MinSize, MaxSize));
 }
 
-Errors::eType CArraySchemaItem::validate(const SmartObject& Object) {
-  rpc::ValidationReport report("RPC");
-  return validate(Object, &report);
-}
-
 Errors::eType CArraySchemaItem::validate(
     const SmartObject& Object,
     rpc::ValidationReport* report__,

@@ -60,14 +60,10 @@ class TransportAdapterListener;
 /**
  * @brief The DeviceType enum defines types based on available transport
  * adapters
- * @deprecated PASA_AOA, PASA_BLUETOOTH, MME
  */
 enum DeviceType {
   AOA,
-  PASA_AOA,
   BLUETOOTH,
-  PASA_BLUETOOTH,
-  MME,
   IOS_BT,
   IOS_USB,
   TCP,

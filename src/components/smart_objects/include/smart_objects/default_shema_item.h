@@ -49,14 +49,6 @@ class CDefaultSchemaItem : public ISchemaItem {
  public:
   typedef TSchemaItemParameter<Type> ParameterType;
   /**
-   * @deprecated
-   * @brief Validate smart object.
-   * @param Object Object to validate.
-   * @return Errors::ERROR
-   **/
-  Errors::eType validate(const SmartObject& Object) OVERRIDE;
-
-  /**
    * @brief Validate smart object.
    * @param Object Object to validate.
    * @param report__ object for reporting errors during validation
@@ -108,12 +100,6 @@ class CDefaultSchemaItem : public ISchemaItem {
 template <typename Type>
 CDefaultSchemaItem<Type>::CDefaultSchemaItem(const ParameterType& DefaultValue)
     : mDefaultValue(DefaultValue) {}
-
-template <typename Type>
-Errors::eType CDefaultSchemaItem<Type>::validate(const SmartObject& Object) {
-  rpc::ValidationReport report("RPC");
-  return validate(Object, &report);
-}
 
 template <typename Type>
 Errors::eType CDefaultSchemaItem<Type>::validate(

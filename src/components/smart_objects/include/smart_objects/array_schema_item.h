@@ -64,17 +64,6 @@ class CArraySchemaItem : public ISchemaItem {
           TSchemaItemParameter<size_t>());
 
   /**
-   * @deprecated
-   *
-   * @brief Validate smart object.
-   *
-   * @param Object Object to validate.
-   *
-   * @return NsSmartObjects::Errors::eType
-   **/
-  Errors::eType validate(const SmartObject& Object) OVERRIDE;
-
-  /**
    * @brief Validate smart object.
    * @param Object Object to validate.
    * @param report__ object for reporting errors during validation

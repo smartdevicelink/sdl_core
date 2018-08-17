@@ -46,11 +46,6 @@ std::shared_ptr<CStringSchemaItem> CStringSchemaItem::create(
       new CStringSchemaItem(MinLength, MaxLength, DefaultValue));
 }
 
-Errors::eType CStringSchemaItem::validate(const SmartObject& Object) {
-  rpc::ValidationReport report("RPC");
-  return validate(Object, &report);
-}
-
 Errors::eType CStringSchemaItem::validate(
     const SmartObject& Object,
     rpc::ValidationReport* report__,
