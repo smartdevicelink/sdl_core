@@ -3034,14 +3034,20 @@
         </param>
         <param name="rdsData" type="RdsData" mandatory="false">
         </param>
-        <param name="hdRadioEnable" type="Boolean" mandatory="false">
+        <param name="hdRadioEnable" type="Boolean" mandatory="false"  since="5.0">
             <description> True if the hd radio is on, false is the radio is off</description>
         </param>
-        <param name="availableHDs" type="Integer" minvalue="1" maxvalue="7" mandatory="false">
+        <param name="availableHDs" type="Integer" minvalue="1" maxvalue="7" mandatory="false" since="5.0">
             <description>number of HD sub-channels if available</description>
+            <history>
+                <param name="availableHDs" type="Integer" minvalue="1" maxvalue="3" mandatory="false" since="4.5" until="5.0"></param>
+            </history>
         </param>
-        <param name="hdChannel" type="Integer" minvalue="1" maxvalue="7" mandatory="false">
+        <param name="hdChannel" type="Integer" minvalue="1" maxvalue="7" mandatory="false" since="5.0">
             <description>Current HD sub-channel if available</description>
+            <history>
+                <param name="hdChannel" type="Integer" minvalue="1" maxvalue="3" mandatory="false" since="4.5" until="5.0"> </param>
+            </history>
         </param>
         <param name="signalStrength" type="Integer" minvalue="0" maxvalue="100" mandatory="false">
         </param>
