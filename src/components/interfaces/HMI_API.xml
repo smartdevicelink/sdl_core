@@ -985,8 +985,13 @@
   </element>
   <element name="MOBILE_APP">
   </element>
-  <element name="RADIO_TUNER">
-    <description>Radio may be on AM, FM or XM</description>
+  <element name="AM">
+  </element>
+  <element name="FM">
+  </element>
+  <element name="XM">
+  </element>
+  <element name="DAB">
   </element>
 </enum>
 
