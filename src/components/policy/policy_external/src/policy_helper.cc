@@ -620,7 +620,6 @@ void FillNotificationData::UpdateParameters(
   ParametersConstItr it_parameters = in_parameters.begin();
   ParametersConstItr it_parameters_end = in_parameters.end();
 
-  // From AppLink Policies Manager specification:
   // To determine consent for a particular RPC in a particular HMI level with
   // particular parameters (if applicable), the system shall find all of the
   // functional groups the RPC is included in. If user consent is needed as
