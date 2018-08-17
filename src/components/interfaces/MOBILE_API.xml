@@ -3040,13 +3040,13 @@
         <param name="availableHDs" type="Integer" minvalue="1" maxvalue="7" mandatory="false" since="5.0">
             <description>number of HD sub-channels if available</description>
             <history>
-                <param name="availableHDs" type="Integer" minvalue="1" maxvalue="3" mandatory="false" since="4.5" until="5.0"></param>
+                <param name="availableHDs" type="Integer" minvalue="1" maxvalue="3" mandatory="false" since="4.5" until="5.0"/>
             </history>
         </param>
         <param name="hdChannel" type="Integer" minvalue="1" maxvalue="7" mandatory="false" since="5.0">
             <description>Current HD sub-channel if available</description>
             <history>
-                <param name="hdChannel" type="Integer" minvalue="1" maxvalue="3" mandatory="false" since="4.5" until="5.0"> </param>
+                <param name="hdChannel" type="Integer" minvalue="1" maxvalue="3" mandatory="false" since="4.5" until="5.0"/>
             </history>
         </param>
         <param name="signalStrength" type="Integer" minvalue="0" maxvalue="100" mandatory="false">
