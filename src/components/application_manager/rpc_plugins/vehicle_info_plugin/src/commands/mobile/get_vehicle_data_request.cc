@@ -114,6 +114,8 @@ void GetVehicleDataRequest::on_event(const event_engine::Event& event) {
       hmi_apis::Common_Result::eType result_code =
           static_cast<hmi_apis::Common_Result::eType>(
               message[strings::params][hmi_response::code].asInt());
+      mobile_apis::Result::eType mobile_result_code =
+          GetMobileResultCode(result_code);
       bool result = PrepareResultForMobileResponse(
           result_code, HmiInterfaces::HMI_INTERFACE_VehicleInfo);
       std::string response_info;
@@ -130,7 +132,7 @@ void GetVehicleDataRequest::on_event(const event_engine::Event& event) {
         response_info = message[strings::params][strings::error_msg].asString();
       }
       SendResponse(result,
-                   MessageHelper::HMIToMobileResult(result_code),
+                   mobile_result_code,
                    response_info.empty() ? NULL : response_info.c_str(),
                    &(message[strings::msg_params]));
       break;

@@ -188,7 +188,8 @@ ResponseInfo::ResponseInfo(const hmi_apis::Common_Result::eType result,
       hmi_apis::Common_Result::WARNINGS,
       hmi_apis::Common_Result::WRONG_LANGUAGE,
       hmi_apis::Common_Result::RETRY,
-      hmi_apis::Common_Result::SAVED);
+      hmi_apis::Common_Result::SAVED,
+      hmi_apis::Common_Result::DATA_NOT_AVAILABLE);
 
   is_not_used = hmi_apis::Common_Result::INVALID_ENUM == result_code;
 
@@ -482,6 +483,7 @@ void CommandRequestImpl::CreateHMINotification(
 mobile_apis::Result::eType CommandRequestImpl::GetMobileResultCode(
     const hmi_apis::Common_Result::eType& hmi_code) const {
   mobile_apis::Result::eType mobile_result = mobile_apis::Result::GENERIC_ERROR;
+
   switch (hmi_code) {
     case hmi_apis::Common_Result::SUCCESS: {
       mobile_result = mobile_apis::Result::SUCCESS;
@@ -822,7 +824,8 @@ bool CommandRequestImpl::PrepareResultForMobileResponse(
           hmi_apis::Common_Result::WARNINGS,
           hmi_apis::Common_Result::WRONG_LANGUAGE,
           hmi_apis::Common_Result::RETRY,
-          hmi_apis::Common_Result::SAVED)) {
+          hmi_apis::Common_Result::SAVED,
+          hmi_apis::Common_Result::DATA_NOT_AVAILABLE)) {
     return true;
   }
 
