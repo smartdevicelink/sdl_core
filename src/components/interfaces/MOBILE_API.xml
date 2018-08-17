@@ -3039,11 +3039,20 @@
         </param>
         <param name="rdsData" type="RdsData" mandatory="false">
         </param>
-        <param name="availableHDs" type="Integer" minvalue="1" maxvalue="3" mandatory="false">
-            <description>number of HD sub-channels if available</description>
+        <param name="hdRadioEnable" type="Boolean" mandatory="false"  since="5.0">
+            <description> True if the hd radio is on, false is the radio is off</description>
         </param>
-        <param name="hdChannel" type="Integer" minvalue="1" maxvalue="3" mandatory="false">
+        <param name="availableHDs" type="Integer" minvalue="1" maxvalue="7" mandatory="false" since="5.0">
+            <description>number of HD sub-channels if available</description>
+            <history>
+                <param name="availableHDs" type="Integer" minvalue="1" maxvalue="3" mandatory="false" since="4.5" until="5.0"/>
+            </history>
+        </param>
+        <param name="hdChannel" type="Integer" minvalue="1" maxvalue="7" mandatory="false" since="5.0">
             <description>Current HD sub-channel if available</description>
+            <history>
+                <param name="hdChannel" type="Integer" minvalue="1" maxvalue="3" mandatory="false" since="4.5" until="5.0"/>
+            </history>
         </param>
         <param name="signalStrength" type="Integer" minvalue="0" maxvalue="100" mandatory="false">
         </param>
@@ -3161,6 +3170,18 @@
         <param name="sisDataAvailable" type="Boolean" mandatory="false" since="5.0">
             <description>
                 Availability of the getting HD radio Station Information Service (SIS) data.
+                True: Available, False: Not Available, Not present: Not Available.
+            </description>
+        </param>
+        <param name="hdRadioEnableAvailable" type="Boolean" mandatory="false" since="5.0">
+            <description>
+                Availability of the control of enable/disable HD radio.
+                True: Available, False: Not Available, Not present: Not Available.
+            </description>
+        </param>
+        <param name="siriusxmRadioAvailable" type="Boolean" mandatory="false" since="5.0">
+            <description>
+                Availability of sirius XM radio.
                 True: Available, False: Not Available, Not present: Not Available.
             </description>
         </param>

@@ -464,6 +464,8 @@
                         "rdsDataAvailable": true,
                         "signalChangeThresholdAvailable": true,
                         "signalStrengthAvailable": true,
+                        "hdRadioEnableAvailable" : true,
+                        "siriusxmRadioAvailable" : true,
                         "sisDataAvailable":true,
                         "stateAvailable": true
                     }
@@ -702,7 +704,6 @@
                                  "rgbColorSpaceAvailable":true
                               }
                         ]
-
                 },
                 "hmiSettingsControlCapabilities": {
                         "moduleName": "hmiSettings",
