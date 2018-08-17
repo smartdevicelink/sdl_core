@@ -227,6 +227,9 @@ bool CheckControlDataByCapabilities(
   auto it = control_data.map_begin();
   for (; it != control_data.map_end(); ++it) {
     const std::string& request_parameter = it->first;
+    if (message_params::kId == request_parameter) {
+      continue;
+    }
     if (message_params::kLightState == request_parameter) {
       auto light_data = control_data[request_parameter].asArray()->begin();
       for (; light_data != control_data[request_parameter].asArray()->end();
