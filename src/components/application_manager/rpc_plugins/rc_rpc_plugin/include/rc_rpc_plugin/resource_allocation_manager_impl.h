@@ -190,7 +190,6 @@ class ResourceAllocationManagerImpl : public ResourceAllocationManager {
    */
   void SetResourceFree(const std::string& module_type, const uint32_t app_id);
 
-  std::vector<std::string> all_supported_modules();
   /**
    * @brief AllocatedResources contains link between resource and application
    * owning that resource

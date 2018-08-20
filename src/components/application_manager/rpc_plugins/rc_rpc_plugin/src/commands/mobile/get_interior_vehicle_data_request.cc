@@ -57,17 +57,12 @@ bool CheckIfModuleTypeExistInCapabilities(
     const smart_objects::SmartObject& rc_capabilities,
     const std::string& module_type) {
   LOG4CXX_AUTO_TRACE(logger_);
-  const std::map<std::string, std::string> params = {
-      {enums_value::kRadio, strings::kradioControlCapabilities},
-      {enums_value::kClimate, strings::kclimateControlCapabilities},
-      {enums_value::kAudio, strings::kaudioControlCapabilities},
-      {enums_value::kLight, strings::klightControlCapabilities},
-      {enums_value::kSeat, strings::kseatControlCapabilities},
-      {enums_value::kHmiSettings, strings::khmiSettingsControlCapabilities}};
+  const auto& mapping = RCHelpers::GetModuleTypeToCapabilitiesMapping();
+  const auto& module_list = RCHelpers::GetModulesList();
   bool is_module_type_valid = false;
-  for (const auto& param : params) {
-    if (param.first == module_type) {
-      if (rc_capabilities.keyExists(param.second)) {
+  for (const auto& module : module_list) {
+    if (module == module_type) {
+      if (rc_capabilities.keyExists(mapping(module))) {
         is_module_type_valid = true;
         break;
       }

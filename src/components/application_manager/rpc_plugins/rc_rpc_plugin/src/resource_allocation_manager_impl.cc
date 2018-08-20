@@ -238,7 +238,7 @@ ResourceAllocationManagerImpl::CreateOnRCStatusNotificationToMobile(
   if (is_rc_enabled()) {
     ConstructOnRCStatusNotificationParams(msg_params,
                                           allocated_resources_,
-                                          all_supported_modules(),
+                                          RCHelpers::GetModulesList(),
                                           app->app_id());
   } else {
     msg_params[message_params::kAllocatedModules] =
@@ -257,8 +257,10 @@ ResourceAllocationManagerImpl::CreateOnRCStatusNotificationToHmi(
   auto msg_to_hmi =
       MessageHelper::CreateHMINotification(hmi_apis::FunctionID::RC_OnRCStatus);
   auto& msg_params = (*msg_to_hmi)[application_manager::strings::msg_params];
-  ConstructOnRCStatusNotificationParams(
-      msg_params, allocated_resources_, all_supported_modules(), app->app_id());
+  ConstructOnRCStatusNotificationParams(msg_params,
+                                        allocated_resources_,
+                                        RCHelpers::GetModulesList(),
+                                        app->app_id());
   msg_params[application_manager::strings::app_id] = app->hmi_app_id();
   return msg_to_hmi;
 }
@@ -324,18 +326,6 @@ void ResourceAllocationManagerImpl::SetResourceFree(
   }
   allocated_resources_.erase(allocation);
   LOG4CXX_DEBUG(logger_, "Resource " << module_type << " is released.");
-}
-
-std::vector<std::string>
-ResourceAllocationManagerImpl::all_supported_modules() {
-  std::vector<std::string> result;
-  result.push_back(enums_value::kClimate);
-  result.push_back(enums_value::kRadio);
-  result.push_back(enums_value::kSeat);
-  result.push_back(enums_value::kAudio);
-  result.push_back(enums_value::kLight);
-  result.push_back(enums_value::kHmiSettings);
-  return result;
 }
 
 std::vector<std::string> ResourceAllocationManagerImpl::GetAcquiredResources(

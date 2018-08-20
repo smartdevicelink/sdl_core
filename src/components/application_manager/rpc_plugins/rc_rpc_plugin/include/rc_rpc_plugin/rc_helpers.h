@@ -57,6 +57,20 @@ class RCHelpers {
   GetModuleTypeToDataMapping();
 
   /**
+  * @brief GetModuleTypeToDataMapping get mapping of module type enum naming to
+  * actual module capabilities key
+  * @return module mapping from enum naming to capabilities key
+  */
+  static const std::function<std::string(const std::string& module_type)>
+  GetModuleTypeToCapabilitiesMapping();
+
+  /**
+   * @brief GetModulesList get list of all known modules
+   * @return vector contains all known modules
+   */
+  static const std::vector<std::string> GetModulesList();
+
+  /**
    * @brief GetRCExtension extract RC extension from application
    * @param app application to extract extension
    * @return rc extension of app is rc applicaiton, otherwise return emty shared

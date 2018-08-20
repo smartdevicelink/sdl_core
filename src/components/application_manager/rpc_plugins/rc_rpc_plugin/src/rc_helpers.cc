@@ -12,17 +12,47 @@ const std::function<std::string(const std::string& module_type)>
 RCHelpers::GetModuleTypeToDataMapping() {
   auto mapping_lambda = [](const std::string& module_type) -> std::string {
     static std::map<std::string, std::string> mapping = {
-        {enums_value::kRadio, message_params::kRadioControlData},
         {enums_value::kClimate, message_params::kClimateControlData},
-        {enums_value::kSeat, message_params::kSeatControlData}};
+        {enums_value::kRadio, message_params::kRadioControlData},
+        {enums_value::kSeat, message_params::kSeatControlData},
+        {enums_value::kAudio, message_params::kAudioControlData},
+        {enums_value::kLight, message_params::kLightControlData},
+        {enums_value::kHmiSettings, message_params::kHmiSettingsControlData}};
     auto it = mapping.find(module_type);
     if (mapping.end() == it) {
+      LOG4CXX_ERROR(logger_, "Unknown module type" << module_type);
       return std::string();
     }
     return it->second;
   };
 
   return mapping_lambda;
+}
+
+const std::function<std::string(const std::string& module_type)>
+RCHelpers::GetModuleTypeToCapabilitiesMapping() {
+  auto mapping_lambda = [](const std::string& module_type) -> std::string {
+    static std::map<std::string, std::string> mapping = {
+        {enums_value::kClimate, strings::kclimateControlCapabilities},
+        {enums_value::kRadio, strings::kradioControlCapabilities},
+        {enums_value::kSeat, strings::kseatControlCapabilities},
+        {enums_value::kAudio, strings::kaudioControlCapabilities},
+        {enums_value::kLight, strings::klightControlCapabilities},
+        {enums_value::kHmiSettings, strings::khmiSettingsControlCapabilities}};
+    auto it = mapping.find(module_type);
+    if (mapping.end() == it) {
+      LOG4CXX_ERROR(logger_, "Unknown module type" << module_type);
+      return std::string();
+    }
+    return it->second;
+  };
+
+  return mapping_lambda;
+}
+
+const std::vector<std::string> RCHelpers::GetModulesList() {
+  using namespace enums_value;
+  return {kClimate, kRadio, kSeat, kAudio, kLight, kHmiSettings};
 }
 
 RCAppExtensionPtr RCHelpers::GetRCExtension(
