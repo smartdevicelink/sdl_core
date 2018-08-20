@@ -306,6 +306,25 @@ class MockMessageHelper {
                     ApplicationSharedPtr application,
                     ApplicationManager& app_mngr));
 
+  MOCK_METHOD2(CreateUIResetGlobalPropertiesRequest,
+               smart_objects::SmartObjectSPtr(
+                   const ResetGlobalPropertiesResult& reset_result,
+                   ApplicationSharedPtr application));
+
+  MOCK_METHOD2(CreateTTSResetGlobalPropertiesRequest,
+               smart_objects::SmartObjectSPtr(
+                   const ResetGlobalPropertiesResult& reset_result,
+                   ApplicationSharedPtr application));
+  MOCK_METHOD2(CreateGlobalPropertiesRequestsToHMI,
+               smart_objects::SmartObjectList(ApplicationConstSharedPtr app,
+                                              const uint32_t correlation_id));
+
+  MOCK_METHOD4(SendOnButtonSubscriptionNotification,
+               void(uint32_t app_id,
+                    hmi_apis::Common_ButtonName::eType button,
+                    bool is_subscribed,
+                    ApplicationManager& app_mngr));
+
   static MockMessageHelper* message_helper_mock();
 };
 

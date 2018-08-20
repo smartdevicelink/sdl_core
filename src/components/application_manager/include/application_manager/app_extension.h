@@ -49,7 +49,7 @@ using Subscriber = std::function<void(const int32_t, const ResumptionRequest)>;
 }  // namespace resumption
 
 namespace application_manager {
-    
+
 typedef int AppExtensionUID;
 
 class AppExtension {
