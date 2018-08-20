@@ -68,13 +68,20 @@ void OnVehicleDataNotification::Run() {
   std::vector<smart_objects::SmartObject> appSO;
 
   const VehicleData& vehicle_data = MessageHelper::vehicle_data();
+  const smart_objects::SmartObject& incoming_msg_params =
+      (*message_)[strings::msg_params];
   VehicleData::const_iterator it = vehicle_data.begin();
 
   for (; vehicle_data.end() != it; ++it) {
-    if (true == (*message_)[strings::msg_params].keyExists(it->first)) {
+    const std::string& key = it->first;
+    if (incoming_msg_params.keyExists(key)) {
+      if (strings::gps == key && incoming_msg_params[key].empty()) {
+        LOG4CXX_ERROR(logger_, "Invalid response received from system");
+        continue;
+      }
+
       LOG4CXX_ERROR(logger_, "vehicle_data nanme" << it->first);
-      auto vehicle_data_value =
-          (*message_)[strings::msg_params][it->first].asInt();
+      auto vehicle_data_value = incoming_msg_params[key].asInt();
 
       application_manager_.IviInfoUpdated(it->second, vehicle_data_value);
 
@@ -104,12 +111,12 @@ void OnVehicleDataNotification::Run() {
           appNotification.push_back(app);
           smart_objects::SmartObject msg_param =
               smart_objects::SmartObject(smart_objects::SmartType_Map);
-          msg_param[it->first] = (*message_)[strings::msg_params][it->first];
+          msg_param[key] = incoming_msg_params[key];
           appSO.push_back(msg_param);
         } else {
           size_t idx =
               std::distance(appNotification.begin(), appNotification_it);
-          appSO[idx][it->first] = (*message_)[strings::msg_params][it->first];
+          appSO[idx][key] = incoming_msg_params[key];
         }
       }
     }
