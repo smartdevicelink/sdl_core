@@ -1949,7 +1949,7 @@ bool ApplicationManagerImpl::Stop() {
   application_list_update_timer_.Stop();
   try {
     SetUnregisterAllApplicationsReason(
-      mobile_api::AppInterfaceUnregisteredReason::IGNITION_OFF);
+        mobile_api::AppInterfaceUnregisteredReason::IGNITION_OFF);
     UnregisterAllApplications();
   } catch (...) {
     LOG4CXX_ERROR(logger_,
@@ -2633,11 +2633,16 @@ void ApplicationManagerImpl::UnregisterApplication(
           logger_, "There is no more SDL4 apps with device handle: " << handle);
 
       RemoveAppsWaitingForRegistration(handle);
+    }
+
+    commands_holder_->Clear(app_to_remove);
+    MessageHelper::SendOnAppUnregNotificationToHMI(
+        app_to_remove, is_unexpected_disconnect, *this);
+
+    if (!app) {
       SendUpdateAppList();
     }
   }
-
-  commands_holder_->Clear(app_to_remove);
 
   if (EndAudioPassThru(app_id)) {
     // May be better to put this code in MessageHelper?
@@ -2649,11 +2654,10 @@ void ApplicationManagerImpl::UnregisterApplication(
         plugin.OnApplicationEvent(plugin_manager::kApplicationUnregistered,
                                   app_to_remove);
       };
-  plugin_manager_->ForEachPlugin(on_app_unregistered);
 
-  MessageHelper::SendOnAppUnregNotificationToHMI(
-      app_to_remove, is_unexpected_disconnect, *this);
+  plugin_manager_->ForEachPlugin(on_app_unregistered);
   request_ctrl_.terminateAppRequests(app_id);
+
   return;
 }
 
