@@ -133,6 +133,12 @@ class ResumptionDataJson : public ResumptionData {
    */
   virtual uint32_t GetIgnOffTime() const;
 
+  void IncrementGlobalIgnOnCounter() OVERRIDE;
+
+  uint32_t GetGlobalIgnOnCounter() const OVERRIDE;
+
+  void ResetGlobalIgnOnCount() OVERRIDE;
+
   /**
    * @brief Checks if saved data have application
    * @param policy_app_id - mobile application id

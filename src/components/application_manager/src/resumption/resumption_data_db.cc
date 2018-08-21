@@ -163,11 +163,10 @@ void ResumptionDataDB::SaveApplication(
   }
 
   if (application->is_application_data_changed()) {
-    if (application_exist) {
-      if (!DeleteSavedApplication(policy_app_id, device_mac)) {
-        LOG4CXX_ERROR(logger_, "Deleting of application data is not finished");
-        return;
-      }
+    if (application_exist &&
+        !DeleteSavedApplication(policy_app_id, device_mac)) {
+      LOG4CXX_ERROR(logger_, "Deleting of application data is not finished");
+      return;
     }
 
     if (!SaveApplicationToDB(application, policy_app_id, device_mac)) {
@@ -176,23 +175,15 @@ void ResumptionDataDB::SaveApplication(
     }
     LOG4CXX_INFO(logger_, "All data from application were saved successfully");
     application->set_is_application_data_changed(false);
-  } else {
-    if (application_exist) {
-      if (!UpdateApplicationData(application, policy_app_id, device_mac)) {
-        LOG4CXX_ERROR(logger_, "Updating application data is failed");
-        return;
-      }
-      LOG4CXX_INFO(logger_, "Application data were updated successfully");
-    } else {
-      if (Compare<HMILevel::eType, EQ, ONE>(application->hmi_level(),
-                                            HMILevel::HMI_FULL,
-                                            HMILevel::HMI_LIMITED)) {
-        if (!InsertApplicationData(application, policy_app_id, device_mac)) {
-          LOG4CXX_ERROR(logger_, "Saving data of application is failed");
-          return;
-        }
-      }
+  } else if (application_exist) {
+    if (!UpdateApplicationData(application, policy_app_id, device_mac)) {
+      LOG4CXX_ERROR(logger_, "Updating application data is failed");
+      return;
     }
+    LOG4CXX_INFO(logger_, "Application data were updated successfully");
+  } else if (!InsertApplicationData(application, policy_app_id, device_mac)) {
+    LOG4CXX_ERROR(logger_, "Saving data of application is failed");
+    return;
   }
   WriteDb();
 }
@@ -238,7 +229,7 @@ void ResumptionDataDB::IncrementIgnOffCount() {
     }
   }
 
-  if (query_update_last_ign_off_time.Prepare(KUpdateLastIgnOffTime)) {
+  if (query_update_last_ign_off_time.Prepare(kUpdateLastIgnOffTime)) {
     query_update_last_ign_off_time.Bind(0, static_cast<int64_t>(time(NULL)));
     if (query_update_last_ign_off_time.Exec()) {
       LOG4CXX_INFO(logger_, "Data last_ign_off_time was updated");
@@ -372,8 +363,59 @@ bool ResumptionDataDB::RemoveApplicationFromSaved(
 
 uint32_t ResumptionDataDB::GetIgnOffTime() const {
   LOG4CXX_AUTO_TRACE(logger_);
-
   return SelectIgnOffTime();
+}
+
+uint32_t ResumptionDataDB::GetGlobalIgnOnCounter() const {
+  LOG4CXX_AUTO_TRACE(logger_);
+  sync_primitives::AutoLock autolock(resumption_lock_);
+
+  utils::dbms::SQLQuery query(db());
+  if (!query.Prepare(kSelectGlobalIgnOnCounter)) {
+    LOG4CXX_ERROR(logger_,
+                  "Problem with prepare query : " << kSelectGlobalIgnOnCounter);
+    return 1;
+  }
+
+  if (!query.Exec()) {
+    LOG4CXX_ERROR(logger_,
+                  "Problem with exec query : " << kSelectGlobalIgnOnCounter);
+    return 1;
+  }
+
+  const auto global_ign_on_counter = query.GetUInteger(0);
+  LOG4CXX_DEBUG(logger_, "Global Ign On Counter = " << global_ign_on_counter);
+  return global_ign_on_counter;
+}
+
+void ResumptionDataDB::IncrementGlobalIgnOnCounter() {
+  LOG4CXX_AUTO_TRACE(logger_);
+  sync_primitives::AutoLock autolock(resumption_lock_);
+
+  db_->BeginTransaction();
+  utils::dbms::SQLQuery query_update_global_ign_on_count(db());
+  if (query_update_global_ign_on_count.Prepare(kUpdateGlobalIgnOnCount)) {
+    if (query_update_global_ign_on_count.Exec()) {
+      LOG4CXX_DEBUG(logger_,
+                    "Data query_update_global_ign_on_count was updated");
+    }
+  }
+  db_->CommitTransaction();
+  WriteDb();
+}
+
+void ResumptionDataDB::ResetGlobalIgnOnCount() {
+  LOG4CXX_AUTO_TRACE(logger_);
+  sync_primitives::AutoLock autolock(resumption_lock_);
+
+  LOG4CXX_DEBUG(logger_, "Global IGN ON counter resetting");
+
+  utils::dbms::SQLQuery query_update_global_ign_on_count(db());
+  if (query_update_global_ign_on_count.Prepare(kResetGlobalIgnOnCount)) {
+    if (query_update_global_ign_on_count.Exec()) {
+      LOG4CXX_DEBUG(logger_, "Data was updated");
+    }
+  }
 }
 
 ssize_t ResumptionDataDB::IsApplicationSaved(
@@ -553,7 +595,6 @@ void ResumptionDataDB::SelectDataForLoadResumeData(
   using namespace app_mngr;
   using namespace smart_objects;
   LOG4CXX_AUTO_TRACE(logger_);
-
   utils::dbms::SQLQuery select_data(db());
   utils::dbms::SQLQuery count_application(db());
   if (!select_data.Prepare(kSelectDataForLoadResumeData) ||

@@ -123,7 +123,7 @@ class ResumptionDataDBTest : public ResumptionDataTest {
 
   void SetZeroIgnOffTime() {
     utils::dbms::SQLQuery query(test_db());
-    EXPECT_TRUE(query.Prepare(KUpdateLastIgnOffTime));
+    EXPECT_TRUE(query.Prepare(kUpdateLastIgnOffTime));
     query.Bind(0, 0);
     EXPECT_TRUE(query.Exec());
   }

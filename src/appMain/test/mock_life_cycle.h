@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2014, Ford Motor Company
+* Copyright (c) 2018, Ford Motor Company
 * All rights reserved.
 *
 * Redistribution and use in source and binary forms, with or without
@@ -30,11 +30,25 @@
 * POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include "appMain/signal_handlers.h"
+#ifndef SRC_APPMAIN_TEST_MOCK_LIFE_CYCLE_H_
+#define SRC_APPMAIN_TEST_MOCK_LIFE_CYCLE_H_
+
 #include "appMain/life_cycle.h"
-#include "utils/logger.h"
+#include "gmock/gmock.h"
 
 namespace main_namespace {
-CREATE_LOGGERPTR_GLOBAL(logger_, "SDLMain")
+
+class MockLifeCycle : public LifeCycle {
+ public:
+  MOCK_METHOD0(StartComponents, bool());
+  MOCK_METHOD0(InitMessageSystem, bool());
+  MOCK_METHOD0(Run, void());
+  MOCK_METHOD0(StopComponents, void());
+  MOCK_METHOD0(LowVoltage, void());
+  MOCK_METHOD0(WakeUp, void());
+  MOCK_METHOD0(IgnitionOff, void());
+};
 
 }  // namespace main_namespace
+
+#endif  // SRC_APPMAIN_TEST_MOCK_LIFE_CYCLE_H_

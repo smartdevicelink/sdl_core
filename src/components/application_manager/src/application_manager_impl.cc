@@ -178,7 +178,7 @@ ApplicationManagerImpl::ApplicationManagerImpl(
     , is_low_voltage_(false)
     , apps_size_(0)
     , is_stopping_(false) {
-  std::srand(std::time(0));
+  std::srand(std::time(nullptr));
   AddPolicyObserver(this);
 
   dir_type_to_string_map_ = {{TYPE_STORAGE, "Storage"},
@@ -405,6 +405,7 @@ void ApplicationManagerImpl::OnApplicationSwitched(ApplicationSharedPtr app) {
 
 bool ApplicationManagerImpl::IsAppTypeExistsInFullOrLimited(
     ApplicationConstSharedPtr app) const {
+  LOG4CXX_AUTO_TRACE(logger_);
   bool voice_state = app->is_voice_communication_supported();
   bool media_state = app->is_media_application();
   bool navi_state = app->is_navi();
@@ -2237,7 +2238,10 @@ void ApplicationManagerImpl::ClearAppsPersistentData() {
 
 void ApplicationManagerImpl::SendOnSDLClose() {
   LOG4CXX_AUTO_TRACE(logger_);
-
+  if (IsLowVoltage()) {
+    LOG4CXX_TRACE(logger_, "SDL is in Low Voltage State");
+    return;
+  }
   // must be sent to PASA HMI on shutdown synchronously
   smart_objects::SmartObjectSPtr msg =
       std::make_shared<smart_objects::SmartObject>(
@@ -2427,11 +2431,13 @@ void ApplicationManagerImpl::UnregisterApplication(
 
       return;
     }
+
     if (is_resuming) {
       resume_controller().SaveApplication(app_to_remove);
     } else {
       resume_controller().RemoveApplicationFromSaved(app_to_remove);
     }
+
     (hmi_capabilities_->get_hmi_language_handler())
         .OnUnregisterApplication(app_id);
     AppV4DevicePredicate finder(handle);
@@ -2535,12 +2541,22 @@ bool ApplicationManagerImpl::is_audio_pass_thru_active() const {
 void ApplicationManagerImpl::OnLowVoltage() {
   LOG4CXX_AUTO_TRACE(logger_);
   is_low_voltage_ = true;
+  resume_ctrl_->SaveLowVoltageTime();
+  resume_ctrl_->StopSavePersistentDataTimer();
   request_ctrl_.OnLowVoltage();
 }
 
-bool ApplicationManagerImpl::IsLowVoltage() {
-  LOG4CXX_TRACE(logger_, "result: " << is_low_voltage_);
+bool ApplicationManagerImpl::IsLowVoltage() const {
+  LOG4CXX_TRACE(logger_, "Result: " << is_low_voltage_);
   return is_low_voltage_;
+}
+
+void ApplicationManagerImpl::OnWakeUp() {
+  LOG4CXX_AUTO_TRACE(logger_);
+  is_low_voltage_ = false;
+  resume_ctrl_->SaveWakeUpTime();
+  resume_ctrl_->StartSavePersistentDataTimer();
+  request_ctrl_.OnWakeUp();
 }
 
 std::string ApplicationManagerImpl::GetHashedAppID(
@@ -2959,12 +2975,6 @@ bool ApplicationManagerImpl::IsAppInReconnectMode(
 policy::DeviceConsent ApplicationManagerImpl::GetUserConsentForDevice(
     const std::string& device_id) const {
   return GetPolicyHandler().GetUserConsentForDevice(device_id);
-}
-
-void ApplicationManagerImpl::OnWakeUp() {
-  LOG4CXX_AUTO_TRACE(logger_);
-  is_low_voltage_ = false;
-  request_ctrl_.OnWakeUp();
 }
 
 mobile_apis::Result::eType ApplicationManagerImpl::SaveBinary(

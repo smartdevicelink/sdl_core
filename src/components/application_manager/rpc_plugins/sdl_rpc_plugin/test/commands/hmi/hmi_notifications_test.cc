@@ -872,7 +872,7 @@ TEST_F(HMICommandsNotificationsTest,
 
   SubscribeForSignal();
   command->Run();
-  utils::WaitTerminationSignals(sig_handler);
+  utils::Signals::WaitTerminationSignals(sig_handler);
 
   EXPECT_EQ(am::mobile_api::AppInterfaceUnregisteredReason::IGNITION_OFF,
             mob_reason);
@@ -914,7 +914,7 @@ TEST_F(HMICommandsNotificationsTest,
 
     SubscribeForSignal();
     command->Run();
-    utils::WaitTerminationSignals(sig_handler);
+    utils::Signals::WaitTerminationSignals(sig_handler);
 #endif
   }
 }
