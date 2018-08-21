@@ -322,11 +322,11 @@ void RegisterAppInterfaceRequest::Run() {
   }
 
   // Version negotiation
-  utils::SemanticVersion ver_4_5(4,5,0);
+  utils::SemanticVersion ver_4_5(4, 5, 0);
   utils::SemanticVersion module_version(
       major_version, minor_version, patch_version);
   if (mobile_version <= ver_4_5) {
-    // Mobile versioning did not exist for 
+    // Mobile versioning did not exist for
     // versions 4.5 and prior.
     application->set_msg_version(ver_4_5);
   } else if (mobile_version < module_version) {
