@@ -110,7 +110,9 @@ class ApplicationManagerImplTest : public ::testing::Test {
             application_manager::MockMessageHelper::message_helper_mock())
 
   {
+#ifdef ENABLE_LOG
     logger::create_log_message_loop_thread();
+#endif
     Mock::VerifyAndClearExpectations(mock_message_helper_);
   }
   ~ApplicationManagerImplTest() {

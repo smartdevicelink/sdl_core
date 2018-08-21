@@ -86,6 +86,7 @@ app_mngr::CommandSharedPtr VehicleInfoMobileCommandFactory::CreateCommand(
     message_type_str = "notification";
   }
 
+  UNUSED(message_type_str);
   LOG4CXX_DEBUG(logger_,
                 "HMICommandFactory::CreateCommand function_id: "
                     << function_id << ", message type: " << message_type_str);
