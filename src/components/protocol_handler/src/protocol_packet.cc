@@ -48,6 +48,30 @@ namespace protocol_handler {
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "ProtocolHandler")
 
+namespace {
+std::string StringifyFrameType(uint8_t type) {
+  switch (type) {
+    case FRAME_TYPE_SINGLE:
+      return "FRAME_TYPE_SINGLE";
+
+    case FRAME_TYPE_CONSECUTIVE:
+      return "FRAME_TYPE_CONSECUTIVE";
+
+    case FRAME_TYPE_CONTROL:
+      return "FRAME_TYPE_CONTROL";
+
+    case FRAME_TYPE_FIRST:
+      return "FRAME_TYPE_FIRST";
+
+    default:
+      LOG4CXX_ERROR(logger_, "Unknown frame type:" << static_cast<int>(type));
+      break;
+  }
+
+  return "";
+}
+}  // namespace
+
 ProtocolPacket::ProtocolData::ProtocolData() : data(NULL), totalDataBytes(0u) {}
 
 ProtocolPacket::ProtocolData::~ProtocolData() {
@@ -324,35 +348,33 @@ RESULT_CODE ProtocolPacket::ProtocolHeaderValidator::validate(
   switch (header.frameType) {
     case FRAME_TYPE_SINGLE:
     case FRAME_TYPE_CONSECUTIVE:
-      if (header.dataSize <= 0u || header.dataSize > payload_size) {
+    case FRAME_TYPE_CONTROL: {
+      bool wrongDataSize = false;
+
+      if (header.dataSize > payload_size) {
+        wrongDataSize = true;
+      }
+
+      if (FRAME_TYPE_CONTROL != header.frameType && header.dataSize <= 0u) {
+        wrongDataSize = true;
+      }
+
+      if (wrongDataSize) {
         LOG4CXX_WARN(
             logger_,
             "Packet data size of "
-                << (header.frameType == FRAME_TYPE_SINGLE
-                        ? "FRAME_TYPE_SINGLE"
-                        : "FRAME_TYPE_CONSECUTIVE")
+                << StringifyFrameType(header.frameType)
                 << " frame must be in range (0, payload_size=" << payload_size
                 << "], but actual value is " << header.dataSize);
         return RESULT_FAIL;
       }
-      break;
-      
-    case FRAME_TYPE_CONTROL:
-      if (header.dataSize > payload_size) {
-        LOG4CXX_WARN(logger_,
-                     "Packet data size of FRAME_TYPE_CONTROL frame must NOT be "
-                     "greater than payload_size = "
-                         << payload_size << ", but actual value is "
-                         << header.dataSize);
-        return RESULT_FAIL;
-      }
-      break;
+    } break;
 
     case FRAME_TYPE_FIRST:
       if (FIRST_FRAME_DATA_SIZE != header.dataSize) {
         LOG4CXX_WARN(logger_,
                      "Packet data size of FRAME_TYPE_FIRST frame must equal "
-                         << int(FIRST_FRAME_DATA_SIZE)
+                         << static_cast<int>(FIRST_FRAME_DATA_SIZE)
                          << ", but actual value is " << header.dataSize);
         return RESULT_FAIL;
       }
