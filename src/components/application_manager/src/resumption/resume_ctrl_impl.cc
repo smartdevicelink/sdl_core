@@ -76,7 +76,8 @@ ResumeCtrlImpl::ResumeCtrlImpl(ApplicationManager& application_manager)
     , launch_time_(time(nullptr))
     , low_voltage_time_(0)
     , wake_up_time_(0)
-    , application_manager_(application_manager) {}
+    , application_manager_(application_manager) 
+    , resumption_data_processor_(application_manager) {}
 #ifdef BUILD_TESTS
 void ResumeCtrlImpl::set_resumption_storage(
     std::shared_ptr<ResumptionData> mock_storage) {
@@ -385,7 +386,8 @@ void ResumeCtrlImpl::StopSavePersistentDataTimer() {
 }
 
 bool ResumeCtrlImpl::StartResumption(ApplicationSharedPtr application,
-                                     const std::string& hash) {
+                                     const std::string& hash,
+                                     ResumptionCallBack callback) {
   LOG4CXX_AUTO_TRACE(logger_);
   DCHECK_OR_RETURN(application, false);
   LOG4CXX_DEBUG(
@@ -401,7 +403,8 @@ bool ResumeCtrlImpl::StartResumption(ApplicationSharedPtr application,
       application->policy_app_id(), device_mac, saved_app);
   if (result) {
     const std::string& saved_hash = saved_app[strings::hash_id].asString();
-    result = saved_hash == hash ? RestoreApplicationData(application) : false;
+    result = saved_hash == hash ? RestoreApplicationData(application, callback)
+                                : false;
     application->UpdateHash();
     AddToResumptionTimerQueue(application->app_id());
   }
@@ -581,7 +584,8 @@ bool ResumeCtrlImpl::IsDeviceMacAddressEqual(
   return device_mac == saved_device_mac;
 }
 
-bool ResumeCtrlImpl::RestoreApplicationData(ApplicationSharedPtr application) {
+bool ResumeCtrlImpl::RestoreApplicationData(ApplicationSharedPtr application,
+                                            ResumptionCallBack callback) {
   LOG4CXX_AUTO_TRACE(logger_);
   DCHECK_OR_RETURN(application, false);
   LOG4CXX_DEBUG(logger_, "app_id : " << application->app_id());
@@ -594,7 +598,9 @@ bool ResumeCtrlImpl::RestoreApplicationData(ApplicationSharedPtr application) {
     if (saved_app.keyExists(strings::grammar_id)) {
       const uint32_t app_grammar_id = saved_app[strings::grammar_id].asUInt();
       application->set_grammar_id(app_grammar_id);
-      resumption_data_processor_.Restore(application, saved_app);
+
+      resumption_data_processor_.Restore(application, saved_app, callback);
+
       result = true;
     } else {
       LOG4CXX_WARN(logger_,
@@ -642,7 +648,7 @@ bool ResumeCtrlImpl::CheckLowVoltageRestrictions(
   return true;
 }
 
-bool ResumeCtrlImpl::CheckDelayBeforeIgnOff(
+bool ResumeCtrlImpl::CheckDelayBeforeIgnOff(	
     const smart_objects::SmartObject& saved_app) const {
   using namespace date_time;
   LOG4CXX_AUTO_TRACE(logger_);
@@ -809,7 +815,6 @@ bool ResumeCtrlImpl::CheckDelayAfterIgnOn() const {
   }
   const time_t curr_time = time(nullptr);
   const time_t sdl_launch_time = LaunchTime();
-
   const uint32_t seconds_from_sdl_start = labs(curr_time - sdl_launch_time);
   const uint32_t wait_time =
       application_manager_.get_settings().resumption_delay_after_ign();

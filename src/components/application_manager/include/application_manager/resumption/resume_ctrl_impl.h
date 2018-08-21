@@ -160,7 +160,8 @@ class ResumeCtrlImpl : public ResumeCtrl {
    * @return true if it was saved, otherwise return false
    */
   bool StartResumption(app_mngr::ApplicationSharedPtr application,
-                       const std::string& hash) OVERRIDE;
+                       const std::string& hash,
+                       ResumptionCallBack callback) OVERRIDE;
 
   /**
    * @brief Start timer for resumption applications
@@ -308,7 +309,8 @@ class ResumeCtrlImpl : public ResumeCtrl {
    * @param application contains application for which restores data
    * @return true if success, otherwise return false
    */
-  bool RestoreApplicationData(app_mngr::ApplicationSharedPtr application);
+  bool RestoreApplicationData(app_mngr::ApplicationSharedPtr application,
+                              ResumptionCallBack callback);
 
   /**
    * @brief SaveDataOnTimer :

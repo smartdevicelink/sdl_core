@@ -58,7 +58,8 @@ ResumptionDataProcessor::ResumptionDataProcessor(
 ResumptionDataProcessor::~ResumptionDataProcessor() {}
 
 void ResumptionDataProcessor::Restore(ApplicationSharedPtr application,
-                                      smart_objects::SmartObject& saved_app) {
+                                      smart_objects::SmartObject& saved_app,
+                                      ResumeCtrl::ResumptionCallBack callback) {
   LOG4CXX_AUTO_TRACE(logger_);
   AddFiles(application, saved_app);
   AddSubmenues(application, saved_app);
@@ -67,35 +68,82 @@ void ResumptionDataProcessor::Restore(ApplicationSharedPtr application,
   SetGlobalProperties(application, saved_app);
   AddSubscriptions(application, saved_app);
   AddWayPointsSubscription(application, saved_app);
+  register_callbacks_[application->app_id()] = callback;
+}
+
+bool ResumptionRequestIDs::operator<(const ResumptionRequestIDs& other) const {
+  LOG4CXX_AUTO_TRACE(logger_);
+  return correlation_id < other.correlation_id ||
+         function_id < other.function_id;
 }
 
 void ResumptionDataProcessor::on_event(const event_engine::Event& event) {
   LOG4CXX_AUTO_TRACE(logger_);
   const smart_objects::SmartObject& response = event.smart_object();
 
-  const int32_t app_id =
-      response[strings::msg_params][strings::app_id].asUInt();
+  ResumptionRequestIDs request_ids;
+  request_ids.function_id = event.id();
+  request_ids.correlation_id = event.smart_object_correlation_id();
+  //TODO i suppose it can be optimised with moving app id into
+  //ResumptionRequest struct, so that we don't have to perform
+  //basically the same search twice
+  auto predicate =
+      [&event](const std::pair<ResumptionRequestIDs, std::uint32_t>& item) {
+        return item.first.function_id == event.id() &&
+               item.first.correlation_id == event.smart_object_correlation_id();
+      };
+
+  auto app_id_ptr =
+      std::find_if(request_app_ids_.begin(),
+                   request_app_ids_.end(),
+                   predicate);
+
+  if (app_id_ptr == request_app_ids_.end()) {
+    LOG4CXX_ERROR(logger_,
+                  "application id for correlation id "
+                      << event.smart_object_correlation_id()
+                      << " and function id: " << event.id()
+                      << " was not found.");
+    return;
+  }
+
+  const uint32_t app_id = app_id_ptr->second;
+
+  LOG4CXX_DEBUG(logger_, "app_id is: " << app_id);
+
+  LOG4CXX_DEBUG(logger_,
+                "Found function id: " << app_id_ptr->first.function_id
+                                      << " correlation id: "
+                                      << app_id_ptr->first.correlation_id);
+
+  LOG4CXX_DEBUG(logger_,
+                "Now processing event with function id: "
+                    << request_ids.function_id
+                    << " correlation id: " << request_ids.correlation_id);
 
   ApplicationResumptionStatus& status = resumption_status_[app_id];
   std::vector<ResumptionRequest>& list_of_sent_requests =
       status.list_of_sent_requests;
 
-  auto request_ptr = std::find_if(
-      list_of_sent_requests.begin(),
-      list_of_sent_requests.end(),
-      [&event](const ResumptionRequest& request) {
-        return request.correlation_id == event.smart_object_correlation_id() &&
-               request.function_id == event.id();
-      });
+  auto request_ptr =
+      std::find_if(list_of_sent_requests.begin(),
+                   list_of_sent_requests.end(),
+                   [&event](const ResumptionRequest& request) {
+                     return request.request_ids.correlation_id ==
+                                event.smart_object_correlation_id() &&
+                            request.request_ids.function_id == event.id();
+                   });
 
   if (list_of_sent_requests.end() == request_ptr) {
     LOG4CXX_ERROR(logger_, "Request not found");
     return;
   }
 
-  const bool is_success = response[strings::params][strings::success].asBool();
+  const int32_t result_code =
+      response[strings::params][application_manager::hmi_response::code]
+          .asInt();
 
-  if (is_success) {
+  if (result_code == 0) {
     status.successful_requests.push_back(*request_ptr);
   } else {
     status.error_requests.push_back(*request_ptr);
@@ -107,14 +155,20 @@ void ResumptionDataProcessor::on_event(const event_engine::Event& event) {
     return;
   }
 
+  auto it = register_callbacks_.find(app_id);
+  DCHECK_OR_RETURN_VOID(it !=register_callbacks_.end());
+  auto callback = it->second;
   if (status.error_requests.empty()) {
     LOG4CXX_DEBUG(logger_, "Resumption for app " << app_id << "successful");
+    callback(mobile_apis::Result::SUCCESS, "Data resumption succesful");
   }
   if (!status.error_requests.empty()) {
     LOG4CXX_ERROR(logger_, "Resumption for app " << app_id << "failed");
     RevertRestoredData(app_id);
+    callback(mobile_apis::Result::RESUME_FAILED, "Data resumption failed");
   }
   resumption_status_.erase(app_id);
+  request_app_ids_.erase(app_id_ptr);
 }
 
 void ResumptionDataProcessor::RevertRestoredData(const int32_t app_id) {
@@ -131,8 +185,14 @@ void ResumptionDataProcessor::RevertRestoredData(const int32_t app_id) {
 void ResumptionDataProcessor::WaitForResponse(
     const int32_t app_id, const ResumptionRequest& request) {
   LOG4CXX_AUTO_TRACE(logger_);
-  subscribe_on_event(request.function_id, request.correlation_id);
+  LOG4CXX_DEBUG(logger_,
+                "app " << app_id << "Subscribe on "
+                       << request.request_ids.function_id << " "
+                       << request.request_ids.correlation_id);
+  subscribe_on_event(request.request_ids.function_id,
+                     request.request_ids.correlation_id);
   resumption_status_[app_id].list_of_sent_requests.push_back(request);
+  request_app_ids_.insert(std::make_pair(request.request_ids, app_id));
 }
 
 void ResumptionDataProcessor::ProcessHMIRequest(
@@ -140,17 +200,17 @@ void ResumptionDataProcessor::ProcessHMIRequest(
   LOG4CXX_AUTO_TRACE(logger_);
   if (subscribe_on_response) {
     auto function_id = static_cast<hmi_apis::FunctionID::eType>(
-        (*request)[strings::function_id].asInt());
+        (*request)[strings::params][strings::function_id].asInt());
 
     const int32_t hmi_correlation_id =
-        (*request)[strings::correlation_id].asInt();
+        (*request)[strings::params][strings::correlation_id].asInt();
 
     const int32_t app_id =
         (*request)[strings::msg_params][strings::app_id].asInt();
 
     ResumptionRequest wait_for_response;
-    wait_for_response.correlation_id = hmi_correlation_id;
-    wait_for_response.function_id = function_id;
+    wait_for_response.request_ids.correlation_id = hmi_correlation_id;
+    wait_for_response.request_ids.function_id = function_id;
     wait_for_response.message = *request;
 
     WaitForResponse(app_id, wait_for_response);
@@ -228,7 +288,7 @@ void ResumptionDataProcessor::AddSubmenues(
     application->AddSubMenu(submenu[strings::menu_id].asUInt(), submenu);
   }
 
-  ProcessHMIRequests(MessageHelper::CreateAddSubMenuRequestToHMI(
+  ProcessHMIRequests(MessageHelper::CreateAddSubMenuRequestsToHMI(
       application, application_manager_.GetNextHMICorrelationID()));
 }
 
@@ -237,7 +297,8 @@ void ResumptionDataProcessor::DeleteSubmenues(const int32_t app_id) {
   ApplicationResumptionStatus& status = resumption_status_[app_id];
   ApplicationSharedPtr application = application_manager_.application(app_id);
   for (auto request : status.successful_requests) {
-    if (hmi_apis::FunctionID::UI_AddSubMenu == request.function_id) {
+    if (hmi_apis::FunctionID::UI_AddSubMenu ==
+        request.request_ids.function_id) {
       smart_objects::SmartObjectSPtr ui_sub_menu =
           MessageHelper::CreateMessageForHMI(
               hmi_apis::messageType::request,
@@ -295,10 +356,12 @@ void ResumptionDataProcessor::DeleteCommands(const int32_t app_id) {
     const uint32_t cmd_id =
         request.message[strings::msg_params][strings::cmd_id].asUInt();
 
-    if (hmi_apis::FunctionID::UI_AddCommand == request.function_id) {
+    if (hmi_apis::FunctionID::UI_AddCommand ==
+        request.request_ids.function_id) {
       DeleteUICommands(request);
     }
-    if (hmi_apis::FunctionID::VR_AddCommand == request.function_id) {
+    if (hmi_apis::FunctionID::VR_AddCommand ==
+        request.request_ids.function_id) {
       DeleteVRCommands(request);
     }
 
@@ -412,7 +475,7 @@ void ResumptionDataProcessor::SetGlobalProperties(
   application->load_global_properties(properties_so);
 
   ProcessHMIRequests(MessageHelper::CreateGlobalPropertiesRequestsToHMI(
-      application, application_manager_.GetNextHMICorrelationID()));
+      application, application_manager_));
 }
 
 void ResumptionDataProcessor::DeleteGlobalProperties(const int32_t app_id) {
@@ -452,6 +515,10 @@ void ResumptionDataProcessor::AddWayPointsSubscription(
       saved_app[strings::subscribed_for_way_points];
   if (true == subscribed_for_way_points_so.asBool()) {
     application_manager_.SubscribeAppForWayPoints(application);
+    auto subscribe_waypoints_msg =
+        MessageHelper::CreateSubscribeWayPointsMessageToHMI(
+            application_manager_.GetNextHMICorrelationID());
+    ProcessHMIRequest(subscribe_waypoints_msg, true);
   }
 }
 
@@ -555,7 +622,7 @@ void ResumptionDataProcessor::DeletePluginsSubscriptions(
       resumption_status_[application->app_id()];
   for (auto request : status.successful_requests) {
     if (hmi_apis::FunctionID::VehicleInfo_SubscribeVehicleData ==
-        request.function_id) {
+        request.request_ids.function_id) {
       extension_subscriptions[strings::application_vehicle_info] =
           request.message;
     }
