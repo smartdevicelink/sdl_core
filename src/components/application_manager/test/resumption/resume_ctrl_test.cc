@@ -1272,7 +1272,6 @@ TEST_F(
   res_ctrl_->StartAppHmiStateResumption(mock_app_);
 }
 
-
 TEST_F(
     ResumeCtrlTest,
     ResumptionLowVoltage_AppInFullUnregisteredBeyondTimeFrame_HMILevelNotRestored) {
