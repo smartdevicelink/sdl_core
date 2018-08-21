@@ -352,7 +352,9 @@ void ResumeCtrlImpl::StopSavePersistentDataTimer() {
 }
 
 bool ResumeCtrlImpl::StartResumption(ApplicationSharedPtr application,
-                                     const std::string& hash) {
+                                     const std::string& hash,
+                                     std::function<void(mobile_apis::Result::eType,
+                                                        const std::string&)> callback) {
   LOG4CXX_AUTO_TRACE(logger_);
   DCHECK_OR_RETURN(application, false);
   LOG4CXX_DEBUG(
@@ -368,7 +370,7 @@ bool ResumeCtrlImpl::StartResumption(ApplicationSharedPtr application,
       application->policy_app_id(), device_mac, saved_app);
   if (result) {
     const std::string& saved_hash = saved_app[strings::hash_id].asString();
-    result = saved_hash == hash ? RestoreApplicationData(application) : false;
+    result = saved_hash == hash ? RestoreApplicationData(application, callback) : false;
     application->UpdateHash();
     AddToResumptionTimerQueue(application->app_id());
   }
@@ -535,7 +537,9 @@ bool ResumeCtrlImpl::IsDeviceMacAddressEqual(
   return device_mac == saved_device_mac;
 }
 
-bool ResumeCtrlImpl::RestoreApplicationData(ApplicationSharedPtr application) {
+bool ResumeCtrlImpl::RestoreApplicationData(ApplicationSharedPtr application,
+                                            std::function<void(mobile_apis::Result::eType,
+                                                               const std::string&)> callback) {
   LOG4CXX_AUTO_TRACE(logger_);
   DCHECK_OR_RETURN(application, false);
   LOG4CXX_DEBUG(logger_, "app_id : " << application->app_id());
@@ -549,7 +553,7 @@ bool ResumeCtrlImpl::RestoreApplicationData(ApplicationSharedPtr application) {
       const uint32_t app_grammar_id = saved_app[strings::grammar_id].asUInt();
       application->set_grammar_id(app_grammar_id);
 
-      resumption_data_processor_.Restore(application, saved_app);
+      resumption_data_processor_.Restore(application, saved_app, callback);
 
       result = true;
     } else {
