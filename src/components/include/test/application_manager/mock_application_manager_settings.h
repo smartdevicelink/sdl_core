@@ -55,6 +55,8 @@ class MockApplicationManagerSettings
   // typedef for the return type.
   MOCK_CONST_METHOD0(get_vehicle_data_frequency,
                      const std::pair<uint32_t, int32_t>&());
+  MOCK_CONST_METHOD0(get_interior_vehicle_data_frequency,
+                     const std::pair<uint32_t, int32_t>&());
   MOCK_CONST_METHOD0(hash_string_size, uint32_t());
   MOCK_CONST_METHOD0(app_storage_folder, const std::string&());
   MOCK_CONST_METHOD0(app_info_storage, const std::string&());

@@ -298,13 +298,6 @@ TEST_F(RAManagerTest, AnotherAppExit_NoReleaseResource) {
   EXPECT_CALL(mock_app_mngr_, application(kAppId2))
       .WillRepeatedly(Return(mock_app_2_));
 
-  RCAppExtensionPtr rc_extention_ptr =
-      std::make_shared<RCAppExtension>(application_manager::AppExtensionUID(
-          rc_rpc_plugin::RCRPCPlugin::kRCPluginID));
-
-  EXPECT_CALL(*mock_app_2_, QueryInterface(_))
-      .WillOnce(Return(rc_extention_ptr));
-
   // Act
   application_manager::ApplicationSharedPtr app_ptr(mock_app_2_);
   EXPECT_CALL(*mock_app_2_, app_id()).WillRepeatedly(Return(kAppId2));
@@ -357,13 +350,6 @@ TEST_F(RAManagerTest, AnotherAppUnregistered_NoReleaseResource) {
 
   EXPECT_CALL(mock_app_mngr_, application(kAppId1))
       .WillRepeatedly(Return(mock_app_2_));
-
-  RCAppExtensionPtr rc_extention_ptr =
-      std::make_shared<RCAppExtension>(application_manager::AppExtensionUID(
-          rc_rpc_plugin::RCRPCPlugin::kRCPluginID));
-
-  EXPECT_CALL(*mock_app_2_, QueryInterface(_))
-      .WillOnce(Return(rc_extention_ptr));
 
   // Act
   application_manager::ApplicationSharedPtr app_ptr(mock_app_2_);

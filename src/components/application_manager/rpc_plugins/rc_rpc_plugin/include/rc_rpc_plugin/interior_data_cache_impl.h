@@ -30,32 +30,35 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_RC_RPC_PLUGIN_INCLUDE_RC_RPC_PLUGIN_COMMANDS_MOBILE_BUTTON_PRESS_RESPONSE_H_
-#define SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_RC_RPC_PLUGIN_INCLUDE_RC_RPC_PLUGIN_COMMANDS_MOBILE_BUTTON_PRESS_RESPONSE_H_
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_RC_RPC_PLUGIN_INCLUDE_RC_RPC_PLUGIN_INTERIOR_DATA_CACHE_IMPL_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_RC_RPC_PLUGIN_INCLUDE_RC_RPC_PLUGIN_INTERIOR_DATA_CACHE_IMPL_H_
 
-#include "application_manager/commands/command_response_impl.h"
-#include "rc_rpc_plugin/resource_allocation_manager.h"
-#include "rc_rpc_plugin/commands/rc_command_request.h"
-#include "rc_rpc_plugin/interior_data_cache.h"
+#include <map>
+
 #include "utils/macro.h"
+#include "utils/lock.h"
+#include "rc_rpc_plugin/interior_data_cache.h"
 
 namespace rc_rpc_plugin {
-namespace app_mngr = application_manager;
-
-namespace commands {
-class ButtonPressResponse
-    : public application_manager::commands::CommandResponseImpl {
+class InteriorDataCacheImpl : public InteriorDataCache {
  public:
-  ButtonPressResponse(
-      const application_manager::commands::MessageSharedPtr& message,
-      const RCCommandParams& params);
-  void Run() OVERRIDE;
-  /**
-   * @brief ButtonPressResponse class destructor
-   */
-  ~ButtonPressResponse();
-};
-}  // namespace commands
-}  // namespace rc_rpc_plugin
+  InteriorDataCacheImpl();
 
-#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_RC_RPC_PLUGIN_INCLUDE_RC_RPC_PLUGIN_COMMANDS_MOBILE_BUTTON_PRESS_RESPONSE_H_
+  ~InteriorDataCacheImpl();
+
+  void Add(const std::string& module_type,
+           const smart_objects::SmartObject& module_data) OVERRIDE;
+  smart_objects::SmartObject Retrieve(
+      const std::string& module_type) const OVERRIDE;
+  bool Contains(const std::string& module_type) const OVERRIDE;
+  void Remove(const std::string& module_type) OVERRIDE;
+  void Clear() OVERRIDE;
+
+ private:
+  std::map<std::string, smart_objects::SmartObject> cached_data_;
+  mutable sync_primitives::Lock cached_data_lock_;
+};
+
+}  // rc_rpc_plugin
+
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_RC_RPC_PLUGIN_INCLUDE_RC_RPC_PLUGIN_INTERIOR_DATA_CACHE_IMPL_H_

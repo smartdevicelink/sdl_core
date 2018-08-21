@@ -30,32 +30,25 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_RC_RPC_PLUGIN_INCLUDE_RC_RPC_PLUGIN_COMMANDS_MOBILE_BUTTON_PRESS_RESPONSE_H_
-#define SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_RC_RPC_PLUGIN_INCLUDE_RC_RPC_PLUGIN_COMMANDS_MOBILE_BUTTON_PRESS_RESPONSE_H_
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_RC_RPC_PLUGIN_TEST_INCLUDE_RC_RPC_PLUGIN_MOCK_MOCK_INTERIOR_DATA_CACHE_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_RC_RPC_PLUGIN_TEST_INCLUDE_RC_RPC_PLUGIN_MOCK_MOCK_INTERIOR_DATA_CACHE_H_
 
-#include "application_manager/commands/command_response_impl.h"
-#include "rc_rpc_plugin/resource_allocation_manager.h"
-#include "rc_rpc_plugin/commands/rc_command_request.h"
+#include <string>
+#include "gmock/gmock.h"
 #include "rc_rpc_plugin/interior_data_cache.h"
-#include "utils/macro.h"
 
-namespace rc_rpc_plugin {
-namespace app_mngr = application_manager;
+namespace rc_rpc_plugin_test {
 
-namespace commands {
-class ButtonPressResponse
-    : public application_manager::commands::CommandResponseImpl {
+class MockInteriorDataCache : public rc_rpc_plugin::InteriorDataCache {
  public:
-  ButtonPressResponse(
-      const application_manager::commands::MessageSharedPtr& message,
-      const RCCommandParams& params);
-  void Run() OVERRIDE;
-  /**
-   * @brief ButtonPressResponse class destructor
-   */
-  ~ButtonPressResponse();
+  MOCK_METHOD2(Add,
+               void(const std::string&, const smart_objects::SmartObject&));
+  MOCK_CONST_METHOD1(Retrieve, smart_objects::SmartObject(const std::string&));
+  MOCK_CONST_METHOD1(Contains, bool(const std::string&));
+  MOCK_METHOD1(Remove, void(const std::string&));
+  MOCK_METHOD0(Clear, void());
 };
-}  // namespace commands
-}  // namespace rc_rpc_plugin
 
-#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_RC_RPC_PLUGIN_INCLUDE_RC_RPC_PLUGIN_COMMANDS_MOBILE_BUTTON_PRESS_RESPONSE_H_
+}  // namespace rc_rpc_plugin_test
+
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_RC_RPC_PLUGIN_TEST_INCLUDE_RC_RPC_PLUGIN_MOCK_MOCK_INTERIOR_DATA_CACHE_H_

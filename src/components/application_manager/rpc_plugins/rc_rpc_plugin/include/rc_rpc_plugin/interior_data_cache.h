@@ -29,33 +29,53 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_RC_RPC_PLUGIN_INCLUDE_RC_RPC_PLUGIN_COMMANDS_MOBILE_BUTTON_PRESS_RESPONSE_H_
-#define SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_RC_RPC_PLUGIN_INCLUDE_RC_RPC_PLUGIN_COMMANDS_MOBILE_BUTTON_PRESS_RESPONSE_H_
-
-#include "application_manager/commands/command_response_impl.h"
-#include "rc_rpc_plugin/resource_allocation_manager.h"
-#include "rc_rpc_plugin/commands/rc_command_request.h"
-#include "rc_rpc_plugin/interior_data_cache.h"
-#include "utils/macro.h"
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_RC_RPC_PLUGIN_INCLUDE_RC_RPC_PLUGIN_INTERIOR_DATA_CACHE_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_RC_RPC_PLUGIN_INCLUDE_RC_RPC_PLUGIN_INTERIOR_DATA_CACHE_H_
+#include <string>
+#include "smart_objects/smart_object.h"
 
 namespace rc_rpc_plugin {
-namespace app_mngr = application_manager;
 
-namespace commands {
-class ButtonPressResponse
-    : public application_manager::commands::CommandResponseImpl {
+/**
+ * @brief The InteriorDataCache interface for caching data class
+ * Provide ability to cache module data by module type name and clear cache
+ */
+class InteriorDataCache {
  public:
-  ButtonPressResponse(
-      const application_manager::commands::MessageSharedPtr& message,
-      const RCCommandParams& params);
-  void Run() OVERRIDE;
   /**
-   * @brief ButtonPressResponse class destructor
+   * @brief Add module data to cache
+   * @param module_type module type name
+   * @param module_data data to be cached
    */
-  ~ButtonPressResponse();
-};
-}  // namespace commands
-}  // namespace rc_rpc_plugin
+  virtual void Add(const std::string& module_type,
+                   const smart_objects::SmartObject& module_data) = 0;
 
-#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_RC_RPC_PLUGIN_INCLUDE_RC_RPC_PLUGIN_COMMANDS_MOBILE_BUTTON_PRESS_RESPONSE_H_
+  /**
+   * @brief Retrieve Get cached data
+   * @param module_type data type to get from cache
+   * @return smart object with cached data, or nulll smart object
+   */
+  virtual smart_objects::SmartObject Retrieve(
+      const std::string& module_type) const = 0;
+
+  /**
+   * @brief Contains check if data exists in cache
+   * @param module_type module type name to check in cache
+   * @return true if cached, false otherwize
+   */
+  virtual bool Contains(const std::string& module_type) const = 0;
+
+  /**
+   * @brief Remove cached data
+   * @param module_type data type to remove from cache
+   */
+  virtual void Remove(const std::string& module_type) = 0;
+
+  /**
+   * @brief Clear clear all cached data
+   */
+  virtual void Clear() = 0;
+};
+}  // rc_rpc_plugin
+
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_RC_RPC_PLUGIN_INCLUDE_RC_RPC_PLUGIN_INTERIOR_DATA_CACHE_H_

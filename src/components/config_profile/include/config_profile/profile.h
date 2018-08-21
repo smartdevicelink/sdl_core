@@ -762,6 +762,8 @@ class Profile : public protocol_handler::ProtocolHandlerSettings,
 
   const std::pair<uint32_t, int32_t>& get_vehicle_data_frequency()
       const OVERRIDE;
+  const std::pair<uint32_t, int32_t>& get_interior_vehicle_data_frequency()
+      const OVERRIDE;
 
   const std::pair<uint32_t, int32_t>& start_stream_retry_amount()
       const OVERRIDE;
@@ -986,6 +988,12 @@ class Profile : public protocol_handler::ProtocolHandlerSettings,
    * second is time scale
    */
   std::pair<uint32_t, int32_t> get_vehicle_data_frequency_;
+
+  /*
+   * first value is count of request
+   * second is time scale
+   */
+  std::pair<uint32_t, int32_t> get_interior_vehicle_data_frequency_;
 
   /**
    * first value is count of retries for start stream

@@ -30,12 +30,14 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_RC_RPC_PLUGIN_INCLUDE_RC_RPC_PLUGIN_COMMANDS_RC_COMMAND_REQUEST_H
-#define SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_RC_RPC_PLUGIN_INCLUDE_RC_RPC_PLUGIN_COMMANDS_RC_COMMAND_REQUEST_H
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_RC_RPC_PLUGIN_INCLUDE_RC_RPC_PLUGIN_COMMANDS_RC_COMMAND_REQUEST_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_RC_RPC_PLUGIN_INCLUDE_RC_RPC_PLUGIN_COMMANDS_RC_COMMAND_REQUEST_H_
 
 #include "rc_rpc_plugin/resource_allocation_manager.h"
 #include "rc_rpc_plugin/rc_app_extension.h"
 #include "application_manager/commands/command_request_impl.h"
+#include "rc_rpc_plugin/interior_data_cache.h"
+#include "rc_rpc_plugin/commands/rc_command_params.h"
 
 namespace rc_rpc_plugin {
 namespace app_mngr = application_manager;
@@ -56,12 +58,8 @@ class RCCommandRequest : public app_mngr::commands::CommandRequestImpl {
    * @param resource_allocation_manager ResourceAllocationManager
    **/
   RCCommandRequest(
-      const app_mngr::commands::MessageSharedPtr& message,
-      app_mngr::ApplicationManager& application_manager,
-      app_mngr::rpc_service::RPCService& rpc_service,
-      app_mngr::HMICapabilities& hmi_capabilities,
-      policy::PolicyHandlerInterface& policy_handl,
-      rc_rpc_plugin::ResourceAllocationManager& resource_allocation_manager);
+      const application_manager::commands::MessageSharedPtr& message,
+      const RCCommandParams& params);
 
   virtual ~RCCommandRequest();
 
@@ -73,9 +71,11 @@ class RCCommandRequest : public app_mngr::commands::CommandRequestImpl {
 
  protected:
   bool is_subscribed;
-  ResourceAllocationManager& resource_allocation_manager_;
   bool auto_allowed_;
 
+  ResourceAllocationManager& resource_allocation_manager_;
+  InteriorDataCache& interior_data_cache_;
+  InteriorDataManager& interior_data_manager_;
   /**
    * @brief AcquireResource try to allocate resource for application
    * In case if allocation of resource is not required, return ALLOWED by
@@ -169,4 +169,4 @@ class RCCommandRequest : public app_mngr::commands::CommandRequestImpl {
 }
 }
 
-#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_RC_RPC_PLUGIN_INCLUDE_RC_RPC_PLUGIN_COMMANDS_RC_COMMAND_REQUEST_H
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_RC_RPC_PLUGIN_INCLUDE_RC_RPC_PLUGIN_COMMANDS_RC_COMMAND_REQUEST_H_

@@ -30,32 +30,26 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_RC_RPC_PLUGIN_INCLUDE_RC_RPC_PLUGIN_COMMANDS_MOBILE_BUTTON_PRESS_RESPONSE_H_
-#define SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_RC_RPC_PLUGIN_INCLUDE_RC_RPC_PLUGIN_COMMANDS_MOBILE_BUTTON_PRESS_RESPONSE_H_
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_RC_RPC_PLUGIN_TEST_INCLUDE_RC_RPC_PLUGIN_MOCK_MOCK_INTERIOR_DATA_MANAGER_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_RC_RPC_PLUGIN_TEST_INCLUDE_RC_RPC_PLUGIN_MOCK_MOCK_INTERIOR_DATA_MANAGER_H_
 
-#include "application_manager/commands/command_response_impl.h"
-#include "rc_rpc_plugin/resource_allocation_manager.h"
-#include "rc_rpc_plugin/commands/rc_command_request.h"
-#include "rc_rpc_plugin/interior_data_cache.h"
-#include "utils/macro.h"
+#include <string>
+#include "gmock/gmock.h"
+#include "rc_rpc_plugin/interior_data_manager.h"
+namespace rc_rpc_plugin_test {
 
-namespace rc_rpc_plugin {
-namespace app_mngr = application_manager;
-
-namespace commands {
-class ButtonPressResponse
-    : public application_manager::commands::CommandResponseImpl {
+class MockInteriorDataManager : public rc_rpc_plugin::InteriorDataManager {
  public:
-  ButtonPressResponse(
-      const application_manager::commands::MessageSharedPtr& message,
-      const RCCommandParams& params);
-  void Run() OVERRIDE;
-  /**
-   * @brief ButtonPressResponse class destructor
-   */
-  ~ButtonPressResponse();
+  MOCK_METHOD1(OnPolicyEvent,
+               void(application_manager::plugin_manager::PolicyEvent));
+  MOCK_METHOD2(OnApplicationEvent,
+               void(application_manager::plugin_manager::ApplicationEvent,
+                    application_manager::ApplicationSharedPtr));
+  MOCK_METHOD0(OnDisablingRC, void());
+  MOCK_METHOD1(StoreRequestToHMITime, void(const std::string&));
+  MOCK_METHOD1(CheckRequestsToHMIFrequency, bool(const std::string&));
 };
-}  // namespace commands
-}  // namespace rc_rpc_plugin
 
-#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_RC_RPC_PLUGIN_INCLUDE_RC_RPC_PLUGIN_COMMANDS_MOBILE_BUTTON_PRESS_RESPONSE_H_
+}  // namespace rc_rpc_plugin_test
+
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_RC_RPC_PLUGIN_TEST_INCLUDE_RC_RPC_PLUGIN_MOCK_MOCK_INTERIOR_DATA_MANAGER_H_

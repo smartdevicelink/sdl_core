@@ -30,8 +30,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_REMOTE_CONTROL_TEST_INCLUDE_MOCK_RESOURCE_ALLOCATION_MANAGER_H_
-#define SRC_COMPONENTS_REMOTE_CONTROL_TEST_INCLUDE_MOCK_RESOURCE_ALLOCATION_MANAGER_H_
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_RC_RPC_PLUGIN_TEST_INCLUDE_RC_RPC_PLUGIN_MOCK_MOCK_RESOURCE_ALLOCATION_MANAGER_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_RC_RPC_PLUGIN_TEST_INCLUDE_RC_RPC_PLUGIN_MOCK_MOCK_RESOURCE_ALLOCATION_MANAGER_H_
 
 #include "gmock/gmock.h"
 #include "application_manager/rpc_plugins/rc_rpc_plugin/include/rc_rpc_plugin/resource_allocation_manager.h"
@@ -61,9 +61,6 @@ class MockResourceAllocationManager
                     const uint32_t app_id,
                     const rc_rpc_plugin::ResourceState::eType state));
   MOCK_CONST_METHOD1(IsResourceFree, bool(const std::string& module_type));
-  MOCK_METHOD1(GetApplicationExtention,
-               rc_rpc_plugin::RCAppExtensionPtr(
-                   application_manager::ApplicationSharedPtr application));
   MOCK_METHOD0(ResetAllAllocations, void());
   MOCK_METHOD2(SendOnRCStatusNotifications,
                void(rc_rpc_plugin::NotificationTrigger::eType,
@@ -74,4 +71,4 @@ class MockResourceAllocationManager
 
 }  // namespace rc_rpc_plugin_test
 
-#endif  // SRC_COMPONENTS_REMOTE_CONTROL_TEST_INCLUDE_MOCK_RESOURCE_ALLOCATION_MANAGER_H_
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_RC_RPC_PLUGIN_TEST_INCLUDE_RC_RPC_PLUGIN_MOCK_MOCK_RESOURCE_ALLOCATION_MANAGER_H_

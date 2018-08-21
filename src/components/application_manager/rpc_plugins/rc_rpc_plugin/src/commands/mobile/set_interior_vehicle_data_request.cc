@@ -33,6 +33,7 @@
 #include "rc_rpc_plugin/commands/mobile/set_interior_vehicle_data_request.h"
 #include "rc_rpc_plugin/rc_module_constants.h"
 #include "rc_rpc_plugin/rc_rpc_plugin.h"
+#include "rc_rpc_plugin/rc_helpers.h"
 #include "smart_objects/enum_schema_item.h"
 #include "utils/macro.h"
 #include "json/json.h"
@@ -60,17 +61,6 @@ std::vector<std::string> GetModuleReadOnlyParams(
     module_ro_params.push_back(kSisData);
   }
   return module_ro_params;
-}
-
-const std::map<std::string, std::string> GetModuleTypeToDataMapping() {
-  std::map<std::string, std::string> mapping = {
-      {enums_value::kRadio, message_params::kRadioControlData},
-      {enums_value::kClimate, message_params::kClimateControlData},
-      {enums_value::kAudio, message_params::kAudioControlData},
-      {enums_value::kLight, message_params::kLightControlData},
-      {enums_value::kHmiSettings, message_params::kHmiSettingsControlData},
-      {enums_value::kSeat, message_params::kSeatControlData}};
-  return mapping;
 }
 
 const std::map<std::string, std::string> GetModuleDataToCapabilitiesMapping() {
@@ -142,17 +132,8 @@ CREATE_LOGGERPTR_GLOBAL(logger_, "RemoteControlModule")
 
 SetInteriorVehicleDataRequest::SetInteriorVehicleDataRequest(
     const app_mngr::commands::MessageSharedPtr& message,
-    app_mngr::ApplicationManager& application_manager,
-    app_mngr::rpc_service::RPCService& rpc_service,
-    app_mngr::HMICapabilities& hmi_capabilities,
-    policy::PolicyHandlerInterface& policy_handle,
-    ResourceAllocationManager& resource_allocation_manager)
-    : RCCommandRequest(message,
-                       application_manager,
-                       rpc_service,
-                       hmi_capabilities,
-                       policy_handle,
-                       resource_allocation_manager) {}
+    const RCCommandParams& params)
+    : RCCommandRequest(message, params) {}
 
 SetInteriorVehicleDataRequest::~SetInteriorVehicleDataRequest() {}
 
@@ -299,30 +280,30 @@ bool CheckIfModuleDataExistInCapabilities(
     const smart_objects::SmartObject& rc_capabilities,
     const smart_objects::SmartObject& module_data) {
   LOG4CXX_AUTO_TRACE(logger_);
-  const std::map<std::string, std::string> params = {
-      {message_params::kRadioControlData, strings::kradioControlCapabilities},
-      {message_params::kClimateControlData,
-       strings::kclimateControlCapabilities},
-      {message_params::kAudioControlData, strings::kaudioControlCapabilities},
-      {message_params::kLightControlData, strings::klightControlCapabilities},
-      {message_params::kSeatControlData, strings::kseatControlCapabilities},
-      {message_params::kHmiSettingsControlData,
-       strings::khmiSettingsControlCapabilities}};
+
+  const auto& all_module_types = RCHelpers::GetModulesList();
+  const auto& get_module_data_key = RCHelpers::GetModuleTypeToDataMapping();
+  const auto& get_capabilities_key =
+      RCHelpers::GetModuleTypeToCapabilitiesMapping();
+
   bool is_module_data_valid = false;
-  for (const auto& param : params) {
-    if (module_data.keyExists(param.first)) {
-      if (!rc_capabilities.keyExists(param.second)) {
-        LOG4CXX_DEBUG(logger_, param.first << " capabilities not present");
+  for (const auto& module_type : all_module_types) {
+    const auto module_data_key = get_module_data_key(module_type);
+    const auto capabilities_key = get_capabilities_key(module_type);
+    if (module_data.keyExists(module_data_key)) {
+      if (!rc_capabilities.keyExists(capabilities_key)) {
+        LOG4CXX_DEBUG(logger_, module_data_key << " capabilities not present");
         return false;
       }
-      const smart_objects::SmartObject& caps = rc_capabilities[param.second];
-      if (message_params::kHmiSettingsControlData == param.first ||
-          message_params::kLightControlData == param.first) {
+      const smart_objects::SmartObject& caps =
+          rc_capabilities[capabilities_key];
+      if (message_params::kHmiSettingsControlData == module_data_key ||
+          message_params::kLightControlData == module_data_key) {
         is_module_data_valid =
-            CheckControlDataByCapabilities(caps, module_data[param.first]);
+            CheckControlDataByCapabilities(caps, module_data[module_data_key]);
       } else {
-        is_module_data_valid =
-            CheckControlDataByCapabilities(caps[0], module_data[param.first]);
+        is_module_data_valid = CheckControlDataByCapabilities(
+            caps[0], module_data[module_data_key]);
       }
     }
   }
@@ -332,12 +313,12 @@ bool CheckIfModuleDataExistInCapabilities(
 bool isModuleTypeAndDataMatch(const std::string& module_type,
                               const smart_objects::SmartObject& module_data) {
   LOG4CXX_AUTO_TRACE(logger_);
-  std::map<std::string, std::string> data_mapping =
-      GetModuleTypeToDataMapping();
+  const auto& all_module_types = RCHelpers::GetModulesList();
+  const auto& data_mapping = RCHelpers::GetModuleTypeToDataMapping();
   bool module_type_and_data_match = false;
-  for (const auto& data : data_mapping) {
-    if (data.first == module_type) {
-      module_type_and_data_match = module_data.keyExists(data.second);
+  for (const auto& type : all_module_types) {
+    if (type == module_type) {
+      module_type_and_data_match = module_data.keyExists(data_mapping(type));
       break;
     }
   }
@@ -447,11 +428,12 @@ void SetInteriorVehicleDataRequest::on_event(
 const smart_objects::SmartObject& SetInteriorVehicleDataRequest::ControlData(
     const smart_objects::SmartObject& module_data) {
   const std::string module_type = ModuleType();
-  std::map<std::string, std::string> data_mapping =
-      GetModuleTypeToDataMapping();
-  for (const auto& data : data_mapping) {
-    if (data.first == module_type) {
-      return module_data[data.second];
+
+  const auto& all_module_types = RCHelpers::GetModulesList();
+  const auto& data_mapping = RCHelpers::GetModuleTypeToDataMapping();
+  for (const auto& type : all_module_types) {
+    if (type == module_type) {
+      return module_data[data_mapping(type)];
     }
   }
   NOTREACHED();
