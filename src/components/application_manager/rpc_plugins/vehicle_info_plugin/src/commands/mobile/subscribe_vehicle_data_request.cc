@@ -234,21 +234,6 @@ bool SubscribeVehicleDataRequest::IsSomeoneSubscribedFor(
   return it != accessor.GetData().end();
 }
 
-void SubscribeVehicleDataRequest::CheckVISubscribtions(
-    ApplicationSharedPtr app,
-    std::string& out_info,
-    mobile_apis::Result::eType& out_result_code,
-    smart_objects::SmartObject& out_response_params,
-    smart_objects::SmartObject& out_request_params,
-    bool& out_result) {
-  CheckVISubscriptions(app,
-                       out_info,
-                       out_result_code,
-                       out_response_params,
-                       out_request_params,
-                       out_result);
-}
-
 void SubscribeVehicleDataRequest::CheckVISubscriptions(
     ApplicationSharedPtr app,
     std::string& out_info,

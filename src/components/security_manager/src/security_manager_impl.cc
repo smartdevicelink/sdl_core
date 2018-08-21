@@ -403,10 +403,6 @@ void SecurityManagerImpl::NotifyListenersOnHandshakeDone(
   }
 }
 
-void SecurityManagerImpl::NotifyOnCertififcateUpdateRequired() {
-  NotifyOnCertificateUpdateRequired();
-}
-
 void SecurityManagerImpl::NotifyOnCertificateUpdateRequired() {
   LOG4CXX_AUTO_TRACE(logger_);
   std::list<SecurityManagerListener*>::iterator it = listeners_.begin();

@@ -66,14 +66,6 @@ class TNumberSchemaItem : public CDefaultSchemaItem<NumberType> {
           TSchemaItemParameter<NumberType>());
 
   /**
-   * @deprecated
-   * @brief Validate smart object.
-   * @param Object Object to validate.
-   * @return Errors::ERROR
-   **/
-  Errors::eType validate(const SmartObject& Object) OVERRIDE;
-
-  /**
    * @brief Validate smart object.
    * @param Object Object to validate.
    * @param report__ object for reporting errors during validation
@@ -139,13 +131,6 @@ bool TNumberSchemaItem<NumberType>::isValidNumberType(SmartType type) {
     return true;
   }
   return false;
-}
-
-template <typename NumberType>
-Errors::eType TNumberSchemaItem<NumberType>::validate(
-    const SmartObject& Object) {
-  rpc::ValidationReport report("RPC");
-  return validate(Object, &report);
 }
 
 template <typename NumberType>

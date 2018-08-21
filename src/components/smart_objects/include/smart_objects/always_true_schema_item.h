@@ -47,13 +47,6 @@ class CAlwaysTrueSchemaItem : public ISchemaItem {
    * @return Shared pointer to a new schema item.
    **/
   static std::shared_ptr<CAlwaysTrueSchemaItem> create();
-  /**
-   * @deprecated
-   * @brief Validate smart object.
-   * @param Object Object to validate.
-   * @return NsSmartObjects::Errors::eType
-   **/
-  Errors::eType validate(const SmartObject& Object) OVERRIDE;
 
   /**
    * @brief Validate smart object.
