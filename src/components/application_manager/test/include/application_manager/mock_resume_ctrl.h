@@ -61,7 +61,9 @@ class MockResumeCtrl : public resumption::ResumeCtrl {
   MOCK_METHOD0(StartSavePersistentDataTimer, void());
   MOCK_METHOD2(StartResumption,
                bool(app_mngr::ApplicationSharedPtr application,
-                    const std::string& hash));
+                    const std::string& hash,
+                    std::function<void(mobile_apis::Result::eType,
+                                       const std::string&)>));
   MOCK_METHOD1(StartResumptionOnlyHMILevel,
                bool(app_mngr::ApplicationSharedPtr application));
   MOCK_METHOD1(RetryResumption, void(const uint32_t app_id));

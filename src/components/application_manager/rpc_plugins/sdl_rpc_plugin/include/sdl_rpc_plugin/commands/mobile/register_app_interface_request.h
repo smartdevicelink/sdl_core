@@ -83,6 +83,16 @@ class RegisterAppInterfaceRequest
    **/
   virtual void Run();
 
+<<<<<<< HEAD
+=======
+  /**
+   * @brief Prepares and sends RegisterAppInterface response to mobile
+   * considering application type
+   **/
+  void SendRegisterAppInterfaceResponseToMobile();
+
+
+>>>>>>> Send RAI response on last received response of resumption data
  private:
   /**
    * @brief FillApplicationParams set app application attributes from the RAI

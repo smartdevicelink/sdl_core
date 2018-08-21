@@ -163,7 +163,9 @@ class ResumeCtrl {
    * @return true if it was saved, otherwise return false
    */
   virtual bool StartResumption(app_mngr::ApplicationSharedPtr application,
-                               const std::string& hash) = 0;
+                               const std::string& hash,
+                               std::function<void(mobile_apis::Result::eType,
+                                                  const std::string&)> callback) = 0;
   /**
    * @brief Start timer for resumption applications
    *        Does not restore D1-D5 data
