@@ -131,12 +131,6 @@ class Profile : public protocol_handler::ProtocolHandlerSettings,
   int ignition_off_signal_offset() const;
 
   /**
-   * @brief Returns true, if SDL 4.0 is enabled
-   * @deprecated use max_supported_protocol_version instead
-   */
-  DEPRECATED bool enable_protocol_4() const OVERRIDE;
-
-  /**
    * @brief Returns application icons folder path
    */
   const std::string& app_icons_folder() const OVERRIDE;

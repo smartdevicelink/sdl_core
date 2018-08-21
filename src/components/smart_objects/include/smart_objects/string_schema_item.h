@@ -59,13 +59,6 @@ class CStringSchemaItem : public CDefaultSchemaItem<std::string> {
           TSchemaItemParameter<size_t>(),
       const TSchemaItemParameter<std::string>& DefaultValue =
           TSchemaItemParameter<std::string>());
-  /**
-   * @deprecated
-   * @brief Validate smart object.
-   * @param Object Object to validate.
-   * @return NsSmartObjects::Errors::eType
-   **/
-  Errors::eType validate(const SmartObject& Object) OVERRIDE;
 
   /**
    * @brief Validate smart object.

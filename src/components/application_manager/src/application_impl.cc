@@ -671,10 +671,6 @@ void ApplicationImpl::set_app_allowed(const bool allowed) {
   is_app_allowed_ = allowed;
 }
 
-void ApplicationImpl::set_device(connection_handler::DeviceHandle device) {
-  device_id_ = device;
-}
-
 void ApplicationImpl::set_secondary_device(
     connection_handler::DeviceHandle secondary_device) {
   secondary_device_id_ = secondary_device;

@@ -873,11 +873,6 @@ bool SmartObject::isValid() const {
   return (Errors::OK == m_schema.validate(*this, &report));
 }
 
-Errors::eType SmartObject::validate() {
-  rpc::ValidationReport report("RPC");
-  return validate(&report);
-}
-
 Errors::eType SmartObject::validate(
     rpc::ValidationReport* report__,
     const utils::SemanticVersion& MessageVersion) {

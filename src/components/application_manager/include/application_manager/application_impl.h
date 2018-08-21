@@ -94,14 +94,6 @@ class ApplicationImpl : public virtual Application,
       std::shared_ptr<usage_statistics::StatisticsManager> statistics_manager,
       ApplicationManager& application_manager);
 
-  DEPRECATED ApplicationImpl(
-      uint32_t application_id,
-      const std::string& policy_app_id,
-      const std::string& mac_address,
-      const custom_str::CustomString& app_name,
-      std::shared_ptr<usage_statistics::StatisticsManager> statistics_manager,
-      ApplicationManager& application_manager);
-
   ~ApplicationImpl();
 
   /**

@@ -284,29 +284,6 @@ class ApplicationManager {
   virtual void SendDriverDistractionState(ApplicationSharedPtr application) = 0;
 
   /**
-   * DEPRECATED
-   * @brief Checks if Application is subscribed for way points
-   * @param Application AppID
-   * @return true if Application is subscribed for way points
-   * otherwise false
-   */
-  virtual bool IsAppSubscribedForWayPoints(const uint32_t app_id) const = 0;
-
-  /**
-   * DEPRECATED
-   * @brief Subscribe Application for way points
-   * @param Application AppID
-   */
-  virtual void SubscribeAppForWayPoints(const uint32_t app_id) = 0;
-
-  /**
-   * DEPRECATED
-   * @brief Unsubscribe Application for way points
-   * @param Application AppID
-   */
-  virtual void UnsubscribeAppFromWayPoints(const uint32_t app_id) = 0;
-
-  /**
    * @brief Checks if Application is subscribed for way points
    * @param Application pointer
    * @return true if Application is subscribed for way points
@@ -430,27 +407,12 @@ class ApplicationManager {
    */
   virtual bool IsLowVoltage() const = 0;
 
-  /* @brief Starts audio passthru process
-   * @deprecated Use BeginAudioPassThru(uint32_t app_id) instead
-   *
-   * @return true on success, false if passthru is already in process
-   */
-  DEPRECATED virtual bool BeginAudioPassThrough() = 0;
-
   /**
    * @brief Starts AudioPassThru process by given application
    * @param app_id ID of the application which starts the process
    * @return true if AudioPassThru can be started, false otherwise
    */
   virtual bool BeginAudioPassThru(uint32_t app_id) = 0;
-
-  /*
-   * @brief Finishes already started audio passthru process
-   * @deprecated Use EndAudioPassThru(uint32_t app_id) instead
-   *
-   * @return true on success, false if passthru is not active
-   */
-  DEPRECATED virtual bool EndAudioPassThrough() = 0;
 
   /**
    * @brief Finishes already started AudioPassThru process by given application
@@ -717,21 +679,6 @@ class ApplicationManager {
       mobile_apis::HMILevel::eType hmi_level,
       mobile_apis::AudioStreamingState::eType audio_state,
       mobile_apis::VideoStreamingState::eType video_state,
-      mobile_apis::SystemContext::eType system_context) const = 0;
-
-  /**
-   * DEPRECATED
-   * @brief CreateRegularState create regular HMI state for application
-   * @param app_id Application id
-   * @param hmi_level of returned state
-   * @param audio_state of returned state
-   * @param system_context of returned state
-   * @return new regular HMI state
-   */
-  virtual HmiStatePtr CreateRegularState(
-      uint32_t app_id,
-      mobile_apis::HMILevel::eType hmi_level,
-      mobile_apis::AudioStreamingState::eType audio_state,
       mobile_apis::SystemContext::eType system_context) const = 0;
 
   /**

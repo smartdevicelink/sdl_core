@@ -252,7 +252,8 @@ TEST_F(
     ApplicationManagerImplTest,
     IsAnyAppSubscribedForWayPoints_SubcribeAppForWayPoints_ExpectCorrectResult) {
   EXPECT_FALSE(app_manager_impl_->IsAnyAppSubscribedForWayPoints());
-  app_manager_impl_->SubscribeAppForWayPoints(app_id_);
+  auto app_ptr = std::static_pointer_cast<am::Application>(mock_app_ptr_);
+  app_manager_impl_->SubscribeAppForWayPoints(app_ptr);
   EXPECT_TRUE(app_manager_impl_->IsAnyAppSubscribedForWayPoints());
 }
 

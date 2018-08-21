@@ -161,9 +161,7 @@ class MockApplicationManager : public application_manager::ApplicationManager {
   MOCK_METHOD0(GetNextHMICorrelationID, uint32_t());
   MOCK_METHOD0(GenerateNewHMIAppID, uint32_t());
   MOCK_METHOD1(EndNaviServices, void(uint32_t app_id));
-  DEPRECATED MOCK_METHOD0(BeginAudioPassThrough, bool());
   MOCK_METHOD1(BeginAudioPassThru, bool(uint32_t app_id));
-  DEPRECATED MOCK_METHOD0(EndAudioPassThrough, bool());
   MOCK_METHOD1(EndAudioPassThru, bool(uint32_t app_id));
   MOCK_METHOD1(ConnectToDevice, void(const std::string& device_mac));
   MOCK_METHOD0(OnHMIStartedCooperation, void());
@@ -256,13 +254,6 @@ class MockApplicationManager : public application_manager::ApplicationManager {
                          mobile_apis::AudioStreamingState::eType audio_state,
                          mobile_apis::VideoStreamingState::eType video_state,
                          mobile_apis::SystemContext::eType system_context));
-  DEPRECATED MOCK_CONST_METHOD4(
-      CreateRegularState,
-      application_manager::HmiStatePtr(
-          uint32_t app_id,
-          mobile_apis::HMILevel::eType hmi_level,
-          mobile_apis::AudioStreamingState::eType audio_state,
-          mobile_apis::SystemContext::eType system_context));
 
   MOCK_METHOD2(SendAudioPassThroughNotification,
                void(uint32_t session_key, std::vector<uint8_t>& binary_data));
@@ -278,11 +269,6 @@ class MockApplicationManager : public application_manager::ApplicationManager {
   MOCK_METHOD2(IsSOStructValid,
                bool(const hmi_apis::StructIdentifiers::eType struct_id,
                     const smart_objects::SmartObject& display_capabilities));
-
-  DEPRECATED MOCK_CONST_METHOD1(IsAppSubscribedForWayPoints,
-                                bool(const uint32_t));
-  DEPRECATED MOCK_METHOD1(SubscribeAppForWayPoints, void(const uint32_t));
-  DEPRECATED MOCK_METHOD1(UnsubscribeAppFromWayPoints, void(const uint32_t));
   MOCK_CONST_METHOD1(IsAppSubscribedForWayPoints,
                      bool(application_manager::ApplicationSharedPtr));
   MOCK_METHOD1(SubscribeAppForWayPoints,
