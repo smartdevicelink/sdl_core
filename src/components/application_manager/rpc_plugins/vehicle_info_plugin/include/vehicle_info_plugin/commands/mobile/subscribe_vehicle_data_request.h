@@ -113,14 +113,6 @@ class SubscribeVehicleDataRequest
       app_mngr::ApplicationSharedPtr app,
       const smart_objects::SmartObject& msg_params) const;
 
-  DEPRECATED void CheckVISubscribtions(
-      app_mngr::ApplicationSharedPtr app,
-      std::string& out_info,
-      mobile_apis::Result::eType& out_result_code,
-      smart_objects::SmartObject& out_response_params,
-      smart_objects::SmartObject& out_request_params,
-      bool& out_result);
-
   /**
    * @brief Checks if current application and other applications
    * were subscribed to VI, prepare data that need to send to mobile app

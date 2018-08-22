@@ -30,8 +30,8 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_REMOTE_CONTROL_INCLUDE_REMOTE_CONTROL_RESOURCE_ALLOCATION_IMPL_H
-#define SRC_COMPONENTS_REMOTE_CONTROL_INCLUDE_REMOTE_CONTROL_RESOURCE_ALLOCATION_IMPL_H
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_RC_RPC_PLUGIN_INCLUDE_RC_RPC_PLUGIN_RESOURCE_ALLOCATION_MANAGER_IMPL_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_RC_RPC_PLUGIN_INCLUDE_RC_RPC_PLUGIN_RESOURCE_ALLOCATION_MANAGER_IMPL_H_
 #include "rc_rpc_plugin/resource_allocation_manager.h"
 #include "application_manager/application_impl.h"
 #include "rc_rpc_plugin/rc_app_extension.h"
@@ -109,14 +109,6 @@ class ResourceAllocationManagerImpl : public ResourceAllocationManager {
       application_manager::plugin_manager::PolicyEvent event) FINAL;
 
   void ResetAllAllocations() FINAL;
-
-  /**
-   * @brief GetApplicationExtention Provides access to application RC extention
-   * @param application Application
-   * @return Pointer to RC extention of application or NULL if not available
-   */
-  RCAppExtensionPtr GetApplicationExtention(
-      application_manager::ApplicationSharedPtr application) FINAL;
 
   void SendOnRCStatusNotifications(
       NotificationTrigger::eType event,
@@ -198,8 +190,6 @@ class ResourceAllocationManagerImpl : public ResourceAllocationManager {
    */
   void SetResourceFree(const std::string& module_type, const uint32_t app_id);
 
-  std::vector<std::string> all_supported_modules();
-
   /**
    * @brief AllocatedResources contains link between resource and application
    * owning that resource
@@ -231,4 +221,4 @@ class ResourceAllocationManagerImpl : public ResourceAllocationManager {
 };
 }  // rc_rpc_plugin
 
-#endif  // SRC_COMPONENTS_REMOTE_CONTROL_INCLUDE_REMOTE_CONTROL_RESOURCE_ALLOCATION_IMPL_H
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_RC_RPC_PLUGIN_INCLUDE_RC_RPC_PLUGIN_RESOURCE_ALLOCATION_MANAGER_IMPL_H_

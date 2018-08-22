@@ -63,8 +63,6 @@ void TelemetryMonitor::Start() {
   thread_ = threads::CreateThread("TelemetryMonitor", streamer_.get());
 }
 
-void TelemetryMonitor::set_streamer(Streamer* streamer) {}
-
 void TelemetryMonitor::set_streamer(std::shared_ptr<Streamer> streamer) {
   LOG4CXX_AUTO_TRACE(logger_);
   if (thread_ && !thread_->is_running()) {

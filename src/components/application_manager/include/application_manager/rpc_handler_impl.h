@@ -57,6 +57,7 @@
 #include "interfaces/v4_protocol_v1_2_no_extra_schema.h"
 
 #include "utils/threads/message_loop_thread.h"
+#include "utils/semantic_version.h"
 
 namespace application_manager {
 namespace rpc_handler {
@@ -141,6 +142,16 @@ class RPCHandlerImpl : public RPCHandler,
    */
   void SetTelemetryObserver(AMTelemetryObserver* observer) OVERRIDE;
 #endif  // TELEMETRY_MONITOR
+
+  /**
+   * @brief Extracts and validates the syncMsgVersion included in
+   * a RegisterAppInterfaceRequest
+   *
+   * @param output - SmartObject Message received from mobile
+   * @param messageVersion - message version to be updated
+   */
+  void GetMessageVersion(NsSmartDeviceLink::NsSmartObjects::SmartObject& output,
+                         utils::SemanticVersion& message_version);
 
  private:
   void ProcessMessageFromMobile(const std::shared_ptr<Message> message);

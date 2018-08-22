@@ -186,7 +186,8 @@ void PerformInteractionRequest::Run() {
     case mobile_apis::InteractionMode::BOTH: {
       LOG4CXX_DEBUG(logger_, "Interaction Mode: BOTH");
       if (!CheckChoiceSetVRSynonyms(app) || !CheckChoiceSetMenuNames(app) ||
-          !CheckVrHelpItemPositions(app)) {
+          !CheckVrHelpItemPositions(app) ||
+          !CheckChoiceSetListVRCommands(app)) {
         return;
       }
       break;
@@ -201,7 +202,8 @@ void PerformInteractionRequest::Run() {
     }
     case mobile_apis::InteractionMode::VR_ONLY: {
       LOG4CXX_DEBUG(logger_, "Interaction Mode: VR_ONLY");
-      if (!CheckChoiceSetVRSynonyms(app) || !CheckVrHelpItemPositions(app)) {
+      if (!CheckChoiceSetVRSynonyms(app) || !CheckVrHelpItemPositions(app) ||
+          !CheckChoiceSetListVRCommands(app)) {
         return;
       }
       break;
@@ -542,7 +544,7 @@ void PerformInteractionRequest::SendVRPerformInteractionRequest(
       smart_objects::SmartObject* choice_set =
           app->FindChoiceSet(choice_list[i].asInt());
       if (!choice_set) {
-        LOG4CXX_WARN(logger_, "Couldn't found choiset");
+        LOG4CXX_WARN(logger_, "Couldn't found choiceset");
         continue;
       }
       msg_params[strings::grammar_id][grammar_id_index++] =
@@ -750,6 +752,15 @@ bool PerformInteractionRequest::CheckChoiceSetVRSynonyms(
       size_t jj = 0;
       for (; ii < (*i_choice_set)[strings::choice_set].length(); ++ii) {
         for (; jj < (*j_choice_set)[strings::choice_set].length(); ++jj) {
+          if (!((*i_choice_set)[strings::choice_set][ii].keyExists(
+                    strings::vr_commands) &&
+                (*j_choice_set)[strings::choice_set][jj].keyExists(
+                    strings::vr_commands))) {
+            LOG4CXX_DEBUG(logger_,
+                          "One or both sets has missing vr commands, skipping "
+                          "synonym check");
+            return true;
+          }
           // choice_set pointer contains SmartObject msg_params
           smart_objects::SmartObject& ii_vr_commands =
               (*i_choice_set)[strings::choice_set][ii][strings::vr_commands];
@@ -946,6 +957,45 @@ bool PerformInteractionRequest::CheckChoiceIDFromResponse(
   return false;
 }
 
+bool PerformInteractionRequest::CheckChoiceSetListVRCommands(
+    ApplicationSharedPtr app) {
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  const smart_objects::SmartObject& choice_set_id_list =
+      (*message_)[strings::msg_params][strings::interaction_choice_set_id_list];
+
+  smart_objects::SmartObject* choice_set = nullptr;
+
+  for (size_t i = 0; i < choice_set_id_list.length(); ++i) {
+    choice_set = app->FindChoiceSet(choice_set_id_list[i].asInt());
+
+    // this should never ever happen since this was already checked
+    if (choice_set == nullptr) {
+      LOG4CXX_ERROR(
+          logger_,
+          "Couldn't find choiceset_id = " << choice_set_id_list[i].asInt());
+      SendResponse(false, mobile_apis::Result::INVALID_ID);
+      return false;
+    }
+
+    const smart_objects::SmartObject& choices_list =
+        (*choice_set)[strings::choice_set];
+    auto vr_status = MessageHelper::CheckChoiceSetVRCommands(choices_list);
+
+    // if not all choices have vr commands
+    if (vr_status != MessageHelper::ChoiceSetVRCommandsStatus::ALL) {
+      LOG4CXX_ERROR(logger_,
+                    "PerformInteraction has choice sets with "
+                    "missing vrCommands, not in MANUAL_ONLY mode");
+      SendResponse(false,
+                   mobile_apis::Result::INVALID_DATA,
+                   "Some choices don't contain VR commands.");
+      return false;
+    }
+  }
+  return true;
+}
+
 bool PerformInteractionRequest::CheckChoiceIDFromRequest(
     ApplicationSharedPtr app,
     const size_t choice_set_id_list_length,
@@ -962,9 +1012,10 @@ bool PerformInteractionRequest::CheckChoiceIDFromRequest(
     if (!choice_set) {
       LOG4CXX_ERROR(
           logger_,
-          "Couldn't find choiset_id = " << choice_set_id_list[i].asInt());
+          "Couldn't find choiceset_id = " << choice_set_id_list[i].asInt());
       return false;
     }
+
     choice_list_length = (*choice_set)[strings::choice_set].length();
     const smart_objects::SmartObject& choices_list =
         (*choice_set)[strings::choice_set];
@@ -973,7 +1024,7 @@ bool PerformInteractionRequest::CheckChoiceIDFromRequest(
           choice_id_set.insert(choices_list[k][strings::choice_id].asInt());
       if (!ins_res.second) {
         LOG4CXX_ERROR(logger_,
-                      "Choise with ID "
+                      "choice with ID "
                           << choices_list[k][strings::choice_id].asInt()
                           << " already exists");
         return false;

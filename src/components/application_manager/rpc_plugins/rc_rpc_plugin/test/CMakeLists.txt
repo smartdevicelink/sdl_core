@@ -41,6 +41,7 @@ include_directories (
 
 set (RC_TEST_SOURCES
 ${CMAKE_CURRENT_SOURCE_DIR}/resource_allocation_manager_impl_test.cc
+${CMAKE_CURRENT_SOURCE_DIR}/interior_data_cache_test.cc
 )
 
 set(RC_COMMANDS_TEST_DIR ${CMAKE_CURRENT_SOURCE_DIR}/commands)
@@ -72,5 +73,5 @@ if(ENABLE_LOG)
 endif()
 
 create_test("rc_commands_test" "${SOURCES}" "${LIBRARIES}" )
-create_test("resource_allocation_manager_test" "${RC_TEST_SOURCES}" "${LIBRARIES}")
+create_test("rc_plugin_test" "${RC_TEST_SOURCES}" "${LIBRARIES}")
 

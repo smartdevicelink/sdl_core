@@ -31,6 +31,7 @@
  */
 
 #include "rc_rpc_plugin/commands/hmi/rc_get_interior_vehicle_data_response.h"
+#include "rc_rpc_plugin/rc_module_constants.h"
 #include "application_manager/event_engine/event.h"
 
 namespace rc_rpc_plugin {
@@ -38,24 +39,30 @@ namespace commands {
 
 RCGetInteriorVehicleDataResponse::RCGetInteriorVehicleDataResponse(
     const app_mngr::commands::MessageSharedPtr& message,
-    app_mngr::ApplicationManager& application_manager,
-    app_mngr::rpc_service::RPCService& rpc_service,
-    app_mngr::HMICapabilities& hmi_capabilities,
-    policy::PolicyHandlerInterface& policy_handle,
-    ResourceAllocationManager& resource_allocation_manager)
-    : application_manager::commands::ResponseFromHMI(message,
-                                                     application_manager,
-                                                     rpc_service,
-                                                     hmi_capabilities,
-                                                     policy_handle) {
-  UNUSED(resource_allocation_manager);
-}
+    const RCCommandParams& params)
+    : application_manager::commands::ResponseFromHMI(
+          message,
+          params.application_manager_,
+          params.rpc_service_,
+          params.hmi_capabilities_,
+          params.policy_handler_) {}
 
 void RCGetInteriorVehicleDataResponse::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
 
   app_mngr::event_engine::Event event(
       hmi_apis::FunctionID::RC_GetInteriorVehicleData);
+
+  smart_objects::SmartObject& module_data = (*message_)
+      [application_manager::strings::msg_params][message_params::kModuleData];
+  if (module_data.keyExists(message_params::kAudioControlData)) {
+    smart_objects::SmartObject& audio_control_data =
+        module_data[message_params::kAudioControlData];
+    if (audio_control_data.keyExists(message_params::kKeepContext)) {
+      audio_control_data.erase(message_params::kKeepContext);
+    }
+  }
+
   event.set_smart_object(*message_);
   event.raise(application_manager_.event_dispatcher());
 }

@@ -189,6 +189,8 @@ const char* kAckMQKey = "AckMQ";
 const char* kApplicationListUpdateTimeoutKey = "ApplicationListUpdateTimeout";
 const char* kReadDIDFrequencykey = "ReadDIDRequest";
 const char* kGetVehicleDataFrequencyKey = "GetVehicleDataRequest";
+const char* kGetInteriorVehicleDataFrequencyKey =
+    "GetInteriorVehicleDataRequest";
 const char* kLegacyProtocolMaskKey = "LegacyProtocol";
 const char* kHubProtocolMaskKey = "HubProtocol";
 const char* kPoolProtocolMaskKey = "PoolProtocol";
@@ -222,6 +224,9 @@ const char* kEnableAppLaunchIOSKey = "EnableAppLaunchIOS";
 const char* kAppTransportChangeTimerKey = "AppTransportChangeTimer";
 const char* kAppTransportChangeTimerAdditionKey =
     "AppTransportChangeTimerAddition";
+const char* kLowVoltageSignalOffsetKey = "LowVoltageSignal";
+const char* kWakeUpSignalOffsetKey = "WakeUpSignal";
+const char* kIgnitionOffSignalOffsetKey = "IgnitionOffSignal";
 const char* kMultipleTransportsEnabledKey = "MultipleTransportsEnabled";
 const char* kSecondaryTransportForBluetoothKey =
     "SecondaryTransportForBluetooth";
@@ -339,6 +344,7 @@ const uint32_t kDefaultTransportManagerDisconnectTimeout = 0;
 const uint32_t kDefaultApplicationListUpdateTimeout = 1;
 const std::pair<uint32_t, uint32_t> kReadDIDFrequency = {5, 1};
 const std::pair<uint32_t, uint32_t> kGetVehicleDataFrequency = {5, 1};
+const std::pair<uint32_t, uint32_t> kGetInteriorVehicleDataFrequency = {20, 1};
 const std::pair<uint32_t, uint32_t> kStartStreamRetryAmount = {3, 1};
 const uint32_t kDefaultMaxThreadPoolSize = 2;
 const int kDefaultIAP2HubConnectAttempts = 0;
@@ -372,6 +378,9 @@ const uint16_t kDefaultWaitTimeBetweenApps = 4000;
 const bool kDefaultEnableAppLaunchIOS = true;
 const uint32_t kDefaultAppTransportChangeTimer = 500u;
 const uint32_t kDefaultAppTransportChangeTimerAddition = 0u;
+const int32_t kDefaultLowVoltageSignalOffset = 1;
+const int32_t kDefaultWakeUpSignalOffset = 2;
+const int32_t kDefaultIgnitionOffSignalOffset = 3;
 const std::string kAllowedSymbols =
     "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ01234567890_.-";
 const bool kDefaultMultipleTransportsEnabled = false;
@@ -485,7 +494,10 @@ Profile::Profile()
           kDefaultAppTransportChangeTimerAddition)
     , multiple_transports_enabled_(kDefaultMultipleTransportsEnabled)
     , error_occured_(false)
-    , error_description_() {
+    , error_description_()
+    , low_voltage_signal_offset_(kDefaultLowVoltageSignalOffset)
+    , wake_up_signal_offset_(kDefaultWakeUpSignalOffset)
+    , ignition_off_signal_offset_(kDefaultIgnitionOffSignalOffset) {
   // SDL version
   ReadStringValue(
       &sdl_version_, kDefaultSDLVersion, kMainSection, kSDLVersionKey);
@@ -530,8 +542,16 @@ const std::string& Profile::app_resource_folder() const {
   return app_resource_folder_;
 }
 
-bool Profile::enable_protocol_4() const {
-  return max_supported_protocol_version_ >= 4;
+int Profile::low_voltage_signal_offset() const {
+  return low_voltage_signal_offset_;
+}
+
+int Profile::wake_up_signal_offset() const {
+  return wake_up_signal_offset_;
+}
+
+int Profile::ignition_off_signal_offset() const {
+  return ignition_off_signal_offset_;
 }
 
 const std::string& Profile::app_icons_folder() const {
@@ -788,6 +808,11 @@ const std::pair<uint32_t, int32_t>& Profile::read_did_frequency() const {
 const std::pair<uint32_t, int32_t>& Profile::get_vehicle_data_frequency()
     const {
   return get_vehicle_data_frequency_;
+}
+
+const std::pair<uint32_t, int32_t>&
+Profile::get_interior_vehicle_data_frequency() const {
+  return get_interior_vehicle_data_frequency_;
 }
 
 const std::pair<uint32_t, int32_t>& Profile::start_stream_retry_amount() const {
@@ -1863,6 +1888,11 @@ void Profile::UpdateValues() {
                        kMainSection,
                        kGetVehicleDataFrequencyKey);
 
+  ReadUintIntPairValue(&get_interior_vehicle_data_frequency_,
+                       kGetInteriorVehicleDataFrequency,
+                       kMainSection,
+                       kGetInteriorVehicleDataFrequencyKey);
+
   ReadUIntValue(&max_thread_pool_size_,
                 kDefaultMaxThreadPoolSize,
                 kApplicationManagerSection,
@@ -2123,6 +2153,30 @@ void Profile::UpdateValues() {
   LOG_UPDATED_VALUE(app_tranport_change_timer_addition_,
                     kAppTransportChangeTimerAdditionKey,
                     kMainSection);
+
+  ReadIntValue(&low_voltage_signal_offset_,
+               kDefaultLowVoltageSignalOffset,
+               kMainSection,
+               kLowVoltageSignalOffsetKey);
+
+  LOG_UPDATED_VALUE(
+      low_voltage_signal_offset_, kLowVoltageSignalOffsetKey, kMainSection);
+
+  ReadIntValue(&wake_up_signal_offset_,
+               kDefaultWakeUpSignalOffset,
+               kMainSection,
+               kWakeUpSignalOffsetKey);
+
+  LOG_UPDATED_VALUE(
+      wake_up_signal_offset_, kWakeUpSignalOffsetKey, kMainSection);
+
+  ReadIntValue(&ignition_off_signal_offset_,
+               kDefaultIgnitionOffSignalOffset,
+               kMainSection,
+               kIgnitionOffSignalOffsetKey);
+
+  LOG_UPDATED_VALUE(
+      ignition_off_signal_offset_, kIgnitionOffSignalOffsetKey, kMainSection);
 
   ReadBoolValue(&multiple_transports_enabled_,
                 kDefaultMultipleTransportsEnabled,

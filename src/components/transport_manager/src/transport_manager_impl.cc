@@ -532,6 +532,8 @@ int TransportManagerImpl::Reinit() {
   LOG4CXX_AUTO_TRACE(logger_);
   DisconnectAllDevices();
   TerminateAllAdapters();
+  device_to_adapter_map_.clear();
+  connection_id_counter_ = 0;
   int ret = InitAllAdapters();
   return ret;
 }

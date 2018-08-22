@@ -82,6 +82,10 @@ extern const std::string S_PROTOCOL_TYPE;
 extern const std::string S_CORRELATION_ID;
 
 /**
+ * @brief String constant for RPC_MSG_VERSION.
+ */
+extern const std::string S_RPC_MSG_VERSION;
+/**
  * @brief String constant for "code" param name.
  */
 extern const std::string kCode;
@@ -149,8 +153,10 @@ class CSmartFactory {
    *
    * @return True if operation was successful or false otherwise.
    */
-  bool attachSchema(NsSmartDeviceLink::NsSmartObjects::SmartObject& object,
-                    const bool RemoveFakeParameters);
+  bool attachSchema(
+      NsSmartDeviceLink::NsSmartObjects::SmartObject& object,
+      const bool RemoveFakeParameters,
+      const utils::SemanticVersion& MessageVersion = utils::SemanticVersion());
 
   /**
    * @brief Attach schema to the struct SmartObject.
@@ -269,7 +275,8 @@ CSmartFactory<FunctionIdEnum, MessageTypeEnum, StructIdEnum>::CSmartFactory(
 template <class FunctionIdEnum, class MessageTypeEnum, class StructIdEnum>
 bool CSmartFactory<FunctionIdEnum, MessageTypeEnum, StructIdEnum>::attachSchema(
     NsSmartDeviceLink::NsSmartObjects::SmartObject& object,
-    const bool RemoveFakeParameters) {
+    const bool RemoveFakeParameters,
+    const utils::SemanticVersion& MessageVersion) {
   if (false == object.keyExists(strings::S_PARAMS))
     return false;
   if (false == object[strings::S_PARAMS].keyExists(strings::S_MESSAGE_TYPE))
@@ -295,7 +302,9 @@ bool CSmartFactory<FunctionIdEnum, MessageTypeEnum, StructIdEnum>::attachSchema(
   }
 
   object.setSchema(schemaIterator->second);
-  schemaIterator->second.applySchema(object, RemoveFakeParameters);
+
+  schemaIterator->second.applySchema(
+      object, RemoveFakeParameters, MessageVersion);
 
   return true;
 }

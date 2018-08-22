@@ -43,8 +43,6 @@ namespace application_manager {
 namespace commands {
 
 struct ResponseInfo {
-  DEPRECATED ResponseInfo(hmi_apis::Common_Result::eType result,
-                          HmiInterfaces::InterfaceID interface);
   ResponseInfo();
   ResponseInfo(const hmi_apis::Common_Result::eType result,
                const HmiInterfaces::InterfaceID hmi_interface,

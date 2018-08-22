@@ -42,13 +42,10 @@ std::shared_ptr<CArraySchemaItem> CArraySchemaItem::create(
       new CArraySchemaItem(ElementSchemaItem, MinSize, MaxSize));
 }
 
-Errors::eType CArraySchemaItem::validate(const SmartObject& Object) {
-  rpc::ValidationReport report("RPC");
-  return validate(Object, &report);
-}
-
-Errors::eType CArraySchemaItem::validate(const SmartObject& Object,
-                                         rpc::ValidationReport* report__) {
+Errors::eType CArraySchemaItem::validate(
+    const SmartObject& Object,
+    rpc::ValidationReport* report__,
+    const utils::SemanticVersion& MessageVersion) {
   if (SmartType_Array != Object.getType()) {
     std::string validation_info = "Incorrect type, expected: " +
                                   SmartObject::typeToString(SmartType_Array) +
@@ -80,8 +77,10 @@ Errors::eType CArraySchemaItem::validate(const SmartObject& Object,
   for (size_t i = 0u; i < array_len; ++i) {
     std::stringstream strVal;
     strVal << i;
-    const Errors::eType result = mElementSchemaItem->validate(
-        Object.getElement(i), &report__->ReportSubobject(strVal.str()));
+    const Errors::eType result =
+        mElementSchemaItem->validate(Object.getElement(i),
+                                     &report__->ReportSubobject(strVal.str()),
+                                     MessageVersion);
     if (Errors::OK != result) {
       return result;
     }
@@ -89,11 +88,14 @@ Errors::eType CArraySchemaItem::validate(const SmartObject& Object,
   return Errors::OK;
 }
 
-void CArraySchemaItem::applySchema(SmartObject& Object,
-                                   const bool RemoveFakeParameters) {
+void CArraySchemaItem::applySchema(
+    SmartObject& Object,
+    const bool RemoveFakeParameters,
+    const utils::SemanticVersion& MessageVersion) {
   if (SmartType_Array == Object.getType()) {
     for (size_t i = 0U; i < Object.length(); ++i) {
-      mElementSchemaItem->applySchema(Object[i], RemoveFakeParameters);
+      mElementSchemaItem->applySchema(
+          Object[i], RemoveFakeParameters, MessageVersion);
     }
   }
 }

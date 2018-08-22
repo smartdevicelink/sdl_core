@@ -30,8 +30,8 @@
 * POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include "signal_handlers.h"
-#include "life_cycle.h"
+#include "appMain/signal_handlers.h"
+#include "appMain/life_cycle.h"
 #include "utils/logger.h"
 
 namespace main_namespace {

@@ -64,5 +64,9 @@ void RCAppExtension::SaveResumptionData(
 void RCAppExtension::ProcessResumption(
     const NsSmartDeviceLink::NsSmartObjects::SmartObject& resumption_data) {}
 
+std::set<std::string> RCAppExtension::InteriorVehicleDataSubscriptions() const {
+  return subscribed_interior_vehicle_data_;
+}
+
 RCAppExtension::~RCAppExtension() {}
 }  //  namespace rc_rpc_plugin

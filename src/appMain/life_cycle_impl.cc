@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2017, Ford Motor Company
+* Copyright (c) 2018, Ford Motor Company
 * All rights reserved.
 *
 * Redistribution and use in source and binary forms, with or without
@@ -30,7 +30,7 @@
 * POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include "life_cycle.h"
+#include "appMain/life_cycle_impl.h"
 #include "utils/signals.h"
 #include "config_profile/profile.h"
 #include "application_manager/system_time/system_time_handler_impl.h"
@@ -47,13 +47,15 @@
 #include "utils/log_message_loop_thread.h"
 #endif  // ENABLE_LOG
 
+#include "appMain/low_voltage_signals_handler.h"
+
 using threads::Thread;
 
 namespace main_namespace {
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "SDLMain")
 
-LifeCycle::LifeCycle(const profile::Profile& profile)
+LifeCycleImpl::LifeCycleImpl(const profile::Profile& profile)
     : transport_manager_(NULL)
     , protocol_handler_(NULL)
     , connection_handler_(NULL)
@@ -76,7 +78,7 @@ LifeCycle::LifeCycle(const profile::Profile& profile)
     , profile_(profile) {
 }
 
-bool LifeCycle::StartComponents() {
+bool LifeCycleImpl::StartComponents() {
   LOG4CXX_AUTO_TRACE(logger_);
   DCHECK(!last_state_);
   last_state_ = new resumption::LastStateImpl(profile_.app_storage_folder(),
@@ -165,11 +167,36 @@ bool LifeCycle::StartComponents() {
   // start transport manager
   transport_manager_->Visibility(true);
 
+  LowVoltageSignalsOffset signals_offset{profile_.low_voltage_signal_offset(),
+                                         profile_.wake_up_signal_offset(),
+                                         profile_.ignition_off_signal_offset()};
+
+  low_voltage_signals_handler_.reset(
+      new LowVoltageSignalsHandler(*this, signals_offset));
+
   return true;
 }
 
+void LifeCycleImpl::LowVoltage() {
+  LOG4CXX_AUTO_TRACE(logger_);
+  transport_manager_->Visibility(false);
+  app_manager_->OnLowVoltage();
+}
+
+void LifeCycleImpl::IgnitionOff() {
+  LOG4CXX_AUTO_TRACE(logger_);
+  kill(getpid(), SIGINT);
+}
+
+void LifeCycleImpl::WakeUp() {
+  LOG4CXX_AUTO_TRACE(logger_);
+  app_manager_->OnWakeUp();
+  transport_manager_->Reinit();
+  transport_manager_->Visibility(true);
+}
+
 #ifdef MESSAGEBROKER_HMIADAPTER
-bool LifeCycle::InitMessageSystem() {
+bool LifeCycleImpl::InitMessageSystem() {
   mb_adapter_ = new hmi_message_handler::MessageBrokerAdapter(
       hmi_handler_, profile_.server_address(), profile_.server_port());
 
@@ -206,16 +233,16 @@ void sig_handler(int sig) {
 }
 }  //  namespace
 
-void LifeCycle::Run() {
+void LifeCycleImpl::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
   // Register signal handlers and wait sys signals
   // from OS
-  if (!utils::WaitTerminationSignals(&sig_handler)) {
+  if (!utils::Signals::WaitTerminationSignals(&sig_handler)) {
     LOG4CXX_FATAL(logger_, "Fail to catch system signal!");
   }
 }
 
-void LifeCycle::StopComponents() {
+void LifeCycleImpl::StopComponents() {
   LOG4CXX_AUTO_TRACE(logger_);
 
   DCHECK_OR_RETURN_VOID(hmi_handler_);
@@ -283,6 +310,9 @@ void LifeCycle::StopComponents() {
   DCHECK(app_manager_);
   delete app_manager_;
   app_manager_ = NULL;
+
+  LOG4CXX_INFO(logger_, "Destroying Low Voltage Signals Handler.");
+  low_voltage_signals_handler_.reset();
 
   LOG4CXX_INFO(logger_, "Destroying HMI Message Handler and MB adapter.");
 

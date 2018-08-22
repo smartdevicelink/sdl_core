@@ -50,6 +50,7 @@
 #include "application_manager/policies/policy_handler_interface.h"
 #include "smart_objects/smart_object.h"
 #include "transport_manager/common.h"
+#include <application_manager/smart_object_keys.h>
 
 namespace policy {
 class PolicyHandlerInterface;
@@ -633,6 +634,21 @@ class MessageHelper {
       smart_objects::SmartObject& image,
       ApplicationConstSharedPtr app,
       ApplicationManager& app_mngr);
+
+  /**
+  * @brief Stores whether each choice in a set has the vrCommands parameter
+  * MIXED means some choices have vrCommands and others don't
+  * ALL means all do, NONE means none do
+  */
+  enum ChoiceSetVRCommandsStatus { MIXED, ALL, NONE };
+
+  /**
+   * @brief Check whether each choice in the set has the vrCommands parameter
+   * @param choice set to check
+   * @return a ChoiceSetVRCommandsStatus with the state of the choice set
+   */
+  static ChoiceSetVRCommandsStatus CheckChoiceSetVRCommands(
+      const smart_objects::SmartObject& choice_set);
 
   /*
    * @brief Finds "Image" structure in request and verify image file presence

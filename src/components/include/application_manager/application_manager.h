@@ -33,6 +33,7 @@
 #ifndef SRC_COMPONENTS_INCLUDE_APPLICATION_MANAGER_APPLICATION_MANAGER_H_
 #define SRC_COMPONENTS_INCLUDE_APPLICATION_MANAGER_APPLICATION_MANAGER_H_
 
+#include <ctime>
 #include <string>
 #include <vector>
 #include <set>
@@ -239,6 +240,18 @@ class ApplicationManager {
    */
   virtual void set_application_id(const int32_t correlation_id,
                                   const uint32_t app_id) = 0;
+  /**
+   * @brief get_current_audio_source
+   * @return current audio source
+   */
+  virtual uint32_t get_current_audio_source() const = 0;
+
+  /**
+   * @brief set_current_audio_source
+   * @param source
+   * set current audio source
+   */
+  virtual void set_current_audio_source(const uint32_t source) = 0;
 
   /**
    * @brief OnHMILevelChanged the callback that allows SDL to react when
@@ -269,29 +282,6 @@ class ApplicationManager {
    * @param application contains registered application.
    */
   virtual void SendDriverDistractionState(ApplicationSharedPtr application) = 0;
-
-  /**
-   * DEPRECATED
-   * @brief Checks if Application is subscribed for way points
-   * @param Application AppID
-   * @return true if Application is subscribed for way points
-   * otherwise false
-   */
-  virtual bool IsAppSubscribedForWayPoints(const uint32_t app_id) const = 0;
-
-  /**
-   * DEPRECATED
-   * @brief Subscribe Application for way points
-   * @param Application AppID
-   */
-  virtual void SubscribeAppForWayPoints(const uint32_t app_id) = 0;
-
-  /**
-   * DEPRECATED
-   * @brief Unsubscribe Application for way points
-   * @param Application AppID
-   */
-  virtual void UnsubscribeAppFromWayPoints(const uint32_t app_id) = 0;
 
   /**
    * @brief Checks if Application is subscribed for way points
@@ -412,12 +402,10 @@ class ApplicationManager {
    */
   virtual void EndNaviServices(uint32_t app_id) = 0;
 
-  /* @brief Starts audio passthru process
-   * @deprecated Use BeginAudioPassThru(uint32_t app_id) instead
-   *
-   * @return true on success, false if passthru is already in process
+  /**
+   * @brief returns true if low voltage state is active
    */
-  DEPRECATED virtual bool BeginAudioPassThrough() = 0;
+  virtual bool IsLowVoltage() const = 0;
 
   /**
    * @brief Starts AudioPassThru process by given application
@@ -425,14 +413,6 @@ class ApplicationManager {
    * @return true if AudioPassThru can be started, false otherwise
    */
   virtual bool BeginAudioPassThru(uint32_t app_id) = 0;
-
-  /*
-   * @brief Finishes already started audio passthru process
-   * @deprecated Use EndAudioPassThru(uint32_t app_id) instead
-   *
-   * @return true on success, false if passthru is not active
-   */
-  DEPRECATED virtual bool EndAudioPassThrough() = 0;
 
   /**
    * @brief Finishes already started AudioPassThru process by given application
@@ -485,8 +465,6 @@ class ApplicationManager {
       const connection_handler::DeviceHandle handle) const = 0;
 
   virtual bool IsStopping() const = 0;
-
-  virtual bool IsLowVoltage() = 0;
 
   virtual void RemoveAppFromTTSGlobalPropertiesList(const uint32_t app_id) = 0;
 
@@ -701,21 +679,6 @@ class ApplicationManager {
       mobile_apis::HMILevel::eType hmi_level,
       mobile_apis::AudioStreamingState::eType audio_state,
       mobile_apis::VideoStreamingState::eType video_state,
-      mobile_apis::SystemContext::eType system_context) const = 0;
-
-  /**
-   * DEPRECATED
-   * @brief CreateRegularState create regular HMI state for application
-   * @param app_id Application id
-   * @param hmi_level of returned state
-   * @param audio_state of returned state
-   * @param system_context of returned state
-   * @return new regular HMI state
-   */
-  virtual HmiStatePtr CreateRegularState(
-      uint32_t app_id,
-      mobile_apis::HMILevel::eType hmi_level,
-      mobile_apis::AudioStreamingState::eType audio_state,
       mobile_apis::SystemContext::eType system_context) const = 0;
 
   /**

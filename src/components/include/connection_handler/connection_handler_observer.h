@@ -86,19 +86,6 @@ class ConnectionHandlerObserver {
   /**
    * \brief Callback function used by connection_handler
    * when Mobile Application initiates start of new service.
-   * \param deviceHandle Device identifier within which session has to be
-   * started.
-   * \param sessionKey Key of started session.
-   * \param type Established service type
-   */
-  virtual bool OnServiceStartedCallback(
-      const connection_handler::DeviceHandle& device_handle,
-      const int32_t& session_key,
-      const protocol_handler::ServiceType& type) = 0;
-
-  /**
-   * \brief Callback function used by connection_handler
-   * when Mobile Application initiates start of new service.
    * Result must be notified through NotifyServiceStartedResult().
    * \param deviceHandle Device identifier within which session has to be
    * started.

@@ -110,16 +110,11 @@ class ResumptionDataDB : public ResumptionData {
   virtual uint32_t GetHMIApplicationID(const std::string& policy_app_id,
                                        const std::string& device_id) const;
 
-  /**
-   * @brief Increments ignition counter for all registered applications
-   * and remember ign_off time stamp
-   */
-  DEPRECATED void OnSuspend() FINAL;
+  void IncrementGlobalIgnOnCounter() OVERRIDE;
 
-  /**
-   * @brief Decrements ignition counter for all registered applications
-   */
-  DEPRECATED void OnAwake() FINAL;
+  uint32_t GetGlobalIgnOnCounter() const OVERRIDE;
+
+  void ResetGlobalIgnOnCount() OVERRIDE;
 
   /**
    * @brief Increments ignition counter for all registered applications
