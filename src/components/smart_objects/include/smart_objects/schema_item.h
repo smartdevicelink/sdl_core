@@ -39,6 +39,7 @@
 #include "smart_objects/errors.h"
 
 #include <memory>
+#include <vector>
 #include "utils/macro.h"
 #include "utils/semantic_version.h"
 

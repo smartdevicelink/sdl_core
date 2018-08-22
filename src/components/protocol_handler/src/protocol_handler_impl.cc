@@ -290,6 +290,7 @@ void ProtocolHandlerImpl::SendStartSessionAck(
         static_cast<int64_t>(
             protocol_header_validator_.max_payload_size_by_service_type(
                 serviceTypeValue)));
+    UNUSED(mtu_written)
     LOG4CXX_DEBUG(logger_,
                   "MTU parameter was written to bson params: "
                       << mtu_written << "; Value: "
@@ -300,6 +301,7 @@ void ProtocolHandlerImpl::SendStartSessionAck(
       // Hash ID is only used in RPC case
       const bool hash_written = bson_object_put_int32(
           &params, strings::hash_id, static_cast<int32_t>(hash_id));
+      UNUSED(hash_written);
       LOG4CXX_DEBUG(logger_,
                     "Hash parameter was written to bson params: "
                         << hash_written << "; Value: "
@@ -317,6 +319,7 @@ void ProtocolHandlerImpl::SendStartSessionAck(
 
       const bool protocol_ver_written = bson_object_put_string(
           &params, strings::protocol_version, protocolVersionString);
+      UNUSED(protocol_ver_written);
       LOG4CXX_DEBUG(
           logger_,
           "Protocol version parameter was written to bson params: "
