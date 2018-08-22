@@ -40,9 +40,14 @@ include_directories (
   ${COMPONENTS_DIR}/resumption/include
   ${POLICY_GLOBAL_INCLUDE_PATH}/
   ${JSONCPP_INCLUDE_DIRECTORY}
-  ${LIBUSB_INCLUDE_DIRECTORY}
   ${LOG4CXX_INCLUDE_DIRECTORY}
 )
+
+if (CMAKE_SYSTEM_NAME STREQUAL "QNX")
+    include_directories ("${CMAKE_CURRENT_SOURCE_DIR}/include/transport_manager/tcp/platform_specific/qnx")
+elseif (CMAKE_SYSTEM_NAME STREQUAL "Linux")
+    include_directories ("${CMAKE_CURRENT_SOURCE_DIR}/include/transport_manager/tcp/platform_specific/linux")
+endif ()
 
 set(PATHS
   ${CMAKE_CURRENT_SOURCE_DIR}/include
@@ -73,9 +78,7 @@ if(BUILD_USB_SUPPORT)
       ${COMPONENTS_DIR}/transport_manager/include/transport_manager/usb/qnx
       ${COMPONENTS_DIR}/transport_manager/src/usb/qnx
     )
-    list(APPEND LIBRARIES
-      Libusb-1.0.16
-    )
+
   elseif(CMAKE_SYSTEM_NAME STREQUAL "QNX")
     set(EXCLUDE_PATHS
       ${COMPONENTS_DIR}/transport_manager/include/transport_manager/usb/libusb
@@ -92,7 +95,29 @@ else()
   )
 endif()
 
+if(NOT BUILD_TESTS)
+  list (APPEND EXCLUDE_PATH
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/iap2_emulation/iap2_transport_adapter.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/iap2_emulation/iap2_transport_adapter.cc
+  )
+endif()
+
+# exclude platform-dependent files before running collect_sources
+list(APPEND EXCLUDE_PATHS
+  ${COMPONENTS_DIR}/transport_manager/include/transport_manager/tcp/platform_specific
+  ${COMPONENTS_DIR}/transport_manager/src/tcp/platform_specific
+)
+
 collect_sources(SOURCES "${PATHS}" "${EXCLUDE_PATHS}")
+
+# then add platform-dependent files later
+set(PLATFORM_DEPENDENT_SOURCES)
+if (CMAKE_SYSTEM_NAME STREQUAL "QNX")
+  collect_sources(PLATFORM_DEPENDENT_SOURCES "${COMPONENTS_DIR}/transport_manager/src/tcp/platform_specific/qnx")
+elseif (CMAKE_SYSTEM_NAME STREQUAL "Linux")
+  collect_sources(PLATFORM_DEPENDENT_SOURCES "${COMPONENTS_DIR}/transport_manager/src/tcp/platform_specific/linux")
+endif ()
+list(APPEND SOURCES ${PLATFORM_DEPENDENT_SOURCES})
 
 add_library("TransportManager" ${SOURCES})
 target_link_libraries("TransportManager" ${LIBRARIES})

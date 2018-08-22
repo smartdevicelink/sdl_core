@@ -36,7 +36,7 @@
 #include "json/json.h"
 #include "gtest/gtest.h"
 #include "utils/macro.h"
-#include "utils/make_shared.h"
+
 #include "utils/file_system.h"
 #include "utils/date_time.h"
 #include "resumption/last_state_impl.h"
@@ -67,7 +67,7 @@ class AppLaunchDataJsonTest : public ::testing::Test {
  private:
   virtual void SetUp() {
     ::file_system::DeleteFile(kAppStorageFile);
-    test_last_state_ = std::auto_ptr<resumption::LastState>(
+    test_last_state_ = std::unique_ptr<resumption::LastState>(
         new resumption::LastStateImpl(kAppStorageFolder, kAppInfoStorage));
     ASSERT_TRUE(::file_system::CreateFile(kAppStorageFile));
 
@@ -102,8 +102,8 @@ class AppLaunchDataJsonTest : public ::testing::Test {
   void GetApplicationData_EXPECT_FALSE(const ApplicationData& in_data);
   std::string AddCounter(const std::string& inp, int32_t val);
 
-  std::auto_ptr<resumption::LastState> test_last_state_;
-  std::auto_ptr<AppLaunchDataJson> res_json_;
+  std::unique_ptr<resumption::LastState> test_last_state_;
+  std::unique_ptr<AppLaunchDataJson> res_json_;
   void SetTimestamp(const ApplicationData& in_data, TimevalStruct& timestamp);
 };
 
@@ -301,7 +301,7 @@ TEST_F(AppLaunchDataJsonTest, SelectMultipleData) {
     const std::string mobile_app_id = AddCounter("d1_mobile_app_id_", i);
     const std::string bundle_id = AddCounter("d1_bundle_id_", i);
 
-    ApplicationDataPtr app_data = utils::MakeShared<ApplicationData>(
+    ApplicationDataPtr app_data = std::make_shared<ApplicationData>(
         mobile_app_id, bundle_id, device_mac_1);
     AddApplicationDataWithIncreaseTable(*app_data);
     input_data1.push_back(app_data);
@@ -311,7 +311,7 @@ TEST_F(AppLaunchDataJsonTest, SelectMultipleData) {
     const std::string mobile_app_id = AddCounter("d2_mobile_app_id_", i);
     const std::string bundle_id = AddCounter("d2_bundle_id_", i);
 
-    ApplicationDataPtr app_data = utils::MakeShared<ApplicationData>(
+    ApplicationDataPtr app_data = std::make_shared<ApplicationData>(
         mobile_app_id, bundle_id, device_mac_2);
     AddApplicationDataWithIncreaseTable(*app_data);
     input_data2.push_back(app_data);

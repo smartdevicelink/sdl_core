@@ -39,8 +39,11 @@
 #include <map>
 #include <set>
 #include <utility>
-#include "utils/shared_ptr.h"
+#include <memory>
+
 #include "utils/helpers.h"
+#include "transport_manager/common.h"
+
 namespace policy {
 
 // TODO(PV): specify errors
@@ -77,7 +80,7 @@ enum PolicyTableStatus {
 // Code generator uses String class name, so this typedef was renamed to PTSring
 typedef std::string PTString;
 typedef std::vector<uint8_t> BinaryMessage;
-typedef utils::SharedPtr<BinaryMessage> BinaryMessageSptr;
+typedef std::shared_ptr<BinaryMessage> BinaryMessageSptr;
 
 typedef std::string HMILevel;
 typedef std::string Parameter;
@@ -190,7 +193,7 @@ struct DeviceParams {
   std::string device_name;
   std::string device_mac_address;
   std::string device_connection_type;
-  uint32_t device_handle;
+  transport_manager::DeviceHandle device_handle;
 };
 
 /**
@@ -265,7 +268,8 @@ struct AppPermissions {
       , appRevoked(false)
       , appPermissionsConsentNeeded(false)
       , appUnauthorized(false)
-      , requestTypeChanged(false) {}
+      , requestTypeChanged(false)
+      , requestSubTypeChanged(false) {}
 
   std::string application_id;
   bool isAppPermissionsRevoked;
@@ -278,6 +282,8 @@ struct AppPermissions {
   DeviceParams deviceInfo;
   bool requestTypeChanged;
   std::vector<std::string> requestType;
+  bool requestSubTypeChanged;
+  std::vector<std::string> requestSubType;
 };
 
 /**
@@ -432,6 +438,28 @@ struct ExternalConsentStatusItemSorter {
 };
 
 /**
+ * @brief The ApplicationPolicyActions struct contains actions which should be
+ * done for some application
+ */
+struct ApplicationPolicyActions {
+  ApplicationPolicyActions()
+      : is_notify_system(false)
+      , is_send_permissions_to_app(false)
+      , is_consent_needed(false) {}
+
+  bool is_notify_system;
+  bool is_send_permissions_to_app;
+  bool is_consent_needed;
+};
+
+/**
+ * @brief ApplicationsPoliciesActions map of actions to be done for every
+ * application
+ */
+typedef std::map<std::string, ApplicationPolicyActions>
+    ApplicationsPoliciesActions;
+
+/**
  * @brief Customer connectivity settings status
  */
 typedef std::set<ExternalConsentStatusItem, ExternalConsentStatusItemSorter>
@@ -479,7 +507,8 @@ enum PermissionsCheckResult {
   RESULT_CONSENT_NEEDED,
   RESULT_CONSENT_NOT_REQIURED,
   RESULT_PERMISSIONS_REVOKED_AND_CONSENT_NEEDED,
-  RESULT_REQUEST_TYPE_CHANGED
+  RESULT_REQUEST_TYPE_CHANGED,
+  RESULT_REQUEST_SUBTYPE_CHANGED
 };
 
 /**

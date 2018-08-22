@@ -52,6 +52,7 @@ namespace resumption_test {
 
 using ::testing::_;
 using ::testing::Return;
+using ::testing::ReturnRef;
 using ::testing::NiceMock;
 
 namespace am = application_manager;
@@ -68,7 +69,8 @@ class ResumptionDataJsonTest : public ResumptionDataTest {
       : last_state_("app_storage_folder", "app_info_storage")
       , res_json(last_state_, mock_application_manager_) {}
   virtual void SetUp() {
-    app_mock = new NiceMock<application_manager_test::MockApplication>();
+    app_mock = std::make_shared<
+        NiceMock<application_manager_test::MockApplication> >();
 
     policy_app_id_ = "test_policy_app_id";
     app_id_ = 10;
@@ -109,12 +111,14 @@ class ResumptionDataJsonTest : public ResumptionDataTest {
 
 TEST_F(ResumptionDataJsonTest, SaveApplication) {
   PrepareData();
+  EXPECT_CALL(*mock_app_extension_, SaveResumptionData(_));
   res_json.SaveApplication(app_mock);
   CheckSavedJson();
 }
 
 TEST_F(ResumptionDataJsonTest, SavedApplicationTwice) {
   PrepareData();
+  EXPECT_CALL(*mock_app_extension_, SaveResumptionData(_)).Times(2);
   res_json.SaveApplication(app_mock);
   CheckSavedJson();
   res_json.SaveApplication(app_mock);
@@ -123,6 +127,7 @@ TEST_F(ResumptionDataJsonTest, SavedApplicationTwice) {
 
 TEST_F(ResumptionDataJsonTest, SavedApplicationTwice_UpdateApp) {
   PrepareData();
+  EXPECT_CALL(*mock_app_extension_, SaveResumptionData(_)).Times(2);
   res_json.SaveApplication(app_mock);
   CheckSavedJson();
   (*vr_help_)[0][am::strings::position] = 2;
@@ -133,6 +138,7 @@ TEST_F(ResumptionDataJsonTest, SavedApplicationTwice_UpdateApp) {
 
 TEST_F(ResumptionDataJsonTest, RemoveApplicationFromSaved) {
   PrepareData();
+  EXPECT_CALL(*mock_app_extension_, SaveResumptionData(_));
   res_json.SaveApplication(app_mock);
   EXPECT_TRUE(
       res_json.RemoveApplicationFromSaved(policy_app_id_, kMacAddress_));
@@ -150,6 +156,7 @@ TEST_F(ResumptionDataJsonTest, RemoveApplicationFromSaved_AppNotSaved) {
 
 TEST_F(ResumptionDataJsonTest, IsApplicationSaved_ApplicationSaved) {
   PrepareData();
+  EXPECT_CALL(*mock_app_extension_, SaveResumptionData(_));
   res_json.SaveApplication(app_mock);
   CheckSavedJson();
   ssize_t result = res_json.IsApplicationSaved(policy_app_id_, kMacAddress_);
@@ -158,6 +165,7 @@ TEST_F(ResumptionDataJsonTest, IsApplicationSaved_ApplicationSaved) {
 
 TEST_F(ResumptionDataJsonTest, IsApplicationSaved_ApplicationRemoved) {
   PrepareData();
+  EXPECT_CALL(*mock_app_extension_, SaveResumptionData(_));
   res_json.SaveApplication(app_mock);
   CheckSavedJson();
   EXPECT_TRUE(
@@ -168,6 +176,7 @@ TEST_F(ResumptionDataJsonTest, IsApplicationSaved_ApplicationRemoved) {
 
 TEST_F(ResumptionDataJsonTest, GetSavedApplication) {
   PrepareData();
+  EXPECT_CALL(*mock_app_extension_, SaveResumptionData(_));
   res_json.SaveApplication(app_mock);
   smart_objects::SmartObject saved_app;
   EXPECT_TRUE(
@@ -184,6 +193,7 @@ TEST_F(ResumptionDataJsonTest, GetSavedApplication_AppNotSaved) {
 
 TEST_F(ResumptionDataJsonTest, GetDataForLoadResumeData) {
   PrepareData();
+  EXPECT_CALL(*mock_app_extension_, SaveResumptionData(_));
   res_json.SaveApplication(app_mock);
   CheckSavedJson();
   smart_objects::SmartObject saved_app;
@@ -201,6 +211,7 @@ TEST_F(ResumptionDataJsonTest, GetDataForLoadResumeData_AppRemove) {
   smart_objects::SmartObject saved_app;
 
   PrepareData();
+  EXPECT_CALL(*mock_app_extension_, SaveResumptionData(_));
   res_json.SaveApplication(app_mock);
   CheckSavedJson();
   EXPECT_TRUE(
@@ -211,6 +222,7 @@ TEST_F(ResumptionDataJsonTest, GetDataForLoadResumeData_AppRemove) {
 
 TEST_F(ResumptionDataJsonTest, UpdateHmiLevel) {
   PrepareData();
+  EXPECT_CALL(*mock_app_extension_, SaveResumptionData(_));
   res_json.SaveApplication(app_mock);
   CheckSavedJson();
   HMILevel::eType new_hmi_level = HMILevel::HMI_LIMITED;
@@ -222,6 +234,7 @@ TEST_F(ResumptionDataJsonTest, UpdateHmiLevel) {
 
 TEST_F(ResumptionDataJsonTest, IsHMIApplicationIdExist_AppIsSaved) {
   PrepareData();
+  EXPECT_CALL(*mock_app_extension_, SaveResumptionData(_));
   res_json.SaveApplication(app_mock);
   CheckSavedJson();
   EXPECT_TRUE(res_json.IsHMIApplicationIdExist(hmi_app_id_));
@@ -229,6 +242,7 @@ TEST_F(ResumptionDataJsonTest, IsHMIApplicationIdExist_AppIsSaved) {
 
 TEST_F(ResumptionDataJsonTest, IsHMIApplicationIdExist_AppNotSaved) {
   PrepareData();
+  EXPECT_CALL(*mock_app_extension_, SaveResumptionData(_));
   res_json.SaveApplication(app_mock);
 
   CheckSavedJson();
@@ -238,6 +252,7 @@ TEST_F(ResumptionDataJsonTest, IsHMIApplicationIdExist_AppNotSaved) {
 
 TEST_F(ResumptionDataJsonTest, GetHMIApplicationID) {
   PrepareData();
+  EXPECT_CALL(*mock_app_extension_, SaveResumptionData(_));
   res_json.SaveApplication(app_mock);
   CheckSavedJson();
   EXPECT_EQ(hmi_app_id_,
@@ -246,6 +261,7 @@ TEST_F(ResumptionDataJsonTest, GetHMIApplicationID) {
 
 TEST_F(ResumptionDataJsonTest, GetHMIApplicationID_AppNotSaved) {
   PrepareData();
+  EXPECT_CALL(*mock_app_extension_, SaveResumptionData(_));
   res_json.SaveApplication(app_mock);
   EXPECT_EQ(0u, res_json.GetHMIApplicationID(policy_app_id_, "other_dev_id"));
 }
@@ -253,11 +269,11 @@ TEST_F(ResumptionDataJsonTest, GetHMIApplicationID_AppNotSaved) {
 TEST_F(ResumptionDataJsonTest, OnSuspend) {
   SetZeroIgnOff();
   PrepareData();
-
+  EXPECT_CALL(*mock_app_extension_, SaveResumptionData(_));
   res_json.SaveApplication(app_mock);
   CheckSavedJson();
 
-  res_json.OnSuspend();
+  res_json.IncrementIgnOffCount();
   ign_off_count_++;
   CheckSavedJson();
 }
@@ -265,16 +281,17 @@ TEST_F(ResumptionDataJsonTest, OnSuspend) {
 TEST_F(ResumptionDataJsonTest, OnSuspendFourTimes) {
   PrepareData();
   SetZeroIgnOff();
+  EXPECT_CALL(*mock_app_extension_, SaveResumptionData(_));
   res_json.SaveApplication(app_mock);
   CheckSavedJson();
 
-  res_json.OnSuspend();
+  res_json.IncrementIgnOffCount();
   ign_off_count_++;
   CheckSavedJson();
 
-  res_json.OnSuspend();
-  res_json.OnSuspend();
-  res_json.OnSuspend();
+  res_json.IncrementIgnOffCount();
+  res_json.IncrementIgnOffCount();
+  res_json.IncrementIgnOffCount();
 
   EXPECT_TRUE(-1 != res_json.IsApplicationSaved(policy_app_id_, kMacAddress_));
 }
@@ -282,14 +299,15 @@ TEST_F(ResumptionDataJsonTest, OnSuspendFourTimes) {
 TEST_F(ResumptionDataJsonTest, OnSuspendOnAwake) {
   PrepareData();
   SetZeroIgnOff();
+  EXPECT_CALL(*mock_app_extension_, SaveResumptionData(_));
   res_json.SaveApplication(app_mock);
   CheckSavedJson();
 
-  res_json.OnSuspend();
+  res_json.IncrementIgnOffCount();
   ign_off_count_++;
   CheckSavedJson();
 
-  res_json.OnAwake();
+  res_json.DecrementIgnOffCount();
   ign_off_count_ = 0;
   CheckSavedJson();
 }
@@ -297,10 +315,11 @@ TEST_F(ResumptionDataJsonTest, OnSuspendOnAwake) {
 TEST_F(ResumptionDataJsonTest, Awake_AppNotSuspended) {
   SetZeroIgnOff();
   PrepareData();
+  EXPECT_CALL(*mock_app_extension_, SaveResumptionData(_));
   res_json.SaveApplication(app_mock);
   CheckSavedJson();
 
-  res_json.OnAwake();
+  res_json.DecrementIgnOffCount();
   ign_off_count_ = 0;
   CheckSavedJson();
 }
@@ -308,20 +327,22 @@ TEST_F(ResumptionDataJsonTest, Awake_AppNotSuspended) {
 TEST_F(ResumptionDataJsonTest, TwiceAwake_AppNotSuspended) {
   SetZeroIgnOff();
   PrepareData();
+  EXPECT_CALL(*mock_app_extension_, SaveResumptionData(_));
   res_json.SaveApplication(app_mock);
   CheckSavedJson();
 
-  res_json.OnSuspend();
-  res_json.OnAwake();
+  res_json.IncrementIgnOffCount();
+  res_json.DecrementIgnOffCount();
   ign_off_count_ = 0;
   CheckSavedJson();
 
-  res_json.OnAwake();
+  res_json.DecrementIgnOffCount();
   CheckSavedJson();
 }
 
 TEST_F(ResumptionDataJsonTest, GetHashId) {
   PrepareData();
+  EXPECT_CALL(*mock_app_extension_, SaveResumptionData(_));
   res_json.SaveApplication(app_mock);
   CheckSavedJson();
 
@@ -334,19 +355,20 @@ TEST_F(ResumptionDataJsonTest, GetIgnOffTime_AfterSuspendAndAwake) {
   uint32_t last_ign_off_time;
   PrepareData();
   SetZeroIgnOff();
+  EXPECT_CALL(*mock_app_extension_, SaveResumptionData(_));
   res_json.SaveApplication(app_mock);
   CheckSavedJson();
   last_ign_off_time = res_json.GetIgnOffTime();
   EXPECT_EQ(0u, last_ign_off_time);
 
-  res_json.OnSuspend();
+  res_json.IncrementIgnOffCount();
 
   uint32_t after_suspend;
   after_suspend = res_json.GetIgnOffTime();
   EXPECT_LE(last_ign_off_time, after_suspend);
 
   uint32_t after_awake;
-  res_json.OnAwake();
+  res_json.DecrementIgnOffCount();
 
   after_awake = res_json.GetIgnOffTime();
   EXPECT_LE(after_suspend, after_awake);
@@ -355,6 +377,7 @@ TEST_F(ResumptionDataJsonTest, GetIgnOffTime_AfterSuspendAndAwake) {
 TEST_F(ResumptionDataJsonTest, DropAppDataResumption) {
   PrepareData();
   SetZeroIgnOff();
+  EXPECT_CALL(*mock_app_extension_, SaveResumptionData(_));
   res_json.SaveApplication(app_mock);
   CheckSavedJson();
 
@@ -375,8 +398,8 @@ TEST_F(ResumptionDataJsonTest, DropAppDataResumption) {
   EXPECT_TRUE(app.keyExists(am::strings::application_global_properties) &&
               app[am::strings::application_global_properties].empty());
 
-  EXPECT_TRUE(app.keyExists(am::strings::application_subscribtions) &&
-              app[am::strings::application_subscribtions].empty());
+  EXPECT_TRUE(app.keyExists(am::strings::application_subscriptions) &&
+              app[am::strings::application_subscriptions].empty());
 
   EXPECT_TRUE(app.keyExists(am::strings::application_files) &&
               app[am::strings::application_files].empty());

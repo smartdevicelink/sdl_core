@@ -36,7 +36,7 @@
 #include "smart_objects/smart_object.h"
 #include "application_manager/smart_object_keys.h"
 #include "json/json.h"
-#include "utils/shared_ptr.h"
+
 #include "utils/date_time.h"
 
 namespace application_manager {
@@ -46,9 +46,9 @@ class AMTelemetryObserver {
   struct MessageMetric {
     TimevalStruct begin;
     TimevalStruct end;
-    utils::SharedPtr<smart_objects::SmartObject> message;
+    std::shared_ptr<smart_objects::SmartObject> message;
   };
-  typedef utils::SharedPtr<MessageMetric> MessageMetricSharedPtr;
+  typedef std::shared_ptr<MessageMetric> MessageMetricSharedPtr;
 
   virtual void OnMessage(MessageMetricSharedPtr) = 0;
   virtual ~AMTelemetryObserver() {}

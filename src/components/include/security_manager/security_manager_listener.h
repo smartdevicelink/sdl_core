@@ -31,6 +31,9 @@
  */
 #ifndef SRC_COMPONENTS_INCLUDE_SECURITY_MANAGER_SECURITY_MANAGER_LISTENER_H_
 #define SRC_COMPONENTS_INCLUDE_SECURITY_MANAGER_SECURITY_MANAGER_LISTENER_H_
+
+#include <string>
+
 namespace security_manager {
 
 class SecurityManagerListener {
@@ -44,10 +47,25 @@ class SecurityManagerListener {
    */
   virtual bool OnHandshakeDone(uint32_t connection_key,
                                SSLContext::HandshakeResult result) = 0;
+
+  /**
+   * @brief Notification about handshake failure
+   * @return true on success notification handling or false otherwise
+   */
+  virtual bool OnHandshakeFailed() = 0;
+
   /**
    * @brief Notify listeners that certificate update is required.
    */
   virtual void OnCertificateUpdateRequired() = 0;
+
+  /**
+   * @brief Get certificate data from policy
+   * @param reference to string where to save certificate data
+   * @return true if listener saved some data to string otherwise false
+   */
+  virtual bool GetPolicyCertificateData(std::string& data) const = 0;
+
   virtual ~SecurityManagerListener() {}
 };
 }  // namespace security_manager

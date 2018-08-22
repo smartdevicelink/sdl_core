@@ -35,10 +35,7 @@ include_directories(
   ${COMPONENTS_DIR}/application_manager/include/
   ${COMPONENTS_DIR}/application_manager/include/application_manager/
   ${COMPONENTS_DIR}/application_manager/include/application_manager/commands/
-  ${COMPONENTS_DIR}/application_manager/include/application_manager/commands/hmi/
-  ${COMPONENTS_DIR}/application_manager/include/application_manager/commands/mobile/
-  ${COMPONENTS_DIR}/application_manager/test/include/
-  ${COMPONENTS_DIR}/application_manager/test/include/application_manager/
+  ${CMAKE_SOURCE_DIR}/src
 )
 
 set(COMMANDS_TEST_DIR ${AM_TEST_DIR}/commands)
@@ -46,24 +43,22 @@ set(COMMANDS_TEST_DIR ${AM_TEST_DIR}/commands)
 file(GLOB SOURCES
   ${COMMANDS_TEST_DIR}/*
   ${COMPONENTS_DIR}/application_manager/test/mock_message_helper.cc
-  ${COMPONENTS_DIR}/application_manager/src/smart_object_keys.cc
-  ${COMPONENTS_DIR}/application_manager/src/message.cc
-  ${COMMANDS_TEST_DIR}/hmi/*
-  ${COMMANDS_TEST_DIR}/hmi/hmi_notifications/*
-  ${COMMANDS_TEST_DIR}/mobile/*
+  ${COMPONENTS_DIR}/application_manager/test/mock_application_helper.cc
+  ${COMPONENTS_DIR}/application_manager/test/commands/command_imp_test.cc
+  ${COMPONENTS_DIR}/application_manager/test/commands/command_request_impl_test.cc
+  ${COMPONENTS_DIR}/application_manager/test/commands/command_response_impl_test.cc
 )
 
 set(LIBRARIES
   gmock
   Utils
   SmartObjects
-  jsoncpp
   HMI_API
   MOBILE_API
-  ApplicationManager
-  AMHMICommandsLibrary
-  AMMobileCommandsLibrary
   connectionHandler
+  ApplicationManager
+  jsoncpp
+  Policy
 )
 
-create_cotired_test("commands_test" "${SOURCES}" "${LIBRARIES}" )
+create_test("commands_test" "${SOURCES}" "${LIBRARIES}")

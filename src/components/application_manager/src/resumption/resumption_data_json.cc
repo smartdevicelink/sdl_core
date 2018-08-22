@@ -66,7 +66,7 @@ void ResumptionDataJson::SaveApplication(
   const std::string device_mac = application->mac_address();
   const mobile_apis::HMILevel::eType hmi_level = application->hmi_level();
   const bool is_subscribed_for_way_points =
-      application_manager_.IsAppSubscribedForWayPoints(application->app_id());
+      application_manager_.IsAppSubscribedForWayPoints(application);
 
   sync_primitives::AutoLock autolock(resumption_lock_);
   Json::Value tmp;
@@ -95,7 +95,7 @@ void ResumptionDataJson::SaveApplication(
   json_app[strings::application_global_properties] = tmp;
   Formatters::CFormatterJsonBase::objToJsonValue(
       GetApplicationSubscriptions(application), tmp);
-  json_app[strings::application_subscribtions] = tmp;
+  json_app[strings::application_subscriptions] = tmp;
   Formatters::CFormatterJsonBase::objToJsonValue(
       GetApplicationFiles(application), tmp);
   json_app[strings::application_files] = tmp;
@@ -143,11 +143,11 @@ uint32_t ResumptionDataJson::GetHMIApplicationID(
   return hmi_app_id;
 }
 
-void ResumptionDataJson::OnSuspend() {
+void ResumptionDataJson::IncrementIgnOffCount() {
   using namespace app_mngr;
   LOG4CXX_AUTO_TRACE(logger_);
   sync_primitives::AutoLock autolock(resumption_lock_);
-  Json::Value to_save;
+  Json::Value to_save = Json::arrayValue;
   for (Json::Value::iterator it = GetSavedApplications().begin();
        it != GetSavedApplications().end();
        ++it) {
@@ -167,7 +167,7 @@ void ResumptionDataJson::OnSuspend() {
   LOG4CXX_DEBUG(logger_, GetResumptionData().toStyledString());
 }
 
-void ResumptionDataJson::OnAwake() {
+void ResumptionDataJson::DecrementIgnOffCount() {
   using namespace app_mngr;
   LOG4CXX_AUTO_TRACE(logger_);
   sync_primitives::AutoLock autolock(resumption_lock_);
@@ -277,6 +277,51 @@ uint32_t ResumptionDataJson::GetIgnOffTime() const {
     LOG4CXX_WARN(logger_, "last_save_time section is missed");
   }
   return resumption[strings::last_ign_off_time].asUInt();
+}
+
+uint32_t ResumptionDataJson::GetGlobalIgnOnCounter() const {
+  using namespace app_mngr;
+  LOG4CXX_AUTO_TRACE(logger_);
+  sync_primitives::AutoLock autolock(resumption_lock_);
+  Json::Value& resumption = GetResumptionData();
+  if (resumption.isMember(strings::global_ign_on_counter)) {
+    const uint32_t global_ign_on_counter =
+        resumption[strings::global_ign_on_counter].asUInt();
+    LOG4CXX_DEBUG(logger_, "Global Ign On Counter = " << global_ign_on_counter);
+    return global_ign_on_counter;
+  }
+  return 1;
+}
+
+void ResumptionDataJson::IncrementGlobalIgnOnCounter() {
+  using namespace app_mngr;
+  LOG4CXX_AUTO_TRACE(logger_);
+  sync_primitives::AutoLock autolock(resumption_lock_);
+  Json::Value& resumption = GetResumptionData();
+  if (resumption.isMember(strings::global_ign_on_counter)) {
+    const uint32_t global_ign_on_counter =
+        resumption[strings::global_ign_on_counter].asUInt();
+    LOG4CXX_DEBUG(
+        logger_,
+        "Global IGN ON counter in resumption data: " << global_ign_on_counter);
+    resumption[strings::global_ign_on_counter] = global_ign_on_counter + 1;
+    LOG4CXX_DEBUG(logger_,
+                  "Global IGN ON counter new value: "
+                      << resumption[strings::global_ign_on_counter].asUInt());
+  } else {
+    resumption[strings::global_ign_on_counter] = 1;
+  }
+  last_state().SaveStateToFileSystem();
+}
+
+void ResumptionDataJson::ResetGlobalIgnOnCount() {
+  using namespace app_mngr;
+  LOG4CXX_AUTO_TRACE(logger_);
+  sync_primitives::AutoLock autolock(resumption_lock_);
+  Json::Value& resumption = GetResumptionData();
+
+  resumption[strings::global_ign_on_counter] = 0;
+  LOG4CXX_DEBUG(logger_, "Global IGN ON counter resetting");
 }
 
 ssize_t ResumptionDataJson::IsApplicationSaved(
@@ -469,7 +514,7 @@ bool ResumptionDataJson::DropAppDataResumption(const std::string& device_id,
   application[strings::application_submenus].clear();
   application[strings::application_choice_sets].clear();
   application[strings::application_global_properties].clear();
-  application[strings::application_subscribtions].clear();
+  application[strings::application_subscriptions].clear();
   application[strings::application_files].clear();
   application.removeMember(strings::grammar_id);
   LOG4CXX_DEBUG(logger_,
@@ -480,6 +525,9 @@ bool ResumptionDataJson::DropAppDataResumption(const std::string& device_id,
 }
 
 void ResumptionDataJson::Persist() {
+  // We lock the resumption data because SaveStateToFileSystem accesses
+  // the same dictionary that we use here in ResumptionDataJson
+  sync_primitives::AutoLock autolock(resumption_lock_);
   last_state().SaveStateToFileSystem();
 }
 

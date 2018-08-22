@@ -40,7 +40,7 @@
 
 #include "transport_manager/transport_adapter/connection.h"
 #include "protocol/common.h"
-#include "utils/atomic_object.h"
+#include <atomic>
 #include "utils/threads/thread_delegate.h"
 #include "utils/lock.h"
 
@@ -201,7 +201,7 @@ class ThreadedSocketConnection : public Connection {
   FrameQueue frames_to_send_;
   mutable sync_primitives::Lock frames_to_send_mutex_;
 
-  sync_primitives::atomic_int socket_;
+  std::atomic_int socket_;
   bool terminate_flag_;
   bool unexpected_disconnect_;
   const DeviceUID device_uid_;

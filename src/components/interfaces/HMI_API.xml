@@ -37,7 +37,7 @@
 
 <interfaces name="SmartDeviceLink HMI API">
 
-<interface name="Common" version="1.6.0" date="2017-04-27">
+<interface name="Common" version="1.7.0" date="2017-10-20">
 
 <enum name="Result">
     <element name="SUCCESS" value="0"/>
@@ -335,6 +335,20 @@
   <element name="CLEAR" />
   <description>Clears the media clock timer (previously done through Show->mediaClock)</description>
 </enum>
+<enum name="AudioStreamingIndicator">
+  <element name="PLAY_PAUSE">
+    <description>Default playback indicator.</description>
+  </element>
+  <element name="PLAY">
+    <description>Indicates that a button press of the Play/Pause button would start the playback.</description>
+  </element>
+  <element name="PAUSE">
+    <description>Indicates that a button press of the Play/Pause button would pause the current playback.</description>
+  </element>
+  <element name="STOP">
+    <description>Indicates that a button press of the Play/Pause button would stop the current playback.</description>
+  </element>
+</enum> 
 
 <enum name="SystemContext">
   <description>Enumeration that describes possible contexts the application might be in on HU.</description>
@@ -371,6 +385,7 @@
   <element name="LHPLUS_PHONEMES" />
   <element name="PRE_RECORDED" />
   <element name="SILENCE" />
+  <element name="FILE" />
 </enum>
 
 <enum name="VrCapabilities">
@@ -559,6 +574,45 @@
     <element name="turnText"/>
 </enum>
 
+<enum name="MetadataType">
+  <element name="mediaTitle">
+    <description>The data in this field contains the title of the currently playing audio track.</description>
+  </element>
+  <element name="mediaArtist">
+    <description>The data in this field contains the artist or creator of the currently playing audio track.</description>
+  </element>
+  <element name="mediaAlbum">
+    <description>The data in this field contains the album title of the currently playing audio track.</description>
+  </element>
+  <element name="mediaYear">
+    <description>The data in this field contains the creation year of the currently playing audio track.</description>
+  </element>
+  <element name="mediaGenre">
+    <description>The data in this field contains the genre of the currently playing audio track.</description>
+  </element>
+  <element name="mediaStation">
+    <description>The data in this field contains the name of the current source for the media.</description>
+  </element>
+  <element name="rating">
+    <description>The data in this field is a rating.</description>
+  </element>
+  <element name="currentTemperature">
+    <description>The data in this field is the current temperature.</description>
+  </element>
+  <element name="maximumTemperature">
+    <description>The data in this field is the maximum temperature for the day.</description>
+  </element>
+  <element name="minimumTemperature">
+    <description>The data in this field is the minimum temperature for the day.</description>
+  </element>
+  <element name="weatherTerm">
+    <description>The data in this field describes the current weather (ex. cloudy, clear, etc.).</description>
+  </element>
+  <element name="humidity">
+    <description>The data in this field describes the current humidity value.</description>
+  </element>
+</enum>
+
 <enum name="ImageFieldName">
   <element name="softButtonImage">
     <description>The image field for SoftButton</description>
@@ -585,7 +639,10 @@
     <description>The image field for the app icon (set by setAppIcon)</description>
   </element>
   <element name="graphic">
-    <description>The image field for Show</description>
+    <description>The primary image field for Show</description>
+  </element>
+  <element name="secondaryGraphic">
+    <description>The secondary image field for Show</description>
   </element>
   <element name="showConstantTBTIcon">
     <description>The primary image field for ShowConstantTBT</description>
@@ -687,6 +744,63 @@
 </enum>
 
 <!--IVI part-->
+<enum name="ElectronicParkBrakeStatus">
+  <element name="CLOSED">
+    <description>
+      Park brake actuators have been fully applied.
+    </description>
+  </element>
+  <element name="TRANSITION">
+    <description>
+      Park brake actuators are transitioning to either Apply/Closed or Release/Open state.
+    </description>
+  </element>
+  <element name="OPEN">
+    <description>
+      Park brake actuators are released.
+    </description>
+  </element>
+  <element name="DRIVE_ACTIVE">
+    <description>
+      When driver pulls the Electronic Park Brake switch while driving "at speed".
+    </description>
+  </element>
+ <element name="FAULT">
+    <description>
+      When system has a fault or is under maintenance.
+    </description>
+ </element>
+</enum>
+<enum name="FuelType">
+    <element name="GASOLINE" />
+    <element name="DIESEL" />
+    <element name="CNG">
+        <description>
+            For vehicles using compressed natural gas.
+        </description>
+    </element>
+    <element name="LPG">
+        <description>
+            For vehicles using liquefied petroleum gas.
+        </description>
+    </element>
+    <element name="HYDROGEN">
+        <description>For FCEV (fuel cell electric vehicle).</description>
+    </element>
+    <element name="BATTERY">
+        <description>For BEV (Battery Electric Vehicle), PHEV (Plug-in Hybrid Electric Vehicle), solar vehicles and other vehicles which run on a battery.</description>
+    </element>
+</enum>
+
+<struct name="FuelRange">
+    <param name="type" type="Common.FuelType" mandatory="false"/>
+    <param name="range" type="Float" minvalue="0" maxvalue="10000" mandatory="false">
+        <description>
+            The estimate range in KM the vehicle can travel based on fuel level and consumption.
+        </description>
+    </param>
+</struct>
+
 <enum name="ComponentVolumeStatus">
   <description>The volume status of a vehicle component.</description>
   <element name="UNKNOWN" internal_name="CVS_UNKNOWN">
@@ -706,6 +820,33 @@
   </element>
   <element name="NOT_SUPPORTED" internal_name="CVS_NOT_SUPPORTED">
   <description> The data is not supported.</description>
+  </element>
+</enum>
+
+<enum name="TPMS">
+  <element name="UNKNOWN">
+    <description>If set the status of the tire is not known.</description>
+  </element>
+  <element name="SYSTEM_FAULT">
+    <description>TPMS does not function.</description>
+  </element>
+  <element name="SENSOR_FAULT">
+    <description>The sensor of the tire does not function.</description>
+  </element>
+  <element name="LOW">
+    <description>TPMS is reporting a low tire pressure for the tire.</description>
+  </element>
+  <element name="SYSTEM_ACTIVE">
+    <description>TPMS is active and the tire pressure is monitored.</description>
+  </element>
+  <element name="TRAIN">
+    <description>TPMS is reporting that the tire must be trained.</description>
+  </element>
+  <element name="TRAINING_COMPLETE">
+    <description>TPMS reports the training for the tire is completed.</description>
+  </element>
+  <element name="NOT_TRAINED">
+    <description>TPMS reports the tire is not trained.</description>
   </element>
 </enum>
 
@@ -830,6 +971,8 @@
   <description>Reflects the current primary audio source (if selected).</description>
   <element name="NO_SOURCE_SELECTED">
   </element>
+  <element name="CD">
+  </element>
   <element name="USB">
   </element>
   <element name="USB2">
@@ -841,6 +984,14 @@
   <element name="IPOD">
   </element>
   <element name="MOBILE_APP">
+  </element>
+  <element name="AM">
+  </element>
+  <element name="FM">
+  </element>
+  <element name="XM">
+  </element>
+  <element name="DAB">
   </element>
 </enum>
 
@@ -920,6 +1071,7 @@
   <element name="VEHICLEDATA_FUELLEVEL_STATE" />
   <element name="VEHICLEDATA_FUELCONSUMPTION" />
   <element name="VEHICLEDATA_EXTERNTEMP" />
+  <element name="VEHICLEDATA_TURNSIGNAL" />
   <element name="VEHICLEDATA_VIN" />
   <element name="VEHICLEDATA_PRNDL" />
   <element name="VEHICLEDATA_TIREPRESSURE" />
@@ -939,6 +1091,9 @@
   <element name="VEHICLEDATA_ENGINETORQUE" />
   <element name="VEHICLEDATA_ACCPEDAL" />
   <element name="VEHICLEDATA_STEERINGWHEEL" />
+  <element name="VEHICLEDATA_FUELRANGE" />
+  <element name="VEHICLEDATA_ENGINEOILLIFE" />
+  <element name="VEHICLEDATA_ELECTRONICPARKBRAKESTATUS" />
 </enum>
 
 <enum name="WiperStatus">
@@ -992,21 +1147,35 @@
 
 <enum name="SamplingRate">
   <description>Describes different sampling options for PerformAudioPassThru.</description>
-  <element name="8KHZ" internal_name="RATE_8KHZ"/>
-  <element name="16KHZ" internal_name="RATE_16KHZ"/>
-  <element name="22KHZ" internal_name="RATE_22KHZ"/>
-  <element name="44KHZ" internal_name="RATE_44KHZ"/>
+  <element name="8KHZ" internal_name="RATE_8KHZ">
+    <description>Sampling rate of 8000 Hz.</description>
+  </element>
+  <element name="16KHZ" internal_name="RATE_16KHZ">
+    <description>Sampling rate of 16000 Hz.</description>
+  </element>
+  <element name="22KHZ" internal_name="RATE_22KHZ">
+    <description>Sampling rate of 22050 Hz.</description>
+  </element>
+  <element name="44KHZ" internal_name="RATE_44KHZ">
+    <description>Sampling rate of 44100 Hz.</description>
+  </element>
 </enum>
 
 <enum name="BitsPerSample">
   <description>Describes different quality options for PerformAudioPassThru.</description>
-  <element name="8_BIT" internal_name="RATE_8_BIT"/>
-  <element name="16_BIT" internal_name="RATE_16_BIT"/>
+  <element name="8_BIT" internal_name="RATE_8_BIT">
+    <description>Audio sample is 8 bits wide, unsigned.</description>
+  </element>
+  <element name="16_BIT" internal_name="RATE_16_BIT">
+    <description>Audio sample is 16 bits wide, signed, and in little endian.</description>
+  </element>
 </enum>
 
 <enum name="AudioType">
   <description>Describes different audio type options for PerformAudioPassThru.</description>
-  <element name="PCM" />
+  <element name="PCM">
+    <description>Linear PCM.</description>
+  </element>
 </enum>
 
 <enum name="KeyboardLayout">
@@ -1063,13 +1232,13 @@
 </enum>
 
 <enum name="RequestType">
-    <description>Enumeration listing possible asynchronous requests.</description>
-    <element name="HTTP" />
-    <element name="FILE_RESUME" />
-    <element name="AUTH_REQUEST" />
-    <element name="AUTH_CHALLENGE" />
-    <element name="AUTH_ACK" />
-    <element name="PROPRIETARY" />
+  <description>Enumeration listing possible asynchronous requests.</description>
+  <element name="HTTP" />
+  <element name="FILE_RESUME" />
+  <element name="AUTH_REQUEST" />
+  <element name="AUTH_CHALLENGE" />
+  <element name="AUTH_ACK" />
+  <element name="PROPRIETARY" />
   <element name="QUERY_APPS" />
   <element name="LAUNCH_APP" />
   <element name="LOCK_SCREEN_ICON_URL" />
@@ -1084,6 +1253,7 @@
   <element name="EMERGENCY" />
   <element name="MEDIA" />
   <element name="FOTA" />
+  <element name="OEM_SPECIFIC"/>
 </enum>
 
 <enum name="ECallConfirmationStatus">
@@ -1350,21 +1520,21 @@
     <element name="UPDATING" />
     <element name="UPDATE_NEEDED"/>
   </enum>
-  
+
   <enum name="SystemError">
     <element name="SYNC_REBOOTED"/>
     <element name="SYNC_OUT_OF_MEMMORY" />
   </enum>
-  
+
   <enum name="StatisticsType">
     <element name="iAPP_BUFFER_FULL"/>
   </enum>
-  
+
   <enum name="ConsentSource">
     <element name="GUI"/>
     <element name="VUI" />
   </enum>
-  
+
   <enum name="DeviceState">
     <element name="UNKNOWN"/>
     <element name="UNPAIRED"/>
@@ -1377,7 +1547,7 @@
     <param name="line2" type="String" mandatory="false"/>
     <param name="textBody" type="String" mandatory="false"/>
   </struct>
-  
+
   <struct name="PermissionItem">
     <param name="name" type="String" mandatory="true">
       <description>Code of message of user-friendly text about functional group to be allowed/disallowed</description>
@@ -1388,7 +1558,7 @@
     <param name="allowed" type="Boolean" mandatory="false">
       <description>Specifies whether functionality was allowed/disallowed. If ommited - no information about User Consent is yet found for app.</description>
     </param>
-  </struct>  
+  </struct>
   <struct name="ServiceInfo">
     <param name="url" type="String" mandatory="true">
       <description>Get URL based on service type.</description>
@@ -1420,7 +1590,136 @@
 <enum name="ModuleType">
    <element name="CLIMATE"/>
    <element name="RADIO"/>
- </enum>
+   <element name="SEAT"/>
+   <element name="AUDIO"/>
+   <element name="LIGHT"/>
+   <element name="HMI_SETTINGS"/>
+</enum>
+
+    <enum name="MassageZone">
+      <description>List possible zones of a multi-contour massage seat.</description>
+      <element name="LUMBAR">
+        <description>The back of a multi-contour massage seat. or SEAT_BACK</description>
+      </element>
+      <element name="SEAT_CUSHION">
+        <description>The bottom a multi-contour massage seat. or SEAT_BOTTOM </description>
+      </element>
+    </enum>
+
+    <enum name="MassageMode">
+      <description>List possible modes of a massage zone.</description>
+      <element name="OFF"/>
+      <element name="LOW"/>
+      <element name="HIGH"/>
+    </enum>
+
+    <struct name="MassageModeData">
+      <description>Specify the mode of a massage zone.</description>
+      <param name="massageZone" type="MassageZone" mandatory="true"></param>
+      <param name="massageMode" type="MassageMode" mandatory="true"></param>
+    </struct>
+
+    <enum name="MassageCushion">
+      <description>List possible cushions of a multi-contour massage seat.</description>
+      <element name="TOP_LUMBAR"/>
+      <element name="MIDDLE_LUMBAR"/>
+      <element name="BOTTOM_LUMBAR"/>
+      <element name="BACK_BOLSTERS"/>
+      <element name="SEAT_BOLSTERS"/>
+    </enum>
+
+    <struct name="MassageCushionFirmness">
+      <description>The intensity or firmness of a cushion.</description>
+      <param name="cushion" type="MassageCushion" mandatory="true"></param>
+      <param name="firmness" type="Integer" minvalue="0" maxvalue="100" mandatory="true"></param>
+    </struct>
+
+    <enum name="SeatMemoryActionType">
+      <element name="SAVE">
+        <description>Save current seat postions and settings to seat memory.</description>
+      </element>
+      <element name="RESTORE">
+        <description>Restore / apply the seat memory settings to the current seat. </description>
+      </element>
+      <element name="NONE">
+        <description>No action to be performed.</description>
+      </element>
+    </enum>
+
+    <struct name="SeatMemoryAction">
+      <param name="id" type="Integer" minvalue="1" maxvalue="10" mandatory="true"/>
+      <param name="label" type="String" maxlength="100" mandatory="false"/>
+      <param name="action" type="SeatMemoryActionType" mandatory="true"/>
+    </struct>
+
+    <enum name="SupportedSeat">
+      <description>List possible seats that is a remote controllable seat.</description>
+      <element name="DRIVER"/>
+      <element name="FRONT_PASSENGER"/>
+    </enum>
+
+    <struct name="SeatControlData">
+      <description>Seat control data corresponds to "SEAT" ModuleType. </description>
+      <param name="id" type="SupportedSeat" mandatory="true"></param>
+
+      <param name="heatingEnabled" type="Boolean" mandatory="false"></param>
+      <param name="coolingEnabled" type="Boolean" mandatory="false"></param>
+      <param name="heatingLevel" type="Integer" minvalue="0" maxvalue="100" mandatory="false"></param>
+      <param name="coolingLevel" type="Integer" minvalue="0" maxvalue="100" mandatory="false"></param>
+
+      <param name="horizontalPosition" type="Integer" minvalue="0" maxvalue="100" mandatory="false"></param>
+      <param name="verticalPosition" type="Integer" minvalue="0" maxvalue="100" mandatory="false"></param>
+      <param name="frontVerticalPosition" type="Integer" minvalue="0" maxvalue="100" mandatory="false"></param>
+      <param name="backVerticalPosition" type="Integer" minvalue="0" maxvalue="100" mandatory="false"></param>
+      <param name="backTiltAngle" type="Integer" minvalue="0" maxvalue="100" mandatory="false"></param>
+
+      <param name="headSupportHorizontalPosition" type="Integer" minvalue="0" maxvalue="100" mandatory="false"></param>
+      <param name="headSupportVerticalPosition" type="Integer" minvalue="0" maxvalue="100" mandatory="false"></param>
+
+      <param name="massageEnabled" type="Boolean" mandatory="false"></param>
+      <param name="massageMode" type="MassageModeData" minsize="1" maxsize="2" array="true" mandatory="false"></param>
+      <param name="massageCushionFirmness" type="MassageCushionFirmness" minsize="1" maxsize="5" array="true" mandatory="false"></param>
+      <param name="memory" type="SeatMemoryAction" mandatory="false"></param>
+    </struct>
+
+    <struct name="SeatControlCapabilities">
+      <param name="moduleName" type="String" maxlength="100"  mandatory="true">
+        <description>
+        The short friendly name of the light control module.
+        It should not be used to identify a module by mobile application.
+        </description>
+      </param>
+      <param name="heatingEnabledAvailable" type="Boolean" mandatory="false">
+      </param>
+      <param name="coolingEnabledAvailable" type="Boolean" mandatory="false">
+      </param>
+      <param name="heatingLevelAvailable" type="Boolean" mandatory="false">
+      </param>
+      <param name="coolingLevelAvailable" type="Boolean" mandatory="false">
+      </param>
+      <param name="horizontalPositionAvailable" type="Boolean" mandatory="false">
+      </param>
+      <param name="verticalPositionAvailable" type="Boolean" mandatory="false">
+      </param>
+      <param name="frontVerticalPositionAvailable" type="Boolean" mandatory="false">
+      </param>
+      <param name="backVerticalPositionAvailable" type="Boolean" mandatory="false">
+      </param>
+      <param name="backTiltAngleAvailable" type="Boolean" mandatory="false">
+      </param>
+      <param name="headSupportHorizontalPositionAvailable" type="Boolean" mandatory="false">
+      </param>
+      <param name="headSupportVerticalPositionAvailable" type="Boolean" mandatory="false">
+      </param>
+      <param name="massageEnabledAvailable" type="Boolean" mandatory="false">
+      </param>
+      <param name="massageModeAvailable" type="Boolean" mandatory="false">
+      </param>
+      <param name="massageCushionFirmnessAvailable" type="Boolean" mandatory="false">
+      </param>
+      <param name="memoryAvailable" type="Boolean" mandatory="false">
+      </param>
+    </struct>
 
  <enum name="RadioBand">
    <element name="AM"/>
@@ -1462,6 +1761,92 @@
    <element name="NOT_FOUND"/>
  </enum>
 
+ <struct name="StationIDNumber">
+     <param name="countryCode" type="Integer" minvalue="0" maxvalue="999"  mandatory="false">
+         <description>Binary Representation of ITU Country Code. USA Code is 001.</description>
+     </param>
+     <param name="fccFacilityId" type="Integer" minvalue="0" maxvalue="999999"  mandatory="false">
+         <description>Binary representation  of unique facility ID assigned by the FCC; FCC controlled for U.S. territory</description>
+     </param>
+ </struct>
+
+ <struct name="GPSData">
+   <description>Struct with the GPS data.</description>
+   <param name="longitudeDegrees" type="Float" minvalue="-180" maxvalue="180" mandatory="true">
+   </param>
+   <param name="latitudeDegrees" type="Float" minvalue="-90" maxvalue="90" mandatory="true">
+   </param>
+   <param name="utcYear" type="Integer" minvalue="2010" maxvalue="2100" mandatory="false">
+       <description>The current UTC year.</description>
+   </param>
+   <param name="utcMonth" type="Integer" minvalue="1" maxvalue="12" mandatory="false">
+       <description>The current UTC month.</description>
+  </param>
+   <param name="utcDay" type="Integer" minvalue="1" maxvalue="31" mandatory="false">
+      <description>The current UTC day.</description>
+   </param>
+   <param name="utcHours" type="Integer" minvalue="0" maxvalue="23" mandatory="false">
+       <description>The current UTC hour.</description>
+   </param>
+   <param name="utcMinutes" type="Integer" minvalue="0" maxvalue="59" mandatory="false">
+       <description>The current UTC minute.</description>
+   </param>
+   <param name="utcSeconds" type="Integer" minvalue="0" maxvalue="59" mandatory="false">
+       <description>The current UTC second.</description>
+   </param>
+   <param name="compassDirection" type="Common.CompassDirection" mandatory="false">
+       <description>See CompassDirection.</description>
+   </param>
+   <param name="pdop" type="Float" minvalue="0" maxvalue="1000" mandatory="false">
+       <description>PDOP.</description>
+   </param>
+   <param name="hdop" type="Float" minvalue="0" maxvalue="1000" mandatory="false">
+       <description>HDOP.</description>
+   </param>
+   <param name="vdop" type="Float" minvalue="0" maxvalue="1000" mandatory="false">
+       <description>VDOP.</description>
+   </param>
+   <param name="actual" type="Boolean" mandatory="false">
+       <description>
+         True, if actual.
+         False, if infered.
+       </description>
+   </param>
+   <param name="satellites" type="Integer" minvalue="0" maxvalue="31" mandatory="false">
+       <description>Number of satellites in view</description>
+   </param>
+   <param name="dimension" type="Common.Dimension" mandatory="false">
+       <description>See Dimension</description>
+   </param>
+   <param name="altitude" type="Float" minvalue="-10000" maxvalue="10000" mandatory="false">
+       <description>Altitude in meters</description>
+   </param>
+   <param name="heading" type="Float" minvalue="0" maxvalue="359.99" mandatory="false">
+       <description>The heading. North is 0. Resolution is 0.01</description>
+   </param>
+   <param name="speed" type="Float" minvalue="0" maxvalue="500" mandatory="false">
+       <description>The speed in KPH</description>
+   </param>
+ </struct>
+
+ <struct name="SisData">
+     <param name="stationShortName" type="String" minlength="4" maxlength="7"  mandatory="false">
+         <description>Identifies the 4-alpha-character station call sign plus an optional (-FM) extension</description>
+     </param>
+     <param name="stationIDNumber" type="StationIDNumber"  mandatory="false">
+         <description>Used for network Application. Consists of Country Code and FCC Facility ID.</description>
+     </param>
+     <param name="stationLongName" type="String" minlength="0" maxlength="56"  mandatory="false">
+         <description>Identifies the station call sign or other identifying information in the long format.</description>
+     </param>
+     <param name="stationLocation" type="GPSData" mandatory="false">
+         <description>Provides the 3-dimensional geographic station location.</description>
+     </param>
+     <param name="stationMessage" type="String" minlength="0" maxlength="56"  mandatory="false">
+         <description>May be used to convey textual information of general interest to the consumer such as weather forecasts or public service announcements. Includes a high priority delivery feature to convey emergencies that may be in the listening area.</description>
+     </param>
+ </struct>
+
  <struct name="RadioControlData">
    <param name="frequencyInteger" type="Integer" minvalue="0" maxvalue="1710" mandatory="false">
      <description>The integer part of the frequency ie for 101.7 this value should be 101</description>
@@ -1473,10 +1858,13 @@
    </param>
    <param name="rdsData" type="Common.RdsData" mandatory="false">
    </param>
-   <param name="availableHDs" type="Integer" minvalue="1" maxvalue="3" mandatory="false">
+   <param name="hdRadioEnable" type="Boolean" mandatory="false">
+     <description> True if the hd radio is on, false is the radio is off</description>
+   </param>
+   <param name="availableHDs" type="Integer" minvalue="1" maxvalue="7" mandatory="false">
      <description>number of HD sub-channels if available</description>
    </param>
-   <param name="hdChannel" type="Integer" minvalue="1" maxvalue="3" mandatory="false">
+   <param name="hdChannel" type="Integer" minvalue="1" maxvalue="7" mandatory="false">
      <description>Current HD sub-channel if available</description>
    </param>
    <param name="signalStrength" type="Integer" minvalue="0" maxvalue="100" mandatory="false">
@@ -1488,6 +1876,9 @@
      <description> True if the radio is on, false is the radio is off</description>
    </param>
    <param name="state" type="Common.RadioState" mandatory="false">
+   </param>
+   <param name="sisData" type="SisData" mandatory="false">
+       <description>Read-only Station Information Service (SIS) data provides basic information about the station such as call sign, as well as information not displayable to the consumer such as the station identification number</description>
    </param>
  </struct>
 
@@ -1550,6 +1941,24 @@
        True: Available, False: Not Available, Not present: Not Available.
      </description>
    </param>
+   <param name="sisDataAvailable" type="Boolean" mandatory="false">
+       <description>
+         Availability of the getting HD radio Station Information Service (SIS) data.
+         True: Available, False: Not Available, Not present: Not Available.
+       </description>
+   </param>
+   <param name="hdRadioEnableAvailable" type="Boolean" mandatory="false">
+     <description>
+       Availability of the control of enable/disable HD radio.
+       True: Available, False: Not Available, Not present: Not Available.
+     </description>
+   </param>
+   <param name="siriusxmRadioAvailable" type="Boolean" mandatory="false">
+     <description>
+       Availability of sirius XM radio.
+       True: Available, False: Not Available, Not present: Not Available.
+     </description>
+   </param>
  </struct>
 
  <enum name="DefrostZone">
@@ -1600,6 +2009,18 @@
    <param name="acMaxEnable" type="Boolean" mandatory="false">
    </param>
    <param name="ventilationMode" type="Common.VentilationMode" mandatory="false">
+   </param>
+   <param name="heatedSteeringWheelEnable" type="Boolean" mandatory="false">
+       <description>value false means disabled/turn off, value true means enabled/turn on.</description>
+   </param>
+   <param name="heatedWindshieldEnable" type="Boolean" mandatory="false">
+       <description>value false means disabled, value true means enabled.</description>
+   </param>
+   <param name="heatedRearWindowEnable" type="Boolean" mandatory="false">
+       <description>value false means disabled, value true means enabled.</description>
+   </param>
+   <param name="heatedMirrorsEnable" type="Boolean" mandatory="false">
+       <description>value false means disabled, value true means enabled.</description>
    </param>
  </struct>
 
@@ -1678,6 +2099,253 @@
        A set of all ventilation modes that are controllable.
      </description>
    </param>
+   <param name="heatedSteeringWheelAvailable" type="Boolean" mandatory="false">
+       <description>
+         Availability of the control (enable/disable) of heated Steering Wheel.
+         True: Available, False: Not Available, Not present: Not Available.
+       </description>
+   </param>
+   <param name="heatedWindshieldAvailable" type="Boolean" mandatory="false">
+       <description>
+         Availability of the control (enable/disable) of heated Windshield.
+         True: Available, False: Not Available, Not present: Not Available.
+       </description>
+   </param>
+   <param name="heatedRearWindowAvailable" type="Boolean" mandatory="false">
+       <description>
+         Availability of the control (enable/disable) of heated Rear Window.
+         True: Available, False: Not Available, Not present: Not Available.
+       </description>
+   </param>
+   <param name="heatedMirrorsAvailable" type="Boolean" mandatory="false">
+       <description>
+         Availability of the control (enable/disable) of heated Mirrors.
+         True: Available, False: Not Available, Not present: Not Available.
+       </description>
+   </param>
+ </struct>
+
+ <struct name="EqualizerSettings">
+     <description>Defines the each Equalizer channel settings.</description>
+     <param name="channelId" type="Integer" minvalue="1" maxvalue="100" mandatory="true"></param>
+     <param name="channelName" type="String" mandatory="false" maxlength="50">
+         <description>read-only channel / frequency name (e.i. "Treble, Midrange, Bass" or "125 Hz")</description>
+     </param>
+     <param name="channelSetting" type="Integer" minvalue="0" maxvalue="100" mandatory="true"></param>
+ </struct>
+
+ <struct name="AudioControlData">
+     <param name="source" type="PrimaryAudioSource" mandatory="false">
+         <description>
+           In a getter response or a notification, it is the current primary audio source of the system.
+           In a setter request, it is the target audio source that the system shall switch to.
+           If the value is MOBILE_APP, the system shall switch to the mobile media app that issues the setter RPC.
+         </description>
+     </param>
+     <param name="keepContext" type="Boolean" mandatory="false">
+         <description>
+           This parameter shall not be present in any getter responses or notifications.
+           This parameter is optional in a setter request. The default value is false.
+           If it is false, the system not only changes the audio source but also brings the default application
+           or system UI associated with the audio source to foreground.
+           If it is true, the system changes the audio source, but still keeps the current application in foreground.
+         </description>
+     </param>
+     <param name="volume" type="Integer" mandatory="false" minvalue="0" maxvalue="100">
+         <description>Reflects the volume of audio, from 0%-100%.</description>
+     </param>
+     <param name="equalizerSettings" type="EqualizerSettings" minsize="1" maxsize="100" mandatory="false" array="true">
+         <description>Defines the list of supported channels (band) and their current/desired settings on HMI</description>
+     </param>
+ </struct>
+
+ <struct name="AudioControlCapabilities">
+     <param name="moduleName" type="String" maxlength="100" mandatory="true">
+         <description>
+           The short friendly name of the light control module.
+           It should not be used to identify a module by mobile application.
+         </description>
+     </param>
+     <param name="sourceAvailable" type="Boolean" mandatory="false">
+         <description>Availability of the control of audio source. </description>
+     </param>
+     <param name="keepContextAvailable" type="Boolean" mandatory="false">
+         <description>Availability of the keepContext paramter. </description>
+     </param>
+     <param name="volumeAvailable" type="Boolean" mandatory="false">
+         <description>Availability of the control of audio volume.</description>
+     </param>
+     <param name="equalizerAvailable" type="Boolean" mandatory="false">
+         <description>Availability of the control of Equalizer Settings.</description>
+     </param>
+     <param name="equalizerMaxChannelId" type="Integer" minvalue="1" maxvalue="100" mandatory="false">
+         <description>Must be included if equalizerAvailable=true, and assume all IDs starting from 1 to this value are valid</description>
+     </param>
+ </struct>
+
+
+ <struct name="RGBColor">
+     <param name="red" type="Integer" minvalue="0" maxvalue="255" mandatory="true" />
+     <param name="green" type="Integer" minvalue="0" maxvalue="255" mandatory="true" />
+     <param name="blue" type="Integer" minvalue="0" maxvalue="255" mandatory="true" />
+ </struct>
+
+ <enum name="LightName">
+     <!-- Common Single Light 0~500 -->
+     <element name="FRONT_LEFT_HIGH_BEAM" value="0"/>
+     <element name="FRONT_RIGHT_HIGH_BEAM" value="1"/>
+     <element name="FRONT_LEFT_LOW_BEAM" value="2"/>
+     <element name="FRONT_RIGHT_LOW_BEAM" value="3"/>
+     <element name="FRONT_LEFT_PARKING_LIGHT" value="4"/>
+     <element name="FRONT_RIGHT_PARKING_LIGHT" value="5"/>
+     <element name="FRONT_LEFT_FOG_LIGHT" value="6"/>
+     <element name="FRONT_RIGHT_FOG_LIGHT" value="7"/>
+     <element name="FRONT_LEFT_DAYTIME_RUNNING_LIGHT" value="8"/>
+     <element name="FRONT_RIGHT_DAYTIME_RUNNING_LIGHT" value="9"/>
+     <element name="FRONT_LEFT_TURN_LIGHT" value="10"/>
+     <element name="FRONT_RIGHT_TURN_LIGHT" value="11"/>
+     <element name="REAR_LEFT_FOG_LIGHT" value="12"/>
+     <element name="REAR_RIGHT_FOG_LIGHT" value="13"/>
+     <element name="REAR_LEFT_TAIL_LIGHT" value="14"/>
+     <element name="REAR_RIGHT_TAIL_LIGHT" value="15"/>
+     <element name="REAR_LEFT_BRAKE_LIGHT" value="16"/>
+     <element name="REAR_RIGHT_BRAKE_LIGHT" value="17"/>
+     <element name="REAR_LEFT_TURN_LIGHT" value="18"/>
+     <element name="REAR_RIGHT_TURN_LIGHT" value="19"/>
+     <element name="REAR_REGISTRATION_PLATE_LIGHT" value="20"/>
+
+     <!-- Exterior Lights by common function groups 501~800 -->
+     <element name="HIGH_BEAMS" value="501">
+         <description>Include all high beam lights: front_left and front_right.</description>
+     </element>
+     <element name="LOW_BEAMS" value="502">
+         <description>Include all low beam lights: front_left and front_right.</description>
+     </element>
+     <element name="FOG_LIGHTS" value="503">
+         <description>Include all fog lights: front_left, front_right, rear_left and rear_right.</description>
+     </element>
+     <element name="RUNNING_LIGHTS" value="504">
+         <description>Include all daytime running lights: front, left and right.</description>
+     </element>
+     <element name="PARKING_LIGHTS" value="505">
+         <description>Include all parking lights: front_left and front_right.</description>
+     </element>
+     <element name="BRAKE_LIGHTS" value="506">
+         <description>Include all brake lights: rear_left and rear_right.</description>
+     </element>
+     <element name="REAR_REVERSING_LIGHTS" value="507"/>
+     <element name="SIDE_MARKER_LIGHTS" value="508"/>
+     <element name="LEFT_TURN_LIGHTS" value="509">
+         <description>Include all left turn signal lights: front_left, rear_left, left_side and mirror_mounted.</description>
+     </element>
+     <element name="RIGHT_TURN_LIGHTS" value="510">
+         <description>Include all right turn signal lights: front_right, rear_right, right_side and mirror_mounted.</description>
+     </element>
+     <element name="HAZARD_LIGHTS" value="511">
+         <description>Include all hazard lights: front_left, front_right, rear_left and rear_right.</description>
+     </element>
+
+     <!-- Interior Lights by common function groups 801~900 -->
+     <element name="AMBIENT_LIGHTS" value="801"/>
+     <element name="OVERHEAD_LIGHTS" value="802"/>
+     <element name="READING_LIGHTS" value="803"/>
+     <element name="TRUNK_LIGHTS" value="804"/>
+
+     <!-- Lights by location 901~1000-->
+     <element name="EXTERIOR_FRONT_LIGHTS" value="901">
+         <description>Include exterior lights located in front of the vehicle. For example, fog lights and low beams.</description>
+     </element>
+     <element name="EXTERIOR_REAR_LIGHTS" value="902">
+         <description>Include exterior lights located at the back of the vehicle. For example, license plate lights, reverse lights, cargo lights, bed lights an trailer assist lights.</description>
+     </element>
+     <element name="EXTERIOR_LEFT_LIGHTS" value="903">
+         <description>Include exterior lights located at the left side of the vehicle. For example, left puddle lights and spot lights.</description>
+     </element>
+     <element name="EXTERIOR_RIGHT_LIGHTS" value="904">
+         <description>Include exterior lights located at the right side of the vehicle. For example, right puddle lights and spot lights.</description>
+     </element>
+ </enum>
+
+ <enum name="LightStatus">
+     <element name="ON"/>
+     <element name="OFF"/>
+ </enum>
+
+ <struct name="LightCapabilities">
+     <param name="name" type="LightName" mandatory="true" />
+     <!-- Assuming light ON/OFF status is always available -->
+     <param name="densityAvailable" type="Boolean" mandatory="false">
+         <description>
+           Indicates if the light's density can be set remotely (similar to a dimmer).
+         </description>
+     </param>
+     <param name="rgbColorSpaceAvailable" type="Boolean" mandatory="false">
+         <description>
+           Indicates if the light's color can be set remotely by using the RGB color space.
+         </description>
+     </param>
+ </struct>
+
+ <struct name="LightControlCapabilities">
+     <param name="moduleName" type="String" maxlength="100" mandatory="true">
+         <description>
+           The short friendly name of the light control module.
+           It should not be used to identify a module by mobile application.
+         </description>
+     </param>
+     <param name="supportedLights" type="LightCapabilities" minsize="1" maxsize="100" array="true" mandatory="true">
+     <description> An array of available light names that are controllable. </description>
+     </param>
+ </struct>
+
+ <struct name="LightState">
+     <param name="id" type="LightName" mandatory="true">
+         <description>The name of a light or a group of lights. </description>
+     </param>
+     <param name="status" type="LightStatus" mandatory="true"/>
+     <param name="density" type="Float" minvalue="0" maxvalue="1" mandatory="false" />
+     <param name="color" type="RGBColor" mandatory="false" />
+ </struct>
+
+ <struct name="LightControlData">
+     <param name="lightState" type="LightState" mandatory="true" minsize="1" maxsize="100" array="true">
+         <description>An array of LightNames and their current or desired status. No change to the status of the LightNames that are not listed in the array.</description>
+     </param>
+ </struct>
+
+ <enum name="DisplayMode">
+     <element name="DAY"/>
+     <element name="NIGHT"/>
+     <element name="AUTO"/>
+ </enum>
+ <enum name="DistanceUnit">
+     <element name="MILES"/>
+     <element name="KILOMETERS"/>
+ </enum>
+
+ <struct name="HMISettingsControlData">
+     <description>Corresponds to "HMI_SETTINGS" ModuleType</description>
+     <param name="displayMode" type="DisplayMode" mandatory="false"></param>
+     <param name="temperatureUnit" type="TemperatureUnit" mandatory="false"></param>
+     <param name="distanceUnit" type="DistanceUnit" mandatory="false"></param>
+ </struct>
+
+ <struct name="HMISettingsControlCapabilities">
+     <param name="moduleName" type="String" maxlength="100" mandatory="true">
+         <description>
+           The short friendly name of the hmi setting module.
+           It should not be used to identify a module by mobile application.
+         </description>
+     </param>
+     <param name="distanceUnitAvailable" type="Boolean" mandatory="false">
+         <description>Availability of the control of distance unit. </description>
+     </param>
+     <param name="temperatureUnitAvailable" type="Boolean" mandatory="false">
+         <description>Availability of the control of temperature unit. </description>
+     </param>
+     <param name="displayModeUnitAvailable" type="Boolean" mandatory="false">
+         <description>Availability of the control of HMI display mode. </description>
+     </param>
  </struct>
 
  <struct name="ModuleData">
@@ -1688,13 +2356,21 @@
    </param>
    <param name="climateControlData" type="Common.ClimateControlData" mandatory="false">
    </param>
+   <param name="seatControlData" type="SeatControlData" mandatory="false">
+   </param>
+   <param name="audioControlData" type="AudioControlData" mandatory="false">
+   </param>
+   <param name="lightControlData" type="LightControlData" mandatory="false">
+   </param>
+   <param name="hmiSettingsControlData" type="HMISettingsControlData" mandatory="false">
+   </param>
  </struct>
 
 <enum name="RCAccessMode">
-  <description>Enumeration that describes possible remote control access mode the application might be in on HU.</description>
-  <element name="AUTO_ALLOW"/>
-  <element name="AUTO_DENY"/>
-  <element name="ASK_DRIVER"/>
+    <description>Enumeration that describes possible remote control access mode the application might be in on HU.</description>
+    <element name="AUTO_ALLOW"/>
+    <element name="AUTO_DENY"/>
+    <element name="ASK_DRIVER"/>
 </enum>
 
 <!-- End Remote Control -->
@@ -1782,6 +2458,9 @@
   <param name="imageType" type="Common.ImageType" mandatory="true">
     <description>Describes, whether it is a static or dynamic image.</description>
   </param>
+  <param name="isTemplate" type="Boolean" mandatory="false">
+    <description>Optional value to specify whether it's a template image. A template image can be (re)colored by the HMI as needed by using an image pattern</description>
+  </param>
 </struct>
 
 <struct name="DeviceInfo">
@@ -1822,13 +2501,29 @@
  </struct>
 
 <struct name="TTSChunk">
-    <description>A TTS chunk, that consists of the text/phonemes to be spoken</description>
+    <description>A TTS chunk, that consists of text/phonemes to speak or the name of a file to play, and a TTS type (like text or SAPI)</description>
     <param name="text" type="String" mandatory="true" maxlength="500">
-        <description>The text or phonemes to be spoken.</description>
+        <description>The text or phonemes to be spoken, or the name of an audio file to play.</description>
     </param>
     <param name="type" type="Common.SpeechCapabilities" mandatory="true">
-      <description>Describes, whether it is text or a specific phoneme set. See SpeechCapabilities.</description>
+      <description>Describes whether the TTS chunk is plain text, a specific phoneme set, or an audio file. See SpeechCapabilities.</description>
     </param>
+</struct>
+
+
+<struct name="TemplateColorScheme">
+  <description>
+    A color scheme for all display layout templates.
+  </description>
+  <param name="primaryColor" type="Common.RGBColor" mandatory="false">
+    <description>The primary "accent" color</description>
+  </param>
+  <param name="secondaryColor" type="Common.RGBColor" mandatory="false">
+      <description>The secondary "accent" color</description>
+  </param>
+  <param name="backgroundColor" type="Common.RGBColor" mandatory="false">
+    <description>The color of the background</description>
+  </param>
 </struct>
 
 <struct name="HMIApplication">
@@ -1845,6 +2540,9 @@
     </param>
     <param name="deviceInfo" type="Common.DeviceInfo" mandatory="true">
        <description>The ID, serial number, transport type the named-app's-device is connected over to HU.</description>
+    </param>
+    <param name="secondaryDeviceInfo" type="Common.DeviceInfo" mandatory="false">
+       <description>The ID, serial number, transport type that are acquired through Secondary Transport.</description>
     </param>
     <param name="policyAppID" type="String" maxlength="50" minlength="1" mandatory="true">
       <description>Policy ID(=the appID the application registers with) of registered application.</description>
@@ -1888,6 +2586,16 @@
       <description>If SDL omits this parameter - none RequestType is allowed for this app</description>
       <description>(either this is a pre-registered app or such is dictated by policies).</description>
     </param>
+	<param name="requestSubType" type="String" maxlength="100" minsize="0" maxsize="100" array="true" mandatory="false">
+        <description>
+            The list of SystemRequest's requestSubTypes allowed by policies for the named application.
+            If the app sends a requestSubType which is not specified in this list, then that request should be rejected.
+            An empty array signifies that any value of requestSubType is allowed for this app.
+            If this parameter is omitted, then a request with any value of requestSubType is now allowed for this app
+        </description>
+    </param>
+    <param name="dayColorScheme" type="Common.TemplateColorScheme" mandatory="false"></param>
+    <param name="nightColorScheme" type="Common.TemplateColorScheme" mandatory="false"></param>
 </struct>
 
 <struct name="MenuParams">
@@ -2020,6 +2728,9 @@
   <param name="displayType" type="Common.DisplayType" mandatory="true">
     <description>The type of the display. See DisplayType</description>
   </param>
+  <param name="displayName" type="String" mandatory="false">
+      <description>The name of the display the app is connected to.</description>
+  </param>
   <param name="textFields" type="Common.TextField" minsize="0" maxsize="100" array="true" mandatory="true">
     <description>A set of all fields for text displaying supported by HU. See TextFieldName.</description>
     <description>If there are no textfields supported, the empty array must be returned</description>
@@ -2073,12 +2784,16 @@
   <param name="phoneCall" type="Boolean" mandatory="false">
     <description>Availability of build in phone. True: Available, False: Not Available</description>
   </param>
+  <param name="videoStreaming" type="Boolean" mandatory="false">
+    <description>Availability of built-in video streaming. True: Available, False: Not Available</description>
+  </param>
 </struct>
 
 <struct name="AudioPassThruCapabilities">
   <description>
     Describes different audio type configurations for PerformAudioPassThru.
     e.g. 8kHz,8-bit,PCM
+    The audio is recorded in monaural.
   </description>
   <param name="samplingRate" type="Common.SamplingRate" mandatory="true"/>
   <param name="bitsPerSample" type="Common.BitsPerSample" mandatory="true"/>
@@ -2091,6 +2806,9 @@
   </param>
   <param name="fieldText" type="String" maxlength="500" mandatory="true">
     <description>The  text itself.</description>
+  </param>
+  <param name="fieldTypes" type="Common.MetadataType" minsize="0" maxsize="5" array="true" mandatory="false">
+    <description>The type of data contained in the field.</description>
   </param>
 </struct>
 
@@ -2146,69 +2864,32 @@
 </struct>
 
 <!--IVI part-->
-<struct name="GPSData">
-  <description>Struct with the GPS data.</description>
-  <param name="longitudeDegrees" type="Float" minvalue="-180" maxvalue="180" mandatory="false">
-  </param>
-  <param name="latitudeDegrees" type="Float" minvalue="-90" maxvalue="90" mandatory="false">
-  </param>
-  <param name="utcYear" type="Integer" minvalue="2010" maxvalue="2100" mandatory="false">
-    <description>The current UTC year.</description>
-  </param>
-  <param name="utcMonth" type="Integer" minvalue="1" maxvalue="12" mandatory="false">
-    <description>The current UTC month.</description>
-  </param>
-  <param name="utcDay" type="Integer" minvalue="1" maxvalue="31" mandatory="false">
-    <description>The current UTC day.</description>
-  </param>
-  <param name="utcHours" type="Integer" minvalue="0" maxvalue="23" mandatory="false">
-    <description>The current UTC hour.</description>
-  </param>
-  <param name="utcMinutes" type="Integer" minvalue="0" maxvalue="59" mandatory="false">
-    <description>The current UTC minute.</description>
-  </param>
-  <param name="utcSeconds" type="Integer" minvalue="0" maxvalue="59" mandatory="false">
-    <description>The current UTC second.</description>
-  </param>
-  <param name="compassDirection" type="Common.CompassDirection" mandatory="false">
-    <description>See CompassDirection.</description>
-  </param>
-  <param name="pdop" type="Float" minvalue="0" maxvalue="10" mandatory="false">
-    <description>PDOP.</description>
-  </param>
-  <param name="hdop" type="Float" minvalue="0" maxvalue="10" mandatory="false">
-    <description>HDOP.</description>
-  </param>
-  <param name="vdop" type="Float" minvalue="0" maxvalue="10" mandatory="false">
-    <description>VDOP.</description>
-  </param>
-  <param name="actual" type="Boolean" mandatory="false">
-    <description>
-      True, if actual.
-      False, if infered.
-    </description>
-  </param>
-  <param name="satellites" type="Integer" minvalue="0" maxvalue="31" mandatory="false">
-    <description>Number of satellites in view</description>
-  </param>
-  <param name="dimension" type="Common.Dimension" mandatory="false">
-    <description>See Dimension</description>
-  </param>
-  <param name="altitude" type="Float" minvalue="-10000" maxvalue="10000" mandatory="false">
-    <description>Altitude in meters</description>
-  </param>
-  <param name="heading" type="Float" minvalue="0" maxvalue="359.99" mandatory="false">
-    <description>The heading. North is 0. Resolution is 0.01</description>
-  </param>
-  <param name="speed" type="Float" minvalue="0" maxvalue="500" mandatory="false">
-    <description>The speed in KPH</description>
-  </param>
-</struct>
+<enum name="TurnSignal">
+  <description>Enumeration that describes the status of the turn light indicator.</description>
+  <element name="OFF">
+    <description>Turn signal is OFF</description>
+  </element>
+  <element name="LEFT">
+    <description>Left turn signal is on</description>
+  </element>
+  <element name="RIGHT">
+    <description>Right turn signal is on</description>
+  </element>
+  <element name="BOTH">
+    <description>Both signals (left and right) are on.</description>
+  </element>
+</enum>
 
 <struct name="SingleTireStatus">
   <param name="status" type="Common.ComponentVolumeStatus" mandatory="true">
     <description>The status of component volume. See ComponentVolumeStatus.</description>
-</param>
+  </param>
+  <param name="tpms" type="TPMS" mandatory="false">
+      <description>The status of TPMS according to the particular tire.</description>
+  </param>
+  <param name="pressure" type="Float" mandatory="false" minvalue="0" maxvalue="2000">
+    <description>The pressure value of the particular tire in kilo pascal.</description>
+  </param>
 </struct>
 
 <struct name="DIDResult">
@@ -2450,7 +3131,7 @@
 
 <struct name="DateTime">
   <param name="millisecond" type="Integer" minvalue="0" maxvalue="999" mandatory="false">
-    <description>Milliseconds </description>     
+    <description>Milliseconds </description>
   </param>
   <param name="second" type="Integer" minvalue="0" maxvalue="60" mandatory="false">
     <description>Seconds part of time</description>
@@ -2588,6 +3269,20 @@
     <param name="buttonCapabilities" type="ButtonCapabilities"  mandatory="false" minsize="1" maxsize="100" array="true" >
       <description>If included, the platform supports RC button controls with the included button names.</description >
     </param>
+    <param name="seatControlCapabilities" type="SeatControlCapabilities" mandatory="false" minsize="1" maxsize="100" array="true">
+      <description>
+      If included, the platform supports seat controls.
+      </description >
+    </param>
+    <param name="audioControlCapabilities" type="AudioControlCapabilities" mandatory="false" minsize="1" maxsize="100" array="true">
+        <description> If included, the platform supports audio controls. </description >
+    </param>
+    <param name="hmiSettingsControlCapabilities" type="HMISettingsControlCapabilities" mandatory="false">
+        <description> If included, the platform supports hmi setting controls. </description >
+    </param>
+    <param name="lightControlCapabilities" type="LightControlCapabilities" mandatory="false">
+        <description> If included, the platform supports light controls. </description >
+    </param>
   </struct>
 
   <struct name="Rectangle">
@@ -2617,7 +3312,7 @@
 
 </interface>
 
-<interface name="Buttons" version="1.2.0" date="2017-04-27">
+<interface name="Buttons" version="1.3.0" date="2017-07-18">
     <function name="GetCapabilities" messagetype="request">
       <description>Method is invoked at system start-up. SDL requests the information about all supported hardware buttons and their capabilities</description>
     </function>
@@ -2701,7 +3396,18 @@
     </function>
 </interface>
 
-<interface name="BasicCommunication" version="1.2.0" date="2017-04-27">
+<interface name="BasicCommunication" version="1.2.1" date="2017-08-02">
+    <function name="GetSystemTime" messagetype="request">
+      <description>Request from SDL to HMI to obtain current UTC time.</description>
+    </function>
+    <function name="GetSystemTime" messagetype="response">
+      <param name="systemTime" type="Common.DateTime" mandatory="true">
+        <description>Current UTC system time</description>
+      </param>
+    </function>
+    <function name="OnSystemTimeReady" messagetype="notification">
+      <description>HMI must notify SDL about readiness to provide system time.</description>
+    </function>
     <function name="OnReady" messagetype="notification">
       <description>HMI must notify SDL about its readiness to start communication. In fact, this has to be the first message between SDL and HMI.</description>
     </function>
@@ -2883,6 +3589,11 @@
       <param name="requestType" type="Common.RequestType" mandatory="true">
         <description>The type of system request.</description>
       </param>
+      <param name="requestSubType" type="String" maxlength="255" mandatory="false">
+        <description>
+          This parameter is filled for supporting OEM proprietary data exchanges.
+        </description>
+      </param>
       <param name="url" type="String" maxlength="1000" minlength="1" mandatory="false">
         <description>Optional array of URL(s) for HTTP requests.</description>
       </param>
@@ -2908,6 +3619,11 @@
       <description>An asynchronous request from the device; binary data can be included in hybrid part of message for some requests (such as Authentication requests)</description>
       <param name="requestType" type="Common.RequestType" mandatory="true">
           <description>The type of system request.</description>
+      </param>
+      <param name="requestSubType" type="String" maxlength="255" mandatory="false">
+          <description>
+              This parameter is filled for supporting OEM proprietary data exchanges.
+          </description>
       </param>
       <param name="fileName" type="String" maxlength="255" minlength="1" mandatory="true">
           <description>The path to file.</description>
@@ -3187,10 +3903,10 @@
     <description>Method is invoked at system start-up. SDL requests the information about all supported hardware and their capabilities</description>
   </function>
   <function name="GetCapabilities" messagetype="response">
-    <param name="speechCapabilities" type="Common.SpeechCapabilities" minsize="1" maxsize="5" array="true" mandatory="true">
+    <param name="speechCapabilities" type="Common.SpeechCapabilities" minsize="1" maxsize="100" array="true" mandatory="true">
       <description>See SpeechCapabilities</description>
     </param>
-    <param name="prerecordedSpeechCapabilities" type="Common.PrerecordedSpeech" minsize="1" maxsize="5" array="true" mandatory="true">
+    <param name="prerecordedSpeechCapabilities" type="Common.PrerecordedSpeech" minsize="1" maxsize="100" array="true" mandatory="true">
       <description>See PrerecordedSpeech</description>
     </param>
   </function>
@@ -3307,7 +4023,7 @@
   </function>
 </interface>
 
-<interface name="UI" version="1.1.0" date="2017-04-27">
+<interface name="UI" version="1.2.0" date="2017-09-05">
   <function name="Alert" messagetype="request">
     <description>Request from SDL to show an alert message on the display.</description>
     <param name="alertStrings" type="Common.TextFieldStruct" mandatory="true" array="true" minsize="0" maxsize="3">
@@ -3410,6 +4126,9 @@
     <param name="menuParams" type="Common.MenuParams" mandatory="true">
       <description>Position and name of menu to be added. 'parent' field is omitted for this RPC.  </description>
     </param>
+    <param name="menuIcon" type="Common.Image" mandatory="false">
+      <description>The image field for AddSubMenu</description>
+    </param>
     <param name="appID" type="Integer" mandatory="true">
       <description>ID of application that requested this RPC.</description>
     </param>
@@ -3479,6 +4198,9 @@
     <param name="updateMode" type="Common.ClockUpdateMode" mandatory="true">
       <description>The update method of the media clock.</description>
       <description>In case of pause, resume, or clear, the start time value is ignored and shall be left out.  For resume, the time continues with the same value as it was when paused.</description>
+    </param>
+    <param name="audioStreamingIndicator" type="Common.AudioStreamingIndicator" mandatory="false">
+      <description>Indicates that a button press of the Play/Pause button would play, pause or Stop the current playback.</description>
     </param>
     <param name="appID" type="Integer" mandatory="true">
       <description>ID of application that requested this RPC.</description>
@@ -3625,6 +4347,8 @@
     <param name="appID" type="Integer" mandatory="true">
       <description>ID of application related to this RPC.</description>
     </param>
+    <param name="dayColorScheme" type="Common.TemplateColorScheme" mandatory="false"></param>
+    <param name="nightColorScheme" type="Common.TemplateColorScheme" mandatory="false"></param>
   </function>
   <function name="SetDisplayLayout" messagetype="response">
     <param name="displayCapabilities" type="Common.DisplayCapabilities" mandatory="false">
@@ -3819,7 +4543,7 @@
   </function>
 </interface>
 
-<interface name="Navigation" version="1.4.0" date="2017-04-27"> 
+<interface name="Navigation" version="1.5.0" date="2017-08-15">
 
   <function name="IsReady" messagetype="request">
     <description>Method is invoked at system startup. Response must provide the information about presence of UI Navigation module and its readiness to cooperate with SDL.</description>
@@ -4150,8 +4874,14 @@
     <param name="instantFuelConsumption" type="Boolean" mandatory="false">
       <description>The instantaneous fuel consumption in microlitres</description>
     </param>
+    <param name="fuelRange" type="Boolean" mandatory="false">
+        <description>The estimate range in KM the vehicle can travel based on fuel level and consumption</description>
+    </param>
     <param name="externalTemperature" type="Boolean" mandatory="false">
       <description>The external temperature in degrees celsius</description>
+    </param>
+    <param name="turnSignal" type="Boolean" mandatory="false">
+        <description>See TurnSignal</description>
     </param>
     <param name="prndl" type="Boolean" mandatory="false">
       <description>See PRNDL</description>
@@ -4188,6 +4918,12 @@
     </param>
     <param name="steeringWheelAngle" type="Boolean" mandatory="false">
       <description>Current angle of the steering wheel (in deg)</description>
+    </param>
+    <param name="engineOilLife" type="Boolean" mandatory="false">
+      <description>The estimated percentage of remaining oil life of the engine.</description>
+    </param>
+    <param name="electronicParkBrakeStatus" type="Boolean" mandatory="false">
+      <description>The status of the park brake as provided by Electric Park Brake (EPB) system.</description>
     </param>
         <!-- Ford Specific Data Items -->
     <param name="eCallInfo" type="Boolean" mandatory="false">
@@ -4226,8 +4962,14 @@
     <param name="instantFuelConsumption" type="Common.VehicleDataResult" mandatory="false">
       <description>The instantaneous fuel consumption in microlitres</description>
     </param>
+    <param name="fuelRange" type="Common.VehicleDataResult" mandatory="false">
+        <description>The estimate range in KM the vehicle can travel based on fuel level and consumption</description>
+    </param>
     <param name="externalTemperature" type="Common.VehicleDataResult" mandatory="false">
       <description>The external temperature in degrees celsius.</description>
+    </param>
+    <param name="turnSignal" type="Common.VehicleDataResult" mandatory="false">
+        <description>See TurnSignal</description>
     </param>
     <param name="prndl" type="Common.VehicleDataResult" mandatory="false">
       <description>See PRNDL</description>
@@ -4264,6 +5006,12 @@
     </param>
     <param name="steeringWheelAngle" type="Common.VehicleDataResult" mandatory="false">
       <description>Current angle of the steering wheel (in deg)</description>
+    </param>
+    <param name="engineOilLife" type="Common.VehicleDataResult" mandatory="false">
+      <description>The estimated percentage of remaining oil life of the engine.</description>
+    </param>
+    <param name="electronicParkBrakeStatus" type="Common.VehicleDataResult" mandatory="false">
+      <description>The status of the park brake as provided by Electric Park Brake (EPB) system.</description>
     </param>
         <!-- Ford Specific Data Items -->
     <param name="eCallInfo" type="Common.VehicleDataResult" mandatory="false">
@@ -4308,8 +5056,14 @@
     <param name="instantFuelConsumption" type="Boolean" mandatory="false">
       <description>The instantaneous fuel consumption in microlitres</description>
     </param>
+    <param name="fuelRange" type="Boolean" mandatory="false">
+        <description>The estimate range in KM the vehicle can travel based on fuel level and consumption</description>
+    </param>
     <param name="externalTemperature" type="Boolean" mandatory="false">
       <description>The external temperature in degrees celsius.</description>
+    </param>
+    <param name="turnSignal" type="Boolean" mandatory="false">
+        <description>See TurnSignal</description>
     </param>
     <param name="prndl" type="Boolean" mandatory="false">
       <description>See PRNDL</description>
@@ -4346,6 +5100,12 @@
     </param>
     <param name="steeringWheelAngle" type="Boolean" mandatory="false">
       <description>Current angle of the steering wheel (in deg)</description>
+    </param>
+    <param name="engineOilLife" type="Boolean" mandatory="false">
+      <description>The estimated percentage of remaining oil life of the engine.</description>
+    </param>
+    <param name="electronicParkBrakeStatus" type="Boolean" mandatory="false">
+      <description>The status of the park brake as provided by Electric Park Brake (EPB) system.</description>
     </param>
         <!-- Ford Specific Data Items -->
     <param name="eCallInfo" type="Boolean" mandatory="false">
@@ -4384,8 +5144,14 @@
     <param name="instantFuelConsumption" type="Common.VehicleDataResult" mandatory="false">
       <description>The instantaneous fuel consumption in microlitres</description>
     </param>
+    <param name="fuelRange" type="Common.VehicleDataResult" mandatory="false">
+        <description>The estimate range in KM the vehicle can travel based on fuel level and consumption</description>
+    </param>
     <param name="externalTemperature" type="Common.VehicleDataResult" mandatory="false">
       <description>The external temperature in degrees celsius</description>
+    </param>
+    <param name="turnSignal" type="Common.VehicleDataResult" mandatory="false">
+        <description>See TurnSignal</description>
     </param>
     <param name="prndl" type="Common.VehicleDataResult" mandatory="false">
       <description>See PRNDL</description>
@@ -4422,6 +5188,12 @@
     </param>
     <param name="steeringWheelAngle" type="Common.VehicleDataResult" mandatory="false">
       <description>Current angle of the steering wheel (in deg)</description>
+    </param>
+    <param name="engineOilLife" type="Common.VehicleDataResult" mandatory="false">
+      <description>The estimated percentage of remaining oil life of the engine.</description>
+    </param>
+    <param name="electronicParkBrakeStatus" type="Common.VehicleDataResult" mandatory="false">
+      <description>The status of the park brake as provided by Electric Park Brake (EPB) system.</description>
     </param>
         <!-- Ford Specific Data Items -->
     <param name="eCallInfo" type="Common.VehicleDataResult" mandatory="false">
@@ -4461,8 +5233,14 @@
     <param name="instantFuelConsumption" type="Boolean" mandatory="false">
       <description>The instantaneous fuel consumption in microlitres</description>
     </param>
+    <param name="fuelRange" type="Boolean" mandatory="false">
+        <description>The estimate range in KM the vehicle can travel based on fuel level and consumption</description>
+    </param>
     <param name="externalTemperature" type="Boolean" mandatory="false">
       <description>The external temperature in degrees celsius</description>
+    </param>
+    <param name="turnSignal" type="Boolean" mandatory="false">
+        <description>See TurnSignal</description>
     </param>
     <param name="vin" type="Boolean" mandatory="false">
       <description>Vehicle identification number</description>
@@ -4503,6 +5281,12 @@
     <param name="steeringWheelAngle" type="Boolean" mandatory="false">
       <description>Current angle of the steering wheel (in deg)</description>
     </param>
+    <param name="engineOilLife" type="Boolean" mandatory="false">
+      <description>The estimated percentage of remaining oil life of the engine.</description>
+    </param>
+    <param name="electronicParkBrakeStatus" type="Boolean" mandatory="false">
+      <description>The status of the park brake as provided by Electric Park Brake (EPB) system.</description>
+    </param>
     <param name="eCallInfo" type="Boolean" mandatory="false">
       <description>Emergency Call notification and confirmation data</description>
     </param>
@@ -4538,8 +5322,14 @@
     <param name="instantFuelConsumption" type="Float" minvalue="0" maxvalue="25575" mandatory="false">
       <description>The instantaneous fuel consumption in microlitres</description>
     </param>
+    <param name="fuelRange" type="Common.FuelRange" minsize="0" maxsize="100" array="true" mandatory="false">
+        <description>The estimate range in KM the vehicle can travel based on fuel level and consumption</description>
+    </param>
     <param name="externalTemperature" type="Float" minvalue="-40" maxvalue="100" mandatory="false">
       <description>The external temperature in degrees celsius</description>
+    </param>
+    <param name="turnSignal" type="Common.TurnSignal" mandatory="false">
+        <description>See TurnSignal</description>
     </param>
     <param name="vin" type="String" maxlength="17" mandatory="false">
       <description>Vehicle identification number</description>
@@ -4580,6 +5370,12 @@
     <param name="steeringWheelAngle" type="Float" minvalue="-2000" maxvalue="2000" mandatory="false">
       <description>Current angle of the steering wheel (in deg)</description>
     </param>
+    <param name="engineOilLife" type="Float" minvalue="0" maxvalue="100" mandatory="false">
+      <description>The estimated percentage of remaining oil life of the engine.</description>
+    </param>
+    <param name="electronicParkBrakeStatus" type="Common.ElectronicParkBrakeStatus" mandatory="false">
+      <description>The status of the park brake as provided by Electric Park Brake (EPB) system.</description>
+    </param>
     <param name="eCallInfo" type="Common.ECallInfo" mandatory="false">
       <description>Emergency Call notification and confirmation data</description>
     </param>
@@ -4616,8 +5412,14 @@
     <param name="instantFuelConsumption" type="Float" minvalue="0" maxvalue="25575" mandatory="false">
       <description>The instantaneous fuel consumption in microlitres</description>
     </param>
+    <param name="fuelRange" type="Common.FuelRange" minsize="0" maxsize="100" array="true" mandatory="false">
+      <description>The estimate range in KM the vehicle can travel based on fuel level and consumption</description>
+    </param>
     <param name="externalTemperature" type="Float" minvalue="-40" maxvalue="100" mandatory="false">
       <description>The external temperature in degrees celsius</description>
+    </param>
+    <param name="turnSignal" type="Common.TurnSignal" mandatory="false">
+        <description>See TurnSignal</description>
     </param>
     <param name="vin" type="String" maxlength="17" mandatory="false">
       <description>Vehicle identification number.</description>
@@ -4633,6 +5435,9 @@
     </param>
     <param name="beltStatus" type="Common.BeltStatus" mandatory="false">
       <description>The status of the seat belts</description>
+    </param>
+    <param name="electronicParkBrakeStatus" type="Common.ElectronicParkBrakeStatus" mandatory="false">
+      <description>The status of the park brake as provided by Electric Park Brake (EPB) system.</description>
     </param>
     <param name="bodyInformation" type="Common.BodyInformation" mandatory="false">
       <description>The body information including power modes</description>
@@ -4793,6 +5598,14 @@
         If SDL omits this parameter - nothing is changed for RequestType in the policies
       </description>
       </param>
+      <param name="requestSubType" type="String" maxlength="100" minsize="0" maxsize="100" array="true" mandatory="false">
+          <description>
+              The list of SystemRequest's requestSubTypes allowed by policies for the named application.
+              If the app sends a requestSubType which is not specified in this list, then that request should be rejected.
+              An empty array signifies that any value of requestSubType is allowed for this app.
+              If this parameter is omitted, then a request with any value of requestSubType is now allowed for this app
+          </description>
+      </param>
     </function>
 
   <function name="OnSDLConsentNeeded" messagetype="notification">
@@ -4842,7 +5655,7 @@
     </function>
 </interface>
 
-<interface name="RC" version="1.1" date="2017-07-18">
+<interface name="RC" version="1.1.0" date="2017-07-18">
   <function name="IsReady" messagetype="request">
     <description>Method is invoked at system startup. Response should provide information about presence of any of remote controllable module and its readiness to cooperate with SDL.</description>
   </function>
@@ -4880,11 +5693,8 @@
   <param name="moduleType" type="Common.ModuleType" mandatory="true" >
     <description>The module data to retrieve from the vehicle for that type</description>
   </param>
-  <param name="subscribe" type="Boolean" mandatory="false" defvalue="false">
+  <param name="subscribe" type="Boolean" mandatory="false">
     <description>If subscribe is true, the head unit will send onInteriorVehicleData notifications for the module type</description>
-  </param>
-  <param name="appID" type="Integer" mandatory="true">
-    <description>Internal SDL-assigned ID of the related application</description>
   </param>
 </function>
 
@@ -4930,5 +5740,19 @@
     <description>The remote control access mode specified by the driver via HMI.</description>
   </param>
 </function>
+
+<function name="OnRCStatus" messagetype="notification">
+  <description>Issued by SDL to notify HMI about remote control status change on SDL</description>
+  <param name="appID" type="Integer" mandatory="true">
+    <description>ID of selected application.</description>
+  </param>
+  <param name="allocatedModules" type="Common.ModuleData" minsize="0" maxsize="100" array="true" mandatory="true">
+    <description>Contains a list (zero or more) of module types that are allocated to the application.</description>
+  </param>
+  <param name="freeModules" type="Common.ModuleData" minsize="0" maxsize="100" array="true" mandatory="true">
+    <description>Contains a list (zero or more) of module types that are free to access for the application.</description>
+  </param>
+</function>
+
 </interface>
 </interfaces>

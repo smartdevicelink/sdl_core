@@ -230,7 +230,7 @@ void UsbConnection::OnOutTransfer(usbd_urb* urb) {
     }
   }
 
-  if ((!disconnecting_) && current_out_message_.valid()) {
+  if ((!disconnecting_) && (current_out_message_.use_count() != 0)) {
     PostOutTransfer();
   } else {
     pending_out_transfer_ = false;
@@ -243,7 +243,7 @@ TransportAdapter::Error UsbConnection::SendData(
     return TransportAdapter::BAD_STATE;
   }
   sync_primitives::AutoLock locker(out_messages_mutex_);
-  if (current_out_message_.valid()) {
+  if (current_out_message_.use_count() != 0) {
     out_messages_.push_back(message);
   } else {
     current_out_message_ = message;

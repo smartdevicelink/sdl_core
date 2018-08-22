@@ -43,23 +43,17 @@ include_directories (
     ${MESSAGE_BROKER_INCLUDE_DIRECTORY}
     ${COMPONENTS_DIR}
     ${CMAKE_BINARY_DIR}/src/components/
-    ${COMPONENTS_DIR}/dbus/include/
     ${CMAKE_SOURCE_DIR}/
     ${LOG4CXX_INCLUDE_DIRECTORY}
+    ${COMPONENTS_DIR}/hmi_message_handler/include
+    ${COMPONENTS_DIR}/hmi_message_handler/src
+    ${BOOST_INCLUDE_DIR}
 )
 
 set(PATHS
   ${CMAKE_CURRENT_SOURCE_DIR}/include
   ${CMAKE_CURRENT_SOURCE_DIR}/src
 )
-
-if (HMIADAPTER STREQUAL "dbus")
-  set(EXCLUDE_PATHS)
-  set(DBUS_ADAPTER DBus)
-else()
-  set(EXCLUDE_PATHS dbus_message_adapter.cc)
-  set(DBUS_ADAPTER)
-endif ()
 
 list(APPEND EXCLUDE_PATHS
   mqueue_adapter.cc
@@ -69,11 +63,15 @@ collect_sources(SOURCES "${PATHS}" "${EXCLUDE_PATHS}")
 
 set(LIBRARIES
   Utils
-  ${DBUS_ADAPTER}
   ${RTLIB}
 )
 
 add_library("HMIMessageHandler" ${SOURCES})
+
+if (HMIADAPTER STREQUAL "messagebroker")
+  add_dependencies("HMIMessageHandler" Boost)
+endif()
+
 target_link_libraries("HMIMessageHandler" ${LIBRARIES})
 
 if(ENABLE_LOG)

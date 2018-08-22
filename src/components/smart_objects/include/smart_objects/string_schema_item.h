@@ -36,8 +36,6 @@
 #include <stddef.h>
 #include <string>
 
-#include "utils/shared_ptr.h"
-
 #include "smart_objects/default_shema_item.h"
 #include "smart_objects/schema_item_parameter.h"
 
@@ -54,19 +52,25 @@ class CStringSchemaItem : public CDefaultSchemaItem<std::string> {
    * @param DefaultValue Default value.
    * @return Shared pointer to a new schema item.
    **/
-  static utils::SharedPtr<CStringSchemaItem> create(
+  static std::shared_ptr<CStringSchemaItem> create(
       const TSchemaItemParameter<size_t>& MinLength =
           TSchemaItemParameter<size_t>(),
       const TSchemaItemParameter<size_t>& MaxLength =
           TSchemaItemParameter<size_t>(),
       const TSchemaItemParameter<std::string>& DefaultValue =
           TSchemaItemParameter<std::string>());
+
   /**
    * @brief Validate smart object.
    * @param Object Object to validate.
+   * @param report__ object for reporting errors during validation
+   * @param MessageVersion to check mobile RPC version against RPC Spec History
    * @return NsSmartObjects::Errors::eType
    **/
-  Errors::eType validate(const SmartObject& Object) OVERRIDE;
+  Errors::eType validate(const SmartObject& Object,
+                         rpc::ValidationReport* report__,
+                         const utils::SemanticVersion& MessageVersion =
+                             utils::SemanticVersion()) OVERRIDE;
 
  private:
   /**

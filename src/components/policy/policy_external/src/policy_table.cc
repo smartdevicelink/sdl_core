@@ -42,7 +42,7 @@ CREATE_LOGGERPTR_GLOBAL(logger_, "Policy")
 
 PolicyTable::PolicyTable() : pt_data_(new SQLPTExtRepresentation()) {}
 
-PolicyTable::PolicyTable(utils::SharedPtr<PTRepresentation> pt_data)
+PolicyTable::PolicyTable(std::shared_ptr<PTRepresentation> pt_data)
     : pt_data_(pt_data) {}
 
 PolicyTable::~PolicyTable() {

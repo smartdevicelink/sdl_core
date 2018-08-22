@@ -35,9 +35,9 @@
 namespace NsSmartDeviceLink {
 namespace NsSmartObjects {
 
-utils::SharedPtr<CBoolSchemaItem> CBoolSchemaItem::create(
+std::shared_ptr<CBoolSchemaItem> CBoolSchemaItem::create(
     const TSchemaItemParameter<bool>& DefaultValue) {
-  return new CBoolSchemaItem(DefaultValue);
+  return std::shared_ptr<CBoolSchemaItem>(new CBoolSchemaItem(DefaultValue));
 }
 
 CBoolSchemaItem::CBoolSchemaItem(const TSchemaItemParameter<bool>& DefaultValue)

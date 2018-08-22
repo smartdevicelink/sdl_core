@@ -124,7 +124,8 @@ class InterfaceItemBase(object):
     """
 
     def __init__(self, name, description=None, design_description=None,
-                 issues=None, todos=None, platform=None, default_value=None, scope=None):
+                 issues=None, todos=None, platform=None, default_value=None, scope=None,
+                 since=None, until=None, deprecated=None, removed=None, history=None):
         self.name = name
         self.description = description if description is not None else []
         self.design_description = \
@@ -134,6 +135,11 @@ class InterfaceItemBase(object):
         self.platform = platform
         self.default_value = default_value
         self.scope = scope
+        self.since = since
+        self.until = until
+        self.deprecated = deprecated
+        self.removed = removed
+        self.history = history
 
 
 class EnumElement(InterfaceItemBase):
@@ -149,13 +155,18 @@ class EnumElement(InterfaceItemBase):
 
     def __init__(self, name, description=None, design_description=None,
                  issues=None, todos=None, platform=None, internal_name=None,
-                 value=None):
+                 value=None, since=None, until=None, deprecated=None, removed=None, history=None):
         super(EnumElement, self).__init__(
             name, description=description,
             design_description=design_description, issues=issues, todos=todos,
-            platform=platform)
+            platform=platform, history=history)
         self.internal_name = internal_name
         self.value = value
+        self.since = since
+        self.until = until
+        self.deprecated = deprecated
+        self.removed = removed
+
 
     @property
     def primary_name(self):
@@ -180,15 +191,19 @@ class Enum(InterfaceItemBase):
 
     def __init__(self, name, description=None, design_description=None,
                  issues=None, todos=None, platform=None, internal_scope=None,
-                 elements=None, scope=None):
+                 elements=None, scope=None, since=None, until=None, deprecated=None, removed=None, history=None):
         super(Enum, self).__init__(
             name, description=description,
             design_description=design_description, issues=issues, todos=todos,
-            platform=platform, scope=scope)
+            platform=platform, scope=scope, history=history)
 
         self.internal_scope = internal_scope
         self.elements = \
             elements if elements is not None else collections.OrderedDict()
+        self.since = since
+        self.until = until
+        self.deprecated = deprecated
+        self.removed = removed
 
 
 class EnumSubset(InterfaceItemBase):
@@ -204,15 +219,19 @@ class EnumSubset(InterfaceItemBase):
 
     def __init__(self, name, enum, description=None, design_description=None,
                  issues=None, todos=None, platform=None,
-                 allowed_elements=None):
+                 allowed_elements=None, since=None, until=None, deprecated=None, removed=None, history=None):
         super(EnumSubset, self).__init__(
             name, description=description,
             design_description=design_description, issues=issues, todos=todos,
-            platform=platform)
+            platform=platform, history=history)
 
         self.enum = enum
         self.allowed_elements = \
             allowed_elements if allowed_elements is not None else {}
+        self.since = since
+        self.until = until
+        self.deprecated = deprecated
+        self.removed = removed
 
 
 class Param(InterfaceItemBase):
@@ -229,15 +248,20 @@ class Param(InterfaceItemBase):
 
     def __init__(self, name, param_type, description=None,
                  design_description=None, issues=None, todos=None,
-                 platform=None, is_mandatory=True, default_value=None, scope=None):
+                 platform=None, is_mandatory=True, default_value=None, scope=None,
+                 since=None, until=None, deprecated=None, removed=None, history=None):
         super(Param, self).__init__(
             name, description=description,
             design_description=design_description, issues=issues, todos=todos,
-            platform=platform, default_value=default_value, scope=scope)
+            platform=platform, default_value=default_value, scope=scope, history=history)
 
         self.is_mandatory = is_mandatory
         self.param_type = param_type
         self.default_value = default_value
+        self.since = since
+        self.until = until
+        self.deprecated = deprecated
+        self.removed=removed
 
 
 class FunctionParam(Param):
@@ -251,11 +275,13 @@ class FunctionParam(Param):
 
     def __init__(self, name, param_type, description=None,
                  design_description=None, issues=None, todos=None,
-                 platform=None, is_mandatory=True, default_value=None, scope=None):
+                 platform=None, is_mandatory=True, default_value=None, scope=None,
+                 since=None, until=None, deprecated=None, removed=None, history=None):
         super(FunctionParam, self).__init__(
             name, param_type=param_type, description=description,
             design_description=design_description, issues=issues, todos=todos,
-            platform=platform, is_mandatory=is_mandatory, default_value=default_value, scope=scope)
+            platform=platform, is_mandatory=is_mandatory, default_value=default_value, 
+            scope=scope, since=since, until=until, deprecated=deprecated, removed=removed, history=history)
 
         self.default_value = default_value
 
@@ -270,11 +296,13 @@ class Struct(InterfaceItemBase):
     """
 
     def __init__(self, name, description=None, design_description=None,
-                 issues=None, todos=None, platform=None, members=None, scope=None):
+                 issues=None, todos=None, platform=None, members=None, scope=None, 
+                 since=None, until=None, deprecated=None, removed=None, history=None):
         super(Struct, self).__init__(
             name, description=description,
             design_description=design_description, issues=issues, todos=todos,
-            platform=platform, scope=scope)
+            platform=platform, scope=scope, since=since, until=until,
+            deprecated=deprecated, removed=removed, history=history)
 
         self.members = \
             members if members is not None else collections.OrderedDict()
@@ -293,11 +321,11 @@ class Function(InterfaceItemBase):
 
     def __init__(self, name, function_id, message_type, description=None,
                  design_description=None, issues=None, todos=None,
-                 platform=None, params=None, scope=None):
+                 platform=None, params=None, scope=None, since=None, until=None, deprecated=None, removed=None, history=None):
         super(Function, self).__init__(
             name, description=description,
             design_description=design_description, issues=issues, todos=todos,
-            platform=platform, scope=scope)
+            platform=platform, scope=scope, since=since, until=until, deprecated=deprecated, removed=removed, history=history)
 
         self.function_id = function_id
         self.message_type = message_type

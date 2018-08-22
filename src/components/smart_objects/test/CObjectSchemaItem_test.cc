@@ -44,6 +44,7 @@
 #include "smart_objects/object_schema_item.h"
 #include "formatters/generic_json_formatter.h"
 #include "formatters/CSmartFactory.h"
+#include "utils/semantic_version.h"
 
 namespace formatters = NsSmartDeviceLink::NsJSONHandler::Formatters;
 namespace smartobj = NsSmartDeviceLink::NsSmartObjects;
@@ -136,6 +137,36 @@ class ObjectSchemaItemTest : public ::testing::Test {
     schemaMembersMap[Keys::SUCCESS] =
         CObjectSchemaItem::SMember(CBoolSchemaItem::create(), false);
 
+    // Create fake param that has breaking history changes
+    std::vector<CObjectSchemaItem::SMember> fake_param_history_vector;
+
+    std::shared_ptr<ISchemaItem> fake_param_SchemaItem =
+        CArraySchemaItem::create(
+            CStringSchemaItem::create(TSchemaItemParameter<size_t>(1),
+                                      TSchemaItemParameter<size_t>(99),
+                                      TSchemaItemParameter<std::string>()),
+            TSchemaItemParameter<size_t>(1),
+            TSchemaItemParameter<size_t>(100));
+
+    std::shared_ptr<ISchemaItem> fake_param_history_v1_SchemaItem =
+        CArraySchemaItem::create(
+            CStringSchemaItem::create(TSchemaItemParameter<size_t>(1),
+                                      TSchemaItemParameter<size_t>(99),
+                                      TSchemaItemParameter<std::string>()),
+            TSchemaItemParameter<size_t>(1),
+            TSchemaItemParameter<size_t>(100));
+
+    fake_param_history_vector.push_back(CObjectSchemaItem::SMember(
+        fake_param_history_v1_SchemaItem, true, "", "4.5.0", false, false));
+    schemaMembersMap["fakeParam"] =
+        CObjectSchemaItem::SMember(fake_param_SchemaItem,
+                                   false,
+                                   "4.5.0",
+                                   "",
+                                   false,
+                                   false,
+                                   fake_param_history_vector);
+
     CObjectSchemaItem::Members rootMembersMap;
     rootMembersMap[S_PARAMS] = CObjectSchemaItem::SMember(
         CObjectSchemaItem::create(paramsMembersMap), true);
@@ -155,7 +186,39 @@ TEST_F(ObjectSchemaItemTest, validation_correct) {
   obj[S_MSG_PARAMS][Keys::INFO] = "0123456789";
   obj[S_MSG_PARAMS][Keys::SUCCESS] = true;
 
-  EXPECT_EQ(Errors::OK, schema_item->validate(obj));
+  rpc::ValidationReport report("RPC");
+  EXPECT_EQ(Errors::OK, schema_item->validate(obj, &report));
+  EXPECT_EQ(std::string(""), rpc::PrettyFormat(report));
+}
+
+TEST_F(ObjectSchemaItemTest, validation_correct_with_new_version) {
+  SmartObject obj;
+  obj[S_PARAMS][S_FUNCTION_ID] = 0;
+  obj[S_PARAMS][S_CORRELATION_ID] = 0XFF0;
+  obj[S_PARAMS][S_PROTOCOL_VERSION] = 1;
+  obj[S_MSG_PARAMS][Keys::RESULT_CODE] = 0;
+  obj[S_MSG_PARAMS][Keys::INFO] = "0123456789";
+  obj[S_MSG_PARAMS][Keys::SUCCESS] = true;
+
+  utils::SemanticVersion messageVersion(4, 5, 0);
+  rpc::ValidationReport report("RPC");
+  EXPECT_EQ(Errors::OK, schema_item->validate(obj, &report, messageVersion));
+  EXPECT_EQ(std::string(""), rpc::PrettyFormat(report));
+}
+
+TEST_F(ObjectSchemaItemTest, validation_invalid_data_with_old_version) {
+  SmartObject obj;
+  obj[S_PARAMS][S_FUNCTION_ID] = 0;
+  obj[S_PARAMS][S_CORRELATION_ID] = 0XFF0;
+  obj[S_PARAMS][S_PROTOCOL_VERSION] = 1;
+  obj[S_MSG_PARAMS][Keys::RESULT_CODE] = 0;
+  obj[S_MSG_PARAMS][Keys::INFO] = "0123456789";
+  obj[S_MSG_PARAMS][Keys::SUCCESS] = true;
+
+  utils::SemanticVersion messageVersion(3, 0, 0);
+  rpc::ValidationReport report("RPC");
+  EXPECT_EQ(Errors::MISSING_MANDATORY_PARAMETER,
+            schema_item->validate(obj, &report, messageVersion));
 }
 
 TEST_F(ObjectSchemaItemTest, validation_correct_skip_not_mandatory) {
@@ -167,7 +230,9 @@ TEST_F(ObjectSchemaItemTest, validation_correct_skip_not_mandatory) {
   // skip non-mandatory obj[S_MSG_PARAMS][Keys::INFO]
   obj[S_MSG_PARAMS][Keys::SUCCESS] = false;
 
-  EXPECT_EQ(Errors::OK, schema_item->validate(obj));
+  rpc::ValidationReport report("RPC");
+  EXPECT_EQ(Errors::OK, schema_item->validate(obj, &report));
+  EXPECT_EQ(std::string(""), rpc::PrettyFormat(report));
 }
 
 TEST_F(ObjectSchemaItemTest, validation_invalid_param) {
@@ -175,7 +240,9 @@ TEST_F(ObjectSchemaItemTest, validation_invalid_param) {
   obj[S_PARAMS] = "some parameters";
   obj[S_MSG_PARAMS] = "some message parameters";
 
-  EXPECT_EQ(Errors::INVALID_VALUE, schema_item->validate(obj));
+  rpc::ValidationReport report("RPC");
+  EXPECT_EQ(Errors::INVALID_VALUE, schema_item->validate(obj, &report));
+  EXPECT_NE(std::string(""), rpc::PrettyFormat(report));
 
   obj[S_PARAMS][S_FUNCTION_ID] = "some function";
   obj[S_PARAMS][S_CORRELATION_ID] = "some correlation id";
@@ -183,23 +250,35 @@ TEST_F(ObjectSchemaItemTest, validation_invalid_param) {
   obj[S_MSG_PARAMS][Keys::RESULT_CODE] = "some result";
   obj[S_MSG_PARAMS][Keys::SUCCESS] = 0xABC;
 
-  EXPECT_EQ(Errors::INVALID_VALUE, schema_item->validate(obj));
+  report = rpc::ValidationReport("RPC");
+  EXPECT_EQ(Errors::INVALID_VALUE, schema_item->validate(obj, &report));
+  EXPECT_NE(std::string(""), rpc::PrettyFormat(report));
 
   obj[S_PARAMS][S_FUNCTION_ID] = 1;
-  EXPECT_EQ(Errors::INVALID_VALUE, schema_item->validate(obj));
+  report = rpc::ValidationReport("RPC");
+  EXPECT_EQ(Errors::INVALID_VALUE, schema_item->validate(obj, &report));
+  EXPECT_NE(std::string(""), rpc::PrettyFormat(report));
 
   obj[S_PARAMS][S_CORRELATION_ID] = -0xFF1;
-  EXPECT_EQ(Errors::INVALID_VALUE, schema_item->validate(obj));
+  report = rpc::ValidationReport("RPC");
+  EXPECT_EQ(Errors::INVALID_VALUE, schema_item->validate(obj, &report));
+  EXPECT_NE(std::string(""), rpc::PrettyFormat(report));
 
   obj[S_PARAMS][S_PROTOCOL_VERSION] = 2;
-  EXPECT_EQ(Errors::INVALID_VALUE, schema_item->validate(obj));
+  report = rpc::ValidationReport("RPC");
+  EXPECT_EQ(Errors::INVALID_VALUE, schema_item->validate(obj, &report));
+  EXPECT_NE(std::string(""), rpc::PrettyFormat(report));
 
   obj[S_MSG_PARAMS][Keys::RESULT_CODE] = 1;
-  EXPECT_EQ(Errors::INVALID_VALUE, schema_item->validate(obj));
+  report = rpc::ValidationReport("RPC");
+  EXPECT_EQ(Errors::INVALID_VALUE, schema_item->validate(obj, &report));
+  EXPECT_NE(std::string(""), rpc::PrettyFormat(report));
 
   obj[S_MSG_PARAMS][Keys::SUCCESS] = false;
 
-  EXPECT_EQ(Errors::OK, schema_item->validate(obj));
+  report = rpc::ValidationReport("RPC");
+  EXPECT_EQ(Errors::OK, schema_item->validate(obj, &report));
+  EXPECT_EQ(std::string(""), rpc::PrettyFormat(report));
 }
 TEST_F(ObjectSchemaItemTest, validation_invalid_not_mandatory_param) {
   SmartObject obj;
@@ -211,18 +290,26 @@ TEST_F(ObjectSchemaItemTest, validation_invalid_not_mandatory_param) {
 
   // invalid non-mandatory obj[S_MSG_PARAMS][Keys::INFO]
   obj[S_MSG_PARAMS][Keys::INFO] = 0x10;
-  EXPECT_EQ(Errors::INVALID_VALUE, schema_item->validate(obj));
+  rpc::ValidationReport report("RPC");
+  EXPECT_EQ(Errors::INVALID_VALUE, schema_item->validate(obj, &report));
+  EXPECT_NE(std::string(""), rpc::PrettyFormat(report));
 
   // invalid non-mandatory obj[S_MSG_PARAMS][Keys::INFO]
   obj[S_MSG_PARAMS][Keys::INFO] = true;
-  EXPECT_EQ(Errors::INVALID_VALUE, schema_item->validate(obj));
+  report = rpc::ValidationReport("RPC");
+  EXPECT_EQ(Errors::INVALID_VALUE, schema_item->validate(obj, &report));
+  EXPECT_NE(std::string(""), rpc::PrettyFormat(report));
 
   // invalid non-mandatory obj[S_MSG_PARAMS][Keys::INFO]
   obj[S_MSG_PARAMS][Keys::INFO] = SmartObject();
-  EXPECT_EQ(Errors::INVALID_VALUE, schema_item->validate(obj));
+  report = rpc::ValidationReport("RPC");
+  EXPECT_EQ(Errors::INVALID_VALUE, schema_item->validate(obj, &report));
+  EXPECT_NE(std::string(""), rpc::PrettyFormat(report));
 
   obj[S_MSG_PARAMS][Keys::INFO] = "info";
-  EXPECT_EQ(Errors::OK, schema_item->validate(obj));
+  report = rpc::ValidationReport("RPC");
+  EXPECT_EQ(Errors::OK, schema_item->validate(obj, &report));
+  EXPECT_EQ(std::string(""), rpc::PrettyFormat(report));
 }
 
 TEST_F(ObjectSchemaItemTest, validation_missing_mandatory) {
@@ -234,18 +321,29 @@ TEST_F(ObjectSchemaItemTest, validation_missing_mandatory) {
   obj[S_MSG_PARAMS][Keys::INFO] = "123";
   obj[S_MSG_PARAMS][Keys::SUCCESS] = false;
 
-  EXPECT_EQ(Errors::MISSING_MANDATORY_PARAMETER, schema_item->validate(obj));
+  rpc::ValidationReport report("RPC");
+  EXPECT_EQ(Errors::MISSING_MANDATORY_PARAMETER,
+            schema_item->validate(obj, &report));
+  EXPECT_NE(std::string(""), rpc::PrettyFormat(report));
 
   obj[S_PARAMS][S_FUNCTION_ID] = 2;
   // S_CORRELATION_ID and S_PROTOCOL_VERSION is still missed
-  EXPECT_EQ(Errors::MISSING_MANDATORY_PARAMETER, schema_item->validate(obj));
+  report = rpc::ValidationReport("RPC");
+  EXPECT_EQ(Errors::MISSING_MANDATORY_PARAMETER,
+            schema_item->validate(obj, &report));
+  EXPECT_NE(std::string(""), rpc::PrettyFormat(report));
 
   obj[S_PARAMS][S_CORRELATION_ID] = 0XFF2;
   // S_PROTOCOL_VERSION is still missed
-  EXPECT_EQ(Errors::MISSING_MANDATORY_PARAMETER, schema_item->validate(obj));
+  report = rpc::ValidationReport("RPC");
+  EXPECT_EQ(Errors::MISSING_MANDATORY_PARAMETER,
+            schema_item->validate(obj, &report));
+  EXPECT_NE(std::string(""), rpc::PrettyFormat(report));
 
   obj[S_PARAMS][S_PROTOCOL_VERSION] = 1;
-  EXPECT_EQ(Errors::OK, schema_item->validate(obj));
+  report = rpc::ValidationReport("RPC");
+  EXPECT_EQ(Errors::OK, schema_item->validate(obj, &report));
+  EXPECT_EQ(std::string(""), rpc::PrettyFormat(report));
 }
 
 TEST_F(ObjectSchemaItemTest, validation_unexpected_param) {
@@ -263,15 +361,21 @@ TEST_F(ObjectSchemaItemTest, validation_unexpected_param) {
 
   obj[fake1] = SmartObject(static_cast<int64_t>(0));
   // any fake parameter is OK
-  EXPECT_EQ(Errors::OK, schema_item->validate(obj));
+  rpc::ValidationReport report("RPC");
+  EXPECT_EQ(Errors::OK, schema_item->validate(obj, &report));
+  EXPECT_EQ(std::string(""), rpc::PrettyFormat(report));
 
   obj[S_PARAMS][fake2] = SmartObject("123");
   // any fake parameters are OK
-  EXPECT_EQ(Errors::OK, schema_item->validate(obj));
+  report = rpc::ValidationReport("RPC");
+  EXPECT_EQ(Errors::OK, schema_item->validate(obj, &report));
+  EXPECT_EQ(std::string(""), rpc::PrettyFormat(report));
 
   obj[S_MSG_PARAMS][fake3] = true;
   // any fake parameters are OK
-  EXPECT_EQ(Errors::OK, schema_item->validate(obj));
+  report = rpc::ValidationReport("RPC");
+  EXPECT_EQ(Errors::OK, schema_item->validate(obj, &report));
+  EXPECT_EQ(std::string(""), rpc::PrettyFormat(report));
 }
 
 TEST_F(ObjectSchemaItemTest, validation_unexpected_param_remove) {
@@ -297,7 +401,9 @@ TEST_F(ObjectSchemaItemTest, validation_unexpected_param_remove) {
   EXPECT_TRUE(obj.keyExists(fake1));
   EXPECT_TRUE(obj[S_PARAMS].keyExists(fake2));
   EXPECT_TRUE(obj[S_MSG_PARAMS].keyExists(fake3));
-  EXPECT_EQ(Errors::OK, schema_item->validate(obj));
+  rpc::ValidationReport report("RPC");
+  EXPECT_EQ(Errors::OK, schema_item->validate(obj, &report));
+  EXPECT_EQ(std::string(""), rpc::PrettyFormat(report));
 
   // Check apply schema, remove fake parameter
   schema_item->applySchema(obj, true);
@@ -310,7 +416,9 @@ TEST_F(ObjectSchemaItemTest, validation_unexpected_param_remove) {
   EXPECT_TRUE(obj[S_MSG_PARAMS].keyExists(Keys::RESULT_CODE));
   EXPECT_TRUE(obj[S_MSG_PARAMS].keyExists(Keys::INFO));
   EXPECT_TRUE(obj[S_MSG_PARAMS].keyExists(Keys::SUCCESS));
-  EXPECT_EQ(Errors::OK, schema_item->validate(obj));
+  report = rpc::ValidationReport("RPC");
+  EXPECT_EQ(Errors::OK, schema_item->validate(obj, &report));
+  EXPECT_EQ(std::string(""), rpc::PrettyFormat(report));
 
   obj[fake1] = SmartObject(static_cast<int64_t>(0));
   obj[S_PARAMS][fake2] = SmartObject("123");
@@ -324,7 +432,9 @@ TEST_F(ObjectSchemaItemTest, validation_unexpected_param_remove) {
   EXPECT_FALSE(obj[S_PARAMS].keyExists(fake2));
   EXPECT_FALSE(obj[S_MSG_PARAMS].keyExists(fake3));
   // Invalide state after enum convertion
-  EXPECT_EQ(Errors::INVALID_VALUE, schema_item->validate(obj));
+  report = rpc::ValidationReport("RPC");
+  EXPECT_EQ(Errors::INVALID_VALUE, schema_item->validate(obj, &report));
+  EXPECT_NE(std::string(""), rpc::PrettyFormat(report));
 }
 
 TEST_F(ObjectSchemaItemTest, validation_empty_params) {
@@ -338,14 +448,20 @@ TEST_F(ObjectSchemaItemTest, validation_empty_params) {
   obj[S_MSG_PARAMS]["FAKE_PARAM2"] = SmartObject(0x1);
   obj[S_MSG_PARAMS]["FAKE_PARAM3"] = SmartObject("2");
 
-  EXPECT_EQ(Errors::OK, schema_item->validate(obj));
+  rpc::ValidationReport report("RPC");
+  EXPECT_EQ(Errors::OK, schema_item->validate(obj, &report));
+  EXPECT_EQ(std::string(""), rpc::PrettyFormat(report));
 
   schema_item->applySchema(obj, false);
-  EXPECT_EQ(Errors::OK, schema_item->validate(obj));
+  report = rpc::ValidationReport("RPC");
+  EXPECT_EQ(Errors::OK, schema_item->validate(obj, &report));
+  EXPECT_EQ(std::string(""), rpc::PrettyFormat(report));
 
   schema_item->unapplySchema(obj);
   // Invalide state after enum convertion
-  EXPECT_EQ(Errors::INVALID_VALUE, schema_item->validate(obj));
+  report = rpc::ValidationReport("RPC");
+  EXPECT_EQ(Errors::INVALID_VALUE, schema_item->validate(obj, &report));
+  EXPECT_NE(std::string(""), rpc::PrettyFormat(report));
 }
 
 TEST_F(ObjectSchemaItemTest, test_strings_to_enum_conversion) {
@@ -380,10 +496,14 @@ TEST_F(ObjectSchemaItemTest, test_strings_to_enum_conversion) {
       object[S_MSG_PARAMS][Keys::RESULT_CODE] = result_type_str;
 
       // S_FUNCTION_ID and RESULT_CODE are not converted to int
-      EXPECT_NE(Errors::OK, schema_item->validate(object));
+      rpc::ValidationReport report("RPC");
+      EXPECT_NE(Errors::OK, schema_item->validate(object, &report));
+      EXPECT_NE(std::string(""), rpc::PrettyFormat(report));
 
       schema_item->applySchema(object, false);
-      EXPECT_EQ(Errors::OK, schema_item->validate(object));
+      report = rpc::ValidationReport("RPC");
+      EXPECT_EQ(Errors::OK, schema_item->validate(object, &report));
+      EXPECT_EQ(std::string(""), rpc::PrettyFormat(report));
 
       // check conversion result
       EXPECT_EQ(function_type, object[S_PARAMS][S_FUNCTION_ID].asInt());
@@ -391,7 +511,9 @@ TEST_F(ObjectSchemaItemTest, test_strings_to_enum_conversion) {
 
       schema_item->unapplySchema(object);
       // S_FUNCTION_ID and RESULT_CODE are string
-      EXPECT_NE(Errors::OK, schema_item->validate(object));
+      report = rpc::ValidationReport("RPC");
+      EXPECT_NE(Errors::OK, schema_item->validate(object, &report));
+      EXPECT_NE(std::string(""), rpc::PrettyFormat(report));
 
       // check conversion result
       EXPECT_EQ(function_str, object[S_PARAMS][S_FUNCTION_ID].asString());

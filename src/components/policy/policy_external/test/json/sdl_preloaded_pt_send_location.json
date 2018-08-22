@@ -16,12 +16,12 @@
       "endpoints": {
         "0x04": {
           "default": [
-            "http://ivsu.software.ford.com/api/getsoftwareupdates"
+            "http://x.x.x.x:3000/api/1/softwareUpdate"
           ]
         },
         "0x07": {
           "default": [
-            "http://policies.telematics.ford.com/api/policies"
+            "http://x.x.x.x:3000/api/1/policies"
           ]
         }
       },
@@ -415,6 +415,7 @@
             "parameters": [
               "accPedalPosition",
               "beltStatus",
+              "electronicParkBrakeStatus",
               "driverBraking",
               "myKey",
               "prndl",
@@ -431,6 +432,7 @@
             "parameters": [
               "accPedalPosition",
               "beltStatus",
+              "electronicParkBrakeStatus",
               "driverBraking",
               "myKey",
               "prndl",
@@ -447,6 +449,7 @@
             "parameters": [
               "accPedalPosition",
               "beltStatus",
+              "electronicParkBrakeStatus",
               "driverBraking",
               "myKey",
               "prndl",
@@ -463,6 +466,7 @@
             "parameters": [
               "accPedalPosition",
               "beltStatus",
+              "electronicParkBrakeStatus",
               "driverBraking",
               "myKey",
               "prndl",
@@ -484,12 +488,15 @@
             "parameters": [
               "bodyInformation",
               "deviceStatus",
+              "engineOilLife",
               "engineTorque",
               "externalTemperature",
+              "turnSignal",
               "fuelLevel",
               "fuelLevel_State",
               "headLampStatus",
               "instantFuelConsumption",
+              "fuelRange",
               "odometer",
               "tirePressure",
               "vin",
@@ -505,12 +512,15 @@
             "parameters": [
               "bodyInformation",
               "deviceStatus",
+              "engineOilLife",
               "engineTorque",
               "externalTemperature",
+              "turnSignal",
               "fuelLevel",
               "fuelLevel_State",
               "headLampStatus",
               "instantFuelConsumption",
+              "fuelRange",
               "odometer",
               "tirePressure",
               "vin",
@@ -526,12 +536,15 @@
             "parameters": [
               "bodyInformation",
               "deviceStatus",
+              "engineOilLife",
               "engineTorque",
               "externalTemperature",
+              "turnSignal",
               "fuelLevel",
               "fuelLevel_State",
               "headLampStatus",
               "instantFuelConsumption",
+              "fuelRange",
               "odometer",
               "tirePressure",
               "wiperStatus"
@@ -546,12 +559,15 @@
             "parameters": [
               "bodyInformation",
               "deviceStatus",
+              "engineOilLife",
               "engineTorque",
               "externalTemperature",
+              "turnSignal",
               "fuelLevel",
               "fuelLevel_State",
               "headLampStatus",
               "instantFuelConsumption",
+              "fuelRange",
               "odometer",
               "tirePressure",
               "wiperStatus"

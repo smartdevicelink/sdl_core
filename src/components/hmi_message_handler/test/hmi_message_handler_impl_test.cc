@@ -57,6 +57,7 @@ class HMIMessageHandlerImplTest : public ::testing::Test {
   hmi_message_handler::MessageBrokerAdapter* mb_adapter_;
   hmi_message_handler::HMIMessageHandlerImpl* hmi_handler_;
   MockHMIMessageObserver* mock_hmi_message_observer_;
+
   testing::NiceMock<MockHMIMessageHandlerSettings>
       mock_hmi_message_handler_settings;
   const uint64_t stack_size = 1000u;
@@ -68,7 +69,7 @@ class HMIMessageHandlerImplTest : public ::testing::Test {
         mock_hmi_message_handler_settings);
     ASSERT_TRUE(NULL != hmi_handler_);
     mb_adapter_ = new hmi_message_handler::MessageBrokerAdapter(
-        hmi_handler_, "localhost", 22);
+        hmi_handler_, "127.0.0.1", 8087);
     ASSERT_TRUE(NULL != mb_adapter_);
     mock_hmi_message_observer_ = new MockHMIMessageObserver();
     ASSERT_TRUE(NULL != mock_hmi_message_observer_);
@@ -85,7 +86,7 @@ class HMIMessageHandlerImplTest : public ::testing::Test {
 
   hmi_message_handler::MessageSharedPointer CreateMessage() {
     // The ServiceType doesn't really matter
-    return new application_manager::Message(
+    return std::make_shared<application_manager::Message>(
         protocol_handler::MessagePriority::FromServiceType(
             protocol_handler::ServiceType::kInvalidServiceType));
   }
@@ -103,7 +104,7 @@ TEST_F(HMIMessageHandlerImplTest,
 TEST_F(HMIMessageHandlerImplTest,
        OnErrorSending_NotEmptyMessage_ExpectOnErrorSendingProceeded) {
   // Arrange
-  utils::SharedPtr<application_manager::Message> message = CreateMessage();
+  std::shared_ptr<application_manager::Message> message = CreateMessage();
 
   EXPECT_CALL(*mock_hmi_message_observer_, OnErrorSending(message));
   // Act
@@ -112,7 +113,7 @@ TEST_F(HMIMessageHandlerImplTest,
 
 TEST_F(HMIMessageHandlerImplTest, OnErrorSending_InvalidObserver_Cancelled) {
   // Arrange
-  utils::SharedPtr<application_manager::Message> message = CreateMessage();
+  std::shared_ptr<application_manager::Message> message = CreateMessage();
 
   hmi_handler_->set_message_observer(NULL);
   EXPECT_CALL(*mock_hmi_message_observer_, OnErrorSending(_)).Times(0);

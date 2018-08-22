@@ -51,6 +51,8 @@ const std::string kDeviceAddress = "address";
 const std::string kDeviceApplications = "applications";
 const std::string kApplicationPort = "port";
 const std::string kApplicationPortValue = "12345";
+const std::string kApplicationRfcomm = "rfcomm_channel";
+const std::string kApplicationRfcommValue = "7";
 const std::string kTransportManager = "TransportManager";
 const std::string kTcpAdapter = "TcpAdapter";
 const std::string kBluetoothAdapter = "BluetoothAdapter";
@@ -71,7 +73,11 @@ TEST(TestTransportManagerDefault, Init_LastStateNotUsed) {
   EXPECT_CALL(transport_manager_settings, use_last_state())
       .WillRepeatedly(Return(false));
   EXPECT_CALL(transport_manager_settings, transport_manager_tcp_adapter_port())
-      .WillRepeatedly(Return(1u));
+      .WillRepeatedly(Return(12345u));
+  std::string network_interface = "";
+  EXPECT_CALL(transport_manager_settings,
+              transport_manager_tcp_adapter_network_interface())
+      .WillRepeatedly(ReturnRef(network_interface));
 
   transport_manager.Init(mock_last_state);
   transport_manager.Stop();
@@ -86,13 +92,48 @@ TEST(TestTransportManagerDefault, Init_LastStateUsed) {
   Json::Value custom_dictionary;
   Json::Value tcp_device;
   tcp_device[kDeviceName] = "unique_tcp_device_name";
-  tcp_device[kDeviceAddress] = "57.48.0.1";
+  tcp_device[kDeviceAddress] = "127.0.0.1";
   tcp_device[kDeviceApplications][0][kApplicationPort] = kApplicationPortValue;
   Json::Value bluetooth_device;
   bluetooth_device[kDeviceName] = "unique_bluetooth_device_name";
-  bluetooth_device[kDeviceAddress] = "57.48.0.2";
-  bluetooth_device[kDeviceApplications][0][kApplicationPort] =
-      kApplicationPortValue;
+  bluetooth_device[kDeviceAddress] = "AB:CD:EF:GH:IJ:KL";
+  bluetooth_device[kDeviceApplications][0][kApplicationRfcomm] =
+      kApplicationRfcommValue;
+  custom_dictionary[kTransportManager][kTcpAdapter][kDevices][0] = tcp_device;
+  custom_dictionary[kTransportManager][kBluetoothAdapter][kDevices][0] =
+      bluetooth_device;
+
+  ON_CALL(mock_last_state, get_dictionary())
+      .WillByDefault(ReturnRef(custom_dictionary));
+
+  EXPECT_CALL(transport_manager_settings, use_last_state())
+      .WillRepeatedly(Return(true));
+  EXPECT_CALL(transport_manager_settings, transport_manager_tcp_adapter_port())
+      .WillRepeatedly(Return(12345u));
+  std::string network_interface = "";
+  EXPECT_CALL(transport_manager_settings,
+              transport_manager_tcp_adapter_network_interface())
+      .WillRepeatedly(ReturnRef(network_interface));
+  transport_manager.Init(mock_last_state);
+  transport_manager.Stop();
+}
+
+TEST(TestTransportManagerDefault, Init_LastStateUsed_InvalidPort) {
+  MockTransportManagerSettings transport_manager_settings;
+  transport_manager::TransportManagerDefault transport_manager(
+      transport_manager_settings);
+
+  NiceMock<MockLastState> mock_last_state;
+  Json::Value custom_dictionary;
+  Json::Value tcp_device;
+  tcp_device[kDeviceName] = "unique_tcp_device_name";
+  tcp_device[kDeviceAddress] = "127.0.0.1";
+  tcp_device[kDeviceApplications][0][kApplicationPort] = "1";
+  Json::Value bluetooth_device;
+  bluetooth_device[kDeviceName] = "unique_bluetooth_device_name";
+  bluetooth_device[kDeviceAddress] = "AB:CD:EF:GH:IJ:KL";
+  bluetooth_device[kDeviceApplications][0][kApplicationRfcomm] =
+      kApplicationRfcommValue;
   custom_dictionary[kTransportManager][kTcpAdapter][kDevices][0] = tcp_device;
   custom_dictionary[kTransportManager][kBluetoothAdapter][kDevices][0] =
       bluetooth_device;
@@ -104,7 +145,10 @@ TEST(TestTransportManagerDefault, Init_LastStateUsed) {
       .WillRepeatedly(Return(true));
   EXPECT_CALL(transport_manager_settings, transport_manager_tcp_adapter_port())
       .WillRepeatedly(Return(1u));
-
+  std::string network_interface = "";
+  EXPECT_CALL(transport_manager_settings,
+              transport_manager_tcp_adapter_network_interface())
+      .WillRepeatedly(ReturnRef(network_interface));
   transport_manager.Init(mock_last_state);
   transport_manager.Stop();
 }

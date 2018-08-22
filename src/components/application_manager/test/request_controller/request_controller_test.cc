@@ -36,12 +36,12 @@
 #include "application_manager/request_controller.h"
 #include "application_manager/request_info.h"
 #include "application_manager/mock_request.h"
-#include "utils/shared_ptr.h"
+
 #include "smart_objects/smart_object.h"
 #include "application_manager/commands/command_request_impl.h"
 #include "application_manager/message_helper.h"
 #include "application_manager/application_impl.h"
-#include "utils/make_shared.h"
+
 #include "application_manager/mock_application_manager.h"
 #include "application_manager/event_engine/event_dispatcher.h"
 #include "resumption/last_state.h"
@@ -62,10 +62,11 @@ using ::application_manager::request_controller::RequestInfo;
 using ::testing::Return;
 using ::testing::ReturnRef;
 using ::testing::NiceMock;
+using ::testing::_;
 
 typedef NiceMock<application_manager_test::MockRequest> MRequest;
-typedef utils::SharedPtr<MRequest> RequestPtr;
-typedef utils::SharedPtr<RequestController> RequestControllerSPtr;
+typedef std::shared_ptr<MRequest> RequestPtr;
+typedef std::shared_ptr<RequestController> RequestControllerSPtr;
 
 namespace {
 const size_t kNumberOfRequests = 10u;
@@ -104,7 +105,7 @@ class RequestControllerTestClass : public ::testing::Test {
     ON_CALL(mock_request_controller_settings_, thread_pool_size())
         .WillByDefault(Return(kThreadPoolSize));
     request_ctrl_ =
-        utils::MakeShared<RequestController>(mock_request_controller_settings_);
+        std::make_shared<RequestController>(mock_request_controller_settings_);
   }
 
   RequestPtr GetMockRequest(
@@ -112,8 +113,9 @@ class RequestControllerTestClass : public ::testing::Test {
       const uint32_t connection_key = kDefaultConnectionKey,
       const uint32_t default_timeout = kDefaultTimeout) {
     RequestPtr output =
-        utils::MakeShared<MRequest>(connection_key, correlation_id);
+        std::make_shared<MRequest>(connection_key, correlation_id);
     ON_CALL(*output, default_timeout()).WillByDefault(Return(default_timeout));
+    ON_CALL(*output, CheckPermissions()).WillByDefault(Return(true));
     return output;
   }
 
@@ -157,6 +159,40 @@ class RequestControllerTestClass : public ::testing::Test {
   RequestPtr empty_mock_request_;
   const TestSettings default_settings_;
 };
+
+TEST_F(RequestControllerTestClass,
+       AddMobileRequest_DuplicateCorrelationId_INVALID_ID) {
+  RequestPtr request_valid = GetMockRequest();
+  TestAsyncWaiter waiter_valid;
+  ON_CALL(*request_valid, default_timeout()).WillByDefault(Return(0));
+  EXPECT_CALL(*request_valid, Init()).WillOnce(Return(true));
+  EXPECT_CALL(*request_valid, Run())
+      .Times(1)
+      .WillRepeatedly(NotifyTestAsyncWaiter(&waiter_valid));
+
+  EXPECT_EQ(RequestController::SUCCESS,
+            AddRequest(default_settings_,
+                       request_valid,
+                       RequestInfo::RequestType::MobileRequest,
+                       mobile_apis::HMILevel::HMI_NONE));
+  EXPECT_TRUE(waiter_valid.WaitFor(1, 1000));
+
+  // The command should not be run if another command with the same
+  // correlation_id is waiting for a response
+  RequestPtr request_dup_corr_id = GetMockRequest();
+  TestAsyncWaiter waiter_dup;
+  ON_CALL(*request_dup_corr_id, default_timeout()).WillByDefault(Return(0));
+  EXPECT_CALL(*request_dup_corr_id, Init()).WillOnce(Return(true));
+  ON_CALL(*request_dup_corr_id, Run())
+      .WillByDefault(NotifyTestAsyncWaiter(&waiter_dup));
+
+  EXPECT_EQ(RequestController::SUCCESS,
+            AddRequest(default_settings_,
+                       request_dup_corr_id,
+                       RequestInfo::RequestType::MobileRequest,
+                       mobile_apis::HMILevel::HMI_NONE));
+  EXPECT_FALSE(waiter_dup.WaitFor(1, 1000));
+}
 
 TEST_F(RequestControllerTestClass,
        CheckPosibilitytoAdd_ZeroValueLimiters_SUCCESS) {

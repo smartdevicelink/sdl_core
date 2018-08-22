@@ -34,10 +34,11 @@
 
 #include <stddef.h>
 
-#include "utils/shared_ptr.h"
 #include "smart_objects/schema_item.h"
 #include "smart_objects/always_true_schema_item.h"
 #include "smart_objects/schema_item_parameter.h"
+
+#include "utils/semantic_version.h"
 
 namespace NsSmartDeviceLink {
 namespace NsSmartObjects {
@@ -55,7 +56,7 @@ class CArraySchemaItem : public ISchemaItem {
    *
    * @return Shared pointer to a new schema item.
    **/
-  static utils::SharedPtr<CArraySchemaItem> create(
+  static std::shared_ptr<CArraySchemaItem> create(
       const ISchemaItemPtr ElementSchemaItem = CAlwaysTrueSchemaItem::create(),
       const TSchemaItemParameter<size_t>& MinSize =
           TSchemaItemParameter<size_t>(),
@@ -64,12 +65,15 @@ class CArraySchemaItem : public ISchemaItem {
 
   /**
    * @brief Validate smart object.
-   *
    * @param Object Object to validate.
-   *
+   * @param report__ object for reporting errors during validation
+   * @param MessageVersion to check mobile RPC version against RPC Spec History
    * @return NsSmartObjects::Errors::eType
    **/
-  Errors::eType validate(const SmartObject& Object) OVERRIDE;
+  Errors::eType validate(const SmartObject& Object,
+                         rpc::ValidationReport* report__,
+                         const utils::SemanticVersion& MessageVersion =
+                             utils::SemanticVersion()) OVERRIDE;
 
   /**
    * @brief Apply schema.
@@ -80,7 +84,9 @@ class CArraySchemaItem : public ISchemaItem {
    * from smart object otherwise contains false.
    **/
   void applySchema(SmartObject& Object,
-                   const bool RemoveFakeParameters) OVERRIDE;
+                   const bool RemoveFakeParameters,
+                   const utils::SemanticVersion& MessageVersion =
+                       utils::SemanticVersion()) OVERRIDE;
 
   /**
    * @brief Unapply schema.

@@ -31,12 +31,16 @@
  */
 
 #include <algorithm>
+#include <numeric>
 #include <string>
 #include "utils/macro.h"
+
 #include "application_manager/commands/command_request_impl.h"
 #include "application_manager/application_manager.h"
+#include "application_manager/rpc_service.h"
 #include "application_manager/message_helper.h"
 #include "smart_objects/smart_object.h"
+
 namespace application_manager {
 
 namespace commands {
@@ -105,20 +109,29 @@ const std::string CreateInfoForUnsupportedResult(
 }
 
 bool CheckResultCode(const ResponseInfo& first, const ResponseInfo& second) {
-  if (first.is_ok && second.is_unsupported_resource &&
-      second.interface_state == HmiInterfaces::STATE_NOT_AVAILABLE) {
+  if (first.is_ok && second.is_unsupported_resource) {
+    return true;
+  }
+  if (first.is_ok && second.is_not_used) {
+    return true;
+  }
+  if (first.is_ok && second.is_ok) {
     return true;
   }
   return false;
 }
 
-bool IsResultCodeUnsupported(const ResponseInfo& first,
-                             const ResponseInfo& second) {
-  return ((first.is_ok || first.is_invalid_enum) &&
-          second.is_unsupported_resource) ||
-         ((second.is_ok || second.is_invalid_enum) &&
-          first.is_unsupported_resource) ||
-         (first.is_unsupported_resource && second.is_unsupported_resource);
+bool IsResultCodeWarning(const ResponseInfo& first,
+                         const ResponseInfo& second) {
+  const bool first_is_ok_second_is_warn =
+      (first.is_ok || first.is_not_used) &&
+      hmi_apis::Common_Result::WARNINGS == second.result_code;
+
+  const bool both_warnings =
+      hmi_apis::Common_Result::WARNINGS == first.result_code &&
+      hmi_apis::Common_Result::WARNINGS == second.result_code;
+
+  return first_is_ok_second_is_warn || both_warnings;
 }
 
 struct DisallowedParamsInserter {
@@ -132,7 +145,8 @@ struct DisallowedParamsInserter {
     VehicleData::const_iterator it = vehicle_data.find(param);
     if (vehicle_data.end() != it) {
       smart_objects::SmartObjectSPtr disallowed_param =
-          new smart_objects::SmartObject(smart_objects::SmartType_Map);
+          std::make_shared<smart_objects::SmartObject>(
+              smart_objects::SmartType_Map);
       (*disallowed_param)[strings::data_type] = (*it).second;
       (*disallowed_param)[strings::result_code] = code_;
       response_[strings::msg_params][param.c_str()] = *disallowed_param;
@@ -146,9 +160,53 @@ struct DisallowedParamsInserter {
   mobile_apis::VehicleDataResultCode::eType code_;
 };
 
-CommandRequestImpl::CommandRequestImpl(const MessageSharedPtr& message,
-                                       ApplicationManager& application_manager)
-    : CommandImpl(message, application_manager)
+ResponseInfo::ResponseInfo()
+    : result_code(hmi_apis::Common_Result::INVALID_ENUM)
+    , interface(HmiInterfaces::HMI_INTERFACE_INVALID_ENUM)
+    , interface_state(HmiInterfaces::STATE_NOT_RESPONSE)
+    , is_ok(false)
+    , is_unsupported_resource(false)
+    , is_not_used(false) {}
+
+ResponseInfo::ResponseInfo(const hmi_apis::Common_Result::eType result,
+                           const HmiInterfaces::InterfaceID hmi_interface,
+                           ApplicationManager& application_manager)
+    : result_code(result)
+    , interface(hmi_interface)
+    , interface_state(HmiInterfaces::STATE_NOT_RESPONSE)
+    , is_ok(false)
+    , is_unsupported_resource(false)
+    , is_not_used(false) {
+  using namespace helpers;
+
+  interface_state =
+      application_manager.hmi_interfaces().GetInterfaceState(hmi_interface);
+
+  is_ok = Compare<hmi_apis::Common_Result::eType, EQ, ONE>(
+      result_code,
+      hmi_apis::Common_Result::SUCCESS,
+      hmi_apis::Common_Result::WARNINGS,
+      hmi_apis::Common_Result::WRONG_LANGUAGE,
+      hmi_apis::Common_Result::RETRY,
+      hmi_apis::Common_Result::SAVED);
+
+  is_not_used = hmi_apis::Common_Result::INVALID_ENUM == result_code;
+
+  is_unsupported_resource =
+      hmi_apis::Common_Result::UNSUPPORTED_RESOURCE == result_code;
+}
+
+CommandRequestImpl::CommandRequestImpl(
+    const MessageSharedPtr& message,
+    ApplicationManager& application_manager,
+    rpc_service::RPCService& rpc_service,
+    HMICapabilities& hmi_capabilities,
+    policy::PolicyHandlerInterface& policy_handler)
+    : CommandImpl(message,
+                  application_manager,
+                  rpc_service,
+                  hmi_capabilities,
+                  policy_handler)
     , EventObserver(application_manager.event_dispatcher())
     , current_state_(kAwaitingHMIResponse)
     , hash_update_mode_(kSkipHashUpdate)
@@ -193,8 +251,8 @@ void CommandRequestImpl::onTimeOut() {
                                             function_id(),
                                             correlation_id(),
                                             mobile_api::Result::GENERIC_ERROR);
-
-  application_manager_.ManageMobileCommand(response, ORIGIN_SDL);
+  AddTimeOutComponentInfoToMessage(*response);
+  rpc_service_.ManageMobileCommand(response, SOURCE_SDL);
 }
 
 void CommandRequestImpl::on_event(const event_engine::Event& event) {}
@@ -204,6 +262,7 @@ void CommandRequestImpl::SendResponse(
     const mobile_apis::Result::eType& result_code,
     const char* info,
     const smart_objects::SmartObject* response_params) {
+  LOG4CXX_AUTO_TRACE(logger_);
   {
     sync_primitives::AutoLock auto_lock(state_lock_);
     if (kTimedOut == current_state_) {
@@ -214,11 +273,9 @@ void CommandRequestImpl::SendResponse(
     current_state_ = kCompleted;
   }
 
-  smart_objects::SmartObjectSPtr result = new smart_objects::SmartObject;
-  if (!result) {
-    LOG4CXX_ERROR(logger_, "Memory allocation failed.");
-    return;
-  }
+  smart_objects::SmartObjectSPtr result =
+      std::make_shared<smart_objects::SmartObject>();
+
   smart_objects::SmartObject& response = *result;
 
   response[strings::params][strings::message_type] = MessageType::kResponse;
@@ -258,7 +315,7 @@ void CommandRequestImpl::SendResponse(
 
   is_success_result_ = success;
 
-  application_manager_.ManageMobileCommand(result, ORIGIN_SDL);
+  rpc_service_.ManageMobileCommand(result, SOURCE_SDL);
 }
 
 bool CommandRequestImpl::CheckSyntax(const std::string& str,
@@ -361,7 +418,8 @@ uint32_t CommandRequestImpl::SendHMIRequest(
     const hmi_apis::FunctionID::eType& function_id,
     const smart_objects::SmartObject* msg_params,
     bool use_events) {
-  smart_objects::SmartObjectSPtr result = new smart_objects::SmartObject;
+  smart_objects::SmartObjectSPtr result =
+      std::make_shared<smart_objects::SmartObject>();
 
   const uint32_t hmi_correlation_id =
       application_manager_.GetNextHMICorrelationID();
@@ -386,7 +444,7 @@ uint32_t CommandRequestImpl::SendHMIRequest(
     subscribe_on_event(function_id, hmi_correlation_id);
   }
   if (ProcessHMIInterfacesAvailability(hmi_correlation_id, function_id)) {
-    if (!application_manager_.ManageHMICommand(result)) {
+    if (!rpc_service_.ManageHMICommand(result)) {
       LOG4CXX_ERROR(logger_, "Unable to send request");
       SendResponse(false, mobile_apis::Result::OUT_OF_MEMORY);
     }
@@ -399,7 +457,8 @@ uint32_t CommandRequestImpl::SendHMIRequest(
 void CommandRequestImpl::CreateHMINotification(
     const hmi_apis::FunctionID::eType& function_id,
     const NsSmart::SmartObject& msg_params) const {
-  smart_objects::SmartObjectSPtr result = new smart_objects::SmartObject;
+  smart_objects::SmartObjectSPtr result =
+      std::make_shared<smart_objects::SmartObject>();
   if (!result) {
     LOG4CXX_ERROR(logger_, "Memory allocation failed.");
     return;
@@ -415,7 +474,7 @@ void CommandRequestImpl::CreateHMINotification(
   notify[strings::params][strings::function_id] = function_id;
   notify[strings::msg_params] = msg_params;
 
-  if (!application_manager_.ManageHMICommand(result)) {
+  if (!rpc_service_.ManageHMICommand(result)) {
     LOG4CXX_ERROR(logger_, "Unable to send HMI notification");
   }
 }
@@ -524,6 +583,10 @@ mobile_apis::Result::eType CommandRequestImpl::GetMobileResultCode(
       mobile_result = mobile_apis::Result::SAVED;
       break;
     }
+    case hmi_apis::Common_Result::READ_ONLY: {
+      mobile_result = mobile_apis::Result::READ_ONLY;
+      break;
+    }
     default: {
       LOG4CXX_ERROR(logger_, "Unknown HMI result code " << hmi_code);
       break;
@@ -559,10 +622,8 @@ bool CommandRequestImpl::CheckAllowedParameters() {
   smart_objects::SmartMap::const_iterator iter_end = s_map.map_end();
 
   for (; iter != iter_end; ++iter) {
-    if (iter->second.asBool()) {
-      LOG4CXX_DEBUG(logger_, "Request's param: " << iter->first);
-      params.insert(iter->first);
-    }
+    LOG4CXX_DEBUG(logger_, "Request's param: " << iter->first);
+    params.insert(iter->first);
   }
 
   mobile_apis::Result::eType check_result =
@@ -582,7 +643,7 @@ bool CommandRequestImpl::CheckAllowedParameters() {
             correlation_id(),
             app->app_id());
 
-    application_manager_.SendMessageToMobile(response);
+    rpc_service_.SendMessageToMobile(response);
     return false;
   }
 
@@ -606,15 +667,13 @@ bool CommandRequestImpl::CheckHMICapabilities(
   using namespace smart_objects;
   using namespace mobile_apis;
 
-  const HMICapabilities& hmi_capabilities =
-      application_manager_.hmi_capabilities();
-  if (!hmi_capabilities.is_ui_cooperating()) {
+  if (!hmi_capabilities_.is_ui_cooperating()) {
     LOG4CXX_ERROR(logger_, "UI is not supported by HMI");
     return false;
   }
 
   const SmartObject* button_capabilities_so =
-      hmi_capabilities.button_capabilities();
+      hmi_capabilities_.button_capabilities();
   if (!button_capabilities_so) {
     LOG4CXX_ERROR(logger_, "Invalid button capabilities object");
     return false;
@@ -755,6 +814,7 @@ bool CommandRequestImpl::HasDisallowedParams() const {
 bool CommandRequestImpl::PrepareResultForMobileResponse(
     hmi_apis::Common_Result::eType result_code,
     HmiInterfaces::InterfaceID interface) const {
+  LOG4CXX_AUTO_TRACE(logger_);
   using namespace helpers;
   if (Compare<hmi_apis::Common_Result::eType, EQ, ONE>(
           result_code,
@@ -777,48 +837,9 @@ bool CommandRequestImpl::PrepareResultForMobileResponse(
 
 bool CommandRequestImpl::PrepareResultForMobileResponse(
     ResponseInfo& out_first, ResponseInfo& out_second) const {
-  using namespace helpers;
-
-  out_first.is_ok = Compare<hmi_apis::Common_Result::eType, EQ, ONE>(
-      out_first.result_code,
-      hmi_apis::Common_Result::SUCCESS,
-      hmi_apis::Common_Result::WARNINGS,
-      hmi_apis::Common_Result::WRONG_LANGUAGE,
-      hmi_apis::Common_Result::RETRY,
-      hmi_apis::Common_Result::SAVED);
-
-  out_second.is_ok = Compare<hmi_apis::Common_Result::eType, EQ, ONE>(
-      out_second.result_code,
-      hmi_apis::Common_Result::SUCCESS,
-      hmi_apis::Common_Result::WARNINGS,
-      hmi_apis::Common_Result::WRONG_LANGUAGE,
-      hmi_apis::Common_Result::RETRY,
-      hmi_apis::Common_Result::SAVED);
-
-  out_first.is_invalid_enum =
-      hmi_apis::Common_Result::INVALID_ENUM == out_first.result_code;
-
-  out_second.is_invalid_enum =
-      hmi_apis::Common_Result::INVALID_ENUM == out_second.result_code;
-
-  out_first.is_unsupported_resource =
-      hmi_apis::Common_Result::UNSUPPORTED_RESOURCE == out_first.result_code;
-
-  out_second.is_unsupported_resource =
-      hmi_apis::Common_Result::UNSUPPORTED_RESOURCE == out_second.result_code;
-
-  out_first.interface_state =
-      application_manager_.hmi_interfaces().GetInterfaceState(
-          out_first.interface);
-  out_second.interface_state =
-      application_manager_.hmi_interfaces().GetInterfaceState(
-          out_second.interface);
-
-  bool result = (out_first.is_ok && out_second.is_ok) ||
-                (out_second.is_invalid_enum && out_first.is_ok) ||
-                (out_first.is_invalid_enum && out_second.is_ok);
-  result = result || CheckResultCode(out_first, out_second);
-  result = result || CheckResultCode(out_second, out_first);
+  LOG4CXX_AUTO_TRACE(logger_);
+  bool result = CheckResultCode(out_first, out_second) ||
+                CheckResultCode(out_second, out_first);
   return result;
 }
 
@@ -835,31 +856,130 @@ void CommandRequestImpl::GetInfo(
 
 mobile_apis::Result::eType CommandRequestImpl::PrepareResultCodeForResponse(
     const ResponseInfo& first, const ResponseInfo& second) {
+  LOG4CXX_AUTO_TRACE(logger_);
   mobile_apis::Result::eType result_code = mobile_apis::Result::INVALID_ENUM;
-  if (IsResultCodeUnsupported(first, second)) {
-    result_code = mobile_apis::Result::UNSUPPORTED_RESOURCE;
-  } else {
-    // If response contains erroneous result code SDL need return erroneus
-    // result code.
-    hmi_apis::Common_Result::eType first_result =
-        hmi_apis::Common_Result::INVALID_ENUM;
-    hmi_apis::Common_Result::eType second_result =
-        hmi_apis::Common_Result::INVALID_ENUM;
-    if (!first.is_unsupported_resource) {
-      first_result = first.result_code;
-    }
-    if (!second.is_unsupported_resource) {
-      second_result = second.result_code;
-    }
-    result_code =
-        MessageHelper::HMIToMobileResult(std::max(first_result, second_result));
+  if (IsResultCodeUnsupported(first, second) ||
+      IsResultCodeUnsupported(second, first)) {
+    return mobile_apis::Result::UNSUPPORTED_RESOURCE;
   }
+  if (IsResultCodeWarning(first, second) ||
+      IsResultCodeWarning(second, first)) {
+    return mobile_apis::Result::WARNINGS;
+  }
+  // If response contains erroneous result code SDL need return erroneus
+  // result code.
+  hmi_apis::Common_Result::eType first_result =
+      hmi_apis::Common_Result::INVALID_ENUM;
+  hmi_apis::Common_Result::eType second_result =
+      hmi_apis::Common_Result::INVALID_ENUM;
+  if (!first.is_unsupported_resource) {
+    first_result = first.result_code;
+  }
+  if (!second.is_unsupported_resource) {
+    second_result = second.result_code;
+  }
+  result_code =
+      MessageHelper::HMIToMobileResult(std::max(first_result, second_result));
   return result_code;
 }
 
 const CommandParametersPermissions& CommandRequestImpl::parameters_permissions()
     const {
   return parameters_permissions_;
+}
+
+void CommandRequestImpl::StartAwaitForInterface(
+    const HmiInterfaces::InterfaceID interface_id) {
+  sync_primitives::AutoLock lock(awaiting_response_interfaces_lock_);
+  awaiting_response_interfaces_.insert(interface_id);
+}
+
+bool CommandRequestImpl::IsInterfaceAwaited(
+    const HmiInterfaces::InterfaceID& interface_id) const {
+  sync_primitives::AutoLock lock(awaiting_response_interfaces_lock_);
+  std::set<HmiInterfaces::InterfaceID>::const_iterator it =
+      awaiting_response_interfaces_.find(interface_id);
+  return (it != awaiting_response_interfaces_.end());
+}
+
+void CommandRequestImpl::EndAwaitForInterface(
+    const HmiInterfaces::InterfaceID& interface_id) {
+  sync_primitives::AutoLock lock(awaiting_response_interfaces_lock_);
+  std::set<HmiInterfaces::InterfaceID>::const_iterator it =
+      awaiting_response_interfaces_.find(interface_id);
+  if (it != awaiting_response_interfaces_.end()) {
+    awaiting_response_interfaces_.erase(it);
+  } else {
+    LOG4CXX_WARN(logger_,
+                 "EndAwaitForInterface called on interface \
+                    which was not put into await state: "
+                     << interface_id);
+  }
+}
+
+bool CommandRequestImpl::IsResultCodeUnsupported(
+    const ResponseInfo& first, const ResponseInfo& second) const {
+  const bool first_ok_second_unsupported =
+      (first.is_ok || first.is_not_used) && second.is_unsupported_resource;
+  const bool both_unsupported =
+      first.is_unsupported_resource && second.is_unsupported_resource;
+  return first_ok_second_unsupported || both_unsupported;
+}
+
+std::string GetComponentNameFromInterface(
+    const HmiInterfaces::InterfaceID& interface) {
+  switch (interface) {
+    case HmiInterfaces::HMI_INTERFACE_Buttons:
+      return "Buttons";
+    case HmiInterfaces::HMI_INTERFACE_BasicCommunication:
+      return "BasicCommunication";
+    case HmiInterfaces::HMI_INTERFACE_VR:
+      return "VR";
+    case HmiInterfaces::HMI_INTERFACE_TTS:
+      return "TTS";
+    case HmiInterfaces::HMI_INTERFACE_UI:
+      return "UI";
+    case HmiInterfaces::HMI_INTERFACE_Navigation:
+      return "Navigation";
+    case HmiInterfaces::HMI_INTERFACE_VehicleInfo:
+      return "VehicleInfo";
+    case HmiInterfaces::HMI_INTERFACE_SDL:
+      return "SDL";
+    default:
+      return "Unknown type";
+  }
+}
+
+const std::string InfoInterfaceSeparator(
+    const std::string& sum, const HmiInterfaces::InterfaceID container_value) {
+  return sum.empty()
+             ? GetComponentNameFromInterface(container_value)
+             : sum + ", " + GetComponentNameFromInterface(container_value);
+}
+
+void CommandRequestImpl::AddTimeOutComponentInfoToMessage(
+    smart_objects::SmartObject& response) const {
+  using NsSmartDeviceLink::NsSmartObjects::SmartObject;
+  LOG4CXX_AUTO_TRACE(logger_);
+  sync_primitives::AutoLock lock(awaiting_response_interfaces_lock_);
+  if (awaiting_response_interfaces_.empty()) {
+    LOG4CXX_ERROR(logger_, "No interfaces awaiting, info param is empty");
+    return;
+  }
+
+  const std::string not_responding_interfaces_string =
+      std::accumulate(awaiting_response_interfaces_.begin(),
+                      awaiting_response_interfaces_.end(),
+                      std::string(""),
+                      InfoInterfaceSeparator);
+  LOG4CXX_DEBUG(
+      logger_,
+      "Not responding interfaces string: " << not_responding_interfaces_string);
+  if (!not_responding_interfaces_string.empty()) {
+    const std::string component_info =
+        not_responding_interfaces_string + " component does not respond";
+    response[strings::msg_params][strings::info] = component_info;
+  }
 }
 
 }  // namespace commands

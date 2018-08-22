@@ -93,6 +93,8 @@ void InitCapabilities() {
                      hmi_apis::Common_SpeechCapabilities::PRE_RECORDED));
   tts_enum_capabilities.insert(std::make_pair(
       std::string("SILENCE"), hmi_apis::Common_SpeechCapabilities::SILENCE));
+  tts_enum_capabilities.insert(std::make_pair(
+      std::string("FILE"), hmi_apis::Common_SpeechCapabilities::FILE));
 
   button_enum_name.insert(
       std::make_pair(std::string("OK"), hmi_apis::Common_ButtonName::OK));
@@ -282,6 +284,9 @@ void InitCapabilities() {
   image_field_name_enum.insert(std::make_pair(
       std::string("graphic"), hmi_apis::Common_ImageFieldName::graphic));
   image_field_name_enum.insert(
+      std::make_pair(std::string("secondaryGraphic"),
+                     hmi_apis::Common_ImageFieldName::secondaryGraphic));
+  image_field_name_enum.insert(
       std::make_pair(std::string("showConstantTBTIcon"),
                      hmi_apis::Common_ImageFieldName::showConstantTBTIcon));
   image_field_name_enum.insert(std::make_pair(
@@ -391,6 +396,7 @@ HMICapabilitiesImpl::HMICapabilitiesImpl(ApplicationManager& app_mngr)
     , is_navigation_supported_(false)
     , is_phone_call_supported_(false)
     , is_video_streaming_supported_(false)
+    , is_rc_supported_(false)
     , navigation_capability_(NULL)
     , phone_capability_(NULL)
     , video_streaming_capability_(NULL)
@@ -547,10 +553,15 @@ void HMICapabilitiesImpl::set_vr_supported_languages(
 
 void HMICapabilitiesImpl::set_display_capabilities(
     const smart_objects::SmartObject& display_capabilities) {
-  if (display_capabilities_) {
-    delete display_capabilities_;
+  if (app_mngr_.IsSOStructValid(
+          hmi_apis::StructIdentifiers::Common_DisplayCapabilities,
+          display_capabilities)) {
+    if (display_capabilities_) {
+      delete display_capabilities_;
+    }
+    display_capabilities_ =
+        new smart_objects::SmartObject(display_capabilities);
   }
-  display_capabilities_ = new smart_objects::SmartObject(display_capabilities);
 }
 
 void HMICapabilitiesImpl::set_hmi_zone_capabilities(
@@ -648,6 +659,10 @@ void HMICapabilitiesImpl::set_phone_call_supported(const bool supported) {
 
 void HMICapabilitiesImpl::set_video_streaming_supported(const bool supported) {
   is_video_streaming_supported_ = supported;
+}
+
+void HMICapabilitiesImpl::set_rc_supported(const bool supported) {
+  is_rc_supported_ = supported;
 }
 
 void HMICapabilitiesImpl::set_navigation_capability(
@@ -801,6 +816,10 @@ bool HMICapabilitiesImpl::phone_call_supported() const {
 
 bool HMICapabilitiesImpl::video_streaming_supported() const {
   return is_video_streaming_supported_;
+}
+
+bool HMICapabilitiesImpl::rc_supported() const {
+  return is_rc_supported_;
 }
 
 const smart_objects::SmartObject* HMICapabilitiesImpl::navigation_capability()
@@ -1076,6 +1095,9 @@ bool HMICapabilitiesImpl::load_capabilities_from_file() {
           Formatters::CFormatterJsonBase::jsonValueToObj(
               navigation_capability, navigation_capability_so);
           set_navigation_capability(navigation_capability_so);
+          if (!navigation_capability_so.empty()) {
+            set_navigation_supported(true);
+          }
         }
         if (check_existing_json_member(system_capabilities,
                                        "phoneCapability")) {
@@ -1085,6 +1107,9 @@ bool HMICapabilitiesImpl::load_capabilities_from_file() {
           Formatters::CFormatterJsonBase::jsonValueToObj(phone_capability,
                                                          phone_capability_so);
           set_phone_capability(phone_capability_so);
+          if (!phone_capability_so.empty()) {
+            set_phone_call_supported(true);
+          }
         }
         if (check_existing_json_member(system_capabilities,
                                        "videoStreamingCapability")) {
@@ -1132,6 +1157,9 @@ bool HMICapabilitiesImpl::load_capabilities_from_file() {
             vs_capability_so["supportedFormats"] = converted_array;
           }
           set_video_streaming_capability(vs_capability_so);
+          if (!vs_capability_so.empty()) {
+            set_video_streaming_supported(true);
+          }
         }
         if (check_existing_json_member(system_capabilities,
                                        "remoteControlCapability")) {
@@ -1141,6 +1169,9 @@ bool HMICapabilitiesImpl::load_capabilities_from_file() {
           Formatters::CFormatterJsonBase::jsonValueToObj(rc_capability,
                                                          rc_capability_so);
           set_rc_capability(rc_capability_so);
+          if (!rc_capability_so.empty()) {
+            set_rc_supported(true);
+          }
         }
       }
     }  // UI end
