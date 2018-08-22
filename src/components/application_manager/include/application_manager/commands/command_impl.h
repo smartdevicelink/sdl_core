@@ -46,9 +46,9 @@ namespace application_manager {
  * table
  */
 struct CommandParametersPermissions {
-  std::vector<std::string> allowed_params;
-  std::vector<std::string> disallowed_params;
-  std::vector<std::string> undefined_params;
+  RPCParams allowed_params;
+  RPCParams disallowed_params;
+  RPCParams undefined_params;
 };
 
 namespace commands {
@@ -63,7 +63,10 @@ class CommandImpl : public Command {
    * @param message Incoming SmartObject message
    **/
   CommandImpl(const MessageSharedPtr& message,
-              ApplicationManager& application_manager);
+              ApplicationManager& application_manager,
+              rpc_service::RPCService& rpc_service,
+              HMICapabilities& hmi_capabilities,
+              policy::PolicyHandlerInterface& policy_handler);
 
   /**
    * @brief CommandImpl class destructor
@@ -142,23 +145,26 @@ class CommandImpl : public Command {
 
  protected:
   /**
-   * @brief Parse smartObject and replace mobile app Id by HMI app ID
-   *
-   * @param message Smartobject to be parsed
+   * @brief Parses mobile message and replaces mobile app id with HMI app id
+   * @param message Message to replace its ids
+   * @return True if replacement succeeded, otherwise - false
    */
-  void ReplaceMobileByHMIAppId(smart_objects::SmartObject& message);
+  bool ReplaceMobileWithHMIAppId(smart_objects::SmartObject& message);
 
   /**
-   * @brief Parse smartObject and replace HMI app ID by mobile app Id
-   *
-   * @param message Smartobject to be parsed
+   * @brief Parses message from HMI and replaces HMI app id with mobile app id
+   * @param message Message to replace its ids
+   * @return True if replacement succeeded, otherwise - false
    */
-  void ReplaceHMIByMobileAppId(smart_objects::SmartObject& message);
+  bool ReplaceHMIWithMobileAppId(smart_objects::SmartObject& message);
 
   MessageSharedPtr message_;
   uint32_t default_timeout_;
   bool allowed_to_terminate_;
   ApplicationManager& application_manager_;
+  rpc_service::RPCService& rpc_service_;
+  HMICapabilities& hmi_capabilities_;
+  policy::PolicyHandlerInterface& policy_handler_;
 
 #ifdef ENABLE_LOG
   static log4cxx::LoggerPtr logger_;

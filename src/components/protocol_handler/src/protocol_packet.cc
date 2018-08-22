@@ -41,6 +41,7 @@
 #include "protocol_handler/protocol_packet.h"
 #include "utils/macro.h"
 #include "utils/byte_order.h"
+#include "utils/semantic_version.h"
 
 namespace protocol_handler {
 
@@ -114,7 +115,8 @@ void ProtocolPacket::ProtocolHeader::deserialize(const uint8_t* message,
   switch (version) {
     case PROTOCOL_VERSION_2:
     case PROTOCOL_VERSION_3:
-    case PROTOCOL_VERSION_4: {
+    case PROTOCOL_VERSION_4:
+    case PROTOCOL_VERSION_5: {
       if (messageSize < PROTOCOL_HEADER_V2_SIZE) {
         LOG4CXX_DEBUG(logger_,
                       "Message size less " << PROTOCOL_HEADER_V2_SIZE
@@ -131,7 +133,11 @@ void ProtocolPacket::ProtocolHeader::deserialize(const uint8_t* message,
 }
 
 ProtocolPacket::ProtocolHeaderValidator::ProtocolHeaderValidator()
-    : max_payload_size_(std::numeric_limits<size_t>::max()) {}
+    : max_payload_size_(std::numeric_limits<size_t>::max())
+    , max_control_payload_size_(0)
+    , max_rpc_payload_size_(0)
+    , max_audio_payload_size_(0)
+    , max_video_payload_size_(0) {}
 
 void ProtocolPacket::ProtocolHeaderValidator::set_max_payload_size(
     const size_t max_payload_size) {
@@ -139,15 +145,92 @@ void ProtocolPacket::ProtocolHeaderValidator::set_max_payload_size(
   max_payload_size_ = max_payload_size;
 }
 
+void ProtocolPacket::ProtocolHeaderValidator::set_max_control_payload_size(
+    const size_t max_payload_size) {
+  LOG4CXX_DEBUG(logger_,
+                "New maximum Control payload size is " << max_payload_size);
+  max_control_payload_size_ = max_payload_size;
+}
+
+void ProtocolPacket::ProtocolHeaderValidator::set_max_rpc_payload_size(
+    const size_t max_payload_size) {
+  LOG4CXX_DEBUG(logger_,
+                "New maximum RPC payload size is " << max_payload_size);
+  max_rpc_payload_size_ = max_payload_size;
+}
+
+void ProtocolPacket::ProtocolHeaderValidator::set_max_audio_payload_size(
+    const size_t max_payload_size) {
+  LOG4CXX_DEBUG(logger_,
+                "New maximum audio payload size is " << max_payload_size);
+  max_audio_payload_size_ = max_payload_size;
+}
+
+void ProtocolPacket::ProtocolHeaderValidator::set_max_video_payload_size(
+    const size_t max_payload_size) {
+  LOG4CXX_DEBUG(logger_,
+                "New maximum video payload size is " << max_payload_size);
+  max_video_payload_size_ = max_payload_size;
+}
+
 size_t ProtocolPacket::ProtocolHeaderValidator::max_payload_size() const {
   return max_payload_size_;
+}
+
+size_t ProtocolPacket::ProtocolHeaderValidator::max_control_payload_size()
+    const {
+  return max_control_payload_size_;
+}
+
+size_t ProtocolPacket::ProtocolHeaderValidator::max_rpc_payload_size() const {
+  return max_rpc_payload_size_;
+}
+
+size_t ProtocolPacket::ProtocolHeaderValidator::max_audio_payload_size() const {
+  return max_audio_payload_size_;
+}
+
+size_t ProtocolPacket::ProtocolHeaderValidator::max_video_payload_size() const {
+  return max_video_payload_size_;
+}
+
+size_t
+ProtocolPacket::ProtocolHeaderValidator::max_payload_size_by_service_type(
+    const ServiceType type) const {
+  size_t payload_size = 0;
+  switch (type) {
+    case kControl:
+      // Default to the generic MTU if specific MTU is not set
+      payload_size = max_control_payload_size_ == 0 ? max_payload_size_
+                                                    : max_control_payload_size_;
+      break;
+    case kBulk:
+    case kRpc:
+      // Default to the generic MTU if specific MTU is not set
+      payload_size = max_rpc_payload_size_ == 0 ? max_payload_size_
+                                                : max_rpc_payload_size_;
+      break;
+    case kAudio:
+      // Default to the generic MTU if specific MTU is not set
+      payload_size = max_audio_payload_size_ == 0 ? max_payload_size_
+                                                  : max_audio_payload_size_;
+      break;
+    case kMobileNav:
+      // Default to the generic MTU if specific MTU is not set
+      payload_size = max_video_payload_size_ == 0 ? max_payload_size_
+                                                  : max_video_payload_size_;
+      break;
+    case kInvalidServiceType:
+      LOG4CXX_WARN(logger_, "Invalid service type: " << static_cast<int>(type));
+  }
+  return payload_size;
 }
 
 RESULT_CODE ProtocolPacket::ProtocolHeaderValidator::validate(
     const ProtocolHeader& header) const {
   LOG4CXX_DEBUG(logger_, "Validating header - " << header);
   // expected payload size will be calculated depending
-  // on used protocol version
+  // on used protocol version and service type
   size_t payload_size = MAXIMUM_FRAME_DATA_V2_SIZE;
   // Protocol version shall be from 1 to 4
   switch (header.version) {
@@ -159,6 +242,10 @@ RESULT_CODE ProtocolPacket::ProtocolHeaderValidator::validate(
       payload_size = max_payload_size_ > MAXIMUM_FRAME_DATA_V2_SIZE
                          ? max_payload_size_
                          : MAXIMUM_FRAME_DATA_V2_SIZE;
+      break;
+    case PROTOCOL_VERSION_5:
+      payload_size = max_payload_size_by_service_type(
+          ServiceTypeFromByte(header.serviceType));
       break;
     default:
       LOG4CXX_WARN(logger_,
@@ -176,8 +263,8 @@ RESULT_CODE ProtocolPacket::ProtocolHeaderValidator::validate(
   // Check frame info for each frame type
   // Frame type shall be 0x00 (Control), 0x01 (Single), 0x02 (First), 0x03
   // (Consecutive)
-  // For Control frames Frame info value shall be from 0x00 to 0x06 or 0xFE(Data
-  // Ack), 0xFF(HB Ack)
+  // For Control frames Frame info value shall be from 0x00 to 0x09 or
+  // 0xFD(Transport Event Update), 0xFE(Data Ack), 0xFF(HB Ack)
   // For Single and First frames Frame info value shall be equal 0x00
   switch (header.frameType) {
     case FRAME_TYPE_CONTROL: {
@@ -189,6 +276,10 @@ RESULT_CODE ProtocolPacket::ProtocolHeaderValidator::validate(
         case FRAME_DATA_END_SERVICE:
         case FRAME_DATA_END_SERVICE_ACK:
         case FRAME_DATA_END_SERVICE_NACK:
+        case FRAME_DATA_REGISTER_SECONDARY_TRANSPORT:
+        case FRAME_DATA_REGISTER_SECONDARY_TRANSPORT_ACK:
+        case FRAME_DATA_REGISTER_SECONDARY_TRANSPORT_NACK:
+        case FRAME_DATA_TRANSPORT_EVENT_UPDATE:
         case FRAME_DATA_SERVICE_DATA_ACK:
         case FRAME_DATA_HEART_BEAT_ACK:
           break;
@@ -392,6 +483,17 @@ bool ProtocolPacket::operator==(const ProtocolPacket& other) const {
   return false;
 }
 
+void ProtocolPacket::HandleRawFirstFrameData(const uint8_t* message) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  payload_size_ = 0;
+  const uint8_t* data = message;
+  uint32_t total_data_bytes = data[0] << 24;
+  total_data_bytes |= data[1] << 16;
+  total_data_bytes |= data[2] << 8;
+  total_data_bytes |= data[3];
+  set_total_data_bytes(total_data_bytes);
+}
+
 RESULT_CODE ProtocolPacket::deserializePacket(const uint8_t* message,
                                               const size_t messageSize) {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -404,18 +506,15 @@ RESULT_CODE ProtocolPacket::deserializePacket(const uint8_t* message,
   packet_data_.totalDataBytes = packet_header_.dataSize;
 
   uint32_t dataPayloadSize = 0;
-  if ((offset < messageSize) && packet_header_.frameType != FRAME_TYPE_FIRST) {
+  if ((offset < messageSize)) {
     dataPayloadSize = messageSize - offset;
   }
 
-  if (packet_header_.frameType == FRAME_TYPE_FIRST) {
+  if (packet_header_.frameType == FRAME_TYPE_FIRST &&
+      !packet_header_.protection_flag) {
     payload_size_ = 0;
     const uint8_t* data = message + offset;
-    uint32_t total_data_bytes = data[0] << 24;
-    total_data_bytes |= data[1] << 16;
-    total_data_bytes |= data[2] << 8;
-    total_data_bytes |= data[3];
-    set_total_data_bytes(total_data_bytes);
+    HandleRawFirstFrameData(data);
     if (0 == packet_data_.data) {
       return RESULT_FAIL;
     }
@@ -474,6 +573,8 @@ uint8_t* ProtocolPacket::data() const {
 }
 
 void ProtocolPacket::set_total_data_bytes(size_t dataBytes) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  LOG4CXX_DEBUG(logger_, "Data bytes : " << dataBytes);
   if (dataBytes) {
     delete[] packet_data_.data;
     packet_data_.data = new (std::nothrow) uint8_t[dataBytes];
@@ -502,6 +603,10 @@ uint32_t ProtocolPacket::total_data_bytes() const {
 
 ConnectionID ProtocolPacket::connection_id() const {
   return connection_id_;
+}
+
+void ProtocolPacket::set_connection_id(ConnectionID connection_id) {
+  connection_id_ = connection_id;
 }
 
 uint32_t ProtocolPacket::payload_size() const {

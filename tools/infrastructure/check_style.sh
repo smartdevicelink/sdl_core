@@ -27,21 +27,50 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+FORMATER=clang-format-3.6
+INSTALL_CMD="sudo apt-get install -f $FORMATER"
+
+if [ "$1" = "--help" ]
+then
+    echo ""
+    echo "Script checks c++ code style in all .h .cc and .cpp files"
+    echo "Uses $FORMATER as base tool. Install it with : $INSTALL_CMD"
+    echo "Usage: `basename $0` [option]"
+    echo "      --fix   Fix files format indirectly"
+    echo "      --help  Display this information"
+    exit 0
+fi
+
+command -v $FORMATER >/dev/null 2>&1 || { echo >&2 "$FORMATER is not installed. Use following: $INSTALL_CMD"; exit 1; }
+
 FILE_NAMES=$(find src -name \*.h -print -o -name \*.cpp -print  -o -name \*.cc -print | grep -v 3rd_party)
 
 
 check_style() {
-	clang-format-3.6 -style=file $1 | diff $1 -
+	$FORMATER -style=file $1 | diff $1 -
 }
 
 fix_style() {
-	clang-format-3.6 -style=file -i $1
+	$FORMATER -style=file -i $1
 }
 
 if [ "$1" = "--fix" ]
 then
   for FILE_NAME in $FILE_NAMES; do fix_style $FILE_NAME; done
 else
-  for FILE_NAME in $FILE_NAMES; do check_style $FILE_NAME; done
+  PASSED=0
+  for FILE_NAME in $FILE_NAMES; do
+    check_style $FILE_NAME
+    if [ $? != 0 ]
+    then
+      echo "in " $FILE_NAME 
+      PASSED=1
+    fi
+  done
+  if [ $PASSED = 1 ]
+  then 
+    exit 1
+  fi
 fi
+
 

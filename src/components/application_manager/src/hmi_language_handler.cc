@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, Ford Motor Company
+ * Copyright (c) 2017, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,9 +33,11 @@
 #include "application_manager/hmi_language_handler.h"
 #include "application_manager/application_manager.h"
 #include "application_manager/message_helper.h"
+#include "application_manager/rpc_service.h"
 #include "application_manager/hmi_capabilities.h"
 #include "utils/helpers.h"
 #include "resumption/last_state.h"
+#include "smart_objects/smart_object.h"
 
 static const std::string LanguagesKey = "Languages";
 static const std::string UIKey = "UI";
@@ -79,7 +81,8 @@ void HMILanguageHandler::set_language_for(
   LOG4CXX_DEBUG(logger_,
                 "Setting language " << language << " for interface "
                                     << interface);
-  last_state_->dictionary[LanguagesKey][key] = language;
+  Json::Value& dictionary = last_state_->get_dictionary();
+  dictionary[LanguagesKey][key] = language;
   return;
 }
 
@@ -104,10 +107,11 @@ hmi_apis::Common_Language::eType HMILanguageHandler::get_language_for(
       return Common_Language::INVALID_ENUM;
   }
 
-  if (last_state_->dictionary.isMember(LanguagesKey)) {
-    if (last_state_->dictionary[LanguagesKey].isMember(key)) {
+  const Json::Value& dictionary = last_state_->get_dictionary();
+  if (dictionary.isMember(LanguagesKey)) {
+    if (dictionary[LanguagesKey].isMember(key)) {
       Common_Language::eType language = static_cast<Common_Language::eType>(
-          last_state_->dictionary[LanguagesKey][key].asInt());
+          dictionary[LanguagesKey][key].asInt());
       return language;
     }
   }
@@ -150,7 +154,7 @@ void HMILanguageHandler::on_event(const event_engine::Event& event) {
 }
 
 void HMILanguageHandler::set_handle_response_for(
-    const event_engine::smart_objects::SmartObject& request) {
+    const smart_objects::SmartObject& request) {
   LOG4CXX_AUTO_TRACE(logger_);
   using namespace helpers;
   if (!request.keyExists(strings::params)) {
@@ -219,7 +223,8 @@ void HMILanguageHandler::SendOnLanguageChangeToMobile(
     const uint32_t connection_key) {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  smart_objects::SmartObjectSPtr notification = new smart_objects::SmartObject;
+  smart_objects::SmartObjectSPtr notification =
+      std::make_shared<smart_objects::SmartObject>();
   DCHECK_OR_RETURN_VOID(notification);
   smart_objects::SmartObject& message = *notification;
   message[strings::params][strings::function_id] =
@@ -233,8 +238,8 @@ void HMILanguageHandler::SendOnLanguageChangeToMobile(
       hmi_capabilities.active_ui_language();
   message[strings::msg_params][strings::language] =
       hmi_capabilities.active_vr_language();
-  if (application_manager_.ManageMobileCommand(notification,
-                                               commands::Command::ORIGIN_SDL)) {
+  if (application_manager_.GetRPCService().ManageMobileCommand(
+          notification, commands::Command::SOURCE_SDL)) {
     LOG4CXX_INFO(logger_, "Mobile command sent");
   } else {
     LOG4CXX_WARN(logger_, "Cannot send mobile command");
@@ -303,11 +308,11 @@ void HMILanguageHandler::HandleWrongLanguageApp(const Apps::value_type& app) {
     }
   }
   SendOnLanguageChangeToMobile(app.first);
-  application_manager_.ManageMobileCommand(
+  application_manager_.GetRPCService().ManageMobileCommand(
       MessageHelper::GetOnAppInterfaceUnregisteredNotificationToMobile(
           app.first,
           mobile_api::AppInterfaceUnregisteredReason::LANGUAGE_CHANGE),
-      commands::Command::ORIGIN_SDL);
+      commands::Command::SOURCE_SDL);
   application_manager_.UnregisterApplication(
       app.first, mobile_apis::Result::SUCCESS, false);
   LOG4CXX_INFO(logger_,

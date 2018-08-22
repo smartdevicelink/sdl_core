@@ -37,7 +37,7 @@
 
 namespace test {
 namespace components {
-namespace utils {
+namespace utils_test {
 
 using ::utils::BitStream;
 
@@ -220,6 +220,6 @@ TEST(BitstreamTest, ExtractBitstream_WithDataMarkedBad_ExpectIsBad) {
   EXPECT_TRUE(bs.IsBad());
 }
 
-}  // namespace utils
+}  // namespace utils_test
 }  // namespace components
 }  // namespace test

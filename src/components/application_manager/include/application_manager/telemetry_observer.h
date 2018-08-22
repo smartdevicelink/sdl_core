@@ -30,16 +30,15 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_TIME_METRIC_OBSERVER_H_
-#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_TIME_METRIC_OBSERVER_H_
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_TELEMETRY_OBSERVER_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_TELEMETRY_OBSERVER_H_
 
 #include "smart_objects/smart_object.h"
 #include "application_manager/smart_object_keys.h"
 #include "json/json.h"
-#include "utils/shared_ptr.h"
+
 #include "utils/date_time.h"
 
-namespace smart_objects = NsSmartDeviceLink::NsSmartObjects;
 namespace application_manager {
 
 class AMTelemetryObserver {
@@ -47,12 +46,12 @@ class AMTelemetryObserver {
   struct MessageMetric {
     TimevalStruct begin;
     TimevalStruct end;
-    utils::SharedPtr<smart_objects::SmartObject> message;
+    std::shared_ptr<smart_objects::SmartObject> message;
   };
-  typedef utils::SharedPtr<MessageMetric> MessageMetricSharedPtr;
+  typedef std::shared_ptr<MessageMetric> MessageMetricSharedPtr;
 
   virtual void OnMessage(MessageMetricSharedPtr) = 0;
   virtual ~AMTelemetryObserver() {}
 };
 }  // application_manager
-#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_USAGE_STATISTICS_H_
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_TELEMETRY_OBSERVER_H_

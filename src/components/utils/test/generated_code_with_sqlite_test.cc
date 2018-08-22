@@ -33,7 +33,9 @@
 #include "gtest/gtest.h"
 #include "utils/generated_code_with_sqlite_test.h"
 
-namespace rpc {
+namespace test {
+namespace components {
+namespace rpc_test {
 
 class GeneratedCodeTest : public ::testing::Test {
  public:
@@ -64,7 +66,7 @@ const std::string GeneratedCodeTest::kEndpointsCreation =
     "CREATE TABLE Endpoints ("
     "endpoint_id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,"
     "service_id VARCHAR(45) NOT NULL,"
-    "application_id VARCHAR(45),"
+    "application_id VARCHAR(45) COLLATE NOCASE,"
     "url VARCHAR(45) NOT NULL,"
     "is_default INTEGER NOT NULL CHECK(is_default>=0))";
 
@@ -75,14 +77,14 @@ const std::string GeneratedCodeTest::kEndpointsContent =
 const std::string GeneratedCodeTest::kAppPoliciesCreation =
     "CREATE TABLE AppPolicies ("
     "id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,"
-    "application_id VARCHAR(45),"
+    "application_id VARCHAR(45) COLLATE NOCASE,"
     "priority VARCHAR(45),"
     "is_default INTEGER NOT NULL CHECK(is_default>=0))";
 
 const std::string GeneratedCodeTest::kGroupsCreation =
     "CREATE TABLE Groups ("
     "id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,"
-    "application_id VARCHAR(45) NOT NULL,"
+    "application_id VARCHAR(45) NOT NULL COLLATE NOCASE,"
     "group_name VARCHAR(45) NOT NULL )";
 
 TEST_F(GeneratedCodeTest,
@@ -95,7 +97,7 @@ TEST_F(GeneratedCodeTest,
   policy_table::ServiceEndpoints ep;
 
   // assert
-  EXPECT_TRUE(policy_table::FindSection(&db, ep));
+  EXPECT_TRUE(FindSection(&db, ep));
   EXPECT_EQ(1u, ep.size());
 
   // act
@@ -117,7 +119,7 @@ TEST_F(GeneratedCodeTest,
   policy_table::ServiceEndpoints ep;
 
   // assert
-  EXPECT_TRUE(policy_table::RemoveSection(&db, ep));
+  EXPECT_TRUE(RemoveSection(&db, ep));
   dbms::SQLQuery sqlquery(&db);
 
   // act
@@ -151,7 +153,7 @@ TEST_F(GeneratedCodeTest,
   ep["0x07"] = urllist;
 
   // assert
-  EXPECT_TRUE(policy_table::UpdateSection(&db, ep));
+  EXPECT_TRUE(UpdateSection(&db, ep));
 
   dbms::SQLQuery sqlquery(&db);
   std::string num_of_records_check = "select count (*) from endpoints";
@@ -188,7 +190,7 @@ TEST_F(GeneratedCodeTest,
   ap[application_id].priority = policy_table::P_NORMAL;
 
   // assert
-  EXPECT_TRUE(policy_table::UpdateSection(&db, ap));
+  EXPECT_TRUE(UpdateSection(&db, ap));
 
   // act
   dbms::SQLQuery sqlquery(&db);
@@ -214,4 +216,6 @@ TEST_F(GeneratedCodeTest,
   EXPECT_TRUE(sqlquery.Reset());
 }
 
-}  // namespace rpc
+}  // namespace rpc_test
+}  // namespace components
+}  // namespace test

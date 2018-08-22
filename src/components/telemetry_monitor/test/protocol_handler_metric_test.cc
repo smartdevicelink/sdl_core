@@ -59,7 +59,7 @@ TEST(ProtocolHandlerMetricTest, GetJsonMetric) {
   end_time.tv_sec = 10;
   end_time.tv_usec = 0;
   metric_test.message_metric =
-      new protocol_handler::PHTelemetryObserver::MessageMetric();
+      std::make_shared<protocol_handler::PHTelemetryObserver::MessageMetric>();
   metric_test.message_metric->begin = start_time;
   metric_test.message_metric->end = end_time;
   metric_test.message_metric->message_id = 5;
@@ -93,7 +93,7 @@ TEST(ProtocolHandlerMetricTest, GetJsonMetricWithGrabResources) {
   end_time.tv_sec = 10;
   end_time.tv_usec = 0;
   metric_test.message_metric =
-      new protocol_handler::PHTelemetryObserver::MessageMetric();
+      std::make_shared<protocol_handler::PHTelemetryObserver::MessageMetric>();
   metric_test.message_metric->begin = start_time;
   metric_test.message_metric->end = end_time;
   metric_test.message_metric->message_id = 5;
@@ -120,6 +120,6 @@ TEST(ProtocolHandlerMetricTest, GetJsonMetricWithGrabResources) {
   delete resources;
 }
 
-}  // namespace telemetry_monitor
+}  // namespace telemetry_monitor_test
 }  // namespace components
 }  // namespace test

@@ -39,8 +39,7 @@
 
 namespace test {
 namespace components {
-namespace SmartObjects {
-namespace SchemaItem {
+namespace smart_object_test {
 
 /**
  * Test StringSchemaItem no default value
@@ -60,7 +59,8 @@ TEST(test_no_default_value, test_StringSchemaItemTest) {
   obj = "New valid string";
   ASSERT_EQ(std::string("New valid string"), obj.asString());
 
-  int resultType = item->validate(obj);
+  rpc::ValidationReport report("RPC");
+  int resultType = item->validate(obj, &report);
   EXPECT_EQ(Errors::OK, resultType);
   bool resDefault = item->setDefaultValue(obj);
   EXPECT_FALSE(resDefault);
@@ -69,7 +69,7 @@ TEST(test_no_default_value, test_StringSchemaItemTest) {
   // Obj - bool
   obj = true;
 
-  resultType = item->validate(obj);
+  resultType = item->validate(obj, &report);
   EXPECT_EQ(Errors::INVALID_VALUE, resultType);
   resDefault = item->setDefaultValue(obj);
   EXPECT_FALSE(resDefault);
@@ -78,12 +78,12 @@ TEST(test_no_default_value, test_StringSchemaItemTest) {
   // Object - number
   obj = 3.1415926;
 
-  resultType = item->validate(obj);
+  resultType = item->validate(obj, &report);
   EXPECT_EQ(Errors::INVALID_VALUE, resultType);
 
   resDefault = item->setDefaultValue(obj);
   EXPECT_FALSE(resDefault);
-  resultType = item->validate(obj);
+  resultType = item->validate(obj, &report);
   EXPECT_EQ(Errors::INVALID_VALUE, resultType);
   EXPECT_EQ(3.1415926, obj.asDouble());
 }
@@ -111,7 +111,8 @@ TEST(test_item_with_default_value, test_StringSchemaItemTest) {
   obj = "New valid string";
   ASSERT_EQ(std::string("New valid string"), obj.asString());
 
-  int resultType = item->validate(obj);
+  rpc::ValidationReport report("RPC");
+  int resultType = item->validate(obj, &report);
   EXPECT_EQ(Errors::OK, resultType);
   bool resDefault = item->setDefaultValue(obj);
   EXPECT_TRUE(resDefault);
@@ -120,7 +121,7 @@ TEST(test_item_with_default_value, test_StringSchemaItemTest) {
   // Obj - bool
   obj = true;
 
-  resultType = item->validate(obj);
+  resultType = item->validate(obj, &report);
   EXPECT_EQ(Errors::INVALID_VALUE, resultType);
   resDefault = item->setDefaultValue(obj);
   EXPECT_TRUE(resDefault);
@@ -129,12 +130,12 @@ TEST(test_item_with_default_value, test_StringSchemaItemTest) {
   // Object - number
   obj = 3.1415926;
 
-  resultType = item->validate(obj);
+  resultType = item->validate(obj, &report);
   EXPECT_EQ(Errors::INVALID_VALUE, resultType);
 
   resDefault = item->setDefaultValue(obj);
   EXPECT_TRUE(resDefault);
-  resultType = item->validate(obj);
+  resultType = item->validate(obj, &report);
   EXPECT_EQ(Errors::OK, resultType);
   EXPECT_EQ(std::string("Default string"), obj.asString());
 }
@@ -155,7 +156,8 @@ TEST(test_item_with_max_length, test_StringSchemaItemTest) {
   obj = "New valid string";
   ASSERT_EQ(std::string("New valid string"), obj.asString());
 
-  int resultType = item->validate(obj);
+  rpc::ValidationReport report("RPC");
+  int resultType = item->validate(obj, &report);
   EXPECT_EQ(Errors::OK, resultType);
   bool resDefault = item->setDefaultValue(obj);
   EXPECT_TRUE(resDefault);
@@ -165,13 +167,13 @@ TEST(test_item_with_max_length, test_StringSchemaItemTest) {
   obj = "New very very loooooong string";
   ASSERT_EQ(std::string("New very very loooooong string"), obj.asString());
 
-  resultType = item->validate(obj);
+  resultType = item->validate(obj, &report);
   EXPECT_EQ(Errors::OUT_OF_RANGE, resultType);
 
   resDefault = item->setDefaultValue(obj);
   EXPECT_TRUE(resDefault);
   EXPECT_EQ(std::string("Default string"), obj.asString());
-  resultType = item->validate(obj);
+  resultType = item->validate(obj, &report);
   EXPECT_EQ(Errors::OK, resultType);
 }
 
@@ -189,19 +191,20 @@ TEST(test_map_validate, test_StringSchemaItemTest) {
   obj["bool"] = true;
   obj["num"] = 3.14;
 
-  int resultType = item->validate(obj["str"]);
+  rpc::ValidationReport report("RPC");
+  int resultType = item->validate(obj["str"], &report);
   EXPECT_EQ(Errors::OK, resultType);
 
-  resultType = item->validate(obj["long"]);
+  resultType = item->validate(obj["long"], &report);
   EXPECT_EQ(Errors::OUT_OF_RANGE, resultType);
 
-  resultType = item->validate(obj["bool"]);
+  resultType = item->validate(obj["bool"], &report);
   EXPECT_EQ(Errors::INVALID_VALUE, resultType);
 
-  resultType = item->validate(obj["num"]);
+  resultType = item->validate(obj["num"], &report);
   EXPECT_EQ(Errors::INVALID_VALUE, resultType);
 
-  resultType = item->validate(obj);
+  resultType = item->validate(obj, &report);
   EXPECT_EQ(Errors::INVALID_VALUE, resultType);
 
   bool resDefault = item->setDefaultValue(obj["str"]);
@@ -216,23 +219,23 @@ TEST(test_map_validate, test_StringSchemaItemTest) {
   EXPECT_TRUE(resDefault);
   EXPECT_EQ(std::string("Default string"), obj["num"].asString());
 
-  resultType = item->validate(obj["str"]);
+  resultType = item->validate(obj["str"], &report);
   EXPECT_EQ(Errors::OK, resultType);
 
-  resultType = item->validate(obj["long"]);
+  resultType = item->validate(obj["long"], &report);
   EXPECT_EQ(Errors::OUT_OF_RANGE, resultType);
 
-  resultType = item->validate(obj["bool"]);
+  resultType = item->validate(obj["bool"], &report);
   EXPECT_EQ(Errors::OK, resultType);
 
-  resultType = item->validate(obj["num"]);
+  resultType = item->validate(obj["num"], &report);
   EXPECT_EQ(Errors::OK, resultType);
 
   resDefault = item->setDefaultValue(obj);
   EXPECT_TRUE(resDefault);
   EXPECT_EQ(std::string("Default string"), obj.asString());
 
-  resultType = item->validate(obj);
+  resultType = item->validate(obj, &report);
   EXPECT_EQ(Errors::OK, resultType);
 }
 
@@ -251,22 +254,23 @@ TEST(test_array_validate, test_StringSchemaItemTest) {
   obj[3] = 3.14;
   obj[4] = "New valid string";
 
-  int resultType = item->validate(obj[0]);
+  rpc::ValidationReport report("RPC");
+  int resultType = item->validate(obj[0], &report);
   EXPECT_EQ(Errors::OK, resultType);
 
-  resultType = item->validate(obj[1]);
+  resultType = item->validate(obj[1], &report);
   EXPECT_EQ(Errors::OUT_OF_RANGE, resultType);
 
-  resultType = item->validate(obj[2]);
+  resultType = item->validate(obj[2], &report);
   EXPECT_EQ(Errors::INVALID_VALUE, resultType);
 
-  resultType = item->validate(obj[3]);
+  resultType = item->validate(obj[3], &report);
   EXPECT_EQ(Errors::INVALID_VALUE, resultType);
 
-  resultType = item->validate(obj[4]);
+  resultType = item->validate(obj[4], &report);
   EXPECT_EQ(Errors::OK, resultType);
 
-  resultType = item->validate(obj);
+  resultType = item->validate(obj, &report);
   EXPECT_EQ(Errors::INVALID_VALUE, resultType);
 
   bool resDefault = item->setDefaultValue(obj[0]);
@@ -285,27 +289,27 @@ TEST(test_array_validate, test_StringSchemaItemTest) {
   EXPECT_EQ(std::string("Default string"), obj[4].asString());
   EXPECT_EQ(std::string("Default string"), obj[5].asString());
 
-  resultType = item->validate(obj[0]);
+  resultType = item->validate(obj[0], &report);
   EXPECT_EQ(Errors::OK, resultType);
-  resultType = item->validate(obj[1]);
+  resultType = item->validate(obj[1], &report);
   EXPECT_EQ(Errors::OUT_OF_RANGE, resultType);
-  resultType = item->validate(obj[2]);
+  resultType = item->validate(obj[2], &report);
   EXPECT_EQ(Errors::OK, resultType);
-  resultType = item->validate(obj[3]);
+  resultType = item->validate(obj[3], &report);
   EXPECT_EQ(Errors::INVALID_VALUE, resultType);
-  resultType = item->validate(obj[4]);
+  resultType = item->validate(obj[4], &report);
   EXPECT_EQ(Errors::OK, resultType);
-  resultType = item->validate(obj[5]);
+  resultType = item->validate(obj[5], &report);
   EXPECT_EQ(Errors::OK, resultType);
 
   resDefault = item->setDefaultValue(obj);
   EXPECT_TRUE(resDefault);
   EXPECT_EQ(std::string("Default string"), obj.asString());
 
-  resultType = item->validate(obj);
+  resultType = item->validate(obj, &report);
   EXPECT_EQ(Errors::OK, resultType);
 }
-}  // namespace SchemaItem
-}  // namespace SmartObjects
+
+}  // namespace smart_object_test
 }  // namespace components
 }  // namespace test

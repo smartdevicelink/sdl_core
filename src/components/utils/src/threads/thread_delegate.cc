@@ -52,6 +52,7 @@ void ThreadDelegate::exitThreadMain() {
     } else {
       pthread_cancel(thread_->thread_handle());
     }
+    thread_ = NULL;
   }
 }
 

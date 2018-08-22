@@ -30,12 +30,11 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_TELEMETRY_MONITOR_INCLUDE_TELEMETRY_MONITOR_H_
-#define SRC_COMPONENTS_TELEMETRY_MONITOR_INCLUDE_TELEMETRY_MONITOR_H_
+#ifndef SRC_COMPONENTS_TELEMETRY_MONITOR_INCLUDE_TELEMETRY_MONITOR_TELEMETRY_MONITOR_H_
+#define SRC_COMPONENTS_TELEMETRY_MONITOR_INCLUDE_TELEMETRY_MONITOR_TELEMETRY_MONITOR_H_
 
 #include <string>
 
-#include "utils/shared_ptr.h"
 #include "utils/message_queue.h"
 #include "utils/threads/thread.h"
 #include "utils/threads/thread_delegate.h"
@@ -58,7 +57,7 @@ class Streamer : public threads::ThreadDelegate {
   void threadMain() OVERRIDE;
   void exitThreadMain() OVERRIDE;
 
-  virtual void PushMessage(utils::SharedPtr<MetricWrapper> metric);
+  virtual void PushMessage(std::shared_ptr<MetricWrapper> metric);
   volatile bool is_client_connected_;
 
  private:
@@ -71,7 +70,7 @@ class Streamer : public threads::ThreadDelegate {
   int32_t server_socket_fd_;
   int32_t client_socket_fd_;
   volatile bool stop_flag_;
-  MessageQueue<utils::SharedPtr<MetricWrapper> > messages_;
+  MessageQueue<std::shared_ptr<MetricWrapper> > messages_;
   DISALLOW_COPY_AND_ASSIGN(Streamer);
 };
 
@@ -87,17 +86,16 @@ class TelemetryMonitor {
                         transport_manager);
   virtual void Stop();
   virtual void Start();
-  virtual void SendMetric(utils::SharedPtr<MetricWrapper> metric);
-  void set_streamer(Streamer* streamer);
+  virtual void SendMetric(std::shared_ptr<MetricWrapper> metric);
+  void set_streamer(std::shared_ptr<Streamer> streamer);
   const std::string& ip() const;
   int16_t port() const;
 
  private:
   std::string server_address_;
   int16_t port_;
-  bool is_ready_;
   threads::Thread* thread_;
-  Streamer* streamer_;
+  std::shared_ptr<Streamer> streamer_;
   ApplicationManagerObserver app_observer;
   TransportManagerObserver tm_observer;
   ProtocolHandlerObserver ph_observer;
@@ -105,4 +103,4 @@ class TelemetryMonitor {
   DISALLOW_COPY_AND_ASSIGN(TelemetryMonitor);
 };
 }  // namespace telemetry_monitor
-#endif  // SRC_COMPONENTS_TELEMETRY_MONITOR_INCLUDE_TELEMETRY_MONITOR_H_
+#endif  // SRC_COMPONENTS_TELEMETRY_MONITOR_INCLUDE_TELEMETRY_MONITOR_TELEMETRY_MONITOR_H_

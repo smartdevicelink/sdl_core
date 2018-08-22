@@ -35,34 +35,44 @@
 
 #include "gmock/gmock.h"
 #include "utils/macro.h"
-#include "utils/make_shared.h"
+
 #include "application_manager/policies/policy_handler.h"
-#include "application_manager/test/resumption/include/application_mock.h"
+#include "application_manager/mock_application.h"
+#include "application_manager/mock_help_prompt_manager.h"
 #include "utils/custom_string.h"
+#include "utils/lock.h"
 #include "policy/mock_policy_settings.h"
 #include "application_manager/policies/policy_handler.h"
 #include "application_manager/mock_application_manager.h"
+#include "application_manager/mock_rpc_service.h"
 #include "application_manager/event_engine/event_dispatcher.h"
 #include "application_manager/state_controller.h"
 #include "application_manager/resumption/resume_ctrl.h"
 
-namespace application_manager {
+#ifdef EXTERNAL_PROPRIETARY_MODE
+#include "policy/policy_external/include/policy/policy_types.h"
+#endif
+
 namespace test {
+namespace components {
+namespace application_manager_test {
 
 namespace HmiLanguage = hmi_apis::Common_Language;
 namespace HmiResults = hmi_apis::Common_Result;
 namespace MobileResults = mobile_apis::Result;
 
-typedef ::test::components::resumption_test::MockApplication AppMock;
-typedef utils::SharedPtr<AppMock> MockApplicationSharedPtr;
+using namespace application_manager;
+
+typedef std::shared_ptr<MockApplication> MockApplicationSharedPtr;
 typedef std::vector<std::string> StringArray;
-typedef ::application_manager::Application App;
-typedef utils::SharedPtr<App> ApplicationSharedPtr;
+typedef std::shared_ptr<application_manager::Application> ApplicationSharedPtr;
 
 using testing::AtLeast;
 using testing::ReturnRefOfCopy;
 using testing::ReturnRef;
 using testing::Return;
+using testing::SaveArg;
+using testing::_;
 
 TEST(MessageHelperTestCreate,
      CreateBlockedByPoliciesResponse_SmartObject_Equal) {
@@ -74,10 +84,10 @@ TEST(MessageHelperTestCreate,
   bool success = false;
 
   smart_objects::SmartObjectSPtr ptr =
-      MessageHelper::CreateBlockedByPoliciesResponse(
+      application_manager::MessageHelper::CreateBlockedByPoliciesResponse(
           function_id, result, correlation_id, connection_key);
 
-  EXPECT_TRUE(ptr);
+  EXPECT_TRUE((bool)ptr);
 
   smart_objects::SmartObject& obj = *ptr;
 
@@ -89,7 +99,8 @@ TEST(MessageHelperTestCreate,
             obj[strings::params][strings::correlation_id].asUInt());
   EXPECT_EQ(connection_key,
             obj[strings::params][strings::connection_key].asUInt());
-  EXPECT_EQ(kV2, obj[strings::params][strings::protocol_version].asInt());
+  EXPECT_EQ(protocol_handler::MajorProtocolVersion::PROTOCOL_VERSION_2,
+            obj[strings::params][strings::protocol_version].asInt());
 }
 
 TEST(MessageHelperTestCreate, CreateSetAppIcon_SendNullPathImagetype_Equal) {
@@ -98,7 +109,7 @@ TEST(MessageHelperTestCreate, CreateSetAppIcon_SendNullPathImagetype_Equal) {
   smart_objects::SmartObjectSPtr ptr =
       MessageHelper::CreateSetAppIcon(path_to_icon, app_id);
 
-  EXPECT_TRUE(ptr);
+  EXPECT_TRUE((bool)ptr);
 
   smart_objects::SmartObject& obj = *ptr;
 
@@ -117,7 +128,7 @@ TEST(MessageHelperTestCreate, CreateSetAppIcon_SendPathImagetype_Equal) {
   smart_objects::SmartObjectSPtr ptr =
       MessageHelper::CreateSetAppIcon(path_to_icon, app_id);
 
-  EXPECT_TRUE(ptr);
+  EXPECT_TRUE((bool)ptr);
 
   smart_objects::SmartObject& obj = *ptr;
 
@@ -132,11 +143,18 @@ TEST(MessageHelperTestCreate, CreateSetAppIcon_SendPathImagetype_Equal) {
 
 TEST(MessageHelperTestCreate,
      CreateGlobalPropertiesRequestsToHMI_SmartObject_EmptyList) {
-  MockApplicationSharedPtr appSharedMock = utils::MakeShared<MockApplication>();
+  MockApplicationSharedPtr appSharedMock = std::make_shared<MockApplication>();
   EXPECT_CALL(*appSharedMock, vr_help_title()).Times(AtLeast(1));
   EXPECT_CALL(*appSharedMock, vr_help()).Times(AtLeast(1));
   EXPECT_CALL(*appSharedMock, help_prompt()).Times(AtLeast(1));
   EXPECT_CALL(*appSharedMock, timeout_prompt()).Times(AtLeast(1));
+
+  std::shared_ptr<MockHelpPromptManager> mock_help_prompt_manager =
+      std::make_shared<MockHelpPromptManager>();
+  EXPECT_CALL(*appSharedMock, help_prompt_manager())
+      .WillRepeatedly(ReturnRef(*mock_help_prompt_manager));
+  EXPECT_CALL(*mock_help_prompt_manager, GetSendingType())
+      .WillRepeatedly(Return(HelpPromptManager::SendingType::kSendBoth));
 
   smart_objects::SmartObjectList ptr =
       MessageHelper::CreateGlobalPropertiesRequestsToHMI(appSharedMock, 0u);
@@ -146,9 +164,9 @@ TEST(MessageHelperTestCreate,
 
 TEST(MessageHelperTestCreate,
      CreateGlobalPropertiesRequestsToHMI_SmartObject_NotEmpty) {
-  MockApplicationSharedPtr appSharedMock = utils::MakeShared<AppMock>();
+  MockApplicationSharedPtr appSharedMock = std::make_shared<MockApplication>();
   smart_objects::SmartObjectSPtr objPtr =
-      MakeShared<smart_objects::SmartObject>();
+      std::make_shared<smart_objects::SmartObject>();
 
   (*objPtr)[0][strings::vr_help_title] = "111";
   (*objPtr)[1][strings::vr_help] = "222";
@@ -181,6 +199,13 @@ TEST(MessageHelperTestCreate,
       .WillRepeatedly(Return(&(*objPtr)[4]));
   EXPECT_CALL(*appSharedMock, app_id()).WillRepeatedly(Return(0));
 
+  std::shared_ptr<MockHelpPromptManager> mock_help_prompt_manager =
+      std::make_shared<MockHelpPromptManager>();
+  EXPECT_CALL(*appSharedMock, help_prompt_manager())
+      .WillRepeatedly(ReturnRef(*mock_help_prompt_manager));
+  EXPECT_CALL(*mock_help_prompt_manager, GetSendingType())
+      .WillRepeatedly(Return(HelpPromptManager::SendingType::kSendBoth));
+
   smart_objects::SmartObjectList ptr =
       MessageHelper::CreateGlobalPropertiesRequestsToHMI(appSharedMock, 0u);
 
@@ -200,10 +225,10 @@ TEST(MessageHelperTestCreate,
 }
 
 TEST(MessageHelperTestCreate, CreateShowRequestToHMI_SendSmartObject_Equal) {
-  MockApplicationSharedPtr appSharedMock = utils::MakeShared<AppMock>();
+  MockApplicationSharedPtr appSharedMock = std::make_shared<MockApplication>();
 
   smart_objects::SmartObjectSPtr smartObjectPtr =
-      utils::MakeShared<smart_objects::SmartObject>();
+      std::make_shared<smart_objects::SmartObject>();
 
   const smart_objects::SmartObject& object = *smartObjectPtr;
 
@@ -226,9 +251,10 @@ TEST(MessageHelperTestCreate, CreateShowRequestToHMI_SendSmartObject_Equal) {
 
 TEST(MessageHelperTestCreate,
      CreateAddCommandRequestToHMI_SendSmartObject_Empty) {
-  MockApplicationSharedPtr appSharedMock = utils::MakeShared<MockApplication>();
+  MockApplicationSharedPtr appSharedMock = std::make_shared<MockApplication>();
   ::application_manager::CommandsMap vis;
-  DataAccessor<application_manager::CommandsMap> data_accessor(vis, true);
+  DataAccessor<application_manager::CommandsMap> data_accessor(
+      vis, std::make_shared<sync_primitives::RecursiveLock>());
 
   EXPECT_CALL(*appSharedMock, commands_map()).WillOnce(Return(data_accessor));
   application_manager_test::MockApplicationManager mock_application_manager;
@@ -241,11 +267,12 @@ TEST(MessageHelperTestCreate,
 
 TEST(MessageHelperTestCreate,
      CreateAddCommandRequestToHMI_SendSmartObject_Equal) {
-  MockApplicationSharedPtr appSharedMock = utils::MakeShared<AppMock>();
+  MockApplicationSharedPtr appSharedMock = std::make_shared<MockApplication>();
   CommandsMap vis;
-  DataAccessor<CommandsMap> data_accessor(vis, true);
+  DataAccessor<CommandsMap> data_accessor(
+      vis, std::make_shared<sync_primitives::RecursiveLock>());
   smart_objects::SmartObjectSPtr smartObjectPtr =
-      utils::MakeShared<smart_objects::SmartObject>();
+      std::make_shared<smart_objects::SmartObject>();
 
   smart_objects::SmartObject& object = *smartObjectPtr;
 
@@ -282,9 +309,10 @@ TEST(MessageHelperTestCreate,
 
 TEST(MessageHelperTestCreate,
      CreateAddVRCommandRequestFromChoiceToHMI_SendEmptyData_EmptyList) {
-  MockApplicationSharedPtr appSharedMock = utils::MakeShared<AppMock>();
+  MockApplicationSharedPtr appSharedMock = std::make_shared<MockApplication>();
   application_manager::ChoiceSetMap vis;
-  DataAccessor< ::application_manager::ChoiceSetMap> data_accessor(vis, true);
+  DataAccessor< ::application_manager::ChoiceSetMap> data_accessor(
+      vis, std::make_shared<sync_primitives::RecursiveLock>());
 
   EXPECT_CALL(*appSharedMock, choice_set_map()).WillOnce(Return(data_accessor));
   application_manager_test::MockApplicationManager mock_application_manager;
@@ -297,11 +325,12 @@ TEST(MessageHelperTestCreate,
 
 TEST(MessageHelperTestCreate,
      CreateAddVRCommandRequestFromChoiceToHMI_SendObject_EqualList) {
-  MockApplicationSharedPtr appSharedMock = utils::MakeShared<AppMock>();
+  MockApplicationSharedPtr appSharedMock = std::make_shared<MockApplication>();
   application_manager::ChoiceSetMap vis;
-  DataAccessor< ::application_manager::ChoiceSetMap> data_accessor(vis, true);
+  DataAccessor< ::application_manager::ChoiceSetMap> data_accessor(
+      vis, std::make_shared<sync_primitives::RecursiveLock>());
   smart_objects::SmartObjectSPtr smartObjectPtr =
-      utils::MakeShared<smart_objects::SmartObject>();
+      std::make_shared<smart_objects::SmartObject>();
 
   smart_objects::SmartObject& object = *smartObjectPtr;
 
@@ -343,11 +372,12 @@ TEST(MessageHelperTestCreate,
 }
 
 TEST(MessageHelperTestCreate, CreateAddSubMenuRequestToHMI_SendObject_Equal) {
-  MockApplicationSharedPtr appSharedMock = utils::MakeShared<AppMock>();
+  MockApplicationSharedPtr appSharedMock = std::make_shared<MockApplication>();
   application_manager::SubMenuMap vis;
-  DataAccessor< ::application_manager::SubMenuMap> data_accessor(vis, true);
+  DataAccessor< ::application_manager::SubMenuMap> data_accessor(
+      vis, std::make_shared<sync_primitives::RecursiveLock>());
   smart_objects::SmartObjectSPtr smartObjectPtr =
-      utils::MakeShared<smart_objects::SmartObject>();
+      std::make_shared<smart_objects::SmartObject>();
 
   smart_objects::SmartObject& object = *smartObjectPtr;
 
@@ -382,9 +412,10 @@ TEST(MessageHelperTestCreate, CreateAddSubMenuRequestToHMI_SendObject_Equal) {
 
 TEST(MessageHelperTestCreate,
      CreateAddSubMenuRequestToHMI_SendEmptyMap_EmptySmartObjectList) {
-  MockApplicationSharedPtr appSharedMock = utils::MakeShared<AppMock>();
+  MockApplicationSharedPtr appSharedMock = std::make_shared<MockApplication>();
   application_manager::SubMenuMap vis;
-  DataAccessor< ::application_manager::SubMenuMap> data_accessor(vis, true);
+  DataAccessor< ::application_manager::SubMenuMap> data_accessor(
+      vis, std::make_shared<sync_primitives::RecursiveLock>());
 
   EXPECT_CALL(*appSharedMock, sub_menu_map()).WillOnce(Return(data_accessor));
 
@@ -404,7 +435,7 @@ TEST(MessageHelperTestCreate, CreateNegativeResponse_SendSmartObject_Equal) {
   smart_objects::SmartObjectSPtr ptr = MessageHelper::CreateNegativeResponse(
       connection_key, function_id, correlation_id, result_code);
 
-  EXPECT_TRUE(ptr);
+  EXPECT_TRUE((bool)ptr);
 
   smart_objects::SmartObject& obj = *ptr;
 
@@ -441,7 +472,9 @@ class MessageHelperTest : public ::testing::Test {
                          "RU-RU", "TR-TR", "PL-PL", "FR-FR", "IT-IT", "SV-SE",
                          "PT-PT", "NL-NL", "EN-AU", "ZH-CN", "ZH-TW", "JA-JP",
                          "AR-SA", "KO-KR", "PT-BR", "CS-CZ", "DA-DK", "NO-NO",
-                         "NL-BE", "EL-GR", "HU-HU", "FI-FI", "SK-SK"}
+                         "NL-BE", "EL-GR", "HU-HU", "FI-FI", "SK-SK", "EN-IN",
+                         "TH-TH", "EN-SA", "HE-IL", "RO-RO", "UK-UA", "ID-ID",
+                         "VI-VN", "MS-MY", "HI-IN"}
       , hmi_result_strings{"SUCCESS",
                            "UNSUPPORTED_REQUEST",
                            "UNSUPPORTED_RESOURCE",
@@ -561,6 +594,7 @@ class MessageHelperTest : public ::testing::Test {
 
  protected:
   application_manager_test::MockApplicationManager mock_application_manager;
+  application_manager_test::MockRPCService mock_rpc_service_;
   const StringArray language_strings;
   const StringArray hmi_result_strings;
   const StringArray mobile_result_strings;
@@ -681,7 +715,7 @@ TEST_F(MessageHelperTest, VerifySoftButtonString_WrongStrings_False) {
                                   "soft_button1\\n",
                                   "soft_button1\\t"};
   for (size_t i = 0; i < wrong_strings.size(); ++i) {
-    EXPECT_FALSE(MessageHelper::VerifySoftButtonString(wrong_strings[i]));
+    EXPECT_FALSE(MessageHelper::VerifyString(wrong_strings[i]));
   }
 }
 
@@ -692,33 +726,14 @@ TEST_F(MessageHelperTest, VerifySoftButtonString_CorrectStrings_True) {
                                   "soft_button1??....asd",
                                   "soft_button12313fcvzxc./.,"};
   for (size_t i = 0; i < wrong_strings.size(); ++i) {
-    EXPECT_TRUE(MessageHelper::VerifySoftButtonString(wrong_strings[i]));
+    EXPECT_TRUE(MessageHelper::VerifyString(wrong_strings[i]));
   }
 }
 
 TEST_F(MessageHelperTest,
-       GetIVISubscriptionRequests_ValidApplication_HmiRequestNotEmpty) {
-  // Creating sharedPtr to MockApplication
-  MockApplicationSharedPtr appSharedMock = utils::MakeShared<AppMock>();
-  // Creating data acessor
-  application_manager::VehicleInfoSubscriptions vis;
-  DataAccessor<application_manager::VehicleInfoSubscriptions> data_accessor(
-      vis, true);
-  // Calls for ApplicationManager
-  EXPECT_CALL(*appSharedMock, app_id()).WillOnce(Return(1u));
-  EXPECT_CALL(*appSharedMock, SubscribedIVI()).WillOnce(Return(data_accessor));
-
-  smart_objects::SmartObjectList outList =
-      MessageHelper::GetIVISubscriptionRequests(appSharedMock,
-                                                mock_application_manager);
-  // Expect not empty request
-  EXPECT_FALSE(outList.empty());
-}
-
-TEST_F(MessageHelperTest,
        ProcessSoftButtons_SmartObjectWithoutButtonsKey_Success) {
-  // Creating sharedPtr to MockApplication
-  MockApplicationSharedPtr appSharedMock = utils::MakeShared<AppMock>();
+  // Creating std::shared_ptr to MockApplication
+  MockApplicationSharedPtr appSharedMock = std::make_shared<MockApplication>();
   // Creating input data for method
   smart_objects::SmartObject object;
   policy_handler_test::MockPolicySettings policy_settings_;
@@ -733,8 +748,8 @@ TEST_F(MessageHelperTest,
 
 TEST_F(MessageHelperTest,
        ProcessSoftButtons_IncorectSoftButonValue_InvalidData) {
-  // Creating sharedPtr to MockApplication
-  MockApplicationSharedPtr appSharedMock = utils::MakeShared<AppMock>();
+  // Creating std::shared_ptr to MockApplication
+  MockApplicationSharedPtr appSharedMock = std::make_shared<MockApplication>();
   // Creating input data for method
   smart_objects::SmartObject object;
   smart_objects::SmartObject& buttons = object[strings::soft_buttons];
@@ -751,11 +766,12 @@ TEST_F(MessageHelperTest,
 }
 
 TEST_F(MessageHelperTest, VerifyImage_ImageTypeIsStatic_Success) {
-  // Creating sharedPtr to MockApplication
-  MockApplicationSharedPtr appSharedMock = utils::MakeShared<AppMock>();
+  // Creating std::shared_ptr to MockApplication
+  MockApplicationSharedPtr appSharedMock = std::make_shared<MockApplication>();
   // Creating input data for method
   smart_objects::SmartObject image;
   image[strings::image_type] = mobile_apis::ImageType::STATIC;
+  image[strings::value] = "static_icon";
   // Method call
   mobile_apis::Result::eType result = MessageHelper::VerifyImage(
       image, appSharedMock, mock_application_manager);
@@ -764,8 +780,38 @@ TEST_F(MessageHelperTest, VerifyImage_ImageTypeIsStatic_Success) {
 }
 
 TEST_F(MessageHelperTest, VerifyImage_ImageValueNotValid_InvalidData) {
-  // Creating sharedPtr to MockApplication
-  MockApplicationSharedPtr appSharedMock = utils::MakeShared<AppMock>();
+  // Creating std::shared_ptr to MockApplication
+  MockApplicationSharedPtr appSharedMock = std::make_shared<MockApplication>();
+  // Creating input data for method
+  smart_objects::SmartObject image;
+  image[strings::image_type] = mobile_apis::ImageType::DYNAMIC;
+  // Invalid value
+  image[strings::value] = "   ";
+  // Method call
+  mobile_apis::Result::eType result = MessageHelper::VerifyImage(
+      image, appSharedMock, mock_application_manager);
+  // EXPECT
+  EXPECT_EQ(mobile_apis::Result::INVALID_DATA, result);
+}
+
+TEST_F(MessageHelperTest, VerifyImageApplyPath_ImageTypeIsStatic_Success) {
+  // Creating std::shared_ptr to MockApplication
+  MockApplicationSharedPtr appSharedMock = std::make_shared<MockApplication>();
+  // Creating input data for method
+  smart_objects::SmartObject image;
+  image[strings::image_type] = mobile_apis::ImageType::STATIC;
+  image[strings::value] = "icon.png";
+  // Method call
+  mobile_apis::Result::eType result = MessageHelper::VerifyImage(
+      image, appSharedMock, mock_application_manager);
+  EXPECT_EQ(mobile_apis::Result::SUCCESS, result);
+  // EXPECT
+  EXPECT_EQ("icon.png", image[strings::value].asString());
+}
+
+TEST_F(MessageHelperTest, VerifyImageApplyPath_ImageValueNotValid_InvalidData) {
+  // Creating std::shared_ptr to MockApplication
+  MockApplicationSharedPtr appSharedMock = std::make_shared<MockApplication>();
   // Creating input data for method
   smart_objects::SmartObject image;
   image[strings::image_type] = mobile_apis::ImageType::DYNAMIC;
@@ -779,12 +825,14 @@ TEST_F(MessageHelperTest, VerifyImage_ImageValueNotValid_InvalidData) {
 }
 
 TEST_F(MessageHelperTest, VerifyImageFiles_SmartObjectWithValidData_Success) {
-  // Creating sharedPtr to MockApplication
-  MockApplicationSharedPtr appSharedMock = utils::MakeShared<AppMock>();
+  // Creating std::shared_ptr to MockApplication
+  MockApplicationSharedPtr appSharedMock = std::make_shared<MockApplication>();
   // Creating input data for method
   smart_objects::SmartObject images;
   images[0][strings::image_type] = mobile_apis::ImageType::STATIC;
   images[1][strings::image_type] = mobile_apis::ImageType::STATIC;
+  images[0][strings::value] = "static_icon";
+  images[1][strings::value] = "static_icon";
   // Method call
   mobile_apis::Result::eType result = MessageHelper::VerifyImageFiles(
       images, appSharedMock, mock_application_manager);
@@ -794,8 +842,8 @@ TEST_F(MessageHelperTest, VerifyImageFiles_SmartObjectWithValidData_Success) {
 
 TEST_F(MessageHelperTest,
        VerifyImageFiles_SmartObjectWithInvalidData_NotSuccsess) {
-  // Creating sharedPtr to MockApplication
-  MockApplicationSharedPtr appSharedMock = utils::MakeShared<AppMock>();
+  // Creating std::shared_ptr to MockApplication
+  MockApplicationSharedPtr appSharedMock = std::make_shared<MockApplication>();
   // Creating input data for method
   smart_objects::SmartObject images;
   images[0][strings::image_type] = mobile_apis::ImageType::DYNAMIC;
@@ -812,14 +860,17 @@ TEST_F(MessageHelperTest,
 
 TEST_F(MessageHelperTest,
        VerifyImageVrHelpItems_SmartObjectWithSeveralValidImages_Succsess) {
-  // Creating sharedPtr to MockApplication
-  MockApplicationSharedPtr appSharedMock = utils::MakeShared<AppMock>();
+  // Creating std::shared_ptr to MockApplication
+  MockApplicationSharedPtr appSharedMock = std::make_shared<MockApplication>();
   // Creating input data for method
   smart_objects::SmartObject message;
   message[0][strings::image][strings::image_type] =
       mobile_apis::ImageType::STATIC;
   message[1][strings::image][strings::image_type] =
       mobile_apis::ImageType::STATIC;
+
+  message[0][strings::image][strings::value] = "static_icon";
+  message[1][strings::image][strings::value] = "static_icon";
   // Method call
   mobile_apis::Result::eType result = MessageHelper::VerifyImageVrHelpItems(
       message, appSharedMock, mock_application_manager);
@@ -829,8 +880,8 @@ TEST_F(MessageHelperTest,
 
 TEST_F(MessageHelperTest,
        VerifyImageVrHelpItems_SmartObjWithSeveralInvalidImages_NotSuccsess) {
-  // Creating sharedPtr to MockApplication
-  MockApplicationSharedPtr appSharedMock = utils::MakeShared<AppMock>();
+  // Creating std::shared_ptr to MockApplication
+  MockApplicationSharedPtr appSharedMock = std::make_shared<MockApplication>();
   // Creating input data for method
   smart_objects::SmartObject message;
   message[0][strings::image][strings::image_type] =
@@ -891,7 +942,7 @@ TEST_F(MessageHelperTest, StringToHmiLevel_LevelString_EqEType) {
 
 TEST_F(MessageHelperTest, SubscribeApplicationToSoftButton_CallFromApp) {
   // Create application mock
-  MockApplicationSharedPtr appSharedPtr = utils::MakeShared<AppMock>();
+  MockApplicationSharedPtr appSharedPtr = std::make_shared<MockApplication>();
   // Prepare data for method
   smart_objects::SmartObject message_params;
   size_t function_id = 1;
@@ -901,6 +952,134 @@ TEST_F(MessageHelperTest, SubscribeApplicationToSoftButton_CallFromApp) {
   MessageHelper::SubscribeApplicationToSoftButton(
       message_params, appSharedPtr, function_id);
 }
+#ifdef EXTERNAL_PROPRIETARY_MODE
+TEST_F(MessageHelperTest, SendGetListOfPermissionsResponse_SUCCESS) {
+  std::vector<policy::FunctionalGroupPermission> permissions;
+  policy::ExternalConsentStatus external_consent_status;
+  policy::FunctionalGroupPermission permission;
+  permission.state = policy::GroupConsent::kGroupAllowed;
+  permissions.push_back(permission);
 
+  smart_objects::SmartObjectSPtr result;
+
+  ON_CALL(mock_application_manager, GetRPCService())
+      .WillByDefault(ReturnRef(mock_rpc_service_));
+  EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_))
+      .WillOnce(DoAll(SaveArg<0>(&result), Return(true)));
+
+  const uint32_t correlation_id = 0u;
+  MessageHelper::SendGetListOfPermissionsResponse(permissions,
+                                                  external_consent_status,
+                                                  correlation_id,
+                                                  mock_application_manager);
+
+  ASSERT_TRUE(result.get());
+
+  EXPECT_EQ(hmi_apis::FunctionID::SDL_GetListOfPermissions,
+            (*result)[strings::params][strings::function_id].asInt());
+
+  smart_objects::SmartObject& msg_params = (*result)[strings::msg_params];
+  const std::string external_consent_status_key = "externalConsentStatus";
+  EXPECT_TRUE(msg_params.keyExists(external_consent_status_key));
+  EXPECT_TRUE(msg_params[external_consent_status_key].empty());
+}
+
+TEST_F(MessageHelperTest,
+       SendGetListOfPermissionsResponse_ExternalConsentStatusNonEmpty_SUCCESS) {
+  std::vector<policy::FunctionalGroupPermission> permissions;
+
+  policy::ExternalConsentStatus external_consent_status;
+  const int32_t entity_type_1 = 1;
+  const int32_t entity_id_1 = 2;
+  const policy::EntityStatus entity_status_1 = policy::kStatusOn;
+  const policy::EntityStatus entity_status_2 = policy::kStatusOff;
+  const int32_t entity_type_2 = 3;
+  const int32_t entity_id_2 = 4;
+  external_consent_status.insert(policy::ExternalConsentStatusItem(
+      entity_type_1, entity_id_1, entity_status_1));
+  external_consent_status.insert(policy::ExternalConsentStatusItem(
+      entity_type_2, entity_id_2, entity_status_2));
+
+  smart_objects::SmartObjectSPtr result;
+
+  ON_CALL(mock_application_manager, GetRPCService())
+      .WillByDefault(ReturnRef(mock_rpc_service_));
+  EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_))
+      .WillOnce(DoAll(SaveArg<0>(&result), Return(true)));
+
+  const uint32_t correlation_id = 0u;
+  MessageHelper::SendGetListOfPermissionsResponse(permissions,
+                                                  external_consent_status,
+                                                  correlation_id,
+                                                  mock_application_manager);
+
+  ASSERT_TRUE(result.get());
+
+  smart_objects::SmartObject& msg_params = (*result)[strings::msg_params];
+  const std::string external_consent_status_key = "externalConsentStatus";
+  EXPECT_TRUE(msg_params.keyExists(external_consent_status_key));
+
+  smart_objects::SmartArray* status_array =
+      msg_params[external_consent_status_key].asArray();
+  EXPECT_TRUE(external_consent_status.size() == status_array->size());
+
+  const std::string entityType = "entityType";
+  const std::string entityID = "entityID";
+  const std::string status = "status";
+
+  smart_objects::SmartObject item_1_so =
+      smart_objects::SmartObject(smart_objects::SmartType_Map);
+  item_1_so[entityType] = entity_type_1;
+  item_1_so[entityID] = entity_id_1;
+  item_1_so[status] = hmi_apis::Common_EntityStatus::ON;
+
+  smart_objects::SmartObject item_2_so =
+      smart_objects::SmartObject(smart_objects::SmartType_Map);
+  item_2_so[entityType] = entity_type_2;
+  item_2_so[entityID] = entity_id_2;
+  item_2_so[status] = hmi_apis::Common_EntityStatus::OFF;
+
+  EXPECT_TRUE(status_array->end() !=
+              std::find(status_array->begin(), status_array->end(), item_1_so));
+  EXPECT_TRUE(status_array->end() !=
+              std::find(status_array->begin(), status_array->end(), item_2_so));
+}
+#endif
+
+TEST_F(MessageHelperTest, SendNaviSetVideoConfigRequest) {
+  smart_objects::SmartObjectSPtr result;
+  ON_CALL(mock_application_manager, GetRPCService())
+      .WillByDefault(ReturnRef(mock_rpc_service_));
+  EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_))
+      .WillOnce(DoAll(SaveArg<0>(&result), Return(true)));
+
+  int32_t app_id = 123;
+  smart_objects::SmartObject video_params(smart_objects::SmartType_Map);
+  video_params[strings::protocol] =
+      hmi_apis::Common_VideoStreamingProtocol::RTP;
+  video_params[strings::codec] = hmi_apis::Common_VideoStreamingCodec::H264;
+  video_params[strings::width] = 640;
+  video_params[strings::height] = 480;
+
+  MessageHelper::SendNaviSetVideoConfig(
+      app_id, mock_application_manager, video_params);
+
+  EXPECT_EQ(hmi_apis::FunctionID::Navigation_SetVideoConfig,
+            (*result)[strings::params][strings::function_id].asInt());
+
+  smart_objects::SmartObject& msg_params = (*result)[strings::msg_params];
+  EXPECT_TRUE(msg_params.keyExists(strings::config));
+
+  EXPECT_TRUE(msg_params[strings::config].keyExists(strings::protocol));
+  EXPECT_EQ(1, msg_params[strings::config][strings::protocol].asInt());
+  EXPECT_TRUE(msg_params[strings::config].keyExists(strings::codec));
+  EXPECT_EQ(0, msg_params[strings::config][strings::codec].asInt());
+  EXPECT_TRUE(msg_params[strings::config].keyExists(strings::width));
+  EXPECT_EQ(640, msg_params[strings::config][strings::width].asInt());
+  EXPECT_TRUE(msg_params[strings::config].keyExists(strings::height));
+  EXPECT_EQ(480, msg_params[strings::config][strings::height].asInt());
+}
+
+}  // namespace application_manager_test
+}  // namespace components
 }  // namespace test
-}  // namespace application_manager

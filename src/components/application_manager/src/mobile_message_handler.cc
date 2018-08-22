@@ -55,9 +55,9 @@ using protocol_handler::Extract;
 
 namespace {
 typedef std::map<MessageType, std::string> MessageTypeMap;
-MessageTypeMap messageTypes = {std::make_pair(kRequest, "Request"),
-                               std::make_pair(kResponse, "Response"),
-                               std::make_pair(kNotification, "Notification")};
+MessageTypeMap message_types = {std::make_pair(kRequest, "Request"),
+                                std::make_pair(kResponse, "Response"),
+                                std::make_pair(kNotification, "Notification")};
 }
 CREATE_LOGGERPTR_GLOBAL(logger_, "ApplicationManager")
 
@@ -67,23 +67,28 @@ MobileMessageHandler::HandleIncomingMessageProtocol(
   DCHECK_OR_RETURN(message, NULL);
   application_manager::Message* out_message = NULL;
   switch (message->protocol_version()) {
-    case ProtocolVersion::kV1:
+    case protocol_handler::MajorProtocolVersion::PROTOCOL_VERSION_1:
       LOG4CXX_DEBUG(logger_, "Protocol version - V1");
       out_message =
           MobileMessageHandler::HandleIncomingMessageProtocolV1(message);
       break;
-    case ProtocolVersion::kV2:
+    case protocol_handler::MajorProtocolVersion::PROTOCOL_VERSION_2:
       LOG4CXX_DEBUG(logger_, "Protocol version - V2");
       out_message =
           MobileMessageHandler::HandleIncomingMessageProtocolV2(message);
       break;
-    case ProtocolVersion::kV3:
+    case protocol_handler::MajorProtocolVersion::PROTOCOL_VERSION_3:
       LOG4CXX_DEBUG(logger_, "Protocol version - V3");
       out_message =
           MobileMessageHandler::HandleIncomingMessageProtocolV2(message);
       break;
-    case ProtocolVersion::kV4:
+    case protocol_handler::MajorProtocolVersion::PROTOCOL_VERSION_4:
       LOG4CXX_DEBUG(logger_, "Protocol version - V4");
+      out_message =
+          MobileMessageHandler::HandleIncomingMessageProtocolV2(message);
+      break;
+    case protocol_handler::MajorProtocolVersion::PROTOCOL_VERSION_5:
+      LOG4CXX_DEBUG(logger_, "Protocol version - V5");
       out_message =
           MobileMessageHandler::HandleIncomingMessageProtocolV2(message);
       break;
@@ -99,7 +104,7 @@ MobileMessageHandler::HandleIncomingMessageProtocol(
   LOG4CXX_DEBUG(logger_,
                 "Incoming RPC_INFO: " << (out_message->connection_key() >> 16)
                                       << ", "
-                                      << messageTypes[out_message->type()]
+                                      << message_types[out_message->type()]
                                       << ", " << out_message->function_id()
                                       << ", " << out_message->correlation_id()
                                       << ", " << out_message->json_message());
@@ -111,17 +116,18 @@ MobileMessageHandler::HandleOutgoingMessageProtocol(
     const MobileMessage& message) {
   LOG4CXX_DEBUG(logger_,
                 "Outgoing RPC_INFO: " << (message->connection_key() >> 16)
-                                      << ", " << messageTypes[message->type()]
+                                      << ", " << message_types[message->type()]
                                       << ", " << message->function_id() << ", "
                                       << message->correlation_id() << ", "
                                       << message->json_message());
 
-  if (message->protocol_version() == application_manager::kV1) {
+  if (message->protocol_version() ==
+      protocol_handler::MajorProtocolVersion::PROTOCOL_VERSION_1) {
     return MobileMessageHandler::HandleOutgoingMessageProtocolV1(message);
   }
-  if ((message->protocol_version() == application_manager::kV2) ||
-      (message->protocol_version() == application_manager::kV3) ||
-      (message->protocol_version() == application_manager::kV4)) {
+  if (Message::is_sufficient_version(
+          protocol_handler::MajorProtocolVersion::PROTOCOL_VERSION_2,
+          message->protocol_version())) {
     return MobileMessageHandler::HandleOutgoingMessageProtocolV2(message);
   }
   return NULL;
@@ -137,12 +143,13 @@ MobileMessageHandler::HandleIncomingMessageProtocolV1(
               message->service_type()));
   if (!message) {
     NOTREACHED();
+    delete outgoing_message;
     return NULL;
   }
 
   outgoing_message->set_connection_key(message->connection_key());
   outgoing_message->set_protocol_version(
-      static_cast<application_manager::ProtocolVersion>(
+      static_cast<protocol_handler::MajorProtocolVersion>(
           message->protocol_version()));
   outgoing_message->set_json_message(std::string(
       reinterpret_cast<const char*>(message->data()), message->data_size()));
@@ -172,7 +179,7 @@ MobileMessageHandler::HandleIncomingMessageProtocolV2(
     return NULL;
   }
 
-  std::auto_ptr<application_manager::Message> outgoing_message(
+  std::unique_ptr<application_manager::Message> outgoing_message(
       new application_manager::Message(
           protocol_handler::MessagePriority::FromServiceType(
               message->service_type())));
@@ -184,14 +191,14 @@ MobileMessageHandler::HandleIncomingMessageProtocolV2(
   outgoing_message->set_correlation_id(int32_t(payload.header.correlation_id));
   outgoing_message->set_connection_key(message->connection_key());
   outgoing_message->set_protocol_version(
-      static_cast<application_manager::ProtocolVersion>(
+      static_cast<protocol_handler::MajorProtocolVersion>(
           message->protocol_version()));
   outgoing_message->set_data_size(message->data_size());
   outgoing_message->set_payload_size(message->payload_size());
 
   if (!payload.data.empty()) {
-    outgoing_message->set_binary_data(
-        new application_manager::BinaryData(payload.data));
+    const BinaryData binary_payload_data(payload.data);
+    outgoing_message->set_binary_data(&binary_payload_data);
   }
   return outgoing_message.release();
 }
@@ -200,19 +207,20 @@ protocol_handler::RawMessage*
 MobileMessageHandler::HandleOutgoingMessageProtocolV1(
     const MobileMessage& message) {
   LOG4CXX_AUTO_TRACE(logger_);
-  std::string messageString = message->json_message();
-  if (messageString.length() == 0) {
+  std::string message_string = message->json_message();
+  if (message_string.length() == 0) {
     LOG4CXX_WARN(logger_, "Drop ill-formed message from mobile");
     return NULL;
   }
 
-  uint8_t* rawMessage = new uint8_t[messageString.length() + 1];
-  memcpy(rawMessage, messageString.c_str(), messageString.length() + 1);
+  BinaryData raw_message(message_string.length() + 1);
+  memcpy(&raw_message[0], message_string.c_str(), message_string.length() + 1);
 
-  protocol_handler::RawMessage* result = new protocol_handler::RawMessage(
-      message->connection_key(), 1, rawMessage, messageString.length() + 1);
-
-  delete[] rawMessage;
+  protocol_handler::RawMessage* result =
+      new protocol_handler::RawMessage(message->connection_key(),
+                                       1,
+                                       &raw_message[0],
+                                       message_string.length() + 1);
 
   return result;
 }
@@ -224,51 +232,52 @@ MobileMessageHandler::HandleOutgoingMessageProtocolV2(
   if (message->json_message().length() == 0) {
     LOG4CXX_ERROR(logger_, "json string is empty.");
   }
-  uint32_t jsonSize = message->json_message().length();
-  uint32_t binarySize = 0;
+  uint32_t json_size = message->json_message().length();
+  uint32_t binary_size = 0;
   if (message->has_binary_data()) {
-    binarySize = message->binary_data()->size();
+    binary_size = message->binary_data()->size();
   }
 
-  const size_t dataForSendingSize =
-      protocol_handler::PROTOCOL_HEADER_V2_SIZE + jsonSize + binarySize;
-  uint8_t* dataForSending = new uint8_t[dataForSendingSize];
+  const size_t data_for_sending_size =
+      protocol_handler::PROTOCOL_HEADER_V2_SIZE + json_size + binary_size;
+  BinaryData data_for_sending(data_for_sending_size);
   uint8_t offset = 0;
 
-  uint8_t rpcTypeFlag = 0;
+  uint8_t rpc_type_flag = 0;
   switch (message->type()) {
     case application_manager::kRequest:
-      rpcTypeFlag = kRequest;
+      rpc_type_flag = kRequest;
       break;
     case application_manager::kResponse:
-      rpcTypeFlag = kResponse;
+      rpc_type_flag = kResponse;
       break;
     case application_manager::kNotification:
-      rpcTypeFlag = kNotification;
+      rpc_type_flag = kNotification;
       break;
     default:
       NOTREACHED();
       break;
   }
 
-  uint32_t functionId = message->function_id();
-  dataForSending[offset++] = ((rpcTypeFlag << 4) & 0xF0) | (functionId >> 24);
-  dataForSending[offset++] = functionId >> 16;
-  dataForSending[offset++] = functionId >> 8;
-  dataForSending[offset++] = functionId;
+  uint32_t function_id = message->function_id();
+  data_for_sending[offset++] =
+      ((rpc_type_flag << 4) & 0xF0) | (function_id >> 24);
+  data_for_sending[offset++] = function_id >> 16;
+  data_for_sending[offset++] = function_id >> 8;
+  data_for_sending[offset++] = function_id;
 
-  uint32_t correlationId = message->correlation_id();
-  dataForSending[offset++] = correlationId >> 24;
-  dataForSending[offset++] = correlationId >> 16;
-  dataForSending[offset++] = correlationId >> 8;
-  dataForSending[offset++] = correlationId;
+  uint32_t correlation_id = message->correlation_id();
+  data_for_sending[offset++] = correlation_id >> 24;
+  data_for_sending[offset++] = correlation_id >> 16;
+  data_for_sending[offset++] = correlation_id >> 8;
+  data_for_sending[offset++] = correlation_id;
 
-  dataForSending[offset++] = jsonSize >> 24;
-  dataForSending[offset++] = jsonSize >> 16;
-  dataForSending[offset++] = jsonSize >> 8;
-  dataForSending[offset++] = jsonSize;
+  data_for_sending[offset++] = json_size >> 24;
+  data_for_sending[offset++] = json_size >> 16;
+  data_for_sending[offset++] = json_size >> 8;
+  data_for_sending[offset++] = json_size;
 
-  memcpy(dataForSending + offset, message->json_message().c_str(), jsonSize);
+  memcpy(&data_for_sending[offset], message->json_message().c_str(), json_size);
 
   // Default the service type to RPC Service
   uint8_t type = 0x07;
@@ -276,22 +285,21 @@ MobileMessageHandler::HandleOutgoingMessageProtocolV2(
   if (message->has_binary_data()) {
     // Change the service type to Hybrid Service
     type = 0x0F;
-    const std::vector<uint8_t>& binaryData = *(message->binary_data());
-    uint8_t* currentPointer = dataForSending + offset + jsonSize;
-    for (uint32_t i = 0; i < binarySize; ++i) {
-      currentPointer[i] = binaryData[i];
+    const BinaryData& binary_data = *(message->binary_data());
+    BinaryData::value_type* current_pointer =
+        &data_for_sending[offset + json_size];
+    for (uint32_t i = 0; i < binary_size; ++i) {
+      current_pointer[i] = binary_data[i];
     }
   }
 
-  protocol_handler::RawMessage* msgToProtocolHandler =
+  protocol_handler::RawMessage* msg_to_protocol_handler =
       new protocol_handler::RawMessage(message->connection_key(),
                                        message->protocol_version(),
-                                       dataForSending,
-                                       dataForSendingSize,
+                                       &data_for_sending[0],
+                                       data_for_sending_size,
                                        type);
 
-  delete[] dataForSending;
-
-  return msgToProtocolHandler;
+  return msg_to_protocol_handler;
 }
 }  // namespace application_manager

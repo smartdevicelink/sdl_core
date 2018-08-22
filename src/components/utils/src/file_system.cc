@@ -60,32 +60,25 @@ uint64_t file_system::GetAvailableDiskSpace(const std::string& path) {
 int64_t file_system::FileSize(const std::string& path) {
   if (file_system::FileExists(path)) {
     struct stat file_info = {0};
-    stat(path.c_str(), &file_info);
-    return file_info.st_size;
+    if (0 != stat(path.c_str(), &file_info)) {
+      LOG4CXX_WARN_WITH_ERRNO(logger_, "Could not get file size: " << path);
+    } else {
+      return file_info.st_size;
+    }
   }
   return 0;
 }
 
 size_t file_system::DirectorySize(const std::string& path) {
   size_t size = 0;
-  int32_t return_code = 0;
   DIR* directory = NULL;
 
-#ifndef __QNXNTO__
-  struct dirent dir_element_;
-  struct dirent* dir_element = &dir_element_;
-#else
-  char* direntbuffer = new char[offsetof(struct dirent, d_name) +
-                                pathconf(path.c_str(), _PC_NAME_MAX) + 1];
-  struct dirent* dir_element = new (direntbuffer) dirent;
-#endif
   struct dirent* result = NULL;
   struct stat file_info = {0};
   directory = opendir(path.c_str());
   if (NULL != directory) {
-    return_code = readdir_r(directory, dir_element, &result);
-    for (; NULL != result && 0 == return_code;
-         return_code = readdir_r(directory, dir_element, &result)) {
+    result = readdir(directory);
+    for (; NULL != result; result = readdir(directory)) {
       if (0 == strcmp(result->d_name, "..") ||
           0 == strcmp(result->d_name, ".")) {
         continue;
@@ -100,15 +93,14 @@ size_t file_system::DirectorySize(const std::string& path) {
     }
   }
   closedir(directory);
-#ifdef __QNXNTO__
-  delete[] direntbuffer;
-#endif
   return size;
 }
 
 std::string file_system::CreateDirectory(const std::string& name) {
   if (!DirectoryExists(name)) {
-    mkdir(name.c_str(), S_IRWXU);
+    if (0 != mkdir(name.c_str(), S_IRWXU)) {
+      LOG4CXX_WARN_WITH_ERRNO(logger_, "Unable to create directory: " << name);
+    }
   }
 
   return name;
@@ -222,6 +214,10 @@ std::string file_system::GetAbsolutePath(const std::string& path) {
   return std::string(abs_path);
 }
 
+bool file_system::IsFileNameValid(const std::string& file_name) {
+  return file_name.end() == std::find(file_name.begin(), file_name.end(), '/');
+}
+
 bool file_system::DeleteFile(const std::string& name) {
   if (FileExists(name) && IsAccessible(name, W_OK)) {
     return !remove(name.c_str());
@@ -230,26 +226,15 @@ bool file_system::DeleteFile(const std::string& name) {
 }
 
 void file_system::remove_directory_content(const std::string& directory_name) {
-  int32_t return_code = 0;
   DIR* directory = NULL;
-#ifndef __QNXNTO__
-  struct dirent dir_element_;
-  struct dirent* dir_element = &dir_element_;
-#else
-  char* direntbuffer =
-      new char[offsetof(struct dirent, d_name) +
-               pathconf(directory_name.c_str(), _PC_NAME_MAX) + 1];
-  struct dirent* dir_element = new (direntbuffer) dirent;
-#endif
   struct dirent* result = NULL;
 
   directory = opendir(directory_name.c_str());
 
   if (NULL != directory) {
-    return_code = readdir_r(directory, dir_element, &result);
+    result = readdir(directory);
 
-    for (; NULL != result && 0 == return_code;
-         return_code = readdir_r(directory, dir_element, &result)) {
+    for (; NULL != result; result = readdir(directory)) {
       if (0 == strcmp(result->d_name, "..") ||
           0 == strcmp(result->d_name, ".")) {
         continue;
@@ -261,15 +246,15 @@ void file_system::remove_directory_content(const std::string& directory_name) {
         remove_directory_content(full_element_path);
         rmdir(full_element_path.c_str());
       } else {
-        remove(full_element_path.c_str());
+        if (0 != remove(full_element_path.c_str())) {
+          LOG4CXX_WARN_WITH_ERRNO(
+              logger_, "Unable to remove file: " << full_element_path);
+        }
       }
     }
   }
 
   closedir(directory);
-#ifdef __QNXNTO__
-  delete[] direntbuffer;
-#endif
 }
 
 bool file_system::RemoveDirectory(const std::string& directory_name,
@@ -303,25 +288,14 @@ std::vector<std::string> file_system::ListFiles(
     return listFiles;
   }
 
-  int32_t return_code = 0;
   DIR* directory = NULL;
-#ifndef __QNXNTO__
-  struct dirent dir_element_;
-  struct dirent* dir_element = &dir_element_;
-#else
-  char* direntbuffer =
-      new char[offsetof(struct dirent, d_name) +
-               pathconf(directory_name.c_str(), _PC_NAME_MAX) + 1];
-  struct dirent* dir_element = new (direntbuffer) dirent;
-#endif
   struct dirent* result = NULL;
 
   directory = opendir(directory_name.c_str());
   if (NULL != directory) {
-    return_code = readdir_r(directory, dir_element, &result);
+    result = readdir(directory);
 
-    for (; NULL != result && 0 == return_code;
-         return_code = readdir_r(directory, dir_element, &result)) {
+    for (; NULL != result; result = readdir(directory)) {
       if (0 == strcmp(result->d_name, "..") ||
           0 == strcmp(result->d_name, ".")) {
         continue;
@@ -332,10 +306,6 @@ std::vector<std::string> file_system::ListFiles(
 
     closedir(directory);
   }
-
-#ifdef __QNXNTO__
-  delete[] direntbuffer;
-#endif
 
   return listFiles;
 }
@@ -411,12 +381,10 @@ bool file_system::CreateFile(const std::string& path) {
 
 uint64_t file_system::GetFileModificationTime(const std::string& path) {
   struct stat info;
-  stat(path.c_str(), &info);
-#ifndef __QNXNTO__
+  if (0 != stat(path.c_str(), &info)) {
+    LOG4CXX_WARN_WITH_ERRNO(logger_, "Could not get file mod time: " << path);
+  }
   return static_cast<uint64_t>(info.st_mtim.tv_nsec);
-#else
-  return static_cast<uint64_t>(info.st_mtime);
-#endif
 }
 
 bool file_system::CopyFile(const std::string& src, const std::string& dst) {

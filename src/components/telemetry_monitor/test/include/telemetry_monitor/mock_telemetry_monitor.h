@@ -30,14 +30,13 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_TEST_INCLUDE_MOCK_TELEMETRY_MONITOR_H_
-#define SRC_COMPONENTS_TRANSPORT_MANAGER_TEST_INCLUDE_MOCK_TELEMETRY_MONITOR_H_
+#ifndef SRC_COMPONENTS_TELEMETRY_MONITOR_TEST_INCLUDE_TELEMETRY_MONITOR_MOCK_TELEMETRY_MONITOR_H_
+#define SRC_COMPONENTS_TELEMETRY_MONITOR_TEST_INCLUDE_TELEMETRY_MONITOR_MOCK_TELEMETRY_MONITOR_H_
 
 #include <string>
 #include "gmock/gmock.h"
 #include "telemetry_monitor/telemetry_monitor.h"
 #include "telemetry_monitor/metric_wrapper.h"
-#include "utils/shared_ptr.h"
 
 namespace test {
 namespace components {
@@ -50,9 +49,9 @@ class MockTelemetryMonitor : public telemetry_monitor::TelemetryMonitor {
   MOCK_METHOD0(Stop, void());
   MOCK_METHOD0(Start, void());
   MOCK_METHOD1(SendMetric,
-               void(utils::SharedPtr<telemetry_monitor::MetricWrapper> metric));
+               void(std::shared_ptr<telemetry_monitor::MetricWrapper> metric));
 };
 }  // namespace transport_manager_test
 }  // namespace components
 }  // namespace test
-#endif  // SRC_COMPONENTS_TRANSPORT_MANAGER_TEST_INCLUDE_MOCK_TELEMETRY_MONITOR_H_
+#endif  // SRC_COMPONENTS_TELEMETRY_MONITOR_TEST_INCLUDE_TELEMETRY_MONITOR_MOCK_TELEMETRY_MONITOR_H_

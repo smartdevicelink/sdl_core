@@ -38,7 +38,7 @@
 #include <list>
 
 #include "utils/lock.h"
-#include "utils/shared_ptr.h"
+
 #include "utils/threads/thread.h"
 #include "utils/conditional_variable.h"
 #include "utils/threads/thread_delegate.h"
@@ -49,6 +49,7 @@
 
 #include "application_manager/request_info.h"
 #include "application_manager/request_controller_settings.h"
+#include "application_manager/request_tracker.h"
 
 namespace application_manager {
 
@@ -229,11 +230,15 @@ class RequestController {
   void terminateWaitingForResponseAppRequests(const uint32_t& app_id);
 
   /**
-   * @brief Check Posibility to add new requests, or limits was exceeded
-   * @param request - request to check possipility to Add
-   * @return True if new request could be added, false otherwise
+   * @brief Checks whether all constraints are met before adding of request into
+   * processing queue. Verifies amount of pending requests, amount of requests
+   * per time scale for different HMI levels
+   * @param request - request to check constraints for
+   * @param level - HMI level in which request has been issued
+   * @return Appropriate result code of verification
    */
-  TResult CheckPosibilitytoAdd(const RequestPtr request);
+  TResult CheckPosibilitytoAdd(const RequestPtr request,
+                               const mobile_api::HMILevel::eType level);
 
   /**
    * @brief Check Posibility to add new requests, or limits was exceeded
@@ -274,9 +279,22 @@ class RequestController {
   RequestInfoSet waiting_for_response_;
 
   /**
+   * @brief Tracker verifying time scale and maximum requests amount in
+   * different HMI levels
+   */
+  RequestTracker request_tracker_;
+
+  /**
   * @brief Set of HMI notifications with timeout.
   */
   std::list<RequestPtr> notification_list_;
+
+  /**
+   * @brief Map keeping track of how many duplicate messages were sent for a
+   * given correlation id, to prevent early termination of a request
+   */
+  std::map<uint32_t, uint32_t> duplicate_message_count_;
+  sync_primitives::Lock duplicate_message_count_lock_;
 
   /*
    * timer for checking requests timeout

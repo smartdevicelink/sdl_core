@@ -41,10 +41,10 @@
 #include "gmock/gmock.h"
 #include "application_manager/message.h"
 #include "protocol/raw_message.h"
-#include "utils/make_shared.h"
 
-namespace application_manager {
 namespace test {
+namespace components {
+namespace application_manager_test {
 
 using protocol_handler::RawMessage;
 using protocol_handler::RawMessagePtr;
@@ -52,8 +52,10 @@ using protocol_handler::ServiceType;
 using protocol_handler::MessagePriority;
 using protocol_handler::PROTOCOL_HEADER_V2_SIZE;
 using application_manager::MobileMessageHandler;
-using application_manager::ProtocolVersion;
+using protocol_handler::MajorProtocolVersion;
 using ::testing::_;
+using ::application_manager::Message;
+using ::application_manager::MobileMessage;
 
 using testing::Return;
 
@@ -103,12 +105,12 @@ class MobileMessageHandlerTest : public testing::Test {
 
     size_t full_size = sizeof(uint8_t) * full_data.size();
 
-    message_ptr_ = utils::MakeShared<RawMessage>(connection_key_,
-                                                 protocol_version,
-                                                 &full_data[0],
-                                                 full_size,
-                                                 ServiceType::kRpc,
-                                                 payload_size);
+    message_ptr_ = std::make_shared<RawMessage>(connection_key_,
+                                                protocol_version,
+                                                &full_data[0],
+                                                full_size,
+                                                ServiceType::kRpc,
+                                                payload_size);
 
     return MobileMessageHandler::HandleIncomingMessageProtocol(message_ptr_);
   }
@@ -137,7 +139,7 @@ class MobileMessageHandlerTest : public testing::Test {
     EXPECT_EQ(full_data_size, message->data_size());
     EXPECT_EQ(payload_size, message->payload_size());
     EXPECT_TRUE(message->has_binary_data());
-    EXPECT_EQ(MessageType::kNotification, message->type());
+    EXPECT_EQ(application_manager::MessageType::kNotification, message->type());
   }
 
   void TestHandlingIncomingMessageWithoutBinaryDataProtocol(
@@ -157,23 +159,24 @@ class MobileMessageHandlerTest : public testing::Test {
     EXPECT_EQ(full_data_size, message->data_size());
     EXPECT_EQ(payload_size, message->payload_size());
     EXPECT_FALSE(message->has_binary_data());
-    EXPECT_EQ(MessageType::kNotification, message->type());
+    EXPECT_EQ(application_manager::MessageType::kNotification, message->type());
   }
 
-  MobileMessage CreateMessageForSending(uint32_t protocol_version,
-                                        uint32_t function_id,
-                                        uint32_t correlation_id,
-                                        uint32_t connection_key,
-                                        const std::string& json_msg,
-                                        BinaryData* data = NULL) {
-    MobileMessage message = utils::MakeShared<Message>(
+  MobileMessage CreateMessageForSending(
+      uint32_t protocol_version,
+      uint32_t function_id,
+      uint32_t correlation_id,
+      uint32_t connection_key,
+      const std::string& json_msg,
+      const application_manager::BinaryData* data = NULL) {
+    MobileMessage message = std::make_shared<Message>(
         MessagePriority::FromServiceType(ServiceType::kRpc));
     message->set_function_id(function_id);
     message->set_correlation_id(correlation_id);
     message->set_connection_key(connection_key);
     message->set_protocol_version(
-        static_cast<ProtocolVersion>(protocol_version));
-    message->set_message_type(MessageType::kNotification);
+        static_cast<protocol_handler::MajorProtocolVersion>(protocol_version));
+    message->set_message_type(application_manager::MessageType::kNotification);
     if (data) {
       message->set_binary_data(data);
     }
@@ -214,7 +217,8 @@ class MobileMessageHandlerTest : public testing::Test {
   void TestHandlingOutgoingMessageProtocolWithBinaryData(
       const uint32_t protocol_version) {
     // Arrange
-    BinaryData* bin_dat = new BinaryData;
+    application_manager::BinaryData* bin_dat =
+        new application_manager::BinaryData;
     bin_dat->push_back('\a');
 
     const uint32_t function_id = 247u;
@@ -249,11 +253,12 @@ class MobileMessageHandlerTest : public testing::Test {
 TEST(mobile_message_test, basic_test) {
   // Example message
   MobileMessage message =
-      utils::MakeShared<Message>(protocol_handler::MessagePriority::kDefault);
+      std::make_shared<Message>(protocol_handler::MessagePriority::kDefault);
   EXPECT_FALSE(message->has_binary_data());
-  BinaryData* binary_data = new BinaryData;
-  binary_data->push_back('X');
-  message->set_binary_data(binary_data);
+  application_manager::BinaryData binary_data;
+  binary_data.push_back('X');
+  message->set_binary_data(
+      (const application_manager::BinaryData*)&binary_data);
   EXPECT_TRUE(message->has_binary_data());
 }
 
@@ -264,7 +269,7 @@ TEST_F(
   size_t payload_size = data.size();
   std::srand(time(0));
   // Generate unknown random protocol version except 1-3
-  uint32_t protocol_version = 4 + rand() % UINT32_MAX;
+  uint32_t protocol_version = 5 + rand() % UINT32_MAX;
   Message* message =
       HandleIncomingMessage(protocol_version, data, payload_size);
 
@@ -282,7 +287,7 @@ TEST_F(
   const uint32_t correlation_id = 92u;
   const uint32_t connection_key = 1u;
   // Generate unknown random protocol version except 1-3
-  uint32_t protocol_version = 4 + rand() % UINT32_MAX;
+  uint32_t protocol_version = 5 + rand() % UINT32_MAX;
 
   MobileMessage message_to_send = CreateMessageForSending(
       protocol_version, function_id, correlation_id, connection_key, data);
@@ -350,5 +355,6 @@ TEST_F(
   TestHandlingOutgoingMessageProtocolWithBinaryData(protocol_version);
 }
 
+}  // namespace application_manager_test
+}  // namespace components
 }  // namespace test
-}  // namespace application_manager

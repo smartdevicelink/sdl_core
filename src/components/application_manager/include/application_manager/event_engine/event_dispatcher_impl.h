@@ -30,8 +30,8 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_EVENT_DISPATCHER_IMPL_H_
-#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_EVENT_DISPATCHER_IMPL_H_
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_EVENT_ENGINE_EVENT_DISPATCHER_IMPL_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_EVENT_ENGINE_EVENT_DISPATCHER_IMPL_H_
 
 #include <vector>
 #include <map>
@@ -118,7 +118,7 @@ class EventDispatcherImpl : public EventDispatcher {
  private:
   // Members section
   sync_primitives::Lock state_lock_;
-  sync_primitives::Lock observer_lock_;
+  sync_primitives::RecursiveLock observer_lock_;
   EventObserverMap observers_event_;
   ObserverVector observers_;
 };
@@ -126,4 +126,4 @@ class EventDispatcherImpl : public EventDispatcher {
 }  // namespace event_engine
 }  // namespace application_manager
 
-#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_EVENT_DISPATCHER_IMPL_H_
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_EVENT_ENGINE_EVENT_DISPATCHER_IMPL_H_

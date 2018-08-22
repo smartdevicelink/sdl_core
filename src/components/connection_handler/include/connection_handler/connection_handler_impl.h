@@ -49,15 +49,19 @@
 
 #include "utils/logger.h"
 #include "utils/macro.h"
+#include "utils/message_queue.h"
 #include "utils/lock.h"
 #include "utils/stl_utils.h"
 #include "utils/rwlock.h"
+
+const transport_manager::ConnectionUID kDisabledSecondary = 0xFFFFFFFF;
 
 /**
  * \namespace connection_handler
  * \brief SmartDeviceLink connection_handler namespace.
  */
 namespace connection_handler {
+
 /**
  * \class ConnectionHandlerImpl
  * \brief SmartDeviceLink connection_handler main class
@@ -136,6 +140,24 @@ class ConnectionHandlerImpl
   void OnDeviceRemoved(
       const transport_manager::DeviceInfo& device_info) OVERRIDE;
 
+  /**
+   * @brief OnDeviceSwitchingStart notifies listeners on device transport
+   * switching start
+   * @param device_uid_from the id of the device which has to switch its
+   * transport
+   * @param device_uid_to the id of the device on new transport
+   */
+  void OnDeviceSwitchingStart(const std::string& device_uid_from,
+                              const std::string& device_uid_to) FINAL;
+
+  /**
+   * @brief OnDeviceSwitchingFinish notifies listeners on device transport
+   * switching completion
+   * @param device_uid the id for the device which is fails to reconnect.
+   */
+  void OnDeviceSwitchingFinish(
+      const transport_manager::DeviceUID& device_uid) FINAL;
+
   void OnScanDevicesFinished() OVERRIDE;
   void OnScanDevicesFailed(
       const transport_manager::SearchDeviceError& error) OVERRIDE;
@@ -174,20 +196,21 @@ class ConnectionHandlerImpl
   /**
    * \brief Callback function used by ProtocolHandler
    * when Mobile Application initiates start of new session.
-   * \param connection_handle Connection identifier within which session has to
-   * be started.
-   * \param session_id Identifier of the session to be started
+   * Result must be notified through NotifySessionStartedContext().
+   * \param connection_handle Connection identifier within which session
+   * has to be started.
+   * \param sessionId Identifier of the session to be start
    * \param service_type Type of service
+   * \param protocol_version Version of protocol
    * \param is_protected would be service protected
-   * \param hash_id pointer for session hash identifier
-   * \return uint32_t Id (number) of new session if successful, otherwise 0.
+   * \param params configuration parameters specified by mobile
    */
-  virtual uint32_t OnSessionStartedCallback(
+  virtual void OnSessionStartedCallback(
       const transport_manager::ConnectionUID connection_handle,
       const uint8_t session_id,
       const protocol_handler::ServiceType& service_type,
       const bool is_protected,
-      uint32_t* hash_id);
+      const BsonObject* params);
 
   /**
    * \brief Callback function used by ProtocolHandler
@@ -195,14 +218,14 @@ class ConnectionHandlerImpl
    * \param connection_handle Connection identifier within which session exists
    * \param sessionId Identifier of the session to be ended
    * \param hashCode Hash used only in second version of SmartDeviceLink
-   * protocol.
+   * protocol. (Set to HASH_ID_WRONG if the hash is incorrect)
    * If not equal to hash assigned to session on start then operation fails.
    * \return uint32_t 0 if operation fails, session key otherwise
    */
   uint32_t OnSessionEndedCallback(
       const transport_manager::ConnectionUID connection_handle,
       const uint8_t session_id,
-      const uint32_t& hashCode,
+      uint32_t* hashCode,
       const protocol_handler::ServiceType& service_type) OVERRIDE;
 
   /**
@@ -218,6 +241,24 @@ class ConnectionHandlerImpl
    * \param connection_key  used by other components as application identifier
    */
   void OnMalformedMessageCallback(const uint32_t& connection_key) OVERRIDE;
+
+  /**
+   * @brief Converts connection handle to transport type string used in
+   * smartDeviceLink.ini file, e.g. "TCP_WIFI"
+   * @param connection_handle A connection identifier
+   * @return string representation of the transport of the device
+   */
+  const std::string TransportTypeProfileStringFromConnHandle(
+      transport_manager::ConnectionUID connection_handle) const;
+
+  /**
+   * @brief Converts device handle to transport type string used in
+   * smartDeviceLink.ini file, e.g. "TCP_WIFI"
+   * @param device_handle A device handle
+   * @return string representation of the transport of the device
+   */
+  const std::string TransportTypeProfileStringFromDeviceHandle(
+      DeviceHandle device_handle) const;
 
   /**
    * \brief Creates unique identifier of session (can be used as hash)
@@ -299,6 +340,16 @@ class ConnectionHandlerImpl
   security_manager::SSLContext::HandshakeContext GetHandshakeContext(
       uint32_t key) const OVERRIDE;
 #endif  // ENABLE_SECURITY
+
+  /**
+   * @brief Check if session contains service with specified service type
+   * @param connection_key unique id of session to check
+   * @param service_type type of service to check
+   * @return true if session contains service with specified service type
+   */
+  bool SessionServiceExists(
+      const uint32_t connection_key,
+      const protocol_handler::ServiceType& service_type) const OVERRIDE;
 
   /**
    * \brief Get device handle by mac address
@@ -425,15 +476,99 @@ class ConnectionHandlerImpl
                            uint8_t session_id,
                            uint8_t& protocol_version) const OVERRIDE;
 
-  int32_t GetDataOnSessionKey(uint32_t key,
-                              uint32_t* app_id,
-                              std::list<int32_t>* sessions_list,
-                              uint32_t* device_id) const OVERRIDE;
+  /**
+   * \brief information about given Connection Key.
+   * \param key Unique key used by other components as session identifier
+   * \param app_id Returned: ApplicationID
+   * \param sessions_list Returned: List of session keys
+   * \param device_id Returned: DeviceID
+   * \return int32_t -1 in case of error or 0 in case of success
+   */
+  int32_t GetDataOnSessionKey(
+      uint32_t key,
+      uint32_t* app_id,
+      std::list<int32_t>* sessions_list,
+      connection_handler::DeviceHandle* device_id) const OVERRIDE;
 
   const ConnectionHandlerSettings& get_settings() const OVERRIDE;
 
   const protocol_handler::SessionObserver& get_session_observer();
   DevicesDiscoveryStarter& get_device_discovery_starter();
+
+  /**
+   * \brief Add a session. This is meant to be called from Connection class.
+   * \param primary_transport_id the primary connection ID to associate with the
+   * newly created session
+   * \return new session id, or 0 if failed
+   **/
+  uint32_t AddSession(
+      const transport_manager::ConnectionUID primary_transport_id) OVERRIDE;
+
+  /**
+   * \brief Remove a session. This is meant to be called from Connection class.
+   * \param session_id ID of the session to remove
+   * \return true if successful, false otherwise
+   **/
+  bool RemoveSession(uint8_t session_id) OVERRIDE;
+
+  DataAccessor<SessionConnectionMap> session_connection_map() OVERRIDE;
+
+  /**
+   * \brief Associate a secondary transport ID with a session
+   * \param session_id the session ID
+   * \param connection_id the new secondary connection ID to associate with the
+   * session
+   * \return the SessionTransports (newly) associated with the session
+   **/
+  SessionTransports SetSecondaryTransportID(
+      uint8_t session_id,
+      transport_manager::ConnectionUID secondary_transport_id) OVERRIDE;
+
+  /**
+   * \brief Retrieve the session transports associated with a session
+   * \param session_id the session ID
+   * \return the SessionTransports associated with the session
+   **/
+  const SessionTransports GetSessionTransports(
+      uint8_t session_id) const OVERRIDE;
+
+  /**
+   * \brief Invoked when observer's OnServiceStartedCallback is completed
+   * \param session_key the key of started session passed to
+   * OnServiceStartedCallback().
+   * \param result true if observer accepts starting service, false otherwise
+   * \param rejected_params list of rejected parameters' name. Only valid when
+   * result is false. Note that even if result is false, this may be empty.
+   *
+   * \note This is invoked only once but can be invoked by multiple threads.
+   * Also it can be invoked before OnServiceStartedCallback() returns.
+   **/
+  virtual void NotifyServiceStartedResult(
+      uint32_t session_key,
+      bool result,
+      std::vector<std::string>& rejected_params);
+
+  /**
+   * \brief Called when secondary transport with given session ID is established
+   * \param primary_connection_handle Set to identifier of primary connection
+   * \param secondary_connection_handle Identifier of secondary connection
+   * \param sessionid session ID taken from Register Secondary Transport frame
+   **/
+  bool OnSecondaryTransportStarted(
+      transport_manager::ConnectionUID& primary_connection_handle,
+      const transport_manager::ConnectionUID secondary_connection_handle,
+      const uint8_t session_id) OVERRIDE;
+
+  /**
+   * \brief Called when secondary transport shuts down
+   * \param primary_connection_handle Identifier of primary connection
+   * \param secondary_connection_handle Identifier of secondary connection
+   * transport
+   **/
+  void OnSecondaryTransportEnded(
+      const transport_manager::ConnectionUID primary_connection_handle,
+      const transport_manager::ConnectionUID secondary_connection_handle)
+      OVERRIDE;
 
  private:
   /**
@@ -445,6 +580,9 @@ class ConnectionHandlerImpl
   void RemoveConnection(const ConnectionHandle connection_handle);
 
   void OnConnectionEnded(const transport_manager::ConnectionUID connection_id);
+
+  const uint8_t GetSessionIdFromSecondaryTransport(
+      transport_manager::ConnectionUID secondary_transport_id) const;
 
   const ConnectionHandlerSettings& settings_;
   /**
@@ -465,6 +603,13 @@ class ConnectionHandlerImpl
   DeviceMap device_list_;
 
   /**
+   * @brief session/connection map
+   */
+  SessionConnectionMap session_connection_map_;
+  mutable std::shared_ptr<sync_primitives::RecursiveLock>
+      session_connection_map_lock_ptr_;
+
+  /**
    * \brief List of connections
    */
   ConnectionList connection_list_;
@@ -480,6 +625,15 @@ class ConnectionHandlerImpl
    */
   utils::StlMapDeleter<ConnectionList> connection_list_deleter_;
 
+  sync_primitives::Lock start_service_context_map_lock_;
+  std::map<uint32_t, protocol_handler::SessionContext>
+      start_service_context_map_;
+
+  /**
+   * @brief connection object as it's being closed
+   */
+  Connection* ending_connection_;
+
 #ifdef BUILD_TESTS
   // Methods for test usage
  public:
@@ -488,6 +642,9 @@ class ConnectionHandlerImpl
   void addDeviceConnection(
       const transport_manager::DeviceInfo& device_info,
       const transport_manager::ConnectionUID connection_id);
+  SessionConnectionMap& getSessionConnectionMap() {
+    return session_connection_map_;
+  }
 #endif
  private:
   DISALLOW_COPY_AND_ASSIGN(ConnectionHandlerImpl);

@@ -55,13 +55,18 @@ class MockProtocolHandler : public ::protocol_handler::ProtocolHandler {
                void(uint32_t connection_key, int32_t number_of_frames));
   MOCK_METHOD2(SendHeartBeat, void(int32_t connection_id, uint8_t session_id));
   MOCK_METHOD2(SendEndSession, void(int32_t connection_id, uint8_t session_id));
-  MOCK_METHOD3(SendEndService,
-               void(int32_t connection_id,
+  MOCK_METHOD4(SendEndService,
+               void(int32_t primary_connection_id,
+                    int32_t connection_id,
                     uint8_t session_id,
                     uint8_t service_type));
   MOCK_CONST_METHOD0(get_settings,
                      const ::protocol_handler::ProtocolHandlerSettings&());
   MOCK_METHOD0(get_session_observer, protocol_handler::SessionObserver&());
+  MOCK_METHOD2(NotifySessionStarted,
+               void(const ::protocol_handler::SessionContext& context,
+                    std::vector<std::string>& rejected_params));
+  MOCK_METHOD0(NotifyOnFailedHandshake, void());
 };
 }  // namespace protocol_handler_test
 }  // namespace components

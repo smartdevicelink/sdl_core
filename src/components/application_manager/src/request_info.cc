@@ -151,7 +151,7 @@ RequestInfoPtr RequestInfoSet::Find(const uint32_t connection_key,
   RequestInfoPtr result;
 
   // Request info for searching in request info set by log_n time
-  utils::SharedPtr<FakeRequestInfo> request_info_for_search(
+  std::shared_ptr<FakeRequestInfo> request_info_for_search(
       new FakeRequestInfo(connection_key, correlation_id));
 
   sync_primitives::AutoLock lock(this_lock_);
@@ -266,66 +266,6 @@ void RequestInfoSet::CheckSetSizes() {
   const ssize_t hash_set_size = hash_sorted_pending_requests_.size();
   const bool set_sizes_equal = (time_set_size == hash_set_size);
   DCHECK(set_sizes_equal);
-}
-
-bool RequestInfoSet::CheckTimeScaleMaxRequest(
-    uint32_t app_id,
-    uint32_t app_time_scale,
-    uint32_t max_request_per_time_scale) {
-  LOG4CXX_AUTO_TRACE(logger_);
-  if (max_request_per_time_scale > 0 && app_time_scale > 0) {
-    TimevalStruct end = date_time::DateTime::getCurrentTime();
-    TimevalStruct start = {0, 0};
-    start.tv_sec = end.tv_sec - app_time_scale;
-
-    sync_primitives::AutoLock lock(this_lock_);
-    TimeScale scale(start, end, app_id);
-    const uint32_t count = std::count_if(time_sorted_pending_requests_.begin(),
-                                         time_sorted_pending_requests_.end(),
-                                         scale);
-    if (count >= max_request_per_time_scale) {
-      LOG4CXX_WARN(logger_,
-                   "Processing requests count " << count
-                                                << " exceed application limit "
-                                                << max_request_per_time_scale);
-      return false;
-    }
-    LOG4CXX_DEBUG(logger_, "Requests count " << count);
-  } else {
-    LOG4CXX_DEBUG(logger_, "CheckTimeScaleMaxRequest disabled");
-  }
-  return true;
-}
-
-bool RequestInfoSet::CheckHMILevelTimeScaleMaxRequest(
-    mobile_apis::HMILevel::eType hmi_level,
-    uint32_t app_id,
-    uint32_t app_time_scale,
-    uint32_t max_request_per_time_scale) {
-  LOG4CXX_AUTO_TRACE(logger_);
-  if (max_request_per_time_scale > 0 && app_time_scale > 0) {
-    TimevalStruct end = date_time::DateTime::getCurrentTime();
-    TimevalStruct start = {0, 0};
-    start.tv_sec = end.tv_sec - app_time_scale;
-
-    sync_primitives::AutoLock lock(this_lock_);
-    HMILevelTimeScale scale(start, end, app_id, hmi_level);
-    const uint32_t count = std::count_if(time_sorted_pending_requests_.begin(),
-                                         time_sorted_pending_requests_.end(),
-                                         scale);
-    if (count >= max_request_per_time_scale) {
-      LOG4CXX_WARN(logger_,
-                   "Processing requests count "
-                       << count << " exceed application limit "
-                       << max_request_per_time_scale << " in hmi level "
-                       << hmi_level);
-      return false;
-    }
-    LOG4CXX_DEBUG(logger_, "Requests count " << count);
-  } else {
-    LOG4CXX_DEBUG(logger_, "CheckHMILevelTimeScaleMaxRequest disabled");
-  }
-  return true;
 }
 
 bool RequestInfoSet::AppIdCompararator::operator()(

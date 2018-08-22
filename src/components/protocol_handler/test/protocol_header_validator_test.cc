@@ -57,7 +57,7 @@ class ProtocolHeaderValidatorTest : public ::testing::Test {
   uint32_t some_session_id;
 };
 
-// Protocol version shall be from 1 to 3
+// Protocol version shall be from 1 to 5
 TEST_F(ProtocolHeaderValidatorTest, MaxPayloadSizeSetGet) {
   EXPECT_EQ(std::numeric_limits<size_t>::max(),
             header_validator.max_payload_size());
@@ -67,11 +67,96 @@ TEST_F(ProtocolHeaderValidatorTest, MaxPayloadSizeSetGet) {
   }
 }
 
-// Protocol version shall be from 1 to 4
+TEST_F(ProtocolHeaderValidatorTest, MaxControlPayloadSizeSetGet) {
+  EXPECT_EQ(0u, header_validator.max_control_payload_size());
+  for (size_t value = 0; value < MAXIMUM_FRAME_DATA_V3_SIZE * 2; ++value) {
+    header_validator.set_max_control_payload_size(value);
+    EXPECT_EQ(value, header_validator.max_control_payload_size());
+  }
+}
+
+TEST_F(ProtocolHeaderValidatorTest, MaxRpcPayloadSizeSetGet) {
+  EXPECT_EQ(0u, header_validator.max_rpc_payload_size());
+  for (size_t value = 0; value < MAXIMUM_FRAME_DATA_V3_SIZE * 2; ++value) {
+    header_validator.set_max_rpc_payload_size(value);
+    EXPECT_EQ(value, header_validator.max_rpc_payload_size());
+  }
+}
+
+TEST_F(ProtocolHeaderValidatorTest, MaxAudioPayloadSizeSetGet) {
+  EXPECT_EQ(0u, header_validator.max_audio_payload_size());
+  for (size_t value = 0; value < MAXIMUM_FRAME_DATA_V3_SIZE * 2; ++value) {
+    header_validator.set_max_audio_payload_size(value);
+    EXPECT_EQ(value, header_validator.max_audio_payload_size());
+  }
+}
+
+TEST_F(ProtocolHeaderValidatorTest, MaxVideoPayloadSizeSetGet) {
+  EXPECT_EQ(0u, header_validator.max_video_payload_size());
+  for (size_t value = 0; value < MAXIMUM_FRAME_DATA_V3_SIZE * 2; ++value) {
+    header_validator.set_max_video_payload_size(value);
+    EXPECT_EQ(value, header_validator.max_video_payload_size());
+  }
+}
+
+TEST_F(ProtocolHeaderValidatorTest, GetMaxPayloadSizeByServiceType_Control) {
+  size_t payload_size = MAXIMUM_FRAME_DATA_V2_SIZE;
+  header_validator.set_max_payload_size(payload_size);
+  // Default to max_payload_size if a specific MTU is not set
+  EXPECT_EQ(payload_size,
+            header_validator.max_payload_size_by_service_type(kControl));
+  for (size_t value = 1; value < MAXIMUM_FRAME_DATA_V3_SIZE * 2; ++value) {
+    header_validator.set_max_control_payload_size(value);
+    EXPECT_EQ(value,
+              header_validator.max_payload_size_by_service_type(kControl));
+  }
+}
+
+TEST_F(ProtocolHeaderValidatorTest, GetMaxPayloadSizeByServiceType_Rpc) {
+  size_t payload_size = MAXIMUM_FRAME_DATA_V2_SIZE;
+  header_validator.set_max_payload_size(payload_size);
+  // Default to max_payload_size if a specific MTU is not set
+  EXPECT_EQ(payload_size,
+            header_validator.max_payload_size_by_service_type(kRpc));
+  EXPECT_EQ(payload_size,
+            header_validator.max_payload_size_by_service_type(kBulk));
+  for (size_t value = 1; value < MAXIMUM_FRAME_DATA_V3_SIZE * 2; ++value) {
+    header_validator.set_max_rpc_payload_size(value);
+    EXPECT_EQ(value, header_validator.max_payload_size_by_service_type(kRpc));
+    EXPECT_EQ(value, header_validator.max_payload_size_by_service_type(kBulk));
+  }
+}
+
+TEST_F(ProtocolHeaderValidatorTest, GetMaxPayloadSizeByServiceType_Audio) {
+  size_t payload_size = MAXIMUM_FRAME_DATA_V2_SIZE;
+  header_validator.set_max_payload_size(payload_size);
+  // Default to max_payload_size if a specific MTU is not set
+  EXPECT_EQ(payload_size,
+            header_validator.max_payload_size_by_service_type(kAudio));
+  for (size_t value = 1; value < MAXIMUM_FRAME_DATA_V3_SIZE * 2; ++value) {
+    header_validator.set_max_audio_payload_size(value);
+    EXPECT_EQ(value, header_validator.max_payload_size_by_service_type(kAudio));
+  }
+}
+
+TEST_F(ProtocolHeaderValidatorTest, GetMaxPayloadSizeByServiceType_Video) {
+  size_t payload_size = MAXIMUM_FRAME_DATA_V2_SIZE;
+  header_validator.set_max_payload_size(payload_size);
+  // Default to max_payload_size if a specific MTU is not set
+  EXPECT_EQ(payload_size,
+            header_validator.max_payload_size_by_service_type(kMobileNav));
+  for (size_t value = 1; value < MAXIMUM_FRAME_DATA_V3_SIZE * 2; ++value) {
+    header_validator.set_max_video_payload_size(value);
+    EXPECT_EQ(value,
+              header_validator.max_payload_size_by_service_type(kMobileNav));
+  }
+}
+
+// Protocol version shall be from 1 to 5
 TEST_F(ProtocolHeaderValidatorTest, Malformed_Version) {
   std::vector<uint8_t> malformed_versions;
   malformed_versions.push_back(0);
-  for (uint8_t version = PROTOCOL_VERSION_4 + 1;
+  for (uint8_t version = PROTOCOL_VERSION_5 + 1;
        version <= PROTOCOL_VERSION_MAX;
        ++version) {
     malformed_versions.push_back(version);
@@ -145,12 +230,12 @@ TEST_F(ProtocolHeaderValidatorTest, Malformed_FrameType) {
   }
 }
 
-// For Control frames Frame info value shall be from 0x00 to 0x06 or 0xFE(Data
-// Ack), 0xFF(HB Ack)
+// For Control frames Frame info value shall be from 0x00 to 0x09 or 0xFD
+// (Transport Update Event), 0xFE(Data Ack), 0xFF(HB Ack)
 TEST_F(ProtocolHeaderValidatorTest, Malformed_ControlFrame) {
   std::vector<uint8_t> malformed_frame_data;
-  for (uint8_t frame_type = FRAME_DATA_END_SERVICE_NACK + 1;
-       frame_type < FRAME_DATA_SERVICE_DATA_ACK;
+  for (uint8_t frame_type = FRAME_DATA_REGISTER_SECONDARY_TRANSPORT_NACK + 1;
+       frame_type < FRAME_DATA_TRANSPORT_EVENT_UPDATE;
        ++frame_type) {
     malformed_frame_data.push_back(frame_type);
   }

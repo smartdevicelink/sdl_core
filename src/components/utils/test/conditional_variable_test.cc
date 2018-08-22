@@ -30,18 +30,18 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <iostream>
 #include <pthread.h>
+#include <iostream>
 
 #include "gtest/gtest.h"
 
+#include "utils/conditional_variable.h"
 #include "utils/lock.h"
 #include "utils/macro.h"
-#include "utils/conditional_variable.h"
 
 namespace test {
 namespace components {
-namespace utils {
+namespace utils_test {
 
 class ConditionalVariableTest : public ::testing::Test {
  public:
@@ -61,8 +61,8 @@ class ConditionalVariableTest : public ::testing::Test {
 
  protected:
   std::string test_value_;
-  sync_primitives::ConditionalVariable cond_var_;
   sync_primitives::Lock test_mutex_;
+  sync_primitives::ConditionalVariable cond_var_;
   unsigned counter_;
 };
 
@@ -102,6 +102,7 @@ TEST_F(ConditionalVariableTest,
   cond_var_.WaitFor(test_lock, 2000);
   std::string last_value("changed again by thread 1");
   EXPECT_EQ(last_value, test_value_);
+  pthread_join(thread1, NULL);
 }
 
 TEST_F(ConditionalVariableTest,
@@ -116,6 +117,8 @@ TEST_F(ConditionalVariableTest,
   ASSERT_FALSE(thread_created) << "thread2 is not created!";
   check_counter();
   EXPECT_EQ(2u, counter_);
+  pthread_join(thread1, NULL);
+  pthread_join(thread2, NULL);
 }
 
 TEST_F(
@@ -123,10 +126,10 @@ TEST_F(
     CheckWaitForWithTimeout1sec_ThreadBlockedForTimeout_ExpectSuccessfulWakeUp) {
   sync_primitives::AutoLock test_lock(test_mutex_);
   sync_primitives::ConditionalVariable::WaitStatus wait_st =
-      cond_var_.WaitFor(test_lock, 1000);
+      cond_var_.WaitFor(test_lock, 10);
   EXPECT_EQ(sync_primitives::ConditionalVariable::kTimeout, wait_st);
 }
 
-}  // namespace utils
+}  // namespace utils_test
 }  // namespace components
 }  // namespace test

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Ford Motor Company
+ * Copyright (c) 2017, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -64,24 +64,23 @@ TransportAdapter::Error UsbConnectionFactory::CreateConnection(
                 "enter DeviceUID: " << &device_uid
                                     << ", ApplicationHandle: " << &app_handle);
   DeviceSptr device = controller_->FindDevice(device_uid);
-  if (!device.valid()) {
+  if (device.use_count() == 0) {
     LOG4CXX_ERROR(logger_, "device " << device_uid << " not found");
-    LOG4CXX_TRACE(
-        logger_,
-        "exit with TransportAdapter::BAD_PARAM. Condition: !device.valid()");
+    LOG4CXX_TRACE(logger_,
+                  "exit with TransportAdapter::BAD_PARAM. Condition: "
+                  "device.use_count() == 0");
     return TransportAdapter::BAD_PARAM;
   }
 
   UsbDevice* usb_device = static_cast<UsbDevice*>(device.get());
-  UsbConnection* usb_connection = new UsbConnection(device_uid,
-                                                    app_handle,
-                                                    controller_,
-                                                    usb_handler_,
-                                                    usb_device->usb_device());
-
-  controller_->ConnectionCreated(usb_connection, device_uid, app_handle);
-
-  if (usb_connection->Init()) {
+  std::shared_ptr<UsbConnection> connection =
+      std::make_shared<UsbConnection>(device_uid,
+                                      app_handle,
+                                      controller_,
+                                      usb_handler_,
+                                      usb_device->usb_device());
+  controller_->ConnectionCreated(connection, device_uid, app_handle);
+  if (connection->Init()) {
     LOG4CXX_INFO(logger_, "USB connection initialised");
     LOG4CXX_TRACE(logger_,
                   "exit with TransportAdapter::OK. Condition: USB connection "

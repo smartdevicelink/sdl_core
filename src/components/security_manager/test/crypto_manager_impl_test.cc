@@ -51,6 +51,10 @@ namespace {
 const size_t kUpdatesBeforeHour = 24;
 const std::string kAllCiphers = "ALL";
 const std::string kCaCertPath = "";
+const uint32_t kServiceNumber = 2u;
+const size_t kMaxSizeVector = 1u;
+const std::string kCertPath = "certificate.crt";
+const std::string kPrivateKeyPath = "private.key";
 
 #ifdef __QNXNTO__
 const std::string kFordCipher = SSL3_TXT_RSA_DES_192_CBC3_SHA;
@@ -64,10 +68,14 @@ namespace test {
 namespace components {
 namespace crypto_manager_test {
 
+using security_manager::CryptoManagerImpl;
+
 class CryptoManagerTest : public testing::Test {
  protected:
+  typedef NiceMock<security_manager_test::MockCryptoManagerSettings>
+      MockCryptoManagerSettings;
   static void SetUpTestCase() {
-    std::ifstream certificate_file("server/spt_credential.p12.enc");
+    std::ifstream certificate_file("server/spt_credential.pem");
     ASSERT_TRUE(certificate_file.is_open())
         << "Could not open certificate data file";
 
@@ -81,17 +89,11 @@ class CryptoManagerTest : public testing::Test {
   void SetUp() OVERRIDE {
     ASSERT_FALSE(certificate_data_base64_.empty());
     mock_security_manager_settings_ =
-        new NiceMock<security_manager_test::MockCryptoManagerSettings>();
-    utils::SharedPtr<security_manager::CryptoManagerSettings> scrypto =
-        utils::SharedPtr<security_manager::CryptoManagerSettings>::
-            static_pointer_cast<security_manager::CryptoManagerSettings>(
-                mock_security_manager_settings_);
-    crypto_manager_ = new security_manager::CryptoManagerImpl(scrypto);
-  }
-
-  void TearDown() OVERRIDE {
-    delete mock_security_manager_settings_;
-    testing::Mock::AsyncVerifyAndClearExpectations(1000);
+        std::make_shared<MockCryptoManagerSettings>();
+    crypto_manager_ =
+        std::make_shared<CryptoManagerImpl>(mock_security_manager_settings_);
+    forced_protected_services_.reserve(kMaxSizeVector);
+    forced_unprotected_services_.reserve(kMaxSizeVector);
   }
 
   void InitSecurityManager() {
@@ -104,6 +106,10 @@ class CryptoManagerTest : public testing::Test {
   void SetInitialValues(security_manager::Mode mode,
                         security_manager::Protocol protocol,
                         const std::string& cipher) {
+    ON_CALL(*mock_security_manager_settings_, force_unprotected_service())
+        .WillByDefault(ReturnRef(forced_unprotected_services_));
+    ON_CALL(*mock_security_manager_settings_, force_protected_service())
+        .WillByDefault(ReturnRef(forced_protected_services_));
     ON_CALL(*mock_security_manager_settings_, security_manager_mode())
         .WillByDefault(Return(mode));
     ON_CALL(*mock_security_manager_settings_, security_manager_protocol_name())
@@ -114,16 +120,21 @@ class CryptoManagerTest : public testing::Test {
         .WillByDefault(ReturnRef(cipher));
     ON_CALL(*mock_security_manager_settings_, ca_cert_path())
         .WillByDefault(ReturnRef(kCaCertPath));
+    ON_CALL(*mock_security_manager_settings_, module_cert_path())
+        .WillByDefault(ReturnRef(kCertPath));
+    ON_CALL(*mock_security_manager_settings_, module_key_path())
+        .WillByDefault(ReturnRef(kPrivateKeyPath));
     ON_CALL(*mock_security_manager_settings_, verify_peer())
         .WillByDefault(Return(false));
   }
 
-  security_manager::CryptoManager* crypto_manager_;
+  std::shared_ptr<CryptoManagerImpl> crypto_manager_;
+  std::shared_ptr<MockCryptoManagerSettings> mock_security_manager_settings_;
   static std::string certificate_data_base64_;
-
-  NiceMock<security_manager_test::MockCryptoManagerSettings>*
-      mock_security_manager_settings_;
+  std::vector<int> forced_protected_services_;
+  std::vector<int> forced_unprotected_services_;
 };
+
 std::string CryptoManagerTest::certificate_data_base64_;
 
 TEST_F(CryptoManagerTest, UsingBeforeInit) {
@@ -138,16 +149,15 @@ TEST_F(CryptoManagerTest, WrongInit) {
   // Unknown protocol version
   security_manager::Protocol UNKNOWN =
       static_cast<security_manager::Protocol>(-1);
-
-  EXPECT_CALL(*mock_security_manager_settings_, security_manager_mode())
-      .WillRepeatedly(Return(security_manager::SERVER));
-  EXPECT_CALL(*mock_security_manager_settings_,
-              security_manager_protocol_name()).WillOnce(Return(UNKNOWN));
-  EXPECT_FALSE(crypto_manager_->Init());
-
-  EXPECT_NE(std::string(), crypto_manager_->LastError());
   // Unexistent cipher value
   const std::string invalid_cipher = "INVALID_UNKNOWN_CIPHER";
+  const security_manager::Mode mode = security_manager::SERVER;
+
+  SetInitialValues(mode, UNKNOWN, invalid_cipher);
+
+  EXPECT_FALSE(crypto_manager_->Init());
+  EXPECT_NE(std::string(), crypto_manager_->LastError());
+
   EXPECT_CALL(*mock_security_manager_settings_,
               security_manager_protocol_name())
       .WillOnce(Return(security_manager::TLSv1_2));
@@ -156,7 +166,6 @@ TEST_F(CryptoManagerTest, WrongInit) {
   EXPECT_CALL(*mock_security_manager_settings_, ciphers_list())
       .WillRepeatedly(ReturnRef(invalid_cipher));
   EXPECT_FALSE(crypto_manager_->Init());
-
   EXPECT_NE(std::string(), crypto_manager_->LastError());
 }
 
@@ -181,9 +190,17 @@ TEST_F(CryptoManagerTest, CorrectInit) {
       security_manager::CLIENT, security_manager::TLSv1_1, kFordCipher);
   EXPECT_TRUE(crypto_manager_->Init());
 
+  SetInitialValues(
+      security_manager::CLIENT, security_manager::DTLSv1, kFordCipher);
+  EXPECT_TRUE(crypto_manager_->Init());
+
   // Cipher value
   SetInitialValues(
       security_manager::SERVER, security_manager::TLSv1_2, kAllCiphers);
+  EXPECT_TRUE(crypto_manager_->Init());
+
+  SetInitialValues(
+      security_manager::SERVER, security_manager::DTLSv1, kAllCiphers);
   EXPECT_TRUE(crypto_manager_->Init());
 }
 // #endif  // __QNX__
@@ -203,7 +220,6 @@ TEST_F(CryptoManagerTest, CreateReleaseSSLContext) {
   EXPECT_CALL(*mock_security_manager_settings_, maximum_payload_size())
       .Times(1)
       .WillRepeatedly(Return(max_payload_size));
-
   security_manager::SSLContext* context = crypto_manager_->CreateSSLContext();
   EXPECT_TRUE(context);
   EXPECT_NO_THROW(crypto_manager_->ReleaseSSLContext(context));
@@ -215,7 +231,10 @@ TEST_F(CryptoManagerTest, OnCertificateUpdated) {
 }
 
 TEST_F(CryptoManagerTest, OnCertificateUpdated_UpdateNotRequired) {
+  time_t system_time = 0;
+  time_t certificates_time = 1;
   size_t updates_before = 0;
+
   SetInitialValues(
       security_manager::CLIENT, security_manager::TLSv1_2, kAllCiphers);
   ASSERT_TRUE(crypto_manager_->Init());
@@ -223,7 +242,8 @@ TEST_F(CryptoManagerTest, OnCertificateUpdated_UpdateNotRequired) {
   EXPECT_CALL(*mock_security_manager_settings_, update_before_hours())
       .WillOnce(Return(updates_before));
 
-  EXPECT_FALSE(crypto_manager_->IsCertificateUpdateRequired());
+  EXPECT_FALSE(crypto_manager_->IsCertificateUpdateRequired(system_time,
+                                                            certificates_time));
 
   size_t max_updates_ = std::numeric_limits<size_t>::max();
   SetInitialValues(
@@ -232,7 +252,8 @@ TEST_F(CryptoManagerTest, OnCertificateUpdated_UpdateNotRequired) {
       .WillOnce(Return(max_updates_));
   ASSERT_TRUE(crypto_manager_->Init());
 
-  EXPECT_TRUE(crypto_manager_->IsCertificateUpdateRequired());
+  EXPECT_TRUE(crypto_manager_->IsCertificateUpdateRequired(system_time,
+                                                           certificates_time));
 }
 
 TEST_F(CryptoManagerTest, OnCertificateUpdated_NotInitialized) {

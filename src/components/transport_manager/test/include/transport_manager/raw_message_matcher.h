@@ -33,8 +33,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef APPLINK_TEST_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_RAW_MESSAGE_MATCHER_H_
-#define APPLINK_TEST_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_RAW_MESSAGE_MATCHER_H_
+#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_TEST_INCLUDE_TRANSPORT_MANAGER_RAW_MESSAGE_MATCHER_H_
+#define SRC_COMPONENTS_TRANSPORT_MANAGER_TEST_INCLUDE_TRANSPORT_MANAGER_RAW_MESSAGE_MATCHER_H_
 
 #include <gmock/gmock.h>
 
@@ -47,7 +47,7 @@ using ::testing::MatchResultListener;
 
 namespace test {
 namespace components {
-namespace transport_manager {
+namespace transport_manager_test {
 
 using namespace ::protocol_handler;
 
@@ -57,8 +57,8 @@ class RawMessageMatcher : public MatcherInterface<RawMessagePtr> {
 
   virtual bool MatchAndExplain(const RawMessagePtr ptr,
                                MatchResultListener* listener) const;
-  virtual void DescribeTo(::std::ostream* os) const;
-  virtual void DescribeNegationTo(::std::ostream* os) const;
+  virtual void DescribeTo(std::ostream* os) const;
+  virtual void DescribeNegationTo(std::ostream* os) const;
 
  private:
   const RawMessagePtr ptr_;
@@ -68,9 +68,8 @@ inline const Matcher<RawMessagePtr> RawMessageEq(RawMessagePtr msg) {
   return MakeMatcher(new RawMessageMatcher(msg));
 }
 
-}  // namespace transport_manager
+}  // namespace transport_manager_test
 }  // namespace components
 }  // namespace test
 
-#endif /* APPLINK_TEST_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_RAW_MESSAGE_MATCHER_H_ \
-          */
+#endif  // SRC_COMPONENTS_TRANSPORT_MANAGER_TEST_INCLUDE_TRANSPORT_MANAGER_RAW_MESSAGE_MATCHER_H_

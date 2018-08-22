@@ -113,6 +113,13 @@
     return;                                                                   \
   }
 
+#define EXPORT_FUNCTION(TypeName) extern "C" TypeName* Create();
+
+#define EXPORT_FUNCTION_IMPL(TypeName) \
+  extern "C" TypeName* Create() {      \
+    return new TypeName();             \
+  }
+
 #define NOTREACHED() DCHECK(!"Unreachable code")
 
 // Allows to perform static check that virtual function from base class is
@@ -134,6 +141,26 @@
 #ifdef BUILD_TESTS
 #define FRIEND_TEST(test_case_name, test_name) \
   friend class test_case_name##_##test_name##_Test
+#else  // BUILD_TESTS
+#define FRIEND_TEST(test_case_name, test_name)
+#endif  // BUILD_TESTS
+
+/*
+* @brief deprecate a method declaration, a warning will be thrown by your
+*        compiler if a method with this macro is used
+*/
+#if __cplusplus > 201103L
+#define DEPRECATED [[deprecated]]
+#else
+#ifdef __GNUC__
+#define DEPRECATED __attribute__((deprecated))
+#define DEPRECATED_CLASS __attribute__((deprecated))
+#elif defined(_MSC_VER)
+#define DEPRECATED __declspec(deprecated)
+#else
+#pragma message("WARNING: You need to implement DEPRECATED for this compiler")
+#define DEPRECATED
+#endif
 #endif
 
 #endif  // SRC_COMPONENTS_INCLUDE_UTILS_MACRO_H_

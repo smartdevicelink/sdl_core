@@ -34,10 +34,8 @@
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_COMMAND_H_
 #include <stdint.h>
 #include "smart_objects/smart_object.h"
-#include "utils/shared_ptr.h"
 
 namespace application_manager {
-namespace smart_objects = NsSmartDeviceLink::NsSmartObjects;
 
 namespace commands {
 
@@ -114,7 +112,7 @@ class Command {
  */
   virtual void SetAllowedToTerminate(const bool allowed) = 0;
 
-  enum CommandOrigin { ORIGIN_SDL, ORIGIN_MOBILE };
+  enum CommandSource { SOURCE_SDL, SOURCE_MOBILE, SOURCE_HMI };
 };
 
 typedef smart_objects::SmartObjectSPtr MessageSharedPtr;

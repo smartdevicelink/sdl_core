@@ -36,14 +36,14 @@
 
 namespace test {
 namespace components {
-namespace utils {
+namespace utils_test {
 
 using ::utils::ScopeGuard;
 using ::utils::MakeGuard;
 using ::utils::MakeObjGuard;
 using ::testing::Mock;
 
-class TestObject {
+class TestCalleeObject {
  public:
   MOCK_METHOD0(function_to_call, void());
   MOCK_METHOD1(function_to_call_with_param, void(void*));
@@ -68,21 +68,21 @@ TEST(ScopeGuardTest, CallFreeFunctionWithParam) {
 }
 
 TEST(ScopeGuardTest, CallObjectFunction) {
-  TestObject obj;
+  TestCalleeObject obj;
   Mock::AllowLeak(&obj);  // Google tests bug
   EXPECT_CALL(obj, function_to_call()).Times(1);
   {
-    ScopeGuard guard = MakeObjGuard(obj, &TestObject::function_to_call);
+    ScopeGuard guard = MakeObjGuard(obj, &TestCalleeObject::function_to_call);
     UNUSED(guard);
   }
 }
 
 TEST(ScopeGuardTest, CallObjectFunctionWithParam) {
-  TestObject obj;
+  TestCalleeObject obj;
   EXPECT_CALL(obj, function_to_call_with_param(&obj)).Times(1);
   {
     ScopeGuard guard =
-        MakeObjGuard(obj, &TestObject::function_to_call_with_param, &obj);
+        MakeObjGuard(obj, &TestCalleeObject::function_to_call_with_param, &obj);
     UNUSED(guard);
   }
 }
@@ -98,24 +98,24 @@ TEST(ScopeGuardTest, DismissCallFreeFunctionWithParam) {
 }
 
 TEST(ScopeGuardTest, DismissCallObjectFunction) {
-  TestObject obj;
+  TestCalleeObject obj;
   EXPECT_CALL(obj, function_to_call()).Times(0);
   {
-    ScopeGuard guard = MakeObjGuard(obj, &TestObject::function_to_call);
+    ScopeGuard guard = MakeObjGuard(obj, &TestCalleeObject::function_to_call);
     guard.Dismiss();
   }
 }
 
 TEST(ScopeGuardTest, DismissCallObjectFunctionWithParam) {
-  TestObject obj;
+  TestCalleeObject obj;
   EXPECT_CALL(obj, function_to_call_with_param(&obj)).Times(0);
   {
     ScopeGuard guard =
-        MakeObjGuard(obj, &TestObject::function_to_call_with_param, &obj);
+        MakeObjGuard(obj, &TestCalleeObject::function_to_call_with_param, &obj);
     guard.Dismiss();
   }
 }
 
-}  // namespace utils
-}  // components
+}  // namespace utils_test
+}  // namespace components
 }  // namesapce test

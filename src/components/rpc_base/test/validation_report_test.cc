@@ -35,6 +35,8 @@
 #include "rpc_base/validation_report.h"
 
 namespace test {
+namespace components {
+namespace rpc_base_test {
 using namespace rpc;
 
 class ValidationReportTest : public testing::Test {
@@ -73,7 +75,7 @@ class ValidationReportTest : public testing::Test {
     } else {
       temp = "";
     }
-    result = parent_name + temp + obj_name + ":" + " " + val_info + "\n";
+    result = parent_name + temp + obj_name + ":" + " " + val_info;
   }
 
   void ClearValidationInfo() {
@@ -157,4 +159,6 @@ TEST_F(ValidationReportTest, PrettyFormat_ExpectDataCorrect) {
   EXPECT_EQ(temp2, result2);
 }
 
-}  // namespace rpc
+}  // namespace rpc_base_test
+}  // namespace components
+}  // namespace test

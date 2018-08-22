@@ -30,11 +30,7 @@
 if(BUILD_TESTS)
 include(${CMAKE_SOURCE_DIR}/tools/intergen/GenerateInterfaceLibrary.cmake)
 
-if (${HMI_DBUS_API})
-  GenerateInterfaceLibrary("test_interface.xml" test_rpc_interface DBUS_SUPPORT)
-else()
-  GenerateInterfaceLibrary("test_interface.xml" test_rpc_interface)
-endif()
+GenerateInterfaceLibrary("test_interface.xml" test_rpc_interface)
 
 set (TEST_HMI_INTERFACES
   common
@@ -45,11 +41,7 @@ set (TEST_HMI_INTERFACES
   ui
 )
 
-if (${HMI_DBUS_API})
-  GenerateInterfaceLibrary("test_hmi_interface.xml" "${TEST_HMI_INTERFACES}" AUTO_FUNC_IDS DBUS_SUPPORT)
-else()
-  GenerateInterfaceLibrary("test_hmi_interface.xml" "${TEST_HMI_INTERFACES}" AUTO_FUNC_IDS)
-endif()
+GenerateInterfaceLibrary("test_hmi_interface.xml" "${TEST_HMI_INTERFACES}" AUTO_FUNC_IDS)
 
 include_directories (
   ${CMAKE_SOURCE_DIR}/src/components/rpc_base/include
@@ -70,16 +62,5 @@ set (SOURCES
   generated_interface_json_tests.cc
 )
 
-if (${HMI_DBUS_API})
-  # Build dbus tests
-  include_directories(
-      ${CMAKE_SOURCE_DIR}/src/components/dbus/include
-      ${DBUS_INCLUDE_DIRS}
-  )
-  set (LIBRARIES ${LIBRARIES} DBus)
-  set (SOURCES ${SOURCES} generated_interface_dbus_tests.cc)
-endif ()
-
-
 create_test(test_generated_interface "${SOURCES}" "${LIBRARIES}")
-endif()  
+endif()

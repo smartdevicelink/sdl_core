@@ -38,12 +38,7 @@
 #include "utils/threads/thread_delegate.h"
 #include "utils/conditional_variable.h"
 #include "utils/lock.h"
-
-namespace NsSmartDeviceLink {
-namespace NsSmartObjects {
-class SmartObject;
-}
-}
+#include "smart_objects/smart_object.h"
 
 namespace application_manager {
 class ApplicationManager;
@@ -66,6 +61,12 @@ typedef enum {
 } AudioCaptureQuality;
 
 typedef enum { AT_INVALID = -1, AT_PCM = 0 } AudioType;
+
+// AudioPassThru
+typedef struct {
+  std::vector<uint8_t> binary_data;
+  int32_t session_key;
+} AudioData;
 
 /*
  * @brief AudioStreamSenderThread class used to read binary data written from
@@ -108,6 +109,18 @@ class AudioStreamSenderThread : public threads::ThreadDelegate {
    * @brief Sends AudioPassThru request
    */
   bool SendEndAudioPassThru();
+
+  /**
+   * @brief Creates AudioPassThru data chunk and inserts it
+   * to audio_pass_thru_messages_
+   *
+   * @param session_key Id of application for which
+   * audio pass thru should be sent
+   *
+   * @param binary_data AudioPassThru data chunk
+   */
+  void SendAudioPassThroughNotification(uint32_t session_key,
+                                        std::vector<uint8_t>& binary_data);
 
   void sendAudioChunkToMobile();
 

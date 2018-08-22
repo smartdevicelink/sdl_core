@@ -29,8 +29,8 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-#ifndef SRC_COMPONENTS_CONNECTION_HANDLER_INCLUDE_HEARTBEAT_MONITOR_H_
-#define SRC_COMPONENTS_CONNECTION_HANDLER_INCLUDE_HEARTBEAT_MONITOR_H_
+#ifndef SRC_COMPONENTS_CONNECTION_HANDLER_INCLUDE_CONNECTION_HANDLER_HEARTBEAT_MONITOR_H_
+#define SRC_COMPONENTS_CONNECTION_HANDLER_INCLUDE_CONNECTION_HANDLER_HEARTBEAT_MONITOR_H_
 
 #include <stdint.h>
 #include <map>
@@ -111,7 +111,7 @@ class HeartBeatMonitor : public threads::ThreadDelegate {
   typedef std::map<uint8_t, SessionState> SessionMap;
   SessionMap sessions_;
 
-  sync_primitives::Lock sessions_list_lock_;  // recurcive
+  sync_primitives::RecursiveLock sessions_list_lock_;  // recurcive
   sync_primitives::Lock main_thread_lock_;
   mutable sync_primitives::Lock heartbeat_timeout_seconds_lock_;
   sync_primitives::ConditionalVariable heartbeat_monitor_;
@@ -125,4 +125,4 @@ class HeartBeatMonitor : public threads::ThreadDelegate {
 
 }  // namespace connection_handler
 
-#endif  // SRC_COMPONENTS_CONNECTION_HANDLER_INCLUDE_HEARTBEAT_MONITOR_H_
+#endif  // SRC_COMPONENTS_CONNECTION_HANDLER_INCLUDE_CONNECTION_HANDLER_HEARTBEAT_MONITOR_H_

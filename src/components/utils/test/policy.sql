@@ -108,7 +108,7 @@ BEGIN TRANSACTION;
   CREATE INDEX `rpc.select_rpc_name_hmi_level` 
     ON `rpc`(`name`,`hmi_level_value`);
   CREATE TABLE IF NOT EXISTS `application`( 
-    `id` VARCHAR(45) PRIMARY KEY NOT NULL, 
+    `id` VARCHAR(45) PRIMARY KEY NOT NULL COLLATE NOCASE,
     `keep_context` BOOLEAN, 
     `steal_focus` BOOLEAN, 
     `default_hmi` VARCHAR(45), 
@@ -131,7 +131,7 @@ BEGIN TRANSACTION;
   CREATE INDEX IF NOT EXISTS `application.fk_application_priorities1_idx` 
     ON `application`(`priority_value`); 
   CREATE TABLE IF NOT EXISTS `app_group`( 
-    `application_id` VARCHAR(45) NOT NULL, 
+    `application_id` VARCHAR(45) NOT NULL COLLATE NOCASE,
     `functional_group_id` INTEGER NOT NULL, 
     PRIMARY KEY(`application_id`,`functional_group_id`), 
     CONSTRAINT `fk_application_has_functional_group_application1` 
@@ -144,9 +144,9 @@ BEGIN TRANSACTION;
   CREATE INDEX IF NOT EXISTS `app_group.fk_application_has_functional_group_functional_group1_idx` 
     ON `app_group`(`functional_group_id`); 
   CREATE INDEX IF NOT EXISTS `app_group.fk_application_has_functional_group_application1_idx` 
-    ON `app_group`(`application_id`); 
+    ON `app_group`(`application_id` COLLATE NOCASE);
   CREATE TABLE IF NOT EXISTS `preconsented_group`( 
-    `application_id` VARCHAR(45) NOT NULL, 
+    `application_id` VARCHAR(45) NOT NULL COLLATE NOCASE,
     `functional_group_id` INTEGER NOT NULL, 
     PRIMARY KEY(`application_id`,`functional_group_id`), 
     CONSTRAINT `fk_application_has_functional_group_application2` 
@@ -161,7 +161,7 @@ BEGIN TRANSACTION;
     ON `preconsented_group`(`functional_group_id`); 
   CREATE INDEX IF NOT EXISTS 
   `preconsented_group.fk_application_has_functional_group_application2_idx` 
-    ON `preconsented_group`(`application_id`); 
+    ON `preconsented_group`(`application_id` COLLATE NOCASE);
   CREATE TABLE IF NOT EXISTS `seconds_between_retry`( 
     `index` INTEGER PRIMARY KEY NOT NULL, 
     `value` INTEGER NOT NULL 
@@ -187,7 +187,7 @@ BEGIN TRANSACTION;
   `device_consent_group.fk_device_has_functional_group_device1_idx` 
     ON `device_consent_group`(`device_id`); 
   CREATE TABLE IF NOT EXISTS `app_level`( 
-    `application_id` VARCHAR(45) PRIMARY KEY NOT NULL, 
+    `application_id` VARCHAR(45) PRIMARY KEY NOT NULL COLLATE NOCASE,
     `minutes_in_hmi_full` INTEGER DEFAULT 0, 
     `minutes_in_hmi_limited` INTEGER DEFAULT 0, 
     `minutes_in_hmi_background` INTEGER DEFAULT 0, 
@@ -214,34 +214,34 @@ BEGIN TRANSACTION;
       REFERENCES `language`(`code`) 
   ); 
   CREATE INDEX IF NOT EXISTS `app_level.fk_app_levels_application1_idx` 
-    ON `app_level`(`application_id`); 
+    ON `app_level`(`application_id` COLLATE NOCASE);
   CREATE INDEX IF NOT EXISTS `app_level.fk_app_level_language1_idx` 
     ON `app_level`(`app_registration_language_gui`); 
   CREATE INDEX IF NOT EXISTS `app_level.fk_app_level_language2_idx` 
     ON `app_level`(`app_registration_language_vui`); 
   CREATE TABLE IF NOT EXISTS `nickname`( 
-    `name` VARCHAR(100) NOT NULL, 
-    `application_id` VARCHAR(45) NOT NULL, 
+    `name` VARCHAR(100) NOT NULL COLLATE NOCASE,
+    `application_id` VARCHAR(45) NOT NULL COLLATE NOCASE,
     PRIMARY KEY(`name`,`application_id`), 
     CONSTRAINT `fk_nickname_application1` 
       FOREIGN KEY(`application_id`) 
       REFERENCES `application`(`id`) 
   ); 
   CREATE INDEX IF NOT EXISTS `nickname.fk_nickname_application1_idx` 
-    ON `nickname`(`application_id`); 
+    ON `nickname`(`application_id` COLLATE NOCASE);
   CREATE TABLE IF NOT EXISTS `app_type`( 
     `name` VARCHAR(50) NOT NULL, 
-    `application_id` VARCHAR(45) NOT NULL, 
+    `application_id` VARCHAR(45) NOT NULL COLLATE NOCASE,
     PRIMARY KEY(`name`,`application_id`), 
     CONSTRAINT `fk_app_type_application1` 
       FOREIGN KEY(`application_id`) 
       REFERENCES `application`(`id`) 
   ); 
   CREATE INDEX IF NOT EXISTS `app_type.fk_app_type_application1_idx` 
-    ON `app_type`(`application_id`); 
+    ON `app_type`(`application_id` COLLATE NOCASE);
   CREATE TABLE IF NOT EXISTS `consent_group`( 
     `device_id` VARCHAR(100) NOT NULL, 
-    `application_id` VARCHAR(45) NOT NULL, 
+    `application_id` VARCHAR(45) NOT NULL COLLATE NOCASE,
     `functional_group_id` INTEGER NOT NULL, 
     `is_consented` BOOL NOT NULL, 
     `input` VARCHAR(45), 
@@ -263,15 +263,15 @@ BEGIN TRANSACTION;
   CREATE INDEX IF NOT EXISTS `consent_group.fk_consent_group_functional_group1_idx` 
     ON `consent_group`(`functional_group_id`); 
   CREATE TABLE IF NOT EXISTS `endpoint`( 
-    `service` INTEGER NOT NULL, 
+    `service` VARCHAR(100) NOT NULL, 
     `url` VARCHAR(100) NOT NULL, 
-    `application_id` VARCHAR(45) NOT NULL, 
+    `application_id` VARCHAR(45) NOT NULL COLLATE NOCASE,
     CONSTRAINT `fk_endpoint_application1` 
       FOREIGN KEY(`application_id`) 
       REFERENCES `application`(`id`) 
   ); 
   CREATE INDEX IF NOT EXISTS `endpoint.fk_endpoint_application1_idx` 
-    ON `endpoint`(`application_id`); 
+    ON `endpoint`(`application_id` COLLATE NOCASE);
   CREATE TABLE IF NOT EXISTS `message`( 
     `id` INTEGER PRIMARY KEY NOT NULL, 
     `tts` TEXT, 

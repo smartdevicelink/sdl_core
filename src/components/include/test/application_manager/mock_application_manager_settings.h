@@ -55,8 +55,11 @@ class MockApplicationManagerSettings
   // typedef for the return type.
   MOCK_CONST_METHOD0(get_vehicle_data_frequency,
                      const std::pair<uint32_t, int32_t>&());
+  MOCK_CONST_METHOD0(get_interior_vehicle_data_frequency,
+                     const std::pair<uint32_t, int32_t>&());
   MOCK_CONST_METHOD0(hash_string_size, uint32_t());
   MOCK_CONST_METHOD0(app_storage_folder, const std::string&());
+  MOCK_CONST_METHOD0(app_info_storage, const std::string&());
   MOCK_CONST_METHOD0(app_dir_quota, const uint32_t&());
   MOCK_CONST_METHOD0(stop_streaming_timeout, uint32_t());
   MOCK_CONST_METHOD0(application_list_update_timeout, uint32_t());
@@ -94,13 +97,21 @@ class MockApplicationManagerSettings
   MOCK_CONST_METHOD0(app_resuming_timeout, const uint32_t&());
   MOCK_CONST_METHOD0(attempts_to_open_resumption_db, uint16_t());
   MOCK_CONST_METHOD0(open_attempt_timeout_ms_resumption_db, uint16_t());
-  MOCK_METHOD1(config_file_name, void(const std::string& fileName));
+  MOCK_CONST_METHOD0(transport_required_for_resumption_map,
+                     std::map<std::string, std::vector<std::string> >&());
+  MOCK_CONST_METHOD0(navigation_lowbandwidth_resumption_level,
+                     const std::string&());
+  MOCK_CONST_METHOD0(projection_lowbandwidth_resumption_level,
+                     const std::string&());
+  MOCK_CONST_METHOD0(media_lowbandwidth_resumption_level, const std::string&());
+  MOCK_METHOD1(set_config_file_name, void(const std::string& fileName));
   // The following line won't really compile, as the return
   // type has multiple template arguments.  To fix it, use a
   // typedef for the return type.
   MOCK_CONST_METHOD0(start_stream_retry_amount,
                      const std::pair<uint32_t, int32_t>&());
   MOCK_CONST_METHOD0(app_icons_folder, const std::string&());
+  MOCK_CONST_METHOD0(plugins_folder, const std::string&());
   MOCK_CONST_METHOD0(app_icons_folder_max_size, const uint32_t&());
   MOCK_CONST_METHOD0(app_icons_amount_to_remove, const uint32_t&());
   MOCK_CONST_METHOD0(list_files_response_size, const uint32_t&());

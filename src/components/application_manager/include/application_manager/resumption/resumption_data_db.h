@@ -34,8 +34,8 @@
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_RESUMPTION_RESUMPTION_DATA_DB_H_
 #include "application_manager/resumption/resumption_data.h"
 
-#include "sql_database.h"
-#include "sql_query.h"
+#include "utils/sqlite_wrapper/sql_database.h"
+#include "utils/sqlite_wrapper/sql_query.h"
 
 namespace resumption {
 
@@ -55,6 +55,7 @@ struct ApplicationParams {
   mobile_apis::HMILevel::eType m_hmi_level;
   bool m_is_media_application;
   bool m_is_valid;
+  app_mngr::ApplicationSharedPtr app_ptr;
 };
 
 /**
@@ -109,11 +110,22 @@ class ResumptionDataDB : public ResumptionData {
   virtual uint32_t GetHMIApplicationID(const std::string& policy_app_id,
                                        const std::string& device_id) const;
 
+  void IncrementGlobalIgnOnCounter() OVERRIDE;
+
+  uint32_t GetGlobalIgnOnCounter() const OVERRIDE;
+
+  void ResetGlobalIgnOnCount() OVERRIDE;
+
   /**
    * @brief Increments ignition counter for all registered applications
    * and remember ign_off time stamp
    */
-  virtual void OnSuspend();
+  void IncrementIgnOffCount() FINAL;
+
+  /**
+   * @brief Decrements ignition counter for all registered applications
+   */
+  void DecrementIgnOffCount() FINAL;
 
   /**
    * @brief Retrieves hash ID for the given mobile app ID
@@ -128,12 +140,6 @@ class ResumptionDataDB : public ResumptionData {
   virtual bool GetHashId(const std::string& policy_app_id,
                          const std::string& device_id,
                          std::string& hash_id) const;
-
-  /**
-   * @brief Decrements ignition counter for all registered applications
-   * and remember ign_off time stamp
-   */
-  virtual void OnAwake();
 
   /**
    * @brief Retrieves data of saved application for the given mobile app ID
@@ -672,7 +678,7 @@ class ResumptionDataDB : public ResumptionData {
                          smart_objects::SmartObject& saved_app) const;
 
   /**
-   * @brief Selects data from applicationSubscribtionsArray table
+   * @brief Selects data from applicationSubscriptionsArray table
    * @param policy_app_id contains mobile application id of application
    * @param device_id contains id of device on which is running application
    * @param saved_app will contain subscriptions

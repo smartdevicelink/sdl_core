@@ -35,6 +35,7 @@
 #include <signal.h>
 #include <cstdio>
 #include <cstdlib>
+#include <memory>
 #include <vector>
 #include <string>
 #include <iostream>  // cpplint: Streams are highly discouraged.
@@ -45,7 +46,7 @@
 #include "utils/log_message_loop_thread.h"
 #include "utils/logger.h"
 
-#include "./life_cycle.h"
+#include "appMain/life_cycle_impl.h"
 #include "signal_handlers.h"
 
 #include "utils/signals.h"
@@ -58,11 +59,6 @@
 #endif
 
 #include "media_manager/media_manager_impl.h"
-// ----------------------------------------------------------------------------
-// Third-Party includes
-#include "networking.h"  // cpplint: Include the directory when naming .h files
-
-// ----------------------------------------------------------------------------
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "SDLMain")
 
@@ -90,23 +86,6 @@ bool InitHmi(std::string hmi_link) {
       .Execute();
 }
 #endif  // WEB_HMI
-
-#ifdef QT_HMI
-/**
- * Initialize HTML based HMI.
- * @return true if success otherwise false.
- */
-bool InitHmi() {
-  std::string kStartHmi = "./start_hmi.sh";
-  struct stat sb;
-  if (stat(kStartHmi.c_str(), &sb) == -1) {
-    LOG4CXX_FATAL(logger_, "HMI start script doesn't exist!");
-    return false;
-  }
-
-  return utils::System(kStartHmi).Execute();
-}
-#endif  // QT_HMI
 }
 
 /**
@@ -116,8 +95,8 @@ bool InitHmi() {
  * \return EXIT_SUCCESS or EXIT_FAILURE
  */
 int32_t main(int32_t argc, char** argv) {
-  // Unsibscribe once for all threads
-  if (!utils::UnsibscribeFromTermination()) {
+  // Unsubscribe once for all threads
+  if (!utils::Signals::UnsubscribeFromTermination()) {
     // Can't use internal logger here
     exit(EXIT_FAILURE);
   }
@@ -125,11 +104,29 @@ int32_t main(int32_t argc, char** argv) {
   // --------------------------------------------------------------------------
   // Components initialization
   profile::Profile profile_instance;
-  main_namespace::LifeCycle life_cycle(profile_instance);
+  std::unique_ptr<main_namespace::LifeCycle> life_cycle(
+      new main_namespace::LifeCycleImpl(profile_instance));
+
   if ((argc > 1) && (0 != argv)) {
-    profile_instance.config_file_name(argv[1]);
+    profile_instance.set_config_file_name(argv[1]);
   } else {
-    profile_instance.config_file_name("smartDeviceLink.ini");
+    profile_instance.set_config_file_name("smartDeviceLink.ini");
+  }
+
+  // Reading profile offsets for real-time signals dedicated
+  // for Low Voltage functionality handling
+  main_namespace::LowVoltageSignalsOffset signals_offset{
+      profile_instance.low_voltage_signal_offset(),
+      profile_instance.wake_up_signal_offset(),
+      profile_instance.ignition_off_signal_offset()};
+
+  // Unsubscribe once for all threads
+  // except specific thread dedicated for
+  // Low Voltage signals handling
+  // Thread will be created later
+  if (!utils::Signals::UnsubscribeFromLowVoltageSignals(signals_offset)) {
+    // Can't use internal logger here
+    exit(EXIT_FAILURE);
   }
 
   // --------------------------------------------------------------------------
@@ -146,45 +143,53 @@ int32_t main(int32_t argc, char** argv) {
   LOG4CXX_INFO(logger_, "Application started!");
   LOG4CXX_INFO(logger_, "SDL version: " << profile_instance.sdl_version());
 
-  // --------------------------------------------------------------------------
-  // Components initialization
-  if (!life_cycle.StartComponents()) {
-    LOG4CXX_FATAL(logger_, "Failed to start components");
-    life_cycle.StopComponents();
+  // Check if no error values were read from config file
+  if (profile_instance.ErrorOccured()) {
+    LOG4CXX_FATAL(logger_, profile_instance.ErrorDescription());
+    FLUSH_LOGGER();
     DEINIT_LOGGER();
     exit(EXIT_FAILURE);
   }
 
   // --------------------------------------------------------------------------
+  // Components initialization
+  if (!life_cycle->StartComponents()) {
+    LOG4CXX_FATAL(logger_, "Failed to start components");
+    life_cycle->StopComponents();
+    DEINIT_LOGGER();
+    exit(EXIT_FAILURE);
+  }
+  LOG4CXX_INFO(logger_, "Components Started");
+
+  // --------------------------------------------------------------------------
   // Third-Party components initialization.
 
-  if (!life_cycle.InitMessageSystem()) {
+  if (!life_cycle->InitMessageSystem()) {
     LOG4CXX_FATAL(logger_, "Failed to init message system");
-    life_cycle.StopComponents();
+    life_cycle->StopComponents();
     DEINIT_LOGGER();
     _exit(EXIT_FAILURE);
   }
   LOG4CXX_INFO(logger_, "InitMessageBroker successful");
-
   if (profile_instance.launch_hmi()) {
     if (profile_instance.server_address() == kLocalHostAddress) {
       LOG4CXX_INFO(logger_, "Start HMI on localhost");
 
-#ifndef NO_HMI
+#ifdef WEB_HMI
       if (!InitHmi(profile_instance.link_to_web_hmi())) {
         LOG4CXX_INFO(logger_, "InitHmi successful");
       } else {
         LOG4CXX_WARN(logger_, "Failed to init HMI");
       }
-#endif  // #ifndef NO_HMI
+#endif
     }
   }
   // --------------------------------------------------------------------------
 
-  life_cycle.Run();
+  life_cycle->Run();
   LOG4CXX_INFO(logger_, "Stop SDL due to caught signal");
 
-  life_cycle.StopComponents();
+  life_cycle->StopComponents();
   LOG4CXX_INFO(logger_, "Application has been stopped successfuly");
 
   DEINIT_LOGGER();

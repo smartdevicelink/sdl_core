@@ -176,6 +176,51 @@
      <element name="NO-NO" internal_name="NO_NO">
       <description>Norwegian - Norway</description>
     </element>
+    <element name="NL-BE" internal_name="NL_BE">
+      <description>Dutch (Flemish) - Belgium</description>
+    </element>
+    <element name="EL-GR" internal_name="EL_GR">
+      <description>Greek - Greece</description>
+    </element>
+    <element name="HU-HU" internal_name="HU_HU">
+      <description>Hungarian - Hungary</description>
+    </element>
+    <element name="FI-FI" internal_name="FI_FI">
+      <description>Finnish - Finland</description>
+    </element>
+    <element name="SK-SK" internal_name="SK_SK">
+      <description>Slovak - Slovakia</description>
+    </element>
+    <element name="EN-IN" internal_name="EN_IN">
+      <description>English - India</description>
+    </element>
+    <element name="TH-TH" internal_name="TH_TH">
+      <description>Thai - Thailand</description>
+    </element>
+    <element name="EN-SA" internal_name="EN_SA">
+      <description>English - Middle East</description>
+    </element>
+    <element name="HE-IL" internal_name="HE_IL">
+      <description>Hebrew - Israel</description>
+    </element>
+    <element name="RO-RO" internal_name="RO_RO">
+      <description>Romanian - Romania</description>
+    </element>
+    <element name="UK-UA" internal_name="UK_UA">
+      <description>Ukrainian - Ukraine</description>
+    </element>
+    <element name="ID-ID" internal_name="ID_ID">
+      <description>Indonesian - Indonesia</description>
+    </element>
+    <element name="VI-VN" internal_name="VI_VN">
+      <description>Vietnamese - Vietnam</description>
+    </element>
+    <element name="MS-MY" internal_name="MS_MY">
+      <description>Malay - Malaysia</description>
+    </element>
+    <element name="HI-IN" internal_name="HI_IN">
+      <description>Hindi - India</description>
+    </element>
 </enum>
 
 <enum name="SoftButtonType">
@@ -2733,938 +2778,573 @@
       </description>
     </param>
   </function>
-
-<!--Qt HMI version of GetVehicleData-->
-  <function name="GetGpsData" messagetype="request">
-    <param name="appID" type="Integer" mandatory="true">
-      <description>ID of application requested this RPC.</description>
-    </param>
-  </function>
-  <function name="GetGpsData" messagetype="response">
-    <param name="gps" type="Common.GPSData" mandatory="true">
+  <function name="SubscribeVehicleData" messagetype="request">
+    <description>
+        Subscribes for specific published data items.
+        The data will be only sent if it has changed.
+        The application will be notified by the onVehicleData notification whenever new data is available.
+        To unsubscribe the notifications, use unsubscribe with the same subscriptionType.
+    </description>
+    <param name="gps" type="Boolean" mandatory="false">
       <description>See GPSData</description>
     </param>
-  </function>
-
-  <function name="GetSpeed" messagetype="request">
-    <param name="appID" type="Integer" mandatory="true">
-      <description>ID of application requested this RPC.</description>
-    </param>
-  </function>
-  <function name="GetSpeed" messagetype="response">
-    <param name="speed" type="Float" minvalue="0" maxvalue="700" mandatory="true">
+    <param name="speed" type="Boolean" mandatory="false">
       <description>The vehicle speed in kilometers per hour</description>
     </param>
-  </function>
-
-  <function name="GetRpm" messagetype="request">
-    <param name="appID" type="Integer" mandatory="true">
-      <description>ID of application requested this RPC.</description>
-    </param>
-  </function>
-  <function name="GetRpm" messagetype="response">
-    <param name="rpm" type="Integer" minvalue="0" maxvalue="20000" mandatory="true">
+    <param name="rpm" type="Boolean" mandatory="false">
       <description>The number of revolutions per minute of the engine</description>
     </param>
-  </function>
-
-  <function name="GetFuelLevel" messagetype="request">
-    <param name="appID" type="Integer" mandatory="true">
-      <description>ID of application requested this RPC.</description>
-    </param>
-  </function>
-  <function name="GetFuelLevel" messagetype="response">
-    <param name="fuelLevel" type="Float" minvalue="-6" maxvalue="106" mandatory="true">
+    <param name="fuelLevel" type="Boolean" mandatory="false">
       <description>The fuel level in the tank (percentage)</description>
     </param>
-  </function>
-
-  <function name="GetFuelLevelState" messagetype="request">
-    <param name="appID" type="Integer" mandatory="true">
-      <description>ID of application requested this RPC.</description>
-    </param>
-  </function>
-  <function name="GetFuelLevelState" messagetype="response">
-    <param name="fuelLevel_State" type="Common.ComponentVolumeStatus" mandatory="true">
+    <param name="fuelLevel_State" type="Boolean" mandatory="false">
       <description>The fuel level state</description>
     </param>
-  </function>
-
-  <function name="GetInstantFuelConsumption" messagetype="request">
-    <param name="appID" type="Integer" mandatory="true">
-      <description>ID of application requested this RPC.</description>
-    </param>
-  </function>
-  <function name="GetInstantFuelConsumption" messagetype="response">
-    <param name="instantFuelConsumption" type="Float" minvalue="0" maxvalue="25575" mandatory="true">
+    <param name="instantFuelConsumption" type="Boolean" mandatory="false">
       <description>The instantaneous fuel consumption in microlitres</description>
     </param>
-  </function>
-
-  <function name="GetExternalTemperature" messagetype="request">
-    <param name="appID" type="Integer" mandatory="true">
-      <description>ID of application requested this RPC.</description>
-    </param>
-  </function>
-  <function name="GetExternalTemperature" messagetype="response">
-    <param name="externalTemperature" type="Float" minvalue="-40" maxvalue="100" mandatory="true">
+    <param name="externalTemperature" type="Boolean" mandatory="false">
       <description>The external temperature in degrees celsius</description>
     </param>
-  </function>
-
-  <function name="GetVin" messagetype="request">
-    <param name="appID" type="Integer" mandatory="true">
-      <description>ID of application requested this RPC.</description>
-    </param>
-  </function>
-  <function name="GetVin" messagetype="response">
-    <param name="vin" type="String" maxlength="17" mandatory="true">
-      <description>Vehicle identification number</description>
-    </param>
-  </function>
-
-  <function name="GetPrndl" messagetype="request">
-    <param name="appID" type="Integer" mandatory="true">
-      <description>ID of application requested this RPC.</description>
-    </param>
-  </function>
-  <function name="GetPrndl" messagetype="response">
-    <param name="prndl" type="Common.PRNDL" mandatory="true">
+    <param name="prndl" type="Boolean" mandatory="false">
       <description>See PRNDL</description>
     </param>
-  </function>
-
-  <function name="GetTirePressure" messagetype="request">
-    <param name="appID" type="Integer" mandatory="true">
-      <description>ID of application requested this RPC.</description>
-    </param>
-  </function>
-  <function name="GetTirePressure" messagetype="response">
-    <param name="tirePressure" type="Common.TireStatus" mandatory="true">
+    <param name="tirePressure" type="Boolean" mandatory="false">
       <description>See TireStatus</description>
     </param>
-  </function>
-
-  <function name="GetOdometer" messagetype="request">
-    <param name="appID" type="Integer" mandatory="true">
-      <description>ID of application requested this RPC.</description>
-    </param>
-  </function>
-  <function name="GetOdometer" messagetype="response">
-    <param name="odometer" type="Integer" minvalue="0" maxvalue="17000000" mandatory="true">
+    <param name="odometer" type="Boolean" mandatory="false">
       <description>Odometer in km</description>
     </param>
-  </function>
-
-  <function name="GetBeltStatus" messagetype="request">
-    <param name="appID" type="Integer" mandatory="true">
-      <description>ID of application requested this RPC.</description>
-    </param>
-  </function>
-  <function name="GetBeltStatus" messagetype="response">
-    <param name="beltStatus" type="Common.BeltStatus" mandatory="true">
+    <param name="beltStatus" type="Boolean" mandatory="false">
       <description>The status of the seat belts</description>
     </param>
-  </function>
-
-  <function name="GetBodyInformation" messagetype="request">
-    <param name="appID" type="Integer" mandatory="true">
-      <description>ID of application requested this RPC.</description>
-    </param>
-  </function>
-  <function name="GetBodyInformation" messagetype="response">
-    <param name="bodyInformation" type="Common.BodyInformation" mandatory="true">
+    <param name="bodyInformation" type="Boolean" mandatory="false">
       <description>The body information including power modes</description>
     </param>
-  </function>
-
-  <function name="GetDeviceStatus" messagetype="request">
-    <param name="appID" type="Integer" mandatory="true">
-      <description>ID of application requested this RPC.</description>
-    </param>
-  </function>
-  <function name="GetDeviceStatus" messagetype="response">
-    <param name="deviceStatus" type="Common.DeviceStatus" mandatory="true">
+    <param name="deviceStatus" type="Boolean" mandatory="false">
       <description>The device status including signal and battery strength</description>
     </param>
-  </function>
-
-  <function name="GetDriverBraking" messagetype="request">
-    <param name="appID" type="Integer" mandatory="true">
-      <description>ID of application requested this RPC.</description>
-    </param>
-  </function>
-  <function name="GetDriverBraking" messagetype="response">
-    <param name="driverBraking" type="Common.VehicleDataEventStatus" mandatory="true">
+    <param name="driverBraking" type="Boolean" mandatory="false">
       <description>The status of the brake pedal</description>
     </param>
-  </function>
-
-  <function name="GetWiperStatus" messagetype="request">
-    <param name="appID" type="Integer" mandatory="true">
-      <description>ID of application requested this RPC.</description>
-    </param>
-  </function>
-  <function name="GetWiperStatus" messagetype="response">
-    <param name="wiperStatus" type="Common.WiperStatus" mandatory="true">
+    <param name="wiperStatus" type="Boolean" mandatory="false">
       <description>The status of the wipers</description>
     </param>
-  </function>
-
-  <function name="GetHeadLampStatus" messagetype="request">
-    <param name="appID" type="Integer" mandatory="true">
-      <description>ID of application requested this RPC.</description>
-    </param>
-  </function>
-  <function name="GetHeadLampStatus" messagetype="response">
-    <param name="headLampStatus" type="Common.HeadLampStatus" mandatory="true">
+    <param name="headLampStatus" type="Boolean" mandatory="false">
       <description>Status of the head lamps</description>
     </param>
-  </function>
-
-  <function name="GetEngineTorque" messagetype="request">
-    <param name="appID" type="Integer" mandatory="true">
-      <description>ID of application requested this RPC.</description>
-    </param>
-  </function>
-  <function name="GetEngineTorque" messagetype="response">
-    <param name="engineTorque" type="Float" minvalue="-1000" maxvalue="2000" mandatory="true">
+    <param name="engineTorque" type="Boolean" mandatory="false">
       <description>Torque value for engine (in Nm) on non-diesel variants</description>
     </param>
-  </function>
-
-  <function name="GetAccPedalPosition" messagetype="request">
-    <param name="appID" type="Integer" mandatory="true">
-      <description>ID of application requested this RPC.</description>
-    </param>
-  </function>
-  <function name="GetAccPedalPosition" messagetype="response">
-    <param name="accPedalPosition" type="Float" minvalue="0" maxvalue="100" mandatory="true">
+    <param name="accPedalPosition" type="Boolean" mandatory="false">
       <description>Accelerator pedal position (percentage depressed)</description>
     </param>
-  </function>
-
-  <function name="GetSteeringWheelAngle" messagetype="request">
-    <param name="appID" type="Integer" mandatory="true">
-      <description>ID of application requested this RPC.</description>
-    </param>
-  </function>
-  <function name="GetSteeringWheelAngle" messagetype="response">
-    <param name="steeringWheelAngle" type="Float" minvalue="-2000" maxvalue="2000" mandatory="true">
+    <param name="steeringWheelAngle" type="Boolean" mandatory="false">
       <description>Current angle of the steering wheel (in deg)</description>
     </param>
-  </function>
-
-  <function name="GetECallInfo" messagetype="request">
-    <param name="appID" type="Integer" mandatory="true">
-      <description>ID of application requested this RPC.</description>
+    <param name="engineOilLife" type="Boolean" mandatory="false">
+      <description>The estimated percentage of remaining oil life of the engine.</description>
     </param>
-  </function>
-  <function name="GetECallInfo" messagetype="response">
-    <param name="eCallInfo" type="Common.ECallInfo" mandatory="true">
+        <!-- Ford Specific Data Items -->
+    <param name="eCallInfo" type="Boolean" mandatory="false">
       <description>Emergency Call notification and confirmation data</description>
     </param>
-  </function>
-
-  <function name="GetAirbagStatus" messagetype="request">
-    <param name="appID" type="Integer" mandatory="true">
-      <description>ID of application requested this RPC.</description>
-    </param>
-  </function>
-  <function name="GetAirbagStatus" messagetype="response">
-    <param name="airbagStatus" type="Common.AirbagStatus" mandatory="true">
+    <param name="airbagStatus" type="Boolean" mandatory="false">
       <description>The status of the air bags</description>
     </param>
-  </function>
-
-  <function name="GetEmergencyEvent" messagetype="request">
-    <param name="appID" type="Integer" mandatory="true">
-      <description>ID of application requested this RPC.</description>
-    </param>
-  </function>
-  <function name="GetEmergencyEvent" messagetype="response">
-    <param name="emergencyEvent" type="Common.EmergencyEvent" mandatory="true">
+    <param name="emergencyEvent" type="Boolean" mandatory="false">
       <description>Information related to an emergency event (and if it occurred)</description>
     </param>
-  </function>
-
-  <function name="GetClusterModeStatus" messagetype="request">
-    <param name="appID" type="Integer" mandatory="true">
-      <description>ID of application requested this RPC.</description>
-    </param>
-  </function>
-  <function name="GetClusterModeStatus" messagetype="response">
-    <param name="clusterModeStatus" type="Common.ClusterModeStatus" mandatory="true">
+    <param name="clusterModeStatus" type="Boolean" mandatory="false">
       <description>The status modes of the cluster</description>
     </param>
-  </function>
-
-  <function name="GetMyKey" messagetype="request">
-    <param name="appID" type="Integer" mandatory="true">
-      <description>ID of application requested this RPC.</description>
+    <param name="myKey" type="Boolean" mandatory="false">
+      <description>Information related to the MyKey feature</description>
     </param>
+        <!-- / Ford Specific Data Items -->
   </function>
-  <function name="GetMyKey" messagetype="response">
-    <param name="myKey" type="Common.MyKey" mandatory="true">
+  <function name="SubscribeVehicleData" messagetype="response">
+    <param name="gps" type="Common.VehicleDataResult" mandatory="false">
+      <description>See GPSData</description>
+    </param>
+    <param name="speed" type="Common.VehicleDataResult" mandatory="false">
+      <description>The vehicle speed in kilometers per hour</description>
+    </param>
+    <param name="rpm" type="Common.VehicleDataResult" mandatory="false">
+      <description>The number of revolutions per minute of the engine</description>
+    </param>
+    <param name="fuelLevel" type="Common.VehicleDataResult" mandatory="false">
+      <description>The fuel level in the tank (percentage)</description>
+    </param>
+    <param name="fuelLevel_State" type="Common.VehicleDataResult" mandatory="false">
+      <description>The fuel level state</description>
+    </param>
+    <param name="instantFuelConsumption" type="Common.VehicleDataResult" mandatory="false">
+      <description>The instantaneous fuel consumption in microlitres</description>
+    </param>
+    <param name="externalTemperature" type="Common.VehicleDataResult" mandatory="false">
+      <description>The external temperature in degrees celsius.</description>
+    </param>
+    <param name="prndl" type="Common.VehicleDataResult" mandatory="false">
+      <description>See PRNDL</description>
+    </param>
+    <param name="tirePressure" type="Common.VehicleDataResult" mandatory="false">
+      <description>See TireStatus</description>
+    </param>
+    <param name="odometer" type="Common.VehicleDataResult" mandatory="false">
+      <description>Odometer in km</description>
+    </param>
+    <param name="beltStatus" type="Common.VehicleDataResult" mandatory="false">
+      <description>The status of the seat belts</description>
+    </param>
+    <param name="bodyInformation" type="Common.VehicleDataResult" mandatory="false">
+      <description>The body information including power modes</description>
+    </param>
+    <param name="deviceStatus" type="Common.VehicleDataResult" mandatory="false">
+      <description>The device status including signal and battery strength</description>
+    </param>
+    <param name="driverBraking" type="Common.VehicleDataResult" mandatory="false">
+      <description>The status of the brake pedal</description>
+    </param>
+    <param name="wiperStatus" type="Common.VehicleDataResult" mandatory="false">
+      <description>The status of the wipers</description>
+    </param>
+    <param name="headLampStatus" type="Common.VehicleDataResult" mandatory="false">
+      <description>Status of the head lamps</description>
+    </param>
+    <param name="engineTorque" type="Common.VehicleDataResult" mandatory="false">
+      <description>Torque value for engine (in Nm) on non-diesel variants</description>
+    </param>
+    <param name="accPedalPosition" type="Common.VehicleDataResult" mandatory="false">
+      <description>Accelerator pedal position (percentage depressed)</description>
+    </param>
+    <param name="steeringWheelAngle" type="Common.VehicleDataResult" mandatory="false">
+      <description>Current angle of the steering wheel (in deg)</description>
+    </param>
+    <param name="engineOilLife" type="Common.VehicleDataResult" mandatory="false">
+      <description>The estimated percentage of remaining oil life of the engine.</description>
+    </param>
+        <!-- Ford Specific Data Items -->
+    <param name="eCallInfo" type="Common.VehicleDataResult" mandatory="false">
+      <description>Emergency Call notification and confirmation data</description>
+    </param>
+    <param name="airbagStatus" type="Common.VehicleDataResult" mandatory="false">
+      <description>The status of the air bags</description>
+    </param>
+    <param name="emergencyEvent" type="Common.VehicleDataResult" mandatory="false">
+      <description>Information related to an emergency event (and if it occurred)</description>
+    </param>
+    <param name="clusterModes" type="Common.VehicleDataResult" mandatory="false">
+      <description>The status modes of the cluster</description>
+    </param>
+    <param name="myKey" type="Common.VehicleDataResult" mandatory="false">
+      <description>Information related to the MyKey feature</description>
+    </param>
+        <!-- / Ford Specific Data Items -->
+  </function>
+  <function name="UnsubscribeVehicleData" messagetype="request">
+    <description>
+      This function is used to unsubscribe the notifications from the subscribeVehicleData function.
+    </description>
+    <param name="appID" type="Integer" mandatory="true">
+      <description>ID of application that requested this RPC.</description>
+    </param>
+    <param name="gps" type="Boolean" mandatory="false">
+      <description>See GPSData</description>
+    </param>
+    <param name="speed" type="Boolean" mandatory="false">
+      <description>The vehicle speed in kilometers per hour</description>
+    </param>
+    <param name="rpm" type="Boolean" mandatory="false">
+      <description>The number of revolutions per minute of the engine</description>
+    </param>
+    <param name="fuelLevel" type="Boolean" mandatory="false">
+      <description>The fuel level in the tank (percentage)</description>
+    </param>
+    <param name="fuelLevel_State" type="Boolean" mandatory="false">
+      <description>The fuel level state</description>
+    </param>
+    <param name="instantFuelConsumption" type="Boolean" mandatory="false">
+      <description>The instantaneous fuel consumption in microlitres</description>
+    </param>
+    <param name="externalTemperature" type="Boolean" mandatory="false">
+      <description>The external temperature in degrees celsius.</description>
+    </param>
+    <param name="prndl" type="Boolean" mandatory="false">
+      <description>See PRNDL</description>
+    </param>
+    <param name="tirePressure" type="Boolean" mandatory="false">
+      <description>See TireStatus</description>
+    </param>
+    <param name="odometer" type="Boolean" mandatory="false">
+      <description>Odometer in km</description>
+    </param>
+    <param name="beltStatus" type="Boolean" mandatory="false">
+      <description>The status of the seat belts</description>
+    </param>
+    <param name="bodyInformation" type="Boolean" mandatory="false">
+      <description>The body information including power modes</description>
+    </param>
+    <param name="deviceStatus" type="Boolean" mandatory="false">
+      <description>The device status including signal and battery strength</description>
+    </param>
+    <param name="driverBraking" type="Boolean" mandatory="false">
+      <description>The status of the brake pedal</description>
+    </param>
+    <param name="wiperStatus" type="Boolean" mandatory="false">
+      <description>The status of the wipers</description>
+    </param>
+    <param name="headLampStatus" type="Boolean" mandatory="false">
+      <description>Status of the head lamps</description>
+    </param>
+    <param name="engineTorque" type="Boolean" mandatory="false">
+      <description>Torque value for engine (in Nm) on non-diesel variants</description>
+    </param>
+    <param name="accPedalPosition" type="Boolean" mandatory="false">
+      <description>Accelerator pedal position (percentage depressed)</description>
+    </param>
+    <param name="steeringWheelAngle" type="Boolean" mandatory="false">
+      <description>Current angle of the steering wheel (in deg)</description>
+    </param>
+    <param name="engineOilLife" type="Boolean" mandatory="false">
+      <description>The estimated percentage of remaining oil life of the engine.</description>
+    </param>
+        <!-- Ford Specific Data Items -->
+    <param name="eCallInfo" type="Boolean" mandatory="false">
+      <description>Emergency Call notification and confirmation data</description>
+    </param>
+    <param name="airbagStatus" type="Boolean" mandatory="false">
+      <description>The status of the air bags</description>
+    </param>
+    <param name="emergencyEvent" type="Boolean" mandatory="false">
+      <description>Information related to an emergency event (and if it occurred)</description>
+    </param>
+    <param name="clusterModeStatus" type="Boolean" mandatory="false">
+      <description>The status modes of the cluster</description>
+    </param>
+    <param name="myKey" type="Boolean" mandatory="false">
+      <description>Information related to the MyKey feature</description>
+    </param>
+        <!-- / Ford Specific Data Items -->
+  </function>
+  <function name="UnsubscribeVehicleData" messagetype="response">
+    <param name="gps" type="Common.VehicleDataResult" mandatory="false">
+      <description>See GPSData</description>
+    </param>
+    <param name="speed" type="Common.VehicleDataResult" mandatory="false">
+      <description>The vehicle speed in kilometers per hour</description>
+    </param>
+    <param name="rpm" type="Common.VehicleDataResult" mandatory="false">
+      <description>The number of revolutions per minute of the engine</description>
+    </param>
+    <param name="fuelLevel" type="Common.VehicleDataResult" mandatory="false">
+      <description>The fuel level in the tank (percentage)</description>
+    </param>
+    <param name="fuelLevel_State" type="Common.VehicleDataResult" mandatory="false">
+      <description>The fuel level state</description>
+    </param>
+    <param name="instantFuelConsumption" type="Common.VehicleDataResult" mandatory="false">
+      <description>The instantaneous fuel consumption in microlitres</description>
+    </param>
+    <param name="externalTemperature" type="Common.VehicleDataResult" mandatory="false">
+      <description>The external temperature in degrees celsius</description>
+    </param>
+    <param name="prndl" type="Common.VehicleDataResult" mandatory="false">
+      <description>See PRNDL</description>
+    </param>
+    <param name="tirePressure" type="Common.VehicleDataResult" mandatory="false">
+      <description>See TireStatus</description>
+    </param>
+    <param name="odometer" type="Common.VehicleDataResult" mandatory="false">
+      <description>Odometer in km</description>
+    </param>
+    <param name="beltStatus" type="Common.VehicleDataResult" mandatory="false">
+      <description>The status of the seat belts</description>
+    </param>
+    <param name="bodyInformation" type="Common.VehicleDataResult" mandatory="false">
+      <description>The body information including power modes</description>
+    </param>
+    <param name="deviceStatus" type="Common.VehicleDataResult" mandatory="false">
+      <description>The device status including signal and battery strength</description>
+    </param>
+    <param name="driverBraking" type="Common.VehicleDataResult" mandatory="false">
+      <description>The status of the brake pedal</description>
+    </param>
+    <param name="wiperStatus" type="Common.VehicleDataResult" mandatory="false">
+      <description>The status of the wipers</description>
+    </param>
+    <param name="headLampStatus" type="Common.VehicleDataResult" mandatory="false">
+      <description>Status of the head lamps</description>
+    </param>
+    <param name="engineTorque" type="Common.VehicleDataResult" mandatory="false">
+      <description>Torque value for engine (in Nm) on non-diesel variants</description>
+    </param>
+    <param name="accPedalPosition" type="Common.VehicleDataResult" mandatory="false">
+      <description>Accelerator pedal position (percentage depressed)</description>
+    </param>
+    <param name="steeringWheelAngle" type="Common.VehicleDataResult" mandatory="false">
+      <description>Current angle of the steering wheel (in deg)</description>
+    </param>
+    <param name="engineOilLife" type="Common.VehicleDataResult" mandatory="false">
+      <description>The estimated percentage of remaining oil life of the engine.</description>
+    </param>
+        <!-- Ford Specific Data Items -->
+    <param name="eCallInfo" type="Common.VehicleDataResult" mandatory="false">
+      <description>Emergency Call notification and confirmation data</description>
+    </param>
+    <param name="airbagStatus" type="Common.VehicleDataResult" mandatory="false">
+      <description>The status of the air bags</description>
+    </param>
+    <param name="emergencyEvent" type="Common.VehicleDataResult" mandatory="false">
+      <description>Information related to an emergency event (and if it occurred)</description>
+    </param>
+    <param name="clusterModes" type="Common.VehicleDataResult" mandatory="false">
+      <description>The status modes of the cluster</description>
+    </param>
+    <param name="myKey" type="Common.VehicleDataResult" mandatory="false">
+      <description>Information related to the MyKey feature</description>
+    </param>
+        <!-- / Ford Specific Data Items -->
+  </function>
+  <function name="GetVehicleData" messagetype="request">
+    <description>Non periodic vehicle data read request.</description>
+    <param name="gps" type="Boolean" mandatory="false">
+      <description>See GPSData</description>
+    </param>
+    <param name="speed" type="Boolean" mandatory="false">
+      <description>The vehicle speed in kilometers per hour</description>
+    </param>
+    <param name="rpm" type="Boolean" mandatory="false">
+      <description>The number of revolutions per minute of the engine</description>
+    </param>
+    <param name="fuelLevel" type="Boolean" mandatory="false">
+      <description>The fuel level in the tank (percentage)</description>
+    </param>
+    <param name="fuelLevel_State" type="Boolean" mandatory="false">
+      <description>The fuel level state</description>
+    </param>
+    <param name="instantFuelConsumption" type="Boolean" mandatory="false">
+      <description>The instantaneous fuel consumption in microlitres</description>
+    </param>
+    <param name="externalTemperature" type="Boolean" mandatory="false">
+      <description>The external temperature in degrees celsius</description>
+    </param>
+    <param name="vin" type="Boolean" mandatory="false">
+      <description>Vehicle identification number</description>
+    </param>
+    <param name="prndl" type="Boolean" mandatory="false">
+      <description>See PRNDL</description>
+    </param>
+    <param name="tirePressure" type="Boolean" mandatory="false">
+      <description>See TireStatus</description>
+    </param>
+    <param name="odometer" type="Boolean" mandatory="false">
+      <description>Odometer in km</description>
+    </param>
+    <param name="beltStatus" type="Boolean" mandatory="false">
+      <description>The status of the seat belts</description>
+    </param>
+    <param name="bodyInformation" type="Boolean" mandatory="false">
+      <description>The body information including ignition status and internal temp</description>
+    </param>
+    <param name="deviceStatus" type="Boolean" mandatory="false">
+      <description>The device status including signal and battery strength</description>
+    </param>
+    <param name="driverBraking" type="Boolean" mandatory="false">
+      <description>The status of the brake pedal</description>
+    </param>
+    <param name="wiperStatus" type="Boolean" mandatory="false">
+      <description>The status of the wipers</description>
+    </param>
+    <param name="headLampStatus" type="Boolean" mandatory="false">
+      <description>Status of the head lamps</description>
+    </param>
+    <param name="engineTorque" type="Boolean" mandatory="false">
+      <description>Torque value for engine (in Nm) on non-diesel variants</description>
+    </param>
+    <param name="accPedalPosition" type="Boolean" mandatory="false">
+      <description>Accelerator pedal position (percentage depressed)</description>
+    </param>
+    <param name="steeringWheelAngle" type="Boolean" mandatory="false">
+      <description>Current angle of the steering wheel (in deg)</description>
+    </param>
+    <param name="engineOilLife" type="Boolean" mandatory="false">
+      <description>The estimated percentage of remaining oil life of the engine.</description>
+    </param>
+    <param name="eCallInfo" type="Boolean" mandatory="false">
+      <description>Emergency Call notification and confirmation data</description>
+    </param>
+    <param name="airbagStatus" type="Boolean" mandatory="false">
+      <description>The status of the air bags</description>
+    </param>
+    <param name="emergencyEvent" type="Boolean" mandatory="false">
+      <description>Information related to an emergency event (and if it occurred)</description>
+    </param>
+    <param name="clusterModeStatus" type="Boolean" mandatory="false">
+      <description>The status modes of the cluster</description>
+    </param>
+    <param name="myKey" type="Boolean" mandatory="false">
       <description>Information related to the MyKey feature</description>
     </param>
   </function>
-<!--end Qt HMI version of GetVehicleData-->
-
-<!--Qt HMI version of OnVehicleData-->
-  <function name="OnGpsData" messagetype="notification">
-    <param name="gps" type="Common.GPSData" mandatory="true">
+  <function name="GetVehicleData" messagetype="response">
+    <param name="gps" type="Common.GPSData" mandatory="false">
       <description>See GPSData</description>
     </param>
-  </function>
-
-  <function name="OnSpeed" messagetype="notification">
-    <param name="speed" type="Float" minvalue="0" maxvalue="700" mandatory="true">
+    <param name="speed" type="Float" minvalue="0" maxvalue="700" mandatory="false">
       <description>The vehicle speed in kilometers per hour</description>
     </param>
-  </function>
-
-  <function name="OnRpm" messagetype="notification">
-    <param name="rpm" type="Integer" minvalue="0" maxvalue="20000" mandatory="true">
+    <param name="rpm" type="Integer" minvalue="0" maxvalue="20000" mandatory="false">
       <description>The number of revolutions per minute of the engine</description>
     </param>
-  </function>
-
-  <function name="OnFuelLevel" messagetype="notification">
-    <param name="fuelLevel" type="Float" minvalue="-6" maxvalue="106" mandatory="true">
+    <param name="fuelLevel" type="Float" minvalue="-6" maxvalue="106" mandatory="false">
       <description>The fuel level in the tank (percentage)</description>
     </param>
-  </function>
-
-  <function name="OnFuelLevelState" messagetype="notification">
-    <param name="fuelLevel_State" type="Common.ComponentVolumeStatus" mandatory="true">
+    <param name="fuelLevel_State" type="Common.ComponentVolumeStatus" mandatory="false">
       <description>The fuel level state</description>
     </param>
-  </function>
-
-  <function name="OnInstantFuelConsumption" messagetype="notification">
-    <param name="instantFuelConsumption" type="Float" minvalue="0" maxvalue="25575" mandatory="true">
+    <param name="instantFuelConsumption" type="Float" minvalue="0" maxvalue="25575" mandatory="false">
       <description>The instantaneous fuel consumption in microlitres</description>
     </param>
-  </function>
-
-  <function name="OnExternalTemperature" messagetype="notification">
-    <param name="externalTemperature" type="Float" minvalue="-40" maxvalue="100" mandatory="true">
+    <param name="externalTemperature" type="Float" minvalue="-40" maxvalue="100" mandatory="false">
       <description>The external temperature in degrees celsius</description>
     </param>
+    <param name="vin" type="String" maxlength="17" mandatory="false">
+      <description>Vehicle identification number</description>
+    </param>
+    <param name="prndl" type="Common.PRNDL" mandatory="false">
+      <description>See PRNDL</description>
+    </param>
+    <param name="tirePressure" type="Common.TireStatus" mandatory="false">
+      <description>See TireStatus</description>
+    </param>
+    <param name="odometer" type="Integer" minvalue="0" maxvalue="17000000" mandatory="false">
+      <description>Odometer in km</description>
+    </param>
+    <param name="beltStatus" type="Common.BeltStatus" mandatory="false">
+      <description>The status of the seat belts</description>
+    </param>
+    <param name="bodyInformation" type="Common.BodyInformation" mandatory="false">
+      <description>The body information including power modes</description>
+    </param>
+    <param name="deviceStatus" type="Common.DeviceStatus" mandatory="false">
+      <description>The device status including signal and battery strength</description>
+    </param>
+    <param name="driverBraking" type="Common.VehicleDataEventStatus" mandatory="false">
+      <description>The status of the brake pedal</description>
+    </param>
+    <param name="wiperStatus" type="Common.WiperStatus" mandatory="false">
+      <description>The status of the wipers</description>
+    </param>
+    <param name="headLampStatus" type="Common.HeadLampStatus" mandatory="false">
+      <description>Status of the head lamps</description>
+    </param>
+    <param name="engineTorque" type="Float" minvalue="-1000" maxvalue="2000" mandatory="false">
+      <description>Torque value for engine (in Nm) on non-diesel variants</description>
+    </param>
+    <param name="accPedalPosition" type="Float" minvalue="0" maxvalue="100" mandatory="false">
+      <description>Accelerator pedal position (percentage depressed)</description>
+    </param>
+    <param name="steeringWheelAngle" type="Float" minvalue="-2000" maxvalue="2000" mandatory="false">
+      <description>Current angle of the steering wheel (in deg)</description>
+    </param>
+    <param name="engineOilLife" type="Float" minvalue="0" maxvalue="100" mandatory="false">
+      <description>The estimated percentage of remaining oil life of the engine.</description>
+    </param>
+    <param name="eCallInfo" type="Common.ECallInfo" mandatory="false">
+      <description>Emergency Call notification and confirmation data</description>
+    </param>
+    <param name="airbagStatus" type="Common.AirbagStatus" mandatory="false">
+      <description>The status of the air bags</description>
+    </param>
+    <param name="emergencyEvent" type="Common.EmergencyEvent" mandatory="false">
+      <description>Information related to an emergency event (and if it occurred)</description>
+    </param>
+    <param name="clusterModeStatus" type="Common.ClusterModeStatus" mandatory="false">
+      <description>The status modes of the cluster</description>
+    </param>
+    <param name="myKey" type="Common.MyKey" mandatory="false">
+      <description>Information related to the MyKey feature</description>
+    </param>
   </function>
-
-  <function name="OnVin" messagetype="notification">
-    <param name="vin" type="String" maxlength="17" mandatory="true">
+  <function name="OnVehicleData" messagetype="notification">
+    <description>Callback for the periodic and non periodic vehicle data read function.</description>
+    <param name="gps" type="Common.GPSData" mandatory="false">
+      <description>See GPSData</description>
+    </param>
+    <param name="speed" type="Float" minvalue="0" maxvalue="700" mandatory="false">
+      <description>The vehicle speed in kilometers per hour</description>
+    </param>
+    <param name="rpm" type="Integer" minvalue="0" maxvalue="20000" mandatory="false">
+      <description>The number of revolutions per minute of the engine</description>
+    </param>
+    <param name="fuelLevel" type="Float" minvalue="-6" maxvalue="106" mandatory="false">
+      <description>The fuel level in the tank (percentage)</description>
+    </param>
+    <param name="fuelLevel_State" type="Common.ComponentVolumeStatus" mandatory="false">
+      <description>The fuel level state</description>
+    </param>
+    <param name="instantFuelConsumption" type="Float" minvalue="0" maxvalue="25575" mandatory="false">
+      <description>The instantaneous fuel consumption in microlitres</description>
+    </param>
+    <param name="externalTemperature" type="Float" minvalue="-40" maxvalue="100" mandatory="false">
+      <description>The external temperature in degrees celsius</description>
+    </param>
+    <param name="vin" type="String" maxlength="17" mandatory="false">
       <description>Vehicle identification number.</description>
     </param>
-  </function>
-
-  <function name="OnPrndl" messagetype="notification">
-    <param name="prndl" type="Common.PRNDL" mandatory="true">
+    <param name="prndl" type="Common.PRNDL" mandatory="false">
       <description>See PRNDL</description>
     </param>
-  </function>
-
-  <function name="OnTirePressure" messagetype="notification">
-    <param name="tirePressure" type="Common.TireStatus" mandatory="true">
+    <param name="tirePressure" type="Common.TireStatus" mandatory="false">
       <description>See TireStatus</description>
     </param>
-  </function>
-
-  <function name="OnOdometer" messagetype="notification">
-    <param name="odometer" type="Integer" minvalue="0" maxvalue="2000000" mandatory="true">
+    <param name="odometer" type="Integer" minvalue="0" maxvalue="17000000" mandatory="false">
       <description>Odometer in km</description>
     </param>
-  </function>
-
-  <function name="OnBeltStatus" messagetype="notification">
-    <param name="beltStatus" type="Common.BeltStatus" mandatory="true">
+    <param name="beltStatus" type="Common.BeltStatus" mandatory="false">
       <description>The status of the seat belts</description>
     </param>
-  </function>
-
-  <function name="OnBodyInformation" messagetype="notification">
-    <param name="bodyInformation" type="Common.BodyInformation" mandatory="true">
+    <param name="bodyInformation" type="Common.BodyInformation" mandatory="false">
       <description>The body information including power modes</description>
     </param>
-  </function>
-
-  <function name="OnDeviceStatus" messagetype="notification">
-    <param name="deviceStatus" type="Common.DeviceStatus" mandatory="true">
+    <param name="deviceStatus" type="Common.DeviceStatus" mandatory="false">
       <description>The device status including signal and battery strength</description>
     </param>
-  </function>
-
-  <function name="OnDriverBraking" messagetype="notification">
-    <param name="driverBraking" type="Common.VehicleDataEventStatus" mandatory="true">
+    <param name="driverBraking" type="Common.VehicleDataEventStatus" mandatory="false">
       <description>The status of the brake pedal</description>
     </param>
-  </function>
-
-  <function name="OnWiperStatus" messagetype="notification">
-    <param name="wiperStatus" type="Common.WiperStatus" mandatory="true">
+    <param name="wiperStatus" type="Common.WiperStatus" mandatory="false">
       <description>The status of the wipers</description>
     </param>
-  </function>
-
-  <function name="OnHeadLampStatus" messagetype="notification">
-    <param name="headLampStatus" type="Common.HeadLampStatus" mandatory="true">
+    <param name="headLampStatus" type="Common.HeadLampStatus" mandatory="false">
       <description>Status of the head lamps</description>
     </param>
-  </function>
-
-  <function name="OnEngineTorque" messagetype="notification">
-    <param name="engineTorque" type="Float" minvalue="-1000" maxvalue="2000" mandatory="true">
+    <param name="engineTorque" type="Float" minvalue="-1000" maxvalue="2000" mandatory="false">
       <description>Torque value for engine (in Nm) on non-diesel variants</description>
     </param>
-  </function>
-
-  <function name="OnAccPedalPosition" messagetype="notification">
-    <param name="accPedalPosition" type="Float" minvalue="0" maxvalue="100" mandatory="true">
+    <param name="accPedalPosition" type="Float" minvalue="0" maxvalue="100" mandatory="false">
       <description>Accelerator pedal position (percentage depressed)</description>
     </param>
-  </function>
-
-  <function name="OnSteeringWheelAngle" messagetype="notification">
-    <param name="steeringWheelAngle" type="Float" minvalue="-2000" maxvalue="2000" mandatory="true">
+    <param name="steeringWheelAngle" type="Float" minvalue="-2000" maxvalue="2000" mandatory="false">
       <description>Current angle of the steering wheel (in deg)</description>
     </param>
-  </function>
-
-  <function name="OnMyKey" messagetype="notification">
-    <param name="myKey" type="Common.MyKey" mandatory="true">
-      <description>Information related to the MyKey feature</description>
-    </param>
-  </function>
-<!--end Qt HMI version of OnVehicleData-->
-
-<!--Qt HMI version of SubscribeVehicleData/UnsubscribeVehicleData-->
-  <function name="SubscribeGps" messagetype="request">
-    <param name="appID" type="Integer" mandatory="true">
-      <description>ID of application requested this RPC.</description>
-    </param>
-  </function>
-  <function name="SubscribeGps" messagetype="response">
-    <param name="gps" type="Common.VehicleDataResult" mandatory="true">
-      <description>See GPSData</description>
-    </param>
-  </function>
-  <function name="UnsubscribeGps" messagetype="request">
-    <param name="appID" type="Integer" mandatory="true">
-      <description>ID of application requested this RPC.</description>
-    </param>
-  </function>
-  <function name="UnsubscribeGps" messagetype="response">
-    <param name="gps" type="Common.VehicleDataResult" mandatory="true">
-      <description>See GPSData</description>
-    </param>
-  </function>
-
-  <function name="SubscribeSpeed" messagetype="request">
-    <param name="appID" type="Integer" mandatory="true">
-      <description>ID of application requested this RPC.</description>
-    </param>
-  </function>
-  <function name="SubscribeSpeed" messagetype="response">
-    <param name="speed" type="Common.VehicleDataResult" mandatory="true">
-      <description>The vehicle speed in kilometers per hour</description>
-    </param>
-  </function>
-  <function name="UnsubscribeSpeed" messagetype="request">
-    <param name="appID" type="Integer" mandatory="true">
-      <description>ID of application requested this RPC.</description>
-    </param>
-  </function>
-  <function name="UnsubscribeSpeed" messagetype="response">
-    <param name="speed" type="Common.VehicleDataResult" mandatory="true">
-      <description>The vehicle speed in kilometers per hour</description>
-    </param>
-  </function>
-
-  <function name="SubscribeRpm" messagetype="request">
-    <param name="appID" type="Integer" mandatory="true">
-      <description>ID of application requested this RPC.</description>
-    </param>
-  </function>
-  <function name="SubscribeRpm" messagetype="response">
-    <param name="rpm" type="Common.VehicleDataResult" mandatory="true">
-      <description>The number of revolutions per minute of the engine</description>
-    </param>
-  </function>
-  <function name="UnsubscribeRpm" messagetype="request">
-    <param name="appID" type="Integer" mandatory="true">
-      <description>ID of application requested this RPC.</description>
-    </param>
-  </function>
-  <function name="UnsubscribeRpm" messagetype="response">
-    <param name="rpm" type="Common.VehicleDataResult" mandatory="true">
-      <description>The number of revolutions per minute of the engine</description>
-    </param>
-  </function>
-
-  <function name="SubscribeFuelLevel" messagetype="request">
-    <param name="appID" type="Integer" mandatory="true">
-      <description>ID of application requested this RPC.</description>
-    </param>
-  </function>
-  <function name="SubscribeFuelLevel" messagetype="response">
-    <param name="fuelLevel" type="Common.VehicleDataResult" mandatory="true">
-      <description>The fuel level in the tank (percentage)</description>
-    </param>
-  </function>
-  <function name="UnsubscribeFuelLevel" messagetype="request">
-    <param name="appID" type="Integer" mandatory="true">
-      <description>ID of application requested this RPC.</description>
-    </param>
-  </function>
-  <function name="UnsubscribeFuelLevel" messagetype="response">
-    <param name="fuelLevel" type="Common.VehicleDataResult" mandatory="true">
-      <description>The fuel level in the tank (percentage)</description>
-    </param>
-  </function>
-
-  <function name="SubscribeFuelLevel_State" messagetype="request">
-    <param name="appID" type="Integer" mandatory="true">
-      <description>ID of application requested this RPC.</description>
-    </param>
-  </function>
-  <function name="SubscribeFuelLevel_State" messagetype="response">
-    <param name="fuelLevel_State" type="Common.VehicleDataResult" mandatory="true">
-      <description>The fuel level state</description>
-    </param>
-  </function>
-  <function name="UnsubscribeFuelLevel_State" messagetype="request">
-    <param name="appID" type="Integer" mandatory="true">
-      <description>ID of application requested this RPC.</description>
-    </param>
-  </function>
-  <function name="UnsubscribeFuelLevel_State" messagetype="response">
-    <param name="fuelLevel_State" type="Common.VehicleDataResult" mandatory="true">
-      <description>The fuel level state</description>
-    </param>
-  </function>
-
-  <function name="SubscribeInstantFuelConsumption" messagetype="request">
-    <param name="appID" type="Integer" mandatory="true">
-      <description>ID of application requested this RPC.</description>
-    </param>
-  </function>
-  <function name="SubscribeInstantFuelConsumption" messagetype="response">
-    <param name="instantFuelConsumption" type="Common.VehicleDataResult" mandatory="true">
-      <description>The instantaneous fuel consumption in microlitres</description>
-    </param>
-  </function>
-  <function name="UnsubscribeInstantFuelConsumption" messagetype="request">
-    <param name="appID" type="Integer" mandatory="true">
-      <description>ID of application requested this RPC.</description>
-    </param>
-  </function>
-  <function name="UnsubscribeInstantFuelConsumption" messagetype="response">
-    <param name="instantFuelConsumption" type="Common.VehicleDataResult" mandatory="true">
-      <description>The instantaneous fuel consumption in microlitres</description>
-    </param>
-  </function>
-
-  <function name="SubscribeExternalTemperature" messagetype="request">
-    <param name="appID" type="Integer" mandatory="true">
-      <description>ID of application requested this RPC.</description>
-    </param>
-  </function>
-  <function name="SubscribeExternalTemperature" messagetype="response">
-    <param name="externalTemperature" type="Common.VehicleDataResult" mandatory="true">
-      <description>The external temperature in degrees celsius</description>
-    </param>
-  </function>
-  <function name="UnsubscribeExternalTemperature" messagetype="request">
-    <param name="appID" type="Integer" mandatory="true">
-      <description>ID of application requested this RPC.</description>
-    </param>
-  </function>
-  <function name="UnsubscribeExternalTemperature" messagetype="response">
-    <param name="externalTemperature" type="Common.VehicleDataResult" mandatory="true">
-      <description>The external temperature in degrees celsius</description>
-    </param>
-  </function>
-
-  <function name="SubscribePrndl" messagetype="request">
-    <param name="appID" type="Integer" mandatory="true">
-      <description>ID of application requested this RPC.</description>
-    </param>
-  </function>
-  <function name="SubscribePrndl" messagetype="response">
-    <param name="prndl" type="Common.VehicleDataResult" mandatory="true">
-      <description>See PRNDL</description>
-    </param>
-  </function>
-  <function name="UnsubscribePrndl" messagetype="request">
-    <param name="appID" type="Integer" mandatory="true">
-      <description>ID of application requested this RPC.</description>
-    </param>
-  </function>
-  <function name="UnsubscribePrndl" messagetype="response">
-    <param name="prndl" type="Common.VehicleDataResult" mandatory="true">
-      <description>See PRNDL</description>
-    </param>
-  </function>
-
-  <function name="SubscribeVin" messagetype="request">
-    <param name="appID" type="Integer" mandatory="true">
-      <description>ID of application requested this RPC.</description>
-    </param>
-  </function>
-  <function name="SubscribeVin" messagetype="response">
-    <param name="vin" type="String" maxlength="17" mandatory="true">
-      <description>Vehicle identification number</description>
-    </param>
-  </function>
-  <function name="UnsubscribeVin" messagetype="request">
-    <param name="appID" type="Integer" mandatory="true">
-      <description>ID of application requested this RPC.</description>
-    </param>
-  </function>
-  <function name="UnsubscribeVin" messagetype="response">
-    <param name="vin" type="String" maxlength="17" mandatory="true">
-      <description>Vehicle identification number</description>
-    </param>
-  </function>
-
-  <function name="SubscribeTirePressure" messagetype="request">
-    <param name="appID" type="Integer" mandatory="true">
-      <description>ID of application requested this RPC.</description>
-    </param>
-  </function>
-  <function name="SubscribeTirePressure" messagetype="response">
-    <param name="tirePressure" type="Common.VehicleDataResult" mandatory="true">
-      <description>See TireStatus</description>
-    </param>
-  </function>
-  <function name="UnsubscribeTirePressure" messagetype="request">
-    <param name="appID" type="Integer" mandatory="true">
-      <description>ID of application requested this RPC.</description>
-    </param>
-  </function>
-  <function name="UnsubscribeTirePressure" messagetype="response">
-    <param name="tirePressure" type="Common.VehicleDataResult" mandatory="true">
-      <description>See TireStatus</description>
-    </param>
-  </function>
-
-  <function name="SubscribeOdometer" messagetype="request">
-    <param name="appID" type="Integer" mandatory="true">
-      <description>ID of application requested this RPC.</description>
-    </param>
-  </function>
-  <function name="SubscribeOdometer" messagetype="response">
-    <param name="odometer" type="Common.VehicleDataResult" mandatory="true">
-      <description>Odometer in km</description>
-    </param>
-  </function>
-  <function name="UnsubscribeOdometer" messagetype="request">
-    <param name="appID" type="Integer" mandatory="true">
-      <description>ID of application requested this RPC.</description>
-    </param>
-  </function>
-  <function name="UnsubscribeOdometer" messagetype="response">
-    <param name="odometer" type="Common.VehicleDataResult" mandatory="true">
-      <description>Odometer in km</description>
-    </param>
-  </function>
-
-  <function name="SubscribeBeltStatus" messagetype="request">
-    <param name="appID" type="Integer" mandatory="true">
-      <description>ID of application requested this RPC.</description>
-    </param>
-  </function>
-  <function name="SubscribeBeltStatus" messagetype="response">
-    <param name="beltStatus" type="Common.VehicleDataResult" mandatory="true">
-      <description>The status of the seat belts</description>
-    </param>
-  </function>
-  <function name="UnsubscribeBeltStatus" messagetype="request">
-    <param name="appID" type="Integer" mandatory="true">
-      <description>ID of application requested this RPC.</description>
-    </param>
-  </function>
-  <function name="UnsubscribeBeltStatus" messagetype="response">
-    <param name="beltStatus" type="Common.VehicleDataResult" mandatory="true">
-      <description>The status of the seat belts</description>
-    </param>
-  </function>
-
-  <function name="SubscribeBodyInformation" messagetype="request">
-    <param name="appID" type="Integer" mandatory="true">
-      <description>ID of application requested this RPC.</description>
-    </param>
-  </function>
-  <function name="SubscribeBodyInformation" messagetype="response">
-    <param name="bodyInformation" type="Common.VehicleDataResult" mandatory="true">
-      <description>The body information including power modes</description>
-    </param>
-  </function>
-  <function name="UnsubscribeBodyInformation" messagetype="request">
-    <param name="appID" type="Integer" mandatory="true">
-      <description>ID of application requested this RPC.</description>
-    </param>
-  </function>
-  <function name="UnsubscribeBodyInformation" messagetype="response">
-    <param name="bodyInformation" type="Common.VehicleDataResult" mandatory="true">
-      <description>The body information including power modes</description>
-    </param>
-  </function>
-
-  <function name="SubscribeDeviceStatus" messagetype="request">
-    <param name="appID" type="Integer" mandatory="true">
-      <description>ID of application requested this RPC.</description>
-    </param>
-  </function>
-  <function name="SubscribeDeviceStatus" messagetype="response">
-    <param name="deviceStatus" type="Common.VehicleDataResult" mandatory="true">
-      <description>The device status including signal and battery strength</description>
-    </param>
-  </function>
-  <function name="UnsubscribeDeviceStatus" messagetype="request">
-    <param name="appID" type="Integer" mandatory="true">
-      <description>ID of application requested this RPC.</description>
-    </param>
-  </function>
-  <function name="UnsubscribeDeviceStatus" messagetype="response">
-    <param name="deviceStatus" type="Common.VehicleDataResult" mandatory="true">
-      <description>The device status including signal and battery strength</description>
-    </param>
-  </function>
-
-  <function name="SubscribeDriverBraking" messagetype="request">
-    <param name="appID" type="Integer" mandatory="true">
-      <description>ID of application requested this RPC.</description>
-    </param>
-  </function>
-  <function name="SubscribeDriverBraking" messagetype="response">
-    <param name="driverBraking" type="Common.VehicleDataResult" mandatory="true">
-      <description>The status of the brake pedal</description>
-    </param>
-  </function>
-  <function name="UnsubscribeDriverBraking" messagetype="request">
-    <param name="appID" type="Integer" mandatory="true">
-      <description>ID of application requested this RPC.</description>
-    </param>
-  </function>
-  <function name="UnsubscribeDriverBraking" messagetype="response">
-    <param name="driverBraking" type="Common.VehicleDataResult" mandatory="true">
-      <description>The status of the brake pedal</description>
-    </param>
-  </function>
-
-  <function name="SubscribeWiperStatus" messagetype="request">
-    <param name="appID" type="Integer" mandatory="true">
-      <description>ID of application requested this RPC.</description>
-    </param>
-  </function>
-  <function name="SubscribeWiperStatus" messagetype="response">
-    <param name="wiperStatus" type="Common.VehicleDataResult" mandatory="true">
-      <description>The status of the wipers</description>
-    </param>
-  </function>
-  <function name="UnsubscribeWiperStatus" messagetype="request">
-    <param name="appID" type="Integer" mandatory="true">
-      <description>ID of application requested this RPC.</description>
-    </param>
-  </function>
-  <function name="UnsubscribeWiperStatus" messagetype="response">
-    <param name="wiperStatus" type="Common.VehicleDataResult" mandatory="true">
-      <description>The status of the wipers</description>
-    </param>
-  </function>
-
-  <function name="SubscribeHeadLampStatus" messagetype="request">
-    <param name="appID" type="Integer" mandatory="true">
-      <description>ID of application requested this RPC.</description>
-    </param>
-  </function>
-  <function name="SubscribeHeadLampStatus" messagetype="response">
-    <param name="headLampStatus" type="Common.VehicleDataResult" mandatory="true">
-      <description>Status of the head lamps</description>
-    </param>
-  </function>
-  <function name="UnsubscribeHeadLampStatus" messagetype="request">
-    <param name="appID" type="Integer" mandatory="true">
-      <description>ID of application requested this RPC.</description>
-    </param>
-  </function>
-  <function name="UnsubscribeHeadLampStatus" messagetype="response">
-    <param name="headLampStatus" type="Common.VehicleDataResult" mandatory="true">
-      <description>Status of the head lamps</description>
-    </param>
-  </function>
-
-  <function name="SubscribeEngineTorque" messagetype="request">
-    <param name="appID" type="Integer" mandatory="true">
-      <description>ID of application requested this RPC.</description>
-    </param>
-  </function>
-  <function name="SubscribeEngineTorque" messagetype="response">
-    <param name="engineTorque" type="Common.VehicleDataResult" mandatory="true">
-      <description>Torque value for engine (in Nm) on non-diesel variants</description>
-    </param>
-  </function>
-  <function name="UnsubscribeEngineTorque" messagetype="request">
-    <param name="appID" type="Integer" mandatory="true">
-      <description>ID of application requested this RPC.</description>
-    </param>
-  </function>
-  <function name="UnsubscribeEngineTorque" messagetype="response">
-    <param name="engineTorque" type="Common.VehicleDataResult" mandatory="true">
-      <description>Torque value for engine (in Nm) on non-diesel variants</description>
-    </param>
-  </function>
-
-  <function name="SubscribeAccPedalPosition" messagetype="request">
-    <param name="appID" type="Integer" mandatory="true">
-      <description>ID of application requested this RPC.</description>
-    </param>
-  </function>
-  <function name="SubscribeAccPedalPosition" messagetype="response">
-    <param name="accPedalPosition" type="Common.VehicleDataResult" mandatory="true">
-      <description>Accelerator pedal position (percentage depressed)</description>
-    </param>
-  </function>
-  <function name="UnsubscribeAccPedalPosition" messagetype="request">
-    <param name="appID" type="Integer" mandatory="true">
-      <description>ID of application requested this RPC.</description>
-    </param>
-  </function>
-  <function name="UnsubscribeAccPedalPosition" messagetype="response">
-    <param name="accPedalPosition" type="Common.VehicleDataResult" mandatory="true">
-      <description>Accelerator pedal position (percentage depressed)</description>
-    </param>
-  </function>
-
-  <function name="SubscribeSteeringWheelAngle" messagetype="request">
-    <param name="appID" type="Integer" mandatory="true">
-      <description>ID of application requested this RPC.</description>
-    </param>
-  </function>
-  <function name="SubscribeSteeringWheelAngle" messagetype="response">
-    <param name="steeringWheelAngle" type="Common.VehicleDataResult" mandatory="true">
-      <description>Current angle of the steering wheel (in deg)</description>
-    </param>
-  </function>
-  <function name="UnsubscribeSteeringWheelAngle" messagetype="request">
-    <param name="appID" type="Integer" mandatory="true">
-      <description>ID of application requested this RPC.</description>
-    </param>
-  </function>
-  <function name="UnsubscribeSteeringWheelAngle" messagetype="response">
-    <param name="steeringWheelAngle" type="Common.VehicleDataResult" mandatory="true">
-      <description>Current angle of the steering wheel (in deg)</description>
-    </param>
-  </function>
-
-  <function name="SubscribeECallInfo" messagetype="request">
-    <param name="appID" type="Integer" mandatory="true">
-      <description>ID of application requested this RPC.</description>
-    </param>
-  </function>
-  <function name="SubscribeECallInfo" messagetype="response">
-    <param name="eCallInfo" type="Common.VehicleDataResult" mandatory="true">
+    <param name="eCallInfo" type="Common.ECallInfo" mandatory="false">
       <description>Emergency Call notification and confirmation data</description>
     </param>
-  </function>
-  <function name="UnsubscribeECallInfo" messagetype="request">
-    <param name="appID" type="Integer" mandatory="true">
-      <description>ID of application requested this RPC.</description>
-    </param>
-  </function>
-  <function name="UnsubscribeECallInfo" messagetype="response">
-    <param name="eCallInfo" type="Common.VehicleDataResult" mandatory="true">
-      <description>Emergency Call notification and confirmation data</description>
-    </param>
-  </function>
-
-  <function name="SubscribeAirbagStatus" messagetype="request">
-    <param name="appID" type="Integer" mandatory="true">
-      <description>ID of application requested this RPC.</description>
-    </param>
-  </function>
-  <function name="SubscribeAirbagStatus" messagetype="response">
-    <param name="airbagStatus" type="Common.VehicleDataResult" mandatory="true">
+    <param name="airbagStatus" type="Common.AirbagStatus" mandatory="false">
       <description>The status of the air bags</description>
     </param>
-  </function>
-  <function name="UnsubscribeAirbagStatus" messagetype="request">
-    <param name="appID" type="Integer" mandatory="true">
-      <description>ID of application requested this RPC.</description>
-    </param>
-  </function>
-  <function name="UnsubscribeAirbagStatus" messagetype="response">
-    <param name="airbagStatus" type="Common.VehicleDataResult" mandatory="true">
-      <description>The status of the air bags</description>
-    </param>
-  </function>
-
-  <function name="SubscribeEmergencyEvent" messagetype="request">
-    <param name="appID" type="Integer" mandatory="true">
-      <description>ID of application requested this RPC.</description>
-    </param>
-  </function>
-  <function name="SubscribeEmergencyEvent" messagetype="response">
-    <param name="emergencyEvent" type="Common.VehicleDataResult" mandatory="true">
+    <param name="emergencyEvent" type="Common.EmergencyEvent" mandatory="false">
       <description>Information related to an emergency event (and if it occurred)</description>
     </param>
-  </function>
-  <function name="UnsubscribeEmergencyEvent" messagetype="request">
-    <param name="appID" type="Integer" mandatory="true">
-      <description>ID of application requested this RPC.</description>
-    </param>
-  </function>
-  <function name="UnsubscribeEmergencyEvent" messagetype="response">
-    <param name="emergencyEvent" type="Common.VehicleDataResult" mandatory="true">
-      <description>Information related to an emergency event (and if it occurred)</description>
-    </param>
-  </function>
-
-  <function name="SubscribeClusterModeStatus" messagetype="request">
-    <param name="appID" type="Integer" mandatory="true">
-      <description>ID of application requested this RPC.</description>
-    </param>
-  </function>
-  <function name="SubscribeClusterModeStatus" messagetype="response">
-    <param name="clusterModeStatus" type="Common.VehicleDataResult" mandatory="true">
+    <param name="clusterModeStatus" type="Common.ClusterModeStatus" mandatory="false">
       <description>The status modes of the cluster</description>
     </param>
-  </function>
-  <function name="UnsubscribeClusterModeStatus" messagetype="request">
-    <param name="appID" type="Integer" mandatory="true">
-      <description>ID of application requested this RPC.</description>
-    </param>
-  </function>
-  <function name="UnsubscribeClusterModeStatus" messagetype="response">
-    <param name="clusterModeStatus" type="Common.VehicleDataResult" mandatory="true">
-      <description>The status modes of the cluster</description>
-    </param>
-  </function>
-
-  <function name="SubscribeMyKey" messagetype="request">
-    <param name="appID" type="Integer" mandatory="true">
-      <description>ID of application requested this RPC.</description>
-    </param>
-  </function>
-  <function name="SubscribeMyKey" messagetype="response">
-    <param name="myKey" type="Common.VehicleDataResult" mandatory="true">
+    <param name="myKey" type="Common.MyKey" mandatory="false">
       <description>Information related to the MyKey feature</description>
     </param>
   </function>
-  <function name="UnsubscribeMyKey" messagetype="request">
-    <param name="appID" type="Integer" mandatory="true">
-      <description>ID of application requested this RPC.</description>
-    </param>
-  </function>
-  <function name="UnsubscribeMyKey" messagetype="response">
-    <param name="myKey" type="Common.VehicleDataResult" mandatory="true">
-      <description>Information related to the MyKey feature</description>
-    </param>
-  </function>
-<!--end Qt HMI version of SubscribeVehicleData/UnsubscribeVehicleData-->
 
 </interface>
 </interfaces>

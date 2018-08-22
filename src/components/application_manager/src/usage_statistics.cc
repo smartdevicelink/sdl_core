@@ -35,7 +35,6 @@
 #include "smart_objects/enum_schema_item.h"
 #include "policy/usage_statistics/statistics_manager.h"
 #include "utils/macro.h"
-#include "utils/make_shared.h"
 
 using namespace mobile_apis;
 using namespace NsSmartDeviceLink::NsSmartObjects;
@@ -56,7 +55,7 @@ std::string LanguageIdToString(Language::eType lang_id) {
 
 UsageStatistics::UsageStatistics(
     const std::string& app_id,
-    utils::SharedPtr<StatisticsManager> statistics_manager)
+    std::shared_ptr<StatisticsManager> statistics_manager)
     : time_in_hmi_state_sptr_(
           new usage_statistics::AppStopwatchImpl(statistics_manager, app_id))
     , app_registration_language_gui_(statistics_manager, app_id, LANGUAGE_GUI)
@@ -70,13 +69,15 @@ UsageStatistics::UsageStatistics(
           statistics_manager, app_id, RUN_ATTEMPTS_WHILE_REVOKED)
     , count_of_removals_for_bad_behavior_(
           statistics_manager, app_id, REMOVALS_MISBEHAVED)
-    , count_of_tls_error_(statistics_manager, app_id, COUNT_OF_TLS_ERRORS) {
+    , count_of_tls_error_(statistics_manager, app_id, COUNT_OF_TLS_ERRORS)
+    , count_of_rejections_sync_out_of_memory_(
+          statistics_manager, app_id, REJECTIONS_SYNC_OUT_OF_MEMORY) {
   time_in_hmi_state_sptr_->Start(SECONDS_HMI_NONE);
 }
 
 UsageStatistics::UsageStatistics(
     const std::string& app_id,
-    utils::SharedPtr<StatisticsManager> statistics_manager,
+    std::shared_ptr<StatisticsManager> statistics_manager,
     AppStopwatch* time_in_hmi_state_ptr)
     : time_in_hmi_state_sptr_(time_in_hmi_state_ptr)
     , app_registration_language_gui_(statistics_manager, app_id, LANGUAGE_GUI)
@@ -90,7 +91,9 @@ UsageStatistics::UsageStatistics(
           statistics_manager, app_id, RUN_ATTEMPTS_WHILE_REVOKED)
     , count_of_removals_for_bad_behavior_(
           statistics_manager, app_id, REMOVALS_MISBEHAVED)
-    , count_of_tls_error_(statistics_manager, app_id, COUNT_OF_TLS_ERRORS) {
+    , count_of_tls_error_(statistics_manager, app_id, COUNT_OF_TLS_ERRORS)
+    , count_of_rejections_sync_out_of_memory_(
+          statistics_manager, app_id, REJECTIONS_SYNC_OUT_OF_MEMORY) {
   DCHECK(time_in_hmi_state_sptr_.get());
   time_in_hmi_state_sptr_->Start(SECONDS_HMI_NONE);
 }
@@ -124,7 +127,7 @@ void UsageStatistics::RecordAppRegistrationGuiLanguage(
 
 void UsageStatistics::RecordAppRegistrationVuiLanguage(
     Language::eType vui_language) {
-  app_registration_language_gui_.Update(LanguageIdToString(vui_language));
+  app_registration_language_vui_.Update(LanguageIdToString(vui_language));
 }
 
 void UsageStatistics::RecordRpcSentInHMINone() {
@@ -149,6 +152,10 @@ void UsageStatistics::RecordRemovalsForBadBehavior() {
 
 void UsageStatistics::RecordTLSError() {
   ++count_of_tls_error_;
+}
+
+void UsageStatistics::RecordRejectionsSyncOutOfMemory() {
+  ++count_of_rejections_sync_out_of_memory_;
 }
 
 }  // namespace application_manager

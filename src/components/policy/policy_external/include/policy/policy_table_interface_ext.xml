@@ -1,0 +1,287 @@
+<?xml version="1.0" standalone="no"?>
+<?xml-stylesheet type="text/xml" href="protocol2html.xsl"?>
+
+<interface name="policy table interface base" version="0.0"
+    date="2014-01-23">
+
+    <!-- Common parameters start -->
+    <enum name="Priority">
+        <element name="EMERGENCY" />
+        <element name="NAVIGATION" />
+        <element name="VOICECOM" />
+        <element name="COMMUNICATION" />
+        <element name="NORMAL" />
+        <element name="NONE" />
+    </enum>
+
+    <enum name="HmiLevel">
+        <element name="BACKGROUND" />
+        <element name="FULL" />
+        <element name="LIMITED" />
+        <element name="NONE" />
+    </enum>
+
+    <enum name="Parameter">
+        <element name="gps" />
+        <element name="speed" />
+        <element name="engineTorque" />
+        <element name="externalTemperature" />
+        <element name="turnSignal" />
+        <element name="fuelLevel" />
+        <element name="fuelLevel_State" />
+        <element name="headLampStatus" />
+        <element name="instantFuelConsumption" />
+        <element name="fuelRange" />
+        <element name="odometer" />
+        <element name="tirePressure" />
+        <element name="wiperStatus" />
+        <element name="vin" />
+        <element name="accPedalPosition" />
+        <element name="beltStatus" />
+        <element name="electronicParkBrakeStatus" />
+        <element name="driverBraking" />
+        <element name="prndl" />
+        <element name="rpm" />
+        <element name="steeringWheelAngle" />
+        <element name="engineOilLife" />
+        <element name="myKey" />
+        <element name="airbagStatus" />
+        <element name="bodyInformation" />
+        <element name="clusterModeStatus" />
+        <element name="deviceStatus" />
+        <element name="emergencyEvent" />
+        <element name="eCallInfo" />
+        <element name="abs_State" />
+        <element name="turnSignal" />
+        <element name="fuelRange" />
+        <element name="tirePressureValue" />
+        <element name="tpms" />
+    </enum>
+
+    <enum name="AppHMIType">
+        <element name="DEFAULT" />
+        <element name="COMMUNICATION" />
+        <element name="MEDIA" />
+        <element name="MESSAGING" />
+        <element name="NAVIGATION" />
+        <element name="INFORMATION" />
+        <element name="SOCIAL" />
+        <element name="BACKGROUND_PROCESS" />
+        <element name="TESTING" />
+        <element name="SYSTEM" />
+    </enum>
+    <!-- Common parameters end -->
+
+    <!-- app_policies section start -->
+
+    <typedef name="Strings" type="String" maxlength="255" array="true"
+        maxsize="255" />
+
+    <typedef name="AppHMITypes" type="AppHMIType" array="true"
+        maxsize="255" />
+
+    <struct name="ApplicationParams">
+        <param name="groups" type="Strings" />
+        <param name="nicknames" type="Strings" mandatory="false" />
+        <param name="preconsented_groups" type="Strings" mandatory="false" />
+        <param name="AppHMIType" type="AppHMITypes" mandatory="false" />
+        <param name="priority" type="Priority" />
+        <param name="default_hmi" type="HmiLevel" />
+        <param name="keep_context" type="Boolean" />
+        <param name="steal_focus" type="Boolean" />
+        <param name="memory_kb" type="Integer" minvalue="1" maxvalue="65225" mandatory="false"/>
+        <param name="watchdog_timer_ms" type="Integer" minvalue="1"
+            maxvalue="65225" mandatory="false"/>
+        <param name="certificate" type="String" minlength="0" maxlength="255"
+            mandatory="false" />
+    </struct>
+
+    <typedef name="HmiLevels" type="HmiLevel" array="true"
+        maxsize="4" />
+    <typedef name="Parameters" type="Parameter" array="true"/>
+
+    <struct name="RpcParameters">
+        <!-- maxsizes are equal to number of currently known elements of
+            given type -->
+        <param name="hmi_levels" type="HmiLevels" />
+        <param name="parameters" type="Parameters" mandatory="false" />
+    </struct>
+
+    <!-- maxsizes are equal to number of currently known elements of given
+        type -->
+    <typedef name="Rpc" type="RpcParameters" map="true" maxsize="50" null_values_allowed="true" />
+
+    <struct name="Rpcs">
+        <param name="user_consent_prompt" type="String" minlegth="1"
+            maxlength="255" mandatory="false"/>
+        <param name="rpcs" type="Rpc" null_values_allowed="true"/>
+    </struct>
+    <!-- app_policies section end -->
+
+    <!-- module_config section start -->
+    <!-- minlenght="10" since minimum expected is "http://a.b" -->
+    <typedef name="URL" type="String" minlength="10" maxlength="255"
+        array="true" minsize="1" maxsize="255" />
+
+    <typedef name="URLList" type="URL" map="true" minsize="1"
+        maxsize="255" />
+
+    <!-- max number of services is limited to 255 according to protocol specification -->
+    <typedef name="ServiceEndpoints" type="URLList" map="true"
+        minsize="1" maxsize="255" />
+
+    <typedef name="NumberOfNotificationsPerMinute" type="Integer"
+        map="true" maxsize="7" minvalue="0" maxvalue="255" />
+
+    <typedef name="SecondsBetweenRetries" type="Integer" array="true"
+        maxsize="10" minvalue="1" maxvalue="1000" />
+
+    <struct name="ModuleConfig">
+        <param name="device_certificates" type="String" minlength="1" maxlength="100" mandatory="false" map="true" minsize="1" maxsize="255" />
+        <param name="preloaded_pt" type="Boolean" mandatory="false" />
+        <param name="exchange_after_x_ignition_cycles" type="Integer"
+            maxvalue="255" />
+        <param name="exchange_after_x_kilometers" type="Integer"
+            maxvalue="4294967296" />
+        <param name="exchange_after_x_days" type="Integer"
+            maxvalue="255" />
+        <param name="timeout_after_x_seconds" type="Integer"
+            maxvalue="65535" />
+        <param name="seconds_between_retries" type="SecondsBetweenRetries" />
+        <param name="endpoints" type="ServiceEndpoints" />
+        <param name="notifications_per_minute_by_priority" type="NumberOfNotificationsPerMinute" />
+        <param name="vehicle_make" type="String" maxlength="100"
+            mandatory="false" />
+        <param name="vehicle_model" type="String" maxlength="100"
+            mandatory="false" />
+        <param name="vehicle_year" type="String" minlength="4" maxlength="4"
+            mandatory="false" />
+    </struct>
+    <!-- module_config section end -->
+
+    <!-- consumer_friendly_messages section start -->
+    <struct name="MessageString">
+        <param name="line1" type="String" maxlength="255"
+            mandatory="false" />
+        <param name="line2" type="String" maxlength="255"
+            mandatory="false" />
+        <param name="tts" type="String" maxlength="65535" mandatory="false" />
+        <param name="label" type="String" maxlength="255"
+            mandatory="false" />
+        <param name="textBody" type="String" maxlength="500"
+            mandatory="false" />
+    </struct>
+
+    <typedef name="Languages" map="true" type="MessageString"
+        maxsize="500" mandatory="false" />
+
+    <struct name="MessageLanguages">
+        <param name="languages" type="Languages" />
+    </struct>
+
+    <typedef name="Messages" map="true" type="MessageLanguages"
+        maxsize="255" />
+
+    <struct name="ConsumerFriendlyMessages">
+        <param name="version" type="String" maxlength="100" />
+        <param name="messages" type="Messages" mandatory="false" />
+    </struct>
+    <!-- consumer_friendly_messages section end -->
+
+    <!-- module_meta section start -->
+    <struct name="ModuleMeta">
+        <param name="ccpu_version" type="String" maxlength="250" mandatory="false"/>
+        <param name="language" type="String" maxlength="250" mandatory="false"/>
+        <param name="wers_country_code" type="String" maxlength="250" mandatory="false"/>
+        <param name="pt_exchanged_at_odometer_x" type="Integer" minvalue="0" maxvalue="65535" mandatory="false"/>
+        <param name="pt_exchanged_x_days_after_epoch" type="Integer" minvalue="0" maxvalue="65535" mandatory="false"/>
+        <param name="ignition_cycles_since_last_exchange" type="Integer" minvalue="0" maxvalue="65535" mandatory="false"/>
+        <param name="vin" type="String" maxlength="250" mandatory="false"/>
+    </struct>
+    <!-- module_meta section end -->
+
+    <!-- usage_and_error_counts section start -->
+    <struct name="AppLevel">
+        <param name="minutes_in_hmi_full" type="Integer" minvalue="0" maxvalue="65535" />
+        <param name="app_registration_language_gui" type="String" minlength="1" maxlength="10" />
+        <param name="app_registration_language_vui" type="String" minlength="1" maxlength="10" />
+        <param name="count_of_rfcom_limit_reached" type="Integer" minvalue="0" maxvalue="65535" />
+        <param name="minutes_in_hmi_limited" type="Integer" minvalue="0" maxvalue="65535" />
+        <param name="minutes_in_hmi_background" type="Integer" minvalue="0" maxvalue="65535" />
+        <param name="minutes_in_hmi_none" type="Integer" minvalue="0" maxvalue="65535" />
+        <param name="count_of_user_selections" type="Integer" minvalue="0" maxvalue="65535" />
+        <param name="count_of_rejections_sync_out_of_memory" type="Integer" minvalue="0" maxvalue="65535" />
+        <param name="count_of_rejections_nickname_mismatch" type="Integer" minvalue="0" maxvalue="65535" />
+        <param name="count_of_rejections_duplicate_name" type="Integer" minvalue="0" maxvalue="65535" />
+        <param name="count_of_rejected_rpc_calls" type="Integer" minvalue="0" maxvalue="65535" />
+        <param name="count_of_rpcs_sent_in_hmi_none" type="Integer" minvalue="0" maxvalue="65535" />
+        <param name="count_of_removals_for_bad_behavior" type="Integer" minvalue="0" maxvalue="65535" />
+        <param name="count_of_run_attempts_while_revoked" type="Integer" minvalue="0" maxvalue="65535" />
+    </struct>
+
+    <typedef name="AppLevels" type="AppLevel" map="true"
+        maxsize="255" />
+
+    <struct name="UsageAndErrorCounts">
+        <param name="count_of_iap_buffer_full" type="Integer" minvalue="0" maxvalue="65535" mandatory="false" />
+        <param name="count_sync_out_of_memory" type="Integer" minvalue="0" maxvalue="65535" mandatory="false" />
+        <param name="count_of_sync_reboots" type="Integer" minvalue="0" maxvalue="65535" mandatory="false" />
+        <param name="app_level" type="AppLevels" mandatory="false" />
+    </struct>
+    <!-- usage_and_error_counts section end -->
+
+    <!-- device_data section start -->
+    <enum name="Input" scope="internal">
+        <element name="GUI" />
+        <element name="VUI" />
+    </enum>
+
+    <typedef name="ConsentGroups" scope="internal" type="Boolean" map="true" maxsize="255" mandatory="false"/>
+
+    <struct name="ConsentRecords" scope="internal">
+        <param name="consent_groups" type="ConsentGroups" mandatory="false"/>
+        <param name="input" type="Input" mandatory="false" />
+        <param name="time_stamp" type="String" maxlength="255" mandatory="false" />
+    </struct>
+
+    <typedef name="UserConsentRecords" scope="internal" map="true" type="ConsentRecords" minsize="0" maxsize="1000"/>
+
+    <struct name="DeviceParams" scope="internal">
+        <param name="hardware" type="String" maxlength="255" mandatory="false"/>
+        <param name="firmware_rev" type="String" maxlength="255" nullable="true" mandatory="false"/>
+        <param name="os" type="String" maxlength="255" mandatory="false"/>
+        <param name="os_version" type="String" maxlength="255" mandatory="false"/>
+        <param name="carrier" type="String" maxlength="255" nullable="true" mandatory="false"/>
+        <param name="user_consent_records" type="UserConsentRecords" mandatory="false"/>
+        <param name="max_number_rfcom_ports" type="Integer" maxvalue="255" mandatory="false"/>
+    </struct>
+    <!-- device_data section end -->
+
+    <!-- policy_table section start -->
+    <typedef name="ApplicationPolicies" map="true" type="ApplicationParams"
+        null_values_allowed="true" minsize="1" maxsize="1000" />
+
+    <typedef name="FunctionalGroupings" map="true" type="Rpcs"
+        minsize="1" maxsize="255" />
+
+    <typedef name="DeviceData" map="true" type="DeviceParams"
+        maxsize="255" />
+
+    <struct name="PolicyTable">
+        <!-- maxsize for app_policies can be changed, if necessary -->
+        <param name="app_policies" type="ApplicationPolicies" />
+        <param name="functional_groupings" type="FunctionalGroupings" />
+        <param name="consumer_friendly_messages" type="ConsumerFriendlyMessages" />
+        <param name="module_config" type="ModuleConfig" />
+        <param name="module_meta" type="ModuleMeta" mandatory="false"/>
+        <param name="usage_and_error_counts" type="UsageAndErrorCounts" mandatory="false" />
+        <param name="device_data" type="DeviceData" mandatory="false" />
+    </struct>
+    <!-- policy_table section end -->
+
+    <!-- Root element -->
+    <struct name="Table">
+        <param name="policy_table" type="PolicyTable" />
+    </struct>
+
+</interface>

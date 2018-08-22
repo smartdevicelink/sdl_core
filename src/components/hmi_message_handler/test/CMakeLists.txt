@@ -1,4 +1,4 @@
-# Copyright (c) 2014, Ford Motor Company
+# Copyright (c) 2016, Ford Motor Company
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -28,7 +28,8 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-if(BUILD_TESTS)
+include(${CMAKE_SOURCE_DIR}/tools/cmake/helpers/platform.cmake)
+include(${CMAKE_SOURCE_DIR}/tools/cmake/helpers/sources.cmake)
 
 include_directories (
     ${GMOCK_INCLUDE_DIRECTORY}
@@ -36,27 +37,26 @@ include_directories (
     ${COMPONENTS_DIR}/hmi_message_handler/test/include
 )
 
+if (HMIADAPTER STREQUAL "messagebroker")
+  set(EXCLUDE_PATHS)
+else()
+  set(EXCLUDE_PATHS hmi_message_handler_impl_test.cc)
+endif()
+
 set(LIBRARIES    
     gmock
     ApplicationManager
     HMIMessageHandler
     jsoncpp
-    MessageBrokerClient
-    MessageBrokerServer
+	${BROKER_LIBRARIES}
     ConfigProfile
 )
 
-set(SOURCES 
-${COMPONENTS_DIR}/hmi_message_handler/test/hmi_message_handler_impl_test.cc
-${COMPONENTS_DIR}/hmi_message_handler/test/hmi_message_adapter_test.cc
-)
+collect_sources(SOURCES "${CMAKE_CURRENT_SOURCE_DIR}" "${EXCLUDE_PATHS}")
 
-if(${QT_HMI})
-    list (APPEND SOURCES  
-    ${COMPONENTS_DIR}/hmi_message_handler/test/mock_subscriber.cc 
-    ${COMPONENTS_DIR}/hmi_message_handler/test/dbus_message_adapter_test.cc
-  )
+if (HMIADAPTER STREQUAL "messagebroker")
+  GET_PROPERTY(BOOST_LIBS_DIRECTORY GLOBAL PROPERTY GLOBAL_BOOST_LIBS)
+  list(APPEND LIBRARIES boost_system -L${BOOST_LIBS_DIRECTORY})
 endif()
-create_test("hmi_message_handler_test" "${SOURCES}" "${LIBRARIES}")
 
-endif()
+create_test(hmi_message_handler_test "${SOURCES}" "${LIBRARIES}")

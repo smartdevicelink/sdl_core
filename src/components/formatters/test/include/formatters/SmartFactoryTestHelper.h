@@ -30,14 +30,14 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_FORMATTERS_TEST_INCLUDE_SMARTFACTORYTESTHELPER_H_
-#define SRC_COMPONENTS_FORMATTERS_TEST_INCLUDE_SMARTFACTORYTESTHELPER_H_
+#ifndef SRC_COMPONENTS_FORMATTERS_TEST_INCLUDE_FORMATTERS_SMARTFACTORYTESTHELPER_H_
+#define SRC_COMPONENTS_FORMATTERS_TEST_INCLUDE_FORMATTERS_SMARTFACTORYTESTHELPER_H_
 
 #include <map>
 #include <set>
 
 #include "formatters/CSmartFactory.h"
-#include "HMI_API_schema.h"
+#include "interfaces/HMI_API_schema.h"
 #include "smart_objects/always_true_schema_item.h"
 #include "smart_objects/always_false_schema_item.h"
 #include "smart_objects/array_schema_item.h"
@@ -107,9 +107,9 @@ class CSmartFactoryTest : public CSmartFactory<FunctionIdTest::eType,
 
  protected:
   typedef std::map<const StructIdentifiersTest::eType,
-                   utils::SharedPtr<ISchemaItem> > TStructsSchemaItems;
+                   std::shared_ptr<ISchemaItem> > TStructsSchemaItems;
 
-  static utils::SharedPtr<ISchemaItem> ProvideObjectSchemaItemForStruct(
+  static std::shared_ptr<ISchemaItem> ProvideObjectSchemaItemForStruct(
       TStructsSchemaItems& struct_schema_items,
       const StructIdentifiersTest::eType struct_id);
 
@@ -147,14 +147,14 @@ class CSmartFactoryTest : public CSmartFactory<FunctionIdTest::eType,
       const std::set<FunctionIdTest::eType>& function_id_items,
       const std::set<MessageTypeTest::eType>& message_type_items);
 
-  static utils::SharedPtr<ISchemaItem> InitStructSchemaItem_Common_1(
+  static std::shared_ptr<ISchemaItem> InitStructSchemaItem_Common_1(
       TStructsSchemaItems& struct_schema_items);
 
-  static utils::SharedPtr<ISchemaItem> InitStructSchemaItem_Common_2();
+  static std::shared_ptr<ISchemaItem> InitStructSchemaItem_Common_2();
 };
 
 }  // namespace formatters
 }  // namespace components
 }  // namespace test
 
-#endif  // SRC_COMPONENTS_FORMATTERS_TEST_INCLUDE_SMARTFACTORYTESTHELPER_H_
+#endif  // SRC_COMPONENTS_FORMATTERS_TEST_INCLUDE_FORMATTERS_SMARTFACTORYTESTHELPER_H_

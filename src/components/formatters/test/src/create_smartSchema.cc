@@ -338,7 +338,7 @@ CSmartSchema initSchemaForMetaFormatter() {
 
   ISchemaItemPtr majorVersion_SchemaItem = TNumberSchemaItem<int>::create();
   ISchemaItemPtr minorVersion_SchemaItem = TNumberSchemaItem<int>::create();
-
+  ISchemaItemPtr patchVersion_SchemaItem = TNumberSchemaItem<int>::create();
   ISchemaItemPtr syncMsg_SchemaItem =
       CStringSchemaItem::create(TSchemaItemParameter<size_t>(0),
                                 TSchemaItemParameter<size_t>(1000),
@@ -355,6 +355,8 @@ CSmartSchema initSchemaForMetaFormatter() {
       CObjectSchemaItem::SMember(majorVersion_SchemaItem, false);
   schemaSyncMsgVersionMap["minorVersion"] =
       CObjectSchemaItem::SMember(minorVersion_SchemaItem, false);
+  schemaSyncMsgVersionMap["patchVersion"] =
+      CObjectSchemaItem::SMember(patchVersion_SchemaItem, false);
   ;
 
   // Map of parameters

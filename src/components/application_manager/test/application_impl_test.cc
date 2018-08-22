@@ -39,7 +39,6 @@
 #include "application_manager/hmi_state.h"
 #include "utils/file_system.h"
 
-#include "utils/make_shared.h"
 #include "application_manager/mock_message_helper.h"
 #include "utils/custom_string.h"
 #include "application_manager/mock_application_manager.h"
@@ -50,7 +49,9 @@
 #include "resumption/last_state.h"
 #include "application_manager/resumption/resume_ctrl.h"
 #include "application_manager/policies/mock_policy_handler_interface.h"
-#include "policy/mock_statistics_manager.h"
+#include "application_manager/mock_resume_ctrl.h"
+#include "policy/usage_statistics/mock_statistics_manager.h"
+#include "smart_objects/smart_object.h"
 
 namespace test {
 namespace components {
@@ -59,10 +60,10 @@ namespace application_manager_test {
 using namespace application_manager;
 
 using namespace mobile_apis;
-namespace smart_objects = NsSmartDeviceLink::NsSmartObjects;
 namespace custom_str = utils::custom_string;
 
 using ::testing::_;
+using ::testing::Mock;
 using ::testing::Return;
 using ::testing::ReturnRef;
 using ::testing::AtLeast;
@@ -77,14 +78,12 @@ class ApplicationImplTest : public ::testing::Test {
     policy_app_id = "policy_app_id";
     app_name = "app_name";
     mac_address = "mac_address";
+    device_handle = 0;
     test_lvl = HMILevel::INVALID_ENUM;
     state_id = HmiState::STATE_ID_REGULAR;
     audiostate = AudioStreamingState::NOT_AUDIBLE;
     syst_context = SystemContext::SYSCTXT_MAIN;
 
-    testHmiState = CreateTestHmiState();
-    EXPECT_CALL(mock_application_manager_, CreateRegularState(app_id, _, _, _))
-        .WillOnce(Return(testHmiState));
     EXPECT_CALL(mock_application_manager_, get_settings())
         .WillRepeatedly(ReturnRef(mock_application_manager_settings_));
     EXPECT_CALL(mock_application_manager_settings_, app_icons_folder())
@@ -95,16 +94,23 @@ class ApplicationImplTest : public ::testing::Test {
                 audio_data_stopped_timeout()).WillOnce(Return(0));
     EXPECT_CALL(mock_application_manager_settings_,
                 video_data_stopped_timeout()).WillOnce(Return(0));
-    app_impl = new ApplicationImpl(app_id,
-                                   policy_app_id,
-                                   mac_address,
-                                   app_name,
-                                   utils::MakeShared<MockStatisticsManager>(),
-                                   mock_application_manager_);
+    app_impl.reset(
+        new ApplicationImpl(app_id,
+                            policy_app_id,
+                            mac_address,
+                            device_handle,
+                            app_name,
+                            std::make_shared<MockStatisticsManager>(),
+                            mock_application_manager_));
+
+    HmiStatePtr initial_state = CreateTestHmiState();
+    app_impl->SetInitialState(initial_state);
   }
-  void TearDown() OVERRIDE {
-    delete app_impl;
+
+  virtual void TearDown() OVERRIDE {
+    Mock::VerifyAndClearExpectations(MockMessageHelper::message_helper_mock());
   }
+
   HmiStatePtr CreateTestHmiState();
 
   HmiStatePtr TestAddHmiState(HMILevel::eType hmi_lvl,
@@ -114,10 +120,11 @@ class ApplicationImplTest : public ::testing::Test {
   void CheckCurrentHMIState();
   MockApplicationManagerSettings mock_application_manager_settings_;
   MockApplicationManager mock_application_manager_;
-  ApplicationImpl* app_impl;
+  std::shared_ptr<ApplicationImpl> app_impl;
   uint32_t app_id;
   std::string policy_app_id;
   std::string mac_address;
+  connection_handler::DeviceHandle device_handle;
   custom_str::CustomString app_name;
   const std::string directory_name = "./test_storage";
   HmiState::StateID state_id;
@@ -128,8 +135,10 @@ class ApplicationImplTest : public ::testing::Test {
 };
 
 HmiStatePtr ApplicationImplTest::CreateTestHmiState() {
-  HmiStatePtr testState =
-      utils::MakeShared<HmiState>(app_id, mock_application_manager_, state_id);
+  HmiStatePtr testState = std::make_shared<HmiState>(
+      static_cast<std::shared_ptr<Application> >(app_impl),
+      mock_application_manager_,
+      state_id);
   testState->set_hmi_level(test_lvl);
   testState->set_audio_streaming_state(audiostate);
   testState->set_system_context(syst_context);
@@ -142,7 +151,7 @@ HmiStatePtr ApplicationImplTest::TestAddHmiState(HMILevel::eType hmi_lvl,
   test_lvl = hmi_lvl;
   state_id = id_state;
   HmiStatePtr state = CreateTestHmiState();
-  (app_impl->*hmi_action)(state);
+  ((app_impl.get())->*hmi_action)(state);
   return state;
 }
 
@@ -175,7 +184,7 @@ TEST_F(ApplicationImplTest, AddStateAddRegularState_GetCurrentState) {
                   HmiState::STATE_ID_REGULAR,
                   &ApplicationImpl::SetRegularState);
   TestAddHmiState(HMILevel::HMI_LIMITED,
-                  HmiState::STATE_ID_NAVI_STREAMING,
+                  HmiState::STATE_ID_VIDEO_STREAMING,
                   &ApplicationImpl::AddHMIState);
 
   CheckCurrentHMIState();
@@ -187,7 +196,7 @@ TEST_F(ApplicationImplTest, AddStateAddRegularState_GetRegularState) {
                   HmiState::STATE_ID_REGULAR,
                   &ApplicationImpl::SetRegularState);
   TestAddHmiState(HMILevel::HMI_LIMITED,
-                  HmiState::STATE_ID_NAVI_STREAMING,
+                  HmiState::STATE_ID_VIDEO_STREAMING,
                   &ApplicationImpl::AddHMIState);
 
   HmiStatePtr current_state = app_impl->RegularHmiState();
@@ -202,7 +211,7 @@ TEST_F(ApplicationImplTest, AddStates_RemoveLastState) {
                   HmiState::STATE_ID_PHONE_CALL,
                   &ApplicationImpl::AddHMIState);
   HmiStatePtr state2 = TestAddHmiState(HMILevel::HMI_NONE,
-                                       HmiState::STATE_ID_NAVI_STREAMING,
+                                       HmiState::STATE_ID_VIDEO_STREAMING,
                                        &ApplicationImpl::AddHMIState);
   HmiStatePtr state3 = TestAddHmiState(HMILevel::HMI_LIMITED,
                                        HmiState::STATE_ID_TTS_SESSION,
@@ -215,7 +224,7 @@ TEST_F(ApplicationImplTest, AddStates_RemoveLastState) {
   HmiStatePtr current_state = app_impl->CurrentHmiState();
   EXPECT_EQ(state2, current_state);
   EXPECT_EQ(HMILevel::HMI_NONE, current_state->hmi_level());
-  EXPECT_EQ(HmiState::STATE_ID_NAVI_STREAMING, current_state->state_id());
+  EXPECT_EQ(HmiState::STATE_ID_VIDEO_STREAMING, current_state->state_id());
 }
 
 TEST_F(ApplicationImplTest, AddStates_RemoveNotLastNotFirstState) {
@@ -223,7 +232,7 @@ TEST_F(ApplicationImplTest, AddStates_RemoveNotLastNotFirstState) {
                                        HmiState::STATE_ID_PHONE_CALL,
                                        &ApplicationImpl::AddHMIState);
   HmiStatePtr state2 = TestAddHmiState(HMILevel::HMI_NONE,
-                                       HmiState::STATE_ID_NAVI_STREAMING,
+                                       HmiState::STATE_ID_VIDEO_STREAMING,
                                        &ApplicationImpl::AddHMIState);
   HmiStatePtr state3 = TestAddHmiState(HMILevel::HMI_LIMITED,
                                        HmiState::STATE_ID_TTS_SESSION,
@@ -247,7 +256,7 @@ TEST_F(ApplicationImplTest, AddStates_RemoveFirstState) {
                                        &ApplicationImpl::AddHMIState);
   // Second state
   TestAddHmiState(HMILevel::HMI_NONE,
-                  HmiState::STATE_ID_NAVI_STREAMING,
+                  HmiState::STATE_ID_VIDEO_STREAMING,
                   &ApplicationImpl::AddHMIState);
   HmiStatePtr state3 = TestAddHmiState(HMILevel::HMI_LIMITED,
                                        HmiState::STATE_ID_TTS_SESSION,
@@ -261,12 +270,12 @@ TEST_F(ApplicationImplTest, AddStates_RemoveFirstState) {
   // Last state does not have a parent
   EXPECT_EQ(HMILevel::HMI_LIMITED, current_state->hmi_level());
   EXPECT_EQ(HmiState::STATE_ID_TTS_SESSION, current_state->state_id());
-  EXPECT_EQ(NULL, current_state->parent());
+  EXPECT_EQ(nullptr, current_state->parent());
 }
 
 TEST_F(ApplicationImplTest, SetRegularState_RemoveFirstState) {
   HmiStatePtr state1 = TestAddHmiState(HMILevel::HMI_NONE,
-                                       HmiState::STATE_ID_NAVI_STREAMING,
+                                       HmiState::STATE_ID_VIDEO_STREAMING,
                                        &ApplicationImpl::AddHMIState);
   // Set regular state
   HmiStatePtr state2 = TestAddHmiState(HMILevel::HMI_FULL,
@@ -300,7 +309,7 @@ TEST_F(ApplicationImplTest, SetPostponedState_RemovePostponedState) {
   // Check that state was correctly removed
   app_impl->RemovePostponedState();
   state2 = app_impl->PostponedHmiState();
-  EXPECT_EQ(NULL, state2);
+  EXPECT_EQ(nullptr, state2);
 }
 
 TEST_F(ApplicationImplTest, AddStateAddRegularState_GetHmiLvlAudioSystemState) {
@@ -317,7 +326,7 @@ TEST_F(ApplicationImplTest, AddStateAddRegularState_GetHmiLvlAudioSystemState) {
   audiostate = AudioStreamingState::AUDIBLE;
   syst_context = SystemContext::SYSCTXT_MENU;
   TestAddHmiState(HMILevel::HMI_LIMITED,
-                  HmiState::STATE_ID_NAVI_STREAMING,
+                  HmiState::STATE_ID_VIDEO_STREAMING,
                   &ApplicationImpl::AddHMIState);
 
   EXPECT_EQ(test_lvl, app_impl->hmi_level());
@@ -396,7 +405,7 @@ TEST_F(ApplicationImplTest, GetFile) {
   test_file.file_type = FileType::GRAPHIC_JPEG;
   test_file.file_name = "test_file 1";
 
-  EXPECT_EQ(NULL, app_impl->GetFile(test_file.file_name));
+  EXPECT_EQ(nullptr, app_impl->GetFile(test_file.file_name));
   EXPECT_TRUE(app_impl->AddFile(test_file));
   const AppFile* app_file = app_impl->GetFile(test_file.file_name);
   EXPECT_EQ(test_file.is_persistent, app_file->is_persistent);
@@ -565,68 +574,137 @@ TEST_F(ApplicationImplTest, SubscribeToSoftButton_UnsubscribeFromSoftButton) {
 
 TEST_F(ApplicationImplTest, ChangeSupportingAppHMIType_TypeNotNaviNotVoice) {
   smart_objects::SmartObject type_media;
-  type_media[0] = AppHMIType::MEDIA;
+  type_media[0] = mobile_apis::AppHMIType::MEDIA;
 
   EXPECT_FALSE(app_impl->is_navi());
   EXPECT_FALSE(app_impl->is_voice_communication_supported());
+  EXPECT_FALSE(app_impl->mobile_projection_enabled());
 
   app_impl->set_app_types(type_media);
   app_impl->ChangeSupportingAppHMIType();
 
   EXPECT_FALSE(app_impl->is_navi());
   EXPECT_FALSE(app_impl->is_voice_communication_supported());
+  EXPECT_FALSE(app_impl->mobile_projection_enabled());
 }
 
 TEST_F(ApplicationImplTest, ChangeSupportingAppHMIType_TypeIsVoice) {
   smart_objects::SmartObject type_comm;
-  type_comm[0] = AppHMIType::COMMUNICATION;
+  type_comm[0] = mobile_apis::AppHMIType::COMMUNICATION;
 
   EXPECT_FALSE(app_impl->is_navi());
   EXPECT_FALSE(app_impl->is_voice_communication_supported());
+  EXPECT_FALSE(app_impl->mobile_projection_enabled());
 
   app_impl->set_app_types(type_comm);
   app_impl->ChangeSupportingAppHMIType();
 
   EXPECT_FALSE(app_impl->is_navi());
   EXPECT_TRUE(app_impl->is_voice_communication_supported());
+  EXPECT_FALSE(app_impl->mobile_projection_enabled());
 }
 
 TEST_F(ApplicationImplTest, ChangeSupportingAppHMIType_TypeIsNavi) {
   smart_objects::SmartObject type_navi;
-  type_navi[0] = AppHMIType::NAVIGATION;
+  type_navi[0] = mobile_apis::AppHMIType::NAVIGATION;
 
   EXPECT_FALSE(app_impl->is_navi());
   EXPECT_FALSE(app_impl->is_voice_communication_supported());
+  EXPECT_FALSE(app_impl->mobile_projection_enabled());
 
   app_impl->set_app_types(type_navi);
   app_impl->ChangeSupportingAppHMIType();
 
   EXPECT_TRUE(app_impl->is_navi());
   EXPECT_FALSE(app_impl->is_voice_communication_supported());
+  EXPECT_FALSE(app_impl->mobile_projection_enabled());
 }
 
 TEST_F(ApplicationImplTest, ChangeSupportingAppHMIType_TypeIsNaviAndVoice) {
   smart_objects::SmartObject app_types;
-  app_types[0] = AppHMIType::NAVIGATION;
-  app_types[1] = AppHMIType::COMMUNICATION;
-  app_types[2] = AppHMIType::MEDIA;
+  app_types[0] = mobile_apis::AppHMIType::NAVIGATION;
+  app_types[1] = mobile_apis::AppHMIType::COMMUNICATION;
+  app_types[2] = mobile_apis::AppHMIType::MEDIA;
 
   EXPECT_FALSE(app_impl->is_navi());
   EXPECT_FALSE(app_impl->is_voice_communication_supported());
+  EXPECT_FALSE(app_impl->mobile_projection_enabled());
 
   app_impl->set_app_types(app_types);
   app_impl->ChangeSupportingAppHMIType();
 
   EXPECT_TRUE(app_impl->is_navi());
   EXPECT_TRUE(app_impl->is_voice_communication_supported());
+  EXPECT_FALSE(app_impl->mobile_projection_enabled());
+}
+
+TEST_F(ApplicationImplTest,
+       ChangeSupportingAppHMIType_TypeIsNaviAndVoiceAndProjection) {
+  smart_objects::SmartObject app_types;
+  app_types[0] = mobile_apis::AppHMIType::NAVIGATION;
+  app_types[1] = mobile_apis::AppHMIType::COMMUNICATION;
+  app_types[2] = mobile_apis::AppHMIType::MEDIA;
+  app_types[3] = mobile_apis::AppHMIType::PROJECTION;
+
+  EXPECT_FALSE(app_impl->is_navi());
+  EXPECT_FALSE(app_impl->is_voice_communication_supported());
+  EXPECT_FALSE(app_impl->mobile_projection_enabled());
+
+  app_impl->set_app_types(app_types);
+  app_impl->ChangeSupportingAppHMIType();
+
+  EXPECT_TRUE(app_impl->is_navi());
+  EXPECT_TRUE(app_impl->is_voice_communication_supported());
+  EXPECT_TRUE(app_impl->mobile_projection_enabled());
 }
 
 TEST_F(ApplicationImplTest, UpdateHash_AppMngrNotSuspended) {
   EXPECT_CALL(*MockMessageHelper::message_helper_mock(),
               SendHashUpdateNotification(app_id, _)).Times(1);
+  resumprion_test::MockResumeCtrl mock_resume_ctrl;
+  EXPECT_CALL(mock_application_manager_, resume_controller())
+      .WillOnce(ReturnRef(mock_resume_ctrl));
+  EXPECT_CALL(mock_resume_ctrl, is_suspended()).WillOnce(Return(false));
   app_impl->UpdateHash();
 
   EXPECT_TRUE(app_impl->is_application_data_changed());
+}
+
+TEST_F(ApplicationImplTest, UpdateHash_AppMngrSuspended) {
+  EXPECT_CALL(*MockMessageHelper::message_helper_mock(),
+              SendHashUpdateNotification(app_id, _)).Times(0);
+  resumprion_test::MockResumeCtrl mock_resume_ctrl;
+  EXPECT_CALL(mock_application_manager_, resume_controller())
+      .WillOnce(ReturnRef(mock_resume_ctrl));
+  EXPECT_CALL(mock_resume_ctrl, is_suspended()).WillOnce(Return(true));
+  app_impl->UpdateHash();
+
+  EXPECT_TRUE(app_impl->is_application_data_changed());
+}
+
+TEST_F(ApplicationImplTest, SetVideoConfig_MobileNavi_StreamingNotApproved) {
+  EXPECT_CALL(*MockMessageHelper::message_helper_mock(),
+              SendNaviSetVideoConfig(app_id, _, _));
+
+  smart_objects::SmartObject params;
+  app_impl->SetVideoConfig(protocol_handler::ServiceType::kMobileNav, params);
+}
+
+TEST_F(ApplicationImplTest, SetVideoConfig_MobileNavi_StreamingApproved) {
+  app_impl->set_video_streaming_approved(true);
+  EXPECT_CALL(*MockMessageHelper::message_helper_mock(),
+              SendNaviSetVideoConfig(app_id, _, _)).Times(0);
+
+  smart_objects::SmartObject params;
+  app_impl->SetVideoConfig(protocol_handler::ServiceType::kMobileNav, params);
+}
+
+TEST_F(ApplicationImplTest, SetVideoConfig_NotMobileNavi) {
+  EXPECT_CALL(*MockMessageHelper::message_helper_mock(),
+              SendNaviSetVideoConfig(app_id, _, _)).Times(0);
+
+  smart_objects::SmartObject params;
+  app_impl->SetVideoConfig(protocol_handler::ServiceType::kAudio, params);
 }
 
 TEST_F(ApplicationImplTest, StartStreaming_MobileNavi_StreamingNotApproved) {
@@ -729,6 +807,52 @@ TEST_F(ApplicationImplTest, StopStreaming_StreamingApproved) {
 
   app_impl->StopStreaming(type);
   EXPECT_FALSE(app_impl->audio_streaming_approved());
+}
+
+TEST_F(ApplicationImplTest, PushPopMobileMessage) {
+  smart_objects::SmartObjectSPtr on_driver_distraction =
+      std::make_shared<smart_objects::SmartObject>();
+  const hmi_apis::Common_DriverDistractionState::eType state =
+      hmi_apis::Common_DriverDistractionState::DD_ON;
+  (*on_driver_distraction)[strings::params][strings::function_id] =
+      mobile_api::FunctionID::OnDriverDistractionID;
+
+  (*on_driver_distraction)[strings::msg_params][mobile_notification::state] =
+      state;
+
+  app_impl->PushMobileMessage(on_driver_distraction);
+  app_impl->PushMobileMessage(on_driver_distraction);
+
+  MobileMessageQueue messages;
+  app_impl->SwapMobileMessageQueue(messages);
+
+  EXPECT_EQ(2u, messages.size());
+
+  app_impl->SwapMobileMessageQueue(messages);
+  EXPECT_TRUE(messages.empty());
+}
+
+TEST_F(ApplicationImplTest, SetSecondaryDeviceTest) {
+  connection_handler::DeviceHandle initial_device =
+      app_impl->secondary_device();
+  EXPECT_EQ(0u, initial_device);
+
+  connection_handler::DeviceHandle device = 123;
+  app_impl->set_secondary_device(device);
+
+  EXPECT_EQ(device, app_impl->secondary_device());
+}
+
+TEST_F(ApplicationImplTest, SetDeferredResumptionHMILevelTest) {
+  using namespace mobile_api::HMILevel;
+  HMILevel::eType initial_deferred_level =
+      app_impl->deferred_resumption_hmi_level();
+  EXPECT_EQ(HMILevel::eType::INVALID_ENUM, initial_deferred_level);
+
+  HMILevel::eType deferred_level = HMILevel::eType::HMI_FULL;
+  app_impl->set_deferred_resumption_hmi_level(deferred_level);
+
+  EXPECT_EQ(deferred_level, app_impl->deferred_resumption_hmi_level());
 }
 
 }  // namespace application_manager_test

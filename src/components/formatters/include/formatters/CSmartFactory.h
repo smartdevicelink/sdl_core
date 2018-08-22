@@ -32,8 +32,8 @@
 // ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef __CSMARTFACTORY_HPP__
-#define __CSMARTFACTORY_HPP__
+#ifndef SRC_COMPONENTS_FORMATTERS_INCLUDE_FORMATTERS_CSMARTFACTORY_H_
+#define SRC_COMPONENTS_FORMATTERS_INCLUDE_FORMATTERS_CSMARTFACTORY_H_
 
 #include "smart_objects/smart_object.h"
 #include "smart_objects/smart_schema.h"
@@ -81,6 +81,10 @@ extern const std::string S_PROTOCOL_TYPE;
  */
 extern const std::string S_CORRELATION_ID;
 
+/**
+ * @brief String constant for RPC_MSG_VERSION.
+ */
+extern const std::string S_RPC_MSG_VERSION;
 /**
  * @brief String constant for "code" param name.
  */
@@ -149,8 +153,10 @@ class CSmartFactory {
    *
    * @return True if operation was successful or false otherwise.
    */
-  bool attachSchema(NsSmartDeviceLink::NsSmartObjects::SmartObject& object,
-                    const bool RemoveFakeParameters);
+  bool attachSchema(
+      NsSmartDeviceLink::NsSmartObjects::SmartObject& object,
+      const bool RemoveFakeParameters,
+      const utils::SemanticVersion& MessageVersion = utils::SemanticVersion());
 
   /**
    * @brief Attach schema to the struct SmartObject.
@@ -269,7 +275,8 @@ CSmartFactory<FunctionIdEnum, MessageTypeEnum, StructIdEnum>::CSmartFactory(
 template <class FunctionIdEnum, class MessageTypeEnum, class StructIdEnum>
 bool CSmartFactory<FunctionIdEnum, MessageTypeEnum, StructIdEnum>::attachSchema(
     NsSmartDeviceLink::NsSmartObjects::SmartObject& object,
-    const bool RemoveFakeParameters) {
+    const bool RemoveFakeParameters,
+    const utils::SemanticVersion& MessageVersion) {
   if (false == object.keyExists(strings::S_PARAMS))
     return false;
   if (false == object[strings::S_PARAMS].keyExists(strings::S_MESSAGE_TYPE))
@@ -295,7 +302,9 @@ bool CSmartFactory<FunctionIdEnum, MessageTypeEnum, StructIdEnum>::attachSchema(
   }
 
   object.setSchema(schemaIterator->second);
-  schemaIterator->second.applySchema(object, RemoveFakeParameters);
+
+  schemaIterator->second.applySchema(
+      object, RemoveFakeParameters, MessageVersion);
 
   return true;
 }
@@ -407,4 +416,4 @@ bool operator<(const SmartSchemaKey<FunctionIdEnum, MessageTypeEnum>& l,
 }
 }
 }
-#endif  //__CSMARTFACTORY_HPP__
+#endif  // SRC_COMPONENTS_FORMATTERS_INCLUDE_FORMATTERS_CSMARTFACTORY_H_

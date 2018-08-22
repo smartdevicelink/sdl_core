@@ -99,7 +99,19 @@ class ProtocolPacket {
      * \brief Setter/getter maximum payload size of packets
      */
     void set_max_payload_size(const size_t max_payload_size);
+    void set_max_control_payload_size(const size_t max_payload_size);
+    void set_max_rpc_payload_size(const size_t max_payload_size);
+    void set_max_audio_payload_size(const size_t max_payload_size);
+    void set_max_video_payload_size(const size_t max_payload_size);
+
     size_t max_payload_size() const;
+    size_t max_control_payload_size() const;
+    size_t max_rpc_payload_size() const;
+    size_t max_audio_payload_size() const;
+    size_t max_video_payload_size() const;
+
+    size_t max_payload_size_by_service_type(const ServiceType type) const;
+
     /**
      * \brief Check ProtocolHeader according to protocol requiements
      */
@@ -107,6 +119,10 @@ class ProtocolPacket {
 
    private:
     size_t max_payload_size_;
+    size_t max_control_payload_size_;
+    size_t max_rpc_payload_size_;
+    size_t max_audio_payload_size_;
+    size_t max_video_payload_size_;
   };
 
   /**
@@ -184,6 +200,12 @@ class ProtocolPacket {
                                 const size_t messageSize);
 
   /**
+   * @brief Calculates FIRST_FRAME data for further handling of consecutive
+   * frames
+   */
+  void HandleRawFirstFrameData(const uint8_t* message);
+
+  /**
    * \brief Getter of protocol version.
    */
   uint8_t protocol_version() const;
@@ -258,6 +280,11 @@ class ProtocolPacket {
   ConnectionID connection_id() const;
 
   /**
+   * \brief Setter of Connection Identifier
+   */
+  void set_connection_id(ConnectionID connection_id);
+
+  /**
     * \brief Getter for data payload size
     */
   uint32_t payload_size() const;
@@ -296,7 +323,7 @@ class ProtocolPacket {
     * @brief Type definition for variable that hold shared pointer to protocolol
     * packet
     */
-typedef utils::SharedPtr<protocol_handler::ProtocolPacket> ProtocolFramePtr;
+typedef std::shared_ptr<protocol_handler::ProtocolPacket> ProtocolFramePtr;
 typedef std::list<ProtocolFramePtr> ProtocolFramePtrList;
 
 template <typename _CharT>

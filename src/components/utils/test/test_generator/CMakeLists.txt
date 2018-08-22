@@ -1,4 +1,4 @@
-# Copyright (c) 2015, Ford Motor Company
+# Copyright (c) 2016, Ford Motor Company
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -28,38 +28,35 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-if(BUILD_TESTS)
+include(${CMAKE_SOURCE_DIR}/tools/cmake/helpers/generators.cmake)
 
 include_directories (
-  ${JSONCPP_INCLUDE_DIRECTORY}
-  ${CMAKE_SOURCE_DIR}/src/3rd_party-static/gmock-1.7.0/include
-  ${CMAKE_SOURCE_DIR}/src/3rd_party-static/gmock-1.7.0/gtest/include
   ${CMAKE_SOURCE_DIR}/tools/interfaceGenerator
   ${CMAKE_CURRENT_BINARY_DIR}
   ${COMPONENTS_DIR}/utils/include/utils
   ${COMPONENTS_DIR}/include/utils
+  ${JSONCPP_INCLUDE_DIRECTORY}
+  ${GMOCK_INCLUDE_DIRECTORY}
 )
 
-set(full_xml_name "${CMAKE_CURRENT_SOURCE_DIR}/MOBILE_API.xml")
+set(XML_NAME ${CMAKE_SOURCE_DIR}/src/components/interfaces/MOBILE_API.xml)
+add_custom_target(generate_version
+  COMMAND ${INTEFRACE_GENERATOR_CMD} ${XML_NAME} "mobile_apis"
+  ${CMAKE_CURRENT_BINARY_DIR} "--parser-type" "sdlrpcv2"
+  DEPENDS ${INTERFACE_GENERATOR_DEPENDENCIES} ${XML_NAME}
+  VERBATIM
+)
 
-add_custom_target( generate_version
-                   COMMAND ${INTEFRACE_GENERATOR_CMD} ${full_xml_name} "mobile_apis"
-                   ${CMAKE_CURRENT_BINARY_DIR} "--parser-type" "sdlrpcv2"
-                   DEPENDS ${INTERFACE_GENERATOR_DEPENDENCIES} ${full_xml_name}
-                   VERBATIM
-                 )
-
-set(testLibraries
+set(LIBRARIES
   gmock
   Utils
 )
 
-set(testSources
+set(SOURCES
   generated_msg_version_test.cc
 )
 
-file(COPY MOBILE_API.xml DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
-create_test("generator_test" "${testSources}" "${testLibraries}")
-add_dependencies("generator_test" generate_version)
+create_test(generator_test "${SOURCES}" "${LIBRARIES}")
+file(COPY ${XML_NAME} DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 
-endif()
+add_dependencies("generator_test" generate_version)

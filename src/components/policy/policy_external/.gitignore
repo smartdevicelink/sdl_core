@@ -1,0 +1,77 @@
+*.a
+*.so
+*.cmake
+!cmake/
+bin
+build
+CMakeFiles
+*-prefix
+Makefile
+CMakeCache.txt
+CMakeLists.txt.user
+install_manifest.txt
+*.o
+*.lo
+.libs
+*.la
+*.kdev4
+*.*~
+.project
+.cproject
+*.pyc
+*.swp
+
+# logs
+*.log
+
+# binaries
+src/appMain/hmi_link
+src/appMain/smartDeviceLinkCore
+test/components/application_manager/policies_manager/test_policies_table
+test/components/application_manager/test_formatters_commands
+test/components/protocol_handler/test_ProtocolHandler
+test/components/request_watchdog/test_RequestWatchdog
+test/components/smart_objects/SchemaItem/test_SmartObject_AlwaysFalseSchemaItemTest
+test/components/smart_objects/SchemaItem/test_SmartObject_AlwaysTrueSchemaItemTest
+test/components/smart_objects/SchemaItem/test_SmartObject_ArraySchemaItemTest
+test/components/smart_objects/SchemaItem/test_SmartObject_BoolSchemaItemTest
+test/components/smart_objects/SchemaItem/test_SmartObject_EnumSchemaItemTest
+test/components/smart_objects/SchemaItem/test_SmartObject_NumberSchemaItemTest
+test/components/smart_objects/SchemaItem/test_SmartObject_ObjectSchemaItemTest
+test/components/smart_objects/SchemaItem/test_SmartObject_StringSchemaItemTest
+test/components/smart_objects/test_SmartObject_ConvertionTimeTest
+test/components/smart_objects/test_SmartObject_DraftTest
+test/components/smart_objects/test_SmartObject_InvalidTest
+test/components/smart_objects/test_SmartObject_StressTest
+test/components/smart_objects/test_SmartObject_UnitTest
+test/components/smart_objects/test_TSharedPtrTest
+test/components/transport_manager/test_DnssdServiceDiscovery
+test/components/transport_manager/test_TcpTransportAdapter
+test/components/transport_manager/test_TransportManagerTest
+test/components/utils/test_Utils
+test/test_suit
+
+# libraries
+
+# install folders
+
+# ctags-generated
+tags
+
+# Qt
+moc_*.cpp
+*.pro.user
+*.qmlproject.user
+*_automoc.cpp
+
+# generated files
+
+# Mac OS Specific
+.DS_Store
+# Android specific
+*.iml
+*.orig
+.idea
+.gradle
+local.properties
+mobile/android/FordSnadbox

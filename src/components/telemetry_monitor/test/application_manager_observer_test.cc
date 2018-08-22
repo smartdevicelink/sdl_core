@@ -35,7 +35,7 @@
 #include "application_manager/telemetry_observer.h"
 #include "telemetry_monitor/application_manager_metric_wrapper.h"
 #include "telemetry_monitor/application_manager_observer.h"
-#include "utils/shared_ptr.h"
+
 #include "telemetry_monitor/telemetry_monitor.h"
 
 namespace test {
@@ -49,12 +49,12 @@ TEST(ApplicationManagerObserver, CallOnMessage) {
   MockTelemetryMonitor mock_telemetry_monitor;
   ApplicationManagerObserver app_observer(&mock_telemetry_monitor);
   typedef application_manager::AMTelemetryObserver::MessageMetric AMMetric;
-  utils::SharedPtr<AMMetric> ptr =
+  std::shared_ptr<AMMetric> ptr =
       application_manager::AMTelemetryObserver::MessageMetricSharedPtr();
   EXPECT_CALL(mock_telemetry_monitor, SendMetric(_));
   app_observer.OnMessage(ptr);
 }
 
-}  // namespace telemetry_monitor
+}  // namespace telemetry_monitor_test
 }  // namespace components
 }  // namespace test

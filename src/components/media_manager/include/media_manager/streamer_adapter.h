@@ -37,8 +37,7 @@
 #include "utils/message_queue.h"
 #include "utils/threads/thread.h"
 #include "utils/threads/thread_delegate.h"
-#include "utils/atomic_object.h"
-#include "utils/shared_ptr.h"
+#include <atomic>
 #include "protocol/raw_message.h"
 
 namespace media_manager {
@@ -72,13 +71,15 @@ class StreamerAdapter : public MediaAdapterImpl {
     virtual void threadMain();
     virtual void exitThreadMain();
 
+    virtual void Close() = 0;
+
    protected:
     virtual bool Connect() = 0;
     virtual void Disconnect() = 0;
     virtual bool Send(protocol_handler::RawMessagePtr msg) = 0;
 
    private:
-    sync_primitives::atomic_bool stop_flag_;
+    std::atomic_bool stop_flag_;
     StreamerAdapter* adapter_;
 
     DISALLOW_COPY_AND_ASSIGN(Streamer);
@@ -94,7 +95,7 @@ class StreamerAdapter : public MediaAdapterImpl {
   DISALLOW_COPY_AND_ASSIGN(StreamerAdapter);
 };
 
-typedef utils::SharedPtr<StreamerAdapter> StreamerAdapterPtr;
+typedef std::shared_ptr<StreamerAdapter> StreamerAdapterPtr;
 
 }  // namespace media_manager
 

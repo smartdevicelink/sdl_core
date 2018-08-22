@@ -41,6 +41,7 @@
 #include "connection_handler/device.h"
 #include "connection_handler/heartbeat_monitor.h"
 #include "protocol/service_type.h"
+#include "protocol_handler/protocol_packet.h"
 
 #ifdef ENABLE_SECURITY
 namespace security_manager {
@@ -71,12 +72,19 @@ typedef std::map<int32_t, Connection*> ConnectionList;
  */
 struct Service {
   protocol_handler::ServiceType service_type;
+  transport_manager::ConnectionUID connection_id;
   bool is_protected_;
   Service()
       : service_type(protocol_handler::kInvalidServiceType)
+      , connection_id(0)
       , is_protected_(false) {}
-  explicit Service(protocol_handler::ServiceType service_type)
-      : service_type(service_type), is_protected_(false) {}
+
+  explicit Service(protocol_handler::ServiceType service_type,
+                   transport_manager::ConnectionUID connection_id)
+      : service_type(service_type)
+      , connection_id(connection_id)
+      , is_protected_(false) {}
+
   bool operator==(const protocol_handler::ServiceType service_type) const {
     return this->service_type == service_type;
   }
@@ -95,6 +103,7 @@ struct Session {
 #endif  // ENABLE_SECURITY
   Session()
       : service_list()
+      , protocol_version(::protocol_handler::PROTOCOL_VERSION_2)
 #ifdef ENABLE_SECURITY
       , ssl_context(NULL)
 #endif  // ENABLE_SECURITY
@@ -150,9 +159,11 @@ class Connection {
 
   /**
    * @brief Adds session to connection
+   * @param connection_handle Connection Handle for the session
    * @return new session id or 0 in case of issues
    */
-  uint32_t AddNewSession();
+  uint32_t AddNewSession(
+      const transport_manager::ConnectionUID connection_handle);
 
   /**
    * @brief Removes session from connection
@@ -167,11 +178,13 @@ class Connection {
    * @param session_id session ID
    * @param service_type Type of service
    * @param is_protected protection state
+   * @param connection_id Connection ID associated with the service
    * @return TRUE on success, otherwise FALSE
    */
   bool AddNewService(uint8_t session_id,
                      protocol_handler::ServiceType service_type,
-                     const bool is_protected);
+                     const bool is_protected,
+                     transport_manager::ConnectionUID connection_id);
   /**
    * @brief Removes service from session
    * @param session_id session ID
@@ -180,6 +193,18 @@ class Connection {
    */
   bool RemoveService(uint8_t session_id,
                      protocol_handler::ServiceType service_type);
+
+  /**
+   * @brief Removes secondary service from session
+   * @param secondary_connection_handle connection identifying services to be
+   * removed
+   * @param removed_services_list Returned: List of service types removed
+   * @return the session ID associated with the services removed
+   */
+  uint8_t RemoveSecondaryServices(
+      transport_manager::ConnectionUID secondary_connection_handle,
+      std::list<protocol_handler::ServiceType>& removed_services_list);
+
 #ifdef ENABLE_SECURITY
   /**
    * @brief Sets crypto context of service
@@ -207,12 +232,24 @@ class Connection {
    */
   void SetProtectionFlag(const uint8_t session_id,
                          const protocol_handler::ServiceType& service_type);
+
 #endif  // ENABLE_SECURITY
-        /**
-         * @brief Returns map of sessions which have been opened in
-         *  current connection.
-         */
+
+  /**
+   * @brief Returns map of sessions which have been opened in
+   * current connection.
+   */
   const SessionMap session_map() const;
+
+  /**
+   * @brief Check if session contains service with specified service type
+   * @param session_id id of session to check
+   * @param service_type type of service to check
+   * @return true if session contains service with specified service type
+   */
+  bool SessionServiceExists(
+      const uint8_t session_id,
+      const protocol_handler::ServiceType& service_type) const;
 
   /**
    * @brief Close session
@@ -268,6 +305,20 @@ class Connection {
    */
   bool ProtocolVersion(uint8_t session_id, uint8_t& protocol_version);
 
+  /**
+   * @brief Returns the primary connection handle associated with this
+   * connection
+   * @return ConnectionHandle
+   */
+  ConnectionHandle primary_connection_handle() const;
+
+  /**
+   * @brief Sets the primary connection handle
+   * @param primary_connection_handle the primary connection handle to
+   * associate with this connection
+   */
+  void SetPrimaryConnectionHandle(ConnectionHandle primary_connection_handle);
+
  private:
   /**
    * @brief Current connection handler.
@@ -289,7 +340,12 @@ class Connection {
    */
   SessionMap session_map_;
 
-  mutable sync_primitives::Lock session_map_lock_;
+  mutable sync_primitives::RecursiveLock session_map_lock_;
+
+  /**
+   * @brief primary connection handle for secondary connections
+   */
+  ConnectionHandle primary_connection_handle_;
 
   /**
    * @brief monitor that closes connection if there is no traffic over it

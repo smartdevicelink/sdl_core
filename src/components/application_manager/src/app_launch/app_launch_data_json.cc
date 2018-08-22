@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, Ford Motor Company
+ * Copyright (c) 2017, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,7 +33,7 @@
 #include "application_manager/app_launch/app_launch_data_json.h"
 #include "application_manager/smart_object_keys.h"
 #include "smart_objects/smart_object.h"
-#include "utils/make_shared.h"
+
 #include "utils/date_time.h"
 #include "json/json.h"
 
@@ -43,9 +43,7 @@ CREATE_LOGGERPTR_GLOBAL(logger_, "AppLaunch")
 
 AppLaunchDataJson::AppLaunchDataJson(const AppLaunchSettings& settings,
                                      resumption::LastState& last_state)
-    : AppLaunchDataImpl(settings)
-    , app_launch_json_lock_(true)
-    , last_state_(last_state) {}
+    : AppLaunchDataImpl(settings), last_state_(last_state) {}
 
 AppLaunchDataJson::~AppLaunchDataJson() {}
 
@@ -70,10 +68,9 @@ Json::Value& AppLaunchDataJson::GetApplicationData() const {
   using namespace application_manager;
   LOG4CXX_AUTO_TRACE(logger_);
   sync_primitives::AutoLock autolock(app_launch_json_lock_);
-  Json::Value& dictionary = last_state().dictionary;
+  Json::Value& dictionary = last_state().get_dictionary();
   if (!dictionary.isMember(strings::app_launch)) {
-    last_state().dictionary[strings::app_launch] =
-        Json::Value(Json::objectValue);
+    dictionary[strings::app_launch] = Json::Value(Json::objectValue);
     LOG4CXX_WARN(logger_, "app_launch section is missed");
   }
   Json::Value& app_launch = dictionary[strings::app_launch];
@@ -186,7 +183,7 @@ std::vector<ApplicationDataPtr> AppLaunchDataJson::GetAppDataByDevMac(
 
       if (deviceMac == dev_mac) {
         dev_apps.push_back(
-            utils::MakeShared<ApplicationData>(appID, bundleID, deviceMac));
+            std::make_shared<ApplicationData>(appID, bundleID, deviceMac));
       }
     }
   }
@@ -276,7 +273,7 @@ bool AppLaunchDataJson::DeleteOldestAppData() {
 bool AppLaunchDataJson::Persist() {
   LOG4CXX_AUTO_TRACE(logger_);
   sync_primitives::AutoLock autolock(app_launch_json_lock_);
-  last_state().SaveToFileSystem();
+  last_state().SaveStateToFileSystem();
   return true;
 }
 

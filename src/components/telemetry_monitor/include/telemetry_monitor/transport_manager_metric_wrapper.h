@@ -30,8 +30,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_TELEMETRY_MONITOR_INCLUDE_TELEMETRY_MONITOR_TRANSPORT_MANAGER_MECTRIC_WRAPPER_H_
-#define SRC_COMPONENTS_TELEMETRY_MONITOR_INCLUDE_TELEMETRY_MONITOR_TRANSPORT_MANAGER_MECTRIC_H_
+#ifndef SRC_COMPONENTS_TELEMETRY_MONITOR_INCLUDE_TELEMETRY_MONITOR_TRANSPORT_MANAGER_METRIC_WRAPPER_H_
+#define SRC_COMPONENTS_TELEMETRY_MONITOR_INCLUDE_TELEMETRY_MONITOR_TRANSPORT_MANAGER_METRIC_WRAPPER_H_
 
 #include <string>
 #include "telemetry_monitor/metric_wrapper.h"
@@ -41,9 +41,9 @@ namespace telemetry_monitor {
 
 class TransportManagerMecticWrapper : public MetricWrapper {
  public:
-  utils::SharedPtr<transport_manager::TMTelemetryObserver::MessageMetric>
+  std::shared_ptr<transport_manager::TMTelemetryObserver::MessageMetric>
       message_metric;
   virtual Json::Value GetJsonMetric();
 };
 }  // namespace telemetry_monitor
-#endif  // SRC_COMPONENTS_TELEMETRY_MONITOR_INCLUDE_TELEMETRY_MONITOR_TRANSPORT_MANAGER_MECTRIC_WRAPPER_H_
+#endif  // SRC_COMPONENTS_TELEMETRY_MONITOR_INCLUDE_TELEMETRY_MONITOR_TRANSPORT_MANAGER_METRIC_WRAPPER_H_
