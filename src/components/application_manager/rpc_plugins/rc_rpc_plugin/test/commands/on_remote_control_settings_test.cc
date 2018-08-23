@@ -139,7 +139,6 @@ TEST_F(RCOnRemoteControlSettingsNotificationTest,
   (*mobile_message)[application_manager::strings::msg_params]
                    [message_params::kAllowed] = false;
 
-
   EXPECT_CALL(mock_allocation_manager_, ResetAllAllocations());
   EXPECT_CALL(mock_interior_data_manager_, OnDisablingRC());
 
