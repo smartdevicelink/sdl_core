@@ -51,6 +51,7 @@ using connection_handler::ConnectionHandle;
 using connection_handler::DeviceHandle;
 using connection_handler::CloseSessionReason;
 using connection_handler::DevicesDiscoveryStarter;
+using connection_handler::SessionTransports;
 
 class MockConnectionHandler : public connection_handler::ConnectionHandler {
  public:
@@ -88,7 +89,7 @@ class MockConnectionHandler : public connection_handler::ConnectionHandler {
                      int32_t(uint32_t key,
                              uint32_t* app_id,
                              std::list<int32_t>* sessions_list,
-                             uint32_t* device_id));
+                             connection_handler::DeviceHandle* device_id));
   MOCK_CONST_METHOD0(get_settings,
                      const connection_handler::ConnectionHandlerSettings&());
   MOCK_METHOD0(get_session_observer,
@@ -96,10 +97,31 @@ class MockConnectionHandler : public connection_handler::ConnectionHandler {
   MOCK_METHOD0(get_device_discovery_starter, DevicesDiscoveryStarter&());
   MOCK_CONST_METHOD1(GetConnectedDevicesMAC,
                      void(std::vector<std::string>& macs));
+  MOCK_METHOD1(
+      AddSession,
+      uint32_t(const transport_manager::ConnectionUID primary_transport_id));
+  MOCK_METHOD1(RemoveSession, bool(uint8_t session_id));
+  MOCK_METHOD0(session_connection_map,
+               DataAccessor<connection_handler::SessionConnectionMap>());
+  MOCK_METHOD2(SetSecondaryTransportID,
+               SessionTransports(
+                   uint8_t session_id,
+                   transport_manager::ConnectionUID secondary_transport_id));
+  MOCK_CONST_METHOD1(GetSessionTransports,
+                     const SessionTransports(uint8_t session_id));
   MOCK_METHOD3(NotifyServiceStartedResult,
                void(uint32_t session_key,
                     bool result,
                     std::vector<std::string>& rejected_params));
+  MOCK_METHOD3(
+      OnSecondaryTransportStarted,
+      bool(transport_manager::ConnectionUID& primary_connection_handle,
+           const transport_manager::ConnectionUID secondary_connection_handle,
+           const uint8_t session_id));
+  MOCK_METHOD2(
+      OnSecondaryTransportEnded,
+      void(const transport_manager::ConnectionUID primary_connection_handle,
+           const transport_manager::ConnectionUID secondary_connection_handle));
 };
 
 }  // namespace connection_handler_test

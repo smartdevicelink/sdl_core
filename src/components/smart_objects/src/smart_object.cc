@@ -869,11 +869,14 @@ bool SmartObject::erase(const std::string& Key) {
 }
 
 bool SmartObject::isValid() const {
-  return (Errors::OK == m_schema.validate(*this));
+  rpc::ValidationReport report("RPC");
+  return (Errors::OK == m_schema.validate(*this, &report));
 }
 
-Errors::eType SmartObject::validate() {
-  return m_schema.validate(*this);
+Errors::eType SmartObject::validate(
+    rpc::ValidationReport* report__,
+    const utils::SemanticVersion& MessageVersion) {
+  return m_schema.validate(*this, report__, MessageVersion);
 }
 
 void SmartObject::setSchema(const CSmartSchema& schema) {

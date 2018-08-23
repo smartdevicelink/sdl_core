@@ -106,7 +106,7 @@ class MockCacheManagerInterface : public ::policy::CacheManagerInterface {
   MOCK_METHOD2(Init,
                bool(const std::string& file_name,
                     const PolicySettings* settings));
-  MOCK_METHOD0(GenerateSnapshot, utils::SharedPtr<policy_table::Table>());
+  MOCK_METHOD0(GenerateSnapshot, std::shared_ptr<policy_table::Table>());
   MOCK_METHOD1(ApplyUpdate, bool(const policy_table::Table& update_pt));
   MOCK_METHOD1(Save, bool(const policy_table::Table& table));
   MOCK_CONST_METHOD0(UpdateRequired, bool());
@@ -231,7 +231,7 @@ class MockCacheManagerInterface : public ::policy::CacheManagerInterface {
                bool(const std::string& device_id,
                     const std::string& policy_app_id,
                     policy::Permissions& permission));
-  MOCK_CONST_METHOD0(GetPT, utils::SharedPtr<policy_table::Table>());
+  MOCK_CONST_METHOD0(GetPT, std::shared_ptr<policy_table::Table>());
   MOCK_CONST_METHOD0(GetMetaInfo, const MetaInfo());
   MOCK_CONST_METHOD0(GetCertificate, std::string());
   MOCK_METHOD1(SetDecryptedCertificate, void(const std::string&));
@@ -247,6 +247,16 @@ class MockCacheManagerInterface : public ::policy::CacheManagerInterface {
                GroupsByExternalConsentStatus(const ExternalConsentStatus&));
   MOCK_METHOD0(GetKnownLinksFromPT, std::map<std::string, std::string>());
   MOCK_METHOD1(SetExternalConsentForApp, void(const PermissionConsent&));
+  MOCK_METHOD2(OnDeviceSwitching,
+               void(const std::string& device_id_from,
+                    const std::string& device_id_to));
+  MOCK_CONST_METHOD2(GetAppRequestSubTypes,
+                     void(const std::string& policy_app_id,
+                          std::vector<std::string>& request_subtypes));
+  MOCK_CONST_METHOD1(GetAppRequestTypesState,
+                     RequestType::State(const std::string& policy_app_id));
+  MOCK_CONST_METHOD1(GetAppRequestSubTypesState,
+                     RequestSubType::State(const std::string& policy_app_id));
 };
 
 }  // namespace policy_test

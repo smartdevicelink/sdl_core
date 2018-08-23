@@ -123,7 +123,7 @@ const std::string kCreateSchema =
     "CREATE INDEX `rpc.select_rpc_name_hmi_level` "
     "  ON `rpc`(`name`,`hmi_level_value`);"
     "CREATE TABLE IF NOT EXISTS `application`( "
-    "  `id` VARCHAR(45) PRIMARY KEY NOT NULL, "
+    "  `id` VARCHAR(45) PRIMARY KEY NOT NULL COLLATE NOCASE, "
     "  `keep_context` BOOLEAN, "
     "  `steal_focus` BOOLEAN, "
     "  `default_hmi` VARCHAR(45), "
@@ -147,7 +147,7 @@ const std::string kCreateSchema =
     "CREATE INDEX IF NOT EXISTS `application.fk_application_priorities1_idx` "
     "  ON `application`(`priority_value`); "
     "CREATE TABLE IF NOT EXISTS `app_group`( "
-    "  `application_id` VARCHAR(45) NOT NULL, "
+    "  `application_id` VARCHAR(45) NOT NULL COLLATE NOCASE, "
     "  `functional_group_id` INTEGER NOT NULL, "
     "  PRIMARY KEY(`application_id`,`functional_group_id`), "
     "  CONSTRAINT `fk_application_has_functional_group_application1` "
@@ -162,9 +162,9 @@ const std::string kCreateSchema =
     "  ON `app_group`(`functional_group_id`); "
     "CREATE INDEX IF NOT EXISTS "
     "`app_group.fk_application_has_functional_group_application1_idx` "
-    "  ON `app_group`(`application_id`); "
+    "  ON `app_group`(`application_id` COLLATE NOCASE); "
     "CREATE TABLE IF NOT EXISTS `preconsented_group`( "
-    "  `application_id` VARCHAR(45) NOT NULL, "
+    "  `application_id` VARCHAR(45) NOT NULL COLLATE NOCASE, "
     "  `functional_group_id` INTEGER NOT NULL, "
     "  PRIMARY KEY(`application_id`,`functional_group_id`), "
     "  CONSTRAINT `fk_application_has_functional_group_application2` "
@@ -180,7 +180,7 @@ const std::string kCreateSchema =
     "  ON `preconsented_group`(`functional_group_id`); "
     "CREATE INDEX IF NOT EXISTS "
     "`preconsented_group.fk_application_has_functional_group_application2_idx` "
-    "  ON `preconsented_group`(`application_id`); "
+    "  ON `preconsented_group`(`application_id` COLLATE NOCASE); "
     "CREATE TABLE IF NOT EXISTS `seconds_between_retry`( "
     "  `index` INTEGER PRIMARY KEY NOT NULL, "
     "  `value` INTEGER NOT NULL "
@@ -207,7 +207,7 @@ const std::string kCreateSchema =
     "`device_consent_group.fk_device_has_functional_group_device1_idx` "
     "  ON `device_consent_group`(`device_id`); "
     "CREATE TABLE IF NOT EXISTS `app_level`( "
-    "  `application_id` VARCHAR(45) PRIMARY KEY NOT NULL, "
+    "  `application_id` VARCHAR(45) PRIMARY KEY NOT NULL COLLATE NOCASE, "
     "  `minutes_in_hmi_full` INTEGER DEFAULT 0, "
     "  `minutes_in_hmi_limited` INTEGER DEFAULT 0, "
     "  `minutes_in_hmi_background` INTEGER DEFAULT 0, "
@@ -234,42 +234,50 @@ const std::string kCreateSchema =
     "    REFERENCES `language`(`code`) "
     "); "
     "CREATE INDEX IF NOT EXISTS `app_level.fk_app_levels_application1_idx` "
-    "  ON `app_level`(`application_id`); "
+    "  ON `app_level`(`application_id` COLLATE NOCASE); "
     "CREATE INDEX IF NOT EXISTS `app_level.fk_app_level_language1_idx` "
     "  ON `app_level`(`app_registration_language_gui`); "
     "CREATE INDEX IF NOT EXISTS `app_level.fk_app_level_language2_idx` "
     "  ON `app_level`(`app_registration_language_vui`); "
     "CREATE TABLE IF NOT EXISTS `nickname`( "
-    "  `name` VARCHAR(100) NOT NULL, "
-    "  `application_id` VARCHAR(45) NOT NULL, "
+    "  `name` VARCHAR(100) NOT NULL COLLATE NOCASE, "
+    "  `application_id` VARCHAR(45) NOT NULL COLLATE NOCASE, "
     "  PRIMARY KEY(`name`,`application_id`), "
     "  CONSTRAINT `fk_nickname_application1` "
     "    FOREIGN KEY(`application_id`) "
     "    REFERENCES `application`(`id`) "
     "); "
     "CREATE INDEX IF NOT EXISTS `nickname.fk_nickname_application1_idx` "
-    "  ON `nickname`(`application_id`); "
+    "  ON `nickname`(`application_id` COLLATE NOCASE); "
     "CREATE TABLE IF NOT EXISTS `app_type`( "
     "  `name` VARCHAR(50) NOT NULL, "
-    "  `application_id` VARCHAR(45) NOT NULL, "
+    "  `application_id` VARCHAR(45) NOT NULL COLLATE NOCASE, "
     "  PRIMARY KEY(`name`,`application_id`), "
     "  CONSTRAINT `fk_app_type_application1` "
     "    FOREIGN KEY(`application_id`) "
     "    REFERENCES `application`(`id`) "
     "); "
     "CREATE TABLE IF NOT EXISTS `request_type`( "
-    "  `request_type` VARCHAR(50) NOT NULL, "
-    "  `application_id` VARCHAR(45) NOT NULL, "
+    "  `request_type` VARCHAR(50), "
+    "  `application_id` VARCHAR(45) NOT NULL COLLATE NOCASE, "
     "  PRIMARY KEY(`request_type`,`application_id`), "
     "  CONSTRAINT `fk_app_type_application1` "
     "    FOREIGN KEY(`application_id`) "
     "    REFERENCES `application`(`id`) "
     "); "
+    "CREATE TABLE IF NOT EXISTS `request_subtype`( "
+    "  `request_subtype` VARCHAR(50), "
+    "  `application_id` VARCHAR(45) NOT NULL COLLATE NOCASE, "
+    "  PRIMARY KEY(`request_subtype`,`application_id`), "
+    "  CONSTRAINT `fk_request_subtype_app_id` "
+    "    FOREIGN KEY(`application_id`) "
+    "    REFERENCES `application`(`id`) "
+    "); "
     "CREATE INDEX IF NOT EXISTS `app_type.fk_app_type_application1_idx` "
-    "  ON `app_type`(`application_id`); "
+    "  ON `app_type`(`application_id` COLLATE NOCASE); "
     "CREATE TABLE IF NOT EXISTS `consent_group`( "
     "  `device_id` VARCHAR(100) NOT NULL, "
-    "  `application_id` VARCHAR(45) NOT NULL, "
+    "  `application_id` VARCHAR(45) NOT NULL COLLATE NOCASE, "
     "  `functional_group_id` INTEGER NOT NULL, "
     "  `is_consented` BOOL NOT NULL, "
     "  `input` VARCHAR(45), "
@@ -294,13 +302,13 @@ const std::string kCreateSchema =
     "CREATE TABLE IF NOT EXISTS `endpoint`( "
     "  `service` VARCHAR(100) NOT NULL, "
     "  `url` VARCHAR(100) NOT NULL, "
-    "  `application_id` VARCHAR(45) NOT NULL, "
+    "  `application_id` VARCHAR(45) NOT NULL COLLATE NOCASE, "
     "  CONSTRAINT `fk_endpoint_application1` "
     "    FOREIGN KEY(`application_id`) "
     "    REFERENCES `application`(`id`) "
     "); "
     "CREATE INDEX IF NOT EXISTS `endpoint.fk_endpoint_application1_idx` "
-    "  ON `endpoint`(`application_id`); "
+    "  ON `endpoint`(`application_id` COLLATE NOCASE); "
     "CREATE TABLE IF NOT EXISTS `message`( "
     "  `id` INTEGER PRIMARY KEY NOT NULL, "
     "  `tts` TEXT, "
@@ -440,6 +448,8 @@ const std::string kDropSchema =
     "DROP TABLE IF EXISTS `consent_group`; "
     "DROP INDEX IF EXISTS `app_type.fk_app_type_application1_idx`; "
     "DROP TABLE IF EXISTS `app_type`; "
+    "DROP TABLE IF EXISTS `request_type`; "
+    "DROP TABLE IF EXISTS `request_subtype`; "
     "DROP INDEX IF EXISTS `nickname.fk_nickname_application1_idx`; "
     "DROP TABLE IF EXISTS `nickname`; "
     "DROP INDEX IF EXISTS `app_level.fk_app_level_language2_idx`; "
@@ -582,8 +592,21 @@ const std::string kInsertAppType =
     "INSERT OR IGNORE INTO `app_type` (`application_id`, `name`) VALUES (?, ?)";
 
 const std::string kInsertRequestType =
-    "INSERT OR IGNORE INTO `request_type` (`application_id`, `request_type`) "
+    "INSERT INTO `request_type` (`application_id`, `request_type`) "
     "VALUES (?, ?)";
+
+const std::string kInsertOmittedRequestType =
+    "INSERT INTO `request_type` (`application_id`) "
+    "VALUES (?)";
+
+const std::string kInsertRequestSubType =
+    "INSERT INTO `request_subtype` (`application_id`, "
+    "`request_subtype`) "
+    "VALUES (?, ?)";
+
+const std::string kInsertOmittedRequestSubType =
+    "INSERT INTO `request_subtype` (`application_id`) "
+    "VALUES (?)";
 
 const std::string kUpdateVersion = "UPDATE `version` SET `number`= ?";
 
@@ -695,6 +718,11 @@ const std::string kSelectRequestTypes =
     "SELECT DISTINCT `request_type` FROM `request_type` WHERE `application_id` "
     "= ?";
 
+const std::string kSelectRequestSubTypes =
+    "SELECT DISTINCT `request_subtype` FROM `request_subtype` WHERE "
+    "`application_id` "
+    "= ?";
+
 const std::string kSelectSecondsBetweenRetries =
     "SELECT `value` FROM `seconds_between_retry` ORDER BY `index`";
 
@@ -739,6 +767,8 @@ const std::string kUpdateCountersSuccessfulUpdate =
 const std::string kDeleteApplication = "DELETE FROM `application`";
 
 const std::string kDeleteRequestType = "DELETE FROM `request_type`";
+
+const std::string kDeleteRequestSubType = "DELETE FROM `request_subtype`";
 
 const std::string kSelectApplicationRevoked =
     "SELECT `is_revoked` FROM `application` WHERE `id` = ?";

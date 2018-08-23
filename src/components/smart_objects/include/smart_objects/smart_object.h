@@ -35,11 +35,13 @@
 
 #include <set>
 #include <string>
+#include <sstream>
 #include <vector>
 #include <map>
 
 #include "smart_objects/smart_schema.h"
 #include "utils/custom_string.h"
+#include "rpc_base/validation_report.h"
 
 namespace NsSmartDeviceLink {
 namespace NsSmartObjects {
@@ -125,7 +127,7 @@ typedef std::map<std::string, SmartObject> SmartMap;
  **/
 typedef std::vector<uint8_t> SmartBinary;
 
-typedef utils::SharedPtr<SmartObject> SmartObjectSPtr;
+typedef std::shared_ptr<SmartObject> SmartObjectSPtr;
 
 /**
  * @brief List of SmartObjects
@@ -672,9 +674,13 @@ class SmartObject FINAL {
   /**
    * @brief Validates object according to attached schema.
    *
+   * @param report__ object for reporting errors during validation
+   * @param messageVersion of the mobile app to check against RPC Spec Schema
    * @return Result of validation.
    */
-  Errors::eType validate();
+  Errors::eType validate(
+      rpc::ValidationReport* report__,
+      const utils::SemanticVersion& MessageVersion = utils::SemanticVersion());
 
   /**
    * @brief Sets new schema
@@ -725,6 +731,35 @@ class SmartObject FINAL {
   template <typename Type>
   bool operator!=(const Type& Other) const {
     return !(*this == Other);
+  }
+
+  static std::string typeToString(SmartType type) {
+    switch (type) {
+      case SmartType_Null:
+        return "Null";
+      case SmartType_Boolean:
+        return "Boolean";
+      case SmartType_Integer:
+        return "Integer";
+      case SmartType_Character:
+        return "Character";
+      case SmartType_String:
+        return "String";
+      case SmartType_Double:
+        return "Double";
+      case SmartType_Map:
+        return "Object";
+      case SmartType_Array:
+        return "Array";
+      case SmartType_Binary:
+        return "Binary_Data";
+      case SmartType_UInteger:
+        return "Unsigned_Integer";
+      case SmartType_Invalid:
+        return "Invalid_Type";
+      default:
+        return "Unknown_Type";
+    }
   }
 
  protected:

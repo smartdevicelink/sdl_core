@@ -39,13 +39,13 @@ namespace hmi_message_handler {
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "HMIMessageHandler")
 
-typedef NsMessageBroker::CMessageBrokerController MessageBrokerController;
+typedef hmi_message_handler::CMessageBrokerController MessageBrokerController;
 
 MessageBrokerAdapter::MessageBrokerAdapter(HMIMessageHandler* handler_param,
                                            const std::string& server_address,
                                            uint16_t port)
     : HMIMessageAdapterImpl(handler_param)
-    , MessageBrokerController(server_address, port, "SDL") {
+    , MessageBrokerController(server_address, port, "SDL", 8) {
   LOG4CXX_TRACE(logger_, "Created MessageBrokerAdapter");
 }
 
@@ -55,7 +55,7 @@ void MessageBrokerAdapter::SendMessageToHMI(
     hmi_message_handler::MessageSharedPointer message) {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  if (!message.valid()) {
+  if (message.use_count() == 0) {
     LOG4CXX_ERROR(logger_, "Can`t send not valid message");
     return;
   }
@@ -108,6 +108,7 @@ void MessageBrokerAdapter::SubscribeTo() {
   MessageBrokerController::subscribeTo("BasicCommunication.OnUpdateDeviceList");
   MessageBrokerController::subscribeTo("BasicCommunication.OnFindApplications");
   MessageBrokerController::subscribeTo("BasicCommunication.OnAppActivated");
+  MessageBrokerController::subscribeTo("BasicCommunication.OnAwakeSDL");
   MessageBrokerController::subscribeTo("BasicCommunication.OnExitApplication");
   MessageBrokerController::subscribeTo(
       "BasicCommunication.OnExitAllApplications");
@@ -152,6 +153,7 @@ void* MessageBrokerAdapter::SubscribeAndBeginReceiverThread(void* param) {
 
 void MessageBrokerAdapter::ProcessRecievedFromMB(Json::Value& root) {
   LOG4CXX_AUTO_TRACE(logger_);
+  LOG4CXX_INFO(logger_, "MB_Adapter: " << root);
   if (root.isNull()) {
     // LOG
     return;

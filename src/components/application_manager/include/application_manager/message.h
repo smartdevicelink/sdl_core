@@ -36,7 +36,6 @@
 #include <string>
 #include <vector>
 
-#include "utils/shared_ptr.h"
 #include "protocol/message_priority.h"
 #include "protocol/rpc_type.h"
 #include "protocol/common.h"
@@ -68,9 +67,7 @@ class Message {
 
   //! --------------------------------------------------------------------------
   int32_t function_id() const;
-#ifdef SDL_REMOTE_CONTROL
   std::string function_name() const;
-#endif  // SDL_REMOTE_CONTROL
   int32_t correlation_id() const;
   int32_t connection_key() const;
 
@@ -87,13 +84,11 @@ class Message {
   //!
   //--------------------------------------------------------------------------.
   void set_function_id(int32_t id);
-#ifdef SDL_REMOTE_CONTROL
   void set_function_name(const std::string& name);
-#endif  // SDL_REMOTE_CONTROL
   void set_correlation_id(int32_t id);
   void set_connection_key(int32_t key);
   void set_message_type(MessageType type);
-  void set_binary_data(BinaryData* data);
+  void set_binary_data(const BinaryData* data);
   void set_json_message(const std::string& json_message);
   void set_protocol_version(protocol_handler::MajorProtocolVersion version);
   void set_smart_object(const smart_objects::SmartObject& object);
@@ -112,9 +107,7 @@ class Message {
   int32_t function_id_;     // @remark protocol V2.
   int32_t correlation_id_;  // @remark protocol V2.
   MessageType type_;        // @remark protocol V2.
-#ifdef SDL_REMOTE_CONTROL
   std::string function_name_;
-#endif  // SDL_REMOTE_CONTROL
 
   // Pre-calculated message priority, higher priority messages are
   // Processed first
@@ -131,8 +124,8 @@ class Message {
   protocol_handler::MajorProtocolVersion version_;
 };
 
-typedef utils::SharedPtr<application_manager::Message> MobileMessage;
-typedef utils::SharedPtr<application_manager::Message> MessagePtr;
+typedef std::shared_ptr<application_manager::Message> MobileMessage;
+typedef std::shared_ptr<application_manager::Message> MessagePtr;
 }  // namespace application_manager
 
 #endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_MESSAGE_H_

@@ -42,7 +42,14 @@ set(PATHS
   ${CMAKE_CURRENT_SOURCE_DIR}/include
   ${CMAKE_CURRENT_SOURCE_DIR}/src
 )
-collect_sources(SOURCES "${PATHS}")
+
+if (ENABLE_SECURITY)
+  set(EXCLUDE_PATHS)
+else()
+  set(EXCLUDE_PATHS handshake_handler.cc)
+endif()
+
+collect_sources(SOURCES "${PATHS}" "${EXCLUDE_PATHS}")
 
 set(LIBRARIES
   ProtocolLibrary
@@ -58,7 +65,6 @@ endforeach()
 
 
 add_library(ProtocolHandler ${SOURCES})
-add_dependencies(ProtocolHandler libbson)
 target_link_libraries(ProtocolHandler ${LIBRARIES})
 
 if(BUILD_TESTS)

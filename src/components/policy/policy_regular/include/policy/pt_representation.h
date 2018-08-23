@@ -35,9 +35,11 @@
 
 #include <vector>
 #include <string>
+#include <memory>
 #include "policy/policy_types.h"
 #include "policy/policy_table/types.h"
 #include "policy/policy_settings.h"
+#include "utils/macro.h"
 
 namespace policy {
 namespace policy_table = rpc::policy_table_interface_base;
@@ -208,7 +210,7 @@ class PTRepresentation {
    * device_info, statistics, excluding user messages
    * @return Generated structure for obtaining Json string.
    */
-  virtual utils::SharedPtr<policy_table::Table> GenerateSnapshot() const = 0;
+  virtual std::shared_ptr<policy_table::Table> GenerateSnapshot() const = 0;
 
   virtual bool Save(const policy_table::Table& table) = 0;
 

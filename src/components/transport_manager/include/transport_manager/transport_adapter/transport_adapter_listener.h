@@ -2,6 +2,9 @@
  * Copyright (c) 2014, Ford Motor Company
  * All rights reserved.
  *
+ * Copyright (c) 2018 Xevo Inc.
+ * All rights reserved.
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *
@@ -13,7 +16,7 @@
  * disclaimer in the documentation and/or other materials provided with the
  * distribution.
  *
- * Neither the name of the Ford Motor Company nor the names of its contributors
+ * Neither the name of the copyright holders nor the names of its contributors
  * may be used to endorse or promote products derived from this software
  * without specific prior written permission.
  *
@@ -146,6 +149,7 @@ class TransportAdapterListener {
                                       const DeviceUID& device_handle,
                                       const ApplicationHandle& app_handle,
                                       const CommunicationError& error) = 0;
+
   /**
    * @brief Search specified device adapter in the container of shared pointers
    *to device adapters to be sure it is available,
@@ -269,6 +273,22 @@ class TransportAdapterListener {
   virtual void OnCommunicationError(const TransportAdapter* transport_adapter,
                                     const DeviceUID& device_handle,
                                     const ApplicationHandle& app_handle) = 0;
+  /**
+   * @brief OnTransportSwitchRequested notifies on received signal to start
+   * transport switching flow (at the moment Bluetooth to USB only)
+   * @param transport_adapter Transport adapter who received the signal
+   */
+  virtual void OnTransportSwitchRequested(
+      const TransportAdapter* transport_adapter) = 0;
+
+  /**
+   * @brief Notification that the transport's specific configuration has been
+   *        updated.
+   *
+   * @param transport_adapter  pointer to the transport adapter
+   */
+  virtual void OnTransportConfigUpdated(
+      const TransportAdapter* transport_adapter) = 0;
 };
 
 }  // transport_adapter namespace

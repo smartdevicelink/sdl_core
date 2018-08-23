@@ -67,7 +67,7 @@ class ApplicationManager;
 namespace policy {
 
 typedef std::vector<uint32_t> AppIds;
-typedef std::vector<uint32_t> DeviceHandles;
+typedef std::vector<transport_manager::DeviceHandle> DeviceHandles;
 namespace custom_str = utils::custom_string;
 
 class PolicyHandler : public PolicyHandlerInterface,
@@ -113,7 +113,6 @@ class PolicyHandler : public PolicyHandlerInterface,
   virtual DeviceConsent GetUserConsentForDevice(
       const std::string& device_id) const OVERRIDE;
 
-#ifdef SDL_REMOTE_CONTROL
   /**
    * @brief Sets HMI default type for specified application
    * @param application_id ID application
@@ -177,7 +176,6 @@ class PolicyHandler : public PolicyHandlerInterface,
    */
   bool GetModuleTypes(const std::string& policy_app_id,
                       std::vector<std::string>* modules) const OVERRIDE;
-#endif  // SDL_REMOTE_CONTROL
 
   bool GetDefaultHmi(const std::string& policy_app_id,
                      std::string* default_hmi) const OVERRIDE;
@@ -208,7 +206,7 @@ class PolicyHandler : public PolicyHandlerInterface,
   void add_listener(PolicyHandlerObserver* listener) OVERRIDE;
   void remove_listener(PolicyHandlerObserver* listener) OVERRIDE;
 
-  utils::SharedPtr<usage_statistics::StatisticsManager> GetStatisticManager()
+  std::shared_ptr<usage_statistics::StatisticsManager> GetStatisticManager()
       const OVERRIDE;
 
   /**
@@ -487,11 +485,45 @@ class PolicyHandler : public PolicyHandlerInterface,
       mobile_apis::RequestType::eType type) const OVERRIDE;
 
   /**
+   * @brief Checks if certain request subtype is allowed for application
+   * @param policy_app_id Unique applicaion id
+   * @param request_subtype Request subtype
+   * @return true, if allowed, otherwise - false
+   */
+  bool IsRequestSubTypeAllowed(
+      const std::string& policy_app_id,
+      const std::string& request_subtype) const OVERRIDE;
+
+  /**
+   * @brief Gets application request types state
+   * @param policy_app_id Unique application id
+   * @return request types state
+   */
+  RequestType::State GetAppRequestTypeState(
+      const std::string& policy_app_id) const OVERRIDE;
+
+  /**
+   * @brief Gets application request subtypes state
+   * @param policy_app_id Unique application id
+   * @return request subtypes state
+   */
+  RequestSubType::State GetAppRequestSubTypeState(
+      const std::string& policy_app_id) const OVERRIDE;
+
+  /**
    * @brief Gets application request types
    * @param policy_app_id Unique application id
    * @return request types
    */
   const std::vector<std::string> GetAppRequestTypes(
+      const std::string& policy_app_id) const OVERRIDE;
+
+  /**
+   * @brief Gets application request subtypes
+   * @param policy_app_id Unique application id
+   * @return app request subtypes
+   */
+  const std::vector<std::string> GetAppRequestSubTypes(
       const std::string& policy_app_id) const OVERRIDE;
 
   /**
@@ -520,7 +552,7 @@ class PolicyHandler : public PolicyHandlerInterface,
            int32_t timespan_seconds) OVERRIDE;
 
 #ifdef BUILD_TESTS
-  void SetPolicyManager(utils::SharedPtr<PolicyManager> pm) {
+  void SetPolicyManager(std::shared_ptr<PolicyManager> pm) {
     policy_manager_ = pm;
   }
 #endif  // BUILD_TESTS
@@ -532,6 +564,15 @@ class PolicyHandler : public PolicyHandlerInterface,
   const PolicySettings& get_settings() const OVERRIDE;
 
   virtual void OnPTUFinished(const bool ptu_result) OVERRIDE;
+
+  /**
+   * @brief OnDeviceSwitching Notifies policy manager on device switch event so
+   * policy permissions should be processed accordingly
+   * @param device_id_from Id of device being switched
+   * @param device_id_to Id of device on the new transport
+   */
+  void OnDeviceSwitching(const std::string& device_id_from,
+                         const std::string& device_id_to) FINAL;
 
  protected:
   /**
@@ -584,7 +625,6 @@ class PolicyHandler : public PolicyHandlerInterface,
       PermissionConsent& out_permissions) OVERRIDE;
 #endif
 
-#ifdef SDL_REMOTE_CONTROL
   /**
    * @brief Updates HMI level for specified application and send notification
    * @param app application where HMI level was changed
@@ -594,7 +634,6 @@ class PolicyHandler : public PolicyHandlerInterface,
                       mobile_apis::HMILevel::eType level);
   std::vector<std::string> GetDevicesIds(
       const std::string& policy_app_id) OVERRIDE;
-#endif  // SDL_REMOTE_CONTROL
 
   /**
    * @brief Sets days after epoch on successful policy update
@@ -693,9 +732,9 @@ class PolicyHandler : public PolicyHandlerInterface,
 
  private:
   mutable sync_primitives::RWLock policy_manager_lock_;
-  utils::SharedPtr<PolicyManager> policy_manager_;
+  std::shared_ptr<PolicyManager> policy_manager_;
   void* dl_handle_;
-  utils::SharedPtr<PolicyEventObserver> event_observer_;
+  std::shared_ptr<PolicyEventObserver> event_observer_;
   uint32_t last_activated_app_id_;
 
   /**
@@ -717,9 +756,9 @@ class PolicyHandler : public PolicyHandlerInterface,
   std::map<std::string, std::string> app_to_device_link_;
 
   // Lock for app to device list
-  sync_primitives::Lock app_to_device_link_lock_;
+  sync_primitives::RecursiveLock app_to_device_link_lock_;
 
-  utils::SharedPtr<StatisticManagerImpl> statistic_manager_impl_;
+  std::shared_ptr<StatisticManagerImpl> statistic_manager_impl_;
   const PolicySettings& settings_;
   application_manager::ApplicationManager& application_manager_;
   friend class AppPermissionDelegate;

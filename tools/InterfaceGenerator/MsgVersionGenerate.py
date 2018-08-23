@@ -12,14 +12,25 @@ def generate_msg_version(file_name, path_to_storage):
     """
     tree = xml.etree.ElementTree.parse(file_name)
     root = tree.getroot()
-    if (root.tag == "interface" and "version" in root.attrib):
+    if (root.tag == "interface" and "version" and "minVersion" in root.attrib):
         check_version_format(root.attrib["version"])
         array = (root.attrib["version"]).split(".")
         major_version = array[0]
         minor_version = array[1]
         patch_version = array[2]
-        if (major_version.isdigit() and minor_version.isdigit() and patch_version.isdigit):
-            data_for_storage = prepare_data_for_storage(major_version, minor_version, patch_version)
+
+        check_minimum_version_format(root.attrib["minVersion"])
+        minimum_version_array = (root.attrib["minVersion"]).split(".")
+        if (len(minimum_version_array) == 2):
+            minimum_version_array.append("0")
+        minimum_major_version = minimum_version_array[0]
+        minimum_minor_version = minimum_version_array[1]
+        minimum_patch_version = minimum_version_array[2]
+
+        if (major_version.isdigit() and minor_version.isdigit() and patch_version.isdigit() and 
+            minimum_major_version.isdigit() and minimum_minor_version.isdigit() and minimum_patch_version.isdigit()):
+            data_for_storage = prepare_data_for_storage(major_version, minor_version, patch_version,  
+                minimum_major_version,  minimum_minor_version,  minimum_patch_version)
             store_data_to_file(path_to_storage, data_for_storage)  
         else:
             raise RPCBase.ParseError("Attribute version has incorect value in MOBILE_API.xml")
@@ -45,7 +56,16 @@ def check_version_format(version):
         raise RPCBase.ParseError("Incorrect format of version please check MOBILE_API.xml. "
                                  "Need format of version major_version.minor_version.patch_version")
 
-def prepare_data_for_storage(major_version, minor_version, patch_version):
+
+def check_minimum_version_format(version):
+    """Checks correctness of format of version
+    """
+    p = re.compile('\d+\\.\d+\\.\d+|\d+\\.\d+')
+    result = p.match(version)
+    if result == None or (result.end() != len(version)):
+        raise RPCBase.ParseError("Incorrect format of version please check MOBILE_API.xml. "
+                                 "Need format of minVersion major_version.minor_version or major_version.minor_version.patch_version")
+def prepare_data_for_storage(major_version, minor_version, patch_version, minimum_major_version, minimum_minor_version, minimum_patch_version):
     """Prepares data to store to file.
     """
     temp = Template(
@@ -80,8 +100,12 @@ def prepare_data_for_storage(major_version, minor_version, patch_version):
     u'''const uint16_t major_version = $m_version;\n'''
     u'''const uint16_t minor_version = $min_version;\n'''
     u'''const uint16_t patch_version = $p_version;\n'''
+    u'''const uint16_t minimum_major_version = $min_major_version;\n'''
+    u'''const uint16_t minimum_minor_version = $min_minor_version;\n'''
+    u'''const uint16_t minimum_patch_version = $min_patch_version;\n'''
     u'''}  // namespace application_manager\n'''
     u'''#endif  // GENERATED_MSG_VERSION_H''')
-    data_to_file = temp.substitute(m_version = major_version, min_version = minor_version, p_version = patch_version)
+    data_to_file = temp.substitute(m_version = major_version, min_version = minor_version, p_version = patch_version,
+        min_major_version = minimum_major_version, min_minor_version = minimum_minor_version, min_patch_version = minimum_patch_version)
     return data_to_file
     

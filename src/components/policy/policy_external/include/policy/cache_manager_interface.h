@@ -38,7 +38,7 @@
 
 #include "policy/policy_table/types.h"
 #include "policy/pt_representation.h"
-#include "utils/shared_ptr.h"
+
 #include "policy/usage_statistics/counter.h"
 #include "policy/policy_types.h"
 #include "policy/policy_settings.h"
@@ -46,6 +46,16 @@
 namespace policy_table = rpc::policy_table_interface_base;
 
 namespace policy {
+
+namespace RequestType {
+// Describes available RequestType states in policy table
+enum class State { UNAVAILABLE = 0, AVAILABLE, EMPTY, OMITTED };
+}  // namespace RequestType
+
+namespace RequestSubType {
+// Describes available RequestSubType states in policy table
+enum class State { UNAVAILABLE = 0, AVAILABLE, EMPTY, OMITTED };
+}  // namespace RequestSubType
 
 class CacheManagerInterface {
  public:
@@ -79,6 +89,21 @@ class CacheManagerInterface {
                                 const PTString& hmi_level,
                                 const PTString& rpc,
                                 CheckPermissionResult& result) = 0;
+  /**
+   * @brief Get state of request types for given application
+   * @param policy_app_id Unique application id
+   * @return request type state
+   */
+  virtual RequestType::State GetAppRequestTypesState(
+      const std::string& policy_app_id) const = 0;
+
+  /**
+   * @brief Get state of request subtypes for given application
+   * @param policy_app_id Unique application id
+   * @return request subtype state
+   */
+  virtual RequestSubType::State GetAppRequestSubTypesState(
+      const std::string& policy_app_id) const = 0;
 
   /**
    * @brief Returns true if Policy Table was not updated yet
@@ -212,7 +237,7 @@ class CacheManagerInterface {
    * device_info, statistics, excluding user messages
    * @return Generated structure for obtaining Json string.
    */
-  virtual utils::SharedPtr<policy_table::Table> GenerateSnapshot() = 0;
+  virtual std::shared_ptr<policy_table::Table> GenerateSnapshot() = 0;
 
   /**
    * Applies policy table to the current table
@@ -706,6 +731,15 @@ class CacheManagerInterface {
       std::vector<std::string>& request_types) const = 0;
 
   /**
+   * @brief Gets request subtypes for application
+   * @param policy_app_id Unique application id
+   * @param request_subtypes Request subtypes of application to be filled
+   */
+  virtual void GetAppRequestSubTypes(
+      const std::string& policy_app_id,
+      std::vector<std::string>& request_subtypes) const = 0;
+
+  /**
    * @brief Gets meta information
    * @return meta information
    */
@@ -778,18 +812,27 @@ class CacheManagerInterface {
   virtual void SetExternalConsentForApp(
       const PermissionConsent& permissions) = 0;
 
+  /**
+   * @brief OnDeviceSwitching Processes existing policy permissions for devices
+   * switching transport
+   * @param device_id_from Device ID original
+   * @param device_id_to Device ID new
+   */
+  virtual void OnDeviceSwitching(const std::string& device_id_from,
+                                 const std::string& device_id_to) = 0;
+
 #ifdef BUILD_TESTS
   /**
-   * @brief GetPT allows to obtain SharedPtr to PT.
+   * @brief GetPT allows to obtain std::shared_ptr to PT.
    * Used ONLY in Unit tests
-   * @return SharedPTR to PT
+   * @return std::shared_ptr to PT
    *
    */
-  virtual utils::SharedPtr<policy_table::Table> GetPT() const = 0;
+  virtual std::shared_ptr<policy_table::Table> GetPT() const = 0;
 #endif
 };
 
-typedef utils::SharedPtr<CacheManagerInterface> CacheManagerInterfaceSPtr;
+typedef std::shared_ptr<CacheManagerInterface> CacheManagerInterfaceSPtr;
 
 }  // namespace policy
 

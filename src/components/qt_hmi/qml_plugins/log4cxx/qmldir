@@ -1,3 +1,0 @@
-module com.ford.sdl.hmi.log4cxx
-plugin QmlLog4cxx
-

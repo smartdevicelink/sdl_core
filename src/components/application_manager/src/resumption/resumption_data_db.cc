@@ -163,11 +163,10 @@ void ResumptionDataDB::SaveApplication(
   }
 
   if (application->is_application_data_changed()) {
-    if (application_exist) {
-      if (!DeleteSavedApplication(policy_app_id, device_mac)) {
-        LOG4CXX_ERROR(logger_, "Deleting of application data is not finished");
-        return;
-      }
+    if (application_exist &&
+        !DeleteSavedApplication(policy_app_id, device_mac)) {
+      LOG4CXX_ERROR(logger_, "Deleting of application data is not finished");
+      return;
     }
 
     if (!SaveApplicationToDB(application, policy_app_id, device_mac)) {
@@ -176,23 +175,15 @@ void ResumptionDataDB::SaveApplication(
     }
     LOG4CXX_INFO(logger_, "All data from application were saved successfully");
     application->set_is_application_data_changed(false);
-  } else {
-    if (application_exist) {
-      if (!UpdateApplicationData(application, policy_app_id, device_mac)) {
-        LOG4CXX_ERROR(logger_, "Updating application data is failed");
-        return;
-      }
-      LOG4CXX_INFO(logger_, "Application data were updated successfully");
-    } else {
-      if (Compare<HMILevel::eType, EQ, ONE>(application->hmi_level(),
-                                            HMILevel::HMI_FULL,
-                                            HMILevel::HMI_LIMITED)) {
-        if (!InsertApplicationData(application, policy_app_id, device_mac)) {
-          LOG4CXX_ERROR(logger_, "Saving data of application is failed");
-          return;
-        }
-      }
+  } else if (application_exist) {
+    if (!UpdateApplicationData(application, policy_app_id, device_mac)) {
+      LOG4CXX_ERROR(logger_, "Updating application data is failed");
+      return;
     }
+    LOG4CXX_INFO(logger_, "Application data were updated successfully");
+  } else if (!InsertApplicationData(application, policy_app_id, device_mac)) {
+    LOG4CXX_ERROR(logger_, "Saving data of application is failed");
+    return;
   }
   WriteDb();
 }
@@ -212,7 +203,7 @@ uint32_t ResumptionDataDB::GetHMIApplicationID(
   return hmi_app_id;
 }
 
-void ResumptionDataDB::OnSuspend() {
+void ResumptionDataDB::IncrementIgnOffCount() {
   LOG4CXX_AUTO_TRACE(logger_);
 
   utils::dbms::SQLQuery query_update_suspend_data(db());
@@ -238,7 +229,7 @@ void ResumptionDataDB::OnSuspend() {
     }
   }
 
-  if (query_update_last_ign_off_time.Prepare(KUpdateLastIgnOffTime)) {
+  if (query_update_last_ign_off_time.Prepare(kUpdateLastIgnOffTime)) {
     query_update_last_ign_off_time.Bind(0, static_cast<int64_t>(time(NULL)));
     if (query_update_last_ign_off_time.Exec()) {
       LOG4CXX_INFO(logger_, "Data last_ign_off_time was updated");
@@ -291,7 +282,7 @@ bool ResumptionDataDB::GetHashId(const std::string& policy_app_id,
   return SelectHashId(policy_app_id, device_id, hash_id);
 }
 
-void ResumptionDataDB::OnAwake() {
+void ResumptionDataDB::DecrementIgnOffCount() {
   LOG4CXX_AUTO_TRACE(logger_);
 
   UpdateDataOnAwake();
@@ -372,8 +363,59 @@ bool ResumptionDataDB::RemoveApplicationFromSaved(
 
 uint32_t ResumptionDataDB::GetIgnOffTime() const {
   LOG4CXX_AUTO_TRACE(logger_);
-
   return SelectIgnOffTime();
+}
+
+uint32_t ResumptionDataDB::GetGlobalIgnOnCounter() const {
+  LOG4CXX_AUTO_TRACE(logger_);
+  sync_primitives::AutoLock autolock(resumption_lock_);
+
+  utils::dbms::SQLQuery query(db());
+  if (!query.Prepare(kSelectGlobalIgnOnCounter)) {
+    LOG4CXX_ERROR(logger_,
+                  "Problem with prepare query : " << kSelectGlobalIgnOnCounter);
+    return 1;
+  }
+
+  if (!query.Exec()) {
+    LOG4CXX_ERROR(logger_,
+                  "Problem with exec query : " << kSelectGlobalIgnOnCounter);
+    return 1;
+  }
+
+  const auto global_ign_on_counter = query.GetUInteger(0);
+  LOG4CXX_DEBUG(logger_, "Global Ign On Counter = " << global_ign_on_counter);
+  return global_ign_on_counter;
+}
+
+void ResumptionDataDB::IncrementGlobalIgnOnCounter() {
+  LOG4CXX_AUTO_TRACE(logger_);
+  sync_primitives::AutoLock autolock(resumption_lock_);
+
+  db_->BeginTransaction();
+  utils::dbms::SQLQuery query_update_global_ign_on_count(db());
+  if (query_update_global_ign_on_count.Prepare(kUpdateGlobalIgnOnCount)) {
+    if (query_update_global_ign_on_count.Exec()) {
+      LOG4CXX_DEBUG(logger_,
+                    "Data query_update_global_ign_on_count was updated");
+    }
+  }
+  db_->CommitTransaction();
+  WriteDb();
+}
+
+void ResumptionDataDB::ResetGlobalIgnOnCount() {
+  LOG4CXX_AUTO_TRACE(logger_);
+  sync_primitives::AutoLock autolock(resumption_lock_);
+
+  LOG4CXX_DEBUG(logger_, "Global IGN ON counter resetting");
+
+  utils::dbms::SQLQuery query_update_global_ign_on_count(db());
+  if (query_update_global_ign_on_count.Prepare(kResetGlobalIgnOnCount)) {
+    if (query_update_global_ign_on_count.Exec()) {
+      LOG4CXX_DEBUG(logger_, "Data was updated");
+    }
+  }
 }
 
 ssize_t ResumptionDataDB::IsApplicationSaved(
@@ -553,7 +595,6 @@ void ResumptionDataDB::SelectDataForLoadResumeData(
   using namespace app_mngr;
   using namespace smart_objects;
   LOG4CXX_AUTO_TRACE(logger_);
-
   utils::dbms::SQLQuery select_data(db());
   utils::dbms::SQLQuery count_application(db());
   if (!select_data.Prepare(kSelectDataForLoadResumeData) ||
@@ -949,7 +990,7 @@ bool ResumptionDataDB::SelectSubscriptionsData(
     return false;
   }
 
-  saved_app[strings::application_subscribtions] = SmartObject(SmartType_Map);
+  saved_app[strings::application_subscriptions] = SmartObject(SmartType_Map);
 
   if (0 == count_item) {
     LOG4CXX_INFO(logger_, "Application does not contain subscriptions data");
@@ -968,8 +1009,8 @@ bool ResumptionDataDB::SelectSubscriptionsData(
   size_t buttons_idx = 0;
   size_t vi_idx = 0;
   /* Position of data in "select_subscriptions" :
-     field "vehicleValue" from table "applicationSubscribtionsArray" = 0
-     field "ButtonNameValue" from table "applicationSubscribtionsArray" = 1*/
+     field "vehicleValue" from table "applicationSubscriptionsArray" = 0
+     field "ButtonNameValue" from table "applicationSubscriptionsArray" = 1*/
   while (select_subscriptions.Next()) {
     if (!select_subscriptions.IsNull(0)) {
       application_vehicle_info[vi_idx++] = select_subscriptions.GetInteger(0);
@@ -979,12 +1020,12 @@ bool ResumptionDataDB::SelectSubscriptionsData(
     }
   }
   if (!application_buttons.empty()) {
-    saved_app[strings::application_subscribtions]
+    saved_app[strings::application_subscriptions]
              [strings::application_buttons] = application_buttons;
   }
 
   if (!application_vehicle_info.empty()) {
-    saved_app[strings::application_subscribtions]
+    saved_app[strings::application_subscriptions]
              [strings::application_vehicle_info] = application_vehicle_info;
   }
   LOG4CXX_INFO(logger_, "Subscriptions were restored from DB successfully");
@@ -1500,9 +1541,9 @@ bool ResumptionDataDB::DeleteSavedSubscriptions(
   LOG4CXX_AUTO_TRACE(logger_);
 
   if (!ExecQueryToDeleteData(
-          policy_app_id, device_id, kDeleteApplicationSubscribtionsArray)) {
+          policy_app_id, device_id, kDeleteApplicationSubscriptionsArray)) {
     LOG4CXX_WARN(logger_,
-                 "Incorrect delete from applicationSubscribtionsArray.");
+                 "Incorrect delete from applicationSubscriptionsArray.");
     return false;
   }
   return true;
@@ -1895,7 +1936,7 @@ bool ResumptionDataDB::SaveApplicationToDB(
   }
   if (!InsertSubscriptionsData(GetApplicationSubscriptions(application),
                                application_primary_key)) {
-    LOG4CXX_WARN(logger_, "Incorrect insert subscribtions data to DB.");
+    LOG4CXX_WARN(logger_, "Incorrect insert subscriptions data to DB.");
     db_->RollbackTransaction();
     return false;
   }
@@ -1952,9 +1993,9 @@ bool ResumptionDataDB::SaveApplicationToDB(
     db_->RollbackTransaction();
     return false;
   }
-  if (!InsertSubscriptionsData(application["subscribtions"],
+  if (!InsertSubscriptionsData(application["subscriptions"],
                                application_primary_key)) {
-    LOG4CXX_WARN(logger_, "Incorrect insert subscribtions data to DB.");
+    LOG4CXX_WARN(logger_, "Incorrect insert subscriptions data to DB.");
     db_->RollbackTransaction();
     return false;
   }
@@ -2160,9 +2201,9 @@ bool ResumptionDataDB::InsertSubscriptionsData(
     return false;
   }
   /* Positions of binding data for "insert_subscriptions":
-       field "idApplication" from table "applicationSubscribtionsArray" = 0
-       field "vehicleValue" from table "applicationSubscribtionsArray" = 1
-       field "ButtonNameValue" from table "applicationSubscribtionsArray" = 2*/
+       field "idApplication" from table "applicationSubscriptionsArray" = 0
+       field "vehicleValue" from table "applicationSubscriptionsArray" = 1
+       field "ButtonNameValue" from table "applicationSubscriptionsArray" = 2*/
   for (size_t i = 0; i < max_length; ++i) {
     insert_subscriptions.Bind(0, application_primary_key);
     if (i < vi_sub_length) {
@@ -2578,7 +2619,7 @@ bool ResumptionDataDB::InsertApplicationData(
   const mobile_apis::HMILevel::eType hmi_level = application.m_hmi_level;
   bool is_media_application = application.m_is_media_application;
   bool is_subscribed_for_way_points =
-      application_manager_.IsAppSubscribedForWayPoints(connection_key);
+      application_manager_.IsAppSubscribedForWayPoints(application.app_ptr);
 
   if (!query.Prepare(kInsertApplication)) {
     LOG4CXX_WARN(logger_,
@@ -2804,6 +2845,7 @@ ApplicationParams::ApplicationParams(app_mngr::ApplicationSharedPtr application)
     m_hmi_app_id = application->hmi_app_id();
     m_hmi_level = application->hmi_level();
     m_is_media_application = application->IsAudioApplication();
+    app_ptr = application;
   }
 }
 

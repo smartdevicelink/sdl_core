@@ -34,7 +34,7 @@
 #define SRC_COMPONENTS_POLICY_POLICY_REGULAR_INCLUDE_POLICY_POLICY_HELPER_H_
 
 #include "policy/policy_table/functions.h"
-#include "utils/shared_ptr.h"
+
 #include "policy/policy_types.h"
 
 namespace policy {
@@ -82,8 +82,8 @@ bool operator!=(const policy_table::ApplicationParams& first,
  */
 struct CheckAppPolicy {
   CheckAppPolicy(PolicyManagerImpl* pm,
-                 const utils::SharedPtr<policy_table::Table> update,
-                 const utils::SharedPtr<policy_table::Table> snapshot);
+                 const std::shared_ptr<policy_table::Table> update,
+                 const std::shared_ptr<policy_table::Table> snapshot);
   bool operator()(const AppPoliciesValueType& app_policy);
 
  private:
@@ -95,7 +95,8 @@ struct CheckAppPolicy {
     RESULT_CONSENT_NEEDED,
     RESULT_CONSENT_NOT_REQIURED,
     RESULT_PERMISSIONS_REVOKED_AND_CONSENT_NEEDED,
-    RESULT_REQUEST_TYPE_CHANGED
+    RESULT_REQUEST_TYPE_CHANGED,
+    RESULT_REQUEST_SUBTYPE_CHANGED
   };
 
   void SetPendingPermissions(const AppPoliciesValueType& app_policy,
@@ -114,7 +115,8 @@ struct CheckAppPolicy {
       const std::vector<FunctionalGroupPermission>& revoked_groups) const;
   bool IsKnownAppication(const std::string& application_id) const;
   void NotifySystem(const AppPoliciesValueType& app_policy) const;
-  void SendPermissionsToApp(const AppPoliciesValueType& app_policy) const;
+  void SendPermissionsToApp(const std::string& app_id,
+                            const policy_table::Strings& groups) const;
   bool IsAppRevoked(const AppPoliciesValueType& app_policy) const;
   bool NicknamesMatch(const AppPoliciesValueType& app_policy) const;
   /**
@@ -125,11 +127,12 @@ struct CheckAppPolicy {
   bool IsConsentRequired(const std::string& app_id,
                          const std::string& group_name) const;
   bool IsRequestTypeChanged(const AppPoliciesValueType& app_policy) const;
+  bool IsRequestSubTypeChanged(const AppPoliciesValueType& app_policy) const;
 
  private:
   PolicyManagerImpl* pm_;
-  const utils::SharedPtr<policy_table::Table> update_;
-  const utils::SharedPtr<policy_table::Table> snapshot_;
+  const std::shared_ptr<policy_table::Table> update_;
+  const std::shared_ptr<policy_table::Table> snapshot_;
 };
 
 /*

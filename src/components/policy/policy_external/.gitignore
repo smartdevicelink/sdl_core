@@ -29,8 +29,6 @@ src/appMain/hmi_link
 src/appMain/smartDeviceLinkCore
 test/components/application_manager/policies_manager/test_policies_table
 test/components/application_manager/test_formatters_commands
-test/components/dbus/test_DBusAdapter
-test/components/dbus/test_DBusSchema
 test/components/protocol_handler/test_ProtocolHandler
 test/components/request_watchdog/test_RequestWatchdog
 test/components/smart_objects/SchemaItem/test_SmartObject_AlwaysFalseSchemaItemTest
@@ -54,11 +52,8 @@ test/components/utils/test_Utils
 test/test_suit
 
 # libraries
-src/components/qt_hmi/qml_plugins/dbus/libhmi_dbus.so
-src/components/qt_hmi/qml_plugins/hmi_framework/libHmiFramework.so
 
 # install folders
-src/components/qt_hmi/qml_model/com/ford/sdl
 
 # ctags-generated
 tags
@@ -70,9 +65,6 @@ moc_*.cpp
 *_automoc.cpp
 
 # generated files
-src/components/qt_hmi/qml_plugins/dbus_adapter/qml_dbus.cc
-src/components/qt_hmi/qml_plugins/dbus_adapter/qml_dbus.h
-src/components/qt_hmi/qml_model/hmi_api/*Proxy.qml
 
 # Mac OS Specific
 .DS_Store

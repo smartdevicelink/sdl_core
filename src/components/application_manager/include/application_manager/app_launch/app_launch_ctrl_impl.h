@@ -49,7 +49,7 @@ class ResumeCtrl;
 
 namespace app_launch {
 // TODO(AK) Use unique pointer
-typedef utils::SharedPtr<timer::Timer> TimerPtr;
+typedef std::shared_ptr<timer::Timer> TimerPtr;
 class MultipleAppsLauncherFactoryImpl;
 
 class AppLaunchCtrlImpl : public AppLaunchCtrl {

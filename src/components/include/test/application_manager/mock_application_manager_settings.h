@@ -55,6 +55,8 @@ class MockApplicationManagerSettings
   // typedef for the return type.
   MOCK_CONST_METHOD0(get_vehicle_data_frequency,
                      const std::pair<uint32_t, int32_t>&());
+  MOCK_CONST_METHOD0(get_interior_vehicle_data_frequency,
+                     const std::pair<uint32_t, int32_t>&());
   MOCK_CONST_METHOD0(hash_string_size, uint32_t());
   MOCK_CONST_METHOD0(app_storage_folder, const std::string&());
   MOCK_CONST_METHOD0(app_info_storage, const std::string&());
@@ -87,6 +89,7 @@ class MockApplicationManagerSettings
   MOCK_CONST_METHOD0(named_audio_pipe_path, const std::string&());
   MOCK_CONST_METHOD0(video_stream_file, const std::string&());
   MOCK_CONST_METHOD0(audio_stream_file, const std::string&());
+  MOCK_CONST_METHOD0(use_full_app_id, bool());
   MOCK_CONST_METHOD0(use_db_for_resumption, bool());
   MOCK_CONST_METHOD0(app_resumption_save_persistent_data_timeout,
                      const uint32_t&());
@@ -95,6 +98,13 @@ class MockApplicationManagerSettings
   MOCK_CONST_METHOD0(app_resuming_timeout, const uint32_t&());
   MOCK_CONST_METHOD0(attempts_to_open_resumption_db, uint16_t());
   MOCK_CONST_METHOD0(open_attempt_timeout_ms_resumption_db, uint16_t());
+  MOCK_CONST_METHOD0(transport_required_for_resumption_map,
+                     std::map<std::string, std::vector<std::string> >&());
+  MOCK_CONST_METHOD0(navigation_lowbandwidth_resumption_level,
+                     const std::string&());
+  MOCK_CONST_METHOD0(projection_lowbandwidth_resumption_level,
+                     const std::string&());
+  MOCK_CONST_METHOD0(media_lowbandwidth_resumption_level, const std::string&());
   MOCK_METHOD1(set_config_file_name, void(const std::string& fileName));
   // The following line won't really compile, as the return
   // type has multiple template arguments.  To fix it, use a

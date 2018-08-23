@@ -1,92 +1,61 @@
-# 4.3.0 Release Candidate
+# Release 4.5.0
 
-## New Features
+## Supported Specifications
+- SDL Mobile RPC Spec: [Version 4.5.0](https://github.com/smartdevicelink/rpc_spec/releases/tag/4.5.0)
+- SDL Protocol Spec: [Version 5.0.0](https://github.com/smartdevicelink/protocol_spec/releases/tag/5.0.0)
 
-### EXTENDED_POLICY modes:
-- The `EXTENDED_POLICY` CMake variable (previously `ENABLE_EXTENDED_POLICY`) now has three possible configurations
-  - `HTTP` (previously `ENABLE_EXTENDED_POLICY: OFF`) - #941 
-  - `PROPRIETARY` (previously `ENABLE_EXTENDED_POLICY: ON`) - #940
-  - `EXTERNAL_PROPRIETARY` (new, fully featured version of `PROPRIETARY` mode) - #942 
+## Implemented Proposals
 
-### EXTERNAL_PROPRIETARY mode:
-#### New policy table update sequence 
-A new policy table update flow was created specifically for the `EXTERNAL_PROPRIETARY`  policy mode
+[Connectivity via iAP-BT and Transport Switch](https://github.com/smartdevicelink/sdl_evolution/blob/master/proposals/0053-Connectivity-via-iAP-BT-and-Transport-Switch.md) - Implementation of a mechanism to change a registered app connected over one transport to another seamlessly.
 
-- Requirements/Details - #933 
-- Diagram - https://user-images.githubusercontent.com/10549248/26896053-9417c604-4b91-11e7-9e47-524c930eb542.png
+[Mark public deprecated methods](https://github.com/smartdevicelink/sdl_evolution/blob/master/proposals/0092-Deprecated-interfaces-markup.md) - Implemented a DEPRECATED macro for marking deprecated methods in the project. Using methods marked with this macro will result in a warning being generated.
 
-#### External Policy Manager
-As part of the `EXTERNAL_PROPRIETARY` policy mode, the concept of an "external policy manager" is necessary. This policy manager is a separate program which is in charge of encrypting/decrypting policy tables and attaching an HTTP header to the OnSystemRequest payload when performing a Policy Table Update.
+[Remove QT HMI from SDL Core (Partially Complete)](https://github.com/smartdevicelink/sdl_evolution/blob/master/proposals/0110-remove-qt-hmi-from-sdl-core.md) - The `qt_hmi` component was removed from SDL Core, the QT_HMI_API interface and dbus adapter will be removed in the next major release, due to this aspect of the proposal requiring breaking changes.
 
-As part of this release, a sample application which performs this function was added to this repository for those who wish to implement this new policy mode, and this program can be started along with Core using an included bash script. This sample application does nothing with the policy table snapshot during the encryption and decryption phases, allowing for OEMs to implement their own encryption algorithms in their place.
+[Use Boost Library (Partially Complete)](https://github.com/smartdevicelink/sdl_evolution/blob/master/proposals/0044-use-Boost-library.md) - The `boost` library is now installed as a 3rd party library, this library is currently only used in the refactored message broker component.
 
-#### App permissions/User consent
-Users can now control what functional groups that they want apps to be able to access, as well as decide whether to enable SDL functionality at all on a device-by-device basis. 
+## Enhancements
+- `DBus` and `libusb` are now dynamically linked, instead of being installed as 3rd-party libraries during the SDL Core build - #2004 
 
-  - Logic was added to allow the user to control what devices are permitted to use SDL functionality - #934 
-    - Users are prompted when activating an app on a new device for the first time whether or not to allow the device to use SDL functionality (sequence shown in [this diagram](https://user-images.githubusercontent.com/10549248/26897493-ba378f2c-4b96-11e7-93b0-b24f01c7dc28.png))
-  - Logic was added to the Policy Manager to allow the user to control what apps have access to specific functional groups - #939 
-    - Users are prompted when activating an app for the first time (or modifying permissions in settings) with information on what access a requested functional group requires. The user responds to determine whether or not to allow this functionality within the new app (sequence shown in [this diagram](https://user-images.githubusercontent.com/10549248/26902322-e6e02bf0-4ba6-11e7-98b3-c285396061a4.png))
+## Bug Fixes
+- [Remove OEM Specific references in SDL policy table preload file](https://github.com/smartdevicelink/sdl_core/issues/1252)
+- ["resultCode" should be more descriptive than "INVALID_DATA"](https://github.com/smartdevicelink/sdl_core/issues/31)
+- [SDL doesn't apply sequence SUSPEND -> OnSDLAwake -> SUSPEND -> IGN_OFF for saving resumption data](https://github.com/smartdevicelink/sdl_core/issues/1395)
+- [SDL responds "resultCode: SUCCESS" while dataType:VEHICLEDATA_EXTERNTEMP is VEHICLE_DATA_NOT_AVAILABLE and not in subscribed list store](https://github.com/smartdevicelink/sdl_core/issues/982)
+- [Policies SDL should be case-insensetive to "AppID" against listed in policies manager](https://github.com/smartdevicelink/sdl_core/issues/992)
+- [App is disconnected due to PROTOCOL_VIOLATION when start audio streaming after rejected 2 times then accepted](https://github.com/smartdevicelink/sdl_core/issues/1004)
+- [SDL doesn't set unsuccessful "message" value to "info" param in case HMI responds via single UI.RPC when Interface.IsReady missing](https://github.com/smartdevicelink/sdl_core/issues/997)
+- [Navigation SDL does not respond info message in case GENERIC_ERROR watchdog timeout from HMI](https://github.com/smartdevicelink/sdl_core/issues/990)
+- [SDL does not respond info message in case GENERIC_ERROR watchdog timeout from HM](https://github.com/smartdevicelink/sdl_core/issues/1012)
+- [SDL doesn't send info parameter when result of ResetGlobalProperties is GENERIC_ERROR](https://github.com/smartdevicelink/sdl_core/issues/1016)
+- [SDL does not send StopAudioStream() if exit app while Video service and Audio service are starting.](https://github.com/smartdevicelink/sdl_core/issues/1002)
+- [APIs AlertManeuver: SDL responds GENERIC_ERROR instead of INVALID_DATA when soft button has Type is Image or Both and Text is whitespace or \t or \n or empty](https://github.com/smartdevicelink/sdl_core/issues/980)
+- [IVSU SDL doesn't reject SystemRequest with filenam=IVSU but w/o binary data.](https://github.com/smartdevicelink/sdl_core/issues/976)
+- [Memory leaks: SDL does not release memory after sending AddCommand limit exhausted](https://github.com/smartdevicelink/sdl_core/issues/1029)
+- [Negative result code send instead of IGNORED for UnsubscribedVehicleData when VehicleInfo IsReady Missing](https://github.com/smartdevicelink/sdl_core/issues/996)
+- [API SDL responds "UNSUPPORTED_RESOURCE", success= false in case only have "UNSUPPORTED_RESOURCE" to Navigation.AlertManeuver](https://github.com/smartdevicelink/sdl_core/issues/989)
+- [Default app policies are never updated after a PTU](https://github.com/smartdevicelink/sdl_core/issues/1772)
+- [Build fails with GCC6+](https://github.com/smartdevicelink/sdl_core/issues/1975)
+- [Remote Control test suite fails](https://github.com/smartdevicelink/sdl_core/issues/1993)
+- [PoliciesManager allows all requested params in case "parameters" field is empty](https://github.com/smartdevicelink/sdl_core/issues/1873)
+- [OnDriverDistraction SDL does not send notification to app right after this app changes level from NONE to any other](https://github.com/smartdevicelink/sdl_core/issues/1881)
+- [Protect access to Resumption data during LastState::SaveStateToFileSystem](https://github.com/smartdevicelink/sdl_core/issues/1953)
+- [Need to protect cache manager "pt_" from concurrent access](https://github.com/smartdevicelink/sdl_core/issues/1961)
+- [Prevent deadlock in EventDispatcherIimpl::raise_event](https://github.com/smartdevicelink/sdl_core/issues/1949)
+- [Bluetooth StartService fail after Core restarted](https://github.com/smartdevicelink/sdl_core/issues/1932)
+- [Silent error caused by implicit conversion of SmartPointer to integer](https://github.com/smartdevicelink/sdl_core/issues/1834)
+- [AOA USB transport buffer size too small](https://github.com/smartdevicelink/sdl_core/issues/1863)
+- [Lock screen icon URL should be updated](https://github.com/smartdevicelink/sdl_core/issues/1646)
+- [Broken link in README.md for Software Architecture Documentation](https://github.com/smartdevicelink/sdl_core/issues/2091)
+- [SDL doesn't send OnPermissionsChange in case of external user consent](https://github.com/smartdevicelink/sdl_core/issues/2072)
+- [Build fails when ENABLE_SECURITY=OFF](https://github.com/smartdevicelink/sdl_core/issues/2073)
 
-
-#### External user consent
-External user consent allows the HMI to define several groups of permissions within the policy table. This allows the user to enable/disable several functional groups at once.
-
-  - The `externalConsentStatus` field is included as part of a GetListOfPermissions response from SDL Core to communicate which groups are activated - #1047 
-  - External consent groups can be used to enable sets of functional groups using the `disallowed_by_external_consent_entities_off` field in the Policy Table - #1049 
-    - If this external consent group is set to `ON`, all functional groupings with this parameter are allowed by the user - #1048 
-    - If this external consent group is set to `OFF`, all functional groupings with this parameter are disallowed by the user - #1050 
-  - External consent groups can be used to disable sets of functional groups using the `disallowed_by_external_consent_entities_on` field in the Policy Table
-    - If this external consent group is set to `ON`, all functional groupings with this parameter are disallowed by the user
-    - If this external consent group is set to `OFF`, all functional groupings with this parameter are allowed by the user
-
-#### Cache Manager Function Implementations
-Prior to this release, several functions included in cache_manager.cc were not fully implemented and would not query the local policy table for defined rules and policies. The newly implemented functions for the `EXTERNAL_PROPRIETARY` cache manager are listed below:
- - [CanAppKeepContext()](https://github.com/smartdevicelink/sdl_core/blob/release/4.3.0/src/components/policy/policy_external/src/cache_manager.cc#L310)
- - [CanAppStealFocus()](https://github.com/smartdevicelink/sdl_core/blob/release/4.3.0/src/components/policy/policy_external/src/cache_manager.cc#L363)
- - [GetDefaultHMI()](https://github.com/smartdevicelink/sdl_core/blob/release/4.3.0/src/components/policy/policy_external/src/cache_manager.cc#L374)
- - [ResetUserConsent()](https://github.com/smartdevicelink/sdl_core/blob/release/4.3.0/src/components/policy/policy_external/src/cache_manager.cc#L391)
- - [GetUserPermissionsForDevice()](https://github.com/smartdevicelink/sdl_core/blob/release/4.3.0/src/components/policy/policy_external/src/cache_manager.cc#L406)
- - [GetPreconsentedGroups()](https://github.com/smartdevicelink/sdl_core/blob/release/4.3.0/src/components/policy/policy_external/src/cache_manager.cc#L477)
- - [GetConsentedGroups()](https://github.com/smartdevicelink/sdl_core/blob/release/4.3.0/src/components/policy/policy_external/src/cache_manager.cc#L514)
- - [GetUnconsentedGroups()](https://github.com/smartdevicelink/sdl_core/blob/release/4.3.0/src/components/policy/policy_external/src/cache_manager.cc#L549)
- - [RemoveAppConsentForGroup()](https://github.com/smartdevicelink/sdl_core/blob/release/4.3.0/src/components/policy/policy_external/src/cache_manager.cc#L605)
- - [GetDeviceGroupsFromPolicies()](https://github.com/smartdevicelink/sdl_core/blob/release/4.3.0/src/components/policy/policy_external/src/cache_manager.cc#L799)
- - [SetDeviceData()](https://github.com/smartdevicelink/sdl_core/blob/release/4.3.0/src/components/policy/policy_external/src/cache_manager.cc#L975)
- - [SetUserPermissionsForDevice()](https://github.com/smartdevicelink/sdl_core/blob/release/4.3.0/src/components/policy/policy_external/src/cache_manager.cc#L1008)
- - [ReactOnUserDevConsentForApp()](https://github.com/smartdevicelink/sdl_core/blob/release/4.3.0/src/components/policy/policy_external/src/cache_manager.cc#L1043)
- - [SetUserPermissionsForApp()](https://github.com/smartdevicelink/sdl_core/blob/release/4.3.0/src/components/policy/policy_external/src/cache_manager.cc#L1076)
- - [CountUnconsentedGroups()](https://github.com/smartdevicelink/sdl_core/blob/release/4.3.0/src/components/policy/policy_external/src/cache_manager.cc#L1768)
- - [SetMetaInfo()](https://github.com/smartdevicelink/sdl_core/blob/release/4.3.0/src/components/policy/policy_external/src/cache_manager.cc#L1868) 
- - [IsMetaInfoPresent()](https://github.com/smartdevicelink/sdl_core/blob/release/4.3.0/src/components/policy/policy_external/src/cache_manager.cc#L1884)
- - [SetSystemLanguage()](https://github.com/smartdevicelink/sdl_core/blob/release/4.3.0/src/components/policy/policy_external/src/cache_manager.cc#L1893)
- - [CleanupUnpairedDevices()](https://github.com/smartdevicelink/sdl_core/blob/release/4.3.0/src/components/policy/policy_external/src/cache_manager.cc#L1919)
- - [SetVinValue()](https://github.com/smartdevicelink/sdl_core/blob/release/4.3.0/src/components/policy/policy_external/src/cache_manager.cc#L2175)
- - [ResetPT()](https://github.com/smartdevicelink/sdl_core/blob/release/4.3.0/src/components/policy/policy_external/src/cache_manager.cc#L2309)
-
-#### Security behavior 
-Requirements/Details - #937 
-
-### HMI_API additions:
-
-A new RPC was added as part of the implementation of `EXTERNAL_PROPRIETARY` policy mode
-
-  - [DecryptCertificate](https://github.com/smartdevicelink/sdl_core/blob/6283aa26e262d2d16ed1393989d8e0e062dba88d/src/components/interfaces/HMI_API.xml#L2468-L2476) RPC
-
-Several API additions were made as part of the implementation of the external user consent feature
-
-  - [EntityStatus](https://github.com/smartdevicelink/sdl_core/blob/6283aa26e262d2d16ed1393989d8e0e062dba88d/src/components/interfaces/HMI_API.xml#L1263-L1266) enum
-  - [ExternalConsentStatus](https://github.com/smartdevicelink/sdl_core/blob/6283aa26e262d2d16ed1393989d8e0e062dba88d/src/components/interfaces/HMI_API.xml#L1268-L1278) struct
-  - externalConsentStatus field added to [OnAppPermissionConsent](https://github.com/smartdevicelink/sdl_core/blob/6283aa26e262d2d16ed1393989d8e0e062dba88d/src/components/interfaces/HMI_API.xml#L4170-L4172) and [GetListOfPermissions](https://github.com/smartdevicelink/sdl_core/blob/6283aa26e262d2d16ed1393989d8e0e062dba88d/src/components/interfaces/HMI_API.xml#L4170-L4172)
-
-## Fixes
-- Includes fixes for all defects found by the Coverity scan tool that were introduced in this release - #1641
-- Includes fixes for several Coverity defects that were previously implemented in the `coverity` branch - #1637
-
-## Implemented proposals
-Two new evolution proposals were implemented in release 4.3.0:
-
-- Add API Patch Version [SDL-0050](https://github.com/smartdevicelink/sdl_evolution/blob/master/proposals/0050-add-api-patch-version.md)
-  - A patch version was added to the MOBILE API version, HMI API interface versions, and SyncMsgVersion struct
-- External Policy Manager [SDL-0045](https://github.com/smartdevicelink/sdl_evolution/blob/master/proposals/0045-external-policy-manager.md)
-  - Details for the implementation of this proposal can be found in the `External Policy Manager` section of these release notes
+### Security Related Fixes
+- [SDL must start PTU for navi app right after app successfully registration](https://github.com/smartdevicelink/sdl_core/issues/1925)
+- [SDL must start PTU for any app except navi right after app successfully request to start first secure service](https://github.com/smartdevicelink/sdl_core/issues/1924)
+- [PolicyTableUpdate is failed by any reason and "ForceProtectedService"=ON at .ini file](https://github.com/smartdevicelink/sdl_core/issues/1923)
+- [PolicyTableUpdate has NO "certificate" and "ForceProtectedService"=ON at .ini file](https://github.com/smartdevicelink/sdl_core/issues/1922)
+- [SDL must respond NACK in case navigation app connected over protocol v2 sends StartService for audio service](https://github.com/smartdevicelink/sdl_core/issues/1912)
+- [PolicyTableUpdate has NO "certificate" and "ForceProtectedService"=OFF at .ini file](https://github.com/smartdevicelink/sdl_core/issues/1894)
+- [PolicyTableUpdate is failed by any reason and "ForceProtectedService"=OFF at .ini file](https://github.com/smartdevicelink/sdl_core/issues/1891)
+- [PolicyTableUpdate is valid and brings "certificate"](https://github.com/smartdevicelink/sdl_core/issues/1888)
