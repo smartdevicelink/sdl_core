@@ -143,6 +143,7 @@ MobileMessageHandler::HandleIncomingMessageProtocolV1(
               message->service_type()));
   if (!message) {
     NOTREACHED();
+    delete outgoing_message;
     return NULL;
   }
 
@@ -178,7 +179,7 @@ MobileMessageHandler::HandleIncomingMessageProtocolV2(
     return NULL;
   }
 
-  std::auto_ptr<application_manager::Message> outgoing_message(
+  std::unique_ptr<application_manager::Message> outgoing_message(
       new application_manager::Message(
           protocol_handler::MessagePriority::FromServiceType(
               message->service_type())));

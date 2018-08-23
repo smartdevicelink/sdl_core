@@ -35,16 +35,14 @@ namespace NsSmartObjects {
 
 CAlwaysTrueSchemaItem::CAlwaysTrueSchemaItem() {}
 
-utils::SharedPtr<CAlwaysTrueSchemaItem> CAlwaysTrueSchemaItem::create() {
-  return new CAlwaysTrueSchemaItem();
+std::shared_ptr<CAlwaysTrueSchemaItem> CAlwaysTrueSchemaItem::create() {
+  return std::shared_ptr<CAlwaysTrueSchemaItem>(new CAlwaysTrueSchemaItem());
 }
 
-Errors::eType CAlwaysTrueSchemaItem::validate(const SmartObject& object) {
-  return Errors::OK;
-}
-
-Errors::eType CAlwaysTrueSchemaItem::validate(const SmartObject& object,
-                                              rpc::ValidationReport* report__) {
+Errors::eType CAlwaysTrueSchemaItem::validate(
+    const SmartObject& Object,
+    rpc::ValidationReport* report__,
+    const utils::SemanticVersion& MessageVersion) {
   return Errors::OK;
 }
 

@@ -41,18 +41,20 @@
 #include <forward_list>
 #include <stdint.h>
 
-#include "utils/date_time.h"
+#include "application_manager/application.h"
 #include "application_manager/application_data_impl.h"
 #include "application_manager/usage_statistics.h"
+#include "application_manager/help_prompt_manager_impl.h"
 #include "application_manager/hmi_state.h"
 #include "protocol_handler/protocol_handler.h"
 
 #include "connection_handler/device.h"
 #include "utils/lock.h"
-#include "utils/atomic_object.h"
+#include <atomic>
 #include "utils/custom_string.h"
 #include "utils/timer.h"
 #include "utils/macro.h"
+#include "utils/date_time.h"
 
 namespace usage_statistics {
 
@@ -89,15 +91,7 @@ class ApplicationImpl : public virtual Application,
       const std::string& mac_address,
       const connection_handler::DeviceHandle device_id,
       const custom_str::CustomString& app_name,
-      utils::SharedPtr<usage_statistics::StatisticsManager> statistics_manager,
-      ApplicationManager& application_manager);
-
-  DEPRECATED ApplicationImpl(
-      uint32_t application_id,
-      const std::string& policy_app_id,
-      const std::string& mac_address,
-      const custom_str::CustomString& app_name,
-      utils::SharedPtr<usage_statistics::StatisticsManager> statistics_manager,
+      std::shared_ptr<usage_statistics::StatisticsManager> statistics_manager,
       ApplicationManager& application_manager);
 
   ~ApplicationImpl();
@@ -120,6 +114,10 @@ class ApplicationImpl : public virtual Application,
     return is_navi_;
   }
   void set_is_navi(bool allow);
+
+  virtual bool is_remote_control_supported() const;
+
+  void set_remote_control_supported(const bool allow);
 
   void set_mobile_projection_enabled(bool option);
 
@@ -167,8 +165,11 @@ class ApplicationImpl : public virtual Application,
   const mobile_api::SystemContext::eType system_context() const;
   inline const mobile_apis::AudioStreamingState::eType audio_streaming_state()
       const;
+  inline const mobile_apis::VideoStreamingState::eType video_streaming_state()
+      const;
   const std::string& app_icon_path() const;
   connection_handler::DeviceHandle device() const;
+  connection_handler::DeviceHandle secondary_device() const;
   const std::string& mac_address() const OVERRIDE;
   const std::string& bundle_id() const OVERRIDE;
   void set_bundle_id(const std::string& bundle_id) OVERRIDE;
@@ -185,6 +186,7 @@ class ApplicationImpl : public virtual Application,
   bool set_app_icon_path(const std::string& path);
   void set_app_allowed(const bool allowed);
   void set_device(connection_handler::DeviceHandle device);
+  void set_secondary_device(connection_handler::DeviceHandle secondary_device);
   virtual uint32_t get_grammar_id() const;
   virtual void set_grammar_id(uint32_t value);
   bool is_audio() const OVERRIDE;
@@ -195,6 +197,24 @@ class ApplicationImpl : public virtual Application,
 
   virtual void set_is_resuming(bool is_resuming);
   virtual bool is_resuming() const;
+
+  /**
+   * @brief Remembers the HMI level which the app would resume into if high-
+   * bandwidth transport were available.
+   * @param level The HMI level which the app would resume into. Specify
+   * INVALID_ENUM to clear the state.
+   */
+  void set_deferred_resumption_hmi_level(
+      mobile_api::HMILevel::eType level) OVERRIDE;
+  /**
+   * @brief Returns the HMI level which the app would resume into if high-
+   * bandwidth transport were available.
+   *
+   * A value of INVALID_ENUM indicates that the app does not have deferred
+   * HMI level.
+   * @return HMI level which the app would resume into
+   */
+  mobile_api::HMILevel::eType deferred_resumption_hmi_level() const OVERRIDE;
 
   bool AddFile(const AppFile& file);
   bool UpdateFile(const AppFile& file);
@@ -207,10 +227,6 @@ class ApplicationImpl : public virtual Application,
   bool IsSubscribedToButton(mobile_apis::ButtonName::eType btn_name);
   bool UnsubscribeFromButton(mobile_apis::ButtonName::eType btn_name);
 
-  bool SubscribeToIVI(uint32_t vehicle_info_type) OVERRIDE;
-  bool IsSubscribedToIVI(uint32_t vehicle_info_type) const OVERRIDE;
-  bool UnsubscribeFromIVI(uint32_t vehicle_info_type) OVERRIDE;
-  DataAccessor<VehicleInfoSubscriptions> SubscribedIVI() const OVERRIDE;
   inline bool IsRegistered() const OVERRIDE;
 
   /**
@@ -245,6 +261,12 @@ class ApplicationImpl : public virtual Application,
 
   UsageStatistics& usage_report();
 
+  /**
+   * @brief Access to HelpPromptManager interface
+   * @return object for Handling VR help
+   */
+  HelpPromptManager& help_prompt_manager() OVERRIDE;
+
   bool AreCommandLimitsExceeded(mobile_apis::FunctionID::eType cmd_id,
                                 TLimitSource source);
   virtual void SubscribeToSoftButtons(int32_t cmd_id,
@@ -263,7 +285,14 @@ class ApplicationImpl : public virtual Application,
    *
    * @return true if application is media, voice communication or navigation
    */
-  virtual bool IsAudioApplication() const;
+  bool IsAudioApplication() const OVERRIDE;
+
+  /**
+   * @brief Checks whether the application is navigation or projection
+   *
+   * @return true if application is navigation or projection
+   */
+  bool IsVideoApplication() const OVERRIDE;
 
   /**
    * @brief SetInitialState sets initial HMI state for application on
@@ -316,6 +345,12 @@ class ApplicationImpl : public virtual Application,
   virtual const HmiStatePtr CurrentHmiState() const;
 
   /**
+   * @brief Checks if app is allowed to change audio source
+   * @return True - if allowed, otherwise - False
+   */
+  virtual bool IsAllowedToChangeAudioSource() const;
+
+  /**
    * @brief RegularHmiState of application without active events VR, TTS etc ...
    * @return HmiState of application
    */
@@ -349,7 +384,6 @@ class ApplicationImpl : public virtual Application,
    */
   uint32_t GetAvailableDiskSpace() OVERRIDE;
 
-#ifdef SDL_REMOTE_CONTROL
   /**
    * @brief Sets current system context
    * @param system_context new system context
@@ -368,19 +402,10 @@ class ApplicationImpl : public virtual Application,
    */
   void set_hmi_level(const mobile_api::HMILevel::eType& hmi_level) OVERRIDE;
 
-  /**
-   * @brief Get list of subscriptions to vehicle info notifications
-   * @return list of subscriptions to vehicle info notifications
-   */
-  const VehicleInfoSubscriptions& SubscribesIVI() const OVERRIDE;
+  void PushMobileMessage(
+      smart_objects::SmartObjectSPtr mobile_message) OVERRIDE;
 
-  /**
-   * @brief Return pointer to extension by uid
-   * @param uid uid of extension
-   * @return Pointer to extension, if extension was initialized, otherwise NULL
-   */
-  AppExtensionPtr QueryInterface(AppExtensionUID uid) OVERRIDE;
-#endif
+  void SwapMobileMessageQueue(MobileMessageQueue& mobile_messages) OVERRIDE;
 
  protected:
   /**
@@ -411,7 +436,8 @@ class ApplicationImpl : public virtual Application,
    */
   void OnAudioStreamSuspend();
 
-#ifdef SDL_REMOTE_CONTROL
+  AppExtensionPtr QueryInterface(AppExtensionUID uid) OVERRIDE;
+
   /**
    * @brief Add extension to application
    * @param extension pointer to extension
@@ -426,11 +452,7 @@ class ApplicationImpl : public virtual Application,
    */
   bool RemoveExtension(AppExtensionUID uid) OVERRIDE;
 
-  /**
-   * @brief Removes all extensions
-   */
-  void RemoveExtensions() OVERRIDE;
-#endif  // SDL_REMOTE_CONTROL
+  const std::list<AppExtensionPtr>& Extensions() const OVERRIDE;
 
   std::string hash_val_;
   uint32_t grammar_id_;
@@ -442,6 +464,7 @@ class ApplicationImpl : public virtual Application,
   smart_objects::SmartObject* active_message_;
   bool is_media_;
   bool is_navi_;
+  bool is_remote_control_supported_;
   bool mobile_projection_enabled_;
 
   bool video_streaming_approved_;
@@ -452,6 +475,7 @@ class ApplicationImpl : public virtual Application,
   bool audio_streaming_suspended_;
   sync_primitives::Lock video_streaming_suspended_lock_;
   sync_primitives::Lock audio_streaming_suspended_lock_;
+  sync_primitives::Lock streaming_stop_lock_;
 
   bool is_app_allowed_;
   bool has_been_activated_;
@@ -465,14 +489,16 @@ class ApplicationImpl : public virtual Application,
   std::string app_icon_path_;
   std::string mac_address_;
   connection_handler::DeviceHandle device_id_;
+  connection_handler::DeviceHandle secondary_device_id_;
   std::string bundle_id_;
   AppFilesMap app_files_;
   std::set<mobile_apis::ButtonName::eType> subscribed_buttons_;
-  VehicleInfoSubscriptions subscribed_vehicle_info_;
   UsageStatistics usage_report_;
+  HelpPromptManagerImpl help_prompt_manager_impl_;
   protocol_handler::MajorProtocolVersion protocol_version_;
   bool is_voice_communication_application_;
-  sync_primitives::atomic_bool is_resuming_;
+  std::atomic_bool is_resuming_;
+  mobile_api::HMILevel::eType deferred_resumption_hmi_level_;
   bool is_hash_changed_during_suspend_;
 
   uint32_t video_stream_retry_number_;
@@ -482,9 +508,7 @@ class ApplicationImpl : public virtual Application,
   Timer video_stream_suspend_timer_;
   Timer audio_stream_suspend_timer_;
 
-#ifdef SDL_REMOTE_CONTROL
   std::list<AppExtensionPtr> extensions_;
-#endif  // SDL_REMOTE_CONTROL
 
   /**
    * @brief Defines number per time in seconds limits
@@ -505,10 +529,13 @@ class ApplicationImpl : public virtual Application,
   CommandSoftButtonID cmd_softbuttonid_;
   // Lock for command soft button id
   sync_primitives::Lock cmd_softbuttonid_lock_;
-  mutable sync_primitives::Lock vi_lock_;
-  sync_primitives::Lock button_lock_;
+  mutable std::shared_ptr<sync_primitives::Lock> vi_lock_ptr_;
+  mutable std::shared_ptr<sync_primitives::Lock> button_lock_ptr_;
   std::string folder_name_;
   ApplicationManager& application_manager_;
+
+  sync_primitives::Lock mobile_message_lock_;
+  MobileMessageQueue mobile_message_queue_;
 
   friend void SwitchApplicationParameters(ApplicationSharedPtr app,
                                           const uint32_t app_id,
@@ -532,6 +559,14 @@ ApplicationImpl::audio_streaming_state() const {
   const HmiStatePtr hmi_state = CurrentHmiState();
   return hmi_state ? hmi_state->audio_streaming_state()
                    : AudioStreamingState::INVALID_ENUM;
+}
+
+const mobile_api::VideoStreamingState::eType
+ApplicationImpl::video_streaming_state() const {
+  using namespace mobile_apis;
+  const HmiStatePtr hmi_state = CurrentHmiState();
+  return hmi_state ? hmi_state->video_streaming_state()
+                   : VideoStreamingState::INVALID_ENUM;
 }
 
 bool ApplicationImpl::app_allowed() const {

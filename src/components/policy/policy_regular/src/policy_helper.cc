@@ -121,8 +121,8 @@ bool operator!=(const policy_table::ApplicationParams& first,
 
 CheckAppPolicy::CheckAppPolicy(
     PolicyManagerImpl* pm,
-    const utils::SharedPtr<policy_table::Table> update,
-    const utils::SharedPtr<policy_table::Table> snapshot)
+    const std::shared_ptr<policy_table::Table> update,
+    const std::shared_ptr<policy_table::Table> snapshot)
     : pm_(pm), update_(update), snapshot_(snapshot) {}
 
 bool policy::CheckAppPolicy::HasRevokedGroups(
@@ -339,9 +339,20 @@ bool CheckAppPolicy::operator()(const AppPoliciesValueType& app_policy) {
   }
 
   PermissionsCheckResult result = CheckPermissionsChanges(app_policy);
-  if (!IsPredefinedApp(app_policy) && IsRequestTypeChanged(app_policy)) {
-    SetPendingPermissions(app_policy, RESULT_REQUEST_TYPE_CHANGED);
-    NotifySystem(app_policy);
+  if (!IsPredefinedApp(app_policy)) {
+    const bool is_request_type_changed = IsRequestTypeChanged(app_policy);
+    const bool is_request_subtype_changed = IsRequestSubTypeChanged(app_policy);
+
+    if (is_request_type_changed) {
+      SetPendingPermissions(app_policy, RESULT_REQUEST_TYPE_CHANGED);
+    }
+    if (is_request_subtype_changed) {
+      SetPendingPermissions(app_policy, RESULT_REQUEST_SUBTYPE_CHANGED);
+    }
+
+    if (is_request_type_changed || is_request_subtype_changed) {
+      NotifySystem(app_policy);
+    }
   }
   if (RESULT_NO_CHANGES == result) {
     LOG4CXX_INFO(logger_,
@@ -412,17 +423,19 @@ void policy::CheckAppPolicy::SetPendingPermissions(
     case RESULT_REQUEST_TYPE_CHANGED:
       permissions_diff.priority.clear();
       permissions_diff.requestTypeChanged = true;
-      {
-        // Getting RequestTypes from PTU (not from cache)
-        policy_table::RequestTypes::const_iterator it_request_type =
-            app_policy.second.RequestType->begin();
-        for (; app_policy.second.RequestType->end() != it_request_type;
-             ++it_request_type) {
-          permissions_diff.requestType.push_back(
-              EnumToJsonString(*it_request_type));
-        }
-      }
 
+      // Getting Request Types from PTU (not from cache)
+      for (const auto& request_type : *app_policy.second.RequestType) {
+        permissions_diff.requestType.push_back(EnumToJsonString(request_type));
+      }
+      break;
+    case RESULT_REQUEST_SUBTYPE_CHANGED:
+      permissions_diff.priority.clear();
+      permissions_diff.requestSubTypeChanged = true;
+      // Getting Request SubTypes from PTU (not from cache)
+      for (const auto& request_subtype : *app_policy.second.RequestSubType) {
+        permissions_diff.requestSubType.push_back(request_subtype);
+      }
       break;
     default:
       return;
@@ -487,6 +500,32 @@ bool CheckAppPolicy::IsRequestTypeChanged(
                       it->second.RequestType->end(),
                       app_policy.second.RequestType->begin(),
                       app_policy.second.RequestType->end(),
+                      std::back_inserter(diff));
+  return diff.size();
+}
+
+bool CheckAppPolicy::IsRequestSubTypeChanged(
+    const AppPoliciesValueType& app_policy) const {
+  policy::AppPoliciesConstItr it =
+      snapshot_->policy_table.app_policies_section.apps.find(app_policy.first);
+
+  if (it == snapshot_->policy_table.app_policies_section.apps.end()) {
+    if (!app_policy.second.RequestSubType->empty()) {
+      return true;
+    }
+    return false;
+  }
+
+  if (it->second.RequestSubType->size() !=
+      app_policy.second.RequestSubType->size()) {
+    return true;
+  }
+
+  policy_table::RequestSubTypes diff;
+  std::set_difference(it->second.RequestSubType->begin(),
+                      it->second.RequestSubType->end(),
+                      app_policy.second.RequestSubType->begin(),
+                      app_policy.second.RequestSubType->end(),
                       std::back_inserter(diff));
   return diff.size();
 }
@@ -709,7 +748,7 @@ void FillFunctionalGroupPermissions(
     FunctionalGroupNames& names,
     GroupConsent state,
     std::vector<FunctionalGroupPermission>& permissions) {
-  LOG4CXX_INFO(logger_, "FillFunctionalGroupPermissions");
+  LOG4CXX_AUTO_TRACE(logger_);
   FunctionalGroupIDs::const_iterator it = ids.begin();
   FunctionalGroupIDs::const_iterator it_end = ids.end();
   for (; it != it_end; ++it) {
@@ -729,7 +768,7 @@ bool IsPredefinedApp(const AppPoliciesValueType& app) {
 
 FunctionalGroupIDs ExcludeSame(const FunctionalGroupIDs& from,
                                const FunctionalGroupIDs& what) {
-  LOG4CXX_INFO(logger_, "Exclude same groups");
+  LOG4CXX_AUTO_TRACE(logger_);
   FunctionalGroupIDs from_copy(from);
   FunctionalGroupIDs what_copy(what);
 
@@ -751,7 +790,7 @@ FunctionalGroupIDs ExcludeSame(const FunctionalGroupIDs& from,
 
 FunctionalGroupIDs Merge(const FunctionalGroupIDs& first,
                          const FunctionalGroupIDs& second) {
-  LOG4CXX_INFO(logger_, "Merge groups");
+  LOG4CXX_AUTO_TRACE(logger_);
   FunctionalGroupIDs first_copy(first);
   FunctionalGroupIDs second_copy(second);
 

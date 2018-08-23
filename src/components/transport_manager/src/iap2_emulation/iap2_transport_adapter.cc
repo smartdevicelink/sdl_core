@@ -78,6 +78,7 @@ IAP2USBEmulationTransportAdapter::IAP2USBEmulationTransportAdapter(
   signal_handler_ = threads::CreateThread("iAP signal handler", delegate);
   signal_handler_->start();
   const auto result = mkfifo(out_signals_channel, mode);
+  UNUSED(result);
   LOG4CXX_DEBUG(logger_, "Out signals channel creation result: " << result);
 }
 
@@ -100,6 +101,11 @@ void IAP2USBEmulationTransportAdapter::DeviceSwitched(
   auto out_ = open(out_signals_channel, O_WRONLY);
   LOG4CXX_DEBUG(logger_, "Out channel descriptor: " << out_);
 
+  if (out_ < 0) {
+    LOG4CXX_ERROR(logger_, "Failed to open out signals channel");
+    return;
+  }
+
   const auto bytes =
       write(out_, switch_signal_ack.c_str(), switch_signal_ack.size());
   UNUSED(bytes);
@@ -107,6 +113,7 @@ void IAP2USBEmulationTransportAdapter::DeviceSwitched(
 
   LOG4CXX_DEBUG(logger_, "Switching signal ACK is sent");
   LOG4CXX_DEBUG(logger_, "iAP2 USB device is switched with iAP2 Bluetooth");
+  close(out_);
 }
 
 DeviceType IAP2USBEmulationTransportAdapter::GetDeviceType() const {
@@ -117,6 +124,7 @@ IAP2USBEmulationTransportAdapter::IAPSignalHandlerDelegate::
     IAPSignalHandlerDelegate(IAP2USBEmulationTransportAdapter& adapter)
     : adapter_(adapter), run_flag_(true), in_(0) {
   const auto result = mkfifo(in_signals_channel, mode);
+  UNUSED(result);
   LOG4CXX_DEBUG(logger_, "In signals channel creation result: " << result);
 }
 
@@ -128,11 +136,15 @@ void IAP2USBEmulationTransportAdapter::IAPSignalHandlerDelegate::threadMain() {
 
   in_ = open(in_signals_channel, O_RDONLY);
   LOG4CXX_DEBUG(logger_, "In channel descriptor: " << in_);
+  if (in_ < 0) {
+    LOG4CXX_ERROR(logger_, "Failed to open in signals channel");
+    return;
+  }
 
   const auto size = 32;
   while (run_flag_) {
     char buffer[size];
-    auto bytes = read(in_, &buffer, size);
+    auto bytes = read(in_, &buffer, size - 1);
     if (0 == bytes) {
       continue;
     }
@@ -141,6 +153,7 @@ void IAP2USBEmulationTransportAdapter::IAPSignalHandlerDelegate::threadMain() {
       break;
     }
     LOG4CXX_DEBUG(logger_, "Read in bytes: " << bytes);
+    buffer[bytes] = '\0';
     std::string str(buffer);
     if (std::string::npos != str.find(switch_signal)) {
       LOG4CXX_DEBUG(logger_, "Switch signal received.");

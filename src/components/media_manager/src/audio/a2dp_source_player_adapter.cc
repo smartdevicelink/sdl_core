@@ -91,19 +91,19 @@ void A2DPSourcePlayerAdapter::StartActivity(int32_t application_key) {
   if (application_key != current_application_) {
     current_application_ = application_key;
 
-    uint32_t device_id = 0;
+    transport_manager::DeviceHandle device_id = 0;
     session_observer_.GetDataOnSessionKey(application_key, 0, NULL, &device_id);
-    std::string mac_adddress;
-    session_observer_.GetDataOnDeviceID(device_id, NULL, NULL, &mac_adddress);
+    std::string mac_address;
+    session_observer_.GetDataOnDeviceID(device_id, NULL, NULL, &mac_address);
 
-    // TODO(PK): Convert mac_adddress to the
+    // TODO(PK): Convert mac_address to the
     // following format : "bluez_source.XX_XX_XX_XX_XX_XX" if needed
     // before passing to the A2DPSourcePlayerThread constructor
 
     A2DPSourcePlayerThread* delegate =
-        new A2DPSourcePlayerAdapter::A2DPSourcePlayerThread(mac_adddress);
+        new A2DPSourcePlayerAdapter::A2DPSourcePlayerThread(mac_address);
     threads::Thread* new_activity =
-        threads::CreateThread(mac_adddress.c_str(), delegate);
+        threads::CreateThread(mac_address.c_str(), delegate);
     sources_[application_key] = Pair(new_activity, delegate);
     new_activity->start();
   }

@@ -64,7 +64,7 @@ typedef threads::MessageLoopThread<std::queue<protocol_handler::RawMessagePtr> >
     RawMessageLoopThread;
 typedef threads::MessageLoopThread<std::queue<TransportAdapterEvent> >
     TransportAdapterEventLoopThread;
-typedef utils::SharedPtr<timer::Timer> TimerSPtr;
+typedef std::shared_ptr<timer::Timer> TimerSPtr;
 typedef std::map<DeviceUID, TransportAdapter*> DeviceToAdapterMap;
 
 /**
@@ -243,14 +243,6 @@ class TransportManagerImpl
    * @return Code error.
    */
   int Visibility(const bool& on_off) const OVERRIDE;
-
-  /**
-   * DEPRECATED
-   * Must be moved under 'private' section
-   * @brief Updates total device list with info from specific transport adapter.
-   * @param ta Transport adapter
-   */
-  void UpdateDeviceList(TransportAdapter* ta);
 
   /**
    * @brief OnDeviceListUpdated updates device list and sends appropriate
@@ -501,6 +493,12 @@ class TransportManagerImpl
    * @return True if mapping has been updated, otherwise - false
    */
   bool UpdateDeviceMapping(TransportAdapter* ta);
+
+  /**
+   * @brief Updates total device list with info from specific transport adapter.
+   * @param ta Transport adapter
+   */
+  void UpdateDeviceList(TransportAdapter* ta);
 };  // class TransportManagerImpl
 }  // namespace transport_manager
 #endif  // SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_MANAGER_IMPL_H_

@@ -6,8 +6,7 @@
 #include "application_manager/app_launch/app_launch_data.h"
 #include "application_manager/app_launch/apps_launcher.h"
 #include "application_manager/resumption/resume_ctrl.h"
-#include "utils/shared_ptr.h"
-#include "utils/make_shared.h"
+
 #include "utils/timer.h"
 #include "utils/timer_task_impl.h"
 #include <iostream>
@@ -16,7 +15,7 @@ namespace app_launch {
 CREATE_LOGGERPTR_GLOBAL(logger_, "AppLaunch")
 
 typedef std::pair<std::string, std::vector<ApplicationDataPtr> > AppsOnDevice;
-typedef utils::SharedPtr<AppsOnDevice> AppsOnDevicePtr;
+typedef std::shared_ptr<AppsOnDevice> AppsOnDevicePtr;
 
 class Launcher {
  public:
@@ -61,7 +60,7 @@ class Launcher {
     } else {
       LOG4CXX_DEBUG(logger_,
                     "All Apps on " << apps_on_device_->first
-                                   << " posponed launched");
+                                   << " postponed launched");
       device_launcher_.StopLaunchingAppsOnDevice(apps_on_device_->first);
     }
   }
@@ -95,7 +94,7 @@ class Launcher {
   AppsOnDevicePtr apps_on_device_;
 };
 
-typedef utils::SharedPtr<Launcher> LauncherPtr;
+typedef std::shared_ptr<Launcher> LauncherPtr;
 typedef std::vector<LauncherPtr> Launchers;
 
 struct LauncherGenerator {
@@ -107,8 +106,7 @@ struct LauncherGenerator {
       , apps_launcher_(apps_launcher) {}
 
   LauncherPtr operator()() const {
-    return utils::MakeShared<Launcher>(
-        resume_ctrl_, interface_, apps_launcher_);
+    return std::make_shared<Launcher>(resume_ctrl_, interface_, apps_launcher_);
   }
 
   resumption::ResumeCtrl& resume_ctrl_;
@@ -116,71 +114,59 @@ struct LauncherGenerator {
   AppsLauncher& apps_launcher_;
 };
 
-class DeviceAppsLauncherImpl {
- public:
-  DeviceAppsLauncherImpl(DeviceAppsLauncher& interface,
-                         AppsLauncher& apps_launcher)
-      : interface_(interface) {
-    sync_primitives::AutoLock lock(launchers_lock_);
-    LauncherGenerator generate(
-        interface.app_mngr_.resume_controller(), interface, apps_launcher);
-    free_launchers_.reserve(interface.settings_.max_number_of_ios_device());
-    std::generate_n(std::back_inserter(free_launchers_),
-                    interface.settings_.max_number_of_ios_device(),
-                    generate);
+// DeviceAppsLauncherImpl member function definitions
+DeviceAppsLauncherImpl::DeviceAppsLauncherImpl(DeviceAppsLauncher& interface,
+                                               AppsLauncher& apps_launcher)
+    : interface_(interface) {
+  sync_primitives::AutoLock lock(launchers_lock_);
+  LauncherGenerator generate(
+      interface.app_mngr_.resume_controller(), interface, apps_launcher);
+  free_launchers_.reserve(interface.settings_.max_number_of_ios_device());
+  std::generate_n(std::back_inserter(free_launchers_),
+                  interface.settings_.max_number_of_ios_device(),
+                  generate);
+}
+
+bool DeviceAppsLauncherImpl::LauncherFinder::operator()(
+    const std::shared_ptr<Launcher>& launcher) const {
+  return device_mac_ == launcher->apps_on_device_->first;
+}
+
+bool DeviceAppsLauncherImpl::LaunchAppsOnDevice(
+    const std::string& device_mac,
+    const std::vector<ApplicationDataPtr>& applications_to_launch) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  LOG4CXX_DEBUG(logger_,
+                "On Device " << device_mac << " will be launched "
+                             << applications_to_launch.size() << " apps");
+  AppsOnDevicePtr apps_on_device =
+      std::make_shared<AppsOnDevice>(device_mac, applications_to_launch);
+  sync_primitives::AutoLock lock(launchers_lock_);
+  DCHECK_OR_RETURN(!free_launchers_.empty(), false)
+  const Launchers::iterator it = free_launchers_.begin();
+  LauncherPtr launcher = *it;
+  works_launchers_.push_back(launcher);
+  free_launchers_.erase(it);
+  launcher->Start(apps_on_device);
+  return true;
+}
+
+bool DeviceAppsLauncherImpl::StopLaunchingAppsOnDevice(
+    const std::string& device_mac) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  sync_primitives::AutoLock lock(launchers_lock_);
+  const Launchers::iterator it = std::find_if(works_launchers_.begin(),
+                                              works_launchers_.end(),
+                                              LauncherFinder(device_mac));
+  if (it == works_launchers_.end()) {
+    return false;
   }
-
-  bool LaunchAppsOnDevice(
-      const std::string& device_mac,
-      const std::vector<ApplicationDataPtr>& applications_to_launch) {
-    LOG4CXX_AUTO_TRACE(logger_);
-    LOG4CXX_DEBUG(logger_,
-                  "On Device " << device_mac << " will be launched "
-                               << applications_to_launch.size() << " apps");
-    AppsOnDevicePtr apps_on_device =
-        utils::MakeShared<AppsOnDevice>(device_mac, applications_to_launch);
-    sync_primitives::AutoLock lock(launchers_lock_);
-    DCHECK_OR_RETURN(!free_launchers_.empty(), false)
-    const Launchers::iterator it = free_launchers_.begin();
-    LauncherPtr launcher = *it;
-    works_launchers_.push_back(launcher);
-    free_launchers_.erase(it);
-    launcher->Start(apps_on_device);
-    return true;
-  }
-
-  struct LauncherFinder {
-    LauncherFinder(const std::string& device_mac) : device_mac_(device_mac) {}
-
-    bool operator()(const LauncherPtr& launcher) const {
-      return device_mac_ == launcher->apps_on_device_->first;
-    }
-
-    std::string device_mac_;
-  };
-
-  bool StopLaunchingAppsOnDevice(const std::string& device_mac) {
-    LOG4CXX_AUTO_TRACE(logger_);
-    sync_primitives::AutoLock lock(launchers_lock_);
-    const Launchers::iterator it = std::find_if(works_launchers_.begin(),
-                                                works_launchers_.end(),
-                                                LauncherFinder(device_mac));
-    if (it == works_launchers_.end()) {
-      return false;
-    }
-    LauncherPtr launcher = *it;
-    launcher->Clear();
-    free_launchers_.push_back(launcher);
-    works_launchers_.erase(it);
-    return true;
-  }
-
- private:
-  sync_primitives::Lock launchers_lock_;
-  Launchers free_launchers_;
-  Launchers works_launchers_;
-  DeviceAppsLauncher& interface_;
-};
+  LauncherPtr launcher = *it;
+  launcher->Clear();
+  free_launchers_.push_back(launcher);
+  works_launchers_.erase(it);
+  return true;
+}
 
 bool DeviceAppsLauncher::LaunchAppsOnDevice(
     const std::string& device_mac,

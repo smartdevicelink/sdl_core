@@ -55,7 +55,7 @@ void MessageBrokerAdapter::SendMessageToHMI(
     hmi_message_handler::MessageSharedPointer message) {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  if (!message.valid()) {
+  if (message.use_count() == 0) {
     LOG4CXX_ERROR(logger_, "Can`t send not valid message");
     return;
   }

@@ -3,6 +3,7 @@
 #include "application_manager/app_launch/app_launch_data.h"
 #include "connection_handler/connection_handler.h"
 #include "utils/timer.h"
+#include <memory>
 
 namespace app_launch {
 class AppLaunchCtrlImpl;
@@ -69,7 +70,7 @@ class AppsLauncher {
     connection_handler::ConnectionHandler& connection_handler_;
     AppsLauncher& parent_;
   };
-  typedef utils::SharedPtr<Launcher> LauncherPtr;
+  typedef std::shared_ptr<Launcher> LauncherPtr;
   typedef std::vector<LauncherPtr> AppLaunchers;
 
  private:

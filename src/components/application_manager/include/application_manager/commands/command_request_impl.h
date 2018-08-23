@@ -43,8 +43,6 @@ namespace application_manager {
 namespace commands {
 
 struct ResponseInfo {
-  DEPRECATED ResponseInfo(hmi_apis::Common_Result::eType result,
-                          HmiInterfaces::InterfaceID interface);
   ResponseInfo();
   ResponseInfo(const hmi_apis::Common_Result::eType result,
                const HmiInterfaces::InterfaceID hmi_interface,
@@ -110,7 +108,10 @@ class CommandRequestImpl : public CommandImpl,
   enum HashUpdateMode { kSkipHashUpdate, kDoHashUpdate };
 
   CommandRequestImpl(const MessageSharedPtr& message,
-                     ApplicationManager& application_manager);
+                     ApplicationManager& application_manager,
+                     rpc_service::RPCService& rpc_service,
+                     HMICapabilities& hmi_capabilities,
+                     policy::PolicyHandlerInterface& policy_handler);
 
   ~CommandRequestImpl();
 

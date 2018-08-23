@@ -40,11 +40,18 @@
 #include "application_manager/policies/policy_handler_interface.h"
 #include "application_manager/application_manager.h"
 #include "smart_objects/smart_object.h"
+#include "transport_manager/common.h"
 
 namespace application_manager {
 
 class MockMessageHelper {
  public:
+  MOCK_METHOD2(CreateNotification,
+               smart_objects::SmartObjectSPtr(mobile_apis::FunctionID::eType,
+                                              uint32_t));
+  MOCK_METHOD1(CreateHMINotification,
+               smart_objects::SmartObjectSPtr(hmi_apis::FunctionID::eType));
+
   MOCK_METHOD1(GetHashUpdateNotification,
                smart_objects::SmartObjectSPtr(const uint32_t app_id));
   MOCK_METHOD2(SendHashUpdateNotification,
@@ -118,6 +125,9 @@ class MockMessageHelper {
                     ApplicationManager& application_manager,
                     hmi_apis::Common_HMILevel::eType level,
                     bool send_policy_priority));
+  MOCK_METHOD2(CreateMessageForHMI,
+               smart_objects::SmartObjectSPtr(hmi_apis::messageType::eType,
+                                              const uint32_t));
   MOCK_METHOD2(SendHMIStatusNotification,
                void(const Application& application_impl,
                     ApplicationManager& application_manager));
@@ -173,8 +183,10 @@ class MockMessageHelper {
   MOCK_METHOD1(CreateAddVRCommandRequestFromChoiceToHMI,
                smart_objects::SmartObjectList(ApplicationConstSharedPtr app));
   MOCK_METHOD1(SendGlobalPropertiesToHMI, void(ApplicationConstSharedPtr app));
-  MOCK_METHOD1(GetIVISubscriptionRequests,
-               smart_objects::SmartObjectList(ApplicationSharedPtr app));
+  MOCK_METHOD3(VerifyTtsFiles,
+               mobile_apis::Result::eType(smart_objects::SmartObject& message,
+                                          ApplicationConstSharedPtr app,
+                                          ApplicationManager& app_mngr));
   MOCK_METHOD3(VerifyImageFiles,
                mobile_apis::Result::eType(smart_objects::SmartObject& message,
                                           ApplicationConstSharedPtr app,
@@ -183,6 +195,9 @@ class MockMessageHelper {
                mobile_apis::Result::eType(smart_objects::SmartObject& message,
                                           ApplicationConstSharedPtr app,
                                           ApplicationManager& app_mngr));
+  MOCK_METHOD1(CheckChoiceSetVRCommands,
+               MessageHelper::ChoiceSetVRCommandsStatus(
+                   const smart_objects::SmartObject&));
 
   MOCK_METHOD6(GetBCActivateAppRequestToHMI,
                smart_objects::SmartObjectSPtr(
@@ -224,6 +239,12 @@ class MockMessageHelper {
   MOCK_METHOD2(SendUIChangeRegistrationRequestToHMI,
                void(ApplicationConstSharedPtr app,
                     ApplicationManager& app_mngr));
+  MOCK_METHOD5(CreateDeviceInfo,
+               bool(connection_handler::DeviceHandle device_handle,
+                    const protocol_handler::SessionObserver& session_observer,
+                    const policy::PolicyHandlerInterface& policy_handler,
+                    ApplicationManager& app_mngr,
+                    smart_objects::SmartObject* output));
   MOCK_METHOD5(CreateHMIApplicationStruct,
                bool(ApplicationConstSharedPtr app,
                     const protocol_handler::SessionObserver& session_observer,
@@ -266,7 +287,7 @@ class MockMessageHelper {
   MOCK_METHOD1(StringifiedHMILevel,
                std::string(const mobile_apis::HMILevel::eType hmi_level));
   MOCK_METHOD2(GetDeviceMacAddressForHandle,
-               std::string(const uint32_t device_handle,
+               std::string(const transport_manager::DeviceHandle device_handle,
                            const ApplicationManager& app_mngr));
   MOCK_METHOD3(SendDeleteCommandRequest,
                void(smart_objects::SmartObject* cmd,
@@ -285,10 +306,6 @@ class MockMessageHelper {
                     ApplicationManager& app_mngr));
   MOCK_METHOD3(SendUnsubscribeButtonNotification,
                void(mobile_apis::ButtonName::eType button,
-                    ApplicationSharedPtr application,
-                    ApplicationManager& app_mngr));
-  MOCK_METHOD3(SendUnsubscribeIVIRequest,
-               void(int32_t ivi_id,
                     ApplicationSharedPtr application,
                     ApplicationManager& app_mngr));
 

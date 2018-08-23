@@ -38,7 +38,7 @@
 #include "policy/policy_manager_impl_test_base.h"
 
 #include "utils/file_system.h"
-#include "utils/make_shared.h"
+
 #include "utils/gen_hash.h"
 #include "json/reader.h"
 
@@ -238,8 +238,8 @@ void PolicyManagerImplTest::TearDown() {
 // PolicyManagerImplTest2 class methods
 PolicyManagerImplTest2::PolicyManagerImplTest2()
     : app_id_1_("123456789")
-    , app_id_2_("1766825573")
-    , app_id_3_("584421907")
+    , app_id_2_("1010101010")
+    , app_id_3_("123454321")
     , device_id_1_("XXX123456789ZZZ")
     , device_id_2_("08-00-27-CE-76-FE")
     , application_id_("1234")
@@ -414,7 +414,7 @@ void PolicyManagerImplTest2::GetFunctionalGroupingsFromManager(
   // Get cache
   ::policy::CacheManagerInterfaceSPtr cache = policy_manager_->GetCache();
   // Get table_snapshot
-  utils::SharedPtr<policy_table::Table> table = cache->GenerateSnapshot();
+  std::shared_ptr<policy_table::Table> table = cache->GenerateSnapshot();
   // Set functional groupings from policy table
   input_functional_groupings = table->policy_table.functional_groupings;
 }
@@ -629,7 +629,7 @@ PolicyManagerImplTest_RequestTypes::PolicyManagerImplTest_RequestTypes()
                  "PTU_pre_data_consent_app_one_invalid_value_RequestType_"
                  "array."
                  "json"}
-    , kAppId("1766825573")
+    , kAppId("1010101010")
     , kDefaultAppId(policy::kDefaultId)
     , app_storage_folder_("storage3")
     , preloaded_pt_filename_(kSdlPreloadedPtJson) {}
@@ -639,7 +639,7 @@ void PolicyManagerImplTest_RequestTypes::SetUp() {
 
   file_system::CreateDirectory(app_storage_folder_);
   const bool in_memory = true;
-  policy_manager_impl_sptr_ = utils::MakeShared<PolicyManagerImpl>(in_memory);
+  policy_manager_impl_sptr_ = std::make_shared<PolicyManagerImpl>(in_memory);
   policy_manager_impl_sptr_->set_listener(&listener_);
 }
 

@@ -7,6 +7,7 @@
         ],
         "displayCapabilities": {
             "displayType": "GEN2_8_DMA",
+            "displayName": "GENERIC_DISPLAY",
             "textFields": [{
                     "name": "mainField1",
                     "characterSet": "TYPE2SET",
@@ -178,7 +179,6 @@
             ],
             "imageFields": [{
                     "name": "softButtonImage",
-                    "imageTypeSupported": [],
                     "imageResolution": {
                         "resolutionWidth": 35,
                         "resolutionHeight": 35
@@ -186,7 +186,6 @@
                 },
                 {
                     "name": "choiceImage",
-                    "imageTypeSupported": [],
                     "imageResolution": {
                         "resolutionWidth": 35,
                         "resolutionHeight": 35
@@ -194,7 +193,6 @@
                 },
                 {
                     "name": "choiceSecondaryImage",
-                    "imageTypeSupported": [],
                     "imageResolution": {
                         "resolutionWidth": 35,
                         "resolutionHeight": 35
@@ -202,7 +200,6 @@
                 },
                 {
                     "name": "menuIcon",
-                    "imageTypeSupported": [],
                     "imageResolution": {
                         "resolutionWidth": 35,
                         "resolutionHeight": 35
@@ -210,7 +207,6 @@
                 },
                 {
                     "name": "cmdIcon",
-                    "imageTypeSupported": [],
                     "imageResolution": {
                         "resolutionWidth": 35,
                         "resolutionHeight": 35
@@ -218,7 +214,6 @@
                 },
                 {
                     "name": "appIcon",
-                    "imageTypeSupported": [],
                     "imageResolution": {
                         "resolutionWidth": 35,
                         "resolutionHeight": 35
@@ -226,9 +221,13 @@
                 },
                 {
                     "name": "graphic",
-                    "imageTypeSupported": [
-
-                    ],
+                    "imageResolution": {
+                        "resolutionWidth": 35,
+                        "resolutionHeight": 35
+                    }
+                },
+                {
+                    "name": "secondaryGraphic",
                     "imageResolution": {
                         "resolutionWidth": 35,
                         "resolutionHeight": 35
@@ -251,7 +250,6 @@
             ],
             "graphicSupported": true,
             "templatesAvailable": [
-
                 "DEFAULT", "MEDIA", "NON-MEDIA", "ONSCREEN_PRESETS", "NAV_FULLSCREEN_MAP", "NAV_KEYBOARD",
                 "GRAPHIC_WITH_TEXT", "TEXT_WITH_GRAPHIC", "TILES_ONLY", "TEXTBUTTONS_ONLY",
                 "GRAPHIC_WITH_TILES", "TILES_WITH_GRAPHIC", "GRAPHIC_WITH_TEXT_AND_SOFTBUTTONS",
@@ -440,6 +438,10 @@
                         "defrostZoneAvailable": true,
                         "desiredTemperatureAvailable": true,
                         "dualModeEnableAvailable": true,
+                        "heatedMirrorsAvailable":true,
+                        "heatedRearWindowAvailable":true,
+                        "heatedSteeringWheelAvailable":true,
+                        "heatedWindshieldAvailable":true,
                         "fanSpeedAvailable": true,
                         "moduleName": "primary_climate",
                         "ventilationMode": [
@@ -462,9 +464,253 @@
                         "rdsDataAvailable": true,
                         "signalChangeThresholdAvailable": true,
                         "signalStrengthAvailable": true,
+                        "hdRadioEnableAvailable" : true,
+                        "siriusxmRadioAvailable" : true,
+                        "sisDataAvailable":true,
                         "stateAvailable": true
                     }
-                ]
+                ],
+                "audioControlCapabilities": [
+                    {
+                        "moduleName": "audio",
+                        "sourceAvailable": true,
+                        "volumeAvailable": true,
+                        "equalizerAvailable": true,
+                        "keepContextAvailable" : true,
+                        "equalizerMaxChannelId": 10
+                    }
+                ],
+                "seatControlCapabilities": [
+                    {
+                        "moduleName": "driver_seat",
+                        "heatingEnabledAvailable" : true,
+                        "coolingEnabledAvailable": true,
+                        "heatingLevelAvailable": true,
+                        "coolingLevelAvailable": true,
+                        "horizontalPositionAvailable": true,
+                        "verticalPositionAvailable" : true,
+                        "frontVerticalPositionAvailable": true,
+                        "backVerticalPositionAvailable": true,
+                        "backTiltAngleAvailable": true,
+                        "headSupportHorizontalPositionAvailable": true,
+                        "headSupportVerticalPositionAvailable" : true,
+                        "massageEnabledAvailable": true,
+                        "massageModeAvailable": true,
+                        "massageCushionFirmnessAvailable": true,
+                        "memoryAvailable": true
+                    }
+                ],
+                "lightControlCapabilities": {
+                        "moduleName": "light",
+                        "supportedLights":[
+                              {
+                                 "densityAvailable":true,
+                                 "name":"FRONT_LEFT_HIGH_BEAM",
+                                 "rgbColorSpaceAvailable":true
+                              },
+                              {
+                                 "densityAvailable":true,
+                                 "name":"FRONT_RIGHT_HIGH_BEAM",
+                                 "rgbColorSpaceAvailable":true
+                              },
+                              {
+                                 "densityAvailable":true,
+                                 "name":"FRONT_LEFT_LOW_BEAM",
+                                 "rgbColorSpaceAvailable":true
+                              },
+                              {
+                                 "densityAvailable":true,
+                                 "name":"FRONT_RIGHT_LOW_BEAM",
+                                 "rgbColorSpaceAvailable":true
+                              },
+                              {
+                                 "densityAvailable":true,
+                                 "name":"FRONT_LEFT_PARKING_LIGHT",
+                                 "rgbColorSpaceAvailable":true
+                              },
+                              {
+                                 "densityAvailable":true,
+                                 "name":"FRONT_RIGHT_PARKING_LIGHT",
+                                 "rgbColorSpaceAvailable":true
+                              },
+                              {
+                                 "densityAvailable":true,
+                                 "name":"FRONT_LEFT_FOG_LIGHT",
+                                 "rgbColorSpaceAvailable":true
+                              },
+                              {
+                                 "densityAvailable":true,
+                                 "name":"FRONT_RIGHT_FOG_LIGHT",
+                                 "rgbColorSpaceAvailable":true
+                              },
+                              {
+                                 "densityAvailable":true,
+                                 "name":"FRONT_LEFT_DAYTIME_RUNNING_LIGHT",
+                                 "rgbColorSpaceAvailable":true
+                              },
+                              {
+                                 "densityAvailable":true,
+                                 "name":"FRONT_RIGHT_DAYTIME_RUNNING_LIGHT",
+                                 "rgbColorSpaceAvailable":true
+                              },
+                              {
+                                 "densityAvailable":true,
+                                 "name":"FRONT_LEFT_TURN_LIGHT",
+                                 "rgbColorSpaceAvailable":true
+                              },
+                              {
+                                 "densityAvailable":true,
+                                 "name":"FRONT_RIGHT_TURN_LIGHT",
+                                 "rgbColorSpaceAvailable":true
+                              },
+                              {
+                                 "densityAvailable":true,
+                                 "name":"REAR_LEFT_FOG_LIGHT",
+                                 "rgbColorSpaceAvailable":true
+                              },
+                              {
+                                 "densityAvailable":true,
+                                 "name":"REAR_RIGHT_FOG_LIGHT",
+                                 "rgbColorSpaceAvailable":true
+                              },
+                              {
+                                 "densityAvailable":true,
+                                 "name":"REAR_LEFT_TAIL_LIGHT",
+                                 "rgbColorSpaceAvailable":true
+                              },
+                              {
+                                 "densityAvailable":true,
+                                 "name":"REAR_RIGHT_TAIL_LIGHT",
+                                 "rgbColorSpaceAvailable":true
+                              },
+                              {
+                                 "densityAvailable":true,
+                                 "name":"REAR_LEFT_BREAK_LIGHT",
+                                 "rgbColorSpaceAvailable":true
+                              },
+                              {
+                                 "densityAvailable":true,
+                                 "name":"REAR_RIGHT_BREAK_LIGHT",
+                                 "rgbColorSpaceAvailable":true
+                              },
+                              {
+                                 "densityAvailable":true,
+                                 "name":"REAR_LEFT_TURN_LIGHT",
+                                 "rgbColorSpaceAvailable":true
+                              },
+                              {
+                                 "densityAvailable":true,
+                                 "name":"REAR_RIGHT_TURN_LIGHT",
+                                 "rgbColorSpaceAvailable":true
+                              },
+                              {
+                                 "densityAvailable":true,
+                                 "name":"REAR_REGISTRATION_PLATE_LIGHT",
+                                 "rgbColorSpaceAvailable":true
+                              },
+                              {
+                                 "densityAvailable":true,
+                                 "name":"HIGH_BEAMS",
+                                 "rgbColorSpaceAvailable":true
+                              },
+                              {
+                                 "densityAvailable":true,
+                                 "name":"LOW_BEAMS",
+                                 "rgbColorSpaceAvailable":true
+                              },
+                              {
+                                 "densityAvailable":true,
+                                 "name":"FOG_LIGHTS",
+                                 "rgbColorSpaceAvailable":true
+                              },
+                              {
+                                 "densityAvailable":true,
+                                 "name":"RUNNING_LIGHTS",
+                                 "rgbColorSpaceAvailable":true
+                              },
+                              {
+                                 "densityAvailable":true,
+                                 "name":"PARKING_LIGHTS",
+                                 "rgbColorSpaceAvailable":true
+                              },
+                              {
+                                 "densityAvailable":true,
+                                 "name":"BRAKE_LIGHTS",
+                                 "rgbColorSpaceAvailable":true
+                              },
+                              {
+                                 "densityAvailable":true,
+                                 "name":"REAR_REVERSING_LIGHTS",
+                                 "rgbColorSpaceAvailable":true
+                              },
+                              {
+                                 "densityAvailable":true,
+                                 "name":"SIDE_MARKER_LIGHTS",
+                                 "rgbColorSpaceAvailable":true
+                              },
+                              {
+                                 "densityAvailable":true,
+                                 "name":"LEFT_TURN_LIGHTS",
+                                 "rgbColorSpaceAvailable":true
+                              },
+                              {
+                                 "densityAvailable":true,
+                                 "name":"RIGHT_TURN_LIGHTS",
+                                 "rgbColorSpaceAvailable":true
+                              },
+                              {
+                                 "densityAvailable":true,
+                                 "name":"HAZARD_LIGHTS",
+                                 "rgbColorSpaceAvailable":true
+                              },
+                              {
+                                 "densityAvailable":true,
+                                 "name":"AMBIENT_LIGHTS",
+                                 "rgbColorSpaceAvailable":true
+                              },
+                              {
+                                 "densityAvailable":true,
+                                 "name":"OVERHEAD_LIGHTS",
+                                 "rgbColorSpaceAvailable":true
+                              },
+                              {
+                                 "densityAvailable":true,
+                                 "name":"READING_LIGHTS",
+                                 "rgbColorSpaceAvailable":true
+                              },
+                              {
+                                 "densityAvailable":true,
+                                 "name":"TRUNK_LIGHTS",
+                                 "rgbColorSpaceAvailable":true
+                              },
+                              {
+                                 "densityAvailable":true,
+                                 "name":"EXTERIOR_FRONT_LIGHTS",
+                                 "rgbColorSpaceAvailable":true
+                              },
+                              {
+                                 "densityAvailable":true,
+                                 "name":"EXTERIOR_REAR_LIGHTS",
+                                 "rgbColorSpaceAvailable":true
+                              },
+                              {
+                                 "densityAvailable":true,
+                                 "name":"EXTERIOR_LEFT_LIGHTS",
+                                 "rgbColorSpaceAvailable":true
+                              },
+                              {
+                                 "densityAvailable":true,
+                                 "name":"EXTERIOR_RIGHT_LIGHTS",
+                                 "rgbColorSpaceAvailable":true
+                              }
+                        ]
+                },
+                "hmiSettingsControlCapabilities": {
+                        "moduleName": "hmiSettings",
+                        "distanceUnitAvailable": true,
+                        "temperatureUnitAvailable": true,
+                        "displayModeUnitAvailable": true
+                }
             }
         }
     },

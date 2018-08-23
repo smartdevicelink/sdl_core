@@ -41,6 +41,7 @@
 #include "protocol_handler/protocol_packet.h"
 #include "utils/macro.h"
 #include "utils/byte_order.h"
+#include "utils/semantic_version.h"
 
 namespace protocol_handler {
 
@@ -50,48 +51,6 @@ ProtocolPacket::ProtocolData::ProtocolData() : data(NULL), totalDataBytes(0u) {}
 
 ProtocolPacket::ProtocolData::~ProtocolData() {
   delete[] data;
-}
-
-ProtocolPacket::ProtocolVersion::ProtocolVersion()
-    : majorVersion(0), minorVersion(0), patchVersion(0) {}
-
-ProtocolPacket::ProtocolVersion::ProtocolVersion(uint8_t majorVersion,
-                                                 uint8_t minorVersion,
-                                                 uint8_t patchVersion)
-    : majorVersion(majorVersion)
-    , minorVersion(minorVersion)
-    , patchVersion(patchVersion) {}
-
-ProtocolPacket::ProtocolVersion::ProtocolVersion(ProtocolVersion& other) {
-  this->majorVersion = other.majorVersion;
-  this->minorVersion = other.minorVersion;
-  this->patchVersion = other.patchVersion;
-}
-
-ProtocolPacket::ProtocolVersion::ProtocolVersion(std::string versionString)
-    : majorVersion(0), minorVersion(0), patchVersion(0) {
-  unsigned int majorInt, minorInt, patchInt;
-  int readElements = sscanf(
-      versionString.c_str(), "%u.%u.%u", &majorInt, &minorInt, &patchInt);
-  if (readElements != 3) {
-    LOG4CXX_WARN(logger_,
-                 "Error while parsing version string: " << versionString);
-  } else {
-    majorVersion = static_cast<uint8_t>(majorInt);
-    minorVersion = static_cast<uint8_t>(minorInt);
-    patchVersion = static_cast<uint8_t>(patchInt);
-  }
-}
-
-std::string ProtocolPacket::ProtocolVersion::to_string() {
-  char versionString[256];
-  snprintf(versionString,
-           255,
-           "%u.%u.%u",
-           static_cast<unsigned int>(majorVersion),
-           static_cast<unsigned int>(minorVersion),
-           static_cast<unsigned int>(patchVersion));
-  return std::string(versionString);
 }
 
 ProtocolPacket::ProtocolHeader::ProtocolHeader()
@@ -304,8 +263,8 @@ RESULT_CODE ProtocolPacket::ProtocolHeaderValidator::validate(
   // Check frame info for each frame type
   // Frame type shall be 0x00 (Control), 0x01 (Single), 0x02 (First), 0x03
   // (Consecutive)
-  // For Control frames Frame info value shall be from 0x00 to 0x06 or 0xFE(Data
-  // Ack), 0xFF(HB Ack)
+  // For Control frames Frame info value shall be from 0x00 to 0x09 or
+  // 0xFD(Transport Event Update), 0xFE(Data Ack), 0xFF(HB Ack)
   // For Single and First frames Frame info value shall be equal 0x00
   switch (header.frameType) {
     case FRAME_TYPE_CONTROL: {
@@ -317,6 +276,10 @@ RESULT_CODE ProtocolPacket::ProtocolHeaderValidator::validate(
         case FRAME_DATA_END_SERVICE:
         case FRAME_DATA_END_SERVICE_ACK:
         case FRAME_DATA_END_SERVICE_NACK:
+        case FRAME_DATA_REGISTER_SECONDARY_TRANSPORT:
+        case FRAME_DATA_REGISTER_SECONDARY_TRANSPORT_ACK:
+        case FRAME_DATA_REGISTER_SECONDARY_TRANSPORT_NACK:
+        case FRAME_DATA_TRANSPORT_EVENT_UPDATE:
         case FRAME_DATA_SERVICE_DATA_ACK:
         case FRAME_DATA_HEART_BEAT_ACK:
           break;
@@ -520,6 +483,17 @@ bool ProtocolPacket::operator==(const ProtocolPacket& other) const {
   return false;
 }
 
+void ProtocolPacket::HandleRawFirstFrameData(const uint8_t* message) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  payload_size_ = 0;
+  const uint8_t* data = message;
+  uint32_t total_data_bytes = data[0] << 24;
+  total_data_bytes |= data[1] << 16;
+  total_data_bytes |= data[2] << 8;
+  total_data_bytes |= data[3];
+  set_total_data_bytes(total_data_bytes);
+}
+
 RESULT_CODE ProtocolPacket::deserializePacket(const uint8_t* message,
                                               const size_t messageSize) {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -532,18 +506,15 @@ RESULT_CODE ProtocolPacket::deserializePacket(const uint8_t* message,
   packet_data_.totalDataBytes = packet_header_.dataSize;
 
   uint32_t dataPayloadSize = 0;
-  if ((offset < messageSize) && packet_header_.frameType != FRAME_TYPE_FIRST) {
+  if ((offset < messageSize)) {
     dataPayloadSize = messageSize - offset;
   }
 
-  if (packet_header_.frameType == FRAME_TYPE_FIRST) {
+  if (packet_header_.frameType == FRAME_TYPE_FIRST &&
+      !packet_header_.protection_flag) {
     payload_size_ = 0;
     const uint8_t* data = message + offset;
-    uint32_t total_data_bytes = data[0] << 24;
-    total_data_bytes |= data[1] << 16;
-    total_data_bytes |= data[2] << 8;
-    total_data_bytes |= data[3];
-    set_total_data_bytes(total_data_bytes);
+    HandleRawFirstFrameData(data);
     if (0 == packet_data_.data) {
       return RESULT_FAIL;
     }
@@ -602,6 +573,8 @@ uint8_t* ProtocolPacket::data() const {
 }
 
 void ProtocolPacket::set_total_data_bytes(size_t dataBytes) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  LOG4CXX_DEBUG(logger_, "Data bytes : " << dataBytes);
   if (dataBytes) {
     delete[] packet_data_.data;
     packet_data_.data = new (std::nothrow) uint8_t[dataBytes];
@@ -630,6 +603,10 @@ uint32_t ProtocolPacket::total_data_bytes() const {
 
 ConnectionID ProtocolPacket::connection_id() const {
   return connection_id_;
+}
+
+void ProtocolPacket::set_connection_id(ConnectionID connection_id) {
+  connection_id_ = connection_id;
 }
 
 uint32_t ProtocolPacket::payload_size() const {

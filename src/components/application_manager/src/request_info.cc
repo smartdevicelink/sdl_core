@@ -151,7 +151,7 @@ RequestInfoPtr RequestInfoSet::Find(const uint32_t connection_key,
   RequestInfoPtr result;
 
   // Request info for searching in request info set by log_n time
-  utils::SharedPtr<FakeRequestInfo> request_info_for_search(
+  std::shared_ptr<FakeRequestInfo> request_info_for_search(
       new FakeRequestInfo(connection_key, correlation_id));
 
   sync_primitives::AutoLock lock(this_lock_);

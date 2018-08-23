@@ -35,6 +35,8 @@
 
 #include "application_manager/app_launch/app_launch_data.h"
 #include "application_manager/app_launch_settings.h"
+#include "utils/macro.h"
+#include <memory>
 
 namespace app_launch {
 

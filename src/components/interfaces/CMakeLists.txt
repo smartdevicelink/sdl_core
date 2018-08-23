@@ -44,31 +44,8 @@ add_library(v4_protocol_v1_2_no_extra ${CMAKE_CURRENT_BINARY_DIR}/v4_protocol_v1
 generate_interface("MOBILE_API.xml" "mobile_apis" "sdlrpcv2")
 add_library(MOBILE_API ${CMAKE_CURRENT_BINARY_DIR}/MOBILE_API_schema.cc)
 
-if(HMI_JSON_API)
-  generate_interface("HMI_API.xml" "hmi_apis" "jsonrpc")
-  add_library(HMI_API ${CMAKE_CURRENT_BINARY_DIR}/HMI_API_schema.cc)
-endif()
-
-if(HMI_DBUS_API)
-  generate_interface("QT_HMI_API.xml" "hmi_apis" "jsonrpc")
-
-  add_custom_command(
-    OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/HMI_API.h"
-    COMMAND sed "-e" "s/QT_HMI_API/HMI_API/g" "${CMAKE_CURRENT_BINARY_DIR}/QT_HMI_API.h" > "${CMAKE_CURRENT_BINARY_DIR}/HMI_API.h"
-    DEPENDS "${CMAKE_CURRENT_BINARY_DIR}/QT_HMI_API.h"
-  )
-  add_custom_command(
-    OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/HMI_API_schema.h"
-    COMMAND sed "-e" "s/QT_HMI_API/HMI_API/g" "${CMAKE_CURRENT_BINARY_DIR}/QT_HMI_API_schema.h" > "${CMAKE_CURRENT_BINARY_DIR}/HMI_API_schema.h"
-    DEPENDS "${CMAKE_CURRENT_BINARY_DIR}/QT_HMI_API_schema.h"
-  )
-  add_custom_command(
-    OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/HMI_API_schema.cc"
-    COMMAND sed "-e" "s/QT_HMI_API/HMI_API/g" "${CMAKE_CURRENT_BINARY_DIR}/QT_HMI_API_schema.cc" > "${CMAKE_CURRENT_BINARY_DIR}/HMI_API_schema.cc"
-    DEPENDS "${CMAKE_CURRENT_BINARY_DIR}/QT_HMI_API_schema.cc" "${CMAKE_CURRENT_BINARY_DIR}/HMI_API_schema.h" "${CMAKE_CURRENT_BINARY_DIR}/HMI_API.h")
-  
-  add_library(HMI_API ${CMAKE_CURRENT_BINARY_DIR}/HMI_API_schema.cc)
-endif()
+generate_interface("HMI_API.xml" "hmi_apis" "jsonrpc")
+add_library(HMI_API ${CMAKE_CURRENT_BINARY_DIR}/HMI_API_schema.cc)
 
 target_link_libraries(v4_protocol_v1_2_no_extra Utils)
 target_link_libraries(MOBILE_API Utils)

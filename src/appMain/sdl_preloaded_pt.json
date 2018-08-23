@@ -13,21 +13,22 @@
             625],
             "endpoints": {
                 "0x07": {
-                    "default": ["http://localhost:3000/api/1/policies/proprietary"]
+                    "default": ["http://x.x.x.x:3000/api/1/policies/proprietary"]
                 },
                 "0x04": {
-                    "default": ["http://localhost:3000/api/1/softwareUpdate"]
+                    "default": ["http://x.x.x.x:3000/api/1/softwareUpdate"]
                 },
                 "queryAppsUrl": {
                     "default": ["http://sdl.shaid.server"]
                 },
                 "lock_screen_icon_url": {
-                    "default": ["http://i.imgur.com/QwZ9uKG.png"]
+                    "default": ["http://i.imgur.com/TgkvOIZ.png"]
                 }
             },
             "notifications_per_minute_by_priority": {
                 "EMERGENCY": 60,
                 "NAVIGATION": 15,
+                "PROJECTION": 15,
                 "VOICECOM": 20,
                 "COMMUNICATION": 6,
                 "NORMAL": 4,
@@ -140,7 +141,8 @@
                     "OnDriverDistraction": {
                         "hmi_levels": ["BACKGROUND",
                         "FULL",
-                        "LIMITED"]
+                        "LIMITED",
+                        "NONE"]
                     },
                     "OnEncodedSyncPData": {
                         "hmi_levels": ["BACKGROUND",
@@ -344,6 +346,7 @@
                         "LIMITED"],
                         "parameters": ["accPedalPosition",
                         "beltStatus",
+                        "electronicParkBrakeStatus",
                         "driverBraking",
                         "myKey",
                         "prndl",
@@ -356,6 +359,7 @@
                         "LIMITED"],
                         "parameters": ["accPedalPosition",
                         "beltStatus",
+                        "electronicParkBrakeStatus",
                         "driverBraking",
                         "myKey",
                         "prndl",
@@ -368,6 +372,7 @@
                         "LIMITED"],
                         "parameters": ["accPedalPosition",
                         "beltStatus",
+                        "electronicParkBrakeStatus",
                         "driverBraking",
                         "myKey",
                         "prndl",
@@ -380,6 +385,7 @@
                         "LIMITED"],
                         "parameters": ["accPedalPosition",
                         "beltStatus",
+                        "electronicParkBrakeStatus",
                         "driverBraking",
                         "myKey",
                         "prndl",
@@ -397,12 +403,15 @@
                         "LIMITED"],
                         "parameters": ["bodyInformation",
                         "deviceStatus",
+                        "engineOilLife",
                         "engineTorque",
                         "externalTemperature",
+                        "turnSignal",
                         "fuelLevel",
                         "fuelLevel_State",
                         "headLampStatus",
                         "instantFuelConsumption",
+                        "fuelRange",
                         "odometer",
                         "tirePressure",
                         "vin",
@@ -414,12 +423,15 @@
                         "LIMITED"],
                         "parameters": ["bodyInformation",
                         "deviceStatus",
+                        "engineOilLife",
                         "engineTorque",
                         "externalTemperature",
+                        "turnSignal",
                         "fuelLevel",
                         "fuelLevel_State",
                         "headLampStatus",
                         "instantFuelConsumption",
+                        "fuelRange",
                         "odometer",
                         "tirePressure",
                         "vin",
@@ -431,12 +443,15 @@
                         "LIMITED"],
                         "parameters": ["bodyInformation",
                         "deviceStatus",
+                        "engineOilLife",
                         "engineTorque",
                         "externalTemperature",
+                        "turnSignal",
                         "fuelLevel",
                         "fuelLevel_State",
                         "headLampStatus",
                         "instantFuelConsumption",
+                        "fuelRange",
                         "odometer",
                         "tirePressure",
                         "wiperStatus"]
@@ -447,12 +462,15 @@
                         "LIMITED"],
                         "parameters": ["bodyInformation",
                         "deviceStatus",
+                        "engineOilLife",
                         "engineTorque",
                         "externalTemperature",
+                        "turnSignal",
                         "fuelLevel",
                         "fuelLevel_State",
                         "headLampStatus",
                         "instantFuelConsumption",
+                        "fuelRange",
                         "odometer",
                         "tirePressure",
                         "wiperStatus"]
@@ -534,6 +552,12 @@
                         "LIMITED"]
                     },
                     "SystemRequest": {
+                        "hmi_levels": ["BACKGROUND",
+                        "FULL",
+                        "LIMITED",
+                        "NONE"]
+                    },
+                    "OnRCStatus": {
                         "hmi_levels": ["BACKGROUND",
                         "FULL",
                         "LIMITED",
@@ -696,7 +720,8 @@
                     "OnDriverDistraction": {
                         "hmi_levels": ["BACKGROUND",
                         "FULL",
-                        "LIMITED"]
+                        "LIMITED",
+                        "NONE"]
                     },
                     "OnEncodedSyncPData": {
                         "hmi_levels": ["BACKGROUND",
@@ -2344,7 +2369,9 @@
                 "steal_focus": false,
                 "priority": "NONE",
                 "default_hmi": "NONE",
-                "groups": ["Base-4"]
+                "groups": ["Base-4"],
+                "RequestType": [],
+                "RequestSubType": []
             },
             "device": {
                 "keep_context": false,
@@ -2363,4 +2390,3 @@
         }
     }
 }
-

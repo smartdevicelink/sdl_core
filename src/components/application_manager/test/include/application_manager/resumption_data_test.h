@@ -39,6 +39,7 @@
 #include "application_manager/usage_statistics.h"
 #include "application_manager/mock_application.h"
 #include "application_manager/mock_application_manager.h"
+#include "application_manager/mock_app_extension.h"
 #include "utils/data_accessor.h"
 #include "config_profile/profile.h"
 #include "application_manager/policies/policy_handler.h"
@@ -68,12 +69,17 @@ class ResumptionDataTest : public ::testing::Test {
       , kCountOfSubmenues_(3u)
       , kCountOfFiles_(8u)
       , kCountOfVrhelptitle_(2u)
-      , kMacAddress_("12345") {}
+      , kMacAddress_("12345")
+      , sublock_ptr_(std::make_shared<sync_primitives::Lock>())
+      , comlock_ptr_(std::make_shared<sync_primitives::Lock>())
+      , setlock_ptr_(std::make_shared<sync_primitives::Lock>())
+      , btnlock_ptr_(std::make_shared<sync_primitives::Lock>())
+      , ivilock_ptr_(std::make_shared<sync_primitives::Lock>()) {}
   // Check structure in saved application
   void CheckSavedApp(sm::SmartObject& saved_data);
   // Set data for resumption
   virtual void PrepareData();
-  utils::SharedPtr<NiceMock<application_manager_test::MockApplication> >
+  std::shared_ptr<NiceMock<application_manager_test::MockApplication> >
       app_mock;
 
   profile::Profile profile_;
@@ -137,16 +143,18 @@ class ResumptionDataTest : public ::testing::Test {
   am::AppFilesMap app_files_map_;
 
   am::ButtonSubscriptions btn_subscr;
-  am::VehicleInfoSubscriptions ivi;
 
-  sync_primitives::Lock sublock_;
-  sync_primitives::Lock comlock_;
-  sync_primitives::Lock setlock_;
-  sync_primitives::Lock btnlock_;
-  sync_primitives::Lock ivilock_;
+  std::shared_ptr<sync_primitives::Lock> sublock_ptr_;
+  std::shared_ptr<sync_primitives::Lock> comlock_ptr_;
+  std::shared_ptr<sync_primitives::Lock> setlock_ptr_;
+  std::shared_ptr<sync_primitives::Lock> btnlock_ptr_;
+  std::shared_ptr<sync_primitives::Lock> ivilock_ptr_;
   application_manager_test::MockApplicationManagerSettings
       mock_application_manager_settings_;
   application_manager_test::MockApplicationManager mock_application_manager_;
+  std::shared_ptr<NiceMock<application_manager_test::MockAppExtension> >
+      mock_app_extension_;
+  std::list<application_manager::AppExtensionPtr> extensions_;
 };
 
 }  // namespace resumption_test

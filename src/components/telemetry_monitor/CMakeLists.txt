@@ -39,11 +39,9 @@ include_directories (
   ${COMPONENTS_DIR}/connection_handler/include/
   ${COMPONENTS_DIR}/transport_manager/include/
   ${COMPONENTS_DIR}/application_manager/include/
-  ${COMPONENTS_DIR}/remote_control/include/
   ${POLICY_PATH}/include/
   ${POLICY_GLOBAL_INCLUDE_PATH}/
   ${COMPONENTS_DIR}/rpc_base/include/
-  ${COMPONENTS_DIR}/functional_module/include/
   ${COMPONENTS_DIR}/hmi_message_handler/include/
   ${COMPONENTS_DIR}/formatters/include/
   ${COMPONENTS_DIR}/media_manager/include/

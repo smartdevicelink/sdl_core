@@ -33,7 +33,6 @@
 #ifndef SRC_COMPONENTS_POLICY_POLICY_REGULAR_INCLUDE_POLICY_POLICY_TABLE_H_
 #define SRC_COMPONENTS_POLICY_POLICY_REGULAR_INCLUDE_POLICY_POLICY_TABLE_H_
 
-#include "utils/shared_ptr.h"
 #include "policy/pt_representation.h"
 #include "policy/pt_ext_representation.h"
 
@@ -42,7 +41,7 @@ namespace policy {
 class PolicyTable {
  public:
   PolicyTable();
-  explicit PolicyTable(utils::SharedPtr<PTRepresentation> pt_data);
+  explicit PolicyTable(std::shared_ptr<PTRepresentation> pt_data);
   virtual ~PolicyTable();
 
   /**
@@ -50,12 +49,12 @@ class PolicyTable {
    * actual class storing policy table.
    * @return PTRepresentation* Policy Table Content Handler
    */
-  utils::SharedPtr<PTRepresentation> pt_data() const {
+  std::shared_ptr<PTRepresentation> pt_data() const {
     return pt_data_;
   }
 
  private:
-  utils::SharedPtr<PTRepresentation> pt_data_;
+  std::shared_ptr<PTRepresentation> pt_data_;
 };
 }  // namespace policy
 

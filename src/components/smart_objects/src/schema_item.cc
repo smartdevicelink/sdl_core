@@ -35,12 +35,10 @@
 namespace NsSmartDeviceLink {
 namespace NsSmartObjects {
 
-Errors::eType ISchemaItem::validate(const SmartObject& Object) {
-  return Errors::ERROR;
-}
-
-Errors::eType ISchemaItem::validate(const SmartObject& object,
-                                    rpc::ValidationReport* report__) {
+Errors::eType ISchemaItem::validate(
+    const SmartObject& object,
+    rpc::ValidationReport* report__,
+    const utils::SemanticVersion& MessageVersion) {
   return Errors::ERROR;
 }
 
@@ -53,7 +51,8 @@ bool ISchemaItem::hasDefaultValue(SmartObject& Object) {
 }
 
 void ISchemaItem::applySchema(SmartObject& Object,
-                              const bool RemoveFakeParameters) {}
+                              const bool RemoveFakeParameters,
+                              const utils::SemanticVersion& MessageVersion) {}
 
 void ISchemaItem::unapplySchema(SmartObject& Object) {}
 

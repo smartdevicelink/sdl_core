@@ -41,6 +41,7 @@
 #include <vector>
 
 #include "utils/file_system.h"
+#include "utils/helpers.h"
 #include "json/reader.h"
 #include "json/features.h"
 #include "json/writer.h"
@@ -277,6 +278,7 @@ ConsentPriorityType CacheManager::GetConsentsPriority(
   LOG4CXX_AUTO_TRACE(logger_);
   ConsentPriorityType prio_type = ConsentPriorityType::kExternalConsentPrio;
   CACHE_MANAGER_CHECK(prio_type);
+  sync_primitives::AutoLock auto_lock(cache_lock_);
   policy_table::DeviceData::const_iterator dev_params_iter =
       pt_->policy_table.device_data->find(device_id);
 
@@ -304,11 +306,13 @@ ConsentPriorityType CacheManager::GetConsentsPriority(
 }
 
 const policy_table::Strings& CacheManager::GetGroups(const PTString& app_id) {
+  sync_primitives::AutoLock auto_lock(cache_lock_);
   return pt_->policy_table.app_policies_section.apps[app_id].groups;
 }
 
 bool CacheManager::CanAppKeepContext(const std::string& app_id) const {
   CACHE_MANAGER_CHECK(false);
+  sync_primitives::AutoLock auto_lock(cache_lock_);
   bool result = false;
   if (kDeviceId == app_id) {
     result = pt_->policy_table.app_policies_section.device.keep_context;
@@ -320,6 +324,7 @@ bool CacheManager::CanAppKeepContext(const std::string& app_id) const {
 
 uint32_t CacheManager::HeartBeatTimeout(const std::string& app_id) const {
   CACHE_MANAGER_CHECK(0);
+  sync_primitives::AutoLock auto_lock(cache_lock_);
   uint32_t result = 0;
   if (!IsApplicationRepresented(app_id)) {
     return result;
@@ -336,6 +341,7 @@ uint32_t CacheManager::HeartBeatTimeout(const std::string& app_id) const {
 
 const policy_table::AppHMITypes* CacheManager::GetHMITypes(
     const std::string& app_id) {
+  sync_primitives::AutoLock auto_lock(cache_lock_);
   const policy_table::ApplicationPolicies& apps =
       pt_->policy_table.app_policies_section.apps;
   policy_table::ApplicationPolicies::const_iterator i = apps.find(app_id);
@@ -365,6 +371,7 @@ int32_t CacheManager::GenerateHash(const std::string& str_to_hash) {
 
 bool CacheManager::CanAppStealFocus(const std::string& app_id) const {
   CACHE_MANAGER_CHECK(false);
+  sync_primitives::AutoLock auto_lock(cache_lock_);
   bool result = false;
   if (kDeviceId == app_id) {
     result = pt_->policy_table.app_policies_section.device.steal_focus;
@@ -377,6 +384,7 @@ bool CacheManager::CanAppStealFocus(const std::string& app_id) const {
 bool CacheManager::GetDefaultHMI(const std::string& app_id,
                                  std::string& default_hmi) const {
   CACHE_MANAGER_CHECK(false);
+  sync_primitives::AutoLock auto_lock(cache_lock_);
   bool result = false;
   default_hmi.clear();
   if (kDeviceId == app_id) {
@@ -412,6 +420,7 @@ bool CacheManager::GetUserPermissionsForDevice(
     StringArray& disallowed_groups) const {
   LOG4CXX_AUTO_TRACE(logger_);
   CACHE_MANAGER_CHECK(false);
+  sync_primitives::AutoLock auto_lock(cache_lock_);
   policy_table::DeviceData& device_data = *pt_->policy_table.device_data;
   if (device_data.end() == device_data.find(device_id)) {
     LOG4CXX_ERROR(logger_,
@@ -444,6 +453,8 @@ void CacheManager::GetAllAppGroups(const std::string& app_id,
                                    FunctionalGroupIDs& all_group_ids) {
   LOG4CXX_AUTO_TRACE(logger_);
   CACHE_MANAGER_CHECK_VOID();
+  sync_primitives::AutoLock auto_lock(cache_lock_);
+
   if (kDeviceId == app_id) {
     policy_table::DevicePolicy& device =
         pt_->policy_table.app_policies_section.device;
@@ -481,6 +492,7 @@ void CacheManager::GetPreConsentedGroups(
     const std::string& app_id, FunctionalGroupIDs& preconsented_groups) {
   LOG4CXX_AUTO_TRACE(logger_);
   CACHE_MANAGER_CHECK_VOID();
+  sync_primitives::AutoLock auto_lock(cache_lock_);
   if (kDeviceId == app_id) {
     policy_table::DevicePolicy& device =
         pt_->policy_table.app_policies_section.device;
@@ -520,6 +532,7 @@ void CacheManager::GetConsentedGroups(const std::string& device_id,
                                       FunctionalGroupIDs& disallowed_groups) {
   LOG4CXX_AUTO_TRACE(logger_);
   CACHE_MANAGER_CHECK_VOID();
+  sync_primitives::AutoLock auto_lock(cache_lock_);
   policy_table::DeviceData::iterator dev_params_iter =
       pt_->policy_table.device_data->find(device_id);
 
@@ -559,10 +572,11 @@ void CacheManager::GetUnconsentedGroups(
   if (!IsApplicationRepresented(policy_app_id)) {
     LOG4CXX_WARN(logger_,
                  "The application with app_id: " << policy_app_id
-                                                 << " is not reresented");
+                                                 << " is not represented");
     return;
   }
 
+  sync_primitives::AutoLock auto_lock(cache_lock_);
   policy_table::Strings::iterator iter_groups;
   policy_table::Strings::iterator iter_groups_end;
   if (kDeviceId == policy_app_id) {
@@ -608,6 +622,7 @@ void CacheManager::GetUnconsentedGroups(
 void CacheManager::RemoveAppConsentForGroup(const std::string& app_id,
                                             const std::string& group_name) {
   CACHE_MANAGER_CHECK_VOID();
+  sync_primitives::AutoLock auto_lock(cache_lock_);
   policy_table::DeviceData::iterator device_iter =
       pt_->policy_table.device_data->begin();
   policy_table::DeviceData::iterator device_iter_end =
@@ -622,13 +637,11 @@ void CacheManager::RemoveAppConsentForGroup(const std::string& app_id,
   }
 }
 
-using rpc::policy_table_interface_base::RequestTypes;
-using rpc::policy_table_interface_base::RequestType;
-
 void CacheManager::ProcessUpdate(
     const policy_table::ApplicationPolicies::const_iterator
         initial_policy_iter) {
   using namespace policy;
+  using rpc::policy_table_interface_base::RequestTypes;
   const RequestTypes& new_request_types =
       *(initial_policy_iter->second.RequestType);
 
@@ -658,6 +671,7 @@ void CacheManager::ProcessUpdate(
     }
   }
 
+  sync_primitives::AutoLock lock(cache_lock_);
   const RequestTypes merged_pt_request_types =
       update_request_types
           ? new_request_types
@@ -716,6 +730,7 @@ void CacheManager::GetHMIAppTypeAfterUpdate(
     std::map<std::string, StringArray>& app_hmi_types) {
   LOG4CXX_AUTO_TRACE(logger_);
   CACHE_MANAGER_CHECK_VOID();
+  sync_primitives::AutoLock auto_lock(cache_lock_);
   policy_table::ApplicationPolicies::const_iterator policy_iter_begin =
       pt_->policy_table.app_policies_section.apps.begin();
   policy_table::ApplicationPolicies::const_iterator policy_iter_end =
@@ -739,6 +754,7 @@ void CacheManager::GetHMIAppTypeAfterUpdate(
 
 bool CacheManager::AppHasHMIType(const std::string& application_id,
                                  policy_table::AppHMIType hmi_type) const {
+  sync_primitives::AutoLock auto_lock(cache_lock_);
   const policy_table::ApplicationPolicies& policies =
       pt_->policy_table.app_policies_section.apps;
 
@@ -798,6 +814,7 @@ bool CacheManager::GetDeviceGroupsFromPolicies(
     policy_table::Strings& preconsented_groups) const {
   LOG4CXX_AUTO_TRACE(logger_);
   CACHE_MANAGER_CHECK(false);
+  sync_primitives::AutoLock auto_lock(cache_lock_);
   groups = pt_->policy_table.app_policies_section.device.groups;
   preconsented_groups =
       *(pt_->policy_table.app_policies_section.device).preconsented_groups;
@@ -1057,6 +1074,7 @@ bool CacheManager::ReactOnUserDevConsentForApp(const std::string& app_id,
 void CacheManager::GetGroupNameByHashID(const int32_t group_id,
                                         std::string& group_name) {
   CACHE_MANAGER_CHECK_VOID();
+  sync_primitives::AutoLock auto_lock(cache_lock_);
   policy_table::FunctionalGroupings::const_iterator fg_iter =
       pt_->policy_table.functional_groupings.begin();
   policy_table::FunctionalGroupings::const_iterator fg_iter_end =
@@ -1125,6 +1143,7 @@ void CacheManager::SaveUpdateRequired(bool status) {
 
 bool CacheManager::IsApplicationRevoked(const std::string& app_id) const {
   CACHE_MANAGER_CHECK(false);
+  sync_primitives::AutoLock auto_lock(cache_lock_);
   if (!IsApplicationRepresented(app_id)) {
     return false;
   }
@@ -1139,6 +1158,7 @@ void CacheManager::CheckPermissions(const PTString& app_id,
                                     CheckPermissionResult& result) {
   LOG4CXX_AUTO_TRACE(logger_);
   CACHE_MANAGER_CHECK_VOID();
+  sync_primitives::AutoLock auto_lock(cache_lock_);
 
   if (!IsApplicationRepresented(app_id)) {
     LOG4CXX_ERROR(
@@ -1192,11 +1212,13 @@ void CacheManager::CheckPermissions(const PTString& app_id,
 
 bool CacheManager::IsPTPreloaded() {
   CACHE_MANAGER_CHECK(false);
+  sync_primitives::AutoLock auto_lock(cache_lock_);
   return *pt_->policy_table.module_config.preloaded_pt;
 }
 
 int CacheManager::IgnitionCyclesBeforeExchange() {
   CACHE_MANAGER_CHECK(0);
+  sync_primitives::AutoLock auto_lock(cache_lock_);
   const uint8_t limit = std::max(
       static_cast<int>(
           pt_->policy_table.module_config.exchange_after_x_ignition_cycles),
@@ -1218,6 +1240,7 @@ int CacheManager::IgnitionCyclesBeforeExchange() {
 
 int CacheManager::KilometersBeforeExchange(int current) {
   CACHE_MANAGER_CHECK(0);
+  sync_primitives::AutoLock auto_lock(cache_lock_);
   const int limit =
       std::max(static_cast<int>(
                    pt_->policy_table.module_config.exchange_after_x_kilometers),
@@ -1238,6 +1261,7 @@ int CacheManager::KilometersBeforeExchange(int current) {
 bool CacheManager::SetCountersPassedForSuccessfulUpdate(
     policy::Counters counter, int value) {
   CACHE_MANAGER_CHECK(false);
+  sync_primitives::AutoLock auto_lock(cache_lock_);
   switch (counter) {
     case KILOMETERS:
       *pt_->policy_table.module_meta->pt_exchanged_at_odometer_x = value;
@@ -1263,6 +1287,7 @@ bool CacheManager::SetCountersPassedForSuccessfulUpdate(
 int CacheManager::DaysBeforeExchange(uint16_t current) {
   LOG4CXX_AUTO_TRACE(logger_);
   CACHE_MANAGER_CHECK(0);
+  sync_primitives::AutoLock auto_lock(cache_lock_);
 
   const rpc::Optional<rpc::Integer<uint16_t, 0, 65535> >& days_after_epoch =
       (pt_->policy_table.module_meta->pt_exchanged_x_days_after_epoch);
@@ -1286,6 +1311,7 @@ int CacheManager::DaysBeforeExchange(uint16_t current) {
 
 void CacheManager::IncrementIgnitionCycles() {
   CACHE_MANAGER_CHECK_VOID();
+  sync_primitives::AutoLock auto_lock(cache_lock_);
   const int ign_val = static_cast<int>(
       *pt_->policy_table.module_meta->ignition_cycles_since_last_exchange);
   (*pt_->policy_table.module_meta->ignition_cycles_since_last_exchange) =
@@ -1296,18 +1322,21 @@ void CacheManager::IncrementIgnitionCycles() {
 
 void CacheManager::ResetIgnitionCycles() {
   CACHE_MANAGER_CHECK_VOID();
+  sync_primitives::AutoLock auto_lock(cache_lock_);
   (*pt_->policy_table.module_meta->ignition_cycles_since_last_exchange) = 0;
   Backup();
 }
 
 int CacheManager::TimeoutResponse() {
   CACHE_MANAGER_CHECK(0);
+  sync_primitives::AutoLock auto_lock(cache_lock_);
   return pt_->policy_table.module_config.timeout_after_x_seconds *
          date_time::DateTime::MILLISECONDS_IN_SECOND;
 }
 
 bool CacheManager::SecondsBetweenRetries(std::vector<int>& seconds) {
   CACHE_MANAGER_CHECK(false);
+  sync_primitives::AutoLock auto_lock(cache_lock_);
   rpc::policy_table_interface_base::SecondsBetweenRetries::iterator iter =
       pt_->policy_table.module_config.seconds_between_retries.begin();
   rpc::policy_table_interface_base::SecondsBetweenRetries::iterator iter_end =
@@ -1324,6 +1353,7 @@ bool CacheManager::SecondsBetweenRetries(std::vector<int>& seconds) {
 
 const policy::VehicleInfo CacheManager::GetVehicleInfo() const {
   CACHE_MANAGER_CHECK(VehicleInfo());
+  sync_primitives::AutoLock auto_lock(cache_lock_);
   policy_table::ModuleConfig& module_config = pt_->policy_table.module_config;
   VehicleInfo vehicle_info;
   vehicle_info.vehicle_make = *module_config.vehicle_make;
@@ -1347,6 +1377,7 @@ std::vector<UserFriendlyMessage> CacheManager::GetUserFriendlyMsg(
 
   std::vector<std::string>::const_iterator it = msg_codes.begin();
   std::vector<std::string>::const_iterator it_end = msg_codes.end();
+  sync_primitives::AutoLock auto_lock(cache_lock_);
   for (; it != it_end; ++it) {
     policy_table::MessageLanguages msg_languages =
         (*pt_->policy_table.consumer_friendly_messages->messages)[*it];
@@ -1410,6 +1441,7 @@ void CacheManager::GetUpdateUrls(const std::string& service_type,
 
   LOG4CXX_DEBUG(logger_, "Search service value is: " << service_type);
 
+  sync_primitives::AutoLock auto_lock(cache_lock_);
   policy_table::ServiceEndpoints::const_iterator iter =
       pt_->policy_table.module_config.endpoints.find(service_type);
 
@@ -1442,6 +1474,7 @@ CacheManager::GetNotificationsNumber(const std::string& priority) {
   CACHE_MANAGER_CHECK(0);
   typedef rpc::policy_table_interface_base::NumberOfNotificationsPerMinute NNPM;
 
+  sync_primitives::AutoLock auto_lock(cache_lock_);
   const NNPM& nnpm =
       pt_->policy_table.module_config.notifications_per_minute_by_priority;
 
@@ -1455,6 +1488,7 @@ CacheManager::GetNotificationsNumber(const std::string& priority) {
 bool CacheManager::GetPriority(const std::string& policy_app_id,
                                std::string& priority) const {
   CACHE_MANAGER_CHECK(false);
+  sync_primitives::AutoLock auto_lock(cache_lock_);
   if (kDeviceId == policy_app_id) {
     priority = EnumToJsonString(
         pt_->policy_table.app_policies_section.device.priority);
@@ -1482,6 +1516,9 @@ void CacheManager::CheckSnapshotInitialization() {
   }
 
   *(snapshot_->policy_table.module_config.preloaded_pt) = false;
+
+  *(snapshot_->policy_table.module_config.full_app_id_supported) =
+      settings_->use_full_app_id();
 
   // SDL must not send certificate in snapshot
   snapshot_->policy_table.module_config.certificate =
@@ -1591,12 +1628,12 @@ void CacheManager::CheckSnapshotInitialization() {
 
 void CacheManager::PersistData() {
   LOG4CXX_AUTO_TRACE(logger_);
-  if (backup_.valid()) {
-    if (pt_.valid()) {
-      cache_lock_.Acquire();
-      policy_table::Table copy_pt(*pt_);
-      cache_lock_.Release();
-
+  if (backup_.use_count() != 0) {
+    if (pt_.use_count() != 0) {
+      // Comma expression is used to hold the lock only during the constructor
+      // call
+      policy_table::Table copy_pt(
+          (sync_primitives::AutoLock(cache_lock_), *pt_));
       backup_->Save(copy_pt);
       backup_->SaveUpdateRequired(update_required);
 
@@ -1634,7 +1671,7 @@ void CacheManager::PersistData() {
       }
 
       // In case of extended policy the meta info should be backuped as well.
-      if (ex_backup_.valid()) {
+      if (ex_backup_.use_count() != 0) {
         ex_backup_->SetMetaInfo(
             *(*copy_pt.policy_table.module_meta).ccpu_version,
             *(*copy_pt.policy_table.module_meta).wers_country_code,
@@ -1714,10 +1751,10 @@ bool CacheManager::IsPermissionsCalculated(const std::string& device_id,
   return false;
 }
 
-utils::SharedPtr<policy_table::Table> CacheManager::GenerateSnapshot() {
+std::shared_ptr<policy_table::Table> CacheManager::GenerateSnapshot() {
   CACHE_MANAGER_CHECK(snapshot_);
-  sync_primitives::AutoLock lock(cache_lock_);
-  snapshot_ = new policy_table::Table();
+  snapshot_ = std::make_shared<policy_table::Table>();
+  sync_primitives::AutoLock auto_lock(cache_lock_);
   snapshot_->policy_table = pt_->policy_table;
 
   snapshot_->SetPolicyTableType(policy_table::PT_SNAPSHOT);
@@ -1731,6 +1768,7 @@ bool CacheManager::GetInitialAppData(const std::string& app_id,
                                      StringArray& app_hmi_types) {
   LOG4CXX_AUTO_TRACE(logger_);
   CACHE_MANAGER_CHECK(false);
+  sync_primitives::AutoLock auto_lock(cache_lock_);
   policy_table::ApplicationPolicies::const_iterator policy_iter =
       pt_->policy_table.app_policies_section.apps.find(app_id);
 
@@ -1753,6 +1791,7 @@ bool CacheManager::GetFunctionalGroupings(
     policy_table::FunctionalGroupings& groups) {
   LOG4CXX_AUTO_TRACE(logger_);
   CACHE_MANAGER_CHECK(false);
+  sync_primitives::AutoLock auto_lock(cache_lock_);
   const policy_table::FunctionalGroupings& f_groupings =
       pt_->policy_table.functional_groupings;
 
@@ -1774,6 +1813,7 @@ int CacheManager::CountUnconsentedGroups(const std::string& policy_app_id,
     return 0;
   }
 
+  sync_primitives::AutoLock lock(cache_lock_);
   policy_table::FunctionalGroupings::const_iterator groups_iter_end =
       pt_->policy_table.functional_groupings.end();
 
@@ -1864,6 +1904,8 @@ bool CacheManager::SetMetaInfo(const std::string& ccpu_version,
                                const std::string& wers_country_code,
                                const std::string& language) {
   CACHE_MANAGER_CHECK(false);
+  sync_primitives::AutoLock auto_lock(cache_lock_);
+
   *pt_->policy_table.module_meta->ccpu_version = ccpu_version;
   *pt_->policy_table.module_meta->wers_country_code = wers_country_code;
   *pt_->policy_table.module_meta->language = language;
@@ -1879,6 +1921,7 @@ bool CacheManager::SetMetaInfo(const std::string& ccpu_version,
 bool CacheManager::IsMetaInfoPresent() const {
   CACHE_MANAGER_CHECK(false);
   bool result = true;
+  sync_primitives::AutoLock lock(cache_lock_);
   result = NULL != pt_->policy_table.module_meta->ccpu_version &&
            NULL != pt_->policy_table.module_meta->wers_country_code &&
            NULL != pt_->policy_table.module_meta->language;
@@ -1887,6 +1930,7 @@ bool CacheManager::IsMetaInfoPresent() const {
 
 bool CacheManager::SetSystemLanguage(const std::string& language) {
   CACHE_MANAGER_CHECK(false);
+  sync_primitives::AutoLock lock(cache_lock_);
   *pt_->policy_table.module_meta->language = language;
   Backup();
   return true;
@@ -1895,6 +1939,7 @@ bool CacheManager::SetSystemLanguage(const std::string& language) {
 bool CacheManager::GetFunctionalGroupNames(FunctionalGroupNames& names) {
   LOG4CXX_AUTO_TRACE(logger_);
   CACHE_MANAGER_CHECK(false);
+  sync_primitives::AutoLock auto_lock(cache_lock_);
   rpc::policy_table_interface_base::FunctionalGroupings::iterator iter =
       pt_->policy_table.functional_groupings.begin();
   rpc::policy_table_interface_base::FunctionalGroupings::iterator iter_end =
@@ -2084,6 +2129,7 @@ bool CacheManager::SetDefaultPolicy(const std::string& app_id) {
 
 bool CacheManager::IsDefaultPolicy(const std::string& app_id) const {
   CACHE_MANAGER_CHECK(false);
+  sync_primitives::AutoLock auto_lock(cache_lock_);
   const bool result =
       IsApplicationRepresented(app_id) &&
       policy::kDefaultId ==
@@ -2094,7 +2140,7 @@ bool CacheManager::IsDefaultPolicy(const std::string& app_id) const {
 
 bool CacheManager::SetIsDefault(const std::string& app_id) {
   CACHE_MANAGER_CHECK(false);
-
+  sync_primitives::AutoLock auto_lock(cache_lock_);
   if (IsApplicationRepresented(app_id)) {
     pt_->policy_table.app_policies_section.apps[app_id].set_to_string(
         kDefaultId);
@@ -2137,6 +2183,7 @@ bool CacheManager::SetPredataPolicy(const std::string& app_id) {
 }
 
 bool CacheManager::IsPredataPolicy(const std::string& app_id) const {
+  sync_primitives::AutoLock auto_lock(cache_lock_);
   if (!IsApplicationRepresented(app_id)) {
     return false;
   }
@@ -2146,6 +2193,7 @@ bool CacheManager::IsPredataPolicy(const std::string& app_id) const {
 
 bool CacheManager::SetUnpairedDevice(const std::string& device_id,
                                      bool unpaired) {
+  sync_primitives::AutoLock auto_lock(cache_lock_);
   const bool result = pt_->policy_table.device_data->end() !=
                       pt_->policy_table.device_data->find(device_id);
   if (!result) {
@@ -2169,15 +2217,17 @@ bool CacheManager::SetUnpairedDevice(const std::string& device_id,
 
 bool CacheManager::SetVINValue(const std::string& value) {
   CACHE_MANAGER_CHECK(false);
-  cache_lock_.Acquire();
-  *pt_->policy_table.module_meta->vin = value;
-  cache_lock_.Release();
+  {
+    sync_primitives::AutoLock lock(cache_lock_);
+    *pt_->policy_table.module_meta->vin = value;
+  }
   Backup();
   return true;
 }
 
 bool CacheManager::IsApplicationRepresented(const std::string& app_id) const {
   CACHE_MANAGER_CHECK(false);
+  sync_primitives::AutoLock auto_lock(cache_lock_);
   policy_table::ApplicationPolicies::const_iterator iter =
       pt_->policy_table.app_policies_section.apps.find(app_id);
   return pt_->policy_table.app_policies_section.apps.end() != iter;
@@ -2188,8 +2238,7 @@ bool CacheManager::Init(const std::string& file_name,
   LOG4CXX_AUTO_TRACE(logger_);
   settings_ = settings;
   InitResult init_result = backup_->Init(settings);
-  ex_backup_ = utils::SharedPtr<PTRepresentation>::dynamic_pointer_cast<
-      PTExtRepresentation>(backup_);
+  ex_backup_ = std::dynamic_pointer_cast<PTExtRepresentation>(backup_);
 
   bool result = true;
   switch (init_result) {
@@ -2212,7 +2261,7 @@ bool CacheManager::Init(const std::string& file_name,
     case InitResult::SUCCESS: {
       LOG4CXX_INFO(logger_, "Policy Table was inited successfully");
       result = LoadFromFile(file_name, *pt_);
-      utils::SharedPtr<policy_table::Table> snapshot = GenerateSnapshot();
+      std::shared_ptr<policy_table::Table> snapshot = GenerateSnapshot();
 
       result &= snapshot->is_valid();
       LOG4CXX_DEBUG(logger_,
@@ -2303,6 +2352,7 @@ bool CacheManager::LoadFromFile(const std::string& file_name,
   LOG4CXX_DEBUG(logger_,
                 "Start verification of policy table loaded from file.");
 
+  sync_primitives::AutoLock locker(cache_lock_);
   table = policy_table::Table(&value);
 
 #ifdef ENABLE_LOG
@@ -2341,11 +2391,38 @@ bool CacheManager::ResetPT(const std::string& file_name) {
   return result;
 }
 
+policy::RequestType::State CacheManager::GetAppRequestTypesState(
+    const std::string& policy_app_id) const {
+  LOG4CXX_AUTO_TRACE(logger_);
+  sync_primitives::AutoLock auto_lock(cache_lock_);
+  policy_table::ApplicationPolicies::const_iterator app_policies_iter =
+      pt_->policy_table.app_policies_section.apps.find(policy_app_id);
+  if (pt_->policy_table.app_policies_section.apps.end() == app_policies_iter) {
+    LOG4CXX_DEBUG(logger_,
+                  "Can't find request types for app_id " << policy_app_id);
+    return policy::RequestType::State::UNAVAILABLE;
+  }
+  const policy_table::RequestTypes& request_types =
+      *app_policies_iter->second.RequestType;
+  if (!request_types.is_initialized()) {
+    LOG4CXX_TRACE(logger_,
+                  "Request types for " << policy_app_id << " are OMITTED");
+    return RequestType::State::OMITTED;
+  }
+  if (request_types.empty()) {
+    LOG4CXX_TRACE(logger_,
+                  "Request types for " << policy_app_id << " are EMPTY");
+    return policy::RequestType::State::EMPTY;
+  }
+  return policy::RequestType::State::AVAILABLE;
+}
+
 void CacheManager::GetAppRequestTypes(
     const std::string& policy_app_id,
     std::vector<std::string>& request_types) const {
   LOG4CXX_AUTO_TRACE(logger_);
   CACHE_MANAGER_CHECK_VOID();
+  sync_primitives::AutoLock auto_lock(cache_lock_);
   if (kDeviceId == policy_app_id) {
     LOG4CXX_DEBUG(logger_,
                   "Request types not applicable for app_id " << kDeviceId);
@@ -2359,18 +2436,67 @@ void CacheManager::GetAppRequestTypes(
     return;
   }
   if (policy_iter->second.RequestType.is_initialized()) {
-    policy_table::RequestTypes::iterator it_request_type =
-        policy_iter->second.RequestType->begin();
-    for (; it_request_type != policy_iter->second.RequestType->end();
-         ++it_request_type) {
-      request_types.push_back(EnumToJsonString(*it_request_type));
+    for (const auto& request_type : *policy_iter->second.RequestType) {
+      request_types.push_back(EnumToJsonString(request_type));
     }
+  }
+  return;
+}
+
+RequestSubType::State CacheManager::GetAppRequestSubTypesState(
+    const std::string& policy_app_id) const {
+  LOG4CXX_AUTO_TRACE(logger_);
+  sync_primitives::AutoLock auto_lock(cache_lock_);
+  policy_table::ApplicationPolicies::const_iterator app_policies_iter =
+      pt_->policy_table.app_policies_section.apps.find(policy_app_id);
+  if (pt_->policy_table.app_policies_section.apps.end() == app_policies_iter) {
+    LOG4CXX_DEBUG(logger_,
+                  "Can't find request subtypes for app_id " << policy_app_id);
+    return RequestSubType::State::UNAVAILABLE;
+  }
+  const policy_table::RequestSubTypes& request_subtypes =
+      *app_policies_iter->second.RequestSubType;
+  if (!request_subtypes.is_initialized()) {
+    LOG4CXX_TRACE(logger_,
+                  "Request subtypes for " << policy_app_id << " are OMITTED");
+    return RequestSubType::State::OMITTED;
+  }
+  if (request_subtypes.empty()) {
+    LOG4CXX_TRACE(logger_,
+                  "Request subtypes for " << policy_app_id << " are EMPTY");
+    return RequestSubType::State::EMPTY;
+  }
+  return RequestSubType::State::AVAILABLE;
+}
+
+void CacheManager::GetAppRequestSubTypes(
+    const std::string& policy_app_id,
+    std::vector<std::string>& request_subtypes) const {
+  LOG4CXX_AUTO_TRACE(logger_);
+  CACHE_MANAGER_CHECK_VOID();
+  if (kDeviceId == policy_app_id) {
+    LOG4CXX_DEBUG(logger_,
+                  "Request subtypes not applicable for app_id " << kDeviceId);
+    return;
+  }
+  sync_primitives::AutoLock auto_lock(cache_lock_);
+  policy_table::ApplicationPolicies::iterator policy_iter =
+      pt_->policy_table.app_policies_section.apps.find(policy_app_id);
+  if (pt_->policy_table.app_policies_section.apps.end() == policy_iter) {
+    LOG4CXX_DEBUG(logger_,
+                  "Can't find request subtypes for app_id " << policy_app_id);
+    return;
+  }
+
+  for (const auto& request_subtype : *policy_iter->second.RequestSubType) {
+    request_subtypes.push_back(request_subtype);
   }
   return;
 }
 
 const MetaInfo CacheManager::GetMetaInfo() const {
   LOG4CXX_AUTO_TRACE(logger_);
+  sync_primitives::AutoLock auto_lock(cache_lock_);
   MetaInfo meta_info;
   meta_info.ccpu_version = *pt_->policy_table.module_meta->ccpu_version;
   meta_info.wers_country_code =
@@ -2381,6 +2507,7 @@ const MetaInfo CacheManager::GetMetaInfo() const {
 
 std::string CacheManager::GetCertificate() const {
   CACHE_MANAGER_CHECK(std::string(""));
+  sync_primitives::AutoLock auto_lock(cache_lock_);
   if (pt_->policy_table.module_config.certificate.is_initialized()) {
     return *pt_->policy_table.module_config.certificate;
   }
@@ -2681,9 +2808,10 @@ void CacheManager::BackgroundBackuper::threadMain() {
   LOG4CXX_AUTO_TRACE(logger_);
   sync_primitives::AutoLock lock(need_backup_lock_);
   while (!stop_flag_) {
-    need_backup_lock_.Release();
-    InternalBackup();
-    need_backup_lock_.Acquire();
+    {
+      sync_primitives::AutoUnlock need_backup_lock(need_backup_lock_);
+      InternalBackup();
+    }
     if (new_data_available_ || stop_flag_) {
       continue;
     }
