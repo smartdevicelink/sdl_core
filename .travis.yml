@@ -1,4 +1,5 @@
 language: cpp
+cache: ccache
 dist: trusty
 sudo: required
 only:
@@ -23,6 +24,7 @@ script:
   - cppcheck --force -isrc/3rd_party -isrc/3rd_party-static --quiet --error-exitcode=1 src
   - ./tools/infrastructure/check_style.sh
   - mkdir build && cd build
+  - export THIRD_PARTY_INSTALL_PREFIX=$HOME/.ccache
   - cmake ../ -DBUILD_TESTS=ON
   - make install-3rd_party && make -j `nproc` install && sudo ldconfig && make test
 env:
