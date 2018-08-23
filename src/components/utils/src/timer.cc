@@ -64,8 +64,8 @@ timer::Timer::~Timer() {
   StopDelegate();
   single_shot_ = true;
 
-  delegate_.reset();
   DeleteThread(thread_);
+  delegate_.reset();
   DCHECK(task_);
   delete task_;
   LOG4CXX_DEBUG(logger_, "Timer " << name_ << " has been destroyed");
