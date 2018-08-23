@@ -228,9 +228,6 @@ void RegisterAppInterfaceRequest::Run() {
     return;
   }
 
-  const std::string mobile_app_id =
-      (*message_)[strings::msg_params][strings::app_id].asString();
-
   ApplicationSharedPtr application =
       application_manager_.application(connection_key());
 
@@ -238,18 +235,31 @@ void RegisterAppInterfaceRequest::Run() {
     SendResponse(false, mobile_apis::Result::APPLICATION_REGISTERED_ALREADY);
     return;
   }
+  // cache the original app ID (for legacy behavior)
+  const std::string policy_app_id =
+      application_manager_.GetCorrectMobileIDFromMessage(message_);
 
   const smart_objects::SmartObject& msg_params =
       (*message_)[strings::msg_params];
 
-  const std::string policy_app_id = msg_params[strings::app_id].asString();
-  std::string new_policy_app_id = policy_app_id;
-  std::transform(policy_app_id.begin(),
-                 policy_app_id.end(),
-                 new_policy_app_id.begin(),
+  // transform app IDs to lowercase for usage in policy checks later
+  const std::string app_id_short = msg_params[strings::app_id].asString();
+  std::string new_app_id_short = app_id_short;
+  std::transform(app_id_short.begin(),
+                 app_id_short.end(),
+                 new_app_id_short.begin(),
                  ::tolower);
-  (*message_)[strings::msg_params][strings::app_id] = new_policy_app_id;
-
+  (*message_)[strings::msg_params][strings::app_id] = new_app_id_short;
+  // If full ID is present, shift that to lowercase too
+  if (msg_params.keyExists(strings::full_app_id)) {
+    const std::string app_id_full = msg_params[strings::full_app_id].asString();
+    std::string new_app_id_full = app_id_full;
+    std::transform(app_id_full.begin(),
+                   app_id_full.end(),
+                   new_app_id_full.begin(),
+                   ::tolower);
+    (*message_)[strings::msg_params][strings::full_app_id] = new_app_id_full;
+  }
   if (application_manager_.IsApplicationForbidden(connection_key(),
                                                   policy_app_id)) {
     SendResponse(false, mobile_apis::Result::TOO_MANY_PENDING_REQUESTS);
@@ -1067,7 +1077,7 @@ mobile_apis::Result::eType RegisterAppInterfaceRequest::CheckWithPolicyData() {
   policy::StringArray app_hmi_types;
 
   const std::string mobile_app_id =
-      message[strings::msg_params][strings::app_id].asString();
+      application_manager_.GetCorrectMobileIDFromMessage(message_);
   const bool init_result = GetPolicyHandler().GetInitialAppData(
       mobile_app_id, &app_nicknames, &app_hmi_types);
 
@@ -1171,8 +1181,8 @@ void RegisterAppInterfaceRequest::FillDeviceInfo(
 bool RegisterAppInterfaceRequest::IsApplicationWithSameAppIdRegistered() {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  const custom_string::CustomString mobile_app_id =
-      (*message_)[strings::msg_params][strings::app_id].asCustomString();
+  const custom_string::CustomString mobile_app_id(
+      application_manager_.GetCorrectMobileIDFromMessage(message_));
 
   const ApplicationSet& applications =
       application_manager_.applications().GetData();
@@ -1314,6 +1324,17 @@ bool RegisterAppInterfaceRequest::IsWhiteSpaceExist() {
     }
   }
 
+  if (application_manager_.get_settings().use_full_app_id()) {
+    if ((*message_)[strings::msg_params].keyExists(strings::full_app_id)) {
+      str =
+          (*message_)[strings::msg_params][strings::full_app_id].asCharArray();
+      if (!CheckSyntax(str)) {
+        LOG4CXX_ERROR(logger_, "Invalid app_id syntax check failed");
+        return true;
+      }
+    }
+  }
+
   return false;
 }
 
@@ -1346,10 +1367,8 @@ void RegisterAppInterfaceRequest::SendSubscribeCustomButtonNotification() {
 }
 
 bool RegisterAppInterfaceRequest::IsApplicationSwitched() {
-  const smart_objects::SmartObject& msg_params =
-      (*message_)[strings::msg_params];
-
-  const std::string& policy_app_id = msg_params[strings::app_id].asString();
+  const std::string& policy_app_id =
+      application_manager_.GetCorrectMobileIDFromMessage(message_);
 
   LOG4CXX_DEBUG(logger_, "Looking for application id " << policy_app_id);
 

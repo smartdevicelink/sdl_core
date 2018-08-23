@@ -139,6 +139,7 @@
     <struct name="ModuleConfig">
         <param name="device_certificates" type="String" minlength="1" maxlength="100" mandatory="false" map="true" minsize="1" maxsize="255" />
         <param name="preloaded_pt" type="Boolean" mandatory="false" />
+        <param name="full_app_id_supported" type="Boolean" mandatory="false" />
         <param name="exchange_after_x_ignition_cycles" type="Integer"
             maxvalue="255" />
         <param name="exchange_after_x_kilometers" type="Integer"

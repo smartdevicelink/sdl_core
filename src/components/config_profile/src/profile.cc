@@ -184,6 +184,7 @@ const char* kTTSDelimiterKey = "TTSDelimiter";
 const char* kRecordingFileNameKey = "RecordingFileName";
 const char* kRecordingFileSourceKey = "RecordingFileSource";
 const char* kEnablePolicy = "EnablePolicy";
+const char* kUseFullAppID = "UseFullAppID";
 const char* kEventMQKey = "EventMQ";
 const char* kAckMQKey = "AckMQ";
 const char* kApplicationListUpdateTimeoutKey = "ApplicationListUpdateTimeout";
@@ -444,6 +445,7 @@ Profile::Profile()
     , max_supported_protocol_version_(kDefaultMaxSupportedProtocolVersion)
     , policy_snapshot_file_name_(kDefaultPoliciesSnapshotFileName)
     , enable_policy_(false)
+    , use_full_app_id_(true)
     , transport_manager_disconnect_timeout_(
           kDefaultTransportManagerDisconnectTimeout)
     , use_last_state_(false)
@@ -748,6 +750,10 @@ const std::string& Profile::policies_snapshot_file_name() const {
 
 bool Profile::enable_policy() const {
   return enable_policy_;
+}
+
+bool Profile::use_full_app_id() const {
+  return use_full_app_id_;
 }
 
 uint32_t Profile::transport_manager_disconnect_timeout() const {
@@ -1852,6 +1858,15 @@ void Profile::UpdateValues() {
     enable_policy_ = true;
   } else {
     enable_policy_ = false;
+  }
+
+  // Use full app ID internally?
+  std::string use_full_id_string;
+  if (ReadValue(&use_full_id_string, kPolicySection, kUseFullAppID) &&
+      0 == strcmp("true", use_full_id_string.c_str())) {
+    use_full_app_id_ = true;
+  } else {
+    use_full_app_id_ = false;
   }
 
   // Max protocol version

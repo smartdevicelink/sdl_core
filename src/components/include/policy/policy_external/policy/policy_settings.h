@@ -31,6 +31,8 @@ class PolicySettings {
    */
   virtual const std::string& policies_snapshot_file_name() const = 0;
 
+  virtual bool use_full_app_id() const = 0;
+
   /**
     * @brief Returns system files folder path
     */

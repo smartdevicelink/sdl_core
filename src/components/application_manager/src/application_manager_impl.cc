@@ -500,7 +500,8 @@ ApplicationSharedPtr ApplicationManagerImpl::RegisterApplication(
   }
 
   smart_objects::SmartObject& params = message[strings::msg_params];
-  const std::string& policy_app_id = params[strings::app_id].asString();
+  const std::string& policy_app_id =
+      GetCorrectMobileIDFromMessage(request_for_registration);
   const custom_str::CustomString& app_name =
       message[strings::msg_params][strings::app_name].asCustomString();
   std::string device_mac;
@@ -931,6 +932,22 @@ StateController& ApplicationManagerImpl::state_controller() {
 
 const ApplicationManagerSettings& ApplicationManagerImpl::get_settings() const {
   return settings_;
+}
+
+// Extract the app ID to use for policy based on the UseFullAppID .ini setting
+std::string ApplicationManagerImpl::GetCorrectMobileIDFromMessage(
+    const commands::MessageSharedPtr& message) const {
+  // If core is expecting a fullAppID
+  if (get_settings().use_full_app_id()) {
+    // fullAppID is present and core is configured to use it
+    if ((*message)[strings::msg_params].keyExists(strings::full_app_id)) {
+      return (*message)[strings::msg_params][strings::full_app_id].asString();
+    } else {
+      LOG4CXX_DEBUG(logger_, "UseFullAppID is on but only short ID given!");
+    }
+  }
+  // If core isn't using full or no full given, use regular appID
+  return (*message)[strings::msg_params][strings::app_id].asString();
 }
 
 void application_manager::ApplicationManagerImpl::MarkAppsGreyOut(

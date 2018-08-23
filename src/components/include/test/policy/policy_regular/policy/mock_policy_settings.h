@@ -49,6 +49,7 @@ class MockPolicySettings : public ::policy::PolicySettings {
   MOCK_CONST_METHOD0(open_attempt_timeout_ms, uint16_t());
   MOCK_CONST_METHOD0(policies_snapshot_file_name, const std::string&());
   MOCK_CONST_METHOD0(system_files_path, const std::string&());
+  MOCK_CONST_METHOD0(use_full_app_id, bool());
 };
 
 }  // namespace policy_test

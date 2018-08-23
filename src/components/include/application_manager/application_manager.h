@@ -712,6 +712,9 @@ class ApplicationManager {
       std::vector<std::string>& rejected_params) = 0;
 
   virtual const ApplicationManagerSettings& get_settings() const = 0;
+  // Extract the app ID to use internally based on the UseFullAppID .ini setting
+  virtual std::string GetCorrectMobileIDFromMessage(
+      const commands::MessageSharedPtr& message) const = 0;
 
   virtual event_engine::EventDispatcher& event_dispatcher() = 0;
 

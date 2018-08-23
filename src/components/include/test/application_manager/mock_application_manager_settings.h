@@ -89,6 +89,7 @@ class MockApplicationManagerSettings
   MOCK_CONST_METHOD0(named_audio_pipe_path, const std::string&());
   MOCK_CONST_METHOD0(video_stream_file, const std::string&());
   MOCK_CONST_METHOD0(audio_stream_file, const std::string&());
+  MOCK_CONST_METHOD0(use_full_app_id, bool());
   MOCK_CONST_METHOD0(use_db_for_resumption, bool());
   MOCK_CONST_METHOD0(app_resumption_save_persistent_data_timeout,
                      const uint32_t&());
