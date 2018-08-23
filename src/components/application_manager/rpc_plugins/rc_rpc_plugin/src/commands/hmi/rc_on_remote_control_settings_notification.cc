@@ -89,14 +89,6 @@ std::string AccessModeToString(
 
 void RCOnRemoteControlSettingsNotification::DisallowRCFunctionality() {
   LOG4CXX_AUTO_TRACE(logger_);
-  typedef std::vector<application_manager::ApplicationSharedPtr> Apps;
-  Apps apps = RCRPCPlugin::GetRCApplications(application_manager_);
-  for (Apps::iterator it = apps.begin(); it != apps.end(); ++it) {
-    application_manager::ApplicationSharedPtr app = *it;
-    DCHECK(app);
-    application_manager_.ChangeAppsHMILevel(
-        app->app_id(), mobile_apis::HMILevel::eType::HMI_NONE);
-  }
   interior_data_manager_.OnDisablingRC();
 }
 
