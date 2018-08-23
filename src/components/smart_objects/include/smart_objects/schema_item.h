@@ -39,6 +39,7 @@
 #include "smart_objects/errors.h"
 
 #include <memory>
+#include <vector>
 #include "utils/macro.h"
 #include "utils/semantic_version.h"
 
@@ -51,17 +52,6 @@ class SmartObject;
  **/
 class ISchemaItem {
  public:
-  /**
-   * @deprecated
-   *
-   * @brief Validate smart object.
-   *
-   * @param Object Object to validate.
-   *
-   * @return NsSmartObjects::Errors::eType
-   **/
-  DEPRECATED virtual Errors::eType validate(const SmartObject& Object);
-
   /**
    * @brief Validate smart object.
    *

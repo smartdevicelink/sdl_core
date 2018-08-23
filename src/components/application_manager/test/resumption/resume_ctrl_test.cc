@@ -44,6 +44,7 @@
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/application.h"
 #include "utils/data_accessor.h"
+#include "config_profile/profile.h"
 
 #include "application_manager/mock_message_helper.h"
 #include "application_manager/mock_application_manager.h"
@@ -89,7 +90,11 @@ class ResumeCtrlTest : public ::testing::Test {
       , kDefaultDeferredTestLevel_(eType::INVALID_ENUM)
       , kNaviLowbandwidthLevel_("LIMITED")
       , kProjectionLowbandwidthLevel_("NONE")
-      , kMediaLowbandwidthLevel_("NONE") {}
+      , kMediaLowbandwidthLevel_("NONE") {
+    profile::Profile profile_;
+    profile_.set_config_file_name("smartDeviceLink.ini");
+    resumption_delay_before_ign_ = profile_.resumption_delay_before_ign();
+  }
 
   virtual void SetUp() OVERRIDE {
     Mock::VerifyAndClearExpectations(&mock_app_mngr_);
@@ -153,7 +158,7 @@ class ResumeCtrlTest : public ::testing::Test {
   NiceMock<event_engine_test::MockEventDispatcher> mock_event_dispatcher_;
   application_manager_test::MockApplicationManagerSettings
       mock_application_manager_settings_;
-  application_manager_test::MockApplicationManager mock_app_mngr_;
+  NiceMock<application_manager_test::MockApplicationManager> mock_app_mngr_;
   std::shared_ptr<NiceMock<application_manager_test::MockAppExtension> >
       mock_app_extension_;
   MockStateController mock_state_controller_;
@@ -172,6 +177,7 @@ class ResumeCtrlTest : public ::testing::Test {
   const std::string kHash_;
   const uint32_t kAppResumingTimeout_;
   const uint32_t kTestTimeStamp_;
+  uint32_t resumption_delay_before_ign_;
   std::shared_ptr<sync_primitives::Lock> app_set_lock_ptr_;
   sync_primitives::Lock app_set_lock_;
   const mobile_apis::HMILevel::eType kDefaultDeferredTestLevel_;
@@ -613,8 +619,12 @@ TEST_F(ResumeCtrlTest, StartAppHmiStateResumption_AppInFull) {
   mobile_apis::HMILevel::eType restored_test_type = eType::HMI_FULL;
   uint32_t ign_off_count = 0;
   smart_objects::SmartObject saved_app;
+  const uint32_t time_offset = 5;
+  const uint32_t time_stamp =
+      time(nullptr) - resumption_delay_before_ign_ + time_offset;
   saved_app[application_manager::strings::ign_off_count] = ign_off_count;
   saved_app[application_manager::strings::hmi_level] = restored_test_type;
+  saved_app[application_manager::strings::time_stamp] = time_stamp;
 
   application_manager::CommandsMap command;
   DataAccessor<application_manager::CommandsMap> data_accessor(
@@ -661,8 +671,12 @@ TEST_F(ResumeCtrlTest, StartAppHmiStateResumption_AppHasDeferredResumption) {
   mobile_apis::HMILevel::eType deferred_level = eType::HMI_FULL;
   uint32_t ign_off_count = 0;
   smart_objects::SmartObject saved_app;
+  const uint32_t time_offset = 5;
+  const uint32_t time_stamp =
+      time(nullptr) - resumption_delay_before_ign_ + time_offset;
   saved_app[application_manager::strings::ign_off_count] = ign_off_count;
   saved_app[application_manager::strings::hmi_level] = restored_test_type;
+  saved_app[application_manager::strings::time_stamp] = time_stamp;
 
   // resume into deferred level instead of restored level
   EXPECT_CALL(mock_state_controller_, SetRegularState(_, deferred_level))
@@ -693,8 +707,12 @@ TEST_F(ResumeCtrlTest,
   mobile_apis::HMILevel::eType restored_test_type = eType::HMI_FULL;
   uint32_t ign_off_count = 0;
   smart_objects::SmartObject saved_app;
+  const uint32_t time_offset = 5;
+  const uint32_t time_stamp =
+      time(nullptr) - resumption_delay_before_ign_ + time_offset;
   saved_app[application_manager::strings::ign_off_count] = ign_off_count;
   saved_app[application_manager::strings::hmi_level] = restored_test_type;
+  saved_app[application_manager::strings::time_stamp] = time_stamp;
 
   EXPECT_CALL(mock_state_controller_, SetRegularState(_, eType::HMI_LIMITED))
       .Times(AtLeast(1));
@@ -731,8 +749,12 @@ TEST_F(
   mobile_apis::HMILevel::eType restored_test_type = eType::HMI_LIMITED;
   uint32_t ign_off_count = 0;
   smart_objects::SmartObject saved_app;
+  const uint32_t time_offset = 5;
+  const uint32_t time_stamp =
+      time(nullptr) - resumption_delay_before_ign_ + time_offset;
   saved_app[application_manager::strings::ign_off_count] = ign_off_count;
   saved_app[application_manager::strings::hmi_level] = restored_test_type;
+  saved_app[application_manager::strings::time_stamp] = time_stamp;
 
   // in this test, it is expected that the app will resume into LIMITED, which
   // is the higher level among NONE and LIMITED
@@ -869,8 +891,12 @@ TEST_F(ResumeCtrlTest, ApplicationResumptiOnTimer_AppInFull) {
   mobile_apis::HMILevel::eType restored_test_type = eType::HMI_FULL;
   const uint32_t ign_off_count = 0u;
   smart_objects::SmartObject saved_app;
+  const uint32_t time_offset = 5;
+  const uint32_t time_stamp =
+      time(nullptr) - resumption_delay_before_ign_ + time_offset;
   saved_app[application_manager::strings::ign_off_count] = ign_off_count;
   saved_app[application_manager::strings::hmi_level] = restored_test_type;
+  saved_app[application_manager::strings::time_stamp] = time_stamp;
 
   MockStateController state_controller;
   EXPECT_CALL(mock_app_mngr_, state_controller())
@@ -1201,6 +1227,194 @@ TEST_F(ResumeCtrlTest, GetSavedAppHmiLevel_AskedAppFound_INVALID_ENUM) {
       .WillByDefault(DoAll(SetHmiLevel(hmi_level), Return(true)));
   EXPECT_EQ(hmi_level,
             res_ctrl_->GetSavedAppHmiLevel(kTestPolicyAppId_, kMacAddress_));
+}
+
+TEST_F(
+    ResumeCtrlTest,
+    ResumptionLowVoltage_AppInFullUnregisteredWithinTimeFrame_HMILevelRestored) {
+  const mobile_apis::HMILevel::eType restored_test_type = eType::HMI_FULL;
+  const uint32_t time_offset = 5;
+  const uint32_t time_stamp =
+      time(nullptr) - resumption_delay_before_ign_ + time_offset;
+  smart_objects::SmartObject saved_app;
+  saved_app[application_manager::strings::hmi_level] = restored_test_type;
+  saved_app[application_manager::strings::time_stamp] = time_stamp;
+
+  application_manager::CommandsMap command;
+  DataAccessor<application_manager::CommandsMap> data_accessor(
+      command, app_set_lock_ptr_);
+
+  EXPECT_CALL(mock_state_controller_, SetRegularState(_, restored_test_type))
+      .Times(AtLeast(1));
+  GetInfoFromApp();
+  EXPECT_CALL(mock_app_mngr_, GetDefaultHmiLevel(const_app_))
+      .WillRepeatedly(Return(kDefaultTestLevel_));
+  EXPECT_CALL(*mock_app_, commands_map()).WillRepeatedly(Return(data_accessor));
+  ON_CALL(*mock_storage_,
+          GetSavedApplication(kTestPolicyAppId_, kMacAddress_, _))
+      .WillByDefault(DoAll(SetArgReferee<2>(saved_app), Return(true)));
+
+  EXPECT_CALL(*mock_storage_,
+              RemoveApplicationFromSaved(kTestPolicyAppId_, kMacAddress_))
+      .WillOnce(Return(true));
+
+  ON_CALL(mock_app_mngr_, GetUserConsentForDevice("12345"))
+      .WillByDefault(Return(policy::kDeviceAllowed));
+
+  NiceMock<MockApplicationManagerSettings> app_mngr_settings_;
+  EXPECT_CALL(mock_app_mngr_, get_settings())
+      .WillOnce(ReturnRef(app_mngr_settings_));
+
+  EXPECT_CALL(app_mngr_settings_, resumption_delay_before_ign())
+      .WillOnce(Return(resumption_delay_before_ign_));
+
+  res_ctrl_->SaveLowVoltageTime();
+  res_ctrl_->StartAppHmiStateResumption(mock_app_);
+}
+
+TEST_F(
+    ResumeCtrlTest,
+    ResumptionLowVoltage_AppInFullUnregisteredBeyondTimeFrame_HMILevelNotRestored) {
+  const mobile_apis::HMILevel::eType restored_test_type = eType::HMI_FULL;
+  const uint32_t time_offset = 5;
+  const uint32_t time_stamp =
+      time(nullptr) - resumption_delay_before_ign_ - time_offset;
+  smart_objects::SmartObject saved_app;
+  saved_app[application_manager::strings::hmi_level] = restored_test_type;
+  saved_app[application_manager::strings::time_stamp] = time_stamp;
+
+  application_manager::CommandsMap command;
+  DataAccessor<application_manager::CommandsMap> data_accessor(
+      command, app_set_lock_ptr_);
+
+  EXPECT_CALL(mock_app_mngr_, state_controller()).Times(0);
+  GetInfoFromApp();
+  EXPECT_CALL(mock_app_mngr_, GetDefaultHmiLevel(const_app_))
+      .WillRepeatedly(Return(kDefaultTestLevel_));
+  EXPECT_CALL(*mock_app_, commands_map()).WillRepeatedly(Return(data_accessor));
+  ON_CALL(*mock_storage_,
+          GetSavedApplication(kTestPolicyAppId_, kMacAddress_, _))
+      .WillByDefault(DoAll(SetArgReferee<2>(saved_app), Return(true)));
+
+  ON_CALL(mock_app_mngr_, GetUserConsentForDevice("12345"))
+      .WillByDefault(Return(policy::kDeviceAllowed));
+
+  NiceMock<MockApplicationManagerSettings> app_mngr_settings_;
+  EXPECT_CALL(mock_app_mngr_, get_settings())
+      .WillOnce(ReturnRef(app_mngr_settings_));
+
+  EXPECT_CALL(app_mngr_settings_, resumption_delay_before_ign())
+      .WillOnce(Return(resumption_delay_before_ign_));
+
+  res_ctrl_->SaveLowVoltageTime();
+  res_ctrl_->StartAppHmiStateResumption(mock_app_);
+}
+
+TEST_F(ResumeCtrlTest, ResumptionLowVoltage_AppInBackground_NotRestored) {
+  const mobile_apis::HMILevel::eType restored_test_type = eType::HMI_BACKGROUND;
+  const uint32_t time_offset = 5;
+  const uint32_t time_stamp =
+      time(nullptr) - resumption_delay_before_ign_ - time_offset;
+  smart_objects::SmartObject saved_app;
+  saved_app[application_manager::strings::hmi_level] = restored_test_type;
+  saved_app[application_manager::strings::time_stamp] = time_stamp;
+
+  application_manager::CommandsMap command;
+  DataAccessor<application_manager::CommandsMap> data_accessor(
+      command, app_set_lock_ptr_);
+
+  EXPECT_CALL(mock_app_mngr_, state_controller()).Times(0);
+  GetInfoFromApp();
+  EXPECT_CALL(mock_app_mngr_, GetDefaultHmiLevel(const_app_))
+      .WillRepeatedly(Return(kDefaultTestLevel_));
+  EXPECT_CALL(*mock_app_, commands_map()).WillRepeatedly(Return(data_accessor));
+  ON_CALL(*mock_storage_,
+          GetSavedApplication(kTestPolicyAppId_, kMacAddress_, _))
+      .WillByDefault(DoAll(SetArgReferee<2>(saved_app), Return(true)));
+
+  res_ctrl_->SaveLowVoltageTime();
+  res_ctrl_->StartAppHmiStateResumption(mock_app_);
+}
+
+TEST_F(
+    ResumeCtrlTest,
+    ResumptionLowVoltage_AppInLimitedlUnregisteredWithinTimeFrame_HMILevelRestored) {
+  const mobile_apis::HMILevel::eType restored_test_type = eType::HMI_LIMITED;
+  const uint32_t time_offset = 5;
+  const uint32_t time_stamp =
+      time(nullptr) - resumption_delay_before_ign_ + time_offset;
+  smart_objects::SmartObject saved_app;
+  saved_app[application_manager::strings::hmi_level] = restored_test_type;
+  saved_app[application_manager::strings::time_stamp] = time_stamp;
+
+  application_manager::CommandsMap command;
+  DataAccessor<application_manager::CommandsMap> data_accessor(
+      command, app_set_lock_ptr_);
+
+  EXPECT_CALL(mock_state_controller_, SetRegularState(_, restored_test_type))
+      .Times(AtLeast(1));
+  GetInfoFromApp();
+  EXPECT_CALL(mock_app_mngr_, GetDefaultHmiLevel(const_app_))
+      .WillRepeatedly(Return(kDefaultTestLevel_));
+  EXPECT_CALL(*mock_app_, commands_map()).WillRepeatedly(Return(data_accessor));
+  ON_CALL(*mock_storage_,
+          GetSavedApplication(kTestPolicyAppId_, kMacAddress_, _))
+      .WillByDefault(DoAll(SetArgReferee<2>(saved_app), Return(true)));
+
+  EXPECT_CALL(*mock_storage_,
+              RemoveApplicationFromSaved(kTestPolicyAppId_, kMacAddress_))
+      .WillOnce(Return(true));
+
+  ON_CALL(mock_app_mngr_, GetUserConsentForDevice("12345"))
+      .WillByDefault(Return(policy::kDeviceAllowed));
+
+  NiceMock<MockApplicationManagerSettings> app_mngr_settings_;
+  EXPECT_CALL(mock_app_mngr_, get_settings())
+      .WillOnce(ReturnRef(app_mngr_settings_));
+
+  EXPECT_CALL(app_mngr_settings_, resumption_delay_before_ign())
+      .WillOnce(Return(resumption_delay_before_ign_ + time_offset));
+
+  res_ctrl_->SaveLowVoltageTime();
+  res_ctrl_->StartAppHmiStateResumption(mock_app_);
+}
+
+TEST_F(
+    ResumeCtrlTest,
+    ResumptionLowVoltage_AppInLimitedlUnregisteredBeyondTimeFrame_HMILevelNotRestored) {
+  const mobile_apis::HMILevel::eType restored_test_type = eType::HMI_LIMITED;
+  const uint32_t time_offset = 5;
+  const uint32_t time_stamp =
+      time(nullptr) - resumption_delay_before_ign_ - time_offset;
+  smart_objects::SmartObject saved_app;
+  saved_app[application_manager::strings::hmi_level] = restored_test_type;
+  saved_app[application_manager::strings::time_stamp] = time_stamp;
+
+  application_manager::CommandsMap command;
+  DataAccessor<application_manager::CommandsMap> data_accessor(
+      command, app_set_lock_ptr_);
+
+  EXPECT_CALL(mock_app_mngr_, state_controller()).Times(0);
+  GetInfoFromApp();
+  EXPECT_CALL(mock_app_mngr_, GetDefaultHmiLevel(const_app_))
+      .WillRepeatedly(Return(kDefaultTestLevel_));
+  EXPECT_CALL(*mock_app_, commands_map()).WillRepeatedly(Return(data_accessor));
+  ON_CALL(*mock_storage_,
+          GetSavedApplication(kTestPolicyAppId_, kMacAddress_, _))
+      .WillByDefault(DoAll(SetArgReferee<2>(saved_app), Return(true)));
+
+  ON_CALL(mock_app_mngr_, GetUserConsentForDevice("12345"))
+      .WillByDefault(Return(policy::kDeviceAllowed));
+
+  NiceMock<MockApplicationManagerSettings> app_mngr_settings_;
+  EXPECT_CALL(mock_app_mngr_, get_settings())
+      .WillOnce(ReturnRef(app_mngr_settings_));
+
+  EXPECT_CALL(app_mngr_settings_, resumption_delay_before_ign())
+      .WillOnce(Return(resumption_delay_before_ign_));
+
+  res_ctrl_->SaveLowVoltageTime();
+  res_ctrl_->StartAppHmiStateResumption(mock_app_);
 }
 
 }  // namespace resumption_test

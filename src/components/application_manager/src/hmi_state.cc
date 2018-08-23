@@ -67,27 +67,6 @@ HmiState::HmiState(std::shared_ptr<Application> app,
   LOG4CXX_DEBUG(logger_, *this);
 }
 
-DEPRECATED HmiState::HmiState(uint32_t app_id,
-                              const ApplicationManager& app_mngr,
-                              StateID state_id)
-    : state_id_(state_id)
-    , app_mngr_(app_mngr)
-    , hmi_level_(mobile_apis::HMILevel::INVALID_ENUM)
-    , audio_streaming_state_(mobile_apis::AudioStreamingState::INVALID_ENUM)
-    , system_context_(mobile_apis::SystemContext::INVALID_ENUM) {
-  app_ = app_mngr_.application(app_id);
-}
-
-DEPRECATED HmiState::HmiState(uint32_t app_id,
-                              const ApplicationManager& app_mngr)
-    : state_id_(STATE_ID_REGULAR)
-    , app_mngr_(app_mngr)
-    , hmi_level_(mobile_apis::HMILevel::INVALID_ENUM)
-    , audio_streaming_state_(mobile_apis::AudioStreamingState::INVALID_ENUM)
-    , system_context_(mobile_apis::SystemContext::INVALID_ENUM) {
-  app_ = app_mngr_.application(app_id);
-}
-
 void HmiState::set_parent(HmiStatePtr parent) {
   DCHECK_OR_RETURN_VOID(parent);
   parent_ = parent;
@@ -119,17 +98,9 @@ VRHmiState::VRHmiState(std::shared_ptr<Application> app,
                        const ApplicationManager& app_mngr)
     : HmiState(app, app_mngr, STATE_ID_VR_SESSION) {}
 
-DEPRECATED VRHmiState::VRHmiState(uint32_t app_id,
-                                  const ApplicationManager& app_mngr)
-    : HmiState(app_id, app_mngr, STATE_ID_VR_SESSION) {}
-
 TTSHmiState::TTSHmiState(std::shared_ptr<Application> app,
                          const ApplicationManager& app_mngr)
     : HmiState(app, app_mngr, STATE_ID_TTS_SESSION) {}
-
-DEPRECATED TTSHmiState::TTSHmiState(uint32_t app_id,
-                                    const ApplicationManager& app_mngr)
-    : HmiState(app_id, app_mngr, STATE_ID_TTS_SESSION) {}
 
 mobile_apis::AudioStreamingState::eType TTSHmiState::audio_streaming_state()
     const {
@@ -189,10 +160,6 @@ PhoneCallHmiState::PhoneCallHmiState(std::shared_ptr<Application> app,
                                      const ApplicationManager& app_mngr)
     : HmiState(app, app_mngr, STATE_ID_PHONE_CALL) {}
 
-DEPRECATED PhoneCallHmiState::PhoneCallHmiState(
-    uint32_t app_id, const ApplicationManager& app_mngr)
-    : HmiState(app_id, app_mngr, STATE_ID_PHONE_CALL) {}
-
 mobile_apis::HMILevel::eType PhoneCallHmiState::hmi_level() const {
   using namespace helpers;
   using namespace mobile_apis;
@@ -214,17 +181,9 @@ SafetyModeHmiState::SafetyModeHmiState(std::shared_ptr<Application> app,
                                        const ApplicationManager& app_mngr)
     : HmiState(app, app_mngr, STATE_ID_SAFETY_MODE) {}
 
-DEPRECATED SafetyModeHmiState::SafetyModeHmiState(
-    uint32_t app_id, const ApplicationManager& app_mngr)
-    : HmiState(app_id, app_mngr, STATE_ID_SAFETY_MODE) {}
-
 DeactivateHMI::DeactivateHMI(std::shared_ptr<Application> app,
                              const ApplicationManager& app_mngr)
     : HmiState(app, app_mngr, STATE_ID_DEACTIVATE_HMI) {}
-
-DEPRECATED DeactivateHMI::DeactivateHMI(uint32_t app_id,
-                                        const ApplicationManager& app_mngr)
-    : HmiState(app_id, app_mngr, STATE_ID_DEACTIVATE_HMI) {}
 
 mobile_apis::HMILevel::eType DeactivateHMI::hmi_level() const {
   using namespace helpers;
@@ -242,15 +201,14 @@ AudioSource::AudioSource(std::shared_ptr<Application> app,
                          const ApplicationManager& app_mngr)
     : HmiState(app, app_mngr, STATE_ID_AUDIO_SOURCE) {}
 
-DEPRECATED AudioSource::AudioSource(uint32_t app_id,
-                                    const ApplicationManager& app_mngr)
-    : HmiState(app_id, app_mngr, STATE_ID_AUDIO_SOURCE) {}
-
 mobile_apis::HMILevel::eType AudioSource::hmi_level() const {
   // Checking for NONE  is necessary to avoid issue during
   // calculation of HMI level during setting default HMI level
   if (mobile_apis::HMILevel::HMI_NONE == parent()->hmi_level()) {
     return mobile_apis::HMILevel::HMI_NONE;
+  }
+  if (mobile_apis::HMILevel::HMI_FULL == parent()->hmi_level()) {
+    return mobile_apis::HMILevel::HMI_FULL;
   }
 
   return mobile_apis::HMILevel::HMI_BACKGROUND;
@@ -259,10 +217,6 @@ mobile_apis::HMILevel::eType AudioSource::hmi_level() const {
 EmbeddedNavi::EmbeddedNavi(std::shared_ptr<Application> app,
                            const ApplicationManager& app_mngr)
     : HmiState(app, app_mngr, STATE_ID_EMBEDDED_NAVI) {}
-
-DEPRECATED EmbeddedNavi::EmbeddedNavi(uint32_t app_id,
-                                      const ApplicationManager& app_mngr)
-    : HmiState(app_id, app_mngr, STATE_ID_EMBEDDED_NAVI) {}
 
 mobile_apis::HMILevel::eType EmbeddedNavi::hmi_level() const {
   using namespace mobile_apis;

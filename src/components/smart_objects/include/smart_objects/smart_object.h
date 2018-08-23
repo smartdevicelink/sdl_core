@@ -35,6 +35,7 @@
 
 #include <set>
 #include <string>
+#include <sstream>
 #include <vector>
 #include <map>
 
@@ -669,14 +670,6 @@ class SmartObject FINAL {
    * @return bolean validation result
    **/
   bool isValid() const;
-
-  /**
-   * @deprecated
-   * @brief Validates object according to attached schema.
-   *
-   * @return Result of validation.
-   */
-  DEPRECATED Errors::eType validate();
 
   /**
    * @brief Validates object according to attached schema.

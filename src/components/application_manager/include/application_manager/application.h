@@ -597,8 +597,6 @@ class Application : public virtual InitialApplicationData,
   virtual void increment_list_files_in_none_count() = 0;
   virtual bool set_app_icon_path(const std::string& file_name) = 0;
   virtual void set_app_allowed(const bool allowed) = 0;
-  DEPRECATED virtual void set_device(
-      connection_handler::DeviceHandle device) = 0;
   /**
    * @brief Sets the handle of the device on which secondary transport of this
    * app is running
@@ -738,6 +736,12 @@ class Application : public virtual InitialApplicationData,
   virtual const HmiStatePtr RegularHmiState() const = 0;
 
   /**
+   * @brief Checks if app is allowed to change audio source
+   * @return True - if allowed, otherwise - False
+   */
+  virtual bool IsAllowedToChangeAudioSource() const = 0;
+
+  /**
    * @brief PostponedHmiState returns postponed hmi state of application
    * if it's present
    *
@@ -783,16 +787,6 @@ class Application : public virtual InitialApplicationData,
    * @return true if application is projection or navigation
    */
   virtual bool IsVideoApplication() const = 0;
-
-  /**
-   * DEPRECATED
-   * @brief GetDeviceId allows to obtain device id which posseses
-   * by this application.
-   * @return device the device id.
-   */
-  std::string GetDeviceId() const {
-    return device_id_;
-  }
 
   /**
    * @brief IsRegistered allows to distinguish if this

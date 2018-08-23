@@ -30,8 +30,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_REMOTE_CONTROL_INCLUDE_REMOTE_CONTROL_RC_APP_EXTENSION_H_
-#define SRC_COMPONENTS_REMOTE_CONTROL_INCLUDE_REMOTE_CONTROL_RC_APP_EXTENSION_H_
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_RC_RPC_PLUGIN_INCLUDE_RC_RPC_PLUGIN_RC_APP_EXTENSION_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_RC_RPC_PLUGIN_INCLUDE_RC_RPC_PLUGIN_RC_APP_EXTENSION_H_
 
 #include <string>
 #include <set>
@@ -69,6 +69,12 @@ class RCAppExtension : public application_manager::AppExtension {
    */
   bool IsSubscibedToInteriorVehicleData(const std::string& module_type);
 
+  /**
+   * @brief get list of subscriptions of application
+   * @return list of subscriptions of application
+   */
+  std::set<std::string> InteriorVehicleDataSubscriptions() const;
+
  private:
   std::set<std::string> subscribed_interior_vehicle_data_;
 
@@ -84,4 +90,4 @@ typedef std::shared_ptr<RCAppExtension> RCAppExtensionPtr;
 
 }  //  namespace rc_rpc_plugin
 
-#endif  //  SRC_COMPONENTS_REMOTE_CONTROL_INCLUDE_REMOTE_CONTROL_RC_APP_EXTENSION_H_
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_RC_RPC_PLUGIN_INCLUDE_RC_RPC_PLUGIN_RC_APP_EXTENSION_H_

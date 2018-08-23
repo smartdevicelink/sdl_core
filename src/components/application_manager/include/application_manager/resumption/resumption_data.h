@@ -95,20 +95,26 @@ class ResumptionData {
   virtual void IncrementIgnOffCount() = 0;
 
   /**
-   * @brief Increments ignition counter for all registered applications
-   * and remember ign_off time stamp
-   */
-  DEPRECATED virtual void OnSuspend() = 0;
-
-  /**
    * @brief Decrements ignition counter for all registered applications
    */
   virtual void DecrementIgnOffCount() = 0;
 
   /**
-   * @brief Decrements ignition counter for all registered applications
+   * @brief Increments global ignition on counter
+   * by 1
    */
-  DEPRECATED virtual void OnAwake() = 0;
+  virtual void IncrementGlobalIgnOnCounter() = 0;
+
+  /**
+   * @brief Get the global ignition on counter
+   * @return the global ignition on counter
+   */
+  virtual uint32_t GetGlobalIgnOnCounter() const = 0;
+
+  /**
+   * @brief Resets global ignition on counter
+   */
+  virtual void ResetGlobalIgnOnCount() = 0;
 
   /**
    * @brief Retrieves hash ID for the given mobile app ID

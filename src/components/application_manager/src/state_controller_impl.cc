@@ -458,6 +458,8 @@ mobile_apis::HMILevel::eType StateControllerImpl::GetAvailableHmiLevel(
   LOG4CXX_AUTO_TRACE(logger_);
 
   mobile_apis::HMILevel::eType result = hmi_level;
+  LOG4CXX_DEBUG(logger_, "HMI Level: " << hmi_level);
+
   if (!IsStreamableHMILevel(hmi_level)) {
     return result;
   }
@@ -465,6 +467,7 @@ mobile_apis::HMILevel::eType StateControllerImpl::GetAvailableHmiLevel(
   const bool is_audio_app = app->IsAudioApplication();
   const bool does_audio_app_with_same_type_exist =
       app_mngr_.IsAppTypeExistsInFullOrLimited(app);
+
   if (mobile_apis::HMILevel::HMI_LIMITED == hmi_level) {
     if (!is_audio_app || does_audio_app_with_same_type_exist) {
       result = app_mngr_.GetDefaultHmiLevel(app);

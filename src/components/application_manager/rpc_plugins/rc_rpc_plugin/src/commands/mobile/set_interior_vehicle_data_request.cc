@@ -33,6 +33,7 @@
 #include "rc_rpc_plugin/commands/mobile/set_interior_vehicle_data_request.h"
 #include "rc_rpc_plugin/rc_module_constants.h"
 #include "rc_rpc_plugin/rc_rpc_plugin.h"
+#include "rc_rpc_plugin/rc_helpers.h"
 #include "smart_objects/enum_schema_item.h"
 #include "utils/macro.h"
 #include "json/json.h"
@@ -57,16 +58,9 @@ std::vector<std::string> GetModuleReadOnlyParams(
     module_ro_params.push_back(kSignalStrength);
     module_ro_params.push_back(kSignalChangeThreshold);
     module_ro_params.push_back(kState);
+    module_ro_params.push_back(kSisData);
   }
   return module_ro_params;
-}
-
-const std::map<std::string, std::string> GetModuleTypeToDataMapping() {
-  std::map<std::string, std::string> mapping = {
-      {enums_value::kRadio, message_params::kRadioControlData},
-      {enums_value::kClimate, message_params::kClimateControlData},
-      {enums_value::kSeat, message_params::kSeatControlData}};
-  return mapping;
 }
 
 const std::map<std::string, std::string> GetModuleDataToCapabilitiesMapping() {
@@ -82,6 +76,10 @@ const std::map<std::string, std::string> GetModuleDataToCapabilitiesMapping() {
   mapping["dualModeEnable"] = "dualModeEnableAvailable";
   mapping["acMaxEnable"] = "acMaxEnableAvailable";
   mapping["ventilationMode"] = "ventilationModeAvailable";
+  mapping["heatedSteeringWheelEnable"] = "heatedSteeringWheelAvailable";
+  mapping["heatedWindshieldEnable"] = "heatedWindshieldAvailable";
+  mapping["heatedMirrorsEnable"] = "heatedMirrorsAvailable";
+  mapping["heatedRearWindowEnable"] = "heatedRearWindowAvailable";
 
   // radio
   mapping["band"] = "radioBandAvailable";
@@ -90,10 +88,12 @@ const std::map<std::string, std::string> GetModuleDataToCapabilitiesMapping() {
   mapping["rdsData"] = "rdsDataAvailable";
   mapping["availableHDs"] = "availableHDsAvailable";
   mapping["hdChannel"] = "availableHDsAvailable";
+  mapping["hdRadioEnable"] = "hdRadioEnableAvailable";
   mapping["signalStrength"] = "signalStrengthAvailable";
   mapping["signalChangeThreshold"] = "signalChangeThresholdAvailable";
   mapping["radioEnable"] = "radioEnableAvailable";
   mapping["state"] = "stateAvailable";
+  mapping["sisData"] = "sisDataAvailable";
 
   // seat
   mapping["heatingEnabled"] = "heatingEnabledAvailable";
@@ -113,6 +113,16 @@ const std::map<std::string, std::string> GetModuleDataToCapabilitiesMapping() {
   mapping["massageMode"] = "massageModeAvailable";
   mapping["massageCushionFirmness"] = "massageCushionFirmnessAvailable";
   mapping["memory"] = "memoryAvailable";
+  // audio
+  mapping["source"] = "sourceAvailable";
+  mapping["keepContext"] = "keepContextAvailable";
+  mapping["volume"] = "volumeAvailable";
+  mapping["equalizerSettings"] = "equalizerAvailable";
+
+  // hmi settings
+  mapping["distanceUnit"] = "distanceUnitAvailable";
+  mapping["temperatureUnit"] = "temperatureUnitAvailable";
+  mapping["displayMode"] = "displayModeUnitAvailable";
 
   return mapping;
 }
@@ -122,37 +132,127 @@ CREATE_LOGGERPTR_GLOBAL(logger_, "RemoteControlModule")
 
 SetInteriorVehicleDataRequest::SetInteriorVehicleDataRequest(
     const app_mngr::commands::MessageSharedPtr& message,
-    app_mngr::ApplicationManager& application_manager,
-    app_mngr::rpc_service::RPCService& rpc_service,
-    app_mngr::HMICapabilities& hmi_capabilities,
-    policy::PolicyHandlerInterface& policy_handle,
-    ResourceAllocationManager& resource_allocation_manager)
-    : RCCommandRequest(message,
-                       application_manager,
-                       rpc_service,
-                       hmi_capabilities,
-                       policy_handle,
-                       resource_allocation_manager) {}
+    const RCCommandParams& params)
+    : RCCommandRequest(message, params) {}
 
 SetInteriorVehicleDataRequest::~SetInteriorVehicleDataRequest() {}
 
+const std::string LightName(const smart_objects::SmartObject& light_name) {
+  const char* name;
+  const bool ok = NsSmartDeviceLink::NsSmartObjects::
+      EnumConversionHelper<mobile_apis::LightName::eType>::EnumToCString(
+          static_cast<mobile_apis::LightName::eType>(light_name.asUInt()),
+          &name);
+  return ok ? name : "unknown";
+}
+
+bool CheckLightDataByCapabilities(
+    const smart_objects::SmartObject& capabilities,
+    const smart_objects::SmartObject& light_data) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  std::map<std::string, std::string> lightCapsMapping = {
+      {message_params::kId, strings::kName},
+      {message_params::kDensity, strings::kDensityAvailable},
+      {message_params::kColor, strings::kRGBColorSpaceAvailable}};
+  auto it = light_data.map_begin();
+  for (; it != light_data.map_end(); ++it) {
+    if (message_params::kStatus == it->first ||
+        message_params::kId == it->first) {
+      continue;
+    }
+    const std::string& caps_key = lightCapsMapping[it->first];
+    LOG4CXX_DEBUG(logger_,
+                  "Checking request parameter "
+                      << it->first << " with capabilities. Appropriate key is "
+                      << caps_key);
+
+    if (!capabilities.keyExists(caps_key)) {
+      LOG4CXX_DEBUG(logger_,
+                    "Capability "
+                        << caps_key
+                        << " is missed in RemoteControl capabilities");
+      return false;
+    }
+    if (!capabilities[caps_key].asBool()) {
+      LOG4CXX_DEBUG(logger_,
+                    "Capability "
+                        << caps_key
+                        << " is switched off in RemoteControl capabilities");
+      return false;
+    }
+  }
+  return true;
+}
+
+bool CheckLightNameByCapabilities(
+    const smart_objects::SmartObject& capabilities_status,
+    const smart_objects::SmartObject& light_data) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  auto it = capabilities_status.asArray()->begin();
+  for (; it != capabilities_status.asArray()->end(); ++it) {
+    const smart_objects::SmartObject& so = *it;
+    const int64_t current_id = so[message_params::kName].asInt();
+    if (current_id == light_data[message_params::kId].asInt()) {
+      return CheckLightDataByCapabilities(so, light_data);
+    }
+  }
+  LOG4CXX_DEBUG(logger_, "There is no such light name in capabilities");
+  return false;
+}
+
+bool CheckRadioBandByCapabilities(
+    const smart_objects::SmartObject& capabilities_status,
+    const smart_objects::SmartObject& request_parameter) {
+  mobile_apis::RadioBand::eType radio_band =
+      static_cast<mobile_apis::RadioBand::eType>(request_parameter.asUInt());
+  if (mobile_apis::RadioBand::XM == radio_band) {
+    if (!capabilities_status.keyExists(strings::kSiriusxmRadioAvailable)) {
+      LOG4CXX_DEBUG(logger_,
+                    "Capability "
+                        << strings::kSiriusxmRadioAvailable
+                        << " is missed in RemoteControl capabilities");
+      return false;
+    }
+    if (!capabilities_status[strings::kSiriusxmRadioAvailable].asBool()) {
+      LOG4CXX_DEBUG(logger_,
+                    "Capability "
+                        << strings::kSiriusxmRadioAvailable
+                        << " is switched off in RemoteControl capabilities");
+      return false;
+    }
+  }
+  return true;
+}
+
 bool CheckControlDataByCapabilities(
-    const smart_objects::SmartObject& module_caps,
+    const smart_objects::SmartObject& capabilities_status,
     const smart_objects::SmartObject& control_data) {
+  LOG4CXX_AUTO_TRACE(logger_);
   std::map<std::string, std::string> mapping =
       GetModuleDataToCapabilitiesMapping();
-  const smart_objects::SmartObject& capabilities_status = module_caps[0];
   auto it = control_data.map_begin();
   for (; it != control_data.map_end(); ++it) {
     const std::string& request_parameter = it->first;
     if (message_params::kId == request_parameter) {
       continue;
     }
+    if (message_params::kLightState == request_parameter) {
+      auto light_data = control_data[request_parameter].asArray()->begin();
+      for (; light_data != control_data[request_parameter].asArray()->end();
+           ++light_data) {
+        if (!CheckLightNameByCapabilities(
+                capabilities_status[strings::kSupportedLights], *light_data)) {
+          return false;
+        }
+      }
+      return true;
+    }
     const std::string& caps_key = mapping[request_parameter];
     LOG4CXX_DEBUG(logger_,
                   "Checking request parameter "
                       << request_parameter
                       << " with capabilities. Appropriate key is " << caps_key);
+
     if (!capabilities_status.keyExists(caps_key)) {
       LOG4CXX_DEBUG(logger_,
                     "Capability "
@@ -167,6 +267,11 @@ bool CheckControlDataByCapabilities(
                         << " is switched off in RemoteControl capabilities");
       return false;
     }
+    if (message_params::kBand == request_parameter &&
+        !CheckRadioBandByCapabilities(capabilities_status,
+                                      control_data[request_parameter])) {
+      return false;
+    }
   }
   return true;
 }
@@ -175,21 +280,31 @@ bool CheckIfModuleDataExistInCapabilities(
     const smart_objects::SmartObject& rc_capabilities,
     const smart_objects::SmartObject& module_data) {
   LOG4CXX_AUTO_TRACE(logger_);
-  const std::map<std::string, std::string> params = {
-      {message_params::kRadioControlData, strings::kradioControlCapabilities},
-      {message_params::kClimateControlData,
-       strings::kclimateControlCapabilities},
-      {message_params::kSeatControlData, strings::kseatControlCapabilities}};
+
+  const auto& all_module_types = RCHelpers::GetModulesList();
+  const auto& get_module_data_key = RCHelpers::GetModuleTypeToDataMapping();
+  const auto& get_capabilities_key =
+      RCHelpers::GetModuleTypeToCapabilitiesMapping();
+
   bool is_module_data_valid = false;
-  for (const auto& param : params) {
-    if (module_data.keyExists(param.first)) {
-      if (!rc_capabilities.keyExists(param.second)) {
-        LOG4CXX_DEBUG(logger_, param.first << " capabilities not present");
+  for (const auto& module_type : all_module_types) {
+    const auto module_data_key = get_module_data_key(module_type);
+    const auto capabilities_key = get_capabilities_key(module_type);
+    if (module_data.keyExists(module_data_key)) {
+      if (!rc_capabilities.keyExists(capabilities_key)) {
+        LOG4CXX_DEBUG(logger_, module_data_key << " capabilities not present");
         return false;
       }
-      const smart_objects::SmartObject& caps = rc_capabilities[param.second];
-      is_module_data_valid =
-          CheckControlDataByCapabilities(caps, module_data[param.first]);
+      const smart_objects::SmartObject& caps =
+          rc_capabilities[capabilities_key];
+      if (message_params::kHmiSettingsControlData == module_data_key ||
+          message_params::kLightControlData == module_data_key) {
+        is_module_data_valid =
+            CheckControlDataByCapabilities(caps, module_data[module_data_key]);
+      } else {
+        is_module_data_valid = CheckControlDataByCapabilities(
+            caps[0], module_data[module_data_key]);
+      }
     }
   }
   return is_module_data_valid;
@@ -198,12 +313,12 @@ bool CheckIfModuleDataExistInCapabilities(
 bool isModuleTypeAndDataMatch(const std::string& module_type,
                               const smart_objects::SmartObject& module_data) {
   LOG4CXX_AUTO_TRACE(logger_);
-  std::map<std::string, std::string> data_mapping =
-      GetModuleTypeToDataMapping();
+  const auto& all_module_types = RCHelpers::GetModulesList();
+  const auto& data_mapping = RCHelpers::GetModuleTypeToDataMapping();
   bool module_type_and_data_match = false;
-  for (const auto& data : data_mapping) {
-    if (data.first == module_type) {
-      module_type_and_data_match = module_data.keyExists(data.second);
+  for (const auto& type : all_module_types) {
+    if (type == module_type) {
+      module_type_and_data_match = module_data.keyExists(data_mapping(type));
       break;
     }
   }
@@ -249,6 +364,20 @@ void SetInteriorVehicleDataRequest::Execute() {
     (*message_)[app_mngr::strings::msg_params][app_mngr::strings::app_id] =
         app->app_id();
 
+    const bool app_wants_to_set_audio_src =
+        module_data.keyExists(message_params::kAudioControlData) &&
+        module_data[message_params::kAudioControlData].keyExists(
+            message_params::kSource);
+
+    if (app_wants_to_set_audio_src && !app->IsAllowedToChangeAudioSource()) {
+      LOG4CXX_WARN(logger_, "App is not allowed to change audio source");
+      SetResourceState(ModuleType(), ResourceState::FREE);
+      SendResponse(false,
+                   mobile_apis::Result::REJECTED,
+                   "App is not allowed to change audio source");
+      return;
+    }
+
     SendHMIRequest(hmi_apis::FunctionID::RC_SetInteriorVehicleData,
                    &(*message_)[app_mngr::strings::msg_params],
                    true);
@@ -284,6 +413,11 @@ void SetInteriorVehicleDataRequest::on_event(
   smart_objects::SmartObject response_params;
   if (result) {
     response_params = hmi_response[app_mngr::strings::msg_params];
+    if (enums_value::kAudio == ModuleType()) {
+      CheckAudioSource((
+          *message_)[app_mngr::strings::msg_params][message_params::kModuleData]
+                    [message_params::kAudioControlData]);
+    }
   }
   std::string info;
   GetInfo(hmi_response, info);
@@ -294,15 +428,42 @@ void SetInteriorVehicleDataRequest::on_event(
 const smart_objects::SmartObject& SetInteriorVehicleDataRequest::ControlData(
     const smart_objects::SmartObject& module_data) {
   const std::string module_type = ModuleType();
-  std::map<std::string, std::string> data_mapping =
-      GetModuleTypeToDataMapping();
-  for (const auto& data : data_mapping) {
-    if (data.first == module_type) {
-      return module_data[data.second];
+
+  const auto& all_module_types = RCHelpers::GetModulesList();
+  const auto& data_mapping = RCHelpers::GetModuleTypeToDataMapping();
+  for (const auto& type : all_module_types) {
+    if (type == module_type) {
+      return module_data[data_mapping(type)];
     }
   }
   NOTREACHED();
   return module_data[0];
+}
+
+void SetInteriorVehicleDataRequest::CheckAudioSource(
+    const smart_objects::SmartObject& audio_data) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  const bool should_keep_context =
+      audio_data.keyExists(message_params::kKeepContext) &&
+      audio_data[message_params::kKeepContext].asBool();
+  const bool switch_source_from_app =
+      mobile_apis::PrimaryAudioSource::MOBILE_APP ==
+          application_manager_.get_current_audio_source() &&
+      mobile_apis::PrimaryAudioSource::MOBILE_APP !=
+          audio_data[message_params::kSource].asInt();
+  if (!should_keep_context && switch_source_from_app) {
+    app_mngr::ApplicationSharedPtr app =
+        application_manager_.application(connection_key());
+    if (app->mobile_projection_enabled()) {
+      application_manager_.ChangeAppsHMILevel(
+          app->app_id(), mobile_apis::HMILevel::eType::HMI_LIMITED);
+    } else {
+      application_manager_.ChangeAppsHMILevel(
+          app->app_id(), mobile_apis::HMILevel::eType::HMI_BACKGROUND);
+    }
+  }
+  application_manager_.set_current_audio_source(
+      audio_data[message_params::kSource].asUInt());
 }
 
 bool SetInteriorVehicleDataRequest::AreAllParamsReadOnly(
@@ -320,13 +481,34 @@ bool SetInteriorVehicleDataRequest::AreAllParamsReadOnly(
   return true;
 }
 
+bool CheckReadOnlyParamsForAudio(
+    const smart_objects::SmartObject& module_type_params) {
+  if (module_type_params.keyExists(message_params::kEqualizerSettings)) {
+    const auto& equalizer_settings =
+        module_type_params[message_params::kEqualizerSettings];
+    auto it = equalizer_settings.asArray()->begin();
+    for (; it != equalizer_settings.asArray()->end(); ++it) {
+      if (it->keyExists(message_params::kChannelName)) {
+        LOG4CXX_DEBUG(logger_,
+                      " READ ONLY parameter: " << message_params::kChannelName);
+        return true;
+      }
+    }
+  }
+  return false;
+}
+
 bool SetInteriorVehicleDataRequest::AreReadOnlyParamsPresent(
     const smart_objects::SmartObject& module_data) {
   LOG4CXX_AUTO_TRACE(logger_);
   const smart_objects::SmartObject& module_type_params =
       ControlData(module_data);
   auto it = module_type_params.map_begin();
-  std::vector<std::string> ro_params = GetModuleReadOnlyParams(ModuleType());
+  const std::string module_type = ModuleType();
+  std::vector<std::string> ro_params = GetModuleReadOnlyParams(module_type);
+  if (enums_value::kAudio == module_type) {
+    return CheckReadOnlyParamsForAudio(module_type_params);
+  }
   for (; it != module_type_params.map_end(); ++it) {
     if (helpers::in_range(ro_params, it->first)) {
       return true;
@@ -351,6 +533,20 @@ void SetInteriorVehicleDataRequest::CutOffReadOnlyParams(
       } else if (enums_value::kRadio == module_type) {
         module_data[message_params::kRadioControlData].erase(it);
         LOG4CXX_DEBUG(logger_, "Cutting-off READ ONLY parameter: " << it);
+      }
+    }
+  }
+
+  if (enums_value::kAudio == module_type) {
+    auto& equalizer_settings = module_data[message_params::kAudioControlData]
+                                          [message_params::kEqualizerSettings];
+    auto it = equalizer_settings.asArray()->begin();
+    for (; it != equalizer_settings.asArray()->end(); ++it) {
+      if (it->keyExists(message_params::kChannelName)) {
+        it->erase(message_params::kChannelName);
+        LOG4CXX_DEBUG(logger_,
+                      "Cutting-off READ ONLY parameter: "
+                          << message_params::kChannelName);
       }
     }
   }

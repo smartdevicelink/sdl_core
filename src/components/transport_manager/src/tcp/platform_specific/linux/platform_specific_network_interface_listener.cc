@@ -652,6 +652,7 @@ void PlatformSpecificNetworkInterfaceListener::DumpTable() const {
   for (auto it = status_table_.begin(); it != status_table_.end(); ++it) {
     const std::string ifname = it->first;
     const InterfaceStatus& status = it->second;
+    UNUSED(status);
 
     LOG4CXX_DEBUG(
         logger_,

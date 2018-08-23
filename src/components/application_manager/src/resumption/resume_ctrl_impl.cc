@@ -74,7 +74,9 @@ ResumeCtrlImpl::ResumeCtrlImpl(ApplicationManager& application_manager)
     , is_resumption_active_(false)
     , is_data_saved_(false)
     , is_suspended_(false)
-    , launch_time_(time(NULL))
+    , launch_time_(time(nullptr))
+    , low_voltage_time_(0)
+    , wake_up_time_(0)
     , application_manager_(application_manager) {}
 #ifdef BUILD_TESTS
 void ResumeCtrlImpl::set_resumption_storage(
@@ -128,6 +130,8 @@ bool ResumeCtrlImpl::Init(resumption::LastState& last_state) {
       application_manager_.get_settings()
           .app_resumption_save_persistent_data_timeout(),
       timer::kPeriodic);
+
+  resumption_storage_->IncrementGlobalIgnOnCounter();
   return true;
 }
 
@@ -144,9 +148,13 @@ void ResumeCtrlImpl::SaveAllApplications() {
 void ResumeCtrlImpl::SaveApplication(ApplicationSharedPtr application) {
   LOG4CXX_AUTO_TRACE(logger_);
   DCHECK_OR_RETURN_VOID(application);
-  LOG4CXX_INFO(logger_,
-               "application with appID " << application->app_id()
-                                         << " will be saved");
+  if (application_manager_.IsLowVoltage()) {
+    LOG4CXX_DEBUG(logger_, "Low Voltage state is active");
+    return;
+  }
+  LOG4CXX_DEBUG(logger_,
+                "application with appID " << application->app_id()
+                                          << " will be saved");
   resumption_storage_->SaveApplication(application);
 }
 
@@ -310,6 +318,10 @@ uint32_t ResumeCtrlImpl::GetHMIApplicationID(
 
 bool ResumeCtrlImpl::RemoveApplicationFromSaved(
     ApplicationConstSharedPtr application) {
+  if (application_manager_.IsLowVoltage()) {
+    LOG4CXX_DEBUG(logger_, "Low Voltage state is active");
+    return false;
+  }
   const std::string& device_mac = application->mac_address();
   return resumption_storage_->RemoveApplicationFromSaved(
       application->policy_app_id(), device_mac);
@@ -323,8 +335,11 @@ void ResumeCtrlImpl::OnSuspend() {
 
 void ResumeCtrlImpl::OnIgnitionOff() {
   LOG4CXX_AUTO_TRACE(logger_);
-  resumption_storage_->IncrementIgnOffCount();
-  FinalPersistData();
+  if (!application_manager_.IsLowVoltage()) {
+    resumption_storage_->IncrementIgnOffCount();
+    resumption_storage_->ResetGlobalIgnOnCount();
+    FinalPersistData();
+  }
 }
 
 void ResumeCtrlImpl::OnAwake() {
@@ -332,6 +347,25 @@ void ResumeCtrlImpl::OnAwake() {
   is_suspended_ = false;
   ResetLaunchTime();
   StartSavePersistentDataTimer();
+}
+
+void ResumeCtrlImpl::SaveLowVoltageTime() {
+  low_voltage_time_ = time(nullptr);
+  LOG4CXX_DEBUG(logger_,
+                "Low Voltage timestamp : " << low_voltage_time_ << " saved");
+}
+
+void ResumeCtrlImpl::SaveWakeUpTime() {
+  wake_up_time_ = std::time(nullptr);
+  LOG4CXX_DEBUG(logger_, "Wake Up timestamp : " << wake_up_time_ << " saved");
+}
+
+time_t ResumeCtrlImpl::LowVoltageTime() const {
+  return low_voltage_time_;
+}
+
+time_t ResumeCtrlImpl::WakeUpTime() const {
+  return wake_up_time_;
 }
 
 bool ResumeCtrlImpl::is_suspended() const {
@@ -440,12 +474,25 @@ void ResumeCtrlImpl::StartAppHmiStateResumption(
     LOG4CXX_ERROR(logger_, "Application was not saved");
     return;
   }
-  const uint32_t ign_off_count = saved_app[strings::ign_off_count].asUInt();
-  bool restore_data_allowed = false;
-  restore_data_allowed =
-      CheckAppRestrictions(application, saved_app) &&
-      ((0 == ign_off_count) || CheckIgnCycleRestrictions(saved_app));
-  if (restore_data_allowed) {
+
+  const bool is_hmi_level_applicable_to_resume =
+      CheckAppRestrictions(application, saved_app);
+
+  if (!is_hmi_level_applicable_to_resume) {
+    LOG4CXX_DEBUG(logger_, "No applicable HMI level found for resuming");
+    return;
+  }
+
+  const bool is_resume_allowed_by_low_voltage =
+      CheckLowVoltageRestrictions(saved_app);
+
+  const bool is_hmi_level_allowed_by_ign_cycle =
+      CheckIgnCycleRestrictions(saved_app);
+
+  const bool restore_hmi_level_allowed =
+      is_resume_allowed_by_low_voltage && is_hmi_level_allowed_by_ign_cycle;
+
+  if (restore_hmi_level_allowed) {
     LOG4CXX_INFO(logger_,
                  "Resume application " << application->policy_app_id());
     RestoreAppHMIState(application);
@@ -716,30 +763,62 @@ void ResumeCtrlImpl::AddSubscriptions(
 bool ResumeCtrlImpl::CheckIgnCycleRestrictions(
     const smart_objects::SmartObject& saved_app) {
   LOG4CXX_AUTO_TRACE(logger_);
-  bool result = true;
 
   if (!CheckDelayAfterIgnOn()) {
-    LOG4CXX_INFO(logger_, "Application was connected long after ign on");
-    result = false;
+    LOG4CXX_DEBUG(logger_, "Application was connected long after ign on");
+    return false;
   }
 
-  if (!DisconnectedJustBeforeIgnOff(saved_app)) {
-    LOG4CXX_INFO(logger_, "Application was dissconnected long before ign off");
-    result = false;
+  if (!CheckDelayBeforeIgnOff(saved_app)) {
+    LOG4CXX_DEBUG(logger_, "Application was disconnected long before ign off");
+    return false;
   }
-  return result;
+  return true;
 }
 
-bool ResumeCtrlImpl::DisconnectedJustBeforeIgnOff(
+bool ResumeCtrlImpl::CheckLowVoltageRestrictions(
     const smart_objects::SmartObject& saved_app) {
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  if (!CheckDelayBeforeLowVoltage(saved_app)) {
+    LOG4CXX_DEBUG(logger_,
+                  "Application was disconnected long before low voltage");
+    return false;
+  }
+
+  if (!CheckDelayAfterWakeUp()) {
+    LOG4CXX_DEBUG(logger_, "Application was connected long after wake up");
+    return false;
+  }
+
+  LOG4CXX_DEBUG(logger_, "HMI Level resuming in not restricted by Low Voltage");
+  return true;
+}
+
+bool ResumeCtrlImpl::CheckDelayBeforeIgnOff(
+    const smart_objects::SmartObject& saved_app) const {
   using namespace date_time;
   LOG4CXX_AUTO_TRACE(logger_);
   DCHECK_OR_RETURN(saved_app.keyExists(strings::time_stamp), false);
 
   const time_t time_stamp =
       static_cast<time_t>(saved_app[strings::time_stamp].asInt());
-  time_t ign_off_time =
+  const time_t ign_off_time =
       static_cast<time_t>(resumption_storage_->GetIgnOffTime());
+
+  if (CheckIgnCyclesData() && 0 == ign_off_time) {
+    LOG4CXX_DEBUG(
+        logger_, "No IGNITION OFF records found: This is first Ignition cycle");
+    return true;
+  }
+
+  // This means that ignition off timestamp was not saved
+  // Possible reasons: Low Voltage event, core crash etc.
+  if (ign_off_time < time_stamp) {
+    LOG4CXX_DEBUG(logger_, "Last IGNITION OFF record missed");
+    return true;
+  }
+
   const uint32_t sec_spent_before_ign = labs(ign_off_time - time_stamp);
   LOG4CXX_DEBUG(
       logger_,
@@ -750,6 +829,71 @@ bool ResumeCtrlImpl::DisconnectedJustBeforeIgnOff(
           << application_manager_.get_settings().resumption_delay_before_ign());
   return sec_spent_before_ign <=
          application_manager_.get_settings().resumption_delay_before_ign();
+}
+
+bool ResumeCtrlImpl::CheckDelayBeforeLowVoltage(
+    const smart_objects::SmartObject& saved_app) const {
+  using namespace date_time;
+  LOG4CXX_AUTO_TRACE(logger_);
+  DCHECK_OR_RETURN(saved_app.keyExists(strings::time_stamp), false);
+
+  if (0 == LowVoltageTime()) {
+    LOG4CXX_DEBUG(logger_, "No Low Voltage signal timestamp saved");
+    return true;
+  }
+
+  const time_t unregistration_time_stamp =
+      static_cast<time_t>(saved_app[strings::time_stamp].asInt());
+  const time_t low_voltage_timestamp = static_cast<time_t>(LowVoltageTime());
+  const int32_t sec_spent_before_low_voltage =
+      (low_voltage_timestamp - unregistration_time_stamp);
+  if (0 > sec_spent_before_low_voltage) {
+    LOG4CXX_DEBUG(logger_,
+                  "Low Voltage time: "
+                      << low_voltage_timestamp
+                      << "; App disconnect time: " << unregistration_time_stamp
+                      << "; Secs between app disconnect and low voltage event "
+                      << sec_spent_before_low_voltage);
+    return true;
+  }
+
+  const uint32_t secs_between_app_disconnect_and_low_voltage =
+      static_cast<uint32_t>(sec_spent_before_low_voltage);
+  const uint32_t wait_time =
+      application_manager_.get_settings().resumption_delay_before_ign();
+  LOG4CXX_DEBUG(logger_,
+                "Low Voltage time: "
+                    << low_voltage_timestamp
+                    << "; App disconnect time: " << unregistration_time_stamp
+                    << "; Secs between app disconnect and low voltage event "
+                    << secs_between_app_disconnect_and_low_voltage
+                    << "; Timeout for HMI level resuming:  " << wait_time);
+  return secs_between_app_disconnect_and_low_voltage <= wait_time;
+}
+
+bool ResumeCtrlImpl::CheckDelayAfterWakeUp() const {
+  using namespace date_time;
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  if (0 == WakeUpTime()) {
+    LOG4CXX_DEBUG(logger_, "No WakeUp signal timestamp saved");
+    return true;
+  }
+
+  const time_t current_time = time(nullptr);
+  const time_t wake_up_timestamp = static_cast<time_t>(WakeUpTime());
+
+  const uint32_t seconds_from_wake_up_signal =
+      labs(current_time - wake_up_timestamp);
+  const uint32_t wait_time =
+      application_manager_.get_settings().resumption_delay_after_ign();
+  LOG4CXX_DEBUG(
+      logger_,
+      "Current time: " << current_time << "; WakeUp Signal time: "
+                       << wake_up_timestamp << "; Seconds passed from wake up: "
+                       << seconds_from_wake_up_signal
+                       << "; Timeout for HMI level resuming:  " << wait_time);
+  return seconds_from_wake_up_signal <= wait_time;
 }
 
 bool ResumeCtrlImpl::CheckAppRestrictions(
@@ -773,9 +917,10 @@ bool ResumeCtrlImpl::CheckAppRestrictions(
                           ? true
                           : false;
   LOG4CXX_DEBUG(logger_,
-                "is_media_app " << application->is_media_application()
-                                << "; hmi_level " << hmi_level << " result "
-                                << result);
+                "is_media_app: " << application->is_media_application()
+                                 << "; hmi_level: " << hmi_level << "; result: "
+                                 << (result ? "Applicable for resume"
+                                            : "Non-applicable for resume"));
   return result;
 }
 
@@ -788,11 +933,36 @@ bool ResumeCtrlImpl::CheckIcons(ApplicationSharedPtr application,
   return mobile_apis::Result::INVALID_DATA != verify_images;
 }
 
-bool ResumeCtrlImpl::CheckDelayAfterIgnOn() {
+bool ResumeCtrlImpl::CheckIgnCyclesData() const {
+  LOG4CXX_AUTO_TRACE(logger_);
+  const uint32_t global_ign_on_count =
+      resumption_storage_->GetGlobalIgnOnCounter();
+  const uint32_t the_first_ignition = 1;
+  const bool is_emergency_ign_off_occurred =
+      global_ign_on_count > the_first_ignition;
+  // global_ign_on_count is reseting to 0 at ignition off
+  // global_ign_on_count is incrementing at ignition on
+  // global_ign_on_count > 1 means that correct ignition off was not present.
+  if (is_emergency_ign_off_occurred) {
+    LOG4CXX_WARN(logger_,
+                 "Emergency IGN OFF occurred. Possibly after Low Voltage");
+    return false;
+  }
+  return true;
+}
+
+bool ResumeCtrlImpl::CheckDelayAfterIgnOn() const {
   using namespace date_time;
   LOG4CXX_AUTO_TRACE(logger_);
-  const time_t curr_time = time(NULL);
+  const time_t ign_off_time = GetIgnOffTime();
+
+  if (CheckIgnCyclesData() && 0 == ign_off_time) {
+    LOG4CXX_DEBUG(logger_, "This is first Ignition cycle");
+    return true;
+  }
+  const time_t curr_time = time(nullptr);
   const time_t sdl_launch_time = LaunchTime();
+
   const uint32_t seconds_from_sdl_start = labs(curr_time - sdl_launch_time);
   const uint32_t wait_time =
       application_manager_.get_settings().resumption_delay_after_ign();
@@ -808,7 +978,7 @@ time_t ResumeCtrlImpl::LaunchTime() const {
   return launch_time_;
 }
 
-time_t ResumeCtrlImpl::GetIgnOffTime() {
+time_t ResumeCtrlImpl::GetIgnOffTime() const {
   return resumption_storage_->GetIgnOffTime();
 }
 
@@ -856,6 +1026,8 @@ void ResumeCtrlImpl::AddToResumptionTimerQueue(const uint32_t app_id) {
                 "Application ID " << app_id << " have been added"
                                                " to resumption queue.");
   if (run_resumption) {
+    LOG4CXX_DEBUG(logger_,
+                  "Application ID " << app_id << " will be restored by timer");
     restore_hmi_level_timer_.Start(
         application_manager_.get_settings().app_resuming_timeout(),
         timer::kSingleShot);

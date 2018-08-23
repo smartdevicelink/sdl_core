@@ -195,6 +195,9 @@ class MockMessageHelper {
                mobile_apis::Result::eType(smart_objects::SmartObject& message,
                                           ApplicationConstSharedPtr app,
                                           ApplicationManager& app_mngr));
+  MOCK_METHOD1(CheckChoiceSetVRCommands,
+               MessageHelper::ChoiceSetVRCommandsStatus(
+                   const smart_objects::SmartObject&));
 
   MOCK_METHOD6(GetBCActivateAppRequestToHMI,
                smart_objects::SmartObjectSPtr(

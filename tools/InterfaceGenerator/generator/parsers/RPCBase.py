@@ -889,7 +889,6 @@ class Parser(object):
         return dot_str.join(version_array)
 
     def _parse_history(self, history, prefix, parent):
-        print "Pare History of Size: %d" % len(history)
         if history.tag != "history":
             raise ParseError("Invalid history tag: " + interface.tag)
         

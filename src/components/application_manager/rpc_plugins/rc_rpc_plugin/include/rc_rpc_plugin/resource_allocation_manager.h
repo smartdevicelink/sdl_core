@@ -30,8 +30,8 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_REMOTE_CONTROL_INCLUDE_REMOTE_CONTROL_RESOURCE_ALLOCATION_H
-#define SRC_COMPONENTS_REMOTE_CONTROL_INCLUDE_REMOTE_CONTROL_RESOURCE_ALLOCATION_H
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_RC_RPC_PLUGIN_INCLUDE_RC_RPC_PLUGIN_RESOURCE_ALLOCATION_MANAGER_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_RC_RPC_PLUGIN_INCLUDE_RC_RPC_PLUGIN_RESOURCE_ALLOCATION_MANAGER_H_
 #include <string>
 #include "utils/macro.h"
 
@@ -154,9 +154,6 @@ class ResourceAllocationManager {
    */
   virtual void ResetAllAllocations() = 0;
 
-  virtual RCAppExtensionPtr GetApplicationExtention(
-      application_manager::ApplicationSharedPtr application) = 0;
-
   /**
    * @brief Create and send OnRCStatusNotification to mobile and HMI
    * @param event trigger for notification sending
@@ -178,4 +175,4 @@ class ResourceAllocationManager {
 };
 
 }  // namespace rc_rpc_plugin
-#endif  // SRC_COMPONENTS_REMOTE_CONTROL_INCLUDE_REMOTE_CONTROL_RESOURCE_ALLOCATION_H
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_RC_RPC_PLUGIN_INCLUDE_RC_RPC_PLUGIN_RESOURCE_ALLOCATION_MANAGER_H_

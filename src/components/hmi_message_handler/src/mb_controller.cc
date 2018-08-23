@@ -222,7 +222,7 @@ void CMessageBrokerController::exitReceivingThread() {
       it;
   for (it = mConnectionList.begin(); it != mConnectionList.end();) {
     (*it)->Shutdown();
-    mConnectionList.erase(it++);
+    it = mConnectionList.erase(it);
   }
   mConnectionListLock.Release();
 

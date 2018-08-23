@@ -314,6 +314,8 @@ extern const char* resume_vr_grammars;
 
 extern const char* ign_off_count;
 
+extern const char* global_ign_on_counter;
+
 extern const char* connection_info;
 extern const char* is_download_complete;
 

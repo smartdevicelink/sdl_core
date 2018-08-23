@@ -840,11 +840,6 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile(
   SendChangeRegistrationOnHMI(application);
 }
 
-DEPRECATED void
-RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile() {
-  SendRegisterAppInterfaceResponseToMobile(ApplicationType::kNewApplication);
-}
-
 void RegisterAppInterfaceRequest::SendChangeRegistration(
     const hmi_apis::FunctionID::eType function_id,
     const int32_t language,

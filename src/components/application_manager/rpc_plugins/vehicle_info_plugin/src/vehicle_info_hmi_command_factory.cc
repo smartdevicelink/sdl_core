@@ -89,6 +89,7 @@ app_mngr::CommandSharedPtr VehicleInfoHmiCommandFactory::CreateCommand(
     message_type_str = "error response";
   }
 
+  UNUSED(message_type_str);
   LOG4CXX_DEBUG(logger_,
                 "HMICommandFactory::CreateCommand function_id: "
                     << function_id << ", message type: " << message_type_str);

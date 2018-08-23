@@ -110,10 +110,25 @@ class Profile : public protocol_handler::ProtocolHandlerSettings,
   const std::string& app_resource_folder() const;
 
   /**
-   * @brief Returns true, if SDL 4.0 is enabled
-   * @deprecated use max_supported_protocol_version instead
-   */
-  DEPRECATED bool enable_protocol_4() const OVERRIDE;
+    * @brief Returns offset from SIGRTMIN for user defined signal
+    * SIGLOWVOLTAGE
+    * which is used for handling LOW Voltage functionality
+    */
+  int low_voltage_signal_offset() const;
+
+  /**
+    * @brief Returns offset from SIGRTMIN for user defined signal
+    * SIGWAKEUP
+    * which is used for handling LOW Voltage functionality
+    */
+  int wake_up_signal_offset() const;
+
+  /**
+    * @brief Returns offset from SIGRTMIN for user defined signal
+    * SIGIGNITIONOFF
+    * which is used for handling LOW Voltage functionality
+    */
+  int ignition_off_signal_offset() const;
 
   /**
    * @brief Returns application icons folder path
@@ -753,6 +768,8 @@ class Profile : public protocol_handler::ProtocolHandlerSettings,
 
   const std::pair<uint32_t, int32_t>& get_vehicle_data_frequency()
       const OVERRIDE;
+  const std::pair<uint32_t, int32_t>& get_interior_vehicle_data_frequency()
+      const OVERRIDE;
 
   const std::pair<uint32_t, int32_t>& start_stream_retry_amount()
       const OVERRIDE;
@@ -979,6 +996,12 @@ class Profile : public protocol_handler::ProtocolHandlerSettings,
    */
   std::pair<uint32_t, int32_t> get_vehicle_data_frequency_;
 
+  /*
+   * first value is count of request
+   * second is time scale
+   */
+  std::pair<uint32_t, int32_t> get_interior_vehicle_data_frequency_;
+
   /**
    * first value is count of retries for start stream
    * second for timer
@@ -1025,6 +1048,9 @@ class Profile : public protocol_handler::ProtocolHandlerSettings,
   std::vector<std::string> video_service_transports_;
   bool error_occured_;
   std::string error_description_;
+  int low_voltage_signal_offset_;
+  int wake_up_signal_offset_;
+  int ignition_off_signal_offset_;
 
   DISALLOW_COPY_AND_ASSIGN(Profile);
 };

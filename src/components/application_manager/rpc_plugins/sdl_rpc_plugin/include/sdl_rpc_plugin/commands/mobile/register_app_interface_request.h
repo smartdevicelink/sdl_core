@@ -83,12 +83,6 @@ class RegisterAppInterfaceRequest
    **/
   virtual void Run();
 
-  /**
-   * @brief Prepares and sends RegisterAppInterface response to mobile
-   * considering application type
-   **/
-  void SendRegisterAppInterfaceResponseToMobile();
-
  private:
   /**
    * @brief The AppicationType enum defines whether application is newly

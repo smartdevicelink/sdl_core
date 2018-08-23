@@ -314,6 +314,13 @@ const HmiStatePtr ApplicationImpl::RegularHmiState() const {
   return state_.GetState(HmiState::STATE_ID_REGULAR);
 }
 
+bool ApplicationImpl::IsAllowedToChangeAudioSource() const {
+  if (is_remote_control_supported() && is_media_application()) {
+    return true;
+  }
+  return false;
+}
+
 const HmiStatePtr ApplicationImpl::PostponedHmiState() const {
   return state_.GetState(HmiState::STATE_ID_POSTPONED);
 }
@@ -662,10 +669,6 @@ bool ApplicationImpl::set_app_icon_path(const std::string& path) {
 
 void ApplicationImpl::set_app_allowed(const bool allowed) {
   is_app_allowed_ = allowed;
-}
-
-void ApplicationImpl::set_device(connection_handler::DeviceHandle device) {
-  device_id_ = device;
 }
 
 void ApplicationImpl::set_secondary_device(
