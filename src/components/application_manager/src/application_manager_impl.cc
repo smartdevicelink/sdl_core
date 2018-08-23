@@ -1755,6 +1755,11 @@ bool ApplicationManagerImpl::Stop() {
   stopping_application_mng_lock_.Acquire();
   is_stopping_ = true;
   stopping_application_mng_lock_.Release();
+
+  if (app_launch_ctrl_) {
+    app_launch_ctrl_->Stop();
+  }
+
   application_list_update_timer_.Stop();
   try {
     SetUnregisterAllApplicationsReason(
@@ -1765,6 +1770,8 @@ bool ApplicationManagerImpl::Stop() {
                   "An error occurred during unregistering applications.");
   }
   request_ctrl_.DestroyThreadpool();
+
+  hmi_handler_ = nullptr;
 
   // for PASA customer policy backup should happen :AllApp(SUSPEND)
   LOG4CXX_DEBUG(logger_, "Unloading policy library.");

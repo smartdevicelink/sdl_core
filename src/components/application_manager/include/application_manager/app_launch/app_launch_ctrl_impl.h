@@ -69,6 +69,7 @@ class AppLaunchCtrlImpl : public AppLaunchCtrl {
   void OnAppRegistered(const application_manager::Application& app) OVERRIDE;
   void OnDeviceConnected(const std::string& device_mac) OVERRIDE;
   void OnMasterReset() OVERRIDE;
+  void Stop() OVERRIDE;
 
  private:
   const AppLaunchSettings& settings_;
@@ -77,6 +78,7 @@ class AppLaunchCtrlImpl : public AppLaunchCtrl {
 
   AppsLauncher apps_launcher_;
   DeviceAppsLauncher device_apps_launcher_;
+  sync_primitives::Lock launch_ctrl_lock_;
 
   DISALLOW_COPY_AND_ASSIGN(AppLaunchCtrlImpl);
 };
