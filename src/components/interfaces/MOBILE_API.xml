@@ -562,7 +562,16 @@
     <enum name="ButtonName" since="1.0">
         <description>Defines the hard (physical) and soft (touchscreen) buttons available from the module</description>
         <element name="OK" />
-        <element name="PLAY_PAUSE" since="5.0"/>
+        <element name="PLAY_PAUSE" since="5.0">
+            <description>
+              The button name for the physical Play/Pause
+              toggle that can be used by media apps.
+            </description>
+            <warning>
+              Please use the physical OK button in order to
+              use a Play/Pause toggle for versions &lt; 4.5.0.
+            </warning>
+        </element>
         <element name="SEEKLEFT" />
         <element name="SEEKRIGHT" />
         <element name="TUNEUP" />
