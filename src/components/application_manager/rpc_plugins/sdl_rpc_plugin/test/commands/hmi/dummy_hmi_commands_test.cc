@@ -223,7 +223,6 @@
 #include "hmi/on_tts_reset_timeout_notification.h"
 #include "hmi/dial_number_request.h"
 #include "hmi/dial_number_response.h"
-#include "hmi/ui_set_icon_request.h"
 
 #include "application_manager/commands/commands_test.h"
 #include "application_manager/mock_application.h"
