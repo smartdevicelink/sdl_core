@@ -47,7 +47,7 @@ include_directories (
     ${LOG4CXX_INCLUDE_DIRECTORY}
     ${COMPONENTS_DIR}/hmi_message_handler/include
     ${COMPONENTS_DIR}/hmi_message_handler/src
-    ${BOOST_INCLUDE_DIR}
+    ${BOOST_INCLUDEDIR}
 )
 
 set(PATHS

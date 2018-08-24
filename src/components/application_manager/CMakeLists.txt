@@ -141,8 +141,6 @@ set(LIBRARIES
   formatters
   dbms
   Utils
-  bson -L${BSON_LIBS_DIRECTORY}
-  emhashmap -L${EMHASHMAP_LIBS_DIRECTORY}
 )
 
 
