@@ -28,6 +28,8 @@ typedef std::shared_ptr<UnsubscribeButtonRequest> CommandPtr;
 namespace {
 const uint32_t kConnectionKey = 1u;
 const mobile_apis::ButtonName::eType kButtonId = mobile_apis::ButtonName::OK;
+const utils::SemanticVersion mock_semantic_version(5, 0, 0);
+const utils::SemanticVersion mock_semantic_version_4_5(4, 5, 0);
 }  // namespace
 
 class UnsubscribeButtonRequestTest
@@ -73,6 +75,8 @@ TEST_F(UnsubscribeButtonRequestTest,
   MockAppPtr mock_app(CreateMockApp());
   EXPECT_CALL(app_mngr_, application(kConnectionKey))
       .WillOnce(Return(mock_app));
+  ON_CALL(*mock_app, msg_version())
+      .WillByDefault(ReturnRef(mock_semantic_version));
   EXPECT_CALL(*mock_app, UnsubscribeFromButton(kButtonId))
       .WillOnce(Return(false));
 
@@ -94,6 +98,8 @@ TEST_F(UnsubscribeButtonRequestTest,
   MockAppPtr mock_app(CreateMockApp());
   EXPECT_CALL(app_mngr_, application(kConnectionKey))
       .WillOnce(Return(mock_app));
+  ON_CALL(*mock_app, msg_version())
+      .WillByDefault(ReturnRef(mock_semantic_version));
 
   EXPECT_CALL(mock_hmi_capabilities_, is_ui_cooperating())
       .WillOnce(Return(true));
@@ -128,8 +134,53 @@ TEST_F(UnsubscribeButtonRequestTest, Run_SUCCESS) {
   MockAppPtr mock_app(CreateMockApp());
   EXPECT_CALL(app_mngr_, application(kConnectionKey))
       .WillRepeatedly(Return(mock_app));
+  ON_CALL(*mock_app, msg_version())
+      .WillByDefault(ReturnRef(mock_semantic_version));
 
   EXPECT_CALL(*mock_app, UnsubscribeFromButton(kButtonId))
+      .WillOnce(Return(true));
+  EXPECT_CALL(mock_rpc_service_,
+              ManageHMICommand(HMIResultCodeIs(
+                  hmi_apis::FunctionID::Buttons_OnButtonSubscription)));
+  EXPECT_CALL(
+      mock_rpc_service_,
+      ManageMobileCommand(MobileResultCodeIs(mobile_result::SUCCESS), _));
+
+  EXPECT_CALL(*mock_app, UpdateHash());
+  command->Init();
+  command->Run();
+}
+
+TEST_F(UnsubscribeButtonRequestTest, Run_SUCCESS_Version_4_5) {
+  MessageSharedPtr command_msg(CreateMessage(smart_objects::SmartType_Map));
+  (*command_msg)[am::strings::params][am::strings::connection_key] =
+      kConnectionKey;
+  (*command_msg)[am::strings::msg_params][am::strings::button_name] =
+      mobile_apis::ButtonName::OK;
+
+  CommandPtr command(CreateCommand<UnsubscribeButtonRequest>(command_msg));
+
+  EXPECT_CALL(mock_hmi_capabilities_, is_ui_cooperating())
+      .WillRepeatedly(Return(true));
+
+  MessageSharedPtr button_caps_ptr(CreateMessage(smart_objects::SmartType_Map));
+  (*button_caps_ptr)[0][am::hmi_response::button_name] =
+      mobile_apis::ButtonName::OK;
+  (*button_caps_ptr)[1][am::hmi_response::button_name] =
+      mobile_apis::ButtonName::PLAY_PAUSE;
+
+  EXPECT_CALL(mock_hmi_capabilities_, button_capabilities())
+      .WillRepeatedly(Return(button_caps_ptr.get()));
+
+  MockAppPtr mock_app(CreateMockApp());
+  EXPECT_CALL(app_mngr_, application(kConnectionKey))
+      .WillRepeatedly(Return(mock_app));
+  ON_CALL(*mock_app, msg_version())
+      .WillByDefault(ReturnRef(mock_semantic_version_4_5));
+  ON_CALL(*mock_app, is_media_application()).WillByDefault(Return(true));
+
+  EXPECT_CALL(*mock_app,
+              UnsubscribeFromButton(mobile_apis::ButtonName::PLAY_PAUSE))
       .WillOnce(Return(true));
   EXPECT_CALL(mock_rpc_service_,
               ManageHMICommand(HMIResultCodeIs(

@@ -161,8 +161,16 @@ void OnButtonEventNotification::SendButtonEvent(ApplicationConstSharedPtr app) {
   (*on_btn_event)[strings::params][strings::function_id] =
       static_cast<int32_t>(mobile_apis::FunctionID::eType::OnButtonEventID);
 
-  (*on_btn_event)[strings::msg_params][strings::button_name] =
-      (*message_)[strings::msg_params][hmi_response::button_name];
+  mobile_apis::ButtonName::eType btn_id =
+      static_cast<mobile_apis::ButtonName::eType>(
+          (*message_)[strings::msg_params][hmi_response::button_name].asInt());
+
+  if (btn_id == mobile_apis::ButtonName::PLAY_PAUSE &&
+      app->msg_version() <= utils::version_4_5) {
+    btn_id = mobile_apis::ButtonName::OK;
+  }
+
+  (*on_btn_event)[strings::msg_params][strings::button_name] = btn_id;
   (*on_btn_event)[strings::msg_params][strings::button_event_mode] =
       (*message_)[strings::msg_params][hmi_response::button_mode];
 

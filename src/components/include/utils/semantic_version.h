@@ -33,6 +33,7 @@
 #ifndef SRC_COMPONENTS_INCLUDE_UTILS_SEMANTIC_VERSION_H_
 #define SRC_COMPONENTS_INCLUDE_UTILS_SEMANTIC_VERSION_H_
 
+#include <string>
 namespace utils {
 
 struct SemanticVersion {
@@ -116,6 +117,8 @@ struct SemanticVersion {
   uint16_t minor_version_ = 0;
   uint16_t patch_version_ = 0;
 };
+
+extern const SemanticVersion version_4_5;
 }
 
 #endif  // SRC_COMPONENTS_INCLUDE_UTILS_CALLABLE_H
