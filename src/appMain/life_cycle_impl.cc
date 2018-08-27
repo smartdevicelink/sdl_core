@@ -163,7 +163,7 @@ bool LifeCycleImpl::StartComponents() {
   // It's important to initialise TM after setting up listener chain
   // [TM -> CH -> AM], otherwise some events from TM could arrive at nowhere
   app_manager_->set_protocol_handler(protocol_handler_);
-  if (!transport_manager_->Init(*last_state_)) {
+  if (transport_manager::E_SUCCESS != transport_manager_->Init(*last_state_)) {
     LOG4CXX_ERROR(logger_, "Transport manager init failed.");
     return false;
   }
