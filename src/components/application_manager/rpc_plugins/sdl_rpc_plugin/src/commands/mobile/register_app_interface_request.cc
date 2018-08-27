@@ -499,7 +499,7 @@ void RegisterAppInterfaceRequest::Run() {
   SetupAppDeviceInfo(application);
 
   const auto resume_data_result = ApplicationDataShouldBeResumed();
-  SendOnAppRegisteredNotificationToHMI(*(application.get()),
+  SendOnAppRegisteredNotificationToHMI(*application,
                                        resume_data_result == DataResumeResult::RESUME_DATA);
 
   if (DataResumeResult::RESUME_DATA == resume_data_result) {

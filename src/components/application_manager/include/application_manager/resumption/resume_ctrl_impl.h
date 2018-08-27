@@ -160,8 +160,7 @@ class ResumeCtrlImpl : public ResumeCtrl {
    */
   bool StartResumption(app_mngr::ApplicationSharedPtr application,
                        const std::string& hash,
-                       std::function<void(mobile_apis::Result::eType,
-                                          const std::string&)> callback) OVERRIDE;
+                       ResumptionCallBack callback) OVERRIDE;
 
   /**
    * @brief Start timer for resumption applications
@@ -310,8 +309,7 @@ class ResumeCtrlImpl : public ResumeCtrl {
    * @return true if success, otherwise return false
    */
   bool RestoreApplicationData(app_mngr::ApplicationSharedPtr application,
-                              std::function<void(mobile_apis::Result::eType,
-                                                 const std::string&)> callback);
+                              ResumptionCallBack callback);
 
   /**
    * @brief SaveDataOnTimer :
