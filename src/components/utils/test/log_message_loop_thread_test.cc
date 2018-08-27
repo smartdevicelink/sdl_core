@@ -57,7 +57,7 @@ TEST(LogMessageLoopThread, DestroyLogMessage_loggerStatusDeletingLogger) {
   logger::logger_status = LoggerThreadNotCreated;
 }
 
-class MockLogMessageTest : public LogMessageHandler {
+class MockLogMessageTest : public LogMessageLoopThread {
  public:
   MOCK_CONST_METHOD1(Handle, void(const LogMessage message));
 };
