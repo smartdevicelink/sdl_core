@@ -103,7 +103,6 @@
 #include "sdl_rpc_plugin/commands/hmi/navi_stop_stream_request.h"
 #include "sdl_rpc_plugin/commands/hmi/navi_subscribe_way_points_request.h"
 #include "sdl_rpc_plugin/commands/hmi/sdl_policy_update.h"
-#include "sdl_rpc_plugin/commands/hmi/ui_set_icon_request.h"
 #include "sdl_rpc_plugin/commands/hmi/dial_number_request.h"
 #include "sdl_rpc_plugin/commands/hmi/ui_send_haptic_data_request.h"
 

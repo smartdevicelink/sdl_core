@@ -71,7 +71,7 @@ const uint32_t kAppId1 = 11u;
 const uint32_t kHMIAppId1 = 1u;
 const uint32_t kAppId2 = 22u;
 const std::string policy_app_id_1_ = "policy_id_1";
-const uint32_t kSizeOfModules = 3u;
+const uint32_t kSizeOfModules = 6u;
 }
 
 namespace rc_rpc_plugin_test {
@@ -298,13 +298,6 @@ TEST_F(RAManagerTest, AnotherAppExit_NoReleaseResource) {
   EXPECT_CALL(mock_app_mngr_, application(kAppId2))
       .WillRepeatedly(Return(mock_app_2_));
 
-  RCAppExtensionPtr rc_extention_ptr =
-      std::make_shared<RCAppExtension>(application_manager::AppExtensionUID(
-          rc_rpc_plugin::RCRPCPlugin::kRCPluginID));
-
-  EXPECT_CALL(*mock_app_2_, QueryInterface(_))
-      .WillOnce(Return(rc_extention_ptr));
-
   // Act
   application_manager::ApplicationSharedPtr app_ptr(mock_app_2_);
   EXPECT_CALL(*mock_app_2_, app_id()).WillRepeatedly(Return(kAppId2));
@@ -357,13 +350,6 @@ TEST_F(RAManagerTest, AnotherAppUnregistered_NoReleaseResource) {
 
   EXPECT_CALL(mock_app_mngr_, application(kAppId1))
       .WillRepeatedly(Return(mock_app_2_));
-
-  RCAppExtensionPtr rc_extention_ptr =
-      std::make_shared<RCAppExtension>(application_manager::AppExtensionUID(
-          rc_rpc_plugin::RCRPCPlugin::kRCPluginID));
-
-  EXPECT_CALL(*mock_app_2_, QueryInterface(_))
-      .WillOnce(Return(rc_extention_ptr));
 
   // Act
   application_manager::ApplicationSharedPtr app_ptr(mock_app_2_);

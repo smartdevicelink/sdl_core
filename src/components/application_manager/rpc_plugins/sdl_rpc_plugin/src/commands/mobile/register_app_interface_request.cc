@@ -228,9 +228,6 @@ void RegisterAppInterfaceRequest::Run() {
     return;
   }
 
-  const std::string mobile_app_id =
-      (*message_)[strings::msg_params][strings::app_id].asString();
-
   ApplicationSharedPtr application =
       application_manager_.application(connection_key());
 
@@ -238,18 +235,31 @@ void RegisterAppInterfaceRequest::Run() {
     SendResponse(false, mobile_apis::Result::APPLICATION_REGISTERED_ALREADY);
     return;
   }
+  // cache the original app ID (for legacy behavior)
+  const std::string policy_app_id =
+      application_manager_.GetCorrectMobileIDFromMessage(message_);
 
   const smart_objects::SmartObject& msg_params =
       (*message_)[strings::msg_params];
 
-  const std::string policy_app_id = msg_params[strings::app_id].asString();
-  std::string new_policy_app_id = policy_app_id;
-  std::transform(policy_app_id.begin(),
-                 policy_app_id.end(),
-                 new_policy_app_id.begin(),
+  // transform app IDs to lowercase for usage in policy checks later
+  const std::string app_id_short = msg_params[strings::app_id].asString();
+  std::string new_app_id_short = app_id_short;
+  std::transform(app_id_short.begin(),
+                 app_id_short.end(),
+                 new_app_id_short.begin(),
                  ::tolower);
-  (*message_)[strings::msg_params][strings::app_id] = new_policy_app_id;
-
+  (*message_)[strings::msg_params][strings::app_id] = new_app_id_short;
+  // If full ID is present, shift that to lowercase too
+  if (msg_params.keyExists(strings::full_app_id)) {
+    const std::string app_id_full = msg_params[strings::full_app_id].asString();
+    std::string new_app_id_full = app_id_full;
+    std::transform(app_id_full.begin(),
+                   app_id_full.end(),
+                   new_app_id_full.begin(),
+                   ::tolower);
+    (*message_)[strings::msg_params][strings::full_app_id] = new_app_id_full;
+  }
   if (application_manager_.IsApplicationForbidden(connection_key(),
                                                   policy_app_id)) {
     SendResponse(false, mobile_apis::Result::TOO_MANY_PENDING_REQUESTS);
@@ -293,12 +303,50 @@ void RegisterAppInterfaceRequest::Run() {
     return;
   }
 
+  uint16_t major =
+      msg_params[strings::sync_msg_version][strings::major_version].asUInt();
+  uint16_t minor =
+      msg_params[strings::sync_msg_version][strings::minor_version].asUInt();
+  uint16_t patch = 0;
+  // Check if patch exists since it is not mandatory.
+  if (msg_params[strings::sync_msg_version].keyExists(strings::patch_version)) {
+    patch =
+        msg_params[strings::sync_msg_version][strings::patch_version].asUInt();
+  }
+
+  utils::SemanticVersion mobile_version(major, minor, patch);
+  utils::SemanticVersion min_module_version(
+      minimum_major_version, minimum_minor_version, minimum_patch_version);
+
+  if (mobile_version < min_module_version) {
+    LOG4CXX_WARN(logger_,
+                 "Application RPC Version does not meet minimum requirement");
+    SendResponse(false, mobile_apis::Result::REJECTED);
+  }
+
   application = application_manager_.RegisterApplication(message_);
 
   if (!application) {
     LOG4CXX_ERROR(logger_, "Application hasn't been registered!");
     return;
   }
+
+  // Version negotiation
+  utils::SemanticVersion ver_4_5(4, 5, 0);
+  utils::SemanticVersion module_version(
+      major_version, minor_version, patch_version);
+  if (mobile_version <= ver_4_5) {
+    // Mobile versioning did not exist for
+    // versions 4.5 and prior.
+    application->set_msg_version(ver_4_5);
+  } else if (mobile_version < module_version) {
+    // Use mobile RPC version as negotiated version
+    application->set_msg_version(mobile_version);
+  } else {
+    // Use module version as negotiated version
+    application->set_msg_version(module_version);
+  }
+
   // For resuming application need to restore hmi_app_id from resumeCtrl
   resumption::ResumeCtrl& resumer = application_manager_.resume_controller();
   const std::string& device_mac = application->mac_address();
@@ -585,12 +633,14 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile(
     return;
   }
 
+  utils::SemanticVersion negotiated_version = application->msg_version();
+
   response_params[strings::sync_msg_version][strings::major_version] =
-      major_version;  // From generated file interfaces/generated_msg_version.h
+      negotiated_version.major_version_;
   response_params[strings::sync_msg_version][strings::minor_version] =
-      minor_version;  // From generated file interfaces/generated_msg_version.h
+      negotiated_version.minor_version_;
   response_params[strings::sync_msg_version][strings::patch_version] =
-      patch_version;  // From generated file interfaces/generated_msg_version.h
+      negotiated_version.patch_version_;
 
   const smart_objects::SmartObject& msg_params =
       (*message_)[strings::msg_params];
@@ -793,11 +843,6 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile(
   // By default app subscribed to CUSTOM_BUTTON
   SendSubscribeCustomButtonNotification();
   SendChangeRegistrationOnHMI(application);
-}
-
-DEPRECATED void
-RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile() {
-  SendRegisterAppInterfaceResponseToMobile(ApplicationType::kNewApplication);
 }
 
 void RegisterAppInterfaceRequest::SendChangeRegistration(
@@ -1037,7 +1082,7 @@ mobile_apis::Result::eType RegisterAppInterfaceRequest::CheckWithPolicyData() {
   policy::StringArray app_hmi_types;
 
   const std::string mobile_app_id =
-      message[strings::msg_params][strings::app_id].asString();
+      application_manager_.GetCorrectMobileIDFromMessage(message_);
   const bool init_result = GetPolicyHandler().GetInitialAppData(
       mobile_app_id, &app_nicknames, &app_hmi_types);
 
@@ -1141,8 +1186,8 @@ void RegisterAppInterfaceRequest::FillDeviceInfo(
 bool RegisterAppInterfaceRequest::IsApplicationWithSameAppIdRegistered() {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  const custom_string::CustomString mobile_app_id =
-      (*message_)[strings::msg_params][strings::app_id].asCustomString();
+  const custom_string::CustomString mobile_app_id(
+      application_manager_.GetCorrectMobileIDFromMessage(message_));
 
   const ApplicationSet& applications =
       application_manager_.applications().GetData();
@@ -1284,6 +1329,17 @@ bool RegisterAppInterfaceRequest::IsWhiteSpaceExist() {
     }
   }
 
+  if (application_manager_.get_settings().use_full_app_id()) {
+    if ((*message_)[strings::msg_params].keyExists(strings::full_app_id)) {
+      str =
+          (*message_)[strings::msg_params][strings::full_app_id].asCharArray();
+      if (!CheckSyntax(str)) {
+        LOG4CXX_ERROR(logger_, "Invalid app_id syntax check failed");
+        return true;
+      }
+    }
+  }
+
   return false;
 }
 
@@ -1316,10 +1372,8 @@ void RegisterAppInterfaceRequest::SendSubscribeCustomButtonNotification() {
 }
 
 bool RegisterAppInterfaceRequest::IsApplicationSwitched() {
-  const smart_objects::SmartObject& msg_params =
-      (*message_)[strings::msg_params];
-
-  const std::string& policy_app_id = msg_params[strings::app_id].asString();
+  const std::string& policy_app_id =
+      application_manager_.GetCorrectMobileIDFromMessage(message_);
 
   LOG4CXX_DEBUG(logger_, "Looking for application id " << policy_app_id);
 

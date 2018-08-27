@@ -1,5 +1,4 @@
 /*
-
  Copyright (c) 2018, Ford Motor Company
  All rights reserved.
 
@@ -31,32 +30,35 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "sdl_rpc_plugin/commands/mobile/set_icon_response.h"
-#include "application_manager/application_manager.h"
-#include "application_manager/rpc_service.h"
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_RC_RPC_PLUGIN_INCLUDE_RC_RPC_PLUGIN_COMMANDS_RC_COMMAND_PARAMS_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_RC_RPC_PLUGIN_INCLUDE_RC_RPC_PLUGIN_COMMANDS_RC_COMMAND_PARAMS_H_
 
-namespace sdl_rpc_plugin {
-using namespace application_manager;
-
-namespace commands {
-
-SetIconResponse::SetIconResponse(
-    const application_manager::commands::MessageSharedPtr& message,
-    ApplicationManager& app_man,
-    app_mngr::rpc_service::RPCService& rpc_service,
-    app_mngr::HMICapabilities& hmi_capabilities,
-    policy::PolicyHandlerInterface& policy_handler)
-    : CommandResponseImpl(
-          message, app_man, rpc_service, hmi_capabilities, policy_handler) {}
-
-SetIconResponse::~SetIconResponse() {}
-
-void SetIconResponse::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
-
-  rpc_service_.SendMessageToMobile(message_);
+namespace application_manager {
+class ApplicationManager;
+namespace rpc_service {
+class RPCService;
+}
+class HMICapabilities;
 }
 
-}  // namespace commands
+namespace policy {
+class PolicyHandlerInterface;
+}
 
-}  // namespace application_manager
+namespace rc_rpc_plugin {
+
+class ResourceAllocationManager;
+class InteriorDataCache;
+class InteriorDataManager;
+
+struct RCCommandParams {
+  application_manager::ApplicationManager& application_manager_;
+  application_manager::rpc_service::RPCService& rpc_service_;
+  application_manager::HMICapabilities& hmi_capabilities_;
+  policy::PolicyHandlerInterface& policy_handler_;
+  rc_rpc_plugin::ResourceAllocationManager& resource_allocation_manager_;
+  rc_rpc_plugin::InteriorDataCache& interior_data_cache_;
+  rc_rpc_plugin::InteriorDataManager& interior_data_manager_;
+};
+}
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_RC_RPC_PLUGIN_INCLUDE_RC_RPC_PLUGIN_COMMANDS_RC_COMMAND_PARAMS_H_

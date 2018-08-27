@@ -80,18 +80,6 @@ class ResumptionDataJson : public ResumptionData {
    */
   virtual uint32_t GetHMIApplicationID(const std::string& policy_app_id,
                                        const std::string& device_id) const;
-
-  /**
-   * @brief Increments ignition counter for all registered applications
-   * and remember ign_off time stamp
-   */
-  DEPRECATED void OnSuspend() FINAL;
-
-  /**
-   * @brief Decrements ignition counter for all registered applications
-   */
-  DEPRECATED void OnAwake() FINAL;
-
   /**
    * @brief Increments ignition counter for all registered applications
    * and remember ign_off time stamp
@@ -144,6 +132,12 @@ class ResumptionDataJson : public ResumptionData {
    * @return the last ignition off time from LastState
    */
   virtual uint32_t GetIgnOffTime() const;
+
+  void IncrementGlobalIgnOnCounter() OVERRIDE;
+
+  uint32_t GetGlobalIgnOnCounter() const OVERRIDE;
+
+  void ResetGlobalIgnOnCount() OVERRIDE;
 
   /**
    * @brief Checks if saved data have application

@@ -30,47 +30,25 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_HMI_UI_SET_ICON_RESPONSE_H_
-#define SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_HMI_UI_SET_ICON_RESPONSE_H_
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_RC_RPC_PLUGIN_TEST_INCLUDE_RC_RPC_PLUGIN_MOCK_MOCK_INTERIOR_DATA_CACHE_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_RC_RPC_PLUGIN_TEST_INCLUDE_RC_RPC_PLUGIN_MOCK_MOCK_INTERIOR_DATA_CACHE_H_
 
-#include "application_manager/commands/response_from_hmi.h"
+#include <string>
+#include "gmock/gmock.h"
+#include "rc_rpc_plugin/interior_data_cache.h"
 
-namespace sdl_rpc_plugin {
-namespace app_mngr = application_manager;
+namespace rc_rpc_plugin_test {
 
-namespace commands {
-
-/**
- * @brief UISetIconResponse command class
- **/
-class UISetIconResponse : public app_mngr::commands::ResponseFromHMI {
+class MockInteriorDataCache : public rc_rpc_plugin::InteriorDataCache {
  public:
-  /**
-   * @brief UISetIconResponse class constructor
-   *
-   * @param message Incoming SmartObject message
-   **/
-  UISetIconResponse(const app_mngr::commands::MessageSharedPtr& message,
-                    app_mngr::rpc_service::RPCService& rpc_service,
-                    app_mngr::HMICapabilities& hmi_capabilities,
-                    policy::PolicyHandlerInterface& policy_handle);
-
-  /**
-   * @brief UISetIconResponse class destructor
-   **/
-  virtual ~UISetIconResponse();
-
-  /**
-   * @brief Execute command
-   **/
-  virtual void Run();
-
- private:
-  DISALLOW_COPY_AND_ASSIGN(UISetIconResponse);
+  MOCK_METHOD2(Add,
+               void(const std::string&, const smart_objects::SmartObject&));
+  MOCK_CONST_METHOD1(Retrieve, smart_objects::SmartObject(const std::string&));
+  MOCK_CONST_METHOD1(Contains, bool(const std::string&));
+  MOCK_METHOD1(Remove, void(const std::string&));
+  MOCK_METHOD0(Clear, void());
 };
 
-}  // namespace commands
+}  // namespace rc_rpc_plugin_test
 
-}  // namespace application_manager
-
-#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_HMI_UI_SET_ICON_RESPONSE_H_
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_RC_RPC_PLUGIN_TEST_INCLUDE_RC_RPC_PLUGIN_MOCK_MOCK_INTERIOR_DATA_CACHE_H_

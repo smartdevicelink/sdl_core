@@ -195,12 +195,6 @@ class SecurityManagerImpl : public SecurityManager,
    * @brief Notifiers for listeners.
    * Allows to notify that certificate should be updated
    */
-  DEPRECATED void NotifyOnCertififcateUpdateRequired();
-
-  /**
-   * @brief Notifiers for listeners.
-   * Allows to notify that certificate should be updated
-   */
   void NotifyOnCertificateUpdateRequired() OVERRIDE;
 
   /**

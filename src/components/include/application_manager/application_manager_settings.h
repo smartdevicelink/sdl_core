@@ -50,6 +50,8 @@ class ApplicationManagerSettings : public RequestControlerSettings,
   virtual const std::pair<uint32_t, int32_t>& read_did_frequency() const = 0;
   virtual const std::pair<uint32_t, int32_t>& get_vehicle_data_frequency()
       const = 0;
+  virtual const std::pair<uint32_t, int32_t>&
+  get_interior_vehicle_data_frequency() const = 0;
   virtual uint32_t hash_string_size() const = 0;
   virtual const uint32_t& app_dir_quota() const = 0;
   virtual uint32_t stop_streaming_timeout() const = 0;
@@ -82,6 +84,7 @@ class ApplicationManagerSettings : public RequestControlerSettings,
   virtual const std::string& video_stream_file() const = 0;
   virtual const std::string& audio_stream_file() const = 0;
 
+  virtual bool use_full_app_id() const = 0;
   virtual bool use_db_for_resumption() const = 0;
   virtual const uint32_t& app_resumption_save_persistent_data_timeout()
       const = 0;

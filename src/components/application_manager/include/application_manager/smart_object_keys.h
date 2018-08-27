@@ -54,6 +54,7 @@ extern const char* msg_params;
 extern const char* method_name;
 extern const char* info;
 extern const char* app_id;
+extern const char* full_app_id;
 extern const char* bundle_id;
 extern const char* app_info;
 extern const char* app_launch;
@@ -312,6 +313,8 @@ extern const char* last_ign_off_time;
 extern const char* resume_vr_grammars;
 
 extern const char* ign_off_count;
+
+extern const char* global_ign_on_counter;
 
 extern const char* connection_info;
 extern const char* is_download_complete;

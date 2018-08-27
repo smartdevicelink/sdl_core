@@ -202,6 +202,7 @@ class PolicyManagerImplTest2 : public ::testing::Test {
     manager = new PolicyManagerImpl();
     ON_CALL(policy_settings_, app_storage_folder())
         .WillByDefault(ReturnRef(kAppStorageFolder));
+    ON_CALL(policy_settings_, use_full_app_id()).WillByDefault(Return(true));
     manager->set_listener(&listener);
     const char* levels[] = {"BACKGROUND", "FULL", "LIMITED", "NONE"};
     hmi_level.assign(levels, levels + sizeof(levels) / sizeof(levels[0]));
@@ -238,6 +239,7 @@ class PolicyManagerImplTest2 : public ::testing::Test {
     file_system::remove_directory_content(kAppStorageFolder);
     ON_CALL(policy_settings_, app_storage_folder())
         .WillByDefault(ReturnRef(kAppStorageFolder));
+    ON_CALL(policy_settings_, use_full_app_id()).WillByDefault(Return(true));
     ASSERT_TRUE(manager->InitPT(file_name, &policy_settings_));
   }
 
@@ -466,6 +468,7 @@ TEST_F(PolicyManagerImplTest, GetNotificationsNumber) {
 
 TEST_F(PolicyManagerImplTest2, GetNotificationsNumberAfterPTUpdate) {
   // Arrange
+  CreateLocalPT("sdl_preloaded_pt.json");
   Json::Value table = CreatePTforLoad();
   manager->ForcePTExchange();
   manager->SetSendOnUpdateSentOut(false);
@@ -504,6 +507,7 @@ TEST_F(PolicyManagerImplTest2, GetNotificationsNumberAfterPTUpdate) {
 }
 
 TEST_F(PolicyManagerImplTest2, IsAppRevoked_SetRevokedAppID_ExpectAppRevoked) {
+  CreateLocalPT("sdl_preloaded_pt.json");
   // Arrange
   std::ifstream ifile("sdl_preloaded_pt.json");
   Json::Reader reader;

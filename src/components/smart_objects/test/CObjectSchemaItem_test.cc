@@ -44,6 +44,7 @@
 #include "smart_objects/object_schema_item.h"
 #include "formatters/generic_json_formatter.h"
 #include "formatters/CSmartFactory.h"
+#include "utils/semantic_version.h"
 
 namespace formatters = NsSmartDeviceLink::NsJSONHandler::Formatters;
 namespace smartobj = NsSmartDeviceLink::NsSmartObjects;
@@ -136,6 +137,36 @@ class ObjectSchemaItemTest : public ::testing::Test {
     schemaMembersMap[Keys::SUCCESS] =
         CObjectSchemaItem::SMember(CBoolSchemaItem::create(), false);
 
+    // Create fake param that has breaking history changes
+    std::vector<CObjectSchemaItem::SMember> fake_param_history_vector;
+
+    std::shared_ptr<ISchemaItem> fake_param_SchemaItem =
+        CArraySchemaItem::create(
+            CStringSchemaItem::create(TSchemaItemParameter<size_t>(1),
+                                      TSchemaItemParameter<size_t>(99),
+                                      TSchemaItemParameter<std::string>()),
+            TSchemaItemParameter<size_t>(1),
+            TSchemaItemParameter<size_t>(100));
+
+    std::shared_ptr<ISchemaItem> fake_param_history_v1_SchemaItem =
+        CArraySchemaItem::create(
+            CStringSchemaItem::create(TSchemaItemParameter<size_t>(1),
+                                      TSchemaItemParameter<size_t>(99),
+                                      TSchemaItemParameter<std::string>()),
+            TSchemaItemParameter<size_t>(1),
+            TSchemaItemParameter<size_t>(100));
+
+    fake_param_history_vector.push_back(CObjectSchemaItem::SMember(
+        fake_param_history_v1_SchemaItem, true, "", "4.5.0", false, false));
+    schemaMembersMap["fakeParam"] =
+        CObjectSchemaItem::SMember(fake_param_SchemaItem,
+                                   false,
+                                   "4.5.0",
+                                   "",
+                                   false,
+                                   false,
+                                   fake_param_history_vector);
+
     CObjectSchemaItem::Members rootMembersMap;
     rootMembersMap[S_PARAMS] = CObjectSchemaItem::SMember(
         CObjectSchemaItem::create(paramsMembersMap), true);
@@ -158,6 +189,36 @@ TEST_F(ObjectSchemaItemTest, validation_correct) {
   rpc::ValidationReport report("RPC");
   EXPECT_EQ(Errors::OK, schema_item->validate(obj, &report));
   EXPECT_EQ(std::string(""), rpc::PrettyFormat(report));
+}
+
+TEST_F(ObjectSchemaItemTest, validation_correct_with_new_version) {
+  SmartObject obj;
+  obj[S_PARAMS][S_FUNCTION_ID] = 0;
+  obj[S_PARAMS][S_CORRELATION_ID] = 0XFF0;
+  obj[S_PARAMS][S_PROTOCOL_VERSION] = 1;
+  obj[S_MSG_PARAMS][Keys::RESULT_CODE] = 0;
+  obj[S_MSG_PARAMS][Keys::INFO] = "0123456789";
+  obj[S_MSG_PARAMS][Keys::SUCCESS] = true;
+
+  utils::SemanticVersion messageVersion(4, 5, 0);
+  rpc::ValidationReport report("RPC");
+  EXPECT_EQ(Errors::OK, schema_item->validate(obj, &report, messageVersion));
+  EXPECT_EQ(std::string(""), rpc::PrettyFormat(report));
+}
+
+TEST_F(ObjectSchemaItemTest, validation_invalid_data_with_old_version) {
+  SmartObject obj;
+  obj[S_PARAMS][S_FUNCTION_ID] = 0;
+  obj[S_PARAMS][S_CORRELATION_ID] = 0XFF0;
+  obj[S_PARAMS][S_PROTOCOL_VERSION] = 1;
+  obj[S_MSG_PARAMS][Keys::RESULT_CODE] = 0;
+  obj[S_MSG_PARAMS][Keys::INFO] = "0123456789";
+  obj[S_MSG_PARAMS][Keys::SUCCESS] = true;
+
+  utils::SemanticVersion messageVersion(3, 0, 0);
+  rpc::ValidationReport report("RPC");
+  EXPECT_EQ(Errors::MISSING_MANDATORY_PARAMETER,
+            schema_item->validate(obj, &report, messageVersion));
 }
 
 TEST_F(ObjectSchemaItemTest, validation_correct_skip_not_mandatory) {

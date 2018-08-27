@@ -36,9 +36,10 @@
 #include "interfaces/HMI_API.h"
 #include "interfaces/MOBILE_API.h"
 #include "smart_objects/enum_schema_item.h"
-#include "rc_rpc_plugin/rc_rpc_plugin.h"
 #include "application_manager/message_helper.h"
+#include "rc_rpc_plugin/rc_rpc_plugin.h"
 #include "rc_rpc_plugin/rc_module_constants.h"
+#include "rc_rpc_plugin/rc_helpers.h"
 #include "json/json.h"
 #include "utils/helpers.h"
 
@@ -166,52 +167,15 @@ void ResourceAllocationManagerImpl::ProcessApplicationPolicyUpdate() {
                         allowed_modules.end(),
                         std::back_inserter(disallowed_modules));
 
-    RCAppExtensionPtr rc_extention = GetApplicationExtention(app_ptr);
+    auto rc_extention = RCHelpers::GetRCExtension(**app);
     Resources::const_iterator module = disallowed_modules.begin();
     for (; disallowed_modules.end() != module; ++module) {
       ReleaseResource(*module, application_id);
-      if (rc_extention) {
-        rc_extention->UnsubscribeFromInteriorVehicleData(*module);
-      }
     }
     if (!disallowed_modules.empty()) {
       SendOnRCStatusNotifications(
           NotificationTrigger::MODULE_ALLOCATION,
           std::shared_ptr<application_manager::Application>());
-    }
-  }
-}
-
-RCAppExtensionPtr ResourceAllocationManagerImpl::GetApplicationExtention(
-    application_manager::ApplicationSharedPtr application) {
-  LOG4CXX_AUTO_TRACE(logger_);
-  RCAppExtensionPtr rc_app_extension;
-  if (!application) {
-    return rc_app_extension;
-  }
-
-  application_manager::AppExtensionPtr app_extension =
-      application->QueryInterface(RCRPCPlugin::kRCPluginID);
-  if (!app_extension) {
-    return rc_app_extension;
-  }
-
-  rc_app_extension = std::static_pointer_cast<RCAppExtension>(app_extension);
-
-  return rc_app_extension;
-}
-
-void ResourceAllocationManagerImpl::RemoveAppsSubscriptions(const Apps& apps) {
-  LOG4CXX_AUTO_TRACE(logger_);
-  Apps::const_iterator app = apps.begin();
-  for (; apps.end() != app; ++app) {
-    application_manager::ApplicationSharedPtr app_ptr = *app;
-    if (!app_ptr) {
-      continue;
-    }
-    RCAppExtensionPtr rc_extention = GetApplicationExtention(app_ptr);
-    if (rc_extention) {
-      rc_extention->UnsubscribeFromInteriorVehicleData();
     }
   }
 }
@@ -235,6 +199,7 @@ void ConstructOnRCStatusNotificationParams(
   using smart_objects::SmartType_Map;
   using smart_objects::SmartType_Array;
   LOG4CXX_AUTO_TRACE(logger_);
+
   auto modules_inserter = [](SmartObject& result_modules) {
     return [&result_modules](const std::string& module_name) {
       smart_objects::SmartObject module_data =
@@ -273,7 +238,7 @@ ResourceAllocationManagerImpl::CreateOnRCStatusNotificationToMobile(
   if (is_rc_enabled()) {
     ConstructOnRCStatusNotificationParams(msg_params,
                                           allocated_resources_,
-                                          all_supported_modules(),
+                                          RCHelpers::GetModulesList(),
                                           app->app_id());
   } else {
     msg_params[message_params::kAllocatedModules] =
@@ -292,8 +257,10 @@ ResourceAllocationManagerImpl::CreateOnRCStatusNotificationToHmi(
   auto msg_to_hmi =
       MessageHelper::CreateHMINotification(hmi_apis::FunctionID::RC_OnRCStatus);
   auto& msg_params = (*msg_to_hmi)[application_manager::strings::msg_params];
-  ConstructOnRCStatusNotificationParams(
-      msg_params, allocated_resources_, all_supported_modules(), app->app_id());
+  ConstructOnRCStatusNotificationParams(msg_params,
+                                        allocated_resources_,
+                                        RCHelpers::GetModulesList(),
+                                        app->app_id());
   msg_params[application_manager::strings::app_id] = app->hmi_app_id();
   return msg_to_hmi;
 }
@@ -359,15 +326,6 @@ void ResourceAllocationManagerImpl::SetResourceFree(
   }
   allocated_resources_.erase(allocation);
   LOG4CXX_DEBUG(logger_, "Resource " << module_type << " is released.");
-}
-
-std::vector<std::string>
-ResourceAllocationManagerImpl::all_supported_modules() {
-  std::vector<std::string> result;
-  result.push_back(enums_value::kClimate);
-  result.push_back(enums_value::kRadio);
-  result.push_back(enums_value::kSeat);
-  return result;
 }
 
 std::vector<std::string> ResourceAllocationManagerImpl::GetAcquiredResources(
@@ -510,9 +468,6 @@ void ResourceAllocationManagerImpl::OnApplicationEvent(
           NotificationTrigger::MODULE_ALLOCATION,
           std::shared_ptr<application_manager::Application>());
     }
-    Apps app_list;
-    app_list.push_back(application);
-    RemoveAppsSubscriptions(app_list);
   }
 }
 
@@ -529,8 +484,6 @@ void ResourceAllocationManagerImpl::OnPolicyEvent(
 
   if (PolicyEvent::kApplicationsDisabled == event) {
     ResetAllAllocations();
-    Apps app_list = RCRPCPlugin::GetRCApplications(app_mngr_);
-    RemoveAppsSubscriptions(app_list);
     return;
   }
 }

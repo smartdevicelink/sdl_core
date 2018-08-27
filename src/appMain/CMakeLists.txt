@@ -70,9 +70,19 @@ include_directories(
   ${default_media_inc}
   ${MESSAGE_BROKER_INCLUDE_DIRECTORY}
   ${BOOST_INCLUDE_DIR}
+  ${CMAKE_SOURCE_DIR}/src
 )
 
-collect_sources(SOURCES "${CMAKE_CURRENT_SOURCE_DIR}")
+# Create object library
+add_library("LowVoltageHandlerObjLibrary" OBJECT ${CMAKE_CURRENT_SOURCE_DIR}/low_voltage_signals_handler.cc
+)
+
+set (SOURCES
+  ${CMAKE_CURRENT_SOURCE_DIR}/main.cc
+  ${CMAKE_CURRENT_SOURCE_DIR}/life_cycle_impl.cc
+  ${CMAKE_CURRENT_SOURCE_DIR}/signal_handlers.cc
+  $<TARGET_OBJECTS:LowVoltageHandlerObjLibrary>
+)
 
 cmake_policy(PUSH)
 # make link_directories() treat paths relative to the source dir
@@ -243,3 +253,6 @@ else()
       GROUP_EXECUTE WORLD_READ WORLD_EXECUTE)
 endif()
 
+if(BUILD_TESTS)
+  add_subdirectory(test)
+endif()

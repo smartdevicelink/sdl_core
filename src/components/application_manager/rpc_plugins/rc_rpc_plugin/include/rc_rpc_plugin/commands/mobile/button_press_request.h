@@ -30,8 +30,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_RC_RPC_PLUGIN_INCLUDE_COMMANDS_BUTTON_PRESS_REQUEST_H
-#define SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_RC_RPC_PLUGIN_INCLUDE_COMMANDS_BUTTON_PRESS_REQUEST_H
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_RC_RPC_PLUGIN_INCLUDE_RC_RPC_PLUGIN_COMMANDS_MOBILE_BUTTON_PRESS_REQUEST_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_RC_RPC_PLUGIN_INCLUDE_RC_RPC_PLUGIN_COMMANDS_MOBILE_BUTTON_PRESS_REQUEST_H_
 
 #include "rc_rpc_plugin/commands/rc_command_request.h"
 
@@ -41,12 +41,9 @@ namespace app_mngr = application_manager;
 namespace commands {
 class ButtonPressRequest : public RCCommandRequest {
  public:
-  ButtonPressRequest(const app_mngr::commands::MessageSharedPtr& message,
-                     app_mngr::ApplicationManager& application_manager,
-                     app_mngr::rpc_service::RPCService& rpc_service,
-                     app_mngr::HMICapabilities& hmi_capabilities,
-                     policy::PolicyHandlerInterface& policy_handle,
-                     ResourceAllocationManager& resource_allocation_manager);
+  ButtonPressRequest(
+      const application_manager::commands::MessageSharedPtr& message,
+      const RCCommandParams& params);
 
   /**
    * @brief Execute command
@@ -96,4 +93,4 @@ class ButtonPressRequest : public RCCommandRequest {
 }  // namespace commands
 }  // namespace rc_rpc_plugin
 
-#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_RC_RPC_PLUGIN_INCLUDE_COMMANDS_BUTTON_PRESS_REQUEST_H
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_RC_RPC_PLUGIN_INCLUDE_RC_RPC_PLUGIN_COMMANDS_MOBILE_BUTTON_PRESS_REQUEST_H_

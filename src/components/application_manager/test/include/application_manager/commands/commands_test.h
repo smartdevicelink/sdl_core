@@ -44,6 +44,7 @@
 #include "application_manager/test/include/application_manager/mock_hmi_interface.h"
 #include "application_manager/test/include/application_manager/mock_application.h"
 #include "application_manager/test/include/application_manager/mock_message_helper.h"
+#include "application_manager/mock_application_manager_settings.h"
 #include "application_manager/mock_rpc_service.h"
 #include "application_manager/mock_hmi_capabilities.h"
 #include "application_manager/policies/mock_policy_handler_interface.h"
@@ -149,8 +150,10 @@ class CommandsTest : public ::testing::Test {
 
   MockAppManager app_mngr_;
   MockRPCService mock_rpc_service_;
-  application_manager_test::MockHMICapabilities mock_hmi_capabilities_;
-  policy_test::MockPolicyHandlerInterface mock_policy_handler_;
+  testing::NiceMock<application_manager_test::MockHMICapabilities>
+      mock_hmi_capabilities_;
+  testing::NiceMock<policy_test::MockPolicyHandlerInterface>
+      mock_policy_handler_;
   MockAppManagerSettings app_mngr_settings_;
   MOCK(am::MockHmiInterfaces) mock_hmi_interfaces_;
   am::MockMessageHelper& mock_message_helper_;
