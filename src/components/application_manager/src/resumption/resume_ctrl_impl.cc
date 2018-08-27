@@ -387,8 +387,7 @@ void ResumeCtrlImpl::StopSavePersistentDataTimer() {
 
 bool ResumeCtrlImpl::StartResumption(ApplicationSharedPtr application,
                                      const std::string& hash,
-                                     std::function<void(mobile_apis::Result::eType,
-                                                        const std::string&)> callback) {
+                                     ResumptionCallBack callback) {
   LOG4CXX_AUTO_TRACE(logger_);
   DCHECK_OR_RETURN(application, false);
   LOG4CXX_DEBUG(
@@ -585,8 +584,7 @@ bool ResumeCtrlImpl::IsDeviceMacAddressEqual(
 }
 
 bool ResumeCtrlImpl::RestoreApplicationData(ApplicationSharedPtr application,
-                                            std::function<void(mobile_apis::Result::eType,
-                                                               const std::string&)> callback) {
+                                            ResumptionCallBack callback) {
   LOG4CXX_AUTO_TRACE(logger_);
   DCHECK_OR_RETURN(application, false);
   LOG4CXX_DEBUG(logger_, "app_id : " << application->app_id());

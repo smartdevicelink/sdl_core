@@ -59,8 +59,7 @@ ResumptionDataProcessor::~ResumptionDataProcessor() {}
 
 void ResumptionDataProcessor::Restore(ApplicationSharedPtr application,
                                       smart_objects::SmartObject& saved_app,
-                                      std::function<void(mobile_apis::Result::eType,
-                                                         const std::string&)> callback) {
+                                      ResumeCtrl::ResumptionCallBack callback) {
   LOG4CXX_AUTO_TRACE(logger_);
   AddFiles(application, saved_app);
   AddSubmenues(application, saved_app);
