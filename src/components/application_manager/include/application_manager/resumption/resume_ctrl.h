@@ -55,6 +55,14 @@ class LastState;
 
 class ResumeCtrl {
  public:
+
+   /**
+   * @brief ResumptionCallBack Function signature to be called whe DataResumptionFinished
+   * @param result_code result code for sending to mobile
+   * @param info additional info for sending to mobile
+   */
+  typedef std::function<void(mobile_apis::Result::eType result_code,
+                             const std::string& info)> ResumptionCallBack;
   /**
    * @brief allows to destroy ResumeCtrl object
    */
@@ -147,7 +155,8 @@ class ResumeCtrl {
    * @return true if it was saved, otherwise return false
    */
   virtual bool StartResumption(app_mngr::ApplicationSharedPtr application,
-                               const std::string& hash) = 0;
+                               const std::string& hash,
+                               ResumptionCallBack callback) = 0;
   /**
    * @brief Start timer for resumption applications
    *        Does not restore D1-D5 data

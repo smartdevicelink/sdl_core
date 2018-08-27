@@ -499,13 +499,22 @@ void RegisterAppInterfaceRequest::Run() {
   SetupAppDeviceInfo(application);
 
   const auto resume_data_result = ApplicationDataShouldBeResumed();
+  SendOnAppRegisteredNotificationToHMI(*application,
+                                       resume_data_result == DataResumeResult::RESUME_DATA);
 
   if (DataResumeResult::RESUME_DATA == resume_data_result) {
     auto& resume_ctrl = application_manager_.resume_controller();
     const auto& msg_params = (*message_)[strings::msg_params];
     const auto& hash_id = msg_params[strings::hash_id].asString();
     LOG4CXX_WARN(logger_, "Start Data Resumption");
-    resume_ctrl.StartResumption(application, hash_id);
+    auto send_response = [this](mobile_apis::Result::eType result_code,
+            const std::string& info) {
+        result_code_ = result_code;
+        SendRegisterAppInterfaceResponseToMobile(
+            ApplicationType::kNewApplication, info, true);
+    };
+
+    resume_ctrl.StartResumption(application, hash_id, send_response);
     return;
   }
 
@@ -522,10 +531,10 @@ void RegisterAppInterfaceRequest::Run() {
     add_info = "Persistent data is missing.";
     result_code_ = mobile_apis::Result::RESUME_FAILED;
   }
-  const bool need_to_restore_vr =
-      resume_data_result == DataResumeResult::RESUME_DATA;
 
   CheckLanguage();
+  const bool need_to_restore_vr =
+      resume_data_result == DataResumeResult::RESUME_DATA;
 
   SendRegisterAppInterfaceResponseToMobile(
       ApplicationType::kNewApplication, add_info, need_to_restore_vr);
@@ -851,7 +860,7 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile(
       file_system::FileExists(application->app_icon_path());
 
   SendResponse(true, result_code_, response_info_.c_str(), &response_params);
-  SendOnAppRegisteredNotificationToHMI(*(application.get()), need_restore_vr);
+
   if (msg_params.keyExists(strings::app_hmi_type)) {
     policy_handler_.SetDefaultHmiTypes(application->policy_app_id(),
                                        &(msg_params[strings::app_hmi_type]));

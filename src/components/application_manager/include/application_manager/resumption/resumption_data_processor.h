@@ -39,6 +39,7 @@
 #include "smart_objects/smart_object.h"
 #include "application_manager/application.h"
 #include "application_manager/event_engine/event_observer.h"
+#include "application_manager/resumption/resume_ctrl.h"
 
 namespace resumption {
 
@@ -79,7 +80,8 @@ class ResumptionDataProcessor : public app_mngr::event_engine::EventObserver {
   * @param saved_app application specific section from backup file
   */
   void Restore(app_mngr::ApplicationSharedPtr application,
-               smart_objects::SmartObject& saved_app);
+               smart_objects::SmartObject& saved_app,
+               ResumeCtrl::ResumptionCallBack callback);
 
   /**
    * @brief Event, that raised if application get resumption response from HMI
@@ -265,6 +267,8 @@ class ResumptionDataProcessor : public app_mngr::event_engine::EventObserver {
    **/
   app_mngr::ApplicationManager& application_manager_;
   std::map<std::int32_t, ApplicationResumptionStatus> resumption_status_;
+  std::map<std::int32_t, ResumeCtrl::ResumptionCallBack> register_callbacks_;
+
 };
 
 }  // namespace resumption

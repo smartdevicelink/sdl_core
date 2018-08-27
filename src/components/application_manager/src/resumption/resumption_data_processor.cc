@@ -58,7 +58,8 @@ ResumptionDataProcessor::ResumptionDataProcessor(
 ResumptionDataProcessor::~ResumptionDataProcessor() {}
 
 void ResumptionDataProcessor::Restore(ApplicationSharedPtr application,
-                                      smart_objects::SmartObject& saved_app) {
+                                      smart_objects::SmartObject& saved_app,
+                                      ResumeCtrl::ResumptionCallBack callback) {
   LOG4CXX_AUTO_TRACE(logger_);
   AddFiles(application, saved_app);
   AddSubmenues(application, saved_app);
@@ -67,6 +68,7 @@ void ResumptionDataProcessor::Restore(ApplicationSharedPtr application,
   SetGlobalProperties(application, saved_app);
   AddSubscriptions(application, saved_app);
   AddWayPointsSubscription(application, saved_app);
+  register_callbacks_[application->app_id()] = callback;
 }
 
 void ResumptionDataProcessor::on_event(const event_engine::Event& event) {
@@ -107,12 +109,17 @@ void ResumptionDataProcessor::on_event(const event_engine::Event& event) {
     return;
   }
 
+  auto it = register_callbacks_.find(app_id);
+  DCHECK_OR_RETURN_VOID(it !=register_callbacks_.end());
+  auto callback = it->second;
   if (status.error_requests.empty()) {
     LOG4CXX_DEBUG(logger_, "Resumption for app " << app_id << "successful");
+    callback(mobile_apis::Result::SUCCESS, "Data resumption succesful");
   }
   if (!status.error_requests.empty()) {
     LOG4CXX_ERROR(logger_, "Resumption for app " << app_id << "failed");
     RevertRestoredData(app_id);
+    callback(mobile_apis::Result::RESUME_FAILED, "Data resumption failed");
   }
   resumption_status_.erase(app_id);
 }
@@ -131,6 +138,7 @@ void ResumptionDataProcessor::RevertRestoredData(const int32_t app_id) {
 void ResumptionDataProcessor::WaitForResponse(
     const int32_t app_id, const ResumptionRequest& request) {
   LOG4CXX_AUTO_TRACE(logger_);
+  LOG4CXX_DEBUG(logger_, "app " << app_id << "Subscribe on " << request.function_id << " " << request.correlation_id);
   subscribe_on_event(request.function_id, request.correlation_id);
   resumption_status_[app_id].list_of_sent_requests.push_back(request);
 }
@@ -140,10 +148,10 @@ void ResumptionDataProcessor::ProcessHMIRequest(
   LOG4CXX_AUTO_TRACE(logger_);
   if (subscribe_on_response) {
     auto function_id = static_cast<hmi_apis::FunctionID::eType>(
-        (*request)[strings::function_id].asInt());
+        (*request)[strings::params][strings::function_id].asInt());
 
     const int32_t hmi_correlation_id =
-        (*request)[strings::correlation_id].asInt();
+        (*request)[strings::params][strings::correlation_id].asInt();
 
     const int32_t app_id =
         (*request)[strings::msg_params][strings::app_id].asInt();
@@ -228,7 +236,7 @@ void ResumptionDataProcessor::AddSubmenues(
     application->AddSubMenu(submenu[strings::menu_id].asUInt(), submenu);
   }
 
-  ProcessHMIRequests(MessageHelper::CreateAddSubMenuRequestToHMI(
+  ProcessHMIRequests(MessageHelper::CreateAddSubMenuRequestsToHMI(
       application, application_manager_.GetNextHMICorrelationID()));
 }
 

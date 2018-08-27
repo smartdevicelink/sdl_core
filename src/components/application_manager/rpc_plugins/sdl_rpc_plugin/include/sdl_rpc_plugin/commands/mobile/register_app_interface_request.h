@@ -89,6 +89,7 @@ class RegisterAppInterfaceRequest
    **/
   void SendRegisterAppInterfaceResponseToMobile();
 
+
  private:
   /**
    * @brief FillApplicationParams set app application attributes from the RAI

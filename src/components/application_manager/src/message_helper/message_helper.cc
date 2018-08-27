@@ -1600,7 +1600,7 @@ void MessageHelper::SendAddSubMenuRequestToHMI(ApplicationConstSharedPtr app,
   }
 
   smart_objects::SmartObjectList requests =
-      CreateAddSubMenuRequestToHMI(app, app_mngr.GetNextHMICorrelationID());
+      CreateAddSubMenuRequestsToHMI(app, app_mngr.GetNextHMICorrelationID());
   for (smart_objects::SmartObjectList::iterator it = requests.begin();
        it != requests.end();
        ++it) {
@@ -1608,7 +1608,7 @@ void MessageHelper::SendAddSubMenuRequestToHMI(ApplicationConstSharedPtr app,
   }
 }
 
-smart_objects::SmartObjectList MessageHelper::CreateAddSubMenuRequestToHMI(
+smart_objects::SmartObjectList MessageHelper::CreateAddSubMenuRequestsToHMI(
     ApplicationConstSharedPtr app, const uint32_t correlation_id) {
   smart_objects::SmartObjectList requsets;
   const DataAccessor<SubMenuMap> accessor = app->sub_menu_map();
