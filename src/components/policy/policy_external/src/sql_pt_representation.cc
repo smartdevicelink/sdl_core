@@ -235,10 +235,10 @@ int SQLPTRepresentation::TimeoutResponse() {
   utils::dbms::SQLQuery query(db());
   if (!query.Prepare(sql_pt::kSelectTimeoutResponse) || !query.Exec()) {
     LOG4CXX_INFO(logger_, "Can not select timeout response for retry sequence");
-    const int defaultTimeout = 30 * date_time::DateTime::MILLISECONDS_IN_SECOND;
+    const int defaultTimeout = 30 * date_time::MILLISECONDS_IN_SECOND;
     return defaultTimeout;
   }
-  return query.GetInteger(0) * date_time::DateTime::MILLISECONDS_IN_SECOND;
+  return query.GetInteger(0) * date_time::MILLISECONDS_IN_SECOND;
 }
 
 bool SQLPTRepresentation::SecondsBetweenRetries(std::vector<int>* seconds) {

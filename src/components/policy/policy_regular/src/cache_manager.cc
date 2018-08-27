@@ -645,7 +645,7 @@ int CacheManager::TimeoutResponse() {
   CACHE_MANAGER_CHECK(0);
   sync_primitives::AutoLock auto_lock(cache_lock_);
   return pt_->policy_table.module_config.timeout_after_x_seconds *
-         date_time::DateTime::MILLISECONDS_IN_SECOND;
+         date_time::MILLISECONDS_IN_SECOND;
 }
 
 bool CacheManager::SecondsBetweenRetries(std::vector<int>& seconds) {

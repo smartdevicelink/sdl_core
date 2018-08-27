@@ -407,11 +407,11 @@ void RequestController::TimeoutThread() {
                         << " request id: " << probably_expired->requestId()
                         << " connection_key: " << probably_expired->app_id()
                         << " NOT expired");
-      const TimevalStruct current_time = date_time::DateTime::getCurrentTime();
-      const TimevalStruct end_time = probably_expired->end_time();
+      const date_time::TimeDuration current_time = date_time::getCurrentTime();
+      const date_time::TimeDuration end_time = probably_expired->end_time();
       if (current_time < end_time) {
-        const uint32_t msecs = static_cast<uint32_t>(
-            date_time::DateTime::getmSecs(end_time - current_time));
+        const uint32_t msecs =
+            static_cast<uint32_t>(date_time::getmSecs(end_time - current_time));
         LOG4CXX_DEBUG(logger_, "Sleep for " << msecs << " millisecs");
         timer_condition_.WaitFor(auto_lock, msecs);
       }

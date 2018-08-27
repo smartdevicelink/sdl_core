@@ -45,11 +45,11 @@ class PHTelemetryObserver {
     RawMessagePtr raw_msg;
     uint32_t message_id;
     uint8_t connection_key;
-    TimevalStruct begin;
-    TimevalStruct end;
+    date_time::TimeDuration begin;
+    date_time::TimeDuration end;
   };
-  virtual void StartMessageProcess(uint32_t message_id,
-                                   const TimevalStruct& start_time) = 0;
+  virtual void StartMessageProcess(
+      uint32_t message_id, const date_time::TimeDuration& start_time) = 0;
   virtual void EndMessageProcess(std::shared_ptr<MessageMetric> m) = 0;
   virtual ~PHTelemetryObserver() {}
 };

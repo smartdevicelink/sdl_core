@@ -107,7 +107,7 @@ class InteriorDataManagerImpl : public InteriorDataManager {
    * @brief RequestsToHMIHistory mapping from module type to vector of time
    * stamps
    */
-  typedef std::map<std::string, std::deque<TimevalStruct> >
+  typedef std::map<std::string, std::deque<date_time::TimeDuration> >
       RequestsToHMIHistory;
   RequestsToHMIHistory requests_to_hmi_history_;
   mutable sync_primitives::Lock requests_to_hmi_history_lock_;

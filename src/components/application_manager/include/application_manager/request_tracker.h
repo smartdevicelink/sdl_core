@@ -85,7 +85,7 @@ class RequestTracker {
                     const mobile_apis::HMILevel::eType level);
 
  private:
-  typedef std::vector<TimevalStruct> RequestAddedAt;
+  typedef std::vector<date_time::TimeDuration> RequestAddedAt;
   typedef std::map<ApplicationID, RequestAddedAt> ApplicationsRequestsTracker;
 
   /**

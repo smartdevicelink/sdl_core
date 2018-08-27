@@ -60,7 +60,7 @@ typedef uint32_t MessageID;
 
 struct ProtocolFrameData {
   ProtocolFramePtr frame;
-  TimevalStruct append_time;
+  date_time::TimeDuration append_time;
 };
 /**
  *\brief Map of frames with last frame data for messages received in multiple

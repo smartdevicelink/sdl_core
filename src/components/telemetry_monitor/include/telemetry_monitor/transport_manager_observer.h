@@ -49,7 +49,8 @@ class TransportManagerObserver : public transport_manager::TMTelemetryObserver {
 
  private:
   TelemetryMonitor* telemetry_monitor_;
-  std::map<const protocol_handler::RawMessage*, TimevalStruct> time_starts;
+  std::map<const protocol_handler::RawMessage*, date_time::TimeDuration>
+      time_starts;
 };
 }  // namespace telemetry_monitor
 #endif  // SRC_COMPONENTS_TELEMETRY_MONITOR_INCLUDE_TELEMETRY_MONITOR_TRANSPORT_MANAGER_OBSERVER_H_

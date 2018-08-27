@@ -44,8 +44,8 @@ namespace application_manager {
 class AMTelemetryObserver {
  public:
   struct MessageMetric {
-    TimevalStruct begin;
-    TimevalStruct end;
+    date_time::TimeDuration begin;
+    date_time::TimeDuration end;
     std::shared_ptr<smart_objects::SmartObject> message;
   };
   typedef std::shared_ptr<MessageMetric> MessageMetricSharedPtr;
