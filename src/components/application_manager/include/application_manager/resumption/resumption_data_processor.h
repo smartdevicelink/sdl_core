@@ -219,7 +219,7 @@ class ResumptionDataProcessor : public app_mngr::event_engine::EventObserver {
   * @param saved_app application specific section from backup file
   */
   void AddButtonsSubscriptions(app_mngr::ApplicationSharedPtr application,
-                        const smart_objects::SmartObject& saved_app);
+                               const smart_objects::SmartObject& saved_app);
 
   /**
   * @brief AddSubscriptions allows to restore subscriptions
@@ -227,7 +227,7 @@ class ResumptionDataProcessor : public app_mngr::event_engine::EventObserver {
   * @param saved_app application specific section from backup file
   */
   void AddPluginsSubscriptions(app_mngr::ApplicationSharedPtr application,
-                        const smart_objects::SmartObject& saved_app);
+                               const smart_objects::SmartObject& saved_app);
 
   /**
    * @brief Deleting subscriptions have been resumed

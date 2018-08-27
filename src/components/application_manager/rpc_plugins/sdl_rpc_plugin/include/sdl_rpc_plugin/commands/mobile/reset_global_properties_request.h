@@ -42,7 +42,6 @@ namespace sdl_rpc_plugin {
 namespace app_mngr = application_manager;
 
 namespace commands {
-
 /**
  * @brief ResetGlobalPropertiesRequest command class
  **/
@@ -85,40 +84,6 @@ class ResetGlobalPropertiesRequest
 
  private:
   /*
-   * @brief Sets default value of the HELPPROMT global property
-   * to the first vrCommand of each Command Menu registered in application
-   *
-   * @param app Registered application
-   * @param is_timeout_promp Flag indicating that timeout prompt
-   * should be reset
-   *
-   * @return TRUE on success, otherwise FALSE
-   */
-  bool ResetHelpPromt(app_mngr::ApplicationSharedPtr app);
-
-  /*
-   * @brief  Sets default value of the TIMEOUTPROMT global property
-   * to the first vrCommand of each Command Menu registered in application
-   *
-   * @param app Registered application
-   *
-   * @return TRUE on success, otherwise FALSE
-   */
-  bool ResetTimeoutPromt(application_manager::ApplicationSharedPtr const app);
-
-  /*
-   * @brief Sets default value of the VRHELPTITLE global property
-   * to the application name and value of the VRHELPITEMS global property
-   * to value equal to registered command -1(default command “Help / Cancel”.)
-   *
-   * @param app Registered application
-   *
-   * @return TRUE on success, otherwise FALSE
-   */
-  bool ResetVrHelpTitleItems(
-      application_manager::ApplicationSharedPtr const app);
-
-  /*
    * @brief Prepare result for sending to mobile application
    * @param out_result_code contains result code for sending to mobile
    * application
@@ -134,6 +99,12 @@ class ResetGlobalPropertiesRequest
    * @return true if all responses received
    */
   bool IsPendingResponseExist();
+
+  /*
+   * @brief ResetGlobalProperties gets global properties data from message_
+   * and passes it to ApplicationManager::ResetGlobalProperties
+   */
+  void ResetGlobalProperties();
 
   DISALLOW_COPY_AND_ASSIGN(ResetGlobalPropertiesRequest);
 
