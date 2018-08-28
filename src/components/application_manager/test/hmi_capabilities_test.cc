@@ -255,7 +255,7 @@ TEST_F(HMICapabilitiesTest, LoadCapabilitiesFromFile) {
 
   // Count of buttons in json file
   const uint32_t btn_length = buttons_capabilities_so.length();
-  EXPECT_EQ(15u, btn_length);
+  EXPECT_EQ(16u, btn_length);
   for (uint32_t i = 0; i < btn_length; ++i) {
     EXPECT_TRUE((buttons_capabilities_so[i]).keyExists(strings::name));
     EXPECT_TRUE((buttons_capabilities_so[i]).keyExists("shortPressAvailable"));

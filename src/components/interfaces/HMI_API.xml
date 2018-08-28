@@ -80,6 +80,7 @@
 <enum name="ButtonName">
     <description>Defines the hard (physical) and soft (touchscreen) buttons available from SYNC</description>
     <element name="OK"/>
+    <element name="PLAY_PAUSE"/>
     <element name="SEEKLEFT"/>
     <element name="SEEKRIGHT"/>
     <element name="TUNEUP"/>
