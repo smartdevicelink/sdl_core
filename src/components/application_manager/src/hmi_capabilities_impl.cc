@@ -99,6 +99,8 @@ void InitCapabilities() {
   button_enum_name.insert(
       std::make_pair(std::string("OK"), hmi_apis::Common_ButtonName::OK));
   button_enum_name.insert(std::make_pair(
+      std::string("PLAY_PAUSE"), hmi_apis::Common_ButtonName::PLAY_PAUSE));
+  button_enum_name.insert(std::make_pair(
       std::string("SEEKLEFT"), hmi_apis::Common_ButtonName::SEEKLEFT));
   button_enum_name.insert(std::make_pair(
       std::string("SEEKRIGHT"), hmi_apis::Common_ButtonName::SEEKRIGHT));

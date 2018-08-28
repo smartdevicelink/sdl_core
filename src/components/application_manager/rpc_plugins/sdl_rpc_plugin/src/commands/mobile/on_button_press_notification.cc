@@ -35,6 +35,7 @@
 
 #include "application_manager/application_impl.h"
 #include "interfaces/MOBILE_API.h"
+#include "utils/semantic_version.h"
 
 namespace sdl_rpc_plugin {
 using namespace application_manager;
@@ -168,8 +169,16 @@ void OnButtonPressNotification::SendButtonPress(ApplicationConstSharedPtr app) {
   (*on_btn_press)[strings::params][strings::function_id] =
       static_cast<int32_t>(mobile_apis::FunctionID::eType::OnButtonPressID);
 
-  (*on_btn_press)[strings::msg_params][strings::button_name] =
-      (*message_)[strings::msg_params][hmi_response::button_name];
+  mobile_apis::ButtonName::eType btn_id =
+      static_cast<mobile_apis::ButtonName::eType>(
+          (*message_)[strings::msg_params][hmi_response::button_name].asInt());
+
+  if (btn_id == mobile_apis::ButtonName::PLAY_PAUSE &&
+      app->msg_version() <= utils::version_4_5) {
+    btn_id = mobile_apis::ButtonName::OK;
+  }
+
+  (*on_btn_press)[strings::msg_params][strings::button_name] = btn_id;
   (*on_btn_press)[strings::msg_params][strings::button_press_mode] =
       (*message_)[strings::msg_params][hmi_response::button_mode];
 

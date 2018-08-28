@@ -32,6 +32,7 @@
  */
 
 #include "sdl_rpc_plugin/commands/mobile/subscribe_button_request.h"
+#include "utils/semantic_version.h"
 
 namespace sdl_rpc_plugin {
 using namespace application_manager;
@@ -65,7 +66,7 @@ void SubscribeButtonRequest::Run() {
     return;
   }
 
-  const mobile_apis::ButtonName::eType btn_id =
+  mobile_apis::ButtonName::eType btn_id =
       static_cast<mobile_apis::ButtonName::eType>(
           (*message_)[str::msg_params][str::button_name].asInt());
 
@@ -76,7 +77,20 @@ void SubscribeButtonRequest::Run() {
     return;
   }
 
-  if (!CheckHMICapabilities(btn_id)) {
+  if (app->msg_version() <= utils::version_4_5 &&
+      btn_id == mobile_apis::ButtonName::OK && app->is_media_application()) {
+    bool ok_supported = CheckHMICapabilities(mobile_apis::ButtonName::OK);
+    bool play_pause_supported =
+        CheckHMICapabilities(mobile_apis::ButtonName::PLAY_PAUSE);
+    if (play_pause_supported) {
+      LOG4CXX_DEBUG(logger_, "Converting Legacy OK button to PLAY_PAUSE");
+      btn_id = mobile_apis::ButtonName::PLAY_PAUSE;
+      (*message_)[str::msg_params][str::button_name] = btn_id;
+    } else if (!ok_supported) {
+      LOG4CXX_ERROR(logger_, "OK button isn't allowed by HMI capabilities");
+      SendResponse(false, mobile_apis::Result::UNSUPPORTED_RESOURCE);
+    }
+  } else if (!CheckHMICapabilities(btn_id)) {
     LOG4CXX_ERROR(logger_,
                   "Subscribe on button "
                       << btn_id << " isn't allowed by HMI capabilities");
@@ -105,7 +119,8 @@ bool SubscribeButtonRequest::Init() {
 bool SubscribeButtonRequest::IsSubscriptionAllowed(
     ApplicationSharedPtr app, mobile_apis::ButtonName::eType btn_id) {
   if (!app->is_media_application() &&
-      ((mobile_apis::ButtonName::SEEKLEFT == btn_id) ||
+      ((mobile_apis::ButtonName::PLAY_PAUSE == btn_id) ||
+       (mobile_apis::ButtonName::SEEKLEFT == btn_id) ||
        (mobile_apis::ButtonName::SEEKRIGHT == btn_id) ||
        (mobile_apis::ButtonName::TUNEUP == btn_id) ||
        (mobile_apis::ButtonName::TUNEDOWN == btn_id))) {

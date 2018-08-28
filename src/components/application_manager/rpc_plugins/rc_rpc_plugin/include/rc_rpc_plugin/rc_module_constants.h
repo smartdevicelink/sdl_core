@@ -52,6 +52,7 @@ const char kSupportedLights[] = "supportedLights";
 
 // LightControlCapabilities
 const char kName[] = "name";
+const char kStatusAvailable[] = "statusAvailable";
 const char kDensityAvailable[] = "densityAvailable";
 const char kRGBColorSpaceAvailable[] = "rgbColorSpaceAvailable";
 
@@ -178,9 +179,9 @@ const char kHeatedMirrorsEnable[] = "heatedMirrorsEnable";
 
 // LightControlData
 const char kLightState[] = "lightState";
-const char kStatus[] = "status";
-const char kDensity[] = "density";
-const char kColor[] = "color";
+const char kLightStatus[] = "status";
+const char kLightDensity[] = "density";
+const char kLightColor[] = "color";
 
 // AudioControlData
 const char kSource[] = "source";

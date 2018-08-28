@@ -33,7 +33,7 @@
 #define SRC_COMPONENTS_INCLUDE_UTILS_DATE_TIME_H_
 
 #include <stdint.h>
-#include "boost/date_time.hpp"
+#include "boost/date_time/posix_time/posix_time_duration.hpp"
 
 namespace date_time {
 

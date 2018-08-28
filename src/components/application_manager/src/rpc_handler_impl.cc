@@ -219,7 +219,8 @@ void RPCHandlerImpl::GetMessageVersion(
     }
     utils::SemanticVersion temp_version(major, minor, patch);
     if (temp_version.isValid()) {
-      message_version = temp_version;
+      utils::SemanticVersion ver_4_5(4, 5, 0);
+      message_version = (temp_version > ver_4_5) ? temp_version : ver_4_5;
     }
   }
 }
@@ -251,10 +252,7 @@ bool RPCHandlerImpl::ConvertMessageToSO(
       // Attach RPC version to SmartObject if it does not exist yet.
       auto app_ptr = app_manager_.application(message.connection_key());
       utils::SemanticVersion msg_version(0, 0, 0);
-      if (app_ptr &&
-          (output[NsSmartDeviceLink::NsJSONHandler::strings::S_PARAMS]
-               .keyExists(NsSmartDeviceLink::NsJSONHandler::strings::
-                              S_RPC_MSG_VERSION) == false)) {
+      if (app_ptr) {
         msg_version = app_ptr->msg_version();
       } else if (mobile_apis::FunctionID::RegisterAppInterfaceID ==
                  static_cast<mobile_apis::FunctionID::eType>(

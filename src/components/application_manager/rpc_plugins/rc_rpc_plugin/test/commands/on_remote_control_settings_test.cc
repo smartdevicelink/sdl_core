@@ -139,22 +139,8 @@ TEST_F(RCOnRemoteControlSettingsNotificationTest,
   (*mobile_message)[application_manager::strings::msg_params]
                    [message_params::kAllowed] = false;
 
-  ApplicationSet app_set = {mock_app_};
-
-  std::shared_ptr<sync_primitives::Lock> apps_lock =
-      std::make_shared<sync_primitives::Lock>();
-  DataAccessor<ApplicationSet> accessor(app_set, apps_lock);
-  // Expectations
-  EXPECT_CALL(app_mngr_, applications()).WillOnce(Return(accessor));
-
-  RCAppExtensionPtr rc_extention_ptr =
-      std::make_shared<RCAppExtension>(application_manager::AppExtensionUID(
-          rc_rpc_plugin::RCRPCPlugin::kRCPluginID));
-  rc_extention_ptr->SubscribeToInteriorVehicleData(enums_value::kClimate);
-  ON_CALL(*mock_app_, QueryInterface(_))
-      .WillByDefault(Return(rc_extention_ptr));
-
   EXPECT_CALL(mock_allocation_manager_, ResetAllAllocations());
+  EXPECT_CALL(mock_interior_data_manager_, OnDisablingRC());
 
   // Act
   std::shared_ptr<

@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2018, Ford Motor Company
+/*
+ * Copyright (c) 2018, Livio
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -29,34 +29,10 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
+#include "utils/semantic_version.h"
 
-#include "sdl_rpc_plugin/commands/hmi/ui_set_icon_request.h"
+namespace utils {
 
-namespace sdl_rpc_plugin {
-using namespace application_manager;
+const SemanticVersion version_4_5(4, 5, 0);
 
-namespace commands {
-
-UISetIconRequest::UISetIconRequest(
-    const application_manager::commands::MessageSharedPtr& message,
-    ApplicationManager& application_manager,
-    rpc_service::RPCService& rpc_service,
-    HMICapabilities& hmi_capabilities,
-    policy::PolicyHandlerInterface& policy_handle)
-    : RequestToHMI(message,
-                   application_manager,
-                   rpc_service,
-                   hmi_capabilities,
-                   policy_handle) {}
-
-UISetIconRequest::~UISetIconRequest() {}
-
-void UISetIconRequest::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
-
-  SendRequest();
-}
-
-}  // namespace commands
-
-}  // namespace application_manager
+}  // namespace utils
