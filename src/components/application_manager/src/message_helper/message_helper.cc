@@ -854,12 +854,12 @@ MessageHelper::CreateTTSResetGlobalPropertiesRequest(
 
   if (reset_result.help_prompt) {
     (*ui_reset_global_prop_request)[strings::help_prompt] =
-        application->help_prompt();
+        *(application->help_prompt());
   }
 
   if (reset_result.timeout_prompt) {
     (*ui_reset_global_prop_request)[strings::timeout_prompt] =
-        application->timeout_prompt();
+        *(application->timeout_prompt());
   }
 
   (*ui_reset_global_prop_request)[strings::app_id] = application->app_id();
