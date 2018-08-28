@@ -690,8 +690,32 @@ TEST_F(ProfileTest, CheckStringContainer) {
   std::vector<std::string>::iterator element_mode = diagmodes_list.begin();
   element_mode++;
   element_mode++;
-  diag_mode = std::find(diagmodes_list.begin(), diagmodes_list.end(), " 0x03");
+  diag_mode = std::find(diagmodes_list.begin(), diagmodes_list.end(), "0x03");
   EXPECT_EQ(diag_mode, element_mode);
+}
+
+TEST_F(ProfileTest, CheckStringContainerEmpty) {
+  // Set new config file
+  profile_.set_config_file_name("smartDeviceLink_test.ini");
+  EXPECT_EQ("smartDeviceLink_test.ini", profile_.config_file_name());
+
+  bool isread = false;
+  std::vector<std::string> output_list =
+      profile_.ReadStringContainer("MAIN", "AppConfigFolder", &isread);
+  EXPECT_FALSE(isread);
+  EXPECT_TRUE(output_list.empty());
+
+  isread = false;
+  std::vector<std::string> output_list2 =
+      profile_.ReadStringContainer("MAIN", "AppConfigFolder", &isread, true);
+  EXPECT_TRUE(isread);
+  EXPECT_TRUE(output_list2.empty());
+
+  isread = false;
+  std::vector<std::string> output_list3 =
+      profile_.ReadStringContainer("MAIN", "DoesNotExistKey", &isread, true);
+  EXPECT_FALSE(isread);
+  EXPECT_TRUE(output_list2.empty());
 }
 
 #ifdef ENABLE_SECURITY

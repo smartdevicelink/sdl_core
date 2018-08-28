@@ -86,19 +86,6 @@ class ConnectionHandlerObserver {
   /**
    * \brief Callback function used by connection_handler
    * when Mobile Application initiates start of new service.
-   * \param deviceHandle Device identifier within which session has to be
-   * started.
-   * \param sessionKey Key of started session.
-   * \param type Established service type
-   */
-  virtual bool OnServiceStartedCallback(
-      const connection_handler::DeviceHandle& device_handle,
-      const int32_t& session_key,
-      const protocol_handler::ServiceType& type) = 0;
-
-  /**
-   * \brief Callback function used by connection_handler
-   * when Mobile Application initiates start of new service.
    * Result must be notified through NotifyServiceStartedResult().
    * \param deviceHandle Device identifier within which session has to be
    * started.
@@ -157,6 +144,23 @@ class ConnectionHandlerObserver {
   virtual security_manager::SSLContext::HandshakeContext GetHandshakeContext(
       uint32_t key) const = 0;
 #endif  // ENABLE_SECURITY
+
+  /**
+   * \brief Called when secondary transport for a particular app is started.
+   * \param device_handle Device identifier on which the secondary transport is
+   * started.
+   * \param session_key session ID representing the app
+   */
+  virtual void OnSecondaryTransportStartedCallback(
+      const connection_handler::DeviceHandle device_handle,
+      const int32_t session_key) = 0;
+
+  /**
+   * \brief Called when secondary transport for a particular app is terminated.
+   * \param session_key session ID representing the app
+   */
+  virtual void OnSecondaryTransportEndedCallback(const int32_t session_key) = 0;
+
  protected:
   /**
    * \brief Destructor

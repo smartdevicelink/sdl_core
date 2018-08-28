@@ -57,25 +57,25 @@ const TimePair testing_time_pairs[] = {TimePair(0, 50),
 class MessageMeterTest : public ::testing::TestWithParam<TimePair> {
  protected:
   void SetUp() OVERRIDE {
-    usecs = date_time::DateTime::MICROSECONDS_IN_MILLISECOND;
+    usecs = date_time::MICROSECONDS_IN_MILLISECOND;
     id1 = 0x0;
     id2 = 0xABCDEF;
     id3 = 0xFEBCDA;
 
     const TimePair time_pair = GetParam();
     EXPECT_GT(usecs, time_pair.second) << "Wrong time (msecs) value";
+    time_range = date_time::seconds(time_pair.first) +
+                 date_time::microseconds(time_pair.second * usecs);
 
-    time_range.tv_sec = time_pair.first;
-    time_range.tv_usec = time_pair.second * usecs;
-    EXPECT_LT(0, date_time::DateTime::getuSecs(time_range))
+    EXPECT_LT(0, date_time::getuSecs(time_range))
         << "Wrong test case with null range value";
 
     meter.set_time_range(time_range);
-    time_range_msecs = date_time::DateTime::getmSecs(time_range);
+    time_range_msecs = date_time::getmSecs(time_range);
   }
   void TearDown() OVERRIDE {}
   ::utils::MessageMeter<int> meter;
-  TimevalStruct time_range = {0, 0};
+  date_time::TimeDuration time_range = date_time::TimeDurationZero();
   int64_t time_range_msecs;
   int usecs;
   int id1, id2, id3;
@@ -83,27 +83,25 @@ class MessageMeterTest : public ::testing::TestWithParam<TimePair> {
 
 TEST(MessageMeterTest, DefaultTimeRange) {
   const ::utils::MessageMeter<int> default_meter;
-  const TimevalStruct time_second{1, 0};
+  const date_time::TimeDuration time_second = date_time::seconds(1);
   EXPECT_EQ(time_second, default_meter.time_range());
 }
 
 TEST(MessageMeterTest, TimeRangeSetter) {
   ::utils::MessageMeter<int> meter;
-  TimevalStruct time_range{0, 0};
+  date_time::TimeDuration time_range;
   const int test_count_secs = 1000;
-  // Skip 1000th msec value as wrong for TimevalStruct
+  // Skip 1000th msec value as wrong for date_time::TimeDuration
   const int test_count_msecs = 999;
   for (int sec = test_count_secs; sec >= 0; --sec) {
     for (int msec = test_count_msecs; msec >= 0; --msec) {
-      time_range.tv_sec = sec;
-      time_range.tv_usec =
-          msec * date_time::DateTime::MICROSECONDS_IN_MILLISECOND;
-      // Setter TimevalStruct
+      time_range = date_time::seconds(sec) + date_time::milliseconds(msec);
+
+      // Setter date_time::TimeDuration
       meter.set_time_range(time_range);
       EXPECT_EQ(time_range, meter.time_range()) << sec << "." << msec << " sec";
       // Setter mSecs
-      meter.set_time_range(sec * date_time::DateTime::MILLISECONDS_IN_SECOND +
-                           msec);
+      meter.set_time_range(sec * date_time::MILLISECONDS_IN_SECOND + msec);
       EXPECT_EQ(time_range, meter.time_range()) << sec << "." << msec << " sec";
     }
   }
@@ -113,7 +111,7 @@ TEST(MessageMeterTest, AddingWithNullTimeRange) {
   ::utils::MessageMeter<int> meter;
   const int id1 = 1;
   const int id2 = 2;
-  const TimevalStruct null_time_range{0, 0};
+  const date_time::TimeDuration null_time_range = date_time::TimeDurationZero();
   meter.set_time_range(null_time_range);
   for (int i = 0; i < 10000; ++i) {
     // 1st Connection
@@ -129,10 +127,10 @@ TEST(MessageMeterTest, AddingWithNullTimeRange) {
 TEST_P(MessageMeterTest,
        DISABLED_TrackMessage_AddingOverPeriod_CorrectCountOfMessages) {
   size_t messages = 0;
-  const TimevalStruct start_time = date_time::DateTime::getCurrentTime();
+  const date_time::TimeDuration start_time = date_time::getCurrentTime();
   // Add messages for less range period
   int64_t time_span;
-  while ((time_span = date_time::DateTime::calculateTimeSpan(start_time)) <
+  while ((time_span = date_time::calculateTimeSpan(start_time)) <
          time_range_msecs) {
     ++messages;
 
@@ -153,10 +151,10 @@ TEST_P(MessageMeterTest,
 TEST_P(MessageMeterTest,
        DISABLED_TrackMessage_AddingOverPeriodMultiIds_CorrectCountOfMessages) {
   size_t messages = 0;
-  const TimevalStruct start_time = date_time::DateTime::getCurrentTime();
+  const date_time::TimeDuration start_time = date_time::getCurrentTime();
   // Add messages for less range period
   int64_t time_span;
-  while ((time_span = date_time::DateTime::calculateTimeSpan(start_time)) <
+  while ((time_span = date_time::calculateTimeSpan(start_time)) <
          time_range_msecs) {
     ++messages;
 
@@ -188,14 +186,14 @@ TEST_P(MessageMeterTest,
 TEST_P(MessageMeterTest,
        DISABLED_Frequency_CountingOverPeriod_CorrectCountOfMessages) {
   const size_t one_message = 1;
-  const TimevalStruct start_time = date_time::DateTime::getCurrentTime();
+  const date_time::TimeDuration start_time = date_time::getCurrentTime();
   EXPECT_EQ(one_message, meter.TrackMessage(id1));
   EXPECT_EQ(one_message, meter.TrackMessage(id2));
   EXPECT_EQ(one_message, meter.TrackMessage(id3));
 
   // Check messages count over period
   int64_t time_span;
-  while ((time_span = date_time::DateTime::calculateTimeSpan(start_time)) <
+  while ((time_span = date_time::calculateTimeSpan(start_time)) <
          time_range_msecs) {
     usleep(time_range_msecs);
 

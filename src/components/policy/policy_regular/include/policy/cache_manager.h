@@ -35,7 +35,6 @@
 
 #include <map>
 
-#include "utils/shared_ptr.h"
 #include "policy/pt_representation.h"
 #include "policy/pt_ext_representation.h"
 #include "policy/usage_statistics/statistics_manager.h"
@@ -71,6 +70,22 @@ class CacheManager : public CacheManagerInterface {
                                 const PTString& hmi_level,
                                 const PTString& rpc,
                                 CheckPermissionResult& result);
+
+  /**
+   * @brief Get state of request types for given application
+   * @param policy_app_id Unique application id
+   * @return request type state
+   */
+  RequestType::State GetAppRequestTypesState(
+      const std::string& policy_app_id) const OVERRIDE;
+
+  /**
+   * @brief Get state of request subtypes for given application
+   * @param policy_app_id Unique application id
+   * @return request subtype state
+   */
+  RequestSubType::State GetAppRequestSubTypesState(
+      const std::string& policy_app_id) const OVERRIDE;
 
   /**
    * @brief Returns true if Policy Table was not updated yet
@@ -200,7 +215,7 @@ class CacheManager : public CacheManagerInterface {
    * device_info, statistics, excluding user messages
    * @return Generated structure for obtaining Json string.
    */
-  virtual utils::SharedPtr<policy_table::Table> GenerateSnapshot();
+  virtual std::shared_ptr<policy_table::Table> GenerateSnapshot();
 
   /**
    * Applies policy table to the current table
@@ -597,8 +612,18 @@ class CacheManager : public CacheManagerInterface {
    * @param policy_app_id Unique application id
    * @param request_types Request types of application
    */
-  void GetAppRequestTypes(const std::string& policy_app_id,
-                          std::vector<std::string>& request_types) const;
+  void GetAppRequestTypes(
+      const std::string& policy_app_id,
+      std::vector<std::string>& request_types) const OVERRIDE;
+
+  /**
+   * @brief Gets request subtypes for application
+   * @param policy_app_id Unique application id
+   * @param request_subtypes Request subtypes of application to be filled
+   */
+  void GetAppRequestSubTypes(
+      const std::string& policy_app_id,
+      std::vector<std::string>& request_subtypes) const OVERRIDE;
 
   /**
    * @brief GetCertificate allows to obtain certificate in order to
@@ -697,7 +722,7 @@ class CacheManager : public CacheManagerInterface {
 
   const PolicySettings& get_settings() const;
 
-  utils::SharedPtr<policy_table::Table> pt() const {
+  std::shared_ptr<policy_table::Table> pt() const {
     return pt_;
   }
 
@@ -749,14 +774,14 @@ class CacheManager : public CacheManagerInterface {
                                policy::Permissions& permission);
 
  private:
-  utils::SharedPtr<policy_table::Table> pt_;
-  utils::SharedPtr<policy_table::Table> snapshot_;
-  utils::SharedPtr<PTRepresentation> backup_;
+  std::shared_ptr<policy_table::Table> pt_;
+  std::shared_ptr<policy_table::Table> snapshot_;
+  std::shared_ptr<PTRepresentation> backup_;
   bool update_required;
   typedef std::set<std::string> UnpairedDevices;
   UnpairedDevices is_unpaired_;
 
-  mutable sync_primitives::Lock cache_lock_;
+  mutable sync_primitives::RecursiveLock cache_lock_;
   sync_primitives::Lock unpaired_lock_;
 
   typedef std::map<std::string, Permissions> AppCalculatedPermissions;

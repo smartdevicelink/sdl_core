@@ -36,8 +36,6 @@
 #include "smart_objects/enum_schema_item.h"
 #include "policy/usage_statistics/mock_statistics_manager.h"
 #include "policy/usage_statistics/mock_app_stopwatch.h"
-#include "utils/make_shared.h"
-#include "utils/shared_ptr.h"
 
 namespace test {
 namespace components {
@@ -69,23 +67,22 @@ const std::string kAppId = "SPT";
 class UsageStatisticsTest : public testing::Test {
  public:
   UsageStatisticsTest()
-      : mock_statistics_manager_sptr_(
-            utils::MakeShared<MockStatisticsManager>())
+      : mock_statistics_manager_sptr_(std::make_shared<MockStatisticsManager>())
       , usage_statistics_test_object1_sptr_(
             new application_manager::UsageStatistics(
                 kAppId, mock_statistics_manager_sptr_))
       , language_(LanguageIdToString(kTestLanguageId)) {}
 
  protected:
-  utils::SharedPtr<MockStatisticsManager> mock_statistics_manager_sptr_;
-  std::auto_ptr<application_manager::UsageStatistics>
+  std::shared_ptr<MockStatisticsManager> mock_statistics_manager_sptr_;
+  std::unique_ptr<application_manager::UsageStatistics>
       usage_statistics_test_object1_sptr_;
   const std::string language_;
 };
 
 TEST_F(UsageStatisticsTest, RecordHmiStateChanged_CallMethod_ExpectMethodCall) {
   // Arrange
-  std::auto_ptr<MockAppStopwatch> mock_app_stopwatch_object(
+  std::unique_ptr<MockAppStopwatch> mock_app_stopwatch_object(
       new MockAppStopwatch);
 
   // Checks
@@ -93,7 +90,7 @@ TEST_F(UsageStatisticsTest, RecordHmiStateChanged_CallMethod_ExpectMethodCall) {
   EXPECT_CALL(*mock_app_stopwatch_object, Switch(kTestAppStopwatchId));
 
   // Act
-  std::auto_ptr<application_manager::UsageStatistics>
+  std::unique_ptr<application_manager::UsageStatistics>
       usage_statistics_test_object2_sptr_(
           new application_manager::UsageStatistics(
               kAppId,

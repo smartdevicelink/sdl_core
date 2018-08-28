@@ -33,7 +33,7 @@
 #include "application_manager/app_launch/app_launch_data_json.h"
 #include "application_manager/smart_object_keys.h"
 #include "smart_objects/smart_object.h"
-#include "utils/make_shared.h"
+
 #include "utils/date_time.h"
 #include "json/json.h"
 
@@ -43,9 +43,7 @@ CREATE_LOGGERPTR_GLOBAL(logger_, "AppLaunch")
 
 AppLaunchDataJson::AppLaunchDataJson(const AppLaunchSettings& settings,
                                      resumption::LastState& last_state)
-    : AppLaunchDataImpl(settings)
-    , app_launch_json_lock_(true)
-    , last_state_(last_state) {}
+    : AppLaunchDataImpl(settings), last_state_(last_state) {}
 
 AppLaunchDataJson::~AppLaunchDataJson() {}
 
@@ -133,7 +131,7 @@ bool AppLaunchDataJson::RefreshAppSessionTime(const ApplicationData& app_data) {
   if (index != NotFound) {
     if (json_data_list.empty() == false) {
       json_data_list[index][strings::app_launch_last_session] =
-          static_cast<Json::Value::UInt64>(DateTime::getCurrentTime().tv_sec);
+          static_cast<Json::Value::UInt64>(getSecs(getCurrentTime()));
       retVal = true;
     }
   }
@@ -152,7 +150,7 @@ bool AppLaunchDataJson::AddNewAppData(const ApplicationData& app_data) {
   json_app_data[strings::app_id] = app_data.mobile_app_id_;
   json_app_data[strings::bundle_id] = app_data.bundle_id_;
   json_app_data[strings::app_launch_last_session] =
-      static_cast<Json::Value::UInt64>(DateTime::getCurrentTime().tv_sec);
+      static_cast<Json::Value::UInt64>(getSecs(getCurrentTime()));
 
   LOG4CXX_DEBUG(logger_,
                 "New application data saved. Detatils device_id: "
@@ -185,7 +183,7 @@ std::vector<ApplicationDataPtr> AppLaunchDataJson::GetAppDataByDevMac(
 
       if (deviceMac == dev_mac) {
         dev_apps.push_back(
-            utils::MakeShared<ApplicationData>(appID, bundleID, deviceMac));
+            std::make_shared<ApplicationData>(appID, bundleID, deviceMac));
       }
     }
   }

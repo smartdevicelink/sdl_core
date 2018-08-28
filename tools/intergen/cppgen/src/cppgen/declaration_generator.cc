@@ -47,7 +47,6 @@
 #include "cppgen/module_manager.h"
 #include "cppgen/naming_convention.h"
 #include "cppgen/struct_type_constructor.h"
-#include "cppgen/struct_type_dbus_serializer.h"
 #include "cppgen/struct_type_from_json_method.h"
 #include "cppgen/struct_type_is_initialized_method.h"
 #include "cppgen/struct_type_is_valid_method.h"
@@ -97,14 +96,6 @@ void DeclareExternalTypes(const TypePreferences& prefs, Namespace* ns) {
     ns->nested("Json").ForwardDeclare(
         Namespace::ForwardDeclaration(
             Namespace::ForwardDeclaration::kClass, "Value"));
-  }
-  if (prefs.generate_dbus) {
-    ns->nested("dbus").ForwardDeclare(
-        Namespace::ForwardDeclaration(
-            Namespace::ForwardDeclaration::kClass, "MessageReader"));
-    ns->nested("dbus").ForwardDeclare(
-        Namespace::ForwardDeclaration(
-            Namespace::ForwardDeclaration::kClass, "MessageWriter"));
   }
 }
 
@@ -171,13 +162,6 @@ void DeclarationGenerator::GenerateCodeForStruct(const Struct* strct) {
     if (preferences_->generate_json) {
       StructTypeFromJsonConstructor(strct, base_class_name).Declare(&o , true);
       StructTypeToJsonMethod(strct).Declare(&o , true);
-    }
-    if (preferences_->generate_dbus) {
-      StructTypeFromDbusReaderConstructor(
-            preferences_, strct, true, base_class_name).Declare(&o, true);
-      StructTypeToDbusWriterMethod(strct, true).Declare(&o , true);
-      StructTypeDbusMessageSignatureMethod(preferences_,
-                                           strct, true).Declare(&o, true);
     }
     StructTypeIsValidMethod(strct).Declare(&o, true);
     StructTypeIsInitializedMethod(strct).Declare(&o, true);
@@ -284,13 +268,6 @@ void DeclarationGenerator::GenerateCodeForRequest(const Request& request,
       StructTypeFromJsonConstructor(&request, base_class_name).Declare(&o , true);
       StructTypeToJsonMethod(&request).Declare(&o , true);
     }
-    if (preferences_->generate_dbus) {
-      StructTypeFromDbusReaderConstructor(preferences_, &request, false,
-                                          base_class_name).Declare(&o, true);
-      StructTypeToDbusWriterMethod(&request, false).Declare(&o , true);
-      StructTypeDbusMessageSignatureMethod(preferences_,
-                                           &request, false).Declare(&o, true);
-    }
     StructTypeIsValidMethod(&request).Declare(&o, true);
     StructTypeIsInitializedMethod(&request).Declare(&o, true);
     StructTypeStructEmptyMethod(&request).Declare(&o, true);
@@ -336,14 +313,6 @@ void DeclarationGenerator::GenerateCodeForResponse(const Response& response) {
       StructTypeToJsonMethod(&response).Declare(&o , true);
 
     }
-    if (preferences_->generate_dbus) {
-      StructTypeFromDbusReaderConstructor(preferences_, &response, false,
-                                          base_class_name).Declare(&o, true);
-      StructTypeToDbusWriterMethod(&response, false).Declare(&o , true);
-
-      StructTypeDbusMessageSignatureMethod(preferences_,
-                                           &response, false).Declare(&o, true);
-    }
     StructTypeIsValidMethod(&response).Declare(&o, true);
     StructTypeIsInitializedMethod(&response).Declare(&o, true);
     StructTypeStructEmptyMethod(&response).Declare(&o, true);
@@ -388,13 +357,6 @@ void DeclarationGenerator::GenerateCodeForNotification(
     if (preferences_->generate_json) {
       StructTypeFromJsonConstructor(&notification, base_class_name).Declare(&o , true);
       StructTypeToJsonMethod(&notification).Declare(&o , true);
-    }
-    if (preferences_->generate_dbus) {
-      StructTypeFromDbusReaderConstructor(preferences_, &notification, false,
-                                          base_class_name).Declare(&o , true);
-      StructTypeToDbusWriterMethod(&notification, false).Declare(&o , true);
-      StructTypeDbusMessageSignatureMethod(preferences_,
-                                           &notification, false).Declare(&o, true);
     }
     StructTypeIsValidMethod(&notification).Declare(&o, true);
     StructTypeIsInitializedMethod(&notification).Declare(&o, true);

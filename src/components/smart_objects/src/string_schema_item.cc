@@ -38,20 +38,18 @@ namespace NsSmartObjects {
 
 namespace custom_str = utils::custom_string;
 
-utils::SharedPtr<CStringSchemaItem> CStringSchemaItem::create(
+std::shared_ptr<CStringSchemaItem> CStringSchemaItem::create(
     const TSchemaItemParameter<size_t>& MinLength,
     const TSchemaItemParameter<size_t>& MaxLength,
     const TSchemaItemParameter<std::string>& DefaultValue) {
-  return new CStringSchemaItem(MinLength, MaxLength, DefaultValue);
+  return std::shared_ptr<CStringSchemaItem>(
+      new CStringSchemaItem(MinLength, MaxLength, DefaultValue));
 }
 
-Errors::eType CStringSchemaItem::validate(const SmartObject& Object) {
-  rpc::ValidationReport report("RPC");
-  return validate(Object, &report);
-}
-
-Errors::eType CStringSchemaItem::validate(const SmartObject& Object,
-                                          rpc::ValidationReport* report__) {
+Errors::eType CStringSchemaItem::validate(
+    const SmartObject& Object,
+    rpc::ValidationReport* report__,
+    const utils::SemanticVersion& MessageVersion) {
   if (SmartType_String != Object.getType()) {
     std::string validation_info = "Incorrect type, expected: " +
                                   SmartObject::typeToString(SmartType_String) +

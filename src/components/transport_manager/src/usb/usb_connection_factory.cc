@@ -34,7 +34,6 @@
 #include "transport_manager/usb/usb_device.h"
 #include "transport_manager/transport_adapter/transport_adapter_impl.h"
 #include "utils/logger.h"
-#include "utils/make_shared.h"
 
 #if defined(__QNXNTO__)
 #include "transport_manager/usb/qnx/usb_connection.h"
@@ -65,21 +64,21 @@ TransportAdapter::Error UsbConnectionFactory::CreateConnection(
                 "enter DeviceUID: " << &device_uid
                                     << ", ApplicationHandle: " << &app_handle);
   DeviceSptr device = controller_->FindDevice(device_uid);
-  if (!device.valid()) {
+  if (device.use_count() == 0) {
     LOG4CXX_ERROR(logger_, "device " << device_uid << " not found");
-    LOG4CXX_TRACE(
-        logger_,
-        "exit with TransportAdapter::BAD_PARAM. Condition: !device.valid()");
+    LOG4CXX_TRACE(logger_,
+                  "exit with TransportAdapter::BAD_PARAM. Condition: "
+                  "device.use_count() == 0");
     return TransportAdapter::BAD_PARAM;
   }
 
   UsbDevice* usb_device = static_cast<UsbDevice*>(device.get());
-  utils::SharedPtr<UsbConnection> connection =
-      utils::MakeShared<UsbConnection>(device_uid,
-                                       app_handle,
-                                       controller_,
-                                       usb_handler_,
-                                       usb_device->usb_device());
+  std::shared_ptr<UsbConnection> connection =
+      std::make_shared<UsbConnection>(device_uid,
+                                      app_handle,
+                                      controller_,
+                                      usb_handler_,
+                                      usb_device->usb_device());
   controller_->ConnectionCreated(connection, device_uid, app_handle);
   if (connection->Init()) {
     LOG4CXX_INFO(logger_, "USB connection initialised");

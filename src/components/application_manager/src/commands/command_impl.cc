@@ -35,6 +35,16 @@
 #include "application_manager/application_manager.h"
 
 namespace application_manager {
+
+namespace {
+struct AppExtensionPredicate {
+  AppExtensionUID uid;
+  bool operator()(const ApplicationSharedPtr app) {
+    return app ? (app->QueryInterface(uid).use_count() != 0) : false;
+  }
+};
+}
+
 namespace commands {
 
 CREATE_LOGGERPTR_LOCAL(CommandImpl::logger_, "Commands")
@@ -44,11 +54,17 @@ const int32_t CommandImpl::mobile_protocol_type_ = 0;
 const int32_t CommandImpl::protocol_version_ = 3;
 
 CommandImpl::CommandImpl(const MessageSharedPtr& message,
-                         ApplicationManager& application_manager)
+                         ApplicationManager& application_manager,
+                         rpc_service::RPCService& rpc_service,
+                         HMICapabilities& hmi_capabilities,
+                         policy::PolicyHandlerInterface& policy_handler)
     : message_(message)
     , default_timeout_(application_manager.get_settings().default_timeout())
     , allowed_to_terminate_(true)
-    , application_manager_(application_manager) {}
+    , application_manager_(application_manager)
+    , rpc_service_(rpc_service)
+    , hmi_capabilities_(hmi_capabilities)
+    , policy_handler_(policy_handler) {}
 
 CommandImpl::~CommandImpl() {
   CleanUp();
@@ -139,13 +155,6 @@ bool CommandImpl::ReplaceMobileWithHMIAppId(
   return true;
 }
 
-DEPRECATED void CommandImpl::ReplaceMobileByHMIAppId(
-    NsSmartDeviceLink::NsSmartObjects::SmartObject& message) {
-  if (!ReplaceMobileWithHMIAppId(message)) {
-    LOG4CXX_ERROR(logger_, "Substitution mobile --> HMI id is failed.");
-  }
-}
-
 bool CommandImpl::ReplaceHMIWithMobileAppId(
     NsSmartDeviceLink::NsSmartObjects::SmartObject& message) {
   if (message.keyExists(strings::app_id)) {
@@ -189,13 +198,6 @@ bool CommandImpl::ReplaceHMIWithMobileAppId(
   }
 
   return true;
-}
-
-DEPRECATED void CommandImpl::ReplaceHMIByMobileAppId(
-    NsSmartDeviceLink::NsSmartObjects::SmartObject& message) {
-  if (!ReplaceHMIWithMobileAppId(message)) {
-    LOG4CXX_ERROR(logger_, "Substitution HMI --> mobile id is failed.");
-  }
 }
 
 }  // namespace commands
