@@ -924,7 +924,7 @@ TEST_F(
 }
 
 uint32_t GetCurrentDaysCount() {
-  TimevalStruct current_time = date_time::DateTime::getCurrentTime();
+  date_time::TimeDuration current_time = date_time::getCurrentTime();
   const uint32_t kSecondsInDay = 60 * 60 * 24;
   return current_time.tv_sec / kSecondsInDay;
 }

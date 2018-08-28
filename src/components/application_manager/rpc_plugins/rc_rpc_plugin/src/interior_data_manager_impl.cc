@@ -52,8 +52,7 @@ void InteriorDataManagerImpl::StoreRequestToHMITime(
     const std::string& module_type) {
   LOG4CXX_AUTO_TRACE(logger_);
   sync_primitives::AutoLock autolock(requests_to_hmi_history_lock_);
-  requests_to_hmi_history_[module_type].push_back(
-      date_time::DateTime::getCurrentTime());
+  requests_to_hmi_history_[module_type].push_back(date_time::getCurrentTime());
 }
 
 bool InteriorDataManagerImpl::CheckRequestsToHMIFrequency(
@@ -129,9 +128,9 @@ void InteriorDataManagerImpl::UnsubscribeFromInteriorVehicleData(
 void InteriorDataManagerImpl::ClearOldRequestsToHMIHistory() {
   auto limit =
       app_mngr_.get_settings().get_interior_vehicle_data_frequency().second;
-  uint32_t time_frame = limit * date_time::DateTime::MILLISECONDS_IN_SECOND;
-  auto lest_that_time_frame_ago = [time_frame](TimevalStruct time) {
-    auto span = date_time::DateTime::calculateTimeSpan(time);
+  uint32_t time_frame = limit * date_time::MILLISECONDS_IN_SECOND;
+  auto lest_that_time_frame_ago = [time_frame](date_time::TimeDuration time) {
+    auto span = date_time::calculateTimeSpan(time);
     return span < time_frame;
   };
   for (auto& it : requests_to_hmi_history_) {

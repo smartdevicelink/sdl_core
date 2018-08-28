@@ -62,7 +62,7 @@ struct RequestInfo {
       , app_id_(0)
       , requst_type_(RequestNone)
       , correlation_id_(0) {
-    start_time_ = date_time::DateTime::getCurrentTime();
+    start_time_ = date_time::getCurrentTime();
     updateEndTime();
   }
   virtual ~RequestInfo() {}
@@ -71,14 +71,14 @@ struct RequestInfo {
               const RequestType requst_type,
               const uint64_t timeout_msec)
       : request_(request), timeout_msec_(timeout_msec), correlation_id_(0) {
-    start_time_ = date_time::DateTime::getCurrentTime();
+    start_time_ = date_time::getCurrentTime();
     updateEndTime();
     requst_type_ = requst_type;
   }
 
   RequestInfo(RequestPtr request,
               const RequestType requst_type,
-              const TimevalStruct& start_time,
+              const date_time::TimeDuration& start_time,
               const uint64_t timeout_msec);
 
   void updateEndTime();
@@ -87,11 +87,11 @@ struct RequestInfo {
 
   bool isExpired();
 
-  TimevalStruct start_time() {
+  date_time::TimeDuration start_time() {
     return start_time_;
   }
 
-  void update_start_time(TimevalStruct start_time) {
+  void update_start_time(date_time::TimeDuration start_time) {
     start_time_ = start_time;
   }
 
@@ -103,7 +103,7 @@ struct RequestInfo {
     timeout_msec_ = timeout;
   }
 
-  TimevalStruct end_time() {
+  date_time::TimeDuration end_time() {
     return end_time_;
   }
 
@@ -128,9 +128,9 @@ struct RequestInfo {
 
  protected:
   RequestPtr request_;
-  TimevalStruct start_time_;
+  date_time::TimeDuration start_time_;
   uint64_t timeout_msec_;
-  TimevalStruct end_time_;
+  date_time::TimeDuration end_time_;
   uint32_t app_id_;
   RequestType requst_type_;
   uint32_t correlation_id_;
@@ -141,14 +141,14 @@ typedef std::shared_ptr<RequestInfo> RequestInfoPtr;
 struct MobileRequestInfo : public RequestInfo {
   MobileRequestInfo(RequestPtr request, const uint64_t timeout_msec);
   MobileRequestInfo(RequestPtr request,
-                    const TimevalStruct& start_time,
+                    const date_time::TimeDuration& start_time,
                     const uint64_t timeout_msec);
 };
 
 struct HMIRequestInfo : public RequestInfo {
   HMIRequestInfo(RequestPtr request, const uint64_t timeout_msec);
   HMIRequestInfo(RequestPtr request,
-                 const TimevalStruct& start_time,
+                 const date_time::TimeDuration& start_time,
                  const uint64_t timeout_msec);
 };
 
@@ -270,8 +270,8 @@ class RequestInfoSet {
 * during time scale
 */
 struct TimeScale {
-  TimeScale(const TimevalStruct& start,
-            const TimevalStruct& end,
+  TimeScale(const date_time::TimeDuration& start,
+            const date_time::TimeDuration& end,
             const uint32_t& app_id)
       : start_(start), end_(end), app_id_(app_id) {}
 
@@ -292,8 +292,8 @@ struct TimeScale {
   }
 
  private:
-  TimevalStruct start_;
-  TimevalStruct end_;
+  date_time::TimeDuration start_;
+  date_time::TimeDuration end_;
   uint32_t app_id_;
 };
 

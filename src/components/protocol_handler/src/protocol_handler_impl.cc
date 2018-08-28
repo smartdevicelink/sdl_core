@@ -838,7 +838,7 @@ void ProtocolHandlerImpl::SendHeartBeat(int32_t connection_id,
 void ProtocolHandlerImpl::SendMessageToMobileApp(const RawMessagePtr message,
                                                  bool final_message) {
 #ifdef TELEMETRY_MONITOR
-  const TimevalStruct start_time = date_time::DateTime::getCurrentTime();
+  const date_time::TimeDuration start_time = date_time::getCurrentTime();
 #endif  // TELEMETRY_MONITOR
   LOG4CXX_AUTO_TRACE(logger_);
   if (!message) {
@@ -983,7 +983,7 @@ void ProtocolHandlerImpl::OnTMMessageReceived(const RawMessagePtr tm_message) {
        it != protocol_frames.end();
        ++it) {
 #ifdef TELEMETRY_MONITOR
-    const TimevalStruct start_time = date_time::DateTime::getCurrentTime();
+    const date_time::TimeDuration start_time = date_time::getCurrentTime();
 #endif  // TELEMETRY_MONITOR
     ProtocolFramePtr frame = *it;
 #ifdef ENABLE_SECURITY
