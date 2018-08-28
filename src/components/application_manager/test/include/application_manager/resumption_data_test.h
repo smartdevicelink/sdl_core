@@ -151,7 +151,8 @@ class ResumptionDataTest : public ::testing::Test {
   std::shared_ptr<sync_primitives::Lock> ivilock_ptr_;
   application_manager_test::MockApplicationManagerSettings
       mock_application_manager_settings_;
-  application_manager_test::MockApplicationManager mock_application_manager_;
+  NiceMock<application_manager_test::MockApplicationManager>
+      mock_application_manager_;
   std::shared_ptr<NiceMock<application_manager_test::MockAppExtension> >
       mock_app_extension_;
   std::list<application_manager::AppExtensionPtr> extensions_;

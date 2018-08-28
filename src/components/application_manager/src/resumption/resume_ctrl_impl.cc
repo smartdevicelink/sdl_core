@@ -482,15 +482,19 @@ void ResumeCtrlImpl::StartAppHmiStateResumption(
     LOG4CXX_DEBUG(logger_, "No applicable HMI level found for resuming");
     return;
   }
-
   const bool is_resume_allowed_by_low_voltage =
       CheckLowVoltageRestrictions(saved_app);
 
   const bool is_hmi_level_allowed_by_ign_cycle =
       CheckIgnCycleRestrictions(saved_app);
 
-  const bool restore_hmi_level_allowed =
-      is_resume_allowed_by_low_voltage && is_hmi_level_allowed_by_ign_cycle;
+  const bool is_app_revoked =
+      application_manager_.GetPolicyHandler().IsApplicationRevoked(
+          application->policy_app_id());
+
+  const bool restore_hmi_level_allowed = is_resume_allowed_by_low_voltage &&
+                                         is_hmi_level_allowed_by_ign_cycle &&
+                                         !is_app_revoked;
 
   if (restore_hmi_level_allowed) {
     LOG4CXX_INFO(logger_,

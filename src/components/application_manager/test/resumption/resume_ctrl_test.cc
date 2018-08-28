@@ -51,6 +51,7 @@
 #include "application_manager/mock_application_manager_settings.h"
 #include "application_manager/mock_event_dispatcher.h"
 #include "application_manager/mock_state_controller.h"
+#include "application_manager/policies/mock_policy_handler_interface.h"
 
 namespace test {
 namespace components {
@@ -155,17 +156,25 @@ class ResumeCtrlTest : public ::testing::Test {
     ON_CALL(*mock_app_, app_id()).WillByDefault(Return(kTestAppId_));
   }
 
+  void SetupIsAppRevoked(const bool is_app_revoked) {
+    EXPECT_CALL(mock_app_mngr_, GetPolicyHandler())
+        .WillOnce(ReturnRef(mock_policy_handler_));
+    EXPECT_CALL(mock_policy_handler_, IsApplicationRevoked(_))
+        .WillOnce(Return(is_app_revoked));
+  }
+
   NiceMock<event_engine_test::MockEventDispatcher> mock_event_dispatcher_;
-  application_manager_test::MockApplicationManagerSettings
+  NiceMock<application_manager_test::MockApplicationManagerSettings>
       mock_application_manager_settings_;
   NiceMock<application_manager_test::MockApplicationManager> mock_app_mngr_;
   std::shared_ptr<NiceMock<application_manager_test::MockAppExtension> >
       mock_app_extension_;
-  MockStateController mock_state_controller_;
+  NiceMock<MockStateController> mock_state_controller_;
   std::shared_ptr<ResumeCtrl> res_ctrl_;
   std::shared_ptr<NiceMock<resumption_test::MockResumptionData> > mock_storage_;
   std::shared_ptr<NiceMock<MockApplication> > mock_app_;
   std::shared_ptr<MockHelpPromptManager> mock_help_prompt_manager_;
+  policy_test::MockPolicyHandlerInterface mock_policy_handler_;
   application_manager::ApplicationConstSharedPtr const_app_;
   const uint32_t kTestAppId_;
   const std::string kTestPolicyAppId_;
@@ -197,7 +206,6 @@ TEST_F(ResumeCtrlTest, StartResumption_AppWithGrammarId) {
 
   // Check RestoreApplicationData
   GetInfoFromApp();
-
   ON_CALL(mock_app_mngr_, GetDefaultHmiLevel(const_app_))
       .WillByDefault(Return(kDefaultTestLevel_));
   ON_CALL(*mock_storage_,
@@ -640,6 +648,9 @@ TEST_F(ResumeCtrlTest, StartAppHmiStateResumption_AppInFull) {
           GetSavedApplication(kTestPolicyAppId_, kMacAddress_, _))
       .WillByDefault(DoAll(SetArgReferee<2>(saved_app), Return(true)));
 
+  const bool is_app_revoked = false;
+  SetupIsAppRevoked(is_app_revoked);
+
   EXPECT_CALL(*mock_storage_,
               RemoveApplicationFromSaved(kTestPolicyAppId_, kMacAddress_))
       .WillOnce(Return(true));
@@ -686,6 +697,9 @@ TEST_F(ResumeCtrlTest, StartAppHmiStateResumption_AppHasDeferredResumption) {
           GetSavedApplication(kTestPolicyAppId_, kMacAddress_, _))
       .WillByDefault(DoAll(SetArgReferee<2>(saved_app), Return(true)));
 
+  const bool is_app_revoked = false;
+  SetupIsAppRevoked(is_app_revoked);
+
   mobile_apis::HMILevel::eType app_deferred_level = deferred_level;
   EXPECT_CALL(*mock_app_, deferred_resumption_hmi_level())
       .WillRepeatedly(ReturnPointee(&app_deferred_level));
@@ -720,6 +734,9 @@ TEST_F(ResumeCtrlTest,
   ON_CALL(*mock_storage_,
           GetSavedApplication(kTestPolicyAppId_, kMacAddress_, _))
       .WillByDefault(DoAll(SetArgReferee<2>(saved_app), Return(true)));
+
+  const bool is_app_revoked = false;
+  SetupIsAppRevoked(is_app_revoked);
 
   EXPECT_CALL(mock_app_mngr_, CheckResumptionRequiredTransportAvailable(_))
       .WillOnce(Return(false));
@@ -764,6 +781,9 @@ TEST_F(
   ON_CALL(*mock_storage_,
           GetSavedApplication(kTestPolicyAppId_, kMacAddress_, _))
       .WillByDefault(DoAll(SetArgReferee<2>(saved_app), Return(true)));
+
+  const bool is_app_revoked = false;
+  SetupIsAppRevoked(is_app_revoked);
 
   EXPECT_CALL(mock_app_mngr_, CheckResumptionRequiredTransportAvailable(_))
       .WillOnce(Return(false));
@@ -910,6 +930,9 @@ TEST_F(ResumeCtrlTest, ApplicationResumptiOnTimer_AppInFull) {
   ON_CALL(*mock_storage_,
           GetSavedApplication(kTestPolicyAppId_, kMacAddress_, _))
       .WillByDefault(DoAll(SetArgReferee<2>(saved_app), Return(true)));
+
+  const bool is_app_revoked = false;
+  SetupIsAppRevoked(is_app_revoked);
 
   EXPECT_CALL(*mock_storage_,
               RemoveApplicationFromSaved(kTestPolicyAppId_, kMacAddress_))
@@ -1254,6 +1277,9 @@ TEST_F(
           GetSavedApplication(kTestPolicyAppId_, kMacAddress_, _))
       .WillByDefault(DoAll(SetArgReferee<2>(saved_app), Return(true)));
 
+  const bool is_app_revoked = false;
+  SetupIsAppRevoked(is_app_revoked);
+
   EXPECT_CALL(*mock_storage_,
               RemoveApplicationFromSaved(kTestPolicyAppId_, kMacAddress_))
       .WillOnce(Return(true));
@@ -1295,6 +1321,9 @@ TEST_F(
   ON_CALL(*mock_storage_,
           GetSavedApplication(kTestPolicyAppId_, kMacAddress_, _))
       .WillByDefault(DoAll(SetArgReferee<2>(saved_app), Return(true)));
+
+  const bool is_app_revoked = false;
+  SetupIsAppRevoked(is_app_revoked);
 
   ON_CALL(mock_app_mngr_, GetUserConsentForDevice("12345"))
       .WillByDefault(Return(policy::kDeviceAllowed));
@@ -1361,6 +1390,9 @@ TEST_F(
           GetSavedApplication(kTestPolicyAppId_, kMacAddress_, _))
       .WillByDefault(DoAll(SetArgReferee<2>(saved_app), Return(true)));
 
+  const bool is_app_revoked = false;
+  SetupIsAppRevoked(is_app_revoked);
+
   EXPECT_CALL(*mock_storage_,
               RemoveApplicationFromSaved(kTestPolicyAppId_, kMacAddress_))
       .WillOnce(Return(true));
@@ -1402,6 +1434,9 @@ TEST_F(
   ON_CALL(*mock_storage_,
           GetSavedApplication(kTestPolicyAppId_, kMacAddress_, _))
       .WillByDefault(DoAll(SetArgReferee<2>(saved_app), Return(true)));
+
+  const bool is_app_revoked = false;
+  SetupIsAppRevoked(is_app_revoked);
 
   ON_CALL(mock_app_mngr_, GetUserConsentForDevice("12345"))
       .WillByDefault(Return(policy::kDeviceAllowed));
