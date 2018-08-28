@@ -30,9 +30,11 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "utils/date_time.h"
+
 #include <stdint.h>
 #include <sys/time.h>
-#include "utils/date_time.h"
+#include "boost/date_time/posix_time/posix_time.hpp"
 
 namespace bpt = boost::posix_time;
 using namespace boost::date_time;
