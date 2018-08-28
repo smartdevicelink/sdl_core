@@ -135,9 +135,9 @@ namespace Json {
       bool readCppStyleComment();
       bool readString();
       void readNumber();
-      bool readValue();
-      bool readObject( Token &token );
-      bool readArray( Token &token );
+      bool readValue( int& depth_level );
+      bool readObject( Token &token, int& depth_level );
+      bool readArray( Token &token, int& depth_level );
       bool decodeNumber( Token &token );
       bool decodeString( Token &token );
       bool decodeString( Token &token, std::string &decoded );
