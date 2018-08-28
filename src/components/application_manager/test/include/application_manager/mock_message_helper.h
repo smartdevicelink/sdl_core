@@ -174,7 +174,7 @@ class MockMessageHelper {
                     ApplicationManager& app_mngr));
   MOCK_METHOD2(SendOnResumeAudioSourceToHMI,
                void(uint32_t app_id, ApplicationManager& app_mngr));
-  MOCK_METHOD2(CreateAddSubMenuRequestToHMI,
+  MOCK_METHOD2(CreateAddSubMenuRequestsToHMI,
                smart_objects::SmartObjectList(ApplicationConstSharedPtr app,
                                               const uint32_t correlation_id));
   MOCK_METHOD2(CreateAddCommandRequestToHMI,

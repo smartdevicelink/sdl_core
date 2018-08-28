@@ -371,7 +371,7 @@ TEST(MessageHelperTestCreate,
   EXPECT_EQ(type, obj[strings::msg_params][strings::type].asInt());
 }
 
-TEST(MessageHelperTestCreate, CreateAddSubMenuRequestToHMI_SendObject_Equal) {
+TEST(MessageHelperTestCreate, CreateAddSubMenuRequestsToHMI_SendObject_Equal) {
   MockApplicationSharedPtr appSharedMock = std::make_shared<MockApplication>();
   application_manager::SubMenuMap vis;
   DataAccessor< ::application_manager::SubMenuMap> data_accessor(
@@ -391,7 +391,7 @@ TEST(MessageHelperTestCreate, CreateAddSubMenuRequestToHMI_SendObject_Equal) {
 
   const uint32_t cor_id = 0u;
   smart_objects::SmartObjectList ptr =
-      MessageHelper::CreateAddSubMenuRequestToHMI(appSharedMock, cor_id);
+      MessageHelper::CreateAddSubMenuRequestsToHMI(appSharedMock, cor_id);
 
   EXPECT_FALSE(ptr.empty());
 
@@ -411,7 +411,7 @@ TEST(MessageHelperTestCreate, CreateAddSubMenuRequestToHMI_SendObject_Equal) {
 }
 
 TEST(MessageHelperTestCreate,
-     CreateAddSubMenuRequestToHMI_SendEmptyMap_EmptySmartObjectList) {
+     CreateAddSubMenuRequestsToHMI_SendEmptyMap_EmptySmartObjectList) {
   MockApplicationSharedPtr appSharedMock = std::make_shared<MockApplication>();
   application_manager::SubMenuMap vis;
   DataAccessor< ::application_manager::SubMenuMap> data_accessor(
@@ -421,7 +421,7 @@ TEST(MessageHelperTestCreate,
 
   const uint32_t cor_id = 0u;
   smart_objects::SmartObjectList ptr =
-      MessageHelper::CreateAddSubMenuRequestToHMI(appSharedMock, cor_id);
+      MessageHelper::CreateAddSubMenuRequestsToHMI(appSharedMock, cor_id);
 
   EXPECT_TRUE(ptr.empty());
 }

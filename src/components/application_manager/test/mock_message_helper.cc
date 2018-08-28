@@ -299,9 +299,9 @@ void MessageHelper::SendOnResumeAudioSourceToHMI(const uint32_t app_id,
       app_id, app_mngr);
 }
 
-smart_objects::SmartObjectList MessageHelper::CreateAddSubMenuRequestToHMI(
+smart_objects::SmartObjectList MessageHelper::CreateAddSubMenuRequestsToHMI(
     ApplicationConstSharedPtr app, const uint32_t correlation_id) {
-  return MockMessageHelper::message_helper_mock()->CreateAddSubMenuRequestToHMI(
+  return MockMessageHelper::message_helper_mock()->CreateAddSubMenuRequestsToHMI(
       app, correlation_id);
 }
 

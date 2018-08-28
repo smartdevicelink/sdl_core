@@ -178,11 +178,13 @@ class ResumeCtrlTest : public ::testing::Test {
   const std::string kNaviLowbandwidthLevel_;
   const std::string kProjectionLowbandwidthLevel_;
   const std::string kMediaLowbandwidthLevel_;
+  resumption::ResumeCtrl::ResumptionCallBack callback_;
 };
 
 /**
  * @brief  Group of tests which check starting resumption with different data
  */
+
 
 TEST_F(ResumeCtrlTest, StartResumption_AppWithGrammarId) {
   smart_objects::SmartObject saved_app;
@@ -200,7 +202,7 @@ TEST_F(ResumeCtrlTest, StartResumption_AppWithGrammarId) {
   EXPECT_CALL(*mock_app_, UpdateHash());
   EXPECT_CALL(*mock_app_, set_grammar_id(kTestGrammarId_));
 
-  const bool res = res_ctrl_->StartResumption(mock_app_, kHash_);
+  const bool res = res_ctrl_->StartResumption(mock_app_, kHash_, callback_);
   EXPECT_TRUE(res);
 }
 
@@ -225,7 +227,7 @@ TEST_F(ResumeCtrlTest, StartResumption_WithoutGrammarId) {
   EXPECT_CALL(*mock_app_, UpdateHash());
   EXPECT_CALL(*mock_app_, set_grammar_id(kTestGrammarId_)).Times(0);
 
-  bool res = res_ctrl_->StartResumption(mock_app_, kHash_);
+  bool res = res_ctrl_->StartResumption(mock_app_, kHash_, callback_);
   EXPECT_FALSE(res);
 }
 
@@ -280,7 +282,7 @@ TEST_F(ResumeCtrlTest, StartResumption_AppWithFiles) {
                     static_cast<mobile_apis::FileType::eType>(file_types[i]))));
   }
 
-  const bool res = res_ctrl_->StartResumption(mock_app_, kHash_);
+  const bool res = res_ctrl_->StartResumption(mock_app_, kHash_, callback_);
   EXPECT_TRUE(res);
 }
 
@@ -318,11 +320,11 @@ TEST_F(ResumeCtrlTest, StartResumption_AppWithSubmenues) {
   EXPECT_CALL(mock_app_mngr_, GetNextHMICorrelationID())
       .WillRepeatedly(Return(kCorId_));
   EXPECT_CALL(*application_manager::MockMessageHelper::message_helper_mock(),
-              CreateAddSubMenuRequestToHMI(_, kCorId_))
+              CreateAddSubMenuRequestsToHMI(_, kCorId_))
       .WillRepeatedly(Return(requests));
 
   EXPECT_CALL(*mock_app_, UpdateHash());
-  const bool res = res_ctrl_->StartResumption(mock_app_, kHash_);
+  const bool res = res_ctrl_->StartResumption(mock_app_, kHash_, callback_);
   EXPECT_TRUE(res);
 }
 
@@ -365,7 +367,7 @@ TEST_F(ResumeCtrlTest, StartResumption_AppWithCommands) {
               CreateAddCommandRequestToHMI(_, _))
       .WillRepeatedly(Return(requests));
 
-  const bool res = res_ctrl_->StartResumption(mock_app_, kHash_);
+  const bool res = res_ctrl_->StartResumption(mock_app_, kHash_, callback_);
   EXPECT_TRUE(res);
 }
 
@@ -417,7 +419,7 @@ TEST_F(ResumeCtrlTest, StartResumption_AppWithChoiceSet) {
               CreateAddVRCommandRequestFromChoiceToHMI(_))
       .WillRepeatedly(Return(requests));
 
-  const bool res = res_ctrl_->StartResumption(mock_app_, kHash_);
+  const bool res = res_ctrl_->StartResumption(mock_app_, kHash_, callback_);
   EXPECT_TRUE(res);
 }
 
@@ -446,7 +448,7 @@ TEST_F(ResumeCtrlTest, StartResumption_AppWithGlobalProperties) {
   EXPECT_CALL(*mock_app_, load_global_properties(test_global_properties));
 
   EXPECT_CALL(*mock_app_, UpdateHash());
-  const bool res = res_ctrl_->StartResumption(mock_app_, kHash_);
+  const bool res = res_ctrl_->StartResumption(mock_app_, kHash_, callback_);
   EXPECT_TRUE(res);
 }
 
@@ -496,7 +498,7 @@ TEST_F(ResumeCtrlTest, StartResumption_AppWithSubscribeOnButtons) {
   EXPECT_CALL(*application_manager::MockMessageHelper::message_helper_mock(),
               SendAllOnButtonSubscriptionNotificationsForApp(_, _)).Times(2);
 
-  const bool res = res_ctrl_->StartResumption(mock_app_, kHash_);
+  const bool res = res_ctrl_->StartResumption(mock_app_, kHash_, callback_);
   EXPECT_TRUE(res);
 }
 
@@ -541,7 +543,7 @@ TEST_F(ResumeCtrlTest, StartResumption_AppWithSubscriptionToIVI) {
   EXPECT_CALL(*mock_app_, Extensions()).WillOnce(ReturnRef(extensions));
 
   EXPECT_CALL(*mock_app_extension_, ProcessResumption(test_subscriptions, _));
-  const bool res = res_ctrl_->StartResumption(mock_app_, kHash_);
+  const bool res = res_ctrl_->StartResumption(mock_app_, kHash_, callback_);
   EXPECT_TRUE(res);
 }
 
@@ -566,7 +568,7 @@ TEST_F(ResumeCtrlTest, StartResumption_AppWithSubscriptionToWayPoints) {
       .WillByDefault(Return(hmi_test_level));
   EXPECT_CALL(mock_state_controller_, SetRegularState(_, hmi_test_level));
 
-  const bool result = res_ctrl_->StartResumption(mock_app_, kHash_);
+  const bool result = res_ctrl_->StartResumption(mock_app_, kHash_, callback_);
   EXPECT_TRUE(result);
 }
 
