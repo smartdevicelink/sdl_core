@@ -1696,6 +1696,10 @@ bool SQLPTRepresentation::GatherModuleType(
     if (!policy_table::EnumFromJsonString(query.GetString(0), &type)) {
       return false;
     }
+    if (policy_table::ModuleType::MT_EMPTY == type) {
+      app_types->mark_initialized();
+      continue;
+    }
     app_types->push_back(type);
   }
   return true;
@@ -1728,18 +1732,30 @@ bool SQLPTRepresentation::SaveModuleType(
   }
 
   policy_table::ModuleTypes::const_iterator it;
-  for (it = types.begin(); it != types.end(); ++it) {
-    query.Bind(0, app_id);
-    std::string module(policy_table::EnumToJsonString(*it));
-    query.Bind(1, module);
-    LOG4CXX_DEBUG(logger_,
-                  "Module(app: " << app_id << ", type: " << module << ")");
-    if (!query.Exec() || !query.Reset()) {
-      LOG4CXX_WARN(logger_, "Incorrect insert into module type.");
-      return false;
+  if (!types.empty()) {
+    for (it = types.begin(); it != types.end(); ++it) {
+      query.Bind(0, app_id);
+      std::string module(policy_table::EnumToJsonString(*it));
+      query.Bind(1, module);
+      LOG4CXX_DEBUG(logger_,
+                    "Module(app: " << app_id << ", type: " << module << ")");
+      if (!query.Exec() || !query.Reset()) {
+        LOG4CXX_WARN(logger_, "Incorrect insert into module type.");
+        return false;
+      }
     }
+  } else if (types.is_initialized()) {
+    query.Bind(0, app_id);
+    query.Bind(1,
+               std::string(policy_table::EnumToJsonString(
+                   policy_table::ModuleType::MT_EMPTY)));
+    if (!query.Exec() || !query.Reset()) {
+      LOG4CXX_WARN(logger_, "Incorrect insert into module types.");
+      return false;
+    }    
+  } else {
+    LOG4CXX_WARN(logger_, "Module Type omitted.");
   }
-
   return true;
 }
 

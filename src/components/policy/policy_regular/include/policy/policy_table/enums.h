@@ -159,7 +159,8 @@ enum ModuleType {
   MT_SEAT,
   MT_AUDIO,
   MT_LIGHT,
-  MT_HMI_SETTINGS
+  MT_HMI_SETTINGS,
+  MT_EMPTY
 };
 bool IsValidEnum(ModuleType val);
 const char* EnumToJsonString(ModuleType val);

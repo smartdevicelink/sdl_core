@@ -649,6 +649,8 @@ bool IsValidEnum(ModuleType val) {
       return true;
     case MT_HMI_SETTINGS:
       return true;
+    case MT_EMPTY:
+      return true;
     default:
       return false;
   }
@@ -667,6 +669,8 @@ const char* EnumToJsonString(ModuleType val) {
       return "LIGHT";
     case MT_HMI_SETTINGS:
       return "HMI_SETTINGS";
+    case MT_EMPTY:
+      return "EMPTY";
     default:
       return "";
   }
@@ -690,6 +694,9 @@ bool EnumFromJsonString(const std::string& literal, ModuleType* result) {
     return true;
   } else if ("HMI_SETTINGS" == literal) {
     *result = MT_HMI_SETTINGS;
+    return true;
+  } else if ("EMPTY" == literal) {
+    *result = MT_EMPTY;
     return true;
   }
   return false;
