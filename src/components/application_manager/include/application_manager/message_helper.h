@@ -309,7 +309,7 @@ class MessageHelper {
   static void SendAddCommandRequestToHMI(ApplicationConstSharedPtr app,
                                          ApplicationManager& app_man);
 
-  static smart_objects::SmartObjectList CreateAddSubMenuRequestToHMI(
+  static smart_objects::SmartObjectList CreateAddSubMenuRequestsToHMI(
       ApplicationConstSharedPtr app, const uint32_t correlation_id);
 
   static smart_objects::SmartObjectList CreateAddCommandRequestToHMI(
@@ -370,8 +370,6 @@ class MessageHelper {
 
   static void SendAddSubMenuRequestToHMI(ApplicationConstSharedPtr app,
                                          ApplicationManager& app_mngr);
-  static smart_objects::SmartObjectList CreateAddSubMenuRequestsToHMI(
-      ApplicationConstSharedPtr app, const uint32_t correlation_id);
 
   /*
    * @brief Creates BasicCommunication.OnAppUnregistered notification
