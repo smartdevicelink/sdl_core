@@ -186,12 +186,14 @@ Integer<T, minval, maxval>& Integer<T, minval, maxval>::operator=(
 template <typename T, T minval, T maxval>
 Integer<T, minval, maxval>& Integer<T, minval, maxval>::operator++() {
   ++value_;
+  value_state_ = range_.Includes(value_) ? kValid : kInvalid;
   return *this;
 }
 
 template <typename T, T minval, T maxval>
 Integer<T, minval, maxval>& Integer<T, minval, maxval>::operator+=(int value) {
   value_ += value;
+  value_state_ = range_.Includes(value_) ? kValid : kInvalid;
   return *this;
 }
 
