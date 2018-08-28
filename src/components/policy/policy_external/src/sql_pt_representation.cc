@@ -1796,7 +1796,7 @@ bool SQLPTRepresentation::SaveModuleType(
     if (!query.Exec() || !query.Reset()) {
       LOG4CXX_WARN(logger_, "Incorrect insert into module types.");
       return false;
-    }    
+    }
   } else {
     LOG4CXX_WARN(logger_, "Module Type omitted.");
   }
