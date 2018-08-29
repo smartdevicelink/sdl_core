@@ -37,7 +37,7 @@ using namespace application_manager;
 
 namespace commands {
 
-NaviUnSubscribeWayPointsRequest::NaviUnSubscribeWayPointsRequest(
+NaviUnsubscribeWayPointsRequest::NaviUnsubscribeWayPointsRequest(
     const application_manager::commands::MessageSharedPtr& message,
     ApplicationManager& application_manager,
     rpc_service::RPCService& rpc_service,
@@ -49,9 +49,9 @@ NaviUnSubscribeWayPointsRequest::NaviUnSubscribeWayPointsRequest(
                    hmi_capabilities,
                    policy_handle) {}
 
-NaviUnSubscribeWayPointsRequest::~NaviUnSubscribeWayPointsRequest() {}
+NaviUnsubscribeWayPointsRequest::~NaviUnsubscribeWayPointsRequest() {}
 
-void NaviUnSubscribeWayPointsRequest::Run() {
+void NaviUnsubscribeWayPointsRequest::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
 
   SendRequest();

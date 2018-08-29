@@ -273,7 +273,7 @@ CommandCreator& MobileCommandFactory::get_creator_factory(
     }
     case mobile_apis::FunctionID::UnsubscribeWayPointsID: {
       return mobile_api::messageType::request == message_type
-                 ? factory.GetCreator<commands::UnSubscribeWayPointsRequest>()
+                 ? factory.GetCreator<commands::UnsubscribeWayPointsRequest>()
                  : factory.GetCreator<commands::UnsubscribeWayPointsResponse>();
     }
     case mobile_apis::FunctionID::GetSystemCapabilityID: {
