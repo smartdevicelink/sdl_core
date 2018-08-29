@@ -209,12 +209,7 @@ else()
       )
 endif()
 
-<<<<<<< HEAD
-
-find_package(Boost 1.66.0 COMPONENTS system thread filesystem) 
-=======
-find_package(Boost 1.66.0 COMPONENTS system thread date_time) 
->>>>>>> origin/develop
+find_package(Boost 1.66.0 COMPONENTS system thread date_time filesystem) 
 set(BOOST_LIB_SOURCE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/boost_src)
 set(BOOST_LIBS_DIRECTORY ${3RD_PARTY_INSTALL_PREFIX}/lib)
 SET_PROPERTY(GLOBAL PROPERTY GLOBAL_BOOST_LIBS ${BOOST_LIBS_DIRECTORY})
