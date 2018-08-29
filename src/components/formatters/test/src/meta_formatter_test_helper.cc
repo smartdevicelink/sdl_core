@@ -36,8 +36,8 @@ namespace test {
 namespace components {
 namespace formatters {
 
-using namespace NsSmartDeviceLink::NsJSONHandler::strings;
-using namespace NsSmartDeviceLink::NsJSONHandler::Formatters;
+using namespace ns_smart_device_link::ns_json_handler::strings;
+using namespace ns_smart_device_link::ns_json_handler::formatters;
 
 void CMetaFormatterTestHelper::SetUp() {
   function_id_items_.insert(FunctionIDTest::RegisterAppInterface);

@@ -52,9 +52,9 @@ namespace test {
 namespace components {
 namespace formatters {
 
-using namespace NsSmartDeviceLink::NsSmartObjects;
-using namespace NsSmartDeviceLink::NsJSONHandler;
-using namespace NsSmartDeviceLink::NsJSONHandler::strings;
+using namespace ns_smart_device_link::ns_smart_objects;
+using namespace ns_smart_device_link::ns_json_handler;
+using namespace ns_smart_device_link::ns_json_handler::strings;
 using namespace hmi_apis;
 
 namespace TestType {

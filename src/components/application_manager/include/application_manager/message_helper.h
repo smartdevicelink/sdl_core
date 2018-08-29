@@ -348,7 +348,7 @@ class MessageHelper {
                                               bool is_unexpected_disconnect,
                                               ApplicationManager& app_mngr);
 
-  static NsSmartDeviceLink::NsSmartObjects::SmartObjectSPtr
+  static ns_smart_device_link::ns_smart_objects::SmartObjectSPtr
   GetBCActivateAppRequestToHMI(
       ApplicationConstSharedPtr app,
       const protocol_handler::SessionObserver& session_observer,
@@ -460,7 +460,7 @@ class MessageHelper {
 
   static void SendSystemRequestNotification(
       uint32_t connection_key,
-      NsSmartDeviceLink::NsSmartObjects::SmartObject& content,
+      ns_smart_device_link::ns_smart_objects::SmartObject& content,
       ApplicationManager& app_mngr);
 
   /**

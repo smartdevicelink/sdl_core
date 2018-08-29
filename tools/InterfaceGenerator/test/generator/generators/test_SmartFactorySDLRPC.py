@@ -17,23 +17,23 @@ from generator import Model
 
 
 EXPECTED_NOTIFICATION_RESULT = (
-    u"""params_members[NsSmartDeviceLink::NsJSONHandler::"""
+    u"""params_members[ns_smart_device_link::ns_json_handler::"""
     u"""strings::S_FUNCTION_ID] = CObjectSchemaItem::SMember("""
     u"""TEnumSchemaItem<FunctionID::eType>::create("""
     u"""function_id_items), true);\n"""
-    u"""params_members[NsSmartDeviceLink::NsJSONHandler::"""
+    u"""params_members[ns_smart_device_link::ns_json_handler::"""
     u"""strings::S_MESSAGE_TYPE] = CObjectSchemaItem::SMember("""
     u"""TEnumSchemaItem<messageType::eType>::create("""
     u"""message_type_items), true);\n"""
-    u"""params_members[NsSmartDeviceLink::NsJSONHandler::"""
+    u"""params_members[ns_smart_device_link::ns_json_handler::"""
     u"""strings::S_PROTOCOL_VERSION] = CObjectSchemaItem::SMember("""
     u"""TNumberSchemaItem<int>::create(), true);\n"""
-    u"""params_members[NsSmartDeviceLink::NsJSONHandler::"""
+    u"""params_members[ns_smart_device_link::ns_json_handler::"""
     u"""strings::S_PROTOCOL_TYPE] = CObjectSchemaItem::SMember("""
     u"""TNumberSchemaItem<int>::create(), true);\n""")
 
 EXPECTED_REQ_RESP_RESULT = "".join([EXPECTED_NOTIFICATION_RESULT, (
-    u"""params_members[NsSmartDeviceLink::NsJSONHandler::"""
+    u"""params_members[ns_smart_device_link::ns_json_handler::"""
     u"""strings::S_CORRELATION_ID] = CObjectSchemaItem::SMember("""
     u"""TNumberSchemaItem<int>::create(), true);\n""")])
 

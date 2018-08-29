@@ -38,8 +38,8 @@
 #include "smart_objects/schema_item_parameter.h"
 #include "smart_objects/smart_object.h"
 
-namespace NsSmartDeviceLink {
-namespace NsSmartObjects {
+namespace ns_smart_device_link {
+namespace ns_smart_objects {
 
 /**
  * @brief Default schema item.
@@ -53,9 +53,9 @@ class CDefaultSchemaItem : public ISchemaItem {
    * @param Object Object to validate.
    * @param report__ object for reporting errors during validation
    * @param MessageVersion to check mobile RPC version against RPC Spec History
-   * @return NsSmartObjects::Errors::eType
+   * @return ns_smart_objects::errors::eType
    **/
-  Errors::eType validate(const SmartObject& Object,
+  errors::eType validate(const SmartObject& Object,
                          rpc::ValidationReport* report__,
                          const utils::SemanticVersion& MessageVersion =
                              utils::SemanticVersion()) OVERRIDE;
@@ -102,7 +102,7 @@ CDefaultSchemaItem<Type>::CDefaultSchemaItem(const ParameterType& DefaultValue)
     : mDefaultValue(DefaultValue) {}
 
 template <typename Type>
-Errors::eType CDefaultSchemaItem<Type>::validate(
+errors::eType CDefaultSchemaItem<Type>::validate(
     const SmartObject& Object,
     rpc::ValidationReport* report__,
     const utils::SemanticVersion& MessageVersion) {
@@ -112,9 +112,9 @@ Errors::eType CDefaultSchemaItem<Type>::validate(
                                   ", got: " +
                                   SmartObject::typeToString(Object.getType());
     report__->set_validation_info(validation_info);
-    return Errors::INVALID_VALUE;
+    return errors::INVALID_VALUE;
   } else {
-    return Errors::OK;
+    return errors::OK;
   }
 }
 
@@ -140,6 +140,6 @@ void CDefaultSchemaItem<Type>::BuildObjectBySchema(
   }
 }
 
-}  // namespace NsSmartObjects
-}  // namespace NsSmartDeviceLink
+}  // namespace ns_smart_objects
+}  // namespace ns_smart_device_link
 #endif  // SRC_COMPONENTS_SMART_OBJECTS_INCLUDE_SMART_OBJECTS_DEFAULT_SHEMA_ITEM_H_

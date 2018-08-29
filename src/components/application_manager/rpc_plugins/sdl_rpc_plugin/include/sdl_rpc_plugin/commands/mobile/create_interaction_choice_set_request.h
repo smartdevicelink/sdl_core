@@ -221,8 +221,8 @@ class CreateInteractionChoiceSetRequest
    * otherwise FALSE
   */
   bool compareSynonyms(
-      const NsSmartDeviceLink::NsSmartObjects::SmartObject& choice1,
-      const NsSmartDeviceLink::NsSmartObjects::SmartObject& choice2);
+      const ns_smart_device_link::ns_smart_objects::SmartObject& choice1,
+      const ns_smart_device_link::ns_smart_objects::SmartObject& choice2);
 
   /*
    * @brief Checks VR synonyms ignoring differences in case.
@@ -234,8 +234,8 @@ class CreateInteractionChoiceSetRequest
    * otherwise FALSE
   */
   static bool compareStr(
-      const NsSmartDeviceLink::NsSmartObjects::SmartObject& str1,
-      const NsSmartDeviceLink::NsSmartObjects::SmartObject& str2);
+      const ns_smart_device_link::ns_smart_objects::SmartObject& str1,
+      const ns_smart_device_link::ns_smart_objects::SmartObject& str2);
 
   /**
    * @brief Checks choice set params(menuName, tertiaryText, ...)

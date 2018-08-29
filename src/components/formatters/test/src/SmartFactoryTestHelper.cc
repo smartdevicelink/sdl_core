@@ -187,7 +187,7 @@ void CSmartFactoryTest::InitFunctionSchemes(
       CObjectSchemaItem::SMember(CStringSchemaItem::create(), true);
 
   CObjectSchemaItem::Members root_members_map;
-  root_members_map[NsSmartDeviceLink::NsJSONHandler::strings::S_PARAMS] =
+  root_members_map[ns_smart_device_link::ns_json_handler::strings::S_PARAMS] =
       CObjectSchemaItem::SMember(CObjectSchemaItem::create(params_members),
                                  true);
 
@@ -506,5 +506,6 @@ CSmartFactoryTest::ProvideObjectSchemaItemForStruct(
   if (it != struct_schema_items.end()) {
     return it->second;
   }
-  return NsSmartDeviceLink::NsSmartObjects::CAlwaysFalseSchemaItem::create();
+  return ns_smart_device_link::ns_smart_objects::CAlwaysFalseSchemaItem::
+      create();
 }

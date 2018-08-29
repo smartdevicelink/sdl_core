@@ -208,7 +208,7 @@ class MockMessageHelper {
                    bool send_policy_priority,
                    ApplicationManager& app_mngr));
   MOCK_METHOD2(GetOnAppInterfaceUnregisteredNotificationToMobile,
-               NsSmartDeviceLink::NsSmartObjects::SmartObjectSPtr(
+               ns_smart_device_link::ns_smart_objects::SmartObjectSPtr(
                    int32_t connection_key,
                    mobile_apis::AppInterfaceUnregisteredReason::eType reason));
   MOCK_METHOD4(ProcessSoftButtons,

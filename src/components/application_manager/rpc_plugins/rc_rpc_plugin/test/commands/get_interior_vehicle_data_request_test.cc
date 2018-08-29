@@ -281,7 +281,7 @@ TEST_F(
                    [message_params::kSubscribe] = false;
 
   MessageSharedPtr hmi_response = CreateBasicMessage();
-  NsSmartDeviceLink::NsSmartObjects::SmartObject& hmi_msg_params =
+  ns_smart_device_link::ns_smart_objects::SmartObject& hmi_msg_params =
       (*hmi_response)[application_manager::strings::msg_params];
   hmi_apis::Common_Result::eType response_code =
       hmi_apis::Common_Result::SUCCESS;
@@ -371,7 +371,7 @@ TEST_F(
     Execute_CapabilitiesValidationFailed_ExpectMessageNotSentToHMI_AndFalseSentToMobile) {
   // Arrange
   MessageSharedPtr mobile_message = CreateBasicMessage();
-  NsSmartDeviceLink::NsSmartObjects::SmartObject& msg_params =
+  ns_smart_device_link::ns_smart_objects::SmartObject& msg_params =
       (*mobile_message)[application_manager::strings::msg_params];
   msg_params[message_params::kModuleType] = mobile_apis::ModuleType::RADIO;
   std::shared_ptr<
@@ -397,7 +397,7 @@ TEST_F(
     Execute_PolicyValidationFailed_ExpectMessageNotSentToHMI_AndFalseSentToMobile) {
   // Arrange
   MessageSharedPtr mobile_message = CreateBasicMessage();
-  NsSmartDeviceLink::NsSmartObjects::SmartObject& msg_params =
+  ns_smart_device_link::ns_smart_objects::SmartObject& msg_params =
       (*mobile_message)[application_manager::strings::msg_params];
   msg_params[message_params::kModuleType] = mobile_apis::ModuleType::RADIO;
   std::shared_ptr<
@@ -506,7 +506,7 @@ TEST_F(GetInteriorVehicleDataRequestTest,
                    [message_params::kSubscribe] = false;
 
   MessageSharedPtr hmi_response = CreateBasicMessage();
-  NsSmartDeviceLink::NsSmartObjects::SmartObject& hmi_msg_params =
+  ns_smart_device_link::ns_smart_objects::SmartObject& hmi_msg_params =
       (*hmi_response)[application_manager::strings::params];
   hmi_msg_params[application_manager::hmi_response::code] =
       hmi_apis::Common_Result::READ_ONLY;

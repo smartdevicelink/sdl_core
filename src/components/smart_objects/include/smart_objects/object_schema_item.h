@@ -43,8 +43,8 @@
 #include "smart_objects/schema_item.h"
 #include "smart_objects/schema_item_parameter.h"
 
-namespace NsSmartDeviceLink {
-namespace NsSmartObjects {
+namespace ns_smart_device_link {
+namespace ns_smart_objects {
 /**
  * @brief Object schema item.
  **/
@@ -109,9 +109,9 @@ class CObjectSchemaItem : public ISchemaItem {
    * @param Object Object to validate.
    * @param report__ object for reporting errors during validation
    * @param MessageVersion to check mobile RPC version against RPC Spec History
-   * @return NsSmartObjects::Errors::eType
+   * @return ns_smart_objects::errors::eType
    **/
-  Errors::eType validate(const SmartObject& Object,
+  errors::eType validate(const SmartObject& Object,
                          rpc::ValidationReport* report__,
                          const utils::SemanticVersion& MessageVersion =
                              utils::SemanticVersion()) OVERRIDE;
@@ -174,6 +174,6 @@ class CObjectSchemaItem : public ISchemaItem {
   const Members mMembers;
   DISALLOW_COPY_AND_ASSIGN(CObjectSchemaItem);
 };
-}  // namespace NsSmartObjects
-}  // namespace NsSmartDeviceLink
+}  // namespace ns_smart_objects
+}  // namespace ns_smart_device_link
 #endif  // SRC_COMPONENTS_SMART_OBJECTS_INCLUDE_SMART_OBJECTS_OBJECT_SCHEMA_ITEM_H_

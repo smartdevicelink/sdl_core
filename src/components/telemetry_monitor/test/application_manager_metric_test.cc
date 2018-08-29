@@ -58,11 +58,12 @@ TEST(ApplicationManagerMetricWrapper, GetJsonMetric) {
       application_manager::AMTelemetryObserver::MessageMetric>();
   metric_test.message_metric->begin = start_time;
   metric_test.message_metric->end = end_time;
-  NsSmartDeviceLink::NsSmartObjects::SmartObject obj;
+  ns_smart_device_link::ns_smart_objects::SmartObject obj;
   obj["params"][application_manager::strings::correlation_id] = 11;
   obj["params"][application_manager::strings::connection_key] = 12;
   metric_test.message_metric->message =
-      std::make_shared<NsSmartDeviceLink::NsSmartObjects::SmartObject>(obj);
+      std::make_shared<ns_smart_device_link::ns_smart_objects::SmartObject>(
+          obj);
   Json::Value jvalue = metric_test.GetJsonMetric();
 
   EXPECT_EQ("null\n",
@@ -95,11 +96,12 @@ TEST(ApplicationManagerMetricWrapper, GetJsonMetricWithGrabResources) {
       application_manager::AMTelemetryObserver::MessageMetric>();
   metric_test.message_metric->begin = start_time;
   metric_test.message_metric->end = end_time;
-  NsSmartDeviceLink::NsSmartObjects::SmartObject obj;
+  ns_smart_device_link::ns_smart_objects::SmartObject obj;
   obj["params"][application_manager::strings::correlation_id] = 11;
   obj["params"][application_manager::strings::connection_key] = 12;
   metric_test.message_metric->message =
-      std::make_shared<NsSmartDeviceLink::NsSmartObjects::SmartObject>(obj);
+      std::make_shared<ns_smart_device_link::ns_smart_objects::SmartObject>(
+          obj);
   Json::Value jvalue = metric_test.GetJsonMetric();
 
   EXPECT_EQ(date_time::getuSecs(start_time),

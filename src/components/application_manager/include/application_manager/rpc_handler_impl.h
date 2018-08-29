@@ -150,8 +150,9 @@ class RPCHandlerImpl : public RPCHandler,
    * @param output - SmartObject Message received from mobile
    * @param messageVersion - message version to be updated
    */
-  void GetMessageVersion(NsSmartDeviceLink::NsSmartObjects::SmartObject& output,
-                         utils::SemanticVersion& message_version);
+  void GetMessageVersion(
+      ns_smart_device_link::ns_smart_objects::SmartObject& output,
+      utils::SemanticVersion& message_version);
 
  private:
   void ProcessMessageFromMobile(const std::shared_ptr<Message> message);

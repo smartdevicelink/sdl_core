@@ -40,8 +40,8 @@
 #include <map>
 #include <string>
 
-namespace NsSmartDeviceLink {
-namespace NsJSONHandler {
+namespace ns_smart_device_link {
+namespace ns_json_handler {
 /**
  * @brief String constants used by SmartFactory.
  */
@@ -154,7 +154,7 @@ class CSmartFactory {
    * @return True if operation was successful or false otherwise.
    */
   bool attachSchema(
-      NsSmartDeviceLink::NsSmartObjects::SmartObject& object,
+      ns_smart_device_link::ns_smart_objects::SmartObject& object,
       const bool RemoveFakeParameters,
       const utils::SemanticVersion& MessageVersion = utils::SemanticVersion());
 
@@ -166,8 +166,9 @@ class CSmartFactory {
    *
    * @return True if operation was successful of false otherwise.
    */
-  bool AttachSchema(const StructIdEnum struct_id,
-                    NsSmartDeviceLink::NsSmartObjects::SmartObject& object);
+  bool AttachSchema(
+      const StructIdEnum struct_id,
+      ns_smart_device_link::ns_smart_objects::SmartObject& object);
 
   /**
    * @brief Create new SmartObject with attached function SmartSchema.
@@ -182,7 +183,7 @@ class CSmartFactory {
    *         SmartObject) function returns empty SmartObject with
    *         null type.
    */
-  NsSmartDeviceLink::NsSmartObjects::SmartObject CreateSmartObject(
+  ns_smart_device_link::ns_smart_objects::SmartObject CreateSmartObject(
       const FunctionIdEnum function_id, const MessageTypeEnum message_type);
 
   /**
@@ -197,7 +198,7 @@ class CSmartFactory {
    *         SmartObject) function returns empty SmartObject with
    *         null type.
    */
-  NsSmartDeviceLink::NsSmartObjects::SmartObject CreateSmartObject(
+  ns_smart_device_link::ns_smart_objects::SmartObject CreateSmartObject(
       const StructIdEnum struct_id);
 
   /**
@@ -216,7 +217,7 @@ class CSmartFactory {
    */
   bool GetSchema(const FunctionIdEnum function_id,
                  const MessageTypeEnum message_type,
-                 NsSmartDeviceLink::NsSmartObjects::CSmartSchema& result);
+                 ns_smart_device_link::ns_smart_objects::CSmartSchema& result);
 
   /**
    * @brief Get SmartSchema for specific struct.
@@ -233,7 +234,7 @@ class CSmartFactory {
    *         found or false otherwise.
    */
   bool GetSchema(const StructIdEnum struct_id,
-                 NsSmartDeviceLink::NsSmartObjects::CSmartSchema& result);
+                 ns_smart_device_link::ns_smart_objects::CSmartSchema& result);
 
  protected:
   /**
@@ -243,7 +244,7 @@ class CSmartFactory {
    * functions.
    */
   typedef std::map<SmartSchemaKey<FunctionIdEnum, MessageTypeEnum>,
-                   NsSmartDeviceLink::NsSmartObjects::CSmartSchema>
+                   ns_smart_device_link::ns_smart_objects::CSmartSchema>
       FuncionsSchemesMap;
 
   /**
@@ -253,7 +254,7 @@ class CSmartFactory {
    * structs.
    */
   typedef std::map<StructIdEnum,
-                   NsSmartDeviceLink::NsSmartObjects::CSmartSchema>
+                   ns_smart_device_link::ns_smart_objects::CSmartSchema>
       StructsSchemesMap;
 
   /**
@@ -274,7 +275,7 @@ CSmartFactory<FunctionIdEnum, MessageTypeEnum, StructIdEnum>::CSmartFactory(
 
 template <class FunctionIdEnum, class MessageTypeEnum, class StructIdEnum>
 bool CSmartFactory<FunctionIdEnum, MessageTypeEnum, StructIdEnum>::attachSchema(
-    NsSmartDeviceLink::NsSmartObjects::SmartObject& object,
+    ns_smart_device_link::ns_smart_objects::SmartObject& object,
     const bool RemoveFakeParameters,
     const utils::SemanticVersion& MessageVersion) {
   if (false == object.keyExists(strings::S_PARAMS))
@@ -312,7 +313,7 @@ bool CSmartFactory<FunctionIdEnum, MessageTypeEnum, StructIdEnum>::attachSchema(
 template <class FunctionIdEnum, class MessageTypeEnum, class StructIdEnum>
 bool CSmartFactory<FunctionIdEnum, MessageTypeEnum, StructIdEnum>::AttachSchema(
     const StructIdEnum struct_id,
-    NsSmartDeviceLink::NsSmartObjects::SmartObject& object) {
+    ns_smart_device_link::ns_smart_objects::SmartObject& object) {
   typename StructsSchemesMap::iterator structs_iterator =
       structs_schemes_.find(struct_id);
 
@@ -327,7 +328,7 @@ bool CSmartFactory<FunctionIdEnum, MessageTypeEnum, StructIdEnum>::AttachSchema(
 }
 
 template <class FunctionIdEnum, class MessageTypeEnum, class StructIdEnum>
-NsSmartDeviceLink::NsSmartObjects::SmartObject
+ns_smart_device_link::ns_smart_objects::SmartObject
 CSmartFactory<FunctionIdEnum, MessageTypeEnum, StructIdEnum>::CreateSmartObject(
     const FunctionIdEnum function_id, const MessageTypeEnum message_type) {
   SmartSchemaKey<FunctionIdEnum, MessageTypeEnum> key(function_id,
@@ -337,34 +338,34 @@ CSmartFactory<FunctionIdEnum, MessageTypeEnum, StructIdEnum>::CreateSmartObject(
       functions_schemes_.find(key);
 
   if (schema_iterator != functions_schemes_.end()) {
-    NsSmartDeviceLink::NsSmartObjects::SmartObject function_object(
-        NsSmartDeviceLink::NsSmartObjects::SmartType_Map);
+    ns_smart_device_link::ns_smart_objects::SmartObject function_object(
+        ns_smart_device_link::ns_smart_objects::SmartType_Map);
     function_object.setSchema(schema_iterator->second);
     schema_iterator->second.applySchema(function_object, false);
     return function_object;
   }
 
-  return NsSmartDeviceLink::NsSmartObjects::SmartObject();
+  return ns_smart_device_link::ns_smart_objects::SmartObject();
 }
 
 template <class FunctionIdEnum, class MessageTypeEnum, class StructIdEnum>
-NsSmartDeviceLink::NsSmartObjects::SmartObject
+ns_smart_device_link::ns_smart_objects::SmartObject
 CSmartFactory<FunctionIdEnum, MessageTypeEnum, StructIdEnum>::CreateSmartObject(
     const StructIdEnum struct_id) {
-  NsSmartDeviceLink::NsSmartObjects::SmartObject struct_object(
-      NsSmartDeviceLink::NsSmartObjects::SmartType_Map);
+  ns_smart_device_link::ns_smart_objects::SmartObject struct_object(
+      ns_smart_device_link::ns_smart_objects::SmartType_Map);
   if (AttachSchema(struct_id, struct_object)) {
     return struct_object;
   }
 
-  return NsSmartDeviceLink::NsSmartObjects::SmartObject();
+  return ns_smart_device_link::ns_smart_objects::SmartObject();
 }
 
 template <class FunctionIdEnum, class MessageTypeEnum, class StructIdEnum>
 bool CSmartFactory<FunctionIdEnum, MessageTypeEnum, StructIdEnum>::GetSchema(
     const FunctionIdEnum function_id,
     const MessageTypeEnum message_type,
-    NsSmartDeviceLink::NsSmartObjects::CSmartSchema& result) {
+    ns_smart_device_link::ns_smart_objects::CSmartSchema& result) {
   SmartSchemaKey<FunctionIdEnum, MessageTypeEnum> key(function_id,
                                                       message_type);
 
@@ -382,7 +383,7 @@ bool CSmartFactory<FunctionIdEnum, MessageTypeEnum, StructIdEnum>::GetSchema(
 template <class FunctionIdEnum, class MessageTypeEnum, class StructIdEnum>
 bool CSmartFactory<FunctionIdEnum, MessageTypeEnum, StructIdEnum>::GetSchema(
     const StructIdEnum struct_id,
-    NsSmartDeviceLink::NsSmartObjects::CSmartSchema& result) {
+    ns_smart_device_link::ns_smart_objects::CSmartSchema& result) {
   typename StructsSchemesMap::iterator structs_iterator =
       structs_schemes_.find(struct_id);
 

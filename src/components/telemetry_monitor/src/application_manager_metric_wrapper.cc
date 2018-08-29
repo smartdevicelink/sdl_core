@@ -43,7 +43,7 @@ Json::Value ApplicationManagerMetricWrapper::GetJsonMetric() {
   result[strings::begin] =
       Json::Int64(date_time::getuSecs(message_metric->begin));
   result[strings::end] = Json::Int64(date_time::getuSecs(message_metric->end));
-  const NsSmartDeviceLink::NsSmartObjects::SmartObject& params =
+  const ns_smart_device_link::ns_smart_objects::SmartObject& params =
       message_metric->message->getElement(application_manager::strings::params);
   result[strings::correlation_id] = utils::ConvertInt64ToLongLongInt(
       params[application_manager::strings::correlation_id].asInt());

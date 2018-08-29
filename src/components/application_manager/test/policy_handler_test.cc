@@ -997,8 +997,8 @@ TEST_F(PolicyHandlerTest,
   AppPermissions permissions(kPolicyAppId_);
   permissions.appUnauthorized = true;
 
-  NsSmartDeviceLink::NsSmartObjects::SmartObjectSPtr message =
-      std::make_shared<NsSmartDeviceLink::NsSmartObjects::SmartObject>();
+  ns_smart_device_link::ns_smart_objects::SmartObjectSPtr message =
+      std::make_shared<ns_smart_device_link::ns_smart_objects::SmartObject>();
   // Check expectations
   EXPECT_CALL(mock_message_helper_,
               SendOnAppPermissionsChangedNotification(kAppId1_, _, _));
@@ -1050,8 +1050,8 @@ TEST_F(PolicyHandlerTest,
   AppPermissions permissions(kPolicyAppId_);
   permissions.appUnauthorized = true;
 
-  NsSmartDeviceLink::NsSmartObjects::SmartObjectSPtr message =
-      std::make_shared<NsSmartDeviceLink::NsSmartObjects::SmartObject>();
+  ns_smart_device_link::ns_smart_objects::SmartObjectSPtr message =
+      std::make_shared<ns_smart_device_link::ns_smart_objects::SmartObject>();
   // Check expectations
   // Notification won't be sent
   EXPECT_CALL(mock_message_helper_,

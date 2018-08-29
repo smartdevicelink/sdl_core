@@ -41,9 +41,9 @@ namespace test {
 namespace components {
 namespace usage_statistics_test {
 
-using namespace mobile_apis;                        // For Language enums
-using namespace NsSmartDeviceLink::NsSmartObjects;  // For EnumToCString &
-                                                    // EnumConversionHelper
+using namespace mobile_apis;                             // For Language enums
+using namespace ns_smart_device_link::ns_smart_objects;  // For EnumToCString &
+                                                         // EnumConversionHelper
 using namespace usage_statistics;
 using testing::_;
 

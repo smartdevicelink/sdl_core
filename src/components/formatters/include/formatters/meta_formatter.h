@@ -39,9 +39,9 @@
 #include "smart_objects/smart_object.h"
 #include "smart_objects/smart_schema.h"
 
-namespace NsSmartDeviceLink {
-namespace NsJSONHandler {
-namespace Formatters {
+namespace ns_smart_device_link {
+namespace ns_json_handler {
+namespace formatters {
 
 /**
   * @brief Formats to string the smart object against given schema for given
@@ -66,13 +66,13 @@ class CMetaFormatter {
     * @return true if successful, false - otherwise
     */
   static bool CreateObjectByPattern(
-      const NsSmartDeviceLink::NsSmartObjects::SmartObject& object,
-      const NsSmartDeviceLink::NsSmartObjects::CSmartSchema& schema,
-      NsSmartDeviceLink::NsSmartObjects::SmartObject& result_object);
+      const ns_smart_device_link::ns_smart_objects::SmartObject& object,
+      const ns_smart_device_link::ns_smart_objects::CSmartSchema& schema,
+      ns_smart_device_link::ns_smart_objects::SmartObject& result_object);
 };
 
-}  // namespace NsSmartDeviceLink
-}  // namespace NsSmartDeviceLink::NsJSONHandler
-}  // namespace NsSmartDeviceLink::NsJSONHandler::Formatters
+}  // namespace ns_smart_device_link
+}  // namespace ns_smart_device_link::ns_json_handler
+}  // namespace ns_smart_device_link::ns_json_handler::formatters
 
 #endif  // SRC_COMPONENTS_FORMATTERS_INCLUDE_FORMATTERS_META_FORMATTER_H_

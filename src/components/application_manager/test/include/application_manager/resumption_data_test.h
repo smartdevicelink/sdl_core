@@ -125,7 +125,8 @@ class ResumptionDataTest : public ::testing::Test {
   void CheckMenuIcon(sm::SmartObject& res_list);
   void CheckHelpPrompt(sm::SmartObject& res_list);
   void CheckTimeoutPrompt(sm::SmartObject& res_list);
-  void CheckVRHelp(NsSmartDeviceLink::NsSmartObjects::SmartObject& res_list);
+  void CheckVRHelp(
+      ns_smart_device_link::ns_smart_objects::SmartObject& res_list);
   void CheckVRTitle(sm::SmartObject& res_list);
   void CheckSubscriptions(sm::SmartObject& res_list);
 

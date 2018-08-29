@@ -38,7 +38,7 @@ include_directories (
   ${CMAKE_BINARY_DIR}
 )
 
-generate_interface("v4_protocol_v1_2_no_extra.xml" "NsSmartDeviceLinkRPC::V1" "sdlrpcv1")
+generate_interface("v4_protocol_v1_2_no_extra.xml" "ns_smart_device_link_rpc::V1" "sdlrpcv1")
 add_library(v4_protocol_v1_2_no_extra ${CMAKE_CURRENT_BINARY_DIR}/v4_protocol_v1_2_no_extra_schema.cc)
 
 generate_interface("MOBILE_API.xml" "mobile_apis" "sdlrpcv2")

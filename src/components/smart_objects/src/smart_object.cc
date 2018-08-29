@@ -42,8 +42,8 @@
 #include <iterator>
 #include <limits>
 
-namespace NsSmartDeviceLink {
-namespace NsSmartObjects {
+namespace ns_smart_device_link {
+namespace ns_smart_objects {
 
 /**
  * @brief Value that is used as invalid value for string type
@@ -491,7 +491,7 @@ std::string SmartObject::convert_string() const {
     default:
       break;
   }
-  return NsSmartDeviceLink::NsSmartObjects::invalid_cstr_value;
+  return ns_smart_device_link::ns_smart_objects::invalid_cstr_value;
 }
 
 custom_str::CustomString SmartObject::convert_custom_string() const {
@@ -870,10 +870,10 @@ bool SmartObject::erase(const std::string& Key) {
 
 bool SmartObject::isValid() const {
   rpc::ValidationReport report("RPC");
-  return (Errors::OK == m_schema.validate(*this, &report));
+  return (errors::OK == m_schema.validate(*this, &report));
 }
 
-Errors::eType SmartObject::validate(
+errors::eType SmartObject::validate(
     rpc::ValidationReport* report__,
     const utils::SemanticVersion& MessageVersion) {
   return m_schema.validate(*this, report__, MessageVersion);
@@ -887,5 +887,5 @@ CSmartSchema SmartObject::getSchema() {
   return m_schema;
 }
 
-}  // namespace NsSmartObjects
-}  // namespace NsSmartDeviceLink
+}  // namespace ns_smart_objects
+}  // namespace ns_smart_device_link

@@ -247,7 +247,7 @@ smart_objects::SmartObjectSPtr MessageHelper::CreateNotification(
   return object;
 }
 
-NsSmartDeviceLink::NsSmartObjects::SmartObjectSPtr
+ns_smart_device_link::ns_smart_objects::SmartObjectSPtr
 MessageHelper::CreateHMINotification(hmi_apis::FunctionID::eType function_id) {
   using smart_objects::SmartObject;
   using smart_objects::SmartObjectSPtr;
@@ -277,7 +277,7 @@ const uint32_t MessageHelper::GetPriorityCode(const std::string& priority) {
 
 hmi_apis::Common_Language::eType MessageHelper::CommonLanguageFromString(
     const std::string& language) {
-  using namespace NsSmartDeviceLink::NsSmartObjects;
+  using namespace ns_smart_device_link::ns_smart_objects;
   hmi_apis::Common_Language::eType value;
   if (EnumConversionHelper<hmi_apis::Common_Language::eType>::StringToEnum(
           language, &value)) {
@@ -298,7 +298,7 @@ std::string MessageHelper::GetDeviceMacAddressForHandle(
 
 std::string MessageHelper::CommonLanguageToString(
     hmi_apis::Common_Language::eType language) {
-  using namespace NsSmartDeviceLink::NsSmartObjects;
+  using namespace ns_smart_device_link::ns_smart_objects;
   const char* str = 0;
   if (EnumConversionHelper<hmi_apis::Common_Language::eType>::EnumToCString(
           language, &str)) {
@@ -630,7 +630,7 @@ const VehicleData& MessageHelper::vehicle_data() {
 
 std::string MessageHelper::HMIResultToString(
     hmi_apis::Common_Result::eType hmi_result) {
-  using namespace NsSmartDeviceLink::NsSmartObjects;
+  using namespace ns_smart_device_link::ns_smart_objects;
   const char* str = 0;
   if (EnumConversionHelper<hmi_apis::Common_Result::eType>::EnumToCString(
           hmi_result, &str)) {
@@ -641,7 +641,7 @@ std::string MessageHelper::HMIResultToString(
 
 hmi_apis::Common_Result::eType MessageHelper::HMIResultFromString(
     const std::string& hmi_result) {
-  using namespace NsSmartDeviceLink::NsSmartObjects;
+  using namespace ns_smart_device_link::ns_smart_objects;
   hmi_apis::Common_Result::eType value;
   if (EnumConversionHelper<hmi_apis::Common_Result::eType>::StringToEnum(
           hmi_result, &value)) {
@@ -652,7 +652,7 @@ hmi_apis::Common_Result::eType MessageHelper::HMIResultFromString(
 
 std::string MessageHelper::MobileResultToString(
     mobile_apis::Result::eType mobile_result) {
-  using namespace NsSmartDeviceLink::NsSmartObjects;
+  using namespace ns_smart_device_link::ns_smart_objects;
   const char* str = 0;
   if (EnumConversionHelper<mobile_apis::Result::eType>::EnumToCString(
           mobile_result, &str)) {
@@ -663,7 +663,7 @@ std::string MessageHelper::MobileResultToString(
 
 mobile_apis::Result::eType MessageHelper::MobileResultFromString(
     const std::string& mobile_result) {
-  using namespace NsSmartDeviceLink::NsSmartObjects;
+  using namespace ns_smart_device_link::ns_smart_objects;
   mobile_apis::Result::eType value;
   if (EnumConversionHelper<mobile_apis::Result::eType>::StringToEnum(
           mobile_result, &value)) {
@@ -781,7 +781,7 @@ void MessageHelper::SendActivateAppToHMI(
 
 mobile_apis::HMILevel::eType MessageHelper::StringToHMILevel(
     const std::string& hmi_level) {
-  using namespace NsSmartDeviceLink::NsSmartObjects;
+  using namespace ns_smart_device_link::ns_smart_objects;
   mobile_apis::HMILevel::eType value;
   if (EnumConversionHelper<mobile_apis::HMILevel::eType>::StringToEnum(
           hmi_level, &value)) {
@@ -792,7 +792,7 @@ mobile_apis::HMILevel::eType MessageHelper::StringToHMILevel(
 
 std::string MessageHelper::StringifiedHMILevel(
     const mobile_apis::HMILevel::eType hmi_level) {
-  using namespace NsSmartDeviceLink::NsSmartObjects;
+  using namespace ns_smart_device_link::ns_smart_objects;
   const char* str = 0;
   if (EnumConversionHelper<mobile_apis::HMILevel::eType>::EnumToCString(
           hmi_level, &str)) {
@@ -804,7 +804,7 @@ std::string MessageHelper::StringifiedHMILevel(
 std::string MessageHelper::StringifiedFunctionID(
     mobile_apis::FunctionID::eType function_id) {
   LOG4CXX_AUTO_TRACE(logger_);
-  using namespace NsSmartDeviceLink::NsSmartObjects;
+  using namespace ns_smart_device_link::ns_smart_objects;
   const char* str = 0;
   if (EnumConversionHelper<mobile_apis::FunctionID::eType>::EnumToCString(
           function_id, &str)) {
@@ -1517,9 +1517,9 @@ bool MessageHelper::CreateHMIApplicationStruct(
     ApplicationConstSharedPtr app,
     const protocol_handler::SessionObserver& session_observer,
     const policy::PolicyHandlerInterface& policy_handler,
-    NsSmartDeviceLink::NsSmartObjects::SmartObject* output,
+    ns_smart_device_link::ns_smart_objects::SmartObject* output,
     ApplicationManager& app_mngr) {
-  using NsSmartDeviceLink::NsSmartObjects::SmartObject;
+  using ns_smart_device_link::ns_smart_objects::SmartObject;
   DCHECK_OR_RETURN(output, false);
   SmartObject& message = *output;
 
@@ -2557,7 +2557,8 @@ mobile_apis::Result::eType MessageHelper::VerifyImageFiles(
     smart_objects::SmartObject& message,
     ApplicationConstSharedPtr app,
     ApplicationManager& app_mngr) {
-  if (NsSmartDeviceLink::NsSmartObjects::SmartType_Array == message.getType()) {
+  if (ns_smart_device_link::ns_smart_objects::SmartType_Array ==
+      message.getType()) {
     for (uint32_t i = 0; i < message.length(); ++i) {
       mobile_apis::Result::eType res =
           VerifyImageFiles(message[i], app, app_mngr);
@@ -2566,7 +2567,7 @@ mobile_apis::Result::eType MessageHelper::VerifyImageFiles(
         return res;
       }
     }
-  } else if (NsSmartDeviceLink::NsSmartObjects::SmartType_Map ==
+  } else if (ns_smart_device_link::ns_smart_objects::SmartType_Map ==
              message.getType()) {
     if (message.keyExists(strings::image_type)) {
       mobile_apis::Result::eType verification_result =
@@ -2888,7 +2889,7 @@ bool MessageHelper::PrintSmartObject(const smart_objects::SmartObject& object) {
   }
 
   switch (object.getType()) {
-    case NsSmartDeviceLink::NsSmartObjects::SmartType_Array: {
+    case ns_smart_device_link::ns_smart_objects::SmartType_Array: {
       for (size_t i = 0; i < object.length(); i++) {
         ++tab;
 
@@ -2900,7 +2901,7 @@ bool MessageHelper::PrintSmartObject(const smart_objects::SmartObject& object) {
       }
       break;
     }
-    case NsSmartDeviceLink::NsSmartObjects::SmartType_Map: {
+    case ns_smart_device_link::ns_smart_objects::SmartType_Map: {
       std::set<std::string> keys = object.enumerate();
 
       for (std::set<std::string>::const_iterator key = keys.begin();
@@ -2916,20 +2917,20 @@ bool MessageHelper::PrintSmartObject(const smart_objects::SmartObject& object) {
       }
       break;
     }
-    case NsSmartDeviceLink::NsSmartObjects::SmartType_Boolean:
+    case ns_smart_device_link::ns_smart_objects::SmartType_Boolean:
       object.asBool() ? printf("true\n") : printf("false\n");
       break;
-    case NsSmartDeviceLink::NsSmartObjects::SmartType_Double: {
+    case ns_smart_device_link::ns_smart_objects::SmartType_Double: {
       printf("%f", object.asDouble());
       break;
     }
-    case NsSmartDeviceLink::NsSmartObjects::SmartType_Integer:
+    case ns_smart_device_link::ns_smart_objects::SmartType_Integer:
       printf("%lld", static_cast<long long int>(object.asInt()));
       break;
-    case NsSmartDeviceLink::NsSmartObjects::SmartType_String:
+    case ns_smart_device_link::ns_smart_objects::SmartType_String:
       printf("%s", object.asString().c_str());
       break;
-    case NsSmartDeviceLink::NsSmartObjects::SmartType_Character:
+    case ns_smart_device_link::ns_smart_objects::SmartType_Character:
       printf("%c", object.asChar());
       break;
     default:

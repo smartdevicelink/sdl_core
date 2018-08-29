@@ -589,7 +589,7 @@ void SystemRequest::Run() {
     SendResponse(true, mobile_apis::Result::SUCCESS);
     return;
   } else if (mobile_apis::RequestType::QUERY_APPS == request_type) {
-    using namespace NsSmartDeviceLink::NsJSONHandler::Formatters;
+    using namespace ns_smart_device_link::ns_json_handler::formatters;
 
     smart_objects::SmartObject sm_object;
     Json::Reader reader;

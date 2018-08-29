@@ -55,7 +55,7 @@ struct ResponseInfo {
   bool is_not_used;
 };
 
-namespace NsSmart = NsSmartDeviceLink::NsSmartObjects;
+namespace ns_smart = ns_smart_device_link::ns_smart_objects;
 
 /**
  * @brief MergeInfos merge 2 infos in one string
@@ -189,7 +189,7 @@ class CommandRequestImpl : public CommandImpl,
    * @param msg_params HMI request msg params
    */
   void CreateHMINotification(const hmi_apis::FunctionID::eType& function_id,
-                             const NsSmart::SmartObject& msg_params) const;
+                             const ns_smart::SmartObject& msg_params) const;
 
   /**
    * @brief Converts HMI result code to Mobile result code

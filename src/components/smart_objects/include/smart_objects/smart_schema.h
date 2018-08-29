@@ -35,8 +35,8 @@
 #include "utils/macro.h"
 #include "smart_objects/schema_item.h"
 
-namespace NsSmartDeviceLink {
-namespace NsSmartObjects {
+namespace ns_smart_device_link {
+namespace ns_smart_objects {
 class SmartObject;
 
 /**
@@ -66,9 +66,9 @@ class CSmartSchema FINAL {
    * @param Object Object to validate.
    * @param report__ object for reporting errors during validation
    * @param MessageVersion to check mobile RPC version against RPC Spec History
-   * @return NsSmartObjects::Errors::eType
+   * @return ns_smart_objects::errors::eType
    **/
-  Errors::eType validate(const SmartObject& Object,
+  errors::eType validate(const SmartObject& Object,
                          rpc::ValidationReport* report__,
                          const utils::SemanticVersion& messageVersion =
                              utils::SemanticVersion()) const;
@@ -118,6 +118,6 @@ class CSmartSchema FINAL {
    */
   ISchemaItemPtr mSchemaItem;
 };
-}  // namespace NsSmartObjects
-}  // namespace NsSmartDeviceLink
+}  // namespace ns_smart_objects
+}  // namespace ns_smart_device_link
 #endif  // SRC_COMPONENTS_SMART_OBJECTS_INCLUDE_SMART_OBJECTS_SMART_SCHEMA_H_

@@ -1572,10 +1572,10 @@ class CodeGenerator(object):
         u'''#include "smart_objects/number_schema_item.h"\n'''
         u'''#include "smart_objects/schema_item_parameter.h"\n'''
         u'''\n'''
-        u'''using namespace NsSmartDeviceLink::NsSmartObjects;\n'''
+        u'''using namespace ns_smart_device_link::ns_smart_objects;\n'''
         u'''\n'''
         u'''$namespace::$class_name::$class_name()\n'''
-        u''' : NsSmartDeviceLink::NsJSONHandler::CSmartFactory<FunctionID::eType, '''
+        u''' : ns_smart_device_link::ns_json_handler::CSmartFactory<FunctionID::eType, '''
         u'''messageType::eType, StructIdentifiers::eType>() {\n'''
         u'''  TStructsSchemaItems struct_schema_items;\n'''
         u'''  InitStructSchemes(struct_schema_items);\n'''
@@ -1600,7 +1600,7 @@ class CodeGenerator(object):
         u'''    return it->second;\n'''
         u'''  }\n'''
         u'''\n'''
-        u'''  return NsSmartDeviceLink::NsSmartObjects::'''
+        u'''  return ns_smart_device_link::ns_smart_objects::'''
         u'''CAlwaysFalseSchemaItem::create();\n'''
         u'''}\n'''
         u'''\n'''
@@ -1627,13 +1627,13 @@ class CodeGenerator(object):
         u'''\n'''
         u'''//-------------- String to value enum mapping ----------------\n'''
         u'''\n'''
-        u'''namespace NsSmartDeviceLink {\n'''
-        u'''namespace NsSmartObjects {\n'''
+        u'''namespace ns_smart_device_link {\n'''
+        u'''namespace ns_smart_objects {\n'''
         u'''\n'''
         u'''$enum_string_coversions'''
         u'''\n'''
-        u'''} // NsSmartObjects\n'''
-        u'''} // NsSmartDeviceLink\n'''
+        u'''} // ns_smart_objects\n'''
+        u'''} // ns_smart_device_link\n'''
         u'''\n''')
 
     _enum_to_str_converter_template = string.Template(
@@ -1678,8 +1678,8 @@ class CodeGenerator(object):
         u'''struct_schema_item_${name})));''')
 
     _function_schema_template = string.Template(
-        u'''functions_schemes_.insert(std::make_pair(NsSmartDeviceLink::'''
-        u'''NsJSONHandler::'''
+        u'''functions_schemes_.insert(std::make_pair(ns_smart_device_link::'''
+        u'''ns_json_handler::'''
         u'''SmartSchemaKey<FunctionID::eType, messageType::eType>'''
         u'''(FunctionID::$function_id, messageType::$message_type), '''
         u'''InitFunction_${function_id}_${message_type}('''
@@ -1787,11 +1787,11 @@ class CodeGenerator(object):
         u'''\n'''
         u'''CObjectSchemaItem::Members '''
         u'''root_members_map;\n'''
-        u'''root_members_map[NsSmartDeviceLink::NsJSONHandler::'''
+        u'''root_members_map[ns_smart_device_link::ns_json_handler::'''
         u'''strings::S_MSG_PARAMS] = '''
         u'''CObjectSchemaItem::SMember(CObjectSchemaItem::'''
         u'''create(schema_members), true);\n'''
-        u'''root_members_map[NsSmartDeviceLink::NsJSONHandler::'''
+        u'''root_members_map[ns_smart_device_link::ns_json_handler::'''
         u'''strings::S_PARAMS] = '''
         u'''CObjectSchemaItem::SMember(CObjectSchemaItem::'''
         u'''create(params_members), true);\n\n'''
@@ -1800,7 +1800,7 @@ class CodeGenerator(object):
 
     _class_h_template = string.Template(
         u'''$comment\n'''
-        u'''class $class_name : public NsSmartDeviceLink::NsJSONHandler::'''
+        u'''class $class_name : public ns_smart_device_link::ns_json_handler::'''
         u'''CSmartFactory<FunctionID::eType, messageType::eType, '''
         u'''StructIdentifiers::eType> {\n'''
         u''' public:\n'''
@@ -1814,7 +1814,7 @@ class CodeGenerator(object):
         u'''   * @brief Type that maps of struct IDs to schema items.\n'''
         u'''   */\n'''
         u'''  typedef std::map<const StructIdentifiers::eType, '''
-        u'''std::shared_ptr<NsSmartDeviceLink::NsSmartObjects::'''
+        u'''std::shared_ptr<ns_smart_device_link::ns_smart_objects::'''
         u'''ISchemaItem> > TStructsSchemaItems;\n'''
         u'''\n'''
         u'''  /**\n'''
@@ -1826,7 +1826,7 @@ class CodeGenerator(object):
         u'''   * @return std::shared_ptr of strucute\n'''
         u'''   */\n'''
         u'''  static '''
-        u'''std::shared_ptr<NsSmartDeviceLink::NsSmartObjects::ISchemaItem> '''
+        u'''std::shared_ptr<ns_smart_device_link::ns_smart_objects::ISchemaItem> '''
         u'''ProvideObjectSchemaItemForStruct(\n'''
         u'''        const TStructsSchemaItems &struct_schema_items,\n'''
         u'''        const StructIdentifiers::eType struct_id);\n'''
@@ -1857,12 +1857,12 @@ class CodeGenerator(object):
         u'''$init_struct_decls'''
         u'''};''')
 
-    _function_return_comment = u''' * @return NsSmartDeviceLink::''' \
-                               u'''NsSmartObjects::CSmartSchema\n'''
+    _function_return_comment = u''' * @return ns_smart_device_link::''' \
+                               u'''ns_smart_objects::CSmartSchema\n'''
 
     _function_decl_template = string.Template(
         u'''$comment\n'''
-        u'''static NsSmartDeviceLink::NsSmartObjects::CSmartSchema '''
+        u'''static ns_smart_device_link::ns_smart_objects::CSmartSchema '''
         u'''InitFunction_${function_id}_${message_type}(\n'''
         u'''    const TStructsSchemaItems &struct_schema_items,\n'''
         u'''    const std::set<FunctionID::eType> &function_id_items,\n'''
@@ -1871,7 +1871,7 @@ class CodeGenerator(object):
     _struct_decl_template = string.Template(
         u'''$comment\n'''
         u'''static '''
-        u'''std::shared_ptr<NsSmartDeviceLink::NsSmartObjects::ISchemaItem> '''
+        u'''std::shared_ptr<ns_smart_device_link::ns_smart_objects::ISchemaItem> '''
         u'''InitStructSchemaItem_${struct_name}(\n'''
         u'''    const TStructsSchemaItems &struct_schema_items);''')
 

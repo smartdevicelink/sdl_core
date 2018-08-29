@@ -111,7 +111,7 @@ void CommandImpl::SetAllowedToTerminate(const bool allowed) {
 }
 
 bool CommandImpl::ReplaceMobileWithHMIAppId(
-    NsSmartDeviceLink::NsSmartObjects::SmartObject& message) {
+    ns_smart_device_link::ns_smart_objects::SmartObject& message) {
   LOG4CXX_AUTO_TRACE(logger_);
   if (message.keyExists(strings::app_id)) {
     ApplicationSharedPtr application =
@@ -156,7 +156,7 @@ bool CommandImpl::ReplaceMobileWithHMIAppId(
 }
 
 bool CommandImpl::ReplaceHMIWithMobileAppId(
-    NsSmartDeviceLink::NsSmartObjects::SmartObject& message) {
+    ns_smart_device_link::ns_smart_objects::SmartObject& message) {
   if (message.keyExists(strings::app_id)) {
     ApplicationSharedPtr application =
         application_manager_.application_by_hmi_app(

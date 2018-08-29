@@ -67,23 +67,23 @@ class CodeGenerator(SmartFactoryBase.CodeGenerator):
         """
 
         base_params = \
-            u'''params_members[NsSmartDeviceLink::NsJSONHandler::''' \
+            u'''params_members[ns_smart_device_link::ns_json_handler::''' \
             u'''strings::S_FUNCTION_ID] = CObjectSchemaItem::''' \
             u'''SMember(TEnumSchemaItem<FunctionID::eType>::''' \
             u'''create(function_id_items), true);\n''' \
-            u'''params_members[NsSmartDeviceLink::NsJSONHandler::''' \
+            u'''params_members[ns_smart_device_link::ns_json_handler::''' \
             u'''strings::S_MESSAGE_TYPE] = CObjectSchemaItem::''' \
             u'''SMember(TEnumSchemaItem<messageType::eType>::''' \
             u'''create(message_type_items), true);\n''' \
-            u'''params_members[NsSmartDeviceLink::NsJSONHandler::''' \
+            u'''params_members[ns_smart_device_link::ns_json_handler::''' \
             u'''strings::S_PROTOCOL_VERSION] = CObjectSchemaItem::''' \
             u'''SMember(TNumberSchemaItem<int>::create(), true);\n''' \
-            u'''params_members[NsSmartDeviceLink::NsJSONHandler::''' \
+            u'''params_members[ns_smart_device_link::ns_json_handler::''' \
             u'''strings::S_PROTOCOL_TYPE] = CObjectSchemaItem::''' \
             u'''SMember(TNumberSchemaItem<int>::create(), true);\n'''
 
         correlation_id_param = \
-            u'''params_members[NsSmartDeviceLink::NsJSONHandler::''' \
+            u'''params_members[ns_smart_device_link::ns_json_handler::''' \
             u'''strings::S_CORRELATION_ID] = CObjectSchemaItem::''' \
             u'''SMember(TNumberSchemaItem<int>::create(), true);\n'''
 

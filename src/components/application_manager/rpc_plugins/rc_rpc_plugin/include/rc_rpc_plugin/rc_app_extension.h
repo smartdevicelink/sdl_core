@@ -80,10 +80,11 @@ class RCAppExtension : public application_manager::AppExtension {
 
   // AppExtension interface
  public:
-  void SaveResumptionData(
-      NsSmartDeviceLink::NsSmartObjects::SmartObject& resumption_data) OVERRIDE;
-  void ProcessResumption(const NsSmartDeviceLink::NsSmartObjects::SmartObject&
-                             resumption_data) OVERRIDE;
+  void SaveResumptionData(ns_smart_device_link::ns_smart_objects::SmartObject&
+                              resumption_data) OVERRIDE;
+  void ProcessResumption(
+      const ns_smart_device_link::ns_smart_objects::SmartObject&
+          resumption_data) OVERRIDE;
 };
 
 typedef std::shared_ptr<RCAppExtension> RCAppExtensionPtr;
