@@ -104,11 +104,9 @@ typedef Array<Enum<RequestType>, 0, 255> RequestsTypeArray;
 
 typedef Strings RequestSubTypes;
 
-#ifdef SDL_REMOTE_CONTROL
 typedef Map<Strings, 0, 255> RemoteRpcs;
 typedef Map<RemoteRpcs, 0, 255> AccessModules;
 typedef Array<Enum<ModuleType>, 0, 255> ModuleTypes;
-#endif  // SDL_REMOTE_CONTROL
 
 typedef AppHMIType AppHmiType;
 typedef std::vector<AppHMIType> AppHmiTypes;
@@ -178,9 +176,7 @@ struct ApplicationParams : PolicyBase {
   Optional<RequestSubTypes> RequestSubType;
   Optional<Integer<uint16_t, 0, 65225> > memory_kb;
   Optional<Integer<uint32_t, 0, UINT_MAX> > heart_beat_timeout_ms;
-#ifdef SDL_REMOTE_CONTROL
   mutable Optional<ModuleTypes> moduleType;
-#endif  // SDL_REMOTE_CONTROL
 
  public:
   ApplicationParams();
@@ -200,9 +196,7 @@ struct ApplicationParams : PolicyBase {
 
  private:
   bool Validate() const;
-#ifdef SDL_REMOTE_CONTROL
   bool ValidateModuleTypes() const;
-#endif  // SDL_REMOTE_CONTROL
 };
 
 struct ApplicationPoliciesSection : CompositeType {
@@ -309,6 +303,7 @@ struct ModuleConfig : CompositeType {
   Optional<String<0, 10> > preloaded_date;
   Optional<String<0, 65535> > certificate;
   Optional<Boolean> preloaded_pt;
+  Optional<Boolean> full_app_id_supported;
 
  public:
   ModuleConfig();

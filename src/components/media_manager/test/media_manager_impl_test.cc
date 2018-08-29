@@ -44,8 +44,7 @@
 #include "application_manager/state_controller.h"
 #include "protocol_handler/mock_protocol_handler.h"
 #include "protocol/common.h"
-#include "utils/make_shared.h"
-#include "utils/shared_ptr.h"
+
 #include "utils/file_system.h"
 #include "utils/scope_guard.h"
 
@@ -58,7 +57,7 @@ using namespace ::media_manager;
 using ::testing::_;
 using ::testing::Return;
 using ::testing::ReturnRef;
-using ::utils::SharedPtr;
+
 using ::utils::ScopeGuard;
 using ::utils::MakeGuard;
 using ::testing::NiceMock;
@@ -99,19 +98,18 @@ void dealloc_file(std::ofstream* test_file) {
 }  // namespace
 
 typedef NiceMock<application_manager_test::MockApplication> MockApp;
-typedef SharedPtr<MockApp> MockAppPtr;
-typedef SharedPtr<MockMediaAdapterImpl> MockMediaAdapterImplPtr;
+typedef std::shared_ptr<MockApp> MockAppPtr;
+typedef std::shared_ptr<MockMediaAdapterImpl> MockMediaAdapterImplPtr;
 
 class MediaManagerImplTest : public ::testing::Test {
  public:
   MediaManagerImplTest() {
-    media_adapter_listener_mock_ =
-        utils::MakeShared<MockMediaAdapterListener>();
+    media_adapter_listener_mock_ = std::make_shared<MockMediaAdapterListener>();
     ON_CALL(mock_media_manager_settings_, video_server_type())
         .WillByDefault(ReturnRef(kDefaultValue));
     ON_CALL(mock_media_manager_settings_, audio_server_type())
         .WillByDefault(ReturnRef(kDefaultValue));
-    mock_app_ = ::utils::MakeShared<MockApp>();
+    mock_app_ = std::make_shared<MockApp>();
     media_manager_impl_.reset(
         new MediaManagerImpl(app_mngr_, mock_media_manager_settings_));
   }
@@ -180,7 +178,7 @@ class MediaManagerImplTest : public ::testing::Test {
         .WillOnce(Return(mock_app_));
     EXPECT_CALL(*mock_app_, WakeUpStreaming(service_type));
     MockMediaAdapterImplPtr mock_media_streamer =
-        utils::MakeShared<MockMediaAdapterImpl>();
+        std::make_shared<MockMediaAdapterImpl>();
     media_manager_impl_->set_mock_streamer(service_type, mock_media_streamer);
     media_manager_impl_->set_mock_streamer_listener(
         service_type, media_adapter_listener_mock_);
@@ -203,10 +201,10 @@ class MediaManagerImplTest : public ::testing::Test {
 
   application_manager_test::MockApplicationManager app_mngr_;
   MockAppPtr mock_app_;
-  SharedPtr<MockMediaAdapterListener> media_adapter_listener_mock_;
+  std::shared_ptr<MockMediaAdapterListener> media_adapter_listener_mock_;
   const ::testing::NiceMock<MockMediaManagerSettings>
       mock_media_manager_settings_;
-  SharedPtr<MediaManagerImpl> media_manager_impl_;
+  std::shared_ptr<MediaManagerImpl> media_manager_impl_;
 };
 
 TEST_F(MediaManagerImplTest,
@@ -376,11 +374,11 @@ TEST_F(MediaManagerImplTest, StopMicrophoneRecording_SUCCESS) {
 TEST_F(MediaManagerImplTest,
        StartStopStreaming_AudioAndVideoServiceType_SUCCESS) {
   MockMediaAdapterImplPtr mock_audio_media_streamer =
-      utils::MakeShared<MockMediaAdapterImpl>();
+      std::make_shared<MockMediaAdapterImpl>();
   media_manager_impl_->set_mock_streamer(ServiceType::kAudio,
                                          mock_audio_media_streamer);
   MockMediaAdapterImplPtr mock_nav_media_streamer =
-      utils::MakeShared<MockMediaAdapterImpl>();
+      std::make_shared<MockMediaAdapterImpl>();
   media_manager_impl_->set_mock_streamer(ServiceType::kMobileNav,
                                          mock_nav_media_streamer);
 

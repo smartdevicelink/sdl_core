@@ -29,13 +29,16 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
+#include <sys/wait.h>
 #include <csignal>
 #include <cstdlib>
 #include <stdint.h>
+#include <iostream>
 
 #include "utils/signals.h"
 
-bool utils::UnsibscribeFromTermination() {
+namespace utils {
+bool Signals::UnsubscribeFromTermination() {
   // Disable some system signals receiving in thread
   // by blocking those signals
   // (system signals processes only in the main thread)
@@ -51,6 +54,42 @@ bool utils::UnsibscribeFromTermination() {
   return !pthread_sigmask(SIG_BLOCK, &signal_set, NULL);
 }
 
+bool Signals::UnsubscribeFromLowVoltageSignals(
+    const main_namespace::LowVoltageSignalsOffset& offset_data) {
+  // Disable Low Voltage signals in main thread
+  // due to all further threads will inherit signals mask
+  sigset_t signal_set;
+  sigemptyset(&signal_set);
+  const int SIGLOWVOLTAGE = SIGRTMIN + offset_data.low_voltage_signal_offset;
+  const int SIGWAKEUP = SIGRTMIN + offset_data.wake_up_signal_offset;
+  const int SIGIGNOFF = SIGRTMIN + offset_data.ignition_off_signal_offset;
+  sigaddset(&signal_set, SIGLOWVOLTAGE);
+  sigaddset(&signal_set, SIGWAKEUP);
+  sigaddset(&signal_set, SIGIGNOFF);
+
+  // Set signals mask to be blocked by thread
+  return !pthread_sigmask(SIG_BLOCK, &signal_set, nullptr);
+}
+
+void Signals::SendSignal(const int signo, const pid_t pid) {
+  if (kill(pid, signo) == -1) {
+    std::cerr << "Error sending signal: " << strsignal(signo) << " to " << pid
+              << " .Error: " << strerror(errno) << std::endl;
+  }
+}
+
+pid_t Signals::Fork() {
+  return fork();
+}
+
+void Signals::ExitProcess(const int status) {
+  exit(status);
+}
+
+void Signals::WaitPid(pid_t cpid, int* status, int options) {
+  waitpid(cpid, status, options);
+}
+
 namespace {
 bool CatchSIGSEGV(sighandler_t handler) {
   struct sigaction act;
@@ -63,7 +102,7 @@ bool CatchSIGSEGV(sighandler_t handler) {
 }
 }  // namespace
 
-bool utils::WaitTerminationSignals(sighandler_t sig_handler) {
+bool Signals::WaitTerminationSignals(sighandler_t sig_handler) {
   sigset_t signal_set;
   int sig = -1;
 
@@ -81,3 +120,4 @@ bool utils::WaitTerminationSignals(sighandler_t sig_handler) {
   }
   return false;
 }
+}  // namespace utils

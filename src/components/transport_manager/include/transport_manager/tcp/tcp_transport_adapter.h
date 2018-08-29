@@ -58,6 +58,18 @@ class TcpTransportAdapter : public TransportAdapterImpl {
    */
   virtual ~TcpTransportAdapter();
 
+  /**
+   * @brief Notification that transport's configuration is updated
+   *
+   * @param new_config The new configuration of the transport
+   */
+  void TransportConfigUpdated(const TransportConfig& new_config) OVERRIDE;
+
+  /**
+   * @brief Returns the transport's configuration information
+   */
+  virtual TransportConfig GetTransportConfiguration() const OVERRIDE;
+
  protected:
   /**
    * @brief Return type of device.
@@ -77,6 +89,19 @@ class TcpTransportAdapter : public TransportAdapterImpl {
    * @return True on success false otherwise
    */
   virtual bool Restore();
+
+ private:
+  /**
+   * @brief Keeps transport specific configuration
+   *
+   * TCP transport uses following information:
+   * - "enabled": whether the transport is currently enabled or not. Value can
+   *              be "true" or "false".
+   * - "tcp_ip_address": string representation of IP address (either IPv4 or
+   *                     IPv6)
+   * - "tcp_port": string representation of TCP port number (e.g. "12345")
+   */
+  TransportConfig transport_config_;
 };
 
 }  // namespace transport_adapter

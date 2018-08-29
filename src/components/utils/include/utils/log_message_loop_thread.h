@@ -56,18 +56,14 @@ typedef std::queue<LogMessage> LogMessageQueue;
 typedef threads::MessageLoopThread<LogMessageQueue>
     LogMessageLoopThreadTemplate;
 
-class LogMessageHandler : public LogMessageLoopThreadTemplate::Handler {
- public:
-  virtual void Handle(const LogMessage message) OVERRIDE;
-};
-
-class LogMessageLoopThread : public LogMessageLoopThreadTemplate {
+class LogMessageLoopThread : public LogMessageLoopThreadTemplate,
+                             public LogMessageLoopThreadTemplate::Handler {
  public:
   LogMessageLoopThread();
   ~LogMessageLoopThread();
+  void Handle(const LogMessage message) OVERRIDE;
 
  private:
-  LogMessageHandler* handler_;
   DISALLOW_COPY_AND_ASSIGN(LogMessageLoopThread);
 };
 

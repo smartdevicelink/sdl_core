@@ -33,6 +33,7 @@
 #ifndef SRC_COMPONENTS_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_MANAGER_LISTENER_H_
 #define SRC_COMPONENTS_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_MANAGER_LISTENER_H_
 
+#include <map>
 #include <vector>
 #include "transport_manager/common.h"
 #include "transport_manager/info.h"
@@ -193,6 +194,14 @@ class TransportManagerListener {
   virtual void OnTMMessageSendFailed(
       const DataSendError& error,
       const ::protocol_handler::RawMessagePtr message) = 0;
+
+  /**
+   * @brief Notifies that configuration of a transport has been updated.
+   *
+   * @param configs pairs of key and value that represent configuration.
+   */
+  virtual void OnTransportConfigUpdated(
+      const std::map<std::string, std::string>& configs) = 0;
 };
 }  //  namespace transport_manager
 #endif  // SRC_COMPONENTS_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_MANAGER_LISTENER_H_

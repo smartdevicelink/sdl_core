@@ -420,7 +420,7 @@ class StateControllerImpl : public event_engine::EventObserver,
    * @param state_id state id
    * @return
    */
-  HmiStatePtr CreateHmiState(utils::SharedPtr<Application> app,
+  HmiStatePtr CreateHmiState(std::shared_ptr<Application> app,
                              HmiState::StateID state_id) const;
 
   /**

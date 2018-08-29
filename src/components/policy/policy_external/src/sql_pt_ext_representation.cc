@@ -761,6 +761,13 @@ bool SQLPTExtRepresentation::SaveSpecificAppPolicy(
   if (!SaveAppGroup(app.first, app.second.groups)) {
     return false;
   }
+
+  bool denied = !app.second.moduleType->is_initialized();
+  if (!SaveRemoteControlDenied(app.first, denied) ||
+      !SaveModuleType(app.first, *app.second.moduleType)) {
+    return false;
+  }
+
   if (!SaveNickname(app.first, *app.second.nicknames)) {
     return false;
   }
@@ -870,6 +877,17 @@ bool SQLPTExtRepresentation::GatherApplicationPoliciesSection(
     if (!GatherAppGroup(app_id, &params.groups)) {
       return false;
     }
+
+    bool denied = false;
+    if (!GatherRemoteControlDenied(app_id, &denied)) {
+      return false;
+    }
+    if (!denied) {
+      if (!GatherModuleType(app_id, &*params.moduleType)) {
+        return false;
+      }
+    }
+
     if (!GatherNickName(app_id, &*params.nicknames)) {
       return false;
     }

@@ -86,10 +86,10 @@ class MediaManagerImpl : public MediaManager,
   void set_mock_mic_listener(MediaListenerPtr media_listener);
   void set_mock_mic_recorder(MediaAdapterImpl* media_adapter);
   void set_mock_streamer(protocol_handler::ServiceType stype,
-                         ::utils::SharedPtr<MediaAdapterImpl> mock_stream);
+                         std::shared_ptr<MediaAdapterImpl> mock_stream);
   void set_mock_streamer_listener(
       protocol_handler::ServiceType stype,
-      ::utils::SharedPtr<MediaAdapterListener> mock_stream);
+      std::shared_ptr<MediaAdapterListener> mock_stream);
 #endif  // BUILD_TESTS
 
  protected:

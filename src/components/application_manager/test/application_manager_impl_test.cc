@@ -43,6 +43,8 @@
 #include "application_manager/mock_application.h"
 #include "application_manager/mock_application_manager_settings.h"
 #include "application_manager/mock_resumption_data.h"
+#include "application_manager/mock_rpc_service.h"
+#include "application_manager/mock_rpc_plugin_manager.h"
 #include "application_manager/resumption/resume_ctrl_impl.h"
 #include "application_manager/test/include/application_manager/mock_message_helper.h"
 #include "connection_handler/mock_connection_handler.h"
@@ -52,10 +54,11 @@
 #include "policy/usage_statistics/mock_statistics_manager.h"
 #include "protocol/bson_object_keys.h"
 #include "protocol_handler/mock_session_observer.h"
+#include "protocol_handler/mock_protocol_handler.h"
 #include "utils/custom_string.h"
 #include "utils/file_system.h"
 #include "utils/lock.h"
-#include "utils/make_shared.h"
+
 #include "utils/push_log.h"
 #include "encryption/hashing.h"
 
@@ -68,6 +71,7 @@ namespace policy_test = test::components::policy_handler_test;
 namespace con_test = connection_handler_test;
 
 using testing::_;
+using ::testing::An;
 using ::testing::Matcher;
 using ::testing::ByRef;
 using ::testing::DoAll;
@@ -97,17 +101,22 @@ const std::string kAppName = "appName";
 class ApplicationManagerImplTest : public ::testing::Test {
  public:
   ApplicationManagerImplTest()
-      : mock_storage_(
-            ::utils::MakeShared<NiceMock<resumption_test::MockResumptionData> >(
+      : app_id_(0u)
+      , mock_storage_(
+            std::make_shared<NiceMock<resumption_test::MockResumptionData> >(
                 mock_app_mngr_))
+      , mock_rpc_service_(new MockRPCService)
       , mock_message_helper_(
             application_manager::MockMessageHelper::message_helper_mock())
-      , app_id_(0u) {
+
+  {
+#ifdef ENABLE_LOG
     logger::create_log_message_loop_thread();
-    Mock::VerifyAndClearExpectations(&mock_message_helper_);
+#endif
+    Mock::VerifyAndClearExpectations(mock_message_helper_);
   }
   ~ApplicationManagerImplTest() {
-    Mock::VerifyAndClearExpectations(&mock_message_helper_);
+    Mock::VerifyAndClearExpectations(mock_message_helper_);
   }
 
  protected:
@@ -117,7 +126,7 @@ class ApplicationManagerImplTest : public ::testing::Test {
         .WillByDefault(DoAll(SetArgPointee<3u>(app_id_), Return(0)));
     ON_CALL(mock_connection_handler_, get_session_observer())
         .WillByDefault(ReturnRef(mock_session_observer_));
-
+    app_manager_impl_->SetRPCService(mock_rpc_service_);
     app_manager_impl_->resume_controller().set_resumption_storage(
         mock_storage_);
     app_manager_impl_->set_connection_handler(&mock_connection_handler_);
@@ -144,8 +153,8 @@ class ApplicationManagerImplTest : public ::testing::Test {
 
     app_manager_impl_.reset(new am::ApplicationManagerImpl(
         mock_application_manager_settings_, mock_policy_settings_));
-    mock_app_ptr_ = utils::SharedPtr<MockApplication>(new MockApplication());
-
+    mock_app_ptr_ = std::shared_ptr<MockApplication>(new MockApplication());
+    app_manager_impl_->set_protocol_handler(&mock_protocol_handler_);
     ASSERT_TRUE(app_manager_impl_.get());
     ASSERT_TRUE(mock_app_ptr_.get());
   }
@@ -180,31 +189,40 @@ class ApplicationManagerImplTest : public ::testing::Test {
                         Return(0)));
   }
 
+  bool CheckResumptionRequiredTransportAvailableTest(
+      smart_objects::SmartObject* app_types_array,
+      connection_handler::DeviceHandle primary_device_handle,
+      std::string primary_transport_device_string,
+      connection_handler::DeviceHandle secondary_device_handle,
+      std::string secondary_transport_device_string);
+
+  uint32_t app_id_;
   NiceMock<policy_test::MockPolicySettings> mock_policy_settings_;
-  utils::SharedPtr<NiceMock<resumption_test::MockResumptionData> >
-      mock_storage_;
+  std::shared_ptr<NiceMock<resumption_test::MockResumptionData> > mock_storage_;
+
+  std::unique_ptr<rpc_service::RPCService> mock_rpc_service_;
   NiceMock<con_test::MockConnectionHandler> mock_connection_handler_;
   NiceMock<protocol_handler_test::MockSessionObserver> mock_session_observer_;
   NiceMock<MockApplicationManagerSettings> mock_application_manager_settings_;
   application_manager_test::MockApplicationManager mock_app_mngr_;
-  std::auto_ptr<am::ApplicationManagerImpl> app_manager_impl_;
+  std::unique_ptr<am::ApplicationManagerImpl> app_manager_impl_;
   application_manager::MockMessageHelper* mock_message_helper_;
-  uint32_t app_id_;
-  utils::SharedPtr<MockApplication> mock_app_ptr_;
+
+  std::shared_ptr<MockApplication> mock_app_ptr_;
+  NiceMock<protocol_handler_test::MockProtocolHandler> mock_protocol_handler_;
 };
 
 TEST_F(ApplicationManagerImplTest, ProcessQueryApp_ExpectSuccess) {
   using namespace NsSmartDeviceLink::NsSmartObjects;
   SmartObject app_data;
   const uint32_t connection_key = 65537u;
-
   app_data[am::json::name] = "application_manager_test";
   app_data[am::json::appId] = app_id_;
   app_data[am::json::android] = "bucket";
   app_data[am::json::android][am::json::packageName] = "com.android.test";
   smart_objects::SmartObject sm_object(SmartType_Map);
   sm_object[am::json::response][0] = app_data;
-  SmartObjectSPtr sptr = MakeShared<SmartObject>(sm_object);
+  SmartObjectSPtr sptr = std::make_shared<SmartObject>(sm_object);
 
   ON_CALL(*mock_message_helper_, CreateModuleInfoSO(_, _))
       .WillByDefault(Return(sptr));
@@ -215,16 +233,14 @@ TEST_F(ApplicationManagerImplTest, ProcessQueryApp_ExpectSuccess) {
 
 TEST_F(ApplicationManagerImplTest,
        SubscribeAppForWayPoints_ExpectSubscriptionApp) {
-  auto app_ptr =
-      ApplicationSharedPtr::static_pointer_cast<am::Application>(mock_app_ptr_);
+  auto app_ptr = std::static_pointer_cast<am::Application>(mock_app_ptr_);
   app_manager_impl_->SubscribeAppForWayPoints(app_ptr);
   EXPECT_TRUE(app_manager_impl_->IsAppSubscribedForWayPoints(app_ptr));
 }
 
 TEST_F(ApplicationManagerImplTest,
        UnsubscribeAppForWayPoints_ExpectUnsubscriptionApp) {
-  auto app_ptr =
-      ApplicationSharedPtr::static_pointer_cast<am::Application>(mock_app_ptr_);
+  auto app_ptr = std::static_pointer_cast<am::Application>(mock_app_ptr_);
   app_manager_impl_->SubscribeAppForWayPoints(app_ptr);
   EXPECT_TRUE(app_manager_impl_->IsAppSubscribedForWayPoints(app_ptr));
   app_manager_impl_->UnsubscribeAppFromWayPoints(app_ptr);
@@ -238,19 +254,19 @@ TEST_F(
     ApplicationManagerImplTest,
     IsAnyAppSubscribedForWayPoints_SubcribeAppForWayPoints_ExpectCorrectResult) {
   EXPECT_FALSE(app_manager_impl_->IsAnyAppSubscribedForWayPoints());
-  app_manager_impl_->SubscribeAppForWayPoints(app_id_);
+  auto app_ptr = std::static_pointer_cast<am::Application>(mock_app_ptr_);
+  app_manager_impl_->SubscribeAppForWayPoints(app_ptr);
   EXPECT_TRUE(app_manager_impl_->IsAnyAppSubscribedForWayPoints());
 }
 
 TEST_F(
     ApplicationManagerImplTest,
     GetAppsSubscribedForWayPoints_SubcribeAppForWayPoints_ExpectCorrectResult) {
-  auto app_ptr =
-      ApplicationSharedPtr::static_pointer_cast<am::Application>(mock_app_ptr_);
+  auto app_ptr = std::static_pointer_cast<am::Application>(mock_app_ptr_);
   app_manager_impl_->SubscribeAppForWayPoints(app_ptr);
   std::set<int32_t> result = app_manager_impl_->GetAppsSubscribedForWayPoints();
   EXPECT_EQ(1u, result.size());
-  EXPECT_TRUE(result.find(app_ptr) != result.end());
+  EXPECT_TRUE(result.find(app_ptr->app_id()) != result.end());
 }
 
 TEST_F(ApplicationManagerImplTest, OnServiceStartedCallback_RpcService) {
@@ -680,9 +696,89 @@ TEST_F(ApplicationManagerImplTest,
 }
 
 TEST_F(ApplicationManagerImplTest,
+       OnSecondaryTransportStartedCallback_BeforeAppRegistration) {
+  const connection_handler::DeviceHandle device_handle = 1;
+  const int32_t session_key = 123;
+
+  // make sure that BC.UpdateAppList is not invoked
+  EXPECT_CALL(*mock_message_helper_,
+              CreateModuleInfoSO(
+                  hmi_apis::FunctionID::BasicCommunication_UpdateAppList, _))
+      .Times(0);
+
+  app_manager_impl_->OnSecondaryTransportStartedCallback(device_handle,
+                                                         session_key);
+}
+
+TEST_F(ApplicationManagerImplTest,
+       OnSecondaryTransportStartedCallback_AfterAppRegistration) {
+  using namespace NsSmartDeviceLink::NsSmartObjects;
+
+  AddMockApplication();
+  EXPECT_CALL(*mock_app_ptr_, app_id()).WillRepeatedly(Return(app_id_));
+
+  const connection_handler::DeviceHandle device_handle = 1;
+  const int32_t session_key = app_id_;
+
+  EXPECT_CALL(*mock_app_ptr_, set_secondary_device(device_handle)).Times(1);
+  // called by ResumeCtrlImpl::RetryResumption()
+  EXPECT_CALL(*mock_app_ptr_, deferred_resumption_hmi_level())
+      .WillOnce(Return(mobile_api::HMILevel::eType::INVALID_ENUM));
+
+  smart_objects::SmartObject dummy_object(SmartType_Map);
+  SmartObjectSPtr sptr = std::make_shared<SmartObject>(dummy_object);
+
+  EXPECT_CALL(*mock_message_helper_,
+              CreateModuleInfoSO(
+                  hmi_apis::FunctionID::BasicCommunication_UpdateAppList, _))
+      .WillOnce(Return(sptr));
+
+  app_manager_impl_->OnSecondaryTransportStartedCallback(device_handle,
+                                                         session_key);
+}
+
+TEST_F(ApplicationManagerImplTest,
+       OnSecondaryTransportEndedCallback_AfterAppRegistration) {
+  using namespace NsSmartDeviceLink::NsSmartObjects;
+
+  const connection_handler::DeviceHandle device_handle = 1;
+  const int32_t session_key = app_id_;
+
+  AddMockApplication();
+  EXPECT_CALL(*mock_app_ptr_, app_id()).WillRepeatedly(Return(app_id_));
+  EXPECT_CALL(*mock_app_ptr_, secondary_device())
+      .WillRepeatedly(Return(device_handle));
+
+  EXPECT_CALL(*mock_app_ptr_, set_secondary_device(0)).Times(1);
+
+  smart_objects::SmartObject dummy_object(SmartType_Map);
+  SmartObjectSPtr sptr = std::make_shared<SmartObject>(dummy_object);
+
+  EXPECT_CALL(*mock_message_helper_,
+              CreateModuleInfoSO(
+                  hmi_apis::FunctionID::BasicCommunication_UpdateAppList, _))
+      .WillOnce(Return(sptr));
+
+  app_manager_impl_->OnSecondaryTransportEndedCallback(session_key);
+}
+
+TEST_F(ApplicationManagerImplTest,
+       OnSecondaryTransportEndedCallback_BeforeAppRegistration) {
+  const int32_t session_key = app_id_;
+
+  // make sure that BC.UpdateAppList is not invoked
+  EXPECT_CALL(*mock_message_helper_,
+              CreateModuleInfoSO(
+                  hmi_apis::FunctionID::BasicCommunication_UpdateAppList, _))
+      .Times(0);
+
+  app_manager_impl_->OnSecondaryTransportEndedCallback(session_key);
+}
+
+TEST_F(ApplicationManagerImplTest,
        OnDeviceSwitchingStart_ExpectPutAppsInWaitList) {
-  utils::SharedPtr<MockApplication> switching_app_ptr =
-      utils::MakeShared<MockApplication>();
+  std::shared_ptr<MockApplication> switching_app_ptr =
+      std::make_shared<MockApplication>();
 
   const std::string switching_device_id = "switching";
   const std::string switching_device_id_hash =
@@ -699,8 +795,8 @@ TEST_F(ApplicationManagerImplTest,
   EXPECT_CALL(*switching_app_ptr, hmi_level())
       .WillRepeatedly(Return(hmi_level_switching_app));
 
-  utils::SharedPtr<MockApplication> nonswitching_app_ptr =
-      utils::MakeShared<MockApplication>();
+  std::shared_ptr<MockApplication> nonswitching_app_ptr =
+      std::make_shared<MockApplication>();
 
   const std::string nonswitching_device_id = "nonswitching";
   const std::string nonswitching_device_id_hash =
@@ -739,8 +835,14 @@ TEST_F(ApplicationManagerImplTest,
 
 TEST_F(ApplicationManagerImplTest,
        OnDeviceSwitchingFinish_ExpectUnregisterAppsInWaitList) {
-  utils::SharedPtr<MockApplication> switching_app_ptr =
-      utils::MakeShared<MockApplication>();
+  std::shared_ptr<MockApplication> switching_app_ptr =
+      std::make_shared<MockApplication>();
+
+  plugin_manager::MockRPCPluginManager* mock_rpc_plugin_manager =
+      new plugin_manager::MockRPCPluginManager;
+  std::unique_ptr<plugin_manager::RPCPluginManager> mock_rpc_plugin_manager_ptr(
+      mock_rpc_plugin_manager);
+  app_manager_impl_->SetPluginManager(mock_rpc_plugin_manager_ptr);
 
   const std::string switching_device_id = "switching";
   const std::string switching_device_id_hash =
@@ -757,8 +859,8 @@ TEST_F(ApplicationManagerImplTest,
   EXPECT_CALL(*switching_app_ptr, hmi_level())
       .WillRepeatedly(Return(hmi_level_switching_app));
 
-  utils::SharedPtr<MockApplication> nonswitching_app_ptr =
-      utils::MakeShared<MockApplication>();
+  std::shared_ptr<MockApplication> nonswitching_app_ptr =
+      std::make_shared<MockApplication>();
 
   const std::string nonswitching_device_id = "nonswitching";
   const std::string nonswitching_device_id_hash =
@@ -788,7 +890,6 @@ TEST_F(ApplicationManagerImplTest,
 
   EXPECT_CALL(*mock_message_helper_, CreateDeviceListSO(_, _, _))
       .WillOnce(Return(smart_objects::SmartObjectSPtr()));
-
   app_manager_impl_->OnDeviceSwitchingStart(switching_device,
                                             non_switching_device);
 
@@ -807,13 +908,13 @@ TEST_F(ApplicationManagerImplTest,
   const connection_handler::DeviceHandle device_id = 1;
   const custom_str::CustomString app_name("");
 
-  utils::SharedPtr<ApplicationImpl> app_impl = new ApplicationImpl(
+  std::shared_ptr<ApplicationImpl> app_impl = std::make_shared<ApplicationImpl>(
       application_id,
       policy_app_id,
       mac_address,
       device_id,
       app_name,
-      utils::SharedPtr<usage_statistics::StatisticsManager>(
+      std::shared_ptr<usage_statistics::StatisticsManager>(
           new usage_statistics_test::MockStatisticsManager()),
       *app_manager_impl_);
 
@@ -876,12 +977,16 @@ TEST_F(ApplicationManagerImplTest, UnregisterAnotherAppDuringAudioPassThru) {
   ON_CALL(mock_application_manager_settings_, recording_file_name())
       .WillByDefault(ReturnRef(dummy_file_name));
 
+  std::unique_ptr<plugin_manager::RPCPluginManager> mock_rpc_plugin_manager_ptr(
+      new plugin_manager::MockRPCPluginManager);
+  app_manager_impl_->SetPluginManager(mock_rpc_plugin_manager_ptr);
+
   const uint32_t app_id_1 = 65537;
   const uint32_t app_id_2 = 65538;
 
   std::string dummy_mac_address;
-  utils::SharedPtr<MockApplication> mock_app_1 =
-      utils::SharedPtr<MockApplication>(new MockApplication());
+  std::shared_ptr<MockApplication> mock_app_1 =
+      std::shared_ptr<MockApplication>(new MockApplication());
   EXPECT_CALL(*mock_app_1, app_id()).WillRepeatedly(Return(app_id_1));
   EXPECT_CALL(*mock_app_1, device()).WillRepeatedly(Return(0));
   EXPECT_CALL(*mock_app_1, mac_address())
@@ -891,8 +996,8 @@ TEST_F(ApplicationManagerImplTest, UnregisterAnotherAppDuringAudioPassThru) {
       .WillRepeatedly(
           Return(protocol_handler::MajorProtocolVersion::PROTOCOL_VERSION_4));
 
-  utils::SharedPtr<MockApplication> mock_app_2 =
-      utils::SharedPtr<MockApplication>(new MockApplication());
+  std::shared_ptr<MockApplication> mock_app_2 =
+      std::shared_ptr<MockApplication>(new MockApplication());
   EXPECT_CALL(*mock_app_2, app_id()).WillRepeatedly(Return(app_id_2));
   EXPECT_CALL(*mock_app_2, device()).WillRepeatedly(Return(0));
   EXPECT_CALL(*mock_app_2, mac_address())
@@ -946,6 +1051,324 @@ TEST_F(ApplicationManagerImplTest, UnregisterAnotherAppDuringAudioPassThru) {
   }
 }
 
+static std::map<std::string, std::vector<std::string> > CreateTransportMap() {
+  /*
+   * DefaultTransportRequiredForResumption = TCP_WIFI, IAP_USB, SPP_BLUETOOTH
+   * MediaTransportRequiredForResumption = TCP_WIFI, AOA_USB
+   * NavigationTransportRequiredForResumption = AOA_USB, SPP_BLUETOOTH
+   * TestingTransportRequiredForResumption =
+   * EmptyAppTransportRequiredForResumption = TCP_WIFI
+   */
+  std::string TCP_WIFI("TCP_WIFI");
+  std::string IAP_USB("IAP_USB");
+  std::string SPP_BLUETOOTH("SPP_BLUETOOTH");
+  std::string AOA_USB("AOA_USB");
+
+  std::vector<std::string> default_transports;
+  default_transports.push_back(TCP_WIFI);
+  default_transports.push_back(IAP_USB);
+  default_transports.push_back(SPP_BLUETOOTH);
+  std::vector<std::string> media_transports;
+  media_transports.push_back(TCP_WIFI);
+  media_transports.push_back(AOA_USB);
+  std::vector<std::string> navi_transports;
+  navi_transports.push_back(AOA_USB);
+  navi_transports.push_back(SPP_BLUETOOTH);
+  std::vector<std::string> testing_transports;
+  std::vector<std::string> empty_transports;
+  empty_transports.push_back(TCP_WIFI);
+
+  std::map<std::string, std::vector<std::string> > transport_map;
+  transport_map[std::string("DEFAULT")] = default_transports;
+  transport_map[std::string("MEDIA")] = media_transports;
+  transport_map[std::string("NAVIGATION")] = navi_transports;
+  transport_map[std::string("TESTING")] = testing_transports;
+  transport_map[std::string("EMPTY_APP")] = empty_transports;
+
+  return transport_map;
+}
+
+bool ApplicationManagerImplTest::CheckResumptionRequiredTransportAvailableTest(
+    smart_objects::SmartObject* app_types_array,
+    connection_handler::DeviceHandle primary_device_handle,
+    std::string primary_transport_device_string,
+    connection_handler::DeviceHandle secondary_device_handle,
+    std::string secondary_transport_device_string) {
+  EXPECT_CALL(*mock_app_ptr_, app_types())
+      .WillRepeatedly(Return(app_types_array));
+
+  std::map<std::string, std::vector<std::string> > transport_map =
+      CreateTransportMap();
+
+  EXPECT_CALL(mock_application_manager_settings_,
+              transport_required_for_resumption_map())
+      .WillRepeatedly(ReturnRef(transport_map));
+
+  EXPECT_CALL(*mock_app_ptr_, device())
+      .WillRepeatedly(Return(primary_device_handle));
+  EXPECT_CALL(*mock_app_ptr_, secondary_device())
+      .WillRepeatedly(Return(secondary_device_handle));
+
+  EXPECT_CALL(mock_session_observer_,
+              TransportTypeProfileStringFromDeviceHandle(primary_device_handle))
+      .WillOnce(Return(primary_transport_device_string));
+
+  if (secondary_device_handle != 0) {
+    EXPECT_CALL(
+        mock_session_observer_,
+        TransportTypeProfileStringFromDeviceHandle(secondary_device_handle))
+        .WillOnce(Return(secondary_transport_device_string));
+  } else {
+    EXPECT_CALL(mock_session_observer_,
+                TransportTypeProfileStringFromDeviceHandle(
+                    secondary_device_handle)).WillOnce(Return(std::string("")));
+  }
+
+  return app_manager_impl_->CheckResumptionRequiredTransportAvailable(
+      mock_app_ptr_);
+}
+
+TEST_F(ApplicationManagerImplTest,
+       CheckResumptionRequiredTransportAvailableTest_PrimaryOnly_Success) {
+  using namespace NsSmartDeviceLink::NsSmartObjects;
+
+  smart_objects::SmartObject app_types_array(SmartType_Array);
+  app_types_array[0] = mobile_apis::AppHMIType::eType::DEFAULT;
+
+  const connection_handler::DeviceHandle primary_device_handle = 1;
+  const connection_handler::DeviceHandle secondary_device_handle = 0;
+
+  // refer to transport_adapter_impl.cc
+  std::string primary_transport_device_string("SPP_BLUETOOTH");
+  std::string secondary_transport_device_string("");
+
+  // - The app is DEFAULT.
+  // - A DEFAULT app is allowed for resumption if either primary or secondary
+  //   transport is TCP_WIFI, IAP_USB or SPP_BLUETOOTH.
+  // - We have SPP_BLUETOOTH for primary transport.
+  //   -> Conclusion: the app has required transport.
+  bool result = CheckResumptionRequiredTransportAvailableTest(
+      &app_types_array,
+      primary_device_handle,
+      primary_transport_device_string,
+      secondary_device_handle,
+      secondary_transport_device_string);
+  EXPECT_TRUE(result);
+}
+
+TEST_F(ApplicationManagerImplTest,
+       CheckResumptionRequiredTransportAvailableTest_PrimaryOnly_NotListed) {
+  using namespace NsSmartDeviceLink::NsSmartObjects;
+
+  smart_objects::SmartObject app_types_array(SmartType_Array);
+  app_types_array[0] = mobile_apis::AppHMIType::eType::SOCIAL;
+
+  const connection_handler::DeviceHandle primary_device_handle = 1;
+  const connection_handler::DeviceHandle secondary_device_handle = 0;
+
+  std::string primary_transport_device_string("SPP_BLUETOOTH");
+  std::string secondary_transport_device_string("");
+
+  // - The app is SOCIAL.
+  // - We do not have an entry in .ini file for SOCIAL apps.
+  //   -> In this case, resumption is always enabled for backward compatibility.
+  bool result = CheckResumptionRequiredTransportAvailableTest(
+      &app_types_array,
+      primary_device_handle,
+      primary_transport_device_string,
+      secondary_device_handle,
+      secondary_transport_device_string);
+  EXPECT_TRUE(result);
+}
+
+TEST_F(ApplicationManagerImplTest,
+       CheckResumptionRequiredTransportAvailableTest_PrimaryOnly_Disabled) {
+  using namespace NsSmartDeviceLink::NsSmartObjects;
+
+  smart_objects::SmartObject app_types_array(SmartType_Array);
+  app_types_array[0] = mobile_apis::AppHMIType::eType::TESTING;
+
+  const connection_handler::DeviceHandle primary_device_handle = 1;
+  const connection_handler::DeviceHandle secondary_device_handle = 0;
+
+  std::string primary_transport_device_string("SPP_BLUETOOTH");
+  std::string secondary_transport_device_string("");
+
+  // - The app is TESTING.
+  // - We do not have any transports allowed for TESTING apps.
+  //   -> In this case, resumption is always disabled.
+  bool result = CheckResumptionRequiredTransportAvailableTest(
+      &app_types_array,
+      primary_device_handle,
+      primary_transport_device_string,
+      secondary_device_handle,
+      secondary_transport_device_string);
+  EXPECT_FALSE(result);
+}
+
+TEST_F(ApplicationManagerImplTest,
+       CheckResumptionRequiredTransportAvailableTest_PrimaryOnly_NoAppTypes) {
+  using namespace NsSmartDeviceLink::NsSmartObjects;
+
+  smart_objects::SmartObject app_types_array(SmartType_Array);
+  // we don't specify any app type
+
+  const connection_handler::DeviceHandle primary_device_handle = 1;
+  const connection_handler::DeviceHandle secondary_device_handle = 0;
+
+  std::string primary_transport_device_string("SPP_BLUETOOTH");
+  std::string secondary_transport_device_string("");
+
+  // - The app doesn't specify AppHMIType.
+  // - .ini file specifies TCP_WIFI for EMPTY_APP entry.
+  //   -> The app does not have required transport.
+  bool result = CheckResumptionRequiredTransportAvailableTest(
+      &app_types_array,
+      primary_device_handle,
+      primary_transport_device_string,
+      secondary_device_handle,
+      secondary_transport_device_string);
+  EXPECT_FALSE(result);
+}
+
+TEST_F(ApplicationManagerImplTest,
+       CheckResumptionRequiredTransportAvailableTest_PrimaryOnly_NoAppTypes2) {
+  using namespace NsSmartDeviceLink::NsSmartObjects;
+
+  const connection_handler::DeviceHandle primary_device_handle = 1;
+  const connection_handler::DeviceHandle secondary_device_handle = 0;
+
+  std::string primary_transport_device_string("SPP_BLUETOOTH");
+  std::string secondary_transport_device_string("");
+
+  // - The app doesn't specify AppHMIType.
+  // - .ini file specifies TCP_WIFI for EMPTY_APP entry.
+  //   -> The app does not have required transport.
+  bool result = CheckResumptionRequiredTransportAvailableTest(
+      NULL,
+      primary_device_handle,
+      primary_transport_device_string,
+      secondary_device_handle,
+      secondary_transport_device_string);
+  EXPECT_FALSE(result);
+}
+
+TEST_F(ApplicationManagerImplTest,
+       CheckResumptionRequiredTransportAvailableTest_TwoTransports_Success) {
+  using namespace NsSmartDeviceLink::NsSmartObjects;
+
+  smart_objects::SmartObject app_types_array(SmartType_Array);
+  app_types_array[0] = mobile_apis::AppHMIType::eType::MEDIA;
+
+  const connection_handler::DeviceHandle primary_device_handle = 1;
+  const connection_handler::DeviceHandle secondary_device_handle = 2;
+
+  // refer to transport_adapter_impl.cc
+  std::string primary_transport_device_string("SPP_BLUETOOTH");
+  std::string secondary_transport_device_string("TCP_WIFI");
+
+  // - The app is MEDIA.
+  // - A MEDIA app is allowed for resumption if either primary or secondary
+  //   transport is TCP_WIFI or AOA_USB.
+  // - We have TCP_WIFI for secondary transport.
+  //   -> Conclusion: the app has required transport.
+  bool result = CheckResumptionRequiredTransportAvailableTest(
+      &app_types_array,
+      primary_device_handle,
+      primary_transport_device_string,
+      secondary_device_handle,
+      secondary_transport_device_string);
+  EXPECT_TRUE(result);
+}
+
+TEST_F(ApplicationManagerImplTest,
+       CheckResumptionRequiredTransportAvailableTest_TwoTransports_Failure) {
+  using namespace NsSmartDeviceLink::NsSmartObjects;
+
+  smart_objects::SmartObject app_types_array(SmartType_Array);
+  app_types_array[0] = mobile_apis::AppHMIType::eType::NAVIGATION;
+
+  const connection_handler::DeviceHandle primary_device_handle = 1;
+  const connection_handler::DeviceHandle secondary_device_handle = 2;
+
+  // refer to transport_adapter_impl.cc
+  std::string primary_transport_device_string("IAP_USB");
+  std::string secondary_transport_device_string("TCP_WIFI");
+
+  // - The app is NAVIGATION.
+  // - A NAVIGATION app is allowed for resumption if either primary or secondary
+  //   transport is AOA_USB or SPP_BLUETOOTH.
+  // - We have IAP_USB for primary and TCP_WIFI for secondary transport.
+  //   -> Conclusion: the app does not have required transport.
+  bool result = CheckResumptionRequiredTransportAvailableTest(
+      &app_types_array,
+      primary_device_handle,
+      primary_transport_device_string,
+      secondary_device_handle,
+      secondary_transport_device_string);
+  EXPECT_FALSE(result);
+}
+
+TEST_F(ApplicationManagerImplTest,
+       CheckResumptionRequiredTransportAvailableTest_MultipleAppTypes_Failure) {
+  using namespace NsSmartDeviceLink::NsSmartObjects;
+
+  smart_objects::SmartObject app_types_array(SmartType_Array);
+  app_types_array[0] = mobile_apis::AppHMIType::eType::MEDIA;
+  app_types_array[1] = mobile_apis::AppHMIType::eType::NAVIGATION;
+
+  const connection_handler::DeviceHandle primary_device_handle = 1;
+  const connection_handler::DeviceHandle secondary_device_handle = 2;
+
+  std::string primary_transport_device_string("IAP_USB");
+  std::string secondary_transport_device_string("TCP_WIFI");
+
+  // - The app is MEDIA and NAVIGATION.
+  // - A MEDIA app is allowed for resumption if either primary or secondary
+  //   transport is TCP_WIFI or AOA_USB.
+  // - A NAVIGATION app is allowed for resumption if either primary or secondary
+  //   transport is AOA_USB or SPP_BLUETOOTH.
+  // - We have IAP_USB for primary and TCP_WIFI is secondary
+  //   -> Conclusion: the app does NOT have required transport.
+  bool result = CheckResumptionRequiredTransportAvailableTest(
+      &app_types_array,
+      primary_device_handle,
+      primary_transport_device_string,
+      secondary_device_handle,
+      secondary_transport_device_string);
+  EXPECT_FALSE(result);
+}
+
+TEST_F(ApplicationManagerImplTest,
+       CheckResumptionRequiredTransportAvailableTest_MultipleAppTypes_Empty) {
+  using namespace NsSmartDeviceLink::NsSmartObjects;
+
+  smart_objects::SmartObject app_types_array(SmartType_Array);
+  app_types_array[0] = mobile_apis::AppHMIType::eType::NAVIGATION;
+  app_types_array[1] = mobile_apis::AppHMIType::eType::SYSTEM;
+
+  const connection_handler::DeviceHandle primary_device_handle = 1;
+  const connection_handler::DeviceHandle secondary_device_handle = 2;
+
+  std::string primary_transport_device_string("IAP_USB");
+  std::string secondary_transport_device_string("TCP_WIFI");
+
+  // - The app is NAVIGATION and SYSTEM.
+  // - A NAVIGATION app is allowed for resumption if either primary or secondary
+  //   transport is AOA_USB or SPP_BLUETOOTH.
+  // - .ini file does not have an entry for SYSTEM apps. So any transport is
+  //   allowed.
+  // - We have SPP_BLUETOOTH for primary and TCP_WIFI is secondary
+  //   -> Conclusion: the app does NOT have required transport.
+  bool result = CheckResumptionRequiredTransportAvailableTest(
+      &app_types_array,
+      primary_device_handle,
+      primary_transport_device_string,
+      secondary_device_handle,
+      secondary_transport_device_string);
+  EXPECT_FALSE(result);
+}
+
 TEST_F(ApplicationManagerImplTest,
        RegisterApplication_PathToTheIconExists_IconWasSet) {
   file_system::CreateDirectory(kDirectoryName);
@@ -973,7 +1396,7 @@ TEST_F(ApplicationManagerImplTest,
       protocol_handler::MajorProtocolVersion::PROTOCOL_VERSION_2;
 
   smart_objects::SmartObjectSPtr request_for_registration_ptr =
-      MakeShared<smart_objects::SmartObject>(request_for_registration);
+      std::make_shared<smart_objects::SmartObject>(request_for_registration);
 
   ApplicationSharedPtr application =
       app_manager_impl_->RegisterApplication(request_for_registration_ptr);

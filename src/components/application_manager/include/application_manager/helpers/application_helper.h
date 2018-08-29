@@ -75,16 +75,6 @@ std::vector<ApplicationSharedPtr> FindAllApps(
 }
 
 /**
- * @brief The SubscribedToIVIPredicate is predicate for lookup within
- * applications list for apps subscribed for specific vehicle data
- */
-struct SubscribedToIVIPredicate {
-  uint32_t vehicle_info_;
-  explicit SubscribedToIVIPredicate(uint32_t vehicle_info);
-  bool operator()(const ApplicationSharedPtr app) const;
-};
-
-/**
  * @brief RecallApplicationData cleans up data within application instance to
  * its initial state and notifies HMI to delete same data on its side
  * @param app Application to clean its data

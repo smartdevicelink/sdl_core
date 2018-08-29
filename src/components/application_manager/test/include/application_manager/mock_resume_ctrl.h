@@ -50,13 +50,21 @@ class MockResumeCtrl : public resumption::ResumeCtrl {
   MOCK_METHOD0(OnSuspend, void());
   MOCK_METHOD0(OnIgnitionOff, void());
   MOCK_METHOD0(OnAwake, void());
+  MOCK_CONST_METHOD0(LowVoltageTime, time_t());
+  MOCK_CONST_METHOD0(WakeUpTime, time_t());
+  MOCK_METHOD0(SaveLowVoltageTime, void());
+  MOCK_METHOD0(SaveWakeUpTime, void());
+  MOCK_METHOD0(ResetLowVoltageTime, void());
+  MOCK_METHOD0(ResetWakeUpTime, void());
   MOCK_CONST_METHOD0(is_suspended, bool());
   MOCK_METHOD0(StopSavePersistentDataTimer, void());
+  MOCK_METHOD0(StartSavePersistentDataTimer, void());
   MOCK_METHOD2(StartResumption,
                bool(app_mngr::ApplicationSharedPtr application,
                     const std::string& hash));
   MOCK_METHOD1(StartResumptionOnlyHMILevel,
                bool(app_mngr::ApplicationSharedPtr application));
+  MOCK_METHOD1(RetryResumption, void(const uint32_t app_id));
   MOCK_METHOD1(CheckPersistenceFilesForResumption,
                bool(app_mngr::ApplicationSharedPtr application));
   MOCK_METHOD2(CheckApplicationHash,
@@ -95,7 +103,8 @@ class MockResumeCtrl : public resumption::ResumeCtrl {
 
 #ifdef BUILD_TESTS
   MOCK_METHOD1(set_resumption_storage,
-               void(utils::SharedPtr<resumption::ResumptionData> mock_storage));
+               void(std::shared_ptr<resumption::ResumptionData> mock_storage));
+  MOCK_CONST_METHOD0(get_resumption_active, bool());
 #endif  // BUILD_TESTS
 };
 

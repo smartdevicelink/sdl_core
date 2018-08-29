@@ -41,12 +41,13 @@
 #include "application_manager/mock_message_helper.h"
 #include "smart_objects/enum_schema_item.h"
 #include "interfaces/HMI_API.h"
-#include "utils/make_shared.h"
+
 #include "application_manager/hmi_capabilities_for_testing.h"
 #include "utils/file_system.h"
 #include "application_manager/mock_application_manager.h"
 #include "application_manager/mock_application_manager_settings.h"
 #include "application_manager/mock_event_dispatcher.h"
+#include "application_manager/mock_rpc_service.h"
 #include "application_manager/state_controller.h"
 #include "resumption/last_state_impl.h"
 #include "application_manager/resumption/resume_ctrl.h"
@@ -81,7 +82,7 @@ class HMICapabilitiesTest : public ::testing::Test {
     EXPECT_CALL(mock_application_manager_settings_, launch_hmi())
         .WillOnce(Return(false));
     hmi_capabilities_test =
-        utils::MakeShared<HMICapabilitiesForTesting>(app_mngr_);
+        std::make_shared<HMICapabilitiesForTesting>(app_mngr_);
     hmi_capabilities_test->Init(&last_state_);
   }
 
@@ -99,8 +100,9 @@ class HMICapabilitiesTest : public ::testing::Test {
   event_engine_test::MockEventDispatcher mock_event_dispatcher;
   resumption::LastStateImpl last_state_;
   MockApplicationManagerSettings mock_application_manager_settings_;
-  utils::SharedPtr<HMICapabilitiesForTesting> hmi_capabilities_test;
+  std::shared_ptr<HMICapabilitiesForTesting> hmi_capabilities_test;
   const std::string file_name_;
+  application_manager_test::MockRPCService mock_rpc_service_;
 };
 
 const char* const cstring_values_[] = {
@@ -253,7 +255,7 @@ TEST_F(HMICapabilitiesTest, LoadCapabilitiesFromFile) {
 
   // Count of buttons in json file
   const uint32_t btn_length = buttons_capabilities_so.length();
-  EXPECT_EQ(15u, btn_length);
+  EXPECT_EQ(16u, btn_length);
   for (uint32_t i = 0; i < btn_length; ++i) {
     EXPECT_TRUE((buttons_capabilities_so[i]).keyExists(strings::name));
     EXPECT_TRUE((buttons_capabilities_so[i]).keyExists("shortPressAvailable"));
@@ -504,8 +506,8 @@ TEST_F(HMICapabilitiesTest,
     EXPECT_TRUE(::file_system::DeleteFile("./app_info_data"));
   }
 
-  utils::SharedPtr<HMICapabilitiesForTesting> hmi_capabilities =
-      utils::MakeShared<HMICapabilitiesForTesting>(mock_app_mngr);
+  std::shared_ptr<HMICapabilitiesForTesting> hmi_capabilities =
+      std::make_shared<HMICapabilitiesForTesting>(mock_app_mngr);
   hmi_capabilities->Init(&last_state_);
 
   // Check system capabilities; only phone capability is available
@@ -544,8 +546,8 @@ TEST_F(HMICapabilitiesTest,
     EXPECT_TRUE(::file_system::DeleteFile("./app_info_data"));
   }
 
-  utils::SharedPtr<HMICapabilitiesForTesting> hmi_capabilities =
-      utils::MakeShared<HMICapabilitiesForTesting>(mock_app_mngr);
+  std::shared_ptr<HMICapabilitiesForTesting> hmi_capabilities =
+      std::make_shared<HMICapabilitiesForTesting>(mock_app_mngr);
   hmi_capabilities->Init(&last_state_);
 
   // Check system capabilities; only navigation capability is valid, the other
@@ -581,7 +583,8 @@ void HMICapabilitiesTest::SetCooperating() {
   smart_objects::SmartObjectSPtr test_so;
   EXPECT_CALL(*(MockMessageHelper::message_helper_mock()),
               CreateModuleInfoSO(_, _)).WillRepeatedly(Return(test_so));
-  EXPECT_CALL(app_mngr_, ManageHMICommand(_)).WillRepeatedly(Return(true));
+  EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_))
+      .WillRepeatedly(Return(true));
 }
 
 TEST_F(HMICapabilitiesTest, SetVRCooperating) {

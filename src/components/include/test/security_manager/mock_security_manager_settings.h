@@ -50,8 +50,12 @@ class MockCryptoManagerSettings
   MOCK_CONST_METHOD0(certificate_data, const std::string&());
   MOCK_CONST_METHOD0(ciphers_list, const std::string&());
   MOCK_CONST_METHOD0(ca_cert_path, const std::string&());
+  MOCK_CONST_METHOD0(module_cert_path, const std::string&());
+  MOCK_CONST_METHOD0(module_key_path, const std::string&());
   MOCK_CONST_METHOD0(update_before_hours, size_t());
   MOCK_CONST_METHOD0(maximum_payload_size, size_t());
+  MOCK_CONST_METHOD0(force_protected_service, const std::vector<int>&());
+  MOCK_CONST_METHOD0(force_unprotected_service, const std::vector<int>&());
 };
 
 }  // namespace security_manager_test

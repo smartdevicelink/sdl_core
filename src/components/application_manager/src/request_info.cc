@@ -51,7 +51,7 @@ HMIRequestInfo::HMIRequestInfo(RequestPtr request, const uint64_t timeout_msec)
 }
 
 HMIRequestInfo::HMIRequestInfo(RequestPtr request,
-                               const TimevalStruct& start_time,
+                               const date_time::TimeDuration& start_time,
                                const uint64_t timeout_msec)
     : RequestInfo(request, HMIRequest, start_time, timeout_msec) {
   correlation_id_ = request_->correlation_id();
@@ -66,7 +66,7 @@ MobileRequestInfo::MobileRequestInfo(RequestPtr request,
 }
 
 MobileRequestInfo::MobileRequestInfo(RequestPtr request,
-                                     const TimevalStruct& start_time,
+                                     const date_time::TimeDuration& start_time,
                                      const uint64_t timeout_msec)
     : RequestInfo(request, MobileRequest, start_time, timeout_msec) {
   correlation_id_ = request_.get()->correlation_id();
@@ -75,7 +75,7 @@ MobileRequestInfo::MobileRequestInfo(RequestPtr request,
 
 RequestInfo::RequestInfo(RequestPtr request,
                          const RequestInfo::RequestType requst_type,
-                         const TimevalStruct& start_time,
+                         const date_time::TimeDuration& start_time,
                          const uint64_t timeout_msec)
     : request_(request), start_time_(start_time), timeout_msec_(timeout_msec) {
   updateEndTime();
@@ -85,8 +85,8 @@ RequestInfo::RequestInfo(RequestPtr request,
 }
 
 void application_manager::request_controller::RequestInfo::updateEndTime() {
-  end_time_ = date_time::DateTime::getCurrentTime();
-  date_time::DateTime::AddMilliseconds(end_time_, timeout_msec_);
+  end_time_ = date_time::getCurrentTime();
+  date_time::AddMilliseconds(end_time_, timeout_msec_);
 }
 
 void RequestInfo::updateTimeOut(const uint64_t& timeout_msec) {
@@ -95,9 +95,8 @@ void RequestInfo::updateTimeOut(const uint64_t& timeout_msec) {
 }
 
 bool RequestInfo::isExpired() {
-  TimevalStruct curr_time = date_time::DateTime::getCurrentTime();
-  return date_time::DateTime::getmSecs(end_time_) <=
-         date_time::DateTime::getmSecs(curr_time);
+  date_time::TimeDuration curr_time = date_time::getCurrentTime();
+  return date_time::getmSecs(end_time_) <= date_time::getmSecs(curr_time);
 }
 
 uint64_t RequestInfo::hash() {
@@ -151,7 +150,7 @@ RequestInfoPtr RequestInfoSet::Find(const uint32_t connection_key,
   RequestInfoPtr result;
 
   // Request info for searching in request info set by log_n time
-  utils::SharedPtr<FakeRequestInfo> request_info_for_search(
+  std::shared_ptr<FakeRequestInfo> request_info_for_search(
       new FakeRequestInfo(connection_key, correlation_id));
 
   sync_primitives::AutoLock lock(this_lock_);
@@ -283,7 +282,7 @@ bool RequestInfoSet::AppIdCompararator::operator()(
 bool RequestInfoTimeComparator::operator()(const RequestInfoPtr lhs,
                                            const RequestInfoPtr rhs) const {
   date_time::TimeCompare compare_result =
-      date_time::DateTime::compareTime(lhs->end_time(), rhs->end_time());
+      date_time::compareTime(lhs->end_time(), rhs->end_time());
   if (compare_result == date_time::LESS) {
     return true;
   } else if (compare_result == date_time::GREATER) {

@@ -51,11 +51,10 @@
 #include "utils/macro.h"
 #include "utils/file_system.h"
 #include "utils/date_time.h"
-#include "utils/make_shared.h"
+
 #include "utils/gen_hash.h"
-#ifdef SDL_REMOTE_CONTROL
 #include "policy/mock_access_remote.h"
-#endif  // SDL_REMOTE_CONTROL
+
 using ::testing::ReturnRef;
 using ::testing::DoAll;
 using ::testing::SetArgReferee;
@@ -146,20 +145,15 @@ class PolicyManagerImplTest : public ::testing::Test {
   MockCacheManagerInterface* cache_manager;
   NiceMock<MockPolicyListener> listener;
   const std::string device_id;
-#ifdef SDL_REMOTE_CONTROL
-  utils::SharedPtr<access_remote_test::MockAccessRemote> access_remote;
-#endif  // SDL_REMOTE_CONTROL
+  std::shared_ptr<access_remote_test::MockAccessRemote> access_remote;
 
   void SetUp() OVERRIDE {
     manager = new PolicyManagerImpl();
     manager->set_listener(&listener);
     cache_manager = new MockCacheManagerInterface();
     manager->set_cache_manager(cache_manager);
-
-#ifdef SDL_REMOTE_CONTROL
-    access_remote = new access_remote_test::MockAccessRemote();
+    access_remote = std::shared_ptr<access_remote_test::MockAccessRemote>();
     manager->set_access_remote(access_remote);
-#endif  // SDL_REMOTE_CONTROL
   }
 
   void TearDown() OVERRIDE {
@@ -208,6 +202,7 @@ class PolicyManagerImplTest2 : public ::testing::Test {
     manager = new PolicyManagerImpl();
     ON_CALL(policy_settings_, app_storage_folder())
         .WillByDefault(ReturnRef(kAppStorageFolder));
+    ON_CALL(policy_settings_, use_full_app_id()).WillByDefault(Return(true));
     manager->set_listener(&listener);
     const char* levels[] = {"BACKGROUND", "FULL", "LIMITED", "NONE"};
     hmi_level.assign(levels, levels + sizeof(levels) / sizeof(levels[0]));
@@ -244,6 +239,7 @@ class PolicyManagerImplTest2 : public ::testing::Test {
     file_system::remove_directory_content(kAppStorageFolder);
     ON_CALL(policy_settings_, app_storage_folder())
         .WillByDefault(ReturnRef(kAppStorageFolder));
+    ON_CALL(policy_settings_, use_full_app_id()).WillByDefault(Return(true));
     ASSERT_TRUE(manager->InitPT(file_name, &policy_settings_));
   }
 
@@ -358,7 +354,7 @@ class PolicyManagerImplTest2 : public ::testing::Test {
     // Get cache
     ::policy::CacheManagerInterfaceSPtr cache = manager->GetCache();
     // Get table_snapshot
-    utils::SharedPtr<policy_table::Table> table = cache->GenerateSnapshot();
+    std::shared_ptr<policy_table::Table> table = cache->GenerateSnapshot();
     // Set functional groupings from policy table
     input_functional_groupings = table->policy_table.functional_groupings;
   }
@@ -472,6 +468,7 @@ TEST_F(PolicyManagerImplTest, GetNotificationsNumber) {
 
 TEST_F(PolicyManagerImplTest2, GetNotificationsNumberAfterPTUpdate) {
   // Arrange
+  CreateLocalPT("sdl_preloaded_pt.json");
   Json::Value table = CreatePTforLoad();
   manager->ForcePTExchange();
   manager->SetSendOnUpdateSentOut(false);
@@ -510,6 +507,7 @@ TEST_F(PolicyManagerImplTest2, GetNotificationsNumberAfterPTUpdate) {
 }
 
 TEST_F(PolicyManagerImplTest2, IsAppRevoked_SetRevokedAppID_ExpectAppRevoked) {
+  CreateLocalPT("sdl_preloaded_pt.json");
   // Arrange
   std::ifstream ifile("sdl_preloaded_pt.json");
   Json::Reader reader;
@@ -726,8 +724,8 @@ TEST_F(PolicyManagerImplTest, LoadPT_SetPT_PTIsLoaded) {
   const std::string json = table.toStyledString();
   ::policy::BinaryMessage msg(json.begin(), json.end());
 
-  utils::SharedPtr<policy_table::Table> snapshot =
-      utils::MakeShared<policy_table::Table>(update.policy_table);
+  std::shared_ptr<policy_table::Table> snapshot =
+      std::make_shared<policy_table::Table>(update.policy_table);
   // Assert
   EXPECT_CALL(*cache_manager, GenerateSnapshot()).WillOnce(Return(snapshot));
   EXPECT_CALL(*cache_manager, ApplyUpdate(_)).WillOnce(Return(true));
@@ -840,9 +838,9 @@ TEST_F(PolicyManagerImplTest2,
        PTUpdatedAt_DaysNotExceedLimit_ExpectNoUpdateRequired) {
   // Arrange
   CreateLocalPT("sdl_preloaded_pt.json");
-  TimevalStruct current_time = date_time::DateTime::getCurrentTime();
+  date_time::TimeDuration current_time = date_time::getCurrentTime();
   const int kSecondsInDay = 60 * 60 * 24;
-  int days = current_time.tv_sec / kSecondsInDay;
+  int days = date_time::getSecs(current_time) / kSecondsInDay;
   EXPECT_EQ("UP_TO_DATE", manager->GetPolicyTableStatus());
 
   GetPTU("valid_sdl_pt_update.json");
@@ -900,24 +898,24 @@ TEST_F(PolicyManagerImplTest2, NextRetryTimeout_ExpectTimeoutsFromPT) {
     uint32_t timeout_after_x_seconds =
         root["policy_table"]["module_config"]["timeout_after_x_seconds"]
             .asInt() *
-        date_time::DateTime::MILLISECONDS_IN_SECOND;
+        date_time::MILLISECONDS_IN_SECOND;
     const uint32_t first_retry = timeout_after_x_seconds;
     EXPECT_EQ(first_retry, manager->NextRetryTimeout());
-    uint32_t next_retry = first_retry +
-                          seconds_between_retries[0].asInt() *
-                              date_time::DateTime::MILLISECONDS_IN_SECOND;
+    uint32_t next_retry =
+        first_retry +
+        seconds_between_retries[0].asInt() * date_time::MILLISECONDS_IN_SECOND;
     EXPECT_EQ(next_retry, manager->NextRetryTimeout());
-    next_retry = first_retry + next_retry +
-                 seconds_between_retries[1].asInt() *
-                     date_time::DateTime::MILLISECONDS_IN_SECOND;
+    next_retry =
+        first_retry + next_retry +
+        seconds_between_retries[1].asInt() * date_time::MILLISECONDS_IN_SECOND;
     EXPECT_EQ(next_retry, manager->NextRetryTimeout());
-    next_retry = first_retry + next_retry +
-                 seconds_between_retries[2].asInt() *
-                     date_time::DateTime::MILLISECONDS_IN_SECOND;
+    next_retry =
+        first_retry + next_retry +
+        seconds_between_retries[2].asInt() * date_time::MILLISECONDS_IN_SECOND;
     EXPECT_EQ(next_retry, manager->NextRetryTimeout());
-    next_retry = first_retry + next_retry +
-                 seconds_between_retries[3].asInt() *
-                     date_time::DateTime::MILLISECONDS_IN_SECOND;
+    next_retry =
+        first_retry + next_retry +
+        seconds_between_retries[3].asInt() * date_time::MILLISECONDS_IN_SECOND;
     EXPECT_EQ(next_retry, manager->NextRetryTimeout());
   }
 }
@@ -967,7 +965,7 @@ TEST_F(PolicyManagerImplTest2, UpdatedPreloadedPT_ExpectLPT_IsUpdated) {
 
   // Arrange
   ::policy::CacheManagerInterfaceSPtr cache = manager->GetCache();
-  utils::SharedPtr<policy_table::Table> table = cache->GenerateSnapshot();
+  std::shared_ptr<policy_table::Table> table = cache->GenerateSnapshot();
   // Get FunctionalGroupings
   policy_table::FunctionalGroupings& fc =
       table->policy_table.functional_groupings;
@@ -1259,7 +1257,7 @@ TEST_F(PolicyManagerImplTest2,
   // Arrange
   CreateLocalPT("sdl_preloaded_pt.json");
   GetPTU("valid_sdl_pt_update.json");
-  utils::SharedPtr<policy_table::Table> pt = (manager->GetCache())->pt();
+  std::shared_ptr<policy_table::Table> pt = (manager->GetCache())->pt();
   policy_table::ModuleConfig& module_config = pt->policy_table.module_config;
   ::policy::VehicleInfo vehicle_info = manager->GetVehicleInfo();
 
@@ -1340,7 +1338,7 @@ TEST_F(
     HertBeatTimeout_AddApp_UpdateAppPolicies_ExpectReceivedHertBeatTimeoutCorrect) {
   // Arrange
   CreateLocalPT("sdl_preloaded_pt.json");
-  utils::SharedPtr<policy_table::Table> pt = (manager->GetCache())->pt();
+  std::shared_ptr<policy_table::Table> pt = (manager->GetCache())->pt();
   ::policy_table::PolicyTableType type1 =
       ::policy_table::PolicyTableType::PT_PRELOADED;
   pt->SetPolicyTableType(type1);

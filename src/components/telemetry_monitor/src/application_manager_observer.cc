@@ -30,7 +30,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 #include "telemetry_monitor/application_manager_observer.h"
-#include "utils/shared_ptr.h"
+
 #include "telemetry_monitor/telemetry_monitor.h"
 #include "telemetry_monitor/application_manager_metric_wrapper.h"
 
@@ -41,8 +41,8 @@ ApplicationManagerObserver::ApplicationManagerObserver(
     : telemetry_monitor_(telemetry_monitor) {}
 
 void ApplicationManagerObserver::OnMessage(
-    utils::SharedPtr<MessageMetric> metric) {
-  ApplicationManagerMetricWrapper* m = new ApplicationManagerMetricWrapper();
+    std::shared_ptr<MessageMetric> metric) {
+  auto m = std::make_shared<ApplicationManagerMetricWrapper>();
   m->message_metric = metric;
   m->grabResources();
   telemetry_monitor_->SendMetric(m);

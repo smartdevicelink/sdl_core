@@ -86,7 +86,7 @@ class HMIMessageHandlerImplTest : public ::testing::Test {
 
   hmi_message_handler::MessageSharedPointer CreateMessage() {
     // The ServiceType doesn't really matter
-    return new application_manager::Message(
+    return std::make_shared<application_manager::Message>(
         protocol_handler::MessagePriority::FromServiceType(
             protocol_handler::ServiceType::kInvalidServiceType));
   }
@@ -104,7 +104,7 @@ TEST_F(HMIMessageHandlerImplTest,
 TEST_F(HMIMessageHandlerImplTest,
        OnErrorSending_NotEmptyMessage_ExpectOnErrorSendingProceeded) {
   // Arrange
-  utils::SharedPtr<application_manager::Message> message = CreateMessage();
+  std::shared_ptr<application_manager::Message> message = CreateMessage();
 
   EXPECT_CALL(*mock_hmi_message_observer_, OnErrorSending(message));
   // Act
@@ -113,7 +113,7 @@ TEST_F(HMIMessageHandlerImplTest,
 
 TEST_F(HMIMessageHandlerImplTest, OnErrorSending_InvalidObserver_Cancelled) {
   // Arrange
-  utils::SharedPtr<application_manager::Message> message = CreateMessage();
+  std::shared_ptr<application_manager::Message> message = CreateMessage();
 
   hmi_handler_->set_message_observer(NULL);
   EXPECT_CALL(*mock_hmi_message_observer_, OnErrorSending(_)).Times(0);

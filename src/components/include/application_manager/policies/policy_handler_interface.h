@@ -40,7 +40,6 @@
 #include <queue>
 #include "interfaces/MOBILE_API.h"
 #include "application_manager/policies/policy_handler_observer.h"
-#include "application_manager/core_service.h"
 #include "application_manager/application.h"
 #include "policy/usage_statistics/statistics_manager.h"
 #include "utils/custom_string.h"
@@ -53,7 +52,7 @@
 
 using namespace ::rpc::policy_table_interface_base;
 namespace policy {
-typedef utils::SharedPtr<utils::Callable> StatusNotifier;
+typedef std::shared_ptr<utils::Callable> StatusNotifier;
 
 class PolicyHandlerInterface {
  public:
@@ -125,7 +124,7 @@ class PolicyHandlerInterface {
   virtual void add_listener(PolicyHandlerObserver* listener) = 0;
   virtual void remove_listener(PolicyHandlerObserver* listener) = 0;
 
-  virtual utils::SharedPtr<usage_statistics::StatisticsManager>
+  virtual std::shared_ptr<usage_statistics::StatisticsManager>
   GetStatisticManager() const = 0;
 
   virtual void SendOnAppPermissionsChanged(
@@ -471,7 +470,6 @@ class PolicyHandlerInterface {
   virtual void OnDeviceSwitching(const std::string& device_id_from,
                                  const std::string& device_id_to) = 0;
 
-#ifdef SDL_REMOTE_CONTROL
   /**
    * @brief Sets HMI default type for specified application
    * @param application_id ID application
@@ -536,7 +534,6 @@ class PolicyHandlerInterface {
    */
   virtual bool GetModuleTypes(const std::string& policy_app_id,
                               std::vector<std::string>* modules) const = 0;
-#endif  // SDL_REMOTE_CONTROL
 
  private:
 /**

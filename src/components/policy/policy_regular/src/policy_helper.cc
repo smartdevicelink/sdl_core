@@ -121,8 +121,8 @@ bool operator!=(const policy_table::ApplicationParams& first,
 
 CheckAppPolicy::CheckAppPolicy(
     PolicyManagerImpl* pm,
-    const utils::SharedPtr<policy_table::Table> update,
-    const utils::SharedPtr<policy_table::Table> snapshot)
+    const std::shared_ptr<policy_table::Table> update,
+    const std::shared_ptr<policy_table::Table> snapshot)
     : pm_(pm), update_(update), snapshot_(snapshot) {}
 
 bool policy::CheckAppPolicy::HasRevokedGroups(

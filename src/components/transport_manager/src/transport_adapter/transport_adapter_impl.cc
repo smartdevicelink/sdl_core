@@ -43,18 +43,24 @@
 namespace transport_manager {
 namespace transport_adapter {
 
+const char* tc_enabled = "enabled";
+const char* tc_tcp_port = "tcp_port";
+const char* tc_tcp_ip_address = "tcp_ip_address";
+
 CREATE_LOGGERPTR_GLOBAL(logger_, "TransportManager")
 namespace {
-// @deprecated DeviceTypes: PASA_AOA, PASA_BLUETOOTH, MME
 DeviceTypes devicesType = {
     std::make_pair(DeviceType::AOA, std::string("USB_AOA")),
-    std::make_pair(DeviceType::PASA_AOA, std::string("USB_AOA")),
     std::make_pair(DeviceType::BLUETOOTH, std::string("BLUETOOTH")),
-    std::make_pair(DeviceType::PASA_BLUETOOTH, std::string("BLUETOOTH")),
-    std::make_pair(DeviceType::MME, std::string("USB_IOS")),
     std::make_pair(DeviceType::IOS_BT, std::string("BLUETOOTH_IOS")),
     std::make_pair(DeviceType::IOS_USB, std::string("USB_IOS")),
-    std::make_pair(DeviceType::TCP, std::string("WIFI"))};
+    std::make_pair(DeviceType::TCP, std::string("WIFI")),
+    std::make_pair(DeviceType::IOS_USB_HOST_MODE,
+                   std::string("USB_IOS_HOST_MODE")),
+    std::make_pair(DeviceType::IOS_USB_DEVICE_MODE,
+                   std::string("USB_IOS_DEVICE_MODE")),
+    std::make_pair(DeviceType::IOS_CARPLAY_WIRELESS,
+                   std::string("CARPLAY_WIRELESS_IOS"))};
 }
 
 TransportAdapterImpl::TransportAdapterImpl(
@@ -695,6 +701,16 @@ void TransportAdapterImpl::DataSendFailed(
   LOG4CXX_TRACE(logger_, "exit");
 }
 
+void TransportAdapterImpl::TransportConfigUpdated(
+    const TransportConfig& new_config) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  for (TransportAdapterListenerList::iterator it = listeners_.begin();
+       it != listeners_.end();
+       ++it) {
+    (*it)->OnTransportConfigUpdated(this);
+  }
+}
+
 void TransportAdapterImpl::DoTransportSwitch() const {
   LOG4CXX_AUTO_TRACE(logger_);
   std::for_each(
@@ -803,16 +819,16 @@ ApplicationList TransportAdapterImpl::GetApplicationList(
     const DeviceUID& device_id) const {
   LOG4CXX_TRACE(logger_, "enter. device_id: " << &device_id);
   DeviceSptr device = FindDevice(device_id);
-  if (device.valid()) {
+  if (device.use_count() != 0) {
     ApplicationList lst = device->GetApplicationList();
     LOG4CXX_TRACE(logger_,
                   "exit with ApplicationList. It's size = "
-                      << lst.size() << " Condition: device.valid()");
+                      << lst.size() << " Condition: device.use_count() != 0");
     return lst;
   }
-  LOG4CXX_TRACE(
-      logger_,
-      "exit with empty ApplicationList. Condition: NOT device.valid()");
+  LOG4CXX_TRACE(logger_,
+                "exit with empty ApplicationList. Condition: NOT "
+                "device.use_count() != 0");
   return ApplicationList();
 }
 
@@ -875,7 +891,7 @@ bool TransportAdapterImpl::IsInitialised() const {
 
 std::string TransportAdapterImpl::DeviceName(const DeviceUID& device_id) const {
   DeviceSptr device = FindDevice(device_id);
-  if (device.valid()) {
+  if (device.use_count() != 0) {
     return device->name();
   } else {
     return "";

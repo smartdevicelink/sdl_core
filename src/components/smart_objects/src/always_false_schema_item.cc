@@ -37,19 +37,17 @@ namespace NsSmartObjects {
 
 CAlwaysFalseSchemaItem::CAlwaysFalseSchemaItem() {}
 
-utils::SharedPtr<CAlwaysFalseSchemaItem> CAlwaysFalseSchemaItem::create() {
-  return new CAlwaysFalseSchemaItem();
-}
-
-Errors::eType CAlwaysFalseSchemaItem::validate(const SmartObject& object) {
-  rpc::ValidationReport report("RPC");
-  return validate(object, &report);
+std::shared_ptr<CAlwaysFalseSchemaItem> CAlwaysFalseSchemaItem::create() {
+  return std::shared_ptr<CAlwaysFalseSchemaItem>(new CAlwaysFalseSchemaItem());
 }
 
 Errors::eType CAlwaysFalseSchemaItem::validate(
-    const SmartObject& object, rpc::ValidationReport* report__) {
+    const SmartObject& Object,
+    rpc::ValidationReport* report__,
+    const utils::SemanticVersion& MessageVersion) {
   report__->set_validation_info("Generic error");
   return Errors::ERROR;
 }
+
 }  // namespace NsSmartObjects
 }  // namespace NsSmartDeviceLink
