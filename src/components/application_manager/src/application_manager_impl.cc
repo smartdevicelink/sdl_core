@@ -600,7 +600,7 @@ ApplicationSharedPtr ApplicationManagerImpl::RegisterApplication(
     connection_handler().BindProtocolVersionWithSession(
         connection_key, static_cast<uint8_t>(protocol_version));
   }
-  if ((protocol_version ==
+  if ((protocol_version >=
        protocol_handler::MajorProtocolVersion::PROTOCOL_VERSION_3) &&
       (get_settings().heart_beat_timeout() != 0)) {
     connection_handler().StartSessionHeartBeat(connection_key);
