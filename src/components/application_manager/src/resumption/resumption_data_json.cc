@@ -41,7 +41,7 @@
 
 namespace resumption {
 
-namespace Formatters = NsSmartDeviceLink::NsJSONHandler::Formatters;
+namespace formatters = ns_smart_device_link::ns_json_handler::formatters;
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "Resumption")
 
@@ -81,22 +81,22 @@ void ResumptionDataJson::SaveApplication(
   json_app[strings::hmi_level] = static_cast<int32_t>(hmi_level);
   json_app[strings::ign_off_count] = 0;
   json_app[strings::hash_id] = hash;
-  Formatters::CFormatterJsonBase::objToJsonValue(
+  formatters::CFormatterJsonBase::objToJsonValue(
       GetApplicationCommands(application), tmp);
   json_app[strings::application_commands] = tmp;
-  Formatters::CFormatterJsonBase::objToJsonValue(
+  formatters::CFormatterJsonBase::objToJsonValue(
       GetApplicationSubMenus(application), tmp);
   json_app[strings::application_submenus] = tmp;
-  Formatters::CFormatterJsonBase::objToJsonValue(
+  formatters::CFormatterJsonBase::objToJsonValue(
       GetApplicationInteractionChoiseSets(application), tmp);
   json_app[strings::application_choice_sets] = tmp;
-  Formatters::CFormatterJsonBase::objToJsonValue(
+  formatters::CFormatterJsonBase::objToJsonValue(
       GetApplicationGlobalProperties(application), tmp);
   json_app[strings::application_global_properties] = tmp;
-  Formatters::CFormatterJsonBase::objToJsonValue(
+  formatters::CFormatterJsonBase::objToJsonValue(
       GetApplicationSubscriptions(application), tmp);
   json_app[strings::application_subscriptions] = tmp;
-  Formatters::CFormatterJsonBase::objToJsonValue(
+  formatters::CFormatterJsonBase::objToJsonValue(
       GetApplicationFiles(application), tmp);
   json_app[strings::application_files] = tmp;
   json_app[strings::time_stamp] = time_stamp;
@@ -225,7 +225,7 @@ bool ResumptionDataJson::GetSavedApplication(
     return false;
   }
   const Json::Value& json_saved_app = GetSavedApplications()[idx];
-  Formatters::CFormatterJsonBase::jsonValueToObj(json_saved_app, saved_app);
+  formatters::CFormatterJsonBase::jsonValueToObj(json_saved_app, saved_app);
 
   return true;
 }

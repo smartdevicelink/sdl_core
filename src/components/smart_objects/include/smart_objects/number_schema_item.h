@@ -41,8 +41,8 @@
 #include "utils/convert_utils.h"
 #include "utils/helpers.h"
 
-namespace NsSmartDeviceLink {
-namespace NsSmartObjects {
+namespace ns_smart_device_link {
+namespace ns_smart_objects {
 /**
  * @brief Number schema item.
  * @tparam NumberType Number type.
@@ -70,9 +70,9 @@ class TNumberSchemaItem : public CDefaultSchemaItem<NumberType> {
    * @param Object Object to validate.
    * @param report__ object for reporting errors during validation
    * @param MessageVersion to check mobile RPC version against RPC Spec History
-   * @return NsSmartObjects::Errors::eType
+   * @return ns_smart_objects::errors::eType
    **/
-  Errors::eType validate(const SmartObject& Object,
+  errors::eType validate(const SmartObject& Object,
                          rpc::ValidationReport* report__,
                          const utils::SemanticVersion& MessageVersion =
                              utils::SemanticVersion()) OVERRIDE;
@@ -134,7 +134,7 @@ bool TNumberSchemaItem<NumberType>::isValidNumberType(SmartType type) {
 }
 
 template <typename NumberType>
-Errors::eType TNumberSchemaItem<NumberType>::validate(
+errors::eType TNumberSchemaItem<NumberType>::validate(
     const SmartObject& Object,
     rpc::ValidationReport* report__,
     const utils::SemanticVersion& MessageVersion) {
@@ -146,7 +146,7 @@ Errors::eType TNumberSchemaItem<NumberType>::validate(
         "Incorrect type, expected: " + SmartObject::typeToString(expectedType) +
         ", got: " + SmartObject::typeToString(Object.getType());
     report__->set_validation_info(validation_info);
-    return Errors::INVALID_VALUE;
+    return errors::INVALID_VALUE;
   }
   NumberType value(0);
   if (typeid(int32_t) == typeid(value)) {
@@ -170,7 +170,7 @@ Errors::eType TNumberSchemaItem<NumberType>::validate(
            << ", minimum allowed: " << rangeLimit;
     std::string validation_info = stream.str();
     report__->set_validation_info(validation_info);
-    return Errors::OUT_OF_RANGE;
+    return errors::OUT_OF_RANGE;
   }
 
   if (mMaxValue.getValue(rangeLimit) && (value > rangeLimit)) {
@@ -179,9 +179,9 @@ Errors::eType TNumberSchemaItem<NumberType>::validate(
            << ", maximum allowed: " << rangeLimit;
     std::string validation_info = stream.str();
     report__->set_validation_info(validation_info);
-    return Errors::OUT_OF_RANGE;
+    return errors::OUT_OF_RANGE;
   }
-  return Errors::OK;
+  return errors::OK;
 }
 
 template <typename NumberType>
@@ -219,6 +219,6 @@ SmartType TNumberSchemaItem<int64_t>::getSmartType() const;
 template <>
 SmartType TNumberSchemaItem<double>::getSmartType() const;
 
-}  // namespace NsSmartObjects
-}  // namespace NsSmartDeviceLink
+}  // namespace ns_smart_objects
+}  // namespace ns_smart_device_link
 #endif  // SRC_COMPONENTS_SMART_OBJECTS_INCLUDE_SMART_OBJECTS_NUMBER_SCHEMA_ITEM_H_

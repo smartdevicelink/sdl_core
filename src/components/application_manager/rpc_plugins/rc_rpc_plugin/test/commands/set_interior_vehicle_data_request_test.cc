@@ -135,7 +135,7 @@ TEST_F(SetInteriorVehicleDataRequestTest,
        Execute_ValidWithoutReadOnlyParams_ExpectResendToHMI) {
   // Arrange
   MessageSharedPtr mobile_message = CreateBasicMessage();
-  NsSmartDeviceLink::NsSmartObjects::SmartObject& msg_params =
+  ns_smart_device_link::ns_smart_objects::SmartObject& msg_params =
       (*mobile_message)[application_manager::strings::msg_params];
   msg_params[message_params::kModuleData][message_params::kModuleType] =
       mobile_apis::ModuleType::CLIMATE;
@@ -167,7 +167,7 @@ TEST_F(
   // Arrange
 
   MessageSharedPtr mobile_message = CreateBasicMessage();
-  NsSmartDeviceLink::NsSmartObjects::SmartObject& msg_params =
+  ns_smart_device_link::ns_smart_objects::SmartObject& msg_params =
       (*mobile_message)[application_manager::strings::msg_params];
   msg_params[message_params::kModuleData][message_params::kModuleType] =
       mobile_apis::ModuleType::RADIO;
@@ -205,7 +205,7 @@ TEST_F(
     Execute_MessageValidationFailed_ExpectMessageNotSentToHMI_AndFalseSentToMobile) {
   // Arrange
   MessageSharedPtr mobile_message = CreateBasicMessage();
-  NsSmartDeviceLink::NsSmartObjects::SmartObject& msg_params =
+  ns_smart_device_link::ns_smart_objects::SmartObject& msg_params =
       (*mobile_message)[application_manager::strings::msg_params];
   msg_params[message_params::kModuleData][message_params::kModuleType] =
       mobile_apis::ModuleType::RADIO;

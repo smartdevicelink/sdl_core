@@ -295,7 +295,7 @@ class DynamicApplicationDataImpl : public virtual Application {
   void SetGlobalProperties(
       const smart_objects::SmartObject& param,
       void (DynamicApplicationData::*callback)(
-          const NsSmartDeviceLink::NsSmartObjects::SmartObject&));
+          const ns_smart_device_link::ns_smart_objects::SmartObject&));
   DISALLOW_COPY_AND_ASSIGN(DynamicApplicationDataImpl);
 };
 

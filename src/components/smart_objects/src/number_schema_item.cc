@@ -31,8 +31,8 @@
  */
 #include "smart_objects/number_schema_item.h"
 
-namespace NsSmartDeviceLink {
-namespace NsSmartObjects {
+namespace ns_smart_device_link {
+namespace ns_smart_objects {
 
 template <>
 SmartType TNumberSchemaItem<int32_t>::getSmartType() const {
@@ -54,5 +54,5 @@ SmartType TNumberSchemaItem<double>::getSmartType() const {
   return SmartType_Double;
 }
 
-}  // namespace NsSmartObjects
-}  // namespace NsSmartDeviceLink
+}  // namespace ns_smart_objects
+}  // namespace ns_smart_device_link

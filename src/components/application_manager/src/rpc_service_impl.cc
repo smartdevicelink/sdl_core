@@ -36,8 +36,8 @@ namespace application_manager {
 namespace rpc_service {
 
 CREATE_LOGGERPTR_LOCAL(logger_, "RPCServiceImpl")
-namespace formatters = NsSmartDeviceLink::NsJSONHandler::Formatters;
-namespace jhs = NsSmartDeviceLink::NsJSONHandler::strings;
+namespace formatters = ns_smart_device_link::ns_json_handler::formatters;
+namespace jhs = ns_smart_device_link::ns_json_handler::strings;
 
 RPCServiceImpl::RPCServiceImpl(
     ApplicationManager& app_manager,
@@ -380,7 +380,7 @@ void RPCServiceImpl::SendMessageToMobile(
     LOG4CXX_ERROR(logger_, "No application associated with connection key");
     if (is_result_code_exists &&
         ((*message)[strings::msg_params][strings::result_code] ==
-         NsSmartDeviceLinkRPC::V1::Result::UNSUPPORTED_VERSION)) {
+         ns_smart_device_link_rpc::V1::Result::UNSUPPORTED_VERSION)) {
       (*message)[strings::params][strings::protocol_version] =
           protocol_handler::MajorProtocolVersion::PROTOCOL_VERSION_1;
     } else {
@@ -518,7 +518,7 @@ void RPCServiceImpl::set_hmi_message_handler(
 }
 
 bool RPCServiceImpl::ConvertSOtoMessage(
-    const NsSmartDeviceLink::NsSmartObjects::SmartObject& message,
+    const ns_smart_device_link::ns_smart_objects::SmartObject& message,
     Message& output) {
   LOG4CXX_AUTO_TRACE(logger_);
 

@@ -90,7 +90,7 @@ class GetUrlsTest : public CommandRequestTest<CommandsTestMocks::kIsNice> {
 
   GetUrlsTest() {
     command_msg_ =
-        CreateMessage(NsSmartDeviceLink::NsSmartObjects::SmartType_Map);
+        CreateMessage(ns_smart_device_link::ns_smart_objects::SmartType_Map);
     (*command_msg_)[am::strings::params][am::strings::connection_key] =
         kConnectionKey;
     (*command_msg_)[am::strings::msg_params][am::hmi_request::service] =

@@ -133,10 +133,10 @@ bool policy_app_id_comparator(const std::string& policy_app_id,
 uint32_t ApplicationManagerImpl::corelation_id_ = 0;
 const uint32_t ApplicationManagerImpl::max_corelation_id_ = UINT_MAX;
 
-namespace formatters = NsSmartDeviceLink::NsJSONHandler::Formatters;
-namespace jhs = NsSmartDeviceLink::NsJSONHandler::strings;
+namespace formatters = ns_smart_device_link::ns_json_handler::formatters;
+namespace jhs = ns_smart_device_link::ns_json_handler::strings;
 
-using namespace NsSmartDeviceLink::NsSmartObjects;
+using namespace ns_smart_device_link::ns_smart_objects;
 
 ApplicationManagerImpl::ApplicationManagerImpl(
     const ApplicationManagerSettings& am_settings,

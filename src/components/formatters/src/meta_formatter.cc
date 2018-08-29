@@ -38,15 +38,15 @@
 
 #include "formatters/meta_formatter.h"
 
-namespace formatter_ns = NsSmartDeviceLink::NsJSONHandler::Formatters;
-namespace smart_objects_ns = NsSmartDeviceLink::NsSmartObjects;
+namespace formatter_ns = ns_smart_device_link::ns_json_handler::formatters;
+namespace smart_objects_ns = ns_smart_device_link::ns_smart_objects;
 
 //---------------------------------------------------------------
 
 bool formatter_ns::CMetaFormatter::CreateObjectByPattern(
-    const NsSmartDeviceLink::NsSmartObjects::SmartObject& object,
-    const NsSmartDeviceLink::NsSmartObjects::CSmartSchema& schema,
-    NsSmartDeviceLink::NsSmartObjects::SmartObject& result_object) {
+    const ns_smart_device_link::ns_smart_objects::SmartObject& object,
+    const ns_smart_device_link::ns_smart_objects::CSmartSchema& schema,
+    ns_smart_device_link::ns_smart_objects::SmartObject& result_object) {
   if (smart_objects_ns::SmartType_Invalid == result_object.getType()) {
     return false;
   }

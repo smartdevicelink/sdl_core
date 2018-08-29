@@ -40,8 +40,8 @@
 
 #include "utils/semantic_version.h"
 
-namespace NsSmartDeviceLink {
-namespace NsSmartObjects {
+namespace ns_smart_device_link {
+namespace ns_smart_objects {
 /**
  * @brief Array schema item.
  **/
@@ -68,9 +68,9 @@ class CArraySchemaItem : public ISchemaItem {
    * @param Object Object to validate.
    * @param report__ object for reporting errors during validation
    * @param MessageVersion to check mobile RPC version against RPC Spec History
-   * @return NsSmartObjects::Errors::eType
+   * @return ns_smart_objects::errors::eType
    **/
-  Errors::eType validate(const SmartObject& Object,
+  errors::eType validate(const SmartObject& Object,
                          rpc::ValidationReport* report__,
                          const utils::SemanticVersion& MessageVersion =
                              utils::SemanticVersion()) OVERRIDE;
@@ -130,7 +130,7 @@ class CArraySchemaItem : public ISchemaItem {
   const TSchemaItemParameter<size_t> mMaxSize;
   DISALLOW_COPY_AND_ASSIGN(CArraySchemaItem);
 };
-}  // namespace NsSmartObjects
-}  // namespace NsSmartDeviceLink
+}  // namespace ns_smart_objects
+}  // namespace ns_smart_device_link
 
 #endif  // SRC_COMPONENTS_SMART_OBJECTS_INCLUDE_SMART_OBJECTS_ARRAY_SCHEMA_ITEM_H_

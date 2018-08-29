@@ -68,7 +68,7 @@ using ::testing::_;
 using ::testing::Return;
 using ::testing::InSequence;
 using sdl_rpc_plugin::commands::AddCommandRequest;
-using NsSmartDeviceLink::NsSmartObjects::SmartObjectSPtr;
+using ns_smart_device_link::ns_smart_objects::SmartObjectSPtr;
 using ::test::components::application_manager_test::MockApplication;
 using am::event_engine::EventObserver;
 using namespace smart_objects;

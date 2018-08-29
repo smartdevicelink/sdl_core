@@ -213,7 +213,7 @@ class ApplicationManagerImplTest : public ::testing::Test {
 };
 
 TEST_F(ApplicationManagerImplTest, ProcessQueryApp_ExpectSuccess) {
-  using namespace NsSmartDeviceLink::NsSmartObjects;
+  using namespace ns_smart_device_link::ns_smart_objects;
   SmartObject app_data;
   const uint32_t connection_key = 65537u;
   app_data[am::json::name] = "application_manager_test";
@@ -712,7 +712,7 @@ TEST_F(ApplicationManagerImplTest,
 
 TEST_F(ApplicationManagerImplTest,
        OnSecondaryTransportStartedCallback_AfterAppRegistration) {
-  using namespace NsSmartDeviceLink::NsSmartObjects;
+  using namespace ns_smart_device_link::ns_smart_objects;
 
   AddMockApplication();
   EXPECT_CALL(*mock_app_ptr_, app_id()).WillRepeatedly(Return(app_id_));
@@ -739,7 +739,7 @@ TEST_F(ApplicationManagerImplTest,
 
 TEST_F(ApplicationManagerImplTest,
        OnSecondaryTransportEndedCallback_AfterAppRegistration) {
-  using namespace NsSmartDeviceLink::NsSmartObjects;
+  using namespace ns_smart_device_link::ns_smart_objects;
 
   const connection_handler::DeviceHandle device_handle = 1;
   const int32_t session_key = app_id_;
@@ -1130,7 +1130,7 @@ bool ApplicationManagerImplTest::CheckResumptionRequiredTransportAvailableTest(
 
 TEST_F(ApplicationManagerImplTest,
        CheckResumptionRequiredTransportAvailableTest_PrimaryOnly_Success) {
-  using namespace NsSmartDeviceLink::NsSmartObjects;
+  using namespace ns_smart_device_link::ns_smart_objects;
 
   smart_objects::SmartObject app_types_array(SmartType_Array);
   app_types_array[0] = mobile_apis::AppHMIType::eType::DEFAULT;
@@ -1158,7 +1158,7 @@ TEST_F(ApplicationManagerImplTest,
 
 TEST_F(ApplicationManagerImplTest,
        CheckResumptionRequiredTransportAvailableTest_PrimaryOnly_NotListed) {
-  using namespace NsSmartDeviceLink::NsSmartObjects;
+  using namespace ns_smart_device_link::ns_smart_objects;
 
   smart_objects::SmartObject app_types_array(SmartType_Array);
   app_types_array[0] = mobile_apis::AppHMIType::eType::SOCIAL;
@@ -1183,7 +1183,7 @@ TEST_F(ApplicationManagerImplTest,
 
 TEST_F(ApplicationManagerImplTest,
        CheckResumptionRequiredTransportAvailableTest_PrimaryOnly_Disabled) {
-  using namespace NsSmartDeviceLink::NsSmartObjects;
+  using namespace ns_smart_device_link::ns_smart_objects;
 
   smart_objects::SmartObject app_types_array(SmartType_Array);
   app_types_array[0] = mobile_apis::AppHMIType::eType::TESTING;
@@ -1208,7 +1208,7 @@ TEST_F(ApplicationManagerImplTest,
 
 TEST_F(ApplicationManagerImplTest,
        CheckResumptionRequiredTransportAvailableTest_PrimaryOnly_NoAppTypes) {
-  using namespace NsSmartDeviceLink::NsSmartObjects;
+  using namespace ns_smart_device_link::ns_smart_objects;
 
   smart_objects::SmartObject app_types_array(SmartType_Array);
   // we don't specify any app type
@@ -1233,7 +1233,7 @@ TEST_F(ApplicationManagerImplTest,
 
 TEST_F(ApplicationManagerImplTest,
        CheckResumptionRequiredTransportAvailableTest_PrimaryOnly_NoAppTypes2) {
-  using namespace NsSmartDeviceLink::NsSmartObjects;
+  using namespace ns_smart_device_link::ns_smart_objects;
 
   const connection_handler::DeviceHandle primary_device_handle = 1;
   const connection_handler::DeviceHandle secondary_device_handle = 0;
@@ -1255,7 +1255,7 @@ TEST_F(ApplicationManagerImplTest,
 
 TEST_F(ApplicationManagerImplTest,
        CheckResumptionRequiredTransportAvailableTest_TwoTransports_Success) {
-  using namespace NsSmartDeviceLink::NsSmartObjects;
+  using namespace ns_smart_device_link::ns_smart_objects;
 
   smart_objects::SmartObject app_types_array(SmartType_Array);
   app_types_array[0] = mobile_apis::AppHMIType::eType::MEDIA;
@@ -1283,7 +1283,7 @@ TEST_F(ApplicationManagerImplTest,
 
 TEST_F(ApplicationManagerImplTest,
        CheckResumptionRequiredTransportAvailableTest_TwoTransports_Failure) {
-  using namespace NsSmartDeviceLink::NsSmartObjects;
+  using namespace ns_smart_device_link::ns_smart_objects;
 
   smart_objects::SmartObject app_types_array(SmartType_Array);
   app_types_array[0] = mobile_apis::AppHMIType::eType::NAVIGATION;
@@ -1311,7 +1311,7 @@ TEST_F(ApplicationManagerImplTest,
 
 TEST_F(ApplicationManagerImplTest,
        CheckResumptionRequiredTransportAvailableTest_MultipleAppTypes_Failure) {
-  using namespace NsSmartDeviceLink::NsSmartObjects;
+  using namespace ns_smart_device_link::ns_smart_objects;
 
   smart_objects::SmartObject app_types_array(SmartType_Array);
   app_types_array[0] = mobile_apis::AppHMIType::eType::MEDIA;
@@ -1341,7 +1341,7 @@ TEST_F(ApplicationManagerImplTest,
 
 TEST_F(ApplicationManagerImplTest,
        CheckResumptionRequiredTransportAvailableTest_MultipleAppTypes_Empty) {
-  using namespace NsSmartDeviceLink::NsSmartObjects;
+  using namespace ns_smart_device_link::ns_smart_objects;
 
   smart_objects::SmartObject app_types_array(SmartType_Array);
   app_types_array[0] = mobile_apis::AppHMIType::eType::NAVIGATION;

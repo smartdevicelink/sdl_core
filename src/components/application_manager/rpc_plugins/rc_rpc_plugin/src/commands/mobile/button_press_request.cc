@@ -173,7 +173,7 @@ void ButtonPressRequest::Execute() {
   LOG4CXX_AUTO_TRACE(logger_);
 
   const char* button_name;
-  NsSmartDeviceLink::NsSmartObjects::
+  ns_smart_device_link::ns_smart_objects::
       EnumConversionHelper<mobile_apis::ButtonName::eType>::EnumToCString(
           static_cast<mobile_apis::ButtonName::eType>(
               (*message_)[app_mngr::strings::msg_params]
@@ -281,7 +281,7 @@ std::string ButtonPressRequest::ModuleType() {
       (*message_)[app_mngr::strings::msg_params][message_params::kModuleType]
           .asUInt());
   const char* str;
-  const bool ok = NsSmartDeviceLink::NsSmartObjects::EnumConversionHelper<
+  const bool ok = ns_smart_device_link::ns_smart_objects::EnumConversionHelper<
       mobile_apis::ModuleType::eType>::EnumToCString(module_type, &str);
   return ok ? str : "unknown";
 }

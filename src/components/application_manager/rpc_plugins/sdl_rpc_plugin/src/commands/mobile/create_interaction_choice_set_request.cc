@@ -197,8 +197,8 @@ mobile_apis::Result::eType CreateInteractionChoiceSetRequest::CheckChoiceSet(
 }
 
 bool CreateInteractionChoiceSetRequest::compareSynonyms(
-    const NsSmartDeviceLink::NsSmartObjects::SmartObject& choice1,
-    const NsSmartDeviceLink::NsSmartObjects::SmartObject& choice2) {
+    const ns_smart_device_link::ns_smart_objects::SmartObject& choice1,
+    const ns_smart_device_link::ns_smart_objects::SmartObject& choice2) {
   // only compare if they both have vr commands
   if (!(choice1.keyExists(strings::vr_commands) &&
         choice2.keyExists(strings::vr_commands))) {
@@ -227,8 +227,8 @@ bool CreateInteractionChoiceSetRequest::compareSynonyms(
 }
 
 bool CreateInteractionChoiceSetRequest::compareStr(
-    const NsSmartDeviceLink::NsSmartObjects::SmartObject& str1,
-    const NsSmartDeviceLink::NsSmartObjects::SmartObject& str2) {
+    const ns_smart_device_link::ns_smart_objects::SmartObject& str1,
+    const ns_smart_device_link::ns_smart_objects::SmartObject& str2) {
   return 0 == strcasecmp(str1.asCharArray(), str2.asCharArray());
 }
 

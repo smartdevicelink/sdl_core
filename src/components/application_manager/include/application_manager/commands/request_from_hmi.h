@@ -41,7 +41,7 @@ namespace application_manager {
 
 namespace commands {
 
-namespace NsSmart = NsSmartDeviceLink::NsSmartObjects;
+namespace ns_smart = ns_smart_device_link::ns_smart_objects;
 
 class RequestFromHMI : public CommandImpl, public event_engine::EventObserver {
  public:
@@ -86,7 +86,7 @@ class RequestFromHMI : public CommandImpl, public event_engine::EventObserver {
    * @param function_id the function id for which response will be sent
    */
   void FillCommonParametersOfSO(
-      NsSmartDeviceLink::NsSmartObjects::SmartObject& message,
+      ns_smart_device_link::ns_smart_objects::SmartObject& message,
       const uint32_t correlation_id,
       const hmi_apis::FunctionID::eType function_id);
 

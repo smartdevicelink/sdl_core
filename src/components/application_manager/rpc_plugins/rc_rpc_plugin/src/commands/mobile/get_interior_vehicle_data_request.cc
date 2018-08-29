@@ -248,7 +248,7 @@ void GetInteriorVehicleDataRequest::on_event(
 GetInteriorVehicleDataRequest::~GetInteriorVehicleDataRequest() {}
 
 void GetInteriorVehicleDataRequest::ProccessSubscription(
-    const NsSmartDeviceLink::NsSmartObjects::SmartObject& hmi_response) {
+    const ns_smart_device_link::ns_smart_objects::SmartObject& hmi_response) {
   LOG4CXX_AUTO_TRACE(logger_);
 
   const bool is_subscribe_present_in_request =
@@ -267,7 +267,7 @@ void GetInteriorVehicleDataRequest::ProccessSubscription(
       application_manager_.application(CommandRequestImpl::connection_key());
   const auto extension = RCHelpers::GetRCExtension(*app);
   const char* module_type;
-  NsSmartDeviceLink::NsSmartObjects::
+  ns_smart_device_link::ns_smart_objects::
       EnumConversionHelper<mobile_apis::ModuleType::eType>::EnumToCString(
           static_cast<mobile_apis::ModuleType::eType>(
               hmi_response[app_mngr::strings::msg_params]
@@ -370,7 +370,7 @@ std::string GetInteriorVehicleDataRequest::ModuleType() {
       (*message_)[app_mngr::strings::msg_params][message_params::kModuleType]
           .asUInt());
   const char* str;
-  const bool ok = NsSmartDeviceLink::NsSmartObjects::EnumConversionHelper<
+  const bool ok = ns_smart_device_link::ns_smart_objects::EnumConversionHelper<
       mobile_apis::ModuleType::eType>::EnumToCString(module_type, &str);
   return ok ? str : "unknown";
 }

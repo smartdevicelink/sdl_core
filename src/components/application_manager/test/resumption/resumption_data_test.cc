@@ -291,7 +291,7 @@ void ResumptionDataTest::CheckHelpPrompt(sm::SmartObject& res_list) {
 }
 
 void ResumptionDataTest::CheckTimeoutPrompt(
-    NsSmartDeviceLink::NsSmartObjects::SmartObject& res_list) {
+    ns_smart_device_link::ns_smart_objects::SmartObject& res_list) {
   for (uint i = 0; i < tts_chunks_count; ++i) {
     std::string text = (*timeout_prompt_)[i][am::strings::text].asString();
     SpeechCapabilities::eType speech = static_cast<SpeechCapabilities::eType>(
@@ -315,7 +315,7 @@ void ResumptionDataTest::CheckVRHelp(sm::SmartObject& res_list) {
 }
 
 void ResumptionDataTest::CheckVRTitle(
-    NsSmartDeviceLink::NsSmartObjects::SmartObject& res_list) {
+    ns_smart_device_link::ns_smart_objects::SmartObject& res_list) {
   std::string vtitle = (*vr_help_title_)[am::strings::vr_help_title].asString();
   EXPECT_EQ(vtitle, res_list[am::strings::vr_help_title].asString());
 }

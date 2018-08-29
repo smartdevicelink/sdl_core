@@ -37,7 +37,7 @@ namespace test {
 namespace components {
 namespace smart_object_test {
 
-using namespace NsSmartDeviceLink::NsSmartObjects;
+using namespace ns_smart_device_link::ns_smart_objects;
 
 class TestHelper : public ::testing::Test {
  protected:

@@ -470,7 +470,7 @@ void DynamicApplicationDataImpl::set_display_layout(const std::string& layout) {
 void DynamicApplicationDataImpl::SetGlobalProperties(
     const smart_objects::SmartObject& param,
     void (DynamicApplicationData::*callback)(
-        const NsSmartDeviceLink::NsSmartObjects::SmartObject&)) {
+        const ns_smart_device_link::ns_smart_objects::SmartObject&)) {
   smart_objects::SmartType so_type = param.getType();
   if (so_type != smart_objects::SmartType::SmartType_Invalid &&
       so_type != smart_objects::SmartType::SmartType_Null) {

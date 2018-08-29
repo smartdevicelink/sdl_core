@@ -456,7 +456,7 @@ uint32_t CommandRequestImpl::SendHMIRequest(
 
 void CommandRequestImpl::CreateHMINotification(
     const hmi_apis::FunctionID::eType& function_id,
-    const NsSmart::SmartObject& msg_params) const {
+    const ns_smart::SmartObject& msg_params) const {
   smart_objects::SmartObjectSPtr result =
       std::make_shared<smart_objects::SmartObject>();
   if (!result) {
@@ -959,7 +959,7 @@ const std::string InfoInterfaceSeparator(
 
 void CommandRequestImpl::AddTimeOutComponentInfoToMessage(
     smart_objects::SmartObject& response) const {
-  using NsSmartDeviceLink::NsSmartObjects::SmartObject;
+  using ns_smart_device_link::ns_smart_objects::SmartObject;
   LOG4CXX_AUTO_TRACE(logger_);
   sync_primitives::AutoLock lock(awaiting_response_interfaces_lock_);
   if (awaiting_response_interfaces_.empty()) {

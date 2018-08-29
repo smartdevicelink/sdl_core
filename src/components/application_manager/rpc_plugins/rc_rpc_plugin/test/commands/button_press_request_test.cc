@@ -177,7 +177,7 @@ TEST_F(ButtonPressRequestTest,
        Execute_ButtonNameMatchesModuleType_ExpectCorrectMessageSentToHMI) {
   // Arrange
   MessageSharedPtr mobile_message = CreateBasicMessage();
-  NsSmartDeviceLink::NsSmartObjects::SmartObject& msg_params =
+  ns_smart_device_link::ns_smart_objects::SmartObject& msg_params =
       (*mobile_message)[application_manager::strings::msg_params];
   msg_params[message_params::kModuleType] = mobile_apis::ModuleType::CLIMATE;
   msg_params[message_params::kButtonName] = mobile_apis::ButtonName::AC;
@@ -212,7 +212,7 @@ TEST_F(
     Execute_ButtonNameDoesNotMatchModuleType_ExpectMessageNotSentToHMI_AndFalseSentToMobile) {
   // Arrange
   MessageSharedPtr mobile_message = CreateBasicMessage();
-  NsSmartDeviceLink::NsSmartObjects::SmartObject& msg_params =
+  ns_smart_device_link::ns_smart_objects::SmartObject& msg_params =
       (*mobile_message)[application_manager::strings::msg_params];
   msg_params[message_params::kModuleType] = mobile_apis::ModuleType::RADIO;
   msg_params[message_params::kButtonName] = mobile_apis::ButtonName::AC;
@@ -249,7 +249,7 @@ TEST_F(
 TEST_F(ButtonPressRequestTest, OnEvent_ExpectSuccessfullResponseSentToMobile) {
   // Arrange
   MessageSharedPtr mobile_message = CreateBasicMessage();
-  NsSmartDeviceLink::NsSmartObjects::SmartObject& msg_params =
+  ns_smart_device_link::ns_smart_objects::SmartObject& msg_params =
       (*mobile_message)[application_manager::strings::msg_params];
   msg_params[message_params::kModuleType] = mobile_apis::ModuleType::CLIMATE;
   msg_params[message_params::kButtonName] = mobile_apis::ButtonName::AC;
@@ -257,7 +257,7 @@ TEST_F(ButtonPressRequestTest, OnEvent_ExpectSuccessfullResponseSentToMobile) {
       mobile_apis::ButtonPressMode::SHORT;
 
   MessageSharedPtr hmi_message = CreateBasicMessage();
-  NsSmartDeviceLink::NsSmartObjects::SmartObject& hmi_msg_params =
+  ns_smart_device_link::ns_smart_objects::SmartObject& hmi_msg_params =
       (*hmi_message)[application_manager::strings::msg_params];
   hmi_apis::Common_Result::eType response_code =
       hmi_apis::Common_Result::SUCCESS;
@@ -288,7 +288,7 @@ TEST_F(ButtonPressRequestTest,
        OnEvent_ReadOnlyParamFromHMI_ExpectFalseSentToMobile) {
   // Arrange
   MessageSharedPtr mobile_message = CreateBasicMessage();
-  NsSmartDeviceLink::NsSmartObjects::SmartObject& msg_params =
+  ns_smart_device_link::ns_smart_objects::SmartObject& msg_params =
       (*mobile_message)[application_manager::strings::msg_params];
   msg_params[message_params::kModuleType] = mobile_apis::ModuleType::CLIMATE;
   msg_params[message_params::kButtonName] = mobile_apis::ButtonName::AC;
@@ -296,7 +296,7 @@ TEST_F(ButtonPressRequestTest,
       mobile_apis::ButtonPressMode::SHORT;
 
   MessageSharedPtr hmi_message = CreateBasicMessage();
-  NsSmartDeviceLink::NsSmartObjects::SmartObject& hmi_msg_params =
+  ns_smart_device_link::ns_smart_objects::SmartObject& hmi_msg_params =
       (*hmi_message)[application_manager::strings::params];
   hmi_apis::Common_Result::eType response_code =
       hmi_apis::Common_Result::READ_ONLY;

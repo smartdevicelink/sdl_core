@@ -44,8 +44,8 @@ namespace test {
 namespace components {
 namespace smart_object_test {
 
-using NsSmartDeviceLink::NsSmartObjects::SmartObject;
-using NsSmartDeviceLink::NsSmartObjects::SmartType;
+using ns_smart_device_link::ns_smart_objects::SmartObject;
+using ns_smart_device_link::ns_smart_objects::SmartType;
 
 TEST(SmartObjectsDraftTest, primitive_types) {
   SmartObject obj;
@@ -126,7 +126,7 @@ TEST(SmartObjectsDraftTest, test_public_interface) {
   ASSERT_EQ(std::string("Hello, world"), obj.asString());
 
   // ---- Binary ---- //
-  NsSmartDeviceLink::NsSmartObjects::SmartBinary binaryData;
+  ns_smart_device_link::ns_smart_objects::SmartBinary binaryData;
   binaryData.push_back('\0');
   binaryData.push_back('a');
   obj = binaryData;
@@ -203,7 +203,7 @@ TEST(SmartObjectsDraftTest, test_helper_methods) {
   ASSERT_EQ(std::string("Hello, world"), obj.asString());
 
   // ---- Binary ---- //
-  NsSmartDeviceLink::NsSmartObjects::SmartBinary binaryData;
+  ns_smart_device_link::ns_smart_objects::SmartBinary binaryData;
   binaryData.push_back('\0');
   binaryData.push_back('a');
   obj = binaryData;

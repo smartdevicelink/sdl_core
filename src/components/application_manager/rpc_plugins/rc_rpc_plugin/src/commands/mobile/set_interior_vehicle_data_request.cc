@@ -152,7 +152,7 @@ SetInteriorVehicleDataRequest::~SetInteriorVehicleDataRequest() {}
 
 const std::string LightName(const smart_objects::SmartObject& light_name) {
   const char* name;
-  const bool ok = NsSmartDeviceLink::NsSmartObjects::
+  const bool ok = ns_smart_device_link::ns_smart_objects::
       EnumConversionHelper<mobile_apis::LightName::eType>::EnumToCString(
           static_cast<mobile_apis::LightName::eType>(light_name.asUInt()),
           &name);
@@ -745,7 +745,7 @@ std::string SetInteriorVehicleDataRequest::ModuleType() {
                      [message_params::kModuleData][message_params::kModuleType]
                          .asUInt());
   const char* str;
-  const bool ok = NsSmartDeviceLink::NsSmartObjects::EnumConversionHelper<
+  const bool ok = ns_smart_device_link::ns_smart_objects::EnumConversionHelper<
       mobile_apis::ModuleType::eType>::EnumToCString(module_type, &str);
   return ok ? str : "unknown";
 }

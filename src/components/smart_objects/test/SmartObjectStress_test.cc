@@ -40,7 +40,7 @@
 namespace test {
 namespace components {
 namespace smart_object_test {
-using namespace NsSmartDeviceLink::NsSmartObjects;
+using namespace ns_smart_device_link::ns_smart_objects;
 
 class StressTestHelper : public ::testing::Test {
  private:
@@ -184,8 +184,8 @@ class StressTestHelper : public ::testing::Test {
         std::string strVal("c:");
         strVal += strDataVal;
 
-        NsSmartDeviceLink::NsSmartObjects::SmartBinary binaryVal(dataSize,
-                                                                 randomChar);
+        ns_smart_device_link::ns_smart_objects::SmartBinary binaryVal(
+            dataSize, randomChar);
 
         obj = binaryVal;  // string with binary data filled with random chars
         mVerifyMap[key_path] = strVal;
@@ -259,10 +259,10 @@ TEST_F(StressTestHelper, StressTest) {
     if (!value.compare(0, 2, "c:")) {
       std::string etalonData = value.substr(2);
 
-      ASSERT_EQ(NsSmartDeviceLink::NsSmartObjects::SmartType_Binary,
+      ASSERT_EQ(ns_smart_device_link::ns_smart_objects::SmartType_Binary,
                 obj.getType());
 
-      NsSmartDeviceLink::NsSmartObjects::SmartBinary binaryData =
+      ns_smart_device_link::ns_smart_objects::SmartBinary binaryData =
           obj.asBinary();
       ASSERT_EQ(etalonData.size(), binaryData.size());
 
@@ -270,10 +270,10 @@ TEST_F(StressTestHelper, StressTest) {
         {
           std::string etalonData = value.substr(2);
 
-          ASSERT_EQ(NsSmartDeviceLink::NsSmartObjects::SmartType_Binary,
+          ASSERT_EQ(ns_smart_device_link::ns_smart_objects::SmartType_Binary,
                     obj.getType());
 
-          NsSmartDeviceLink::NsSmartObjects::SmartBinary binaryData =
+          ns_smart_device_link::ns_smart_objects::SmartBinary binaryData =
               obj.asBinary();
           ASSERT_EQ(etalonData.size(), binaryData.size());
 

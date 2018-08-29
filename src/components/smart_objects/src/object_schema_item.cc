@@ -41,8 +41,8 @@ const char connection_key[] = "connection_key";
 const char binary_data[] = "binary_data";
 const char app_id[] = "appID";
 }
-namespace NsSmartDeviceLink {
-namespace NsSmartObjects {
+namespace ns_smart_device_link {
+namespace ns_smart_objects {
 
 CObjectSchemaItem::SMember::SMember()
     : mSchemaItem(CAlwaysFalseSchemaItem::create()), mIsMandatory(true) {}
@@ -104,7 +104,7 @@ std::shared_ptr<CObjectSchemaItem> CObjectSchemaItem::create(
   return std::shared_ptr<CObjectSchemaItem>(new CObjectSchemaItem(members));
 }
 
-Errors::eType CObjectSchemaItem::validate(
+errors::eType CObjectSchemaItem::validate(
     const SmartObject& object,
     rpc::ValidationReport* report__,
     const utils::SemanticVersion& MessageVersion) {
@@ -114,7 +114,7 @@ Errors::eType CObjectSchemaItem::validate(
                                   ", got: " +
                                   SmartObject::typeToString(object.getType());
     report__->set_validation_info(validation_info);
-    return Errors::INVALID_VALUE;
+    return errors::INVALID_VALUE;
   }
 
   std::set<std::string> object_keys = object.enumerate();
@@ -131,22 +131,22 @@ Errors::eType CObjectSchemaItem::validate(
           correct_member.mIsRemoved == false) {
         std::string validation_info = "Missing mandatory parameter: " + key;
         report__->set_validation_info(validation_info);
-        return Errors::MISSING_MANDATORY_PARAMETER;
+        return errors::MISSING_MANDATORY_PARAMETER;
       }
       continue;
     }
     const SmartObject& field = object.getElement(key);
 
-    Errors::eType result = Errors::OK;
+    errors::eType result = errors::OK;
     // Check if MessageVersion matches schema version
     result = correct_member.mSchemaItem->validate(
         field, &report__->ReportSubobject(key), MessageVersion);
-    if (Errors::OK != result) {
+    if (errors::OK != result) {
       return result;
     }
     object_keys.erase(key_it);
   }
-  return Errors::OK;
+  return errors::OK;
 }
 
 void CObjectSchemaItem::applySchema(
@@ -271,5 +271,5 @@ const CObjectSchemaItem::SMember& CObjectSchemaItem::GetCorrectMember(
   return member;
 }
 
-}  // namespace NsSmartObjects
-}  // namespace NsSmartDeviceLink
+}  // namespace ns_smart_objects
+}  // namespace ns_smart_device_link

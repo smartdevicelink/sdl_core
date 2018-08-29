@@ -36,8 +36,8 @@ namespace application_manager {
 namespace rpc_handler {
 
 CREATE_LOGGERPTR_LOCAL(logger_, "RPCHandlerImpl")
-namespace formatters = NsSmartDeviceLink::NsJSONHandler::Formatters;
-namespace jhs = NsSmartDeviceLink::NsJSONHandler::strings;
+namespace formatters = ns_smart_device_link::ns_json_handler::formatters;
+namespace jhs = ns_smart_device_link::ns_json_handler::strings;
 
 RPCHandlerImpl::RPCHandlerImpl(ApplicationManager& app_manager)
     : app_manager_(app_manager)
@@ -195,15 +195,15 @@ void RPCHandlerImpl::SetTelemetryObserver(AMTelemetryObserver* observer) {
 #endif  // TELEMETRY_MONITOR
 
 void RPCHandlerImpl::GetMessageVersion(
-    NsSmartDeviceLink::NsSmartObjects::SmartObject& output,
+    ns_smart_device_link::ns_smart_objects::SmartObject& output,
     utils::SemanticVersion& message_version) {
   if (output.keyExists(
-          NsSmartDeviceLink::NsJSONHandler::strings::S_MSG_PARAMS) &&
-      output[NsSmartDeviceLink::NsJSONHandler::strings::S_MSG_PARAMS].keyExists(
-          strings::sync_msg_version)) {
+          ns_smart_device_link::ns_json_handler::strings::S_MSG_PARAMS) &&
+      output[ns_smart_device_link::ns_json_handler::strings::S_MSG_PARAMS]
+          .keyExists(strings::sync_msg_version)) {
     // SyncMsgVersion exists, check if it is valid.
     auto sync_msg_version =
-        output[NsSmartDeviceLink::NsJSONHandler::strings::S_MSG_PARAMS]
+        output[ns_smart_device_link::ns_json_handler::strings::S_MSG_PARAMS]
               [strings::sync_msg_version];
     uint16_t major = 0;
     uint16_t minor = 0;
@@ -227,7 +227,7 @@ void RPCHandlerImpl::GetMessageVersion(
 
 bool RPCHandlerImpl::ConvertMessageToSO(
     const Message& message,
-    NsSmartDeviceLink::NsSmartObjects::SmartObject& output) {
+    ns_smart_device_link::ns_smart_objects::SmartObject& output) {
   LOG4CXX_AUTO_TRACE(logger_);
   LOG4CXX_DEBUG(logger_,
                 "\t\t\tMessage to convert: protocol "
@@ -263,7 +263,7 @@ bool RPCHandlerImpl::ConvertMessageToSO(
       if (!conversion_result ||
           !mobile_so_factory().attachSchema(output, true, msg_version) ||
           ((output.validate(&report, msg_version) !=
-            smart_objects::Errors::OK))) {
+            smart_objects::errors::OK))) {
         LOG4CXX_WARN(logger_,
                      "Failed to parse string to smart object with API version "
                          << msg_version.toString() << " : "
@@ -329,7 +329,7 @@ bool RPCHandlerImpl::ConvertMessageToSO(
 
       rpc::ValidationReport report("RPC");
 
-      if (output.validate(&report) != smart_objects::Errors::OK) {
+      if (output.validate(&report) != smart_objects::errors::OK) {
         LOG4CXX_ERROR(logger_,
                       "Incorrect parameter from HMI"
                           << rpc::PrettyFormat(report));
@@ -343,15 +343,15 @@ bool RPCHandlerImpl::ConvertMessageToSO(
       break;
     }
     case protocol_handler::MajorProtocolVersion::PROTOCOL_VERSION_1: {
-      static NsSmartDeviceLinkRPC::V1::v4_protocol_v1_2_no_extra v1_shema;
+      static ns_smart_device_link_rpc::V1::v4_protocol_v1_2_no_extra v1_shema;
 
       if (message.function_id() == 0 || message.type() == kUnknownType) {
         LOG4CXX_ERROR(logger_, "Message received: UNSUPPORTED_VERSION");
 
         int32_t conversation_result =
             formatters::CFormatterJsonSDLRPCv1::fromString<
-                NsSmartDeviceLinkRPC::V1::FunctionID::eType,
-                NsSmartDeviceLinkRPC::V1::messageType::eType>(
+                ns_smart_device_link_rpc::V1::FunctionID::eType,
+                ns_smart_device_link_rpc::V1::messageType::eType>(
                 message.json_message(), output);
 
         if (formatters::CFormatterJsonSDLRPCv1::kSuccess ==
@@ -360,7 +360,7 @@ bool RPCHandlerImpl::ConvertMessageToSO(
               smart_objects::SmartType::SmartType_Map);
 
           output[strings::params][strings::message_type] =
-              NsSmartDeviceLinkRPC::V1::messageType::response;
+              ns_smart_device_link_rpc::V1::messageType::response;
           output[strings::params][strings::connection_key] =
               message.connection_key();
 
@@ -368,7 +368,7 @@ bool RPCHandlerImpl::ConvertMessageToSO(
               smart_objects::SmartType::SmartType_Map);
           output[strings::msg_params][strings::success] = false;
           output[strings::msg_params][strings::result_code] =
-              NsSmartDeviceLinkRPC::V1::Result::UNSUPPORTED_VERSION;
+              ns_smart_device_link_rpc::V1::Result::UNSUPPORTED_VERSION;
 
           smart_objects::SmartObjectSPtr msg_to_send =
               std::make_shared<smart_objects::SmartObject>(output);

@@ -376,7 +376,7 @@ smart_objects::SmartObjectSPtr MessageHelper::GetBCActivateAppRequestToHMI(
       app_mngr);
 }
 
-NsSmartDeviceLink::NsSmartObjects::SmartObjectSPtr
+ns_smart_device_link::ns_smart_objects::SmartObjectSPtr
 MessageHelper::GetOnAppInterfaceUnregisteredNotificationToMobile(
     int32_t connection_key,
     mobile_apis::AppInterfaceUnregisteredReason::eType reason) {

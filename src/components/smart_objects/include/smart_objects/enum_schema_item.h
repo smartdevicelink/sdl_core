@@ -44,8 +44,8 @@
 #include "utils/semantic_version.h"
 #include <boost/optional.hpp>
 
-namespace NsSmartDeviceLink {
-namespace NsSmartObjects {
+namespace ns_smart_device_link {
+namespace ns_smart_objects {
 
 struct ElementSignature {
   boost::optional<utils::SemanticVersion> mSince;
@@ -108,9 +108,9 @@ class TEnumSchemaItem : public CDefaultSchemaItem<EnumType> {
    * @param Object Object to validate.
    * @param report__ object for reporting errors during validation
    * @param MessageVersion to check mobile RPC version against RPC Spec History
-   * @return NsSmartObjects::Errors::eType
+   * @return ns_smart_objects::errors::eType
    **/
-  Errors::eType validate(const SmartObject& Object,
+  errors::eType validate(const SmartObject& Object,
                          rpc::ValidationReport* report__,
                          const utils::SemanticVersion& MessageVersion =
                              utils::SemanticVersion()) OVERRIDE;
@@ -304,7 +304,7 @@ const ElementSignature TEnumSchemaItem<EnumType>::getSignature(
 }
 
 template <typename EnumType>
-Errors::eType TEnumSchemaItem<EnumType>::validate(
+errors::eType TEnumSchemaItem<EnumType>::validate(
     const SmartObject& Object,
     rpc::ValidationReport* report__,
     const utils::SemanticVersion& MessageVersion) {
@@ -319,7 +319,7 @@ Errors::eType TEnumSchemaItem<EnumType>::validate(
                         SmartObject::typeToString(Object.getType());
     }
     report__->set_validation_info(validation_info);
-    return Errors::INVALID_VALUE;
+    return errors::INVALID_VALUE;
   }
 
   auto elements_it =
@@ -330,7 +330,7 @@ Errors::eType TEnumSchemaItem<EnumType>::validate(
     stream << "Invalid enum value: " << Object.asInt();
     std::string validation_info = stream.str();
     report__->set_validation_info(validation_info);
-    return Errors::OUT_OF_RANGE;
+    return errors::OUT_OF_RANGE;
   }
 
   // Element exists in schema. Check if version is also valid.
@@ -347,7 +347,7 @@ Errors::eType TEnumSchemaItem<EnumType>::validate(
                                         " removed for SyncMsgVersion " +
                                         MessageVersion.toString();
           report__->set_validation_info(validation_info);
-          return Errors::INVALID_VALUE;
+          return errors::INVALID_VALUE;
         } else if (signature.mSince == boost::none &&
                    signature.mUntil == boost::none) {
           // Element does not exist for this version
@@ -355,12 +355,12 @@ Errors::eType TEnumSchemaItem<EnumType>::validate(
                                         " does not exist for SyncMsgVersion " +
                                         MessageVersion.toString();
           report__->set_validation_info(validation_info);
-          return Errors::INVALID_VALUE;
+          return errors::INVALID_VALUE;
         }
       }
     }
   }
-  return Errors::OK;
+  return errors::OK;
 }
 
 template <typename EnumType>
@@ -412,6 +412,6 @@ TEnumSchemaItem<EnumType>::TEnumSchemaItem(
     , mAllowedElements(AllowedElements)
     , mElementSignatures(ElementSignatures) {}
 
-}  // namespace NsSmartObjects
-}  // namespace NsSmartDeviceLink
+}  // namespace ns_smart_objects
+}  // namespace ns_smart_device_link
 #endif  // SRC_COMPONENTS_SMART_OBJECTS_INCLUDE_SMART_OBJECTS_ENUM_SCHEMA_ITEM_H_

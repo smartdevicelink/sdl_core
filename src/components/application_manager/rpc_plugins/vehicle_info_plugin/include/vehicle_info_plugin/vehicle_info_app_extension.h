@@ -99,8 +99,8 @@ class VehicleInfoAppExtension : public app_mngr::AppExtension {
    * @brief SaveResumptionData saves vehicle info data
    * @param resumption_data plase to store resumption data
    */
-  void SaveResumptionData(
-      NsSmartDeviceLink::NsSmartObjects::SmartObject& resumption_data) OVERRIDE;
+  void SaveResumptionData(ns_smart_device_link::ns_smart_objects::SmartObject&
+                              resumption_data) OVERRIDE;
 
   /**
    * @brief ProcessResumption load resumtion data back to plugin during

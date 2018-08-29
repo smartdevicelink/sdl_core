@@ -37,7 +37,7 @@
 #include "utils/macro.h"
 
 using namespace mobile_apis;
-using namespace NsSmartDeviceLink::NsSmartObjects;
+using namespace ns_smart_device_link::ns_smart_objects;
 using namespace usage_statistics;
 
 namespace application_manager {

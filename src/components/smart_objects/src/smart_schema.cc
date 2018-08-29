@@ -32,15 +32,15 @@
 #include "smart_objects/smart_schema.h"
 #include "smart_objects/always_true_schema_item.h"
 
-namespace NsSmartDeviceLink {
-namespace NsSmartObjects {
+namespace ns_smart_device_link {
+namespace ns_smart_objects {
 
 CSmartSchema::CSmartSchema() : mSchemaItem(CAlwaysTrueSchemaItem::create()) {}
 
 CSmartSchema::CSmartSchema(const ISchemaItemPtr SchemaItem)
     : mSchemaItem(SchemaItem) {}
 
-Errors::eType CSmartSchema::validate(
+errors::eType CSmartSchema::validate(
     const SmartObject& object,
     rpc::ValidationReport* report__,
     const utils::SemanticVersion& MessageVersion) const {
@@ -66,5 +66,5 @@ void CSmartSchema::BuildObjectBySchema(const SmartObject& pattern_object,
   mSchemaItem->BuildObjectBySchema(pattern_object, result_object);
 }
 
-}  // namespace NsSmartObjects
-}  // namespace NsSmartDeviceLink
+}  // namespace ns_smart_objects
+}  // namespace ns_smart_device_link
