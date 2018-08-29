@@ -1496,7 +1496,7 @@ void PolicyManagerImpl::CalculateGroupsConsentFromExternalConsent(
 bool PolicyManagerImpl::ExceededDays() {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  TimevalStruct current_time = date_time::DateTime::getCurrentTime();
+  date_time::TimeDuration current_time = date_time::getCurrentTime();
   const int kSecondsInDay = 60 * 60 * 24;
   const int days = current_time.tv_sec / kSecondsInDay;
 

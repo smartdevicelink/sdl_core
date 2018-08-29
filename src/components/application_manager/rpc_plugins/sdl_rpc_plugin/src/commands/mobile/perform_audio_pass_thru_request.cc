@@ -250,13 +250,6 @@ PerformAudioPassThruRequest::PrepareResponseParameters() {
   return response_params_;
 }
 
-bool PerformAudioPassThruRequest::PrepareResponseParameters(
-    mobile_apis::Result::eType& result_code, std::string& info) {
-  LOG4CXX_AUTO_TRACE(logger_);
-  NOTREACHED();
-  return false;
-}
-
 void PerformAudioPassThruRequest::SendSpeakRequest() {
   LOG4CXX_AUTO_TRACE(logger_);
 

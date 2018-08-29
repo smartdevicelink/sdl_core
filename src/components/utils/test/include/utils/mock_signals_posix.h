@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2018, Ford Motor Company
  * All rights reserved.
  *
@@ -30,33 +30,30 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "sdl_rpc_plugin/commands/hmi/ui_set_icon_request.h"
+#ifndef SRC_COMPONENTS_UTILS_TEST_INCLUDE_UTILS_MOCK_SIGNALS_POSIX_H_
+#define SRC_COMPONENTS_UTILS_TEST_INCLUDE_UTILS_MOCK_SIGNALS_POSIX_H_
 
-namespace sdl_rpc_plugin {
-using namespace application_manager;
+#include "gmock/gmock.h"
+#include "utils/signals.h"
+#include <signal.h>
+#include "appMain/low_voltage_signals_handler.h"
 
-namespace commands {
+namespace utils {
 
-UISetIconRequest::UISetIconRequest(
-    const application_manager::commands::MessageSharedPtr& message,
-    ApplicationManager& application_manager,
-    rpc_service::RPCService& rpc_service,
-    HMICapabilities& hmi_capabilities,
-    policy::PolicyHandlerInterface& policy_handle)
-    : RequestToHMI(message,
-                   application_manager,
-                   rpc_service,
-                   hmi_capabilities,
-                   policy_handle) {}
+class MockSignalsPosix {
+ public:
+  MOCK_METHOD0(UnsubscribeFromTermination, bool());
+  MOCK_METHOD1(WaitTerminationSignals, bool(sighandler_t sig_handler));
+  MOCK_METHOD1(
+      UnsubscribeFromLowVoltageSignals,
+      bool(const main_namespace::LowVoltageSignalsOffset& offset_data));
+  MOCK_METHOD2(SendSignal, void(const int signo, const pid_t pid));
+  MOCK_METHOD0(Fork, pid_t());
+  MOCK_METHOD1(ExitProcess, void(const int status));
+  MOCK_METHOD3(WaitPid, void(pid_t cpid, int* status, int options));
 
-UISetIconRequest::~UISetIconRequest() {}
+  static MockSignalsPosix* signals_posix_mock();
+};
 
-void UISetIconRequest::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
-
-  SendRequest();
-}
-
-}  // namespace commands
-
-}  // namespace application_manager
+}  // namespace utils
+#endif  // SRC_COMPONENTS_UTILS_TEST_INCLUDE_UTILS_MOCK_SIGNALS_POSIX_H_

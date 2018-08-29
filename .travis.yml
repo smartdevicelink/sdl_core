@@ -24,9 +24,7 @@ script:
   - ./tools/infrastructure/check_style.sh
   - mkdir build && cd build
   - cmake ../ -DBUILD_TESTS=ON
-  - make install && sudo ldconfig
-after_success:
-  - make test
+  - make install-3rd_party && make -j `nproc` install && sudo ldconfig && make test
 env:
   global:
   - LC_CTYPE=en_US.UTF-8

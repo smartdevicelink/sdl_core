@@ -94,14 +94,6 @@ class ApplicationImpl : public virtual Application,
       std::shared_ptr<usage_statistics::StatisticsManager> statistics_manager,
       ApplicationManager& application_manager);
 
-  DEPRECATED ApplicationImpl(
-      uint32_t application_id,
-      const std::string& policy_app_id,
-      const std::string& mac_address,
-      const custom_str::CustomString& app_name,
-      std::shared_ptr<usage_statistics::StatisticsManager> statistics_manager,
-      ApplicationManager& application_manager);
-
   ~ApplicationImpl();
 
   /**
@@ -353,6 +345,12 @@ class ApplicationImpl : public virtual Application,
   virtual const HmiStatePtr CurrentHmiState() const;
 
   /**
+   * @brief Checks if app is allowed to change audio source
+   * @return True - if allowed, otherwise - False
+   */
+  virtual bool IsAllowedToChangeAudioSource() const;
+
+  /**
    * @brief RegularHmiState of application without active events VR, TTS etc ...
    * @return HmiState of application
    */
@@ -515,7 +513,7 @@ class ApplicationImpl : public virtual Application,
   /**
    * @brief Defines number per time in seconds limits
    */
-  typedef std::pair<TimevalStruct, uint32_t> TimeToNumberLimit;
+  typedef std::pair<date_time::TimeDuration, uint32_t> TimeToNumberLimit;
 
   /**
    * @brief Defines specific command number per time in seconds limits

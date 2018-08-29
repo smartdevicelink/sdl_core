@@ -34,7 +34,7 @@
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_RESUMPTION_RESUME_CTRL_H_
 
 #include <stdint.h>
-
+#include <time.h>
 #include "application_manager/resumption/resumption_data.h"
 
 namespace application_manager {
@@ -125,6 +125,16 @@ class ResumeCtrl {
   virtual void OnAwake() = 0;
 
   /**
+   * @brief Saves Low Voltage signal timestamp
+   */
+  virtual void SaveLowVoltageTime() = 0;
+
+  /**
+   * @brief Saves Wake Up signal timestamp
+   */
+  virtual void SaveWakeUpTime() = 0;
+
+  /**
    * @brief Checks if SDL has already received OnExitAllApplication notification
    * with "SUSPEND" reason
    *
@@ -134,11 +144,17 @@ class ResumeCtrl {
   virtual bool is_suspended() const = 0;
 
   /**
-   * @brief Method stops timer "RsmCtrlPercist" when SDL
+   * @brief Method stops timer "RsmCtrlPersist" when SDL
    * receives OnExitAllApplication notification
    * with reason "SUSPEND"
    */
   virtual void StopSavePersistentDataTimer() = 0;
+
+  /**
+   * @brief Method starts timer "RsmCtrlPersist" when
+   * SDL receives onAwakeSDL notification
+   */
+  virtual void StartSavePersistentDataTimer() = 0;
 
   /**
    * @brief Start timer for resumption applications

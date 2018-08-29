@@ -35,6 +35,7 @@
 #include "application_manager/message_helper.h"
 #include "application_manager/hmi_interfaces.h"
 #include "smart_objects/enum_schema_item.h"
+#include "rc_rpc_plugin/interior_data_cache.h"
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "RemoteControlModule")
 
@@ -43,18 +44,17 @@ namespace commands {
 
 RCCommandRequest::RCCommandRequest(
     const app_mngr::commands::MessageSharedPtr& message,
-    app_mngr::ApplicationManager& application_manager,
-    app_mngr::rpc_service::RPCService& rpc_service,
-    app_mngr::HMICapabilities& hmi_capabilities,
-    policy::PolicyHandlerInterface& policy_handle,
-    rc_rpc_plugin::ResourceAllocationManager& resource_allocation_manager)
-    : application_manager::commands::CommandRequestImpl(message,
-                                                        application_manager,
-                                                        rpc_service,
-                                                        hmi_capabilities,
-                                                        policy_handle)
+    const RCCommandParams& params)
+    : application_manager::commands::CommandRequestImpl(
+          message,
+          params.application_manager_,
+          params.rpc_service_,
+          params.hmi_capabilities_,
+          params.policy_handler_)
     , is_subscribed(false)
-    , resource_allocation_manager_(resource_allocation_manager) {}
+    , resource_allocation_manager_(params.resource_allocation_manager_)
+    , interior_data_cache_(params.interior_data_cache_)
+    , interior_data_manager_(params.interior_data_manager_) {}
 
 RCCommandRequest::~RCCommandRequest() {}
 
@@ -79,12 +79,6 @@ bool RCCommandRequest::CheckDriverConsent() {
   LOG4CXX_AUTO_TRACE(logger_);
   app_mngr::ApplicationSharedPtr app =
       application_manager_.application(CommandRequestImpl::connection_key());
-  RCAppExtensionPtr extension =
-      resource_allocation_manager_.GetApplicationExtention(app);
-  if (!extension) {
-    LOG4CXX_ERROR(logger_, "NULL pointer.");
-    return false;
-  }
 
   const std::string module_type = ModuleType();
   rc_rpc_plugin::TypeAccess access = CheckModule(module_type, app);

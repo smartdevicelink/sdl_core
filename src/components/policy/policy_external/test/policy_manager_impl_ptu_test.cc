@@ -757,18 +757,18 @@ TEST_F(PolicyManagerImplTest2,
   policy_manager_->CheckPermissions(
       application_id_, kHmiLevelFull, "SendLocation", input_params, output);
 
-  EXPECT_EQ(::policy::kRpcDisallowed, output.hmi_level_permitted);
-  EXPECT_TRUE(output.list_of_allowed_params.empty());
-  EXPECT_EQ(10u, output.list_of_undefined_params.size());
+  EXPECT_EQ(::policy::kRpcAllowed, output.hmi_level_permitted);
+  EXPECT_TRUE(output.list_of_undefined_params.empty());
+  EXPECT_EQ(10u, output.list_of_allowed_params.size());
   ResetOutputList(output);
 
   // Rpc in LIMITED level
   policy_manager_->CheckPermissions(
       application_id_, kHmiLevelLimited, "SendLocation", input_params, output);
 
-  EXPECT_EQ(::policy::kRpcDisallowed, output.hmi_level_permitted);
-  EXPECT_TRUE(output.list_of_allowed_params.empty());
-  EXPECT_EQ(10u, output.list_of_undefined_params.size());
+  EXPECT_EQ(::policy::kRpcAllowed, output.hmi_level_permitted);
+  EXPECT_TRUE(output.list_of_undefined_params.empty());
+  EXPECT_EQ(10u, output.list_of_allowed_params.size());
   ResetOutputList(output);
 
   // Rpc in BACKGROUND level
@@ -778,9 +778,9 @@ TEST_F(PolicyManagerImplTest2,
                                     input_params,
                                     output);
 
-  EXPECT_EQ(::policy::kRpcDisallowed, output.hmi_level_permitted);
-  EXPECT_TRUE(output.list_of_allowed_params.empty());
-  EXPECT_EQ(10u, output.list_of_undefined_params.size());
+  EXPECT_EQ(::policy::kRpcAllowed, output.hmi_level_permitted);
+  EXPECT_TRUE(output.list_of_undefined_params.empty());
+  EXPECT_EQ(10u, output.list_of_allowed_params.size());
   // Reset output
   ResetOutputList(output);
 
@@ -845,17 +845,17 @@ TEST_F(PolicyManagerImplTest2,
   policy_manager_->CheckPermissions(
       application_id_, kHmiLevelFull, "SendLocation", input_params, output);
 
-  EXPECT_EQ(::policy::kRpcDisallowed, output.hmi_level_permitted);
-  EXPECT_TRUE(output.list_of_allowed_params.empty());
-  EXPECT_EQ(10u, output.list_of_undefined_params.size());
+  EXPECT_EQ(::policy::kRpcAllowed, output.hmi_level_permitted);
+  EXPECT_TRUE(output.list_of_undefined_params.empty());
+  EXPECT_EQ(10u, output.list_of_allowed_params.size());
   ResetOutputList(output);
 
   // Rpc in LIMITED level
   policy_manager_->CheckPermissions(
       application_id_, kHmiLevelLimited, "SendLocation", input_params, output);
-  EXPECT_EQ(::policy::kRpcDisallowed, output.hmi_level_permitted);
-  EXPECT_TRUE(output.list_of_allowed_params.empty());
-  EXPECT_EQ(10u, output.list_of_undefined_params.size());
+  EXPECT_EQ(::policy::kRpcAllowed, output.hmi_level_permitted);
+  EXPECT_TRUE(output.list_of_undefined_params.empty());
+  EXPECT_EQ(10u, output.list_of_allowed_params.size());
   ResetOutputList(output);
 
   // Rpc in BACKGROUND level
@@ -864,9 +864,9 @@ TEST_F(PolicyManagerImplTest2,
                                     "SendLocation",
                                     input_params,
                                     output);
-  EXPECT_EQ(::policy::kRpcDisallowed, output.hmi_level_permitted);
-  EXPECT_TRUE(output.list_of_allowed_params.empty());
-  EXPECT_EQ(10u, output.list_of_undefined_params.size());
+  EXPECT_EQ(::policy::kRpcAllowed, output.hmi_level_permitted);
+  EXPECT_TRUE(output.list_of_undefined_params.empty());
+  EXPECT_EQ(10u, output.list_of_allowed_params.size());
   // Reset output
   ResetOutputList(output);
 
@@ -924,7 +924,7 @@ TEST_F(
 }
 
 uint32_t GetCurrentDaysCount() {
-  TimevalStruct current_time = date_time::DateTime::getCurrentTime();
+  date_time::TimeDuration current_time = date_time::getCurrentTime();
   const uint32_t kSecondsInDay = 60 * 60 * 24;
   return current_time.tv_sec / kSecondsInDay;
 }

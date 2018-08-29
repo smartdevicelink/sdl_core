@@ -51,6 +51,7 @@
 #include "protocol_handler/protocol_handler.h"
 #include "smart_objects/smart_object.h"
 #include "utils/macro.h"
+#include "utils/semantic_version.h"
 
 namespace application_manager {
 
@@ -115,6 +116,7 @@ class InitialApplicationData {
   virtual const smart_objects::SmartObject* ngn_media_screen_name() const = 0;
   virtual const mobile_api::Language::eType& language() const = 0;
   virtual const mobile_api::Language::eType& ui_language() const = 0;
+  virtual const utils::SemanticVersion& msg_version() const = 0;
   virtual void set_app_types(const smart_objects::SmartObject& app_types) = 0;
   virtual void set_vr_synonyms(
       const smart_objects::SmartObject& vr_synonyms) = 0;
@@ -125,6 +127,7 @@ class InitialApplicationData {
   virtual void set_language(const mobile_api::Language::eType& language) = 0;
   virtual void set_ui_language(
       const mobile_api::Language::eType& ui_language) = 0;
+  virtual void set_msg_version(const utils::SemanticVersion& version) = 0;
 };
 
 /*
@@ -594,8 +597,6 @@ class Application : public virtual InitialApplicationData,
   virtual void increment_list_files_in_none_count() = 0;
   virtual bool set_app_icon_path(const std::string& file_name) = 0;
   virtual void set_app_allowed(const bool allowed) = 0;
-  DEPRECATED virtual void set_device(
-      connection_handler::DeviceHandle device) = 0;
   /**
    * @brief Sets the handle of the device on which secondary transport of this
    * app is running
@@ -735,6 +736,12 @@ class Application : public virtual InitialApplicationData,
   virtual const HmiStatePtr RegularHmiState() const = 0;
 
   /**
+   * @brief Checks if app is allowed to change audio source
+   * @return True - if allowed, otherwise - False
+   */
+  virtual bool IsAllowedToChangeAudioSource() const = 0;
+
+  /**
    * @brief PostponedHmiState returns postponed hmi state of application
    * if it's present
    *
@@ -780,16 +787,6 @@ class Application : public virtual InitialApplicationData,
    * @return true if application is projection or navigation
    */
   virtual bool IsVideoApplication() const = 0;
-
-  /**
-   * DEPRECATED
-   * @brief GetDeviceId allows to obtain device id which posseses
-   * by this application.
-   * @return device the device id.
-   */
-  std::string GetDeviceId() const {
-    return device_id_;
-  }
 
   /**
    * @brief IsRegistered allows to distinguish if this

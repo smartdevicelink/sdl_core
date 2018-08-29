@@ -569,7 +569,9 @@ ModuleConfig::ModuleConfig(const Json::Value* value__)
     , vehicle_year(impl::ValueMember(value__, "vehicle_year"))
     , preloaded_date(impl::ValueMember(value__, "preloaded_date"))
     , certificate(impl::ValueMember(value__, "certificate"))
-    , preloaded_pt(impl::ValueMember(value__, "preloaded_pt")) {}
+    , preloaded_pt(impl::ValueMember(value__, "preloaded_pt"))
+    , full_app_id_supported(
+          impl::ValueMember(value__, "full_app_id_supported")) {}
 
 void ModuleConfig::SafeCopyFrom(const ModuleConfig& from) {
   exchange_after_x_days = from.exchange_after_x_days;
@@ -592,6 +594,8 @@ Json::Value ModuleConfig::ToJsonValue() const {
   Json::Value result__(Json::objectValue);
   impl::WriteJsonField("certificate", certificate, &result__);
   impl::WriteJsonField("preloaded_pt", preloaded_pt, &result__);
+  impl::WriteJsonField(
+      "full_app_id_supported", full_app_id_supported, &result__);
   impl::WriteJsonField("exchange_after_x_ignition_cycles",
                        exchange_after_x_ignition_cycles,
                        &result__);
@@ -620,6 +624,9 @@ bool ModuleConfig::is_valid() const {
     return false;
   }
   if (!preloaded_pt.is_valid()) {
+    return false;
+  }
+  if (!full_app_id_supported.is_valid()) {
     return false;
   }
   if (!exchange_after_x_ignition_cycles.is_valid()) {
@@ -672,6 +679,9 @@ bool ModuleConfig::struct_empty() const {
   if (preloaded_pt.is_initialized()) {
     return false;
   }
+  if (full_app_id_supported.is_initialized()) {
+    return false;
+  }
 
   if (exchange_after_x_ignition_cycles.is_initialized()) {
     return false;
@@ -719,6 +729,10 @@ void ModuleConfig::ReportErrors(rpc::ValidationReport* report__) const {
   }
   if (!preloaded_pt.is_valid()) {
     preloaded_pt.ReportErrors(&report__->ReportSubobject("preloaded_pt"));
+  }
+  if (!full_app_id_supported.is_valid()) {
+    full_app_id_supported.ReportErrors(
+        &report__->ReportSubobject("full_app_id_supported"));
   }
   if (!exchange_after_x_ignition_cycles.is_valid()) {
     exchange_after_x_ignition_cycles.ReportErrors(
@@ -797,6 +811,7 @@ void ModuleConfig::SetPolicyTableType(PolicyTableType pt_type) {
   CompositeType::SetPolicyTableType(pt_type);
   certificate.SetPolicyTableType(pt_type);
   preloaded_pt.SetPolicyTableType(pt_type);
+  full_app_id_supported.SetPolicyTableType(pt_type);
   exchange_after_x_ignition_cycles.SetPolicyTableType(pt_type);
   exchange_after_x_kilometers.SetPolicyTableType(pt_type);
   exchange_after_x_days.SetPolicyTableType(pt_type);

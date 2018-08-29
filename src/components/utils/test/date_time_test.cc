@@ -30,6 +30,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <boost/thread/thread.hpp>
 #include "gtest/gtest.h"
 #include "utils/date_time.h"
 
@@ -38,364 +39,270 @@ namespace components {
 namespace utils_test {
 
 using namespace date_time;
+
+namespace bpt = boost::posix_time;
 TEST(DateTimeTest, GetCurrentTime) {
   // arrange
-  const TimevalStruct time1 = date_time::DateTime::getCurrentTime();
+  const date_time::TimeDuration time1 = getCurrentTime();
 
   // assert
-  ASSERT_NE(0, time1.tv_sec);
-  ASSERT_GE(time1.tv_usec, 0);
+  ASSERT_NE(0, time1.total_seconds());
+  ASSERT_GE(get_just_uSecs(time1), 0);
 
   // act
-  const TimevalStruct time2 = date_time::DateTime::getCurrentTime();
+  const date_time::TimeDuration time2 = getCurrentTime();
 
   // assert
-  ASSERT_NE(0, time2.tv_sec);
-  ASSERT_GE(time2.tv_usec, 0);
-  ASSERT_GE(time2.tv_sec, time1.tv_sec);
+  ASSERT_NE(0, time2.total_seconds());
+  ASSERT_GE(get_just_uSecs(time1), 0);
+  ASSERT_GE(time2.total_seconds(), time1.total_seconds());
 }
 
 TEST(DateTimeTest, GetSecs) {
   // arrange
-  TimevalStruct time;
-  time.tv_sec = 1;
-  time.tv_usec = 2 * date_time::DateTime::MICROSECONDS_IN_MILLISECOND;
+  date_time::TimeDuration time1 = bpt::seconds(1) + bpt::milliseconds(2);
 
   // assert
-  ASSERT_EQ(1, date_time::DateTime::getSecs(time));
+  ASSERT_EQ(1, getSecs(time1));
 }
 
 TEST(DateTimeTest, GetmSecs) {
   // arrange
-  TimevalStruct time;
-  time.tv_sec = 1;
-  time.tv_usec = 2 * date_time::DateTime::MICROSECONDS_IN_MILLISECOND;
+  date_time::TimeDuration time1 = bpt::seconds(1) + bpt::milliseconds(2);
+  int expected = 1 * MILLISECONDS_IN_SECOND + 2;
 
-  int64_t expect_value =
-      time.tv_sec * date_time::DateTime::MILLISECONDS_IN_SECOND +
-      time.tv_usec / date_time::DateTime::MICROSECONDS_IN_MILLISECOND;
   // assert
-  ASSERT_EQ(expect_value, date_time::DateTime::getmSecs(time));
+  ASSERT_EQ(expected, getmSecs(time1));
 }
 
 TEST(DateTimeTest, GetuSecs) {
   // arrange
-  TimevalStruct time;
-  time.tv_sec = 3;
-  time.tv_usec = 4;
+  date_time::TimeDuration time1 = bpt::seconds(3) + bpt::microseconds(4);
+  int expect_value =
+      3 * MILLISECONDS_IN_SECOND * MICROSECONDS_IN_MILLISECOND + 4;
 
-  int64_t expect_value = time.tv_sec *
-                             date_time::DateTime::MILLISECONDS_IN_SECOND *
-                             date_time::DateTime::MICROSECONDS_IN_MILLISECOND +
-                         time.tv_usec;
   // assert
-  ASSERT_EQ(expect_value, date_time::DateTime::getuSecs(time));
+  ASSERT_EQ(expect_value, getuSecs(time1));
 }
 
 TEST(DateTimeTest, GetuSecsmSecs) {
   // arrange
-  TimevalStruct time;
-  time.tv_sec = 5;
-  time.tv_usec = 6;
+  date_time::TimeDuration time1 = bpt::seconds(5) + bpt::microseconds(6);
 
-  int64_t expect_value = date_time::DateTime::getuSecs(time) /
-                         date_time::DateTime::MICROSECONDS_IN_MILLISECOND;
+  int64_t expect_value = getuSecs(time1) / MICROSECONDS_IN_MILLISECOND;
 
   // assert
-  ASSERT_EQ(expect_value, date_time::DateTime::getmSecs(time));
+  ASSERT_EQ(expect_value, getmSecs(time1));
 }
 
 TEST(DateTimeTest, CalculateTimeSpan) {
   // arrange
-  const TimevalStruct time = date_time::DateTime::getCurrentTime();
+  const date_time::TimeDuration time1 = getCurrentTime();
 
   const uint32_t sleep_time_mSec = 10;
-  usleep(sleep_time_mSec * date_time::DateTime::MICROSECONDS_IN_MILLISECOND);
+  // sleep current thread
+  boost::this_thread::sleep(boost::posix_time::milliseconds(sleep_time_mSec));
 
   // assert
-  ASSERT_GE(date_time::DateTime::calculateTimeSpan(time), sleep_time_mSec);
+  ASSERT_GE(calculateTimeSpan(time1), sleep_time_mSec);
 }
 
 TEST(DateTimeTest, CalculateTimeDiff) {
   // arrange
-  TimevalStruct time1;
-  time1.tv_sec = 1;
-  time1.tv_usec = 2 * date_time::DateTime::MICROSECONDS_IN_MILLISECOND;
 
-  TimevalStruct time2;
-  time2.tv_sec = 3;
-  time2.tv_usec = 4 * date_time::DateTime::MICROSECONDS_IN_MILLISECOND;
+  date_time::TimeDuration time1 = bpt::seconds(2) + bpt::milliseconds(2);
+  date_time::TimeDuration time2 = bpt::seconds(3) + bpt::milliseconds(4);
 
   // time2 to time1
-  TimevalStruct diff1;
-  diff1.tv_sec = time2.tv_sec - time1.tv_sec;
-  diff1.tv_usec = time2.tv_usec - time1.tv_usec;
-
-  const int64_t mSecDiff =
-      static_cast<int64_t>(diff1.tv_sec) * 1000 + diff1.tv_usec / 1000;
+  date_time::TimeDuration diff1 = bpt::seconds(1) + bpt::milliseconds(2);
 
   // assert
-  ASSERT_EQ(mSecDiff, date_time::DateTime::calculateTimeDiff(time2, time1));
+  ASSERT_EQ(diff1.total_milliseconds(), calculateTimeDiff(time2, time1));
 
-  // time1 to time2
-  TimevalStruct diff2;
-  diff2.tv_sec = time1.tv_sec - time2.tv_sec;
-  diff2.tv_usec = time1.tv_usec - time2.tv_usec;
-
-  const int64_t mSecDiff2 =
-      -(static_cast<int64_t>(diff2.tv_sec) * 1000 + diff2.tv_usec / 1000);
+  // time1 to time2, but calculateTimeDiff returns an absolute value
+  date_time::TimeDuration diff2 = -diff1.invert_sign();
 
   // assert
-  ASSERT_EQ(mSecDiff2, date_time::DateTime::calculateTimeDiff(time1, time2));
+  ASSERT_EQ(diff2.total_milliseconds(), calculateTimeDiff(time1, time2));
 }
 
 TEST(DateTimeTest, CalculateEqualTimeDiff) {
-  TimevalStruct time1;
-  time1.tv_sec = 1;
-  time1.tv_usec = 2 * date_time::DateTime::MICROSECONDS_IN_MILLISECOND;
+  date_time::TimeDuration time1 = bpt::seconds(1) + bpt::milliseconds(2);
 
-  TimevalStruct time2;
-  time2.tv_sec = 1;
-  time2.tv_usec = 2 * date_time::DateTime::MICROSECONDS_IN_MILLISECOND;
+  date_time::TimeDuration time2 = bpt::seconds(1) + bpt::milliseconds(2);
 
-  ASSERT_EQ(0, date_time::DateTime::calculateTimeDiff(time2, time1));
-  ASSERT_EQ(0, date_time::DateTime::calculateTimeDiff(time1, time2));
+  ASSERT_EQ(0, calculateTimeDiff(time2, time1));
+  ASSERT_EQ(0, calculateTimeDiff(time1, time2));
 }
 
 TEST(DateTimeTest, compareTime) {
   // arrange
-  TimevalStruct time1;
-  time1.tv_sec = 1;
-  time1.tv_usec = 2 * date_time::DateTime::MICROSECONDS_IN_MILLISECOND;
+  date_time::TimeDuration time1 = bpt::seconds(1) + bpt::milliseconds(2);
 
-  TimevalStruct time2;
-  time2.tv_sec = 2;
-  time2.tv_usec = 4 * date_time::DateTime::MICROSECONDS_IN_MILLISECOND;
+  date_time::TimeDuration time2 = bpt::seconds(2) + bpt::milliseconds(4);
 
   // assert
-  ASSERT_EQ(LESS, date_time::DateTime::compareTime(time1, time2));
-  ASSERT_EQ(GREATER, date_time::DateTime::compareTime(time2, time1));
-  ASSERT_NE(EQUAL, date_time::DateTime::compareTime(time2, time1));
+  ASSERT_EQ(LESS, compareTime(time1, time2));
+  ASSERT_EQ(GREATER, compareTime(time2, time1));
+  ASSERT_NE(EQUAL, compareTime(time2, time1));
 
   // act
-  TimevalStruct time3 = date_time::DateTime::Sub(time2, time1);
+  date_time::TimeDuration time3 = time2 - time1;
 
   // assert
-  ASSERT_EQ(EQUAL, date_time::DateTime::compareTime(time1, time3));
+  ASSERT_EQ(EQUAL, compareTime(time1, time3));
 }
 
 TEST(DateTimeTest, GetSecs_UsecConvertedInSec) {
   // arrange
-  TimevalStruct time1;
-  time1.tv_sec = 0;
-  time1.tv_usec = date_time::DateTime::MICROSECONDS_IN_SECOND;
+  date_time::TimeDuration time1 = bpt::microseconds(MICROSECONDS_IN_SECOND);
 
   // assert
-  ASSERT_EQ(1, date_time::DateTime::getSecs(time1));
+  ASSERT_EQ(1, getSecs(time1));
 }
 
 TEST(DateTimeTest, compareTime_UsecConvertedInSec) {
   // arrange
-  TimevalStruct time1;
-  time1.tv_sec = 1;
-  time1.tv_usec = 0;
+  date_time::TimeDuration time1 = bpt::seconds(1);
 
-  TimevalStruct time2;
-  time2.tv_sec = 0;
-  time2.tv_usec = date_time::DateTime::MICROSECONDS_IN_SECOND;
+  date_time::TimeDuration time2 = bpt::microseconds(MICROSECONDS_IN_SECOND);
 
   // assert
-  ASSERT_EQ(1, date_time::DateTime::getSecs(time1));
-  ASSERT_EQ(1, date_time::DateTime::getSecs(time2));
-  ASSERT_EQ(EQUAL, date_time::DateTime::compareTime(time1, time2));
-}
-
-TEST(DateTimeTest, compareEqualTime_UsecConvertedInSec) {
-  // arrange
-  TimevalStruct time1;
-  time1.tv_sec = 1;
-  time1.tv_usec = 0;
-
-  TimevalStruct time2;
-  time2.tv_sec = 0;
-  time2.tv_usec = date_time::DateTime::MICROSECONDS_IN_SECOND;
-
-  // assert
-  ASSERT_TRUE(date_time::DateTime::Equal(time1, time2));
+  ASSERT_EQ(1, getSecs(time1));
+  ASSERT_EQ(1, getSecs(time2));
+  ASSERT_EQ(EQUAL, compareTime(time1, time2));
+  ASSERT_TRUE(Equal(time1, time2));
 }
 
 TEST(DateTimeTest, compareLessTime_UsecConvertedInSec) {
   // arrange
-  TimevalStruct time1;
-  time1.tv_sec = 1;
-  time1.tv_usec = 0;
+  date_time::TimeDuration time1 = bpt::seconds(1);
 
-  TimevalStruct time2;
-  time2.tv_sec = 0;
-  time2.tv_usec = 2 * date_time::DateTime::MICROSECONDS_IN_SECOND;
+  date_time::TimeDuration time2 = bpt::microseconds(2 * MICROSECONDS_IN_SECOND);
 
   // assert
-  ASSERT_TRUE(date_time::DateTime::Less(time1, time2));
+  ASSERT_TRUE(Less(time1, time2));
 }
 
 TEST(DateTimeTest, compareGreaterTime_UsecConvertedInSec) {
   // arrange
-  TimevalStruct time1;
-  time1.tv_sec = 1;
-  time1.tv_usec = 0;
+  date_time::TimeDuration time1 = bpt::seconds(1);
 
-  TimevalStruct time2;
-  time2.tv_sec = 0;
-  time2.tv_usec = 2 * date_time::DateTime::MICROSECONDS_IN_SECOND;
+  date_time::TimeDuration time2 = bpt::milliseconds(2 * MICROSECONDS_IN_SECOND);
 
   // assert
-  ASSERT_TRUE(date_time::DateTime::Greater(time2, time1));
+  ASSERT_TRUE(Greater(time2, time1));
 }
 
 TEST(DateTimeTest, CalculateTimeSub_UsecConvertedInSec) {
   // arrange
-  TimevalStruct time1;
-  time1.tv_sec = 1;
-  time1.tv_usec = 0;
+  date_time::TimeDuration time1 = bpt::seconds(1);
 
-  TimevalStruct time2;
-  time2.tv_sec = 0;
-  time2.tv_usec = 2 * date_time::DateTime::MICROSECONDS_IN_SECOND;
+  date_time::TimeDuration time2 = bpt::microseconds(2 * MICROSECONDS_IN_SECOND);
 
-  TimevalStruct time3 = date_time::DateTime::Sub(time2, time1);
+  date_time::TimeDuration time3 = time2 - time1;
 
   // assert
-  ASSERT_EQ(EQUAL, date_time::DateTime::compareTime(time1, time3));
+  ASSERT_EQ(EQUAL, compareTime(time1, time3));
 }
 
 TEST(DateTimeTest, CalculateTimeDiff_UsecConvertedInSec) {
   // arrange
-  TimevalStruct time1;
-  time1.tv_sec = 2;
-  time1.tv_usec = 5 * date_time::DateTime::MICROSECONDS_IN_SECOND;
 
-  TimevalStruct time2;
-  time2.tv_sec = 3;
-  time2.tv_usec = 1 * date_time::DateTime::MICROSECONDS_IN_SECOND;
+  date_time::TimeDuration time1 =
+      bpt::seconds(2) + bpt::microseconds(5 * MICROSECONDS_IN_SECOND);
+  date_time::TimeDuration time2 =
+      bpt::seconds(3) + bpt::microseconds(1 * MICROSECONDS_IN_SECOND);
 
   // assert
-  ASSERT_EQ(3000, date_time::DateTime::calculateTimeDiff(time2, time1));
-  ASSERT_EQ(3000, date_time::DateTime::calculateTimeDiff(time1, time2));
+  ASSERT_EQ(3000, calculateTimeDiff(time2, time1));
+  ASSERT_EQ(3000, calculateTimeDiff(time1, time2));
 }
 
 TEST(DateTimeTest, CalculateEqualTimeDiff_UsecConvertedInSec) {
-  // arrange
-  TimevalStruct time1;
-  time1.tv_sec = 2;
-  time1.tv_usec = 2 * date_time::DateTime::MICROSECONDS_IN_SECOND;
-
-  TimevalStruct time2;
-  time2.tv_sec = 3;
-  time2.tv_usec = 1 * date_time::DateTime::MICROSECONDS_IN_SECOND;
+  date_time::TimeDuration time1 =
+      bpt::seconds(2) + bpt::microseconds(2 * MICROSECONDS_IN_SECOND);
+  date_time::TimeDuration time2 =
+      bpt::seconds(3) + bpt::microseconds(1 * MICROSECONDS_IN_SECOND);
 
   // assert
-  ASSERT_EQ(0, date_time::DateTime::calculateTimeDiff(time2, time1));
-  ASSERT_EQ(0, date_time::DateTime::calculateTimeDiff(time1, time2));
-}
+  ASSERT_EQ(0, calculateTimeDiff(time2, time1));
+  ASSERT_EQ(0, calculateTimeDiff(time1, time2));
 
-TEST(DateTimeTest, CalculateEqualTimeSub_UsecConvertedInSec) {
-  // arrange
-  TimevalStruct time1;
-  time1.tv_sec = 3;
-  time1.tv_usec = 0;
+  date_time::TimeDuration time3 = time2 - time1;
+  date_time::TimeDuration time4 = time1 - time2;
 
-  TimevalStruct time2;
-  time2.tv_sec = 2;
-  time2.tv_usec = 1 * date_time::DateTime::MICROSECONDS_IN_SECOND;
+  date_time::TimeDuration time_expected(0, 0, 0, 0);
 
-  TimevalStruct time3 = date_time::DateTime::Sub(time2, time1);
-  TimevalStruct time4 = date_time::DateTime::Sub(time1, time2);
-
-  TimevalStruct time_expected;
-  time_expected.tv_sec = 0;
-  time_expected.tv_usec = 0;
-  // assert
-  ASSERT_EQ(EQUAL, date_time::DateTime::compareTime(time_expected, time3));
-  ASSERT_EQ(EQUAL, date_time::DateTime::compareTime(time_expected, time4));
+  ASSERT_EQ(EQUAL, compareTime(time_expected, time3));
+  ASSERT_EQ(EQUAL, compareTime(time_expected, time4));
 }
 
 TEST(DateTimeTest,
      AddMilliseconds_SetMillisecondMultiplesSecond_ExpectChangeTime) {
-  TimevalStruct time1;
-  time1.tv_sec = 3;
-  time1.tv_usec = 0;
+  date_time::TimeDuration time1 = bpt::seconds(3);
   uint32_t milliseconds = 7000;
-  date_time::DateTime::AddMilliseconds(time1, milliseconds);
-  ASSERT_EQ(10, time1.tv_sec);
-  ASSERT_EQ(0, time1.tv_usec);
+  AddMilliseconds(time1, milliseconds);
+  ASSERT_EQ(10, getSecs(time1));
+  ASSERT_EQ(0, get_just_mSecs(time1));
 }
 
 TEST(DateTimeTest,
      AddMilliseconds_SetMillisecondNotMultiplesSecond_ExpectChangeTime) {
-  TimevalStruct time1;
+  date_time::TimeDuration time1 = bpt::seconds(3);
   uint32_t milliseconds = 7500;
-  time1.tv_sec = 3;
-  time1.tv_usec = 0;
-  date_time::DateTime::AddMilliseconds(time1, milliseconds);
-  ASSERT_EQ(10, time1.tv_sec);
-  ASSERT_EQ(500000, time1.tv_usec);
+
+  AddMilliseconds(time1, milliseconds);
+  ASSERT_EQ(10, time1.total_seconds());
+  ASSERT_EQ(500000, get_just_uSecs(time1));
 }
 
 TEST(DateTimeTest,
      AddMilliseconds_SetMilliSecondLessThenSeconds_ExpectChangeTime) {
-  TimevalStruct time1;
+  date_time::TimeDuration time1 = bpt::seconds(3);
   uint32_t milliseconds = 500;
-  time1.tv_sec = 3;
-  time1.tv_usec = 0;
-  date_time::DateTime::AddMilliseconds(time1, milliseconds);
-  ASSERT_EQ(3, time1.tv_sec);
-  ASSERT_EQ(500000, time1.tv_usec);
+
+  AddMilliseconds(time1, milliseconds);
+  ASSERT_EQ(3, getSecs(time1));
+  ASSERT_EQ(500000, get_just_uSecs(time1));
 }
 
 TEST(DateTimeTest,
      AddMilliseconds_SetMillisecondEqualNull_ExpectNotChangeTime) {
-  TimevalStruct time1;
+  date_time::TimeDuration time1 = bpt::seconds(3);
   uint32_t milliseconds = 0;
-  time1.tv_sec = 3;
-  time1.tv_usec = 0;
-  date_time::DateTime::AddMilliseconds(time1, milliseconds);
-  ASSERT_EQ(3, time1.tv_sec);
-  ASSERT_EQ(0, time1.tv_usec);
+
+  AddMilliseconds(time1, milliseconds);
+  ASSERT_EQ(3, getSecs(time1));
+  ASSERT_EQ(0, get_just_mSecs(time1));
 }
 
 TEST(DateTimeTest, AddMilliseconds_SetOverlowMicrosecond_ExpectChangeTime) {
-  TimevalStruct time1;
+  date_time::TimeDuration time1 = bpt::seconds(3);
   uint32_t milliseconds = 7600;
-  time1.tv_sec = 3;
-  time1.tv_usec = 500000;
-  date_time::DateTime::AddMilliseconds(time1, milliseconds);
-  ASSERT_EQ(11, time1.tv_sec);
-  ASSERT_EQ(100000, time1.tv_usec);
+
+  AddMilliseconds(time1, milliseconds);
+  ASSERT_EQ(10, getSecs(time1));
+  ASSERT_EQ(600000, get_just_uSecs(time1));
 }
 
-TEST(DateTimeTest, Operator_minus_TimevalStruct_positive) {
-  TimevalStruct time1;
-  TimevalStruct time2;
-  TimevalStruct time3;
-  time1.tv_sec = 3;
-  time1.tv_usec = 0;
-  time2.tv_sec = 3;
-  time2.tv_usec = 0;
-  time3.tv_sec = 2;
-  time3.tv_usec = 9000000;
-  ASSERT_EQ(0, date_time::DateTime::getSecs(time1 - time2));
-  ASSERT_EQ(8000000, date_time::DateTime::getuSecs(time3 - time1));
+TEST(DateTimeTest, Operator_minus_TimeDuration_positive) {
+  date_time::TimeDuration time1 = bpt::seconds(3);
+  date_time::TimeDuration time2 = bpt::seconds(3);
+  date_time::TimeDuration time3 =
+      bpt::seconds(2) + bpt::microseconds(9 * MICROSECONDS_IN_SECOND);
+  date_time::TimeDuration diff1 = time1 - time2;
+  ASSERT_EQ(0, getSecs(diff1));
+  ASSERT_EQ(8000000, getuSecs(time3 - time1));
 }
 
-TEST(DateTimeTest, Operator_minus_TimevalStruct_negative) {
-  TimevalStruct time1;
-  TimevalStruct time2;
-  time1.tv_sec = 3;
-  time1.tv_usec = 0;
-  time2.tv_sec = 2;
-  time2.tv_usec = 9000000;
-  ASSERT_NE(1, date_time::DateTime::getSecs(time1 - time2));
-  ASSERT_NE(-8000000, date_time::DateTime::getSecs(time2 - time1));
+TEST(DateTimeTest, Operator_minus_TimeDuration_negative) {
+  date_time::TimeDuration time1 = bpt::seconds(3);
+  date_time::TimeDuration time2 =
+      bpt::seconds(2) + bpt::microseconds(9 * MICROSECONDS_IN_SECOND);
+
+  ASSERT_NE(1, getSecs(time1 - time2));
+  ASSERT_NE(-8000000, getSecs(time2 - time1));
 }
 
 }  // namespace utils_test

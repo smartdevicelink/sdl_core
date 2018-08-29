@@ -18,6 +18,7 @@ const char* msg_params = "msg_params";
 const char* method_name = "methodName";
 const char* info = "info";
 const char* app_id = "appID";
+const char* full_app_id = "fullAppID";
 const char* bundle_id = "appBundleID";
 const char* app_info = "appInfo";
 const char* app_launch = "app_launch";
@@ -276,6 +277,7 @@ const char* last_ign_off_time = "last_ign_off_time";
 const char* resume_vr_grammars = "resumeVrGrammars";
 
 const char* ign_off_count = "ign_off_count";
+const char* global_ign_on_counter = "global_ign_on_counter";
 const char* suspend_count = "suspend_count";
 
 const char* connection_info = "connection_info";

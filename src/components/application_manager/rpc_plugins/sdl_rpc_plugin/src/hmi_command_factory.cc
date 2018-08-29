@@ -607,7 +607,7 @@ CommandCreator& HMICommandFactory::get_creator_factory(
     case hmi_apis::FunctionID::Navigation_UnsubscribeWayPoints: {
       return hmi_apis::messageType::request == message_type
                  ? factory
-                       .GetCreator<commands::NaviUnSubscribeWayPointsRequest>()
+                       .GetCreator<commands::NaviUnsubscribeWayPointsRequest>()
                  : factory.GetCreator<
                        commands::NaviUnsubscribeWayPointsResponse>();
     }

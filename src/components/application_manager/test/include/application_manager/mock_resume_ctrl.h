@@ -50,8 +50,15 @@ class MockResumeCtrl : public resumption::ResumeCtrl {
   MOCK_METHOD0(OnSuspend, void());
   MOCK_METHOD0(OnIgnitionOff, void());
   MOCK_METHOD0(OnAwake, void());
+  MOCK_CONST_METHOD0(LowVoltageTime, time_t());
+  MOCK_CONST_METHOD0(WakeUpTime, time_t());
+  MOCK_METHOD0(SaveLowVoltageTime, void());
+  MOCK_METHOD0(SaveWakeUpTime, void());
+  MOCK_METHOD0(ResetLowVoltageTime, void());
+  MOCK_METHOD0(ResetWakeUpTime, void());
   MOCK_CONST_METHOD0(is_suspended, bool());
   MOCK_METHOD0(StopSavePersistentDataTimer, void());
+  MOCK_METHOD0(StartSavePersistentDataTimer, void());
   MOCK_METHOD2(StartResumption,
                bool(app_mngr::ApplicationSharedPtr application,
                     const std::string& hash));

@@ -212,10 +212,9 @@ void PutFileRequest::Run() {
     return;
   }
   const std::string full_path = file_path + "/" + sync_file_name_;
-  const size_t bin_data_size = binary_data.size();
 
   if ((*message_)[strings::msg_params].keyExists(strings::crc32_check_sum)) {
-    LOG4CXX_TRACE(logger_, "Binary Data Size:  " << bin_data_size);
+    LOG4CXX_TRACE(logger_, "Binary Data Size:  " << binary_data.size());
     const uint32_t crc_received =
         (*message_)[strings::msg_params][strings::crc32_check_sum].asUInt();
     LOG4CXX_TRACE(logger_, "CRC32 SUM Received: " << crc_received);
@@ -232,7 +231,7 @@ void PutFileRequest::Run() {
   }
 
   LOG4CXX_DEBUG(logger_,
-                "Writing " << bin_data_size << " bytes to " << full_path
+                "Writing " << binary_data.size() << " bytes to " << full_path
                            << " (current size is"
                            << file_system::FileSize(full_path) << ")");
 

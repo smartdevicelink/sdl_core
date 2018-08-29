@@ -39,7 +39,7 @@ using namespace application_manager;
 
 namespace commands {
 
-UnSubscribeWayPointsRequest::UnSubscribeWayPointsRequest(
+UnsubscribeWayPointsRequest::UnsubscribeWayPointsRequest(
     const application_manager::commands::MessageSharedPtr& message,
     ApplicationManager& application_manager,
     app_mngr::rpc_service::RPCService& rpc_service,
@@ -51,9 +51,9 @@ UnSubscribeWayPointsRequest::UnSubscribeWayPointsRequest(
                          hmi_capabilities,
                          policy_handler) {}
 
-UnSubscribeWayPointsRequest::~UnSubscribeWayPointsRequest() {}
+UnsubscribeWayPointsRequest::~UnsubscribeWayPointsRequest() {}
 
-void UnSubscribeWayPointsRequest::Run() {
+void UnsubscribeWayPointsRequest::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
 
   ApplicationSharedPtr app = application_manager_.application(connection_key());
@@ -76,13 +76,13 @@ void UnSubscribeWayPointsRequest::Run() {
       hmi_apis::FunctionID::Navigation_UnsubscribeWayPoints, NULL, true);
 }
 
-void UnSubscribeWayPointsRequest::on_event(const event_engine::Event& event) {
+void UnsubscribeWayPointsRequest::on_event(const event_engine::Event& event) {
   LOG4CXX_AUTO_TRACE(logger_);
   ApplicationSharedPtr app = application_manager_.application(connection_key());
   const smart_objects::SmartObject& message = event.smart_object();
   switch (event.id()) {
     case hmi_apis::FunctionID::Navigation_UnsubscribeWayPoints: {
-      LOG4CXX_INFO(logger_, "Received Navigation_UnSubscribeWayPoints event");
+      LOG4CXX_INFO(logger_, "Received Navigation_UnsubscribeWayPoints event");
       EndAwaitForInterface(HmiInterfaces::HMI_INTERFACE_Navigation);
       const hmi_apis::Common_Result::eType result_code =
           static_cast<hmi_apis::Common_Result::eType>(
@@ -107,7 +107,7 @@ void UnSubscribeWayPointsRequest::on_event(const event_engine::Event& event) {
   }
 }
 
-bool UnSubscribeWayPointsRequest::Init() {
+bool UnsubscribeWayPointsRequest::Init() {
   hash_update_mode_ = HashUpdateMode::kDoHashUpdate;
   return true;
 }

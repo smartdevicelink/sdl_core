@@ -2,9 +2,6 @@
  Copyright (c) 2013, Ford Motor Company
  All rights reserved.
 
- Copyright (c) 2017 Xevo Inc.
- All rights reserved.
-
  Redistribution and use in source and binary forms, with or without
  modification, are permitted provided that the following conditions are met:
 
@@ -16,7 +13,7 @@
  disclaimer in the documentation and/or other materials provided with the
  distribution.
 
- Neither the name of the copyright holders nor the names of their contributors
+ Neither the name of the Ford Motor Company nor the names of its contributors
  may be used to endorse or promote products derived from this software
  without specific prior written permission.
 
@@ -54,6 +51,7 @@ extern const char* msg_params;
 extern const char* method_name;
 extern const char* info;
 extern const char* app_id;
+extern const char* full_app_id;
 extern const char* bundle_id;
 extern const char* app_info;
 extern const char* app_launch;
@@ -312,6 +310,8 @@ extern const char* last_ign_off_time;
 extern const char* resume_vr_grammars;
 
 extern const char* ign_off_count;
+
+extern const char* global_ign_on_counter;
 
 extern const char* connection_info;
 extern const char* is_download_complete;

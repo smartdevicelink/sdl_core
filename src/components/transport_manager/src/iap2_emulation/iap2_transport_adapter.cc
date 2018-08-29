@@ -78,6 +78,7 @@ IAP2USBEmulationTransportAdapter::IAP2USBEmulationTransportAdapter(
   signal_handler_ = threads::CreateThread("iAP signal handler", delegate);
   signal_handler_->start();
   const auto result = mkfifo(out_signals_channel, mode);
+  UNUSED(result);
   LOG4CXX_DEBUG(logger_, "Out signals channel creation result: " << result);
 }
 
@@ -123,6 +124,7 @@ IAP2USBEmulationTransportAdapter::IAPSignalHandlerDelegate::
     IAPSignalHandlerDelegate(IAP2USBEmulationTransportAdapter& adapter)
     : adapter_(adapter), run_flag_(true), in_(0) {
   const auto result = mkfifo(in_signals_channel, mode);
+  UNUSED(result);
   LOG4CXX_DEBUG(logger_, "In signals channel creation result: " << result);
 }
 

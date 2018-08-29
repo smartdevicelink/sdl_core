@@ -103,6 +103,10 @@ const mobile_api::Language::eType& InitialApplicationDataImpl::ui_language()
   return ui_language_;
 }
 
+const utils::SemanticVersion& InitialApplicationDataImpl::msg_version() const {
+  return msg_version_;
+}
+
 void InitialApplicationDataImpl::set_app_types(
     const smart_objects::SmartObject& app_types) {
   if (app_types_) {
@@ -151,6 +155,11 @@ void InitialApplicationDataImpl::set_language(
 void InitialApplicationDataImpl::set_ui_language(
     const mobile_api::Language::eType& ui_language) {
   ui_language_ = ui_language;
+}
+
+void InitialApplicationDataImpl::set_msg_version(
+    const utils::SemanticVersion& version) {
+  msg_version_ = version;
 }
 
 void InitialApplicationDataImpl::set_perform_interaction_layout(

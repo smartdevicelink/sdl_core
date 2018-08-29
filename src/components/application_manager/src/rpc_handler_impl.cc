@@ -59,7 +59,7 @@ void RPCHandlerImpl::ProcessMessageFromMobile(
 #ifdef TELEMETRY_MONITOR
   AMTelemetryObserver::MessageMetricSharedPtr metric(
       new AMTelemetryObserver::MessageMetric());
-  metric->begin = date_time::DateTime::getCurrentTime();
+  metric->begin = date_time::getCurrentTime();
 #endif  // TELEMETRY_MONITOR
   smart_objects::SmartObjectSPtr so_from_mobile =
       std::make_shared<smart_objects::SmartObject>();
@@ -83,7 +83,7 @@ void RPCHandlerImpl::ProcessMessageFromMobile(
     LOG4CXX_ERROR(logger_, "Received command didn't run successfully");
   }
 #ifdef TELEMETRY_MONITOR
-  metric->end = date_time::DateTime::getCurrentTime();
+  metric->end = date_time::getCurrentTime();
   if (metric_observer_) {
     metric_observer_->OnMessage(metric);
   }
@@ -194,6 +194,37 @@ void RPCHandlerImpl::SetTelemetryObserver(AMTelemetryObserver* observer) {
 
 #endif  // TELEMETRY_MONITOR
 
+void RPCHandlerImpl::GetMessageVersion(
+    NsSmartDeviceLink::NsSmartObjects::SmartObject& output,
+    utils::SemanticVersion& message_version) {
+  if (output.keyExists(
+          NsSmartDeviceLink::NsJSONHandler::strings::S_MSG_PARAMS) &&
+      output[NsSmartDeviceLink::NsJSONHandler::strings::S_MSG_PARAMS].keyExists(
+          strings::sync_msg_version)) {
+    // SyncMsgVersion exists, check if it is valid.
+    auto sync_msg_version =
+        output[NsSmartDeviceLink::NsJSONHandler::strings::S_MSG_PARAMS]
+              [strings::sync_msg_version];
+    uint16_t major = 0;
+    uint16_t minor = 0;
+    uint16_t patch = 0;
+    if (sync_msg_version.keyExists(strings::major_version)) {
+      major = sync_msg_version[strings::major_version].asUInt();
+    }
+    if (sync_msg_version.keyExists(strings::minor_version)) {
+      minor = sync_msg_version[strings::minor_version].asUInt();
+    }
+    if (sync_msg_version.keyExists(strings::patch_version)) {
+      patch = sync_msg_version[strings::patch_version].asUInt();
+    }
+    utils::SemanticVersion temp_version(major, minor, patch);
+    if (temp_version.isValid()) {
+      utils::SemanticVersion ver_4_5(4, 5, 0);
+      message_version = (temp_version > ver_4_5) ? temp_version : ver_4_5;
+    }
+  }
+}
+
 bool RPCHandlerImpl::ConvertMessageToSO(
     const Message& message,
     NsSmartDeviceLink::NsSmartObjects::SmartObject& output) {
@@ -218,11 +249,24 @@ bool RPCHandlerImpl::ConvertMessageToSO(
 
       rpc::ValidationReport report("RPC");
 
+      // Attach RPC version to SmartObject if it does not exist yet.
+      auto app_ptr = app_manager_.application(message.connection_key());
+      utils::SemanticVersion msg_version(0, 0, 0);
+      if (app_ptr) {
+        msg_version = app_ptr->msg_version();
+      } else if (mobile_apis::FunctionID::RegisterAppInterfaceID ==
+                 static_cast<mobile_apis::FunctionID::eType>(
+                     output[strings::params][strings::function_id].asInt())) {
+        GetMessageVersion(output, msg_version);
+      }
+
       if (!conversion_result ||
-          !mobile_so_factory().attachSchema(output, true) ||
-          ((output.validate(&report) != smart_objects::Errors::OK))) {
+          !mobile_so_factory().attachSchema(output, true, msg_version) ||
+          ((output.validate(&report, msg_version) !=
+            smart_objects::Errors::OK))) {
         LOG4CXX_WARN(logger_,
-                     "Failed to parse string to smart object :"
+                     "Failed to parse string to smart object with API version "
+                         << msg_version.toString() << " : "
                          << message.json_message());
         std::shared_ptr<smart_objects::SmartObject> response(
             MessageHelper::CreateNegativeResponse(

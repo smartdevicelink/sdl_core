@@ -95,7 +95,7 @@ void SetGlobalPropertiesRequest::Run() {
         (*message_)[strings::msg_params][strings::menu_icon],
         app,
         application_manager_);
-    if (mobile_apis::Result::SUCCESS != verification_result) {
+    if (mobile_apis::Result::INVALID_DATA == verification_result) {
       LOG4CXX_ERROR(
           logger_, "MessageHelper::VerifyImage return " << verification_result);
       SendResponse(false, verification_result);
@@ -104,7 +104,7 @@ void SetGlobalPropertiesRequest::Run() {
   }
   // Check for image file(s) in vrHelpItem
   if ((*message_)[strings::msg_params].keyExists(strings::vr_help)) {
-    if (mobile_apis::Result::SUCCESS !=
+    if (mobile_apis::Result::INVALID_DATA ==
         MessageHelper::VerifyImageVrHelpItems(
             (*message_)[strings::msg_params][strings::vr_help],
             app,

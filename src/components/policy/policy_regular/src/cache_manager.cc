@@ -645,7 +645,7 @@ int CacheManager::TimeoutResponse() {
   CACHE_MANAGER_CHECK(0);
   sync_primitives::AutoLock auto_lock(cache_lock_);
   return pt_->policy_table.module_config.timeout_after_x_seconds *
-         date_time::DateTime::MILLISECONDS_IN_SECOND;
+         date_time::MILLISECONDS_IN_SECOND;
 }
 
 bool CacheManager::SecondsBetweenRetries(std::vector<int>& seconds) {
@@ -824,6 +824,9 @@ void CacheManager::CheckSnapshotInitialization() {
   }
 
   *(snapshot_->policy_table.module_config.preloaded_pt) = false;
+
+  *(snapshot_->policy_table.module_config.full_app_id_supported) =
+      settings_->use_full_app_id();
 
   // SDL must not send certificate in snapshot
   snapshot_->policy_table.module_config.certificate =

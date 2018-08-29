@@ -202,6 +202,7 @@ class PolicyManagerImplTest2 : public ::testing::Test {
     manager = new PolicyManagerImpl();
     ON_CALL(policy_settings_, app_storage_folder())
         .WillByDefault(ReturnRef(kAppStorageFolder));
+    ON_CALL(policy_settings_, use_full_app_id()).WillByDefault(Return(true));
     manager->set_listener(&listener);
     const char* levels[] = {"BACKGROUND", "FULL", "LIMITED", "NONE"};
     hmi_level.assign(levels, levels + sizeof(levels) / sizeof(levels[0]));
@@ -238,6 +239,7 @@ class PolicyManagerImplTest2 : public ::testing::Test {
     file_system::remove_directory_content(kAppStorageFolder);
     ON_CALL(policy_settings_, app_storage_folder())
         .WillByDefault(ReturnRef(kAppStorageFolder));
+    ON_CALL(policy_settings_, use_full_app_id()).WillByDefault(Return(true));
     ASSERT_TRUE(manager->InitPT(file_name, &policy_settings_));
   }
 
@@ -466,6 +468,7 @@ TEST_F(PolicyManagerImplTest, GetNotificationsNumber) {
 
 TEST_F(PolicyManagerImplTest2, GetNotificationsNumberAfterPTUpdate) {
   // Arrange
+  CreateLocalPT("sdl_preloaded_pt.json");
   Json::Value table = CreatePTforLoad();
   manager->ForcePTExchange();
   manager->SetSendOnUpdateSentOut(false);
@@ -504,6 +507,7 @@ TEST_F(PolicyManagerImplTest2, GetNotificationsNumberAfterPTUpdate) {
 }
 
 TEST_F(PolicyManagerImplTest2, IsAppRevoked_SetRevokedAppID_ExpectAppRevoked) {
+  CreateLocalPT("sdl_preloaded_pt.json");
   // Arrange
   std::ifstream ifile("sdl_preloaded_pt.json");
   Json::Reader reader;
@@ -834,9 +838,9 @@ TEST_F(PolicyManagerImplTest2,
        PTUpdatedAt_DaysNotExceedLimit_ExpectNoUpdateRequired) {
   // Arrange
   CreateLocalPT("sdl_preloaded_pt.json");
-  TimevalStruct current_time = date_time::DateTime::getCurrentTime();
+  date_time::TimeDuration current_time = date_time::getCurrentTime();
   const int kSecondsInDay = 60 * 60 * 24;
-  int days = current_time.tv_sec / kSecondsInDay;
+  int days = date_time::getSecs(current_time) / kSecondsInDay;
   EXPECT_EQ("UP_TO_DATE", manager->GetPolicyTableStatus());
 
   GetPTU("valid_sdl_pt_update.json");
@@ -894,24 +898,24 @@ TEST_F(PolicyManagerImplTest2, NextRetryTimeout_ExpectTimeoutsFromPT) {
     uint32_t timeout_after_x_seconds =
         root["policy_table"]["module_config"]["timeout_after_x_seconds"]
             .asInt() *
-        date_time::DateTime::MILLISECONDS_IN_SECOND;
+        date_time::MILLISECONDS_IN_SECOND;
     const uint32_t first_retry = timeout_after_x_seconds;
     EXPECT_EQ(first_retry, manager->NextRetryTimeout());
-    uint32_t next_retry = first_retry +
-                          seconds_between_retries[0].asInt() *
-                              date_time::DateTime::MILLISECONDS_IN_SECOND;
+    uint32_t next_retry =
+        first_retry +
+        seconds_between_retries[0].asInt() * date_time::MILLISECONDS_IN_SECOND;
     EXPECT_EQ(next_retry, manager->NextRetryTimeout());
-    next_retry = first_retry + next_retry +
-                 seconds_between_retries[1].asInt() *
-                     date_time::DateTime::MILLISECONDS_IN_SECOND;
+    next_retry =
+        first_retry + next_retry +
+        seconds_between_retries[1].asInt() * date_time::MILLISECONDS_IN_SECOND;
     EXPECT_EQ(next_retry, manager->NextRetryTimeout());
-    next_retry = first_retry + next_retry +
-                 seconds_between_retries[2].asInt() *
-                     date_time::DateTime::MILLISECONDS_IN_SECOND;
+    next_retry =
+        first_retry + next_retry +
+        seconds_between_retries[2].asInt() * date_time::MILLISECONDS_IN_SECOND;
     EXPECT_EQ(next_retry, manager->NextRetryTimeout());
-    next_retry = first_retry + next_retry +
-                 seconds_between_retries[3].asInt() *
-                     date_time::DateTime::MILLISECONDS_IN_SECOND;
+    next_retry =
+        first_retry + next_retry +
+        seconds_between_retries[3].asInt() * date_time::MILLISECONDS_IN_SECOND;
     EXPECT_EQ(next_retry, manager->NextRetryTimeout());
   }
 }

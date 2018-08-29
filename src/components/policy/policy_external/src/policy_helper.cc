@@ -620,7 +620,16 @@ void FillNotificationData::UpdateParameters(
   ParametersConstItr it_parameters = in_parameters.begin();
   ParametersConstItr it_parameters_end = in_parameters.end();
 
-  // Due to APPLINK-24201 SDL must consider cases when 'parameters' section is
+  // To determine consent for a particular RPC in a particular HMI level with
+  // particular parameters (if applicable), the system shall find all of the
+  // functional groups the RPC is included in. If user consent is needed as
+  // listed within the functional group in the policy table, the system shall
+  // use a logical AND: backend permissions AND User permissions. If the RPC is
+  // listed under more than one group, the system shall perform a logical OR
+  // amongst all of the possible allowed permissions scenarios for the RPC (and
+  // parameter/or HMI level) defined by each of the functional groups.
+
+  // Due to requirements SDL must consider cases when 'parameters' section is
   // not present for RPC or present, but is empty.
 
   // If 'parameters' section is like: 'parameters' : []
@@ -635,10 +644,8 @@ void FillNotificationData::UpdateParameters(
 
   // If 'parameters' section is omitted
   if (!in_parameters.is_initialized()) {
-    if (!does_require_user_consent_) {
-      out_parameter.any_parameter_allowed = true;
-    }
-    if (does_require_user_consent_ && kAllowedKey == current_key_) {
+    if (!does_require_user_consent_ ||
+        (does_require_user_consent_ && kAllowedKey == current_key_)) {
       out_parameter.any_parameter_allowed = true;
     }
   }
@@ -646,6 +653,13 @@ void FillNotificationData::UpdateParameters(
   for (; it_parameters != it_parameters_end; ++it_parameters) {
     out_parameter[current_key_].insert(
         policy_table::EnumToJsonString(*it_parameters));
+  }
+
+  // We should reset ALL DISALLOWED flags if at least one parameter is allowed
+  // due to a logical OR permissions check
+  if (IsSomeParameterAllowed(out_parameter)) {
+    out_parameter.any_parameter_disallowed_by_policy = false;
+    out_parameter.any_parameter_disallowed_by_user = false;
   }
 }
 
@@ -769,14 +783,22 @@ bool FillNotificationData::RpcParametersEmpty(RpcPermissions& rpc) {
          no_user_disallowed_parameters;
 }
 
-bool FillNotificationData::IsSectionEmpty(ParameterPermissions& permissions,
-                                          const std::string& section) {
+bool FillNotificationData::IsSectionEmpty(
+    const ParameterPermissions& permissions, const std::string& section) const {
   ParameterPermissions::const_iterator it_section = permissions.find(section);
   ParameterPermissions::const_iterator end = permissions.end();
   if (end != it_section) {
-    return permissions[section].empty();
+    return it_section->second.empty();
   }
   return true;
+}
+
+bool FillNotificationData::IsSomeParameterAllowed(
+    const ParameterPermissions& permissions) const {
+  const bool are_any_consented_parameters_allowed =
+      kAllowedKey == current_key_ && !IsSectionEmpty(permissions, current_key_);
+  return permissions.any_parameter_allowed ||
+         are_any_consented_parameters_allowed;
 }
 
 ProcessFunctionalGroup::ProcessFunctionalGroup(

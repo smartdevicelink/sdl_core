@@ -51,13 +51,9 @@ TEST(TransportManagerMetricWrapper, grabResources) {
 TEST(TransportManagerMetricWrapper, GetJsonMetric) {
   TransportManagerMecticWrapper metric_test;
 
-  TimevalStruct start_time;
-  start_time.tv_sec = 1;
-  start_time.tv_usec = 0;
+  date_time::TimeDuration start_time = date_time::seconds(1);
 
-  TimevalStruct end_time;
-  end_time.tv_sec = 10;
-  end_time.tv_usec = 0;
+  date_time::TimeDuration end_time = date_time::seconds(10);
   metric_test.message_metric =
       std::make_shared<transport_manager::TMTelemetryObserver::MessageMetric>();
   metric_test.message_metric->begin = start_time;
@@ -69,10 +65,8 @@ TEST(TransportManagerMetricWrapper, GetJsonMetric) {
   EXPECT_EQ("null\n", jvalue[strings::utime].toStyledString());
   EXPECT_EQ("null\n", jvalue[strings::memory].toStyledString());
 
-  EXPECT_EQ(date_time::DateTime::getuSecs(start_time),
-            jvalue[strings::begin].asInt64());
-  EXPECT_EQ(date_time::DateTime::getuSecs(end_time),
-            jvalue[strings::end].asInt64());
+  EXPECT_EQ(date_time::getuSecs(start_time), jvalue[strings::begin].asInt64());
+  EXPECT_EQ(date_time::getuSecs(end_time), jvalue[strings::end].asInt64());
   EXPECT_EQ(1000, jvalue[strings::data_size].asInt());
 }
 
@@ -82,13 +76,9 @@ TEST(TransportManagerMetricWrapper, GetJsonMetricWithGrabResources) {
   EXPECT_TRUE(resources != NULL);
   EXPECT_TRUE(metric_test.grabResources());
 
-  TimevalStruct start_time;
-  start_time.tv_sec = 1;
-  start_time.tv_usec = 0;
+  date_time::TimeDuration start_time = date_time::seconds(1);
 
-  TimevalStruct end_time;
-  end_time.tv_sec = 10;
-  end_time.tv_usec = 0;
+  date_time::TimeDuration end_time = date_time::seconds(10);
   metric_test.message_metric =
       std::make_shared<transport_manager::TMTelemetryObserver::MessageMetric>();
   metric_test.message_metric->begin = start_time;
@@ -98,10 +88,8 @@ TEST(TransportManagerMetricWrapper, GetJsonMetricWithGrabResources) {
   Json::Value jvalue = metric_test.GetJsonMetric();
 
   EXPECT_EQ("\"TransportManager\"\n", jvalue[strings::logger].toStyledString());
-  EXPECT_EQ(date_time::DateTime::getuSecs(start_time),
-            jvalue[strings::begin].asInt64());
-  EXPECT_EQ(date_time::DateTime::getuSecs(end_time),
-            jvalue[strings::end].asInt64());
+  EXPECT_EQ(date_time::getuSecs(start_time), jvalue[strings::begin].asInt64());
+  EXPECT_EQ(date_time::getuSecs(end_time), jvalue[strings::end].asInt64());
   EXPECT_EQ(1000, jvalue[strings::data_size].asInt());
 
   EXPECT_NEAR(resources->stime, jvalue[strings::stime].asInt(), 1);

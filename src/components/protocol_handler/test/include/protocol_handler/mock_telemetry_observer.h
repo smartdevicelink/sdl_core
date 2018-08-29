@@ -35,6 +35,7 @@
 
 #include "gmock/gmock.h"
 #include "protocol_handler/time_metric_observer.h"
+#include "utils/shared_ptr.h"
 
 namespace test {
 namespace components {
@@ -42,7 +43,8 @@ namespace protocol_handler_test {
 
 class MockPHTelemetryObserver : public ::protocol_handler::PHTelemetryObserver {
  public:
-  MOCK_METHOD2(StartMessageProcess, void(uint32_t, const TimevalStruct&));
+  MOCK_METHOD2(StartMessageProcess,
+               void(uint32_t, const date_time::TimeDuration&));
   MOCK_METHOD2(EndMessageProcess, void(std::shared_ptr<MessageMetric>));
 };
 

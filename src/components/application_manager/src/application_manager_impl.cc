@@ -65,7 +65,6 @@
 #include "utils/threads/thread.h"
 #include "utils/file_system.h"
 #include "utils/helpers.h"
-
 #include "utils/timer_task_impl.h"
 #include "smart_objects/enum_schema_item.h"
 #include "interfaces/HMI_API_schema.h"
@@ -178,7 +177,7 @@ ApplicationManagerImpl::ApplicationManagerImpl(
     , is_low_voltage_(false)
     , apps_size_(0)
     , is_stopping_(false) {
-  std::srand(std::time(0));
+  std::srand(std::time(nullptr));
   AddPolicyObserver(this);
 
   dir_type_to_string_map_ = {{TYPE_STORAGE, "Storage"},
@@ -405,6 +404,7 @@ void ApplicationManagerImpl::OnApplicationSwitched(ApplicationSharedPtr app) {
 
 bool ApplicationManagerImpl::IsAppTypeExistsInFullOrLimited(
     ApplicationConstSharedPtr app) const {
+  LOG4CXX_AUTO_TRACE(logger_);
   bool voice_state = app->is_voice_communication_supported();
   bool media_state = app->is_media_application();
   bool navi_state = app->is_navi();
@@ -499,7 +499,8 @@ ApplicationSharedPtr ApplicationManagerImpl::RegisterApplication(
   }
 
   smart_objects::SmartObject& params = message[strings::msg_params];
-  const std::string& policy_app_id = params[strings::app_id].asString();
+  const std::string& policy_app_id =
+      GetCorrectMobileIDFromMessage(request_for_registration);
   const custom_str::CustomString& app_name =
       message[strings::msg_params][strings::app_name].asCustomString();
   std::string device_mac;
@@ -664,16 +665,6 @@ ApplicationSharedPtr ApplicationManagerImpl::RegisterApplication(
   return application;
 }
 
-DEPRECATED bool ApplicationManagerImpl::RemoveAppDataFromHMI(
-    ApplicationSharedPtr app) {
-  return true;
-}
-
-DEPRECATED bool ApplicationManagerImpl::LoadAppDataToHMI(
-    ApplicationSharedPtr app) {
-  return true;
-}
-
 bool ApplicationManagerImpl::ActivateApplication(ApplicationSharedPtr app) {
   using namespace mobile_api;
   LOG4CXX_AUTO_TRACE(logger_);
@@ -800,16 +791,6 @@ uint32_t ApplicationManagerImpl::GetNextHMICorrelationID() {
   return corelation_id_;
 }
 
-bool ApplicationManagerImpl::BeginAudioPassThrough() {
-  sync_primitives::AutoLock lock(audio_pass_thru_lock_);
-  if (audio_pass_thru_active_) {
-    return false;
-  } else {
-    audio_pass_thru_active_ = true;
-    return true;
-  }
-}
-
 bool ApplicationManagerImpl::BeginAudioPassThru(uint32_t app_id) {
   sync_primitives::AutoLock lock(audio_pass_thru_lock_);
   if (audio_pass_thru_active_) {
@@ -818,16 +799,6 @@ bool ApplicationManagerImpl::BeginAudioPassThru(uint32_t app_id) {
     audio_pass_thru_active_ = true;
     audio_pass_thru_app_id_ = app_id;
     return true;
-  }
-}
-
-bool ApplicationManagerImpl::EndAudioPassThrough() {
-  sync_primitives::AutoLock lock(audio_pass_thru_lock_);
-  if (audio_pass_thru_active_) {
-    audio_pass_thru_active_ = false;
-    return true;
-  } else {
-    return false;
   }
 }
 
@@ -852,11 +823,6 @@ void ApplicationManagerImpl::set_driver_distraction_state(
   driver_distraction_state_ = state;
 }
 
-DEPRECATED void ApplicationManagerImpl::set_vr_session_started(
-    const bool state) {
-  is_vr_session_strated_ = state;
-}
-
 void ApplicationManagerImpl::SetAllAppsAllowed(const bool allowed) {
   is_all_apps_allowed_ = allowed;
 }
@@ -871,18 +837,6 @@ HmiStatePtr ApplicationManagerImpl::CreateRegularState(
   state->set_hmi_level(hmi_level);
   state->set_audio_streaming_state(audio_state);
   state->set_video_streaming_state(video_state);
-  state->set_system_context(system_context);
-  return state;
-}
-
-HmiStatePtr ApplicationManagerImpl::CreateRegularState(
-    uint32_t app_id,
-    mobile_apis::HMILevel::eType hmi_level,
-    mobile_apis::AudioStreamingState::eType audio_state,
-    mobile_apis::SystemContext::eType system_context) const {
-  HmiStatePtr state(new HmiState(app_id, *this));
-  state->set_hmi_level(hmi_level);
-  state->set_audio_streaming_state(audio_state);
   state->set_system_context(system_context);
   return state;
 }
@@ -977,6 +931,22 @@ StateController& ApplicationManagerImpl::state_controller() {
 
 const ApplicationManagerSettings& ApplicationManagerImpl::get_settings() const {
   return settings_;
+}
+
+// Extract the app ID to use for policy based on the UseFullAppID .ini setting
+std::string ApplicationManagerImpl::GetCorrectMobileIDFromMessage(
+    const commands::MessageSharedPtr& message) const {
+  // If core is expecting a fullAppID
+  if (get_settings().use_full_app_id()) {
+    // fullAppID is present and core is configured to use it
+    if ((*message)[strings::msg_params].keyExists(strings::full_app_id)) {
+      return (*message)[strings::msg_params][strings::full_app_id].asString();
+    } else {
+      LOG4CXX_DEBUG(logger_, "UseFullAppID is on but only short ID given!");
+    }
+  }
+  // If core isn't using full or no full given, use regular appID
+  return (*message)[strings::msg_params][strings::app_id].asString();
 }
 
 void application_manager::ApplicationManagerImpl::MarkAppsGreyOut(
@@ -1290,111 +1260,6 @@ uint32_t ApplicationManagerImpl::GenerateNewHMIAppID() {
   return hmi_app_id;
 }
 
-void ApplicationManagerImpl::ReplaceMobileByHMIAppId(
-    smart_objects::SmartObject& message) {
-  MessageHelper::PrintSmartObject(message);
-  if (message.keyExists(strings::app_id)) {
-    ApplicationSharedPtr application_ptr =
-        application(message[strings::app_id].asUInt());
-    if (application_ptr.use_count() != 0) {
-      LOG4CXX_DEBUG(logger_,
-                    "ReplaceMobileByHMIAppId from "
-                        << message[strings::app_id].asInt() << " to "
-                        << application_ptr->hmi_app_id());
-      message[strings::app_id] = application_ptr->hmi_app_id();
-    }
-  } else {
-    switch (message.getType()) {
-      case smart_objects::SmartType::SmartType_Array: {
-        smart_objects::SmartArray* message_array = message.asArray();
-        smart_objects::SmartArray::iterator it = message_array->begin();
-        for (; it != message_array->end(); ++it) {
-          ReplaceMobileByHMIAppId(*it);
-        }
-        break;
-      }
-      case smart_objects::SmartType::SmartType_Map: {
-        std::set<std::string> keys = message.enumerate();
-        std::set<std::string>::const_iterator key = keys.begin();
-        for (; key != keys.end(); ++key) {
-          std::string k = *key;
-          ReplaceMobileByHMIAppId(message[*key]);
-        }
-        break;
-      }
-      default: { break; }
-    }
-  }
-}
-
-void ApplicationManagerImpl::ReplaceHMIByMobileAppId(
-    smart_objects::SmartObject& message) {
-  if (message.keyExists(strings::app_id)) {
-    ApplicationSharedPtr application =
-        application_by_hmi_app(message[strings::app_id].asUInt());
-
-    if (application.use_count() != 0) {
-      LOG4CXX_DEBUG(logger_,
-                    "ReplaceHMIByMobileAppId from "
-                        << message[strings::app_id].asInt() << " to "
-                        << application->app_id());
-      message[strings::app_id] = application->app_id();
-    }
-  } else {
-    switch (message.getType()) {
-      case smart_objects::SmartType::SmartType_Array: {
-        smart_objects::SmartArray* message_array = message.asArray();
-        smart_objects::SmartArray::iterator it = message_array->begin();
-        for (; it != message_array->end(); ++it) {
-          ReplaceHMIByMobileAppId(*it);
-        }
-        break;
-      }
-      case smart_objects::SmartType::SmartType_Map: {
-        std::set<std::string> keys = message.enumerate();
-        std::set<std::string>::const_iterator key = keys.begin();
-        for (; key != keys.end(); ++key) {
-          ReplaceHMIByMobileAppId(message[*key]);
-        }
-        break;
-      }
-      default: { break; }
-    }
-  }
-}
-
-bool ApplicationManagerImpl::StartNaviService(
-    uint32_t app_id, protocol_handler::ServiceType service_type) {
-  using namespace protocol_handler;
-  LOG4CXX_AUTO_TRACE(logger_);
-
-  if (HMILevelAllowsStreaming(app_id, service_type)) {
-    NaviServiceStatusMap::iterator it = navi_service_status_.find(app_id);
-    if (navi_service_status_.end() == it) {
-      std::pair<NaviServiceStatusMap::iterator, bool> res =
-          navi_service_status_.insert(
-              std::pair<uint32_t, std::pair<bool, bool> >(
-                  app_id, std::make_pair(false, false)));
-      if (!res.second) {
-        LOG4CXX_WARN(logger_, "Navi service refused");
-        return false;
-      }
-      it = res.first;
-    }
-    // Fill NaviServices map. Set true to first value of pair if
-    // we've started video service or to second value if we've
-    // started audio service
-    service_type == ServiceType::kMobileNav ? it->second.first = true
-                                            : it->second.second = true;
-
-    application(app_id)->StartStreaming(service_type);
-    return true;
-  } else {
-    LOG4CXX_WARN(logger_, "Refused navi service by HMI level");
-  }
-  return false;
-}
-
 bool ApplicationManagerImpl::StartNaviService(
     uint32_t app_id,
     protocol_handler::ServiceType service_type,
@@ -1533,46 +1398,6 @@ void ApplicationManagerImpl::StopNaviService(
 
   app->StopStreaming(service_type);
 }
-
-// Suppress warning for deprecated method used within another deprecated method
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
-bool ApplicationManagerImpl::OnServiceStartedCallback(
-    const connection_handler::DeviceHandle& device_handle,
-    const int32_t& session_key,
-    const protocol_handler::ServiceType& type) {
-  using namespace helpers;
-  using namespace protocol_handler;
-  LOG4CXX_AUTO_TRACE(logger_);
-  LOG4CXX_DEBUG(logger_,
-                "ServiceType = " << type << ". Session = " << std::hex
-                                 << session_key);
-
-  if (type == kRpc) {
-    LOG4CXX_DEBUG(logger_, "RPC service is about to be started.");
-    return true;
-  }
-  ApplicationSharedPtr app = application(session_key);
-  if (!app) {
-    LOG4CXX_WARN(logger_,
-                 "The application with id:" << session_key
-                                            << " doesn't exists.");
-    return false;
-  }
-
-  if (Compare<ServiceType, EQ, ONE>(
-          type, ServiceType::kMobileNav, ServiceType::kAudio)) {
-    if (app->is_navi()) {
-      return StartNaviService(session_key, type);
-    } else {
-      LOG4CXX_WARN(logger_, "Refuse not navi application");
-    }
-  } else {
-    LOG4CXX_WARN(logger_, "Refuse unknown service");
-  }
-  return false;
-}
-#pragma GCC diagnostic pop
 
 void ApplicationManagerImpl::OnServiceStartedCallback(
     const connection_handler::DeviceHandle& device_handle,
@@ -1948,6 +1773,8 @@ bool ApplicationManagerImpl::Stop() {
   stopping_application_mng_lock_.Release();
   application_list_update_timer_.Stop();
   try {
+    SetUnregisterAllApplicationsReason(
+        mobile_api::AppInterfaceUnregisteredReason::IGNITION_OFF);
     UnregisterAllApplications();
   } catch (...) {
     LOG4CXX_ERROR(logger_,
@@ -2327,6 +2154,14 @@ void ApplicationManagerImpl::set_application_id(const int32_t correlation_id,
       std::pair<const int32_t, const uint32_t>(correlation_id, app_id));
 }
 
+uint32_t ApplicationManagerImpl::get_current_audio_source() const {
+  return current_audio_source_;
+}
+
+void ApplicationManagerImpl::set_current_audio_source(const uint32_t source) {
+  current_audio_source_ = source;
+}
+
 void ApplicationManagerImpl::AddPolicyObserver(
     policy::PolicyHandlerObserver* listener) {
   GetPolicyHandler().add_listener(listener);
@@ -2419,7 +2254,10 @@ void ApplicationManagerImpl::ClearAppsPersistentData() {
 
 void ApplicationManagerImpl::SendOnSDLClose() {
   LOG4CXX_AUTO_TRACE(logger_);
-
+  if (IsLowVoltage()) {
+    LOG4CXX_TRACE(logger_, "SDL is in Low Voltage State");
+    return;
+  }
   // must be sent to PASA HMI on shutdown synchronously
   smart_objects::SmartObjectSPtr msg =
       std::make_shared<smart_objects::SmartObject>(
@@ -2609,11 +2447,13 @@ void ApplicationManagerImpl::UnregisterApplication(
 
       return;
     }
+
     if (is_resuming) {
       resume_controller().SaveApplication(app_to_remove);
     } else {
       resume_controller().RemoveApplicationFromSaved(app_to_remove);
     }
+
     (hmi_capabilities_->get_hmi_language_handler())
         .OnUnregisterApplication(app_id);
     AppV4DevicePredicate finder(handle);
@@ -2717,12 +2557,22 @@ bool ApplicationManagerImpl::is_audio_pass_thru_active() const {
 void ApplicationManagerImpl::OnLowVoltage() {
   LOG4CXX_AUTO_TRACE(logger_);
   is_low_voltage_ = true;
+  resume_ctrl_->SaveLowVoltageTime();
+  resume_ctrl_->StopSavePersistentDataTimer();
   request_ctrl_.OnLowVoltage();
 }
 
-bool ApplicationManagerImpl::IsLowVoltage() {
-  LOG4CXX_TRACE(logger_, "result: " << is_low_voltage_);
+bool ApplicationManagerImpl::IsLowVoltage() const {
+  LOG4CXX_TRACE(logger_, "Result: " << is_low_voltage_);
   return is_low_voltage_;
+}
+
+void ApplicationManagerImpl::OnWakeUp() {
+  LOG4CXX_AUTO_TRACE(logger_);
+  is_low_voltage_ = false;
+  resume_ctrl_->SaveWakeUpTime();
+  resume_ctrl_->StartSavePersistentDataTimer();
+  request_ctrl_.OnWakeUp();
 }
 
 std::string ApplicationManagerImpl::GetHashedAppID(
@@ -3143,12 +2993,6 @@ policy::DeviceConsent ApplicationManagerImpl::GetUserConsentForDevice(
   return GetPolicyHandler().GetUserConsentForDevice(device_id);
 }
 
-void ApplicationManagerImpl::OnWakeUp() {
-  LOG4CXX_AUTO_TRACE(logger_);
-  is_low_voltage_ = false;
-  request_ctrl_.OnWakeUp();
-}
-
 mobile_apis::Result::eType ApplicationManagerImpl::SaveBinary(
     const std::vector<uint8_t>& binary_data,
     const std::string& file_path,
@@ -3243,14 +3087,14 @@ void ApplicationManagerImpl::OnTimerSendTTSGlobalProperties() {
   std::vector<uint32_t> app_list;
   {
     sync_primitives::AutoLock lock(tts_global_properties_app_list_lock_);
-    std::map<uint32_t, TimevalStruct>::iterator it =
+    std::map<uint32_t, date_time::TimeDuration>::iterator it =
         tts_global_properties_app_list_.begin();
-    std::map<uint32_t, TimevalStruct>::iterator it_end =
+    std::map<uint32_t, date_time::TimeDuration>::iterator it_end =
         tts_global_properties_app_list_.end();
     date_time::TimeCompare time_comp;
     for (; it != it_end; ++it) {
-      time_comp = date_time::DateTime::compareTime(
-          date_time::DateTime::getCurrentTime(), it->second);
+      time_comp =
+          date_time::compareTime(date_time::getCurrentTime(), it->second);
       if (date_time::GREATER == time_comp || date_time::EQUAL == time_comp) {
         app_list.push_back(it->first);
       }
@@ -3271,8 +3115,8 @@ void ApplicationManagerImpl::AddAppToTTSGlobalPropertiesList(
     const uint32_t app_id) {
   LOG4CXX_AUTO_TRACE(logger_);
   uint16_t timeout = get_settings().tts_global_properties_timeout();
-  TimevalStruct current_time = date_time::DateTime::getCurrentTime();
-  current_time.tv_sec += timeout;
+  date_time::TimeDuration current_time = date_time::getCurrentTime();
+  current_time += date_time::seconds(timeout);
   // please avoid AutoLock usage to avoid deadlock
   tts_global_properties_app_list_lock_.Acquire();
   if (tts_global_properties_app_list_.end() ==
@@ -3295,7 +3139,7 @@ void ApplicationManagerImpl::RemoveAppFromTTSGlobalPropertiesList(
   LOG4CXX_AUTO_TRACE(logger_);
   // please avoid AutoLock usage to avoid deadlock
   tts_global_properties_app_list_lock_.Acquire();
-  std::map<uint32_t, TimevalStruct>::iterator it =
+  std::map<uint32_t, date_time::TimeDuration>::iterator it =
       tts_global_properties_app_list_.find(app_id);
   if (tts_global_properties_app_list_.end() != it) {
     tts_global_properties_app_list_.erase(it);
@@ -3609,30 +3453,6 @@ void ApplicationManagerImpl::ClearTTSGlobalPropertiesList() {
   LOG4CXX_AUTO_TRACE(logger_);
   sync_primitives::AutoLock lock(tts_global_properties_app_list_lock_);
   tts_global_properties_app_list_.clear();
-}
-
-bool ApplicationManagerImpl::IsAppSubscribedForWayPoints(
-    const uint32_t app_id) const {
-  LOG4CXX_AUTO_TRACE(logger_);
-  sync_primitives::AutoLock lock(subscribed_way_points_apps_lock_);
-  if (subscribed_way_points_apps_list_.find(app_id) ==
-      subscribed_way_points_apps_list_.end()) {
-    return false;
-  }
-  return true;
-}
-
-void ApplicationManagerImpl::SubscribeAppForWayPoints(const uint32_t app_id) {
-  LOG4CXX_AUTO_TRACE(logger_);
-  sync_primitives::AutoLock lock(subscribed_way_points_apps_lock_);
-  subscribed_way_points_apps_list_.insert(app_id);
-}
-
-void ApplicationManagerImpl::UnsubscribeAppFromWayPoints(
-    const uint32_t app_id) {
-  LOG4CXX_AUTO_TRACE(logger_);
-  sync_primitives::AutoLock lock(subscribed_way_points_apps_lock_);
-  subscribed_way_points_apps_list_.erase(app_id);
 }
 
 bool ApplicationManagerImpl::IsAppSubscribedForWayPoints(

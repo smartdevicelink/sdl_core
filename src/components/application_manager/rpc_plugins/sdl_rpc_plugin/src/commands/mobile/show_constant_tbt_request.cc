@@ -105,7 +105,7 @@ void ShowConstantTBTRequest::Run() {
   if (msg_params.keyExists(strings::turn_icon)) {
     verification_result = MessageHelper::VerifyImage(
         msg_params[strings::turn_icon], app, application_manager_);
-    if (mobile_apis::Result::SUCCESS != verification_result) {
+    if (mobile_apis::Result::INVALID_DATA == verification_result) {
       LOG4CXX_ERROR(logger_, "VerifyImage INVALID_DATA!");
       SendResponse(false, verification_result);
       return;
@@ -115,7 +115,7 @@ void ShowConstantTBTRequest::Run() {
   if (msg_params.keyExists(strings::next_turn_icon)) {
     verification_result = MessageHelper::VerifyImage(
         msg_params[strings::next_turn_icon], app, application_manager_);
-    if (mobile_apis::Result::SUCCESS != verification_result) {
+    if (mobile_apis::Result::INVALID_DATA == verification_result) {
       LOG4CXX_ERROR(logger_, "VerifyImage INVALID_DATA!");
       SendResponse(false, verification_result);
       return;

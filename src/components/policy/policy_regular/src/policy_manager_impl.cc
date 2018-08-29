@@ -62,7 +62,7 @@ void DeleteManager(policy::PolicyManager* pm) {
 
 namespace {
 const uint32_t kDefaultRetryTimeoutInMSec =
-    60u * date_time::DateTime::MILLISECONDS_IN_SECOND;
+    60u * date_time::MILLISECONDS_IN_SECOND;
 }  // namespace
 
 namespace policy {
@@ -116,9 +116,9 @@ std::shared_ptr<policy_table::Table> PolicyManagerImpl::ParseArray(
     // For PT Update received from SDL Server.
     if (value["data"].size() != 0) {
       Json::Value data = value["data"];
-      return new policy_table::Table(&data[0]);
+      return std::make_shared<policy_table::Table>(&data[0]);
     } else {
-      return new policy_table::Table(&value);
+      return std::make_shared<policy_table::Table>(&value);
     }
   } else {
     return std::shared_ptr<policy_table::Table>();
@@ -827,9 +827,9 @@ const PolicySettings& PolicyManagerImpl::get_settings() const {
 bool PolicyManagerImpl::ExceededDays() {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  TimevalStruct current_time = date_time::DateTime::getCurrentTime();
+  date_time::TimeDuration current_time = date_time::getCurrentTime();
   const int kSecondsInDay = 60 * 60 * 24;
-  const int days = current_time.tv_sec / kSecondsInDay;
+  const int days = date_time::getSecs(current_time) / kSecondsInDay;
 
   return 0 == cache_->DaysBeforeExchange(days);
 }
@@ -879,8 +879,7 @@ uint32_t PolicyManagerImpl::NextRetryTimeout() {
   }
 
   for (uint32_t i = 0u; i < retry_sequence_index_; ++i) {
-    next += retry_sequence_seconds_[i] *
-            date_time::DateTime::MILLISECONDS_IN_SECOND;
+    next += retry_sequence_seconds_[i] * date_time::MILLISECONDS_IN_SECOND;
     next += retry_sequence_timeout_;
   }
   ++retry_sequence_index_;

@@ -30,8 +30,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_RC_RPC_PLUGIN_INCLUDE_COMMANDS_SET_INTERIOR_VEHICLE_DATA_REQUEST_H
-#define SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_RC_RPC_PLUGIN_INCLUDE_COMMANDS_SET_INTERIOR_VEHICLE_DATA_REQUEST_H
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_RC_RPC_PLUGIN_INCLUDE_RC_RPC_PLUGIN_COMMANDS_MOBILE_SET_INTERIOR_VEHICLE_DATA_REQUEST_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_RC_RPC_PLUGIN_INCLUDE_RC_RPC_PLUGIN_COMMANDS_MOBILE_SET_INTERIOR_VEHICLE_DATA_REQUEST_H_
 
 #include "rc_rpc_plugin/commands/rc_command_request.h"
 
@@ -39,15 +39,16 @@ namespace rc_rpc_plugin {
 namespace app_mngr = application_manager;
 
 namespace commands {
+
+enum capabilitiesStatus { success, missedLightName, missedParam, readOnly };
+
+typedef std::pair<std::string, capabilitiesStatus> ModuleCapability;
+
 class SetInteriorVehicleDataRequest : public RCCommandRequest {
  public:
   SetInteriorVehicleDataRequest(
-      const app_mngr::commands::MessageSharedPtr& message,
-      app_mngr::ApplicationManager& application_manager,
-      app_mngr::rpc_service::RPCService& rpc_service,
-      app_mngr::HMICapabilities& hmi_capabilities,
-      policy::PolicyHandlerInterface& policy_handle,
-      rc_rpc_plugin::ResourceAllocationManager& resource_allocation_manager);
+      const application_manager::commands::MessageSharedPtr& message,
+      const RCCommandParams& params);
 
   /**
    * @brief Execute command
@@ -85,10 +86,12 @@ class SetInteriorVehicleDataRequest : public RCCommandRequest {
 
   /**
    * @brief Method that check if READ_ONLY parameters present
-   * @param request_params params from received message
+   * @param request_params params from received message,
+   * @param module_data_capabilities info for notification to mobile
    * @return true if present , false - otherwise
    */
-  bool AreReadOnlyParamsPresent(const smart_objects::SmartObject& module_data);
+  bool AreReadOnlyParamsPresent(const smart_objects::SmartObject& module_data,
+                                ModuleCapability& module_data_capabilities);
 
   /**
    * @brief Method that check if all request parameters are READ_ONLY
@@ -99,7 +102,7 @@ class SetInteriorVehicleDataRequest : public RCCommandRequest {
 
   /**
    * @brief Method that cuts-off READ_ONLY parameters
-   * @param request_params params to handle
+   * @param module_data params to handle
    */
   void CutOffReadOnlyParams(smart_objects::SmartObject& module_data);
 
@@ -118,8 +121,17 @@ class SetInteriorVehicleDataRequest : public RCCommandRequest {
    */
   const smart_objects::SmartObject& ControlData(
       const smart_objects::SmartObject& module_data);
+
+  /**
+   * @brief CheckAudioSource check that if app wants to change
+   * the audio source from MOBILE_APP to other types of audio
+   * source without keepContext parameter or with keepContext=false
+   * then this app will go to HMI level 'BACKGROUND'
+   * @param module_data received params
+   */
+  void CheckAudioSource(const smart_objects::SmartObject& audio_data);
 };
 }  // namespace commands
 }  // namespace rc_rpc_plugin
 
-#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_RC_RPC_PLUGIN_INCLUDE_COMMANDS_SET_INTERIOR_VEHICLE_DATA_REQUEST_H
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_RC_RPC_PLUGIN_INCLUDE_RC_RPC_PLUGIN_COMMANDS_MOBILE_SET_INTERIOR_VEHICLE_DATA_REQUEST_H_

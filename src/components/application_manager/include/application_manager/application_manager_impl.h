@@ -181,6 +181,10 @@ class ApplicationManagerImpl
   void set_application_id(const int32_t correlation_id,
                           const uint32_t app_id) OVERRIDE;
 
+  uint32_t get_current_audio_source() const OVERRIDE;
+
+  void set_current_audio_source(const uint32_t source) OVERRIDE;
+
   void OnHMILevelChanged(uint32_t app_id,
                          mobile_apis::HMILevel::eType from,
                          mobile_apis::HMILevel::eType to) OVERRIDE;
@@ -222,29 +226,6 @@ class ApplicationManagerImpl
    * @return true if exist otherwise false
    */
   bool IsAppTypeExistsInFullOrLimited(ApplicationConstSharedPtr app) const;
-
-  /**
-   * DEPRECATED
-   * @brief Checks if Application is subscribed for way points
-   * @param Application AppID
-   * @return true if Application is subscribed for way points
-   * otherwise false
-   */
-  bool IsAppSubscribedForWayPoints(const uint32_t app_id) const OVERRIDE;
-
-  /**
-   * DEPRECATED
-   * @brief Subscribe Application for way points
-   * @param Application AppID
-   */
-  void SubscribeAppForWayPoints(const uint32_t app_id) OVERRIDE;
-
-  /**
-   * DEPRECATED
-   * @brief Unsubscribe Application for way points
-   * @param Application AppID
-   */
-  void UnsubscribeAppFromWayPoints(const uint32_t app_id) OVERRIDE;
 
   /**
    * @brief Checks if Application is subscribed for way points
@@ -365,10 +346,6 @@ class ApplicationManagerImpl
    * @brief Closes all registered applications
    */
   void UnregisterAllApplications();
-
-  DEPRECATED bool RemoveAppDataFromHMI(ApplicationSharedPtr app);
-
-  DEPRECATED bool LoadAppDataToHMI(ApplicationSharedPtr app);
   bool ActivateApplication(ApplicationSharedPtr app) OVERRIDE;
 
   /**
@@ -390,27 +367,12 @@ class ApplicationManagerImpl
    */
   uint32_t GetNextHMICorrelationID() OVERRIDE;
 
-  /* @brief Starts audio passthru process
-   * @deprecated Use BeginAudioPassThru(uint32_t app_id) instead
-   *
-   * @return true on success, false if passthru is already in process
-   */
-  bool BeginAudioPassThrough() OVERRIDE;
-
   /**
    * @brief Starts AudioPassThru process by given application
    * @param app_id ID of the application which starts the process
    * @return true if AudioPassThru can be started, false otherwise
    */
   bool BeginAudioPassThru(uint32_t app_id) OVERRIDE;
-
-  /*
-   * @brief Finishes already started audio passthru process
-   * @deprecated Use EndAudioPassThru(uint32_t app_id) instead
-   *
-   * @return true on success, false if passthru is not active
-   */
-  bool EndAudioPassThrough() OVERRIDE;
 
   /**
    * @brief Finishes already started AudioPassThru process by given application
@@ -435,22 +397,6 @@ class ApplicationManagerImpl
    */
   void set_driver_distraction_state(
       const hmi_apis::Common_DriverDistractionState::eType state) OVERRIDE;
-
-  /*
-   * DEPRECATED
-   * @brief Retrieves if VR session has started
-   *
-   * @return Current VR session state (started, stopped)
-   */
-  inline bool vr_session_started() const;
-
-  /*
-   * DEPRECATED
-   * @brief Sets VR session state
-   *
-   * @param state Current HMI VR session state
-   */
-  void set_vr_session_started(const bool state);
 
   /*
    * @brief Retrieves SDL access to all mobile apps
@@ -479,21 +425,6 @@ class ApplicationManagerImpl
       mobile_apis::HMILevel::eType hmi_level,
       mobile_apis::AudioStreamingState::eType audio_state,
       mobile_apis::VideoStreamingState::eType video_state,
-      mobile_apis::SystemContext::eType system_context) const OVERRIDE;
-
-  /**
-   * DEPRECATED
-   * @brief CreateRegularState create regular HMI state for application
-   * @param app_id Application id
-   * @param hmi_level of returned state
-   * @param audio_state of returned state
-   * @param system_context of returned state
-   * @return new regular HMI state
-   */
-  DEPRECATED HmiStatePtr CreateRegularState(
-      uint32_t app_id,
-      mobile_apis::HMILevel::eType hmi_level,
-      mobile_apis::AudioStreamingState::eType audio_state,
       mobile_apis::SystemContext::eType system_context) const OVERRIDE;
 
   /**
@@ -660,10 +591,6 @@ class ApplicationManagerImpl
    */
   void OnDeviceSwitchingFinish(const std::string& device_uid) FINAL;
 
-  DEPRECATED bool OnServiceStartedCallback(
-      const connection_handler::DeviceHandle& device_handle,
-      const int32_t& session_key,
-      const protocol_handler::ServiceType& type) OVERRIDE;
   void OnServiceStartedCallback(
       const connection_handler::DeviceHandle& device_handle,
       const int32_t& session_key,
@@ -861,20 +788,6 @@ class ApplicationManagerImpl
    */
   uint32_t GenerateNewHMIAppID() OVERRIDE;
 
-  /**
-   * DERPECATED
-   * @brief Parse smartObject and replace mobile app Id by HMI app ID
-   * @param message Smartobject to be parsed
-   */
-  void ReplaceMobileByHMIAppId(smart_objects::SmartObject& message);
-
-  /**
-   * DEPRECATED
-   * @brief Parse smartObject and replace HMI app ID by mobile app Id
-   * @param message Smartobject to be parsed
-   */
-  void ReplaceHMIByMobileAppId(smart_objects::SmartObject& message);
-
   /*
    * @brief Save binary data to specified directory
    *
@@ -925,22 +838,6 @@ class ApplicationManagerImpl
    * send TTS global properties after timeout
    */
   void RemoveAppFromTTSGlobalPropertiesList(const uint32_t app_id) OVERRIDE;
-
-  /**
-   * DEPRECATED
-   * @brief method adds application in FULL and LIMITED state
-   * to on_phone_call_app_list_.
-   * Also OnHMIStateNotification with BACKGROUND state sent for these apps
-   */
-  void CreatePhoneCallAppList();
-
-  /**
-   * DEPRECATED
-   * @brief method removes application from on_phone_call_app_list_.
-   *
-   * Also OnHMIStateNotification with previous HMI state sent for these apps
-   */
-  void ResetPhoneCallAppList();
 
   // TODO(AOleynik): Temporary added, to fix build. Should be reworked.
   connection_handler::ConnectionHandler& connection_handler() const OVERRIDE;
@@ -1124,6 +1021,8 @@ class ApplicationManagerImpl
 
   StateController& state_controller() OVERRIDE;
   const ApplicationManagerSettings& get_settings() const OVERRIDE;
+  std::string GetCorrectMobileIDFromMessage(
+      const commands::MessageSharedPtr& message) const OVERRIDE;
   virtual event_engine::EventDispatcher& event_dispatcher() OVERRIDE;
 
   app_launch::AppLaunchCtrl& app_launch_ctrl() OVERRIDE;
@@ -1234,10 +1133,10 @@ class ApplicationManagerImpl
    */
   void SendOnSDLClose();
 
-  /*
+  /**
    * @brief returns true if low voltage state is active
    */
-  bool IsLowVoltage();
+  bool IsLowVoltage() const OVERRIDE;
 
   /**
    * @brief Allows to process postponed commands for application
@@ -1306,15 +1205,6 @@ class ApplicationManagerImpl
    * has been changed to not allowed for streaming
    */
   void EndNaviStreaming();
-
-  /**
-   * @brief Starts specified navi service for application
-   * @param app_id Application to proceed
-   * @param service_type Type of service to start
-   * @return True on success, false on fail
-   */
-  DEPRECATED bool StartNaviService(uint32_t app_id,
-                                   protocol_handler::ServiceType service_type);
 
   /**
    * @brief Starts specified navi service for application
@@ -1470,7 +1360,7 @@ class ApplicationManagerImpl
    * @brief Map contains applications which
    * will send TTS global properties to HMI after timeout
    */
-  std::map<uint32_t, TimevalStruct> tts_global_properties_app_list_;
+  std::map<uint32_t, date_time::TimeDuration> tts_global_properties_app_list_;
 
   bool audio_pass_thru_active_;
   uint32_t audio_pass_thru_app_id_;
@@ -1480,6 +1370,7 @@ class ApplicationManagerImpl
   bool is_vr_session_strated_;
   bool hmi_cooperating_;
   bool is_all_apps_allowed_;
+  uint32_t current_audio_source_;
 
   event_engine::EventDispatcherImpl event_dispatcher_;
   media_manager::MediaManager* media_manager_;
@@ -1603,10 +1494,6 @@ class ApplicationManagerImpl
 
   DISALLOW_COPY_AND_ASSIGN(ApplicationManagerImpl);
 };
-
-DEPRECATED bool ApplicationManagerImpl::vr_session_started() const {
-  return is_vr_session_strated_;
-}
 
 inline bool ApplicationManagerImpl::all_apps_allowed() const {
   return is_all_apps_allowed_;

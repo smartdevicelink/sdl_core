@@ -48,6 +48,7 @@
 #endif  // ENABLE_SECURITY
 #include "transport_manager/mock_transport_manager.h"
 #include "utils/mock_system_time_handler.h"
+#include "utils/semantic_version.h"
 
 #include "utils/test_async_waiter.h"
 #include <bson_object.h>
@@ -1539,7 +1540,7 @@ void ProtocolHandlerImplTest::VerifySecondaryTransportParamsInStartSessionAck(
 
   const uint8_t input_protocol_version = 5;
   const uint32_t hash_id = 123456;
-  ProtocolPacket::ProtocolVersion full_version(5, 1, 0);
+  utils::SemanticVersion full_version(5, 1, 0);
   char full_version_string[] = "5.1.0";
 
   // configuration setup
@@ -2030,7 +2031,7 @@ TEST_F(ProtocolHandlerImplTest,
 
   const uint8_t input_protocol_version = 5;
   const uint32_t hash_id = 123456;
-  ProtocolPacket::ProtocolVersion full_version(5, 0, 0);
+  utils::SemanticVersion full_version(5, 0, 0);
   char full_version_string[] = "5.0.0";
 
   const size_t maximum_rpc_payload_size = 1500;
@@ -2190,7 +2191,7 @@ TEST_F(ProtocolHandlerImplTest,
 
   const uint8_t input_protocol_version = 5;
   const uint32_t hash_id = 123456;
-  ProtocolPacket::ProtocolVersion full_version(5, 1, 0);
+  utils::SemanticVersion full_version(5, 1, 0);
 
   const size_t maximum_rpc_payload_size = 1500;
   EXPECT_CALL(protocol_handler_settings_mock, maximum_rpc_payload_size())
@@ -2313,7 +2314,7 @@ TEST_F(ProtocolHandlerImplTest,
 
   const uint8_t input_protocol_version = 5;
   const uint32_t hash_id = 123456;
-  ProtocolPacket::ProtocolVersion full_version(5, 1, 0);
+  utils::SemanticVersion full_version(5, 1, 0);
 
   const size_t maximum_rpc_payload_size = 1500;
   EXPECT_CALL(protocol_handler_settings_mock, maximum_rpc_payload_size())

@@ -47,10 +47,10 @@ class TestRequestInfo : public request_info::RequestInfo {
  public:
   TestRequestInfo(request_info::RequestPtr request,
                   const RequestType requst_type,
-                  const TimevalStruct& start_time,
+                  const date_time::TimeDuration& start_time,
                   const uint64_t timeout_msec)
       : RequestInfo(request, requst_type, start_time, timeout_msec) {}
-  void SetEndTime(const TimevalStruct& end_time) {
+  void SetEndTime(const date_time::TimeDuration& end_time) {
     end_time_ = end_time;
   }
 };
@@ -78,7 +78,7 @@ class RequestInfoTest : public ::testing::Test {
       uint32_t connection_key,
       uint32_t correlation_id,
       request_info::RequestInfo::RequestType requst_type,
-      const TimevalStruct& start_time,
+      const date_time::TimeDuration& start_time,
       uint64_t timeout_msec) {
     std::shared_ptr<MockRequest> mock_request =
         std::make_shared<MockRequest>(connection_key, correlation_id);
@@ -91,7 +91,7 @@ class RequestInfoTest : public ::testing::Test {
 
 TEST_F(RequestInfoTest, RequestInfoEqualEndTime) {
   std::vector<std::shared_ptr<TestRequestInfo> > requests;
-  const TimevalStruct& time = date_time::DateTime::getCurrentTime();
+  const date_time::TimeDuration& time = date_time::getCurrentTime();
   for (uint32_t i = 0; i < count_of_requests_for_test_; ++i) {
     std::shared_ptr<TestRequestInfo> request = CreateTestInfo(
         i, i, request_info::RequestInfo::MobileRequest, time, default_timeout_);
@@ -107,7 +107,7 @@ TEST_F(RequestInfoTest, AddRemoveHMIRequests) {
         CreateTestInfo(hmi_connection_key_,
                        i,
                        request_info::RequestInfo::HMIRequest,
-                       date_time::DateTime::getCurrentTime(),
+                       date_time::getCurrentTime(),
                        default_timeout_);
     EXPECT_TRUE(request_info_set_.Add(request));
     EXPECT_TRUE(request_info_set_.RemoveRequest(request));
@@ -125,7 +125,7 @@ TEST_F(RequestInfoTest, AddHMIRequests_RemoveAllRequests) {
         CreateTestInfo(hmi_connection_key_,
                        i,
                        request_info::RequestInfo::HMIRequest,
-                       date_time::DateTime::getCurrentTime(),
+                       date_time::getCurrentTime(),
                        default_timeout_);
     requests.push_back(request);
     EXPECT_TRUE(request_info_set_.Add(request));
@@ -157,14 +157,14 @@ TEST_F(RequestInfoTest, AddMobileRequests_RemoveMobileRequests) {
       CreateTestInfo(mobile_connection_key1_,
                      12345,
                      request_info::RequestInfo::MobileRequest,
-                     date_time::DateTime::getCurrentTime(),
+                     date_time::getCurrentTime(),
                      default_timeout_);
   EXPECT_TRUE(request_info_set_.Add(mobile_request1));
   std::shared_ptr<TestRequestInfo> mobile_request2 =
       CreateTestInfo(mobile_connection_key2_,
                      54321,
                      request_info::RequestInfo::MobileRequest,
-                     date_time::DateTime::getCurrentTime(),
+                     date_time::getCurrentTime(),
                      default_timeout_);
   EXPECT_TRUE(request_info_set_.Add(mobile_request2));
   EXPECT_EQ(2u, request_info_set_.Size());
@@ -181,7 +181,7 @@ TEST_F(RequestInfoTest, AddMobileRequests_RemoveMobileRequestsByConnectionKey) {
         CreateTestInfo(mobile_connection_key1_,
                        i,
                        request_info::RequestInfo::MobileRequest,
-                       date_time::DateTime::getCurrentTime(),
+                       date_time::getCurrentTime(),
                        default_timeout_);
 
     requests.push_back(mobile_request1);
@@ -194,7 +194,7 @@ TEST_F(RequestInfoTest, AddMobileRequests_RemoveMobileRequestsByConnectionKey) {
         CreateTestInfo(mobile_connection_key2_,
                        i,
                        request_info::RequestInfo::MobileRequest,
-                       date_time::DateTime::getCurrentTime(),
+                       date_time::getCurrentTime(),
                        default_timeout_);
 
     requests.push_back(mobile_request2);
@@ -216,7 +216,7 @@ TEST_F(RequestInfoTest, RequestInfoSetFront) {
         CreateTestInfo(mobile_connection_key1_,
                        i,
                        request_info::RequestInfo::HMIRequest,
-                       date_time::DateTime::getCurrentTime(),
+                       date_time::getCurrentTime(),
                        i);
     request_info_set_.Add(request);
   }
@@ -250,7 +250,7 @@ TEST_F(RequestInfoTest, RequestInfoSetFind) {
         CreateTestInfo(req_it->first,
                        req_it->second,
                        request_info::RequestInfo::HMIRequest,
-                       date_time::DateTime::getCurrentTime(),
+                       date_time::getCurrentTime(),
                        10);
     EXPECT_TRUE(request_info_set_.Add(request));
   }
@@ -279,7 +279,7 @@ TEST_F(RequestInfoTest, RequestInfoSetEqualHash) {
       CreateTestInfo(connection_key,
                      corr_id,
                      request_info::RequestInfo::HMIRequest,
-                     date_time::DateTime::getCurrentTime(),
+                     date_time::getCurrentTime(),
                      10);
   EXPECT_TRUE(request_info_set.Add(request));
   EXPECT_FALSE(request_info_set.Add(request));
@@ -303,13 +303,15 @@ TEST_F(RequestInfoTest, RequestInfoSetEqualHash) {
 }
 
 TEST_F(RequestInfoTest, EndTimeisExpired) {
-  TimevalStruct time = date_time::DateTime::getCurrentTime();
+  date_time::TimeDuration time = date_time::getCurrentTime();
+  // get just the seconds part of the current time
+  date_time::TimeDuration not_expired =
+      date_time::seconds(date_time::getSecs(date_time::getCurrentTime()));
+  not_expired += date_time::microseconds(std::numeric_limits<time_t>::min());
 
-  TimevalStruct not_expired = date_time::DateTime::getCurrentTime();
-  not_expired.tv_usec = std::numeric_limits<time_t>::min();
-
-  TimevalStruct expired = date_time::DateTime::getCurrentTime();
-  expired.tv_usec = std::numeric_limits<time_t>::max();
+  date_time::TimeDuration expired =
+      date_time::seconds(date_time::getSecs(date_time::getCurrentTime()));
+  expired += date_time::microseconds(std::numeric_limits<time_t>::max());
 
   std::shared_ptr<TestRequestInfo> request =
       CreateTestInfo(mobile_connection_key1_,
@@ -326,7 +328,7 @@ TEST_F(RequestInfoTest, EndTimeisExpired) {
 }
 
 TEST_F(RequestInfoTest, UpdateEndTime) {
-  TimevalStruct time = date_time::DateTime::getCurrentTime();
+  date_time::TimeDuration time = date_time::getCurrentTime();
   std::shared_ptr<TestRequestInfo> request =
       CreateTestInfo(mobile_connection_key1_,
                      mobile_correlation_id,
@@ -335,12 +337,12 @@ TEST_F(RequestInfoTest, UpdateEndTime) {
                      default_timeout_);
   request->SetEndTime(time);
   request->updateEndTime();
-  TimevalStruct last_time = request->end_time();
-  EXPECT_LE(time.tv_sec, last_time.tv_sec);
+  date_time::TimeDuration last_time = request->end_time();
+  EXPECT_LE(date_time::getSecs(time), date_time::getSecs(last_time));
 }
 
 TEST_F(RequestInfoTest, UpdateTimeOut) {
-  TimevalStruct time = date_time::DateTime::getCurrentTime();
+  date_time::TimeDuration time = date_time::getCurrentTime();
   std::shared_ptr<TestRequestInfo> request =
       CreateTestInfo(mobile_connection_key1_,
                      mobile_correlation_id,
@@ -351,9 +353,10 @@ TEST_F(RequestInfoTest, UpdateTimeOut) {
   request->updateEndTime();
 
   request->updateTimeOut(100);
-  time = date_time::DateTime::getCurrentTime();
-  TimevalStruct last_time = request->end_time();
-  EXPECT_NEAR(time.tv_sec + 100, last_time.tv_sec, 500);
+  time = date_time::getCurrentTime();
+  date_time::TimeDuration last_time = request->end_time();
+  EXPECT_NEAR(
+      date_time::getSecs(time) + 100, date_time::getSecs(last_time), 500);
 }
 
 }  // namespace application_manager_test

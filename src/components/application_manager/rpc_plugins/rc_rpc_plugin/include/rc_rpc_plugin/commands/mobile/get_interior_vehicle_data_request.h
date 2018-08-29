@@ -43,12 +43,8 @@ namespace commands {
 class GetInteriorVehicleDataRequest : public RCCommandRequest {
  public:
   GetInteriorVehicleDataRequest(
-      const app_mngr::commands::MessageSharedPtr& message,
-      app_mngr::ApplicationManager& application_manager,
-      app_mngr::rpc_service::RPCService& rpc_service,
-      app_mngr::HMICapabilities& hmi_capabilities,
-      policy::PolicyHandlerInterface& policy_handle,
-      ResourceAllocationManager& resource_allocation_manager);
+      const application_manager::commands::MessageSharedPtr& message,
+      const RCCommandParams& params);
   /**
    * @brief Execute command
    */
@@ -67,6 +63,9 @@ class GetInteriorVehicleDataRequest : public RCCommandRequest {
   ~GetInteriorVehicleDataRequest();
 
  private:
+  std::vector<application_manager::ApplicationSharedPtr>
+  AppsSubscribedToModuleType(const std::string& module_type);
+
   /**
    * @brief Check if app wants to proceed with already setup subscription
    * @param request_params request parameters to check
@@ -80,8 +79,7 @@ class GetInteriorVehicleDataRequest : public RCCommandRequest {
     * @brief Handle subscription to vehicle data
     * @param hmi_response json message with response from HMI
     */
-  void ProccessSubscription(
-      const NsSmartDeviceLink::NsSmartObjects::SmartObject& hmi_response);
+  void ProccessSubscription(const smart_objects::SmartObject& hmi_response);
 
   /**
    * @brief Cuts off subscribe parameter
@@ -91,6 +89,11 @@ class GetInteriorVehicleDataRequest : public RCCommandRequest {
 
   std::string ModuleType() FINAL;
   bool excessive_subscription_occured_;
+  bool ProcessCapabilities();
+  void ProcessResponseToMobileFromCache(app_mngr::ApplicationSharedPtr app);
+  bool CheckRateLimits();
+  bool AppShouldBeUnsubscribed();
+  bool TheLastAppShouldBeUnsubscribed(app_mngr::ApplicationSharedPtr app);
 };
 }  // namespace commands
 }  // namespace rc_rpc_plugin

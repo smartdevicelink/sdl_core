@@ -50,6 +50,7 @@
 #include "application_manager/policies/policy_handler_interface.h"
 #include "smart_objects/smart_object.h"
 #include "transport_manager/common.h"
+#include <application_manager/smart_object_keys.h>
 
 namespace policy {
 class PolicyHandlerInterface;
@@ -567,7 +568,7 @@ class MessageHelper {
 
   /**
    * @brief Sends UnsubscribeWayPoints request
-   * @return true if UnSubscribedWayPoints is send otherwise false
+   * @return true if UnsubscribedWayPoints is send otherwise false
    */
   static bool SendUnsubscribedWayPoints(ApplicationManager& app_mngr);
 
@@ -615,10 +616,9 @@ class MessageHelper {
     * @param app current application
     * @return verification result
     */
-  static mobile_apis::Result::eType VerifyImageApplyPath(
-      smart_objects::SmartObject& image,
-      ApplicationConstSharedPtr app,
-      ApplicationManager& app_mngr);
+  static void ApplyImagePath(smart_objects::SmartObject& image,
+                             ApplicationConstSharedPtr app,
+                             ApplicationManager& app_mngr);
 
   /*
    * @brief Verify image and add image file full path
@@ -634,6 +634,21 @@ class MessageHelper {
       smart_objects::SmartObject& image,
       ApplicationConstSharedPtr app,
       ApplicationManager& app_mngr);
+
+  /**
+  * @brief Stores whether each choice in a set has the vrCommands parameter
+  * MIXED means some choices have vrCommands and others don't
+  * ALL means all do, NONE means none do
+  */
+  enum ChoiceSetVRCommandsStatus { MIXED, ALL, NONE };
+
+  /**
+   * @brief Check whether each choice in the set has the vrCommands parameter
+   * @param choice set to check
+   * @return a ChoiceSetVRCommandsStatus with the state of the choice set
+   */
+  static ChoiceSetVRCommandsStatus CheckChoiceSetVRCommands(
+      const smart_objects::SmartObject& choice_set);
 
   /*
    * @brief Finds "Image" structure in request and verify image file presence
@@ -663,7 +678,7 @@ class MessageHelper {
    * @return returns FALSE if string contains incorrect character or
    * string is empty otherwise returns TRUE
    */
-  static bool VerifySoftButtonString(const std::string& str);
+  static bool VerifyString(const std::string& str);
 
   static mobile_apis::Result::eType ProcessSoftButtons(
       smart_objects::SmartObject& message_params,

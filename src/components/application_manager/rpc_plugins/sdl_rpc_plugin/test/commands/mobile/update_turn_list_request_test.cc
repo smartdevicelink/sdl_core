@@ -241,6 +241,66 @@ TEST_F(UpdateTurnListRequestTest, Run_ValidTurnList_SUCCESS) {
                        .asString());
 }
 
+TEST_F(UpdateTurnListRequestTest, Run_ValidTurnList_WARNINGS) {
+  const std::string kNavigationText = "valid_navigation_text";
+
+  (*command_msg_)[am::strings::msg_params][am::strings::turn_list][0]
+                 [am::strings::navigation_text] = kNavigationText;
+  (*command_msg_)[am::strings::msg_params][am::strings::turn_list][0]
+                 [am::strings::turn_icon][am::strings::value] =
+                     "valid_turn_icon";
+  (*command_msg_)[am::strings::msg_params][am::strings::soft_buttons] = 0;
+
+  MockAppPtr mock_app(CreateMockApp());
+  EXPECT_CALL(app_mngr_, application(kConnectionKey))
+      .WillOnce(Return(mock_app));
+
+  EXPECT_CALL(mock_message_helper_,
+              ProcessSoftButtons((*command_msg_)[am::strings::msg_params],
+                                 Eq(mock_app),
+                                 Ref(mock_policy_handler_),
+                                 Ref(app_mngr_)))
+      .WillOnce(Return(mobile_result::SUCCESS));
+
+  EXPECT_CALL(
+      mock_message_helper_,
+      VerifyImage(
+          (*command_msg_)[am::strings::msg_params][am::strings::turn_list][0]
+                         [am::strings::turn_icon],
+          Eq(mock_app),
+          Ref(app_mngr_))).WillOnce(Return(mobile_result::WARNINGS));
+
+  EXPECT_CALL(mock_message_helper_,
+              SubscribeApplicationToSoftButton(_, _, kFunctionId));
+
+  MessageSharedPtr result_msg(CatchHMICommandResult(CallRun(*command_)));
+  ASSERT_TRUE(result_msg != nullptr);
+  EXPECT_EQ(
+      hmi_apis::FunctionID::Navigation_UpdateTurnList,
+      (*result_msg)[am::strings::params][am::strings::function_id].asInt());
+
+  ASSERT_TRUE((*result_msg)[am::strings::msg_params][am::strings::turn_list][0]
+                  .keyExists(am::hmi_request::navi_text));
+
+  EXPECT_TRUE((*result_msg)[am::strings::msg_params][am::strings::turn_list][0]
+                           [am::hmi_request::navi_text].keyExists(
+                               am::hmi_request::field_name));
+  EXPECT_EQ(
+      hmi_apis::Common_TextFieldName::turnText,
+      (*result_msg)[am::strings::msg_params][am::strings::turn_list][0]
+                   [am::hmi_request::navi_text][am::hmi_request::field_name]
+                       .asInt());
+
+  EXPECT_TRUE((*result_msg)[am::strings::msg_params][am::strings::turn_list][0]
+                           [am::hmi_request::navi_text].keyExists(
+                               am::hmi_request::field_text));
+  EXPECT_EQ(
+      kNavigationText,
+      (*result_msg)[am::strings::msg_params][am::strings::turn_list][0]
+                   [am::hmi_request::navi_text][am::hmi_request::field_text]
+                       .asString());
+}
+
 TEST_F(UpdateTurnListRequestTest, OnEvent_UnknownEvent_UNSUCCESS) {
   Event event(hmi_apis::FunctionID::INVALID_ENUM);
   EXPECT_CALL(mock_rpc_service_, ManageMobileCommand(_, _)).Times(0);

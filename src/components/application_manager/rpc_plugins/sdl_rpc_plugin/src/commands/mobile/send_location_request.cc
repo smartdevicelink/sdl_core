@@ -124,7 +124,7 @@ void SendLocationRequest::Run() {
         (*message_)[strings::msg_params][strings::location_image],
         app,
         application_manager_);
-    if (mobile_apis::Result::SUCCESS != verification_result) {
+    if (mobile_apis::Result::INVALID_DATA == verification_result) {
       LOG4CXX_ERROR(logger_, "VerifyImage INVALID_DATA!");
       SendResponse(false, verification_result);
       return;

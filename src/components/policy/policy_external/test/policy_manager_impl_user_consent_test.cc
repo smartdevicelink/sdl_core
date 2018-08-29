@@ -69,7 +69,7 @@ TEST_F(
   // To set UP_TO_DATE before registration
   GetPTU(kValidSdlPtUpdateJson);
 
-  const TimevalStruct current_time = date_time::DateTime::getCurrentTime();
+  const date_time::TimeDuration current_time = date_time::getCurrentTime();
   const int kSecondsInDay = 60 * 60 * 24;
   const int days_after_epoch = current_time.tv_sec / kSecondsInDay;
 

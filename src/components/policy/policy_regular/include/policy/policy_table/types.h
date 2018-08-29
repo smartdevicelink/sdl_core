@@ -65,7 +65,7 @@ typedef Array<Enum<AppHMIType>, 0, 255> AppHMITypes;
 
 typedef Array<Enum<HmiLevel>, 0, 4> HmiLevels;
 
-typedef Array<Enum<Parameter>, 0, 24> Parameters;
+typedef Array<Enum<Parameter>, 0, 255> Parameters;
 
 typedef Map<RpcParameters, 0, UINT_MAX> Rpc;
 
@@ -230,6 +230,7 @@ struct ModuleConfig : CompositeType {
  public:
   Optional<Map<String<0, 100>, 0, 255> > device_certificates;
   Optional<Boolean> preloaded_pt;
+  Optional<Boolean> full_app_id_supported;
   Integer<uint8_t, 0, 255> exchange_after_x_ignition_cycles;
   Integer<int64_t, 0, 4294967296ll> exchange_after_x_kilometers;
   Integer<uint8_t, 0, 255> exchange_after_x_days;

@@ -32,7 +32,9 @@
 
 #include "rc_rpc_plugin/commands/hmi/rc_on_remote_control_settings_notification.h"
 #include "rc_rpc_plugin/rc_rpc_plugin.h"
+#include "rc_rpc_plugin/interior_data_manager.h"
 #include "rc_rpc_plugin/rc_module_constants.h"
+#include "rc_rpc_plugin/rc_helpers.h"
 #include "utils/macro.h"
 
 namespace rc_rpc_plugin {
@@ -49,17 +51,15 @@ CREATE_LOGGERPTR_GLOBAL(logger_, "RemoteControlModule")
 
 RCOnRemoteControlSettingsNotification::RCOnRemoteControlSettingsNotification(
     const app_mngr::commands::MessageSharedPtr& message,
-    app_mngr::ApplicationManager& application_manager,
-    app_mngr::rpc_service::RPCService& rpc_service,
-    app_mngr::HMICapabilities& hmi_capabilities,
-    policy::PolicyHandlerInterface& policy_handle,
-    ResourceAllocationManager& resource_allocation_manager)
-    : application_manager::commands::NotificationFromHMI(message,
-                                                         application_manager,
-                                                         rpc_service,
-                                                         hmi_capabilities,
-                                                         policy_handle)
-    , resource_allocation_manager_(resource_allocation_manager) {}
+    const RCCommandParams& params)
+    : application_manager::commands::NotificationFromHMI(
+          message,
+          params.application_manager_,
+          params.rpc_service_,
+          params.hmi_capabilities_,
+          params.policy_handler_)
+    , resource_allocation_manager_(params.resource_allocation_manager_)
+    , interior_data_manager_(params.interior_data_manager_) {}
 
 RCOnRemoteControlSettingsNotification::
     ~RCOnRemoteControlSettingsNotification() {}
@@ -87,30 +87,9 @@ std::string AccessModeToString(
   return error;
 }
 
-void UnsubscribeFromInteriorVehicleDataForAllModules(
-    RCAppExtensionPtr extension) {
-  LOG4CXX_AUTO_TRACE(logger_);
-  extension->UnsubscribeFromInteriorVehicleData(enums_value::kClimate);
-  extension->UnsubscribeFromInteriorVehicleData(enums_value::kRadio);
-}
-
 void RCOnRemoteControlSettingsNotification::DisallowRCFunctionality() {
   LOG4CXX_AUTO_TRACE(logger_);
-  typedef std::vector<application_manager::ApplicationSharedPtr> Apps;
-  Apps apps = RCRPCPlugin::GetRCApplications(application_manager_);
-  for (Apps::iterator it = apps.begin(); it != apps.end(); ++it) {
-    application_manager::ApplicationSharedPtr app = *it;
-    DCHECK(app);
-    application_manager_.ChangeAppsHMILevel(
-        app->app_id(), mobile_apis::HMILevel::eType::HMI_NONE);
-
-    const RCAppExtensionPtr extension =
-        std::static_pointer_cast<RCAppExtension>(
-            app->QueryInterface(RCRPCPlugin::kRCPluginID));
-    if (extension) {
-      UnsubscribeFromInteriorVehicleDataForAllModules(extension);
-    }
-  }
+  interior_data_manager_.OnDisablingRC();
 }
 
 void RCOnRemoteControlSettingsNotification::Run() {

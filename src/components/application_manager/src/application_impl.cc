@@ -146,9 +146,9 @@ ApplicationImpl::ApplicationImpl(
     , button_lock_ptr_(std::make_shared<sync_primitives::Lock>())
     , application_manager_(application_manager) {
   cmd_number_to_time_limits_[mobile_apis::FunctionID::ReadDIDID] = {
-      date_time::DateTime::getCurrentTime(), 0};
+      date_time::getCurrentTime(), 0};
   cmd_number_to_time_limits_[mobile_apis::FunctionID::GetVehicleDataID] = {
-      date_time::DateTime::getCurrentTime(), 0};
+      date_time::getCurrentTime(), 0};
 
   set_mobile_app_id(mobile_app_id);
   set_name(app_name);
@@ -312,6 +312,13 @@ const HmiStatePtr ApplicationImpl::CurrentHmiState() const {
 
 const HmiStatePtr ApplicationImpl::RegularHmiState() const {
   return state_.GetState(HmiState::STATE_ID_REGULAR);
+}
+
+bool ApplicationImpl::IsAllowedToChangeAudioSource() const {
+  if (is_remote_control_supported() && is_media_application()) {
+    return true;
+  }
+  return false;
 }
 
 const HmiStatePtr ApplicationImpl::PostponedHmiState() const {
@@ -664,10 +671,6 @@ void ApplicationImpl::set_app_allowed(const bool allowed) {
   is_app_allowed_ = allowed;
 }
 
-void ApplicationImpl::set_device(connection_handler::DeviceHandle device) {
-  device_id_ = device;
-}
-
 void ApplicationImpl::set_secondary_device(
     connection_handler::DeviceHandle secondary_device) {
   secondary_device_id_ = secondary_device;
@@ -803,7 +806,7 @@ HelpPromptManager& ApplicationImpl::help_prompt_manager() {
 
 bool ApplicationImpl::AreCommandLimitsExceeded(
     mobile_apis::FunctionID::eType cmd_id, TLimitSource source) {
-  TimevalStruct current = date_time::DateTime::getCurrentTime();
+  date_time::TimeDuration current = date_time::getCurrentTime();
   switch (source) {
     // In case of config file values there is COMMON limitations for number of
     // commands per certain time in seconds, i.e. 5 requests per 10 seconds with
@@ -835,13 +838,14 @@ bool ApplicationImpl::AreCommandLimitsExceeded(
 
       LOG4CXX_INFO(logger_,
                    "Time Info: "
-                       << "\n Current: " << current.tv_sec << "\n Limit: ("
-                       << limit.first.tv_sec << "," << limit.second
-                       << ")"
-                          "\n frequency_restrictions: ("
+                       << "\n Current: " << date_time::getSecs(current)
+                       << "\n Limit: (" << date_time::getSecs(limit.first)
+                       << "," << limit.second << ")"
+                                                 "\n frequency_restrictions: ("
                        << frequency_restrictions.first << ","
                        << frequency_restrictions.second << ")");
-      if (current.tv_sec < limit.first.tv_sec + frequency_restrictions.second) {
+      if (date_time::getSecs(current) <
+          date_time::getSecs(limit.first) + frequency_restrictions.second) {
         if (limit.second < frequency_restrictions.first) {
           ++limit.second;
           return false;
@@ -883,7 +887,8 @@ bool ApplicationImpl::AreCommandLimitsExceeded(
       TimeToNumberLimit& limit = it->second;
 
       // Checking even limitation for command
-      if (static_cast<uint32_t>(current.tv_sec - limit.first.tv_sec) <
+      if (static_cast<uint32_t>(date_time::getSecs(current) -
+                                date_time::getSecs(limit.first)) <
           minute / cmd_limit) {
         return true;
       }

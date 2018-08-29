@@ -43,33 +43,12 @@ namespace protocol_handler {
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "ProtocolHandler")
 
-HandshakeHandler::HandshakeHandler(
-    ProtocolHandlerImpl& protocol_handler,
-    SessionObserver& session_observer,
-    uint32_t connection_key,
-    ConnectionID connection_id,
-    uint8_t session_id,
-    uint8_t protocol_version,
-    uint32_t hash_id,
-    ServiceType service_type,
-    const std::vector<int>& force_protected_service,
-    const bool is_new_service,
-    ProtocolPacket::ProtocolVersion& full_version,
-    std::shared_ptr<BsonObject> payload)
-    : protocol_handler_(protocol_handler)
-    , session_observer_(session_observer)
-    , context_()
-    , full_version_(full_version)
-    , protocol_version_(protocol_version)
-    , payload_(payload) {}
-
-HandshakeHandler::HandshakeHandler(
-    ProtocolHandlerImpl& protocol_handler,
-    SessionObserver& session_observer,
-    ProtocolPacket::ProtocolVersion& full_version,
-    const SessionContext& context,
-    const uint8_t protocol_version,
-    std::shared_ptr<BsonObject> payload)
+HandshakeHandler::HandshakeHandler(ProtocolHandlerImpl& protocol_handler,
+                                   SessionObserver& session_observer,
+                                   utils::SemanticVersion& full_version,
+                                   const SessionContext& context,
+                                   const uint8_t protocol_version,
+                                   std::shared_ptr<BsonObject> payload)
     : protocol_handler_(protocol_handler)
     , session_observer_(session_observer)
     , context_(context)

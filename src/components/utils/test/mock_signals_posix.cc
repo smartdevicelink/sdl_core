@@ -30,48 +30,47 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_HMI_UI_SET_ICON_REQUEST_H_
-#define SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_HMI_UI_SET_ICON_REQUEST_H_
+#include "gtest/gtest.h"
+#include "gmock/gmock.h"
+#include "utils/mock_signals_posix.h"
+#include "utils/signals.h"
 
-#include "application_manager/commands/request_to_hmi.h"
+namespace utils {
 
-namespace sdl_rpc_plugin {
-namespace app_mngr = application_manager;
+bool Signals::UnsubscribeFromTermination() {
+  return MockSignalsPosix::signals_posix_mock()->UnsubscribeFromTermination();
+}
 
-namespace commands {
+bool Signals::WaitTerminationSignals(sighandler_t sig_handler) {
+  return MockSignalsPosix::signals_posix_mock()->WaitTerminationSignals(
+      sig_handler);
+}
 
-/**
- * @brief UISetIconRequest command class
- **/
-class UISetIconRequest : public app_mngr::commands::RequestToHMI {
- public:
-  /**
-   * @brief UISetIconRequest class constructor
-   *
-   * @param message Incoming SmartObject message
-   **/
-  UISetIconRequest(const app_mngr::commands::MessageSharedPtr& message,
-                   app_mngr::ApplicationManager& application_manager,
-                   app_mngr::rpc_service::RPCService& rpc_service,
-                   app_mngr::HMICapabilities& hmi_capabilities,
-                   policy::PolicyHandlerInterface& policy_handle);
+bool Signals::UnsubscribeFromLowVoltageSignals(
+    const main_namespace::LowVoltageSignalsOffset& offset_data) {
+  return MockSignalsPosix::signals_posix_mock()
+      ->UnsubscribeFromLowVoltageSignals(offset_data);
+}
 
-  /**
-   * @brief UISetIconRequest class destructor
-   **/
-  virtual ~UISetIconRequest();
+void Signals::SendSignal(const int signo, const pid_t pid) {
+  MockSignalsPosix::signals_posix_mock()->SendSignal(signo, pid);
+}
 
-  /**
-   * @brief Execute command
-   **/
-  virtual void Run();
+void Signals::ExitProcess(const int status) {
+  MockSignalsPosix::signals_posix_mock()->ExitProcess(status);
+}
 
- private:
-  DISALLOW_COPY_AND_ASSIGN(UISetIconRequest);
-};
+void Signals::WaitPid(pid_t cpid, int* status, int options) {
+  MockSignalsPosix::signals_posix_mock()->WaitPid(cpid, status, options);
+}
 
-}  // namespace commands
+pid_t Signals::Fork() {
+  return MockSignalsPosix::signals_posix_mock()->Fork();
+}
 
-}  // namespace application_manager
+MockSignalsPosix* MockSignalsPosix::signals_posix_mock() {
+  static ::testing::NiceMock<MockSignalsPosix> signals_posix_mock;
+  return &signals_posix_mock;
+}
 
-#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_HMI_UI_SET_ICON_REQUEST_H_
+}  // namespace utils

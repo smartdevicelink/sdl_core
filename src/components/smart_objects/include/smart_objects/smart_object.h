@@ -35,6 +35,7 @@
 
 #include <set>
 #include <string>
+#include <sstream>
 #include <vector>
 #include <map>
 
@@ -671,20 +672,15 @@ class SmartObject FINAL {
   bool isValid() const;
 
   /**
-   * @deprecated
-   * @brief Validates object according to attached schema.
-   *
-   * @return Result of validation.
-   */
-  DEPRECATED Errors::eType validate();
-
-  /**
    * @brief Validates object according to attached schema.
    *
    * @param report__ object for reporting errors during validation
+   * @param messageVersion of the mobile app to check against RPC Spec Schema
    * @return Result of validation.
    */
-  Errors::eType validate(rpc::ValidationReport* report__);
+  Errors::eType validate(
+      rpc::ValidationReport* report__,
+      const utils::SemanticVersion& MessageVersion = utils::SemanticVersion());
 
   /**
    * @brief Sets new schema

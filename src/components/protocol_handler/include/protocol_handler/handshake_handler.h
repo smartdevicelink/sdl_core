@@ -40,6 +40,8 @@
 #include "protocol_handler/session_observer.h"
 #include "security_manager/security_manager_listener.h"
 
+#include "utils/semantic_version.h"
+
 namespace protocol_handler {
 
 class ProtocolHandlerImpl;
@@ -50,22 +52,9 @@ class ProtocolHandlerImpl;
  */
 class HandshakeHandler : public security_manager::SecurityManagerListener {
  public:
-  DEPRECATED HandshakeHandler(ProtocolHandlerImpl& protocol_handler,
-                              SessionObserver& session_observer,
-                              uint32_t connection_key,
-                              ConnectionID connection_id,
-                              uint8_t session_id,
-                              uint8_t protocol_version,
-                              uint32_t hash_id,
-                              ServiceType service_type,
-                              const std::vector<int>& force_protected_service,
-                              const bool is_new_service,
-                              ProtocolPacket::ProtocolVersion& full_version,
-                              std::shared_ptr<BsonObject> payload);
-
   HandshakeHandler(ProtocolHandlerImpl& protocol_handler,
                    SessionObserver& session_observer,
-                   ProtocolPacket::ProtocolVersion& full_version,
+                   utils::SemanticVersion& full_version,
                    const SessionContext& context,
                    const uint8_t protocol_version,
                    std::shared_ptr<BsonObject> payload);
@@ -124,7 +113,7 @@ class HandshakeHandler : public security_manager::SecurityManagerListener {
   ProtocolHandlerImpl& protocol_handler_;
   SessionObserver& session_observer_;
   SessionContext context_;
-  ProtocolPacket::ProtocolVersion full_version_;
+  utils::SemanticVersion full_version_;
   const uint8_t protocol_version_;
   std::shared_ptr<BsonObject> payload_;
 };

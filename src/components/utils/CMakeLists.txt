@@ -40,6 +40,7 @@ include_directories (
   ${COMPONENTS_DIR}/protocol_handler/include
   ${JSONCPP_INCLUDE_DIRECTORY}
   ${LOG4CXX_INCLUDE_DIRECTORY}
+  ${CMAKE_SOURCE_DIR}/src
 )
 
 # dbms
@@ -114,8 +115,11 @@ if(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
 endif()
 
 add_library("Utils" ${SOURCES})
-
-list(APPEND LIBRARIES -lboost_system -lboost_thread -lboost_filesystem)
+GET_PROPERTY(BOOST_LIBS_DIRECTORY GLOBAL PROPERTY GLOBAL_BOOST_LIBS)
+list(APPEND LIBRARIES boost_system -L${BOOST_LIBS_DIRECTORY})
+list(APPEND LIBRARIES boost_thread -L${BOOST_LIBS_DIRECTORY})
+list(APPEND LIBRARIES boost_date_time -L${BOOST_LIBS_DIRECTORY})
+list(APPEND LIBRARIES boost_filesystem -L${BOOST_LIBS_DIRECTORY})
 target_link_libraries("Utils" ${LIBRARIES})
 add_dependencies("Utils" Boost)
 

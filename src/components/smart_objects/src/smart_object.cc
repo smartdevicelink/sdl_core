@@ -873,13 +873,10 @@ bool SmartObject::isValid() const {
   return (Errors::OK == m_schema.validate(*this, &report));
 }
 
-Errors::eType SmartObject::validate() {
-  rpc::ValidationReport report("RPC");
-  return validate(&report);
-}
-
-Errors::eType SmartObject::validate(rpc::ValidationReport* report__) {
-  return m_schema.validate(*this, report__);
+Errors::eType SmartObject::validate(
+    rpc::ValidationReport* report__,
+    const utils::SemanticVersion& MessageVersion) {
+  return m_schema.validate(*this, report__, MessageVersion);
 }
 
 void SmartObject::setSchema(const CSmartSchema& schema) {

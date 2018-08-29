@@ -42,10 +42,12 @@
 #include "utils/gen_hash.h"
 #include "utils/helpers.h"
 
-namespace sdl_rpc_plugin {
-using namespace application_manager;
+const char* kInvalidImageWarningInfo = "Requested image(s) not found.";
 
+namespace sdl_rpc_plugin {
 namespace commands {
+
+using namespace application_manager;
 
 CreateInteractionChoiceSetRequest::CreateInteractionChoiceSetRequest(
     const application_manager::commands::MessageSharedPtr& message,
@@ -78,6 +80,7 @@ void CreateInteractionChoiceSetRequest::Run() {
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     return;
   }
+  should_send_warnings = false;
   for (uint32_t i = 0;
        i < (*message_)[strings::msg_params][strings::choice_set].length();
        ++i) {
@@ -104,6 +107,10 @@ void CreateInteractionChoiceSetRequest::Run() {
       LOG4CXX_ERROR(logger_, "Image verification failed.");
       SendResponse(false, Result::INVALID_DATA);
       return;
+    } else if (verification_result_image == Result::WARNINGS ||
+               verification_result_secondary_image == Result::WARNINGS) {
+      should_send_warnings = true;
+      break;
     }
   }
 
@@ -123,10 +130,30 @@ void CreateInteractionChoiceSetRequest::Run() {
     SendResponse(false, result);
     return;
   }
-  uint32_t grammar_id = application_manager_.GenerateGrammarID();
-  (*message_)[strings::msg_params][strings::grammar_id] = grammar_id;
+  auto vr_status = MessageHelper::CheckChoiceSetVRCommands(
+      (*message_)[strings::msg_params][strings::choice_set]);
+  if (vr_status == MessageHelper::ChoiceSetVRCommandsStatus::MIXED) {
+    // this is an error
+    SendResponse(false,
+                 Result::INVALID_DATA,
+                 "Some choices don't contain VR commands. Either all or none "
+                 "must have voice commands.");
+    return;  // exit now, this is a bad set
+  } else if (vr_status == MessageHelper::ChoiceSetVRCommandsStatus::ALL) {
+    // everyone had a vr command, setup the grammar
+    uint32_t grammar_id = application_manager_.GenerateGrammarID();
+    (*message_)[strings::msg_params][strings::grammar_id] = grammar_id;
+  }
+  // continue on as usual
   app->AddChoiceSet(choice_set_id_, (*message_)[strings::msg_params]);
-  SendVRAddCommandRequests(app);
+
+  if (vr_status == MessageHelper::ChoiceSetVRCommandsStatus::ALL) {
+    // we have VR commands
+    SendVRAddCommandRequests(app);
+  } else {
+    // we have none, just return with success
+    SendResponse(true, Result::SUCCESS);
+  }
 }
 
 mobile_apis::Result::eType CreateInteractionChoiceSetRequest::CheckChoiceSet(
@@ -148,7 +175,7 @@ mobile_apis::Result::eType CreateInteractionChoiceSetRequest::CheckChoiceSet(
             (*current_choice_set_it)[strings::choice_id].asInt());
     if (!ins_res.second) {
       LOG4CXX_ERROR(logger_,
-                    "Choise with ID "
+                    "Choice with ID "
                         << (*current_choice_set_it)[strings::choice_id].asInt()
                         << " already exists");
       return mobile_apis::Result::INVALID_ID;
@@ -172,12 +199,15 @@ mobile_apis::Result::eType CreateInteractionChoiceSetRequest::CheckChoiceSet(
 bool CreateInteractionChoiceSetRequest::compareSynonyms(
     const NsSmartDeviceLink::NsSmartObjects::SmartObject& choice1,
     const NsSmartDeviceLink::NsSmartObjects::SmartObject& choice2) {
+  // only compare if they both have vr commands
+  if (!(choice1.keyExists(strings::vr_commands) &&
+        choice2.keyExists(strings::vr_commands))) {
+    return false;  // clearly there isn't a duplicate if one of them is null
+  }
   smart_objects::SmartArray* vr_cmds_1 =
       choice1[strings::vr_commands].asArray();
-  DCHECK(vr_cmds_1 != NULL);
   smart_objects::SmartArray* vr_cmds_2 =
       choice2[strings::vr_commands].asArray();
-  DCHECK(vr_cmds_2 != NULL);
 
   smart_objects::SmartArray::iterator it;
   it = std::find_first_of(vr_cmds_1->begin(),
@@ -435,7 +465,9 @@ void CreateInteractionChoiceSetRequest::DeleteChoices() {
 void CreateInteractionChoiceSetRequest::OnAllHMIResponsesReceived() {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  if (!error_from_hmi_) {
+  if (!error_from_hmi_ && should_send_warnings) {
+    SendResponse(true, mobile_apis::Result::WARNINGS, kInvalidImageWarningInfo);
+  } else if (!error_from_hmi_) {
     SendResponse(true, mobile_apis::Result::SUCCESS);
   } else {
     DeleteChoices();
