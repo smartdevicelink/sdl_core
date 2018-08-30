@@ -39,6 +39,7 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include <time.h>
 
 namespace file_system {
 
@@ -263,7 +264,7 @@ bool CreateFile(const std::string& path);
  * @param path Path to file
  * @return Modification time in nanoseconds
  */
-uint64_t GetFileModificationTime(const std::string& path);
+time_t GetFileModificationTime(const std::string& path);
 
 /**
  * @brief Copy file from source to destination

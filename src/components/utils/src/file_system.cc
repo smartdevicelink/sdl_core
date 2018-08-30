@@ -213,7 +213,7 @@ bool file_system::IsFileNameValid(const std::string& file_name) {
 // Does not remove if file is write-protected
 bool file_system::DeleteFile(const std::string& name) {
   if (FileExists(name) && IsAccessible(name, W_OK)) {
-    return !remove(name.c_str());
+    return fs::remove(name.c_str());
   }
   return false;
 }
@@ -364,16 +364,13 @@ bool file_system::CreateFile(const std::string& path) {
   }
 }
 
-// NOTE: this seems to be buggy
-// It returns only the ns _component_ of modify time, not the whole thing
-// see https://github.com/smartdevicelink/sdl_core/pull/1436/commits for a
-// potential fix / further explanation
-uint64_t file_system::GetFileModificationTime(const std::string& path) {
-  struct stat info;
-  if (0 != stat(path.c_str(), &info)) {
-    LOG4CXX_WARN_WITH_ERRNO(logger_, "Could not get file mod time: " << path);
+time_t file_system::GetFileModificationTime(const std::string& path) {
+  error_code ec;
+  std::time_t time = fs::last_write_time(path, ec);
+  if (ec) {
+    return 0;
   }
-  return static_cast<uint64_t>(info.st_mtim.tv_nsec);
+  return time;
 }
 
 bool file_system::CopyFile(const std::string& src, const std::string& dst) {
