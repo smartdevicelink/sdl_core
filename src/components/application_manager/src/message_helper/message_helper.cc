@@ -1113,8 +1113,8 @@ void MessageHelper::SendGlobalPropertiesToHMI(ApplicationConstSharedPtr app,
     return;
   }
 
-  smart_objects::SmartObjectList requests = CreateGlobalPropertiesRequestsToHMI(
-      app, app_mngr.GetNextHMICorrelationID());
+  smart_objects::SmartObjectList requests =
+      CreateGlobalPropertiesRequestsToHMI(app, app_mngr);
   for (smart_objects::SmartObjectList::const_iterator it = requests.begin();
        it != requests.end();
        ++it) {
@@ -1124,8 +1124,10 @@ void MessageHelper::SendGlobalPropertiesToHMI(ApplicationConstSharedPtr app,
 
 smart_objects::SmartObjectList
 MessageHelper::CreateGlobalPropertiesRequestsToHMI(
-    ApplicationConstSharedPtr app, const uint32_t correlation_id) {
+    ApplicationConstSharedPtr app, ApplicationManager& app_mngr) {
   LOG4CXX_AUTO_TRACE(logger_);
+
+  uint32_t correlation_id = app_mngr.GetNextHMICorrelationID();
 
   smart_objects::SmartObjectList requests;
   if (app.use_count() == 0) {
@@ -1188,6 +1190,7 @@ MessageHelper::CreateGlobalPropertiesRequestsToHMI(
 
   // TTS global properties
   if (can_send_vr && (app->help_prompt() || app->timeout_prompt())) {
+    correlation_id = app_mngr.GetNextHMICorrelationID();
     smart_objects::SmartObjectSPtr tts_global_properties =
         CreateMessageForHMI(hmi_apis::messageType::request, correlation_id);
     if (!tts_global_properties) {
@@ -2243,6 +2246,18 @@ bool MessageHelper::SendUnsubscribedWayPoints(ApplicationManager& app_mngr) {
       hmi_apis::FunctionID::Navigation_UnsubscribeWayPoints;
 
   return app_mngr.GetRPCService().ManageHMICommand(result);
+}
+
+smart_objects::SmartObjectSPtr
+MessageHelper::CreateSubscribeWayPointsMessageToHMI(
+    const uint32_t correlation_id) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  const smart_objects::SmartObjectSPtr msg =
+      CreateMessageForHMI(hmi_apis::messageType::request, correlation_id);
+  (*msg)[strings::params][strings::function_id] =
+      hmi_apis::FunctionID::Navigation_SubscribeWayPoints;
+
+  return msg;
 }
 
 void MessageHelper::SendPolicySnapshotNotification(

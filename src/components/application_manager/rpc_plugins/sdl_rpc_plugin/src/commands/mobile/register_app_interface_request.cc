@@ -596,10 +596,9 @@ void RegisterAppInterfaceRequest::Run() {
     result_code_ = mobile_apis::Result::RESUME_FAILED;
   }
 
+  CheckLanguage();
   const bool need_to_restore_vr =
       resume_data_result == DataResumeResult::RESUME_DATA;
-
-  CheckLanguage();
 
   SendRegisterAppInterfaceResponseToMobile(
       ApplicationType::kNewApplication, add_info, need_to_restore_vr);
@@ -924,7 +923,27 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile(
   response_params[strings::icon_resumed] =
       file_system::FileExists(application->app_icon_path());
 
+  // copying is needed because by the time
+  // SendRegisterAppInterfaceResponseToMobile() is called from callback
+  // in Run(), request object is deleted, which results in SDL crash.
+  // to prevent that, FinishSendingRegisterAppInterfaceToMobile() method
+  // is created which safely concludes this operation
+  smart_objects::SmartObject msg_params_copy = msg_params;
+
   SendResponse(true, result_code_, response_info_.c_str(), &response_params);
+
+  FinishSendingRegisterAppInterfaceToMobile(
+      msg_params_copy, application_manager_, key, notify_upd_manager);
+}
+
+void RegisterAppInterfaceRequest::FinishSendingRegisterAppInterfaceToMobile(
+    const smart_objects::SmartObject& msg_params,
+    ApplicationManager& app_manager,
+    const uint32_t connection_key,
+    policy::StatusNotifier notify_upd_manager) {
+  resumption::ResumeCtrl& resume_ctrl = app_manager.resume_controller();
+  auto application = app_manager.application(connection_key);
+
   if (msg_params.keyExists(strings::app_hmi_type)) {
     policy_handler_.SetDefaultHmiTypes(application->policy_app_id(),
                                        &(msg_params[strings::app_hmi_type]));
@@ -932,7 +951,7 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile(
 
   // Default HMI level should be set before any permissions validation, since it
   // relies on HMI level.
-  application_manager_.OnApplicationRegistered(application);
+  app_manager.OnApplicationRegistered(application);
   (*notify_upd_manager)();
 
   // Start PTU after successfull registration
@@ -941,7 +960,7 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile(
   policy_handler_.OnAppRegisteredOnMobile(application->policy_app_id());
 
   resumption::ResumeCtrl& resume_ctrl =
-      application_manager_.resume_controller();
+      app_manager.resume_controller();
   resume_ctrl.StartResumptionOnlyHMILevel(application);
 
   // By default app subscribed to CUSTOM_BUTTON

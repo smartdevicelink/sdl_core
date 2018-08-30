@@ -89,9 +89,9 @@ void VehicleInfoPlugin::ProcessResumptionSubscription(
       CreateSubscriptionRequest(app.app_id(), ext, SUBSCRIBE);
 
   resumption::ResumptionRequest resumption_request;
-  resumption_request.correlation_id =
+  resumption_request.request_ids.correlation_id =
       (*request)[strings::msg_params][strings::correlation_id].asInt();
-  resumption_request.function_id =
+  resumption_request.request_ids.function_id =
       hmi_apis::FunctionID::VehicleInfo_SubscribeVehicleData;
   resumption_request.message = *request;
 

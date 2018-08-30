@@ -296,7 +296,7 @@ class MessageHelper {
   static void SendGlobalPropertiesToHMI(ApplicationConstSharedPtr app,
                                         ApplicationManager& app_mngr);
   static smart_objects::SmartObjectList CreateGlobalPropertiesRequestsToHMI(
-      ApplicationConstSharedPtr app, const uint32_t correlation_id);
+      ApplicationConstSharedPtr app, ApplicationManager& app_mngr);
 
   static smart_objects::SmartObjectSPtr CreateAppVrHelp(
       ApplicationConstSharedPtr app);

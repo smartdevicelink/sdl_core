@@ -55,12 +55,12 @@ class LastState;
 
 class ResumeCtrl {
  public:
-
-   /**
-   * @brief ResumptionCallBack Function signature to be called whe DataResumptionFinished
-   * @param result_code result code for sending to mobile
-   * @param info additional info for sending to mobile
-   */
+  /**
+  * @brief ResumptionCallBack Function signature to be called whe
+  * DataResumptionFinished
+  * @param result_code result code for sending to mobile
+  * @param info additional info for sending to mobile
+  */
   typedef std::function<void(mobile_apis::Result::eType result_code,
                              const std::string& info)> ResumptionCallBack;
   /**
