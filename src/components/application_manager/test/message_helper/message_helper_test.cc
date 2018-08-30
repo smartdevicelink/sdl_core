@@ -156,8 +156,10 @@ TEST(MessageHelperTestCreate,
   EXPECT_CALL(*mock_help_prompt_manager, GetSendingType())
       .WillRepeatedly(Return(HelpPromptManager::SendingType::kSendBoth));
 
+  application_manager_test::MockApplicationManager mock_application_manager;
   smart_objects::SmartObjectList ptr =
-      MessageHelper::CreateGlobalPropertiesRequestsToHMI(appSharedMock, 0u);
+      MessageHelper::CreateGlobalPropertiesRequestsToHMI(
+          appSharedMock, mock_application_manager);
 
   EXPECT_TRUE(ptr.empty());
 }
@@ -206,8 +208,10 @@ TEST(MessageHelperTestCreate,
   EXPECT_CALL(*mock_help_prompt_manager, GetSendingType())
       .WillRepeatedly(Return(HelpPromptManager::SendingType::kSendBoth));
 
+  application_manager_test::MockApplicationManager mock_application_manager;
   smart_objects::SmartObjectList ptr =
-      MessageHelper::CreateGlobalPropertiesRequestsToHMI(appSharedMock, 0u);
+      MessageHelper::CreateGlobalPropertiesRequestsToHMI(
+          appSharedMock, mock_application_manager);
 
   EXPECT_FALSE(ptr.empty());
 

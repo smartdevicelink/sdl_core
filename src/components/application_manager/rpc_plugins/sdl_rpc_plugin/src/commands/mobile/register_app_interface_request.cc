@@ -499,8 +499,12 @@ void RegisterAppInterfaceRequest::Run() {
   SetupAppDeviceInfo(application);
 
   const auto resume_data_result = ApplicationDataShouldBeResumed();
-  SendOnAppRegisteredNotificationToHMI(*application,
-                                       resume_data_result == DataResumeResult::RESUME_DATA);
+  SendOnAppRegisteredNotificationToHMI(
+      *application, resume_data_result == DataResumeResult::RESUME_DATA);
+
+  // By default app subscribed to CUSTOM_BUTTON
+  SendSubscribeCustomButtonNotification();
+  SendChangeRegistrationOnHMI(application);
 
   if (DataResumeResult::RESUME_DATA == resume_data_result) {
     auto& resume_ctrl = application_manager_.resume_controller();
@@ -508,10 +512,10 @@ void RegisterAppInterfaceRequest::Run() {
     const auto& hash_id = msg_params[strings::hash_id].asString();
     LOG4CXX_WARN(logger_, "Start Data Resumption");
     auto send_response = [this](mobile_apis::Result::eType result_code,
-            const std::string& info) {
-        result_code_ = result_code;
-        SendRegisterAppInterfaceResponseToMobile(
-            ApplicationType::kNewApplication, info, true);
+                                      const std::string& info) {
+      result_code_ = result_code;
+      SendRegisterAppInterfaceResponseToMobile(
+          ApplicationType::kNewApplication, info, true);
     };
 
     resume_ctrl.StartResumption(application, hash_id, send_response);
@@ -859,7 +863,28 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile(
   response_params[strings::icon_resumed] =
       file_system::FileExists(application->app_icon_path());
 
+  // copying is needed because by the time
+  // SendRegisterAppInterfaceResponseToMobile() is called from callback
+  // in Run(), request object is deleted, which results in SDL crash.
+  // to prevent that, FinishSendingRegisterAppInterfaceToMobile() method
+  // is created which safely concludes this operation
+  smart_objects::SmartObject msg_params_copy = msg_params;
+
   SendResponse(true, result_code_, response_info_.c_str(), &response_params);
+
+  FinishSendingRegisterAppInterfaceToMobile(
+      msg_params_copy, application_manager_, key, notify_upd_manager);
+}
+
+void RegisterAppInterfaceRequest::FinishSendingRegisterAppInterfaceToMobile(
+    const smart_objects::SmartObject& msg_params,
+    ApplicationManager& app_manager,
+    const uint32_t connection_key,
+    policy::StatusNotifier notify_upd_manager) {
+  policy::PolicyHandlerInterface& policy_handler =
+      app_manager.GetPolicyHandler();
+  resumption::ResumeCtrl& resume_ctrl = app_manager.resume_controller();
+  auto application = app_manager.application(connection_key);
 
   if (msg_params.keyExists(strings::app_hmi_type)) {
     policy_handler_.SetDefaultHmiTypes(application->policy_app_id(),
@@ -868,21 +893,15 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile(
 
   // Default HMI level should be set before any permissions validation, since it
   // relies on HMI level.
-  application_manager_.OnApplicationRegistered(application);
+  app_manager.OnApplicationRegistered(application);
   (*notify_upd_manager)();
 
   // Start PTU after successfull registration
   // Sends OnPermissionChange notification to mobile right after RAI response
   // and HMI level set-up
-  policy_handler_.OnAppRegisteredOnMobile(application->policy_app_id());
+  policy_handler.OnAppRegisteredOnMobile(application->policy_app_id());
 
-  resumption::ResumeCtrl& resume_ctrl =
-      application_manager_.resume_controller();
   resume_ctrl.StartResumptionOnlyHMILevel(application);
-
-  // By default app subscribed to CUSTOM_BUTTON
-  SendSubscribeCustomButtonNotification();
-  SendChangeRegistrationOnHMI(application);
 }
 
 DEPRECATED void

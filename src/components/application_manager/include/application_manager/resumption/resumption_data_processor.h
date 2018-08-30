@@ -45,9 +45,15 @@ namespace resumption {
 
 namespace app_mngr = application_manager;
 
-struct ResumptionRequest {
+struct ResumptionRequestIDs {
   hmi_apis::FunctionID::eType function_id;
   int32_t correlation_id;
+
+  bool operator<(const ResumptionRequestIDs& other) const;
+};
+
+struct ResumptionRequest {
+  ResumptionRequestIDs request_ids;
   smart_objects::SmartObject message;
 };
 
@@ -268,7 +274,7 @@ class ResumptionDataProcessor : public app_mngr::event_engine::EventObserver {
   app_mngr::ApplicationManager& application_manager_;
   std::map<std::int32_t, ApplicationResumptionStatus> resumption_status_;
   std::map<std::int32_t, ResumeCtrl::ResumptionCallBack> register_callbacks_;
-
+  std::map<ResumptionRequestIDs, std::uint32_t> request_app_ids_;
 };
 
 }  // namespace resumption

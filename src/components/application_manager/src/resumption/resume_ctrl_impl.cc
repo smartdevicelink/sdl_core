@@ -369,7 +369,8 @@ bool ResumeCtrlImpl::StartResumption(ApplicationSharedPtr application,
       application->policy_app_id(), device_mac, saved_app);
   if (result) {
     const std::string& saved_hash = saved_app[strings::hash_id].asString();
-    result = saved_hash == hash ? RestoreApplicationData(application, callback) : false;
+    result = saved_hash == hash ? RestoreApplicationData(application, callback)
+                                : false;
     application->UpdateHash();
     AddToResumptionTimerQueue(application->app_id());
   }
