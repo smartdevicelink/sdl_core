@@ -200,21 +200,15 @@ void SetAppIconRequest::CopyToIconStorage(
   return;
 }
 
-struct compareTime {
-  bool operator()(const time_t t1, const time_t t2) {
-    double time_difference = difftime(t1, t2);
-    if (time_difference > 0) {
-      return true;
-    } else {
-      return false;
-    }
-  }
-};
-
 void SetAppIconRequest::RemoveOldestIcons(const std::string& storage,
                                           const uint32_t icons_amount) const {
   const std::vector<std::string> icons_list = file_system::ListFiles(storage);
-  std::map<time_t, std::string, compareTime> icon_modification_time;
+  auto compareTime = [](const time_t t1, const time_t t2)
+                         -> bool { return difftime(t1, t2) > 0; };
+  std::map<time_t,
+           std::string,
+           std::function<bool(const time_t, const time_t)> >
+      icon_modification_time(compareTime);
   std::vector<std::string>::const_iterator it = icons_list.begin();
   for (; it != icons_list.end(); ++it) {
     const std::string file_name = *it;

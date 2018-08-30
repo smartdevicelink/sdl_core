@@ -247,21 +247,15 @@ bool file_system::RemoveDirectory(const std::string& directory_name,
     return false;
   }
   error_code ec;
+  bool success;
   // If recursive, just force full remove
   if (is_recursively) {
-    boost::uintmax_t num_removed = fs::remove_all(directory_name, ec);
-    if (ec || num_removed == 0) {
-      return false;
-    }
+    success = (fs::remove_all(directory_name, ec) == 0);
   } else {
     // Otherwise try to remove
-    bool success = fs::remove(directory_name, ec);
-    if (!success || ec) {
-      return false;
-    }
+    success = fs::remove(directory_name, ec);
   }
-  // Return true on success
-  return true;
+  return success && !ec;
 }
 
 bool file_system::IsAccessible(const std::string& name, int32_t how) {
@@ -391,19 +385,15 @@ bool file_system::MoveFile(const std::string& src, const std::string& dst) {
 
   if (std::rename(src.c_str(), dst.c_str()) == 0) {
     return true;
-  } else {
-    // In case of src and dst on different file systems std::rename returns
-    // an error (at least on QNX).
-    // Instead, copy the file over and delete the old one
-    bool success = CopyFile(src, dst);
-    if (!success) {
-      return false;
-    }
-    DeleteFile(src);
-
-    return true;
   }
-  // NOTE this could probably shouldn't be hit if we did it right
+  // In case of src and dst on different file systems std::rename returns
+  // an error (at least on QNX).
+  // Instead, copy the file over and delete the old one
+  bool success = CopyFile(src, dst);
+  if (!success) {
+    return false;
+  }
+  DeleteFile(src);
 
-  return false;
+  return true;
 }
