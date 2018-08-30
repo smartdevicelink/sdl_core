@@ -2379,6 +2379,8 @@ void ApplicationManagerImpl::UnregisterApplication(
   }
   if (1 == subscribed_for_way_points_app_count) {
     LOG4CXX_ERROR(logger_, "Send UnsubscribeWayPoints");
+    ApplicationSharedPtr app = application(app_id);
+    UnsubscribeAppFromWayPoints(app);
     MessageHelper::SendUnsubscribedWayPoints(*this);
   }
 
