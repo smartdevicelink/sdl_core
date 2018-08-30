@@ -803,7 +803,7 @@ class ApplicationManagerImpl
   mobile_apis::Result::eType SaveBinary(const std::vector<uint8_t>& binary_data,
                                         const std::string& file_path,
                                         const std::string& file_name,
-                                        const int64_t offset) OVERRIDE;
+                                        const uint64_t offset) OVERRIDE;
 
   /**
    * @brief Get available app space

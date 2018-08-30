@@ -65,10 +65,10 @@ uint64_t file_system::GetAvailableDiskSpace(const std::string& path) {
   }
 }
 
-int64_t file_system::FileSize(const std::string& path) {
+uint64_t file_system::FileSize(const std::string& path) {
   error_code ec;
   // Boost returns sizes as unsigned
-  int64_t fsize = (int64_t)fs::file_size(path, ec);
+  uint64_t fsize = (uint64_t)fs::file_size(path, ec);
 
   if (ec) {
     LOG4CXX_WARN_WITH_ERRNO(logger_, "Could not get file size: " << path);

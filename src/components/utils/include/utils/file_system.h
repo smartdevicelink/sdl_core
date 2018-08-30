@@ -66,7 +66,7 @@ size_t DirectorySize(const std::string& path);
  * @param path to file
  * @return size of file, return 0 if file not exist
  */
-int64_t FileSize(const std::string& path);
+uint64_t FileSize(const std::string& path);
 
 /**
  * @brief Creates directory with owner_all permissions
