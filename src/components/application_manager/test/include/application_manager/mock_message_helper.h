@@ -317,7 +317,7 @@ class MockMessageHelper {
                    ApplicationSharedPtr application));
   MOCK_METHOD2(CreateGlobalPropertiesRequestsToHMI,
                smart_objects::SmartObjectList(ApplicationConstSharedPtr app,
-                                              const uint32_t correlation_id));
+                                              ApplicationManager& app_mngr));
 
   MOCK_METHOD4(SendOnButtonSubscriptionNotification,
                void(uint32_t app_id,
