@@ -213,7 +213,9 @@ bool file_system::IsFileNameValid(const std::string& file_name) {
 // Does not remove if file is write-protected
 bool file_system::DeleteFile(const std::string& name) {
   if (FileExists(name) && IsAccessible(name, W_OK)) {
-    return fs::remove(name.c_str());
+    error_code ec;
+    bool success = fs::remove(name.c_str(), ec);
+    return success && !ec;
   }
   return false;
 }
@@ -250,7 +252,7 @@ bool file_system::RemoveDirectory(const std::string& directory_name,
   bool success;
   // If recursive, just force full remove
   if (is_recursively) {
-    success = (fs::remove_all(directory_name, ec) == 0);
+    success = (fs::remove_all(directory_name, ec) != 0);
   } else {
     // Otherwise try to remove
     success = fs::remove(directory_name, ec);
