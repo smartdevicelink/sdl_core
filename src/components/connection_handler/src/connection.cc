@@ -220,6 +220,15 @@ bool Connection::AddNewService(uint8_t session_id,
                               << static_cast<int>(service_type));
       return false;
     }
+    if (helpers::Compare<protocol_handler::ServiceType,
+                         helpers::EQ,
+                         helpers::ONE>(
+            service_type,
+            protocol_handler::ServiceType::kAudio,
+            protocol_handler::ServiceType::kMobileNav)) {
+      return false;
+    }
+
     // For unproteced service could be start protection
     return true;
 #else
