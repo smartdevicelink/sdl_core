@@ -3481,13 +3481,6 @@
         <description>ID of the application.</description>
       </param>
     </function>
-    <function name="AllowDeviceToConnect" messagetype="request">
-        <description>Request from SmartDeviceLink to HMI to get the permissions of new device connection.</description>
-        <param name="device" type="Common.DeviceInfo" mandatory="true"/>
-    </function>
-    <function name="AllowDeviceToConnect" messagetype="response">
-      <param name="allow" type="Boolean" mandatory="true"/>
-    </function>
     <function name="OnDeviceChosen" messagetype="notification">
       <description>Notification must be initiated by HMI on user selecting device in the list of devices.</description>
       <param name="deviceInfo" type="Common.DeviceInfo" mandatory="true">
