@@ -103,8 +103,7 @@ typedef std::shared_ptr<MockMediaAdapterImpl> MockMediaAdapterImplPtr;
 
 class MediaManagerImplTest : public ::testing::Test {
  public:
-  // media_adapter_mock_ will be deleted in media_manager_impl (dtor)
-  MediaManagerImplTest() : media_adapter_mock_(new MockMediaAdapter()) {
+  MediaManagerImplTest() {
     media_adapter_listener_mock_ = std::make_shared<MockMediaAdapterListener>();
     ON_CALL(mock_media_manager_settings_, video_server_type())
         .WillByDefault(ReturnRef(kDefaultValue));
@@ -203,7 +202,6 @@ class MediaManagerImplTest : public ::testing::Test {
   application_manager_test::MockApplicationManager app_mngr_;
   MockAppPtr mock_app_;
   std::shared_ptr<MockMediaAdapterListener> media_adapter_listener_mock_;
-  MockMediaAdapter* media_adapter_mock_;
   const ::testing::NiceMock<MockMediaManagerSettings>
       mock_media_manager_settings_;
   std::shared_ptr<MediaManagerImpl> media_manager_impl_;
@@ -275,14 +273,17 @@ TEST_F(MediaManagerImplTest, Init_Settings_ExpectFileValue) {
 }
 
 TEST_F(MediaManagerImplTest, PlayA2DPSource_WithCorrectA2DP_SUCCESS) {
-  media_manager_impl_->set_mock_a2dp_player(media_adapter_mock_);
-  EXPECT_CALL(*media_adapter_mock_, StartActivity(kApplicationKey));
+  // media_adapter_mock_ will be deleted in media_manager_impl (dtor)
+  MockMediaAdapter* media_adapter_mock = new MockMediaAdapter();
+  media_manager_impl_->set_mock_a2dp_player(media_adapter_mock);
+  EXPECT_CALL(*media_adapter_mock, StartActivity(kApplicationKey));
   media_manager_impl_->PlayA2DPSource(kApplicationKey);
 }
 
 TEST_F(MediaManagerImplTest, StopA2DPSource_WithCorrectA2DP_SUCCESS) {
-  media_manager_impl_->set_mock_a2dp_player(media_adapter_mock_);
-  EXPECT_CALL(*media_adapter_mock_, StopActivity(kApplicationKey));
+  MockMediaAdapter* media_adapter_mock = new MockMediaAdapter();
+  media_manager_impl_->set_mock_a2dp_player(media_adapter_mock);
+  EXPECT_CALL(*media_adapter_mock, StopActivity(kApplicationKey));
   media_manager_impl_->StopA2DPSource(kApplicationKey);
 }
 
