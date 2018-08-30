@@ -243,7 +243,7 @@ void file_system::remove_directory_content(const std::string& directory_name) {
 bool file_system::RemoveDirectory(const std::string& directory_name,
                                   bool is_recursively) {
   // Make sure the directory exists
-  if (!DirectoryExists(directory_name)) {
+  if (!DirectoryExists(directory_name) && IsAccessible(directory_name, W_OK)) {
     return false;
   }
   error_code ec;
