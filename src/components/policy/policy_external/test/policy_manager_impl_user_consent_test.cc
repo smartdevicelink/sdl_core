@@ -71,7 +71,7 @@ TEST_F(
 
   const date_time::TimeDuration current_time = date_time::getCurrentTime();
   const int kSecondsInDay = 60 * 60 * 24;
-  const int days_after_epoch = current_time.tv_sec / kSecondsInDay;
+  const int days_after_epoch = date_time::getSecs(current_time) / kSecondsInDay;
 
   policy_manager_->PTUpdatedAt(DAYS_AFTER_EPOCH, days_after_epoch);
   policy_manager_->PTUpdatedAt(KILOMETERS, 1000);

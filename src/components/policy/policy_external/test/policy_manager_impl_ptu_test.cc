@@ -926,7 +926,7 @@ TEST_F(
 uint32_t GetCurrentDaysCount() {
   date_time::TimeDuration current_time = date_time::getCurrentTime();
   const uint32_t kSecondsInDay = 60 * 60 * 24;
-  return current_time.tv_sec / kSecondsInDay;
+  return date_time::getSecs(current_time) / kSecondsInDay;
 }
 
 TEST_F(PolicyManagerImplTest2,
