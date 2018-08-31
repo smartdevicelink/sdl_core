@@ -97,6 +97,7 @@ void VehicleInfoAppExtension::SaveResumptionData(
 void VehicleInfoAppExtension::ProcessResumption(
     const smart_objects::SmartObject& saved_app,
     resumption::Subscriber subscriber) {
+  LOG4CXX_AUTO_TRACE(logger_);
   if (!saved_app.keyExists(strings::application_subscriptions)) {
     LOG4CXX_DEBUG(logger_, "application_subscriptions section is not exists");
     return;
@@ -118,7 +119,9 @@ void VehicleInfoAppExtension::ProcessResumption(
             (subscriptions_ivi[i]).asInt());
     subscribeToVehicleInfo(ivi);
   }
-  plugin_.ProcessResumptionSubscription(app_, *this, subscriber);
+  if (subscriptions_ivi.length() > 0) {
+    plugin_.ProcessResumptionSubscription(app_, *this, subscriber);
+  }
 }
 
 void VehicleInfoAppExtension::RevertResumption(

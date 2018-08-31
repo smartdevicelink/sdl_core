@@ -521,6 +521,8 @@ void ResumptionDataProcessor::AddWayPointsSubscription(
         application_manager_.GetNextHMICorrelationID());
     (*subscribe_waypoints_msg)[strings::params][strings::message_type] =
         hmi_apis::messageType::request;
+    (*subscribe_waypoints_msg)[strings::msg_params][strings::app_id] =
+        application->app_id();
     ProcessHMIRequest(subscribe_waypoints_msg, true);
   }
 }
@@ -564,74 +566,90 @@ void ResumptionDataProcessor::AddButtonsSubscriptions(
           (subscriptions_buttons[i]).asInt());
       application->SubscribeToButton(btn);
     }
+
+    ButtonSubscriptions button_subscriptions =
+        GetButtonSubscriptionsToResume(application);
+
+    MessageHelper::SendOnButtonSubscriptionNotificationsForApp(
+        application, application_manager_, button_subscriptions);
+  }
+ }
+
+  ButtonSubscriptions ResumptionDataProcessor::GetButtonSubscriptionsToResume(
+      ApplicationSharedPtr application) const {
+    ButtonSubscriptions button_subscriptions =
+        application->SubscribedButtons().GetData();
+    auto it = button_subscriptions.find(mobile_apis::ButtonName::CUSTOM_BUTTON);
+    
+    if (it != button_subscriptions.end()) {
+      button_subscriptions.erase(it);
+    }
+
+    return button_subscriptions;
   }
 
-  MessageHelper::SendAllOnButtonSubscriptionNotificationsForApp(
-      application, application_manager_);
-}
+  void ResumptionDataProcessor::AddPluginsSubscriptions(
+      ApplicationSharedPtr application,
+      const smart_objects::SmartObject& saved_app) {
+    LOG4CXX_AUTO_TRACE(logger_);
 
-void ResumptionDataProcessor::AddPluginsSubscriptions(
-    ApplicationSharedPtr application,
-    const smart_objects::SmartObject& saved_app) {
-  LOG4CXX_AUTO_TRACE(logger_);
-
-  for (auto& extension : application->Extensions()) {
-    extension->ProcessResumption(
-        saved_app,
-        [this](const int32_t app_id, const ResumptionRequest request) {
-          this->WaitForResponse(app_id, request);
-        });
-  }
-}
-
-void ResumptionDataProcessor::DeleteSubscriptions(const int32_t app_id) {
-  LOG4CXX_AUTO_TRACE(logger_);
-  ApplicationSharedPtr application = application_manager_.application(app_id);
-  DeleteButtonsSubscriptions(application);
-  DeletePluginsSubscriptions(application);
-}
-
-void ResumptionDataProcessor::DeleteButtonsSubscriptions(
-    ApplicationSharedPtr application) {
-  LOG4CXX_AUTO_TRACE(logger_);
-  ButtonSubscriptions button_subscriptions =
-      application->SubscribedButtons().GetData();
-  for (auto btn : button_subscriptions) {
-    const auto hmi_btn = static_cast<hmi_apis::Common_ButtonName::eType>(btn);
-    MessageHelper::SendOnButtonSubscriptionNotification(
-        application->hmi_app_id(),
-        hmi_btn,
-        /*is_subscribed = */ false,
-        application_manager_);
-    application->UnsubscribeFromButton(btn);
-  }
-
-  MessageHelper::SendOnButtonSubscriptionNotification(
-      application->hmi_app_id(),
-      hmi_apis::Common_ButtonName::CUSTOM_BUTTON,
-      /*is_subscribed = */ false,
-      application_manager_);
-  application->SubscribeToButton(mobile_apis::ButtonName::CUSTOM_BUTTON);
-}
-
-void ResumptionDataProcessor::DeletePluginsSubscriptions(
-    application_manager::ApplicationSharedPtr application) {
-  LOG4CXX_AUTO_TRACE(logger_);
-  smart_objects::SmartObject extension_subscriptions;
-
-  ApplicationResumptionStatus& status =
-      resumption_status_[application->app_id()];
-  for (auto request : status.successful_requests) {
-    if (hmi_apis::FunctionID::VehicleInfo_SubscribeVehicleData ==
-        request.request_ids.function_id) {
-      extension_subscriptions[strings::application_vehicle_info] =
-          request.message;
+    for (auto& extension : application->Extensions()) {
+      extension->ProcessResumption(
+          saved_app,
+          [this](const int32_t app_id, const ResumptionRequest request) {
+            this->WaitForResponse(app_id, request);
+          });
     }
   }
 
-  for (auto& extension : application->Extensions()) {
-    extension->RevertResumption(extension_subscriptions);
+  void ResumptionDataProcessor::DeleteSubscriptions(const int32_t app_id) {
+    LOG4CXX_AUTO_TRACE(logger_);
+    ApplicationSharedPtr application = application_manager_.application(app_id);
+    DeleteButtonsSubscriptions(application);
+    DeletePluginsSubscriptions(application);
   }
-}
+
+  void ResumptionDataProcessor::DeleteButtonsSubscriptions(
+      ApplicationSharedPtr application) {
+    LOG4CXX_AUTO_TRACE(logger_);
+    const ButtonSubscriptions button_subscriptions =
+        application->SubscribedButtons().GetData();
+    for (auto& btn : button_subscriptions) {
+      const auto hmi_btn = static_cast<hmi_apis::Common_ButtonName::eType>(btn);
+      MessageHelper::SendOnButtonSubscriptionNotification(
+          application->hmi_app_id(),
+          hmi_btn,
+          /*is_subscribed = */ false,
+          application_manager_);
+      application->UnsubscribeFromButton(btn);
+    }
+
+    MessageHelper::SendOnButtonSubscriptionNotification(
+        application->hmi_app_id(),
+        hmi_apis::Common_ButtonName::CUSTOM_BUTTON,
+        /*is_subscribed = */ false,
+        application_manager_);
+    application->SubscribeToButton(mobile_apis::ButtonName::CUSTOM_BUTTON);
+  }
+
+  void ResumptionDataProcessor::DeletePluginsSubscriptions(
+      application_manager::ApplicationSharedPtr application) {
+    LOG4CXX_AUTO_TRACE(logger_);
+    smart_objects::SmartObject extension_subscriptions;
+
+    const ApplicationResumptionStatus& status =
+        resumption_status_[application->app_id()];
+    for (auto& request : status.successful_requests) {
+      if (hmi_apis::FunctionID::VehicleInfo_SubscribeVehicleData ==
+          request.request_ids.function_id) {
+        extension_subscriptions[strings::application_vehicle_info] =
+            request.message;
+      }
+    }
+
+    for (auto& extension : application->Extensions()) {
+      extension->RevertResumption(extension_subscriptions);
+    }
+  }
 
 }  // namespce resumption

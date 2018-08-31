@@ -1061,8 +1061,10 @@ void MessageHelper::SendOnButtonSubscriptionNotification(
   }
 }
 
-void MessageHelper::SendAllOnButtonSubscriptionNotificationsForApp(
-    ApplicationConstSharedPtr app, ApplicationManager& app_mngr) {
+void MessageHelper::SendOnButtonSubscriptionNotificationsForApp(
+    ApplicationConstSharedPtr app,
+    ApplicationManager& app_mngr,
+    const ButtonSubscriptions& button_subscriptions) {
   using namespace smart_objects;
   using namespace hmi_apis;
   using namespace mobile_apis;
@@ -1073,15 +1075,12 @@ void MessageHelper::SendAllOnButtonSubscriptionNotificationsForApp(
     return;
   }
 
-  DataAccessor<ButtonSubscriptions> button_accessor = app->SubscribedButtons();
-  ButtonSubscriptions subscriptions = button_accessor.GetData();
-  ButtonSubscriptions::iterator it = subscriptions.begin();
-  for (; subscriptions.end() != it; ++it) {
+  for (auto& it : button_subscriptions) {
+    const Common_ButtonName::eType btn =
+        static_cast<Common_ButtonName::eType>(it);
+
     SendOnButtonSubscriptionNotification(
-        app->hmi_app_id(),
-        static_cast<Common_ButtonName::eType>(*it),
-        true,
-        app_mngr);
+        app->hmi_app_id(), btn, true, app_mngr);
   }
 }
 
