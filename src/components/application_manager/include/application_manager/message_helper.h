@@ -601,6 +601,16 @@ class MessageHelper {
    */
   static bool SendStopAudioPathThru(ApplicationManager& app_mngr);
 
+
+  /**
+   * @brief CreateSubscribeWayPointsMessageToHMI
+   * @param correlation_id
+   * @return
+   */
+  static smart_objects::SmartObjectSPtr CreateSubscribeWayPointsMessageToHMI(
+      const uint32_t correlation_id);
+
+
   /**
    * @brief Sends UnsubscribeWayPoints request
    * @return true if UnSubscribedWayPoints is send otherwise false
