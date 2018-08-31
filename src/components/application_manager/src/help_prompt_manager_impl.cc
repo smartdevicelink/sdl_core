@@ -203,6 +203,27 @@ size_t HelpPromptManagerImpl::GetCommandsCount(
   return std::distance(vr_commands_.begin(), end_element);
 }
 
+void HelpPromptManagerImpl::GenerateVrItems(
+    smart_objects::SmartObject& out_msg_params, const char* vr_key) const {
+  out_msg_params[vr_key] =
+      smart_objects::SmartObject(smart_objects::SmartType_Array);
+
+  const size_t count_to_add = std::min(vr_commands_.size(), kLimitCommand);
+  for (size_t i = 0; i < count_to_add; ++i) {
+    const VRCommandPair& pair = vr_commands_[i];
+
+    smart_objects::SmartObject item(smart_objects::SmartType_Map);
+    item[strings::text] = pair.second->asString();
+    if (strings::help_prompt == vr_key) {
+      item[strings::type] = mobile_apis::SpeechCapabilities::SC_TEXT;
+    } else {
+      item[strings::position] = i + 1;
+    }
+
+    out_msg_params[vr_key][i] = item;
+  }
+}
+
 void HelpPromptManagerImpl::SendTTSRequest() {
   LOG4CXX_AUTO_TRACE(logger_);
   LOG4CXX_DEBUG(logger_, "TTS request for appID:" << app_.app_id());
@@ -302,18 +323,7 @@ void HelpPromptManagerImpl::SendRequests() {
 void HelpPromptManagerImpl::CreatePromptMsg(
     smart_objects::SmartObject& out_msg_params) {
   LOG4CXX_AUTO_TRACE(logger_);
-  out_msg_params[strings::help_prompt] =
-      smart_objects::SmartObject(smart_objects::SmartType_Array);
-  const size_t count_to_add = std::min(vr_commands_.size(), kLimitCommand);
-  for (size_t i = 0; i < count_to_add; ++i) {
-    const VRCommandPair& pair = vr_commands_[i];
-
-    smart_objects::SmartObject item(smart_objects::SmartType_Map);
-    item[strings::text] = pair.second->asString();
-    item[strings::type] = mobile_apis::SpeechCapabilities::SC_TEXT;
-
-    out_msg_params[strings::help_prompt][i] = item;
-  }
+  GenerateVrItems(out_msg_params, strings::help_prompt);
   app_.set_help_prompt(out_msg_params[strings::help_prompt]);
 }
 
@@ -328,18 +338,8 @@ void HelpPromptManagerImpl::CreateVRMsg(
     }
   }
 
-  out_msg_params[strings::vr_help] =
-      smart_objects::SmartObject(smart_objects::SmartType_Array);
-  const size_t count_to_add = std::min(vr_commands_.size(), kLimitCommand);
-  for (size_t i = 0; i < count_to_add; ++i) {
-    const VRCommandPair& pair = vr_commands_[i];
+  GenerateVrItems(out_msg_params, strings::vr_help);
 
-    smart_objects::SmartObject item(smart_objects::SmartType_Map);
-    item[strings::text] = pair.second->asString();
-    item[strings::position] = i + 1;
-
-    out_msg_params[strings::vr_help][i] = item;
-  }
   if (out_msg_params[strings::vr_help].empty()) {
     out_msg_params.erase(strings::vr_help);
     app_.reset_vr_help();
