@@ -31,6 +31,10 @@
 */
 
 #include "application_manager/help_prompt_manager_impl.h"
+
+#include <algorithm>
+#include <iterator>
+
 #include "application_manager/application.h"
 #include "application_manager/application_manager.h"
 #include "application_manager/commands/command_impl.h"
@@ -66,6 +70,12 @@ bool HelpPromptManagerImpl::AddCommand(
     return false;
   }
 
+  const smart_objects::SmartObject& commands = command[strings::vr_commands];
+  if (commands.empty()) {
+    LOG4CXX_DEBUG(logger_, "vr_commands array is empty");
+    return false;
+  }
+
   sync_primitives::AutoLock lock(vr_commands_lock_);
   auto it = std::find_if(
       vr_commands_.begin(),
@@ -73,31 +83,25 @@ bool HelpPromptManagerImpl::AddCommand(
       [cmd_id](const VRCommandPair& pair) { return pair.first == cmd_id; });
 
   if (vr_commands_.end() != it) {
-    LOG4CXX_DEBUG(logger_, "Commands with id:" << cmd_id << " already exists");
+    LOG4CXX_DEBUG(logger_, "Command with id:" << cmd_id << " already exists");
     return false;
   }
 
-  const smart_objects::SmartObject& commands = command[strings::vr_commands];
-  const size_t count_new_commands = commands.length();
   const bool limit_exceeded =
       kLimitCommand <= GetCommandsCount(vr_commands_.end());
 
-  LOG4CXX_DEBUG(logger_, "Will be added " << count_new_commands << " commands");
+  LOG4CXX_DEBUG(logger_,
+                "Will be added first command from array "
+                    << strings::vr_commands);
 
   smart_objects::SmartObjectSPtr vr_item =
-      std::make_shared<smart_objects::SmartObject>(
-          smart_objects::SmartType_Array);
-  smart_objects::SmartArray& ar_vr_cmd = *(vr_item->asArray());
-  smart_objects::SmartArray& ar_cmd = *(commands.asArray());
-  ar_vr_cmd.reserve(count_new_commands);
-  ar_vr_cmd.insert(
-      ar_vr_cmd.end(), ar_cmd.begin(), ar_cmd.begin() + count_new_commands);
+      std::make_shared<smart_objects::SmartObject>(commands.asArray()->front());
   vr_commands_.push_back(std::make_pair(cmd_id, vr_item));
 
   LOG4CXX_DEBUG(logger_,
-                "VR commands with id: " << cmd_id << " added for appID: "
-                                        << app_.app_id() << ". Total "
-                                        << vr_commands_.size() << " in cache");
+                "VR command with id: " << cmd_id << " added for appID: "
+                                       << app_.app_id() << ". Total "
+                                       << vr_commands_.size() << " in cache");
 
   return !limit_exceeded;
 }
@@ -193,13 +197,28 @@ HelpPromptManagerImpl::SendingType HelpPromptManagerImpl::GetSendingType()
 
 size_t HelpPromptManagerImpl::GetCommandsCount(
     VRCommandPairs::const_iterator end_element) const {
-  size_t commands_count = 0;
-  std::for_each(vr_commands_.begin(),
-                end_element,
-                [&commands_count](const VRCommandPair& pair) {
-                  commands_count += pair.second->length();
-                });
-  return commands_count;
+  return std::distance(vr_commands_.begin(), end_element);
+}
+
+void HelpPromptManagerImpl::GenerateVrItems(
+    smart_objects::SmartObject& out_msg_params, const char* vr_key) const {
+  out_msg_params[vr_key] =
+      smart_objects::SmartObject(smart_objects::SmartType_Array);
+
+  const size_t count_to_add = std::min(vr_commands_.size(), kLimitCommand);
+  for (size_t i = 0; i < count_to_add; ++i) {
+    const VRCommandPair& pair = vr_commands_[i];
+
+    smart_objects::SmartObject item(smart_objects::SmartType_Map);
+    item[strings::text] = pair.second->asString();
+    if (strings::help_prompt == vr_key) {
+      item[strings::type] = mobile_apis::SpeechCapabilities::SC_TEXT;
+    } else {
+      item[strings::position] = i + 1;
+    }
+
+    out_msg_params[vr_key][i] = item;
+  }
 }
 
 void HelpPromptManagerImpl::SendTTSRequest() {
@@ -301,21 +320,7 @@ void HelpPromptManagerImpl::SendRequests() {
 void HelpPromptManagerImpl::CreatePromptMsg(
     smart_objects::SmartObject& out_msg_params) {
   LOG4CXX_AUTO_TRACE(logger_);
-  out_msg_params[strings::help_prompt] =
-      smart_objects::SmartObject(smart_objects::SmartType_Array);
-  uint32_t index = 0;
-  for (size_t i = 0; i < vr_commands_.size(); ++i) {
-    const VRCommandPair& pair = vr_commands_[i];
-    for (size_t j = 0; j < pair.second->length() && index < kLimitCommand;
-         ++j) {
-      smart_objects::SmartObject item(smart_objects::SmartType_Map);
-
-      item[strings::text] = pair.second->getElement(j).asString();
-      item[strings::type] = mobile_apis::SpeechCapabilities::SC_TEXT;
-
-      out_msg_params[strings::help_prompt][index++] = item;
-    }
-  }
+  GenerateVrItems(out_msg_params, strings::help_prompt);
   app_.set_help_prompt(out_msg_params[strings::help_prompt]);
 }
 
@@ -329,21 +334,9 @@ void HelpPromptManagerImpl::CreateVRMsg(
       out_msg_params[strings::vr_help_title] = app_.name();
     }
   }
-  out_msg_params[strings::vr_help] =
-      smart_objects::SmartObject(smart_objects::SmartType_Array);
-  uint32_t index = 0;
-  for (size_t i = 0; i < vr_commands_.size(); ++i) {
-    const VRCommandPair& pair = vr_commands_[i];
-    for (size_t j = 0; j < pair.second->length() && index < kLimitCommand;
-         ++j) {
-      smart_objects::SmartObject item(smart_objects::SmartType_Map);
 
-      item[strings::text] = pair.second->getElement(j).asString();
-      item[strings::position] = index + 1;
+  GenerateVrItems(out_msg_params, strings::vr_help);
 
-      out_msg_params[strings::vr_help][index++] = item;
-    }
-  }
   if (out_msg_params[strings::vr_help].empty()) {
     out_msg_params.erase(strings::vr_help);
     app_.reset_vr_help();

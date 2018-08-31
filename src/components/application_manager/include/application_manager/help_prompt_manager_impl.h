@@ -174,6 +174,15 @@ class HelpPromptManagerImpl : public HelpPromptManager {
    */
   size_t GetCommandsCount(VRCommandPairs::const_iterator end_element) const;
 
+  /**
+   * @brief Generate help prompt/vr help items array and write it into provided
+   * smart object
+   * @param out_msg_params output smart object
+   * @param vr_key name of vr item in response
+   */
+  void GenerateVrItems(smart_objects::SmartObject& out_msg_params,
+                       const char* vr_key) const;
+
   Application& app_;
   ApplicationManager& app_manager_;
   VRCommandPairs vr_commands_;
