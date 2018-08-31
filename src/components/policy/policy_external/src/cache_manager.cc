@@ -267,10 +267,7 @@ CacheManager::CacheManager(bool in_memory)
 
 CacheManager::~CacheManager() {
   LOG4CXX_AUTO_TRACE(logger_);
-  sync_primitives::AutoLock lock(backuper_locker_);
-  backup_thread_->join();
-  delete backup_thread_->delegate();
-  threads::DeleteThread(backup_thread_);
+  StopBackupTread();
 }
 
 ConsentPriorityType CacheManager::GetConsentsPriority(
@@ -2745,9 +2742,22 @@ void CacheManager::MergeCFM(const policy_table::PolicyTable& new_pt,
 
 void CacheManager::InitBackupThread() {
   LOG4CXX_AUTO_TRACE(logger_);
+  sync_primitives::AutoLock lock(backuper_locker_);
   backuper_ = new BackgroundBackuper(this);
   backup_thread_ = threads::CreateThread("Backup thread", backuper_);
   backup_thread_->start();
+}
+
+void CacheManager::StopBackupTread() {
+  LOG4CXX_AUTO_TRACE(logger_);
+  sync_primitives::AutoLock lock(backuper_locker_);
+  if (NULL == backup_thread_) {
+    return;
+  }
+  backup_thread_->join();
+  delete backup_thread_->delegate();
+  threads::DeleteThread(backup_thread_);
+  backup_thread_ = NULL;
 }
 
 const PolicySettings& CacheManager::get_settings() const {
@@ -2778,6 +2788,20 @@ void CacheManager::OnDeviceSwitching(const std::string& device_id_from,
     const auto app_id = f->first;
     LOG4CXX_DEBUG(logger_, "Updating permissions for key: " << app_id);
     consents_to[app_id] = f->second;
+  }
+}
+
+void CacheManager::OnSystemStateChanged(SystemState state) {
+  switch (state) {
+    case SystemState::kStateSuspended:
+      StopBackupTread();
+      break;
+    case SystemState::kStateAwaken:
+      InitBackupThread();
+      break;
+    default:
+      LOG4CXX_ERROR(logger_, "Unknown system state.");
+      break;
   }
 }
 

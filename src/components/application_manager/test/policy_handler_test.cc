@@ -685,13 +685,14 @@ TEST_F(PolicyHandlerTest, OnExceededTimeout) {
   policy_handler_.OnExceededTimeout();
 }
 
-TEST_F(PolicyHandlerTest, OnSystemReady) {
+TEST_F(PolicyHandlerTest, OnSystemStateChanged_Ready) {
   // Arrange
   EnablePolicyAndPolicyManagerMock();
   // Check expectations
-  EXPECT_CALL(*mock_policy_manager_, OnSystemReady());
+  EXPECT_CALL(*mock_policy_manager_,
+              OnSystemStateChanged(policy::SystemState::kStateReady));
   // Act
-  policy_handler_.OnSystemReady();
+  policy_handler_.OnSystemStateChanged(policy::SystemState::kStateReady);
 }
 
 TEST_F(PolicyHandlerTest, PTUpdatedAt_method_UseCounter_KILOMETERS) {

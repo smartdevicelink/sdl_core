@@ -107,7 +107,7 @@ class MockPolicyHandlerInterface : public policy::PolicyHandlerInterface {
   MOCK_CONST_METHOD0(TimeoutExchangeSec, uint32_t());
   MOCK_CONST_METHOD0(TimeoutExchangeMSec, uint32_t());
   MOCK_METHOD0(OnExceededTimeout, void());
-  MOCK_METHOD0(OnSystemReady, void());
+  MOCK_METHOD1(OnSystemStateChanged, void(policy::SystemState));
   MOCK_METHOD2(PTUpdatedAt, void(policy::Counters counter, int value));
   MOCK_METHOD1(add_listener, void(policy::PolicyHandlerObserver* listener));
   MOCK_METHOD1(remove_listener, void(policy::PolicyHandlerObserver* listener));

@@ -787,11 +787,18 @@ void PolicyManagerImpl::SetSystemInfo(const std::string& ccpu_version,
   LOG4CXX_AUTO_TRACE(logger_);
 }
 
-void PolicyManagerImpl::OnSystemReady() {
-  // Update policy table for the first time with system information
-  if (cache_->IsPTPreloaded()) {
-    listener()->OnSystemInfoUpdateRequired();
-    return;
+void PolicyManagerImpl::OnSystemStateChanged(SystemState state) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  switch (state) {
+    case SystemState::kStateReady: {
+      // Update policy table for the first time with system information
+      if (cache_->IsPTPreloaded()) {
+        listener()->OnSystemInfoUpdateRequired();
+      }
+    } break;
+    default:
+      cache_->OnSystemStateChanged(state);
+      break;
   }
 }
 

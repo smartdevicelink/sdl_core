@@ -1258,10 +1258,18 @@ void PolicyManagerImpl::SetSystemInfo(const std::string& ccpu_version,
   cache_->SetMetaInfo(ccpu_version, wers_country_code, language);
 }
 
-void PolicyManagerImpl::OnSystemReady() {
-  // Update policy table for the first time with system information
-  if (!cache_->IsMetaInfoPresent()) {
-    listener()->OnSystemInfoUpdateRequired();
+void PolicyManagerImpl::OnSystemStateChanged(SystemState state) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  switch (state) {
+    case SystemState::kStateReady: {
+      // Update policy table for the first time with system information
+      if (!cache_->IsMetaInfoPresent()) {
+        listener()->OnSystemInfoUpdateRequired();
+      }
+    } break;
+    default:
+      cache_->OnSystemStateChanged(state);
+      break;
   }
 }
 

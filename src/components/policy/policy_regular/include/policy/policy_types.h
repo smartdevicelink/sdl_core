@@ -492,6 +492,16 @@ typedef std::set<std::pair<std::string, PermissionsCheckResult> >
  */
 typedef std::pair<uint32_t, uint32_t> AppIdURL;
 
+/**
+ * @brief The SystemState enum defines possible system state what policy has to
+ * be aware of
+ */
+enum class SystemState : uint32_t {
+  kStateReady,
+  kStateSuspended,
+  kStateAwaken
+};
+
 }  //  namespace policy
 
 #endif  // SRC_COMPONENTS_POLICY_POLICY_EXTERNAL_INCLUDE_POLICY_POLICY_TYPES_H_

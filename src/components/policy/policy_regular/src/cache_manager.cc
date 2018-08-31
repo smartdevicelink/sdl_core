@@ -105,17 +105,12 @@ CacheManager::CacheManager()
     , backup_(new SQLPTRepresentation())
     , update_required(false) {
   LOG4CXX_AUTO_TRACE(logger_);
-  backuper_ = new BackgroundBackuper(this);
-  backup_thread_ = threads::CreateThread("Backup thread", backuper_);
-  backup_thread_->start();
+  InitBackupThread();
 }
 
 CacheManager::~CacheManager() {
   LOG4CXX_AUTO_TRACE(logger_);
-  sync_primitives::AutoLock lock(backuper_locker_);
-  backup_thread_->join();
-  delete backup_thread_->delegate();
-  threads::DeleteThread(backup_thread_);
+  StopBackupTread();
 }
 
 const policy_table::Strings& CacheManager::GetGroups(const PTString& app_id) {
@@ -1758,6 +1753,40 @@ void CacheManager::OnDeviceSwitching(const std::string& device_id_from,
                                      const std::string& device_id_to) {
   LOG4CXX_AUTO_TRACE(logger_);
   LOG4CXX_INFO(logger_, "Implementation does not support user consents.");
+}
+
+void CacheManager::InitBackupThread() {
+  LOG4CXX_AUTO_TRACE(logger_);
+  sync_primitives::AutoLock lock(backuper_locker_);
+  backuper_ = new BackgroundBackuper(this);
+  backup_thread_ = threads::CreateThread("Backup thread", backuper_);
+  backup_thread_->start();
+}
+
+void CacheManager::StopBackupTread() {
+  LOG4CXX_AUTO_TRACE(logger_);
+  sync_primitives::AutoLock lock(backuper_locker_);
+  if (NULL == backup_thread_) {
+    return;
+  }
+  backup_thread_->join();
+  delete backup_thread_->delegate();
+  threads::DeleteThread(backup_thread_);
+  backup_thread_ = NULL;
+}
+
+void CacheManager::OnSystemStateChanged(SystemState state) {
+  switch (state) {
+    case SystemState::kStateSuspended:
+      StopBackupTread();
+      break;
+    case SystemState::kStateAwaken:
+      InitBackupThread();
+      break;
+    default:
+      LOG4CXX_ERROR(logger_, "Unknown system state.");
+      break;
+  }
 }
 
 CacheManager::BackgroundBackuper::BackgroundBackuper(

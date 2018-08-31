@@ -412,11 +412,11 @@ class PolicyManager : public usage_statistics::StatisticsManager {
   virtual bool CanAppStealFocus(const std::string& app_id) const = 0;
 
   /**
-   * @brief Runs necessary operations, which is depends on external system
-   * state, e.g. getting system-specific parameters which are need to be
-   * filled into policy table
+   * @brief OnSystemStateChanged makes policy manager aware of current system
+   * state, so it can do necessary preparation steps
+   * @param state System state
    */
-  virtual void OnSystemReady() = 0;
+  virtual void OnSystemStateChanged(SystemState state) = 0;
 
   /**
    * @brief Get number of notification by priority

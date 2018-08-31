@@ -392,6 +392,10 @@ bool PolicyHandler::InitPolicyTable() {
   // info necessary for policy table
   event_observer_->subscribe_on_event(
       hmi_apis::FunctionID::BasicCommunication_OnReady);
+  event_observer_->subscribe_on_event(
+      hmi_apis::FunctionID::BasicCommunication_OnExitAllApplications);
+  event_observer_->subscribe_on_event(
+      hmi_apis::FunctionID::BasicCommunication_OnAwakeSDL);
   std::string preloaded_file = get_settings().preloaded_pt_file();
   if (file_system::FileExists(preloaded_file)) {
     return policy_manager_->InitPT(preloaded_file, &get_settings());
@@ -1599,9 +1603,9 @@ void PolicyHandler::OnExceededTimeout() {
   policy_manager_->OnExceededTimeout();
 }
 
-void PolicyHandler::OnSystemReady() {
+void PolicyHandler::OnSystemStateChanged(SystemState state) {
   POLICY_LIB_CHECK_VOID();
-  policy_manager_->OnSystemReady();
+  policy_manager_->OnSystemStateChanged(SystemState::kStateReady);
 }
 
 void PolicyHandler::PTUpdatedAt(Counters counter, int value) {

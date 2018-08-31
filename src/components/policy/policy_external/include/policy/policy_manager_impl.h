@@ -373,11 +373,13 @@ class PolicyManagerImpl : public PolicyManager {
                      const std::string& language) OVERRIDE;
 
   /**
-   * @brief Runs necessary operations, which is depends on external system
-   * state, e.g. getting system-specific parameters which are need to be
-   * filled into policy table
+   * @brief OnSystemStateChanged does preparation steps according to system
+   * state. In case of 'start' state requests information needed by policy
+   * manager from system. In case of 'suspend/awake' starts/stops backup of
+   * data appropiately.
+   * @param state System state
    */
-  void OnSystemReady() OVERRIDE;
+  void OnSystemStateChanged(SystemState state) FINAL;
 
   /**
    * @brief Get number of notification by priority

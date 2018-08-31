@@ -735,6 +735,8 @@ class CacheManager : public CacheManagerInterface {
   void OnDeviceSwitching(const std::string& device_id_from,
                          const std::string& device_id_to) OVERRIDE;
 
+  void OnSystemStateChanged(SystemState state) OVERRIDE;
+
  private:
   std::string currentDateTime();
   struct AppHMITypeToString {
@@ -772,6 +774,8 @@ class CacheManager : public CacheManagerInterface {
   bool IsPermissionsCalculated(const std::string& device_id,
                                const std::string& policy_app_id,
                                policy::Permissions& permission);
+  void InitBackupThread();
+  void StopBackupTread();
 
  private:
   std::shared_ptr<policy_table::Table> pt_;

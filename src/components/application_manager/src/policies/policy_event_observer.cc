@@ -69,8 +69,24 @@ void PolicyEventObserver::on_event(const event_engine::Event& event) {
       break;
     }
     case hmi_apis::FunctionID::BasicCommunication_OnReady: {
-      policy_handler_->OnSystemReady();
+      policy_handler_->OnSystemStateChanged(policy::SystemState::kStateReady);
       unsubscribe_from_event(hmi_apis::FunctionID::BasicCommunication_OnReady);
+      break;
+    }
+    case hmi_apis::FunctionID::BasicCommunication_OnExitAllApplications: {
+      const hmi_apis::Common_ApplicationsCloseReason::eType reason =
+          static_cast<hmi_apis::Common_ApplicationsCloseReason::eType>(
+              event.smart_object()[strings::msg_params]
+                                  [application_manager::hmi_request::reason]
+                                      .asInt());
+      if (hmi_apis::Common_ApplicationsCloseReason::SUSPEND == reason) {
+        policy_handler_->OnSystemStateChanged(
+            policy::SystemState::kStateSuspended);
+      }
+      break;
+    }
+    case hmi_apis::FunctionID::BasicCommunication_OnAwakeSDL: {
+      policy_handler_->OnSystemStateChanged(policy::SystemState::kStateAwaken);
       break;
     }
     default: { break; }
