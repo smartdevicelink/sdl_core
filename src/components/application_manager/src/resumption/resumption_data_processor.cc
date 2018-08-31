@@ -72,7 +72,6 @@ void ResumptionDataProcessor::Restore(ApplicationSharedPtr application,
 }
 
 bool ResumptionRequestIDs::operator<(const ResumptionRequestIDs& other) const {
-  LOG4CXX_AUTO_TRACE(logger_);
   return correlation_id < other.correlation_id ||
          function_id < other.function_id;
 }
@@ -160,7 +159,7 @@ void ResumptionDataProcessor::on_event(const event_engine::Event& event) {
   DCHECK_OR_RETURN_VOID(it != register_callbacks_.end());
   auto callback = it->second;
   if (status.error_requests.empty()) {
-    LOG4CXX_DEBUG(logger_, "Resumption for app " << app_id << "successful");
+    LOG4CXX_DEBUG(logger_, "Resumption for app " << app_id << " successful");
     callback(mobile_apis::Result::SUCCESS, "Data resumption succesful");
   }
   if (!status.error_requests.empty()) {
@@ -507,14 +506,15 @@ void ResumptionDataProcessor::AddWayPointsSubscription(
     app_mngr::ApplicationSharedPtr application,
     const smart_objects::SmartObject& saved_app) {
   LOG4CXX_AUTO_TRACE(logger_);
-  if (saved_app.keyExists(strings::subscribed_for_way_points)) {
-    LOG4CXX_DEBUG(logger_, "subscribed_for_way_points section is not exists");
+
+  if (!saved_app.keyExists(strings::subscribed_for_way_points)) {
+    LOG4CXX_ERROR(logger_, "subscribed_for_way_points section is not exists");
     return;
   }
 
-  const smart_objects::SmartObject& subscribed_for_way_points_so =
-      saved_app[strings::subscribed_for_way_points];
-  if (true == subscribed_for_way_points_so.asBool()) {
+  const bool subscribed_for_way_points_so =
+      saved_app[strings::subscribed_for_way_points].asBool();
+  if (subscribed_for_way_points_so) {
     application_manager_.SubscribeAppForWayPoints(application);
     auto subscribe_waypoints_msg =
         MessageHelper::CreateMessageForHMI(
