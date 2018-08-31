@@ -87,18 +87,15 @@ bool HelpPromptManagerImpl::AddCommand(
     return false;
   }
 
-  const size_t count_new_commands = commands.length();
   const bool limit_exceeded =
       kLimitCommand <= GetCommandsCount(vr_commands_.end());
 
   LOG4CXX_DEBUG(logger_,
-                "Will be added first of " << count_new_commands << " commands");
+                "Will be added first command from array "
+                    << strings::vr_commands);
 
   smart_objects::SmartObjectSPtr vr_item =
-      std::make_shared<smart_objects::SmartObject>(
-          smart_objects::SmartType_String);
-  smart_objects::SmartArray& ar_cmd = *(commands.asArray());
-  *vr_item = ar_cmd.front();
+      std::make_shared<smart_objects::SmartObject>(commands.asArray()->front());
   vr_commands_.push_back(std::make_pair(cmd_id, vr_item));
 
   LOG4CXX_DEBUG(logger_,
