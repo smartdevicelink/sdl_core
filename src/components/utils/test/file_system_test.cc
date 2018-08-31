@@ -990,13 +990,13 @@ TEST(FileSystemTest,
 TEST(FileSystemTest, WriteFileGetSize) {
   ASSERT_FALSE(FileExists("./test file"));
   EXPECT_TRUE(CreateFile("./test file"));
-  EXPECT_EQ(0, FileSize("./test file"));
+  EXPECT_EQ(0u, FileSize("./test file"));
 
   unsigned char tmp[] = {'t', 'e', 's', 't'};
   std::vector<unsigned char> data(tmp, tmp + 4);
   EXPECT_TRUE(Write("./test file", data));
 
-  EXPECT_NE(0, FileSize("./test file"));
+  EXPECT_NE(0u, FileSize("./test file"));
 
   EXPECT_TRUE(DeleteFile("./test file"));
   EXPECT_FALSE(FileExists("./test file"));
@@ -1022,13 +1022,14 @@ TEST(FileSystemTest, GetFileModificationTime) {
 
   EXPECT_TRUE(CreateFile("./test file"));
 
-  uint64_t modif_time = GetFileModificationTime("./test file");
-  EXPECT_LE(0ul, modif_time);
+  time_t modif_time = GetFileModificationTime("./test file");
+  EXPECT_LE(0ul, static_cast<unsigned long>(modif_time));
 
   std::vector<uint8_t> data(1, 1);
   EXPECT_TRUE(WriteBinaryFile("./test file", data));
 
-  EXPECT_LE(0ul, GetFileModificationTime("./test file"));
+  EXPECT_LE(0ul,
+            static_cast<unsigned long>(GetFileModificationTime("./test file")));
   EXPECT_LE(modif_time, GetFileModificationTime("./test file"));
 
   EXPECT_TRUE(DeleteFile("./test file"));
