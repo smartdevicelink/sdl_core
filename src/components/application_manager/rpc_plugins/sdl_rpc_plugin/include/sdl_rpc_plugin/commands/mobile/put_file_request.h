@@ -70,7 +70,7 @@ class PutFileRequest : public app_mngr::commands::CommandRequestImpl {
   virtual void Run();
 
  private:
-  int64_t offset_;
+  uint64_t offset_;
   std::string sync_file_name_;
   int64_t length_;
   mobile_apis::FileType::eType file_type_;

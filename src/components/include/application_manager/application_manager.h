@@ -472,7 +472,7 @@ class ApplicationManager {
       const std::vector<uint8_t>& binary_data,
       const std::string& file_path,
       const std::string& file_name,
-      const int64_t offset) = 0;
+      const uint64_t offset) = 0;
   /*
    * @brief Sets SDL access to all mobile apps
    *

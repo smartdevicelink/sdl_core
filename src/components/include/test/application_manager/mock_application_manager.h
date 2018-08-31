@@ -186,7 +186,7 @@ class MockApplicationManager : public application_manager::ApplicationManager {
       mobile_apis::Result::eType(const std::vector<uint8_t>& binary_data,
                                  const std::string& file_path,
                                  const std::string& file_name,
-                                 const int64_t offset));
+                                 const uint64_t offset));
   MOCK_METHOD1(SetAllAppsAllowed, void(const bool allowed));
   MOCK_METHOD1(
       set_driver_distraction_state,

@@ -33,122 +33,114 @@
 #include "utils/file_system.h"
 #include "utils/logger.h"
 
-#include <sys/statvfs.h>
 #include <sys/stat.h>
+#include <sys/statvfs.h>
 #include <sys/types.h>
 #include <sstream>
 
 #include <dirent.h>
 #include <unistd.h>
 // TODO(VS): lint error: Streams are highly discouraged.
-#include <fstream>
+#include <algorithm>
+#include <boost/filesystem.hpp>
 #include <cstddef>
 #include <cstdio>
-#include <algorithm>
+#include <fstream>
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "Utils")
 
+// Easier reference
+namespace fs = boost::filesystem;
+using boost::system::error_code;
+
 uint64_t file_system::GetAvailableDiskSpace(const std::string& path) {
-  struct statvfs fsInfo = {0};
-  if (statvfs(path.c_str(), &fsInfo) == 0) {
-    return fsInfo.f_bsize * fsInfo.f_bfree;
-  } else {
+  error_code ec;
+  fs::space_info si = fs::space(path, ec);
+
+  if (ec) {
+    // If something went wrong, assume no free space
     return 0;
+  } else {
+    return si.free;
   }
 }
 
-int64_t file_system::FileSize(const std::string& path) {
-  if (file_system::FileExists(path)) {
-    struct stat file_info = {0};
-    if (0 != stat(path.c_str(), &file_info)) {
-      LOG4CXX_WARN_WITH_ERRNO(logger_, "Could not get file size: " << path);
-    } else {
-      return file_info.st_size;
-    }
+uint64_t file_system::FileSize(const std::string& path) {
+  error_code ec;
+  // Boost returns sizes as unsigned
+  uint64_t fsize = (uint64_t)fs::file_size(path, ec);
+
+  if (ec) {
+    LOG4CXX_WARN_WITH_ERRNO(logger_, "Could not get file size: " << path);
+    return 0;
   }
-  return 0;
+  return fsize;
 }
 
 size_t file_system::DirectorySize(const std::string& path) {
-  size_t size = 0;
-  DIR* directory = NULL;
-
-  struct dirent* result = NULL;
-  struct stat file_info = {0};
-  directory = opendir(path.c_str());
-  if (NULL != directory) {
-    result = readdir(directory);
-    for (; NULL != result; result = readdir(directory)) {
-      if (0 == strcmp(result->d_name, "..") ||
-          0 == strcmp(result->d_name, ".")) {
-        continue;
-      }
-      std::string full_element_path = path + "/" + result->d_name;
-      if (file_system::IsDirectory(full_element_path)) {
-        size += DirectorySize(full_element_path);
-      } else {
-        stat(full_element_path.c_str(), &file_info);
-        size += file_info.st_size;
-      }
-    }
+  size_t dir_size = 0;
+  error_code ec;
+  // Recursively iterate through directory to accumulate file sizes
+  fs::recursive_directory_iterator iter(path, ec);
+  // Directory does not exist
+  if (ec) {
+    return 0;
   }
-  closedir(directory);
-  return size;
+  // default constructor gives end iterator
+  fs::recursive_directory_iterator end;
+  while (iter != end) {
+    size_t fsize = fs::file_size(iter->path(), ec);
+    // No error means we can add the file
+    if (!ec) {
+      dir_size += fsize;
+    }
+    iter++;  // next entry
+  }
+  return dir_size;
 }
 
+// NOTE that boost makes 0777 permissions by default
 std::string file_system::CreateDirectory(const std::string& name) {
-  if (!DirectoryExists(name)) {
-    if (0 != mkdir(name.c_str(), S_IRWXU)) {
-      LOG4CXX_WARN_WITH_ERRNO(logger_, "Unable to create directory: " << name);
-    }
+  error_code ec;
+  bool success = fs::create_directory(name, ec);
+  if (!success || ec) {
+    LOG4CXX_WARN_WITH_ERRNO(logger_, "Unable to create directory: " << name);
+  } else {
+    // Set 0700 permissions to maintain previous API
+    fs::permissions(name, fs::perms::owner_all, ec);
   }
-
   return name;
 }
 
 bool file_system::CreateDirectoryRecursively(const std::string& path) {
-  size_t pos = 0;
-  bool ret_val = true;
+  error_code ec;
+  // Create directory and all parents
+  fs::create_directories(path, ec);
 
-  while (ret_val == true && pos <= path.length()) {
-    pos = path.find('/', pos + 1);
-    if (!DirectoryExists(path.substr(0, pos))) {
-      if (0 != mkdir(path.substr(0, pos).c_str(), S_IRWXU)) {
-        ret_val = false;
-      }
-    }
+  if (ec) {
+    LOG4CXX_WARN_WITH_ERRNO(logger_,
+                            "Unable to create directory recursively: "
+                                << path << " reason: " << ec.message());
+
+    return false;
   }
-
-  return ret_val;
+  // return true if we made something or if it already existed
+  return true;
 }
 
 bool file_system::IsDirectory(const std::string& name) {
-  struct stat status = {0};
-
-  if (-1 == stat(name.c_str(), &status)) {
-    return false;
-  }
-
-  return S_ISDIR(status.st_mode);
+  error_code ec;
+  return fs::is_directory(name, ec);
 }
-
+// NOTE this may be a duplicate of IsDirectory since it already checks
+// existence
 bool file_system::DirectoryExists(const std::string& name) {
-  struct stat status = {0};
-
-  if (-1 == stat(name.c_str(), &status) || !S_ISDIR(status.st_mode)) {
-    return false;
-  }
-
-  return true;
+  return FileExists(name) && IsDirectory(name);
 }
 
 bool file_system::FileExists(const std::string& name) {
-  struct stat status = {0};
-
-  if (-1 == stat(name.c_str(), &status)) {
-    return false;
-  }
-  return true;
+  error_code ec;
+  return fs::exists(name, ec);
 }
 
 bool file_system::Write(const std::string& file_name,
@@ -197,76 +189,75 @@ void file_system::Close(std::ofstream* file_stream) {
 }
 
 std::string file_system::CurrentWorkingDirectory() {
-  const size_t filename_max_length = 1024;
-  char path[filename_max_length];
-  if (0 == getcwd(path, filename_max_length)) {
+  error_code ec;
+  fs::path currpath = fs::current_path(ec);
+  if (ec) {
     LOG4CXX_WARN(logger_, "Could not get CWD");
   }
-  return std::string(path);
+  return currpath.string();
 }
 
 std::string file_system::GetAbsolutePath(const std::string& path) {
-  char abs_path[PATH_MAX];
-  if (NULL == realpath(path.c_str(), abs_path)) {
-    return std::string();
+  error_code ec;
+  fs::path absolute = fs::canonical(path, ec);
+  if (ec) {
+    return std::string();  // invalid path
   }
-
-  return std::string(abs_path);
+  return absolute.string();
 }
 
 bool file_system::IsFileNameValid(const std::string& file_name) {
   return file_name.end() == std::find(file_name.begin(), file_name.end(), '/');
 }
 
+// Does not remove if file is write-protected
 bool file_system::DeleteFile(const std::string& name) {
   if (FileExists(name) && IsAccessible(name, W_OK)) {
-    return !remove(name.c_str());
+    error_code ec;
+    bool success = fs::remove(name.c_str(), ec);
+    return success && !ec;
   }
   return false;
 }
 
 void file_system::remove_directory_content(const std::string& directory_name) {
-  DIR* directory = NULL;
-  struct dirent* result = NULL;
+  error_code ec;
+  fs::directory_iterator dir_iter(directory_name, ec);
 
-  directory = opendir(directory_name.c_str());
-
-  if (NULL != directory) {
-    result = readdir(directory);
-
-    for (; NULL != result; result = readdir(directory)) {
-      if (0 == strcmp(result->d_name, "..") ||
-          0 == strcmp(result->d_name, ".")) {
-        continue;
-      }
-
-      std::string full_element_path = directory_name + "/" + result->d_name;
-
-      if (file_system::IsDirectory(full_element_path)) {
-        remove_directory_content(full_element_path);
-        rmdir(full_element_path.c_str());
-      } else {
-        if (0 != remove(full_element_path.c_str())) {
-          LOG4CXX_WARN_WITH_ERRNO(
-              logger_, "Unable to remove file: " << full_element_path);
-        }
-      }
-    }
+  if (ec) {
+    LOG4CXX_WARN_WITH_ERRNO(logger_,
+                            "Unable to empty directory: " << directory_name);
   }
 
-  closedir(directory);
+  // According to Boost's documentation, removing shouldn't invalidate the
+  // iterator, although it may cause the removed entry to appear again,
+  // duplicating the warning message. See here:
+  // https://www.boost.org/doc/libs/1_67_0/libs/filesystem/doc/reference.html#Class-directory_iterator
+  for (auto& dirent : dir_iter) {
+    fs::remove_all(dirent, ec);
+    if (ec) {
+      LOG4CXX_WARN_WITH_ERRNO(
+          logger_, "Unable to remove file: " << dirent.path().string());
+    }
+  }
 }
 
 bool file_system::RemoveDirectory(const std::string& directory_name,
                                   bool is_recursively) {
-  if (DirectoryExists(directory_name) && IsAccessible(directory_name, W_OK)) {
-    if (is_recursively) {
-      remove_directory_content(directory_name);
-    }
-
-    return !rmdir(directory_name.c_str());
+  // Make sure the directory exists
+  if (!DirectoryExists(directory_name) && IsAccessible(directory_name, W_OK)) {
+    return false;
   }
-  return false;
+  error_code ec;
+  bool success;
+  // If recursive, just force full remove
+  if (is_recursively) {
+    success = (fs::remove_all(directory_name, ec) != 0);
+  } else {
+    // Otherwise try to remove
+    success = fs::remove(directory_name, ec);
+  }
+  return success && !ec;
 }
 
 bool file_system::IsAccessible(const std::string& name, int32_t how) {
@@ -283,30 +274,20 @@ bool file_system::IsReadingAllowed(const std::string& name) {
 
 std::vector<std::string> file_system::ListFiles(
     const std::string& directory_name) {
+  error_code ec;
+
+  fs::directory_iterator dir_iter(directory_name, ec);
   std::vector<std::string> listFiles;
-  if (!DirectoryExists(directory_name)) {
+
+  // In case the directory doesn't exist / can't be read, second check may be
+  // redundant
+  if (ec || !DirectoryExists(directory_name)) {
     return listFiles;
   }
 
-  DIR* directory = NULL;
-  struct dirent* result = NULL;
-
-  directory = opendir(directory_name.c_str());
-  if (NULL != directory) {
-    result = readdir(directory);
-
-    for (; NULL != result; result = readdir(directory)) {
-      if (0 == strcmp(result->d_name, "..") ||
-          0 == strcmp(result->d_name, ".")) {
-        continue;
-      }
-
-      listFiles.push_back(std::string(result->d_name));
-    }
-
-    closedir(directory);
+  for (auto& dirent : dir_iter) {
+    listFiles.push_back(dirent.path().filename().string());
   }
-
   return listFiles;
 }
 
@@ -379,47 +360,42 @@ bool file_system::CreateFile(const std::string& path) {
   }
 }
 
-uint64_t file_system::GetFileModificationTime(const std::string& path) {
-  struct stat info;
-  if (0 != stat(path.c_str(), &info)) {
-    LOG4CXX_WARN_WITH_ERRNO(logger_, "Could not get file mod time: " << path);
+time_t file_system::GetFileModificationTime(const std::string& path) {
+  error_code ec;
+  std::time_t time = fs::last_write_time(path, ec);
+  if (ec) {
+    return 0;
   }
-  return static_cast<uint64_t>(info.st_mtim.tv_nsec);
+  return time;
 }
 
 bool file_system::CopyFile(const std::string& src, const std::string& dst) {
   if (!FileExists(src) || FileExists(dst) || !CreateFile(dst)) {
     return false;
   }
-  std::vector<uint8_t> data;
-  if (!ReadBinaryFile(src, data) || !WriteBinaryFile(dst, data)) {
-    DeleteFile(dst);
+  error_code ec;
+  fs::copy_file(src, dst, ec);
+  if (ec) {
+    // something failed
     return false;
   }
   return true;
 }
 
 bool file_system::MoveFile(const std::string& src, const std::string& dst) {
+  error_code ec;
+
   if (std::rename(src.c_str(), dst.c_str()) == 0) {
     return true;
-  } else {
-    // In case of src and dst on different file systems std::rename returns
-    // an error (at least on QNX).
-    // Seems, streams are not recommended for use, so have
-    // to find another way to do this.
-    std::ifstream s_src(src, std::ios::binary);
-    if (!s_src.good()) {
-      return false;
-    }
-    std::ofstream s_dst(dst, std::ios::binary);
-    if (!s_dst.good()) {
-      return false;
-    }
-    s_dst << s_src.rdbuf();
-    s_dst.close();
-    s_src.close();
-    DeleteFile(src);
-    return true;
   }
-  return false;
+  // In case of src and dst on different file systems std::rename returns
+  // an error (at least on QNX).
+  // Instead, copy the file over and delete the old one
+  bool success = CopyFile(src, dst);
+  if (!success) {
+    return false;
+  }
+  DeleteFile(src);
+
+  return true;
 }
