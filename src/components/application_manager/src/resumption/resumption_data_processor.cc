@@ -521,6 +521,8 @@ void ResumptionDataProcessor::AddWayPointsSubscription(
         application_manager_.GetNextHMICorrelationID());
     (*subscribe_waypoints_msg)[strings::params][strings::message_type] =
         hmi_apis::messageType::request;
+    (*subscribe_waypoints_msg)[strings::msg_params][strings::app_id] =
+        application->app_id();
     ProcessHMIRequest(subscribe_waypoints_msg, true);
   }
 }
