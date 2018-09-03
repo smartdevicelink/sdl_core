@@ -59,7 +59,7 @@ class MockResumeCtrl : public resumption::ResumeCtrl {
   MOCK_CONST_METHOD0(is_suspended, bool());
   MOCK_METHOD0(StopSavePersistentDataTimer, void());
   MOCK_METHOD0(StartSavePersistentDataTimer, void());
-  MOCK_METHOD2(StartResumption,
+  MOCK_METHOD3(StartResumption,
                bool(app_mngr::ApplicationSharedPtr application,
                     const std::string& hash,
                     resumption::ResumeCtrl::ResumptionCallBack));

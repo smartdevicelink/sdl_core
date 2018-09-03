@@ -310,9 +310,6 @@ class MessageHelper {
   static void SendAddCommandRequestToHMI(ApplicationConstSharedPtr app,
                                          ApplicationManager& app_man);
 
-  static smart_objects::SmartObjectList CreateAddSubMenuRequestToHMI(
-      ApplicationConstSharedPtr app, const uint32_t correlation_id);
-
   static smart_objects::SmartObjectList CreateAddCommandRequestToHMI(
       ApplicationConstSharedPtr app, ApplicationManager& app_mngr);
 
@@ -601,15 +598,6 @@ class MessageHelper {
    * @return TRUE on SUCCES otherwise return FALSE
    */
   static bool SendStopAudioPathThru(ApplicationManager& app_mngr);
-
-
-  /**
-   * @brief CreateSubscribeWayPointsMessageToHMI
-   * @param correlation_id
-   * @return
-   */
-  static smart_objects::SmartObjectSPtr CreateSubscribeWayPointsMessageToHMI(
-      const uint32_t correlation_id);
 
 
   /**

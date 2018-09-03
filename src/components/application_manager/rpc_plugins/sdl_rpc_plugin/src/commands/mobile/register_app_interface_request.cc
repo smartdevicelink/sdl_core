@@ -541,22 +541,6 @@ void RegisterAppInterfaceRequest::Run() {
     return;
   }
 
-  // Version negotiation
-  utils::SemanticVersion ver_4_5(4, 5, 0);
-  utils::SemanticVersion module_version(
-      major_version, minor_version, patch_version);
-  if (mobile_version <= ver_4_5) {
-    // Mobile versioning did not exist for
-    // versions 4.5 and prior.
-    application->set_msg_version(ver_4_5);
-  } else if (mobile_version < module_version) {
-    // Use mobile RPC version as negotiated version
-    application->set_msg_version(mobile_version);
-  } else {
-    // Use module version as negotiated version
-    application->set_msg_version(module_version);
-  }
-
   FillApplicationParams(application);
 
   SetupAppDeviceInfo(application);
@@ -789,6 +773,34 @@ void RegisterAppInterfaceRequest::CheckLanguage() {
   }
 }
 
+void FinishSendingRegisterAppInterfaceToMobile(
+    const smart_objects::SmartObject& msg_params,
+    ApplicationManager& app_manager,
+    const uint32_t connection_key,
+    policy::StatusNotifier notify_upd_manager) {
+  policy::PolicyHandlerInterface& policy_handler =
+      app_manager.GetPolicyHandler();
+  resumption::ResumeCtrl& resume_ctrl = app_manager.resume_controller();
+  auto application = app_manager.application(connection_key);
+
+  if (msg_params.keyExists(strings::app_hmi_type)) {
+    policy_handler_.SetDefaultHmiTypes(application->policy_app_id(),
+                                       &(msg_params[strings::app_hmi_type]));
+  }
+
+  // Default HMI level should be set before any permissions validation, since it
+  // relies on HMI level.
+  app_manager.OnApplicationRegistered(application);
+  (*notify_upd_manager)();
+
+  // Start PTU after successfull registration
+  // Sends OnPermissionChange notification to mobile right after RAI response
+  // and HMI level set-up
+  policy_handler.OnAppRegisteredOnMobile(application->policy_app_id());
+
+  resume_ctrl.StartResumptionOnlyHMILevel(application);
+}
+
 void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile(
     ApplicationType app_type,
     const std::string& add_info,
@@ -938,34 +950,6 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile(
 
   FinishSendingRegisterAppInterfaceToMobile(
       msg_params_copy, application_manager_, key, notify_upd_manager);
-}
-
-void RegisterAppInterfaceRequest::FinishSendingRegisterAppInterfaceToMobile(
-    const smart_objects::SmartObject& msg_params,
-    ApplicationManager& app_manager,
-    const uint32_t connection_key,
-    policy::StatusNotifier notify_upd_manager) {
-  policy::PolicyHandlerInterface& policy_handler =
-      app_manager.GetPolicyHandler();
-  resumption::ResumeCtrl& resume_ctrl = app_manager.resume_controller();
-  auto application = app_manager.application(connection_key);
-
-  if (msg_params.keyExists(strings::app_hmi_type)) {
-    policy_handler_.SetDefaultHmiTypes(application->policy_app_id(),
-                                       &(msg_params[strings::app_hmi_type]));
-  }
-
-  // Default HMI level should be set before any permissions validation, since it
-  // relies on HMI level.
-  app_manager.OnApplicationRegistered(application);
-  (*notify_upd_manager)();
-
-  // Start PTU after successfull registration
-  // Sends OnPermissionChange notification to mobile right after RAI response
-  // and HMI level set-up
-  policy_handler.OnAppRegisteredOnMobile(application->policy_app_id());
-
-  resume_ctrl.StartResumptionOnlyHMILevel(application);
 }
 
 DEPRECATED void
