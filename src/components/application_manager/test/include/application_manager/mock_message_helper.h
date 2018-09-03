@@ -128,6 +128,9 @@ class MockMessageHelper {
   MOCK_METHOD2(CreateMessageForHMI,
                smart_objects::SmartObjectSPtr(hmi_apis::messageType::eType,
                                               const uint32_t));
+  MOCK_METHOD2(CreateMessageForHMI,
+               smart_objects::SmartObjectSPtr(hmi_apis::FunctionID::eType,
+                                              const uint32_t));
   MOCK_METHOD2(SendHMIStatusNotification,
                void(const Application& application_impl,
                     ApplicationManager& application_manager));
@@ -258,9 +261,6 @@ class MockMessageHelper {
                     const std::string& packageName,
                     ApplicationManager& app_man));
   MOCK_METHOD1(SendUnsubscribedWayPoints, bool(ApplicationManager& app_mngr));
-
-  MOCK_METHOD1(CreateSubscribeWayPointsMessageToHMI,
-               smart_objects::SmartObjectSPtr(const uint32_t correlation_id));
 
   MOCK_METHOD2(SendQueryApps,
                void(const uint32_t connection_key,
