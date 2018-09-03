@@ -257,6 +257,12 @@ smart_objects::SmartObjectSPtr MessageHelper::CreateMessageForHMI(
       message_type, correlation_id);
 }
 
+smart_objects::SmartObjectSPtr MessageHelper::CreateMessageForHMI(
+    hmi_apis::FunctionID::eType function_id, const uint32_t correlation_id) {
+  return MockMessageHelper::message_helper_mock()->CreateMessageForHMI(
+      function_id, correlation_id);
+}
+
 void MessageHelper::SendHMIStatusNotification(
     const Application& application_impl,
     ApplicationManager& application_manager) {
@@ -474,13 +480,6 @@ void MessageHelper::SendLaunchApp(const uint32_t connection_key,
 bool MessageHelper::SendUnsubscribedWayPoints(ApplicationManager& app_mngr) {
   return MockMessageHelper::message_helper_mock()->SendUnsubscribedWayPoints(
       app_mngr);
-}
-
-smart_objects::SmartObjectSPtr
-MessageHelper::CreateSubscribeWayPointsMessageToHMI(
-    const uint32_t correlation_id) {
-  return MockMessageHelper::message_helper_mock()
-      ->CreateSubscribeWayPointsMessageToHMI(correlation_id);
 }
 
 void MessageHelper::SendQueryApps(const uint32_t connection_key,
