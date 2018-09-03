@@ -91,21 +91,6 @@ class RegisterAppInterfaceRequest
 
  private:
   /**
-   * @brief FinishSendingRegisterAppInterfaceToMobile
-   * used to safely conclude sending notification to mobile
-   * to prevent SDL crash
-   * @param msg_params - copy of msg_params stored in message_ member
-   * @param app_manager - application manager to get policy handler and resume controller
-   * @param connection_key to get app from app manager
-   * @param notify_upd_manager callback to call after app registered
-   */
-
-  void FinishSendingRegisterAppInterfaceToMobile(
-      const smart_objects::SmartObject& msg_params,
-      application_manager::ApplicationManager& app_manager,
-      const uint32_t connection_key,
-      policy::StatusNotifier notify_upd_manager);
-  /**
    * @brief FillApplicationParams set app application attributes from the RAI
    * request
    * @param application applicaiton to fill params

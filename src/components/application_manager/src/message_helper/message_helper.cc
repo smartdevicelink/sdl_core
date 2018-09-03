@@ -2251,8 +2251,7 @@ bool MessageHelper::SendUnsubscribedWayPoints(ApplicationManager& app_mngr) {
 smart_objects::SmartObjectSPtr
 MessageHelper::CreateSubscribeWayPointsMessageToHMI(
     const uint32_t correlation_id) {
-  LOG4CXX_AUTO_TRACE(logger_);
-  const smart_objects::SmartObjectSPtr msg =
+  auto msg =
       CreateMessageForHMI(hmi_apis::messageType::request, correlation_id);
   (*msg)[strings::params][strings::function_id] =
       hmi_apis::FunctionID::Navigation_SubscribeWayPoints;

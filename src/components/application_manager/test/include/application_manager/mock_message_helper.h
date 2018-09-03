@@ -174,7 +174,7 @@ class MockMessageHelper {
                     ApplicationManager& app_mngr));
   MOCK_METHOD2(SendOnResumeAudioSourceToHMI,
                void(uint32_t app_id, ApplicationManager& app_mngr));
-  MOCK_METHOD2(CreateAddSubMenuRequestToHMI,
+  MOCK_METHOD2(CreateAddSubMenuRequestsToHMI,
                smart_objects::SmartObjectList(ApplicationConstSharedPtr app,
                                               const uint32_t correlation_id));
   MOCK_METHOD2(CreateAddCommandRequestToHMI,
@@ -261,6 +261,9 @@ class MockMessageHelper {
                     const std::string& packageName,
                     ApplicationManager& app_man));
   MOCK_METHOD1(SendUnsubscribedWayPoints, bool(ApplicationManager& app_mngr));
+
+  MOCK_METHOD1(CreateSubscribeWayPointsMessageToHMI,
+               smart_objects::SmartObjectSPtr(const uint32_t correlation_id));
 
   MOCK_METHOD2(SendQueryApps,
                void(const uint32_t connection_key,

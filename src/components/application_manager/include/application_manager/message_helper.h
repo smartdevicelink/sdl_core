@@ -310,9 +310,6 @@ class MessageHelper {
   static void SendAddCommandRequestToHMI(ApplicationConstSharedPtr app,
                                          ApplicationManager& app_man);
 
-  static smart_objects::SmartObjectList CreateAddSubMenuRequestToHMI(
-      ApplicationConstSharedPtr app, const uint32_t correlation_id);
-
   static smart_objects::SmartObjectList CreateAddCommandRequestToHMI(
       ApplicationConstSharedPtr app, ApplicationManager& app_mngr);
 
@@ -604,19 +601,17 @@ class MessageHelper {
 
 
   /**
-   * @brief CreateSubscribeWayPointsMessageToHMI
-   * @param correlation_id
-   * @return
-   */
-  static smart_objects::SmartObjectSPtr CreateSubscribeWayPointsMessageToHMI(
-      const uint32_t correlation_id);
-
-
-  /**
    * @brief Sends UnsubscribeWayPoints request
    * @return true if UnsubscribedWayPoints is send otherwise false
    */
   static bool SendUnsubscribedWayPoints(ApplicationManager& app_mngr);
+
+  /**
+   * @brief Creates SubscribeWayPointsMessage to be sent to HMI
+   * @return filled smart object with relevant message data
+   */
+  static smart_objects::SmartObjectSPtr CreateSubscribeWayPointsMessageToHMI(
+      const uint32_t correlation_id);
 
   static smart_objects::SmartObjectSPtr CreateNegativeResponse(
       uint32_t connection_key,
