@@ -517,10 +517,12 @@ void ResumptionDataProcessor::AddWayPointsSubscription(
   if (true == subscribed_for_way_points_so.asBool()) {
     application_manager_.SubscribeAppForWayPoints(application);
     auto subscribe_waypoints_msg =
-        MessageHelper::CreateSubscribeWayPointsMessageToHMI(
-            application_manager_.GetNextHMICorrelationID());
-    application_manager_.GetRPCService().ManageHMICommand(
-        subscribe_waypoints_msg);
+        MessageHelper::CreateMessageForHMI(
+          hmi_apis::FunctionID::Navigation_SubscribeWayPoints,
+          application_manager_.GetNextHMICorrelationID());
+    (*subscribe_waypoints_msg)[strings::params][strings::message_type] = 
+    hmi_apis::messageType::request;
+    ProcessHMIRequest(subscribe_waypoints_msg, true);
   }
 }
 
