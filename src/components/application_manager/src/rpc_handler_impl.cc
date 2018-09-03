@@ -329,6 +329,11 @@ bool RPCHandlerImpl::ConvertMessageToSO(
 
       rpc::ValidationReport report("RPC");
 
+      if (output[strings::msg_params].keyExists(strings::info) &&
+          smart_objects::SmartType_String !=
+              output[strings::msg_params][strings::info].getType()) {
+        output[strings::msg_params].erase(strings::info);
+      }
       if (output.validate(&report) != smart_objects::errors::OK) {
         LOG4CXX_ERROR(logger_,
                       "Incorrect parameter from HMI"
