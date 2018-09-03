@@ -395,7 +395,7 @@ TEST(MessageHelperTestCreate, CreateAddSubMenuRequestToHMI_SendObject_Equal) {
 
   const uint32_t cor_id = 0u;
   smart_objects::SmartObjectList ptr =
-      MessageHelper::CreateAddSubMenuRequestToHMI(appSharedMock, cor_id);
+      MessageHelper::CreateAddSubMenuRequestsToHMI(appSharedMock, cor_id);
 
   EXPECT_FALSE(ptr.empty());
 
@@ -425,7 +425,7 @@ TEST(MessageHelperTestCreate,
 
   const uint32_t cor_id = 0u;
   smart_objects::SmartObjectList ptr =
-      MessageHelper::CreateAddSubMenuRequestToHMI(appSharedMock, cor_id);
+      MessageHelper::CreateAddSubMenuRequestsToHMI(appSharedMock, cor_id);
 
   EXPECT_TRUE(ptr.empty());
 }

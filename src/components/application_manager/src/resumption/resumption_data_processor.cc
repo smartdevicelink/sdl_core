@@ -516,10 +516,6 @@ void ResumptionDataProcessor::AddWayPointsSubscription(
       saved_app[strings::subscribed_for_way_points];
   if (true == subscribed_for_way_points_so.asBool()) {
     application_manager_.SubscribeAppForWayPoints(application);
-    auto subscribe_waypoints_msg =
-        MessageHelper::CreateSubscribeWayPointsMessageToHMI(
-            application_manager_.GetNextHMICorrelationID());
-    ProcessHMIRequest(subscribe_waypoints_msg, true);
   }
 }
 

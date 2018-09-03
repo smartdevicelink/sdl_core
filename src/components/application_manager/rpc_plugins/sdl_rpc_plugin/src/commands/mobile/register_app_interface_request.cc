@@ -736,7 +736,7 @@ void FinishSendingRegisterAppInterfaceToMobile(
   auto application = app_manager.application(connection_key);
 
   if (msg_params.keyExists(strings::app_hmi_type)) {
-    policy_handler_.SetDefaultHmiTypes(application->policy_app_id(),
+    policy_handler.SetDefaultHmiTypes(application->policy_app_id(),
                                        &(msg_params[strings::app_hmi_type]));
   }
 
