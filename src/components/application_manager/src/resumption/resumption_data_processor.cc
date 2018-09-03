@@ -139,11 +139,12 @@ void ResumptionDataProcessor::on_event(const event_engine::Event& event) {
     return;
   }
 
-  const int32_t result_code =
+  const hmi_apis::Common_Result::eType result_code =
+      static_cast<hmi_apis::Common_Result::eType>(
       response[strings::params][application_manager::hmi_response::code]
-          .asInt();
+              .asInt());
 
-  if (result_code == 0) {
+  if (result_code == hmi_apis::Common_Result::SUCCESS) {
     status.successful_requests.push_back(*request_ptr);
   } else {
     status.error_requests.push_back(*request_ptr);
@@ -156,7 +157,7 @@ void ResumptionDataProcessor::on_event(const event_engine::Event& event) {
   }
 
   auto it = register_callbacks_.find(app_id);
-  DCHECK_OR_RETURN_VOID(it !=register_callbacks_.end());
+  DCHECK_OR_RETURN_VOID(it != register_callbacks_.end());
   auto callback = it->second;
   if (status.error_requests.empty()) {
     LOG4CXX_DEBUG(logger_, "Resumption for app " << app_id << "successful");
