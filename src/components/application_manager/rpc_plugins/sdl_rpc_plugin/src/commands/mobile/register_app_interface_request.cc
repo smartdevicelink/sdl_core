@@ -562,8 +562,12 @@ void RegisterAppInterfaceRequest::Run() {
   SetupAppDeviceInfo(application);
 
   const auto resume_data_result = ApplicationDataShouldBeResumed();
-  SendOnAppRegisteredNotificationToHMI(*application,
-                                       resume_data_result == DataResumeResult::RESUME_DATA);
+  SendOnAppRegisteredNotificationToHMI(
+      *application, resume_data_result == DataResumeResult::RESUME_DATA);
+
+  // By default app subscribed to CUSTOM_BUTTON
+  SendSubscribeCustomButtonNotification();
+  SendChangeRegistrationOnHMI(application);
 
   if (DataResumeResult::RESUME_DATA == resume_data_result) {
     auto& resume_ctrl = application_manager_.resume_controller();
@@ -571,10 +575,10 @@ void RegisterAppInterfaceRequest::Run() {
     const auto& hash_id = msg_params[strings::hash_id].asString();
     LOG4CXX_WARN(logger_, "Start Data Resumption");
     auto send_response = [this](mobile_apis::Result::eType result_code,
-            const std::string& info) {
-        result_code_ = result_code;
-        SendRegisterAppInterfaceResponseToMobile(
-            ApplicationType::kNewApplication, info, true);
+                                const std::string& info) {
+      result_code_ = result_code;
+      SendRegisterAppInterfaceResponseToMobile(
+          ApplicationType::kNewApplication, info, true);
     };
 
     resume_ctrl.StartResumption(application, hash_id, send_response);
@@ -941,6 +945,8 @@ void RegisterAppInterfaceRequest::FinishSendingRegisterAppInterfaceToMobile(
     ApplicationManager& app_manager,
     const uint32_t connection_key,
     policy::StatusNotifier notify_upd_manager) {
+  policy::PolicyHandlerInterface& policy_handler =
+      app_manager.GetPolicyHandler();
   resumption::ResumeCtrl& resume_ctrl = app_manager.resume_controller();
   auto application = app_manager.application(connection_key);
 
@@ -957,15 +963,9 @@ void RegisterAppInterfaceRequest::FinishSendingRegisterAppInterfaceToMobile(
   // Start PTU after successfull registration
   // Sends OnPermissionChange notification to mobile right after RAI response
   // and HMI level set-up
-  policy_handler_.OnAppRegisteredOnMobile(application->policy_app_id());
+  policy_handler.OnAppRegisteredOnMobile(application->policy_app_id());
 
-  resumption::ResumeCtrl& resume_ctrl =
-      app_manager.resume_controller();
   resume_ctrl.StartResumptionOnlyHMILevel(application);
-
-  // By default app subscribed to CUSTOM_BUTTON
-  SendSubscribeCustomButtonNotification();
-  SendChangeRegistrationOnHMI(application);
 }
 
 DEPRECATED void
