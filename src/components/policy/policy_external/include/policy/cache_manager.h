@@ -958,6 +958,7 @@ class CacheManager : public CacheManagerInterface {
   sync_primitives::Lock backuper_locker_;
   BackgroundBackuper* backuper_;
   const PolicySettings* settings_;
+  volatile bool is_policy_table_loaded_;
 
   friend class AccessRemoteImpl;
 

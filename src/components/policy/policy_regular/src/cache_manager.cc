@@ -330,7 +330,15 @@ bool CacheManager::AppHasHMIType(const std::string& application_id,
 
 void CacheManager::Backup() {
   sync_primitives::AutoLock lock(backuper_locker_);
-  DCHECK(backuper_);
+  if (NULL == backup_thread_) {
+    LOG4CXX_DEBUG(logger_, "No running backup thread found. Backup skipped.");
+    return;
+  }
+  if (!is_policy_table_loaded_) {
+    LOG4CXX_DEBUG(logger_, "Policy table is not loaded yet. Backup skipped.");
+    return;
+  }
+  DCHECK_OR_RETURN_VOID(backuper_);
   backuper_->DoBackup();
 }
 
@@ -1395,54 +1403,59 @@ bool CacheManager::IsApplicationRepresented(const std::string& app_id) const {
 bool CacheManager::Init(const std::string& file_name,
                         const PolicySettings* settings) {
   LOG4CXX_AUTO_TRACE(logger_);
+  DCHECK_OR_RETURN(settings, false);
   settings_ = settings;
-  InitResult init_result = backup_->Init(settings);
 
-  bool result = true;
-  switch (init_result) {
+  switch (backup_->Init(settings)) {
     case InitResult::EXISTS: {
-      LOG4CXX_INFO(logger_, "Policy Table exists, was loaded correctly.");
-      result = LoadFromBackup();
-      if (result) {
-        if (!backup_->IsDBVersionActual()) {
-          LOG4CXX_INFO(logger_, "DB version is NOT actual");
-          if (!backup_->RefreshDB()) {
-            LOG4CXX_ERROR(logger_, "RefreshDB() failed");
-            return false;
-          }
-          backup_->UpdateDBVersion();
-          Backup();
+      LOG4CXX_INFO(logger_, "Policy storage is loaded.");
+      LoadFromBackup();
+      if (!backup_->IsDBVersionActual()) {
+        LOG4CXX_INFO(logger_, "DB version is NOT actual");
+        if (!backup_->RefreshDB()) {
+          LOG4CXX_ERROR(logger_, "Can't cleanup policy storage.");
+          return false;
         }
-        if (!MergePreloadPT(file_name)) {
-          result = false;
-        }
+        backup_->UpdateDBVersion();
+      }
+      if (!MergePreloadPT(file_name)) {
+        return false;
       }
     } break;
     case InitResult::SUCCESS: {
       LOG4CXX_INFO(logger_, "Policy Table was inited successfully");
-
-      result = LoadFromFile(file_name, *pt_);
-
+      {
+        sync_primitives::AutoLock lock(cache_lock_);
+        if (!LoadFromFile(file_name, *pt_)) {
+          LOG4CXX_ERROR(logger_, "Can't load policy table from " << file_name);
+          backup_->RemoveDB();
+          return false;
+        }
+      }
       std::shared_ptr<policy_table::Table> snapshot = GenerateSnapshot();
-      result &= snapshot->is_valid();
-      LOG4CXX_DEBUG(logger_,
-                    "Check if snapshot is valid: " << std::boolalpha << result);
-      if (!result) {
+
+      if (!snapshot->is_valid()) {
+        LOG4CXX_DEBUG(logger_, "Policy table snapshot is invalid.");
         rpc::ValidationReport report("policy_table");
         snapshot->ReportErrors(&report);
-        return result;
+        backup_->RemoveDB();
+        return false;
       }
-
-      backup_->UpdateDBVersion();
-      Backup();
+      if (!backup_->UpdateDBVersion()) {
+        LOG4CXX_ERROR(logger_, "Can't update storage version.");
+        backup_->RemoveDB();
+        return false;
+      }
     } break;
     default: {
-      result = false;
-      LOG4CXX_ERROR(logger_, "Failed to init policy table.");
-    } break;
+      LOG4CXX_ERROR(logger_, "Policy storage initialization failed.");
+      return false;
+    }
   }
+  is_policy_table_loaded_ = true;
+  Backup();
 
-  return result;
+  return true;
 }
 
 void CacheManager::FillDeviceSpecificData() {}
