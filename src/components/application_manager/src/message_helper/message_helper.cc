@@ -325,6 +325,22 @@ smart_objects::SmartObjectSPtr MessageHelper::CreateMessageForHMI(
   return message;
 }
 
+smart_objects::SmartObjectSPtr MessageHelper::CreateMessageForHMI(
+    hmi_apis::FunctionID::eType function_id, const uint32_t correlation_id) {
+  using namespace smart_objects;
+
+  SmartObjectSPtr message = std::make_shared<SmartObject>(SmartType_Map);
+  SmartObject& ref = *message;
+
+  ref[strings::params][strings::function_id] = static_cast<int>(function_id);
+  ref[strings::params][strings::protocol_version] =
+      commands::CommandImpl::protocol_version_;
+  ref[strings::params][strings::protocol_type] =
+      commands::CommandImpl::hmi_protocol_type_;
+  ref[strings::params][strings::correlation_id] = correlation_id;
+  return message;
+}
+
 smart_objects::SmartObjectSPtr MessageHelper::CreateHashUpdateNotification(
     const uint32_t app_id) {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -2246,17 +2262,6 @@ bool MessageHelper::SendUnsubscribedWayPoints(ApplicationManager& app_mngr) {
       hmi_apis::FunctionID::Navigation_UnsubscribeWayPoints;
 
   return app_mngr.GetRPCService().ManageHMICommand(result);
-}
-
-smart_objects::SmartObjectSPtr
-MessageHelper::CreateSubscribeWayPointsMessageToHMI(
-    const uint32_t correlation_id) {
-  auto msg =
-      CreateMessageForHMI(hmi_apis::messageType::request, correlation_id);
-  (*msg)[strings::params][strings::function_id] =
-      hmi_apis::FunctionID::Navigation_SubscribeWayPoints;
-
-  return msg;
 }
 
 void MessageHelper::SendPolicySnapshotNotification(
