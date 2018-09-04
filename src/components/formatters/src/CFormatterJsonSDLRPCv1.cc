@@ -34,12 +34,12 @@
 #include "formatters/meta_formatter.h"
 #include "utils/convert_utils.h"
 
-namespace strings = NsSmartDeviceLink::NsJSONHandler::strings;
-namespace smart_objects_ns = NsSmartDeviceLink::NsSmartObjects;
+namespace strings = ns_smart_device_link::ns_json_handler::strings;
+namespace smart_objects_ns = ns_smart_device_link::ns_smart_objects;
 
-namespace NsSmartDeviceLink {
-namespace NsJSONHandler {
-namespace Formatters {
+namespace ns_smart_device_link {
+namespace ns_json_handler {
+namespace formatters {
 
 // ----------------------------------------------------------------------------
 

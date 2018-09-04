@@ -29,8 +29,6 @@ src/appMain/hmi_link
 src/appMain/smartDeviceLinkCore
 test/components/application_manager/policies_manager/test_policies_table
 test/components/application_manager/test_formatters_commands
-test/components/dbus/test_DBusAdapter
-test/components/dbus/test_DBusSchema
 test/components/protocol_handler/test_ProtocolHandler
 test/components/request_watchdog/test_RequestWatchdog
 test/components/smart_objects/SchemaItem/test_SmartObject_AlwaysFalseSchemaItemTest

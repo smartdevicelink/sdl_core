@@ -38,17 +38,21 @@
 #include "application_manager/application_impl.h"
 #include "application_manager/application_manager_impl.h"
 #include "utils/custom_string.h"
-#include "utils/make_shared.h"
+
 #include "encryption/hashing.h"
 
 #include "application_manager/mock_application_manager_settings.h"
 #include "application_manager/mock_resumption_data.h"
-#include "application_manager/mock_hmi_command_factory.h"
+#include "application_manager/mock_command_factory.h"
 #include "application_manager/mock_request.h"
 #include "connection_handler/mock_connection_handler.h"
 #include "policy/mock_policy_settings.h"
 #include "policy/usage_statistics/mock_statistics_manager.h"
 #include "protocol_handler/mock_session_observer.h"
+#include "protocol_handler/mock_protocol_handler.h"
+#include "application_manager/mock_rpc_plugin_manager.h"
+#include "application_manager/mock_rpc_plugin.h"
+#include "utils/optional.h"
 
 namespace test {
 namespace components {
@@ -83,7 +87,7 @@ class ApplicationManagerImplMockHmiTest : public ::testing::Test {
  public:
   ApplicationManagerImplMockHmiTest()
       : mock_storage_(
-            ::utils::MakeShared<NiceMock<resumption_test::MockResumptionData> >(
+            std::make_shared<NiceMock<resumption_test::MockResumptionData> >(
                 mock_app_mngr_)) {}
 
  protected:
@@ -113,6 +117,7 @@ class ApplicationManagerImplMockHmiTest : public ::testing::Test {
     app_manager_impl_->set_connection_handler(&mock_connection_handler_);
     app_manager_impl_->resume_controller().set_resumption_storage(
         mock_storage_);
+    app_manager_impl_->set_protocol_handler(&mock_protocol_handler_);
   }
 
   void SetCommonExpectationOnAppReconnection(
@@ -141,14 +146,14 @@ class ApplicationManagerImplMockHmiTest : public ::testing::Test {
                         Return(0)));
   }
 
-  utils::SharedPtr<NiceMock<resumption_test::MockResumptionData> >
-      mock_storage_;
+  std::shared_ptr<NiceMock<resumption_test::MockResumptionData> > mock_storage_;
   application_manager_test::MockApplicationManager mock_app_mngr_;
   NiceMock<policy_handler_test::MockPolicySettings> mock_policy_settings_;
   NiceMock<connection_handler_test::MockConnectionHandler>
       mock_connection_handler_;
   NiceMock<protocol_handler_test::MockSessionObserver> mock_session_observer_;
   NiceMock<MockApplicationManagerSettings> mock_application_manager_settings_;
+  NiceMock<protocol_handler_test::MockProtocolHandler> mock_protocol_handler_;
   std::unique_ptr<am::ApplicationManagerImpl> app_manager_impl_;
 };
 
@@ -159,16 +164,22 @@ TEST_F(ApplicationManagerImplMockHmiTest,
   const std::string mac_address = "MA:CA:DD:RE:SS";
   const connection_handler::DeviceHandle device_id = 1u;
   const custom_str::CustomString app_name("");
+  plugin_manager::MockRPCPluginManager* mock_rpc_plugin_manager =
+      new plugin_manager::MockRPCPluginManager;
 
-  utils::SharedPtr<ApplicationImpl> app_impl = new ApplicationImpl(
+  std::shared_ptr<ApplicationImpl> app_impl = std::make_shared<ApplicationImpl>(
       application_id,
       policy_app_id,
       encryption::MakeHash(mac_address),
       device_id,
       app_name,
-      utils::SharedPtr<usage_statistics::StatisticsManager>(
+      std::shared_ptr<usage_statistics::StatisticsManager>(
           new usage_statistics_test::MockStatisticsManager()),
       *app_manager_impl_);
+  std::unique_ptr<plugin_manager::RPCPluginManager> mock_rpc_plugin_manager_ptr(
+      mock_rpc_plugin_manager);
+
+  app_manager_impl_->SetPluginManager(mock_rpc_plugin_manager_ptr);
 
   app_manager_impl_->AddMockApplication(app_impl);
 
@@ -178,12 +189,21 @@ TEST_F(ApplicationManagerImplMockHmiTest,
   const connection_handler::Device usb(
       device_id + 1, "USB_device", "USB_serial", "USB_IOS");
 
-  MockHMICommandFactory* mock_hmi_factory =
-      MockHMICommandFactory::mock_hmi_command_factory();
+  MockCommandFactory mock_command_factory;
 
-  // Skip sending notification on device switching as it is not the goal here
-  EXPECT_CALL(*mock_hmi_factory, CreateCommand(_, _))
-      .WillOnce(Return(utils::SharedPtr<commands::Command>()));
+  //  // Skip sending notification on device switching as it is not the goal
+  //  here
+  EXPECT_CALL(mock_command_factory, CreateCommand(_, _))
+      .WillOnce(Return(std::shared_ptr<commands::Command>()));
+
+  plugin_manager::MockRPCPlugin mock_rpc_plugin;
+  utils::Optional<plugin_manager::RPCPlugin> mock_rpc_plugin_opt =
+      mock_rpc_plugin;
+
+  EXPECT_CALL(*mock_rpc_plugin_manager, FindPluginToProcess(_, _))
+      .WillRepeatedly(Return(mock_rpc_plugin_opt));
+  ON_CALL(mock_rpc_plugin, GetCommandFactory())
+      .WillByDefault(ReturnRef(mock_command_factory));
 
   app_manager_impl_->OnDeviceSwitchingStart(bt, usb);
 
@@ -191,27 +211,27 @@ TEST_F(ApplicationManagerImplMockHmiTest,
   const uint32_t correlation_id_1 = 1u;
   const uint32_t correlation_id_2 = 2u;
   const uint32_t correlation_id_3 = 3u;
-  utils::SharedPtr<NiceMock<MockRequest> > cmd_1 =
-      utils::MakeShared<NiceMock<MockRequest> >(connection_key,
-                                                correlation_id_1);
-  utils::SharedPtr<NiceMock<MockRequest> > cmd_2 =
-      utils::MakeShared<NiceMock<MockRequest> >(connection_key,
-                                                correlation_id_2);
-  utils::SharedPtr<NiceMock<MockRequest> > cmd_3 =
-      utils::MakeShared<NiceMock<MockRequest> >(connection_key,
-                                                correlation_id_3);
+  std::shared_ptr<NiceMock<MockRequest> > cmd_1 =
+      std::make_shared<NiceMock<MockRequest> >(connection_key,
+                                               correlation_id_1);
+  std::shared_ptr<NiceMock<MockRequest> > cmd_2 =
+      std::make_shared<NiceMock<MockRequest> >(connection_key,
+                                               correlation_id_2);
+  std::shared_ptr<NiceMock<MockRequest> > cmd_3 =
+      std::make_shared<NiceMock<MockRequest> >(connection_key,
+                                               correlation_id_3);
 
-  EXPECT_CALL(*mock_hmi_factory, CreateCommand(_, _))
+  EXPECT_CALL(mock_command_factory, CreateCommand(_, _))
       .WillOnce(Return(cmd_1))
       .WillOnce(Return(cmd_2))
       .WillOnce(Return(cmd_3));
 
   commands::MessageSharedPtr hmi_msg_1 =
-      utils::MakeShared<smart_objects::SmartObject>();
+      std::make_shared<smart_objects::SmartObject>();
   commands::MessageSharedPtr hmi_msg_2 =
-      utils::MakeShared<smart_objects::SmartObject>();
+      std::make_shared<smart_objects::SmartObject>();
   commands::MessageSharedPtr hmi_msg_3 =
-      utils::MakeShared<smart_objects::SmartObject>();
+      std::make_shared<smart_objects::SmartObject>();
 
   (*hmi_msg_1)[strings::msg_params][strings::app_id] =
       (*hmi_msg_2)[strings::msg_params][strings::app_id] =
@@ -222,11 +242,11 @@ TEST_F(ApplicationManagerImplMockHmiTest,
   EXPECT_CALL(*cmd_3, Init()).Times(0);
 
   // Act
-  app_manager_impl_->ManageHMICommand(hmi_msg_1);
-  app_manager_impl_->ManageHMICommand(hmi_msg_2);
-  app_manager_impl_->ManageHMICommand(hmi_msg_3);
+  app_manager_impl_->GetRPCService().ManageHMICommand(hmi_msg_1);
+  app_manager_impl_->GetRPCService().ManageHMICommand(hmi_msg_2);
+  app_manager_impl_->GetRPCService().ManageHMICommand(hmi_msg_3);
 
-  EXPECT_CALL(*mock_hmi_factory, CreateCommand(_, _))
+  EXPECT_CALL(mock_command_factory, CreateCommand(_, _))
       .WillOnce(Return(cmd_1))
       .WillOnce(Return(cmd_2))
       .WillOnce(Return(cmd_3));
@@ -246,7 +266,7 @@ TEST_F(ApplicationManagerImplMockHmiTest,
   app_manager_impl_->ProcessReconnection(app_impl, new_application_id);
   app_manager_impl_->OnApplicationSwitched(app_impl);
 
-  Mock::VerifyAndClearExpectations(&mock_hmi_factory);
+  Mock::VerifyAndClearExpectations(&mock_command_factory);
 }
 
 }  // application_manager_test

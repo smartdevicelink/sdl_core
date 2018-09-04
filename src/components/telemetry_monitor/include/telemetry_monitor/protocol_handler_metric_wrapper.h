@@ -34,7 +34,7 @@
 #define SRC_COMPONENTS_TELEMETRY_MONITOR_INCLUDE_TELEMETRY_MONITOR_PROTOCOL_HANDLER_METRIC_WRAPPER_H_
 
 #include <string>
-#include "utils/shared_ptr.h"
+
 #include "telemetry_monitor/metric_wrapper.h"
 #include "protocol_handler_observer.h"
 
@@ -42,7 +42,7 @@ namespace telemetry_monitor {
 
 class ProtocolHandlerMecticWrapper : public MetricWrapper {
  public:
-  utils::SharedPtr<protocol_handler::PHTelemetryObserver::MessageMetric>
+  std::shared_ptr<protocol_handler::PHTelemetryObserver::MessageMetric>
       message_metric;
   virtual Json::Value GetJsonMetric();
 };

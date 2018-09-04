@@ -37,7 +37,6 @@
 #include <list>
 #include <cstdint>
 
-#include "utils/shared_ptr.h"
 #include "utils/lock.h"
 #include "policy/policy_manager.h"
 #include "policy/policy_table.h"
@@ -47,10 +46,8 @@
 #include "policy/usage_statistics/statistics_manager.h"
 #include "policy/policy_helper.h"
 #include "utils/timer.h"
-#ifdef SDL_REMOTE_CONTROL
 #include "policy/access_remote.h"
 #include "policy/access_remote_impl.h"
-#endif  // SDL_REMOTE_CONTROL
 
 namespace policy_table = rpc::policy_table_interface_base;
 
@@ -448,7 +445,6 @@ class PolicyManagerImpl : public PolicyManager {
       const std::string& application_id,
       const rpc::policy_table_interface_base::AppHmiTypes& hmi_types) OVERRIDE;
 
-#ifdef SDL_REMOTE_CONTROL
   /**
    * @brief Assigns new HMI types for specified application
    * @param application_id Unique application id
@@ -470,7 +466,7 @@ class PolicyManagerImpl : public PolicyManager {
    * @brief Setter for access_remote instance
    * @param access_remote pointer to new access_remote instance
    */
-  void set_access_remote(utils::SharedPtr<AccessRemote> access_remote) OVERRIDE;
+  void set_access_remote(std::shared_ptr<AccessRemote> access_remote) OVERRIDE;
 
   /**
    * @brief Sends notification about application HMI level changed
@@ -483,7 +479,6 @@ class PolicyManagerImpl : public PolicyManager {
    * @param application_id Unique id of application
    */
   void OnPrimaryGroupsChanged(const std::string& application_id);
-#endif  // SDL_REMOTE_CONTROL
 
   /**
    * @brief Removes consent for application functional group
@@ -532,12 +527,36 @@ class PolicyManagerImpl : public PolicyManager {
   void OnAppsSearchCompleted(const bool trigger_ptu) OVERRIDE;
 
   /**
+   * @brief Get state of request types for given application
+   * @param policy_app_id Unique application id
+   * @return request type state
+   */
+  RequestType::State GetAppRequestTypesState(
+      const std::string& policy_app_id) const OVERRIDE;
+
+  /**
+   * @brief Get state of request subtypes for given application
+   * @param policy_app_id Unique application id
+   * @return request subtype state
+   */
+  RequestSubType::State GetAppRequestSubTypesState(
+      const std::string& policy_app_id) const OVERRIDE;
+
+  /**
    * @brief Gets request types for application
    * @param policy_app_id Unique application id
    * @return request types of application
    */
   const std::vector<std::string> GetAppRequestTypes(
       const std::string policy_app_id) const OVERRIDE;
+
+  /**
+   * @brief Gets request subtypes for application
+   * @param policy_app_id Unique application id
+   * @return request subtypes of application
+   */
+  const std::vector<std::string> GetAppRequestSubTypes(
+      const std::string& policy_app_id) const OVERRIDE;
 
   /**
    * @brief Get information about vehicle
@@ -651,7 +670,7 @@ class PolicyManagerImpl : public PolicyManager {
    * @param pt_content binary content of PT
    * @return pointer to converted PT
    */
-  virtual utils::SharedPtr<policy_table::Table> Parse(
+  virtual std::shared_ptr<policy_table::Table> Parse(
       const BinaryMessage& pt_content);
 #else
   /**
@@ -659,7 +678,7 @@ class PolicyManagerImpl : public PolicyManager {
    * @param pt_content binary content of PT
    * @return pointer to converted PT
    */
-  virtual utils::SharedPtr<policy_table::Table> ParseArray(
+  virtual std::shared_ptr<policy_table::Table> ParseArray(
       const BinaryMessage& pt_content);
 #endif
 
@@ -685,8 +704,8 @@ class PolicyManagerImpl : public PolicyManager {
    * @return Collection per-application results
    */
   void CheckPermissionsChanges(
-      const utils::SharedPtr<policy_table::Table> update,
-      const utils::SharedPtr<policy_table::Table> snapshot);
+      const std::shared_ptr<policy_table::Table> update,
+      const std::shared_ptr<policy_table::Table> snapshot);
 
   /**
    * @brief Fill structure to be sent with OnPermissionsChanged notification
@@ -783,7 +802,7 @@ class PolicyManagerImpl : public PolicyManager {
    * @param type policy table type
    * @return true if policy table valid, otherwise false
    */
-  bool IsPTValid(utils::SharedPtr<policy_table::Table> policy_table,
+  bool IsPTValid(std::shared_ptr<policy_table::Table> policy_table,
                  policy_table::PolicyTableType type) const;
 
   /**
@@ -792,7 +811,6 @@ class PolicyManagerImpl : public PolicyManager {
   void RetrySequence();
 
  private:
-#ifdef SDL_REMOTE_CONTROL
   /**
    * @brief Get resulting RPCs permissions for application which started on
    * specific device
@@ -829,10 +847,10 @@ class PolicyManagerImpl : public PolicyManager {
     */
   bool GetModuleTypes(const std::string& policy_app_id,
                       std::vector<std::string>* modules) const OVERRIDE;
-#endif  // SDL_REMOTE_CONTROL
-        /**
-         * @brief pointer to policy table listener for callbacks
-         */
+
+  /**
+   * @brief pointer to policy table listener for callbacks
+   */
   PolicyListener* listener_;
 
   /**
@@ -844,12 +862,11 @@ class PolicyManagerImpl : public PolicyManager {
    * @brief pointer to CacheManagerInterface instance for getting policy data
    */
   CacheManagerInterfaceSPtr cache_;
-#ifdef SDL_REMOTE_CONTROL
+
   /**
    * @brief pointer to AccessRemote instance for working with RC applications
    */
-  utils::SharedPtr<AccessRemote> access_remote_;
-#endif
+  std::shared_ptr<AccessRemote> access_remote_;
 
   /**
    * @brief lock guard for protecting applications list access

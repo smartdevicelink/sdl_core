@@ -34,8 +34,8 @@
 
 #include "utils/macro.h"
 
-namespace NsSmartDeviceLink {
-namespace NsSmartObjects {
+namespace ns_smart_device_link {
+namespace ns_smart_objects {
 /**
  * @brief SchemaItem parameter.
  * Container for schema item parameter such as min/max value, size,
@@ -95,6 +95,6 @@ bool TSchemaItemParameter<ParameterType>::getValue(ParameterType& Value) const {
   }
   return mIsSpecified;
 }
-}  // namespace NsSmartObjects
-}  // namespace NsSmartDeviceLink
+}  // namespace ns_smart_objects
+}  // namespace ns_smart_device_link
 #endif  // SRC_COMPONENTS_SMART_OBJECTS_INCLUDE_SMART_OBJECTS_SCHEMA_ITEM_PARAMETER_H_

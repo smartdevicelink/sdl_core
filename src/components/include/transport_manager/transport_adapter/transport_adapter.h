@@ -41,8 +41,6 @@
 #include <list>
 #include <map>
 
-#include "utils/shared_ptr.h"
-
 #include "transport_manager/transport_adapter/device.h"
 #include "transport_manager/common.h"
 #include "transport_manager/error.h"
@@ -59,17 +57,16 @@ class TransportAdapterListener;
 /**
  * @brief The DeviceType enum defines types based on available transport
  * adapters
- * @deprecated PASA_AOA, PASA_BLUETOOTH, MME
  */
 enum DeviceType {
   AOA,
-  PASA_AOA,
   BLUETOOTH,
-  PASA_BLUETOOTH,
-  MME,
   IOS_BT,
   IOS_USB,
   TCP,
+  IOS_USB_HOST_MODE,
+  IOS_USB_DEVICE_MODE,
+  IOS_CARPLAY_WIRELESS,  // running on iAP over Carplay wireless transport
   UNKNOWN
 };
 
@@ -85,6 +82,18 @@ typedef std::map<DeviceUID, DeviceSptr> DeviceMap;
  * adapter listeners
  */
 typedef std::list<TransportAdapterListener*> TransportAdapterListenerList;
+
+/**
+ * @brief Type definition for transport's configuration information
+ */
+typedef std::map<std::string, std::string> TransportConfig;
+
+/**
+ * @brief TransportConfig keys
+ */
+extern const char* tc_enabled;
+extern const char* tc_tcp_port;
+extern const char* tc_tcp_ip_address;
 
 class TransportAdapter {
  public:
@@ -312,6 +321,12 @@ class TransportAdapter {
   virtual void DeviceSwitched(const DeviceUID& device_handle) = 0;
 
   virtual SwitchableDevices GetSwitchableDevices() const = 0;
+
+  /**
+   * @brief Returns the transport's configuration information
+   */
+  virtual TransportConfig GetTransportConfiguration() const = 0;
+
 #ifdef TELEMETRY_MONITOR
   /**
    * @brief Return Time metric observer

@@ -1,6 +1,6 @@
 [![Slack Status](http://sdlslack.herokuapp.com/badge.svg)](http://slack.smartdevicelink.com)
-
 [![codecov.io](https://codecov.io/github/smartdevicelink/sdl_core/coverage.svg?branch=develop)](https://codecov.io/github/smartdevicelink/sdl_core?branch=develop)
+[![Build Status](http://opensdl-jenkins.luxoft.com:8080/view/develop/job/develop_nightly_coverage/badge/icon)](http://opensdl-jenkins.luxoft.com:8080/view/develop/job/develop_nightly_coverage/)
 
 # SmartDeviceLink (SDL)
 
@@ -65,7 +65,6 @@ The dependencies for SDL Core vary based on the configuration. You can change SD
 | Flag | Description | Dependencies |
 |------|-------------|--------------|
 |Web HMI|Use HTML5 HMI|chromium-browser|
-|DBus|Use DBus HMI Adapter|dbus-1-dev|
 |EXTENDED_MEDIA_MODE|Support Video and Audio Streaming|Opengl es2, gstreamer1.0*|
 |Bluetooth|Enable bluetooth transport adapter|libbluetooth3, libbluetooth-dev, bluez-tools|
 |USB|Enable USB transport adapter|libusb-dev|

@@ -39,7 +39,8 @@
 #include <map>
 #include <set>
 #include <utility>
-#include "utils/shared_ptr.h"
+#include <memory>
+
 #include "utils/helpers.h"
 #include "transport_manager/common.h"
 
@@ -79,7 +80,7 @@ enum PolicyTableStatus {
 // Code generator uses String class name, so this typedef was renamed to PTSring
 typedef std::string PTString;
 typedef std::vector<uint8_t> BinaryMessage;
-typedef utils::SharedPtr<BinaryMessage> BinaryMessageSptr;
+typedef std::shared_ptr<BinaryMessage> BinaryMessageSptr;
 
 typedef std::string HMILevel;
 typedef std::string Parameter;
@@ -267,7 +268,8 @@ struct AppPermissions {
       , appRevoked(false)
       , appPermissionsConsentNeeded(false)
       , appUnauthorized(false)
-      , requestTypeChanged(false) {}
+      , requestTypeChanged(false)
+      , requestSubTypeChanged(false) {}
 
   std::string application_id;
   bool isAppPermissionsRevoked;
@@ -280,6 +282,8 @@ struct AppPermissions {
   DeviceParams deviceInfo;
   bool requestTypeChanged;
   std::vector<std::string> requestType;
+  bool requestSubTypeChanged;
+  std::vector<std::string> requestSubType;
 };
 
 /**
@@ -503,7 +507,8 @@ enum PermissionsCheckResult {
   RESULT_CONSENT_NEEDED,
   RESULT_CONSENT_NOT_REQIURED,
   RESULT_PERMISSIONS_REVOKED_AND_CONSENT_NEEDED,
-  RESULT_REQUEST_TYPE_CHANGED
+  RESULT_REQUEST_TYPE_CHANGED,
+  RESULT_REQUEST_SUBTYPE_CHANGED
 };
 
 /**

@@ -33,25 +33,24 @@
 #ifndef SRC_COMPONENTS_INCLUDE_APPLICATION_MANAGER_APPLICATION_MANAGER_H_
 #define SRC_COMPONENTS_INCLUDE_APPLICATION_MANAGER_APPLICATION_MANAGER_H_
 
+#include <ctime>
 #include <string>
 #include <vector>
 #include <set>
 #include "application_manager/application.h"
 #include "application_manager/hmi_capabilities.h"
 #include "application_manager/commands/command.h"
+#include "application_manager/command_factory.h"
 #include "connection_handler/connection_handler.h"
 #include "utils/data_accessor.h"
-#include "utils/shared_ptr.h"
+
 #include "telemetry_monitor/telemetry_observable.h"
 #include "application_manager/policies/policy_handler_interface.h"
 #include "application_manager/application_manager_settings.h"
 #include "application_manager/state_controller.h"
 #include "application_manager/hmi_interfaces.h"
 #include "policy/policy_types.h"
-#ifdef SDL_REMOTE_CONTROL
-#include "functional_module/plugin_manager.h"
-#endif
-
+#include "application_manager/plugin_manager/rpc_plugin_manager.h"
 namespace resumption {
 class LastState;
 }
@@ -82,6 +81,12 @@ namespace application_manager {
 namespace event_engine {
 class EventDispatcher;
 }
+namespace rpc_service {
+class RPCService;
+}
+namespace rpc_handler {
+class RPCHandler;
+}
 
 class Application;
 class StateControllerImpl;
@@ -94,7 +99,6 @@ struct ApplicationsAppIdSorter {
     return lhs->app_id() < rhs->app_id();
   }
 };
-
 struct ApplicationsPolicyAppIdSorter {
   bool operator()(const ApplicationSharedPtr lhs,
                   const ApplicationSharedPtr rhs) {
@@ -135,8 +139,15 @@ class ApplicationManager {
 
   virtual void set_hmi_message_handler(
       hmi_message_handler::HMIMessageHandler* handler) = 0;
+
+  /**
+   * @brief set_protocol_handler
+   * @param handler
+   * set protocol handler
+   */
   virtual void set_protocol_handler(
       protocol_handler::ProtocolHandler* handler) = 0;
+
   virtual void set_connection_handler(
       connection_handler::ConnectionHandler* handler) = 0;
 
@@ -159,7 +170,6 @@ class ApplicationManager {
   virtual AppSharedPtrs applications_by_button(uint32_t button) = 0;
   virtual AppSharedPtrs applications_with_navi() = 0;
 
-#ifdef SDL_REMOTE_CONTROL
   /**
  * @brief application find application by device and policy identifier
  * @param device_id device id
@@ -176,12 +186,12 @@ class ApplicationManager {
   virtual std::vector<std::string> devices(
       const std::string& policy_app_id) const = 0;
 
-  virtual void SendPostMessageToMobile(const MessagePtr& message) = 0;
+  virtual plugin_manager::RPCPluginManager& GetPluginManager() = 0;
 
-  virtual void SendPostMessageToHMI(const MessagePtr& message) = 0;
-
-  virtual functional_modules::PluginManager& GetPluginManager() = 0;
-#endif  // SDL_REMOTE_CONTROL
+#ifdef BUILD_TESTS
+  virtual void SetPluginManager(
+      std::unique_ptr<plugin_manager::RPCPluginManager>& plugin_manager) = 0;
+#endif
 
   virtual std::vector<ApplicationSharedPtr>
   applications_with_mobile_projection() = 0;
@@ -230,6 +240,18 @@ class ApplicationManager {
    */
   virtual void set_application_id(const int32_t correlation_id,
                                   const uint32_t app_id) = 0;
+  /**
+   * @brief get_current_audio_source
+   * @return current audio source
+   */
+  virtual uint32_t get_current_audio_source() const = 0;
+
+  /**
+   * @brief set_current_audio_source
+   * @param source
+   * set current audio source
+   */
+  virtual void set_current_audio_source(const uint32_t source) = 0;
 
   /**
    * @brief OnHMILevelChanged the callback that allows SDL to react when
@@ -251,30 +273,15 @@ class ApplicationManager {
    *
    **/
   virtual void SendHMIStatusNotification(
-      const utils::SharedPtr<Application> app) = 0;
+      const std::shared_ptr<Application> app) = 0;
 
   /**
-   * DEPRECATED
-   * @brief Checks if Application is subscribed for way points
-   * @param Application AppID
-   * @return true if Application is subscribed for way points
-   * otherwise false
+   * @brief Checks if driver distraction state is valid, creates message
+   * which is sent to the application if allowed, otherwise it is added
+   * to a list of postponed messages.
+   * @param application contains registered application.
    */
-  virtual bool IsAppSubscribedForWayPoints(const uint32_t app_id) const = 0;
-
-  /**
-   * DEPRECATED
-   * @brief Subscribe Application for way points
-   * @param Application AppID
-   */
-  virtual void SubscribeAppForWayPoints(const uint32_t app_id) = 0;
-
-  /**
-   * DEPRECATED
-   * @brief Unsubscribe Application for way points
-   * @param Application AppID
-   */
-  virtual void UnsubscribeAppFromWayPoints(const uint32_t app_id) = 0;
+  virtual void SendDriverDistractionState(ApplicationSharedPtr application) = 0;
 
   /**
    * @brief Checks if Application is subscribed for way points
@@ -308,23 +315,24 @@ class ApplicationManager {
    */
   virtual const std::set<int32_t> GetAppsSubscribedForWayPoints() const = 0;
 
-  virtual void SendMessageToMobile(const commands::MessageSharedPtr message,
-                                   bool final_message = false) = 0;
-
-  virtual void SendMessageToHMI(const commands::MessageSharedPtr message) = 0;
-
   virtual void RemoveHMIFakeParameters(
-      application_manager::MessagePtr& message) = 0;
-
-  virtual bool ManageHMICommand(const commands::MessageSharedPtr message) = 0;
-  virtual bool ManageMobileCommand(const commands::MessageSharedPtr message,
-                                   commands::Command::CommandOrigin origin) = 0;
-
-  virtual MessageValidationResult ValidateMessageBySchema(
-      const Message& message) = 0;
+      application_manager::commands::MessageSharedPtr& message) = 0;
 
   virtual mobile_api::HMILevel::eType GetDefaultHmiLevel(
       ApplicationConstSharedPtr application) const = 0;
+
+  /**
+   * @brief Checks if required transport for resumption is available
+   *
+   * The required transport can be configured through smartDeviceLink.ini file.
+   *
+   * @param application an instance of the app to check
+   * @return true if the app is connected through one of the required
+   *         transports, false otherwise
+   */
+  virtual bool CheckResumptionRequiredTransportAvailable(
+      ApplicationConstSharedPtr application) const = 0;
+
   /**
    * @brief hmi_capabilities return capabilities of hmi
    * @return capabilities of hmi
@@ -380,6 +388,11 @@ class ApplicationManager {
   virtual policy::PolicyHandlerInterface& GetPolicyHandler() = 0;
   virtual const policy::PolicyHandlerInterface& GetPolicyHandler() const = 0;
 
+  virtual rpc_service::RPCService& GetRPCService() const = 0;
+  virtual rpc_handler::RPCHandler& GetRPCHandler() const = 0;
+  virtual bool is_stopping() const = 0;
+  virtual bool is_audio_pass_thru_active() const = 0;
+
   virtual uint32_t GetNextHMICorrelationID() = 0;
   virtual uint32_t GenerateNewHMIAppID() = 0;
 
@@ -389,12 +402,10 @@ class ApplicationManager {
    */
   virtual void EndNaviServices(uint32_t app_id) = 0;
 
-  /* @brief Starts audio passthru process
-   * @deprecated Use BeginAudioPassThru(uint32_t app_id) instead
-   *
-   * @return true on success, false if passthru is already in process
+  /**
+   * @brief returns true if low voltage state is active
    */
-  DEPRECATED virtual bool BeginAudioPassThrough() = 0;
+  virtual bool IsLowVoltage() const = 0;
 
   /**
    * @brief Starts AudioPassThru process by given application
@@ -402,14 +413,6 @@ class ApplicationManager {
    * @return true if AudioPassThru can be started, false otherwise
    */
   virtual bool BeginAudioPassThru(uint32_t app_id) = 0;
-
-  /*
-   * @brief Finishes already started audio passthru process
-   * @deprecated Use EndAudioPassThru(uint32_t app_id) instead
-   *
-   * @return true on success, false if passthru is not active
-   */
-  DEPRECATED virtual bool EndAudioPassThrough() = 0;
 
   /**
    * @brief Finishes already started AudioPassThru process by given application
@@ -431,10 +434,10 @@ class ApplicationManager {
    * @param vehicle_info Enum value of type of vehicle data
    * @param new value (for integer values currently) of vehicle data
    */
-  virtual AppSharedPtrs IviInfoUpdated(
-      mobile_apis::VehicleDataType::eType vehicle_info, int value) = 0;
+  virtual void IviInfoUpdated(mobile_apis::VehicleDataType::eType vehicle_info,
+                              int value) = 0;
 
-  virtual ApplicationSharedPtr RegisterApplication(const utils::SharedPtr<
+  virtual ApplicationSharedPtr RegisterApplication(const std::shared_ptr<
       smart_objects::SmartObject>& request_for_registration) = 0;
 
   virtual void SendUpdateAppList() = 0;
@@ -613,6 +616,9 @@ class ApplicationManager {
 
   virtual app_launch::AppLaunchCtrl& app_launch_ctrl() = 0;
 
+  virtual protocol_handler::MajorProtocolVersion SupportedSDLVersion()
+      const = 0;
+
   /*
    * @brief Converts connection string transport type representation
    * to HMI Common_TransportType
@@ -669,28 +675,11 @@ class ApplicationManager {
    * @return new regular HMI state
    */
   virtual HmiStatePtr CreateRegularState(
-      utils::SharedPtr<Application> app,
+      std::shared_ptr<Application> app,
       mobile_apis::HMILevel::eType hmi_level,
       mobile_apis::AudioStreamingState::eType audio_state,
+      mobile_apis::VideoStreamingState::eType video_state,
       mobile_apis::SystemContext::eType system_context) const = 0;
-
-  /**
-   * DEPRECATED
-   * @brief CreateRegularState create regular HMI state for application
-   * @param app_id Application id
-   * @param hmi_level of returned state
-   * @param audio_state of returned state
-   * @param system_context of returned state
-   * @return new regular HMI state
-   */
-  virtual HmiStatePtr CreateRegularState(
-      uint32_t app_id,
-      mobile_apis::HMILevel::eType hmi_level,
-      mobile_apis::AudioStreamingState::eType audio_state,
-      mobile_apis::SystemContext::eType system_context) const = 0;
-
-  virtual void SendAudioPassThroughNotification(
-      uint32_t session_key, std::vector<uint8_t>& binary_data) = 0;
 
   /**
    * @brief Checks if application can stream (streaming service is started and
@@ -723,6 +712,9 @@ class ApplicationManager {
       std::vector<std::string>& rejected_params) = 0;
 
   virtual const ApplicationManagerSettings& get_settings() const = 0;
+  // Extract the app ID to use internally based on the UseFullAppID .ini setting
+  virtual std::string GetCorrectMobileIDFromMessage(
+      const commands::MessageSharedPtr& message) const = 0;
 
   virtual event_engine::EventDispatcher& event_dispatcher() = 0;
 
@@ -730,6 +722,10 @@ class ApplicationManager {
   virtual void OnTimerSendTTSGlobalProperties() = 0;
   virtual void OnLowVoltage() = 0;
   virtual void OnWakeUp() = 0;
+
+  virtual bool IsSOStructValid(
+      const hmi_apis::StructIdentifiers::eType struct_id,
+      const smart_objects::SmartObject& display_capabilities) = 0;
 };
 
 }  // namespace application_manager

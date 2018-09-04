@@ -206,10 +206,12 @@ class ConnectionHandlerTest : public ::testing::Test {
   }
 
   // Check Service Wrapper
-  void CheckServiceExists(const int connectionId,
-                          const int session_id,
-                          const ::protocol_handler::ServiceType serviceId,
-                          const bool exists) {
+  void CheckServiceExists(
+      const int connectionId,
+      const int session_id,
+      const ::protocol_handler::ServiceType serviceId,
+      const ::transport_manager::ConnectionUID serviceConnectionId,
+      const bool exists) {
     // Check all trees to find Service and check own protected value
     const ConnectionList& connection_list =
         connection_handler_->getConnectionList();
@@ -229,6 +231,7 @@ class ConnectionHandlerTest : public ::testing::Test {
         std::find(service_list.begin(), service_list.end(), serviceId);
     if (exists) {
       ASSERT_NE(serv_it, service_list.end());
+      ASSERT_EQ(serv_it->connection_id, serviceConnectionId);
     } else {
       ASSERT_EQ(serv_it, service_list.end());
     }
@@ -313,6 +316,31 @@ class ConnectionHandlerTest : public ::testing::Test {
     EXPECT_TRUE(
         connection->ProtocolVersion(session_id, check_protocol_version));
     EXPECT_EQ(check_protocol_version, protocol_version);
+  }
+  void AddSecondaryTestService(ServiceType service_type) {
+    EXPECT_NE(0u, out_context_.new_session_id_);
+    EXPECT_EQ(SessionHash(uid_, out_context_.new_session_id_),
+              out_context_.hash_id_);
+    CheckSessionExists(uid_, out_context_.new_session_id_);
+
+    // Set protocol version to 5
+    ChangeProtocol(uid_,
+                   out_context_.new_session_id_,
+                   protocol_handler::PROTOCOL_VERSION_5);
+
+    connection_handler_test::MockConnectionHandlerObserver
+        temp_connection_handler_observer;
+    connection_handler_->set_connection_handler_observer(
+        &temp_connection_handler_observer);
+    EXPECT_CALL(temp_connection_handler_observer,
+                OnServiceStartedCallback(_, _, service_type, _)).Times(1);
+
+    connection_handler_->OnSessionStartedCallback(2u,
+                                                  out_context_.new_session_id_,
+                                                  service_type,
+                                                  PROTECTION_OFF,
+                                                  static_cast<BsonObject*>(0));
+    connection_handler_->set_connection_handler_observer(NULL);
   }
 
   ConnectionHandlerImpl* connection_handler_;
@@ -526,7 +554,7 @@ TEST_F(ConnectionHandlerTest, IsHeartBeatSupported) {
 TEST_F(ConnectionHandlerTest, SendEndServiceWithoutSetProtocolHandler) {
   AddTestDeviceConnection();
   AddTestSession();
-  EXPECT_CALL(mock_protocol_handler_, SendEndService(_, _, kRpc)).Times(0);
+  EXPECT_CALL(mock_protocol_handler_, SendEndService(_, _, _, kRpc)).Times(0);
   connection_handler_->SendEndService(connection_key_, kRpc);
 }
 
@@ -534,7 +562,7 @@ TEST_F(ConnectionHandlerTest, SendEndService) {
   AddTestDeviceConnection();
   AddTestSession();
   connection_handler_->set_protocol_handler(&mock_protocol_handler_);
-  EXPECT_CALL(mock_protocol_handler_, SendEndService(_, _, kRpc));
+  EXPECT_CALL(mock_protocol_handler_, SendEndService(_, _, _, kRpc));
   connection_handler_->SendEndService(connection_key_, kRpc);
 }
 
@@ -1120,7 +1148,7 @@ TEST_F(ConnectionHandlerTest, StartService_withServices) {
                                                 PROTECTION_OFF,
                                                 static_cast<BsonObject*>(NULL));
   EXPECT_NE(0u, audio_context.new_session_id_);
-  CheckServiceExists(uid_, audio_context.new_session_id_, kAudio, true);
+  CheckServiceExists(uid_, audio_context.new_session_id_, kAudio, uid_, true);
   EXPECT_EQ(protocol_handler::HASH_ID_NOT_SUPPORTED, audio_context.hash_id_);
 
   // Start Audio service
@@ -1130,7 +1158,8 @@ TEST_F(ConnectionHandlerTest, StartService_withServices) {
                                                 PROTECTION_OFF,
                                                 static_cast<BsonObject*>(NULL));
   EXPECT_NE(0u, video_context.new_session_id_);
-  CheckServiceExists(uid_, video_context.new_session_id_, kMobileNav, true);
+  CheckServiceExists(
+      uid_, video_context.new_session_id_, kMobileNav, uid_, true);
   EXPECT_EQ(protocol_handler::HASH_ID_NOT_SUPPORTED, video_context.hash_id_);
 
   connection_handler_->set_protocol_handler(NULL);
@@ -1158,7 +1187,8 @@ TEST_F(ConnectionHandlerTest, StartService_withServices_withParams) {
                                                 PROTECTION_OFF,
                                                 dummy_param);
   EXPECT_EQ(out_context_.new_session_id_, video_context.new_session_id_);
-  CheckServiceExists(uid_, out_context_.new_session_id_, kMobileNav, true);
+  CheckServiceExists(
+      uid_, out_context_.new_session_id_, kMobileNav, uid_, true);
   EXPECT_EQ(protocol_handler::HASH_ID_NOT_SUPPORTED, video_context.hash_id_);
 
   connection_handler_->set_protocol_handler(NULL);
@@ -1182,7 +1212,7 @@ TEST_F(ConnectionHandlerTest, ServiceStop_UnExistService) {
       connection_handler_->OnSessionEndedCallback(
           uid_, out_context_.new_session_id_, &dummy_hash, kAudio);
   EXPECT_EQ(0u, end_session_result);
-  CheckServiceExists(uid_, out_context_.new_session_id_, kAudio, false);
+  CheckServiceExists(uid_, out_context_.new_session_id_, kAudio, uid_, false);
 }
 
 TEST_F(ConnectionHandlerTest, ServiceStop) {
@@ -1212,7 +1242,7 @@ TEST_F(ConnectionHandlerTest, ServiceStop) {
         connection_handler_->OnSessionEndedCallback(
             uid_, out_context_.new_session_id_, &some_hash_id, kAudio);
     EXPECT_EQ(connection_key_, end_session_result);
-    CheckServiceExists(uid_, out_context_.new_session_id_, kAudio, false);
+    CheckServiceExists(uid_, out_context_.new_session_id_, kAudio, uid_, false);
   }
 }
 
@@ -1281,9 +1311,6 @@ TEST_F(ConnectionHandlerTest, SessionStarted_WithRpc) {
           true,
           ByRef(empty)));
 
-  EXPECT_CALL(mock_connection_handler_observer, CheckAppIsNavi(_))
-      .WillOnce(Return(true));
-
   connection_handler_->set_protocol_handler(&mock_protocol_handler_);
   EXPECT_CALL(mock_protocol_handler_, NotifySessionStarted(_, _))
       .WillOnce(SaveArg<0>(&out_context_));
@@ -1320,8 +1347,6 @@ TEST_F(ConnectionHandlerTest, ServiceStarted_Video_SUCCESS) {
           session_key,
           true,
           ByRef(empty)));
-  EXPECT_CALL(mock_connection_handler_observer, CheckAppIsNavi(_))
-      .WillOnce(Return(true));
 
   // confirm that NotifySessionStarted() is called
   connection_handler_->set_protocol_handler(&mock_protocol_handler_);
@@ -1362,8 +1387,6 @@ TEST_F(ConnectionHandlerTest, ServiceStarted_Video_FAILURE) {
           session_key,
           false,
           ByRef(empty)));
-  EXPECT_CALL(mock_connection_handler_observer, CheckAppIsNavi(_))
-      .WillOnce(Return(true));
 
   // confirm that NotifySessionStarted() is called
   connection_handler_->set_protocol_handler(&mock_protocol_handler_);
@@ -1454,9 +1477,6 @@ TEST_F(ConnectionHandlerTest, ServiceStarted_Video_Multiple) {
                           session_key1,
                           true,
                           ByRef(empty))));
-  EXPECT_CALL(mock_connection_handler_observer, CheckAppIsNavi(_))
-      .Times(2)
-      .WillRepeatedly(Return(true));
 
   // verify that connection handler will not mix up the two results
   SessionContext new_context_first, new_context_second;
@@ -2019,6 +2039,193 @@ TEST_F(ConnectionHandlerTest, OnDeviceConnectionSwitching) {
               OnDeviceSwitchingStart(SameDevice(d1), SameDevice(d2)));
 
   connection_handler_->OnDeviceSwitchingStart(mac_address_, second_mac_address);
+}
+
+TEST_F(ConnectionHandlerTest, StartStopSecondarySession) {
+  // Add virtual device and connection
+  AddTestDeviceConnection();
+  // Start new session with RPC service
+  AddTestSession();
+
+  connection_handler_test::MockConnectionHandlerObserver
+      mock_connection_handler_observer;
+  connection_handler_->set_connection_handler_observer(
+      &mock_connection_handler_observer);
+
+  // Start a session on a secondary transport
+  const transport_manager::DeviceInfo secondary_device_info(
+      device_handle_, mac_address_, device_name_, std::string("WIFI"));
+  const transport_manager::ConnectionUID secondary_uid = 2u;
+  // Add Device and connection
+  ON_CALL(mock_connection_handler_settings, heart_beat_timeout())
+      .WillByDefault(Return(1000u));
+  connection_handler_->addDeviceConnection(secondary_device_info,
+                                           secondary_uid);
+
+  EXPECT_CALL(mock_connection_handler_observer,
+              OnSecondaryTransportStartedCallback(device_handle_, _)).Times(1);
+
+  connection_handler_->OnSecondaryTransportStarted(
+      uid_, secondary_uid, out_context_.new_session_id_);
+
+  SessionTransports st =
+      connection_handler_->GetSessionTransports(out_context_.new_session_id_);
+  EXPECT_EQ(st.primary_transport, uid_);
+  EXPECT_EQ(st.secondary_transport, secondary_uid);
+
+  AddSecondaryTestService(kAudio);
+  AddSecondaryTestService(kMobileNav);
+
+  CheckServiceExists(
+      uid_, out_context_.new_session_id_, kAudio, secondary_uid, true);
+  CheckServiceExists(
+      uid_, out_context_.new_session_id_, kMobileNav, secondary_uid, true);
+
+  connection_handler_->set_connection_handler_observer(
+      &mock_connection_handler_observer);
+  EXPECT_CALL(mock_connection_handler_observer,
+              OnSecondaryTransportEndedCallback(_)).Times(1);
+  EXPECT_CALL(mock_connection_handler_observer,
+              OnServiceEndedCallback(_, kAudio, _)).Times(1);
+  EXPECT_CALL(mock_connection_handler_observer,
+              OnServiceEndedCallback(_, kMobileNav, _)).Times(1);
+
+  connection_handler_->OnSecondaryTransportEnded(uid_, secondary_uid);
+
+  st = connection_handler_->GetSessionTransports(out_context_.new_session_id_);
+  EXPECT_EQ(st.primary_transport, uid_);
+  EXPECT_EQ(st.secondary_transport, 0u);
+
+  CheckServiceExists(
+      uid_, out_context_.new_session_id_, kAudio, secondary_uid, false);
+  CheckServiceExists(
+      uid_, out_context_.new_session_id_, kMobileNav, secondary_uid, false);
+}
+
+TEST_F(ConnectionHandlerTest, StopSecondarySession_NoService) {
+  AddTestDeviceConnection();
+  AddTestSession();
+
+  connection_handler_test::MockConnectionHandlerObserver
+      mock_connection_handler_observer;
+  connection_handler_->set_connection_handler_observer(
+      &mock_connection_handler_observer);
+
+  const transport_manager::DeviceInfo secondary_device_info(
+      device_handle_, mac_address_, device_name_, std::string("WIFI"));
+  const transport_manager::ConnectionUID secondary_uid = 123u;
+  ON_CALL(mock_connection_handler_settings, heart_beat_timeout())
+      .WillByDefault(Return(1000u));
+  connection_handler_->addDeviceConnection(secondary_device_info,
+                                           secondary_uid);
+
+  EXPECT_CALL(mock_connection_handler_observer,
+              OnSecondaryTransportStartedCallback(device_handle_, _)).Times(1);
+  connection_handler_->OnSecondaryTransportStarted(
+      uid_, secondary_uid, out_context_.new_session_id_);
+
+  // check if OnSecondaryTransportEndedCallback is triggered with correct
+  // session ID even if we don't have any services
+  EXPECT_CALL(mock_connection_handler_observer,
+              OnSecondaryTransportEndedCallback(_));
+  EXPECT_CALL(mock_connection_handler_observer, OnServiceEndedCallback(_, _, _))
+      .Times(0);
+
+  connection_handler_->OnSecondaryTransportEnded(uid_, secondary_uid);
+
+  SessionTransports st =
+      connection_handler_->GetSessionTransports(out_context_.new_session_id_);
+  EXPECT_EQ(st.primary_transport, uid_);
+  EXPECT_EQ(st.secondary_transport, 0u);
+}
+
+TEST_F(ConnectionHandlerTest, ConnectionType_valid) {
+  AddTestDeviceConnection();
+  AddTestSession();
+
+  std::string ret =
+      connection_handler_->TransportTypeProfileStringFromConnHandle(uid_);
+  EXPECT_EQ(connection_type_, ret);
+}
+
+TEST_F(ConnectionHandlerTest, ConnectionType_invalid) {
+  AddTestDeviceConnection();
+
+  transport_manager::ConnectionUID invalid_uid = 12345;
+  ASSERT_TRUE(invalid_uid != uid_);
+  std::string ret =
+      connection_handler_->TransportTypeProfileStringFromConnHandle(
+          invalid_uid);
+  EXPECT_EQ(std::string(), ret);
+}
+
+TEST_F(ConnectionHandlerTest, SetSecondaryTransportID_UpdateSuccess) {
+  uint8_t session_id = 123;
+  transport_manager::ConnectionUID primary_uid = 100;
+  transport_manager::ConnectionUID secondary_uid = 0;
+
+  SessionConnectionMap& session_connection_map =
+      connection_handler_->getSessionConnectionMap();
+  // secondary transport's ID is 0
+  SessionTransports st = {primary_uid, secondary_uid};
+  session_connection_map[session_id] = st;
+
+  secondary_uid = 200;
+  st = connection_handler_->SetSecondaryTransportID(session_id, secondary_uid);
+  EXPECT_EQ(primary_uid, st.primary_transport);
+  EXPECT_EQ(secondary_uid, st.secondary_transport);
+}
+
+TEST_F(ConnectionHandlerTest, SetSecondaryTransportID_UpdateFailure) {
+  uint8_t session_id = 123;
+  transport_manager::ConnectionUID primary_uid = 100;
+  transport_manager::ConnectionUID secondary_uid = 300;
+
+  SessionConnectionMap& session_connection_map =
+      connection_handler_->getSessionConnectionMap();
+  // secondary transport's ID is already assigned
+  SessionTransports st = {primary_uid, secondary_uid};
+  session_connection_map[session_id] = st;
+
+  st = connection_handler_->SetSecondaryTransportID(session_id, 500);
+  EXPECT_EQ(primary_uid, st.primary_transport);
+  // secondary transport's ID is NOT updated
+  EXPECT_EQ(secondary_uid, st.secondary_transport);
+}
+
+TEST_F(ConnectionHandlerTest, SetSecondaryTransportID_OverwirteSecondaryUID) {
+  uint8_t session_id = 123;
+  transport_manager::ConnectionUID primary_uid = 200;
+  transport_manager::ConnectionUID secondary_uid = 500;
+
+  SessionConnectionMap& session_connection_map =
+      connection_handler_->getSessionConnectionMap();
+  SessionTransports st = {primary_uid, secondary_uid};
+  session_connection_map[session_id] = st;
+
+  secondary_uid = kDisabledSecondary;
+  st = connection_handler_->SetSecondaryTransportID(session_id, secondary_uid);
+  EXPECT_EQ(primary_uid, st.primary_transport);
+  // secondary transport's ID is updated
+  EXPECT_EQ(secondary_uid, st.secondary_transport);
+}
+
+TEST_F(ConnectionHandlerTest, SetSecondaryTransportID_Failure) {
+  uint8_t session_id = 123;
+  transport_manager::ConnectionUID primary_uid = 100;
+  transport_manager::ConnectionUID secondary_uid = 0;
+
+  SessionConnectionMap& session_connection_map =
+      connection_handler_->getSessionConnectionMap();
+  SessionTransports st = {primary_uid, secondary_uid};
+  session_connection_map[session_id] = st;
+
+  uint8_t invalid_session_id = 10;
+  secondary_uid = 300;
+  st = connection_handler_->SetSecondaryTransportID(invalid_session_id,
+                                                    secondary_uid);
+  EXPECT_EQ(0u, st.primary_transport);
+  EXPECT_EQ(0u, st.secondary_transport);
 }
 
 }  // namespace connection_handler_test

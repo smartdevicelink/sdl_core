@@ -41,10 +41,9 @@ Json::Value ApplicationManagerMetricWrapper::GetJsonMetric() {
   Json::Value result = MetricWrapper::GetJsonMetric();
   result[strings::logger] = "ApplicationManager";
   result[strings::begin] =
-      Json::Int64(date_time::DateTime::getuSecs(message_metric->begin));
-  result[strings::end] =
-      Json::Int64(date_time::DateTime::getuSecs(message_metric->end));
-  const NsSmartDeviceLink::NsSmartObjects::SmartObject& params =
+      Json::Int64(date_time::getuSecs(message_metric->begin));
+  result[strings::end] = Json::Int64(date_time::getuSecs(message_metric->end));
+  const ns_smart_device_link::ns_smart_objects::SmartObject& params =
       message_metric->message->getElement(application_manager::strings::params);
   result[strings::correlation_id] = utils::ConvertInt64ToLongLongInt(
       params[application_manager::strings::correlation_id].asInt());

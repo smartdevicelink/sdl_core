@@ -44,7 +44,7 @@ class ApplicationManagerObserver;
 
 class ApplicationManagerMetricWrapper : public MetricWrapper {
  public:
-  utils::SharedPtr<application_manager::AMTelemetryObserver::MessageMetric>
+  std::shared_ptr<application_manager::AMTelemetryObserver::MessageMetric>
       message_metric;
   virtual Json::Value GetJsonMetric();
 };

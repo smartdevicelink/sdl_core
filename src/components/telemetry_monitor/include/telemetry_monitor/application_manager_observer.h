@@ -45,7 +45,7 @@ class ApplicationManagerObserver
     : public application_manager::AMTelemetryObserver {
  public:
   explicit ApplicationManagerObserver(TelemetryMonitor* telemetry_monitor);
-  virtual void OnMessage(utils::SharedPtr<MessageMetric> metric);
+  virtual void OnMessage(std::shared_ptr<MessageMetric> metric);
 
  private:
   TelemetryMonitor* telemetry_monitor_;

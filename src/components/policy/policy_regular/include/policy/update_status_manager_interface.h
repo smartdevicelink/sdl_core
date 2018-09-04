@@ -33,7 +33,6 @@
 #ifndef SRC_COMPONENTS_POLICY_POLICY_REGULAR_INCLUDE_POLICY_UPDATE_STATUS_MANAGER_INTERFACE_H_
 #define SRC_COMPONENTS_POLICY_POLICY_REGULAR_INCLUDE_POLICY_UPDATE_STATUS_MANAGER_INTERFACE_H_
 
-#include "utils/shared_ptr.h"
 #include "policy/policy_types.h"
 #include "policy/status.h"
 
@@ -55,14 +54,14 @@ class UpdateStatusManagerInterface {
    * @brief Set next status during event processing
    * @param status Status shared pointer
    */
-  virtual void SetNextStatus(utils::SharedPtr<Status> status) = 0;
+  virtual void SetNextStatus(std::shared_ptr<Status> status) = 0;
 
   /**
    * @brief Set postponed status (will be set after next status) during event
    * processing
    * @param status Status shared pointer
    */
-  virtual void SetPostponedStatus(utils::SharedPtr<Status> status) = 0;
+  virtual void SetPostponedStatus(std::shared_ptr<Status> status) = 0;
   /**
    * @brief Sets listener pointer
    * @param listener Pointer to policy listener implementation
@@ -112,7 +111,7 @@ class UpdateStatusManagerInterface {
   virtual void OnPolicyInit(bool is_update_required) = 0;
 };
 
-typedef utils::SharedPtr<UpdateStatusManagerInterface>
+typedef std::shared_ptr<UpdateStatusManagerInterface>
     UpdateStatusManagerInterfaceSPtr;
 
 }  // namespace policy

@@ -213,7 +213,7 @@ class PTRepresentation {
    * device_info, statistics, excluding user messages
    * @return Generated structure for obtaining Json string.
    */
-  virtual utils::SharedPtr<policy_table::Table> GenerateSnapshot() const = 0;
+  virtual std::shared_ptr<policy_table::Table> GenerateSnapshot() const = 0;
 
   virtual bool Save(const policy_table::Table& table) = 0;
 

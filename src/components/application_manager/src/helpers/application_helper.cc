@@ -21,6 +21,7 @@ void DeleteCommands(ApplicationSharedPtr app, ApplicationManager& app_manager) {
   for (auto cmd : cmap) {
     MessageHelper::SendDeleteCommandRequest(cmd.second, app, app_manager);
     app->RemoveCommand(cmd.first);
+    app->help_prompt_manager().OnVrCommandDeleted(cmd.first, true);
   }
 }
 
@@ -87,20 +88,6 @@ void DeleteButtonSubscriptions(ApplicationSharedPtr app,
   }
 }
 
-void DeleteVISubscriptions(ApplicationSharedPtr app,
-                           ApplicationManager& app_manager) {
-  VehicleInfoSubscriptions ivi = app->SubscribedIVI().GetData();
-
-  for (auto i : ivi) {
-    app->UnsubscribeFromIVI(i);
-    SubscribedToIVIPredicate p(i);
-    auto app = FindApp(app_manager.applications(), p);
-    if (!app) {
-      MessageHelper::SendUnsubscribeIVIRequest(i, app, app_manager);
-    }
-  }
-}
-
 void CleanupAppFiles(ApplicationSharedPtr app) {
   const auto icon_file = app->app_icon_path();
 
@@ -120,14 +107,6 @@ namespace application_manager {
 
 CREATE_LOGGERPTR_GLOBAL(logger, "ApplicationManager")
 
-SubscribedToIVIPredicate::SubscribedToIVIPredicate(uint32_t vehicle_info)
-    : vehicle_info_(vehicle_info) {}
-
-bool SubscribedToIVIPredicate::operator()(
-    const ApplicationSharedPtr app) const {
-  return app ? app->IsSubscribedToIVI(vehicle_info_) : false;
-}
-
 void DeleteApplicationData(ApplicationSharedPtr app,
                            ApplicationManager& app_manager) {
   LOG4CXX_AUTO_TRACE(logger);
@@ -139,8 +118,12 @@ void DeleteApplicationData(ApplicationSharedPtr app,
   DeleteChoiceSets(app, app_manager);
   DeleteGlobalProperties(app, app_manager);
   DeleteButtonSubscriptions(app, app_manager);
-  DeleteVISubscriptions(app, app_manager);
   CleanupAppFiles(app);
+  app_manager.GetPluginManager().ForEachPlugin(
+      [&app](plugin_manager::RPCPlugin& plugin) {
+        plugin.OnApplicationEvent(
+            plugin_manager::ApplicationEvent::kDeleteApplicationData, app);
+      });
 }
 
 }  // namespace application_manager

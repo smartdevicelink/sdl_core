@@ -50,22 +50,20 @@ TEST(ApplicationManagerMetricWrapper, grabResources) {
 TEST(ApplicationManagerMetricWrapper, GetJsonMetric) {
   ApplicationManagerMetricWrapper metric_test;
 
-  TimevalStruct start_time;
-  start_time.tv_sec = 1;
-  start_time.tv_usec = 0;
+  date_time::TimeDuration start_time = date_time::seconds(1);
 
-  TimevalStruct end_time;
-  end_time.tv_sec = 10;
-  end_time.tv_usec = 0;
-  metric_test.message_metric =
-      new application_manager::AMTelemetryObserver::MessageMetric();
+  date_time::TimeDuration end_time = date_time::seconds(10);
+
+  metric_test.message_metric = std::make_shared<
+      application_manager::AMTelemetryObserver::MessageMetric>();
   metric_test.message_metric->begin = start_time;
   metric_test.message_metric->end = end_time;
-  NsSmartDeviceLink::NsSmartObjects::SmartObject obj;
+  ns_smart_device_link::ns_smart_objects::SmartObject obj;
   obj["params"][application_manager::strings::correlation_id] = 11;
   obj["params"][application_manager::strings::connection_key] = 12;
   metric_test.message_metric->message =
-      new NsSmartDeviceLink::NsSmartObjects::SmartObject(obj);
+      std::make_shared<ns_smart_device_link::ns_smart_objects::SmartObject>(
+          obj);
   Json::Value jvalue = metric_test.GetJsonMetric();
 
   EXPECT_EQ("null\n",
@@ -75,9 +73,9 @@ TEST(ApplicationManagerMetricWrapper, GetJsonMetric) {
   EXPECT_EQ("null\n",
             jvalue[telemetry_monitor::strings::memory].toStyledString());
 
-  EXPECT_EQ(date_time::DateTime::getuSecs(start_time),
+  EXPECT_EQ(date_time::getuSecs(start_time),
             jvalue[telemetry_monitor::strings::begin].asInt64());
-  EXPECT_EQ(date_time::DateTime::getuSecs(end_time),
+  EXPECT_EQ(date_time::getuSecs(end_time),
             jvalue[telemetry_monitor::strings::end].asInt64());
   EXPECT_EQ(obj["params"][application_manager::strings::correlation_id].asInt(),
             jvalue[telemetry_monitor::strings::correlation_id].asInt64());
@@ -90,37 +88,34 @@ TEST(ApplicationManagerMetricWrapper, GetJsonMetricWithGrabResources) {
   utils::ResourseUsage* resources = utils::Resources::getCurrentResourseUsage();
   EXPECT_TRUE(metric_test.grabResources());
 
-  TimevalStruct start_time;
-  start_time.tv_sec = 1;
-  start_time.tv_usec = 0;
+  date_time::TimeDuration start_time = date_time::seconds(1);
 
-  TimevalStruct end_time;
-  end_time.tv_sec = 10;
-  end_time.tv_usec = 0;
+  date_time::TimeDuration end_time = date_time::seconds(10);
 
-  metric_test.message_metric =
-      new application_manager::AMTelemetryObserver::MessageMetric();
+  metric_test.message_metric = std::make_shared<
+      application_manager::AMTelemetryObserver::MessageMetric>();
   metric_test.message_metric->begin = start_time;
   metric_test.message_metric->end = end_time;
-  NsSmartDeviceLink::NsSmartObjects::SmartObject obj;
+  ns_smart_device_link::ns_smart_objects::SmartObject obj;
   obj["params"][application_manager::strings::correlation_id] = 11;
   obj["params"][application_manager::strings::connection_key] = 12;
   metric_test.message_metric->message =
-      new NsSmartDeviceLink::NsSmartObjects::SmartObject(obj);
+      std::make_shared<ns_smart_device_link::ns_smart_objects::SmartObject>(
+          obj);
   Json::Value jvalue = metric_test.GetJsonMetric();
 
-  EXPECT_EQ(date_time::DateTime::getuSecs(start_time),
+  EXPECT_EQ(date_time::getuSecs(start_time),
             jvalue[telemetry_monitor::strings::begin].asInt64());
-  EXPECT_EQ(date_time::DateTime::getuSecs(end_time),
+  EXPECT_EQ(date_time::getuSecs(end_time),
             jvalue[telemetry_monitor::strings::end].asInt64());
   EXPECT_EQ(obj["params"][application_manager::strings::correlation_id].asInt(),
             jvalue[telemetry_monitor::strings::correlation_id].asInt64());
   EXPECT_EQ(obj["params"][application_manager::strings::connection_key].asInt(),
             jvalue[telemetry_monitor::strings::connection_key].asInt());
 
-  EXPECT_EQ(date_time::DateTime::getuSecs(start_time),
+  EXPECT_EQ(date_time::getuSecs(start_time),
             jvalue[telemetry_monitor::strings::begin].asInt64());
-  EXPECT_EQ(date_time::DateTime::getuSecs(end_time),
+  EXPECT_EQ(date_time::getuSecs(end_time),
             jvalue[telemetry_monitor::strings::end].asInt64());
 
   EXPECT_NEAR(

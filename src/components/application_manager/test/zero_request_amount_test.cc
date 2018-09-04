@@ -51,7 +51,7 @@ using namespace ::profile;
 
 using namespace application_manager::request_controller;
 using namespace application_manager;
-using namespace NsSmartDeviceLink::NsSmartObjects;
+using namespace ns_smart_device_link::ns_smart_objects;
 
 commands::Command* RegisterApplication() {
   SmartObjectSPtr resultsmart =

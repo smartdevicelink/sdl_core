@@ -102,7 +102,7 @@ class HeartBeatMonitor : public threads::ThreadDelegate {
     void RefreshExpiration();
 
     uint32_t heartbeat_timeout_mseconds_;
-    TimevalStruct heartbeat_expiration_;
+    date_time::TimeDuration heartbeat_expiration_;
     bool is_heartbeat_sent_;
   };
 
@@ -111,7 +111,7 @@ class HeartBeatMonitor : public threads::ThreadDelegate {
   typedef std::map<uint8_t, SessionState> SessionMap;
   SessionMap sessions_;
 
-  sync_primitives::Lock sessions_list_lock_;  // recurcive
+  sync_primitives::RecursiveLock sessions_list_lock_;  // recurcive
   sync_primitives::Lock main_thread_lock_;
   mutable sync_primitives::Lock heartbeat_timeout_seconds_lock_;
   sync_primitives::ConditionalVariable heartbeat_monitor_;

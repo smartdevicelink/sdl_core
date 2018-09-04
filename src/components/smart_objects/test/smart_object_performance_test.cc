@@ -37,7 +37,7 @@
 
 #include "smart_objects/smart_object.h"
 
-using namespace NsSmartDeviceLink::NsSmartObjects;
+using namespace ns_smart_device_link::ns_smart_objects;
 
 namespace test {
 namespace components {

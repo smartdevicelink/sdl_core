@@ -670,6 +670,11 @@ bool SQLPTExtRepresentation::SaveApplicationPoliciesSection(
     return false;
   }
 
+  if (!query_delete.Exec(sql_pt::kDeleteRequestSubType)) {
+    LOG4CXX_WARN(logger_, "Incorrect delete from request subtype.");
+    return false;
+  }
+
   // First, all predefined apps (e.g. default, pre_DataConsent) should be saved,
   // otherwise another app with the predefined permissions can get incorrect
   // permissions
@@ -713,18 +718,17 @@ bool SQLPTExtRepresentation::SaveSpecificAppPolicy(
       if (!SetDefaultPolicy(app.first)) {
         return false;
       }
-      if (!SaveRequestType(app.first, *app.second.RequestType)) {
-        return false;
-      }
     } else if (kPreDataConsentId.compare(app.second.get_string()) == 0) {
       if (!SetPredataPolicy(app.first)) {
         return false;
       }
-      if (!SaveRequestType(app.first, *app.second.RequestType)) {
-        return false;
-      }
     }
-
+    if (!SaveRequestType(app.first, *app.second.RequestType)) {
+      return false;
+    }
+    if (!SaveRequestSubType(app.first, *app.second.RequestSubType)) {
+      return false;
+    }
     // Stop saving other params, since predefined permissions already set
     return true;
   }
@@ -757,6 +761,13 @@ bool SQLPTExtRepresentation::SaveSpecificAppPolicy(
   if (!SaveAppGroup(app.first, app.second.groups)) {
     return false;
   }
+
+  bool denied = !app.second.moduleType->is_initialized();
+  if (!SaveRemoteControlDenied(app.first, denied) ||
+      !SaveModuleType(app.first, *app.second.moduleType)) {
+    return false;
+  }
+
   if (!SaveNickname(app.first, *app.second.nicknames)) {
     return false;
   }
@@ -768,6 +779,10 @@ bool SQLPTExtRepresentation::SaveSpecificAppPolicy(
   }
 
   if (!SaveRequestType(app.first, *app.second.RequestType)) {
+    return false;
+  }
+
+  if (!SaveRequestSubType(app.first, *app.second.RequestSubType)) {
     return false;
   }
 
@@ -862,6 +877,17 @@ bool SQLPTExtRepresentation::GatherApplicationPoliciesSection(
     if (!GatherAppGroup(app_id, &params.groups)) {
       return false;
     }
+
+    bool denied = false;
+    if (!GatherRemoteControlDenied(app_id, &denied)) {
+      return false;
+    }
+    if (!denied) {
+      if (!GatherModuleType(app_id, &*params.moduleType)) {
+        return false;
+      }
+    }
+
     if (!GatherNickName(app_id, &*params.nicknames)) {
       return false;
     }

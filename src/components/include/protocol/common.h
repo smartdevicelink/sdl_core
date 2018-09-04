@@ -167,6 +167,22 @@ enum {
    */
   FRAME_DATA_END_SERVICE_NACK = 0x06,
   /**
+   *\brief Register Secondary Transport frame
+   */
+  FRAME_DATA_REGISTER_SECONDARY_TRANSPORT = 0x07,
+  /**
+   *\brief Register Secondary Transport acknowledgement frame
+   */
+  FRAME_DATA_REGISTER_SECONDARY_TRANSPORT_ACK = 0x08,
+  /**
+   *\brief Register Secondary Transport not acknowledgement frame
+   */
+  FRAME_DATA_REGISTER_SECONDARY_TRANSPORT_NACK = 0x09,
+  /**
+   *\brief Transport Event Update frame
+   */
+  FRAME_DATA_TRANSPORT_EVENT_UPDATE = 0xFD,
+  /**
    *\brief Service data ACK frame
    */
   FRAME_DATA_SERVICE_DATA_ACK = 0xFE,
