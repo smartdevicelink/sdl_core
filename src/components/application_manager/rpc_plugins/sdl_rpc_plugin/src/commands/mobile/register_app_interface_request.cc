@@ -737,7 +737,7 @@ void FinishSendingRegisterAppInterfaceToMobile(
 
   if (msg_params.keyExists(strings::app_hmi_type)) {
     policy_handler.SetDefaultHmiTypes(application->policy_app_id(),
-                                       &(msg_params[strings::app_hmi_type]));
+                                      &(msg_params[strings::app_hmi_type]));
   }
 
   // Default HMI level should be set before any permissions validation, since it
