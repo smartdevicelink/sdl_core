@@ -787,12 +787,14 @@ const AppFile* ApplicationImpl::GetFile(const std::string& file_name) {
 
 bool ApplicationImpl::SubscribeToButton(
     mobile_apis::ButtonName::eType btn_name) {
+  LOG4CXX_AUTO_TRACE(logger_);
   sync_primitives::AutoLock lock(button_lock_ptr_);
   return subscribed_buttons_.insert(btn_name).second;
 }
 
 bool ApplicationImpl::IsSubscribedToButton(
     mobile_apis::ButtonName::eType btn_name) {
+  LOG4CXX_AUTO_TRACE(logger_);
   sync_primitives::AutoLock lock(button_lock_ptr_);
   std::set<mobile_apis::ButtonName::eType>::iterator it =
       subscribed_buttons_.find(btn_name);
@@ -801,6 +803,7 @@ bool ApplicationImpl::IsSubscribedToButton(
 
 bool ApplicationImpl::UnsubscribeFromButton(
     mobile_apis::ButtonName::eType btn_name) {
+  LOG4CXX_AUTO_TRACE(logger_);
   sync_primitives::AutoLock lock(button_lock_ptr_);
   return subscribed_buttons_.erase(btn_name);
 }

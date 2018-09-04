@@ -83,9 +83,9 @@ void ResumptionDataProcessor::on_event(const event_engine::Event& event) {
   ResumptionRequestIDs request_ids;
   request_ids.function_id = event.id();
   request_ids.correlation_id = event.smart_object_correlation_id();
-  //TODO i suppose it can be optimised with moving app id into
-  //ResumptionRequest struct, so that we don't have to perform
-  //basically the same search twice
+  // TODO i suppose it can be optimised with moving app id into
+  // ResumptionRequest struct, so that we don't have to perform
+  // basically the same search twice
   auto predicate =
       [&event](const std::pair<ResumptionRequestIDs, std::uint32_t>& item) {
         return item.first.function_id == event.id() &&
@@ -93,9 +93,7 @@ void ResumptionDataProcessor::on_event(const event_engine::Event& event) {
       };
 
   auto app_id_ptr =
-      std::find_if(request_app_ids_.begin(),
-                   request_app_ids_.end(),
-                   predicate);
+      std::find_if(request_app_ids_.begin(), request_app_ids_.end(), predicate);
 
   if (app_id_ptr == request_app_ids_.end()) {
     LOG4CXX_ERROR(logger_,
@@ -140,7 +138,7 @@ void ResumptionDataProcessor::on_event(const event_engine::Event& event) {
 
   const hmi_apis::Common_Result::eType result_code =
       static_cast<hmi_apis::Common_Result::eType>(
-      response[strings::params][application_manager::hmi_response::code]
+          response[strings::params][application_manager::hmi_response::code]
               .asInt());
 
   if (result_code == hmi_apis::Common_Result::SUCCESS) {
@@ -518,12 +516,11 @@ void ResumptionDataProcessor::AddWayPointsSubscription(
       saved_app[strings::subscribed_for_way_points].asBool();
   if (subscribed_for_way_points_so) {
     application_manager_.SubscribeAppForWayPoints(application);
-    auto subscribe_waypoints_msg =
-        MessageHelper::CreateMessageForHMI(
-          hmi_apis::FunctionID::Navigation_SubscribeWayPoints,
-          application_manager_.GetNextHMICorrelationID());
-    (*subscribe_waypoints_msg)[strings::params][strings::message_type] = 
-    hmi_apis::messageType::request;
+    auto subscribe_waypoints_msg = MessageHelper::CreateMessageForHMI(
+        hmi_apis::FunctionID::Navigation_SubscribeWayPoints,
+        application_manager_.GetNextHMICorrelationID());
+    (*subscribe_waypoints_msg)[strings::params][strings::message_type] =
+        hmi_apis::messageType::request;
     ProcessHMIRequest(subscribe_waypoints_msg, true);
   }
 }
@@ -597,18 +594,16 @@ void ResumptionDataProcessor::DeleteSubscriptions(const int32_t app_id) {
 void ResumptionDataProcessor::DeleteButtonsSubscriptions(
     ApplicationSharedPtr application) {
   LOG4CXX_AUTO_TRACE(logger_);
-  DataAccessor<ButtonSubscriptions> button_accessor =
-      application->SubscribedButtons();
-  ButtonSubscriptions button_subscriptions = button_accessor.GetData();
-  while (!button_subscriptions.empty()) {
-    auto btn = button_subscriptions.begin();
+  ButtonSubscriptions button_subscriptions =
+      application->SubscribedButtons().GetData();
+  for (auto btn : button_subscriptions) {
+    const auto hmi_btn = static_cast<hmi_apis::Common_ButtonName::eType>(btn);
     MessageHelper::SendOnButtonSubscriptionNotification(
         application->hmi_app_id(),
-        static_cast<hmi_apis::Common_ButtonName::eType>(*btn),
+        hmi_btn,
         /*is_subscribed = */ false,
         application_manager_);
-    application->UnsubscribeFromButton(
-        static_cast<mobile_apis::ButtonName::eType>(*btn));
+    application->UnsubscribeFromButton(btn);
   }
 
   MessageHelper::SendOnButtonSubscriptionNotification(
