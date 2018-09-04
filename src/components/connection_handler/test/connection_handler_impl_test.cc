@@ -2057,7 +2057,7 @@ TEST_F(ConnectionHandlerTest, StartStopSecondarySession) {
       device_handle_, mac_address_, device_name_, std::string("WIFI"));
   const transport_manager::ConnectionUID secondary_uid = 2u;
   // Add Device and connection
-  ON_CALL(mock_connection_handler_settings, heart_beat_timeout())
+  ON_CALL(mock_connection_handler_settings_, heart_beat_timeout())
       .WillByDefault(Return(1000u));
   connection_handler_->addDeviceConnection(secondary_device_info,
                                            secondary_uid);
@@ -2114,7 +2114,7 @@ TEST_F(ConnectionHandlerTest, StopSecondarySession_NoService) {
   const transport_manager::DeviceInfo secondary_device_info(
       device_handle_, mac_address_, device_name_, std::string("WIFI"));
   const transport_manager::ConnectionUID secondary_uid = 123u;
-  ON_CALL(mock_connection_handler_settings, heart_beat_timeout())
+  ON_CALL(mock_connection_handler_settings_, heart_beat_timeout())
       .WillByDefault(Return(1000u));
   connection_handler_->addDeviceConnection(secondary_device_info,
                                            secondary_uid);

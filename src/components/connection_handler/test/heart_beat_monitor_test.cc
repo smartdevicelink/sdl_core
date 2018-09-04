@@ -88,9 +88,9 @@ ACTION_P2(RemoveSession, conn, session_id) {
 }
 
 TEST_F(HeartBeatMonitorTest, TimerNotStarted) {
-  EXPECT_CALL(connection_handler_mock, AddSession(_))
+  EXPECT_CALL(connection_handler_mock_, AddSession(_))
       .WillOnce(Return(kDefaultSessionId));
-  EXPECT_CALL(connection_handler_mock, RemoveSession(kDefaultSessionId))
+  EXPECT_CALL(connection_handler_mock_, RemoveSession(kDefaultSessionId))
       .WillOnce(Return(true));  // called by destructor of Connection
 
   // Whithout StartHeartBeat nothing to be call
@@ -98,47 +98,30 @@ TEST_F(HeartBeatMonitorTest, TimerNotStarted) {
   EXPECT_CALL(connection_handler_mock_, CloseConnection(_)).Times(0);
   EXPECT_CALL(connection_handler_mock_, SendHeartBeat(_, _)).Times(0);
 
-<<<<<<< HEAD
-  connection_->AddNewSession();
+  connection_->AddNewSession(kDefaultConnectionHandle);
 }
 
 TEST_F(HeartBeatMonitorTest, TimerNotElapsed) {
+  EXPECT_CALL(connection_handler_mock_, AddSession(_))
+      .WillOnce(Return(kDefaultSessionId));
+  EXPECT_CALL(connection_handler_mock_, RemoveSession(kDefaultSessionId))
+      .WillOnce(Return(true));
+
   EXPECT_CALL(connection_handler_mock_, SendHeartBeat(_, _)).Times(0);
   EXPECT_CALL(connection_handler_mock_, CloseSession(_, _)).Times(0);
   EXPECT_CALL(connection_handler_mock_, CloseConnection(_)).Times(0);
 
-  const uint32_t session = connection_->AddNewSession();
+  const uint32_t session = connection_->AddNewSession(kDefaultConnectionHandle);
   connection_->StartHeartBeat(session);
 }
 
 TEST_F(HeartBeatMonitorTest, TimerElapsed) {
-  const uint32_t session = connection_->AddNewSession();
-=======
-  conn->AddNewSession(kDefaultConnectionHandle);
-}
-
-TEST_F(HeartBeatMonitorTest, TimerNotElapsed) {
-  EXPECT_CALL(connection_handler_mock, AddSession(_))
+  EXPECT_CALL(connection_handler_mock_, AddSession(_))
       .WillOnce(Return(kDefaultSessionId));
-  EXPECT_CALL(connection_handler_mock, RemoveSession(kDefaultSessionId))
-      .WillOnce(Return(true));
-
-  EXPECT_CALL(connection_handler_mock, SendHeartBeat(_, _)).Times(0);
-  EXPECT_CALL(connection_handler_mock, CloseSession(_, _)).Times(0);
-  EXPECT_CALL(connection_handler_mock, CloseConnection(_)).Times(0);
-
-  const uint32_t session = conn->AddNewSession(kDefaultConnectionHandle);
-  conn->StartHeartBeat(session);
-}
-
-TEST_F(HeartBeatMonitorTest, TimerElapsed) {
-  EXPECT_CALL(connection_handler_mock, AddSession(_))
-      .WillOnce(Return(kDefaultSessionId));
-  EXPECT_CALL(connection_handler_mock, RemoveSession(kDefaultSessionId))
+  EXPECT_CALL(connection_handler_mock_, RemoveSession(kDefaultSessionId))
       .WillOnce(Return(true));  // invoked by RemoveSession action
 
-  const uint32_t session = conn->AddNewSession(kDefaultConnectionHandle);
->>>>>>> origin/develop
+  const uint32_t session = connection_->AddNewSession(kDefaultConnectionHandle);
 
   TestAsyncWaiter waiter;
   uint32_t times = 0;
@@ -158,12 +141,16 @@ TEST_F(HeartBeatMonitorTest, TimerElapsed) {
 }
 
 TEST_F(HeartBeatMonitorTest, KeptAlive) {
-<<<<<<< HEAD
+  EXPECT_CALL(connection_handler_mock_, AddSession(_))
+      .WillOnce(Return(kDefaultSessionId));
+  EXPECT_CALL(connection_handler_mock_, RemoveSession(kDefaultSessionId))
+      .WillOnce(Return(true));
+
   EXPECT_CALL(connection_handler_mock_, CloseSession(_, _)).Times(0);
   EXPECT_CALL(connection_handler_mock_, CloseConnection(_)).Times(0);
   EXPECT_CALL(connection_handler_mock_, SendHeartBeat(_, _)).Times(0);
 
-  const uint32_t session = connection_->AddNewSession();
+  const uint32_t session = connection_->AddNewSession(kDefaultConnectionHandle);
   connection_->StartHeartBeat(session);
   usleep(timeout_);
   connection_->KeepAlive(session);
@@ -172,36 +159,12 @@ TEST_F(HeartBeatMonitorTest, KeptAlive) {
 }
 
 TEST_F(HeartBeatMonitorTest, NotKeptAlive) {
-  const uint32_t session = connection_->AddNewSession();
-=======
-  EXPECT_CALL(connection_handler_mock, AddSession(_))
+  EXPECT_CALL(connection_handler_mock_, AddSession(_))
       .WillOnce(Return(kDefaultSessionId));
-  EXPECT_CALL(connection_handler_mock, RemoveSession(kDefaultSessionId))
+  EXPECT_CALL(connection_handler_mock_, RemoveSession(kDefaultSessionId))
       .WillOnce(Return(true));
 
-  EXPECT_CALL(connection_handler_mock, CloseSession(_, _)).Times(0);
-  EXPECT_CALL(connection_handler_mock, CloseConnection(_)).Times(0);
-  EXPECT_CALL(connection_handler_mock, SendHeartBeat(_, _)).Times(0);
-
-  const uint32_t session = conn->AddNewSession(kDefaultConnectionHandle);
-  conn->StartHeartBeat(session);
-  usleep(kTimeout * MICROSECONDS_IN_MILLISECONDS - MICROSECONDS_IN_SECOND);
-  conn->KeepAlive(session);
-  usleep(kTimeout * MICROSECONDS_IN_MILLISECONDS - MICROSECONDS_IN_SECOND);
-  conn->KeepAlive(session);
-  usleep(kTimeout * MICROSECONDS_IN_MILLISECONDS - MICROSECONDS_IN_SECOND);
-  conn->KeepAlive(session);
-  usleep(kTimeout * MICROSECONDS_IN_MILLISECONDS - MICROSECONDS_IN_SECOND);
-}
-
-TEST_F(HeartBeatMonitorTest, NotKeptAlive) {
-  EXPECT_CALL(connection_handler_mock, AddSession(_))
-      .WillOnce(Return(kDefaultSessionId));
-  EXPECT_CALL(connection_handler_mock, RemoveSession(kDefaultSessionId))
-      .WillOnce(Return(true));
-
-  const uint32_t session = conn->AddNewSession(kDefaultConnectionHandle);
->>>>>>> origin/develop
+  const uint32_t session = connection_->AddNewSession(kDefaultConnectionHandle);
 
   TestAsyncWaiter waiter;
   uint32_t times = 0;
@@ -223,46 +186,41 @@ TEST_F(HeartBeatMonitorTest, NotKeptAlive) {
 }
 
 TEST_F(HeartBeatMonitorTest, TwoSessionsElapsed) {
-<<<<<<< HEAD
-  const uint32_t session_1 = connection_->AddNewSession();
-  const uint32_t session_2 = connection_->AddNewSession();
-=======
   const uint32_t kMockSessionId1 = 1;
   const uint32_t kMockSessionId2 = 2;
-  EXPECT_CALL(connection_handler_mock, AddSession(_))
+  EXPECT_CALL(connection_handler_mock_, AddSession(_))
       .WillOnce(Return(kMockSessionId1))
       .WillOnce(Return(kMockSessionId2));
-  EXPECT_CALL(connection_handler_mock, RemoveSession(kMockSessionId1))
+  EXPECT_CALL(connection_handler_mock_, RemoveSession(kMockSessionId1))
       .WillOnce(Return(true));
-  EXPECT_CALL(connection_handler_mock, RemoveSession(kMockSessionId2))
+  EXPECT_CALL(connection_handler_mock_, RemoveSession(kMockSessionId2))
       .WillOnce(Return(true));
 
-  const uint32_t kSession1 = conn->AddNewSession(kDefaultConnectionHandle);
+  const uint32_t kSession1 = connection_->AddNewSession(kDefaultConnectionHandle);
 
   const transport_manager::ConnectionUID kAnotherConnectionHandle = 2;
-  const uint32_t kSession2 = conn->AddNewSession(kAnotherConnectionHandle);
->>>>>>> origin/develop
+  const uint32_t kSession2 = connection_->AddNewSession(kAnotherConnectionHandle);
 
   TestAsyncWaiter waiter;
   uint32_t times = 0;
-  EXPECT_CALL(connection_handler_mock_, CloseSession(_, session_1, _))
+  EXPECT_CALL(connection_handler_mock_, CloseSession(_, kSession1, _))
       .WillOnce(DoAll(NotifyTestAsyncWaiter(&waiter),
-                      RemoveSession(connection_, session_1)));
+                      RemoveSession(connection_, kSession1)));
   times++;
-  EXPECT_CALL(connection_handler_mock_, CloseSession(_, session_2, _))
+  EXPECT_CALL(connection_handler_mock_, CloseSession(_, kSession2, _))
       .WillOnce(DoAll(NotifyTestAsyncWaiter(&waiter),
-                      RemoveSession(connection_, session_2)));
+                      RemoveSession(connection_, kSession2)));
   times++;
 
-  EXPECT_CALL(connection_handler_mock_, SendHeartBeat(_, session_1))
+  EXPECT_CALL(connection_handler_mock_, SendHeartBeat(_, kSession1))
       .WillOnce(NotifyTestAsyncWaiter(&waiter));
   times++;
-  EXPECT_CALL(connection_handler_mock_, SendHeartBeat(_, session_2))
+  EXPECT_CALL(connection_handler_mock_, SendHeartBeat(_, kSession2))
       .WillOnce(NotifyTestAsyncWaiter(&waiter));
   times++;
 
-  connection_->StartHeartBeat(session_1);
-  connection_->StartHeartBeat(session_2);
+  connection_->StartHeartBeat(kSession1);
+  connection_->StartHeartBeat(kSession2);
 
   EXPECT_TRUE(waiter.WaitFor(
       times,
@@ -270,51 +228,43 @@ TEST_F(HeartBeatMonitorTest, TwoSessionsElapsed) {
 }
 
 TEST_F(HeartBeatMonitorTest, IncreaseHeartBeatTimeout) {
-<<<<<<< HEAD
-  const uint32_t session = connection_->AddNewSession();
-=======
-  EXPECT_CALL(connection_handler_mock, AddSession(_))
+  EXPECT_CALL(connection_handler_mock_, AddSession(_))
       .WillOnce(Return(kDefaultSessionId));
-  EXPECT_CALL(connection_handler_mock, RemoveSession(kDefaultSessionId))
+  EXPECT_CALL(connection_handler_mock_, RemoveSession(kDefaultSessionId))
       .WillOnce(Return(true));
 
-  const uint32_t kSession = conn->AddNewSession(kDefaultConnectionHandle);
->>>>>>> origin/develop
+  const uint32_t kSession = connection_->AddNewSession(kDefaultConnectionHandle);
 
   EXPECT_CALL(connection_handler_mock_, CloseSession(_, _)).Times(0);
   EXPECT_CALL(connection_handler_mock_, CloseConnection(_)).Times(0);
   EXPECT_CALL(connection_handler_mock_, SendHeartBeat(_, _)).Times(0);
 
   const uint32_t kNewTimeout = timeout_ + MICROSECONDS_IN_MILLISECONDS;
-  connection_->StartHeartBeat(session);
-  connection_->SetHeartBeatTimeout(kNewTimeout, session);
+  connection_->StartHeartBeat(kSession);
+  connection_->SetHeartBeatTimeout(kNewTimeout, kSession);
 }
 
 TEST_F(HeartBeatMonitorTest, DecreaseHeartBeatTimeout) {
-<<<<<<< HEAD
-  const uint32_t session = connection_->AddNewSession();
-=======
-  EXPECT_CALL(connection_handler_mock, AddSession(_))
+  EXPECT_CALL(connection_handler_mock_, AddSession(_))
       .WillOnce(Return(kDefaultSessionId));
-  EXPECT_CALL(connection_handler_mock, RemoveSession(kDefaultSessionId))
+  EXPECT_CALL(connection_handler_mock_, RemoveSession(kDefaultSessionId))
       .WillOnce(Return(true));
 
-  const uint32_t kSession = conn->AddNewSession(kDefaultConnectionHandle);
->>>>>>> origin/develop
+  const uint32_t kSession = connection_->AddNewSession(kDefaultConnectionHandle);
 
   TestAsyncWaiter waiter;
   uint32_t times = 0;
-  EXPECT_CALL(connection_handler_mock_, CloseSession(_, session, _))
+  EXPECT_CALL(connection_handler_mock_, CloseSession(_, kSession, _))
       .WillOnce(DoAll(NotifyTestAsyncWaiter(&waiter),
-                      RemoveSession(connection_, session)));
+                      RemoveSession(connection_, kSession)));
   times++;
-  EXPECT_CALL(connection_handler_mock_, SendHeartBeat(_, session))
+  EXPECT_CALL(connection_handler_mock_, SendHeartBeat(_, kSession))
       .WillOnce(NotifyTestAsyncWaiter(&waiter));
   times++;
 
   const uint32_t new_timeout = timeout_ - kTime_offset;
-  connection_->StartHeartBeat(session);
-  connection_->SetHeartBeatTimeout(new_timeout, session);
+  connection_->StartHeartBeat(kSession);
+  connection_->SetHeartBeatTimeout(new_timeout, kSession);
 
   EXPECT_TRUE(waiter.WaitFor(
       times,
