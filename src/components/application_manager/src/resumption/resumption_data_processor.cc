@@ -595,18 +595,16 @@ void ResumptionDataProcessor::DeleteSubscriptions(const int32_t app_id) {
 void ResumptionDataProcessor::DeleteButtonsSubscriptions(
     ApplicationSharedPtr application) {
   LOG4CXX_AUTO_TRACE(logger_);
-  DataAccessor<ButtonSubscriptions> button_accessor =
-      application->SubscribedButtons();
-  ButtonSubscriptions button_subscriptions = button_accessor.GetData();
-  while (!button_subscriptions.empty()) {
-    auto btn = button_subscriptions.begin();
+  ButtonSubscriptions button_subscriptions =
+      application->SubscribedButtons().GetData();
+  for (auto btn : button_subscriptions) {
+    const auto hmi_btn = static_cast<hmi_apis::Common_ButtonName::eType>(btn);
     MessageHelper::SendOnButtonSubscriptionNotification(
         application->hmi_app_id(),
-        static_cast<hmi_apis::Common_ButtonName::eType>(*btn),
+        hmi_btn,
         /*is_subscribed = */ false,
         application_manager_);
-    application->UnsubscribeFromButton(
-        static_cast<mobile_apis::ButtonName::eType>(*btn));
+    application->UnsubscribeFromButton(btn);
   }
 
   MessageHelper::SendOnButtonSubscriptionNotification(
