@@ -506,6 +506,13 @@ void RegisterAppInterfaceRequest::Run() {
   SendSubscribeCustomButtonNotification();
   SendChangeRegistrationOnHMI(application);
 
+  std::function<void(plugin_manager::RPCPlugin&)> on_app_registered =
+      [application](plugin_manager::RPCPlugin& plugin) {
+        plugin.OnApplicationEvent(plugin_manager::kApplicationRegistered,
+                                  application);
+      };
+  application_manager_.GetPluginManager().ForEachPlugin(on_app_registered);
+
   if (DataResumeResult::RESUME_DATA == resume_data_result) {
     auto& resume_ctrl = application_manager_.resume_controller();
     const auto& msg_params = (*message_)[strings::msg_params];

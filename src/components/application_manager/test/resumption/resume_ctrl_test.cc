@@ -604,7 +604,8 @@ TEST_F(ResumeCtrlTest, StartResumption_AppWithSubscriptionToIVI) {
   EXPECT_TRUE(res);
 }
 
-TEST_F(ResumeCtrlTest, DISABLED_StartResumption_AppWithSubscriptionToWayPoints) {
+TEST_F(ResumeCtrlTest,
+       DISABLED_StartResumption_AppWithSubscriptionToWayPoints) {
   smart_objects::SmartObject saved_app;
   saved_app[application_manager::strings::hash_id] = kHash_;
   saved_app[application_manager::strings::grammar_id] = kTestGrammarId_;
