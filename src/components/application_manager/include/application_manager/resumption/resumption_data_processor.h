@@ -269,6 +269,16 @@ class ResumptionDataProcessor : public app_mngr::event_engine::EventObserver {
   void DeleteWayPointsSubscription(const int32_t app_id);
 
   /**
+   * @brief Get button subscriptions that need to be resumed.
+   * Since some subscriptions can be set by default during 
+   * app registration, this function is needed to discard subscriptions
+   * that do not need to be resumed 
+   * @param application which subscriptions to resume
+   */
+  app_mngr::ButtonSubscriptions GetButtonSubscriptionsToResume(
+      app_mngr::ApplicationSharedPtr application) const;
+
+  /**
    * @brief A map of the IDs and Application Resumption Status for these ID
    **/
   app_mngr::ApplicationManager& application_manager_;

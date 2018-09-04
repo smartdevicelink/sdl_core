@@ -287,8 +287,10 @@ class MessageHelper {
    * @brief Sends button subscription notifications for all buttons
    * that application is subscribed on
    */
-  static void SendAllOnButtonSubscriptionNotificationsForApp(
-      ApplicationConstSharedPtr app, ApplicationManager& app_mngr);
+  static void SendOnButtonSubscriptionNotificationsForApp(
+      ApplicationConstSharedPtr app,
+      ApplicationManager& app_mngr,
+      const ButtonSubscriptions& button_subscriptions);
 
   static void SendAppDataToHMI(ApplicationConstSharedPtr app,
                                ApplicationManager& app_man);
