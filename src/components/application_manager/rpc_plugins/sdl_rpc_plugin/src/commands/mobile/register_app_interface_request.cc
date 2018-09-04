@@ -778,8 +778,6 @@ void FinishSendingRegisterAppInterfaceToMobile(
     ApplicationManager& app_manager,
     const uint32_t connection_key,
     policy::StatusNotifier notify_upd_manager) {
-  policy::PolicyHandlerInterface& policy_handler =
-      app_manager.GetPolicyHandler();
   resumption::ResumeCtrl& resume_ctrl = app_manager.resume_controller();
   auto application = app_manager.application(connection_key);
 
