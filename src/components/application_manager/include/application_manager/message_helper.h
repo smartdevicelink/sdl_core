@@ -598,7 +598,6 @@ class MessageHelper {
    */
   static bool SendStopAudioPathThru(ApplicationManager& app_mngr);
 
-
   /**
    * @brief Sends UnsubscribeWayPoints request
    * @return true if UnSubscribedWayPoints is send otherwise false
