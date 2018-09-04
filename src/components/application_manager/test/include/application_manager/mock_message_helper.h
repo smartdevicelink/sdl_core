@@ -173,9 +173,10 @@ class MockMessageHelper {
   MOCK_METHOD2(CreateModuleInfoSO,
                smart_objects::SmartObjectSPtr(uint32_t function_id,
                                               ApplicationManager& app_mngr));
-  MOCK_METHOD2(SendAllOnButtonSubscriptionNotificationsForApp,
+  MOCK_METHOD3(SendOnButtonSubscriptionNotificationsForApp,
                void(ApplicationConstSharedPtr app,
-                    ApplicationManager& app_mngr));
+                    ApplicationManager& app_mngr,
+                    const ButtonSubscriptions& button_subscriptions));
   MOCK_METHOD2(SendOnResumeAudioSourceToHMI,
                void(uint32_t app_id, ApplicationManager& app_mngr));
   MOCK_METHOD2(CreateAddSubMenuRequestsToHMI,

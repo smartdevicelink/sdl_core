@@ -293,10 +293,13 @@ MockMessageHelper* MockMessageHelper::message_helper_mock() {
   static ::testing::NiceMock<MockMessageHelper> message_helper_mock;
   return &message_helper_mock;
 }
-void MessageHelper::SendAllOnButtonSubscriptionNotificationsForApp(
-    ApplicationConstSharedPtr app, ApplicationManager& app_mngr) {
+void MessageHelper::SendOnButtonSubscriptionNotificationsForApp(
+    ApplicationConstSharedPtr app,
+    ApplicationManager& app_mngr,
+    const ButtonSubscriptions& button_subscriptions) {
   MockMessageHelper::message_helper_mock()
-      ->SendAllOnButtonSubscriptionNotificationsForApp(app, app_mngr);
+      ->SendOnButtonSubscriptionNotificationsForApp(
+          app, app_mngr, button_subscriptions);
 }
 
 void MessageHelper::SendOnResumeAudioSourceToHMI(const uint32_t app_id,
