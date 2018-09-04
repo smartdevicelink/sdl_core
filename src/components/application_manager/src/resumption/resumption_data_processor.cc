@@ -327,6 +327,7 @@ void ResumptionDataProcessor::AddCommands(
   LOG4CXX_AUTO_TRACE(logger_);
   if (!saved_app.keyExists(strings::application_commands)) {
     LOG4CXX_ERROR(logger_, "application_commands section is not exists");
+    return;
   }
 
   const smart_objects::SmartObject& app_commands =
@@ -431,6 +432,7 @@ void ResumptionDataProcessor::AddChoicesets(
   LOG4CXX_AUTO_TRACE(logger_);
   if (!saved_app.keyExists(strings::application_choice_sets)) {
     LOG4CXX_ERROR(logger_, "There is no any choicesets");
+    return;
   }
 
   const smart_objects::SmartObject& app_choice_sets =
