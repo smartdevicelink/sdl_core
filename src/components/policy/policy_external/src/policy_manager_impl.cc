@@ -1498,7 +1498,7 @@ bool PolicyManagerImpl::ExceededDays() {
 
   date_time::TimeDuration current_time = date_time::getCurrentTime();
   const int kSecondsInDay = 60 * 60 * 24;
-  const int days = current_time.tv_sec / kSecondsInDay;
+  const int days = date_time::getSecs(current_time) / kSecondsInDay;
 
   DCHECK(std::numeric_limits<uint16_t>::max() >= days);
 
