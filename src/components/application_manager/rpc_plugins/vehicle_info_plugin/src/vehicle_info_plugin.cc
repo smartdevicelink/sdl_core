@@ -74,6 +74,7 @@ void VehicleInfoPlugin::OnPolicyEvent(plugins::PolicyEvent event) {}
 void VehicleInfoPlugin::OnApplicationEvent(
     plugins::ApplicationEvent event,
     app_mngr::ApplicationSharedPtr application) {
+  LOG4CXX_AUTO_TRACE(logger_);
   if (plugins::ApplicationEvent::kApplicationRegistered == event) {
     application->AddExtension(
         std::make_shared<VehicleInfoAppExtension>(*this, *application));
@@ -90,7 +91,7 @@ void VehicleInfoPlugin::ProcessResumptionSubscription(
 
   resumption::ResumptionRequest resumption_request;
   resumption_request.request_ids.correlation_id =
-      (*request)[strings::msg_params][strings::correlation_id].asInt();
+      (*request)[strings::params][strings::correlation_id].asInt();
   resumption_request.request_ids.function_id =
       hmi_apis::FunctionID::VehicleInfo_SubscribeVehicleData;
   resumption_request.message = *request;
@@ -114,7 +115,6 @@ smart_objects::SmartObjectSPtr VehicleInfoPlugin::CreateSubscriptionRequest(
   LOG4CXX_AUTO_TRACE(logger_);
   smart_objects::SmartObject msg_params =
       smart_objects::SmartObject(smart_objects::SmartType_Map);
-  msg_params[strings::app_id] = app_id;
   const auto& subscriptions = ext.Subscriptions();
   for (auto& ivi_data : application_manager::MessageHelper::vehicle_data()) {
     mobile_apis::VehicleDataType::eType type_id = ivi_data.second;
@@ -123,11 +123,13 @@ smart_objects::SmartObjectSPtr VehicleInfoPlugin::CreateSubscriptionRequest(
       msg_params[key_name] = subscribe_status == SUBSCRIBE;
     }
   }
+
   smart_objects::SmartObjectSPtr request =
       application_manager::MessageHelper::CreateModuleInfoSO(
           hmi_apis::FunctionID::VehicleInfo_SubscribeVehicleData,
           *application_manager_);
   (*request)[strings::msg_params] = msg_params;
+  (*request)[strings::params][strings::app_id] = app_id;
 
   return request;
 }
