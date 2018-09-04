@@ -196,10 +196,12 @@ TEST_F(HeartBeatMonitorTest, TwoSessionsElapsed) {
   EXPECT_CALL(connection_handler_mock_, RemoveSession(kMockSessionId2))
       .WillOnce(Return(true));
 
-  const uint32_t kSession1 = connection_->AddNewSession(kDefaultConnectionHandle);
+  const uint32_t kSession1 =
+      connection_->AddNewSession(kDefaultConnectionHandle);
 
   const transport_manager::ConnectionUID kAnotherConnectionHandle = 2;
-  const uint32_t kSession2 = connection_->AddNewSession(kAnotherConnectionHandle);
+  const uint32_t kSession2 =
+      connection_->AddNewSession(kAnotherConnectionHandle);
 
   TestAsyncWaiter waiter;
   uint32_t times = 0;
@@ -233,7 +235,8 @@ TEST_F(HeartBeatMonitorTest, IncreaseHeartBeatTimeout) {
   EXPECT_CALL(connection_handler_mock_, RemoveSession(kDefaultSessionId))
       .WillOnce(Return(true));
 
-  const uint32_t kSession = connection_->AddNewSession(kDefaultConnectionHandle);
+  const uint32_t kSession =
+      connection_->AddNewSession(kDefaultConnectionHandle);
 
   EXPECT_CALL(connection_handler_mock_, CloseSession(_, _)).Times(0);
   EXPECT_CALL(connection_handler_mock_, CloseConnection(_)).Times(0);
@@ -250,7 +253,8 @@ TEST_F(HeartBeatMonitorTest, DecreaseHeartBeatTimeout) {
   EXPECT_CALL(connection_handler_mock_, RemoveSession(kDefaultSessionId))
       .WillOnce(Return(true));
 
-  const uint32_t kSession = connection_->AddNewSession(kDefaultConnectionHandle);
+  const uint32_t kSession =
+      connection_->AddNewSession(kDefaultConnectionHandle);
 
   TestAsyncWaiter waiter;
   uint32_t times = 0;
