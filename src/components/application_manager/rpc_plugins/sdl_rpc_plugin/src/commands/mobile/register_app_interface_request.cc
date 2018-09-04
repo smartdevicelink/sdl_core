@@ -518,11 +518,12 @@ void RegisterAppInterfaceRequest::Run() {
     const auto& msg_params = (*message_)[strings::msg_params];
     const auto& hash_id = msg_params[strings::hash_id].asString();
     LOG4CXX_WARN(logger_, "Start Data Resumption");
-    auto send_response = [this](mobile_apis::Result::eType result_code,
-                                const std::string& info) {
+    auto send_response = [this, application](
+        mobile_apis::Result::eType result_code, const std::string& info) {
       result_code_ = result_code;
       SendRegisterAppInterfaceResponseToMobile(
           ApplicationType::kNewApplication, info, true);
+      application->UpdateHash();
     };
 
     resume_ctrl.StartResumption(application, hash_id, send_response);

@@ -453,10 +453,9 @@ void ResumptionDataProcessor::DeleteChoicesets(const int32_t app_id) {
   LOG4CXX_AUTO_TRACE(logger_);
   ApplicationSharedPtr application = application_manager_.application(app_id);
 
-  const DataAccessor<ChoiceSetMap> accessor = application->choice_set_map();
-  const ChoiceSetMap& choices = accessor.GetData();
-  while (!choices.empty()) {
-    application->RemoveChoiceSet(choices.begin()->first);
+  auto choices = application->choice_set_map().GetData();
+  for (auto& choice : choices) {
+    application->RemoveChoiceSet(choice.first);
   }
 }
 
