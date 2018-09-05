@@ -278,8 +278,7 @@ class MessageHelper {
   /**
    * @brief Creates button subscription notification
    */
-  static smart_objects::SmartObjectSPtr
-  CreateOnButtonSubscriptionNotification(
+  static smart_objects::SmartObjectSPtr CreateOnButtonSubscriptionNotification(
       const uint32_t app_id,
       const hmi_apis::Common_ButtonName::eType button,
       const bool is_subscribed,
