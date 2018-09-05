@@ -559,7 +559,7 @@ TEST_F(ResumeCtrlTest, StartResumption_AppWithSubscribeOnButtons) {
   EXPECT_CALL(*mock_app_extension_, ProcessResumption(saved_app, _));
 
   EXPECT_CALL(*application_manager::MockMessageHelper::message_helper_mock(),
-              SendOnButtonSubscriptionNotificationsForApp(_, _, _)).Times(2);
+              CreateOnButtonSubscriptionNotificationsForApp(_, _, _)).Times(2);
 
   const bool res = res_ctrl_->StartResumption(mock_app_, kHash_, callback_);
   EXPECT_TRUE(res);
