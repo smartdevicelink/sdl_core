@@ -136,12 +136,7 @@ void ResumptionDataProcessor::on_event(const event_engine::Event& event) {
     return;
   }
 
-  const hmi_apis::Common_Result::eType result_code =
-      static_cast<hmi_apis::Common_Result::eType>(
-          response[strings::params][application_manager::hmi_response::code]
-              .asInt());
-
-  if (IsRequestSuccessful(result_code)) {
+  if (IsRequestSuccessful(response)) {
     status.successful_requests.push_back(*request_ptr);
   } else {
     status.error_requests.push_back(*request_ptr);
@@ -656,7 +651,11 @@ void ResumptionDataProcessor::DeletePluginsSubscriptions(
   }
 }
 
-bool ResumptionDataProcessor::IsRequestSuccessful(const hmi_apis::Common_Result::eType result_code) const {
+bool ResumptionDataProcessor::IsRequestSuccessful(const smart_objects::SmartObject& response) const {
+  const hmi_apis::Common_Result::eType result_code =
+      static_cast<hmi_apis::Common_Result::eType>(
+          response[strings::params][application_manager::hmi_response::code]
+              .asInt());
   return result_code == hmi_apis::Common_Result::SUCCESS || 
          result_code == hmi_apis::Common_Result::WARNINGS;
 }
