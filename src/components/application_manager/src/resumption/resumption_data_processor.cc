@@ -573,6 +573,7 @@ void ResumptionDataProcessor::AddButtonsSubscriptions(
     MessageHelper::SendOnButtonSubscriptionNotificationsForApp(
         application, application_manager_, button_subscriptions);
   }
+ }
 
   ButtonSubscriptions ResumptionDataProcessor::GetButtonSubscriptionsToResume(
       ApplicationSharedPtr application) const {
@@ -611,9 +612,9 @@ void ResumptionDataProcessor::AddButtonsSubscriptions(
   void ResumptionDataProcessor::DeleteButtonsSubscriptions(
       ApplicationSharedPtr application) {
     LOG4CXX_AUTO_TRACE(logger_);
-    ButtonSubscriptions button_subscriptions =
+    const ButtonSubscriptions button_subscriptions =
         application->SubscribedButtons().GetData();
-    for (auto btn : button_subscriptions) {
+    for (auto& btn : button_subscriptions) {
       const auto hmi_btn = static_cast<hmi_apis::Common_ButtonName::eType>(btn);
       MessageHelper::SendOnButtonSubscriptionNotification(
           application->hmi_app_id(),
@@ -636,9 +637,9 @@ void ResumptionDataProcessor::AddButtonsSubscriptions(
     LOG4CXX_AUTO_TRACE(logger_);
     smart_objects::SmartObject extension_subscriptions;
 
-    ApplicationResumptionStatus& status =
+    const ApplicationResumptionStatus& status =
         resumption_status_[application->app_id()];
-    for (auto request : status.successful_requests) {
+    for (auto& request : status.successful_requests) {
       if (hmi_apis::FunctionID::VehicleInfo_SubscribeVehicleData ==
           request.request_ids.function_id) {
         extension_subscriptions[strings::application_vehicle_info] =
