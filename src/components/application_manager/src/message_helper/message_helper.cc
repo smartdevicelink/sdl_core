@@ -1022,7 +1022,8 @@ smart_objects::SmartObjectSPtr MessageHelper::CreateSetAppIcon(
   return set_icon;
 }
 
-void MessageHelper::SendOnButtonSubscriptionNotification(
+smart_objects::SmartObjectSPtr
+MessageHelper::CreateOnButtonSubscriptionNotification(
     uint32_t app_id,
     hmi_apis::Common_ButtonName::eType button,
     bool is_subscribed,
@@ -1035,7 +1036,7 @@ void MessageHelper::SendOnButtonSubscriptionNotification(
       std::make_shared<SmartObject>(SmartType_Map);
   if (!notification_ptr) {
     LOG4CXX_ERROR(logger_, "Memory allocation failed.");
-    return;
+    return SmartObjectSPtr(nullptr);
   }
   SmartObject& notification = *notification_ptr;
 
@@ -1054,12 +1055,11 @@ void MessageHelper::SendOnButtonSubscriptionNotification(
       hmi_apis::FunctionID::Buttons_OnButtonSubscription;
   notification[strings::msg_params] = msg_params;
 
-  if (!app_mngr.GetRPCService().ManageHMICommand(notification_ptr)) {
-    LOG4CXX_ERROR(logger_, "Unable to send HMI notification");
-  }
+  return notification_ptr;
 }
 
-void MessageHelper::SendOnButtonSubscriptionNotificationsForApp(
+smart_objects::SmartObjectList
+MessageHelper::CreateOnButtonSubscriptionNotificationsForApp(
     ApplicationConstSharedPtr app,
     ApplicationManager& app_mngr,
     const ButtonSubscriptions& button_subscriptions) {
@@ -1068,18 +1068,23 @@ void MessageHelper::SendOnButtonSubscriptionNotificationsForApp(
   using namespace mobile_apis;
   LOG4CXX_AUTO_TRACE(logger_);
 
+  SmartObjectList button_subscription_requests;
+
   if (app.use_count() == 0) {
     LOG4CXX_ERROR(logger_, "Invalid application pointer ");
-    return;
+    return button_subscription_requests;
   }
 
   for (auto& it : button_subscriptions) {
     const Common_ButtonName::eType btn =
         static_cast<Common_ButtonName::eType>(it);
 
-    SendOnButtonSubscriptionNotification(
-        app->hmi_app_id(), btn, true, app_mngr);
+    button_subscription_requests.push_back(
+        CreateOnButtonSubscriptionNotification(
+        app->hmi_app_id(), btn, true, app_mngr));
   }
+
+  return button_subscription_requests;
 }
 
 void MessageHelper::SendSetAppIcon(
