@@ -302,18 +302,16 @@ void PutFileRequest::SendOnPutFileNotification() {
   smart_objects::SmartObjectSPtr notification =
       std::make_shared<smart_objects::SmartObject>(
           smart_objects::SmartType_Map);
-
   smart_objects::SmartObject& message = *notification;
   message[strings::params][strings::function_id] =
       hmi_apis::FunctionID::BasicCommunication_OnPutFile;
-
   message[strings::params][strings::message_type] = MessageType::kNotification;
   message[strings::msg_params][strings::app_id] = connection_key();
   message[strings::msg_params][strings::sync_file_name] = sync_file_name_;
   message[strings::msg_params][strings::offset] = offset_;
-  if (0 == offset_) {
-    message[strings::msg_params][strings::file_size] =
-        (*message_)[strings::msg_params][strings::length];
+  if (0 == offset_ &&
+      !(*message_)[strings::msg_params].keyExists(strings::length)) {
+    message[strings::msg_params][strings::file_size] = length_;
   }
   message[strings::msg_params][strings::length] = length_;
   message[strings::msg_params][strings::persistent_file] = is_persistent_file_;
