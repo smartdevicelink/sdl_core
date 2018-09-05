@@ -1083,7 +1083,7 @@ MessageHelper::CreateOnButtonSubscriptionNotificationsForApp(
 
     button_subscription_requests.push_back(
         CreateOnButtonSubscriptionNotification(
-        app->hmi_app_id(), btn, true, app_mngr));
+            app->hmi_app_id(), btn, true, app_mngr));
   }
 
   return button_subscription_requests;
