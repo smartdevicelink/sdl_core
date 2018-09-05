@@ -99,9 +99,9 @@ class ResumptionDataProcessor : public app_mngr::event_engine::EventObserver {
  private:
   /**
    * @brief Revert the data to the state before Resumption
-   * @param app_id application id
+   * @param shared ptr to application
    */
-  void RevertRestoredData(const int32_t app_id);
+  void RevertRestoredData(app_mngr::ApplicationSharedPtr application);
 
   /**
    * @brief subscribe to events for the application and save request
@@ -136,9 +136,9 @@ class ResumptionDataProcessor : public app_mngr::event_engine::EventObserver {
 
   /**
    * @brief Deleting files that have been resumed
-   * @param app_id application id
+   * @param shared ptr to application 
    */
-  void DeleteFiles(const int32_t app_id);
+  void DeleteFiles(app_mngr::ApplicationSharedPtr application);
 
   /**
   * @brief AddSubmenues allows to add sub-menus for the application
@@ -151,9 +151,9 @@ class ResumptionDataProcessor : public app_mngr::event_engine::EventObserver {
 
   /**
    * @brief Deleting sub-menus that have been resumed
-   * @param app_id application id
+   * @param shared ptr to application
    */
-  void DeleteSubmenues(const int32_t app_id);
+  void DeleteSubmenues(app_mngr::ApplicationSharedPtr application);
 
   /**
    * @brief AddCommands allows to add commands for the application
@@ -166,13 +166,13 @@ class ResumptionDataProcessor : public app_mngr::event_engine::EventObserver {
 
   /**
    * @brief Deleting all commands that have been resumed
-   * @param app_id application id
+   * @param shared ptr to application
    */
-  void DeleteCommands(const int32_t app_id);
+  void DeleteCommands(app_mngr::ApplicationSharedPtr application);
 
   /**
    * @brief Deleting UI commands that have been resumed
-   * @param app_id application id
+   * @param shared ptr to application
    */
   void DeleteUICommands(const ResumptionRequest& request);
 
@@ -193,9 +193,9 @@ class ResumptionDataProcessor : public app_mngr::event_engine::EventObserver {
 
   /**
    * @brief Deleting choice sets that have been resumed
-   * @param app_id application id
+   * @param shared ptr to application
    */
-  void DeleteChoicesets(const int32_t app_id);
+  void DeleteChoicesets(app_mngr::ApplicationSharedPtr application);
 
   /**
   * @brief SetGlobalProperties allows to restore global properties.
@@ -207,9 +207,9 @@ class ResumptionDataProcessor : public app_mngr::event_engine::EventObserver {
 
   /**
    * @brief Reset global properties that have been resumed
-   * @param app_id application id
+   * @param shared ptr to application
    */
-  void DeleteGlobalProperties(const int32_t app_id);
+  void DeleteGlobalProperties(app_mngr::ApplicationSharedPtr application);
 
   /**
   * @brief AddSubscriptions allows to restore subscriptions
@@ -237,13 +237,13 @@ class ResumptionDataProcessor : public app_mngr::event_engine::EventObserver {
 
   /**
    * @brief Deleting subscriptions have been resumed
-   * @param app_id application id
+   * @param shared ptr to application 
    */
-  void DeleteSubscriptions(const int32_t app_id);
+  void DeleteSubscriptions(app_mngr::ApplicationSharedPtr application);
 
   /**
    * @brief Deleting buttons subscriptions have been resumed
-   * @param app_id application id
+   * @param shared ptr to application
    */
   void DeleteButtonsSubscriptions(app_mngr::ApplicationSharedPtr application);
 
@@ -264,9 +264,9 @@ class ResumptionDataProcessor : public app_mngr::event_engine::EventObserver {
 
   /**
    * @brief Deleting subscription for WayPoints have been resumed
-   * @param app_id application id
+   * @param shared ptr to application
    */
-  void DeleteWayPointsSubscription(const int32_t app_id);
+  void DeleteWayPointsSubscription(app_mngr::ApplicationSharedPtr application);
 
   /**
    * @brief Get button subscriptions that need to be resumed.
