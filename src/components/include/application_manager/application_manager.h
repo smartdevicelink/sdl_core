@@ -51,6 +51,9 @@
 #include "application_manager/hmi_interfaces.h"
 #include "policy/policy_types.h"
 #include "application_manager/plugin_manager/rpc_plugin_manager.h"
+#include "interfaces/HMI_API_schema.h"
+#include "interfaces/MOBILE_API_schema.h"
+
 namespace resumption {
 class LastState;
 }
@@ -726,6 +729,18 @@ class ApplicationManager {
   virtual bool IsSOStructValid(
       const hmi_apis::StructIdentifiers::eType struct_id,
       const smart_objects::SmartObject& display_capabilities) = 0;
+
+  /**
+   * @brief Function returns reference to HMI factory instance.
+   * @return Reference to HMI factory instance.
+   */
+  virtual hmi_apis::HMI_API& hmi_so_factory() const = 0;
+
+  /**
+   * @brief Function returns reference to MOBILE factory instance.
+   * @return Reference to MOBILE factory instance.
+   */
+  virtual mobile_apis::MOBILE_API& mobile_so_factory() const = 0;
 };
 
 }  // namespace application_manager

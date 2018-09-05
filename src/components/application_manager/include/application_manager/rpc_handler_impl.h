@@ -161,8 +161,6 @@ class RPCHandlerImpl : public RPCHandler,
                           smart_objects::SmartObject& output);
   std::shared_ptr<Message> ConvertRawMsgToMessage(
       const ::protocol_handler::RawMessagePtr message);
-  hmi_apis::HMI_API& hmi_so_factory();
-  mobile_apis::MOBILE_API& mobile_so_factory();
 
   ApplicationManager& app_manager_;
   // Thread that pumps messages coming from mobile side.
@@ -170,8 +168,8 @@ class RPCHandlerImpl : public RPCHandler,
   // Thread that pumps messages coming from HMI.
   impl::FromHmiQueue messages_from_hmi_;
 
-  hmi_apis::HMI_API hmi_so_factory_;
-  mobile_apis::MOBILE_API mobile_so_factory_;
+  ns_smart_device_link_rpc::V1::v4_protocol_v1_2_no_extra
+      v4_protocol_so_factory_;
 #ifdef TELEMETRY_MONITOR
   AMTelemetryObserver* metric_observer_;
 #endif  // TELEMETRY_MONITOR

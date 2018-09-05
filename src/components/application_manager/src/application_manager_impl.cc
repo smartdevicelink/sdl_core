@@ -157,8 +157,8 @@ ApplicationManagerImpl::ApplicationManagerImpl(
     , policy_handler_(new policy::PolicyHandler(policy_settings, *this))
     , protocol_handler_(NULL)
     , request_ctrl_(am_settings)
-    , hmi_so_factory_(NULL)
-    , mobile_so_factory_(NULL)
+    , hmi_so_factory_(new hmi_apis::HMI_API())
+    , mobile_so_factory_(new mobile_apis::MOBILE_API())
     , hmi_capabilities_(new HMICapabilitiesImpl(*this))
     , unregister_reason_(
           mobile_api::AppInterfaceUnregisteredReason::INVALID_ENUM)
@@ -1888,28 +1888,6 @@ bool ApplicationManagerImpl::ConvertSOtoMessage(
   return true;
 }
 
-hmi_apis::HMI_API& ApplicationManagerImpl::hmi_so_factory() {
-  if (!hmi_so_factory_) {
-    hmi_so_factory_ = new hmi_apis::HMI_API;
-    if (!hmi_so_factory_) {
-      LOG4CXX_ERROR(logger_, "Out of memory");
-      NOTREACHED();
-    }
-  }
-  return *hmi_so_factory_;
-}
-
-mobile_apis::MOBILE_API& ApplicationManagerImpl::mobile_so_factory() {
-  if (!mobile_so_factory_) {
-    mobile_so_factory_ = new mobile_apis::MOBILE_API;
-    if (!mobile_so_factory_) {
-      LOG4CXX_ERROR(logger_, "Out of memory.");
-      NOTREACHED();
-    }
-  }
-  return *mobile_so_factory_;
-}
-
 HMICapabilities& ApplicationManagerImpl::hmi_capabilities() {
   return *hmi_capabilities_;
 }
@@ -2281,7 +2259,7 @@ void ApplicationManagerImpl::SendOnSDLClose() {
   std::shared_ptr<Message> message_to_send(
       new Message(protocol_handler::MessagePriority::kDefault));
 
-  hmi_so_factory().attachSchema(*msg, false);
+  hmi_so_factory_->attachSchema(*msg, false);
   LOG4CXX_DEBUG(
       logger_,
       "Attached schema to message, result if valid: " << msg->isValid());
@@ -3396,6 +3374,14 @@ ApplicationManagerImpl::SupportedSDLVersion() const {
       get_settings().max_supported_protocol_version());
 }
 
+hmi_apis::HMI_API& ApplicationManagerImpl::hmi_so_factory() const {
+  return *hmi_so_factory_;
+}
+
+mobile_apis::MOBILE_API& ApplicationManagerImpl::mobile_so_factory() const {
+  return *mobile_so_factory_;
+}
+
 event_engine::EventDispatcher& ApplicationManagerImpl::event_dispatcher() {
   return event_dispatcher_;
 }
@@ -3603,7 +3589,7 @@ bool ApplicationManagerImpl::IsSOStructValid(
     const hmi_apis::StructIdentifiers::eType struct_id,
     const smart_objects::SmartObject& display_capabilities) {
   smart_objects::SmartObject display_capabilities_so = display_capabilities;
-  if (hmi_so_factory().AttachSchema(struct_id, display_capabilities_so)) {
+  if (hmi_so_factory_->AttachSchema(struct_id, display_capabilities_so)) {
     if (display_capabilities_so.isValid()) {
       return true;
     } else {

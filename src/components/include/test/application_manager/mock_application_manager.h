@@ -310,6 +310,8 @@ class MockApplicationManager : public application_manager::ApplicationManager {
   MOCK_CONST_METHOD0(GetCommandFactory, application_manager::CommandFactory&());
   MOCK_CONST_METHOD0(get_current_audio_source, uint32_t());
   MOCK_METHOD1(set_current_audio_source, void(const uint32_t));
+  MOCK_CONST_METHOD0(hmi_so_factory, hmi_apis::HMI_API&());
+  MOCK_CONST_METHOD0(mobile_so_factory, mobile_apis::MOBILE_API&());
 };
 
 }  // namespace application_manager_test
