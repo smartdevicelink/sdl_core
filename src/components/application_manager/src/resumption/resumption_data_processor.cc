@@ -136,12 +136,7 @@ void ResumptionDataProcessor::on_event(const event_engine::Event& event) {
     return;
   }
 
-  const hmi_apis::Common_Result::eType result_code =
-      static_cast<hmi_apis::Common_Result::eType>(
-          response[strings::params][application_manager::hmi_response::code]
-              .asInt());
-
-  if (result_code == hmi_apis::Common_Result::SUCCESS) {
+  if (IsRequestSuccessful(response)) {
     status.successful_requests.push_back(*request_ptr);
   } else {
     status.error_requests.push_back(*request_ptr);
@@ -486,18 +481,29 @@ void ResumptionDataProcessor::DeleteGlobalProperties(
       application_manager_.ResetAllApplicationGlobalProperties(app_id);
 
   if (result.HasUIPropertiesReset()) {
-    smart_objects::SmartObjectSPtr ui_gl_props_reset_req =
+    smart_objects::SmartObjectSPtr msg_params =
         MessageHelper::CreateUIResetGlobalPropertiesRequest(result,
                                                             application);
-
-    ProcessHMIRequest(ui_gl_props_reset_req, false);
+    auto msg = MessageHelper::CreateMessageForHMI(
+        hmi_apis::messageType::request,
+        application_manager_.GetNextHMICorrelationID());
+    (*msg)[strings::params][strings::function_id] =
+        hmi_apis::FunctionID::UI_SetGlobalProperties;
+    (*msg)[strings::msg_params] = *msg_params;
+    ProcessHMIRequest(msg, false);
   }
   if (result.HasTTSPropertiesReset()) {
-    smart_objects::SmartObjectSPtr tts_gl_props_reset_req =
-        MessageHelper::CreateUIResetGlobalPropertiesRequest(result,
+    smart_objects::SmartObjectSPtr msg_params =
+        MessageHelper::CreateTTSResetGlobalPropertiesRequest(result,
                                                             application);
+    auto msg = MessageHelper::CreateMessageForHMI(
+        hmi_apis::messageType::request,
+        application_manager_.GetNextHMICorrelationID());
+    (*msg)[strings::params][strings::function_id] =
+        hmi_apis::FunctionID::TTS_SetGlobalProperties;
 
-    ProcessHMIRequest(tts_gl_props_reset_req, false);
+    (*msg)[strings::msg_params] = *msg_params;
+    ProcessHMIRequest(msg, false);
   }
 }
 
@@ -531,7 +537,16 @@ void ResumptionDataProcessor::DeleteWayPointsSubscription(
   LOG4CXX_AUTO_TRACE(logger_);
 
   if (application_manager_.IsAppSubscribedForWayPoints(application)) {
+    LOG4CXX_DEBUG(logger_, "App is subscribed");
     application_manager_.UnsubscribeAppFromWayPoints(application);
+    auto subscribe_waypoints_msg = MessageHelper::CreateMessageForHMI(
+        hmi_apis::FunctionID::Navigation_UnsubscribeWayPoints,
+        application_manager_.GetNextHMICorrelationID());
+    (*subscribe_waypoints_msg)[strings::params][strings::message_type] =
+        hmi_apis::messageType::request;
+    (*subscribe_waypoints_msg)[strings::msg_params][strings::app_id] =
+        application->app_id();
+    ProcessHMIRequest(subscribe_waypoints_msg, false);
   }
 }
 
@@ -654,6 +669,16 @@ void ResumptionDataProcessor::DeletePluginsSubscriptions(
   for (auto& extension : application->Extensions()) {
     extension->RevertResumption(extension_subscriptions);
   }
+}
+
+bool ResumptionDataProcessor::IsRequestSuccessful(
+    const smart_objects::SmartObject& response) const {
+  const hmi_apis::Common_Result::eType result_code =
+      static_cast<hmi_apis::Common_Result::eType>(
+          response[strings::params][application_manager::hmi_response::code]
+              .asInt());
+  return result_code == hmi_apis::Common_Result::SUCCESS ||
+         result_code == hmi_apis::Common_Result::WARNINGS;
 }
 
 }  // namespce resumption

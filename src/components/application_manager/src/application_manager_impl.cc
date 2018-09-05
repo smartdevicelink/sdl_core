@@ -2388,8 +2388,9 @@ void ApplicationManagerImpl::UnregisterApplication(
         subscribed_way_points_apps_list_.size();
   }
   if (1 == subscribed_for_way_points_app_count) {
-    LOG4CXX_ERROR(logger_, "Send UnsubscribeWayPoints");
-    if (!is_unexpected_disconnect) {
+    LOG4CXX_DEBUG(logger_, "Send UnsubscribeWayPoints");
+    if (!is_resuming) {
+      LOG4CXX_DEBUG(logger_, "Unsubscribe App from WayPoints");
       UnsubscribeAppFromWayPoints(app_id);
     }
     MessageHelper::SendUnsubscribedWayPoints(*this);
