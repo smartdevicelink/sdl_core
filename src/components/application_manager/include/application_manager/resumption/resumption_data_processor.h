@@ -279,6 +279,13 @@ class ResumptionDataProcessor : public app_mngr::event_engine::EventObserver {
       app_mngr::ApplicationSharedPtr application) const;
 
   /**
+   * @brief Determines whether request is successful
+   * judging from result code received from HMI
+   * @param result_code received from HMI
+   */
+  bool IsRequestSuccessful(const hmi_apis::Common_Result::eType result_code) const;
+
+  /**
    * @brief A map of the IDs and Application Resumption Status for these ID
    **/
   app_mngr::ApplicationManager& application_manager_;
