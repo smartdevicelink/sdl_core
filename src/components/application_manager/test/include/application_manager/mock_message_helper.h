@@ -174,9 +174,10 @@ class MockMessageHelper {
                smart_objects::SmartObjectSPtr(uint32_t function_id,
                                               ApplicationManager& app_mngr));
   MOCK_METHOD3(CreateOnButtonSubscriptionNotificationsForApp,
-               smart_objects::SmartObjectList(ApplicationConstSharedPtr app,
-                    ApplicationManager& app_mngr,
-                    const ButtonSubscriptions& button_subscriptions));
+               smart_objects::SmartObjectList(
+                   ApplicationConstSharedPtr app,
+                   ApplicationManager& app_mngr,
+                   const ButtonSubscriptions& button_subscriptions));
   MOCK_METHOD2(SendOnResumeAudioSourceToHMI,
                void(uint32_t app_id, ApplicationManager& app_mngr));
   MOCK_METHOD2(CreateAddSubMenuRequestsToHMI,
@@ -327,11 +328,12 @@ class MockMessageHelper {
                smart_objects::SmartObjectList(ApplicationConstSharedPtr app,
                                               ApplicationManager& app_mngr));
 
-  MOCK_METHOD4(CreateOnButtonSubscriptionNotification,
-               smart_objects::SmartObjectSPtr(uint32_t app_id,
-                    hmi_apis::Common_ButtonName::eType button,
-                    bool is_subscribed,
-                    ApplicationManager& app_mngr));
+  MOCK_METHOD4(
+      CreateOnButtonSubscriptionNotification,
+      smart_objects::SmartObjectSPtr(uint32_t app_id,
+                                     hmi_apis::Common_ButtonName::eType button,
+                                     bool is_subscribed,
+                                     ApplicationManager& app_mngr));
 
   static MockMessageHelper* message_helper_mock();
 };
