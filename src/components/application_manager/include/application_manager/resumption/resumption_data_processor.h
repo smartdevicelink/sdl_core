@@ -281,9 +281,9 @@ class ResumptionDataProcessor : public app_mngr::event_engine::EventObserver {
   /**
    * @brief Determines whether request is successful
    * judging from result code received from HMI
-   * @param result_code received from HMI
+   * @param response from HMI with request's result code
    */
-  bool IsRequestSuccessful(const hmi_apis::Common_Result::eType result_code) const;
+  bool IsRequestSuccessful(const smart_objects::SmartObject& response) const;
 
   /**
    * @brief A map of the IDs and Application Resumption Status for these ID
