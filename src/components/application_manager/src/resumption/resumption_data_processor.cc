@@ -136,12 +136,7 @@ void ResumptionDataProcessor::on_event(const event_engine::Event& event) {
     return;
   }
 
-  const hmi_apis::Common_Result::eType result_code =
-      static_cast<hmi_apis::Common_Result::eType>(
-          response[strings::params][application_manager::hmi_response::code]
-              .asInt());
-
-  if (result_code == hmi_apis::Common_Result::SUCCESS) {
+  if (IsRequestSuccessful(response)) {
     status.successful_requests.push_back(*request_ptr);
   } else {
     status.error_requests.push_back(*request_ptr);
@@ -654,6 +649,15 @@ void ResumptionDataProcessor::DeletePluginsSubscriptions(
   for (auto& extension : application->Extensions()) {
     extension->RevertResumption(extension_subscriptions);
   }
+}
+
+bool ResumptionDataProcessor::IsRequestSuccessful(const smart_objects::SmartObject& response) const {
+  const hmi_apis::Common_Result::eType result_code =
+      static_cast<hmi_apis::Common_Result::eType>(
+          response[strings::params][application_manager::hmi_response::code]
+              .asInt());
+  return result_code == hmi_apis::Common_Result::SUCCESS || 
+         result_code == hmi_apis::Common_Result::WARNINGS;
 }
 
 }  // namespce resumption
