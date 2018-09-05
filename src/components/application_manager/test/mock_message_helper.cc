@@ -293,12 +293,13 @@ MockMessageHelper* MockMessageHelper::message_helper_mock() {
   static ::testing::NiceMock<MockMessageHelper> message_helper_mock;
   return &message_helper_mock;
 }
-void MessageHelper::SendOnButtonSubscriptionNotificationsForApp(
+smart_objects::SmartObjectList
+MessageHelper::CreateOnButtonSubscriptionNotificationsForApp(
     ApplicationConstSharedPtr app,
     ApplicationManager& app_mngr,
     const ButtonSubscriptions& button_subscriptions) {
-  MockMessageHelper::message_helper_mock()
-      ->SendOnButtonSubscriptionNotificationsForApp(
+  return MockMessageHelper::message_helper_mock()
+      ->CreateOnButtonSubscriptionNotificationsForApp(
           app, app_mngr, button_subscriptions);
 }
 
@@ -597,13 +598,14 @@ MessageHelper::CreateGlobalPropertiesRequestsToHMI(
       ->CreateGlobalPropertiesRequestsToHMI(app, app_mngr);
 }
 
-void MessageHelper::SendOnButtonSubscriptionNotification(
+smart_objects::SmartObjectSPtr
+MessageHelper::CreateOnButtonSubscriptionNotification(
     uint32_t app_id,
     hmi_apis::Common_ButtonName::eType button,
     bool is_subscribed,
     ApplicationManager& app_mngr) {
   return MockMessageHelper::message_helper_mock()
-      ->SendOnButtonSubscriptionNotification(
+      ->CreateOnButtonSubscriptionNotification(
           app_id, button, is_subscribed, app_mngr);
 }
 

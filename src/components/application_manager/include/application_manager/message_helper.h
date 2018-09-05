@@ -275,19 +275,21 @@ class MessageHelper {
       const std::string& path_to_icon, uint32_t app_id);
 
   /**
-   * @brief Sends button subscription notification
+   * @brief Creates button subscription notification
    */
-  static void SendOnButtonSubscriptionNotification(
+  static smart_objects::SmartObjectSPtr
+  CreateOnButtonSubscriptionNotification(
       const uint32_t app_id,
       const hmi_apis::Common_ButtonName::eType button,
       const bool is_subscribed,
       ApplicationManager& app_mngr);
 
   /**
-   * @brief Sends button subscription notifications for all buttons
+   * @brief Creates button subscription notifications for buttons
    * that application is subscribed on
    */
-  static void SendOnButtonSubscriptionNotificationsForApp(
+  static smart_objects::SmartObjectList
+  CreateOnButtonSubscriptionNotificationsForApp(
       ApplicationConstSharedPtr app,
       ApplicationManager& app_mngr,
       const ButtonSubscriptions& button_subscriptions);
