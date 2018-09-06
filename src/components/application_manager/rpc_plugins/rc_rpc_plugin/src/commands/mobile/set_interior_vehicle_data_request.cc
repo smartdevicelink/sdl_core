@@ -488,7 +488,8 @@ void SetInteriorVehicleDataRequest::Execute() {
       CutOffReadOnlyParams(module_data);
     }
 
-    application_manager_.RemoveHMIFakeParameters(message_);
+    application_manager_.RemoveHMIFakeParameters(
+        message_, hmi_apis::FunctionID::RC_SetInteriorVehicleData);
 
     app_mngr::ApplicationSharedPtr app =
         application_manager_.application(connection_key());

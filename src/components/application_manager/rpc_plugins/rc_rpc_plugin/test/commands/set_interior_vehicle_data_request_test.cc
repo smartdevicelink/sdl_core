@@ -184,7 +184,7 @@ TEST_F(
   EXPECT_CALL(mock_hmi_capabilities_, rc_capability())
       .WillOnce(Return(nullptr));
 
-  EXPECT_CALL(app_mngr_, RemoveHMIFakeParameters(_));
+  EXPECT_CALL(app_mngr_, RemoveHMIFakeParameters(_, _));
 
   EXPECT_CALL(
       mock_rpc_service_,

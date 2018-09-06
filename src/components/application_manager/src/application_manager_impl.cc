@@ -1693,10 +1693,21 @@ void ApplicationManagerImpl::TerminateRequest(const uint32_t connection_key,
 }
 
 void ApplicationManagerImpl::RemoveHMIFakeParameters(
-    application_manager::commands::MessageSharedPtr& message) {
+    application_manager::commands::MessageSharedPtr& message,
+    const hmi_apis::FunctionID::eType& function_id) {
   LOG4CXX_AUTO_TRACE(logger_);
   hmi_apis::HMI_API factory;
+  if (!(*message)[jhs::S_PARAMS].keyExists(jhs::S_FUNCTION_ID)) {
+    LOG4CXX_ERROR(logger_,
+                  "RemoveHMIFakeParameters message missing function id");
+    return;
+  }
+  mobile_apis::FunctionID::eType mobile_function_id =
+      static_cast<mobile_apis::FunctionID::eType>(
+          (*message)[jhs::S_PARAMS][jhs::S_FUNCTION_ID].asInt());
+  (*message)[jhs::S_PARAMS][jhs::S_FUNCTION_ID] = function_id;
   factory.attachSchema(*message, true);
+  (*message)[jhs::S_PARAMS][jhs::S_FUNCTION_ID] = mobile_function_id;
 }
 
 bool ApplicationManagerImpl::Init(resumption::LastState& last_state,
