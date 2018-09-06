@@ -537,7 +537,16 @@ void ResumptionDataProcessor::DeleteWayPointsSubscription(
   LOG4CXX_AUTO_TRACE(logger_);
 
   if (application_manager_.IsAppSubscribedForWayPoints(application)) {
+    LOG4CXX_DEBUG(logger_, "App is subscribed");
     application_manager_.UnsubscribeAppFromWayPoints(application);
+    auto subscribe_waypoints_msg = MessageHelper::CreateMessageForHMI(
+        hmi_apis::FunctionID::Navigation_UnsubscribeWayPoints,
+        application_manager_.GetNextHMICorrelationID());
+    (*subscribe_waypoints_msg)[strings::params][strings::message_type] =
+        hmi_apis::messageType::request;
+    (*subscribe_waypoints_msg)[strings::msg_params][strings::app_id] =
+        application->app_id();
+    ProcessHMIRequest(subscribe_waypoints_msg, false);
   }
 }
 
