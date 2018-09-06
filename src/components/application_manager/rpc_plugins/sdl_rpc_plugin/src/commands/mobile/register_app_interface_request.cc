@@ -184,6 +184,7 @@ RegisterAppInterfaceRequest::RegisterAppInterfaceRequest(
                          rpc_service,
                          hmi_capabilities,
                          policy_handler)
+    , is_data_resumption_(false)
     , result_code_(mobile_apis::Result::INVALID_ENUM) {}
 
 RegisterAppInterfaceRequest::~RegisterAppInterfaceRequest() {}
@@ -421,6 +422,18 @@ RegisterAppInterfaceRequest::ApplicationDataShouldBeResumed() {
   return DataResumeResult::RESUME_DATA;
 }
 
+void RegisterAppInterfaceRequest::onTimeOut() {
+  LOG4CXX_AUTO_TRACE(logger_);
+  if (!is_data_resumption_) {
+    app_mngr::commands::CommandRequestImpl::onTimeOut();
+    return;
+  }
+  result_code_ = mobile_api::Result::RESUME_FAILED;
+  const std::string info = "HMI does not respond during timeout.";
+  SendRegisterAppInterfaceResponseToMobile(
+      ApplicationType::kNewApplication, info, true);
+}
+
 void RegisterAppInterfaceRequest::Run() {
   using namespace helpers;
   LOG4CXX_AUTO_TRACE(logger_);
@@ -514,6 +527,7 @@ void RegisterAppInterfaceRequest::Run() {
   application_manager_.GetPluginManager().ForEachPlugin(on_app_registered);
 
   if (DataResumeResult::RESUME_DATA == resume_data_result) {
+    is_data_resumption_ = true;
     auto& resume_ctrl = application_manager_.resume_controller();
     const auto& msg_params = (*message_)[strings::msg_params];
     const auto& hash_id = msg_params[strings::hash_id].asString();
@@ -748,7 +762,8 @@ void FinishSendingRegisterAppInterfaceToMobile(
                                       &(msg_params[strings::app_hmi_type]));
   }
 
-  // Default HMI level should be set before any permissions validation, since it
+  // Default HMI level should be set before any permissions validation, since
+  // it
   // relies on HMI level.
   app_manager.OnApplicationRegistered(application);
   (*notify_upd_manager)();
@@ -774,11 +789,14 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile(
   ApplicationSharedPtr application = application_manager_.application(key);
 
   response_params[strings::sync_msg_version][strings::major_version] =
-      major_version;  // From generated file interfaces/generated_msg_version.h
+      major_version;  // From generated file
+                      // interfaces/generated_msg_version.h
   response_params[strings::sync_msg_version][strings::minor_version] =
-      minor_version;  // From generated file interfaces/generated_msg_version.h
+      minor_version;  // From generated file
+                      // interfaces/generated_msg_version.h
   response_params[strings::sync_msg_version][strings::patch_version] =
-      patch_version;  // From generated file interfaces/generated_msg_version.h
+      patch_version;  // From generated file
+                      // interfaces/generated_msg_version.h
 
   const smart_objects::SmartObject& msg_params =
       (*message_)[strings::msg_params];
@@ -1186,7 +1204,8 @@ mobile_apis::Result::eType RegisterAppInterfaceRequest::CheckWithPolicyData() {
   // If AppHMIType is not included in policy - allow any type
   if (!app_hmi_types.empty()) {
     if (message[strings::msg_params].keyExists(strings::app_hmi_type)) {
-      // If AppHmiTypes are partially same, the system should allow those listed
+      // If AppHmiTypes are partially same, the system should allow those
+      // listed
       // in the policy table and send warning info on missed values
       smart_objects::SmartArray app_types =
           *(message[strings::msg_params][strings::app_hmi_type].asArray());

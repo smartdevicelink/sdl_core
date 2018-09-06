@@ -84,6 +84,11 @@ class RegisterAppInterfaceRequest
   virtual void Run();
 
   /**
+   * @brief onTimeOut from requrst Controller
+   **/
+  void onTimeOut() OVERRIDE;
+
+  /**
    * @brief Prepares and sends RegisterAppInterface response to mobile
    * considering application type
    **/
@@ -292,6 +297,7 @@ class RegisterAppInterfaceRequest
    */
   void CheckLanguage();
 
+  bool is_data_resumption_;
   std::string response_info_;
   mobile_apis::Result::eType result_code_;
   DISALLOW_COPY_AND_ASSIGN(RegisterAppInterfaceRequest);
