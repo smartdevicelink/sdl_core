@@ -481,18 +481,29 @@ void ResumptionDataProcessor::DeleteGlobalProperties(
       application_manager_.ResetAllApplicationGlobalProperties(app_id);
 
   if (result.HasUIPropertiesReset()) {
-    smart_objects::SmartObjectSPtr ui_gl_props_reset_req =
+    smart_objects::SmartObjectSPtr msg_params =
         MessageHelper::CreateUIResetGlobalPropertiesRequest(result,
                                                             application);
-
-    ProcessHMIRequest(ui_gl_props_reset_req, false);
+    auto msg = MessageHelper::CreateMessageForHMI(
+        hmi_apis::messageType::request,
+        application_manager_.GetNextHMICorrelationID());
+    (*msg)[strings::params][strings::function_id] =
+        hmi_apis::FunctionID::UI_SetGlobalProperties;
+    (*msg)[strings::msg_params] = *msg_params;
+    ProcessHMIRequest(msg, false);
   }
   if (result.HasTTSPropertiesReset()) {
-    smart_objects::SmartObjectSPtr tts_gl_props_reset_req =
+    smart_objects::SmartObjectSPtr msg_params =
         MessageHelper::CreateUIResetGlobalPropertiesRequest(result,
                                                             application);
+    auto msg = MessageHelper::CreateMessageForHMI(
+        hmi_apis::messageType::request,
+        application_manager_.GetNextHMICorrelationID());
+    (*msg)[strings::params][strings::function_id] =
+        hmi_apis::FunctionID::TTS_SetGlobalProperties;
 
-    ProcessHMIRequest(tts_gl_props_reset_req, false);
+    (*msg)[strings::msg_params] = *msg_params;
+    ProcessHMIRequest(msg, false);
   }
 }
 
