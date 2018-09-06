@@ -553,7 +553,8 @@ class ApplicationManagerImpl
   void StartDevicesDiscovery();
 
   void RemoveHMIFakeParameters(
-      application_manager::commands::MessageSharedPtr& message) OVERRIDE;
+      application_manager::commands::MessageSharedPtr& message,
+      const hmi_apis::FunctionID::eType& function_id) OVERRIDE;
 
   /**
    * @brief TerminateRequest forces termination of request
