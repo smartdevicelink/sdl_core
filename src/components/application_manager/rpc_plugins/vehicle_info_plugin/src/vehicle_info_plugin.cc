@@ -103,6 +103,7 @@ void VehicleInfoPlugin::ProcessResumptionSubscription(
 
 void VehicleInfoPlugin::RevertResumption(application_manager::Application& app,
                                          VehicleInfoAppExtension& ext) {
+  LOG4CXX_AUTO_TRACE(logger_);
   smart_objects::SmartObjectSPtr request =
       CreateSubscriptionRequest(app.app_id(), ext, UNSUBSCRIBE);
   application_manager_->GetRPCService().ManageHMICommand(request);
@@ -120,13 +121,16 @@ smart_objects::SmartObjectSPtr VehicleInfoPlugin::CreateSubscriptionRequest(
     mobile_apis::VehicleDataType::eType type_id = ivi_data.second;
     if (subscriptions.end() != subscriptions.find(type_id)) {
       std::string key_name = ivi_data.first;
-      msg_params[key_name] = subscribe_status == SUBSCRIBE;
+      msg_params[key_name] = true;
     }
   }
+  const auto function_id = (subscribe_status == SUBSCRIBE) ?
+          hmi_apis::FunctionID::VehicleInfo_SubscribeVehicleData:
+          hmi_apis::FunctionID::VehicleInfo_UnsubscribeVehicleData;
 
   smart_objects::SmartObjectSPtr request =
       application_manager::MessageHelper::CreateModuleInfoSO(
-          hmi_apis::FunctionID::VehicleInfo_SubscribeVehicleData,
+          function_id,
           *application_manager_);
   (*request)[strings::msg_params] = msg_params;
   (*request)[strings::params][strings::app_id] = app_id;
