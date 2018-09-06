@@ -65,6 +65,8 @@
 #include "formatters/formatter_json_rpc.h"
 #include "formatters/CFormatterJsonSDLRPCv2.h"
 #include "formatters/CFormatterJsonSDLRPCv1.h"
+#include "json/json.h"
+#include "formatters/CFormatterJsonBase.h"
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "ApplicationManager")
 
@@ -2873,77 +2875,12 @@ void MessageHelper::SubscribeApplicationToSoftButton(
   app->SubscribeToSoftButtons(function_id, softbuttons_id);
 }
 
-// TODO(AK): change printf to logger
 bool MessageHelper::PrintSmartObject(const smart_objects::SmartObject& object) {
-  return true;
-#ifdef ENABLE_LOG
-  static uint32_t tab = 0;
-  std::string tab_buffer;
+  Json::Value tmp;
+  namespace Formatters = ns_smart_device_link::ns_json_handler::formatters;
+  Formatters::CFormatterJsonBase::objToJsonValue(object, tmp);
+  LOG4CXX_DEBUG(logger_, "SMART OBJECT: " << tmp.toStyledString());
 
-  if (tab == 0) {
-    printf("\n-------------------------------------------------------------");
-  }
-
-  for (uint32_t i = 0; i < tab; ++i) {
-    tab_buffer += "\t";
-  }
-
-  switch (object.getType()) {
-    case ns_smart_device_link::ns_smart_objects::SmartType_Array: {
-      for (size_t i = 0; i < object.length(); i++) {
-        ++tab;
-
-        printf("\n%s%zu: ", tab_buffer.c_str(), i);
-        if (!PrintSmartObject(object.getElement(i))) {
-          printf("\n");
-          return false;
-        }
-      }
-      break;
-    }
-    case ns_smart_device_link::ns_smart_objects::SmartType_Map: {
-      std::set<std::string> keys = object.enumerate();
-
-      for (std::set<std::string>::const_iterator key = keys.begin();
-           key != keys.end();
-           key++) {
-        ++tab;
-
-        printf("\n%s%s: ", tab_buffer.c_str(), (*key).c_str());
-        if (!PrintSmartObject(object[(*key).c_str()])) {
-          printf("\n");
-          return false;
-        }
-      }
-      break;
-    }
-    case ns_smart_device_link::ns_smart_objects::SmartType_Boolean:
-      object.asBool() ? printf("true\n") : printf("false\n");
-      break;
-    case ns_smart_device_link::ns_smart_objects::SmartType_Double: {
-      printf("%f", object.asDouble());
-      break;
-    }
-    case ns_smart_device_link::ns_smart_objects::SmartType_Integer:
-      printf("%lld", static_cast<long long int>(object.asInt()));
-      break;
-    case ns_smart_device_link::ns_smart_objects::SmartType_String:
-      printf("%s", object.asString().c_str());
-      break;
-    case ns_smart_device_link::ns_smart_objects::SmartType_Character:
-      printf("%c", object.asChar());
-      break;
-    default:
-      printf("PrintSmartObject - default case\n");
-      break;
-  }
-
-  if (0 != tab) {
-    --tab;
-  } else {
-    printf("\n-------------------------------------------------------------\n");
-  }
-#endif
   return true;
 }
 
