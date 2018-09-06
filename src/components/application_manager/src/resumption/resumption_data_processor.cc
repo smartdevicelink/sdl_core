@@ -494,7 +494,7 @@ void ResumptionDataProcessor::DeleteGlobalProperties(
   }
   if (result.HasTTSPropertiesReset()) {
     smart_objects::SmartObjectSPtr msg_params =
-        MessageHelper::CreateUIResetGlobalPropertiesRequest(result,
+        MessageHelper::CreateTTSResetGlobalPropertiesRequest(result,
                                                             application);
     auto msg = MessageHelper::CreateMessageForHMI(
         hmi_apis::messageType::request,
@@ -671,12 +671,13 @@ void ResumptionDataProcessor::DeletePluginsSubscriptions(
   }
 }
 
-bool ResumptionDataProcessor::IsRequestSuccessful(const smart_objects::SmartObject& response) const {
+bool ResumptionDataProcessor::IsRequestSuccessful(
+    const smart_objects::SmartObject& response) const {
   const hmi_apis::Common_Result::eType result_code =
       static_cast<hmi_apis::Common_Result::eType>(
           response[strings::params][application_manager::hmi_response::code]
               .asInt());
-  return result_code == hmi_apis::Common_Result::SUCCESS || 
+  return result_code == hmi_apis::Common_Result::SUCCESS ||
          result_code == hmi_apis::Common_Result::WARNINGS;
 }
 
