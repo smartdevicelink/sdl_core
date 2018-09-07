@@ -488,12 +488,19 @@ void SetInteriorVehicleDataRequest::Execute() {
       CutOffReadOnlyParams(module_data);
     }
 
-    application_manager_.RemoveHMIFakeParameters(message_);
+    smart_objects::SmartObjectSPtr message_to_hmi =
+        std::make_shared<smart_objects::SmartObject>(*message_);
+
+    (*message_to_hmi)[application_manager::strings::params]
+                     [application_manager::strings::function_id] =
+                         hmi_apis::FunctionID::RC_SetInteriorVehicleData;
+
+    application_manager_.RemoveHMIFakeParameters(message_to_hmi);
 
     app_mngr::ApplicationSharedPtr app =
         application_manager_.application(connection_key());
-    (*message_)[app_mngr::strings::msg_params][app_mngr::strings::app_id] =
-        app->app_id();
+    (*message_to_hmi)[app_mngr::strings::msg_params]
+                     [app_mngr::strings::app_id] = app->app_id();
 
     const bool app_wants_to_set_audio_src =
         module_data.keyExists(message_params::kAudioControlData) &&
@@ -510,7 +517,7 @@ void SetInteriorVehicleDataRequest::Execute() {
     }
 
     SendHMIRequest(hmi_apis::FunctionID::RC_SetInteriorVehicleData,
-                   &(*message_)[app_mngr::strings::msg_params],
+                   &(*message_to_hmi)[app_mngr::strings::msg_params],
                    true);
   } else {
     LOG4CXX_WARN(logger_, "Request module type & data mismatch!");
