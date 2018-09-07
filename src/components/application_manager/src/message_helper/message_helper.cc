@@ -2221,11 +2221,7 @@ void MessageHelper::SendSystemRequestNotification(
       commands::CommandImpl::protocol_version_;
 
   content[strings::params][strings::connection_key] = connection_key;
-
-#ifdef DEBUG
   PrintSmartObject(content);
-#endif
-
   DCHECK(app_mngr.GetRPCService().ManageMobileCommand(
       std::make_shared<smart_objects::SmartObject>(content),
       commands::Command::SOURCE_SDL));
@@ -2876,11 +2872,12 @@ void MessageHelper::SubscribeApplicationToSoftButton(
 }
 
 bool MessageHelper::PrintSmartObject(const smart_objects::SmartObject& object) {
+#ifdef DEBUG
   Json::Value tmp;
   namespace Formatters = ns_smart_device_link::ns_json_handler::formatters;
   Formatters::CFormatterJsonBase::objToJsonValue(object, tmp);
   LOG4CXX_DEBUG(logger_, "SMART OBJECT: " << tmp.toStyledString());
-
+#endif
   return true;
 }
 
