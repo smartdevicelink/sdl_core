@@ -396,7 +396,6 @@ bool ResumeCtrlImpl::StartResumption(ApplicationSharedPtr application,
                           << " hmi_app_id = " << application->hmi_app_id()
                           << " policy_id = " << application->policy_app_id()
                           << " received hash = " << hash);
-  SetupDefaultHMILevel(application);
   smart_objects::SmartObject saved_app;
   const std::string& device_mac = application->mac_address();
   bool result = resumption_storage_->GetSavedApplication(
