@@ -700,6 +700,14 @@ class MessageHelper {
       ApplicationSharedPtr app,
       int32_t function_id);
 
+  /**
+   * @brief Prints SmartObject contents to log file
+   * @param object - SmartObject to print
+   * @return always True as this function is used for internal debug purposes
+   * only
+   * @note Function prints SmartObject only in DEBUG build mode. There will not
+   * be any print in RELEASE build mode
+   */
   static bool PrintSmartObject(const smart_objects::SmartObject& object);
 
   template <typename From, typename To>
