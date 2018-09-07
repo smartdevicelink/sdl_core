@@ -43,6 +43,7 @@
 #include "application_manager/mock_application_manager.h"
 #include "application_manager/mock_application.h"
 #include "application_manager/mock_application_helper.h"
+#include "application_manager/mock_rpc_plugin_manager.h"
 #include "interfaces/MOBILE_API.h"
 #include "application_manager/smart_object_keys.h"
 #include "application_manager/policies/mock_policy_handler_interface.h"
@@ -71,6 +72,7 @@ namespace am = ::application_manager;
 
 using am::commands::MessageSharedPtr;
 using sdl_rpc_plugin::commands::RegisterAppInterfaceRequest;
+using am::plugin_manager::MockRPCPluginManager;
 
 namespace {
 const uint32_t kConnectionKey = 1u;
@@ -94,13 +96,21 @@ class RegisterAppInterfaceRequestTest
       , lock_ptr_(std::make_shared<sync_primitives::Lock>())
       , mock_application_helper_(
             application_manager_test::MockApplicationHelper::
-                application_helper_mock()) {
+                application_helper_mock())
+      , mock_rpc_plugin_manager_(
+          std::make_shared<NiceMock<MockRPCPluginManager> >()) {
     InitGetters();
     InitLanguage();
   }
 
   void SetUp() OVERRIDE {
     testing::Mock::VerifyAndClearExpectations(&mock_application_helper_);
+
+    ON_CALL(app_mngr_, GetPluginManager())
+      .WillByDefault(ReturnRef(*mock_rpc_plugin_manager_));
+
+    ON_CALL(app_mngr_, GetPolicyHandler())
+      .WillByDefault(ReturnRef(mock_policy_handler_));
   }
 
   void TearDown() OVERRIDE {
@@ -247,6 +257,7 @@ class RegisterAppInterfaceRequestTest
   MockConnectionHandler mock_connection_handler_;
   MockSessionObserver mock_session_observer_;
   application_manager_test::MockApplicationHelper& mock_application_helper_;
+  std::shared_ptr<am::plugin_manager::MockRPCPluginManager> mock_rpc_plugin_manager_;
 };
 
 TEST_F(RegisterAppInterfaceRequestTest, Init_SUCCESS) {
@@ -279,7 +290,7 @@ TEST_F(RegisterAppInterfaceRequestTest, Run_MinimalData_SUCCESS) {
       std::make_shared<utils::CallNothing>();
   ON_CALL(mock_policy_handler_, AddApplication(_, _))
       .WillByDefault(Return(notify_upd_manager));
-
+  
   EXPECT_CALL(app_mngr_, RegisterApplication(msg_)).WillOnce(Return(mock_app));
   EXPECT_CALL(mock_rpc_service_,
               ManageHMICommand(HMIResultCodeIs(
