@@ -60,9 +60,11 @@ void WebsocketSession::Accept() {
 
 void WebsocketSession::Shutdown() {
   shutdown_ = true;
+  DCHECK(thread_delegate_);
   thread_delegate_->SetShutdown();
   thread_->join();
   delete thread_delegate_;
+  thread_delegate_ = NULL;
   threads::DeleteThread(thread_);
 }
 
