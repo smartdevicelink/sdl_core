@@ -3204,6 +3204,12 @@
             <description>The short friendly name of the climate control module.
                 It should not be used to identify a module by mobile application.</description>
         </param>
+        <param name="currentTemperatureAvailable" type="Boolean" mandatory="false" since="5.0">
+            <description>
+                Availability of the reading of current temperature.
+                True: Available, False: Not Available, Not present: Not Available.
+            </description>
+        </param>
         <param name="fanSpeedAvailable" type="Boolean" mandatory="false">
             <description>
                 Availability of the control of fan speed.
@@ -5987,11 +5993,14 @@
             <element name="CORRUPTED_DATA"/>
         </param>
         
-        <param name="spaceAvailable" type="Integer" minvalue="0" maxvalue="2000000000" mandatory="true">
+        <param name="spaceAvailable" type="Integer" minvalue="0" maxvalue="2000000000" mandatory="false" since="5.0">
             <description>
                 Provides the total local space available in SDL Core for the registered app.
                 If the transfer has systemFile enabled, then the value will be set to 0 automatically.
             </description>
+            <history>
+                <param name="spaceAvailable" type="Integer" minvalue="0" maxvalue="2000000000" mandatory="true" since="3.0" until="5.0"/>
+            </history>
         </param>
         
         <param name="info" type="String" maxlength="1000" mandatory="false" platform="documentation">
@@ -6032,8 +6041,14 @@
             <element name="UNSUPPORTED_REQUEST"/>
         </param>
         
-        <param name="spaceAvailable" type="Integer" minvalue="0" maxvalue="2000000000" mandatory="true">
-            <description>Provides the total local space available on the module for the registered app.</description>
+        <param name="spaceAvailable" type="Integer" minvalue="0" maxvalue="2000000000" mandatory="false" since="5.0">
+            <description>
+                Provides the total local space available in SDL Core for the registered app.
+                If the transfer has systemFile enabled, then the value will be set to 0 automatically.
+            </description>
+            <history>
+                <param name="spaceAvailable" type="Integer" minvalue="0" maxvalue="2000000000" mandatory="true" since="3.0" until="5.0"/>
+            </history>
         </param>
         
         <param name="info" type="String" maxlength="1000" mandatory="false" platform="documentation">
@@ -6076,8 +6091,14 @@
             </description>
         </param>
         
-        <param name="spaceAvailable" type="Integer" minvalue="0" maxvalue="2000000000" mandatory="true">
-            <description>Provides the total local space available on the module for the registered app.</description>
+        <param name="spaceAvailable" type="Integer" minvalue="0" maxvalue="2000000000" mandatory="false" since="5.0">
+            <description>
+                Provides the total local space available in SDL Core for the registered app.
+                If the transfer has systemFile enabled, then the value will be set to 0 automatically.
+            </description>
+            <history>
+                <param name="spaceAvailable" type="Integer" minvalue="0" maxvalue="2000000000" mandatory="true" since="3.0" until="5.0"/>
+            </history>
         </param>
         
         <param name="info" type="String" maxlength="1000" mandatory="false" platform="documentation">
