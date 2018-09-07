@@ -213,7 +213,6 @@ TEST_F(ResumeCtrlTest, StartResumption_AppWithGrammarId) {
   extensions.insert(extensions.begin(), mock_app_extension_);
   EXPECT_CALL(*mock_app_, Extensions()).WillOnce(ReturnRef(extensions));
 
-  EXPECT_CALL(*mock_app_, UpdateHash());
   EXPECT_CALL(*mock_app_, set_grammar_id(kTestGrammarId_));
 
   const bool res = res_ctrl_->StartResumption(mock_app_, kHash_, callback_);
@@ -238,7 +237,6 @@ TEST_F(ResumeCtrlTest, StartResumption_WithoutGrammarId) {
   ON_CALL(*mock_storage_,
           GetSavedApplication(kTestPolicyAppId_, kMacAddress_, _))
       .WillByDefault(DoAll(SetArgReferee<2>(saved_app), Return(true)));
-  EXPECT_CALL(*mock_app_, UpdateHash());
   EXPECT_CALL(*mock_app_, set_grammar_id(kTestGrammarId_)).Times(0);
 
   bool res = res_ctrl_->StartResumption(mock_app_, kHash_, callback_);
@@ -297,7 +295,6 @@ TEST_F(ResumeCtrlTest, StartResumption_AppWithFiles) {
   extensions.insert(extensions.begin(), mock_app_extension_);
   EXPECT_CALL(*mock_app_, Extensions()).WillOnce(ReturnRef(extensions));
 
-  EXPECT_CALL(*mock_app_, UpdateHash());
   EXPECT_CALL(*mock_app_, set_grammar_id(kTestGrammarId_));
   for (uint32_t i = 0; i < count_of_files; ++i) {
     EXPECT_CALL(*mock_app_,
@@ -359,7 +356,6 @@ TEST_F(ResumeCtrlTest, StartResumption_AppWithSubmenues) {
   extensions.insert(extensions.begin(), mock_app_extension_);
   EXPECT_CALL(*mock_app_, Extensions()).WillOnce(ReturnRef(extensions));
 
-  EXPECT_CALL(*mock_app_, UpdateHash());
   const bool res = res_ctrl_->StartResumption(mock_app_, kHash_, callback_);
   EXPECT_TRUE(res);
 }
@@ -387,7 +383,6 @@ TEST_F(ResumeCtrlTest, StartResumption_AppWithCommands) {
   ON_CALL(*mock_storage_,
           GetSavedApplication(kTestPolicyAppId_, kMacAddress_, _))
       .WillByDefault(DoAll(SetArgReferee<2>(saved_app), Return(true)));
-  EXPECT_CALL(*mock_app_, UpdateHash());
   EXPECT_CALL(*mock_app_, set_grammar_id(kTestGrammarId_));
   ON_CALL(*mock_app_, help_prompt_manager())
       .WillByDefault(ReturnRef(*mock_help_prompt_manager_));
@@ -449,7 +444,6 @@ TEST_F(ResumeCtrlTest, StartResumption_AppWithChoiceSet) {
   ON_CALL(*mock_storage_,
           GetSavedApplication(kTestPolicyAppId_, kMacAddress_, _))
       .WillByDefault(DoAll(SetArgReferee<2>(saved_app), Return(true)));
-  EXPECT_CALL(*mock_app_, UpdateHash());
   EXPECT_CALL(*mock_app_, set_grammar_id(kTestGrammarId_));
 
   for (uint32_t i = 0; i < count_of_choice_sets; ++i) {
@@ -504,7 +498,6 @@ TEST_F(ResumeCtrlTest, StartResumption_AppWithGlobalProperties) {
   extensions.insert(extensions.begin(), mock_app_extension_);
   EXPECT_CALL(*mock_app_, Extensions()).WillOnce(ReturnRef(extensions));
 
-  EXPECT_CALL(*mock_app_, UpdateHash());
   const bool res = res_ctrl_->StartResumption(mock_app_, kHash_, callback_);
   EXPECT_TRUE(res);
 }
@@ -536,6 +529,19 @@ TEST_F(ResumeCtrlTest, StartResumption_AppWithSubscribeOnButtons) {
           GetSavedApplication(kTestPolicyAppId_, kMacAddress_, _))
       .WillByDefault(DoAll(SetArgReferee<2>(saved_app), Return(true)));
 
+  std::shared_ptr<sync_primitives::Lock> button_lock_ptr = 
+  std::make_shared<sync_primitives::Lock>();
+  ButtonSubscriptions button_subscriptions;
+  DataAccessor<ButtonSubscriptions> button_subscription_accessor(button_subscriptions, button_lock_ptr);
+  ON_CALL(*mock_app_,
+          SubscribedButtons()).WillByDefault(Return(button_subscription_accessor));
+
+  smart_objects::SmartObjectList button_subscription_notifications;
+  ON_CALL(*application_manager::MockMessageHelper::message_helper_mock(),
+              CreateOnButtonSubscriptionNotificationsForApp(_, _, _))
+              .WillByDefault(Return(button_subscription_notifications));
+
+
   EXPECT_CALL(*mock_app_, set_grammar_id(kTestGrammarId_));
 
   for (uint32_t i = 0; i < count_of_buttons; ++i) {
@@ -543,7 +549,6 @@ TEST_F(ResumeCtrlTest, StartResumption_AppWithSubscribeOnButtons) {
         *mock_app_,
         SubscribeToButton(static_cast<mobile_apis::ButtonName::eType>(i)));
   }
-  EXPECT_CALL(*mock_app_, UpdateHash());
 
   std::list<application_manager::AppExtensionPtr> extensions;
   extensions.insert(extensions.begin(), mock_app_extension_);
@@ -553,7 +558,7 @@ TEST_F(ResumeCtrlTest, StartResumption_AppWithSubscribeOnButtons) {
   EXPECT_CALL(*mock_app_extension_, ProcessResumption(saved_app, _));
 
   EXPECT_CALL(*application_manager::MockMessageHelper::message_helper_mock(),
-              CreateOnButtonSubscriptionNotificationsForApp(_, _, _)).Times(2);
+             CreateOnButtonSubscriptionNotificationsForApp(_, _, _));
 
   const bool res = res_ctrl_->StartResumption(mock_app_, kHash_, callback_);
   EXPECT_TRUE(res);
@@ -592,7 +597,6 @@ TEST_F(ResumeCtrlTest, StartResumption_AppWithSubscriptionToIVI) {
 
   smart_objects::SmartObjectList requests;
 
-  EXPECT_CALL(*mock_app_, UpdateHash());
   std::list<application_manager::AppExtensionPtr> extensions;
 
   extensions.insert(extensions.begin(), mock_app_extension_);
