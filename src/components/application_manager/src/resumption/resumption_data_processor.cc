@@ -486,16 +486,19 @@ void ResumptionDataProcessor::DeleteGlobalProperties(
       application_manager_.ResetAllApplicationGlobalProperties(app_id);
   ApplicationResumptionStatus& status = resumption_status_[app_id];
   auto check_if_successful = [status](hmi_apis::FunctionID::eType function_id) {
-     for(auto& resumption_request : status.successful_requests) {
-        auto request_func = resumption_request.message[strings::params][strings::function_id].asInt();
-        if (request_func == function_id) {
-          return true;
-        }
-     }
-     return false;
+    for (auto& resumption_request : status.successful_requests) {
+      auto request_func =
+          resumption_request.message[strings::params][strings::function_id]
+              .asInt();
+      if (request_func == function_id) {
+        return true;
+      }
+    }
+    return false;
   };
 
-  if (result.HasUIPropertiesReset() && check_if_successful(hmi_apis::FunctionID::UI_SetGlobalProperties)) {
+  if (result.HasUIPropertiesReset() &&
+      check_if_successful(hmi_apis::FunctionID::UI_SetGlobalProperties)) {
     smart_objects::SmartObjectSPtr msg_params =
         MessageHelper::CreateUIResetGlobalPropertiesRequest(result,
                                                             application);
@@ -508,10 +511,11 @@ void ResumptionDataProcessor::DeleteGlobalProperties(
     ProcessHMIRequest(msg, false);
   }
 
-  if (result.HasTTSPropertiesReset() && check_if_successful(hmi_apis::FunctionID::TTS_SetGlobalProperties)) {
+  if (result.HasTTSPropertiesReset() &&
+      check_if_successful(hmi_apis::FunctionID::TTS_SetGlobalProperties)) {
     smart_objects::SmartObjectSPtr msg_params =
         MessageHelper::CreateTTSResetGlobalPropertiesRequest(result,
-                                                            application);
+                                                             application);
     auto msg = MessageHelper::CreateMessageForHMI(
         hmi_apis::messageType::request,
         application_manager_.GetNextHMICorrelationID());
