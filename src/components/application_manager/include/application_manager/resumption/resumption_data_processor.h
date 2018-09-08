@@ -96,6 +96,12 @@ class ResumptionDataProcessor : public app_mngr::event_engine::EventObserver {
    */
   void on_event(const app_mngr::event_engine::Event& event) OVERRIDE;
 
+  /**
+   * @brief Handle restored data when timeout appeared
+   * @param application id - const int32_t
+   */
+  void HandleOnTimeOut(const int32_t app_id);
+
  private:
   /**
    * @brief Revert the data to the state before Resumption

@@ -184,6 +184,7 @@ RegisterAppInterfaceRequest::RegisterAppInterfaceRequest(
                          rpc_service,
                          hmi_capabilities,
                          policy_handler)
+    , application_(nullptr)
     , is_data_resumption_(false)
     , result_code_(mobile_apis::Result::INVALID_ENUM) {}
 
@@ -428,6 +429,8 @@ void RegisterAppInterfaceRequest::onTimeOut() {
     app_mngr::commands::CommandRequestImpl::onTimeOut();
     return;
   }
+  auto& resume_ctrl = application_manager_.resume_controller();
+  resume_ctrl.HandleOnTimeOut(application_->app_id());
   result_code_ = mobile_api::Result::RESUME_FAILED;
   const std::string info = "HMI does not respond during timeout.";
   SendRegisterAppInterfaceResponseToMobile(
@@ -526,16 +529,6 @@ void RegisterAppInterfaceRequest::Run() {
     return;
   }
 
-  uint16_t major =
-      msg_params[strings::sync_msg_version][strings::major_version].asUInt();
-  uint16_t minor =
-      msg_params[strings::sync_msg_version][strings::minor_version].asUInt();
-  uint16_t patch = 0;
-  // Check if patch exists since it is not mandatory.
-  if (msg_params[strings::sync_msg_version].keyExists(strings::patch_version)) {
-    patch =
-        msg_params[strings::sync_msg_version][strings::patch_version].asUInt();
-  }
 
   utils::SemanticVersion mobile_version(major, minor, patch);
   utils::SemanticVersion min_module_version(
@@ -547,29 +540,29 @@ void RegisterAppInterfaceRequest::Run() {
     SendResponse(false, mobile_apis::Result::REJECTED);
   }
 
-  application = application_manager_.RegisterApplication(message_);
+  application_ = application_manager_.RegisterApplication(message_);
 
-  if (!application) {
+  if (!application_) {
     LOG4CXX_ERROR(logger_, "Application hasn't been registered!");
     return;
   }
 
-  FillApplicationParams(application);
+  FillApplicationParams(application_);
 
-  SetupAppDeviceInfo(application);
+  SetupAppDeviceInfo(application_);
 
   const auto resume_data_result = ApplicationDataShouldBeResumed();
   SendOnAppRegisteredNotificationToHMI(
-      *application, resume_data_result == DataResumeResult::RESUME_DATA);
+      *application_, resume_data_result == DataResumeResult::RESUME_DATA);
 
   // By default app subscribed to CUSTOM_BUTTON
   SendSubscribeCustomButtonNotification();
-  SendChangeRegistrationOnHMI(application);
+  SendChangeRegistrationOnHMI(application_);
 
   std::function<void(plugin_manager::RPCPlugin&)> on_app_registered =
-      [application](plugin_manager::RPCPlugin& plugin) {
+      [this](plugin_manager::RPCPlugin& plugin) {
         plugin.OnApplicationEvent(plugin_manager::kApplicationRegistered,
-                                  application);
+                                  application_);
       };
   application_manager_.GetPluginManager().ForEachPlugin(on_app_registered);
 
@@ -595,7 +588,6 @@ void RegisterAppInterfaceRequest::Run() {
   if (mobile_apis::Result::INVALID_ENUM == result_code_) {
     result_code_ = mobile_apis::Result::SUCCESS;
   }
-
   if (DataResumeResult::WRONG_HASH == resume_data_result) {
     add_info = "Hash from RAI does not match to saved resume data.";
     result_code_ = mobile_apis::Result::RESUME_FAILED;
@@ -613,9 +605,9 @@ void RegisterAppInterfaceRequest::Run() {
   SendRegisterAppInterfaceResponseToMobile(
       ApplicationType::kNewApplication, add_info, need_to_restore_vr);
   smart_objects::SmartObjectSPtr so =
-      GetLockScreenIconUrlNotification(connection_key(), application);
+      GetLockScreenIconUrlNotification(connection_key(), application_);
   rpc_service_.ManageMobileCommand(so, SOURCE_SDL);
-  application_manager_.SendDriverDistractionState(application);
+  application_manager_.SendDriverDistractionState(application_);
 }
 
 smart_objects::SmartObjectSPtr

@@ -76,6 +76,11 @@ bool ResumptionRequestIDs::operator<(const ResumptionRequestIDs& other) const {
          function_id < other.function_id;
 }
 
+void ResumptionDataProcessor::HandleOnTimeOut(const int32_t app_id) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  RevertRestoredData(application_manager_.application(app_id));
+}
+
 void ResumptionDataProcessor::on_event(const event_engine::Event& event) {
   LOG4CXX_AUTO_TRACE(logger_);
   const smart_objects::SmartObject& response = event.smart_object();
