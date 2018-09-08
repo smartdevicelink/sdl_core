@@ -404,8 +404,6 @@ bool ResumeCtrlImpl::StartResumption(ApplicationSharedPtr application,
     const std::string& saved_hash = saved_app[strings::hash_id].asString();
     result = saved_hash == hash ? RestoreApplicationData(application, callback)
                                 : false;
-
-    AddToResumptionTimerQueue(application->app_id());
   }
   return result;
 }
