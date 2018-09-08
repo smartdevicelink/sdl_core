@@ -163,6 +163,8 @@ class ResumeCtrlImpl : public ResumeCtrl {
                        const std::string& hash,
                        ResumptionCallBack callback) OVERRIDE;
 
+  void HandleOnTimeOut(const int32_t app_id) OVERRIDE;
+
   /**
    * @brief Start timer for resumption applications
    *        Does not restore D1-D5 data

@@ -184,6 +184,7 @@ RegisterAppInterfaceRequest::RegisterAppInterfaceRequest(
                          rpc_service,
                          hmi_capabilities,
                          policy_handler)
+    , application_(nullptr)
     , is_data_resumption_(false)
     , result_code_(mobile_apis::Result::INVALID_ENUM) {}
 
@@ -428,6 +429,8 @@ void RegisterAppInterfaceRequest::onTimeOut() {
     app_mngr::commands::CommandRequestImpl::onTimeOut();
     return;
   }
+  auto& resume_ctrl = application_manager_.resume_controller();
+  resume_ctrl.HandleOnTimeOut(application_->app_id());
   result_code_ = mobile_api::Result::RESUME_FAILED;
   const std::string info = "HMI does not respond during timeout.";
   SendRegisterAppInterfaceResponseToMobile(
@@ -547,9 +550,9 @@ void RegisterAppInterfaceRequest::Run() {
     SendResponse(false, mobile_apis::Result::REJECTED);
   }
 
-  application = application_manager_.RegisterApplication(message_);
+  application_ = application_manager_.RegisterApplication(message_);
 
-  if (!application) {
+  if (!application_) {
     LOG4CXX_ERROR(logger_, "Application hasn't been registered!");
     return;
   }
@@ -569,22 +572,22 @@ void RegisterAppInterfaceRequest::Run() {
     application->set_msg_version(module_version);
   }
 
-  FillApplicationParams(application);
+  FillApplicationParams(application_);
 
-  SetupAppDeviceInfo(application);
+  SetupAppDeviceInfo(application_);
 
   const auto resume_data_result = ApplicationDataShouldBeResumed();
   SendOnAppRegisteredNotificationToHMI(
-      *application, resume_data_result == DataResumeResult::RESUME_DATA);
+      *application_, resume_data_result == DataResumeResult::RESUME_DATA);
 
   // By default app subscribed to CUSTOM_BUTTON
   SendSubscribeCustomButtonNotification();
-  SendChangeRegistrationOnHMI(application);
+  SendChangeRegistrationOnHMI(application_);
 
   std::function<void(plugin_manager::RPCPlugin&)> on_app_registered =
-      [application](plugin_manager::RPCPlugin& plugin) {
+      [this](plugin_manager::RPCPlugin& plugin) {
         plugin.OnApplicationEvent(plugin_manager::kApplicationRegistered,
-                                  application);
+                                  application_);
       };
   application_manager_.GetPluginManager().ForEachPlugin(on_app_registered);
 
@@ -628,9 +631,9 @@ void RegisterAppInterfaceRequest::Run() {
   SendRegisterAppInterfaceResponseToMobile(
       ApplicationType::kNewApplication, add_info, need_to_restore_vr);
   smart_objects::SmartObjectSPtr so =
-      GetLockScreenIconUrlNotification(connection_key(), application);
+      GetLockScreenIconUrlNotification(connection_key(), application_);
   rpc_service_.ManageMobileCommand(so, SOURCE_SDL);
-  application_manager_.SendDriverDistractionState(application);
+  application_manager_.SendDriverDistractionState(application_);
 }
 
 smart_objects::SmartObjectSPtr
