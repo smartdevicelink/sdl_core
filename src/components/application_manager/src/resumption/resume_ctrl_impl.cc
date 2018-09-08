@@ -377,6 +377,11 @@ bool ResumeCtrlImpl::StartResumption(ApplicationSharedPtr application,
   return result;
 }
 
+void ResumeCtrlImpl::HandleOnTimeOut(const int32_t app_id) {
+    LOG4CXX_AUTO_TRACE(logger_);
+    resumption_data_processor_.HandleOnTimeOut(app_id);
+}
+
 bool ResumeCtrlImpl::StartResumptionOnlyHMILevel(
     ApplicationSharedPtr application) {
   // sync_primitives::AutoLock lock(resumtion_lock_);

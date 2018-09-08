@@ -297,6 +297,7 @@ class RegisterAppInterfaceRequest
    */
   void CheckLanguage();
 
+  application_manager::ApplicationSharedPtr application_;
   bool is_data_resumption_;
   std::string response_info_;
   mobile_apis::Result::eType result_code_;
