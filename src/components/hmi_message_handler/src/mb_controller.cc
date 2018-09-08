@@ -220,7 +220,7 @@ void CMessageBrokerController::exitReceivingThread() {
   mConnectionListLock.Acquire();
   std::vector<std::shared_ptr<hmi_message_handler::WebsocketSession> >::iterator
       it;
-  while(!mConnectionList.empty()){
+  while (!mConnectionList.empty()) {
     mConnectionList.back()->Shutdown();
     mConnectionList.pop_back();
   }

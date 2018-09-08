@@ -126,14 +126,14 @@ smart_objects::SmartObjectSPtr VehicleInfoPlugin::CreateSubscriptionRequest(
       msg_params[key_name] = true;
     }
   }
-  const auto function_id = (subscribe_status == SUBSCRIBE) ?
-          hmi_apis::FunctionID::VehicleInfo_SubscribeVehicleData:
-          hmi_apis::FunctionID::VehicleInfo_UnsubscribeVehicleData;
+  const auto function_id =
+      (subscribe_status == SUBSCRIBE)
+          ? hmi_apis::FunctionID::VehicleInfo_SubscribeVehicleData
+          : hmi_apis::FunctionID::VehicleInfo_UnsubscribeVehicleData;
 
   smart_objects::SmartObjectSPtr request =
       application_manager::MessageHelper::CreateModuleInfoSO(
-          function_id,
-          *application_manager_);
+          function_id, *application_manager_);
   (*request)[strings::msg_params] = msg_params;
   (*request)[strings::params][strings::app_id] = app_id;
 

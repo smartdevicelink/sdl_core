@@ -267,14 +267,33 @@ ApplicationSharedPtr ApplicationManagerImpl::active_application() const {
   return FindApp(accessor, ActiveAppPredicate);
 }
 
-bool LimitedAppPredicate(const ApplicationSharedPtr app) {
-  return app ? app->hmi_level() == mobile_api::HMILevel::HMI_LIMITED : false;
-}
-
 ApplicationSharedPtr ApplicationManagerImpl::get_limited_media_application()
     const {
   DataAccessor<ApplicationSet> accessor = applications();
-  return FindApp(accessor, LimitedAppPredicate);
+  auto is_limited_media_app = [](const ApplicationSharedPtr app) {
+    if (!app) {
+      return false;
+    }
+
+    if (app->is_media_application()) {
+      return true;
+    }
+
+    const auto app_types = app->app_types();
+    if (!app_types) {
+      return false;
+    }
+
+    for (size_t i = 0; i < app_types->length(); i++) {
+      const auto app_type = app_types->getElement(i).asUInt();
+      if (mobile_apis::AppHMIType::MEDIA == app_type) {
+        return true;
+      }
+    }
+    return false;
+  };
+
+  return FindApp(accessor, is_limited_media_app);
 }
 
 bool LimitedNaviAppPredicate(const ApplicationSharedPtr app) {
@@ -414,18 +433,22 @@ bool ApplicationManagerImpl::IsAppTypeExistsInFullOrLimited(
     }
 
     if (voice_state && active_app->is_voice_communication_supported()) {
+      LOG4CXX_DEBUG(logger_, "AKutsan 1");
       return true;
     }
 
     if (media_state && active_app->is_media_application()) {
+      LOG4CXX_DEBUG(logger_, "AKutsan 2");
       return true;
     }
 
     if (navi_state && active_app->is_navi()) {
+      LOG4CXX_DEBUG(logger_, "AKutsan 3");
       return true;
     }
 
     if (mobile_projection_state && active_app->mobile_projection_enabled()) {
+      LOG4CXX_DEBUG(logger_, "AKutsan 4");
       return true;
     }
   }
@@ -434,6 +457,7 @@ bool ApplicationManagerImpl::IsAppTypeExistsInFullOrLimited(
   if (voice_state) {
     if ((get_limited_voice_application().use_count() != 0) &&
         (get_limited_voice_application()->app_id() != app->app_id())) {
+      LOG4CXX_DEBUG(logger_, "AKutsan 5");
       return true;
     }
   }
@@ -441,6 +465,7 @@ bool ApplicationManagerImpl::IsAppTypeExistsInFullOrLimited(
   if (media_state) {
     if ((get_limited_media_application().use_count() != 0) &&
         (get_limited_media_application()->app_id() != app->app_id())) {
+      LOG4CXX_DEBUG(logger_, "AKutsan 6");
       return true;
     }
   }
@@ -448,6 +473,7 @@ bool ApplicationManagerImpl::IsAppTypeExistsInFullOrLimited(
   if (navi_state) {
     if ((get_limited_navi_application().use_count() != 0) &&
         (get_limited_navi_application()->app_id() != app->app_id())) {
+      LOG4CXX_DEBUG(logger_, "AKutsan 7");
       return true;
     }
   }
@@ -456,6 +482,7 @@ bool ApplicationManagerImpl::IsAppTypeExistsInFullOrLimited(
     if ((get_limited_mobile_projection_application().use_count() != 0) &&
         (get_limited_mobile_projection_application()->app_id() !=
          app->app_id())) {
+      LOG4CXX_DEBUG(logger_, "AKutsan 8");
       return true;
     }
   }
@@ -2464,6 +2491,7 @@ void ApplicationManagerImpl::UnregisterApplication(
 
     if (is_resuming) {
       resume_controller().SaveApplication(app_to_remove);
+      UnsubscribeAppFromWayPoints(app_id);
     } else {
       resume_controller().RemoveApplicationFromSaved(app_to_remove);
     }
