@@ -157,6 +157,13 @@ class ResumeCtrl {
   virtual bool StartResumption(app_mngr::ApplicationSharedPtr application,
                                const std::string& hash,
                                ResumptionCallBack callback) = 0;
+
+  /**
+   * @brief Handle restored data when timeout appeared
+   * @param application id - const int32_t
+   */
+  virtual void HandleOnTimeOut(const int32_t app_id) = 0;
+
   /**
    * @brief Start timer for resumption applications
    *        Does not restore D1-D5 data

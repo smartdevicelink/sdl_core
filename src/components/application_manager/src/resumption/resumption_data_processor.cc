@@ -76,6 +76,11 @@ bool ResumptionRequestIDs::operator<(const ResumptionRequestIDs& other) const {
          function_id < other.function_id;
 }
 
+void ResumptionDataProcessor::HandleOnTimeOut(const int32_t app_id) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  RevertRestoredData(application_manager_.application(app_id));
+}
+
 void ResumptionDataProcessor::on_event(const event_engine::Event& event) {
   LOG4CXX_AUTO_TRACE(logger_);
   const smart_objects::SmartObject& response = event.smart_object();
@@ -481,16 +486,19 @@ void ResumptionDataProcessor::DeleteGlobalProperties(
       application_manager_.ResetAllApplicationGlobalProperties(app_id);
   ApplicationResumptionStatus& status = resumption_status_[app_id];
   auto check_if_successful = [status](hmi_apis::FunctionID::eType function_id) {
-     for(auto& resumption_request : status.successful_requests) {
-        auto request_func = resumption_request.message[strings::params][strings::function_id].asInt();
-        if (request_func == function_id) {
-          return true;
-        }
-     }
-     return false;
+    for (auto& resumption_request : status.successful_requests) {
+      auto request_func =
+          resumption_request.message[strings::params][strings::function_id]
+              .asInt();
+      if (request_func == function_id) {
+        return true;
+      }
+    }
+    return false;
   };
 
-  if (result.HasUIPropertiesReset() && check_if_successful(hmi_apis::FunctionID::UI_SetGlobalProperties)) {
+  if (result.HasUIPropertiesReset() &&
+      check_if_successful(hmi_apis::FunctionID::UI_SetGlobalProperties)) {
     smart_objects::SmartObjectSPtr msg_params =
         MessageHelper::CreateUIResetGlobalPropertiesRequest(result,
                                                             application);
@@ -503,10 +511,11 @@ void ResumptionDataProcessor::DeleteGlobalProperties(
     ProcessHMIRequest(msg, false);
   }
 
-  if (result.HasTTSPropertiesReset() && check_if_successful(hmi_apis::FunctionID::TTS_SetGlobalProperties)) {
+  if (result.HasTTSPropertiesReset() &&
+      check_if_successful(hmi_apis::FunctionID::TTS_SetGlobalProperties)) {
     smart_objects::SmartObjectSPtr msg_params =
         MessageHelper::CreateTTSResetGlobalPropertiesRequest(result,
-                                                            application);
+                                                             application);
     auto msg = MessageHelper::CreateMessageForHMI(
         hmi_apis::messageType::request,
         application_manager_.GetNextHMICorrelationID());
