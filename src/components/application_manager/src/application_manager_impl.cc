@@ -2609,6 +2609,7 @@ void ApplicationManagerImpl::UnregisterApplication(
     }
     if (is_resuming) {
       resume_controller().SaveApplication(app_to_remove);
+      UnsubscribeAppFromWayPoints(app_id);
     } else {
       resume_controller().RemoveApplicationFromSaved(app_to_remove);
     }
