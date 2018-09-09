@@ -529,18 +529,18 @@ TEST_F(ResumeCtrlTest, StartResumption_AppWithSubscribeOnButtons) {
           GetSavedApplication(kTestPolicyAppId_, kMacAddress_, _))
       .WillByDefault(DoAll(SetArgReferee<2>(saved_app), Return(true)));
 
-  std::shared_ptr<sync_primitives::Lock> button_lock_ptr = 
-  std::make_shared<sync_primitives::Lock>();
+  std::shared_ptr<sync_primitives::Lock> button_lock_ptr =
+      std::make_shared<sync_primitives::Lock>();
   ButtonSubscriptions button_subscriptions;
-  DataAccessor<ButtonSubscriptions> button_subscription_accessor(button_subscriptions, button_lock_ptr);
-  ON_CALL(*mock_app_,
-          SubscribedButtons()).WillByDefault(Return(button_subscription_accessor));
+  DataAccessor<ButtonSubscriptions> button_subscription_accessor(
+      button_subscriptions, button_lock_ptr);
+  ON_CALL(*mock_app_, SubscribedButtons())
+      .WillByDefault(Return(button_subscription_accessor));
 
   smart_objects::SmartObjectList button_subscription_notifications;
   ON_CALL(*application_manager::MockMessageHelper::message_helper_mock(),
-              CreateOnButtonSubscriptionNotificationsForApp(_, _, _))
-              .WillByDefault(Return(button_subscription_notifications));
-
+          CreateOnButtonSubscriptionNotificationsForApp(_, _, _))
+      .WillByDefault(Return(button_subscription_notifications));
 
   EXPECT_CALL(*mock_app_, set_grammar_id(kTestGrammarId_));
 
@@ -558,7 +558,7 @@ TEST_F(ResumeCtrlTest, StartResumption_AppWithSubscribeOnButtons) {
   EXPECT_CALL(*mock_app_extension_, ProcessResumption(saved_app, _));
 
   EXPECT_CALL(*application_manager::MockMessageHelper::message_helper_mock(),
-             CreateOnButtonSubscriptionNotificationsForApp(_, _, _));
+              CreateOnButtonSubscriptionNotificationsForApp(_, _, _));
 
   const bool res = res_ctrl_->StartResumption(mock_app_, kHash_, callback_);
   EXPECT_TRUE(res);
