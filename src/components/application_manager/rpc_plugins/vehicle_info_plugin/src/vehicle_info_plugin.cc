@@ -86,8 +86,15 @@ void VehicleInfoPlugin::ProcessResumptionSubscription(
     VehicleInfoAppExtension& ext,
     resumption::Subscriber subscriber) {
   LOG4CXX_AUTO_TRACE(logger_);
+
+  std::set<std::string> subscriptions;
+  for (auto& ivi : application_manager::MessageHelper::vehicle_data()) {
+    if (ext.Subscriptions().end() != ext.Subscriptions().find(ivi.second))
+      subscriptions.insert(ivi.first);
+  }
+
   smart_objects::SmartObjectSPtr request =
-      CreateSubscriptionRequest(app.app_id(), ext, SUBSCRIBE);
+      CreateSubscriptionRequest(app.app_id(), subscriptions, SUBSCRIBE);
 
   resumption::ResumptionRequest resumption_request;
   resumption_request.request_ids.correlation_id =
@@ -101,28 +108,26 @@ void VehicleInfoPlugin::ProcessResumptionSubscription(
   application_manager_->GetRPCService().ManageHMICommand(request);
 }
 
-void VehicleInfoPlugin::RevertResumption(application_manager::Application& app,
-                                         VehicleInfoAppExtension& ext) {
+void VehicleInfoPlugin::RevertResumption(
+    application_manager::Application& app,
+    VehicleInfoAppExtension& ext,
+    std::set<std::string> list_of_subscriptions) {
   LOG4CXX_AUTO_TRACE(logger_);
-  smart_objects::SmartObjectSPtr request =
-      CreateSubscriptionRequest(app.app_id(), ext, UNSUBSCRIBE);
+
+  smart_objects::SmartObjectSPtr request = CreateSubscriptionRequest(
+      app.app_id(), list_of_subscriptions, UNSUBSCRIBE);
   application_manager_->GetRPCService().ManageHMICommand(request);
 }
 
 smart_objects::SmartObjectSPtr VehicleInfoPlugin::CreateSubscriptionRequest(
     const uint32_t app_id,
-    VehicleInfoAppExtension& ext,
+    std::set<std::string> list_of_subscriptions,
     const SubscribeStatus subscribe_status) {
   LOG4CXX_AUTO_TRACE(logger_);
   smart_objects::SmartObject msg_params =
       smart_objects::SmartObject(smart_objects::SmartType_Map);
-  const auto& subscriptions = ext.Subscriptions();
-  for (auto& ivi_data : application_manager::MessageHelper::vehicle_data()) {
-    mobile_apis::VehicleDataType::eType type_id = ivi_data.second;
-    if (subscriptions.end() != subscriptions.find(type_id)) {
-      std::string key_name = ivi_data.first;
-      msg_params[key_name] = true;
-    }
+  for (auto& ivi_data : list_of_subscriptions) {
+    msg_params[ivi_data] = true;
   }
   const auto function_id =
       (subscribe_status == SUBSCRIBE)

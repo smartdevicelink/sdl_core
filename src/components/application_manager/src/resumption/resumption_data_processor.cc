@@ -111,12 +111,11 @@ void ResumptionDataProcessor::on_event(const event_engine::Event& event) {
 
   const uint32_t app_id = app_id_ptr->second;
 
-  LOG4CXX_DEBUG(logger_, "app_id is: " << app_id);
 
   LOG4CXX_DEBUG(logger_,
-                "Found function id: " << app_id_ptr->first.function_id
-                                      << " correlation id: "
-                                      << app_id_ptr->first.correlation_id);
+                "Found function id: "
+                    << app_id_ptr->first.function_id
+                    << " correlation id: " << app_id_ptr->first.correlation_id);
 
   LOG4CXX_DEBUG(logger_,
                 "Now processing event with function id: "
@@ -146,21 +145,33 @@ void ResumptionDataProcessor::on_event(const event_engine::Event& event) {
   } else {
     status.error_requests.push_back(*request_ptr);
   }
+
+  if (hmi_apis::FunctionID::VehicleInfo_SubscribeVehicleData ==
+      request_ids.function_id) {
+    CheckVehicleDataResponse(response, status);
+  }
+
   list_of_sent_requests.erase(request_ptr);
 
   if (!list_of_sent_requests.empty()) {
-    LOG4CXX_DEBUG(logger_, "is not the last response for this application");
+    LOG4CXX_DEBUG(logger_,
+                  "Resumption app "
+                      << app_id << " not finished . Amount of requests left : "
+                      << list_of_sent_requests.size());
     return;
   }
 
   auto it = register_callbacks_.find(app_id);
   DCHECK_OR_RETURN_VOID(it != register_callbacks_.end());
   auto callback = it->second;
-  if (status.error_requests.empty()) {
+  const bool successful_resumption =
+      status.error_requests.empty() &&
+      status.unsuccesfull_vehicle_data_subscriptions_.empty();
+  if (successful_resumption) {
     LOG4CXX_DEBUG(logger_, "Resumption for app " << app_id << " successful");
     callback(mobile_apis::Result::SUCCESS, "Data resumption succesful");
   }
-  if (!status.error_requests.empty()) {
+  if (!successful_resumption) {
     LOG4CXX_ERROR(logger_, "Resumption for app " << app_id << "failed");
     RevertRestoredData(application_manager_.application(app_id));
     callback(mobile_apis::Result::RESUME_FAILED, "Data resumption failed");
@@ -185,7 +196,7 @@ void ResumptionDataProcessor::WaitForResponse(
     const int32_t app_id, const ResumptionRequest& request) {
   LOG4CXX_AUTO_TRACE(logger_);
   LOG4CXX_DEBUG(logger_,
-                "app " << app_id << "Subscribe on "
+                "App " << app_id << " subscribe on "
                        << request.request_ids.function_id << " "
                        << request.request_ids.correlation_id);
   subscribe_on_event(request.request_ids.function_id,
@@ -674,16 +685,14 @@ void ResumptionDataProcessor::DeleteButtonsSubscriptions(
 void ResumptionDataProcessor::DeletePluginsSubscriptions(
     application_manager::ApplicationSharedPtr application) {
   LOG4CXX_AUTO_TRACE(logger_);
-  smart_objects::SmartObject extension_subscriptions;
 
-  const ApplicationResumptionStatus& status =
-      resumption_status_[application->app_id()];
-  for (auto& request : status.successful_requests) {
-    if (hmi_apis::FunctionID::VehicleInfo_SubscribeVehicleData ==
-        request.request_ids.function_id) {
-      extension_subscriptions[strings::application_vehicle_info] =
-          request.message;
-    }
+  auto it = resumption_status_.find(application->app_id());
+  DCHECK_OR_RETURN_VOID(it != resumption_status_.end());
+
+  const ApplicationResumptionStatus& status = it->second;
+  smart_objects::SmartObject extension_subscriptions;
+  for (auto ivi : status.succesfull_vehicle_data_subscriptions_) {
+    extension_subscriptions[ivi] = true;
   }
 
   for (auto& extension : application->Extensions()) {
@@ -699,6 +708,30 @@ bool ResumptionDataProcessor::IsRequestSuccessful(
               .asInt());
   return result_code == hmi_apis::Common_Result::SUCCESS ||
          result_code == hmi_apis::Common_Result::WARNINGS;
+}
+
+void ResumptionDataProcessor::CheckVehicleDataResponse(
+    const smart_objects::SmartObject& response,
+    ApplicationResumptionStatus& status) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  const auto& msg_params = response[strings::msg_params];
+  const auto keys = msg_params.enumerate();
+
+  for (auto& ivi : keys) {
+    const auto& vd_response = msg_params[ivi];
+    const auto vd_result_code = vd_response[strings::result_code].asInt();
+    const auto kSuccess = hmi_apis::Common_VehicleDataResultCode::VDRC_SUCCESS;
+    if (kSuccess != vd_result_code) {
+      LOG4CXX_DEBUG(logger_,
+                    "ivi "
+                        << ivi
+                        << " was not successfuly subscribed");
+
+      status.unsuccesfull_vehicle_data_subscriptions_.push_back(ivi);
+    } else {
+      status.succesfull_vehicle_data_subscriptions_.push_back(ivi);
+    }
+  }
 }
 
 }  // namespce resumption

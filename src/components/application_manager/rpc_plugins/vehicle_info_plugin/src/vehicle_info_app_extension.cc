@@ -126,12 +126,8 @@ void VehicleInfoAppExtension::ProcessResumption(
 
 void VehicleInfoAppExtension::RevertResumption(
     const smart_objects::SmartObject& subscriptions) {
-  if (!subscriptions.keyExists(strings::application_vehicle_info)) {
-    LOG4CXX_DEBUG(logger_, "application_vehicle_info section is not exists");
-    return;
-  }
-  plugin_.RevertResumption(app_, *this);
   unsubscribeFromVehicleInfo();
+  plugin_.RevertResumption(app_, *this, subscriptions.enumerate());
 }
 
 VehicleInfoAppExtension& VehicleInfoAppExtension::ExtractVIExtension(

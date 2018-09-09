@@ -61,6 +61,8 @@ struct ApplicationResumptionStatus {
   std::vector<ResumptionRequest> list_of_sent_requests;
   std::vector<ResumptionRequest> error_requests;
   std::vector<ResumptionRequest> successful_requests;
+  std::vector<std::string> unsuccesfull_vehicle_data_subscriptions_;
+  std::vector<std::string> succesfull_vehicle_data_subscriptions_;
 };
 
 /**
@@ -291,6 +293,8 @@ class ResumptionDataProcessor : public app_mngr::event_engine::EventObserver {
    */
   bool IsRequestSuccessful(const smart_objects::SmartObject& response) const;
 
+  void CheckVehicleDataResponse(const smart_objects::SmartObject& response,
+                                ApplicationResumptionStatus& status);
   /**
    * @brief A map of the IDs and Application Resumption Status for these ID
    **/
