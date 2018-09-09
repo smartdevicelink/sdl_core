@@ -454,27 +454,33 @@ bool StateControllerImpl::IsResumptionAllowed(ApplicationSharedPtr app,
 }
 
 mobile_apis::HMILevel::eType StateControllerImpl::GetAvailableHmiLevel(
-    ApplicationSharedPtr app, mobile_apis::HMILevel::eType hmi_level) const {
+    ApplicationSharedPtr app,
+    mobile_apis::HMILevel::eType desired_hmi_level) const {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  mobile_apis::HMILevel::eType result = hmi_level;
-  if (!IsStreamableHMILevel(hmi_level)) {
+  mobile_apis::HMILevel::eType result = desired_hmi_level;
+  if (!IsStreamableHMILevel(desired_hmi_level)) {
     return result;
   }
 
   const bool is_audio_app = app->IsAudioApplication();
   const bool does_audio_app_with_same_type_exist =
       app_mngr_.IsAppTypeExistsInFullOrLimited(app);
-  if (mobile_apis::HMILevel::HMI_LIMITED == hmi_level) {
+  if (mobile_apis::HMILevel::HMI_LIMITED == desired_hmi_level) {
     if (!is_audio_app || does_audio_app_with_same_type_exist) {
+      LOG4CXX_DEBUG(logger_,
+                    "Not audio application trying to resume in limmited or "
+                    "audio application with the same type active");
       result = app_mngr_.GetDefaultHmiLevel(app);
     }
     return result;
   }
 
   const bool is_active_app_exist = (bool)app_mngr_.active_application();
+
   if (is_audio_app) {
     if (does_audio_app_with_same_type_exist) {
+      LOG4CXX_DEBUG(logger_, "Audio application with the same type active");
       result = app_mngr_.GetDefaultHmiLevel(app);
     } else if (is_active_app_exist) {
       result = mobile_apis::HMILevel::HMI_LIMITED;

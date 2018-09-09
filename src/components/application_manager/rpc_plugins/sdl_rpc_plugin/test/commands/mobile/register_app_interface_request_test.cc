@@ -98,7 +98,7 @@ class RegisterAppInterfaceRequestTest
             application_manager_test::MockApplicationHelper::
                 application_helper_mock())
       , mock_rpc_plugin_manager_(
-          std::make_shared<NiceMock<MockRPCPluginManager> >()) {
+            std::make_shared<NiceMock<MockRPCPluginManager> >()) {
     InitGetters();
     InitLanguage();
   }
@@ -107,10 +107,10 @@ class RegisterAppInterfaceRequestTest
     testing::Mock::VerifyAndClearExpectations(&mock_application_helper_);
 
     ON_CALL(app_mngr_, GetPluginManager())
-      .WillByDefault(ReturnRef(*mock_rpc_plugin_manager_));
+        .WillByDefault(ReturnRef(*mock_rpc_plugin_manager_));
 
     ON_CALL(app_mngr_, GetPolicyHandler())
-      .WillByDefault(ReturnRef(mock_policy_handler_));
+        .WillByDefault(ReturnRef(mock_policy_handler_));
   }
 
   void TearDown() OVERRIDE {
@@ -257,7 +257,8 @@ class RegisterAppInterfaceRequestTest
   MockConnectionHandler mock_connection_handler_;
   MockSessionObserver mock_session_observer_;
   application_manager_test::MockApplicationHelper& mock_application_helper_;
-  std::shared_ptr<am::plugin_manager::MockRPCPluginManager> mock_rpc_plugin_manager_;
+  std::shared_ptr<am::plugin_manager::MockRPCPluginManager>
+      mock_rpc_plugin_manager_;
 };
 
 TEST_F(RegisterAppInterfaceRequestTest, Init_SUCCESS) {
@@ -290,7 +291,7 @@ TEST_F(RegisterAppInterfaceRequestTest, Run_MinimalData_SUCCESS) {
       std::make_shared<utils::CallNothing>();
   ON_CALL(mock_policy_handler_, AddApplication(_, _))
       .WillByDefault(Return(notify_upd_manager));
-  
+
   EXPECT_CALL(app_mngr_, RegisterApplication(msg_)).WillOnce(Return(mock_app));
   EXPECT_CALL(mock_rpc_service_,
               ManageHMICommand(HMIResultCodeIs(
