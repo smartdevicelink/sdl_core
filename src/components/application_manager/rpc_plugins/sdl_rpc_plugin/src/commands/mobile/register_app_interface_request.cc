@@ -572,15 +572,15 @@ void RegisterAppInterfaceRequest::Run() {
     const auto& msg_params = (*message_)[strings::msg_params];
     const auto& hash_id = msg_params[strings::hash_id].asString();
     LOG4CXX_WARN(logger_, "Start Data Resumption");
-    auto send_response = [this, application](
-        mobile_apis::Result::eType result_code, const std::string& info) {
+    auto send_response = [this](mobile_apis::Result::eType result_code,
+                                const std::string& info) {
       result_code_ = result_code;
       SendRegisterAppInterfaceResponseToMobile(
           ApplicationType::kNewApplication, info, true);
-      application->UpdateHash();
+      application_->UpdateHash();
     };
 
-    resume_ctrl.StartResumption(application, hash_id, send_response);
+    resume_ctrl.StartResumption(application_, hash_id, send_response);
     return;
   }
 
@@ -796,8 +796,8 @@ void FinishSendingRegisterAppInterfaceToMobile(
   auto application = app_manager.application(connection_key);
 
   if (msg_params.keyExists(strings::app_hmi_type)) {
-    policy_handler_.SetDefaultHmiTypes(application->policy_app_id(),
-                                       &(msg_params[strings::app_hmi_type]));
+    policy_handler.SetDefaultHmiTypes(application->policy_app_id(),
+                                      &(msg_params[strings::app_hmi_type]));
   }
 
   // Default HMI level should be set before any permissions validation, since
