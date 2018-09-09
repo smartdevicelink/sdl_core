@@ -715,38 +715,32 @@ void ResumptionDataProcessor::CheckVehicleDataResponse(
     const smart_objects::SmartObject& response,
     ApplicationResumptionStatus& status) {
   LOG4CXX_AUTO_TRACE(logger_);
+  const auto request_keys = request[strings::msg_params].enumerate();
+
   if (!IsRequestSuccessful(response)) {
     LOG4CXX_TRACE(logger_, "Vehicle data request not succesfull");
-    const auto keys = request[strings::msg_params].enumerate();
-    for (const auto key : keys) {
+    for (const auto key : request_keys) {
       status.unsuccesfull_vehicle_data_subscriptions_.push_back(key);
     }
     return;
   }
 
-  const auto& msg_params = response[strings::msg_params];
-  const auto keys = msg_params.enumerate();
-  if (keys.empty()) {
-    LOG4CXX_TRACE(logger_, "Successful subscription to all requested data");
-    const auto keys = request[strings::msg_params].enumerate();
-    for (const auto key : keys) {
-      status.succesfull_vehicle_data_subscriptions_.push_back(key);
-    }
-    return;
-  }
-  LOG4CXX_DEBUG(logger_, "keys size " << keys.size());
-  for (auto& ivi : keys) {
-    const auto& vd_response = msg_params[ivi];
-    const auto vd_result_code = vd_response[strings::result_code].asInt();
+  const auto& response_params = response[strings::msg_params];
+  const auto response_keys = response_params.enumerate();
+  for (auto& ivi : request_keys) {
+    const auto it = response_keys.find(ivi);
     const auto kSuccess = hmi_apis::Common_VehicleDataResultCode::VDRC_SUCCESS;
+    const auto vd_result_code =
+        (response_keys.end() == it)
+            ? kSuccess
+            : response_params[ivi][strings::result_code].asInt();
     if (kSuccess != vd_result_code) {
-      LOG4CXX_DEBUG(logger_,
+      LOG4CXX_TRACE(logger_,
                     "ivi " << ivi << " was not successfuly subscribed");
 
       status.unsuccesfull_vehicle_data_subscriptions_.push_back(ivi);
     } else {
       status.succesfull_vehicle_data_subscriptions_.push_back(ivi);
-      LOG4CXX_DEBUG(logger_, "ivi " << ivi << " was successfuly subscribed");
     }
   }
 }
