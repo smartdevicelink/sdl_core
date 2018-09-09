@@ -93,7 +93,7 @@ class VehicleInfoAppExtension : public app_mngr::AppExtension {
    * @brief Subscriptions get list of subscriptions for application extension
    * @return list of subscriptions for application extension
    */
-  VehicleInfoSubscriptions Subscriptions();
+  const VehicleInfoSubscriptions& Subscriptions();
 
   /**
    * @brief SaveResumptionData saves vehicle info data
