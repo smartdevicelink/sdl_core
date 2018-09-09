@@ -78,14 +78,16 @@ class VehicleInfoPlugin : public plugins::RPCPlugin {
    * @param subscriptions Subscriptions to be returned
    **/
   void RevertResumption(app_mngr::Application& app,
-                        std::set<std::string> list_of_subscriptions);
+                        const std::set<std::string>& list_of_subscriptions);
 
   smart_objects::SmartObjectSPtr CreateSubscriptionRequest(
-      const uint32_t app_id,
-      std::set<std::string> list_of_subscriptions,
-      const SubscribeStatus subscribe_status);
+      const std::set<std::string>& list_of_subscriptions);
+
+  smart_objects::SmartObjectSPtr CreateUnsubscriptionRequest(
+      const std::set<std::string>& list_of_subscriptions);
 
  private:
+  bool IsSubscribedAppExist(const std::string& ivi);
   void DeleteSubscriptions(app_mngr::ApplicationSharedPtr app);
 
   std::unique_ptr<app_mngr::CommandFactory> command_factory_;
