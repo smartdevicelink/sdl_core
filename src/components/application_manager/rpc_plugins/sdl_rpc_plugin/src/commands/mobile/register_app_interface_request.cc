@@ -473,7 +473,7 @@ void RegisterAppInterfaceRequest::Run() {
   const std::string app_id_short = msg_params[strings::app_id].asString();
   std::string new_app_id_short = app_id_short;
   std::transform(app_id_short.begin(),
-                 app_id_short.en
+                 app_id_short.end(),
                  new_app_id_short.begin(),
                  ::tolower);
   (*message_)[strings::msg_params][strings::app_id] = new_app_id_short;
@@ -487,7 +487,7 @@ void RegisterAppInterfaceRequest::Run() {
                    ::tolower);
     (*message_)[strings::msg_params][strings::full_app_id] = new_app_id_full;
   }
-  
+
   if (IsApplicationForbidden()) {
     LOG4CXX_WARN(logger_, "Application is Forbidden ");
     SendResponse(false, mobile_apis::Result::TOO_MANY_PENDING_REQUESTS);
@@ -820,6 +820,9 @@ void FinishSendingRegisterAppInterfaceToMobile(
     policy::StatusNotifier notify_upd_manager) {
   resumption::ResumeCtrl& resume_ctrl = app_manager.resume_controller();
   auto application = app_manager.application(connection_key);
+
+  policy::PolicyHandlerInterface& policy_handler =
+      app_manager.GetPolicyHandler();
 
   if (msg_params.keyExists(strings::app_hmi_type)) {
     policy_handler.SetDefaultHmiTypes(application->policy_app_id(),
