@@ -1089,6 +1089,7 @@ bool PolicyHandler::ReceiveMessageFromSDK(const std::string& file,
         correlation_id, vehicle_data_args, application_manager_);
   } else {
     LOG4CXX_WARN(logger_, "Exchange wasn't successful");
+    policy_manager_->ForcePTExchange();
   }
   OnPTUFinished(ret);
   return ret;
