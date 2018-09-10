@@ -132,7 +132,7 @@ void VehicleInfoPlugin::RevertResumption(
 }
 
 smart_objects::SmartObjectSPtr VehicleInfoPlugin::CreateSubscriptionRequest(
-    const std::set<std::__cxx11::string>& list_of_subscriptions) {
+    const std::set<std::string>& list_of_subscriptions) {
   LOG4CXX_AUTO_TRACE(logger_);
   smart_objects::SmartObject msg_params =
       smart_objects::SmartObject(smart_objects::SmartType_Map);
