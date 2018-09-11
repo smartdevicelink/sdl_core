@@ -207,7 +207,7 @@ class PerformInteractionRequest
    * same choice id returns false, otherwise returns
    * true.
    */
-  bool CheckChoiceIDFromRequest(
+  const mobile_apis::Result::eType CheckChoiceIDFromRequest(
       app_mngr::ApplicationSharedPtr app,
       const size_t choice_set_id_list_length,
       const smart_objects::SmartObject& choice_set_id_list) const;
