@@ -338,6 +338,14 @@ bool RPCHandlerImpl::ConvertMessageToSO(
         output[strings::params][hmi_response::code] =
             hmi_apis::Common_Result::INVALID_DATA;
         output[strings::msg_params][strings::info] = rpc::PrettyFormat(report);
+
+        smart_objects::SmartObjectSPtr msg_to_send =
+            std::make_shared<smart_objects::SmartObject>(output);
+
+        (*msg_to_send)[strings::params][strings::message_type] =
+            hmi_apis::messageType::response;
+
+        app_manager_.GetRPCService().SendMessageToHMI(msg_to_send);
         return false;
       }
       break;
