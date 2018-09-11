@@ -203,11 +203,10 @@ class PerformInteractionRequest
    * @param choice_set_id_list_length contains amount
    * of choice set ids.
    * @param choice_set_id_list array of choice set ids
-   * @return If request contains several choice sets with
-   * same choice id returns false, otherwise returns
-   * true.
+   * @return the result of checking for a match of 
+   * choice ID in choice sets
    */
-  bool CheckChoiceIDFromRequest(
+  const mobile_apis::Result::eType CheckChoiceIDFromRequest(
       app_mngr::ApplicationSharedPtr app,
       const size_t choice_set_id_list_length,
       const smart_objects::SmartObject& choice_set_id_list) const;

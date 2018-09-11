@@ -153,14 +153,15 @@ void PerformInteractionRequest::Run() {
     }
   }
 
-  if (!CheckChoiceIDFromRequest(
-          app,
-          choice_set_id_list_length,
-          msg_params[strings::interaction_choice_set_id_list])) {
+  const auto result = CheckChoiceIDFromRequest(
+      app,
+      choice_set_id_list_length,
+      msg_params[strings::interaction_choice_set_id_list]);
+  if (mobile_apis::Result::SUCCESS != result) {
     LOG4CXX_ERROR(logger_,
                   "PerformInteraction has choice sets with "
                   "duplicated IDs or application does not have choice sets");
-    SendResponse(false, mobile_apis::Result::INVALID_ID);
+    SendResponse(false, result);
     return;
   }
 
@@ -996,7 +997,8 @@ bool PerformInteractionRequest::CheckChoiceSetListVRCommands(
   return true;
 }
 
-bool PerformInteractionRequest::CheckChoiceIDFromRequest(
+const mobile_apis::Result::eType
+PerformInteractionRequest::CheckChoiceIDFromRequest(
     ApplicationSharedPtr app,
     const size_t choice_set_id_list_length,
     const smart_objects::SmartObject& choice_set_id_list) const {
@@ -1013,7 +1015,7 @@ bool PerformInteractionRequest::CheckChoiceIDFromRequest(
       LOG4CXX_ERROR(
           logger_,
           "Couldn't find choiceset_id = " << choice_set_id_list[i].asInt());
-      return false;
+      return mobile_apis::Result::REJECTED;
     }
 
     choice_list_length = (*choice_set)[strings::choice_set].length();
@@ -1027,11 +1029,11 @@ bool PerformInteractionRequest::CheckChoiceIDFromRequest(
                       "choice with ID "
                           << choices_list[k][strings::choice_id].asInt()
                           << " already exists");
-        return false;
+        return mobile_apis::Result::INVALID_ID;
       }
     }
   }
-  return true;
+  return mobile_apis::Result::SUCCESS;
 }
 
 const bool PerformInteractionRequest::HasHMIResponsesToWait() const {
