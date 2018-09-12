@@ -57,6 +57,7 @@ class ConnectionHandlerObserver;
 typedef struct {
   transport_manager::ConnectionUID primary_transport;
   transport_manager::ConnectionUID secondary_transport;
+  std::vector<protocol_handler::ServiceType> secondary_transport_services;
 } SessionTransports;
 typedef std::map<uint8_t, SessionTransports> SessionConnectionMap;
 

@@ -2698,7 +2698,7 @@ void ApplicationManagerImpl::OnAppStreaming(
     media_manager_->StartStreaming(app_id, service_type);
   } else {
     media_manager_->StopStreaming(app_id, service_type);
-    state_ctrl_.OnVideoStreamingStarted(app);
+    state_ctrl_.OnVideoStreamingStopped(app);
   }
 }
 

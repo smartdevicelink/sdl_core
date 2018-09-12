@@ -621,9 +621,9 @@ void ProtocolHandlerImpl::SendEndServicePrivate(int32_t primary_connection_id,
         impl::RawFordMessageToMobile(ptr, false));
     LOG4CXX_DEBUG(logger_,
                   "SendEndServicePrivate() for connection "
-                      << primary_connection_id << " for service_type "
+                      << connection_id << " for service_type "
                       << static_cast<int>(service_type)
-                      << " service connection " << connection_id
+                      << " primary connection " << primary_connection_id
                       << " session_id " << static_cast<int32_t>(session_id));
   } else {
     LOG4CXX_WARN(
