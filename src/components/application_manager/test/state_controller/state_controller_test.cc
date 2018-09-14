@@ -302,33 +302,33 @@ class StateControllerImplTest : public ::testing::Test {
     namespace SystemContext = mobile_apis::SystemContext;
     PrepareCommonStateResults(result_hmi_state);
     if (isMediaApplication(app)) {
-    result_hmi_state.push_back(
-        createHmiState(HMILevel::HMI_LIMITED,
-                       AudioStreamingState::ATTENUATED,
-                       VideoStreamingState::NOT_STREAMABLE,
-                       SystemContext::SYSCTXT_MAIN));
-    result_hmi_state.push_back(
-        createHmiState(HMILevel::HMI_LIMITED,
-                       AudioStreamingState::ATTENUATED,
-                       VideoStreamingState::NOT_STREAMABLE,
-                       SystemContext::SYSCTXT_MAIN));
-    result_hmi_state.push_back(
-        createHmiState(HMILevel::HMI_FULL,
-                       AudioStreamingState::NOT_AUDIBLE,
-                       VideoStreamingState::NOT_STREAMABLE,
-                       SystemContext::SYSCTXT_MAIN));
-    result_hmi_state.push_back(
-        createHmiState(HMILevel::HMI_FULL,
-                       AudioStreamingState::ATTENUATED,
-                       VideoStreamingState::NOT_STREAMABLE,
-                       SystemContext::SYSCTXT_MAIN));
+      result_hmi_state.push_back(
+          createHmiState(HMILevel::HMI_LIMITED,
+                         AudioStreamingState::ATTENUATED,
+                         VideoStreamingState::NOT_STREAMABLE,
+                         SystemContext::SYSCTXT_MAIN));
+      result_hmi_state.push_back(
+          createHmiState(HMILevel::HMI_LIMITED,
+                         AudioStreamingState::ATTENUATED,
+                         VideoStreamingState::NOT_STREAMABLE,
+                         SystemContext::SYSCTXT_MAIN));
+      result_hmi_state.push_back(
+          createHmiState(HMILevel::HMI_FULL,
+                         AudioStreamingState::NOT_AUDIBLE,
+                         VideoStreamingState::NOT_STREAMABLE,
+                         SystemContext::SYSCTXT_MAIN));
+      result_hmi_state.push_back(
+          createHmiState(HMILevel::HMI_FULL,
+                         AudioStreamingState::ATTENUATED,
+                         VideoStreamingState::NOT_STREAMABLE,
+                         SystemContext::SYSCTXT_MAIN));
     } else {
       result_hmi_state.push_back(
           createHmiState(HMILevel::HMI_FULL,
                          AudioStreamingState::NOT_AUDIBLE,
                          VideoStreamingState::NOT_STREAMABLE,
                          SystemContext::SYSCTXT_MAIN));
-  }
+    }
   }
 
   /**
@@ -344,7 +344,7 @@ class StateControllerImplTest : public ::testing::Test {
     namespace VideoStreamingState = mobile_apis::VideoStreamingState;
     namespace SystemContext = mobile_apis::SystemContext;
 
-        PrepareCommonStateResults(result_hmi_state);
+    PrepareCommonStateResults(result_hmi_state);
     if (isMediaApplication(app)) {
       if (app->is_navi()) {
         result_hmi_state.push_back(
@@ -425,36 +425,36 @@ class StateControllerImplTest : public ::testing::Test {
     namespace VideoStreamingState = mobile_apis::VideoStreamingState;
     namespace SystemContext = mobile_apis::SystemContext;
 
-        PrepareCommonStateResults(result_hmi_state);
+    PrepareCommonStateResults(result_hmi_state);
     if (isMediaApplication(app)) {
-        result_hmi_state.push_back(
+      result_hmi_state.push_back(
           createHmiState(HMILevel::HMI_LIMITED,
-                           AudioStreamingState::NOT_AUDIBLE,
-                           VideoStreamingState::NOT_STREAMABLE,
-                           SystemContext::SYSCTXT_MAIN));
-        result_hmi_state.push_back(
-            createHmiState(HMILevel::HMI_LIMITED,
-                           AudioStreamingState::NOT_AUDIBLE,
-                           VideoStreamingState::NOT_STREAMABLE,
-                           SystemContext::SYSCTXT_MAIN));
-        result_hmi_state.push_back(
+                         AudioStreamingState::NOT_AUDIBLE,
+                         VideoStreamingState::NOT_STREAMABLE,
+                         SystemContext::SYSCTXT_MAIN));
+      result_hmi_state.push_back(
+          createHmiState(HMILevel::HMI_LIMITED,
+                         AudioStreamingState::NOT_AUDIBLE,
+                         VideoStreamingState::NOT_STREAMABLE,
+                         SystemContext::SYSCTXT_MAIN));
+      result_hmi_state.push_back(
           createHmiState(HMILevel::HMI_FULL,
-                           AudioStreamingState::NOT_AUDIBLE,
-                           VideoStreamingState::NOT_STREAMABLE,
-                           SystemContext::SYSCTXT_MAIN));
-        result_hmi_state.push_back(
-            createHmiState(HMILevel::HMI_FULL,
-                           AudioStreamingState::NOT_AUDIBLE,
-                           VideoStreamingState::NOT_STREAMABLE,
-                           SystemContext::SYSCTXT_MAIN));
+                         AudioStreamingState::NOT_AUDIBLE,
+                         VideoStreamingState::NOT_STREAMABLE,
+                         SystemContext::SYSCTXT_MAIN));
+      result_hmi_state.push_back(
+          createHmiState(HMILevel::HMI_FULL,
+                         AudioStreamingState::NOT_AUDIBLE,
+                         VideoStreamingState::NOT_STREAMABLE,
+                         SystemContext::SYSCTXT_MAIN));
     } else {
-        result_hmi_state.push_back(
-            createHmiState(HMILevel::HMI_FULL,
-                           AudioStreamingState::NOT_AUDIBLE,
-                           VideoStreamingState::NOT_STREAMABLE,
-                           SystemContext::SYSCTXT_MAIN));
-      }
-      }
+      result_hmi_state.push_back(
+          createHmiState(HMILevel::HMI_FULL,
+                         AudioStreamingState::NOT_AUDIBLE,
+                         VideoStreamingState::NOT_STREAMABLE,
+                         SystemContext::SYSCTXT_MAIN));
+    }
+  }
 
   /**
    * @brief Prepare list of resultant HMI states for testing HMIState, for
@@ -469,7 +469,7 @@ class StateControllerImplTest : public ::testing::Test {
     namespace VideoStreamingState = mobile_apis::VideoStreamingState;
     namespace SystemContext = mobile_apis::SystemContext;
 
-        PrepareCommonStateResults(result_hmi_state);
+    PrepareCommonStateResults(result_hmi_state);
     if (isMediaApplication(app)) {
       if (app->is_navi()) {
         result_hmi_state = valid_states_for_audio_app_;
@@ -496,13 +496,13 @@ class StateControllerImplTest : public ::testing::Test {
                            SystemContext::SYSCTXT_MAIN));
       }
     } else {
-        result_hmi_state.push_back(
-            createHmiState(HMILevel::HMI_FULL,
-                           AudioStreamingState::NOT_AUDIBLE,
-                           VideoStreamingState::NOT_STREAMABLE,
-                           SystemContext::SYSCTXT_MAIN));
-      }
-      }
+      result_hmi_state.push_back(
+          createHmiState(HMILevel::HMI_FULL,
+                         AudioStreamingState::NOT_AUDIBLE,
+                         VideoStreamingState::NOT_STREAMABLE,
+                         SystemContext::SYSCTXT_MAIN));
+    }
+  }
 
   /**
    * @brief Prepare list of resultant HMI states for testing HMIState, for
@@ -521,18 +521,18 @@ class StateControllerImplTest : public ::testing::Test {
     if (isMediaApplication(app) || app->is_navi()) {
       PrepareStateResultsForAttenuated(result_hmi_state, app);
     } else {
-        PrepareCommonStateResults(result_hmi_state);
-        result_hmi_state.push_back(
-            createHmiState(HMILevel::HMI_FULL,
-                           AudioStreamingState::NOT_AUDIBLE,
-                           VideoStreamingState::NOT_STREAMABLE,
-                           SystemContext::SYSCTXT_MAIN));
-      }
-      }
+      PrepareCommonStateResults(result_hmi_state);
+      result_hmi_state.push_back(
+          createHmiState(HMILevel::HMI_FULL,
+                         AudioStreamingState::NOT_AUDIBLE,
+                         VideoStreamingState::NOT_STREAMABLE,
+                         SystemContext::SYSCTXT_MAIN));
+    }
+  }
 
   bool isMediaApplication(am::ApplicationSharedPtr app) {
     return app->is_media_application();
-    }
+  }
 
   bool isMediaApplication(uint16_t app_id) {
     std::vector<am::ApplicationSharedPtr>::iterator app = std::find_if(
@@ -541,11 +541,11 @@ class StateControllerImplTest : public ::testing::Test {
         [app_id](am::ApplicationSharedPtr a) { return app_id == a->app_id(); });
 
     return isMediaApplication(*app);
-    }
+  }
 
   void TestSetState(
       am::ApplicationSharedPtr app,
-                    am::HmiStatePtr hmi_state,
+      am::HmiStatePtr hmi_state,
       void (StateControllerImplTest::*call_back)(std::vector<am::HmiStatePtr>&,
                                                  am::ApplicationSharedPtr)) {
     InsertApplication(app);
@@ -2251,7 +2251,7 @@ TEST_F(StateControllerImplTest,
 TEST_F(StateControllerImplTest, SetNaviStreamingStateForNonMediaApplication) {
   am::HmiStatePtr state_navi_streming =
       std::make_shared<am::NaviStreamingHmiState>(simple_app_,
-                                                   app_manager_mock_);
+                                                  app_manager_mock_);
   TestSetState(simple_app_,
                state_navi_streming,
                &StateControllerImplTest::PrepareNaviStreamingHMIStateResults);
@@ -2261,7 +2261,7 @@ TEST_F(StateControllerImplTest,
        SetNaviStreamingStateMediaApplicationAttenuatedNotSupported) {
   am::HmiStatePtr state_navi_streming =
       std::make_shared<am::NaviStreamingHmiState>(media_app_,
-                                                   app_manager_mock_);
+                                                  app_manager_mock_);
   EXPECT_CALL(app_manager_mock_, is_attenuated_supported())
       .WillRepeatedly(Return(false));
   TestSetState(media_app_,
@@ -2273,7 +2273,7 @@ TEST_F(StateControllerImplTest,
        SetNaviStreamingStateMediaApplicationAttenuatedSupported) {
   am::HmiStatePtr state_navi_streming =
       std::make_shared<am::NaviStreamingHmiState>(media_app_,
-                                                   app_manager_mock_);
+                                                  app_manager_mock_);
   EXPECT_CALL(app_manager_mock_, is_attenuated_supported())
       .WillRepeatedly(Return(true));
   TestSetState(media_app_,
@@ -2314,7 +2314,7 @@ TEST_F(StateControllerImplTest, SetNaviStreamingStateNaviApplication) {
 TEST_F(StateControllerImplTest, SetNaviStreamingStateMediaNaviApplication) {
   am::HmiStatePtr state_navi_streming =
       std::make_shared<am::NaviStreamingHmiState>(media_navi_app_,
-                                                   app_manager_mock_);
+                                                  app_manager_mock_);
   TestSetState(media_navi_app_,
                state_navi_streming,
                &StateControllerImplTest::PrepareNaviStreamingHMIStateResults);
