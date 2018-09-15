@@ -164,6 +164,14 @@ void PerformInteractionRequest::Run() {
     return;
   }
 
+  if (!IsAllChoiceSetAllowedToPerform(
+          app,
+          choice_set_id_list_length,
+          msg_params[strings::interaction_choice_set_id_list])) {
+    LOG4CXX_ERROR(logger_, "Choice set is not ready to perform.");
+    SendResponse(false, mobile_apis::Result::REJECTED);
+  }
+
   if (msg_params.keyExists(strings::vr_help)) {
     if (mobile_apis::Result::INVALID_DATA ==
         MessageHelper::VerifyImageVrHelpItems(
@@ -1063,6 +1071,21 @@ void PerformInteractionRequest::SendBothModeResponse(
                response_params);
 }
 
+bool PerformInteractionRequest::IsAllChoiceSetAllowedToPerform(
+    ApplicationSharedPtr app,
+    const size_t choice_set_id_list_length,
+    const ns_smart_device_link::ns_smart_objects::SmartObject&
+        choice_set_id_list) const {
+  LOG4CXX_AUTO_TRACE(logger_);
+  for (size_t i = 0; i < choice_set_id_list_length; ++i) {
+    const bool is_allowed =
+        app->is_choice_set_allowed_to_perform(choice_set_id_list[i].asInt());
+    if (!is_allowed) {
+      return false;
+    }
+  }
+  return true;
+}
 }  // namespace commands
 
 }  // namespace application_manager

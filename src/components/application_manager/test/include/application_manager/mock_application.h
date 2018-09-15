@@ -299,6 +299,8 @@ class MockApplication : public ::application_manager::Application {
                      mobile_apis::LayoutMode::eType());
   MOCK_METHOD1(set_reset_global_properties_active, void(bool active));
   MOCK_CONST_METHOD0(is_reset_global_properties_active, bool());
+  MOCK_METHOD2(set_choice_set_allow_mode, void(std::uint32_t, bool));
+  MOCK_CONST_METHOD1(is_choice_set_allowed_to_perform, bool(std::uint32_t));
   MOCK_CONST_METHOD0(app_id, uint32_t());
   MOCK_CONST_METHOD0(mac_address, const std::string&());
   MOCK_CONST_METHOD0(bundle_id, const std::string&());

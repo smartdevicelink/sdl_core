@@ -561,6 +561,7 @@ void DynamicApplicationDataImpl::AddChoiceSet(
   ChoiceSetMap::const_iterator it = choice_set_map_.find(choice_set_id);
   if (choice_set_map_.end() == it) {
     choice_set_map_[choice_set_id] = new smart_objects::SmartObject(choice_set);
+    choice_set_allowed_map_.insert(std::make_pair(choice_set_id, false));
   }
 }
 
@@ -572,6 +573,10 @@ void DynamicApplicationDataImpl::RemoveChoiceSet(uint32_t choice_set_id) {
     delete it->second;
     choice_set_map_.erase(choice_set_id);
   }
+
+  ChoiceSetAllowedMap::iterator choise_id_it =
+      choice_set_allowed_map_.find(choice_set_id);
+  choice_set_allowed_map_.erase(choise_id_it);
 }
 
 smart_objects::SmartObject* DynamicApplicationDataImpl::FindChoiceSet(
@@ -614,6 +619,21 @@ void DynamicApplicationDataImpl::set_perform_interaction_active(
 void DynamicApplicationDataImpl::set_reset_global_properties_active(
     bool active) {
   is_reset_global_properties_active_ = active;
+}
+
+void DynamicApplicationDataImpl::set_choice_set_allow_mode(
+    const uint32_t choice_set_id, const bool is_allowed) {
+  auto choice_set = choice_set_allowed_map_.find(choice_set_id);
+  if (choice_set == choice_set_allowed_map_.end()) {
+    LOG4CXX_WARN(logger_,
+                 "Choice set with id " << choice_set_id << " is not found.");
+  }
+  choice_set->second = is_allowed;
+}
+
+bool DynamicApplicationDataImpl::is_choice_set_allowed_to_perform(
+    uint32_t choice_set_id) const {
+  return choice_set_allowed_map_.find(choice_set_id)->second;
 }
 
 void DynamicApplicationDataImpl::set_perform_interaction_mode(int32_t mode) {

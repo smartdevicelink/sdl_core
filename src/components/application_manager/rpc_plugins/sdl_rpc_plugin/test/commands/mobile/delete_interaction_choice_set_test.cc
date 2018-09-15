@@ -192,7 +192,7 @@ TEST_F(DeleteInteractionChoiceSetRequestTest,
   smart_objects::SmartObject* choice_set_id =
       &((*message_)[am::strings::msg_params]
                    [am::strings::interaction_choice_set_id]);
-  smart_objects::SmartObject* invalid_choice_set_id = NULL;
+  smart_objects::SmartObject* invalid_choice_set_id = nullptr;
 
   EXPECT_CALL(app_mngr_, application(kConnectionKey))
       .WillRepeatedly(Return(app_));
@@ -207,10 +207,6 @@ TEST_F(DeleteInteractionChoiceSetRequestTest,
 
     EXPECT_CALL(*app_, FindChoiceSet(kChoiceSetId))
         .WillOnce(Return(invalid_choice_set_id));
-
-    EXPECT_CALL(*app_, app_id()).WillOnce(Return(kConnectionKey));
-    EXPECT_CALL(*app_, RemoveChoiceSet(kChoiceSetId));
-    EXPECT_CALL(*app_, UpdateHash());
   }
 
   DeleteInteractionChoiceSetRequestPtr command =
@@ -245,15 +241,11 @@ TEST_F(DeleteInteractionChoiceSetRequestTest, Run_SendVrDeleteCommand_SUCCESS) {
     EXPECT_CALL(*app_, FindChoiceSet(kChoiceSetId))
         .WillOnce(Return(choice_set_id));
 
-    EXPECT_CALL(*app_, app_id())
-        .WillOnce(Return(kConnectionKey))
-        .WillOnce(Return(kConnectionKey));
-    EXPECT_CALL(*app_, RemoveChoiceSet(kChoiceSetId));
-    EXPECT_CALL(*app_, UpdateHash());
+    EXPECT_CALL(*app_, set_choice_set_allow_mode(kChoiceSetId, false));
+    EXPECT_CALL(*app_, app_id()).WillOnce(Return(kConnectionKey));
   }
 
   EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_)).WillOnce(Return(true));
-  EXPECT_CALL(mock_rpc_service_, ManageMobileCommand(_, _));
 
   DeleteInteractionChoiceSetRequestPtr command =
       CreateCommand<DeleteInteractionChoiceSetRequest>(message_);

@@ -63,6 +63,7 @@ using am::MockMessageHelper;
 using ::testing::_;
 using ::testing::Return;
 using ::testing::ReturnRef;
+using ::testing::InSequence;
 using sdl_rpc_plugin::commands::PerformInteractionRequest;
 using ::test::components::application_manager_test::MockApplication;
 
@@ -73,6 +74,8 @@ namespace {
 const int32_t kCommandId = 1;
 const uint32_t kCmdId = 1u;
 const uint32_t kConnectionKey = 2u;
+const uint32_t kChoiceSetId = 11u;
+const uint32_t kCorrelationId = 10u;
 }  // namespace
 
 class PerformInteractionRequestTest
@@ -254,6 +257,49 @@ TEST_F(PerformInteractionRequestTest,
                             "UI is not supported by system");
 }
 
+TEST_F(PerformInteractionRequestTest, ChoiceProcessesOnHHMI_REJECT) {
+  MessageSharedPtr message = CreateMessage(smart_objects::SmartType_Map);
+  (*message)[strings::params][strings::connection_key] = kConnectionKey;
+  (*message)[strings::msg_params][strings::interaction_choice_set_id_list][0] =
+      kChoiceSetId;
+  smart_objects::SmartObject* choice_set_id =
+      &((*message)[am::strings::msg_params]
+                  [am::strings::interaction_choice_set_id]);
+  std::shared_ptr<PerformInteractionRequest> command =
+      CreateCommand<PerformInteractionRequest>(message);
+
+  smart_objects::SmartObject& response = *message;
+
+  response[strings::params][strings::message_type] = am::MessageType::kResponse;
+  response[strings::params][strings::correlation_id] = kCorrelationId;
+  response[strings::params][strings::protocol_type] = 0;
+  response[strings::params][strings::protocol_version] = 3;
+  response[strings::params][strings::connection_key] = kConnectionKey;
+  response[strings::params][strings::function_id] =
+      mobile_apis::FunctionID::PerformInteractionID;
+  response[strings::msg_params][strings::success] = false;
+  response[strings::msg_params][strings::result_code] =
+      mobile_apis::Result::REJECTED;
+
+  EXPECT_CALL(app_mngr_, application(kConnectionKey))
+      .WillRepeatedly(Return(mock_app_));
+  {
+    InSequence seq;
+    EXPECT_CALL(*mock_app_, is_perform_interaction_active())
+        .WillOnce(Return(false));
+    EXPECT_CALL(*mock_app_, FindChoiceSet(kChoiceSetId))
+        .WillOnce(Return(choice_set_id));
+    EXPECT_CALL(*mock_app_, is_choice_set_allowed_to_perform(kChoiceSetId))
+        .WillOnce(Return(false));
+    EXPECT_CALL(mock_rpc_service_, ManageMobileCommand(_, _))
+        .WillOnce(Return(false));
+    EXPECT_CALL(mock_rpc_service_, ManageMobileCommand(_, _))
+        .WillOnce(Return(true));
+  }
+
+  command->Init();
+  command->Run();
+}
 }  // namespace perform_interaction_request
 }  // namespace mobile_commands_test
 }  // namespace commands_test

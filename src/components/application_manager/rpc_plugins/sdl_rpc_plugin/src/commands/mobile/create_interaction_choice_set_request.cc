@@ -466,7 +466,15 @@ void CreateInteractionChoiceSetRequest::DeleteChoices() {
 void CreateInteractionChoiceSetRequest::OnAllHMIResponsesReceived() {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  if (!error_from_hmi_ && should_send_warnings_) {
+  ApplicationSharedPtr application =
+      application_manager_.application(connection_key());
+  if (!error_from_hmi_) {
+    application->set_choice_set_allow_mode(choice_set_id_, true);
+    LOG4CXX_DEBUG(logger_,
+                  "Choice set with id " << choice_set_id_
+                                        << " is allowed to perform.");
+  }
+  if (!error_from_hmi_ && should_send_warnings) {
     SendResponse(true, mobile_apis::Result::WARNINGS, kInvalidImageWarningInfo);
   } else if (!error_from_hmi_) {
     SendResponse(true, mobile_apis::Result::SUCCESS);
