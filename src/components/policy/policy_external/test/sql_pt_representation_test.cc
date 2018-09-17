@@ -1484,9 +1484,8 @@ TEST_F(SQLPTRepresentationTest,
       "`steal_focus`, "
       " `default_hmi`, `priority_value`, `is_revoked`, `is_default`, "
       "`is_predata`, `memory_kb`, "
-      " `heart_beat_timeout_ms`) VALUES( 'default', 0, 0, 'NONE', 'NONE', 0, "
-      "0, "
-      "0, 64, 10) ";
+      " `heart_beat_timeout_ms`, `remote_control_denied`) "
+      "VALUES( 'default', 0, 0, 'NONE', 'NONE', 0, 0, 0, 64, 10, 0) ";
   ASSERT_TRUE(query_wrapper_->Exec(query_insert_app_default));
 
   const std::string query_insert_app_1234567 =

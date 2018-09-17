@@ -1402,9 +1402,9 @@ TEST_F(SQLPTRepresentationTest,
       "`steal_focus`, "
       " `default_hmi`, `priority_value`, `is_revoked`, `is_default`, "
       "`is_predata`, `memory_kb`, "
-      " `heart_beat_timeout_ms`) "
+      " `heart_beat_timeout_ms`, `remote_control_denied`) "
       "VALUES( '" +
-      kDefaultId + "', 0, 0, 'NONE', 'NONE', 0, 0, 0, 64, 10) ";
+      kDefaultId + "', 0, 0, 'NONE', 'NONE', 0, 0, 0, 64, 10, 0) ";
 
   ASSERT_TRUE(dbms->Exec(query_insert_default_app.c_str()));
 

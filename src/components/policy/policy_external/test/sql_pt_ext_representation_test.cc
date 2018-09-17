@@ -870,10 +870,17 @@ TEST_F(
       "VALUES (129372391, '', 'pre_DataConsent')";
   ASSERT_TRUE(query_wrapper_->Exec(query_insert_functional_group));
 
+  const std::string query_insert_default_application =
+      "INSERT INTO `application` (`id`, `memory_kb`,"
+      " `heart_beat_timeout_ms`, `is_predata`, `keep_context`, "
+      "`remote_control_denied`) "
+      "VALUES ('default', 5, 10, 1, 0, 0)";
+  ASSERT_TRUE(query_wrapper_->Exec(query_insert_default_application));
+
   const std::string query_insert_application =
       "INSERT INTO `application` (`id`, `memory_kb`,"
-      " `heart_beat_timeout_ms`, `is_predata`, `keep_context`) VALUES ('1234', "
-      "5, 10, 1, 0)";
+      " `heart_beat_timeout_ms`, `is_predata`, `keep_context`) "
+      "VALUES ('1234', 5, 10, 1, 0)";
 
   // Assert
   ASSERT_TRUE(query_wrapper_->Exec(query_insert_application));
@@ -1374,6 +1381,13 @@ TEST_F(
     SQLPTExtRepresentationTest,
     SetDefaultPolicy_SetPredataThenChangeToDefaultPolicy_ExpectDefaultPolicySet) {
   // Arrange
+  const std::string query_insert_default_application =
+      "INSERT INTO `application` (`id`, `memory_kb`,"
+      " `heart_beat_timeout_ms`, `is_predata`, `keep_context`, "
+      "`remote_control_denied`) "
+      "VALUES ('default', 5, 10, 1, 0, 0)";
+  ASSERT_TRUE(query_wrapper_->Exec(query_insert_default_application));
+
   const std::string query_insert_app =
       "INSERT OR IGNORE INTO `application`(`id`, `keep_context`, "
       "`steal_focus`, "
