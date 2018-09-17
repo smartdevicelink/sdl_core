@@ -2396,11 +2396,12 @@ void ApplicationManagerImpl::UnregisterApplication(
     subscribed_for_way_points_app_count =
         subscribed_way_points_apps_list_.size();
   }
+  ApplicationSharedPtr app_ptr = application(app_id);
   if (1 == subscribed_for_way_points_app_count) {
     LOG4CXX_DEBUG(logger_, "Send UnsubscribeWayPoints");
     if (!is_resuming) {
       LOG4CXX_DEBUG(logger_, "Unsubscribe App from WayPoints");
-      UnsubscribeAppFromWayPoints(app_id);
+      UnsubscribeAppFromWayPoints(app_ptr);
     }
     MessageHelper::SendUnsubscribedWayPoints(*this);
   }
@@ -2429,7 +2430,6 @@ void ApplicationManagerImpl::UnregisterApplication(
     case mobile_apis::Result::EXPIRED_CERT:
       break;
     case mobile_apis::Result::TOO_MANY_PENDING_REQUESTS: {
-      ApplicationSharedPtr app_ptr = application(app_id);
       if (app_ptr) {
         app_ptr->usage_report().RecordRemovalsForBadBehavior();
         if (reason == mobile_apis::Result::TOO_MANY_PENDING_REQUESTS) {
@@ -2473,7 +2473,7 @@ void ApplicationManagerImpl::UnregisterApplication(
 
     if (is_resuming) {
       resume_controller().SaveApplication(app_to_remove);
-      UnsubscribeAppFromWayPoints(app_id);
+      UnsubscribeAppFromWayPoints(app_ptr);
     } else {
       resume_controller().RemoveApplicationFromSaved(app_to_remove);
     }

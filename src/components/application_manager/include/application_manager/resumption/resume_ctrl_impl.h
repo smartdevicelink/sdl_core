@@ -36,6 +36,7 @@
 #include "application_manager/resumption/resume_ctrl.h"
 
 #include <stdint.h>
+#include <time.h>
 #include <vector>
 #include <map>
 #include <set>
@@ -132,6 +133,10 @@ class ResumeCtrlImpl : public ResumeCtrl {
    */
   void OnAwake() OVERRIDE;
 
+  void SaveLowVoltageTime() OVERRIDE;
+
+  void SaveWakeUpTime() OVERRIDE;
+
   /**
    * @brief Checks if SDL has already received OnExitAllApplication notification
    * with "SUSPEND" reason
@@ -147,6 +152,13 @@ class ResumeCtrlImpl : public ResumeCtrl {
    * with reason "SUSPEND"
    */
   void StopSavePersistentDataTimer() OVERRIDE;
+
+  /**
+     * @brief Check if all IGNITION OFF and IGNITION ON records
+     * saved in resumption data base
+     * @return True if all records saved, otherwise False
+     */
+  bool CheckIgnCyclesData() const;
 
   /**
    * @brief Method stops restore_hmi_level_timer_ "RsmCtrlRstore" in OnSuspend()
@@ -307,6 +319,20 @@ class ResumeCtrlImpl : public ResumeCtrl {
 #endif  // BUILD_TESTS
  private:
   /**
+   * @brief Returns Low Voltage signal timestamp
+   * @return Low Voltage event timestamp if event LOW VOLTAGE event occures
+   * otherwise 0
+   */
+  time_t LowVoltageTime() const;
+
+  /**
+   * @brief Returns Wake Up signal timestamp
+   * @return Wake Up timestamp if Wake Up signal occures
+   * otherwise 0
+   */
+  time_t WakeUpTime() const;
+
+  /**
    * @brief restores saved data of application
    * @param application contains application for which restores data
    * @return true if success, otherwise return false
@@ -332,6 +358,19 @@ class ResumeCtrlImpl : public ResumeCtrl {
   bool DisconnectedJustBeforeIgnOff(
       const smart_objects::SmartObject& saved_app);
 
+  /**
+     * @brief Checks if saved HMI level is allowed for resumption
+     * by Low Voltage restrictions
+     * @param saved_app application specific section from backup file
+     * @return True if allowed , otherwise - False
+     */
+  bool CheckLowVoltageRestrictions(const smart_objects::SmartObject& saved_app);
+
+  /**
+     * @brief Checks if saved HMI level is applicable for resumption
+     * @param saved_app application specific section from backup file
+     * @return True fs allowed , otherwise - False
+     */
   bool CheckAppRestrictions(app_mngr::ApplicationConstSharedPtr application,
                             const smart_objects::SmartObject& saved_app);
 
@@ -345,11 +384,39 @@ class ResumeCtrlImpl : public ResumeCtrl {
                   smart_objects::SmartObject& obj);
 
   /**
-   * @brief CheckDelayAfterIgnOn should check if SDL was started less
-   * then N seconds ago. N will be readed from profile.
-   * @return true if SDL started N seconds ago, otherwise return false
+    * @brief CheckDelayAfterIgnOn should check if SDL was started less
+    * than N seconds ago. N will be read from profile.
+    * @return true if SDL started N seconds ago, otherwise return false
+    */
+  bool CheckDelayAfterIgnOn() const;
+
+  /**
+    * @brief CheckDelayBeforeIgnOff checks if app was unregistered less
+    * than N seconds before Ignition OFF. N will be read from profile.
+    * @return true if app was disconnected within timeframe of N seconds before
+    * Ignition Off,
+    * otherwise return false
+    */
+  bool CheckDelayBeforeIgnOff(
+      const smart_objects::SmartObject& saved_app) const;
+
+  /**
+   * @brief CheckDelayAfterWakeUp should check if app was registered
+   * during the first N seconds after WakeUp signal. N will be read from
+   * profile.
+   * @return true if app registered within N seconds after WakeUp, otherwise
+   * return false
    */
-  bool CheckDelayAfterIgnOn();
+  bool CheckDelayAfterWakeUp() const;
+
+  /**
+   * @brief CheckDelayBeforeLowVoltage checks if app was unregistered within
+   * N seconds before Low Voltage signal. N will be read from profile.
+   * @return true if app was disconnected within timeframe of N seconds before
+   * Low Voltage , otherwise return false
+   */
+  bool CheckDelayBeforeLowVoltage(
+      const smart_objects::SmartObject& saved_app) const;
 
   typedef std::pair<uint32_t, uint32_t> application_timestamp;
 
@@ -384,7 +451,7 @@ class ResumeCtrlImpl : public ResumeCtrl {
    * @brief Get the last ignition off time from LastState
    * @return the last ignition off time from LastState
    */
-  time_t GetIgnOffTime();
+  time_t GetIgnOffTime() const;
 
   /**
    * @brief Setup IgnOff time to LastState
@@ -457,8 +524,11 @@ class ResumeCtrlImpl : public ResumeCtrl {
   bool is_data_saved_;
   bool is_suspended_;
   time_t launch_time_;
+  time_t low_voltage_time_;
+  time_t wake_up_time_;
   std::shared_ptr<ResumptionData> resumption_storage_;
   application_manager::ApplicationManager& application_manager_;
+  ResumptionDataProcessor resumption_data_processor_;
 };
 
 }  // namespace resumption

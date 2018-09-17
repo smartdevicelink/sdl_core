@@ -76,7 +76,7 @@ ResumeCtrlImpl::ResumeCtrlImpl(ApplicationManager& application_manager)
     , launch_time_(time(nullptr))
     , low_voltage_time_(0)
     , wake_up_time_(0)
-    , application_manager_(application_manager) 
+    , application_manager_(application_manager)
     , resumption_data_processor_(application_manager) {}
 #ifdef BUILD_TESTS
 void ResumeCtrlImpl::set_resumption_storage(
@@ -352,7 +352,7 @@ void ResumeCtrlImpl::SaveLowVoltageTime() {
 }
 
 void ResumeCtrlImpl::SaveWakeUpTime() {
-  wake_up_time_ = std::time(nullptr);
+  wake_up_time_ = time(nullptr);
   LOG4CXX_DEBUG(logger_, "Wake Up timestamp : " << wake_up_time_ << " saved");
 }
 
@@ -650,7 +650,7 @@ bool ResumeCtrlImpl::CheckLowVoltageRestrictions(
   return true;
 }
 
-bool ResumeCtrlImpl::CheckDelayBeforeIgnOff(	
+bool ResumeCtrlImpl::CheckDelayBeforeIgnOff(
     const smart_objects::SmartObject& saved_app) const {
   using namespace date_time;
   LOG4CXX_AUTO_TRACE(logger_);
