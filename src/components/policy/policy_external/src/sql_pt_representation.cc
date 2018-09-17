@@ -1193,18 +1193,6 @@ bool SQLPTRepresentation::SaveRequestType(
       LOG4CXX_WARN(logger_, "Incorrect insert into request types.");
       return false;
     }
-  } else {
-    utils::dbms::SQLQuery query_omitted(db());
-    if (!query_omitted.Prepare(sql_pt::kInsertOmittedRequestType)) {
-      LOG4CXX_WARN(logger_, "Incorrect insert statement for request types.");
-      return false;
-    }
-    LOG4CXX_WARN(logger_, "Request types omitted.");
-    query_omitted.Bind(0, app_id);
-    if (!query_omitted.Exec() || !query_omitted.Reset()) {
-      LOG4CXX_WARN(logger_, "Incorrect insert into request types.");
-      return false;
-    }
   }
   return true;
 }
@@ -1234,18 +1222,6 @@ bool SQLPTRepresentation::SaveRequestSubType(
     query.Bind(0, app_id);
     query.Bind(1, std::string("EMPTY"));
     if (!query.Exec() || !query.Reset()) {
-      LOG4CXX_WARN(logger_, "Incorrect insert into request subtypes.");
-      return false;
-    }
-  } else {
-    utils::dbms::SQLQuery query_omitted(db());
-    if (!query_omitted.Prepare(sql_pt::kInsertOmittedRequestSubType)) {
-      LOG4CXX_WARN(logger_, "Incorrect insert statement for request subtypes.");
-      return false;
-    }
-    LOG4CXX_WARN(logger_, "Request subtypes omitted.");
-    query_omitted.Bind(0, app_id);
-    if (!query_omitted.Exec() || !query_omitted.Reset()) {
       LOG4CXX_WARN(logger_, "Incorrect insert into request subtypes.");
       return false;
     }
