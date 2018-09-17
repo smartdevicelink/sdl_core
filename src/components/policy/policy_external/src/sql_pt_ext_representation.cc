@@ -1739,6 +1739,20 @@ bool SQLPTExtRepresentation::SetDefaultPolicy(const std::string& app_id) {
 
   SetPreloaded(false);
 
+  bool rc_denied = false;
+  if (!GatherRemoteControlDenied(kDefaultId, &rc_denied) ||
+      !SaveRemoteControlDenied(app_id, rc_denied)) {
+    return false;
+  }
+
+  if (!rc_denied) {
+    policy_table::ModuleTypes module_types;
+    if (!GatherModuleType(kDefaultId, &module_types) ||
+        !SaveModuleType(app_id, module_types)) {
+      return false;
+    }
+  }
+
   policy_table::Strings default_groups;
   policy_table::Strings default_preconsented_groups;
   GatherAppGroup(kDefaultId, &default_groups);
