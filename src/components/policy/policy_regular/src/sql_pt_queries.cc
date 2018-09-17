@@ -794,15 +794,16 @@ const std::string kDeleteAppGroupByApplicationId =
 const std::string kInsertApplicationFull =
     "INSERT OR IGNORE INTO `application` (`id`, `keep_context`, `steal_focus`, "
     "  `default_hmi`, `priority_value`, `is_revoked`, `is_default`, "
-    "`is_predata`, "
-    " `memory_kb`, `heart_beat_timeout_ms`, `certificate`) "
-    "  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+    "  `is_predata`, "
+    "  `memory_kb`, `heart_beat_timeout_ms`, `certificate`, "
+    "  `remote_control_denied`) "
+    "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
 const std::string kSelectApplicationFull =
     "SELECT `keep_context`, `steal_focus`, `default_hmi`, `priority_value`, "
     "  `is_revoked`, `is_default`, `is_predata`, `memory_kb`,"
-    "  `heart_beat_timeout_ms`, `certificate` FROM `application` WHERE `id` = "
-    "?";
+    "  `heart_beat_timeout_ms`, `certificate`, `remote_control_denied` "
+    "FROM `application` WHERE `id` = ?";
 
 const std::string kSelectDBVersion =
     "SELECT `db_version_hash` from `_internal_data`";

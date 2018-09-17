@@ -1985,6 +1985,20 @@ bool SQLPTRepresentation::SetDefaultPolicy(const std::string& app_id) {
     return false;
   }
 
+  bool rc_denied = false;
+  if (!GatherRemoteControlDenied(kDefaultId, &rc_denied) ||
+      !SaveRemoteControlDenied(app_id, rc_denied)) {
+    return false;
+  }
+
+  if (!rc_denied) {
+    policy_table::ModuleTypes module_types;
+    if (!GatherModuleType(kDefaultId, &module_types) ||
+        !SaveModuleType(app_id, module_types)) {
+      return false;
+    }
+  }
+
   return SetIsDefault(app_id, true);
 }
 
@@ -2100,6 +2114,7 @@ bool SQLPTRepresentation::CopyApplication(const std::string& source,
   query.Bind(9, source_app.GetInteger(8));
   source_app.IsNull(9) ? query.Bind(10)
                        : query.Bind(10, source_app.GetString(9));
+  query.Bind(11, source_app.GetInteger(10));
   if (!query.Exec()) {
     LOG4CXX_WARN(logger_, "Failed inserting into application.");
     return false;
