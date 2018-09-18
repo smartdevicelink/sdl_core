@@ -118,6 +118,8 @@ class MockApplication : public ::application_manager::Application {
   MOCK_METHOD0(tts_properties_in_none, bool());
   MOCK_METHOD1(set_tts_properties_in_full, void(bool active));
   MOCK_METHOD0(tts_properties_in_full, bool());
+  MOCK_METHOD1(set_keep_context, void(bool keep_context));
+  MOCK_METHOD0(keep_context, bool());
   MOCK_METHOD1(set_version,
                void(const ::application_manager::Version& version));
   MOCK_METHOD1(set_name, void(const custom_str::CustomString& name));

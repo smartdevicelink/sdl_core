@@ -368,6 +368,9 @@ class AudioSource : public HmiState {
       const OVERRIDE {
     return mobile_apis::VideoStreamingState::NOT_STREAMABLE;
   }
+
+ private:
+  bool keep_context_;
 };
 
 /**
