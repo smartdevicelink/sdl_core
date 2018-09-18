@@ -63,7 +63,9 @@ class MockResumeCtrl : public resumption::ResumeCtrl {
                bool(app_mngr::ApplicationSharedPtr application,
                     const std::string& hash,
                     resumption::ResumeCtrl::ResumptionCallBack));
-  MOCK_METHOD1(HandleOnTimeOut, void(const int32_t app_id));
+  MOCK_METHOD2(HandleOnTimeOut,
+               void(const uint32_t cor_id,
+                    const hmi_apis::FunctionID::eType function_id));
   MOCK_METHOD1(StartResumptionOnlyHMILevel,
                bool(app_mngr::ApplicationSharedPtr application));
   MOCK_METHOD1(RetryResumption, void(const uint32_t app_id));

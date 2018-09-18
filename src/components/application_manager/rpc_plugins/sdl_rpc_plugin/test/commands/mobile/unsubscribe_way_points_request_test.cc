@@ -100,9 +100,7 @@ TEST_F(UnsubscribeWayPointsRequestTest,
   EXPECT_CALL(app_mngr_, application(kConnectionKey))
       .WillOnce(Return(mock_app));
 
-  EXPECT_CALL(app_mngr_,
-              IsAppSubscribedForWayPoints(
-                  ::testing::Matcher<am::ApplicationSharedPtr>(mock_app)))
+  EXPECT_CALL(app_mngr_, IsAppSubscribedForWayPoints(Ref(*mock_app)))
       .WillOnce(Return(false));
 
   EXPECT_CALL(
@@ -117,9 +115,7 @@ TEST_F(UnsubscribeWayPointsRequestTest, Run_AppSubscribedForWayPoints_SUCCESS) {
   EXPECT_CALL(app_mngr_, application(kConnectionKey))
       .WillOnce(Return(mock_app));
 
-  EXPECT_CALL(app_mngr_,
-              IsAppSubscribedForWayPoints(
-                  ::testing::Matcher<am::ApplicationSharedPtr>(mock_app)))
+  EXPECT_CALL(app_mngr_, IsAppSubscribedForWayPoints(Ref(*mock_app)))
       .WillOnce(Return(true));
 
   EXPECT_CALL(mock_rpc_service_,

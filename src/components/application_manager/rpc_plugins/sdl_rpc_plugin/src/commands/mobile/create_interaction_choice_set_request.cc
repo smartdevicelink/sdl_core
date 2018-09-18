@@ -39,6 +39,7 @@
 
 #include "application_manager/application_impl.h"
 #include "application_manager/message_helper.h"
+#include "application_manager/resumption/resume_ctrl.h"
 #include "utils/gen_hash.h"
 #include "utils/helpers.h"
 
@@ -419,6 +420,12 @@ void CreateInteractionChoiceSetRequest::onTimeOut() {
   }
   CommandRequestImpl::onTimeOut();
   DeleteChoices();
+
+  auto& resume_ctrl = application_manager_.resume_controller();
+
+  resume_ctrl.HandleOnTimeOut(
+      correlation_id(),
+      static_cast<hmi_apis::FunctionID::eType>(function_id()));
 
   // We have to keep request alive until receive all responses from HMI
   // according to SDLAQ-CRS-2976

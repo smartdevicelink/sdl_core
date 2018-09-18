@@ -61,14 +61,92 @@ void ResumptionDataProcessor::Restore(ApplicationSharedPtr application,
                                       smart_objects::SmartObject& saved_app,
                                       ResumeCtrl::ResumptionCallBack callback) {
   LOG4CXX_AUTO_TRACE(logger_);
+
+  if (!HasDataToRestore(saved_app) &&
+      !HasGlobalPropertiesToRestore(saved_app) &&
+      !HasSubscriptionsToRestore(saved_app)) {
+    LOG4CXX_DEBUG(logger_, "No data to restore, resumption is successful");
+    callback(mobile_apis::Result::SUCCESS, "Data resumption succesful");
+    return;
+  }
+
   AddFiles(application, saved_app);
   AddSubmenues(application, saved_app);
   AddCommands(application, saved_app);
   AddChoicesets(application, saved_app);
   SetGlobalProperties(application, saved_app);
   AddSubscriptions(application, saved_app);
-  AddWayPointsSubscription(application, saved_app);
   register_callbacks_[application->app_id()] = callback;
+}
+
+bool ResumptionDataProcessor::HasDataToRestore(
+    const smart_objects::SmartObject& saved_app) const {
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  const bool has_data_to_restore =
+      !saved_app[strings::application_submenus].empty() ||
+      !saved_app[strings::application_commands].empty() ||
+      !saved_app[strings::application_choice_sets].empty();
+
+  LOG4CXX_DEBUG(logger_,
+                std::boolalpha << "Application has data to restore: "
+                               << has_data_to_restore);
+
+  return has_data_to_restore;
+}
+
+bool ResumptionDataProcessor::HasGlobalPropertiesToRestore(
+    const smart_objects::SmartObject& saved_app) const {
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  const smart_objects::SmartObject& global_properties =
+      saved_app[strings::application_global_properties];
+
+  const bool has_gl_props_to_restore =
+      !global_properties[strings::help_prompt].empty() ||
+      !global_properties[strings::keyboard_properties].empty() ||
+      !global_properties[strings::menu_icon].empty() ||
+      !global_properties[strings::menu_title].empty() ||
+      !global_properties[strings::timeout_prompt].empty() ||
+      !global_properties[strings::vr_help].empty() ||
+      !global_properties[strings::vr_help_title].empty();
+
+  LOG4CXX_DEBUG(logger_,
+                std::boolalpha
+                    << "Application has global properties to restore: "
+                    << has_gl_props_to_restore);
+
+  return has_gl_props_to_restore;
+}
+
+bool ResumptionDataProcessor::HasSubscriptionsToRestore(
+    const smart_objects::SmartObject& saved_app) const {
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  const smart_objects::SmartObject& subscriptions =
+      saved_app[strings::application_subscriptions];
+
+  const bool has_ivi_subscriptions =
+      !subscriptions[strings::application_vehicle_info].empty();
+
+  const bool has_button_subscriptions =
+      !(subscriptions[strings::application_buttons].length() == 1 &&
+        static_cast<hmi_apis::Common_ButtonName::eType>(
+            subscriptions[strings::application_buttons][0].asInt()) ==
+            hmi_apis::Common_ButtonName::CUSTOM_BUTTON);
+
+  const bool has_waypoints_subscriptions =
+      subscriptions[strings::subscribed_for_way_points].asBool();
+
+  const bool has_subscriptions_to_restore = has_ivi_subscriptions ||
+                                            has_button_subscriptions ||
+                                            has_waypoints_subscriptions;
+
+  LOG4CXX_DEBUG(logger_,
+                std::boolalpha << "Application has subscriptions to restore: "
+                               << has_subscriptions_to_restore);
+
+  return has_subscriptions_to_restore;
 }
 
 bool ResumptionRequestIDs::operator<(const ResumptionRequestIDs& other) const {
@@ -76,9 +154,34 @@ bool ResumptionRequestIDs::operator<(const ResumptionRequestIDs& other) const {
          function_id < other.function_id;
 }
 
-void ResumptionDataProcessor::HandleOnTimeOut(const int32_t app_id) {
+void ResumptionDataProcessor::HandleOnTimeOut(
+    const uint32_t corr_id, const hmi_apis::FunctionID::eType function_id) {
   LOG4CXX_AUTO_TRACE(logger_);
-  RevertRestoredData(application_manager_.application(app_id));
+  LOG4CXX_DEBUG(logger_,
+                "Handling timeout with corr id: "
+                    << corr_id << " and function_id: " << function_id);
+  uint32_t app_id = 0;
+  ApplicationSharedPtr app;
+
+  auto it = std::find_if(
+      request_app_ids_.begin(),
+      request_app_ids_.end(),
+      [corr_id, function_id](
+          const std::pair<ResumptionRequestIDs, std::uint32_t>& item) {
+        return item.first.function_id == function_id &&
+               item.first.correlation_id == static_cast<int32_t>(corr_id);
+      });
+  if (it != request_app_ids_.end()) {
+    app_id = it->second;
+    app = application_manager_.application(app_id);
+  }
+  if (app && app->is_resuming()) {
+    LOG4CXX_DEBUG(logger_, "Unsubscribing from event: " << function_id);
+    auto callback = register_callbacks_[app_id];
+    callback(mobile_apis::Result::RESUME_FAILED, "Data resumption failed");
+    unsubscribe_from_event(function_id);
+    RevertRestoredData(application_manager_.application(app_id));
+  }
 }
 
 void ResumptionDataProcessor::on_event(const event_engine::Event& event) {
@@ -110,6 +213,8 @@ void ResumptionDataProcessor::on_event(const event_engine::Event& event) {
   }
 
   const uint32_t app_id = app_id_ptr->second;
+
+  LOG4CXX_DEBUG(logger_, "app_id is: " << app_id);
 
   LOG4CXX_DEBUG(logger_,
                 "Found function id: " << app_id_ptr->first.function_id
@@ -150,7 +255,10 @@ void ResumptionDataProcessor::on_event(const event_engine::Event& event) {
     CheckVehicleDataResponse(request_ptr->message, response, status);
   }
 
-  list_of_sent_requests.erase(request_ptr);
+  {
+    sync_primitives::AutoLock lock(resumption_data_procesoor_lock_);
+    list_of_sent_requests.erase(request_ptr);
+  }
 
   if (!list_of_sent_requests.empty()) {
     LOG4CXX_DEBUG(logger_,
@@ -161,34 +269,42 @@ void ResumptionDataProcessor::on_event(const event_engine::Event& event) {
   }
 
   auto it = register_callbacks_.find(app_id);
-  DCHECK_OR_RETURN_VOID(it != register_callbacks_.end());
+  if (it == register_callbacks_.end()) {
+    LOG4CXX_WARN(logger_, "Callback for app_id: " << app_id << " not found");
+
+    return;
+  }
   auto callback = it->second;
   const bool successful_resumption =
       status.error_requests.empty() &&
       status.unsuccesfull_vehicle_data_subscriptions_.empty();
+
   if (successful_resumption) {
     LOG4CXX_DEBUG(logger_, "Resumption for app " << app_id << " successful");
     callback(mobile_apis::Result::SUCCESS, "Data resumption succesful");
   }
   if (!successful_resumption) {
-    LOG4CXX_ERROR(logger_, "Resumption for app " << app_id << "failed");
-    RevertRestoredData(application_manager_.application(app_id));
+    LOG4CXX_ERROR(logger_, "Resumption for app " << app_id << " failed");
     callback(mobile_apis::Result::RESUME_FAILED, "Data resumption failed");
+    RevertRestoredData(application_manager_.application(app_id));
   }
   resumption_status_.erase(app_id);
   request_app_ids_.erase(app_id_ptr);
+  register_callbacks_.erase(app_id);
 }
 
 void ResumptionDataProcessor::RevertRestoredData(
     ApplicationSharedPtr application) {
   LOG4CXX_AUTO_TRACE(logger_);
+  LOG4CXX_DEBUG(logger_, "Reverting for app: " << application->app_id());
   DeleteFiles(application);
   DeleteSubmenues(application);
   DeleteCommands(application);
   DeleteChoicesets(application);
   DeleteGlobalProperties(application);
   DeleteSubscriptions(application);
-  DeleteWayPointsSubscription(application);
+  resumption_status_.erase(application->app_id());
+  register_callbacks_.erase(application->app_id());
 }
 
 void ResumptionDataProcessor::WaitForResponse(
@@ -200,6 +316,7 @@ void ResumptionDataProcessor::WaitForResponse(
                        << request.request_ids.correlation_id);
   subscribe_on_event(request.request_ids.function_id,
                      request.request_ids.correlation_id);
+  sync_primitives::AutoLock lock(resumption_data_procesoor_lock_);
   resumption_status_[app_id].list_of_sent_requests.push_back(request);
   request_app_ids_.insert(std::make_pair(request.request_ids, app_id));
 }
@@ -297,7 +414,7 @@ void ResumptionDataProcessor::AddSubmenues(
   }
 
   ProcessHMIRequests(MessageHelper::CreateAddSubMenuRequestsToHMI(
-      application, application_manager_.GetNextHMICorrelationID()));
+      application, application_manager_));
 }
 
 void ResumptionDataProcessor::DeleteSubmenues(
@@ -305,7 +422,11 @@ void ResumptionDataProcessor::DeleteSubmenues(
   LOG4CXX_AUTO_TRACE(logger_);
   const uint32_t app_id = application->app_id();
   ApplicationResumptionStatus& status = resumption_status_[app_id];
-  for (auto request : status.successful_requests) {
+  auto requests = status.successful_requests;
+  requests.insert(requests.begin(),
+                  status.error_requests.begin(),
+                  status.error_requests.end());
+  for (auto request : requests) {
     if (hmi_apis::FunctionID::UI_AddSubMenu ==
         request.request_ids.function_id) {
       smart_objects::SmartObjectSPtr ui_sub_menu =
@@ -361,8 +482,8 @@ void ResumptionDataProcessor::DeleteCommands(ApplicationSharedPtr application) {
   LOG4CXX_AUTO_TRACE(logger_);
   const uint32_t app_id = application->app_id();
   ApplicationResumptionStatus& status = resumption_status_[app_id];
-
-  for (auto request : status.successful_requests) {
+  auto requests = status.successful_requests;
+  for (auto request : requests) {
     const uint32_t cmd_id =
         request.message[strings::msg_params][strings::cmd_id].asUInt();
 
@@ -537,49 +658,6 @@ void ResumptionDataProcessor::DeleteGlobalProperties(
   }
 }
 
-void ResumptionDataProcessor::AddWayPointsSubscription(
-    app_mngr::ApplicationSharedPtr application,
-    const smart_objects::SmartObject& saved_app) {
-  LOG4CXX_AUTO_TRACE(logger_);
-
-  if (!saved_app.keyExists(strings::subscribed_for_way_points)) {
-    LOG4CXX_ERROR(logger_, "subscribed_for_way_points section is not exists");
-    return;
-  }
-
-  const bool subscribed_for_way_points_so =
-      saved_app[strings::subscribed_for_way_points].asBool();
-  if (subscribed_for_way_points_so) {
-    application_manager_.SubscribeAppForWayPoints(application);
-    auto subscribe_waypoints_msg = MessageHelper::CreateMessageForHMI(
-        hmi_apis::FunctionID::Navigation_SubscribeWayPoints,
-        application_manager_.GetNextHMICorrelationID());
-    (*subscribe_waypoints_msg)[strings::params][strings::message_type] =
-        hmi_apis::messageType::request;
-    (*subscribe_waypoints_msg)[strings::msg_params][strings::app_id] =
-        application->app_id();
-    ProcessHMIRequest(subscribe_waypoints_msg, true);
-  }
-}
-
-void ResumptionDataProcessor::DeleteWayPointsSubscription(
-    ApplicationSharedPtr application) {
-  LOG4CXX_AUTO_TRACE(logger_);
-
-  if (application_manager_.IsAppSubscribedForWayPoints(application)) {
-    LOG4CXX_DEBUG(logger_, "App is subscribed");
-    application_manager_.UnsubscribeAppFromWayPoints(application);
-    auto subscribe_waypoints_msg = MessageHelper::CreateMessageForHMI(
-        hmi_apis::FunctionID::Navigation_UnsubscribeWayPoints,
-        application_manager_.GetNextHMICorrelationID());
-    (*subscribe_waypoints_msg)[strings::params][strings::message_type] =
-        hmi_apis::messageType::request;
-    (*subscribe_waypoints_msg)[strings::msg_params][strings::app_id] =
-        application->app_id();
-    ProcessHMIRequest(subscribe_waypoints_msg, false);
-  }
-}
-
 void ResumptionDataProcessor::AddSubscriptions(
     ApplicationSharedPtr application,
     const smart_objects::SmartObject& saved_app) {
@@ -663,6 +741,9 @@ void ResumptionDataProcessor::DeleteButtonsSubscriptions(
   smart_objects::SmartObjectSPtr notification;
   for (auto& btn : button_subscriptions) {
     const auto hmi_btn = static_cast<hmi_apis::Common_ButtonName::eType>(btn);
+    if (hmi_apis::Common_ButtonName::CUSTOM_BUTTON == hmi_btn) {
+      continue;
+    }
     notification = MessageHelper::CreateOnButtonSubscriptionNotification(
         application->hmi_app_id(),
         hmi_btn,
@@ -671,14 +752,6 @@ void ResumptionDataProcessor::DeleteButtonsSubscriptions(
     ProcessHMIRequest(notification, false);
     application->UnsubscribeFromButton(btn);
   }
-
-  notification = MessageHelper::CreateOnButtonSubscriptionNotification(
-      application->hmi_app_id(),
-      hmi_apis::Common_ButtonName::CUSTOM_BUTTON,
-      /*is_subscribed = */ false,
-      application_manager_);
-  ProcessHMIRequest(notification, false);
-  application->SubscribeToButton(mobile_apis::ButtonName::CUSTOM_BUTTON);
 }
 
 void ResumptionDataProcessor::DeletePluginsSubscriptions(
@@ -736,10 +809,11 @@ void ResumptionDataProcessor::CheckVehicleDataResponse(
             : response_params[ivi][strings::result_code].asInt();
     if (kSuccess != vd_result_code) {
       LOG4CXX_TRACE(logger_,
-                    "ivi " << ivi << " was not successfuly subscribed");
+                    "ivi " << ivi << " was NOT successfuly subscribed");
 
       status.unsuccesfull_vehicle_data_subscriptions_.push_back(ivi);
     } else {
+      LOG4CXX_TRACE(logger_, "ivi " << ivi << " was successfuly subscribed");
       status.succesfull_vehicle_data_subscriptions_.push_back(ivi);
     }
   }

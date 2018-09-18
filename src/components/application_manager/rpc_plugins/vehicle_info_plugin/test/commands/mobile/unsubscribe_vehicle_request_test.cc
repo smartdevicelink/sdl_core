@@ -78,6 +78,8 @@ class UnsubscribeVehicleRequestTest
  protected:
   void UnsubscribeSuccessfully();
   void SetUp() OVERRIDE {
+    ON_CALL(app_mngr_, event_dispatcher())
+        .WillByDefault(ReturnRef(event_dispatcher_));
     vi_plugin_.Init(app_mngr_,
                     mock_rpc_service_,
                     mock_hmi_capabilities_,
@@ -107,7 +109,6 @@ TEST_F(UnsubscribeVehicleRequestTest, Run_AppNotRegistered_UNSUCCESS) {
       mock_rpc_service_,
       ManageMobileCommand(
           MobileResultCodeIs(mobile_result::APPLICATION_NOT_REGISTERED), _));
-
   command->Run();
 }
 

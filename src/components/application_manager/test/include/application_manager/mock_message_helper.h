@@ -182,7 +182,7 @@ class MockMessageHelper {
                void(uint32_t app_id, ApplicationManager& app_mngr));
   MOCK_METHOD2(CreateAddSubMenuRequestsToHMI,
                smart_objects::SmartObjectList(ApplicationConstSharedPtr app,
-                                              const uint32_t correlation_id));
+                                              ApplicationManager& app_mngr));
   MOCK_METHOD2(CreateAddCommandRequestToHMI,
                smart_objects::SmartObjectList(ApplicationConstSharedPtr app,
                                               ApplicationManager& app_mngr));

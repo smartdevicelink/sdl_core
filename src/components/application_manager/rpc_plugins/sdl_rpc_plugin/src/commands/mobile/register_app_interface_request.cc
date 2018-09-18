@@ -223,10 +223,12 @@ bool RegisterAppInterfaceRequest::ProcessApplicationTransportSwitching() {
   if (!IsApplicationSwitched()) {
     return false;
   }
-  const auto& msg_params = (*message_)[strings::msg_params];
 
-  const auto& policy_app_id = msg_params[strings::app_id].asString();
+  const std::string& policy_app_id =
+      application_manager_.GetCorrectMobileIDFromMessage(message_);
+
   auto app = application_manager_.application_by_policy_id(policy_app_id);
+
   DCHECK_OR_RETURN(app, false);
   if (!application_manager_.IsAppInReconnectMode(policy_app_id)) {
     LOG4CXX_DEBUG(logger_,
@@ -251,7 +253,7 @@ bool RegisterAppInterfaceRequest::ProcessApplicationTransportSwitching() {
 
   application_manager_.ProcessReconnection(app, connection_key());
   result_code_ = mobile_apis::Result::SUCCESS;
-  SendRegisterAppInterfaceResponseToMobile(app_type, "", false);
+  SendRegisterAppInterfaceResponseToMobile(app_type, "");
 
   application_manager_.SendHMIStatusNotification(app);
 
@@ -279,18 +281,6 @@ void RegisterAppInterfaceRequest::FillApplicationParams(
   LOG4CXX_AUTO_TRACE(logger_);
   const auto& msg_params = (*message_)[strings::msg_params];
   const std::string policy_app_id = msg_params[strings::app_id].asString();
-  // For resuming application need to restore hmi_app_id from resumeCtrl
-  resumption::ResumeCtrl& resumer = application_manager_.resume_controller();
-  const std::string& device_mac = application->mac_address();
-
-  // there is side affect with 2 mobile app with the same mobile app_id
-  if (resumer.IsApplicationSaved(policy_app_id, device_mac)) {
-    application->set_hmi_application_id(
-        resumer.GetHMIApplicationID(policy_app_id, device_mac));
-  } else {
-    application->set_hmi_application_id(
-        application_manager_.GenerateNewHMIAppID());
-  }
 
   application->set_is_media_application(
       msg_params[strings::is_media_application].asBool());
@@ -423,20 +413,6 @@ RegisterAppInterfaceRequest::ApplicationDataShouldBeResumed() {
   return DataResumeResult::RESUME_DATA;
 }
 
-void RegisterAppInterfaceRequest::onTimeOut() {
-  LOG4CXX_AUTO_TRACE(logger_);
-  if (!is_data_resumption_) {
-    app_mngr::commands::CommandRequestImpl::onTimeOut();
-    return;
-  }
-  auto& resume_ctrl = application_manager_.resume_controller();
-  resume_ctrl.HandleOnTimeOut(application_->app_id());
-  result_code_ = mobile_api::Result::RESUME_FAILED;
-  const std::string info = "HMI does not respond during timeout.";
-  SendRegisterAppInterfaceResponseToMobile(
-      ApplicationType::kNewApplication, info, true);
-}
-
 void RegisterAppInterfaceRequest::Run() {
   using namespace helpers;
   LOG4CXX_AUTO_TRACE(logger_);
@@ -558,18 +534,19 @@ void RegisterAppInterfaceRequest::Run() {
   }
 
   // Version negotiation
+  utils::SemanticVersion ver_4_5(4, 5, 0);
   utils::SemanticVersion module_version(
       major_version, minor_version, patch_version);
-  if (mobile_version < utils::rpc_version_5) {
+  if (mobile_version <= ver_4_5) {
     // Mobile versioning did not exist for
-    // versions before 5.0
-    application->set_msg_version(utils::base_rpc_version);
+    // versions 4.5 and prior.
+    application_->set_msg_version(ver_4_5);
   } else if (mobile_version < module_version) {
     // Use mobile RPC version as negotiated version
-    application->set_msg_version(mobile_version);
+    application_->set_msg_version(mobile_version);
   } else {
     // Use module version as negotiated version
-    application->set_msg_version(module_version);
+    application_->set_msg_version(module_version);
   }
 
   FillApplicationParams(application_);
@@ -592,17 +569,23 @@ void RegisterAppInterfaceRequest::Run() {
   application_manager_.GetPluginManager().ForEachPlugin(on_app_registered);
 
   if (DataResumeResult::RESUME_DATA == resume_data_result) {
+    application_manager_.updateRequestTimeout(
+        connection_key(), correlation_id(), 0);
+    sleep(1);
     is_data_resumption_ = true;
+    application_->set_is_resuming(true);
     auto& resume_ctrl = application_manager_.resume_controller();
     const auto& msg_params = (*message_)[strings::msg_params];
     const auto& hash_id = msg_params[strings::hash_id].asString();
     LOG4CXX_WARN(logger_, "Start Data Resumption");
-    auto send_response = [this](mobile_apis::Result::eType result_code,
-                                const std::string& info) {
+    auto app = application_;
+    auto send_response = [this, app](mobile_apis::Result::eType result_code,
+                                     const std::string info) {
+      LOG4CXX_DEBUG(logger_, "Invoking lambda callback for: " << this);
       result_code_ = result_code;
-      SendRegisterAppInterfaceResponseToMobile(
-          ApplicationType::kNewApplication, info, true);
-      application_->UpdateHash();
+      SendRegisterAppInterfaceResponseToMobile(ApplicationType::kNewApplication,
+                                               info);
+      app->UpdateHash();
     };
 
     resume_ctrl.StartResumption(application_, hash_id, send_response);
@@ -613,7 +596,6 @@ void RegisterAppInterfaceRequest::Run() {
   if (mobile_apis::Result::INVALID_ENUM == result_code_) {
     result_code_ = mobile_apis::Result::SUCCESS;
   }
-
   if (DataResumeResult::WRONG_HASH == resume_data_result) {
     add_info = "Hash from RAI does not match to saved resume data.";
     result_code_ = mobile_apis::Result::RESUME_FAILED;
@@ -625,11 +607,9 @@ void RegisterAppInterfaceRequest::Run() {
   }
 
   CheckLanguage();
-  const bool need_to_restore_vr =
-      resume_data_result == DataResumeResult::RESUME_DATA;
 
-  SendRegisterAppInterfaceResponseToMobile(
-      ApplicationType::kNewApplication, add_info, need_to_restore_vr);
+  SendRegisterAppInterfaceResponseToMobile(ApplicationType::kNewApplication,
+                                           add_info);
   smart_objects::SmartObjectSPtr so =
       GetLockScreenIconUrlNotification(connection_key(), application_);
   rpc_service_.ManageMobileCommand(so, SOURCE_SDL);
@@ -830,8 +810,7 @@ void FinishSendingRegisterAppInterfaceToMobile(
   }
 
   // Default HMI level should be set before any permissions validation, since
-  // it
-  // relies on HMI level.
+  // it relies on HMI level.
   app_manager.OnApplicationRegistered(application);
   (*notify_upd_manager)();
 
@@ -844,9 +823,7 @@ void FinishSendingRegisterAppInterfaceToMobile(
 }
 
 void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile(
-    ApplicationType app_type,
-    const std::string& add_info,
-    bool need_restore_vr) {
+    ApplicationType app_type, const std::string& add_info) {
   LOG4CXX_AUTO_TRACE(logger_);
   smart_objects::SmartObject response_params(smart_objects::SmartType_Map);
 
@@ -997,38 +974,10 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile(
       msg_params_copy, application_manager_, key, notify_upd_manager);
 }
 
-void RegisterAppInterfaceRequest::FinishSendingRegisterAppInterfaceToMobile(
-    const smart_objects::SmartObject& msg_params,
-    ApplicationManager& app_manager,
-    const uint32_t connection_key,
-    policy::StatusNotifier notify_upd_manager) {
-  policy::PolicyHandlerInterface& policy_handler =
-      app_manager.GetPolicyHandler();
-  resumption::ResumeCtrl& resume_ctrl = app_manager.resume_controller();
-  auto application = app_manager.application(connection_key);
-
-  if (msg_params.keyExists(strings::app_hmi_type)) {
-    policy_handler_.SetDefaultHmiTypes(application->policy_app_id(),
-                                       &(msg_params[strings::app_hmi_type]));
-  }
-
-  // Default HMI level should be set before any permissions validation, since it
-  // relies on HMI level.
-  app_manager.OnApplicationRegistered(application);
-  (*notify_upd_manager)();
-
-  // Start PTU after successfull registration
-  // Sends OnPermissionChange notification to mobile right after RAI response
-  // and HMI level set-up
-  policy_handler.OnAppRegisteredOnMobile(application->policy_app_id());
-
-  resume_ctrl.StartResumptionOnlyHMILevel(application);
-}
-
 DEPRECATED void
 RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile() {
-  SendRegisterAppInterfaceResponseToMobile(
-      ApplicationType::kNewApplication, "", false);
+  SendRegisterAppInterfaceResponseToMobile(ApplicationType::kNewApplication,
+                                           "");
 }
 
 void RegisterAppInterfaceRequest::SendChangeRegistration(

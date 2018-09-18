@@ -49,6 +49,7 @@
 #include "application_manager/event_engine/event.h"
 #include "application_manager/mock_hmi_interface.h"
 #include "application_manager/mock_hmi_capabilities.h"
+#include "application_manager/mock_resume_ctrl.h"
 
 namespace test {
 namespace components {
@@ -157,6 +158,7 @@ class CreateInteractionChoiceSetRequestTest
   CreateInteractionChoiceSetRequestPtr command_;
   MockAppPtr mock_app_;
   std::shared_ptr<sync_primitives::Lock> lock_;
+  resumprion_test::MockResumeCtrl mock_resume_ctrl_;
 };
 
 class CreateInteractionChoiceSetResponseTest
@@ -183,6 +185,10 @@ TEST_F(CreateInteractionChoiceSetRequestTest, OnTimeout_GENERIC_ERROR) {
       mock_rpc_service_,
       ManageMobileCommand(_, am::commands::Command::CommandSource::SOURCE_SDL))
       .WillOnce(DoAll(SaveArg<0>(&vr_command_result), Return(true)));
+
+  ON_CALL(app_mngr_, resume_controller())
+      .WillByDefault(ReturnRef(mock_resume_ctrl_));
+  EXPECT_CALL(mock_resume_ctrl_, HandleOnTimeOut(_, _));
 
   req_vr->onTimeOut();
   EXPECT_EQ(
@@ -705,6 +711,9 @@ TEST_F(CreateInteractionChoiceSetRequestTest,
                   am::commands::Command::SOURCE_SDL));
 
   EXPECT_CALL(app_mngr_, TerminateRequest(_, _, _));
+  ON_CALL(app_mngr_, resume_controller())
+      .WillByDefault(ReturnRef(mock_resume_ctrl_));
+  EXPECT_CALL(mock_resume_ctrl_, HandleOnTimeOut(_, _));
   command_->onTimeOut();
 }
 
@@ -749,6 +758,9 @@ TEST_F(CreateInteractionChoiceSetRequestTest,
 
   EXPECT_CALL(mock_rpc_service_, ManageMobileCommand(_, _)).Times(0);
   EXPECT_CALL(app_mngr_, TerminateRequest(_, _, _));
+  ON_CALL(app_mngr_, resume_controller())
+      .WillByDefault(ReturnRef(mock_resume_ctrl_));
+  EXPECT_CALL(mock_resume_ctrl_, HandleOnTimeOut(_, _));
   command_->onTimeOut();
 }
 
@@ -794,6 +806,9 @@ TEST_F(CreateInteractionChoiceSetRequestTest, OnTimeOut_InvalidApp_UNSUCCESS) {
   EXPECT_CALL(app_mngr_, application(kConnectionKey))
       .WillOnce(Return(invalid_app));
   EXPECT_CALL(*mock_app_, RemoveChoiceSet(_)).Times(0);
+  ON_CALL(app_mngr_, resume_controller())
+      .WillByDefault(ReturnRef(mock_resume_ctrl_));
+  EXPECT_CALL(mock_resume_ctrl_, HandleOnTimeOut(_, _));
   command_->onTimeOut();
 }
 
@@ -844,6 +859,9 @@ TEST_F(CreateInteractionChoiceSetRequestTest,
   EXPECT_CALL(app_mngr_, application(kConnectionKey))
       .WillOnce(Return(mock_app_));
   EXPECT_CALL(*mock_app_, RemoveChoiceSet(_));
+  ON_CALL(app_mngr_, resume_controller())
+      .WillByDefault(ReturnRef(mock_resume_ctrl_));
+  EXPECT_CALL(mock_resume_ctrl_, HandleOnTimeOut(_, _));
 
   command_->onTimeOut();
 }

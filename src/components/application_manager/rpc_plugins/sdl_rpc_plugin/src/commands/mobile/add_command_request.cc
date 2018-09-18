@@ -36,6 +36,7 @@
 
 #include "application_manager/application.h"
 #include "application_manager/message_helper.h"
+#include "application_manager/resumption/resume_ctrl.h"
 #include "utils/file_system.h"
 #include "utils/helpers.h"
 #include "utils/custom_string.h"
@@ -71,6 +72,12 @@ void AddCommandRequest::onTimeOut() {
   LOG4CXX_AUTO_TRACE(logger_);
   RemoveCommand();
   CommandRequestImpl::onTimeOut();
+
+  auto& resume_ctrl = application_manager_.resume_controller();
+
+  resume_ctrl.HandleOnTimeOut(
+      correlation_id(),
+      static_cast<hmi_apis::FunctionID::eType>(function_id()));
 }
 
 bool AddCommandRequest::Init() {

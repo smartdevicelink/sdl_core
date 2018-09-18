@@ -349,7 +349,7 @@ TEST_F(ResumeCtrlTest, StartResumption_AppWithSubmenues) {
   EXPECT_CALL(mock_app_mngr_, GetNextHMICorrelationID())
       .WillRepeatedly(Return(kCorId_));
   EXPECT_CALL(*application_manager::MockMessageHelper::message_helper_mock(),
-              CreateAddSubMenuRequestsToHMI(_, kCorId_))
+              CreateAddSubMenuRequestsToHMI(_, _))
       .WillRepeatedly(Return(requests));
 
   EXPECT_CALL(*application_manager::MockMessageHelper::message_helper_mock(),

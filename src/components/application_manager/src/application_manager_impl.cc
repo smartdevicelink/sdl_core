@@ -1147,7 +1147,7 @@ void ApplicationManagerImpl::SwitchApplication(ApplicationSharedPtr app,
                                       << ". Changing device id to "
                                       << device_id);
 
-  bool is_subscribed_to_way_points = IsAppSubscribedForWayPoints(app);
+  bool is_subscribed_to_way_points = IsAppSubscribedForWayPoints(*app);
   if (is_subscribed_to_way_points) {
     UnsubscribeAppFromWayPoints(app);
   }
@@ -3639,13 +3639,13 @@ void ApplicationManagerImpl::ClearTTSGlobalPropertiesList() {
 }
 
 bool ApplicationManagerImpl::IsAppSubscribedForWayPoints(
-    ApplicationSharedPtr app) const {
+    Application& app) const {
   LOG4CXX_AUTO_TRACE(logger_);
   sync_primitives::AutoLock lock(subscribed_way_points_apps_lock_);
   LOG4CXX_DEBUG(logger_,
                 "There are applications subscribed: "
                     << subscribed_way_points_apps_list_.size());
-  if (subscribed_way_points_apps_list_.find(app->app_id()) ==
+  if (subscribed_way_points_apps_list_.find(app.app_id()) ==
       subscribed_way_points_apps_list_.end()) {
     return false;
   }

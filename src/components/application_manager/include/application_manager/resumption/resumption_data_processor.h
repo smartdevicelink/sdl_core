@@ -40,6 +40,7 @@
 #include "application_manager/application.h"
 #include "application_manager/event_engine/event_observer.h"
 #include "application_manager/resumption/resume_ctrl.h"
+#include "utils/lock.h"
 
 namespace resumption {
 
@@ -102,7 +103,8 @@ class ResumptionDataProcessor : public app_mngr::event_engine::EventObserver {
    * @brief Handle restored data when timeout appeared
    * @param application id - const int32_t
    */
-  void HandleOnTimeOut(const int32_t app_id);
+  void HandleOnTimeOut(const uint32_t correlation_id,
+                       const hmi_apis::FunctionID::eType);
 
  private:
   /**
@@ -296,9 +298,39 @@ class ResumptionDataProcessor : public app_mngr::event_engine::EventObserver {
   void CheckVehicleDataResponse(const smart_objects::SmartObject& request,
                                 const smart_objects::SmartObject& response,
                                 ApplicationResumptionStatus& status);
+
+  /**
+   * @brief Determines whether application has saved data, including
+   * submenues, commands and choice sets, to restore. This does not include
+   * global properties and subscriptions
+   * @param saved_app smart object containing saved app data
+   * @return bool value stating whether app has mentioned data to restore
+   */
+  bool HasDataToRestore(const smart_objects::SmartObject& saved_app) const;
+
+  /**
+   * @brief Determines whether application has saved global properties
+   * to restore
+   * @param saved_app smart object containing saved app data
+   * @return bool value stating whether app has mentioned data to restore
+   */
+  bool HasGlobalPropertiesToRestore(
+      const smart_objects::SmartObject& saved_app) const;
+
+  /**
+   * @brief Determines whether application has saved subscriptions
+   * to restore
+   * @param saved_app smart object containing saved app data
+   * @return bool value stating whether app has mentioned data to restore
+   */
+  bool HasSubscriptionsToRestore(
+      const smart_objects::SmartObject& saved_app) const;
+
   /**
    * @brief A map of the IDs and Application Resumption Status for these ID
    **/
+
+  sync_primitives::Lock resumption_data_procesoor_lock_;
   app_mngr::ApplicationManager& application_manager_;
   std::map<std::int32_t, ApplicationResumptionStatus> resumption_status_;
   std::map<std::int32_t, ResumeCtrl::ResumptionCallBack> register_callbacks_;

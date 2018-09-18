@@ -32,15 +32,25 @@
 
 #include "sdl_rpc_plugin/sdl_rpc_plugin.h"
 #include "sdl_rpc_plugin/sdl_command_factory.h"
+#include "sdl_rpc_plugin/sdl_app_extension.h"
+#include "sdl_rpc_plugin/sdl_pending_resumption_handler.h"
+#include "application_manager/message_helper.h"
 
 namespace sdl_rpc_plugin {
+CREATE_LOGGERPTR_GLOBAL(logger_, "SDLRPCPlugin")
 namespace plugins = application_manager::plugin_manager;
+
+SDLRPCPlugin::SDLRPCPlugin()
+    : application_manager_(nullptr), pending_resumption_handler_(nullptr) {}
 
 bool SDLRPCPlugin::Init(
     application_manager::ApplicationManager& app_manager,
     application_manager::rpc_service::RPCService& rpc_service,
     application_manager::HMICapabilities& hmi_capabilities,
     policy::PolicyHandlerInterface& policy_handler) {
+  application_manager_ = &app_manager;
+  pending_resumption_handler_ =
+      std::make_shared<SDLPendingResumptionHandler>(app_manager);
   command_factory_.reset(new sdl_rpc_plugin::SDLCommandFactory(
       app_manager, rpc_service, hmi_capabilities, policy_handler));
   return true;
@@ -66,7 +76,59 @@ void SDLRPCPlugin::OnPolicyEvent(
 
 void SDLRPCPlugin::OnApplicationEvent(
     application_manager::plugin_manager::ApplicationEvent event,
-    application_manager::ApplicationSharedPtr application) {}
+    application_manager::ApplicationSharedPtr application) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  if (plugins::ApplicationEvent::kApplicationRegistered == event) {
+    application->AddExtension(
+        std::make_shared<SDLAppExtension>(*this, *application));
+  }
+}
+
+void SDLRPCPlugin::ProcessResumptionSubscription(
+    application_manager::Application& app,
+    SDLAppExtension& ext,
+    resumption::Subscriber subscriber) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  application_manager::ApplicationSharedPtr application =
+      application_manager_->application(app.app_id());
+  std::set<uint32_t> apps =
+      application_manager_->GetAppsSubscribedForWayPoints();
+  application_manager_->SubscribeAppForWayPoints(application);
+  pending_resumption_handler_->HandleResumptionSubscriptionRequest(
+      ext, subscriber, app);
+}
+
+void SDLRPCPlugin::SaveResumptionData(
+    application_manager::Application& app,
+    smart_objects::SmartObject& resumption_data) {
+  resumption_data[application_manager::strings::subscribed_for_way_points] =
+      application_manager_->IsAppSubscribedForWayPoints(app);
+}
+
+void SDLRPCPlugin::RevertResumption(application_manager::Application& app) {
+  application_manager::ApplicationSharedPtr application =
+      application_manager_->application(app.app_id());
+  pending_resumption_handler_->ClearPendingResumptionRequests();
+  std::set<uint32_t> apps =
+      application_manager_->GetAppsSubscribedForWayPoints();
+  if (1 == apps.size() &&
+      application_manager_->IsAppSubscribedForWayPoints(*application)) {
+    auto subscribe_waypoints_msg =
+        application_manager::MessageHelper::CreateMessageForHMI(
+            hmi_apis::FunctionID::Navigation_UnsubscribeWayPoints,
+            application_manager_->GetNextHMICorrelationID());
+    (*subscribe_waypoints_msg)[application_manager::strings::params]
+                              [application_manager::strings::message_type] =
+                                  hmi_apis::messageType::request;
+    (*subscribe_waypoints_msg)[application_manager::strings::msg_params]
+                              [application_manager::strings::app_id] =
+                                  app.app_id();
+
+    application_manager_->GetRPCService().ManageHMICommand(
+        subscribe_waypoints_msg);
+  }
+  application_manager_->UnsubscribeAppFromWayPoints(application);
+}
 
 }  // namespace sdl_rpc_plugin
 

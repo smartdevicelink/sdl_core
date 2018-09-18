@@ -34,12 +34,16 @@
 #define SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_SDL_RPC_PLUGIN_H
 #include "application_manager/plugin_manager/rpc_plugin.h"
 #include "application_manager/command_factory.h"
+#include "application_manager/resumption/extension_pending_resumption_handler.h"
 
 namespace sdl_rpc_plugin {
+class SDLAppExtension;
 namespace plugins = application_manager::plugin_manager;
 class SDLRPCPlugin : public plugins::RPCPlugin {
   // RPCPlugin interface
  public:
+  SDLRPCPlugin();
+
   bool Init(application_manager::ApplicationManager& app_manager,
             application_manager::rpc_service::RPCService& rpc_service,
             application_manager::HMICapabilities& hmi_capabilities,
@@ -58,8 +62,36 @@ class SDLRPCPlugin : public plugins::RPCPlugin {
       application_manager::plugin_manager::ApplicationEvent event,
       application_manager::ApplicationSharedPtr application) OVERRIDE;
 
+  /**
+   * @brief ProcessResumptionSubscription send appropriate subscribe requests
+   * to HMI
+   * @param app application for subscription
+   * @param ext application extension
+   * @param subscriber callback for subscription
+   */
+  void ProcessResumptionSubscription(application_manager::Application& app,
+                                     SDLAppExtension& ext,
+                                     resumption::Subscriber subscriber);
+
+  /**
+   * @brief Revert the data to the state before Resumption.
+   * @param subscriptions Subscriptions to be returned
+   **/
+  void RevertResumption(application_manager::Application& app);
+
+  /**
+   * @brief SaveResumptionData saves subscription data
+   * @param resumption_data plase to store resumption data
+   */
+  void SaveResumptionData(application_manager::Application& app,
+                          smart_objects::SmartObject& resumption_data);
+
  private:
   std::unique_ptr<application_manager::CommandFactory> command_factory_;
+  application_manager::ApplicationManager* application_manager_;
+  using ExtensionPendingResumptionHandlerSPtr =
+      std::shared_ptr<resumption::ExtensionPendingResumptionHandler>;
+  ExtensionPendingResumptionHandlerSPtr pending_resumption_handler_;
 };
 }
 

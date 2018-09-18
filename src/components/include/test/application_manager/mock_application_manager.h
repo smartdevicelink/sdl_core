@@ -255,7 +255,7 @@ class MockApplicationManager : public application_manager::ApplicationManager {
                          mobile_apis::AudioStreamingState::eType audio_state,
                          mobile_apis::VideoStreamingState::eType video_state,
                          mobile_apis::SystemContext::eType system_context));
- 
+
   MOCK_METHOD2(SendAudioPassThroughNotification,
                void(uint32_t session_key, std::vector<uint8_t>& binary_data));
   MOCK_CONST_METHOD2(CanAppStream,
@@ -275,7 +275,7 @@ class MockApplicationManager : public application_manager::ApplicationManager {
                bool(const hmi_apis::StructIdentifiers::eType struct_id,
                     const smart_objects::SmartObject& display_capabilities));
   MOCK_CONST_METHOD1(IsAppSubscribedForWayPoints,
-                     bool(application_manager::ApplicationSharedPtr));
+                     bool(application_manager::Application&));
   MOCK_METHOD1(SubscribeAppForWayPoints,
                void(application_manager::ApplicationSharedPtr));
   MOCK_METHOD1(UnsubscribeAppFromWayPoints,
