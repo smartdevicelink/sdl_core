@@ -61,6 +61,8 @@ class VRAddCommandRequest : public app_mngr::commands::RequestToHMI {
    **/
   virtual ~VRAddCommandRequest();
 
+  void onTimeOut() OVERRIDE;
+
   /**
    * @brief Execute command
    **/

@@ -117,10 +117,10 @@ class RegisterAppInterfaceRequest
    * @brief Prepares and sends RegisterAppInterface response to mobile
    * considering application type
    * @param app_type Type of application
+   * @param add_info - additional information to be sent to mobile app
    **/
   void SendRegisterAppInterfaceResponseToMobile(ApplicationType app_type,
-                                                const std::string& add_info,
-                                                bool need_restore_vr);
+                                                const std::string& add_info);
 
   smart_objects::SmartObjectSPtr GetLockScreenIconUrlNotification(
       const uint32_t connection_key, app_mngr::ApplicationSharedPtr app);
