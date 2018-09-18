@@ -84,11 +84,6 @@ class RegisterAppInterfaceRequest
   virtual void Run();
 
   /**
-   * @brief onTimeOut from requrst Controller
-   **/
-  void onTimeOut() OVERRIDE;
-
-  /**
    * @brief Prepares and sends RegisterAppInterface response to mobile
    * considering application type
    **/

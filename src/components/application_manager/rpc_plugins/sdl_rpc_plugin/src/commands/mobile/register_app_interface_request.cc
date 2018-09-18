@@ -411,20 +411,6 @@ RegisterAppInterfaceRequest::ApplicationDataShouldBeResumed() {
   return DataResumeResult::RESUME_DATA;
 }
 
-void RegisterAppInterfaceRequest::onTimeOut() {
-  LOG4CXX_AUTO_TRACE(logger_);
-  if (!is_data_resumption_) {
-    app_mngr::commands::CommandRequestImpl::onTimeOut();
-    return;
-  }
-  auto& resume_ctrl = application_manager_.resume_controller();
-  resume_ctrl.HandleOnTimeOut(application_->app_id());
-  result_code_ = mobile_api::Result::RESUME_FAILED;
-  const std::string info = "HMI does not respond during timeout.";
-  SendRegisterAppInterfaceResponseToMobile(ApplicationType::kNewApplication,
-                                           info);
-}
-
 void RegisterAppInterfaceRequest::Run() {
   using namespace helpers;
   LOG4CXX_AUTO_TRACE(logger_);
