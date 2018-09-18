@@ -34,6 +34,7 @@
 #define SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_VEHICLE_INFO_PLUGIN_INCLUDE_VEHICLE_INFO_PLUGIN_VEHICLE_INFO_PLUGIN_H
 
 #include "application_manager/command_factory.h"
+#include "application_manager/resumption/extension_pending_resumption_handler.h"
 
 namespace vehicle_info_plugin {
 class VehicleInfoAppExtension;
@@ -92,6 +93,9 @@ class VehicleInfoPlugin : public plugins::RPCPlugin {
 
   std::unique_ptr<app_mngr::CommandFactory> command_factory_;
   app_mngr::ApplicationManager* application_manager_;
+  using ExtensionPendingResumptionHandlerSPtr =
+      std::shared_ptr<resumption::ExtensionPendingResumptionHandler>;
+  ExtensionPendingResumptionHandlerSPtr pending_resumption_handler_;
 };
 }
 

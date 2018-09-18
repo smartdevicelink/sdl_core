@@ -408,9 +408,10 @@ bool ResumeCtrlImpl::StartResumption(ApplicationSharedPtr application,
   return result;
 }
 
-void ResumeCtrlImpl::HandleOnTimeOut(const int32_t app_id) {
+void ResumeCtrlImpl::HandleOnTimeOut(
+    const uint32_t cor_id, const hmi_apis::FunctionID::eType function_id) {
   LOG4CXX_AUTO_TRACE(logger_);
-  resumption_data_processor_.HandleOnTimeOut(app_id);
+  resumption_data_processor_.HandleOnTimeOut(cor_id, function_id);
 }
 
 bool ResumeCtrlImpl::StartResumptionOnlyHMILevel(

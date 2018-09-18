@@ -163,7 +163,8 @@ class ResumeCtrlImpl : public ResumeCtrl {
                        const std::string& hash,
                        ResumptionCallBack callback) OVERRIDE;
 
-  void HandleOnTimeOut(const int32_t app_id) OVERRIDE;
+  void HandleOnTimeOut(const uint32_t correlation_id,
+                       const hmi_apis::FunctionID::eType) OVERRIDE;
 
   /**
    * @brief Start timer for resumption applications
@@ -459,6 +460,7 @@ class ResumeCtrlImpl : public ResumeCtrl {
   time_t launch_time_;
   std::shared_ptr<ResumptionData> resumption_storage_;
   application_manager::ApplicationManager& application_manager_;
+  ResumptionDataProcessor resumption_data_processor_;
 };
 
 }  // namespace resumption
