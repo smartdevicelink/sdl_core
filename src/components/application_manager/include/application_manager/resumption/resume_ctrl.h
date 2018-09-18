@@ -176,9 +176,12 @@ class ResumeCtrl {
 
   /**
    * @brief Handle restored data when timeout appeared
-   * @param application id - const int32_t
+   * @param correlation_id - const int32_t
+   * @param function id hmi_apis::FunctionID::eType
    */
-  virtual void HandleOnTimeOut(const int32_t app_id) = 0;
+
+  virtual void HandleOnTimeOut(const uint32_t correlation_id,
+                               const hmi_apis::FunctionID::eType) = 0;
 
   /**
    * @brief Start timer for resumption applications

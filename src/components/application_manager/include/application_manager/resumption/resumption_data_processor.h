@@ -102,7 +102,8 @@ class ResumptionDataProcessor : public app_mngr::event_engine::EventObserver {
    * @brief Handle restored data when timeout appeared
    * @param application id - const int32_t
    */
-  void HandleOnTimeOut(const int32_t app_id);
+  void HandleOnTimeOut(const uint32_t correlation_id,
+                       const hmi_apis::FunctionID::eType);
 
  private:
   /**

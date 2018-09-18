@@ -47,10 +47,10 @@ static unsigned MockAppExtensionUID = 123;
 class MockAppExtension : public application_manager::AppExtension {
  public:
   MockAppExtension() : AppExtension(MockAppExtensionUID) {}
-  MOCK_METHOD1(
-      SaveResumptionData,
-      void(ns_smart_device_link::ns_smart_objects::SmartObject& resumption_data));
-  MOCK_METHOD1(ProcessResumption,
+  MOCK_METHOD1(SaveResumptionData,
+               void(ns_smart_device_link::ns_smart_objects::SmartObject&
+                        resumption_data));
+  MOCK_METHOD2(ProcessResumption,
                void(const ns_smart_device_link::ns_smart_objects::SmartObject&
                         resumption_data,
                     resumption::Subscriber subscriber));

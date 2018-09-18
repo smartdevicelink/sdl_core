@@ -37,13 +37,15 @@
 #include "application_manager/message_helper.h"
 #include "application_manager/message_helper.h"
 #include "application_manager/resumption/resumption_data_processor.h"
+#include "vehicle_info_plugin/vehicle_info_pending_resumption_handler.h"
 
 namespace vehicle_info_plugin {
 CREATE_LOGGERPTR_GLOBAL(logger_, "VehicleInfoPlugin")
 
 namespace strings = application_manager::strings;
 
-VehicleInfoPlugin::VehicleInfoPlugin() : application_manager_(nullptr) {}
+VehicleInfoPlugin::VehicleInfoPlugin()
+    : application_manager_(nullptr), pending_resumption_handler_(nullptr) {}
 
 bool VehicleInfoPlugin::Init(
     application_manager::ApplicationManager& app_manager,
@@ -51,6 +53,8 @@ bool VehicleInfoPlugin::Init(
     application_manager::HMICapabilities& hmi_capabilities,
     policy::PolicyHandlerInterface& policy_handler) {
   application_manager_ = &app_manager;
+  pending_resumption_handler_ =
+      std::make_shared<VehicleInfoPendingResumptionHandler>(app_manager);
   command_factory_.reset(new vehicle_info_plugin::VehicleInfoCommandFactory(
       app_manager, rpc_service, hmi_capabilities, policy_handler));
   return true;
@@ -87,33 +91,16 @@ void VehicleInfoPlugin::ProcessResumptionSubscription(
     resumption::Subscriber subscriber) {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  std::set<std::string> subscriptions;
-  for (auto& ivi : application_manager::MessageHelper::vehicle_data()) {
-    const auto it = ext.Subscriptions().find(ivi.second);
-    if (ext.Subscriptions().end() != it) {
-      subscriptions.insert(ivi.first);
-    }
-  }
-
-  smart_objects::SmartObjectSPtr request =
-      CreateSubscriptionRequest(subscriptions);
-
-  resumption::ResumptionRequest resumption_request;
-  resumption_request.request_ids.correlation_id =
-      (*request)[strings::params][strings::correlation_id].asInt();
-  resumption_request.request_ids.function_id =
-      hmi_apis::FunctionID::VehicleInfo_SubscribeVehicleData;
-  resumption_request.message = *request;
-
-  subscriber(app.app_id(), resumption_request);
-
-  application_manager_->GetRPCService().ManageHMICommand(request);
+  pending_resumption_handler_->HandleResumptionSubscriptionRequest(
+      ext, subscriber, app);
 }
 
 void VehicleInfoPlugin::RevertResumption(
     application_manager::Application& app,
     const std::set<std::string>& list_of_subscriptions) {
   LOG4CXX_AUTO_TRACE(logger_);
+
+  pending_resumption_handler_->ClearPendingResumptionRequests();
 
   std::set<std::string> subscriptions_to_revert;
   for (auto& ivi_data : list_of_subscriptions) {
@@ -170,6 +157,7 @@ smart_objects::SmartObjectSPtr VehicleInfoPlugin::CreateUnsubscriptionRequest(
 }
 
 bool VehicleInfoPlugin::IsSubscribedAppExist(const std::string& ivi) {
+  LOG4CXX_AUTO_TRACE(logger_);
   auto applications = application_manager_->applications();
   const auto it = application_manager::MessageHelper::vehicle_data().find(ivi);
   DCHECK_OR_RETURN(

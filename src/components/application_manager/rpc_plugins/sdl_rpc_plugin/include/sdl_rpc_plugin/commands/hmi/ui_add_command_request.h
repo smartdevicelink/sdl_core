@@ -66,6 +66,8 @@ class UIAddCommandRequest : public app_mngr::commands::RequestToHMI {
    **/
   virtual void Run();
 
+  virtual void onTimeOut() OVERRIDE;
+
  private:
   DISALLOW_COPY_AND_ASSIGN(UIAddCommandRequest);
 };
