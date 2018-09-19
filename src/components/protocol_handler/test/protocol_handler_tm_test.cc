@@ -269,6 +269,21 @@ class ProtocolHandlerImplTest : public ::testing::Test {
                           HASH_ID_WRONG,
                           callback_protection_flag);
 
+    // Expect verification of allowed transport
+    EXPECT_CALL(session_observer_mock,
+                TransportTypeProfileStringFromConnHandle(connection_id))
+        .WillOnce(Return("TCP_WIFI"));
+
+    std::vector<std::string> audio_service_transports;
+    audio_service_transports.push_back("TCP_WIFI");
+    std::vector<std::string> video_service_transports;
+    video_service_transports.push_back("TCP_WIFI");
+
+    EXPECT_CALL(protocol_handler_settings_mock, audio_service_transports())
+        .WillOnce(ReturnRef(audio_service_transports));
+    EXPECT_CALL(protocol_handler_settings_mock, video_service_transports())
+        .WillOnce(ReturnRef(video_service_transports));
+
     // Expect ConnectionHandler check
     EXPECT_CALL(session_observer_mock,
                 OnSessionStartedCallback(connection_id,
@@ -452,6 +467,24 @@ TEST_F(ProtocolHandlerImplTest,
   TestAsyncWaiter waiter;
   uint32_t times = 0;
   ServiceType service_type;
+  // Expect verification of allowed transport
+  EXPECT_CALL(session_observer_mock,
+              TransportTypeProfileStringFromConnHandle(connection_id))
+      .Times(call_times)
+      .WillRepeatedly(Return("TCP_WIFI"));
+
+  std::vector<std::string> audio_service_transports;
+  audio_service_transports.push_back("TCP_WIFI");
+  std::vector<std::string> video_service_transports;
+  video_service_transports.push_back("TCP_WIFI");
+
+  EXPECT_CALL(protocol_handler_settings_mock, audio_service_transports())
+      .Times(call_times)
+      .WillRepeatedly(ReturnRef(audio_service_transports));
+  EXPECT_CALL(protocol_handler_settings_mock, video_service_transports())
+      .Times(call_times)
+      .WillRepeatedly(ReturnRef(video_service_transports));
+
   // Expect ConnectionHandler check
   EXPECT_CALL(
       session_observer_mock,
@@ -520,6 +553,24 @@ TEST_F(ProtocolHandlerImplTest, StartSession_Protected_SessionObserverReject) {
   TestAsyncWaiter waiter;
   uint32_t times = 0;
   ServiceType service_type;
+  // Expect verification of allowed transport
+  EXPECT_CALL(session_observer_mock,
+              TransportTypeProfileStringFromConnHandle(connection_id))
+      .Times(call_times)
+      .WillRepeatedly(Return("TCP_WIFI"));
+
+  std::vector<std::string> audio_service_transports;
+  audio_service_transports.push_back("TCP_WIFI");
+  std::vector<std::string> video_service_transports;
+  video_service_transports.push_back("TCP_WIFI");
+
+  EXPECT_CALL(protocol_handler_settings_mock, audio_service_transports())
+      .Times(call_times)
+      .WillRepeatedly(ReturnRef(audio_service_transports));
+  EXPECT_CALL(protocol_handler_settings_mock, video_service_transports())
+      .Times(call_times)
+      .WillRepeatedly(ReturnRef(video_service_transports));
+
   // Expect ConnectionHandler check
   EXPECT_CALL(
       session_observer_mock,
@@ -578,6 +629,21 @@ TEST_F(ProtocolHandlerImplTest,
 
   TestAsyncWaiter waiter;
   uint32_t times = 0;
+  // Expect verification of allowed transport
+  EXPECT_CALL(session_observer_mock,
+              TransportTypeProfileStringFromConnHandle(connection_id))
+      .WillOnce(Return("TCP_WIFI"));
+
+  std::vector<std::string> audio_service_transports;
+  audio_service_transports.push_back("TCP_WIFI");
+  std::vector<std::string> video_service_transports;
+  video_service_transports.push_back("TCP_WIFI");
+
+  EXPECT_CALL(protocol_handler_settings_mock, audio_service_transports())
+      .WillOnce(ReturnRef(audio_service_transports));
+  EXPECT_CALL(protocol_handler_settings_mock, video_service_transports())
+      .WillOnce(ReturnRef(video_service_transports));
+
   // Expect ConnectionHandler check
   EXPECT_CALL(session_observer_mock,
               OnSessionStartedCallback(connection_id,
@@ -693,6 +759,26 @@ TEST_F(ProtocolHandlerImplTest,
 
   TestAsyncWaiter waiter;
   uint32_t times = 0;
+
+  // Expect verification of allowed transport
+  EXPECT_CALL(session_observer_mock,
+              TransportTypeProfileStringFromConnHandle(connection_id1))
+      .WillOnce(Return("TCP_WIFI"));
+  EXPECT_CALL(session_observer_mock,
+              TransportTypeProfileStringFromConnHandle(connection_id2))
+      .WillOnce(Return("TCP_WIFI"));
+
+  std::vector<std::string> audio_service_transports;
+  audio_service_transports.push_back("TCP_WIFI");
+  std::vector<std::string> video_service_transports;
+  video_service_transports.push_back("TCP_WIFI");
+
+  EXPECT_CALL(protocol_handler_settings_mock, audio_service_transports())
+      .Times(2)
+      .WillRepeatedly(ReturnRef(audio_service_transports));
+  EXPECT_CALL(protocol_handler_settings_mock, video_service_transports())
+      .Times(2)
+      .WillRepeatedly(ReturnRef(video_service_transports));
 
   BsonObject bson_params1;
   bson_object_initialize_default(&bson_params1);
@@ -830,6 +916,84 @@ TEST_F(ProtocolHandlerImplTest,
   bson_object_deinitialize(&bson_params2);
 }
 
+/*
+ * ProtocolHandler shall send NAck on session_observer rejection
+ * Check protection flag OFF for all services from kControl to kBulk
+ */
+TEST_F(ProtocolHandlerImplTest, StartSession_Audio_RejectByTransportType) {
+  using namespace protocol_handler;
+  AddConnection();
+  const ServiceType start_service = kAudio;
+
+  TestAsyncWaiter waiter;
+  uint32_t times = 0;
+  // Expect verification of allowed transport
+  EXPECT_CALL(session_observer_mock,
+              TransportTypeProfileStringFromConnHandle(connection_id))
+      .WillOnce(Return("TCP_WIFI"));
+
+  std::vector<std::string> audio_service_transports;
+  audio_service_transports.push_back("AOA_USB");
+  std::vector<std::string> video_service_transports;
+  video_service_transports.push_back("TCP_WIFI");
+
+  EXPECT_CALL(protocol_handler_settings_mock, audio_service_transports())
+      .WillOnce(ReturnRef(audio_service_transports));
+  EXPECT_CALL(protocol_handler_settings_mock, video_service_transports())
+      .WillOnce(ReturnRef(video_service_transports));
+
+  // Expect send Ack
+  EXPECT_CALL(transport_manager_mock,
+              SendMessageToDevice(ControlMessage(FRAME_DATA_START_SERVICE_NACK,
+                                                 PROTECTION_OFF)))
+      .WillOnce(DoAll(NotifyTestAsyncWaiter(&waiter), Return(E_SUCCESS)));
+  times++;
+
+  SendControlMessage(
+      PROTECTION_OFF, start_service, NEW_SESSION_ID, FRAME_DATA_START_SERVICE);
+
+  EXPECT_TRUE(waiter.WaitFor(times, kAsyncExpectationsTimeout));
+}
+
+/*
+ * ProtocolHandler shall send NAck on session_observer rejection
+ * Check protection flag OFF for all services from kControl to kBulk
+ */
+TEST_F(ProtocolHandlerImplTest, StartSession_Video_RejectByTransportType) {
+  using namespace protocol_handler;
+  AddConnection();
+  const ServiceType start_service = kMobileNav;
+
+  TestAsyncWaiter waiter;
+  uint32_t times = 0;
+  // Expect verification of allowed transport
+  EXPECT_CALL(session_observer_mock,
+              TransportTypeProfileStringFromConnHandle(connection_id))
+      .WillOnce(Return("TCP_WIFI"));
+
+  std::vector<std::string> audio_service_transports;
+  audio_service_transports.push_back("TCP_WIFI");
+  std::vector<std::string> video_service_transports;
+  video_service_transports.push_back("AOA_USB");
+
+  EXPECT_CALL(protocol_handler_settings_mock, audio_service_transports())
+      .WillOnce(ReturnRef(audio_service_transports));
+  EXPECT_CALL(protocol_handler_settings_mock, video_service_transports())
+      .WillOnce(ReturnRef(video_service_transports));
+
+  // Expect send Ack
+  EXPECT_CALL(transport_manager_mock,
+              SendMessageToDevice(ControlMessage(FRAME_DATA_START_SERVICE_NACK,
+                                                 PROTECTION_OFF)))
+      .WillOnce(DoAll(NotifyTestAsyncWaiter(&waiter), Return(E_SUCCESS)));
+  times++;
+
+  SendControlMessage(
+      PROTECTION_OFF, start_service, NEW_SESSION_ID, FRAME_DATA_START_SERVICE);
+
+  EXPECT_TRUE(waiter.WaitFor(times, kAsyncExpectationsTimeout));
+}
+
 // TODO(EZamakhov): add test for get_hash_id/set_hash_id from
 // protocol_handler_impl.cc
 /*
@@ -910,6 +1074,21 @@ TEST_F(ProtocolHandlerImplTest, SecurityEnable_StartSessionProtocoloV1) {
   // Add security manager
   AddSecurityManager();
   const ServiceType start_service = kRpc;
+  // Expect verification of allowed transport
+  EXPECT_CALL(session_observer_mock,
+              TransportTypeProfileStringFromConnHandle(connection_id))
+      .WillOnce(Return("TCP_WIFI"));
+
+  std::vector<std::string> audio_service_transports;
+  audio_service_transports.push_back("TCP_WIFI");
+  std::vector<std::string> video_service_transports;
+  video_service_transports.push_back("TCP_WIFI");
+
+  EXPECT_CALL(protocol_handler_settings_mock, audio_service_transports())
+      .WillOnce(ReturnRef(audio_service_transports));
+  EXPECT_CALL(protocol_handler_settings_mock, video_service_transports())
+      .WillOnce(ReturnRef(video_service_transports));
+
   // Expect ConnectionHandler check
   EXPECT_CALL(session_observer_mock,
               OnSessionStartedCallback(connection_id,
@@ -966,6 +1145,21 @@ TEST_F(ProtocolHandlerImplTest, SecurityEnable_StartSessionUnprotected) {
 
   TestAsyncWaiter waiter;
   uint32_t times = 0;
+  // Expect verification of allowed transport
+  EXPECT_CALL(session_observer_mock,
+              TransportTypeProfileStringFromConnHandle(connection_id))
+      .WillOnce(Return("TCP_WIFI"));
+
+  std::vector<std::string> audio_service_transports;
+  audio_service_transports.push_back("TCP_WIFI");
+  std::vector<std::string> video_service_transports;
+  video_service_transports.push_back("TCP_WIFI");
+
+  EXPECT_CALL(protocol_handler_settings_mock, audio_service_transports())
+      .WillOnce(ReturnRef(audio_service_transports));
+  EXPECT_CALL(protocol_handler_settings_mock, video_service_transports())
+      .WillOnce(ReturnRef(video_service_transports));
+
   // Expect ConnectionHandler check
   EXPECT_CALL(session_observer_mock,
               OnSessionStartedCallback(connection_id,
@@ -1021,6 +1215,21 @@ TEST_F(ProtocolHandlerImplTest, SecurityEnable_StartSessionProtected_Fail) {
                                                                PROTECTION_ON);
   context.is_new_service_ = true;
 
+  // Expect verification of allowed transport
+  EXPECT_CALL(session_observer_mock,
+              TransportTypeProfileStringFromConnHandle(connection_id))
+      .WillOnce(Return("TCP_WIFI"));
+
+  std::vector<std::string> audio_service_transports;
+  audio_service_transports.push_back("TCP_WIFI");
+  std::vector<std::string> video_service_transports;
+  video_service_transports.push_back("TCP_WIFI");
+
+  EXPECT_CALL(protocol_handler_settings_mock, audio_service_transports())
+      .WillOnce(ReturnRef(audio_service_transports));
+  EXPECT_CALL(protocol_handler_settings_mock, video_service_transports())
+      .WillOnce(ReturnRef(video_service_transports));
+
   // Expect ConnectionHandler check
   EXPECT_CALL(session_observer_mock,
               OnSessionStartedCallback(connection_id,
@@ -1074,6 +1283,21 @@ TEST_F(ProtocolHandlerImplTest,
 
   TestAsyncWaiter waiter;
   uint32_t times = 0;
+  // Expect verification of allowed transport
+  EXPECT_CALL(session_observer_mock,
+              TransportTypeProfileStringFromConnHandle(connection_id))
+      .WillOnce(Return("TCP_WIFI"));
+
+  std::vector<std::string> audio_service_transports;
+  audio_service_transports.push_back("TCP_WIFI");
+  std::vector<std::string> video_service_transports;
+  video_service_transports.push_back("TCP_WIFI");
+
+  EXPECT_CALL(protocol_handler_settings_mock, audio_service_transports())
+      .WillOnce(ReturnRef(audio_service_transports));
+  EXPECT_CALL(protocol_handler_settings_mock, video_service_transports())
+      .WillOnce(ReturnRef(video_service_transports));
+
   // Expect ConnectionHandler check
   EXPECT_CALL(session_observer_mock,
               OnSessionStartedCallback(connection_id,
@@ -1149,6 +1373,21 @@ TEST_F(ProtocolHandlerImplTest,
                                                                HASH_ID_WRONG,
                                                                PROTECTION_ON);
   context.is_new_service_ = true;
+
+  // Expect verification of allowed transport
+  EXPECT_CALL(session_observer_mock,
+              TransportTypeProfileStringFromConnHandle(connection_id))
+      .WillOnce(Return("TCP_WIFI"));
+
+  std::vector<std::string> audio_service_transports;
+  audio_service_transports.push_back("TCP_WIFI");
+  std::vector<std::string> video_service_transports;
+  video_service_transports.push_back("TCP_WIFI");
+
+  EXPECT_CALL(protocol_handler_settings_mock, audio_service_transports())
+      .WillOnce(ReturnRef(audio_service_transports));
+  EXPECT_CALL(protocol_handler_settings_mock, video_service_transports())
+      .WillOnce(ReturnRef(video_service_transports));
 
   // Expect ConnectionHandler check
   EXPECT_CALL(session_observer_mock,
@@ -1231,6 +1470,21 @@ TEST_F(ProtocolHandlerImplTest,
 
   TestAsyncWaiter waiter;
   uint32_t times = 0;
+  // Expect verification of allowed transport
+  EXPECT_CALL(session_observer_mock,
+              TransportTypeProfileStringFromConnHandle(connection_id))
+      .WillOnce(Return("TCP_WIFI"));
+
+  std::vector<std::string> audio_service_transports;
+  audio_service_transports.push_back("TCP_WIFI");
+  std::vector<std::string> video_service_transports;
+  video_service_transports.push_back("TCP_WIFI");
+
+  EXPECT_CALL(protocol_handler_settings_mock, audio_service_transports())
+      .WillOnce(ReturnRef(audio_service_transports));
+  EXPECT_CALL(protocol_handler_settings_mock, video_service_transports())
+      .WillOnce(ReturnRef(video_service_transports));
+
   // Expect ConnectionHandler check
   EXPECT_CALL(session_observer_mock,
               OnSessionStartedCallback(connection_id,
@@ -1329,6 +1583,21 @@ TEST_F(
 
   TestAsyncWaiter waiter;
   uint32_t times = 0;
+  // Expect verification of allowed transport
+  EXPECT_CALL(session_observer_mock,
+              TransportTypeProfileStringFromConnHandle(connection_id))
+      .WillOnce(Return("TCP_WIFI"));
+
+  std::vector<std::string> audio_service_transports;
+  audio_service_transports.push_back("TCP_WIFI");
+  std::vector<std::string> video_service_transports;
+  video_service_transports.push_back("TCP_WIFI");
+
+  EXPECT_CALL(protocol_handler_settings_mock, audio_service_transports())
+      .WillOnce(ReturnRef(audio_service_transports));
+  EXPECT_CALL(protocol_handler_settings_mock, video_service_transports())
+      .WillOnce(ReturnRef(video_service_transports));
+
   // Expect ConnectionHandler check
   EXPECT_CALL(session_observer_mock,
               OnSessionStartedCallback(connection_id,
@@ -1425,6 +1694,21 @@ TEST_F(ProtocolHandlerImplTest,
 
   TestAsyncWaiter waiter;
   uint32_t times = 0;
+  // Expect verification of allowed transport
+  EXPECT_CALL(session_observer_mock,
+              TransportTypeProfileStringFromConnHandle(connection_id))
+      .WillOnce(Return("TCP_WIFI"));
+
+  std::vector<std::string> audio_service_transports;
+  audio_service_transports.push_back("TCP_WIFI");
+  std::vector<std::string> video_service_transports;
+  video_service_transports.push_back("TCP_WIFI");
+
+  EXPECT_CALL(protocol_handler_settings_mock, audio_service_transports())
+      .WillOnce(ReturnRef(audio_service_transports));
+  EXPECT_CALL(protocol_handler_settings_mock, video_service_transports())
+      .WillOnce(ReturnRef(video_service_transports));
+
   // Expect ConnectionHandler check
   EXPECT_CALL(session_observer_mock,
               OnSessionStartedCallback(connection_id,
