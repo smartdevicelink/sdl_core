@@ -15,6 +15,8 @@ bool IsValidEnum(Priority val) {
       return true;
     case P_NORMAL:
       return true;
+    case P_PROJECTION:
+      return true;
     case P_NONE:
       return true;
     default:
@@ -33,6 +35,8 @@ const char* EnumToJsonString(Priority val) {
       return "COMMUNICATION";
     case P_NORMAL:
       return "NORMAL";
+    case P_PROJECTION:
+      return "PROJECTION";
     case P_NONE:
       return "NONE";
     default:
@@ -54,6 +58,9 @@ bool EnumFromJsonString(const std::string& literal, Priority* result) {
     return true;
   } else if ("NORMAL" == literal) {
     *result = P_NORMAL;
+    return true;
+  } else if ("PROJECTION" == literal) {
+    *result = P_PROJECTION;
     return true;
   } else if ("NONE" == literal) {
     *result = P_NONE;

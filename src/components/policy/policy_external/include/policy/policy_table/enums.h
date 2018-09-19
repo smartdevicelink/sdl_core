@@ -44,6 +44,7 @@ enum Priority {
   P_VOICECOM,
   P_COMMUNICATION,
   P_NORMAL,
+  P_PROJECTION,
   P_NONE,
 };
 
