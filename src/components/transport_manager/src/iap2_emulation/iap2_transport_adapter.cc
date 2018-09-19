@@ -69,6 +69,11 @@ DeviceType IAP2BluetoothEmulationTransportAdapter::GetDeviceType() const {
   return IOS_BT;
 }
 
+void IAP2BluetoothEmulationTransportAdapter::TransportConfigUpdated(
+    const TransportConfig& new_config) {
+  return;
+}
+
 IAP2USBEmulationTransportAdapter::IAP2USBEmulationTransportAdapter(
     const uint16_t port,
     resumption::LastState& last_state,
@@ -118,6 +123,11 @@ void IAP2USBEmulationTransportAdapter::DeviceSwitched(
 
 DeviceType IAP2USBEmulationTransportAdapter::GetDeviceType() const {
   return IOS_USB;
+}
+
+void IAP2USBEmulationTransportAdapter::TransportConfigUpdated(
+    const TransportConfig& new_config) {
+  return;
 }
 
 IAP2USBEmulationTransportAdapter::IAPSignalHandlerDelegate::
