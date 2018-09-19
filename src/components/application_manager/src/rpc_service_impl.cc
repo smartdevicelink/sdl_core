@@ -71,9 +71,8 @@ bool RPCServiceImpl::ManageMobileCommand(
     LOG4CXX_WARN(logger_, "Low Voltage is active");
     return false;
   }
-#ifdef DEBUG
+
   MessageHelper::PrintSmartObject(*message);
-#endif
 
   const uint32_t connection_key = static_cast<uint32_t>(
       (*message)[strings::params][strings::connection_key].asUInt());

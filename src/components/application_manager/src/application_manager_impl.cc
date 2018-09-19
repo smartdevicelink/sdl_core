@@ -1305,9 +1305,7 @@ bool ApplicationManagerImpl::StartNaviService(
         return false;
       } else if (!converted_params.empty()) {
         LOG4CXX_INFO(logger_, "Sending video configuration params");
-#ifdef DEBUG
         MessageHelper::PrintSmartObject(converted_params);
-#endif
         bool request_sent =
             application(app_id)->SetVideoConfig(service_type, converted_params);
         if (request_sent) {
