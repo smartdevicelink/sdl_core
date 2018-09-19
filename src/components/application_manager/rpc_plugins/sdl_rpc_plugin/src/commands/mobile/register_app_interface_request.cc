@@ -223,10 +223,12 @@ bool RegisterAppInterfaceRequest::ProcessApplicationTransportSwitching() {
   if (!IsApplicationSwitched()) {
     return false;
   }
-  const auto& msg_params = (*message_)[strings::msg_params];
 
-  const auto& policy_app_id = msg_params[strings::app_id].asString();
+  const std::string& policy_app_id =
+      application_manager_.GetCorrectMobileIDFromMessage(message_);
+
   auto app = application_manager_.application_by_policy_id(policy_app_id);
+
   DCHECK_OR_RETURN(app, false);
   if (!application_manager_.IsAppInReconnectMode(policy_app_id)) {
     LOG4CXX_DEBUG(logger_,
@@ -529,6 +531,22 @@ void RegisterAppInterfaceRequest::Run() {
   if (!application_) {
     LOG4CXX_ERROR(logger_, "Application hasn't been registered!");
     return;
+  }
+
+  // Version negotiation
+  utils::SemanticVersion ver_4_5(4, 5, 0);
+  utils::SemanticVersion module_version(
+      major_version, minor_version, patch_version);
+  if (mobile_version <= ver_4_5) {
+    // Mobile versioning did not exist for
+    // versions 4.5 and prior.
+    application_->set_msg_version(ver_4_5);
+  } else if (mobile_version < module_version) {
+    // Use mobile RPC version as negotiated version
+    application_->set_msg_version(mobile_version);
+  } else {
+    // Use module version as negotiated version
+    application_->set_msg_version(module_version);
   }
 
   FillApplicationParams(application_);
