@@ -51,6 +51,7 @@
 #include "application_manager/event_engine/event.h"
 #include "application_manager/mock_hmi_interface.h"
 #include "application_manager/mock_help_prompt_manager.h"
+#include "application_manager/mock_resume_ctrl.h"
 
 namespace test {
 namespace components {
@@ -221,6 +222,9 @@ class AddCommandRequestTest
         mock_rpc_service_,
         ManageMobileCommand(response,
                             am::commands::Command::CommandSource::SOURCE_SDL));
+    ON_CALL(app_mngr_, resume_controller())
+        .WillByDefault(ReturnRef(mock_resume_ctrl_));
+    EXPECT_CALL(mock_resume_ctrl_, HandleOnTimeOut(_, _));
     std::shared_ptr<CommandRequestImpl> base_class_request =
         static_cast<std::shared_ptr<CommandRequestImpl> >(request_ptr);
     base_class_request->onTimeOut();
@@ -232,6 +236,7 @@ class AddCommandRequestTest
   std::shared_ptr<sync_primitives::Lock> lock_ptr_;
   std::shared_ptr<am_test::MockHelpPromptManager> mock_help_prompt_manager_;
   MockAppPtr mock_app_;
+  resumprion_test::MockResumeCtrl mock_resume_ctrl_;
 };
 
 TEST_F(AddCommandRequestTest, Run_AppNotExisted_EXPECT_AppNotRegistered) {
@@ -1092,6 +1097,9 @@ TEST_F(AddCommandRequestTest,
   EXPECT_CALL(mock_rpc_service_,
               ManageMobileCommand(
                   response, am::commands::Command::CommandSource::SOURCE_SDL));
+  ON_CALL(app_mngr_, resume_controller())
+      .WillByDefault(ReturnRef(mock_resume_ctrl_));
+  EXPECT_CALL(mock_resume_ctrl_, HandleOnTimeOut(_, _));
   std::shared_ptr<CommandRequestImpl> base_class_request =
       static_cast<std::shared_ptr<CommandRequestImpl> >(
           CreateCommand<AddCommandRequest>(msg_));
@@ -1142,6 +1150,9 @@ TEST_F(AddCommandRequestTest, OnTimeOut_AppRemoveCommandCalled) {
   EXPECT_CALL(mock_rpc_service_,
               ManageMobileCommand(
                   response, am::commands::Command::CommandSource::SOURCE_SDL));
+  ON_CALL(app_mngr_, resume_controller())
+      .WillByDefault(ReturnRef(mock_resume_ctrl_));
+  EXPECT_CALL(mock_resume_ctrl_, HandleOnTimeOut(_, _));
   std::shared_ptr<CommandRequestImpl> base_class_request =
       static_cast<std::shared_ptr<CommandRequestImpl> >(request_ptr);
   base_class_request->onTimeOut();
