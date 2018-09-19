@@ -336,6 +336,10 @@ void ResumeCtrlImpl::OnSuspend() {
 void ResumeCtrlImpl::OnIgnitionOff() {
   LOG4CXX_AUTO_TRACE(logger_);
   if (!application_manager_.IsLowVoltage()) {
+    if (!resumption_storage_) {
+      LOG4CXX_ERROR(logger_, "resumption_storage_ is not initialized");
+      return;
+    }
     resumption_storage_->IncrementIgnOffCount();
     resumption_storage_->ResetGlobalIgnOnCount();
     FinalPersistData();
@@ -572,6 +576,10 @@ void ResumeCtrlImpl::SaveDataOnTimer() {
 
 void ResumeCtrlImpl::FinalPersistData() {
   LOG4CXX_AUTO_TRACE(logger_);
+  if (!resumption_storage_) {
+    LOG4CXX_ERROR(logger_, "resumption_storage_ is not initialized");
+    return;
+  }
   StopSavePersistentDataTimer();
   SaveAllApplications();
   resumption_storage_->Persist();
