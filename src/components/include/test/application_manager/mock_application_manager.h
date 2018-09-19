@@ -254,7 +254,7 @@ class MockApplicationManager : public application_manager::ApplicationManager {
                          mobile_apis::AudioStreamingState::eType audio_state,
                          mobile_apis::VideoStreamingState::eType video_state,
                          mobile_apis::SystemContext::eType system_context));
- 
+
   MOCK_METHOD2(SendAudioPassThroughNotification,
                void(uint32_t session_key, std::vector<uint8_t>& binary_data));
   MOCK_CONST_METHOD2(CanAppStream,
