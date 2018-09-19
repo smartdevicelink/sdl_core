@@ -1556,15 +1556,9 @@ RESULT_CODE ProtocolHandlerImpl::HandleControlMessageStartSession(
       logger_,
       "Protocol version:" << static_cast<int>(packet->protocol_version()));
   const ServiceType service_type = ServiceTypeFromByte(packet->service_type());
-  BsonObject bson_obj;
-  if (packet->data() != NULL) {
-    bson_obj = bson_object_from_bytes(packet->data());
-  } else {
-    bson_object_initialize_default(&bson_obj);
-  }
 
-#ifdef ENABLE_SECURITY
   const uint8_t protocol_version = packet->protocol_version();
+#ifdef ENABLE_SECURITY
   const bool protection =
       // Protocol version 1 does not support protection
       (protocol_version > PROTOCOL_VERSION_1) ? packet->protection_flag()
@@ -1575,6 +1569,31 @@ RESULT_CODE ProtocolHandlerImpl::HandleControlMessageStartSession(
 
   const ConnectionID connection_id = packet->connection_id();
   const uint8_t session_id = packet->session_id();
+  const std::string& transport =
+      session_observer_.TransportTypeProfileStringFromConnHandle(connection_id);
+
+  const auto video_transports = settings_.video_service_transports();
+  const bool is_video_allowed =
+      video_transports.empty() ||
+      std::find(video_transports.begin(), video_transports.end(), transport) !=
+          video_transports.end();
+
+  const auto audio_transports = settings_.audio_service_transports();
+  const bool is_audio_allowed =
+      audio_transports.empty() ||
+      std::find(audio_transports.begin(), audio_transports.end(), transport) !=
+          audio_transports.end();
+
+  if ((ServiceType::kMobileNav == service_type && !is_video_allowed) ||
+      (ServiceType::kAudio == service_type && !is_audio_allowed)) {
+    LOG4CXX_DEBUG(logger_,
+                  "Rejecting StartService for service:"
+                      << service_type << ", over transport: " << transport
+                      << ", disallowed by settings.");
+    SendStartSessionNAck(
+        connection_id, session_id, protocol_version, service_type);
+    return RESULT_OK;
+  }
 
   LOG4CXX_INFO(logger_,
                "StartSession ID " << static_cast<int>(session_id)
@@ -1585,6 +1604,13 @@ RESULT_CODE ProtocolHandlerImpl::HandleControlMessageStartSession(
     sync_primitives::AutoLock auto_lock(start_session_frame_map_lock_);
     start_session_frame_map_[std::make_pair(connection_id, session_id)] =
         packet;
+  }
+
+  BsonObject bson_obj;
+  if (packet->data() != NULL) {
+    bson_obj = bson_object_from_bytes(packet->data());
+  } else {
+    bson_object_initialize_default(&bson_obj);
   }
 
   session_observer_.OnSessionStartedCallback(
