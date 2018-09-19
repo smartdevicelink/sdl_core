@@ -176,7 +176,10 @@ void ResumptionDataProcessor::on_event(const event_engine::Event& event) {
     CheckVehicleDataResponse(request_ptr->message, response, status);
   }
 
-  list_of_sent_requests.erase(request_ptr);
+  {
+    sync_primitives::AutoLock lock(resumption_data_procesoor_lock_);
+    list_of_sent_requests.erase(request_ptr);
+  }
 
   if (!list_of_sent_requests.empty()) {
     LOG4CXX_DEBUG(logger_,
@@ -234,6 +237,7 @@ void ResumptionDataProcessor::WaitForResponse(
                        << request.request_ids.correlation_id);
   subscribe_on_event(request.request_ids.function_id,
                      request.request_ids.correlation_id);
+  sync_primitives::AutoLock lock(resumption_data_procesoor_lock_);
   resumption_status_[app_id].list_of_sent_requests.push_back(request);
   request_app_ids_.insert(std::make_pair(request.request_ids, app_id));
 }
@@ -331,7 +335,7 @@ void ResumptionDataProcessor::AddSubmenues(
   }
 
   ProcessHMIRequests(MessageHelper::CreateAddSubMenuRequestsToHMI(
-      application, application_manager_.GetNextHMICorrelationID()));
+      application, application_manager_));
 }
 
 void ResumptionDataProcessor::DeleteSubmenues(

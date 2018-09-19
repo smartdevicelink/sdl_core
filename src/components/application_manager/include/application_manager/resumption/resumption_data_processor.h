@@ -40,6 +40,7 @@
 #include "application_manager/application.h"
 #include "application_manager/event_engine/event_observer.h"
 #include "application_manager/resumption/resume_ctrl.h"
+#include "utils/lock.h"
 
 namespace resumption {
 
@@ -300,6 +301,8 @@ class ResumptionDataProcessor : public app_mngr::event_engine::EventObserver {
   /**
    * @brief A map of the IDs and Application Resumption Status for these ID
    **/
+
+  sync_primitives::Lock resumption_data_procesoor_lock_;
   app_mngr::ApplicationManager& application_manager_;
   std::map<std::int32_t, ApplicationResumptionStatus> resumption_status_;
   std::map<std::int32_t, ResumeCtrl::ResumptionCallBack> register_callbacks_;
