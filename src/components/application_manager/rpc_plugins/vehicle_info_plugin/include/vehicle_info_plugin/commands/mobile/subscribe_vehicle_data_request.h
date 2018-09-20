@@ -37,8 +37,8 @@
 #ifndef SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_MOBILE_SUBSCRIBE_VEHICLE_DATA_REQUEST_H_
 #define SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_MOBILE_SUBSCRIBE_VEHICLE_DATA_REQUEST_H_
 
-#include "application_manager/commands/command_request_impl.h"
 #include "application_manager/application.h"
+#include "application_manager/commands/command_request_impl.h"
 #include "utils/macro.h"
 #include "vehicle_info_plugin/vehicle_info_app_extension.h"
 
@@ -66,7 +66,7 @@ class SubscribeVehicleDataRequest
       policy::PolicyHandlerInterface& policy_handler);
 
   /**
-   * @brief SubscribeButtonCommandRequest class destructor
+   * @brief SubscribeVehicleDataRequest class destructor
    **/
   ~SubscribeVehicleDataRequest();
 
@@ -153,6 +153,6 @@ class SubscribeVehicleDataRequest
 };
 
 }  // namespace commands
-}  // namespace application_manager
+}  // namespace vehicle_info_plugin
 
 #endif  // SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_MOBILE_SUBSCRIBE_VEHICLE_DATA_REQUEST_H_

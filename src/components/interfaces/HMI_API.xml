@@ -3424,6 +3424,35 @@
         </description>
       </param>
     </function>
+    <function name="SubscribeButton" messagetype="request">
+        <description>
+            Subscribes to buttons.
+        </description>
+        <param name="appID" type="Integer" mandatory="true">
+            <description>The ID of the application requesting this button subscription. </description>
+        </param>
+
+        <param name="buttonName" type="Common.ButtonName" mandatory="true">
+            <description>Name of the button to subscribe.</description>
+        </param>
+    </function>
+
+    <function name="SubscribeButton" messagetype="response"> </function>
+
+    <function name="UnsubscribeButton" messagetype="request">
+        <description>
+            Unsubscribes from buttons.
+        </description>
+        <param name="appID" type="Integer" mandatory="true">
+            <description>The ID of the application requesting this button unsubscription. </description>
+        </param>
+
+        <param name="buttonName" type="Common.ButtonName" mandatory="true">
+            <description>Name of the button to unsubscribe from.</description>
+        </param>
+    </function>
+
+    <function name="UnsubscribeButton" messagetype="response"></function>
 </interface>
 
 <interface name="BasicCommunication" version="1.2.1" date="2017-08-02">

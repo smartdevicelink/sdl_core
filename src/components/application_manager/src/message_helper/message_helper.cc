@@ -1077,13 +1077,15 @@ MessageHelper::CreateOnButtonSubscriptionNotificationsForApp(
     return button_subscription_requests;
   }
 
-  for (auto& it : button_subscriptions) {
-    const Common_ButtonName::eType btn =
-        static_cast<Common_ButtonName::eType>(it);
-
-    button_subscription_requests.push_back(
-        CreateOnButtonSubscriptionNotification(
-            app->hmi_app_id(), btn, true, app_mngr));
+  DataAccessor<ButtonSubscriptions> button_accessor = app->SubscribedButtons();
+  ButtonSubscriptions subscriptions = button_accessor.GetData();
+  ButtonSubscriptions::iterator it = subscriptions.begin();
+  for (; subscriptions.end() != it; ++it) {
+    SendOnButtonSubscriptionNotification(
+        app->hmi_app_id(),
+        static_cast<Common_ButtonName::eType>(*it),
+        true,
+        app_mngr);
   }
 
   return button_subscription_requests;
@@ -2960,11 +2962,74 @@ void MessageHelper::SubscribeApplicationToSoftButton(
 }
 
 bool MessageHelper::PrintSmartObject(const smart_objects::SmartObject& object) {
-#ifdef DEBUG
-  Json::Value tmp;
-  namespace Formatters = ns_smart_device_link::ns_json_handler::formatters;
-  Formatters::CFormatterJsonBase::objToJsonValue(object, tmp);
-  LOG4CXX_DEBUG(logger_, "SMART OBJECT: " << tmp.toStyledString());
+  return true;
+#ifdef ENABLE_LOG
+  static uint32_t tab = 0;
+  std::string tab_buffer;
+
+  if (tab == 0) {
+    printf("\n-------------------------------------------------------------");
+  }
+
+  for (uint32_t i = 0; i < tab; ++i) {
+    tab_buffer += "\t";
+  }
+
+  switch (object.getType()) {
+    case ns_smart_device_link::ns_smart_objects::SmartType_Array: {
+      for (size_t i = 0; i < object.length(); i++) {
+        ++tab;
+
+        printf("\n%s%zu: ", tab_buffer.c_str(), i);
+        if (!PrintSmartObject(object.getElement(i))) {
+          printf("\n");
+          return false;
+        }
+      }
+      break;
+    }
+    case ns_smart_device_link::ns_smart_objects::SmartType_Map: {
+      std::set<std::string> keys = object.enumerate();
+
+      for (std::set<std::string>::const_iterator key = keys.begin();
+           key != keys.end();
+           key++) {
+        ++tab;
+
+        printf("\n%s%s: ", tab_buffer.c_str(), (*key).c_str());
+        if (!PrintSmartObject(object[(*key).c_str()])) {
+          printf("\n");
+          return false;
+        }
+      }
+      break;
+    }
+    case ns_smart_device_link::ns_smart_objects::SmartType_Boolean:
+      object.asBool() ? printf("true\n") : printf("false\n");
+      break;
+    case ns_smart_device_link::ns_smart_objects::SmartType_Double: {
+      printf("%f", object.asDouble());
+      break;
+    }
+    case ns_smart_device_link::ns_smart_objects::SmartType_Integer:
+      printf("%lld", static_cast<long long int>(object.asInt()));
+      break;
+    case ns_smart_device_link::ns_smart_objects::SmartType_String:
+      printf("%s", object.asString().c_str());
+      break;
+    case ns_smart_device_link::ns_smart_objects::SmartType_Character:
+      printf("%c", object.asChar());
+      break;
+    default:
+      printf("PrintSmartObject - default case\n");
+      break;
+  }
+
+  if (0 != tab) {
+    --tab;
+  } else {
+    printf("\n-------------------------------------------------------------\n");
+  }
 #endif
   return true;
 }

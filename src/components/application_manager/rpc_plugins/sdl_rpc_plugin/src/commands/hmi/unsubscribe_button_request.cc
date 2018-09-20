@@ -30,15 +30,16 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "vehicle_info_plugin/commands/hmi/vi_subscribe_vehicle_data_request.h"
-#include "application_manager/resumption/resume_ctrl.h"
+#include "sdl_rpc_plugin/commands/hmi/unsubscribe_button_request.h"
 
-namespace vehicle_info_plugin {
+namespace sdl_rpc_plugin {
 using namespace application_manager;
 
 namespace commands {
 
-VISubscribeVehicleDataRequest::VISubscribeVehicleDataRequest(
+namespace hmi {
+
+UnsubscribeButtonRequest::UnsubscribeButtonRequest(
     const application_manager::commands::MessageSharedPtr& message,
     ApplicationManager& application_manager,
     rpc_service::RPCService& rpc_service,
@@ -50,21 +51,13 @@ VISubscribeVehicleDataRequest::VISubscribeVehicleDataRequest(
                    hmi_capabilities,
                    policy_handle) {}
 
-VISubscribeVehicleDataRequest::~VISubscribeVehicleDataRequest() {}
+UnsubscribeButtonRequest::~UnsubscribeButtonRequest() {}
 
-void VISubscribeVehicleDataRequest::Run() {
+void UnsubscribeButtonRequest::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
-
   SendRequest();
 }
 
-void VISubscribeVehicleDataRequest::onTimeOut() {
-  auto& resume_ctrl = application_manager_.resume_controller();
-
-  resume_ctrl.HandleOnTimeOut(
-      correlation_id(),
-      static_cast<hmi_apis::FunctionID::eType>(function_id()));
-}
-
+}  // namespace hmi
 }  // namespace commands
-}  // namespace vehicle_info_plugin
+}  // namespace sdl_rpc_plugin

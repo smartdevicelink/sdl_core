@@ -61,7 +61,7 @@ class SubscribeVehicleDataResponse
       policy::PolicyHandlerInterface& policy_handler);
 
   /**
-   * @brief UnsubscribeVehicleDataCommandRequest class destructor
+   * @brief SubscribeVehicleDataResponse class destructor
    **/
   virtual ~SubscribeVehicleDataResponse();
 
@@ -75,6 +75,6 @@ class SubscribeVehicleDataResponse
 };
 
 }  // namespace commands
-}  // namespace application_manager
+}  // namespace vehicle_info_plugin
 
 #endif  // SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_MOBILE_SUBSCRIBE_VEHICLE_DATA_RESPONSE_H_

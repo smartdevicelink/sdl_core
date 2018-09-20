@@ -34,8 +34,8 @@
 #ifndef SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_MOBILE_SUBSCRIBE_BUTTON_REQUEST_H_
 #define SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_MOBILE_SUBSCRIBE_BUTTON_REQUEST_H_
 
-#include "application_manager/commands/command_request_impl.h"
 #include "application_manager/application_impl.h"
+#include "application_manager/commands/command_request_impl.h"
 #include "utils/macro.h"
 
 namespace sdl_rpc_plugin {
@@ -70,6 +70,12 @@ class SubscribeButtonRequest : public app_mngr::commands::CommandRequestImpl {
   void Run() FINAL;
 
   /**
+   * @brief Interface method that is called whenever new event received
+   * @param event The received event
+   */
+  void on_event(const app_mngr::event_engine::Event& event) FINAL;
+
+  /**
    * @brief Init sets hash update mode for request
    */
   bool Init() FINAL;
@@ -98,6 +104,6 @@ class SubscribeButtonRequest : public app_mngr::commands::CommandRequestImpl {
 };
 
 }  // namespace commands
-}  // namespace application_manager
+}  // namespace sdl_rpc_plugin
 
 #endif  // SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_MOBILE_SUBSCRIBE_BUTTON_REQUEST_H_

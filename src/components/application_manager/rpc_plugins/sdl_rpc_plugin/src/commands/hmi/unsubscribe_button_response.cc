@@ -29,42 +29,37 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
+#include "sdl_rpc_plugin/commands/hmi/unsubscribe_button_response.h"
+#include "application_manager/event_engine/event.h"
+#include "interfaces/MOBILE_API.h"
 
-#include "vehicle_info_plugin/commands/hmi/vi_subscribe_vehicle_data_request.h"
-#include "application_manager/resumption/resume_ctrl.h"
-
-namespace vehicle_info_plugin {
+namespace sdl_rpc_plugin {
 using namespace application_manager;
-
 namespace commands {
 
-VISubscribeVehicleDataRequest::VISubscribeVehicleDataRequest(
+namespace hmi {
+
+UnsubscribeButtonResponse::UnsubscribeButtonResponse(
     const application_manager::commands::MessageSharedPtr& message,
     ApplicationManager& application_manager,
     rpc_service::RPCService& rpc_service,
     HMICapabilities& hmi_capabilities,
     policy::PolicyHandlerInterface& policy_handle)
-    : RequestToHMI(message,
-                   application_manager,
-                   rpc_service,
-                   hmi_capabilities,
-                   policy_handle) {}
+    : ResponseFromHMI(message,
+                      application_manager,
+                      rpc_service,
+                      hmi_capabilities,
+                      policy_handle) {}
 
-VISubscribeVehicleDataRequest::~VISubscribeVehicleDataRequest() {}
+UnsubscribeButtonResponse::~UnsubscribeButtonResponse() {}
 
-void VISubscribeVehicleDataRequest::Run() {
+void UnsubscribeButtonResponse::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
-
-  SendRequest();
+  event_engine::Event event(hmi_apis::FunctionID::Buttons_UnsubscribeButton);
+  event.set_smart_object(*message_);
+  event.raise(application_manager_.event_dispatcher());
 }
 
-void VISubscribeVehicleDataRequest::onTimeOut() {
-  auto& resume_ctrl = application_manager_.resume_controller();
-
-  resume_ctrl.HandleOnTimeOut(
-      correlation_id(),
-      static_cast<hmi_apis::FunctionID::eType>(function_id()));
-}
-
+}  // namespace hmi
 }  // namespace commands
-}  // namespace vehicle_info_plugin
+}  // namespace sdl_rpc_plugin
