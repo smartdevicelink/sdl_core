@@ -137,46 +137,117 @@ void PolicyManagerImpl::CheckTriggers() {
   * @brief FilterInvalidFunctions filter functions that are absent in schema
   * @param rpcs list of functions to filter
   */
- void FilterInvalidFunctions(policy_table::Rpc& rpcs) {
-   policy_table::Rpc valid_rpcs;
-   for (const auto& rpc : rpcs) {
-     const std::string& rpc_name = rpc.first;
-     policy_table::FunctionID function_id;
-     if (policy_table::EnumFromJsonString(rpc_name, &function_id)) {
-       valid_rpcs.insert(rpc);
-     }
-   }
-   rpcs.swap(valid_rpcs);
- }
+void FilterInvalidFunctions(policy_table::Rpc& rpcs) {
+  policy_table::Rpc valid_rpcs;
+  for (const auto& rpc : rpcs) {
+    const std::string& rpc_name = rpc.first;
+    policy_table::FunctionID function_id;
+    if (policy_table::EnumFromJsonString(rpc_name, &function_id)) {
+      valid_rpcs.insert(rpc);
+    }
+  }
+  rpcs.swap(valid_rpcs);
+}
 
- /**
-  * @brief FilterInvalidParameters filter parameters that not present in schema
-  * @param rpc_parameters parameters to filter
-  */
- void FilterInvalidParameters(policy_table::RpcParameters& rpc_parameters) {
-   policy_table::Parameters valid_params;
-   for (auto& param : *(rpc_parameters.parameters)) {
-     if (param.is_valid()) {
-       valid_params.push_back(param);
-     }
-   }
-   rpc_parameters.parameters->swap(valid_params);
- }
+/**
+ * @brief FilterInvalidParameters filter parameters that not present in schema
+ * @param rpc_parameters parameters to filter
+ */
+void FilterInvalidRPCParameters(policy_table::RpcParameters& rpc_parameters) {
+  policy_table::HmiLevels valid_hmi_levels;
+  for (auto& hmi_level : rpc_parameters.hmi_levels) {
+    if (hmi_level.is_valid()) {
+      valid_hmi_levels.push_back(hmi_level);
+    }
+  }
+  rpc_parameters.hmi_levels.swap(valid_hmi_levels);
+  policy_table::Parameters valid_params;
+  for (auto& param : *(rpc_parameters.parameters)) {
+    if (param.is_valid()) {
+      valid_params.push_back(param);
+    }
+  }
+  rpc_parameters.parameters->swap(valid_params);
+}
 
- /**
-  * @brief FilterPolicyTable filter values that not present in schema
-  * @param pt policy table to filter
-  */
- void FilterPolicyTable(policy_table::PolicyTable& pt) {
-   for (auto& group : pt.functional_groupings) {
-     policy_table::Rpc& rpcs = group.second.rpcs;
-     FilterInvalidFunctions(rpcs);
+/**
+ * @brief FilterInvalidNotifications filter notification priorities that are not
+ * present in schema
+ * @param notification priorities to filter
+ */
 
-     for (auto& func : rpcs) {
-       FilterInvalidParameters(func.second);
-     }
-   }
- }
+void FilterInvalidNotifications(
+    policy_table::NumberOfNotificationsPerMinute& notifications) {
+  policy_table::NumberOfNotificationsPerMinute valid_notifications;
+  for (const auto& notification : notifications) {
+    policy_table::Priority priority;
+    if (policy_table::EnumFromJsonString(notification.first, &priority)) {
+      valid_notifications.insert(notification);
+    }
+  }
+  notifications.swap(valid_notifications);
+}
+
+/**
+ * @brief FilterInvalidApplicationParameters filter app params that are not
+ * present in schema
+ * @param object of app policy params to filter
+ */
+void FilterInvalidApplicationParameters(
+    policy_table::ApplicationParams& app_params) {
+  // Filter AppHMIType array
+  policy_table::AppHMITypes valid_app_hmi_types;
+  policy_table::AppHMITypes app_hmi_types = *(app_params.AppHMIType);
+  for (const auto& app_hmi_type : app_hmi_types) {
+    if (app_hmi_type.is_valid()) {
+      valid_app_hmi_types.push_back(app_hmi_type);
+    }
+  }
+  app_params.AppHMIType->swap(valid_app_hmi_types);
+  // Filter RquestTypes array
+  policy_table::RequestTypes valid_request_types;
+  policy_table::RequestTypes request_types = *(app_params.RequestType);
+  for (const auto& request_type : request_types) {
+    if (request_type.is_valid()) {
+      valid_request_types.push_back(request_type);
+    }
+  }
+  if (valid_request_types.empty() && !request_types.empty()) {
+    // An empty RequestType array will allow all request types. No valid
+    // parameters are in the filtered array, so assign an uninitizlied value to
+    // for array to be "omitted"
+    policy_table::RequestTypes omitted_request_types;
+    *(app_params.RequestType) = omitted_request_types;
+  } else {
+    app_params.RequestType->swap(valid_request_types);
+  }
+}
+
+/**
+ * @brief FilterPolicyTable filter values that not present in schema
+ * @param pt policy table to filter
+ */
+void FilterPolicyTable(policy_table::PolicyTable& pt) {
+  policy_table::ModuleConfig& module_config = pt.module_config;
+  if (module_config.is_initialized() &&
+      module_config.notifications_per_minute_by_priority.is_initialized()) {
+    FilterInvalidNotifications(
+        module_config.notifications_per_minute_by_priority);
+  }
+  if (pt.app_policies_section.is_initialized()) {
+    policy_table::ApplicationPolicies& apps = pt.app_policies_section.apps;
+    for (auto& app_policy : apps) {
+      FilterInvalidApplicationParameters(app_policy.second);
+    }
+  }
+  for (auto& group : pt.functional_groupings) {
+    policy_table::Rpc& rpcs = group.second.rpcs;
+    FilterInvalidFunctions(rpcs);
+    for (auto& func : rpcs) {
+      FilterInvalidRPCParameters(func.second);
+    }
+  }
+}
 
 bool PolicyManagerImpl::LoadPT(const std::string& file,
                                const BinaryMessage& pt_content) {

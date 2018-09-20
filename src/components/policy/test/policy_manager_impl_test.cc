@@ -375,12 +375,12 @@ Json::Value CreatePTforLoad() {
       "}"
       "},"
       "\"notifications_per_minute_by_priority\": {"
-      "\"emergency\": 1,"
-      "\"navigation\": 2,"
-      "\"VOICECOMM\": 3,"
-      "\"communication\": 4,"
-      "\"normal\": 5,"
-      "\"none\": 6"
+      "\"EMERGENCY\": 1,"
+      "\"NAVIGATION\": 2,"
+      "\"VOICECOM\": 3,"
+      "\"COMMUNICATION\": 4,"
+      "\"NORMAL\": 5,"
+      "\"NONE\": 6"
       "},"
       "\"vehicle_make\" : \"MakeT\","
       "\"vehicle_model\" : \"ModelT\","
@@ -469,27 +469,27 @@ TEST_F(PolicyManagerImplTest2, GetNotificationsNumberAfterPTUpdate) {
   EXPECT_CALL(listener, OnUpdateStatusChanged(_));
   EXPECT_TRUE(manager->LoadPT("file_pt_update.json", msg));
 
-  std::string priority = "emergency";
+  std::string priority = "EMERGENCY";
   uint32_t notif_number = manager->GetNotificationsNumber(priority);
   EXPECT_EQ(1u, notif_number);
 
-  priority = "navigation";
+  priority = "NAVIGATION";
   notif_number = manager->GetNotificationsNumber(priority);
   EXPECT_EQ(2u, notif_number);
 
-  priority = "emergency";
+  priority = "EMERGENCY";
   notif_number = manager->GetNotificationsNumber(priority);
   EXPECT_EQ(1u, notif_number);
 
-  priority = "VOICECOMM";
+  priority = "VOICECOM";
   notif_number = manager->GetNotificationsNumber(priority);
   EXPECT_EQ(3u, notif_number);
 
-  priority = "normal";
+  priority = "NORMAL";
   notif_number = manager->GetNotificationsNumber(priority);
   EXPECT_EQ(5u, notif_number);
 
-  priority = "none";
+  priority = "NONE";
   notif_number = manager->GetNotificationsNumber(priority);
   EXPECT_EQ(6u, notif_number);
 }
