@@ -39,6 +39,7 @@
 
 #include "application_manager/mock_application_manager.h"
 #include "application_manager/mock_application.h"
+#include "application_manager/mock_message_helper.h"
 
 #include "application_manager/commands/command_impl.h"
 #include "application_manager/commands/commands_test.h"
@@ -222,6 +223,11 @@ TYPED_TEST(OnButtonNotificationCommandsTest, Run_CustomButton_SUCCESS) {
   EXPECT_CALL(this->app_mngr_, application(kAppId)).WillOnce(Return(mock_app));
   EXPECT_CALL(*mock_app, IsSubscribedToSoftButton(kCustomButtonId))
       .WillOnce(Return(true));
+  auto mock_message_helper = am::MockMessageHelper::message_helper_mock();
+  smart_objects::SmartObjectSPtr msg =
+      std::make_shared<smart_objects::SmartObject>();
+  EXPECT_CALL(*mock_message_helper, CreateButtonNotificationToMobile(_, _, _))
+      .WillRepeatedly(Return(msg));
   EXPECT_CALL(this->mock_rpc_service_,
               SendMessageToMobile(
                   CheckNotificationMessage(TestFixture::kFunctionId), _));
@@ -323,9 +329,17 @@ TYPED_TEST(OnButtonNotificationCommandsTest, Run_SUCCESS) {
 
   EXPECT_CALL(this->app_mngr_, applications_by_button(kButtonName))
       .WillOnce(Return(subscribed_apps_list));
+  auto mock_message_helper = am::MockMessageHelper::message_helper_mock();
+  smart_objects::SmartObjectSPtr msg =
+      std::make_shared<smart_objects::SmartObject>();
+  EXPECT_CALL(*mock_message_helper, CreateButtonNotificationToMobile(_, _, _))
+      .WillRepeatedly(Return(msg));
+
   EXPECT_CALL(this->mock_rpc_service_,
               SendMessageToMobile(
                   CheckNotificationMessage(TestFixture::kFunctionId), _));
+
+  EXPECT_CALL(this->app_mngr_, application(kAppId)).WillOnce(Return(mock_app));
 
   command->Run();
 }

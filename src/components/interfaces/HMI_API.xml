@@ -3406,24 +3406,35 @@
             </description>
         </param>
     </function>
-    <function name="OnButtonSubscription" messagetype="notification">
-      <description>
-        Sender: SDL->HMI. Purpose: to notify about button subscription state is changed for the named application
-      </description>
-      <param name="name" type="Common.ButtonName" mandatory="true" />
-      <param name="isSubscribed" type="Boolean" mandatory="true">
+    <function name="SubscribeButton" messagetype="request">
         <description>
-          Defines whether the named button has status of 'subscribed' or 'unsubscribed':
-          If "true" - the named button is subscribed.
-          If "false" - the named button is unsubscribed.
+            Subscribes to buttons.
         </description>
-      </param>
-      <param name="appID" type="Integer" mandatory="true">
-        <description>
-          The ID of application that relates to this button-subscription status change.
-        </description>
-      </param>
+        <param name="appID" type="Integer" mandatory="true">
+            <description>The ID of the application requesting this button subscription. </description>
+        </param>
+
+        <param name="buttonName" type="Common.ButtonName" mandatory="true">
+            <description>Name of the button to subscribe.</description>
+        </param>
     </function>
+
+    <function name="SubscribeButton" messagetype="response"> </function>
+
+    <function name="UnsubscribeButton" messagetype="request">
+        <description>
+            Unsubscribes from buttons.
+        </description>
+        <param name="appID" type="Integer" mandatory="true">
+            <description>The ID of the application requesting this button unsubscription. </description>
+        </param>
+
+        <param name="buttonName" type="Common.ButtonName" mandatory="true">
+            <description>Name of the button to unsubscribe from.</description>
+        </param>
+    </function>
+
+    <function name="UnsubscribeButton" messagetype="response"></function>
 </interface>
 
 <interface name="BasicCommunication" version="1.2.1" date="2017-08-02">

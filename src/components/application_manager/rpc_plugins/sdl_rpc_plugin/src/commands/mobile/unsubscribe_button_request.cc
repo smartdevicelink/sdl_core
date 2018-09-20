@@ -34,6 +34,8 @@
 #include "sdl_rpc_plugin/commands/mobile/unsubscribe_button_request.h"
 
 #include "application_manager/application_impl.h"
+#include "application_manager/message_helper.h"
+#include "utils/helpers.h"
 #include "utils/semantic_version.h"
 
 namespace sdl_rpc_plugin {
@@ -92,15 +94,60 @@ void UnsubscribeButtonRequest::Run() {
     return;
   }
 
-  if (!app->UnsubscribeFromButton(
-          static_cast<mobile_apis::ButtonName::eType>(btn_id))) {
-    LOG4CXX_ERROR(logger_, "App doesn't subscibe to button " << btn_id);
+  if (!app->IsSubscribedToButton(btn_id)) {
+    LOG4CXX_ERROR(logger_, "App is not subscribed to button " << btn_id);
     SendResponse(false, mobile_apis::Result::IGNORED);
     return;
   }
 
-  SendUnsubscribeButtonNotification();
-  SendResponse(true, mobile_apis::Result::SUCCESS);
+  (*message_)[str::msg_params][str::app_id] = app->app_id();
+  StartAwaitForInterface(HmiInterfaces::HMI_INTERFACE_Buttons);
+  SendHMIRequest(hmi_apis::FunctionID::Buttons_UnsubscribeButton,
+                 &(*message_)[app_mngr::strings::msg_params],
+                 true);
+}
+
+void UnsubscribeButtonRequest::on_event(const event_engine::Event& event) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  using namespace helpers;
+
+  const smart_objects::SmartObject& message = event.smart_object();
+
+  if (hmi_apis::FunctionID::Buttons_UnsubscribeButton != event.id()) {
+    LOG4CXX_ERROR(logger_, "Received unknown event.");
+    return;
+  }
+  EndAwaitForInterface(HmiInterfaces::HMI_INTERFACE_Buttons);
+  ApplicationSharedPtr app =
+      application_manager_.application(CommandRequestImpl::connection_key());
+
+  if (!app) {
+    LOG4CXX_ERROR(logger_, "NULL pointer.");
+    return;
+  }
+
+  hmi_apis::Common_Result::eType hmi_result =
+      static_cast<hmi_apis::Common_Result::eType>(
+          message[strings::params][hmi_response::code].asInt());
+  std::string response_info;
+  GetInfo(message, response_info);
+  const bool result = PrepareResultForMobileResponse(
+      hmi_result, HmiInterfaces::HMI_INTERFACE_Buttons);
+
+  if (result) {
+    const mobile_apis::ButtonName::eType btn_id =
+        static_cast<mobile_apis::ButtonName::eType>(
+            (*message_)[str::msg_params][str::button_name].asInt());
+    app->UnsubscribeFromButton(
+        static_cast<mobile_apis::ButtonName::eType>(btn_id));
+  }
+  mobile_apis::Result::eType result_code =
+      MessageHelper::HMIToMobileResult(hmi_result);
+
+  SendResponse(result,
+               result_code,
+               response_info.empty() ? nullptr : response_info.c_str(),
+               &(message[strings::msg_params]));
 }
 
 bool UnsubscribeButtonRequest::Init() {
@@ -108,19 +155,5 @@ bool UnsubscribeButtonRequest::Init() {
   return true;
 }
 
-void UnsubscribeButtonRequest::SendUnsubscribeButtonNotification() {
-  using namespace smart_objects;
-  using namespace hmi_apis;
-
-  // send OnButtonSubscription notification
-  SmartObject msg_params = SmartObject(SmartType_Map);
-  msg_params[strings::app_id] = connection_key();
-  msg_params[strings::name] = static_cast<Common_ButtonName::eType>(
-      (*message_)[strings::msg_params][strings::button_name].asInt());
-  msg_params[strings::is_suscribed] = false;
-  CreateHMINotification(FunctionID::Buttons_OnButtonSubscription, msg_params);
-}
-
 }  // namespace commands
-
-}  // namespace application_manager
+}  // namespace sdl_rpc_plugin

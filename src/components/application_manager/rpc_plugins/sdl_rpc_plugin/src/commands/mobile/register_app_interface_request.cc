@@ -1497,12 +1497,15 @@ void RegisterAppInterfaceRequest::CheckResponseVehicleTypeParam(
 void RegisterAppInterfaceRequest::SendSubscribeCustomButtonNotification() {
   using namespace smart_objects;
   using namespace hmi_apis;
+  LOG4CXX_AUTO_TRACE(logger_);
 
   SmartObject msg_params = SmartObject(SmartType_Map);
   msg_params[strings::app_id] = connection_key();
-  msg_params[strings::name] = Common_ButtonName::CUSTOM_BUTTON;
+  msg_params[strings::button_name] = Common_ButtonName::CUSTOM_BUTTON;
   msg_params[strings::is_suscribed] = true;
-  CreateHMINotification(FunctionID::Buttons_OnButtonSubscription, msg_params);
+
+  SendHMIRequest(
+      hmi_apis::FunctionID::Buttons_SubscribeButton, &msg_params, false);
 }
 
 bool RegisterAppInterfaceRequest::IsApplicationSwitched() {

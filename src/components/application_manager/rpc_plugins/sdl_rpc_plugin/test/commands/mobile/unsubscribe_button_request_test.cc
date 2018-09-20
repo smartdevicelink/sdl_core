@@ -77,8 +77,6 @@ TEST_F(UnsubscribeButtonRequestTest,
       .WillOnce(Return(mock_app));
   ON_CALL(*mock_app, msg_version())
       .WillByDefault(ReturnRef(mock_semantic_version));
-  EXPECT_CALL(*mock_app, UnsubscribeFromButton(kButtonId))
-      .WillOnce(Return(false));
 
   EXPECT_CALL(
       mock_rpc_service_,
@@ -111,7 +109,7 @@ TEST_F(UnsubscribeButtonRequestTest,
   EXPECT_CALL(mock_rpc_service_,
               ManageMobileCommand(
                   MobileResultCodeIs(mobile_result::UNSUPPORTED_RESOURCE), _));
-
+  command->Init();
   command->Run();
 }
 
@@ -137,16 +135,13 @@ TEST_F(UnsubscribeButtonRequestTest, Run_SUCCESS) {
   ON_CALL(*mock_app, msg_version())
       .WillByDefault(ReturnRef(mock_semantic_version));
 
-  EXPECT_CALL(*mock_app, UnsubscribeFromButton(kButtonId))
+  EXPECT_CALL(*mock_app, IsSubscribedToButton(kButtonId))
       .WillOnce(Return(true));
+
   EXPECT_CALL(mock_rpc_service_,
               ManageHMICommand(HMIResultCodeIs(
-                  hmi_apis::FunctionID::Buttons_OnButtonSubscription)));
-  EXPECT_CALL(
-      mock_rpc_service_,
-      ManageMobileCommand(MobileResultCodeIs(mobile_result::SUCCESS), _));
+                  hmi_apis::FunctionID::Buttons_UnsubscribeButton)));
 
-  EXPECT_CALL(*mock_app, UpdateHash());
   command->Init();
   command->Run();
 }
@@ -180,16 +175,13 @@ TEST_F(UnsubscribeButtonRequestTest, Run_SUCCESS_Version_4_5) {
   ON_CALL(*mock_app, is_media_application()).WillByDefault(Return(true));
 
   EXPECT_CALL(*mock_app,
-              UnsubscribeFromButton(mobile_apis::ButtonName::PLAY_PAUSE))
+              IsSubscribedToButton(mobile_apis::ButtonName::PLAY_PAUSE))
       .WillOnce(Return(true));
+
   EXPECT_CALL(mock_rpc_service_,
               ManageHMICommand(HMIResultCodeIs(
-                  hmi_apis::FunctionID::Buttons_OnButtonSubscription)));
-  EXPECT_CALL(
-      mock_rpc_service_,
-      ManageMobileCommand(MobileResultCodeIs(mobile_result::SUCCESS), _));
+                  hmi_apis::FunctionID::Buttons_UnsubscribeButton)));
 
-  EXPECT_CALL(*mock_app, UpdateHash());
   command->Init();
   command->Run();
 }

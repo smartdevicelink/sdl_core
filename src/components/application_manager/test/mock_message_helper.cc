@@ -293,14 +293,27 @@ MockMessageHelper* MockMessageHelper::message_helper_mock() {
   static ::testing::NiceMock<MockMessageHelper> message_helper_mock;
   return &message_helper_mock;
 }
+
 smart_objects::SmartObjectList
-MessageHelper::CreateOnButtonSubscriptionNotificationsForApp(
+MessageHelper::CreateButtonSubscriptionsHandlingRequestsList(
     ApplicationConstSharedPtr app,
-    ApplicationManager& app_mngr,
-    const ButtonSubscriptions& button_subscriptions) {
+    const ButtonSubscriptions& button_subscriptions,
+    const hmi_apis::FunctionID::eType function,
+    ApplicationManager& app_mngr) {
   return MockMessageHelper::message_helper_mock()
-      ->CreateOnButtonSubscriptionNotificationsForApp(
-          app, app_mngr, button_subscriptions);
+      ->CreateButtonSubscriptionsHandlingRequestsList(
+          app, button_subscriptions, function, app_mngr);
+}
+
+smart_objects::SmartObjectSPtr
+MessageHelper::CreateButtonSubscriptionHandlingRequestToHmi(
+    const uint32_t app_id,
+    const hmi_apis::Common_ButtonName::eType button,
+    const hmi_apis::FunctionID::eType function,
+    ApplicationManager& app_mngr) {
+  return MockMessageHelper::message_helper_mock()
+      ->CreateButtonSubscriptionHandlingRequestToHmi(
+          app_id, button, function, app_mngr);
 }
 
 void MessageHelper::SendOnResumeAudioSourceToHMI(const uint32_t app_id,
@@ -605,15 +618,12 @@ MessageHelper::CreateGlobalPropertiesRequestsToHMI(
       ->CreateGlobalPropertiesRequestsToHMI(app, app_mngr);
 }
 
-smart_objects::SmartObjectSPtr
-MessageHelper::CreateOnButtonSubscriptionNotification(
-    uint32_t app_id,
-    hmi_apis::Common_ButtonName::eType button,
-    bool is_subscribed,
-    ApplicationManager& app_mngr) {
+smart_objects::SmartObjectSPtr MessageHelper::CreateButtonNotificationToMobile(
+    ApplicationManager& app_mngr,
+    ApplicationSharedPtr app,
+    const smart_objects::SmartObject& source_message) {
   return MockMessageHelper::message_helper_mock()
-      ->CreateOnButtonSubscriptionNotification(
-          app_id, button, is_subscribed, app_mngr);
+      ->CreateButtonNotificationToMobile(app_mngr, app, source_message);
 }
 
 }  // namespace application_manager

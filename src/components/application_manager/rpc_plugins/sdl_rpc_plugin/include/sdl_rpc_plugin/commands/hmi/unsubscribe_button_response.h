@@ -30,41 +30,52 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "vehicle_info_plugin/commands/hmi/vi_subscribe_vehicle_data_request.h"
-#include "application_manager/resumption/resume_ctrl.h"
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_HMI_UNSUBSCRIBE_BUTTON_RESPONSE_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_HMI_UNSUBSCRIBE_BUTTON_RESPONSE_H_
 
-namespace vehicle_info_plugin {
-using namespace application_manager;
+#include "application_manager/application_manager.h"
+#include "application_manager/commands/response_from_hmi.h"
+#include "utils/macro.h"
+
+namespace sdl_rpc_plugin {
+namespace app_mngr = application_manager;
 
 namespace commands {
 
-VISubscribeVehicleDataRequest::VISubscribeVehicleDataRequest(
-    const application_manager::commands::MessageSharedPtr& message,
-    ApplicationManager& application_manager,
-    rpc_service::RPCService& rpc_service,
-    HMICapabilities& hmi_capabilities,
-    policy::PolicyHandlerInterface& policy_handle)
-    : RequestToHMI(message,
-                   application_manager,
-                   rpc_service,
-                   hmi_capabilities,
-                   policy_handle) {}
+namespace hmi {
+/**
+ * @brief UnsubscribeButtonResponse command class
+ **/
+class UnsubscribeButtonResponse : public app_mngr::commands::ResponseFromHMI {
+ public:
+  /**
+   * @brief UnsubscribeButtonResponse class constructor
+   * @param message Incoming SmartObject message
+   **/
+  UnsubscribeButtonResponse(const app_mngr::commands::MessageSharedPtr& message,
+                            app_mngr::ApplicationManager& application_manager,
+                            app_mngr::rpc_service::RPCService& rpc_service,
+                            app_mngr::HMICapabilities& hmi_capabilities,
+                            policy::PolicyHandlerInterface& policy_handle);
 
-VISubscribeVehicleDataRequest::~VISubscribeVehicleDataRequest() {}
+  /**
+   * @brief UnsubscribeButtonResponse class destructor
+   **/
+  virtual ~UnsubscribeButtonResponse();
 
-void VISubscribeVehicleDataRequest::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  /**
+   * @brief Execute command
+   **/
+  virtual void Run();
 
-  SendRequest();
-}
+ private:
+  DISALLOW_COPY_AND_ASSIGN(UnsubscribeButtonResponse);
+};
 
-void VISubscribeVehicleDataRequest::onTimeOut() {
-  auto& resume_ctrl = application_manager_.resume_controller();
-
-  resume_ctrl.HandleOnTimeOut(
-      correlation_id(),
-      static_cast<hmi_apis::FunctionID::eType>(function_id()));
-}
+}  // namespace hmi
 
 }  // namespace commands
-}  // namespace vehicle_info_plugin
+
+}  // namespace sdl_rpc_plugin
+
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_HMI_UNSUBSCRIBE_BUTTON_RESPONSE_H_
