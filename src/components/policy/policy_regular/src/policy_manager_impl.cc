@@ -144,7 +144,7 @@ void PolicyManagerImpl::CheckTriggers() {
 }
 
 /**
- * @brief FilterInvalidFunctions filter functions that are not present in schema
+ * @brief FilterInvalidFunctions filter functions that are absent in schema
  * @param rpcs list of functions to filter
  */
 void FilterInvalidFunctions(policy_table::Rpc& rpcs) {
@@ -166,7 +166,7 @@ void FilterInvalidFunctions(policy_table::Rpc& rpcs) {
  */
 void FilterInvalidRPCParameters(policy_table::RpcParameters& rpc_parameters) {
   policy_table::HmiLevels valid_hmi_levels;
-  for (auto& hmi_level : rpc_parameters.hmi_levels) {
+  for (const auto& hmi_level : rpc_parameters.hmi_levels) {
     if (hmi_level.is_valid()) {
       valid_hmi_levels.push_back(hmi_level);
     }
@@ -174,7 +174,7 @@ void FilterInvalidRPCParameters(policy_table::RpcParameters& rpc_parameters) {
   rpc_parameters.hmi_levels.swap(valid_hmi_levels);
 
   policy_table::Parameters valid_params;
-  for (auto& param : *(rpc_parameters.parameters)) {
+  for (const auto& param : *(rpc_parameters.parameters)) {
     if (param.is_valid()) {
       valid_params.push_back(param);
     }
@@ -183,11 +183,12 @@ void FilterInvalidRPCParameters(policy_table::RpcParameters& rpc_parameters) {
 }
 
 /**
- * @brief FilterInvalidNotifications filter notification priorities that are not
+ * @brief FilterInvalidPriorityValues filter notification priorities that are
+ * not
  * present in schema
- * @param notification priorities to filter
+ * @param notifications priorities to filter
  */
-void FilterInvalidNotifications(
+void FilterInvalidPriorityValues(
     policy_table::NumberOfNotificationsPerMinute& notifications) {
   policy_table::NumberOfNotificationsPerMinute valid_notifications;
   for (const auto& notification : notifications) {
@@ -202,13 +203,13 @@ void FilterInvalidNotifications(
 /**
  * @brief FilterInvalidApplicationParameters filter app params that are not
  * present in schema
- * @param object of app policy params to filter
+ * @param app_params object of app policy params to filter
  */
 void FilterInvalidApplicationParameters(
     policy_table::ApplicationParams& app_params) {
   // Filter AppHMIType array
   policy_table::AppHMITypes valid_app_hmi_types;
-  policy_table::AppHMITypes app_hmi_types = *(app_params.AppHMIType);
+  const policy_table::AppHMITypes& app_hmi_types = *(app_params.AppHMIType);
   for (const auto& app_hmi_type : app_hmi_types) {
     if (app_hmi_type.is_valid()) {
       valid_app_hmi_types.push_back(app_hmi_type);
@@ -218,7 +219,7 @@ void FilterInvalidApplicationParameters(
 
   // Filter RquestTypes array
   policy_table::RequestTypes valid_request_types;
-  policy_table::RequestTypes request_types = *(app_params.RequestType);
+  const policy_table::RequestTypes& request_types = *(app_params.RequestType);
   for (const auto& request_type : request_types) {
     if (request_type.is_valid()) {
       valid_request_types.push_back(request_type);
@@ -226,36 +227,16 @@ void FilterInvalidApplicationParameters(
   }
   if (valid_request_types.empty() && !request_types.empty()) {
     // An empty RequestType array will allow all request types. No valid
-    // parameters are in the filtered array, so assign an uninitizlied value to
+    // parameters are in the filtered array, so assign an unitialized value to
     // for array to be "omitted"
-    policy_table::RequestTypes omitted_request_types;
-    *(app_params.RequestType) = omitted_request_types;
-  } else {
-    app_params.RequestType->swap(valid_request_types);
-  }
-
-  // Filter RquestSubTypes array
-  policy_table::RequestSubTypes valid_request_sub_types;
-  policy_table::RequestSubTypes request_sub_types =
-      *(app_params.RequestSubType);
-  for (const auto& request_sub_type : request_sub_types) {
-    if (request_sub_type.is_valid()) {
-      valid_request_sub_types.push_back(request_sub_type);
-    }
-  }
-  if (valid_request_types.empty() && !request_types.empty()) {
-    // An empty RequestSubType array will allow all request types. No valid
-    // parameters are in the filtered array, so assign an uninitizlied value to
-    // for array to be "omitted"
-    policy_table::RequestTypes omitted_request_types;
-    *(app_params.RequestType) = omitted_request_types;
+    *(app_params.RequestType) = policy_table::RequestTypes();
   } else {
     app_params.RequestType->swap(valid_request_types);
   }
 
   // Filter moduleType array
   policy_table::ModuleTypes valid_module_types;
-  policy_table::ModuleTypes module_types = *(app_params.moduleType);
+  const policy_table::ModuleTypes& module_types = *(app_params.moduleType);
   for (const auto& module_type : module_types) {
     if (module_type.is_valid()) {
       valid_module_types.push_back(module_type);
@@ -263,12 +244,21 @@ void FilterInvalidApplicationParameters(
   }
   if (valid_module_types.empty() && !module_types.empty()) {
     // An empty moduleType array will allow all request types. No valid
-    // parameters are in the filtered array, so assign an uninitizlied value to
+    // parameters are in the filtered array, so assign an unitialized value to
     // for array to be "omitted"
-    policy_table::ModuleTypes omitted_module_types;
-    *(app_params.moduleType) = omitted_module_types;
+    *(app_params.moduleType) = policy_table::ModuleTypes();
   } else {
     app_params.moduleType->swap(valid_module_types);
+  }
+
+  // Filter default_hmi
+  if (!app_params.default_hmi.is_valid()) {
+    app_params.default_hmi = policy_table::HmiLevel();
+  }
+
+  // Filter priority
+  if (!app_params.priority.is_valid()) {
+    app_params.priority = policy_table::Priority();
   }
 }
 
@@ -280,7 +270,7 @@ void FilterPolicyTable(policy_table::PolicyTable& pt) {
   policy_table::ModuleConfig& module_config = pt.module_config;
   if (module_config.is_initialized() &&
       module_config.notifications_per_minute_by_priority.is_initialized()) {
-    FilterInvalidNotifications(
+    FilterInvalidPriorityValues(
         module_config.notifications_per_minute_by_priority);
   }
 
