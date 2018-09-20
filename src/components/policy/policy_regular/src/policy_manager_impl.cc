@@ -227,7 +227,7 @@ void FilterInvalidApplicationParameters(
   }
   if (valid_request_types.empty() && !request_types.empty()) {
     // An empty RequestType array will allow all request types. No valid
-    // parameters are in the filtered array, so assign an unitialized value to
+    // parameters are in the filtered array, so assign an uninitialized value to
     // for array to be "omitted"
     *(app_params.RequestType) = policy_table::RequestTypes();
   } else {
@@ -244,7 +244,7 @@ void FilterInvalidApplicationParameters(
   }
   if (valid_module_types.empty() && !module_types.empty()) {
     // An empty moduleType array will allow all request types. No valid
-    // parameters are in the filtered array, so assign an unitialized value to
+    // parameters are in the filtered array, so assign an uninitialized value to
     // for array to be "omitted"
     *(app_params.moduleType) = policy_table::ModuleTypes();
   } else {
