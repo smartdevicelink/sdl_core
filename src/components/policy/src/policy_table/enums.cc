@@ -569,6 +569,329 @@ bool EnumFromJsonString(const std::string& literal, RequestType* result) {
   }
 }
 
+bool EnumFromJsonString(const std::string& literal, FunctionID* result) {
+   if ("RESERVE" == literal) {
+     *result = RESERVED;
+     return true;
+   }
+
+   if ("RegisterAppInterface" == literal) {
+     *result = RegisterAppInterfaceID;
+     return true;
+   }
+
+   if ("UnregisterAppInterface" == literal) {
+     *result = UnregisterAppInterfaceID;
+     return true;
+   }
+
+   if ("SetGlobalProperties" == literal) {
+     *result = SetGlobalPropertiesID;
+     return true;
+   }
+
+   if ("ResetGlobalProperties" == literal) {
+     *result = ResetGlobalPropertiesID;
+     return true;
+   }
+
+   if ("AddCommand" == literal) {
+     *result = AddCommandID;
+     return true;
+   }
+
+   if ("DeleteCommand" == literal) {
+     *result = DeleteCommandID;
+     return true;
+   }
+
+   if ("AddSubMenu" == literal) {
+     *result = AddSubMenuID;
+     return true;
+   }
+
+   if ("DeleteSubMenu" == literal) {
+     *result = DeleteSubMenuID;
+     return true;
+   }
+
+   if ("CreateInteractionChoiceSet" == literal) {
+     *result = CreateInteractionChoiceSetID;
+     return true;
+   }
+
+   if ("PerformInteraction" == literal) {
+     *result = PerformInteractionID;
+     return true;
+   }
+
+   if ("DeleteInteractionChoiceSet" == literal) {
+     *result = DeleteInteractionChoiceSetID;
+     return true;
+   }
+
+   if ("Alert" == literal) {
+     *result = AlertID;
+     return true;
+   }
+
+   if ("Show" == literal) {
+     *result = ShowID;
+     return true;
+   }
+
+   if ("Speak" == literal) {
+     *result = SpeakID;
+     return true;
+   }
+
+   if ("SetMediaClockTimer" == literal) {
+     *result = SetMediaClockTimerID;
+     return true;
+   }
+
+   if ("PerformAudioPassThru" == literal) {
+     *result = PerformAudioPassThruID;
+     return true;
+   }
+
+   if ("EndAudioPassThru" == literal) {
+     *result = EndAudioPassThruID;
+     return true;
+   }
+
+   if ("SubscribeButton" == literal) {
+     *result = SubscribeButtonID;
+     return true;
+   }
+
+   if ("UnsubscribeButton" == literal) {
+     *result = UnsubscribeButtonID;
+     return true;
+   }
+
+   if ("SubscribeVehicleData" == literal) {
+     *result = SubscribeVehicleDataID;
+     return true;
+   }
+
+   if ("UnsubscribeVehicleData" == literal) {
+     *result = UnsubscribeVehicleDataID;
+     return true;
+   }
+
+   if ("GetVehicleData" == literal) {
+     *result = GetVehicleDataID;
+     return true;
+   }
+
+   if ("ReadD" == literal) {
+     *result = ReadDIDID;
+     return true;
+   }
+
+   if ("GetDTCs" == literal) {
+     *result = GetDTCsID;
+     return true;
+   }
+
+   if ("ScrollableMessage" == literal) {
+     *result = ScrollableMessageID;
+     return true;
+   }
+
+   if ("Slider" == literal) {
+     *result = SliderID;
+     return true;
+   }
+
+   if ("ShowConstantTBT" == literal) {
+     *result = ShowConstantTBTID;
+     return true;
+   }
+
+   if ("AlertManeuver" == literal) {
+     *result = AlertManeuverID;
+     return true;
+   }
+
+   if ("UpdateTurnList" == literal) {
+     *result = UpdateTurnListID;
+     return true;
+   }
+
+   if ("ChangeRegistration" == literal) {
+     *result = ChangeRegistrationID;
+     return true;
+   }
+
+   if ("GenericResponse" == literal) {
+     *result = GenericResponseID;
+     return true;
+   }
+
+   if ("PutFile" == literal) {
+     *result = PutFileID;
+     return true;
+   }
+
+   if ("DeleteFile" == literal) {
+     *result = DeleteFileID;
+     return true;
+   }
+
+   if ("ListFiles" == literal) {
+     *result = ListFilesID;
+     return true;
+   }
+
+   if ("SetAppIcon" == literal) {
+     *result = SetAppIconID;
+     return true;
+   }
+
+   if ("SetDisplayLayout" == literal) {
+     *result = SetDisplayLayoutID;
+     return true;
+   }
+
+   if ("DiagnosticMessage" == literal) {
+     *result = DiagnosticMessageID;
+     return true;
+   }
+
+   if ("SystemRequest" == literal) {
+     *result = SystemRequestID;
+     return true;
+   }
+
+   if ("SendLocation" == literal) {
+     *result = SendLocationID;
+     return true;
+   }
+
+   if ("DialNumber" == literal) {
+     *result = DialNumberID;
+     return true;
+   }
+
+   if ("GetWayPoints" == literal) {
+     *result = GetWayPointsID;
+     return true;
+   }
+
+   if ("SubscribeWayPoints" == literal) {
+     *result = SubscribeWayPointsID;
+     return true;
+   }
+
+   if ("UnsubscribeWayPoints" == literal) {
+     *result = UnsubscribeWayPointsID;
+     return true;
+   }
+
+   if ("OnHMIStatus" == literal) {
+     *result = OnHMIStatusID;
+     return true;
+   }
+
+   if ("OnAppInterfaceUnregistered" == literal) {
+     *result = OnAppInterfaceUnregisteredID;
+     return true;
+   }
+
+   if ("OnButtonEvent" == literal) {
+     *result = OnButtonEventID;
+     return true;
+   }
+
+   if ("OnButtonPress" == literal) {
+     *result = OnButtonPressID;
+     return true;
+   }
+
+   if ("OnVehicleData" == literal) {
+     *result = OnVehicleDataID;
+     return true;
+   }
+
+   if ("OnCommand" == literal) {
+     *result = OnCommandID;
+     return true;
+   }
+
+   if ("OnTBTClientState" == literal) {
+     *result = OnTBTClientStateID;
+     return true;
+   }
+
+   if ("OnDriverDistraction" == literal) {
+     *result = OnDriverDistractionID;
+     return true;
+   }
+
+   if ("OnPermissionsChange" == literal) {
+     *result = OnPermissionsChangeID;
+     return true;
+   }
+
+   if ("OnAudioPassThru" == literal) {
+     *result = OnAudioPassThruID;
+     return true;
+   }
+
+   if ("OnLanguageChange" == literal) {
+     *result = OnLanguageChangeID;
+     return true;
+   }
+
+   if ("OnKeyboardInput" == literal) {
+     *result = OnKeyboardInputID;
+     return true;
+   }
+
+   if ("OnTouchEvent" == literal) {
+     *result = OnTouchEventID;
+     return true;
+   }
+
+   if ("OnSystemRequest" == literal) {
+     *result = OnSystemRequestID;
+     return true;
+   }
+
+   if ("OnHashChange" == literal) {
+     *result = OnHashChangeID;
+     return true;
+   }
+
+   if ("OnWayPointChange" == literal) {
+     *result = OnWayPointChangeID;
+     return true;
+   }
+
+   if ("EncodedSyncPData" == literal) {
+     *result = EncodedSyncPDataID;
+     return true;
+   }
+
+   if ("SyncPData" == literal) {
+     *result = SyncPDataID;
+     return true;
+   }
+
+   if ("OnEncodedSyncPData" == literal) {
+     *result = OnEncodedSyncPDataID;
+     return true;
+   }
+
+   if ("OnSyncPData" == literal) {
+     *result = OnSyncPDataID;
+     return true;
+   }
+   return false;
+ };
+
 const std::string kDefaultApp = "default";
 const std::string kPreDataConsentApp = "pre_DataConsent";
 const std::string kDeviceApp = "device";
