@@ -595,18 +595,10 @@ const std::string kInsertRequestType =
     "INSERT INTO `request_type` (`application_id`, `request_type`) "
     "VALUES (?, ?)";
 
-const std::string kInsertOmittedRequestType =
-    "INSERT INTO `request_type` (`application_id`) "
-    "VALUES (?)";
-
 const std::string kInsertRequestSubType =
     "INSERT INTO `request_subtype` (`application_id`, "
     "`request_subtype`) "
     "VALUES (?, ?)";
-
-const std::string kInsertOmittedRequestSubType =
-    "INSERT INTO `request_subtype` (`application_id`) "
-    "VALUES (?)";
 
 const std::string kUpdateVersion = "UPDATE `version` SET `number`= ?";
 

@@ -267,6 +267,32 @@ ModuleCapability GetLightNameCapabilities(
                         capabilitiesStatus::missedLightName);
 }
 
+ModuleCapability GetRadioBandByCapabilities(
+    const smart_objects::SmartObject& capabilities_status,
+    const smart_objects::SmartObject& request_parameter) {
+  mobile_apis::RadioBand::eType radio_band =
+      static_cast<mobile_apis::RadioBand::eType>(request_parameter.asUInt());
+  if (mobile_apis::RadioBand::XM == radio_band) {
+    if (!capabilities_status.keyExists(strings::kSiriusxmRadioAvailable)) {
+      LOG4CXX_DEBUG(logger_,
+                    "Capability "
+                        << strings::kSiriusxmRadioAvailable
+                        << " is missed in RemoteControl capabilities");
+      return std::make_pair(strings::kSiriusxmRadioAvailable,
+                            capabilitiesStatus::missedParam);
+    }
+    if (!capabilities_status[strings::kSiriusxmRadioAvailable].asBool()) {
+      LOG4CXX_DEBUG(logger_,
+                    "Capability "
+                        << strings::kSiriusxmRadioAvailable
+                        << " is switched off in RemoteControl capabilities");
+      return std::make_pair(strings::kSiriusxmRadioAvailable,
+                            capabilitiesStatus::missedParam);
+    }
+  }
+  return std::make_pair("", capabilitiesStatus::success);
+}
+
 /**
  * @brief Check whether the exists light data related to correspondent
  * capabilities
@@ -303,40 +329,18 @@ ModuleCapability GetControlDataCapabilities(
 
       return light_capability;
     }
-
-    const capabilitiesStatus status_item_capability =
-        GetItemCapability(capabilities[0],
-                          mapping,
-                          request_parameter,
-                          mobile_apis::Result::UNSUPPORTED_RESOURCE);
-
-    if (capabilitiesStatus::success != status_item_capability) {
-      return std::make_pair("", status_item_capability);
+    if (message_params::kBand == request_parameter) {
+      ModuleCapability radio_capability = GetRadioBandByCapabilities(
+          capabilities, control_data[request_parameter]);
+      if (capabilitiesStatus::success != radio_capability.second) {
+        return radio_capability;
+      }
     }
-  }
 
-  return std::make_pair("", capabilitiesStatus::success);
-}
-
-/**
- * @brief Check whether the exists hmi data related to correspondent
- * capabilities
- * @param smart object of capabilities
- * @param smart object of control_data
- * @return pair of state and capability status - ModuleCapability
- */
-ModuleCapability GetHmiControlDataCapabilities(
-    const smart_objects::SmartObject& capabilities,
-    const smart_objects::SmartObject& control_data) {
-  LOG4CXX_AUTO_TRACE(logger_);
-  std::map<std::string, std::string> mapping =
-      GetModuleDataToCapabilitiesMapping();
-
-  for (auto it = control_data.map_begin(); it != control_data.map_end(); ++it) {
     const capabilitiesStatus status_item_capability =
         GetItemCapability(capabilities,
                           mapping,
-                          it->first,
+                          request_parameter,
                           mobile_apis::Result::UNSUPPORTED_RESOURCE);
 
     if (capabilitiesStatus::success != status_item_capability) {
@@ -376,12 +380,13 @@ ModuleCapability GetModuleDataCapabilities(
       const smart_objects::SmartObject& caps =
           rc_capabilities[capabilities_key];
 
-      if (message_params::kHmiSettingsControlData == module_data_key) {
-        module_data_capabilities =
-            GetHmiControlDataCapabilities(caps, module_data[module_data_key]);
-      } else {
+      if (message_params::kHmiSettingsControlData == module_data_key ||
+          message_params::kLightControlData == module_data_key) {
         module_data_capabilities =
             GetControlDataCapabilities(caps, module_data[module_data_key]);
+      } else {
+        module_data_capabilities =
+            GetControlDataCapabilities(caps[0], module_data[module_data_key]);
       }
     }
   }
@@ -488,7 +493,8 @@ void SetInteriorVehicleDataRequest::Execute() {
       CutOffReadOnlyParams(module_data);
     }
 
-    application_manager_.RemoveHMIFakeParameters(message_);
+    application_manager_.RemoveHMIFakeParameters(
+        message_, hmi_apis::FunctionID::RC_SetInteriorVehicleData);
 
     app_mngr::ApplicationSharedPtr app =
         application_manager_.application(connection_key());

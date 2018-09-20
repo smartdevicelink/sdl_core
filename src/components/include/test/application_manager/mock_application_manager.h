@@ -124,8 +124,9 @@ class MockApplicationManager : public application_manager::ApplicationManager {
       void(const std::shared_ptr<application_manager::Application> app));
   MOCK_METHOD1(SendDriverDistractionState,
                void(application_manager::ApplicationSharedPtr app));
-  MOCK_METHOD1(RemoveHMIFakeParameters,
-               void(application_manager::commands::MessageSharedPtr& message));
+  MOCK_METHOD2(RemoveHMIFakeParameters,
+               void(application_manager::commands::MessageSharedPtr& message,
+                    const hmi_apis::FunctionID::eType& function_id));
   MOCK_CONST_METHOD1(
       GetDefaultHmiLevel,
       mobile_apis::HMILevel::eType(
