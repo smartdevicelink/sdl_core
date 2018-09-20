@@ -69,7 +69,7 @@ class IncomingDataHandlerTest : public ::testing::Test {
                    const uint8_t* const data,
                    const uint32_t data_size) {
     actual_frames = data_handler.ProcessData(
-        RawMessage(uid, 0, data, data_size), &result_code, &malformed_occurs);
+        RawMessage(uid, 0, data, data_size), result_code, &malformed_occurs);
   }
 
   void AppendPacketToTMData(const ProtocolPacket& packet) {
@@ -118,7 +118,7 @@ TEST_F(IncomingDataHandlerTest, NullData) {
 TEST_F(IncomingDataHandlerTest, DataForUnknownConnection) {
   size_t malformed_count = 0;
   actual_frames = data_handler.ProcessData(
-      RawMessage(uid_unknown, 0, NULL, 0), &result_code, &malformed_count);
+      RawMessage(uid_unknown, 0, NULL, 0), result_code, &malformed_count);
   EXPECT_EQ(RESULT_FAIL, result_code);
   EXPECT_EQ(malformed_count, 0u);
   EXPECT_TRUE(actual_frames.empty());
@@ -126,7 +126,7 @@ TEST_F(IncomingDataHandlerTest, DataForUnknownConnection) {
   AppendPacketToTMData(ProtocolPacket());
   actual_frames = data_handler.ProcessData(
       RawMessage(uid_unknown, 0, tm_data.data(), tm_data.size()),
-      &result_code,
+      result_code,
       &malformed_count);
   EXPECT_EQ(RESULT_FAIL, result_code);
   EXPECT_EQ(malformed_count, 0u);
@@ -1034,6 +1034,24 @@ TEST_F(
   EXPECT_EQ(RESULT_MALFORMED_OCCURS, result_code);
   EXPECT_EQ(1u, malformed_occurs);
   EXPECT_EQ(1u, actual_frames.size());
+}
+
+TEST_F(IncomingDataHandlerTest,
+       ProcessData_ProtocolVersionBiggerThanSupported_MalformedOccurs) {
+  header_validator.set_max_protocol_version_supported(PROTOCOL_VERSION_2);
+  const ProtocolPacket packet(uid1,
+                              PROTOCOL_VERSION_3,
+                              PROTECTION_OFF,
+                              FRAME_TYPE_CONTROL,
+                              kControl,
+                              FRAME_DATA_SINGLE,
+                              some_session_id,
+                              0u,
+                              some_message_id,
+                              NULL);
+  const auto raw_message_ptr = packet.serializePacket();
+  data_handler.ProcessData(*raw_message_ptr, result_code, &malformed_occurs);
+  EXPECT_EQ(RESULT_CODE::RESULT_MALFORMED_OCCURS, result_code);
 }
 
 // TODO(EZamakhov): add tests for handling 2+ connection data

@@ -103,6 +103,8 @@ ProtocolHandlerImpl::ProtocolHandlerImpl(
       get_settings().maximum_audio_payload_size());
   protocol_header_validator_.set_max_video_payload_size(
       get_settings().maximum_video_payload_size());
+  protocol_header_validator_.set_max_protocol_version_supported(
+      get_settings().max_supported_protocol_version());
   incoming_data_handler_.set_validator(&protocol_header_validator_);
 
   const size_t& message_frequency_count =
@@ -957,17 +959,17 @@ void ProtocolHandlerImpl::OnTMMessageReceived(const RawMessagePtr tm_message) {
   size_t malformed_occurs = 0u;
   const ProtocolFramePtrList protocol_frames =
       incoming_data_handler_.ProcessData(
-          *tm_message, &result, &malformed_occurs);
-  LOG4CXX_DEBUG(logger_, "Proccessed " << protocol_frames.size() << " frames");
+          *tm_message, result, &malformed_occurs);
+  LOG4CXX_DEBUG(logger_, "Processed " << protocol_frames.size() << " frames");
   if (result != RESULT_OK) {
     if (result == RESULT_MALFORMED_OCCURS) {
       LOG4CXX_WARN(logger_,
                    "Malformed message occurs, connection id "
                        << connection_key);
       if (!get_settings().malformed_message_filtering()) {
-        LOG4CXX_DEBUG(logger_, "Malformed message filterign disabled");
+        LOG4CXX_DEBUG(logger_, "Malformed message filtering disabled");
         session_observer_.OnMalformedMessageCallback(connection_key);
-        // For tracking only malformed occurrence check outpute
+        // For tracking only malformed occurrence check output
       } else {
         if (malformed_occurs > 0) {
           TrackMalformedMessage(connection_key, malformed_occurs);

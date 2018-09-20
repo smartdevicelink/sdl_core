@@ -103,12 +103,14 @@ class ProtocolPacket {
     void set_max_rpc_payload_size(const size_t max_payload_size);
     void set_max_audio_payload_size(const size_t max_payload_size);
     void set_max_video_payload_size(const size_t max_payload_size);
+    void set_max_protocol_version_supported(const uint16_t max_payload_size);
 
     size_t max_payload_size() const;
     size_t max_control_payload_size() const;
     size_t max_rpc_payload_size() const;
     size_t max_audio_payload_size() const;
     size_t max_video_payload_size() const;
+    uint16_t max_protocol_version_supported() const;
 
     size_t max_payload_size_by_service_type(const ServiceType type) const;
 
@@ -123,6 +125,7 @@ class ProtocolPacket {
     size_t max_rpc_payload_size_;
     size_t max_audio_payload_size_;
     size_t max_video_payload_size_;
+    uint16_t max_protocol_version_supported_;
   };
 
   /**

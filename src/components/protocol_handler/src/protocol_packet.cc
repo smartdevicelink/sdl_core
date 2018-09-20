@@ -137,7 +137,8 @@ ProtocolPacket::ProtocolHeaderValidator::ProtocolHeaderValidator()
     , max_control_payload_size_(0)
     , max_rpc_payload_size_(0)
     , max_audio_payload_size_(0)
-    , max_video_payload_size_(0) {}
+    , max_video_payload_size_(0)
+    , max_protocol_version_supported_(PROTOCOL_VERSION_MAX) {}
 
 void ProtocolPacket::ProtocolHeaderValidator::set_max_payload_size(
     const size_t max_payload_size) {
@@ -173,6 +174,15 @@ void ProtocolPacket::ProtocolHeaderValidator::set_max_video_payload_size(
   max_video_payload_size_ = max_payload_size;
 }
 
+void ProtocolPacket::ProtocolHeaderValidator::
+    set_max_protocol_version_supported(
+        const uint16_t max_protocol_version_supported) {
+  LOG4CXX_DEBUG(logger_,
+                "New maximum protocol version supported is "
+                    << max_protocol_version_supported);
+  max_protocol_version_supported_ = max_protocol_version_supported;
+}
+
 size_t ProtocolPacket::ProtocolHeaderValidator::max_payload_size() const {
   return max_payload_size_;
 }
@@ -192,6 +202,12 @@ size_t ProtocolPacket::ProtocolHeaderValidator::max_audio_payload_size() const {
 
 size_t ProtocolPacket::ProtocolHeaderValidator::max_video_payload_size() const {
   return max_video_payload_size_;
+}
+
+uint16_t
+ProtocolPacket::ProtocolHeaderValidator::max_protocol_version_supported()
+    const {
+  return max_protocol_version_supported_;
 }
 
 size_t
@@ -233,6 +249,9 @@ RESULT_CODE ProtocolPacket::ProtocolHeaderValidator::validate(
   // on used protocol version and service type
   size_t payload_size = MAXIMUM_FRAME_DATA_V2_SIZE;
   // Protocol version shall be from 1 to 4
+  if (max_protocol_version_supported_ < header.version) {
+    return RESULT_FAIL;
+  }
   switch (header.version) {
     case PROTOCOL_VERSION_1:
     case PROTOCOL_VERSION_2:

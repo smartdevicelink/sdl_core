@@ -174,6 +174,8 @@ class ProtocolHandlerImplTest : public ::testing::Test {
         .WillByDefault(Return(malformd_max_messages));
     ON_CALL(protocol_handler_settings_mock, multiframe_waiting_timeout())
         .WillByDefault(Return(multiframe_waiting_timeout));
+    ON_CALL(protocol_handler_settings_mock, max_supported_protocol_version())
+        .WillByDefault(Return(PROTOCOL_VERSION_MAX));
 #ifdef ENABLE_SECURITY
     ON_CALL(protocol_handler_settings_mock, force_protected_service())
         .WillByDefault(ReturnRefOfCopy(force_protected_services));
