@@ -174,7 +174,8 @@ void FilterInvalidRPCParameters(policy_table::RpcParameters& rpc_parameters) {
   rpc_parameters.hmi_levels.swap(valid_hmi_levels);
 
   policy_table::Parameters valid_params;
-  for (const auto& param : *(rpc_parameters.parameters)) {
+  const policy_table::Parameters& params = *(rpc_parameters.parameters);
+  for (const auto& param : params) {
     if (param.is_valid()) {
       valid_params.push_back(param);
     }
@@ -184,8 +185,7 @@ void FilterInvalidRPCParameters(policy_table::RpcParameters& rpc_parameters) {
 
 /**
  * @brief FilterInvalidPriorityValues filter notification priorities that are
- * not
- * present in schema
+ * not present in schema
  * @param notifications priorities to filter
  */
 void FilterInvalidPriorityValues(
