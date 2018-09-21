@@ -271,6 +271,51 @@ std::string PolicyManagerImpl::GetLockScreenIconUrl() const {
   return cache_->GetLockScreenIconUrl();
 }
 
+/**
+ * @brief FilterInvalidFunctions filter functions that are absent in schema
+ * @param rpcs list of functions to filter
+ */
+void FilterInvalidFunctions(policy_table::Rpc& rpcs) {
+  policy_table::Rpc valid_rpcs;
+  for (const auto& rpc : rpcs) {
+    const std::string& rpc_name = rpc.first;
+    policy_table::FunctionID function_id;
+    if (policy_table::EnumFromJsonString(rpc_name, &function_id)) {
+      valid_rpcs.insert(rpc);
+    }
+  }
+  rpcs.swap(valid_rpcs);
+}
+
+/**
+ * @brief FilterInvalidParameters filter parameters that not present in schema
+ * @param rpc_parameters parameters to filter
+ */
+void FilterInvalidParameters(policy_table::RpcParameters& rpc_parameters) {
+  policy_table::Parameters valid_params;
+  for (auto& param : *(rpc_parameters.parameters)) {
+    if (param.is_valid()) {
+      valid_params.push_back(param);
+    }
+  }
+  rpc_parameters.parameters->swap(valid_params);
+}
+
+/**
+ * @brief FilterPolicyTable filter values that not present in schema
+ * @param pt policy table to filter
+ */
+void FilterPolicyTable(policy_table::PolicyTable& pt) {
+  for (auto& group : pt.functional_groupings) {
+    policy_table::Rpc& rpcs = group.second.rpcs;
+    FilterInvalidFunctions(rpcs);
+
+    for (auto& func : rpcs) {
+      FilterInvalidParameters(func.second);
+    }
+  }
+}
+
 bool PolicyManagerImpl::LoadPT(const std::string& file,
                                const BinaryMessage& pt_content) {
   LOG4CXX_INFO(logger_, "LoadPT of size " << pt_content.size());
@@ -287,7 +332,7 @@ bool PolicyManagerImpl::LoadPT(const std::string& file,
   }
 
   file_system::DeleteFile(file);
-
+  FilterPolicyTable(pt_update->policy_table);
   if (!IsPTValid(pt_update, policy_table::PT_UPDATE)) {
     wrong_ptu_update_received_ = true;
     update_status_manager_.OnWrongUpdateReceived();
