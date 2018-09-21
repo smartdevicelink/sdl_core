@@ -192,7 +192,9 @@ class MockHMICapabilities : public ::application_manager::HMICapabilities {
       set_seat_location_capability,
       void(const smart_objects::SmartObject& seat_location_capability));
 
-  MOCK_METHOD1(Init, void(resumption::LastState* last_state));
+  MOCK_METHOD1(
+      Init,
+      void(std::shared_ptr<resumption::LastStateWrapper> last_state_wrapper));
 
   MOCK_CONST_METHOD0(ccpu_version, const std::string&());
   MOCK_METHOD1(set_ccpu_version, void(const std::string& ccpu_version));

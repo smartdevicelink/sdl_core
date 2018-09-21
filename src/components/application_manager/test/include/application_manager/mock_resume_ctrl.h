@@ -31,10 +31,10 @@
  */
 #ifndef SRC_COMPONENTS_APPLICATION_MANAGER_TEST_INCLUDE_APPLICATION_MANAGER_MOCK_RESUME_CTRL_H_
 #define SRC_COMPONENTS_APPLICATION_MANAGER_TEST_INCLUDE_APPLICATION_MANAGER_MOCK_RESUME_CTRL_H_
-#include "application_manager/application.h"
-#include "application_manager/resumption/resume_ctrl.h"
 #include "gmock/gmock.h"
-#include "resumption/last_state.h"
+#include "application_manager/resumption/resume_ctrl.h"
+#include "application_manager/application.h"
+#include "resumption/last_state_wrapper.h"
 
 namespace test {
 namespace components {
@@ -82,7 +82,8 @@ class MockResumeCtrl : public resumption::ResumeCtrl {
   MOCK_METHOD1(OnAppActivated,
                void(app_mngr::ApplicationSharedPtr application));
   MOCK_METHOD1(RemoveFromResumption, void(uint32_t app_id));
-  MOCK_METHOD1(Init, bool(resumption::LastState& last_state));
+  MOCK_METHOD1(Init,
+               bool(std::shared_ptr<resumption::LastStateWrapper> last_state));
   MOCK_METHOD2(OnAppRegistrationStart,
                void(const std::string& policy_app_id,
                     const std::string& device_id));

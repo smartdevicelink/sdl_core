@@ -41,6 +41,7 @@
 #include "transport_manager/mock_transport_manager_listener.h"
 #include "transport_manager/mock_transport_manager_settings.h"
 #include "transport_manager/transport_adapter/mock_transport_adapter.h"
+#include "resumption/last_state_wrapper.h"
 
 #include "utils/test_async_waiter.h"
 
@@ -79,9 +80,11 @@ class TransportManagerImplTest : public ::testing::Test {
             device_handle_, mac_address_, device_name_, connection_type_) {}
 
   void SetUp() OVERRIDE {
-    resumption::LastStateImpl last_state_("app_storage_folder",
-                                          "app_info_storage");
-    tm_.Init(last_state_);
+    std::shared_ptr<resumption::LastStateWrapper> wrapper =
+        std::make_shared<resumption::LastStateWrapper>(
+            std::make_shared<resumption::LastStateImpl>("app_storage_folder",
+                                                        "app_info_storage"));
+    tm_.Init(wrapper);
     mock_adapter_ = new MockTransportAdapter();
     tm_listener_ = std::make_shared<MockTransportManagerListener>();
 

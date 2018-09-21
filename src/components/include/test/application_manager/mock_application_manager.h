@@ -33,9 +33,9 @@
 #ifndef SRC_COMPONENTS_INCLUDE_TEST_APPLICATION_MANAGER_MOCK_APPLICATION_MANAGER_H_
 #define SRC_COMPONENTS_INCLUDE_TEST_APPLICATION_MANAGER_MOCK_APPLICATION_MANAGER_H_
 
-#include <memory>
 #include <string>
 #include <vector>
+#include <memory>
 
 #include "gmock/gmock.h"
 
@@ -55,7 +55,7 @@
 #include "application_manager/state_controller.h"
 #include "interfaces/HMI_API.h"
 #include "interfaces/MOBILE_API.h"
-#include "resumption/last_state.h"
+#include "resumption/last_state_wrapper.h"
 #include "smart_objects/smart_object.h"
 
 namespace test {
@@ -66,7 +66,7 @@ using application_manager::plugin_manager::RPCPluginManager;
 class MockApplicationManager : public application_manager::ApplicationManager {
  public:
   MOCK_METHOD2(Init,
-               bool(resumption::LastState& last_state,
+               bool(std::shared_ptr<resumption::LastStateWrapper> last_state,
                     media_manager::MediaManager* media_manager));
   MOCK_METHOD0(Stop, bool());
   MOCK_METHOD1(set_hmi_message_handler,

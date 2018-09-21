@@ -68,7 +68,9 @@ using namespace application_manager;
 class HMICapabilitiesTest : public ::testing::Test {
  protected:
   HMICapabilitiesTest()
-      : last_state_("app_storage_folder", "app_info_data")
+      : last_state_wrapper_(std::make_shared<resumption::LastStateWrapper>(
+            std::make_shared<resumption::LastStateImpl>("app_storage_folder",
+                                                        "app_info_storage")))
       , file_name_("hmi_capabilities.json") {}
   virtual void SetUp() OVERRIDE {
     EXPECT_CALL(app_mngr_, event_dispatcher())
@@ -84,7 +86,7 @@ class HMICapabilitiesTest : public ::testing::Test {
         .WillOnce(Return(false));
     hmi_capabilities_test =
         std::make_shared<HMICapabilitiesForTesting>(app_mngr_);
-    hmi_capabilities_test->Init(&last_state_);
+    hmi_capabilities_test->Init(last_state_wrapper_);
   }
 
   void TearDown() OVERRIDE {
@@ -99,7 +101,7 @@ class HMICapabilitiesTest : public ::testing::Test {
   void SetCooperating();
   MockApplicationManager app_mngr_;
   event_engine_test::MockEventDispatcher mock_event_dispatcher;
-  resumption::LastStateImpl last_state_;
+  std::shared_ptr<resumption::LastStateWrapper> last_state_wrapper_;
   MockApplicationManagerSettings mock_application_manager_settings_;
   std::shared_ptr<HMICapabilitiesForTesting> hmi_capabilities_test;
   const std::string file_name_;
@@ -514,7 +516,7 @@ TEST_F(HMICapabilitiesTest,
 
   std::shared_ptr<HMICapabilitiesForTesting> hmi_capabilities =
       std::make_shared<HMICapabilitiesForTesting>(mock_app_mngr);
-  hmi_capabilities->Init(&last_state_);
+  hmi_capabilities->Init(last_state_wrapper_);
 
   // Check system capabilities; only phone capability is available
   EXPECT_FALSE(hmi_capabilities->navigation_supported());
@@ -554,7 +556,7 @@ TEST_F(HMICapabilitiesTest,
 
   std::shared_ptr<HMICapabilitiesForTesting> hmi_capabilities =
       std::make_shared<HMICapabilitiesForTesting>(mock_app_mngr);
-  hmi_capabilities->Init(&last_state_);
+  hmi_capabilities->Init(last_state_wrapper_);
 
   // Check system capabilities; only navigation capability is valid, the other
   // two are empty

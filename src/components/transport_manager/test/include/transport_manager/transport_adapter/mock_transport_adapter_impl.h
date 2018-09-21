@@ -58,12 +58,12 @@ class MockTransportAdapterImpl : public TransportAdapterImpl {
       DeviceScanner* device_scanner,
       ServerConnectionFactory* server_connection_factory,
       ClientConnectionListener* client_connection_listener,
-      resumption::LastState& last_state,
+      std::shared_ptr<resumption::LastStateWrapper> last_state_wrapper,
       const transport_manager::TransportManagerSettings& settings)
       : TransportAdapterImpl(device_scanner,
                              server_connection_factory,
                              client_connection_listener,
-                             last_state,
+                             last_state_wrapper,
                              settings) {}
 
   ConnectionSPtr FindStatedConnection(const DeviceUID& device_handle,
