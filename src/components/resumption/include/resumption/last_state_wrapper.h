@@ -30,45 +30,39 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_RESUMPTION_INCLUDE_RESUMPTION_LAST_STATE_H_
-#define SRC_COMPONENTS_RESUMPTION_INCLUDE_RESUMPTION_LAST_STATE_H_
+#ifndef SRC_COMPONENTS_RESUMPTION_INCLUDE_RESUMPTION_LAST_STATE_WRAPPER_H_
+#define SRC_COMPONENTS_RESUMPTION_INCLUDE_RESUMPTION_LAST_STATE_WRAPPER_H_
 
-#include "json/json.h"
+#include <memory>
+
+#include "resumption/last_state_wrapper.h"
+#include "utils/lock.h"
+#include "utils/macro.h"
+#include "utils/mutable_data_accessor.h"
 
 namespace resumption {
 
-class LastState {
+typedef DataAccessor<LastState> LastStateAccessor;
+
+class LastStateWrapper {
  public:
   /**
-   * @brief Destructor
+   * @brief Constructor
    */
-  virtual ~LastState() {}
+  explicit LastStateWrapper(std::shared_ptr<LastState> last_state);
 
   /**
-    * @brief SaveToFileSystem
-    * Saving dictionary to filesystem
-    */
-  virtual void SaveToFileSystem() = 0;
-
-  /**
-   * @brief RemoveFromFileSystem
-   * Remove dictionary from filesystem
+   * @brief Getter for providing exclusive access to LastState instance using
+   * provided lock
+   * @return accessor with ability to access to LastState instance
    */
-  virtual void RemoveFromFileSystem() = 0;
+  LastStateAccessor get_accessor() const;
 
-  /**
-   * @brief dictionary Gets internal dictionary
-   * @return Copy of internal dictionary json value
-   */
-  virtual Json::Value dictionary() const = 0;
-
-  /**
-   * @brief set_dictionary Resets internal dictionary
-   * @param dictionary New dictionary json value to be set
-   */
-  virtual void set_dictionary(const Json::Value& dictionary) = 0;
+ private:
+  std::shared_ptr<LastState> last_state_;
+  mutable std::shared_ptr<sync_primitives::Lock> lock_;
 };
 
 }  // namespace resumption
 
-#endif  // SRC_COMPONENTS_RESUMPTION_INCLUDE_RESUMPTION_LAST_STATE_H_
+#endif  // SRC_COMPONENTS_RESUMPTION_INCLUDE_RESUMPTION_LAST_STATE_WRAPPER_H_

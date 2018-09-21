@@ -91,7 +91,8 @@ bool ResumeCtrlImpl::get_resumption_active() const {
 }
 #endif  // BUILD_TESTS
 
-bool ResumeCtrlImpl::Init(resumption::LastState& last_state) {
+bool ResumeCtrlImpl::Init(
+    std::shared_ptr<resumption::LastStateWrapper> last_state_wrapper) {
   bool use_db = application_manager_.get_settings().use_db_for_resumption();
   if (use_db) {
     resumption_storage_.reset(
@@ -120,7 +121,7 @@ bool ResumeCtrlImpl::Init(resumption::LastState& last_state) {
     }
   } else {
     resumption_storage_.reset(
-        new ResumptionDataJson(last_state, application_manager_));
+        new ResumptionDataJson(last_state_wrapper, application_manager_));
     if (!resumption_storage_->Init()) {
       LOG4CXX_DEBUG(logger_, "Resumption storage initialisation failed");
       return false;

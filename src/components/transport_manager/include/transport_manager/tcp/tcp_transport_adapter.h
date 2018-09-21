@@ -49,9 +49,10 @@ class TcpTransportAdapter : public TransportAdapterImpl {
   /**
    * @brief Constructor.
    */
-  explicit TcpTransportAdapter(uint16_t port,
-                               resumption::LastState& last_state,
-                               const TransportManagerSettings& settings);
+  explicit TcpTransportAdapter(
+      uint16_t port,
+      std::shared_ptr<resumption::LastStateWrapper> last_state_wrapper,
+      const TransportManagerSettings& settings);
 
   /**
    * @brief Destructor.

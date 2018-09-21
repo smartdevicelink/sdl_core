@@ -581,9 +581,10 @@ int TransportManagerImpl::SearchDevices() {
   return transport_adapter_search;
 }
 
-int TransportManagerImpl::Init(resumption::LastState& last_state) {
+int TransportManagerImpl::Init(
+    std::shared_ptr<resumption::LastStateWrapper> last_state_wrapper) {
   // Last state requred to initialize Transport adapters
-  UNUSED(last_state);
+  UNUSED(last_state_wrapper);
   LOG4CXX_TRACE(logger_, "enter");
   is_initialized_ = true;
   LOG4CXX_TRACE(logger_, "exit with E_SUCCESS");

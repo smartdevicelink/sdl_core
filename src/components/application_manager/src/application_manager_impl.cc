@@ -2329,8 +2329,9 @@ void ApplicationManagerImpl::RemoveHMIFakeParameters(
   (*message)[jhs::S_PARAMS][jhs::S_FUNCTION_ID] = mobile_function_id;
 }
 
-bool ApplicationManagerImpl::Init(resumption::LastState& last_state,
-                                  media_manager::MediaManager* media_manager) {
+bool ApplicationManagerImpl::Init(
+    std::shared_ptr<resumption::LastStateWrapper> last_state_wrapper,
+    media_manager::MediaManager* media_manager) {
   LOG4CXX_TRACE(logger_, "Init application manager");
   plugin_manager_.reset(new plugin_manager::RPCPluginManagerImpl(
       *this, *rpc_service_, *hmi_capabilities_, *policy_handler_, last_state));
@@ -2343,11 +2344,11 @@ bool ApplicationManagerImpl::Init(resumption::LastState& last_state,
       !IsReadWriteAllowed(app_storage_folder, TYPE_STORAGE)) {
     return false;
   }
-  if (!resume_controller().Init(last_state)) {
+  if (!resume_controller().Init(last_state_wrapper)) {
     LOG4CXX_ERROR(logger_, "Problem with initialization of resume controller");
     return false;
   }
-  hmi_capabilities_->Init(&last_state);
+  hmi_capabilities_->Init(last_state_wrapper);
 
   if (!(file_system::IsWritingAllowed(app_storage_folder) &&
         file_system::IsReadingAllowed(app_storage_folder))) {
@@ -2389,7 +2390,7 @@ bool ApplicationManagerImpl::Init(resumption::LastState& last_state,
     app_launch_dto_.reset(new app_launch::AppLaunchDataDB(settings_));
   } else {
     app_launch_dto_.reset(
-        new app_launch::AppLaunchDataJson(settings_, last_state));
+        new app_launch::AppLaunchDataJson(settings_, last_state_wrapper));
   }
   app_launch_ctrl_.reset(new app_launch::AppLaunchCtrlImpl(
       *app_launch_dto_.get(), *this, settings_));

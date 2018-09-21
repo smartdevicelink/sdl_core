@@ -33,21 +33,21 @@
 #ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_ADAPTER_TRANSPORT_ADAPTER_IMPL_H_
 #define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_ADAPTER_TRANSPORT_ADAPTER_IMPL_H_
 
-#include <map>
-#include <memory>
 #include <queue>
 #include <set>
+#include <map>
+#include <memory>
 #include <string>
 
 #include "utils/lock.h"
 #include "utils/rwlock.h"
 #include "utils/timer.h"
 
-#include "resumption/last_state.h"
 #include "transport_manager/transport_adapter/connection.h"
 #include "transport_manager/transport_adapter/transport_adapter.h"
 #include "transport_manager/transport_adapter/transport_adapter_controller.h"
 #include "transport_manager/transport_manager_settings.h"
+#include "resumption/last_state_wrapper.h"
 
 #ifdef TELEMETRY_MONITOR
 #include "transport_manager/telemetry_observer.h"
@@ -79,11 +79,12 @@ class TransportAdapterImpl : public TransportAdapter,
    * @param client_connection_listener Pointer to the listener of client
    *connection.
    **/
-  TransportAdapterImpl(DeviceScanner* device_scanner,
-                       ServerConnectionFactory* server_connection_factory,
-                       ClientConnectionListener* client_connection_listener,
-                       resumption::LastState& last_state,
-                       const TransportManagerSettings& settings);
+  TransportAdapterImpl(
+      DeviceScanner* device_scanner,
+      ServerConnectionFactory* server_connection_factory,
+      ClientConnectionListener* client_connection_listener,
+      std::shared_ptr<resumption::LastStateWrapper> last_state_wrapper,
+      const TransportManagerSettings& settings);
 
   /**
    * @brief Destructor.
@@ -662,7 +663,7 @@ class TransportAdapterImpl : public TransportAdapter,
 #endif  // TELEMETRY_MONITOR
 
   resumption::LastState& last_state() const {
-    return last_state_;
+    return last_state_wrapper_->get_accessor().GetMutableData();
   }
 
   /**
@@ -680,7 +681,7 @@ class TransportAdapterImpl : public TransportAdapter,
    */
   ClientConnectionListener* client_connection_listener_;
 
-  resumption::LastState& last_state_;
+  std::shared_ptr<resumption::LastStateWrapper> last_state_wrapper_;
   const TransportManagerSettings& settings_;
 };
 

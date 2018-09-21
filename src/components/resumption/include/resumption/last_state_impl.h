@@ -33,7 +33,10 @@
 #ifndef SRC_COMPONENTS_RESUMPTION_INCLUDE_RESUMPTION_LAST_STATE_IMPL_H_
 #define SRC_COMPONENTS_RESUMPTION_INCLUDE_RESUMPTION_LAST_STATE_IMPL_H_
 
+#include <string>
+
 #include "resumption/last_state.h"
+#include "utils/lock.h"
 #include "utils/macro.h"
 
 namespace resumption {
@@ -45,35 +48,43 @@ namespace resumption {
 class LastStateImpl : public LastState {
  public:
   /**
-   * @brief Constructor
-   */
+     * @brief Constructor
+     */
   LastStateImpl(const std::string& app_storage_folder,
                 const std::string& app_info_storage);
-
   /**
-   * @brief Destructor
-   */
+     * @brief Destructor
+     */
   ~LastStateImpl();
-
   /**
-   * @brief Saving dictionary to filesystem
-   */
-  void SaveStateToFileSystem() OVERRIDE;
-
+     * @brief Saving dictionary to filesystem
+     */
+  void SaveToFileSystem() OVERRIDE;
   /**
-   * @brief Get reference to dictionary
-   */
-  Json::Value& get_dictionary() OVERRIDE;
+     * @brief Remove dictionary from filesystem
+     */
+  void RemoveFromFileSystem() OVERRIDE;
+  /**
+     * @brief Get reference to dictionary
+     */
+  Json::Value dictionary() const OVERRIDE;
+  /**
+     * @brief Resets internal dictionary
+     * @param dictionary New dictionary json value to be set
+     */
+  void set_dictionary(const Json::Value& dictionary) OVERRIDE;
 
  private:
-  const std::string app_storage_folder_;
-  const std::string app_info_storage_;
-  Json::Value dictionary_;
-
   /**
-   * @brief Load dictionary from filesystem
-   */
-  void LoadStateFromFileSystem();
+     * @brief Load dictionary from filesystem
+     */
+  void LoadFromFileSystem();
+
+  Json::Value dictionary_;
+  mutable sync_primitives::Lock dictionary_lock_;
+
+  std::string app_storage_folder_;
+  std::string app_info_storage_;
 
   DISALLOW_COPY_AND_ASSIGN(LastStateImpl);
 };

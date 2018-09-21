@@ -46,9 +46,10 @@ namespace formatters = ns_smart_device_link::ns_json_handler::formatters;
 CREATE_LOGGERPTR_GLOBAL(logger_, "Resumption")
 
 ResumptionDataJson::ResumptionDataJson(
-    LastState& last_state,
+    std::shared_ptr<resumption::LastStateWrapper> last_state_wrapper,
     const application_manager::ApplicationManager& application_manager)
-    : ResumptionData(application_manager), last_state_(last_state) {}
+    : ResumptionData(application_manager)
+    , last_state_wrapper_(last_state_wrapper) {}
 
 void ResumptionDataJson::SaveApplication(
     app_mngr::ApplicationSharedPtr application) {
@@ -71,7 +72,10 @@ void ResumptionDataJson::SaveApplication(
 
   sync_primitives::AutoLock autolock(resumption_lock_);
   Json::Value tmp;
-  Json::Value& json_app = GetFromSavedOrAppend(policy_app_id, device_mac);
+  resumption::LastStateAccessor accessor = last_state_wrapper_->get_accessor();
+  Json::Value dictionary = accessor.GetData().dictionary();
+  Json::Value& json_app =
+      GetFromSavedOrAppend(policy_app_id, device_mac, dictionary);
 
   json_app[strings::device_id] = device_mac;
   json_app[strings::app_id] = policy_app_id;
@@ -106,6 +110,7 @@ void ResumptionDataJson::SaveApplication(
   json_app[strings::time_stamp] = time_stamp;
   json_app[strings::subscribed_for_way_points] = is_subscribed_for_way_points;
 
+  accessor.GetMutableData().set_dictionary(dictionary);
   LOG4CXX_DEBUG(logger_, "SaveApplication : " << json_app.toStyledString());
 }
 
@@ -113,9 +118,11 @@ bool ResumptionDataJson::IsHMIApplicationIdExist(uint32_t hmi_app_id) const {
   using namespace app_mngr;
   LOG4CXX_AUTO_TRACE(logger_);
   sync_primitives::AutoLock autolock(resumption_lock_);
-  for (Json::Value::iterator it = GetSavedApplications().begin();
-       it != GetSavedApplications().end();
-       ++it) {
+  resumption::LastStateAccessor accessor = last_state_wrapper_->get_accessor();
+  Json::Value dictionary = accessor.GetData().dictionary();
+  const Json::Value& saved_apps = GetSavedApplications(dictionary);
+
+  for (auto it = saved_apps.begin(); it != saved_apps.end(); ++it) {
     if ((*it).isMember(strings::hmi_app_id)) {
       if ((*it)[strings::hmi_app_id].asUInt() == hmi_app_id) {
         return true;
@@ -137,8 +144,9 @@ uint32_t ResumptionDataJson::GetHMIApplicationID(
     LOG4CXX_WARN(logger_, "Application not saved");
     return hmi_app_id;
   }
-
-  const Json::Value& json_app = GetSavedApplications()[idx];
+  resumption::LastStateAccessor accessor = last_state_wrapper_->get_accessor();
+  Json::Value dictionary = accessor.GetData().dictionary();
+  const Json::Value& json_app = GetSavedApplications(dictionary)[idx];
   if (json_app.isMember(strings::app_id) &&
       json_app.isMember(strings::device_id)) {
     hmi_app_id = json_app[strings::hmi_app_id].asUInt();
@@ -152,23 +160,27 @@ void ResumptionDataJson::IncrementIgnOffCount() {
   LOG4CXX_AUTO_TRACE(logger_);
   sync_primitives::AutoLock autolock(resumption_lock_);
   Json::Value to_save = Json::arrayValue;
-  for (Json::Value::iterator it = GetSavedApplications().begin();
-       it != GetSavedApplications().end();
-       ++it) {
-    if ((*it).isMember(strings::ign_off_count)) {
-      Json::Value& ign_off_count = (*it)[strings::ign_off_count];
+  Json::Value dictionary;
+  resumption::LastStateAccessor accessor = last_state_wrapper_->get_accessor();
+  dictionary = accessor.GetData().dictionary();
+  Json::Value& saved_apps = GetSavedApplications(dictionary);
+  for (auto json_app = saved_apps.begin(); json_app != saved_apps.end();
+       ++json_app) {
+    if ((*json_app).isMember(strings::ign_off_count)) {
+      Json::Value& ign_off_count = (*json_app)[strings::ign_off_count];
       const uint32_t counter_value = ign_off_count.asUInt();
       ign_off_count = counter_value + 1;
     } else {
       LOG4CXX_WARN(logger_, "Unknown key among saved applications");
-      Json::Value& ign_off_count = (*it)[strings::ign_off_count];
+      Json::Value& ign_off_count = (*json_app)[strings::ign_off_count];
       ign_off_count = 1;
     }
-    to_save.append(*it);
+    to_save.append(*json_app);
   }
-  SetSavedApplication(to_save);
-  SetLastIgnOffTime(time(NULL));
-  LOG4CXX_DEBUG(logger_, GetResumptionData().toStyledString());
+  SetSavedApplication(to_save, dictionary);
+  SetLastIgnOffTime(time(NULL), dictionary);
+  accessor.GetMutableData().set_dictionary(dictionary);
+  LOG4CXX_DEBUG(logger_, GetResumptionData(dictionary).toStyledString());
 }
 
 void ResumptionDataJson::DecrementIgnOffCount() {
@@ -176,8 +188,10 @@ void ResumptionDataJson::DecrementIgnOffCount() {
   LOG4CXX_AUTO_TRACE(logger_);
   sync_primitives::AutoLock autolock(resumption_lock_);
 
-  for (Json::Value::iterator it = GetSavedApplications().begin();
-       it != GetSavedApplications().end();
+  resumption::LastStateAccessor accessor = last_state_wrapper_->get_accessor();
+  Json::Value dictionary = accessor.GetData().dictionary();
+  Json::Value& saved_apps = GetSavedApplications(dictionary);
+  for (Json::Value::iterator it = saved_apps.begin(); it != saved_apps.end();
        ++it) {
     if ((*it).isMember(strings::ign_off_count)) {
       const uint32_t ign_off_count = (*it)[strings::ign_off_count].asUInt();
@@ -191,6 +205,7 @@ void ResumptionDataJson::DecrementIgnOffCount() {
       (*it)[strings::ign_off_count] = 0;
     }
   }
+  accessor.GetMutableData().set_dictionary(dictionary);
 }
 
 bool ResumptionDataJson::GetHashId(const std::string& policy_app_id,
@@ -205,7 +220,9 @@ bool ResumptionDataJson::GetHashId(const std::string& policy_app_id,
     return false;
   }
 
-  const Json::Value& json_app = GetSavedApplications()[idx];
+  resumption::LastStateAccessor accessor = last_state_wrapper_->get_accessor();
+  Json::Value dictionary = accessor.GetData().dictionary();
+  const Json::Value& json_app = GetSavedApplications(dictionary)[idx];
   LOG4CXX_DEBUG(logger_,
                 "Saved_application_data: " << json_app.toStyledString());
   if (json_app.isMember(strings::hash_id) &&
@@ -228,7 +245,9 @@ bool ResumptionDataJson::GetSavedApplication(
   if (-1 == idx) {
     return false;
   }
-  const Json::Value& json_saved_app = GetSavedApplications()[idx];
+  resumption::LastStateAccessor accessor = last_state_wrapper_->get_accessor();
+  Json::Value dictionary = accessor.GetData().dictionary();
+  const Json::Value& json_saved_app = GetSavedApplications(dictionary)[idx];
   formatters::CFormatterJsonBase::jsonValueToObj(json_saved_app, saved_app);
 
   return true;
@@ -241,8 +260,10 @@ bool ResumptionDataJson::RemoveApplicationFromSaved(
   sync_primitives::AutoLock autolock(resumption_lock_);
   bool result = false;
   std::vector<Json::Value> temp;
-  for (Json::Value::iterator it = GetSavedApplications().begin();
-       it != GetSavedApplications().end();
+  resumption::LastStateAccessor accessor = last_state_wrapper_->get_accessor();
+  Json::Value dictionary = accessor.GetData().dictionary();
+  Json::Value& saved_apps = GetSavedApplications(dictionary);
+  for (Json::Value::iterator it = saved_apps.begin(); it != saved_apps.end();
        ++it) {
     if ((*it).isMember(strings::app_id) && (*it).isMember(strings::device_id)) {
       const std::string& saved_policy_app_id =
@@ -259,15 +280,17 @@ bool ResumptionDataJson::RemoveApplicationFromSaved(
 
   if (false == result) {
     LOG4CXX_TRACE(logger_, "EXIT result: " << (result ? "true" : "false"));
+    accessor.GetMutableData().set_dictionary(dictionary);
     return result;
   }
 
-  GetSavedApplications().clear();
+  GetSavedApplications(dictionary).clear();
   for (std::vector<Json::Value>::iterator it = temp.begin(); it != temp.end();
        ++it) {
-    GetSavedApplications().append((*it));
+    GetSavedApplications(dictionary).append((*it));
   }
   LOG4CXX_TRACE(logger_, "EXIT result: " << (result ? "true" : "false"));
+  accessor.GetMutableData().set_dictionary(dictionary);
   return result;
 }
 
@@ -275,9 +298,12 @@ uint32_t ResumptionDataJson::GetIgnOffTime() const {
   using namespace app_mngr;
   LOG4CXX_AUTO_TRACE(logger_);
   sync_primitives::AutoLock autolock(resumption_lock_);
-  Json::Value& resumption = GetResumptionData();
+  resumption::LastStateAccessor accessor = last_state_wrapper_->get_accessor();
+  Json::Value dictionary = accessor.GetData().dictionary();
+  Json::Value& resumption = GetResumptionData(dictionary);
   if (!resumption.isMember(strings::last_ign_off_time)) {
     resumption[strings::last_ign_off_time] = 0;
+    accessor.GetMutableData().set_dictionary(dictionary);
     LOG4CXX_WARN(logger_, "last_save_time section is missed");
   }
   return resumption[strings::last_ign_off_time].asUInt();
@@ -287,7 +313,9 @@ uint32_t ResumptionDataJson::GetGlobalIgnOnCounter() const {
   using namespace app_mngr;
   LOG4CXX_AUTO_TRACE(logger_);
   sync_primitives::AutoLock autolock(resumption_lock_);
-  Json::Value& resumption = GetResumptionData();
+  resumption::LastStateAccessor accessor = last_state_wrapper_->get_accessor();
+  Json::Value dictionary = accessor.GetData().dictionary();
+  Json::Value& resumption = GetResumptionData(dictionary);
   if (resumption.isMember(strings::global_ign_on_counter)) {
     const uint32_t global_ign_on_counter =
         resumption[strings::global_ign_on_counter].asUInt();
@@ -301,7 +329,9 @@ void ResumptionDataJson::IncrementGlobalIgnOnCounter() {
   using namespace app_mngr;
   LOG4CXX_AUTO_TRACE(logger_);
   sync_primitives::AutoLock autolock(resumption_lock_);
-  Json::Value& resumption = GetResumptionData();
+  resumption::LastStateAccessor accessor = last_state_wrapper_->get_accessor();
+  Json::Value dictionary = accessor.GetData().dictionary();
+  Json::Value& resumption = GetResumptionData(dictionary);
   if (resumption.isMember(strings::global_ign_on_counter)) {
     const uint32_t global_ign_on_counter =
         resumption[strings::global_ign_on_counter].asUInt();
@@ -315,16 +345,20 @@ void ResumptionDataJson::IncrementGlobalIgnOnCounter() {
   } else {
     resumption[strings::global_ign_on_counter] = 1;
   }
-  last_state().SaveStateToFileSystem();
+  accessor.GetMutableData().set_dictionary(dictionary);
+  accessor.GetMutableData().SaveToFileSystem();
 }
 
 void ResumptionDataJson::ResetGlobalIgnOnCount() {
   using namespace app_mngr;
   LOG4CXX_AUTO_TRACE(logger_);
   sync_primitives::AutoLock autolock(resumption_lock_);
-  Json::Value& resumption = GetResumptionData();
+  resumption::LastStateAccessor accessor = last_state_wrapper_->get_accessor();
+  Json::Value dictionary = accessor.GetData().dictionary();
+  Json::Value& resumption = GetResumptionData(dictionary);
 
   resumption[strings::global_ign_on_counter] = 0;
+  accessor.GetMutableData().set_dictionary(dictionary);
   LOG4CXX_DEBUG(logger_, "Global IGN ON counter resetting");
 }
 
@@ -336,12 +370,14 @@ ssize_t ResumptionDataJson::IsApplicationSaved(
 }
 
 Json::Value& ResumptionDataJson::GetFromSavedOrAppend(
-    const std::string& policy_app_id, const std::string& device_id) const {
+    const std::string& policy_app_id,
+    const std::string& device_id,
+    Json::Value& dictionary) const {
   using namespace app_mngr;
   LOG4CXX_AUTO_TRACE(logger_);
   sync_primitives::AutoLock autolock(resumption_lock_);
-  for (Json::Value::iterator it = GetSavedApplications().begin();
-       it != GetSavedApplications().end();
+  Json::Value& saved_apps = GetSavedApplications(dictionary);
+  for (Json::Value::iterator it = saved_apps.begin(); it != saved_apps.end();
        ++it) {
     if (device_id == (*it)[strings::device_id].asString() &&
         policy_app_id == (*it)[strings::app_id].asString()) {
@@ -349,7 +385,7 @@ Json::Value& ResumptionDataJson::GetFromSavedOrAppend(
     }
   }
 
-  return GetSavedApplications().append(Json::Value());
+  return GetSavedApplications(dictionary).append(Json::Value());
 }
 
 void ResumptionDataJson::GetDataForLoadResumeData(
@@ -359,8 +395,10 @@ void ResumptionDataJson::GetDataForLoadResumeData(
   sync_primitives::AutoLock autolock(resumption_lock_);
   smart_objects::SmartObject so_array_data(smart_objects::SmartType_Array);
   int i = 0;
-  for (Json::Value::iterator it = GetSavedApplications().begin();
-       it != GetSavedApplications().end();
+  resumption::LastStateAccessor accessor = last_state_wrapper_->get_accessor();
+  Json::Value dictionary = accessor.GetData().dictionary();
+  Json::Value& saved_apps = GetSavedApplications(dictionary);
+  for (Json::Value::iterator it = saved_apps.begin(); it != saved_apps.end();
        ++it) {
     if (((*it).isMember(strings::hmi_level)) &&
         ((*it).isMember(strings::ign_off_count)) &&
@@ -397,14 +435,18 @@ void ResumptionDataJson::UpdateHmiLevel(
                      << policy_app_id << " device_id = " << device_id);
     return;
   }
-  GetSavedApplications()[idx][strings::hmi_level] = hmi_level;
+  resumption::LastStateAccessor accessor = last_state_wrapper_->get_accessor();
+  Json::Value dictionary = accessor.GetData().dictionary();
+  GetSavedApplications(dictionary)[idx][strings::hmi_level] = hmi_level;
+  accessor.GetMutableData().set_dictionary(dictionary);
 }
 
-Json::Value& ResumptionDataJson::GetSavedApplications() const {
+Json::Value& ResumptionDataJson::GetSavedApplications(
+    Json::Value& dictionary) const {
   using namespace app_mngr;
   LOG4CXX_AUTO_TRACE(logger_);
   sync_primitives::AutoLock autolock(resumption_lock_);
-  Json::Value& resumption = GetResumptionData();
+  Json::Value& resumption = GetResumptionData(dictionary);
   if (!resumption.isMember(strings::resume_app_list)) {
     resumption[strings::resume_app_list] = Json::Value(Json::arrayValue);
     LOG4CXX_WARN(logger_, "app_list section is missed");
@@ -417,11 +459,11 @@ Json::Value& ResumptionDataJson::GetSavedApplications() const {
   return resume_app_list;
 }
 
-Json::Value& ResumptionDataJson::GetResumptionData() const {
+Json::Value& ResumptionDataJson::GetResumptionData(
+    Json::Value& dictionary) const {
   using namespace app_mngr;
   LOG4CXX_AUTO_TRACE(logger_);
   sync_primitives::AutoLock autolock(resumption_lock_);
-  Json::Value& dictionary = last_state().get_dictionary();
   if (!dictionary.isMember(strings::resumption)) {
     dictionary[strings::resumption] = Json::Value(Json::objectValue);
     LOG4CXX_WARN(logger_, "resumption section is missed");
@@ -439,7 +481,9 @@ ssize_t ResumptionDataJson::GetObjectIndex(const std::string& policy_app_id,
   using namespace app_mngr;
   LOG4CXX_AUTO_TRACE(logger_);
   sync_primitives::AutoLock autolock(resumption_lock_);
-  const Json::Value& apps = GetSavedApplications();
+  resumption::LastStateAccessor accessor = last_state_wrapper_->get_accessor();
+  Json::Value dictionary = accessor.GetData().dictionary();
+  const Json::Value& apps = GetSavedApplications(dictionary);
   const Json::ArrayIndex size = apps.size();
   Json::ArrayIndex idx = 0;
   for (; idx != size; ++idx) {
@@ -461,7 +505,9 @@ bool ResumptionDataJson::IsResumptionDataValid(uint32_t index) const {
   using namespace app_mngr;
   LOG4CXX_AUTO_TRACE(logger_);
   sync_primitives::AutoLock autolock(resumption_lock_);
-  const Json::Value& json_app = GetSavedApplications()[index];
+  resumption::LastStateAccessor accessor = last_state_wrapper_->get_accessor();
+  Json::Value dictionary = accessor.GetData().dictionary();
+  const Json::Value& json_app = GetSavedApplications(dictionary)[index];
   if (!json_app.isMember(strings::app_id) ||
       !json_app.isMember(strings::ign_off_count) ||
       !json_app.isMember(strings::hmi_level) ||
@@ -481,19 +527,21 @@ bool ResumptionDataJson::IsResumptionDataValid(uint32_t index) const {
   return true;
 }
 
-void ResumptionDataJson::SetSavedApplication(Json::Value& apps_json) {
+void ResumptionDataJson::SetSavedApplication(Json::Value& apps_json,
+                                             Json::Value& dictionary) {
   LOG4CXX_AUTO_TRACE(logger_);
   sync_primitives::AutoLock autolock(resumption_lock_);
-  Json::Value& app_list = GetSavedApplications();
+  Json::Value& app_list = GetSavedApplications(dictionary);
   app_list = apps_json;
 }
 
-void ResumptionDataJson::SetLastIgnOffTime(time_t ign_off_time) {
+void ResumptionDataJson::SetLastIgnOffTime(time_t ign_off_time,
+                                           Json::Value& dictionary) {
   using namespace app_mngr;
   LOG4CXX_AUTO_TRACE(logger_);
   sync_primitives::AutoLock autolock(resumption_lock_);
   LOG4CXX_WARN(logger_, "ign_off_time = " << ign_off_time);
-  Json::Value& resumption = GetResumptionData();
+  Json::Value& resumption = GetResumptionData(dictionary);
   resumption[strings::last_ign_off_time] = static_cast<uint32_t>(ign_off_time);
 }
 
@@ -507,7 +555,10 @@ bool ResumptionDataJson::DropAppDataResumption(const std::string& device_id,
   LOG4CXX_AUTO_TRACE(logger_);
   using namespace app_mngr;
   sync_primitives::AutoLock autolock(resumption_lock_);
-  Json::Value& application = GetFromSavedOrAppend(app_id, device_id);
+  resumption::LastStateAccessor accessor = last_state_wrapper_->get_accessor();
+  Json::Value dictionary = accessor.GetData().dictionary();
+  Json::Value& application =
+      GetFromSavedOrAppend(app_id, device_id, dictionary);
   if (application.isNull()) {
     LOG4CXX_DEBUG(logger_,
                   "Application " << app_id << " with device_id " << device_id
@@ -521,6 +572,7 @@ bool ResumptionDataJson::DropAppDataResumption(const std::string& device_id,
   application[strings::application_subscriptions].clear();
   application[strings::application_files].clear();
   application.removeMember(strings::grammar_id);
+  accessor.GetMutableData().set_dictionary(dictionary);
   LOG4CXX_DEBUG(logger_,
                 "Resumption data for application "
                     << app_id << " with device_id " << device_id
@@ -529,10 +581,7 @@ bool ResumptionDataJson::DropAppDataResumption(const std::string& device_id,
 }
 
 void ResumptionDataJson::Persist() {
-  // We lock the resumption data because SaveStateToFileSystem accesses
-  // the same dictionary that we use here in ResumptionDataJson
-  sync_primitives::AutoLock autolock(resumption_lock_);
-  last_state().SaveStateToFileSystem();
+  last_state_wrapper_->get_accessor().GetMutableData().SaveToFileSystem();
 }
 
 }  // namespace resumption

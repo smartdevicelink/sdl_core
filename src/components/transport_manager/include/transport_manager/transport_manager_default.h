@@ -39,7 +39,7 @@
 #include "transport_manager/transport_manager_impl.h"
 
 namespace resumption {
-class LastState;
+class LastStateWrapper;
 }
 
 namespace transport_manager {
@@ -56,7 +56,8 @@ class TransportManagerDefault : public TransportManagerImpl {
    *
    * @return Code error.
    */
-  int Init(resumption::LastState& last_state) OVERRIDE;
+  int Init(std::shared_ptr<resumption::LastStateWrapper> last_state_wrapper)
+      OVERRIDE;
 
   /**
    * @brief Destructor.

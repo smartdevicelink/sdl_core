@@ -39,7 +39,7 @@
 #include "transport_manager/transport_manager_listener.h"
 
 namespace resumption {
-class LastState;
+class LastStateWrapper;
 }
 
 namespace transport_manager {
@@ -60,7 +60,8 @@ class TransportManager {
    * @brief Initialize transport manager.
    * @return Error code.
    */
-  virtual int Init(resumption::LastState& last_state) = 0;
+  virtual int Init(
+      std::shared_ptr<resumption::LastStateWrapper> last_state_wrapper) = 0;
 
   /**
    * @brief Reinitializes transport manager

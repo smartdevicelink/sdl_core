@@ -158,7 +158,7 @@ class ApplicationManagerImpl
   /**
    * Inits application manager
    */
-  bool Init(resumption::LastState& last_state,
+  bool Init(std::shared_ptr<resumption::LastStateWrapper> last_state_wrapper,
             media_manager::MediaManager* media_manager) OVERRIDE;
 
   /**

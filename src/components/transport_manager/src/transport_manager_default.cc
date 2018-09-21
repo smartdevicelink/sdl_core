@@ -59,9 +59,10 @@ TransportManagerDefault::TransportManagerDefault(
     const TransportManagerSettings& settings)
     : TransportManagerImpl(settings) {}
 
-int TransportManagerDefault::Init(resumption::LastState& last_state) {
+int TransportManagerDefault::Init(
+    std::shared_ptr<resumption::LastStateWrapper> last_state_wrapper) {
   LOG4CXX_TRACE(logger_, "enter");
-  if (E_SUCCESS != TransportManagerImpl::Init(last_state)) {
+  if (E_SUCCESS != TransportManagerImpl::Init(last_state_wrapper)) {
     LOG4CXX_TRACE(logger_,
                   "exit with E_TM_IS_NOT_INITIALIZED. Condition: E_SUCCESS != "
                   "TransportManagerImpl::Init()");
@@ -70,7 +71,7 @@ int TransportManagerDefault::Init(resumption::LastState& last_state) {
 
 #ifdef BLUETOOTH_SUPPORT
   transport_adapter::TransportAdapterImpl* ta_bluetooth =
-      new transport_adapter::BluetoothTransportAdapter(last_state,
+      new transport_adapter::BluetoothTransportAdapter(last_state_wrapper,
                                                        get_settings());
 #ifdef TELEMETRY_MONITOR
   if (metric_observer_) {
@@ -84,7 +85,7 @@ int TransportManagerDefault::Init(resumption::LastState& last_state) {
   const uint16_t port = get_settings().transport_manager_tcp_adapter_port();
   transport_adapter::TransportAdapterImpl* ta_tcp =
       new transport_adapter::TcpTransportAdapter(
-          port, last_state, get_settings());
+          port, last_state_wrapper, get_settings());
 #ifdef TELEMETRY_MONITOR
   if (metric_observer_) {
     ta_tcp->SetTelemetryObserver(metric_observer_);
@@ -95,7 +96,7 @@ int TransportManagerDefault::Init(resumption::LastState& last_state) {
 
 #if defined(USB_SUPPORT)
   transport_adapter::TransportAdapterImpl* ta_usb =
-      new transport_adapter::UsbAoaAdapter(last_state, get_settings());
+      new transport_adapter::UsbAoaAdapter(last_state_wrapper, get_settings());
 #ifdef TELEMETRY_MONITOR
   if (metric_observer_) {
     ta_usb->SetTelemetryObserver(metric_observer_);
@@ -123,14 +124,14 @@ int TransportManagerDefault::Init(resumption::LastState& last_state) {
   transport_adapter::IAP2BluetoothEmulationTransportAdapter*
       iap2_bt_emu_adapter =
           new transport_adapter::IAP2BluetoothEmulationTransportAdapter(
-              iap2_bt_emu_port, last_state, get_settings());
+              iap2_bt_emu_port, last_state_wrapper, get_settings());
 
   AddTransportAdapter(iap2_bt_emu_adapter);
 
   const uint16_t iap2_usb_emu_port = 34567;
   transport_adapter::IAP2USBEmulationTransportAdapter* iap2_usb_emu_adapter =
       new transport_adapter::IAP2USBEmulationTransportAdapter(
-          iap2_usb_emu_port, last_state, get_settings());
+          iap2_usb_emu_port, last_state_wrapper, get_settings());
 
   AddTransportAdapter(iap2_usb_emu_adapter);
 #endif  // BUILD_TEST

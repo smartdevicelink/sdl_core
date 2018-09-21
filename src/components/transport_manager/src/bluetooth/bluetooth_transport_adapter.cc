@@ -34,18 +34,18 @@
  */
 
 #include <errno.h>
-#include <sys/socket.h>
 #include <sys/types.h>
+#include <sys/socket.h>
 #include <unistd.h>
 
-#include <bluetooth/bluetooth.h>
 #include <iomanip>
 #include <set>
+#include <bluetooth/bluetooth.h>
 
+#include "transport_manager/bluetooth/bluetooth_transport_adapter.h"
+#include "transport_manager/bluetooth/bluetooth_device_scanner.h"
 #include "transport_manager/bluetooth/bluetooth_connection_factory.h"
 #include "transport_manager/bluetooth/bluetooth_device.h"
-#include "transport_manager/bluetooth/bluetooth_device_scanner.h"
-#include "transport_manager/bluetooth/bluetooth_transport_adapter.h"
 
 #include "utils/logger.h"
 
@@ -57,12 +57,13 @@ CREATE_LOGGERPTR_GLOBAL(logger_, "TransportManager")
 BluetoothTransportAdapter::~BluetoothTransportAdapter() {}
 
 BluetoothTransportAdapter::BluetoothTransportAdapter(
-    resumption::LastState& last_state, const TransportManagerSettings& settings)
+    std::shared_ptr<resumption::LastStateWrapper> last_state_wrapper,
+    const TransportManagerSettings& settings)
     : TransportAdapterImpl(
           new BluetoothDeviceScanner(this, true, 0, settings.bluetooth_uuid()),
           new BluetoothConnectionFactory(this),
           NULL,
-          last_state,
+          last_state_wrapper,
           settings) {}
 
 DeviceType BluetoothTransportAdapter::GetDeviceType() const {
@@ -112,17 +113,21 @@ void BluetoothTransportAdapter::Store() const {
     }
   }
   bluetooth_adapter_dictionary["devices"] = devices_dictionary;
-  Json::Value& dictionary = last_state().get_dictionary();
+  resumption::LastStateAccessor accessor = last_state_wrapper_->get_accessor();
+  Json::Value dictionary = accessor.GetData().dictionary();
   dictionary["TransportManager"]["BluetoothAdapter"] =
       bluetooth_adapter_dictionary;
+  accessor.GetMutableData().set_dictionary(dictionary);
   LOG4CXX_TRACE(logger_, "exit");
 }
 
 bool BluetoothTransportAdapter::Restore() {
   LOG4CXX_TRACE(logger_, "enter");
   bool errors_occured = false;
+  resumption::LastStateAccessor accessor = last_state_wrapper_->get_accessor();
+  Json::Value dictionary = accessor.GetData().dictionary();
   const Json::Value bluetooth_adapter_dictionary =
-      last_state().get_dictionary()["TransportManager"]["BluetoothAdapter"];
+      dictionary["TransportManager"]["BluetoothAdapter"];
   const Json::Value devices_dictionary =
       bluetooth_adapter_dictionary["devices"];
   for (Json::Value::const_iterator i = devices_dictionary.begin();

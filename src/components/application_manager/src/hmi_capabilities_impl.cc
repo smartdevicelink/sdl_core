@@ -761,8 +761,9 @@ void HMICapabilitiesImpl::set_seat_location_capability(
       new smart_objects::SmartObject(seat_location_capability);
 }
 
-void HMICapabilitiesImpl::Init(resumption::LastState* last_state) {
-  hmi_language_handler_.Init(last_state);
+void HMICapabilitiesImpl::Init(
+    std::shared_ptr<resumption::LastStateWrapper> last_state_wrapper) {
+  hmi_language_handler_.Init(last_state_wrapper);
   if (false == load_capabilities_from_file()) {
     LOG4CXX_ERROR(logger_, "file hmi_capabilities.json was not loaded");
   } else {
