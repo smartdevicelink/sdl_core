@@ -44,6 +44,7 @@ enum Priority {
   P_VOICECOM,
   P_COMMUNICATION,
   P_NORMAL,
+  P_PROJECTION,
   P_NONE,
 };
 
@@ -184,7 +185,7 @@ bool EnumFromJsonString(const std::string& literal, ModuleType* result);
  * @brief Enumeration FunctionID.
  *
  * Enumeration linking function names with function IDs in AppLink protocol.
- *Assumes enumeration starts at value 0.
+ * Assumes enumeration starts at value 0.
  */
 enum FunctionID {
   /**
