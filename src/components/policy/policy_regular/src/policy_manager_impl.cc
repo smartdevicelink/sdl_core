@@ -251,11 +251,6 @@ void FilterInvalidApplicationParameters(
     app_params.moduleType->swap(valid_module_types);
   }
 
-  // Filter default_hmi
-  if (!app_params.default_hmi.is_valid()) {
-    app_params.default_hmi = policy_table::HmiLevel();
-  }
-
   // Filter priority
   if (!app_params.priority.is_valid()) {
     app_params.priority = policy_table::Priority();
