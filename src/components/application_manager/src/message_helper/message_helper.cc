@@ -1455,8 +1455,9 @@ smart_objects::SmartObjectList MessageHelper::CreateAddCommandRequestToHMI(
     }
 
     // VR Interface
-    if ((*i->second).keyExists(strings::vr_commands)) {
-      SendAddVRCommandToHMI(i->first,
+    if ((*i->second).keyExists(strings::vr_commands) &&
+        (*i->second).keyExists(strings::cmd_id)) {
+      SendAddVRCommandToHMI((*i->second)[strings::cmd_id].asUInt(),
                             (*i->second)[strings::vr_commands],
                             app->app_id(),
                             app_mngr);
