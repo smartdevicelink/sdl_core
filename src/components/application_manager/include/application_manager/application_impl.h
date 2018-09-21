@@ -177,6 +177,8 @@ class ApplicationImpl : public virtual Application,
   bool tts_properties_in_none();
   void set_tts_properties_in_full(bool active);
   bool tts_properties_in_full();
+  void set_keep_context(bool keep_context);
+  bool keep_context();
   void set_version(const Version& ver);
   void set_name(const custom_str::CustomString& name);
   void set_is_media_application(bool is_media);
@@ -481,6 +483,7 @@ class ApplicationImpl : public virtual Application,
   bool has_been_activated_;
   bool tts_properties_in_none_;
   bool tts_properties_in_full_;
+  bool keep_context_;
   bool is_foreground_;
   bool is_application_data_changed_;
   uint32_t put_file_in_none_count_;

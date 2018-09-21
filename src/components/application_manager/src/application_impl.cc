@@ -116,6 +116,7 @@ ApplicationImpl::ApplicationImpl(
     , has_been_activated_(false)
     , tts_properties_in_none_(false)
     , tts_properties_in_full_(false)
+    , keep_context_(false)
     , is_foreground_(false)
     , is_application_data_changed_(false)
     , put_file_in_none_count_(0)
@@ -436,6 +437,14 @@ void ApplicationImpl::set_tts_properties_in_full(bool active) {
 
 bool ApplicationImpl::tts_properties_in_full() {
   return tts_properties_in_full_;
+}
+
+void ApplicationImpl::set_keep_context(bool keep_context) {
+  keep_context_ = keep_context;
+}
+
+bool ApplicationImpl::keep_context() {
+  return keep_context_;
 }
 
 void ApplicationImpl::set_video_streaming_approved(bool state) {

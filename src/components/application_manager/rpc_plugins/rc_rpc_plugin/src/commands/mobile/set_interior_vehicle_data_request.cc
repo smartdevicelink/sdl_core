@@ -506,13 +506,20 @@ void SetInteriorVehicleDataRequest::Execute() {
         module_data[message_params::kAudioControlData].keyExists(
             message_params::kSource);
 
-    if (app_wants_to_set_audio_src && !app->IsAllowedToChangeAudioSource()) {
-      LOG4CXX_WARN(logger_, "App is not allowed to change audio source");
-      SetResourceState(ModuleType(), ResourceState::FREE);
-      SendResponse(false,
-                   mobile_apis::Result::REJECTED,
-                   "App is not allowed to change audio source");
-      return;
+    if (app_wants_to_set_audio_src) {
+      if (!app->IsAllowedToChangeAudioSource()) {
+        LOG4CXX_WARN(logger_, "App is not allowed to change audio source");
+        SetResourceState(ModuleType(), ResourceState::FREE);
+        SendResponse(false,
+                     mobile_apis::Result::REJECTED,
+                     "App is not allowed to change audio source");
+        return;
+      } else if (module_data[message_params::kAudioControlData].keyExists(
+                     message_params::kKeepContext)) {
+        app->set_keep_context(
+            module_data[message_params::kAudioControlData]
+                       [message_params::kKeepContext].asBool());
+      }
     }
 
     SendHMIRequest(hmi_apis::FunctionID::RC_SetInteriorVehicleData,
@@ -555,6 +562,10 @@ void SetInteriorVehicleDataRequest::on_event(
           *message_)[app_mngr::strings::msg_params][message_params::kModuleData]
                     [message_params::kAudioControlData]);
     }
+  } else {
+    app_mngr::ApplicationSharedPtr app =
+        application_manager_.application(connection_key());
+    app->set_keep_context(false);
   }
   std::string info;
   GetInfo(hmi_response, info);
@@ -580,27 +591,10 @@ const smart_objects::SmartObject& SetInteriorVehicleDataRequest::ControlData(
 void SetInteriorVehicleDataRequest::CheckAudioSource(
     const smart_objects::SmartObject& audio_data) {
   LOG4CXX_AUTO_TRACE(logger_);
-  const bool should_keep_context =
-      audio_data.keyExists(message_params::kKeepContext) &&
-      audio_data[message_params::kKeepContext].asBool();
-  const bool switch_source_from_app =
-      mobile_apis::PrimaryAudioSource::MOBILE_APP ==
-          application_manager_.get_current_audio_source() &&
-      mobile_apis::PrimaryAudioSource::MOBILE_APP !=
-          audio_data[message_params::kSource].asInt();
-  if (!should_keep_context && switch_source_from_app) {
-    app_mngr::ApplicationSharedPtr app =
-        application_manager_.application(connection_key());
-    if (app->mobile_projection_enabled()) {
-      application_manager_.ChangeAppsHMILevel(
-          app->app_id(), mobile_apis::HMILevel::eType::HMI_LIMITED);
-    } else {
-      application_manager_.ChangeAppsHMILevel(
-          app->app_id(), mobile_apis::HMILevel::eType::HMI_BACKGROUND);
-    }
+  if (audio_data.keyExists(message_params::kSource)) {
+    application_manager_.set_current_audio_source(
+        audio_data[message_params::kSource].asUInt());
   }
-  application_manager_.set_current_audio_source(
-      audio_data[message_params::kSource].asUInt());
 }
 
 bool SetInteriorVehicleDataRequest::AreAllParamsReadOnly(
