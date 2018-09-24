@@ -57,6 +57,8 @@ AlertManeuverResponse::~AlertManeuverResponse() {}
 void AlertManeuverResponse::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
 
+  application_manager_.UnsubscribeAppFromSoftButtons(message_);
+
   rpc_service_.SendMessageToMobile(message_);
 }
 

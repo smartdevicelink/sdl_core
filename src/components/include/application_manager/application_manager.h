@@ -726,6 +726,14 @@ class ApplicationManager {
   virtual bool IsSOStructValid(
       const hmi_apis::StructIdentifiers::eType struct_id,
       const smart_objects::SmartObject& display_capabilities) = 0;
+
+  /**
+   * @brief Unsubscribe application that specified in message from softbuttons.
+   * @param MessageSharedPtr - Response message recivied from HMI.
+   * @return bool - Result of unsubscribing process.
+   */
+  virtual bool UnsubscribeAppFromSoftButtons(
+      const commands::MessageSharedPtr response_message) = 0;
 };
 
 }  // namespace application_manager

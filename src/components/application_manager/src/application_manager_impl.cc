@@ -3614,6 +3614,28 @@ bool ApplicationManagerImpl::IsSOStructValid(
   return true;
 }
 
+bool ApplicationManagerImpl::UnsubscribeAppFromSoftButtons(
+    const commands::MessageSharedPtr response_message) {
+  const mobile_apis::Result::eType result_code =
+      static_cast<mobile_apis::Result::eType>(
+          (*response_message)[strings::msg_params][strings::result_code]
+              .asUInt());
+  const uint32_t connection_key =
+      (*response_message)[strings::params][strings::connection_key].asUInt();
+  const auto function_id = static_cast<mobile_apis::FunctionID::eType>(
+      (*response_message)[strings::params][strings::function_id].asInt());
+
+  ApplicationSharedPtr app = application(connection_key);
+  if ((mobile_apis::Result::REJECTED != result_code) && app) {
+    app->UnsubscribeFromSoftButtons(function_id);
+    LOG4CXX_DEBUG(logger_,
+                  "Application has unsubscribed from softbusttons. FunctionID: "
+                      << function_id);
+    return true;
+  }
+  return false;
+}
+
 #ifdef BUILD_TESTS
 void ApplicationManagerImpl::AddMockApplication(ApplicationSharedPtr mock_app) {
   applications_list_lock_ptr_->Acquire();

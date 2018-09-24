@@ -94,15 +94,12 @@ class MobileResponseCommandsTest
 
 typedef Types<commands::ListFilesResponse,
               commands::DeleteCommandResponse,
-              commands::AlertManeuverResponse,
-              commands::AlertResponse,
               commands::SubscribeButtonResponse,
               commands::AddSubMenuResponse,
               commands::DialNumberResponse,
               commands::EndAudioPassThruResponse,
               commands::UnregisterAppInterfaceResponse,
               commands::UnsubscribeWayPointsResponse,
-              commands::UpdateTurnListResponse,
               commands::UnsubscribeButtonResponse,
               commands::SliderResponse,
               commands::SpeakResponse,
@@ -113,7 +110,6 @@ typedef Types<commands::ListFilesResponse,
               commands::PerformAudioPassThruResponse,
               commands::SetGlobalPropertiesResponse,
               commands::SetMediaClockTimerResponse,
-              commands::ShowConstantTBTResponse,
               commands::ShowResponse,
               commands::SystemResponse,
               commands::AddCommandResponse,
@@ -131,6 +127,35 @@ TYPED_TEST(MobileResponseCommandsTest, Run_SendResponseToMobile_SUCCESS) {
   command->Run();
 }
 
+template <class CammandWithUnsubscribe>
+class MobileResponseWithUnsubscribeCommandsTest
+    : public CommandsTest<CommandsTestMocks::kIsNice> {
+ public:
+  typedef CammandWithUnsubscribe UnsubscribeCommand;
+};
+
+typedef Types<commands::AlertManeuverResponse,
+              commands::AlertResponse,
+              commands::UpdateTurnListResponse,
+              commands::ScrollableMessageResponse,
+              commands::ShowConstantTBTResponse>
+    ResponseWithUnsubscribeCommandList;
+
+TYPED_TEST_CASE(MobileResponseWithUnsubscribeCommandsTest,
+                ResponseWithUnsubscribeCommandList);
+
+TYPED_TEST(MobileResponseWithUnsubscribeCommandsTest,
+           RunWithUnsubscribe_SUCCESS) {
+  std::shared_ptr<typename TestFixture::UnsubscribeCommand> command =
+      this->template CreateCommand<typename TestFixture::UnsubscribeCommand>();
+
+  EXPECT_CALL(this->app_mngr_, UnsubscribeAppFromSoftButtons(_));
+  EXPECT_CALL(this->mock_rpc_service_, SendMessageToMobile(NotNull(), _));
+
+  command->Init();
+  command->Run();
+}
+
 class GenericResponseFromHMICommandsTest
     : public CommandsTest<CommandsTestMocks::kIsNice> {};
 
@@ -145,7 +170,6 @@ MATCHER_P2(CheckMessageParams, success, result, "") {
       result ==
       static_cast<int32_t>(
           (*arg)[am::strings::msg_params][am::strings::result_code].asInt());
-
   using namespace helpers;
   return Compare<bool, EQ, ALL>(
       true, is_msg_type_correct, is_success_correct, is_result_code_correct);
@@ -164,24 +188,6 @@ TEST_F(GenericResponseFromHMICommandsTest, Run_SUCCESS) {
 
   command->Run();
 }
-
-class ScrollableMessageResponseTest
-    : public CommandsTest<CommandsTestMocks::kIsNice> {};
-
-TEST_F(ScrollableMessageResponseTest, Run_SUCCESS) {
-  MessageSharedPtr message = CreateMessage();
-  (*message)[am::strings::msg_params][am::strings::result_code] =
-      mobile_apis::Result::SUCCESS;
-
-  MockAppPtr app(CreateMockApp());
-
-  std::shared_ptr<commands::ScrollableMessageResponse> command(
-      CreateCommand<commands::ScrollableMessageResponse>(message));
-  EXPECT_CALL(app_mngr_, application(_)).WillOnce(Return(app));
-  EXPECT_CALL(*app, UnsubscribeFromSoftButtons(_));
-  command->Run();
-}
-
 }  // namespace simple_response_commands_test
 }  // namespace mobile_commands_test
 }  // namespace commands_test

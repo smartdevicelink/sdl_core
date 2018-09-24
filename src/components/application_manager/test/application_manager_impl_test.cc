@@ -1412,6 +1412,42 @@ TEST_F(ApplicationManagerImplTest,
   EXPECT_TRUE(file_system::RemoveDirectory(kDirectoryName, true));
 }
 
+class ApplicationManagerImplTestWithParams
+    : public ::testing::WithParamInterface<mobile_apis::FunctionID::eType>,
+      public ApplicationManagerImplTest {};
+
+TEST_P(ApplicationManagerImplTestWithParams,
+       UnsubscribeAppFromSoftButtons_SUCCESS) {
+  AddMockApplication();
+  commands::MessageSharedPtr response_message =
+      std::make_shared<smart_objects::SmartObject>(
+          smart_objects::SmartType_Map);
+
+  const mobile_apis::FunctionID::eType function_id = GetParam();
+  (*response_message)[strings::params][strings::connection_key] =
+      kConnectionKey;
+  (*response_message)[strings::msg_params][strings::result_code] =
+      mobile_apis::Result::SUCCESS;
+  (*response_message)[strings::params][strings::function_id] = function_id;
+
+  EXPECT_CALL(*mock_app_ptr_, app_id()).WillOnce(Return(kConnectionKey));
+  EXPECT_CALL(*mock_app_ptr_, UnsubscribeFromSoftButtons(function_id));
+
+  const bool unsubscribe_result =
+      app_manager_impl_->UnsubscribeAppFromSoftButtons(response_message);
+
+  EXPECT_TRUE(unsubscribe_result);
+}
+
+INSTANTIATE_TEST_CASE_P(
+    UnsubscribeAppFromSoftButtons,
+    ApplicationManagerImplTestWithParams,
+    ::testing::Values(mobile_apis::FunctionID::ScrollableMessageID,
+                      mobile_apis::FunctionID::AlertID,
+                      mobile_apis::FunctionID::AlertManeuverID,
+                      mobile_apis::FunctionID::UpdateTurnListID,
+                      mobile_apis::FunctionID::ShowConstantTBTID));
+
 }  // application_manager_test
 }  // namespace components
 }  // namespace test

@@ -1030,6 +1030,8 @@ class ApplicationManagerImpl
   bool IsSOStructValid(const hmi_apis::StructIdentifiers::eType struct_id,
                        const smart_objects::SmartObject& display_capabilities);
 
+  virtual bool UnsubscribeAppFromSoftButtons(
+      const commands::MessageSharedPtr response_message) OVERRIDE;
   /**
    * @brief Function returns supported SDL Protocol Version
    * @return protocol version depends on parameters from smartDeviceLink.ini.
