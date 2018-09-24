@@ -841,11 +841,6 @@ bool EnumFromJsonString(const std::string& literal, ModuleType* result) {
 }
 
 bool EnumFromJsonString(const std::string& literal, FunctionID* result) {
-  if ("RESERVE" == literal) {
-    *result = RESERVED;
-    return true;
-  }
-
   if ("RegisterAppInterface" == literal) {
     *result = RegisterAppInterfaceID;
     return true;
@@ -956,7 +951,7 @@ bool EnumFromJsonString(const std::string& literal, FunctionID* result) {
     return true;
   }
 
-  if ("ReadD" == literal) {
+  if ("ReadDID" == literal) {
     *result = ReadDIDID;
     return true;
   }

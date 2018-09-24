@@ -711,8 +711,6 @@ bool EnumFromJsonString(const std::string& literal, ModuleType* result) {
 
 bool IsValidEnum(FunctionID val) {
   switch (val) {
-    case RESERVED:
-      return true;
     case RegisterAppInterfaceID:
       return true;
     case UnregisterAppInterfaceID:
@@ -860,8 +858,6 @@ bool IsValidEnum(FunctionID val) {
 
 const char* EnumToJsonString(FunctionID val) {
   switch (val) {
-    case RESERVED:
-      return "RESERVE";
     case RegisterAppInterfaceID:
       return "RegisterAppInterface";
     case UnregisterAppInterfaceID:
@@ -907,7 +903,7 @@ const char* EnumToJsonString(FunctionID val) {
     case GetVehicleDataID:
       return "GetVehicleData";
     case ReadDIDID:
-      return "ReadD";
+      return "ReadDID";
     case GetDTCsID:
       return "GetDTCs";
     case ScrollableMessageID:
@@ -1008,11 +1004,6 @@ const char* EnumToJsonString(FunctionID val) {
 };
 
 bool EnumFromJsonString(const std::string& literal, FunctionID* result) {
-  if ("RESERVE" == literal) {
-    *result = RESERVED;
-    return true;
-  }
-
   if ("RegisterAppInterface" == literal) {
     *result = RegisterAppInterfaceID;
     return true;
@@ -1123,7 +1114,7 @@ bool EnumFromJsonString(const std::string& literal, FunctionID* result) {
     return true;
   }
 
-  if ("ReadD" == literal) {
+  if ("ReadDID" == literal) {
     *result = ReadDIDID;
     return true;
   }
