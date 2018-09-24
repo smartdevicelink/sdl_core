@@ -221,6 +221,10 @@ void FilterInvalidApplicationParameters(
   } else {
     app_params.RequestType->swap(valid_request_types);
   }
+  // Filter priority
+  if (!app_params.priority.is_valid()) {
+    app_params.priority = policy_table::Priority();
+  }
 }
 
 /**
