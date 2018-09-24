@@ -685,7 +685,7 @@ bool EnumFromJsonString(const std::string& literal, FunctionID* result) {
     return true;
   }
 
-  if ("ReadD" == literal) {
+  if ("ReadDID" == literal) {
     *result = ReadDIDID;
     return true;
   }
