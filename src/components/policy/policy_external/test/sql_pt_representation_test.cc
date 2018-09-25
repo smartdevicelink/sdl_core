@@ -49,7 +49,6 @@
 #include "policy/policy_table/enums.h"
 #include "rpc_base/rpc_base.h"
 #include "policy/mock_policy_settings.h"
-#include "utils/shared_ptr.h"
 
 namespace policy_table = rpc::policy_table_interface_base;
 using policy::SQLPTRepresentation;
@@ -81,14 +80,14 @@ class SQLPTRepresentationTest : public SQLPTRepresentation,
   static const std::string kDatabaseName;
   static utils::dbms::SQLQuery* query_wrapper_;
   // Gtest can show message that this object doesn't destroyed
-  static std::auto_ptr<policy_handler_test::MockPolicySettings>
+  static std::unique_ptr<policy_handler_test::MockPolicySettings>
       policy_settings_;
 
   static void SetUpTestCase() {
     const std::string kAppStorageFolder = "storage_SQLPTRepresentationTest";
     reps = new SQLPTRepresentation(in_memory_);
     ASSERT_TRUE(reps != NULL);
-    policy_settings_ = std::auto_ptr<policy_handler_test::MockPolicySettings>(
+    policy_settings_ = std::unique_ptr<policy_handler_test::MockPolicySettings>(
         new policy_handler_test::MockPolicySettings());
     ON_CALL(*policy_settings_, app_storage_folder())
         .WillByDefault(ReturnRef(kAppStorageFolder));
@@ -348,7 +347,7 @@ SQLPTRepresentation* SQLPTRepresentationTest::reps = 0;
 utils::dbms::SQLQuery* SQLPTRepresentationTest::query_wrapper_ = 0;
 const std::string SQLPTRepresentationTest::kDatabaseName = ":memory:";
 const bool SQLPTRepresentationTest::in_memory_ = true;
-std::auto_ptr<policy_handler_test::MockPolicySettings>
+std::unique_ptr<policy_handler_test::MockPolicySettings>
     SQLPTRepresentationTest::policy_settings_;
 
 class SQLPTRepresentationTest2 : public ::testing::Test {
@@ -1585,7 +1584,7 @@ TEST_F(SQLPTRepresentationTest,
   ASSERT_TRUE(reps->Save(update));
 
   // Act
-  utils::SharedPtr<policy_table::Table> snapshot = reps->GenerateSnapshot();
+  std::shared_ptr<policy_table::Table> snapshot = reps->GenerateSnapshot();
   snapshot->SetPolicyTableType(rpc::policy_table_interface_base::PT_SNAPSHOT);
   // Remove fields which must be absent in snapshot
   table["policy_table"]["consumer_friendly_messages"].removeMember("messages");

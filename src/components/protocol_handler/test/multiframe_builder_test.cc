@@ -35,7 +35,7 @@
 #include <algorithm>
 #include <utility>
 #include <limits>
-#include "utils/make_shared.h"
+
 #include "protocol_handler/multiframe_builder.h"
 
 namespace test {
@@ -149,7 +149,7 @@ class MultiFrameBuilderTest : public ::testing::Test {
     const ProtocolFramePtrList::const_iterator it_last = --(multiframes.end());
     while (it != it_last) {
       const ProtocolFramePtr frame = *it;
-      ASSERT_TRUE(frame);
+      ASSERT_TRUE((bool)frame);
       EXPECT_EQ(RESULT_OK, multiframe_builder_.AddFrame(frame))
           << "Non final CONSECUTIVE frame: " << frame;
       EXPECT_EQ(ProtocolFramePtrList(), multiframe_builder_.PopMultiframes())
@@ -331,7 +331,7 @@ TEST_F(MultiFrameBuilderTest, Add_FirstFrames_NoConnections) {
         const ProtocolFramePtrList& multiframes = multiframe_data.multiframes;
         ASSERT_FALSE(multiframes.empty());
         const ProtocolFramePtr first_frame = multiframes.front();
-        ASSERT_TRUE(first_frame);
+        ASSERT_TRUE((bool)first_frame);
         EXPECT_EQ(RESULT_FAIL, multiframe_builder_.AddFrame(first_frame))
             << "Non-existed connection " << connection_id
             << "- to be skipped first frame: " << first_frame;
@@ -365,7 +365,7 @@ TEST_F(MultiFrameBuilderTest, Add_FirstFrames_only) {
         const ProtocolFramePtrList& multiframes = multiframe_data.multiframes;
         ASSERT_FALSE(multiframes.empty());
         const ProtocolFramePtr first_frame = multiframes.front();
-        ASSERT_TRUE(first_frame);
+        ASSERT_TRUE((bool)first_frame);
         EXPECT_EQ(RESULT_OK, multiframe_builder_.AddFrame(first_frame))
             << "First frame: " << first_frame;
 
@@ -440,7 +440,7 @@ TEST_F(MultiFrameBuilderTest, Add_ConsecutiveFrames_per1) {
           ASSERT_FALSE(multiframes.empty());
 
           const ProtocolFramePtr frame = multiframes.front();
-          ASSERT_TRUE(frame);
+          ASSERT_TRUE((bool)frame);
 
           EXPECT_EQ(RESULT_OK, multiframe_builder_.AddFrame(frame))
               << "Frame: " << frame;
@@ -501,7 +501,7 @@ TEST_F(MultiFrameBuilderTest, FrameExpired_OneMSec) {
   const ProtocolFramePtrList& multiframes = multiframe_data.multiframes;
   ASSERT_FALSE(multiframes.empty());
   const ProtocolFramePtr first_frame = multiframes.front();
-  ASSERT_TRUE(first_frame);
+  ASSERT_TRUE((bool)first_frame);
   EXPECT_EQ(RESULT_OK, multiframe_builder_.AddFrame(first_frame))
       << "First frame: " << first_frame;
 

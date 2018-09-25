@@ -34,11 +34,11 @@
 
 #include "formatters/generic_json_formatter.h"
 
-namespace NsSmartDeviceLink {
-namespace NsJSONHandler {
-namespace Formatters {
+namespace ns_smart_device_link {
+namespace ns_json_handler {
+namespace formatters {
 
-void GenericJsonFormatter::ToString(const NsSmartObjects::SmartObject& obj,
+void GenericJsonFormatter::ToString(const ns_smart_objects::SmartObject& obj,
                                     std::string& out_str) {
   Json::Value json_root;
   objToJsonValue(obj, json_root);
@@ -46,7 +46,7 @@ void GenericJsonFormatter::ToString(const NsSmartObjects::SmartObject& obj,
 }
 
 bool GenericJsonFormatter::FromString(const std::string& str,
-                                      NsSmartObjects::SmartObject& out) {
+                                      ns_smart_objects::SmartObject& out) {
   Json::Value json_root;
   Json::Reader reader;
   bool result = reader.parse(str, json_root);
@@ -58,6 +58,6 @@ bool GenericJsonFormatter::FromString(const std::string& str,
   return result;
 }
 
-}  // namespace Formatters
-}  // namespace NsJSONHandler
-}  // namespace NsSmartDeviceLink
+}  // namespace formatters
+}  // namespace ns_json_handler
+}  // namespace ns_smart_device_link

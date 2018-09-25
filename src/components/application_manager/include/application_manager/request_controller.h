@@ -38,7 +38,7 @@
 #include <list>
 
 #include "utils/lock.h"
-#include "utils/shared_ptr.h"
+
 #include "utils/threads/thread.h"
 #include "utils/conditional_variable.h"
 #include "utils/threads/thread_delegate.h"

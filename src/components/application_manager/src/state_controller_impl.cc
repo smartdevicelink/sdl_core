@@ -33,8 +33,9 @@
 #include "application_manager/state_controller_impl.h"
 #include <tuple>
 #include "application_manager/usage_statistics.h"
+#include "application_manager/rpc_service.h"
 #include "utils/helpers.h"
-#include "utils/make_shared.h"
+
 #include "connection_handler/connection_handler.h"
 
 namespace application_manager {
@@ -457,6 +458,8 @@ mobile_apis::HMILevel::eType StateControllerImpl::GetAvailableHmiLevel(
   LOG4CXX_AUTO_TRACE(logger_);
 
   mobile_apis::HMILevel::eType result = hmi_level;
+  LOG4CXX_DEBUG(logger_, "HMI Level: " << hmi_level);
+
   if (!IsStreamableHMILevel(hmi_level)) {
     return result;
   }
@@ -464,6 +467,7 @@ mobile_apis::HMILevel::eType StateControllerImpl::GetAvailableHmiLevel(
   const bool is_audio_app = app->IsAudioApplication();
   const bool does_audio_app_with_same_type_exist =
       app_mngr_.IsAppTypeExistsInFullOrLimited(app);
+
   if (mobile_apis::HMILevel::HMI_LIMITED == hmi_level) {
     if (!is_audio_app || does_audio_app_with_same_type_exist) {
       result = app_mngr_.GetDefaultHmiLevel(app);
@@ -471,7 +475,7 @@ mobile_apis::HMILevel::eType StateControllerImpl::GetAvailableHmiLevel(
     return result;
   }
 
-  const bool is_active_app_exist = app_mngr_.active_application();
+  const bool is_active_app_exist = (bool)app_mngr_.active_application();
   if (is_audio_app) {
     if (does_audio_app_with_same_type_exist) {
       result = app_mngr_.GetDefaultHmiLevel(app);
@@ -801,7 +805,7 @@ int64_t StateControllerImpl::SendBCActivateApp(
     LOG4CXX_ERROR(logger_, "Unable to create BC.ActivateAppRequest");
     return -1;
   }
-  if (!app_mngr_.ManageHMICommand(bc_activate_app_request)) {
+  if (!app_mngr_.GetRPCService().ManageHMICommand(bc_activate_app_request)) {
     LOG4CXX_ERROR(logger_, "Unable to send BC.ActivateAppRequest");
     return -1;
   }
@@ -852,7 +856,7 @@ void StateControllerImpl::DeactivateApp(ApplicationSharedPtr app) {
   DCHECK_OR_RETURN_VOID(app);
   const HmiStatePtr regular = app->RegularHmiState();
   DCHECK_OR_RETURN_VOID(regular);
-  HmiStatePtr new_regular = utils::MakeShared<HmiState>(*regular);
+  HmiStatePtr new_regular = std::make_shared<HmiState>(*regular);
 
   LOG4CXX_DEBUG(logger_, "Current HMI level: '" << app->hmi_level() << "'");
   const bool is_audio_app = app->IsAudioApplication();
@@ -967,53 +971,53 @@ bool StateControllerImpl::IsStateActive(HmiState::StateID state_id) const {
 }
 
 HmiStatePtr StateControllerImpl::CreateHmiState(
-    utils::SharedPtr<Application> app, HmiState::StateID state_id) const {
+    std::shared_ptr<Application> app, HmiState::StateID state_id) const {
   using namespace utils;
   LOG4CXX_AUTO_TRACE(logger_);
   HmiStatePtr new_state;
   switch (state_id) {
     case HmiState::STATE_ID_PHONE_CALL: {
-      new_state = MakeShared<PhoneCallHmiState>(app, app_mngr_);
+      new_state = std::make_shared<PhoneCallHmiState>(app, app_mngr_);
       break;
     }
     case HmiState::STATE_ID_SAFETY_MODE: {
-      new_state = MakeShared<SafetyModeHmiState>(app, app_mngr_);
+      new_state = std::make_shared<SafetyModeHmiState>(app, app_mngr_);
       break;
     }
     case HmiState::STATE_ID_VR_SESSION: {
-      new_state = MakeShared<VRHmiState>(app, app_mngr_);
+      new_state = std::make_shared<VRHmiState>(app, app_mngr_);
       break;
     }
     case HmiState::STATE_ID_TTS_SESSION: {
-      new_state = MakeShared<TTSHmiState>(app, app_mngr_);
+      new_state = std::make_shared<TTSHmiState>(app, app_mngr_);
       break;
     }
     case HmiState::STATE_ID_VIDEO_STREAMING: {
-      new_state = MakeShared<VideoStreamingHmiState>(app, app_mngr_);
+      new_state = std::make_shared<VideoStreamingHmiState>(app, app_mngr_);
       break;
     }
     case HmiState::STATE_ID_NAVI_STREAMING: {
-      new_state = MakeShared<NaviStreamingHmiState>(app, app_mngr_);
+      new_state = std::make_shared<NaviStreamingHmiState>(app, app_mngr_);
       break;
     }
     case HmiState::STATE_ID_REGULAR: {
-      new_state = MakeShared<HmiState>(app, app_mngr_);
+      new_state = std::make_shared<HmiState>(app, app_mngr_);
       break;
     }
     case HmiState::STATE_ID_POSTPONED: {
-      new_state = MakeShared<HmiState>(app, app_mngr_, state_id);
+      new_state = std::make_shared<HmiState>(app, app_mngr_, state_id);
       break;
     }
     case HmiState::STATE_ID_DEACTIVATE_HMI: {
-      new_state = MakeShared<DeactivateHMI>(app, app_mngr_);
+      new_state = std::make_shared<DeactivateHMI>(app, app_mngr_);
       break;
     }
     case HmiState::STATE_ID_AUDIO_SOURCE: {
-      new_state = MakeShared<AudioSource>(app, app_mngr_);
+      new_state = std::make_shared<AudioSource>(app, app_mngr_);
       break;
     }
     case HmiState::STATE_ID_EMBEDDED_NAVI: {
-      new_state = MakeShared<EmbeddedNavi>(app, app_mngr_);
+      new_state = std::make_shared<EmbeddedNavi>(app, app_mngr_);
       break;
     }
     default:

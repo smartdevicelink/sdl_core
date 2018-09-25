@@ -27,6 +27,7 @@
         <element name="speed" />
         <element name="engineTorque" />
         <element name="externalTemperature" />
+        <element name="turnSignal" />
         <element name="fuelLevel" />
         <element name="fuelLevel_State" />
         <element name="headLampStatus" />
@@ -38,6 +39,7 @@
         <element name="vin" />
         <element name="accPedalPosition" />
         <element name="beltStatus" />
+        <element name="electronicParkBrakeStatus" />
         <element name="driverBraking" />
         <element name="prndl" />
         <element name="rpm" />
@@ -92,8 +94,7 @@
 
     <typedef name="HmiLevels" type="HmiLevel" array="true"
         maxsize="4" />
-    <typedef name="Parameters" type="Parameter" array="true"
-        maxsize="24" />
+    <typedef name="Parameters" type="Parameter" array="true"/>
 
     <struct name="RpcParameters">
         <!-- maxsizes are equal to number of currently known elements of
@@ -134,6 +135,7 @@
     <struct name="ModuleConfig">
         <param name="device_certificates" type="String" minlength="1" maxlength="100" mandatory="false" map="true" minsize="1" maxsize="255" />
         <param name="preloaded_pt" type="Boolean" mandatory="false" />
+        <param name="full_app_id_supported" type="Boolean" mandatory="false" />
         <param name="exchange_after_x_ignition_cycles" type="Integer"
             maxvalue="255" />
         <param name="exchange_after_x_kilometers" type="Integer"

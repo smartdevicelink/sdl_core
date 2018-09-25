@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, Ford Motor Company
+ * Copyright (c) 2018, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -41,8 +41,7 @@
 #include "utils/file_system.h"
 #include "utils/logger.h"
 #include "utils/gen_hash.h"
-#include "utils/shared_ptr.h"
-#include "utils/make_shared.h"
+
 #include "utils/timer_task_impl.h"
 #include "application_manager/policies/policy_handler_interface.h"
 #include "application_manager/resumption/resume_ctrl.h"
@@ -72,7 +71,7 @@ mobile_apis::FileType::eType StringToFileType(const char* str) {
     return mobile_apis::FileType::BINARY;
   }
 }
-}
+}  // namespace
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "ApplicationManager")
 
@@ -83,8 +82,8 @@ void SwitchApplicationParameters(ApplicationSharedPtr app,
                                  const size_t device_id,
                                  const std::string& mac_address) {
   LOG4CXX_AUTO_TRACE(logger_);
-  utils::SharedPtr<ApplicationImpl> application =
-      ApplicationSharedPtr::dynamic_pointer_cast<ApplicationImpl>(app);
+  std::shared_ptr<ApplicationImpl> application =
+      std::dynamic_pointer_cast<ApplicationImpl>(app);
   DCHECK_OR_RETURN_VOID(application);
   application->app_id_ = app_id;
   application->device_id_ = device_id;
@@ -97,7 +96,7 @@ ApplicationImpl::ApplicationImpl(
     const std::string& mac_address,
     const connection_handler::DeviceHandle device_id,
     const custom_str::CustomString& app_name,
-    utils::SharedPtr<usage_statistics::StatisticsManager> statistics_manager,
+    std::shared_ptr<usage_statistics::StatisticsManager> statistics_manager,
     ApplicationManager& application_manager)
     : grammar_id_(0)
     , hmi_app_id_(0)
@@ -105,6 +104,7 @@ ApplicationImpl::ApplicationImpl(
     , active_message_(NULL)
     , is_media_(false)
     , is_navi_(false)
+    , is_remote_control_supported_(false)
     , mobile_projection_enabled_(false)
     , video_streaming_approved_(false)
     , audio_streaming_approved_(false)
@@ -123,11 +123,14 @@ ApplicationImpl::ApplicationImpl(
     , list_files_in_none_count_(0)
     , mac_address_(mac_address)
     , device_id_(device_id)
+    , secondary_device_id_(0)
     , usage_report_(mobile_app_id, statistics_manager)
+    , help_prompt_manager_impl_(*this, application_manager)
     , protocol_version_(
           protocol_handler::MajorProtocolVersion::PROTOCOL_VERSION_3)
     , is_voice_communication_application_(false)
     , is_resuming_(false)
+    , deferred_resumption_hmi_level_(mobile_api::HMILevel::eType::INVALID_ENUM)
     , is_hash_changed_during_suspend_(false)
     , video_stream_retry_number_(0)
     , audio_stream_retry_number_(0)
@@ -139,11 +142,13 @@ ApplicationImpl::ApplicationImpl(
           "AudioStreamSuspend",
           new ::timer::TimerTaskImpl<ApplicationImpl>(
               this, &ApplicationImpl::OnAudioStreamSuspend))
+    , vi_lock_ptr_(std::make_shared<sync_primitives::Lock>())
+    , button_lock_ptr_(std::make_shared<sync_primitives::Lock>())
     , application_manager_(application_manager) {
   cmd_number_to_time_limits_[mobile_apis::FunctionID::ReadDIDID] = {
-      date_time::DateTime::getCurrentTime(), 0};
+      date_time::getCurrentTime(), 0};
   cmd_number_to_time_limits_[mobile_apis::FunctionID::GetVehicleDataID] = {
-      date_time::DateTime::getCurrentTime(), 0};
+      date_time::getCurrentTime(), 0};
 
   set_mobile_app_id(mobile_app_id);
   set_name(app_name);
@@ -168,7 +173,6 @@ ApplicationImpl::~ApplicationImpl() {
   }
 
   subscribed_buttons_.clear();
-  subscribed_vehicle_info_.clear();
   if (is_perform_interaction_active()) {
     set_perform_interaction_active(0);
     set_perform_interaction_mode(-1);
@@ -218,6 +222,14 @@ void ApplicationImpl::ChangeSupportingAppHMIType() {
 
 void ApplicationImpl::set_is_navi(bool allow) {
   is_navi_ = allow;
+}
+
+bool ApplicationImpl::is_remote_control_supported() const {
+  return is_remote_control_supported_;
+}
+
+void ApplicationImpl::set_remote_control_supported(const bool allow) {
+  is_remote_control_supported_ = allow;
 }
 
 bool ApplicationImpl::is_voice_communication_supported() const {
@@ -302,6 +314,13 @@ const HmiStatePtr ApplicationImpl::RegularHmiState() const {
   return state_.GetState(HmiState::STATE_ID_REGULAR);
 }
 
+bool ApplicationImpl::IsAllowedToChangeAudioSource() const {
+  if (is_remote_control_supported() && is_media_application()) {
+    return true;
+  }
+  return false;
+}
+
 const HmiStatePtr ApplicationImpl::PostponedHmiState() const {
   return state_.GetState(HmiState::STATE_ID_POSTPONED);
 }
@@ -377,6 +396,10 @@ const std::string& ApplicationImpl::bundle_id() const {
 
 connection_handler::DeviceHandle ApplicationImpl::device() const {
   return device_id_;
+}
+
+connection_handler::DeviceHandle ApplicationImpl::secondary_device() const {
+  return secondary_device_id_;
 }
 
 const std::string& ApplicationImpl::mac_address() const {
@@ -492,6 +515,9 @@ void ApplicationImpl::StopStreamingForce(
   using namespace protocol_handler;
   LOG4CXX_AUTO_TRACE(logger_);
 
+  // see the comment in StopStreaming()
+  sync_primitives::AutoLock lock(streaming_stop_lock_);
+
   SuspendStreaming(service_type);
 
   if (service_type == ServiceType::kMobileNav) {
@@ -505,6 +531,12 @@ void ApplicationImpl::StopStreaming(
     protocol_handler::ServiceType service_type) {
   using namespace protocol_handler;
   LOG4CXX_AUTO_TRACE(logger_);
+
+  // since WakeUpStreaming() is called from another thread, it is possible that
+  // the stream will be restarted after we call SuspendStreaming() and before
+  // we call StopXxxStreaming(). To avoid such timing issue, make sure that
+  // we run SuspendStreaming() and StopXxxStreaming() atomically.
+  sync_primitives::AutoLock lock(streaming_stop_lock_);
 
   SuspendStreaming(service_type);
 
@@ -555,6 +587,10 @@ void ApplicationImpl::WakeUpStreaming(
     protocol_handler::ServiceType service_type) {
   using namespace protocol_handler;
   LOG4CXX_AUTO_TRACE(logger_);
+
+  // See the comment in StopStreaming(). Also, please make sure that we acquire
+  // streaming_stop_lock_ then xxx_streaming_suspended_lock_ in this order!
+  sync_primitives::AutoLock lock(streaming_stop_lock_);
 
   if (ServiceType::kMobileNav == service_type) {
     sync_primitives::AutoLock lock(video_streaming_suspended_lock_);
@@ -635,8 +671,9 @@ void ApplicationImpl::set_app_allowed(const bool allowed) {
   is_app_allowed_ = allowed;
 }
 
-void ApplicationImpl::set_device(connection_handler::DeviceHandle device) {
-  device_id_ = device;
+void ApplicationImpl::set_secondary_device(
+    connection_handler::DeviceHandle secondary_device) {
+  secondary_device_id_ = secondary_device;
 }
 
 uint32_t ApplicationImpl::get_grammar_id() const {
@@ -682,6 +719,16 @@ void ApplicationImpl::set_is_resuming(bool is_resuming) {
 
 bool ApplicationImpl::is_resuming() const {
   return is_resuming_;
+}
+
+void ApplicationImpl::set_deferred_resumption_hmi_level(
+    mobile_api::HMILevel::eType level) {
+  deferred_resumption_hmi_level_ = level;
+}
+
+mobile_api::HMILevel::eType ApplicationImpl::deferred_resumption_hmi_level()
+    const {
+  return deferred_resumption_hmi_level_;
 }
 
 bool ApplicationImpl::AddFile(const AppFile& file) {
@@ -731,13 +778,13 @@ const AppFile* ApplicationImpl::GetFile(const std::string& file_name) {
 
 bool ApplicationImpl::SubscribeToButton(
     mobile_apis::ButtonName::eType btn_name) {
-  sync_primitives::AutoLock lock(button_lock_);
+  sync_primitives::AutoLock lock(button_lock_ptr_);
   return subscribed_buttons_.insert(btn_name).second;
 }
 
 bool ApplicationImpl::IsSubscribedToButton(
     mobile_apis::ButtonName::eType btn_name) {
-  sync_primitives::AutoLock lock(button_lock_);
+  sync_primitives::AutoLock lock(button_lock_ptr_);
   std::set<mobile_apis::ButtonName::eType>::iterator it =
       subscribed_buttons_.find(btn_name);
   return (subscribed_buttons_.end() != it);
@@ -745,38 +792,21 @@ bool ApplicationImpl::IsSubscribedToButton(
 
 bool ApplicationImpl::UnsubscribeFromButton(
     mobile_apis::ButtonName::eType btn_name) {
-  sync_primitives::AutoLock lock(button_lock_);
+  sync_primitives::AutoLock lock(button_lock_ptr_);
   return subscribed_buttons_.erase(btn_name);
-}
-
-bool ApplicationImpl::SubscribeToIVI(uint32_t vehicle_info_type) {
-  sync_primitives::AutoLock lock(vi_lock_);
-  return subscribed_vehicle_info_
-      .insert(
-           static_cast<mobile_apis::VehicleDataType::eType>(vehicle_info_type))
-      .second;
-}
-
-bool ApplicationImpl::IsSubscribedToIVI(uint32_t vehicle_info_type) const {
-  sync_primitives::AutoLock lock(vi_lock_);
-  VehicleInfoSubscriptions::const_iterator it = subscribed_vehicle_info_.find(
-      static_cast<mobile_apis::VehicleDataType::eType>(vehicle_info_type));
-  return (subscribed_vehicle_info_.end() != it);
-}
-
-bool ApplicationImpl::UnsubscribeFromIVI(uint32_t vehicle_info_type) {
-  sync_primitives::AutoLock lock(vi_lock_);
-  return subscribed_vehicle_info_.erase(
-      static_cast<mobile_apis::VehicleDataType::eType>(vehicle_info_type));
 }
 
 UsageStatistics& ApplicationImpl::usage_report() {
   return usage_report_;
 }
 
+HelpPromptManager& ApplicationImpl::help_prompt_manager() {
+  return help_prompt_manager_impl_;
+}
+
 bool ApplicationImpl::AreCommandLimitsExceeded(
     mobile_apis::FunctionID::eType cmd_id, TLimitSource source) {
-  TimevalStruct current = date_time::DateTime::getCurrentTime();
+  date_time::TimeDuration current = date_time::getCurrentTime();
   switch (source) {
     // In case of config file values there is COMMON limitations for number of
     // commands per certain time in seconds, i.e. 5 requests per 10 seconds with
@@ -808,13 +838,14 @@ bool ApplicationImpl::AreCommandLimitsExceeded(
 
       LOG4CXX_INFO(logger_,
                    "Time Info: "
-                       << "\n Current: " << current.tv_sec << "\n Limit: ("
-                       << limit.first.tv_sec << "," << limit.second
-                       << ")"
-                          "\n frequency_restrictions: ("
+                       << "\n Current: " << date_time::getSecs(current)
+                       << "\n Limit: (" << date_time::getSecs(limit.first)
+                       << "," << limit.second << ")"
+                                                 "\n frequency_restrictions: ("
                        << frequency_restrictions.first << ","
                        << frequency_restrictions.second << ")");
-      if (current.tv_sec < limit.first.tv_sec + frequency_restrictions.second) {
+      if (date_time::getSecs(current) <
+          date_time::getSecs(limit.first) + frequency_restrictions.second) {
         if (limit.second < frequency_restrictions.first) {
           ++limit.second;
           return false;
@@ -856,7 +887,8 @@ bool ApplicationImpl::AreCommandLimitsExceeded(
       TimeToNumberLimit& limit = it->second;
 
       // Checking even limitation for command
-      if (static_cast<uint32_t>(current.tv_sec - limit.first.tv_sec) <
+      if (static_cast<uint32_t>(date_time::getSecs(current) -
+                                date_time::getSecs(limit.first)) <
           minute / cmd_limit) {
         return true;
       }
@@ -876,12 +908,8 @@ bool ApplicationImpl::AreCommandLimitsExceeded(
 }
 
 DataAccessor<ButtonSubscriptions> ApplicationImpl::SubscribedButtons() const {
-  return DataAccessor<ButtonSubscriptions>(subscribed_buttons_, button_lock_);
-}
-
-DataAccessor<VehicleInfoSubscriptions> ApplicationImpl::SubscribedIVI() const {
-  return DataAccessor<VehicleInfoSubscriptions>(subscribed_vehicle_info_,
-                                                vi_lock_);
+  return DataAccessor<ButtonSubscriptions>(subscribed_buttons_,
+                                           button_lock_ptr_);
 }
 
 const std::string& ApplicationImpl::curHash() const {
@@ -1059,8 +1087,6 @@ void ApplicationImpl::UnsubscribeFromSoftButtons(int32_t cmd_id) {
   }
 }
 
-#ifdef SDL_REMOTE_CONTROL
-
 void ApplicationImpl::set_system_context(
     const mobile_api::SystemContext::eType& system_context) {
   const HmiStatePtr hmi_state = CurrentHmiState();
@@ -1096,10 +1122,6 @@ void ApplicationImpl::set_hmi_level(
   usage_report_.RecordHmiStateChanged(new_hmi_level);
 }
 
-const VehicleInfoSubscriptions& ApplicationImpl::SubscribesIVI() const {
-  return subscribed_vehicle_info_;
-}
-
 AppExtensionPtr ApplicationImpl::QueryInterface(AppExtensionUID uid) {
   std::list<AppExtensionPtr>::const_iterator it = extensions_.begin();
   for (; it != extensions_.end(); ++it) {
@@ -1120,21 +1142,17 @@ bool ApplicationImpl::AddExtension(AppExtensionPtr extension) {
 }
 
 bool ApplicationImpl::RemoveExtension(AppExtensionUID uid) {
-  for (std::list<AppExtensionPtr>::iterator it = extensions_.begin();
-       extensions_.end() != it;
-       ++it) {
-    if ((*it)->uid() == uid) {
-      extensions_.erase(it);
-      return true;
-    }
-  }
-  return false;
+  auto it = std::find_if(
+      extensions_.begin(),
+      extensions_.end(),
+      [uid](AppExtensionPtr extension) { return extension->uid() == uid; });
+
+  return it != extensions_.end();
 }
 
-void ApplicationImpl::RemoveExtensions() {
-  application_manager_.GetPluginManager().RemoveAppExtension(app_id_);
+const std::list<AppExtensionPtr>& ApplicationImpl::Extensions() const {
+  return extensions_;
 }
-#endif  // SDL_REMOTE_CONTROL
 
 void ApplicationImpl::PushMobileMessage(
     smart_objects::SmartObjectSPtr mobile_message) {

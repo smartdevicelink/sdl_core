@@ -148,7 +148,7 @@ CSmartFactoryTest::CSmartFactoryTest()
 
 void CSmartFactoryTest::InitStructSchemes(
     TStructsSchemaItems& struct_schema_items) {
-  utils::SharedPtr<ISchemaItem> struct_schema_item_Common_1 =
+  std::shared_ptr<ISchemaItem> struct_schema_item_Common_1 =
       InitStructSchemaItem_Common_1(struct_schema_items);
   struct_schema_items.insert(std::make_pair(StructIdentifiersTest::Common_1,
                                             struct_schema_item_Common_1));
@@ -156,7 +156,7 @@ void CSmartFactoryTest::InitStructSchemes(
       std::make_pair(StructIdentifiersTest::Common_1,
                      CSmartSchema(struct_schema_item_Common_1)));
 
-  utils::SharedPtr<ISchemaItem> struct_schema_item_Common_2 =
+  std::shared_ptr<ISchemaItem> struct_schema_item_Common_2 =
       InitStructSchemaItem_Common_2();
   struct_schema_items.insert(std::make_pair(StructIdentifiersTest::Common_2,
                                             struct_schema_item_Common_2));
@@ -187,7 +187,7 @@ void CSmartFactoryTest::InitFunctionSchemes(
       CObjectSchemaItem::SMember(CStringSchemaItem::create(), true);
 
   CObjectSchemaItem::Members root_members_map;
-  root_members_map[NsSmartDeviceLink::NsJSONHandler::strings::S_PARAMS] =
+  root_members_map[ns_smart_device_link::ns_json_handler::strings::S_PARAMS] =
       CObjectSchemaItem::SMember(CObjectSchemaItem::create(params_members),
                                  true);
 
@@ -269,7 +269,7 @@ CSmartSchema CSmartFactoryTest::InitFunction_Function1_response(
     const std::set<FunctionIdTest::eType>& function_id_items,
     const std::set<MessageTypeTest::eType>& message_type_items) {
   // Function parameter available.
-  utils::SharedPtr<ISchemaItem> available_SchemaItem =
+  std::shared_ptr<ISchemaItem> available_SchemaItem =
       CBoolSchemaItem::create(TSchemaItemParameter<bool>());
 
   CObjectSchemaItem::Members schema_members;
@@ -333,7 +333,7 @@ CSmartSchema CSmartFactoryTest::InitFunction_Function2_response(
     const std::set<FunctionIdTest::eType>& function_id_items,
     const std::set<MessageTypeTest::eType>& message_type_items) {
   // Function parameter available.
-  utils::SharedPtr<ISchemaItem> available_SchemaItem =
+  std::shared_ptr<ISchemaItem> available_SchemaItem =
       CBoolSchemaItem::create(TSchemaItemParameter<bool>());
 
   CObjectSchemaItem::Members schema_members;
@@ -399,7 +399,7 @@ CSmartSchema CSmartFactoryTest::InitFunction_Function3_response(
   // Function parameter available.
   //
   // Must be true if VR is present and ready to communicate with SDL.
-  utils::SharedPtr<ISchemaItem> available_SchemaItem =
+  std::shared_ptr<ISchemaItem> available_SchemaItem =
       CBoolSchemaItem::create(TSchemaItemParameter<bool>());
 
   CObjectSchemaItem::Members schema_members;
@@ -431,12 +431,12 @@ CSmartSchema CSmartFactoryTest::InitFunction_Function3_response(
   return CSmartSchema(CObjectSchemaItem::create(root_members_map));
 }
 
-utils::SharedPtr<ISchemaItem> CSmartFactoryTest::InitStructSchemaItem_Common_1(
+std::shared_ptr<ISchemaItem> CSmartFactoryTest::InitStructSchemaItem_Common_1(
     TStructsSchemaItems& struct_schema_items) {
   // Struct member text.
   //
   // Text to display
-  utils::SharedPtr<ISchemaItem> text_SchemaItem =
+  std::shared_ptr<ISchemaItem> text_SchemaItem =
       CStringSchemaItem::create(TSchemaItemParameter<size_t>(1),
                                 TSchemaItemParameter<size_t>(500),
                                 TSchemaItemParameter<std::string>());
@@ -444,14 +444,14 @@ utils::SharedPtr<ISchemaItem> CSmartFactoryTest::InitStructSchemaItem_Common_1(
   // Struct member image.
   //
   // Image struct
-  utils::SharedPtr<ISchemaItem> image_SchemaItem =
+  std::shared_ptr<ISchemaItem> image_SchemaItem =
       ProvideObjectSchemaItemForStruct(struct_schema_items,
                                        StructIdentifiersTest::Common_2);
 
   // Struct member position.
   //
   // Position to display item
-  utils::SharedPtr<ISchemaItem> position_SchemaItem =
+  std::shared_ptr<ISchemaItem> position_SchemaItem =
       TNumberSchemaItem<int32_t>::create(TSchemaItemParameter<int32_t>(1),
                                          TSchemaItemParameter<int32_t>(500),
                                          TSchemaItemParameter<int32_t>());
@@ -472,19 +472,19 @@ utils::SharedPtr<ISchemaItem> CSmartFactoryTest::InitStructSchemaItem_Common_1(
   return CObjectSchemaItem::create(schema_members);
 }
 
-utils::SharedPtr<ISchemaItem>
+std::shared_ptr<ISchemaItem>
 CSmartFactoryTest::InitStructSchemaItem_Common_2() {
   // Struct member text.
   //
   // Text to display
-  utils::SharedPtr<ISchemaItem> text_SchemaItem =
+  std::shared_ptr<ISchemaItem> text_SchemaItem =
       CStringSchemaItem::create(TSchemaItemParameter<size_t>(1),
                                 TSchemaItemParameter<size_t>(500),
                                 TSchemaItemParameter<std::string>());
   // Struct member position.
   //
   // Position to display item
-  utils::SharedPtr<ISchemaItem> position_SchemaItem =
+  std::shared_ptr<ISchemaItem> position_SchemaItem =
       TNumberSchemaItem<int32_t>::create(TSchemaItemParameter<int32_t>(1),
                                          TSchemaItemParameter<int32_t>(500),
                                          TSchemaItemParameter<int32_t>());
@@ -497,7 +497,7 @@ CSmartFactoryTest::InitStructSchemaItem_Common_2() {
   return CObjectSchemaItem::create(schema_members);
 }
 
-utils::SharedPtr<ISchemaItem>
+std::shared_ptr<ISchemaItem>
 CSmartFactoryTest::ProvideObjectSchemaItemForStruct(
     TStructsSchemaItems& struct_schema_items,
     const StructIdentifiersTest::eType struct_id) {
@@ -506,5 +506,6 @@ CSmartFactoryTest::ProvideObjectSchemaItemForStruct(
   if (it != struct_schema_items.end()) {
     return it->second;
   }
-  return NsSmartDeviceLink::NsSmartObjects::CAlwaysFalseSchemaItem::create();
+  return ns_smart_device_link::ns_smart_objects::CAlwaysFalseSchemaItem::
+      create();
 }

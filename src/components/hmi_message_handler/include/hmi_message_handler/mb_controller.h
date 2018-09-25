@@ -52,7 +52,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "json/json.h"
 #include "utils/macro.h"
 #include "utils/lock.h"
-#include "utils/atomic_object.h"
+#include <atomic>
 #include "websocket_session.h"
 
 using namespace boost::beast::websocket;

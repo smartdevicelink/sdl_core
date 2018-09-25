@@ -58,6 +58,19 @@ if [ "$1" = "--fix" ]
 then
   for FILE_NAME in $FILE_NAMES; do fix_style $FILE_NAME; done
 else
-  for FILE_NAME in $FILE_NAMES; do check_style $FILE_NAME; done
+  PASSED=0
+  for FILE_NAME in $FILE_NAMES; do
+    check_style $FILE_NAME
+    if [ $? != 0 ]
+    then
+      echo "in " $FILE_NAME 
+      PASSED=1
+    fi
+  done
+  if [ $PASSED = 1 ]
+  then 
+    exit 1
+  fi
 fi
+
 

@@ -42,6 +42,9 @@ CREATE_LOGGERPTR_GLOBAL(logger_, "MediaManager")
 
 GMainLoop* FromMicToFileRecorderThread::loop = NULL;
 
+// As per spec, AudioPassThru recording is in monaural
+static const int kNumAudioChannels = 1;
+
 FromMicToFileRecorderThread::FromMicToFileRecorderThread(
     const std::string& output_file, int32_t duration)
     : threads::ThreadDelegate()
@@ -119,7 +122,8 @@ void FromMicToFileRecorderThread::threadMain() {
   initArgs();
 
   GstElement* pipeline;
-  GstElement* alsasrc, *wavenc, *filesink;
+  GstElement* alsasrc, *audioconvert, *capsfilter, *wavenc, *filesink;
+  GstCaps* audiocaps;
   GstBus* bus;
 
   const gchar* device = "hw:0,0";
@@ -196,11 +200,18 @@ void FromMicToFileRecorderThread::threadMain() {
 
   // Create all of the elements to be added to the pipeline
   alsasrc = gst_element_factory_make("alsasrc", "alsasrc0");
+  audioconvert = gst_element_factory_make("audioconvert", "audioconvert0");
+  capsfilter = gst_element_factory_make("capsfilter", "filter0");
   wavenc = gst_element_factory_make("wavenc", "wavenc0");
   filesink = gst_element_factory_make("filesink", "filesink0");
 
+  // create a capability to downmix the recorded audio to monaural
+  audiocaps = gst_caps_new_simple(
+      "audio/x-raw", "channels", G_TYPE_INT, kNumAudioChannels, NULL);
+
   // Assert that all the elements were created
-  if (!alsasrc || !wavenc || !filesink) {
+  if (!alsasrc || !audioconvert || !capsfilter || !wavenc || !filesink ||
+      !audiocaps) {
     g_error("Failed creating one or more of the pipeline elements.\n");
   }
 
@@ -209,10 +220,21 @@ void FromMicToFileRecorderThread::threadMain() {
   g_object_set(G_OBJECT(filesink), "location", outfile, NULL);
 
   // Add the elements to the pipeline
-  gst_bin_add_many(GST_BIN(pipeline), alsasrc, wavenc, filesink, NULL);
+  gst_bin_add_many(GST_BIN(pipeline),
+                   alsasrc,
+                   audioconvert,
+                   capsfilter,
+                   wavenc,
+                   filesink,
+                   NULL);
 
   // Link the elements
-  gst_element_link_many(alsasrc, wavenc, filesink, NULL);
+  gst_element_link_many(
+      alsasrc, audioconvert, capsfilter, wavenc, filesink, NULL);
+
+  // set the capability
+  g_object_set(G_OBJECT(capsfilter), "caps", audiocaps, NULL);
+  gst_caps_unref(audiocaps);
 
   gst_element_set_state(pipeline, GST_STATE_PLAYING);
 

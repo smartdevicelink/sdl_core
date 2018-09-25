@@ -30,23 +30,21 @@
 
 #include "smart_objects/always_true_schema_item.h"
 
-namespace NsSmartDeviceLink {
-namespace NsSmartObjects {
+namespace ns_smart_device_link {
+namespace ns_smart_objects {
 
 CAlwaysTrueSchemaItem::CAlwaysTrueSchemaItem() {}
 
-utils::SharedPtr<CAlwaysTrueSchemaItem> CAlwaysTrueSchemaItem::create() {
-  return new CAlwaysTrueSchemaItem();
+std::shared_ptr<CAlwaysTrueSchemaItem> CAlwaysTrueSchemaItem::create() {
+  return std::shared_ptr<CAlwaysTrueSchemaItem>(new CAlwaysTrueSchemaItem());
 }
 
-Errors::eType CAlwaysTrueSchemaItem::validate(const SmartObject& object) {
-  return Errors::OK;
+errors::eType CAlwaysTrueSchemaItem::validate(
+    const SmartObject& Object,
+    rpc::ValidationReport* report__,
+    const utils::SemanticVersion& MessageVersion) {
+  return errors::OK;
 }
 
-Errors::eType CAlwaysTrueSchemaItem::validate(const SmartObject& object,
-                                              rpc::ValidationReport* report__) {
-  return Errors::OK;
-}
-
-}  // namespace NsSmartObjects
-}  // namespace NsSmartDeviceLink
+}  // namespace ns_smart_objects
+}  // namespace ns_smart_device_link

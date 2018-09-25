@@ -187,10 +187,10 @@ int SQLPTRepresentation::TimeoutResponse() {
   utils::dbms::SQLQuery query(db());
   if (!query.Prepare(sql_pt::kSelectTimeoutResponse) || !query.Exec()) {
     LOG4CXX_INFO(logger_, "Can not select timeout response for retry sequence");
-    const int defaultTimeout = 30 * date_time::DateTime::MILLISECONDS_IN_SECOND;
+    const int defaultTimeout = 30 * date_time::MILLISECONDS_IN_SECOND;
     return defaultTimeout;
   }
-  return query.GetInteger(0) * date_time::DateTime::MILLISECONDS_IN_SECOND;
+  return query.GetInteger(0) * date_time::MILLISECONDS_IN_SECOND;
 }
 
 bool SQLPTRepresentation::SecondsBetweenRetries(std::vector<int>* seconds) {
@@ -483,10 +483,10 @@ bool SQLPTRepresentation::RefreshDB() {
   return true;
 }
 
-utils::SharedPtr<policy_table::Table> SQLPTRepresentation::GenerateSnapshot()
+std::shared_ptr<policy_table::Table> SQLPTRepresentation::GenerateSnapshot()
     const {
   LOG4CXX_AUTO_TRACE(logger_);
-  utils::SharedPtr<policy_table::Table> table = new policy_table::Table();
+  auto table = std::make_shared<policy_table::Table>();
   GatherModuleMeta(&*table->policy_table.module_meta);
   GatherModuleConfig(&table->policy_table.module_config);
   GatherUsageAndErrorCounts(&*table->policy_table.usage_and_error_counts);
@@ -723,7 +723,6 @@ bool SQLPTRepresentation::GatherApplicationPoliciesSection(
     if (!GatherAppGroup(app_id, &params.groups)) {
       return false;
     }
-#ifdef SDL_REMOTE_CONTROL
     bool denied = false;
     if (!GatherRemoteControlDenied(app_id, &denied)) {
       return false;
@@ -733,7 +732,6 @@ bool SQLPTRepresentation::GatherApplicationPoliciesSection(
         return false;
       }
     }
-#endif  // SDL_REMOTE_CONTROL
     if (!GatherNickName(app_id, &*params.nicknames)) {
       return false;
     }
@@ -905,12 +903,10 @@ bool SQLPTRepresentation::SaveApplicationPoliciesSection(
     LOG4CXX_WARN(logger_, "Incorrect delete from app_group.");
     return false;
   }
-#ifdef SDL_REMOTE_CONTROL
   if (!query_delete.Exec(sql_pt::kDeleteModuleTypes)) {
     LOG4CXX_WARN(logger_, "Incorrect delete from module_type.");
     return false;
   }
-#endif  // SDL_REMOTE_CONTROL
   if (!query_delete.Exec(sql_pt::kDeleteApplication)) {
     LOG4CXX_WARN(logger_, "Incorrect delete from application.");
     return false;
@@ -998,13 +994,11 @@ bool SQLPTRepresentation::SaveSpecificAppPolicy(
   if (!SaveAppGroup(app.first, app.second.groups)) {
     return false;
   }
-#ifdef SDL_REMOTE_CONTROL
   bool denied = !app.second.moduleType->is_initialized();
   if (!SaveRemoteControlDenied(app.first, denied) ||
       !SaveModuleType(app.first, *app.second.moduleType)) {
     return false;
   }
-#endif  // SDL_REMOTE_CONTROL
   if (!SaveNickname(app.first, *app.second.nicknames)) {
     return false;
   }
@@ -1671,8 +1665,6 @@ bool SQLPTRepresentation::GatherAppGroup(
   return true;
 }
 
-#ifdef SDL_REMOTE_CONTROL
-
 bool SQLPTRepresentation::GatherRemoteControlDenied(const std::string& app_id,
                                                     bool* denied) const {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -1703,6 +1695,10 @@ bool SQLPTRepresentation::GatherModuleType(
     policy_table::ModuleType type;
     if (!policy_table::EnumFromJsonString(query.GetString(0), &type)) {
       return false;
+    }
+    if (policy_table::ModuleType::MT_EMPTY == type) {
+      app_types->mark_initialized();
+      continue;
     }
     app_types->push_back(type);
   }
@@ -1736,18 +1732,30 @@ bool SQLPTRepresentation::SaveModuleType(
   }
 
   policy_table::ModuleTypes::const_iterator it;
-  for (it = types.begin(); it != types.end(); ++it) {
+  if (!types.empty()) {
+    for (it = types.begin(); it != types.end(); ++it) {
+      query.Bind(0, app_id);
+      std::string module(policy_table::EnumToJsonString(*it));
+      query.Bind(1, module);
+      LOG4CXX_DEBUG(logger_,
+                    "Module(app: " << app_id << ", type: " << module << ")");
+      if (!query.Exec() || !query.Reset()) {
+        LOG4CXX_WARN(logger_, "Incorrect insert into module type.");
+        return false;
+      }
+    }
+  } else if (types.is_initialized()) {
     query.Bind(0, app_id);
-    std::string module(policy_table::EnumToJsonString(*it));
-    query.Bind(1, module);
-    LOG4CXX_DEBUG(logger_,
-                  "Module(app: " << app_id << ", type: " << module << ")");
+    query.Bind(1,
+               std::string(policy_table::EnumToJsonString(
+                   policy_table::ModuleType::MT_EMPTY)));
     if (!query.Exec() || !query.Reset()) {
-      LOG4CXX_WARN(logger_, "Incorrect insert into module type.");
+      LOG4CXX_WARN(logger_, "Incorrect insert into module types.");
       return false;
     }
+  } else {
+    LOG4CXX_WARN(logger_, "Module Type omitted.");
   }
-
   return true;
 }
 
@@ -1862,7 +1870,6 @@ bool SQLPTRepresentation::GatherRemoteRpc(
   }
   return true;
 }
-#endif  // SDL_REMOTE_CONTROL
 
 bool SQLPTRepresentation::SaveApplicationCustomData(const std::string& app_id,
                                                     bool is_revoked,

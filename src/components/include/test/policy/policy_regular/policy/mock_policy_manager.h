@@ -147,7 +147,6 @@ class MockPolicyManager : public PolicyManager {
       StatusNotifier(
           const std::string& application_id,
           const rpc::policy_table_interface_base::AppHmiTypes& hmi_types));
-#ifdef SDL_REMOTE_CONTROL
   MOCK_METHOD2(SetDefaultHmiTypes,
                void(const std::string& application_id,
                     const std::vector<int>& hmi_types));
@@ -163,8 +162,7 @@ class MockPolicyManager : public PolicyManager {
                      bool(const std::string& policy_app_id,
                           std::vector<std::string>* modules));
   MOCK_METHOD1(set_access_remote,
-               void(utils::SharedPtr<AccessRemote> access_remote));
-#endif  // SDL_REMOTE_CONTROL
+               void(std::shared_ptr<AccessRemote> access_remote));
   MOCK_METHOD0(CleanupUnpairedDevices, bool());
   MOCK_CONST_METHOD1(CanAppKeepContext, bool(const std::string& app_id));
   MOCK_CONST_METHOD1(CanAppStealFocus, bool(const std::string& app_id));
@@ -186,7 +184,6 @@ class MockPolicyManager : public PolicyManager {
   MOCK_CONST_METHOD0(GetMetaInfo, const policy::MetaInfo());
   MOCK_CONST_METHOD0(RetrieveCertificate, std::string());
   MOCK_CONST_METHOD0(HasCertificate, bool());
-  MOCK_METHOD1(SetDecryptedCertificate, void(const std::string&));
   MOCK_METHOD0(ExceededIgnitionCycles, bool());
   MOCK_METHOD0(ExceededDays, bool());
   MOCK_METHOD0(StartPTExchange, void());

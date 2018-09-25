@@ -168,11 +168,7 @@ ApplicationParams::ApplicationParams(const Json::Value* value__)
     , memory_kb(impl::ValueMember(value__, "memory_kb"), 0)
     , heart_beat_timeout_ms(impl::ValueMember(value__, "heart_beat_timeout_ms"))
     , certificate(impl::ValueMember(value__, "certificate"), "not_specified")
-#ifdef SDL_REMOTE_CONTROL
-    , moduleType(impl::ValueMember(value__, "moduleType"))
-#endif  // SDL_REMOTE_CONTROL
-{
-}
+    , moduleType(impl::ValueMember(value__, "moduleType")) {}
 
 Json::Value ApplicationParams::ToJsonValue() const {
   Json::Value result__(PolicyBase::ToJsonValue());
@@ -184,9 +180,7 @@ Json::Value ApplicationParams::ToJsonValue() const {
   impl::WriteJsonField("memory_kb", memory_kb, &result__);
   impl::WriteJsonField(
       "heart_beat_timeout_ms", heart_beat_timeout_ms, &result__);
-#ifdef SDL_REMOTE_CONTROL
   impl::WriteJsonField("moduleType", moduleType, &result__);
-#endif  // SDL_REMOTE_CONTROL
   return result__;
 }
 
@@ -215,11 +209,9 @@ bool ApplicationParams::is_valid() const {
   if (!certificate.is_valid()) {
     return false;
   }
-#ifdef SDL_REMOTE_CONTROL
   if (!moduleType.is_valid()) {
     return false;
   }
-#endif  // SDL_REMOTE_CONTROL
   return Validate();
 }
 
@@ -255,11 +247,9 @@ bool ApplicationParams::struct_empty() const {
   if (certificate.is_initialized()) {
     return false;
   }
-#ifdef SDL_REMOTE_CONTROL
   if (moduleType.is_initialized()) {
     return false;
   }
-#endif  // SDL_REMOTE_CONTROL
   return true;
 }
 
@@ -295,11 +285,9 @@ void ApplicationParams::ReportErrors(rpc::ValidationReport* report__) const {
   if (!certificate.is_valid()) {
     certificate.ReportErrors(&report__->ReportSubobject("certificate"));
   }
-#ifdef SDL_REMOTE_CONTROL
   if (!moduleType.is_valid()) {
     moduleType.ReportErrors(&report__->ReportSubobject("moduleType"));
   }
-#endif  // SDL_REMOTE_CONTROL
 }
 
 void ApplicationParams::SetPolicyTableType(PolicyTableType pt_type) {
@@ -311,9 +299,7 @@ void ApplicationParams::SetPolicyTableType(PolicyTableType pt_type) {
   memory_kb.SetPolicyTableType(pt_type);
   heart_beat_timeout_ms.SetPolicyTableType(pt_type);
   certificate.SetPolicyTableType(pt_type);
-#ifdef SDL_REMOTE_CONTROL
   moduleType.SetPolicyTableType(pt_type);
-#endif  // SDL_REMOTE_CONTROL
 }
 
 // RpcParameters methods
@@ -469,6 +455,7 @@ ModuleConfig::ModuleConfig(const Json::Value* value__)
     : CompositeType(InitHelper(value__, &Json::Value::isObject))
     , device_certificates(impl::ValueMember(value__, "device_certificates"))
     , preloaded_pt(impl::ValueMember(value__, "preloaded_pt"))
+    , full_app_id_supported(impl::ValueMember(value__, "full_app_id_supported"))
     , exchange_after_x_ignition_cycles(
           impl::ValueMember(value__, "exchange_after_x_ignition_cycles"))
     , exchange_after_x_kilometers(
@@ -508,6 +495,8 @@ void ModuleConfig::SafeCopyFrom(const ModuleConfig& from) {
 Json::Value ModuleConfig::ToJsonValue() const {
   Json::Value result__(Json::objectValue);
   impl::WriteJsonField("preloaded_pt", preloaded_pt, &result__);
+  impl::WriteJsonField(
+      "full_app_id_supported", full_app_id_supported, &result__);
   impl::WriteJsonField("exchange_after_x_ignition_cycles",
                        exchange_after_x_ignition_cycles,
                        &result__);
@@ -533,6 +522,9 @@ Json::Value ModuleConfig::ToJsonValue() const {
 
 bool ModuleConfig::is_valid() const {
   if (!preloaded_pt.is_valid()) {
+    return false;
+  }
+  if (!full_app_id_supported.is_valid()) {
     return false;
   }
   if (!exchange_after_x_ignition_cycles.is_valid()) {
@@ -580,6 +572,9 @@ bool ModuleConfig::is_initialized() const {
 
 bool ModuleConfig::struct_empty() const {
   if (preloaded_pt.is_initialized()) {
+    return false;
+  }
+  if (full_app_id_supported.is_initialized()) {
     return false;
   }
 
@@ -630,6 +625,10 @@ void ModuleConfig::ReportErrors(rpc::ValidationReport* report__) const {
   }
   if (!preloaded_pt.is_valid()) {
     preloaded_pt.ReportErrors(&report__->ReportSubobject("preloaded_pt"));
+  }
+  if (!full_app_id_supported.is_valid()) {
+    full_app_id_supported.ReportErrors(
+        &report__->ReportSubobject("full_app_id_supported"));
   }
   if (!exchange_after_x_ignition_cycles.is_valid()) {
     exchange_after_x_ignition_cycles.ReportErrors(
@@ -689,6 +688,7 @@ void ModuleConfig::ReportErrors(rpc::ValidationReport* report__) const {
 void ModuleConfig::SetPolicyTableType(PolicyTableType pt_type) {
   CompositeType::SetPolicyTableType(pt_type);
   preloaded_pt.SetPolicyTableType(pt_type);
+  full_app_id_supported.SetPolicyTableType(pt_type);
   exchange_after_x_ignition_cycles.SetPolicyTableType(pt_type);
   exchange_after_x_kilometers.SetPolicyTableType(pt_type);
   exchange_after_x_days.SetPolicyTableType(pt_type);

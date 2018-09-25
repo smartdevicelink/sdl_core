@@ -43,33 +43,12 @@ namespace protocol_handler {
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "ProtocolHandler")
 
-HandshakeHandler::HandshakeHandler(
-    ProtocolHandlerImpl& protocol_handler,
-    SessionObserver& session_observer,
-    uint32_t connection_key,
-    ConnectionID connection_id,
-    uint8_t session_id,
-    uint8_t protocol_version,
-    uint32_t hash_id,
-    ServiceType service_type,
-    const std::vector<int>& force_protected_service,
-    const bool is_new_service,
-    ProtocolPacket::ProtocolVersion& full_version,
-    std::shared_ptr<uint8_t> payload)
-    : protocol_handler_(protocol_handler)
-    , session_observer_(session_observer)
-    , context_()
-    , full_version_(full_version)
-    , protocol_version_(protocol_version)
-    , payload_(payload) {}
-
-HandshakeHandler::HandshakeHandler(
-    ProtocolHandlerImpl& protocol_handler,
-    SessionObserver& session_observer,
-    ProtocolPacket::ProtocolVersion& full_version,
-    const SessionContext& context,
-    const uint8_t protocol_version,
-    std::shared_ptr<uint8_t> payload)
+HandshakeHandler::HandshakeHandler(ProtocolHandlerImpl& protocol_handler,
+                                   SessionObserver& session_observer,
+                                   utils::SemanticVersion& full_version,
+                                   const SessionContext& context,
+                                   const uint8_t protocol_version,
+                                   std::shared_ptr<BsonObject> payload)
     : protocol_handler_(protocol_handler)
     , session_observer_(session_observer)
     , context_(context)
@@ -92,6 +71,19 @@ bool HandshakeHandler::GetPolicyCertificateData(std::string& data) const {
 
 void HandshakeHandler::OnCertificateUpdateRequired() {}
 
+bool HandshakeHandler::OnHandshakeFailed() {
+  if (payload_) {
+    ProcessFailedHandshake(*payload_);
+  } else {
+    BsonObject params;
+    bson_object_initialize_default(&params);
+    ProcessFailedHandshake(params);
+    bson_object_deinitialize(&params);
+  }
+
+  return true;
+}
+
 bool HandshakeHandler::OnHandshakeDone(
     uint32_t connection_key,
     security_manager::SSLContext::HandshakeResult result) {
@@ -110,20 +102,23 @@ bool HandshakeHandler::OnHandshakeDone(
   const bool success =
       result == security_manager::SSLContext::Handshake_Result_Success;
 
-  BsonObject params;
   if (payload_) {
-    params = bson_object_from_bytes(payload_.get());
+    if (success) {
+      ProcessSuccessfulHandshake(connection_key, *payload_);
+    } else {
+      ProcessFailedHandshake(*payload_);
+    }
   } else {
+    BsonObject params;
     bson_object_initialize_default(&params);
+    if (success) {
+      ProcessSuccessfulHandshake(connection_key, params);
+    } else {
+      ProcessFailedHandshake(params);
+    }
+    bson_object_deinitialize(&params);
   }
 
-  if (success) {
-    ProcessSuccessfulHandshake(connection_key, params);
-  } else {
-    ProcessFailedHandshake(params);
-  }
-
-  bson_object_deinitialize(&params);
   return true;
 }
 

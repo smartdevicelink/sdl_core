@@ -112,7 +112,7 @@ class MockPolicyHandlerInterface : public policy::PolicyHandlerInterface {
   MOCK_METHOD1(add_listener, void(policy::PolicyHandlerObserver* listener));
   MOCK_METHOD1(remove_listener, void(policy::PolicyHandlerObserver* listener));
   MOCK_CONST_METHOD0(GetStatisticManager,
-                     utils::SharedPtr<usage_statistics::StatisticsManager>());
+                     std::shared_ptr<usage_statistics::StatisticsManager>());
   MOCK_CONST_METHOD2(CheckSystemAction,
                      bool(mobile_apis::SystemAction::eType system_action,
                           const std::string& policy_app_id));
@@ -239,7 +239,6 @@ class MockPolicyHandlerInterface : public policy::PolicyHandlerInterface {
                void(const std::string& service_type,
                     policy::EndpointUrls& end_points));
 
-#ifdef SDL_REMOTE_CONTROL
   MOCK_METHOD3(OnUpdateHMILevel,
                void(const std::string& device_id,
                     const std::string& policy_app_id,
@@ -270,7 +269,6 @@ class MockPolicyHandlerInterface : public policy::PolicyHandlerInterface {
   MOCK_METHOD2(OnDeviceSwitching,
                void(const std::string& device_id_from,
                     const std::string& device_id_to));
-#endif  // SDL_REMOTE_CONTROL
 
  private:
 #ifdef EXTERNAL_PROPRIETARY_MODE

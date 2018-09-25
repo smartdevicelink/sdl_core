@@ -41,7 +41,7 @@ CREATE_LOGGERPTR_GLOBAL(logger_, "Resumption")
 
 ResumptionData::ResumptionData(
     const application_manager::ApplicationManager& application_manager)
-    : resumption_lock_(true), application_manager_(application_manager) {}
+    : application_manager_(application_manager) {}
 
 smart_objects::SmartObject ResumptionData::GetApplicationCommands(
     app_mngr::ApplicationConstSharedPtr application) const {
@@ -159,16 +159,9 @@ smart_objects::SmartObject ResumptionData::GetApplicationSubscriptions(
          strings::application_buttons,
          subscriptions);
 
-  DataAccessor<VehicleInfoSubscriptions> vi_accessor =
-      application->SubscribedIVI();
-
-  const VehicleInfoSubscriptions& vi_subscription = vi_accessor.GetData();
-
-  LOG4CXX_DEBUG(logger_, "SubscribedIVI:" << vi_subscription.size());
-  Append(vi_subscription.begin(),
-         vi_subscription.end(),
-         strings::application_vehicle_info,
-         subscriptions);
+  for (auto extension : application->Extensions()) {
+    extension->SaveResumptionData(subscriptions);
+  }
   return subscriptions;
 }
 

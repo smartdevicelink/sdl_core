@@ -36,15 +36,18 @@
 #ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TCP_TCP_CLIENT_LISTENER_H_
 #define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TCP_TCP_CLIENT_LISTENER_H_
 
+#include "utils/lock.h"
 #include "utils/threads/thread_delegate.h"
 #include "transport_manager/transport_adapter/client_connection_listener.h"
 
 class Thread;
+struct in_addr;
 
 namespace transport_manager {
 namespace transport_adapter {
 
 class TransportAdapterController;
+class NetworkInterfaceListener;
 
 /**
  * @brief Listener of device adapter that use TCP transport.
@@ -57,11 +60,15 @@ class TcpClientListener : public ClientConnectionListener {
    * @param controller Pointer to the device adapter controller.
    * @param port Port No.
    * @param enable_keepalive If true enables TCP keepalive on accepted
+   * @param designated_interface Specify the name of the network interface to
+   *listen on. If empty, then this process will listen on all network
+   *interfaces.
    *connections
    */
   TcpClientListener(TransportAdapterController* controller,
                     uint16_t port,
-                    bool enable_keepalive);
+                    bool enable_keepalive,
+                    const std::string designated_interface = "");
 
   /**
    * @brief Destructor.
@@ -101,7 +108,18 @@ class TcpClientListener : public ClientConnectionListener {
    */
   virtual TransportAdapter::Error StopListening();
 
+  /**
+   * @brief Called from NetworkInterfaceListener when IP address of the network
+   *        interface is changed.
+   */
+  virtual void OnIPAddressUpdated(const std::string ipv4_addr,
+                                  const std::string ipv6_addr);
+
 #ifdef BUILD_TESTS
+  void set_network_interface_listener(NetworkInterfaceListener* listener) {
+    interface_listener_ = listener;
+  }
+
   uint16_t port() const {
     return port_;
   }
@@ -113,18 +131,46 @@ class TcpClientListener : public ClientConnectionListener {
   threads::Thread* thread() const {
     return thread_;
   }
+
+  static void set_testing(bool enabled) {
+    testing_ = enabled;
+  }
 #endif  // BUILD_TESTS
 
  private:
   const uint16_t port_;
   const bool enable_keepalive_;
   TransportAdapterController* controller_;
+  bool initialized_;
+  bool started_;
   threads::Thread* thread_;
   int socket_;
   bool thread_stop_requested_;
+  int pipe_fds_[2];
+  NetworkInterfaceListener* interface_listener_;
+  const std::string designated_interface_;
+  std::string current_ip_address_;
+  sync_primitives::Lock start_stop_lock_;
+
+#ifdef BUILD_TESTS
+  static bool testing_;
+#endif  // BUILD_TESTS
 
   void Loop();
   void StopLoop();
+
+  TransportAdapter::Error StartListeningThread();
+  TransportAdapter::Error StopListeningThread();
+
+  bool StartOnNetworkInterface();
+  bool StopOnNetworkInterface();
+  bool IsListeningOnSpecificInterface() const;
+
+  static int CreateIPv4ServerSocket(uint16_t port,
+                                    const std::string interface_name = "");
+  static void DestroyServerSocket(int sock);
+  static bool GetIPv4Address(const std::string interface_name,
+                             struct in_addr* ip_address);
 
   class ListeningThreadDelegate : public threads::ThreadDelegate {
    public:

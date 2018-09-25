@@ -94,7 +94,7 @@ class CodeGenerator(SmartFactoryBase.CodeGenerator):
 
     _error_response_insert_template = string.Template(
         u'''functions_schemes_.insert(std::make_pair('''
-        u'''NsSmartDeviceLink::NsJSONHandler::'''
+        u'''ns_smart_device_link::ns_json_handler::'''
         u'''SmartSchemaKey<FunctionID::eType, messageType::eType>('''
         u'''FunctionID::${function_id}, messageType::error_response), '''
         u'''error_response_schema));\n''')
@@ -102,32 +102,32 @@ class CodeGenerator(SmartFactoryBase.CodeGenerator):
     _error_response_schema_template = (
         u'''CObjectSchemaItem::Members '''
         u'''params_members;\n'''
-        u'''params_members[NsSmartDeviceLink::NsJSONHandler::'''
+        u'''params_members[ns_smart_device_link::ns_json_handler::'''
         u'''strings::S_FUNCTION_ID] = CObjectSchemaItem::SMember('''
         u'''TEnumSchemaItem<FunctionID::eType>::create('''
         u'''function_id_items), true);\n'''
-        u'''params_members[NsSmartDeviceLink::NsJSONHandler::'''
+        u'''params_members[ns_smart_device_link::ns_json_handler::'''
         u'''strings::S_MESSAGE_TYPE] = CObjectSchemaItem::SMember('''
         u'''TEnumSchemaItem<messageType::eType>::create('''
         u'''message_type_items), true);\n'''
-        u'''params_members[NsSmartDeviceLink::NsJSONHandler::'''
+        u'''params_members[ns_smart_device_link::ns_json_handler::'''
         u'''strings::S_PROTOCOL_VERSION] = CObjectSchemaItem::SMember('''
         u'''TNumberSchemaItem<int>::create(), true);\n'''
-        u'''params_members[NsSmartDeviceLink::NsJSONHandler::'''
+        u'''params_members[ns_smart_device_link::ns_json_handler::'''
         u'''strings::S_PROTOCOL_TYPE] = CObjectSchemaItem::SMember('''
         u'''TNumberSchemaItem<int>::create(), true);\n'''
-        u'''params_members[NsSmartDeviceLink::NsJSONHandler::'''
+        u'''params_members[ns_smart_device_link::ns_json_handler::'''
         u'''strings::S_CORRELATION_ID] = CObjectSchemaItem::SMember('''
         u'''TNumberSchemaItem<int>::create(), true);\n'''
-        u'''params_members[NsSmartDeviceLink::NsJSONHandler::'''
+        u'''params_members[ns_smart_device_link::ns_json_handler::'''
         u'''strings::kCode] = CObjectSchemaItem::SMember('''
         u'''TNumberSchemaItem<int>::create(), true);\n'''
-        u'''params_members[NsSmartDeviceLink::NsJSONHandler::'''
+        u'''params_members[ns_smart_device_link::ns_json_handler::'''
         u'''strings::kMessage] = CObjectSchemaItem::SMember('''
         u'''CStringSchemaItem::create(), true);\n'''
         u'''\n'''
         u'''CObjectSchemaItem::Members root_members_map;\n'''
-        u'''root_members_map[NsSmartDeviceLink::NsJSONHandler::'''
+        u'''root_members_map[ns_smart_device_link::ns_json_handler::'''
         u'''strings::S_PARAMS] = CObjectSchemaItem::SMember('''
         u'''CObjectSchemaItem::create(params_members), true);\n'''
         u'''\n'''
@@ -136,30 +136,30 @@ class CodeGenerator(SmartFactoryBase.CodeGenerator):
         u'''\n''')
 
     _base_params = (
-        u'''params_members[NsSmartDeviceLink::NsJSONHandler::'''
+        u'''params_members[ns_smart_device_link::ns_json_handler::'''
         u'''strings::S_FUNCTION_ID] = CObjectSchemaItem::'''
         u'''SMember(TEnumSchemaItem<FunctionID::eType>::'''
         u'''create(function_id_items), true);\n'''
-        u'''params_members[NsSmartDeviceLink::NsJSONHandler::'''
+        u'''params_members[ns_smart_device_link::ns_json_handler::'''
         u'''strings::S_MESSAGE_TYPE] = CObjectSchemaItem::'''
         u'''SMember(TEnumSchemaItem<messageType::eType>::'''
         u'''create(message_type_items), true);\n'''
-        u'''params_members[NsSmartDeviceLink::NsJSONHandler::'''
+        u'''params_members[ns_smart_device_link::ns_json_handler::'''
         u'''strings::S_PROTOCOL_VERSION] = CObjectSchemaItem::'''
         u'''SMember(TNumberSchemaItem<int>::create(), true);\n'''
-        u'''params_members[NsSmartDeviceLink::NsJSONHandler::'''
+        u'''params_members[ns_smart_device_link::ns_json_handler::'''
         u'''strings::S_PROTOCOL_TYPE] = CObjectSchemaItem::'''
         u'''SMember(TNumberSchemaItem<int>::create(), true);\n'''
     )
 
     _correlation_id_param = (
-        u'''params_members[NsSmartDeviceLink::NsJSONHandler::'''
+        u'''params_members[ns_smart_device_link::ns_json_handler::'''
         u'''strings::S_CORRELATION_ID] = CObjectSchemaItem::'''
         u'''SMember(TNumberSchemaItem<int>::create(), true);\n'''
     )
 
     _additional_response_params = (
-        u'''params_members[NsSmartDeviceLink::NsJSONHandler::'''
+        u'''params_members[ns_smart_device_link::ns_json_handler::'''
         u'''strings::kCode] = CObjectSchemaItem::'''
         u'''SMember(TNumberSchemaItem<int>::create(), true);\n'''
     )

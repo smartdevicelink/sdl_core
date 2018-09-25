@@ -272,6 +272,15 @@ class TransportAdapterListenerImpl
    */
   void OnTransportSwitchRequested(const TransportAdapter* adapter) OVERRIDE;
 
+  /**
+   * @brief Notification that the transport's specific configuration has been
+   *        updated.
+   *
+   * @param transport_adapter  pointer to the transport adapter
+   */
+  void OnTransportConfigUpdated(
+      const transport_adapter::TransportAdapter* adapter) OVERRIDE;
+
  private:
   TransportManager* transport_manager_;
   TransportAdapter* transport_adapter_;

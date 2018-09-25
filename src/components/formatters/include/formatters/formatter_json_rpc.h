@@ -45,9 +45,9 @@
 #include "CFormatterJsonBase.h"
 #include "formatters/CSmartFactory.h"
 
-namespace NsSmartDeviceLink {
-namespace NsJSONHandler {
-namespace Formatters {
+namespace ns_smart_device_link {
+namespace ns_json_handler {
+namespace formatters {
 
 /**
  * @brief Formatter for JSON RPC format.
@@ -108,7 +108,7 @@ class FormatterJsonRpc : public CFormatterJsonBase {
    *
    * @return true if success, false otherwise.
    */
-  static bool ToString(const NsSmartObjects::SmartObject& obj,
+  static bool ToString(const ns_smart_objects::SmartObject& obj,
                        std::string& out_str);
 
   /**
@@ -125,7 +125,7 @@ class FormatterJsonRpc : public CFormatterJsonBase {
    */
   template <typename FunctionId, typename MessageType>
   static int32_t FromString(const std::string& str,
-                            NsSmartObjects::SmartObject& out);
+                            ns_smart_objects::SmartObject& out);
 
  private:
   /**
@@ -223,7 +223,7 @@ class FormatterJsonRpc : public CFormatterJsonBase {
    */
   template <typename FunctionId>
   static int32_t ParseFunctionId(const Json::Value& method_value,
-                                 NsSmartObjects::SmartObject& out);
+                                 ns_smart_objects::SmartObject& out);
 
   /**
    * @brief Set method.
@@ -237,7 +237,7 @@ class FormatterJsonRpc : public CFormatterJsonBase {
    * @return true if function id was extracted successfully and set as a
    *         value of "method" field.
    */
-  static bool SetMethod(const NsSmartObjects::SmartObject& params,
+  static bool SetMethod(const ns_smart_objects::SmartObject& params,
                         Json::Value& method_container);
 
   /**
@@ -252,7 +252,7 @@ class FormatterJsonRpc : public CFormatterJsonBase {
    * @return true if request/response id was extracted successfully and set
    *         as a value of "id" field.
    */
-  static bool SetId(const NsSmartObjects::SmartObject& params,
+  static bool SetId(const ns_smart_objects::SmartObject& params,
                     Json::Value& id_container);
 
   /**
@@ -267,18 +267,18 @@ class FormatterJsonRpc : public CFormatterJsonBase {
    * @return true if message string was extracted successfully and set
    *         as a value of "message" field.
    */
-  static bool SetMessage(const NsSmartObjects::SmartObject& params,
+  static bool SetMessage(const ns_smart_objects::SmartObject& params,
                          Json::Value& id_container);
 };
 
 template <typename FunctionId, typename MessageType>
 int32_t FormatterJsonRpc::FromString(const std::string& str,
-                                     NsSmartObjects::SmartObject& out) {
+                                     ns_smart_objects::SmartObject& out) {
   int32_t result = kSuccess;
   try {
     Json::Value root;
     Json::Reader reader;
-    namespace strings = NsSmartDeviceLink::NsJSONHandler::strings;
+    namespace strings = ns_smart_device_link::ns_json_handler::strings;
 
     if (false == reader.parse(str, root)) {
       result = kParsingError | kMethodNotSpecified | kUnknownMethod |
@@ -309,7 +309,7 @@ int32_t FormatterJsonRpc::FromString(const std::string& str,
           result |= ParseFunctionId<FunctionId>(root[kMethod], out);
         }
         out[strings::S_MSG_PARAMS] =
-            NsSmartObjects::SmartObject(NsSmartObjects::SmartType_Map);
+            ns_smart_objects::SmartObject(ns_smart_objects::SmartType_Map);
       } else {
         const Json::Value& id_value = root[kId];
 
@@ -323,7 +323,7 @@ int32_t FormatterJsonRpc::FromString(const std::string& str,
               id_value.asDouble();
         } else if (true == id_value.isNull()) {
           out[strings::S_PARAMS][strings::S_CORRELATION_ID] =
-              NsSmartObjects::SmartObject(NsSmartObjects::SmartType_Null);
+              ns_smart_objects::SmartObject(ns_smart_objects::SmartType_Null);
         } else {
           result |= kInvalidFormat | kInvalidId;
         }
@@ -332,14 +332,14 @@ int32_t FormatterJsonRpc::FromString(const std::string& str,
           message_type_string = kRequest;
           result |= ParseFunctionId<FunctionId>(root[kMethod], out);
           out[strings::S_MSG_PARAMS] =
-              NsSmartObjects::SmartObject(NsSmartObjects::SmartType_Map);
+              ns_smart_objects::SmartObject(ns_smart_objects::SmartType_Map);
         } else {
           Json::Value method_container;
           bool method_container_found = false;
 
           if (true == root.isMember(kResult)) {
             out[strings::S_MSG_PARAMS] =
-                NsSmartObjects::SmartObject(NsSmartObjects::SmartType_Map);
+                ns_smart_objects::SmartObject(ns_smart_objects::SmartType_Map);
 
             message_type_string = kResponse;
             response_value = root[kResult];
@@ -348,7 +348,7 @@ int32_t FormatterJsonRpc::FromString(const std::string& str,
             method_container_found = true;
           } else if (true == root.isMember(kError)) {
             out[strings::S_MSG_PARAMS] =
-                NsSmartObjects::SmartObject(NsSmartObjects::SmartType_Map);
+                ns_smart_objects::SmartObject(ns_smart_objects::SmartType_Map);
             message_type_string = kErrorResponse;
             response_value = root[kError];
             response_value_found = true;
@@ -382,7 +382,7 @@ int32_t FormatterJsonRpc::FromString(const std::string& str,
       if (0 == (result & kUnknownMessageType)) {
         MessageType message_type;
 
-        if (!NsSmartObjects::EnumConversionHelper<MessageType>::StringToEnum(
+        if (!ns_smart_objects::EnumConversionHelper<MessageType>::StringToEnum(
                 message_type_string, &message_type)) {
           result |= kUnknownMessageType;
         } else {
@@ -469,7 +469,7 @@ int32_t FormatterJsonRpc::FromString(const std::string& str,
 
 template <typename FunctionId>
 int32_t FormatterJsonRpc::ParseFunctionId(const Json::Value& method_value,
-                                          NsSmartObjects::SmartObject& out) {
+                                          ns_smart_objects::SmartObject& out) {
   int32_t result = kSuccess;
 
   if (false == method_value.isString()) {
@@ -477,11 +477,11 @@ int32_t FormatterJsonRpc::ParseFunctionId(const Json::Value& method_value,
   } else {
     FunctionId function_id;
 
-    if (!NsSmartObjects::EnumConversionHelper<FunctionId>::CStringToEnum(
+    if (!ns_smart_objects::EnumConversionHelper<FunctionId>::CStringToEnum(
             method_value.asCString(), &function_id)) {
       result |= kUnknownMethod;
     } else {
-      namespace strings = NsSmartDeviceLink::NsJSONHandler::strings;
+      namespace strings = ns_smart_device_link::ns_json_handler::strings;
 
       out[strings::S_PARAMS][strings::S_FUNCTION_ID] = function_id;
     }
@@ -490,8 +490,8 @@ int32_t FormatterJsonRpc::ParseFunctionId(const Json::Value& method_value,
   return result;
 }
 
-}  // namespace Formatters
-}  // namespace NsJSONHandler
-}  // namespace NsSmartDeviceLink
+}  // namespace formatters
+}  // namespace ns_json_handler
+}  // namespace ns_smart_device_link
 
 #endif  // SRC_COMPONENTS_FORMATTERS_INCLUDE_FORMATTERS_FORMATTER_JSON_RPC_H_

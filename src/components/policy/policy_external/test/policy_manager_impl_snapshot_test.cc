@@ -84,7 +84,7 @@ TEST_F(PolicyManagerImplTest2, UpdatedPreloadedPT_ExpectLPT_IsUpdated) {
   EXPECT_TRUE(cache->IsPTPreloaded());
 
   // Arrange
-  utils::SharedPtr<policy_table::Table> table = cache->GenerateSnapshot();
+  std::shared_ptr<policy_table::Table> table = cache->GenerateSnapshot();
   // Get FunctionalGroupings
   policy_table::FunctionalGroupings& fc =
       table->policy_table.functional_groupings;
@@ -119,7 +119,7 @@ TEST_F(PolicyManagerImplTest2,
   // Arrange
   CreateLocalPT(preloaded_pt_filename_);
   policy_manager_->SetSystemLanguage("it-it");
-  utils::SharedPtr<policy_table::Table> pt =
+  std::shared_ptr<policy_table::Table> pt =
       (policy_manager_->GetCache())->GetPT();
   ::policy_table::ModuleMeta& ModuleMeta = *(pt->policy_table.module_meta);
   EXPECT_EQ("it-it", static_cast<std::string>(*(ModuleMeta.language)));
@@ -130,7 +130,7 @@ TEST_F(PolicyManagerImplTest2, SetVINValue_ExpectVINSetSuccessfully) {
   CreateLocalPT(preloaded_pt_filename_);
   std::string vin_code("1FAPP6242VH100001");
   policy_manager_->SetVINValue(vin_code);
-  utils::SharedPtr<policy_table::Table> pt =
+  std::shared_ptr<policy_table::Table> pt =
       (policy_manager_->GetCache())->GetPT();
   ::policy_table::ModuleMeta& ModuleMeta = *(pt->policy_table.module_meta);
   EXPECT_EQ(vin_code, static_cast<std::string>(*(ModuleMeta.vin)));
@@ -141,7 +141,7 @@ TEST_F(PolicyManagerImplTest2, SetSystemInfo_ExpectSystemInfoSetSuccessfully) {
   CreateLocalPT(preloaded_pt_filename_);
   policy_manager_->SetSystemInfo("4.1.3.B_EB355B", "WAEGB", "ru-ru");
   policy::CacheManagerInterfaceSPtr cache = policy_manager_->GetCache();
-  utils::SharedPtr<policy_table::Table> pt = cache->GetPT();
+  std::shared_ptr<policy_table::Table> pt = cache->GetPT();
   ::policy_table::ModuleMeta& ModuleMeta = *(pt->policy_table.module_meta);
   EXPECT_EQ("ru-ru", static_cast<std::string>(*(ModuleMeta.language)));
   EXPECT_EQ("4.1.3.B_EB355B",
@@ -189,7 +189,7 @@ TEST_F(PolicyManagerImplTest2, CleanUnpairedDevice_ExpectDevicesDeleted) {
   policy_manager_->AddDevice("AAA123456789RRR", "Bluetooth");
   policy_manager_->SetDeviceInfo("AAA123456789RRR", dev_info3);
 
-  utils::SharedPtr<policy_table::Table> pt =
+  std::shared_ptr<policy_table::Table> pt =
       (policy_manager_->GetCache())->GetPT();
   // Try to find first device in PT
   policy_table::DeviceData::const_iterator iter =
@@ -316,7 +316,7 @@ TEST_F(PolicyManagerImplTest2, AddDevice_RegisterDevice_TRUE) {
   const bool result =
       (policy_manager_->GetCache())->AddDevice(device_id_1_, connection_type);
   // Get Policy table
-  const utils::SharedPtr<policy_table::Table> policy_table =
+  const std::shared_ptr<policy_table::Table> policy_table =
       policy_manager_->GetCache()->GetPT();
   // Get preloaded_pt flag from Policy table
   const bool is_preloaded_pt =

@@ -44,7 +44,7 @@
 
 #include "utils/macro.h"
 #include "utils/logger.h"
-#include "utils/make_shared.h"
+
 #include "utils/timer_task_impl.h"
 #include "transport_manager/common.h"
 #include "transport_manager/transport_manager_listener.h"
@@ -529,6 +529,8 @@ int TransportManagerImpl::Reinit() {
   LOG4CXX_AUTO_TRACE(logger_);
   DisconnectAllDevices();
   TerminateAllAdapters();
+  device_to_adapter_map_.clear();
+  connection_id_counter_ = 0;
   int ret = InitAllAdapters();
   return ret;
 }
@@ -1066,7 +1068,7 @@ void TransportManagerImpl::Handle(TransportAdapterEvent event) {
       LOG4CXX_ERROR(logger_, "Transport adapter failed to send data");
       // TODO(YK): potential error case -> thread unsafe
       // update of message content
-      if (event.event_data.valid()) {
+      if (event.event_data.use_count() != 0) {
         event.event_data->set_waiting(true);
       } else {
         LOG4CXX_DEBUG(logger_, "Data is invalid");
@@ -1144,6 +1146,13 @@ void TransportManagerImpl::Handle(TransportAdapterEvent event) {
       LOG4CXX_DEBUG(logger_, "eevent_type = ON_UNEXPECTED_DISCONNECT");
       break;
     }
+    case EventTypeEnum::ON_TRANSPORT_CONFIG_UPDATED: {
+      LOG4CXX_DEBUG(logger_, "event_type = ON_TRANSPORT_CONFIG_UPDATED");
+      transport_adapter::TransportConfig config =
+          event.transport_adapter->GetTransportConfiguration();
+      RaiseEvent(&TransportManagerListener::OnTransportConfigUpdated, config);
+      break;
+    }
   }  // switch
   LOG4CXX_TRACE(logger_, "exit");
 }
@@ -1203,9 +1212,9 @@ TransportManagerImpl::ConnectionInternal::ConnectionInternal(
     const DeviceHandle device_handle)
     : transport_manager(transport_manager)
     , transport_adapter(transport_adapter)
-    , timer(utils::MakeShared<timer::Timer,
-                              const char*,
-                              ::timer::TimerTaskImpl<ConnectionInternal>*>(
+    , timer(std::make_shared<timer::Timer,
+                             const char*,
+                             ::timer::TimerTaskImpl<ConnectionInternal>*>(
           "TM DiscRoutine",
           new ::timer::TimerTaskImpl<ConnectionInternal>(
               this, &ConnectionInternal::DisconnectFailedRoutine)))

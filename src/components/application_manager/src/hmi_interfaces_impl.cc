@@ -61,8 +61,6 @@ generate_function_to_interface_convert_map() {
       HmiInterfaces::HMI_INTERFACE_BasicCommunication;
   convert_map[BasicCommunication_OnFileRemoved] =
       HmiInterfaces::HMI_INTERFACE_BasicCommunication;
-  convert_map[BasicCommunication_AllowDeviceToConnect] =
-      HmiInterfaces::HMI_INTERFACE_BasicCommunication;
   convert_map[BasicCommunication_OnDeviceChosen] =
       HmiInterfaces::HMI_INTERFACE_BasicCommunication;
   convert_map[BasicCommunication_OnFindApplications] =
@@ -222,6 +220,13 @@ generate_function_to_interface_convert_map() {
   convert_map[SDL_GetURLS] = HmiInterfaces::HMI_INTERFACE_SDL;
   convert_map[RC_IsReady] = HmiInterfaces::HMI_INTERFACE_RC;
   convert_map[RC_GetCapabilities] = HmiInterfaces::HMI_INTERFACE_RC;
+  convert_map[Buttons_ButtonPress] = HmiInterfaces::HMI_INTERFACE_RC;
+  convert_map[RC_SetInteriorVehicleData] = HmiInterfaces::HMI_INTERFACE_RC;
+  convert_map[RC_GetInteriorVehicleData] = HmiInterfaces::HMI_INTERFACE_RC;
+  convert_map[RC_GetInteriorVehicleDataConsent] =
+      HmiInterfaces::HMI_INTERFACE_RC;
+  convert_map[RC_OnInteriorVehicleData] = HmiInterfaces::HMI_INTERFACE_RC;
+  convert_map[RC_OnRemoteControlSettings] = HmiInterfaces::HMI_INTERFACE_RC;
   return convert_map;
 }
 

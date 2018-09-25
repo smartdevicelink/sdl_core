@@ -38,6 +38,8 @@
 
 #include <stdint.h>
 #include <string>
+#include <map>
+#include <vector>
 
 namespace application_manager {
 class ApplicationManagerSettings : public RequestControlerSettings,
@@ -48,6 +50,8 @@ class ApplicationManagerSettings : public RequestControlerSettings,
   virtual const std::pair<uint32_t, int32_t>& read_did_frequency() const = 0;
   virtual const std::pair<uint32_t, int32_t>& get_vehicle_data_frequency()
       const = 0;
+  virtual const std::pair<uint32_t, int32_t>&
+  get_interior_vehicle_data_frequency() const = 0;
   virtual uint32_t hash_string_size() const = 0;
   virtual const uint32_t& app_dir_quota() const = 0;
   virtual uint32_t stop_streaming_timeout() const = 0;
@@ -80,6 +84,7 @@ class ApplicationManagerSettings : public RequestControlerSettings,
   virtual const std::string& video_stream_file() const = 0;
   virtual const std::string& audio_stream_file() const = 0;
 
+  virtual bool use_full_app_id() const = 0;
   virtual bool use_db_for_resumption() const = 0;
   virtual const uint32_t& app_resumption_save_persistent_data_timeout()
       const = 0;
@@ -87,6 +92,13 @@ class ApplicationManagerSettings : public RequestControlerSettings,
   virtual const uint32_t& app_resuming_timeout() const = 0;
   virtual uint16_t attempts_to_open_resumption_db() const = 0;
   virtual uint16_t open_attempt_timeout_ms_resumption_db() const = 0;
+  virtual const std::map<std::string, std::vector<std::string> >&
+  transport_required_for_resumption_map() const = 0;
+  virtual const std::string& navigation_lowbandwidth_resumption_level()
+      const = 0;
+  virtual const std::string& projection_lowbandwidth_resumption_level()
+      const = 0;
+  virtual const std::string& media_lowbandwidth_resumption_level() const = 0;
   virtual void set_config_file_name(const std::string& fileName) = 0;
   virtual const std::pair<uint32_t, int32_t>& start_stream_retry_amount()
       const = 0;
