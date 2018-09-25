@@ -298,6 +298,8 @@ class ResumptionDataProcessor : public app_mngr::event_engine::EventObserver {
   void CheckVehicleDataResponse(const smart_objects::SmartObject& request,
                                 const smart_objects::SmartObject& response,
                                 ApplicationResumptionStatus& status);
+
+  bool HasNoHMIRequestsSent(const int32_t app_id);
   /**
    * @brief A map of the IDs and Application Resumption Status for these ID
    **/
