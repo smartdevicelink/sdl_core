@@ -61,6 +61,15 @@ void ResumptionDataProcessor::Restore(ApplicationSharedPtr application,
                                       smart_objects::SmartObject& saved_app,
                                       ResumeCtrl::ResumptionCallBack callback) {
   LOG4CXX_AUTO_TRACE(logger_);
+
+  if (!HasDataToRestore(saved_app) &&
+      !HasGlobalPropertiesToRestore(saved_app) &&
+      !HasSubscriptionsToRestore(saved_app)) {
+    LOG4CXX_DEBUG(logger_, "No data to restore, resumption is successful");
+    callback(mobile_apis::Result::SUCCESS, "Data resumption succesful");
+    return;
+  }
+
   AddFiles(application, saved_app);
   AddSubmenues(application, saved_app);
   AddCommands(application, saved_app);
@@ -68,6 +77,67 @@ void ResumptionDataProcessor::Restore(ApplicationSharedPtr application,
   SetGlobalProperties(application, saved_app);
   AddSubscriptions(application, saved_app);
   register_callbacks_[application->app_id()] = callback;
+}
+
+bool ResumptionDataProcessor::HasDataToRestore(
+    const smart_objects::SmartObject& saved_app) const {
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  const bool has_data_to_restore =
+      !saved_app[strings::application_submenus].empty() ||
+      !saved_app[strings::application_commands].empty() ||
+      !saved_app[strings::application_choice_sets].empty();
+
+  LOG4CXX_DEBUG(logger_, "HasDataToRestore: " << has_data_to_restore);
+
+  return has_data_to_restore;
+}
+
+bool ResumptionDataProcessor::HasGlobalPropertiesToRestore(
+    const smart_objects::SmartObject& saved_app) const {
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  const smart_objects::SmartObject& global_properties =
+      saved_app[strings::application_global_properties];
+
+  const bool has_gl_props_to_restore =
+      !global_properties[strings::help_prompt].empty() ||
+      !global_properties[strings::keyboard_properties].empty() ||
+      !global_properties[strings::menu_icon].empty() ||
+      !global_properties[strings::menu_title].empty() ||
+      !global_properties[strings::timeout_prompt].empty() ||
+      !global_properties[strings::vr_help].empty() ||
+      !global_properties[strings::vr_help_title].empty();
+
+  LOG4CXX_DEBUG(logger_,
+                "HasGlobalPropertiesToRestore: " << has_gl_props_to_restore);
+
+  return has_gl_props_to_restore;
+}
+
+bool ResumptionDataProcessor::HasSubscriptionsToRestore(
+    const smart_objects::SmartObject& saved_app) const {
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  const smart_objects::SmartObject& suscriptions =
+      saved_app[strings::application_subscriptions];
+
+  const bool has_ivi_subscriptions =
+      !suscriptions[strings::application_vehicle_info].empty();
+
+  const bool has_button_subscriptions =
+      !(suscriptions[strings::application_buttons].length() == 1 &&
+        static_cast<hmi_apis::Common_ButtonName::eType>(
+            suscriptions[strings::application_buttons][0].asInt()) ==
+            hmi_apis::Common_ButtonName::CUSTOM_BUTTON);
+
+  const bool has_subscriptions_to_restore =
+      has_ivi_subscriptions || has_button_subscriptions;
+
+  LOG4CXX_DEBUG(logger_,
+                "HasSubscriptionsToRestore: " << has_subscriptions_to_restore);
+
+  return has_subscriptions_to_restore;
 }
 
 bool ResumptionRequestIDs::operator<(const ResumptionRequestIDs& other) const {
@@ -343,7 +413,11 @@ void ResumptionDataProcessor::DeleteSubmenues(
   LOG4CXX_AUTO_TRACE(logger_);
   const uint32_t app_id = application->app_id();
   ApplicationResumptionStatus& status = resumption_status_[app_id];
-  for (auto request : status.successful_requests) {
+  auto requests = status.successful_requests;
+  requests.insert(requests.begin(),
+                  status.error_requests.begin(),
+                  status.error_requests.end());
+  for (auto request : requests) {
     if (hmi_apis::FunctionID::UI_AddSubMenu ==
         request.request_ids.function_id) {
       smart_objects::SmartObjectSPtr ui_sub_menu =
@@ -399,8 +473,11 @@ void ResumptionDataProcessor::DeleteCommands(ApplicationSharedPtr application) {
   LOG4CXX_AUTO_TRACE(logger_);
   const uint32_t app_id = application->app_id();
   ApplicationResumptionStatus& status = resumption_status_[app_id];
-
-  for (auto request : status.successful_requests) {
+  auto requests = status.successful_requests;
+  requests.insert(requests.begin(),
+                  status.error_requests.begin(),
+                  status.error_requests.end());
+  for (auto request : requests) {
     const uint32_t cmd_id =
         request.message[strings::msg_params][strings::cmd_id].asUInt();
 

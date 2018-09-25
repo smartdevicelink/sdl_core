@@ -298,6 +298,33 @@ class ResumptionDataProcessor : public app_mngr::event_engine::EventObserver {
   void CheckVehicleDataResponse(const smart_objects::SmartObject& request,
                                 const smart_objects::SmartObject& response,
                                 ApplicationResumptionStatus& status);
+
+  /**
+   * @brief Determines whether application has saved data, including
+   * submenues, commands and choice sets, to restore
+   * @param saved_app smart object containing saved app data
+   * @return bool value stating whether app has mentioned data to restore
+   */
+  bool HasDataToRestore(const smart_objects::SmartObject& saved_app) const;
+
+  /**
+   * @brief Determines whether application has saved global properties
+   * to restore
+   * @param saved_app smart object containing saved app data
+   * @return bool value stating whether app has mentioned data to restore
+   */
+  bool HasGlobalPropertiesToRestore(
+      const smart_objects::SmartObject& saved_app) const;
+
+  /**
+   * @brief Determines whether application has saved subscriptions
+   * to restore
+   * @param saved_app smart object containing saved app data
+   * @return bool value stating whether app has mentioned data to restore
+   */
+  bool HasSubscriptionsToRestore(
+      const smart_objects::SmartObject& saved_app) const;
+
   /**
    * @brief A map of the IDs and Application Resumption Status for these ID
    **/
