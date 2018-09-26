@@ -696,6 +696,8 @@ const std::vector<std::string> PolicyManagerImpl::GetAppRequestTypes(
   if (kDeviceDisallowed ==
       cache_->GetDeviceConsent(GetCurrentDeviceId(policy_app_id))) {
     cache_->GetAppRequestTypes(kPreDataConsentId, request_types);
+  } else if (cache_->IsDefaultPolicy(policy_app_id)) {
+    cache_->GetAppRequestTypes(kDefaultId, request_types);
   } else {
     cache_->GetAppRequestTypes(policy_app_id, request_types);
   }
@@ -705,19 +707,29 @@ const std::vector<std::string> PolicyManagerImpl::GetAppRequestTypes(
 RequestType::State PolicyManagerImpl::GetAppRequestTypesState(
     const std::string& policy_app_id) const {
   LOG4CXX_AUTO_TRACE(logger_);
+  if (cache_->IsDefaultPolicy(policy_app_id)) {
+    return cache_->GetAppRequestTypesState(kDefaultId);
+  }
   return cache_->GetAppRequestTypesState(policy_app_id);
 }
 
 RequestSubType::State PolicyManagerImpl::GetAppRequestSubTypesState(
     const std::string& policy_app_id) const {
   LOG4CXX_AUTO_TRACE(logger_);
+  if (cache_->IsDefaultPolicy(policy_app_id)) {
+    return cache_->GetAppRequestSubTypesState(kDefaultId);
+  }
   return cache_->GetAppRequestSubTypesState(policy_app_id);
 }
 
 const std::vector<std::string> PolicyManagerImpl::GetAppRequestSubTypes(
     const std::string& policy_app_id) const {
   std::vector<std::string> request_subtypes;
-  cache_->GetAppRequestSubTypes(policy_app_id, request_subtypes);
+  if (cache_->IsDefaultPolicy(policy_app_id)) {
+    cache_->GetAppRequestSubTypes(kDefaultId, request_subtypes);
+  } else {
+    cache_->GetAppRequestSubTypes(policy_app_id, request_subtypes);
+  }
   return request_subtypes;
 }
 
