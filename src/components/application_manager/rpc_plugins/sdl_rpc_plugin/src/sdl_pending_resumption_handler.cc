@@ -135,8 +135,8 @@ void SDLPendingResumptionHandler::on_event(
 
 void SDLPendingResumptionHandler::HandleResumptionSubscriptionRequest(
     application_manager::AppExtension& extension,
-    resumption::Subscriber& subscriber,
-    application_manager::Application& app) {
+    app_mngr::Application& app,
+    resumption::ResumptionHandlingCallbacks callbacks) {
   LOG4CXX_AUTO_TRACE(logger_);
   SDLAppExtension& ext = dynamic_cast<SDLAppExtension&>(extension);
   smart_objects::SmartObjectSPtr request = CreateSubscriptionRequest();
@@ -156,7 +156,7 @@ void SDLPendingResumptionHandler::HandleResumptionSubscriptionRequest(
                   "There are no pending requests for app_id: " << app.app_id());
     pending_requests_[corr_id] = request_ref;
     subscribe_on_event(function_id, corr_id);
-    subscriber(app.app_id(), resumption_request);
+    callbacks.subscriber_(app.app_id(), resumption_request);
     LOG4CXX_DEBUG(logger_,
                   "Sending request with function id: "
                       << function_id << " and correlation_id: " << corr_id);
@@ -165,7 +165,8 @@ void SDLPendingResumptionHandler::HandleResumptionSubscriptionRequest(
   }
   LOG4CXX_DEBUG(logger_,
                 "There are pending requests for app_id: " << app.app_id());
-  ResumptionAwaitingHandling frozen_res(app.app_id(), ext, subscriber);
+  ResumptionAwaitingHandling frozen_res(
+      app.app_id(), ext, callbacks.subscriber_);
   freezed_resumptions_.push(frozen_res);
 }
 }

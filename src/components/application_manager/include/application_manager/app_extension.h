@@ -45,7 +45,9 @@ namespace smart_objects = ns_smart_device_link::ns_smart_objects;
 
 namespace resumption {
 struct ResumptionRequest;
+struct ResumptionHandlingCallbacks;
 using Subscriber = std::function<void(const int32_t, const ResumptionRequest)>;
+using ConcludeResumptionCallback = std::function<void(const int32_t)>;
 }  // namespace resumption
 
 namespace application_manager {
@@ -76,7 +78,7 @@ class AppExtension {
    */
   virtual void ProcessResumption(
       const smart_objects::SmartObject& resumption_data,
-      resumption::Subscriber subscriber) = 0;
+      resumption::ResumptionHandlingCallbacks) = 0;
 
   /**
    * @brief RevertResumption Method called by SDL during revert resumption.

@@ -107,8 +107,9 @@ class VehicleInfoAppExtension : public app_mngr::AppExtension {
    * @param resumption_data resumption data
    * @param subscriber callback for subscription
    */
-  void ProcessResumption(const smart_objects::SmartObject& saved_app,
-                         resumption::Subscriber subscriber) OVERRIDE;
+  void ProcessResumption(
+      const smart_objects::SmartObject& saved_app,
+      resumption::ResumptionHandlingCallbacks callbacks) OVERRIDE;
 
   /**
    * @brief Revert the data to the state before Resumption.

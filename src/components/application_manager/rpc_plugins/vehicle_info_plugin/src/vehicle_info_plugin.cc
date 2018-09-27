@@ -90,11 +90,11 @@ void VehicleInfoPlugin::OnApplicationEvent(
 void VehicleInfoPlugin::ProcessResumptionSubscription(
     application_manager::Application& app,
     VehicleInfoAppExtension& ext,
-    resumption::Subscriber subscriber) {
+    resumption::ResumptionHandlingCallbacks callbacks) {
   LOG4CXX_AUTO_TRACE(logger_);
 
   pending_resumption_handler_->HandleResumptionSubscriptionRequest(
-      ext, subscriber, app);
+      ext, app, callbacks);
 }
 
 void VehicleInfoPlugin::RevertResumption(

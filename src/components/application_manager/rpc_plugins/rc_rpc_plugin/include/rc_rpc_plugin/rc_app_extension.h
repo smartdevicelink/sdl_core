@@ -96,10 +96,11 @@ class RCAppExtension : public application_manager::AppExtension {
   /**
   * @brief Running resumption data process.
   * @param saved_app saved data for resumption
-  * @param subscriber callback for subscription
+  * @param callbacks callback for handling resumption
   **/
-  void ProcessResumption(const smart_objects::SmartObject& saved_app,
-                         resumption::Subscriber subscriber) OVERRIDE;
+  void ProcessResumption(
+      const smart_objects::SmartObject& saved_app,
+      resumption::ResumptionHandlingCallbacks callbacks) OVERRIDE;
 
   /**
    * @brief Revert the data to the state before Resumption.

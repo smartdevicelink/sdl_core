@@ -154,6 +154,40 @@ bool ResumptionRequestIDs::operator<(const ResumptionRequestIDs& other) const {
          function_id < other.function_id;
 }
 
+ResumptionHandlingCallbacks
+ResumptionDataProcessor::GetResumptionHandlingCallbacks() {
+  ResumptionHandlingCallbacks callbacks;
+
+  callbacks.subscriber_ =
+      [this](const int32_t app_id, const ResumptionRequest request) {
+        WaitForResponse(app_id, request);
+      };
+
+  callbacks.conclude_resumption_callback_ = [this](const int32_t app_id) {
+    LOG4CXX_DEBUG(
+        logger_,
+        "Entered conclude resumption callback with app id: " << app_id);
+    auto it = resumption_status_.find(app_id);
+    if (it != resumption_status_.end()) {
+      if (it->second.list_of_sent_requests.empty()) {
+        ConcludeResumption(app_id, it->second);
+      }
+    } else {
+      if (register_callbacks_.find(app_id) != register_callbacks_.end()) {
+        auto callback = register_callbacks_[app_id];
+        LOG4CXX_DEBUG(logger_,
+                      "No HMI requests sent, but resumption is successful");
+        callback(mobile_apis::Result::SUCCESS, "Data resumption succesful");
+      } else {
+        LOG4CXX_WARN(logger_, "Callback not found");
+      }
+    }
+  };
+
+  return callbacks;
+}
+
+
 void ResumptionDataProcessor::HandleOnTimeOut(
     const uint32_t corr_id, const hmi_apis::FunctionID::eType function_id) {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -268,6 +302,15 @@ void ResumptionDataProcessor::on_event(const event_engine::Event& event) {
     return;
   }
 
+  ConcludeResumption(app_id, status);
+
+  request_app_ids_.erase(app_id_ptr);
+}
+
+void ResumptionDataProcessor::ConcludeResumption(
+    const uint32_t app_id, const ApplicationResumptionStatus& status) {
+  LOG4CXX_AUTO_TRACE(logger_);
+
   auto it = register_callbacks_.find(app_id);
   if (it == register_callbacks_.end()) {
     LOG4CXX_WARN(logger_, "Callback for app_id: " << app_id << " not found");
@@ -289,7 +332,6 @@ void ResumptionDataProcessor::on_event(const event_engine::Event& event) {
     RevertRestoredData(application_manager_.application(app_id));
   }
   resumption_status_.erase(app_id);
-  request_app_ids_.erase(app_id_ptr);
   register_callbacks_.erase(app_id);
 }
 
@@ -717,12 +759,10 @@ void ResumptionDataProcessor::AddPluginsSubscriptions(
     const smart_objects::SmartObject& saved_app) {
   LOG4CXX_AUTO_TRACE(logger_);
 
+  auto callbacks = GetResumptionHandlingCallbacks();
+
   for (auto& extension : application->Extensions()) {
-    extension->ProcessResumption(
-        saved_app,
-        [this](const int32_t app_id, const ResumptionRequest request) {
-          this->WaitForResponse(app_id, request);
-        });
+    extension->ProcessResumption(saved_app, callbacks);
   }
 }
 

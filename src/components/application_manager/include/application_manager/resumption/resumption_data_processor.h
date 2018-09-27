@@ -64,6 +64,13 @@ struct ApplicationResumptionStatus {
   std::vector<ResumptionRequest> successful_requests;
   std::vector<std::string> unsuccesfull_vehicle_data_subscriptions_;
   std::vector<std::string> succesfull_vehicle_data_subscriptions_;
+
+struct ResumptionHandlingCallbacks {
+  using Subscriber =
+      std::function<void(const int32_t, const ResumptionRequest)>;
+  using ConcludeResumptionCallback = std::function<void(const int32_t)>;
+  Subscriber subscriber_;
+  ConcludeResumptionCallback conclude_resumption_callback_;
 };
 
 /**
@@ -298,6 +305,49 @@ class ResumptionDataProcessor : public app_mngr::event_engine::EventObserver {
   void CheckVehicleDataResponse(const smart_objects::SmartObject& request,
                                 const smart_objects::SmartObject& response,
                                 ApplicationResumptionStatus& status);
+
+  /**
+   * @brief Determines whether application has saved data, including
+   * submenues, commands and choice sets, to restore. This does not include
+   * global properties and subscriptions
+   * @param saved_app smart object containing saved app data
+   * @return bool value stating whether app has mentioned data to restore
+   */
+  bool HasDataToRestore(const smart_objects::SmartObject& saved_app) const;
+
+  /**
+   * @brief Determines whether application has saved global properties
+   * to restore
+   * @param saved_app smart object containing saved app data
+   * @return bool value stating whether app has mentioned data to restore
+   */
+  bool HasGlobalPropertiesToRestore(
+      const smart_objects::SmartObject& saved_app) const;
+
+  /**
+   * @brief Determines whether application has saved subscriptions
+   * to restore
+   * @param saved_app smart object containing saved app data
+   * @return bool value stating whether app has mentioned data to restore
+   */
+  bool HasSubscriptionsToRestore(
+      const smart_objects::SmartObject& saved_app) const;
+
+  /**
+   * @brief Get button subscriptions that need to be resumed.
+   * Since some subscriptions can be set by default during 
+   * app registration, this function is needed to discard subscriptions
+   * that do not need to be resumed 
+   * @param application which subscriptions to resume
+   */
+  app_mngr::ButtonSubscriptions GetButtonSubscriptionsToResume(
+      app_mngr::ApplicationSharedPtr application) const;
+
+  void ConcludeResumption(const uint32_t app_id,
+                          const ApplicationResumptionStatus& status);
+
+  ResumptionHandlingCallbacks GetResumptionHandlingCallbacks();
+
   /**
    * @brief A map of the IDs and Application Resumption Status for these ID
    **/

@@ -32,6 +32,7 @@
 
 #include "sdl_rpc_plugin/sdl_app_extension.h"
 #include "sdl_rpc_plugin/sdl_rpc_plugin.h"
+#include "application_manager/resumption/resumption_data_processor.h"
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "SDLAppExtension")
 
@@ -58,7 +59,7 @@ void SDLAppExtension::SaveResumptionData(
 
 void SDLAppExtension::ProcessResumption(
     const smart_objects::SmartObject& saved_app,
-    resumption::Subscriber subscriber) {
+    resumption::ResumptionHandlingCallbacks callbacks) {
   LOG4CXX_AUTO_TRACE(logger_);
   if (!saved_app.keyExists(strings::subscribed_for_way_points)) {
     LOG4CXX_ERROR(logger_, "subscribed_for_way_points section does not exist");
@@ -67,7 +68,7 @@ void SDLAppExtension::ProcessResumption(
   const bool subscribed_for_way_points_so =
       saved_app[strings::subscribed_for_way_points].asBool();
   if (subscribed_for_way_points_so) {
-    plugin_.ProcessResumptionSubscription(app_, *this, subscriber);
+    plugin_.ProcessResumptionSubscription(app_, *this, callbacks);
   }
 }
 

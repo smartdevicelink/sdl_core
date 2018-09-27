@@ -35,6 +35,7 @@
 #include "sdl_rpc_plugin/sdl_app_extension.h"
 #include "sdl_rpc_plugin/sdl_pending_resumption_handler.h"
 #include "application_manager/message_helper.h"
+#include "application_manager/resumption/resumption_data_processor.h"
 
 namespace sdl_rpc_plugin {
 CREATE_LOGGERPTR_GLOBAL(logger_, "SDLRPCPlugin")
@@ -87,7 +88,7 @@ void SDLRPCPlugin::OnApplicationEvent(
 void SDLRPCPlugin::ProcessResumptionSubscription(
     application_manager::Application& app,
     SDLAppExtension& ext,
-    resumption::Subscriber subscriber) {
+    resumption::ResumptionHandlingCallbacks callbacks) {
   LOG4CXX_AUTO_TRACE(logger_);
   application_manager::ApplicationSharedPtr application =
       application_manager_->application(app.app_id());
@@ -95,7 +96,7 @@ void SDLRPCPlugin::ProcessResumptionSubscription(
       application_manager_->GetAppsSubscribedForWayPoints();
   application_manager_->SubscribeAppForWayPoints(application);
   pending_resumption_handler_->HandleResumptionSubscriptionRequest(
-      ext, subscriber, app);
+      ext, app, callbacks);
 }
 
 void SDLRPCPlugin::SaveResumptionData(

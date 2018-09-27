@@ -6,6 +6,8 @@
 
 namespace resumption {
 
+struct ResumptionHandlingCallbacks;
+
 namespace app_mngr = application_manager;
 
 class ExtensionPendingResumptionHandler
@@ -22,8 +24,8 @@ class ExtensionPendingResumptionHandler
 
   virtual void HandleResumptionSubscriptionRequest(
       app_mngr::AppExtension& extension,
-      Subscriber& subscriber,
-      application_manager::Application& app) = 0;
+      app_mngr::Application& app,
+      ResumptionHandlingCallbacks callbacks) = 0;
 
   virtual void ClearPendingResumptionRequests() = 0;
 

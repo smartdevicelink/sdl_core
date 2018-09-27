@@ -17,9 +17,10 @@ class VehicleInfoPendingResumptionHandler
   // EventObserver interface
   void on_event(const app_mngr::event_engine::Event& event) OVERRIDE;
 
-  void HandleResumptionSubscriptionRequest(app_mngr::AppExtension& extension,
-                                           resumption::Subscriber& subscriber,
-                                           app_mngr::Application& app) OVERRIDE;
+  void HandleResumptionSubscriptionRequest(
+      app_mngr::AppExtension& extension,
+      app_mngr::Application& app,
+      resumption::ResumptionHandlingCallbacks callbacks) OVERRIDE;
 
   std::map<std::string, bool> ExtractSubscribeResults(
       const smart_objects::SmartObject& response,

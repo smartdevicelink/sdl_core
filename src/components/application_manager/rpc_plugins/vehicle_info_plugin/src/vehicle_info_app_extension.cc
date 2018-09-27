@@ -32,6 +32,7 @@
 
 #include "vehicle_info_plugin/vehicle_info_app_extension.h"
 #include "vehicle_info_plugin/vehicle_info_plugin.h"
+#include "application_manager/resumption/resumption_data_processor.h"
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "VehicleInfoPlugin")
 
@@ -96,7 +97,7 @@ void VehicleInfoAppExtension::SaveResumptionData(
 
 void VehicleInfoAppExtension::ProcessResumption(
     const smart_objects::SmartObject& saved_app,
-    resumption::Subscriber subscriber) {
+    resumption::ResumptionHandlingCallbacks callbacks) {
   LOG4CXX_AUTO_TRACE(logger_);
   if (!saved_app.keyExists(strings::application_subscriptions)) {
     LOG4CXX_DEBUG(logger_, "application_subscriptions section is not exists");
@@ -120,14 +121,14 @@ void VehicleInfoAppExtension::ProcessResumption(
     subscribeToVehicleInfo(ivi);
   }
   if (subscriptions_ivi.length() > 0) {
-    plugin_.ProcessResumptionSubscription(app_, *this, subscriber);
+    plugin_.ProcessResumptionSubscription(app_, *this, callbacks);
   }
 }
 
 void VehicleInfoAppExtension::RevertResumption(
     const smart_objects::SmartObject& subscriptions) {
   unsubscribeFromVehicleInfo();
-  plugin_.RevertResumption(app_, subscriptions.enumerate());
+  plugin_.RevertResumption(app_, subscriptions["ivi"].enumerate());
 }
 
 VehicleInfoAppExtension& VehicleInfoAppExtension::ExtractVIExtension(
