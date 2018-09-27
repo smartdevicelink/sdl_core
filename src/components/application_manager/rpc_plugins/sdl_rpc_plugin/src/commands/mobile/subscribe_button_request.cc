@@ -110,6 +110,7 @@ void SubscribeButtonRequest::Run() {
     return;
   }
 
+  (*message_)[str::msg_params][str::app_id] = app->app_id();
   StartAwaitForInterface(HmiInterfaces::HMI_INTERFACE_Buttons);
   SendHMIRequest(hmi_apis::FunctionID::Buttons_SubscribeButton,
                  &(*message_)[app_mngr::strings::msg_params],
