@@ -5741,13 +5741,13 @@
         </param>
         <param name="nextTurnIcon" type="Image" mandatory="false" since="3.0">
         </param>
-        <param name="distanceToManeuver" type="Float" minvalue="0" maxvalue="1000000000" mandatory="false" since="2.0">
+        <param name="distanceToManeuver" type="Float" minvalue="0" maxvalue="1000000000" mandatory="true" since="2.0">
             <description>
                 Fraction of distance till next maneuver (starting from when AlertManeuver is triggered).
                 Used to calculate progress bar.
             </description>
         </param>
-        <param name="distanceToManeuverScale" type="Float" minvalue="0" maxvalue="1000000000" mandatory="false" since="2.0">
+        <param name="distanceToManeuverScale" type="Float" minvalue="0" maxvalue="1000000000" mandatory="true" since="2.0">
             <description>
                 Distance till next maneuver (starting from) from previous maneuver.
                 Used to calculate progress bar.
