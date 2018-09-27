@@ -50,6 +50,28 @@ RCHelpers::GetModuleTypeToCapabilitiesMapping() {
   return mapping_lambda;
 }
 
+const std::function<std::string(const RCModuleTypeIDs module_type)>
+RCHelpers::GetModuleTypeToEnumMapping() {
+  auto mapping_lambda = [](const RCModuleTypeIDs module_type) -> std::string {
+    static std::map<RCModuleTypeIDs, std::string> mapping = {
+        {RCModuleTypeIDs::CLIMATE, enums_value::kClimate},
+        {RCModuleTypeIDs::RADIO, enums_value::kRadio},
+        {RCModuleTypeIDs::SEAT, enums_value::kSeat},
+        {RCModuleTypeIDs::AUDIO, enums_value::kAudio},
+        {RCModuleTypeIDs::LIGHT, enums_value::kLight},
+        {RCModuleTypeIDs::HMI_SETTINGS, enums_value::kHmiSettings}};
+    auto it = mapping.find(module_type);
+    if (mapping.end() == it) {
+      LOG4CXX_ERROR(logger_,
+                    "Unknown module type" << static_cast<int32_t>(module_type));
+      return std::string();
+    }
+    return it->second;
+  };
+
+  return mapping_lambda;
+}
+
 const std::vector<std::string> RCHelpers::GetModulesList() {
   using namespace enums_value;
   return {kClimate, kRadio, kSeat, kAudio, kLight, kHmiSettings};

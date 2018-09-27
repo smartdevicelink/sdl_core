@@ -34,12 +34,15 @@
 #define SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_RC_RPC_PLUGIN_INCLUDE_RC_RPC_PLUGIN_RC_RPC_PLUGIN_H_
 
 #include <memory>
+#include <string>
+#include <vector>
 
 #include "application_manager/plugin_manager/rpc_plugin.h"
 #include "application_manager/command_factory.h"
 #include "rc_rpc_plugin/resource_allocation_manager.h"
 #include "rc_rpc_plugin/interior_data_cache.h"
 #include "rc_rpc_plugin/interior_data_manager.h"
+#include "application_manager/resumption/extension_pending_resumption_handler.h"
 
 namespace rc_rpc_plugin {
 namespace plugins = application_manager::plugin_manager;
@@ -92,19 +95,52 @@ class RCRPCPlugin : public plugins::RPCPlugin {
   void OnApplicationEvent(plugins::ApplicationEvent event,
                           app_mngr::ApplicationSharedPtr application) OVERRIDE;
 
+  /**
+   * @brief ProcessResumptionSubscription send Subscribe interior vehicle data
+   * requests to HMI
+   * @param app application for subscription
+   * @param ext application extension
+   * @param subscriber callback for subscription
+   */
+  void ProcessResumptionSubscription(
+      app_mngr::Application& app,
+      RCAppExtension& ext,
+      resumption::ResumptionHandlingCallbacks callbacks);
+
+  /**
+  * @brief Revert the data to the state before Resumption.
+  * @param app application for which revert sould be performed
+  * @param list_of_subscriptions Subscriptions to be returned
+  **/
+  void RevertResumption(application_manager::Application& app,
+                        const std::set<std::string>& list_of_subscriptions);
+
   static const uint32_t kRCPluginID = 153;
 
   typedef std::vector<application_manager::ApplicationSharedPtr> Apps;
   static Apps GetRCApplications(
       application_manager::ApplicationManager& app_mngr);
 
+  bool IsSubscribedAppExist(const std::string& subscription);
+
+  smart_objects::SmartObjectSPtr CreateUnsubscriptionRequest(
+      const std::string& module_type);
+
  private:
+  void DeleteSubscriptions(app_mngr::ApplicationSharedPtr app);
+
+  RCAppExtension& ExtractInteriorVehicleDataExtension(
+      application_manager::Application& app);
+
   application_manager::rpc_service::RPCService* rpc_service_;
   application_manager::ApplicationManager* app_mngr_;
   std::unique_ptr<application_manager::CommandFactory> command_factory_;
   std::unique_ptr<ResourceAllocationManager> resource_allocation_manager_;
-  std::unique_ptr<InteriorDataCache> interior_data_cache_;
+  std::shared_ptr<InteriorDataCache> interior_data_cache_;
   std::unique_ptr<InteriorDataManager> interior_data_manager_;
+  using ExtensionPendingResumptionHandlerSPtr =
+      std::shared_ptr<resumption::ExtensionPendingResumptionHandler>;
+  ExtensionPendingResumptionHandlerSPtr pending_resumption_handler_;
 };
 }  // namespace rc_rpc_plugin
 

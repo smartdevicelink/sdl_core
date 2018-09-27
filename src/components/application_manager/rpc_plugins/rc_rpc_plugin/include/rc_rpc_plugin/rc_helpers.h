@@ -41,6 +41,15 @@
 namespace rc_rpc_plugin {
 class RCRPCPlugin;
 
+enum class RCModuleTypeIDs {
+  CLIMATE = 0,
+  RADIO,
+  SEAT,
+  AUDIO,
+  LIGHT,
+  HMI_SETTINGS
+};
+
 /**
  * @brief The RCHelpers class contains frequently used static data
  * structures related strictly to RC
@@ -63,6 +72,9 @@ class RCHelpers {
   */
   static const std::function<std::string(const std::string& module_type)>
   GetModuleTypeToCapabilitiesMapping();
+
+  static const std::function<std::string(const RCModuleTypeIDs module_type)>
+  GetModuleTypeToEnumMapping();
 
   /**
    * @brief GetModulesList get list of all known modules

@@ -101,7 +101,7 @@ void InteriorDataManagerImpl::UpdateHMISubscriptionsOnAppUnregistered(
     application_manager::Application& app) {
   LOG4CXX_AUTO_TRACE(logger_);
   auto rc_extension = RCHelpers::GetRCExtension(app);
-  auto subscribed_data = rc_extension->InteriorVehicleDataSubscriptions();
+  auto subscribed_data = rc_extension->Subscriptions();
   rc_extension->UnsubscribeFromInteriorVehicleData();
   for (auto& data : subscribed_data) {
     auto apps_subscribed =
@@ -147,7 +147,7 @@ InteriorDataManagerImpl::AppsSubscribedModules() {
   InteriorDataManagerImpl::AppsModules result;
   for (auto& app_ptr : apps_list) {
     const auto rc_extension = RCHelpers::GetRCExtension(*app_ptr);
-    auto app_subscriptions = rc_extension->InteriorVehicleDataSubscriptions();
+    auto app_subscriptions = rc_extension->Subscriptions();
     result[app_ptr] = std::vector<std::string>(app_subscriptions.size());
     std::copy(app_subscriptions.begin(),
               app_subscriptions.end(),

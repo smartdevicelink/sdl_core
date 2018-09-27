@@ -38,11 +38,16 @@
 #include <memory>
 #include "utils/macro.h"
 #include "application_manager/app_extension.h"
+#include "application_manager/application.h"
 
 namespace rc_rpc_plugin {
+class RCRPCPlugin;
+
 class RCAppExtension : public application_manager::AppExtension {
  public:
-  explicit RCAppExtension(application_manager::AppExtensionUID uid);
+  RCAppExtension(application_manager::AppExtensionUID uid,
+                 RCRPCPlugin* plugin,
+                 application_manager::Application& app);
   ~RCAppExtension();
 
   /**
@@ -73,10 +78,12 @@ class RCAppExtension : public application_manager::AppExtension {
    * @brief get list of subscriptions of application
    * @return list of subscriptions of application
    */
-  std::set<std::string> InteriorVehicleDataSubscriptions() const;
+  std::set<std::string> Subscriptions() const;
 
  private:
   std::set<std::string> subscribed_interior_vehicle_data_;
+  RCRPCPlugin* plugin_;
+  application_manager::Application& app_;
 
   // AppExtension interface
  public:
