@@ -36,7 +36,7 @@
 
 #include "utils/logger.h"
 #include "connection_handler/connection.h"
-#include <boost/exception/diagnostic_information.hpp>
+
 namespace connection_handler {
 
 using namespace sync_primitives;
@@ -83,14 +83,8 @@ void HeartBeatMonitor::threadMain() {
                 "Start heart beat monitor. Timeout is "
                     << default_heartbeat_timeout_);
   while (run_) {
-    try{
-      heartbeat_monitor_.WaitFor(main_lock, kDefaultCycleTimeout);
-      Process();
-    }
-    catch (const boost::exception& error) {
-      std::string error_string = boost::diagnostic_information(error);
-      LOG4CXX_FATAL(logger_, error_string);
-    }
+    heartbeat_monitor_.WaitFor(main_lock, kDefaultCycleTimeout);
+    Process();
   }
 }
 
