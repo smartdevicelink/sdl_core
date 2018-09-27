@@ -35,6 +35,7 @@
 #include "rc_rpc_plugin/rc_helpers.h"
 #include "rc_rpc_plugin/rc_rpc_plugin.h"
 #include "smart_objects/enum_schema_item.h"
+#include "application_manager/message_helper.h"
 #include "utils/macro.h"
 #include "interfaces/MOBILE_API.h"
 
@@ -137,14 +138,19 @@ void GetInteriorVehicleDataRequest::ProcessResponseToMobileFromCache(
       auto extension = RCHelpers::GetRCExtension(*app);
       DCHECK(extension);
       extension->SubscribeToInteriorVehicleData(ModuleType());
+      app->UpdateHash();
     }
   }
+  LOG4CXX_DEBUG(logger_, "sending response to mobile");
   SendResponse(
       true, mobile_apis::Result::SUCCESS, nullptr, &response_msg_params);
   if (AppShouldBeUnsubscribed()) {
     auto extension = RCHelpers::GetRCExtension(*app);
     DCHECK(extension);
-    extension->UnsubscribeFromInteriorVehicleData(ModuleType());
+    if (extension->IsSubscibedToInteriorVehicleData(ModuleType())) {
+      extension->UnsubscribeFromInteriorVehicleData(ModuleType());
+      app->UpdateHash();
+    }
   }
 }
 
@@ -196,7 +202,6 @@ void GetInteriorVehicleDataRequest::Execute() {
       is_subscribed =
           (*message_)[app_mngr::strings::msg_params][message_params::kSubscribe]
               .asBool();
-      RemoveExcessiveSubscription();
     }
     if (!CheckRateLimits()) {
       LOG4CXX_WARN(logger_, "GetInteriorVehicleData frequency is too high.");
@@ -246,6 +251,8 @@ void GetInteriorVehicleDataRequest::on_event(
 
     DCHECK_OR_RETURN_VOID(app);
     if (TheLastAppShouldBeUnsubscribed(app)) {
+      LOG4CXX_DEBUG(logger_,
+                    "removing module type " << ModuleType() << "from cache");
       interior_data_cache_.Remove(ModuleType());
     }
     ProccessSubscription(hmi_response);
@@ -351,11 +358,13 @@ void GetInteriorVehicleDataRequest::ProccessSubscription(
                     "SubscribeToInteriorVehicleData " << app->app_id() << " "
                                                       << module_type);
       extension->SubscribeToInteriorVehicleData(module_type);
+      app->UpdateHash();
     } else {
       LOG4CXX_DEBUG(logger_,
                     "UnsubscribeFromInteriorVehicleData "
                         << app->app_id() << " " << module_type);
       extension->UnsubscribeFromInteriorVehicleData(module_type);
+      app->UpdateHash();
     }
   }
 }
@@ -377,6 +386,8 @@ bool GetInteriorVehicleDataRequest::HasRequestExcessiveSubscription() {
         (*message_)[app_mngr::strings::msg_params][message_params::kSubscribe]
             .asBool();
     if (!app_wants_to_subscribe && !is_app_already_subscribed) {
+      LOG4CXX_DEBUG(logger_,
+                    "(!app_wants_to_subscribe && !is_app_already_subscribed)");
       return true;
     }
     return app_wants_to_subscribe && is_app_already_subscribed;

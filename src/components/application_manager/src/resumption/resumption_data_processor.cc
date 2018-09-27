@@ -70,13 +70,14 @@ void ResumptionDataProcessor::Restore(ApplicationSharedPtr application,
     return;
   }
 
+  register_callbacks_[application->app_id()] = callback;
+
   AddFiles(application, saved_app);
   AddSubmenues(application, saved_app);
   AddCommands(application, saved_app);
   AddChoicesets(application, saved_app);
   SetGlobalProperties(application, saved_app);
   AddSubscriptions(application, saved_app);
-  register_callbacks_[application->app_id()] = callback;
 }
 
 bool ResumptionDataProcessor::HasDataToRestore(
@@ -287,6 +288,16 @@ void ResumptionDataProcessor::on_event(const event_engine::Event& event) {
   if (hmi_apis::FunctionID::VehicleInfo_SubscribeVehicleData ==
       request_ids.function_id) {
     CheckVehicleDataResponse(request_ptr->message, response, status);
+  }
+
+  if (hmi_apis::FunctionID::RC_GetInteriorVehicleData ==
+      request_ids.function_id) {
+    const auto& module_type =
+        response[app_mngr::strings::msg_params][kModuleData][kModuleType]
+            .asString();
+    if (IsRequestSuccessful(response)) {
+      status.successful_ivd_subscriptions_.push_back(module_type);
+    }
   }
 
   {
@@ -805,7 +816,12 @@ void ResumptionDataProcessor::DeletePluginsSubscriptions(
   smart_objects::SmartObject extension_subscriptions;
   for (auto ivi : status.succesfull_vehicle_data_subscriptions_) {
     LOG4CXX_DEBUG(logger_, "ivi " << ivi << " should be deleted");
-    extension_subscriptions[ivi] = true;
+    extension_subscriptions["ivi"][ivi] = true;
+  }
+
+  for (auto ivd : status.successful_ivd_subscriptions_) {
+    LOG4CXX_DEBUG(logger_, "ivd " << ivd << " should be deleted");
+    extension_subscriptions["ivd"][ivd] = true;
   }
 
   for (auto& extension : application->Extensions()) {
