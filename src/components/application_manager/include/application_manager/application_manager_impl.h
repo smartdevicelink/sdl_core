@@ -347,9 +347,9 @@ class ApplicationManagerImpl
    */
   void UnregisterAllApplications();
 
-  DEPRECATED bool RemoveAppDataFromHMI(ApplicationSharedPtr app);
+  bool RemoveAppDataFromHMI(ApplicationSharedPtr app);
 
-  DEPRECATED bool LoadAppDataToHMI(ApplicationSharedPtr app);
+  bool LoadAppDataToHMI(ApplicationSharedPtr app);
   bool ActivateApplication(ApplicationSharedPtr app) OVERRIDE;
 
   /**
