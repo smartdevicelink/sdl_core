@@ -35,6 +35,7 @@
 
 #include "gmock/gmock.h"
 #include "application_manager/app_extension.h"
+#include "application_manager/resumption/resumption_data_processor.h"
 
 namespace test {
 namespace components {
@@ -53,7 +54,7 @@ class MockAppExtension : public application_manager::AppExtension {
   MOCK_METHOD2(ProcessResumption,
                void(const ns_smart_device_link::ns_smart_objects::SmartObject&
                         resumption_data,
-                    resumption::Subscriber subscriber));
+                    resumption::ResumptionHandlingCallbacks callbacks));
 
   MOCK_METHOD1(RevertResumption,
                void(const ns_smart_device_link::ns_smart_objects::SmartObject&

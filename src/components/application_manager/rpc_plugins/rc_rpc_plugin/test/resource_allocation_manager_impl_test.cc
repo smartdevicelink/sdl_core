@@ -90,7 +90,8 @@ class RAManagerTest : public ::testing::Test {
     ON_CALL(mock_app_mngr_, GetPolicyHandler())
         .WillByDefault(ReturnRef(mock_policy_handler_));
     auto plugin_id = rc_rpc_plugin::RCRPCPlugin::kRCPluginID;
-    app_ext_ptr_ = std::make_shared<rc_rpc_plugin::RCAppExtension>(plugin_id);
+    app_ext_ptr_ = std::make_shared<rc_rpc_plugin::RCAppExtension>(
+        plugin_id, nullptr, *(mock_app_1_.get()));
     ON_CALL(*mock_app_1_, app_id()).WillByDefault(Return(kAppId1));
 
     OnRCStatusNotificationExpectations();
@@ -317,9 +318,11 @@ TEST_F(RAManagerTest, AppUnregistered_ReleaseResource) {
   ResourceAllocationManagerImpl ra_manager(mock_app_mngr_, mock_rpc_service_);
   ra_manager.SetAccessMode(hmi_apis::Common_RCAccessMode::eType::AUTO_DENY);
 
-  RCAppExtensionPtr rc_extention_ptr =
-      std::make_shared<RCAppExtension>(application_manager::AppExtensionUID(
-          rc_rpc_plugin::RCRPCPlugin::kRCPluginID));
+  RCAppExtensionPtr rc_extention_ptr = std::make_shared<RCAppExtension>(
+      application_manager::AppExtensionUID(
+          rc_rpc_plugin::RCRPCPlugin::kRCPluginID),
+      nullptr,
+      *(mock_app_1_.get()));
 
   EXPECT_EQ(rc_rpc_plugin::AcquireResult::ALLOWED,
             ra_manager.AcquireResource(kModuleType1, kAppId1));
@@ -387,9 +390,11 @@ TEST_F(RAManagerTest, AppsDisallowed_ReleaseAllResources) {
 
   EXPECT_CALL(mock_app_mngr_, applications()).WillRepeatedly(Return(apps_da));
 
-  RCAppExtensionPtr rc_extention_ptr =
-      std::make_shared<RCAppExtension>(application_manager::AppExtensionUID(
-          rc_rpc_plugin::RCRPCPlugin::kRCPluginID));
+  RCAppExtensionPtr rc_extention_ptr = std::make_shared<RCAppExtension>(
+      application_manager::AppExtensionUID(
+          rc_rpc_plugin::RCRPCPlugin::kRCPluginID),
+      nullptr,
+      *(mock_app_1_.get()));
 
   EXPECT_CALL(*mock_app_1_, QueryInterface(RCRPCPlugin::kRCPluginID))
       .WillRepeatedly(Return(rc_extention_ptr));
@@ -420,7 +425,9 @@ TEST_F(RAManagerTest, AppGotRevokedModulesWithPTU_ReleaseRevokedResource) {
   RCAppExtensionPtr rc_extention_ptr =
       std::make_shared<rc_rpc_plugin::RCAppExtension>(
           application_manager::AppExtensionUID(
-              rc_rpc_plugin::RCRPCPlugin::kRCPluginID));
+              rc_rpc_plugin::RCRPCPlugin::kRCPluginID),
+          nullptr,
+          *(mock_app_1_.get()));
 
   EXPECT_CALL(*mock_app_1_, QueryInterface(RCRPCPlugin::kRCPluginID))
       .WillRepeatedly(Return(rc_extention_ptr));

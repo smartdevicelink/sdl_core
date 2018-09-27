@@ -87,8 +87,10 @@ class GetInteriorVehicleDataRequestTest
   GetInteriorVehicleDataRequestTest()
       : mock_app_(std::make_shared<NiceMock<MockApplication> >())
       , mock_app2_(std::make_shared<NiceMock<MockApplication> >())
-      , rc_app_extention_(std::make_shared<RCAppExtension>(kModuleId))
-      , rc_app_extention2_(std::make_shared<RCAppExtension>(kModuleId))
+      , rc_app_extention_(
+            std::make_shared<RCAppExtension>(kModuleId, nullptr, *mock_app_))
+      , rc_app_extention2_(
+            std::make_shared<RCAppExtension>(kModuleId, nullptr, *mock_app2_))
       , apps_lock_(std::make_shared<sync_primitives::Lock>())
       , apps_da_(apps_, apps_lock_) {
     ON_CALL(*mock_app_, app_id()).WillByDefault(Return(kAppId));

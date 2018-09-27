@@ -67,7 +67,8 @@ class SetInteriorVehicleDataRequestTest
  public:
   SetInteriorVehicleDataRequestTest()
       : mock_app_(std::make_shared<NiceMock<MockApplication> >())
-      , rc_app_extention_(std::make_shared<RCAppExtension>(kModuleId)) {}
+      , rc_app_extention_(
+            std::make_shared<RCAppExtension>(kModuleId, nullptr, *mock_app_)) {}
 
   void SetUp() OVERRIDE {
     ON_CALL(app_mngr_, hmi_interfaces())
