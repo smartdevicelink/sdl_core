@@ -543,10 +543,10 @@ TEST_F(ResumeCtrlTest, StartResumption_AppWithSubscribeOnButtons) {
   ON_CALL(*mock_app_, SubscribedButtons())
       .WillByDefault(Return(button_subscription_accessor));
 
-  smart_objects::SmartObjectList button_subscription_notifications;
+  smart_objects::SmartObjectList button_subscription_requests_list;
   ON_CALL(*application_manager::MockMessageHelper::message_helper_mock(),
-          CreateOnButtonSubscriptionNotificationsForApp(_, _, _))
-      .WillByDefault(Return(button_subscription_notifications));
+          CreateButtonSubscriptionsHandlingRequestsList(_, _, _, _))
+      .WillByDefault(Return(button_subscription_requests_list));
 
   EXPECT_CALL(*mock_app_, set_grammar_id(kTestGrammarId_));
 
@@ -564,7 +564,7 @@ TEST_F(ResumeCtrlTest, StartResumption_AppWithSubscribeOnButtons) {
   EXPECT_CALL(*mock_app_extension_, ProcessResumption(saved_app, _));
 
   EXPECT_CALL(*application_manager::MockMessageHelper::message_helper_mock(),
-              CreateOnButtonSubscriptionNotificationsForApp(_, _, _));
+              CreateButtonSubscriptionsHandlingRequestsList(_, _, _, _));
 
   const bool res = res_ctrl_->StartResumption(mock_app_, kHash_, callback_);
   EXPECT_TRUE(res);

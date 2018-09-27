@@ -1025,46 +1025,33 @@ smart_objects::SmartObjectSPtr MessageHelper::CreateSetAppIcon(
 }
 
 smart_objects::SmartObjectSPtr
-MessageHelper::CreateOnButtonSubscriptionNotification(
-    uint32_t app_id,
-    hmi_apis::Common_ButtonName::eType button,
-    bool is_subscribed,
-    ApplicationManager& app_mngr) {
+MessageHelper::CreateButtonSubscriptionHandlingRequestToHmi(
+    const uint32_t app_id,
+    const hmi_apis::Common_ButtonName::eType button,
+    const hmi_apis::FunctionID::eType function,
+    application_manager::ApplicationManager& app_mngr) {
   using namespace smart_objects;
   using namespace hmi_apis;
   LOG4CXX_AUTO_TRACE(logger_);
 
-  SmartObjectSPtr notification_ptr =
-      std::make_shared<SmartObject>(SmartType_Map);
-  if (!notification_ptr) {
-    LOG4CXX_ERROR(logger_, "Memory allocation failed.");
-    return SmartObjectSPtr(nullptr);
-  }
-  SmartObject& notification = *notification_ptr;
+  SmartObjectSPtr request_ptr = CreateMessageForHMI(
+      hmi_apis::messageType::request, app_mngr.GetNextHMICorrelationID());
 
+  SmartObject& request = *request_ptr;
   SmartObject msg_params = SmartObject(SmartType_Map);
   msg_params[strings::app_id] = app_id;
   msg_params[strings::name] = button;
-  msg_params[strings::is_suscribed] = is_subscribed;
-
-  notification[strings::params][strings::message_type] =
-      static_cast<int32_t>(application_manager::MessageType::kNotification);
-  notification[strings::params][strings::protocol_version] =
-      commands::CommandImpl::protocol_version_;
-  notification[strings::params][strings::protocol_type] =
-      commands::CommandImpl::hmi_protocol_type_;
-  notification[strings::params][strings::function_id] =
-      hmi_apis::FunctionID::Buttons_OnButtonSubscription;
-  notification[strings::msg_params] = msg_params;
-
-  return notification_ptr;
+  request[strings::params][strings::function_id] = function;
+  request[strings::msg_params] = msg_params;
+  return request_ptr;
 }
 
 smart_objects::SmartObjectList
-MessageHelper::CreateOnButtonSubscriptionNotificationsForApp(
+MessageHelper::CreateButtonSubscriptionsHandlingRequestsList(
     ApplicationConstSharedPtr app,
-    ApplicationManager& app_mngr,
-    const ButtonSubscriptions& button_subscriptions) {
+    const ButtonSubscriptions& button_subscriptions,
+    const hmi_apis::FunctionID::eType function,
+    ApplicationManager& app_mngr) {
   using namespace smart_objects;
   using namespace hmi_apis;
   using namespace mobile_apis;
@@ -1077,15 +1064,13 @@ MessageHelper::CreateOnButtonSubscriptionNotificationsForApp(
     return button_subscription_requests;
   }
 
-  DataAccessor<ButtonSubscriptions> button_accessor = app->SubscribedButtons();
-  ButtonSubscriptions subscriptions = button_accessor.GetData();
-  ButtonSubscriptions::iterator it = subscriptions.begin();
-  for (; subscriptions.end() != it; ++it) {
-    SendOnButtonSubscriptionNotification(
-        app->hmi_app_id(),
-        static_cast<Common_ButtonName::eType>(*it),
-        true,
-        app_mngr);
+  for (auto& it : button_subscriptions) {
+    const Common_ButtonName::eType btn =
+        static_cast<Common_ButtonName::eType>(it);
+
+    button_subscription_requests.push_back(
+        CreateButtonSubscriptionHandlingRequestToHmi(
+            app->hmi_app_id(), btn, function, app_mngr));
   }
 
   return button_subscription_requests;
@@ -2962,74 +2947,11 @@ void MessageHelper::SubscribeApplicationToSoftButton(
 }
 
 bool MessageHelper::PrintSmartObject(const smart_objects::SmartObject& object) {
-  return true;
-#ifdef ENABLE_LOG
-  static uint32_t tab = 0;
-  std::string tab_buffer;
-
-  if (tab == 0) {
-    printf("\n-------------------------------------------------------------");
-  }
-
-  for (uint32_t i = 0; i < tab; ++i) {
-    tab_buffer += "\t";
-  }
-
-  switch (object.getType()) {
-    case ns_smart_device_link::ns_smart_objects::SmartType_Array: {
-      for (size_t i = 0; i < object.length(); i++) {
-        ++tab;
-
-        printf("\n%s%zu: ", tab_buffer.c_str(), i);
-        if (!PrintSmartObject(object.getElement(i))) {
-          printf("\n");
-          return false;
-        }
-      }
-      break;
-    }
-    case ns_smart_device_link::ns_smart_objects::SmartType_Map: {
-      std::set<std::string> keys = object.enumerate();
-
-      for (std::set<std::string>::const_iterator key = keys.begin();
-           key != keys.end();
-           key++) {
-        ++tab;
-
-        printf("\n%s%s: ", tab_buffer.c_str(), (*key).c_str());
-        if (!PrintSmartObject(object[(*key).c_str()])) {
-          printf("\n");
-          return false;
-        }
-      }
-      break;
-    }
-    case ns_smart_device_link::ns_smart_objects::SmartType_Boolean:
-      object.asBool() ? printf("true\n") : printf("false\n");
-      break;
-    case ns_smart_device_link::ns_smart_objects::SmartType_Double: {
-      printf("%f", object.asDouble());
-      break;
-    }
-    case ns_smart_device_link::ns_smart_objects::SmartType_Integer:
-      printf("%lld", static_cast<long long int>(object.asInt()));
-      break;
-    case ns_smart_device_link::ns_smart_objects::SmartType_String:
-      printf("%s", object.asString().c_str());
-      break;
-    case ns_smart_device_link::ns_smart_objects::SmartType_Character:
-      printf("%c", object.asChar());
-      break;
-    default:
-      printf("PrintSmartObject - default case\n");
-      break;
-  }
-
-  if (0 != tab) {
-    --tab;
-  } else {
-    printf("\n-------------------------------------------------------------\n");
-  }
+#ifdef DEBUG
+  Json::Value tmp;
+  namespace Formatters = ns_smart_device_link::ns_json_handler::formatters;
+  Formatters::CFormatterJsonBase::objToJsonValue(object, tmp);
+  LOG4CXX_DEBUG(logger_, "SMART OBJECT: " << tmp.toStyledString());
 #endif
   return true;
 }

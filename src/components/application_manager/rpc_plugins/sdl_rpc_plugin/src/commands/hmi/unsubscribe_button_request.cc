@@ -31,6 +31,7 @@
  */
 
 #include "sdl_rpc_plugin/commands/hmi/unsubscribe_button_request.h"
+#include "application_manager/resumption/resume_ctrl.h"
 
 namespace sdl_rpc_plugin {
 using namespace application_manager;
@@ -56,6 +57,14 @@ UnsubscribeButtonRequest::~UnsubscribeButtonRequest() {}
 void UnsubscribeButtonRequest::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
   SendRequest();
+}
+
+void UnsubscribeButtonRequest::onTimeOut() {
+  auto& resume_ctrl = application_manager_.resume_controller();
+
+  resume_ctrl.HandleOnTimeOut(
+      correlation_id(),
+      static_cast<hmi_apis::FunctionID::eType>(function_id()));
 }
 
 }  // namespace hmi

@@ -276,33 +276,32 @@ class MessageHelper {
       const std::string& path_to_icon, uint32_t app_id);
 
   /**
-   * @brief Creates button subscription notification
+   * @brief Creates button subscription request to hmi
+   * @param app_id - id of application for which request should be created
+   * @param button - button to be subscribed
+   * @param app_mngr - application manager
+   * @return Smart object with fulfilled request
    */
-  static smart_objects::SmartObjectSPtr CreateOnButtonSubscriptionNotification(
+  static smart_objects::SmartObjectSPtr
+  CreateButtonSubscriptionHandlingRequestToHmi(
       const uint32_t app_id,
       const hmi_apis::Common_ButtonName::eType button,
-      const bool is_subscribed,
+      const hmi_apis::FunctionID::eType function,
       ApplicationManager& app_mngr);
 
   /**
-   * @brief Creates button subscription notifications for buttons
-   * that application is subscribed on
+   * @brief Creates buttons subscription requests list
+   * for all buttons that application is subscribed on
+   * @param app - application to be subscribed for button
+   * @param buttons_subscriptions - set of buttons to be subscribed
+   * @return list of all buttons subscription requests ready to be sent to hmi
+   * @note for every button - separate request is created in the list
    */
   static smart_objects::SmartObjectList
-  CreateOnButtonSubscriptionNotificationsForApp(
+  CreateButtonSubscriptionsHandlingRequestsList(
       ApplicationConstSharedPtr app,
-      ApplicationManager& app_mngr,
-      const ButtonSubscriptions& button_subscriptions);
-
-  /**
-   * @brief Sends button subscription request to HMI
-   * @param app_id - app which needs button subscription
-   * @param button - button to subscribe
-   * @param app_mngr - application manager
-   */
-  static void SendButtonSubscriptionRequest(
-      const uint32_t app_id,
-      const hmi_apis::Common_ButtonName::eType button,
+      const ButtonSubscriptions& buttons_subscriptions,
+      const hmi_apis::FunctionID::eType function,
       ApplicationManager& app_mngr);
 
   /**

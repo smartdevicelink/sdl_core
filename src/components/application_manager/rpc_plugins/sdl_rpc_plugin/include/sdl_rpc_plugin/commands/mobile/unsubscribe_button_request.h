@@ -80,12 +80,6 @@ class UnsubscribeButtonRequest : public app_mngr::commands::CommandRequestImpl {
   void on_event(const app_mngr::event_engine::Event& event) FINAL;
 
  private:
-  /**
-   * @brief Sends ButtonSubscription notification
-   * to notify HMI that app unsubscribed from the button.
-   */
-  void SendUnsubscribeButtonNotification();
-
   DISALLOW_COPY_AND_ASSIGN(UnsubscribeButtonRequest);
 };
 

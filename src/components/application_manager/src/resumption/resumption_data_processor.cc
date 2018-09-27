@@ -611,8 +611,11 @@ void ResumptionDataProcessor::AddButtonsSubscriptions(
         GetButtonSubscriptionsToResume(application);
 
     ProcessHMIRequests(
-        MessageHelper::CreateOnButtonSubscriptionNotificationsForApp(
-            application, application_manager_, button_subscriptions));
+        MessageHelper::CreateButtonSubscriptionsHandlingRequestsList(
+            application,
+            button_subscriptions,
+            hmi_apis::FunctionID::Buttons_SubscribeButton,
+            application_manager_));
   }
 }
 
@@ -655,18 +658,18 @@ void ResumptionDataProcessor::DeleteButtonsSubscriptions(
   LOG4CXX_AUTO_TRACE(logger_);
   const ButtonSubscriptions button_subscriptions =
       application->SubscribedButtons().GetData();
-  smart_objects::SmartObjectSPtr notification;
   for (auto& btn : button_subscriptions) {
     const auto hmi_btn = static_cast<hmi_apis::Common_ButtonName::eType>(btn);
     if (hmi_apis::Common_ButtonName::CUSTOM_BUTTON == hmi_btn) {
       continue;
     }
-    notification = MessageHelper::CreateOnButtonSubscriptionNotification(
-        application->hmi_app_id(),
-        hmi_btn,
-        /*is_subscribed = */ false,
-        application_manager_);
-    ProcessHMIRequest(notification, false);
+    smart_objects::SmartObjectSPtr unsubscribe_request =
+        MessageHelper::CreateButtonSubscriptionHandlingRequestToHmi(
+            application->hmi_app_id(),
+            hmi_btn,
+            hmi_apis::FunctionID::Buttons_UnsubscribeButton,
+            application_manager_);
+    ProcessHMIRequest(unsubscribe_request, false);
     application->UnsubscribeFromButton(btn);
   }
 }

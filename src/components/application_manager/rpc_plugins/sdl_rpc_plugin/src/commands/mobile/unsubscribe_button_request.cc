@@ -154,19 +154,5 @@ bool UnsubscribeButtonRequest::Init() {
   return true;
 }
 
-void UnsubscribeButtonRequest::SendUnsubscribeButtonNotification() {
-  using namespace smart_objects;
-  using namespace hmi_apis;
-
-  // send OnButtonSubscription notification
-  SmartObject msg_params = SmartObject(SmartType_Map);
-  msg_params[strings::app_id] = connection_key();
-  msg_params[strings::name] = static_cast<Common_ButtonName::eType>(
-      (*message_)[strings::msg_params][strings::button_name].asInt());
-  msg_params[strings::is_suscribed] = false;
-  CreateHMINotification(FunctionID::Buttons_OnButtonSubscription, msg_params);
-}
-
 }  // namespace commands
-
 }  // namespace sdl_rpc_plugin
