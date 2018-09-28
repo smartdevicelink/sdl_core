@@ -77,7 +77,8 @@ class SSLContext {
   };
 
   struct HandshakeContext {
-    HandshakeContext() : expected_sn(""), expected_cn("") {}
+    HandshakeContext()
+        : expected_sn(""), expected_cn(""), system_time(time(NULL)) {}
 
     HandshakeContext(const custom_str::CustomString& exp_sn,
                      const custom_str::CustomString& exp_cn)

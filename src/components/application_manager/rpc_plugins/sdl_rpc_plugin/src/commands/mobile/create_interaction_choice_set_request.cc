@@ -63,6 +63,7 @@ CreateInteractionChoiceSetRequest::CreateInteractionChoiceSetRequest(
     , choice_set_id_(0)
     , expected_chs_count_(0)
     , received_chs_count_(0)
+    , should_send_warnings_(false)
     , error_from_hmi_(false)
     , is_timed_out_(false) {}
 
@@ -80,7 +81,7 @@ void CreateInteractionChoiceSetRequest::Run() {
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     return;
   }
-  should_send_warnings = false;
+
   for (uint32_t i = 0;
        i < (*message_)[strings::msg_params][strings::choice_set].length();
        ++i) {
@@ -109,7 +110,7 @@ void CreateInteractionChoiceSetRequest::Run() {
       return;
     } else if (verification_result_image == Result::WARNINGS ||
                verification_result_secondary_image == Result::WARNINGS) {
-      should_send_warnings = true;
+      should_send_warnings_ = true;
       break;
     }
   }
@@ -465,7 +466,7 @@ void CreateInteractionChoiceSetRequest::DeleteChoices() {
 void CreateInteractionChoiceSetRequest::OnAllHMIResponsesReceived() {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  if (!error_from_hmi_ && should_send_warnings) {
+  if (!error_from_hmi_ && should_send_warnings_) {
     SendResponse(true, mobile_apis::Result::WARNINGS, kInvalidImageWarningInfo);
   } else if (!error_from_hmi_) {
     SendResponse(true, mobile_apis::Result::SUCCESS);
