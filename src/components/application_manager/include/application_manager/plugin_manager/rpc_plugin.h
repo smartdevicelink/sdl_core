@@ -66,7 +66,7 @@ class RPCPlugin {
    * @brief Class destructor
    */
   virtual ~RPCPlugin() = 0;
-  
+
   /**
     * @brief Command initialization function
     * @param app_manager ApplicationManager
