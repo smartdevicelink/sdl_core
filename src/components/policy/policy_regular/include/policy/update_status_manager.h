@@ -118,6 +118,12 @@ class UpdateStatusManager : public UpdateStatusManagerInterface {
   void OnNewApplicationAdded(const DeviceConsent consent);
 
   /**
+   * @brief Update status handler on existed application registering
+   * @param is_update_required Update necessity flag
+   */
+  void OnExistedApplicationAdded(const bool is_update_required);
+
+  /**
    * @brief Update status handler for policy initialization
    * @param is_update_required Update necessity flag
    */

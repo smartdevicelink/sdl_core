@@ -1453,10 +1453,13 @@ bool CacheManager::Init(const std::string& file_name,
 void CacheManager::FillDeviceSpecificData() {}
 
 bool CacheManager::LoadFromBackup() {
+  LOG4CXX_AUTO_TRACE(logger_);
   sync_primitives::AutoLock lock(cache_lock_);
   pt_ = backup_->GenerateSnapshot();
   update_required = backup_->UpdateRequired();
-
+  LOG4CXX_DEBUG(logger_,
+                "Update required flag from backup: " << std::boolalpha
+                                                     << update_required);
   FillDeviceSpecificData();
 
   return true;

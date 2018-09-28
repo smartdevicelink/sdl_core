@@ -100,6 +100,15 @@ void UpdateStatusManager::OnResetRetrySequence() {
   ProcessEvent(kOnResetRetrySequence);
 }
 
+void UpdateStatusManager::OnExistedApplicationAdded(
+    const bool is_update_required) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  if (is_update_required) {
+    current_status_.reset(new UpToDateStatus());
+    ProcessEvent(kScheduleUpdate);
+  }
+}
+
 void UpdateStatusManager::OnNewApplicationAdded(const DeviceConsent consent) {
   LOG4CXX_AUTO_TRACE(logger_);
   if (kDeviceAllowed != consent) {
