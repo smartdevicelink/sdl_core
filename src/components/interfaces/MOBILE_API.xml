@@ -3344,9 +3344,6 @@
         <param name="sourceAvailable" type="Boolean" mandatory="false">
             <description>Availability of the control of audio source. </description>
         </param>
-        <param name="keepContextAvailable" type="Boolean" mandatory="false">
-            <description>Availability of the keepContext paramter. </description>
-        </param>
         <param name="volumeAvailable" type="Boolean" mandatory="false">
             <description>Availability of the control of audio volume.</description>
         </param>
