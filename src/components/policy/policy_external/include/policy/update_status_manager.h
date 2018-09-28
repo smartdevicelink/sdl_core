@@ -114,6 +114,12 @@ class UpdateStatusManager {
   void OnResetRetrySequence();
 
   /**
+   * @brief Update status handler on existed application registering
+   * @param is_update_required Update necessity flag
+   */
+  void OnExistedApplicationAdded(const bool is_update_required);
+
+  /**
    * @brief Update status handler on new application registering
    */
   void OnNewApplicationAdded(const DeviceConsent consent);

@@ -1922,13 +1922,15 @@ StatusNotifier PolicyManagerImpl::AddApplication(
   DeviceConsent device_consent = GetUserConsentForDevice(device_id);
   sync_primitives::AutoLock lock(apps_registration_lock_);
   if (IsNewApplication(application_id)) {
+    LOG4CXX_DEBUG(logger_, "Adding new application");
     AddNewApplication(application_id, device_consent);
     return std::make_shared<CallStatusChange>(update_status_manager_,
                                               device_consent);
-  } else {
-    PromoteExistedApplication(application_id, device_consent);
-    return std::make_shared<utils::CallNothing>();
   }
+  LOG4CXX_DEBUG(logger_, "Promote existed application");
+  PromoteExistedApplication(application_id, device_consent);
+  update_status_manager_.OnExistedApplicationAdded(cache_->UpdateRequired());
+  return std::make_shared<utils::CallNothing>();
 }
 
 void PolicyManagerImpl::RemoveAppConsentForGroup(
@@ -2042,7 +2044,6 @@ bool PolicyManagerImpl::InitPT(const std::string& file_name,
   const bool ret = cache_->Init(file_name, settings);
   if (ret) {
     RefreshRetrySequence();
-    update_status_manager_.OnPolicyInit(cache_->UpdateRequired());
   }
   return ret;
 }
