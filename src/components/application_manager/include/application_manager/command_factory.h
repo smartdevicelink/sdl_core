@@ -49,6 +49,11 @@ typedef std::shared_ptr<commands::Command> CommandSharedPtr;
 class CommandFactory {
  public:
   /**
+   * @brief Class destructor
+   */
+  virtual ~CommandFactory() = 0;
+
+  /**
    * @brief Create command object and return pointer to it
    *
    * @param  message SmartObject shared pointer.
