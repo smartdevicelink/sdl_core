@@ -137,7 +137,7 @@ class PlatformSpecificNetworkInterfaceListener
     struct sockaddr_storage address;
 
     EventParam(int interface_index, unsigned int interface_flags = 0)
-        : if_index(interface_index), flags(interface_flags) {}
+        : if_index(interface_index), flags(interface_flags), address() {}
   };
 
   // parent class which we will notify the events to

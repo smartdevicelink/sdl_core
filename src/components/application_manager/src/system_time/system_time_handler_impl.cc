@@ -46,6 +46,7 @@ SystemTimeHandlerImpl::SystemTimeHandlerImpl(
     : event_engine::EventObserver(application_manager.event_dispatcher())
     , utc_time_can_be_received_(false)
     , awaiting_get_system_time_(false)
+    , last_time_(0)
     , system_time_listener_(NULL)
     , app_manager_(application_manager) {
   LOG4CXX_AUTO_TRACE(logger_);
