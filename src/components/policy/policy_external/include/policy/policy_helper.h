@@ -100,7 +100,8 @@ struct CheckAppPolicy {
    * @param result Result of check of updated policy
    */
   void SetPendingPermissions(const AppPoliciesValueType& app_policy,
-                             PermissionsCheckResult result) const;
+                             PermissionsCheckResult result,
+                             AppPermissions& permissions_diff) const;
   /**
    * @brief Analyzes updated application policy whether any changes received. If
    * yes - provides appropriate result code
@@ -199,6 +200,18 @@ struct CheckAppPolicy {
    * @return True if changed, otherwise - false
    */
   bool IsRequestSubTypeChanged(const AppPoliciesValueType& app_policy) const;
+
+  /**
+   * @brief Helper function that inserts permissions into app_permissions_diff_
+   * map.
+   * udpated
+   * @param app_policy Reference to updated application policy
+   * @param permissions_diff Reference to app permissions to be inserted into
+   * map.
+   * @return void
+   */
+  void InsertPermission(const std::string& app_id,
+                        const AppPermissions& permissions_diff);
 
  private:
   PolicyManagerImpl* pm_;

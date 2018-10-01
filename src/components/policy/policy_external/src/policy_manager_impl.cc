@@ -1261,15 +1261,8 @@ void PolicyManagerImpl::GetUserConsentForApp(
   FunctionalGroupIDs allowed_groups =
       Merge(consent_allowed_groups, preconsented_wo_disallowed_auto);
 
-  FunctionalGroupIDs merged_stage_1 =
-      Merge(default_groups, predataconsented_groups);
-
-  FunctionalGroupIDs merged_stage_2 = Merge(merged_stage_1, device_groups);
-
-  FunctionalGroupIDs merged_stage_3 =
-      Merge(merged_stage_2, auto_allowed_groups);
-
-  FunctionalGroupIDs excluded_stage_1 = ExcludeSame(all_groups, merged_stage_3);
+  FunctionalGroupIDs excluded_stage_1 =
+      ExcludeSame(all_groups, auto_allowed_groups);
 
   FunctionalGroupIDs excluded_stage_2 =
       ExcludeSame(excluded_stage_1, consent_disallowed_groups);
