@@ -69,24 +69,34 @@ class PolicyListener {
  */
   virtual bool CanUpdate() = 0;
 
+#ifdef EXTERNAL_PROPRIETARY_MODE
   /**
    * @brief OnSnapshotCreated the notification which will be sent
    * when snapshot for PTU has been created.
-   *
    * @param pt_string the snapshot
-   *
    * @param retry_seconds retry sequence timeouts.
-   *
+   * @param timeout_exceed timeout.
+   */
+  virtual void OnSnapshotCreated(const BinaryMessage& pt_string,
+                                 const std::vector<int>& retry_delay_seconds,
+                                 uint32_t timeout_exchange) = 0;
+#endif
+
+#if defined(PROPRIETARY_MODE) || defined(HTTP_MODE)
+  /**
+   * @brief OnSnapshotCreated the notification which will be sent
+   * when snapshot for PTU has been created.
+   * @param pt_string the snapshot
+   * @param retry_seconds retry sequence timeouts.
    * @param timeout_exceed timeout.
    */
   virtual void OnSnapshotCreated(const BinaryMessage& pt_string) = 0;
 
-#ifdef PROPRIETARY_MODE
   /**
    * @brief Sends snapshot via OnSystemRequest to mobile.
    */
   virtual void OnNextRetry() = 0;
-#endif  // PROPRIETARY_MODE
+#endif  // PROPRIETARY_MODE || EXTERNAL_PROPRIETARY_MODE
 
   /**
    * @brief Make appropriate changes for related applications permissions and

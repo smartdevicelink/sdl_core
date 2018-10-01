@@ -99,12 +99,13 @@ class PolicyHandler : public PolicyHandlerInterface,
   void OnSnapshotCreated(const BinaryMessage& pt_string,
                          const std::vector<int>& retry_delay_seconds,
                          uint32_t timeout_exchange) OVERRIDE;
-#else  // EXTERNAL_PROPRIETARY_MODE
+
+#else  // PROPRIETARY_MODE and HTTP_MODE
+
   void OnSnapshotCreated(const BinaryMessage& pt_string) OVERRIDE;
-#ifdef PROPRIETARY_MODE
   void OnNextRetry() OVERRIDE;
-#endif  // PROPRIETARY_MODE
-#endif  // EXTERNAL_PROPRIETARY_MODE
+#endif  // PROPRIETARY_MODE || HTTP_MODE
+
   virtual bool GetPriority(const std::string& policy_app_id,
                            std::string* priority) const OVERRIDE;
   virtual void CheckPermissions(

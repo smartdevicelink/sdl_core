@@ -79,8 +79,10 @@ class PolicyHandlerInterface {
   virtual void OnSnapshotCreated(const BinaryMessage& pt_string,
                                  const std::vector<int>& retry_delay_seconds,
                                  uint32_t timeout_exchange) = 0;
-#else   // EXTERNAL_PROPRIETARY_MODE
+
+#else   // PROPRIETARY_MODE and HTTP_MODE
   virtual void OnSnapshotCreated(const BinaryMessage& pt_string) = 0;
+
 #endif  // EXTERNAL_PROPRIETARY_MODE
 
   virtual bool GetPriority(const std::string& policy_app_id,

@@ -1650,6 +1650,7 @@ TEST_F(PolicyHandlerTest, OnSnapshotCreated_UrlNotAdded) {
 #if defined(PROPRIETARY_MODE) || defined(EXTERNAL_PROPRIETARY_MODE)
   ExtendedPolicyExpectations();
 #endif  // PROPRIETARY_MODE || EXTERNAL_PROPRIETARY_MODE
+
 #ifdef EXTERNAL_PROPRIETARY_MODE
   std::vector<int> retry_delay_seconds;
   const uint32_t timeout_exchange = 10u;
@@ -1657,9 +1658,11 @@ TEST_F(PolicyHandlerTest, OnSnapshotCreated_UrlNotAdded) {
   EXPECT_CALL(*mock_policy_manager_, GetUpdateUrls("0x07", _))
       .WillRepeatedly(SetArgReferee<1>(test_data));
   policy_handler_.OnSnapshotCreated(msg, retry_delay_seconds, timeout_exchange);
-#else   // EXTERNAL_PROPRIETARY_MODE
-  policy_handler_.OnSnapshotCreated(msg);
 #endif  // EXTERNAL_PROPRIETARY_MODE
+
+#if defined(PROPRIETARY_MODE) || defined(HTTP_MODE)
+  policy_handler_.OnSnapshotCreated(msg);
+#endif  // PROPRIETARY_MODE || HTTP_MODE
 }
 
 TEST_F(PolicyHandlerTest,
@@ -1700,7 +1703,9 @@ TEST_F(PolicyHandlerTest, OnSnapshotCreated_UrlAdded) {
 
   policy_handler_.OnSnapshotCreated(msg, retry_delay_seconds, timeout_exchange);
 }
-#else  // EXTERNAL_PROPRIETARY_MODE
+
+#else  // PROPRIETARY_MODE and HTTP_MODE
+
 // TODO(LevchenkoS): Find out what is wrong with this test on HTTP Policy
 TEST_F(PolicyHandlerTest, DISABLED_OnSnapshotCreated_UrlAdded) {
   EnablePolicyAndPolicyManagerMock();
@@ -1726,7 +1731,8 @@ TEST_F(PolicyHandlerTest, DISABLED_OnSnapshotCreated_UrlAdded) {
       .WillOnce(ReturnRef(mock_session_observer));
   EXPECT_CALL(*mock_app_, device()).WillOnce(Return(0));
   EXPECT_CALL(app_manager_, applications()).WillOnce(Return(app_set));
-  EXPECT_CALL(mock_message_helper_, SendPolicySnapshotNotification(_, _, _, _));
+  EXPECT_CALL(mock_message_helper_,
+              SendPolicySnapshotNotification(_, msg, _, _));
   // Check expectations for get app id
   GetAppIDForSending();
   // Expectations
@@ -1736,7 +1742,10 @@ TEST_F(PolicyHandlerTest, DISABLED_OnSnapshotCreated_UrlAdded) {
 #endif  // PROPRIETARY_MODE
 
   EXPECT_CALL(*mock_policy_manager_, OnUpdateStarted());
+
+#if defined(PROPRIETARY_MODE) || defined(HTTP_MODE)
   policy_handler_.OnSnapshotCreated(msg);
+#endif  // PROPRIETARY_MODE || HTTP_MODE
 }
 #endif  // EXTERNAL_PROPRIETARY_MODE
 

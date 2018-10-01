@@ -1325,9 +1325,9 @@ void PolicyManagerImpl::RetrySequence() {
     }
     return;
   }
-#ifdef PROPRIETARY_MODE
+#if defined(PROPRIETARY_MODE) || defined(HTTP_MODE)
   listener_->OnNextRetry();
-#endif  // PROPRIETARY_MODE
+#endif  // PROPRIETARY_MODE || HTTP_MODE
   timer_retry_sequence_.Start(timeout_msec, timer::kPeriodic);
 }
 

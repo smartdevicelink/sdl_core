@@ -1081,11 +1081,12 @@ bool PolicyHandler::SendMessageToSDK(const BinaryMessage& pt_string,
   POLICY_LIB_CHECK(false);
 
   ApplicationSharedPtr app = ChooseApplication();
-  uint32_t app_id = app->app_id();
 
   if (!app) {
     return false;
   }
+
+  uint32_t app_id = app->app_id();
 
   LOG4CXX_DEBUG(logger_,
                 "Update url is " << url << " for application "
@@ -1493,7 +1494,18 @@ void PolicyHandler::OnSnapshotCreated(
                                     application_manager_);
   }
 }
-#endif
+#endif  // EXTERNAL_PROPRIETARY_MODE
+
+#ifdef HTTP_MODE
+void PolicyHandler::OnSnapshotCreated(const BinaryMessage& pt_string) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  const std::string url;
+  if (url.empty()) {
+    return;
+  }
+  SendMessageToSDK(pt_string, url);
+}
+#endif  // HTTP_MODE
 
 #ifdef PROPRIETARY_MODE
 void PolicyHandler::OnSnapshotCreated(const BinaryMessage& pt_string) {
@@ -1512,6 +1524,9 @@ void PolicyHandler::OnSnapshotCreated(const BinaryMessage& pt_string) {
   OnUpdateRequestSentToMobile();
 }
 
+#endif  // PROPRIETARY_MODE
+
+#if defined(PROPRIETARY_MODE) || defined(HTTP_MODE)
 void PolicyHandler::OnNextRetry() {
   LOG4CXX_AUTO_TRACE(logger_);
   const std::string url = ChooseUrl();
@@ -1524,18 +1539,7 @@ void PolicyHandler::OnNextRetry() {
       app_id, snapshot_file_path_, url, application_manager_);
   OnUpdateRequestSentToMobile();
 }
-#endif
-
-#ifdef HTTP_MODE
-void PolicyHandler::OnSnapshotCreated(const BinaryMessage& pt_string) {
-  LOG4CXX_AUTO_TRACE(logger_);
-  const std::string url = ();
-  if (url.empty()) {
-    return;
-  }
-  SendMessageToSDK(pt_string, url);
-}
-#endif
+#endif  // PROPRIETARY_MODE || HTTP_MODE
 
 bool PolicyHandler::GetPriority(const std::string& policy_app_id,
                                 std::string* priority) const {
