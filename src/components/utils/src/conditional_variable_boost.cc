@@ -93,7 +93,7 @@ ConditionalVariable::WaitStatus ConditionalVariable::WaitFor(
   BaseLock& lock = auto_lock.GetLock();
 
   WaitStatus wait_status = kNoTimeout;
-  try{
+  try {
     lock.AssertTakenAndMarkFree();
     bool timeout = true;
 
@@ -120,8 +120,8 @@ ConditionalVariable::WaitStatus ConditionalVariable::WaitFor(
     }
     lock.AssertFreeAndMarkTaken();
   } catch (const boost::exception& error) {
-     std::string error_string = boost::diagnostic_information(error);
-     LOG4CXX_FATAL(logger_, error_string);
+    std::string error_string = boost::diagnostic_information(error);
+    LOG4CXX_FATAL(logger_, error_string);
   }
 
   return wait_status;
