@@ -103,8 +103,8 @@ CacheManager::CacheManager()
     : CacheManagerInterface()
     , pt_(new policy_table::Table)
     , backup_(new SQLPTRepresentation())
-    , settings_(nullptr)
-    , update_required(false) {
+    , update_required(false)
+    , settings_(nullptr) {
   LOG4CXX_AUTO_TRACE(logger_);
   backuper_ = new BackgroundBackuper(this);
   backup_thread_ = threads::CreateThread("Backup thread", backuper_);
@@ -827,7 +827,7 @@ void CacheManager::CheckSnapshotInitialization() {
   *(snapshot_->policy_table.module_config.preloaded_pt) = false;
 
   *(snapshot_->policy_table.module_config.full_app_id_supported) =
-      get_settings()->use_full_app_id();
+      get_settings().use_full_app_id();
 
   // SDL must not send certificate in snapshot
   snapshot_->policy_table.module_config.certificate =
