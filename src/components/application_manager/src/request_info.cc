@@ -74,12 +74,12 @@ MobileRequestInfo::MobileRequestInfo(RequestPtr request,
 }
 
 RequestInfo::RequestInfo(RequestPtr request,
-                         const RequestInfo::RequestType requst_type,
+                         const RequestInfo::RequestType request_type,
                          const date_time::TimeDuration& start_time,
                          const uint64_t timeout_msec)
     : request_(request), start_time_(start_time), timeout_msec_(timeout_msec) {
   updateEndTime();
-  requst_type_ = requst_type;
+  request_type_ = request_type;
   correlation_id_ = request_->correlation_id();
   app_id_ = request_->connection_key();
 }

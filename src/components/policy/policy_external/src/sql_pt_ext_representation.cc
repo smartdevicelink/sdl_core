@@ -897,6 +897,9 @@ bool SQLPTExtRepresentation::GatherApplicationPoliciesSection(
     if (!GatherRequestType(app_id, &*params.RequestType)) {
       return false;
     }
+    if (!GatherRequestSubType(app_id, &*params.RequestSubType)) {
+      return false;
+    }
     GatherPreconsentedGroup(app_id, &*params.preconsented_groups);
     (*policies).apps[app_id] = params;
   }

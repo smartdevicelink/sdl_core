@@ -33,7 +33,6 @@
 #define SRC_COMPONENTS_POLICY_POLICY_EXTERNAL_TEST_INCLUDE_POLICY_MOCK_UPDATE_STATUS_MANAGER_H_
 
 #include "gmock/gmock.h"
-
 #include "policy/update_status_manager.h"
 
 namespace test {
@@ -49,6 +48,7 @@ class MockUpdateStatusManager : public ::policy::UpdateStatusManager {
   MOCK_METHOD0(OnWrongUpdateReceived, void());
   MOCK_METHOD1(OnResetDefaultPT, void(bool is_update_required));
   MOCK_METHOD0(OnResetRetrySequence, void());
+  MOCK_METHOD1(OnExistedApplicationAdded, void(const bool is_update_required));
   MOCK_METHOD1(OnNewApplicationAdded, void(const DeviceConsent));
   MOCK_METHOD1(OnPolicyInit, void(bool is_update_required));
   MOCK_METHOD0(GetUpdateStatus, PolicyTableStatus());

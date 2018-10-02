@@ -401,7 +401,7 @@ void RequestController::TimeoutThread() {
       LOG4CXX_DEBUG(logger_,
                     "Timeout for "
                         << (RequestInfo::HMIRequest ==
-                                    probably_expired->requst_type()
+                                    probably_expired->request_type()
                                 ? "HMI"
                                 : "Mobile")
                         << " request id: " << probably_expired->requestId()
@@ -420,7 +420,7 @@ void RequestController::TimeoutThread() {
     LOG4CXX_INFO(logger_,
                  "Timeout for "
                      << (RequestInfo::HMIRequest ==
-                                 probably_expired->requst_type()
+                                 probably_expired->request_type()
                              ? "HMI"
                              : "Mobile")
                      << " request id: " << probably_expired->requestId()
