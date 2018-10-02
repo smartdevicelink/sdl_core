@@ -63,23 +63,27 @@ void ConditionalVariable::Broadcast() {
 bool ConditionalVariable::Wait(BaseLock& lock) {
   // NOTE this grossness is due to boost mutex and recursive mutex not sharing a
   // superclass
-
-  lock.AssertTakenAndMarkFree();
-  // What kind of lock are we ?
-  if (Lock* test_lock = dynamic_cast<Lock*>(&lock)) {
-    // Regular lock
-    cond_var_.wait<boost::mutex>(test_lock->mutex_);
-  } else if (RecursiveLock* test_rec_lock =
-                 dynamic_cast<RecursiveLock*>(&lock)) {
-    // Recursive lock
-    cond_var_.wait<boost::recursive_mutex>(test_rec_lock->mutex_);
-  } else {
-    // unknown, give up the lock
-    LOG4CXX_ERROR(logger_, "Unknown lock type!");
+  try {
+    lock.AssertTakenAndMarkFree();
+    // What kind of lock are we ?
+    if (Lock* test_lock = dynamic_cast<Lock*>(&lock)) {
+      // Regular lock
+      cond_var_.wait<boost::mutex>(test_lock->mutex_);
+    } else if (RecursiveLock* test_rec_lock =
+                   dynamic_cast<RecursiveLock*>(&lock)) {
+      // Recursive lock
+      cond_var_.wait<boost::recursive_mutex>(test_rec_lock->mutex_);
+    } else {
+      // unknown, give up the lock
+      LOG4CXX_ERROR(logger_, "Unknown lock type!");
+      NOTREACHED();
+    }
+    lock.AssertFreeAndMarkTaken();
+  } catch (const boost::exception& error) {
+    std::string error_string = boost::diagnostic_information(error);
+    LOG4CXX_FATAL(logger_, error_string);
     NOTREACHED();
   }
-  lock.AssertFreeAndMarkTaken();
-
   return true;
 }
 
@@ -122,6 +126,7 @@ ConditionalVariable::WaitStatus ConditionalVariable::WaitFor(
   } catch (const boost::exception& error) {
     std::string error_string = boost::diagnostic_information(error);
     LOG4CXX_FATAL(logger_, error_string);
+    NOTREACHED();
   }
 
   return wait_status;
