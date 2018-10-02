@@ -52,9 +52,10 @@ endif ()
 
 if (NOT ${Boost_FOUND})
   message(STATUS "Did not find boost. Downloading and installing boost 1.66")
-  set(BOOST_INSTALL_COMMAND ./b2 install)
+  set(BOOST_BUILD_COMMAND ./b2 address-model=${ADDRESS_MODEL} target-os=qnx toolset=gcc-nto${CMAKE_SYSTEM_PROCESSOR} define=linux)
+  set(BOOST_INSTALL_COMMAND ${BOOST_BUILD_COMMAND} install > boost_install.log)
   if (${3RD_PARTY_INSTALL_PREFIX} MATCHES "/usr/local")
-    set(BOOST_INSTALL_COMMAND sudo ./b2 install)
+    set(BOOST_INSTALL_COMMAND sudo  ${BOOST_BUILD_COMMAND} install > boost_install.log)
   endif()
   include(ExternalProject)  
   ExternalProject_Add(
@@ -63,8 +64,8 @@ if (NOT ${Boost_FOUND})
     DOWNLOAD_DIR ${BOOST_LIB_SOURCE_DIRECTORY}
     SOURCE_DIR ${BOOST_LIB_SOURCE_DIRECTORY}  
     CONFIGURE_COMMAND  ${BOOST_GCC_JAM} COMMAND ${BOOTSTRAP}
-    BUILD_COMMAND echo ${BOOST_QNX_PROJECT_CONFIG_JAM} $<SEMICOLON> >> ./project-config.jam COMMAND ./b2 address-model=${ADDRESS_MODEL} target-os=qnx toolset=gcc-nto${CMAKE_SYSTEM_PROCESSOR} define=linux     
-    INSTALL_COMMAND ${BOOST_INSTALL_COMMAND} --with-system --with-thread --with-date_time --with-filesystem --prefix=${3RD_PARTY_INSTALL_PREFIX} > boost_install.log
+    BUILD_COMMAND echo ${BOOST_QNX_PROJECT_CONFIG_JAM} $<SEMICOLON> >> ./project-config.jam COMMAND ${BOOST_BUILD_COMMAND}
+    INSTALL_COMMAND ${BOOST_INSTALL_COMMAND}
     INSTALL_DIR ${3RD_PARTY_INSTALL_PREFIX}
     BUILD_IN_SOURCE true
 
