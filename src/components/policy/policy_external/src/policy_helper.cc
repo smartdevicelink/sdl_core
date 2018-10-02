@@ -302,7 +302,9 @@ void CheckAppPolicy::AddResult(const std::string& app_id,
 void CheckAppPolicy::InsertPermission(const std::string& app_id,
                                       const AppPermissions& permissions_diff) {
   pm_->app_permissions_diff_lock_.Acquire();
-  if (!pm_->app_permissions_diff_.insert(std::make_pair(app_id, permissions_diff)).second) {
+  auto result = pm_->app_permissions_diff_.insert(
+      std::make_pair(app_id, permissions_diff));
+  if (!result.second) {
     LOG4CXX_ERROR(logger_, "App ID: " << app_id << " already exists in map.");
   }
   pm_->app_permissions_diff_lock_.Release();

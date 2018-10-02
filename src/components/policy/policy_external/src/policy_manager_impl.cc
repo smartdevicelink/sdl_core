@@ -1246,10 +1246,6 @@ void PolicyManagerImpl::GetUserConsentForApp(
   FunctionalGroupIDs preconsented_groups = group_types[kTypePreconsented];
   FunctionalGroupIDs consent_allowed_groups = group_types[kTypeAllowed];
   FunctionalGroupIDs consent_disallowed_groups = group_types[kTypeDisallowed];
-  FunctionalGroupIDs default_groups = group_types[kTypeDefault];
-  FunctionalGroupIDs predataconsented_groups =
-      group_types[kTypePreDataConsented];
-  FunctionalGroupIDs device_groups = group_types[kTypeDevice];
 
   // Sorting groups by consent
   FunctionalGroupIDs preconsented_wo_auto =
