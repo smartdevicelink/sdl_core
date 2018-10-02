@@ -65,7 +65,7 @@ class RPCPlugin {
   /**
    * @brief Class destructor
    */
-  virtual ~RPCPlugin() = 0;
+  virtual ~RPCPlugin() {}
 
   /**
     * @brief Command initialization function

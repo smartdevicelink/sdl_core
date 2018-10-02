@@ -51,7 +51,7 @@ class CommandFactory {
   /**
    * @brief Class destructor
    */
-  virtual ~CommandFactory() = 0;
+  virtual ~CommandFactory() {}
 
   /**
    * @brief Create command object and return pointer to it

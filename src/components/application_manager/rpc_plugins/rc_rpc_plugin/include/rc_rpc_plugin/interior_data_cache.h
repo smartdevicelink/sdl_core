@@ -45,7 +45,7 @@ class InteriorDataCache {
   /**
    * @brief Class destructor
    */
-  virtual ~InteriorDataCache() = 0;
+  virtual ~InteriorDataCache(){};
 
   /**
    * @brief Add module data to cache
