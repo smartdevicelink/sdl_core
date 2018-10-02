@@ -99,8 +99,13 @@ bool AccessRemoteImpl::CheckModuleType(const PTString& app_id,
     return false;
   }
 
-  const policy_table::ApplicationParams& app =
-      cache_->pt_->policy_table.app_policies_section.apps[app_id];
+  policy_table::ApplicationParams app;
+  if (cache_->IsDefaultPolicy(app_id)) {
+    app = cache_->pt_->policy_table.app_policies_section.apps[kDefaultId];
+  } else {
+    app = cache_->pt_->policy_table.app_policies_section.apps[app_id];
+  }
+
   if (!app.moduleType.is_initialized()) {
     return false;
   }
