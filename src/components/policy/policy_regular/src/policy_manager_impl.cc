@@ -1211,10 +1211,10 @@ StatusNotifier PolicyManagerImpl::AddApplication(
     AddNewApplication(application_id, device_consent);
     return std::make_shared<CallStatusChange>(update_status_manager_,
                                               device_consent);
-  } else {
-    PromoteExistedApplication(application_id, device_consent);
-    return std::make_shared<utils::CallNothing>();
   }
+  PromoteExistedApplication(application_id, device_consent);
+  update_status_manager_.OnExistedApplicationAdded(cache_->UpdateRequired());
+  return std::make_shared<utils::CallNothing>();
 }
 
 void PolicyManagerImpl::RemoveAppConsentForGroup(
@@ -1237,6 +1237,7 @@ void PolicyManagerImpl::AddNewApplication(const std::string& application_id,
 
 void PolicyManagerImpl::PromoteExistedApplication(
     const std::string& application_id, DeviceConsent device_consent) {
+  LOG4CXX_AUTO_TRACE(logger_);
   // If device consent changed to allowed during application being
   // disconnected, app permissions should be changed also
   if (kDeviceAllowed == device_consent &&
@@ -1289,7 +1290,6 @@ bool PolicyManagerImpl::InitPT(const std::string& file_name,
   const bool ret = cache_->Init(file_name, settings);
   if (ret) {
     RefreshRetrySequence();
-    update_status_manager_.OnPolicyInit(cache_->UpdateRequired());
     const std::string certificate_data = cache_->GetCertificate();
     if (!certificate_data.empty()) {
       listener_->OnCertificateUpdated(certificate_data);
