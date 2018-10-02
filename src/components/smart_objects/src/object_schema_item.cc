@@ -45,7 +45,10 @@ namespace ns_smart_device_link {
 namespace ns_smart_objects {
 
 CObjectSchemaItem::SMember::SMember()
-    : mSchemaItem(CAlwaysFalseSchemaItem::create()), mIsMandatory(true) {}
+    : mSchemaItem(CAlwaysFalseSchemaItem::create())
+    , mIsMandatory(true)
+    , mIsDeprecated(false)
+    , mIsRemoved(false) {}
 
 CObjectSchemaItem::SMember::SMember(
     const ISchemaItemPtr SchemaItem,
