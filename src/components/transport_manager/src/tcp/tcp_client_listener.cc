@@ -286,10 +286,8 @@ void TcpClientListener::Loop() {
       }
 
       char device_name[32];
-      size_t size =
-          sizeof(device_name) /
-          sizeof(device_name[0]; strncpy(
-                     device_name, inet_ntoa(client_address.sin_addr), size));
+      size_t size = sizeof(device_name) / sizeof(device_name[0]);
+      strncpy(device_name, inet_ntoa(client_address.sin_addr), size);
 
       device_name[size - 1] = '\0';
       LOG4CXX_INFO(logger_, "Connected client " << device_name);
