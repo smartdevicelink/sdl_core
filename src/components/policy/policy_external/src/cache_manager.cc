@@ -207,6 +207,21 @@ struct ExternalConsentConsentGroupAppender
   }
 };
 
+struct DefaultPolicyUpdater {
+  DefaultPolicyUpdater(const policy_table::ApplicationParams& default_params)
+      : default_params_(default_params) {}
+
+  void operator()(policy_table::ApplicationPolicies::value_type& pt_value) {
+    if (policy::kDefaultId == pt_value.second.get_string()) {
+      pt_value.second = default_params_;
+      pt_value.second.set_to_string(policy::kDefaultId);
+    }
+  }
+
+ private:
+  const policy_table::ApplicationParams& default_params_;
+};
+
 }  // namespace
 
 namespace policy {
@@ -681,6 +696,13 @@ void CacheManager::ProcessUpdate(
       initial_policy_iter->second;
   *(pt_->policy_table.app_policies_section.apps[app_id].RequestType) =
       merged_pt_request_types;
+
+  if (app_id == kDefaultId) {
+    std::for_each(pt_->policy_table.app_policies_section.apps.begin(),
+                  pt_->policy_table.app_policies_section.apps.end(),
+                  DefaultPolicyUpdater(
+                      pt_->policy_table.app_policies_section.apps[app_id]));
+  }
 }
 
 bool CacheManager::ApplyUpdate(const policy_table::Table& update_pt) {
