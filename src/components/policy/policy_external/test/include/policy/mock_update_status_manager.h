@@ -50,7 +50,6 @@ class MockUpdateStatusManager : public ::policy::UpdateStatusManager {
   MOCK_METHOD0(OnResetRetrySequence, void());
   MOCK_METHOD1(OnExistedApplicationAdded, void(const bool is_update_required));
   MOCK_METHOD1(OnNewApplicationAdded, void(const DeviceConsent));
-  MOCK_METHOD1(OnPolicyInit, void(bool is_update_required));
   MOCK_METHOD0(GetUpdateStatus, PolicyTableStatus());
 };
 

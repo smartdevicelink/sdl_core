@@ -125,12 +125,6 @@ class UpdateStatusManager {
   void OnNewApplicationAdded(const DeviceConsent consent);
 
   /**
-   * @brief Update status handler for policy initialization
-   * @param is_update_required Update necessity flag
-   */
-  void OnPolicyInit(bool is_update_required);
-
-  /**
    * @brief In case application from non-consented device has been registered
    * before and and no updated happened then triggers status change
    */
