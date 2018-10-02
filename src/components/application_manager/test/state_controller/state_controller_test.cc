@@ -2894,12 +2894,6 @@ TEST_F(StateControllerImplTest, OnEventChangedAudioSourceAppRemainInFull) {
   am::event_engine::Event event(event_id);
   event.set_smart_object(msg);
 
-  const HmiStatePtr state =
-      createHmiState(mobile_apis::HMILevel::HMI_FULL,
-                     mobile_apis::AudioStreamingState::AUDIBLE,
-                     mobile_apis::VideoStreamingState::NOT_STREAMABLE,
-                     mobile_apis::SystemContext::SYSCTXT_MAIN);
-  EXPECT_CALL(*simple_app_ptr_, RegularHmiState()).WillOnce(Return(state));
   EXPECT_CALL(*simple_app_ptr_, IsAudioApplication())
       .WillRepeatedly(Return(true));
   EXPECT_CALL(*simple_app_ptr_, CurrentHmiState())
@@ -2930,12 +2924,6 @@ TEST_F(StateControllerImplTest, OnEventChangedAudioSourceAppToBackground) {
   am::event_engine::Event event(event_id);
   event.set_smart_object(msg);
 
-  const HmiStatePtr state =
-      createHmiState(mobile_apis::HMILevel::HMI_LIMITED,
-                     mobile_apis::AudioStreamingState::AUDIBLE,
-                     mobile_apis::VideoStreamingState::NOT_STREAMABLE,
-                     mobile_apis::SystemContext::SYSCTXT_MAIN);
-  EXPECT_CALL(*simple_app_ptr_, RegularHmiState()).WillOnce(Return(state));
   EXPECT_CALL(*simple_app_ptr_, IsAudioApplication())
       .WillRepeatedly(Return(true));
   EXPECT_CALL(*simple_app_ptr_, CurrentHmiState())
