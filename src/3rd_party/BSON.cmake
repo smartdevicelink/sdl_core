@@ -1,36 +1,48 @@
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}")
-set(CMAKE_SOURCE_PREFIX ${CMAKE_SOURCE_PREFIX} "${3RD_PARTY_INSTALL_PREFIX}")
-find_package (BSON)
-message (STATUS "bson installed in " ${BSON_LIBS_DIRECTORY} " , " ${BSON_INCLUDE_DIRECTORY})
-message (STATUS "emhashmap installed in " ${EMHASHMAP_LIBS_DIRECTORY} " , " ${EMHASHMAP_INCLUDE_DIRECTORY})
+# Copyright (c) 2018, Ford Motor Company
+# All rights reserved.
+#
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions are met:
+#
+# Redistributions of source code must retain the above copyright notice, this
+# list of conditions and the following disclaimer.
+#
+# Redistributions in binary form must reproduce the above copyright notice,
+# this list of conditions and the following
+# disclaimer in the documentation and/or other materials provided with the
+# distribution.
+#
+# Neither the name of the Ford Motor Company nor the names of its contributors
+# may be used to endorse or promote products derived from this software
+# without specific prior written permission.
+#
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+# AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+# IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+# ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+# LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+# CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+# SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+# CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+# ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+# POSSIBILITY OF SUCH DAMAGE.
 
-if (${BSON_LIB} MATCHES "BSON_LIB-NOTFOUND")
-  message (STATUS "Building bson required")
-  set(BSON_LIB_SOURCE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/bson_c_lib CACHE INTERNAL "Sources of bson library" FORCE)
-  set(BSON_LIBS_DIRECTORY ${3RD_PARTY_INSTALL_PREFIX}/lib CACHE INTERNAL "Installation path of bson libraries" FORCE)
-  set(BSON_INCLUDE_DIRECTORY ${3RD_PARTY_INSTALL_PREFIX}/include CACHE INTERNAL "Installation path of bson headers" FORCE)
-  set(EMHASHMAP_LIBS_DIRECTORY ${3RD_PARTY_INSTALL_PREFIX}/lib CACHE INTERNAL "Installation path of emashmap libraries" FORCE)
-  set(EMHASHMAP_INCLUDE_DIRECTORY ${3RD_PARTY_INSTALL_PREFIX}/include CACHE INTERNAL "Installation path of emashmap headers" FORCE)
-
-  set(BSON_MAKE     MAKE=${QNX_HOST}/usr/bin/make${HOST_EXECUTABLE_SUFFIX})
-  set(BSON__STRIP   STRIP=${QNX_HOST}/usr/bin/nto${CMAKE_SYSTEM_PROCESSOR}-strip${HOST_EXECUTABLE_SUFFIX})
-  set(BSON_OBJDUMP  OBJDUMP=${QNX_HOST}/usr/bin/nto${CMAKE_SYSTEM_PROCESSOR}-objdump${HOST_EXECUTABLE_SUFFIX})
-  set(BSON_OBJCOPY  OBJCOPY=${QNX_HOST}/usr/bin/nto${CMAKE_SYSTEM_PROCESSOR}-objcopy${HOST_EXECUTABLE_SUFFIX})
-  set(BSON_LINKER   LINKER=${QNX_HOST}/usr/bin/nto${CMAKE_SYSTEM_PROCESSOR}-ld)
-  set(BSON_NM       NM=${QNX_HOST}/usr/bin/nto${CMAKE_SYSTEM_PROCESSOR}-nm${HOST_EXECUTABLE_SUFFIX})
-  set(BSON_RANLIB   RANLIB=${QNX_HOST}/usr/bin/nto${CMAKE_SYSTEM_PROCESSOR}-ranlib${HOST_EXECUTABLE_SUFFIX})
-  set(BSON_AR       AR=${QNX_HOST}/usr/bin/nto${CMAKE_SYSTEM_PROCESSOR}-ar${HOST_EXECUTABLE_SUFFIX})
-  set(BSON_CXX      CXX=${QNX_HOST}/usr/bin/nto${CMAKE_SYSTEM_PROCESSOR}-g++${HOST_EXECUTABLE_SUFFIX})
-  set(BSON_CC       CC=${QNX_HOST}/usr/bin/nto${CMAKE_SYSTEM_PROCESSOR}-gcc${HOST_EXECUTABLE_SUFFIX})
-
-  set(
-    BSON_LIB_CONFIG
-    --host=${CMAKE_SYSTEM_PROCESSOR}-linux-gnueabi --target=nto${CMAKE_SYSTEM_PROCESSOR} --bindir=${QNX_HOST}/usr/bin/ --prefix=${3RD_PARTY_INSTALL_PREFIX}
-  )
-  set(
-    BSON_LIB_FLAG
-    ${BSON_MAKE} ${BSON__STRIP} ${BSON_OBJDUMP} ${BSON_OBJCOPY} ${BSON_LINKER} ${BSON_NM} ${BSON_RANLIB} ${BSON_AR} ${BSON_AR} ${BSON_CXX} ${BSON_CC} 
-  )  
+  set(BSON_CONFIGURE_FLAGS
+    "--host=${CMAKE_SYSTEM_PROCESSOR}-nto-qnx"
+    "--target=qnxnto"
+    "--bindir=${QNX_HOST}/usr/bin/"
+    "--prefix=${3RD_PARTY_INSTALL_PREFIX}"
+    "MAKE=${QNX_HOST}/usr/bin/make${HOST_EXECUTABLE_SUFFIX}"
+    "STRIP=${QNX_HOST}/usr/bin/nto${CMAKE_SYSTEM_PROCESSOR}-strip${HOST_EXECUTABLE_SUFFIX}"
+    "OBJDUMP=${QNX_HOST}/usr/bin/nto${CMAKE_SYSTEM_PROCESSOR}-objdump${HOST_EXECUTABLE_SUFFIX}"
+    "OBJCOPY=${QNX_HOST}/usr/bin/nto${CMAKE_SYSTEM_PROCESSOR}-objcopy${HOST_EXECUTABLE_SUFFIX}"
+    "LINKER=${QNX_HOST}/usr/bin/nto${CMAKE_SYSTEM_PROCESSOR}-ld"
+    "NM=${QNX_HOST}/usr/bin/nto${CMAKE_SYSTEM_PROCESSOR}-nm${HOST_EXECUTABLE_SUFFIX}"
+    "RANLIB=${QNX_HOST}/usr/bin/nto${CMAKE_SYSTEM_PROCESSOR}-ranlib${HOST_EXECUTABLE_SUFFIX}"
+    "AR=${QNX_HOST}/usr/bin/nto${CMAKE_SYSTEM_PROCESSOR}-ar${HOST_EXECUTABLE_SUFFIX}"
+    "CXX=${QNX_HOST}/usr/bin/nto${CMAKE_SYSTEM_PROCESSOR}-g++${HOST_EXECUTABLE_SUFFIX}"
+    "CC=${QNX_HOST}/usr/bin/nto${CMAKE_SYSTEM_PROCESSOR}-gcc${HOST_EXECUTABLE_SUFFIX}")
 
   set(BSON_INSTALL_COMMAND make install)
   if (${3RD_PARTY_INSTALL_PREFIX} MATCHES "/usr/local")
@@ -44,17 +56,6 @@ if (${BSON_LIB} MATCHES "BSON_LIB-NOTFOUND")
       INSTALL_DIR ${3RD_PARTY_INSTALL_PREFIX}
       DOWNLOAD_DIR ${BSON_LIB_SOURCE_DIRECTORY}
       SOURCE_DIR ${BSON_LIB_SOURCE_DIRECTORY}
-      CONFIGURE_COMMAND touch aclocal.m4 configure.ac Makefile.am Makefile.in configure config.h.in && ./configure ${BSON_LIB_CONFIG} ${BSON_LIB_FLAG}
+      CONFIGURE_COMMAND touch aclocal.m4 configure.ac Makefile.am Makefile.in configure config.h.in && ./configure ${BSON_CONFIGURE_FLAGS}
       BUILD_COMMAND make
       INSTALL_COMMAND ${BSON_INSTALL_COMMAND})
-else()
-  get_filename_component(BSON_LIBS_DIRECTORY ${BSON_LIB} DIRECTORY)
-  get_filename_component(EMHASHMAP_LIBS_DIRECTORY ${EMHASHMAP_LIB} DIRECTORY)
-  set(BSON_LIBS_DIRECTORY ${BSON_LIBS_DIRECTORY} CACHE INTERNAL "Installation path of bson libraries" FORCE)
-  set(EMHASHMAP_LIBS_DIRECTORY ${BSON_LIBS_DIRECTORY} CACHE INTERNAL "Installation path of emashmap libraries" FORCE)
-  add_custom_target(
-      libbson
-      DEPENDS ${BSON_LIBS_DIRECTORY}
-      DEPENDS ${EMHASHMAP_LIBS_DIRECTORY}
-      )
-endif()
