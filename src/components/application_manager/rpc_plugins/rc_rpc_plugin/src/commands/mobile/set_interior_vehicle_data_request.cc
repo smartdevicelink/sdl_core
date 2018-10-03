@@ -128,7 +128,6 @@ const std::map<std::string, std::string> GetModuleDataToCapabilitiesMapping() {
 
   // audio
   mapping["source"] = "sourceAvailable";
-  mapping["keepContext"] = "keepContextAvailable";
   mapping["volume"] = "volumeAvailable";
   mapping["equalizerSettings"] = "equalizerAvailable";
 
@@ -309,7 +308,8 @@ ModuleCapability GetControlDataCapabilities(
 
   for (auto it = control_data.map_begin(); it != control_data.map_end(); ++it) {
     const std::string& request_parameter = it->first;
-    if (message_params::kId == request_parameter) {
+    if (message_params::kId == request_parameter ||
+        message_params::kKeepContext == request_parameter) {
       continue;
     }
     if (message_params::kLightState == request_parameter) {
