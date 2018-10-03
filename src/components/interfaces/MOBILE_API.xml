@@ -1,7 +1,7 @@
 <?xml version="1.0" standalone="no"?>
 <?xml-stylesheet type="text/xml" href="protocol2html.xsl"?>
 
-<interface name="SmartDeviceLink RAPI" version="5.0.0" minVersion="1.0.0" date="2018-08-17">
+<interface name="SmartDeviceLink RAPI" version="5.0.0" minVersion="1.0" date="2018-10-03">
     <enum name="Result" internal_scope="base" since="1.0">
         <element name="SUCCESS">
             <description>The request succeeded</description>
@@ -302,21 +302,6 @@
             <description>Clears the media clock timer (previously done through Show->mediaClock)</description>
         </element>
     </enum>
-
-    <enum name="AudioStreamingIndicator" since="5.0">
-        <element name="PLAY_PAUSE">
-            <description>Default playback indicator.</description>
-        </element>
-        <element name="PLAY">
-            <description>Indicates that a button press of the Play/Pause button would start the playback.</description>
-        </element>
-        <element name="PAUSE">
-            <description>Indicates that a button press of the Play/Pause button would pause the current playback.</description>
-        </element>
-        <element name="STOP">
-            <description>Indicates that a button press of the Play/Pause button would stop the current playback.</description>
-        </element>
-    </enum> 
     
     <enum name="TimerMode" since="1.0">
         <element name="UP" >
@@ -376,12 +361,6 @@
         <element name="ATTENUATED" />
         <element name="NOT_AUDIBLE" />
     </enum>
-
-    <enum name="VideoStreamingState" since="5.0">
-        <description>Enumeration that describes possible states of video streaming. </description>
-        <element name="STREAMABLE" />
-        <element name="NOT_STREAMABLE" />
-    </enum>
     
     <enum name="SystemAction" since="1.0">
         <description>Enumeration that describes system actions that can be triggered.</description>
@@ -413,6 +392,12 @@
         <element name="ALERT" internal_name="SYSCTXT_ALERT">
             <description>Broadcast only to whichever app has an alert currently being displayed.</description>
         </element>
+    </enum>
+
+    <enum name="VideoStreamingState" since="5.0">
+        <description>Enumeration that describes possible states of video streaming. </description>
+        <element name="STREAMABLE" />
+        <element name="NOT_STREAMABLE" />
     </enum>
     
     <enum name="SoftButtonType" since="2.0">
@@ -534,7 +519,6 @@
         <element name="VEHICLEDATA_FUELLEVEL_STATE" />
         <element name="VEHICLEDATA_FUELCONSUMPTION" />
         <element name="VEHICLEDATA_EXTERNTEMP" />
-        <element name="VEHICLEDATA_TURNSIGNAL" since="5.0" />
         <element name="VEHICLEDATA_VIN" />
         <element name="VEHICLEDATA_PRNDL" />
         <element name="VEHICLEDATA_TIREPRESSURE" />
@@ -554,6 +538,7 @@
         <element name="VEHICLEDATA_ENGINETORQUE" />
         <element name="VEHICLEDATA_ACCPEDAL" />
         <element name="VEHICLEDATA_STEERINGWHEEL" />
+        <element name="VEHICLEDATA_TURNSIGNAL" since="5.0" />
         <element name="VEHICLEDATA_FUELRANGE" since="5.0" />
         <element name="VEHICLEDATA_ENGINEOILLIFE" since="5.0" />
         <element name="VEHICLEDATA_ELECTRONICPARKBRAKESTATUS" since="5.0" />
@@ -952,6 +937,27 @@
             <description>Similar to VP8, but VP9 is customized for video resolutions beyond high-definition video (UHD) and also enables lossless compression.</description>
         </element>
     </enum>
+	
+    <enum name="AudioStreamingIndicator" since="5.0">
+        <element name="PLAY_PAUSE">
+            <description>
+                Default playback indicator.
+                By default the playback indicator should be PLAY_PAUSE when:
+                    - the media app is newly registered on the head unit (after RegisterAppInterface)
+                    - the media app was closed by the user (App enters HMI_NONE)
+                    - the app sends SetMediaClockTimer with audioStreamingIndicator not set to any value
+            </description>
+        </element>
+        <element name="PLAY">
+            <description>Indicates that a button press of the Play/Pause button starts the audio playback.</description>
+        </element>
+        <element name="PAUSE">
+            <description>Indicates that a button press of the Play/Pause button pauses the current audio playback.</description>
+        </element>
+        <element name="STOP">
+            <description>Indicates that a button press of the Play/Pause button stops the current audio playback.</description>
+        </element>
+    </enum> 
     
     <struct name="Image" since="2.0">
         <param name="value" minlength="0" maxlength="65535" type="String" mandatory="true">
@@ -961,7 +967,7 @@
             <description>Describes, whether it is a static or dynamic image.</description>
         </param>
         <param name="isTemplate" type="Boolean" mandatory="false" since="5.0">
-            <description>Optional value to specify whether it's a template image. A template image can be (re)colored by the HMI as needed by using an image pattern</description>
+            <description>If true, the image is a template image and can be recolored by the HMI</description>
         </param>
     </struct>
     
@@ -1177,35 +1183,7 @@
             <description>TPMS reports the tire is not trained.</description>
         </element>
     </enum>
-    
-    <enum name="ElectronicParkBrakeStatus" since="5.0">
-      <element name="CLOSED">
-        <description>
-          Park brake actuators have been fully applied.
-        </description>		
-      </element>
-      <element name="TRANSITION">
-        <description>
-          Park brake actuators are transitioning to either Apply/Closed or Release/Open state.
-        </description>
-      </element>
-      <element name="OPEN">
-        <description>
-          Park brake actuators are released.
-        </description>		
-      </element>
-      <element name="DRIVE_ACTIVE">
-        <description>
-          When driver pulls the Electronic Park Brake switch while driving "at speed".
-        </description>
-      </element>
-     <element name="FAULT">
-        <description>
-          When system has a fault or is under maintenance.
-        </description>
-     </element>
-    </enum>
-    
+
     <enum name="FuelType" since="5.0">
         <element name="GASOLINE" />
         <element name="DIESEL" />
@@ -1236,12 +1214,42 @@
         </param>
     </struct>
 
+    <enum name="ElectronicParkBrakeStatus" since="5.0">
+      <element name="CLOSED">
+        <description>
+          Park brake actuators have been fully applied.
+        </description>
+        </element>
+      <element name="TRANSITION">
+        <description>
+          Park brake actuators are transitioning to either Apply/Closed or Release/Open state.
+        </description>
+      </element>
+      <element name="OPEN">
+        <description>
+          Park brake actuators are released.
+        </description>
+      </element>
+      <element name="DRIVE_ACTIVE">
+        <description>
+          When driver pulls the Electronic Park Brake switch while driving "at speed".
+        </description>
+      </element>
+     <element name="FAULT">
+        <description>
+          When system has a fault or is under maintenance.
+        </description>
+     </element>
+    </enum>
+    
     <struct name="SingleTireStatus" since="2.0">
         <param name="status" type="ComponentVolumeStatus" mandatory="true">
             <description>See ComponentVolumeStatus.</description>
         </param>
         <param name="tpms" type="TPMS" mandatory="false" since="5.0">
-            <description>The status of TPMS according to the particular tire.</description>
+            <description>
+                The status of TPMS according to the particular tire.
+            </description>
         </param>
         <param name="pressure" type="Float" mandatory="false" minvalue="0" maxvalue="2000" since="5.0">
             <description>The pressure value of the particular tire in kilo pascal.</description>
@@ -1855,7 +1863,6 @@
         </param>
     </struct>
     
-    
     <enum name="TurnSignal" since="5.0">
         <description>Enumeration that describes the status of the turn light indicator.</description>
         <element name="OFF">
@@ -1871,7 +1878,7 @@
             <description>Both signals (left and right) are on.</description>
         </element>
     </enum>
-    
+
     <struct name="GPSData" since="2.0">
         <description>Struct with the GPS data.</description>
         <param name="longitudeDegrees" type="Float" minvalue="-180" maxvalue="180" mandatory="true">
@@ -1920,20 +1927,20 @@
                 <param name="compassDirection" type="CompassDirection" mandatory="true" since="2.0" until="5.0"/>
             </history>
         </param>
-        <param name="pdop" type="Float" minvalue="0" maxvalue="1000" mandatory="false" since="5.0">
-            <description>PDOP.</description>
+        <param name="pdop" type="Float" minvalue="0" maxvalue="1000" defvalue="0" mandatory="false" since="5.0">
+            <description>PDOP.  If undefined or unavailable, then value shall be set to 0.</description>
             <history>
                 <param name="pdop" type="Float" minvalue="0" maxvalue="10" defvalue="0" mandatory="true" since="2.0" until="5.0"/>
             </history>
         </param>
-        <param name="hdop" type="Float" minvalue="0" maxvalue="1000" mandatory="false" since="5.0">
-            <description>HDOP.</description>
+        <param name="hdop" type="Float" minvalue="0" maxvalue="1000" defvalue="0" mandatory="false" since="5.0">
+            <description>HDOP.  If value is unknown, value shall be set to 0.</description>
             <history>
                 <param name="hdop" type="Float" minvalue="0" maxvalue="10" defvalue="0" mandatory="true" since="2.0" until="5.0"/>
             </history>
         </param>
-        <param name="vdop" type="Float" minvalue="0" maxvalue="1000" mandatory="false" since="5.0">
-            <description>VDOP.</description>
+        <param name="vdop" type="Float" minvalue="0" maxvalue="1000" defvalue="0" mandatory="false" since="5.0">
+            <description>VDOP.  If value is unknown, value shall be set to 0.</description>
             <history>
                 <param name="vdop" type="Float" minvalue="0" maxvalue="10" defvalue="0" mandatory="true" since="2.0" until="5.0"/>
             </history>
@@ -2851,130 +2858,131 @@
     <!---Remote control  -->
 
     <enum name="MassageZone" since="5.0">
-      <description>List possible zones of a multi-contour massage seat.</description>
-      <element name="LUMBAR">
-        <description>The back of a multi-contour massage seat. or SEAT_BACK</description>
-      </element>
-      <element name="SEAT_CUSHION">
-        <description>The bottom a multi-contour massage seat. or SEAT_BOTTOM </description>
-      </element>
+        <description>List possible zones of a multi-contour massage seat.</description>
+        <element name="LUMBAR">
+            <description>The back of a multi-contour massage seat. or SEAT_BACK</description>
+        </element>
+        <element name="SEAT_CUSHION">
+            <description>The bottom a multi-contour massage seat. or SEAT_BOTTOM </description>
+        </element>
     </enum>
 
     <enum name="MassageMode" since="5.0">
-      <description>List possible modes of a massage zone.</description>
-      <element name="OFF"/>
-      <element name="LOW"/>
-      <element name="HIGH"/>
+        <description>List possible modes of a massage zone.</description>
+        <element name="OFF"/>
+        <element name="LOW"/>
+        <element name="HIGH"/>
     </enum>
 
     <struct name="MassageModeData" since="5.0">
-      <description>Specify the mode of a massage zone.</description>
-      <param name="massageZone" type="MassageZone" mandatory="true"></param>
-      <param name="massageMode" type="MassageMode" mandatory="true"></param>
+        <description>Specify the mode of a massage zone.</description>
+        <param name="massageZone" type="MassageZone" mandatory="true"></param>
+        <param name="massageMode" type="MassageMode" mandatory="true"></param>
     </struct>
 
     <enum name="MassageCushion" since="5.0">
-      <description>List possible cushions of a multi-contour massage seat.</description>
-      <element name="TOP_LUMBAR"/>
-      <element name="MIDDLE_LUMBAR"/>
-      <element name="BOTTOM_LUMBAR"/>
-      <element name="BACK_BOLSTERS"/>
-      <element name="SEAT_BOLSTERS"/>
+        <description>List possible cushions of a multi-contour massage seat.</description>
+        <element name="TOP_LUMBAR"/>
+        <element name="MIDDLE_LUMBAR"/>
+        <element name="BOTTOM_LUMBAR"/>
+        <element name="BACK_BOLSTERS"/>
+        <element name="SEAT_BOLSTERS"/>
     </enum>
 
     <struct name="MassageCushionFirmness" since="5.0">
-      <description>The intensity or firmness of a cushion.</description>
-      <param name="cushion" type="MassageCushion" mandatory="true"></param>
-      <param name="firmness" type="Integer" minvalue="0" maxvalue="100" mandatory="true"></param>
+        <description>The intensity or firmness of a cushion.</description>
+        <param name="cushion" type="MassageCushion" mandatory="true"></param>
+        <param name="firmness" type="Integer" minvalue="0" maxvalue="100" mandatory="true"></param>
     </struct>
 
     <enum name="SeatMemoryActionType" since="5.0">
-      <element name="SAVE">
-        <description>Save current seat postions and settings to seat memory.</description>
-      </element>
-      <element name="RESTORE">
-        <description>Restore / apply the seat memory settings to the current seat. </description>
-      </element>
-      <element name="NONE">
-        <description>No action to be performed.</description>
-      </element>
+        <element name="SAVE">
+            <description>Save current seat postions and settings to seat memory.</description>
+        </element>
+        <element name="RESTORE">
+            <description>Restore / apply the seat memory settings to the current seat. </description>
+        </element>
+        <element name="NONE">
+            <description>No action to be performed.</description>
+        </element>
     </enum>
 
     <struct name="SeatMemoryAction" since="5.0">
-      <param name="id" type="Integer" minvalue="1" maxvalue="10" mandatory="true"/>
-      <param name="label" type="String" maxlength="100" mandatory="false"/>
-      <param name="action" type="SeatMemoryActionType" mandatory="true"/>
+        <param name="id" type="Integer" minvalue="1" maxvalue="10" mandatory="true"/>
+        <param name="label" type="String" maxlength="100" mandatory="false"/>
+        <param name="action" type="SeatMemoryActionType" mandatory="true"/>
     </struct>
 
     <enum name="SupportedSeat" since="5.0">
-      <description>List possible seats that is a remote controllable seat.</description>
-      <element name="DRIVER"/>
-      <element name="FRONT_PASSENGER"/>
+        <description>List possible seats that is a remote controllable seat.</description>
+        <element name="DRIVER"/>
+        <element name="FRONT_PASSENGER"/>
     </enum>
 
     <struct name="SeatControlData" since="5.0">
-      <description>Seat control data corresponds to "SEAT" ModuleType. </description>
-      <param name="id" type="SupportedSeat" mandatory="true"></param>
+        <description>Seat control data corresponds to "SEAT" ModuleType. </description>
+        <param name="id" type="SupportedSeat" mandatory="true"></param>
+        
+        <param name="heatingEnabled" type="Boolean" mandatory="false"></param>
+        <param name="coolingEnabled" type="Boolean" mandatory="false"></param>
+        <param name="heatingLevel" type="Integer" minvalue="0" maxvalue="100" mandatory="false"></param>
+        <param name="coolingLevel" type="Integer" minvalue="0" maxvalue="100" mandatory="false"></param>
 
-      <param name="heatingEnabled" type="Boolean" mandatory="false"></param>
-      <param name="coolingEnabled" type="Boolean" mandatory="false"></param>
-      <param name="heatingLevel" type="Integer" minvalue="0" maxvalue="100" mandatory="false"></param>
-      <param name="coolingLevel" type="Integer" minvalue="0" maxvalue="100" mandatory="false"></param>
-
-      <param name="horizontalPosition" type="Integer" minvalue="0" maxvalue="100" mandatory="false"></param>
-      <param name="verticalPosition" type="Integer" minvalue="0" maxvalue="100" mandatory="false"></param>
-      <param name="frontVerticalPosition" type="Integer" minvalue="0" maxvalue="100" mandatory="false"></param>
-      <param name="backVerticalPosition" type="Integer" minvalue="0" maxvalue="100" mandatory="false"></param>
-      <param name="backTiltAngle" type="Integer" minvalue="0" maxvalue="100" mandatory="false"></param>
-
-      <param name="headSupportHorizontalPosition" type="Integer" minvalue="0" maxvalue="100" mandatory="false"></param>
-      <param name="headSupportVerticalPosition" type="Integer" minvalue="0" maxvalue="100" mandatory="false"></param>
-
-      <param name="massageEnabled" type="Boolean" mandatory="false"></param>
-      <param name="massageMode" type="MassageModeData" minsize="1" maxsize="2" array="true" mandatory="false"></param>
-      <param name="massageCushionFirmness" type="MassageCushionFirmness" minsize="1" maxsize="5" array="true" mandatory="false"></param>
-      <param name="memory" type="SeatMemoryAction" mandatory="false"></param>
+        <param name="horizontalPosition" type="Integer" minvalue="0" maxvalue="100" mandatory="false"></param>
+        <param name="verticalPosition" type="Integer" minvalue="0" maxvalue="100" mandatory="false"></param>
+        <param name="frontVerticalPosition" type="Integer" minvalue="0" maxvalue="100" mandatory="false"></param>
+        <param name="backVerticalPosition" type="Integer" minvalue="0" maxvalue="100" mandatory="false"></param>
+        <param name="backTiltAngle" type="Integer" minvalue="0" maxvalue="100" mandatory="false"></param>
+        
+        <param name="headSupportHorizontalPosition" type="Integer" minvalue="0" maxvalue="100" mandatory="false"></param>
+        <param name="headSupportVerticalPosition" type="Integer" minvalue="0" maxvalue="100" mandatory="false"></param>
+        
+        <param name="massageEnabled" type="Boolean" mandatory="false"></param>
+        <param name="massageMode" type="MassageModeData" minsize="1" maxsize="2" array="true" mandatory="false"></param>
+        <param name="massageCushionFirmness" type="MassageCushionFirmness" minsize="1" maxsize="5" array="true" mandatory="false"></param>
+        
+        <param name="memory" type="SeatMemoryAction" mandatory="false"></param>
     </struct>
 
     <struct name="SeatControlCapabilities" since="5.0">
-      <param name="moduleName" type="String" maxlength="100"  mandatory="true">
-        <description>
-        The short friendly name of the light control module.
-        It should not be used to identify a module by mobile application.
-        </description>
-      </param>
-      <param name="heatingEnabledAvailable" type="Boolean" mandatory="false">
-      </param>
-      <param name="coolingEnabledAvailable" type="Boolean" mandatory="false">
-      </param>
-      <param name="heatingLevelAvailable" type="Boolean" mandatory="false">
-      </param>
-      <param name="coolingLevelAvailable" type="Boolean" mandatory="false">
-      </param>
-      <param name="horizontalPositionAvailable" type="Boolean" mandatory="false">
-      </param>
-      <param name="verticalPositionAvailable" type="Boolean" mandatory="false">
-      </param>
-      <param name="frontVerticalPositionAvailable" type="Boolean" mandatory="false">
-      </param>
-      <param name="backVerticalPositionAvailable" type="Boolean" mandatory="false">
-      </param>
-      <param name="backTiltAngleAvailable" type="Boolean" mandatory="false">
-      </param>
-      <param name="headSupportHorizontalPositionAvailable" type="Boolean" mandatory="false">
-      </param>
-      <param name="headSupportVerticalPositionAvailable" type="Boolean" mandatory="false">
-      </param>
-      <param name="massageEnabledAvailable" type="Boolean" mandatory="false">
-      </param>
-      <param name="massageModeAvailable" type="Boolean" mandatory="false">
-      </param>
-      <param name="massageCushionFirmnessAvailable" type="Boolean" mandatory="false">
-      </param>
-      <param name="memoryAvailable" type="Boolean" mandatory="false">
-      </param>
-    </struct>
-
+        <param name="moduleName" type="String" maxlength="100"  mandatory="true">
+            <description>
+            The short friendly name of the light control module.
+            It should not be used to identify a module by mobile application.
+            </description>
+        </param>
+        <param name="heatingEnabledAvailable" type="Boolean" mandatory="false">
+        </param>
+        <param name="coolingEnabledAvailable" type="Boolean" mandatory="false">
+        </param>
+        <param name="heatingLevelAvailable" type="Boolean" mandatory="false">
+        </param>
+        <param name="coolingLevelAvailable" type="Boolean" mandatory="false">
+        </param>
+        <param name="horizontalPositionAvailable" type="Boolean" mandatory="false">
+        </param> 
+        <param name="verticalPositionAvailable" type="Boolean" mandatory="false">
+        </param> 
+        <param name="frontVerticalPositionAvailable" type="Boolean" mandatory="false">
+        </param> 
+        <param name="backVerticalPositionAvailable" type="Boolean" mandatory="false">
+        </param> 
+        <param name="backTiltAngleAvailable" type="Boolean" mandatory="false">
+        </param>
+        <param name="headSupportHorizontalPositionAvailable" type="Boolean" mandatory="false">
+        </param> 
+        <param name="headSupportVerticalPositionAvailable" type="Boolean" mandatory="false">
+        </param> 
+        <param name="massageEnabledAvailable" type="Boolean" mandatory="false">
+        </param> 
+        <param name="massageModeAvailable" type="Boolean" mandatory="false">
+        </param> 
+        <param name="massageCushionFirmnessAvailable" type="Boolean" mandatory="false">
+        </param>
+        <param name="memoryAvailable" type="Boolean" mandatory="false">
+        </param> 
+    </struct> 
+    
     <struct name="Temperature" since="4.5">
         <param name="unit" type="TemperatureUnit" mandatory="true">
             <description>Temperature Unit</description>
@@ -3050,7 +3058,7 @@
         <param name="rdsData" type="RdsData" mandatory="false">
         </param>
         <param name="hdRadioEnable" type="Boolean" mandatory="false"  since="5.0">
-            <description> True if the hd radio is on, false is the radio is off</description>
+            <description> True if the hd radio is on, false if the radio is off</description>
         </param>
         <param name="availableHDs" type="Integer" minvalue="1" maxvalue="7" mandatory="false" since="5.0">
             <description>number of HD sub-channels if available</description>
@@ -3070,7 +3078,7 @@
             <description>If the signal strength falls below the set value for this parameter, the radio will tune to an alternative frequency</description>
         </param>
         <param name="radioEnable" type="Boolean" mandatory="false">
-            <description> True if the radio is on, false is the radio is off. If set to false, no other data will be included.</description>
+            <description> True if the radio is on, false if the radio is off. If set to false, no other data will be included.</description>
         </param>
         <param name="state" type="RadioState" mandatory="false">
         </param>
@@ -3306,7 +3314,9 @@
         <param name="channelName" type="String" mandatory="false" maxlength="50">
             <description>read-only channel / frequency name (e.i. "Treble, Midrange, Bass" or "125 Hz")</description>
         </param>
-        <param name="channelSetting" type="Integer" minvalue="0" maxvalue="100" mandatory="true"></param>
+        <param name="channelSetting" type="Integer" minvalue="0" maxvalue="100" mandatory="true">
+            <description>Reflects the setting, from 0%-100%.</description>
+        </param>
     </struct>
 
     <struct name="AudioControlData" since="5.0">
@@ -3317,13 +3327,13 @@
                 If the value is MOBILE_APP, the system shall switch to the mobile media app that issues the setter RPC.
             </description>
         </param>
-        <param name="keepContext" type="Boolean" mandatory="false">
+        <param name="keepContext" type="Boolean" defvalue="false" mandatory="false">
             <description>
                 This parameter shall not be present in any getter responses or notifications.
-                This parameter is optional in a setter request. The default value is false.
-                If it is false, the system not only changes the audio source but also brings the default application
-                or system UI associated with the audio source to foreground.
-                If it is true, the system changes the audio source, but still keeps the current application in foreground.
+                This parameter is optional in a setter request. The default value is false if it is not included.
+                If it is false, the system not only changes the audio source but also brings the default application or 
+                system UI associated with the audio source to foreground.
+                If it is true, the system only changes the audio source, but keeps the current application in foreground.
             </description>
         </param>
         <param name="volume" type="Integer" mandatory="false" minvalue="0" maxvalue="100">
@@ -3345,7 +3355,7 @@
             <description>Availability of the control of audio source. </description>
         </param>
         <param name="keepContextAvailable" type="Boolean" mandatory="false">
-            <description>Availability of the keepContext paramter. </description>
+            <description>Availability of the keepContext parameter. </description>
         </param>
         <param name="volumeAvailable" type="Boolean" mandatory="false">
             <description>Availability of the control of audio volume.</description>
@@ -3393,7 +3403,7 @@
             <description>Include all fog lights: front_left, front_right, rear_left and rear_right.</description>
         </element>
         <element name="RUNNING_LIGHTS" value="504">
-            <description>Include all daytime running lights: front, left and right.</description>
+            <description>Include all daytime running lights: front_left and front_right.</description>
         </element>
         <element name="PARKING_LIGHTS" value="505">
             <description>Include all parking lights: front_left and front_right.</description>
@@ -3445,7 +3455,7 @@
             <description>Include exterior lights located in front of the vehicle. For example, fog lights and low beams.</description>
         </element>
         <element name="EXTERIOR_REAR_LIGHTS" value="902">
-            <description>Include exterior lights located at the back of the vehicle. For example, license plate lights, reverse lights, cargo lights, bed lights an trailer assist lights.</description>
+            <description>Include exterior lights located at the back of the vehicle. For example, license plate lights, reverse lights, cargo lights, bed lights and trailer assist lights.</description>
         </element>
         <element name="EXTERIOR_LEFT_LIGHTS" value="903">
             <description>Include exterior lights located at the left side of the vehicle. For example, left puddle lights and spot lights.</description>
@@ -3481,7 +3491,7 @@
         </param>
         <param name="rgbColorSpaceAvailable" type="Boolean" mandatory="false">
             <description>
-                Indicates if the light's color can be set remotely by using the RGB color space.
+                Indicates if the light's color can be set remotely by using the sRGB color space.
             </description>
         </param>
     </struct>
@@ -3494,7 +3504,7 @@
             </description>
         </param>
         <param name="supportedLights" type="LightCapabilities" minsize="1" maxsize="100" array="true" mandatory="true">
-            <description> An array of available light names that are controllable. </description>
+            <description> An array of available LightCapabilities that are controllable. </description>
         </param>
     </struct>
 
@@ -3518,6 +3528,7 @@
         <element name="NIGHT"/>
         <element name="AUTO"/>
     </enum>
+
     <enum name="DistanceUnit" since="5.0">
         <element name="MILES"/>
         <element name="KILOMETERS"/>
@@ -3547,7 +3558,7 @@
             <description>Availability of the control of HMI display mode. </description>
         </param>
     </struct>
-    
+
     <struct name="ModuleData" since="4.5">
         <description>The moduleType indicates which type of data should be changed and identifies which data object exists in this struct. For example, if the moduleType is CLIMATE then a "climateControlData" should exist</description>
         <param name="moduleType" type="ModuleType" mandatory="true">
@@ -3568,27 +3579,25 @@
 
     <struct name="RemoteControlCapabilities" since="4.5">
         <param name="climateControlCapabilities" type="ClimateControlCapabilities" mandatory="false" minsize="1" maxsize="100" array="true">
-            <description>If included, the platform supports RC climate controls. For this baseline version, maxsize=1. i.e. only one climate control module is supported.</description >
+            <description>If included, the platform supports RC climate controls. For this baseline version, maxsize=1. i.e. only one climate control module is supported.</description>
         </param>
         <param name="radioControlCapabilities" type="RadioControlCapabilities" mandatory="false" minsize="1" maxsize="100" array="true">
-            <description>If included, the platform supports RC radio controls.For this baseline version, maxsize=1. i.e. only one radio control module is supported.</description >
+            <description>If included, the platform supports RC radio controls.For this baseline version, maxsize=1. i.e. only one radio control module is supported.</description>
         </param>
-        <param name="buttonCapabilities" type="ButtonCapabilities"  mandatory="false" minsize="1" maxsize="100" array="true" >
-            <description>If included, the platform supports RC button controls with the included button names.</description >
-        </param>
-        <param name="seatControlCapabilities" type="SeatControlCapabilities" mandatory="false" minsize="1" maxsize="100" array="true" since="5.0">
-            <description>
-                If included, the platform supports seat controls.
-            </description >
+        <param name="buttonCapabilities" type="ButtonCapabilities"  mandatory="false" minsize="1" maxsize="100" array="true">
+            <description>If included, the platform supports RC button controls with the included button names.</description>
         </param>
         <param name="audioControlCapabilities" type="AudioControlCapabilities" mandatory="false" minsize="1" maxsize="100" array="true" since="5.0">
-            <description> If included, the platform supports audio controls. </description >
+            <description>If included, the platform supports audio controls.</description>
         </param>
         <param name="hmiSettingsControlCapabilities" type="HMISettingsControlCapabilities" mandatory="false" since="5.0">
-            <description> If included, the platform supports hmi setting controls. </description >
+            <description>If included, the platform supports hmi setting controls.</description>
         </param>
         <param name="lightControlCapabilities" type="LightControlCapabilities" mandatory="false" since="5.0">
-            <description> If included, the platform supports light controls. </description >
+            <description>If included, the platform supports light controls.</description>
+        </param>
+        <param name="seatControlCapabilities" type="SeatControlCapabilities" mandatory="false" minsize="1" maxsize="100" array="true" since="5.0">
+            <description>If included, the platform supports seat controls.</description>
         </param>
     </struct>
     
@@ -3794,9 +3803,7 @@
                 See AppInfo.
             </description>
         </param>
-
         <param name="dayColorScheme" type="TemplateColorScheme" mandatory="false" since="5.0"/>
-
         <param name="nightColorScheme" type="TemplateColorScheme" mandatory="false" since="5.0"/>
     </function>
     
@@ -3900,6 +3907,7 @@
         <param name="systemSoftwareVersion" type="String" maxlength="100" mandatory="false" platform="documentation" since="3.0">
             <description>The software version of the system that implements the SmartDeviceLink core.</description>
         </param>
+
         <param name="iconResumed" type="Boolean" mandatory="false" since="5.0">
             <description>
                 Existence of apps icon at system. If true, apps icon
@@ -4155,6 +4163,7 @@
         <param name="menuName" maxlength="500" type="String" mandatory="true">
             <description>Text to show in the menu for this sub menu.</description>
         </param>
+
         <param name="menuIcon" type="Image" mandatory="false" since="5.0">
             <description>The image field for AddSubMenu</description>
         </param>
@@ -4670,8 +4679,11 @@
                 In case of pause, resume, or clear, the start time value is ignored and shall be left out.  For resume, the time continues with the same value as it was when paused.
             </description>
         </param>
+
         <param name="audioStreamingIndicator" type="AudioStreamingIndicator" mandatory="false" since="5.0">
-            <description>Indicates that a button press of the Play/Pause button would play, pause or Stop the current playback.</description>
+            <description>
+                Enumeration for the indicator icon on a play/pause button. see AudioStreamingIndicator.
+            </description>
         </param>
     </function>
     
@@ -4925,9 +4937,8 @@
             <description>The estimated percentage of remaining oil life of the engine.</description>
         </param>
         <param name="electronicParkBrakeStatus" type="Boolean" mandatory="false" since="5.0">
-          <description>The status of the park brake as provided by Electric Park Brake (EPB) system.</description>
+            <description>The status of the park brake as provided by Electric Park Brake (EPB) system.</description>
         </param>
-
         
         <!-- Ford Specific Data Items -->
         <param name="eCallInfo" type="Boolean" mandatory="false">
@@ -5041,9 +5052,8 @@
             <description>The estimated percentage of remaining oil life of the engine.</description>
         </param>
         <param name="electronicParkBrakeStatus" type="VehicleDataResult" mandatory="false" since="5.0">
-          <description>The status of the park brake as provided by Electric Park Brake (EPB) system.</description>
+            <description>The status of the park brake as provided by Electric Park Brake (EPB) system.</description>
         </param>
-
         
         <!-- Ford Specific Data Items -->
         <param name="eCallInfo" type="VehicleDataResult" mandatory="false">
@@ -5135,9 +5145,8 @@
             <description>The estimated percentage of remaining oil life of the engine.</description>
         </param>
         <param name="electronicParkBrakeStatus" type="Boolean" mandatory="false" since="5.0">
-          <description>The status of the park brake as provided by Electric Park Brake (EPB) system.</description>
+            <description>The status of the park brake as provided by Electric Park Brake (EPB) system.</description>
         </param>
-
         
         <!-- Ford Specific Data Items -->
         <param name="eCallInfo" type="Boolean" mandatory="false">
@@ -5249,9 +5258,8 @@
             <description>The estimated percentage of remaining oil life of the engine.</description>
         </param>
         <param name="electronicParkBrakeStatus" type="VehicleDataResult" mandatory="false" since="5.0">
-          <description>The status of the park brake as provided by Electric Park Brake (EPB) system.</description>
+            <description>The status of the park brake as provided by Electric Park Brake (EPB) system.</description>
         </param>
-
         
         <!-- Ford Specific Data Items -->
         <param name="eCallInfo" type="VehicleDataResult" mandatory="false">
@@ -5346,9 +5354,8 @@
             <description>The estimated percentage of remaining oil life of the engine.</description>
         </param>
         <param name="electronicParkBrakeStatus" type="Boolean" mandatory="false" since="5.0">
-          <description>The status of the park brake as provided by Electric Park Brake (EPB) system.</description>
+            <description>The status of the park brake as provided by Electric Park Brake (EPB) system.</description>
         </param>
-
         
         <!-- Ford Specific Data Items -->
         <param name="eCallInfo" type="Boolean" mandatory="false">
@@ -5464,9 +5471,8 @@
             <description>The estimated percentage of remaining oil life of the engine.</description>
         </param>
         <param name="electronicParkBrakeStatus" type="ElectronicParkBrakeStatus" mandatory="false" since="5.0">
-          <description>The status of the park brake as provided by Electric Park Brake (EPB) system.</description>
+            <description>The status of the park brake as provided by Electric Park Brake (EPB) system.</description>
         </param>
-
         
         <!-- Ford Specific Data Items -->
         <param name="eCallInfo" type="ECallInfo" mandatory="false">
@@ -5969,7 +5975,7 @@
             </description>
         </param>
         <param name="crc" type="Integer" minvalue="0" maxvalue="4294967295" mandatory="false" since="5.0">
-            <description> Additional CRC32 checksum to protect data integrity up to 512 Mbits . </description>
+            <description> Additional CRC32 checksum to protect data integrity up to 512 Mbits </description>
         </param>
     </function>
     
@@ -6042,10 +6048,7 @@
         </param>
         
         <param name="spaceAvailable" type="Integer" minvalue="0" maxvalue="2000000000" mandatory="false" since="5.0">
-            <description>
-                Provides the total local space available in SDL Core for the registered app.
-                If the transfer has systemFile enabled, then the value will be set to 0 automatically.
-            </description>
+            <description>Provides the total local space available on the module for the registered app.</description>
             <history>
                 <param name="spaceAvailable" type="Integer" minvalue="0" maxvalue="2000000000" mandatory="true" since="3.0" until="5.0"/>
             </history>
@@ -6092,10 +6095,7 @@
         </param>
         
         <param name="spaceAvailable" type="Integer" minvalue="0" maxvalue="2000000000" mandatory="false" since="5.0">
-            <description>
-                Provides the total local space available in SDL Core for the registered app.
-                If the transfer has systemFile enabled, then the value will be set to 0 automatically.
-            </description>
+            <description>Provides the total local space available on the module for the registered app.</description>
             <history>
                 <param name="spaceAvailable" type="Integer" minvalue="0" maxvalue="2000000000" mandatory="true" since="3.0" until="5.0"/>
             </history>
@@ -6158,7 +6158,7 @@
                 Currently only predefined screen layouts are defined.
             </description>
         </param>
-        
+
         <param name="dayColorScheme" type="TemplateColorScheme" mandatory="false" since="5.0"/>
 
         <param name="nightColorScheme" type="TemplateColorScheme" mandatory="false" since="5.0"/>
@@ -6393,14 +6393,11 @@
                 In the future, this should be the Identification of a module.
             </description>
         </param>
-        <param name="subscribe" type="Boolean" mandatory="false" since="5.0">
+        <param name="subscribe" type="Boolean" mandatory="false" defvalue="false">
             <description>
-                If subscribe is true, the head unit will register onInteriorVehicleData notifications for the requested moduelType.
-                If subscribe is false, the head unit will unregister onInteriorVehicleData notifications for the requested moduelType.
+                If subscribe is true, the head unit will register onInteriorVehicleData notifications for the requested moduleType.
+                If subscribe is false, the head unit will unregister onInteriorVehicleData notifications for the requested moduleType.
             </description>
-            <history>
-                <param name="subscribe" type="Boolean" mandatory="false" defvalue="false" since="4.5" until="5.0"/>
-            </history>
         </param>
     </function>
     
@@ -6620,8 +6617,12 @@
         <param name="systemContext" type="SystemContext" mandatory="true">
             <description>See SystemContext</description>
         </param>
+
         <param name="videoStreamingState" type="VideoStreamingState" mandatory="false" defvalue="STREAMABLE" since="5.0">
-            <description>See VideoStreamingState. If it is NOT_STREAMABLE, the app must stop streaming video to SDL.</description>
+            <description>
+                See VideoStreamingState. 
+                If it is NOT_STREAMABLE, the app must stop streaming video to SDL Core(stop service).
+            </description>
         </param>
     </function>
     
@@ -6725,9 +6726,8 @@
             <description>The estimated percentage of remaining oil life of the engine.</description>
         </param>
         <param name="electronicParkBrakeStatus" type="ElectronicParkBrakeStatus" mandatory="false" since="5.0">
-          <description>The status of the park brake as provided by Electric Park Brake (EPB) system.</description>
+            <description>The status of the park brake as provided by Electric Park Brake (EPB) system.</description>
         </param>
-
         
         <!-- Ford Specific Vehicle Data -->
         <param name="eCallInfo" type="ECallInfo" mandatory="false">
@@ -6881,18 +6881,16 @@
     </function>
 
     <function name="OnRCStatus" functionID="OnRCStatusID" messagetype="notification" since="5.0">
-      <description>Issued by SDL to notify the application about remote control status change on SDL</description>
-      <param name="allowed" type="Boolean" mandatory="false">
-        <description>
-            If "true" - RC is allowed; if "false" - RC is disallowed.
-        </description>
-      </param>
-      <param name="allocatedModules" type="ModuleData" minsize="0" maxsize="100" array="true" mandatory="true">
-        <description>Contains a list (zero or more) of module types that are allocated to the application.</description>
-      </param>
-      <param name="freeModules" type="ModuleData" minsize="0" maxsize="100" array="true" mandatory="true">
-        <description>Contains a list (zero or more) of module types that are free to access for the application.</description>
-      </param>
+        <description>Issued by SDL to notify the application about remote control status change on SDL</description>
+        <param name="allowed" type="Boolean" mandatory="false">
+            <description>If "true" - RC is allowed; if "false" - RC is disallowed.</description>
+        </param>
+        <param name="allocatedModules" type="ModuleData" minsize="0" maxsize="100" array="true" mandatory="true">
+            <description>Contains a list (zero or more) of module types that are allocated to the application.</description>
+        </param>
+        <param name="freeModules" type="ModuleData" minsize="0" maxsize="100" array="true" mandatory="true">
+            <description>Contains a list (zero or more) of module types that are free to access for the application.</description>
+        </param>
     </function>
     
     <!-- ~~~~~~~~~~~~~~~~~~ -->
