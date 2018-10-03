@@ -139,14 +139,6 @@ void UpdateStatusManager::OnNewApplicationAdded(const DeviceConsent consent) {
   ProcessEvent(kOnNewAppRegistered);
 }
 
-void UpdateStatusManager::OnPolicyInit(bool is_update_required) {
-  LOG4CXX_AUTO_TRACE(logger_);
-  if (is_update_required) {
-    current_status_.reset(new UpToDateStatus());
-    ProcessEvent(kScheduleUpdate);
-  }
-}
-
 void UpdateStatusManager::OnDeviceConsented() {
   LOG4CXX_AUTO_TRACE(logger_);
   if (app_registered_from_non_consented_device_) {

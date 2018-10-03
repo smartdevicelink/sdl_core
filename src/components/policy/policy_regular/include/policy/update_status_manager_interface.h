@@ -109,12 +109,6 @@ class UpdateStatusManagerInterface {
    * @param is_update_required Update necessity flag
    */
   virtual void OnExistedApplicationAdded(const bool is_update_required) = 0;
-
-  /**
-   * @brief Update status handler for policy initialization
-   * @param is_update_required Update necessity flag
-   */
-  virtual void OnPolicyInit(bool is_update_required) = 0;
 };
 
 typedef std::shared_ptr<UpdateStatusManagerInterface>
