@@ -40,29 +40,33 @@ file(MAKE_DIRECTORY
   ${LOG4CXX_BUILD_DIRECTORY}
 )
 
-set(COMMON_CONFIGURE_FLAGS
-  "--with-apr=../apr-build"
-  "--with-apr-util=../apr-util-build"
-  "LDFLAGS=-L${EXPAT_LIBS_DIRECTORY}"
-)
-
-if(CMAKE_SYSTEM_NAME STREQUAL "QNX")
-  if (CMAKE_SYSTEM_PROCESSOR MATCHES arm*)
-    set (ARCHITECTURE arm) # log4cxx doesn't recognize armv7
-  else ()
-    set (ARCHITECTURE ${CMAKE_SYSTEM_PROCESSOR})
-  endif ()
-  set(CONFIGURE_FLAGS "--host=${ARCHITECTURE}-nto-qnx" ${COMMON_CONFIGURE_FLAGS})
+if(DEFINED CMAKE_TOOLCHAIN_FILE)  
+  include("./APACHE_LOG4CXX.cmake")
 else()
-  set(CONFIGURE_FLAGS ${COMMON_CONFIGURE_FLAGS})
-endif()
+  set(COMMON_CONFIGURE_FLAGS
+    "--with-apr=../apr-build"
+    "--with-apr-util=../apr-util-build"
+    "LDFLAGS=-L${EXPAT_LIBS_DIRECTORY}"
+  )
 
-add_custom_command(OUTPUT ${LOG4CXX_BUILD_DIRECTORY}/Makefile
-  COMMAND CC=${CMAKE_C_COMPILER} CXX=${CMAKE_CXX_COMPILER} ${LOG4CXX_SOURCE_DIRECTORY}/configure ${CONFIGURE_FLAGS}
-  DEPENDS libapr-1
-  DEPENDS apr-util
-  WORKING_DIRECTORY ${LOG4CXX_BUILD_DIRECTORY}
-)
+  if(CMAKE_SYSTEM_NAME STREQUAL "QNX")
+    if (CMAKE_SYSTEM_PROCESSOR MATCHES arm*)
+      set (ARCHITECTURE arm) # log4cxx doesn't recognize armv7
+    else ()
+      set (ARCHITECTURE ${CMAKE_SYSTEM_PROCESSOR})
+    endif ()
+    set(CONFIGURE_FLAGS "--host=${ARCHITECTURE}-nto-qnx" ${COMMON_CONFIGURE_FLAGS})
+  else()
+    set(CONFIGURE_FLAGS ${COMMON_CONFIGURE_FLAGS})
+  endif()
+
+  add_custom_command(OUTPUT ${LOG4CXX_BUILD_DIRECTORY}/Makefile
+    COMMAND CC=${CMAKE_C_COMPILER} CXX=${CMAKE_CXX_COMPILER} ${LOG4CXX_SOURCE_DIRECTORY}/configure ${CONFIGURE_FLAGS}
+    DEPENDS libapr-1
+    DEPENDS apr-util
+    WORKING_DIRECTORY ${LOG4CXX_BUILD_DIRECTORY}
+  )
+endif()
 
 add_custom_target(liblog4cxx ALL make
   COMMAND /bin/bash -c \"
