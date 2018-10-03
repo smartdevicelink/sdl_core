@@ -43,6 +43,11 @@ namespace rc_rpc_plugin {
 class InteriorDataCache {
  public:
   /**
+   * @brief Class destructor
+   */
+  virtual ~InteriorDataCache() {}
+
+  /**
    * @brief Add module data to cache
    * @param module_type module type name
    * @param module_data data to be cached
