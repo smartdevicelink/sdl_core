@@ -345,6 +345,8 @@ bool CheckAppPolicy::operator()(const AppPoliciesValueType& app_policy) {
       SetPendingPermissions(
           app_policy, RESULT_REQUEST_TYPE_CHANGED, permissions_diff);
       AddResult(app_id, RESULT_REQUEST_TYPE_CHANGED);
+      result =
+          (RESULT_NO_CHANGES == result) ? RESULT_REQUEST_TYPE_CHANGED : result;
     }
     if (is_request_subtype_changed) {
       LOG4CXX_TRACE(
@@ -352,6 +354,8 @@ bool CheckAppPolicy::operator()(const AppPoliciesValueType& app_policy) {
       SetPendingPermissions(
           app_policy, RESULT_REQUEST_SUBTYPE_CHANGED, permissions_diff);
       AddResult(app_id, RESULT_REQUEST_SUBTYPE_CHANGED);
+      result = (RESULT_NO_CHANGES == result) ? RESULT_REQUEST_SUBTYPE_CHANGED
+                                             : result;
     }
   }
 

@@ -921,7 +921,7 @@ TEST_F(PolicyHandlerTest,
   EXPECT_CALL(*mock_policy_manager_, GetAppPermissionsChanges(_))
       .WillOnce(Return(permissions));
   EXPECT_CALL(*mock_policy_manager_,
-              RemovePendingPermissionChanges(kPolicyAppId_)).Times(0);
+              RemovePendingPermissionChanges(kPolicyAppId_));
   // Act
   policy_handler_.OnPendingPermissionChange(kPolicyAppId_);
 }
