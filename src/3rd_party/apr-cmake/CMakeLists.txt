@@ -44,26 +44,30 @@ file(COPY ${APR_SOURCE_DIRECTORY}/tools/gen_test_char.c
   DESTINATION ${APR_BUILD_DIRECTORY}/tools
 )
 
-if(CMAKE_SYSTEM_NAME STREQUAL "QNX")
-  set(CONFIGURE_FLAGS
-    "--host=${CMAKE_SYSTEM_PROCESSOR}-nto-qnx"
-    "ac_cv_file__dev_zero=yes"
-    "ac_cv_func_setpgrp_void=yes"
-    "apr_cv_process_shared_works=yes"
-    "apr_cv_mutex_recursive=yes"
-    "apr_cv_mutex_robust_shared=no"
-    "apr_cv_tcp_nodelay_with_cork=no"
-    "ac_cv_sizeof_struct_iovec=8"
-  )
+if(DEFINED CMAKE_TOOLCHAIN_FILE)  
+  include("./APR.cmake")
 else()
-  set(CONFIGURE_FLAGS "")
-endif()
+  if(CMAKE_SYSTEM_NAME STREQUAL "QNX")
+    set(CONFIGURE_FLAGS
+      "--host=${CMAKE_SYSTEM_PROCESSOR}-nto-qnx"
+      "ac_cv_file__dev_zero=yes"
+      "ac_cv_func_setpgrp_void=yes"
+      "apr_cv_process_shared_works=yes"
+      "apr_cv_mutex_recursive=yes"
+      "apr_cv_mutex_robust_shared=no"
+      "apr_cv_tcp_nodelay_with_cork=no"
+      "ac_cv_sizeof_struct_iovec=8"
+    )
+  else()
+    set(CONFIGURE_FLAGS "")
+  endif()
 
-add_custom_command(OUTPUT ${APR_BUILD_DIRECTORY}/Makefile
-  COMMAND CC=${CMAKE_C_COMPILER} ${APR_SOURCE_DIRECTORY}/configure ${CONFIGURE_FLAGS}
-  COMMAND ${CMAKE_COMMAND} -E copy include/apr.h ${APR_SOURCE_DIRECTORY}/include
-  WORKING_DIRECTORY ${APR_BUILD_DIRECTORY}
-)
+  add_custom_command(OUTPUT ${APR_BUILD_DIRECTORY}/Makefile
+    COMMAND CC=${CMAKE_C_COMPILER} ${APR_SOURCE_DIRECTORY}/configure ${CONFIGURE_FLAGS}
+    COMMAND ${CMAKE_COMMAND} -E copy include/apr.h ${APR_SOURCE_DIRECTORY}/include
+    WORKING_DIRECTORY ${APR_BUILD_DIRECTORY}
+  )
+endif()
 
 add_custom_command(OUTPUT ${APR_BUILD_DIRECTORY}/include/private/apr_escape_test_char.h
   DEPENDS ${APR_BUILD_DIRECTORY}/Makefile
