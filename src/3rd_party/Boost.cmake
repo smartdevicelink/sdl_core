@@ -28,12 +28,6 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-find_package(Boost 1.66.0 COMPONENTS system thread date_time filesystem) 
-set(BOOST_LIB_SOURCE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/boost_src)
-set(BOOST_LIBS_DIRECTORY ${3RD_PARTY_INSTALL_PREFIX}/lib)
-SET_PROPERTY(GLOBAL PROPERTY GLOBAL_BOOST_LIBS ${BOOST_LIBS_DIRECTORY})
-set(BOOST_INCLUDE_DIRECTORY ${3RD_PARTY_INSTALL_PREFIX}/include )
-
 set(
 BOOST_QNX_PROJECT_CONFIG_JAM
 "using gcc : nto${CMAKE_SYSTEM_PROCESSOR} : ${QNX_HOST}/usr/bin/nto${CMAKE_SYSTEM_PROCESSOR}-g++${HOST_EXECUTABLE_SUFFIX} : -L${QNX_HOST}/usr/lib -I${QNX_HOST}/usr/include")
@@ -50,29 +44,20 @@ else()
   set(ADDRESS_MODEL "32")
 endif ()
 
-if (NOT ${Boost_FOUND})
-  message(STATUS "Did not find boost. Downloading and installing boost 1.66")
-  set(BOOST_BUILD_COMMAND ./b2 address-model=${ADDRESS_MODEL} target-os=qnx toolset=gcc-nto${CMAKE_SYSTEM_PROCESSOR} define=linux)
-  set(BOOST_INSTALL_COMMAND ${BOOST_BUILD_COMMAND} install > boost_install.log)
-  if (${3RD_PARTY_INSTALL_PREFIX} MATCHES "/usr/local")
-    set(BOOST_INSTALL_COMMAND sudo  ${BOOST_BUILD_COMMAND} install > boost_install.log)
-  endif()
-  include(ExternalProject)  
-  ExternalProject_Add(
-    Boost
-    URL https://dl.bintray.com/boostorg/release/1.66.0/source/boost_1_66_0.tar.gz
-    DOWNLOAD_DIR ${BOOST_LIB_SOURCE_DIRECTORY}
-    SOURCE_DIR ${BOOST_LIB_SOURCE_DIRECTORY}  
-    CONFIGURE_COMMAND  ${BOOST_GCC_JAM} COMMAND ${BOOTSTRAP}
-    BUILD_COMMAND echo ${BOOST_QNX_PROJECT_CONFIG_JAM} $<SEMICOLON> >> ./project-config.jam COMMAND ${BOOST_BUILD_COMMAND}
-    INSTALL_COMMAND ${BOOST_INSTALL_COMMAND}
-    INSTALL_DIR ${3RD_PARTY_INSTALL_PREFIX}
-    BUILD_IN_SOURCE true
-
-  )
-  set(BOOST_INCLUDE_DIR ${BOOST_ROOT_DIR}/Boost-prefix/src/Boost)
-  set(BOOST_LIB_DIR ${BOOST_ROOT_DIR}/Boost-prefix/src/Boost/stage/lib/)   
-else()
-add_custom_target(Boost) # empty target, Boost is already installed
+set(BOOST_BUILD_COMMAND ./b2 address-model=${ADDRESS_MODEL} target-os=qnxnto toolset=gcc-nto${CMAKE_SYSTEM_PROCESSOR} define=linux)
+set(BOOST_INSTALL_COMMAND ${BOOST_BUILD_COMMAND} install > boost_install.log)
+if (${3RD_PARTY_INSTALL_PREFIX} MATCHES "/usr/local")
+  set(BOOST_INSTALL_COMMAND sudo  ${BOOST_BUILD_COMMAND} install > boost_install.log)
 endif()
-
+include(ExternalProject)  
+ExternalProject_Add(
+  Boost
+  URL https://dl.bintray.com/boostorg/release/1.66.0/source/boost_1_66_0.tar.gz
+  DOWNLOAD_DIR ${BOOST_LIB_SOURCE_DIRECTORY}
+  SOURCE_DIR ${BOOST_LIB_SOURCE_DIRECTORY}  
+  CONFIGURE_COMMAND  ${BOOST_GCC_JAM} COMMAND ${BOOTSTRAP}
+  BUILD_COMMAND echo ${BOOST_QNX_PROJECT_CONFIG_JAM} $<SEMICOLON> >> ./project-config.jam COMMAND ${BOOST_BUILD_COMMAND}
+  INSTALL_COMMAND ${BOOST_INSTALL_COMMAND}
+  INSTALL_DIR ${3RD_PARTY_INSTALL_PREFIX}
+  BUILD_IN_SOURCE true
+)
