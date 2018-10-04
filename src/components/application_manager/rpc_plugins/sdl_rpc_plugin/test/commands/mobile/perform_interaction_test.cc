@@ -70,6 +70,11 @@ using ::test::components::application_manager_test::MockApplication;
 namespace strings = ::application_manager::strings;
 namespace hmi_response = ::application_manager::hmi_response;
 
+MATCHER_P(CheckMessageSuccess, success, "") {
+  return success ==
+         (*arg)[am::strings::msg_params][am::strings::success].asBool();
+}
+
 namespace {
 const int32_t kCommandId = 1;
 const uint32_t kCmdId = 1u;
@@ -258,44 +263,31 @@ TEST_F(PerformInteractionRequestTest,
 }
 
 TEST_F(PerformInteractionRequestTest, ChoiceProcessesOnHHMI_REJECT) {
-  MessageSharedPtr message = CreateMessage(smart_objects::SmartType_Map);
-  (*message)[strings::params][strings::connection_key] = kConnectionKey;
+  MessageSharedPtr message = CreateMessage(smart_objects::SmartType_Null);
   (*message)[strings::msg_params][strings::interaction_choice_set_id_list][0] =
       kChoiceSetId;
   smart_objects::SmartObject* choice_set_id =
       &((*message)[am::strings::msg_params]
                   [am::strings::interaction_choice_set_id]);
-  std::shared_ptr<PerformInteractionRequest> command =
-      CreateCommand<PerformInteractionRequest>(message);
 
-  smart_objects::SmartObject& response = *message;
+  EXPECT_CALL(app_mngr_, application(_)).WillRepeatedly(Return(mock_app_));
 
-  response[strings::params][strings::message_type] = am::MessageType::kResponse;
-  response[strings::params][strings::correlation_id] = kCorrelationId;
-  response[strings::params][strings::protocol_type] = 0;
-  response[strings::params][strings::protocol_version] = 3;
-  response[strings::params][strings::connection_key] = kConnectionKey;
-  response[strings::params][strings::function_id] =
-      mobile_apis::FunctionID::PerformInteractionID;
-  response[strings::msg_params][strings::success] = false;
-  response[strings::msg_params][strings::result_code] =
-      mobile_apis::Result::REJECTED;
-
-  EXPECT_CALL(app_mngr_, application(kConnectionKey))
-      .WillRepeatedly(Return(mock_app_));
   {
     InSequence seq;
     EXPECT_CALL(*mock_app_, is_perform_interaction_active())
         .WillOnce(Return(false));
     EXPECT_CALL(*mock_app_, FindChoiceSet(kChoiceSetId))
         .WillOnce(Return(choice_set_id));
-    EXPECT_CALL(*mock_app_, is_choice_set_allowed_to_perform(kChoiceSetId))
+    EXPECT_CALL(*mock_app_, is_choice_set_allowed(kChoiceSetId))
         .WillOnce(Return(false));
-    EXPECT_CALL(mock_rpc_service_, ManageMobileCommand(_, _))
-        .WillOnce(Return(false));
-    EXPECT_CALL(mock_rpc_service_, ManageMobileCommand(_, _))
+    EXPECT_CALL(mock_rpc_service_,
+                ManageMobileCommand(
+                    _, am::commands::Command::CommandSource::SOURCE_SDL))
         .WillOnce(Return(true));
   }
+
+  std::shared_ptr<PerformInteractionRequest> command =
+      CreateCommand<PerformInteractionRequest>(message);
 
   command->Init();
   command->Run();

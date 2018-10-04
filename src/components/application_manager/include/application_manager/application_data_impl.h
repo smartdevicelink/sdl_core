@@ -36,6 +36,7 @@
 #include <string>
 #include <map>
 #include <cstdint>
+
 #include "utils/lock.h"
 #include "utils/semantic_version.h"
 #include "smart_objects/smart_object.h"
@@ -45,7 +46,7 @@
 namespace application_manager {
 
 namespace mobile_api = mobile_apis;
-typedef std::map<std::uint32_t, bool> ChoiceSetAllowedMap;
+typedef std::map<uint32_t, bool> ChoiceSetAllowedMap;
 
 class InitialApplicationDataImpl : public virtual Application {
  public:
@@ -266,9 +267,9 @@ class DynamicApplicationDataImpl : public virtual Application {
    */
   inline bool is_reset_global_properties_active() const;
 
-  virtual void set_choice_set_allow_mode(const std::uint32_t choice_set_id,
+  virtual void set_choice_set_allow_mode(const uint32_t choice_set_id,
                                          const bool is_allowed);
-  bool is_choice_set_allowed_to_perform(std::uint32_t choice_set_id) const;
+  bool is_choice_set_allowed(const uint32_t choice_set_id) const;
 
  protected:
   smart_objects::SmartObject* help_prompt_;

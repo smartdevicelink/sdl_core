@@ -87,6 +87,18 @@ void DeleteInteractionChoiceSetRequest::Run() {
     return;
   }
   SendVrDeleteCommand(app);
+
+  smart_objects::SmartObject msg_params =
+      smart_objects::SmartObject(smart_objects::SmartType_Map);
+
+  msg_params[strings::interaction_choice_set_id] = choice_set_id;
+  msg_params[strings::app_id] = app->app_id();
+
+  app->RemoveChoiceSet(choice_set_id);
+
+  // Checking of HMI responses will be implemented with APPLINK-14600
+  const bool result = true;
+  SendResponse(result, mobile_apis::Result::SUCCESS);
 }
 
 bool DeleteInteractionChoiceSetRequest::Init() {

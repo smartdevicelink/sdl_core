@@ -242,7 +242,6 @@ TEST_F(DeleteInteractionChoiceSetRequestTest, Run_SendVrDeleteCommand_SUCCESS) {
         .WillOnce(Return(choice_set_id));
 
     EXPECT_CALL(*app_, set_choice_set_allow_mode(kChoiceSetId, false));
-    EXPECT_CALL(*app_, app_id()).WillOnce(Return(kConnectionKey));
   }
 
   EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_)).WillOnce(Return(true));

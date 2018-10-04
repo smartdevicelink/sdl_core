@@ -152,6 +152,11 @@ void CreateInteractionChoiceSetRequest::Run() {
     // we have VR commands
     SendVRAddCommandRequests(app);
   } else {
+    if (vr_status == MessageHelper::ChoiceSetVRCommandsStatus::NONE) {
+      // We not wait for calling on_event and choice set is allowed just after
+      // added.
+      app->set_choice_set_allow_mode(choice_set_id_, true);
+    }
     // we have none, just return with success
     SendResponse(true, Result::SUCCESS);
   }

@@ -164,12 +164,10 @@ void PerformInteractionRequest::Run() {
     return;
   }
 
-  if (!IsAllChoiceSetAllowedToPerform(
-          app,
-          choice_set_id_list_length,
-          msg_params[strings::interaction_choice_set_id_list])) {
-    LOG4CXX_ERROR(logger_, "Choice set is not ready to perform.");
+  if (!IsAllChoiceSetIdsAllowed(
+          app, msg_params[strings::interaction_choice_set_id_list])) {
     SendResponse(false, mobile_apis::Result::REJECTED);
+    return;
   }
 
   if (msg_params.keyExists(strings::vr_help)) {
@@ -1071,16 +1069,19 @@ void PerformInteractionRequest::SendBothModeResponse(
                response_params);
 }
 
-bool PerformInteractionRequest::IsAllChoiceSetAllowedToPerform(
+bool PerformInteractionRequest::IsAllChoiceSetIdsAllowed(
     ApplicationSharedPtr app,
-    const size_t choice_set_id_list_length,
     const ns_smart_device_link::ns_smart_objects::SmartObject&
         choice_set_id_list) const {
   LOG4CXX_AUTO_TRACE(logger_);
+  const size_t choice_set_id_list_length = choice_set_id_list.length();
   for (size_t i = 0; i < choice_set_id_list_length; ++i) {
     const bool is_allowed =
-        app->is_choice_set_allowed_to_perform(choice_set_id_list[i].asInt());
+        app->is_choice_set_allowed(choice_set_id_list[i].asInt());
     if (!is_allowed) {
+      LOG4CXX_DEBUG(logger_,
+                    "Choice set with id " << choice_set_id_list[i].asInt()
+                                          << "dosn't allowed.");
       return false;
     }
   }
