@@ -313,7 +313,7 @@ class ApplicationManager {
    * @brief Get subscribed for way points
    * @return reference to set of subscribed apps for way points
    */
-  virtual const std::set<int32_t> GetAppsSubscribedForWayPoints() const = 0;
+  virtual const std::set<uint32_t> GetAppsSubscribedForWayPoints() const = 0;
 
   virtual void RemoveHMIFakeParameters(
       application_manager::commands::MessageSharedPtr& message,

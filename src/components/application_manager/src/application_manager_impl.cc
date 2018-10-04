@@ -1126,7 +1126,14 @@ void ApplicationManagerImpl::SwitchApplication(ApplicationSharedPtr app,
                                       << ". Changing device id to "
                                       << device_id);
 
+  bool is_subscribed_to_way_points = IsAppSubscribedForWayPoints(app);
+  if (is_subscribed_to_way_points) {
+    UnsubscribeAppFromWayPoints(app);
+  }
   SwitchApplicationParameters(app, connection_key, device_id, mac_address);
+  if (is_subscribed_to_way_points) {
+    SubscribeAppForWayPoints(app);
+  }
 
   // Normally this is done during registration, however since switched apps are
   // not being registered again need to set protocol version on session.
@@ -3482,6 +3489,7 @@ void ApplicationManagerImpl::SubscribeAppForWayPoints(
     ApplicationSharedPtr app) {
   LOG4CXX_AUTO_TRACE(logger_);
   sync_primitives::AutoLock lock(subscribed_way_points_apps_lock_);
+  LOG4CXX_DEBUG(logger_, "Subscribing " << app->app_id());
   subscribed_way_points_apps_list_.insert(app->app_id());
   LOG4CXX_DEBUG(logger_,
                 "There are applications subscribed: "
@@ -3492,6 +3500,7 @@ void ApplicationManagerImpl::UnsubscribeAppFromWayPoints(
     ApplicationSharedPtr app) {
   LOG4CXX_AUTO_TRACE(logger_);
   sync_primitives::AutoLock lock(subscribed_way_points_apps_lock_);
+  LOG4CXX_DEBUG(logger_, "Unsubscribing " << app->app_id());
   subscribed_way_points_apps_list_.erase(app->app_id());
   LOG4CXX_DEBUG(logger_,
                 "There are applications subscribed: "
@@ -3507,7 +3516,7 @@ bool ApplicationManagerImpl::IsAnyAppSubscribedForWayPoints() const {
   return !subscribed_way_points_apps_list_.empty();
 }
 
-const std::set<int32_t> ApplicationManagerImpl::GetAppsSubscribedForWayPoints()
+const std::set<uint32_t> ApplicationManagerImpl::GetAppsSubscribedForWayPoints()
     const {
   LOG4CXX_AUTO_TRACE(logger_);
   sync_primitives::AutoLock lock(subscribed_way_points_apps_lock_);

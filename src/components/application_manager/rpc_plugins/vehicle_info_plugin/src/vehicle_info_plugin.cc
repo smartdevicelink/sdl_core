@@ -76,6 +76,8 @@ void VehicleInfoPlugin::OnApplicationEvent(
   if (plugins::ApplicationEvent::kApplicationRegistered == event) {
     application->AddExtension(
         std::make_shared<VehicleInfoAppExtension>(*this, *application));
+  } else if (plugins::ApplicationEvent::kDeleteApplicationData == event) {
+    DeleteSubscriptions(application);
   }
 }
 
