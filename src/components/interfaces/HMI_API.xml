@@ -1069,7 +1069,6 @@
   <element name="VEHICLEDATA_FUELLEVEL_STATE" />
   <element name="VEHICLEDATA_FUELCONSUMPTION" />
   <element name="VEHICLEDATA_EXTERNTEMP" />
-  <element name="VEHICLEDATA_TURNSIGNAL" />
   <element name="VEHICLEDATA_VIN" />
   <element name="VEHICLEDATA_PRNDL" />
   <element name="VEHICLEDATA_TIREPRESSURE" />
@@ -1089,6 +1088,7 @@
   <element name="VEHICLEDATA_ENGINETORQUE" />
   <element name="VEHICLEDATA_ACCPEDAL" />
   <element name="VEHICLEDATA_STEERINGWHEEL" />
+  <element name="VEHICLEDATA_TURNSIGNAL" />
   <element name="VEHICLEDATA_FUELRANGE" />
   <element name="VEHICLEDATA_ENGINEOILLIFE" />
   <element name="VEHICLEDATA_ELECTRONICPARKBRAKESTATUS" />
