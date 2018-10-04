@@ -75,6 +75,12 @@ class MockPolicyHandlerInterface : public policy::PolicyHandlerInterface {
   MOCK_METHOD1(OnSnapshotCreated, void(const policy::BinaryMessage& pt_string));
 #endif  // EXTERNAL_PROPRIETARY_MODE
 
+#ifdef HTTP_MODE
+  MOCK_METHOD1(SaveSnapshotBinaryMessage,
+               bool(const policy::BinaryMessage& pt_string));
+  MOCK_CONST_METHOD0(GetSavedSnapshotBinaryMessage, policy::BinaryMessage());
+#endif  // HTTP_MODE
+
   MOCK_CONST_METHOD2(GetPriority,
                      bool(const std::string& policy_app_id,
                           std::string* priority));
