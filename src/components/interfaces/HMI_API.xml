@@ -883,6 +883,8 @@
   </element>
   <element name="EIGHTH">
   </element>
+  <element name="UNKNOWN">
+  </element>
   <element name="FAULT">
   </element>
 </enum>
