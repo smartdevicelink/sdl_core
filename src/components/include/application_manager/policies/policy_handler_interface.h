@@ -80,10 +80,26 @@ class PolicyHandlerInterface {
                                  const std::vector<int>& retry_delay_seconds,
                                  uint32_t timeout_exchange) = 0;
 
-#else   // PROPRIETARY_MODE and HTTP_MODE
+#else  // PROPRIETARY_MODE and HTTP_MODE
   virtual void OnSnapshotCreated(const BinaryMessage& pt_string) = 0;
 
 #endif  // EXTERNAL_PROPRIETARY_MODE
+
+#ifdef HTTP_MODE
+  /**
+   * @brief Saves created snapshot in binary form
+   * for further processing in PTU Retry Sequence
+   * @param pt_string - snapshot message to save
+   * @return True in case of successful saving, otherwise false
+   */
+  virtual bool SaveSnapshotBinaryMessage(const BinaryMessage& pt_string) = 0;
+
+  /**
+   * @brief Returns saved snapshot in binary form
+   * @return Saved Snapshot binary message
+   */
+  virtual BinaryMessage GetSavedSnapshotBinaryMessage() const = 0;
+#endif  // HTTP_MODE
 
   virtual bool GetPriority(const std::string& policy_app_id,
                            std::string* priority) const = 0;

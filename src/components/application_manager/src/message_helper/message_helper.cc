@@ -1827,6 +1827,7 @@ void MessageHelper::SendPolicyUpdate(const std::string& file_path,
   }
   app_mngr.GetRPCService().ManageHMICommand(message);
 }
+
 void MessageHelper::SendGetUserFriendlyMessageResponse(
     const std::vector<policy::UserFriendlyMessage>& msg,
     const uint32_t correlation_id,
@@ -2185,6 +2186,7 @@ void MessageHelper::SendPolicySnapshotNotification(
     const std::vector<uint8_t>& policy_data,
     const std::string& url,
     ApplicationManager& app_mngr) {
+  LOG4CXX_AUTO_TRACE(logger_);
   smart_objects::SmartObject content(smart_objects::SmartType_Map);
 
   if (!url.empty()) {
@@ -2197,9 +2199,13 @@ void MessageHelper::SendPolicySnapshotNotification(
   content[strings::params][strings::binary_data] =
       smart_objects::SmartObject(policy_data);
 #if defined(PROPRIETARY_MODE) || defined(EXTERNAL_PROPRIETARY_MODE)
+  LOG4CXX_DEBUG(logger_,
+                "PROPRIETARY or EXTERNAL_PROPRIETARY Policy: Setting Request "
+                "Type: PROPRIETARY");
   content[strings::msg_params][strings::request_type] =
       mobile_apis::RequestType::PROPRIETARY;
 #else
+  LOG4CXX_DEBUG(logger_, "HTTP Policy: Setting Request Type: HTTP");
   content[strings::msg_params][strings::request_type] =
       mobile_apis::RequestType::HTTP;
 #endif  // PROPRIETARY || EXTERNAL_PROPRIETARY_MODE
@@ -2212,6 +2218,7 @@ void MessageHelper::SendPolicySnapshotNotification(
     const std::string& snapshot_file_path,
     const std::string& url,
     ApplicationManager& app_mngr) {
+  LOG4CXX_AUTO_TRACE(logger_);
   smart_objects::SmartObject content(smart_objects::SmartType_Map);
 
   if (!url.empty()) {

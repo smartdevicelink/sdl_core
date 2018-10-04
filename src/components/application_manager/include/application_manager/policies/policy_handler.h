@@ -100,7 +100,7 @@ class PolicyHandler : public PolicyHandlerInterface,
                          const std::vector<int>& retry_delay_seconds,
                          uint32_t timeout_exchange) OVERRIDE;
 
-#else  // PROPRIETARY_MODE and HTTP_MODE
+#else   // PROPRIETARY_MODE and HTTP_MODE
 
   void OnSnapshotCreated(const BinaryMessage& pt_string) OVERRIDE;
   void OnNextRetry() OVERRIDE;
@@ -710,6 +710,11 @@ class PolicyHandler : public PolicyHandlerInterface,
 #endif  // EXTERNAL_PROPRIETARY_MODE
   bool SaveSnapshot(const BinaryMessage& pt_string, std::string& snap_path);
 
+#ifdef HTTP_MODE
+  bool SaveSnapshotBinaryMessage(const BinaryMessage& pt_string) OVERRIDE;
+  BinaryMessage GetSavedSnapshotBinaryMessage() const OVERRIDE;
+#endif  // HTTP_MODE
+
   /**
    * @brief Collects permissions for all currently registered applications on
    * all devices
@@ -752,7 +757,6 @@ class PolicyHandler : public PolicyHandlerInterface,
   inline bool CreateManager();
 
   typedef std::list<PolicyHandlerObserver*> HandlersCollection;
-  typedef std::vector<uint8_t> BinaryMessage;
   HandlersCollection listeners_;
   mutable sync_primitives::Lock listeners_lock_;
 
@@ -769,6 +773,9 @@ class PolicyHandler : public PolicyHandlerInterface,
   std::shared_ptr<StatisticManagerImpl> statistic_manager_impl_;
   const PolicySettings& settings_;
   application_manager::ApplicationManager& application_manager_;
+#ifdef HTTP_MODE
+  BinaryMessage pt_snapshot_;
+#endif  // HTTP_MODE
   friend class AppPermissionDelegate;
 
   /**

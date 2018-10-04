@@ -1499,12 +1499,35 @@ void PolicyHandler::OnSnapshotCreated(
 #ifdef HTTP_MODE
 void PolicyHandler::OnSnapshotCreated(const BinaryMessage& pt_string) {
   LOG4CXX_AUTO_TRACE(logger_);
-  const std::string url;
+  LOG4CXX_DEBUG(logger_, "HTTP policy");
+  const std::string& url = ChooseUrl();
   if (url.empty()) {
+    LOG4CXX_ERROR(logger_, "URL for snapshot processing is empty.");
     return;
   }
-  SendMessageToSDK(pt_string, url);
+  if (SaveSnapshotBinaryMessage(pt_string)) {
+    SendMessageToSDK(pt_string, url);
+    OnUpdateRequestSentToMobile();
+  } else {
+    LOG4CXX_ERROR(logger_, "Can not save created snapshot");
+    return;
+  }
 }
+
+bool PolicyHandler::SaveSnapshotBinaryMessage(const BinaryMessage& pt_string) {
+  if (pt_string.empty()) {
+    LOG4CXX_ERROR(logger_, "Snapshot binary messagge is empty");
+    return false;
+  }
+  pt_snapshot_ = pt_string;
+
+  return true;
+}
+
+BinaryMessage PolicyHandler::GetSavedSnapshotBinaryMessage() const {
+  return pt_snapshot_;
+}
+
 #endif  // HTTP_MODE
 
 #ifdef PROPRIETARY_MODE
@@ -1535,8 +1558,15 @@ void PolicyHandler::OnNextRetry() {
     return;
   }
   const uint32_t app_id = app->app_id();
+#ifdef PROPRIETARY_MODE
   MessageHelper::SendPolicySnapshotNotification(
       app_id, snapshot_file_path_, url, application_manager_);
+#else  // HTTP
+  const BinaryMessage pt_string = GetSavedSnapshotBinaryMessage();
+  MessageHelper::SendPolicySnapshotNotification(
+      app_id, pt_string, url, application_manager_);
+#endif
+
   OnUpdateRequestSentToMobile();
 }
 #endif  // PROPRIETARY_MODE || HTTP_MODE
