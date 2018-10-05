@@ -3327,7 +3327,7 @@
                 If the value is MOBILE_APP, the system shall switch to the mobile media app that issues the setter RPC.
             </description>
         </param>
-        <param name="keepContext" type="Boolean" defvalue="false" mandatory="false">
+        <param name="keepContext" type="Boolean" mandatory="false">
             <description>
                 This parameter shall not be present in any getter responses or notifications.
                 This parameter is optional in a setter request. The default value is false if it is not included.
