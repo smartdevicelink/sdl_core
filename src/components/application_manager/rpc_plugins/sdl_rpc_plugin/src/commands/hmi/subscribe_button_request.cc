@@ -50,22 +50,65 @@ SubscribeButtonRequest::SubscribeButtonRequest(
                    application_manager,
                    rpc_service,
                    hmi_capabilities,
-                   policy_handle) {}
+                   policy_handle)
+    , EventObserver(application_manager.event_dispatcher()) {}
 
-SubscribeButtonRequest::~SubscribeButtonRequest() {}
+SubscribeButtonRequest::~SubscribeButtonRequest() {
+  unsubscribe_from_event(hmi_apis::FunctionID::Buttons_SubscribeButton);
+}
 
 void SubscribeButtonRequest::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
 
+  subscribe_on_event(hmi_apis::FunctionID::Buttons_SubscribeButton,
+                     correlation_id());
   SendRequest();
 }
 
 void SubscribeButtonRequest::onTimeOut() {
+  LOG4CXX_AUTO_TRACE(logger_);
+  application_manager_.updateRequestTimeout(
+      connection_key(), correlation_id(), 0);
+
   auto& resume_ctrl = application_manager_.resume_controller();
 
   resume_ctrl.HandleOnTimeOut(
       correlation_id(),
       static_cast<hmi_apis::FunctionID::eType>(function_id()));
+}
+
+void SubscribeButtonRequest::on_event(const event_engine::Event& event) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  using namespace helpers;
+
+  const smart_objects::SmartObject& message = event.smart_object();
+
+  if (hmi_apis::FunctionID::Buttons_SubscribeButton != event.id()) {
+    LOG4CXX_ERROR(logger_, "Received unknown event.");
+    return;
+  }
+
+  const uint32_t app_id =
+      (*message_)[strings::msg_params][strings::app_id].asUInt();
+
+  ApplicationSharedPtr app =
+      application_manager_.application_by_hmi_app(app_id);
+
+  if (!app) {
+    LOG4CXX_ERROR(logger_, "NULL pointer.");
+    return;
+  }
+
+  hmi_apis::Common_Result::eType hmi_result =
+      static_cast<hmi_apis::Common_Result::eType>(
+          message[strings::params][hmi_response::code].asInt());
+
+  if (hmi_apis::Common_Result::SUCCESS == hmi_result) {
+    const mobile_apis::ButtonName::eType btn_id =
+        static_cast<mobile_apis::ButtonName::eType>(
+            (*message_)[strings::msg_params][strings::button_name].asInt());
+    app->SubscribeToButton(static_cast<mobile_apis::ButtonName::eType>(btn_id));
+  }
 }
 
 }  // namespace hmi

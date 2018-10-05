@@ -34,6 +34,7 @@
 #define SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_HMI_SUBSCRIBE_BUTTON_REQUEST_H_
 
 #include "application_manager/commands/request_to_hmi.h"
+#include "application_manager/event_engine/event.h"
 #include "utils/macro.h"
 
 namespace sdl_rpc_plugin {
@@ -45,7 +46,8 @@ namespace hmi {
 /**
  * @brief SubscribeButtonRequest command class
  **/
-class SubscribeButtonRequest : public app_mngr::commands::RequestToHMI {
+class SubscribeButtonRequest : public app_mngr::commands::RequestToHMI,
+                               public app_mngr::event_engine::EventObserver {
  public:
   /**
    * @brief SubscribeButtonRequest class constructor
@@ -68,6 +70,8 @@ class SubscribeButtonRequest : public app_mngr::commands::RequestToHMI {
   virtual void Run();
 
   void onTimeOut() OVERRIDE;
+
+  void on_event(const application_manager::event_engine::Event& event) OVERRIDE;
 
  private:
   DISALLOW_COPY_AND_ASSIGN(SubscribeButtonRequest);

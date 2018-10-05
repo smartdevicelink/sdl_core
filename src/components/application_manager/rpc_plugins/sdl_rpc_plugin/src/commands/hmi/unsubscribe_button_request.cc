@@ -32,6 +32,7 @@
 
 #include "sdl_rpc_plugin/commands/hmi/unsubscribe_button_request.h"
 #include "application_manager/resumption/resume_ctrl.h"
+#include "application_manager/event_engine/event_dispatcher_impl.h"
 
 namespace sdl_rpc_plugin {
 using namespace application_manager;
@@ -50,21 +51,33 @@ UnsubscribeButtonRequest::UnsubscribeButtonRequest(
                    application_manager,
                    rpc_service,
                    hmi_capabilities,
-                   policy_handle) {}
+                   policy_handle)
+    , EventObserver(application_manager.event_dispatcher()) {}
 
-UnsubscribeButtonRequest::~UnsubscribeButtonRequest() {}
+UnsubscribeButtonRequest::~UnsubscribeButtonRequest() {
+  unsubscribe_from_event(hmi_apis::FunctionID::Buttons_UnsubscribeButton);
+}
 
 void UnsubscribeButtonRequest::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
+
+  subscribe_on_event(hmi_apis::FunctionID::Buttons_UnsubscribeButton,
+                     correlation_id());
   SendRequest();
 }
 
 void UnsubscribeButtonRequest::onTimeOut() {
+  application_manager_.updateRequestTimeout(
+      connection_key(), correlation_id(), 0);
   auto& resume_ctrl = application_manager_.resume_controller();
 
   resume_ctrl.HandleOnTimeOut(
       correlation_id(),
       static_cast<hmi_apis::FunctionID::eType>(function_id()));
+}
+
+void UnsubscribeButtonRequest::on_event(const event_engine::Event& event) {
+  LOG4CXX_AUTO_TRACE(logger_);
 }
 
 }  // namespace hmi

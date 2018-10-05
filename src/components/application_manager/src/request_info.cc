@@ -42,12 +42,12 @@ namespace request_controller {
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "RequestController")
 
-uint32_t RequestInfo::HmiConnectoinKey = 0;
+uint32_t RequestInfo::HmiConnectionKey = 0;
 
 HMIRequestInfo::HMIRequestInfo(RequestPtr request, const uint64_t timeout_msec)
     : RequestInfo(request, HMIRequest, timeout_msec) {
   correlation_id_ = request_->correlation_id();
-  app_id_ = RequestInfo::HmiConnectoinKey;
+  app_id_ = RequestInfo::HmiConnectionKey;
 }
 
 HMIRequestInfo::HMIRequestInfo(RequestPtr request,
@@ -55,7 +55,7 @@ HMIRequestInfo::HMIRequestInfo(RequestPtr request,
                                const uint64_t timeout_msec)
     : RequestInfo(request, HMIRequest, start_time, timeout_msec) {
   correlation_id_ = request_->correlation_id();
-  app_id_ = RequestInfo::HmiConnectoinKey;
+  app_id_ = RequestInfo::HmiConnectionKey;
 }
 
 MobileRequestInfo::MobileRequestInfo(RequestPtr request,
@@ -252,7 +252,7 @@ uint32_t RequestInfoSet::RemoveByConnectionKey(uint32_t connection_key) {
 uint32_t RequestInfoSet::RemoveMobileRequests() {
   LOG4CXX_AUTO_TRACE(logger_);
   return RemoveRequests(AppIdCompararator(AppIdCompararator::NotEqual,
-                                          RequestInfo::HmiConnectoinKey));
+                                          RequestInfo::HmiConnectionKey));
 }
 
 const size_t RequestInfoSet::Size() {
