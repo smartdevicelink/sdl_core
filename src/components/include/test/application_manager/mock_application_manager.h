@@ -275,6 +275,8 @@ class MockApplicationManager : public application_manager::ApplicationManager {
                     const smart_objects::SmartObject& display_capabilities));
   MOCK_CONST_METHOD1(IsAppSubscribedForWayPoints,
                      bool(application_manager::ApplicationSharedPtr));
+  MOCK_CONST_METHOD1(IsAppSubscribedForWayPoints,
+                     bool(application_manager::Application&));
   MOCK_METHOD1(SubscribeAppForWayPoints,
                void(application_manager::ApplicationSharedPtr));
   MOCK_METHOD1(UnsubscribeAppFromWayPoints,

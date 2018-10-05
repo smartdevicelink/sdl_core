@@ -292,6 +292,8 @@ class ApplicationManager {
    */
   virtual bool IsAppSubscribedForWayPoints(ApplicationSharedPtr app) const = 0;
 
+  virtual bool IsAppSubscribedForWayPoints(Application& app) const = 0;
+
   /**
    * @brief Subscribe Application for way points
    * @param Application pointer

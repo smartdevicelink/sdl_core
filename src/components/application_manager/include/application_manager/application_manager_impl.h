@@ -236,6 +236,14 @@ class ApplicationManagerImpl
   bool IsAppSubscribedForWayPoints(ApplicationSharedPtr app) const OVERRIDE;
 
   /**
+   * @brief Checks if Application is subscribed for way points
+   * @param Application reference
+   * @return true if Application is subscribed for way points
+   * otherwise false
+   */
+  bool IsAppSubscribedForWayPoints(Application& app) const OVERRIDE;
+
+  /**
    * @brief Subscribe Application for way points
    * @param Application pointer
    */

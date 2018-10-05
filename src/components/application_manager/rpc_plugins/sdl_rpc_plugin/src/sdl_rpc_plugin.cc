@@ -102,7 +102,7 @@ void SDLRPCPlugin::SaveResumptionData(
     application_manager::Application& app,
     smart_objects::SmartObject& resumption_data) {
   resumption_data[application_manager::strings::subscribed_for_way_points] =
-      true;
+      application_manager_->IsAppSubscribedForWayPoints(app);
 }
 
 void SDLRPCPlugin::RevertResumption(application_manager::Application& app) {
