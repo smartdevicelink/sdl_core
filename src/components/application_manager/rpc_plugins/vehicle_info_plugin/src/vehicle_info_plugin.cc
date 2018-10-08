@@ -36,13 +36,16 @@
 #include "application_manager/smart_object_keys.h"
 #include "application_manager/message_helper.h"
 #include "application_manager/message_helper.h"
+#include "application_manager/resumption/resumption_data_processor.h"
+#include "vehicle_info_plugin/vehicle_info_pending_resumption_handler.h"
 
 namespace vehicle_info_plugin {
 CREATE_LOGGERPTR_GLOBAL(logger_, "VehicleInfoPlugin")
 
 namespace strings = application_manager::strings;
 
-VehicleInfoPlugin::VehicleInfoPlugin() : application_manager_(nullptr) {}
+VehicleInfoPlugin::VehicleInfoPlugin()
+    : application_manager_(nullptr), pending_resumption_handler_(nullptr) {}
 
 bool VehicleInfoPlugin::Init(
     application_manager::ApplicationManager& app_manager,
@@ -50,6 +53,8 @@ bool VehicleInfoPlugin::Init(
     application_manager::HMICapabilities& hmi_capabilities,
     policy::PolicyHandlerInterface& policy_handler) {
   application_manager_ = &app_manager;
+  pending_resumption_handler_ =
+      std::make_shared<VehicleInfoPendingResumptionHandler>(app_manager);
   command_factory_.reset(new vehicle_info_plugin::VehicleInfoCommandFactory(
       app_manager, rpc_service, hmi_capabilities, policy_handler));
   return true;
@@ -73,6 +78,7 @@ void VehicleInfoPlugin::OnPolicyEvent(plugins::PolicyEvent event) {}
 void VehicleInfoPlugin::OnApplicationEvent(
     plugins::ApplicationEvent event,
     app_mngr::ApplicationSharedPtr application) {
+  LOG4CXX_AUTO_TRACE(logger_);
   if (plugins::ApplicationEvent::kApplicationRegistered == event) {
     application->AddExtension(
         std::make_shared<VehicleInfoAppExtension>(*this, *application));
@@ -80,25 +86,90 @@ void VehicleInfoPlugin::OnApplicationEvent(
 }
 
 void VehicleInfoPlugin::ProcessResumptionSubscription(
-    application_manager::Application& app, VehicleInfoAppExtension& ext) {
+    application_manager::Application& app,
+    VehicleInfoAppExtension& ext,
+    resumption::Subscriber subscriber) {
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  pending_resumption_handler_->HandleResumptionSubscriptionRequest(
+      ext, subscriber, app);
+}
+
+void VehicleInfoPlugin::RevertResumption(
+    application_manager::Application& app,
+    const std::set<std::string>& list_of_subscriptions) {
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  pending_resumption_handler_->ClearPendingResumptionRequests();
+
+  std::set<std::string> subscriptions_to_revert;
+  for (auto& ivi_data : list_of_subscriptions) {
+    if (!IsSubscribedAppExist(ivi_data)) {
+      subscriptions_to_revert.insert(ivi_data);
+    }
+  }
+
+  if (subscriptions_to_revert.empty()) {
+    LOG4CXX_DEBUG(logger_, "No data to unsubscribe");
+    return;
+  }
+  smart_objects::SmartObjectSPtr request =
+      CreateUnsubscriptionRequest(subscriptions_to_revert);
+  application_manager_->GetRPCService().ManageHMICommand(request);
+}
+
+smart_objects::SmartObjectSPtr VehicleInfoPlugin::CreateSubscriptionRequest(
+    const std::set<std::string>& list_of_subscriptions) {
   LOG4CXX_AUTO_TRACE(logger_);
   smart_objects::SmartObject msg_params =
       smart_objects::SmartObject(smart_objects::SmartType_Map);
-  msg_params[strings::app_id] = app.app_id();
-  const auto& subscriptions = ext.Subscriptions();
-  for (auto& ivi_data : application_manager::MessageHelper::vehicle_data()) {
-    mobile_apis::VehicleDataType::eType type_id = ivi_data.second;
-    if (subscriptions.end() != subscriptions.find(type_id)) {
-      std::string key_name = ivi_data.first;
-      msg_params[key_name] = true;
-    }
+
+  for (auto& ivi_data : list_of_subscriptions) {
+    msg_params[ivi_data] = true;
   }
+
   smart_objects::SmartObjectSPtr request =
       application_manager::MessageHelper::CreateModuleInfoSO(
           hmi_apis::FunctionID::VehicleInfo_SubscribeVehicleData,
           *application_manager_);
   (*request)[strings::msg_params] = msg_params;
-  application_manager_->GetRPCService().ManageHMICommand(request);
+
+  return request;
+}
+
+smart_objects::SmartObjectSPtr VehicleInfoPlugin::CreateUnsubscriptionRequest(
+    const std::set<std::string>& list_of_subscriptions) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  smart_objects::SmartObject msg_params =
+      smart_objects::SmartObject(smart_objects::SmartType_Map);
+
+  for (auto& ivi_data : list_of_subscriptions) {
+    msg_params[ivi_data] = true;
+  }
+
+  smart_objects::SmartObjectSPtr request =
+      application_manager::MessageHelper::CreateModuleInfoSO(
+          hmi_apis::FunctionID::VehicleInfo_UnsubscribeVehicleData,
+          *application_manager_);
+  (*request)[strings::msg_params] = msg_params;
+
+  return request;
+}
+
+bool VehicleInfoPlugin::IsSubscribedAppExist(const std::string& ivi) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  auto applications = application_manager_->applications();
+  const auto it = application_manager::MessageHelper::vehicle_data().find(ivi);
+  DCHECK_OR_RETURN(
+      it != application_manager::MessageHelper::vehicle_data().end(), false);
+  auto ivi_enum = it->second;
+  for (auto& app : applications.GetData()) {
+    auto& ext = VehicleInfoAppExtension::ExtractVIExtension(*app);
+    if (ext.isSubscribedToVehicleInfo(ivi_enum)) {
+      return true;
+    }
+  }
+  return false;
 }
 
 application_manager::ApplicationSharedPtr FindAppSubscribedToIVI(

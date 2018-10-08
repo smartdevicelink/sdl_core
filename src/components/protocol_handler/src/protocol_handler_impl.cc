@@ -177,11 +177,6 @@ void set_hash_id(uint32_t hash_id, protocol_handler::ProtocolPacket& packet) {
   if (HASH_ID_NOT_SUPPORTED == hash_id || HASH_ID_WRONG == hash_id) {
     return;
   }
-  if (packet.protocol_version() < PROTOCOL_VERSION_2) {
-    LOG4CXX_DEBUG(logger_,
-                  "Packet needs no hash data (protocol version less 2)");
-    return;
-  }
   LOG4CXX_DEBUG(logger_,
                 "Set hash_id 0x" << std::hex << hash_id << " to the packet 0x"
                                  << &packet);

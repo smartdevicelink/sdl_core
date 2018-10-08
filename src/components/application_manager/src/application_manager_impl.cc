@@ -267,14 +267,33 @@ ApplicationSharedPtr ApplicationManagerImpl::active_application() const {
   return FindApp(accessor, ActiveAppPredicate);
 }
 
-bool LimitedAppPredicate(const ApplicationSharedPtr app) {
-  return app ? app->hmi_level() == mobile_api::HMILevel::HMI_LIMITED : false;
-}
-
 ApplicationSharedPtr ApplicationManagerImpl::get_limited_media_application()
     const {
   DataAccessor<ApplicationSet> accessor = applications();
-  return FindApp(accessor, LimitedAppPredicate);
+  auto is_limited_media_app = [](const ApplicationSharedPtr app) {
+    if (!app) {
+      return false;
+    }
+
+    if (app->is_media_application()) {
+      return true;
+    }
+
+    const auto app_types = app->app_types();
+    if (!app_types) {
+      return false;
+    }
+
+    for (size_t i = 0; i < app_types->length(); i++) {
+      const auto app_type = app_types->getElement(i).asUInt();
+      if (mobile_apis::AppHMIType::MEDIA == app_type) {
+        return true;
+      }
+    }
+    return false;
+  };
+
+  return FindApp(accessor, is_limited_media_app);
 }
 
 bool LimitedNaviAppPredicate(const ApplicationSharedPtr app) {
@@ -374,12 +393,6 @@ void ApplicationManagerImpl::OnApplicationRegistered(ApplicationSharedPtr app) {
   const mobile_apis::HMILevel::eType default_level = GetDefaultHmiLevel(app);
   state_ctrl_.OnApplicationRegistered(app, default_level);
 
-  std::function<void(plugin_manager::RPCPlugin&)> on_app_registered =
-      [app](plugin_manager::RPCPlugin& plugin) {
-        plugin.OnApplicationEvent(plugin_manager::kApplicationRegistered, app);
-      };
-  plugin_manager_->ForEachPlugin(on_app_registered);
-
   // TODO(AOleynik): Is neccessary to be able to know that registration process
   // has been completed and default HMI level is set, otherwise policy will
   // block all the requests/notifications to mobile
@@ -420,18 +433,22 @@ bool ApplicationManagerImpl::IsAppTypeExistsInFullOrLimited(
     }
 
     if (voice_state && active_app->is_voice_communication_supported()) {
+      LOG4CXX_DEBUG(logger_, "AKutsan 1");
       return true;
     }
 
     if (media_state && active_app->is_media_application()) {
+      LOG4CXX_DEBUG(logger_, "AKutsan 2");
       return true;
     }
 
     if (navi_state && active_app->is_navi()) {
+      LOG4CXX_DEBUG(logger_, "AKutsan 3");
       return true;
     }
 
     if (mobile_projection_state && active_app->mobile_projection_enabled()) {
+      LOG4CXX_DEBUG(logger_, "AKutsan 4");
       return true;
     }
   }
@@ -440,6 +457,7 @@ bool ApplicationManagerImpl::IsAppTypeExistsInFullOrLimited(
   if (voice_state) {
     if ((get_limited_voice_application().use_count() != 0) &&
         (get_limited_voice_application()->app_id() != app->app_id())) {
+      LOG4CXX_DEBUG(logger_, "AKutsan 5");
       return true;
     }
   }
@@ -447,6 +465,7 @@ bool ApplicationManagerImpl::IsAppTypeExistsInFullOrLimited(
   if (media_state) {
     if ((get_limited_media_application().use_count() != 0) &&
         (get_limited_media_application()->app_id() != app->app_id())) {
+      LOG4CXX_DEBUG(logger_, "AKutsan 6");
       return true;
     }
   }
@@ -454,6 +473,7 @@ bool ApplicationManagerImpl::IsAppTypeExistsInFullOrLimited(
   if (navi_state) {
     if ((get_limited_navi_application().use_count() != 0) &&
         (get_limited_navi_application()->app_id() != app->app_id())) {
+      LOG4CXX_DEBUG(logger_, "AKutsan 7");
       return true;
     }
   }
@@ -462,6 +482,7 @@ bool ApplicationManagerImpl::IsAppTypeExistsInFullOrLimited(
     if ((get_limited_mobile_projection_application().use_count() != 0) &&
         (get_limited_mobile_projection_application()->app_id() !=
          app->app_id())) {
+      LOG4CXX_DEBUG(logger_, "AKutsan 8");
       return true;
     }
   }
@@ -2375,8 +2396,13 @@ void ApplicationManagerImpl::UnregisterApplication(
     subscribed_for_way_points_app_count =
         subscribed_way_points_apps_list_.size();
   }
+  ApplicationSharedPtr app_ptr = application(app_id);
   if (1 == subscribed_for_way_points_app_count) {
-    LOG4CXX_ERROR(logger_, "Send UnsubscribeWayPoints");
+    LOG4CXX_DEBUG(logger_, "Send UnsubscribeWayPoints");
+    if (!is_resuming) {
+      LOG4CXX_DEBUG(logger_, "Unsubscribe App from WayPoints");
+      UnsubscribeAppFromWayPoints(app_ptr);
+    }
     MessageHelper::SendUnsubscribedWayPoints(*this);
   }
 
@@ -2404,7 +2430,6 @@ void ApplicationManagerImpl::UnregisterApplication(
     case mobile_apis::Result::EXPIRED_CERT:
       break;
     case mobile_apis::Result::TOO_MANY_PENDING_REQUESTS: {
-      ApplicationSharedPtr app_ptr = application(app_id);
       if (app_ptr) {
         app_ptr->usage_report().RecordRemovalsForBadBehavior();
         if (reason == mobile_apis::Result::TOO_MANY_PENDING_REQUESTS) {
@@ -2448,6 +2473,7 @@ void ApplicationManagerImpl::UnregisterApplication(
 
     if (is_resuming) {
       resume_controller().SaveApplication(app_to_remove);
+      UnsubscribeAppFromWayPoints(app_ptr);
     } else {
       resume_controller().RemoveApplicationFromSaved(app_to_remove);
     }
@@ -2822,6 +2848,54 @@ void ApplicationManagerImpl::ProcessApp(const uint32_t app_id,
   }
 }
 
+bool ApplicationManagerImpl::ResetHelpPromt(ApplicationSharedPtr app) const {
+  if (!app) {
+    LOG4CXX_ERROR(logger_, "Null pointer");
+    return false;
+  }
+  smart_objects::SmartObject so_help_prompt =
+      smart_objects::SmartObject(smart_objects::SmartType_Array);
+  app->set_help_prompt(so_help_prompt);
+  return true;
+}
+
+bool ApplicationManagerImpl::ResetTimeoutPromt(ApplicationSharedPtr app) const {
+  if (!app) {
+    LOG4CXX_ERROR(logger_, "Null pointer");
+    return false;
+  }
+
+  const std::vector<std::string>& time_out_promt =
+      get_settings().time_out_promt();
+
+  smart_objects::SmartObject so_time_out_promt =
+      smart_objects::SmartObject(smart_objects::SmartType_Array);
+
+  for (uint32_t i = 0; i < time_out_promt.size(); ++i) {
+    smart_objects::SmartObject timeoutPrompt =
+        smart_objects::SmartObject(smart_objects::SmartType_Map);
+    timeoutPrompt[strings::text] = time_out_promt[i];
+    timeoutPrompt[strings::type] = hmi_apis::Common_SpeechCapabilities::SC_TEXT;
+    so_time_out_promt[i] = timeoutPrompt;
+  }
+
+  app->set_timeout_prompt(so_time_out_promt);
+
+  return true;
+}
+
+bool ApplicationManagerImpl::ResetVrHelpTitleItems(
+    ApplicationSharedPtr app) const {
+  if (!app) {
+    LOG4CXX_ERROR(logger_, "Null pointer");
+    return false;
+  }
+  app->reset_vr_help_title();
+  app->reset_vr_help();
+
+  return true;
+}
+
 void ApplicationManagerImpl::SendHMIStatusNotification(
     const std::shared_ptr<Application> app) {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -3150,6 +3224,99 @@ void ApplicationManagerImpl::RemoveAppFromTTSGlobalPropertiesList(
     }
   }
   tts_global_properties_app_list_lock_.Release();
+}
+
+ResetGlobalPropertiesResult ApplicationManagerImpl::ResetGlobalProperties(
+    const smart_objects::SmartObject& global_properties_ids,
+    const uint32_t app_id) {
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  ApplicationSharedPtr application =
+      ApplicationManagerImpl::application(app_id);
+  // if application waits for sending ttsGlobalProperties need to remove this
+  // application from tts_global_properties_app_list_
+  LOG4CXX_INFO(logger_, "RemoveAppFromTTSGlobalPropertiesList");
+  RemoveAppFromTTSGlobalPropertiesList(app_id);
+
+  ResetGlobalPropertiesResult result;
+
+  for (size_t i = 0; i < global_properties_ids.length(); ++i) {
+    mobile_apis::GlobalProperty::eType global_property =
+        static_cast<mobile_apis::GlobalProperty::eType>(
+            global_properties_ids[i].asInt());
+    switch (global_property) {
+      case mobile_apis::GlobalProperty::HELPPROMPT: {
+        result.help_prompt = ResetHelpPromt(application);
+        break;
+      }
+      case mobile_apis::GlobalProperty::TIMEOUTPROMPT: {
+        result.timeout_prompt = ResetTimeoutPromt(application);
+        break;
+      }
+      case mobile_apis::GlobalProperty::VRHELPTITLE:
+      case mobile_apis::GlobalProperty::VRHELPITEMS: {
+        if (0 == result.number_of_reset_vr) {
+          result.number_of_reset_vr++;
+          result.vr_help_title_items = ResetVrHelpTitleItems(application);
+        }
+        break;
+      }
+      case mobile_apis::GlobalProperty::MENUNAME: {
+        result.menu_name = true;
+        break;
+      }
+      case mobile_apis::GlobalProperty::MENUICON: {
+        result.menu_icon = true;
+        break;
+      }
+      case mobile_apis::GlobalProperty::KEYBOARDPROPERTIES: {
+        result.keyboard_properties = true;
+        break;
+      }
+      default: {
+        LOG4CXX_TRACE(logger_, "Unknown global property: " << global_property);
+        break;
+      }
+    }
+  }
+
+  return result;
+}
+
+ResetGlobalPropertiesResult
+ApplicationManagerImpl::ResetAllApplicationGlobalProperties(
+    const uint32_t app_id) {
+  const smart_objects::SmartObjectSPtr application_gl_props =
+      CreateAllAppGlobalPropsIDList(app_id);
+  return ResetGlobalProperties(*application_gl_props, app_id);
+}
+
+const smart_objects::SmartObjectSPtr
+ApplicationManagerImpl::CreateAllAppGlobalPropsIDList(
+    const uint32_t app_id) const {
+  smart_objects::SmartObjectSPtr ret_gl_props =
+      std::make_shared<smart_objects::SmartObject>(
+          smart_objects::SmartType_Array);
+  using namespace mobile_apis;
+
+  ApplicationConstSharedPtr application =
+      ApplicationManagerImpl::application(app_id);
+  int32_t i = 0;
+
+  if (application->help_prompt())
+    (*ret_gl_props)[i++] = GlobalProperty::HELPPROMPT;
+  if (application->timeout_prompt())
+    (*ret_gl_props)[i++] = GlobalProperty::TIMEOUTPROMPT;
+  if (application->vr_help_title())
+    (*ret_gl_props)[i++] = GlobalProperty::VRHELPTITLE;
+  if (application->menu_title())
+    (*ret_gl_props)[i++] = GlobalProperty::MENUNAME;
+  if (application->menu_icon())
+    (*ret_gl_props)[i++] = GlobalProperty::MENUICON;
+  if (application->keyboard_props())
+    (*ret_gl_props)[i++] = GlobalProperty::KEYBOARDPROPERTIES;
+
+  return ret_gl_props;
 }
 
 mobile_apis::AppHMIType::eType ApplicationManagerImpl::StringToAppHMIType(

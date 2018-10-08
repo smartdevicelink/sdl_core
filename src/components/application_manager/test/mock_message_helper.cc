@@ -257,6 +257,12 @@ smart_objects::SmartObjectSPtr MessageHelper::CreateMessageForHMI(
       message_type, correlation_id);
 }
 
+smart_objects::SmartObjectSPtr MessageHelper::CreateMessageForHMI(
+    hmi_apis::FunctionID::eType function_id, const uint32_t correlation_id) {
+  return MockMessageHelper::message_helper_mock()->CreateMessageForHMI(
+      function_id, correlation_id);
+}
+
 void MessageHelper::SendHMIStatusNotification(
     const Application& application_impl,
     ApplicationManager& application_manager) {
@@ -287,10 +293,14 @@ MockMessageHelper* MockMessageHelper::message_helper_mock() {
   static ::testing::NiceMock<MockMessageHelper> message_helper_mock;
   return &message_helper_mock;
 }
-void MessageHelper::SendAllOnButtonSubscriptionNotificationsForApp(
-    ApplicationConstSharedPtr app, ApplicationManager& app_mngr) {
-  MockMessageHelper::message_helper_mock()
-      ->SendAllOnButtonSubscriptionNotificationsForApp(app, app_mngr);
+smart_objects::SmartObjectList
+MessageHelper::CreateOnButtonSubscriptionNotificationsForApp(
+    ApplicationConstSharedPtr app,
+    ApplicationManager& app_mngr,
+    const ButtonSubscriptions& button_subscriptions) {
+  return MockMessageHelper::message_helper_mock()
+      ->CreateOnButtonSubscriptionNotificationsForApp(
+          app, app_mngr, button_subscriptions);
 }
 
 void MessageHelper::SendOnResumeAudioSourceToHMI(const uint32_t app_id,
@@ -299,10 +309,10 @@ void MessageHelper::SendOnResumeAudioSourceToHMI(const uint32_t app_id,
       app_id, app_mngr);
 }
 
-smart_objects::SmartObjectList MessageHelper::CreateAddSubMenuRequestToHMI(
-    ApplicationConstSharedPtr app, const uint32_t correlation_id) {
-  return MockMessageHelper::message_helper_mock()->CreateAddSubMenuRequestToHMI(
-      app, correlation_id);
+smart_objects::SmartObjectList MessageHelper::CreateAddSubMenuRequestsToHMI(
+    ApplicationConstSharedPtr app, ApplicationManager& app_mngr) {
+  return MockMessageHelper::message_helper_mock()
+      ->CreateAddSubMenuRequestsToHMI(app, app_mngr);
 }
 
 smart_objects::SmartObjectList MessageHelper::CreateAddCommandRequestToHMI(
@@ -570,6 +580,40 @@ void MessageHelper::SendUnsubscribeButtonNotification(
     ApplicationManager& app_mngr) {
   return MockMessageHelper::message_helper_mock()
       ->SendUnsubscribeButtonNotification(button, application, app_mngr);
+}
+
+smart_objects::SmartObjectSPtr
+MessageHelper::CreateUIResetGlobalPropertiesRequest(
+    const ResetGlobalPropertiesResult& reset_result,
+    ApplicationSharedPtr application) {
+  return MockMessageHelper::message_helper_mock()
+      ->CreateUIResetGlobalPropertiesRequest(reset_result, application);
+}
+
+smart_objects::SmartObjectSPtr
+MessageHelper::CreateTTSResetGlobalPropertiesRequest(
+    const ResetGlobalPropertiesResult& reset_result,
+    ApplicationSharedPtr application) {
+  return MockMessageHelper::message_helper_mock()
+      ->CreateTTSResetGlobalPropertiesRequest(reset_result, application);
+}
+
+smart_objects::SmartObjectList
+MessageHelper::CreateGlobalPropertiesRequestsToHMI(
+    ApplicationConstSharedPtr app, ApplicationManager& app_mngr) {
+  return MockMessageHelper::message_helper_mock()
+      ->CreateGlobalPropertiesRequestsToHMI(app, app_mngr);
+}
+
+smart_objects::SmartObjectSPtr
+MessageHelper::CreateOnButtonSubscriptionNotification(
+    uint32_t app_id,
+    hmi_apis::Common_ButtonName::eType button,
+    bool is_subscribed,
+    ApplicationManager& app_mngr) {
+  return MockMessageHelper::message_helper_mock()
+      ->CreateOnButtonSubscriptionNotification(
+          app_id, button, is_subscribed, app_mngr);
 }
 
 }  // namespace application_manager

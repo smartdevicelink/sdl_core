@@ -34,11 +34,14 @@
 #define SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_VEHICLE_INFO_PLUGIN_INCLUDE_VEHICLE_INFO_PLUGIN_VEHICLE_INFO_PLUGIN_H
 
 #include "application_manager/command_factory.h"
+#include "application_manager/resumption/extension_pending_resumption_handler.h"
 
 namespace vehicle_info_plugin {
 class VehicleInfoAppExtension;
 namespace app_mngr = application_manager;
 namespace plugins = application_manager::plugin_manager;
+
+enum SubscribeStatus { SUBSCRIBE, UNSUBSCRIBE };
 
 class VehicleInfoPlugin : public plugins::RPCPlugin {
  public:
@@ -65,15 +68,34 @@ class VehicleInfoPlugin : public plugins::RPCPlugin {
    * to HMI
    * @param app application for subscription
    * @param ext application extension
+   * @param subscriber callback for subscription
    */
   void ProcessResumptionSubscription(app_mngr::Application& app,
-                                     VehicleInfoAppExtension& ext);
+                                     VehicleInfoAppExtension& ext,
+                                     resumption::Subscriber subscriber);
+
+  /**
+   * @brief Revert the data to the state before Resumption.
+   * @param subscriptions Subscriptions to be returned
+   **/
+  void RevertResumption(app_mngr::Application& app,
+                        const std::set<std::string>& list_of_subscriptions);
+
+  smart_objects::SmartObjectSPtr CreateSubscriptionRequest(
+      const std::set<std::string>& list_of_subscriptions);
+
+  smart_objects::SmartObjectSPtr CreateUnsubscriptionRequest(
+      const std::set<std::string>& list_of_subscriptions);
 
  private:
+  bool IsSubscribedAppExist(const std::string& ivi);
   void DeleteSubscriptions(app_mngr::ApplicationSharedPtr app);
 
   std::unique_ptr<app_mngr::CommandFactory> command_factory_;
   app_mngr::ApplicationManager* application_manager_;
+  using ExtensionPendingResumptionHandlerSPtr =
+      std::shared_ptr<resumption::ExtensionPendingResumptionHandler>;
+  ExtensionPendingResumptionHandlerSPtr pending_resumption_handler_;
 };
 }
 

@@ -30,47 +30,49 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "rc_rpc_plugin/rc_app_extension.h"
+#include "sdl_rpc_plugin/sdl_app_extension.h"
+#include "sdl_rpc_plugin/sdl_rpc_plugin.h"
 
-namespace rc_rpc_plugin {
-RCAppExtension::RCAppExtension(application_manager::AppExtensionUID uid)
-    : AppExtension(uid) {}
+CREATE_LOGGERPTR_GLOBAL(logger_, "SDLAppExtension")
 
-void RCAppExtension::SubscribeToInteriorVehicleData(
-    const std::string& module_type) {
-  subscribed_interior_vehicle_data_.insert(module_type);
+namespace sdl_rpc_plugin {
+namespace strings = application_manager::strings;
+unsigned SDLAppExtension::SDLAppExtensionUID = 138;
+
+SDLAppExtension::SDLAppExtension(SDLRPCPlugin& plugin,
+                                 application_manager::Application& app)
+    : app_mngr::AppExtension(SDLAppExtension::SDLAppExtensionUID)
+    , plugin_(plugin)
+    , app_(app) {
+  LOG4CXX_AUTO_TRACE(logger_);
 }
 
-void RCAppExtension::UnsubscribeFromInteriorVehicleData(
-    const std::string& module_type) {
-  subscribed_interior_vehicle_data_.erase(module_type);
+SDLAppExtension::~SDLAppExtension() {
+  LOG4CXX_AUTO_TRACE(logger_);
 }
 
-void RCAppExtension::UnsubscribeFromInteriorVehicleData() {
-  subscribed_interior_vehicle_data_.clear();
+void SDLAppExtension::SaveResumptionData(
+    smart_objects::SmartObject& resumption_data) {
+  plugin_.SaveResumptionData(app_, resumption_data);
 }
 
-bool RCAppExtension::IsSubscibedToInteriorVehicleData(
-    const std::string& module_type) {
-  std::set<std::string>::iterator it =
-      subscribed_interior_vehicle_data_.find(module_type);
-
-  return (it != subscribed_interior_vehicle_data_.end());
-}
-
-void RCAppExtension::SaveResumptionData(
-    smart_objects::SmartObject& resumption_data) {}
-
-void RCAppExtension::ProcessResumption(
+void SDLAppExtension::ProcessResumption(
     const smart_objects::SmartObject& saved_app,
-    resumption::Subscriber subscriber) {}
-
-void RCAppExtension::RevertResumption(
-    const smart_objects::SmartObject& subscriptions) {}
-
-std::set<std::string> RCAppExtension::InteriorVehicleDataSubscriptions() const {
-  return subscribed_interior_vehicle_data_;
+    resumption::Subscriber subscriber) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  if (!saved_app.keyExists(strings::subscribed_for_way_points)) {
+    LOG4CXX_ERROR(logger_, "subscribed_for_way_points section does not exist");
+    return;
+  }
+  const bool subscribed_for_way_points_so =
+      saved_app[strings::subscribed_for_way_points].asBool();
+  if (subscribed_for_way_points_so) {
+    plugin_.ProcessResumptionSubscription(app_, *this, subscriber);
+  }
 }
 
-RCAppExtension::~RCAppExtension() {}
-}  //  namespace rc_rpc_plugin
+void SDLAppExtension::RevertResumption(
+    const smart_objects::SmartObject& subscriptions) {
+  plugin_.RevertResumption(app_);
+}
+}

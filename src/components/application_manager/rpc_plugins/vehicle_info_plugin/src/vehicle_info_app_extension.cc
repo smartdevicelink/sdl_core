@@ -36,7 +36,7 @@
 CREATE_LOGGERPTR_GLOBAL(logger_, "VehicleInfoPlugin")
 
 namespace vehicle_info_plugin {
-
+namespace strings = application_manager::strings;
 unsigned VehicleInfoAppExtension::VehicleInfoAppExtensionUID = 146;
 
 VehicleInfoAppExtension::VehicleInfoAppExtension(
@@ -80,35 +80,54 @@ bool VehicleInfoAppExtension::isSubscribedToVehicleInfo(
   return subscribed_data_.find(vehicle_data) != subscribed_data_.end();
 }
 
-VehicleInfoSubscriptions VehicleInfoAppExtension::Subscriptions() {
+const VehicleInfoSubscriptions& VehicleInfoAppExtension::Subscriptions() {
   return subscribed_data_;
 }
 
 void VehicleInfoAppExtension::SaveResumptionData(
     smart_objects::SmartObject& resumption_data) {
-  const char* application_vehicle_info = "vehicleInfo";
-  resumption_data[application_vehicle_info] =
+  resumption_data[strings::application_vehicle_info] =
       smart_objects::SmartObject(smart_objects::SmartType_Array);
   int i = 0;
   for (const auto& subscription : subscribed_data_) {
-    resumption_data[application_vehicle_info][i] = subscription;
+    resumption_data[strings::application_vehicle_info][i++] = subscription;
   }
 }
 
 void VehicleInfoAppExtension::ProcessResumption(
-    const smart_objects::SmartObject& resumption_data) {
-  const char* application_vehicle_info = "vehicleInfo";
-  if (resumption_data.keyExists(application_vehicle_info)) {
-    const smart_objects::SmartObject& subscriptions_ivi =
-        resumption_data[application_vehicle_info];
-    for (size_t i = 0; i < subscriptions_ivi.length(); ++i) {
-      mobile_apis::VehicleDataType::eType ivi =
-          static_cast<mobile_apis::VehicleDataType::eType>(
-              (resumption_data[i]).asInt());
-      subscribeToVehicleInfo(ivi);
-    }
-    plugin_.ProcessResumptionSubscription(app_, *this);
+    const smart_objects::SmartObject& saved_app,
+    resumption::Subscriber subscriber) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  if (!saved_app.keyExists(strings::application_subscriptions)) {
+    LOG4CXX_DEBUG(logger_, "application_subscriptions section is not exists");
+    return;
   }
+
+  const smart_objects::SmartObject& resumption_data =
+      saved_app[strings::application_subscriptions];
+
+  if (!resumption_data.keyExists(strings::application_vehicle_info)) {
+    LOG4CXX_DEBUG(logger_, "application_vehicle_info section is not exists");
+    return;
+  }
+
+  const smart_objects::SmartObject& subscriptions_ivi =
+      resumption_data[strings::application_vehicle_info];
+  for (size_t i = 0; i < subscriptions_ivi.length(); ++i) {
+    mobile_apis::VehicleDataType::eType ivi =
+        static_cast<mobile_apis::VehicleDataType::eType>(
+            (subscriptions_ivi[i]).asInt());
+    subscribeToVehicleInfo(ivi);
+  }
+  if (subscriptions_ivi.length() > 0) {
+    plugin_.ProcessResumptionSubscription(app_, *this, subscriber);
+  }
+}
+
+void VehicleInfoAppExtension::RevertResumption(
+    const smart_objects::SmartObject& subscriptions) {
+  unsubscribeFromVehicleInfo();
+  plugin_.RevertResumption(app_, subscriptions.enumerate());
 }
 
 VehicleInfoAppExtension& VehicleInfoAppExtension::ExtractVIExtension(

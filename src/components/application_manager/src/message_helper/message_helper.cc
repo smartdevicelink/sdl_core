@@ -325,6 +325,22 @@ smart_objects::SmartObjectSPtr MessageHelper::CreateMessageForHMI(
   return message;
 }
 
+smart_objects::SmartObjectSPtr MessageHelper::CreateMessageForHMI(
+    hmi_apis::FunctionID::eType function_id, const uint32_t correlation_id) {
+  using namespace smart_objects;
+
+  SmartObjectSPtr message = std::make_shared<SmartObject>(SmartType_Map);
+  SmartObject& ref = *message;
+
+  ref[strings::params][strings::function_id] = static_cast<int>(function_id);
+  ref[strings::params][strings::protocol_version] =
+      commands::CommandImpl::protocol_version_;
+  ref[strings::params][strings::protocol_type] =
+      commands::CommandImpl::hmi_protocol_type_;
+  ref[strings::params][strings::correlation_id] = correlation_id;
+  return message;
+}
+
 smart_objects::SmartObjectSPtr MessageHelper::CreateHashUpdateNotification(
     const uint32_t app_id) {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -846,6 +862,70 @@ void MessageHelper::CreateGetVehicleDataRequest(
   app_mngr.GetRPCService().ManageHMICommand(request);
 }
 
+smart_objects::SmartObjectSPtr
+MessageHelper::CreateTTSResetGlobalPropertiesRequest(
+    const ResetGlobalPropertiesResult& reset_result,
+    const ApplicationSharedPtr application) {
+  smart_objects::SmartObjectSPtr ui_reset_global_prop_request =
+      std::make_shared<smart_objects::SmartObject>(
+          smart_objects::SmartType_Map);
+
+  if (reset_result.help_prompt) {
+    (*ui_reset_global_prop_request)[strings::help_prompt] =
+        *(application->help_prompt());
+  }
+
+  if (reset_result.timeout_prompt) {
+    (*ui_reset_global_prop_request)[strings::timeout_prompt] =
+        *(application->timeout_prompt());
+  }
+
+  (*ui_reset_global_prop_request)[strings::app_id] = application->app_id();
+
+  return ui_reset_global_prop_request;
+}
+
+smart_objects::SmartObjectSPtr
+MessageHelper::CreateUIResetGlobalPropertiesRequest(
+    const ResetGlobalPropertiesResult& reset_result,
+    const ApplicationSharedPtr application) {
+  smart_objects::SmartObjectSPtr tts_reset_global_prop_request =
+      std::make_shared<smart_objects::SmartObject>(
+          smart_objects::SmartType_Map);
+
+  if (reset_result.vr_help_title_items) {
+    smart_objects::SmartObjectSPtr vr_help = CreateAppVrHelp(application);
+    if (!vr_help.get()) {
+      LOG4CXX_WARN(logger_, "Failed to create vr_help");
+      return smart_objects::SmartObjectSPtr();
+    } else {
+      tts_reset_global_prop_request = vr_help;
+    }
+  }
+  if (reset_result.menu_name) {
+    (*tts_reset_global_prop_request)[hmi_request::menu_title] = "";
+    application->set_menu_title(
+        (*tts_reset_global_prop_request)[hmi_request::menu_title]);
+  }
+
+  if (reset_result.keyboard_properties) {
+    smart_objects::SmartObject key_board_properties =
+        smart_objects::SmartObject(smart_objects::SmartType_Map);
+    key_board_properties[strings::language] =
+        static_cast<int32_t>(hmi_apis::Common_Language::EN_US);
+    key_board_properties[hmi_request::keyboard_layout] =
+        static_cast<int32_t>(hmi_apis::Common_KeyboardLayout::QWERTY);
+
+    key_board_properties[hmi_request::auto_complete_text] = "";
+    (*tts_reset_global_prop_request)[hmi_request::keyboard_properties] =
+        key_board_properties;
+  }
+
+  (*tts_reset_global_prop_request)[strings::app_id] = application->app_id();
+
+  return tts_reset_global_prop_request;
+}
+
 smart_objects::SmartObjectSPtr MessageHelper::CreateBlockedByPoliciesResponse(
     mobile_apis::FunctionID::eType function_id,
     mobile_apis::Result::eType result,
@@ -944,7 +1024,8 @@ smart_objects::SmartObjectSPtr MessageHelper::CreateSetAppIcon(
   return set_icon;
 }
 
-void MessageHelper::SendOnButtonSubscriptionNotification(
+smart_objects::SmartObjectSPtr
+MessageHelper::CreateOnButtonSubscriptionNotification(
     uint32_t app_id,
     hmi_apis::Common_ButtonName::eType button,
     bool is_subscribed,
@@ -957,7 +1038,7 @@ void MessageHelper::SendOnButtonSubscriptionNotification(
       std::make_shared<SmartObject>(SmartType_Map);
   if (!notification_ptr) {
     LOG4CXX_ERROR(logger_, "Memory allocation failed.");
-    return;
+    return SmartObjectSPtr(nullptr);
   }
   SmartObject& notification = *notification_ptr;
 
@@ -976,33 +1057,36 @@ void MessageHelper::SendOnButtonSubscriptionNotification(
       hmi_apis::FunctionID::Buttons_OnButtonSubscription;
   notification[strings::msg_params] = msg_params;
 
-  if (!app_mngr.GetRPCService().ManageHMICommand(notification_ptr)) {
-    LOG4CXX_ERROR(logger_, "Unable to send HMI notification");
-  }
+  return notification_ptr;
 }
 
-void MessageHelper::SendAllOnButtonSubscriptionNotificationsForApp(
-    ApplicationConstSharedPtr app, ApplicationManager& app_mngr) {
+smart_objects::SmartObjectList
+MessageHelper::CreateOnButtonSubscriptionNotificationsForApp(
+    ApplicationConstSharedPtr app,
+    ApplicationManager& app_mngr,
+    const ButtonSubscriptions& button_subscriptions) {
   using namespace smart_objects;
   using namespace hmi_apis;
   using namespace mobile_apis;
   LOG4CXX_AUTO_TRACE(logger_);
 
+  SmartObjectList button_subscription_requests;
+
   if (app.use_count() == 0) {
     LOG4CXX_ERROR(logger_, "Invalid application pointer ");
-    return;
+    return button_subscription_requests;
   }
 
-  DataAccessor<ButtonSubscriptions> button_accessor = app->SubscribedButtons();
-  ButtonSubscriptions subscriptions = button_accessor.GetData();
-  ButtonSubscriptions::iterator it = subscriptions.begin();
-  for (; subscriptions.end() != it; ++it) {
-    SendOnButtonSubscriptionNotification(
-        app->hmi_app_id(),
-        static_cast<Common_ButtonName::eType>(*it),
-        true,
-        app_mngr);
+  for (auto& it : button_subscriptions) {
+    const Common_ButtonName::eType btn =
+        static_cast<Common_ButtonName::eType>(it);
+
+    button_subscription_requests.push_back(
+        CreateOnButtonSubscriptionNotification(
+            app->hmi_app_id(), btn, true, app_mngr));
   }
+
+  return button_subscription_requests;
 }
 
 void MessageHelper::SendSetAppIcon(
@@ -1049,8 +1133,8 @@ void MessageHelper::SendGlobalPropertiesToHMI(ApplicationConstSharedPtr app,
     return;
   }
 
-  smart_objects::SmartObjectList requests = CreateGlobalPropertiesRequestsToHMI(
-      app, app_mngr.GetNextHMICorrelationID());
+  smart_objects::SmartObjectList requests =
+      CreateGlobalPropertiesRequestsToHMI(app, app_mngr);
   for (smart_objects::SmartObjectList::const_iterator it = requests.begin();
        it != requests.end();
        ++it) {
@@ -1060,8 +1144,10 @@ void MessageHelper::SendGlobalPropertiesToHMI(ApplicationConstSharedPtr app,
 
 smart_objects::SmartObjectList
 MessageHelper::CreateGlobalPropertiesRequestsToHMI(
-    ApplicationConstSharedPtr app, const uint32_t correlation_id) {
+    ApplicationConstSharedPtr app, ApplicationManager& app_mngr) {
   LOG4CXX_AUTO_TRACE(logger_);
+
+  uint32_t correlation_id = app_mngr.GetNextHMICorrelationID();
 
   smart_objects::SmartObjectList requests;
   if (app.use_count() == 0) {
@@ -1124,6 +1210,7 @@ MessageHelper::CreateGlobalPropertiesRequestsToHMI(
 
   // TTS global properties
   if (can_send_vr && (app->help_prompt() || app->timeout_prompt())) {
+    correlation_id = app_mngr.GetNextHMICorrelationID();
     smart_objects::SmartObjectSPtr tts_global_properties =
         CreateMessageForHMI(hmi_apis::messageType::request, correlation_id);
     if (!tts_global_properties) {
@@ -1337,10 +1424,11 @@ smart_objects::SmartObjectList MessageHelper::CreateAddCommandRequestToHMI(
 
     // VR Interface
     if ((*i->second).keyExists(strings::vr_commands)) {
-      SendAddVRCommandToHMI(i->first,
-                            (*i->second)[strings::vr_commands],
-                            app->app_id(),
-                            app_mngr);
+      requests.push_back(
+          CreateAddVRCommandToHMI(/*cmd_id = */ i->first,
+                                  (*i->second)[strings::vr_commands],
+                                  app->app_id(),
+                                  app_mngr));
     }
   }
   return requests;
@@ -1601,7 +1689,7 @@ void MessageHelper::SendAddSubMenuRequestToHMI(ApplicationConstSharedPtr app,
   }
 
   smart_objects::SmartObjectList requests =
-      CreateAddSubMenuRequestToHMI(app, app_mngr.GetNextHMICorrelationID());
+      CreateAddSubMenuRequestsToHMI(app, app_mngr);
   for (smart_objects::SmartObjectList::iterator it = requests.begin();
        it != requests.end();
        ++it) {
@@ -1609,15 +1697,15 @@ void MessageHelper::SendAddSubMenuRequestToHMI(ApplicationConstSharedPtr app,
   }
 }
 
-smart_objects::SmartObjectList MessageHelper::CreateAddSubMenuRequestToHMI(
-    ApplicationConstSharedPtr app, const uint32_t correlation_id) {
+smart_objects::SmartObjectList MessageHelper::CreateAddSubMenuRequestsToHMI(
+    ApplicationConstSharedPtr app, ApplicationManager& app_mngr) {
   smart_objects::SmartObjectList requsets;
   const DataAccessor<SubMenuMap> accessor = app->sub_menu_map();
   const SubMenuMap& sub_menu = accessor.GetData();
   SubMenuMap::const_iterator i = sub_menu.begin();
   for (; sub_menu.end() != i; ++i) {
-    smart_objects::SmartObjectSPtr ui_sub_menu =
-        CreateMessageForHMI(hmi_apis::messageType::request, correlation_id);
+    smart_objects::SmartObjectSPtr ui_sub_menu = CreateMessageForHMI(
+        hmi_apis::messageType::request, app_mngr.GetNextHMICorrelationID());
     if (!ui_sub_menu) {
       return requsets;
     }
