@@ -31,7 +31,15 @@
 set(APR_CONFIGURE_FLAGS
     "--host=${CMAKE_SYSTEM_PROCESSOR}-nto-qnx"
     "--bindir=${QNX_HOST}/usr/bin/"
-    "--prefix=${3RD_PARTY_INSTALL_PREFIX}"
+    "ac_cv_file__dev_zero=yes"
+    "ac_cv_func_setpgrp_void=yes"
+    "apr_cv_process_shared_works=yes"
+    "apr_cv_mutex_recursive=yes"
+    "apr_cv_mutex_robust_shared=no"
+    "apr_cv_tcp_nodelay_with_cork=no"
+    "ac_cv_sizeof_struct_iovec=8"
+    "LDFLAGS=-L${QNX_HOST}/usr/lib"
+    "CPPFLAGS=-I${QNX_HOST}/usr/include"
     "MAKE=${QNX_HOST}/usr/bin/make${HOST_EXECUTABLE_SUFFIX}"
     "STRIP=${QNX_HOST}/usr/bin/nto${CMAKE_SYSTEM_PROCESSOR}-strip${HOST_EXECUTABLE_SUFFIX}"
     "OBJDUMP=${QNX_HOST}/usr/bin/nto${CMAKE_SYSTEM_PROCESSOR}-objdump${HOST_EXECUTABLE_SUFFIX}"
@@ -42,13 +50,6 @@ set(APR_CONFIGURE_FLAGS
     "AR=${QNX_HOST}/usr/bin/nto${CMAKE_SYSTEM_PROCESSOR}-ar${HOST_EXECUTABLE_SUFFIX}"
     "CXX=${QNX_HOST}/usr/bin/nto${CMAKE_SYSTEM_PROCESSOR}-g++${HOST_EXECUTABLE_SUFFIX}"
     "CC=${QNX_HOST}/usr/bin/nto${CMAKE_SYSTEM_PROCESSOR}-gcc${HOST_EXECUTABLE_SUFFIX}"
-    "ac_cv_file__dev_zero=yes"
-    "ac_cv_func_setpgrp_void=yes"
-    "apr_cv_process_shared_works=yes"
-    "apr_cv_mutex_recursive=yes"
-    "apr_cv_mutex_robust_shared=no"
-    "apr_cv_tcp_nodelay_with_cork=no"
-    "ac_cv_sizeof_struct_iovec=8"
     )
 
 add_custom_command(OUTPUT ${APR_BUILD_DIRECTORY}/Makefile

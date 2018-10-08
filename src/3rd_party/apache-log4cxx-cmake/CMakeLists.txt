@@ -66,7 +66,6 @@ else()
     DEPENDS apr-util
     WORKING_DIRECTORY ${LOG4CXX_BUILD_DIRECTORY}
   )
-endif()
 
 add_custom_target(liblog4cxx ALL make
   COMMAND /bin/bash -c \"
@@ -84,6 +83,7 @@ add_custom_target(liblog4cxx ALL make
   DEPENDS ${LOG4CXX_BUILD_DIRECTORY}/Makefile
   WORKING_DIRECTORY ${LOG4CXX_BUILD_DIRECTORY}
 )
+endif()
 
 install(
   DIRECTORY ${LOG4CXX_LIBS_DIRECTORY}/

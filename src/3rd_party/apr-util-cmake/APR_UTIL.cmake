@@ -35,6 +35,8 @@ set(APR_UTIL_CONFIGURE_FLAGS
     "--with-apr=../apr-build"
     "--with-expat-source=${EXPAT_SOURCE_DIRECTORY}"
     "--with-expat-build=${EXPAT_BUILD_DIRECTORY}"
+    "LDFLAGS=-L${QNX_HOST}/usr/lib"
+    "CPPFLAGS=-I${QNX_HOST}/usr/include"
     "MAKE=${QNX_HOST}/usr/bin/make${HOST_EXECUTABLE_SUFFIX}"
     "STRIP=${QNX_HOST}/usr/bin/nto${CMAKE_SYSTEM_PROCESSOR}-strip${HOST_EXECUTABLE_SUFFIX}"
     "OBJDUMP=${QNX_HOST}/usr/bin/nto${CMAKE_SYSTEM_PROCESSOR}-objdump${HOST_EXECUTABLE_SUFFIX}"

@@ -33,6 +33,8 @@
     "--target=qnxnto"
     "--bindir=${QNX_HOST}/usr/bin/"
     "--prefix=${3RD_PARTY_INSTALL_PREFIX}"
+    "LDFLAGS=-L${QNX_HOST}/usr/lib"
+    "CPPFLAGS=-I${QNX_HOST}/usr/include"
     "MAKE=${QNX_HOST}/usr/bin/make${HOST_EXECUTABLE_SUFFIX}"
     "STRIP=${QNX_HOST}/usr/bin/nto${CMAKE_SYSTEM_PROCESSOR}-strip${HOST_EXECUTABLE_SUFFIX}"
     "OBJDUMP=${QNX_HOST}/usr/bin/nto${CMAKE_SYSTEM_PROCESSOR}-objdump${HOST_EXECUTABLE_SUFFIX}"
