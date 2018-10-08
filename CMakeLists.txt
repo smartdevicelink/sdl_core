@@ -237,16 +237,16 @@ set(ARCHIVE_OUTPUT_DIRECTORY ./bin)
 
 set(CMAKE_CXX_FLAGS "-fPIC -std=gnu++0x -Wall -Werror -Wuninitialized -Wvla")
 
-if (USE_GOLD_LD)
-  execute_process(COMMAND ld -v OUTPUT_VARIABLE result)
-  string(FIND ${result} Binutils GOLD_LD_FOUND)
-  if (GOLD_LD_FOUND EQUAL -1)
-    message(SEND_ERROR "Gold linker not found!")
-  else()
-    message(INFO " Use gold linker")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fuse-ld=gold")
-  endif()
-endif(USE_GOLD_LD)
+# if (USE_GOLD_LD)
+#   execute_process(COMMAND ld -v OUTPUT_VARIABLE result)
+#   string(FIND ${result} Binutils GOLD_LD_FOUND)
+#   if (GOLD_LD_FOUND EQUAL -1)
+#     message(SEND_ERROR "Gold linker not found!")
+#   else()
+#     message(INFO " Use gold linker")
+#     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fuse-ld=gold")
+#   endif()
+# endif(USE_GOLD_LD)
 
 if (USE_CCACHE)
 # Configure CCache if available
@@ -303,17 +303,17 @@ elseif(CMAKE_SYSTEM_NAME STREQUAL "QNX")
 endif()
 
 
-if (BUILD_USB_SUPPORT)
-  add_definitions(-DUSB_SUPPORT)
-  find_package(UDev REQUIRED)
-  message(STATUS "USB support enabled")
-endif()
+# if (BUILD_USB_SUPPORT)
+#   add_definitions(-DUSB_SUPPORT)
+#   find_package(UDev REQUIRED)
+#   message(STATUS "USB support enabled")
+# endif()
 
 
-if (BUILD_BT_SUPPORT)
-  add_definitions(-DBLUETOOTH_SUPPORT)
-  message(STATUS "Bluetooth support enabled")
-endif()
+# if (BUILD_BT_SUPPORT)
+#   add_definitions(-DBLUETOOTH_SUPPORT)
+#   message(STATUS "Bluetooth support enabled")
+# endif()
 
 if (BUILD_BACKTRACE_SUPPORT)
   add_definitions(-DBACKTRACE_SUPPORT)
@@ -391,7 +391,7 @@ include_directories(
 )
 
 # --- 3rd party libs
-add_subdirectory(./src/3rd_party EXCLUDE_FROM_ALL)
+#add_subdirectory(./src/3rd_party EXCLUDE_FROM_ALL)
 
 find_package(OpenSSL REQUIRED)
 if(ENABLE_LOG)
@@ -439,22 +439,23 @@ if(BUILD_TESTS)
 endif()
 
 # --- 3rd party libs (static)
+add_subdirectory(./src/3rd_party)
 add_subdirectory(./src/3rd_party-static)
 
 # --- Tools
-add_subdirectory(./tools)
+#add_subdirectory(./tools)
 
 # --- Components
-add_subdirectory(./src/components)
+#add_subdirectory(./src/components)
 
 # --- Main application
-add_subdirectory(./src/appMain)
+#add_subdirectory(./src/appMain)
 
 # --- Plugins
-add_subdirectory(./src/plugins)
+#add_subdirectory(./src/plugins)
 
-add_dependencies(${PROJECT} Policy)
-add_dependencies(${PROJECT} copy_policy_library)
+#add_dependencies(${PROJECT} Policy)
+#add_dependencies(${PROJECT} copy_policy_library)
 
 # Building documentation
 
