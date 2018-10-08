@@ -33,13 +33,18 @@
 #define SRC_COMPONENTS_SMART_OBJECTS_INCLUDE_SMART_OBJECTS_SCHEMA_ITEM_H_
 
 #include <stdlib.h>
-#include "utils/shared_ptr.h"
+
 #include "rpc_base/validation_report.h"
 
 #include "smart_objects/errors.h"
 
-namespace NsSmartDeviceLink {
-namespace NsSmartObjects {
+#include <memory>
+#include <vector>
+#include "utils/macro.h"
+#include "utils/semantic_version.h"
+
+namespace ns_smart_device_link {
+namespace ns_smart_objects {
 class SmartObject;
 
 /**
@@ -48,27 +53,18 @@ class SmartObject;
 class ISchemaItem {
  public:
   /**
-   * @deprecated
-   *
-   * @brief Validate smart object.
-   *
-   * @param Object Object to validate.
-   *
-   * @return NsSmartObjects::Errors::eType
-   **/
-  DEPRECATED virtual Errors::eType validate(const SmartObject& Object);
-
-  /**
    * @brief Validate smart object.
    *
    * @param Object Object to validate.
    * @param report__ object for reporting errors during validation
    * message if an error occurs
-   *
-   * @return NsSmartObjects::Errors::eType
+   * @param MessageVersion to check mobile RPC version against RPC Spec Histor
+   * @return ns_smart_objects::errors::eType
    **/
-  virtual Errors::eType validate(const SmartObject& Object,
-                                 rpc::ValidationReport* report__);
+  virtual errors::eType validate(
+      const SmartObject& Object,
+      rpc::ValidationReport* report__,
+      const utils::SemanticVersion& MessageVersion = utils::SemanticVersion());
 
   /**
    * @brief Set default value to an object.
@@ -96,8 +92,9 @@ class ISchemaItem {
    * from smart object otherwise contains false.
    **/
   virtual void applySchema(
-      NsSmartDeviceLink::NsSmartObjects::SmartObject& Object,
-      const bool RemoveFakeParameters);
+      ns_smart_device_link::ns_smart_objects::SmartObject& Object,
+      const bool RemoveFakeParameters,
+      const utils::SemanticVersion& MessageVersion = utils::SemanticVersion());
 
   /**
    * @brief Unapply schema.
@@ -105,7 +102,7 @@ class ISchemaItem {
    * @param Object Object to unapply schema.
    **/
   virtual void unapplySchema(
-      NsSmartDeviceLink::NsSmartObjects::SmartObject& Object);
+      ns_smart_device_link::ns_smart_objects::SmartObject& Object);
 
   /**
    * @brief Build smart object by smart schema having copied matched
@@ -126,7 +123,7 @@ class ISchemaItem {
 
   virtual ~ISchemaItem() {}
 };
-typedef utils::SharedPtr<ISchemaItem> ISchemaItemPtr;
-}  // namespace NsSmartObjects
-}  // namespace NsSmartDeviceLink
+typedef std::shared_ptr<ISchemaItem> ISchemaItemPtr;
+}  // namespace ns_smart_objects
+}  // namespace ns_smart_device_link
 #endif  // SRC_COMPONENTS_SMART_OBJECTS_INCLUDE_SMART_OBJECTS_SCHEMA_ITEM_H_

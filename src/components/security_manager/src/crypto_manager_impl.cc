@@ -41,6 +41,7 @@
 #include <iostream>
 #include <stdio.h>
 #include <ctime>
+#include <algorithm>
 #include "security_manager/security_manager.h"
 
 #include "utils/logger.h"
@@ -63,7 +64,12 @@ namespace {
 int debug_callback(int preverify_ok, X509_STORE_CTX* ctx) {
   if (!preverify_ok) {
     const int error = X509_STORE_CTX_get_error(ctx);
-    UNUSED(error);
+    if (error == X509_V_ERR_CERT_NOT_YET_VALID ||
+        error == X509_V_ERR_CERT_HAS_EXPIRED) {
+      // return success result code instead of error because start
+      // and expiration cert dates will be checked by SDL
+      return 1;
+    }
     LOG4CXX_WARN(logger_,
                  "Certificate verification failed with error "
                      << error << " \"" << X509_verify_cert_error_string(error)
@@ -81,7 +87,7 @@ void free_ctx(SSL_CTX** ctx) {
 }
 
 CryptoManagerImpl::CryptoManagerImpl(
-    const utils::SharedPtr<const CryptoManagerSettings> set)
+    const std::shared_ptr<const CryptoManagerSettings> set)
     : settings_(set), context_(NULL) {
   LOG4CXX_AUTO_TRACE(logger_);
   sync_primitives::AutoLock lock(instance_lock_);
@@ -93,7 +99,6 @@ CryptoManagerImpl::CryptoManagerImpl(
     OpenSSL_add_all_algorithms();
     SSL_library_init();
   }
-  InitCertExpTime();
 }
 
 CryptoManagerImpl::~CryptoManagerImpl() {
@@ -113,10 +118,35 @@ CryptoManagerImpl::~CryptoManagerImpl() {
   }
 }
 
+bool CryptoManagerImpl::AreForceProtectionSettingsCorrect() const {
+  LOG4CXX_AUTO_TRACE(logger_);
+  const std::vector<int>& forced_unprotected_services =
+      get_settings().force_unprotected_service();
+  const std::vector<int>& forced_protected_services =
+      get_settings().force_protected_service();
+
+  for (auto& item : forced_protected_services) {
+    if (0 == item) {
+      continue;
+    }
+
+    if (std::find(forced_unprotected_services.begin(),
+                  forced_unprotected_services.end(),
+                  item) != forced_unprotected_services.end()) {
+      return false;
+    }
+  }
+  return true;
+}
+
 bool CryptoManagerImpl::Init() {
   LOG4CXX_AUTO_TRACE(logger_);
 
   const Mode mode = get_settings().security_manager_mode();
+  if (!AreForceProtectionSettingsCorrect()) {
+    LOG4CXX_DEBUG(logger_, "Force protection settings of ini file are wrong!");
+    return false;
+  }
   const bool is_server = (mode == SERVER);
   if (is_server) {
     LOG4CXX_DEBUG(logger_, "Server mode");
@@ -133,16 +163,24 @@ bool CryptoManagerImpl::Init() {
 #if OPENSSL_VERSION_NUMBER < CONST_SSL_METHOD_MINIMAL_VERSION
   SSL_METHOD* method;
 #else
-  const SSL_METHOD* method;
+  const SSL_METHOD* method = NULL;
 #endif
   switch (get_settings().security_manager_protocol_name()) {
     case SSLv3:
+#ifdef OPENSSL_NO_SSL3
+      LOG4CXX_WARN(logger_, "OpenSSL does not support SSL3 protocol");
+      return false;
+#else
+      LOG4CXX_DEBUG(logger_, "SSLv3 is used");
       method = is_server ? SSLv3_server_method() : SSLv3_client_method();
       break;
+#endif
     case TLSv1:
+      LOG4CXX_DEBUG(logger_, "TLSv1 is used");
       method = is_server ? TLSv1_server_method() : TLSv1_client_method();
       break;
     case TLSv1_1:
+      LOG4CXX_DEBUG(logger_, "TLSv1_1 is used");
 #if OPENSSL_VERSION_NUMBER < TLS1_1_MINIMAL_VERSION
       LOG4CXX_WARN(
           logger_,
@@ -153,6 +191,7 @@ bool CryptoManagerImpl::Init() {
 #endif
       break;
     case TLSv1_2:
+      LOG4CXX_DEBUG(logger_, "TLSv1_2 is used");
 #if OPENSSL_VERSION_NUMBER < TLS1_1_MINIMAL_VERSION
       LOG4CXX_WARN(
           logger_,
@@ -161,6 +200,10 @@ bool CryptoManagerImpl::Init() {
 #else
       method = is_server ? TLSv1_2_server_method() : TLSv1_2_client_method();
 #endif
+      break;
+    case DTLSv1:
+      LOG4CXX_DEBUG(logger_, "DTLSv1 is used");
+      method = is_server ? DTLSv1_server_method() : DTLSv1_client_method();
       break;
     default:
       LOG4CXX_ERROR(logger_,
@@ -178,7 +221,7 @@ bool CryptoManagerImpl::Init() {
   // Disable SSL2 as deprecated
   SSL_CTX_set_options(context_, SSL_OP_NO_SSLv2);
 
-  set_certificate(get_settings().certificate_data());
+  SaveCertificateData(get_settings().certificate_data());
 
   if (get_settings().ciphers_list().empty()) {
     LOG4CXX_WARN(logger_, "Empty ciphers list");
@@ -211,6 +254,21 @@ bool CryptoManagerImpl::Init() {
                      << '"');
   }
 
+  LOG4CXX_DEBUG(logger_, "Setting up module certificate and private key");
+
+  X509* module_certificate = LoadModuleCertificateFromFile();
+  utils::ScopeGuard certificate_guard =
+      utils::MakeGuard(X509_free, module_certificate);
+  UNUSED(certificate_guard);
+
+  EVP_PKEY* module_key = LoadModulePrivateKeyFromFile();
+  utils::ScopeGuard key_guard = utils::MakeGuard(EVP_PKEY_free, module_key);
+  UNUSED(key_guard);
+
+  if (!UpdateModuleCertificateData(module_certificate, module_key)) {
+    LOG4CXX_WARN(logger_, "Failed to update module key and certificate");
+  }
+
   guard.Dismiss();
 
   const int verify_mode =
@@ -230,17 +288,33 @@ bool CryptoManagerImpl::OnCertificateUpdated(const std::string& data) {
     return false;
   }
 
-  return set_certificate(data);
+  if (!SaveCertificateData(data)) {
+    LOG4CXX_ERROR(logger_, "Failed to save certificate data");
+    return false;
+  }
+
+  X509* module_certificate = LoadModuleCertificateFromFile();
+  EVP_PKEY* module_key = LoadModulePrivateKeyFromFile();
+
+  utils::ScopeGuard certificate_guard =
+      utils::MakeGuard(X509_free, module_certificate);
+  UNUSED(certificate_guard);
+
+  utils::ScopeGuard key_guard = utils::MakeGuard(EVP_PKEY_free, module_key);
+  UNUSED(key_guard);
+
+  return UpdateModuleCertificateData(module_certificate, module_key);
 }
 
 SSLContext* CryptoManagerImpl::CreateSSLContext() {
-  if (context_ == NULL) {
+  if (NULL == context_) {
     return NULL;
   }
 
   SSL* conn = SSL_new(context_);
-  if (conn == NULL)
+  if (NULL == conn) {
     return NULL;
+  }
 
   if (get_settings().security_manager_mode() == SERVER) {
     SSL_set_accept_state(conn);
@@ -264,38 +338,32 @@ std::string CryptoManagerImpl::LastError() const {
   return std::string(reason ? reason : "");
 }
 
-bool CryptoManagerImpl::IsCertificateUpdateRequired() const {
+bool CryptoManagerImpl::IsCertificateUpdateRequired(
+    const time_t system_time, const time_t certificates_time) const {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  const time_t cert_date = mktime(&expiration_time_);
+  const double seconds = difftime(certificates_time, system_time);
 
-  if (cert_date == -1) {
-    LOG4CXX_WARN(logger_,
-                 "The certifiacte expiration time cannot be represented.");
-    return false;
-  }
-  const time_t now = time(NULL);
-  const double seconds = difftime(cert_date, now);
+  LOG4CXX_DEBUG(
+      logger_, "Certificate UTC time: " << asctime(gmtime(&certificates_time)));
 
-  LOG4CXX_DEBUG(logger_,
-                "Certificate expiration time: " << asctime(&expiration_time_));
-  LOG4CXX_DEBUG(logger_,
-                "Host time: " << asctime(localtime(&now))
-                              << ". Seconds before expiration: " << seconds);
+  LOG4CXX_DEBUG(logger_, "Host UTC time: " << asctime(gmtime(&system_time)));
+  LOG4CXX_DEBUG(logger_, "Seconds before expiration: " << seconds);
   if (seconds < 0) {
     LOG4CXX_WARN(logger_, "Certificate is already expired.");
     return true;
   }
 
-  return seconds <= (get_settings().update_before_hours() *
-                     date_time::DateTime::SECONDS_IN_HOUR);
+  return seconds <=
+         (get_settings().update_before_hours() * date_time::SECONDS_IN_HOUR);
 }
 
 const CryptoManagerSettings& CryptoManagerImpl::get_settings() const {
   return *settings_;
 }
 
-bool CryptoManagerImpl::set_certificate(const std::string& cert_data) {
+bool CryptoManagerImpl::SaveCertificateData(
+    const std::string& cert_data) const {
   LOG4CXX_AUTO_TRACE(logger_);
 
   if (cert_data.empty()) {
@@ -310,100 +378,162 @@ bool CryptoManagerImpl::set_certificate(const std::string& cert_data) {
   UNUSED(bio_guard)
 
   X509* cert = NULL;
-  PEM_read_bio_X509(bio_cert, &cert, 0, 0);
+  if (!PEM_read_bio_X509(bio_cert, &cert, 0, 0)) {
+    LOG4CXX_WARN(logger_, "Could not read certificate data: " << LastError());
+    return false;
+  }
 
-  EVP_PKEY* pkey = NULL;
-  if (1 == BIO_reset(bio_cert)) {
-    PEM_read_bio_PrivateKey(bio_cert, &pkey, 0, 0);
-  } else {
+  utils::ScopeGuard cert_guard = utils::MakeGuard(X509_free, cert);
+  UNUSED(cert_guard);
+
+  if (1 != BIO_reset(bio_cert)) {
     LOG4CXX_WARN(logger_,
                  "Unabled to reset BIO in order to read private key, "
                      << LastError());
   }
 
-  if (NULL == cert || NULL == pkey) {
-    LOG4CXX_WARN(logger_, "Either certificate or key not valid.");
+  EVP_PKEY* pkey = NULL;
+  if (!PEM_read_bio_PrivateKey(bio_cert, &pkey, 0, 0)) {
+    LOG4CXX_WARN(logger_, "Could not read private key data: " << LastError());
     return false;
   }
 
-  if (!SSL_CTX_use_certificate(context_, cert)) {
-    LOG4CXX_WARN(logger_, "Could not use certificate: " << LastError());
-    return false;
-  }
+  utils::ScopeGuard key_guard = utils::MakeGuard(EVP_PKEY_free, pkey);
+  UNUSED(key_guard);
 
-  asn1_time_to_tm(X509_get_notAfter(cert));
+  return SaveModuleCertificateToFile(cert) && SaveModuleKeyToFile(pkey);
+}
 
-  if (!SSL_CTX_use_PrivateKey(context_, pkey)) {
-    LOG4CXX_ERROR(logger_, "Could not use key: " << LastError());
-    return false;
-  }
-
-  if (!SSL_CTX_check_private_key(context_)) {
-    LOG4CXX_ERROR(logger_, "Could not use certificate: " << LastError());
-    return false;
-  }
-
-  X509_STORE* store = SSL_CTX_get_cert_store(context_);
-  if (store) {
-    X509* extra_cert = NULL;
-    while ((extra_cert = PEM_read_bio_X509(bio_cert, NULL, 0, 0))) {
-      if (extra_cert != cert) {
-        LOG4CXX_DEBUG(logger_,
-                      "Added new certificate to store: " << extra_cert);
-        X509_STORE_add_cert(store, extra_cert);
-      }
+bool CryptoManagerImpl::UpdateModuleCertificateData(X509* certificate,
+                                                    EVP_PKEY* key) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  if (certificate) {
+    if (!SSL_CTX_use_certificate(context_, certificate)) {
+      LOG4CXX_WARN(logger_, "Could not use certificate: " << LastError());
+      return false;
     }
   }
 
-  LOG4CXX_DEBUG(logger_, "Certificate and key successfully updated");
+  if (key) {
+    if (!SSL_CTX_use_PrivateKey(context_, key)) {
+      LOG4CXX_ERROR(logger_, "Could not use key: " << LastError());
+      return false;
+    }
+
+    if (!SSL_CTX_check_private_key(context_)) {
+      LOG4CXX_ERROR(logger_, "Private key is invalid: " << LastError());
+      return false;
+    }
+  }
+
+  LOG4CXX_DEBUG(logger_, "Certificate and key are successfully updated");
   return true;
 }
 
-int CryptoManagerImpl::pull_number_from_buf(char* buf, int* idx) {
-  if (!idx) {
-    return 0;
+X509* CryptoManagerImpl::LoadModuleCertificateFromFile() {
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  const std::string cert_path = get_settings().module_cert_path();
+  BIO* bio_cert = BIO_new_file(cert_path.c_str(), "r");
+  if (!bio_cert) {
+    LOG4CXX_WARN(logger_,
+                 "Failed to open " << cert_path << " file: " << LastError());
+    return NULL;
   }
-  const int val = ((buf[*idx] - '0') * 10) + buf[(*idx) + 1] - '0';
-  *idx = *idx + 2;
-  return val;
+
+  utils::ScopeGuard bio_guard = utils::MakeGuard(BIO_free, bio_cert);
+  UNUSED(bio_guard);
+
+  X509* module_certificate = NULL;
+  if (!PEM_read_bio_X509(bio_cert, &module_certificate, NULL, NULL)) {
+    LOG4CXX_ERROR(logger_,
+                  "Failed to read certificate data from file: " << LastError());
+    return NULL;
+  }
+  LOG4CXX_DEBUG(logger_,
+                "Module certificate was loaded: " << module_certificate);
+
+  return module_certificate;
 }
 
-void CryptoManagerImpl::asn1_time_to_tm(ASN1_TIME* time) {
-  char* buf = (char*)time->data;
-  int index = 0;
-  const int year = pull_number_from_buf(buf, &index);
-  if (V_ASN1_GENERALIZEDTIME == time->type) {
-    expiration_time_.tm_year =
-        (year * 100 - 1900) + pull_number_from_buf(buf, &index);
-  } else {
-    expiration_time_.tm_year = year < 50 ? year + 100 : year;
+EVP_PKEY* CryptoManagerImpl::LoadModulePrivateKeyFromFile() {
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  const std::string key_path = get_settings().module_key_path();
+  BIO* bio_key = BIO_new_file(key_path.c_str(), "r");
+  if (!bio_key) {
+    LOG4CXX_WARN(logger_,
+                 "Failed to open " << key_path << " file: " << LastError());
+    return NULL;
   }
 
-  const int mon = pull_number_from_buf(buf, &index);
-  const int day = pull_number_from_buf(buf, &index);
-  const int hour = pull_number_from_buf(buf, &index);
-  const int mn = pull_number_from_buf(buf, &index);
+  utils::ScopeGuard bio_guard = utils::MakeGuard(BIO_free, bio_key);
+  UNUSED(bio_guard);
 
-  expiration_time_.tm_mon = mon - 1;
-  expiration_time_.tm_mday = day;
-  expiration_time_.tm_hour = hour;
-  expiration_time_.tm_min = mn;
+  EVP_PKEY* module_key = NULL;
+  if (!PEM_read_bio_PrivateKey(bio_key, &module_key, NULL, NULL)) {
+    LOG4CXX_ERROR(logger_,
+                  "Failed to read private key data from file: " << LastError());
+    return NULL;
+  }
+  LOG4CXX_DEBUG(logger_, "Module private key was loaded: " << module_key);
 
-  if (buf[index] == 'Z') {
-    expiration_time_.tm_sec = 0;
-  }
-  if ((buf[index] == '+') || (buf[index] == '-')) {
-    const int mn = pull_number_from_buf(buf, &index);
-    const int mn1 = pull_number_from_buf(buf, &index);
-    expiration_time_.tm_sec = (mn * 3600) + (mn1 * 60);
-  } else {
-    const int sec = pull_number_from_buf(buf, &index);
-    expiration_time_.tm_sec = sec;
-  }
+  return module_key;
 }
 
-void CryptoManagerImpl::InitCertExpTime() {
-  strptime("1 Jan 1970 00:00:00", "%d %b %Y %H:%M:%S", &expiration_time_);
+bool CryptoManagerImpl::SaveModuleCertificateToFile(X509* certificate) const {
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  if (!certificate) {
+    LOG4CXX_WARN(logger_, "Empty certificate. Saving will be skipped");
+    return false;
+  }
+
+  const std::string cert_path = get_settings().module_cert_path();
+  BIO* bio_cert = BIO_new_file(cert_path.c_str(), "w");
+  if (!bio_cert) {
+    LOG4CXX_ERROR(logger_,
+                  "Failed to open " << cert_path << " file: " << LastError());
+    return false;
+  }
+
+  utils::ScopeGuard bio_guard = utils::MakeGuard(BIO_free, bio_cert);
+  UNUSED(bio_guard);
+
+  if (!PEM_write_bio_X509(bio_cert, certificate)) {
+    LOG4CXX_ERROR(logger_,
+                  "Failed to write certificate to file: " << LastError());
+    return false;
+  }
+
+  return true;
+}
+
+bool CryptoManagerImpl::SaveModuleKeyToFile(EVP_PKEY* key) const {
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  if (!key) {
+    LOG4CXX_WARN(logger_, "Empty private key. Saving will be skipped");
+    return false;
+  }
+
+  const std::string key_path = get_settings().module_key_path();
+  BIO* bio_key = BIO_new_file(key_path.c_str(), "w");
+  if (!bio_key) {
+    LOG4CXX_ERROR(logger_,
+                  "Failed to open " << key_path << " file: " << LastError());
+    return false;
+  }
+
+  utils::ScopeGuard bio_guard = utils::MakeGuard(BIO_free, bio_key);
+  UNUSED(bio_guard);
+
+  if (!PEM_write_bio_PrivateKey(bio_key, key, NULL, NULL, 0, NULL, NULL)) {
+    LOG4CXX_ERROR(logger_, "Failed to write key to file: " << LastError());
+    return false;
+  }
+
+  return true;
 }
 
 }  // namespace security_manager

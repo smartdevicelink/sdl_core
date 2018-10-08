@@ -40,8 +40,6 @@
 #include "connection_handler/mock_connection_handler.h"
 #include "transport_manager/mock_transport_manager.h"
 #include "telemetry_monitor/mock_telemetry_observable.h"
-#include "utils/shared_ptr.h"
-#include "utils/make_shared.h"
 
 using testing::Return;
 using testing::_;
@@ -57,7 +55,7 @@ class StreamerMock : public Streamer {
   StreamerMock(TelemetryMonitor* const server) : Streamer(server) {
     is_client_connected_ = true;
   }
-  MOCK_METHOD1(PushMessage, void(utils::SharedPtr<MetricWrapper> metric));
+  MOCK_METHOD1(PushMessage, void(std::shared_ptr<MetricWrapper> metric));
 };
 
 TEST(TelemetryMonitorTest, MessageProcess) {
@@ -92,14 +90,14 @@ TEST(TelemetryMonitorTest, MessageProcess) {
   EXPECT_CALL(am_observeble, SetTelemetryObserver(_));
   EXPECT_CALL(transport_manager_mock, SetTelemetryObserver(_));
   telemetry_monitor::TelemetryMonitor telemetry_monitor(server_address, port);
-  utils::SharedPtr<StreamerMock> streamer_mock =
-      utils::MakeShared<StreamerMock>(&telemetry_monitor);
+  std::shared_ptr<StreamerMock> streamer_mock =
+      std::make_shared<StreamerMock>(&telemetry_monitor);
   // streamer_mock will be freed by telemetry_monitor on destruction
   telemetry_monitor.Start();
   telemetry_monitor.set_streamer(streamer_mock);
   telemetry_monitor.Init(
       &protocol_handler_mock, &am_observeble, &transport_manager_mock);
-  utils::SharedPtr<telemetry_monitor::MetricWrapper> test_metric;
+  std::shared_ptr<telemetry_monitor::MetricWrapper> test_metric;
   EXPECT_CALL(*streamer_mock, PushMessage(test_metric));
   telemetry_monitor.SendMetric(test_metric);
 }

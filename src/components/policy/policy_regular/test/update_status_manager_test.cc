@@ -34,7 +34,6 @@
 #include "policy/mock_policy_listener.h"
 #include "policy/policy_manager_impl.h"
 #include "policy/update_status_manager.h"
-#include "utils/make_shared.h"
 
 namespace test {
 namespace components {
@@ -46,13 +45,13 @@ using ::testing::Return;
 
 class UpdateStatusManagerTest : public ::testing::Test {
  protected:
-  utils::SharedPtr<UpdateStatusManager> manager_;
-  utils::SharedPtr<MockPolicyListener> listener_;
+  std::shared_ptr<UpdateStatusManager> manager_;
+  std::shared_ptr<MockPolicyListener> listener_;
 
  public:
   UpdateStatusManagerTest()
-      : manager_(utils::MakeShared<UpdateStatusManager>())
-      , listener_(utils::MakeShared<MockPolicyListener>()) {}
+      : manager_(std::make_shared<UpdateStatusManager>())
+      , listener_(std::make_shared<MockPolicyListener>()) {}
 
   void SetUp() OVERRIDE {
     manager_->set_listener(listener_.get());

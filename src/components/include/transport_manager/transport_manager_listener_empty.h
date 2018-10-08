@@ -187,6 +187,14 @@ class TransportManagerListenerEmpty : public TransportManagerListener {
   void OnTMMessageSendFailed(
       const DataSendError& error,
       const ::protocol_handler::RawMessagePtr message) OVERRIDE {}
+
+  /**
+   * @brief Notifies that configuration of a transport has been updated.
+   *
+   * @param configs pairs of key and value that represent configuration.
+   */
+  void OnTransportConfigUpdated(
+      const std::map<std::string, std::string>& configs) OVERRIDE {}
 };
 }  // namespace transport_manager
 #endif  // SRC_COMPONENTS_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_MANAGER_LISTENER_EMPTY_H_

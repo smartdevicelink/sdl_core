@@ -35,6 +35,7 @@
 
 #include <set>
 #include <string>
+#include <sstream>
 #include <vector>
 #include <map>
 
@@ -42,8 +43,8 @@
 #include "utils/custom_string.h"
 #include "rpc_base/validation_report.h"
 
-namespace NsSmartDeviceLink {
-namespace NsSmartObjects {
+namespace ns_smart_device_link {
+namespace ns_smart_objects {
 
 namespace custom_str = utils::custom_string;
 
@@ -126,7 +127,7 @@ typedef std::map<std::string, SmartObject> SmartMap;
  **/
 typedef std::vector<uint8_t> SmartBinary;
 
-typedef utils::SharedPtr<SmartObject> SmartObjectSPtr;
+typedef std::shared_ptr<SmartObject> SmartObjectSPtr;
 
 /**
  * @brief List of SmartObjects
@@ -671,20 +672,15 @@ class SmartObject FINAL {
   bool isValid() const;
 
   /**
-   * @deprecated
-   * @brief Validates object according to attached schema.
-   *
-   * @return Result of validation.
-   */
-  DEPRECATED Errors::eType validate();
-
-  /**
    * @brief Validates object according to attached schema.
    *
    * @param report__ object for reporting errors during validation
+   * @param messageVersion of the mobile app to check against RPC Spec Schema
    * @return Result of validation.
    */
-  Errors::eType validate(rpc::ValidationReport* report__);
+  errors::eType validate(
+      rpc::ValidationReport* report__,
+      const utils::SemanticVersion& MessageVersion = utils::SemanticVersion());
 
   /**
    * @brief Sets new schema
@@ -704,7 +700,7 @@ class SmartObject FINAL {
   /**
    * @brief Returns current object type
    *
-   * @return NsSmartObjects::SmartType
+   * @return ns_smart_objects::SmartType
    **/
   SmartType getType() const;
 
@@ -1053,9 +1049,9 @@ static SmartObject invalid_object_value(SmartType_Invalid);
  * @brief Value that is used as invalid value for object type
  **/
 static const SmartBinary invalid_binary_value;
-}  // namespace NsSmartObjects
-}  // namespace NsSmartDeviceLink
+}  // namespace ns_smart_objects
+}  // namespace ns_smart_device_link
 
-namespace smart_objects = NsSmartDeviceLink::NsSmartObjects;
+namespace smart_objects = ns_smart_device_link::ns_smart_objects;
 
 #endif  // SRC_COMPONENTS_SMART_OBJECTS_INCLUDE_SMART_OBJECTS_SMART_OBJECT_H_

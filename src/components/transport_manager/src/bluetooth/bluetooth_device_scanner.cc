@@ -262,8 +262,8 @@ void BluetoothDeviceScanner::CheckSDLServiceOnDevices(
       deviceName[name_len - 1] = '\0';
     }
 
-    Device* bluetooth_device =
-        new BluetoothDevice(bd_address, deviceName, sdl_rfcomm_channels[i]);
+    auto bluetooth_device = std::make_shared<BluetoothDevice>(
+        bd_address, deviceName, sdl_rfcomm_channels[i]);
     if (bluetooth_device) {
       LOG4CXX_INFO(logger_, "Bluetooth device created successfully");
       discovered_devices->push_back(bluetooth_device);

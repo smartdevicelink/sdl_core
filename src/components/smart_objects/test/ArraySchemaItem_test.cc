@@ -46,7 +46,7 @@ namespace smart_object_test {
  * Test ArraySchemaItem no schema item, no min and max size
  **/
 TEST(test_no_default_value, test_ArraySchemaItemTest) {
-  using namespace NsSmartDeviceLink::NsSmartObjects;
+  using namespace ns_smart_device_link::ns_smart_objects;
   SmartObject obj;
 
   ISchemaItemPtr item =
@@ -68,28 +68,28 @@ TEST(test_no_default_value, test_ArraySchemaItemTest) {
 
   rpc::ValidationReport report("RPC");
   int resultType = item->validate(obj, &report);
-  EXPECT_EQ(Errors::OK, resultType);
+  EXPECT_EQ(errors::OK, resultType);
   resultType = item->validate(obj[0], &report);
-  EXPECT_EQ(Errors::INVALID_VALUE, resultType);
+  EXPECT_EQ(errors::INVALID_VALUE, resultType);
   resultType = item->validate(obj[1], &report);
-  EXPECT_EQ(Errors::INVALID_VALUE, resultType);
+  EXPECT_EQ(errors::INVALID_VALUE, resultType);
   resultType = item->validate(obj[2], &report);
-  EXPECT_EQ(Errors::INVALID_VALUE, resultType);
+  EXPECT_EQ(errors::INVALID_VALUE, resultType);
   resultType = item->validate(obj[3], &report);
-  EXPECT_EQ(Errors::OK, resultType);
+  EXPECT_EQ(errors::OK, resultType);
 
   item->applySchema(obj, false);
 
   resultType = item->validate(obj, &report);
-  EXPECT_EQ(Errors::OK, resultType);
+  EXPECT_EQ(errors::OK, resultType);
   resultType = item->validate(obj[0], &report);
-  EXPECT_EQ(Errors::INVALID_VALUE, resultType);
+  EXPECT_EQ(errors::INVALID_VALUE, resultType);
   resultType = item->validate(obj[1], &report);
-  EXPECT_EQ(Errors::INVALID_VALUE, resultType);
+  EXPECT_EQ(errors::INVALID_VALUE, resultType);
   resultType = item->validate(obj[2], &report);
-  EXPECT_EQ(Errors::INVALID_VALUE, resultType);
+  EXPECT_EQ(errors::INVALID_VALUE, resultType);
   resultType = item->validate(obj[3], &report);
-  EXPECT_EQ(Errors::OK, resultType);
+  EXPECT_EQ(errors::OK, resultType);
 
   EXPECT_EQ(38, obj[0].asInt());
   EXPECT_TRUE(obj[1].asBool());
@@ -103,19 +103,19 @@ TEST(test_no_default_value, test_ArraySchemaItemTest) {
   ASSERT_EQ(std::string("New valid string"), obj.asString());
 
   resultType = item->validate(obj, &report);
-  EXPECT_EQ(Errors::INVALID_VALUE, resultType);
+  EXPECT_EQ(errors::INVALID_VALUE, resultType);
 
   // Obj - bool
   obj = true;
 
   resultType = item->validate(obj, &report);
-  EXPECT_EQ(Errors::INVALID_VALUE, resultType);
+  EXPECT_EQ(errors::INVALID_VALUE, resultType);
 
   // Object - number
   obj = 3.1415926;
 
   resultType = item->validate(obj, &report);
-  EXPECT_EQ(Errors::INVALID_VALUE, resultType);
+  EXPECT_EQ(errors::INVALID_VALUE, resultType);
 }
 
 /**
@@ -125,7 +125,7 @@ TEST(test_no_default_value, test_ArraySchemaItemTest) {
  * only if all array elements are valid schema item objects
  **/
 TEST(test_item_with_default_value, test_ArraySchemaItemTest) {
-  using namespace NsSmartDeviceLink::NsSmartObjects;
+  using namespace ns_smart_device_link::ns_smart_objects;
   SmartObject obj;
 
   ISchemaItemPtr item = CArraySchemaItem::create();  // No min and max size
@@ -140,24 +140,24 @@ TEST(test_item_with_default_value, test_ArraySchemaItemTest) {
 
   rpc::ValidationReport report("RPC");
   int resultType = item->validate(obj, &report);
-  EXPECT_EQ(Errors::OK, resultType);
+  EXPECT_EQ(errors::OK, resultType);
   resultType = item->validate(obj[0], &report);
-  EXPECT_EQ(Errors::INVALID_VALUE, resultType);
+  EXPECT_EQ(errors::INVALID_VALUE, resultType);
   resultType = item->validate(obj[1], &report);
-  EXPECT_EQ(Errors::INVALID_VALUE, resultType);
+  EXPECT_EQ(errors::INVALID_VALUE, resultType);
   resultType = item->validate(obj[2], &report);
-  EXPECT_EQ(Errors::INVALID_VALUE, resultType);
+  EXPECT_EQ(errors::INVALID_VALUE, resultType);
 
   item->applySchema(obj, false);
 
   resultType = item->validate(obj, &report);
-  EXPECT_EQ(Errors::OK, resultType);
+  EXPECT_EQ(errors::OK, resultType);
   resultType = item->validate(obj[0], &report);
-  EXPECT_EQ(Errors::INVALID_VALUE, resultType);
+  EXPECT_EQ(errors::INVALID_VALUE, resultType);
   resultType = item->validate(obj[1], &report);
-  EXPECT_EQ(Errors::INVALID_VALUE, resultType);
+  EXPECT_EQ(errors::INVALID_VALUE, resultType);
   resultType = item->validate(obj[2], &report);
-  EXPECT_EQ(Errors::INVALID_VALUE, resultType);
+  EXPECT_EQ(errors::INVALID_VALUE, resultType);
 
   EXPECT_EQ(std::string("Some String"), obj[0].asString());
   EXPECT_EQ(std::string("true"), obj[1].asString());
@@ -172,21 +172,21 @@ TEST(test_item_with_default_value, test_ArraySchemaItemTest) {
   EXPECT_EQ(std::string("Another String"), obj[3][2].asString());
 
   resultType = item->validate(obj, &report);
-  EXPECT_EQ(Errors::OK, resultType);
+  EXPECT_EQ(errors::OK, resultType);
   resultType = item->validate(obj[3], &report);
-  EXPECT_EQ(Errors::OK, resultType);
+  EXPECT_EQ(errors::OK, resultType);
 
   obj[3][3] = "Another very very loooooong String";
 
   resultType = item->validate(obj[3], &report);
-  EXPECT_EQ(Errors::OK, resultType);
+  EXPECT_EQ(errors::OK, resultType);
 }
 
 /**
  * Test ArraySchemaItem with min size
  **/
 TEST(test_array_with_min_size, test_ArraySchemaItemTest) {
-  using namespace NsSmartDeviceLink::NsSmartObjects;
+  using namespace ns_smart_device_link::ns_smart_objects;
   SmartObject obj;
 
   ISchemaItemPtr item = CArraySchemaItem::create(
@@ -197,17 +197,17 @@ TEST(test_array_with_min_size, test_ArraySchemaItemTest) {
 
   rpc::ValidationReport report("RPC");
   int resultType = item->validate(obj, &report);
-  EXPECT_EQ(Errors::OUT_OF_RANGE, resultType);
+  EXPECT_EQ(errors::OUT_OF_RANGE, resultType);
 
   obj[1] = "true";
 
   resultType = item->validate(obj, &report);
-  EXPECT_EQ(Errors::OUT_OF_RANGE, resultType);
+  EXPECT_EQ(errors::OUT_OF_RANGE, resultType);
 
   obj[2] = "New String";
 
   resultType = item->validate(obj, &report);
-  EXPECT_EQ(Errors::OUT_OF_RANGE, resultType);
+  EXPECT_EQ(errors::OUT_OF_RANGE, resultType);
 
   EXPECT_EQ(std::string("Some String"), obj[0].asString());
   EXPECT_EQ(std::string("true"), obj[1].asString());
@@ -218,7 +218,7 @@ TEST(test_array_with_min_size, test_ArraySchemaItemTest) {
  * Test ArraySchemaItem with min size
  **/
 TEST(test_array_with_max_size, test_ArraySchemaItemTest) {
-  using namespace NsSmartDeviceLink::NsSmartObjects;
+  using namespace ns_smart_device_link::ns_smart_objects;
   SmartObject obj;
 
   ISchemaItemPtr item = CArraySchemaItem::create(
@@ -231,22 +231,22 @@ TEST(test_array_with_max_size, test_ArraySchemaItemTest) {
 
   rpc::ValidationReport report("RPC");
   int resultType = item->validate(obj, &report);
-  EXPECT_EQ(Errors::OK, resultType);
+  EXPECT_EQ(errors::OK, resultType);
 
   obj[1] = "true";
 
   resultType = item->validate(obj, &report);
-  EXPECT_EQ(Errors::OK, resultType);
+  EXPECT_EQ(errors::OK, resultType);
 
   obj[2] = "New String";
 
   resultType = item->validate(obj, &report);
-  EXPECT_EQ(Errors::OK, resultType);
+  EXPECT_EQ(errors::OK, resultType);
 
   obj[3] = "Another String";
 
   resultType = item->validate(obj, &report);
-  EXPECT_EQ(Errors::OUT_OF_RANGE, resultType);
+  EXPECT_EQ(errors::OUT_OF_RANGE, resultType);
 
   EXPECT_EQ(std::string("Some String"), obj[0].asString());
   EXPECT_EQ(std::string("true"), obj[1].asString());
@@ -258,7 +258,7 @@ TEST(test_array_with_max_size, test_ArraySchemaItemTest) {
  * Test ArraySchemaItem with min and max size
  **/
 TEST(test_array_with_min_and_max_size, test_ArraySchemaItemTest) {
-  using namespace NsSmartDeviceLink::NsSmartObjects;
+  using namespace ns_smart_device_link::ns_smart_objects;
   SmartObject obj;
 
   ISchemaItemPtr item = CArraySchemaItem::create(
@@ -271,27 +271,27 @@ TEST(test_array_with_min_and_max_size, test_ArraySchemaItemTest) {
 
   rpc::ValidationReport report("RPC");
   int resultType = item->validate(obj, &report);
-  EXPECT_EQ(Errors::OUT_OF_RANGE, resultType);
+  EXPECT_EQ(errors::OUT_OF_RANGE, resultType);
 
   obj[1] = "true";
 
   resultType = item->validate(obj, &report);
-  EXPECT_EQ(Errors::OK, resultType);
+  EXPECT_EQ(errors::OK, resultType);
 
   obj[2] = "New String";
 
   resultType = item->validate(obj, &report);
-  EXPECT_EQ(Errors::OK, resultType);
+  EXPECT_EQ(errors::OK, resultType);
 
   obj[3] = "Another String";
 
   resultType = item->validate(obj, &report);
-  EXPECT_EQ(Errors::OK, resultType);
+  EXPECT_EQ(errors::OK, resultType);
 
   obj[4] = "Out of array";
 
   resultType = item->validate(obj, &report);
-  EXPECT_EQ(Errors::OUT_OF_RANGE, resultType);
+  EXPECT_EQ(errors::OUT_OF_RANGE, resultType);
 
   EXPECT_EQ(std::string("Some String"), obj[0].asString());
   EXPECT_EQ(std::string("true"), obj[1].asString());
@@ -301,7 +301,7 @@ TEST(test_array_with_min_and_max_size, test_ArraySchemaItemTest) {
 }
 
 TEST(test_map_validate, test_ArraySchemaItemTest) {
-  using namespace NsSmartDeviceLink::NsSmartObjects;
+  using namespace ns_smart_device_link::ns_smart_objects;
   SmartObject obj;
 
   ISchemaItemPtr item = CArraySchemaItem::create(
@@ -314,29 +314,29 @@ TEST(test_map_validate, test_ArraySchemaItemTest) {
 
   rpc::ValidationReport report("RPC");
   int resultType = item->validate(obj["array"], &report);
-  EXPECT_EQ(Errors::OUT_OF_RANGE, resultType);
+  EXPECT_EQ(errors::OUT_OF_RANGE, resultType);
 
   obj["array"][1] = "true";
 
   resultType = item->validate(obj["array"], &report);
-  EXPECT_EQ(Errors::OK, resultType);
+  EXPECT_EQ(errors::OK, resultType);
 
   obj["array"][2] = "New String";
 
   resultType = item->validate(obj["array"], &report);
-  EXPECT_EQ(Errors::OK, resultType);
+  EXPECT_EQ(errors::OK, resultType);
 
   obj["array"][3] = "Another String";
 
   resultType = item->validate(obj["array"], &report);
-  EXPECT_EQ(Errors::OK, resultType);
+  EXPECT_EQ(errors::OK, resultType);
 
   obj["array"][4] = "Out of array";
 
   resultType = item->validate(obj["array"], &report);
-  EXPECT_EQ(Errors::OUT_OF_RANGE, resultType);
+  EXPECT_EQ(errors::OUT_OF_RANGE, resultType);
   resultType = item->validate(obj, &report);
-  EXPECT_EQ(Errors::INVALID_VALUE, resultType);
+  EXPECT_EQ(errors::INVALID_VALUE, resultType);
 
   EXPECT_EQ(std::string("Some String"), obj["array"][0].asString());
   EXPECT_EQ(std::string("true"), obj["array"][1].asString());

@@ -51,7 +51,6 @@ option(ENABLE_GCOV "gcov code coverage feature" OFF)
 option(ENABLE_SANITIZE "Sanitize tool" OFF)
 option(ENABLE_SECURITY "Security Ford protocol protection" ON)
 option(ENABLE_HMI_PTU_DECRYPTION "Policy table update parsed by hmi" ON)
-option(REMOTE_CONTROL "Enable Reverse functionality" ON)
 option(USE_COTIRE "Use Cotire to speed up build (currently only for commands tests)" ON)
 option(USE_GOLD_LD "Use gold linker intead of GNU linker" ON)
 option(USE_CCACHE "Turn on ccache usage" ON)
@@ -113,9 +112,6 @@ if (HMI_ADAPTER_OPTION)
   if (${HMI_ADAPTER_OPTION} STREQUAL "MESSAGEBROKER")
     message(STATUS "Jenkins integration: selected HMI adapter MESSAGEBROKER")
     set (HMIADAPTER "messagebroker")
-  elseif (${HMI_ADAPTER_OPTION} STREQUAL "DBUS")
-    message(STATUS "Jenkins integration: selected HMI adapter DBUS")
-    set (HMIADAPTER "dbus")
   endif()
 endif()
 
@@ -156,12 +152,60 @@ if (OS_TYPE_OPTION)
   endif()
 endif()
 
-if (REMOTE_CONTROL)
-  add_definitions(-DSDL_REMOTE_CONTROL)
-  message(STATUS "Remote control support is enabled (aka Reverse SDL or SDL-RC)")
-endif()
-
 #Jenkins integration section end
+
+#Deliver Build Configuration
+
+set(build_config_path "src/appMain/build_config.txt")
+FILE(WRITE "${build_config_path}" "")
+
+get_property(cHelpString CACHE EXTENDED_POLICY PROPERTY HELPSTRING)
+get_property(cType CACHE EXTENDED_POLICY PROPERTY TYPE)
+get_property(cValue CACHE EXTENDED_POLICY PROPERTY VALUE)
+file(APPEND "${build_config_path}" "//${cHelpString}\n")
+file(APPEND "${build_config_path}" "EXTENDED_POLICY:${cType}=${cValue}\n\n")
+
+get_property(cHelpString CACHE BUILD_BT_SUPPORT PROPERTY HELPSTRING)
+get_property(cType CACHE BUILD_BT_SUPPORT PROPERTY TYPE)
+get_property(cValue CACHE BUILD_BT_SUPPORT PROPERTY VALUE)
+file(APPEND "${build_config_path}" "//${cHelpString}\n")
+file(APPEND "${build_config_path}" "BUILD_BT_SUPPORT:${cType}=${cValue}\n\n")
+
+get_property(cHelpString CACHE BUILD_USB_SUPPORT PROPERTY HELPSTRING)
+get_property(cType CACHE BUILD_USB_SUPPORT PROPERTY TYPE)
+get_property(cValue CACHE BUILD_USB_SUPPORT PROPERTY VALUE)
+file(APPEND "${build_config_path}" "//${cHelpString}\n")
+file(APPEND "${build_config_path}" "BUILD_USB_SUPPORT:${cType}=${cValue}\n\n")
+
+get_property(cHelpString CACHE ENABLE_SECURITY PROPERTY HELPSTRING)
+get_property(cType CACHE ENABLE_SECURITY PROPERTY TYPE)
+get_property(cValue CACHE ENABLE_SECURITY PROPERTY VALUE)
+file(APPEND "${build_config_path}" "//${cHelpString}\n")
+file(APPEND "${build_config_path}" "ENABLE_SECURITY:${cType}=${cValue}\n\n")
+
+get_property(cHelpString CACHE EXTENDED_MEDIA_MODE PROPERTY HELPSTRING)
+get_property(cType CACHE EXTENDED_MEDIA_MODE PROPERTY TYPE)
+get_property(cValue CACHE EXTENDED_MEDIA_MODE PROPERTY VALUE)
+file(APPEND "${build_config_path}" "//${cHelpString}\n")
+file(APPEND "${build_config_path}" "EXTENDED_MEDIA_MODE:${cType}=${cValue}\n\n")
+
+get_property(cHelpString CACHE TELEMETRY_MONITOR PROPERTY HELPSTRING)
+get_property(cType CACHE TELEMETRY_MONITOR PROPERTY TYPE)
+get_property(cValue CACHE TELEMETRY_MONITOR PROPERTY VALUE)
+file(APPEND "${build_config_path}" "//${cHelpString}\n")
+file(APPEND "${build_config_path}" "TELEMETRY_MONITOR:${cType}=${cValue}\n\n")
+
+get_property(cHelpString CACHE HMI PROPERTY HELPSTRING)
+get_property(cType CACHE HMI PROPERTY TYPE)
+get_property(cValue CACHE HMI PROPERTY VALUE)
+file(APPEND "${build_config_path}" "//${cHelpString}\n")
+file(APPEND "${build_config_path}" "HMI:${cType}=${cValue}\n\n")
+
+get_property(cHelpString CACHE ENABLE_HMI_PTU_DECRYPTION PROPERTY HELPSTRING)
+get_property(cType CACHE ENABLE_HMI_PTU_DECRYPTION PROPERTY TYPE)
+get_property(cValue CACHE ENABLE_HMI_PTU_DECRYPTION PROPERTY VALUE)
+file(APPEND "${build_config_path}" "//${cHelpString}\n")
+file(APPEND "${build_config_path}" "ENABLE_HMI_PTU_DECRYPTION:${cType}=${cValue}\n")
 
 add_custom_target(pasa-tarball
   COMMAND ${CMAKE_SOURCE_DIR}/tools/Utils/export-customer-specific.sh ${CMAKE_SOURCE_DIR} ${CMAKE_BINARY_DIR} pasa
@@ -180,7 +224,6 @@ add_custom_target(genivi-tarball
   COMMAND tar -cz -C /tmp/GENIVI -f ${CMAKE_BINARY_DIR}/genivi.tar.gz .
 )
 
-
 project (${PROJECT})
 
 #ADD_DEPENDENCIES(${PROJECT} Policy)
@@ -192,7 +235,7 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
 set(CMAKE_INSTALL_PREFIX ${CMAKE_CURRENT_BINARY_DIR})
 set(ARCHIVE_OUTPUT_DIRECTORY ./bin)
 
-set(CMAKE_CXX_FLAGS "-fPIC -std=gnu++0x -Wall -Werror -Wno-deprecated-declarations -Wuninitialized -Wvla")
+set(CMAKE_CXX_FLAGS "-fPIC -std=gnu++0x -Wall -Werror -Wuninitialized -Wvla")
 
 if (USE_GOLD_LD)
   execute_process(COMMAND ld -v OUTPUT_VARIABLE result)
@@ -335,15 +378,6 @@ if (HMI STREQUAL "web" AND NOT DEFINED HMIADAPTER)
     set(HMIADAPTER "messagebroker")
 endif()
 
-if (HMIADAPTER STREQUAL "dbus")
-    set(HMI_DBUS_API ON)
-    add_definitions(-DDBUS_HMIADAPTER)
-    add_definitions(-DHMI_DBUS_API)
-
-    find_package(DBus REQUIRED)
-    set(DBUS_LIBS_DIRECTORY ${DBUS_LIBRARY_DIRS} PARENT_SCOPE)
-    message(${DBUS_INCLUDE_DIRS})
-endif()
 if (HMIADAPTER STREQUAL "messagebroker")
     set(HMI_JSON_API ON)
     add_definitions(-DMESSAGEBROKER_HMIADAPTER)
@@ -446,4 +480,3 @@ find_package(Doxygen)
     message(STATUS "To enable processing of MscGen comments please install mscgen")
     message(STATUS "sudo apt-get install mscgen")
 endif()
-

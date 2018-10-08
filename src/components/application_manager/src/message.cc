@@ -130,11 +130,9 @@ int32_t Message::function_id() const {
   return function_id_;
 }
 
-#ifdef SDL_REMOTE_CONTROL
 std::string Message::function_name() const {
   return function_name_;
 }
-#endif  // SDL_REMOTE_CONTROL
 
 int32_t Message::correlation_id() const {
   return correlation_id_;
@@ -176,11 +174,9 @@ void Message::set_function_id(int32_t id) {
   function_id_ = id;
 }
 
-#ifdef SDL_REMOTE_CONTROL
 void Message::set_function_name(const std::string& name) {
   function_name_ = name;
 }
-#endif  // SDL_REMOTE_CONTROL
 
 void Message::set_correlation_id(int32_t id) {
   correlation_id_ = id;
@@ -192,19 +188,6 @@ void Message::set_connection_key(int32_t key) {
 
 void Message::set_message_type(MessageType type) {
   type_ = type;
-}
-
-void Message::set_binary_data(BinaryData* data) {
-  if (NULL == data) {
-    NOTREACHED();
-    return;
-  }
-
-  if (binary_data_) {
-    delete binary_data_;
-  }
-
-  binary_data_ = new BinaryData(*data);
 }
 
 void Message::set_binary_data(const BinaryData* data) {

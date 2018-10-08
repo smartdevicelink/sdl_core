@@ -41,7 +41,6 @@
 #include "gmock/gmock.h"
 #include "application_manager/message.h"
 #include "protocol/raw_message.h"
-#include "utils/make_shared.h"
 
 namespace test {
 namespace components {
@@ -106,12 +105,12 @@ class MobileMessageHandlerTest : public testing::Test {
 
     size_t full_size = sizeof(uint8_t) * full_data.size();
 
-    message_ptr_ = utils::MakeShared<RawMessage>(connection_key_,
-                                                 protocol_version,
-                                                 &full_data[0],
-                                                 full_size,
-                                                 ServiceType::kRpc,
-                                                 payload_size);
+    message_ptr_ = std::make_shared<RawMessage>(connection_key_,
+                                                protocol_version,
+                                                &full_data[0],
+                                                full_size,
+                                                ServiceType::kRpc,
+                                                payload_size);
 
     return MobileMessageHandler::HandleIncomingMessageProtocol(message_ptr_);
   }
@@ -170,7 +169,7 @@ class MobileMessageHandlerTest : public testing::Test {
       uint32_t connection_key,
       const std::string& json_msg,
       const application_manager::BinaryData* data = NULL) {
-    MobileMessage message = utils::MakeShared<Message>(
+    MobileMessage message = std::make_shared<Message>(
         MessagePriority::FromServiceType(ServiceType::kRpc));
     message->set_function_id(function_id);
     message->set_correlation_id(correlation_id);
@@ -254,7 +253,7 @@ class MobileMessageHandlerTest : public testing::Test {
 TEST(mobile_message_test, basic_test) {
   // Example message
   MobileMessage message =
-      utils::MakeShared<Message>(protocol_handler::MessagePriority::kDefault);
+      std::make_shared<Message>(protocol_handler::MessagePriority::kDefault);
   EXPECT_FALSE(message->has_binary_data());
   application_manager::BinaryData binary_data;
   binary_data.push_back('X');
