@@ -166,6 +166,7 @@ void PerformInteractionRequest::Run() {
 
   if (!IsAllChoiceSetIdsAllowed(
           app, msg_params[strings::interaction_choice_set_id_list])) {
+    LOG4CXX_WARN(logger_, "One of choice sets is disallowed.");
     SendResponse(false, mobile_apis::Result::REJECTED);
     return;
   }
@@ -1081,7 +1082,7 @@ bool PerformInteractionRequest::IsAllChoiceSetIdsAllowed(
     if (!is_allowed) {
       LOG4CXX_DEBUG(logger_,
                     "Choice set with id " << choice_set_id_list[i].asInt()
-                                          << "dosn't allowed.");
+                                          << " dosn't allowed.");
       return false;
     }
   }

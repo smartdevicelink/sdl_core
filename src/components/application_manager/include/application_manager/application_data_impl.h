@@ -267,8 +267,8 @@ class DynamicApplicationDataImpl : public virtual Application {
    */
   inline bool is_reset_global_properties_active() const;
 
-  virtual void set_choice_set_allow_mode(const uint32_t choice_set_id,
-                                         const bool is_allowed);
+  void set_choice_set_allow_mode(const uint32_t choice_set_id,
+                                 const bool is_allowed) FINAL;
   bool is_choice_set_allowed(const uint32_t choice_set_id) const;
 
  protected:

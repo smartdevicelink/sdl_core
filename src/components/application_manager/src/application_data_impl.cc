@@ -578,8 +578,7 @@ void DynamicApplicationDataImpl::RemoveChoiceSet(uint32_t choice_set_id) {
       choice_set_allowed_map_.find(choice_set_id);
   if (choice_set_allowed_map_.end() == choise_id_it) {
     LOG4CXX_WARN(logger_,
-                 "Not exists info about choice set " << choice_set_id
-                                                     << " allow");
+                 "Choice set with id " << choice_set_id << " is not found");
     return;
   }
   choice_set_allowed_map_.erase(choise_id_it);
@@ -637,8 +636,9 @@ void DynamicApplicationDataImpl::set_choice_set_allow_mode(
   }
   choice_set->second = is_allowed;
   LOG4CXX_DEBUG(logger_,
-                "choice_set_id: " << choice_set_id << " is_allowed: "
-                                  << std::boolalpha << is_allowed);
+                "choice_set_id: "
+                    << choice_set_id
+                    << (choice_set->second ? " is allowed" : " disallowed"));
 }
 
 bool DynamicApplicationDataImpl::is_choice_set_allowed(
