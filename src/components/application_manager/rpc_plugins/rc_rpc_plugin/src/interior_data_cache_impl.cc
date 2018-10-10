@@ -34,6 +34,7 @@
 #include <thread>
 #include <chrono>
 #include "rc_rpc_plugin/interior_data_cache_impl.h"
+#include "application_manager/smart_object_keys.h"
 #include "utils/date_time.h"
 #include "utils/logger.h"
 
@@ -54,15 +55,65 @@ InteriorDataCacheImpl::~InteriorDataCacheImpl() {}
  */
 smart_objects::SmartObject MergeModuleData(
     const smart_objects::SmartObject& data1,
+    const smart_objects::SmartObject& data2);
+
+smart_objects::SmartObject MergeArray(const smart_objects::SmartObject& data1,
+                                      const smart_objects::SmartObject& data2);
+
+smart_objects::SmartObject MergeModuleData(
+    const smart_objects::SmartObject& data1,
     const smart_objects::SmartObject& data2) {
   smart_objects::SmartObject result = data1;
   auto it = data2.map_begin();
   for (; it != data2.map_end(); ++it) {
     const std::string& key = it->first;
     const smart_objects::SmartObject& value = it->second;
-    result[key] = value;
+    // Merge maps and arrays with `id` param included, replace other types
+    if (result.keyExists(key) && value.getType() == result[key].getType()) {
+      if (value.getType() == smart_objects::SmartType::SmartType_Map) {
+        result[key] = MergeModuleData(result[key], value);
+      } else if (value.getType() == smart_objects::SmartType::SmartType_Array) {
+        result[key] = MergeArray(result[key], value);
+      } else {
+        result[key] = value;
+      }
+    } else {
+      result[key] = value;
+    }
   }
   return result;
+}
+
+smart_objects::SmartObject MergeArray(const smart_objects::SmartObject& data1,
+                                      const smart_objects::SmartObject& data2) {
+  // Merge data only in the case where each value in the array is an Object with
+  // an ID included, otherwise replace
+  if (!data2.empty() &&
+      data2.getElement(0).getType() ==
+          smart_objects::SmartType::SmartType_Map &&
+      data2.getElement(0).keyExists(application_manager::strings::id)) {
+    smart_objects::SmartObject result = data1;
+    smart_objects::SmartArray* result_array = result.asArray();
+    smart_objects::SmartArray* data_array = data2.asArray();
+    auto data_it = data_array->begin();
+    for (; data_it != data_array->end(); ++data_it) {
+      auto result_it =
+          std::find_if(result_array->begin(),
+                       result_array->end(),
+                       [data_it](smart_objects::SmartObject& obj) -> bool {
+                         return obj[application_manager::strings::id] ==
+                                (*data_it)[application_manager::strings::id];
+                       });
+
+      if (result_it != result_array->end()) {
+        *result_it = MergeModuleData(*result_it, *data_it);
+      } else {
+        result_array->push_back(*data_it);
+      }
+    }
+    return result;
+  }
+  return data2;
 }
 
 void InteriorDataCacheImpl::Add(const std::string& module_type,
