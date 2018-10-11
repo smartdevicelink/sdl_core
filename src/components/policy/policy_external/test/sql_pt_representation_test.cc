@@ -49,7 +49,6 @@
 #include "policy/policy_table/enums.h"
 #include "rpc_base/rpc_base.h"
 #include "policy/mock_policy_settings.h"
-#include "utils/shared_ptr.h"
 
 namespace policy_table = rpc::policy_table_interface_base;
 using policy::SQLPTRepresentation;
@@ -62,9 +61,14 @@ using testing::ReturnRef;
 using testing::Return;
 using testing::NiceMock;
 using testing::Mock;
+
 namespace test {
 namespace components {
 namespace policy_test {
+
+namespace {
+const int32_t kPolicyTablesNumber = 27;
+}
 
 class SQLPTRepresentationTest : public SQLPTRepresentation,
                                 public ::testing::Test {
@@ -76,14 +80,14 @@ class SQLPTRepresentationTest : public SQLPTRepresentation,
   static const std::string kDatabaseName;
   static utils::dbms::SQLQuery* query_wrapper_;
   // Gtest can show message that this object doesn't destroyed
-  static std::auto_ptr<policy_handler_test::MockPolicySettings>
+  static std::unique_ptr<policy_handler_test::MockPolicySettings>
       policy_settings_;
 
   static void SetUpTestCase() {
-    const std::string kAppStorageFolder = "storage1";
+    const std::string kAppStorageFolder = "storage_SQLPTRepresentationTest";
     reps = new SQLPTRepresentation(in_memory_);
     ASSERT_TRUE(reps != NULL);
-    policy_settings_ = std::auto_ptr<policy_handler_test::MockPolicySettings>(
+    policy_settings_ = std::unique_ptr<policy_handler_test::MockPolicySettings>(
         new policy_handler_test::MockPolicySettings());
     ON_CALL(*policy_settings_, app_storage_folder())
         .WillByDefault(ReturnRef(kAppStorageFolder));
@@ -224,6 +228,7 @@ class SQLPTRepresentationTest : public SQLPTRepresentation,
     policy_table["app_policies"] = Json::Value(Json::objectValue);
 
     Json::Value& module_config = policy_table["module_config"];
+    module_config["preloaded_date"] = Json::Value("25-04-2015");
     module_config["exchange_after_x_ignition_cycles"] = Json::Value(10);
     module_config["exchange_after_x_kilometers"] = Json::Value(100);
     module_config["exchange_after_x_days"] = Json::Value(5);
@@ -342,7 +347,7 @@ SQLPTRepresentation* SQLPTRepresentationTest::reps = 0;
 utils::dbms::SQLQuery* SQLPTRepresentationTest::query_wrapper_ = 0;
 const std::string SQLPTRepresentationTest::kDatabaseName = ":memory:";
 const bool SQLPTRepresentationTest::in_memory_ = true;
-std::auto_ptr<policy_handler_test::MockPolicySettings>
+std::unique_ptr<policy_handler_test::MockPolicySettings>
     SQLPTRepresentationTest::policy_settings_;
 
 class SQLPTRepresentationTest2 : public ::testing::Test {
@@ -400,7 +405,10 @@ TEST_F(SQLPTRepresentationTest,
   // Check PT structure destroyed and tables number is 0
   query.Prepare(query_select);
   query.Next();
-  ASSERT_EQ(25, query.GetInteger(0));
+
+  // 33 - is current total tables number created by schema
+  const int policy_tables_number = 33;
+  ASSERT_EQ(policy_tables_number, query.GetInteger(0));
 
   const std::string query_select_count_of_iap_buffer_full =
       "SELECT `count_of_iap_buffer_full` FROM `usage_and_error_count`";
@@ -1576,7 +1584,7 @@ TEST_F(SQLPTRepresentationTest,
   ASSERT_TRUE(reps->Save(update));
 
   // Act
-  utils::SharedPtr<policy_table::Table> snapshot = reps->GenerateSnapshot();
+  std::shared_ptr<policy_table::Table> snapshot = reps->GenerateSnapshot();
   snapshot->SetPolicyTableType(rpc::policy_table_interface_base::PT_SNAPSHOT);
   // Remove fields which must be absent in snapshot
   table["policy_table"]["consumer_friendly_messages"].removeMember("messages");

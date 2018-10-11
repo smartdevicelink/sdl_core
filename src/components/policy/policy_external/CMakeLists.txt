@@ -55,6 +55,7 @@ set(SOURCES
   ${POLICY_PATH}/src/update_status_manager.cc
   ${POLICY_PATH}/src/status.cc
   ${POLICY_PATH}/src/cache_manager.cc
+  ${POLICY_PATH}/src/access_remote_impl.cc
   ${COMPONENTS_DIR}/rpc_base/src/rpc_base/rpc_base.cc
 )
 

@@ -65,8 +65,8 @@ set(EXCLUDE_PATHS
 )
 
 set(PATHS
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/
+  ${CMAKE_CURRENT_SOURCE_DIR}/include
+  ${CMAKE_CURRENT_SOURCE_DIR}/src
   ${COMPONENTS_DIR}/rpc_base/src/rpc_base/rpc_base.cc
 )
 collect_sources(SOURCES "${PATHS}" "${EXCLUDE_PATHS}")

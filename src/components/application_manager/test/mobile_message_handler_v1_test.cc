@@ -40,7 +40,6 @@
 #include "gmock/gmock.h"
 #include "application_manager/message.h"
 #include "protocol/raw_message.h"
-#include "utils/make_shared.h"
 
 using protocol_handler::RawMessage;
 using protocol_handler::RawMessagePtr;
@@ -70,7 +69,7 @@ const unsigned char* data_v1 =
 
 TEST(MobileMessageHandlerTestV1Test,
      HandleIncomingMessageProtocolV1_SendJSONData_ExpectEqual) {
-  RawMessagePtr message = utils::MakeShared<RawMessage>(
+  RawMessagePtr message = std::make_shared<RawMessage>(
       connection_key_p1, protocol_version_1, data_v1, data_json.length());
 
   application_manager::Message* ptr =
@@ -90,7 +89,7 @@ TEST(MobileMessageHandlerTestV1Test,
   const unsigned char* data_v1 =
       reinterpret_cast<const unsigned char*>(full_data.c_str());
 
-  RawMessagePtr message = utils::MakeShared<RawMessage>(
+  RawMessagePtr message = std::make_shared<RawMessage>(
       connection_key_p1, protocol_version_1, data_v1, full_data.length());
 
   application_manager::Message* ptr =
@@ -108,10 +107,11 @@ TEST(MobileMessageHandlerTestV1Test,
   uint32_t connection_key = 1;
 
   application_manager::MobileMessage message =
-      utils::MakeShared<application_manager::Message>(
+      std::make_shared<application_manager::Message>(
           protocol_handler::MessagePriority::kDefault);
 
-  message->set_protocol_version(application_manager::ProtocolVersion::kV1);
+  message->set_protocol_version(
+      protocol_handler::MajorProtocolVersion::PROTOCOL_VERSION_1);
   message->set_json_message(data_json);
   message->set_connection_key(connection_key_p1);
 
@@ -121,7 +121,8 @@ TEST(MobileMessageHandlerTestV1Test,
   ASSERT_TRUE(ptr);
 
   EXPECT_EQ(connection_key, ptr->connection_key());
-  EXPECT_EQ(static_cast<uint32_t>(application_manager::ProtocolVersion::kV1),
+  EXPECT_EQ(static_cast<uint32_t>(
+                protocol_handler::MajorProtocolVersion::PROTOCOL_VERSION_1),
             ptr->protocol_version());
 }
 

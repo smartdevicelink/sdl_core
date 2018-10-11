@@ -36,8 +36,8 @@ namespace test {
 namespace components {
 namespace formatters {
 
-using namespace NsSmartDeviceLink::NsJSONHandler::strings;
-using namespace NsSmartDeviceLink::NsJSONHandler::Formatters;
+using namespace ns_smart_device_link::ns_json_handler::strings;
+using namespace ns_smart_device_link::ns_json_handler::formatters;
 
 void CMetaFormatterTestHelper::SetUp() {
   function_id_items_.insert(FunctionIDTest::RegisterAppInterface);
@@ -109,17 +109,6 @@ void CMetaFormatterTestHelper::
   obj[S_MSG_PARAMS]["languageDesired"] = Language::EN_EU;
   obj[S_MSG_PARAMS]["hmiDisplayLanguageDesired"] = Language::RU_RU;
   obj[S_MSG_PARAMS]["appID"] = "APP ID";
-
-  // Commented not mandatory params for check creation object without them
-  //   obj[S_MSG_PARAMS]["ttsName"][0]["text"] = "ABC";
-  //   obj[S_MSG_PARAMS]["ttsName"][0]["type"] =
-  //       SpeechCapabilities::SC_TEXT;
-
-  //   obj[S_MSG_PARAMS]["vrSynonyms"][0] = "Synonym1";
-  //   obj[S_MSG_PARAMS]["vrSynonyms"][1] = "Synonym2";
-
-  //   obj[S_MSG_PARAMS]["appType"][0] = AppTypeTest::SYSTEM; // not mandatory
-  //   obj[S_MSG_PARAMS]["appType"][1] = AppTypeTest::MEDIA;
 }
 
 void CMetaFormatterTestHelper::FillObjectWithoutSomeMandatoryFields(
@@ -129,11 +118,6 @@ void CMetaFormatterTestHelper::FillObjectWithoutSomeMandatoryFields(
 
   obj[S_PARAMS][S_PROTOCOL_VERSION] = 1;
   obj[S_PARAMS][S_PROTOCOL_TYPE] = 0;
-
-  // Commented mandatory params for check creation object without them
-  //   obj[S_PARAMS][S_CORRELATION_ID] = 12;
-  //   obj[S_MSG_PARAMS]["syncMsgVersion"]["majorVersion"] = 2;
-  //   obj[S_MSG_PARAMS]["syncMsgVersion"]["minorVersion"] = 10;
 
   obj[S_MSG_PARAMS]["appName"] = "APP NAME";
   obj[S_MSG_PARAMS]["ttsName"][0]["text"] = "ABC";
@@ -200,17 +184,6 @@ void CMetaFormatterTestHelper::FillObjectWithDefaultValues(SmartObject& obj) {
   obj[S_MSG_PARAMS]["languageDesired"] = -1;
   obj[S_MSG_PARAMS]["hmiDisplayLanguageDesired"] = -1;
   obj[S_MSG_PARAMS]["appID"] = "";
-
-  // Commented params for check creation object with only default values
-  //   obj[S_MSG_PARAMS]["ttsName"][0]["text"] = "ABC";
-  //   obj[S_MSG_PARAMS]["ttsName"][0]["type"] =
-  //       SpeechCapabilities::SC_TEXT;
-
-  //   obj[S_MSG_PARAMS]["vrSynonyms"][0] = "Synonym1";
-  //   obj[S_MSG_PARAMS]["vrSynonyms"][1] = "Synonym2";
-
-  //   obj[S_MSG_PARAMS]["appType"][0] = AppTypeTest::SYSTEM;
-  //   obj[S_MSG_PARAMS]["appType"][1] = AppTypeTest::MEDIA;
 }
 
 }  // namespace formatters

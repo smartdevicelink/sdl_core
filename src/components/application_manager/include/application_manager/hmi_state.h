@@ -33,16 +33,19 @@
 #ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_HMI_STATE_H_
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_HMI_STATE_H_
 
+#include <iosfwd>
 #include <list>
+#include <memory>
 #include "interfaces/MOBILE_API.h"
-#include "utils/shared_ptr.h"
+#include "utils/macro.h"
 
 namespace application_manager {
 
 class HmiState;
 class ApplicationManager;
+class Application;
 
-typedef utils::SharedPtr<HmiState> HmiStatePtr;
+typedef std::shared_ptr<HmiState> HmiStatePtr;
 
 /**
 * @brief The HmiState class
@@ -51,10 +54,12 @@ typedef utils::SharedPtr<HmiState> HmiStatePtr;
 *
 */
 class HmiState {
+  friend std::ostream& operator<<(std::ostream& os, const HmiState& src);
+
  public:
   /**
    * @brief The StateID enum describes state of application
-   * If no events occured STATE_ID_DEFAULT shuld be presented
+   * If no events occurred STATE_ID_DEFAULT should be presented
    */
   enum StateID {
     STATE_ID_CURRENT,
@@ -64,14 +69,28 @@ class HmiState {
     STATE_ID_SAFETY_MODE,
     STATE_ID_VR_SESSION,
     STATE_ID_TTS_SESSION,
+    STATE_ID_VIDEO_STREAMING,
     STATE_ID_NAVI_STREAMING,
     STATE_ID_DEACTIVATE_HMI,
     STATE_ID_AUDIO_SOURCE,
     STATE_ID_EMBEDDED_NAVI
   };
 
-  HmiState(uint32_t app_id, const ApplicationManager& app_mngr);
-  HmiState(uint32_t app_id,
+  /**
+   * @brief HmiState constructor
+   * @param app Application pointer
+   * @param app_mngr Application manager
+   */
+  HmiState(std::shared_ptr<Application> app,
+           const ApplicationManager& app_mngr);
+
+  /**
+   * @brief HmiState constructor
+   * @param app Application pointer
+   * @param app_mngr Application manager
+   * @param state_id HMI state to assign
+   */
+  HmiState(std::shared_ptr<Application> app,
            const ApplicationManager& app_mngr,
            StateID state_id);
 
@@ -120,6 +139,28 @@ class HmiState {
     }
     return audio_streaming_state_;
   }
+
+  /**
+   * @brief video_streaming_state
+   * @return return video streaming state member
+   */
+  virtual mobile_apis::VideoStreamingState::eType video_streaming_state()
+      const {
+    if (parent_) {
+      return parent_->video_streaming_state();
+    }
+    return video_streaming_state_;
+  }
+
+  /**
+   * @brief set_video_streaming_state set set_video_streaming_state member
+   * @param video_state video_state to setup
+   */
+  virtual void set_video_streaming_state(
+      mobile_apis::VideoStreamingState::eType video_state) {
+    video_streaming_state_ = video_state;
+  }
+
   /**
    * @brief set_audio_streaming_state set audio_streaming_state member
    * @param audio_state audio_state to setup
@@ -161,40 +202,45 @@ class HmiState {
    * @brief set_state_id sets state id
    * @param state_id state id to setup
    */
-  virtual void set_state_id(StateID state_id) {
+  void set_state_id(StateID state_id) {
     state_id_ = state_id;
   }
 
  protected:
-  uint32_t app_id_;
+  std::shared_ptr<Application> app_;
   StateID state_id_;
   const ApplicationManager& app_mngr_;
   HmiStatePtr parent_;
   mobile_apis::HMILevel::eType hmi_level_;
   mobile_apis::AudioStreamingState::eType audio_streaming_state_;
+  mobile_apis::VideoStreamingState::eType video_streaming_state_;
   mobile_apis::SystemContext::eType system_context_;
 
  protected:
   /**
    * @brief is_navi_app check if app is navi
-   * @param app_id application id
    * @return true if app is navi, otherwise return false
    */
-  bool is_navi_app(const uint32_t app_id) const;
+  bool is_navi_app() const;
 
   /**
    * @brief is_media_app check if app is media
-   * @param app_id application id
    * @return true if media_app, otherwise return false
    */
-  bool is_media_app(const uint32_t app_id) const;
+  bool is_media_app() const;
 
   /**
    * @brief is_voice_communicationn_app check if app is voice comunication
-   * @param app_id application id
    * @return true if voice_communicationn_app, otherwise return false
    */
-  bool is_voice_communication_app(const uint32_t app_id) const;
+  bool is_voice_communication_app() const;
+
+  /**
+   * @brief is_mobile_projection_app checks if application of 'projection'
+   * HMI type
+   * @return True if application is of 'projection' HMI type, otherwise - false
+   */
+  bool is_mobile_projection_app() const;
 
  private:
   void operator=(const HmiState&);
@@ -207,7 +253,8 @@ class VRHmiState : public HmiState {
  public:
   virtual mobile_apis::AudioStreamingState::eType audio_streaming_state()
       const OVERRIDE;
-  VRHmiState(uint32_t app_id, const ApplicationManager& app_mngr);
+  VRHmiState(std::shared_ptr<Application> app,
+             const ApplicationManager& app_mngr);
 };
 
 /**
@@ -215,18 +262,35 @@ class VRHmiState : public HmiState {
  */
 class TTSHmiState : public HmiState {
  public:
-  TTSHmiState(uint32_t app_id, const ApplicationManager& app_mngr);
+  TTSHmiState(std::shared_ptr<Application> app,
+              const ApplicationManager& app_mngr);
+
   virtual mobile_apis::AudioStreamingState::eType audio_streaming_state()
       const OVERRIDE;
 };
 
 /**
- * @brief The NaviStreamingState class implements logic of NaviStreaming
+ * @brief The VideoStreamingState class implements logic of video streaming
  * temporary state
  */
-class NaviStreamingHmiState : public HmiState {
+class VideoStreamingHmiState : public HmiState {
  public:
-  NaviStreamingHmiState(uint32_t app_id, const ApplicationManager& app_mngr);
+  VideoStreamingHmiState(std::shared_ptr<Application> app,
+                         const ApplicationManager& app_mngr);
+
+  mobile_apis::VideoStreamingState::eType video_streaming_state()
+      const OVERRIDE;
+};
+
+/**
+ * @brief The NaviStreamingHmiState class implements logic of navigation
+ * streaming temporary state that is more specific than VideoStreamingHmiState
+ */
+class NaviStreamingHmiState : public VideoStreamingHmiState {
+ public:
+  NaviStreamingHmiState(std::shared_ptr<Application> app,
+                        const ApplicationManager& app_mngr);
+
   mobile_apis::AudioStreamingState::eType audio_streaming_state()
       const OVERRIDE;
 };
@@ -237,7 +301,9 @@ class NaviStreamingHmiState : public HmiState {
  */
 class PhoneCallHmiState : public HmiState {
  public:
-  PhoneCallHmiState(uint32_t app_id, const ApplicationManager& app_mngr);
+  PhoneCallHmiState(std::shared_ptr<Application> app,
+                    const ApplicationManager& app_mngr);
+
   mobile_apis::HMILevel::eType hmi_level() const OVERRIDE;
   mobile_apis::AudioStreamingState::eType audio_streaming_state()
       const OVERRIDE {
@@ -251,10 +317,16 @@ class PhoneCallHmiState : public HmiState {
  */
 class SafetyModeHmiState : public HmiState {
  public:
-  SafetyModeHmiState(uint32_t app_id, const ApplicationManager& app_mngr);
+  SafetyModeHmiState(std::shared_ptr<Application> app,
+                     const ApplicationManager& app_mngr);
+
   mobile_apis::AudioStreamingState::eType audio_streaming_state()
       const OVERRIDE {
     return mobile_apis::AudioStreamingState::NOT_AUDIBLE;
+  }
+  mobile_apis::VideoStreamingState::eType video_streaming_state()
+      const OVERRIDE {
+    return mobile_apis::VideoStreamingState::NOT_STREAMABLE;
   }
 };
 
@@ -264,11 +336,17 @@ class SafetyModeHmiState : public HmiState {
  */
 class DeactivateHMI : public HmiState {
  public:
-  DeactivateHMI(uint32_t app_id, const ApplicationManager& app_mngr);
+  DeactivateHMI(std::shared_ptr<Application> app,
+                const ApplicationManager& app_mngr);
+
   mobile_apis::HMILevel::eType hmi_level() const OVERRIDE;
   mobile_apis::AudioStreamingState::eType audio_streaming_state()
       const OVERRIDE {
     return mobile_apis::AudioStreamingState::NOT_AUDIBLE;
+  }
+  mobile_apis::VideoStreamingState::eType video_streaming_state()
+      const OVERRIDE {
+    return mobile_apis::VideoStreamingState::NOT_STREAMABLE;
   }
 };
 
@@ -278,12 +356,21 @@ class DeactivateHMI : public HmiState {
  */
 class AudioSource : public HmiState {
  public:
-  AudioSource(uint32_t app_id, const ApplicationManager& app_mngr);
+  AudioSource(std::shared_ptr<Application> app,
+              const ApplicationManager& app_mngr);
+
   mobile_apis::HMILevel::eType hmi_level() const OVERRIDE;
   mobile_apis::AudioStreamingState::eType audio_streaming_state()
       const OVERRIDE {
     return mobile_apis::AudioStreamingState::NOT_AUDIBLE;
   }
+  mobile_apis::VideoStreamingState::eType video_streaming_state()
+      const OVERRIDE {
+    return mobile_apis::VideoStreamingState::NOT_STREAMABLE;
+  }
+
+ private:
+  bool keep_context_;
 };
 
 /**
@@ -293,12 +380,36 @@ class AudioSource : public HmiState {
  */
 class EmbeddedNavi : public HmiState {
  public:
-  EmbeddedNavi(uint32_t app_id, const ApplicationManager& app_mngr);
+  EmbeddedNavi(std::shared_ptr<Application> app,
+               const ApplicationManager& app_mngr);
+
   mobile_apis::HMILevel::eType hmi_level() const OVERRIDE;
   mobile_apis::AudioStreamingState::eType audio_streaming_state()
       const OVERRIDE {
     return mobile_apis::AudioStreamingState::NOT_AUDIBLE;
   }
+  mobile_apis::VideoStreamingState::eType video_streaming_state()
+      const OVERRIDE {
+    return mobile_apis::VideoStreamingState::NOT_STREAMABLE;
+  }
 };
-}
+
+/**
+ * @brief Outputs StateID to ostream in human readable format
+ * @param os output stream to insert data to
+ * @param src StateID value to output
+ * @return os
+ */
+std::ostream& operator<<(std::ostream& os, const HmiState::StateID src);
+
+/**
+ * @brief Outputs HmiState to ostream in human readable format
+ * @param os output stream to insert data to
+ * @param src HmiState value to output
+ * @return os
+ */
+std::ostream& operator<<(std::ostream& os, const HmiState& src);
+
+}  // namespace application_manager
+
 #endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_HMI_STATE_H_

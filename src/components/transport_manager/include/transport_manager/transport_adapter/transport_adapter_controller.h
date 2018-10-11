@@ -204,6 +204,13 @@ class TransportAdapterController {
                               const ApplicationHandle& app_handle,
                               ::protocol_handler::RawMessagePtr message,
                               const DataSendError&) = 0;
+
+  /**
+   * @brief Notification that transport's configuration is updated
+   *
+   * @param new_config The new configuration of the transport
+   */
+  virtual void TransportConfigUpdated(const TransportConfig& new_config) = 0;
 };
 
 }  // namespace transport_adapter

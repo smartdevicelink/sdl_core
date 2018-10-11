@@ -33,7 +33,6 @@
 #ifndef SRC_COMPONENTS_POLICY_POLICY_REGULAR_INCLUDE_POLICY_UPDATE_STATUS_MANAGER_INTERFACE_H_
 #define SRC_COMPONENTS_POLICY_POLICY_REGULAR_INCLUDE_POLICY_UPDATE_STATUS_MANAGER_INTERFACE_H_
 
-#include "utils/shared_ptr.h"
 #include "policy/policy_types.h"
 #include "policy/status.h"
 
@@ -55,14 +54,14 @@ class UpdateStatusManagerInterface {
    * @brief Set next status during event processing
    * @param status Status shared pointer
    */
-  virtual void SetNextStatus(utils::SharedPtr<Status> status) = 0;
+  virtual void SetNextStatus(std::shared_ptr<Status> status) = 0;
 
   /**
    * @brief Set postponed status (will be set after next status) during event
    * processing
    * @param status Status shared pointer
    */
-  virtual void SetPostponedStatus(utils::SharedPtr<Status> status) = 0;
+  virtual void SetPostponedStatus(std::shared_ptr<Status> status) = 0;
   /**
    * @brief Sets listener pointer
    * @param listener Pointer to policy listener implementation
@@ -71,9 +70,8 @@ class UpdateStatusManagerInterface {
 
   /**
    * @brief Update status hanlder for PTS sending out
-   * @param update_timeout Timeout for waiting of incoming PTU
    */
-  virtual void OnUpdateSentOut(uint32_t update_timeout) = 0;
+  virtual void OnUpdateSentOut() = 0;
 
   /**
    * @brief Update status handler for PTU waiting timeout
@@ -107,13 +105,13 @@ class UpdateStatusManagerInterface {
   virtual void OnNewApplicationAdded(DeviceConsent device_consent) = 0;
 
   /**
-   * @brief Update status handler for policy initialization
+   * @brief Update status handler on existed application registering
    * @param is_update_required Update necessity flag
    */
-  virtual void OnPolicyInit(bool is_update_required) = 0;
+  virtual void OnExistedApplicationAdded(const bool is_update_required) = 0;
 };
 
-typedef utils::SharedPtr<UpdateStatusManagerInterface>
+typedef std::shared_ptr<UpdateStatusManagerInterface>
     UpdateStatusManagerInterfaceSPtr;
 
 }  // namespace policy

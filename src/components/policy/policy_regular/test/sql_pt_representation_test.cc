@@ -47,8 +47,7 @@
 #include "json/writer.h"
 #include "json/reader.h"
 #include "rpc_base/rpc_base.h"
-#include "utils/shared_ptr.h"
-#include "utils/make_shared.h"
+
 #include "utils/file_system.h"
 #include "utils/sqlite_wrapper/sql_database.h"
 
@@ -68,22 +67,23 @@ namespace test {
 namespace components {
 namespace policy_test {
 
+using policy_handler_test::MockPolicySettings;
+
 class SQLPTRepresentationTest : public SQLPTRepresentation,
                                 public ::testing::Test {
  protected:
-  static DBMS* dbms;
-  static SQLPTRepresentation* reps;
+  DBMS* dbms;
+  SQLPTRepresentation* reps;
   static const std::string kDatabaseName;
   static const std::string kAppStorageFolder;
   // Gtest can show message that this object doesn't destroyed
-  static std::auto_ptr<policy_handler_test::MockPolicySettings>
-      policy_settings_;
+  std::unique_ptr<NiceMock<MockPolicySettings> > policy_settings_;
 
-  static void SetUpTestCase() {
-    file_system::DeleteFile(kAppStorageFolder + "/policy.sqlite");
+  void SetUp() OVERRIDE {
+    file_system::CreateDirectory(kAppStorageFolder);
     reps = new SQLPTRepresentation;
-    policy_settings_ = std::auto_ptr<policy_handler_test::MockPolicySettings>(
-        new policy_handler_test::MockPolicySettings());
+    policy_settings_ = std::unique_ptr<NiceMock<MockPolicySettings> >(
+        new NiceMock<MockPolicySettings>());
     ON_CALL(*policy_settings_, app_storage_folder())
         .WillByDefault(ReturnRef(kAppStorageFolder));
     EXPECT_EQ(::policy::SUCCESS, reps->Init(policy_settings_.get()));
@@ -93,15 +93,13 @@ class SQLPTRepresentationTest : public SQLPTRepresentation,
 
   void TearDown() OVERRIDE {
     EXPECT_TRUE(reps->Clear());
-  }
-
-  static void TearDownTestCase() {
     EXPECT_TRUE(reps->Drop());
     EXPECT_TRUE(reps->Close());
     reps->RemoveDB();
     delete reps;
     dbms->Close();
-    file_system::RemoveDirectory(kAppStorageFolder);
+    file_system::remove_directory_content(kAppStorageFolder);
+    file_system::RemoveDirectory(kAppStorageFolder, true);
     policy_settings_.reset();
   }
 
@@ -290,6 +288,7 @@ class SQLPTRepresentationTest : public SQLPTRepresentation,
     app_policies["default"]["default_hmi"] = Json::Value("FULL");
     app_policies["default"]["keep_context"] = Json::Value(true);
     app_policies["default"]["steal_focus"] = Json::Value(true);
+    app_policies["default"]["RequestType"] = Json::Value(Json::arrayValue);
 
     app_policies["pre_DataConsent"] = Json::Value(Json::objectValue);
     app_policies["pre_DataConsent"]["memory_kb"] = Json::Value(40);
@@ -301,6 +300,9 @@ class SQLPTRepresentationTest : public SQLPTRepresentation,
     app_policies["pre_DataConsent"]["is_revoked"] = Json::Value(false);
     app_policies["pre_DataConsent"]["keep_context"] = Json::Value(true);
     app_policies["pre_DataConsent"]["steal_focus"] = Json::Value(true);
+    app_policies["pre_DataConsent"]["RequestType"] =
+        Json::Value(Json::arrayValue);
+
     app_policies["1234"] = Json::Value(Json::objectValue);
     app_policies["1234"]["memory_kb"] = Json::Value(150);
     app_policies["1234"]["heart_beat_timeout_ms"] = Json::Value(200);
@@ -311,6 +313,8 @@ class SQLPTRepresentationTest : public SQLPTRepresentation,
     app_policies["1234"]["is_revoked"] = Json::Value(true);
     app_policies["1234"]["keep_context"] = Json::Value(false);
     app_policies["1234"]["steal_focus"] = Json::Value(false);
+    app_policies["1234"]["RequestType"] = Json::Value(Json::arrayValue);
+
     app_policies["device"] = Json::Value(Json::objectValue);
     app_policies["device"]["groups"] = Json::Value(Json::arrayValue);
     app_policies["device"]["groups"][0] = Json::Value("default");
@@ -346,12 +350,9 @@ class SQLPTRepresentationTest : public SQLPTRepresentation,
   }
 };
 
-DBMS* SQLPTRepresentationTest::dbms = 0;
-SQLPTRepresentation* SQLPTRepresentationTest::reps = 0;
 const std::string SQLPTRepresentationTest::kDatabaseName = "policy.sqlite";
-const std::string SQLPTRepresentationTest::kAppStorageFolder = "storage1";
-std::auto_ptr<policy_handler_test::MockPolicySettings>
-    SQLPTRepresentationTest::policy_settings_;
+const std::string SQLPTRepresentationTest::kAppStorageFolder =
+    "storage_SQLPTRepresentationTest";
 
 class SQLPTRepresentationTest2 : public ::testing::Test {
  protected:
@@ -378,7 +379,7 @@ class SQLPTRepresentationTest2 : public ::testing::Test {
   }
 
   SQLPTRepresentation* reps;
-  NiceMock<policy_handler_test::MockPolicySettings> policy_settings_;
+  NiceMock<MockPolicySettings> policy_settings_;
   const std::string kAppStorageFolder;
   const uint16_t kOpenAttemptTimeoutMs;
   const uint16_t kAttemptsToOpenPolicyDB;
@@ -399,7 +400,7 @@ class SQLPTRepresentationTest3 : public ::testing::Test {
   }
 
   SQLPTRepresentation* reps;
-  NiceMock<policy_handler_test::MockPolicySettings> policy_settings_;
+  NiceMock<MockPolicySettings> policy_settings_;
   const std::string kAppStorageFolder;
 };
 
@@ -424,7 +425,10 @@ TEST_F(SQLPTRepresentationTest,
   ASSERT_EQ(0, dbms->FetchOneInt(query_select));
   ASSERT_TRUE(reps->RefreshDB());
   // Check PT structure destroyed and tables number is 0
-  ASSERT_EQ(25, dbms->FetchOneInt(query_select));
+
+  // There are 29 tables in the database, now.
+  const int32_t total_tables_number = 29;
+  ASSERT_EQ(total_tables_number, dbms->FetchOneInt(query_select));
   const char* query_select_count_of_iap_buffer_full =
       "SELECT `count_of_iap_buffer_full` FROM `usage_and_error_count`";
   const char* query_select_count_sync_out_of_memory =
@@ -1102,7 +1106,7 @@ TEST_F(SQLPTRepresentationTest,
        GetInitialAppData_SetData_ExpectCorrectValuesReceived) {
   // Arrange
   const char* query_insert =
-      "INSERT INTO `nickname` (`application_id`, `name`)"
+      "INSERT INTO `nickname` (`application_id`, `name`) "
       "VALUES ('1111', 'first_app') , "
       "('2222', 'second_app'), ('3333', 'third_app')";
   ASSERT_TRUE(dbms->Exec(query_insert));
@@ -1512,7 +1516,7 @@ TEST_F(SQLPTRepresentationTest,
   ASSERT_TRUE(reps->Save(update));
 
   // Act
-  utils::SharedPtr<policy_table::Table> snapshot = reps->GenerateSnapshot();
+  std::shared_ptr<policy_table::Table> snapshot = reps->GenerateSnapshot();
   snapshot->SetPolicyTableType(rpc::policy_table_interface_base::PT_SNAPSHOT);
   // Remove fields which must be absent in snapshot
   table["policy_table"]["consumer_friendly_messages"].removeMember("messages");

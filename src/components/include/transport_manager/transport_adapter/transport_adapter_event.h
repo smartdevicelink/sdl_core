@@ -39,6 +39,28 @@
 
 namespace transport_manager {
 
+/**
+ * @enum Available types of events.
+ */
+enum class EventTypeEnum {
+  ON_SEARCH_DONE = 0,
+  ON_SEARCH_FAIL,
+  ON_DEVICE_LIST_UPDATED,
+  ON_FIND_NEW_APPLICATIONS_REQUEST,
+  ON_CONNECT_DONE,
+  ON_CONNECT_FAIL,
+  ON_DISCONNECT_DONE,
+  ON_DISCONNECT_FAIL,
+  ON_SEND_DONE,
+  ON_SEND_FAIL,
+  ON_RECEIVED_DONE,
+  ON_RECEIVED_FAIL,
+  ON_COMMUNICATION_ERROR,
+  ON_UNEXPECTED_DISCONNECT,
+  ON_TRANSPORT_SWITCH_REQUESTED,
+  ON_TRANSPORT_CONFIG_UPDATED
+};
+
 class TransportAdapterEvent {
  public:
   TransportAdapterEvent() {}
@@ -52,7 +74,7 @@ class TransportAdapterEvent {
    * @param data Smart pointer to the raw message.
    * @param error Error class that contains details of this error situation.
    */
-  TransportAdapterEvent(int type,
+  TransportAdapterEvent(EventTypeEnum type,
                         transport_adapter::TransportAdapter* adapter,
                         const DeviceUID& device_handle,
                         const ApplicationHandle& application_id,
@@ -64,10 +86,11 @@ class TransportAdapterEvent {
       , transport_adapter(adapter)
       , event_data(data)
       , event_error(error) {}
+
   /**
    * @brief Value that describe event type.
    */
-  int event_type;
+  EventTypeEnum event_type;
   /**
    * @brief Handle of application
    */

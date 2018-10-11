@@ -37,6 +37,7 @@
 #include <string>
 #include <vector>
 #include <list>
+#include <map>
 #include "utils/macro.h"
 #include "protocol_handler/protocol_handler_settings.h"
 #include "connection_handler/connection_handler_settings.h"
@@ -109,9 +110,25 @@ class Profile : public protocol_handler::ProtocolHandlerSettings,
   const std::string& app_resource_folder() const;
 
   /**
-   * @brief Returns true, if SDL 4.0 is enabled
-   */
-  bool enable_protocol_4() const OVERRIDE;
+    * @brief Returns offset from SIGRTMIN for user defined signal
+    * SIGLOWVOLTAGE
+    * which is used for handling LOW Voltage functionality
+    */
+  int low_voltage_signal_offset() const;
+
+  /**
+    * @brief Returns offset from SIGRTMIN for user defined signal
+    * SIGWAKEUP
+    * which is used for handling LOW Voltage functionality
+    */
+  int wake_up_signal_offset() const;
+
+  /**
+    * @brief Returns offset from SIGRTMIN for user defined signal
+    * SIGIGNITIONOFF
+    * which is used for handling LOW Voltage functionality
+    */
+  int ignition_off_signal_offset() const;
 
   /**
    * @brief Returns application icons folder path
@@ -128,6 +145,26 @@ class Profile : public protocol_handler::ProtocolHandlerSettings,
    * if maximum size exceeded
    */
   const uint32_t& app_icons_amount_to_remove() const OVERRIDE;
+
+  /**
+   * @brief Returns the maximum payload size for control services
+   */
+  size_t maximum_control_payload_size() const OVERRIDE;
+
+  /**
+   * @brief Returns the maximum payload size for RPC services
+   */
+  size_t maximum_rpc_payload_size() const OVERRIDE;
+
+  /**
+   * @brief Returns the maximum payload size for audio services
+   */
+  size_t maximum_audio_payload_size() const OVERRIDE;
+
+  /**
+   * @brief Returns the maximum payload size for video services
+   */
+  size_t maximum_video_payload_size() const OVERRIDE;
 
   /**
    * @brief Returns the path to the config file
@@ -155,9 +192,9 @@ class Profile : public protocol_handler::ProtocolHandlerSettings,
   const uint16_t video_streaming_port() const OVERRIDE;
 
   /**
-    * @brief Returns port for audio streaming
-    */
-  const uint16_t audio_streaming_port() const;
+   * @brief Returns port for audio streaming
+   */
+  const uint16_t audio_streaming_port() const OVERRIDE;
 
   /**
    * @brief Returns streaming timeout
@@ -191,6 +228,11 @@ class Profile : public protocol_handler::ProtocolHandlerSettings,
   const std::vector<std::string>& vr_commands() const;
 
   /**
+    * @brief Returns folder containing all plugins
+    */
+  const std::string& plugins_folder() const OVERRIDE;
+
+  /**
    * @brief Maximum command id available for mobile app
    */
   const uint32_t& max_cmd_id() const;
@@ -209,7 +251,7 @@ class Profile : public protocol_handler::ProtocolHandlerSettings,
   /**
    * @brief Returns desirable thread stack size
    */
-  const uint64_t& thread_min_stack_size() const;
+  const uint64_t thread_min_stack_size() const;
 
   /**
     * @brief Returns true if audio mixing is supported
@@ -323,7 +365,7 @@ class Profile : public protocol_handler::ProtocolHandlerSettings,
   /*
    * @brief Returns file name for storing applications data
    */
-  const std::string& app_info_storage() const;
+  const std::string& app_info_storage() const OVERRIDE;
 
   /*
    * @brief Path to preloaded policy file
@@ -342,13 +384,34 @@ class Profile : public protocol_handler::ProtocolHandlerSettings,
    */
   bool enable_policy() const;
 
+  /**
+   * @brief Should core use fullAppID internally instead of appID (Default true)
+   * @return Flag
+   */
+  bool use_full_app_id() const;
+
   // TransportManageSettings interface
 
+  /*
+   * @brief Returns true if last state singleton is used
+   */
   bool use_last_state() const OVERRIDE;
 
+  /**
+   * @brief Timeout in transport manager before disconnect
+   */
   uint32_t transport_manager_disconnect_timeout() const OVERRIDE;
 
+  /**
+   * @brief Returns port for TCP transport adapter
+   */
   uint16_t transport_manager_tcp_adapter_port() const OVERRIDE;
+
+  /**
+   * @brief Returns the network interface name for TCP transport adapter
+   */
+  const std::string& transport_manager_tcp_adapter_network_interface()
+      const OVERRIDE;
 
   // TransportManageMMESettings interface
 
@@ -431,17 +494,39 @@ class Profile : public protocol_handler::ProtocolHandlerSettings,
   size_t update_before_hours() const;
 
 #endif  // ENABLE_SECURITY
-        /**
-         * @brief Reads a string value from the profile
-         *
-         * @param value         Result value
-         * @param default_value Value to use key wasn't found
-         * @param pSection      The section to read the value in
-         * @param pKey          The key whose value needs to be read out
-         *
-         * @return FALSE if could not read the value out of the profile
-         * (then the value is equal \c default_value)
-         */
+
+  /**
+   * @brief Returns true multiple transports is enabled
+   */
+  const bool multiple_transports_enabled() const OVERRIDE;
+
+  /**
+   * @brief Returns list of secondary transports available
+   * for the named primary transport
+   */
+  const std::vector<std::string>& secondary_transports_for_bluetooth()
+      const OVERRIDE;
+  const std::vector<std::string>& secondary_transports_for_usb() const OVERRIDE;
+  const std::vector<std::string>& secondary_transports_for_wifi()
+      const OVERRIDE;
+
+  /**
+   * @brief Returns list of allowed transports for the named service
+   */
+  const std::vector<std::string>& audio_service_transports() const OVERRIDE;
+  const std::vector<std::string>& video_service_transports() const OVERRIDE;
+
+  /**
+   * @brief Reads a string value from the profile
+   *
+   * @param value         Result value
+   * @param default_value Value to use key wasn't found
+   * @param pSection      The section to read the value in
+   * @param pKey          The key whose value needs to be read out
+   *
+   * @return FALSE if could not read the value out of the profile
+   * (then the value is equal \c default_value)
+   */
   bool ReadStringValue(std::string* value,
                        const char* default_value,
                        const char* const pSection,
@@ -485,13 +570,17 @@ class Profile : public protocol_handler::ProtocolHandlerSettings,
    * @param pKey          The key whose value needs to be read out
    * @param out_result    Pointer to bool value for result reading Section
    * (could be NULL)
+   * @param allow_empty   If true, then out_result will be true when the value
+   *                      contains an empty string.
+   *                      If false, then out_result will be false in such case.
    *
    * @return container of values or empty continer
    * if could not read the value out of the profile
    */
   std::vector<std::string> ReadStringContainer(const char* const pSection,
                                                const char* const pKey,
-                                               bool* out_result) const;
+                                               bool* out_result,
+                                               bool allow_empty = false) const;
   /**
    * @brief Reads an container of hex int values from the profile,
    * which handle as "0x01, 0xA0, 0XFF"
@@ -583,6 +672,33 @@ class Profile : public protocol_handler::ProtocolHandlerSettings,
   uint16_t open_attempt_timeout_ms_resumption_db() const;
 
   /**
+   * @brief Returns "transport required for resumption" map
+   *
+   * Keys of the map are AppHMIType strings, i.e. "DEFAULT", "COMMUNICATION",
+   * "MEDIA", and so on. The map may contain a special key "EMPTY_APP" for apps
+   * that does not specify any AppHMIType.
+   */
+  const std::map<std::string, std::vector<std::string> >&
+  transport_required_for_resumption_map() const OVERRIDE;
+
+  /**
+   * @brief Returns HMI level for resumption of a NAVIGATION app
+   */
+  const std::string& navigation_lowbandwidth_resumption_level() const OVERRIDE;
+
+  /**
+   * @brief Returns HMI level for resumption of a PROJECTION app
+   */
+  const std::string& projection_lowbandwidth_resumption_level() const OVERRIDE;
+
+  /**
+   * @brief Returns HMI level for resumption of a media app
+   *
+   * Note: this is *not* for AppHMIType = MEDIA.
+   */
+  const std::string& media_lowbandwidth_resumption_level() const OVERRIDE;
+
+  /**
    * @brief Returns wait time after device connection
    * before app launch request
    */
@@ -621,6 +737,18 @@ class Profile : public protocol_handler::ProtocolHandlerSettings,
   const bool enable_app_launch_ios() const OVERRIDE;
 
   /**
+     * @brief Returns the millisecond count before timeout
+     * for transport change feature occures.
+     */
+  uint32_t app_transport_change_timer() const OVERRIDE;
+
+  /**
+   * @brief Returns the millisecond count used as addition
+   * value for transport change timer
+   */
+  uint32_t app_transport_change_timer_addition() const OVERRIDE;
+
+  /**
    * @brief Updates all related values from ini file
    */
   void UpdateValues();
@@ -639,6 +767,8 @@ class Profile : public protocol_handler::ProtocolHandlerSettings,
   const std::pair<uint32_t, int32_t>& read_did_frequency() const OVERRIDE;
 
   const std::pair<uint32_t, int32_t>& get_vehicle_data_frequency()
+      const OVERRIDE;
+  const std::pair<uint32_t, int32_t>& get_interior_vehicle_data_frequency()
       const OVERRIDE;
 
   const std::pair<uint32_t, int32_t>& start_stream_retry_amount()
@@ -667,11 +797,27 @@ class Profile : public protocol_handler::ProtocolHandlerSettings,
    * @param pKey       The key whose value needs to be read out
    *
    * @return FALSE if could not read the value out of the profile
-   * (then the value is not changed)
+   * (then the value is not changed) or the value was empty
    */
   bool ReadValue(std::string* value,
                  const char* const pSection,
                  const char* const pKey) const;
+
+  /**
+   * @brief Reads a string value from the profile
+   *
+   * This is same as ReadValue(), except that this method will accept an empty
+   * string.
+   *
+   * @param value      The value to return
+   * @param pSection   The section to read the value in
+   * @param pKey       The key whose value needs to be read out
+   *
+   * @return TRUE if the value is read, FALSE if the value is not found
+   */
+  bool ReadValueEmpty(std::string* value,
+                      const char* const pSection,
+                      const char* const pKey) const;
 
   /**
    * @brief Reads a boolean value from the profile
@@ -759,10 +905,13 @@ class Profile : public protocol_handler::ProtocolHandlerSettings,
   std::string app_config_folder_;
   std::string app_storage_folder_;
   std::string app_resource_folder_;
-  bool enable_protocol_4_;
   std::string app_icons_folder_;
   uint32_t app_icons_folder_max_size_;
   uint32_t app_icons_amount_to_remove_;
+  size_t maximum_control_payload_size_;
+  size_t maximum_rpc_payload_size_;
+  size_t maximum_audio_payload_size_;
+  size_t maximum_video_payload_size_;
   std::string config_file_name_;
   std::string server_address_;
   uint16_t server_port_;
@@ -804,11 +953,13 @@ class Profile : public protocol_handler::ProtocolHandlerSettings,
   std::string preloaded_pt_file_;
   std::string policy_snapshot_file_name_;
   bool enable_policy_;
+  bool use_full_app_id_;
   uint32_t transport_manager_disconnect_timeout_;
   bool use_last_state_;
   std::vector<uint32_t> supported_diag_modes_;
   std::string system_files_path_;
   uint16_t transport_manager_tcp_adapter_port_;
+  std::string transport_manager_tcp_adapter_network_interface_;
   std::string tts_delimiter_;
   uint32_t audio_data_stopped_timeout_;
   uint32_t video_data_stopped_timeout_;
@@ -845,6 +996,12 @@ class Profile : public protocol_handler::ProtocolHandlerSettings,
    */
   std::pair<uint32_t, int32_t> get_vehicle_data_frequency_;
 
+  /*
+   * first value is count of request
+   * second is time scale
+   */
+  std::pair<uint32_t, int32_t> get_interior_vehicle_data_frequency_;
+
   /**
    * first value is count of retries for start stream
    * second for timer
@@ -856,6 +1013,7 @@ class Profile : public protocol_handler::ProtocolHandlerSettings,
   std::string iap_pool_protocol_mask_;
   std::string iap_system_config_;
   std::string iap2_system_config_;
+  std::string plugins_folder_;
   int iap2_hub_connect_attempts_;
   int iap_hub_connection_wait_timeout_;
   uint16_t tts_global_properties_timeout_;
@@ -868,6 +1026,11 @@ class Profile : public protocol_handler::ProtocolHandlerSettings,
   bool use_db_for_resumption_;
   uint16_t attempts_to_open_resumption_db_;
   uint16_t open_attempt_timeout_ms_resumption_db_;
+  std::map<std::string, std::vector<std::string> >
+      transport_required_for_resumption_map_;
+  std::string navigation_lowbandwidth_resumption_level_;
+  std::string projection_lowbandwidth_resumption_level_;
+  std::string media_lowbandwidth_resumption_level_;
   uint16_t app_launch_wait_time_;
   uint16_t app_launch_max_retry_attempt_;
   uint16_t app_launch_retry_wait_time_;
@@ -875,8 +1038,19 @@ class Profile : public protocol_handler::ProtocolHandlerSettings,
   uint16_t max_number_of_ios_device_;
   uint16_t wait_time_between_apps_;
   bool enable_app_launch_ios_;
+  uint32_t app_tranport_change_timer_;
+  uint32_t app_tranport_change_timer_addition_;
+  bool multiple_transports_enabled_;
+  std::vector<std::string> secondary_transports_for_bluetooth_;
+  std::vector<std::string> secondary_transports_for_usb_;
+  std::vector<std::string> secondary_transports_for_wifi_;
+  std::vector<std::string> audio_service_transports_;
+  std::vector<std::string> video_service_transports_;
   bool error_occured_;
   std::string error_description_;
+  int low_voltage_signal_offset_;
+  int wake_up_signal_offset_;
+  int ignition_off_signal_offset_;
 
   DISALLOW_COPY_AND_ASSIGN(Profile);
 };

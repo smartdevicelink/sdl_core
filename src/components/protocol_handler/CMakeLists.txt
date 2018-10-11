@@ -35,17 +35,27 @@ include_directories(
   ${COMPONENTS_DIR}/protocol_handler/include/
   ${COMPONENTS_DIR}/connection_handler/include/
   ${LOG4CXX_INCLUDE_DIRECTORY}
+  ${BSON_INCLUDE_DIRECTORY}
 )
 
 set(PATHS
   ${CMAKE_CURRENT_SOURCE_DIR}/include
   ${CMAKE_CURRENT_SOURCE_DIR}/src
 )
-collect_sources(SOURCES "${PATHS}")
+
+if (ENABLE_SECURITY)
+  set(EXCLUDE_PATHS)
+else()
+  set(EXCLUDE_PATHS handshake_handler.cc)
+endif()
+
+collect_sources(SOURCES "${PATHS}" "${EXCLUDE_PATHS}")
 
 set(LIBRARIES
   ProtocolLibrary
   Utils
+  bson -L${BSON_LIBS_DIRECTORY}
+  emhashmap -L${EMHASHMAP_LIBS_DIRECTORY}
 )
 
 get_property(dirs DIRECTORY "" PROPERTY LIBRARIES)

@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2016, Ford Motor Company
+* Copyright (c) 2018, Ford Motor Company
 * All rights reserved.
 *
 * Redistribution and use in source and binary forms, with or without
@@ -32,91 +32,60 @@
 
 #ifndef SRC_APPMAIN_LIFE_CYCLE_H_
 #define SRC_APPMAIN_LIFE_CYCLE_H_
-#include "utils/macro.h"
-#include "unistd.h"
-
-#include "config_profile/profile.h"
-#include "hmi_message_handler/hmi_message_handler_impl.h"
-#ifdef DBUS_HMIADAPTER
-#include "hmi_message_handler/dbus_message_adapter.h"
-#endif  // DBUS_HMIADAPTER
-#if (defined(MESSAGEBROKER_HMIADAPTER) || defined(PASA_HMI))
-#include "hmi_message_handler/messagebroker_adapter.h"
-#endif  // #if ( defined (MESSAGEBROKER_HMIADAPTER) || defined(PASA_HMI)  )
-#include "application_manager/application_manager_impl.h"
-#include "connection_handler/connection_handler_impl.h"
-#include "protocol_handler/protocol_handler_impl.h"
-#include "transport_manager/transport_manager.h"
-#include "transport_manager/transport_manager_default.h"
-#include "media_manager/media_manager_impl.h"
-#ifdef TELEMETRY_MONITOR
-#include "telemetry_monitor/telemetry_monitor.h"
-#endif
-
-//#if ( defined (MESSAGEBROKER_HMIADAPTER) || defined(PASA_HMI)  )
-#ifdef MESSAGEBROKER_HMIADAPTER
-#include "CMessageBroker.hpp"
-#include "mb_tcpserver.hpp"
-#include "networking.h"  // cpplint: Include the directory when naming .h files
-#endif                   // MESSAGEBROKER_HMIADAPTER
-#include "system.h"      // cpplint: Include the directory when naming .h files
-
-#ifdef ENABLE_SECURITY
-namespace security_manager {
-class CryptoManager;
-class SecurityManagerImpl;
-}  // namespace security_manager
-#endif  // ENABLE_SECURITY
 
 namespace main_namespace {
+
+/**
+ * Class responsible for all system components creation,
+ * start, stop, suspend and restore
+ */
+
 class LifeCycle {
  public:
-  LifeCycle(const profile::Profile& profile);
-  bool StartComponents();
+  virtual ~LifeCycle() {}
 
   /**
-  * Initialize MessageBroker component
-  * @return true if success otherwise false.
-  */
-  bool InitMessageSystem();
-  /**
-   * \brief Main loop
+   * Creates and starts all system components
+   * @return true if all components started successfully
+   * otherwise false.
    */
-  void Run();
-  void StopComponents();
+  virtual bool StartComponents() = 0;
 
- private:
-  transport_manager::TransportManagerImpl* transport_manager_;
-  protocol_handler::ProtocolHandlerImpl* protocol_handler_;
-  connection_handler::ConnectionHandlerImpl* connection_handler_;
-  application_manager::ApplicationManagerImpl* app_manager_;
-#ifdef ENABLE_SECURITY
-  security_manager::CryptoManager* crypto_manager_;
-  security_manager::SecurityManager* security_manager_;
-#endif  // ENABLE_SECURITY
-  hmi_message_handler::HMIMessageHandlerImpl* hmi_handler_;
-  hmi_message_handler::HMIMessageAdapter* hmi_message_adapter_;
-  media_manager::MediaManagerImpl* media_manager_;
-  resumption::LastState* last_state_;
-#ifdef TELEMETRY_MONITOR
-  telemetry_monitor::TelemetryMonitor* telemetry_monitor_;
-#endif  // TELEMETRY_MONITOR
-#ifdef DBUS_HMIADAPTER
-  hmi_message_handler::DBusMessageAdapter* dbus_adapter_;
-  System::Thread* dbus_adapter_thread_;
-#endif  // DBUS_HMIADAPTER
+  /**
+   * Initializes MessageBroker component
+   * @return true if success otherwise false.
+   */
+  virtual bool InitMessageSystem() = 0;
 
-#ifdef MESSAGEBROKER_HMIADAPTER
-  hmi_message_handler::MessageBrokerAdapter* mb_adapter_;
-  NsMessageBroker::CMessageBroker* message_broker_;
-  NsMessageBroker::TcpServer* message_broker_server_;
-  System::Thread* mb_thread_;
-  System::Thread* mb_server_thread_;
-  System::Thread* mb_adapter_thread_;
-#endif  // MESSAGEBROKER_HMIADAPTER
+  /**
+   * @brief Main loop
+   */
+  virtual void Run() = 0;
 
-  const profile::Profile& profile_;
-  DISALLOW_COPY_AND_ASSIGN(LifeCycle);
+  /**
+   * Stops all system components
+   */
+  virtual void StopComponents() = 0;
+
+  /**
+   * Makes appropriate actions when Low Voltage signal received:
+   * Stops all SDL activities except of waiting of UNIX signals
+   * from HMI
+   */
+  virtual void LowVoltage() = 0;
+
+  /**
+   * Makes appropriate actions when Wake Up signal received:
+   * Restores all SDL activities stopped due to LOW VOLTAGE
+   * from HMI
+   */
+  virtual void WakeUp() = 0;
+
+  /**
+   * Makes appropriate actions when Ignition Off signal received:
+   * Triggers all SDL components stop and deletion
+   */
+  virtual void IgnitionOff() = 0;
 };
 }  //  namespace main_namespace
 

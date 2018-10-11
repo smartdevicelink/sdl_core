@@ -59,6 +59,10 @@ class MockTransportManagerSettings
   MOCK_CONST_METHOD0(iap_system_config, const std::string&());
   MOCK_CONST_METHOD0(iap2_system_config, const std::string&());
   MOCK_CONST_METHOD0(iap_hub_connection_wait_timeout, uint32_t());
+  MOCK_CONST_METHOD0(app_transport_change_timer, uint32_t());
+  MOCK_CONST_METHOD0(app_transport_change_timer_addition, uint32_t());
+  MOCK_CONST_METHOD0(transport_manager_tcp_adapter_network_interface,
+                     std::string&());
 };
 
 }  // namespace transport_manager_test

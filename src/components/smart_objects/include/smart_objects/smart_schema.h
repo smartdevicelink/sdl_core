@@ -35,8 +35,8 @@
 #include "utils/macro.h"
 #include "smart_objects/schema_item.h"
 
-namespace NsSmartDeviceLink {
-namespace NsSmartObjects {
+namespace ns_smart_device_link {
+namespace ns_smart_objects {
 class SmartObject;
 
 /**
@@ -63,11 +63,15 @@ class CSmartSchema FINAL {
   /**
    * @brief Validate smart object.
    *
-   * @param Object SmartObject to validate.
-   *
-   * @return Result of validation.
-   */
-  Errors::eType validate(const SmartObject& Object) const;
+   * @param Object Object to validate.
+   * @param report__ object for reporting errors during validation
+   * @param MessageVersion to check mobile RPC version against RPC Spec History
+   * @return ns_smart_objects::errors::eType
+   **/
+  errors::eType validate(const SmartObject& Object,
+                         rpc::ValidationReport* report__,
+                         const utils::SemanticVersion& messageVersion =
+                             utils::SemanticVersion()) const;
 
   /**
    * @brief Set new root schema item.
@@ -84,7 +88,10 @@ class CSmartSchema FINAL {
    * @param RemoveFakeParameters contains true if need to remove fake parameters
    * from smart object otherwise contains false.
    **/
-  void applySchema(SmartObject& Object, const bool RemoveFakeParameters);
+  void applySchema(
+      SmartObject& Object,
+      const bool RemoveFakeParameters,
+      const utils::SemanticVersion& MessageVersion = utils::SemanticVersion());
 
   /**
    * @brief The reverse SmartObject conversion using schema.
@@ -111,6 +118,6 @@ class CSmartSchema FINAL {
    */
   ISchemaItemPtr mSchemaItem;
 };
-}  // namespace NsSmartObjects
-}  // namespace NsSmartDeviceLink
+}  // namespace ns_smart_objects
+}  // namespace ns_smart_device_link
 #endif  // SRC_COMPONENTS_SMART_OBJECTS_INCLUDE_SMART_OBJECTS_SMART_SCHEMA_H_

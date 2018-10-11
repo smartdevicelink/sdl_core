@@ -1,10 +1,43 @@
-// This file is generated, do not edit
+/*
+ * Copyright (c) 2017, Ford Motor Company
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *
+ * Redistributions of source code must retain the above copyright notice, this
+ * list of conditions and the following disclaimer.
+ *
+ * Redistributions in binary form must reproduce the above copyright notice,
+ * this list of conditions and the following
+ * disclaimer in the documentation and/or other materials provided with the
+ * distribution.
+ *
+ * Neither the name of the Ford Motor Company nor the names of its contributors
+ * may be used to endorse or promote products derived from this software
+ * without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
+ */
+
 #ifndef SRC_COMPONENTS_POLICY_POLICY_REGULAR_INCLUDE_POLICY_POLICY_TABLE_TYPES_H_
 #define SRC_COMPONENTS_POLICY_POLICY_REGULAR_INCLUDE_POLICY_POLICY_TABLE_TYPES_H_
+
 #include <climits>
 
-#include "./enums.h"
+#include "policy/policy_table/enums.h"
 #include "rpc_base/rpc_message.h"
+
 namespace Json {
 class Value;
 }  // namespace Json
@@ -32,21 +65,21 @@ typedef Array<Enum<AppHMIType>, 0, 255> AppHMITypes;
 
 typedef Array<Enum<HmiLevel>, 0, 4> HmiLevels;
 
-typedef Array<Enum<Parameter>, 0, 24> Parameters;
+typedef Array<Enum<Parameter>, 0, 255> Parameters;
 
-typedef Map<RpcParameters, 0, 50> Rpc;
+typedef Map<RpcParameters, 0, UINT_MAX> Rpc;
 
-typedef Array<String<10, 255>, 1, 255> URL;
+typedef Array<String<10, 255>, 1, 3> URL;
 
 typedef Map<URL, 1, 255> URLList;
 
 typedef Map<URLList, 1, 255> ServiceEndpoints;
 
 typedef uint8_t NumberOfNotificationsType;
-typedef Map<Integer<NumberOfNotificationsType, 0, 255>, 0, 6>
+typedef Map<Integer<NumberOfNotificationsType, 0, 255>, 0, 7>
     NumberOfNotificationsPerMinute;
 
-typedef Array<Integer<uint16_t, 1, 1000>, 0, 10> SecondsBetweenRetries;
+typedef Array<Integer<uint16_t, 1, 1000>, 0, 5> SecondsBetweenRetries;
 
 typedef Map<MessageString, 0, 500> Languages;
 
@@ -62,6 +95,15 @@ typedef Map<Rpcs, 1, 255> FunctionalGroupings;
 typedef Map<DeviceParams, 0, 255> DeviceData;
 
 typedef Array<Enum<RequestType>, 0, 255> RequestTypes;
+
+typedef Strings RequestSubTypes;
+
+typedef Map<Strings, 0, 255> RemoteRpcs;
+typedef Map<RemoteRpcs, 0, 255> AccessModules;
+typedef Array<Enum<ModuleType>, 0, 255> ModuleTypes;
+
+typedef AppHMIType AppHmiType;
+typedef std::vector<AppHMIType> AppHmiTypes;
 
 struct PolicyBase : CompositeType {
  public:
@@ -97,9 +139,11 @@ struct ApplicationParams : PolicyBase {
   Optional<Strings> nicknames;
   Optional<AppHMITypes> AppHMIType;
   Optional<RequestTypes> RequestType;
+  Optional<RequestSubTypes> RequestSubType;
   Optional<Integer<uint16_t, 0, 65225> > memory_kb;
   Optional<Integer<uint32_t, 0, UINT_MAX> > heart_beat_timeout_ms;
   Optional<String<0, 255> > certificate;
+  mutable Optional<ModuleTypes> moduleType;
 
  public:
   ApplicationParams();
@@ -115,6 +159,7 @@ struct ApplicationParams : PolicyBase {
 
  private:
   bool Validate() const;
+  bool ValidateModuleTypes() const;
 };
 
 struct ApplicationPoliciesSection : CompositeType {
@@ -185,6 +230,7 @@ struct ModuleConfig : CompositeType {
  public:
   Optional<Map<String<0, 100>, 0, 255> > device_certificates;
   Optional<Boolean> preloaded_pt;
+  Optional<Boolean> full_app_id_supported;
   Integer<uint8_t, 0, 255> exchange_after_x_ignition_cycles;
   Integer<int64_t, 0, 4294967296ll> exchange_after_x_kilometers;
   Integer<uint8_t, 0, 255> exchange_after_x_days;
@@ -262,6 +308,7 @@ struct MessageLanguages : CompositeType {
   virtual void SetPolicyTableType(PolicyTableType pt_type);
 
  private:
+  static const std::string default_language_;
   bool Validate() const;
 };
 

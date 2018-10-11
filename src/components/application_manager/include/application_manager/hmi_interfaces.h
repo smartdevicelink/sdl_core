@@ -59,7 +59,8 @@ class HmiInterfaces {
     HMI_INTERFACE_UI,
     HMI_INTERFACE_Navigation,
     HMI_INTERFACE_VehicleInfo,
-    HMI_INTERFACE_SDL
+    HMI_INTERFACE_SDL,
+    HMI_INTERFACE_RC
   };
 
   /**

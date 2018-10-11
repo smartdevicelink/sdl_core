@@ -33,8 +33,6 @@
 #ifndef SRC_COMPONENTS_INCLUDE_HMI_MESSAGE_HANDLER_HMI_MESSAGE_OBSERVER_H_
 #define SRC_COMPONENTS_INCLUDE_HMI_MESSAGE_HANDLER_HMI_MESSAGE_OBSERVER_H_
 
-#include "utils/shared_ptr.h"
-
 namespace application_manager {
 class Message;
 }
@@ -43,10 +41,11 @@ namespace hmi_message_handler {
 
 class HMIMessageObserver {
  public:
+  virtual ~HMIMessageObserver() {}
   virtual void OnMessageReceived(
-      utils::SharedPtr<application_manager::Message> message) = 0;
+      std::shared_ptr<application_manager::Message> message) = 0;
   virtual void OnErrorSending(
-      utils::SharedPtr<application_manager::Message> message) = 0;
+      std::shared_ptr<application_manager::Message> message) = 0;
 };
 }
 

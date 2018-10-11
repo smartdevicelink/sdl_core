@@ -39,6 +39,8 @@
 #include "connection_handler/device.h"
 #include "connection_handler/connection.h"
 #include "connection_handler/devices_discovery_starter.h"
+#include "utils/macro.h"
+#include "utils/data_accessor.h"
 
 /**
  * \namespace connection_handler
@@ -49,6 +51,15 @@ namespace connection_handler {
 enum CloseSessionReason { kCommon = 0, kFlood, kMalformed, kUnauthorizedApp };
 
 class ConnectionHandlerObserver;
+
+// The SessionConnectionMap keeps track of the primary and secondary transports
+// associated with a session ID
+typedef struct {
+  transport_manager::ConnectionUID primary_transport;
+  transport_manager::ConnectionUID secondary_transport;
+  std::vector<protocol_handler::ServiceType> secondary_transport_services;
+} SessionTransports;
+typedef std::map<uint8_t, SessionTransports> SessionConnectionMap;
 
 /**
  * \class ConnectionHandler
@@ -175,10 +186,12 @@ class ConnectionHandler {
    * \param device_id Returned: DeviceID
    * \return int32_t -1 in case of error or 0 in case of success
    */
-  virtual int32_t GetDataOnSessionKey(uint32_t key,
-                                      uint32_t* app_id,
-                                      std::list<int32_t>* sessions_list,
-                                      uint32_t* device_id) const = 0;
+  virtual int32_t GetDataOnSessionKey(
+      uint32_t key,
+      uint32_t* app_id,
+      std::list<int32_t>* sessions_list,
+      connection_handler::DeviceHandle* device_id) const = 0;
+
   /**
    * @brief GetConnectedDevicesMAC allows to obtain MAC adresses for all
    * currently connected devices.
@@ -197,6 +210,81 @@ class ConnectionHandler {
   virtual const protocol_handler::SessionObserver& get_session_observer() = 0;
 
   virtual DevicesDiscoveryStarter& get_device_discovery_starter() = 0;
+
+  /**
+   * \brief Add a session. This is meant to be called from Connection class.
+   * \param primary_transport_id the primary connection ID to associate with the
+   * newly created session
+   * \return new session id, or 0 if failed
+   **/
+  virtual uint32_t AddSession(
+      const transport_manager::ConnectionUID primary_transport_id) = 0;
+
+  /**
+   * \brief Remove a session. This is meant to be called from Connection class.
+   * \param session_id ID of the session to remove
+   * \return true if successful, false otherwise
+   **/
+  virtual bool RemoveSession(uint8_t session_id) = 0;
+
+  virtual DataAccessor<SessionConnectionMap> session_connection_map() = 0;
+
+  /**
+   * \brief Associate a secondary transport ID with a session
+   * \param session_id the session ID
+   * \param connection_id the new secondary connection ID to associate with the
+   * session
+   * \return the SessionTransports (newly) associated with the session
+   **/
+  virtual SessionTransports SetSecondaryTransportID(
+      uint8_t session_id,
+      transport_manager::ConnectionUID secondary_transport_id) = 0;
+
+  /**
+   * \brief Retrieve the session transports associated with a session
+   * \param session_id the session ID
+   * \return the SessionTransports associated with the session
+   **/
+  virtual const SessionTransports GetSessionTransports(
+      uint8_t session_id) const = 0;
+
+  /**
+   * \brief Invoked when observer's OnServiceStartedCallback is completed
+   * \param session_key the key of started session passed to
+   * OnServiceStartedCallback().
+   * \param result true if observer accepts starting service, false otherwise
+   * \param rejected_params list of rejected parameters' name. Only valid when
+   * result is false. Note that even if result is false, this may be empty.
+   *
+   * \note This is invoked only once but can be invoked by multiple threads.
+   * Also it can be invoked before OnServiceStartedCallback() returns.
+   **/
+  virtual void NotifyServiceStartedResult(
+      uint32_t session_key,
+      bool result,
+      std::vector<std::string>& rejected_params) = 0;
+
+  /**
+   * \brief Called when secondary transport with given session ID is established
+   * \param primary_connection_handle Set to identifier of primary connection
+   * \param secondary_connection_handle Identifier of secondary connection
+   * \param session_id session ID taken from Register Secondary Transport frame
+   * \return true if successful
+   **/
+  virtual bool OnSecondaryTransportStarted(
+      transport_manager::ConnectionUID& primary_connection_handle,
+      const transport_manager::ConnectionUID secondary_connection_handle,
+      const uint8_t session_id) = 0;
+
+  /**
+   * \brief Called when secondary transport shuts down
+   * \param primary_connection_handle Identifier of primary connection
+   * \param secondary_connection_handle Identifier of secondary connection
+   * transport
+   **/
+  virtual void OnSecondaryTransportEnded(
+      const transport_manager::ConnectionUID primary_connection_handle,
+      const transport_manager::ConnectionUID secondary_connection_handle) = 0;
 
  protected:
   /**

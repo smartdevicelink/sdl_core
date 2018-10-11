@@ -51,6 +51,24 @@ class TransportManagerSettings : public TransportManagerMMESettings {
    * @brief Returns port for TCP transport adapter
    */
   virtual uint16_t transport_manager_tcp_adapter_port() const = 0;
+
+  /**
+   * @brief Returns the millisecond count before timeout
+   * for transport change feature occures.
+   */
+  virtual uint32_t app_transport_change_timer() const = 0;
+
+  /**
+   * @brief Returns the millisecond count as addition to
+   * the transport change timeout value.
+   */
+  virtual uint32_t app_transport_change_timer_addition() const = 0;
+
+  /**
+   * @brief Returns the network interface name for TCP transport adapter
+   */
+  virtual const std::string& transport_manager_tcp_adapter_network_interface()
+      const = 0;
 };
 }  // namespace transport_manager
 #endif  // SRC_COMPONENTS_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_MANAGER_SETTINGS_H_

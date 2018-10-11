@@ -29,8 +29,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_INCLUDE_TEST_POLICY_MOCK_POLICY_LISTENER_H_
-#define SRC_COMPONENTS_INCLUDE_TEST_POLICY_MOCK_POLICY_LISTENER_H_
+#ifndef SRC_COMPONENTS_INCLUDE_TEST_POLICY_POLICY_EXTERNAL_POLICY_MOCK_POLICY_LISTENER_H_
+#define SRC_COMPONENTS_INCLUDE_TEST_POLICY_POLICY_EXTERNAL_POLICY_MOCK_POLICY_LISTENER_H_
 
 #include <string>
 #include <map>
@@ -81,12 +81,29 @@ class MockPolicyListener : public ::policy::PolicyListener {
                     uint32_t timeout_exceed));
   MOCK_METHOD0(CanUpdate, bool());
   MOCK_METHOD1(OnCertificateUpdated, void(const std::string&));
+  MOCK_METHOD1(OnPTUFinished, void(const bool ptu_result));
   MOCK_CONST_METHOD2(SendOnAppPermissionsChanged,
                      void(const policy::AppPermissions&, const std::string&));
+  MOCK_METHOD1(GetDevicesIds,
+               std::vector<std::string>(const std::string& policy_app_id));
+  MOCK_METHOD3(OnUpdateHMILevel,
+               void(const std::string& device_id,
+                    const std::string& policy_app_id,
+                    const std::string& hmi_level));
+  MOCK_CONST_METHOD1(GetRegisteredLinks,
+                     void(std::map<std::string, std::string>&));
+  MOCK_METHOD1(OnRemoteAllowedChanged, void(bool new_consent));
+  MOCK_METHOD2(OnRemoteAppPermissionsChanged,
+               void(const std::string& device_id,
+                    const std::string& application_id));
+  MOCK_METHOD3(OnUpdateHMIStatus,
+               void(const std::string& device_id,
+                    const std::string& policy_app_id,
+                    const std::string& hmi_level));
 };
 
 }  // namespace policy_test
 }  // namespace components
 }  // namespace test
 
-#endif  // SRC_COMPONENTS_INCLUDE_TEST_POLICY_MOCK_POLICY_LISTENER_H_
+#endif  // SRC_COMPONENTS_INCLUDE_TEST_POLICY_POLICY_EXTERNAL_POLICY_MOCK_POLICY_LISTENER_H_

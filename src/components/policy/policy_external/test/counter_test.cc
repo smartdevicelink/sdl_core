@@ -28,6 +28,7 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
+
 #include "gtest/gtest.h"
 #include "policy/usage_statistics/mock_statistics_manager.h"
 #include "policy/usage_statistics/counter.h"
@@ -45,7 +46,7 @@ TEST(
     StatisticsManagerIncrementMethod1Arg,
     GlobalCounterOverloadedIncrement_CallONCE_StatisticsManagerIncrementCalledONCE) {
   // Arrange
-  MockStatisticsManager* msm = new StrictMock<MockStatisticsManager>();
+  auto msm = std::make_shared<StrictMock<MockStatisticsManager> >();
   GlobalCounter reboots_counter(msm, SYNC_REBOOTS);
 
   // Assert
@@ -59,7 +60,7 @@ TEST(
     StatisticsManagerIncrementMethod1Arg,
     GlobalCounterOverloadedIncrement_CallTWICE_StatisticsManagerIncrementCalledTWICE) {
   // Arrange
-  MockStatisticsManager* msm = new StrictMock<MockStatisticsManager>();
+  auto msm = std::make_shared<StrictMock<MockStatisticsManager> >();
   GlobalCounter reboots_counter(msm, SYNC_REBOOTS);
 
   // Assert
@@ -74,7 +75,7 @@ TEST(
     StatisticsManagerIncrementMethod2Args,
     AppCounterOverloadedIncrement_CallONCE_StatisticsManagerIncrementCalledONCE) {
   // Arrange
-  MockStatisticsManager* msm = new StrictMock<MockStatisticsManager>();
+  auto msm = std::make_shared<StrictMock<MockStatisticsManager> >();
   AppCounter user_selections_counter(msm, "HelloApp", USER_SELECTIONS);
 
   // Assert
@@ -88,7 +89,7 @@ TEST(
     StatisticsManagerIncrementMethod2Args,
     AppCounterOverloadedIncrement_CallTWICE_StatisticsManagerIncrementCalledTWICE) {
   // Arrange
-  MockStatisticsManager* msm = new StrictMock<MockStatisticsManager>();
+  auto msm = std::make_shared<StrictMock<MockStatisticsManager> >();
   AppCounter user_selections_counter(msm, "HelloApp", USER_SELECTIONS);
 
   // Assert
@@ -102,7 +103,7 @@ TEST(
 TEST(StatisticsManagerSetMethod,
      AppInfoUpdateMethod_CallONCE_StatisticsManagerSetMethodCalledONCE) {
   // Arrange
-  MockStatisticsManager* msm = new StrictMock<MockStatisticsManager>();
+  auto msm = std::make_shared<StrictMock<MockStatisticsManager> >();
   AppInfo gui_language_info(msm, "HelloApp", LANGUAGE_GUI);
 
   // Assert
@@ -115,7 +116,7 @@ TEST(StatisticsManagerSetMethod,
 TEST(StatisticsManagerSetMethod,
      AppInfoUpdateMethod_CallTWICE_StatisticsManagerSetMethodCalledTWICE) {
   // Arrange
-  MockStatisticsManager* msm = new StrictMock<MockStatisticsManager>();
+  auto msm = std::make_shared<StrictMock<MockStatisticsManager> >();
   AppInfo gui_language_info(msm, "HelloApp", LANGUAGE_GUI);
 
   // Assert
@@ -130,7 +131,7 @@ TEST(StatisticsManagerSetMethod,
 TEST(StatisticsManagerAddMethod,
      AppStopwatchStartMethod_CallONCE_StatisticsManagerAddMethodCalledONCE) {
   // Arrange
-  MockStatisticsManager* msm = new StrictMock<MockStatisticsManager>();
+  auto msm = std::make_shared<StrictMock<MockStatisticsManager> >();
   const std::uint32_t time_out = 1;
   AppStopwatchImpl hmi_full_stopwatch(msm, "HelloApp", time_out);
 
@@ -145,7 +146,7 @@ TEST(StatisticsManagerAddMethod,
 TEST(StatisticsManagerAddMethod,
      AppStopwatchSwitchMethod_Call_StatisticsManagerAddMethodCalled) {
   // Arrange
-  MockStatisticsManager* msm = new StrictMock<MockStatisticsManager>();
+  auto msm = std::make_shared<StrictMock<MockStatisticsManager> >();
   AppStopwatchImpl hmi_full_stopwatch(msm, "HelloApp");
   hmi_full_stopwatch.Start(SECONDS_HMI_FULL);
 
@@ -161,7 +162,7 @@ TEST(
     StatisticsManagerAddMethod,
     AppStopwatchSwitchMethod_CallAnd1SecSleepAfter_StatisticsManagerAddMethodCalledWith1SecTimespan) {
   // Arrange
-  MockStatisticsManager* msm = new StrictMock<MockStatisticsManager>();
+  auto msm = std::make_shared<StrictMock<MockStatisticsManager> >();
   const std::uint32_t time_out = 1;
   AppStopwatchImpl hmi_full_stopwatch(msm, "HelloApp", time_out);
 

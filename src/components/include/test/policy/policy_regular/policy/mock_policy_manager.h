@@ -30,8 +30,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_INCLUDE_TEST_POLICY_MOCK_POLICY_MANAGER_H_
-#define SRC_COMPONENTS_INCLUDE_TEST_POLICY_MOCK_POLICY_MANAGER_H_
+#ifndef SRC_COMPONENTS_INCLUDE_TEST_POLICY_POLICY_REGULAR_POLICY_MOCK_POLICY_MANAGER_H_
+#define SRC_COMPONENTS_INCLUDE_TEST_POLICY_POLICY_REGULAR_POLICY_MOCK_POLICY_MANAGER_H_
 
 #include <string>
 #include <vector>
@@ -142,8 +142,27 @@ class MockPolicyManager : public PolicyManager {
   MOCK_METHOD1(SendNotificationOnPermissionsUpdated,
                void(const std::string& application_id));
   MOCK_METHOD1(MarkUnpairedDevice, void(const std::string& device_id));
-  MOCK_METHOD1(AddApplication,
-               StatusNotifier(const std::string& application_id));
+  MOCK_METHOD2(
+      AddApplication,
+      StatusNotifier(
+          const std::string& application_id,
+          const rpc::policy_table_interface_base::AppHmiTypes& hmi_types));
+  MOCK_METHOD2(SetDefaultHmiTypes,
+               void(const std::string& application_id,
+                    const std::vector<int>& hmi_types));
+  MOCK_METHOD2(GetHMITypes,
+               bool(const std::string& application_id,
+                    std::vector<int>* app_types));
+  MOCK_METHOD2(CheckModule,
+               bool(const PTString& app_id, const PTString& module));
+  MOCK_METHOD2(SendAppPermissionsChanged,
+               void(const std::string& device_id,
+                    const std::string& application_id));
+  MOCK_CONST_METHOD2(GetModuleTypes,
+                     bool(const std::string& policy_app_id,
+                          std::vector<std::string>* modules));
+  MOCK_METHOD1(set_access_remote,
+               void(std::shared_ptr<AccessRemote> access_remote));
   MOCK_METHOD0(CleanupUnpairedDevices, bool());
   MOCK_CONST_METHOD1(CanAppKeepContext, bool(const std::string& app_id));
   MOCK_CONST_METHOD1(CanAppStealFocus, bool(const std::string& app_id));
@@ -155,7 +174,7 @@ class MockPolicyManager : public PolicyManager {
   MOCK_CONST_METHOD1(HeartBeatTimeout, uint32_t(const std::string& app_id));
   MOCK_METHOD1(SaveUpdateStatusRequired, void(bool is_update_needed));
   MOCK_METHOD0(OnAppsSearchStarted, void());
-  MOCK_METHOD0(OnAppsSearchCompleted, void());
+  MOCK_METHOD1(OnAppsSearchCompleted, void(const bool trigger_ptu));
   MOCK_METHOD1(OnAppRegisteredOnMobile,
                void(const std::string& application_id));
   MOCK_CONST_METHOD1(
@@ -164,7 +183,7 @@ class MockPolicyManager : public PolicyManager {
   MOCK_CONST_METHOD0(GetVehicleInfo, const policy::VehicleInfo());
   MOCK_CONST_METHOD0(GetMetaInfo, const policy::MetaInfo());
   MOCK_CONST_METHOD0(RetrieveCertificate, std::string());
-  MOCK_METHOD1(SetDecryptedCertificate, void(const std::string&));
+  MOCK_CONST_METHOD0(HasCertificate, bool());
   MOCK_METHOD0(ExceededIgnitionCycles, bool());
   MOCK_METHOD0(ExceededDays, bool());
   MOCK_METHOD0(StartPTExchange, void());
@@ -189,10 +208,33 @@ class MockPolicyManager : public PolicyManager {
   MOCK_CONST_METHOD2(RetrySequenceUrl,
                      AppIdURL(const struct RetrySequenceURL&,
                               const EndpointUrls& urls));
+  MOCK_METHOD6(CheckPermissions,
+               void(const PTString& device_id,
+                    const PTString& app_id,
+                    const PTString& hmi_level,
+                    const PTString& rpc,
+                    const RPCParams& rpc_params,
+                    CheckPermissionResult& result));
+  MOCK_METHOD2(
+      CheckPendingPermissionsChanges,
+      void(const std::string& policy_app_id,
+           const std::vector<FunctionalGroupPermission>& current_permissions));
+
+  MOCK_METHOD2(OnDeviceSwitching,
+               void(const std::string& device_id_from,
+                    const std::string& device_id_to));
+
+  MOCK_CONST_METHOD1(
+      GetAppRequestSubTypes,
+      const std::vector<std::string>(const std::string& policy_app_id));
+  MOCK_CONST_METHOD1(GetAppRequestTypesState,
+                     RequestType::State(const std::string& policy_app_id));
+  MOCK_CONST_METHOD1(GetAppRequestSubTypesState,
+                     RequestSubType::State(const std::string& policy_app_id));
 };
 
 }  // namespace policy_manager_test
 }  // namespace components
 }  // namespace test
 
-#endif  // SRC_COMPONENTS_INCLUDE_TEST_POLICY_MOCK_POLICY_MANAGER_H_
+#endif  // SRC_COMPONENTS_INCLUDE_TEST_POLICY_POLICY_REGULAR_POLICY_MOCK_POLICY_MANAGER_H_

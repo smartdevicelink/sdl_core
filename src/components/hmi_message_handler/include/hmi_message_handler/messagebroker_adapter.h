@@ -35,15 +35,16 @@
 
 #include <string>
 
-#include "mb_controller.hpp"
+#include "hmi_message_handler/mb_controller.h"
 #include "hmi_message_handler/hmi_message_adapter_impl.h"
 #include "utils/threads/thread_validator.h"
 
 namespace hmi_message_handler {
 
-class MessageBrokerAdapter : public HMIMessageAdapterImpl,
-                             public NsMessageBroker::CMessageBrokerController,
-                             public threads::SingleThreadValidator {
+class MessageBrokerAdapter
+    : public HMIMessageAdapterImpl,
+      public hmi_message_handler::CMessageBrokerController,
+      public threads::SingleThreadValidator {
  public:
   MessageBrokerAdapter(HMIMessageHandler* handler_param,
                        const std::string& server_address,

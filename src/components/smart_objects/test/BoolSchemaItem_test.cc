@@ -34,8 +34,6 @@
 
 #include "gmock/gmock.h"
 
-#include "utils/shared_ptr.h"
-
 #include "smart_objects/smart_object.h"
 #include "smart_objects/bool_schema_item.h"
 
@@ -43,7 +41,7 @@ namespace test {
 namespace components {
 namespace smart_object_test {
 
-using NsSmartDeviceLink::NsSmartObjects::ISchemaItemPtr;
+using ns_smart_device_link::ns_smart_objects::ISchemaItemPtr;
 
 /**
  * Test BoolSchemaItem no default value
@@ -53,25 +51,26 @@ using NsSmartDeviceLink::NsSmartObjects::ISchemaItemPtr;
  * and leave SmartObject in previous state.
  **/
 TEST(test_no_default_value, test_BoolSchemaItemTest) {
-  NsSmartDeviceLink::NsSmartObjects::SmartObject obj;
+  ns_smart_device_link::ns_smart_objects::SmartObject obj;
 
   ISchemaItemPtr item =
-      NsSmartDeviceLink::NsSmartObjects::CBoolSchemaItem::create();  // No
-                                                                     // default
-                                                                     // value
+      ns_smart_device_link::ns_smart_objects::CBoolSchemaItem::create();  // No
+  // default
+  // value
 
   obj = 5;
   ASSERT_EQ(5, obj.asInt());
 
-  int resultType = item->validate(obj);
-  EXPECT_EQ(NsSmartDeviceLink::NsSmartObjects::Errors::INVALID_VALUE,
+  rpc::ValidationReport report("RPC");
+  int resultType = item->validate(obj, &report);
+  EXPECT_EQ(ns_smart_device_link::ns_smart_objects::errors::INVALID_VALUE,
             resultType);
 
   obj = true;
   ASSERT_TRUE(obj.asBool());
 
-  resultType = item->validate(obj);
-  EXPECT_EQ(NsSmartDeviceLink::NsSmartObjects::Errors::OK, resultType);
+  resultType = item->validate(obj, &report);
+  EXPECT_EQ(ns_smart_device_link::ns_smart_objects::errors::OK, resultType);
   bool resDefault = item->setDefaultValue(obj);
   EXPECT_FALSE(resDefault);
   EXPECT_TRUE(obj.asBool());
@@ -79,13 +78,13 @@ TEST(test_no_default_value, test_BoolSchemaItemTest) {
   obj = "Test";
   ASSERT_EQ(std::string("Test"), obj.asString());
 
-  resultType = item->validate(obj);
-  EXPECT_EQ(NsSmartDeviceLink::NsSmartObjects::Errors::INVALID_VALUE,
+  resultType = item->validate(obj, &report);
+  EXPECT_EQ(ns_smart_device_link::ns_smart_objects::errors::INVALID_VALUE,
             resultType);
   resDefault = item->setDefaultValue(obj);
   EXPECT_FALSE(resDefault);
-  resultType = item->validate(obj);
-  EXPECT_EQ(NsSmartDeviceLink::NsSmartObjects::Errors::INVALID_VALUE,
+  resultType = item->validate(obj, &report);
+  EXPECT_EQ(ns_smart_device_link::ns_smart_objects::errors::INVALID_VALUE,
             resultType);
 }
 
@@ -99,25 +98,26 @@ TEST(test_no_default_value, test_BoolSchemaItemTest) {
  *value.
  **/
 TEST(test_item_with_default_value, test_BoolSchemaItemTest) {
-  NsSmartDeviceLink::NsSmartObjects::SmartObject obj;
+  ns_smart_device_link::ns_smart_objects::SmartObject obj;
 
   ISchemaItemPtr item =
-      NsSmartDeviceLink::NsSmartObjects::CBoolSchemaItem::create(
-          NsSmartDeviceLink::NsSmartObjects::TSchemaItemParameter<bool>(
+      ns_smart_device_link::ns_smart_objects::CBoolSchemaItem::create(
+          ns_smart_device_link::ns_smart_objects::TSchemaItemParameter<bool>(
               false));  // Default value = false
 
   obj = 5;
   ASSERT_EQ(5, obj.asInt());
 
-  int resultType = item->validate(obj);
-  EXPECT_EQ(NsSmartDeviceLink::NsSmartObjects::Errors::INVALID_VALUE,
+  rpc::ValidationReport report("RPC");
+  int resultType = item->validate(obj, &report);
+  EXPECT_EQ(ns_smart_device_link::ns_smart_objects::errors::INVALID_VALUE,
             resultType);
 
   obj = true;
   ASSERT_TRUE(obj.asBool());
 
-  resultType = item->validate(obj);
-  EXPECT_EQ(NsSmartDeviceLink::NsSmartObjects::Errors::OK, resultType);
+  resultType = item->validate(obj, &report);
+  EXPECT_EQ(ns_smart_device_link::ns_smart_objects::errors::OK, resultType);
   bool resDefault = item->setDefaultValue(obj);
   EXPECT_TRUE(resDefault);
   EXPECT_FALSE(obj.asBool());
@@ -125,33 +125,34 @@ TEST(test_item_with_default_value, test_BoolSchemaItemTest) {
   obj = "Test";
   ASSERT_EQ(std::string("Test"), obj.asString());
 
-  resultType = item->validate(obj);
-  EXPECT_EQ(NsSmartDeviceLink::NsSmartObjects::Errors::INVALID_VALUE,
+  resultType = item->validate(obj, &report);
+  EXPECT_EQ(ns_smart_device_link::ns_smart_objects::errors::INVALID_VALUE,
             resultType);
   resDefault = item->setDefaultValue(obj);
   EXPECT_TRUE(resDefault);
   EXPECT_FALSE(obj.asBool());
 
-  resultType = item->validate(obj);
-  EXPECT_EQ(NsSmartDeviceLink::NsSmartObjects::Errors::OK, resultType);
+  resultType = item->validate(obj, &report);
+  EXPECT_EQ(ns_smart_device_link::ns_smart_objects::errors::OK, resultType);
   EXPECT_FALSE(obj.asBool());
 }
 
 TEST(test_map_validate, test_BoolSchemaItemTest) {
-  NsSmartDeviceLink::NsSmartObjects::SmartObject obj;
+  ns_smart_device_link::ns_smart_objects::SmartObject obj;
   ISchemaItemPtr item =
-      NsSmartDeviceLink::NsSmartObjects::CBoolSchemaItem::create(
-          NsSmartDeviceLink::NsSmartObjects::TSchemaItemParameter<bool>(
+      ns_smart_device_link::ns_smart_objects::CBoolSchemaItem::create(
+          ns_smart_device_link::ns_smart_objects::TSchemaItemParameter<bool>(
               false));  // Default value = false
 
   obj["aa"] = true;
   ASSERT_TRUE(obj["aa"].asBool());
 
-  int resultType = item->validate(obj["aa"]);
-  EXPECT_EQ(NsSmartDeviceLink::NsSmartObjects::Errors::OK, resultType);
+  rpc::ValidationReport report("RPC");
+  int resultType = item->validate(obj["aa"], &report);
+  EXPECT_EQ(ns_smart_device_link::ns_smart_objects::errors::OK, resultType);
 
-  resultType = item->validate(obj);
-  EXPECT_EQ(NsSmartDeviceLink::NsSmartObjects::Errors::INVALID_VALUE,
+  resultType = item->validate(obj, &report);
+  EXPECT_EQ(ns_smart_device_link::ns_smart_objects::errors::INVALID_VALUE,
             resultType);
 
   bool resDefault = item->setDefaultValue(obj["aa"]);
@@ -162,19 +163,19 @@ TEST(test_map_validate, test_BoolSchemaItemTest) {
   EXPECT_TRUE(resDefault);
   EXPECT_FALSE(obj.asBool());
 
-  resultType = item->validate(obj);
-  EXPECT_EQ(NsSmartDeviceLink::NsSmartObjects::Errors::OK, resultType);
+  resultType = item->validate(obj, &report);
+  EXPECT_EQ(ns_smart_device_link::ns_smart_objects::errors::OK, resultType);
 
   obj["ind"] = true;
-  resultType = item->validate(obj);
-  EXPECT_EQ(NsSmartDeviceLink::NsSmartObjects::Errors::INVALID_VALUE,
+  resultType = item->validate(obj, &report);
+  EXPECT_EQ(ns_smart_device_link::ns_smart_objects::errors::INVALID_VALUE,
             resultType);
 }
 
 TEST(test_array_validate, test_BoolSchemaItemTest) {
-  NsSmartDeviceLink::NsSmartObjects::SmartObject obj;
+  ns_smart_device_link::ns_smart_objects::SmartObject obj;
   ISchemaItemPtr item =
-      NsSmartDeviceLink::NsSmartObjects::CBoolSchemaItem::create();
+      ns_smart_device_link::ns_smart_objects::CBoolSchemaItem::create();
 
   obj[0] = true;
   obj[1] = false;
@@ -182,14 +183,15 @@ TEST(test_array_validate, test_BoolSchemaItemTest) {
   ASSERT_TRUE(obj[0].asBool());
   ASSERT_FALSE(obj[1].asBool());
 
-  int resultType = item->validate(obj[0]);
-  EXPECT_EQ(NsSmartDeviceLink::NsSmartObjects::Errors::OK, resultType);
+  rpc::ValidationReport report("RPC");
+  int resultType = item->validate(obj[0], &report);
+  EXPECT_EQ(ns_smart_device_link::ns_smart_objects::errors::OK, resultType);
 
-  resultType = item->validate(obj[1]);
-  EXPECT_EQ(NsSmartDeviceLink::NsSmartObjects::Errors::OK, resultType);
+  resultType = item->validate(obj[1], &report);
+  EXPECT_EQ(ns_smart_device_link::ns_smart_objects::errors::OK, resultType);
 
-  resultType = item->validate(obj);
-  EXPECT_EQ(NsSmartDeviceLink::NsSmartObjects::Errors::INVALID_VALUE,
+  resultType = item->validate(obj, &report);
+  EXPECT_EQ(ns_smart_device_link::ns_smart_objects::errors::INVALID_VALUE,
             resultType);
 
   bool resDefault = item->setDefaultValue(obj[0]);
@@ -200,14 +202,14 @@ TEST(test_array_validate, test_BoolSchemaItemTest) {
   EXPECT_FALSE(resDefault);
   EXPECT_FALSE(obj[1].asBool());
 
-  resultType = item->validate(obj);
-  EXPECT_EQ(NsSmartDeviceLink::NsSmartObjects::Errors::INVALID_VALUE,
+  resultType = item->validate(obj, &report);
+  EXPECT_EQ(ns_smart_device_link::ns_smart_objects::errors::INVALID_VALUE,
             resultType);
 
   obj = false;
 
-  resultType = item->validate(obj);
-  EXPECT_EQ(NsSmartDeviceLink::NsSmartObjects::Errors::OK, resultType);
+  resultType = item->validate(obj, &report);
+  EXPECT_EQ(ns_smart_device_link::ns_smart_objects::errors::OK, resultType);
 }
 
 }  // namespace smart_object_test

@@ -1,4 +1,3 @@
-// This file is generated, do not edit
 #include "policy/policy_table/enums.h"
 
 namespace rpc {
@@ -14,6 +13,8 @@ bool IsValidEnum(Priority val) {
     case P_COMMUNICATION:
       return true;
     case P_NORMAL:
+      return true;
+    case P_PROJECTION:
       return true;
     case P_NONE:
       return true;
@@ -33,6 +34,8 @@ const char* EnumToJsonString(Priority val) {
       return "COMMUNICATION";
     case P_NORMAL:
       return "NORMAL";
+    case P_PROJECTION:
+      return "PROJECTION";
     case P_NONE:
       return "NONE";
     default:
@@ -54,6 +57,9 @@ bool EnumFromJsonString(const std::string& literal, Priority* result) {
     return true;
   } else if ("NORMAL" == literal) {
     *result = P_NORMAL;
+    return true;
+  } else if ("PROJECTION" == literal) {
+    *result = P_PROJECTION;
     return true;
   } else if ("NONE" == literal) {
     *result = P_NONE;
@@ -119,6 +125,8 @@ bool IsValidEnum(Parameter val) {
       return true;
     case P_EXTERNALTEMPERATURE:
       return true;
+    case P_TURNSIGNAL:
+      return true;
     case P_FUELLEVEL:
       return true;
     case P_FUELLEVEL_STATE:
@@ -126,6 +134,8 @@ bool IsValidEnum(Parameter val) {
     case P_HEADLAMPSTATUS:
       return true;
     case P_INSTANTFUELCONSUMPTION:
+      return true;
+    case P_FUELRANGE:
       return true;
     case P_ODOMETER:
       return true;
@@ -139,6 +149,8 @@ bool IsValidEnum(Parameter val) {
       return true;
     case P_BELTSTATUS:
       return true;
+    case P_ELECTRONICPARKBRAKESTATUS:
+      return true;
     case P_DRIVERBRAKING:
       return true;
     case P_PRNDL:
@@ -146,6 +158,8 @@ bool IsValidEnum(Parameter val) {
     case P_RPM:
       return true;
     case P_STEERINGWHEELANGLE:
+      return true;
+    case P_ENGINEOILLIFE:
       return true;
     case P_MYKEY:
       return true;
@@ -162,8 +176,6 @@ bool IsValidEnum(Parameter val) {
     case P_ECALLINFO:
       return true;
     case P_ABS_STATE:
-      return true;
-    case P_TURN_SIGNAL:
       return true;
     case P_FUEL_RANGE:
       return true;
@@ -208,6 +220,8 @@ const char* EnumToJsonString(Parameter val) {
       return "engineTorque";
     case P_EXTERNALTEMPERATURE:
       return "externalTemperature";
+    case P_TURNSIGNAL:
+      return "turnSignal";
     case P_FUELLEVEL:
       return "fuelLevel";
     case P_FUELLEVEL_STATE:
@@ -216,6 +230,8 @@ const char* EnumToJsonString(Parameter val) {
       return "headLampStatus";
     case P_INSTANTFUELCONSUMPTION:
       return "instantFuelConsumption";
+    case P_FUELRANGE:
+      return "fuelRange";
     case P_ODOMETER:
       return "odometer";
     case P_TIREPRESSURE:
@@ -228,6 +244,8 @@ const char* EnumToJsonString(Parameter val) {
       return "accPedalPosition";
     case P_BELTSTATUS:
       return "beltStatus";
+    case P_ELECTRONICPARKBRAKESTATUS:
+      return "electronicParkBrakeStatus";
     case P_DRIVERBRAKING:
       return "driverBraking";
     case P_PRNDL:
@@ -236,6 +254,8 @@ const char* EnumToJsonString(Parameter val) {
       return "rpm";
     case P_STEERINGWHEELANGLE:
       return "steeringWheelAngle";
+    case P_ENGINEOILLIFE:
+      return "engineOilLife";
     case P_MYKEY:
       return "myKey";
     case P_AIRBAGSTATUS:
@@ -252,8 +272,6 @@ const char* EnumToJsonString(Parameter val) {
       return "eCallInfo";
     case P_ABS_STATE:
       return "abs_State";
-    case P_TURN_SIGNAL:
-      return "turnSignal";
     case P_FUEL_RANGE:
       return "fuelRange";
     case P_TIRE_PRESSURE_VALUE:
@@ -300,6 +318,9 @@ bool EnumFromJsonString(const std::string& literal, Parameter* result) {
   } else if ("externalTemperature" == literal) {
     *result = P_EXTERNALTEMPERATURE;
     return true;
+  } else if ("turnSignal" == literal) {
+    *result = P_TURNSIGNAL;
+    return true;
   } else if ("fuelLevel" == literal) {
     *result = P_FUELLEVEL;
     return true;
@@ -311,6 +332,9 @@ bool EnumFromJsonString(const std::string& literal, Parameter* result) {
     return true;
   } else if ("instantFuelConsumption" == literal) {
     *result = P_INSTANTFUELCONSUMPTION;
+    return true;
+  } else if ("fuelRange" == literal) {
+    *result = P_FUELRANGE;
     return true;
   } else if ("odometer" == literal) {
     *result = P_ODOMETER;
@@ -330,6 +354,9 @@ bool EnumFromJsonString(const std::string& literal, Parameter* result) {
   } else if ("beltStatus" == literal) {
     *result = P_BELTSTATUS;
     return true;
+  } else if ("electronicParkBrakeStatus" == literal) {
+    *result = P_ELECTRONICPARKBRAKESTATUS;
+    return true;
   } else if ("driverBraking" == literal) {
     *result = P_DRIVERBRAKING;
     return true;
@@ -341,6 +368,9 @@ bool EnumFromJsonString(const std::string& literal, Parameter* result) {
     return true;
   } else if ("steeringWheelAngle" == literal) {
     *result = P_STEERINGWHEELANGLE;
+    return true;
+  } else if ("engineOilLife" == literal) {
+    *result = P_ENGINEOILLIFE;
     return true;
   } else if ("myKey" == literal) {
     *result = P_MYKEY;
@@ -365,9 +395,6 @@ bool EnumFromJsonString(const std::string& literal, Parameter* result) {
     return true;
   } else if ("abs_State" == literal) {
     *result = P_ABS_STATE;
-    return true;
-  } else if ("turnSignal" == literal) {
-    *result = P_TURN_SIGNAL;
     return true;
   } else if ("fuelRange" == literal) {
     *result = P_FUEL_RANGE;
@@ -438,6 +465,10 @@ bool IsValidEnum(AppHMIType val) {
       return true;
     case AHT_SYSTEM:
       return true;
+    case AHT_PROJECTION:
+      return true;
+    case AHT_REMOTE_CONTROL:
+      return true;
     default:
       return false;
   }
@@ -464,6 +495,10 @@ const char* EnumToJsonString(AppHMIType val) {
       return "TESTING";
     case AHT_SYSTEM:
       return "SYSTEM";
+    case AHT_PROJECTION:
+      return "PROJECTION";
+    case AHT_REMOTE_CONTROL:
+      return "REMOTE_CONTROL";
     default:
       return "";
   }
@@ -498,6 +533,12 @@ bool EnumFromJsonString(const std::string& literal, AppHMIType* result) {
     return true;
   } else if ("SYSTEM" == literal) {
     *result = AHT_SYSTEM;
+    return true;
+  } else if ("PROJECTION" == literal) {
+    *result = AHT_PROJECTION;
+    return true;
+  } else if ("REMOTE_CONTROL" == literal) {
+    *result = AHT_REMOTE_CONTROL;
     return true;
   } else {
     return false;
@@ -578,6 +619,10 @@ bool IsValidEnum(RequestType val) {
       return true;
     case RT_FOTA:
       return true;
+    case RT_OEM_SPECIFIC:
+      return true;
+    case RT_EMPTY:
+      return true;
     default:
       return false;
   }
@@ -625,6 +670,10 @@ const char* EnumToJsonString(RequestType val) {
       return "MEDIA";
     case RT_FOTA:
       return "FOTA";
+    case RT_OEM_SPECIFIC:
+      return "OEM_SPECIFIC";
+    case RT_EMPTY:
+      return "EMPTY";
     default:
       return "";
   }
@@ -710,10 +759,439 @@ bool EnumFromJsonString(const std::string& literal, RequestType* result) {
   if ("FOTA" == literal) {
     *result = RT_FOTA;
     return true;
+  }
+  if ("OEM_SPECIFIC" == literal) {
+    *result = RT_OEM_SPECIFIC;
+    return true;
+  }
+  if ("EMPTY" == literal) {
+    *result = RT_EMPTY;
+    return true;
   } else {
     return false;
   }
 }
+
+bool IsValidEnum(ModuleType val) {
+  switch (val) {
+    case MT_CLIMATE:
+      return true;
+    case MT_RADIO:
+      return true;
+    case MT_AUDIO:
+      return true;
+    case MT_LIGHT:
+      return true;
+    case MT_HMI_SETTINGS:
+      return true;
+    case MT_SEAT:
+      return true;
+    case MT_EMPTY:
+      return true;
+    default:
+      return false;
+  }
+}
+const char* EnumToJsonString(ModuleType val) {
+  switch (val) {
+    case MT_CLIMATE:
+      return "CLIMATE";
+    case MT_RADIO:
+      return "RADIO";
+    case MT_AUDIO:
+      return "AUDIO";
+    case MT_LIGHT:
+      return "LIGHT";
+    case MT_HMI_SETTINGS:
+      return "HMI_SETTINGS";
+    case MT_SEAT:
+      return "SEAT";
+    case MT_EMPTY:
+      return "EMPTY";
+    default:
+      return "";
+  }
+}
+
+bool EnumFromJsonString(const std::string& literal, ModuleType* result) {
+  if ("CLIMATE" == literal) {
+    *result = MT_CLIMATE;
+    return true;
+  } else if ("RADIO" == literal) {
+    *result = MT_RADIO;
+    return true;
+  } else if ("SEAT" == literal) {
+    *result = MT_SEAT;
+    return true;
+  } else if ("AUDIO" == literal) {
+    *result = MT_AUDIO;
+    return true;
+  } else if ("LIGHT" == literal) {
+    *result = MT_LIGHT;
+    return true;
+  } else if ("HMI_SETTINGS" == literal) {
+    *result = MT_HMI_SETTINGS;
+    return true;
+  } else if ("EMPTY" == literal) {
+    *result = MT_EMPTY;
+    return true;
+  } else {
+    return false;
+  }
+}
+
+bool EnumFromJsonString(const std::string& literal, FunctionID* result) {
+  if ("RegisterAppInterface" == literal) {
+    *result = RegisterAppInterfaceID;
+    return true;
+  }
+
+  if ("UnregisterAppInterface" == literal) {
+    *result = UnregisterAppInterfaceID;
+    return true;
+  }
+
+  if ("SetGlobalProperties" == literal) {
+    *result = SetGlobalPropertiesID;
+    return true;
+  }
+
+  if ("ResetGlobalProperties" == literal) {
+    *result = ResetGlobalPropertiesID;
+    return true;
+  }
+
+  if ("AddCommand" == literal) {
+    *result = AddCommandID;
+    return true;
+  }
+
+  if ("DeleteCommand" == literal) {
+    *result = DeleteCommandID;
+    return true;
+  }
+
+  if ("AddSubMenu" == literal) {
+    *result = AddSubMenuID;
+    return true;
+  }
+
+  if ("DeleteSubMenu" == literal) {
+    *result = DeleteSubMenuID;
+    return true;
+  }
+
+  if ("CreateInteractionChoiceSet" == literal) {
+    *result = CreateInteractionChoiceSetID;
+    return true;
+  }
+
+  if ("PerformInteraction" == literal) {
+    *result = PerformInteractionID;
+    return true;
+  }
+
+  if ("DeleteInteractionChoiceSet" == literal) {
+    *result = DeleteInteractionChoiceSetID;
+    return true;
+  }
+
+  if ("Alert" == literal) {
+    *result = AlertID;
+    return true;
+  }
+
+  if ("Show" == literal) {
+    *result = ShowID;
+    return true;
+  }
+
+  if ("Speak" == literal) {
+    *result = SpeakID;
+    return true;
+  }
+
+  if ("SetMediaClockTimer" == literal) {
+    *result = SetMediaClockTimerID;
+    return true;
+  }
+
+  if ("PerformAudioPassThru" == literal) {
+    *result = PerformAudioPassThruID;
+    return true;
+  }
+
+  if ("EndAudioPassThru" == literal) {
+    *result = EndAudioPassThruID;
+    return true;
+  }
+
+  if ("SubscribeButton" == literal) {
+    *result = SubscribeButtonID;
+    return true;
+  }
+
+  if ("UnsubscribeButton" == literal) {
+    *result = UnsubscribeButtonID;
+    return true;
+  }
+
+  if ("SubscribeVehicleData" == literal) {
+    *result = SubscribeVehicleDataID;
+    return true;
+  }
+
+  if ("UnsubscribeVehicleData" == literal) {
+    *result = UnsubscribeVehicleDataID;
+    return true;
+  }
+
+  if ("GetVehicleData" == literal) {
+    *result = GetVehicleDataID;
+    return true;
+  }
+
+  if ("ReadDID" == literal) {
+    *result = ReadDIDID;
+    return true;
+  }
+
+  if ("GetDTCs" == literal) {
+    *result = GetDTCsID;
+    return true;
+  }
+
+  if ("ScrollableMessage" == literal) {
+    *result = ScrollableMessageID;
+    return true;
+  }
+
+  if ("Slider" == literal) {
+    *result = SliderID;
+    return true;
+  }
+
+  if ("ShowConstantTBT" == literal) {
+    *result = ShowConstantTBTID;
+    return true;
+  }
+
+  if ("AlertManeuver" == literal) {
+    *result = AlertManeuverID;
+    return true;
+  }
+
+  if ("UpdateTurnList" == literal) {
+    *result = UpdateTurnListID;
+    return true;
+  }
+
+  if ("ChangeRegistration" == literal) {
+    *result = ChangeRegistrationID;
+    return true;
+  }
+
+  if ("GenericResponse" == literal) {
+    *result = GenericResponseID;
+    return true;
+  }
+
+  if ("PutFile" == literal) {
+    *result = PutFileID;
+    return true;
+  }
+
+  if ("DeleteFile" == literal) {
+    *result = DeleteFileID;
+    return true;
+  }
+
+  if ("ListFiles" == literal) {
+    *result = ListFilesID;
+    return true;
+  }
+
+  if ("SetAppIcon" == literal) {
+    *result = SetAppIconID;
+    return true;
+  }
+
+  if ("SetDisplayLayout" == literal) {
+    *result = SetDisplayLayoutID;
+    return true;
+  }
+
+  if ("DiagnosticMessage" == literal) {
+    *result = DiagnosticMessageID;
+    return true;
+  }
+
+  if ("SystemRequest" == literal) {
+    *result = SystemRequestID;
+    return true;
+  }
+
+  if ("SendLocation" == literal) {
+    *result = SendLocationID;
+    return true;
+  }
+
+  if ("DialNumber" == literal) {
+    *result = DialNumberID;
+    return true;
+  }
+
+  if ("ButtonPress" == literal) {
+    *result = ButtonPressID;
+    return true;
+  }
+
+  if ("GetInteriorVehicleData" == literal) {
+    *result = GetInteriorVehicleDataID;
+    return true;
+  }
+
+  if ("SetInteriorVehicleData" == literal) {
+    *result = SetInteriorVehicleDataID;
+    return true;
+  }
+
+  if ("GetWayPoints" == literal) {
+    *result = GetWayPointsID;
+    return true;
+  }
+
+  if ("SubscribeWayPoints" == literal) {
+    *result = SubscribeWayPointsID;
+    return true;
+  }
+
+  if ("UnsubscribeWayPoints" == literal) {
+    *result = UnsubscribeWayPointsID;
+    return true;
+  }
+
+  if ("GetSystemCapability" == literal) {
+    *result = GetSystemCapabilityID;
+    return true;
+  }
+
+  if ("SendHapticData" == literal) {
+    *result = SendHapticDataID;
+    return true;
+  }
+
+  if ("OnHMIStatus" == literal) {
+    *result = OnHMIStatusID;
+    return true;
+  }
+
+  if ("OnAppInterfaceUnregistered" == literal) {
+    *result = OnAppInterfaceUnregisteredID;
+    return true;
+  }
+
+  if ("OnButtonEvent" == literal) {
+    *result = OnButtonEventID;
+    return true;
+  }
+
+  if ("OnButtonPress" == literal) {
+    *result = OnButtonPressID;
+    return true;
+  }
+
+  if ("OnVehicleData" == literal) {
+    *result = OnVehicleDataID;
+    return true;
+  }
+
+  if ("OnCommand" == literal) {
+    *result = OnCommandID;
+    return true;
+  }
+
+  if ("OnTBTClientState" == literal) {
+    *result = OnTBTClientStateID;
+    return true;
+  }
+
+  if ("OnDriverDistraction" == literal) {
+    *result = OnDriverDistractionID;
+    return true;
+  }
+
+  if ("OnPermissionsChange" == literal) {
+    *result = OnPermissionsChangeID;
+    return true;
+  }
+
+  if ("OnAudioPassThru" == literal) {
+    *result = OnAudioPassThruID;
+    return true;
+  }
+
+  if ("OnLanguageChange" == literal) {
+    *result = OnLanguageChangeID;
+    return true;
+  }
+
+  if ("OnKeyboardInput" == literal) {
+    *result = OnKeyboardInputID;
+    return true;
+  }
+
+  if ("OnTouchEvent" == literal) {
+    *result = OnTouchEventID;
+    return true;
+  }
+
+  if ("OnSystemRequest" == literal) {
+    *result = OnSystemRequestID;
+    return true;
+  }
+
+  if ("OnHashChange" == literal) {
+    *result = OnHashChangeID;
+    return true;
+  }
+
+  if ("OnInteriorVehicleData" == literal) {
+    *result = OnInteriorVehicleDataID;
+    return true;
+  }
+
+  if ("OnWayPointChange" == literal) {
+    *result = OnWayPointChangeID;
+    return true;
+  }
+
+  if ("OnRCStatus" == literal) {
+    *result = OnRCStatusID;
+    return true;
+  }
+
+  if ("EncodedSyncPData" == literal) {
+    *result = EncodedSyncPDataID;
+    return true;
+  }
+
+  if ("SyncPData" == literal) {
+    *result = SyncPDataID;
+    return true;
+  }
+
+  if ("OnEncodedSyncPData" == literal) {
+    *result = OnEncodedSyncPDataID;
+    return true;
+  }
+
+  if ("OnSyncPData" == literal) {
+    *result = OnSyncPDataID;
+    return true;
+  }
+  return false;
+};
 
 const std::string kDefaultApp = "default";
 const std::string kPreDataConsentApp = "pre_DataConsent";

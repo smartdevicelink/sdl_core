@@ -41,8 +41,6 @@
 #include <list>
 #include <map>
 
-#include "utils/shared_ptr.h"
-
 #include "transport_manager/transport_adapter/device.h"
 #include "transport_manager/common.h"
 #include "transport_manager/error.h"
@@ -56,10 +54,21 @@ namespace transport_adapter {
 
 class TransportAdapterListener;
 
-// TODO(EZamakhov): cahnge to DeviceUID
-// typedef std::string DeviceType;
-
-enum DeviceType { AOA, PASA_AOA, BLUETOOTH, PASA_BLUETOOTH, MME, TCP, UNKNOWN };
+/**
+ * @brief The DeviceType enum defines types based on available transport
+ * adapters
+ */
+enum DeviceType {
+  AOA,
+  BLUETOOTH,
+  IOS_BT,
+  IOS_USB,
+  TCP,
+  IOS_USB_HOST_MODE,
+  IOS_USB_DEVICE_MODE,
+  IOS_CARPLAY_WIRELESS,  // running on iAP over Carplay wireless transport
+  UNKNOWN
+};
 
 typedef std::map<DeviceType, std::string> DeviceTypes;
 
@@ -73,6 +82,18 @@ typedef std::map<DeviceUID, DeviceSptr> DeviceMap;
  * adapter listeners
  */
 typedef std::list<TransportAdapterListener*> TransportAdapterListenerList;
+
+/**
+ * @brief Type definition for transport's configuration information
+ */
+typedef std::map<std::string, std::string> TransportConfig;
+
+/**
+ * @brief TransportConfig keys
+ */
+extern const char* tc_enabled;
+extern const char* tc_tcp_port;
+extern const char* tc_tcp_ip_address;
 
 class TransportAdapter {
  public:
@@ -277,6 +298,34 @@ class TransportAdapter {
    * @return string.
    */
   virtual std::string DeviceName(const DeviceUID& device_id) const = 0;
+
+  /**
+   * @brief StopDevice Stop all activity on device without removing it from
+   * devices list
+   * @param device_id unique device identifier that has to be stopped.
+   */
+  virtual void StopDevice(const DeviceUID& device_id) const = 0;
+
+  /**
+   * @brief DoTransportSwitch notifies listeners of transport adapter events
+   * that transport switching is requested by system
+   */
+  virtual void DoTransportSwitch() const = 0;
+
+  /**
+   * @brief DeviceSwitched is triggered for adapter to proceed with possible
+   * further switching steps required on device side. E.g. to notify device
+   * on end of switching so it can disconnect transport being switched from.
+   * @param device_handle Device id to notify on event
+   */
+  virtual void DeviceSwitched(const DeviceUID& device_handle) = 0;
+
+  virtual SwitchableDevices GetSwitchableDevices() const = 0;
+
+  /**
+   * @brief Returns the transport's configuration information
+   */
+  virtual TransportConfig GetTransportConfiguration() const = 0;
 
 #ifdef TELEMETRY_MONITOR
   /**

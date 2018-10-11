@@ -34,13 +34,14 @@
 
 #include <stddef.h>
 
-#include "utils/shared_ptr.h"
 #include "smart_objects/schema_item.h"
 #include "smart_objects/always_true_schema_item.h"
 #include "smart_objects/schema_item_parameter.h"
 
-namespace NsSmartDeviceLink {
-namespace NsSmartObjects {
+#include "utils/semantic_version.h"
+
+namespace ns_smart_device_link {
+namespace ns_smart_objects {
 /**
  * @brief Array schema item.
  **/
@@ -55,7 +56,7 @@ class CArraySchemaItem : public ISchemaItem {
    *
    * @return Shared pointer to a new schema item.
    **/
-  static utils::SharedPtr<CArraySchemaItem> create(
+  static std::shared_ptr<CArraySchemaItem> create(
       const ISchemaItemPtr ElementSchemaItem = CAlwaysTrueSchemaItem::create(),
       const TSchemaItemParameter<size_t>& MinSize =
           TSchemaItemParameter<size_t>(),
@@ -64,12 +65,15 @@ class CArraySchemaItem : public ISchemaItem {
 
   /**
    * @brief Validate smart object.
-   *
    * @param Object Object to validate.
-   *
-   * @return NsSmartObjects::Errors::eType
+   * @param report__ object for reporting errors during validation
+   * @param MessageVersion to check mobile RPC version against RPC Spec History
+   * @return ns_smart_objects::errors::eType
    **/
-  Errors::eType validate(const SmartObject& Object) OVERRIDE;
+  errors::eType validate(const SmartObject& Object,
+                         rpc::ValidationReport* report__,
+                         const utils::SemanticVersion& MessageVersion =
+                             utils::SemanticVersion()) OVERRIDE;
 
   /**
    * @brief Apply schema.
@@ -80,7 +84,9 @@ class CArraySchemaItem : public ISchemaItem {
    * from smart object otherwise contains false.
    **/
   void applySchema(SmartObject& Object,
-                   const bool RemoveFakeParameters) OVERRIDE;
+                   const bool RemoveFakeParameters,
+                   const utils::SemanticVersion& MessageVersion =
+                       utils::SemanticVersion()) OVERRIDE;
 
   /**
    * @brief Unapply schema.
@@ -124,7 +130,7 @@ class CArraySchemaItem : public ISchemaItem {
   const TSchemaItemParameter<size_t> mMaxSize;
   DISALLOW_COPY_AND_ASSIGN(CArraySchemaItem);
 };
-}  // namespace NsSmartObjects
-}  // namespace NsSmartDeviceLink
+}  // namespace ns_smart_objects
+}  // namespace ns_smart_device_link
 
 #endif  // SRC_COMPONENTS_SMART_OBJECTS_INCLUDE_SMART_OBJECTS_ARRAY_SCHEMA_ITEM_H_

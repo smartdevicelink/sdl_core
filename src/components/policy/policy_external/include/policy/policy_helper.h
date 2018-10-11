@@ -34,7 +34,7 @@
 #define SRC_COMPONENTS_POLICY_POLICY_EXTERNAL_INCLUDE_POLICY_POLICY_HELPER_H_
 
 #include "policy/policy_table/functions.h"
-#include "utils/shared_ptr.h"
+
 #include "policy/policy_types.h"
 
 namespace policy {
@@ -75,49 +75,109 @@ struct CompareGroupName {
 bool operator!=(const policy_table::ApplicationParams& first,
                 const policy_table::ApplicationParams& second);
 
-/*
+/**
  * @brief Helper struct for checking changes of application policies, which
  * come with update along with current data snapshot
- * In case of policies changed for some application, current data will be
- * updated and notification will be sent to application
+ * @param pm Pointer to PolicyManager instance
+ * @param update Shared pointer to policy table update received
+ * @param snapshot Shared pointer to current policy table copy
+ * @param out_results Collection of check result
  */
 struct CheckAppPolicy {
   CheckAppPolicy(PolicyManagerImpl* pm,
-                 const utils::SharedPtr<policy_table::Table> update,
-                 const utils::SharedPtr<policy_table::Table> snapshot);
+                 const std::shared_ptr<policy_table::Table> update,
+                 const std::shared_ptr<policy_table::Table> snapshot,
+                 CheckAppPolicyResults& out_results);
+
   bool operator()(const AppPoliciesValueType& app_policy);
 
  private:
-  enum PermissionsCheckResult {
-    RESULT_NO_CHANGES,
-    RESULT_APP_REVOKED,
-    RESULT_NICKNAME_MISMATCH,
-    RESULT_PERMISSIONS_REVOKED,
-    RESULT_CONSENT_NEEDED,
-    RESULT_CONSENT_NOT_REQIURED,
-    RESULT_PERMISSIONS_REVOKED_AND_CONSENT_NEEDED,
-    RESULT_REQUEST_TYPE_CHANGED
-  };
-
+  /**
+   * @brief Sets pending values to be notified to the system (depends on HMI
+   * level of application) with SDL.ActivateApp or OnAppPermissionsChanged
+   * notification
+   * @param app_policy Reference to updated application policy
+   * @param result Result of check of updated policy
+   */
   void SetPendingPermissions(const AppPoliciesValueType& app_policy,
-                             PermissionsCheckResult result) const;
+                             PermissionsCheckResult result,
+                             AppPermissions& permissions_diff) const;
+  /**
+   * @brief Analyzes updated application policy whether any changes received. If
+   * yes - provides appropriate result code
+   * @param app_policy Reference to updated application policy
+   * @return Result code according to changes in updated policy
+   */
   PermissionsCheckResult CheckPermissionsChanges(
       const AppPoliciesValueType& app_policy) const;
+  /**
+   * @brief Checks whether updated policy has groups revoked, i.e. absent in
+   * compare to current one
+   * @param app_policy Reference to updated policy
+   * @param revoked_groups List of revoked groups if any
+   * @return True if there are revoked groups, otherwise - false
+   */
   bool HasRevokedGroups(const AppPoliciesValueType& app_policy,
                         policy_table::Strings* revoked_groups = NULL) const;
+  /**
+   * @brief Checks whether updated application policy has new group in compare
+   * to current one
+   * @param app_policy Reference to updated application policy
+   * @param new_groups List of new groups if any
+   * @return True if new groups found, otherwise - false
+   */
   bool HasNewGroups(const AppPoliciesValueType& app_policy,
                     policy_table::Strings* new_groups = NULL) const;
+  /**
+   * @brief Checks whether updated policy has groups which require user consent
+   * @param app_policy Reference to updated application policy
+   * @return True if has groups requiring user consents, otherwise - false
+   */
   bool HasConsentNeededGroups(const AppPoliciesValueType& app_policy) const;
+  /**
+   * @brief Gets revoked groups parameters from current policies
+   * @param app_policy Reference to updated application policy
+   * @return List of revoked groups with their parameters
+   */
   std::vector<FunctionalGroupPermission> GetRevokedGroups(
       const AppPoliciesValueType& app_policy) const;
+  /**
+   * @brief Removes consents for revoked groups of application
+   * @param app_policy Reference to updated application policy
+   * @param revoked_groups List of revoked groups with parameters to remove
+   * consents if any exists
+   */
   void RemoveRevokedConsents(
       const AppPoliciesValueType& app_policy,
       const std::vector<FunctionalGroupPermission>& revoked_groups) const;
+  /**
+   * @brief Checks whether application is present in current policy table,
+   * since update can be processed only for application known by policy while
+   * it sent update request
+   * @param application_id Application id
+   * @return True if application is known, otherwise - false
+   */
   bool IsKnownAppication(const std::string& application_id) const;
-  void NotifySystem(const AppPoliciesValueType& app_policy) const;
-  void SendPermissionsToApp(const AppPoliciesValueType& app_policy) const;
+  /**
+   * @brief Checks whether application is revoked by backend, i.e. has 'null'
+   * for policies parameters
+   * @param app_policy Reference to updated application policy
+   * @return True if application is revoked, otherwise - false
+   */
   bool IsAppRevoked(const AppPoliciesValueType& app_policy) const;
+  /**
+   * @brief Checks whether there such application is registered and has correct
+   * nickname
+   * @param app_policy Reference to updated application policy
+   * @return  True if there is nickname mismatch, otherwise - false
+   */
   bool NicknamesMatch(const AppPoliciesValueType& app_policy) const;
+  /**
+   * @brief Adds result of check of current application policy with updated one
+   * @param app_id Application id
+   * @param result Result value
+   */
+  void AddResult(const std::string& app_id, PermissionsCheckResult result);
   /**
    * @brief Allows to check if appropriate group requires any consent.
    * @param group_name the group for which consent will be checked.
@@ -125,12 +185,56 @@ struct CheckAppPolicy {
    */
   bool IsConsentRequired(const std::string& app_id,
                          const std::string& group_name) const;
+  /**
+   * @brief Checks whether RequestTypes of application have been changed by
+   * udpated
+   * @param app_policy Reference to updated application policy
+   * @return True if changed, otherwise - false
+   */
   bool IsRequestTypeChanged(const AppPoliciesValueType& app_policy) const;
+
+  /**
+   * @brief Checks whether App RequestSubTypes have been changed by
+   * udpated
+   * @param app_policy Reference to updated application policy
+   * @return True if changed, otherwise - false
+   */
+  bool IsRequestSubTypeChanged(const AppPoliciesValueType& app_policy) const;
+
+  /**
+   * @brief Helper function that inserts permissions into app_permissions_diff_
+   * map.
+   * udpated
+   * @param app_policy Reference to updated application policy
+   * @param permissions_diff Reference to app permissions to be inserted into
+   * map.
+   * @return void
+   */
+  void InsertPermission(const std::string& app_id,
+                        const AppPermissions& permissions_diff);
 
  private:
   PolicyManagerImpl* pm_;
-  const utils::SharedPtr<policy_table::Table> update_;
-  const utils::SharedPtr<policy_table::Table> snapshot_;
+  const std::shared_ptr<policy_table::Table> update_;
+  const std::shared_ptr<policy_table::Table> snapshot_;
+  CheckAppPolicyResults& out_results_;
+};
+
+/**
+ * @brief Helper struct for filling actions to be done for processed application
+ * using CheckAppPolicyResults data as a source
+ */
+struct FillActionsForAppPolicies {
+  FillActionsForAppPolicies(
+      ApplicationsPoliciesActions& actions,
+      const policy_table::ApplicationPolicies& app_policies)
+      : actions_(actions), app_policies_(app_policies) {}
+
+  void operator()(const policy::CheckAppPolicyResults::value_type& value);
+
+ private:
+  ApplicationsPoliciesActions& actions_;
+  const policy_table::ApplicationPolicies& app_policies_;
 };
 
 /*
@@ -164,8 +268,26 @@ struct FillNotificationData {
                              const std::set<Parameter>& target);
   void InitRpcKeys(const std::string& rpc_name);
   bool RpcParametersEmpty(RpcPermissions& rpc);
-  bool IsSectionEmpty(ParameterPermissions& permissions,
-                      const std::string& section);
+
+  /**
+   * @brief Checks if specific section in specified permissions is empty
+   * @param permissions reference to the permissions structure
+   * @param section reference to the section name
+   * @return true if specified section in permissions is empty otherwise returns
+   * false
+   */
+  bool IsSectionEmpty(const ParameterPermissions& permissions,
+                      const std::string& section) const;
+
+  /**
+   * @brief Checks if at least one parameter is allowed for the specified
+   * permissions
+   * @param permissions reference to the permissions structure
+   * @return true if at least one parameter is allowed for the specified
+   * permissions otherwise returns false
+   */
+  bool IsSomeParameterAllowed(const ParameterPermissions& permissions) const;
+
   std::string current_key_;
   Permissions& data_;
   const bool does_require_user_consent_;
@@ -257,6 +379,7 @@ FunctionalGroupIDs FindSame(const FunctionalGroupIDs& first,
  * @return true, if succeded, otherwise - false
  */
 bool UnwrapAppPolicies(policy_table::ApplicationPolicies& app_policies);
-}
+
+}  // namespace policy
 
 #endif  // SRC_COMPONENTS_POLICY_POLICY_EXTERNAL_INCLUDE_POLICY_POLICY_HELPER_H_

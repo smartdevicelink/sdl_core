@@ -39,6 +39,7 @@ include_directories(
   ${COMPONENTS_DIR}/rpc_base/include
   ${COMPONENTS_DIR}/config_profile/include
   ${COMPONENTS_DIR}/utils/include/
+  ${COMPONENTS_DIR}/include/test/policy/policy_regular/
   ${POLICY_PATH}/test/include/
   ${POLICY_MOCK_INCLUDE_PATH}/
 )

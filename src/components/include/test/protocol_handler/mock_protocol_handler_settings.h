@@ -43,6 +43,10 @@ class MockProtocolHandlerSettings
     : public protocol_handler::ProtocolHandlerSettings {
  public:
   MOCK_CONST_METHOD0(maximum_payload_size, size_t());
+  MOCK_CONST_METHOD0(maximum_control_payload_size, size_t());
+  MOCK_CONST_METHOD0(maximum_rpc_payload_size, size_t());
+  MOCK_CONST_METHOD0(maximum_audio_payload_size, size_t());
+  MOCK_CONST_METHOD0(maximum_video_payload_size, size_t());
   MOCK_CONST_METHOD0(message_frequency_count, size_t());
   MOCK_CONST_METHOD0(message_frequency_time, size_t());
   MOCK_CONST_METHOD0(malformed_message_filtering, bool());
@@ -56,6 +60,17 @@ class MockProtocolHandlerSettings
   MOCK_CONST_METHOD0(force_protected_service, const std::vector<int>&());
   MOCK_CONST_METHOD0(force_unprotected_service, const std::vector<int>&());
 #endif
+  MOCK_CONST_METHOD0(multiple_transports_enabled, const bool());
+  MOCK_CONST_METHOD0(secondary_transports_for_bluetooth,
+                     const std::vector<std::string>&());
+  MOCK_CONST_METHOD0(secondary_transports_for_usb,
+                     const std::vector<std::string>&());
+  MOCK_CONST_METHOD0(secondary_transports_for_wifi,
+                     const std::vector<std::string>&());
+  MOCK_CONST_METHOD0(audio_service_transports,
+                     const std::vector<std::string>&());
+  MOCK_CONST_METHOD0(video_service_transports,
+                     const std::vector<std::string>&());
 };
 
 }  // namespace protocol_handler_test

@@ -33,33 +33,52 @@
 #include "smart_objects/string_schema_item.h"
 #include "utils/custom_string.h"
 
-namespace NsSmartDeviceLink {
-namespace NsSmartObjects {
+namespace ns_smart_device_link {
+namespace ns_smart_objects {
 
 namespace custom_str = utils::custom_string;
 
-utils::SharedPtr<CStringSchemaItem> CStringSchemaItem::create(
+std::shared_ptr<CStringSchemaItem> CStringSchemaItem::create(
     const TSchemaItemParameter<size_t>& MinLength,
     const TSchemaItemParameter<size_t>& MaxLength,
     const TSchemaItemParameter<std::string>& DefaultValue) {
-  return new CStringSchemaItem(MinLength, MaxLength, DefaultValue);
+  return std::shared_ptr<CStringSchemaItem>(
+      new CStringSchemaItem(MinLength, MaxLength, DefaultValue));
 }
 
-Errors::eType CStringSchemaItem::validate(const SmartObject& Object) {
+errors::eType CStringSchemaItem::validate(
+    const SmartObject& Object,
+    rpc::ValidationReport* report__,
+    const utils::SemanticVersion& MessageVersion) {
   if (SmartType_String != Object.getType()) {
-    return Errors::INVALID_VALUE;
+    std::string validation_info = "Incorrect type, expected: " +
+                                  SmartObject::typeToString(SmartType_String) +
+                                  ", got: " +
+                                  SmartObject::typeToString(Object.getType());
+    report__->set_validation_info(validation_info);
+    return errors::INVALID_VALUE;
   }
 
   const custom_str::CustomString value = Object.asCustomString();
   size_t length;
 
   if (mMinLength.getValue(length) && (value.size() < length)) {
-    return Errors::OUT_OF_RANGE;
+    std::stringstream stream;
+    stream << "Got string of size: " << value.size()
+           << ", minimum allowed: " << length;
+    std::string validation_info = stream.str();
+    report__->set_validation_info(validation_info);
+    return errors::OUT_OF_RANGE;
   }
   if (mMaxLength.getValue(length) && (value.size() > length)) {
-    return Errors::OUT_OF_RANGE;
+    std::stringstream stream;
+    stream << "Got string of size: " << value.size()
+           << ", maximum allowed: " << length;
+    std::string validation_info = stream.str();
+    report__->set_validation_info(validation_info);
+    return errors::OUT_OF_RANGE;
   }
-  return Errors::OK;
+  return errors::OK;
 }
 
 SmartType CStringSchemaItem::getSmartType() const {
@@ -78,5 +97,5 @@ CStringSchemaItem::CStringSchemaItem(
     , mMinLength(MinLength)
     , mMaxLength(MaxLength) {}
 
-}  // namespace NsSmartObjects
-}  // namespace NsSmartDeviceLink
+}  // namespace ns_smart_objects
+}  // namespace ns_smart_device_link

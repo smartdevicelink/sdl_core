@@ -34,8 +34,8 @@
 
 #include "application_manager/request_controller.h"
 #include "application_manager/commands/command_request_impl.h"
-#include "application_manager/commands/hmi/request_to_hmi.h"
-#include "utils/make_shared.h"
+#include "application_manager/commands/request_to_hmi.h"
+
 #include "utils/timer_task_impl.h"
 
 namespace application_manager {
@@ -50,6 +50,7 @@ RequestController::RequestController(const RequestControlerSettings& settings)
     : pool_state_(UNDEFINED)
     , pool_size_(settings.thread_pool_size())
     , request_tracker_(settings)
+    , duplicate_message_count_()
     , timer_("AM RequestCtrlTimer",
              new timer::TimerTaskImpl<RequestController>(
                  this, &RequestController::TimeoutThread))
@@ -63,8 +64,11 @@ RequestController::RequestController(const RequestControlerSettings& settings)
 
 RequestController::~RequestController() {
   LOG4CXX_AUTO_TRACE(logger_);
-  timer_stop_flag_ = true;
-  timer_condition_.Broadcast();
+  {
+    sync_primitives::AutoLock auto_lock(timer_lock);
+    timer_stop_flag_ = true;
+    timer_condition_.Broadcast();
+  }
   timer_.Stop();
   if (pool_state_ != TPoolState::STOPPED) {
     DestroyThreadpool();
@@ -172,7 +176,7 @@ RequestController::TResult RequestController::addHMIRequest(
     const RequestPtr request) {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  if (!request.valid()) {
+  if (request.use_count() == 0) {
     LOG4CXX_ERROR(logger_, "HMI request pointer is invalid");
     return RequestController::INVALID_DATA;
   }
@@ -181,7 +185,7 @@ RequestController::TResult RequestController::addHMIRequest(
   const uint64_t timeout_in_mseconds =
       static_cast<uint64_t>(request->default_timeout());
   RequestInfoPtr request_info_ptr =
-      utils::MakeShared<HMIRequestInfo>(request, timeout_in_mseconds);
+      std::make_shared<HMIRequestInfo>(request, timeout_in_mseconds);
 
   if (0 == timeout_in_mseconds) {
     LOG4CXX_DEBUG(logger_,
@@ -227,6 +231,21 @@ void RequestController::TerminateRequest(const uint32_t correlation_id,
                     << correlation_id << " connection_key = " << connection_key
                     << " function_id = " << function_id
                     << " force_terminate = " << force_terminate);
+  {
+    AutoLock auto_lock(duplicate_message_count_lock_);
+    auto dup_it = duplicate_message_count_.find(correlation_id);
+    if (duplicate_message_count_.end() != dup_it) {
+      duplicate_message_count_[correlation_id]--;
+      if (0 == duplicate_message_count_[correlation_id]) {
+        duplicate_message_count_.erase(dup_it);
+      }
+      LOG4CXX_DEBUG(logger_,
+                    "Ignoring termination request due to duplicate correlation "
+                    "ID being sent");
+      return;
+    }
+  }
+
   RequestInfoPtr request =
       waiting_for_response_.Find(connection_key, correlation_id);
   if (!request) {
@@ -268,7 +287,7 @@ void RequestController::terminateWaitingForExecutionAppRequests(
   std::list<RequestPtr>::iterator request_it = mobile_request_list_.begin();
   while (mobile_request_list_.end() != request_it) {
     RequestPtr request = (*request_it);
-    if ((request.valid()) && (request->connection_key() == app_id)) {
+    if ((request.use_count() != 0) && (request->connection_key() == app_id)) {
       mobile_request_list_.erase(request_it++);
     } else {
       ++request_it;
@@ -370,11 +389,11 @@ void RequestController::TimeoutThread() {
   LOG4CXX_DEBUG(
       logger_,
       "ENTER Waiting fore response count: " << waiting_for_response_.Size());
+  sync_primitives::AutoLock auto_lock(timer_lock);
   while (!timer_stop_flag_) {
     RequestInfoPtr probably_expired =
         waiting_for_response_.FrontWithNotNullTimeout();
     if (!probably_expired) {
-      sync_primitives::AutoLock auto_lock(timer_lock);
       timer_condition_.Wait(auto_lock);
       continue;
     }
@@ -382,18 +401,17 @@ void RequestController::TimeoutThread() {
       LOG4CXX_DEBUG(logger_,
                     "Timeout for "
                         << (RequestInfo::HMIRequest ==
-                                    probably_expired->requst_type()
+                                    probably_expired->request_type()
                                 ? "HMI"
                                 : "Mobile")
                         << " request id: " << probably_expired->requestId()
                         << " connection_key: " << probably_expired->app_id()
                         << " NOT expired");
-      sync_primitives::AutoLock auto_lock(timer_lock);
-      const TimevalStruct current_time = date_time::DateTime::getCurrentTime();
-      const TimevalStruct end_time = probably_expired->end_time();
+      const date_time::TimeDuration current_time = date_time::getCurrentTime();
+      const date_time::TimeDuration end_time = probably_expired->end_time();
       if (current_time < end_time) {
-        const uint32_t msecs = static_cast<uint32_t>(
-            date_time::DateTime::getmSecs(end_time - current_time));
+        const uint32_t msecs =
+            static_cast<uint32_t>(date_time::getmSecs(end_time - current_time));
         LOG4CXX_DEBUG(logger_, "Sleep for " << msecs << " millisecs");
         timer_condition_.WaitFor(auto_lock, msecs);
       }
@@ -402,7 +420,7 @@ void RequestController::TimeoutThread() {
     LOG4CXX_INFO(logger_,
                  "Timeout for "
                      << (RequestInfo::HMIRequest ==
-                                 probably_expired->requst_type()
+                                 probably_expired->request_type()
                              ? "HMI"
                              : "Mobile")
                      << " request id: " << probably_expired->requestId()
@@ -470,9 +488,26 @@ void RequestController::Worker::threadMain() {
 
     const uint32_t timeout_in_mseconds = request_ptr->default_timeout();
     RequestInfoPtr request_info_ptr =
-        utils::MakeShared<MobileRequestInfo>(request_ptr, timeout_in_mseconds);
+        std::make_shared<MobileRequestInfo>(request_ptr, timeout_in_mseconds);
 
-    request_controller_->waiting_for_response_.Add(request_info_ptr);
+    if (!request_controller_->waiting_for_response_.Add(request_info_ptr)) {
+      commands::CommandRequestImpl* cmd_request =
+          dynamic_cast<commands::CommandRequestImpl*>(request_ptr.get());
+      if (cmd_request != NULL) {
+        uint32_t corr_id = cmd_request->correlation_id();
+        request_controller_->duplicate_message_count_lock_.Acquire();
+        auto dup_it =
+            request_controller_->duplicate_message_count_.find(corr_id);
+        if (request_controller_->duplicate_message_count_.end() == dup_it) {
+          request_controller_->duplicate_message_count_[corr_id] = 0;
+        }
+        request_controller_->duplicate_message_count_[corr_id]++;
+        request_controller_->duplicate_message_count_lock_.Release();
+        cmd_request->SendResponse(
+            false, mobile_apis::Result::INVALID_ID, "Duplicate correlation_id");
+      }
+      continue;
+    }
     LOG4CXX_DEBUG(logger_, "timeout_in_mseconds " << timeout_in_mseconds);
 
     if (0 != timeout_in_mseconds) {

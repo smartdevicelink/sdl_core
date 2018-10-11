@@ -38,8 +38,12 @@
 #include <vector>
 #include <map>
 #include <set>
-#include "utils/shared_ptr.h"
+#include <utility>
+#include <memory>
+
 #include "utils/helpers.h"
+#include "transport_manager/common.h"
+
 namespace policy {
 
 // TODO(PV): specify errors
@@ -76,7 +80,7 @@ enum PolicyTableStatus {
 // Code generator uses String class name, so this typedef was renamed to PTSring
 typedef std::string PTString;
 typedef std::vector<uint8_t> BinaryMessage;
-typedef utils::SharedPtr<BinaryMessage> BinaryMessageSptr;
+typedef std::shared_ptr<BinaryMessage> BinaryMessageSptr;
 
 typedef std::string HMILevel;
 typedef std::string Parameter;
@@ -189,7 +193,7 @@ struct DeviceParams {
   std::string device_name;
   std::string device_mac_address;
   std::string device_connection_type;
-  uint32_t device_handle;
+  transport_manager::DeviceHandle device_handle;
 };
 
 /**
@@ -264,7 +268,8 @@ struct AppPermissions {
       , appRevoked(false)
       , appPermissionsConsentNeeded(false)
       , appUnauthorized(false)
-      , requestTypeChanged(false) {}
+      , requestTypeChanged(false)
+      , requestSubTypeChanged(false) {}
 
   std::string application_id;
   bool isAppPermissionsRevoked;
@@ -277,6 +282,8 @@ struct AppPermissions {
   DeviceParams deviceInfo;
   bool requestTypeChanged;
   std::vector<std::string> requestType;
+  bool requestSubTypeChanged;
+  std::vector<std::string> requestSubType;
 };
 
 /**
@@ -383,6 +390,146 @@ struct RetrySequenceURL {
  * from the Endpoints vector
  */
 typedef std::pair<uint32_t, uint32_t> AppIdURL;
+
+enum EntityStatus { kStatusOn, kStatusOff };
+
+enum ReturnValue { kZero, kNonZero };
+
+/**
+ * @brief The ExternalConsentStatusItem struct represents customer connectivity
+ * settings
+ * item
+ */
+struct ExternalConsentStatusItem {
+  ExternalConsentStatusItem(const uint32_t type,
+                            const uint32_t id,
+                            const EntityStatus status)
+      : entity_type_(type), entity_id_(id), status_(status) {}
+
+  ExternalConsentStatusItem()
+      : entity_type_(0), entity_id_(0), status_(kStatusOff) {}
+
+  ExternalConsentStatusItem operator=(const ExternalConsentStatusItem& rhs) {
+    this->entity_id_ = rhs.entity_id_;
+    this->entity_type_ = rhs.entity_type_;
+    this->status_ = rhs.status_;
+    return *this;  // calls copy constructor
+  }
+
+  bool operator==(const ExternalConsentStatusItem& rhs) const {
+    return (entity_type_ == rhs.entity_type_) && (entity_id_ == rhs.entity_id_);
+  }
+
+  bool operator<(const ExternalConsentStatusItem& rhs) const {
+    return (entity_type_ < rhs.entity_type_) || (entity_id_ < rhs.entity_id_);
+  }
+
+  uint32_t entity_type_;
+  uint32_t entity_id_;
+  EntityStatus status_;
+};
+
+struct ExternalConsentStatusItemSorter {
+  bool operator()(const ExternalConsentStatusItem& lhs,
+                  const ExternalConsentStatusItem& rhs) const {
+    return (lhs.entity_type_ < rhs.entity_type_) ||
+           (lhs.entity_id_ < rhs.entity_id_);
+  }
+};
+
+/**
+ * @brief The ApplicationPolicyActions struct contains actions which should be
+ * done for some application
+ */
+struct ApplicationPolicyActions {
+  ApplicationPolicyActions()
+      : is_notify_system(false)
+      , is_send_permissions_to_app(false)
+      , is_consent_needed(false) {}
+
+  bool is_notify_system;
+  bool is_send_permissions_to_app;
+  bool is_consent_needed;
+};
+
+/**
+ * @brief ApplicationsPoliciesActions map of actions to be done for every
+ * application
+ */
+typedef std::map<std::string, ApplicationPolicyActions>
+    ApplicationsPoliciesActions;
+
+/**
+ * @brief Customer connectivity settings status
+ */
+typedef std::set<ExternalConsentStatusItem, ExternalConsentStatusItemSorter>
+    ExternalConsentStatus;
+
+/**
+ * @brief GroupsByExternalConsentStatus represents list of group names, which
+ * has mapped ExternalConsent item (entity type + entity id) in their
+ * disallowed_by_external_consent_ containers. Boolean value represents
+ * whether ExternalConsent item has been found in
+ * disallowed_by_external_consent_ON or in disallowed_by_external_consent_OFF
+ * container
+ */
+typedef std::map<ExternalConsentStatusItem,
+                 std::vector<std::pair<std::string, bool> > >
+    GroupsByExternalConsentStatus;
+
+/**
+ * @brief GroupsNames represents groups names from policy table -> functional
+ * groupings groups container
+ */
+typedef std::set<std::string> GroupsNames;
+
+typedef std::string ApplicationId;
+typedef std::string DeviceId;
+
+/**
+ * @brief Link of device to application
+ */
+typedef std::pair<policy::DeviceId, policy::ApplicationId> Link;
+
+/**
+ * @brief Collection of links
+ */
+typedef std::set<Link> ApplicationsLinks;
+
+/**
+ * @brief Represents possible result codes for policy table update check
+ */
+enum PermissionsCheckResult {
+  RESULT_NO_CHANGES,
+  RESULT_APP_REVOKED,
+  RESULT_NICKNAME_MISMATCH,
+  RESULT_PERMISSIONS_REVOKED,
+  RESULT_CONSENT_NEEDED,
+  RESULT_CONSENT_NOT_REQIURED,
+  RESULT_PERMISSIONS_REVOKED_AND_CONSENT_NEEDED,
+  RESULT_REQUEST_TYPE_CHANGED,
+  RESULT_REQUEST_SUBTYPE_CHANGED
+};
+
+/**
+ * @brief Per application collection of results done by checking policy table
+ * update
+ */
+typedef std::set<std::pair<std::string, PermissionsCheckResult> >
+    CheckAppPolicyResults;
+
+/**
+ * @brief The ConsentPriorityType enum defined types of priority for group
+ * consents i.e. done by user or by external consents
+ */
+enum ConsentPriorityType { kUserConsentPrio, kExternalConsentPrio };
+
+/**
+ * @brief The ConsentProcessingPolicy enum defines policy for existing consents
+ * update i.e. based on user/external consents timestamps or overriden by
+ * external consents
+ */
+enum ConsentProcessingPolicy { kTimestampBased, kExternalConsentBased };
 
 }  //  namespace policy
 

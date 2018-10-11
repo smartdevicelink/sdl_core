@@ -86,12 +86,8 @@ add_subdirectory(./config_profile)
 # --- Media Manager
 add_subdirectory(./media_manager)
 
+
 # --- Telemetry Monitor
 if(TELEMETRY_MONITOR)
   add_subdirectory(./telemetry_monitor)
-endif()
-
-# --- DBus
-if(HMI_DBUS_API)
-  add_subdirectory(./dbus)
 endif()

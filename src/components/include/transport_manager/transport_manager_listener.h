@@ -33,6 +33,7 @@
 #ifndef SRC_COMPONENTS_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_MANAGER_LISTENER_H_
 #define SRC_COMPONENTS_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_MANAGER_LISTENER_H_
 
+#include <map>
 #include <vector>
 #include "transport_manager/common.h"
 #include "transport_manager/info.h"
@@ -68,6 +69,23 @@ class TransportManagerListener {
   virtual void OnDeviceFound(const DeviceInfo& device_info) = 0;
   virtual void OnDeviceAdded(const DeviceInfo& device_info) = 0;
   virtual void OnDeviceRemoved(const DeviceInfo& device_info) = 0;
+
+  /**
+   * @brief OnDeviceSwitchingStart allows to notify listener that device is
+   * going to switch its connection.
+   * @param device_uid_from the id of the device which has to switch its
+   * transport
+   * @param device_uid_to the id of the device on new transport
+   */
+  virtual void OnDeviceSwitchingStart(const DeviceUID& device_uid_from,
+                                      const DeviceUID& device_uid_to) = 0;
+
+  /**
+   * @brief OnDeviceSwitchingFinish notifies listener that device reconnection
+   * fails due to some reason.
+   * @param device_uid the id for the device which is fails to reconnect.
+   */
+  virtual void OnDeviceSwitchingFinish(const DeviceUID& device_uid) = 0;
 
   /**
    * @brief Reaction to the event, when scanning of devices is finished.
@@ -176,6 +194,14 @@ class TransportManagerListener {
   virtual void OnTMMessageSendFailed(
       const DataSendError& error,
       const ::protocol_handler::RawMessagePtr message) = 0;
+
+  /**
+   * @brief Notifies that configuration of a transport has been updated.
+   *
+   * @param configs pairs of key and value that represent configuration.
+   */
+  virtual void OnTransportConfigUpdated(
+      const std::map<std::string, std::string>& configs) = 0;
 };
 }  //  namespace transport_manager
 #endif  // SRC_COMPONENTS_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_MANAGER_LISTENER_H_

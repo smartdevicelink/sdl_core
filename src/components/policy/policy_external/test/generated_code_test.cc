@@ -135,6 +135,94 @@ TEST(PolicyGeneratedCodeTest, IntegerConstructionAndAssignmentTest) {
   EXPECT_FALSE(valid_value.is_valid());
 }
 
+TEST(PolicyGeneratedCodeTest, TestConsentsGroup_Validation) {
+  using namespace rpc::policy_table_interface_base;
+  // Need to validate CCS consents container wrapped with Optional for case w/o
+  // specific values assigned since it is of generic 'Map' type which requires
+  // to be empty + initialized in order to be valid
+  // Also Map type does not have specific validation on PT type
+
+  rpc::Optional<ConsentGroups> consent_groups;
+
+  EXPECT_TRUE(consent_groups.is_valid());
+
+  consent_groups->insert(
+      std::make_pair(std::string("Group1"), rpc::Boolean(true)));
+
+  EXPECT_TRUE(consent_groups.is_valid());
+
+  // Adds more than container maximum size
+  for (size_t number = 0; number < 256; ++number) {
+    std::stringstream name;
+    name << "Group" << number;
+    consent_groups->insert(std::make_pair(name.str(), rpc::Boolean(true)));
+  }
+
+  EXPECT_FALSE(consent_groups.is_valid());
+}
+
+TEST(PolicyGeneratedCodeTest,
+     TestConsentRecords_ExternalConsents_PT_Validation) {
+  using namespace rpc::policy_table_interface_base;
+  ConsentRecords consent_records;
+
+  // PT_SNAPSHOT does not care of consents since their type is 'optional'
+  // PT_UPDATE and PT_SNAPSHOT have consents as 'omitted' so they must be absent
+  consent_records.SetPolicyTableType(PT_UPDATE);
+  EXPECT_TRUE(consent_records.is_valid());
+
+  consent_records.SetPolicyTableType(PT_PRELOADED);
+  EXPECT_TRUE(consent_records.is_valid());
+
+  consent_records.SetPolicyTableType(PT_SNAPSHOT);
+  EXPECT_TRUE(consent_records.is_valid());
+
+  consent_records.external_consent_status_groups->insert(
+      std::make_pair(std::string("Group1"), true));
+
+  consent_records.external_consent_status_groups->insert(
+      std::make_pair(std::string("Group2"), false));
+
+  consent_records.SetPolicyTableType(PT_UPDATE);
+  EXPECT_FALSE(consent_records.is_valid());
+
+  consent_records.SetPolicyTableType(PT_PRELOADED);
+  EXPECT_FALSE(consent_records.is_valid());
+
+  consent_records.SetPolicyTableType(PT_SNAPSHOT);
+  EXPECT_TRUE(consent_records.is_valid());
+}
+
+TEST(PolicyGeneratedCodeTest,
+     ExternalConsentEntity_ConstructionValidationTest) {
+  using namespace rpc::policy_table_interface_base;
+
+  ExternalConsentEntity empty_entity;
+  EXPECT_FALSE(empty_entity.is_valid());
+
+  const std::string corrent_entity_type_field = "entityType";
+  const std::string correct_entity_id_field = "entityID";
+
+  Json::Value correct_json_entity;
+  correct_json_entity[corrent_entity_type_field] = 1;
+  correct_json_entity[correct_entity_id_field] = 2;
+
+  ExternalConsentEntity entity_from_correct_json(&correct_json_entity);
+  EXPECT_TRUE(entity_from_correct_json.is_valid());
+
+  const std::string wrong_entity_id_field = "entityId";
+
+  Json::Value wrong_json_entity;
+  wrong_json_entity[corrent_entity_type_field] = 1;
+  wrong_json_entity[wrong_entity_id_field] = 2;
+
+  ExternalConsentEntity entity_from_wrong_json(&wrong_json_entity);
+  EXPECT_FALSE(entity_from_wrong_json.is_valid());
+
+  ExternalConsentEntity entity_from_valid_ints(1, 2);
+  EXPECT_TRUE(entity_from_valid_ints.is_valid());
+}
+
 }  // namespace policy_test
 }  // namespace components
 }  // namespace test

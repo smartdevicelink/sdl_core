@@ -13,21 +13,22 @@
             625],
             "endpoints": {
                 "0x07": {
-                    "default": ["http://policies.telematics.ford.com/api/policies"]
+                    "default": ["http://x.x.x.x:3000/api/1/policies/proprietary"]
                 },
                 "0x04": {
-                    "default": ["http://ivsu.software.ford.com/api/getsoftwareupdates"]
+                    "default": ["http://x.x.x.x:3000/api/1/softwareUpdate"]
                 },
                 "queryAppsUrl": {
                     "default": ["http://sdl.shaid.server"]
                 },
                 "lock_screen_icon_url": {
-                    "default": ["http://i.imgur.com/QwZ9uKG.png"]
+                    "default": ["http://i.imgur.com/TgkvOIZ.png"]
                 }
             },
             "notifications_per_minute_by_priority": {
                 "EMERGENCY": 60,
                 "NAVIGATION": 15,
+                "PROJECTION": 15,
                 "VOICECOM": 20,
                 "COMMUNICATION": 6,
                 "NORMAL": 4,
@@ -99,6 +100,12 @@
                         "FULL",
                         "LIMITED"]
                     },
+                    "GetSystemCapability": {
+                        "hmi_levels": ["BACKGROUND",
+                        "FULL",
+                        "LIMITED",
+                        "NONE"]
+                    },
                     "ListFiles": {
                         "hmi_levels": ["BACKGROUND",
                         "FULL",
@@ -134,7 +141,8 @@
                     "OnDriverDistraction": {
                         "hmi_levels": ["BACKGROUND",
                         "FULL",
-                        "LIMITED"]
+                        "LIMITED",
+                        "NONE"]
                     },
                     "OnEncodedSyncPData": {
                         "hmi_levels": ["BACKGROUND",
@@ -301,6 +309,34 @@
                     }
                 }
             },
+            "Notifications-RC": {
+                "rpcs": {
+                    "OnHMIStatus": {
+                        "hmi_levels": [
+                            "BACKGROUND",
+                            "FULL",
+                            "LIMITED",
+                            "NONE"
+                        ]
+                    },
+                    "OnPermissionsChange": {
+                        "hmi_levels": [
+                            "BACKGROUND",
+                            "FULL",
+                            "LIMITED",
+                            "NONE"
+                        ]
+                    },
+                    "OnSystemRequest": {
+                        "hmi_levels": [
+                            "BACKGROUND",
+                            "FULL",
+                            "LIMITED",
+                            "NONE"
+                        ]
+                    }
+                }
+            },
             "DrivingCharacteristics-3": {
                 "user_consent_prompt": "DrivingCharacteristics",
                 "rpcs": {
@@ -310,6 +346,7 @@
                         "LIMITED"],
                         "parameters": ["accPedalPosition",
                         "beltStatus",
+                        "electronicParkBrakeStatus",
                         "driverBraking",
                         "myKey",
                         "prndl",
@@ -322,6 +359,7 @@
                         "LIMITED"],
                         "parameters": ["accPedalPosition",
                         "beltStatus",
+                        "electronicParkBrakeStatus",
                         "driverBraking",
                         "myKey",
                         "prndl",
@@ -334,6 +372,7 @@
                         "LIMITED"],
                         "parameters": ["accPedalPosition",
                         "beltStatus",
+                        "electronicParkBrakeStatus",
                         "driverBraking",
                         "myKey",
                         "prndl",
@@ -346,6 +385,7 @@
                         "LIMITED"],
                         "parameters": ["accPedalPosition",
                         "beltStatus",
+                        "electronicParkBrakeStatus",
                         "driverBraking",
                         "myKey",
                         "prndl",
@@ -363,12 +403,15 @@
                         "LIMITED"],
                         "parameters": ["bodyInformation",
                         "deviceStatus",
+                        "engineOilLife",
                         "engineTorque",
                         "externalTemperature",
+                        "turnSignal",
                         "fuelLevel",
                         "fuelLevel_State",
                         "headLampStatus",
                         "instantFuelConsumption",
+                        "fuelRange",
                         "odometer",
                         "tirePressure",
                         "vin",
@@ -380,12 +423,15 @@
                         "LIMITED"],
                         "parameters": ["bodyInformation",
                         "deviceStatus",
+                        "engineOilLife",
                         "engineTorque",
                         "externalTemperature",
+                        "turnSignal",
                         "fuelLevel",
                         "fuelLevel_State",
                         "headLampStatus",
                         "instantFuelConsumption",
+                        "fuelRange",
                         "odometer",
                         "tirePressure",
                         "vin",
@@ -397,12 +443,15 @@
                         "LIMITED"],
                         "parameters": ["bodyInformation",
                         "deviceStatus",
+                        "engineOilLife",
                         "engineTorque",
                         "externalTemperature",
+                        "turnSignal",
                         "fuelLevel",
                         "fuelLevel_State",
                         "headLampStatus",
                         "instantFuelConsumption",
+                        "fuelRange",
                         "odometer",
                         "tirePressure",
                         "wiperStatus"]
@@ -413,12 +462,15 @@
                         "LIMITED"],
                         "parameters": ["bodyInformation",
                         "deviceStatus",
+                        "engineOilLife",
                         "engineTorque",
                         "externalTemperature",
+                        "turnSignal",
                         "fuelLevel",
                         "fuelLevel_State",
                         "headLampStatus",
                         "instantFuelConsumption",
+                        "fuelRange",
                         "odometer",
                         "tirePressure",
                         "wiperStatus"]
@@ -474,6 +526,42 @@
                         "hmi_levels": ["BACKGROUND",
                         "FULL",
                         "LIMITED"]
+                    }
+                }
+            },
+            "RemoteControl": {
+                "rpcs": {
+                    "ButtonPress": {
+                        "hmi_levels": ["BACKGROUND",
+                        "FULL",
+                        "LIMITED"]
+                    },
+                    "GetInteriorVehicleData": {
+                        "hmi_levels": ["BACKGROUND",
+                        "FULL",
+                        "LIMITED"]
+                    },
+                    "SetInteriorVehicleData": {
+                        "hmi_levels": ["BACKGROUND",
+                        "FULL",
+                        "LIMITED"]
+                    },
+                    "OnInteriorVehicleData": {
+                        "hmi_levels": ["BACKGROUND",
+                        "FULL",
+                        "LIMITED"]
+                    },
+                    "SystemRequest": {
+                        "hmi_levels": ["BACKGROUND",
+                        "FULL",
+                        "LIMITED",
+                        "NONE"]
+                    },
+                    "OnRCStatus": {
+                        "hmi_levels": ["BACKGROUND",
+                        "FULL",
+                        "LIMITED",
+                        "NONE"]
                     }
                 }
             },
@@ -632,7 +720,8 @@
                     "OnDriverDistraction": {
                         "hmi_levels": ["BACKGROUND",
                         "FULL",
-                        "LIMITED"]
+                        "LIMITED",
+                        "NONE"]
                     },
                     "OnEncodedSyncPData": {
                         "hmi_levels": ["BACKGROUND",
@@ -936,6 +1025,16 @@
                     },
                     "PerformAudioPassThru": {
                         "hmi_levels": ["BACKGROUND"]
+                    }
+                }
+            },
+            "HapticGroup": {
+                "rpcs": {
+                    "OnTouchEvent": {
+                        "hmi_levels": ["FULL"]
+                    },
+                    "SendHapticData": {
+                        "hmi_levels": ["FULL"]
                     }
                 }
             }
@@ -2270,7 +2369,9 @@
                 "steal_focus": false,
                 "priority": "NONE",
                 "default_hmi": "NONE",
-                "groups": ["Base-4"]
+                "groups": ["Base-4"],
+                "RequestType": [],
+                "RequestSubType": []
             },
             "device": {
                 "keep_context": false,
@@ -2289,4 +2390,3 @@
         }
     }
 }
-

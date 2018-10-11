@@ -33,11 +33,10 @@
 #ifndef SRC_COMPONENTS_SMART_OBJECTS_INCLUDE_SMART_OBJECTS_ALWAYS_FALSE_SCHEMA_ITEM_H_
 #define SRC_COMPONENTS_SMART_OBJECTS_INCLUDE_SMART_OBJECTS_ALWAYS_FALSE_SCHEMA_ITEM_H_
 
-#include "utils/shared_ptr.h"
 #include "smart_objects/schema_item.h"
 
-namespace NsSmartDeviceLink {
-namespace NsSmartObjects {
+namespace ns_smart_device_link {
+namespace ns_smart_objects {
 /**
  * @brief Always false schema item.
  **/
@@ -47,18 +46,24 @@ class CAlwaysFalseSchemaItem : public ISchemaItem {
    * @brief Create a new schema item.
    * @return Shared pointer to a new schema item.
    **/
-  static utils::SharedPtr<CAlwaysFalseSchemaItem> create();
+  static std::shared_ptr<CAlwaysFalseSchemaItem> create();
+
   /**
    * @brief Validate smart object.
    * @param Object Object to validate.
-   * @return Errors::ERROR
+   * @param report__ object for reporting errors during validation
+   * @param MessageVersion to check mobile RPC version against RPC Spec History
+   * @return ns_smart_objects::errors::eType
    **/
-  Errors::eType validate(const SmartObject& Object) OVERRIDE;
+  errors::eType validate(const SmartObject& Object,
+                         rpc::ValidationReport* report__,
+                         const utils::SemanticVersion& MessageVersion =
+                             utils::SemanticVersion()) OVERRIDE;
 
  private:
   CAlwaysFalseSchemaItem();
   DISALLOW_COPY_AND_ASSIGN(CAlwaysFalseSchemaItem);
 };
-}  // namespace NsSmartObjects
-}  // namespace NsSmartDeviceLink
+}  // namespace ns_smart_objects
+}  // namespace ns_smart_device_link
 #endif  // SRC_COMPONENTS_SMART_OBJECTS_INCLUDE_SMART_OBJECTS_ALWAYS_FALSE_SCHEMA_ITEM_H_

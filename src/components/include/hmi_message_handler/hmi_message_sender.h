@@ -36,10 +36,11 @@
 #include "application_manager/message.h"
 
 namespace hmi_message_handler {
-typedef utils::SharedPtr<application_manager::Message> MessageSharedPointer;
+typedef std::shared_ptr<application_manager::Message> MessageSharedPointer;
 
 class HMIMessageSender {
  public:
+  virtual ~HMIMessageSender() {}
   virtual void SendMessageToHMI(MessageSharedPointer message) = 0;
 };
 }

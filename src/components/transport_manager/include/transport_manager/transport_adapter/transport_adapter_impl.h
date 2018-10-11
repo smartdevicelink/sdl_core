@@ -400,6 +400,41 @@ class TransportAdapterImpl : public TransportAdapter,
                       const DataSendError& error) OVERRIDE;
 
   /**
+   * @brief Notification that transport's configuration is updated
+   *
+   * @param new_config The new configuration of the transport
+   */
+  void TransportConfigUpdated(const TransportConfig& new_config) OVERRIDE;
+
+  /**
+   * @brief DoTransportSwitch notifies listeners of transport adapter events
+   * that transport switching is requested by system
+   */
+  void DoTransportSwitch() const OVERRIDE;
+
+  /**
+   * @brief DeviceSwitched Notifies system on successful transport switch for
+   * particular device
+   * @param device_handle Device handle of switched device
+   */
+  void DeviceSwitched(const DeviceUID& device_handle) OVERRIDE;
+
+  /**
+   * @brief GetSwitchableDevices Provides list of devices able to switch their
+   * transport (e.g. iAP2 Bluetooth to iAP2 USB).
+   * @return
+   */
+  SwitchableDevices GetSwitchableDevices() const OVERRIDE;
+
+  /**
+   * @brief Returns the transport's configuration information
+   */
+  virtual TransportConfig GetTransportConfiguration() const OVERRIDE {
+    // default is empty
+    return TransportConfig();
+  }
+
+  /**
    * @brief Return name of device.
    *
    * @param device_id Device unique identifier.
@@ -407,6 +442,13 @@ class TransportAdapterImpl : public TransportAdapter,
    * @return String with name.
    */
   std::string DeviceName(const DeviceUID& device_id) const OVERRIDE;
+
+  /**
+   * @brief StopDevice looks for specific device in devices list and calls
+   * Stop() interface of that device
+   * @param device_id unique device identifier that has to be stopped.
+   */
+  void StopDevice(const DeviceUID& device_id) const OVERRIDE;
 
   /**
    * @brief Allows to obtain connection type used by device.

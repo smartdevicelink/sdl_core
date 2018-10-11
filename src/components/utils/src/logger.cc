@@ -39,6 +39,9 @@ void deinit_logger() {
   CREATE_LOGGERPTR_LOCAL(logger_, "Utils")
   LOG4CXX_DEBUG(logger_, "Logger deinitialization");
   logger::set_logs_enabled(false);
+  if (logger::logger_status == logger::LoggerThreadCreated) {
+    logger::flush_logger();
+  }
   logger::delete_log_message_loop_thread();
   log4cxx::LoggerPtr rootLogger = log4cxx::Logger::getRootLogger();
   log4cxx::spi::LoggerRepositoryPtr repository =

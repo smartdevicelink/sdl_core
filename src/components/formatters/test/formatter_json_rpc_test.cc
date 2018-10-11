@@ -49,9 +49,9 @@ namespace test {
 namespace components {
 namespace formatters_test {
 
-using namespace NsSmartDeviceLink::NsSmartObjects;
-using namespace NsSmartDeviceLink::NsJSONHandler::Formatters;
-using namespace NsSmartDeviceLink::NsJSONHandler::strings;
+using namespace ns_smart_device_link::ns_smart_objects;
+using namespace ns_smart_device_link::ns_json_handler::formatters;
+using namespace ns_smart_device_link::ns_json_handler::strings;
 
 void CompactJson(std::string& str) {
   Json::Value root;
@@ -149,7 +149,9 @@ TEST(FormatterJsonRPCTest, UpperBoundValuesInSystemRequest_ToString_Success) {
 
   hmi_apis::HMI_API factory;
   EXPECT_TRUE(factory.attachSchema(obj, false));
-  EXPECT_EQ(Errors::OK, obj.validate());
+  rpc::ValidationReport report("RPC");
+  EXPECT_EQ(errors::OK, obj.validate(&report));
+  EXPECT_EQ(std::string(""), rpc::PrettyFormat(report));
   std::string result;
   // Convert SmartObject to Json string
   EXPECT_TRUE(FormatterJsonRpc::ToString(obj, result));

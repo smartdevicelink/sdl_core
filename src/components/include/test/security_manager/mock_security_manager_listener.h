@@ -48,6 +48,8 @@ class MockSecurityManagerListener
                bool(uint32_t connection_key,
                     ::security_manager::SSLContext::HandshakeResult result));
   MOCK_METHOD0(OnCertificateUpdateRequired, void());
+  MOCK_CONST_METHOD1(GetPolicyCertificateData, bool(std::string& data));
+  MOCK_METHOD0(OnHandshakeFailed, bool());
 };
 }  // namespace security_manager_test
 }  // namespace components

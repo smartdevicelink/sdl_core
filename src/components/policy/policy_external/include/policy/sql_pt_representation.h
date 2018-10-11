@@ -85,7 +85,7 @@ class SQLPTRepresentation : public virtual PTRepresentation {
   bool Clear();
   bool Drop();
   virtual void WriteDb();
-  virtual utils::SharedPtr<policy_table::Table> GenerateSnapshot() const;
+  virtual std::shared_ptr<policy_table::Table> GenerateSnapshot() const;
   virtual bool Save(const policy_table::Table& table);
   bool GetInitialAppData(const std::string& app_id,
                          StringArray* nicknames = NULL,
@@ -98,6 +98,21 @@ class SQLPTRepresentation : public virtual PTRepresentation {
   }
 #endif  // BUILD_TESTS
  protected:
+  enum TypeAccess { kAllowed, kManual };
+  bool GatherModuleType(const std::string& app_id,
+                        policy_table::ModuleTypes* module_types) const;
+  bool GatherRemoteControlDenied(const std::string& app_id, bool* denied) const;
+  bool GatherAccessModule(TypeAccess access,
+                          policy_table::AccessModules* modules) const;
+  bool GatherRemoteRpc(int module_id, policy_table::RemoteRpcs* rpcs) const;
+  bool SaveModuleType(const std::string& app_id,
+                      const policy_table::ModuleTypes& types);
+  bool SaveRemoteControlDenied(const std::string& app_id, bool deny);
+
+  bool SaveAccessModule(TypeAccess access,
+                        const policy_table::AccessModules& modules);
+  bool SaveRemoteRpc(int module_id, const policy_table::RemoteRpcs& rpcs);
+
   virtual void GatherModuleMeta(policy_table::ModuleMeta* meta) const;
   virtual void GatherModuleConfig(policy_table::ModuleConfig* config) const;
   virtual bool GatherUsageAndErrorCounts(
@@ -116,6 +131,9 @@ class SQLPTRepresentation : public virtual PTRepresentation {
                      policy_table::AppHMITypes* app_types) const;
   bool GatherRequestType(const std::string& app_id,
                          policy_table::RequestTypes* request_types) const;
+  bool GatherRequestSubType(
+      const std::string& app_id,
+      policy_table::RequestSubTypes* request_subtypes) const;
   bool GatherNickName(const std::string& app_id,
                       policy_table::Strings* nicknames) const;
 
@@ -151,6 +169,9 @@ class SQLPTRepresentation : public virtual PTRepresentation {
                    const policy_table::AppHMITypes& types);
   bool SaveRequestType(const std::string& app_id,
                        const policy_table::RequestTypes& types);
+  bool SaveRequestSubType(
+      const std::string& app_id,
+      const policy_table::RequestSubTypes& request_subtypes);
 
  public:
   virtual std::string GetLockScreenIconUrl() const;
@@ -182,7 +203,10 @@ class SQLPTRepresentation : public virtual PTRepresentation {
 #ifdef BUILD_TESTS
   uint32_t open_counter_;
 #endif  // BUILD_TESTS
-
+  enum ExternalConsentEntitiesType {
+    kExternalConsentEntitiesTypeOn,
+    kExternalConsentEntitiesTypeOff
+  };
   /**
    * @brief Calculates DB version from current schema
    * @return version
@@ -198,6 +222,10 @@ class SQLPTRepresentation : public virtual PTRepresentation {
   bool SaveLanguage(const std::string& code);
 
   bool is_in_memory;
+  bool SaveExternalConsentEntities(
+      const int64_t group_id,
+      const policy_table::DisallowedByExternalConsentEntities& entities,
+      ExternalConsentEntitiesType type) const;
 };
 }  //  namespace policy
 

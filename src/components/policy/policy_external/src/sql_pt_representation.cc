@@ -43,6 +43,7 @@
 #include "utils/gen_hash.h"
 #include "policy/sql_pt_representation.h"
 #include "policy/sql_wrapper.h"
+#include "policy/sql_pt_ext_queries.h"
 #include "policy/sql_pt_queries.h"
 #include "policy/policy_helper.h"
 #include "policy/cache_manager.h"
@@ -51,6 +52,8 @@
 namespace policy {
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "Policy")
+
+namespace dbms = utils::dbms;
 
 namespace {
 template <typename T, typename K>
@@ -69,6 +72,10 @@ const char* kDatabaseName = "policy.db";
 #else   // CUSTOMER_PASA
 const char* kDatabaseName = "policy";
 #endif  // CUSTOMER_PASA
+
+const std::string kExternalConsentEntitiesTypeStringOn = "ON";
+const std::string kExternalConsentEntitiesTypeStringOff = "OFF";
+
 }  // namespace
 
 SQLPTRepresentation::SQLPTRepresentation()
@@ -217,8 +224,7 @@ int SQLPTRepresentation::DaysBeforeExchange(uint16_t current) {
     return limit;
   }
 
-  if (limit < 0 || last < 0 || current < 0 || current < last ||
-      limit < (current - last)) {
+  if (limit < 0 || last < 0 || current < last || limit < (current - last)) {
     return 0;
   }
 
@@ -229,10 +235,10 @@ int SQLPTRepresentation::TimeoutResponse() {
   utils::dbms::SQLQuery query(db());
   if (!query.Prepare(sql_pt::kSelectTimeoutResponse) || !query.Exec()) {
     LOG4CXX_INFO(logger_, "Can not select timeout response for retry sequence");
-    const int defaultTimeout = 30 * date_time::DateTime::MILLISECONDS_IN_SECOND;
+    const int defaultTimeout = 30 * date_time::MILLISECONDS_IN_SECOND;
     return defaultTimeout;
   }
-  return query.GetInteger(0) * date_time::DateTime::MILLISECONDS_IN_SECOND;
+  return query.GetInteger(0) * date_time::MILLISECONDS_IN_SECOND;
 }
 
 bool SQLPTRepresentation::SecondsBetweenRetries(std::vector<int>* seconds) {
@@ -507,10 +513,10 @@ bool SQLPTRepresentation::RefreshDB() {
   return true;
 }
 
-utils::SharedPtr<policy_table::Table> SQLPTRepresentation::GenerateSnapshot()
+std::shared_ptr<policy_table::Table> SQLPTRepresentation::GenerateSnapshot()
     const {
   LOG4CXX_AUTO_TRACE(logger_);
-  utils::SharedPtr<policy_table::Table> table = new policy_table::Table();
+  auto table = std::make_shared<policy_table::Table>();
   GatherModuleMeta(&*table->policy_table.module_meta);
   GatherModuleConfig(&table->policy_table.module_config);
   GatherUsageAndErrorCounts(&*table->policy_table.usage_and_error_counts);
@@ -553,10 +559,10 @@ void SQLPTRepresentation::GatherModuleConfig(
     LOG4CXX_WARN(logger_, "Incorrect select statement for endpoints");
   } else {
     while (endpoints.Next()) {
-      std::stringstream stream;
-      stream << "0x0" << endpoints.GetInteger(1);
-      config->endpoints[stream.str()][endpoints.GetString(2)].push_back(
-          endpoints.GetString(0));
+      const std::string& url = endpoints.GetString(0);
+      const std::string& service = endpoints.GetString(1);
+      const std::string& app_id = endpoints.GetString(2);
+      config->endpoints[service][app_id].push_back(url);
     }
   }
 
@@ -617,19 +623,32 @@ bool SQLPTRepresentation::GatherFunctionalGroupings(
     LOG4CXX_WARN(logger_, "Incorrect select from functional_groupings");
     return false;
   }
+
   utils::dbms::SQLQuery rpcs(db());
   if (!rpcs.Prepare(sql_pt::kSelectAllRpcs)) {
     LOG4CXX_WARN(logger_, "Incorrect select all from rpc");
     return false;
   }
 
+  utils::dbms::SQLQuery external_consent_entities(db());
+  if (!external_consent_entities.Prepare(
+          sql_pt::kSelectExternalConsentEntities)) {
+    LOG4CXX_WARN(logger_,
+                 "Incorrect select statement for 'external_consent_entities'.");
+    return false;
+  }
+
   while (func_group.Next()) {
     policy_table::Rpcs rpcs_tbl;
+
     if (!func_group.IsNull(2)) {
       *rpcs_tbl.user_consent_prompt = func_group.GetString(2);
     }
-    int func_id = func_group.GetInteger(0);
-    rpcs.Bind(0, func_id);
+
+    const int group_id = func_group.GetInteger(0);
+
+    rpcs.Bind(0, group_id);
+
     while (rpcs.Next()) {
       if (!rpcs.IsNull(1)) {
         policy_table::HmiLevel level;
@@ -650,10 +669,30 @@ bool SQLPTRepresentation::GatherFunctionalGroupings(
         }
       }
     }
+
+    rpcs.Reset();
+
     if (!rpcs_tbl.rpcs.is_initialized()) {
       rpcs_tbl.rpcs.set_to_null();
     }
-    rpcs.Reset();
+
+    // Collecting entities for disallowed_by_external_consent_entities_on/off
+    external_consent_entities.Bind(0, group_id);
+    while (external_consent_entities.Next()) {
+      policy_table::ExternalConsentEntity external_consent_entity(
+          external_consent_entities.GetInteger(0),
+          external_consent_entities.GetInteger(1));
+
+      policy_table::DisallowedByExternalConsentEntities&
+          external_consent_entities_container =
+              kExternalConsentEntitiesTypeStringOn ==
+                      external_consent_entities.GetString(2)
+                  ? *rpcs_tbl.disallowed_by_external_consent_entities_on
+                  : *rpcs_tbl.disallowed_by_external_consent_entities_off;
+
+      external_consent_entities_container.push_back(external_consent_entity);
+    }
+    external_consent_entities.Reset();
     (*groups)[func_group.GetString(1)] = rpcs_tbl;
   }
   return true;
@@ -667,7 +706,21 @@ bool SQLPTRepresentation::GatherConsumerFriendlyMessages(
     LOG4CXX_WARN(logger_, "Incorrect select from consumer_friendly_messages");
     return false;
   }
+
   messages->version = query.GetString(0);
+
+  if (query.Prepare(sql_pt::kCollectFriendlyMsg)) {
+    while (query.Next()) {
+      UserFriendlyMessage msg;
+      msg.message_code = query.GetString(7);
+      std::string language = query.GetString(6);
+
+      (*messages->messages)[msg.message_code].languages[language];
+    }
+  } else {
+    LOG4CXX_WARN(logger_, "Incorrect statement for select friendly messages.");
+  }
+
   return true;
 }
 
@@ -711,6 +764,17 @@ bool SQLPTRepresentation::GatherApplicationPoliciesSection(
     if (!GatherAppGroup(app_id, &params.groups)) {
       return false;
     }
+
+    bool denied = false;
+    if (!GatherRemoteControlDenied(app_id, &denied)) {
+      return false;
+    }
+    if (!denied) {
+      if (!GatherModuleType(app_id, &*params.moduleType)) {
+        return false;
+      }
+    }
+
     if (!GatherNickName(app_id, &*params.nicknames)) {
       return false;
     }
@@ -718,6 +782,9 @@ bool SQLPTRepresentation::GatherApplicationPoliciesSection(
       return false;
     }
     if (!GatherRequestType(app_id, &*params.RequestType)) {
+      return false;
+    }
+    if (!GatherRequestSubType(app_id, &*params.RequestSubType)) {
       return false;
     }
 
@@ -772,32 +839,38 @@ bool SQLPTRepresentation::SaveFunctionalGroupings(
     return false;
   }
 
+  if (!query_delete.Exec(sql_pt::kDeleteExternalConsentEntities)) {
+    LOG4CXX_WARN(logger_, "Incorrect delete from external consent entities.");
+    return false;
+  }
+
   utils::dbms::SQLQuery query(db());
   if (!query.Exec(sql_pt::kDeleteFunctionalGroup)) {
     LOG4CXX_WARN(logger_, "Incorrect delete from seconds between retries.");
     return false;
   }
+
   if (!query.Prepare(sql_pt::kInsertFunctionalGroup)) {
     LOG4CXX_WARN(logger_, "Incorrect insert statement for functional groups");
     return false;
   }
 
-  policy_table::FunctionalGroupings::const_iterator it;
+  policy_table::FunctionalGroupings::const_iterator groups_it;
 
-  for (it = groups.begin(); it != groups.end(); ++it) {
+  for (groups_it = groups.begin(); groups_it != groups.end(); ++groups_it) {
     // Since we uses this id in other tables, we have to be sure
     // that id for certain group will be same in case when
     // we drop records from the table and add them again.
     // That's why we use hash as a primary key insted of
     // simple auto incremental index.
-    const long int id = abs(utils::Djb2HashFromString(it->first));
+    const long int id = abs(utils::Djb2HashFromString(groups_it->first));
     // SQLite's Bind doesn support 'long' type
     // So we need to explicitly cast it to int64_t
     // to avoid ambiguity.
     query.Bind(0, static_cast<int64_t>(id));
-    query.Bind(1, it->first);
-    it->second.user_consent_prompt.is_initialized()
-        ? query.Bind(2, *(it->second.user_consent_prompt))
+    query.Bind(1, groups_it->first);
+    groups_it->second.user_consent_prompt.is_initialized()
+        ? query.Bind(2, *(groups_it->second.user_consent_prompt))
         : query.Bind(2);
 
     if (!query.Exec() || !query.Reset()) {
@@ -805,10 +878,27 @@ bool SQLPTRepresentation::SaveFunctionalGroupings(
       return false;
     }
 
-    if (!SaveRpcs(query.LastInsertId(), it->second.rpcs)) {
+    const int64_t last_group_id = query.LastInsertId();
+
+    if (!SaveRpcs(last_group_id, groups_it->second.rpcs)) {
+      return false;
+    }
+
+    if (!SaveExternalConsentEntities(
+            last_group_id,
+            *groups_it->second.disallowed_by_external_consent_entities_on,
+            kExternalConsentEntitiesTypeOn)) {
+      return false;
+    }
+
+    if (!SaveExternalConsentEntities(
+            last_group_id,
+            *groups_it->second.disallowed_by_external_consent_entities_off,
+            kExternalConsentEntitiesTypeOff)) {
       return false;
     }
   }
+
   return true;
 }
 
@@ -877,6 +967,7 @@ bool SQLPTRepresentation::SaveApplicationPoliciesSection(
     LOG4CXX_WARN(logger_, "Incorrect delete from app_group.");
     return false;
   }
+
   if (!query_delete.Exec(sql_pt::kDeleteApplication)) {
     LOG4CXX_WARN(logger_, "Incorrect delete from application.");
     return false;
@@ -957,6 +1048,13 @@ bool SQLPTRepresentation::SaveSpecificAppPolicy(
   if (!SaveAppGroup(app.first, app.second.groups)) {
     return false;
   }
+
+  bool denied = !app.second.moduleType->is_initialized();
+  if (!SaveRemoteControlDenied(app.first, denied) ||
+      !SaveModuleType(app.first, *app.second.moduleType)) {
+    return false;
+  }
+
   if (!SaveNickname(app.first, *app.second.nicknames)) {
     return false;
   }
@@ -1075,15 +1173,59 @@ bool SQLPTRepresentation::SaveRequestType(
   }
 
   policy_table::RequestTypes::const_iterator it;
-  for (it = types.begin(); it != types.end(); ++it) {
+  if (!types.empty()) {
+    LOG4CXX_WARN(logger_, "Request types not empty.");
+    for (it = types.begin(); it != types.end(); ++it) {
+      query.Bind(0, app_id);
+      query.Bind(1, std::string(policy_table::EnumToJsonString(*it)));
+      if (!query.Exec() || !query.Reset()) {
+        LOG4CXX_WARN(logger_, "Incorrect insert into request types.");
+        return false;
+      }
+    }
+  } else if (types.is_initialized()) {
+    LOG4CXX_WARN(logger_, "Request types empty.");
     query.Bind(0, app_id);
-    query.Bind(1, std::string(policy_table::EnumToJsonString(*it)));
+    query.Bind(1,
+               std::string(policy_table::EnumToJsonString(
+                   policy_table::RequestType::RT_EMPTY)));
     if (!query.Exec() || !query.Reset()) {
       LOG4CXX_WARN(logger_, "Incorrect insert into request types.");
       return false;
     }
   }
+  return true;
+}
 
+bool SQLPTRepresentation::SaveRequestSubType(
+    const std::string& app_id,
+    const policy_table::RequestSubTypes& request_subtypes) {
+  utils::dbms::SQLQuery query(db());
+  if (!query.Prepare(sql_pt::kInsertRequestSubType)) {
+    LOG4CXX_WARN(logger_, "Incorrect insert statement for request subtypes.");
+    return false;
+  }
+
+  policy_table::Strings::const_iterator it;
+  if (!request_subtypes.empty()) {
+    LOG4CXX_TRACE(logger_, "Request subtypes are not empty.");
+    for (it = request_subtypes.begin(); it != request_subtypes.end(); ++it) {
+      query.Bind(0, app_id);
+      query.Bind(1, *it);
+      if (!query.Exec() || !query.Reset()) {
+        LOG4CXX_WARN(logger_, "Incorrect insert into request subtypes.");
+        return false;
+      }
+    }
+  } else if (request_subtypes.is_initialized()) {
+    LOG4CXX_WARN(logger_, "Request subtypes empty.");
+    query.Bind(0, app_id);
+    query.Bind(1, std::string("EMPTY"));
+    if (!query.Exec() || !query.Reset()) {
+      LOG4CXX_WARN(logger_, "Incorrect insert into request subtypes.");
+      return false;
+    }
+  }
   return true;
 }
 
@@ -1162,11 +1304,7 @@ bool SQLPTRepresentation::SaveServiceEndpoints(
       const policy_table::URL& urls = app_it->second;
       policy_table::URL::const_iterator url_it;
       for (url_it = urls.begin(); url_it != urls.end(); ++url_it) {
-        std::stringstream temp_stream(it->first);
-        int service;
-        temp_stream.seekg(3);
-        temp_stream >> service;
-        query.Bind(0, service);
+        query.Bind(0, it->first);
         query.Bind(1, *url_it);
         query.Bind(2, app_it->first);
         if (!query.Exec() || !query.Reset()) {
@@ -1187,44 +1325,48 @@ bool SQLPTRepresentation::SaveConsumerFriendlyMessages(
   // According CRS-2419  If there is no “consumer_friendly_messages” key,
   // the current local consumer_friendly_messages section shall be maintained in
   // the policy table. So it won't be changed/updated
-  if (messages.messages.is_initialized()) {
-    utils::dbms::SQLQuery query(db());
-    if (!query.Exec(sql_pt::kDeleteMessageString)) {
-      LOG4CXX_WARN(logger_, "Incorrect delete from message.");
+  if (!messages.messages.is_initialized()) {
+    LOG4CXX_INFO(logger_, "ConsumerFriendlyMessages messages list is empty");
+    return true;
+  }
+
+  utils::dbms::SQLQuery query(db());
+  bool delete_query_exec_result = true;
+  if (!messages.messages->empty()) {
+    delete_query_exec_result = query.Exec(sql_pt::kDeleteMessageString);
+  }
+
+  if (!delete_query_exec_result) {
+    LOG4CXX_WARN(logger_, "Failed to delete messages from DB.");
+    return false;
+  }
+
+  if (!query.Prepare(sql_pt::kUpdateVersion)) {
+    LOG4CXX_WARN(logger_, "Invalid update messages version statement.");
+    return false;
+  }
+
+  query.Bind(0, messages.version);
+  if (!query.Exec()) {
+    LOG4CXX_WARN(logger_, "Failed to update messages version number in DB.");
+    return false;
+  }
+
+  policy_table::Messages::const_iterator it;
+  for (it = messages.messages->begin(); it != messages.messages->end(); ++it) {
+    if (!SaveMessageType(it->first)) {
       return false;
     }
-
-    if (query.Prepare(sql_pt::kUpdateVersion)) {
-      query.Bind(0, messages.version);
-      if (!query.Exec()) {
-        LOG4CXX_WARN(logger_, "Incorrect update into version.");
+    const policy_table::Languages& langs = it->second.languages;
+    policy_table::Languages::const_iterator lang_it;
+    for (lang_it = langs.begin(); lang_it != langs.end(); ++lang_it) {
+      if (!SaveLanguage(lang_it->first)) {
         return false;
       }
-    } else {
-      LOG4CXX_WARN(logger_, "Incorrect update statement for version.");
-      return false;
-    }
-
-    policy_table::Messages::const_iterator it;
-    // TODO(IKozyrenko): Check logic if optional container is missing
-    for (it = messages.messages->begin(); it != messages.messages->end();
-         ++it) {
-      if (!SaveMessageType(it->first)) {
+      if (!SaveMessageString(it->first, lang_it->first, lang_it->second)) {
         return false;
       }
-      const policy_table::Languages& langs = it->second.languages;
-      policy_table::Languages::const_iterator lang_it;
-      for (lang_it = langs.begin(); lang_it != langs.end(); ++lang_it) {
-        if (!SaveLanguage(lang_it->first)) {
-          return false;
-        }
-        if (!SaveMessageString(it->first, lang_it->first, lang_it->second)) {
-          return false;
-        }
-      }
     }
-  } else {
-    LOG4CXX_INFO(logger_, "Messages list is empty");
   }
 
   return true;
@@ -1418,6 +1560,12 @@ bool SQLPTRepresentation::GetInitialAppData(const std::string& app_id,
     LOG4CXX_WARN(logger_, "Incorrect select from app types");
     return false;
   }
+  dbms::SQLQuery module_types(db());
+  if (!module_types.Prepare(sql_pt::kSelectModuleTypes)) {
+    LOG4CXX_WARN(logger_, "Incorrect select from module types");
+    return false;
+  }
+
   app_names.Bind(0, app_id);
   while (app_names.Next()) {
     nicknames->push_back(app_names.GetString(0));
@@ -1428,6 +1576,12 @@ bool SQLPTRepresentation::GetInitialAppData(const std::string& app_id,
     app_types->push_back(app_hmi_types.GetString(0));
   }
   app_hmi_types.Reset();
+  module_types.Bind(0, app_id);
+  while (module_types.Next()) {
+    app_types->push_back(module_types.GetString(0));
+  }
+  module_types.Reset();
+
   return true;
 }
 
@@ -1471,7 +1625,32 @@ bool SQLPTRepresentation::GatherRequestType(
     if (!policy_table::EnumFromJsonString(query.GetString(0), &type)) {
       return false;
     }
+    if (policy_table::RequestType::RT_EMPTY == type) {
+      request_types->mark_initialized();
+      continue;
+    }
     request_types->push_back(type);
+  }
+  return true;
+}
+
+bool SQLPTRepresentation::GatherRequestSubType(
+    const std::string& app_id,
+    policy_table::RequestSubTypes* request_subtypes) const {
+  utils::dbms::SQLQuery query(db());
+  if (!query.Prepare(sql_pt::kSelectRequestSubTypes)) {
+    LOG4CXX_WARN(logger_, "Incorrect select from request subtypes.");
+    return false;
+  }
+
+  query.Bind(0, app_id);
+  while (query.Next()) {
+    const std::string request_subtype = query.GetString(0);
+    if ("EMPTY" == request_subtype) {
+      request_subtypes->mark_initialized();
+      continue;
+    }
+    request_subtypes->push_back(request_subtype);
   }
   return true;
 }
@@ -1502,6 +1681,212 @@ bool SQLPTRepresentation::GatherAppGroup(
   query.Bind(0, app_id);
   while (query.Next()) {
     app_groups->push_back(query.GetString(0));
+  }
+  return true;
+}
+
+bool SQLPTRepresentation::GatherRemoteControlDenied(const std::string& app_id,
+                                                    bool* denied) const {
+  LOG4CXX_AUTO_TRACE(logger_);
+  dbms::SQLQuery query(db());
+  if (!query.Prepare(sql_pt::kSelectRemoteControlDenied)) {
+    LOG4CXX_WARN(logger_, "Incorrect select remote control flag");
+    return false;
+  }
+  query.Bind(0, app_id);
+  if (query.Next()) {
+    *denied = query.GetBoolean(0);
+  } else {
+    return false;
+  }
+  return true;
+}
+
+bool SQLPTRepresentation::GatherModuleType(
+    const std::string& app_id, policy_table::ModuleTypes* app_types) const {
+  dbms::SQLQuery query(db());
+  if (!query.Prepare(sql_pt::kSelectModuleTypes)) {
+    LOG4CXX_WARN(logger_, "Incorrect select from app types");
+    return false;
+  }
+
+  query.Bind(0, app_id);
+  while (query.Next()) {
+    policy_table::ModuleType type;
+    if (!policy_table::EnumFromJsonString(query.GetString(0), &type)) {
+      return false;
+    }
+    if (policy_table::ModuleType::MT_EMPTY == type) {
+      app_types->mark_initialized();
+      continue;
+    }
+    app_types->push_back(type);
+  }
+  return true;
+}
+
+bool SQLPTRepresentation::SaveRemoteControlDenied(const std::string& app_id,
+                                                  bool deny) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  dbms::SQLQuery query(db());
+  if (!query.Prepare(sql_pt::kUpdateRemoteControlDenied)) {
+    LOG4CXX_WARN(logger_, "Incorrect update statement for remote control flag");
+    return false;
+  }
+  LOG4CXX_DEBUG(logger_, "App: " << app_id << std::boolalpha << " - " << deny);
+  query.Bind(0, deny);
+  query.Bind(1, app_id);
+  if (!query.Exec()) {
+    LOG4CXX_WARN(logger_, "Incorrect update remote control flag.");
+    return false;
+  }
+  return true;
+}
+
+bool SQLPTRepresentation::SaveModuleType(
+    const std::string& app_id, const policy_table::ModuleTypes& types) {
+  dbms::SQLQuery query(db());
+  if (!query.Prepare(sql_pt::kInsertModuleType)) {
+    LOG4CXX_WARN(logger_, "Incorrect insert statement for module type");
+    return false;
+  }
+
+  policy_table::ModuleTypes::const_iterator it;
+  if (!types.empty()) {
+    for (it = types.begin(); it != types.end(); ++it) {
+      query.Bind(0, app_id);
+      std::string module(policy_table::EnumToJsonString(*it));
+      query.Bind(1, module);
+      LOG4CXX_DEBUG(logger_,
+                    "Module(app: " << app_id << ", type: " << module << ")");
+      if (!query.Exec() || !query.Reset()) {
+        LOG4CXX_WARN(logger_, "Incorrect insert into module type.");
+        return false;
+      }
+    }
+  } else if (types.is_initialized()) {
+    query.Bind(0, app_id);
+    query.Bind(1,
+               std::string(policy_table::EnumToJsonString(
+                   policy_table::ModuleType::MT_EMPTY)));
+    if (!query.Exec() || !query.Reset()) {
+      LOG4CXX_WARN(logger_, "Incorrect insert into module types.");
+      return false;
+    }
+  } else {
+    LOG4CXX_WARN(logger_, "Module Type omitted.");
+  }
+  return true;
+}
+
+bool SQLPTRepresentation::SaveAccessModule(
+    TypeAccess access, const policy_table::AccessModules& modules) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  dbms::SQLQuery query(db());
+  if (!query.Prepare(sql_pt::kInsertAccessModule)) {
+    LOG4CXX_WARN(logger_, "Incorrect insert statement for access module");
+    return false;
+  }
+
+  policy_table::AccessModules::const_iterator i;
+  for (i = modules.begin(); i != modules.end(); ++i) {
+    const std::string& name = i->first;
+    const policy_table::RemoteRpcs& rpcs = i->second;
+    query.Bind(0, name);
+    query.Bind(1, access);
+    if (!query.Exec()) {
+      LOG4CXX_WARN(logger_, "Incorrect insert into access module.");
+      return false;
+    }
+    int id = query.LastInsertId();
+    if (!query.Reset()) {
+      LOG4CXX_WARN(logger_, "Couldn't reset query access module.");
+      return false;
+    }
+    if (!SaveRemoteRpc(id, rpcs)) {
+      return false;
+    }
+  }
+  return true;
+}
+
+bool SQLPTRepresentation::GatherAccessModule(
+    TypeAccess access, policy_table::AccessModules* modules) const {
+  LOG4CXX_AUTO_TRACE(logger_);
+  dbms::SQLQuery query(db());
+  if (!query.Prepare(sql_pt::kSelectAccessModules)) {
+    LOG4CXX_WARN(logger_, "Incorrect select from access module");
+    return false;
+  }
+
+  query.Bind(0, access);
+  while (query.Next()) {
+    int id = query.GetInteger(0);
+    std::string name = query.GetString(1);
+    policy_table::RemoteRpcs rpcs;
+    if (!GatherRemoteRpc(id, &rpcs)) {
+      return false;
+    }
+    modules->insert(std::make_pair(name, rpcs));
+  }
+  return true;
+}
+
+bool SQLPTRepresentation::SaveRemoteRpc(int module_id,
+                                        const policy_table::RemoteRpcs& rpcs) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  dbms::SQLQuery query(db());
+  if (!query.Prepare(sql_pt::kInsertRemoteRpc)) {
+    LOG4CXX_WARN(logger_, "Incorrect insert statement for remote rpc");
+    return false;
+  }
+  policy_table::RemoteRpcs::const_iterator i;
+  for (i = rpcs.begin(); i != rpcs.end(); ++i) {
+    const std::string& name = i->first;
+    const policy_table::Strings& params = i->second;
+    policy_table::Strings::const_iterator j;
+    if (params.empty()) {
+      query.Bind(0, module_id);
+      query.Bind(1, name);
+      query.Bind(2);
+      if (!query.Exec() || !query.Reset()) {
+        LOG4CXX_WARN(logger_, "Incorrect insert into remote rpc.");
+        return false;
+      }
+    } else {
+      for (j = params.begin(); j != params.end(); ++j) {
+        const std::string& param = *j;
+        query.Bind(0, module_id);
+        query.Bind(1, name);
+        query.Bind(2, param);
+        if (!query.Exec() || !query.Reset()) {
+          LOG4CXX_WARN(logger_, "Incorrect insert into remote rpc.");
+          return false;
+        }
+      }
+    }
+  }
+  return true;
+}
+
+bool SQLPTRepresentation::GatherRemoteRpc(
+    int module_id, policy_table::RemoteRpcs* rpcs) const {
+  LOG4CXX_AUTO_TRACE(logger_);
+  dbms::SQLQuery query(db());
+  if (!query.Prepare(sql_pt::kSelectRemoteRpcs)) {
+    LOG4CXX_WARN(logger_, "Incorrect select from remote rpc");
+    return false;
+  }
+
+  query.Bind(0, module_id);
+  while (query.Next()) {
+    std::string name = query.GetString(0);
+    if (!query.IsNull(1)) {
+      std::string parameter = query.GetString(1);
+      (*rpcs)[name].push_back(parameter);
+    } else {
+      rpcs->insert(std::make_pair(name, policy_table::Strings()));
+    }
   }
   return true;
 }
@@ -1597,9 +1982,28 @@ bool SQLPTRepresentation::SetDefaultPolicy(const std::string& app_id) {
 
   SetPreloaded(false);
 
+  policy_table::RequestTypes request_types;
+  if (!GatherRequestType(kDefaultId, &request_types) ||
+      !SaveRequestType(app_id, request_types)) {
+    return false;
+  }
+
+  policy_table::Strings request_subtypes;
+  if (!GatherRequestSubType(kDefaultId, &request_subtypes) ||
+      !SaveRequestSubType(app_id, request_subtypes)) {
+    return false;
+  }
+
+  policy_table::AppHMITypes app_types;
+  if (!GatherAppType(kDefaultId, &app_types) ||
+      !SaveAppType(app_id, app_types)) {
+    return false;
+  }
+
   policy_table::Strings default_groups;
-  if (GatherAppGroup(kDefaultId, &default_groups) &&
-      SaveAppGroup(app_id, default_groups)) {
+  bool ret = (GatherAppGroup(kDefaultId, &default_groups) &&
+              SaveAppGroup(app_id, default_groups));
+  if (ret) {
     return SetIsDefault(app_id, true);
   }
   return false;
@@ -1738,6 +2142,40 @@ void SQLPTRepresentation::SetPreloaded(bool value) {
 }
 
 bool SQLPTRepresentation::SetVINValue(const std::string& value) {
+  return true;
+}
+
+bool SQLPTRepresentation::SaveExternalConsentEntities(
+    const int64_t group_id,
+    const policy_table::DisallowedByExternalConsentEntities& entities,
+    ExternalConsentEntitiesType type) const {
+  utils::dbms::SQLQuery query(db());
+  if (!query.Prepare(sql_pt_ext::kInsertExternalConsentEntity)) {
+    LOG4CXX_WARN(logger_,
+                 "Incorrect insert statement for external consent entities.");
+    return false;
+  }
+
+  const std::string external_consent_entity_type =
+      kExternalConsentEntitiesTypeOn == type
+          ? kExternalConsentEntitiesTypeStringOn
+          : kExternalConsentEntitiesTypeStringOff;
+
+  policy_table::DisallowedByExternalConsentEntities::const_iterator it_entity =
+      entities.begin();
+  for (; entities.end() != it_entity; ++it_entity) {
+    query.Bind(0, group_id);
+    query.Bind(1, it_entity->entity_type);
+    query.Bind(2, it_entity->entity_id);
+    query.Bind(3, external_consent_entity_type);
+    if (!query.Exec() || !query.Reset()) {
+      LOG4CXX_ERROR(logger_,
+                    "Can't insert '" << external_consent_entity_type
+                                     << "' external consent entity.");
+      return false;
+    }
+  }
+
   return true;
 }
 

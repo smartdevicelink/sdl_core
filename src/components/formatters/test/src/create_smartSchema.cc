@@ -35,9 +35,9 @@ namespace test {
 namespace components {
 namespace formatters {
 
-using namespace NsSmartDeviceLink::NsJSONHandler::strings;
-using namespace NsSmartDeviceLink::NsJSONHandler::Formatters;
-using namespace NsSmartDeviceLink::NsSmartObjects;
+using namespace ns_smart_device_link::ns_json_handler::strings;
+using namespace ns_smart_device_link::ns_json_handler::formatters;
+using namespace ns_smart_device_link::ns_smart_objects;
 
 template <>
 const EnumConversionHelper<FunctionIDTest::eType>::EnumToCStringMap
@@ -339,7 +339,6 @@ CSmartSchema initSchemaForMetaFormatter() {
   ISchemaItemPtr majorVersion_SchemaItem = TNumberSchemaItem<int>::create();
   ISchemaItemPtr minorVersion_SchemaItem = TNumberSchemaItem<int>::create();
   ISchemaItemPtr patchVersion_SchemaItem = TNumberSchemaItem<int>::create();
-
   ISchemaItemPtr syncMsg_SchemaItem =
       CStringSchemaItem::create(TSchemaItemParameter<size_t>(0),
                                 TSchemaItemParameter<size_t>(1000),

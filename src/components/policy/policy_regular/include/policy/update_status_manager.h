@@ -66,14 +66,14 @@ class UpdateStatusManager : public UpdateStatusManagerInterface {
    * @brief Set next status during event processing
    * @param status Status shared pointer
    */
-  void SetNextStatus(utils::SharedPtr<Status> status);
+  void SetNextStatus(std::shared_ptr<Status> status);
 
   /**
    * @brief Set postponed status (will be set after next status) during event
    * processing
    * @param status Status shared pointer
    */
-  void SetPostponedStatus(utils::SharedPtr<Status> status);
+  void SetPostponedStatus(std::shared_ptr<Status> status);
 
   /**
    * @brief Sets listener pointer
@@ -83,9 +83,8 @@ class UpdateStatusManager : public UpdateStatusManagerInterface {
 
   /**
    * @brief Update status hanlder for PTS sending out
-   * @param update_timeout Timeout for waiting of incoming PTU (msec)
    */
-  void OnUpdateSentOut(uint32_t update_timeout);
+  void OnUpdateSentOut();
 
   /**
    * @brief Update status handler for PTU waiting timeout
@@ -119,10 +118,10 @@ class UpdateStatusManager : public UpdateStatusManagerInterface {
   void OnNewApplicationAdded(const DeviceConsent consent);
 
   /**
-   * @brief Update status handler for policy initialization
+   * @brief Update status handler on existed application registering
    * @param is_update_required Update necessity flag
    */
-  void OnPolicyInit(bool is_update_required);
+  void OnExistedApplicationAdded(const bool is_update_required);
 
   /**
    * @brief In case application from non-consented device has been registered
@@ -199,41 +198,23 @@ class UpdateStatusManager : public UpdateStatusManagerInterface {
   /**
    * @brief Current update status
    */
-  utils::SharedPtr<Status> current_status_;
+  std::shared_ptr<Status> current_status_;
 
   /**
    * @brief Next status after current to be set
    */
-  utils::SharedPtr<Status> next_status_;
+  std::shared_ptr<Status> next_status_;
 
   /**
    * @brief Status to be set after 'next' status
    */
-  utils::SharedPtr<Status> postponed_status_;
+  std::shared_ptr<Status> postponed_status_;
   sync_primitives::Lock status_lock_;
 
   UpdateEvent last_processed_event_;
   bool apps_search_in_progress_;
   bool app_registered_from_non_consented_device_;
   sync_primitives::Lock apps_search_in_progress_lock_;
-
-  class UpdateThreadDelegate : public threads::ThreadDelegate {
-   public:
-    UpdateThreadDelegate(UpdateStatusManager* update_status_manager);
-    ~UpdateThreadDelegate();
-    virtual void threadMain();
-    virtual void exitThreadMain();
-    void updateTimeOut(const uint32_t timeout_ms);
-
-    volatile uint32_t timeout_;
-    volatile bool stop_flag_;
-    sync_primitives::Lock state_lock_;
-    sync_primitives::ConditionalVariable termination_condition_;
-    UpdateStatusManager* update_status_manager_;
-  };
-
-  UpdateThreadDelegate* update_status_thread_delegate_;
-  threads::Thread* thread_;
 };
 }
 

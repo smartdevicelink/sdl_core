@@ -50,9 +50,9 @@ TEST_F(PolicyManagerImplTest2, UpdatedPreloadedPT_ExpectLPT_IsUpdated) {
   new_data.new_field_name_ = "Notifications-";
   CreateNewRandomData(new_data);
   // Create Initial LocalPT from preloadedPT
-  CreateLocalPT(preloadet_pt_filename_);
+  CreateLocalPT(preloaded_pt_filename_);
   // Update preloadedPT
-  std::ifstream ifile(preloadet_pt_filename_);
+  std::ifstream ifile(preloaded_pt_filename_);
   Json::Reader reader;
   Json::Value root(Json::objectValue);
 
@@ -72,18 +72,19 @@ TEST_F(PolicyManagerImplTest2, UpdatedPreloadedPT_ExpectLPT_IsUpdated) {
   ifile.close();
 
   Json::StyledStreamWriter writer;
-  std::ofstream ofile(preloadet_pt_filename_);
+  std::ofstream ofile(preloaded_pt_filename_);
   writer.write(ofile, root);
   ofile.flush();
   ofile.close();
 
   //  Make PolicyManager to update LocalPT
-  policy::CacheManagerInterfaceSPtr cache = manager_->GetCache();
-  EXPECT_TRUE(manager_->InitPT(preloadet_pt_filename_, &policy_settings_));
+  policy::CacheManagerInterfaceSPtr cache = policy_manager_->GetCache();
+  EXPECT_TRUE(
+      policy_manager_->InitPT(preloaded_pt_filename_, &policy_settings_));
   EXPECT_TRUE(cache->IsPTPreloaded());
 
   // Arrange
-  utils::SharedPtr<policy_table::Table> table = cache->GenerateSnapshot();
+  std::shared_ptr<policy_table::Table> table = cache->GenerateSnapshot();
   // Get FunctionalGroupings
   policy_table::FunctionalGroupings& fc =
       table->policy_table.functional_groupings;
@@ -116,29 +117,31 @@ TEST_F(PolicyManagerImplTest2, UpdatedPreloadedPT_ExpectLPT_IsUpdated) {
 TEST_F(PolicyManagerImplTest2,
        SetSystemLanguage_ExpectSystemLanguageSetSuccessfully) {
   // Arrange
-  CreateLocalPT(preloadet_pt_filename_);
-  manager_->SetSystemLanguage("it-it");
-  utils::SharedPtr<policy_table::Table> pt = (manager_->GetCache())->GetPT();
+  CreateLocalPT(preloaded_pt_filename_);
+  policy_manager_->SetSystemLanguage("it-it");
+  std::shared_ptr<policy_table::Table> pt =
+      (policy_manager_->GetCache())->GetPT();
   ::policy_table::ModuleMeta& ModuleMeta = *(pt->policy_table.module_meta);
   EXPECT_EQ("it-it", static_cast<std::string>(*(ModuleMeta.language)));
 }
 
 TEST_F(PolicyManagerImplTest2, SetVINValue_ExpectVINSetSuccessfully) {
   // Arrange
-  CreateLocalPT(preloadet_pt_filename_);
+  CreateLocalPT(preloaded_pt_filename_);
   std::string vin_code("1FAPP6242VH100001");
-  manager_->SetVINValue(vin_code);
-  utils::SharedPtr<policy_table::Table> pt = (manager_->GetCache())->GetPT();
+  policy_manager_->SetVINValue(vin_code);
+  std::shared_ptr<policy_table::Table> pt =
+      (policy_manager_->GetCache())->GetPT();
   ::policy_table::ModuleMeta& ModuleMeta = *(pt->policy_table.module_meta);
   EXPECT_EQ(vin_code, static_cast<std::string>(*(ModuleMeta.vin)));
 }
 
 TEST_F(PolicyManagerImplTest2, SetSystemInfo_ExpectSystemInfoSetSuccessfully) {
   // Arrange
-  CreateLocalPT(preloadet_pt_filename_);
-  manager_->SetSystemInfo("4.1.3.B_EB355B", "WAEGB", "ru-ru");
-  policy::CacheManagerInterfaceSPtr cache = manager_->GetCache();
-  utils::SharedPtr<policy_table::Table> pt = cache->GetPT();
+  CreateLocalPT(preloaded_pt_filename_);
+  policy_manager_->SetSystemInfo("4.1.3.B_EB355B", "WAEGB", "ru-ru");
+  policy::CacheManagerInterfaceSPtr cache = policy_manager_->GetCache();
+  std::shared_ptr<policy_table::Table> pt = cache->GetPT();
   ::policy_table::ModuleMeta& ModuleMeta = *(pt->policy_table.module_meta);
   EXPECT_EQ("ru-ru", static_cast<std::string>(*(ModuleMeta.language)));
   EXPECT_EQ("4.1.3.B_EB355B",
@@ -149,7 +152,7 @@ TEST_F(PolicyManagerImplTest2, SetSystemInfo_ExpectSystemInfoSetSuccessfully) {
 
 TEST_F(PolicyManagerImplTest2, CleanUnpairedDevice_ExpectDevicesDeleted) {
   // Arrange
-  CreateLocalPT(preloadet_pt_filename_);
+  CreateLocalPT(preloaded_pt_filename_);
   // Add first device
   ::policy::DeviceInfo dev_info1;
   dev_info1.hardware = "hardware IPX";
@@ -159,8 +162,8 @@ TEST_F(PolicyManagerImplTest2, CleanUnpairedDevice_ExpectDevicesDeleted) {
   dev_info1.carrier = "Life";
   dev_info1.max_number_rfcom_ports = 2;
   dev_info1.connection_type = "Bluetooth";
-  manager_->AddDevice(device_id_1_, "Bluetooth");
-  manager_->SetDeviceInfo(device_id_1_, dev_info1);
+  policy_manager_->AddDevice(device_id_1_, "Bluetooth");
+  policy_manager_->SetDeviceInfo(device_id_1_, dev_info1);
 
   // Add second device
   ::policy::DeviceInfo dev_info2;
@@ -171,8 +174,8 @@ TEST_F(PolicyManagerImplTest2, CleanUnpairedDevice_ExpectDevicesDeleted) {
   dev_info2.carrier = "MTS";
   dev_info2.max_number_rfcom_ports = 2;
   dev_info2.connection_type = "Bluetooth";
-  manager_->AddDevice("ZZZ123456789YYY", "Bluetooth");
-  manager_->SetDeviceInfo("ZZZ123456789YYY", dev_info2);
+  policy_manager_->AddDevice("ZZZ123456789YYY", "Bluetooth");
+  policy_manager_->SetDeviceInfo("ZZZ123456789YYY", dev_info2);
 
   // Add third device
   ::policy::DeviceInfo dev_info3;
@@ -183,10 +186,11 @@ TEST_F(PolicyManagerImplTest2, CleanUnpairedDevice_ExpectDevicesDeleted) {
   dev_info3.carrier = "Kyivstar";
   dev_info3.max_number_rfcom_ports = 2;
   dev_info3.connection_type = "Bluetooth";
-  manager_->AddDevice("AAA123456789RRR", "Bluetooth");
-  manager_->SetDeviceInfo("AAA123456789RRR", dev_info3);
+  policy_manager_->AddDevice("AAA123456789RRR", "Bluetooth");
+  policy_manager_->SetDeviceInfo("AAA123456789RRR", dev_info3);
 
-  utils::SharedPtr<policy_table::Table> pt = (manager_->GetCache())->GetPT();
+  std::shared_ptr<policy_table::Table> pt =
+      (policy_manager_->GetCache())->GetPT();
   // Try to find first device in PT
   policy_table::DeviceData::const_iterator iter =
       (*(pt->policy_table.device_data)).find(device_id_1_);
@@ -203,10 +207,10 @@ TEST_F(PolicyManagerImplTest2, CleanUnpairedDevice_ExpectDevicesDeleted) {
   // Check third device successfully added to PT
   ASSERT_TRUE(iter != (*(pt->policy_table.device_data)).end());
 
-  manager_->MarkUnpairedDevice(device_id_1_);
-  manager_->MarkUnpairedDevice("ZZZ123456789YYY");
-  manager_->MarkUnpairedDevice("AAA123456789RRR");
-  manager_->CleanupUnpairedDevices();
+  policy_manager_->MarkUnpairedDevice(device_id_1_);
+  policy_manager_->MarkUnpairedDevice("ZZZ123456789YYY");
+  policy_manager_->MarkUnpairedDevice("AAA123456789RRR");
+  policy_manager_->CleanupUnpairedDevices();
 
   // Try to find first device in PT
   iter = (*(pt->policy_table.device_data)).find(device_id_1_);
@@ -255,19 +259,19 @@ TEST_F(PolicyManagerImplTest2,
 TEST_F(
     PolicyManagerImplTest2,
     AddValidRequestTypeToPT_GetNewAppWithSpecificPoliciesViaPTU_ExpectRTAdded) {
-  const std::string section_name = application_id_;
+  const std::string& app_id = application_id_;
 
   // Arrange
-  CreateLocalPT(preloadet_pt_filename_);
+  CreateLocalPT(preloaded_pt_filename_);
   // Add app
-  manager_->AddApplication(section_name);
+  policy_manager_->AddApplication(app_id, HmiTypes(policy_table::AHT_DEFAULT));
   // Check app gets RequestTypes from pre_DataConsent of app_policies
   // section
-  pt_request_types_ = manager_->GetAppRequestTypes(section_name);
+  pt_request_types_ = policy_manager_->GetAppRequestTypes(app_id);
 
   // Only single item as in pre_DataConsent in preloaded PT
   EXPECT_EQ(1u, pt_request_types_.size());
-  EXPECT_CALL(listener_, OnPendingPermissionChange(section_name)).Times(1);
+  EXPECT_CALL(listener_, OnPendingPermissionChange(app_id)).Times(1);
 
   // PTU has RequestTypes as [] - means 'all allowed'
   Json::Value root = GetPTU("json/PTU2.json");
@@ -276,22 +280,22 @@ TEST_F(
   // permissions, request type etc.
   EXPECT_CALL(listener_, OnCurrentDeviceIdUpdateRequired(application_id_))
       .WillRepeatedly(Return(device_id_1_));
-  manager_->SetUserConsentForDevice(device_id_1_, true);
+  policy_manager_->SetUserConsentForDevice(device_id_1_, true);
 
   // Get App Request Types from PTU
   ptu_request_types_ =
-      root["policy_table"]["app_policies"][section_name]["RequestType"];
+      root["policy_table"]["app_policies"][app_id]["RequestType"];
   ptu_request_types_size_ = ptu_request_types_.size();
 
   pt_request_types_.clear();
   // Get RequestTypes from <app_id> section of app policies after PT update
-  pt_request_types_ = manager_->GetAppRequestTypes(section_name);
+  pt_request_types_ = policy_manager_->GetAppRequestTypes(app_id);
 
   // Check sizes of Request types of PT and PTU
   ASSERT_EQ(ptu_request_types_size_, pt_request_types_.size());
 
   ::policy::AppPermissions permissions =
-      manager_->GetAppPermissionsChanges(section_name);
+      policy_manager_->GetAppPermissionsChanges(app_id);
   EXPECT_TRUE(permissions.requestTypeChanged);
 
   ::policy::StringArray result;
@@ -310,10 +314,10 @@ TEST_F(PolicyManagerImplTest2, AddDevice_RegisterDevice_TRUE) {
   const std::string connection_type = "Bluetooth";
 
   const bool result =
-      (manager_->GetCache())->AddDevice(device_id_1_, connection_type);
+      (policy_manager_->GetCache())->AddDevice(device_id_1_, connection_type);
   // Get Policy table
-  const utils::SharedPtr<policy_table::Table> policy_table =
-      manager_->GetCache()->GetPT();
+  const std::shared_ptr<policy_table::Table> policy_table =
+      policy_manager_->GetCache()->GetPT();
   // Get preloaded_pt flag from Policy table
   const bool is_preloaded_pt =
       *policy_table->policy_table.module_config.preloaded_pt;

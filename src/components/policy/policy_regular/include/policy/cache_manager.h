@@ -35,7 +35,6 @@
 
 #include <map>
 
-#include "utils/shared_ptr.h"
 #include "policy/pt_representation.h"
 #include "policy/pt_ext_representation.h"
 #include "policy/usage_statistics/statistics_manager.h"
@@ -55,6 +54,8 @@ class CacheManager : public CacheManagerInterface {
   CacheManager();
   ~CacheManager();
 
+  const policy_table::Strings& GetGroups(const PTString& app_id);
+
   /**
    * @brief Check if specified RPC for specified application
    * has permission to be executed in specified HMI Level
@@ -65,10 +66,26 @@ class CacheManager : public CacheManagerInterface {
    * @return CheckPermissionResult containing flag if HMI Level is allowed
    * and list of allowed params.
    */
-  virtual void CheckPermissions(const PTString& app_id,
+  virtual void CheckPermissions(const policy_table::Strings& groups,
                                 const PTString& hmi_level,
                                 const PTString& rpc,
                                 CheckPermissionResult& result);
+
+  /**
+   * @brief Get state of request types for given application
+   * @param policy_app_id Unique application id
+   * @return request type state
+   */
+  RequestType::State GetAppRequestTypesState(
+      const std::string& policy_app_id) const OVERRIDE;
+
+  /**
+   * @brief Get state of request subtypes for given application
+   * @param policy_app_id Unique application id
+   * @return request subtype state
+   */
+  RequestSubType::State GetAppRequestSubTypesState(
+      const std::string& policy_app_id) const OVERRIDE;
 
   /**
    * @brief Returns true if Policy Table was not updated yet
@@ -198,7 +215,7 @@ class CacheManager : public CacheManagerInterface {
    * device_info, statistics, excluding user messages
    * @return Generated structure for obtaining Json string.
    */
-  virtual utils::SharedPtr<policy_table::Table> GenerateSnapshot();
+  virtual std::shared_ptr<policy_table::Table> GenerateSnapshot();
 
   /**
    * Applies policy table to the current table
@@ -213,6 +230,15 @@ class CacheManager : public CacheManagerInterface {
    */
   virtual void GetHMIAppTypeAfterUpdate(
       std::map<std::string, StringArray>& app_hmi_types);
+
+  /**
+   * @brief AppHasHMIType checks whether app has been registered with certain
+   *HMI type.
+   *
+   * @return true in case app contains certain HMI type, false otherwise.
+   */
+  virtual bool AppHasHMIType(const std::string& application_id,
+                             policy_table::AppHMIType hmi_type) const OVERRIDE;
 
   /**
    * Gets flag updateRequired
@@ -312,6 +338,13 @@ class CacheManager : public CacheManagerInterface {
    * @return true, if succedeed, otherwise - false
    */
   bool GetDefaultHMI(const std::string& app_id, std::string& default_hmi) const;
+
+  /**
+   * Gets HMI types from specific policy
+   * @param app_id ID application
+   * @return list of HMI types
+   */
+  const policy_table::AppHMITypes* GetHMITypes(const std::string& app_id);
 
   /**
    * @brief Reset user consent for device data and applications permissions
@@ -579,8 +612,18 @@ class CacheManager : public CacheManagerInterface {
    * @param policy_app_id Unique application id
    * @param request_types Request types of application
    */
-  void GetAppRequestTypes(const std::string& policy_app_id,
-                          std::vector<std::string>& request_types) const;
+  void GetAppRequestTypes(
+      const std::string& policy_app_id,
+      std::vector<std::string>& request_types) const OVERRIDE;
+
+  /**
+   * @brief Gets request subtypes for application
+   * @param policy_app_id Unique application id
+   * @param request_subtypes Request subtypes of application to be filled
+   */
+  void GetAppRequestSubTypes(
+      const std::string& policy_app_id,
+      std::vector<std::string>& request_subtypes) const OVERRIDE;
 
   /**
    * @brief GetCertificate allows to obtain certificate in order to
@@ -593,12 +636,13 @@ class CacheManager : public CacheManagerInterface {
   /**
    * @brief MergePreloadPT allows to load policy table from certain JSON file,
    * and then decide if merge is needed. The merge is needed in case when
-   *preload
+   * preload
    * JSON date is different than current database.
    *
    * @param file_name the preloaded policy table JSON file.
+   * @return false in case of invalid preloaded_pt
    */
-  void MergePreloadPT(const std::string& file_name);
+  bool MergePreloadPT(const std::string& file_name);
 
   /**
    * @brief MergeMC allows to merge ModuleConfig section by definite rules.
@@ -678,11 +722,18 @@ class CacheManager : public CacheManagerInterface {
 
   const PolicySettings& get_settings() const;
 
-#ifdef BUILD_TESTS
-  utils::SharedPtr<policy_table::Table> GetPT() const {
+  std::shared_ptr<policy_table::Table> pt() const {
     return pt_;
   }
-#endif
+
+  /**
+   * @brief OnDeviceSwitching Processes existing policy permissions for devices
+   * switching transport
+   * @param device_id_from Device ID original
+   * @param device_id_to Device ID new
+   */
+  void OnDeviceSwitching(const std::string& device_id_from,
+                         const std::string& device_id_to) OVERRIDE;
 
  private:
   std::string currentDateTime();
@@ -705,6 +756,13 @@ class CacheManager : public CacheManagerInterface {
 
   void PersistData();
 
+  /**
+   * @brief Transform to lower case all non default application names in
+   * applications policies section
+   * @param pt polict rable for update
+   */
+  void MakeLowerCaseAppNames(policy_table::Table& pt) const;
+
   void ResetCalculatedPermissions();
 
   void AddCalculatedPermissions(const std::string& device_id,
@@ -716,14 +774,14 @@ class CacheManager : public CacheManagerInterface {
                                policy::Permissions& permission);
 
  private:
-  utils::SharedPtr<policy_table::Table> pt_;
-  utils::SharedPtr<policy_table::Table> snapshot_;
-  utils::SharedPtr<PTRepresentation> backup_;
+  std::shared_ptr<policy_table::Table> pt_;
+  std::shared_ptr<policy_table::Table> snapshot_;
+  std::shared_ptr<PTRepresentation> backup_;
   bool update_required;
   typedef std::set<std::string> UnpairedDevices;
   UnpairedDevices is_unpaired_;
 
-  sync_primitives::Lock cache_lock_;
+  mutable sync_primitives::RecursiveLock cache_lock_;
   sync_primitives::Lock unpaired_lock_;
 
   typedef std::map<std::string, Permissions> AppCalculatedPermissions;
@@ -755,6 +813,13 @@ class CacheManager : public CacheManagerInterface {
   sync_primitives::Lock backuper_locker_;
   BackgroundBackuper* backuper_;
   const PolicySettings* settings_;
+
+#ifdef BUILD_TESTS
+  friend class AccessRemoteImpl;
+  FRIEND_TEST(AccessRemoteImplTest, CheckModuleType);
+  FRIEND_TEST(AccessRemoteImplTest, EnableDisable);
+  FRIEND_TEST(AccessRemoteImplTest, GetGroups);
+#endif  // BUILD_TESTS
 };
 }  // namespace policy
 #endif  // SRC_COMPONENTS_POLICY_POLICY_REGULAR_INCLUDE_POLICY_CACHE_MANAGER_H_

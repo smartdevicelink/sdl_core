@@ -34,7 +34,7 @@
 #include <string>
 
 #include "gtest/gtest.h"
-#include "utils/shared_ptr.h"
+
 #include "smart_objects/smart_object.h"
 #include "application_manager/smart_object_keys.h"
 #include "application_manager/commands/commands_test.h"
@@ -49,7 +49,7 @@ namespace command_response_impl {
 
 namespace strings = ::application_manager::strings;
 namespace hmi_response = ::application_manager::hmi_response;
-using ::utils::SharedPtr;
+
 using ::application_manager::commands::MessageSharedPtr;
 using ::application_manager::commands::CommandResponseImpl;
 
@@ -57,7 +57,8 @@ class CommandResponseImplTest
     : public CommandsTest<CommandsTestMocks::kIsNice> {};
 
 TEST_F(CommandResponseImplTest, BasicMethodsOverloads_SUCCESS) {
-  SharedPtr<CommandResponseImpl> command = CreateCommand<CommandResponseImpl>();
+  std::shared_ptr<CommandResponseImpl> command =
+      CreateCommand<CommandResponseImpl>();
   // Current implementation always return `true`
   EXPECT_TRUE(command->Init());
   EXPECT_TRUE(command->CleanUp());
@@ -66,7 +67,7 @@ TEST_F(CommandResponseImplTest, BasicMethodsOverloads_SUCCESS) {
 
 TEST_F(CommandResponseImplTest, SendResponse_MessageWithResultCode_SUCCESS) {
   MessageSharedPtr msg;
-  SharedPtr<CommandResponseImpl> command =
+  std::shared_ptr<CommandResponseImpl> command =
       CreateCommand<CommandResponseImpl>(msg);
   // Do not have a weight in this case
   const bool kSuccess = true;
@@ -78,7 +79,7 @@ TEST_F(CommandResponseImplTest, SendResponse_MessageWithResultCode_SUCCESS) {
   // then send message to mobile.
   (*msg)[strings::msg_params][strings::result_code] = kResultCode;
 
-  EXPECT_CALL(app_mngr_, SendMessageToMobile(msg, kFinalResponse));
+  EXPECT_CALL(mock_rpc_service_, SendMessageToMobile(msg, kFinalResponse));
 
   command->SendResponse(kSuccess, kResultCode, kFinalResponse);
 }
@@ -86,7 +87,7 @@ TEST_F(CommandResponseImplTest, SendResponse_MessageWithResultCode_SUCCESS) {
 TEST_F(CommandResponseImplTest,
        SendResponse_EmptyMessageValidResultCode_SUCCESS) {
   MessageSharedPtr msg;
-  SharedPtr<CommandResponseImpl> command =
+  std::shared_ptr<CommandResponseImpl> command =
       CreateCommand<CommandResponseImpl>(msg);
 
   const bool kSuccess = true;
@@ -94,7 +95,7 @@ TEST_F(CommandResponseImplTest,
       mobile_apis::Result::eType::SUCCESS;
   const bool kFinalResponse = true;
 
-  EXPECT_CALL(app_mngr_, SendMessageToMobile(msg, kFinalResponse));
+  EXPECT_CALL(mock_rpc_service_, SendMessageToMobile(msg, kFinalResponse));
 
   // If `msg_params->result_code` does not exist in message
   // and arg `result_code` not equals `INVALID_ENUM`,
@@ -108,7 +109,7 @@ TEST_F(CommandResponseImplTest,
 TEST_F(CommandResponseImplTest,
        SendResponse_EmptyMessageInvalidResultCode_SUCCESS) {
   MessageSharedPtr msg;
-  SharedPtr<CommandResponseImpl> command =
+  std::shared_ptr<CommandResponseImpl> command =
       CreateCommand<CommandResponseImpl>(msg);
 
   const bool kSuccess = true;
@@ -122,7 +123,7 @@ TEST_F(CommandResponseImplTest,
   // then set it to `msg_params->result_code` and send message to mobile.
   (*msg)[strings::params][hmi_response::code] = mobile_apis::Result::SUCCESS;
 
-  EXPECT_CALL(app_mngr_, SendMessageToMobile(msg, kFinalResponse));
+  EXPECT_CALL(mock_rpc_service_, SendMessageToMobile(msg, kFinalResponse));
 
   command->SendResponse(kSuccess, kResultCode, kFinalResponse);
 
@@ -133,7 +134,7 @@ TEST_F(CommandResponseImplTest,
 TEST_F(CommandResponseImplTest,
        SendResponse_EmptyMessageInvalidResultCodeNoHmiResponse_SUCCESS) {
   MessageSharedPtr msg;
-  SharedPtr<CommandResponseImpl> command =
+  std::shared_ptr<CommandResponseImpl> command =
       CreateCommand<CommandResponseImpl>(msg);
 
   const mobile_apis::Result::eType kResultCode =
@@ -147,7 +148,7 @@ TEST_F(CommandResponseImplTest,
   // then `msg_params->result_code` will be `SUCCESS`
   const bool kSuccess = true;
 
-  EXPECT_CALL(app_mngr_, SendMessageToMobile(msg, kFinalResponse));
+  EXPECT_CALL(mock_rpc_service_, SendMessageToMobile(msg, kFinalResponse));
 
   command->SendResponse(kSuccess, kResultCode, kFinalResponse);
 
@@ -158,7 +159,7 @@ TEST_F(CommandResponseImplTest,
 TEST_F(CommandResponseImplTest,
        SendResponse_EmptyMessageInvalidResultCodeNoHmiResponse_INVALID_ENUM) {
   MessageSharedPtr msg;
-  SharedPtr<CommandResponseImpl> command =
+  std::shared_ptr<CommandResponseImpl> command =
       CreateCommand<CommandResponseImpl>(msg);
 
   const mobile_apis::Result::eType kResultCode =
@@ -172,7 +173,7 @@ TEST_F(CommandResponseImplTest,
   // then `msg_params->result_code` will be `INVALID_ENUM`
   const bool kSuccess = false;
 
-  EXPECT_CALL(app_mngr_, SendMessageToMobile(msg, kFinalResponse));
+  EXPECT_CALL(mock_rpc_service_, SendMessageToMobile(msg, kFinalResponse));
 
   command->SendResponse(kSuccess, kResultCode, kFinalResponse);
 

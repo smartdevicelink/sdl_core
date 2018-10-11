@@ -80,6 +80,7 @@ class UsbConnection : public Connection {
   uint8_t out_endpoint_;
   uint16_t out_endpoint_max_packet_size_;
   unsigned char* in_buffer_;
+  uint16_t in_buffer_size_;
   libusb_transfer* in_transfer_;
   libusb_transfer* out_transfer_;
 

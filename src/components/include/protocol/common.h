@@ -56,8 +56,9 @@ const uint8_t PROTOCOL_HEADER_V2_SIZE = 12;
  *\brief Protocol versions constants
  * First 4-bit field of AppLink protocol packet
  */
-enum {
-
+enum MajorProtocolVersion {
+  PROTOCOL_VERSION_UNKNOWN = -1,
+  PROTOCOL_VERSION_HMI = 0x00,
   /**
    *\brief Constant: number of protocol version (1).
    */
@@ -84,6 +85,12 @@ enum {
    * SDL4.0 feature.
    */
   PROTOCOL_VERSION_4 = 0x04,
+  /**
+   *@brief Constant: number of protocol version (5).
+   * Supports constructed payloads for protocol packets
+   * SDL4.4 feature.
+   */
+  PROTOCOL_VERSION_5 = 0x05,
   /**
    *\brief Maximum value of packet version field (size 4-bit) specified AppLink
    *Protocol v.7
@@ -159,6 +166,22 @@ enum {
    *\brief End service not acknowledgement frame
    */
   FRAME_DATA_END_SERVICE_NACK = 0x06,
+  /**
+   *\brief Register Secondary Transport frame
+   */
+  FRAME_DATA_REGISTER_SECONDARY_TRANSPORT = 0x07,
+  /**
+   *\brief Register Secondary Transport acknowledgement frame
+   */
+  FRAME_DATA_REGISTER_SECONDARY_TRANSPORT_ACK = 0x08,
+  /**
+   *\brief Register Secondary Transport not acknowledgement frame
+   */
+  FRAME_DATA_REGISTER_SECONDARY_TRANSPORT_NACK = 0x09,
+  /**
+   *\brief Transport Event Update frame
+   */
+  FRAME_DATA_TRANSPORT_EVENT_UPDATE = 0xFD,
   /**
    *\brief Service data ACK frame
    */

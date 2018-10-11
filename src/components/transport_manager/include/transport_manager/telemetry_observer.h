@@ -42,8 +42,8 @@ namespace transport_manager {
 class TMTelemetryObserver {
  public:
   struct MessageMetric {
-    TimevalStruct begin;
-    TimevalStruct end;
+    date_time::TimeDuration begin;
+    date_time::TimeDuration end;
     size_t data_size;
   };
   virtual void StartRawMsg(const protocol_handler::RawMessage* ptr) = 0;

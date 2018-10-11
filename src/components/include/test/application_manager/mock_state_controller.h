@@ -51,27 +51,30 @@ class MockStateController : public am::StateController {
                void(am::ApplicationSharedPtr app,
                     am::HmiStatePtr state,
                     const bool SendActivateApp));
-  MOCK_METHOD4(SetRegularState,
+  MOCK_METHOD5(SetRegularState,
                void(am::ApplicationSharedPtr app,
                     const mobile_apis::HMILevel::eType hmi_level,
                     const mobile_apis::AudioStreamingState::eType audio_state,
+                    const mobile_apis::VideoStreamingState::eType video_state,
                     const bool SendActivateApp));
   MOCK_METHOD3(SetRegularState,
                void(am::ApplicationSharedPtr app,
                     const mobile_apis::HMILevel::eType hmi_level,
                     const bool SendActivateApp));
-  MOCK_METHOD5(SetRegularState,
+  MOCK_METHOD6(SetRegularState,
                void(am::ApplicationSharedPtr app,
                     const mobile_apis::HMILevel::eType hmi_level,
                     const mobile_apis::AudioStreamingState::eType audio_state,
+                    const mobile_apis::VideoStreamingState::eType video_state,
                     const mobile_apis::SystemContext::eType system_context,
                     const bool SendActivateApp));
   MOCK_METHOD2(SetRegularState,
                void(am::ApplicationSharedPtr app,
                     const mobile_apis::HMILevel::eType hmi_level));
-  MOCK_METHOD2(SetRegularState,
+  MOCK_METHOD3(SetRegularState,
                void(am::ApplicationSharedPtr app,
-                    const mobile_apis::AudioStreamingState::eType audio_state));
+                    const mobile_apis::AudioStreamingState::eType audio_state,
+                    const mobile_apis::VideoStreamingState::eType video_state));
   MOCK_METHOD2(SetRegularState,
                void(am::ApplicationSharedPtr app,
                     const mobile_apis::SystemContext::eType system_context));
@@ -84,8 +87,10 @@ class MockStateController : public am::StateController {
                int64_t(am::ApplicationConstSharedPtr app,
                        hmi_apis::Common_HMILevel::eType level,
                        bool send_policy_priority));
-  MOCK_METHOD0(OnNaviStreamingStarted, void());
-  MOCK_METHOD0(OnNaviStreamingStopped, void());
+  MOCK_METHOD1(OnVideoStreamingStarted,
+               void(am::ApplicationConstSharedPtr app));
+  MOCK_METHOD1(OnVideoStreamingStopped,
+               void(am::ApplicationConstSharedPtr app));
   MOCK_METHOD3(OnStateChanged,
                void(am::ApplicationSharedPtr app,
                     am::HmiStatePtr old_state,

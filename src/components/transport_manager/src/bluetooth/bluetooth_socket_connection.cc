@@ -106,14 +106,12 @@ bool BluetoothSocketConnection::Establish(ConnectError** error) {
     if (0 == connect_status) {
       LOG4CXX_DEBUG(logger_, "rfcomm Connect ok");
       break;
-    }
-    if (errno != 111 && errno != 104) {
-      LOG4CXX_DEBUG(logger_, "rfcomm Connect errno " << errno);
-      break;
-    }
-    if (errno) {
-      LOG4CXX_DEBUG(logger_, "rfcomm Connect errno " << errno);
-      close(rfcomm_socket);
+    } else {  // If connect_status is not 0, an errno is returned
+      LOG4CXX_WARN_WITH_ERRNO(logger_, "rfcomm Connect failed");
+      close(rfcomm_socket);  // Always close the socket upon error
+      if (errno != ECONNREFUSED && errno != ECONNRESET) {
+        break;
+      }
     }
     sleep(2);
   } while (--attempts > 0);
