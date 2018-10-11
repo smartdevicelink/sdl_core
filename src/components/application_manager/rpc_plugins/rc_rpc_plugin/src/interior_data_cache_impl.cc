@@ -34,6 +34,7 @@
 #include <thread>
 #include <chrono>
 #include "rc_rpc_plugin/interior_data_cache_impl.h"
+#include "application_manager/smart_object_keys.h"
 #include "utils/date_time.h"
 #include "utils/logger.h"
 
@@ -46,7 +47,7 @@ InteriorDataCacheImpl::InteriorDataCacheImpl() {}
 InteriorDataCacheImpl::~InteriorDataCacheImpl() {}
 
 /**
- * @brief MergeModuleData key all keys and values from first parameter and
+ * @brief MergeModuleData all keys and values from first parameter and
  * update and append keys and values from the second
  * @param data1 - initial data
  * @param data2 - updated data
@@ -54,13 +55,83 @@ InteriorDataCacheImpl::~InteriorDataCacheImpl() {}
  */
 smart_objects::SmartObject MergeModuleData(
     const smart_objects::SmartObject& data1,
+    const smart_objects::SmartObject& data2);
+
+/**
+ * @brief MergeArray merge two arrays if their elements contain an `id`
+ * parameter
+ * @param data1 - initial data
+ * @param data2 - updated data
+ * @return updated data1 with any values in data2 if the arrays can be merged,
+ * otherwise data2
+ */
+smart_objects::SmartObject MergeArray(const smart_objects::SmartObject& data1,
+                                      const smart_objects::SmartObject& data2);
+
+smart_objects::SmartObject MergeModuleData(
+    const smart_objects::SmartObject& data1,
     const smart_objects::SmartObject& data2) {
   smart_objects::SmartObject result = data1;
   auto it = data2.map_begin();
   for (; it != data2.map_end(); ++it) {
     const std::string& key = it->first;
-    const smart_objects::SmartObject& value = it->second;
+    smart_objects::SmartObject& value = it->second;
+    if (!result.keyExists(key) || value.getType() != result[key].getType()) {
+      result[key] = value;
+      continue;
+    }
+
+    // Merge maps and arrays with `id` param included, replace other types
+    if (value.getType() == smart_objects::SmartType::SmartType_Map) {
+      value = MergeModuleData(result[key], value);
+    } else if (value.getType() == smart_objects::SmartType::SmartType_Array) {
+      value = MergeArray(result[key], value);
+    }
     result[key] = value;
+  }
+  return result;
+}
+
+smart_objects::SmartObject MergeArray(const smart_objects::SmartObject& data1,
+                                      const smart_objects::SmartObject& data2) {
+  // Merge data only in the case where each value in the array is an Object with
+  // an ID included, otherwise replace
+  bool array_contains_objects =
+      !data2.empty() &&
+      data2.getElement(0).getType() != smart_objects::SmartType::SmartType_Map;
+  bool can_merge_arrays =
+      array_contains_objects &&
+      data2.getElement(0).keyExists(application_manager::strings::id);
+  if (!can_merge_arrays) {
+    return data2;
+  }
+
+  smart_objects::SmartObject result = data1;
+  smart_objects::SmartArray* result_array = result.asArray();
+  smart_objects::SmartArray* data_array = data2.asArray();
+  auto data_it = data_array->begin();
+  auto find_by_id =
+      [](smart_objects::SmartArray* array, const smart_objects::SmartObject& id)
+          -> smart_objects::SmartArray::iterator {
+            auto it = std::find_if(
+                array->begin(),
+                array->end(),
+                [&id](smart_objects::SmartObject& obj) -> bool {
+                  return obj[application_manager::strings::id] == id;
+                });
+            return it;
+          };
+
+  for (; data_it != data_array->end(); ++data_it) {
+    const smart_objects::SmartObject element_id =
+        (*data_it)[application_manager::strings::id];
+    auto result_it = find_by_id(result_array, element_id);
+
+    if (result_it != result_array->end()) {
+      *result_it = MergeModuleData(*result_it, *data_it);
+    } else {
+      result_array->push_back(*data_it);
+    }
   }
   return result;
 }
