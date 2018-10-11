@@ -212,8 +212,7 @@ TEST_F(SubscribeButtonRequestTest, Run_SUCCESS_App_Base_RPC_Version) {
 
   MockAppPtr app(CreateMockApp());
   ON_CALL(app_mngr_, application(_)).WillByDefault(Return(app));
-  ON_CALL(*app, msg_version())
-      .WillByDefault(ReturnRef(mock_base_rpc_version));
+  ON_CALL(*app, msg_version()).WillByDefault(ReturnRef(mock_base_rpc_version));
   ON_CALL(*app, is_media_application()).WillByDefault(Return(true));
 
   ON_CALL(mock_hmi_capabilities_, is_ui_cooperating())
