@@ -523,6 +523,7 @@ struct DeviceParams : CompositeType {
   Optional<UserConsentRecords> user_consent_records;
   Optional<Integer<uint8_t, 0, 255> > max_number_rfcom_ports;
   Optional<String<0, 255> > connection_type;
+  Optional<Boolean> unpaired;
 
  public:
   DeviceParams();

@@ -69,7 +69,8 @@ class SQLPTExtRepresentation : public SQLPTRepresentation,
                      const std::string& os_version = "",
                      const std::string& carrier = "",
                      const uint32_t number_of_ports = 0,
-                     const std::string& connection_type = "");
+                     const std::string& connection_type = "",
+                     const bool unpaired = false);
   bool SetUserPermissionsForDevice(
       const std::string& device_id,
       const StringArray& consented_groups = StringArray(),

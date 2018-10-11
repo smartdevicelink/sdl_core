@@ -2226,6 +2226,11 @@ bool CacheManager::SetUnpairedDevice(const std::string& device_id,
   }
 
   sync_primitives::AutoLock lock(unpaired_lock_);
+
+  policy_table::DeviceParams& params =
+      (*(pt_->policy_table.device_data))[device_id];
+  *params.unpaired = unpaired;
+
   if (unpaired) {
     is_unpaired_.insert(device_id);
     LOG4CXX_DEBUG(logger_, "Unpaired flag was set for device id " << device_id);

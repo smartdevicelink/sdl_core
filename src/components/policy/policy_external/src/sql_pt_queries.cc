@@ -683,7 +683,11 @@ const std::string kInsertNotificationsByPriority =
     "  VALUES (?, ?)";
 
 const std::string kInsertDeviceData =
-    "INSERT OR IGNORE INTO `device` (`id`) VALUES (?)";
+    "INSERT OR IGNORE INTO `device` "
+    "(`id`, `hardware`, `firmware_rev`, `os`, `os_version`, `carrier`, "
+    "`max_number_rfcom_ports`,`connection_type`, "
+    "`unpaired`) "
+    "VALUES (?,?,?,?,?,?,?,?,?)";
 
 const std::string kInsertAppLevel =
     "INSERT INTO `app_level` (`application_id`, `minutes_in_hmi_full`,"

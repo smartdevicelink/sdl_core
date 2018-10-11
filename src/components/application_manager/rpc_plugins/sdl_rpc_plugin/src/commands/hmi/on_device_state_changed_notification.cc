@@ -38,41 +38,29 @@
 #include "encryption/hashing.h"
 
 namespace {
-// TODO(AOleynik) : replace this !!!
-void check_zero(const char& a, const char& b, std::string& bt_mac) {
-  if ('0' != a && '0' == b) {
-    bt_mac.push_back(a);
-    bt_mac.push_back(b);
-  } else if ('0' == a) {
-    bt_mac.push_back(b);
-  } else {
-    bt_mac.push_back(a);
-    bt_mac.push_back(b);
+
+/**
+ * @brief Converts internal device id in format XXXXXXXXXXXX into
+ * xx:xx:xx:xx:xx:xx as such format of mac address is required for calculating
+ * device hash ID used in the policy table
+ * @param internal device id in format XXXXXXXXXXXX
+ * @return converted device mac address in format xx:xx:xx:xx:xx:xx
+ */
+std::string convert_to_bt_mac(const std::string& device_internal_id) {
+  std::stringstream bt_mac;
+  const size_t octet_hex_length = 2;
+  for (size_t i = 0; i < device_internal_id.length(); i += octet_hex_length) {
+    if (i > 0) {
+      bt_mac << ':';
+    }
+    if ('0' != device_internal_id[i]) {
+      bt_mac << static_cast<char>(::tolower(device_internal_id[i]));
+    }
+    bt_mac << static_cast<char>(::tolower(device_internal_id[i + 1]));
   }
+  return bt_mac.str();
 }
-
-std::string convert_to_bt_mac(std::string& deviceInternalId) {
-  std::transform(deviceInternalId.begin(),
-                 deviceInternalId.end(),
-                 deviceInternalId.begin(),
-                 ::tolower);
-
-  std::string bt_mac;
-  check_zero(deviceInternalId[10], deviceInternalId[11], bt_mac);
-  bt_mac.push_back(':');
-  check_zero(deviceInternalId[8], deviceInternalId[9], bt_mac);
-  bt_mac.push_back(':');
-  check_zero(deviceInternalId[6], deviceInternalId[7], bt_mac);
-  bt_mac.push_back(':');
-  check_zero(deviceInternalId[4], deviceInternalId[5], bt_mac);
-  bt_mac.push_back(':');
-  check_zero(deviceInternalId[2], deviceInternalId[3], bt_mac);
-  bt_mac.push_back(':');
-  check_zero(deviceInternalId[0], deviceInternalId[1], bt_mac);
-
-  return bt_mac;
-}
-}
+}  // namespace
 
 namespace sdl_rpc_plugin {
 using namespace application_manager;
