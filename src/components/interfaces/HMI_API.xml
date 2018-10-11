@@ -4280,11 +4280,11 @@
     <description>Method is invoked at system startup by SDL to request information about UI capabilities of HMI.</description>
   </function>
   <function name="GetCapabilities" messagetype="response">
-    <param name="displayCapabilities" type="Common.DisplayCapabilities" mandatory="true">
+    <param name="displayCapabilities" type="Common.DisplayCapabilities" mandatory="false">
       <description>Information about the capabilities of the display: its type, text field supported, etc. See DisplayCapabilities. </description>
     </param>
-    <param name="audioPassThruCapabilities" type="Common.AudioPassThruCapabilities" mandatory="true"/>
-    <param name="hmiZoneCapabilities" type="Common.HmiZoneCapabilities" mandatory="true"/>
+    <param name="audioPassThruCapabilities" type="Common.AudioPassThruCapabilities" minsize="1" maxsize="100" array="true" mandatory="false"/>
+    <param name="hmiZoneCapabilities" type="Common.HmiZoneCapabilities" minsize="1" maxsize="100" array="true" mandatory="false"/>
     <param name="softButtonCapabilities" type="Common.SoftButtonCapabilities" minsize="1" maxsize="100" array="true" mandatory="false">
       <description>Must be returned if the platform supports on-screen SoftButtons.</description>
     </param>
