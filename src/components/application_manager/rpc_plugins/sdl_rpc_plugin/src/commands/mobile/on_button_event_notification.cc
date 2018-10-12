@@ -166,7 +166,7 @@ void OnButtonEventNotification::SendButtonEvent(ApplicationConstSharedPtr app) {
           (*message_)[strings::msg_params][hmi_response::button_name].asInt());
 
   if (btn_id == mobile_apis::ButtonName::PLAY_PAUSE &&
-      app->msg_version() <= utils::version_4_5) {
+      app->msg_version() <= utils::base_rpc_version) {
     btn_id = mobile_apis::ButtonName::OK;
   }
 

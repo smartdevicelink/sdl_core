@@ -33,6 +33,6 @@
 
 namespace utils {
 
-const SemanticVersion version_4_5(4, 5, 0);
+const SemanticVersion base_rpc_version(4, 5, 1);
 
 }  // namespace utils
