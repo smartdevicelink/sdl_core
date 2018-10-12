@@ -63,6 +63,33 @@ void OnInteriorVehicleDataNotification::AddDataToCache(
   interior_data_cache_.Add(module_type, module_data);
 }
 
+void OnInteriorVehicleDataNotification::FilterDisabledModuleData(
+    const std::string& module_type) {
+  const auto& data_mapping = RCHelpers::GetModuleTypeToDataMapping();
+  auto& module_data =
+      (*message_)[app_mngr::strings::msg_params][message_params::kModuleData]
+                 [data_mapping(module_type)];
+
+  // If radioEnable is false, remove all other radio parameters from the
+  // message.
+  if (module_data.keyExists(message_params::kRadioEnable) &&
+      module_data[message_params::kRadioEnable] == false) {
+    for (auto data = module_data.map_begin(); data != module_data.map_end();
+         ++data) {
+      if (data->first != message_params::kRadioEnable) {
+        module_data.erase(data->first);
+      }
+    }
+  }
+
+  // If hdRadioEnable is false, find and remove the HDChannel if parameter is
+  // present.
+  if (module_data.keyExists(message_params::kHdRadioEnable) &&
+      module_data[message_params::kHdRadioEnable] == false) {
+    module_data.erase(message_params::kHdChannel);
+  }
+}
+
 void OnInteriorVehicleDataNotification::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
 
@@ -71,6 +98,7 @@ void OnInteriorVehicleDataNotification::Run() {
       RCHelpers::AppsSubscribedToModuleType(application_manager_, module_type);
   if (!apps_subscribed.empty()) {
     AddDataToCache(module_type);
+    FilterDisabledModuleData(module_type);
   }
   typedef std::vector<application_manager::ApplicationSharedPtr> AppPtrs;
   AppPtrs apps = RCRPCPlugin::GetRCApplications(application_manager_);
