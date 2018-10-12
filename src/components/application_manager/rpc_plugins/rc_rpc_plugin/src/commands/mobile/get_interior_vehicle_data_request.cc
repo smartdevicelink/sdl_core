@@ -95,10 +95,11 @@ void GetInteriorVehicleDataRequest::FilterDisabledModuleData(
   // message.
   if (module_data.keyExists(message_params::kRadioEnable) &&
       module_data[message_params::kRadioEnable].asBool() == false) {
-    for (auto data = module_data.map_begin(); data != module_data.map_end();
-         ++data) {
-      if (data->first != message_params::kRadioEnable) {
-        module_data.erase(data->first);
+    for (auto data = module_data.map_begin(); data != module_data.map_end();) {
+      auto key = data->first;
+      ++data;
+      if (key != message_params::kRadioEnable) {
+        module_data.erase(key);
       }
     }
   }
