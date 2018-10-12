@@ -89,7 +89,8 @@ bool GetInteriorVehicleDataRequest::ProcessCapabilities() {
   return true;
 }
 
-void GetInteriorVehicleDataRequest::FilterDisabledModuleData(smart_objects::SmartObject& module_data) {
+void GetInteriorVehicleDataRequest::FilterDisabledModuleData(
+    smart_objects::SmartObject& module_data) {
   // If radioEnable is false, remove all other radio parameters from the
   // message.
   if (module_data.keyExists(message_params::kRadioEnable) &&
@@ -101,7 +102,6 @@ void GetInteriorVehicleDataRequest::FilterDisabledModuleData(smart_objects::Smar
       }
     }
   }
-
   // If hdRadioEnable is false, find and remove the HDChannel if parameter is
   // present.
   if (module_data.keyExists(message_params::kHdRadioEnable) &&
