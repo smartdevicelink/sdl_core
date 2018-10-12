@@ -394,16 +394,25 @@ ModuleCapability GetModuleDataCapabilities(
   return module_data_capabilities;
 }
 
-bool isModuleTypeAndDataMatch(const std::string& module_type,
-                              const smart_objects::SmartObject& module_data) {
+/**
+ * @brief Clears unrelated module data parameters
+ * @param module type in request
+ * @param smart object of module_data
+ * @return true if the correct module parameter is present, false otherwise
+ */
+bool ClearUnrelatedModuleData(const std::string& module_type,
+                              smart_objects::SmartObject& module_data) {
   LOG4CXX_AUTO_TRACE(logger_);
   const auto& all_module_types = RCHelpers::GetModulesList();
   const auto& data_mapping = RCHelpers::GetModuleTypeToDataMapping();
   bool module_type_and_data_match = false;
   for (const auto& type : all_module_types) {
+    const std::string module_key = data_mapping(type);
     if (type == module_type) {
-      module_type_and_data_match = module_data.keyExists(data_mapping(type));
-      break;
+      module_type_and_data_match = module_data.keyExists(module_key);
+    } else if (module_data.keyExists(module_key)) {
+      // Cutting unrelated module data
+      module_data.erase(module_key);
     }
   }
   return module_type_and_data_match;
@@ -445,7 +454,7 @@ void SetInteriorVehicleDataRequest::Execute() {
       (*message_)[app_mngr::strings::msg_params][message_params::kModuleData];
   const std::string module_type = ModuleType();
 
-  if (isModuleTypeAndDataMatch(module_type, module_data)) {
+  if (ClearUnrelatedModuleData(module_type, module_data)) {
     const smart_objects::SmartObject* rc_capabilities =
         hmi_capabilities_.rc_capability();
     ModuleCapability module_data_capabilities;
