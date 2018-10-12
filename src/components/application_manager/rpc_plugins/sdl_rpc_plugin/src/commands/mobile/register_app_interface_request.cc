@@ -223,7 +223,6 @@ bool RegisterAppInterfaceRequest::ProcessApplicationTransportSwitching() {
   if (!IsApplicationSwitched()) {
     return false;
   }
-  const auto& msg_params = (*message_)[strings::msg_params];
 
   const std::string& policy_app_id =
       application_manager_.GetCorrectMobileIDFromMessage(message_);

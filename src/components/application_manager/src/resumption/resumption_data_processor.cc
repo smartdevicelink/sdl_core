@@ -48,6 +48,9 @@ using app_mngr::ButtonSubscriptions;
 namespace strings = app_mngr::strings;
 namespace event_engine = app_mngr::event_engine;
 
+const char* kModuleData = "moduleData";
+const char* kModuleType = "moduleType";
+
 CREATE_LOGGERPTR_GLOBAL(logger_, "Resumption")
 
 ResumptionDataProcessor::ResumptionDataProcessor(

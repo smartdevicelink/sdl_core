@@ -135,8 +135,17 @@ void GetInteriorVehicleDataRequest::ProcessResponseToMobileFromCache(
     response_msg_params[message_params::kIsSubscribed] =
         request_msg_params[message_params::kSubscribe].asBool();
     if (request_msg_params[message_params::kSubscribe].asBool()) {
-      auto extension = RCHelpers::GetRCExtension(*app);
+      const auto extension = RCHelpers::GetRCExtension(*app);
       DCHECK(extension);
+      const bool is_app_already_subscribed =
+          extension->IsSubscibedToInteriorVehicleData(ModuleType());
+      if (is_app_already_subscribed) {
+        LOG4CXX_WARN(logger_, "Application is already subscribed");
+        SendResponse(
+            true, mobile_apis::Result::WARNINGS, nullptr, &response_msg_params);
+        return;
+      }
+
       extension->SubscribeToInteriorVehicleData(ModuleType());
       app->UpdateHash();
     }
