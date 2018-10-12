@@ -94,7 +94,7 @@ void GetInteriorVehicleDataRequest::FilterDisabledModuleData(
   // If radioEnable is false, remove all other radio parameters from the
   // message.
   if (module_data.keyExists(message_params::kRadioEnable) &&
-      module_data[message_params::kRadioEnable] == false) {
+      module_data[message_params::kRadioEnable].asBool() == false) {
     for (auto data = module_data.map_begin(); data != module_data.map_end();
          ++data) {
       if (data->first != message_params::kRadioEnable) {
@@ -105,7 +105,7 @@ void GetInteriorVehicleDataRequest::FilterDisabledModuleData(
   // If hdRadioEnable is false, find and remove the HDChannel if parameter is
   // present.
   if (module_data.keyExists(message_params::kHdRadioEnable) &&
-      module_data[message_params::kHdRadioEnable] == false) {
+      module_data[message_params::kHdRadioEnable].asBool() == false) {
     module_data.erase(message_params::kHdChannel);
   }
 }
