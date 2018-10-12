@@ -89,11 +89,33 @@ bool GetInteriorVehicleDataRequest::ProcessCapabilities() {
   return true;
 }
 
+void GetInteriorVehicleDataRequest::FilterDisabledModuleData(smart_objects::SmartObject& module_data) {
+  // If radioEnable is false, remove all other radio parameters from the
+  // message.
+  if (module_data.keyExists(message_params::kRadioEnable) &&
+      module_data[message_params::kRadioEnable] == false) {
+    for (auto data = module_data.map_begin(); data != module_data.map_end();
+         ++data) {
+      if (data->first != message_params::kRadioEnable) {
+        module_data.erase(data->first);
+      }
+    }
+  }
+
+  // If hdRadioEnable is false, find and remove the HDChannel if parameter is
+  // present.
+  if (module_data.keyExists(message_params::kHdRadioEnable) &&
+      module_data[message_params::kHdRadioEnable] == false) {
+    module_data.erase(message_params::kHdChannel);
+  }
+}
+
 void GetInteriorVehicleDataRequest::ProcessResponseToMobileFromCache(
     app_mngr::ApplicationSharedPtr app) {
   LOG4CXX_AUTO_TRACE(logger_);
   const auto& data_mapping = RCHelpers::GetModuleTypeToDataMapping();
   auto data = interior_data_cache_.Retrieve(ModuleType());
+  FilterDisabledModuleData(data);
   auto response_msg_params =
       smart_objects::SmartObject(smart_objects::SmartType_Map);
   response_msg_params[message_params::kModuleData][data_mapping(ModuleType())] =

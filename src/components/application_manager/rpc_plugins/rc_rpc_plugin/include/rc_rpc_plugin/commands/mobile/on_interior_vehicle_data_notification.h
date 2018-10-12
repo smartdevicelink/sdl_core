@@ -60,7 +60,6 @@ class OnInteriorVehicleDataNotification
  private:
   InteriorDataCache& interior_data_cache_;
   void AddDataToCache(const std::string& module_type);
-  void FilterDisabledModuleData(const std::string& module_type);
 };
 }  // namespace commands
 }  // namespace rc_rpc_plugin
