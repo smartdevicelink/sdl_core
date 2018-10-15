@@ -725,6 +725,8 @@ bool SQLPTRepresentation::GatherApplicationPoliciesSection(
     const auto& gather_app_id = ((*policies).apps[app_id].is_string())
                                     ? (*policies).apps[app_id].get_string()
                                     : app_id;
+    // Data should be gathered from db by  "default" key if application has
+    // default policies
 
     if (!GatherAppGroup(gather_app_id, &params.groups)) {
       return false;
@@ -734,7 +736,6 @@ bool SQLPTRepresentation::GatherApplicationPoliciesSection(
       return false;
     }
     if (!denied) {
-      // Module types should be selected from db by referenced groups
       if (!GatherModuleType(gather_app_id, &*params.moduleType)) {
         return false;
       }
