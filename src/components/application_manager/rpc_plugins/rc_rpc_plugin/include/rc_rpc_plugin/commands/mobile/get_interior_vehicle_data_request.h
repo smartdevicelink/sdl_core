@@ -94,6 +94,7 @@ class GetInteriorVehicleDataRequest : public RCCommandRequest {
   bool CheckRateLimits();
   bool AppShouldBeUnsubscribed();
   bool TheLastAppShouldBeUnsubscribed(app_mngr::ApplicationSharedPtr app);
+  void FilterDisabledModuleData(smart_objects::SmartObject& module_data);
 };
 }  // namespace commands
 }  // namespace rc_rpc_plugin
