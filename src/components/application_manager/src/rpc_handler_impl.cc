@@ -219,7 +219,7 @@ void RPCHandlerImpl::GetMessageVersion(
     }
     utils::SemanticVersion temp_version(major, minor, patch);
     if (temp_version.isValid()) {
-      message_version = (temp_version > utils::base_rpc_version)
+      message_version = (temp_version >= utils::rpc_version_5)
                             ? temp_version
                             : utils::base_rpc_version;
     }
