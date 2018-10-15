@@ -108,6 +108,8 @@ void GetInteriorVehicleDataRequest::FilterDisabledModuleData(
   if (module_data.keyExists(message_params::kHdRadioEnable) &&
       module_data[message_params::kHdRadioEnable].asBool() == false) {
     module_data.erase(message_params::kHdChannel);
+    module_data.erase(message_params::kAvailableHDs);
+    module_data.erase(message_params::kSisData);
   }
 }
 
