@@ -63,7 +63,7 @@ void RegisterAppInterfaceResponse::Run() {
   application_manager::ApplicationSharedPtr app =
       application_manager_.application(connection_key());
 
-  if (app && app->msg_version() <= utils::base_rpc_version &&
+  if (app && app->msg_version() < utils::rpc_version_5 &&
       app->is_media_application() &&
       (*message_)[strings::msg_params].keyExists(
           hmi_response::button_capabilities)) {

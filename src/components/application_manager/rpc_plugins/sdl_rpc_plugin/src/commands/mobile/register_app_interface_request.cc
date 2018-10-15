@@ -334,9 +334,9 @@ void RegisterAppInterfaceRequest::Run() {
   // Version negotiation
   utils::SemanticVersion module_version(
       major_version, minor_version, patch_version);
-  if (mobile_version <= utils::base_rpc_version) {
+  if (mobile_version < utils::rpc_version_5) {
     // Mobile versioning did not exist for
-    // versions 4.5 and prior.
+    // versions before 5.0
     application->set_msg_version(utils::base_rpc_version);
   } else if (mobile_version < module_version) {
     // Use mobile RPC version as negotiated version
