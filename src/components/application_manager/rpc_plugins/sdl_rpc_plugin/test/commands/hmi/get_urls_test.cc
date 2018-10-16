@@ -134,7 +134,7 @@ TEST_F(GetUrlsTest, RUN_EmptyEndpoints_UNSUCCESS) {
 
   EXPECT_EQ(am::MessageType::kResponse,
             (*command_msg_)[strings::params][strings::message_type].asInt());
-  EXPECT_EQ(Common_Result::DATA_NOT_AVAILABLE,
+  EXPECT_EQ(Common_Result::SUCCESS,
             (*command_msg_)[strings::params][am::hmi_response::code].asInt());
 }
 

@@ -72,7 +72,7 @@ void GetUrls::Run() {
 
   if (endpoints.empty()) {
     LOG4CXX_ERROR(logger_, "No URLs for service " << service_to_check);
-    SendResponseToHMI(Common_Result::DATA_NOT_AVAILABLE);
+    SendResponseToHMI(Common_Result::SUCCESS);
     return;
   }
 
