@@ -272,21 +272,6 @@ TEST_F(MediaManagerImplTest, Init_Settings_ExpectFileValue) {
   InitMediaManagerFileServerType();
 }
 
-TEST_F(MediaManagerImplTest, PlayA2DPSource_WithCorrectA2DP_SUCCESS) {
-  // media_adapter_mock_ will be deleted in media_manager_impl (dtor)
-  MockMediaAdapter* media_adapter_mock = new MockMediaAdapter();
-  media_manager_impl_->set_mock_a2dp_player(media_adapter_mock);
-  EXPECT_CALL(*media_adapter_mock, StartActivity(kApplicationKey));
-  media_manager_impl_->PlayA2DPSource(kApplicationKey);
-}
-
-TEST_F(MediaManagerImplTest, StopA2DPSource_WithCorrectA2DP_SUCCESS) {
-  MockMediaAdapter* media_adapter_mock = new MockMediaAdapter();
-  media_manager_impl_->set_mock_a2dp_player(media_adapter_mock);
-  EXPECT_CALL(*media_adapter_mock, StopActivity(kApplicationKey));
-  media_manager_impl_->StopA2DPSource(kApplicationKey);
-}
-
 TEST_F(MediaManagerImplTest,
        StartMicrophoneRecording_SourceFileIsWritable_ExpectTrue) {
   StartMicrophoneCheckHelper();

@@ -58,9 +58,6 @@ class MediaManagerImpl : public MediaManager,
                    const MediaManagerSettings& settings);
   virtual ~MediaManagerImpl();
 
-  virtual void PlayA2DPSource(int32_t application_key);
-  virtual void StopA2DPSource(int32_t application_key);
-
   virtual void StartMicrophoneRecording(int32_t application_key,
                                         const std::string& outputFileName,
                                         int32_t duration);
@@ -82,7 +79,6 @@ class MediaManagerImpl : public MediaManager,
   virtual const MediaManagerSettings& settings() const OVERRIDE;
 
 #ifdef BUILD_TESTS
-  void set_mock_a2dp_player(MediaAdapter* media_adapter);
   void set_mock_mic_listener(MediaListenerPtr media_listener);
   void set_mock_mic_recorder(MediaAdapterImpl* media_adapter);
   void set_mock_streamer(protocol_handler::ServiceType stype,
@@ -98,7 +94,6 @@ class MediaManagerImpl : public MediaManager,
   const MediaManagerSettings& settings_;
 
   protocol_handler::ProtocolHandler* protocol_handler_;
-  MediaAdapter* a2dp_player_;
 
   MediaAdapterImpl* from_mic_recorder_;
   MediaListenerPtr from_mic_listener_;

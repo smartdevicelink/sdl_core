@@ -41,8 +41,6 @@ namespace media_manager_test {
 
 class MockMediaManager : public media_manager::MediaManager {
  public:
-  MOCK_METHOD1(PlayA2DPSource, void(int32_t application_key));
-  MOCK_METHOD1(StopA2DPSource, void(int32_t application_key));
   MOCK_METHOD3(StartMicrophoneRecording,
                void(int32_t application_key,
                     const std::string& outputFileName,

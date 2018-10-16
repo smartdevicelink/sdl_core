@@ -62,18 +62,12 @@ MediaManagerImpl::MediaManagerImpl(
     const MediaManagerSettings& settings)
     : settings_(settings)
     , protocol_handler_(NULL)
-    , a2dp_player_(NULL)
     , from_mic_recorder_(NULL)
     , application_manager_(application_manager) {
   Init();
 }
 
 MediaManagerImpl::~MediaManagerImpl() {
-  if (a2dp_player_) {
-    delete a2dp_player_;
-    a2dp_player_ = NULL;
-  }
-
   if (from_mic_recorder_) {
     delete from_mic_recorder_;
     from_mic_recorder_ = NULL;
@@ -81,10 +75,6 @@ MediaManagerImpl::~MediaManagerImpl() {
 }
 
 #ifdef BUILD_TESTS
-void MediaManagerImpl::set_mock_a2dp_player(MediaAdapter* media_adapter) {
-  a2dp_player_ = media_adapter;
-}
-
 void MediaManagerImpl::set_mock_mic_listener(MediaListenerPtr media_listener) {
   from_mic_listener_ = media_listener;
 }
@@ -159,28 +149,6 @@ void MediaManagerImpl::Init() {
   if (streamer_[ServiceType::kAudio]) {
     streamer_[ServiceType::kAudio]->AddListener(
         streamer_listener_[ServiceType::kAudio]);
-  }
-}
-
-void MediaManagerImpl::PlayA2DPSource(int32_t application_key) {
-  LOG4CXX_AUTO_TRACE(logger_);
-
-#if defined(EXTENDED_MEDIA_MODE)
-  if (!a2dp_player_ && protocol_handler_) {
-    a2dp_player_ =
-        new A2DPSourcePlayerAdapter(protocol_handler_->get_session_observer());
-  }
-#endif
-
-  if (a2dp_player_) {
-    a2dp_player_->StartActivity(application_key);
-  }
-}
-
-void MediaManagerImpl::StopA2DPSource(int32_t application_key) {
-  LOG4CXX_AUTO_TRACE(logger_);
-  if (a2dp_player_) {
-    a2dp_player_->StopActivity(application_key);
   }
 }
 
