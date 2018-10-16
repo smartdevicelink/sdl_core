@@ -399,6 +399,10 @@ TEST_F(ConnectionHandlerTest, AddConnection_StopConnection) {
 }
 
 TEST_F(ConnectionHandlerTest, GetConnectionSessionsCount) {
+  EXPECT_TRUE(connection_handler_->getConnectionList().empty());
+  EXPECT_EQ(0u,
+            connection_handler_->GetConnectionSessionsCount(connection_key_));
+
   AddTestDeviceConnection();
   EXPECT_EQ(0u,
             connection_handler_->GetConnectionSessionsCount(connection_key_));
@@ -413,13 +417,20 @@ TEST_F(ConnectionHandlerTest, GetAppIdOnSessionKey) {
   AddTestSession();
 
   uint32_t app_id = 0;
+  DeviceHandle test_handle;
   const uint32_t test_id = SessionHash(uid_, out_context_.new_session_id_);
 
-  connection_handler::DeviceHandle* device_id = NULL;
   EXPECT_EQ(0,
             connection_handler_->GetDataOnSessionKey(
-                connection_key_, &app_id, NULL, device_id));
+                connection_key_, &app_id, NULL, &test_handle));
   EXPECT_EQ(test_id, app_id);
+}
+
+TEST_F(ConnectionHandlerTest, GetAppIdOnSessionKey_InvalidConnectionId) {
+  uint8_t invalid_id = 0;
+  EXPECT_EQ(
+      -1,
+      connection_handler_->GetDataOnSessionKey(invalid_id, NULL, NULL, NULL));
 }
 
 TEST_F(ConnectionHandlerTest, GetAppIdOnSessionKey_SessionNotStarted) {
@@ -443,8 +454,19 @@ TEST_F(ConnectionHandlerTest, GetDeviceID) {
   const Device& devres = pos->second;
   std::string test_mac_address = devres.mac_address();
 
+  std::string invalid_mac_address;
+  EXPECT_FALSE(
+      connection_handler_->GetDeviceID(invalid_mac_address, &test_handle));
+
   EXPECT_TRUE(connection_handler_->GetDeviceID(test_mac_address, &test_handle));
   EXPECT_EQ(device_handle_, test_handle);
+}
+
+TEST_F(ConnectionHandlerTest, GetDataOnDeviceID) {
+  const DeviceHandle handle = 0;
+  EXPECT_EQ(
+      -1,
+      connection_handler_->GetDataOnDeviceID(handle, NULL, NULL, NULL, NULL));
 }
 
 TEST_F(ConnectionHandlerTest, GetDeviceName) {
@@ -463,10 +485,11 @@ TEST_F(ConnectionHandlerTest, GetConnectionType) {
   AddTestSession();
 
   const DeviceHandle handle = 0;
+  std::string test_mac_address;
   std::string test_connection_type;
   EXPECT_EQ(0,
             connection_handler_->GetDataOnDeviceID(
-                handle, NULL, NULL, NULL, &test_connection_type));
+                handle, NULL, NULL, &test_mac_address, &test_connection_type));
   EXPECT_EQ(connection_type_, test_connection_type);
 }
 
@@ -526,6 +549,15 @@ TEST_F(ConnectionHandlerTest, GetProtocolVersionAfterBinding) {
   EXPECT_EQ(PROTOCOL_VERSION_3, protocol_version);
 }
 
+TEST_F(ConnectionHandlerTest, GetProtocolVerssionWrongConnection) {
+  AddTestDeviceConnection();
+  AddTestSession();
+  uint8_t connection_id = 0;
+  uint8_t protocol_version = 0;
+  EXPECT_FALSE(connection_handler_->ProtocolVersionUsed(
+      connection_id, out_context_.new_session_id_, protocol_version));
+}
+
 TEST_F(ConnectionHandlerTest, GetPairFromKey) {
   AddTestDeviceConnection();
   AddTestSession();
@@ -548,6 +580,11 @@ TEST_F(ConnectionHandlerTest, IsHeartBeatSupported) {
   AddTestDeviceConnection();
   AddTestSession();
   ChangeProtocol(uid_, out_context_.new_session_id_, PROTOCOL_VERSION_3);
+
+  uint8_t invalid_id = 0u;
+  EXPECT_FALSE(connection_handler_->IsHeartBeatSupported(
+      invalid_id, out_context_.new_session_id_));
+
   EXPECT_TRUE(connection_handler_->IsHeartBeatSupported(
       uid_, out_context_.new_session_id_));
 }
@@ -555,6 +592,12 @@ TEST_F(ConnectionHandlerTest, IsHeartBeatSupported) {
 TEST_F(ConnectionHandlerTest, SendEndServiceWithoutSetProtocolHandler) {
   AddTestDeviceConnection();
   AddTestSession();
+  EXPECT_CALL(mock_protocol_handler_, SendEndService(_, _, _, kRpc)).Times(0);
+  connection_handler_->SendEndService(connection_key_, kRpc);
+}
+
+TEST_F(ConnectionHandlerTest, SendEndServiceWithoutSession) {
+  AddTestDeviceConnection();
   EXPECT_CALL(mock_protocol_handler_, SendEndService(_, _, _, kRpc)).Times(0);
   connection_handler_->SendEndService(connection_key_, kRpc);
 }
@@ -838,6 +881,24 @@ TEST_F(ConnectionHandlerTest, OnDeviceRemoved_ServiceStarted) {
   connection_handler_->OnDeviceRemoved(device1);
 }
 
+TEST_F(ConnectionHandlerTest, OnConnectionClosedInvalidConnectionId) {
+  AddTestDeviceConnection();
+  AddTestSession();
+
+  connection_handler_test::MockConnectionHandlerObserver
+      mock_connection_handler_observer;
+  connection_handler_->set_connection_handler_observer(
+      &mock_connection_handler_observer);
+
+  EXPECT_CALL(mock_connection_handler_observer,
+              OnServiceEndedCallback(connection_key_, kBulk, kCommon)).Times(0);
+  EXPECT_CALL(mock_connection_handler_observer,
+              OnServiceEndedCallback(connection_key_, kRpc, kCommon)).Times(0);
+
+  uint8_t invalid_id = 0;
+  connection_handler_->OnConnectionClosed(invalid_id);
+}
+
 TEST_F(ConnectionHandlerTest, OnConnectionClosed) {
   AddTestDeviceConnection();
   AddTestSession();
@@ -1091,6 +1152,24 @@ TEST_F(ConnectionHandlerTest, CloseConnectionSessionsWithMalformedMessage) {
   connection_handler_->CloseConnectionSessions(uid_, kMalformed);
 
   EXPECT_TRUE(waiter.WaitFor(times, kAsyncExpectationsTimeout));
+}
+
+TEST_F(ConnectionHandlerTest, CloseConnectionSessionsInvalidConnectionId) {
+  connection_handler_test::MockConnectionHandlerObserver
+      mock_connection_handler_observer;
+  connection_handler_->set_connection_handler_observer(
+      &mock_connection_handler_observer);
+
+  connection_handler_->set_protocol_handler(&mock_protocol_handler_);
+
+  EXPECT_CALL(mock_protocol_handler_, SendEndSession(_, _)).Times(0);
+  EXPECT_CALL(mock_connection_handler_observer, OnServiceEndedCallback(_, _, _))
+      .Times(0);
+  EXPECT_CALL(mock_connection_handler_observer, OnServiceEndedCallback(_, _, _))
+      .Times(0);
+
+  uint8_t invalid_id = 0u;
+  connection_handler_->CloseConnectionSessions(invalid_id, kCommon);
 }
 
 TEST_F(ConnectionHandlerTest, CloseConnectionSessionsWithCommonReason) {
@@ -1698,7 +1777,7 @@ TEST_F(ConnectionHandlerTest,
 #endif  // ENABLE_SECURITY
 }
 
-TEST_F(ConnectionHandlerTest, SessionStarted_DealyProtect) {
+TEST_F(ConnectionHandlerTest, SessionStarted_DelayProtect) {
   AddTestDeviceConnection();
   AddTestSession();
   ChangeProtocol(
@@ -1755,7 +1834,7 @@ TEST_F(ConnectionHandlerTest, SessionStarted_DealyProtect) {
 #endif  // ENABLE_SECURITY
 }
 
-TEST_F(ConnectionHandlerTest, SessionStarted_DealyProtectBulk) {
+TEST_F(ConnectionHandlerTest, SessionStarted_DelayProtectBulk) {
   AddTestDeviceConnection();
   AddTestSession();
 
@@ -2046,6 +2125,25 @@ TEST_F(ConnectionHandlerTest, OnDeviceConnectionSwitching) {
               OnDeviceSwitchingStart(SameDevice(d1), SameDevice(d2)));
 
   connection_handler_->OnDeviceSwitchingStart(mac_address_, second_mac_address);
+
+  EXPECT_CALL(mock_connection_handler_observer,
+              OnDeviceSwitchingFinish(encryption::MakeHash(mac_address_)));
+  connection_handler_->OnDeviceSwitchingFinish(mac_address_);
+
+  EXPECT_CALL(
+      mock_connection_handler_observer,
+      OnDeviceSwitchingFinish(encryption::MakeHash(second_mac_address)));
+  connection_handler_->OnDeviceSwitchingFinish(second_mac_address);
+}
+
+TEST_F(ConnectionHandlerTest, OnConnectionEstablishedForUnknownDevice) {
+  const transport_manager::DeviceInfo device_info(
+      device_handle_, mac_address_, device_name_, std::string("WIFI"));
+  const transport_manager::ConnectionUID uid = 2u;
+
+  connection_handler_->OnConnectionEstablished(device_info, uid);
+  ASSERT_TRUE(connection_handler_->getDeviceList().empty());
+  ASSERT_TRUE(connection_handler_->getConnectionList().empty());
 }
 
 TEST_F(ConnectionHandlerTest, StartStopSecondarySession) {
@@ -2151,6 +2249,13 @@ TEST_F(ConnectionHandlerTest, StopSecondarySession_NoService) {
   EXPECT_EQ(st.secondary_transport, 0u);
 }
 
+TEST_F(ConnectionHandlerTest, GetSessionTransports_InvalidSessionId) {
+  uint8_t invalid_id = 0;
+  SessionTransports st = connection_handler_->GetSessionTransports(invalid_id);
+  EXPECT_EQ(st.primary_transport, 0u);
+  EXPECT_EQ(st.secondary_transport, 0u);
+}
+
 TEST_F(ConnectionHandlerTest, ConnectionType_valid) {
   AddTestDeviceConnection();
   AddTestSession();
@@ -2240,6 +2345,46 @@ TEST_F(ConnectionHandlerTest, SetSecondaryTransportID_Failure) {
   EXPECT_EQ(0u, st.secondary_transport);
 }
 
+TEST_F(ConnectionHandlerTest, CloseSession_TwoSessions_ConnectionOpened) {
+  // Add virtual device and connection
+  AddTestDeviceConnection();
+  AddTestSession();
+
+  connection_handler::ConnectionList& connection_list =
+      connection_handler_->getConnectionList();
+  ASSERT_EQ(1u, connection_list.size());
+
+  connection_handler::Connection* connection = connection_list.begin()->second;
+  EXPECT_EQ(1u, connection->session_map().size());
+
+  AddTestSession();
+  EXPECT_EQ(2u, connection->session_map().size());
+
+  connection_handler_->CloseSession(
+      uid_, out_context_.new_session_id_, kCommon);
+
+  EXPECT_EQ(1u, connection->session_map().size());
+  EXPECT_EQ(1u, connection_list.size());
+}
+
+TEST_F(ConnectionHandlerTest, CloseSession_LastSession_ConnectionOpened) {
+  // Add virtual device and connection
+  AddTestDeviceConnection();
+  AddTestSession();
+
+  connection_handler::ConnectionList& connection_list =
+      connection_handler_->getConnectionList();
+  ASSERT_EQ(1u, connection_list.size());
+
+  connection_handler::Connection* connection = connection_list.begin()->second;
+  EXPECT_EQ(1u, connection->session_map().size());
+
+  connection_handler_->CloseSession(
+      uid_, out_context_.new_session_id_, kCommon);
+
+  EXPECT_EQ(0u, connection->session_map().size());
+  EXPECT_EQ(1u, connection_list.size());
+}
 }  // namespace connection_handler_test
 }  // namespace components
 }  // namespace test

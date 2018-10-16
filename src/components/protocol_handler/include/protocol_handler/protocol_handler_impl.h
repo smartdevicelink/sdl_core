@@ -166,6 +166,18 @@ struct TransportDescription {
 typedef std::map<std::string, TransportDescription> TransportTypes;
 }  // namespace impl
 
+#ifdef BUILD_TESTS
+/**
+ * Function return packet data as std::string.
+ * If packet data is not printable return error message
+ */
+std::string ConvertPacketDataToString(const uint8_t* data,
+                                      const size_t data_size);
+
+uint32_t get_hash_id(const ProtocolPacket& packet);
+void set_hash_id(uint32_t hash_id, ProtocolPacket& packet);
+#endif
+
 /**
  * \class ProtocolHandlerImpl
  * \brief Class for handling message exchange between Transport and higher
@@ -465,6 +477,10 @@ class ProtocolHandlerImpl
     tcp_enabled_ = tcp_enabled;
     tcp_ip_address_ = tcp_address;
     tcp_port_ = tcp_port;
+  }
+
+  const size_t get_protocol_observers_count() const {
+    return protocol_observers_.size();
   }
 #endif
 

@@ -191,6 +191,16 @@ TEST_F(ConnectionTest, Session_UpdateProtocolVersion) {
   EXPECT_EQ(static_cast<uint8_t>(PROTOCOL_VERSION_3), protocol_version);
 }
 
+TEST_F(ConnectionTest, HeartBeat_WrongSessionId) {
+  // Arrange
+  uint8_t fake_id = 0u;
+  const SessionMap session_map = connection_->session_map();
+  EXPECT_TRUE(session_map.empty());
+
+  // Assert
+  EXPECT_FALSE(connection_->SupportHeartBeat(fake_id));
+}
+
 TEST_F(ConnectionTest, HeartBeat_NotSupported) {
   // Arrange
   StartDefaultSession();
@@ -302,6 +312,18 @@ TEST_F(ConnectionTest, Session_AddControlService) {
       kControl, PROTECTION_OFF, EXPECT_RETURN_FALSE, EXPECT_SERVICE_NOT_EXISTS);
   AddNewService(
       kControl, PROTECTION_ON, EXPECT_RETURN_FALSE, EXPECT_SERVICE_NOT_EXISTS);
+}
+
+TEST_F(ConnectionTest, AddNewService_NotSupported) {
+  // Arrange
+  StartDefaultSession();
+  uint8_t protocol_version;
+  EXPECT_TRUE(connection_->ProtocolVersion(session_id, protocol_version));
+  EXPECT_EQ(static_cast<uint8_t>(PROTOCOL_VERSION_2), protocol_version);
+
+  // Assert
+  EXPECT_FALSE(connection_->AddNewService(
+      session_id, kAudio, false, kDefaultConnectionHandle));
 }
 
 // Invalid Services couldnot be started anyway
@@ -485,6 +507,10 @@ TEST_F(ConnectionTest, RemoveSession_VerifyRemoveSessionCalled) {
 
   uint32_t ret = connection->RemoveSession(sid);
   EXPECT_EQ(sid, ret);
+
+  EXPECT_CALL(mock_connection_handler, RemoveSession(mock_session_id))
+      .WillOnce(Return(true));
+  EXPECT_EQ(0u, connection->RemoveSession(mock_session_id));
 
   delete connection;
 }
