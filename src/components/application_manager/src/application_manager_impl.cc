@@ -3615,18 +3615,19 @@ bool ApplicationManagerImpl::IsSOStructValid(
 }
 
 bool ApplicationManagerImpl::UnsubscribeAppFromSoftButtons(
-    const commands::MessageSharedPtr response_message) {
-  const mobile_apis::Result::eType result_code =
-      static_cast<mobile_apis::Result::eType>(
-          (*response_message)[strings::msg_params][strings::result_code]
-              .asUInt());
+    const commands::MessageSharedPtr response) {
+  using namespace mobile_apis;
+
+  const Result::eType result_code = static_cast<Result::eType>(
+      (*response)[strings::msg_params][strings::result_code].asUInt());
   const uint32_t connection_key =
-      (*response_message)[strings::params][strings::connection_key].asUInt();
-  const auto function_id = static_cast<mobile_apis::FunctionID::eType>(
-      (*response_message)[strings::params][strings::function_id].asInt());
+      (*response)[strings::params][strings::connection_key].asUInt();
+  const auto function_id = static_cast<FunctionID::eType>(
+      (*response)[strings::params][strings::function_id].asInt());
 
   ApplicationSharedPtr app = application(connection_key);
-  if ((mobile_apis::Result::REJECTED != result_code) && app) {
+  DCHECK_OR_RETURN(app, false);
+  if (Result::REJECTED != result_code) {
     app->UnsubscribeFromSoftButtons(function_id);
     LOG4CXX_DEBUG(logger_,
                   "Application has unsubscribed from softbusttons. FunctionID: "

@@ -1031,7 +1031,7 @@ class ApplicationManagerImpl
                        const smart_objects::SmartObject& display_capabilities);
 
   virtual bool UnsubscribeAppFromSoftButtons(
-      const commands::MessageSharedPtr response_message) OVERRIDE;
+      const commands::MessageSharedPtr response) OVERRIDE;
   /**
    * @brief Function returns supported SDL Protocol Version
    * @return protocol version depends on parameters from smartDeviceLink.ini.
