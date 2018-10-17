@@ -224,6 +224,10 @@ class RegisterAppInterfaceRequestTest
                 mock_app)));
   }
 
+  void AddExistingApplication(const MockAppPtr& mockApp) {
+    app_set_.insert(mockApp);
+  }
+
   MessageSharedPtr msg_;
   SharedPtr<RegisterAppInterfaceRequest> command_;
 
@@ -421,11 +425,13 @@ TEST_F(RegisterAppInterfaceRequestTest,
   const std::string request_hash_id = "abc123";
   (*msg_)[am::strings::msg_params][am::strings::hash_id] = request_hash_id;
 
+  ON_CALL(app_mngr_, applications())
+      .WillByDefault(
+          Return(DataAccessor<am::ApplicationSet>(app_set_, lock_ptr_)));
+
   MockAppPtr mock_app = CreateBasicMockedApp();
   EXPECT_CALL(app_mngr_, application_by_policy_id(kAppId))
       .WillRepeatedly(Return(mock_app));
-
-  EXPECT_CALL(*mock_app, app_id()).WillOnce(Return(kConnectionKey));
 
   EXPECT_CALL(app_mngr_, IsAppInReconnectMode(kAppId)).WillOnce(Return(true));
 
@@ -460,11 +466,13 @@ TEST_F(RegisterAppInterfaceRequestTest,
   const std::string request_hash_id = "abc123";
   (*msg_)[am::strings::msg_params][am::strings::hash_id] = request_hash_id;
 
+  ON_CALL(app_mngr_, applications())
+      .WillByDefault(
+          Return(DataAccessor<am::ApplicationSet>(app_set_, lock_ptr_)));
+
   MockAppPtr mock_app = CreateBasicMockedApp();
   EXPECT_CALL(app_mngr_, application_by_policy_id(kAppId))
       .WillRepeatedly(Return(mock_app));
-
-  EXPECT_CALL(*mock_app, app_id()).WillOnce(Return(kConnectionKey));
 
   EXPECT_CALL(app_mngr_, IsAppInReconnectMode(kAppId)).WillOnce(Return(true));
 
@@ -499,11 +507,13 @@ TEST_F(RegisterAppInterfaceRequestTest,
        SwitchApplication_NoHash_ExpectCleanupResumeFailed) {
   InitBasicMessage();
 
+  ON_CALL(app_mngr_, applications())
+      .WillByDefault(
+          Return(DataAccessor<am::ApplicationSet>(app_set_, lock_ptr_)));
+
   MockAppPtr mock_app = CreateBasicMockedApp();
   EXPECT_CALL(app_mngr_, application_by_policy_id(kAppId))
       .WillRepeatedly(Return(mock_app));
-
-  EXPECT_CALL(*mock_app, app_id()).WillOnce(Return(kConnectionKey));
 
   EXPECT_CALL(app_mngr_, IsAppInReconnectMode(kAppId)).WillOnce(Return(true));
 
@@ -523,6 +533,48 @@ TEST_F(RegisterAppInterfaceRequestTest,
 
   SetCommonExpectionsOnSwitchedApplication(mock_app,
                                            mobile_apis::Result::RESUME_FAILED);
+
+  command_->Run();
+}
+
+TEST_F(RegisterAppInterfaceRequestTest,
+       Run_Other_App_With_Same_App_Name_DUPLICATE_NAME) {
+  InitBasicMessage();
+  AddExistingApplication(CreateBasicMockedApp());
+
+  const uint32_t kConnection_key_ = 2u;
+  const std::string kApp_Id = "other_app_id";
+  (*msg_)[am::strings::params][am::strings::connection_key] = kConnection_key_;
+  (*msg_)[am::strings::msg_params][am::strings::app_id] = kApp_Id;
+
+  ON_CALL(app_mngr_, applications())
+      .WillByDefault(
+          Return(DataAccessor<am::ApplicationSet>(app_set_, lock_ptr_)));
+
+  EXPECT_CALL(mock_rpc_service_,
+              ManageMobileCommand(
+                  MobileResultCodeIs(mobile_apis::Result::DUPLICATE_NAME), _));
+
+  command_->Run();
+}
+
+TEST_F(RegisterAppInterfaceRequestTest,
+       Run_Other_App_With_Same_App_ID_DUPLICATE_NAME) {
+  InitBasicMessage();
+  AddExistingApplication(CreateBasicMockedApp());
+
+  const uint32_t kConnection_key_ = 2u;
+  const std::string kApp_Name = "other_app_name";
+  (*msg_)[am::strings::params][am::strings::connection_key] = kConnection_key_;
+  (*msg_)[am::strings::msg_params][am::strings::app_name] = kApp_Name;
+
+  ON_CALL(app_mngr_, applications())
+      .WillByDefault(
+          Return(DataAccessor<am::ApplicationSet>(app_set_, lock_ptr_)));
+
+  EXPECT_CALL(mock_rpc_service_,
+              ManageMobileCommand(
+                  MobileResultCodeIs(mobile_apis::Result::DUPLICATE_NAME), _));
 
   command_->Run();
 }
