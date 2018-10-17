@@ -72,7 +72,7 @@ void OnVehicleDataNotification::Run() {
 
   for (; vehicle_data.end() != it; ++it) {
     if (true == (*message_)[strings::msg_params].keyExists(it->first)) {
-      LOG4CXX_ERROR(logger_, "vehicle_data nanme" << it->first);
+      LOG4CXX_DEBUG(logger_, "vehicle_data name: '" << it->first << "'");
       auto vehicle_data_value =
           (*message_)[strings::msg_params][it->first].asInt();
 
