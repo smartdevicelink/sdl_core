@@ -33,6 +33,7 @@
 #define SRC_COMPONENTS_INCLUDE_SECURITY_MANAGER_SECURITY_MANAGER_LISTENER_H_
 
 #include <string>
+#include "security_manager/ssl_context.h"
 
 namespace security_manager {
 
