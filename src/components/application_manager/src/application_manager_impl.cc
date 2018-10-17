@@ -3614,7 +3614,7 @@ bool ApplicationManagerImpl::IsSOStructValid(
   return true;
 }
 
-bool ApplicationManagerImpl::UnsubscribeAppFromSoftButtons(
+void ApplicationManagerImpl::UnsubscribeAppFromSoftButtons(
     const commands::MessageSharedPtr response) {
   using namespace mobile_apis;
 
@@ -3631,9 +3631,13 @@ bool ApplicationManagerImpl::UnsubscribeAppFromSoftButtons(
     app->UnsubscribeFromSoftButtons(function_id);
     LOG4CXX_DEBUG(logger_,
                   "Application has unsubscribed from softbusttons. FunctionID: "
-                      << function_id);
+                      << function_id << ", app_id:" << app->app_id());
     return true;
   }
+  LOG4CXX_DEBUG(
+      logger_,
+      "Application hasn't unsubscribed from softbusttons. FunctionID: "
+          << function_id << ", app_id:" << app->app_id());
   return false;
 }
 
