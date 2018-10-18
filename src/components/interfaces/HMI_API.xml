@@ -348,6 +348,21 @@
   </element>
 </enum> 
 
+<enum name="SeekIndicatorType" since="5.0">
+    <element name="TRACK"/>
+    <element name="TIME"/>
+</enum>
+
+<struct name="SeekStreamingIndicator" since="5.0">
+    <description>
+         The seek next / skip previous subscription buttons content.
+    </description>
+    <param name="type" type="SeekIndicatorType" mandatory="true" />
+    <param name="seekTime" type="Integer" minvalue="1" maxvalue="99" mandatory="false">
+        <description>If the type is TIME, this number of seconds may be present alongside the skip indicator. It will indicate the number of seconds thathe currently playing media will skip forward or backward.</description>
+    </param>
+</struct>
+
 <enum name="SystemContext">
   <description>Enumeration that describes possible contexts the application might be in on HU.</description>
   <description>Communicated to whichever app is in HMI FULL, except Alert.</description>
@@ -4228,6 +4243,8 @@
     <param name="appID" type="Integer" mandatory="true">
       <description>ID of application that requested this RPC.</description>
     </param>
+    <param name="forwardSeekIndicator" type="Common.SeekStreamingIndicator" mandatory="false" />
+    <param name="backSeekIndicator" type="Common.SeekStreamingIndicator" mandatory="false" />
   </function>
   <function name="SetMediaClockTimer" messagetype="response">
   </function>

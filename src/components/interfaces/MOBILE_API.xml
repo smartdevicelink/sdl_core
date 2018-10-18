@@ -317,7 +317,22 @@
             <description>Indicates that a button press of the Play/Pause button would stop the current playback.</description>
         </element>
     </enum> 
-    
+
+    <enum name="SeekIndicatorType" since="5.0">
+        <element name="TRACK"/>
+        <element name="TIME"/>
+    </enum>
+
+    <struct name="SeekStreamingIndicator" since="5.0">
+        <description>
+            The seek next / skip previous subscription buttons content.
+        </description>
+        <param name="type" type="SeekIndicatorType" mandatory="true"/>
+        <param name="seekTime" type="Integer" minvalue="1" maxvalue="99" mandatory="false">
+            <description>If the type is TIME, this number of seconds may be present alongside the skip indicator. It will indicate the number of seconds that the currently playing media will skip forward or backward.</description>
+        </param>
+    </struct>
+
     <enum name="TimerMode" since="1.0">
         <element name="UP" >
             <description>Causes the media clock timer to update from 0:00 to a specified time</description>
@@ -4667,6 +4682,8 @@
         <param name="audioStreamingIndicator" type="AudioStreamingIndicator" mandatory="false" since="5.0">
             <description>Indicates that a button press of the Play/Pause button would play, pause or Stop the current playback.</description>
         </param>
+        <param name="forwardSeekIndicator" type="SeekStreamingIndicator" mandatory="false" since="5.0"/>
+        <param name="backSeekIndicator" type="SeekStreamingIndicator" mandatory="false" since="5.0"/>
     </function>
     
     <function name="SetMediaClockTimer" functionID="SetMediaClockTimerID" messagetype="response" since="1.0">
