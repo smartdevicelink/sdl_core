@@ -1825,7 +1825,7 @@
    <param name="speed" type="Float" minvalue="0" maxvalue="500" mandatory="false">
        <description>The speed in KPH</description>
    </param>
-   <param name="shifted" type="Boolean" mandatory="false" since="5.0">
+   <param name="shifted" type="Boolean" mandatory="false">
        <description>
            True, if GPS lat/long, time, and altitude have been purposefully shifted (requires a proprietary algorithm to unshift).
            False, if the GPS data is raw and un-shifted.
