@@ -311,6 +311,14 @@ const char* activate = "activate";
 const char* set_as_default = "setAsDefault";
 const char* origin_app = "originApp";
 
+// gps data
+const char* shifted = "shifted";
+const char* altitude = "altitude";
+
+// sis data
+const char* station_short_name = "stationShortName";
+const char* station_location = "stationLocation";
+
 // resuming
 const char* application_commands = "applicationCommands";
 const char* application_submenus = "applicationSubMenus";

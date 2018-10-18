@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018, Ford Motor Company
+ * Copyright (c) 2019, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -244,7 +244,19 @@ TEST_F(
   (*mobile_message)[application_manager::strings::msg_params]
                    [message_params::kModuleType] = module_type;
   smart_objects::SmartObject radio_data;
+  smart_objects::SmartObject sis_data;
+  smart_objects::SmartObject gps_data;
+
+  gps_data[application_manager::strings::longitude_degrees] = 1.0;
+  gps_data[application_manager::strings::latitude_degrees] = 1.0;
+
+  sis_data[application_manager::strings::station_short_name] =
+      "dummy_short_name";
+  sis_data[application_manager::strings::station_location] = gps_data;
+
   radio_data[message_params::kBand] = enums_value::kAM;
+  radio_data[message_params::kSisData] = sis_data;
+
   std::shared_ptr<rc_rpc_plugin::commands::GetInteriorVehicleDataRequest>
       command = CreateRCCommand<
           rc_rpc_plugin::commands::GetInteriorVehicleDataRequest>(

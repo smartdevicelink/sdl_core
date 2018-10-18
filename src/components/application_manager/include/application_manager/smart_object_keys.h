@@ -1,5 +1,5 @@
 /*
- Copyright (c) 2013, Ford Motor Company
+ Copyright (c) 2019, Ford Motor Company
  All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -343,6 +343,14 @@ extern const char* service_records;
 extern const char* activate;
 extern const char* set_as_default;
 extern const char* origin_app;
+
+// gps data
+extern const char* shifted;
+extern const char* altitude;
+
+// sis data
+extern const char* station_short_name;
+extern const char* station_location;
 
 // resuming
 extern const char* application_commands;
