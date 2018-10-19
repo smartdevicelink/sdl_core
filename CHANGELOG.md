@@ -1,4 +1,4 @@
-# Release 5.0..0
+# Release 5.0.0
 
 ## Supported Specifications
 - [SDL Mobile RPC Spec: Version 5.0.0](https://github.com/smartdevicelink/rpc_spec/releases/tag/5.0.0)
