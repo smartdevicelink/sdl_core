@@ -1,61 +1,196 @@
-# Release 4.5.0
+# Release 5.0..0
 
 ## Supported Specifications
-- SDL Mobile RPC Spec: [Version 4.5.0](https://github.com/smartdevicelink/rpc_spec/releases/tag/4.5.0)
-- SDL Protocol Spec: [Version 5.0.0](https://github.com/smartdevicelink/protocol_spec/releases/tag/5.0.0)
+- [SDL Mobile RPC Spec: Version 5.0.0](https://github.com/smartdevicelink/rpc_spec/releases/tag/5.0.0)
+- [SDL Protocol Spec: Version 5.1.0](https://github.com/smartdevicelink/protocol_spec/releases/tag/5.1.0)
 
-## Implemented Proposals
+## Implemented Proposals / New Features
 
-[Connectivity via iAP-BT and Transport Switch](https://github.com/smartdevicelink/sdl_evolution/blob/master/proposals/0053-Connectivity-via-iAP-BT-and-Transport-Switch.md) - Implementation of a mechanism to change a registered app connected over one transport to another seamlessly.
+- [[SDL 0043] Move to the new C++11 standard](https://github.com/smartdevicelink/sdl_core/issues/1493) - C++11 unique_ptr, shared_ptr, atomic utils implemented
 
-[Mark public deprecated methods](https://github.com/smartdevicelink/sdl_evolution/blob/master/proposals/0092-Deprecated-interfaces-markup.md) - Implemented a DEPRECATED macro for marking deprecated methods in the project. Using methods marked with this macro will result in a warning being generated.
+- [[SDL 0044] Use Boost library in SDL](https://github.com/smartdevicelink/sdl_core/issues/1523) - Boost Locks, Date/Time, and Filesystem utils implemented
 
-[Remove QT HMI from SDL Core (Partially Complete)](https://github.com/smartdevicelink/sdl_evolution/blob/master/proposals/0110-remove-qt-hmi-from-sdl-core.md) - The `qt_hmi` component was removed from SDL Core, the QT_HMI_API interface and dbus adapter will be removed in the next major release, due to this aspect of the proposal requiring breaking changes.
+- [[SDL 0122] Handling VR help requests when application does not send VR help prompt](https://github.com/smartdevicelink/sdl_core/issues/2154)
 
-[Use Boost Library (Partially Complete)](https://github.com/smartdevicelink/sdl_evolution/blob/master/proposals/0044-use-Boost-library.md) - The `boost` library is now installed as a 3rd party library, this library is currently only used in the refactored message broker component.
+- [[SDL 0160] Remote Control Radio Parameter Update](https://github.com/smartdevicelink/sdl_core/issues/2162)
 
-## Enhancements
-- `DBus` and `libusb` are now dynamically linked, instead of being installed as 3rd-party libraries during the SDL Core build - #2004 
+- [[SDL 0181] SDL shall not put RC applications to HMI level NONE when user disables RC in HMI](https://github.com/smartdevicelink/sdl_core/issues/2377)
+
+- [[SDL 0182] Audio Source AM/FM/XM/DAB](https://github.com/smartdevicelink/sdl_core/issues/2338)
+
+- [[SDL 0165] Remote Control  Lights  More Names and Status Values](https://github.com/smartdevicelink/sdl_core/issues/2172)
+
+- [[SDL 0099] New remote control modules (LIGHT, AUDIO, HMI_SETTINGS) and parameters (SIS Data)](https://github.com/smartdevicelink/sdl_core/issues/1798)
+
+- [[SDL 0178] Interior Vehicle Data Subscription Management and Data Caching in SDL](https://github.com/smartdevicelink/sdl_core/issues/2318)
+
+- [[SDL 0153] Support for Short and Full UUID App ID](https://github.com/smartdevicelink/sdl_core/issues/2159)
+
+- [[SDL 0170] SDL behavior in case of LOW_VOLTAGE event](https://github.com/smartdevicelink/sdl_core/issues/2233)
+
+- [[SDL 0064] Choice-VR optional](https://github.com/smartdevicelink/sdl_core/issues/2160)
+
+- [[SDL 0175] Updating DOP value range for GPS notification](https://github.com/smartdevicelink/sdl_core/issues/2317)
+
+- [[SDL 0089] Mobile API versioning](https://github.com/smartdevicelink/sdl_core/issues/2248)
+
+- [[SDL 0150] Enhancing onHMIStatus with a New Parameter for Video Streaming State](https://github.com/smartdevicelink/sdl_core/issues/2129)
+
+- [[SDL 0109] SetAudioStreamingIndicator RPC](https://github.com/smartdevicelink/sdl_core/issues/2059)
+
+- [[SDL 0041] Provide AppIcon resumption across app registration requests](https://github.com/smartdevicelink/sdl_core/issues/1456)
+
+- [[SDL 0139] Clarification of audio format details of AudioPassThru](https://github.com/smartdevicelink/sdl_core/issues/2014)
+
+- [[SDL 0105] Remote Control - Seat](https://github.com/smartdevicelink/sdl_core/issues/1860)
+
+- [[SDL 0172] Remote Control - Update OnRCStatus with a new allowed parameter](https://github.com/smartdevicelink/sdl_core/issues/2244)
+
+- [[SDL 0106] Remote Control - OnRCStatus notification](https://github.com/smartdevicelink/sdl_core/issues/1930)
+
+- [[SDL 0145] Driver Distraction Notification Upon Registration](https://github.com/smartdevicelink/sdl_core/issues/2054)
+
+- [[SDL 0102] New vehicle data - ElectronicParkBrakeStatus ](https://github.com/smartdevicelink/sdl_core/issues/1815)
+
+- [[SDL 0110] Remove QT HMI from SDL Core](https://github.com/smartdevicelink/sdl_core/issues/1857) - Fully removed from project
+
+- [[SDL 0141] Supporting simultaneous multiple transports](https://github.com/smartdevicelink/sdl_core/issues/2065)
+
+- [[SDL 0149] Add capability to disable resumption based on app type and transport type](https://github.com/smartdevicelink/sdl_core/issues/2130)
+
+- [[SDL 0107] New vehicle data - TurnSignal](https://github.com/smartdevicelink/sdl_core/issues/1859)
+
+- [[SDL 0085] SubMenu Icon](https://github.com/smartdevicelink/sdl_core/issues/1747)
+
+- [[SDL 0168] RPC design refactoring](https://github.com/smartdevicelink/sdl_core/issues/2189)
+
+- [[SDL 0120] GetSystemTime RPC](https://github.com/smartdevicelink/sdl_core/issues/1963)
+
+- [[SDL 0040] DTLS encryption](https://github.com/smartdevicelink/sdl_core/issues/1479)
+
+- [[SDL 0014] Adding Audio File Playback to TTSChunk](https://github.com/smartdevicelink/sdl_core/issues/1277)
+
+- [[SDL 0063] Display name parameter](https://github.com/smartdevicelink/sdl_core/issues/1589)
+
+- [[SDL 0083] Expandable Design for Proprietary Data Exchange](https://github.com/smartdevicelink/sdl_core/issues/1734)
+
+- [[SDL 0042] SDL must transfer RPCs with invalid image reference parameters to the HMI](https://github.com/smartdevicelink/sdl_core/issues/1428)
+
+- [[SDL 0097] Tire pressure additions](https://github.com/smartdevicelink/sdl_core/issues/1766)
+
+- [[SDL 0062] Template images](https://github.com/smartdevicelink/sdl_core/issues/1588)
+
+- [[SDL 0037] Expand Mobile putfile RPC](https://github.com/smartdevicelink/sdl_core/issues/1455)
+
+- [[SDL 0164] Modernize Ubuntu Support](https://github.com/smartdevicelink/sdl_core/issues/2170)
+
+- [[SDL 0162] Define Handling of Duplicate Correlation IDs](https://github.com/smartdevicelink/sdl_core/issues/2169)
+
+- [[SDL 0151] ImageFieldName for SecondaryImage](https://github.com/smartdevicelink/sdl_core/issues/2099)
+
+- [[SDL 0082] New vehicle data - EngineOilLife](https://github.com/smartdevicelink/sdl_core/issues/1733)
+
+- [[SDL 0147] Template Improvements: Color Scheme](https://github.com/smartdevicelink/sdl_core/issues/2082)
+
+- [[SDL 0096] Deliver build configuration](https://github.com/smartdevicelink/sdl_core/issues/1765)
+
+- [[SDL 0072] New vehicle data - FuelRange](https://github.com/smartdevicelink/sdl_core/issues/1656)
+
+- [Inclusion of PLAY_PAUSE as a subscribable button](https://github.com/smartdevicelink/sdl_core/pull/930)
 
 ## Bug Fixes
-- [Remove OEM Specific references in SDL policy table preload file](https://github.com/smartdevicelink/sdl_core/issues/1252)
-- ["resultCode" should be more descriptive than "INVALID_DATA"](https://github.com/smartdevicelink/sdl_core/issues/31)
-- [SDL doesn't apply sequence SUSPEND -> OnSDLAwake -> SUSPEND -> IGN_OFF for saving resumption data](https://github.com/smartdevicelink/sdl_core/issues/1395)
-- [SDL responds "resultCode: SUCCESS" while dataType:VEHICLEDATA_EXTERNTEMP is VEHICLE_DATA_NOT_AVAILABLE and not in subscribed list store](https://github.com/smartdevicelink/sdl_core/issues/982)
-- [Policies SDL should be case-insensetive to "AppID" against listed in policies manager](https://github.com/smartdevicelink/sdl_core/issues/992)
-- [App is disconnected due to PROTOCOL_VIOLATION when start audio streaming after rejected 2 times then accepted](https://github.com/smartdevicelink/sdl_core/issues/1004)
-- [SDL doesn't set unsuccessful "message" value to "info" param in case HMI responds via single UI.RPC when Interface.IsReady missing](https://github.com/smartdevicelink/sdl_core/issues/997)
-- [Navigation SDL does not respond info message in case GENERIC_ERROR watchdog timeout from HMI](https://github.com/smartdevicelink/sdl_core/issues/990)
-- [SDL does not respond info message in case GENERIC_ERROR watchdog timeout from HM](https://github.com/smartdevicelink/sdl_core/issues/1012)
-- [SDL doesn't send info parameter when result of ResetGlobalProperties is GENERIC_ERROR](https://github.com/smartdevicelink/sdl_core/issues/1016)
-- [SDL does not send StopAudioStream() if exit app while Video service and Audio service are starting.](https://github.com/smartdevicelink/sdl_core/issues/1002)
-- [APIs AlertManeuver: SDL responds GENERIC_ERROR instead of INVALID_DATA when soft button has Type is Image or Both and Text is whitespace or \t or \n or empty](https://github.com/smartdevicelink/sdl_core/issues/980)
-- [IVSU SDL doesn't reject SystemRequest with filenam=IVSU but w/o binary data.](https://github.com/smartdevicelink/sdl_core/issues/976)
-- [Memory leaks: SDL does not release memory after sending AddCommand limit exhausted](https://github.com/smartdevicelink/sdl_core/issues/1029)
-- [Negative result code send instead of IGNORED for UnsubscribedVehicleData when VehicleInfo IsReady Missing](https://github.com/smartdevicelink/sdl_core/issues/996)
-- [API SDL responds "UNSUPPORTED_RESOURCE", success= false in case only have "UNSUPPORTED_RESOURCE" to Navigation.AlertManeuver](https://github.com/smartdevicelink/sdl_core/issues/989)
-- [Default app policies are never updated after a PTU](https://github.com/smartdevicelink/sdl_core/issues/1772)
-- [Build fails with GCC6+](https://github.com/smartdevicelink/sdl_core/issues/1975)
-- [Remote Control test suite fails](https://github.com/smartdevicelink/sdl_core/issues/1993)
-- [PoliciesManager allows all requested params in case "parameters" field is empty](https://github.com/smartdevicelink/sdl_core/issues/1873)
-- [OnDriverDistraction SDL does not send notification to app right after this app changes level from NONE to any other](https://github.com/smartdevicelink/sdl_core/issues/1881)
-- [Protect access to Resumption data during LastState::SaveStateToFileSystem](https://github.com/smartdevicelink/sdl_core/issues/1953)
-- [Need to protect cache manager "pt_" from concurrent access](https://github.com/smartdevicelink/sdl_core/issues/1961)
-- [Prevent deadlock in EventDispatcherIimpl::raise_event](https://github.com/smartdevicelink/sdl_core/issues/1949)
-- [Bluetooth StartService fail after Core restarted](https://github.com/smartdevicelink/sdl_core/issues/1932)
-- [Silent error caused by implicit conversion of SmartPointer to integer](https://github.com/smartdevicelink/sdl_core/issues/1834)
-- [AOA USB transport buffer size too small](https://github.com/smartdevicelink/sdl_core/issues/1863)
-- [Lock screen icon URL should be updated](https://github.com/smartdevicelink/sdl_core/issues/1646)
-- [Broken link in README.md for Software Architecture Documentation](https://github.com/smartdevicelink/sdl_core/issues/2091)
-- [SDL doesn't send OnPermissionsChange in case of external user consent](https://github.com/smartdevicelink/sdl_core/issues/2072)
-- [Build fails when ENABLE_SECURITY=OFF](https://github.com/smartdevicelink/sdl_core/issues/2073)
 
-### Security Related Fixes
-- [SDL must start PTU for navi app right after app successfully registration](https://github.com/smartdevicelink/sdl_core/issues/1925)
-- [SDL must start PTU for any app except navi right after app successfully request to start first secure service](https://github.com/smartdevicelink/sdl_core/issues/1924)
-- [PolicyTableUpdate is failed by any reason and "ForceProtectedService"=ON at .ini file](https://github.com/smartdevicelink/sdl_core/issues/1923)
-- [PolicyTableUpdate has NO "certificate" and "ForceProtectedService"=ON at .ini file](https://github.com/smartdevicelink/sdl_core/issues/1922)
-- [SDL must respond NACK in case navigation app connected over protocol v2 sends StartService for audio service](https://github.com/smartdevicelink/sdl_core/issues/1912)
-- [PolicyTableUpdate has NO "certificate" and "ForceProtectedService"=OFF at .ini file](https://github.com/smartdevicelink/sdl_core/issues/1894)
-- [PolicyTableUpdate is failed by any reason and "ForceProtectedService"=OFF at .ini file](https://github.com/smartdevicelink/sdl_core/issues/1891)
-- [PolicyTableUpdate is valid and brings "certificate"](https://github.com/smartdevicelink/sdl_core/issues/1888)
+- [SDL process RC requests with resultCode DISALLOWED after IGN_OFF and IGN_ON](https://github.com/smartdevicelink/sdl_core/issues/2670)
+
+- [SDL stop sending OnInteriorVehicleData notifications after the app sent a GetInteriorVehicleData without optional parameter subscribe](https://github.com/smartdevicelink/sdl_core/issues/2657)
+
+- [Make Size() function thread safe to avoid core dump](https://github.com/smartdevicelink/sdl_core/issues/2603)
+
+- [SDL does not cut parameters not related to defined module type from RC.SetInteriorVD](https://github.com/smartdevicelink/sdl_core/issues/2664)
+
+- [Add missing PRNDL enum value to the HMI API ](https://github.com/smartdevicelink/sdl_core/issues/2431)
+
+- [EXTERNAL_PROPRIETARY user consent is broken when permissions are in default object](https://github.com/smartdevicelink/sdl_core/issues/2146)
+
+- [Processing invalid PT after cutting off unknown_parameter or unknown_RPC](https://github.com/smartdevicelink/sdl_core/issues/1921)
+
+- [SDL does not check for non-mandatory parameters](https://github.com/smartdevicelink/sdl_core/issues/2443)
+
+- [SDL must close only session in case mobile app does not answer on Heartbeat_request](https://github.com/smartdevicelink/sdl_core/issues/1893)
+
+- [App does not activate when policies are disabled](https://github.com/smartdevicelink/sdl_core/issues/842)
+
+- [Pure virtual method called during SDL shutdown](https://github.com/smartdevicelink/sdl_core/issues/2433)
+
+- [SDL build is failing when ENABLE_LOG=OFF](https://github.com/smartdevicelink/sdl_core/issues/2341)
+
+- [Wrong policy permissions calculation in EXTERNAL_PROPRIETARY flow](https://github.com/smartdevicelink/sdl_core/issues/2405)
+
+- [Functional groupings parameters has max size of 24](https://github.com/smartdevicelink/sdl_core/issues/2470)
+
+- [AudioPassThru does not send audio data in raw PCM data](https://github.com/smartdevicelink/sdl_core/issues/1928)
+
+- [Deprecated GetDataOnSessionKey() cannot be overloaded in cross-compiling](https://github.com/smartdevicelink/sdl_core/issues/2137)
+
+- [V5 Protocol Messages do not encrypt payload of Control Frame Message Types](https://github.com/smartdevicelink/sdl_core/issues/2142)
+
+- [Remove TLS Handshake App Name String Compare](https://github.com/smartdevicelink/sdl_core/issues/1617)
+
+- [The reference of wild pointer cause to memory leak](https://github.com/smartdevicelink/sdl_core/issues/860)
+
+- [Build failing on Fedora 25](https://github.com/smartdevicelink/sdl_core/issues/1495)
+
+- [Add missing RPC changes: SpaceAvailable & CurrentTemperatureAvailable](https://github.com/smartdevicelink/sdl_core/pull/2588)
+
+- [Invalid memory accesses detected by valgrind](https://github.com/smartdevicelink/sdl_core/issues/2177)
+
+- [Memory leaks in media_manager_test unit tests](https://github.com/smartdevicelink/sdl_core/issues/2274)
+
+- [Empty moduleType disallows all RPC requests after ignition cycle](https://github.com/smartdevicelink/sdl_core/issues/2547)
+
+- [Feature/boost datetime implementation](https://github.com/smartdevicelink/sdl_core/pull/2278)
+
+- [Flush logger before deleting message loop thread](https://github.com/smartdevicelink/sdl_core/pull/2532)
+
+- [SDL Proxy crash happens when receiving SDLOnAppInterfaceUnregistered notification with reason -1 (INVALID_ENUM)](https://github.com/smartdevicelink/sdl_core/issues/2300)
+
+- [OnHMIStatus returns null hmiLevel if RPC has invalid/incomplete parameters](https://github.com/smartdevicelink/sdl_core/issues/2285)
+
+- [Invalid memory access in CacheManager::CheckPermissions()](https://github.com/smartdevicelink/sdl_core/issues/2298)
+
+- [Cert processing invalid, module certificate should be updated when a policy table update occurs](https://github.com/smartdevicelink/sdl_core/issues/2191)
+
+- [Cert processing invalid, CertificatePath and CACertificatePath keywords are nonfunctional](https://github.com/smartdevicelink/sdl_core/issues/2190)
+
+- [RegisterAppInterface Display Capabilities Segfault](https://github.com/smartdevicelink/sdl_core/issues/2220)
+
+- [Duplicate "PendingRequestsAmount" entries in smartDeviceLink.ini](https://github.com/smartdevicelink/sdl_core/issues/1790)
+
+## Enhancements
+
+- [PrintSmartObject function can not print to log file](https://github.com/smartdevicelink/sdl_core/issues/2574)
+
+## Best Practice
+
+- [AllowDeviceToConnect is never used](https://github.com/smartdevicelink/sdl_core/issues/494)
+
+- [Fix UnsubscribeWayPoints typo](https://github.com/smartdevicelink/sdl_core/pull/2504)
+
+- [Namespace capitalization](https://github.com/smartdevicelink/sdl_core/issues/33)
+
+- [Remove "SetIcon" Files](https://github.com/smartdevicelink/sdl_core/issues/1594)
+
+- [Initialization (et al) method return values](https://github.com/smartdevicelink/sdl_core/issues/34)
+
+- [Fix misspellings of "subscription"](https://github.com/smartdevicelink/sdl_core/issues/736)
+
+
+## Documentation
+
+- [Add FAQ link to README.md](https://github.com/smartdevicelink/sdl_core/pull/1366)
+
+- [Broken Links in SDD Documentation](https://github.com/smartdevicelink/sdl_core/issues/2107)
+
+- [Alter build instructions for slight clarity improvements](https://github.com/smartdevicelink/sdl_core/pull/218)
+
+- [Add third_party file](https://github.com/smartdevicelink/sdl_core/issues/2610)
