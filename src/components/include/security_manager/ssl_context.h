@@ -77,14 +77,16 @@ class SSLContext {
   };
 
   struct HandshakeContext {
-    HandshakeContext() : expected_sn(""), expected_cn("") {}
+    HandshakeContext()
+        : expected_sn(""), expected_cn(""), system_time(time(NULL)) {}
 
     HandshakeContext(const custom_str::CustomString& exp_sn,
                      const custom_str::CustomString& exp_cn)
-        : expected_sn(exp_sn), expected_cn(exp_cn) {}
+        : expected_sn(exp_sn), expected_cn(exp_cn), system_time(time(NULL)) {}
 
     custom_str::CustomString expected_sn;
     custom_str::CustomString expected_cn;
+    time_t system_time;
   };
 
   virtual HandshakeResult StartHandshake(const uint8_t** const out_data,
@@ -103,6 +105,14 @@ class SSLContext {
                        size_t* out_data_size) = 0;
   virtual bool IsInitCompleted() const = 0;
   virtual bool IsHandshakePending() const = 0;
+  /**
+  * @brief GetCertificateDueDate gets certificate expiration date
+  * @param due_date - certificate expiration time to be received
+  * @return True if certificate expiration date received
+  * otherwise False
+  */
+  virtual bool GetCertificateDueDate(time_t& due_date) const = 0;
+  virtual bool HasCertificate() const = 0;
   virtual size_t get_max_block_size(size_t mtu) const = 0;
   virtual std::string LastError() const = 0;
 

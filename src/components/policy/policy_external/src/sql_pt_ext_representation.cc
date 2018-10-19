@@ -670,6 +670,11 @@ bool SQLPTExtRepresentation::SaveApplicationPoliciesSection(
     return false;
   }
 
+  if (!query_delete.Exec(sql_pt::kDeleteRequestSubType)) {
+    LOG4CXX_WARN(logger_, "Incorrect delete from request subtype.");
+    return false;
+  }
+
   // First, all predefined apps (e.g. default, pre_DataConsent) should be saved,
   // otherwise another app with the predefined permissions can get incorrect
   // permissions
@@ -713,18 +718,17 @@ bool SQLPTExtRepresentation::SaveSpecificAppPolicy(
       if (!SetDefaultPolicy(app.first)) {
         return false;
       }
-      if (!SaveRequestType(app.first, *app.second.RequestType)) {
-        return false;
-      }
     } else if (kPreDataConsentId.compare(app.second.get_string()) == 0) {
       if (!SetPredataPolicy(app.first)) {
         return false;
       }
-      if (!SaveRequestType(app.first, *app.second.RequestType)) {
-        return false;
-      }
     }
-
+    if (!SaveRequestType(app.first, *app.second.RequestType)) {
+      return false;
+    }
+    if (!SaveRequestSubType(app.first, *app.second.RequestSubType)) {
+      return false;
+    }
     // Stop saving other params, since predefined permissions already set
     return true;
   }
@@ -757,6 +761,13 @@ bool SQLPTExtRepresentation::SaveSpecificAppPolicy(
   if (!SaveAppGroup(app.first, app.second.groups)) {
     return false;
   }
+
+  bool denied = !app.second.moduleType->is_initialized();
+  if (!SaveRemoteControlDenied(app.first, denied) ||
+      !SaveModuleType(app.first, *app.second.moduleType)) {
+    return false;
+  }
+
   if (!SaveNickname(app.first, *app.second.nicknames)) {
     return false;
   }
@@ -768,6 +779,10 @@ bool SQLPTExtRepresentation::SaveSpecificAppPolicy(
   }
 
   if (!SaveRequestType(app.first, *app.second.RequestType)) {
+    return false;
+  }
+
+  if (!SaveRequestSubType(app.first, *app.second.RequestSubType)) {
     return false;
   }
 
@@ -859,19 +874,39 @@ bool SQLPTExtRepresentation::GatherApplicationPoliciesSection(
     *params.memory_kb = query.GetInteger(5);
     *params.heart_beat_timeout_ms = query.GetUInteger(6);
 
-    if (!GatherAppGroup(app_id, &params.groups)) {
+    const auto& gather_app_id = ((*policies).apps[app_id].is_string())
+                                    ? (*policies).apps[app_id].get_string()
+                                    : app_id;
+    // Data should be gathered from db by  "default" key if application has
+    // default policies
+
+    if (!GatherAppGroup(gather_app_id, &params.groups)) {
       return false;
     }
-    if (!GatherNickName(app_id, &*params.nicknames)) {
+
+    bool denied = false;
+    if (!GatherRemoteControlDenied(gather_app_id, &denied)) {
       return false;
     }
-    if (!GatherAppType(app_id, &*params.AppHMIType)) {
+    if (!denied) {
+      if (!GatherModuleType(gather_app_id, &*params.moduleType)) {
+        return false;
+      }
+    }
+
+    if (!GatherNickName(gather_app_id, &*params.nicknames)) {
       return false;
     }
-    if (!GatherRequestType(app_id, &*params.RequestType)) {
+    if (!GatherAppType(gather_app_id, &*params.AppHMIType)) {
       return false;
     }
-    GatherPreconsentedGroup(app_id, &*params.preconsented_groups);
+    if (!GatherRequestType(gather_app_id, &*params.RequestType)) {
+      return false;
+    }
+    if (!GatherRequestSubType(gather_app_id, &*params.RequestSubType)) {
+      return false;
+    }
+    GatherPreconsentedGroup(gather_app_id, &*params.preconsented_groups);
     (*policies).apps[app_id] = params;
   }
   return true;

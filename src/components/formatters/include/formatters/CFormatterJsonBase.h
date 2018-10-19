@@ -38,9 +38,9 @@
 #include "smart_objects/smart_object.h"
 #include "json/json.h"
 
-namespace NsSmartDeviceLink {
-namespace NsJSONHandler {
-namespace Formatters {
+namespace ns_smart_device_link {
+namespace ns_json_handler {
+namespace formatters {
 
 namespace meta_formatter_error_code {
 /**
@@ -99,7 +99,7 @@ class CFormatterJsonBase {
    */
   static void jsonValueToObj(
       const Json::Value& value,
-      NsSmartDeviceLink::NsSmartObjects::SmartObject& obj);
+      ns_smart_device_link::ns_smart_objects::SmartObject& obj);
 
   /**
     * @brief The method constructs a JSON object from the input SmartObject
@@ -109,11 +109,11 @@ class CFormatterJsonBase {
     *input SmartObject.
     */
   static void objToJsonValue(
-      const NsSmartDeviceLink::NsSmartObjects::SmartObject& obj,
+      const ns_smart_device_link::ns_smart_objects::SmartObject& obj,
       Json::Value& value);
 };
 }
 }
-}  // namespace NsSmartDeviceLink::NsJSONHandler::Formatters
+}  // namespace ns_smart_device_link::ns_json_handler::formatters
 
 #endif  // SRC_COMPONENTS_FORMATTERS_INCLUDE_FORMATTERS_CFORMATTERJSONBASE_H_

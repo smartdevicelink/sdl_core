@@ -53,7 +53,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "json/json.h"
 #include "utils/macro.h"
 #include "utils/lock.h"
-#include "utils/atomic_object.h"
+#include <atomic>
 #include "utils/threads/thread.h"
 #include "utils/threads/message_loop_thread.h"
 #include "utils/message_queue.h"
@@ -152,7 +152,7 @@ class WebsocketSession : public std::enable_shared_from_this<WebsocketSession> {
   std::string GetComponentName(std::string& method);
 
  protected:
-  sync_primitives::atomic_bool stop;
+  std::atomic_bool stop;
 
  private:
   void onMessageReceived(Json::Value message);

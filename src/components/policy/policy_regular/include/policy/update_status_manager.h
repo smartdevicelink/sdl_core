@@ -66,14 +66,14 @@ class UpdateStatusManager : public UpdateStatusManagerInterface {
    * @brief Set next status during event processing
    * @param status Status shared pointer
    */
-  void SetNextStatus(utils::SharedPtr<Status> status);
+  void SetNextStatus(std::shared_ptr<Status> status);
 
   /**
    * @brief Set postponed status (will be set after next status) during event
    * processing
    * @param status Status shared pointer
    */
-  void SetPostponedStatus(utils::SharedPtr<Status> status);
+  void SetPostponedStatus(std::shared_ptr<Status> status);
 
   /**
    * @brief Sets listener pointer
@@ -118,10 +118,10 @@ class UpdateStatusManager : public UpdateStatusManagerInterface {
   void OnNewApplicationAdded(const DeviceConsent consent);
 
   /**
-   * @brief Update status handler for policy initialization
+   * @brief Update status handler on existed application registering
    * @param is_update_required Update necessity flag
    */
-  void OnPolicyInit(bool is_update_required);
+  void OnExistedApplicationAdded(const bool is_update_required);
 
   /**
    * @brief In case application from non-consented device has been registered
@@ -198,17 +198,17 @@ class UpdateStatusManager : public UpdateStatusManagerInterface {
   /**
    * @brief Current update status
    */
-  utils::SharedPtr<Status> current_status_;
+  std::shared_ptr<Status> current_status_;
 
   /**
    * @brief Next status after current to be set
    */
-  utils::SharedPtr<Status> next_status_;
+  std::shared_ptr<Status> next_status_;
 
   /**
    * @brief Status to be set after 'next' status
    */
-  utils::SharedPtr<Status> postponed_status_;
+  std::shared_ptr<Status> postponed_status_;
   sync_primitives::Lock status_lock_;
 
   UpdateEvent last_processed_event_;

@@ -51,24 +51,24 @@ class CMetaFormatterTestHelper : public ::testing::Test {
   virtual void TearDown();
 
   void AnyObjectToJsonString(
-      const NsSmartDeviceLink::NsSmartObjects::SmartObject& obj,
+      const ns_smart_device_link::ns_smart_objects::SmartObject& obj,
       std::string& result_string);
 
   void FillObjectIdenticalToSchema(
-      NsSmartDeviceLink::NsSmartObjects::SmartObject& obj);
+      ns_smart_device_link::ns_smart_objects::SmartObject& obj);
 
   void FillObjectIdenticalToSchemaWithoutNoMandatoriesParams(
-      NsSmartDeviceLink::NsSmartObjects::SmartObject& obj);
+      ns_smart_device_link::ns_smart_objects::SmartObject& obj);
 
   void CompareObjects(
-      const NsSmartDeviceLink::NsSmartObjects::SmartObject& first,
-      const NsSmartDeviceLink::NsSmartObjects::SmartObject& second);
+      const ns_smart_device_link::ns_smart_objects::SmartObject& first,
+      const ns_smart_device_link::ns_smart_objects::SmartObject& second);
 
   void FillObjectWithDefaultValues(
-      NsSmartDeviceLink::NsSmartObjects::SmartObject& obj);
+      ns_smart_device_link::ns_smart_objects::SmartObject& obj);
 
   void FillObjectWithoutSomeMandatoryFields(
-      NsSmartDeviceLink::NsSmartObjects::SmartObject& obj);
+      ns_smart_device_link::ns_smart_objects::SmartObject& obj);
 
   // Members
   std::set<FunctionIDTest::eType> function_id_items_;

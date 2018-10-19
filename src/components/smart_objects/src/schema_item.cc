@@ -32,16 +32,14 @@
 
 #include "smart_objects/schema_item.h"
 
-namespace NsSmartDeviceLink {
-namespace NsSmartObjects {
+namespace ns_smart_device_link {
+namespace ns_smart_objects {
 
-Errors::eType ISchemaItem::validate(const SmartObject& Object) {
-  return Errors::ERROR;
-}
-
-Errors::eType ISchemaItem::validate(const SmartObject& object,
-                                    rpc::ValidationReport* report__) {
-  return Errors::ERROR;
+errors::eType ISchemaItem::validate(
+    const SmartObject& object,
+    rpc::ValidationReport* report__,
+    const utils::SemanticVersion& MessageVersion) {
+  return errors::ERROR;
 }
 
 bool ISchemaItem::setDefaultValue(SmartObject& Object) {
@@ -53,7 +51,8 @@ bool ISchemaItem::hasDefaultValue(SmartObject& Object) {
 }
 
 void ISchemaItem::applySchema(SmartObject& Object,
-                              const bool RemoveFakeParameters) {}
+                              const bool RemoveFakeParameters,
+                              const utils::SemanticVersion& MessageVersion) {}
 
 void ISchemaItem::unapplySchema(SmartObject& Object) {}
 
@@ -64,5 +63,5 @@ size_t ISchemaItem::GetMemberSize() {
   return 0;
 }
 
-}  // namespace NsSmartObjects
-}  // namespace NsSmartDeviceLink
+}  // namespace ns_smart_objects
+}  // namespace ns_smart_device_link

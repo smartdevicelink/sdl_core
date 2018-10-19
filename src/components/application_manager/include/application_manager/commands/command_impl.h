@@ -63,7 +63,10 @@ class CommandImpl : public Command {
    * @param message Incoming SmartObject message
    **/
   CommandImpl(const MessageSharedPtr& message,
-              ApplicationManager& application_manager);
+              ApplicationManager& application_manager,
+              rpc_service::RPCService& rpc_service,
+              HMICapabilities& hmi_capabilities,
+              policy::PolicyHandlerInterface& policy_handler);
 
   /**
    * @brief CommandImpl class destructor
@@ -149,30 +152,19 @@ class CommandImpl : public Command {
   bool ReplaceMobileWithHMIAppId(smart_objects::SmartObject& message);
 
   /**
-   * DEPRECATED
-   * @brief Parses mobile message and replaces mobile app id with HMI app id
-   * @param message Message to replace its ids
-   */
-  void ReplaceMobileByHMIAppId(smart_objects::SmartObject& message);
-
-  /**
    * @brief Parses message from HMI and replaces HMI app id with mobile app id
    * @param message Message to replace its ids
    * @return True if replacement succeeded, otherwise - false
    */
   bool ReplaceHMIWithMobileAppId(smart_objects::SmartObject& message);
 
-  /**
-   * DEPRECATED
-   * @brief Parses message from HMI and replaces HMI app id with mobile app id
-   * @param message Message to replace its ids
-   */
-  void ReplaceHMIByMobileAppId(smart_objects::SmartObject& message);
-
   MessageSharedPtr message_;
   uint32_t default_timeout_;
   bool allowed_to_terminate_;
   ApplicationManager& application_manager_;
+  rpc_service::RPCService& rpc_service_;
+  HMICapabilities& hmi_capabilities_;
+  policy::PolicyHandlerInterface& policy_handler_;
 
 #ifdef ENABLE_LOG
   static log4cxx::LoggerPtr logger_;

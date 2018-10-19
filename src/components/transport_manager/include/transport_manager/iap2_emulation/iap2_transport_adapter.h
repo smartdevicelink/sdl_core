@@ -74,6 +74,15 @@ class IAP2BluetoothEmulationTransportAdapter : public TcpTransportAdapter {
    */
   void DeviceSwitched(const DeviceUID& device_handle) OVERRIDE;
 
+  /**
+   * @brief Notification that transport's configuration is updated. This
+   * override is needed so that a OnTransportConfigUpdated is not sent to the
+   * mobile device for the emulated transport.
+   *
+   * @param new_config The new configuration of the transport
+   */
+  void TransportConfigUpdated(const TransportConfig& new_config) OVERRIDE;
+
  protected:
   /**
    * @brief GetDeviceType Provides SDL device type for transport adapter
@@ -109,6 +118,15 @@ class IAP2USBEmulationTransportAdapter : public TcpTransportAdapter {
    * @param device_handle Device handle of switched device
    */
   void DeviceSwitched(const DeviceUID& device_handle) OVERRIDE;
+
+  /**
+   * @brief Notification that transport's configuration is updated. This
+   * override is needed so that a OnTransportConfigUpdated is not sent to the
+   * mobile device for the emulated transport.
+   *
+   * @param new_config The new configuration of the transport
+   */
+  void TransportConfigUpdated(const TransportConfig& new_config) OVERRIDE;
 
  protected:
   /**

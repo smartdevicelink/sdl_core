@@ -34,7 +34,7 @@
 #define SRC_COMPONENTS_POLICY_POLICY_EXTERNAL_INCLUDE_POLICY_POLICY_HELPER_H_
 
 #include "policy/policy_table/functions.h"
-#include "utils/shared_ptr.h"
+
 #include "policy/policy_types.h"
 
 namespace policy {
@@ -85,8 +85,8 @@ bool operator!=(const policy_table::ApplicationParams& first,
  */
 struct CheckAppPolicy {
   CheckAppPolicy(PolicyManagerImpl* pm,
-                 const utils::SharedPtr<policy_table::Table> update,
-                 const utils::SharedPtr<policy_table::Table> snapshot,
+                 const std::shared_ptr<policy_table::Table> update,
+                 const std::shared_ptr<policy_table::Table> snapshot,
                  CheckAppPolicyResults& out_results);
 
   bool operator()(const AppPoliciesValueType& app_policy);
@@ -100,7 +100,8 @@ struct CheckAppPolicy {
    * @param result Result of check of updated policy
    */
   void SetPendingPermissions(const AppPoliciesValueType& app_policy,
-                             PermissionsCheckResult result) const;
+                             PermissionsCheckResult result,
+                             AppPermissions& permissions_diff) const;
   /**
    * @brief Analyzes updated application policy whether any changes received. If
    * yes - provides appropriate result code
@@ -192,10 +193,30 @@ struct CheckAppPolicy {
    */
   bool IsRequestTypeChanged(const AppPoliciesValueType& app_policy) const;
 
+  /**
+   * @brief Checks whether App RequestSubTypes have been changed by
+   * udpated
+   * @param app_policy Reference to updated application policy
+   * @return True if changed, otherwise - false
+   */
+  bool IsRequestSubTypeChanged(const AppPoliciesValueType& app_policy) const;
+
+  /**
+   * @brief Helper function that inserts permissions into app_permissions_diff_
+   * map.
+   * udpated
+   * @param app_policy Reference to updated application policy
+   * @param permissions_diff Reference to app permissions to be inserted into
+   * map.
+   * @return void
+   */
+  void InsertPermission(const std::string& app_id,
+                        const AppPermissions& permissions_diff);
+
  private:
   PolicyManagerImpl* pm_;
-  const utils::SharedPtr<policy_table::Table> update_;
-  const utils::SharedPtr<policy_table::Table> snapshot_;
+  const std::shared_ptr<policy_table::Table> update_;
+  const std::shared_ptr<policy_table::Table> snapshot_;
   CheckAppPolicyResults& out_results_;
 };
 
@@ -247,8 +268,26 @@ struct FillNotificationData {
                              const std::set<Parameter>& target);
   void InitRpcKeys(const std::string& rpc_name);
   bool RpcParametersEmpty(RpcPermissions& rpc);
-  bool IsSectionEmpty(ParameterPermissions& permissions,
-                      const std::string& section);
+
+  /**
+   * @brief Checks if specific section in specified permissions is empty
+   * @param permissions reference to the permissions structure
+   * @param section reference to the section name
+   * @return true if specified section in permissions is empty otherwise returns
+   * false
+   */
+  bool IsSectionEmpty(const ParameterPermissions& permissions,
+                      const std::string& section) const;
+
+  /**
+   * @brief Checks if at least one parameter is allowed for the specified
+   * permissions
+   * @param permissions reference to the permissions structure
+   * @return true if at least one parameter is allowed for the specified
+   * permissions otherwise returns false
+   */
+  bool IsSomeParameterAllowed(const ParameterPermissions& permissions) const;
+
   std::string current_key_;
   Permissions& data_;
   const bool does_require_user_consent_;

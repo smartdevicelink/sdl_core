@@ -60,8 +60,6 @@ target_link_libraries(UsageStatistics Utils)
 set(EXCLUDE_PATHS
   ${POLICY_TABLE_PATHS}
   ${USAGE_STATISTICS_PATHS}
-  sql_pt_ext_queries.cc
-  sql_pt_ext_representation.cc
 )
 
 set(PATHS
@@ -70,11 +68,6 @@ set(PATHS
   ${COMPONENTS_DIR}/rpc_base/src/rpc_base/rpc_base.cc
 )
 collect_sources(SOURCES "${PATHS}" "${EXCLUDE_PATHS}")
-
-if (NOT REMOTE_CONTROL)
-  list(REMOVE_ITEM SOURCES
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/access_remote_impl.cc)
-endif()
 
 set(LIBRARIES
   ConfigProfile

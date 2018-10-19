@@ -33,7 +33,6 @@
 #include "policy/update_status_manager.h"
 #include "policy/policy_listener.h"
 #include "utils/logger.h"
-#include "utils/make_shared.h"
 
 namespace policy {
 
@@ -41,7 +40,7 @@ CREATE_LOGGERPTR_GLOBAL(logger_, "Policy")
 
 UpdateStatusManager::UpdateStatusManager()
     : listener_(NULL)
-    , current_status_(utils::MakeShared<UpToDateStatus>())
+    , current_status_(std::make_shared<UpToDateStatus>())
     , last_processed_event_(kNoEvent)
     , apps_search_in_progress_(false)
     , app_registered_from_non_consented_device_(true) {}
@@ -55,11 +54,11 @@ void UpdateStatusManager::ProcessEvent(UpdateEvent event) {
   DoTransition();
 }
 
-void UpdateStatusManager::SetNextStatus(utils::SharedPtr<Status> status) {
+void UpdateStatusManager::SetNextStatus(std::shared_ptr<Status> status) {
   next_status_ = status;
 }
 
-void UpdateStatusManager::SetPostponedStatus(utils::SharedPtr<Status> status) {
+void UpdateStatusManager::SetPostponedStatus(std::shared_ptr<Status> status) {
   postponed_status_ = status;
 }
 
@@ -101,6 +100,15 @@ void UpdateStatusManager::OnResetRetrySequence() {
   ProcessEvent(kOnResetRetrySequence);
 }
 
+void UpdateStatusManager::OnExistedApplicationAdded(
+    const bool is_update_required) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  if (is_update_required) {
+    current_status_.reset(new UpToDateStatus());
+    ProcessEvent(kScheduleUpdate);
+  }
+}
+
 void UpdateStatusManager::OnNewApplicationAdded(const DeviceConsent consent) {
   LOG4CXX_AUTO_TRACE(logger_);
   if (kDeviceAllowed != consent) {
@@ -109,14 +117,6 @@ void UpdateStatusManager::OnNewApplicationAdded(const DeviceConsent consent) {
   }
   app_registered_from_non_consented_device_ = false;
   ProcessEvent(kOnNewAppRegistered);
-}
-
-void UpdateStatusManager::OnPolicyInit(bool is_update_required) {
-  LOG4CXX_AUTO_TRACE(logger_);
-  if (is_update_required) {
-    current_status_.reset(new UpToDateStatus());
-    ProcessEvent(kScheduleUpdate);
-  }
 }
 
 void UpdateStatusManager::OnDeviceConsented() {

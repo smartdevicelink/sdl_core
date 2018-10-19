@@ -38,7 +38,7 @@
 #include "application_manager/message.h"
 
 namespace application_manager {
-typedef utils::SharedPtr<application_manager::Message> MobileMessage;
+typedef std::shared_ptr<application_manager::Message> MobileMessage;
 class MobileMessageHandler {
  public:
   static application_manager::Message* HandleIncomingMessageProtocol(

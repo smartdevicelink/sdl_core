@@ -277,6 +277,15 @@ class TransportAdapterListener {
    */
   virtual void OnTransportSwitchRequested(
       const TransportAdapter* transport_adapter) = 0;
+
+  /**
+   * @brief Notification that the transport's specific configuration has been
+   *        updated.
+   *
+   * @param transport_adapter  pointer to the transport adapter
+   */
+  virtual void OnTransportConfigUpdated(
+      const TransportAdapter* transport_adapter) = 0;
 };
 
 }  // transport_adapter namespace

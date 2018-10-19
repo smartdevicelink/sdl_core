@@ -77,7 +77,7 @@ bool RequestTracker::Track(const ApplicationID& app_id,
                            const uint32_t max_requests,
                            ApplicationsRequestsTracker& tracker) {
   LOG4CXX_AUTO_TRACE(logger_);
-  using date_time::DateTime;
+  using namespace date_time;
 
   if (!time_scale || !max_requests) {
     LOG4CXX_INFO(logger_, "Time scale request tracking is disabled.");
@@ -93,7 +93,7 @@ bool RequestTracker::Track(const ApplicationID& app_id,
 
   if (tracker.end() == it_app) {
     LOG4CXX_DEBUG(logger_, "Adding new application into tracking.");
-    tracker[app_id].push_back(DateTime::getCurrentTime());
+    tracker[app_id].push_back(getCurrentTime());
     return true;
   }
 
@@ -102,25 +102,24 @@ bool RequestTracker::Track(const ApplicationID& app_id,
 
   if (it_app->second.size() < max_requests) {
     LOG4CXX_DEBUG(logger_, "Adding new request into tracking.");
-    tracker[app_id].push_back(DateTime::getCurrentTime());
+    tracker[app_id].push_back(getCurrentTime());
     return true;
   }
 
   LOG4CXX_DEBUG(logger_,
                 "Oldest request is added at: "
-                    << DateTime::getmSecs(it_app->second.front())
-                    << ". Current time is: "
-                    << DateTime::getmSecs(DateTime::getCurrentTime())
+                    << getmSecs(it_app->second.front())
+                    << ". Current time is: " << getmSecs(getCurrentTime())
                     << ". Time scale is: " << time_scale);
 
-  if (DateTime::calculateTimeSpan(it_app->second.front()) > time_scale) {
+  if (calculateTimeSpan(it_app->second.front()) > time_scale) {
     LOG4CXX_DEBUG(logger_, "Dropping oldest request, adding new one.");
     ApplicationsRequestsTracker::mapped_type& times = tracker[app_id];
 
     DCHECK_OR_RETURN(!times.empty(), false);
 
     times.erase(times.begin());
-    times.push_back(DateTime::getCurrentTime());
+    times.push_back(getCurrentTime());
     return true;
   }
 

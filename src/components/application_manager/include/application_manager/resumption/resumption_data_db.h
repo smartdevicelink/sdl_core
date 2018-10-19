@@ -110,16 +110,11 @@ class ResumptionDataDB : public ResumptionData {
   virtual uint32_t GetHMIApplicationID(const std::string& policy_app_id,
                                        const std::string& device_id) const;
 
-  /**
-   * @brief Increments ignition counter for all registered applications
-   * and remember ign_off time stamp
-   */
-  DEPRECATED void OnSuspend() FINAL;
+  void IncrementGlobalIgnOnCounter() OVERRIDE;
 
-  /**
-   * @brief Decrements ignition counter for all registered applications
-   */
-  DEPRECATED void OnAwake() FINAL;
+  uint32_t GetGlobalIgnOnCounter() const OVERRIDE;
+
+  void ResetGlobalIgnOnCount() OVERRIDE;
 
   /**
    * @brief Increments ignition counter for all registered applications
@@ -683,7 +678,7 @@ class ResumptionDataDB : public ResumptionData {
                          smart_objects::SmartObject& saved_app) const;
 
   /**
-   * @brief Selects data from applicationSubscribtionsArray table
+   * @brief Selects data from applicationSubscriptionsArray table
    * @param policy_app_id contains mobile application id of application
    * @param device_id contains id of device on which is running application
    * @param saved_app will contain subscriptions

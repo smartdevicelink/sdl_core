@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Ford Motor Company
+ * Copyright (c) 2018, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -81,7 +81,7 @@ Connection::Connection(ConnectionHandle connection_handle,
     : connection_handler_(connection_handler)
     , connection_handle_(connection_handle)
     , connection_device_handle_(connection_device_handle)
-    , session_map_lock_(true)
+    , primary_connection_handle_(0)
     , heartbeat_timeout_(heartbeat_timeout) {
   LOG4CXX_AUTO_TRACE(logger_);
   DCHECK(connection_handler_);
@@ -97,39 +97,62 @@ Connection::~Connection() {
   heart_beat_monitor_thread_->join();
   delete heartbeat_monitor_;
   threads::DeleteThread(heart_beat_monitor_thread_);
+
+  // Before clearing out the session_map_, we must remove all sessions
+  // associated with this Connection from the SessionConnectionMap.
+
+  // NESTED LOCK: make sure to lock session_map_lock_ then ConnectionHandler's
+  // session_connection_map_lock_ptr_ (which will be taken in RemoveSession).
   sync_primitives::AutoLock lock(session_map_lock_);
+  SessionMap::iterator session_it = session_map_.begin();
+  while (session_it != session_map_.end()) {
+    LOG4CXX_INFO(
+        logger_,
+        "Removed Session ID "
+            << static_cast<int>(session_it->first)
+            << " from Session/Connection Map in Connection Destructor");
+    connection_handler_->RemoveSession(session_it->first);
+    session_it++;
+  }
+
   session_map_.clear();
 }
 
-// Finds a key not presented in std::map<unsigned char, T>
-// Returns 0 if that key not found
-namespace {
-template <class T>
-uint32_t findGap(const std::map<unsigned char, T>& map) {
-  for (uint32_t i = 1; i <= UCHAR_MAX; ++i) {
-    if (map.find(i) == map.end()) {
-      return i;
-    }
-  }
-  return 0;
-}
-}  // namespace
-
-uint32_t Connection::AddNewSession() {
+uint32_t Connection::AddNewSession(
+    const transport_manager::ConnectionUID connection_handle) {
   LOG4CXX_AUTO_TRACE(logger_);
+
+  // NESTED LOCK: make sure to lock session_map_lock_ then ConnectionHandler's
+  // session_connection_map_lock_ptr_ (which will be taken in AddSession)
   sync_primitives::AutoLock lock(session_map_lock_);
-  const uint32_t session_id = findGap(session_map_);
+
+  // Even though we have our own SessionMap, we use the Connection Handler's
+  // SessionConnectionMap to generate a session ID. We want to make sure that
+  // session IDs are globally unique, and not only unique within a Connection.
+  const uint32_t session_id =
+      connection_handler_->AddSession(connection_handle);
   if (session_id > 0) {
     Session& new_session = session_map_[session_id];
     new_session.protocol_version = ::protocol_handler::PROTOCOL_VERSION_2;
-    new_session.service_list.push_back(Service(protocol_handler::kRpc));
-    new_session.service_list.push_back(Service(protocol_handler::kBulk));
+    new_session.service_list.push_back(
+        Service(protocol_handler::kRpc, connection_handle));
+    new_session.service_list.push_back(
+        Service(protocol_handler::kBulk, connection_handle));
   }
+
   return session_id;
 }
 
 uint32_t Connection::RemoveSession(uint8_t session_id) {
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  // Again, a NESTED lock, but it follows the rules.
   sync_primitives::AutoLock lock(session_map_lock_);
+
+  if (!connection_handler_->RemoveSession(session_id)) {
+    return 0;
+  }
+
   SessionMap::iterator it = session_map_.find(session_id);
   if (session_map_.end() == it) {
     LOG4CXX_WARN(logger_, "Session not found in this connection!");
@@ -137,12 +160,14 @@ uint32_t Connection::RemoveSession(uint8_t session_id) {
   }
   heartbeat_monitor_->RemoveSession(session_id);
   session_map_.erase(session_id);
+
   return session_id;
 }
 
 bool Connection::AddNewService(uint8_t session_id,
                                protocol_handler::ServiceType service_type,
-                               const bool request_protection) {
+                               const bool request_protection,
+                               transport_manager::ConnectionUID connection_id) {
   // Ignore wrong services
   if (protocol_handler::kControl == service_type ||
       protocol_handler::kInvalidServiceType == service_type) {
@@ -152,7 +177,9 @@ bool Connection::AddNewService(uint8_t session_id,
 
   LOG4CXX_DEBUG(logger_,
                 "Add service " << service_type << " for session "
-                               << static_cast<uint32_t>(session_id));
+                               << static_cast<uint32_t>(session_id)
+                               << " using connection ID "
+                               << static_cast<uint32_t>(connection_id));
   sync_primitives::AutoLock lock(session_map_lock_);
 
   SessionMap::iterator session_it = session_map_.find(session_id);
@@ -201,7 +228,7 @@ bool Connection::AddNewService(uint8_t session_id,
 #endif  // ENABLE_SECURITY
   }
   // id service is not exists
-  session.service_list.push_back(Service(service_type));
+  session.service_list.push_back(Service(service_type, connection_id));
   return true;
 }
 
@@ -244,6 +271,63 @@ bool Connection::RemoveService(uint8_t session_id,
   }
   service_list.erase(service_it);
   return true;
+}
+
+uint8_t Connection::RemoveSecondaryServices(
+    transport_manager::ConnectionUID secondary_connection_handle,
+    std::list<protocol_handler::ServiceType>& removed_services_list) {
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  uint8_t found_session_id = 0;
+  sync_primitives::AutoLock lock(session_map_lock_);
+
+  LOG4CXX_INFO(logger_,
+               "RemoveSecondaryServices looking for services on Connection ID "
+                   << static_cast<int>(secondary_connection_handle));
+
+  // Walk the SessionMap in the primary connection, and for each
+  // Session, we walk its ServiceList, looking for all the services
+  // that were running on the now-closed Secondary Connection.
+  for (SessionMap::iterator session_it = session_map_.begin();
+       session_map_.end() != session_it;
+       ++session_it) {
+    LOG4CXX_INFO(logger_,
+                 "RemoveSecondaryServices found session ID "
+                     << static_cast<int>(session_it->first));
+
+    // Now, for each session, walk the its ServiceList, looking for services
+    // that were using secondary)_connection_handle. If we find such a service,
+    // set session_found and break out of the outer loop.
+    ServiceList& service_list = session_it->second.service_list;
+    ServiceList::iterator service_it = service_list.begin();
+    for (; service_it != service_list.end();) {
+      LOG4CXX_INFO(logger_,
+                   "RemoveSecondaryServices found service ID "
+                       << static_cast<int>(service_it->service_type));
+      if (service_it->connection_id == secondary_connection_handle) {
+        found_session_id = session_it->first;
+
+        LOG4CXX_INFO(logger_,
+                     "RemoveSecondaryServices removing Service "
+                         << static_cast<int>(service_it->service_type)
+                         << " in session "
+                         << static_cast<int>(found_session_id));
+
+        removed_services_list.push_back(service_it->service_type);
+        service_it = service_list.erase(service_it);
+      } else {
+        service_it++;
+      }
+    }
+
+    // If we found a session that had services running on the secondary
+    // connection, we're done.
+    if (found_session_id != 0) {
+      break;
+    }
+  }
+
+  return found_session_id;
 }
 
 #ifdef ENABLE_SECURITY
@@ -346,7 +430,6 @@ const SessionMap Connection::session_map() const {
 }
 
 void Connection::CloseSession(uint8_t session_id) {
-  size_t size;
   {
     sync_primitives::AutoLock lock(session_map_lock_);
 
@@ -354,16 +437,10 @@ void Connection::CloseSession(uint8_t session_id) {
     if (session_it == session_map_.end()) {
       return;
     }
-    size = session_map_.size();
   }
 
   connection_handler_->CloseSession(
       connection_handle_, session_id, connection_handler::kCommon);
-
-  // Close connection if it is last session
-  if (1 == size) {
-    connection_handler_->CloseConnection(connection_handle_);
-  }
 }
 
 void Connection::UpdateProtocolVersionSession(uint8_t session_id,
@@ -403,6 +480,15 @@ bool Connection::ProtocolVersion(uint8_t session_id,
   }
   protocol_version = (session_it->second).protocol_version;
   return true;
+}
+
+ConnectionHandle Connection::primary_connection_handle() const {
+  return primary_connection_handle_;
+}
+
+void Connection::SetPrimaryConnectionHandle(
+    ConnectionHandle primary_connection_handle) {
+  primary_connection_handle_ = primary_connection_handle;
 }
 
 void Connection::StartHeartBeat(uint8_t session_id) {

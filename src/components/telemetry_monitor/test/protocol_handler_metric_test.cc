@@ -51,15 +51,12 @@ TEST(ProtocolHandlerMetricTest, grabResources) {
 TEST(ProtocolHandlerMetricTest, GetJsonMetric) {
   ProtocolHandlerMecticWrapper metric_test;
 
-  TimevalStruct start_time;
-  start_time.tv_sec = 1;
-  start_time.tv_usec = 0;
+  date_time::TimeDuration start_time = date_time::seconds(1);
 
-  TimevalStruct end_time;
-  end_time.tv_sec = 10;
-  end_time.tv_usec = 0;
+  date_time::TimeDuration end_time = date_time::seconds(10);
+
   metric_test.message_metric =
-      new protocol_handler::PHTelemetryObserver::MessageMetric();
+      std::make_shared<protocol_handler::PHTelemetryObserver::MessageMetric>();
   metric_test.message_metric->begin = start_time;
   metric_test.message_metric->end = end_time;
   metric_test.message_metric->message_id = 5;
@@ -71,10 +68,8 @@ TEST(ProtocolHandlerMetricTest, GetJsonMetric) {
   EXPECT_EQ("null\n", jvalue[strings::utime].toStyledString());
   EXPECT_EQ("null\n", jvalue[strings::memory].toStyledString());
 
-  EXPECT_EQ(date_time::DateTime::getuSecs(start_time),
-            jvalue[strings::begin].asInt64());
-  EXPECT_EQ(date_time::DateTime::getuSecs(end_time),
-            jvalue[strings::end].asInt64());
+  EXPECT_EQ(date_time::getuSecs(start_time), jvalue[strings::begin].asInt64());
+  EXPECT_EQ(date_time::getuSecs(end_time), jvalue[strings::end].asInt64());
   EXPECT_EQ(5, jvalue[strings::message_id].asInt64());
   EXPECT_EQ(2, jvalue[strings::connection_key].asInt());
 }
@@ -85,15 +80,12 @@ TEST(ProtocolHandlerMetricTest, GetJsonMetricWithGrabResources) {
   EXPECT_TRUE(resources != NULL);
   EXPECT_TRUE(metric_test.grabResources());
 
-  TimevalStruct start_time;
-  start_time.tv_sec = 1;
-  start_time.tv_usec = 0;
+  date_time::TimeDuration start_time = date_time::seconds(1);
 
-  TimevalStruct end_time;
-  end_time.tv_sec = 10;
-  end_time.tv_usec = 0;
+  date_time::TimeDuration end_time = date_time::seconds(10);
+
   metric_test.message_metric =
-      new protocol_handler::PHTelemetryObserver::MessageMetric();
+      std::make_shared<protocol_handler::PHTelemetryObserver::MessageMetric>();
   metric_test.message_metric->begin = start_time;
   metric_test.message_metric->end = end_time;
   metric_test.message_metric->message_id = 5;
@@ -107,10 +99,8 @@ TEST(ProtocolHandlerMetricTest, GetJsonMetricWithGrabResources) {
   EXPECT_NE("null/n", jvalue[strings::utime].toStyledString());
   EXPECT_NE("null/n", jvalue[strings::memory].toStyledString());
 
-  EXPECT_EQ(date_time::DateTime::getuSecs(start_time),
-            jvalue[strings::begin].asInt64());
-  EXPECT_EQ(date_time::DateTime::getuSecs(end_time),
-            jvalue[strings::end].asInt64());
+  EXPECT_EQ(date_time::getuSecs(start_time), jvalue[strings::begin].asInt64());
+  EXPECT_EQ(date_time::getuSecs(end_time), jvalue[strings::end].asInt64());
   EXPECT_EQ(5, jvalue[strings::message_id].asInt64());
   EXPECT_EQ(2, jvalue[strings::connection_key].asInt());
 

@@ -100,36 +100,29 @@ class ProtocolHandler {
     */
   virtual void SendEndSession(int32_t connection_id, uint8_t session_id) = 0;
 
-  virtual void SendEndService(int32_t connection_id,
+  /**
+    * \brief Sends ending session to mobile application
+    * \param primary_connection_id Identifier of connection within which
+    * service exists
+    * \param connection_id Identifier of the actual transport for the service
+    * \param session_id ID of session to be ended
+    */
+  virtual void SendEndService(int32_t primary_connection_id,
+                              int32_t connection_id,
                               uint8_t session_id,
                               uint8_t service_type) = 0;
+
+  /**
+   * \brief Called to notify all handsheke handlers about handshake failure.
+   */
+  virtual void NotifyOnFailedHandshake() = 0;
+
   /**
    * \brief Protocol handler settings getter
    * \return pointer to protocol handler settings class
    */
   virtual const ProtocolHandlerSettings& get_settings() const = 0;
   virtual SessionObserver& get_session_observer() = 0;
-
-  /**
-   * \brief Called by connection handler to notify the result of
-   * OnSessionStartedCallback().
-   * \param connection_id Identifier of connection within which session exists
-   * \param session_id session ID passed to OnSessionStartedCallback()
-   * \param generated_session_id Generated session ID, will be 0 if session is
-   * not started
-   * \param hash_id Generated Hash ID
-   * \param protection whether the service will be protected
-   * \param rejected_params list of parameters' name that are rejected.
-   * Only valid when generated_session_id is 0. Note, even if
-   * generated_session_id is 0, the list may be empty.
-   */
-  DEPRECATED virtual void NotifySessionStartedResult(
-      int32_t connection_id,
-      uint8_t session_id,
-      uint8_t generated_session_id,
-      uint32_t hash_id,
-      bool protection,
-      std::vector<std::string>& rejected_params) = 0;
 
   /**
    * @brief Called by connection handler to notify the context of

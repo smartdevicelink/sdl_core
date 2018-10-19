@@ -34,7 +34,6 @@
 #include "policy/mock_policy_listener.h"
 #include "policy/policy_manager_impl.h"
 #include "policy/update_status_manager.h"
-#include "utils/make_shared.h"
 
 namespace test {
 namespace components {
@@ -46,13 +45,13 @@ using ::testing::Return;
 
 class UpdateStatusManagerTest : public ::testing::Test {
  protected:
-  utils::SharedPtr<UpdateStatusManager> manager_;
-  utils::SharedPtr<MockPolicyListener> listener_;
+  std::shared_ptr<UpdateStatusManager> manager_;
+  std::shared_ptr<MockPolicyListener> listener_;
 
  public:
   UpdateStatusManagerTest()
-      : manager_(utils::MakeShared<UpdateStatusManager>())
-      , listener_(utils::MakeShared<MockPolicyListener>()) {}
+      : manager_(std::make_shared<UpdateStatusManager>())
+      , listener_(std::make_shared<MockPolicyListener>()) {}
 
   void SetUp() OVERRIDE {
     manager_->set_listener(listener_.get());
@@ -61,20 +60,6 @@ class UpdateStatusManagerTest : public ::testing::Test {
 
   void TearDown() OVERRIDE {}
 };
-
-TEST_F(UpdateStatusManagerTest,
-       StringifiedUpdateStatus_SetStatuses_ExpectCorrectStringifiedStatuses) {
-  // Arrange
-  manager_->OnPolicyInit(false);
-  // Check
-  EXPECT_EQ("UP_TO_DATE", manager_->StringifiedUpdateStatus());
-  manager_->OnPolicyInit(true);
-  // Check
-  EXPECT_EQ("UPDATE_NEEDED", manager_->StringifiedUpdateStatus());
-  manager_->OnUpdateSentOut();
-  // Check
-  EXPECT_EQ("UPDATING", manager_->StringifiedUpdateStatus());
-}
 
 TEST_F(UpdateStatusManagerTest,
        OnAppSearchStartedCompleted_ExpectAppSearchCorrectStatus) {

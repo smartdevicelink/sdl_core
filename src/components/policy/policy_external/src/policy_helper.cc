@@ -122,8 +122,8 @@ bool operator!=(const policy_table::ApplicationParams& first,
 
 CheckAppPolicy::CheckAppPolicy(
     PolicyManagerImpl* pm,
-    const utils::SharedPtr<policy_table::Table> update,
-    const utils::SharedPtr<policy_table::Table> snapshot,
+    const std::shared_ptr<policy_table::Table> update,
+    const std::shared_ptr<policy_table::Table> snapshot,
     CheckAppPolicyResults& out_results)
     : pm_(pm)
     , update_(update)
@@ -299,9 +299,20 @@ void CheckAppPolicy::AddResult(const std::string& app_id,
   out_results_.insert(std::make_pair(app_id, result));
 }
 
+void CheckAppPolicy::InsertPermission(const std::string& app_id,
+                                      const AppPermissions& permissions_diff) {
+  pm_->app_permissions_diff_lock_.Acquire();
+  auto result = pm_->app_permissions_diff_.insert(
+      std::make_pair(app_id, permissions_diff));
+  if (!result.second) {
+    LOG4CXX_ERROR(logger_, "App ID: " << app_id << " already exists in map.");
+  }
+  pm_->app_permissions_diff_lock_.Release();
+}
+
 bool CheckAppPolicy::operator()(const AppPoliciesValueType& app_policy) {
   const std::string app_id = app_policy.first;
-
+  AppPermissions permissions_diff(app_id);
   if (!IsKnownAppication(app_id)) {
     LOG4CXX_WARN(logger_,
                  "Application:" << app_id << " is not present in snapshot.");
@@ -309,22 +320,43 @@ bool CheckAppPolicy::operator()(const AppPoliciesValueType& app_policy) {
   }
 
   if (!IsPredefinedApp(app_policy) && IsAppRevoked(app_policy)) {
-    SetPendingPermissions(app_policy, RESULT_APP_REVOKED);
+    SetPendingPermissions(app_policy, RESULT_APP_REVOKED, permissions_diff);
     AddResult(app_id, RESULT_APP_REVOKED);
+    InsertPermission(app_id, permissions_diff);
     return true;
   }
 
   if (!IsPredefinedApp(app_policy) && !NicknamesMatch(app_policy)) {
-    SetPendingPermissions(app_policy, RESULT_NICKNAME_MISMATCH);
+    SetPendingPermissions(
+        app_policy, RESULT_NICKNAME_MISMATCH, permissions_diff);
     AddResult(app_id, RESULT_NICKNAME_MISMATCH);
+    InsertPermission(app_id, permissions_diff);
     return true;
   }
 
   PermissionsCheckResult result = CheckPermissionsChanges(app_policy);
 
-  if (!IsPredefinedApp(app_policy) && IsRequestTypeChanged(app_policy)) {
-    SetPendingPermissions(app_policy, RESULT_REQUEST_TYPE_CHANGED);
-    AddResult(app_id, RESULT_REQUEST_TYPE_CHANGED);
+  if (!IsPredefinedApp(app_policy)) {
+    const bool is_request_type_changed = IsRequestTypeChanged(app_policy);
+    const bool is_request_subtype_changed = IsRequestSubTypeChanged(app_policy);
+    if (is_request_type_changed) {
+      LOG4CXX_TRACE(logger_,
+                    "Request types were changed for application: " << app_id);
+      SetPendingPermissions(
+          app_policy, RESULT_REQUEST_TYPE_CHANGED, permissions_diff);
+      AddResult(app_id, RESULT_REQUEST_TYPE_CHANGED);
+      result =
+          (RESULT_NO_CHANGES == result) ? RESULT_REQUEST_TYPE_CHANGED : result;
+    }
+    if (is_request_subtype_changed) {
+      LOG4CXX_TRACE(
+          logger_, "Request subtypes were changed for application: " << app_id);
+      SetPendingPermissions(
+          app_policy, RESULT_REQUEST_SUBTYPE_CHANGED, permissions_diff);
+      AddResult(app_id, RESULT_REQUEST_SUBTYPE_CHANGED);
+      result = (RESULT_NO_CHANGES == result) ? RESULT_REQUEST_SUBTYPE_CHANGED
+                                             : result;
+    }
   }
 
   if (RESULT_NO_CHANGES == result) {
@@ -340,19 +372,20 @@ bool CheckAppPolicy::operator()(const AppPoliciesValueType& app_policy) {
                                               << " have been changed.");
 
   if (!IsPredefinedApp(app_policy)) {
-    SetPendingPermissions(app_policy, result);
+    SetPendingPermissions(app_policy, result, permissions_diff);
     AddResult(app_id, result);
   }
 
+  InsertPermission(app_id, permissions_diff);
   return true;
 }
 
 void policy::CheckAppPolicy::SetPendingPermissions(
     const AppPoliciesValueType& app_policy,
-    PermissionsCheckResult result) const {
+    PermissionsCheckResult result,
+    AppPermissions& permissions_diff) const {
   using namespace rpc::policy_table_interface_base;
   const std::string app_id = app_policy.first;
-  AppPermissions permissions_diff(app_id);
 
   const std::string priority =
       policy_table::EnumToJsonString(app_policy.second.priority);
@@ -389,17 +422,18 @@ void policy::CheckAppPolicy::SetPendingPermissions(
       break;
     case RESULT_REQUEST_TYPE_CHANGED:
       permissions_diff.requestTypeChanged = true;
-      {
-        // Getting RequestTypes from PTU (not from cache)
-        policy_table::RequestTypes::const_iterator it_request_type =
-            app_policy.second.RequestType->begin();
-        for (; app_policy.second.RequestType->end() != it_request_type;
-             ++it_request_type) {
-          permissions_diff.requestType.push_back(
-              EnumToJsonString(*it_request_type));
-        }
-      }
 
+      // Getting Request Types from PTU (not from cache)
+      for (const auto& request_type : *app_policy.second.RequestType) {
+        permissions_diff.requestType.push_back(EnumToJsonString(request_type));
+      }
+      break;
+    case RESULT_REQUEST_SUBTYPE_CHANGED:
+      permissions_diff.requestSubTypeChanged = true;
+      // Getting Request SubTypes from PTU (not from cache)
+      for (const auto& request_subtype : *app_policy.second.RequestSubType) {
+        permissions_diff.requestSubType.push_back(request_subtype);
+      }
       break;
     default:
       return;
@@ -408,10 +442,6 @@ void policy::CheckAppPolicy::SetPendingPermissions(
   if (need_send_priority) {
     permissions_diff.priority = priority;
   }
-
-  pm_->app_permissions_diff_lock_.Acquire();
-  pm_->app_permissions_diff_.insert(std::make_pair(app_id, permissions_diff));
-  pm_->app_permissions_diff_lock_.Release();
 }
 
 PermissionsCheckResult CheckAppPolicy::CheckPermissionsChanges(
@@ -484,6 +514,32 @@ bool CheckAppPolicy::IsRequestTypeChanged(
   return diff.size();
 }
 
+bool CheckAppPolicy::IsRequestSubTypeChanged(
+    const AppPoliciesValueType& app_policy) const {
+  policy::AppPoliciesConstItr it =
+      snapshot_->policy_table.app_policies_section.apps.find(app_policy.first);
+
+  if (it == snapshot_->policy_table.app_policies_section.apps.end()) {
+    if (!app_policy.second.RequestSubType->empty()) {
+      return true;
+    }
+    return false;
+  }
+
+  if (it->second.RequestSubType->size() !=
+      app_policy.second.RequestSubType->size()) {
+    return true;
+  }
+
+  policy_table::RequestSubTypes diff;
+  std::set_difference(it->second.RequestSubType->begin(),
+                      it->second.RequestSubType->end(),
+                      app_policy.second.RequestSubType->begin(),
+                      app_policy.second.RequestSubType->end(),
+                      std::back_inserter(diff));
+  return diff.size();
+}
+
 void FillActionsForAppPolicies::operator()(
     const policy::CheckAppPolicyResults::value_type& value) {
   const std::string app_id = value.first;
@@ -510,6 +566,7 @@ void FillActionsForAppPolicies::operator()(
     case RESULT_CONSENT_NOT_REQIURED:
     case RESULT_PERMISSIONS_REVOKED:
     case RESULT_REQUEST_TYPE_CHANGED:
+    case RESULT_REQUEST_SUBTYPE_CHANGED:
       break;
     case RESULT_NO_CHANGES:
     default:
@@ -580,7 +637,16 @@ void FillNotificationData::UpdateParameters(
   ParametersConstItr it_parameters = in_parameters.begin();
   ParametersConstItr it_parameters_end = in_parameters.end();
 
-  // Due to APPLINK-24201 SDL must consider cases when 'parameters' section is
+  // To determine consent for a particular RPC in a particular HMI level with
+  // particular parameters (if applicable), the system shall find all of the
+  // functional groups the RPC is included in. If user consent is needed as
+  // listed within the functional group in the policy table, the system shall
+  // use a logical AND: backend permissions AND User permissions. If the RPC is
+  // listed under more than one group, the system shall perform a logical OR
+  // amongst all of the possible allowed permissions scenarios for the RPC (and
+  // parameter/or HMI level) defined by each of the functional groups.
+
+  // Due to requirements SDL must consider cases when 'parameters' section is
   // not present for RPC or present, but is empty.
 
   // If 'parameters' section is like: 'parameters' : []
@@ -595,10 +661,8 @@ void FillNotificationData::UpdateParameters(
 
   // If 'parameters' section is omitted
   if (!in_parameters.is_initialized()) {
-    if (!does_require_user_consent_) {
-      out_parameter.any_parameter_allowed = true;
-    }
-    if (does_require_user_consent_ && kAllowedKey == current_key_) {
+    if (!does_require_user_consent_ ||
+        (does_require_user_consent_ && kAllowedKey == current_key_)) {
       out_parameter.any_parameter_allowed = true;
     }
   }
@@ -606,6 +670,13 @@ void FillNotificationData::UpdateParameters(
   for (; it_parameters != it_parameters_end; ++it_parameters) {
     out_parameter[current_key_].insert(
         policy_table::EnumToJsonString(*it_parameters));
+  }
+
+  // We should reset ALL DISALLOWED flags if at least one parameter is allowed
+  // due to a logical OR permissions check
+  if (IsSomeParameterAllowed(out_parameter)) {
+    out_parameter.any_parameter_disallowed_by_policy = false;
+    out_parameter.any_parameter_disallowed_by_user = false;
   }
 }
 
@@ -729,14 +800,22 @@ bool FillNotificationData::RpcParametersEmpty(RpcPermissions& rpc) {
          no_user_disallowed_parameters;
 }
 
-bool FillNotificationData::IsSectionEmpty(ParameterPermissions& permissions,
-                                          const std::string& section) {
+bool FillNotificationData::IsSectionEmpty(
+    const ParameterPermissions& permissions, const std::string& section) const {
   ParameterPermissions::const_iterator it_section = permissions.find(section);
   ParameterPermissions::const_iterator end = permissions.end();
   if (end != it_section) {
-    return permissions[section].empty();
+    return it_section->second.empty();
   }
   return true;
+}
+
+bool FillNotificationData::IsSomeParameterAllowed(
+    const ParameterPermissions& permissions) const {
+  const bool are_any_consented_parameters_allowed =
+      kAllowedKey == current_key_ && !IsSectionEmpty(permissions, current_key_);
+  return permissions.any_parameter_allowed ||
+         are_any_consented_parameters_allowed;
 }
 
 ProcessFunctionalGroup::ProcessFunctionalGroup(

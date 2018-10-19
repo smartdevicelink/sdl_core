@@ -505,7 +505,6 @@ class CodeGenerator(object):
         String with structs implementation source code.
 
         """
-
         processed_enums = []
         return self._struct_impl_template.substitute(
             namespace=namespace,
@@ -518,8 +517,45 @@ class CodeGenerator(object):
                     schema_items_decl=self._gen_schema_items_decls(
                         struct.members.values()),
                     schema_item_fill=self._gen_schema_items_fill(
-                        struct.members.values())),
+                        struct.members.values(), struct.since, struct.until, struct.deprecated, struct.removed)),
                 1))
+
+    
+    def _enum_has_history_present(self, enum):
+        '''
+        Check if any elements in an enum has history signature
+        '''
+        for element in enum.param_type.elements.values():
+            if ( element.history is not None or
+                element.since is not None or
+                element.until is not None or
+                element.removed is not None ):
+                return True
+        return False
+
+    def _element_has_history_present(self, element):
+        '''
+        Check if a specific element has a history signature
+        '''
+        if ( element.history is not None or
+            element.since is not None or
+            element.until is not None or
+            element.removed is not None ):
+            return True        
+        return False
+
+    def _enum_param_type_has_history_present(self, param_type):
+        '''
+        Check if any elements in an enum has history signature
+        '''
+        for element in param_type.elements.values():
+            if ( element.history is not None or
+                element.since is not None or
+                element.until is not None or
+                element.removed is not None ):
+                return True
+        return False
+
 
     def _gen_schema_loc_decls(self, members, processed_enums):
         """Generate local declarations of variables for schema.
@@ -540,6 +576,7 @@ class CodeGenerator(object):
         for member in members:
             if type(member.param_type) is Model.Enum and \
                member.param_type.name not in processed_enums:
+                has_history = self._enum_has_history_present(member)
                 local_var = self._gen_schema_loc_emum_var_name(
                     member.param_type)
                 result = u"\n".join(
@@ -555,6 +592,46 @@ class CodeGenerator(object):
                                     enum=member.param_type.name,
                                     value=x.primary_name)
                              for x in member.param_type.elements.values()])])
+
+                if has_history == True:
+                    history_result = u"\n"
+                    history_result += self._impl_code_loc_decl_enum_history_set_template.substitute(
+                        type=member.param_type.name)
+                    history_result += u"\n"
+                    history_result += u"\n".join(
+                        [self._impl_code_loc_decl_enum_history_set_value_init_template.substitute(
+                            enum=member.param_type.name,
+                            value=x.primary_name) 
+                            for x in member.param_type.elements.values() if self._element_has_history_present(x)])
+                    history_result += u"\n"
+                    history_map_result = []
+
+                    for x in member.param_type.elements.values(): 
+                        if self._element_has_history_present(x):
+                            history_map_result.append(
+                                self._impl_code_loc_decl_enum_history_set_insert_template.
+                                    substitute(
+                                        enum=member.param_type.name,
+                                        value=x.primary_name,
+                                        since=x.since if x.since is not None else "",
+                                        until=x.until if x.until is not None else "",
+                                        removed=x.removed if x.removed is not None else u"false"))
+                            if(x.history is not None) :
+                                history_list = x.history
+                                for item in history_list:                            
+                                    history_map_result.append(
+                                        self._impl_code_loc_decl_enum_history_set_insert_template.
+                                            substitute(
+                                                enum=member.param_type.name,
+                                                value=x.primary_name,
+                                                since=item.since if item.since is not None else "",
+                                                until=item.until if item.until is not None else "",
+                                                removed=item.removed if item.removed is not None else u"false"))
+
+                    history_result += u"\n".join(history_map_result)
+                    result += "\n"
+                    result += history_result
+
                 processed_enums.append(member.param_type.name)
                 result = u"".join([result, u"\n\n"]) if result else u""
             elif type(member.param_type) is Model.EnumSubset:
@@ -599,10 +676,40 @@ class CodeGenerator(object):
 
         """
 
-        result = u"\n\n".join(
-            [self._gen_schema_item_decl(x) for x in members])
+        result_array = []
+        for x in members:
+            result_array.append(self._gen_schema_item_decl(x))
+            count = 0
+            if x.history is not None:
+                history_list = x.history
+                for item in history_list:
+                    item.name += "_history_v" + str(len(history_list)-count)
+                    result_array.append(self._gen_schema_item_decl(item))
+                    count += 1
+                result_array.append(self._gen_history_vector_decl(history_list, x.name))
 
-        return u"".join([result, u"\n\n"]) if result else u""
+        result = u"\n\n".join(result_array)
+        return result
+
+    def _gen_history_vector_decl(self, history_list, name):
+        """Generate History Vector Declaration.
+
+            Generates the declaration and initialization
+            of a vector of schema items
+
+            Arguments:
+            history_list -> list of history items
+            name -> name of parent parameter name
+
+            Returns:
+            String with history array code.
+        """
+        result_array = []
+        result_array.append(self._impl_code_shared_ptr_vector_template.substitute(var_name = name))
+        result = u"\n".join(result_array)
+        return result
+
+
 
     def _gen_schema_item_decl(self, member):
         """Generate schema item declaration.
@@ -696,16 +803,30 @@ class CodeGenerator(object):
             code = self._impl_code_struct_item_template.substitute(
                 name=param.name)
         elif type(param) is Model.Enum:
-            code = self._impl_code_enum_item_template.substitute(
-                type=param.name,
-                params=u"".join(
-                    [self._gen_schema_loc_emum_var_name(param),
-                     u", ",
-                     self._gen_schema_item_param_values(
-                         [[u"".join([param.name, u"::eType"]),
-                          u"".join([param.name, u"::",
-                                    default_value.primary_name]) if
-                           default_value is not None else None]])]))
+            if self._enum_param_type_has_history_present(param):
+                code = self._impl_code_enum_item_with_history_template.substitute(
+                    type=param.name,
+                    params=u"".join(
+                        [self._gen_schema_loc_emum_var_name(param),
+                         u", ",
+                         self._impl_gen_schema_enum_history_map_template.substitute(name=param.name),
+                         u", ",
+                         self._gen_schema_item_param_values(
+                             [[u"".join([param.name, u"::eType"]),
+                              u"".join([param.name, u"::",
+                                        default_value.primary_name]) if
+                               default_value is not None else None]])]))
+            else:
+                code = self._impl_code_enum_item_template.substitute(
+                    type=param.name,
+                    params=u"".join(
+                        [self._gen_schema_loc_emum_var_name(param),
+                         u", ",
+                         self._gen_schema_item_param_values(
+                             [[u"".join([param.name, u"::eType"]),
+                              u"".join([param.name, u"::",
+                                        default_value.primary_name]) if
+                               default_value is not None else None]])]))
         elif type(param) is Model.EnumSubset:
             code = self._impl_code_enum_item_template.substitute(
                 type=param.enum.name,
@@ -746,7 +867,7 @@ class CodeGenerator(object):
 
         return result
 
-    def _gen_schema_items_fill(self, members):
+    def _gen_schema_items_fill(self, members=None, since=None, until=None, deprecated=None, removed=None):
         """Generate schema items fill code.
 
         Generates source code that fills new schema with items.
@@ -758,10 +879,16 @@ class CodeGenerator(object):
         String with function schema items fill code.
 
         """
+        result_array = []
+        for x in members:
+            #If history, create Smember History vector first
+            if x.history is not None:
+                history_list = x.history
+                for item in history_list:
+                    result_array.append(self._gen_history_vector_item_fill(item, x.name))
+            result_array.append(self._gen_schema_item_fill(x, since, until, deprecated, removed))
 
-        result = u"\n".join(
-            [self._gen_schema_item_fill(x) for x in members])
-
+        result = u"\n".join(result_array)
         return u"".join([result, u"\n\n"]) if result else u""
 
     def _gen_schema_params_fill(self, message_type_name):
@@ -781,7 +908,34 @@ class CodeGenerator(object):
 
         raise GenerateError("Unexpected call to the unimplemented function.")
 
-    def _gen_schema_item_fill(self, member):
+    def _check_member_history(self, member):
+        """
+            Checks set of rules that history items are valid
+            Raises error if rules are violated
+        """
+        if (member.since is None and 
+            member.until is None and 
+            member.deprecated is None and 
+            member.removed is None and 
+            member.history is None):
+            return
+        if (member.history is not None and member.since is None):
+            raise GenerateError("Error: Missing since version parameter for " + member.name)
+        if (member.until is not None): 
+            raise GenerateError("Error: Until should only exist in history tag for " + member.name)
+        if (member.history is None):
+            if(member.until is not None or 
+                member.deprecated is not None or 
+                member.removed is not None):
+                raise GenerateError("Error: No history present for " + member.name)
+        if (member.deprecated is not None and member.removed is not None):
+            raise GenerateError("Error: Deprecated and removed should not be present together for " + member.name)
+        if(member.history is not None):
+            for item in member.history:
+                if item.since is None or item.until is None:
+                    raise GenerateError("Error: History items require since and until parameters for " + member.name)
+
+    def _gen_schema_item_fill(self, member, since, until, deprecated, removed):
         """Generate schema item fill code.
 
         Generates source code that fills new schema with item.
@@ -793,11 +947,62 @@ class CodeGenerator(object):
         String with schema item fill code.
 
         """
+        self._check_member_history(member)
 
-        return self._impl_code_item_fill_template.substitute(
-            name=member.name,
-            var_name=self._gen_schema_item_var_name(member),
-            is_mandatory=u"true" if member.is_mandatory is True else u"false")
+        if (since is not None or 
+            member.since is not None):
+            if member.history is not None:
+                return self._impl_code_item_fill_template_with_version_and_history_vector.substitute(
+                    name=member.name,
+                    var_name=self._gen_schema_item_var_name(member),
+                    is_mandatory=u"true" if member.is_mandatory is True else u"false",
+                    since=member.since if member.since is not None else since if since is not None else "", 
+                    until=member.until if member.until is not None else until if until is not None else "", 
+                    deprecated=member.deprecated if member.deprecated is not None else deprecated if deprecated is not None else u"false", 
+                    removed=member.removed if member.removed is not None else removed if removed is not None else u"false",
+                    vector_name=member.name)
+            else:
+                return self._impl_code_item_fill_template_with_version.substitute(
+                    name=member.name,
+                    var_name=self._gen_schema_item_var_name(member),
+                    is_mandatory=u"true" if member.is_mandatory is True else u"false",
+                    since=member.since if member.since is not None else since if since is not None else "", 
+                    until=member.until if member.until is not None else until if until is not None else "", 
+                    deprecated=member.deprecated if member.deprecated is not None else deprecated if deprecated is not None else u"false", 
+                    removed=member.removed if member.removed is not None else removed if removed is not None else u"false")
+        else:
+            return self._impl_code_item_fill_template.substitute(
+                name=member.name,
+                var_name=self._gen_schema_item_var_name(member),
+                is_mandatory=u"true" if member.is_mandatory is True else u"false")            
+
+    def _gen_history_vector_item_fill(self, member, vector_name):
+        """Generate schema item fill code.
+
+        Generates source code that fills history vector with item.
+
+        Keyword arguments:
+        member -- struct member/function parameter to process.
+
+        Returns:
+        String with schema item fill code.
+
+        """
+
+        if (member.since is not None or 
+            member.until is not None or 
+            member.deprecated is not None or
+            member.removed is not None):
+            return self._impl_code_append_history_vector_template.substitute(
+                vector_name=vector_name,
+                name=member.name,
+                mandatory=u"true" if member.is_mandatory is True else u"false",
+                since=member.since if member.since is not None else "", 
+                until=member.until if member.until is not None else "", 
+                deprecated=member.deprecated if member.deprecated is not None else u"false", 
+                removed=member.removed if member.removed is not None else u"false")
+        else:
+            print "Warning! History item does not have any version history. Omitting %s" % member.name      
 
     @staticmethod
     def _gen_schema_item_var_name(member):
@@ -899,7 +1104,7 @@ class CodeGenerator(object):
                     schema_items_decl=self._gen_schema_items_decls(
                         function.params.values()),
                     schema_item_fill=self._gen_schema_items_fill(
-                        function.params.values()),
+                        function.params.values(), function.since, function.until, function.deprecated, function.removed),
                     schema_params_fill=self._gen_schema_params_fill(
                         function.message_type.name)),
                 1))
@@ -1283,7 +1488,6 @@ class CodeGenerator(object):
         u'''#include "formatters/CSmartFactory.h"\n'''
         u'''#include "smart_objects/smart_schema.h"\n'''
         u'''#include "smart_objects/schema_item.h"\n'''
-        u'''#include "utils/shared_ptr.h"\n'''
         u'''#include "$header_file_name"\n'''
         u'''\n'''
         u'''$namespace_open'''
@@ -1368,10 +1572,10 @@ class CodeGenerator(object):
         u'''#include "smart_objects/number_schema_item.h"\n'''
         u'''#include "smart_objects/schema_item_parameter.h"\n'''
         u'''\n'''
-        u'''using namespace NsSmartDeviceLink::NsSmartObjects;\n'''
+        u'''using namespace ns_smart_device_link::ns_smart_objects;\n'''
         u'''\n'''
         u'''$namespace::$class_name::$class_name()\n'''
-        u''' : NsSmartDeviceLink::NsJSONHandler::CSmartFactory<FunctionID::eType, '''
+        u''' : ns_smart_device_link::ns_json_handler::CSmartFactory<FunctionID::eType, '''
         u'''messageType::eType, StructIdentifiers::eType>() {\n'''
         u'''  TStructsSchemaItems struct_schema_items;\n'''
         u'''  InitStructSchemes(struct_schema_items);\n'''
@@ -1386,7 +1590,7 @@ class CodeGenerator(object):
         u'''message_type_items);\n'''
         u'''}\n'''
         u'''\n'''
-        u'''utils::SharedPtr<ISchemaItem> $namespace::$class_name::'''
+        u'''std::shared_ptr<ISchemaItem> $namespace::$class_name::'''
         u'''ProvideObjectSchemaItemForStruct(\n'''
         u'''    const TStructsSchemaItems &struct_schema_items,\n'''
         u'''    const StructIdentifiers::eType struct_id) {\n'''
@@ -1396,7 +1600,7 @@ class CodeGenerator(object):
         u'''    return it->second;\n'''
         u'''  }\n'''
         u'''\n'''
-        u'''  return NsSmartDeviceLink::NsSmartObjects::'''
+        u'''  return ns_smart_device_link::ns_smart_objects::'''
         u'''CAlwaysFalseSchemaItem::create();\n'''
         u'''}\n'''
         u'''\n'''
@@ -1423,13 +1627,13 @@ class CodeGenerator(object):
         u'''\n'''
         u'''//-------------- String to value enum mapping ----------------\n'''
         u'''\n'''
-        u'''namespace NsSmartDeviceLink {\n'''
-        u'''namespace NsSmartObjects {\n'''
+        u'''namespace ns_smart_device_link {\n'''
+        u'''namespace ns_smart_objects {\n'''
         u'''\n'''
         u'''$enum_string_coversions'''
         u'''\n'''
-        u'''} // NsSmartObjects\n'''
-        u'''} // NsSmartDeviceLink\n'''
+        u'''} // ns_smart_objects\n'''
+        u'''} // ns_smart_device_link\n'''
         u'''\n''')
 
     _enum_to_str_converter_template = string.Template(
@@ -1465,7 +1669,7 @@ class CodeGenerator(object):
         u'''\n''')
 
     _struct_schema_item_template = string.Template(
-        u'''utils::SharedPtr<ISchemaItem> struct_schema_item_${name} = '''
+        u'''std::shared_ptr<ISchemaItem> struct_schema_item_${name} = '''
         u'''InitStructSchemaItem_${name}(struct_schema_items);\n'''
         u'''struct_schema_items.insert(std::make_pair('''
         u'''StructIdentifiers::${name}, struct_schema_item_${name}));\n'''
@@ -1474,15 +1678,15 @@ class CodeGenerator(object):
         u'''struct_schema_item_${name})));''')
 
     _function_schema_template = string.Template(
-        u'''functions_schemes_.insert(std::make_pair(NsSmartDeviceLink::'''
-        u'''NsJSONHandler::'''
+        u'''functions_schemes_.insert(std::make_pair(ns_smart_device_link::'''
+        u'''ns_json_handler::'''
         u'''SmartSchemaKey<FunctionID::eType, messageType::eType>'''
         u'''(FunctionID::$function_id, messageType::$message_type), '''
         u'''InitFunction_${function_id}_${message_type}('''
         u'''struct_schema_items, function_id_items, message_type_items)));''')
 
     _struct_impl_template = string.Template(
-        u'''utils::SharedPtr<ISchemaItem> $namespace::$class_name::'''
+        u'''std::shared_ptr<ISchemaItem> $namespace::$class_name::'''
         u'''InitStructSchemaItem_${struct_name}(\n'''
         u'''    const TStructsSchemaItems &struct_schema_items) {\n'''
         u'''$code'''
@@ -1499,12 +1703,31 @@ class CodeGenerator(object):
     _impl_code_loc_decl_enum_template = string.Template(
         u'''std::set<${type}::eType> ${var_name};''')
 
+    _impl_code_loc_decl_enum_history_set_template = string.Template(
+        u'''std::map<${type}::eType, std::vector<ElementSignature>> ${type}_element_signatures;''')
+
     _impl_code_loc_decl_enum_insert_template = string.Template(
         u'''${var_name}.insert(${enum}::${value});''')
 
+    _impl_code_loc_decl_enum_history_set_value_init_template = string.Template(
+        u'''${enum}_element_signatures[${enum}::${value}] = std::vector<ElementSignature>();'''
+        )
+
+    _impl_code_loc_decl_enum_history_set_insert_template = string.Template(
+        u'''${enum}_element_signatures[${enum}::${value}].push_back(ElementSignature("${since}", "${until}", ${removed}));''')
+
+    _impl_gen_schema_enum_history_map_template = string.Template(
+        u'''${name}_element_signatures''')
+
     _impl_code_item_decl_temlate = string.Template(
         u'''${comment}'''
-        u'''utils::SharedPtr<ISchemaItem> ${var_name} = ${item_decl};''')
+        u'''std::shared_ptr<ISchemaItem> ${var_name} = ${item_decl};''')
+
+    _impl_code_shared_ptr_vector_template = string.Template(
+        u'''std::vector<CObjectSchemaItem::SMember> ${var_name}_history_vector;''')
+
+    _impl_code_append_history_vector_template = string.Template(
+        u'''${vector_name}_history_vector.push_back(CObjectSchemaItem::SMember(${name}_SchemaItem, ${mandatory}, "${since}", "${until}", ${deprecated}, ${removed}));''')
 
     _impl_code_integer_item_template = string.Template(
         u'''TNumberSchemaItem<${type}>::create(${params})''')
@@ -1525,12 +1748,23 @@ class CodeGenerator(object):
     _impl_code_enum_item_template = string.Template(
         u'''TEnumSchemaItem<${type}::eType>::create(${params})''')
 
+    _impl_code_enum_item_with_history_template = string.Template(
+        u'''TEnumSchemaItem<${type}::eType>::createWithSignatures(${params})''')
+
     _impl_code_item_param_value_template = string.Template(
         u'''TSchemaItemParameter<$type>($value)''')
 
     _impl_code_item_fill_template = string.Template(
         u'''schema_members["${name}"] = CObjectSchemaItem::'''
         u'''SMember(${var_name}, ${is_mandatory});''')
+
+    _impl_code_item_fill_template_with_version = string.Template(
+        u'''schema_members["${name}"] = CObjectSchemaItem::'''
+        u'''SMember(${var_name}, ${is_mandatory}, "${since}", "${until}", ${deprecated}, ${removed});''')
+
+    _impl_code_item_fill_template_with_version_and_history_vector = string.Template(
+        u'''schema_members["${name}"] = CObjectSchemaItem::'''
+        u'''SMember(${var_name}, ${is_mandatory}, "${since}", "${until}", ${deprecated}, ${removed}, ${vector_name}_history_vector);''')
 
     _function_impl_template = string.Template(
         u'''CSmartSchema $namespace::$class_name::'''
@@ -1553,11 +1787,11 @@ class CodeGenerator(object):
         u'''\n'''
         u'''CObjectSchemaItem::Members '''
         u'''root_members_map;\n'''
-        u'''root_members_map[NsSmartDeviceLink::NsJSONHandler::'''
+        u'''root_members_map[ns_smart_device_link::ns_json_handler::'''
         u'''strings::S_MSG_PARAMS] = '''
         u'''CObjectSchemaItem::SMember(CObjectSchemaItem::'''
         u'''create(schema_members), true);\n'''
-        u'''root_members_map[NsSmartDeviceLink::NsJSONHandler::'''
+        u'''root_members_map[ns_smart_device_link::ns_json_handler::'''
         u'''strings::S_PARAMS] = '''
         u'''CObjectSchemaItem::SMember(CObjectSchemaItem::'''
         u'''create(params_members), true);\n\n'''
@@ -1566,7 +1800,7 @@ class CodeGenerator(object):
 
     _class_h_template = string.Template(
         u'''$comment\n'''
-        u'''class $class_name : public NsSmartDeviceLink::NsJSONHandler::'''
+        u'''class $class_name : public ns_smart_device_link::ns_json_handler::'''
         u'''CSmartFactory<FunctionID::eType, messageType::eType, '''
         u'''StructIdentifiers::eType> {\n'''
         u''' public:\n'''
@@ -1580,7 +1814,7 @@ class CodeGenerator(object):
         u'''   * @brief Type that maps of struct IDs to schema items.\n'''
         u'''   */\n'''
         u'''  typedef std::map<const StructIdentifiers::eType, '''
-        u'''utils::SharedPtr<NsSmartDeviceLink::NsSmartObjects::'''
+        u'''std::shared_ptr<ns_smart_device_link::ns_smart_objects::'''
         u'''ISchemaItem> > TStructsSchemaItems;\n'''
         u'''\n'''
         u'''  /**\n'''
@@ -1589,10 +1823,10 @@ class CodeGenerator(object):
         u'''   * @param struct_schema_items Struct schema items.\n'''
         u'''   * @param struct_id ID of structure to provide.\n'''
         u'''   *\n'''
-        u'''   * @return utils::SharedPtr of strucute\n'''
+        u'''   * @return std::shared_ptr of strucute\n'''
         u'''   */\n'''
         u'''  static '''
-        u'''utils::SharedPtr<NsSmartDeviceLink::NsSmartObjects::ISchemaItem> '''
+        u'''std::shared_ptr<ns_smart_device_link::ns_smart_objects::ISchemaItem> '''
         u'''ProvideObjectSchemaItemForStruct(\n'''
         u'''        const TStructsSchemaItems &struct_schema_items,\n'''
         u'''        const StructIdentifiers::eType struct_id);\n'''
@@ -1623,12 +1857,12 @@ class CodeGenerator(object):
         u'''$init_struct_decls'''
         u'''};''')
 
-    _function_return_comment = u''' * @return NsSmartDeviceLink::''' \
-                               u'''NsSmartObjects::CSmartSchema\n'''
+    _function_return_comment = u''' * @return ns_smart_device_link::''' \
+                               u'''ns_smart_objects::CSmartSchema\n'''
 
     _function_decl_template = string.Template(
         u'''$comment\n'''
-        u'''static NsSmartDeviceLink::NsSmartObjects::CSmartSchema '''
+        u'''static ns_smart_device_link::ns_smart_objects::CSmartSchema '''
         u'''InitFunction_${function_id}_${message_type}(\n'''
         u'''    const TStructsSchemaItems &struct_schema_items,\n'''
         u'''    const std::set<FunctionID::eType> &function_id_items,\n'''
@@ -1637,7 +1871,7 @@ class CodeGenerator(object):
     _struct_decl_template = string.Template(
         u'''$comment\n'''
         u'''static '''
-        u'''utils::SharedPtr<NsSmartDeviceLink::NsSmartObjects::ISchemaItem> '''
+        u'''std::shared_ptr<ns_smart_device_link::ns_smart_objects::ISchemaItem> '''
         u'''InitStructSchemaItem_${struct_name}(\n'''
         u'''    const TStructsSchemaItems &struct_schema_items);''')
 

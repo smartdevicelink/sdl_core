@@ -34,7 +34,7 @@
 #include "policy/mock_policy_listener.h"
 #include "policy/policy_manager_impl.h"
 #include "policy/update_status_manager.h"
-#include "utils/make_shared.h"
+
 #include "utils/conditional_variable.h"
 
 namespace test {
@@ -48,7 +48,7 @@ using testing::NiceMock;
 
 class UpdateStatusManagerTest : public ::testing::Test {
  protected:
-  utils::SharedPtr<UpdateStatusManager> manager_;
+  std::shared_ptr<UpdateStatusManager> manager_;
   PolicyTableStatus status_;
   const uint32_t k_timeout_;
   NiceMock<MockPolicyListener> listener_;
@@ -58,7 +58,7 @@ class UpdateStatusManagerTest : public ::testing::Test {
 
  public:
   UpdateStatusManagerTest()
-      : manager_(utils::MakeShared<UpdateStatusManager>())
+      : manager_(std::make_shared<UpdateStatusManager>())
       , k_timeout_(1000)
       , listener_()
       , up_to_date_status_("UP_TO_DATE")
@@ -284,42 +284,6 @@ TEST_F(UpdateStatusManagerTest, ScheduleUpdate_ExpectStatusUpdateNeeded) {
   EXPECT_EQ(StatusUpdateRequired, status_);
   EXPECT_FALSE(manager_->IsUpdatePending());
   EXPECT_TRUE(manager_->IsUpdateRequired());
-}
-
-TEST_F(UpdateStatusManagerTest,
-       OnPolicyInit_SetUpdateRequired_ExpectStatusUpdateNeeded) {
-  // Arrange
-  manager_->OnPolicyInit(true);
-  status_ = manager_->GetLastUpdateStatus();
-  // Checks
-  EXPECT_EQ(StatusUpdateRequired, status_);
-  EXPECT_FALSE(manager_->IsUpdatePending());
-  EXPECT_TRUE(manager_->IsUpdateRequired());
-}
-
-TEST_F(UpdateStatusManagerTest,
-       OnPolicyInit_SetUpdateNotRequired_ExpectStatusUpToDate) {
-  // Arrange
-  manager_->OnPolicyInit(false);
-  status_ = manager_->GetLastUpdateStatus();
-  // Checks
-  EXPECT_EQ(StatusUpToDate, status_);
-  EXPECT_FALSE(manager_->IsUpdatePending());
-  EXPECT_FALSE(manager_->IsUpdateRequired());
-}
-
-TEST_F(UpdateStatusManagerTest,
-       StringifiedUpdateStatus_SetStatuses_ExpectCorrectStringifiedStatuses) {
-  // Arrange
-  manager_->OnPolicyInit(false);
-  // Check
-  EXPECT_EQ("UP_TO_DATE", manager_->StringifiedUpdateStatus());
-  manager_->OnPolicyInit(true);
-  // Check
-  EXPECT_EQ("UPDATE_NEEDED", manager_->StringifiedUpdateStatus());
-  manager_->OnUpdateSentOut(k_timeout_);
-  // Check
-  EXPECT_EQ("UPDATING", manager_->StringifiedUpdateStatus());
 }
 
 TEST_F(UpdateStatusManagerTest,

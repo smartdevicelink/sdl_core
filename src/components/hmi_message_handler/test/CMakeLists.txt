@@ -56,7 +56,7 @@ collect_sources(SOURCES "${CMAKE_CURRENT_SOURCE_DIR}" "${EXCLUDE_PATHS}")
 
 if (HMIADAPTER STREQUAL "messagebroker")
   GET_PROPERTY(BOOST_LIBS_DIRECTORY GLOBAL PROPERTY GLOBAL_BOOST_LIBS)
-  list(APPEND LIBRARIES ${BOOST_LIBS_DIRECTORY}/libboost_system.so)
+  list(APPEND LIBRARIES boost_system -L${BOOST_LIBS_DIRECTORY})
 endif()
 
 create_test(hmi_message_handler_test "${SOURCES}" "${LIBRARIES}")

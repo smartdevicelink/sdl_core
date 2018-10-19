@@ -35,13 +35,13 @@
 #include "formatters/CFormatterJsonBase.h"
 #include "utils/convert_utils.h"
 
-void NsSmartDeviceLink::NsJSONHandler::Formatters::CFormatterJsonBase::
+void ns_smart_device_link::ns_json_handler::formatters::CFormatterJsonBase::
     jsonValueToObj(const Json::Value& value,
-                   NsSmartDeviceLink::NsSmartObjects::SmartObject& obj) {
+                   ns_smart_device_link::ns_smart_objects::SmartObject& obj) {
   try {
     if (value.type() == Json::objectValue) {
-      obj = NsSmartDeviceLink::NsSmartObjects::SmartObject(
-          NsSmartDeviceLink::NsSmartObjects::SmartType_Map);
+      obj = ns_smart_device_link::ns_smart_objects::SmartObject(
+          ns_smart_device_link::ns_smart_objects::SmartType_Map);
 
       Json::Value::Members members = value.getMemberNames();
 
@@ -49,8 +49,8 @@ void NsSmartDeviceLink::NsJSONHandler::Formatters::CFormatterJsonBase::
         jsonValueToObj(value[members[i]], obj[members[i]]);
       }
     } else if (value.type() == Json::arrayValue) {
-      obj = NsSmartDeviceLink::NsSmartObjects::SmartObject(
-          NsSmartDeviceLink::NsSmartObjects::SmartType_Array);
+      obj = ns_smart_device_link::ns_smart_objects::SmartObject(
+          ns_smart_device_link::ns_smart_objects::SmartType_Array);
 
       for (uint32_t i = 0; i < value.size(); i++) {
         jsonValueToObj(value[i], obj[i]);
@@ -72,11 +72,13 @@ void NsSmartDeviceLink::NsJSONHandler::Formatters::CFormatterJsonBase::
 
 // ----------------------------------------------------------------------------
 
-void NsSmartDeviceLink::NsJSONHandler::Formatters::CFormatterJsonBase::
-    objToJsonValue(const NsSmartDeviceLink::NsSmartObjects::SmartObject& obj,
-                   Json::Value& item) {
+void ns_smart_device_link::ns_json_handler::formatters::CFormatterJsonBase::
+    objToJsonValue(
+        const ns_smart_device_link::ns_smart_objects::SmartObject& obj,
+        Json::Value& item) {
   try {
-    if (NsSmartDeviceLink::NsSmartObjects::SmartType_Array == obj.getType()) {
+    if (ns_smart_device_link::ns_smart_objects::SmartType_Array ==
+        obj.getType()) {
       item = Json::arrayValue;
 
       for (uint32_t i = 0; i < obj.length(); i++) {
@@ -86,7 +88,7 @@ void NsSmartDeviceLink::NsJSONHandler::Formatters::CFormatterJsonBase::
 
         item.append(value);
       }
-    } else if (NsSmartDeviceLink::NsSmartObjects::SmartType_Map ==
+    } else if (ns_smart_device_link::ns_smart_objects::SmartType_Map ==
                obj.getType()) {
       item = Json::objectValue;
       std::set<std::string> keys = obj.enumerate();
@@ -100,19 +102,19 @@ void NsSmartDeviceLink::NsJSONHandler::Formatters::CFormatterJsonBase::
 
         item[*key] = value;
       }
-    } else if (NsSmartDeviceLink::NsSmartObjects::SmartType_Boolean ==
+    } else if (ns_smart_device_link::ns_smart_objects::SmartType_Boolean ==
                obj.getType()) {
       item = obj.asBool();
-    } else if (NsSmartDeviceLink::NsSmartObjects::SmartType_Integer ==
+    } else if (ns_smart_device_link::ns_smart_objects::SmartType_Integer ==
                obj.getType()) {
       item = utils::ConvertInt64ToLongLongInt(obj.asInt());
-    } else if (NsSmartDeviceLink::NsSmartObjects::SmartType_UInteger ==
+    } else if (ns_smart_device_link::ns_smart_objects::SmartType_UInteger ==
                obj.getType()) {
       item = utils::ConvertUInt64ToLongLongUInt(obj.asUInt());
-    } else if (NsSmartDeviceLink::NsSmartObjects::SmartType_Double ==
+    } else if (ns_smart_device_link::ns_smart_objects::SmartType_Double ==
                obj.getType()) {
       item = obj.asDouble();
-    } else if (NsSmartDeviceLink::NsSmartObjects::SmartType_Null ==
+    } else if (ns_smart_device_link::ns_smart_objects::SmartType_Null ==
                obj.getType()) {
       item = Json::nullValue;
     } else {
