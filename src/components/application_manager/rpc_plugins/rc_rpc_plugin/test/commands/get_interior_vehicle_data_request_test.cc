@@ -242,7 +242,20 @@ TEST_F(
   (*mobile_message)[application_manager::strings::msg_params]
                    [message_params::kModuleType] = module_type;
   smart_objects::SmartObject radio_data;
+  smart_objects::SmartObject sis_data;
+  smart_objects::SmartObject gps_data;
+
+  const char kGpsShifted[] = "shifted";
+  gps_data[application_manager::strings::longitude_degrees] = 1.0;
+  gps_data[application_manager::strings::latitude_degrees] = 1.0;
+  gps_data[kGpsShifted] = true;
+
+  sis_data[message_params::kStationShortName] = "dummy_short_name";
+  sis_data[message_params::kStationLocation] = gps_data;
+
   radio_data[message_params::kBand] = enums_value::kAM;
+  radio_data[message_params::kSisData] = sis_data;
+
   std::shared_ptr<
       rc_rpc_plugin::commands::GetInteriorVehicleDataRequest> command =
       CreateRCCommand<rc_rpc_plugin::commands::GetInteriorVehicleDataRequest>(

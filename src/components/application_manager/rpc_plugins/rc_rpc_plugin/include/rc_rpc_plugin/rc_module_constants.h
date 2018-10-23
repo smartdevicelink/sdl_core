@@ -145,6 +145,14 @@ const char kTP[] = "TP";
 const char kREG[] = "REG";
 // RdsData struct
 
+// SisData struct
+const char kStationShortName[] = "stationShortName";
+const char kStationIDNumber[] = "stationIDNumber";
+const char kStationLongName[] = "stationLongName";
+const char kStationLocation[] = "stationLocation";
+const char kStationMessage[] = "stationMessage";
+// SisData struct
+
 // RadioControlData struct
 const char kFrequencyInteger[] = "frequencyInteger";
 const char kFrequencyFraction[] = "frequencyFraction";
