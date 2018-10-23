@@ -358,6 +358,106 @@ TEST_F(SetMediaClockRequestTest, OnEvent_Canceled) {
   command->on_event(event);
 }
 
+TEST_F(SetMediaClockRequestTest, MessageWithForwardSeekIndicator_TRACK) {
+  MessageSharedPtr msg = CreateMsgParams();
+  mobile_apis::SeekIndicatorType::eType seek_indicator_type =
+      mobile_apis::SeekIndicatorType::TRACK;
+
+  auto msg_params = (*msg)[am::strings::msg_params];
+
+  msg_params[am::strings::forward_seek_indicator] = seek_indicator_type;
+  std::shared_ptr<SetMediaClockRequest> command(
+      CreateCommand<SetMediaClockRequest>(msg));
+
+  ExpectationsSetupHelper(true);
+
+  command->Run();
+
+  ASSERT_TRUE(msg_params.keyExists(am::strings::forward_seek_indicator));
+  EXPECT_EQ(seek_indicator_type,
+            static_cast<mobile_apis::SeekIndicatorType::eType>(
+                msg_params[am::strings::forward_seek_indicator].asInt()));
+  EXPECT_FALSE(msg_params.keyExists(am::strings::back_seek_indicator));
+  EXPECT_FALSE(msg_params.keyExists(am::strings::seek_time));
+}
+
+TEST_F(SetMediaClockRequestTest, MessageWithBackSeekIndicator_TRACK) {
+  MessageSharedPtr msg = CreateMsgParams();
+  mobile_apis::SeekIndicatorType::eType seek_indicator_type =
+      mobile_apis::SeekIndicatorType::TRACK;
+
+  auto msg_params = (*msg)[am::strings::msg_params];
+  msg_params[am::strings::back_seek_indicator] = seek_indicator_type;
+  std::shared_ptr<SetMediaClockRequest> command(
+      CreateCommand<SetMediaClockRequest>(msg));
+
+  ExpectationsSetupHelper(true);
+
+  command->Run();
+
+  ASSERT_TRUE(msg_params.keyExists(am::strings::back_seek_indicator));
+  EXPECT_EQ(seek_indicator_type,
+            static_cast<mobile_apis::SeekIndicatorType::eType>(
+                msg_params[am::strings::back_seek_indicator].asInt()));
+
+  EXPECT_FALSE(msg_params.keyExists(am::strings::forward_seek_indicator));
+  EXPECT_FALSE(msg_params.keyExists(am::strings::seek_time));
+}
+
+TEST_F(SetMediaClockRequestTest, MessageWithForwardSeekIndicator_TIME) {
+  MessageSharedPtr msg = CreateMsgParams();
+  mobile_apis::SeekIndicatorType::eType seek_indicator_type =
+      mobile_apis::SeekIndicatorType::TIME;
+  const std::uint32_t seek_time = 10u;
+
+  auto msg_params = (*msg)[am::strings::msg_params];
+
+  msg_params[am::strings::forward_seek_indicator] = seek_indicator_type;
+  msg_params[am::strings::seek_time] = seek_time;
+
+  std::shared_ptr<SetMediaClockRequest> command(
+      CreateCommand<SetMediaClockRequest>(msg));
+
+  ExpectationsSetupHelper(true);
+
+  command->Run();
+
+  ASSERT_TRUE(msg_params.keyExists(am::strings::forward_seek_indicator));
+  EXPECT_FALSE(msg_params.keyExists(am::strings::back_seek_indicator));
+
+  EXPECT_EQ(seek_indicator_type,
+            static_cast<mobile_apis::SeekIndicatorType::eType>(
+                msg_params[am::strings::forward_seek_indicator].asInt()));
+  ASSERT_TRUE(msg_params.keyExists(am::strings::seek_time));
+  EXPECT_EQ(seek_time, msg_params[am::strings::seek_time].asInt());
+}
+
+TEST_F(SetMediaClockRequestTest, MessageWithBackSeekIndicator_TIME) {
+  MessageSharedPtr msg = CreateMsgParams();
+  mobile_apis::SeekIndicatorType::eType seek_indicator_type =
+      mobile_apis::SeekIndicatorType::TIME;
+  const std::uint32_t seek_time = 10u;
+
+  auto msg_params = (*msg)[am::strings::msg_params];
+
+  msg_params[am::strings::back_seek_indicator] = seek_indicator_type;
+  msg_params[am::strings::seek_time] = seek_time;
+
+  std::shared_ptr<SetMediaClockRequest> command(
+      CreateCommand<SetMediaClockRequest>(msg));
+
+  ExpectationsSetupHelper(true);
+
+  command->Run();
+
+  EXPECT_TRUE(msg_params.keyExists(am::strings::back_seek_indicator));
+  EXPECT_EQ(seek_indicator_type,
+            static_cast<mobile_apis::SeekIndicatorType::eType>(
+                msg_params[am::strings::back_seek_indicator].asInt()));
+  EXPECT_FALSE(msg_params.keyExists(am::strings::forward_seek_indicator));
+  ASSERT_TRUE(msg_params.keyExists(am::strings::seek_time));
+  EXPECT_EQ(seek_time, msg_params[am::strings::seek_time].asInt());
+}
 }  // namespace set_media_clock_timer_request
 }  // namespace mobile_commands_test
 }  // namespace commands_test
