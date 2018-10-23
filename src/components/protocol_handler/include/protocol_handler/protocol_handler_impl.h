@@ -174,7 +174,6 @@ typedef std::map<std::string, TransportDescription> TransportTypes;
 std::string ConvertPacketDataToString(const uint8_t* data,
                                       const size_t data_size);
 
-uint32_t get_hash_id(const ProtocolPacket& packet);
 void set_hash_id(uint32_t hash_id, ProtocolPacket& packet);
 #endif
 

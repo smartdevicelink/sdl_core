@@ -399,7 +399,7 @@ TEST_F(ConnectionHandlerTest, AddConnection_StopConnection) {
 }
 
 TEST_F(ConnectionHandlerTest, GetConnectionSessionsCount) {
-  EXPECT_TRUE(connection_handler_->getConnectionList().empty());
+  ASSERT_TRUE(connection_handler_->getConnectionList().empty());
   EXPECT_EQ(0u,
             connection_handler_->GetConnectionSessionsCount(connection_key_));
 
@@ -462,7 +462,7 @@ TEST_F(ConnectionHandlerTest, GetDeviceID) {
   EXPECT_EQ(device_handle_, test_handle);
 }
 
-TEST_F(ConnectionHandlerTest, GetDataOnDeviceID) {
+TEST_F(ConnectionHandlerTest, GetDataOnDeviceID_InvalidDeviceHandle) {
   const DeviceHandle handle = 0;
   EXPECT_EQ(
       -1,
