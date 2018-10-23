@@ -127,11 +127,11 @@ TYPED_TEST(MobileResponseCommandsTest, Run_SendResponseToMobile_SUCCESS) {
   command->Run();
 }
 
-template <class CammandWithUnsubscribe>
+template <class CommandWithUnsubscribe>
 class MobileResponseWithUnsubscribeCommandsTest
     : public CommandsTest<CommandsTestMocks::kIsNice> {
  public:
-  typedef CammandWithUnsubscribe UnsubscribeCommand;
+  typedef CommandWithUnsubscribe UnsubscribeCommand;
 };
 
 typedef Types<commands::AlertManeuverResponse,

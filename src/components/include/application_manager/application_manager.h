@@ -732,7 +732,7 @@ class ApplicationManager {
    * @param MessageSharedPtr - Response message recivied from HMI.
    * @return bool - Result of unsubscribing process.
    */
-  virtual void UnsubscribeAppFromSoftButtons(
+  virtual bool UnsubscribeAppFromSoftButtons(
       const commands::MessageSharedPtr response_message) = 0;
 };
 

@@ -3614,7 +3614,7 @@ bool ApplicationManagerImpl::IsSOStructValid(
   return true;
 }
 
-void ApplicationManagerImpl::UnsubscribeAppFromSoftButtons(
+bool ApplicationManagerImpl::UnsubscribeAppFromSoftButtons(
     const commands::MessageSharedPtr response) {
   using namespace mobile_apis;
 
