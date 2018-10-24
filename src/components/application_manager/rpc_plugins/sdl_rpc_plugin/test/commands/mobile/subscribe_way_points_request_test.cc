@@ -56,6 +56,7 @@ using ::testing::Return;
 using ::testing::ReturnRef;
 using ::testing::DoAll;
 using ::testing::SaveArg;
+using ::testing::Eq;
 using ::testing::InSequence;
 namespace am = ::application_manager;
 using sdl_rpc_plugin::commands::SubscribeWayPointsRequest;
@@ -71,7 +72,7 @@ TEST_F(SubscribeWayPointsRequestTest, Run_SUCCESS) {
   MockAppPtr app(CreateMockApp());
 
   ON_CALL(app_mngr_, application(_)).WillByDefault(Return(app));
-  ON_CALL(app_mngr_, IsAppSubscribedForWayPoints(A<am::ApplicationSharedPtr>()))
+  ON_CALL(app_mngr_, IsAppSubscribedForWayPoints(Ref(*app)))
       .WillByDefault(Return(false));
   ON_CALL(app_mngr_, IsAnyAppSubscribedForWayPoints())
       .WillByDefault(Return(true));

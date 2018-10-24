@@ -88,7 +88,9 @@ bool ResumptionDataProcessor::HasDataToRestore(
       !saved_app[strings::application_commands].empty() ||
       !saved_app[strings::application_choice_sets].empty();
 
-  LOG4CXX_DEBUG(logger_, "HasDataToRestore: " << has_data_to_restore);
+  LOG4CXX_DEBUG(logger_,
+                std::boolalpha << "Application has data to restore: "
+                               << has_data_to_restore);
 
   return has_data_to_restore;
 }
@@ -110,7 +112,9 @@ bool ResumptionDataProcessor::HasGlobalPropertiesToRestore(
       !global_properties[strings::vr_help_title].empty();
 
   LOG4CXX_DEBUG(logger_,
-                "HasGlobalPropertiesToRestore: " << has_gl_props_to_restore);
+                std::boolalpha
+                    << "Application has global properties to restore: "
+                    << has_gl_props_to_restore);
 
   return has_gl_props_to_restore;
 }
@@ -135,7 +139,8 @@ bool ResumptionDataProcessor::HasSubscriptionsToRestore(
       has_ivi_subscriptions || has_button_subscriptions;
 
   LOG4CXX_DEBUG(logger_,
-                "HasSubscriptionsToRestore: " << has_subscriptions_to_restore);
+                std::boolalpha << "Application has subscriptions to restore: "
+                               << has_subscriptions_to_restore);
 
   return has_subscriptions_to_restore;
 }

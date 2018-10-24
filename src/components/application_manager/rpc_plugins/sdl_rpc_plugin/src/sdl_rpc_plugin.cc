@@ -112,7 +112,7 @@ void SDLRPCPlugin::RevertResumption(application_manager::Application& app) {
   std::set<int32_t> apps =
       application_manager_->GetAppsSubscribedForWayPoints();
   if (1 == apps.size() &&
-      application_manager_->IsAppSubscribedForWayPoints(application)) {
+      application_manager_->IsAppSubscribedForWayPoints(*application)) {
     auto subscribe_waypoints_msg =
         application_manager::MessageHelper::CreateMessageForHMI(
             hmi_apis::FunctionID::Navigation_UnsubscribeWayPoints,

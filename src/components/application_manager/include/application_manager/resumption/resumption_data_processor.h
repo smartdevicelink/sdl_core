@@ -301,7 +301,8 @@ class ResumptionDataProcessor : public app_mngr::event_engine::EventObserver {
 
   /**
    * @brief Determines whether application has saved data, including
-   * submenues, commands and choice sets, to restore
+   * submenues, commands and choice sets, to restore. This does not include
+   * global properties and subscriptions
    * @param saved_app smart object containing saved app data
    * @return bool value stating whether app has mentioned data to restore
    */

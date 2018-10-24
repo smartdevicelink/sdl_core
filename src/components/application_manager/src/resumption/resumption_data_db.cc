@@ -2619,7 +2619,7 @@ bool ResumptionDataDB::InsertApplicationData(
   const mobile_apis::HMILevel::eType hmi_level = application.m_hmi_level;
   bool is_media_application = application.m_is_media_application;
   bool is_subscribed_for_way_points =
-      application_manager_.IsAppSubscribedForWayPoints(application.app_ptr);
+      application_manager_.IsAppSubscribedForWayPoints(*(application.app_ptr));
 
   if (!query.Prepare(kInsertApplication)) {
     LOG4CXX_WARN(logger_,

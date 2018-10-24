@@ -3634,12 +3634,6 @@ bool ApplicationManagerImpl::IsAppSubscribedForWayPoints(
   return true;
 }
 
-bool ApplicationManagerImpl::IsAppSubscribedForWayPoints(
-    ApplicationSharedPtr app) const {
-  LOG4CXX_AUTO_TRACE(logger_);
-  return IsAppSubscribedForWayPoints(*app);
-}
-
 void ApplicationManagerImpl::SubscribeAppForWayPoints(
     ApplicationSharedPtr app) {
   LOG4CXX_AUTO_TRACE(logger_);

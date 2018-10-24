@@ -66,7 +66,7 @@ void ResumptionDataJson::SaveApplication(
   const std::string device_mac = application->mac_address();
   const mobile_apis::HMILevel::eType hmi_level = application->hmi_level();
   const bool is_subscribed_for_way_points =
-      application_manager_.IsAppSubscribedForWayPoints(application);
+      application_manager_.IsAppSubscribedForWayPoints(*application);
 
   sync_primitives::AutoLock autolock(resumption_lock_);
   Json::Value tmp;
