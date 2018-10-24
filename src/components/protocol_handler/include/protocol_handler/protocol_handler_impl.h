@@ -46,6 +46,7 @@
 #include "utils/custom_string.h"
 #include "utils/messagemeter.h"
 #include "utils/semantic_version.h"
+#include "utils/convert_utils.h"
 
 #include "application_manager/policies/policy_handler_observer.h"
 #include "connection_handler/connection_handler.h"
@@ -165,17 +166,6 @@ struct TransportDescription {
 
 typedef std::map<std::string, TransportDescription> TransportTypes;
 }  // namespace impl
-
-#ifdef BUILD_TESTS
-/**
- * Function return packet data as std::string.
- * If packet data is not printable return error message
- */
-std::string ConvertPacketDataToString(const uint8_t* data,
-                                      const size_t data_size);
-
-void set_hash_id(uint32_t hash_id, ProtocolPacket& packet);
-#endif
 
 /**
  * \class ProtocolHandlerImpl

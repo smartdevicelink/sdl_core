@@ -1252,9 +1252,9 @@ RESULT_CODE ProtocolHandlerImpl::SendFrame(const ProtocolFramePtr packet) {
 
   LOG4CXX_DEBUG(
       logger_,
-      "Packet to be sent: "
-          << ConvertPacketDataToString(packet->data(), packet->data_size())
-          << " of size: " << packet->data_size());
+      "Packet to be sent: " << utils::ConvertBinaryDataToString(
+                                   packet->data(), packet->data_size())
+                            << " of size: " << packet->data_size());
   const RawMessagePtr message_to_send = packet->serializePacket();
   if (!message_to_send) {
     LOG4CXX_ERROR(logger_, "Serialization error");
@@ -1419,11 +1419,11 @@ RESULT_CODE ProtocolHandlerImpl::HandleSingleFrameMessage(
     const ProtocolFramePtr packet) {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  LOG4CXX_DEBUG(
-      logger_,
-      "FRAME_TYPE_SINGLE message of size "
-          << packet->data_size() << "; message "
-          << ConvertPacketDataToString(packet->data(), packet->data_size()));
+  LOG4CXX_DEBUG(logger_,
+                "FRAME_TYPE_SINGLE message of size "
+                    << packet->data_size() << "; message "
+                    << utils::ConvertBinaryDataToString(packet->data(),
+                                                        packet->data_size()));
 
   // Replace a potential secondary transport ID in the packet with the primary
   // transport ID
@@ -2369,24 +2369,6 @@ void ProtocolHandlerImpl::SetTelemetryObserver(PHTelemetryObserver* observer) {
   metric_observer_ = observer;
 }
 #endif  // TELEMETRY_MONITOR
-
-std::string ConvertPacketDataToString(const uint8_t* data,
-                                      const size_t data_size) {
-  if (0 == data_size)
-    return std::string();
-  bool is_printable_array = true;
-  std::locale loc;
-  const char* text = reinterpret_cast<const char*>(data);
-  // Check data for printability
-  for (size_t i = 0; i < data_size; ++i) {
-    if (!std::isprint(text[i], loc)) {
-      is_printable_array = false;
-      break;
-    }
-  }
-  return is_printable_array ? std::string(text, data_size)
-                            : std::string("is raw data");
-}
 
 uint8_t ProtocolHandlerImpl::SupportedSDLProtocolVersion() const {
   LOG4CXX_AUTO_TRACE(logger_);

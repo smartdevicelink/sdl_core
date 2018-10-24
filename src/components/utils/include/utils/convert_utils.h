@@ -35,6 +35,7 @@
 
 #include <stdint.h>
 #include <limits>
+#include <string>
 
 namespace utils {
 
@@ -71,6 +72,12 @@ OutputType SafeStaticCast(const InputType value) {
                    std::numeric_limits<OutputType>::max());
   return static_cast<OutputType>(value);
 }
+
+/**
+ * Convert binary data to a string value
+ */
+std::string ConvertBinaryDataToString(const uint8_t* data,
+                                      const size_t data_size);
 
 }  // namespace utils
 
