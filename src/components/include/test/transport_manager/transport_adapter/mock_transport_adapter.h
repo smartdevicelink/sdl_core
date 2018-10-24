@@ -54,11 +54,9 @@ class MockTransportAdapter
       AddListener,
       void(::transport_manager::transport_adapter::TransportAdapterListener*
                listener));
-  MOCK_CONST_METHOD0(IsSearchDevicesSupported, bool());
   MOCK_METHOD0(
       SearchDevices,
       ::transport_manager::transport_adapter::TransportAdapter::Error());
-  MOCK_CONST_METHOD0(IsServerOriginatedConnectSupported, bool());
   MOCK_METHOD2(Connect,
                ::transport_manager::transport_adapter::TransportAdapter::Error(
                    const ::transport_manager::DeviceUID& device_handle,
@@ -67,7 +65,6 @@ class MockTransportAdapter
                ::transport_manager::transport_adapter::TransportAdapter::Error(
                    const ::transport_manager::DeviceUID& device_handle));
   MOCK_METHOD2(RunAppOnDevice, void(const std::string&, const std::string&));
-  MOCK_CONST_METHOD0(IsClientOriginatedConnectSupported, bool());
   MOCK_METHOD0(
       StartClientListening,
       ::transport_manager::transport_adapter::TransportAdapter::Error());

@@ -155,13 +155,6 @@ class TransportAdapter {
   virtual void AddListener(TransportAdapterListener* listener) = 0;
 
   /**
-   * @brief Notify that device scanner is available.
-   *
-   * @return true - available, false - not available.
-   */
-  virtual bool IsSearchDevicesSupported() const = 0;
-
-  /**
    * @brief Start scanning for new devices.
    *
    * List of new devices will be supplied in onDeviceListUpdated callback.
@@ -169,13 +162,6 @@ class TransportAdapter {
    * @return Error information about possible reason of failure.
    **/
   virtual Error SearchDevices() = 0;
-
-  /**
-   * @brief Notify that server connection factory is available.
-   *
-   * @return true - available, false - not available.
-   */
-  virtual bool IsServerOriginatedConnectSupported() const = 0;
 
   /**
    * @brief Connect to the specified application discovered on device.
@@ -206,13 +192,6 @@ class TransportAdapter {
    */
   virtual void RunAppOnDevice(const std::string& device_uid,
                               const std::string& bundle_id) = 0;
-
-  /**
-   * @brief Notify that listener of client connection is available.
-   *
-   * @return true - available, false - not available.
-   */
-  virtual bool IsClientOriginatedConnectSupported() const = 0;
 
   /**
    * @brief Start client listener.

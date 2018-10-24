@@ -198,27 +198,6 @@ class TransportAdapterImpl : public TransportAdapter,
   TransportAdapter::Error StopClientListening() OVERRIDE;
 
   /**
-   * @brief Notify that device scanner is available.
-   *
-   * @return True - available, false - not available.
-   */
-  bool IsSearchDevicesSupported() const OVERRIDE;
-
-  /**
-   * @brief Notify that server connection factory is available.
-   *
-   * @return True - available, false - not available.
-   */
-  bool IsServerOriginatedConnectSupported() const OVERRIDE;
-
-  /**
-   * @brief Notify that listener of client connection is available.
-   *
-   * @return True - available, false - not available.
-   */
-  bool IsClientOriginatedConnectSupported() const OVERRIDE;
-
-  /**
    * @brief Create container(vector) of device unique identifiers.
    *
    * @return Container(vector) of device unique identifiers.

@@ -510,21 +510,6 @@ void TransportAdapterImpl::SearchDeviceFailed(const SearchDeviceError& error) {
   LOG4CXX_TRACE(logger_, "exit");
 }
 
-bool TransportAdapterImpl::IsSearchDevicesSupported() const {
-  LOG4CXX_AUTO_TRACE(logger_);
-  return device_scanner_ != 0;
-}
-
-bool TransportAdapterImpl::IsServerOriginatedConnectSupported() const {
-  LOG4CXX_AUTO_TRACE(logger_);
-  return server_connection_factory_ != 0;
-}
-
-bool TransportAdapterImpl::IsClientOriginatedConnectSupported() const {
-  LOG4CXX_AUTO_TRACE(logger_);
-  return client_connection_listener_ != 0;
-}
-
 void TransportAdapterImpl::ConnectionCreated(
     ConnectionSPtr connection,
     const DeviceUID& device_id,
