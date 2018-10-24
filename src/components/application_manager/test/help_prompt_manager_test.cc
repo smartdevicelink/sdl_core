@@ -180,7 +180,8 @@ void HelpPromptManagerTest::SetUp() {
       app_mngr_,
       HmiState::STATE_ID_REGULAR);
 
-  std::string path = file_system::CreateDirectory("storage");
+  std::string path("storage");
+  file_system::CreateDirectory(path);
   file_system::CreateFile(path + "/" + "certificate");
 
   mock_app_ = std::make_shared<application_manager_test::MockApplication>();

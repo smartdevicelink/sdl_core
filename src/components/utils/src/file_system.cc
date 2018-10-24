@@ -100,16 +100,16 @@ size_t file_system::DirectorySize(const std::string& path) {
 }
 
 // NOTE that boost makes 0777 permissions by default
-std::string file_system::CreateDirectory(const std::string& name) {
+bool file_system::CreateDirectory(const std::string& path) {
   error_code ec;
-  bool success = fs::create_directory(name, ec);
+  bool success = fs::create_directory(path, ec);
   if (!success || ec) {
-    LOG4CXX_WARN_WITH_ERRNO(logger_, "Unable to create directory: " << name);
+    LOG4CXX_WARN_WITH_ERRNO(logger_, "Unable to create directory: " << path);
   } else {
     // Set 0700 permissions to maintain previous API
-    fs::permissions(name, fs::perms::owner_all, ec);
+    fs::permissions(path, fs::perms::owner_all, ec);
   }
-  return name;
+  return success;
 }
 
 bool file_system::CreateDirectoryRecursively(const std::string& path) {
