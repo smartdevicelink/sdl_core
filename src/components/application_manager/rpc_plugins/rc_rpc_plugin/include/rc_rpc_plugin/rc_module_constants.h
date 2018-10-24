@@ -153,6 +153,28 @@ const char kStationLocation[] = "stationLocation";
 const char kStationMessage[] = "stationMessage";
 // SisData struct
 
+// GPSData struct
+const char kLongitudeDegrees[] = "longitudeDegrees";
+const char kLatitudeDegrees[] = "latitudeDegrees";
+const char kUtcYear[] = "utcYear";
+const char kUtcMonth[] = "utcMonth";
+const char kUtcDay[] = "utcDay";
+const char kUtcHours[] = "utcHours";
+const char kUtcMinutes[] = "utcMinutes";
+const char kUtcSeconds[] = "utcSeconds";
+const char kCompassDirection[] = "compassDirection";
+const char kPdop[] = "pdop";
+const char kHdop[] = "hdop";
+const char kVdop[] = "vdop";
+const char kActual[] = "actual";
+const char kSatellites[] = "satellites";
+const char kDimension[] = "dimension";
+const char kAltitude[] = "altitude";
+const char kHeading[] = "heading";
+const char kSpeed[] = "speed";
+const char kShifted[] = "shifted";
+// GPSData struct
+
 // RadioControlData struct
 const char kFrequencyInteger[] = "frequencyInteger";
 const char kFrequencyFraction[] = "frequencyFraction";

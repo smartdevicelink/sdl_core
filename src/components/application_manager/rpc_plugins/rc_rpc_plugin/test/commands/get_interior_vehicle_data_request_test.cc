@@ -245,10 +245,9 @@ TEST_F(
   smart_objects::SmartObject sis_data;
   smart_objects::SmartObject gps_data;
 
-  const char kGpsShifted[] = "shifted";
-  gps_data[application_manager::strings::longitude_degrees] = 1.0;
-  gps_data[application_manager::strings::latitude_degrees] = 1.0;
-  gps_data[kGpsShifted] = true;
+  gps_data[message_params::kLongitudeDegrees] = 1.0;
+  gps_data[message_params::kLatitudeDegrees] = 1.0;
+  gps_data[message_params::kShifted] = true;
 
   sis_data[message_params::kStationShortName] = "dummy_short_name";
   sis_data[message_params::kStationLocation] = gps_data;
