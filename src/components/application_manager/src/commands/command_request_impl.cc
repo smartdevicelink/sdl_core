@@ -418,6 +418,7 @@ uint32_t CommandRequestImpl::SendHMIRequest(
     const hmi_apis::FunctionID::eType& function_id,
     const smart_objects::SmartObject* msg_params,
     bool use_events) {
+  LOG4CXX_AUTO_TRACE(logger_);
   smart_objects::SmartObjectSPtr result =
       std::make_shared<smart_objects::SmartObject>();
 
@@ -444,7 +445,10 @@ uint32_t CommandRequestImpl::SendHMIRequest(
     subscribe_on_event(function_id, hmi_correlation_id);
   }
   if (ProcessHMIInterfacesAvailability(hmi_correlation_id, function_id)) {
-    if (!rpc_service_.ManageHMICommand(result)) {
+    if (rpc_service_.ManageHMICommand(result)) {
+      application_manager_.GetResetTimeoutHandler().AddRequest(
+          hmi_correlation_id, correlation_id(), connection_key());
+    } else {
       LOG4CXX_ERROR(logger_, "Unable to send request");
       SendResponse(false, mobile_apis::Result::OUT_OF_MEMORY);
     }

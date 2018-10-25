@@ -3603,6 +3603,27 @@
     </function>
     <function name="DialNumber" messagetype="response">
     </function>
+    <function name="OnResetTimeout" messagetype="notification" since="5.0">
+      <description>
+        HMI must send this notification to SDL for method instance for which timeout needs to be reset
+      </description>
+      <param name="requestID" type="Integer" minvalue="0" maxvalue="65535" mandatory="true">
+        <description>
+          Id between HMI and SDL which SDL used to send the request for method in question, for which timeout needs to be reset.
+        </description>
+      </param>
+      <param name="methodName" type="String" mandatory="true">
+        <description>
+         Name of the function for which timeout needs to be reset
+         </description>
+       </param>
+       <param name="resetPeriod" type="Integer" minvalue="0" maxvalue="1000000" mandatory="false">
+         <description>
+           Timeout period in milliseconds, for the method for which timeout needs to be reset.
+           If omitted, timeout would be reset by defaultTimeout specified in smartDeviceLink.ini
+          </description>
+        </param>
+    </function>
     <!-- Policies -->
 
     <!-- SyncP RPC-->
@@ -4034,7 +4055,7 @@
   </function>
   <function name="SetGlobalProperties" messagetype="response">
   </function>
-  <function name="OnResetTimeout" messagetype="notification">
+  <function name="OnResetTimeout" messagetype="notification" deprecated="true" since="5.0">
     <description>
       Sender: HMI->SDL. HMI must send this notification every 10 sec. in case the 'methodName'
       results long processing on HMI
@@ -4535,7 +4556,7 @@
   <function name="ClosePopUp" messagetype="response">
     <description>Provides the result of operation.</description>
   </function>
-  <function name="OnResetTimeout" messagetype="notification">
+  <function name="OnResetTimeout" messagetype="notification" deprecated="true" since="5.0">
     <description>HMI must provide SDL with notifications specific to the current Turn-By-Turn client status on the module</description>
     <param name="appID" type="Integer" mandatory="true">
       <description>Id of application that invoked notifcation.</description>

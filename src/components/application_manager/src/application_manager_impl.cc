@@ -53,6 +53,7 @@
 #include "application_manager/app_launch/app_launch_data_json.h"
 #include "application_manager/helpers/application_helper.h"
 #include "application_manager/plugin_manager/rpc_plugin_manager_impl.h"
+#include "application_manager/reset_timeout_handler_impl.h"
 #include "protocol_handler/protocol_handler.h"
 #include "hmi_message_handler/hmi_message_handler.h"
 #include "application_manager/command_holder_impl.h"
@@ -156,7 +157,9 @@ ApplicationManagerImpl::ApplicationManagerImpl(
     , connection_handler_(NULL)
     , policy_handler_(new policy::PolicyHandler(policy_settings, *this))
     , protocol_handler_(NULL)
-    , request_ctrl_(am_settings)
+    , reset_timeout_handler_(
+          new request_controller::ResetTimeoutHandlerImpl(*this))
+    , request_ctrl_(am_settings, *reset_timeout_handler_)
     , hmi_so_factory_(NULL)
     , mobile_so_factory_(NULL)
     , hmi_capabilities_(new HMICapabilitiesImpl(*this))
