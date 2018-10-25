@@ -128,7 +128,7 @@ class CreateInteractionChoiceSetRequest
   int32_t choice_set_id_;
   size_t expected_chs_count_;
   size_t received_chs_count_;
-  bool should_send_warnings;
+  bool should_send_warnings_;
 
   /**
    * @brief Flag for stop sending VR commands to HMI, in case one of responses

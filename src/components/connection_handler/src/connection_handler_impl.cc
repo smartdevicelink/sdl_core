@@ -354,8 +354,8 @@ void ConnectionHandlerImpl::OnSessionStartedCallback(
   // so they can send appropriate Ack or NAK messages on the correct transport.
   transport_manager::ConnectionUID primary_connection_handle =
       connection_handle;
+  SessionTransports st = GetSessionTransports(session_id);
   if (session_id != 0) {
-    SessionTransports st = GetSessionTransports(session_id);
     if (st.primary_transport == 0) {
       LOG4CXX_WARN(logger_,
                    "OnSessionStartedCallback could not find Session in the "
@@ -424,6 +424,11 @@ void ConnectionHandlerImpl::OnSessionStartedCallback(
     }
     context.new_session_id_ = session_id;
     context.hash_id_ = protocol_handler::HASH_ID_NOT_SUPPORTED;
+
+    if (st.secondary_transport == connection_handle) {
+      sync_primitives::AutoLock auto_lock(session_connection_map_lock_ptr_);
+      st.secondary_transport_services.push_back(service_type);
+    }
   }
   sync_primitives::AutoReadLock read_lock(connection_handler_observer_lock_);
   if (connection_handler_observer_) {
@@ -1444,11 +1449,16 @@ void ConnectionHandlerImpl::SendEndService(uint32_t key, uint8_t service_type) {
                        << static_cast<int>(st.primary_transport)
                        << " and secondary connection "
                        << static_cast<int>(st.secondary_transport));
-
-      protocol_handler_->SendEndService(st.primary_transport,
-                                        st.secondary_transport,
-                                        session_id,
-                                        service_type);
+      sync_primitives::AutoLock auto_lock(session_connection_map_lock_ptr_);
+      auto it = std::find(st.secondary_transport_services.begin(),
+                          st.secondary_transport_services.end(),
+                          service_type);
+      if (it != st.secondary_transport_services.end()) {
+        connection_handle = st.secondary_transport;
+        st.secondary_transport_services.erase(it);
+      }
+      protocol_handler_->SendEndService(
+          st.primary_transport, connection_handle, session_id, service_type);
     }
   }
 }

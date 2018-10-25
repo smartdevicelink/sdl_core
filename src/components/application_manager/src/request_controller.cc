@@ -274,7 +274,7 @@ void RequestController::OnMobileResponse(const uint32_t mobile_correlation_id,
 void RequestController::OnHMIResponse(const uint32_t correlation_id,
                                       const int32_t function_id) {
   LOG4CXX_AUTO_TRACE(logger_);
-  TerminateRequest(correlation_id, RequestInfo::HmiConnectoinKey, function_id);
+  TerminateRequest(correlation_id, RequestInfo::HmiConnectionKey, function_id);
 }
 
 void RequestController::terminateWaitingForExecutionAppRequests(
@@ -321,7 +321,7 @@ void RequestController::terminateAppRequests(const uint32_t& app_id) {
 
 void RequestController::terminateAllHMIRequests() {
   LOG4CXX_AUTO_TRACE(logger_);
-  terminateWaitingForResponseAppRequests(RequestInfo::HmiConnectoinKey);
+  terminateWaitingForResponseAppRequests(RequestInfo::HmiConnectionKey);
 }
 
 void RequestController::terminateAllMobileRequests() {
@@ -401,7 +401,7 @@ void RequestController::TimeoutThread() {
       LOG4CXX_DEBUG(logger_,
                     "Timeout for "
                         << (RequestInfo::HMIRequest ==
-                                    probably_expired->requst_type()
+                                    probably_expired->request_type()
                                 ? "HMI"
                                 : "Mobile")
                         << " request id: " << probably_expired->requestId()
@@ -420,7 +420,7 @@ void RequestController::TimeoutThread() {
     LOG4CXX_INFO(logger_,
                  "Timeout for "
                      << (RequestInfo::HMIRequest ==
-                                 probably_expired->requst_type()
+                                 probably_expired->request_type()
                              ? "HMI"
                              : "Mobile")
                      << " request id: " << probably_expired->requestId()
@@ -430,7 +430,7 @@ void RequestController::TimeoutThread() {
     const uint32_t experied_app_id = probably_expired->app_id();
 
     probably_expired->request()->onTimeOut();
-    if (RequestInfo::HmiConnectoinKey == probably_expired->app_id()) {
+    if (RequestInfo::HmiConnectionKey == probably_expired->app_id()) {
       LOG4CXX_DEBUG(logger_,
                     "Erase HMI request: " << probably_expired->requestId());
       waiting_for_response_.RemoveRequest(probably_expired);

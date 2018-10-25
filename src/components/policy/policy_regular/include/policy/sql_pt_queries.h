@@ -79,8 +79,6 @@ extern const std::string kInsertAppGroup;
 extern const std::string kInsertNickname;
 extern const std::string kInsertAppType;
 extern const std::string kInsertRequestType;
-extern const std::string kInsertOmittedRequestType;
-extern const std::string kInsertOmittedRequestSubType;
 extern const std::string kInsertRequestSubType;
 extern const std::string kInsertMessageType;
 extern const std::string kInsertLanguage;

@@ -22,7 +22,12 @@ class TcpClientListener;
  */
 class InterfaceStatus {
  public:
-  InterfaceStatus() : flags_(0), has_ipv4_(false), has_ipv6_(false) {}
+  InterfaceStatus()
+      : flags_(0)
+      , has_ipv4_(false)
+      , has_ipv6_(false)
+      , ipv4_address_()
+      , ipv6_address_() {}
   ~InterfaceStatus() {}
 
   bool IsAvailable() const;
@@ -132,7 +137,7 @@ class PlatformSpecificNetworkInterfaceListener
     struct sockaddr_storage address;
 
     EventParam(int interface_index, unsigned int interface_flags = 0)
-        : if_index(interface_index), flags(interface_flags) {}
+        : if_index(interface_index), flags(interface_flags), address() {}
   };
 
   // parent class which we will notify the events to

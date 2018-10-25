@@ -74,7 +74,7 @@ class SubscribeButtonRequestTest
 
 typedef SubscribeButtonRequestTest::MockHMICapabilities MockHMICapabilities;
 const utils::SemanticVersion mock_semantic_version(5, 0, 0);
-const utils::SemanticVersion mock_semantic_version_4_5(4, 5, 0);
+const utils::SemanticVersion mock_base_rpc_version(4, 5, 1);
 
 TEST_F(SubscribeButtonRequestTest, Run_AppNotRegistered_UNSUCCESS) {
   CommandPtr command(CreateCommand<SubscribeButtonRequest>());
@@ -202,7 +202,7 @@ TEST_F(SubscribeButtonRequestTest, Run_SUCCESS) {
                                     [am::strings::result_code].asInt()));
 }
 
-TEST_F(SubscribeButtonRequestTest, Run_SUCCESS_App_Version_4_5) {
+TEST_F(SubscribeButtonRequestTest, Run_SUCCESS_App_Base_RPC_Version) {
   const mobile_apis::ButtonName::eType kButtonName =
       mobile_apis::ButtonName::OK;
 
@@ -212,8 +212,7 @@ TEST_F(SubscribeButtonRequestTest, Run_SUCCESS_App_Version_4_5) {
 
   MockAppPtr app(CreateMockApp());
   ON_CALL(app_mngr_, application(_)).WillByDefault(Return(app));
-  ON_CALL(*app, msg_version())
-      .WillByDefault(ReturnRef(mock_semantic_version_4_5));
+  ON_CALL(*app, msg_version()).WillByDefault(ReturnRef(mock_base_rpc_version));
   ON_CALL(*app, is_media_application()).WillByDefault(Return(true));
 
   ON_CALL(mock_hmi_capabilities_, is_ui_cooperating())

@@ -245,7 +245,7 @@ TEST_F(ApplicationManagerImplTest,
   EXPECT_TRUE(app_manager_impl_->IsAppSubscribedForWayPoints(app_ptr));
   app_manager_impl_->UnsubscribeAppFromWayPoints(app_ptr);
   EXPECT_FALSE(app_manager_impl_->IsAppSubscribedForWayPoints(app_ptr));
-  const std::set<int32_t> result =
+  const std::set<uint32_t> result =
       app_manager_impl_->GetAppsSubscribedForWayPoints();
   EXPECT_TRUE(result.empty());
 }
@@ -264,7 +264,8 @@ TEST_F(
     GetAppsSubscribedForWayPoints_SubcribeAppForWayPoints_ExpectCorrectResult) {
   auto app_ptr = std::static_pointer_cast<am::Application>(mock_app_ptr_);
   app_manager_impl_->SubscribeAppForWayPoints(app_ptr);
-  std::set<int32_t> result = app_manager_impl_->GetAppsSubscribedForWayPoints();
+  std::set<uint32_t> result =
+      app_manager_impl_->GetAppsSubscribedForWayPoints();
   EXPECT_EQ(1u, result.size());
   EXPECT_TRUE(result.find(app_ptr->app_id()) != result.end());
 }

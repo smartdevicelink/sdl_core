@@ -103,7 +103,8 @@ CacheManager::CacheManager()
     : CacheManagerInterface()
     , pt_(new policy_table::Table)
     , backup_(new SQLPTRepresentation())
-    , update_required(false) {
+    , update_required(false)
+    , settings_(nullptr) {
   LOG4CXX_AUTO_TRACE(logger_);
   backuper_ = new BackgroundBackuper(this);
   backup_thread_ = threads::CreateThread("Backup thread", backuper_);
@@ -826,7 +827,7 @@ void CacheManager::CheckSnapshotInitialization() {
   *(snapshot_->policy_table.module_config.preloaded_pt) = false;
 
   *(snapshot_->policy_table.module_config.full_app_id_supported) =
-      settings_->use_full_app_id();
+      get_settings().use_full_app_id();
 
   // SDL must not send certificate in snapshot
   snapshot_->policy_table.module_config.certificate =
@@ -1453,10 +1454,13 @@ bool CacheManager::Init(const std::string& file_name,
 void CacheManager::FillDeviceSpecificData() {}
 
 bool CacheManager::LoadFromBackup() {
+  LOG4CXX_AUTO_TRACE(logger_);
   sync_primitives::AutoLock lock(cache_lock_);
   pt_ = backup_->GenerateSnapshot();
   update_required = backup_->UpdateRequired();
-
+  LOG4CXX_DEBUG(logger_,
+                "Update required flag from backup: " << std::boolalpha
+                                                     << update_required);
   FillDeviceSpecificData();
 
   return true;

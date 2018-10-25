@@ -55,10 +55,10 @@ OnWayPointChangeNotification::~OnWayPointChangeNotification() {}
 void OnWayPointChangeNotification::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  std::set<int32_t> subscribed_for_way_points =
+  std::set<uint32_t> subscribed_for_way_points =
       application_manager_.GetAppsSubscribedForWayPoints();
 
-  for (std::set<int32_t>::const_iterator app_id =
+  for (std::set<uint32_t>::const_iterator app_id =
            subscribed_for_way_points.begin();
        app_id != subscribed_for_way_points.end();
        ++app_id) {

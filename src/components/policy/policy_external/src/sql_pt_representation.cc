@@ -761,30 +761,36 @@ bool SQLPTRepresentation::GatherApplicationPoliciesSection(
     *params.memory_kb = query.GetInteger(2);
     *params.heart_beat_timeout_ms = query.GetUInteger(3);
 
-    if (!GatherAppGroup(app_id, &params.groups)) {
+    const auto& gather_app_id = ((*policies).apps[app_id].is_string())
+                                    ? (*policies).apps[app_id].get_string()
+                                    : app_id;
+    // Data should be gathered from db by  "default" key if application has
+    // default policies
+
+    if (!GatherAppGroup(gather_app_id, &params.groups)) {
       return false;
     }
 
     bool denied = false;
-    if (!GatherRemoteControlDenied(app_id, &denied)) {
+    if (!GatherRemoteControlDenied(gather_app_id, &denied)) {
       return false;
     }
     if (!denied) {
-      if (!GatherModuleType(app_id, &*params.moduleType)) {
+      if (!GatherModuleType(gather_app_id, &*params.moduleType)) {
         return false;
       }
     }
 
-    if (!GatherNickName(app_id, &*params.nicknames)) {
+    if (!GatherNickName(gather_app_id, &*params.nicknames)) {
       return false;
     }
-    if (!GatherAppType(app_id, &*params.AppHMIType)) {
+    if (!GatherAppType(gather_app_id, &*params.AppHMIType)) {
       return false;
     }
-    if (!GatherRequestType(app_id, &*params.RequestType)) {
+    if (!GatherRequestType(gather_app_id, &*params.RequestType)) {
       return false;
     }
-    if (!GatherRequestSubType(app_id, &*params.RequestSubType)) {
+    if (!GatherRequestSubType(gather_app_id, &*params.RequestSubType)) {
       return false;
     }
 
@@ -1193,18 +1199,6 @@ bool SQLPTRepresentation::SaveRequestType(
       LOG4CXX_WARN(logger_, "Incorrect insert into request types.");
       return false;
     }
-  } else {
-    utils::dbms::SQLQuery query_omitted(db());
-    if (!query_omitted.Prepare(sql_pt::kInsertOmittedRequestType)) {
-      LOG4CXX_WARN(logger_, "Incorrect insert statement for request types.");
-      return false;
-    }
-    LOG4CXX_WARN(logger_, "Request types omitted.");
-    query_omitted.Bind(0, app_id);
-    if (!query_omitted.Exec() || !query_omitted.Reset()) {
-      LOG4CXX_WARN(logger_, "Incorrect insert into request types.");
-      return false;
-    }
   }
   return true;
 }
@@ -1234,18 +1228,6 @@ bool SQLPTRepresentation::SaveRequestSubType(
     query.Bind(0, app_id);
     query.Bind(1, std::string("EMPTY"));
     if (!query.Exec() || !query.Reset()) {
-      LOG4CXX_WARN(logger_, "Incorrect insert into request subtypes.");
-      return false;
-    }
-  } else {
-    utils::dbms::SQLQuery query_omitted(db());
-    if (!query_omitted.Prepare(sql_pt::kInsertOmittedRequestSubType)) {
-      LOG4CXX_WARN(logger_, "Incorrect insert statement for request subtypes.");
-      return false;
-    }
-    LOG4CXX_WARN(logger_, "Request subtypes omitted.");
-    query_omitted.Bind(0, app_id);
-    if (!query_omitted.Exec() || !query_omitted.Reset()) {
       LOG4CXX_WARN(logger_, "Incorrect insert into request subtypes.");
       return false;
     }

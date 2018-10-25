@@ -257,7 +257,7 @@ class ApplicationManagerImpl
    * @brief Get subscribed for way points
    * @return reference to set of subscribed apps for way points
    */
-  const std::set<int32_t> GetAppsSubscribedForWayPoints() const OVERRIDE;
+  const std::set<uint32_t> GetAppsSubscribedForWayPoints() const OVERRIDE;
 
   /**
    * @brief Notifies all components interested in Vehicle Data update
@@ -553,7 +553,8 @@ class ApplicationManagerImpl
   void StartDevicesDiscovery();
 
   void RemoveHMIFakeParameters(
-      application_manager::commands::MessageSharedPtr& message) OVERRIDE;
+      application_manager::commands::MessageSharedPtr& message,
+      const hmi_apis::FunctionID::eType& function_id) OVERRIDE;
 
   /**
    * @brief TerminateRequest forces termination of request
@@ -1354,7 +1355,7 @@ class ApplicationManagerImpl
   /**
    * @brief Set AppIDs of subscribed apps for way points
    */
-  std::set<int32_t> subscribed_way_points_apps_list_;
+  std::set<uint32_t> subscribed_way_points_apps_list_;
 
   /**
    * @brief Map contains applications which

@@ -219,8 +219,9 @@ void RPCHandlerImpl::GetMessageVersion(
     }
     utils::SemanticVersion temp_version(major, minor, patch);
     if (temp_version.isValid()) {
-      utils::SemanticVersion ver_4_5(4, 5, 0);
-      message_version = (temp_version > ver_4_5) ? temp_version : ver_4_5;
+      message_version = (temp_version >= utils::rpc_version_5)
+                            ? temp_version
+                            : utils::base_rpc_version;
     }
   }
 }

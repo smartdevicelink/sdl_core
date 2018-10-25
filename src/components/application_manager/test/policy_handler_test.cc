@@ -921,7 +921,7 @@ TEST_F(PolicyHandlerTest,
   EXPECT_CALL(*mock_policy_manager_, GetAppPermissionsChanges(_))
       .WillOnce(Return(permissions));
   EXPECT_CALL(*mock_policy_manager_,
-              RemovePendingPermissionChanges(kPolicyAppId_)).Times(0);
+              RemovePendingPermissionChanges(kPolicyAppId_));
   // Act
   policy_handler_.OnPendingPermissionChange(kPolicyAppId_);
 }
@@ -2481,7 +2481,7 @@ TEST_F(PolicyHandlerTest, AddStatisticsInfo_SUCCESS) {
   EXPECT_TRUE(waiter.Wait(auto_lock));
 }
 
-TEST_F(PolicyHandlerTest, OnSystemError_SUCCESS) {
+TEST_F(PolicyHandlerTest, DISABLED_OnSystemError_SUCCESS) {
   EnablePolicyAndPolicyManagerMock();
 
   sync_primitives::Lock wait_hmi_lock;

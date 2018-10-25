@@ -60,8 +60,6 @@ target_link_libraries(UsageStatistics Utils)
 set(EXCLUDE_PATHS
   ${POLICY_TABLE_PATHS}
   ${USAGE_STATISTICS_PATHS}
-  sql_pt_ext_queries.cc
-  sql_pt_ext_representation.cc
 )
 
 set(PATHS
