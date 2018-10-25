@@ -50,6 +50,7 @@
 #include "application_manager/request_info.h"
 #include "application_manager/request_controller_settings.h"
 #include "application_manager/request_tracker.h"
+#include "application_manager/reset_timeout_handler_impl.h"
 
 namespace application_manager {
 
@@ -87,7 +88,8 @@ class RequestController {
   * @brief Class constructor
   *
   */
-  RequestController(const RequestControlerSettings& settings);
+  RequestController(const RequestControlerSettings& settings,
+                    ResetTimeoutHandler& reset_timeout_handler);
 
   /**
   * @brief Class destructor
@@ -310,6 +312,7 @@ class RequestController {
 
   bool is_low_voltage_;
   const RequestControlerSettings& settings_;
+  ResetTimeoutHandler& reset_timeout_handler_;
   DISALLOW_COPY_AND_ASSIGN(RequestController);
 };
 
