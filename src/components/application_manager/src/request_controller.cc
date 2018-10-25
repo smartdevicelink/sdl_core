@@ -46,7 +46,8 @@ using namespace sync_primitives;
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "RequestController")
 
-RequestController::RequestController(const RequestControlerSettings& settings)
+RequestController::RequestController(const RequestControlerSettings& settings,
+                                     ResetTimeoutHandler& reset_timeout_handler)
     : pool_state_(UNDEFINED)
     , pool_size_(settings.thread_pool_size())
     , request_tracker_(settings)
@@ -56,7 +57,8 @@ RequestController::RequestController(const RequestControlerSettings& settings)
                  this, &RequestController::TimeoutThread))
     , timer_stop_flag_(false)
     , is_low_voltage_(false)
-    , settings_(settings) {
+    , settings_(settings)
+    , reset_timeout_handler_(reset_timeout_handler) {
   LOG4CXX_AUTO_TRACE(logger_);
   InitializeThreadpool();
   timer_.Start(0, timer::kSingleShot);
@@ -258,6 +260,10 @@ void RequestController::TerminateRequest(const uint32_t correlation_id,
   }
   if (force_terminate || request->request()->AllowedToTerminate()) {
     waiting_for_response_.RemoveRequest(request);
+    if (RequestInfo::HMIRequest == request->request_type()) {
+      reset_timeout_handler_.RemoveRequest(request->requestId());
+    }
+
   } else {
     LOG4CXX_WARN(logger_, "Request was not terminated");
   }
@@ -434,6 +440,9 @@ void RequestController::TimeoutThread() {
       LOG4CXX_DEBUG(logger_,
                     "Erase HMI request: " << probably_expired->requestId());
       waiting_for_response_.RemoveRequest(probably_expired);
+      if (RequestInfo::HMIRequest == probably_expired->request_type()) {
+        reset_timeout_handler_.RemoveRequest(experied_request_id);
+      }
     }
     probably_expired = waiting_for_response_.FrontWithNotNullTimeout();
     if (probably_expired) {
