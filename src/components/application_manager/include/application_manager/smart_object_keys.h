@@ -381,6 +381,10 @@ extern const char* const haptic_rect_data;
 extern const char* const rect;
 extern const char* const x;
 extern const char* const y;
+
+// OnResetTimeout
+extern const char* const request_id;
+extern const char* const reset_period;
 }  // namespace strings
 
 namespace json {

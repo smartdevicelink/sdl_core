@@ -49,6 +49,7 @@
 #include "application_manager/application_manager_settings.h"
 #include "application_manager/state_controller.h"
 #include "application_manager/hmi_interfaces.h"
+#include "application_manager/reset_timeout_handler.h"
 #include "policy/policy_types.h"
 #include "application_manager/plugin_manager/rpc_plugin_manager.h"
 namespace resumption {
@@ -87,7 +88,9 @@ class RPCService;
 namespace rpc_handler {
 class RPCHandler;
 }
-
+namespace request_controller {
+class ResetTimeoutHandler;
+}
 class Application;
 class StateControllerImpl;
 struct CommandParametersPermissions;
@@ -391,6 +394,8 @@ class ApplicationManager {
 
   virtual rpc_service::RPCService& GetRPCService() const = 0;
   virtual rpc_handler::RPCHandler& GetRPCHandler() const = 0;
+  virtual request_controller::ResetTimeoutHandler& GetResetTimeoutHandler()
+      const = 0;
   virtual bool is_stopping() const = 0;
   virtual bool is_audio_pass_thru_active() const = 0;
 
