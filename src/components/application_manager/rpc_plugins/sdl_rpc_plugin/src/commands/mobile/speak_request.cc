@@ -53,9 +53,7 @@ SpeakRequest::SpeakRequest(
                          application_manager,
                          rpc_service,
                          hmi_capabilities,
-                         policy_handler) {
-  subscribe_on_event(hmi_apis::FunctionID::TTS_OnResetTimeout);
-}
+                         policy_handler) {}
 
 SpeakRequest::~SpeakRequest() {}
 
@@ -109,13 +107,6 @@ void SpeakRequest::on_event(const event_engine::Event& event) {
       LOG4CXX_INFO(logger_, "Received TTS_Speak event");
       EndAwaitForInterface(HmiInterfaces::HMI_INTERFACE_TTS);
       ProcessTTSSpeakResponse(event.smart_object());
-      break;
-    }
-    case hmi_apis::FunctionID::TTS_OnResetTimeout: {
-      LOG4CXX_INFO(logger_, "Received TTS_OnResetTimeout event");
-
-      application_manager_.updateRequestTimeout(
-          connection_key(), correlation_id(), default_timeout());
       break;
     }
     default: {

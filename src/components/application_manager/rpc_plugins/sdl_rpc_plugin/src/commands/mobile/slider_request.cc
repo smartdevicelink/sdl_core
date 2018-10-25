@@ -53,9 +53,7 @@ SliderRequest::SliderRequest(
                          application_manager,
                          rpc_service,
                          hmi_capabilities,
-                         policy_handler) {
-  subscribe_on_event(hmi_apis::FunctionID::UI_OnResetTimeout);
-}
+                         policy_handler) {}
 
 SliderRequest::~SliderRequest() {}
 
@@ -129,13 +127,6 @@ void SliderRequest::on_event(const event_engine::Event& event) {
   const SmartObject& message = event.smart_object();
 
   const event_engine::Event::EventID event_id = event.id();
-  if (event_id == FunctionID::UI_OnResetTimeout) {
-    LOG4CXX_INFO(logger_, "Received UI_OnResetTimeout event");
-    application_manager_.updateRequestTimeout(
-        connection_key(), correlation_id(), default_timeout());
-    return;
-  }
-
   if (event_id != FunctionID::UI_Slider) {
     LOG4CXX_ERROR(logger_, "Received unknown event" << event.id());
     return;

@@ -57,9 +57,7 @@ PerformAudioPassThruRequest::PerformAudioPassThruRequest(
                          hmi_capabilities,
                          policy_handler)
     , result_tts_speak_(hmi_apis::Common_Result::INVALID_ENUM)
-    , result_ui_(hmi_apis::Common_Result::INVALID_ENUM) {
-  subscribe_on_event(hmi_apis::FunctionID::TTS_OnResetTimeout);
-}
+    , result_ui_(hmi_apis::Common_Result::INVALID_ENUM) {}
 
 PerformAudioPassThruRequest::~PerformAudioPassThruRequest() {}
 
@@ -184,13 +182,6 @@ void PerformAudioPassThruRequest::on_event(const event_engine::Event& event) {
         application_manager_.updateRequestTimeout(
             connection_key(), correlation_id(), default_timeout());
       }
-      break;
-    }
-    case hmi_apis::FunctionID::TTS_OnResetTimeout: {
-      LOG4CXX_INFO(logger_, "Received TTS_OnResetTimeout event");
-
-      application_manager_.updateRequestTimeout(
-          connection_key(), correlation_id(), default_timeout());
       break;
     }
     default: {
