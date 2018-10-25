@@ -197,7 +197,6 @@
 #include "sdl_rpc_plugin/commands/hmi/on_button_subscription_notification.h"
 #include "sdl_rpc_plugin/commands/hmi/on_ui_keyboard_input_notification.h"
 #include "sdl_rpc_plugin/commands/hmi/on_ui_touch_event_notification.h"
-#include "sdl_rpc_plugin/commands/hmi/on_ui_reset_timeout_notification.h"
 #include "sdl_rpc_plugin/commands/hmi/navi_set_video_config_request.h"
 #include "sdl_rpc_plugin/commands/hmi/navi_set_video_config_response.h"
 #include "sdl_rpc_plugin/commands/hmi/navi_start_stream_request.h"
@@ -230,7 +229,7 @@
 #include "sdl_rpc_plugin/commands/hmi/on_device_state_changed_notification.h"
 #include "sdl_rpc_plugin/commands/hmi/navi_send_location_request.h"
 #include "sdl_rpc_plugin/commands/hmi/navi_send_location_response.h"
-#include "sdl_rpc_plugin/commands/hmi/on_tts_reset_timeout_notification.h"
+#include "sdl_rpc_plugin/commands/hmi/on_reset_timeout_notification.h"
 #include "sdl_rpc_plugin/commands/hmi/dial_number_request.h"
 #include "sdl_rpc_plugin/commands/hmi/dial_number_response.h"
 #include "sdl_rpc_plugin/commands/hmi/ui_send_haptic_data_request.h"
@@ -711,8 +710,8 @@ CommandCreator& HMICommandFactory::get_creator_factory(
     case hmi_apis::FunctionID::UI_OnTouchEvent: {
       return factory.GetCreator<commands::hmi::OnUITouchEventNotification>();
     }
-    case hmi_apis::FunctionID::UI_OnResetTimeout: {
-      return factory.GetCreator<commands::hmi::OnUIResetTimeoutNotification>();
+    case hmi_apis::FunctionID::BasicCommunication_OnResetTimeout: {
+      return factory.GetCreator<commands::hmi::OnResetTimeoutNotification>();
     }
     case hmi_apis::FunctionID::Navigation_SetVideoConfig: {
       return hmi_apis::messageType::request == message_type
@@ -810,9 +809,6 @@ CommandCreator& HMICommandFactory::get_creator_factory(
     }
     case hmi_apis::FunctionID::SDL_OnDeviceStateChanged: {
       return factory.GetCreator<commands::OnDeviceStateChangedNotification>();
-    }
-    case hmi_apis::FunctionID::TTS_OnResetTimeout: {
-      return factory.GetCreator<commands::hmi::OnTTSResetTimeoutNotification>();
     }
     case hmi_apis::FunctionID::BasicCommunication_OnEventChanged: {
       return factory.GetCreator<commands::OnEventChangedNotification>();

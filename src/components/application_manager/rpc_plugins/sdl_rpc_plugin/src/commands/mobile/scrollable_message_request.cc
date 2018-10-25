@@ -56,9 +56,7 @@ ScrollableMessageRequest::ScrollableMessageRequest(
                          application_manager,
                          rpc_service,
                          hmi_capabilities,
-                         policy_handler) {
-  subscribe_on_event(hmi_apis::FunctionID::UI_OnResetTimeout);
-}
+                         policy_handler) {}
 
 ScrollableMessageRequest::~ScrollableMessageRequest() {}
 
@@ -127,12 +125,6 @@ void ScrollableMessageRequest::on_event(const event_engine::Event& event) {
   const smart_objects::SmartObject& message = event.smart_object();
 
   switch (event.id()) {
-    case hmi_apis::FunctionID::UI_OnResetTimeout: {
-      LOG4CXX_INFO(logger_, "Received UI_OnResetTimeout event");
-      application_manager_.updateRequestTimeout(
-          connection_key(), correlation_id(), default_timeout());
-      break;
-    }
     case hmi_apis::FunctionID::UI_ScrollableMessage: {
       LOG4CXX_INFO(logger_, "Received UI_ScrollableMessage event");
       EndAwaitForInterface(HmiInterfaces::HMI_INTERFACE_UI);
