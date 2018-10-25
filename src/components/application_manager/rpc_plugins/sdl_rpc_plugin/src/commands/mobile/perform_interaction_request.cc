@@ -72,7 +72,6 @@ PerformInteractionRequest::PerformInteractionRequest(
     , app_pi_was_active_before_(false)
     , vr_result_code_(hmi_apis::Common_Result::INVALID_ENUM)
     , ui_result_code_(hmi_apis::Common_Result::INVALID_ENUM) {
-  subscribe_on_event(hmi_apis::FunctionID::UI_OnResetTimeout);
   subscribe_on_event(hmi_apis::FunctionID::VR_OnCommand);
   subscribe_on_event(hmi_apis::FunctionID::Buttons_OnButtonPress);
 }
@@ -231,12 +230,6 @@ void PerformInteractionRequest::on_event(const event_engine::Event& event) {
       smart_objects::SmartObject(smart_objects::SmartType_Map);
 
   switch (event.id()) {
-    case hmi_apis::FunctionID::UI_OnResetTimeout: {
-      LOG4CXX_DEBUG(logger_, "Received UI_OnResetTimeout event");
-      application_manager_.updateRequestTimeout(
-          connection_key(), correlation_id(), default_timeout());
-      break;
-    }
     case hmi_apis::FunctionID::UI_PerformInteraction: {
       LOG4CXX_DEBUG(logger_, "Received UI_PerformInteraction event");
       EndAwaitForInterface(HmiInterfaces::HMI_INTERFACE_UI);
