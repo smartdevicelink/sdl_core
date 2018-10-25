@@ -366,18 +366,6 @@ TEST_F(SpeakRequestTest, OnEvent_TTS_SpeakWithWarning_WarningWithSuccess) {
   command->on_event(event);
 }
 
-TEST_F(SpeakRequestTest, OnEvent_TTS_OnResetTimeout_UpdateTimeout) {
-  Event event(Event::EventID::TTS_OnResetTimeout);
-  (*request_)[am::strings::params][am::strings::connection_key] =
-      kConnectionKey;
-  (*request_)[am::strings::params][am::strings::correlation_id] = kAppId;
-  CommandPtr command(CreateCommand<SpeakRequest>(request_));
-
-  EXPECT_CALL(app_mngr_, updateRequestTimeout(kConnectionKey, kAppId, _));
-
-  command->on_event(event);
-}
-
 TEST_F(SpeakRequestTest, OnEvent_ApplicationIsNotRegistered_UNSUCCESS) {
   const hmi_apis::Common_Result::eType hmi_result =
       hmi_apis::Common_Result::SUCCESS;

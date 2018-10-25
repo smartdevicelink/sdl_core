@@ -328,12 +328,10 @@ typedef Types<
                 hmi_apis::FunctionID::BasicCommunication_OnAppDeactivated>,
     CommandPair<OnEventChangedNotification,
                 hmi_apis::FunctionID::BasicCommunication_OnEventChanged>,
-    CommandPair<hmi::OnTTSResetTimeoutNotification,
-                hmi_apis::FunctionID::TTS_OnResetTimeout>,
+    CommandPair<hmi::OnResetTimeoutNotification,
+                hmi_apis::FunctionID::OnResetTimeout>,
     CommandPair<OnTTSStartedNotification, hmi_apis::FunctionID::TTS_Started>,
     CommandPair<OnTTSStoppedNotification, hmi_apis::FunctionID::TTS_Stopped>,
-    CommandPair<hmi::OnUIResetTimeoutNotification,
-                hmi_apis::FunctionID::UI_OnResetTimeout>,
     CommandPair<OnVRStartedNotification, hmi_apis::FunctionID::VR_Started>,
     CommandPair<OnVRStoppedNotification, hmi_apis::FunctionID::VR_Stopped> >
     HMIOnNotificationsEventDispatcherTypes;
