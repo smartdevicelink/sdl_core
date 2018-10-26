@@ -56,7 +56,7 @@ namespace profile {
 /*
  * @brief Global defines
  */
-#define INI_LINE_LEN 512
+#define INI_LINE_LEN 1024
 #define INI_FILE_TEMP_NAME "ini.tmp"
 
 #define INI_FLAG_UPDATE 0x00
