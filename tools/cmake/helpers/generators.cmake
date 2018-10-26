@@ -28,35 +28,86 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
+if(GENERATORS_INCLUDED)
+  return()
+endif()
+set(GENERATORS_INCLUDED ON)
+
 find_package(PythonInterp REQUIRED)
 
-if(NOT PYTHONINTERP_FOUND)
-  message(STATUS "Python interpreter is not found")
-  message(STATUS "To install it type in the command line:")
-  message(STATUS "sudo apt-get install python")
-  message(FATAL_ERROR "Exiting!")
-endif(NOT PYTHONINTERP_FOUND)
+get_filename_component(INTEFRACE_GENERATOR_DIR
+  "../../InterfaceGenerator"
+  REALPATH
+  BASE_DIR "${CMAKE_CURRENT_LIST_DIR}")
+file(GLOB_RECURSE INTERFACE_GENERATOR_DEPENDENCIES "${INTEFRACE_GENERATOR_DIR}/*")
 
-set(INTEFRACE_GENERATOR "${CMAKE_SOURCE_DIR}/tools/InterfaceGenerator/Generator.py")
-set(INTEFRACE_GENERATOR_CMD ${PYTHON_EXECUTABLE} -B ${INTEFRACE_GENERATOR})
-file(GLOB_RECURSE INTERFACE_GENERATOR_DEPENDENCIES "${CMAKE_SOURCE_DIR}/tools/InterfaceGenerator/*.*")
+function(generate_interface XML_INPUT ARG_NAMESPACE PARSER_TYPE TARGET_NAME)
+  set(GENERATOR_OUTPUT_DIR "${CMAKE_BINARY_DIR}/InterfaceGenerator/output")
+  set(GENERATE_OUTPUT_TARGET "${GENERATOR_OUTPUT_DIR}/${TARGET_NAME}/interfaces")
 
-macro(generate_interface ARG_XML_NAME ARG_NAMESPACE PARSER_TYPE)
-  string(REGEX MATCH "^[a-zA-Z_0-9]*[^.]" FILE_NAME ${ARG_XML_NAME})  # TODO: make expression more robust
+  get_filename_component(FILE_NAME ${XML_INPUT} NAME_WE)
+  if("${FILE_NAME}" STREQUAL "QT_HMI_API")
+    set(GENERATED_SOURCES
+      "${GENERATE_OUTPUT_TARGET}/HMI_API.h"
+      "${GENERATE_OUTPUT_TARGET}/HMI_API_schema.h"
+      "${GENERATE_OUTPUT_TARGET}/HMI_API_schema.cc")
 
-  set(HPP_FILE
-    "${CMAKE_CURRENT_BINARY_DIR}/${FILE_NAME}.h"
-    "${CMAKE_CURRENT_BINARY_DIR}/${FILE_NAME}_schema.h"
+    add_custom_command(
+      OUTPUT ${GENERATED_SOURCES}
+      COMMAND
+        "${PYTHON_EXECUTABLE}"
+          -B "${INTEFRACE_GENERATOR_DIR}/Generator.py"
+          "${XML_INPUT}"
+          "${ARG_NAMESPACE}"
+          "${GENERATE_OUTPUT_TARGET}"
+          "--parser-type" "${PARSER_TYPE}"
+      COMMAND
+        ${CMAKE_COMMAND}
+          -DINPUT_FILE="${GENERATE_OUTPUT_TARGET}/QT_HMI_API.h"
+          -DMATCH_TEXT="QT_HMI_API"
+          -DREPLACE_WITH="HMI_API"
+          -DOUTPUT_FILE="${GENERATE_OUTPUT_TARGET}/HMI_API.h"
+          -P "${CMAKE_SOURCE_DIR}/tools/cmake/helpers/string_replace.cmake"
+      COMMAND
+        ${CMAKE_COMMAND}
+          -DINPUT_FILE="${GENERATE_OUTPUT_TARGET}/QT_HMI_API_schema.h"
+          -DMATCH_TEXT="QT_HMI_API"
+          -DREPLACE_WITH="HMI_API"
+          -DOUTPUT_FILE="${GENERATE_OUTPUT_TARGET}/HMI_API_schema.h"
+          -P "${CMAKE_SOURCE_DIR}/tools/cmake/helpers/string_replace.cmake"
+      COMMAND
+        ${CMAKE_COMMAND}
+          -DINPUT_FILE="${GENERATE_OUTPUT_TARGET}/QT_HMI_API_schema.cc"
+          -DMATCH_TEXT="QT_HMI_API"
+          -DREPLACE_WITH="HMI_API"
+          -DOUTPUT_FILE="${GENERATE_OUTPUT_TARGET}/HMI_API_schema.cc"
+          -P "${CMAKE_SOURCE_DIR}/tools/cmake/helpers/string_replace.cmake"
+      DEPENDS "${INTERFACE_GENERATOR_DEPENDENCIES}" "${XML_INPUT}"
+      COMMENT "Generating files:\n   ${GENERATED_SOURCES}\nfrom:\n   ${XML_INPUT} ...")
+  else()
+    set(GENERATED_SOURCES
+      "${GENERATE_OUTPUT_TARGET}/${FILE_NAME}.h"
+      "${GENERATE_OUTPUT_TARGET}/${FILE_NAME}_schema.h"
+      "${GENERATE_OUTPUT_TARGET}/${FILE_NAME}_schema.cc")
+
+    add_custom_command(
+      OUTPUT ${GENERATED_SOURCES}
+      COMMAND
+        "${PYTHON_EXECUTABLE}"
+          -B "${INTEFRACE_GENERATOR_DIR}/Generator.py"
+          "${XML_INPUT}"
+          "${ARG_NAMESPACE}"
+          "${GENERATE_OUTPUT_TARGET}"
+          "--parser-type" "${PARSER_TYPE}"
+      DEPENDS "${INTERFACE_GENERATOR_DEPENDENCIES}" "${XML_INPUT}"
+      COMMENT "Generating files:\n   ${GENERATED_SOURCES}\nfrom:\n   ${XML_INPUT} ...")
+  endif()
+
+  target_sources(${TARGET_NAME}
+    PRIVATE
+      ${GENERATED_SOURCES}
   )
-
-  set(CPP_FILE "${CMAKE_CURRENT_BINARY_DIR}/${FILE_NAME}_schema.cc")
-  set(FULL_XML_NAME "${CMAKE_CURRENT_SOURCE_DIR}/${ARG_XML_NAME}")
-
-  add_custom_command(
-    OUTPUT ${HPP_FILE} ${CPP_FILE}
-    COMMAND ${INTEFRACE_GENERATOR_CMD} ${FULL_XML_NAME} ${ARG_NAMESPACE} ${CMAKE_CURRENT_BINARY_DIR} "--parser-type" "${PARSER_TYPE}"
-    DEPENDS ${INTERFACE_GENERATOR_DEPENDENCIES} ${FULL_XML_NAME}
-    COMMENT "Generating files:\n   ${HPP_FILE}\n   ${CPP_FILE}\nfrom:\n   ${FULL_XML_NAME} ..."
-    VERBATIM
+  target_include_directories(${TARGET_NAME}
+    PUBLIC "${GENERATOR_OUTPUT_DIR}/${TARGET_NAME}"
   )
-endmacro()
+endfunction()

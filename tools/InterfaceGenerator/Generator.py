@@ -101,6 +101,15 @@ Generating interface source code with following parameters:
     except ParseError as error:
         _handle_fatal_error(error)
 
+    if not os.path.exists(output_dir):
+        try:
+            os.makedirs(output_dir)
+        except OSError as e:
+            if e.errno == errno.EEXIST and os.path.isdir(output_dir):
+                pass
+            else:
+                raise
+
     # Parse sdl version from MOBILE_API.xml and create source file with this version
     if src_xml_name == "MOBILE_API":
         try:

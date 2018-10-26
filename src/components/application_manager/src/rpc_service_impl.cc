@@ -379,7 +379,7 @@ void RPCServiceImpl::SendMessageToMobile(
     LOG4CXX_ERROR(logger_, "No application associated with connection key");
     if (is_result_code_exists &&
         ((*message)[strings::msg_params][strings::result_code] ==
-         ns_smart_device_link_rpc::V1::Result::UNSUPPORTED_VERSION)) {
+         NsSmartDeviceLinkRPC::V1::Result::UNSUPPORTED_VERSION)) {
       (*message)[strings::params][strings::protocol_version] =
           protocol_handler::MajorProtocolVersion::PROTOCOL_VERSION_1;
     } else {

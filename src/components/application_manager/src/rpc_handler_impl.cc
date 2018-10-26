@@ -343,15 +343,15 @@ bool RPCHandlerImpl::ConvertMessageToSO(
       break;
     }
     case protocol_handler::MajorProtocolVersion::PROTOCOL_VERSION_1: {
-      static ns_smart_device_link_rpc::V1::v4_protocol_v1_2_no_extra v1_shema;
+      static NsSmartDeviceLinkRPC::V1::v4_protocol_v1_2_no_extra v1_shema;
 
       if (message.function_id() == 0 || message.type() == kUnknownType) {
         LOG4CXX_ERROR(logger_, "Message received: UNSUPPORTED_VERSION");
 
         int32_t conversation_result =
             formatters::CFormatterJsonSDLRPCv1::fromString<
-                ns_smart_device_link_rpc::V1::FunctionID::eType,
-                ns_smart_device_link_rpc::V1::messageType::eType>(
+                NsSmartDeviceLinkRPC::V1::FunctionID::eType,
+                NsSmartDeviceLinkRPC::V1::messageType::eType>(
                 message.json_message(), output);
 
         if (formatters::CFormatterJsonSDLRPCv1::kSuccess ==
@@ -360,7 +360,7 @@ bool RPCHandlerImpl::ConvertMessageToSO(
               smart_objects::SmartType::SmartType_Map);
 
           output[strings::params][strings::message_type] =
-              ns_smart_device_link_rpc::V1::messageType::response;
+              NsSmartDeviceLinkRPC::V1::messageType::response;
           output[strings::params][strings::connection_key] =
               message.connection_key();
 
@@ -368,7 +368,7 @@ bool RPCHandlerImpl::ConvertMessageToSO(
               smart_objects::SmartType::SmartType_Map);
           output[strings::msg_params][strings::success] = false;
           output[strings::msg_params][strings::result_code] =
-              ns_smart_device_link_rpc::V1::Result::UNSUPPORTED_VERSION;
+              NsSmartDeviceLinkRPC::V1::Result::UNSUPPORTED_VERSION;
 
           smart_objects::SmartObjectSPtr msg_to_send =
               std::make_shared<smart_objects::SmartObject>(output);
