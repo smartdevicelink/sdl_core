@@ -978,6 +978,8 @@ const char* EnumToJsonString(FunctionID val) {
       return "OnLanguageChange";
     case OnKeyboardInputID:
       return "OnKeyboardInput";
+    case OnSeekMediaClockTimerID:
+      return "OnSeekMediaClockTimer";
     case OnTouchEventID:
       return "OnTouchEvent";
     case OnSystemRequestID:
@@ -1301,6 +1303,11 @@ bool EnumFromJsonString(const std::string& literal, FunctionID* result) {
 
   if ("OnKeyboardInput" == literal) {
     *result = OnKeyboardInputID;
+    return true;
+  }
+
+  if ("OnSeekMediaClockTimer" == literal) {
+    *result = OnSeekMediaClockTimerID;
     return true;
   }
 

@@ -99,6 +99,7 @@ void MessageBrokerAdapter::SubscribeTo() {
   MessageBrokerController::subscribeTo("UI.OnSystemContext");
   MessageBrokerController::subscribeTo("UI.OnAppActivated");
   MessageBrokerController::subscribeTo("UI.OnKeyboardInput");
+  MessageBrokerController::subscribeTo("UI.OnSeekMediaClockTimer");
   MessageBrokerController::subscribeTo("UI.OnTouchEvent");
   MessageBrokerController::subscribeTo("UI.OnResetTimeout");
   MessageBrokerController::subscribeTo("TTS.OnResetTimeout");

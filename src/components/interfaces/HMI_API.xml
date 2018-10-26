@@ -4230,6 +4230,11 @@
     <param name="appID" type="Integer" mandatory="true">
       <description>ID of application that requested this RPC.</description>
     </param>
+    <param name="enableSeek" type="Boolean" mandatory="false">
+     <description>
+       Defines if seek media clock timer functionality will be available. If omitted, the value is set to false. The value is retained until the next SetMediaClockTimer is sent.
+     </description>
+    </param>
   </function>
   <function name="SetMediaClockTimer" messagetype="response">
   </function>
@@ -4265,6 +4270,16 @@
     <param name="appID" type="Integer" mandatory="true">
       <description>ID of application that is related to this RPC.</description>
     </param>
+  </function>
+  <function name="OnSeekMediaClockTimer" messagetype="notification">
+        <param name="seekTime" type="Common.TimeFormat" mandatory="true">
+            <description>See TimeFormat.</description>
+        </param>
+        <param name="appID" type="Integer" mandatory="true">
+            <description>
+		          The ID of application that relates to this media clock status change.
+            </description>
+        </param>
   </function>
   <function name="OnSystemContext" messagetype="notification">
     <description>

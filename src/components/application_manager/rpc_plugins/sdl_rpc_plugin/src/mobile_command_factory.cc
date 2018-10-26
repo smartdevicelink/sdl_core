@@ -73,6 +73,7 @@
 #include "sdl_rpc_plugin/commands/mobile/on_tbt_client_state_notification.h"
 #include "sdl_rpc_plugin/commands/mobile/on_hash_change_notification.h"
 #include "sdl_rpc_plugin/commands/mobile/on_way_point_change_notification.h"
+#include "sdl_rpc_plugin/commands/mobile/on_seek_media_clock_timer_notification.h"
 #include "sdl_rpc_plugin/commands/mobile/perform_audio_pass_thru_request.h"
 #include "sdl_rpc_plugin/commands/mobile/perform_audio_pass_thru_response.h"
 #include "sdl_rpc_plugin/commands/mobile/perform_interaction_request.h"
@@ -391,6 +392,10 @@ CommandCreator& MobileCommandFactory::get_creator_factory(
     case mobile_apis::FunctionID::OnWayPointChangeID: {
       using app_mngr::commands::Command;
       return factory.GetCreator<commands::OnWayPointChangeNotification>();
+    }
+    case mobile_apis::FunctionID::OnSeekMediaClockTimerID: {
+      return factory
+          .GetCreator<commands::mobile::OnSeekMediaClockTimerNotification>();
     }
     case mobile_apis::FunctionID::GenericResponseID: {
       using app_mngr::commands::Command;

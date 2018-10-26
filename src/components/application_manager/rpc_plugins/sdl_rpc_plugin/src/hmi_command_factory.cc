@@ -78,6 +78,7 @@
 #include "sdl_rpc_plugin/commands/hmi/close_popup_response.h"
 #include "sdl_rpc_plugin/commands/hmi/button_get_capabilities_request.h"
 #include "sdl_rpc_plugin/commands/hmi/button_get_capabilities_response.h"
+#include "sdl_rpc_plugin/commands/hmi/on_seek_media_clock_timer_notification.h"
 #include "sdl_rpc_plugin/commands/hmi/ui_add_command_request.h"
 #include "sdl_rpc_plugin/commands/hmi/ui_add_command_response.h"
 #include "sdl_rpc_plugin/commands/hmi/ui_delete_command_request.h"
@@ -694,6 +695,10 @@ CommandCreator& HMICommandFactory::get_creator_factory(
     }
     case hmi_apis::FunctionID::Buttons_OnButtonEvent: {
       return factory.GetCreator<commands::hmi::OnButtonEventNotification>();
+    }
+    case hmi_apis::FunctionID::UI_OnSeekMediaClockTimer: {
+      return factory
+          .GetCreator<commands::hmi::OnSeekMediaClockTimerNotification>();
     }
     case hmi_apis::FunctionID::Buttons_OnButtonPress: {
       return factory.GetCreator<commands::hmi::OnButtonPressNotification>();

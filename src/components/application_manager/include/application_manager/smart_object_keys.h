@@ -159,6 +159,7 @@ extern const char* minutes;
 extern const char* seconds;
 extern const char* update_mode;
 extern const char* audioStreamingIndicator;
+extern const char* enable_seek;
 extern const char* trigger_source;
 extern const char* hmi_level;
 extern const char* activate_app_hmi_level;

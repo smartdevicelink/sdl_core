@@ -127,6 +127,7 @@ generate_function_to_interface_convert_map() {
   convert_map[TTS_GetLanguage] = HmiInterfaces::HMI_INTERFACE_TTS;
   convert_map[TTS_SetGlobalProperties] = HmiInterfaces::HMI_INTERFACE_TTS;
   convert_map[TTS_OnResetTimeout] = HmiInterfaces::HMI_INTERFACE_TTS;
+  convert_map[UI_OnSeekMediaClockTimer] = HmiInterfaces::HMI_INTERFACE_UI;
   convert_map[UI_Alert] = HmiInterfaces::HMI_INTERFACE_UI;
   convert_map[UI_Show] = HmiInterfaces::HMI_INTERFACE_UI;
   convert_map[UI_AddCommand] = HmiInterfaces::HMI_INTERFACE_UI;

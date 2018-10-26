@@ -2632,6 +2632,7 @@
         <element name="OnInteriorVehicleDataID" value="32783" hexvalue="800F" since="4.5" />
         <element name="OnWayPointChangeID" value="32784" hexvalue="8010" since="4.1" />
         <element name="OnRCStatusID" value="32785" hexvalue="8011" since="5.0" />
+        <element name="OnSeekMediaClockTimerID" value="32786" hexvalue="8012" since="5.0" />
 
         <!--
          Ford Specific Request / Response RPCs
@@ -4684,6 +4685,18 @@
             <description>
                 Enumeration for the indicator icon on a play/pause button. see AudioStreamingIndicator.
             </description>
+        </param>
+        <param name="enableSeek" type="Boolean" mandatory="false">
+            <description>
+            Defines if seek media clock timer functionality will be available. If omitted, the value is set to false. The value is retained until the next SetMediaClockTimer is sent.
+            </description>
+        </param>
+    </function>
+
+    <function name="OnSeekMediaClockTimer" functionID="OnSeekMediaClockTimerID" messagetype="notification">
+        <description> Callback for the seek media clock timer notification. Notifies the application of progress bar seek event on the mediaclock timer. System will automatically update the media clock timer position based on the seek notification location. </description> 
+        <param name="seekTime" type="StartTime" mandatory="true">
+        <description>See StartTime.</description>
         </param>
     </function>
     

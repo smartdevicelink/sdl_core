@@ -524,6 +524,11 @@ enum FunctionID {
   OnRCStatusID = 32785,
 
   /**
+   * @brief OnSeekMediaClockTimerID.
+   */
+  OnSeekMediaClockTimerID = 32786,
+
+  /**
    * @brief EncodedSyncPDataID.
    */
   EncodedSyncPDataID = 65536,

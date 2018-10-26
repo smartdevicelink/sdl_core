@@ -126,6 +126,7 @@ const char* minutes = "minutes";
 const char* seconds = "seconds";
 const char* update_mode = "updateMode";
 const char* audioStreamingIndicator = "audioStreamingIndicator";
+const char* enable_seek = "enableSeek";
 const char* trigger_source = "triggerSource";
 const char* hmi_level = "hmiLevel";
 const char* activate_app_hmi_level = "level";
