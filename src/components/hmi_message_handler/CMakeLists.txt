@@ -1,4 +1,4 @@
-# Copyright (c) 2016, Ford Motor Company
+# Copyright (c) 2018, Ford Motor Company
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -39,34 +39,17 @@ target_sources(${PROJECT_NAME}
     "${CMAKE_CURRENT_LIST_DIR}/src/hmi_message_handler_impl.cc"
 )
 
-if(QNXNTO)
-  target_sources(${PROJECT_NAME}
-    PRIVATE
-      "${CMAKE_CURRENT_LIST_DIR}/src/message_queue/mq_mb_client.cc"
-      "${CMAKE_CURRENT_LIST_DIR}/src/message_queue/mq_mb_controller.cc"
-      "${CMAKE_CURRENT_LIST_DIR}/src/message_queue/mq_messagebroker_adapter.cc"
-      "${CMAKE_CURRENT_LIST_DIR}/src/message_queue/mq_messages_controller.cc"
-  )
-else()
-  target_sources(${PROJECT_NAME}
-    PRIVATE
-      "${CMAKE_CURRENT_LIST_DIR}/src/mb_controller.cc"
-      "${CMAKE_CURRENT_LIST_DIR}/src/messagebroker_adapter.cc"
-      "${CMAKE_CURRENT_LIST_DIR}/src/websocket_session.cc"
-  )
-  find_package(Boost REQUIRED
-               COMPONENTS system)
-  target_link_libraries(${PROJECT_NAME}
-    PUBLIC
-      Boost::system
-  )
-endif()
+target_sources(${PROJECT_NAME}
+  PRIVATE
+    "${CMAKE_CURRENT_LIST_DIR}/src/mb_controller.cc"
+    "${CMAKE_CURRENT_LIST_DIR}/src/messagebroker_adapter.cc"
+    "${CMAKE_CURRENT_LIST_DIR}/src/websocket_session.cc"
+)
 
 target_link_libraries(${PROJECT_NAME}
   PUBLIC
     utils::utils
     application_manager::application_manager
-    $<$<BOOL:${SYNC_USE_MQ_SERVER}>:mq>
   PRIVATE
     components::interface
 )

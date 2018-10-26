@@ -1,4 +1,4 @@
-# Copyright (c) 2016, Ford Motor Company
+# Copyright (c) 2018, Ford Motor Company
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -35,7 +35,7 @@ include("${CMAKE_SOURCE_DIR}/tools/cmake/helpers/generators.cmake")
 set(TARGET_NAME v4_protocol_v1_2_no_extra)
 add_library(${TARGET_NAME} STATIC)
 add_library(${PROJECT_NAME}::${TARGET_NAME} ALIAS ${TARGET_NAME})
-generate_interface("${CMAKE_CURRENT_SOURCE_DIR}/v4_protocol_v1_2_no_extra.xml" "NsSmartDeviceLinkRPC::V1" "sdlrpcv1" ${TARGET_NAME})
+generate_interface("${CMAKE_CURRENT_SOURCE_DIR}/v4_protocol_v1_2_no_extra.xml" "ns_smart_device_link_rpc::V1" "sdlrpcv1" ${TARGET_NAME})
 target_link_libraries(${TARGET_NAME}
   PUBLIC
     smart_objects::smart_objects

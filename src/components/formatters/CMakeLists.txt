@@ -1,4 +1,4 @@
-# Copyright (c) 2016, Ford Motor Company
+# Copyright (c) 2018, Ford Motor Company
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -48,7 +48,7 @@ target_link_libraries(${PROJECT_NAME}
   PUBLIC
     smart_objects::smart_objects
     utils::utils
-    jsoncpp
+    jsoncpp::jsoncpp
   PRIVATE
     components::interface
 )

@@ -1,4 +1,4 @@
-# Copyright (c) 2016, Ford Motor Company
+# Copyright (c) 2018, Ford Motor Company
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -48,11 +48,10 @@ target_link_libraries(${PROJECT_NAME}
     config_profile::config_profile
     protocol::protocol
     utils::utils
-    #transport_manager::transport_manager
     connection_handler::connection_handler
-    bson
   PRIVATE
     components::interface
+    bson
 )
 
 if(TELEMETRY_MONITOR)

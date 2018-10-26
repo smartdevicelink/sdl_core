@@ -1,4 +1,4 @@
-# Copyright (c) 2016, Ford Motor Company
+# Copyright (c) 2018, Ford Motor Company
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -74,7 +74,6 @@ target_link_libraries( ${PROJECT_NAME}
   PUBLIC
     utils::utils
     application_manager::application_manager
-    $<$<BOOL:${SYNC_USE_MQ_SERVER}>:mq>
   PRIVATE
     components::interface
 )

@@ -1,7 +1,7 @@
-# Copyright (c) 2016, Ford Motor Company
+# Copyright (c) 2018, Ford Motor Company
 # All rights reserved.
 #
-# Copyright (c) 2017 Xevo Inc.
+# Copyright (c) 2018 Xevo Inc.
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -135,8 +135,7 @@ target_link_libraries(${PROJECT_NAME}
     hmi_message_handler::hmi_message_handler
     Policy::Policy
     Policy::usage_statistics
-    bson
-    $<$<BOOL:${SYNC_USE_MQ_SERVER}>:mq>
+    # bson
   PRIVATE
     components::interface
 )
