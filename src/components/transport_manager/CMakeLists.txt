@@ -1,4 +1,4 @@
-# Copyright (c) 2017, Ford Motor Company
+# Copyright (c) 2018, Ford Motor Company
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -122,7 +122,6 @@ target_link_libraries(${PROJECT_NAME}
     protocol::protocol
     config_profile::config_profile
     resumption::resumption
-    $<$<BOOL:${SYNC_USE_MQ_SERVER}>:mq>
   PRIVATE
     components::interface
 )
@@ -134,9 +133,16 @@ if(TELEMETRY_MONITOR)
   )
 endif()
 
+if(QNXNTO)
+  target_include_directories(${PROJECT_NAME}
+    PUBLIC "${CMAKE_CURRENT_LIST_DIR}/include/transport_manager/tcp/platform_specific/qnx"
+  )
+else ()
+  target_include_directories(${PROJECT_NAME}
+  PUBLIC "${CMAKE_CURRENT_LIST_DIR}/include/transport_manager/tcp/platform_specific/linux"
+  )
+endif()
+
 target_include_directories(${PROJECT_NAME}
   PUBLIC "${CMAKE_CURRENT_LIST_DIR}/include"
-  PUBLIC "${CMAKE_CURRENT_LIST_DIR}/include/transport_manager/tcp/platform_specific/qnx"
 )
-
-#if BUILD_TESTS (Not just yet)

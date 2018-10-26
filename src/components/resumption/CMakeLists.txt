@@ -1,4 +1,4 @@
-# Copyright (c) 2017, Ford Motor Company
+# Copyright (c) 2018, Ford Motor Company
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -41,7 +41,7 @@ target_sources(${PROJECT_NAME}
 target_link_libraries(${PROJECT_NAME}
   PUBLIC
     utils::utils
-    jsoncpp
+    jsoncpp::jsoncpp
   PRIVATE
     components::interface
 )

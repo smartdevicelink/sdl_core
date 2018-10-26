@@ -21,7 +21,7 @@ target_sources(${PROJECT_NAME}
 
 target_link_libraries(${PROJECT_NAME}
   PUBLIC
-    jsoncpp
+    jsoncpp::jsoncpp
     utils::utils
     utils::dbms
     config_profile::config_profile

@@ -44,8 +44,9 @@ if(QNXNTO)
   )
 endif()
 
+find_package(Boost 1.66 COMPONENTS system thread REQUIRED)	
+
 if(ENABLE_LOG)
-  find_package(Boost 1.65 COMPONENTS system thread REQUIRED)
   find_package(EXPAT REQUIRED)
 
   target_sources(${PROJECT_NAME}
@@ -62,10 +63,10 @@ if(ENABLE_LOG)
       libaprutil-1.so
       log4cxx
       EXPAT::EXPAT
+      config_profile::config_profile
       Boost::boost
       Boost::system
       ${Boost_LIBRARIES}
-      config_profile::config_profile
   )
   target_compile_definitions(${PROJECT_NAME}
     PUBLIC
@@ -90,7 +91,7 @@ target_link_libraries(${PROJECT_NAME}
 target_include_directories(${PROJECT_NAME}
   PUBLIC
     "${CMAKE_CURRENT_LIST_DIR}/include"
-    # To make an opportunity include from appMain directory
+    "${CMAKE_CURRENT_LIST_DIR}/include/utils"
     "${CMAKE_SOURCE_DIR}/src"
 )
 
