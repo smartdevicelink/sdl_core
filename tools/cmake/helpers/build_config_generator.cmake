@@ -20,8 +20,6 @@ function(generate_build_config BUILD_CONFIG_FILENAME)
   _add_build_option_record(BUILD_BT_SUPPORT ${BUILD_CONFIG_FILENAME})
   _add_build_option_record(BUILD_USB_SUPPORT ${BUILD_CONFIG_FILENAME})
   _add_build_option_record(ENABLE_SECURITY ${BUILD_CONFIG_FILENAME})
-  # TODO: Uncomment when options will be integrated.
-  # _add_build_option_record(EXTENDED_MEDIA_MODE ${BUILD_CONFIG_FILENAME})
   _add_build_option_record(TELEMETRY_MONITOR ${BUILD_CONFIG_FILENAME})
   _add_build_option_record(HMI ${BUILD_CONFIG_FILENAME})
   _add_build_option_record(ENABLE_HMI_PTU_DECRYPTION ${BUILD_CONFIG_FILENAME})

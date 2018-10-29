@@ -356,10 +356,6 @@ target_sources(${PROJECT_NAME}
     "${CMAKE_CURRENT_LIST_DIR}/src/commands/mobile/unsubscribe_way_points_response.cc"
     "${CMAKE_CURRENT_LIST_DIR}/src/commands/mobile/update_turn_list_request.cc"
     "${CMAKE_CURRENT_LIST_DIR}/src/commands/mobile/update_turn_list_response.cc"
-
-    # TODO: Temporary solution for fixing error:
-    # 'LoadPlugin: Failed to open dll .//libsdl_rpc_plugins.so : .//libsdl_rpc_plugins.so: undefined symbol: _ZN5utils11version_4_5E'
-    # Provide symbol 'version_4_5' for plugin
     "${CMAKE_SOURCE_DIR}/src/components/utils/src/semantic_version.cc"
 )
 

@@ -1,4 +1,4 @@
-# Copyright (c) 2016, Ford Motor Company
+# Copyright (c) 2018, Ford Motor Company
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -35,13 +35,13 @@ add_executable(${PROJECT_NAME}::${PROJECT_NAME} ALIAS ${PROJECT_NAME})
 
 target_sources(${PROJECT_NAME}
   PRIVATE
-    $<$<PLATFORM_ID:QNX>:${CMAKE_CURRENT_LIST_DIR}/qnx_main.cc>
-    $<$<NOT:$<PLATFORM_ID:QNX>>:${CMAKE_CURRENT_LIST_DIR}/main.cc>
+    "${CMAKE_CURRENT_LIST_DIR}/main.cc"
     "${CMAKE_CURRENT_LIST_DIR}/life_cycle_impl.cc"
     "${CMAKE_CURRENT_LIST_DIR}/low_voltage_signals_handler.cc"
     "${CMAKE_CURRENT_LIST_DIR}/signal_handlers.cc"
 )
 
+find_package(Boost 1.66.0 COMPONENTS system filesystem)
 
 target_link_libraries(${PROJECT_NAME}
   PUBLIC
@@ -52,12 +52,11 @@ target_link_libraries(${PROJECT_NAME}
     transport_manager::transport_manager
     $<$<BOOL:${TELEMETRY_MONITOR}>:telemetry_monitor::telemetry_monitor>
     utils::utils
-    $<$<BOOL:${SYNC_USE_MQ_SERVER}>:mq>
   PRIVATE
     components::interface
     Policy::usage_statistics
-    libboost_filesystem.so.1.66.0
-    libboost_thread.so.1.66.0
+    Boost::system
+    Boost::filesystem
 )
 
 target_include_directories(${PROJECT_NAME}
@@ -91,7 +90,7 @@ target_include_directories(${PROJECT_NAME}
       "${MESSAGE_BROKER_INCLUDE_DIRECTORY}"
       "${BOOST_INCLUDE_DIR}"
       "${CMAKE_SOURCE_DIR}/src"
-) 
+)
 
 
 if(UNIX AND NOT QNXNTO)
@@ -107,11 +106,11 @@ elseif(QNXNTO)
   )
 endif()
 
-# if (BUILD_BT_SUPPORT)
-#   target_link_libraries(${PROJECT_NAME}
-#     PRIVATE bluetooth
-#   )
-# endif()
+if (BUILD_BT_SUPPORT)
+  target_link_libraries(${PROJECT_NAME}
+    PRIVATE bluetooth
+  )
+endif()
 
 if (BUILD_USB_SUPPORT)
   if(UNIX AND NOT QNXNTO)
@@ -127,9 +126,9 @@ install(
   COMPONENT sdl_core
 )
 
-# Print/Generate SDL dependencies file only for QNX platform 
+# Print/Generate SDL dependencies file only for QNX platform
 if (QNXNTO)
-  if (CMAKE_HOST_UNIX) # Available only for unix-based operation systems 
+  if (CMAKE_HOST_UNIX) # Available only for unix-based operation systems
     set(BUILD_IDS_FILE ${CMAKE_BINARY_DIR}/build_ids.txt)
     set(BUILD_IDS_SEARCH_PATH ${CMAKE_BINARY_DIR} ${CMAKE_FIND_ROOT_PATH})
 
@@ -147,6 +146,8 @@ endif(QNXNTO)
 
 get_property(GIT_COMMIT GLOBAL PROPERTY SDL_VERSION_GIT_COMMIT)
 
+set(SDL_IN_CONFIG_FILE "${CMAKE_CURRENT_LIST_DIR}/smartDeviceLink.ini")
+
 if(QNXNTO)
   set(SDL_CONFIG_PATH "/${SDL_CONFIG_INSTALL_DIR}")
   set(SDL_CACERTIFICATE_PATH "/${SDL_CONFIG_INSTALL_DIR}")
@@ -156,30 +157,6 @@ if(QNXNTO)
   set(SDL_LOG_FILE "${SDL_LOG_PATH}/${SDL_LOG_FILENAME}")
   set(SDL_STORAGE_PATH "/fs/storage/rwdata/storage/sdl")
   set(SDL_TMPDIR_PATH "/fs/tmpfs")
-
-  set(SDL_IN_CONFIG_FILE "${CMAKE_CURRENT_LIST_DIR}/smartDeviceLink_qnx.ini")
-
-  set(SDL_IN_LOG_CONFIG_FILE "${CMAKE_CURRENT_SOURCE_DIR}/log4cxx_qnx.properties")
-  set(SDL_OUT_LOG_CONFIG_FILE "${CMAKE_CURRENT_BINARY_DIR}/log4cxx.properties")
-  configure_file(
-    ${SDL_IN_LOG_CONFIG_FILE}
-    ${SDL_OUT_LOG_CONFIG_FILE}
-  @ONLY
-  NEWLINE_STYLE UNIX
-  )
-  list(APPEND SDL_LOG_CONFIG_LIST ${SDL_OUT_LOG_CONFIG_FILE})
-
-  # Install log properties for debug reasons.
-  # TODO: Remove this for production
-  set(SDL_IN_LOG_CONFIG_FILE "${CMAKE_CURRENT_SOURCE_DIR}/log4cxx_qnx.debug.properties")
-  set(SDL_OUT_LOG_CONFIG_FILE "${CMAKE_CURRENT_BINARY_DIR}/log4cxx.debug.properties")
-  configure_file(
-    ${SDL_IN_LOG_CONFIG_FILE}
-    ${SDL_OUT_LOG_CONFIG_FILE}
-  @ONLY
-  NEWLINE_STYLE UNIX
-  )
-  list(APPEND SDL_LOG_CONFIG_LIST ${SDL_OUT_LOG_CONFIG_FILE})
 
   set(POLICY_QDB_DB_INITIALIZER "${CMAKE_CURRENT_LIST_DIR}/init_policy.sh")
   install(
@@ -200,7 +177,7 @@ else()
   set(SDL_LOG_FILE ${SDL_LOG_FILENAME})
   set(SDL_STORAGE_PATH "storage")
 
-  set(SDL_IN_CONFIG_FILE "${CMAKE_CURRENT_LIST_DIR}/smartDeviceLink.ini")
+  
 
   configure_file(
     "${CMAKE_CURRENT_SOURCE_DIR}/log4cxx.properties"

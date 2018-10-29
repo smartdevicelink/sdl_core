@@ -90,7 +90,6 @@ target_link_libraries(${PROJECT_NAME}
 target_include_directories(${PROJECT_NAME}
   PUBLIC
     "${CMAKE_CURRENT_LIST_DIR}/include"
-    # To make an opportunity include from appMain directory
     "${CMAKE_SOURCE_DIR}/src"
 )
 

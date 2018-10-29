@@ -1,4 +1,4 @@
-# Copyright (c) 2017, Ford Motor Company
+# Copyright (c) 2018, Ford Motor Company
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -177,7 +177,6 @@ target_link_libraries(${PROJECT_NAME}
     protocol::protocol
     config_profile::config_profile
     resumption::resumption
-    $<$<BOOL:${SYNC_USE_MQ_SERVER}>:mq>
   PRIVATE
     components::interface
 )

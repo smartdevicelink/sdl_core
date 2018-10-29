@@ -1,4 +1,4 @@
-# Copyright (c) 2014, Ford Motor Company
+# Copyright (c) 2018, Ford Motor Company
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -280,9 +280,6 @@ add_custom_target(genivi-tarball
   COMMAND tar -cz -C /tmp/GENIVI -f ${CMAKE_BINARY_DIR}/genivi.tar.gz .
 )
 
-
-#ADD_DEPENDENCIES(${PROJECT} Policy)
-
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
 
 # Please do not change compiler/linker flags if You do not know how particular
@@ -291,17 +288,6 @@ set(CMAKE_INSTALL_PREFIX ${CMAKE_CURRENT_BINARY_DIR})
 set(ARCHIVE_OUTPUT_DIRECTORY ./bin)
 
 set(CMAKE_CXX_FLAGS "-fPIC -std=gnu++0x -Wall -Werror -Wuninitialized -Wvla")
-
-# if (USE_GOLD_LD)
-#   execute_process(COMMAND ld -v OUTPUT_VARIABLE result)
-#   string(FIND ${result} Binutils GOLD_LD_FOUND)
-#   if (GOLD_LD_FOUND EQUAL -1)
-#     message(SEND_ERROR "Gold linker not found!")
-#   else()
-#     message(INFO " Use gold linker")
-#     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fuse-ld=gold")
-#   endif()
-# endif(USE_GOLD_LD)
 
 if (USE_CCACHE)
 # Configure CCache if available
@@ -357,19 +343,6 @@ elseif(CMAKE_SYSTEM_NAME STREQUAL "QNX")
   SET(EXTENDED_MEDIA_MODE OFF)
 endif()
 
-
-# if (BUILD_USB_SUPPORT)
-#   add_definitions(-DUSB_SUPPORT)
-#   find_package(UDev REQUIRED)
-#   message(STATUS "USB support enabled")
-# endif()
-
-
-# if (BUILD_BT_SUPPORT)
-#   add_definitions(-DBLUETOOTH_SUPPORT)
-#   message(STATUS "Bluetooth support enabled")
-# endif()
-
 if (BUILD_BACKTRACE_SUPPORT)
   add_definitions(-DBACKTRACE_SUPPORT)
   message(STATUS "Backtrace support enabled")
@@ -388,7 +361,6 @@ if (TELEMETRY_MONITOR)
   message(STATUS "Telemetry monitor enabled")
 endif()
 
-# TODO(AK): check current OS here
 add_definitions(-DOS_POSIX)
 
 if (EXTENDED_MEDIA_MODE)
@@ -425,7 +397,6 @@ if(ENABLE_SECURITY)
   add_definitions(-DENABLE_SECURITY)
   set(SecurityManagerLibrary SecurityManager)
   set(SecurityManagerIncludeDir ${COMPONENTS_DIR}/security_manager/include)
-  #set(SecurityManagerTestIncludeDir ${CMAKE_SOURCE_DIR}/test/components/security_manager/include)
   message(STATUS "Security enabled")
 endif()
 

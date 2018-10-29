@@ -1,4 +1,4 @@
-# Copyright (c) 2014, Ford Motor Company
+# Copyright (c) 2018, Ford Motor Company
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -70,14 +70,14 @@ endif()
 
 add_subdirectory(application_manager)
 add_subdirectory(config_profile)
-add_subdirectory(connection_handler)  
+add_subdirectory(connection_handler)
 add_subdirectory(formatters)
-add_subdirectory(hmi_message_handler)  
+add_subdirectory(hmi_message_handler)
 add_subdirectory(interfaces)
 add_subdirectory(media_manager)
 add_subdirectory(protocol)
 add_subdirectory(protocol_handler)
-add_subdirectory(resumption)   
+add_subdirectory(resumption)
 add_subdirectory(rpc_base)
 add_subdirectory(smart_objects)
 add_subdirectory(transport_manager)
