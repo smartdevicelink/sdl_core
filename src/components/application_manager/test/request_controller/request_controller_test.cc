@@ -44,12 +44,13 @@
 
 #include "application_manager/mock_application_manager.h"
 #include "application_manager/event_engine/event_dispatcher.h"
-#include "resumption/last_state.h"
 #include "application_manager/policies/policy_handler.h"
 #include "application_manager/state_controller.h"
 #include "application_manager/resumption/resume_ctrl.h"
 #include "application_manager/mock_request_controller_settings.h"
 #include "application_manager/mock_application_manager.h"
+#include "application_manager/mock_reset_timeout_handler.h"
+#include "resumption/last_state.h"
 #include "utils/test_async_waiter.h"
 
 namespace test {
@@ -58,6 +59,7 @@ namespace request_controller_test {
 
 using ::application_manager::request_controller::RequestController;
 using ::application_manager::request_controller::RequestInfo;
+using test::components::application_manager_test::MockResetTimeoutHandler;
 
 using ::testing::Return;
 using ::testing::ReturnRef;
@@ -104,8 +106,8 @@ class RequestControllerTestClass : public ::testing::Test {
   RequestControllerTestClass() {
     ON_CALL(mock_request_controller_settings_, thread_pool_size())
         .WillByDefault(Return(kThreadPoolSize));
-    request_ctrl_ =
-        std::make_shared<RequestController>(mock_request_controller_settings_);
+    request_ctrl_ = std::make_shared<RequestController>(
+        mock_request_controller_settings_, mock_reset_timeout_);
   }
 
   RequestPtr GetMockRequest(
@@ -155,6 +157,7 @@ class RequestControllerTestClass : public ::testing::Test {
 
   NiceMock<application_manager_test::MockRequestControlerSettings>
       mock_request_controller_settings_;
+  MockResetTimeoutHandler mock_reset_timeout_;
   RequestControllerSPtr request_ctrl_;
   RequestPtr empty_mock_request_;
   const TestSettings default_settings_;
