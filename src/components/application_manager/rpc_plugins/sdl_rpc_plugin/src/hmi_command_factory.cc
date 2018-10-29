@@ -235,6 +235,8 @@
 #include "sdl_rpc_plugin/commands/hmi/dial_number_response.h"
 #include "sdl_rpc_plugin/commands/hmi/ui_send_haptic_data_request.h"
 #include "sdl_rpc_plugin/commands/hmi/ui_send_haptic_data_response.h"
+#include "sdl_rpc_plugin/commands/hmi/ui_show_app_menu_request.h"
+#include "sdl_rpc_plugin/commands/hmi/ui_show_app_menu_response.h"
 
 #include "sdl_rpc_plugin/commands/hmi/rc_is_ready_request.h"
 #include "sdl_rpc_plugin/commands/hmi/rc_is_ready_response.h"
@@ -393,6 +395,11 @@ CommandCreator& HMICommandFactory::get_creator_factory(
       return hmi_apis::messageType::request == message_type
                  ? factory.GetCreator<commands::UIDeleteSubmenuRequest>()
                  : factory.GetCreator<commands::UIDeleteSubmenuResponse>();
+    }
+    case hmi_apis::FunctionID::UI_ShowAppMenu: {
+      return hmi_apis::messageType::request == message_type
+                 ? factory.GetCreator<commands::UIShowAppMenuRequest>()
+                 : factory.GetCreator<commands::UIShowAppMenuResponse>();
     }
     case hmi_apis::FunctionID::UI_SetMediaClockTimer: {
       return hmi_apis::messageType::request == message_type

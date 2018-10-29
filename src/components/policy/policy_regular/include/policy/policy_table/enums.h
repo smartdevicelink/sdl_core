@@ -420,6 +420,11 @@ enum FunctionID {
   SendHapticDataID = 49,
 
   /**
+   * @brief ShowAppMenuID.
+   **/
+  ShowAppMenuID = 50,
+
+  /**
    * @brief OnHMIStatusID.
    */
   OnHMIStatusID = 32768,

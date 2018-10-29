@@ -124,6 +124,8 @@
 #include "sdl_rpc_plugin/commands/mobile/dial_number_response.h"
 #include "sdl_rpc_plugin/commands/mobile/send_haptic_data_request.h"
 #include "sdl_rpc_plugin/commands/mobile/send_haptic_data_response.h"
+#include "sdl_rpc_plugin/commands/mobile/show_app_menu_request.h"
+#include "sdl_rpc_plugin/commands/mobile/show_app_menu_response.h"
 #include "interfaces/MOBILE_API.h"
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "ApplicationManager")
@@ -180,6 +182,11 @@ CommandCreator& MobileCommandFactory::get_creator_factory(
       return mobile_api::messageType::request == message_type
                  ? factory.GetCreator<commands::DeleteSubMenuRequest>()
                  : factory.GetCreator<commands::DeleteSubMenuResponse>();
+    }
+    case mobile_apis::FunctionID::ShowAppMenuID: {
+      return mobile_api::messageType::request == message_type
+                 ? factory.GetCreator<commands::ShowAppMenuRequest>()
+                 : factory.GetCreator<commands::ShowAppMenuResponse>();
     }
     case mobile_apis::FunctionID::DeleteInteractionChoiceSetID: {
       return mobile_api::messageType::request == message_type

@@ -881,6 +881,11 @@ bool EnumFromJsonString(const std::string& literal, FunctionID* result) {
     return true;
   }
 
+  if ("ShowAppMenu" == literal) {
+    *result = ShowAppMenuID;
+    return true;
+  }
+
   if ("CreateInteractionChoiceSet" == literal) {
     *result = CreateInteractionChoiceSetID;
     return true;
