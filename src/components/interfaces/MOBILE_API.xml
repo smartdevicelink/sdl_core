@@ -1,7 +1,7 @@
 <?xml version="1.0" standalone="no"?>
 <?xml-stylesheet type="text/xml" href="protocol2html.xsl"?>
 
-<interface name="SmartDeviceLink RAPI" version="4.5.0" date="2017-09-22">
+<interface name="SmartDeviceLink RAPI" version="4.5.1" date="2018-10-10">
     <enum name="Result" internal_scope="base">
         <element name="SUCCESS">
             <description>The request succeeded</description>
@@ -1997,7 +1997,7 @@
         <param name="remoteControl" type="Boolean" mandatory="false">
             <description>Availability of remote control feature. True: Available, False: Not Available</description>
         </param>
-    </struct>         
+    </struct>
     <struct name="MenuParams">
         <param name="parentID" type="Integer" minvalue="0" maxvalue="2000000000" defvalue="0" mandatory="false">
             <description>
@@ -2600,7 +2600,7 @@
             <description>If the signal strength falls below the set value for this parameter, the radio will tune to an alternative frequency</description>
         </param>
         <param name="radioEnable" type="Boolean" mandatory="false">
-            <description> True if the radio is on, false is the radio is off</description>
+            <description> True if the radio is on, false is the radio is off. If set to false, no other data will be included.</description>
         </param>
         <param name="state" type="RadioState" mandatory="false">
         </param>
@@ -5471,10 +5471,11 @@
                 In the future, this should be the Identification of a module.
             </description>
         </param>
-        <param name="subscribe" type="Boolean" mandatory="false" defvalue="false">
+        <param name="subscribe" type="Boolean" mandatory="false">
             <description>
-                If subscribe is true, the head unit will register onInteriorVehicleData notifications for the requested moduelType.
-                If subscribe is false, the head unit will unregister onInteriorVehicleData notifications for the requested moduelType.
+                If subscribe is true, the head unit will register OnInteriorVehicleData notifications for the requested moduleType.
+                If subscribe is false, the head unit will unregister OnInteriorVehicleData notifications for the requested moduleType.
+                If subscribe is not included, the subscription status of the app for the requested moduleType will remain unchanged.
             </description>
         </param>
     </function>
