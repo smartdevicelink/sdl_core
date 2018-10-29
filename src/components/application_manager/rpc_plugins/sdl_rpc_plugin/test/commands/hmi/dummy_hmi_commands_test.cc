@@ -196,7 +196,6 @@
 #include "hmi/on_button_subscription_notification.h"
 #include "hmi/on_ui_keyboard_input_notification.h"
 #include "hmi/on_ui_touch_event_notification.h"
-#include "hmi/on_ui_reset_timeout_notification.h"
 #include "hmi/navi_start_stream_request.h"
 #include "hmi/navi_start_stream_response.h"
 #include "hmi/navi_stop_stream_request.h"
@@ -220,7 +219,7 @@
 #include "hmi/on_device_state_changed_notification.h"
 #include "hmi/navi_send_location_request.h"
 #include "hmi/navi_send_location_response.h"
-#include "hmi/on_tts_reset_timeout_notification.h"
+#include "hmi/on_reset_timeout_notification.h"
 #include "hmi/dial_number_request.h"
 #include "hmi/dial_number_response.h"
 
@@ -453,7 +452,6 @@ typedef Types<commands::hmi::OnButtonEventNotification,
               commands::OnNaviTBTClientStateNotification,
               commands::hmi::OnUIKeyBoardInputNotification,
               commands::hmi::OnUITouchEventNotification,
-              commands::hmi::OnUIResetTimeoutNotification,
               commands::NaviStartStreamResponse,
               commands::NaviStartStreamRequest,
               commands::NaviStopStreamResponse,
@@ -484,7 +482,7 @@ typedef Types<commands::hmi::OnButtonEventNotification,
               commands::OnReceivedPolicyUpdate,
               commands::OnPolicyUpdate,
               commands::OnDeviceStateChangedNotification,
-              commands::hmi::OnTTSResetTimeoutNotification,
+              commands::hmi::OnResetTimeoutNotification,
               commands::hmi::DialNumberResponse,
               commands::hmi::DialNumberRequest,
               commands::OnEventChangedNotification,
