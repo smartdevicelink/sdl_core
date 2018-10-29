@@ -60,10 +60,9 @@
 #include "sdl_rpc_plugin/commands/hmi/on_button_press_notification.h"
 #include "sdl_rpc_plugin/commands/hmi/on_event_changed_notification.h"
 #include "sdl_rpc_plugin/commands/hmi/on_ready_notification.h"
-#include "sdl_rpc_plugin/commands/hmi/on_tts_reset_timeout_notification.h"
 #include "sdl_rpc_plugin/commands/hmi/on_tts_started_notification.h"
 #include "sdl_rpc_plugin/commands/hmi/on_tts_stopped_notification.h"
-#include "sdl_rpc_plugin/commands/hmi/on_ui_reset_timeout_notification.h"
+#include "sdl_rpc_plugin/commands/hmi/on_reset_timeout_notification.h"
 #include "sdl_rpc_plugin/commands/hmi/on_vr_started_notification.h"
 #include "sdl_rpc_plugin/commands/hmi/on_vr_stopped_notification.h"
 #include "sdl_rpc_plugin/commands/hmi/on_app_permission_consent_notification.h"
@@ -329,7 +328,7 @@ typedef Types<
     CommandPair<OnEventChangedNotification,
                 hmi_apis::FunctionID::BasicCommunication_OnEventChanged>,
     CommandPair<hmi::OnResetTimeoutNotification,
-                hmi_apis::FunctionID::OnResetTimeout>,
+                hmi_apis::FunctionID::BasicCommunication_OnResetTimeout>,
     CommandPair<OnTTSStartedNotification, hmi_apis::FunctionID::TTS_Started>,
     CommandPair<OnTTSStoppedNotification, hmi_apis::FunctionID::TTS_Stopped>,
     CommandPair<OnVRStartedNotification, hmi_apis::FunctionID::VR_Started>,

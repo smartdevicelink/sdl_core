@@ -42,6 +42,7 @@
 #include "application_manager/mock_rpc_plugin.h"
 #include "application_manager/mock_command_factory.h"
 #include "application_manager/mock_event_dispatcher.h"
+#include "application_manager/mock_reset_timeout_handler.h"
 #include "application_manager/message.h"
 #include "rc_rpc_plugin/rc_rpc_plugin.h"
 #include "rc_rpc_plugin/rc_module_constants.h"
@@ -84,6 +85,7 @@ using test::components::hmi_message_handler_test::MockHMIMessageHandler;
 using test::components::application_manager_test::MockHMICapabilities;
 using test::components::application_manager_test::MockCommandFactory;
 using test::components::policy_test::MockPolicyHandlerInterface;
+using test::components::application_manager_test::MockResetTimeoutHandler;
 
 namespace rc_rpc_plugin_test {
 using namespace rc_rpc_plugin;
@@ -101,7 +103,7 @@ class RCGetInteriorVehicleDataConsentTest
   RCGetInteriorVehicleDataConsentTest()
       : mock_app_(std::make_shared<NiceMock<MockApplication> >())
       , command_holder(app_mngr_)
-      , request_controller(mock_request_controler)
+      , request_controller(mock_request_controler, mock_reset_timeout_)
       , rpc_service_(app_mngr_,
                      request_controller,
                      &mock_protocol_handler,
@@ -187,6 +189,7 @@ class RCGetInteriorVehicleDataConsentTest
   smart_objects::SmartObject rc_capabilities_;
   MockRPCPlugin mock_rpc_plugin;
   MockCommandFactory mock_command_factory;
+  MockResetTimeoutHandler mock_reset_timeout_;
   am::request_controller::RequestController request_controller;
   am::rpc_service::RPCServiceImpl rpc_service_;
   std::shared_ptr<RCAppExtension> rc_app_extention_;
