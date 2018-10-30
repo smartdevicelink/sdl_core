@@ -81,7 +81,7 @@ void SubscribeButtonRequest::Run() {
     return;
   }
 
-  app->PendingSubscriptionButtons()[correlation_id()] = button_name_;
+  app->AddPendingSubscriptionButton(correlation_id(), button_name_);
 
   SendRequest();
 }
@@ -103,7 +103,7 @@ void SubscribeButtonRequest::onTimeOut() {
     return;
   }
 
-  app->PendingSubscriptionButtons().erase(correlation_id());
+  app->RemovePendingSubscriptionButton(correlation_id());
 
   resume_ctrl.HandleOnTimeOut(
       correlation_id(),
@@ -145,7 +145,7 @@ void SubscribeButtonRequest::on_event(const event_engine::Event& event) {
         static_cast<mobile_apis::ButtonName::eType>(
             (*message_)[strings::msg_params][strings::button_name].asInt());
     app->SubscribeToButton(static_cast<mobile_apis::ButtonName::eType>(btn_id));
-    app->PendingSubscriptionButtons().erase(correlation_id());
+    app->RemovePendingSubscriptionButton(correlation_id());
   } else if (!is_in_pending) {
     smart_objects::SmartObjectSPtr msg =
         MessageHelper::CreateButtonSubscriptionHandlingRequestToHmi(

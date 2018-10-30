@@ -407,15 +407,49 @@ class ApplicationImpl : public virtual Application,
 
   void SwapMobileMessageQueue(MobileMessageQueue& mobile_messages) OVERRIDE;
 
-  std::map<int32_t, hmi_apis::Common_ButtonName::eType>&
-  PendingSubscriptionButtons() OVERRIDE {
-    return pending_subscription_buttons_;
-  }
+  /**
+   * @brief Get map of pending button subscription requests correlation ids
+   * to button names
+   * @return pending button subscriptions map
+   */
+  const std::map<int32_t, hmi_apis::Common_ButtonName::eType>&
+  PendingSubscriptionButtons() const OVERRIDE;
 
-  std::map<int32_t, hmi_apis::Common_ButtonName::eType>&
-  PendingUnsubscriptionButtons() OVERRIDE {
-    return pending_unsubscription_buttons_;
-  }
+  /**
+   * @brief Add  pending button subscription request
+   * @param correlation_id - correlation id of subscription request
+   * @param button_name - enum value indication button name
+   */
+  void AddPendingSubscriptionButton(
+      const int32_t correlation_id,
+      const hmi_apis::Common_ButtonName::eType button_name) OVERRIDE;
+  /**
+   * @brief Remove pending button subscription request
+   * @param correlation_id - correlation id of subscription request
+   */
+  void RemovePendingSubscriptionButton(const int32_t correlation_id) OVERRIDE;
+
+  /**
+   * @brief Get map of pending button unsubscription requests correlation ids
+   * to button names
+   * @return pending button unsubscriptions map
+   */
+  const std::map<int32_t, hmi_apis::Common_ButtonName::eType>&
+  PendingUnsubscriptionButtons() const OVERRIDE;
+
+  /**
+   * @brief Add  pending button unsubscription request
+   * @param correlation_id - correlation id of unsubscription request
+   * @param button_name - enum value indication button name
+   */
+  void AddPendingUnsubscriptionButton(
+      const int32_t correlation_id,
+      const hmi_apis::Common_ButtonName::eType button_name) OVERRIDE;
+  /**
+   * @brief Remove pending button unsubscription request
+   * @param correlation_id - correlation id of unsubscription request
+   */
+  void RemovePendingUnsubscriptionButton(const int32_t correlation_id) OVERRIDE;
 
  protected:
   /**

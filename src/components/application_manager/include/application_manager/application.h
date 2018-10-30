@@ -935,11 +935,51 @@ class Application : public virtual InitialApplicationData,
    */
   virtual const std::list<AppExtensionPtr>& Extensions() const = 0;
 
-  virtual std::map<int32_t, hmi_apis::Common_ButtonName::eType>&
-  PendingSubscriptionButtons() = 0;
+  /**
+   * @brief Get map of pending button subscription requests correlation ids
+   * to button names
+   * @return pending button subscriptions map
+   */
+  const virtual std::map<int32_t, hmi_apis::Common_ButtonName::eType>&
+  PendingSubscriptionButtons() const = 0;
 
-  virtual std::map<int32_t, hmi_apis::Common_ButtonName::eType>&
-  PendingUnsubscriptionButtons() = 0;
+  /**
+   * @brief Add  pending button subscription request
+   * @param correlation_id - correlation id of subscription request
+   * @param button_name - enum value indication button name
+   */
+  virtual void AddPendingSubscriptionButton(
+      const int32_t correlation_id,
+      const hmi_apis::Common_ButtonName::eType button_name) = 0;
+  /**
+   * @brief Remove pending button subscription request
+   * @param correlation_id - correlation id of subscription request
+   */
+  virtual void RemovePendingSubscriptionButton(
+      const int32_t correlation_id) = 0;
+
+  /**
+   * @brief Get map of pending button unsubscription requests correlation ids
+   * to button names
+   * @return pending button unsubscriptions map
+   */
+  const virtual std::map<int32_t, hmi_apis::Common_ButtonName::eType>&
+  PendingUnsubscriptionButtons() const = 0;
+
+  /**
+   * @brief Add  pending button unsubscription request
+   * @param correlation_id - correlation id of unsubscription request
+   * @param button_name - enum value indication button name
+   */
+  virtual void AddPendingUnsubscriptionButton(
+      const int32_t correlation_id,
+      const hmi_apis::Common_ButtonName::eType button_name) = 0;
+  /**
+   * @brief Remove pending button unsubscription request
+   * @param correlation_id - correlation id of unsubscription request
+   */
+  virtual void RemovePendingUnsubscriptionButton(
+      const int32_t correlation_id) = 0;
 
  protected:
   mutable sync_primitives::Lock hmi_states_lock_;
