@@ -618,4 +618,12 @@ MessageHelper::CreateGlobalPropertiesRequestsToHMI(
       ->CreateGlobalPropertiesRequestsToHMI(app, app_mngr);
 }
 
+smart_objects::SmartObjectSPtr MessageHelper::CreateButtonNotificationToMobile(
+    ApplicationManager& app_mngr,
+    ApplicationSharedPtr app,
+    const smart_objects::SmartObject& source_message) {
+  return MockMessageHelper::message_helper_mock()
+      ->CreateButtonNotificationToMobile(app_mngr, app, source_message);
+}
+
 }  // namespace application_manager

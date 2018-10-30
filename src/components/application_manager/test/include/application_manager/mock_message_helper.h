@@ -340,6 +340,11 @@ class MockMessageHelper {
   MOCK_METHOD2(CreateGlobalPropertiesRequestsToHMI,
                smart_objects::SmartObjectList(ApplicationConstSharedPtr app,
                                               ApplicationManager& app_mngr));
+  MOCK_METHOD3(CreateButtonNotificationToMobile,
+               smart_objects::SmartObjectSPtr(
+                   ApplicationManager& app_mngr,
+                   ApplicationSharedPtr app,
+                   const smart_objects::SmartObject& source_message));
 
   static MockMessageHelper* message_helper_mock();
 };

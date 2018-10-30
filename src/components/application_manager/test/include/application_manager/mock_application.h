@@ -340,6 +340,10 @@ class MockApplication : public ::application_manager::Application {
                      const std::list<application_manager::AppExtensionPtr>&());
   MOCK_CONST_METHOD0(is_remote_control_supported, bool());
   MOCK_METHOD1(set_remote_control_supported, void(const bool allow));
+  MOCK_METHOD0(PendingSubscriptionButtons,
+               std::map<int32_t, hmi_apis::Common_ButtonName::eType>&());
+  MOCK_METHOD0(PendingUnsubscriptionButtons,
+               std::map<int32_t, hmi_apis::Common_ButtonName::eType>&());
 };
 
 }  // namespace application_manager_test
