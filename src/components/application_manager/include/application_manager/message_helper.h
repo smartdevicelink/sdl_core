@@ -289,6 +289,11 @@ class MessageHelper {
       const hmi_apis::FunctionID::eType function,
       ApplicationManager& app_mngr);
 
+  static smart_objects::SmartObjectSPtr CreateButtonNotificationToMobile(
+      ApplicationManager& app_mngr,
+      ApplicationSharedPtr app,
+      const smart_objects::SmartObject& source_message);
+
   /**
    * @brief Creates buttons subscription requests list
    * for all buttons that application is subscribed on
