@@ -727,8 +727,6 @@ bool IsValidEnum(FunctionID val) {
       return true;
     case DeleteSubMenuID:
       return true;
-    case ShowAppMenuID:
-      return true;
     case CreateInteractionChoiceSetID:
       return true;
     case PerformInteractionID:
@@ -876,8 +874,6 @@ const char* EnumToJsonString(FunctionID val) {
       return "AddSubMenu";
     case DeleteSubMenuID:
       return "DeleteSubMenu";
-    case ShowAppMenuID:
-      return "ShowAppMenu";
     case CreateInteractionChoiceSetID:
       return "CreateInteractionChoiceSet";
     case PerformInteractionID:
@@ -1045,11 +1041,6 @@ bool EnumFromJsonString(const std::string& literal, FunctionID* result) {
 
   if ("DeleteSubMenu" == literal) {
     *result = DeleteSubMenuID;
-    return true;
-  }
-
-  if ("ShowAppMenu" == literal) {
-    *result = ShowAppMenuID;
     return true;
   }
 
