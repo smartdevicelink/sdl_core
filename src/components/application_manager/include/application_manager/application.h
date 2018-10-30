@@ -42,6 +42,7 @@
 
 #include "utils/data_accessor.h"
 #include "interfaces/MOBILE_API.h"
+#include "interfaces/HMI_API.h"
 #include "connection_handler/device.h"
 #include "application_manager/app_extension.h"
 #include "application_manager/message.h"
@@ -933,6 +934,12 @@ class Application : public virtual InitialApplicationData,
    * @return application extensions
    */
   virtual const std::list<AppExtensionPtr>& Extensions() const = 0;
+
+  virtual std::map<int32_t, hmi_apis::Common_ButtonName::eType>&
+  PendingSubscriptionButtons() = 0;
+
+  virtual std::map<int32_t, hmi_apis::Common_ButtonName::eType>&
+  PendingUnsubscriptionButtons() = 0;
 
  protected:
   mutable sync_primitives::Lock hmi_states_lock_;

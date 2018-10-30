@@ -407,6 +407,16 @@ class ApplicationImpl : public virtual Application,
 
   void SwapMobileMessageQueue(MobileMessageQueue& mobile_messages) OVERRIDE;
 
+  std::map<int32_t, hmi_apis::Common_ButtonName::eType>&
+  PendingSubscriptionButtons() OVERRIDE {
+    return pending_subscription_buttons_;
+  }
+
+  std::map<int32_t, hmi_apis::Common_ButtonName::eType>&
+  PendingUnsubscriptionButtons() OVERRIDE {
+    return pending_unsubscription_buttons_;
+  }
+
  protected:
   /**
    * @brief Clean up application folder. Persistent files will stay
@@ -493,6 +503,10 @@ class ApplicationImpl : public virtual Application,
   std::string bundle_id_;
   AppFilesMap app_files_;
   std::set<mobile_apis::ButtonName::eType> subscribed_buttons_;
+  std::map<int32_t, hmi_apis::Common_ButtonName::eType>
+      pending_subscription_buttons_;
+  std::map<int32_t, hmi_apis::Common_ButtonName::eType>
+      pending_unsubscription_buttons_;
   UsageStatistics usage_report_;
   HelpPromptManagerImpl help_prompt_manager_impl_;
   protocol_handler::MajorProtocolVersion protocol_version_;

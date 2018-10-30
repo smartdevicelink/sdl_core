@@ -75,6 +75,8 @@ class UnsubscribeButtonRequest : public app_mngr::commands::RequestToHMI,
 
  private:
   DISALLOW_COPY_AND_ASSIGN(UnsubscribeButtonRequest);
+
+  hmi_apis::Common_ButtonName::eType button_name_;
 };
 
 }  // namespace hmi
