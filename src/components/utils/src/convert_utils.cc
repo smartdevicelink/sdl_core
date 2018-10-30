@@ -73,7 +73,10 @@ uint64_t utils::ConvertLongLongUIntToUInt64(
 
 std::string utils::ConvertBinaryDataToString(const uint8_t* data,
                                              const size_t data_size) {
-  DCHECK_OR_RETURN(data_size, std::string());
+  if (!data_size) {
+    return std::string();
+  }
+
   bool is_printable_array = true;
   std::locale loc;
   const char* text = reinterpret_cast<const char*>(data);

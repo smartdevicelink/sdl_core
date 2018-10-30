@@ -4420,6 +4420,49 @@ TEST_F(ProtocolHandlerImplTest, GetHashId_ProtocolVersion5_ValidData) {
   EXPECT_EQ(hash_id, exp_hash_id);
 }
 
+TEST_F(ProtocolHandlerImplTest, SetHashId_CorrectHashId) {
+  std::shared_ptr<TestAsyncWaiter> waiter = std::make_shared<TestAsyncWaiter>();
+  uint32_t times = 0;
+
+  const uint8_t input_protocol_version = 3;
+  utils::SemanticVersion full_version(3, 1, 0);
+  // hash id should be any except HASH_ID_WRONG(0xFFFF0000) and
+  // HASH_ID_NOT_SUPPORTED(0)
+  const uint32_t hash_id = 42;
+
+  const uint32_t hash_id_be = LE_TO_BE32(hash_id);
+  const uint8_t* exp_data = reinterpret_cast<const uint8_t*>(&hash_id_be);
+  const uint32_t exp_data_size = sizeof(hash_id_be);
+
+  SetProtocolVersion2();
+
+  RawMessagePtr raw_message;
+  EXPECT_CALL(transport_manager_mock, SendMessageToDevice(_))
+      .WillOnce(DoAll(NotifyTestAsyncWaiter(waiter),
+                      SaveArg<0>(&raw_message),
+                      Return(transport_manager::E_SUCCESS)));
+  times++;
+
+  protocol_handler_impl->SendStartSessionAck(connection_id,
+                                             session_id,
+                                             input_protocol_version,
+                                             hash_id,
+                                             kRpc,
+                                             PROTECTION_OFF,
+                                             full_version);
+
+  EXPECT_TRUE(waiter->WaitFor(times, kAsyncExpectationsTimeout));
+
+  ProtocolPacket protocol_packet;
+  RESULT_CODE res = protocol_packet.deserializePacket(raw_message->data(),
+                                                      raw_message->data_size());
+  ASSERT_EQ(protocol_handler::RESULT_CODE::RESULT_OK, res);
+
+  EXPECT_THAT(std::vector<uint8_t>(exp_data, exp_data + exp_data_size),
+              ElementsAreArray(protocol_packet.data(),
+                               protocol_packet.total_data_bytes()));
+}
+
 TEST_F(ProtocolHandlerImplTest, SetHashId_HASH_ID_NOT_SUPPORTED) {
   std::shared_ptr<TestAsyncWaiter> waiter = std::make_shared<TestAsyncWaiter>();
   uint32_t times = 0;
@@ -4485,53 +4528,10 @@ TEST_F(ProtocolHandlerImplTest, SetHashId_HASH_ID_WRONG) {
   ProtocolPacket protocol_packet;
   RESULT_CODE res = protocol_packet.deserializePacket(raw_message->data(),
                                                       raw_message->data_size());
+
   ASSERT_EQ(protocol_handler::RESULT_CODE::RESULT_OK, res);
 
   EXPECT_EQ(0u, protocol_packet.total_data_bytes());
-}
-
-TEST_F(ProtocolHandlerImplTest, SetHashId_CorrectHashId) {
-  std::shared_ptr<TestAsyncWaiter> waiter = std::make_shared<TestAsyncWaiter>();
-  uint32_t times = 0;
-
-  const uint8_t input_protocol_version = 3;
-  utils::SemanticVersion full_version(3, 1, 0);
-  // hash id should be any except HASH_ID_WRONG(0xFFFF0000) and
-  // HASH_ID_NOT_SUPPORTED(0)
-  const uint32_t hash_id = 42;
-
-  const uint32_t hash_id_be = LE_TO_BE32(hash_id);
-  const uint8_t* exp_data = reinterpret_cast<const uint8_t*>(&hash_id_be);
-  const uint32_t exp_data_size = sizeof(hash_id_be);
-
-  SetProtocolVersion2();
-
-  RawMessagePtr raw_message;
-  EXPECT_CALL(transport_manager_mock, SendMessageToDevice(_))
-      .WillOnce(DoAll(NotifyTestAsyncWaiter(waiter),
-                      SaveArg<0>(&raw_message),
-                      Return(transport_manager::E_SUCCESS)));
-  times++;
-
-  protocol_handler_impl->SendStartSessionAck(connection_id,
-                                             session_id,
-                                             input_protocol_version,
-                                             hash_id,
-                                             kRpc,
-                                             PROTECTION_OFF,
-                                             full_version);
-
-  EXPECT_TRUE(waiter->WaitFor(times, kAsyncExpectationsTimeout));
-
-  ProtocolPacket protocol_packet;
-  RESULT_CODE res = protocol_packet.deserializePacket(raw_message->data(),
-                                                      raw_message->data_size());
-
-  ASSERT_EQ(protocol_handler::RESULT_CODE::RESULT_OK, res);
-
-  EXPECT_THAT(std::vector<uint8_t>(exp_data, exp_data + exp_data_size),
-              ElementsAreArray(protocol_packet.data(),
-                               protocol_packet.total_data_bytes()));
 }
 
 TEST_F(ProtocolHandlerImplTest, PopValideAndExpirateMultiframes) {
