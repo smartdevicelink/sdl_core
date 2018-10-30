@@ -290,8 +290,7 @@ bool HMICommandFactory::IsAbleToProcess(
   return get_creator_factory(
              static_cast<hmi_apis::FunctionID::eType>(function_id),
              hmi_apis::messageType::INVALID_ENUM,
-             message_source)
-      .CanBeCreated();
+             message_source).CanBeCreated();
 }
 
 CommandCreator& HMICommandFactory::get_creator_factory(

@@ -27,10 +27,8 @@ class ButtonNotificationToMobile
 
   virtual void Run();
 
-  void HandleCustomButton(
-                          app_mngr::ApplicationSharedPtr app);
-  void HandleOKButton(
-                      app_mngr::ApplicationSharedPtr app,
+  void HandleCustomButton(app_mngr::ApplicationSharedPtr app);
+  void HandleOKButton(app_mngr::ApplicationSharedPtr app,
                       const uint32_t btn_id);
   void HandleMediaButton(const uint32_t btn_id);
 

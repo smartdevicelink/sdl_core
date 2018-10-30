@@ -58,7 +58,6 @@ void SubscribeButtonResponse::Run() {
   event_engine::Event event(hmi_apis::FunctionID::Buttons_SubscribeButton);
   event.set_smart_object(*message_);
   event.raise(application_manager_.event_dispatcher());
-
 }
 
 }  // namespace hmi
