@@ -61,13 +61,13 @@ void ResumptionDataProcessor::Restore(ApplicationSharedPtr application,
                                       smart_objects::SmartObject& saved_app,
                                       ResumeCtrl::ResumptionCallBack callback) {
   LOG4CXX_AUTO_TRACE(logger_);
+  register_callbacks_[application->app_id()] = callback;
   AddFiles(application, saved_app);
   AddSubmenues(application, saved_app);
   AddCommands(application, saved_app);
   AddChoicesets(application, saved_app);
   SetGlobalProperties(application, saved_app);
   AddSubscriptions(application, saved_app);
-  register_callbacks_[application->app_id()] = callback;
 }
 
 bool ResumptionRequestIDs::operator<(const ResumptionRequestIDs& other) const {
@@ -665,7 +665,7 @@ void ResumptionDataProcessor::DeleteButtonsSubscriptions(
     }
     smart_objects::SmartObjectSPtr unsubscribe_request =
         MessageHelper::CreateButtonSubscriptionHandlingRequestToHmi(
-            application->hmi_app_id(),
+            application->app_id(),
             hmi_btn,
             hmi_apis::FunctionID::Buttons_UnsubscribeButton,
             application_manager_);
