@@ -72,13 +72,12 @@ void ButtonNotificationToMobile::HandleCustomButton(
 }
 
 void ButtonNotificationToMobile::HandleOKButton(
-    app_mngr::ApplicationSharedPtr app, const uint32_t btn_id) {
+    app_mngr::ApplicationSharedPtr app) {
   LOG4CXX_AUTO_TRACE(logger_);
   using namespace application_manager;
   LOG4CXX_DEBUG(logger_, "OK button received");
 
-  const auto subscribed_apps =
-      application_manager_.applications_by_button(btn_id);
+  const auto subscribed_apps = SubscribedApps();
   auto app_ptr = subscribed_apps.end();
   if (app) {
     app_ptr = std::find_if(subscribed_apps.begin(),
@@ -110,11 +109,17 @@ void ButtonNotificationToMobile::HandleOKButton(
   }
 }
 
-void ButtonNotificationToMobile::HandleMediaButton(const uint32_t btn_id) {
+const std::vector<ApplicationSharedPtr>
+ButtonNotificationToMobile::SubscribedApps() const {
+  const uint32_t btn_id = static_cast<uint32_t>(
+      (*message_)[strings::msg_params][hmi_response::button_name].asInt());
+  return application_manager_.applications_by_button(btn_id);
+}
+
+void ButtonNotificationToMobile::HandleMediaButton() {
   LOG4CXX_AUTO_TRACE(logger_);
   using namespace application_manager;
-  const std::vector<ApplicationSharedPtr>& subscribed_apps =
-      application_manager_.applications_by_button(btn_id);
+  const auto subscribed_apps = SubscribedApps();
 
   std::vector<ApplicationSharedPtr>::const_iterator it =
       subscribed_apps.begin();
@@ -157,9 +162,9 @@ void ButtonNotificationToMobile::Run() {
   if (static_cast<uint32_t>(mobile_apis::ButtonName::CUSTOM_BUTTON) == btn_id) {
     HandleCustomButton(app);
   } else if (static_cast<uint32_t>(mobile_apis::ButtonName::OK) == btn_id) {
-    HandleOKButton(app, btn_id);
+    HandleOKButton(app);
   } else {
-    HandleMediaButton(btn_id);
+    HandleMediaButton();
   }
 }
 
