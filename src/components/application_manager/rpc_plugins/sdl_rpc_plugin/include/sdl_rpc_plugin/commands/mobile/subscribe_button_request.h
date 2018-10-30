@@ -100,6 +100,14 @@ class SubscribeButtonRequest : public app_mngr::commands::CommandRequestImpl {
    */
   void SendSubscribeButtonNotification();
 
+  /**
+   * @brief Checks whether given button id is preset button
+   * @param btn_id button id enum type representing button name
+   * @return true in case if button is a preset button,
+   * otherwise false
+   */
+  bool IsPresetButton(const mobile_apis::ButtonName::eType btn_id) const;
+
   DISALLOW_COPY_AND_ASSIGN(SubscribeButtonRequest);
 };
 

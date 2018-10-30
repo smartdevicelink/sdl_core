@@ -158,6 +158,20 @@ bool SubscribeButtonRequest::Init() {
   return true;
 }
 
+bool SubscribeButtonRequest::IsPresetButton(
+    const mobile_apis::ButtonName::eType btn_id) const {
+  return (mobile_apis::ButtonName::PRESET_0 == btn_id) ||
+         (mobile_apis::ButtonName::PRESET_1 == btn_id) ||
+         (mobile_apis::ButtonName::PRESET_2 == btn_id) ||
+         (mobile_apis::ButtonName::PRESET_3 == btn_id) ||
+         (mobile_apis::ButtonName::PRESET_4 == btn_id) ||
+         (mobile_apis::ButtonName::PRESET_5 == btn_id) ||
+         (mobile_apis::ButtonName::PRESET_6 == btn_id) ||
+         (mobile_apis::ButtonName::PRESET_7 == btn_id) ||
+         (mobile_apis::ButtonName::PRESET_8 == btn_id) ||
+         (mobile_apis::ButtonName::PRESET_9 == btn_id);
+}
+
 bool SubscribeButtonRequest::IsSubscriptionAllowed(
     ApplicationSharedPtr app, mobile_apis::ButtonName::eType btn_id) {
   if (!app->is_media_application() &&
@@ -165,7 +179,8 @@ bool SubscribeButtonRequest::IsSubscriptionAllowed(
        (mobile_apis::ButtonName::SEEKLEFT == btn_id) ||
        (mobile_apis::ButtonName::SEEKRIGHT == btn_id) ||
        (mobile_apis::ButtonName::TUNEUP == btn_id) ||
-       (mobile_apis::ButtonName::TUNEDOWN == btn_id))) {
+       (mobile_apis::ButtonName::TUNEDOWN == btn_id) ||
+       IsPresetButton(btn_id))) {
     return false;
   }
   return true;
