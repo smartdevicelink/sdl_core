@@ -36,15 +36,15 @@
 #include "utils/helpers.h"
 
 namespace sdl_rpc_plugin {
-using namespace application_manager;
+namespace app_mngr = application_manager;
 
 namespace commands {
 
 ShowAppMenuRequest::ShowAppMenuRequest(
-    const application_manager::commands::MessageSharedPtr& message,
-    ApplicationManager& application_manager,
-    rpc_service::RPCService& rpc_service,
-    HMICapabilities& hmi_capabilities,
+    const app_mngr::commands::MessageSharedPtr& message,
+    app_mngr::ApplicationManager& application_manager,
+    app_mngr::rpc_service::RPCService& rpc_service,
+    app_mngr::HMICapabilities& hmi_capabilities,
     policy::PolicyHandlerInterface& policy_handler)
     : CommandRequestImpl(message,
                          application_manager,
@@ -55,12 +55,15 @@ ShowAppMenuRequest::ShowAppMenuRequest(
 ShowAppMenuRequest::~ShowAppMenuRequest() {}
 
 void ShowAppMenuRequest::Run() {
+  using namespace app_mngr;
   LOG4CXX_AUTO_TRACE(logger_);
 
   ApplicationSharedPtr app = application_manager_.application(connection_key());
 
   if (!app) {
-    LOG4CXX_ERROR(logger_, "Application is not registered");
+    LOG4CXX_ERROR(logger_,
+                  "Application with id " << connection_key()
+                                         << " is not registered.");
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     return;
   }
@@ -72,19 +75,17 @@ void ShowAppMenuRequest::Run() {
           app->system_context(),
           mobile_apis::SystemContext::SYSCTXT_MAIN,
           mobile_apis::SystemContext::SYSCTXT_MENU)) {
-    LOG4CXX_ERROR(logger_, "Application is not activated");
+    LOG4CXX_ERROR(logger_,
+                  "Application with id " << connection_key()
+                                         << " is not activated.");
     SendResponse(false, mobile_apis::Result::REJECTED);
     return;
   }
 
-  smart_objects::SmartObject received_msg_params =
-      (*message_)[strings::msg_params];
-
-  smart_objects::SmartObject msg_params =
-      smart_objects::SmartObject(smart_objects::SmartType_Map);
-
+  auto msg_params = smart_objects::SmartObject(smart_objects::SmartType_Map);
   msg_params[strings::app_id] = app->app_id();
 
+  const auto& received_msg_params = (*message_)[strings::msg_params];
   if (received_msg_params.keyExists(strings::menu_id)) {
     const int32_t menu_id = received_msg_params[strings::menu_id].asInt();
     if (!app->FindSubMenu(menu_id)) {
@@ -99,26 +100,28 @@ void ShowAppMenuRequest::Run() {
   SendHMIRequest(hmi_apis::FunctionID::UI_ShowAppMenu, &msg_params, true);
 }
 
-void ShowAppMenuRequest::on_event(const event_engine::Event& event) {
+void ShowAppMenuRequest::on_event(const app_mngr::event_engine::Event& event) {
+  using namespace app_mngr;
   LOG4CXX_AUTO_TRACE(logger_);
   const smart_objects::SmartObject& message = event.smart_object();
 
   switch (event.id()) {
     case hmi_apis::FunctionID::UI_ShowAppMenu: {
       EndAwaitForInterface(HmiInterfaces::HMI_INTERFACE_UI);
-      hmi_apis::Common_Result::eType result_code =
-          static_cast<hmi_apis::Common_Result::eType>(
-              message[strings::params][hmi_response::code].asInt());
+      const auto result_code = static_cast<hmi_apis::Common_Result::eType>(
+          message[strings::params][hmi_response::code].asInt());
       std::string response_info;
       GetInfo(message, response_info);
       const bool result = PrepareResultForMobileResponse(
           result_code, HmiInterfaces::HMI_INTERFACE_UI);
 
-      ApplicationSharedPtr application =
+      ApplicationSharedPtr app =
           application_manager_.application(connection_key());
 
-      if (!application) {
-        LOG4CXX_ERROR(logger_, "NULL pointer");
+      if (!app) {
+        LOG4CXX_ERROR(logger_,
+                      "Application with id " << connection_key()
+                                             << " is not registered.");
         return;
       }
 
@@ -129,7 +132,7 @@ void ShowAppMenuRequest::on_event(const event_engine::Event& event) {
       break;
     }
     default: {
-      LOG4CXX_ERROR(logger_, "Received unknown event" << event.id());
+      LOG4CXX_ERROR(logger_, "Received unknown event: " << event.id());
       return;
     }
   }

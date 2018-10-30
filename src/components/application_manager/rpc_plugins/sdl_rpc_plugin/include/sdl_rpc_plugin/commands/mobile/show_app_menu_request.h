@@ -47,7 +47,6 @@ class ShowAppMenuRequest : public app_mngr::commands::CommandRequestImpl {
  public:
   /**
    * @brief ShowAppMenuRequest class constructor
-   * @param message Incoming SmartObject message
    **/
   ShowAppMenuRequest(const app_mngr::commands::MessageSharedPtr& message,
                      app_mngr::ApplicationManager& application_manager,

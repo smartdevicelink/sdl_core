@@ -33,15 +33,15 @@
 #include "sdl_rpc_plugin/commands/hmi/ui_show_app_menu_request.h"
 
 namespace sdl_rpc_plugin {
-using namespace application_manager;
+namespace app_mngr = application_manager;
 
 namespace commands {
 
 UIShowAppMenuRequest::UIShowAppMenuRequest(
-    const application_manager::commands::MessageSharedPtr& message,
-    ApplicationManager& application_manager,
-    rpc_service::RPCService& rpc_service,
-    HMICapabilities& hmi_capabilities,
+    const app_mngr::commands::MessageSharedPtr& message,
+    app_mngr::ApplicationManager& application_manager,
+    app_mngr::rpc_service::RPCService& rpc_service,
+    app_mngr::HMICapabilities& hmi_capabilities,
     policy::PolicyHandlerInterface& policy_handle)
     : RequestToHMI(message,
                    application_manager,

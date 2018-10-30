@@ -34,14 +34,14 @@
 #include "application_manager/event_engine/event.h"
 
 namespace sdl_rpc_plugin {
-using namespace application_manager;
+namespace app_mngr = application_manager;
 
 namespace commands {
 UIShowAppMenuResponse::UIShowAppMenuResponse(
-    const application_manager::commands::MessageSharedPtr& message,
-    ApplicationManager& application_manager,
-    rpc_service::RPCService& rpc_service,
-    HMICapabilities& hmi_capabilities,
+    const app_mngr::commands::MessageSharedPtr& message,
+    app_mngr::ApplicationManager& application_manager,
+    app_mngr::rpc_service::RPCService& rpc_service,
+    app_mngr::HMICapabilities& hmi_capabilities,
     policy::PolicyHandlerInterface& policy_handle)
     : ResponseFromHMI(message,
                       application_manager,
@@ -54,7 +54,7 @@ UIShowAppMenuResponse::~UIShowAppMenuResponse() {}
 void UIShowAppMenuResponse::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  event_engine::Event event(hmi_apis::FunctionID::UI_ShowAppMenu);
+  app_mngr::event_engine::Event event(hmi_apis::FunctionID::UI_ShowAppMenu);
   event.set_smart_object(*message_);
   event.raise(application_manager_.event_dispatcher());
 }

@@ -47,8 +47,6 @@ class ShowAppMenuResponse : public app_mngr::commands::CommandResponseImpl {
  public:
   /**
    * @brief ShowAppMenuResponse class constructor
-   *
-   * @param message Incoming SmartObject message
    **/
   ShowAppMenuResponse(const app_mngr::commands::MessageSharedPtr& messasge,
                       app_mngr::ApplicationManager& application_manager,

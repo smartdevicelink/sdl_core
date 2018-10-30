@@ -47,8 +47,6 @@ class UIShowAppMenuRequest : public app_mngr::commands::RequestToHMI {
  public:
   /**
    * @brief UIShowAppMenuRequest class constructor
-   *
-   * @param message Incoming SmartObject message
    **/
   UIShowAppMenuRequest(const app_mngr::commands::MessageSharedPtr& message,
                        app_mngr::ApplicationManager& application_manager,
