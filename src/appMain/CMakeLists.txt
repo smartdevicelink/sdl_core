@@ -71,7 +71,6 @@ target_include_directories(${PROJECT_NAME}
       "${COMPONENTS_DIR}/utils/include"
       "${COMPONENTS_DIR}/connection_handler/include"
       "${COMPONENTS_DIR}/hmi_message_handler/include"
-      "${COMPONENTS_DIR}/hmi_message_handler/src"
       "${COMPONENTS_DIR}/request_watchdog/include"
       "${COMPONENTS_DIR}/smart_objects/include"
       "${COMPONENTS_DIR}/media_manager/include"

@@ -66,6 +66,9 @@ if(ENABLE_LOG)
     INTERFACE
       ENABLE_LOG
   )
+  target_include_directories(${PROJECT_NAME}
+  INTERFACE
+  "${THIRD_PARTY_INSTALL_PREFIX}/include")
 endif()
 
 add_subdirectory(application_manager)

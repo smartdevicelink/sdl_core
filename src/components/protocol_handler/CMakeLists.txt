@@ -48,11 +48,10 @@ target_link_libraries(${PROJECT_NAME}
     config_profile::config_profile
     protocol::protocol
     utils::utils
-    #transport_manager::transport_manager
     connection_handler::connection_handler
-    bson
   PRIVATE
     components::interface
+    bson
 )
 
 if(TELEMETRY_MONITOR)

@@ -46,7 +46,6 @@ target_sources(${PROJECT_NAME}
 
 target_link_libraries(${PROJECT_NAME}
   PUBLIC
-    log4cxx
     EXPAT::EXPAT
 )
 

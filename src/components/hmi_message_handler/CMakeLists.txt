@@ -45,13 +45,6 @@ target_sources(${PROJECT_NAME}
     "${CMAKE_CURRENT_LIST_DIR}/src/messagebroker_adapter.cc"
     "${CMAKE_CURRENT_LIST_DIR}/src/websocket_session.cc"
 )
-find_package(Boost REQUIRED
-              COMPONENTS system)
-target_link_libraries(${PROJECT_NAME}
-  PUBLIC
-    Boost::system
-)
-
 
 target_link_libraries(${PROJECT_NAME}
   PUBLIC
