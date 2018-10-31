@@ -542,6 +542,7 @@
         <element name="VEHICLEDATA_FUELRANGE" since="5.0" />
         <element name="VEHICLEDATA_ENGINEOILLIFE" since="5.0" />
         <element name="VEHICLEDATA_ELECTRONICPARKBRAKESTATUS" since="5.0" />
+        <element name="VEHICLEDATA_CLOUDAPPVEHICLEID" since="5.0"/>
     </enum>
     
     <enum name="ButtonName" since="1.0">
@@ -4959,6 +4960,7 @@
         
         <!-- / Ford Specific Data Items -->
         
+        <param name="cloudAppVehicleID" type="Boolean" mandatory="false"></param>
     </function>
     
     <function name="SubscribeVehicleData" functionID="SubscribeVehicleDataID" messagetype="response" since="2.0">
@@ -5073,6 +5075,7 @@
         </param>
         <!-- / Ford Specific Data Items -->
         
+        <param name="cloudAppVehicleID" type="VehicleDataResult" mandatory="false"></param>
     </function>
     
     <function name="UnsubscribeVehicleData" functionID="UnsubscribeVehicleDataID" messagetype="request" since="2.0">
@@ -5166,6 +5169,7 @@
         </param>
         <!-- / Ford Specific Data Items -->
         
+        <param name="cloudAppVehicleID" type="Boolean" mandatory="false"></param>
     </function>
     
     <function name="UnsubscribeVehicleData" functionID="UnsubscribeVehicleDataID" messagetype="response" since="2.0">
@@ -5279,6 +5283,7 @@
         </param>
         <!-- / Ford Specific Data Items -->
         
+        <param name="cloudAppVehicleID" type="VehicleDataResult" mandatory="false"></param>
     </function>
     
     <function name="GetVehicleData" functionID="GetVehicleDataID" messagetype="request" since="2.0">
@@ -5375,6 +5380,7 @@
         </param>
         <!-- / Ford Specific Data Items -->
         
+        <param name="cloudAppVehicleID" type="Boolean" mandatory="false"></param>
     </function>
     
     <function name="GetVehicleData" functionID="GetVehicleDataID" messagetype="response" since="2.0">
@@ -5492,6 +5498,7 @@
         </param>
         <!-- / Ford Specific Data Items -->
         
+        <param name="cloudAppVehicleID" type="String" mandatory="false"></param>
     </function>
     
     <function name="ReadDID" functionID="ReadDIDID" messagetype="request" since="2.0">
@@ -6751,6 +6758,7 @@
         </param>
         <!-- / Ford Specific Vehicle Data -->
         
+        <param name="cloudAppVehicleID" type="String" mandatory="false"></param>
     </function>
     
     <function name="OnCommand" functionID="OnCommandID" messagetype="notification" since="1.0">
