@@ -70,7 +70,11 @@ class HMIOnDriverDistractionNotificationTest
   policy_test::MockPolicyHandlerInterface mock_policy_handler_interface_;
 };
 
-MATCHER_P2(CheckNotificationParams, function_id, state, "") {
+MATCHER_P3(CheckNotificationParams,
+           function_id,
+           state,
+           lock_screen_dismissal_enabled,
+           "") {
   bool is_function_id_matched =
       function_id ==
       static_cast<am::mobile_api::FunctionID::eType>(
@@ -80,7 +84,12 @@ MATCHER_P2(CheckNotificationParams, function_id, state, "") {
       static_cast<hmi_apis::Common_DriverDistractionState::eType>(
           (*arg)[am::strings::msg_params][am::mobile_notification::state]
               .asInt());
-  return is_function_id_matched && is_state_matched;
+  bool is_lock_screen_dismissal_enabled_matched =
+      lock_screen_dismissal_enabled ==
+      (*arg)[am::strings::msg_params]
+            [am::hmi_notification::lock_screen_dismissal_enabled].asBool();
+  return is_function_id_matched && is_state_matched &&
+         is_lock_screen_dismissal_enabled_matched;
 }
 
 ACTION_P(GetArg3, result) {
@@ -92,6 +101,11 @@ TEST_F(HMIOnDriverDistractionNotificationTest, Run_PushMobileMessage_SUCCESS) {
       hmi_apis::Common_DriverDistractionState::DD_ON;
   MessageSharedPtr commands_msg(CreateMessage(smart_objects::SmartType_Map));
   (*commands_msg)[am::strings::msg_params][am::hmi_notification::state] = state;
+
+  const bool lock_screen_dismissal_enabled =
+      (*commands_msg)[am::strings::msg_params]
+                     [am::hmi_notification::lock_screen_dismissal_enabled]
+                         .asBool();
 
   NotificationPtr command(
       CreateCommand<OnDriverDistractionNotification>(commands_msg));
@@ -113,7 +127,9 @@ TEST_F(HMIOnDriverDistractionNotificationTest, Run_PushMobileMessage_SUCCESS) {
 
   EXPECT_CALL(*mock_app,
               PushMobileMessage(CheckNotificationParams(
-                  am::mobile_api::FunctionID::OnDriverDistractionID, state)));
+                  am::mobile_api::FunctionID::OnDriverDistractionID,
+                  state,
+                  lock_screen_dismissal_enabled)));
 
   command->Run();
 }
@@ -124,6 +140,11 @@ TEST_F(HMIOnDriverDistractionNotificationTest,
       hmi_apis::Common_DriverDistractionState::DD_ON;
   MessageSharedPtr commands_msg(CreateMessage(smart_objects::SmartType_Map));
   (*commands_msg)[am::strings::msg_params][am::hmi_notification::state] = state;
+
+  const bool lock_screen_dismissal_enabled =
+      (*commands_msg)[am::strings::msg_params]
+                     [am::hmi_notification::lock_screen_dismissal_enabled]
+                         .asBool();
 
   NotificationPtr command(
       CreateCommand<OnDriverDistractionNotification>(commands_msg));
@@ -143,11 +164,13 @@ TEST_F(HMIOnDriverDistractionNotificationTest,
       .WillOnce(ReturnRef(mock_policy_handler_interface_));
   EXPECT_CALL(mock_policy_handler_interface_, CheckPermissions(_, _, _, _))
       .WillOnce(GetArg3(&result));
-  EXPECT_CALL(mock_rpc_service_,
-              ManageMobileCommand(
-                  CheckNotificationParams(
-                      am::mobile_api::FunctionID::OnDriverDistractionID, state),
-                  Command::CommandSource::SOURCE_SDL));
+  EXPECT_CALL(
+      mock_rpc_service_,
+      ManageMobileCommand(CheckNotificationParams(
+                              am::mobile_api::FunctionID::OnDriverDistractionID,
+                              state,
+                              lock_screen_dismissal_enabled),
+                          Command::CommandSource::SOURCE_SDL));
 
   command->Run();
 }
