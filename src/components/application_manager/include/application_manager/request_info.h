@@ -60,7 +60,7 @@ struct RequestInfo {
   RequestInfo()
       : timeout_msec_(0)
       , app_id_(0)
-      , requst_type_(RequestNone)
+      , request_type_(RequestNone)
       , correlation_id_(0) {
     start_time_ = date_time::getCurrentTime();
     updateEndTime();
@@ -68,16 +68,19 @@ struct RequestInfo {
   virtual ~RequestInfo() {}
 
   RequestInfo(RequestPtr request,
-              const RequestType requst_type,
+              const RequestType request_type,
               const uint64_t timeout_msec)
-      : request_(request), timeout_msec_(timeout_msec), correlation_id_(0) {
+      : request_(request)
+      , timeout_msec_(timeout_msec)
+      , app_id_(0)
+      , correlation_id_(0) {
     start_time_ = date_time::getCurrentTime();
     updateEndTime();
-    requst_type_ = requst_type;
+    request_type_ = request_type;
   }
 
   RequestInfo(RequestPtr request,
-              const RequestType requst_type,
+              const RequestType request_type,
               const date_time::TimeDuration& start_time,
               const uint64_t timeout_msec);
 
@@ -111,8 +114,8 @@ struct RequestInfo {
     return app_id_;
   }
 
-  RequestType requst_type() const {
-    return requst_type_;
+  RequestType request_type() const {
+    return request_type_;
   }
 
   uint32_t requestId() {
@@ -132,7 +135,7 @@ struct RequestInfo {
   uint64_t timeout_msec_;
   date_time::TimeDuration end_time_;
   uint32_t app_id_;
-  RequestType requst_type_;
+  RequestType request_type_;
   uint32_t correlation_id_;
 };
 
@@ -261,8 +264,7 @@ class RequestInfoSet {
   TimeSortedRequestInfoSet time_sorted_pending_requests_;
   HashSortedRequestInfoSet hash_sorted_pending_requests_;
 
-  // the lock caled this_lock_, since the class represent collection by itself.
-  sync_primitives::Lock this_lock_;
+  sync_primitives::Lock pending_requests_lock_;
 };
 
 /**

@@ -36,7 +36,6 @@
 #include <map>
 
 #include "policy/pt_representation.h"
-#include "policy/pt_ext_representation.h"
 #include "policy/usage_statistics/statistics_manager.h"
 #include "policy/cache_manager_interface.h"
 #include "utils/threads/thread.h"

@@ -45,7 +45,6 @@ bool MetricWrapper::grabResources() {
   } else {
     return false;
   }
-  flush(std::cout);
 }
 
 std::string MetricWrapper::GetStyledString() {

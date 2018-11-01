@@ -62,20 +62,6 @@ class UpdateStatusManagerTest : public ::testing::Test {
 };
 
 TEST_F(UpdateStatusManagerTest,
-       StringifiedUpdateStatus_SetStatuses_ExpectCorrectStringifiedStatuses) {
-  // Arrange
-  manager_->OnPolicyInit(false);
-  // Check
-  EXPECT_EQ("UP_TO_DATE", manager_->StringifiedUpdateStatus());
-  manager_->OnPolicyInit(true);
-  // Check
-  EXPECT_EQ("UPDATE_NEEDED", manager_->StringifiedUpdateStatus());
-  manager_->OnUpdateSentOut();
-  // Check
-  EXPECT_EQ("UPDATING", manager_->StringifiedUpdateStatus());
-}
-
-TEST_F(UpdateStatusManagerTest,
        OnAppSearchStartedCompleted_ExpectAppSearchCorrectStatus) {
   // Arrange
   manager_->OnAppsSearchStarted();

@@ -29,7 +29,7 @@ namespace {
 const uint32_t kConnectionKey = 1u;
 const mobile_apis::ButtonName::eType kButtonId = mobile_apis::ButtonName::OK;
 const utils::SemanticVersion mock_semantic_version(5, 0, 0);
-const utils::SemanticVersion mock_semantic_version_4_5(4, 5, 0);
+const utils::SemanticVersion mock_base_rpc_version(4, 5, 1);
 }  // namespace
 
 class UnsubscribeButtonRequestTest
@@ -151,7 +151,7 @@ TEST_F(UnsubscribeButtonRequestTest, Run_SUCCESS) {
   command->Run();
 }
 
-TEST_F(UnsubscribeButtonRequestTest, Run_SUCCESS_Version_4_5) {
+TEST_F(UnsubscribeButtonRequestTest, Run_SUCCESS_Base_RPC_Version) {
   MessageSharedPtr command_msg(CreateMessage(smart_objects::SmartType_Map));
   (*command_msg)[am::strings::params][am::strings::connection_key] =
       kConnectionKey;
@@ -176,7 +176,7 @@ TEST_F(UnsubscribeButtonRequestTest, Run_SUCCESS_Version_4_5) {
   EXPECT_CALL(app_mngr_, application(kConnectionKey))
       .WillRepeatedly(Return(mock_app));
   ON_CALL(*mock_app, msg_version())
-      .WillByDefault(ReturnRef(mock_semantic_version_4_5));
+      .WillByDefault(ReturnRef(mock_base_rpc_version));
   ON_CALL(*mock_app, is_media_application()).WillByDefault(Return(true));
 
   EXPECT_CALL(*mock_app,

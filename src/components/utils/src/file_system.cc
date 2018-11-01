@@ -102,7 +102,7 @@ size_t file_system::DirectorySize(const std::string& path) {
 // NOTE that boost makes 0777 permissions by default
 bool file_system::CreateDirectory(const std::string& path) {
   error_code ec;
-  bool success = fs::create_directory(path, ec);
+  const bool success = fs::create_directory(path, ec);
   if (!success || ec) {
     LOG4CXX_WARN_WITH_ERRNO(logger_, "Unable to create directory: " << path);
   } else {

@@ -118,22 +118,25 @@ void UpdateStatusManager::OnResetRetrySequence() {
   ProcessEvent(kOnResetRetrySequence);
 }
 
-void UpdateStatusManager::OnNewApplicationAdded(const DeviceConsent consent) {
-  LOG4CXX_AUTO_TRACE(logger_);
-  if (kDeviceAllowed != consent) {
-    app_registered_from_non_consented_device_ = true;
-    return;
-  }
-  app_registered_from_non_consented_device_ = false;
-  ProcessEvent(kOnNewAppRegistered);
-}
-
-void UpdateStatusManager::OnPolicyInit(bool is_update_required) {
+void UpdateStatusManager::OnExistedApplicationAdded(
+    const bool is_update_required) {
   LOG4CXX_AUTO_TRACE(logger_);
   if (is_update_required) {
     current_status_.reset(new UpToDateStatus());
     ProcessEvent(kScheduleUpdate);
   }
+}
+
+void UpdateStatusManager::OnNewApplicationAdded(const DeviceConsent consent) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  if (kDeviceAllowed != consent) {
+    LOG4CXX_DEBUG(logger_, "Application registered from non-consented device");
+    app_registered_from_non_consented_device_ = true;
+    return;
+  }
+  LOG4CXX_DEBUG(logger_, "Application registered from consented device");
+  app_registered_from_non_consented_device_ = false;
+  ProcessEvent(kOnNewAppRegistered);
 }
 
 void UpdateStatusManager::OnDeviceConsented() {

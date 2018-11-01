@@ -177,8 +177,8 @@ class PolicyHandlerTest : public ::testing::Test {
     ON_CALL(app_manager_, event_dispatcher())
         .WillByDefault(ReturnRef(mock_event_dispatcher_));
     std::string path("storage");
-    file_system::CreateDirectory(path);
-    file_system::CreateFile(path + "/" + "certificate");
+    if (file_system::CreateDirectory(path))
+      file_system::CreateFile(path + "/" + "certificate");
     mock_policy_manager_ =
         std::make_shared<policy_manager_test::MockPolicyManager>();
     ASSERT_TRUE(mock_policy_manager_.use_count() != 0);
@@ -922,7 +922,7 @@ TEST_F(PolicyHandlerTest,
   EXPECT_CALL(*mock_policy_manager_, GetAppPermissionsChanges(_))
       .WillOnce(Return(permissions));
   EXPECT_CALL(*mock_policy_manager_,
-              RemovePendingPermissionChanges(kPolicyAppId_)).Times(0);
+              RemovePendingPermissionChanges(kPolicyAppId_));
   // Act
   policy_handler_.OnPendingPermissionChange(kPolicyAppId_);
 }

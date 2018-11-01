@@ -71,7 +71,7 @@ uint64_t FileSize(const std::string& path);
 /**
  * @brief Creates directory with owner_all permissions
  * @param path directory to create
- * @return return true if directory was created or already exist.
+ * @return true if directory was created or already exist.
  */
 bool CreateDirectory(const std::string& path);
 
