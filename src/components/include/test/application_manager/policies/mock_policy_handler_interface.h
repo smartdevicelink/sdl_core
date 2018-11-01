@@ -213,6 +213,16 @@ class MockPolicyHandlerInterface : public policy::PolicyHandlerInterface {
       GetAppRequestTypes,
       const std::vector<std::string>(const std::string& policy_app_id));
   MOCK_CONST_METHOD0(GetVehicleInfo, const policy::VehicleInfo());
+  MOCK_CONST_METHOD1(CheckCloudAppEnabled,
+                     const bool(const std::string& policy_app_id));
+  MOCK_CONST_METHOD5(GetCloudAppParameters,
+                     const bool(const std::string& policy_app_id,
+                                std::string& endpoint,
+                                std::string& auth_token,
+                                std::string& cloud_transport_type,
+                                std::string& hybrid_app_preference));
+  MOCK_METHOD1(OnSetCloudAppProperties,
+               void(const smart_objects::SmartObject& message));
 
 #ifdef EXTERNAL_PROPRIETARY_MODE
   MOCK_CONST_METHOD0(GetMetaInfo, const policy::MetaInfo());
