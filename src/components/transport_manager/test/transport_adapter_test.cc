@@ -51,6 +51,7 @@
 
 #include "config_profile/profile.h"
 #include "resumption/last_state_impl.h"
+#include "resumption/last_state_wrapper_impl.h"
 
 namespace test {
 namespace components {
@@ -66,7 +67,7 @@ using namespace ::protocol_handler;
 class TransportAdapterTest : public ::testing::Test {
  protected:
   TransportAdapterTest() {
-    last_state_wrapper_ = std::make_shared<resumption::LastStateWrapper>(
+    last_state_wrapper_ = std::make_shared<resumption::LastStateWrapperImpl>(
         std::make_shared<resumption::LastStateImpl>("app_storage_folder",
                                                     "app_info_storage"));
   }
@@ -85,7 +86,7 @@ class TransportAdapterTest : public ::testing::Test {
   }
 
   NiceMock<MockTransportManagerSettings> transport_manager_settings;
-  std::shared_ptr<resumption::LastStateWrapper> last_state_wrapper_;
+  std::shared_ptr<resumption::LastStateWrapperImpl> last_state_wrapper_;
   std::string dev_id;
   std::string uniq_id;
   int app_handle;

@@ -38,7 +38,8 @@
 #include "application_manager/mock_resumption_data.h"
 #include "application_manager/usage_statistics.h"
 #include "interfaces/MOBILE_API.h"
-#include "resumption/last_state_wrapper.h"
+#include "resumption/last_state_wrapper_impl.h"
+#include "resumption/last_state_impl.h"
 
 #include "application_manager/resumption_data_test.h"
 #include "formatters/CFormatterJsonBase.h"
@@ -66,7 +67,7 @@ namespace formatters = ns_smart_device_link::ns_json_handler::formatters;
 class ResumptionDataJsonTest : public ResumptionDataTest {
  protected:
   ResumptionDataJsonTest()
-      : last_state_wrapper_(std::make_shared<resumption::LastStateWrapper>(
+      : last_state_wrapper_(std::make_shared<resumption::LastStateWrapperImpl>(
             std::make_shared<resumption::LastStateImpl>("app_storage_folder",
                                                         "app_info_storage")))
       , res_json(last_state_wrapper_, mock_application_manager_) {}
@@ -112,7 +113,7 @@ class ResumptionDataJsonTest : public ResumptionDataTest {
     accessor.GetMutableData().SaveToFileSystem();
   }
 
-  std::shared_ptr<resumption::LastStateWrapper> last_state_wrapper_;
+  std::shared_ptr<resumption::LastStateWrapperImpl> last_state_wrapper_;
   ResumptionDataJson res_json;
 };
 

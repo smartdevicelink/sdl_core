@@ -56,8 +56,7 @@ class MockTransportManager : public ::transport_manager::TransportManager,
                              public ::telemetry_monitor::TelemetryObservable<
                                  transport_manager::TMTelemetryObserver> {
  public:
-  MOCK_METHOD1(Init,
-               int(std::shared_ptr<resumption::LastStateWrapper> last_state));
+  MOCK_METHOD1(Init, int(resumption::LastStateWrapperPtr last_state));
   MOCK_METHOD0(Reinit, int());
   MOCK_METHOD0(Deinit, void());
   MOCK_METHOD0(StopEventsProcessing, void());

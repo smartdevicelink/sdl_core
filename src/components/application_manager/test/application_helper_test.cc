@@ -53,7 +53,7 @@
 
 #include "test/resumption/mock_last_state.h"
 #include "media_manager/mock_media_manager.h"
-#include "resumption/last_state_wrapper.h"
+#include "resumption/last_state_wrapper_impl.h"
 
 namespace {
 const uint8_t expected_tread_pool_size = 2u;
@@ -121,7 +121,7 @@ class ApplicationHelperTest : public testing::Test {
         .WillOnce(ReturnRef(path_to_plagin));
     mock_last_state_ = std::make_shared<MockLastState>();
     last_state_wrapper_ =
-        std::make_shared<resumption::LastStateWrapper>(mock_last_state_);
+        std::make_shared<resumption::LastStateWrapperImpl>(mock_last_state_);
     app_manager_impl_.Init(last_state_wrapper_, &mock_media_manager_);
 
     app_impl_ = std::make_shared<ApplicationImpl>(
@@ -141,7 +141,7 @@ class ApplicationHelperTest : public testing::Test {
   ApplicationManagerImpl app_manager_impl_;
   MockMediaManager mock_media_manager_;
   std::shared_ptr<MockLastState> mock_last_state_;
-  std::shared_ptr<resumption::LastStateWrapper> last_state_wrapper_;
+  std::shared_ptr<resumption::LastStateWrapperImpl> last_state_wrapper_;
   ApplicationSharedPtr app_impl_;
 };
 

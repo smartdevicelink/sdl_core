@@ -82,8 +82,7 @@ class MockResumeCtrl : public resumption::ResumeCtrl {
   MOCK_METHOD1(OnAppActivated,
                void(app_mngr::ApplicationSharedPtr application));
   MOCK_METHOD1(RemoveFromResumption, void(uint32_t app_id));
-  MOCK_METHOD1(Init,
-               bool(std::shared_ptr<resumption::LastStateWrapper> last_state));
+  MOCK_METHOD1(Init, bool(resumption::LastStateWrapperPtr last_state));
   MOCK_METHOD2(OnAppRegistrationStart,
                void(const std::string& policy_app_id,
                     const std::string& device_id));

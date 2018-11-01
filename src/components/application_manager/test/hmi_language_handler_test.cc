@@ -32,6 +32,7 @@
 
 #include <stdint.h>
 
+#include "gtest/gtest.h"
 #include "application_manager/application_manager.h"
 #include "application_manager/hmi_language_handler.h"
 #include "application_manager/mock_application.h"
@@ -43,7 +44,7 @@
 #include "application_manager/resumption/resume_ctrl_impl.h"
 #include "application_manager/smart_object_keys.h"
 #include "application_manager/state_controller.h"
-#include "gtest/gtest.h"
+#include "resumption/last_state_wrapper_impl.h"
 #include "test/resumption/mock_last_state.h"
 
 #include "utils/lock.h"
@@ -155,8 +156,8 @@ TEST_F(HmiLanguageHandlerTest, OnEvent_AllLanguageIsReceivedAndSame_SUCCESS) {
   // Set up `active_*_language` and
   //`persisted_ui_language_` to be the same
   auto mock_last_state = std::make_shared<resumption_test::MockLastState>();
-  std::shared_ptr<resumption::LastStateWrapper> last_state_wrapper =
-      std::make_shared<resumption::LastStateWrapper>(mock_last_state);
+  std::shared_ptr<resumption::LastStateWrapperImpl> last_state_wrapper =
+      std::make_shared<resumption::LastStateWrapperImpl>(mock_last_state);
   Json::Value dictionary = Json::Value();
   ON_CALL(*mock_last_state, dictionary()).WillByDefault(Return(dictionary));
   hmi_language_handler_->Init(last_state_wrapper);

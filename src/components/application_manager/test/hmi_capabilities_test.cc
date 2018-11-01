@@ -51,6 +51,7 @@
 #include "application_manager/state_controller.h"
 #include "resumption/last_state_impl.h"
 #include "utils/file_system.h"
+#include "resumption/last_state_wrapper_impl.h"
 
 namespace test {
 namespace components {
@@ -68,7 +69,7 @@ using namespace application_manager;
 class HMICapabilitiesTest : public ::testing::Test {
  protected:
   HMICapabilitiesTest()
-      : last_state_wrapper_(std::make_shared<resumption::LastStateWrapper>(
+      : last_state_wrapper_(std::make_shared<resumption::LastStateWrapperImpl>(
             std::make_shared<resumption::LastStateImpl>("app_storage_folder",
                                                         "app_info_storage")))
       , file_name_("hmi_capabilities.json") {}
@@ -101,7 +102,7 @@ class HMICapabilitiesTest : public ::testing::Test {
   void SetCooperating();
   MockApplicationManager app_mngr_;
   event_engine_test::MockEventDispatcher mock_event_dispatcher;
-  std::shared_ptr<resumption::LastStateWrapper> last_state_wrapper_;
+  resumption::LastStateWrapperPtr last_state_wrapper_;
   MockApplicationManagerSettings mock_application_manager_settings_;
   std::shared_ptr<HMICapabilitiesForTesting> hmi_capabilities_test;
   const std::string file_name_;

@@ -36,7 +36,7 @@
 #include "transport_manager/transport_manager_default.h"
 #include "transport_manager/mock_transport_manager_settings.h"
 #include "resumption/mock_last_state.h"
-#include "resumption/last_state_wrapper.h"
+#include "resumption/last_state_wrapper_impl.h"
 
 namespace test {
 namespace components {
@@ -83,8 +83,8 @@ TEST(TestTransportManagerDefault, Init_LastStateNotUsed) {
       transport_manager_settings);
 
   auto mock_last_state = std::make_shared<MockLastState>();
-  std::shared_ptr<resumption::LastStateWrapper> wrapper =
-      std::make_shared<resumption::LastStateWrapper>(mock_last_state);
+  std::shared_ptr<resumption::LastStateWrapperImpl> wrapper =
+      std::make_shared<resumption::LastStateWrapperImpl>(mock_last_state);
   Json::Value custom_dictionary = Json::Value();
 
   ON_CALL(*mock_last_state, dictionary())
@@ -126,8 +126,8 @@ TEST(TestTransportManagerDefault, Init_LastStateUsed) {
       transport_manager_settings);
 
   auto mock_last_state = std::make_shared<MockLastState>();
-  std::shared_ptr<resumption::LastStateWrapper> wrapper =
-      std::make_shared<resumption::LastStateWrapper>(mock_last_state);
+  std::shared_ptr<resumption::LastStateWrapperImpl> wrapper =
+      std::make_shared<resumption::LastStateWrapperImpl>(mock_last_state);
   Json::Value custom_dictionary;
   Json::Value tcp_device;
   tcp_device[kDeviceName] = "unique_tcp_device_name";
@@ -165,8 +165,8 @@ TEST(TestTransportManagerDefault, Init_LastStateUsed_InvalidPort) {
       transport_manager_settings);
 
   auto mock_last_state = std::make_shared<MockLastState>();
-  std::shared_ptr<resumption::LastStateWrapper> wrapper =
-      std::make_shared<resumption::LastStateWrapper>(mock_last_state);
+  std::shared_ptr<resumption::LastStateWrapperImpl> wrapper =
+      std::make_shared<resumption::LastStateWrapperImpl>(mock_last_state);
   Json::Value custom_dictionary;
   Json::Value tcp_device;
   tcp_device[kDeviceName] = "unique_tcp_device_name";

@@ -66,7 +66,7 @@ using application_manager::plugin_manager::RPCPluginManager;
 class MockApplicationManager : public application_manager::ApplicationManager {
  public:
   MOCK_METHOD2(Init,
-               bool(std::shared_ptr<resumption::LastStateWrapper> last_state,
+               bool(resumption::LastStateWrapperPtr last_state,
                     media_manager::MediaManager* media_manager));
   MOCK_METHOD0(Stop, bool());
   MOCK_METHOD1(set_hmi_message_handler,

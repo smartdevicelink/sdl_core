@@ -39,6 +39,7 @@
 #include "gtest/gtest.h"
 #include "json/json.h"
 #include "resumption/last_state_impl.h"
+#include "resumption/last_state_wrapper_impl.h"
 #include "smart_objects/smart_object.h"
 #include "utils/date_time.h"
 #include "utils/file_system.h"
@@ -66,7 +67,7 @@ class AppLaunchDataJsonTest : public ::testing::Test {
  private:
   virtual void SetUp() {
     ::file_system::DeleteFile(kAppStorageFile);
-    last_state_wrapper_ = std::make_shared<resumption::LastStateWrapper>(
+    last_state_wrapper_ = std::make_shared<resumption::LastStateWrapperImpl>(
         std::make_shared<resumption::LastStateImpl>("app_storage_folder",
                                                     "app_info_storage"));
     ASSERT_TRUE(::file_system::CreateFile(kAppStorageFile));
@@ -102,7 +103,7 @@ class AppLaunchDataJsonTest : public ::testing::Test {
   void GetApplicationData_EXPECT_FALSE(const ApplicationData& in_data);
   std::string AddCounter(const std::string& inp, int32_t val);
 
-  std::shared_ptr<resumption::LastStateWrapper> last_state_wrapper_;
+  resumption::LastStateWrapperPtr last_state_wrapper_;
   std::unique_ptr<AppLaunchDataJson> res_json_;
   void SetTimestamp(const ApplicationData& in_data,
                     date_time::TimeDuration& timestamp);

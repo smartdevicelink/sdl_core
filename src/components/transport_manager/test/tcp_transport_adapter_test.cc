@@ -33,6 +33,7 @@
 #include "transport_manager/tcp/tcp_transport_adapter.h"
 #include "gtest/gtest.h"
 #include "protocol/raw_message.h"
+#include "resumption/last_state_wrapper_impl.h"
 #include "resumption/last_state_impl.h"
 #include "transport_manager/mock_transport_manager_settings.h"
 #include "transport_manager/tcp/mock_tcp_transport_adapter.h"
@@ -40,6 +41,10 @@
 #include "transport_manager/transport_adapter/mock_connection.h"
 #include "transport_manager/transport_adapter/mock_device.h"
 #include "transport_manager/transport_adapter/mock_transport_adapter_listener.h"
+#include "transport_manager/transport_adapter/mock_device.h"
+#include "transport_manager/transport_adapter/mock_connection.h"
+#include "transport_manager/tcp/mock_tcp_transport_adapter.h"
+#include "transport_manager/mock_transport_manager_settings.h"
 
 namespace test {
 namespace components {
@@ -56,12 +61,12 @@ using namespace transport_manager::transport_adapter;
 class TcpAdapterTest : public ::testing::Test {
  protected:
   TcpAdapterTest() {
-    last_state_wrapper_ = std::make_shared<resumption::LastStateWrapper>(
+    last_state_wrapper_ = std::make_shared<resumption::LastStateWrapperImpl>(
         std::make_shared<resumption::LastStateImpl>("app_storage_folder",
                                                     "app_info_storage"));
   }
   MockTransportManagerSettings transport_manager_settings;
-  std::shared_ptr<resumption::LastStateWrapper> last_state_wrapper_;
+  std::shared_ptr<resumption::LastStateWrapperImpl> last_state_wrapper_;
   const uint32_t port = 12345;
   const std::string string_port = "12345";
   std::string network_interface = "";
