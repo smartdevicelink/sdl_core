@@ -39,6 +39,8 @@
 #include "json/json.h"
 #include "smart_objects/smart_object.h"
 #include "utils/macro.h"
+#include "application_manager/hmi_language_handler.h"
+#include "resumption/last_state_wrapper.h"
 
 namespace resumption {
 class LastStateWrapper;
@@ -529,8 +531,7 @@ class HMICapabilities {
   virtual const smart_objects::SmartObject* seat_location_capability()
       const = 0;
 
-  virtual void Init(
-      std::shared_ptr<resumption::LastStateWrapper> last_state_wrapper) = 0;
+  virtual void Init(resumption::LastStateWrapperPtr last_state_wrapper) = 0;
 
   /**
    * @brief Trigger waiting for response

@@ -46,7 +46,7 @@ namespace formatters = ns_smart_device_link::ns_json_handler::formatters;
 CREATE_LOGGERPTR_GLOBAL(logger_, "Resumption")
 
 ResumptionDataJson::ResumptionDataJson(
-    std::shared_ptr<resumption::LastStateWrapper> last_state_wrapper,
+    resumption::LastStateWrapperPtr last_state_wrapper,
     const application_manager::ApplicationManager& application_manager)
     : ResumptionData(application_manager)
     , last_state_wrapper_(last_state_wrapper) {}

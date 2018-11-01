@@ -582,7 +582,7 @@ int TransportManagerImpl::SearchDevices() {
 }
 
 int TransportManagerImpl::Init(
-    std::shared_ptr<resumption::LastStateWrapper> last_state_wrapper) {
+    resumption::LastStateWrapperPtr last_state_wrapper) {
   // Last state requred to initialize Transport adapters
   UNUSED(last_state_wrapper);
   LOG4CXX_TRACE(logger_, "enter");

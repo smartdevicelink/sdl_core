@@ -344,8 +344,7 @@ void HMILanguageHandler::CheckApplication(const Apps::value_type app) {
   }
 }
 
-void HMILanguageHandler::Init(
-    std::shared_ptr<resumption::LastStateWrapper> value) {
+void HMILanguageHandler::Init(resumption::LastStateWrapperPtr value) {
   last_state_wrapper_ = value;
   persisted_ui_language_ = get_language_for(INTERFACE_UI);
   persisted_vr_language_ = get_language_for(INTERFACE_VR);

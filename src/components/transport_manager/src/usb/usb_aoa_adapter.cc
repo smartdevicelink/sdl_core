@@ -43,9 +43,8 @@ namespace transport_manager {
 namespace transport_adapter {
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "TransportManager")
-UsbAoaAdapter::UsbAoaAdapter(
-    std::shared_ptr<resumption::LastStateWrapper> last_state_wrapper,
-    const TransportManagerSettings& settings)
+UsbAoaAdapter::UsbAoaAdapter(resumption::LastStateWrapperPtr last_state_wrapper,
+                             const TransportManagerSettings& settings)
     : TransportAdapterImpl(new UsbDeviceScanner(this),
                            new UsbConnectionFactory(this),
                            NULL,

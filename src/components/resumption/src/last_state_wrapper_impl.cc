@@ -1,5 +1,4 @@
-/*
- * Copyright (c) 2018, Ford Motor Company
+/* Copyright (c) 2018, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,45 +29,21 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_RESUMPTION_INCLUDE_RESUMPTION_LAST_STATE_H_
-#define SRC_COMPONENTS_RESUMPTION_INCLUDE_RESUMPTION_LAST_STATE_H_
-
-#include "json/json.h"
+#include "resumption/last_state_wrapper_impl.h"
+#include "utils/logger.h"
 
 namespace resumption {
 
-class LastState {
- public:
-  /**
-   * @brief Destructor
-   */
-  virtual ~LastState() {}
+CREATE_LOGGERPTR_GLOBAL(logger_, "Resumption")
 
-  /**
-    * @brief SaveToFileSystem
-    * Saving dictionary to filesystem
-    */
-  virtual void SaveToFileSystem() = 0;
+LastStateWrapperImpl::LastStateWrapperImpl(
+    std::shared_ptr<LastState> last_state)
+    : last_state_(last_state)
+    , lock_(std::make_shared<sync_primitives::Lock>()) {}
 
-  /**
-   * @brief RemoveFromFileSystem
-   * Remove dictionary from filesystem
-   */
-  virtual void RemoveFromFileSystem() = 0;
-
-  /**
-   * @brief dictionary Gets internal dictionary
-   * @return Copy of internal dictionary json value
-   */
-  virtual Json::Value dictionary() const = 0;
-
-  /**
-   * @brief set_dictionary Resets internal dictionary
-   * @param dictionary New dictionary json value to be set
-   */
-  virtual void set_dictionary(const Json::Value& dictionary) = 0;
-};
+LastStateAccessor LastStateWrapperImpl::get_accessor() const {
+  LOG4CXX_AUTO_TRACE(logger_);
+  return MutableDataAccessor<LastState>(*last_state_, lock_);
+}
 
 }  // namespace resumption
-
-#endif  // SRC_COMPONENTS_RESUMPTION_INCLUDE_RESUMPTION_LAST_STATE_H_

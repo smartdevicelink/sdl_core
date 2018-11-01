@@ -49,7 +49,7 @@ class ResumptionDataJson : public ResumptionData {
    * @brief Constructor of ResumptionDataJson
    */
   ResumptionDataJson(
-      std::shared_ptr<resumption::LastStateWrapper> last_state_wrapper,
+      resumption::LastStateWrapperPtr last_state_wrapper,
       const application_manager::ApplicationManager& application_manager);
 
   /**
@@ -232,7 +232,7 @@ class ResumptionDataJson : public ResumptionData {
    */
   bool IsResumptionDataValid(uint32_t index) const;
 
-  std::shared_ptr<resumption::LastStateWrapper> last_state_wrapper_;
+  resumption::LastStateWrapperPtr last_state_wrapper_;
   DISALLOW_COPY_AND_ASSIGN(ResumptionDataJson);
 };
 }  // namespace resumption

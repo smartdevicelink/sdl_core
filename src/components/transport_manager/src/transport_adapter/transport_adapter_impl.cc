@@ -70,7 +70,7 @@ TransportAdapterImpl::TransportAdapterImpl(
     DeviceScanner* device_scanner,
     ServerConnectionFactory* server_connection_factory,
     ClientConnectionListener* client_connection_listener,
-    std::shared_ptr<resumption::LastStateWrapper> last_state_wrapper,
+    resumption::LastStateWrapperPtr last_state_wrapper,
     const TransportManagerSettings& settings)
     : listeners_()
     , initialised_(0)

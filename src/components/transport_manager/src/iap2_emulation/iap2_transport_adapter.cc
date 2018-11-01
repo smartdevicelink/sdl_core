@@ -54,7 +54,7 @@ CREATE_LOGGERPTR_GLOBAL(logger_, "IAP2Emulation");
 
 IAP2BluetoothEmulationTransportAdapter::IAP2BluetoothEmulationTransportAdapter(
     const uint16_t port,
-    std::shared_ptr<resumption::LastStateWrapper> last_state_wrapper,
+    resumption::LastStateWrapperPtr last_state_wrapper,
     const TransportManagerSettings& settings)
     : TcpTransportAdapter(port, last_state_wrapper, settings) {}
 
@@ -76,7 +76,7 @@ void IAP2BluetoothEmulationTransportAdapter::TransportConfigUpdated(
 
 IAP2USBEmulationTransportAdapter::IAP2USBEmulationTransportAdapter(
     const uint16_t port,
-    std::shared_ptr<resumption::LastStateWrapper> last_state_wrapper,
+    resumption::LastStateWrapperPtr last_state_wrapper,
     const TransportManagerSettings& settings)
     : TcpTransportAdapter(port, last_state_wrapper, settings), out_(0) {
   auto delegate = new IAPSignalHandlerDelegate(*this);

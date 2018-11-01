@@ -57,7 +57,7 @@ CREATE_LOGGERPTR_GLOBAL(logger_, "TransportManager")
 BluetoothTransportAdapter::~BluetoothTransportAdapter() {}
 
 BluetoothTransportAdapter::BluetoothTransportAdapter(
-    std::shared_ptr<resumption::LastStateWrapper> last_state_wrapper,
+    resumption::LastStateWrapperPtr last_state_wrapper,
     const TransportManagerSettings& settings)
     : TransportAdapterImpl(
           new BluetoothDeviceScanner(this, true, 0, settings.bluetooth_uuid()),

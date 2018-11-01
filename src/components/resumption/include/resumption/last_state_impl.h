@@ -48,36 +48,38 @@ namespace resumption {
 class LastStateImpl : public LastState {
  public:
   /**
-     * @brief Constructor
-     */
+   * @brief Constructor
+   */
   LastStateImpl(const std::string& app_storage_folder,
                 const std::string& app_info_storage);
   /**
-     * @brief Destructor
-     */
+   * @brief Destructor
+   */
   ~LastStateImpl();
   /**
-     * @brief Saving dictionary to filesystem
-     */
+   * @brief Saving dictionary to filesystem
+   */
   void SaveToFileSystem() OVERRIDE;
+
   /**
-     * @brief Remove dictionary from filesystem
-     */
+   * @brief Remove dictionary from filesystem
+   */
   void RemoveFromFileSystem() OVERRIDE;
+
   /**
-     * @brief Get reference to dictionary
-     */
+   * @brief Get reference to dictionary
+   */
   Json::Value dictionary() const OVERRIDE;
   /**
-     * @brief Resets internal dictionary
-     * @param dictionary New dictionary json value to be set
-     */
+   * @brief Resets internal dictionary
+   * @param dictionary New dictionary json value to be set
+   */
   void set_dictionary(const Json::Value& dictionary) OVERRIDE;
 
  private:
   /**
-     * @brief Load dictionary from filesystem
-     */
+   * @brief Load dictionary from filesystem
+   */
   void LoadFromFileSystem();
 
   Json::Value dictionary_;

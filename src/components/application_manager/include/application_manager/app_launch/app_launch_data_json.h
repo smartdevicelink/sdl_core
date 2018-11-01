@@ -52,9 +52,8 @@ class AppLaunchDataJson : public AppLaunchDataImpl {
   /**
    * @brief Constructor of AppLaunchDataJson object
    */
-  AppLaunchDataJson(
-      const AppLaunchSettings& settings,
-      std::shared_ptr<resumption::LastStateWrapper> last_state_wrapper);
+  AppLaunchDataJson(const AppLaunchSettings& settings,
+                    resumption::LastStateWrapperPtr last_state_wrapper);
   /**
    * @brief allows to destroy AppLaunchDataJson object
    */
@@ -142,7 +141,7 @@ class AppLaunchDataJson : public AppLaunchDataImpl {
   /**
    * @brief ponter to Last State object
    */
-  std::shared_ptr<resumption::LastStateWrapper> last_state_wrapper_;
+  resumption::LastStateWrapperPtr last_state_wrapper_;
 
   DISALLOW_COPY_AND_ASSIGN(AppLaunchDataJson);
 };

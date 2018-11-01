@@ -124,8 +124,7 @@ class TransportManagerImpl
    *
    * @return Code error.
    */
-  int Init(std::shared_ptr<resumption::LastStateWrapper> last_state_wrapper)
-      OVERRIDE;
+  int Init(resumption::LastStateWrapperPtr last_state_wrapper) OVERRIDE;
 
   /**
    * Reinitializes transport manager

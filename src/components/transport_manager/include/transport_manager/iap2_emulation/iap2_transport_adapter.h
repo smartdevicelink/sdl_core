@@ -60,7 +60,7 @@ class IAP2BluetoothEmulationTransportAdapter : public TcpTransportAdapter {
    */
   IAP2BluetoothEmulationTransportAdapter(
       const uint16_t port,
-      std::shared_ptr<resumption::LastStateWrapper> last_state_wrapper,
+      resumption::LastStateWrapperPtr last_state_wrapper,
       const TransportManagerSettings& settings);
 
   /**
@@ -105,7 +105,7 @@ class IAP2USBEmulationTransportAdapter : public TcpTransportAdapter {
    */
   IAP2USBEmulationTransportAdapter(
       const uint16_t port,
-      std::shared_ptr<resumption::LastStateWrapper> last_state_wrapper,
+      resumption::LastStateWrapperPtr last_state_wrapper,
       const TransportManagerSettings& settings);
 
   /**

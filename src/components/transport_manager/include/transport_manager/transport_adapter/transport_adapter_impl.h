@@ -79,12 +79,11 @@ class TransportAdapterImpl : public TransportAdapter,
    * @param client_connection_listener Pointer to the listener of client
    *connection.
    **/
-  TransportAdapterImpl(
-      DeviceScanner* device_scanner,
-      ServerConnectionFactory* server_connection_factory,
-      ClientConnectionListener* client_connection_listener,
-      std::shared_ptr<resumption::LastStateWrapper> last_state_wrapper,
-      const TransportManagerSettings& settings);
+  TransportAdapterImpl(DeviceScanner* device_scanner,
+                       ServerConnectionFactory* server_connection_factory,
+                       ClientConnectionListener* client_connection_listener,
+                       resumption::LastStateWrapperPtr last_state_wrapper,
+                       const TransportManagerSettings& settings);
 
   /**
    * @brief Destructor.
@@ -681,7 +680,7 @@ class TransportAdapterImpl : public TransportAdapter,
    */
   ClientConnectionListener* client_connection_listener_;
 
-  std::shared_ptr<resumption::LastStateWrapper> last_state_wrapper_;
+  resumption::LastStateWrapperPtr last_state_wrapper_;
   const TransportManagerSettings& settings_;
 };
 

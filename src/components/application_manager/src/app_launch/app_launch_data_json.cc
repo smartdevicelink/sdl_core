@@ -42,7 +42,7 @@ CREATE_LOGGERPTR_GLOBAL(logger_, "AppLaunch")
 
 AppLaunchDataJson::AppLaunchDataJson(
     const AppLaunchSettings& settings,
-    std::shared_ptr<resumption::LastStateWrapper> last_state_wrapper)
+    resumption::LastStateWrapperPtr last_state_wrapper)
     : AppLaunchDataImpl(settings), last_state_wrapper_(last_state_wrapper) {}
 
 AppLaunchDataJson::~AppLaunchDataJson() {}

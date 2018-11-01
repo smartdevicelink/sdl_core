@@ -47,8 +47,6 @@ namespace app_mngr = application_manager;
 
 namespace resumption {
 
-class LastStateWrapper;
-
 /**
  * @brief Contains logic for storage/restore data of applications.
  */
@@ -277,8 +275,7 @@ class ResumeCtrl {
    * @return true if initialization is success otherwise
    * returns false
    */
-  virtual bool Init(
-      std::shared_ptr<resumption::LastStateWrapper> last_state_wrapper) = 0;
+  virtual bool Init(resumption::LastStateWrapperPtr last_state_wrapper) = 0;
 
   /**
    * @brief Notify resume controller about new application

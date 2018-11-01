@@ -2330,7 +2330,7 @@ void ApplicationManagerImpl::RemoveHMIFakeParameters(
 }
 
 bool ApplicationManagerImpl::Init(
-    std::shared_ptr<resumption::LastStateWrapper> last_state_wrapper,
+    resumption::LastStateWrapperPtr last_state_wrapper,
     media_manager::MediaManager* media_manager) {
   LOG4CXX_TRACE(logger_, "Init application manager");
   plugin_manager_.reset(new plugin_manager::RPCPluginManagerImpl(

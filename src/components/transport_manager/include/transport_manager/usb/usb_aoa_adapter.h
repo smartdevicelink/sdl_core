@@ -44,9 +44,8 @@ namespace transport_adapter {
 
 class UsbAoaAdapter : public TransportAdapterImpl {
  public:
-  UsbAoaAdapter(
-      std::shared_ptr<resumption::LastStateWrapper> last_state_wrapper,
-      const TransportManagerSettings& settings);
+  UsbAoaAdapter(resumption::LastStateWrapperPtr last_state_wrapper,
+                const TransportManagerSettings& settings);
   virtual ~UsbAoaAdapter();
 
  protected:

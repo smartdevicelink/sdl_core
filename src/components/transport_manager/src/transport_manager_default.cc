@@ -60,7 +60,7 @@ TransportManagerDefault::TransportManagerDefault(
     : TransportManagerImpl(settings) {}
 
 int TransportManagerDefault::Init(
-    std::shared_ptr<resumption::LastStateWrapper> last_state_wrapper) {
+    resumption::LastStateWrapperPtr last_state_wrapper) {
   LOG4CXX_TRACE(logger_, "enter");
   if (E_SUCCESS != TransportManagerImpl::Init(last_state_wrapper)) {
     LOG4CXX_TRACE(logger_,

@@ -35,7 +35,7 @@
 #include "config_profile/profile.h"
 #include "resumption/last_state_impl.h"
 #include "utils/signals.h"
-#include "resumption/last_state_wrapper.h"
+#include "resumption/last_state_wrapper_impl.h"
 #ifdef ENABLE_SECURITY
 #include "application_manager/policies/policy_handler.h"
 #include "security_manager/crypto_manager_impl.h"
@@ -80,7 +80,7 @@ LifeCycleImpl::LifeCycleImpl(const profile::Profile& profile)
 bool LifeCycleImpl::StartComponents() {
   LOG4CXX_AUTO_TRACE(logger_);
   DCHECK(!last_state_wrapper_);
-  last_state_wrapper_ = std::make_shared<resumption::LastStateWrapper>(
+  last_state_wrapper_ = std::make_shared<resumption::LastStateWrapperImpl>(
       std::make_shared<resumption::LastStateImpl>(profile_.app_storage_folder(),
                                                   profile_.app_info_storage()));
 

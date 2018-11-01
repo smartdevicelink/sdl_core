@@ -512,8 +512,7 @@ class HMICapabilitiesImpl : public HMICapabilities {
 
   const smart_objects::SmartObject* seat_location_capability() const OVERRIDE;
 
-  void Init(std::shared_ptr<resumption::LastStateWrapper> last_state_wrapper)
-      OVERRIDE;
+  void Init(resumption::LastStateWrapperPtr last_state_wrapper) OVERRIDE;
 
   /*
    * @brief return component which follows for correctness of

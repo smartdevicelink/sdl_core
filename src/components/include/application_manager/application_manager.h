@@ -47,11 +47,7 @@
 #include "application_manager/plugin_manager/rpc_plugin_manager.h"
 #include "application_manager/state_controller.h"
 #include "policy/policy_types.h"
-#include "telemetry_monitor/telemetry_observable.h"
-
-namespace resumption {
-class LastStateWrapper;
-}
+#include "application_manager/plugin_manager/rpc_plugin_manager.h"
 
 namespace app_launch {
 class AppLaunchCtrl;
@@ -139,9 +135,8 @@ class ApplicationManager {
   /**
    * Inits application manager
    */
-  virtual bool Init(
-      std::shared_ptr<resumption::LastStateWrapper> last_state_wrapper,
-      media_manager::MediaManager* media_manager) = 0;
+  virtual bool Init(resumption::LastStateWrapperPtr last_state_wrapper,
+                    media_manager::MediaManager* media_manager) = 0;
 
   /**
    * @brief Stop work.

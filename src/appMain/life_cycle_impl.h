@@ -95,7 +95,7 @@ class LifeCycleImpl : public LifeCycle {
   hmi_message_handler::HMIMessageHandlerImpl* hmi_handler_;
   hmi_message_handler::HMIMessageAdapter* hmi_message_adapter_;
   media_manager::MediaManagerImpl* media_manager_;
-  std::shared_ptr<resumption::LastStateWrapper> last_state_wrapper_;
+  resumption::LastStateWrapperPtr last_state_wrapper_;
 #ifdef TELEMETRY_MONITOR
   telemetry_monitor::TelemetryMonitor* telemetry_monitor_;
 #endif  // TELEMETRY_MONITOR

@@ -91,8 +91,7 @@ bool ResumeCtrlImpl::get_resumption_active() const {
 }
 #endif  // BUILD_TESTS
 
-bool ResumeCtrlImpl::Init(
-    std::shared_ptr<resumption::LastStateWrapper> last_state_wrapper) {
+bool ResumeCtrlImpl::Init(resumption::LastStateWrapperPtr last_state_wrapper) {
   bool use_db = application_manager_.get_settings().use_db_for_resumption();
   if (use_db) {
     resumption_storage_.reset(

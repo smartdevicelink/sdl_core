@@ -52,8 +52,6 @@
 
 namespace resumption {
 
-class LastStateWrapper;
-
 /**
  * @brief Contains logic for storage/restore data of applications.
  */
@@ -291,8 +289,7 @@ class ResumeCtrlImpl : public ResumeCtrl,
    * @return true if initialization is success otherwise
    * returns false
    */
-  bool Init(
-      std::shared_ptr<resumption::LastStateWrapper> last_state_wrapper) FINAL;
+  bool Init(resumption::LastStateWrapperPtr last_state_wrapper) FINAL;
 
   /**
    * @brief Notify resume controller about new application

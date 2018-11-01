@@ -30,8 +30,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_RESUMPTION_INCLUDE_RESUMPTION_LAST_STATE_WRAPPER_H_
-#define SRC_COMPONENTS_RESUMPTION_INCLUDE_RESUMPTION_LAST_STATE_WRAPPER_H_
+#ifndef SRC_COMPONENTS_RESUMPTION_INCLUDE_RESUMPTION_LAST_STATE_WRAPPER_IMPL_H_
+#define SRC_COMPONENTS_RESUMPTION_INCLUDE_RESUMPTION_LAST_STATE_WRAPPER_IMPL_H_
 
 #include <memory>
 
@@ -42,21 +42,14 @@
 
 namespace resumption {
 
-typedef DataAccessor<LastState> LastStateAccessor;
-
-class LastStateWrapper {
+class LastStateWrapperImpl : public LastStateWrapper {
  public:
   /**
    * @brief Constructor
    */
-  explicit LastStateWrapper(std::shared_ptr<LastState> last_state);
+  explicit LastStateWrapperImpl(std::shared_ptr<LastState> last_state);
 
-  /**
-   * @brief Getter for providing exclusive access to LastState instance using
-   * provided lock
-   * @return accessor with ability to access to LastState instance
-   */
-  LastStateAccessor get_accessor() const;
+  LastStateAccessor get_accessor() const OVERRIDE;
 
  private:
   std::shared_ptr<LastState> last_state_;
@@ -65,4 +58,4 @@ class LastStateWrapper {
 
 }  // namespace resumption
 
-#endif  // SRC_COMPONENTS_RESUMPTION_INCLUDE_RESUMPTION_LAST_STATE_WRAPPER_H_
+#endif  // SRC_COMPONENTS_RESUMPTION_INCLUDE_RESUMPTION_LAST_STATE_WRAPPER_IMPL_H_
