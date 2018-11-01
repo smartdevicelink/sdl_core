@@ -377,6 +377,7 @@ const char* GET = "GET";
 
 namespace mobile_notification {
 const char* state = "state";
+const char* lock_screen_dismissal_enabled = "lockScreenDismissalEnabled";
 const char* syncp_timeout = "Timeout";
 const char* syncp_url = "URL";
 }  // namespace mobile_notification
@@ -477,6 +478,7 @@ const char* prndl = "prndl";
 const char* file_name = "file_name";
 const char* system_context = "systemContext";
 const char* state = "state";
+const char* lock_screen_dismissal_enabled = "lockScreenDismissalEnabled";
 const char* result = "result";
 const char* statistic_type = "statisticType";
 const char* error = "error";

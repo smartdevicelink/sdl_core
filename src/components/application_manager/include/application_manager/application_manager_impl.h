@@ -390,6 +390,12 @@ class ApplicationManagerImpl
   hmi_apis::Common_DriverDistractionState::eType driver_distraction_state()
       const;
 
+  /**
+   * @brief Retrieves lock screen dismissal state (enabled/disabled).
+   * @return Current lock screen dismissal state.
+   */
+  bool is_lock_screen_dismissal_enabled_state() const;
+
   /*
    * @brief Sets state for driver distraction
    *
@@ -397,6 +403,13 @@ class ApplicationManagerImpl
    */
   void set_driver_distraction_state(
       const hmi_apis::Common_DriverDistractionState::eType state) OVERRIDE;
+
+  /**
+   * @brief Sets state for lock screen dismissal state (enabled/disabled).
+   * @param lock_screen_dismissal_enabled - New state to be set.
+   */
+  virtual void set_lock_screen_dismissal_state(
+      const bool lock_screen_dismissal_state) OVERRIDE;
 
   /*
    * @brief Retrieves SDL access to all mobile apps
@@ -1368,6 +1381,7 @@ class ApplicationManagerImpl
   sync_primitives::Lock audio_pass_thru_lock_;
   sync_primitives::Lock tts_global_properties_app_list_lock_;
   hmi_apis::Common_DriverDistractionState::eType driver_distraction_state_;
+  bool lock_screen_dismissal_enabled_state_;
   bool is_vr_session_strated_;
   bool hmi_cooperating_;
   bool is_all_apps_allowed_;

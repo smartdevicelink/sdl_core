@@ -192,6 +192,8 @@ class MockApplicationManager : public application_manager::ApplicationManager {
   MOCK_METHOD1(
       set_driver_distraction_state,
       void(const hmi_apis::Common_DriverDistractionState::eType state));
+  MOCK_METHOD1(set_lock_screen_dismissal_state,
+               void(const bool lock_screen_dismissal_enabled));
   MOCK_METHOD6(StartAudioPassThruThread,
                void(int32_t session_key,
                     int32_t correlation_id,
