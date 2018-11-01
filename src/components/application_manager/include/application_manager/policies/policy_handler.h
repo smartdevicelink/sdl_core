@@ -398,6 +398,29 @@ class PolicyHandler : public PolicyHandlerInterface,
   custom_str::CustomString GetAppName(
       const std::string& policy_app_id) OVERRIDE;
 
+  /**
+   * @brief Checks if a given application is an enabled cloud application
+   * @param policy_app_id Unique application id
+   * @return true, if the application is an enabled cloud application,
+   * otherwise - false
+   */
+  const bool CheckCloudAppEnabled(
+      const std::string& policy_app_id) const OVERRIDE;
+
+  /**plzfix
+   * @brief Checks if certain request type is allowed for application
+   * @param policy_app_id Unique application id
+   * @return true, if allowed, otherwise - false
+   */
+  const bool GetCloudAppParameters(const std::string& policy_app_id,
+                             std::string& endpoint,
+                             std::string& auth_token,
+                             std::string& cloud_transport_type,
+                             std::string& hybrid_app_preference) const OVERRIDE;
+
+  void OnSetCloudAppProperties(
+      const smart_objects::SmartObject& message) OVERRIDE;
+
   virtual void OnUpdateHMIAppType(
       std::map<std::string, StringArray> app_hmi_types) OVERRIDE;
 

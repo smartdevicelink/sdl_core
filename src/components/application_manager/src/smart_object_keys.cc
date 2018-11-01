@@ -155,6 +155,10 @@ const char* green = "green";
 const char* blue = "blue";
 const char* display_layout = "displayLayout";
 const char* icon_resumed = "iconResumed";
+const char* enabled = "enabled";
+const char* cloud_app_auth_token = "cloudAppAuthToken";
+const char* cloud_transport_type = "cloudTransportType";
+const char* hybrid_app_preference = "hybridAppPreference";
 
 // PutFile
 const char* sync_file_name = "syncFileName";

@@ -503,6 +503,57 @@ class PolicyManager : public usage_statistics::StatisticsManager {
   virtual const VehicleInfo GetVehicleInfo() const = 0;
 
   /**
+   * @brief Get cloud app policy information, all fields that aren't set for a
+   * given app will be filled with empty strings
+   * @param policy_app_id Unique application id
+   * @param endpoint Filled the endpoint used to connect to the cloud
+   * application
+   * @param auth_token Filled with the token used for authentication when
+   * reconnecting to the cloud app
+   * @param cloud_transport_type Filled with the transport type used by the
+   * cloud application (ex. "WSS")
+   * @param cloud_transport_type Filled with the hybrid app preference for the
+   * cloud application set by the user
+   * @return true if the cloud app is enabled, false otherwise
+   */
+  virtual const bool GetCloudAppParameters(
+      const std::string& policy_app_id,
+      std::string& endpoint,
+      std::string& auth_token,
+      std::string& cloud_transport_type,
+      std::string& hybrid_app_preference) const = 0;
+
+  /**
+   * @brief Enable or disable a cloud application in the HMI
+   * @param enabled Cloud app enabled state
+   */
+  virtual void SetCloudAppEnabled(const std::string& policy_app_id,
+                                  const bool enabled) = 0;
+
+  /**
+   * @brief Set an app's auth token
+   * @param auth_token Cloud app authentication token
+   */
+  virtual void SetAppAuthToken(const std::string& policy_app_id,
+                               const std::string& auth_token) = 0;
+
+  /**
+   * @brief Set a cloud app's transport type
+   * @param cloud_transport_type Cloud app transport type
+   */
+  virtual void SetAppCloudTransportType(
+      const std::string& policy_app_id,
+      const std::string& cloud_transport_type) = 0;
+
+  /**
+   * @brief Set the user preference for how a hybrid (cloud and mobile) app
+   * should be used
+   * @param hybrid_app_preference Hybrid app user preference
+   */
+  virtual void SetHybridAppPreference(const std::string& policy_app_id,
+                                      const std::string& hybrid_app_preference) = 0;
+
+  /**
    * @brief OnAppRegisteredOnMobile allows to handle event when application were
    * succesfully registered on mobile device.
    * It will send OnAppPermissionSend notification and will try to start PTU. *
