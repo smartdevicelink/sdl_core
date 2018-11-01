@@ -56,6 +56,7 @@
         <element name="fuelRange" />
         <element name="tirePressureValue" />
         <element name="tpms" />
+        <element name="cloudAppVehicleID" />
     </enum>
 
     <enum name="AppHMIType">
