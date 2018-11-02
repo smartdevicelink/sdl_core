@@ -181,6 +181,16 @@ bool IsValidEnum(ModuleType val);
 const char* EnumToJsonString(ModuleType val);
 bool EnumFromJsonString(const std::string& literal, ModuleType* result);
 
+enum HybridAppPreference {
+  HAP_MOBILE,
+  HAP_CLOUD,
+  HAP_BOTH
+};
+bool IsValidEnum(HybridAppPreference val);
+const char* EnumToJsonString(HybridAppPreference val);
+bool EnumFromJsonString(const std::string& literal,
+                        HybridAppPreference* result);
+
 /**
  * @brief Enumeration FunctionID.
  *

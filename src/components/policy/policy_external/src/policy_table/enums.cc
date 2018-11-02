@@ -1,4 +1,5 @@
 #include "policy/policy_table/enums.h"
+#include <cstring>
 
 namespace rpc {
 namespace policy_table_interface_base {
@@ -838,6 +839,38 @@ bool EnumFromJsonString(const std::string& literal, ModuleType* result) {
   } else {
     return false;
   }
+}
+
+bool IsValidEnum(HybridAppPreference val) {
+  return strlen(EnumToJsonString(val)) > 0;
+}
+
+const char* EnumToJsonString(HybridAppPreference val) {
+  switch (val) {
+    case HAP_MOBILE:
+      return "MOBILE";
+    case HAP_CLOUD:
+      return "CLOUD";
+    case HAP_BOTH:
+      return "BOTH";
+    default:
+      return "";
+  }
+}
+
+bool EnumFromJsonString(const std::string& literal,
+                        HybridAppPreference* result) {
+  if ("MOBILE" == literal) {
+    *result = HAP_MOBILE;
+    return true;
+  } else if ("CLOUD" == literal) {
+    *result = HAP_CLOUD;
+    return true;
+  } else if ("BOTH" == literal) {
+    *result = HAP_BOTH;
+    return true;
+  }
+  return false;
 }
 
 bool EnumFromJsonString(const std::string& literal, FunctionID* result) {
