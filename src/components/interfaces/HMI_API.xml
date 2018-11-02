@@ -2407,6 +2407,15 @@
 </enum>
 
 <!-- End Remote Control -->
+
+<!-- Cloud App -->
+<enum name="CloudConnectionStatus" since="5.1">
+    <element name="NOT_CONNECTED" value="0"/><description>No active websocket session or ongoing connection attempts</description>
+    <element name="CONNECTED" value="1"/><description>Websocket is active</description>
+    <element name="RETRY" value="2"/><description>Websocket connection failed and retry attempts are ongoing</description>
+</enum>
+<!-- End Cloud App -->
+
 <struct name="TextField">
   <param name="name" type="Common.TextFieldName" mandatory="true">
     <description>The name that identifies the field. See TextFieldName.</description>
@@ -2619,7 +2628,7 @@
       <description>If SDL omits this parameter - none RequestType is allowed for this app</description>
       <description>(either this is a pre-registered app or such is dictated by policies).</description>
     </param>
-	<param name="requestSubType" type="String" maxlength="100" minsize="0" maxsize="100" array="true" mandatory="false">
+	  <param name="requestSubType" type="String" maxlength="100" minsize="0" maxsize="100" array="true" mandatory="false">
         <description>
             The list of SystemRequest's requestSubTypes allowed by policies for the named application.
             If the app sends a requestSubType which is not specified in this list, then that request should be rejected.
@@ -2629,6 +2638,8 @@
     </param>
     <param name="dayColorScheme" type="Common.TemplateColorScheme" mandatory="false"></param>
     <param name="nightColorScheme" type="Common.TemplateColorScheme" mandatory="false"></param>
+    <param name="isCloudApplication" type="Boolean" mandatory="false" since="5.1"></param>
+    <param name="cloudConnectionStatus" type="CloudConnectionStatus" mandatory="false" since="5.1"></param>
 </struct>
 
 <struct name="MenuParams">
@@ -3459,7 +3470,7 @@
     <function name="OnSDLPersistenceComplete" messagetype="notification">
     </function>
     <function name="UpdateAppList" messagetype="request">
-      <description>Issued by SDL to notify HMI about new applications registered.</description>
+      <description>Issued by SDL to notify HMI about new applications registered or enabled cloud apps.</description>
       <param name="applications" type="Common.HMIApplication" mandatory="true" array="true" minsize="0" maxsize="100"/>
     </function>
     <function name="UpdateAppList" messagetype="response">
