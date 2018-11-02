@@ -752,6 +752,24 @@ bool SQLPTExtRepresentation::SaveSpecificAppPolicy(
   app_query.Bind(5, app.second.is_null());
   app_query.Bind(6, *app.second.memory_kb);
   app_query.Bind(7, static_cast<int64_t>(*app.second.heart_beat_timeout_ms));
+  app.second.certificate.is_initialized()
+      ? app_query.Bind(8, *app.second.certificate)
+      : app_query.Bind(8);
+  app.second.hybrid_app_preference.is_initialized()
+      ? app_query.Bind(9,
+                       std::string(policy_table::EnumToJsonString(
+                           *app.second.hybrid_app_preference)))
+      : app_query.Bind(9);
+  app.second.endpoint.is_initialized() ? app_query.Bind(10, *app.second.endpoint)
+                                       : app_query.Bind(10);
+  app.second.enabled.is_initialized() ? app_query.Bind(11, *app.second.enabled)
+                                      : app_query.Bind(11);
+  app.second.auth_token.is_initialized()
+      ? app_query.Bind(12, *app.second.auth_token)
+      : app_query.Bind(12);
+  app.second.cloud_transport_type.is_initialized()
+      ? app_query.Bind(13, *app.second.cloud_transport_type)
+      : app_query.Bind(13);
 
   if (!app_query.Exec() || !app_query.Reset()) {
     LOG4CXX_WARN(logger_, "Incorrect insert into application.");
@@ -873,6 +891,22 @@ bool SQLPTExtRepresentation::GatherApplicationPoliciesSection(
     params.steal_focus = query.GetBoolean(4);
     *params.memory_kb = query.GetInteger(5);
     *params.heart_beat_timeout_ms = query.GetUInteger(6);
+    if (!query.IsNull(7)) {
+      *params.certificate = query.GetString(7);
+    }
+
+    // Read cloud app properties
+    policy_table::HybridAppPreference hap;
+    bool valid = policy_table::EnumFromJsonString(query.GetString(8), &hap);
+    if (valid) {
+      *params.hybrid_app_preference = hap;
+    }
+    *params.endpoint = query.GetString(9);
+    if (!query.IsNull(10)) {
+      *params.enabled = query.GetBoolean(10);
+    }
+    *params.auth_token = query.GetString(11);
+    *params.cloud_transport_type = query.GetString(12);
 
     const auto& gather_app_id = ((*policies).apps[app_id].is_string())
                                     ? (*policies).apps[app_id].get_string()
