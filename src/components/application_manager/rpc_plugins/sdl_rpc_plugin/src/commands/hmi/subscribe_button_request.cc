@@ -144,19 +144,35 @@ void SubscribeButtonRequest::on_event(const event_engine::Event& event) {
     const mobile_apis::ButtonName::eType btn_id =
         static_cast<mobile_apis::ButtonName::eType>(
             (*message_)[strings::msg_params][strings::button_name].asInt());
-    app->SubscribeToButton(static_cast<mobile_apis::ButtonName::eType>(btn_id));
-    app->RemovePendingSubscriptionButton(correlation_id());
-  } else if (!is_in_pending) {
-    smart_objects::SmartObjectSPtr msg =
-        MessageHelper::CreateButtonSubscriptionHandlingRequestToHmi(
-            application_id(),
-            static_cast<hmi_apis::Common_ButtonName::eType>(button_name_),
-            hmi_apis::FunctionID::Buttons_UnsubscribeButton,
-            application_manager_);
+    if ((hmi_apis::Common_Result::SUCCESS == hmi_result ||
+         hmi_apis::Common_Result::WARNINGS) &&
+        is_in_pending) {
+      app->SubscribeToButton(
+          static_cast<mobile_apis::ButtonName::eType>(btn_id));
+      app->RemovePendingSubscriptionButton(correlation_id());
+    } else if (ShouldUnsubscribeIntertally(hmi_result, *app)) {
+      app->UnsubscribeFromButton(
+          static_cast<mobile_apis::ButtonName::eType>(btn_id));
+      app->RemovePendingSubscriptionButton(correlation_id());
+    } else if (!is_in_pending) {
+      smart_objects::SmartObjectSPtr msg =
+          MessageHelper::CreateButtonSubscriptionHandlingRequestToHmi(
+              application_id(),
+              static_cast<hmi_apis::Common_ButtonName::eType>(button_name_),
+              hmi_apis::FunctionID::Buttons_UnsubscribeButton,
+              application_manager_);
 
-    rpc_service_.SendMessageToHMI(msg);
+      rpc_service_.SendMessageToHMI(msg);
+    }
   }
-}
+
+  bool SubscribeButtonRequest::ShouldUnsubscribeIntertally(
+      const hmi_apis::Common_Result::eType hmi_result,
+      const app_mngr::Application& app) const {
+    return (hmi_result != hmi_apis::Common_Result::SUCCESS &&
+            hmi_result != hmi_apis::Common_Result::WARNINGS) &&
+           (app.is_resuming());
+  }
 
 }  // namespace hmi
 }  // namespace commands
