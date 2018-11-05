@@ -1054,7 +1054,8 @@ smart_objects::SmartObjectSPtr MessageHelper::CreateButtonNotificationToMobile(
 
   if (!app) {
     LOG4CXX_ERROR(logger_, "application NULL pointer");
-    return nullptr;
+    return std::make_shared<smart_objects::SmartObject>(
+        smart_objects::SmartType_Null);
   }
 
   smart_objects::SmartObjectSPtr msg =

@@ -33,24 +33,20 @@
 #ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_BUTTON_NOTIFICATION_TO_MOBILE_H_
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_BUTTON_NOTIFICATION_TO_MOBILE_H_
 
-#include "application_manager/application.h"
 #include "command_notification_impl.h"
+#include "application_manager/application.h"
 #include "interfaces/MOBILE_API.h"
 
 namespace application_manager {
-
 namespace commands {
 namespace app_mngr = application_manager;
 
 /**
  * @brief Class is intended to encapsulate shared button notification logic in
- *base class
+ * base class
  **/
 class ButtonNotificationToMobile
     : public app_mngr::commands::CommandNotificationImpl {
- protected:
-  virtual void SendButtonNotification(app_mngr::ApplicationSharedPtr app) = 0;
-
  public:
   /**
    * @brief ButtonNotificationToMobile class constructor
@@ -86,14 +82,17 @@ class ButtonNotificationToMobile
   void HandleMediaButton();
 
   /**
-   * @brief IsAppIDExist check whether app id exists in received message
+   * @brief DoesAppIDExist check whether app id exists in received message
    **/
-  bool IsAppIDExist() const;
+  bool DoesAppIDExist() const;
 
   /**
    * @brief SubscribedApps get subscribed apps for btn id received in message
    **/
   const std::vector<ApplicationSharedPtr> SubscribedApps() const;
+
+ protected:
+  virtual void SendButtonNotification(app_mngr::ApplicationSharedPtr app) = 0;
 };
 }  // namespace commands
 }  // namespace application_manager

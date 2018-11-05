@@ -1164,35 +1164,35 @@ void ApplicationImpl::PushMobileMessage(
 }
 
 const std::map<int32_t, hmi_apis::Common_ButtonName::eType>&
-ApplicationImpl::PendingSubscriptionButtons() const {
-  return pending_subscription_buttons_;
+ApplicationImpl::PendingButtonSubscriptions() const {
+  return pending_button_subscriptions_;
 }
 
 const std::map<int32_t, hmi_apis::Common_ButtonName::eType>&
-ApplicationImpl::PendingUnsubscriptionButtons() const {
-  return pending_unsubscription_buttons_;
+ApplicationImpl::PendingButtonUnsubscriptions() const {
+  return pending_button_unsubscriptions_;
 }
 
-void ApplicationImpl::AddPendingSubscriptionButton(
+void ApplicationImpl::AddPendingButtonSubscription(
     const int32_t correlation_id,
     const hmi_apis::Common_ButtonName::eType button_name) {
-  pending_subscription_buttons_[correlation_id] = button_name;
+  pending_button_subscriptions_[correlation_id] = button_name;
 }
 
 void ApplicationImpl::RemovePendingSubscriptionButton(
     const int32_t correlation_id) {
-  pending_subscription_buttons_.erase(correlation_id);
+  pending_button_subscriptions_.erase(correlation_id);
 }
 
-void ApplicationImpl::AddPendingUnsubscriptionButton(
+void ApplicationImpl::AddPendingButtonUnsubscription(
     const int32_t correlation_id,
     const hmi_apis::Common_ButtonName::eType button_name) {
-  pending_unsubscription_buttons_[correlation_id] = button_name;
+  pending_button_unsubscriptions_[correlation_id] = button_name;
 }
 
-void ApplicationImpl::RemovePendingUnsubscriptionButton(
+void ApplicationImpl::RemovePendingButtonUnsubscription(
     const int32_t correlation_id) {
-  pending_unsubscription_buttons_.erase(correlation_id);
+  pending_button_unsubscriptions_.erase(correlation_id);
 }
 
 void ApplicationImpl::SwapMobileMessageQueue(

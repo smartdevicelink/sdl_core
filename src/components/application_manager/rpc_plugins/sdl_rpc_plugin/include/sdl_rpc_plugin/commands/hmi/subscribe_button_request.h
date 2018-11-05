@@ -41,7 +41,6 @@ namespace sdl_rpc_plugin {
 namespace app_mngr = application_manager;
 
 namespace commands {
-
 namespace hmi {
 /**
  * @brief SubscribeButtonRequest command class
@@ -76,14 +75,13 @@ class SubscribeButtonRequest : public app_mngr::commands::RequestToHMI,
  private:
   DISALLOW_COPY_AND_ASSIGN(SubscribeButtonRequest);
 
-
-   /**
-   * @brief Determines whether internal unsubscription must be performed
-   * and HMI UnsubscribeButton request must not be sent
-   * @param hmi_result - result code received from HMI
-   * @param app - reference to application instance
-   * @return bool - true if app should unsubscribe internally
-   **/
+  /**
+  * @brief Determines whether internal unsubscription must be performed
+  * and HMI UnsubscribeButton request must not be sent
+  * @param hmi_result - result code received from HMI
+  * @param app - reference to application instance
+  * @return bool - true if app should unsubscribe internally
+  **/
   bool ShouldUnsubscribeIntertally(
       const hmi_apis::Common_Result::eType hmi_result,
       const app_mngr::Application& app) const;
@@ -93,7 +91,6 @@ class SubscribeButtonRequest : public app_mngr::commands::RequestToHMI,
 
 }  // namespace hmi
 }  // namespace commands
-
 }  // namespace sdl_rpc_plugin
 
 #endif  // SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_HMI_SUBSCRIBE_BUTTON_REQUEST_H_

@@ -82,7 +82,7 @@ void UnsubscribeButtonRequest::Run() {
     return;
   }
 
-  app->AddPendingUnsubscriptionButton(correlation_id(), button_name_);
+  app->AddPendingButtonUnsubscription(correlation_id(), button_name_);
 
   SendRequest();
 }
@@ -107,7 +107,7 @@ void UnsubscribeButtonRequest::onTimeOut() {
     return;
   }
 
-  app->RemovePendingUnsubscriptionButton(correlation_id());
+  app->RemovePendingButtonUnsubscription(correlation_id());
 }
 
 void UnsubscribeButtonRequest::on_event(const event_engine::Event& event) {
@@ -123,9 +123,13 @@ void UnsubscribeButtonRequest::on_event(const event_engine::Event& event) {
     return;
   }
 
-  const bool is_in_pending = app->PendingUnsubscriptionButtons().find(
-                                 event.smart_object_correlation_id()) !=
-                             app->PendingUnsubscriptionButtons().end();
+  const auto pending_button_unsubscriptions =
+      app->PendingButtonUnsubscriptions();
+
+  const auto it =
+      pending_button_unsubscriptions.find(event.smart_object_correlation_id());
+
+  const bool is_in_pending = it != pending_button_unsubscriptions.end();
 
   hmi_apis::Common_Result::eType hmi_result =
       static_cast<hmi_apis::Common_Result::eType>(
@@ -137,7 +141,7 @@ void UnsubscribeButtonRequest::on_event(const event_engine::Event& event) {
             (*message_)[strings::msg_params][strings::button_name].asInt());
     app->UnsubscribeFromButton(
         static_cast<mobile_apis::ButtonName::eType>(btn_id));
-    app->RemovePendingUnsubscriptionButton(correlation_id());
+    app->RemovePendingButtonUnsubscription(correlation_id());
   } else if (!is_in_pending) {
     smart_objects::SmartObjectSPtr msg =
         MessageHelper::CreateButtonSubscriptionHandlingRequestToHmi(

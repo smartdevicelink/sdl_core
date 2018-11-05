@@ -61,9 +61,7 @@ SubscribeButtonRequest::SubscribeButtonRequest(
   button_name_ = button_name;
 }
 
-SubscribeButtonRequest::~SubscribeButtonRequest() {
-  unsubscribe_from_event(hmi_apis::FunctionID::Buttons_SubscribeButton);
-}
+SubscribeButtonRequest::~SubscribeButtonRequest() {}
 
 void SubscribeButtonRequest::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -81,7 +79,7 @@ void SubscribeButtonRequest::Run() {
     return;
   }
 
-  app->AddPendingSubscriptionButton(correlation_id(), button_name_);
+  app->AddPendingButtonSubscription(correlation_id(), button_name_);
 
   SendRequest();
 }
@@ -136,43 +134,45 @@ void SubscribeButtonRequest::on_event(const event_engine::Event& event) {
       static_cast<hmi_apis::Common_Result::eType>(
           message[strings::params][hmi_response::code].asInt());
 
-  const bool is_in_pending = app->PendingSubscriptionButtons().find(
-                                 event.smart_object_correlation_id()) !=
-                             app->PendingSubscriptionButtons().end();
+  const auto pending_button_subscriptions = app->PendingButtonSubscriptions();
 
-  if (hmi_apis::Common_Result::SUCCESS == hmi_result && is_in_pending) {
-    const mobile_apis::ButtonName::eType btn_id =
-        static_cast<mobile_apis::ButtonName::eType>(
-            (*message_)[strings::msg_params][strings::button_name].asInt());
-    if ((hmi_apis::Common_Result::SUCCESS == hmi_result ||
-         hmi_apis::Common_Result::WARNINGS) &&
-        is_in_pending) {
-      app->SubscribeToButton(
-          static_cast<mobile_apis::ButtonName::eType>(btn_id));
-      app->RemovePendingSubscriptionButton(correlation_id());
-    } else if (ShouldUnsubscribeIntertally(hmi_result, *app)) {
-      app->UnsubscribeFromButton(
-          static_cast<mobile_apis::ButtonName::eType>(btn_id));
-      app->RemovePendingSubscriptionButton(correlation_id());
-    } else if (!is_in_pending) {
-      smart_objects::SmartObjectSPtr msg =
-          MessageHelper::CreateButtonSubscriptionHandlingRequestToHmi(
-              application_id(),
-              static_cast<hmi_apis::Common_ButtonName::eType>(button_name_),
-              hmi_apis::FunctionID::Buttons_UnsubscribeButton,
-              application_manager_);
+  const auto it =
+      pending_button_subscriptions.find(event.smart_object_correlation_id());
 
-      rpc_service_.SendMessageToHMI(msg);
-    }
+  const bool is_in_pending = it != pending_button_subscriptions.end();
+
+  const mobile_apis::ButtonName::eType btn_id =
+      static_cast<mobile_apis::ButtonName::eType>(
+          (*message_)[strings::msg_params][strings::button_name].asInt());
+
+  if ((hmi_apis::Common_Result::SUCCESS == hmi_result ||
+       hmi_apis::Common_Result::WARNINGS == hmi_result) &&
+      is_in_pending) {
+    app->SubscribeToButton(static_cast<mobile_apis::ButtonName::eType>(btn_id));
+    app->RemovePendingSubscriptionButton(correlation_id());
+  } else if (ShouldUnsubscribeIntertally(hmi_result, *app)) {
+    app->UnsubscribeFromButton(
+        static_cast<mobile_apis::ButtonName::eType>(btn_id));
+    app->RemovePendingSubscriptionButton(correlation_id());
+  } else if (!is_in_pending) {
+    smart_objects::SmartObjectSPtr msg =
+        MessageHelper::CreateButtonSubscriptionHandlingRequestToHmi(
+            application_id(),
+            static_cast<hmi_apis::Common_ButtonName::eType>(button_name_),
+            hmi_apis::FunctionID::Buttons_UnsubscribeButton,
+            application_manager_);
+
+    rpc_service_.SendMessageToHMI(msg);
   }
+}
 
-  bool SubscribeButtonRequest::ShouldUnsubscribeIntertally(
-      const hmi_apis::Common_Result::eType hmi_result,
-      const app_mngr::Application& app) const {
-    return (hmi_result != hmi_apis::Common_Result::SUCCESS &&
-            hmi_result != hmi_apis::Common_Result::WARNINGS) &&
-           (app.is_resuming());
-  }
+bool SubscribeButtonRequest::ShouldUnsubscribeIntertally(
+    const hmi_apis::Common_Result::eType hmi_result,
+    const app_mngr::Application& app) const {
+  return (hmi_result != hmi_apis::Common_Result::SUCCESS &&
+          hmi_result != hmi_apis::Common_Result::WARNINGS) &&
+         (app.is_resuming());
+}
 
 }  // namespace hmi
 }  // namespace commands

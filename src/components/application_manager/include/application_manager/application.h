@@ -940,15 +940,15 @@ class Application : public virtual InitialApplicationData,
    * to button names
    * @return pending button subscriptions map
    */
-  const virtual std::map<int32_t, hmi_apis::Common_ButtonName::eType>&
-  PendingSubscriptionButtons() const = 0;
+  virtual const std::map<int32_t, hmi_apis::Common_ButtonName::eType>&
+  PendingButtonSubscriptions() const = 0;
 
   /**
    * @brief Add  pending button subscription request
    * @param correlation_id - correlation id of subscription request
    * @param button_name - enum value indication button name
    */
-  virtual void AddPendingSubscriptionButton(
+  virtual void AddPendingButtonSubscription(
       const int32_t correlation_id,
       const hmi_apis::Common_ButtonName::eType button_name) = 0;
   /**
@@ -963,22 +963,22 @@ class Application : public virtual InitialApplicationData,
    * to button names
    * @return pending button unsubscriptions map
    */
-  const virtual std::map<int32_t, hmi_apis::Common_ButtonName::eType>&
-  PendingUnsubscriptionButtons() const = 0;
+  virtual const std::map<int32_t, hmi_apis::Common_ButtonName::eType>&
+  PendingButtonUnsubscriptions() const = 0;
 
   /**
    * @brief Add  pending button unsubscription request
    * @param correlation_id - correlation id of unsubscription request
    * @param button_name - enum value indication button name
    */
-  virtual void AddPendingUnsubscriptionButton(
+  virtual void AddPendingButtonUnsubscription(
       const int32_t correlation_id,
       const hmi_apis::Common_ButtonName::eType button_name) = 0;
   /**
    * @brief Remove pending button unsubscription request
    * @param correlation_id - correlation id of unsubscription request
    */
-  virtual void RemovePendingUnsubscriptionButton(
+  virtual void RemovePendingButtonUnsubscription(
       const int32_t correlation_id) = 0;
 
  protected:
