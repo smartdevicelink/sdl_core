@@ -86,6 +86,7 @@ TcpClientListener::TcpClientListener(TransportAdapterController* controller,
     , thread_(0)
     , socket_(-1)
     , thread_stop_requested_(false)
+    , remove_devices_on_terminate_(false)
     , designated_interface_(designated_interface) {
   pipe_fds_[0] = pipe_fds_[1] = -1;
   thread_ = threads::CreateThread("TcpClientListener",
@@ -226,6 +227,7 @@ void TcpClientListener::Loop() {
   LOG4CXX_AUTO_TRACE(logger_);
   fd_set rfds;
   char dummy[16];
+  std::vector<DeviceUID> device_uid_list;
 
   while (!thread_stop_requested_) {
     FD_ZERO(&rfds);
@@ -323,10 +325,19 @@ void TcpClientListener::Loop() {
       if (TransportAdapter::OK != error) {
         LOG4CXX_ERROR(logger_,
                       "TCP connection::Start() failed with error: " << error);
+      } else {
+        device_uid_list.push_back(device->unique_device_id());
       }
     }
   }
 
+  if (remove_devices_on_terminate_) {
+    for (std::vector<DeviceUID>::iterator it = device_uid_list.begin();
+         it != device_uid_list.end();
+         ++it) {
+      controller_->DeviceDisconnected(*it, DisconnectDeviceError());
+    }
+  }
   LOG4CXX_INFO(logger_, "TCP server socket loop is terminated.");
 }
 
@@ -534,6 +545,8 @@ bool TcpClientListener::StartOnNetworkInterface() {
       }
     }
 
+    remove_devices_on_terminate_ = true;
+
     if (TransportAdapter::OK != StartListeningThread()) {
       LOG4CXX_WARN(logger_, "Failed to start TCP client listener");
       return false;
@@ -558,6 +571,8 @@ bool TcpClientListener::StopOnNetworkInterface() {
       DestroyServerSocket(socket_);
       socket_ = -1;
     }
+
+    remove_devices_on_terminate_ = false;
 
     LOG4CXX_INFO(
         logger_,
