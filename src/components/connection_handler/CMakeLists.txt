@@ -47,7 +47,6 @@ target_link_libraries(${PROJECT_NAME}
     protocol::protocol
     utils::utils
     protocol_handler::protocol_handler
-    transport_manager::transport_manager
   PRIVATE
     components::interface
 )

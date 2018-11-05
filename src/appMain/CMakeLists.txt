@@ -61,34 +61,7 @@ target_link_libraries(${PROJECT_NAME}
 
 target_include_directories(${PROJECT_NAME}
     PRIVATE
-      "${COMPONENTS_DIR}/protocol_handler/include"
-      "${COMPONENTS_DIR}/application_manager/include"
-      "${COMPONENTS_DIR}/formatters/include"
-      "${COMPONENTS_DIR}/transport_manager/include"
-      "${COMPONENTS_DIR}/security_manager/include"
-      "${COMPONENTS_DIR}/security_manager/include"
-      "${COMPONENTS_DIR}/config_profile/include"
-      "${COMPONENTS_DIR}/utils/include"
-      "${COMPONENTS_DIR}/connection_handler/include"
-      "${COMPONENTS_DIR}/hmi_message_handler/include"
-      "${COMPONENTS_DIR}/request_watchdog/include"
-      "${COMPONENTS_DIR}/smart_objects/include"
-      "${COMPONENTS_DIR}/media_manager/include"
-      "${COMPONENTS_DIR}/telemetry_monitor/include"
-      "${COMPONENTS_DIR}/functional_module/include"
-      "${POLICY_PATH}/include"
-      "${POLICY_GLOBAL_INCLUDE_PATH}/"
-      "${COMPONENTS_DIR}/rpc_base/include"
-      "${COMPONENTS_DIR}/resumption/include"
-      "${CMAKE_BINARY_DIR}/src/components"
-      "${JSONCPP_INCLUDE_DIRECTORY}"
-      "${LOG4CXX_INCLUDE_DIRECTORY}"
-      "${BSON_INCLUDE_DIRECTORY}"
-      "${OPENSSL_INCLUDE_DIRECTORY}"
-      "${default_media_inc}"
-      "${MESSAGE_BROKER_INCLUDE_DIRECTORY}"
-      "${BOOST_INCLUDE_DIR}"
-      "${CMAKE_SOURCE_DIR}/src"
+    "${CMAKE_SOURCE_DIR}/src"
 )
 
 

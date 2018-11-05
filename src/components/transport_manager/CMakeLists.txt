@@ -188,9 +188,16 @@ if(TELEMETRY_MONITOR)
   )
 endif()
 
+if(QNXNTO)
+  target_include_directories(${PROJECT_NAME}
+    PUBLIC "${CMAKE_CURRENT_LIST_DIR}/include/transport_manager/tcp/platform_specific/qnx"
+  )
+else ()
+  target_include_directories(${PROJECT_NAME}
+  PUBLIC "${CMAKE_CURRENT_LIST_DIR}/include/transport_manager/tcp/platform_specific/linux"
+  )
+endif()
+
 target_include_directories(${PROJECT_NAME}
   PUBLIC "${CMAKE_CURRENT_LIST_DIR}/include"
-  PUBLIC "${CMAKE_CURRENT_LIST_DIR}/include/transport_manager/tcp/platform_specific/qnx"
 )
-
-#if BUILD_TESTS (Not just yet)
