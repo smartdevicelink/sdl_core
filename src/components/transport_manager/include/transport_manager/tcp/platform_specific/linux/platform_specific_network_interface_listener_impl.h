@@ -32,6 +32,9 @@ class InterfaceStatus {
 
   bool IsAvailable() const;
   bool IsLoopback() const;
+  std::string GetName() const {
+    return name_;
+  }
   // only for debugging output
   unsigned int GetFlags() const {
     return flags_;
@@ -40,6 +43,10 @@ class InterfaceStatus {
   bool HasIPAddress() const;
   std::string GetIPv4Address() const;
   std::string GetIPv6Address() const;
+
+  void SetName(std::string name) {
+    name_ = name;
+  }
 
   void SetFlags(unsigned int flags) {
     flags_ = flags;
@@ -50,6 +57,7 @@ class InterfaceStatus {
   void SetIPv6Address(struct in6_addr* addr);
 
  private:
+  std::string name_;
   unsigned int flags_;
   bool has_ipv4_;
   bool has_ipv6_;
@@ -57,7 +65,7 @@ class InterfaceStatus {
   struct in6_addr ipv6_address_;
 };
 
-typedef std::map<std::string, InterfaceStatus> InterfaceStatusTable;
+typedef std::map<unsigned int, InterfaceStatus> InterfaceStatusTable;
 
 /**
  * @brief Listener to detect various events on network interfaces
@@ -126,6 +134,10 @@ class PlatformSpecificNetworkInterfaceListener
   const std::string& GetSelectedInterfaceName() const {
     return selected_interface_;
   }
+
+  void SetDummyNameMap(std::map<unsigned int, std::string> m) {
+    dummy_name_map_ = m;
+  }
 #endif  // BUILD_TESTS
 
  private:
@@ -160,6 +172,7 @@ class PlatformSpecificNetworkInterfaceListener
 
 #ifdef BUILD_TESTS
   bool testing_;
+  std::map<unsigned int, std::string> dummy_name_map_;
 #endif
 
   void Loop();
@@ -175,9 +188,13 @@ class PlatformSpecificNetworkInterfaceListener
   // Select an appropriate network interface that we will get IP addresses. Also
   // update selected_interface_.
   const std::string SelectInterface();
+  // return an entry from status_table_ containing specified interface name
+  InterfaceStatusTable::iterator FindInterfaceStatus(std::string ifname);
   // convert ifaddrmsg to a list of EventParam structs
   std::vector<EventParam> ParseIFAddrMessage(struct ifaddrmsg* message,
                                              unsigned int size);
+  // return network interface name of the specified index
+  const std::string GetInterfaceName(unsigned int if_index) const;
   // for debugging
   void DumpTable() const;
 
