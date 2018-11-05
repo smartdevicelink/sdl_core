@@ -537,7 +537,7 @@ const std::string PlatformSpecificNetworkInterfaceListener::SelectInterface() {
     if (status.IsLoopback()) {
       continue;
     }
-    // if the interface has to be UP and RUNNING, and must have an IP address
+    // the interface has to be UP and RUNNING, and must have an IP address
     if (!(status.IsAvailable() && status.HasIPAddress())) {
       continue;
     }

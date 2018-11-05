@@ -108,7 +108,7 @@ TransportAdapter::Error TcpClientListener::Init() {
       return TransportAdapter::FAIL;
     }
   } else {
-    // Network interface is specified and we wiill listen only on the interface.
+    // Network interface is specified and we will listen only on the interface.
     // In this case, the server socket will be created once
     // NetworkInterfaceListener notifies the interface's IP address.
     LOG4CXX_INFO(logger_,
@@ -455,8 +455,7 @@ TransportAdapter::Error TcpClientListener::StartListeningThread() {
 
   if (pipe_fds_[0] < 0 || pipe_fds_[1] < 0) {
     // recreate the pipe every time, so that the thread loop will not get
-    // leftover
-    // data inside pipe after it is started
+    // leftover data inside pipe after it is started
     if (pipe(pipe_fds_) != 0) {
       LOG4CXX_ERROR_WITH_ERRNO(logger_, "Failed to create internal pipe");
       return TransportAdapter::FAIL;
