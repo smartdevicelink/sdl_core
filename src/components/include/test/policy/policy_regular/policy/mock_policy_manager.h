@@ -181,9 +181,12 @@ class MockPolicyManager : public PolicyManager {
       GetAppRequestTypes,
       const std::vector<std::string>(const std::string policy_app_id));
   MOCK_CONST_METHOD0(GetVehicleInfo, const policy::VehicleInfo());
-  MOCK_CONST_METHOD5(GetCloudAppParameters,
+  MOCK_CONST_METHOD1(GetEnabledCloudApps,
+                     void(std::vector<std::string>& enabled_apps));
+  MOCK_CONST_METHOD6(GetCloudAppParameters,
                      const bool(const std::string& policy_app_id,
                                 std::string& endpoint,
+                                std::string& certificate,
                                 std::string& auth_token,
                                 std::string& cloud_transport_type,
                                 std::string& hybrid_app_preference));

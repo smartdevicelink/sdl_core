@@ -544,17 +544,26 @@ const VehicleInfo PolicyManagerImpl::GetVehicleInfo() const {
   return cache_->GetVehicleInfo();
 }
 
+void PolicyManagerImpl::GetEnabledCloudApps(
+    std::vector<std::string>& enabled_apps) const {
+  cache_->GetEnabledCloudApps(enabled_apps);
+}
+
 const bool PolicyManagerImpl::GetCloudAppParameters(
     const std::string& policy_app_id,
     std::string& endpoint,
     std::string& auth_token,
     std::string& cloud_transport_type,
     std::string& hybrid_app_preference) const {
-  return cache_->GetCloudAppParameters(policy_app_id, endpoint, auth_token, cloud_transport_type, hybrid_app_preference);
+  return cache_->GetCloudAppParameters(policy_app_id,
+                                       endpoint,
+                                       auth_token,
+                                       cloud_transport_type,
+                                       hybrid_app_preference);
 }
 
-void PolicyManagerImpl::SetCloudAppEnabled(
-    const std::string& policy_app_id, const bool enabled) {
+void PolicyManagerImpl::SetCloudAppEnabled(const std::string& policy_app_id,
+                                           const bool enabled) {
   cache_->SetCloudAppEnabled(policy_app_id, enabled);
 }
 

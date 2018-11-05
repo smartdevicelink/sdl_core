@@ -565,11 +565,20 @@ class PolicyManagerImpl : public PolicyManager {
   const VehicleInfo GetVehicleInfo() const OVERRIDE;
 
   /**
+   * @brief Get a list of enabled cloud applications
+   * @param enabled_apps List filled with the policy app id of each enabled cloud
+   * application
+   */
+  void GetEnabledCloudApps(std::vector<std::string>& enabled_apps) const OVERRIDE;
+
+  /**
    * @brief Get cloud app policy information, all fields that aren't set for a
    * given app will be filled with empty strings
    * @param policy_app_id Unique application id
    * @param endpoint Filled the endpoint used to connect to the cloud
    * application
+   * @param certificate Filled with the certificate used to for creating a
+   * secure connection to the cloud application
    * @param auth_token Filled with the token used for authentication when
    * reconnecting to the cloud app
    * @param cloud_transport_type Filled with the transport type used by the
@@ -591,7 +600,7 @@ class PolicyManagerImpl : public PolicyManager {
    */
   void SetCloudAppEnabled(const std::string& policy_app_id,
                           const bool enabled) OVERRIDE;
-  
+
   /**
    * @brief Set an app's auth token
    * @param auth_token Cloud app authentication token
