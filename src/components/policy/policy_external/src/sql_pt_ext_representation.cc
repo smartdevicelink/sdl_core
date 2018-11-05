@@ -760,8 +760,9 @@ bool SQLPTExtRepresentation::SaveSpecificAppPolicy(
                        std::string(policy_table::EnumToJsonString(
                            *app.second.hybrid_app_preference)))
       : app_query.Bind(9);
-  app.second.endpoint.is_initialized() ? app_query.Bind(10, *app.second.endpoint)
-                                       : app_query.Bind(10);
+  app.second.endpoint.is_initialized()
+      ? app_query.Bind(10, *app.second.endpoint)
+      : app_query.Bind(10);
   app.second.enabled.is_initialized() ? app_query.Bind(11, *app.second.enabled)
                                       : app_query.Bind(11);
   app.second.auth_token.is_initialized()

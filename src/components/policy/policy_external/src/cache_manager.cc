@@ -1389,9 +1389,24 @@ const policy::VehicleInfo CacheManager::GetVehicleInfo() const {
   return vehicle_info;
 }
 
+void CacheManager::GetEnabledCloudApps(
+    std::vector<std::string>& enabled_apps) const {
+  const policy_table::ApplicationPolicies& policies =
+      pt_->policy_table.app_policies_section.apps;
+  for (policy_table::ApplicationPolicies::const_iterator it = policies.begin();
+       it != policies.end();
+       ++it) {
+    auto app_policy = (*it).second;
+    if (app_policy.enabled.is_initialized() && *app_policy.enabled) {
+      enabled_apps.push_back((*it).first);
+    }
+  }
+}
+
 const bool CacheManager::GetCloudAppParameters(
     const std::string& policy_app_id,
     std::string& endpoint,
+    std::string& certificate,
     std::string& auth_token,
     std::string& cloud_transport_type,
     std::string& hybrid_app_preference) const {
@@ -1403,6 +1418,9 @@ const bool CacheManager::GetCloudAppParameters(
     auto app_policy = (*policy_iter).second;
     endpoint = app_policy.endpoint.is_initialized() ? *app_policy.endpoint
                                                     : std::string();
+    certificate = app_policy.certificate.is_initialized()
+                      ? *app_policy.certificate
+                      : std::string();
     auth_token = app_policy.auth_token.is_initialized() ? *app_policy.auth_token
                                                         : std::string();
     cloud_transport_type = app_policy.cloud_transport_type.is_initialized()
