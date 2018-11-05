@@ -407,43 +407,20 @@ class ApplicationImpl : public virtual Application,
 
   void SwapMobileMessageQueue(MobileMessageQueue& mobile_messages) OVERRIDE;
 
-  const std::map<int32_t, hmi_apis::Common_ButtonName::eType>&
-  PendingButtonSubscriptions() const OVERRIDE;
+  const ButtonSubscriptionsMap& PendingButtonSubscriptions() const OVERRIDE;
 
-  /**
-   * @brief Add  pending button subscription request
-   * @param correlation_id - correlation id of subscription request
-   * @param button_name - enum value indication button name
-   */
   void AddPendingButtonSubscription(
       const int32_t correlation_id,
       const hmi_apis::Common_ButtonName::eType button_name) OVERRIDE;
-  /**
-   * @brief Remove pending button subscription request
-   * @param correlation_id - correlation id of subscription request
-   */
+
   void RemovePendingSubscriptionButton(const int32_t correlation_id) OVERRIDE;
 
-  /**
-   * @brief Get map of pending button unsubscription requests correlation ids
-   * to button names
-   * @return pending button unsubscriptions map
-   */
-  const std::map<int32_t, hmi_apis::Common_ButtonName::eType>&
-  PendingButtonUnsubscriptions() const OVERRIDE;
+  const ButtonSubscriptionsMap& PendingButtonUnsubscriptions() const OVERRIDE;
 
-  /**
-   * @brief Add  pending button unsubscription request
-   * @param correlation_id - correlation id of unsubscription request
-   * @param button_name - enum value indication button name
-   */
   void AddPendingButtonUnsubscription(
       const int32_t correlation_id,
       const hmi_apis::Common_ButtonName::eType button_name) OVERRIDE;
-  /**
-   * @brief Remove pending button unsubscription request
-   * @param correlation_id - correlation id of unsubscription request
-   */
+
   void RemovePendingButtonUnsubscription(const int32_t correlation_id) OVERRIDE;
 
  protected:
@@ -532,10 +509,8 @@ class ApplicationImpl : public virtual Application,
   std::string bundle_id_;
   AppFilesMap app_files_;
   std::set<mobile_apis::ButtonName::eType> subscribed_buttons_;
-  std::map<int32_t, hmi_apis::Common_ButtonName::eType>
-      pending_button_subscriptions_;
-  std::map<int32_t, hmi_apis::Common_ButtonName::eType>
-      pending_button_unsubscriptions_;
+  ButtonSubscriptionsMap pending_button_subscriptions_;
+  ButtonSubscriptionsMap pending_button_unsubscriptions_;
   UsageStatistics usage_report_;
   HelpPromptManagerImpl help_prompt_manager_impl_;
   protocol_handler::MajorProtocolVersion protocol_version_;

@@ -103,6 +103,8 @@ struct AppFile {
   mobile_apis::FileType::eType file_type;
 };
 typedef std::map<std::string, AppFile> AppFilesMap;
+typedef std::map<int32_t, hmi_apis::Common_ButtonName::eType>
+    ButtonSubscriptionsMap;
 class InitialApplicationData {
  public:
   virtual ~InitialApplicationData() {}
@@ -940,8 +942,7 @@ class Application : public virtual InitialApplicationData,
    * to button names
    * @return pending button subscriptions map
    */
-  virtual const std::map<int32_t, hmi_apis::Common_ButtonName::eType>&
-  PendingButtonSubscriptions() const = 0;
+  virtual const ButtonSubscriptionsMap& PendingButtonSubscriptions() const = 0;
 
   /**
    * @brief Add  pending button subscription request
@@ -963,8 +964,8 @@ class Application : public virtual InitialApplicationData,
    * to button names
    * @return pending button unsubscriptions map
    */
-  virtual const std::map<int32_t, hmi_apis::Common_ButtonName::eType>&
-  PendingButtonUnsubscriptions() const = 0;
+  virtual const ButtonSubscriptionsMap& PendingButtonUnsubscriptions()
+      const = 0;
 
   /**
    * @brief Add  pending button unsubscription request

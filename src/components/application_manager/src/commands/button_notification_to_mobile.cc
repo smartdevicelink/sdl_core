@@ -22,14 +22,14 @@ ButtonNotificationToMobile::~ButtonNotificationToMobile() {}
 
 bool ButtonNotificationToMobile::DoesAppIDExist() const {
   LOG4CXX_AUTO_TRACE(logger_);
-  using namespace application_manager;
-  return (*message_)[strings::msg_params].keyExists(strings::app_id);
+  using namespace application_manager::strings;
+  return (*message_)[msg_params].keyExists(strings::app_id);
 }
 
 void ButtonNotificationToMobile::HandleCustomButton(
     app_mngr::ApplicationSharedPtr app) {
   LOG4CXX_AUTO_TRACE(logger_);
-  using namespace application_manager;
+  using namespace application_manager::strings;
   // app_id is mandatory for CUSTOM_BUTTON notification
   if (!DoesAppIDExist()) {
     LOG4CXX_ERROR(logger_, "CUSTOM_BUTTON mobile notification without app_id.");
@@ -37,8 +37,7 @@ void ButtonNotificationToMobile::HandleCustomButton(
   }
 
   // custom_button_id is mandatory for CUSTOM_BUTTON notification
-  if (!(*message_)[app_mngr::strings::msg_params].keyExists(
-          hmi_response::custom_button_id)) {
+  if (!(*message_)[msg_params].keyExists(hmi_response::custom_button_id)) {
     LOG4CXX_ERROR(
         logger_, "CUSTOM_BUTTON mobile notification without custom_button_id.");
     return;
@@ -49,9 +48,8 @@ void ButtonNotificationToMobile::HandleCustomButton(
     return;
   }
 
-  uint32_t custom_btn_id = 0;
-  custom_btn_id =
-      (*message_)[strings::msg_params][hmi_response::custom_button_id].asUInt();
+  const uint32_t custom_btn_id =
+      (*message_)[msg_params][hmi_response::custom_button_id].asUInt();
 
   if (!app->IsSubscribedToSoftButton(custom_btn_id)) {
     LOG4CXX_ERROR(logger_,
@@ -140,10 +138,10 @@ void ButtonNotificationToMobile::HandleMediaButton() {
 
 void ButtonNotificationToMobile::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
-  using namespace application_manager;
+  using namespace application_manager::strings;
 
   const uint32_t btn_id = static_cast<uint32_t>(
-      (*message_)[strings::msg_params][hmi_response::button_name].asInt());
+      (*message_)[msg_params][hmi_response::button_name].asInt());
 
   LOG4CXX_DEBUG(logger_, "received button id: " << btn_id);
 
@@ -151,7 +149,7 @@ void ButtonNotificationToMobile::Run() {
 
   if (DoesAppIDExist()) {
     app = application_manager_.application(
-        (*message_)[strings::msg_params][strings::app_id].asUInt());
+        (*message_)[msg_params][app_id].asUInt());
   }
 
   // CUSTOM_BUTTON notification
