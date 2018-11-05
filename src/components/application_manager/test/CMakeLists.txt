@@ -66,6 +66,7 @@ set(testSources
   ${AM_TEST_DIR}/application_manager_impl_test.cc
   ${AM_TEST_DIR}/application_helper_test.cc
   ${AM_TEST_DIR}/command_holder_test.cc
+  ${AM_TEST_DIR}/reset_timeout_handler_test.cc
 )
 
 set(testSourcesMockHmi
