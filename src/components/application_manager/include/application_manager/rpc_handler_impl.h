@@ -168,8 +168,7 @@ class RPCHandlerImpl : public RPCHandler,
   // Thread that pumps messages coming from HMI.
   impl::FromHmiQueue messages_from_hmi_;
 
-  ns_smart_device_link_rpc::V1::v4_protocol_v1_2_no_extra
-      v4_protocol_so_factory_;
+  ns_smart_device_link_rpc::V1::v4_protocol_v1_2_no_extra smart_schema_factory_;
 #ifdef TELEMETRY_MONITOR
   AMTelemetryObserver* metric_observer_;
 #endif  // TELEMETRY_MONITOR

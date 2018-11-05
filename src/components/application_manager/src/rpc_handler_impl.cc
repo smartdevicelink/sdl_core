@@ -371,7 +371,7 @@ bool RPCHandlerImpl::ConvertMessageToSO(
 
           smart_objects::SmartObjectSPtr msg_to_send =
               std::make_shared<smart_objects::SmartObject>(output);
-          v4_protocol_so_factory_.attachSchema(*msg_to_send, false);
+          smart_schema_factory_.attachSchema(*msg_to_send, false);
           app_manager_.GetRPCService().SendMessageToMobile(msg_to_send);
           return false;
         }
