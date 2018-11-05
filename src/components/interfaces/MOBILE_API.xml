@@ -1,7 +1,7 @@
 <?xml version="1.0" standalone="no"?>
 <?xml-stylesheet type="text/xml" href="protocol2html.xsl"?>
 
-<interface name="SmartDeviceLink RAPI" version="5.0.0" minVersion="1.0" date="2018-10-03">
+<interface name="SmartDeviceLink RAPI" version="5.1.0" minVersion="1.0" date="2018-10-03">
     <enum name="Result" internal_scope="base" since="1.0">
         <element name="SUCCESS">
             <description>The request succeeded</description>
@@ -4940,7 +4940,7 @@
         <param name="electronicParkBrakeStatus" type="Boolean" mandatory="false" since="5.0">
             <description>The status of the park brake as provided by Electric Park Brake (EPB) system.</description>
         </param>
-        <param name="cloudAppVehicleID" type="Boolean" mandatory="false">
+        <param name="cloudAppVehicleID" type="Boolean" mandatory="false" since="5.1">
             <description>Parameter used by cloud apps to identify a head unit</description>
         </param>
 
@@ -5058,7 +5058,7 @@
         <param name="electronicParkBrakeStatus" type="VehicleDataResult" mandatory="false" since="5.0">
             <description>The status of the park brake as provided by Electric Park Brake (EPB) system.</description>
         </param>
-        <param name="cloudAppVehicleID" type="VehicleDataResult" mandatory="false">
+        <param name="cloudAppVehicleID" type="VehicleDataResult" mandatory="false" since="5.1">
             <description>Parameter used by cloud apps to identify a head unit</description>
         </param>
 
@@ -5154,7 +5154,7 @@
         <param name="electronicParkBrakeStatus" type="Boolean" mandatory="false" since="5.0">
             <description>The status of the park brake as provided by Electric Park Brake (EPB) system.</description>
         </param>
-        <param name="cloudAppVehicleID" type="Boolean" mandatory="false">
+        <param name="cloudAppVehicleID" type="Boolean" mandatory="false" since="5.1">
             <description>Parameter used by cloud apps to identify a head unit</description>
         </param>
         
@@ -5270,7 +5270,7 @@
         <param name="electronicParkBrakeStatus" type="VehicleDataResult" mandatory="false" since="5.0">
             <description>The status of the park brake as provided by Electric Park Brake (EPB) system.</description>
         </param>
-        <param name="cloudAppVehicleID" type="VehicleDataResult" mandatory="false">
+        <param name="cloudAppVehicleID" type="VehicleDataResult" mandatory="false" since="5.1">
             <description>Parameter used by cloud apps to identify a head unit</description>
         </param>
         
@@ -5369,7 +5369,7 @@
         <param name="electronicParkBrakeStatus" type="Boolean" mandatory="false" since="5.0">
             <description>The status of the park brake as provided by Electric Park Brake (EPB) system.</description>
         </param>
-        <param name="cloudAppVehicleID" type="Boolean" mandatory="false">
+        <param name="cloudAppVehicleID" type="Boolean" mandatory="false" since="5.1">
             <description>Parameter used by cloud apps to identify a head unit</description>
         </param>
         
@@ -5489,7 +5489,7 @@
         <param name="electronicParkBrakeStatus" type="ElectronicParkBrakeStatus" mandatory="false" since="5.0">
             <description>The status of the park brake as provided by Electric Park Brake (EPB) system.</description>
         </param>
-        <param name="cloudAppVehicleID" type="String" mandatory="false">
+        <param name="cloudAppVehicleID" type="String" mandatory="false" since="5.1">
             <description>Parameter used by cloud apps to identify a head unit</description>
         </param>
         
@@ -6751,7 +6751,7 @@
         <param name="electronicParkBrakeStatus" type="ElectronicParkBrakeStatus" mandatory="false" since="5.0">
             <description>The status of the park brake as provided by Electric Park Brake (EPB) system.</description>
         </param>
-        <param name="cloudAppVehicleID" type="String" mandatory="false">
+        <param name="cloudAppVehicleID" type="String" mandatory="false" since="5.1">
             <description>Parameter used by cloud apps to identify a head unit</description>
         </param>
         
