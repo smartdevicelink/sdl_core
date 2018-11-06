@@ -54,8 +54,6 @@ OnSeekMediaClockTimerNotification::~OnSeekMediaClockTimerNotification() {}
 void OnSeekMediaClockTimerNotification::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  LOG4CXX_INFO(logger_, "We get the message onseekmediaclock timer method ");
-
   (*message_)[strings::params][strings::function_id] =
       static_cast<int32_t>(mobile_apis::FunctionID::OnSeekMediaClockTimerID);
 
@@ -66,4 +64,4 @@ void OnSeekMediaClockTimerNotification::Run() {
 
 }  // namespace commands
 
-}  // namespace application_manager
+}  // namespace sdl_rpc_plugin

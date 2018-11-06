@@ -30,7 +30,6 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 #include "sdl_rpc_plugin/commands/mobile/on_seek_media_clock_timer_notification.h"
-
 #include "application_manager/application_impl.h"
 
 namespace sdl_rpc_plugin {
@@ -56,8 +55,9 @@ OnSeekMediaClockTimerNotification::~OnSeekMediaClockTimerNotification() {}
 
 void OnSeekMediaClockTimerNotification::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
-  ApplicationSharedPtr app = application_manager_.application(
-      (*message_)[strings::msg_params][strings::app_id].asInt());
+
+  int32_t app_id = (*message_)[strings::msg_params][strings::app_id].asInt();
+  auto app = application_manager_.application(app_id);
 
   if (!app) {
     LOG4CXX_ERROR(logger_, "No application associated with session key");
@@ -66,6 +66,9 @@ void OnSeekMediaClockTimerNotification::Run() {
   (*message_)[strings::params][strings::connection_key] = app->app_id();
   SendNotification();
 }
-}
-}
-}
+
+}  // namespace mobile
+
+}  // namespace commands
+
+}  // namespace sdl_rpc_plugin

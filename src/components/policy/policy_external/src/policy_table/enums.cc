@@ -1141,11 +1141,6 @@ bool EnumFromJsonString(const std::string& literal, FunctionID* result) {
     return true;
   }
 
-  if ("OnSeekMediaClockTimer" == literal) {
-    *result = OnSeekMediaClockTimerID;
-    return true;
-  }
-
   if ("OnTouchEvent" == literal) {
     *result = OnTouchEventID;
     return true;

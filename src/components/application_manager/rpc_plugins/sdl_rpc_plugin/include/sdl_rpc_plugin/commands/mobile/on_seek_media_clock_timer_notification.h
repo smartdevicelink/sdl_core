@@ -29,6 +29,7 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
+
 #ifndef SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_MOBILE_ON_SEEK_MEDIA_CLOCK_TIMER_NOTIFICATION_H_
 #define SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_MOBILE_ON_SEEK_MEDIA_CLOCK_TIMER_NOTIFICATION_H_
 
@@ -50,8 +51,11 @@ class OnSeekMediaClockTimerNotification
  public:
   /**
    * @brief OnSeekMediaClockTimerNotification class constructor
-   *
    * @param message Incoming SmartObject message
+   * @param application_manager reference to ApplicationManager instance
+   * @param rpc_service reference to RPCService instance
+   * @param hmi_capabilities reference to HMICapabilities instance
+   * @param policy_handle reference to PolicyHandler instance
    **/
   OnSeekMediaClockTimerNotification(
       const app_mngr::commands::MessageSharedPtr& message,
@@ -77,6 +81,6 @@ class OnSeekMediaClockTimerNotification
 
 }  // namespace commands
 
-}  // namespace application_manager
+}  // namespace sdl_rpc_plugin
 
 #endif  // SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_MOBILE_ON_SEEK_MEDIA_CLOCK_TIMER_NOTIFICATION_H_
