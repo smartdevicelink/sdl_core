@@ -31,6 +31,7 @@
  */
 #include "utils/logger.h"
 #include "application_manager/reset_timeout_handler_impl.h"
+#include "application_manager/message_helper.h"
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "RequestTimeoutHandler")
 
@@ -46,11 +47,11 @@ ResetTimeoutHandlerImpl::ResetTimeoutHandlerImpl(
 }
 
 void ResetTimeoutHandlerImpl::AddRequest(uint32_t hmi_correlation_id,
-                                         uint32_t mobile_correlation_id,
-                                         uint32_t connection_key) {
-  requests_.insert(
-      std::make_pair(hmi_correlation_id,
-                     std::make_pair(connection_key, mobile_correlation_id)));
+                                         uint32_t mob_correlation_id,
+                                         uint32_t connection_key,
+                                         uint32_t hmi_function_id) {
+  Request request(mob_correlation_id, connection_key, hmi_function_id);
+  requests_.insert(std::make_pair(hmi_correlation_id, request));
 }
 
 void ResetTimeoutHandlerImpl::RemoveRequest(uint32_t hmi_correlation_id) {
@@ -67,20 +68,35 @@ void ResetTimeoutHandlerImpl::on_event(const event_engine::Event& event) {
   const auto event_id = event.id();
   if (hmi_apis::FunctionID::BasicCommunication_OnResetTimeout == event_id) {
     const smart_objects::SmartObject& message = event.smart_object();
+    auto method_name = MessageHelper::HMIFunctionIDFromString(
+        message[strings::msg_params][strings::method_name].asString());
+
+    /*SDL must not apply "default timeout for RPCs processing" for
+    BasicCommunication.DialNumber RPC (that is, SDL must always wait for HMI
+    response to BC.DialNumber as long as it takes and not return GENERIC_ERROR
+    to mobile app), so the OnResetTimeout logic is not applicable for DialNumber
+    RPC*/
+    if (hmi_apis::FunctionID::BasicCommunication_DialNumber == method_name ||
+        hmi_apis::FunctionID::INVALID_ENUM == method_name) {
+      return;
+    }
     uint32_t timeout = application_manager_.get_settings().default_timeout();
     if (message[strings::msg_params].keyExists(strings::reset_period)) {
       timeout = message[strings::msg_params][strings::reset_period].asUInt();
     }
-    auto request_id =
+    auto hmi_corr_id =
         message[strings::msg_params][strings::request_id].asUInt();
-    auto it = requests_.find(request_id);
+    auto it = requests_.find(hmi_corr_id);
     if (it != requests_.end()) {
-      auto mob_data = it->second;
-      application_manager_.updateRequestTimeout(
-          mob_data.first, mob_data.second, timeout);
+      auto request = it->second;
+      if (static_cast<hmi_apis::FunctionID::eType>(request.hmi_function_id_) ==
+          method_name) {
+        application_manager_.updateRequestTimeout(
+            request.connection_key_, request.mob_correlation_id_, timeout);
+      }
     }
-    LOG4CXX_INFO(logger_,
-                 "Timeout reset failed by " << request_id
+    LOG4CXX_WARN(logger_,
+                 "Timeout reset failed by " << hmi_corr_id
                                             << ", no such mobile command");
   }
 }

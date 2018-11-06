@@ -277,6 +277,12 @@ hmi_apis::Common_Language::eType MessageHelper::CommonLanguageFromString(
       language);
 }
 
+hmi_apis::FunctionID::eType MessageHelper::HMIFunctionIDFromString(
+    const std::string& function_id) {
+  return MockMessageHelper::message_helper_mock()->HMIFunctionIDFromString(
+      function_id);
+}
+
 smart_objects::SmartObjectSPtr MessageHelper::CreateModuleInfoSO(
     uint32_t function_id, ApplicationManager& app_mngr) {
   return MockMessageHelper::message_helper_mock()->CreateModuleInfoSO(

@@ -42,10 +42,11 @@ namespace application_manager_test {
 class MockResetTimeoutHandler
     : public application_manager::request_controller::ResetTimeoutHandler {
  public:
-  MOCK_METHOD3(AddRequest,
+  MOCK_METHOD4(AddRequest,
                void(uint32_t hmi_correlation_id,
-                    uint32_t mobile_correlation_id,
-                    uint32_t connection_key));
+                    uint32_t mob_correlation_id,
+                    uint32_t connection_key,
+                    uint32_t hmi_function_id));
   MOCK_METHOD1(RemoveRequest, void(uint32_t hmi_correlation_id));
 };
 

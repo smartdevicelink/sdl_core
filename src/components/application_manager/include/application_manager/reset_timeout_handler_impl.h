@@ -47,13 +47,14 @@ class ResetTimeoutHandlerImpl : public event_engine::EventObserver,
  public:
   ResetTimeoutHandlerImpl(ApplicationManager& application_manager);
   void AddRequest(uint32_t hmi_correlation_id,
-                  uint32_t mobile_correlation_id,
-                  uint32_t connection_key) OVERRIDE;
+                  uint32_t mob_correlation_id,
+                  uint32_t connection_key,
+                  uint32_t hmi_function_id) OVERRIDE;
   void RemoveRequest(uint32_t hmi_correlation_id) OVERRIDE;
   void on_event(const event_engine::Event& event) OVERRIDE;
 
  private:
-  std::map<uint32_t, std::pair<uint32_t, uint32_t> > requests_;
+  std::map<uint32_t, Request> requests_;
   ApplicationManager& application_manager_;
   mutable sync_primitives::Lock requests_lock_;
 };

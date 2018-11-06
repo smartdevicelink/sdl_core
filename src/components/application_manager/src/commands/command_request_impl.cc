@@ -447,7 +447,7 @@ uint32_t CommandRequestImpl::SendHMIRequest(
   if (ProcessHMIInterfacesAvailability(hmi_correlation_id, function_id)) {
     if (rpc_service_.ManageHMICommand(result)) {
       application_manager_.GetResetTimeoutHandler().AddRequest(
-          hmi_correlation_id, correlation_id(), connection_key());
+          hmi_correlation_id, correlation_id(), connection_key(), function_id);
     } else {
       LOG4CXX_ERROR(logger_, "Unable to send request");
       SendResponse(false, mobile_apis::Result::OUT_OF_MEMORY);
