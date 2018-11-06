@@ -492,6 +492,7 @@ class ApplicationImpl : public virtual Application,
   sync_primitives::Lock video_streaming_suspended_lock_;
   sync_primitives::Lock audio_streaming_suspended_lock_;
   sync_primitives::Lock streaming_stop_lock_;
+  sync_primitives::Lock pending_button_subscription_lock_;
 
   bool is_app_allowed_;
   bool has_been_activated_;
