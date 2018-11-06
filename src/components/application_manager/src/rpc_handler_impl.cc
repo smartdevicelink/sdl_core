@@ -435,7 +435,7 @@ bool RPCHandlerImpl::ConvertMessageToSO(
             logger_,
             "Incorrect parameter from HMI - " << rpc::PrettyFormat(report));
 
-        return HandleWrongMessageType(output);
+        return HandleWrongMessageType(output, report);
       }
       break;
     }
@@ -489,7 +489,7 @@ bool RPCHandlerImpl::ConvertMessageToSO(
 }
 
 bool RPCHandlerImpl::HandleWrongMessageType(
-    smart_objects::SmartObject& output) const {
+    smart_objects::SmartObject& output, rpc::ValidationReport report) const {
   LOG4CXX_AUTO_TRACE(logger_);
   switch (output[strings::params][strings::message_type].asInt()) {
     case application_manager::MessageType::kNotification: {
@@ -497,15 +497,15 @@ bool RPCHandlerImpl::HandleWrongMessageType(
       return false;
     }
     case application_manager::MessageType::kRequest: {
-      LOG4CXX_ERROR(logger_, "Ignore wrong HMI request");
+      LOG4CXX_ERROR(logger_, "Received invalid data on HMI request");
       output.erase(strings::msg_params);
       output[strings::params].erase(hmi_response::message);
       output[strings::params][hmi_response::code] =
           hmi_apis::Common_Result::INVALID_DATA;
       output[strings::params][strings::message_type] =
           MessageType::kErrorResponse;
-      output[strings::params][strings::error_msg] = "";
-      return false;
+      output[strings::params][strings::error_msg] = rpc::PrettyFormat(report);
+      return true;
     }
     case application_manager::MessageType::kResponse: {
       LOG4CXX_ERROR(logger_, "Received invalid data on HMI response");
