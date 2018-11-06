@@ -43,7 +43,9 @@ namespace app_mngr = application_manager;
 
 /**
  * @brief Class is intended to encapsulate shared button notification logic in
- * base class
+ * base class. Entities defined in this file do not conform to any version of
+ * HMI or mobile API, and exist only to remove duplication in OnButtonPress and
+ * OnButtonEvent notifications.
  **/
 class ButtonNotificationToMobile
     : public app_mngr::commands::CommandNotificationImpl {

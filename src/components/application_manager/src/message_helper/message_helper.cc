@@ -634,8 +634,6 @@ void MessageHelper::SendUnsubscribeButtonNotification(
   DCHECK(message);
 
   SmartObject& object = *message;
-  object[strings::params][strings::function_id] =
-      hmi_apis::FunctionID::Buttons_OnButtonSubscription;
 
   object[strings::msg_params] = msg_params;
 

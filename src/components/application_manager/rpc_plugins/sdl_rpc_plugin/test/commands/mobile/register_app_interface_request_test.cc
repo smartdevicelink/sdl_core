@@ -224,11 +224,6 @@ class RegisterAppInterfaceRequestTest
 
     EXPECT_CALL(mock_rpc_service_,
                 ManageHMICommand(HMIResultCodeIs(
-                    hmi_apis::FunctionID::Buttons_OnButtonSubscription)))
-        .Times(0);
-
-    EXPECT_CALL(mock_rpc_service_,
-                ManageHMICommand(HMIResultCodeIs(
                     hmi_apis::FunctionID::UI_ChangeRegistration))).Times(0);
 
     EXPECT_CALL(mock_rpc_service_,

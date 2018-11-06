@@ -715,10 +715,6 @@ CommandCreator& HMICommandFactory::get_creator_factory(
     case hmi_apis::FunctionID::Buttons_OnButtonPress: {
       return factory.GetCreator<commands::hmi::OnButtonPressNotification>();
     }
-    case hmi_apis::FunctionID::Buttons_OnButtonSubscription: {
-      return factory
-          .GetCreator<commands::hmi::OnButtonSubscriptionNotification>();
-    }
     case hmi_apis::FunctionID::Navigation_OnTBTClientState: {
       return factory.GetCreator<commands::OnNaviTBTClientStateNotification>();
     }

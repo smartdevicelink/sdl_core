@@ -3406,24 +3406,6 @@
             </description>
         </param>
     </function>
-    <function name="OnButtonSubscription" messagetype="notification">
-      <description>
-        Sender: SDL->HMI. Purpose: to notify about button subscription state is changed for the named application
-      </description>
-      <param name="name" type="Common.ButtonName" mandatory="true" />
-      <param name="isSubscribed" type="Boolean" mandatory="true">
-        <description>
-          Defines whether the named button has status of 'subscribed' or 'unsubscribed':
-          If "true" - the named button is subscribed.
-          If "false" - the named button is unsubscribed.
-        </description>
-      </param>
-      <param name="appID" type="Integer" mandatory="true">
-        <description>
-          The ID of application that relates to this button-subscription status change.
-        </description>
-      </param>
-    </function>
     <function name="SubscribeButton" messagetype="request">
         <description>
             Subscribes to buttons.
