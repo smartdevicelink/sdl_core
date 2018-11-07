@@ -946,6 +946,26 @@ class Application : public virtual InitialApplicationData,
    */
   virtual const std::list<AppExtensionPtr>& Extensions() const = 0;
 
+  virtual std::string cloud_app_endpoint() = 0;
+
+  virtual std::string cloud_app_authtoken() = 0;
+
+  virtual std::string cloud_app_transport_type() = 0;
+
+  virtual std::string hybrid_app_preference() = 0;
+
+  virtual std::string cloud_app_certificate() = 0;
+
+  virtual void set_cloud_app_endpoint(const std::string& endpoint) = 0;
+
+  virtual void set_cloud_app_auth_token(const std::string& auth_token) = 0;
+
+  virtual void set_cloud_app_transport_type(const std::string& transport_type) = 0;
+
+  virtual void set_hybrid_app_preference(const std::string& hybrid_app_preference) = 0;
+
+  virtual void set_cloud_app_certificate(const std::string& certificate) = 0;
+
  protected:
   mutable sync_primitives::Lock hmi_states_lock_;
 

@@ -779,6 +779,26 @@ void ApplicationManagerImpl::OnHMIStartedCooperation() {
           *this));
   rpc_service_->ManageHMICommand(mixing_audio_supported_request);
   resume_controller().ResetLaunchTime();
+
+  CollectCloudAppInformation();
+}
+
+void ApplicationManagerImpl::CollectCloudAppInformation() {
+  std::vector<std::string> cloud_app_id_vector;
+  GetPolicyHandler().GetEnabledCloudApps(cloud_app_id_vector);
+  std::vector<std::string>::iterator it = cloud_app_id_vector.begin();
+  std::vector<std::string>::iterator end = cloud_app_id_vector.end();
+  std::string endpoint = "";
+  std::string certificate = "";
+  std::string auth_token = "";
+  std::string cloud_transport_type = "";
+  std::string hybrid_app_preference = "";
+  for (; it!=end; ++it) {
+    GetPolicyHandler().GetCloudAppParameters(*it, endpoint, certificate, auth_token, 
+      cloud_transport_type, hybrid_app_preference);
+
+    connection_handler().AddCloudAppDevice(*it, endpoint, cloud_transport_type);
+  }
 }
 
 uint32_t ApplicationManagerImpl::GetNextHMICorrelationID() {

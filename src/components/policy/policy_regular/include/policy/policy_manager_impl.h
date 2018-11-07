@@ -590,6 +590,7 @@ class PolicyManagerImpl : public PolicyManager {
   const bool GetCloudAppParameters(
       const std::string& policy_app_id,
       std::string& endpoint,
+      std::string& certificate,
       std::string& auth_token,
       std::string& cloud_transport_type,
       std::string& hybrid_app_preference) const OVERRIDE;

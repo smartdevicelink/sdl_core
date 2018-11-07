@@ -129,6 +129,10 @@ void TransportManagerImpl::ReconnectionTimeout() {
              device_to_reconnect_);
 }
 
+void TransportManagerImpl::AddCloudDevice(const std::string& endpoint, const std::string& cloud_transport_type) {
+  return;
+}
+
 int TransportManagerImpl::ConnectDevice(const DeviceHandle device_handle) {
   LOG4CXX_TRACE(logger_, "enter. DeviceHandle: " << &device_handle);
   if (!this->is_initialized_) {

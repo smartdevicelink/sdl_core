@@ -360,6 +360,8 @@ class ApplicationManagerImpl
   void ConnectToDevice(const std::string& device_mac) OVERRIDE;
   void OnHMIStartedCooperation() OVERRIDE;
 
+  void CollectCloudAppInformation();
+
   /*
    * @brief Returns unique correlation ID for HMI request
    *

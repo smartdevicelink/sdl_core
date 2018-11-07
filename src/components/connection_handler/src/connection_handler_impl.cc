@@ -1267,6 +1267,10 @@ void ConnectionHandlerImpl::ConnectToAllDevices() {
   }
 }
 
+void ConnectionHandlerImpl::AddCloudAppDevice(const std::string& policy_app_id, const std::string& endpoint, const std::string& cloud_transport_type) {
+  transport_manager_.AddCloudDevice(endpoint, cloud_transport_type);
+}
+
 void ConnectionHandlerImpl::StartTransportManager() {
   LOG4CXX_AUTO_TRACE(logger_);
   transport_manager_.Visibility(true);

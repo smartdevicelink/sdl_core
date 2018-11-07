@@ -409,6 +409,26 @@ class ApplicationImpl : public virtual Application,
 
   void SwapMobileMessageQueue(MobileMessageQueue& mobile_messages) OVERRIDE;
 
+  std::string cloud_app_endpoint() OVERRIDE;
+
+  std::string cloud_app_authtoken() OVERRIDE;
+
+  std::string cloud_app_transport_type() OVERRIDE;
+
+  std::string hybrid_app_preference() OVERRIDE;
+
+  std::string cloud_app_certificate() OVERRIDE;
+
+  void set_cloud_app_endpoint(const std::string& endpoint) OVERRIDE;
+
+  void set_cloud_app_auth_token(const std::string& auth_token) OVERRIDE;
+
+  void set_cloud_app_transport_type(const std::string& transport_type) OVERRIDE;
+
+  void set_hybrid_app_preference(const std::string& hybrid_app_preference) OVERRIDE;
+
+  void set_cloud_app_certificate(const std::string& certificate) OVERRIDE;
+
  protected:
   /**
    * @brief Clean up application folder. Persistent files will stay
@@ -512,6 +532,13 @@ class ApplicationImpl : public virtual Application,
   Timer audio_stream_suspend_timer_;
 
   std::list<AppExtensionPtr> extensions_;
+
+  // Cloud app properties
+  std::string endpoint_;
+  std::string auth_token_;
+  std::string cloud_transport_type_;
+  std::string hybrid_app_preference_; 
+  std::string certificate_;
 
   /**
    * @brief Defines number per time in seconds limits
