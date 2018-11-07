@@ -786,6 +786,12 @@ class MessageHelper {
   static hmi_apis::Common_Language::eType CommonLanguageFromString(
       const std::string& language);
 
+  /**
+   * @brief HMIFunctionIDFromString converts function_id from
+   * string to enum value
+   * @param function_id function id
+   * @return FunctionID enum
+   */
   static hmi_apis::FunctionID::eType HMIFunctionIDFromString(
       const std::string& function_id);
 
