@@ -37,14 +37,15 @@
 #include "application_manager/mock_application_manager.h"
 #include "application_manager/mock_event_dispatcher.h"
 #include "application_manager/commands/command_request_test.h"
+#include "application_manager/mock_message_helper.h"
 
 namespace test {
 namespace components {
 namespace reset_timeout_handler_test {
 using ::testing::_;
+using ::testing::Mock;
 using ::testing::Return;
 using ::testing::ReturnRef;
-using ::testing::NiceMock;
 using application_manager::event_engine::Event;
 using namespace application_manager::commands;
 using namespace application_manager::strings;
@@ -57,11 +58,14 @@ typedef std::shared_ptr<OnResetTimeoutNotification> NotificationPtr;
 const uint32_t kDefaultTimeout = 10000u;
 const uint32_t kTimeout = 3000u;
 const uint32_t kRequestId = 22;
+const std::string kMethodName = "Navigation.SubscribeWayPoints";
 
 class ResetTimeoutHandlerTest : public commands_test::CommandRequestTest<
                                     commands_test::CommandsTestMocks::kIsNice> {
  public:
-  ResetTimeoutHandlerTest() {}
+  ResetTimeoutHandlerTest()
+      : mock_message_helper_(
+            application_manager::MockMessageHelper::message_helper_mock()) {}
 
  protected:
   std::shared_ptr<ResetTimeoutHandlerImpl> reset_timeout_handler_;
@@ -70,7 +74,14 @@ class ResetTimeoutHandlerTest : public commands_test::CommandRequestTest<
         .WillByDefault(ReturnRef(event_dispatcher_));
     reset_timeout_handler_ =
         std::make_shared<ResetTimeoutHandlerImpl>(app_mngr_);
+    Mock::VerifyAndClearExpectations(&mock_message_helper_);
   }
+
+  void TearDown() OVERRIDE {
+    Mock::VerifyAndClearExpectations(&mock_message_helper_);
+  }
+
+  application_manager::MockMessageHelper* mock_message_helper_;
 };
 
 TEST_F(ResetTimeoutHandlerTest, on_event_OnResetTimeout_success) {
@@ -90,6 +101,7 @@ TEST_F(ResetTimeoutHandlerTest, on_event_OnResetTimeout_success) {
   smart_objects::SmartObject notification_msg;
   notification_msg[msg_params][reset_period] = kTimeout;
   notification_msg[msg_params][request_id] = kRequestId;
+  notification_msg[msg_params][method_name] = kMethodName;
   event.set_smart_object(notification_msg);
 
   ON_CALL(app_mngr_, get_settings())
@@ -97,9 +109,13 @@ TEST_F(ResetTimeoutHandlerTest, on_event_OnResetTimeout_success) {
   ON_CALL(app_mngr_settings_, default_timeout())
       .WillByDefault(ReturnRef(kDefaultTimeout));
 
+  EXPECT_CALL(*mock_message_helper_, HMIFunctionIDFromString(kMethodName))
+      .WillOnce(Return(hmi_apis::FunctionID::Navigation_SubscribeWayPoints));
   EXPECT_CALL(app_mngr_, GetResetTimeoutHandler())
       .WillOnce(ReturnRef(*reset_timeout_handler_));
-  EXPECT_CALL(app_mngr_, updateRequestTimeout(_, _, kTimeout));
+  EXPECT_CALL(app_mngr_,
+              updateRequestTimeout(
+                  mock_app->app_id(), command->correlation_id(), kTimeout));
 
   ASSERT_TRUE(command->Init());
   command->Run();
@@ -122,6 +138,7 @@ TEST_F(ResetTimeoutHandlerTest, on_event_OnResetTimeout_missed_reset_period) {
   Event event(hmi_apis::FunctionID::BasicCommunication_OnResetTimeout);
   smart_objects::SmartObject notification_msg;
   notification_msg[msg_params][request_id] = kRequestId;
+  notification_msg[msg_params][method_name] = kMethodName;
   event.set_smart_object(notification_msg);
 
   ON_CALL(app_mngr_, get_settings())
@@ -129,9 +146,14 @@ TEST_F(ResetTimeoutHandlerTest, on_event_OnResetTimeout_missed_reset_period) {
   ON_CALL(app_mngr_settings_, default_timeout())
       .WillByDefault(ReturnRef(kDefaultTimeout));
 
+  EXPECT_CALL(*mock_message_helper_, HMIFunctionIDFromString(kMethodName))
+      .WillOnce(Return(hmi_apis::FunctionID::Navigation_SubscribeWayPoints));
   EXPECT_CALL(app_mngr_, GetResetTimeoutHandler())
       .WillOnce(ReturnRef(*reset_timeout_handler_));
-  EXPECT_CALL(app_mngr_, updateRequestTimeout(_, _, kDefaultTimeout));
+  EXPECT_CALL(
+      app_mngr_,
+      updateRequestTimeout(
+          mock_app->app_id(), command->correlation_id(), kDefaultTimeout));
 
   ASSERT_TRUE(command->Init());
   command->Run();
@@ -154,6 +176,7 @@ TEST_F(ResetTimeoutHandlerTest, on_event_OnResetTimeout_invalid_request_id) {
   Event event(hmi_apis::FunctionID::BasicCommunication_OnResetTimeout);
   smart_objects::SmartObject notification_msg;
   notification_msg[msg_params][reset_period] = kTimeout;
+  notification_msg[msg_params][method_name] = kMethodName;
   notification_msg[msg_params][request_id] = 0u;
   event.set_smart_object(notification_msg);
 
@@ -162,9 +185,47 @@ TEST_F(ResetTimeoutHandlerTest, on_event_OnResetTimeout_invalid_request_id) {
   ON_CALL(app_mngr_settings_, default_timeout())
       .WillByDefault(ReturnRef(kDefaultTimeout));
 
+  EXPECT_CALL(*mock_message_helper_, HMIFunctionIDFromString(kMethodName))
+      .WillOnce(Return(hmi_apis::FunctionID::Navigation_SubscribeWayPoints));
   EXPECT_CALL(app_mngr_, GetResetTimeoutHandler())
       .WillOnce(ReturnRef(*reset_timeout_handler_));
-  EXPECT_CALL(app_mngr_, updateRequestTimeout(_, _, kTimeout)).Times(0);
+  EXPECT_CALL(app_mngr_, updateRequestTimeout(_, _, _)).Times(0);
+
+  ASSERT_TRUE(command->Init());
+  command->Run();
+  reset_timeout_handler_->on_event(event);
+}
+
+TEST_F(ResetTimeoutHandlerTest, on_event_OnResetTimeout_invalid_method_name) {
+  std::shared_ptr<SubscribeWayPointsRequest> command =
+      CreateCommand<SubscribeWayPointsRequest>();
+  MockAppPtr mock_app = CreateMockApp();
+  ON_CALL(app_mngr_, application(_)).WillByDefault(Return(mock_app));
+  ON_CALL(app_mngr_, IsAppSubscribedForWayPoints(_))
+      .WillByDefault(Return(false));
+  ON_CALL(app_mngr_, IsAnyAppSubscribedForWayPoints())
+      .WillByDefault(Return(false));
+  ON_CALL(app_mngr_, GetNextHMICorrelationID())
+      .WillByDefault(Return(kRequestId));
+  EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_)).WillOnce(Return(true));
+
+  Event event(hmi_apis::FunctionID::BasicCommunication_OnResetTimeout);
+  smart_objects::SmartObject notification_msg;
+  notification_msg[msg_params][reset_period] = kTimeout;
+  notification_msg[msg_params][method_name] = " ";
+  notification_msg[msg_params][request_id] = 0u;
+  event.set_smart_object(notification_msg);
+
+  ON_CALL(app_mngr_, get_settings())
+      .WillByDefault(ReturnRef(app_mngr_settings_));
+  ON_CALL(app_mngr_settings_, default_timeout())
+      .WillByDefault(ReturnRef(kDefaultTimeout));
+
+  EXPECT_CALL(*mock_message_helper_, HMIFunctionIDFromString(" "))
+      .WillOnce(Return(hmi_apis::FunctionID::INVALID_ENUM));
+  EXPECT_CALL(app_mngr_, GetResetTimeoutHandler())
+      .WillOnce(ReturnRef(*reset_timeout_handler_));
+  EXPECT_CALL(app_mngr_, updateRequestTimeout(_, _, _)).Times(0);
 
   ASSERT_TRUE(command->Init());
   command->Run();
