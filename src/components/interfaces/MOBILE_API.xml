@@ -1,7 +1,7 @@
 <?xml version="1.0" standalone="no"?>
 <?xml-stylesheet type="text/xml" href="protocol2html.xsl"?>
 
-<interface name="SmartDeviceLink RAPI" version="5.0.0" minVersion="1.0" date="2018-10-03">
+<interface name="SmartDeviceLink RAPI" version="5.1.0" minVersion="1.0" date="2018-10-03">
     <enum name="Result" internal_scope="base" since="1.0">
         <element name="SUCCESS">
             <description>The request succeeded</description>
@@ -542,6 +542,7 @@
         <element name="VEHICLEDATA_FUELRANGE" since="5.0" />
         <element name="VEHICLEDATA_ENGINEOILLIFE" since="5.0" />
         <element name="VEHICLEDATA_ELECTRONICPARKBRAKESTATUS" since="5.0" />
+        <element name="VEHICLEDATA_CLOUDAPPVEHICLEID" since="5.1"/>
     </enum>
     
     <enum name="ButtonName" since="1.0">
@@ -4939,7 +4940,10 @@
         <param name="electronicParkBrakeStatus" type="Boolean" mandatory="false" since="5.0">
             <description>The status of the park brake as provided by Electric Park Brake (EPB) system.</description>
         </param>
-        
+        <param name="cloudAppVehicleID" type="Boolean" mandatory="false" since="5.1">
+            <description>Parameter used by cloud apps to identify a head unit</description>
+        </param>
+
         <!-- Ford Specific Data Items -->
         <param name="eCallInfo" type="Boolean" mandatory="false">
             <description>Emergency Call notification and confirmation data</description>
@@ -5054,7 +5058,10 @@
         <param name="electronicParkBrakeStatus" type="VehicleDataResult" mandatory="false" since="5.0">
             <description>The status of the park brake as provided by Electric Park Brake (EPB) system.</description>
         </param>
-        
+        <param name="cloudAppVehicleID" type="VehicleDataResult" mandatory="false" since="5.1">
+            <description>Parameter used by cloud apps to identify a head unit</description>
+        </param>
+
         <!-- Ford Specific Data Items -->
         <param name="eCallInfo" type="VehicleDataResult" mandatory="false">
             <description>Emergency Call notification and confirmation data</description>
@@ -5146,6 +5153,9 @@
         </param>
         <param name="electronicParkBrakeStatus" type="Boolean" mandatory="false" since="5.0">
             <description>The status of the park brake as provided by Electric Park Brake (EPB) system.</description>
+        </param>
+        <param name="cloudAppVehicleID" type="Boolean" mandatory="false" since="5.1">
+            <description>Parameter used by cloud apps to identify a head unit</description>
         </param>
         
         <!-- Ford Specific Data Items -->
@@ -5260,6 +5270,9 @@
         <param name="electronicParkBrakeStatus" type="VehicleDataResult" mandatory="false" since="5.0">
             <description>The status of the park brake as provided by Electric Park Brake (EPB) system.</description>
         </param>
+        <param name="cloudAppVehicleID" type="VehicleDataResult" mandatory="false" since="5.1">
+            <description>Parameter used by cloud apps to identify a head unit</description>
+        </param>
         
         <!-- Ford Specific Data Items -->
         <param name="eCallInfo" type="VehicleDataResult" mandatory="false">
@@ -5355,6 +5368,9 @@
         </param>
         <param name="electronicParkBrakeStatus" type="Boolean" mandatory="false" since="5.0">
             <description>The status of the park brake as provided by Electric Park Brake (EPB) system.</description>
+        </param>
+        <param name="cloudAppVehicleID" type="Boolean" mandatory="false" since="5.1">
+            <description>Parameter used by cloud apps to identify a head unit</description>
         </param>
         
         <!-- Ford Specific Data Items -->
@@ -5472,6 +5488,9 @@
         </param>
         <param name="electronicParkBrakeStatus" type="ElectronicParkBrakeStatus" mandatory="false" since="5.0">
             <description>The status of the park brake as provided by Electric Park Brake (EPB) system.</description>
+        </param>
+        <param name="cloudAppVehicleID" type="String" mandatory="false" since="5.1">
+            <description>Parameter used by cloud apps to identify a head unit</description>
         </param>
         
         <!-- Ford Specific Data Items -->
@@ -6731,6 +6750,9 @@
         </param>
         <param name="electronicParkBrakeStatus" type="ElectronicParkBrakeStatus" mandatory="false" since="5.0">
             <description>The status of the park brake as provided by Electric Park Brake (EPB) system.</description>
+        </param>
+        <param name="cloudAppVehicleID" type="String" mandatory="false" since="5.1">
+            <description>Parameter used by cloud apps to identify a head unit</description>
         </param>
         
         <!-- Ford Specific Vehicle Data -->
