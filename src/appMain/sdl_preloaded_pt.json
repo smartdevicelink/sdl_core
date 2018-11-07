@@ -533,6 +533,15 @@
                     }
                 }
             },
+            "CloudApp":{
+                "rpcs":{
+                    "SetCloudAppProperties":{
+                        "hmi_levels":["BACKGROUND",
+                        "FULL",
+                        "LIMITED"]
+                    }
+                }
+            },
             "RemoteControl": {
                 "rpcs": {
                     "ButtonPress": {
@@ -2373,7 +2382,7 @@
                 "steal_focus": false,
                 "priority": "NONE",
                 "default_hmi": "NONE",
-                "groups": ["Base-4"],
+                "groups": ["Base-4", "CloudApp"],
                 "RequestType": [],
                 "RequestSubType": []
             },
