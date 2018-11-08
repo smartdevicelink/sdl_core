@@ -167,8 +167,8 @@ class CacheManagerInterface {
 
   /**
    * @brief Get a list of enabled cloud applications
-   * @param enabled_apps List filled with the policy app id of each enabled cloud
-   * application
+   * @param enabled_apps List filled with the policy app id of each enabled
+   * cloud application
    */
   virtual void GetEnabledCloudApps(
       std::vector<std::string>& enabled_apps) const = 0;

@@ -569,7 +569,15 @@ class PolicyManagerImpl : public PolicyManager {
    * @return vehicle information
    */
   const VehicleInfo GetVehicleInfo() const OVERRIDE;
-  
+
+  /**
+   * @brief Get a list of enabled cloud applications
+   * @param enabled_apps List filled with the policy app id of each enabled
+   * cloud application
+   */
+  void GetEnabledCloudApps(
+      std::vector<std::string>& enabled_apps) const OVERRIDE;
+
   /**
    * @brief Get a list of enabled cloud applications
    * @param enabled_apps List filled with the policy app id of each enabled

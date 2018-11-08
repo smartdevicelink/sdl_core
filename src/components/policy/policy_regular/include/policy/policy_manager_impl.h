@@ -566,10 +566,11 @@ class PolicyManagerImpl : public PolicyManager {
 
   /**
    * @brief Get a list of enabled cloud applications
-   * @param enabled_apps List filled with the policy app id of each enabled cloud
-   * application
+   * @param enabled_apps List filled with the policy app id of each enabled
+   * cloud application
    */
-  void GetEnabledCloudApps(std::vector<std::string>& enabled_apps) const OVERRIDE;
+  void GetEnabledCloudApps(
+      std::vector<std::string>& enabled_apps) const OVERRIDE;
 
   /**
    * @brief Get cloud app policy information, all fields that aren't set for a
