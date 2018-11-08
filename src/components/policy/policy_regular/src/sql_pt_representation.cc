@@ -716,23 +716,11 @@ bool SQLPTRepresentation::GatherApplicationPoliciesSection(
     params.priority = priority;
 
     *params.memory_kb = query.GetInteger(2);
+
     *params.heart_beat_timeout_ms = query.GetUInteger(3);
-    if (!query.IsNull(4)) {
+    if (!query.IsNull(3)) {
       *params.certificate = query.GetString(4);
     }
-
-    // Read cloud app properties
-    policy_table::HybridAppPreference hap;
-    bool valid = policy_table::EnumFromJsonString(query.GetString(5), &hap);
-    if (valid) {
-      *params.hybrid_app_preference = hap;
-    }
-    *params.endpoint = query.GetString(6);
-    if (!query.IsNull(7)) {
-      *params.enabled = query.GetBoolean(7);
-    }
-    *params.auth_token = query.GetString(8);
-    *params.cloud_transport_type = query.GetString(9);
 
     const auto& gather_app_id = ((*policies).apps[app_id].is_string())
                                     ? (*policies).apps[app_id].get_string()
@@ -996,22 +984,6 @@ bool SQLPTRepresentation::SaveSpecificAppPolicy(
   app.second.certificate.is_initialized()
       ? app_query.Bind(5, *app.second.certificate)
       : app_query.Bind(5);
-  app.second.hybrid_app_preference.is_initialized()
-      ? app_query.Bind(6,
-                       std::string(policy_table::EnumToJsonString(
-                           *app.second.hybrid_app_preference)))
-      : app_query.Bind(6);
-  app.second.endpoint.is_initialized() ? app_query.Bind(7, *app.second.endpoint)
-                                       : app_query.Bind(7);
-  app.second.enabled.is_initialized() ? app_query.Bind(8, *app.second.enabled)
-                                      : app_query.Bind(8);
-  app.second.auth_token.is_initialized()
-      ? app_query.Bind(9, *app.second.auth_token)
-      : app_query.Bind(9);
-  app.second.cloud_transport_type.is_initialized()
-      ? app_query.Bind(10, *app.second.cloud_transport_type)
-      : app_query.Bind(10);
-
   if (!app_query.Exec() || !app_query.Reset()) {
     LOG4CXX_WARN(logger_, "Incorrect insert into application.");
     return false;
@@ -2112,17 +2084,6 @@ bool SQLPTRepresentation::CopyApplication(const std::string& source,
   query.Bind(9, source_app.GetInteger(8));
   source_app.IsNull(9) ? query.Bind(10)
                        : query.Bind(10, source_app.GetString(9));
-  source_app.IsNull(10) ? query.Bind(11)
-                        : query.Bind(11, source_app.GetString(10));
-  source_app.IsNull(11) ? query.Bind(12)
-                        : query.Bind(12, source_app.GetString(11));
-  source_app.IsNull(12) ? query.Bind(13)
-                        : query.Bind(13, source_app.GetBoolean(12));
-  source_app.IsNull(13) ? query.Bind(14)
-                        : query.Bind(14, source_app.GetString(13));
-  source_app.IsNull(14) ? query.Bind(15)
-                        : query.Bind(15, source_app.GetString(14));
-
   if (!query.Exec()) {
     LOG4CXX_WARN(logger_, "Failed inserting into application.");
     return false;

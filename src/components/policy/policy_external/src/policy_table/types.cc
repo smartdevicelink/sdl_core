@@ -241,14 +241,7 @@ ApplicationParams::ApplicationParams(const Json::Value* value__)
     , RequestSubType(impl::ValueMember(value__, "RequestSubType"))
     , memory_kb(impl::ValueMember(value__, "memory_kb"), 0)
     , heart_beat_timeout_ms(impl::ValueMember(value__, "heart_beat_timeout_ms"))
-    , moduleType(impl::ValueMember(value__, "moduleType"))
-    , certificate(impl::ValueMember(value__, "certificate"), "not_specified")
-    , hybrid_app_preference(impl::ValueMember(value__, "hybrid_app_preference"))
-    , endpoint(impl::ValueMember(value__, "endpoint"))
-    , enabled(impl::ValueMember(value__, "enabled"))
-    , auth_token(impl::ValueMember(value__, "auth_token"))
-    , cloud_transport_type(impl::ValueMember(value__, "cloud_transport_type")) {
-}
+    , moduleType(impl::ValueMember(value__, "moduleType")) {}
 
 Json::Value ApplicationParams::ToJsonValue() const {
   Json::Value result__(PolicyBase::ToJsonValue());
@@ -260,13 +253,6 @@ Json::Value ApplicationParams::ToJsonValue() const {
   impl::WriteJsonField(
       "heart_beat_timeout_ms", heart_beat_timeout_ms, &result__);
   impl::WriteJsonField("moduleType", moduleType, &result__);
-  impl::WriteJsonField("certificate", certificate, &result__);
-  impl::WriteJsonField(
-      "hybrid_app_preference", hybrid_app_preference, &result__);
-  impl::WriteJsonField("endpoint", endpoint, &result__);
-  impl::WriteJsonField("enabled", enabled, &result__);
-  impl::WriteJsonField("auth_token", auth_token, &result__);
-  impl::WriteJsonField("cloud_transport_type", cloud_transport_type, &result__);
   return result__;
 }
 
@@ -289,24 +275,6 @@ bool ApplicationParams::is_valid() const {
     return false;
   }
   if (!moduleType.is_valid()) {
-    return false;
-  }
-  if (!certificate.is_valid()) {
-    return false;
-  }
-  if (!endpoint.is_valid()) {
-    return false;
-  }
-  if (!enabled.is_valid()) {
-    return false;
-  }
-  if (!auth_token.is_valid()) {
-    return false;
-  }
-  if (!cloud_transport_type.is_valid()) {
-    return false;
-  }
-  if (!hybrid_app_preference.is_valid()) {
     return false;
   }
   return Validate();
@@ -339,24 +307,6 @@ bool ApplicationParams::struct_empty() const {
     return false;
   }
   if (moduleType.is_initialized()) {
-    return false;
-  }
-  if (certificate.is_initialized()) {
-    return false;
-  }
-  if (endpoint.is_initialized()) {
-    return false;
-  }
-  if (enabled.is_initialized()) {
-    return false;
-  }
-  if (auth_token.is_initialized()) {
-    return false;
-  }
-  if (cloud_transport_type.is_initialized()) {
-    return false;
-  }
-  if (hybrid_app_preference.is_initialized()) {
     return false;
   }
   return true;
@@ -407,25 +357,6 @@ void ApplicationParams::ReportErrors(rpc::ValidationReport* report__) const {
   if (!moduleType.is_valid()) {
     moduleType.ReportErrors(&report__->ReportSubobject("moduleType"));
   }
-  if (!certificate.is_valid()) {
-    certificate.ReportErrors(&report__->ReportSubobject("certificate"));
-  }
-  if (!endpoint.is_valid()) {
-    moduleType.ReportErrors(&report__->ReportSubobject("endpoint"));
-  }
-  if (!enabled.is_valid()) {
-    moduleType.ReportErrors(&report__->ReportSubobject("enabled"));
-  }
-  if (!auth_token.is_valid()) {
-    moduleType.ReportErrors(&report__->ReportSubobject("auth_token"));
-  }
-  if (!cloud_transport_type.is_valid()) {
-    moduleType.ReportErrors(&report__->ReportSubobject("cloud_transport_type"));
-  }
-  if (!hybrid_app_preference.is_valid()) {
-    moduleType.ReportErrors(
-        &report__->ReportSubobject("hybrid_app_preference"));
-  }
 }
 
 void ApplicationParams::SetPolicyTableType(PolicyTableType pt_type) {
@@ -436,11 +367,6 @@ void ApplicationParams::SetPolicyTableType(PolicyTableType pt_type) {
   memory_kb.SetPolicyTableType(pt_type);
   heart_beat_timeout_ms.SetPolicyTableType(pt_type);
   moduleType.SetPolicyTableType(pt_type);
-  certificate.SetPolicyTableType(pt_type);
-  endpoint.SetPolicyTableType(pt_type);
-  enabled.SetPolicyTableType(pt_type);
-  cloud_transport_type.SetPolicyTableType(pt_type);
-  hybrid_app_preference.SetPolicyTableType(pt_type);
 }
 
 // RpcParameters methods
