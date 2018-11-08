@@ -394,7 +394,7 @@ class ApplicationManagerImpl
    * @brief Retrieves lock screen dismissal state (enabled/disabled).
    * @return Current lock screen dismissal state.
    */
-  bool is_lock_screen_dismissal_enabled_state() const;
+  bool lock_screen_dismissal_enabled() const;
 
   /*
    * @brief Sets state for driver distraction
@@ -1381,7 +1381,7 @@ class ApplicationManagerImpl
   sync_primitives::Lock audio_pass_thru_lock_;
   sync_primitives::Lock tts_global_properties_app_list_lock_;
   hmi_apis::Common_DriverDistractionState::eType driver_distraction_state_;
-  bool lock_screen_dismissal_enabled_state_;
+  bool lock_screen_dismissal_enabled_;
   bool is_vr_session_strated_;
   bool hmi_cooperating_;
   bool is_all_apps_allowed_;
