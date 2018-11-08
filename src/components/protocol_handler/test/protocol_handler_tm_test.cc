@@ -51,7 +51,7 @@
 #include "utils/semantic_version.h"
 
 #include "utils/test_async_waiter.h"
-#include <bson_object.h>
+#include <bson/bson_object.h>
 
 namespace transport_manager {
 namespace transport_adapter {
