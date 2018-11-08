@@ -9,6 +9,7 @@ find_path(apr_INCLUDE_DIR
   PATH_SUFFIXES
     include
 )
+set(apr_INCLUDE_DIR "${THIRD_PARTY_INSTALL_PREFIX}/include/apr.h")
 
 if(apr_INCLUDE_DIR)
   set(apr_VERSION_MAJOR 0)
@@ -32,7 +33,7 @@ find_library(apr_LIBRARY
   PATH_SUFFIXES
     lib
 )
-
+set(apr_LIBRARY "${THIRD_PARTY_INSTALL_PREFIX}/lib/libapr-1.so")
 mark_as_advanced(apr_INCLUDE_DIR apr_LIBRARY apr_FOUND)
 
 if(apr_LIBRARY AND apr_INCLUDE_DIR)

@@ -10,6 +10,8 @@ find_path(apr-util_INCLUDE_DIR
     include
 )
 
+set(apr-util_INCLUDE_DIR "${THIRD_PARTY_INSTALL_PREFIX}/include/apu.h")
+
 if(apr-util_INCLUDE_DIR)
   set(apr-util_VERSION_MAJOR 0)
   set(apr-util_VERSION_MINOR 0)
@@ -32,7 +34,7 @@ find_library(apr-util_LIBRARY
   PATH_SUFFIXES
     lib
 )
-
+set(apr-util_LIBRARY "${THIRD_PARTY_INSTALL_PREFIX}/lib/libaprutil-1.so")
 mark_as_advanced(apr-util_INCLUDE_DIR apr-util_LIBRARY apr-util_FOUND)
 
 if(apr-util_LIBRARY AND apr-util_INCLUDE_DIR)
