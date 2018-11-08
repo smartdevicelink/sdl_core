@@ -71,6 +71,7 @@ bool WebsocketSession::IsShuttingDown() {
 }
 
 void WebsocketSession::Recv(boost::system::error_code ec) {
+  printf("!!!server recv connection accepted\n");
   if (shutdown_) {
     return;
   }

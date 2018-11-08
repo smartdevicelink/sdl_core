@@ -44,6 +44,10 @@
 #include "transport_manager/usb/usb_aoa_adapter.h"
 #endif  // USB_SUPPORT
 
+#if defined(CLOUD_APP_WEBSOCKET_TRANSPORT_SUPPORT)
+#include "transport_manager/cloud/cloud_websocket_transport_adapter.h"
+#endif
+
 #if defined(BUILD_TESTS)
 #include "transport_manager/iap2_emulation/iap2_transport_adapter.h"
 #endif  // BUILD_TEST
@@ -100,6 +104,18 @@ int TransportManagerDefault::Init(resumption::LastState& last_state) {
   AddTransportAdapter(ta_usb);
   ta_usb = NULL;
 #endif  // USB_SUPPORT
+
+#if defined CLOUD_APP_WEBSOCKET_TRANSPORT_SUPPORT
+  printf("Creating cloud transport\n");
+  transport_adapter::TransportAdapterImpl* ta_cloud = new transport_adapter::CloudWebsocketTransportAdapter(last_state, get_settings()); //Todo add retry connection logic from ini to initializer.
+#ifdef TELEMETRY_MONITOR
+  if (metric_observer_) {
+    ta_cloud->SetTelemetryObserver(metric_observer_);
+  }
+#endif  // TELEMETRY_MONITOR
+  AddTransportAdapter(ta_cloud);
+  ta_cloud = NULL;
+#endif
 
 #if defined BUILD_TESTS
   const uint16_t iap2_bt_emu_port = 23456;

@@ -142,6 +142,8 @@ void ConnectionHandlerImpl::OnDeviceAdded(
   LOG4CXX_AUTO_TRACE(logger_);
   auto handle = device_info.device_handle();
 
+  LOG4CXX_DEBUG(logger_, "OnDeviceAdded!!!: " << handle << " " << device_info.name() << " " << device_info.mac_address() << " " << device_info.connection_type());
+
   Device device(handle,
                 device_info.name(),
                 device_info.mac_address(),
@@ -248,7 +250,7 @@ void ConnectionHandlerImpl::OnConnectionEstablished(
     const transport_manager::DeviceInfo& device_info,
     const transport_manager::ConnectionUID connection_id) {
   LOG4CXX_AUTO_TRACE(logger_);
-
+  LOG4CXX_DEBUG(logger_, "OnConnectionEstablished!!!: " << device_info.device_handle() << " " << device_info.name() << " " << device_info.mac_address() << " " << device_info.connection_type());
   DeviceMap::iterator it = device_list_.find(device_info.device_handle());
   if (device_list_.end() == it) {
     LOG4CXX_ERROR(logger_, "Unknown device!");

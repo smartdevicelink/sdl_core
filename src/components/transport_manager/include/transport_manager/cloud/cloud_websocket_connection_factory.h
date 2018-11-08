@@ -1,5 +1,8 @@
 /*
- * Copyright (c) 2016, Ford Motor Company
+ * \file cloud_websocket_connection_factory.h
+ * \brief CloudWebsocketConnectionFactory class header file.
+ *
+ * Copyright (c) 2018, Livio
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,55 +33,66 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_MANAGER_SETTINGS_H_
-#define SRC_COMPONENTS_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_MANAGER_SETTINGS_H_
+#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_CLOUD_CLOUD_WEBSOCKET_CONNECTION_FACTORY_H_
+#define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_CLOUD_CLOUD_WEBSOCKET_CONNECTION_FACTORY_H_
 
-#include "transport_manager/transport_manager_mme_settings.h"
+#include "transport_manager/transport_adapter/server_connection_factory.h"
+
 namespace transport_manager {
-class TransportManagerSettings : public TransportManagerMMESettings {
+namespace transport_adapter {
+
+class TransportAdapterController;
+
+/**
+ * @brief Create connections.
+ */
+class CloudWebsocketConnectionFactory : public ServerConnectionFactory {
  public:
   /**
-   * @brief Returns true if last state singleton is used
+   * @brief Constructor.
+   *
+   * @param controller Pointer to the device adapter controller.
    */
-  virtual bool use_last_state() const = 0;
+  CloudWebsocketConnectionFactory(TransportAdapterController* controller);
+
+ protected:
+  /**
+   * @brief Start cloud websocket connection factory.
+   */
+  virtual TransportAdapter::Error Init();
 
   /**
-   * @brief Timeout in transport manager before disconnect
+   * @brief Create cloud boost websocket connection.
+   *
+   * @param device_uid Device unique identifier.
+   * @param ap_handle Handle of application.
    */
-  virtual uint32_t transport_manager_disconnect_timeout() const = 0;
+  virtual TransportAdapter::Error CreateConnection(
+      const DeviceUID& device_uid, const ApplicationHandle& app_handle);
 
   /**
-   * @brief Returns port for TCP transport adapter
+   * @brief
    */
-  virtual uint16_t transport_manager_tcp_adapter_port() const = 0;
+  virtual void Terminate();
 
   /**
-   * @brief Returns the millisecond count before timeout
-   * for transport change feature occures.
+   * @brief Check for initialization.
+   *
+   * @return true - initialized.
+   * false - not initialized.
    */
-  virtual uint32_t app_transport_change_timer() const = 0;
+  virtual bool IsInitialised() const;
 
   /**
-   * @brief Returns the millisecond count as addition to
-   * the transport change timeout value.
+   * @brief Destructor.
    */
-  virtual uint32_t app_transport_change_timer_addition() const = 0;
+  virtual ~CloudWebsocketConnectionFactory();
 
-  /**
-   * @brief Returns the network interface name for TCP transport adapter
-   */
-  virtual const std::string& transport_manager_tcp_adapter_network_interface()
-      const = 0;
-
-  /**
-   * @brief Returns retry timeout for cloud app connections
-   */      
-  virtual uint16_t cloud_app_retry_timeout() const = 0;
-
-  /**
-   * @brief Returns maximum retry attempts for cloud app connections
-   */
-  virtual uint16_t cloud_app_max_retry_attempts() const = 0;
+ private:
+  TransportAdapterController* controller_;
 };
+
+}  // namespace transport_adapter
 }  // namespace transport_manager
-#endif  // SRC_COMPONENTS_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_MANAGER_SETTINGS_H_
+
+#endif  // SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_CLOUD_CLOUD_WEBSOCKET_CONNECTION_FACTORY_H_

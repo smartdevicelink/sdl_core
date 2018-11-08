@@ -81,6 +81,7 @@ const char* kMediaManagerSection = "MEDIA MANAGER";
 const char* kGlobalPropertiesSection = "GLOBAL PROPERTIES";
 const char* kVrCommandsSection = "VR COMMANDS";
 const char* kTransportManagerSection = "TransportManager";
+const char* kCloudAppTransportSection = "Cloud App Connections";
 const char* kApplicationManagerSection = "ApplicationManager";
 const char* kFilesystemRestrictionsSection = "FILESYSTEM RESTRICTIONS";
 const char* kIAPSection = "IAP";
@@ -154,6 +155,8 @@ const char* kMaxSupportedProtocolVersionKey = "MaxSupportedProtocolVersion";
 const char* kUseLastStateKey = "UseLastState";
 const char* kTCPAdapterPortKey = "TCPAdapterPort";
 const char* kTCPAdapterNetworkInterfaceKey = "TCPAdapterNetworkInterface";
+const char* kCloudAppRetryTimeoutKey = "CloudAppRetryTimeout";
+const char* kCloudAppMaxRetryAttemptsKey = "CloudAppMaxRetryAttempts";
 const char* kServerPortKey = "ServerPort";
 const char* kVideoStreamingPortKey = "VideoStreamingPort";
 const char* kAudioStreamingPortKey = "AudioStreamingPort";
@@ -318,6 +321,8 @@ const uint32_t kDefaultHubProtocolIndex = 0;
 const uint32_t kDefaultHeartBeatTimeout = 0;
 const uint16_t kDefaultMaxSupportedProtocolVersion = 5;
 const uint16_t kDefautTransportManagerTCPPort = 12345;
+const uint16_t kDefaultCloudAppRetryTimeout = 1000;
+const uint16_t kDefaultCloudAppMaxRetryAttempts = 5;
 const uint16_t kDefaultServerPort = 8087;
 const uint16_t kDefaultVideoStreamingPort = 5050;
 const uint16_t kDefaultAudioStreamingPort = 5080;
@@ -452,6 +457,8 @@ Profile::Profile()
     , supported_diag_modes_()
     , system_files_path_(kDefaultSystemFilesPath)
     , transport_manager_tcp_adapter_port_(kDefautTransportManagerTCPPort)
+    , cloud_app_retry_timeout_(kDefaultCloudAppRetryTimeout)
+    , cloud_app_max_retry_attempts_(kDefaultCloudAppMaxRetryAttempts)
     , tts_delimiter_(kDefaultTtsDelimiter)
     , audio_data_stopped_timeout_(kDefaultAudioDataStoppedTimeout)
     , video_data_stopped_timeout_(kDefaultVideoDataStoppedTimeout)
@@ -782,6 +789,14 @@ uint16_t Profile::transport_manager_tcp_adapter_port() const {
 const std::string& Profile::transport_manager_tcp_adapter_network_interface()
     const {
   return transport_manager_tcp_adapter_network_interface_;
+}
+
+uint16_t Profile::cloud_app_retry_timeout() const {
+  return cloud_app_retry_timeout_;
+}
+
+uint16_t Profile::cloud_app_max_retry_attempts() const {
+  return cloud_app_max_retry_attempts_;
 }
 
 const std::string& Profile::tts_delimiter() const {
@@ -1768,6 +1783,24 @@ void Profile::UpdateValues() {
   LOG_UPDATED_VALUE(transport_manager_tcp_adapter_network_interface_,
                     kTCPAdapterNetworkInterfaceKey,
                     kTransportManagerSection);
+
+  ReadUIntValue(&cloud_app_retry_timeout_,
+                kDefaultCloudAppRetryTimeout,
+                kCloudAppTransportSection,
+                kCloudAppRetryTimeoutKey);
+
+  LOG_UPDATED_VALUE(cloud_app_retry_timeout_,
+                    kCloudAppRetryTimeoutKey,
+                    kCloudAppTransportSection);
+
+  ReadUIntValue(&cloud_app_max_retry_attempts_,
+                kDefaultCloudAppMaxRetryAttempts,
+                kCloudAppTransportSection,
+                kCloudAppMaxRetryAttemptsKey);
+
+  LOG_UPDATED_VALUE(cloud_app_max_retry_attempts_,
+                    kCloudAppMaxRetryAttemptsKey,
+                    kCloudAppTransportSection);
 
   // Event MQ
   ReadStringValue(
