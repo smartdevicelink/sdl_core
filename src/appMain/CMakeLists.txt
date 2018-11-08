@@ -41,7 +41,7 @@ target_sources(${PROJECT_NAME}
     "${CMAKE_CURRENT_LIST_DIR}/signal_handlers.cc"
 )
 
-find_package(Boost 1.66.0 COMPONENTS system filesystem)
+SDL_find_package(boost REQUIRED)
 
 target_link_libraries(${PROJECT_NAME}
   PUBLIC
@@ -55,8 +55,8 @@ target_link_libraries(${PROJECT_NAME}
   PRIVATE
     components::interface
     Policy::usage_statistics
-    Boost::system
-    Boost::filesystem
+    boost::filesystem
+    boost::system
 )
 
 target_include_directories(${PROJECT_NAME}

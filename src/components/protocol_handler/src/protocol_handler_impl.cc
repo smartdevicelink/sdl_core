@@ -34,7 +34,7 @@
 #include <arpa/inet.h>  // for INET6_ADDRSTRLEN
 #include <memory.h>
 #include <algorithm>  // std::find
-#include <bson_object.h>
+#include <bson/bson_object.h>
 #include <protocol/bson_object_keys.h>
 
 #include "connection_handler/connection_handler_impl.h"

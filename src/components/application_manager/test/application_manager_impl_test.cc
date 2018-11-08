@@ -34,7 +34,7 @@
 #include <set>
 #include <string>
 #include <vector>
-#include <bson_object.h>
+#include <bson/bson_object.h>
 
 #include "gtest/gtest.h"
 #include "application_manager/application.h"

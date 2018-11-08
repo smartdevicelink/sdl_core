@@ -135,9 +135,9 @@ target_link_libraries(${PROJECT_NAME}
     hmi_message_handler::hmi_message_handler
     Policy::Policy
     Policy::usage_statistics
-    # bson
   PRIVATE
     components::interface
+    BSON::BSON
 )
 
 if(TELEMETRY_MONITOR)

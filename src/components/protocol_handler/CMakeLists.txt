@@ -42,6 +42,7 @@ target_sources(${PROJECT_NAME}
     "${CMAKE_CURRENT_LIST_DIR}/src/protocol_packet.cc"
     "${CMAKE_CURRENT_LIST_DIR}/src/protocol_payload.cc"
 )
+SDL_find_package(BSON REQUIRED)
 
 target_link_libraries(${PROJECT_NAME}
   PUBLIC
@@ -51,7 +52,7 @@ target_link_libraries(${PROJECT_NAME}
     connection_handler::connection_handler
   PRIVATE
     components::interface
-    bson
+    BSON::BSON
 )
 
 if(TELEMETRY_MONITOR)

@@ -28,32 +28,20 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-project(appenders)
-include(GNUInstallDirs)
 
-find_package(EXPAT REQUIRED)
+include(FetchContent)
 
-add_library(${PROJECT_NAME} SHARED)
-add_library(${PROJECT_NAME}::${PROJECT_NAME} ALIAS ${PROJECT_NAME})
-
-target_sources(${PROJECT_NAME}
-  PRIVATE
-    "${CMAKE_CURRENT_LIST_DIR}/safe_file_appender.cc"
-    "${CMAKE_CURRENT_LIST_DIR}/safe_file_appender.h"
-    "${CMAKE_CURRENT_LIST_DIR}/safe_rolling_file_appender.cc"
-    "${CMAKE_CURRENT_LIST_DIR}/safe_rolling_file_appender.h"
+FetchContent_Declare(
+  BSON
+  GIT_REPOSITORY https://github.com/BSolonenko/bson_c_lib.git
+  GIT_TAG        topic/sdl_rework
 )
 
-target_link_libraries(${PROJECT_NAME}
-  PUBLIC
-  libexpat
-)
+FetchContent_GetProperties(BSON)
+if(NOT bson_POPULATED)
+  FetchContent_Populate(BSON)
+  add_subdirectory("${bson_SOURCE_DIR}" "${bson_BINARY_DIR}")
+endif()
 
-install(TARGETS ${PROJECT_NAME}
-  DESTINATION "${CMAKE_INSTALL_LIBDIR}"
-  COMPONENT sdl_core
-  PERMISSIONS
-    OWNER_READ OWNER_WRITE OWNER_EXECUTE
-    GROUP_READ GROUP_EXECUTE
-    WORLD_READ WORLD_EXECUTE
-)
+set(BSON_FOUND ON)
+
