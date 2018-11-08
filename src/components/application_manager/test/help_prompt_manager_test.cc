@@ -180,7 +180,7 @@ void HelpPromptManagerTest::SetUp() {
       app_mngr_,
       HmiState::STATE_ID_REGULAR);
 
-  std::string path("storage");
+  const std::string path("storage");
   if (file_system::CreateDirectory(path))
     file_system::CreateFile(path + "/" + "certificate");
 

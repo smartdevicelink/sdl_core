@@ -176,7 +176,7 @@ class PolicyHandlerTest : public ::testing::Test {
     ON_CALL(policy_settings_, enable_policy()).WillByDefault(Return(true));
     ON_CALL(app_manager_, event_dispatcher())
         .WillByDefault(ReturnRef(mock_event_dispatcher_));
-    std::string path("storage");
+    const std::string path("storage");
     if (file_system::CreateDirectory(path))
       file_system::CreateFile(path + "/" + "certificate");
     mock_policy_manager_ =
