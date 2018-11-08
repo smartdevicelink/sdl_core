@@ -177,6 +177,13 @@ struct ApplicationParams : PolicyBase {
   Optional<Integer<uint16_t, 0, 65225> > memory_kb;
   Optional<Integer<uint32_t, 0, UINT_MAX> > heart_beat_timeout_ms;
   mutable Optional<ModuleTypes> moduleType;
+  Optional<String<0, 65535> > certificate;
+  // Cloud application params
+  Optional<Enum<HybridAppPreference> > hybrid_app_preference;
+  Optional<String<0, 255> > endpoint;
+  Optional<Boolean> enabled;
+  Optional<String<0, 65535> > auth_token;
+  Optional<String<0, 255> > cloud_transport_type;
 
  public:
   ApplicationParams();

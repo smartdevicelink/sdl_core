@@ -84,6 +84,9 @@ const std::string kCreateSchema =
     "CREATE TABLE IF NOT EXISTS `hmi_level`( "
     "  `value` VARCHAR(45) PRIMARY KEY NOT NULL "
     "); "
+    "CREATE TABLE IF NOT EXISTS `hybrid_app_preference`( "
+    "  `value` VARCHAR(45) PRIMARY KEY NOT NULL "
+    "); "
     "CREATE TABLE IF NOT EXISTS `notifications_by_priority`( "
     "  `priority_value` VARCHAR(45) PRIMARY KEY NOT NULL, "
     "  `value` INTEGER NOT NULL, "
@@ -133,7 +136,12 @@ const std::string kCreateSchema =
     "  `is_predata` BOOLEAN, "
     "  `memory_kb` INTEGER NOT NULL, "
     "  `heart_beat_timeout_ms` INTEGER NOT NULL, "
-    "  `certificate` VARCHAR(45), "
+    "  `certificate` VARCHAR(65535), "
+    "  `hybrid_app_preference_value` VARCHAR(255), "
+    "  `endpoint` VARCHAR(255), "
+    "  `enabled` BOOLEAN, "
+    "  `auth_token` VARCHAR(65535), "
+    "  `cloud_transport_type` VARCHAR(255), "
     "  `remote_control_denied` BOOLEAN NOT NULL DEFAULT 0, "
     "  CONSTRAINT `fk_application_hmi_level1` "
     "    FOREIGN KEY(`default_hmi`) "
@@ -141,11 +149,17 @@ const std::string kCreateSchema =
     "  CONSTRAINT `fk_application_priorities1` "
     "    FOREIGN KEY(`priority_value`) "
     "    REFERENCES `priority`(`value`) "
+    "  CONSTRAINT `fk_application_hybrid_app_preference1` "
+    "    FOREIGN KEY(`hybrid_app_preference_value`) "
+    "    REFERENCES `hybrid_app_preference`(`value`) "
     "); "
     "CREATE INDEX IF NOT EXISTS `application.fk_application_hmi_level1_idx` "
     "  ON `application`(`default_hmi`); "
     "CREATE INDEX IF NOT EXISTS `application.fk_application_priorities1_idx` "
     "  ON `application`(`priority_value`); "
+    "CREATE INDEX IF NOT EXISTS "
+    "`application.fk_application_hybrid_app_preference1` "
+    "  ON `application`(`hybrid_app_preference_value`); "
     "CREATE TABLE IF NOT EXISTS `app_group`( "
     "  `application_id` VARCHAR(45) NOT NULL COLLATE NOCASE, "
     "  `functional_group_id` INTEGER NOT NULL, "
@@ -391,6 +405,9 @@ const std::string kInsertInitData =
     "INSERT OR IGNORE INTO `hmi_level`(`value`) VALUES ('LIMITED'); "
     "INSERT OR IGNORE INTO `hmi_level`(`value`) VALUES ('BACKGROUND'); "
     "INSERT OR IGNORE INTO `hmi_level`(`value`) VALUES ('NONE'); "
+    "INSERT OR IGNORE INTO `hybrid_app_preference`(`value`) VALUES ('MOBILE'); "
+    "INSERT OR IGNORE INTO `hybrid_app_preference`(`value`) VALUES ('CLOUD'); "
+    "INSERT OR IGNORE INTO `hybrid_app_preference`(`value`) VALUES ('BOTH'); "
     "INSERT OR IGNORE INTO `version` (`number`) VALUES('0'); "
     "INSERT OR IGNORE INTO `_internal_data` (`db_version_hash`) VALUES(0); "
     "";
@@ -491,6 +508,7 @@ const std::string kDropSchema =
     "`notifications_by_priority.fk_notifications_by_priority_priority1_idx`; "
     "DROP TABLE IF EXISTS `notifications_by_priority`; "
     "DROP TABLE IF EXISTS `hmi_level`; "
+    "DROP TABLE IF EXISTS `hybrid_app_preference`; "
     "DROP TABLE IF EXISTS `priority`; "
     "DROP TABLE IF EXISTS `functional_group`; "
     "DROP TABLE IF EXISTS `module_config`; "
@@ -578,8 +596,10 @@ const std::string kInsertRpcWithParameter =
 
 const std::string kInsertApplication =
     "INSERT OR IGNORE INTO `application` (`id`, `priority_value`, "
-    "`is_revoked`, `memory_kb`,"
-    " `heart_beat_timeout_ms`, `certificate`) VALUES (?,?,?,?,?,?)";
+    "`is_revoked`, `memory_kb`, `heart_beat_timeout_ms`, `certificate`, "
+    "`hybrid_app_preference_value`, `endpoint`, `enabled`, `auth_token`, "
+    "`cloud_transport_type`) VALUES "
+    "(?,?,?,?,?,?,?,?,?,?,?)";
 
 const std::string kInsertAppGroup =
     "INSERT INTO `app_group` (`application_id`, `functional_group_id`)"
@@ -688,7 +708,8 @@ const std::string kSelectUserMsgsVersion =
 
 const std::string kSelectAppPolicies =
     "SELECT `id`, `priority_value`, `memory_kb`, "
-    " `heart_beat_timeout_ms`, `certificate` FROM `application`";
+    " `heart_beat_timeout_ms`, `certificate`, `hybrid_app_preference_value`, "
+    " `endpoint`, `enabled`, `cloud_transport_type` FROM `application`";
 
 const std::string kCollectFriendlyMsg = "SELECT * FROM `message`";
 
@@ -785,15 +806,19 @@ const std::string kDeleteAppGroupByApplicationId =
 
 const std::string kInsertApplicationFull =
     "INSERT OR IGNORE INTO `application` (`id`, `keep_context`, `steal_focus`, "
-    "  `default_hmi`, `priority_value`, `is_revoked`, `is_default`, "
-    "`is_predata`, "
-    " `memory_kb`, `heart_beat_timeout_ms`, `certificate`) "
-    "  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+    " `default_hmi`, `priority_value`, `is_revoked`, `is_default`, "
+    " `is_predata`, `memory_kb`, `heart_beat_timeout_ms`, "
+    " `certificate`, `hybrid_app_preference_value`, `endpoint`, `enabled`, "
+    " `auth_token`, `cloud_transport_type`) "
+    "  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
 const std::string kSelectApplicationFull =
     "SELECT `keep_context`, `steal_focus`, `default_hmi`, `priority_value`, "
     "  `is_revoked`, `is_default`, `is_predata`, `memory_kb`,"
-    "  `heart_beat_timeout_ms`, `certificate` FROM `application` WHERE `id` = "
+    "  `heart_beat_timeout_ms`, `certificate`, `hybrid_app_preference_value`, "
+    "  `endpoint`, `enabled`, `auth_token`, `cloud_transport_type` "
+    "FROM `application` "
+    "WHERE `id` = "
     "?";
 
 const std::string kSelectDBVersion =
