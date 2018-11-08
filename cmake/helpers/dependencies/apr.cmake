@@ -9,7 +9,7 @@ find_path(apr_INCLUDE_DIR
   PATH_SUFFIXES
     include
 )
-set(apr_INCLUDE_DIR "${THIRD_PARTY_INSTALL_PREFIX}/include/apr.h")
+set(apr_INCLUDE_DIR "${THIRD_PARTY_INSTALL_PREFIX}/include/")
 
 if(apr_INCLUDE_DIR)
   set(apr_VERSION_MAJOR 0)

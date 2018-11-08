@@ -44,7 +44,7 @@ include(GNUInstallDirs)
 
 
 # Request C++11
-set(CMAKE_CXX_STANDARD 11)
+#set(CMAKE_CXX_STANDARD 11)
 
 # Disable fallback if standard not supported by compiler
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -54,7 +54,6 @@ set(CMAKE_CXX_EXTENSIONS ON)
 
 # Enable PIC as static libraries may be linked to shared objects
 set(CMAKE_POSITION_INDEPENDENT_CODE TRUE)
-
 
 if(IS_DIRECTORY "${CMAKE_CURRENT_LIST_DIR}/.git")
   find_package(Git)
@@ -288,7 +287,7 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
 set(CMAKE_INSTALL_PREFIX ${CMAKE_CURRENT_BINARY_DIR})
 set(ARCHIVE_OUTPUT_DIRECTORY ./bin)
 
-set(CMAKE_CXX_FLAGS "-fPIC -std=gnu++11 -Wall -Werror -Wuninitialized -Wvla")
+set(CMAKE_CXX_FLAGS "-fPIC -std=gnu++11 -stdlib=libstdc++ -Wall -Werror -Wuninitialized -Wvla")
 
 if (USE_CCACHE)
 # Configure CCache if available

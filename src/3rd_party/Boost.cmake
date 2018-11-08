@@ -47,7 +47,7 @@ else()
   set(ADDRESS_MODEL "32")
 endif ()
 
-set(BOOST_BUILD_COMMAND ./b2 address-model=${ADDRESS_MODEL} cxxflags=-std=gnu++11 target-os=qnxnto toolset=gcc-nto${CMAKE_SYSTEM_PROCESSOR} define=__QNXNTO__)
+set(BOOST_BUILD_COMMAND ./b2 address-model=${ADDRESS_MODEL} cxxflags="-std=gnu++11" linkflags="-stdlib=libstdc++" target-os=qnxnto toolset=gcc-nto${CMAKE_SYSTEM_PROCESSOR} define=__QNXNTO__)
 set(BOOST_INSTALL_COMMAND ${BOOST_BUILD_COMMAND} install > boost_install.log)
 if (${3RD_PARTY_INSTALL_PREFIX} MATCHES "/usr/local")
   set(BOOST_INSTALL_COMMAND sudo  ${BOOST_BUILD_COMMAND} install > boost_install.log)

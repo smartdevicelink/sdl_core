@@ -10,7 +10,7 @@ find_path(apr-util_INCLUDE_DIR
     include
 )
 
-set(apr-util_INCLUDE_DIR "${THIRD_PARTY_INSTALL_PREFIX}/include/apu.h")
+set(apr-util_INCLUDE_DIR "${THIRD_PARTY_INSTALL_PREFIX}/include/")
 
 if(apr-util_INCLUDE_DIR)
   set(apr-util_VERSION_MAJOR 0)

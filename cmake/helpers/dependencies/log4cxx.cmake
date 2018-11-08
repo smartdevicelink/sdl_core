@@ -10,7 +10,7 @@ find_path(log4cxx_INCLUDE_DIR
     include
 )
 
-set(log4cxx_INCLUDE_DIR "${THIRD_PARTY_INSTALL_PREFIX}/include/log4cxx/log4cxx.h")
+set(log4cxx_INCLUDE_DIR "${THIRD_PARTY_INSTALL_PREFIX}/include/log4cxx/")
 
 find_library(log4cxx_LIBRARY
   NAMES
