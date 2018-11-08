@@ -437,6 +437,56 @@ class PolicyHandlerInterface {
    * @return Structure with vehicle information
    */
   virtual const VehicleInfo GetVehicleInfo() const = 0;
+
+  /**
+   * @brief Get a list of enabled cloud applications
+   * @param enabled_apps List filled with the policy app id of each enabled
+   * cloud application
+   */
+  virtual void GetEnabledCloudApps(
+      std::vector<std::string>& enabled_apps) const = 0;
+
+  /**
+   * @brief Checks if a given application is an enabled cloud application
+   * @param policy_app_id Unique application id
+   * @return true if the application is an enabled cloud application,
+   * false otherwise
+   */
+  virtual const bool CheckCloudAppEnabled(
+      const std::string& policy_app_id) const = 0;
+
+  /**
+   * @brief Get cloud app policy information, all fields that aren't set for a
+   * given app will be filled with empty strings
+   * @param policy_app_id Unique application id
+   * @param endpoint Filled the endpoint used to connect to the cloud
+   * application
+   * @param certificate Filled with the certificate used to for creating a
+   * secure connection to the cloud application
+   * @param auth_token Filled with the token used for authentication when
+   * reconnecting to the cloud app
+   * @param cloud_transport_type Filled with the transport type used by the
+   * cloud application (ex. "WSS")
+   * @param cloud_transport_type Filled with the hybrid app preference for the
+   * cloud application set by the user
+   * @return true if the cloud app is enabled, false otherwise
+   */
+  virtual const bool GetCloudAppParameters(
+      const std::string& policy_app_id,
+      std::string& endpoint,
+      std::string& certificate,
+      std::string& auth_token,
+      std::string& cloud_transport_type,
+      std::string& hybrid_app_preference) const = 0;
+
+  /**
+   * @brief Callback for when a SetCloudAppProperties message is received from a
+   * mobile app
+   * @param message The SetCloudAppProperties message
+   */
+  virtual void OnSetCloudAppProperties(
+      const smart_objects::SmartObject& message) = 0;
+
 #ifdef EXTERNAL_PROPRIETARY_MODE
   /**
    * @brief Gets meta information

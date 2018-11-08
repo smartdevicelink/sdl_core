@@ -1845,6 +1845,81 @@ bool PolicyHandler::CheckSystemAction(
   return false;
 }
 
+void PolicyHandler::GetEnabledCloudApps(
+    std::vector<std::string>& enabled_apps) const {
+  POLICY_LIB_CHECK_VOID();
+  policy_manager_->GetEnabledCloudApps(enabled_apps);
+}
+
+const bool PolicyHandler::GetCloudAppParameters(
+    const std::string& policy_app_id,
+    std::string& endpoint,
+    std::string& certificate,
+    std::string& auth_token,
+    std::string& cloud_transport_type,
+    std::string& hybrid_app_preference) const {
+  POLICY_LIB_CHECK(false);
+  return policy_manager_->GetCloudAppParameters(policy_app_id,
+                                                endpoint,
+                                                certificate,
+                                                auth_token,
+                                                cloud_transport_type,
+                                                hybrid_app_preference);
+}
+
+const bool PolicyHandler::CheckCloudAppEnabled(
+    const std::string& policy_app_id) const {
+  POLICY_LIB_CHECK(false);
+  std::string endpoint;
+  std::string auth_token;
+  std::string certificate;
+  std::string cloud_transport_type;
+  std::string hybrid_app_preference;
+  return policy_manager_->GetCloudAppParameters(policy_app_id,
+                                                endpoint,
+                                                certificate,
+                                                auth_token,
+                                                cloud_transport_type,
+                                                hybrid_app_preference);
+}
+
+void PolicyHandler::OnSetCloudAppProperties(
+    const smart_objects::SmartObject& message) {
+  POLICY_LIB_CHECK_VOID();
+  if (!message.keyExists(strings::msg_params)) {
+    LOG4CXX_ERROR(logger_,
+                  "Message does not contain mandatory section "
+                      << strings::msg_params);
+    return;
+  }
+  const smart_objects::SmartObject& msg_params = message[strings::msg_params];
+  if (!msg_params.keyExists(strings::app_id)) {
+    LOG4CXX_ERROR(logger_,
+                  "Message does not contain mandatory parameter "
+                      << strings::app_id);
+    return;
+  }
+  std::string policy_app_id(msg_params[strings::app_id].asString());
+  if (msg_params.keyExists(strings::enabled)) {
+    policy_manager_->SetCloudAppEnabled(policy_app_id,
+                                        msg_params[strings::enabled].asBool());
+  }
+  if (msg_params.keyExists(strings::cloud_app_auth_token)) {
+    policy_manager_->SetAppAuthToken(
+        policy_app_id, msg_params[strings::cloud_app_auth_token].asString());
+  }
+  if (msg_params.keyExists(strings::cloud_transport_type)) {
+    policy_manager_->SetAppCloudTransportType(
+        policy_app_id, msg_params[strings::cloud_transport_type].asString());
+  }
+  if (msg_params.keyExists(strings::hybrid_app_preference)) {
+    // const std::string hybrid_app_preference =
+    // EnumConversionHelper<HybridAppPreference>::EnumToString(msg_params[strings::hybrid_app_preference]);
+    // policy_manager_->SetHybridAppPreference(
+    //    policy_app_id, hybrid_app_preference);
+  }
+}
+
 uint32_t PolicyHandler::HeartBeatTimeout(const std::string& app_id) const {
   POLICY_LIB_CHECK(0);
   return policy_manager_->HeartBeatTimeout(app_id);

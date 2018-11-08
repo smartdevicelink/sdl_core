@@ -682,6 +682,99 @@ const policy::VehicleInfo CacheManager::GetVehicleInfo() const {
   return vehicle_info;
 }
 
+void CacheManager::GetEnabledCloudApps(
+    std::vector<std::string>& enabled_apps) const {
+  const policy_table::ApplicationPolicies& policies =
+      pt_->policy_table.app_policies_section.apps;
+  for (policy_table::ApplicationPolicies::const_iterator it = policies.begin();
+       it != policies.end();
+       ++it) {
+    auto app_policy = (*it).second;
+    if (app_policy.enabled.is_initialized() && *app_policy.enabled) {
+      enabled_apps.push_back((*it).first);
+    }
+  }
+}
+
+const bool CacheManager::GetCloudAppParameters(
+    const std::string& policy_app_id,
+    std::string& endpoint,
+    std::string& certificate,
+    std::string& auth_token,
+    std::string& cloud_transport_type,
+    std::string& hybrid_app_preference) const {
+  const policy_table::ApplicationPolicies& policies =
+      pt_->policy_table.app_policies_section.apps;
+  policy_table::ApplicationPolicies::const_iterator policy_iter =
+      policies.find(policy_app_id);
+  if (policies.end() != policy_iter) {
+    auto app_policy = (*policy_iter).second;
+    endpoint = app_policy.endpoint.is_initialized() ? *app_policy.endpoint
+                                                    : std::string();
+    auth_token = app_policy.auth_token.is_initialized() ? *app_policy.auth_token
+                                                        : std::string();
+    cloud_transport_type = app_policy.cloud_transport_type.is_initialized()
+                               ? *app_policy.cloud_transport_type
+                               : std::string();
+    certificate = app_policy.certificate.is_initialized()
+                      ? *app_policy.certificate
+                      : std::string();
+    hybrid_app_preference =
+        app_policy.hybrid_app_preference.is_initialized()
+            ? EnumToJsonString(*app_policy.hybrid_app_preference)
+            : std::string();
+    return app_policy.enabled.is_initialized() && *app_policy.enabled;
+  }
+  return false;
+}
+
+void CacheManager::SetCloudAppEnabled(const std::string& policy_app_id,
+                                      const bool enabled) {
+  policy_table::ApplicationPolicies& policies =
+      pt_->policy_table.app_policies_section.apps;
+  policy_table::ApplicationPolicies::iterator policy_iter =
+      policies.find(policy_app_id);
+  if (policies.end() != policy_iter) {
+    *(*policy_iter).second.enabled = enabled;
+  }
+}
+
+void CacheManager::SetAppAuthToken(const std::string& policy_app_id,
+                                   const std::string& auth_token) {
+  policy_table::ApplicationPolicies& policies =
+      pt_->policy_table.app_policies_section.apps;
+  policy_table::ApplicationPolicies::iterator policy_iter =
+      policies.find(policy_app_id);
+  if (policies.end() != policy_iter) {
+    *(*policy_iter).second.auth_token = auth_token;
+  }
+}
+
+void CacheManager::SetAppCloudTransportType(
+    const std::string& policy_app_id, const std::string& cloud_transport_type) {
+  policy_table::ApplicationPolicies& policies =
+      pt_->policy_table.app_policies_section.apps;
+  policy_table::ApplicationPolicies::iterator policy_iter =
+      policies.find(policy_app_id);
+  if (policies.end() != policy_iter) {
+    *(*policy_iter).second.cloud_transport_type = cloud_transport_type;
+  }
+}
+
+void CacheManager::SetHybridAppPreference(
+    const std::string& policy_app_id,
+    const std::string& hybrid_app_preference) {
+  policy_table::HybridAppPreference value;
+  bool valid = EnumFromJsonString(hybrid_app_preference, &value);
+  policy_table::ApplicationPolicies& policies =
+      pt_->policy_table.app_policies_section.apps;
+  policy_table::ApplicationPolicies::iterator policy_iter =
+      policies.find(policy_app_id);
+  if (policies.end() != policy_iter && valid) {
+    *(*policy_iter).second.hybrid_app_preference = value;
+  }
+}
+
 std::vector<UserFriendlyMessage> CacheManager::GetUserFriendlyMsg(
     const std::vector<std::string>& msg_codes, const std::string& language) {
   LOG4CXX_AUTO_TRACE(logger_);
