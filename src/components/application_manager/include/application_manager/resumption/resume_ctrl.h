@@ -270,6 +270,11 @@ class ResumeCtrl {
    */
   virtual void RemoveFromResumption(uint32_t app_id) = 0;
 
+  DEPRECATED
+  virtual bool Init(resumption::LastState*) {
+    return false;
+  }
+
   /**
    * @brief Initialization data for Resume controller
    * @return true if initialization is success otherwise

@@ -52,6 +52,10 @@ class BluetoothTransportAdapter : public TransportAdapterImpl {
   BluetoothTransportAdapter(resumption::LastStateWrapperPtr last_state_wrapper,
                             const TransportManagerSettings& settings);
 
+  DEPRECATED
+  BluetoothTransportAdapter(resumption::LastState&,
+                            const TransportManagerSettings& settings);
+
   /**
    * @brief Destructor.
    */

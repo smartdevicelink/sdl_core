@@ -66,6 +66,14 @@ class MockTransportAdapterImpl : public TransportAdapterImpl {
                              last_state_wrapper,
                              settings) {}
 
+  DEPRECATED
+  MockTransportAdapterImpl(DeviceScanner*,
+                           ServerConnectionFactory*,
+                           ClientConnectionListener*,
+                           resumption::LastState&,
+                           const transport_manager::TransportManagerSettings&) =
+      delete;
+
   ConnectionSPtr FindStatedConnection(const DeviceUID& device_handle,
                                       const ApplicationHandle& app_handle) {
     return this->FindEstablishedConnection(device_handle, app_handle);

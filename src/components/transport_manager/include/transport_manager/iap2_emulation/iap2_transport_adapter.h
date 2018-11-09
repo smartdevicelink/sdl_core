@@ -63,6 +63,10 @@ class IAP2BluetoothEmulationTransportAdapter : public TcpTransportAdapter {
       resumption::LastStateWrapperPtr last_state_wrapper,
       const TransportManagerSettings& settings);
 
+  IAP2BluetoothEmulationTransportAdapter(
+      const uint16_t port,
+      resumption::LastState& last_state_wrapper,
+      const TransportManagerSettings& settings);
   /**
    * @brief DeviceSwitched is called during switching from iAP2 Bluetooth to
    * iAP2 USB transport.
@@ -107,6 +111,12 @@ class IAP2USBEmulationTransportAdapter : public TcpTransportAdapter {
       const uint16_t port,
       resumption::LastStateWrapperPtr last_state_wrapper,
       const TransportManagerSettings& settings);
+
+  DEPRECATED
+  IAP2USBEmulationTransportAdapter(const uint16_t port,
+                                   resumption::LastState&,
+                                   const TransportManagerSettings& settings) =
+      delete;
 
   /**
    * Destructor

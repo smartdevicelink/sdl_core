@@ -54,6 +54,10 @@ class AppLaunchDataJson : public AppLaunchDataImpl {
    */
   AppLaunchDataJson(const AppLaunchSettings& settings,
                     resumption::LastStateWrapperPtr last_state_wrapper);
+
+  DEPRECATED AppLaunchDataJson(const AppLaunchSettings& settings,
+                               resumption::LastState&) = delete;
+
   /**
    * @brief allows to destroy AppLaunchDataJson object
    */
@@ -93,6 +97,10 @@ class AppLaunchDataJson : public AppLaunchDataImpl {
   Json::Value& GetApplicationListAndIndex(const ApplicationData& app_data,
                                           int32_t& founded_index,
                                           Json::Value& dictionary) const;
+
+  DEPRECATED
+  Json::Value& GetApplicationListAndIndex(const ApplicationData& app_data,
+                                          int32_t& founded_index) const;
 
  private:
   /**

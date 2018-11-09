@@ -132,6 +132,12 @@ class ApplicationManager {
  public:
   virtual ~ApplicationManager() {}
 
+  DEPRECATED
+  virtual bool Init(resumption::LastState&,
+                    media_manager::MediaManager* media_manager) {
+    return false;
+  }
+
   /**
    * Inits application manager
    */
