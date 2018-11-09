@@ -98,7 +98,9 @@ DeviceTypes devicesType = {
     std::make_pair(std::string("USB_IOS_DEVICE_MODE"),
                    hmi_apis::Common_TransportType::USB_IOS),
     std::make_pair(std::string("CARPLAY_WIRELESS_IOS"),
-                   hmi_apis::Common_TransportType::WIFI)};
+                   hmi_apis::Common_TransportType::WIFI),
+    std::make_pair(std::string("CLOUD_WEBSOCKET"),
+               hmi_apis::Common_TransportType::CLOUD_WEBSOCKET)};
 }
 
 /**
@@ -798,6 +800,16 @@ void ApplicationManagerImpl::CollectCloudAppInformation() {
       cloud_transport_type, hybrid_app_preference);
 
     connection_handler().AddCloudAppDevice(*it, endpoint, cloud_transport_type);
+    std::string device_mac;
+    std::string connection_type;
+    /*ApplicationSharedPtr application(
+        new ApplicationImpl(app_id,
+                            policy_app_id,
+                            device_mac,
+                            device_id,
+                            app_name,
+                            GetPolicyHandler().GetStatisticManager(),
+                            *this));    */
   }
 }
 

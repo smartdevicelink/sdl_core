@@ -88,6 +88,8 @@ class CloudWebsocketTransportAdapter : public TransportAdapterImpl {
    */
   virtual bool Restore();
 
+  void CreateDevice(const std::string& uid) OVERRIDE;
+
  private:
   /**
    * @brief Keeps transport specific configuration

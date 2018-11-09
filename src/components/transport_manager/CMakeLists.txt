@@ -72,6 +72,11 @@ else()
   )
 endif()
 
+if(BUILD_CLOUD_APP_SUPPORT)
+  GET_PROPERTY(BOOST_LIBS_DIRECTORY GLOBAL PROPERTY GLOBAL_BOOST_LIBS)
+  list(APPEND LIBRARIES boost_system boost_regex -L${BOOST_LIBS_DIRECTORY})
+endif()
+
 if(BUILD_USB_SUPPORT)
   if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
     set(EXCLUDE_PATHS
@@ -129,3 +134,4 @@ endif()
 if(BUILD_TESTS)
   add_subdirectory(test)
 endif()
+

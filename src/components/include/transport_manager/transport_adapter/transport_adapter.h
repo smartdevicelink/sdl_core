@@ -348,6 +348,8 @@ class TransportAdapter {
    */
   virtual TransportConfig GetTransportConfiguration() const = 0;
 
+  virtual void CreateDevice(const std::string& uid) = 0;
+
 #ifdef TELEMETRY_MONITOR
   /**
    * @brief Return Time metric observer

@@ -72,6 +72,7 @@
   <element name="USB_IOS"/>
   <element name="USB_AOA"/>
   <element name="WIFI"/>
+  <element name="CLOUD_WEBSOCKET"/>
 </enum>
 
 <enum name="ButtonName">

@@ -33,6 +33,13 @@
 #include "transport_manager/cloud/cloud_websocket_transport_adapter.h"
 #include "transport_manager/cloud/cloud_websocket_connection_factory.h"
 
+
+#include "transport_manager/cloud/cloud_device.h"
+#include "transport_manager/cloud/websocket_client_connection.h"
+
+
+#include <boost/regex.hpp>
+
 namespace transport_manager {
 namespace transport_adapter {
 
@@ -63,6 +70,41 @@ void CloudWebsocketTransportAdapter::Store() const {} // todo decide if this is 
 
 bool CloudWebsocketTransportAdapter::Restore() { // todo decide if resumption is needed
 	return true;
+}
+
+void CloudWebsocketTransportAdapter::CreateDevice(const std::string& uid) {
+	boost::regex pattern ("(wss?):\\/\\/([A-Z\\d\\.-]{2,})\\.([A-Z]{2,})(:\\d{2,4})", boost::regex::icase);
+	std::string str = uid;
+	if (!boost::regex_match(str, pattern)) {
+		LOG4CXX_DEBUG(logger_, "Invalid Endpoint: " << uid);
+		return;
+	}
+
+	LOG4CXX_DEBUG(logger_, "Valid Endpoint: " << uid);
+	std::size_t pos = uid.find(":");
+	pos = uid.find(":", pos+1);
+	std::size_t size = uid.length();
+	std::string host = uid.substr(0, size - pos);
+	std::string port = uid.substr(pos);
+	std::string device_id = uid;
+
+	LOG4CXX_DEBUG(logger_, "Creating Cloud Device For Host: " << host << " and Port: " << port);
+
+	auto cloud_device = std::make_shared<CloudDevice>(host, port, device_id);
+  
+  	DeviceVector devices{cloud_device};
+
+  	SearchDeviceDone(devices);
+
+  	//Create connection object, do not start until app is activated
+    std::shared_ptr<WebsocketClientConnection> connection =
+      std::make_shared<WebsocketClientConnection>(
+          uid, 0, this);
+
+  	ConnectionCreated(connection, uid, 0);
+  	ConnectDone(uid, 0);
+
+	return;
 }
 
 

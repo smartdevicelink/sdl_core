@@ -165,6 +165,14 @@ class ConnectionHandlerImpl
       const transport_manager::SearchDeviceError& error) OVERRIDE;
 
   /**
+   * \brief Notifies about pending connection.
+   *
+   * \param connection_id ID of new connection.
+   **/
+  void OnConnectionPending(
+      const transport_manager::DeviceInfo& device_info,
+      const transport_manager::ConnectionUID connection_id) OVERRIDE;
+  /**
    * \brief Notifies about established connection.
    *
    * \param connection_id ID of new connection.

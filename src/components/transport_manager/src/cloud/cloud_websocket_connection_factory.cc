@@ -50,7 +50,7 @@ CloudWebsocketConnectionFactory::CloudWebsocketConnectionFactory(
     : controller_(controller) {}
 
 TransportAdapter::Error CloudWebsocketConnectionFactory::Init() {
-  DeviceUID device_id  = "Cloud";
+  /*DeviceUID device_id  = "Cloud";
   ApplicationHandle app_handle = 100;
   printf("Calling create connection\n");
 
@@ -67,7 +67,7 @@ TransportAdapter::Error CloudWebsocketConnectionFactory::Init() {
 
   const TransportAdapter::Error err =
       this->CreateConnection(std::string(device_id+host+port), app_handle);
-    LOG4CXX_DEBUG(logger_, err);
+    LOG4CXX_DEBUG(logger_, err);*/
   return TransportAdapter::OK;
 }
 

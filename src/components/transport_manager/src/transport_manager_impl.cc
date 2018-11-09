@@ -130,6 +130,22 @@ void TransportManagerImpl::ReconnectionTimeout() {
 }
 
 void TransportManagerImpl::AddCloudDevice(const std::string& endpoint, const std::string& cloud_transport_type) {
+
+  //todo put conversion into own function
+  transport_adapter::DeviceType type = transport_adapter::DeviceType::UNKNOWN;
+  if (cloud_transport_type == "WS") {
+    type = transport_adapter::DeviceType::CLOUD_WEBSOCKET;
+  } else {
+    return;
+  }
+
+  std::vector<TransportAdapter*>::iterator ta = transport_adapters_.begin();
+  for (;ta != transport_adapters_.end(); ++ta) {
+    if ((*ta)->GetDeviceType() == type) {
+      (*ta)->CreateDevice(endpoint);
+    }
+  }
+
   return;
 }
 
@@ -956,6 +972,25 @@ void TransportManagerImpl::Handle(TransportAdapterEvent event) {
     case EventTypeEnum::ON_FIND_NEW_APPLICATIONS_REQUEST: {
       RaiseEvent(&TransportManagerListener::OnFindNewApplicationsRequest);
       LOG4CXX_DEBUG(logger_, "event_type = ON_FIND_NEW_APPLICATIONS_REQUEST");
+      break;
+    }
+    case EventTypeEnum::ON_CONNECT_PENDING: {
+      const DeviceHandle device_handle = converter_.UidToHandle(
+          event.device_uid, event.transport_adapter->GetConnectionType());
+      AddConnection(ConnectionInternal(this,
+                                       event.transport_adapter,
+                                       ++connection_id_counter_,
+                                       event.device_uid,
+                                       event.application_id,
+                                       device_handle));
+      RaiseEvent(
+          &TransportManagerListener::OnConnectionPending,
+          DeviceInfo(device_handle,
+                     event.device_uid,
+                     event.transport_adapter->DeviceName(event.device_uid),
+                     event.transport_adapter->GetConnectionType()),
+          connection_id_counter_);
+      LOG4CXX_DEBUG(logger_, "event_type = ON_CONNECT_PENDING");
       break;
     }
     case EventTypeEnum::ON_CONNECT_DONE: {

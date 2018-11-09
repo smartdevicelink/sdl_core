@@ -246,6 +246,32 @@ void ConnectionHandlerImpl::OnScanDevicesFailed(
   LOG4CXX_WARN(logger_, "Scan devices failed. " << error.text());
 }
 
+void ConnectionHandlerImpl::OnConnectionPending(
+    const transport_manager::DeviceInfo& device_info,
+    const transport_manager::ConnectionUID connection_id) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  LOG4CXX_DEBUG(logger_, "OnConnectionEstablished!!!: " << device_info.device_handle() << " " << device_info.name() << " " << device_info.mac_address() << " " << device_info.connection_type());
+  DeviceMap::iterator it = device_list_.find(device_info.device_handle());
+  if (device_list_.end() == it) {
+    LOG4CXX_ERROR(logger_, "Unknown device!");
+    return;
+  }
+  LOG4CXX_DEBUG(logger_,
+                "Add Pending Connection #" << connection_id << " to the list.");
+
+
+  //todo maybe create a seperate "pending_connection_list"
+  sync_primitives::AutoWriteLock lock(connection_list_lock_);
+  if (connection_list_.find(connection_id) == connection_list_.end()) {
+    connection_list_.insert(ConnectionList::value_type(
+        connection_id,
+        new Connection(connection_id,
+                       device_info.device_handle(),
+                       this,
+                       get_settings().heart_beat_timeout())));
+  }
+}
+
 void ConnectionHandlerImpl::OnConnectionEstablished(
     const transport_manager::DeviceInfo& device_info,
     const transport_manager::ConnectionUID connection_id) {
@@ -259,12 +285,14 @@ void ConnectionHandlerImpl::OnConnectionEstablished(
   LOG4CXX_DEBUG(logger_,
                 "Add Connection #" << connection_id << " to the list.");
   sync_primitives::AutoWriteLock lock(connection_list_lock_);
-  connection_list_.insert(ConnectionList::value_type(
-      connection_id,
-      new Connection(connection_id,
-                     device_info.device_handle(),
-                     this,
-                     get_settings().heart_beat_timeout())));
+  if (connection_list_.find(connection_id) == connection_list_.end()) {
+    connection_list_.insert(ConnectionList::value_type(
+        connection_id,
+        new Connection(connection_id,
+                       device_info.device_handle(),
+                       this,
+                       get_settings().heart_beat_timeout())));
+  }
 }
 
 void ConnectionHandlerImpl::OnConnectionFailed(

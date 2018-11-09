@@ -512,6 +512,10 @@ class ProtocolHandlerImpl
   void OnTMMessageSendFailed(const transport_manager::DataSendError& error,
                              const RawMessagePtr message) OVERRIDE;
 
+  void OnConnectionPending(
+      const transport_manager::DeviceInfo& device_info,
+      const transport_manager::ConnectionUID connection_id) OVERRIDE;
+
   void OnConnectionEstablished(
       const transport_manager::DeviceInfo& device_info,
       const transport_manager::ConnectionUID connection_id) OVERRIDE;
