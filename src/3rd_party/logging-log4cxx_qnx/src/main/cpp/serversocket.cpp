@@ -39,6 +39,12 @@ ServerSocket::ServerSocket(int port) : pool(), mutex(pool), socket(0), timeout(0
     throw SocketException(status);
   }
   
+  // AKirov: Added SO_REUSEADDR option to fix APPLINK-15273
+  status = apr_socket_opt_set(socket, APR_SO_REUSEADDR, 1);
+  if (status != APR_SUCCESS) {
+    throw SocketException(status);
+  }
+
         // Create server socket address (including port number)
   apr_sockaddr_t *server_addr;
   status =
@@ -122,6 +128,13 @@ SocketPtr ServerSocket::accept() {
         throw SocketException(status);
     }
     
+    // Added 5 seconds timeout to fix endless blocking on write() when the client is not reading
+    status = apr_socket_timeout_set(newSocket, 5000000);
+    if (status != APR_SUCCESS) {
+        apr_pool_destroy(newPool);
+        throw SocketException(status);
+    }
+
     return new Socket(newSocket, newPool);
 }
 

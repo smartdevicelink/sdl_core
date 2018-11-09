@@ -83,6 +83,25 @@ namespace log4cxx
                                 const LevelPtr& level,   const LogString& message,
                                 const log4cxx::spi::LocationInfo& location);
 
+                        /**
+                        Instantiate a LoggingEvent from the supplied parameters.
+
+                        <p>All the fields of
+                        <code>LoggingEvent</code> are filled when actually needed.
+                        <p>
+                        @param logger The logger of this event.
+                        @param level The level of this event.
+                        @param message  The message of this event.
+                        @param timeStamp Event time stamp.
+                        @param location location of logging request.
+                        @param threadName Event thread name.
+                        */
+                        LoggingEvent(const LogString& logger,
+                                const LevelPtr& level,   const LogString& message,
+                                log4cxx_time_t timeStamp,
+                                const log4cxx::spi::LocationInfo& location,
+                                const LogString& threadName);
+
                         ~LoggingEvent();
 
                         /** Return the level of this event. */
@@ -106,6 +125,9 @@ namespace log4cxx
                         in microseconds elapsed since 01.01.1970.
                         */
                         static log4cxx_time_t getStartTime();
+
+                        /** Return current thread name. */
+                        static const LogString getCurrentThreadName();
 
                         /** Return the threadName of this event. */
                         inline const LogString& getThreadName() const {
@@ -247,7 +269,6 @@ namespace log4cxx
                        //
                        LoggingEvent(const LoggingEvent&);
                        LoggingEvent& operator=(const LoggingEvent&);
-                       static const LogString getCurrentThreadName();
 
                        static void writeProlog(log4cxx::helpers::ObjectOutputStream& os, log4cxx::helpers::Pool& p);
 

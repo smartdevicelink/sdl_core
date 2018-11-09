@@ -86,7 +86,7 @@ namespace log4cxx
          *   Return the file name of the caller.
          *   @returns file name, may be null.
          */
-        const char * getFileName() const;
+        const std::string& getFileName() const;
 
         /**
           *   Returns the line number of the caller.
@@ -105,11 +105,10 @@ namespace log4cxx
         int lineNumber;
 
         /** Caller's file name. */
-        const char * fileName;
+        std::string fileName;
 
         /** Caller's method name. */
-        const char * methodName;
-
+        std::string methodName;
 
       };
   }

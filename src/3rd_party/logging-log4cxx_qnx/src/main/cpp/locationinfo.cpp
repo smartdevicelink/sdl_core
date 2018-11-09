@@ -94,7 +94,7 @@ using namespace log4cxx::helpers;
  *   Return the file name of the caller.
  *   @returns file name, may be null.
  */
- const char * LocationInfo::getFileName() const
+ const std::string& LocationInfo::getFileName() const
 {
   return fileName;
 }
