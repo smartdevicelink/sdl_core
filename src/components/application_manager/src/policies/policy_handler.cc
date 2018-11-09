@@ -879,7 +879,7 @@ void PolicyHandler::OnDeviceSwitching(const std::string& device_id_from,
 
 void PolicyHandler::OnGetStatusUpdate(const uint32_t correlation_id) {
   POLICY_LIB_CHECK_VOID();
-  std::string policy_table_status =
+  const std::string policy_table_status =
       CallPolicyManagerFunction(&PolicyManager::GetPolicyTableStatus);
 
   MessageHelper::SendGetStatusUpdateResponse(
@@ -981,7 +981,7 @@ void PolicyHandler::OnPendingPermissionChange(
     return;
   }
 
-  AppPermissions permissions = CallPolicyManagerFunction(
+  const AppPermissions permissions = CallPolicyManagerFunction(
       &PolicyManager::GetAppPermissionsChanges, policy_app_id);
 
   const uint32_t app_id = app->app_id();
@@ -1086,7 +1086,8 @@ bool PolicyHandler::ReceiveMessageFromSDK(const std::string& file,
                                           const BinaryMessage& pt_string) {
   POLICY_LIB_CHECK(false);
 
-  bool ret = CallPolicyManagerFunction(&PolicyManager::LoadPT, file, pt_string);
+  const bool ret =
+      CallPolicyManagerFunction(&PolicyManager::LoadPT, file, pt_string);
 
   LOG4CXX_INFO(logger_, "Policy table is saved: " << std::boolalpha << ret);
   if (ret) {
@@ -1320,11 +1321,13 @@ void PolicyHandler::OnActivateApp(uint32_t connection_key,
         application_manager_.connection_handler().get_session_observer());
     permissions.deviceInfo = device_params;
 
-    DeviceConsent consent =
-        CallPolicyManagerFunction(&PolicyManager::GetUserConsentForDevice,
-                                  permissions.deviceInfo.device_mac_address);
+    {
+      DeviceConsent consent =
+          CallPolicyManagerFunction(&PolicyManager::GetUserConsentForDevice,
+                                    permissions.deviceInfo.device_mac_address);
 
-    permissions.isSDLAllowed = kDeviceAllowed == consent;
+      permissions.isSDLAllowed = kDeviceAllowed == consent;
+    }
 
     // According to the SDLAQ-CRS-2794, p.9
     // 'priority' should be omitted in case when device
@@ -1380,7 +1383,7 @@ void PolicyHandler::PTExchangeAtUserRequest(uint32_t correlation_id) {
   POLICY_LIB_CHECK_VOID();
   LOG4CXX_DEBUG(logger_, "PT exchange at user request");
 
-  std::string update_status =
+  const std::string update_status =
       CallPolicyManagerFunction(&PolicyManager::ForcePTExchangeAtUserRequest);
 
   MessageHelper::SendUpdateSDLResponse(
@@ -2191,7 +2194,7 @@ bool PolicyHandler::CheckHMIType(const std::string& application_id,
   POLICY_LIB_CHECK(false);
   std::vector<int> policy_hmi_types;
 
-  bool ret = CallPolicyManagerFunction(
+  const bool ret = CallPolicyManagerFunction(
       &PolicyManager::GetHMITypes, application_id, &policy_hmi_types);
 
   std::vector<int> additional_hmi_types;
