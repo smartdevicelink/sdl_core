@@ -996,19 +996,44 @@ void TransportManagerImpl::Handle(TransportAdapterEvent event) {
     case EventTypeEnum::ON_CONNECT_DONE: {
       const DeviceHandle device_handle = converter_.UidToHandle(
           event.device_uid, event.transport_adapter->GetConnectionType());
-      AddConnection(ConnectionInternal(this,
-                                       event.transport_adapter,
-                                       ++connection_id_counter_,
-                                       event.device_uid,
-                                       event.application_id,
-                                       device_handle));
+
+      int connection_id = 0;
+      std::vector<ConnectionInternal>::iterator it = connections_.begin();
+      std::vector<ConnectionInternal>::iterator end = connections_.end();
+      for(; it != end; ++it){
+        if(it->transport_adapter != event.transport_adapter) {
+          continue;
+        } else if(it->Connection::device != event.device_uid) {
+          continue;
+        } else if(it->Connection::application != event.application_id) {
+          continue;
+        } else if(it->device_handle_ != device_handle) {
+          continue;
+        } else {
+          LOG4CXX_DEBUG(logger_, "Connection Object Already Exists");
+          connection_id = it->Connection::id;
+          break;
+        }
+      }
+
+
+      if(it == end) {
+        AddConnection(ConnectionInternal(this,
+                                         event.transport_adapter,
+                                         ++connection_id_counter_,
+                                         event.device_uid,
+                                         event.application_id,
+                                         device_handle));
+        connection_id = connection_id_counter_;
+      }
+
       RaiseEvent(
           &TransportManagerListener::OnConnectionEstablished,
           DeviceInfo(device_handle,
                      event.device_uid,
                      event.transport_adapter->DeviceName(event.device_uid),
                      event.transport_adapter->GetConnectionType()),
-          connection_id_counter_);
+          connection_id);
       LOG4CXX_DEBUG(logger_, "event_type = ON_CONNECT_DONE");
       break;
     }
