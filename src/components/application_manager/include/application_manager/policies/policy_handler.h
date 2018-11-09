@@ -738,6 +738,17 @@ class PolicyHandler : public PolicyHandlerInterface,
   uint32_t last_activated_app_id_;
 
   /**
+   * @brief Call PolicyManager function with sync_primitives::AutoLock
+   * @param func function PolicyManager to call
+   * @param args arguments for call function
+   * @return result PolicyManager function
+   */
+  template <typename Func, typename... Args>
+  auto CallPolicyManagerFunction(Func func, Args... args) const
+      -> decltype((std::declval<PolicyManager>().*
+                   std::declval<Func>())(std::declval<Args>()...));
+
+  /**
    * @brief Contains device handles, which were sent for user consent to HMI
    */
   DeviceHandles pending_device_handles_;

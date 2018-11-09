@@ -358,9 +358,7 @@ bool PolicyHandler::LoadPolicyLibrary() {
   const char* error = dlerror();
   if (!error) {
     if (CreateManager()) {
-      policy_manager_lock_.Acquire();
-      policy_manager_->set_listener(this);
-      policy_manager_lock_.Release();
+      CallPolicyManagerFunction(&PolicyManager::set_listener, this);
 
       event_observer_ =
           std::shared_ptr<PolicyEventObserver>(new PolicyEventObserver(
@@ -649,13 +647,13 @@ void PolicyHandler::OnAppPermissionConsentInternal(
       out_permissions.policy_app_id = it->second;
       out_permissions.device_id = it->first;
 
-      policy_manager_lock_.Acquire();
 #ifdef EXTERNAL_PROPRIETARY_MODE
-      policy_manager_->SetUserConsentForApp(out_permissions, mode);
+      CallPolicyManagerFunction(
+          &PolicyManager::SetUserConsentForApp, out_permissions, mode);
 #else
-      policy_manager_->SetUserConsentForApp(out_permissions);
+      CallPolicyManagerFunction(&PolicyManager::SetUserConsentForApp,
+                                out_permissions);
 #endif
-      policy_manager_lock_.Release();
     }
   } else {
     LOG4CXX_WARN(logger_,
@@ -697,16 +695,14 @@ void PolicyHandler::OnGetUserFriendlyMessage(
   const std::string active_hmi_language =
       application_manager::MessageHelper::CommonLanguageToString(
           application_manager_.hmi_capabilities().active_ui_language());
-  policy_manager_lock_.Acquire();
   const std::vector<UserFriendlyMessage> result =
-      policy_manager_->GetUserFriendlyMessages(
-          message_codes, language, active_hmi_language);
-  policy_manager_lock_.Release();
+      CallPolicyManagerFunction(&PolicyManager::GetUserFriendlyMessages,
+                                message_codes,
+                                language,
+                                active_hmi_language);
 #else
-  policy_manager_lock_.Acquire();
-  const std::vector<UserFriendlyMessage> result =
-      policy_manager_->GetUserFriendlyMessages(message_codes, language);
-  policy_manager_lock_.Release();
+  const std::vector<UserFriendlyMessage> result = CallPolicyManagerFunction(
+      &PolicyManager::GetUserFriendlyMessages, message_codes, language);
 #endif  // EXTERNAL_PROPRIETARY_MODE
   // Send response to HMI with gathered data
   MessageHelper::SendGetUserFriendlyMessageResponse(
@@ -799,10 +795,8 @@ void PolicyHandler::OnGetListOfPermissions(const uint32_t connection_key,
   }
 
 #ifdef EXTERNAL_PROPRIETARY_MODE
-  policy_manager_lock_.Acquire();
   const ExternalConsentStatus external_consent_status =
-      policy_manager_->GetExternalConsentStatus();
-  policy_manager_lock_.Release();
+      CallPolicyManagerFunction(&PolicyManager::GetExternalConsentStatus);
 #endif  // EXTERNAL_PROPRIETARY_MODE
 
   MessageHelper::SendGetListOfPermissionsResponse(permissions,
@@ -888,9 +882,8 @@ void PolicyHandler::OnDeviceSwitching(const std::string& device_id_from,
 
 void PolicyHandler::OnGetStatusUpdate(const uint32_t correlation_id) {
   POLICY_LIB_CHECK_VOID();
-  policy_manager_lock_.Acquire();
-  std::string policy_table_status = policy_manager_->GetPolicyTableStatus();
-  policy_manager_lock_.Release();
+  std::string policy_table_status =
+      CallPolicyManagerFunction(&PolicyManager::GetPolicyTableStatus);
 
   MessageHelper::SendGetStatusUpdateResponse(
       policy_table_status, correlation_id, application_manager_);
@@ -898,10 +891,10 @@ void PolicyHandler::OnGetStatusUpdate(const uint32_t correlation_id) {
 
 void PolicyHandler::OnUpdateStatusChanged(const std::string& status) {
   POLICY_LIB_CHECK_VOID();
-  {
-    sync_primitives::AutoLock lock(policy_manager_lock_);
-    policy_manager_->SaveUpdateStatusRequired(policy::kUpToDate != status);
-  }
+
+  CallPolicyManagerFunction(&PolicyManager::SaveUpdateStatusRequired,
+                            policy::kUpToDate != status);
+
   MessageHelper::SendOnStatusUpdate(status, application_manager_);
 }
 
@@ -992,10 +985,8 @@ void PolicyHandler::OnPendingPermissionChange(
     return;
   }
 
-  policy_manager_lock_.Acquire();
-  AppPermissions permissions =
-      policy_manager_->GetAppPermissionsChanges(policy_app_id);
-  policy_manager_lock_.Release();
+  AppPermissions permissions = CallPolicyManagerFunction(
+      &PolicyManager::GetAppPermissionsChanges, policy_app_id);
 
   const uint32_t app_id = app->app_id();
 
@@ -1099,18 +1090,14 @@ bool PolicyHandler::ReceiveMessageFromSDK(const std::string& file,
                                           const BinaryMessage& pt_string) {
   POLICY_LIB_CHECK(false);
 
-  bool ret = false;
-  {
-    sync_primitives::AutoLock lock_policy(policy_manager_lock_);
-    ret = policy_manager_->LoadPT(file, pt_string);
-  }
+  bool ret = CallPolicyManagerFunction(&PolicyManager::LoadPT, file, pt_string);
+
   LOG4CXX_INFO(logger_, "Policy table is saved: " << std::boolalpha << ret);
   if (ret) {
     LOG4CXX_INFO(logger_, "PTU was successful.");
-    {
-      sync_primitives::AutoLock lock_policy(policy_manager_lock_);
-      policy_manager_->CleanupUnpairedDevices();
-    }
+
+    CallPolicyManagerFunction(&PolicyManager::CleanupUnpairedDevices);
+
     int32_t correlation_id = application_manager_.GetNextHMICorrelationID();
 
     SetDaysAfterEpoch();
@@ -1212,9 +1199,8 @@ void PolicyHandler::OnAllowSDLFunctionalityNotification(
         continue;
       }
 
-      policy_manager_lock_.Acquire();
-      policy_manager_->SetUserConsentForDevice(device_id, is_allowed);
-      policy_manager_lock_.Release();
+      CallPolicyManagerFunction(
+          &PolicyManager::SetUserConsentForDevice, device_id, is_allowed);
 
       connection_handler::DeviceHandle device_handle = 0;
       if (!connection_handler.GetDeviceID(device_id, &device_handle)) {
@@ -1249,10 +1235,9 @@ void PolicyHandler::OnAllowSDLFunctionalityNotification(
   // Case, when specific device was changed
   connection_handler::DeviceHandle device_handle = 0u;
   if (device_specific) {
-    {
-      sync_primitives::AutoLock lock(policy_manager_lock_);
-      policy_manager_->SetUserConsentForDevice(device_mac, is_allowed);
-    }
+    CallPolicyManagerFunction(
+        &PolicyManager::SetUserConsentForDevice, device_mac, is_allowed);
+
     if (!connection_handler.GetDeviceID(device_mac, &device_handle)) {
       LOG4CXX_WARN(logger_,
                    "Device hadle with mac " << device_mac << " wasn't found.");
@@ -1328,10 +1313,9 @@ void PolicyHandler::OnActivateApp(uint32_t connection_key,
       permissions.isSDLAllowed = true;
     }
   } else {
-    {
-      sync_primitives::AutoLock lock(policy_manager_lock_);
-      permissions = policy_manager_->GetAppPermissionsChanges(policy_app_id);
-    }
+    permissions = CallPolicyManagerFunction(
+        &PolicyManager::GetAppPermissionsChanges, policy_app_id);
+
 #ifdef EXTERNAL_PROPRIETARY_MODE
     UsageStatistics& usage = app->usage_report();
 
@@ -1341,10 +1325,9 @@ void PolicyHandler::OnActivateApp(uint32_t connection_key,
         application_manager_.connection_handler().get_session_observer());
     permissions.deviceInfo = device_params;
 
-    policy_manager_lock_.Acquire();
-    DeviceConsent consent = policy_manager_->GetUserConsentForDevice(
-        permissions.deviceInfo.device_mac_address);
-    policy_manager_lock_.Release();
+    DeviceConsent consent =
+        CallPolicyManagerFunction(&PolicyManager::GetUserConsentForDevice,
+                                  permissions.deviceInfo.device_mac_address);
 
     permissions.isSDLAllowed = kDeviceAllowed == consent;
 
@@ -1402,9 +1385,9 @@ void PolicyHandler::KmsChanged(int kilometers) {
 void PolicyHandler::PTExchangeAtUserRequest(uint32_t correlation_id) {
   POLICY_LIB_CHECK_VOID();
   LOG4CXX_DEBUG(logger_, "PT exchange at user request");
-  policy_manager_lock_.Acquire();
-  std::string update_status = policy_manager_->ForcePTExchangeAtUserRequest();
-  policy_manager_lock_.Release();
+
+  std::string update_status =
+      CallPolicyManagerFunction(&PolicyManager::ForcePTExchangeAtUserRequest);
 
   MessageHelper::SendUpdateSDLResponse(
       update_status, correlation_id, application_manager_);
@@ -1537,22 +1520,19 @@ void PolicyHandler::OnSnapshotCreated(const BinaryMessage& pt_string) {
 #else   // PROPRIETARY_MODE
   LOG4CXX_ERROR(logger_, "HTTP policy");
   EndpointUrls urls;
-  {
-    sync_primitives::AutoLock lock(policy_manager_lock_);
-    policy_manager_->GetUpdateUrls("0x07", urls);
-  }
+
+  CallPolicyManagerFunction(&PolicyManager::GetUpdateUrls, "0x07", urls);
 
   if (urls.empty()) {
     LOG4CXX_ERROR(logger_, "Service URLs are empty! NOT sending PT to mobile!");
     return;
   }
 
-  policy_manager_lock_.Acquire();
-  AppIdURL app_url = policy_manager_->GetNextUpdateUrl(urls);
+  AppIdURL app_url =
+      CallPolicyManagerFunction(&PolicyManager::GetNextUpdateUrl, urls);
   while (!IsUrlAppIdValid(app_url.first, urls)) {
-    app_url = policy_manager_->GetNextUpdateUrl(urls);
+    app_url = CallPolicyManagerFunction(&PolicyManager::GetNextUpdateUrl, urls);
   }
-  policy_manager_lock_.Release();
 
   const std::string& url = urls[app_url.first].url[app_url.second];
   SendMessageToSDK(pt_string, url);
@@ -1827,10 +1807,8 @@ void PolicyHandler::OnCertificateDecrypted(bool is_succeeded) {
   LOG4CXX_DEBUG(logger_,
                 "Loaded decrypted certificate data: \"" << certificate_data
                                                         << '"');
-  {
-    sync_primitives::AutoLock lock(policy_manager_lock_);
-    policy_manager_->SetDecryptedCertificate(certificate_data);
-  }
+  CallPolicyManagerFunction(&PolicyManager::SetDecryptedCertificate,
+                            certificate_data);
 
   sync_primitives::AutoLock lock(listeners_lock_);
   std::for_each(
@@ -1869,10 +1847,7 @@ bool PolicyHandler::CanUpdate() {
 void PolicyHandler::RemoveDevice(const std::string& device_id) {
   POLICY_LIB_CHECK_VOID();
 
-  {
-    sync_primitives::AutoLock lock(policy_manager_lock_);
-    policy_manager_->MarkUnpairedDevice(device_id);
-  }
+  CallPolicyManagerFunction(&PolicyManager::MarkUnpairedDevice, device_id);
 
 #ifdef EXTERNAL_PROPRIETARY_MODE
   connection_handler::DeviceHandle device_uid;
@@ -2009,10 +1984,8 @@ bool PolicyHandler::IsRequestTypeAllowed(
     }
     case RequestType::State::AVAILABLE: {
       // If any of request types is available for current application - get them
-      policy_manager_lock_.Acquire();
-      const auto request_types =
-          policy_manager_->GetAppRequestTypes(policy_app_id);
-      policy_manager_lock_.Release();
+      const auto request_types = CallPolicyManagerFunction(
+          &PolicyManager::GetAppRequestTypes, policy_app_id);
 
       return helpers::in_range(request_types, stringified_type);
     }
@@ -2032,10 +2005,8 @@ bool PolicyHandler::IsRequestSubTypeAllowed(
     return false;
   }
 
-  policy_manager_lock_.Acquire();
-  const RequestSubType::State request_subtype_state =
-      policy_manager_->GetAppRequestSubTypesState(policy_app_id);
-  policy_manager_lock_.Release();
+  const RequestSubType::State request_subtype_state = CallPolicyManagerFunction(
+      &PolicyManager::GetAppRequestSubTypesState, policy_app_id);
 
   switch (request_subtype_state) {
     case RequestSubType::State::EMPTY: {
@@ -2052,10 +2023,8 @@ bool PolicyHandler::IsRequestSubTypeAllowed(
     case RequestSubType::State::AVAILABLE: {
       // If any of request subtypes is available for current application
       // get them all
-      policy_manager_lock_.Acquire();
-      const auto request_subtypes =
-          policy_manager_->GetAppRequestSubTypes(policy_app_id);
-      policy_manager_lock_.Release();
+      const auto request_subtypes = CallPolicyManagerFunction(
+          &PolicyManager::GetAppRequestSubTypes, policy_app_id);
 
       return helpers::in_range(request_subtypes, request_subtype);
     }
@@ -2233,9 +2202,8 @@ bool PolicyHandler::CheckHMIType(const std::string& application_id,
   POLICY_LIB_CHECK(false);
   std::vector<int> policy_hmi_types;
 
-  policy_manager_lock_.Acquire();
-  bool ret = policy_manager_->GetHMITypes(application_id, &policy_hmi_types);
-  policy_manager_lock_.Release();
+  bool ret = CallPolicyManagerFunction(
+      &PolicyManager::GetHMITypes, application_id, &policy_hmi_types);
 
   std::vector<int> additional_hmi_types;
   if (app_types && app_types->asArray()) {
@@ -2272,4 +2240,13 @@ void PolicyHandler::OnUpdateHMILevel(const std::string& device_id,
   }
   UpdateHMILevel(app, level);
 }
+
+template <typename Func, typename... Args>
+auto PolicyHandler::CallPolicyManagerFunction(Func func, Args... args) const
+    -> decltype((std::declval<PolicyManager>().*
+                 std::declval<Func>())(std::declval<Args>()...)) {
+  sync_primitives::AutoLock lock(policy_manager_lock_);
+  return ((*policy_manager_).*func)(args...);
+}
+
 }  //  namespace policy
