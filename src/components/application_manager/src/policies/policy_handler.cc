@@ -1917,7 +1917,7 @@ void PolicyHandler::OnSetCloudAppProperties(
     std::string hybrid_app_preference;
  
     mobile_apis::HybridAppPreference::eType value = static_cast<mobile_apis::HybridAppPreference::eType>(msg_params[strings::hybrid_app_preference].asUInt());
-    bool status = smart_objects::EnumConversionHelper<mobile_apis::HybridAppPreference::eType>::EnumToString( 
+    smart_objects::EnumConversionHelper<mobile_apis::HybridAppPreference::eType>::EnumToString( 
       value, &hybrid_app_preference);
 
     policy_manager_->SetHybridAppPreference(
