@@ -731,7 +731,7 @@ class PolicyHandler : public PolicyHandlerInterface,
   void GetRegisteredLinks(std::map<std::string, std::string>& out_links) const;
 
  private:
-  mutable sync_primitives::RWLock policy_manager_lock_;
+  mutable sync_primitives::RecursiveLock policy_manager_lock_;
   std::shared_ptr<PolicyManager> policy_manager_;
   void* dl_handle_;
   std::shared_ptr<PolicyEventObserver> event_observer_;
