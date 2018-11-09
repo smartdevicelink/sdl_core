@@ -224,6 +224,7 @@ const char* fuel_level = "fuelLevel";
 const char* fuel_level_state = "fuelLevel_State";
 const char* instant_fuel_consumption = "instantFuelConsumption";
 const char* fuel_range = "fuelRange";
+const char* cloud_app_vehicle_id = "cloudAppVehicleID";
 const char* external_temp = "externalTemperature";
 const char* turn_signal = "turnSignal";
 const char* vin = "vin";

@@ -138,6 +138,8 @@ bool IsValidEnum(Parameter val) {
       return true;
     case P_FUELRANGE:
       return true;
+    case P_CLOUD_APP_VEHICLE_ID:
+      return true;
     case P_ODOMETER:
       return true;
     case P_TIREPRESSURE:
@@ -233,6 +235,8 @@ const char* EnumToJsonString(Parameter val) {
       return "instantFuelConsumption";
     case P_FUELRANGE:
       return "fuelRange";
+    case P_CLOUD_APP_VEHICLE_ID:
+      return "cloudAppVehicleID";
     case P_ODOMETER:
       return "odometer";
     case P_TIREPRESSURE:
@@ -336,6 +340,9 @@ bool EnumFromJsonString(const std::string& literal, Parameter* result) {
     return true;
   } else if ("fuelRange" == literal) {
     *result = P_FUELRANGE;
+    return true;
+  } else if ("cloudAppVehicleID" == literal) {
+    *result = P_CLOUD_APP_VEHICLE_ID;
     return true;
   } else if ("odometer" == literal) {
     *result = P_ODOMETER;

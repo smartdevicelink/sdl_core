@@ -257,6 +257,7 @@ extern const char* fuel_level;
 extern const char* fuel_level_state;
 extern const char* instant_fuel_consumption;
 extern const char* fuel_range;
+extern const char* cloud_app_vehicle_id;
 extern const char* external_temp;
 extern const char* turn_signal;
 extern const char* vin;

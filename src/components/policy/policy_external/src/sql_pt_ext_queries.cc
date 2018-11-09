@@ -236,7 +236,7 @@ const std::string kSelectPreconsentedGroupsId =
 const std::string kSelectAppPolicies =
     "SELECT `id`, `priority_value`, `default_hmi`, `keep_context`, "
     " `steal_focus`, `memory_kb`, `heart_beat_timeout_ms`, `certificate`, "
-    " `hybrid_app_preference_value`, `endpoint`, `enabled`, "
+    " `hybrid_app_preference_value`, `endpoint`, `enabled`, `auth_token` "
     " `cloud_transport_type` FROM `application`";
 
 const std::string kSelectFunctionalGroupNames =

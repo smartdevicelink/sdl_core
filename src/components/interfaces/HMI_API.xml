@@ -1095,6 +1095,7 @@
   <element name="VEHICLEDATA_FUELRANGE" />
   <element name="VEHICLEDATA_ENGINEOILLIFE" />
   <element name="VEHICLEDATA_ELECTRONICPARKBRAKESTATUS" />
+  <element name="VEHICLEDATA_CLOUDAPPVEHICLEID" />
 </enum>
 
 <enum name="WiperStatus">
@@ -4951,6 +4952,10 @@
     <param name="electronicParkBrakeStatus" type="Boolean" mandatory="false">
       <description>The status of the park brake as provided by Electric Park Brake (EPB) system.</description>
     </param>
+    <param name="cloudAppVehicleID" type="Boolean" mandatory="false">
+      <description>Parameter used by cloud apps to identify a head unit</description>
+    </param>
+
         <!-- Ford Specific Data Items -->
     <param name="eCallInfo" type="Boolean" mandatory="false">
       <description>Emergency Call notification and confirmation data</description>
@@ -4968,6 +4973,7 @@
       <description>Information related to the MyKey feature</description>
     </param>
         <!-- / Ford Specific Data Items -->
+
   </function>
   <function name="SubscribeVehicleData" messagetype="response">
     <param name="gps" type="Common.VehicleDataResult" mandatory="false">
@@ -5039,6 +5045,10 @@
     <param name="electronicParkBrakeStatus" type="Common.VehicleDataResult" mandatory="false">
       <description>The status of the park brake as provided by Electric Park Brake (EPB) system.</description>
     </param>
+    <param name="cloudAppVehicleID" type="Common.VehicleDataResult" mandatory="false">
+      <description>Parameter used by cloud apps to identify a head unit</description>
+    </param>
+
         <!-- Ford Specific Data Items -->
     <param name="eCallInfo" type="Common.VehicleDataResult" mandatory="false">
       <description>Emergency Call notification and confirmation data</description>
@@ -5056,6 +5066,7 @@
       <description>Information related to the MyKey feature</description>
     </param>
         <!-- / Ford Specific Data Items -->
+
   </function>
   <function name="UnsubscribeVehicleData" messagetype="request">
     <description>
@@ -5133,6 +5144,10 @@
     <param name="electronicParkBrakeStatus" type="Boolean" mandatory="false">
       <description>The status of the park brake as provided by Electric Park Brake (EPB) system.</description>
     </param>
+    <param name="cloudAppVehicleID" type="Boolean" mandatory="false">
+      <description>Parameter used by cloud apps to identify a head unit</description>
+    </param>
+
         <!-- Ford Specific Data Items -->
     <param name="eCallInfo" type="Boolean" mandatory="false">
       <description>Emergency Call notification and confirmation data</description>
@@ -5150,6 +5165,7 @@
       <description>Information related to the MyKey feature</description>
     </param>
         <!-- / Ford Specific Data Items -->
+
   </function>
   <function name="UnsubscribeVehicleData" messagetype="response">
     <param name="gps" type="Common.VehicleDataResult" mandatory="false">
@@ -5221,6 +5237,10 @@
     <param name="electronicParkBrakeStatus" type="Common.VehicleDataResult" mandatory="false">
       <description>The status of the park brake as provided by Electric Park Brake (EPB) system.</description>
     </param>
+    <param name="cloudAppVehicleID" type="Common.VehicleDataResult" mandatory="false">
+      <description>Parameter used by cloud apps to identify a head unit</description>
+    </param>
+
         <!-- Ford Specific Data Items -->
     <param name="eCallInfo" type="Common.VehicleDataResult" mandatory="false">
       <description>Emergency Call notification and confirmation data</description>
@@ -5238,6 +5258,7 @@
       <description>Information related to the MyKey feature</description>
     </param>
         <!-- / Ford Specific Data Items -->
+
   </function>
   <function name="GetVehicleData" messagetype="request">
     <description>Non periodic vehicle data read request.</description>
@@ -5313,6 +5334,11 @@
     <param name="electronicParkBrakeStatus" type="Boolean" mandatory="false">
       <description>The status of the park brake as provided by Electric Park Brake (EPB) system.</description>
     </param>
+    <param name="cloudAppVehicleID" type="Boolean" mandatory="false">
+      <description>Parameter used by cloud apps to identify a head unit</description>
+    </param>
+
+        <!-- Ford Specific Data Items -->
     <param name="eCallInfo" type="Boolean" mandatory="false">
       <description>Emergency Call notification and confirmation data</description>
     </param>
@@ -5328,6 +5354,8 @@
     <param name="myKey" type="Boolean" mandatory="false">
       <description>Information related to the MyKey feature</description>
     </param>
+        <!-- / Ford Specific Data Items -->
+
   </function>
   <function name="GetVehicleData" messagetype="response">
     <param name="gps" type="Common.GPSData" mandatory="false">
@@ -5402,6 +5430,11 @@
     <param name="electronicParkBrakeStatus" type="Common.ElectronicParkBrakeStatus" mandatory="false">
       <description>The status of the park brake as provided by Electric Park Brake (EPB) system.</description>
     </param>
+    <param name="cloudAppVehicleID" type="String" mandatory="false">
+      <description>Parameter used by cloud apps to identify a head unit</description>
+    </param>
+
+        <!-- Ford Specific Data Items -->
     <param name="eCallInfo" type="Common.ECallInfo" mandatory="false">
       <description>Emergency Call notification and confirmation data</description>
     </param>
@@ -5417,6 +5450,8 @@
     <param name="myKey" type="Common.MyKey" mandatory="false">
       <description>Information related to the MyKey feature</description>
     </param>
+        <!-- / Ford Specific Data Items -->
+
   </function>
   <function name="OnVehicleData" messagetype="notification">
     <description>Callback for the periodic and non periodic vehicle data read function.</description>
@@ -5489,6 +5524,11 @@
     <param name="steeringWheelAngle" type="Float" minvalue="-2000" maxvalue="2000" mandatory="false">
       <description>Current angle of the steering wheel (in deg)</description>
     </param>
+    <param name="cloudAppVehicleID" type="String" mandatory="false">
+      <description>Parameter used by cloud apps to identify a head unit</description>
+    </param>
+
+        <!-- Ford Specific Data Items -->
     <param name="eCallInfo" type="Common.ECallInfo" mandatory="false">
       <description>Emergency Call notification and confirmation data</description>
     </param>
@@ -5504,6 +5544,8 @@
     <param name="myKey" type="Common.MyKey" mandatory="false">
       <description>Information related to the MyKey feature</description>
     </param>
+        <!-- / Ford Specific Data Items -->
+
   </function>
 </interface>
 

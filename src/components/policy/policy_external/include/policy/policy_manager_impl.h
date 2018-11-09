@@ -579,13 +579,6 @@ class PolicyManagerImpl : public PolicyManager {
       std::vector<std::string>& enabled_apps) const OVERRIDE;
 
   /**
-   * @brief Get a list of enabled cloud applications
-   * @param enabled_apps List filled with the policy app id of each enabled
-   * cloud application
-   */
-  void GetEnabledCloudApps(std::vector<std::string>& enabled_apps) const OVERRIDE;
-
-  /**
    * @brief Get cloud app policy information, all fields that aren't set for a
    * given app will be filled with empty strings
    * @param policy_app_id Unique application id
