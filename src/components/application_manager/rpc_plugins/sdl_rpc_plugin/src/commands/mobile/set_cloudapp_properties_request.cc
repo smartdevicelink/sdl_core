@@ -33,12 +33,11 @@ namespace commands {
             return;
         }
 
-        //Decide which response params to use
         smart_objects::SmartObject cloudapp_properties(smart_objects::SmartType_Map);
 
         cloudapp_properties[strings::msg_params][strings::app_name] = (*message_)[strings::msg_params][strings::app_name];
         cloudapp_properties[strings::msg_params][strings::app_id] = (*message_)[strings::msg_params][strings::app_id];
-
+        
         if ((*message_)[strings::msg_params].keyExists(strings::enabled)) {
             smart_objects::SmartObject enabled = (*message_)[strings::msg_params][strings::enabled];
             cloudapp_properties[strings::msg_params][strings::enabled] = enabled;
@@ -56,7 +55,7 @@ namespace commands {
             cloudapp_properties[strings::msg_params][strings::hybrid_app_preference] = hybrid_app_preference;
         }
         
-        // policy_handler_.OnSetCloudAppProperties(cloudapp_properties);
+        policy_handler_.OnSetCloudAppProperties(cloudapp_properties);
         SendResponse(true, mobile_apis::Result::SUCCESS);
 
 
