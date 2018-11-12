@@ -241,6 +241,8 @@ class MockApplicationManager : public application_manager::ApplicationManager {
                void(const uint32_t connection_key,
                     const uint32_t corr_id,
                     const int32_t function_id));
+  MOCK_METHOD1(OnQueryAppsRequest,
+               void(const connection_handler::DeviceHandle));
   MOCK_METHOD4(UnregisterApplication,
                void(const uint32_t&, mobile_apis::Result::eType, bool, bool));
   MOCK_METHOD3(updateRequestTimeout,

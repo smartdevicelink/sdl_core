@@ -170,6 +170,8 @@ class ApplicationManager {
 
   virtual ApplicationSharedPtr application(uint32_t app_id) const = 0;
   virtual ApplicationSharedPtr active_application() const = 0;
+  virtual void OnQueryAppsRequest(
+      const connection_handler::DeviceHandle device) = 0;
 
   virtual ApplicationSharedPtr get_full_or_limited_application() const = 0;
 

@@ -1443,15 +1443,8 @@ ApplicationManagerImpl::AppsWaitingForRegistration() const {
 
 bool ApplicationManagerImpl::IsAppsQueriedFrom(
     const connection_handler::DeviceHandle handle) const {
-  sync_primitives::AutoLock lock(apps_to_register_list_lock_ptr_);
-  AppsWaitRegistrationSet::iterator it = apps_to_register_.begin();
-  AppsWaitRegistrationSet::const_iterator it_end = apps_to_register_.end();
-  for (; it != it_end; ++it) {
-    if (handle == (*it)->device()) {
-      return true;
-    }
-  }
-  return false;
+  sync_primitives::AutoLock lock(query_apps_devices_lock_);
+  return query_apps_devices_.find(handle) != query_apps_devices_.end();
 }
 
 StateController& ApplicationManagerImpl::state_controller() {
@@ -1543,6 +1536,13 @@ void ApplicationManagerImpl::OnFindNewApplicationsRequest() {
   GetPolicyHandler().OnAppsSearchStarted();
 }
 
+void ApplicationManagerImpl::OnQueryAppsRequest(
+    const connection_handler::DeviceHandle device) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  sync_primitives::AutoLock lock(query_apps_devices_lock_);
+  query_apps_devices_.insert(device);
+}
+
 void ApplicationManagerImpl::SendUpdateAppList() {
   LOG4CXX_AUTO_TRACE(logger_);
 
@@ -1567,6 +1567,8 @@ void ApplicationManagerImpl::SendUpdateAppList() {
 void ApplicationManagerImpl::RemoveDevice(
     const connection_handler::DeviceHandle& device_handle) {
   LOG4CXX_DEBUG(logger_, "device_handle " << device_handle);
+  sync_primitives::AutoLock lock(query_apps_devices_lock_);
+  query_apps_devices_.erase(device_handle);
 }
 
 void ApplicationManagerImpl::OnDeviceSwitchingStart(
