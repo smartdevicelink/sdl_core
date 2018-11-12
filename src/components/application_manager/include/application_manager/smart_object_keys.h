@@ -189,6 +189,7 @@ extern const char* green;
 extern const char* blue;
 extern const char* display_layout;
 extern const char* icon_resumed;
+extern const char* seekTime;
 
 // PutFile
 extern const char* sync_file_name;

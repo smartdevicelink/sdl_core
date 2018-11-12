@@ -156,6 +156,7 @@ const char* green = "green";
 const char* blue = "blue";
 const char* display_layout = "displayLayout";
 const char* icon_resumed = "iconResumed";
+const char* seekTime = "seekTime";
 
 // PutFile
 const char* sync_file_name = "syncFileName";
