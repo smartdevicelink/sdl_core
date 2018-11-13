@@ -1120,8 +1120,8 @@ bool EnumFromJsonString(const std::string& literal, FunctionID* result) {
     *result = SendHapticDataID;
     return true;
   }
-  
-  if("SetCloudAppProperties" == literal){
+
+  if ("SetCloudAppProperties" == literal) {
     *result = SetCloudAppPropertiesID;
     return true;
   }

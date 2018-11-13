@@ -341,8 +341,9 @@ CommandCreator& MobileCommandFactory::get_creator_factory(
     }
     case mobile_apis::FunctionID::SetCloudAppPropertiesID: {
       return mobile_api::messageType::request == message_type
-                ? factory.GetCreator<commands::SetCloudAppPropertiesRequest>()
-                : factory.GetCreator<commands::SetCloudAppPropertiesResponse>();
+                 ? factory.GetCreator<commands::SetCloudAppPropertiesRequest>()
+                 : factory
+                       .GetCreator<commands::SetCloudAppPropertiesResponse>();
     }
     case mobile_apis::FunctionID::OnButtonEventID: {
       return factory.GetCreator<commands::mobile::OnButtonEventNotification>();
