@@ -124,6 +124,8 @@
 #include "sdl_rpc_plugin/commands/mobile/dial_number_response.h"
 #include "sdl_rpc_plugin/commands/mobile/send_haptic_data_request.h"
 #include "sdl_rpc_plugin/commands/mobile/send_haptic_data_response.h"
+#include "sdl_rpc_plugin/commands/mobile/set_cloudapp_properties_request.h"
+#include "sdl_rpc_plugin/commands/mobile/set_cloudapp_properties_response.h"
 #include "interfaces/MOBILE_API.h"
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "ApplicationManager")
@@ -336,6 +338,11 @@ CommandCreator& MobileCommandFactory::get_creator_factory(
       return mobile_api::messageType::request == message_type
                  ? factory.GetCreator<commands::SendHapticDataRequest>()
                  : factory.GetCreator<commands::SendHapticDataResponse>();
+    }
+    case mobile_apis::FunctionID::SetCloudAppPropertiesID: {
+      return mobile_api::messageType::request == message_type
+                ? factory.GetCreator<commands::SetCloudAppPropertiesRequest>()
+                : factory.GetCreator<commands::SetCloudAppPropertiesResponse>();
     }
     case mobile_apis::FunctionID::OnButtonEventID: {
       return factory.GetCreator<commands::mobile::OnButtonEventNotification>();
