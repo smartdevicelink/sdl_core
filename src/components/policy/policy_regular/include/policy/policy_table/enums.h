@@ -427,6 +427,11 @@ enum FunctionID {
   SendHapticDataID = 49,
 
   /**
+   * @brief SetCloudAppPropertiesID.
+   */
+  SetCloudAppPropertiesID = 50,
+
+  /**
    * @brief OnHMIStatusID.
    */
   OnHMIStatusID = 32768,
