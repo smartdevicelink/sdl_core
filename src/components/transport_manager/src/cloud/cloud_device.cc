@@ -42,7 +42,7 @@ CREATE_LOGGERPTR_GLOBAL(logger_, "TransportManager")
 CloudDevice::CloudDevice(std::string& host,
             std::string& port,
             std::string& name)
-    : Device(name, std::string(name+host+port)) {}
+    : Device(name, std::string(name)) {}
 
 
 bool CloudDevice::IsSameAs(const Device* other) const {

@@ -362,6 +362,8 @@ class ApplicationManagerImpl
 
   void CollectCloudAppInformation();
 
+  void CreatePendingApplication(const transport_manager::ConnectionUID connection_id, const transport_manager::DeviceInfo& device_info, connection_handler::DeviceHandle device_id);
+
   /*
    * @brief Returns unique correlation ID for HMI request
    *
@@ -1450,6 +1452,8 @@ class ApplicationManagerImpl
   typedef std::map<int32_t, connection_handler::DeviceHandle> DeviceMap;
 
   DeviceMap secondary_transport_devices_cache_;
+
+  std::map<std::string, std::string> pending_device_map_;
 
 #ifdef TELEMETRY_MONITOR
   AMTelemetryObserver* metric_observer_;

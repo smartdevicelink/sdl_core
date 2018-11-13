@@ -799,18 +799,50 @@ void ApplicationManagerImpl::CollectCloudAppInformation() {
     GetPolicyHandler().GetCloudAppParameters(*it, endpoint, certificate, auth_token, 
       cloud_transport_type, hybrid_app_preference);
 
+    pending_device_map_.insert(std::pair<std::string, std::string>(endpoint, *it));
+
     connection_handler().AddCloudAppDevice(*it, endpoint, cloud_transport_type);
-    std::string device_mac;
-    std::string connection_type;
-    /*ApplicationSharedPtr application(
-        new ApplicationImpl(app_id,
-                            policy_app_id,
-                            device_mac,
-                            device_id,
-                            app_name,
-                            GetPolicyHandler().GetStatisticManager(),
-                            *this));    */
+
+
   }
+}
+
+void ApplicationManagerImpl::CreatePendingApplication(const transport_manager::ConnectionUID connection_id, const transport_manager::DeviceInfo& device_info, connection_handler::DeviceHandle device_id) {
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  std::string policy_app_id = "";
+  std::string name = device_info.name();
+  auto it = pending_device_map_.find(name);
+  if (it == pending_device_map_.end()) {
+   return; 
+  }
+  
+  policy_app_id = it->second;
+  ApplicationSharedPtr application(
+    new ApplicationImpl(0,
+                        policy_app_id,
+                        device_info.mac_address(),
+                        device_id,
+                        custom_str::CustomString("CloudApp"), //todo replace this with policy nick name
+                        GetPolicyHandler().GetStatisticManager(),
+                        *this));
+
+  if(!application) {
+    LOG4CXX_INFO(logger_, "Could not streate application");
+    return;
+  }
+
+  application->set_hmi_application_id(GenerateNewHMIAppID());
+
+  sync_primitives::AutoLock lock(apps_to_register_list_lock_ptr_);
+  LOG4CXX_DEBUG(
+      logger_, "apps_to_register_ size before: " << apps_to_register_.size());
+  apps_to_register_.insert(application);
+  LOG4CXX_DEBUG(logger_,
+                "apps_to_register_ size after: " << apps_to_register_.size());
+
+  SendUpdateAppList();
+
 }
 
 uint32_t ApplicationManagerImpl::GetNextHMICorrelationID() {

@@ -263,13 +263,22 @@ void ConnectionHandlerImpl::OnConnectionPending(
   //todo maybe create a seperate "pending_connection_list"
   sync_primitives::AutoWriteLock lock(connection_list_lock_);
   if (connection_list_.find(connection_id) == connection_list_.end()) {
-    connection_list_.insert(ConnectionList::value_type(
-        connection_id,
-        new Connection(connection_id,
+
+    Connection* connection = new Connection(connection_id,
                        device_info.device_handle(),
                        this,
-                       get_settings().heart_beat_timeout())));
+                       get_settings().heart_beat_timeout());
+
+    connection_list_.insert(ConnectionList::value_type(
+        connection_id, connection));
+
+    connection_handler::DeviceHandle device_id = connection->connection_device_handle();
+    //uint32_t app_id = KeyFromPair(connection_id, session_id);
+  
+    connection_handler_observer_->CreatePendingApplication(connection_id, device_info, device_id);
   }
+
+
 }
 
 void ConnectionHandlerImpl::OnConnectionEstablished(

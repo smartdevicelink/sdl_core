@@ -83,13 +83,14 @@ void CloudWebsocketTransportAdapter::CreateDevice(const std::string& uid) {
 	LOG4CXX_DEBUG(logger_, "Valid Endpoint: " << uid);
 	std::size_t pos = uid.find(":");
 	pos = uid.find(":", pos+1);
-	std::size_t size = uid.length();
-	std::string host = uid.substr(0, size - pos);
-	std::string port = uid.substr(pos);
+	//std::size_t size = uid.length();
+	std::string host = uid.substr(0, pos);
+	std::string port = uid.substr(pos+1);
 	std::string device_id = uid;
 
 	LOG4CXX_DEBUG(logger_, "Creating Cloud Device For Host: " << host << " and Port: " << port);
 
+	//todo get nickname from policies to name device
 	auto cloud_device = std::make_shared<CloudDevice>(host, port, device_id);
   
   	DeviceVector devices{cloud_device};
@@ -102,7 +103,7 @@ void CloudWebsocketTransportAdapter::CreateDevice(const std::string& uid) {
           uid, 0, this);
 
   	ConnectionCreated(connection, uid, 0);
-  	ConnectDone(uid, 0);
+  	ConnectPending(uid, 0);
 
 	return;
 }
