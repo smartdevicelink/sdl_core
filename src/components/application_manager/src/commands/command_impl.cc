@@ -201,7 +201,7 @@ bool CommandImpl::ReplaceHMIWithMobileAppId(
 }
 
 bool CommandImpl::CheckSyntax(const std::string& str,
-                                     bool allow_empty_line) {
+                              bool allow_empty_line) const {
   if (std::string::npos != str.find_first_of("\t\n")) {
     LOG4CXX_ERROR(logger_, "CheckSyntax failed! :" << str);
     return false;

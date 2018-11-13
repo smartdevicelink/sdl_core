@@ -172,7 +172,8 @@ TEST_F(
 
   (*msg)[strings::msg_params][kMessageCodes] =
       SmartObject(smart_objects::SmartType_Array);
-  (*msg)[strings::msg_params][kMessageCodes][0] = SmartObject(kInvalidSyntaxString);
+  (*msg)[strings::msg_params][kMessageCodes][0] =
+      SmartObject(kInvalidSyntaxString);
   (*msg)[strings::msg_params][kMessageCodes][1] = SmartObject(kLanguageEn);
 
   (*msg)[strings::msg_params][strings::language] = kLanguage;

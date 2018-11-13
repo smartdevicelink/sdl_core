@@ -144,7 +144,7 @@ class CommandImpl : public Command {
    * @param allow_empty_string if true methods allow empty sting
    * @return true if success otherwise return false
    */
-  bool CheckSyntax(const std::string& str, bool allow_empty_line = false);
+  bool CheckSyntax(const std::string& str, bool allow_empty_line = false) const;
 
   // members
   static const int32_t hmi_protocol_type_;
