@@ -2,31 +2,30 @@
 #include "application_manager/rpc_service.h"
 #include "sdl_rpc_plugin/commands/mobile/set_cloudapp_properties_response.h"
 
-
 namespace sdl_rpc_plugin {
 using namespace application_manager;
 
 namespace commands {
 
-    SetCloudAppPropertiesResponse::SetCloudAppPropertiesResponse(const app_mngr::commands::MessageSharedPtr& message,
-               app_mngr::ApplicationManager& application_manager,
-               app_mngr::rpc_service::RPCService& rpc_service,
-               app_mngr::HMICapabilities& hmi_capabilities,
-               policy::PolicyHandlerInterface& policy_handler)
-               : CommandResponseImpl(message,
+SetCloudAppPropertiesResponse::SetCloudAppPropertiesResponse(
+    const app_mngr::commands::MessageSharedPtr& message,
+    app_mngr::ApplicationManager& application_manager,
+    app_mngr::rpc_service::RPCService& rpc_service,
+    app_mngr::HMICapabilities& hmi_capabilities,
+    policy::PolicyHandlerInterface& policy_handler)
+    : CommandResponseImpl(message,
                           application_manager,
                           rpc_service,
                           hmi_capabilities,
-                          policy_handler){}
+                          policy_handler) {}
 
+SetCloudAppPropertiesResponse::~SetCloudAppPropertiesResponse() {}
 
-    SetCloudAppPropertiesResponse::~SetCloudAppPropertiesResponse(){}
+void SetCloudAppPropertiesResponse::Run() {
+  LOG4CXX_AUTO_TRACE(logger_);
 
-    void SetCloudAppPropertiesResponse::Run(){
-        LOG4CXX_AUTO_TRACE(logger_);
-        
-        rpc_service_.SendMessageToMobile(message_);
-    }
+  rpc_service_.SendMessageToMobile(message_);
+}
 
-} // namespace commands
-} //namespace sdl_rpc_plugins
+}  // namespace commands
+}  // namespace sdl_rpc_plugins

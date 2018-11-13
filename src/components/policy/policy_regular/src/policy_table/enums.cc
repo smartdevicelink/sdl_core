@@ -848,7 +848,7 @@ bool IsValidEnum(FunctionID val) {
     case SendHapticDataID:
       return true;
     case SetCloudAppPropertiesID:
-      return true;  
+      return true;
     case OnHMIStatusID:
       return true;
     case OnAppInterfaceUnregisteredID:
@@ -1287,7 +1287,7 @@ bool EnumFromJsonString(const std::string& literal, FunctionID* result) {
     *result = SendHapticDataID;
     return true;
   }
-  if("SetCloudAppProperties" == literal){
+  if ("SetCloudAppProperties" == literal) {
     *result = SetCloudAppPropertiesID;
     return true;
   }
