@@ -545,6 +545,13 @@
         <element name="VEHICLEDATA_CLOUDAPPVEHICLEID" since="5.1"/>
     </enum>
     
+    <enum name="HybridAppPreference" since="5.1">
+        <description>Enumeration for the user's preference of which app type to use when both are available</description>
+        <element name = "MOBILE" />
+        <element name = "CLOUD" />
+        <element name = "BOTH" />
+    </enum>
+
     <enum name="ButtonName" since="1.0">
         <description>Defines the hard (physical) and soft (touchscreen) buttons available from the module</description>
         <element name="OK" />
@@ -2609,6 +2616,7 @@
         <element name="UnsubscribeWayPointsID" value="47" hexvalue="2F" since="4.1" />
         <element name="GetSystemCapabilityID" value="48" hexvalue="30" since="4.5" />
         <element name="SendHapticDataID" value="49" hexvalue="31" since="4.5" />
+        <element name="SetCloudAppPropertiesID" value="50" hexvalue="32" since="5.1" />
         
         <!--
          Base Notifications
@@ -6623,6 +6631,51 @@
             <description>See Result</description>
             <element name="SUCCESS"/>
             <element name="GENERIC_ERROR"/>
+        </param>
+    </function>
+    
+    <function name="SetCloudAppProperties" functionID="SetCloudAppPropertiesID" messagetype="request" since="5.1">
+        <description>
+            RPC used to enable/disable a cloud application and set authentication data
+        </description>
+        <param name="appName" type="String" maxlength="100" mandatory="true"></param>
+        <param name="appID" type="String" maxlength="100" mandatory="true"></param>
+        <param name="enabled" type="Boolean" mandatory="false">
+            <description>If true, cloud app will be included in HMI RPC UpdateAppList</description>
+        </param>
+        <param name="cloudAppAuthToken" type="String" maxlength="100" mandatory="false">
+            <description>Used to authenticate websocket connection on app activation</description>
+        </param>
+        <param name="cloudTransportType" type="String" maxlength="100" mandatory="false">
+            <description>Specifies the connection type Core should use</description>
+        </param>
+        <param name="hybridAppPreference" type="HybridAppPreference" mandatory="false">
+            <description>Specifies the user preference to use the cloud app version or mobile app version when both are available</description>
+        </param>
+    </function>
+
+    <function name="SetCloudAppProperties" functionID="SetCloudAppPropertiesID" messagetype="response" since="5.1">
+        <description>
+            The response to registerAppInterface
+        </description>
+        <param name="success" type="Boolean" platform="documentation" mandatory="true">
+            <description> true if successful; false if failed </description>
+        </param>
+        <param name="resultCode" type="Result" platform="documentation" mandatory="true">
+            <description>See Result</description>
+            <element name="SUCCESS" />
+            <element name="INVALID_DATA" />
+            <element name="OUT_OF_MEMORY" />
+            <element name="TOO_MANY_PENDING_REQUESTS" />
+            <element name="GENERIC_ERROR" />
+            <element name="DUPLICATE_NAME" />
+            <element name="TOO_MANY_APPLICATIONS" />
+            <element name="APPLICATION_REGISTERED_ALREADY" />
+            <element name="UNSUPPORTED_VERSION" />
+            <element name="WRONG_LANGUAGE" />
+            <element name="DISALLOWED" />
+            <element name="WARNINGS" />
+            <element name="RESUME_FAILED" />
         </param>
     </function>
     
