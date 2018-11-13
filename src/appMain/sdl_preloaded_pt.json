@@ -533,6 +533,47 @@
                     }
                 }
             },
+            "CloudApp":{
+                "rpcs":{
+                    "SetCloudAppProperties":{
+                        "hmi_levels":["BACKGROUND",
+                        "FULL",
+                        "LIMITED"]
+                    },
+                    "GetVehicleData": {
+                        "hmi_levels": ["BACKGROUND",
+                        "FULL",
+                        "LIMITED"],
+                        "parameters": [
+                        "cloudAppVehicleID"
+                        ]
+                    },
+                    "OnVehicleData": {
+                        "hmi_levels": ["BACKGROUND",
+                        "FULL",
+                        "LIMITED"],
+                        "parameters": [
+                        "cloudAppVehicleID"
+                        ]
+                    },
+                    "SubscribeVehicleData": {
+                        "hmi_levels": ["BACKGROUND",
+                        "FULL",
+                        "LIMITED"],
+                        "parameters": [
+                        "cloudAppVehicleID"
+                        ]
+                    },
+                    "UnsubscribeVehicleData": {
+                        "hmi_levels": ["BACKGROUND",
+                        "FULL",
+                        "LIMITED"],
+                        "parameters": [
+                        "cloudAppVehicleID"
+                        ]
+                    }
+                }
+            },
             "RemoteControl": {
                 "rpcs": {
                     "ButtonPress": {
