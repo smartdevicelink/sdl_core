@@ -34,41 +34,41 @@ void SetCloudAppPropertiesRequest::Run() {
     return;
   }
 
-  smart_objects::SmartObject cloudapp_properties(smart_objects::SmartType_Map);
+  smart_objects::SmartObject cloud_app_properties(smart_objects::SmartType_Map);
 
-  cloudapp_properties[strings::msg_params][strings::app_name] =
+  cloud_app_properties[strings::msg_params][strings::app_name] =
       (*message_)[strings::msg_params][strings::app_name];
-  cloudapp_properties[strings::msg_params][strings::app_id] =
+  cloud_app_properties[strings::msg_params][strings::app_id] =
       (*message_)[strings::msg_params][strings::app_id];
 
   if ((*message_)[strings::msg_params].keyExists(strings::enabled)) {
     smart_objects::SmartObject enabled =
         (*message_)[strings::msg_params][strings::enabled];
-    cloudapp_properties[strings::msg_params][strings::enabled] = enabled;
+    cloud_app_properties[strings::msg_params][strings::enabled] = enabled;
   }
   if ((*message_)[strings::msg_params].keyExists(
           strings::cloud_app_auth_token)) {
     smart_objects::SmartObject auth_token =
         (*message_)[strings::msg_params][strings::cloud_app_auth_token];
-    cloudapp_properties[strings::msg_params][strings::cloud_app_auth_token] =
+    cloud_app_properties[strings::msg_params][strings::cloud_app_auth_token] =
         auth_token;
   }
   if ((*message_)[strings::msg_params].keyExists(
           strings::cloud_transport_type)) {
     smart_objects::SmartObject transport_type =
         (*message_)[strings::msg_params][strings::cloud_transport_type];
-    cloudapp_properties[strings::msg_params][strings::cloud_transport_type] =
+    cloud_app_properties[strings::msg_params][strings::cloud_transport_type] =
         transport_type;
   }
   if ((*message_)[strings::msg_params].keyExists(
           strings::hybrid_app_preference)) {
     smart_objects::SmartObject hybrid_app_preference =
         (*message_)[strings::msg_params][strings::hybrid_app_preference];
-    cloudapp_properties[strings::msg_params][strings::hybrid_app_preference] =
+    cloud_app_properties[strings::msg_params][strings::hybrid_app_preference] =
         hybrid_app_preference;
   }
 
-  policy_handler_.OnSetCloudAppProperties(cloudapp_properties);
+  policy_handler_.OnSetCloudAppProperties(cloud_app_properties);
   SendResponse(true, mobile_apis::Result::SUCCESS);
 }
 
