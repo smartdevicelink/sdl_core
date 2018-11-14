@@ -65,7 +65,7 @@ if(ENABLE_LOG)
       apr::apr
       apr-util::apr-util
       log4cxx::log4cxx
-      expat
+      EXPAT::EXPAT
       config_profile::config_profile
       boost::thread
   )

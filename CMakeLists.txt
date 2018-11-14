@@ -287,7 +287,11 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
 set(CMAKE_INSTALL_PREFIX ${CMAKE_CURRENT_BINARY_DIR})
 set(ARCHIVE_OUTPUT_DIRECTORY ./bin)
 
-set(CMAKE_CXX_FLAGS "-fPIC -std=gnu++11 -stdlib=libstdc++ -Wall -Werror -Wuninitialized -Wvla")
+if (QNXNTO)
+  set(CMAKE_CXX_FLAGS "-fPIC -std=gnu++11 -stdlib=libstdc++ -Wall -Werror -Wuninitialized -Wvla")
+else()
+  set(CMAKE_CXX_FLAGS "-fPIC -std=gnu++11 -Wall -Werror -Wuninitialized -Wvla")
+endif()
 
 if (USE_CCACHE)
 # Configure CCache if available

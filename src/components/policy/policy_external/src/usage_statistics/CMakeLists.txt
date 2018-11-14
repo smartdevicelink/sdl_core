@@ -13,7 +13,7 @@ target_link_libraries(${target_name}
     utils::utils
   PRIVATE
     components::interface
-    libexpat
+    EXPAT::EXPAT
 )
 
 target_include_directories(${target_name}
