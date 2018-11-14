@@ -817,6 +817,12 @@ void ApplicationManagerImpl::CreatePendingApplication(
   LOG4CXX_AUTO_TRACE(logger_);
 
   std::string policy_app_id = "";
+  std::string endpoint = "";
+  std::string certificate = "";
+  std::string auth_token = "";
+  std::string cloud_transport_type = "";
+  std::string hybrid_app_preference = "";
+
   std::string name = device_info.name();
   auto it = pending_device_map_.find(name);
   if (it == pending_device_map_.end()) {
@@ -824,6 +830,7 @@ void ApplicationManagerImpl::CreatePendingApplication(
   }
 
   policy_app_id = it->second;
+
   ApplicationSharedPtr application(new ApplicationImpl(
       0,
       policy_app_id,
@@ -839,7 +846,19 @@ void ApplicationManagerImpl::CreatePendingApplication(
     return;
   }
 
+  GetPolicyHandler().GetCloudAppParameters(*it,
+                                       endpoint,
+                                       certificate,
+                                       auth_token,
+                                       cloud_transport_type,
+                                       hybrid_app_preference);
+
   application->set_hmi_application_id(GenerateNewHMIAppID());
+  application->set_cloud_app_endpoint(endpoint);
+  application->set_cloud_app_auth_token(auth_token);
+  application->set_cloud_app_transport_type(cloud_transport_type);
+  application->set_hybrid_app_preference(hybrid_app_preference);
+  application->set_cloud_app_certificate(certificate);
 
   sync_primitives::AutoLock lock(apps_to_register_list_lock_ptr_);
   LOG4CXX_DEBUG(logger_,
