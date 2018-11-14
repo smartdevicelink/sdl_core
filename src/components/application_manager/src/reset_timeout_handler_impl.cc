@@ -71,13 +71,7 @@ void ResetTimeoutHandlerImpl::on_event(const event_engine::Event& event) {
     auto method_name = MessageHelper::HMIFunctionIDFromString(
         message[strings::msg_params][strings::method_name].asString());
 
-    /*SDL must not apply "default timeout for RPCs processing" for
-    BasicCommunication.DialNumber RPC (that is, SDL must always wait for HMI
-    response to BC.DialNumber as long as it takes and not return GENERIC_ERROR
-    to mobile app), so the OnResetTimeout logic is not applicable for DialNumber
-    RPC*/
-    if (hmi_apis::FunctionID::BasicCommunication_DialNumber == method_name ||
-        hmi_apis::FunctionID::INVALID_ENUM == method_name) {
+    if (hmi_apis::FunctionID::INVALID_ENUM == method_name) {
       return;
     }
     uint32_t timeout = application_manager_.get_settings().default_timeout();
