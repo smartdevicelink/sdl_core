@@ -73,7 +73,7 @@ bool CloudWebsocketTransportAdapter::Restore() { // todo decide if resumption is
 }
 
 void CloudWebsocketTransportAdapter::CreateDevice(const std::string& uid) {
-	boost::regex pattern ("(wss?):\\/\\/([A-Z\\d\\.-]{2,})\\.([A-Z]{2,})(:\\d{2,4})", boost::regex::icase);
+	boost::regex pattern ("(wss?):\\/\\/([A-Z\\d\\.-]{2,})\\.?([A-Z]{2,})?(:\\d{2,4})\\/", boost::regex::icase);
 	std::string str = uid;
 	if (!boost::regex_match(str, pattern)) {
 		LOG4CXX_DEBUG(logger_, "Invalid Endpoint: " << uid);
