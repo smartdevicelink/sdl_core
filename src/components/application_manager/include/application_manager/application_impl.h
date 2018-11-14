@@ -409,6 +409,22 @@ class ApplicationImpl : public virtual Application,
 
   void SwapMobileMessageQueue(MobileMessageQueue& mobile_messages) OVERRIDE;
 
+  const ButtonSubscriptionsMap& PendingButtonSubscriptions() const OVERRIDE;
+
+  void AddPendingButtonSubscription(
+      const int32_t correlation_id,
+      const hmi_apis::Common_ButtonName::eType button_name) OVERRIDE;
+
+  void RemovePendingSubscriptionButton(const int32_t correlation_id) OVERRIDE;
+
+  const ButtonSubscriptionsMap& PendingButtonUnsubscriptions() const OVERRIDE;
+
+  void AddPendingButtonUnsubscription(
+      const int32_t correlation_id,
+      const hmi_apis::Common_ButtonName::eType button_name) OVERRIDE;
+
+  void RemovePendingButtonUnsubscription(const int32_t correlation_id) OVERRIDE;
+
  protected:
   /**
    * @brief Clean up application folder. Persistent files will stay
@@ -478,6 +494,7 @@ class ApplicationImpl : public virtual Application,
   sync_primitives::Lock video_streaming_suspended_lock_;
   sync_primitives::Lock audio_streaming_suspended_lock_;
   sync_primitives::Lock streaming_stop_lock_;
+  sync_primitives::Lock pending_button_subscription_lock_;
 
   bool is_app_allowed_;
   bool has_been_activated_;
@@ -496,6 +513,8 @@ class ApplicationImpl : public virtual Application,
   std::string bundle_id_;
   AppFilesMap app_files_;
   std::set<mobile_apis::ButtonName::eType> subscribed_buttons_;
+  ButtonSubscriptionsMap pending_button_subscriptions_;
+  ButtonSubscriptionsMap pending_button_unsubscriptions_;
   UsageStatistics usage_report_;
   HelpPromptManagerImpl help_prompt_manager_impl_;
   protocol_handler::MajorProtocolVersion protocol_version_;

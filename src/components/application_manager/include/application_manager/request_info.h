@@ -127,7 +127,7 @@ struct RequestInfo {
   }
   uint64_t hash();
   static uint64_t GenerateHash(uint32_t var1, uint32_t var2);
-  static uint32_t HmiConnectoinKey;
+  static uint32_t HmiConnectionKey;
 
  protected:
   RequestPtr request_;

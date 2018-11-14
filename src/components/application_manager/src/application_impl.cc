@@ -1172,6 +1172,42 @@ void ApplicationImpl::PushMobileMessage(
   mobile_message_queue_.push_back(mobile_message);
 }
 
+const std::map<int32_t, hmi_apis::Common_ButtonName::eType>&
+ApplicationImpl::PendingButtonSubscriptions() const {
+  return pending_button_subscriptions_;
+}
+
+const std::map<int32_t, hmi_apis::Common_ButtonName::eType>&
+ApplicationImpl::PendingButtonUnsubscriptions() const {
+  return pending_button_unsubscriptions_;
+}
+
+void ApplicationImpl::AddPendingButtonSubscription(
+    const int32_t correlation_id,
+    const hmi_apis::Common_ButtonName::eType button_name) {
+  sync_primitives::AutoLock auto_lock(pending_button_subscription_lock_);
+  pending_button_subscriptions_[correlation_id] = button_name;
+}
+
+void ApplicationImpl::RemovePendingSubscriptionButton(
+    const int32_t correlation_id) {
+  sync_primitives::AutoLock auto_lock(pending_button_subscription_lock_);
+  pending_button_subscriptions_.erase(correlation_id);
+}
+
+void ApplicationImpl::AddPendingButtonUnsubscription(
+    const int32_t correlation_id,
+    const hmi_apis::Common_ButtonName::eType button_name) {
+  sync_primitives::AutoLock auto_lock(pending_button_subscription_lock_);
+  pending_button_unsubscriptions_[correlation_id] = button_name;
+}
+
+void ApplicationImpl::RemovePendingButtonUnsubscription(
+    const int32_t correlation_id) {
+  sync_primitives::AutoLock auto_lock(pending_button_subscription_lock_);
+  pending_button_unsubscriptions_.erase(correlation_id);
+}
+
 void ApplicationImpl::SwapMobileMessageQueue(
     MobileMessageQueue& mobile_messages) {
   sync_primitives::AutoLock lock(mobile_message_lock_);

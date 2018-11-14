@@ -157,57 +157,11 @@ TEST_F(SubscribeButtonRequestTest, Run_IsSubscribedToButton_UNSUCCESS) {
 }
 
 TEST_F(SubscribeButtonRequestTest, Run_SUCCESS) {
-  const mobile_apis::ButtonName::eType kButtonName =
+  const mobile_apis::ButtonName::eType button_name =
       mobile_apis::ButtonName::SEEKLEFT;
 
-  MessageSharedPtr msg(CreateMessage());
-  (*msg)[am::strings::msg_params][am::strings::button_name] = kButtonName;
-  CommandPtr command(CreateCommand<SubscribeButtonRequest>(msg));
-
-  MockAppPtr app(CreateMockApp());
-  ON_CALL(app_mngr_, application(_)).WillByDefault(Return(app));
-  ON_CALL(*app, msg_version()).WillByDefault(ReturnRef(mock_semantic_version));
-  ON_CALL(*app, is_media_application()).WillByDefault(Return(true));
-
-  ON_CALL(mock_hmi_capabilities_, is_ui_cooperating())
-      .WillByDefault(Return(true));
-
-  MessageSharedPtr button_caps_ptr(CreateMessage(smart_objects::SmartType_Map));
-  (*button_caps_ptr)[0][am::hmi_response::button_name] = kButtonName;
-
-  ON_CALL(mock_hmi_capabilities_, button_capabilities())
-      .WillByDefault(Return(button_caps_ptr.get()));
-
-  ON_CALL(*app, IsSubscribedToButton(_)).WillByDefault(Return(false));
-
-  MessageSharedPtr hmi_result_msg;
-
-  EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_))
-      .WillOnce(DoAll(SaveArg<0>(&hmi_result_msg), Return(true)));
-
-  MessageSharedPtr mobile_result_msg;
-  EXPECT_CALL(this->mock_rpc_service_, ManageMobileCommand(_, _))
-      .WillOnce(DoAll(SaveArg<0>(&mobile_result_msg), Return(true)));
-  ASSERT_TRUE(command->Init());
-  command->Run();
-
-  EXPECT_EQ(hmi_apis::FunctionID::Buttons_OnButtonSubscription,
-            static_cast<hmi_apis::FunctionID::eType>(
-                (*hmi_result_msg)[am::strings::params][am::strings::function_id]
-                    .asInt()));
-
-  EXPECT_EQ(mobile_apis::Result::SUCCESS,
-            static_cast<mobile_apis::Result::eType>(
-                (*mobile_result_msg)[am::strings::msg_params]
-                                    [am::strings::result_code].asInt()));
-}
-
-TEST_F(SubscribeButtonRequestTest, Run_SUCCESS_App_Base_RPC_Version) {
-  const mobile_apis::ButtonName::eType kButtonName =
-      mobile_apis::ButtonName::OK;
-
-  MessageSharedPtr msg(CreateMessage());
-  (*msg)[am::strings::msg_params][am::strings::button_name] = kButtonName;
+  MessageSharedPtr msg(CreateMessage(smart_objects::SmartType_Map));
+  (*msg)[am::strings::msg_params][am::strings::button_name] = button_name;
   CommandPtr command(CreateCommand<SubscribeButtonRequest>(msg));
 
   MockAppPtr app(CreateMockApp());
@@ -219,9 +173,7 @@ TEST_F(SubscribeButtonRequestTest, Run_SUCCESS_App_Base_RPC_Version) {
       .WillByDefault(Return(true));
 
   MessageSharedPtr button_caps_ptr(CreateMessage(smart_objects::SmartType_Map));
-  (*button_caps_ptr)[0][am::hmi_response::button_name] = kButtonName;
-  (*button_caps_ptr)[1][am::hmi_response::button_name] =
-      mobile_apis::ButtonName::PLAY_PAUSE;
+  (*button_caps_ptr)[0][am::hmi_response::button_name] = button_name;
 
   ON_CALL(mock_hmi_capabilities_, button_capabilities())
       .WillByDefault(Return(button_caps_ptr.get()));
@@ -234,25 +186,68 @@ TEST_F(SubscribeButtonRequestTest, Run_SUCCESS_App_Base_RPC_Version) {
       .WillOnce(DoAll(SaveArg<0>(&hmi_result_msg), Return(true)));
 
   MessageSharedPtr mobile_result_msg;
-  EXPECT_CALL(this->mock_rpc_service_, ManageMobileCommand(_, _))
-      .WillOnce(DoAll(SaveArg<0>(&mobile_result_msg), Return(true)));
   ASSERT_TRUE(command->Init());
   command->Run();
 
-  EXPECT_EQ(hmi_apis::FunctionID::Buttons_OnButtonSubscription,
+  EXPECT_EQ(hmi_apis::FunctionID::Buttons_SubscribeButton,
             static_cast<hmi_apis::FunctionID::eType>(
                 (*hmi_result_msg)[am::strings::params][am::strings::function_id]
                     .asInt()));
 
-  EXPECT_EQ(hmi_apis::Common_ButtonName::PLAY_PAUSE,
-            static_cast<hmi_apis::Common_ButtonName::eType>(
-                (*hmi_result_msg)[am::strings::msg_params][am::strings::name]
+  EXPECT_EQ(
+      hmi_apis::Common_ButtonName::eType::SEEKLEFT,
+      static_cast<hmi_apis::Common_ButtonName::eType>(
+          (*hmi_result_msg)[am::strings::msg_params][am::strings::button_name]
+              .asInt()));
+}
+
+TEST_F(SubscribeButtonRequestTest,
+       Run_App_Version_4_5_and_OK_btn_Expect_PlayPause_btn_sent_to_HMI) {
+  const mobile_apis::ButtonName::eType button_ok = mobile_apis::ButtonName::OK;
+
+  const mobile_apis::ButtonName::eType button_play_pause =
+      mobile_apis::ButtonName::PLAY_PAUSE;
+
+  MessageSharedPtr msg(CreateMessage(smart_objects::SmartType_Map));
+  (*msg)[am::strings::msg_params][am::strings::button_name] = button_ok;
+  CommandPtr command(CreateCommand<SubscribeButtonRequest>(msg));
+
+  MockAppPtr app(CreateMockApp());
+  ON_CALL(app_mngr_, application(_)).WillByDefault(Return(app));
+  ON_CALL(*app, msg_version()).WillByDefault(ReturnRef(mock_base_rpc_version));
+  ON_CALL(*app, is_media_application()).WillByDefault(Return(true));
+
+  ON_CALL(mock_hmi_capabilities_, is_ui_cooperating())
+      .WillByDefault(Return(true));
+
+  MessageSharedPtr button_caps_ptr(CreateMessage(smart_objects::SmartType_Map));
+  (*button_caps_ptr)[0][am::hmi_response::button_name] = button_ok;
+  (*button_caps_ptr)[1][am::hmi_response::button_name] = button_play_pause;
+
+  ON_CALL(mock_hmi_capabilities_, button_capabilities())
+      .WillByDefault(Return(button_caps_ptr.get()));
+
+  ON_CALL(*app, IsSubscribedToButton(button_play_pause))
+      .WillByDefault(Return(false));
+
+  MessageSharedPtr hmi_result_msg;
+
+  EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_))
+      .WillOnce(DoAll(SaveArg<0>(&hmi_result_msg), Return(true)));
+
+  ASSERT_TRUE(command->Init());
+  command->Run();
+
+  EXPECT_EQ(hmi_apis::FunctionID::Buttons_SubscribeButton,
+            static_cast<hmi_apis::FunctionID::eType>(
+                (*hmi_result_msg)[am::strings::params][am::strings::function_id]
                     .asInt()));
 
-  EXPECT_EQ(mobile_apis::Result::SUCCESS,
-            static_cast<mobile_apis::Result::eType>(
-                (*mobile_result_msg)[am::strings::msg_params]
-                                    [am::strings::result_code].asInt()));
+  EXPECT_EQ(
+      hmi_apis::Common_ButtonName::PLAY_PAUSE,
+      static_cast<hmi_apis::Common_ButtonName::eType>(
+          (*hmi_result_msg)[am::strings::msg_params][am::strings::button_name]
+              .asInt()));
 }
 
 }  // namespace subscribe_button_request

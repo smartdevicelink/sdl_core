@@ -70,6 +70,12 @@ class SubscribeButtonRequest : public app_mngr::commands::CommandRequestImpl {
   void Run() FINAL;
 
   /**
+   * @brief Interface method that is called whenever new event received
+   * @param event The received event
+   */
+  void on_event(const app_mngr::event_engine::Event& event) FINAL;
+
+  /**
    * @brief Init sets hash update mode for request
    */
   bool Init() FINAL;
@@ -94,10 +100,18 @@ class SubscribeButtonRequest : public app_mngr::commands::CommandRequestImpl {
    */
   void SendSubscribeButtonNotification();
 
+  /**
+   * @brief Checks whether given button id is preset button
+   * @param btn_id button id enum type representing button name
+   * @return true in case if button is a preset button,
+   * otherwise false
+   */
+  bool IsPresetButton(const mobile_apis::ButtonName::eType btn_id) const;
+
   DISALLOW_COPY_AND_ASSIGN(SubscribeButtonRequest);
 };
 
 }  // namespace commands
-}  // namespace application_manager
+}  // namespace sdl_rpc_plugin
 
 #endif  // SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_MOBILE_SUBSCRIBE_BUTTON_REQUEST_H_

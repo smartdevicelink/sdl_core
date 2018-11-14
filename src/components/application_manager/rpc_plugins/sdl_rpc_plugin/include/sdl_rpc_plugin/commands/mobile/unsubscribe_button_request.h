@@ -73,17 +73,17 @@ class UnsubscribeButtonRequest : public app_mngr::commands::CommandRequestImpl {
    */
   bool Init() FINAL;
 
- private:
   /**
-   * @brief Sends ButtonSubscription notification
-   * to notify HMI that app unsubscribed from the button.
+   * @brief Interface method that is called whenever new event received
+   * @param event The received event
    */
-  void SendUnsubscribeButtonNotification();
+  void on_event(const app_mngr::event_engine::Event& event) FINAL;
 
+ private:
   DISALLOW_COPY_AND_ASSIGN(UnsubscribeButtonRequest);
 };
 
 }  // namespace commands
-}  // namespace application_manager
+}  // namespace sdl_rpc_plugin
 
 #endif  // SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_MOBILE_UNSUBSCRIBE_BUTTON_REQUEST_H_
