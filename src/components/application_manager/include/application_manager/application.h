@@ -960,9 +960,11 @@ class Application : public virtual InitialApplicationData,
 
   virtual void set_cloud_app_auth_token(const std::string& auth_token) = 0;
 
-  virtual void set_cloud_app_transport_type(const std::string& transport_type) = 0;
+  virtual void set_cloud_app_transport_type(
+      const std::string& transport_type) = 0;
 
-  virtual void set_hybrid_app_preference(const std::string& hybrid_app_preference) = 0;
+  virtual void set_hybrid_app_preference(
+      const std::string& hybrid_app_preference) = 0;
 
   virtual void set_cloud_app_certificate(const std::string& certificate) = 0;
 

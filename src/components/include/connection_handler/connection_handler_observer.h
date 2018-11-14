@@ -161,7 +161,10 @@ class ConnectionHandlerObserver {
    */
   virtual void OnSecondaryTransportEndedCallback(const int32_t session_key) = 0;
 
-  virtual void CreatePendingApplication(const transport_manager::ConnectionUID connection_id, const transport_manager::DeviceInfo& device_info, connection_handler::DeviceHandle device_id) = 0;
+  virtual void CreatePendingApplication(
+      const transport_manager::ConnectionUID connection_id,
+      const transport_manager::DeviceInfo& device_info,
+      connection_handler::DeviceHandle device_id) = 0;
 
  protected:
   /**

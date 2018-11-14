@@ -101,8 +101,8 @@ class TransportAdapterListener {
    * @param app_id Handle of application.
    */
   virtual void OnConnectPending(const TransportAdapter* adapter,
-                             const DeviceUID& device_handle,
-                             const ApplicationHandle& app_id) = 0;
+                                const DeviceUID& device_handle,
+                                const ApplicationHandle& app_id) = 0;
 
   /**
    * @brief Search specified device adapter in the container of shared pointers

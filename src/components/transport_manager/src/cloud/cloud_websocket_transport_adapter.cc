@@ -33,10 +33,8 @@
 #include "transport_manager/cloud/cloud_websocket_transport_adapter.h"
 #include "transport_manager/cloud/cloud_websocket_connection_factory.h"
 
-
 #include "transport_manager/cloud/cloud_device.h"
 #include "transport_manager/cloud/websocket_client_connection.h"
-
 
 #include <boost/regex.hpp>
 
@@ -45,72 +43,80 @@ namespace transport_adapter {
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "TransportManager")
 
-CloudWebsocketTransportAdapter::CloudWebsocketTransportAdapter(resumption::LastState& last_state, const TransportManagerSettings& settings)
-: TransportAdapterImpl(NULL, new CloudWebsocketConnectionFactory(this), NULL, last_state, settings) {
-
-	/*DeviceUID device_id  = "Cloud";
-	ApplicationHandle app_handle = 100;
-	printf("Calling create connection\n");
-	const TransportAdapter::Error err =
+CloudWebsocketTransportAdapter::CloudWebsocketTransportAdapter(
+    resumption::LastState& last_state, const TransportManagerSettings& settings)
+    : TransportAdapterImpl(NULL,
+                           new CloudWebsocketConnectionFactory(this),
+                           NULL,
+                           last_state,
+                           settings) {
+  /*DeviceUID device_id  = "Cloud";
+  ApplicationHandle app_handle = 100;
+  printf("Calling create connection\n");
+  const TransportAdapter::Error err =
       server_connection_factory_->CreateConnection(device_id, app_handle);
     LOG4CXX_DEBUG(logger_, err);*/
 }
 
 CloudWebsocketTransportAdapter::~CloudWebsocketTransportAdapter() {}
 
-void CloudWebsocketTransportAdapter::CloudTransportConfigUpdated(const CloudAppTransportConfig& new_config) {}
+void CloudWebsocketTransportAdapter::CloudTransportConfigUpdated(
+    const CloudAppTransportConfig& new_config) {}
 
-CloudAppTransportConfig CloudWebsocketTransportAdapter::GetCloudTransportConfiguration() const { return transport_config_; }
+CloudAppTransportConfig
+CloudWebsocketTransportAdapter::GetCloudTransportConfiguration() const {
+  return transport_config_;
+}
 
 DeviceType CloudWebsocketTransportAdapter::GetDeviceType() const {
   return CLOUD_WEBSOCKET;
 }
 
-void CloudWebsocketTransportAdapter::Store() const {} // todo decide if this is needed
+void CloudWebsocketTransportAdapter::Store() const {
+}  // todo decide if this is needed
 
-bool CloudWebsocketTransportAdapter::Restore() { // todo decide if resumption is needed
-	return true;
+bool CloudWebsocketTransportAdapter::Restore() {  // todo decide if resumption
+                                                  // is needed
+  return true;
 }
 
 void CloudWebsocketTransportAdapter::CreateDevice(const std::string& uid) {
-	boost::regex pattern ("(wss?):\\/\\/([A-Z\\d\\.-]{2,})\\.?([A-Z]{2,})?(:\\d{2,4})\\/", boost::regex::icase);
-	std::string str = uid;
-	if (!boost::regex_match(str, pattern)) {
-		LOG4CXX_DEBUG(logger_, "Invalid Endpoint: " << uid);
-		return;
-	}
+  boost::regex pattern(
+      "(wss?):\\/\\/([A-Z\\d\\.-]{2,})\\.?([A-Z]{2,})?(:\\d{2,4})\\/",
+      boost::regex::icase);
+  std::string str = uid;
+  if (!boost::regex_match(str, pattern)) {
+    LOG4CXX_DEBUG(logger_, "Invalid Endpoint: " << uid);
+    return;
+  }
 
-	LOG4CXX_DEBUG(logger_, "Valid Endpoint: " << uid);
-	std::size_t pos = uid.find(":");
-	pos = uid.find(":", pos+1);
-	//std::size_t size = uid.length();
-	std::string host = uid.substr(0, pos);
-	std::string port = uid.substr(pos+1);
-	std::string device_id = uid;
+  LOG4CXX_DEBUG(logger_, "Valid Endpoint: " << uid);
+  std::size_t pos = uid.find(":");
+  pos = uid.find(":", pos + 1);
+  // std::size_t size = uid.length();
+  std::string host = uid.substr(0, pos);
+  std::string port = uid.substr(pos + 1);
+  std::string device_id = uid;
 
-	LOG4CXX_DEBUG(logger_, "Creating Cloud Device For Host: " << host << " and Port: " << port);
+  LOG4CXX_DEBUG(logger_,
+                "Creating Cloud Device For Host: " << host
+                                                   << " and Port: " << port);
 
-	//todo get nickname from policies to name device
-	auto cloud_device = std::make_shared<CloudDevice>(host, port, device_id);
-  
-  	DeviceVector devices{cloud_device};
+  // todo get nickname from policies to name device
+  auto cloud_device = std::make_shared<CloudDevice>(host, port, device_id);
 
-  	SearchDeviceDone(devices);
+  DeviceVector devices{cloud_device};
 
-  	//Create connection object, do not start until app is activated
-    std::shared_ptr<WebsocketClientConnection> connection =
-      std::make_shared<WebsocketClientConnection>(
-          uid, 0, this);
+  SearchDeviceDone(devices);
 
-  	ConnectionCreated(connection, uid, 0);
-  	ConnectPending(uid, 0);
+  // Create connection object, do not start until app is activated
+  std::shared_ptr<WebsocketClientConnection> connection =
+      std::make_shared<WebsocketClientConnection>(uid, 0, this);
 
-	return;
+  ConnectionCreated(connection, uid, 0);
+  ConnectPending(uid, 0);
+
+  return;
 }
-
-
-
-
-
 }
 }

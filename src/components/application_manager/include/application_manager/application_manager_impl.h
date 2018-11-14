@@ -362,7 +362,10 @@ class ApplicationManagerImpl
 
   void CollectCloudAppInformation();
 
-  void CreatePendingApplication(const transport_manager::ConnectionUID connection_id, const transport_manager::DeviceInfo& device_info, connection_handler::DeviceHandle device_id);
+  void CreatePendingApplication(
+      const transport_manager::ConnectionUID connection_id,
+      const transport_manager::DeviceInfo& device_info,
+      connection_handler::DeviceHandle device_id);
 
   /*
    * @brief Returns unique correlation ID for HMI request

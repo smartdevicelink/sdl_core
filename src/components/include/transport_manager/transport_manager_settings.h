@@ -72,7 +72,7 @@ class TransportManagerSettings : public TransportManagerMMESettings {
 
   /**
    * @brief Returns retry timeout for cloud app connections
-   */      
+   */
   virtual uint16_t cloud_app_retry_timeout() const = 0;
 
   /**

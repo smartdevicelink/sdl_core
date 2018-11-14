@@ -1191,15 +1191,18 @@ void ApplicationImpl::set_cloud_app_auth_token(const std::string& auth_token) {
   auth_token_ = auth_token;
 }
 
-void ApplicationImpl::set_cloud_app_transport_type(const std::string& transport_type) {
+void ApplicationImpl::set_cloud_app_transport_type(
+    const std::string& transport_type) {
   cloud_transport_type_ = transport_type;
 }
 
-void ApplicationImpl::set_hybrid_app_preference(const std::string& hybrid_app_preference) {
+void ApplicationImpl::set_hybrid_app_preference(
+    const std::string& hybrid_app_preference) {
   hybrid_app_preference_ = hybrid_app_preference;
 }
 
-void ApplicationImpl::set_cloud_app_certificate(const std::string& certificate) {
+void ApplicationImpl::set_cloud_app_certificate(
+    const std::string& certificate) {
   certificate_ = certificate;
 }
 

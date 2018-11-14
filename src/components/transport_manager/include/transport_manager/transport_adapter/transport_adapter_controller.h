@@ -107,7 +107,7 @@ class TransportAdapterController {
    * @param app_handle Handle of application.
    */
   virtual void ConnectPending(const DeviceUID& device_handle,
-                   const ApplicationHandle& app_handle) = 0;
+                              const ApplicationHandle& app_handle) = 0;
 
   /**
    * @brief Make state of specified connection - ESTABLISHED and launch

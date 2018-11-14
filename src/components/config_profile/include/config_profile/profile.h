@@ -415,7 +415,7 @@ class Profile : public protocol_handler::ProtocolHandlerSettings,
 
   /**
    * @brief Returns retry timeout for cloud app connections
-   */      
+   */
   uint16_t cloud_app_retry_timeout() const OVERRIDE;
 
   /**

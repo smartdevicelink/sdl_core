@@ -120,7 +120,9 @@ class ConnectionHandlerImpl
 
   void ConnectToAllDevices() OVERRIDE;
 
-  void AddCloudAppDevice(const std::string& policy_app_id, const std::string& endpoint, const std::string& cloud_transport_type) OVERRIDE;
+  void AddCloudAppDevice(const std::string& policy_app_id,
+                         const std::string& endpoint,
+                         const std::string& cloud_transport_type) OVERRIDE;
 
   void StartTransportManager() OVERRIDE;
 

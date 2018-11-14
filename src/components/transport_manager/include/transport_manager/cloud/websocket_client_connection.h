@@ -53,12 +53,13 @@
 #include "utils/threads/message_loop_thread.h"
 #include "utils/message_queue.h"
 
-using tcp = boost::asio::ip::tcp;               // from <boost/asio/ip/tcp.hpp>
-namespace ssl = boost::asio::ssl;               // from <boost/asio/ssl.hpp>
-namespace websocket = boost::beast::websocket;  // from <boost/beast/websocket.hpp>
+using tcp = boost::asio::ip::tcp;  // from <boost/asio/ip/tcp.hpp>
+namespace ssl = boost::asio::ssl;  // from <boost/asio/ssl.hpp>
+namespace websocket =
+    boost::beast::websocket;  // from <boost/beast/websocket.hpp>
 using ::utils::MessageQueue;
 
-typedef std::queue<protocol_handler::RawMessagePtr > AsyncQueue;
+typedef std::queue<protocol_handler::RawMessagePtr> AsyncQueue;
 typedef protocol_handler::RawMessagePtr Message;
 
 namespace transport_manager {
@@ -69,7 +70,9 @@ class TransportAdapterController;
 /**
  * @brief Class responsible for communication over bluetooth sockets.
  */
-class WebsocketClientConnection : public std::enable_shared_from_this<WebsocketClientConnection>, public Connection {
+class WebsocketClientConnection
+    : public std::enable_shared_from_this<WebsocketClientConnection>,
+      public Connection {
  public:
   /**
    * @brief Constructor.
@@ -98,13 +101,13 @@ class WebsocketClientConnection : public std::enable_shared_from_this<WebsocketC
    */
   TransportAdapter::Error Start();
 
-    /**
-   * @brief Send data frame.
-   *
-   * @param message Smart pointer to the raw message.
-   *
-   * @return Error Information about possible reason of sending data failure.
-   */
+  /**
+ * @brief Send data frame.
+ *
+ * @param message Smart pointer to the raw message.
+ *
+ * @return Error Information about possible reason of sending data failure.
+ */
   TransportAdapter::Error SendData(::protocol_handler::RawMessagePtr message);
 
   /**
@@ -118,12 +121,9 @@ class WebsocketClientConnection : public std::enable_shared_from_this<WebsocketC
 
   void Recv(boost::system::error_code ec);
 
-  void OnRead(boost::system::error_code ec,
-                            std::size_t bytes_transferred);
-
+  void OnRead(boost::system::error_code ec, std::size_t bytes_transferred);
 
  private:
-
   TransportAdapterController* controller_;
   boost::asio::io_context ioc_;
   tcp::resolver resolver_;
@@ -131,7 +131,6 @@ class WebsocketClientConnection : public std::enable_shared_from_this<WebsocketC
   boost::beast::flat_buffer buffer_;
   std::string host_;
   std::string text_;
-  
 
   std::atomic_bool shutdown_;
 
@@ -140,7 +139,6 @@ class WebsocketClientConnection : public std::enable_shared_from_this<WebsocketC
   mutable sync_primitives::Lock frames_to_send_mutex_;
 
   MessageQueue<Message, AsyncQueue> message_queue_;
-
 
   class LoopThreadDelegate : public threads::ThreadDelegate {
    public:

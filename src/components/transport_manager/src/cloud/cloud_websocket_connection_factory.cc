@@ -75,14 +75,15 @@ TransportAdapter::Error CloudWebsocketConnectionFactory::CreateConnection(
     const DeviceUID& device_uid, const ApplicationHandle& app_handle) {
   LOG4CXX_AUTO_TRACE(logger_);
   printf("Create connection()\n");
-    std::shared_ptr<WebsocketClientConnection> connection =
+  std::shared_ptr<WebsocketClientConnection> connection =
       std::make_shared<WebsocketClientConnection>(
           device_uid, app_handle, controller_);
   controller_->ConnectionCreated(connection, device_uid, app_handle);
   TransportAdapter::Error error = connection->Start();
   if (TransportAdapter::OK != error) {
-    LOG4CXX_ERROR(logger_,
-                  "Cloud Websocket connection::Start() failed with error: " << error);
+    LOG4CXX_ERROR(
+        logger_,
+        "Cloud Websocket connection::Start() failed with error: " << error);
   }
   return error;
 }

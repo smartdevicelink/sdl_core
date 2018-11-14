@@ -40,10 +40,9 @@ namespace transport_adapter {
 CREATE_LOGGERPTR_GLOBAL(logger_, "TransportManager")
 
 CloudDevice::CloudDevice(std::string& host,
-            std::string& port,
-            std::string& name)
+                         std::string& port,
+                         std::string& name)
     : Device(name, std::string(name)) {}
-
 
 bool CloudDevice::IsSameAs(const Device* other) const {
   LOG4CXX_TRACE(logger_, "enter. device: " << other);
@@ -51,12 +50,11 @@ bool CloudDevice::IsSameAs(const Device* other) const {
   return result;
 }
 
-//todo implement getApplicationList
-//to be populated by policies
+// todo implement getApplicationList
+// to be populated by policies
 ApplicationList CloudDevice::GetApplicationList() const {
   return ApplicationList{100};
 }
-
 
 }  // namespace transport_adapter
 }  // namespace transport_manager
