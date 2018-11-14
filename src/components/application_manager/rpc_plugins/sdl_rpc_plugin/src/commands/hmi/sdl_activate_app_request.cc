@@ -124,6 +124,11 @@ void SDLActivateAppRequest::Run() {
                       static_cast<eType>(function_id()),
                       hmi_apis::Common_Result::REJECTED,
                       "HMIDeactivate is active");
+  } else if (!app_to_activate->IsRegistered() &&
+             app_to_activate->is_cloud_app()) {
+    LOG4CXX_DEBUG(logger_, "Starting cloud application.");
+    application_manager_.connection_handler().ConnectToDevice(
+        app_to_activate->device());
   } else {
     const uint32_t application_id = app_id();
     policy_handler_.OnActivateApp(application_id, correlation_id());
@@ -180,6 +185,11 @@ void SDLActivateAppRequest::Run() {
   if (app_to_activate->IsRegistered()) {
     LOG4CXX_DEBUG(logger_, "Application is registered. Activating.");
     policy_handler_.OnActivateApp(application_id, correlation_id());
+    return;
+  } else if (app_to_activate->is_cloud_app()) {
+    LOG4CXX_DEBUG(logger_, "Starting cloud application.");
+    application_manager_.connection_handler().ConnectToDevice(
+        app_to_activate->device());
     return;
   }
 

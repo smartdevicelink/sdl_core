@@ -41,6 +41,7 @@
 
 #include "utils/lock.h"
 #include "utils/rwlock.h"
+#include "utils/timer.h"
 
 #include "transport_manager/transport_adapter/transport_adapter.h"
 #include "transport_manager/transport_adapter/transport_adapter_controller.h"
@@ -60,6 +61,8 @@ class TransportAdapterListener;
 class DeviceScanner;
 class ServerConnectionFactory;
 class ClientConnectionListener;
+
+typedef std::shared_ptr<timer::Timer> TimerSPtr;
 
 /*
  * @brief Implementation of device adapter class.
@@ -546,6 +549,8 @@ class TransportAdapterImpl : public TransportAdapter,
    */
   TransportAdapter::Error ConnectDevice(DeviceSptr device);
 
+  void RetryConnection();
+
   /**
    * @brief Remove specified device
    * @param device_handle Device unique identifier.
@@ -578,6 +583,7 @@ class TransportAdapterImpl : public TransportAdapter,
     ConnectionSPtr connection;
     DeviceUID device_id;
     ApplicationHandle app_handle;
+    uint16_t retry_count;
     enum { NEW, ESTABLISHED, FINALISING, PENDING, RETRY } state;
   };
 
@@ -606,6 +612,9 @@ class TransportAdapterImpl : public TransportAdapter,
    * @brief Container(map) of connections.
    **/
   ConnectionMap connections_;
+
+  std::queue<std::pair<TimerSPtr, std::pair<DeviceUID, ApplicationHandle> > >
+      retry_timer_pool_;
 
   /**
    * @brief Mutex restricting access to connections map.

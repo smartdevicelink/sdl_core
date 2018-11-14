@@ -1183,6 +1183,10 @@ std::string ApplicationImpl::cloud_app_certificate() {
   return certificate_;
 }
 
+bool ApplicationImpl::is_cloud_app() const {
+  return !endpoint_.empty() && hybrid_app_preference_ != "MOBILE";
+}
+
 void ApplicationImpl::set_cloud_app_endpoint(const std::string& endpoint) {
   endpoint_ = endpoint;
 }

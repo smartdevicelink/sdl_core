@@ -31,8 +31,9 @@
  */
 
 #include "config_profile/profile.h"
-#include "utils/logger.h"
 #include "utils/helpers.h"
+#include "utils/logger.h"
+#include "utils/timer_task_impl.h"
 
 #include "transport_manager/transport_adapter/transport_adapter_impl.h"
 #include "transport_manager/transport_adapter/transport_adapter_listener.h"
@@ -209,30 +210,65 @@ TransportAdapter::Error TransportAdapterImpl::Connect(
   }
 
   connections_lock_.AcquireForWriting();
+
+  std::pair<DeviceUID, ApplicationHandle> connection_key;
   const bool already_exists =
-      connections_.end() !=
-      connections_.find(std::make_pair(device_id, app_handle));
+      connections_.end() != connections_.find(connection_key);
+  ConnectionInfo& info = connections_[connection_key];
   if (!already_exists) {
-    ConnectionInfo& info = connections_[std::make_pair(device_id, app_handle)];
     info.app_handle = app_handle;
     info.device_id = device_id;
     info.state = ConnectionInfo::NEW;
   }
+  const bool pending_app = ConnectionInfo::PENDING == info.state ||
+                           ConnectionInfo::RETRY == info.state;
   connections_lock_.Release();
-  if (already_exists) {
+  if (already_exists && !pending_app) {
     LOG4CXX_TRACE(logger_, "exit with ALREADY_EXISTS");
     return ALREADY_EXISTS;
   }
 
   const TransportAdapter::Error err =
       server_connection_factory_->CreateConnection(device_id, app_handle);
-  if (TransportAdapter::OK != err) {
+  if (pending_app && TransportAdapter::FAIL == err) {
+    connections_lock_.AcquireForWriting();
+    if (ConnectionInfo::PENDING == info.state) {
+      info.state = ConnectionInfo::RETRY;
+      info.retry_count = 0;
+    }
+    if (info.retry_count++ > get_settings().cloud_app_max_retry_attempts()) {
+      info.state = ConnectionInfo::PENDING;
+      info.retry_count = 0;
+      return err;
+    }
+    TimerSPtr retry_timer(std::make_shared<timer::Timer>(
+        "RetryConnectionTimer",
+        new timer::TimerTaskImpl<TransportAdapterImpl>(
+            this, &TransportAdapterImpl::RetryConnection)));
+    retry_timer_pool_.push(std::make_pair(retry_timer, connection_key));
+    retry_timer->Start(get_settings().cloud_app_retry_timeout(),
+                       timer::kSingleShot);
+    connections_lock_.Release();
+  } else if (TransportAdapter::OK != err) {
     connections_lock_.AcquireForWriting();
     connections_.erase(std::make_pair(device_id, app_handle));
     connections_lock_.Release();
   }
   LOG4CXX_TRACE(logger_, "exit with error: " << err);
   return err;
+}
+
+void TransportAdapterImpl::RetryConnection() {
+  if (retry_timer_pool_.empty()) {
+    LOG4CXX_ERROR(logger_,
+                  "Unable to find timer, ignoring RetryConnection request");
+    return;
+  }
+  auto connection_key = retry_timer_pool_.front().second;
+  retry_timer_pool_.pop();
+  const DeviceUID device_id = connection_key.first;
+  const ApplicationHandle app_handle = connection_key.second;
+  Connect(device_id, app_handle);
 }
 
 TransportAdapter::Error TransportAdapterImpl::ConnectDevice(

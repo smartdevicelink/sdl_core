@@ -842,6 +842,10 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile(
   // By default app subscribed to CUSTOM_BUTTON
   SendSubscribeCustomButtonNotification();
   SendChangeRegistrationOnHMI(application);
+
+  if (application->is_cloud_app()) {
+    policy_handler_.OnActivateApp(connection_key(), correlation_id());
+  }
 }
 
 void RegisterAppInterfaceRequest::SendChangeRegistration(

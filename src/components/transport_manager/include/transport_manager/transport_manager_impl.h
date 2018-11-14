@@ -43,7 +43,6 @@
 #include <functional>
 
 #include "utils/timer.h"
-#include "utils/timer_task_impl.h"
 #include "utils/rwlock.h"
 
 #include "transport_manager/transport_manager.h"

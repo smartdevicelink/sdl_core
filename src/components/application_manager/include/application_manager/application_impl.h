@@ -419,6 +419,8 @@ class ApplicationImpl : public virtual Application,
 
   std::string cloud_app_certificate() OVERRIDE;
 
+  bool is_cloud_app() const OVERRIDE;
+
   void set_cloud_app_endpoint(const std::string& endpoint) OVERRIDE;
 
   void set_cloud_app_auth_token(const std::string& auth_token) OVERRIDE;

@@ -956,6 +956,8 @@ class Application : public virtual InitialApplicationData,
 
   virtual std::string cloud_app_certificate() = 0;
 
+  virtual bool is_cloud_app() const = 0;
+
   virtual void set_cloud_app_endpoint(const std::string& endpoint) = 0;
 
   virtual void set_cloud_app_auth_token(const std::string& auth_token) = 0;
