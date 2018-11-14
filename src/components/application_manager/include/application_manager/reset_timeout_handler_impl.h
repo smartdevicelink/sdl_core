@@ -54,6 +54,10 @@ class ResetTimeoutHandlerImpl : public event_engine::EventObserver,
   void on_event(const event_engine::Event& event) OVERRIDE;
 
  private:
+  bool CheckConditionsForUpdate(Request request,
+                                uint32_t timeout,
+                                hmi_apis::FunctionID::eType method_name);
+
   std::map<uint32_t, Request> requests_;
   ApplicationManager& application_manager_;
   mutable sync_primitives::Lock requests_lock_;

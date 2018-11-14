@@ -194,7 +194,7 @@ class RequestInfoSet {
    * @return founded request or shared_ptr with NULL
    */
   RequestInfoPtr Find(const uint32_t connection_key,
-                      const uint32_t correlation_id);
+                      const uint32_t correlation_id) const;
 
   /*
    * @brief Get request with smalest end_time_
@@ -264,7 +264,7 @@ class RequestInfoSet {
   TimeSortedRequestInfoSet time_sorted_pending_requests_;
   HashSortedRequestInfoSet hash_sorted_pending_requests_;
 
-  sync_primitives::Lock pending_requests_lock_;
+  mutable sync_primitives::Lock pending_requests_lock_;
 };
 
 /**

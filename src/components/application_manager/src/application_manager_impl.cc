@@ -2154,6 +2154,15 @@ void ApplicationManagerImpl::updateRequestTimeout(
       connection_key, mobile_correlation_id, new_timeout_value);
 }
 
+bool ApplicationManagerImpl::IsUpdateRequestTimeoutRequired(
+    const uint32_t connection_key,
+    const uint32_t mobile_correlation_id,
+    const uint32_t new_timeout_value) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  return request_ctrl_.IsUpdateRequestTimeoutRequired(
+      connection_key, mobile_correlation_id, new_timeout_value);
+}
+
 uint32_t ApplicationManagerImpl::application_id(const int32_t correlation_id) {
   // ykazakov: there is no erase for const iterator for QNX
   std::map<const int32_t, const uint32_t>::iterator it =

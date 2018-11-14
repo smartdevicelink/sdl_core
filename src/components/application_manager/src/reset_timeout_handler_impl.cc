@@ -63,6 +63,27 @@ void ResetTimeoutHandlerImpl::RemoveRequest(uint32_t hmi_correlation_id) {
   };
 }
 
+bool ResetTimeoutHandlerImpl::CheckConditionsForUpdate(
+    Request request,
+    uint32_t timeout,
+    hmi_apis::FunctionID::eType method_name) {
+  if (static_cast<hmi_apis::FunctionID::eType>(request.hmi_function_id_) ==
+      method_name) {
+    if (application_manager_.IsUpdateRequestTimeoutRequired(
+            request.connection_key_, request.mob_correlation_id_, timeout)) {
+      return true;
+    } else {
+      LOG4CXX_WARN(logger_,
+                   "New timeout value is less than the time remaining from "
+                   "the current timeout. OnResetTimeout will be ignored");
+      return false;
+    }
+  } else {
+    LOG4CXX_WARN(logger_, "Method name does not match the hmi function id");
+    return false;
+  }
+}
+
 void ResetTimeoutHandlerImpl::on_event(const event_engine::Event& event) {
   LOG4CXX_AUTO_TRACE(logger_);
   const auto event_id = event.id();
@@ -72,6 +93,10 @@ void ResetTimeoutHandlerImpl::on_event(const event_engine::Event& event) {
         message[strings::msg_params][strings::method_name].asString());
 
     if (hmi_apis::FunctionID::INVALID_ENUM == method_name) {
+      LOG4CXX_WARN(
+          logger_,
+          "Wrong method name received: "
+              << message[strings::msg_params][strings::method_name].asString());
       return;
     }
     uint32_t timeout = application_manager_.get_settings().default_timeout();
@@ -83,15 +108,15 @@ void ResetTimeoutHandlerImpl::on_event(const event_engine::Event& event) {
     auto it = requests_.find(hmi_corr_id);
     if (it != requests_.end()) {
       auto request = it->second;
-      if (static_cast<hmi_apis::FunctionID::eType>(request.hmi_function_id_) ==
-          method_name) {
+      if (CheckConditionsForUpdate(request, timeout, method_name)) {
         application_manager_.updateRequestTimeout(
             request.connection_key_, request.mob_correlation_id_, timeout);
       }
+    } else {
+      LOG4CXX_WARN(logger_,
+                   "Timeout reset failed by " << hmi_corr_id
+                                              << ", no such mobile command");
     }
-    LOG4CXX_WARN(logger_,
-                 "Timeout reset failed by " << hmi_corr_id
-                                            << ", no such mobile command");
   }
 }
 }
