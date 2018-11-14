@@ -446,8 +446,7 @@ uint32_t CommandRequestImpl::SendHMIRequest(
   }
   if (ProcessHMIInterfacesAvailability(hmi_correlation_id, function_id)) {
     if (rpc_service_.ManageHMICommand(result)) {
-      application_manager_.GetResetTimeoutHandler().AddRequest(
-          hmi_correlation_id, correlation_id(), connection_key(), function_id);
+      AddRequestToTimeoutHandler(request);
     } else {
       LOG4CXX_ERROR(logger_, "Unable to send request");
       SendResponse(false, mobile_apis::Result::OUT_OF_MEMORY);
@@ -984,6 +983,36 @@ void CommandRequestImpl::AddTimeOutComponentInfoToMessage(
         not_responding_interfaces_string + " component does not respond";
     response[strings::msg_params][strings::info] = component_info;
   }
+}
+
+void CommandRequestImpl::AddRequestToTimeoutHandler(
+    smart_objects::SmartObject& request) const {
+  uint32_t function_id =
+      request[strings::params][strings::function_id].asUInt();
+  /*SDL must not apply "default timeout for RPCs processing" for
+  BasicCommunication.DialNumber RPC (that is, SDL must always wait for HMI
+  response to BC.DialNumber as long as it takes and not return GENERIC_ERROR
+  to mobile app), so the OnResetTimeout logic is not applicable for DialNumber
+  RPC*/
+  if (hmi_apis::FunctionID::BasicCommunication_DialNumber ==
+      static_cast<hmi_apis::FunctionID::eType>(function_id)) {
+    return;
+  }
+  /*If soft buttons are present in Alert RPC, SDL will not use timeout tracking
+  for response, so the OnResetTimeout logic is not applicable in this case*/
+  if (hmi_apis::FunctionID::UI_Alert ==
+      static_cast<hmi_apis::FunctionID::eType>(function_id)) {
+    if (request.keyExists(strings::msg_params)) {
+      if (request[strings::msg_params].keyExists(strings::soft_buttons)) {
+        return;
+      }
+    }
+  }
+  application_manager_.GetResetTimeoutHandler().AddRequest(
+      request[strings::params][strings::correlation_id].asUInt(),
+      correlation_id(),
+      connection_key(),
+      function_id);
 }
 
 }  // namespace commands

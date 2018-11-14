@@ -383,6 +383,8 @@ class CommandRequestImpl : public CommandImpl,
    */
   void AddTimeOutComponentInfoToMessage(
       smart_objects::SmartObject& response) const;
+
+  void AddRequestToTimeoutHandler(smart_objects::SmartObject& request) const;
 };
 
 }  // namespace commands
