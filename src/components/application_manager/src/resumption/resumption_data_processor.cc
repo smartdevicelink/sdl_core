@@ -142,9 +142,12 @@ bool ResumptionDataProcessor::HasSubscriptionsToRestore(
   const bool has_waypoints_subscriptions =
       subscriptions[strings::subscribed_for_way_points].asBool();
 
-  const bool has_subscriptions_to_restore = has_ivi_subscriptions ||
-                                            has_button_subscriptions ||
-                                            has_waypoints_subscriptions;
+  const bool has_interior_vehicle_data_to_restore =
+      !subscriptions[kModuleData].empty();
+
+  const bool has_subscriptions_to_restore =
+      has_ivi_subscriptions || has_button_subscriptions ||
+      has_waypoints_subscriptions || has_interior_vehicle_data_to_restore;
 
   LOG4CXX_DEBUG(logger_,
                 std::boolalpha << "Application has subscriptions to restore: "
