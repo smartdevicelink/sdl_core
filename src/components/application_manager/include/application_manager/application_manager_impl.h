@@ -678,6 +678,11 @@ class ApplicationManagerImpl
                             uint32_t mobile_correlation_id,
                             uint32_t new_timeout_value) OVERRIDE;
 
+  bool IsUpdateRequestTimeoutRequired(
+      const uint32_t connection_key,
+      const uint32_t mobile_correlation_id,
+      const uint32_t new_timeout_value) OVERRIDE;
+
   /**
    * @brief AddPolicyObserver allows to subscribe needed component to events
    * from policy.

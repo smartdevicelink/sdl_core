@@ -150,6 +150,24 @@ bool RequestController::CheckPendingRequestsAmount(
   return true;
 }
 
+bool RequestController::IsUpdateRequestTimeoutRequired(
+    const uint32_t app_id,
+    const uint32_t correlation_id,
+    const uint32_t new_timeout) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  RequestInfoPtr request_info =
+      waiting_for_response_.Find(app_id, correlation_id);
+  if (request_info) {
+    date_time::TimeDuration current_time = date_time::getCurrentTime();
+    const date_time::TimeDuration end_time = request_info->end_time();
+    date_time::AddMilliseconds(current_time, new_timeout);
+    if (date_time::getmSecs(current_time) > date_time::getmSecs(end_time)) {
+      return true;
+    }
+  }
+  return false;
+}
+
 RequestController::TResult RequestController::addMobileRequest(
     const RequestPtr request, const mobile_apis::HMILevel::eType& hmi_level) {
   LOG4CXX_AUTO_TRACE(logger_);

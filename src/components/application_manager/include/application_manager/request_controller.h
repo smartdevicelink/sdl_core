@@ -196,7 +196,6 @@ class RequestController {
 
   /**
   * @brief Updates request timeout
-  *
   * @param app_id Connection key of application
   * @param mobile_correlation_id Correlation ID of the mobile request
   * @param new_timeout_value New timeout to be set in milliseconds
@@ -205,6 +204,17 @@ class RequestController {
                             const uint32_t& mobile_correlation_id,
                             const uint32_t& new_timeout);
 
+  /**
+   * @brief IsUpdateRequestTimeoutRequired check is update timeout required.
+   * @param app_id Connection key of application
+   * @param correlation_id Correlation ID of the mobile request
+   * @param new_timeout New timeout to be set in milliseconds
+   * @return true if the new timeout value is greater than the time remaining
+   * from the current timeout, otherwise - false
+   */
+  bool IsUpdateRequestTimeoutRequired(const uint32_t app_id,
+                                      const uint32_t correlation_id,
+                                      const uint32_t new_timeout);
   /*
    * @brief Function Should be called when Low Voltage is occured
    */

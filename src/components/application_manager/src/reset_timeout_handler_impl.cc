@@ -72,6 +72,7 @@ void ResetTimeoutHandlerImpl::on_event(const event_engine::Event& event) {
         message[strings::msg_params][strings::method_name].asString());
 
     if (hmi_apis::FunctionID::INVALID_ENUM == method_name) {
+      LOG4CXX_WARN(logger_, "Wrong method name received");
       return;
     }
     uint32_t timeout = application_manager_.get_settings().default_timeout();
@@ -85,13 +86,28 @@ void ResetTimeoutHandlerImpl::on_event(const event_engine::Event& event) {
       auto request = it->second;
       if (static_cast<hmi_apis::FunctionID::eType>(request.hmi_function_id_) ==
           method_name) {
-        application_manager_.updateRequestTimeout(
-            request.connection_key_, request.mob_correlation_id_, timeout);
+        if (application_manager_.IsUpdateRequestTimeoutRequired(
+                request.connection_key_,
+                request.mob_correlation_id_,
+                timeout) ||
+            (0 == timeout)) {  // if timeout = 0 SDL will apply the unlimited
+                               // timeout
+          application_manager_.updateRequestTimeout(
+              request.connection_key_, request.mob_correlation_id_, timeout);
+          return;
+        } else {
+          LOG4CXX_WARN(logger_,
+                       "New timeout value is less than the time remaining from "
+                       "the current timeout. OnResetTimeout will be ignored");
+        }
+      } else {
+        LOG4CXX_WARN(logger_, "Method name does not match the hmi function id");
       }
+    } else {
+      LOG4CXX_WARN(logger_,
+                   "Timeout reset failed by " << hmi_corr_id
+                                              << ", no such mobile command");
     }
-    LOG4CXX_WARN(logger_,
-                 "Timeout reset failed by " << hmi_corr_id
-                                            << ", no such mobile command");
   }
 }
 }
