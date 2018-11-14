@@ -56,7 +56,7 @@ using sdl_rpc_plugin::commands::SubscribeWayPointsRequest;
 typedef std::shared_ptr<OnResetTimeoutNotification> NotificationPtr;
 
 const uint32_t kDefaultTimeout = 10000u;
-const uint32_t kTimeout = 3000u;
+const uint32_t kTimeout = 13000u;
 const uint32_t kRequestId = 22;
 const std::string kMethodName = "Navigation.SubscribeWayPoints";
 
@@ -114,6 +114,10 @@ TEST_F(ResetTimeoutHandlerTest, on_event_OnResetTimeout_success) {
   EXPECT_CALL(app_mngr_, GetResetTimeoutHandler())
       .WillOnce(ReturnRef(*reset_timeout_handler_));
   EXPECT_CALL(app_mngr_,
+              IsUpdateRequestTimeoutRequired(
+                  mock_app->app_id(), command->correlation_id(), kTimeout))
+      .WillOnce(Return(true));
+  EXPECT_CALL(app_mngr_,
               updateRequestTimeout(
                   mock_app->app_id(), command->correlation_id(), kTimeout));
 
@@ -150,6 +154,11 @@ TEST_F(ResetTimeoutHandlerTest, on_event_OnResetTimeout_missed_reset_period) {
       .WillOnce(Return(hmi_apis::FunctionID::Navigation_SubscribeWayPoints));
   EXPECT_CALL(app_mngr_, GetResetTimeoutHandler())
       .WillOnce(ReturnRef(*reset_timeout_handler_));
+  EXPECT_CALL(
+      app_mngr_,
+      IsUpdateRequestTimeoutRequired(
+          mock_app->app_id(), command->correlation_id(), kDefaultTimeout))
+      .WillOnce(Return(true));
   EXPECT_CALL(
       app_mngr_,
       updateRequestTimeout(
@@ -189,6 +198,7 @@ TEST_F(ResetTimeoutHandlerTest, on_event_OnResetTimeout_invalid_request_id) {
       .WillOnce(Return(hmi_apis::FunctionID::Navigation_SubscribeWayPoints));
   EXPECT_CALL(app_mngr_, GetResetTimeoutHandler())
       .WillOnce(ReturnRef(*reset_timeout_handler_));
+  EXPECT_CALL(app_mngr_, IsUpdateRequestTimeoutRequired(_, _, _)).Times(0);
   EXPECT_CALL(app_mngr_, updateRequestTimeout(_, _, _)).Times(0);
 
   ASSERT_TRUE(command->Init());
@@ -225,6 +235,7 @@ TEST_F(ResetTimeoutHandlerTest, on_event_OnResetTimeout_invalid_method_name) {
       .WillOnce(Return(hmi_apis::FunctionID::INVALID_ENUM));
   EXPECT_CALL(app_mngr_, GetResetTimeoutHandler())
       .WillOnce(ReturnRef(*reset_timeout_handler_));
+  EXPECT_CALL(app_mngr_, IsUpdateRequestTimeoutRequired(_, _, _)).Times(0);
   EXPECT_CALL(app_mngr_, updateRequestTimeout(_, _, _)).Times(0);
 
   ASSERT_TRUE(command->Init());

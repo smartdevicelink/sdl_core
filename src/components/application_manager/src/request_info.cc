@@ -146,7 +146,7 @@ bool RequestInfoSet::Add(RequestInfoPtr request_info) {
 }
 
 RequestInfoPtr RequestInfoSet::Find(const uint32_t connection_key,
-                                    const uint32_t correlation_id) {
+                                    const uint32_t correlation_id) const {
   RequestInfoPtr result;
 
   // Request info for searching in request info set by log_n time

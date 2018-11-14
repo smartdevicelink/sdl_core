@@ -551,6 +551,19 @@ class ApplicationManager {
                                     uint32_t mobile_correlation_id,
                                     uint32_t new_timeout_value) = 0;
 
+  /**
+   * @brief IsUpdateRequestTimeoutRequired check is update timeout required.
+   * @param app_id Connection key of application
+   * @param correlation_id Correlation ID of the mobile request
+   * @param new_timeout New timeout to be set in milliseconds
+   * @return true if the new timeout value is greater than the time remaining
+   * from the current timeout, otherwise - false
+   */
+  virtual bool IsUpdateRequestTimeoutRequired(
+      const uint32_t connection_key,
+      const uint32_t mobile_correlation_id,
+      const uint32_t new_timeout_value) = 0;
+
   virtual StateController& state_controller() = 0;
 
   virtual void SetUnregisterAllApplicationsReason(
