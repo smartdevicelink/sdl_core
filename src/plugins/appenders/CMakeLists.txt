@@ -34,13 +34,24 @@ add_library(${PROJECT_NAME} SHARED)
 add_library(${PROJECT_NAME}::${PROJECT_NAME} ALIAS ${PROJECT_NAME})
 
 target_sources(${PROJECT_NAME}
-               PRIVATE
-               "${CMAKE_CURRENT_LIST_DIR}/safe_file_appender.cc"
-               "${CMAKE_CURRENT_LIST_DIR}/safe_file_appender.h"
-               "${CMAKE_CURRENT_LIST_DIR}/safe_rolling_file_appender.cc"
-               "${CMAKE_CURRENT_LIST_DIR}/safe_rolling_file_appender.h")
+  PRIVATE
+    "${CMAKE_CURRENT_LIST_DIR}/src/safe_file_appender.cc"
+    "${CMAKE_CURRENT_LIST_DIR}/src/safe_rolling_file_appender.cc"
+)
 
-target_link_libraries(${PROJECT_NAME} PUBLIC EXPAT::EXPAT)
+target_include_directories(${PROJECT_NAME}
+  PUBLIC 
+  "${CMAKE_CURRENT_LIST_DIR}/include"
+  "${THIRD_PARTY_INSTALL_PREFIX}/include"
+)
+
+SDL_find_package(log4cxx REQUIRED)
+
+target_link_libraries(${PROJECT_NAME}
+  PUBLIC
+  EXPAT::EXPAT
+  log4cxx::log4cxx
+)
 
 install(TARGETS ${PROJECT_NAME}
         DESTINATION "${CMAKE_INSTALL_LIBDIR}"
