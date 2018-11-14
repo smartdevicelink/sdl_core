@@ -49,7 +49,9 @@ class CloudWebsocketTransportAdapter : public TransportAdapterImpl {
   /**
    * @brief Constructor.
    */
-  explicit CloudWebsocketTransportAdapter(resumption::LastState& last_state, const TransportManagerSettings& settings);
+  explicit CloudWebsocketTransportAdapter(
+      resumption::LastState& last_state,
+      const TransportManagerSettings& settings);
 
   /**
    * @brief Destructor.
@@ -93,7 +95,7 @@ class CloudWebsocketTransportAdapter : public TransportAdapterImpl {
  private:
   /**
    * @brief Keeps transport specific configuration
-   * 
+   *
    * Cloud websocket transport uses following information:
    * - "enabled": whether the transport is currently enabled or not. Value can
    *              be "true" or "false".

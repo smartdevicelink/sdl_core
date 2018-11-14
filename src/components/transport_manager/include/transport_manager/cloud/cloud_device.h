@@ -45,9 +45,7 @@ namespace transport_adapter {
 
 class CloudDevice : public Device {
  public:
-  CloudDevice(std::string& host,
-            std::string& port,
-            std::string& name);
+  CloudDevice(std::string& host, std::string& port, std::string& name);
 
  protected:
   virtual bool IsSameAs(const Device* other_device) const;
@@ -55,7 +53,7 @@ class CloudDevice : public Device {
   virtual ApplicationList GetApplicationList() const;
 
  private:
-  //todo add private varaibles, maybe ip port or other connection information?
+  // todo add private varaibles, maybe ip port or other connection information?
 };
 
 }  // namespace transport_adapter

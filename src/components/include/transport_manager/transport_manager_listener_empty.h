@@ -105,7 +105,7 @@ class TransportManagerListenerEmpty : public TransportManagerListener {
    * @param connection_id connection unique identifier.
    */
   void OnConnectionPending(const DeviceInfo& device_info,
-                               const ConnectionUID connection_id) OVERRIDE {}
+                           const ConnectionUID connection_id) OVERRIDE {}
 
   /**
    * @brief Reaction to the event, when connection is established.

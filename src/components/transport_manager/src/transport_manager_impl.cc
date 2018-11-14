@@ -129,9 +129,9 @@ void TransportManagerImpl::ReconnectionTimeout() {
              device_to_reconnect_);
 }
 
-void TransportManagerImpl::AddCloudDevice(const std::string& endpoint, const std::string& cloud_transport_type) {
-
-  //todo put conversion into own function
+void TransportManagerImpl::AddCloudDevice(
+    const std::string& endpoint, const std::string& cloud_transport_type) {
+  // todo put conversion into own function
   transport_adapter::DeviceType type = transport_adapter::DeviceType::UNKNOWN;
   if (cloud_transport_type == "WS") {
     type = transport_adapter::DeviceType::CLOUD_WEBSOCKET;
@@ -140,7 +140,7 @@ void TransportManagerImpl::AddCloudDevice(const std::string& endpoint, const std
   }
 
   std::vector<TransportAdapter*>::iterator ta = transport_adapters_.begin();
-  for (;ta != transport_adapters_.end(); ++ta) {
+  for (; ta != transport_adapters_.end(); ++ta) {
     if ((*ta)->GetDeviceType() == type) {
       (*ta)->CreateDevice(endpoint);
     }
@@ -1000,14 +1000,14 @@ void TransportManagerImpl::Handle(TransportAdapterEvent event) {
       int connection_id = 0;
       std::vector<ConnectionInternal>::iterator it = connections_.begin();
       std::vector<ConnectionInternal>::iterator end = connections_.end();
-      for(; it != end; ++it){
-        if(it->transport_adapter != event.transport_adapter) {
+      for (; it != end; ++it) {
+        if (it->transport_adapter != event.transport_adapter) {
           continue;
-        } else if(it->Connection::device != event.device_uid) {
+        } else if (it->Connection::device != event.device_uid) {
           continue;
-        } else if(it->Connection::application != event.application_id) {
+        } else if (it->Connection::application != event.application_id) {
           continue;
-        } else if(it->device_handle_ != device_handle) {
+        } else if (it->device_handle_ != device_handle) {
           continue;
         } else {
           LOG4CXX_DEBUG(logger_, "Connection Object Already Exists");
@@ -1016,8 +1016,7 @@ void TransportManagerImpl::Handle(TransportAdapterEvent event) {
         }
       }
 
-
-      if(it == end) {
+      if (it == end) {
         AddConnection(ConnectionInternal(this,
                                          event.transport_adapter,
                                          ++connection_id_counter_,

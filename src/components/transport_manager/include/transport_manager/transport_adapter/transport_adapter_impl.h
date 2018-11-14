@@ -313,7 +313,7 @@ class TransportAdapterImpl : public TransportAdapter,
    * @param app_handle Handle of application.
    */
   void ConnectPending(const DeviceUID& device_handle,
-                   const ApplicationHandle& app_handle) OVERRIDE;
+                      const ApplicationHandle& app_handle) OVERRIDE;
 
   /**
    * @brief Set state of specified connection - ESTABLISHED and launch

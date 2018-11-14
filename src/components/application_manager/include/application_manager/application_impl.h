@@ -425,7 +425,8 @@ class ApplicationImpl : public virtual Application,
 
   void set_cloud_app_transport_type(const std::string& transport_type) OVERRIDE;
 
-  void set_hybrid_app_preference(const std::string& hybrid_app_preference) OVERRIDE;
+  void set_hybrid_app_preference(
+      const std::string& hybrid_app_preference) OVERRIDE;
 
   void set_cloud_app_certificate(const std::string& certificate) OVERRIDE;
 
@@ -537,7 +538,7 @@ class ApplicationImpl : public virtual Application,
   std::string endpoint_;
   std::string auth_token_;
   std::string cloud_transport_type_;
-  std::string hybrid_app_preference_; 
+  std::string hybrid_app_preference_;
   std::string certificate_;
 
   /**

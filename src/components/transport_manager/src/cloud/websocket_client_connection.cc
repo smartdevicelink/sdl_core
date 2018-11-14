@@ -44,18 +44,19 @@ CREATE_LOGGERPTR_GLOBAL(logger_, "TransportManager")
 WebsocketClientConnection::WebsocketClientConnection(
     const DeviceUID& device_uid,
     const ApplicationHandle& app_handle,
-    TransportAdapterController* controller): controller_(controller)
-        , resolver_(ioc_)
-        , ws_(ioc_)
-        , shutdown_(false)
-        , thread_delegate_(new LoopThreadDelegate(&message_queue_, this))
-        , write_thread_(threads::CreateThread("WS Async Send", thread_delegate_))
-        , device_uid_(device_uid)
-        , app_handle_(app_handle) {}
+    TransportAdapterController* controller)
+    : controller_(controller)
+    , resolver_(ioc_)
+    , ws_(ioc_)
+    , shutdown_(false)
+    , thread_delegate_(new LoopThreadDelegate(&message_queue_, this))
+    , write_thread_(threads::CreateThread("WS Async Send", thread_delegate_))
+    , device_uid_(device_uid)
+    , app_handle_(app_handle) {}
 
 WebsocketClientConnection::~WebsocketClientConnection() {
   ioc_.stop();
-  if(io_service_thread_.joinable()) {
+  if (io_service_thread_.joinable()) {
     io_service_thread_.join();
   }
 }
@@ -92,20 +93,20 @@ TransportAdapter::Error WebsocketClientConnection::Start() {
   controller_->ConnectDone(device_uid_, app_handle_);
 
   // Start async read
-  ws_.async_read(
-    buffer_,
-    std::bind(
-      &WebsocketClientConnection::OnRead,
-      this,
-      std::placeholders::_1,
-      std::placeholders::_2));
+  ws_.async_read(buffer_,
+                 std::bind(&WebsocketClientConnection::OnRead,
+                           this,
+                           std::placeholders::_1,
+                           std::placeholders::_2));
 
   // Start IO Service thread. Allows for async reads without blocking.
-  io_service_thread_ = std::thread([&](){ ioc_.run(); printf("io_service_thread_ END!!!\n");
-   });
+  io_service_thread_ = std::thread([&]() {
+    ioc_.run();
+    printf("io_service_thread_ END!!!\n");
+  });
 
   // Start async write thread
-  
+
   printf("End of websockets\n");
 
   return TransportAdapter::OK;
@@ -122,26 +123,24 @@ void WebsocketClientConnection::Recv(boost::system::error_code ec) {
     std::string str_err = "ErrorMessage: " + ec.message();
     printf("%s\n", str_err.c_str());
     LOG4CXX_ERROR(logger_, str_err);
-    //shutdown_ = true;
-    //ioc_.stop();
-    //thread_delegate_->SetShutdown();
-    //controller_->deleteController(this);
+    // shutdown_ = true;
+    // ioc_.stop();
+    // thread_delegate_->SetShutdown();
+    // controller_->deleteController(this);
     Shutdown();
     return;
   }
   printf("calling async read\n");
 
-  ws_.async_read(
-    buffer_,
-    std::bind(
-      &WebsocketClientConnection::OnRead,
-      this,
-      std::placeholders::_1,
-      std::placeholders::_2));
+  ws_.async_read(buffer_,
+                 std::bind(&WebsocketClientConnection::OnRead,
+                           this,
+                           std::placeholders::_1,
+                           std::placeholders::_2));
 }
 
 void WebsocketClientConnection::OnRead(boost::system::error_code ec,
-                            std::size_t bytes_transferred) {
+                                       std::size_t bytes_transferred) {
   printf("OnRead\n");
   boost::ignore_unused(bytes_transferred);
   if (ec) {
@@ -151,7 +150,7 @@ void WebsocketClientConnection::OnRead(boost::system::error_code ec,
     Shutdown();
     controller_->ConnectionAborted(
         device_uid_, app_handle_, CommunicationError());
-    
+
     printf("return error\n");
     return;
   }
@@ -160,11 +159,12 @@ void WebsocketClientConnection::OnRead(boost::system::error_code ec,
   LOG4CXX_DEBUG(logger_, "Cloud Transport Received: " << data_str);
   printf("%s\n", data_str.c_str());
 
-  ssize_t size = (ssize_t)buffer_.size();  
-  const uint8_t* data = boost::asio::buffer_cast<const uint8_t*>(boost::beast::buffers_front(buffer_.data()));
+  ssize_t size = (ssize_t)buffer_.size();
+  const uint8_t* data = boost::asio::buffer_cast<const uint8_t*>(
+      boost::beast::buffers_front(buffer_.data()));
 
   ::protocol_handler::RawMessagePtr frame(
-    new protocol_handler::RawMessage(0, 0, data, size));
+      new protocol_handler::RawMessage(0, 0, data, size));
 
   controller_->DataReceiveDone(device_uid_, app_handle_, frame);
 
@@ -189,7 +189,6 @@ TransportAdapter::Error WebsocketClientConnection::Disconnect() {
 }
 
 void WebsocketClientConnection::Shutdown() {
-  
   shutdown_ = true;
 
   if (thread_delegate_) {
@@ -205,7 +204,8 @@ void WebsocketClientConnection::Shutdown() {
 }
 
 WebsocketClientConnection::LoopThreadDelegate::LoopThreadDelegate(
-    MessageQueue<Message, AsyncQueue>* message_queue, WebsocketClientConnection* handler)
+    MessageQueue<Message, AsyncQueue>* message_queue,
+    WebsocketClientConnection* handler)
     : message_queue_(*message_queue), handler_(*handler), shutdown_(false) {}
 
 void WebsocketClientConnection::LoopThreadDelegate::threadMain() {
@@ -231,11 +231,15 @@ void WebsocketClientConnection::LoopThreadDelegate::DrainQueue() {
     if (!shutdown_) {
       printf("Calling Write!!!\n");
       boost::system::error_code ec;
-      handler_.ws_.write(boost::asio::buffer(message_ptr->data(), message_ptr->data_size()));
+      handler_.ws_.write(
+          boost::asio::buffer(message_ptr->data(), message_ptr->data_size()));
       if (ec) {
         LOG4CXX_ERROR(logger_, "Error writing to websocket");
         handler_.Shutdown();
-        handler_.controller_->DataSendFailed(handler_.device_uid_, handler_.app_handle_, message_ptr, DataSendError());
+        handler_.controller_->DataSendFailed(handler_.device_uid_,
+                                             handler_.app_handle_,
+                                             message_ptr,
+                                             DataSendError());
       }
     }
   }

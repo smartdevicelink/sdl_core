@@ -71,9 +71,9 @@ enum DeviceType {
   UNKNOWN
 };
 
-enum HybridAppPreference { // todo find correct place for this enum defintion.
+enum HybridAppPreference {  // todo find correct place for this enum defintion.
   MOBILE,
-  CLOUD, 
+  CLOUD,
   BOTH
 };
 
@@ -105,7 +105,8 @@ typedef std::list<TransportAdapterListener*> TransportAdapterListenerList;
 typedef std::map<std::string, std::string> TransportConfig;
 
 /**
- * @brief Type definition of container indexed by app id that contains connection information for all cloud apps.
+ * @brief Type definition of container indexed by app id that contains
+ * connection information for all cloud apps.
  */
 typedef std::map<std::string, CloudAppProperties> CloudAppTransportConfig;
 

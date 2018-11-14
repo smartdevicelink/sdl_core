@@ -107,7 +107,7 @@ class TransportManagerListener {
    * @param connection_id connection unique identifier.
    */
   virtual void OnConnectionPending(const DeviceInfo& device_info,
-                                       const ConnectionUID connection_id) = 0;
+                                   const ConnectionUID connection_id) = 0;
   /**
    * @brief Reaction to the event, when connection is established.
    *
