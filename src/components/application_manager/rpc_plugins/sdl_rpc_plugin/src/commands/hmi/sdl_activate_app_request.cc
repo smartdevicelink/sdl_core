@@ -115,6 +115,8 @@ void SDLActivateAppRequest::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
   using namespace hmi_apis::FunctionID;
 
+  ApplicationConstSharedPtr app =
+      application_manager_.WaitingApplicationByID(app_id());
   if (application_manager_.state_controller().IsStateActive(
           HmiState::STATE_ID_DEACTIVATE_HMI)) {
     LOG4CXX_DEBUG(logger_,
@@ -124,11 +126,10 @@ void SDLActivateAppRequest::Run() {
                       static_cast<eType>(function_id()),
                       hmi_apis::Common_Result::REJECTED,
                       "HMIDeactivate is active");
-  } else if (!app_to_activate->IsRegistered() &&
-             app_to_activate->is_cloud_app()) {
+  } else if (app && !app->IsRegistered() && app->is_cloud_app()) {
     LOG4CXX_DEBUG(logger_, "Starting cloud application.");
-    application_manager_.connection_handler().ConnectToDevice(
-        app_to_activate->device());
+    subscribe_on_event(BasicCommunication_OnAppRegistered);
+    application_manager_.connection_handler().ConnectToDevice(app->device());
   } else {
     const uint32_t application_id = app_id();
     policy_handler_.OnActivateApp(application_id, correlation_id());
@@ -144,7 +145,7 @@ void SDLActivateAppRequest::Run() {
   const uint32_t application_id = app_id();
 
   ApplicationConstSharedPtr app_to_activate =
-      application_manager_.application(application_id);
+      application_manager_.application_by_hmi_app(application_id);
 
   if (!app_to_activate) {
     LOG4CXX_WARN(
@@ -188,6 +189,7 @@ void SDLActivateAppRequest::Run() {
     return;
   } else if (app_to_activate->is_cloud_app()) {
     LOG4CXX_DEBUG(logger_, "Starting cloud application.");
+    subscribe_on_event(BasicCommunication_OnAppRegistered);
     application_manager_.connection_handler().ConnectToDevice(
         app_to_activate->device());
     return;
@@ -272,7 +274,7 @@ uint32_t SDLActivateAppRequest::hmi_app_id(
     LOG4CXX_DEBUG(logger_, application << " section is absent in the message.");
     return 0;
   }
-  if (so[msg_params][application].keyExists(strings::app_id)) {
+  if (!so[msg_params][application].keyExists(strings::app_id)) {
     LOG4CXX_DEBUG(logger_,
                   strings::app_id << " section is absent in the message.");
     return 0;

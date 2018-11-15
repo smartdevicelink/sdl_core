@@ -346,19 +346,6 @@ void RegisterAppInterfaceRequest::Run() {
     application->set_msg_version(module_version);
   }
 
-  // For resuming application need to restore hmi_app_id from resumeCtrl
-  resumption::ResumeCtrl& resumer = application_manager_.resume_controller();
-  const std::string& device_mac = application->mac_address();
-
-  // there is side affect with 2 mobile app with the same mobile app_id
-  if (resumer.IsApplicationSaved(policy_app_id, device_mac)) {
-    application->set_hmi_application_id(
-        resumer.GetHMIApplicationID(policy_app_id, device_mac));
-  } else {
-    application->set_hmi_application_id(
-        application_manager_.GenerateNewHMIAppID());
-  }
-
   application->set_is_media_application(
       msg_params[strings::is_media_application].asBool());
 
@@ -450,6 +437,8 @@ void RegisterAppInterfaceRequest::Run() {
   if (msg_params.keyExists(strings::device_info)) {
     FillDeviceInfo(&device_info);
   }
+
+  const std::string& device_mac = application->mac_address();
 
   GetPolicyHandler().SetDeviceInfo(device_mac, device_info);
 
@@ -842,10 +831,6 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile(
   // By default app subscribed to CUSTOM_BUTTON
   SendSubscribeCustomButtonNotification();
   SendChangeRegistrationOnHMI(application);
-
-  if (application->is_cloud_app()) {
-    policy_handler_.OnActivateApp(connection_key(), correlation_id());
-  }
 }
 
 void RegisterAppInterfaceRequest::SendChangeRegistration(

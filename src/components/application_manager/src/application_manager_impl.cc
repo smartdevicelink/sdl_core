@@ -541,6 +541,7 @@ ApplicationSharedPtr ApplicationManagerImpl::RegisterApplication(
                           app_name,
                           GetPolicyHandler().GetStatisticManager(),
                           *this));
+
   if (!application) {
     std::shared_ptr<smart_objects::SmartObject> response(
         MessageHelper::CreateNegativeResponse(
@@ -610,10 +611,45 @@ ApplicationSharedPtr ApplicationManagerImpl::RegisterApplication(
 
   // Keep HMI add id in case app is present in "waiting for registration" list
   apps_to_register_list_lock_ptr_->Acquire();
-  AppsWaitRegistrationSet::iterator it = apps_to_register_.find(application);
-  if (apps_to_register_.end() != it) {
+  PolicyAppIdPredicate finder(application->policy_app_id());
+  ApplicationSet::iterator it =
+      std::find_if(apps_to_register_.begin(), apps_to_register_.end(), finder);
+
+  if (apps_to_register_.end() == it) {
+    DevicePredicate finder(application->device());
+    it = std::find_if(
+        apps_to_register_.begin(), apps_to_register_.end(), finder);
+
+    bool found = apps_to_register_.end() != it;
+    bool is_mismatched_cloud_app = found && (*it)->is_cloud_app() &&
+                                   policy_app_id != (*it)->policy_app_id();
+
+    // Reject registration request if a cloud app registers with the incorrect
+    // appID
+    if (is_mismatched_cloud_app) {
+      std::shared_ptr<smart_objects::SmartObject> response(
+          MessageHelper::CreateNegativeResponse(
+              connection_key,
+              mobile_apis::FunctionID::RegisterAppInterfaceID,
+              message[strings::params][strings::correlation_id].asUInt(),
+              mobile_apis::Result::DISALLOWED));
+      (*response)[strings::msg_params][strings::info] =
+          "Cloud app registered with incorrect app id";
+      rpc_service_->ManageMobileCommand(response,
+                                        commands::Command::SOURCE_SDL);
+      return ApplicationSharedPtr();
+    }
+  } else {
     application->set_hmi_application_id((*it)->hmi_app_id());
-    apps_to_register_.erase(application);
+
+    // Set cloud app parameters
+    application->set_cloud_app_endpoint((*it)->cloud_app_endpoint());
+    application->set_cloud_app_certificate((*it)->cloud_app_certificate());
+    application->set_cloud_app_auth_token((*it)->cloud_app_authtoken());
+    application->set_cloud_app_transport_type(
+        (*it)->cloud_app_transport_type());
+    application->set_hybrid_app_preference((*it)->hybrid_app_preference());
+    apps_to_register_.erase(it);
   }
   apps_to_register_list_lock_ptr_->Release();
 
@@ -835,7 +871,7 @@ void ApplicationManagerImpl::CreatePendingApplication(
       *this));
 
   if (!application) {
-    LOG4CXX_INFO(logger_, "Could not streate application");
+    LOG4CXX_INFO(logger_, "Could not create application");
     return;
   }
 
