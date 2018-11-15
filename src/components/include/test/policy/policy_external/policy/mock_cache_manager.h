@@ -78,13 +78,14 @@ class MockCacheManagerInterface : public ::policy::CacheManagerInterface {
   MOCK_CONST_METHOD0(GetVehicleInfo, const VehicleInfo());
   MOCK_CONST_METHOD1(GetEnabledCloudApps,
                      void(std::vector<std::string>& enabled_apps));
-  MOCK_CONST_METHOD6(GetCloudAppParameters,
-                     const bool(const std::string& policy_app_id,
-                                std::string& endpoint,
-                                std::string& certificate,
-                                std::string& auth_token,
-                                std::string& cloud_transport_type,
-                                std::string& hybrid_app_preference));
+  MOCK_CONST_METHOD7(GetCloudAppParameters,
+                     void(const std::string& policy_app_id,
+                          bool& enabled,
+                          std::string& endpoint,
+                          std::string& certificate,
+                          std::string& auth_token,
+                          std::string& cloud_transport_type,
+                          std::string& hybrid_app_preference));
   MOCK_METHOD2(SetCloudAppEnabled,
                void(const std::string& policy_app_id, const bool enabled));
   MOCK_METHOD2(SetAppAuthToken,

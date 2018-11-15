@@ -696,8 +696,9 @@ void CacheManager::GetEnabledCloudApps(
   }
 }
 
-const bool CacheManager::GetCloudAppParameters(
+void CacheManager::GetCloudAppParameters(
     const std::string& policy_app_id,
+    bool& enabled,
     std::string& endpoint,
     std::string& certificate,
     std::string& auth_token,
@@ -723,9 +724,8 @@ const bool CacheManager::GetCloudAppParameters(
         app_policy.hybrid_app_preference.is_initialized()
             ? EnumToJsonString(*app_policy.hybrid_app_preference)
             : std::string();
-    return app_policy.enabled.is_initialized() && *app_policy.enabled;
+    enabled = app_policy.enabled.is_initialized() && *app_policy.enabled;
   }
-  return false;
 }
 
 void CacheManager::SetCloudAppEnabled(const std::string& policy_app_id,
