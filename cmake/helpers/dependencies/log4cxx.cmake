@@ -10,8 +10,6 @@ find_path(log4cxx_INCLUDE_DIR
     include
 )
 
-set(log4cxx_INCLUDE_DIR "${THIRD_PARTY_INSTALL_PREFIX}/include/log4cxx/")
-
 find_library(log4cxx_LIBRARY
   NAMES
     log4cxx
@@ -19,7 +17,6 @@ find_library(log4cxx_LIBRARY
   lib
 )
 
-set(log4cxx_LIBRARY "${THIRD_PARTY_INSTALL_PREFIX}/lib/liblog4cxx.so")
 mark_as_advanced(log4cxx_INCLUDE_DIR log4cxx_LIBRARY log4cxx_FOUND)
 
 if(log4cxx_LIBRARY AND log4cxx_INCLUDE_DIR)

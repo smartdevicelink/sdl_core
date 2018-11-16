@@ -33,142 +33,26 @@ include("./set_3rd_party_paths.cmake")
 set(3RD_PARTY_SOURCE_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
 set(3RD_PARTY_BINARY_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
 
-set (install-3rd_party_logger_var "")
-
-if(NO_REBUILD_3RD_PARTY)
-  set(NO_REBUILD_3RD_PARTY_LOGGER ON)
-endif()
-
-if(FORCE_3RD_PARTY)
-  if(NO_REBUILD_3RD_PARTY)
-  	message(FATAL_ERROR "Please don't turn on both FORCE_3RD_PARTY and NO_REBUILD_3RD_PARTY at the same time.")
-  else()
-	set(FORCE_3RD_PARTY_LOGGER ON)
-  endif()
-endif()
-
 if(ENABLE_LOG)
   # --- libexpat
   add_subdirectory(expat-2.1.0)
   set(EXPAT_LIBS_DIRECTORY ${3RD_PARTY_INSTALL_PREFIX_ARCH}/lib PARENT_SCOPE)
 
-  if(NO_REBUILD_3RD_PARTY_LOGGER)
-    message(STATUS "Not rebuilding logger.")
-  else()
-    if(FORCE_3RD_PARTY_LOGGER)
-      message(STATUS "Force to rebuild logger.")
-
-      #build logger
-      add_custom_target(3rd_party_logger
-        make
-        WORKING_DIRECTORY ${3RD_PARTY_BINARY_DIRECTORY}
-      )
-
-      #install logger
-      #install either to default place with sudo or non-default plase without sudo.
-      #to install with sudo to non-default place use manual installation
-      add_custom_target(install-3rd_party_logger
-        COMMAND /bin/bash -c \"USE_DEFAULT_3RD_PARTY_PATH=${USE_DEFAULT_3RD_PARTY_PATH}\;
-                               if [ \\$$USE_DEFAULT_3RD_PARTY_PATH == "true" ]\; then
-                                 sudo -k \;
-                                 sudo make install\;
-                               else
-                                 make install\;
-                               fi\"
-        DEPENDS 3rd_party_logger
-        WORKING_DIRECTORY ${3RD_PARTY_BINARY_DIRECTORY}
-      )
-    else()
-      #build logger
-      add_custom_target(3rd_party_logger
-        COMMAND /bin/bash -c \"cd ${CMAKE_CURRENT_SOURCE_DIR} &&
-                               grep .commit_hash ${3RD_PARTY_INSTALL_PREFIX_ARCH}/lib/liblog4cxx.so 1>/dev/null 2>&1\;
-                               if [ \\$$? == 0 ]\; then
-                                 VAR1=\\$$\( readelf -p .commit_hash ${3RD_PARTY_INSTALL_PREFIX_ARCH}/lib/liblog4cxx.so 2>/dev/null\)\;
-                                 VAR1=\\$$\(echo \\$$VAR1 | awk '{print \\$$NF}'\)\;
-                                 VAR2=-1\;
-                                 cd ${CMAKE_CURRENT_SOURCE_DIR}\;
-                                 git log . 1>/dev/null 2>&1\;
-                                 if [ \\$$? == 0 ]; then
-                                     VAR2=\\$$\(git log --pretty=\"format:%H\" -1 ${3RD_PARTY_SOURCE_DIRECTORY}/apache-log4cxx-0.10.0\)\;
-                                 fi\;
-                                 if [ \\$$VAR1 != \\$$VAR2 ]\; then
-                                   echo " Need to rebuild logger. " \;
-                                   cd ${3RD_PARTY_BINARY_DIRECTORY}\;
-                                   make\;
-                                 else
-                                   echo " Logger is actual. " \;
-                                 fi\;
-                               else
-                                 echo " Need to build logger. " \;
-                                 cd ${3RD_PARTY_BINARY_DIRECTORY}\;
-                                 make\;
-                               fi\"
-        WORKING_DIRECTORY ${3RD_PARTY_BINARY_DIRECTORY}
-      )
-
-      #install logger
-      #install either to default place with sudo or non-default plase without sudo.
-      #to install with sudo to non-default place use manual installation
-      add_custom_target(install-3rd_party_logger
-        COMMAND /bin/bash -c \"cd ${CMAKE_CURRENT_SOURCE_DIR} &&
-                               grep .commit_hash ${3RD_PARTY_INSTALL_PREFIX_ARCH}/lib/liblog4cxx.so 1>/dev/null 2>&1\;
-                               if [ \\$$? == 0 ]\; then
-                                 VAR1=\\$$\( readelf -p .commit_hash ${3RD_PARTY_INSTALL_PREFIX_ARCH}/lib/liblog4cxx.so 2>/dev/null\)\;
-                                 VAR1=\\$$\(echo \\$$VAR1 | awk '{print \\$$NF}'\)\;
-                                 VAR2=-1\;
-                                 cd ${CMAKE_CURRENT_SOURCE_DIR}\;
-                                 git log . 1>/dev/null 2>&1\;
-                                 if [ \\$$? == 0 ]; then
-                                     VAR2=\\$$\(git log --pretty=\"format:%H\" -1 ${3RD_PARTY_SOURCE_DIRECTORY}/apache-log4cxx-0.10.0\)\;
-                                 fi\;
-                                 if [ \\$$VAR1 != \\$$VAR2 ]\; then
-                                   USE_DEFAULT_3RD_PARTY_PATH=${USE_DEFAULT_3RD_PARTY_PATH}\;
-                                   if [ \\$$USE_DEFAULT_3RD_PARTY_PATH == "true" ]\; then
-                                     cd ${3RD_PARTY_BINARY_DIRECTORY}\;
-                                     sudo -k \;
-                                     sudo make install\;
-                                   else
-                                     cd ${3RD_PARTY_BINARY_DIRECTORY}\;
-                                     make install\;
-                                   fi\;
-                                 fi\;
-                               else
-                                 USE_DEFAULT_3RD_PARTY_PATH=${USE_DEFAULT_3RD_PARTY_PATH}\;
-                                 if [ \\$$USE_DEFAULT_3RD_PARTY_PATH == "true" ]\; then
-                                   cd ${3RD_PARTY_BINARY_DIRECTORY}\;
-                                   sudo -k \;
-                                   sudo make install\;
-                                 else
-                                   cd ${3RD_PARTY_BINARY_DIRECTORY}\;
-                                   make install\;
-                                 fi\;
-                               fi\"
-        DEPENDS 3rd_party_logger
-        WORKING_DIRECTORY ${3RD_PARTY_BINARY_DIRECTORY}
-      )
-    endif()
-
-  set(install-3rd_party_logger_var "install-3rd_party_logger")
-  endif()
-
-  set(APR_LIBS_DIRECTORY ${3RD_PARTY_INSTALL_PREFIX_ARCH}/lib PARENT_SCOPE)
-  set(APR_INCLUDE_DIRECTORY ${3RD_PARTY_INSTALL_PREFIX}/include PARENT_SCOPE)
-  set(APR_UTIL_LIBS_DIRECTORY ${3RD_PARTY_INSTALL_PREFIX_ARCH}/lib PARENT_SCOPE)
-  set(APR_UTIL_INCLUDE_DIRECTORY ${3RD_PARTY_INSTALL_PREFIX}/include PARENT_SCOPE)
-
-  set(LOG4CXX_INCLUDE_DIRECTORY ${3RD_PARTY_INSTALL_PREFIX}/include PARENT_SCOPE)
-  set(LOG4CXX_LIBS_DIRECTORY ${3RD_PARTY_INSTALL_PREFIX_ARCH}/lib PARENT_SCOPE)
+  set(FORCE_APR_BUILD OFF)
+  # --- apr-util
+  add_subdirectory(apr-util)
 
   # --- libapr-1
-  add_subdirectory(apr-cmake)
-
-  # --- apr-util
-  add_subdirectory(apr-util-cmake)
+  add_subdirectory(apr)
 
   # --- log4cxx
-  add_subdirectory(apache-log4cxx-cmake)
+  add_subdirectory(log4cxx)
 endif()
+
+add_custom_target(3rd_party
+make install
+WORKING_DIRECTORY ${3RD_PARTY_BINARY_DIRECTORY}
+)
 
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}")
@@ -191,7 +75,7 @@ if (NOT ${Boost_FOUND})
      include(ExternalProject)
      ExternalProject_Add(
        Boost
-       URL https://dl.bintray.com/boostorg/release/1.66.0/source/boost_1_66_0.tar.gz
+       URL http://dl.bintray.com/boostorg/release/1.66.0/source/boost_1_66_0.tar.gz
        DOWNLOAD_DIR ${BOOST_LIB_SOURCE_DIRECTORY}
        SOURCE_DIR ${BOOST_LIB_SOURCE_DIRECTORY}
        CONFIGURE_COMMAND ./bootstrap.sh --with-libraries=system,thread,date_time,filesystem --prefix=${3RD_PARTY_INSTALL_PREFIX}

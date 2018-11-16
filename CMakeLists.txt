@@ -42,6 +42,9 @@ include("${CMAKE_CURRENT_LIST_DIR}/tools/cmake/helpers/build_config_generator.cm
 include(CMakeDependentOption)
 include(GNUInstallDirs)
 
+if(NOT PLATFORM)
+  set(PLATFORM "Linux")
+endif()
 
 # Request C++11
 #set(CMAKE_CXX_STANDARD 11)
