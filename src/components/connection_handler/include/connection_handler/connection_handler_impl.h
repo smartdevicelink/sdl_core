@@ -106,6 +106,9 @@ class ConnectionHandlerImpl
    */
   void ConnectToDevice(connection_handler::DeviceHandle device_handle) OVERRIDE;
 
+  transport_manager::ConnectionStatus GetConnectionStatus(
+      const DeviceHandle& device_handle) const OVERRIDE;
+
   /**
    * @brief RunAppOnDevice allows to run specific application on the certain
    *device.

@@ -151,6 +151,9 @@ class TransportManagerImpl
    **/
   int ConnectDevice(const DeviceHandle device_id) OVERRIDE;
 
+  ConnectionStatus GetConnectionStatus(
+      const DeviceHandle& device_handle) const OVERRIDE;
+
   /**
    * @brief Disconnect from all applications connected on device.
    *
@@ -367,7 +370,7 @@ class TransportManagerImpl
    * @brief Converter variable (Device ID -> Device Handle; Device Handle ->
    * Device ID)
    */
-  Handle2GUIDConverter converter_;
+  mutable Handle2GUIDConverter converter_;
 
 #ifdef BUILD_TESTS
  public:
@@ -382,7 +385,7 @@ class TransportManagerImpl
   int connection_id_counter_;
   sync_primitives::RWLock connections_lock_;
   std::vector<ConnectionInternal> connections_;
-  sync_primitives::RWLock device_to_adapter_map_lock_;
+  mutable sync_primitives::RWLock device_to_adapter_map_lock_;
   typedef std::map<DeviceUID, TransportAdapter*> DeviceToAdapterMap;
   DeviceToAdapterMap device_to_adapter_map_;
   std::vector<TransportAdapter*> transport_adapters_;

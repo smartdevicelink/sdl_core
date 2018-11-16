@@ -1294,6 +1294,11 @@ void ConnectionHandlerImpl::ConnectToDevice(
   }
 }
 
+transport_manager::ConnectionStatus ConnectionHandlerImpl::GetConnectionStatus(
+    const DeviceHandle& device_handle) const {
+  return transport_manager_.GetConnectionStatus(device_handle);
+}
+
 void ConnectionHandlerImpl::RunAppOnDevice(const std::string& device_mac,
                                            const std::string& bundle_id) const {
   for (DeviceMap::const_iterator i = device_list_.begin();

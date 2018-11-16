@@ -76,7 +76,7 @@ extern const char* ngn_media_screen_app_name;
 extern const char* vr_synonyms;
 extern const char* uses_vehicle_data;
 extern const char* is_media_application;
-extern const char* greyOut;
+extern const char* grey_out;
 extern const char* language_desired;
 extern const char* auto_activated_id;
 extern const char* app_type;
@@ -192,6 +192,8 @@ extern const char* enabled;
 extern const char* cloud_app_auth_token;
 extern const char* cloud_transport_type;
 extern const char* hybrid_app_preference;
+extern const char* is_cloud_application;
+extern const char* cloud_connection_status;
 
 // PutFile
 extern const char* sync_file_name;

@@ -43,7 +43,7 @@ const char* ngn_media_screen_app_name = "ngnMediaScreenAppName";
 const char* vr_synonyms = "vrSynonyms";
 const char* uses_vehicle_data = "usesVehicleData";
 const char* is_media_application = "isMediaApplication";
-const char* greyOut = "greyOut";
+const char* grey_out = "greyOut";
 const char* language_desired = "languageDesired";
 const char* auto_activated_id = "autoActivateID";
 const char* app_type = "appType";
@@ -159,6 +159,8 @@ const char* enabled = "enabled";
 const char* cloud_app_auth_token = "cloudAppAuthToken";
 const char* cloud_transport_type = "cloudTransportType";
 const char* hybrid_app_preference = "hybridAppPreference";
+const char* is_cloud_application = "isCloudApplication";
+const char* cloud_connection_status = "cloudConnectionStatus";
 
 // PutFile
 const char* sync_file_name = "syncFileName";

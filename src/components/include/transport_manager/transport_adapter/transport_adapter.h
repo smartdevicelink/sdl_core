@@ -217,6 +217,9 @@ class TransportAdapter {
    */
   virtual Error ConnectDevice(const DeviceUID& device_handle) = 0;
 
+  virtual ConnectionStatus GetConnectionStatus(
+      const DeviceUID& device_handle) const = 0;
+
   /**
    * @brief RunAppOnDevice allows to run specific application on the certain
    *device.

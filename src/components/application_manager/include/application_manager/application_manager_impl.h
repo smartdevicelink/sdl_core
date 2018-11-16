@@ -367,6 +367,9 @@ class ApplicationManagerImpl
       const transport_manager::DeviceInfo& device_info,
       connection_handler::DeviceHandle device_id);
 
+  hmi_apis::Common_CloudConnectionStatus::eType GetCloudAppConnectionStatus(
+      ApplicationConstSharedPtr app) const;
+
   /*
    * @brief Returns unique correlation ID for HMI request
    *

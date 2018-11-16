@@ -66,6 +66,8 @@ class MockTransportAdapter
   MOCK_METHOD1(ConnectDevice,
                ::transport_manager::transport_adapter::TransportAdapter::Error(
                    const ::transport_manager::DeviceUID& device_handle));
+  MOCK_CONST_METHOD1(GetConnectionStatus,
+                     ConnectionStatus(const DeviceUID& device_handle));
   MOCK_METHOD2(RunAppOnDevice, void(const std::string&, const std::string&));
   MOCK_CONST_METHOD0(IsClientOriginatedConnectSupported, bool());
   MOCK_METHOD0(

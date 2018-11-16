@@ -87,6 +87,9 @@ class TransportManager {
    **/
   virtual int ConnectDevice(const DeviceHandle device_id) = 0;
 
+  virtual ConnectionStatus GetConnectionStatus(
+      const DeviceHandle& device_handle) const = 0;
+
   /**
    * @brief Disconnect from all applications connected on device.
    *

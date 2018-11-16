@@ -177,6 +177,22 @@ int TransportManagerImpl::ConnectDevice(const DeviceHandle device_handle) {
   return err;
 }
 
+ConnectionStatus TransportManagerImpl::GetConnectionStatus(
+    const DeviceHandle& device_handle) const {
+  DeviceUID device_id = converter_.HandleToUid(device_handle);
+
+  sync_primitives::AutoReadLock lock(device_to_adapter_map_lock_);
+  DeviceToAdapterMap::const_iterator it =
+      device_to_adapter_map_.find(device_id);
+  if (it == device_to_adapter_map_.end()) {
+    LOG4CXX_ERROR(logger_, "No device adapter found by id " << device_handle);
+    LOG4CXX_TRACE(logger_, "exit with E_INVALID_HANDLE. Condition: NULL == ta");
+    return ConnectionStatus::INVALID;
+  }
+  transport_adapter::TransportAdapter* ta = it->second;
+  return ta->GetConnectionStatus(device_id);
+}
+
 int TransportManagerImpl::DisconnectDevice(const DeviceHandle device_handle) {
   LOG4CXX_TRACE(logger_, "enter. DeviceHandle: " << &device_handle);
   if (!this->is_initialized_) {

@@ -887,6 +887,24 @@ void ApplicationManagerImpl::CreatePendingApplication(
   SendUpdateAppList();
 }
 
+hmi_apis::Common_CloudConnectionStatus::eType
+ApplicationManagerImpl::GetCloudAppConnectionStatus(
+    ApplicationConstSharedPtr app) const {
+  transport_manager::ConnectionStatus status =
+      connection_handler().GetConnectionStatus(app->device());
+  switch (status) {
+    case transport_manager::ConnectionStatus::CONNECTED:
+      return hmi_apis::Common_CloudConnectionStatus::CONNECTED;
+    case transport_manager::ConnectionStatus::RETRY:
+      return hmi_apis::Common_CloudConnectionStatus::RETRY;
+    case transport_manager::ConnectionStatus::PENDING:
+    case transport_manager::ConnectionStatus::CLOSING:
+      return hmi_apis::Common_CloudConnectionStatus::NOT_CONNECTED;
+    default:
+      return hmi_apis::Common_CloudConnectionStatus::INVALID_ENUM;
+  }
+}
+
 uint32_t ApplicationManagerImpl::GetNextHMICorrelationID() {
   if (corelation_id_ < max_corelation_id_) {
     corelation_id_++;

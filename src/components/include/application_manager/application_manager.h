@@ -427,6 +427,9 @@ class ApplicationManager {
 
   virtual void OnHMIStartedCooperation() = 0;
 
+  virtual hmi_apis::Common_CloudConnectionStatus::eType
+  GetCloudAppConnectionStatus(ApplicationConstSharedPtr app) const = 0;
+
   virtual bool IsHMICooperating() const = 0;
   /**
    * @brief Notifies all components interested in Vehicle Data update

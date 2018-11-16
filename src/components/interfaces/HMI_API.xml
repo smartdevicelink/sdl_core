@@ -292,6 +292,18 @@
   <element name="REMOTE_CONTROL" />
 </enum>
 
+<enum name="CloudConnectionStatus">
+  <element name="NOT_CONNECTED">
+    <description>No active websocket session or ongoing connection attempts</description>
+  </element>
+  <element name="CONNECTED">
+    <description>Websocket is active</description>
+  </element>
+  <element name="RETRY">
+    <description>Websocket connection failed and retry attempts are ongoing</description>
+  </element>
+</enum>
+
   <enum name="WayPointType">
     <description>Describes what kind of waypoint is requested/provided.</description>
     <element name="ALL" />
@@ -2620,16 +2632,18 @@
       <description>If SDL omits this parameter - none RequestType is allowed for this app</description>
       <description>(either this is a pre-registered app or such is dictated by policies).</description>
     </param>
-	<param name="requestSubType" type="String" maxlength="100" minsize="0" maxsize="100" array="true" mandatory="false">
-        <description>
-            The list of SystemRequest's requestSubTypes allowed by policies for the named application.
-            If the app sends a requestSubType which is not specified in this list, then that request should be rejected.
-            An empty array signifies that any value of requestSubType is allowed for this app.
-            If this parameter is omitted, then a request with any value of requestSubType is now allowed for this app
-        </description>
+    <param name="requestSubType" type="String" maxlength="100" minsize="0" maxsize="100" array="true" mandatory="false">
+      <description>
+        The list of SystemRequest's requestSubTypes allowed by policies for the named application.
+        If the app sends a requestSubType which is not specified in this list, then that request should be rejected.
+        An empty array signifies that any value of requestSubType is allowed for this app.
+        If this parameter is omitted, then a request with any value of requestSubType is now allowed for this app
+      </description>
     </param>
     <param name="dayColorScheme" type="Common.TemplateColorScheme" mandatory="false"></param>
     <param name="nightColorScheme" type="Common.TemplateColorScheme" mandatory="false"></param>
+    <param name="isCloudApplication" type="Boolean" mandatory="false"></param>
+    <param name="cloudConnectionStatus" type="Common.CloudConnectionStatus" mandatory="false"></param>
 </struct>
 
 <struct name="MenuParams">

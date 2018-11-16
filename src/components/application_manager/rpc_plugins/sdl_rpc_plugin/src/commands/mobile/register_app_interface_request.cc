@@ -806,7 +806,7 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile(
 
   SendResponse(true, result_code, add_info.c_str(), &response_params);
   SendOnAppRegisteredNotificationToHMI(
-      *(application.get()), resumption, need_restore_vr);
+      application, resumption, need_restore_vr);
   if (msg_params.keyExists(strings::app_hmi_type)) {
     GetPolicyHandler().SetDefaultHmiTypes(application->policy_app_id(),
                                           &(msg_params[strings::app_hmi_type]));
@@ -866,9 +866,7 @@ void RegisterAppInterfaceRequest::SendChangeRegistrationOnHMI(
 }
 
 void RegisterAppInterfaceRequest::SendOnAppRegisteredNotificationToHMI(
-    const app_mngr::Application& application_impl,
-    bool resumption,
-    bool need_restore_vr) {
+    ApplicationConstSharedPtr app, bool resumption, bool need_restore_vr) {
   using namespace smart_objects;
   SmartObjectSPtr notification = std::make_shared<SmartObject>(SmartType_Map);
   if (!notification) {
@@ -892,15 +890,15 @@ void RegisterAppInterfaceRequest::SendOnAppRegisteredNotificationToHMI(
     msg_params[strings::resume_vr_grammars] = need_restore_vr;
   }
 
-  if (application_impl.vr_synonyms()) {
-    msg_params[strings::vr_synonyms] = *(application_impl.vr_synonyms());
+  if (app->vr_synonyms()) {
+    msg_params[strings::vr_synonyms] = *(app->vr_synonyms());
   }
 
-  if (application_impl.tts_name()) {
-    msg_params[strings::tts_name] = *(application_impl.tts_name());
+  if (app->tts_name()) {
+    msg_params[strings::tts_name] = *(app->tts_name());
   }
 
-  const std::string policy_app_id = application_impl.policy_app_id();
+  const std::string policy_app_id = app->policy_app_id();
   std::string priority;
   GetPolicyHandler().GetPriority(policy_app_id, &priority);
 
@@ -910,100 +908,13 @@ void RegisterAppInterfaceRequest::SendOnAppRegisteredNotificationToHMI(
 
   msg_params[strings::msg_params] = SmartObject(SmartType_Map);
   smart_objects::SmartObject& application = msg_params[strings::application];
-  application[strings::app_name] = application_impl.name();
-  application[strings::app_id] = application_impl.app_id();
-  application[hmi_response::policy_app_id] = policy_app_id;
-  if (file_system::FileExists(application_impl.app_icon_path())) {
-    application[strings::icon] = application_impl.app_icon_path();
-  }
-
-  const smart_objects::SmartObject* ngn_media_screen_name =
-      application_impl.ngn_media_screen_name();
-  if (ngn_media_screen_name) {
-    application[strings::ngn_media_screen_app_name] = *ngn_media_screen_name;
-  }
-
-  application[strings::hmi_display_language_desired] =
-      static_cast<int32_t>(application_impl.ui_language());
-
-  application[strings::is_media_application] =
-      application_impl.is_media_application();
-
-  const smart_objects::SmartObject* app_type = application_impl.app_types();
-  if (app_type) {
-    application[strings::app_type] = *app_type;
-  }
-
-  const policy::RequestType::State app_request_types_state =
-      GetPolicyHandler().GetAppRequestTypeState(policy_app_id);
-  if (policy::RequestType::State::AVAILABLE == app_request_types_state) {
-    const auto request_types =
-        GetPolicyHandler().GetAppRequestTypes(policy_app_id);
-    application[strings::request_type] = SmartObject(SmartType_Array);
-    smart_objects::SmartObject& request_types_array =
-        application[strings::request_type];
-
-    size_t index = 0;
-    for (auto it : request_types) {
-      request_types_array[index] = it;
-      ++index;
-    }
-  } else if (policy::RequestType::State::EMPTY == app_request_types_state) {
-    application[strings::request_type] = SmartObject(SmartType_Array);
-  }
-
-  const policy::RequestSubType::State app_request_subtypes_state =
-      GetPolicyHandler().GetAppRequestSubTypeState(policy_app_id);
-  if (policy::RequestSubType::State::AVAILABLE == app_request_subtypes_state) {
-    const auto request_subtypes =
-        GetPolicyHandler().GetAppRequestSubTypes(policy_app_id);
-    application[strings::request_subtype] = SmartObject(SmartType_Array);
-    smart_objects::SmartObject& request_subtypes_array =
-        application[strings::request_subtype];
-
-    size_t index = 0;
-    for (auto it : request_subtypes) {
-      request_subtypes_array[index] = it;
-      ++index;
-    }
-  } else if (policy::RequestSubType::State::EMPTY ==
-             app_request_subtypes_state) {
-    application[strings::request_subtype] = SmartObject(SmartType_Array);
-  }
-
   const protocol_handler::SessionObserver& session_observer =
       application_manager_.connection_handler().get_session_observer();
-
-  application[strings::device_info] = SmartObject(SmartType_Map);
-  smart_objects::SmartObject& device_info = application[strings::device_info];
-  MessageHelper::CreateDeviceInfo(application_impl.device(),
-                                  session_observer,
-                                  GetPolicyHandler(),
-                                  application_manager_,
-                                  &device_info);
-
-  if (application_impl.secondary_device() != 0) {
-    application[strings::secondary_device_info] = SmartObject(SmartType_Map);
-    smart_objects::SmartObject& secondary_device_info =
-        application[strings::secondary_device_info];
-    MessageHelper::CreateDeviceInfo(application_impl.secondary_device(),
-                                    session_observer,
-                                    GetPolicyHandler(),
-                                    application_manager_,
-                                    &secondary_device_info);
-  }
-
-  const smart_objects::SmartObject* day_color_scheme =
-      application_impl.day_color_scheme();
-  if (day_color_scheme) {
-    application[strings::day_color_scheme] = *day_color_scheme;
-  }
-
-  const smart_objects::SmartObject* night_color_scheme =
-      application_impl.night_color_scheme();
-  if (night_color_scheme) {
-    application[strings::night_color_scheme] = *night_color_scheme;
-  }
+  MessageHelper::CreateHMIApplicationStruct(app,
+                                            session_observer,
+                                            GetPolicyHandler(),
+                                            &application,
+                                            application_manager_);
 
   DCHECK(rpc_service_.ManageHMICommand(notification));
 }

@@ -60,6 +60,8 @@ class MockTransportManager : public ::transport_manager::TransportManager,
   MOCK_METHOD0(Reinit, int());
   MOCK_METHOD0(SearchDevices, int());
   MOCK_METHOD1(ConnectDevice, int(const DeviceHandle));
+  MOCK_CONST_METHOD1(GetConnectionStatus,
+                     ConnectionStatus(const DeviceHandle& device_handle));
   MOCK_METHOD1(DisconnectDevice, int(const DeviceHandle));
   MOCK_METHOD1(Disconnect, int(const ConnectionUID));
   MOCK_METHOD1(DisconnectForce, int(const ConnectionUID));

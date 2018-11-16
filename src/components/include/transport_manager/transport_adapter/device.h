@@ -131,6 +131,26 @@ class Device {
     keep_on_disconnect_ = keep_on_disconnect;
   }
 
+  inline ConnectionStatus connection_status() const {
+    return status_;
+  }
+
+  inline void set_connection_status(ConnectionStatus status) {
+    status_ = status;
+  }
+
+  inline uint16_t retry_count() const {
+    return retry_count_;
+  }
+
+  inline void next_retry() {
+    retry_count_++;
+  }
+
+  inline void reset_retry_count() {
+    retry_count_ = 0;
+  }
+
   /**
    * @brief transport_switch_id Returns id used for transport switching
    * flow of device. Filled if applicable, otherwise - empty.
@@ -160,6 +180,10 @@ class Device {
    *finished.
    **/
   bool keep_on_disconnect_;
+
+  ConnectionStatus status_;
+
+  uint16_t retry_count_;
 };
 typedef std::shared_ptr<Device> DeviceSptr;
 typedef std::vector<DeviceSptr> DeviceVector;

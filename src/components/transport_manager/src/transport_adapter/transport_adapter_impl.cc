@@ -220,9 +220,9 @@ TransportAdapter::Error TransportAdapterImpl::Connect(
     info.device_id = device_id;
     info.state = ConnectionInfo::NEW;
   }
-  const bool pending_app = ConnectionInfo::PENDING == info.state ||
-                           ConnectionInfo::RETRY == info.state;
+  const bool pending_app = ConnectionInfo::PENDING == info.state;
   connections_lock_.Release();
+
   if (already_exists && !pending_app) {
     LOG4CXX_TRACE(logger_, "exit with ALREADY_EXISTS");
     return ALREADY_EXISTS;
@@ -230,26 +230,7 @@ TransportAdapter::Error TransportAdapterImpl::Connect(
 
   const TransportAdapter::Error err =
       server_connection_factory_->CreateConnection(device_id, app_handle);
-  if (pending_app && TransportAdapter::FAIL == err) {
-    connections_lock_.AcquireForWriting();
-    if (ConnectionInfo::PENDING == info.state) {
-      info.state = ConnectionInfo::RETRY;
-      info.retry_count = 0;
-    }
-    if (info.retry_count++ > get_settings().cloud_app_max_retry_attempts()) {
-      info.state = ConnectionInfo::PENDING;
-      info.retry_count = 0;
-      return err;
-    }
-    TimerSPtr retry_timer(std::make_shared<timer::Timer>(
-        "RetryConnectionTimer",
-        new timer::TimerTaskImpl<TransportAdapterImpl>(
-            this, &TransportAdapterImpl::RetryConnection)));
-    retry_timer_pool_.push(std::make_pair(retry_timer, connection_key));
-    retry_timer->Start(get_settings().cloud_app_retry_timeout(),
-                       timer::kSingleShot);
-    connections_lock_.Release();
-  } else if (TransportAdapter::OK != err) {
+  if (TransportAdapter::OK != err) {
     connections_lock_.AcquireForWriting();
     connections_.erase(std::make_pair(device_id, app_handle));
     connections_lock_.Release();
@@ -264,11 +245,9 @@ void TransportAdapterImpl::RetryConnection() {
                   "Unable to find timer, ignoring RetryConnection request");
     return;
   }
-  auto connection_key = retry_timer_pool_.front().second;
+  const DeviceUID device_id = retry_timer_pool_.front().second;
   retry_timer_pool_.pop();
-  const DeviceUID device_id = connection_key.first;
-  const ApplicationHandle app_handle = connection_key.second;
-  Connect(device_id, app_handle);
+  ConnectDevice(device_id);
 }
 
 TransportAdapter::Error TransportAdapterImpl::ConnectDevice(
@@ -277,12 +256,45 @@ TransportAdapter::Error TransportAdapterImpl::ConnectDevice(
   DeviceSptr device = FindDevice(device_handle);
   if (device) {
     TransportAdapter::Error err = ConnectDevice(device);
+    if (FAIL == err && GetDeviceType() == DeviceType::CLOUD_WEBSOCKET) {
+      LOG4CXX_TRACE(logger_,
+                    "Error occurred while connecting cloud app: " << err);
+      if (device->connection_status() == ConnectionStatus::PENDING) {
+        device->set_connection_status(ConnectionStatus::RETRY);
+        device->reset_retry_count();
+      }
+
+      if (device->retry_count() >
+          get_settings().cloud_app_max_retry_attempts()) {
+        device->set_connection_status(ConnectionStatus::PENDING);
+        device->reset_retry_count();
+        return err;
+      }
+
+      device->next_retry();
+      TimerSPtr retry_timer(std::make_shared<timer::Timer>(
+          "RetryConnectionTimer",
+          new timer::TimerTaskImpl<TransportAdapterImpl>(
+              this, &TransportAdapterImpl::RetryConnection)));
+      retry_timer_pool_.push(std::make_pair(retry_timer, device_handle));
+      retry_timer->Start(get_settings().cloud_app_retry_timeout(),
+                         timer::kSingleShot);
+    } else if (OK == err) {
+      device->set_connection_status(ConnectionStatus::CONNECTED);
+    }
     LOG4CXX_TRACE(logger_, "exit with error: " << err);
     return err;
   } else {
     LOG4CXX_TRACE(logger_, "exit with BAD_PARAM");
     return BAD_PARAM;
   }
+}
+
+ConnectionStatus TransportAdapterImpl::GetConnectionStatus(
+    const DeviceUID& device_handle) const {
+  DeviceSptr device = FindDevice(device_handle);
+  return device.use_count() == 0 ? ConnectionStatus::INVALID
+                                 : device->connection_status();
 }
 
 TransportAdapter::Error TransportAdapterImpl::Disconnect(
@@ -314,6 +326,8 @@ TransportAdapter::Error TransportAdapterImpl::DisconnectDevice(
   }
 
   Error error = OK;
+  DeviceSptr device = FindDevice(device_id);
+  device->set_connection_status(ConnectionStatus::CLOSING);
 
   std::vector<ConnectionInfo> to_disconnect;
   connections_lock_.AcquireForReading();
@@ -433,6 +447,7 @@ DeviceSptr TransportAdapterImpl::AddDevice(DeviceSptr device) {
     LOG4CXX_TRACE(logger_, "exit with TRUE. Condition: same_device_found");
     return existing_device;
   } else {
+    device->set_connection_status(ConnectionStatus::PENDING);
     for (TransportAdapterListenerList::iterator it = listeners_.begin();
          it != listeners_.end();
          ++it) {

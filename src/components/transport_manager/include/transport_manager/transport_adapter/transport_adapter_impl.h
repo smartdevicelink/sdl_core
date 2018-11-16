@@ -149,6 +149,9 @@ class TransportAdapterImpl : public TransportAdapter,
   TransportAdapter::Error ConnectDevice(
       const DeviceUID& device_handle) OVERRIDE;
 
+  ConnectionStatus GetConnectionStatus(
+      const DeviceUID& device_handle) const OVERRIDE;
+
   /**
    * @brief Disconnect from specified session.
    *
@@ -583,8 +586,7 @@ class TransportAdapterImpl : public TransportAdapter,
     ConnectionSPtr connection;
     DeviceUID device_id;
     ApplicationHandle app_handle;
-    uint16_t retry_count;
-    enum { NEW, ESTABLISHED, FINALISING, PENDING, RETRY } state;
+    enum { NEW, ESTABLISHED, FINALISING, PENDING } state;
   };
 
   /**
@@ -613,8 +615,7 @@ class TransportAdapterImpl : public TransportAdapter,
    **/
   ConnectionMap connections_;
 
-  std::queue<std::pair<TimerSPtr, std::pair<DeviceUID, ApplicationHandle> > >
-      retry_timer_pool_;
+  std::queue<std::pair<TimerSPtr, DeviceUID> > retry_timer_pool_;
 
   /**
    * @brief Mutex restricting access to connections map.

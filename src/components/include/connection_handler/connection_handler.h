@@ -79,6 +79,9 @@ class ConnectionHandler {
   virtual void ConnectToDevice(
       connection_handler::DeviceHandle device_handle) = 0;
 
+  virtual transport_manager::ConnectionStatus GetConnectionStatus(
+      const DeviceHandle& device_handle) const = 0;
+
   /**
    * @brief RunAppOnDevice allows to run specific application on the certain
    *device.

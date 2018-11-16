@@ -128,7 +128,7 @@ class RegisterAppInterfaceRequest
    *
    **/
   void SendOnAppRegisteredNotificationToHMI(
-      const app_mngr::Application& application_impl,
+      app_mngr::ApplicationConstSharedPtr app,
       bool resumption = false,
       bool need_restore_vr = false);
   /*
