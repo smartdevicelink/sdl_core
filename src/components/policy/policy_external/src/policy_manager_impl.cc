@@ -747,7 +747,7 @@ void PolicyManagerImpl::GetCloudAppParameters(
                                 hybrid_app_preference);
 }
 
-void PolicyManagerImpl::InitCloudApp(const std::string& policy_app_id){
+void PolicyManagerImpl::InitCloudApp(const std::string& policy_app_id) {
   cache_->InitCloudApp(policy_app_id);
 }
 

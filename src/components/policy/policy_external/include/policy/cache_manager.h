@@ -189,7 +189,7 @@ class CacheManager : public CacheManagerInterface {
                                      std::string& auth_token,
                                      std::string& cloud_transport_type,
                                      std::string& hybrid_app_preference) const;
-                                     
+
   /**
    * Initializes a new cloud application with default policies
    * Then adds cloud specific policies

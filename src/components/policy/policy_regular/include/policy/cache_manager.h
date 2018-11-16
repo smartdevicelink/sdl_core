@@ -186,7 +186,6 @@ class CacheManager : public CacheManagerInterface {
    */
   virtual void InitCloudApp(const std::string& policy_app_id);
 
-
   /**
    * @brief Enable or disable a cloud application in the HMI
    * @param enabled Cloud app enabled state
