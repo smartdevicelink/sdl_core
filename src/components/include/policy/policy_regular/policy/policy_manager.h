@@ -536,6 +536,13 @@ class PolicyManager : public usage_statistics::StatisticsManager {
       std::string& hybrid_app_preference) const = 0;
 
   /**
+   * @ brief Initialize new cloud app in the policy table
+   * @ param policy_app_id Application ID
+   */
+
+  virtual void InitCloudApp(const std::string& policy_app_id) = 0;
+
+  /**
    * @brief Enable or disable a cloud application in the HMI
    * @param enabled Cloud app enabled state
    */
