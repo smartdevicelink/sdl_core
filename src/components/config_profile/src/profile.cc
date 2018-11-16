@@ -791,7 +791,7 @@ const std::string& Profile::transport_manager_tcp_adapter_network_interface()
   return transport_manager_tcp_adapter_network_interface_;
 }
 
-uint16_t Profile::cloud_app_retry_timeout() const {
+uint32_t Profile::cloud_app_retry_timeout() const {
   return cloud_app_retry_timeout_;
 }
 

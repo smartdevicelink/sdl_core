@@ -816,7 +816,6 @@ void ApplicationManagerImpl::CreatePendingApplication(
     connection_handler::DeviceHandle device_id) {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  std::string policy_app_id = "";
   std::string endpoint = "";
   std::string certificate = "";
   std::string auth_token = "";
@@ -829,7 +828,19 @@ void ApplicationManagerImpl::CreatePendingApplication(
     return;
   }
 
-  policy_app_id = it->second;
+  const std::string policy_app_id = it->second;
+
+  policy::StringArray nicknames;
+  policy::StringArray app_hmi_types;
+
+  GetPolicyHandler().GetInitialAppData(policy_app_id, &nicknames, &app_hmi_types);
+
+  if (!nicknames.size()) {
+    LOG4CXX_ERROR(logger_, "Cloud App missing nickname");
+    return;
+  }
+
+  const std::string display_name = nicknames[0];
 
   ApplicationSharedPtr application(new ApplicationImpl(
       0,
@@ -837,7 +848,7 @@ void ApplicationManagerImpl::CreatePendingApplication(
       device_info.mac_address(),
       device_id,
       custom_str::CustomString(
-          "CloudApp"),  // todo replace this with policy nick name
+          display_name),
       GetPolicyHandler().GetStatisticManager(),
       *this));
 
@@ -846,7 +857,7 @@ void ApplicationManagerImpl::CreatePendingApplication(
     return;
   }
 
-  GetPolicyHandler().GetCloudAppParameters(*it,
+  GetPolicyHandler().GetCloudAppParameters(policy_app_id,
                                        endpoint,
                                        certificate,
                                        auth_token,
