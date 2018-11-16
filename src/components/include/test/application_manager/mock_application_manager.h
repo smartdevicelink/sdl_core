@@ -160,6 +160,9 @@ class MockApplicationManager : public application_manager::ApplicationManager {
   MOCK_CONST_METHOD0(
       GetResetTimeoutHandler,
       application_manager::request_controller::ResetTimeoutHandler&());
+  MOCK_CONST_METHOD0(
+      GetRequestController,
+      application_manager::request_controller::RequestController&());
   MOCK_CONST_METHOD0(is_stopping, bool());
   MOCK_CONST_METHOD0(is_audio_pass_thru_active, bool());
   MOCK_METHOD0(GetNextHMICorrelationID, uint32_t());

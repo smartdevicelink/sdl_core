@@ -45,7 +45,6 @@
 #include "application_manager/hmi_capabilities.h"
 #include "application_manager/message.h"
 #include "application_manager/message_helper.h"
-#include "application_manager/request_controller.h"
 #include "application_manager/resumption/resume_ctrl.h"
 #include "application_manager/state_controller_impl.h"
 #include "application_manager/app_launch/app_launch_data.h"
@@ -678,11 +677,6 @@ class ApplicationManagerImpl
                             uint32_t mobile_correlation_id,
                             uint32_t new_timeout_value) OVERRIDE;
 
-  bool IsUpdateRequestTimeoutRequired(
-      const uint32_t connection_key,
-      const uint32_t mobile_correlation_id,
-      const uint32_t new_timeout_value) OVERRIDE;
-
   /**
    * @brief AddPolicyObserver allows to subscribe needed component to events
    * from policy.
@@ -869,6 +863,10 @@ class ApplicationManagerImpl
   request_controller::ResetTimeoutHandler& GetResetTimeoutHandler()
       const OVERRIDE {
     return *reset_timeout_handler_;
+  }
+
+  request_controller::RequestController& GetRequestController() const OVERRIDE {
+    return *request_ctrl_;
   }
 
   void SetRPCService(std::unique_ptr<rpc_service::RPCService>& rpc_service) {
@@ -1393,7 +1391,7 @@ class ApplicationManagerImpl
   protocol_handler::ProtocolHandler* protocol_handler_;
   std::unique_ptr<request_controller::ResetTimeoutHandler>
       reset_timeout_handler_;
-  request_controller::RequestController request_ctrl_;
+  std::unique_ptr<request_controller::RequestController> request_ctrl_;
   std::unique_ptr<plugin_manager::RPCPluginManager> plugin_manager_;
 
   /**

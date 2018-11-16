@@ -31,6 +31,7 @@
  */
 
 #include "application_manager/rpc_service_impl.h"
+#include "application_manager/commands/command_impl.h"
 
 namespace application_manager {
 namespace rpc_service {
