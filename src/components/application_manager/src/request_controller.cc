@@ -153,10 +153,9 @@ bool RequestController::CheckPendingRequestsAmount(
 bool RequestController::IsUpdateRequestTimeoutRequired(
     const uint32_t app_id,
     const uint32_t correlation_id,
-    const uint32_t new_timeout) {
+    const uint32_t new_timeout) const {
   LOG4CXX_AUTO_TRACE(logger_);
-  RequestInfoPtr request_info =
-      waiting_for_response_.Find(app_id, correlation_id);
+  auto request_info = waiting_for_response_.Find(app_id, correlation_id);
   if (request_info) {
     date_time::TimeDuration current_time = date_time::getCurrentTime();
     const date_time::TimeDuration end_time = request_info->end_time();

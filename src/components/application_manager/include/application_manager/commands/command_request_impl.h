@@ -389,7 +389,7 @@ class CommandRequestImpl : public CommandImpl,
    * @param request request to HMI
    */
   void AddRequestToTimeoutHandler(
-      const smart_objects::SmartObject& request) const;
+      const smart_objects::SmartObject& request_to_hmi) const;
 };
 
 }  // namespace commands

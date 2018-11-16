@@ -214,7 +214,7 @@ class RequestController {
    */
   bool IsUpdateRequestTimeoutRequired(const uint32_t app_id,
                                       const uint32_t correlation_id,
-                                      const uint32_t new_timeout);
+                                      const uint32_t new_timeout) const;
   /*
    * @brief Function Should be called when Low Voltage is occured
    */
