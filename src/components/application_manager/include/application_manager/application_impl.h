@@ -409,27 +409,66 @@ class ApplicationImpl : public virtual Application,
 
   void SwapMobileMessageQueue(MobileMessageQueue& mobile_messages) OVERRIDE;
 
-  std::string cloud_app_endpoint() OVERRIDE;
+  /**
+   * @brief Get cloud app endpoint for websocket connection
+   * @return cloud app endpoint
+   */
+  const std::string cloud_app_endpoint() OVERRIDE;
 
-  std::string cloud_app_authtoken() OVERRIDE;
+  /**
+   * @brief Get cloud app authtoken to be used in connection handshake after
+   * websocket open.
+   * @return cloud app authtoken
+   */
+  const std::string cloud_app_authtoken() OVERRIDE;
 
-  std::string cloud_app_transport_type() OVERRIDE;
+  /**
+   * @brief Get cloud app tranpsport type. Defines the type of websocket
+   * connection used.
+   * @return cloud app transport type
+   */
+  const std::string cloud_app_transport_type() OVERRIDE;
 
-  std::string hybrid_app_preference() OVERRIDE;
+  /**
+   * @brief Get hybrid app preference. Defines behaviour for when a similar
+   * mobile and cloud app are connected simultaneously.
+   * @return hybrid app preference
+   */
+  const mobile_apis::HybridAppPreference::eType hybrid_app_preference()
+      OVERRIDE;
 
-  std::string cloud_app_certificate() OVERRIDE;
+  /**
+   * @brief Get cloud app certificate. Used for secured websocket connections.
+   * @return cloud app certificate.
+   */
+  const std::string cloud_app_certificate() OVERRIDE;
 
   bool is_cloud_app() const OVERRIDE;
 
+  /**
+   * @brief Set cloud app endpoint
+   */
   void set_cloud_app_endpoint(const std::string& endpoint) OVERRIDE;
 
+  /**
+   * @brief Set cloud app auth token
+   */
   void set_cloud_app_auth_token(const std::string& auth_token) OVERRIDE;
 
+  /**
+   * @brief Set cloud app transport type
+   */
   void set_cloud_app_transport_type(const std::string& transport_type) OVERRIDE;
 
-  void set_hybrid_app_preference(
-      const std::string& hybrid_app_preference) OVERRIDE;
+  /**
+   * @brief Set hybrid app preference
+   */
+  void set_hybrid_app_preference(const mobile_apis::HybridAppPreference::eType&
+                                     hybrid_app_preference) OVERRIDE;
 
+  /**
+   * @brief Set cloud app certificate
+   */
   void set_cloud_app_certificate(const std::string& certificate) OVERRIDE;
 
  protected:
@@ -540,7 +579,7 @@ class ApplicationImpl : public virtual Application,
   std::string endpoint_;
   std::string auth_token_;
   std::string cloud_transport_type_;
-  std::string hybrid_app_preference_;
+  mobile_apis::HybridAppPreference::eType hybrid_app_preference_;
   std::string certificate_;
 
   /**

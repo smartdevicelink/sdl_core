@@ -1163,28 +1163,31 @@ const std::list<AppExtensionPtr>& ApplicationImpl::Extensions() const {
   return extensions_;
 }
 
-std::string ApplicationImpl::cloud_app_endpoint() {
+const std::string ApplicationImpl::cloud_app_endpoint() {
   return endpoint_;
 }
 
-std::string ApplicationImpl::cloud_app_authtoken() {
+const std::string ApplicationImpl::cloud_app_authtoken() {
   return auth_token_;
 }
 
-std::string ApplicationImpl::cloud_app_transport_type() {
+const std::string ApplicationImpl::cloud_app_transport_type() {
   return cloud_transport_type_;
 }
 
-std::string ApplicationImpl::hybrid_app_preference() {
+const mobile_apis::HybridAppPreference::eType
+ApplicationImpl::hybrid_app_preference() {
   return hybrid_app_preference_;
 }
 
-std::string ApplicationImpl::cloud_app_certificate() {
+const std::string ApplicationImpl::cloud_app_certificate() {
   return certificate_;
 }
 
 bool ApplicationImpl::is_cloud_app() const {
-  return !endpoint_.empty() && hybrid_app_preference_ != "MOBILE";
+  return !endpoint_.empty() &&
+         hybrid_app_preference_ !=
+             hmi_apis::Common_CloudConnectionStatus::MOBILE;
 }
 
 void ApplicationImpl::set_cloud_app_endpoint(const std::string& endpoint) {
@@ -1201,7 +1204,7 @@ void ApplicationImpl::set_cloud_app_transport_type(
 }
 
 void ApplicationImpl::set_hybrid_app_preference(
-    const std::string& hybrid_app_preference) {
+    const mobile_apis::HybridAppPreference::eType& hybrid_app_preference) {
   hybrid_app_preference_ = hybrid_app_preference;
 }
 

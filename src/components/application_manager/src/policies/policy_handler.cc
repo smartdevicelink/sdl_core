@@ -54,6 +54,7 @@
 #include "interfaces/MOBILE_API.h"
 #include "utils/file_system.h"
 #include "utils/scope_guard.h"
+#include "smart_objects/enum_schema_item.h"
 
 #include "utils/helpers.h"
 #include "policy/policy_manager.h"
@@ -1913,10 +1914,16 @@ void PolicyHandler::OnSetCloudAppProperties(
         policy_app_id, msg_params[strings::cloud_transport_type].asString());
   }
   if (msg_params.keyExists(strings::hybrid_app_preference)) {
-    // const std::string hybrid_app_preference =
-    // EnumConversionHelper<HybridAppPreference>::EnumToString(msg_params[strings::hybrid_app_preference]);
-    // policy_manager_->SetHybridAppPreference(
-    //    policy_app_id, hybrid_app_preference);
+    std::string hybrid_app_preference;
+
+    mobile_apis::HybridAppPreference::eType value =
+        static_cast<mobile_apis::HybridAppPreference::eType>(
+            msg_params[strings::hybrid_app_preference].asUInt());
+    smart_objects::EnumConversionHelper<
+        mobile_apis::HybridAppPreference::eType>::
+        EnumToString(value, &hybrid_app_preference);
+    policy_manager_->SetHybridAppPreference(policy_app_id,
+                                            hybrid_app_preference);
   }
 }
 
