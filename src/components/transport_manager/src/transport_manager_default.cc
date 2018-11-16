@@ -106,7 +106,6 @@ int TransportManagerDefault::Init(resumption::LastState& last_state) {
 #endif  // USB_SUPPORT
 
 #if defined CLOUD_APP_WEBSOCKET_TRANSPORT_SUPPORT
-  printf("Creating cloud transport\n");
   transport_adapter::TransportAdapterImpl* ta_cloud =
       new transport_adapter::CloudWebsocketTransportAdapter(
           last_state, get_settings());  // Todo add retry connection logic from

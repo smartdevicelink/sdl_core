@@ -50,31 +50,12 @@ CloudWebsocketConnectionFactory::CloudWebsocketConnectionFactory(
     : controller_(controller) {}
 
 TransportAdapter::Error CloudWebsocketConnectionFactory::Init() {
-  /*DeviceUID device_id  = "Cloud";
-  ApplicationHandle app_handle = 100;
-  printf("Calling create connection\n");
-
-  std::string host("192.168.1.69");
-  std::string port("8080");
-
-  //todo move this device logic to the correct place.
-  auto cloud_device = std::make_shared<CloudDevice>(
-          host,port,device_id);
-  DeviceVector devices{cloud_device};
-
-  controller_->SearchDeviceDone(devices);
-
-
-  const TransportAdapter::Error err =
-      this->CreateConnection(std::string(device_id+host+port), app_handle);
-    LOG4CXX_DEBUG(logger_, err);*/
   return TransportAdapter::OK;
 }
 
 TransportAdapter::Error CloudWebsocketConnectionFactory::CreateConnection(
     const DeviceUID& device_uid, const ApplicationHandle& app_handle) {
   LOG4CXX_AUTO_TRACE(logger_);
-  printf("Create connection()\n");
   std::shared_ptr<WebsocketClientConnection> connection =
       std::make_shared<WebsocketClientConnection>(
           device_uid, app_handle, controller_);

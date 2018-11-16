@@ -32,6 +32,7 @@
  */
 
 #include "transport_manager/cloud/websocket_client_connection.h"
+#include "transport_manager/cloud/cloud_device.h"
 
 #include "transport_manager/transport_adapter/transport_adapter_controller.h"
 
@@ -63,28 +64,34 @@ WebsocketClientConnection::~WebsocketClientConnection() {
 
 TransportAdapter::Error WebsocketClientConnection::Start() {
   LOG4CXX_AUTO_TRACE(logger_);
-  printf("Calling websocket start\n");
-  auto const host = "192.168.1.69";
-  auto const port = "8080";
+  DeviceSptr device = controller_->FindDevice(device_uid_);
+  CloudDevice* cloud_device = static_cast<CloudDevice*>(device.get());
+  auto const host = cloud_device->GetHost();
+  auto const port = cloud_device->GetPort();
   boost::system::error_code ec;
   auto const results = resolver_.resolve(host, port, ec);
   if (ec) {
-    std::string str_err = "ErrorMessage1: " + ec.message();
-    printf("%s\n", str_err.c_str());
+    std::string str_err = "ErrorMessage: " + ec.message();
+    LOG4CXX_ERROR(logger_, "Could not resolve host/port: " << str_err);
     Shutdown();
     return TransportAdapter::FAIL;
   }
   boost::asio::connect(ws_.next_layer(), results.begin(), results.end(), ec);
   if (ec) {
-    std::string str_err = "ErrorMessage2: " + ec.message();
-    printf("%s\n", str_err.c_str());
+    std::string str_err = "ErrorMessage: " + ec.message();
+    LOG4CXX_ERROR(logger_,
+                  "Could not connect to websocket: " << host << ":" << port);
+    LOG4CXX_ERROR(logger_, str_err);
     Shutdown();
     return TransportAdapter::FAIL;
   }
   ws_.handshake(host, "/", ec);
   if (ec) {
-    std::string str_err = "ErrorMessage3: " + ec.message();
-    printf("%s\n", str_err.c_str());
+    std::string str_err = "ErrorMessage: " + ec.message();
+    LOG4CXX_ERROR(logger_,
+                  "Could not complete handshake with host/port: " << host << ":"
+                                                                  << port);
+    LOG4CXX_ERROR(logger_, str_err);
     Shutdown();
     return TransportAdapter::FAIL;
   }
@@ -102,35 +109,27 @@ TransportAdapter::Error WebsocketClientConnection::Start() {
   // Start IO Service thread. Allows for async reads without blocking.
   io_service_thread_ = std::thread([&]() {
     ioc_.run();
-    printf("io_service_thread_ END!!!\n");
+    LOG4CXX_DEBUG(logger_, "Ending Boost IO Thread");
   });
 
-  // Start async write thread
-
-  printf("End of websockets\n");
+  LOG4CXX_DEBUG(logger_,
+                "Successfully started websocket connection @: " << host << ":"
+                                                                << port);
 
   return TransportAdapter::OK;
 }
 
 void WebsocketClientConnection::Recv(boost::system::error_code ec) {
-  printf("Recv\n");
   if (shutdown_) {
-    printf("shutdown_\n");
     return;
   }
 
   if (ec) {
     std::string str_err = "ErrorMessage: " + ec.message();
-    printf("%s\n", str_err.c_str());
     LOG4CXX_ERROR(logger_, str_err);
-    // shutdown_ = true;
-    // ioc_.stop();
-    // thread_delegate_->SetShutdown();
-    // controller_->deleteController(this);
     Shutdown();
     return;
   }
-  printf("calling async read\n");
 
   ws_.async_read(buffer_,
                  std::bind(&WebsocketClientConnection::OnRead,
@@ -141,23 +140,18 @@ void WebsocketClientConnection::Recv(boost::system::error_code ec) {
 
 void WebsocketClientConnection::OnRead(boost::system::error_code ec,
                                        std::size_t bytes_transferred) {
-  printf("OnRead\n");
   boost::ignore_unused(bytes_transferred);
   if (ec) {
     std::string str_err = "ErrorMessage: " + ec.message();
-    printf("%s\n", str_err.c_str());
     LOG4CXX_ERROR(logger_, str_err);
     Shutdown();
     controller_->ConnectionAborted(
         device_uid_, app_handle_, CommunicationError());
-
-    printf("return error\n");
     return;
   }
 
   std::string data_str = boost::beast::buffers_to_string(buffer_.data());
   LOG4CXX_DEBUG(logger_, "Cloud Transport Received: " << data_str);
-  printf("%s\n", data_str.c_str());
 
   ssize_t size = (ssize_t)buffer_.size();
   const uint8_t* data = boost::asio::buffer_cast<const uint8_t*>(
@@ -175,10 +169,8 @@ void WebsocketClientConnection::OnRead(boost::system::error_code ec,
 TransportAdapter::Error WebsocketClientConnection::SendData(
     ::protocol_handler::RawMessagePtr message) {
   LOG4CXX_AUTO_TRACE(logger_);
-  printf("Send DATA!!!\n");
   sync_primitives::AutoLock auto_lock(frames_to_send_mutex_);
   message_queue_.push(message);
-  printf("Data pushed to queue!!!\n");
   return TransportAdapter::OK;
 }
 
@@ -194,13 +186,11 @@ void WebsocketClientConnection::Shutdown() {
   if (thread_delegate_) {
     thread_delegate_->SetShutdown();
     write_thread_->join();
-    printf("Joined Thread Delegate!!!\n");
     delete thread_delegate_;
   }
   if (buffer_.size()) {
     buffer_.consume(buffer_.size());
   }
-  printf("End of shutdown!!!\n");
 }
 
 WebsocketClientConnection::LoopThreadDelegate::LoopThreadDelegate(
@@ -209,7 +199,6 @@ WebsocketClientConnection::LoopThreadDelegate::LoopThreadDelegate(
     : message_queue_(*message_queue), handler_(*handler), shutdown_(false) {}
 
 void WebsocketClientConnection::LoopThreadDelegate::threadMain() {
-  printf("Starting write thread\n");
   while (!message_queue_.IsShuttingDown() && !shutdown_) {
     DrainQueue();
     message_queue_.wait();
@@ -229,7 +218,6 @@ void WebsocketClientConnection::LoopThreadDelegate::DrainQueue() {
     Message message_ptr;
     message_queue_.pop(message_ptr);
     if (!shutdown_) {
-      printf("Calling Write!!!\n");
       boost::system::error_code ec;
       handler_.ws_.write(
           boost::asio::buffer(message_ptr->data(), message_ptr->data_size()));

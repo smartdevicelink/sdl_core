@@ -49,14 +49,7 @@ CloudWebsocketTransportAdapter::CloudWebsocketTransportAdapter(
                            new CloudWebsocketConnectionFactory(this),
                            NULL,
                            last_state,
-                           settings) {
-  /*DeviceUID device_id  = "Cloud";
-  ApplicationHandle app_handle = 100;
-  printf("Calling create connection\n");
-  const TransportAdapter::Error err =
-      server_connection_factory_->CreateConnection(device_id, app_handle);
-    LOG4CXX_DEBUG(logger_, err);*/
-}
+                           settings) {}
 
 CloudWebsocketTransportAdapter::~CloudWebsocketTransportAdapter() {}
 
