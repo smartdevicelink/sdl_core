@@ -86,6 +86,8 @@ class MockCacheManagerInterface : public ::policy::CacheManagerInterface {
                           std::string& auth_token,
                           std::string& cloud_transport_type,
                           std::string& hybrid_app_preference));
+  MOCK_METHOD1(InitCloudApp,
+               void(const std::string& policy_app_id));
   MOCK_METHOD2(SetCloudAppEnabled,
                void(const std::string& policy_app_id, const bool enabled));
   MOCK_METHOD2(SetAppAuthToken,
