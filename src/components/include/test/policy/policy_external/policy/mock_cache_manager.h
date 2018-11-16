@@ -76,6 +76,27 @@ class MockCacheManagerInterface : public ::policy::CacheManagerInterface {
   MOCK_METHOD1(SecondsBetweenRetries, bool(std::vector<int>& seconds));
   MOCK_CONST_METHOD1(IsDeviceConsentCached, bool(const std::string& device_id));
   MOCK_CONST_METHOD0(GetVehicleInfo, const VehicleInfo());
+  MOCK_CONST_METHOD1(GetEnabledCloudApps,
+                     void(std::vector<std::string>& enabled_apps));
+  MOCK_CONST_METHOD7(GetCloudAppParameters,
+                     void(const std::string& policy_app_id,
+                          bool& enabled,
+                          std::string& endpoint,
+                          std::string& certificate,
+                          std::string& auth_token,
+                          std::string& cloud_transport_type,
+                          std::string& hybrid_app_preference));
+  MOCK_METHOD2(SetCloudAppEnabled,
+               void(const std::string& policy_app_id, const bool enabled));
+  MOCK_METHOD2(SetAppAuthToken,
+               void(const std::string& policy_app_id,
+                    const std::string& auth_token));
+  MOCK_METHOD2(SetAppCloudTransportType,
+               void(const std::string& policy_app_id,
+                    const std::string& cloud_transport_type));
+  MOCK_METHOD2(SetHybridAppPreference,
+               void(const std::string& policy_app_id,
+                    const std::string& hybrid_app_preference));
   MOCK_CONST_METHOD1(GetDeviceConsent,
                      DeviceConsent(const std::string& device_id));
   MOCK_METHOD2(SetDeviceConsent,
