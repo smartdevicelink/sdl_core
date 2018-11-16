@@ -2,7 +2,7 @@ set(APR_UTIL_CONFIGURE_FLAGS
     "--host=${CMAKE_SYSTEM_PROCESSOR}-nto-qnx"
     "--bindir=${QNX_HOST}/usr/bin/"
     "--prefix=${3RD_PARTY_INSTALL_PREFIX}"
-    "--with-apr=../apr/apr-build"
+    "--with-apr=../../apr/apr-build"
     "--with-expat-source=${EXPAT_SOURCE_DIRECTORY}"
     "--with-expat-build=${EXPAT_BUILD_DIRECTORY}"
     "LDFLAGS=-L${QNX_HOST}/usr/lib"

@@ -4,7 +4,7 @@ set(CONFIGURE_FLAGS
     "--host=${CMAKE_SYSTEM_PROCESSOR}-nto-qnx"
     "--bindir=${QNX_HOST}/usr/bin/"
     "--with-apr=../apr/apr-build"
-    "--with-apr-util=../apr-util-build"
+    "--with-apr-util=../apr-util/apr-util-build"
     "--disable-dot"
 	  "--disable-doxygen"
     "--disable-html-docs"

@@ -1,5 +1,5 @@
 set(CONFIGURE_FLAGS
-  "--with-apr=../apr/apr-build"
+  "--with-apr=../../apr/apr-build"
   "--with-expat-source=${EXPAT_SOURCE_DIRECTORY}"
   "--with-expat-build=${EXPAT_BUILD_DIRECTORY}"
 )
