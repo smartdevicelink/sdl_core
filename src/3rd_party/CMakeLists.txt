@@ -49,12 +49,6 @@ if(ENABLE_LOG)
   add_subdirectory(log4cxx)
 endif()
 
-add_custom_target(3rd_party
-make install
-WORKING_DIRECTORY ${3RD_PARTY_BINARY_DIRECTORY}
-)
-
-
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}")
 set(CMAKE_SOURCE_PREFIX ${CMAKE_SOURCE_PREFIX} "${3RD_PARTY_INSTALL_PREFIX}")
 
@@ -92,8 +86,12 @@ else()
   add_custom_target(Boost) # empty target, Boost is already installed
 endif()
 
-add_custom_target(install-3rd_party
-  DEPENDS ${install-3rd_party_logger_var}
-  DEPENDS Boost
+add_custom_target(3rd_party
+  make
+  WORKING_DIRECTORY ${3RD_PARTY_BINARY_DIRECTORY}
+)
+
+add_custom_target(install_3rd_party
+  make install
   WORKING_DIRECTORY ${3RD_PARTY_BINARY_DIRECTORY}
 )
