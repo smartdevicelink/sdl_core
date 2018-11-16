@@ -18,6 +18,7 @@ SetCloudAppPropertiesRequest::SetCloudAppPropertiesRequest(
                          policy_handler) {}
 
 SetCloudAppPropertiesRequest::~SetCloudAppPropertiesRequest() {}
+
 void SetCloudAppPropertiesRequest::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
   ApplicationSharedPtr app = application_manager_.application(connection_key());
@@ -34,41 +35,7 @@ void SetCloudAppPropertiesRequest::Run() {
     return;
   }
 
-  smart_objects::SmartObject cloud_app_properties(smart_objects::SmartType_Map);
-
-  cloud_app_properties[strings::msg_params][strings::app_name] =
-      (*message_)[strings::msg_params][strings::app_name];
-  cloud_app_properties[strings::msg_params][strings::app_id] =
-      (*message_)[strings::msg_params][strings::app_id];
-
-  if ((*message_)[strings::msg_params].keyExists(strings::enabled)) {
-    smart_objects::SmartObject enabled =
-        (*message_)[strings::msg_params][strings::enabled];
-    cloud_app_properties[strings::msg_params][strings::enabled] = enabled;
-  }
-  if ((*message_)[strings::msg_params].keyExists(
-          strings::cloud_app_auth_token)) {
-    smart_objects::SmartObject auth_token =
-        (*message_)[strings::msg_params][strings::cloud_app_auth_token];
-    cloud_app_properties[strings::msg_params][strings::cloud_app_auth_token] =
-        auth_token;
-  }
-  if ((*message_)[strings::msg_params].keyExists(
-          strings::cloud_transport_type)) {
-    smart_objects::SmartObject transport_type =
-        (*message_)[strings::msg_params][strings::cloud_transport_type];
-    cloud_app_properties[strings::msg_params][strings::cloud_transport_type] =
-        transport_type;
-  }
-  if ((*message_)[strings::msg_params].keyExists(
-          strings::hybrid_app_preference)) {
-    smart_objects::SmartObject hybrid_app_preference =
-        (*message_)[strings::msg_params][strings::hybrid_app_preference];
-    cloud_app_properties[strings::msg_params][strings::hybrid_app_preference] =
-        hybrid_app_preference;
-  }
-
-  policy_handler_.OnSetCloudAppProperties(cloud_app_properties);
+  policy_handler_.OnSetCloudAppProperties(*message_);
   SendResponse(true, mobile_apis::Result::SUCCESS);
 }
 
