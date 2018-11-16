@@ -1,6 +1,6 @@
 
   set(CONFIGURE_FLAGS
-    "--with-apr=../apr-build"
+    "--with-apr=../apr/apr-build"
     "--with-apr-util=../apr-util-build"
     "LDFLAGS=-L${EXPAT_LIBS_DIRECTORY}"
   )
