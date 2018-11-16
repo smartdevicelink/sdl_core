@@ -54,6 +54,7 @@
 #include "application_manager/helpers/application_helper.h"
 #include "application_manager/plugin_manager/rpc_plugin_manager_impl.h"
 #include "application_manager/reset_timeout_handler_impl.h"
+#include "application_manager/request_controller_impl.h"
 #include "protocol_handler/protocol_handler.h"
 #include "hmi_message_handler/hmi_message_handler.h"
 #include "application_manager/command_holder_impl.h"
@@ -159,7 +160,8 @@ ApplicationManagerImpl::ApplicationManagerImpl(
     , protocol_handler_(NULL)
     , reset_timeout_handler_(
           new request_controller::ResetTimeoutHandlerImpl(*this))
-    , request_ctrl_(am_settings, *reset_timeout_handler_)
+    , request_ctrl_(new request_controller::RequestControllerImpl(
+          am_settings, *reset_timeout_handler_))
     , hmi_so_factory_(NULL)
     , mobile_so_factory_(NULL)
     , hmi_capabilities_(new HMICapabilitiesImpl(*this))
@@ -198,7 +200,7 @@ ApplicationManagerImpl::ApplicationManagerImpl(
   rpc_handler_.reset(new rpc_handler::RPCHandlerImpl(*this));
   commands_holder_.reset(new CommandHolderImpl(*this));
   rpc_service_.reset(new rpc_service::RPCServiceImpl(*this,
-                                                     request_ctrl_,
+                                                     *request_ctrl_,
                                                      protocol_handler_,
                                                      hmi_handler_,
                                                      *commands_holder_));
@@ -1064,7 +1066,7 @@ void ApplicationManagerImpl::OnDeviceSwitchingStart(
          reregister_wait_list_.end() != i;
          ++i) {
       auto app = *i;
-      request_ctrl_.terminateAppRequests(app->app_id());
+      request_ctrl_->terminateAppRequests(app->app_id());
       resume_ctrl_->SaveApplication(app);
     }
   }
@@ -1697,7 +1699,7 @@ void ApplicationManagerImpl::StartDevicesDiscovery() {
 void ApplicationManagerImpl::TerminateRequest(const uint32_t connection_key,
                                               const uint32_t corr_id,
                                               const int32_t function_id) {
-  request_ctrl_.TerminateRequest(corr_id, connection_key, function_id, true);
+  request_ctrl_->TerminateRequest(corr_id, connection_key, function_id, true);
 }
 
 void ApplicationManagerImpl::RemoveHMIFakeParameters(
@@ -1799,7 +1801,7 @@ bool ApplicationManagerImpl::Stop() {
     LOG4CXX_ERROR(logger_,
                   "An error occurred during unregistering applications.");
   }
-  request_ctrl_.DestroyThreadpool();
+  request_ctrl_->DestroyThreadpool();
 
   // for PASA customer policy backup should happen :AllApp(SUSPEND)
   LOG4CXX_DEBUG(logger_, "Unloading policy library.");
@@ -2137,12 +2139,12 @@ void ApplicationManagerImpl::SetTelemetryObserver(
 #endif  // TELEMETRY_MONITOR
 
 void ApplicationManagerImpl::addNotification(const CommandSharedPtr ptr) {
-  request_ctrl_.addNotification(ptr);
+  request_ctrl_->addNotification(ptr);
 }
 
 void ApplicationManagerImpl::removeNotification(
     const commands::Command* notification) {
-  request_ctrl_.removeNotification(notification);
+  request_ctrl_->removeNotification(notification);
 }
 
 void ApplicationManagerImpl::updateRequestTimeout(
@@ -2150,16 +2152,7 @@ void ApplicationManagerImpl::updateRequestTimeout(
     uint32_t mobile_correlation_id,
     uint32_t new_timeout_value) {
   LOG4CXX_AUTO_TRACE(logger_);
-  request_ctrl_.updateRequestTimeout(
-      connection_key, mobile_correlation_id, new_timeout_value);
-}
-
-bool ApplicationManagerImpl::IsUpdateRequestTimeoutRequired(
-    const uint32_t connection_key,
-    const uint32_t mobile_correlation_id,
-    const uint32_t new_timeout_value) {
-  LOG4CXX_AUTO_TRACE(logger_);
-  return request_ctrl_.IsUpdateRequestTimeoutRequired(
+  request_ctrl_->updateRequestTimeout(
       connection_key, mobile_correlation_id, new_timeout_value);
 }
 
@@ -2365,7 +2358,7 @@ void ApplicationManagerImpl::UnregisterAllApplications() {
   if (is_ignition_off) {
     resume_controller().OnIgnitionOff();
   }
-  request_ctrl_.terminateAllHMIRequests();
+  request_ctrl_->terminateAllHMIRequests();
 }
 
 void ApplicationManagerImpl::RemoveAppsWaitingForRegistration(
@@ -2471,7 +2464,7 @@ void ApplicationManagerImpl::UnregisterApplication(
       // Just to terminate RAI in case of connection is dropped (rare case)
       // App won't be unregistered since RAI has not been started yet
       LOG4CXX_DEBUG(logger_, "Trying to terminate possible RAI request.");
-      request_ctrl_.terminateAppRequests(app_id);
+      request_ctrl_->terminateAppRequests(app_id);
 
       return;
     }
@@ -2511,7 +2504,7 @@ void ApplicationManagerImpl::UnregisterApplication(
 
   MessageHelper::SendOnAppUnregNotificationToHMI(
       app_to_remove, is_unexpected_disconnect, *this);
-  request_ctrl_.terminateAppRequests(app_id);
+  request_ctrl_->terminateAppRequests(app_id);
   return;
 }
 
@@ -2587,7 +2580,7 @@ void ApplicationManagerImpl::OnLowVoltage() {
   is_low_voltage_ = true;
   resume_ctrl_->SaveLowVoltageTime();
   resume_ctrl_->StopSavePersistentDataTimer();
-  request_ctrl_.OnLowVoltage();
+  request_ctrl_->OnLowVoltage();
 }
 
 bool ApplicationManagerImpl::IsLowVoltage() const {
@@ -2600,7 +2593,7 @@ void ApplicationManagerImpl::OnWakeUp() {
   is_low_voltage_ = false;
   resume_ctrl_->SaveWakeUpTime();
   resume_ctrl_->StartSavePersistentDataTimer();
-  request_ctrl_.OnWakeUp();
+  request_ctrl_->OnWakeUp();
 }
 
 std::string ApplicationManagerImpl::GetHashedAppID(

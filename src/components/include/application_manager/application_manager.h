@@ -48,6 +48,7 @@
 #include "application_manager/policies/policy_handler_interface.h"
 #include "application_manager/application_manager_settings.h"
 #include "application_manager/state_controller.h"
+#include "application_manager/request_controller.h"
 #include "application_manager/hmi_interfaces.h"
 #include "application_manager/reset_timeout_handler.h"
 #include "policy/policy_types.h"
@@ -90,6 +91,7 @@ class RPCHandler;
 }
 namespace request_controller {
 class ResetTimeoutHandler;
+class RequestController;
 }
 class Application;
 class StateControllerImpl;
@@ -396,6 +398,8 @@ class ApplicationManager {
   virtual rpc_handler::RPCHandler& GetRPCHandler() const = 0;
   virtual request_controller::ResetTimeoutHandler& GetResetTimeoutHandler()
       const = 0;
+  virtual request_controller::RequestController& GetRequestController()
+      const = 0;
   virtual bool is_stopping() const = 0;
   virtual bool is_audio_pass_thru_active() const = 0;
 
@@ -550,19 +554,6 @@ class ApplicationManager {
   virtual void updateRequestTimeout(uint32_t connection_key,
                                     uint32_t mobile_correlation_id,
                                     uint32_t new_timeout_value) = 0;
-
-  /**
-   * @brief IsUpdateRequestTimeoutRequired check is update timeout required.
-   * @param app_id Connection key of application
-   * @param correlation_id Correlation ID of the mobile request
-   * @param new_timeout New timeout to be set in milliseconds
-   * @return true if the new timeout value is greater than the time remaining
-   * from the current timeout, otherwise - false
-   */
-  virtual bool IsUpdateRequestTimeoutRequired(
-      const uint32_t connection_key,
-      const uint32_t mobile_correlation_id,
-      const uint32_t new_timeout_value) = 0;
 
   virtual StateController& state_controller() = 0;
 

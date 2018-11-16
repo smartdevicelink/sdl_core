@@ -30,8 +30,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_REQUEST_CONTROLLER_H_
-#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_REQUEST_CONTROLLER_H_
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_REQUEST_CONTROLLER_IMPL_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_REQUEST_CONTROLLER_IMPL_H_
 
 #include <climits>
 #include <vector>
@@ -47,6 +47,7 @@
 #include "interfaces/MOBILE_API.h"
 #include "interfaces/HMI_API.h"
 
+#include "application_manager/request_controller.h"
 #include "application_manager/request_info.h"
 #include "application_manager/request_controller_settings.h"
 #include "application_manager/request_tracker.h"
@@ -56,176 +57,63 @@ namespace application_manager {
 
 namespace request_controller {
 
-/**
-* @brief RequestController class is used to control currently active mobile
-* requests.
-*/
-class RequestController {
+class RequestControllerImpl : public RequestController {
  public:
-  /**
-  * @brief Result code for addRequest
-  */
-  enum TResult {
-    SUCCESS = 0,
-    TOO_MANY_REQUESTS,
-    TOO_MANY_PENDING_REQUESTS,
-    NONE_HMI_LEVEL_MANY_REQUESTS,
-    INVALID_DATA
-  };
-
-  /**
-  * @brief Thread pool state
-  */
-  enum TPoolState {
-    UNDEFINED = 0,
-    STARTED,
-    STOPPED,
-  };
-
-  // Methods
-
   /**
   * @brief Class constructor
   *
   */
-  RequestController(const RequestControlerSettings& settings,
-                    ResetTimeoutHandler& reset_timeout_handler);
+  RequestControllerImpl(const RequestControlerSettings& settings,
+                        ResetTimeoutHandler& reset_timeout_handler);
 
-  /**
-  * @brief Class destructor
-  *
-  */
-  virtual ~RequestController();
+  ~RequestControllerImpl();
 
-  /**
-  * @brief Initialize thread pool
-  *
-  */
-  void InitializeThreadpool();
+  void InitializeThreadpool() OVERRIDE;
 
-  /**
-  * @brief Destroy thread pool
-  *
-  */
-  void DestroyThreadpool();
+  void DestroyThreadpool() OVERRIDE;
 
-  /**
-  * @brief Check if max request amount wasn't exceed and adds request to queue.
-  *
-  * @param request     Active mobile request
-  * @param hmi_level   Current application hmi_level
-  *
-  * @return Result code
-  *
-  */
-  TResult addMobileRequest(const RequestPtr request,
-                           const mobile_apis::HMILevel::eType& hmi_level);
+  TResult addMobileRequest(
+      const RequestPtr request,
+      const mobile_apis::HMILevel::eType& hmi_level) OVERRIDE;
 
-  /**
-  * @brief Store HMI request until response or timeout won't remove it
-  *
-  * @param request     Active hmi request
-  * @return Result code
-  *
-  */
-  TResult addHMIRequest(const RequestPtr request);
+  TResult addHMIRequest(const RequestPtr request) OVERRIDE;
 
-  /**
-  * @ Add notification to collection
-  *
-  * @param ptr Reference to shared pointer that point on hmi notification
-  */
-  void addNotification(const RequestPtr ptr);
+  void addNotification(const RequestPtr ptr) OVERRIDE;
 
-  /**
-  * @brief Removes request from queue
-  *
-  * @param correlation_id Active request correlation ID,
-  * @param connection_key Active request connection key (0 for HMI requersts)
-  * @param function_id Active request  function id
-  * @param force_terminate if true, request controller will terminate
-  * even if not allowed by request
-  */
   void TerminateRequest(const uint32_t correlation_id,
                         const uint32_t connection_key,
                         const int32_t function_id,
-                        bool force_terminate = false);
+                        bool force_terminate = false) OVERRIDE;
 
-  /**
-  * @brief Removes request from queue
-  *
-  * @param mobile_correlation_id Active mobile request correlation ID
-  *
-  */
   void OnMobileResponse(const uint32_t mobile_correlation_id,
                         const uint32_t connection_key,
-                        const int32_t function_id);
+                        const int32_t function_id) OVERRIDE;
 
-  /**
-  * @brief Removes request from queue
-  *
-  * @param mobile_correlation_id Active mobile request correlation ID
-  *
-  */
-  void OnHMIResponse(const uint32_t correlation_id, const int32_t function_id);
+  void OnHMIResponse(const uint32_t correlation_id,
+                     const int32_t function_id) OVERRIDE;
 
-  /**
-  * @ Add notification to collection
-  *
-  * @param ptr Reference to shared pointer that point on hmi notification
-  */
-  void removeNotification(const commands::Command* notification);
+  void removeNotification(const commands::Command* notification) OVERRIDE;
 
-  /**
-  * @brief Removes all requests from queue for specified application
-  *
-  * @param app_id Mobile application ID (app_id)
-  *
-  */
-  void terminateAppRequests(const uint32_t& app_id);
+  void terminateAppRequests(const uint32_t& app_id) OVERRIDE;
 
-  /**
-  * @brief Terminates all requests from HMI
-  */
-  void terminateAllHMIRequests();
+  void terminateAllHMIRequests() OVERRIDE;
 
-  /**
-  * @brief Terminates all requests from Mobile
-  */
-  void terminateAllMobileRequests();
+  void terminateAllMobileRequests() OVERRIDE;
 
-  /**
-  * @brief Updates request timeout
-  * @param app_id Connection key of application
-  * @param mobile_correlation_id Correlation ID of the mobile request
-  * @param new_timeout_value New timeout to be set in milliseconds
-  */
   void updateRequestTimeout(const uint32_t& app_id,
                             const uint32_t& mobile_correlation_id,
-                            const uint32_t& new_timeout);
+                            const uint32_t& new_timeout) OVERRIDE;
 
-  /**
-   * @brief IsUpdateRequestTimeoutRequired check is update timeout required.
-   * @param app_id Connection key of application
-   * @param correlation_id Correlation ID of the mobile request
-   * @param new_timeout New timeout to be set in milliseconds
-   * @return true if the new timeout value is greater than the time remaining
-   * from the current timeout, otherwise - false
-   */
-  bool IsUpdateRequestTimeoutRequired(const uint32_t app_id,
-                                      const uint32_t correlation_id,
-                                      const uint32_t new_timeout) const;
-  /*
-   * @brief Function Should be called when Low Voltage is occured
-   */
-  void OnLowVoltage();
+  bool IsUpdateRequestTimeoutRequired(
+      const uint32_t app_id,
+      const uint32_t correlation_id,
+      const uint32_t new_timeout) const OVERRIDE;
 
-  /*
-   * @brief Function Should be called when Low Voltage is occured
-   */
-  void OnWakeUp();
+  void OnLowVoltage() OVERRIDE;
 
-  bool IsLowVoltage();
+  void OnWakeUp() OVERRIDE;
+
+  bool IsLowVoltage() OVERRIDE;
 
  protected:
   /**
@@ -263,14 +151,14 @@ class RequestController {
  private:
   class Worker : public threads::ThreadDelegate {
    public:
-    explicit Worker(RequestController* requestController);
+    explicit Worker(RequestControllerImpl* requestController);
     virtual ~Worker();
     virtual void threadMain();
     virtual void exitThreadMain();
 
    protected:
    private:
-    RequestController* request_controller_;
+    RequestControllerImpl* request_controller_;
     sync_primitives::Lock thread_lock_;
     volatile bool stop_flag_;
   };
@@ -323,11 +211,11 @@ class RequestController {
   bool is_low_voltage_;
   const RequestControlerSettings& settings_;
   ResetTimeoutHandler& reset_timeout_handler_;
-  DISALLOW_COPY_AND_ASSIGN(RequestController);
+  DISALLOW_COPY_AND_ASSIGN(RequestControllerImpl);
 };
 
 }  // namespace request_controller
 
 }  // namespace application_manager
 
-#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_REQUEST_CONTROLLER_H_
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_REQUEST_CONTROLLER_IMPL_H_

@@ -37,7 +37,7 @@
 #include "application_manager/mock_request_controller_settings.h"
 #include "application_manager/include/application_manager/command_holder_impl.h"
 #include "application_manager/mock_hmi_capabilities.h"
-#include "application_manager/request_controller.h"
+#include "application_manager/request_controller_impl.h"
 #include "application_manager/mock_rpc_plugin_manager.h"
 #include "application_manager/mock_rpc_plugin.h"
 #include "application_manager/mock_command_factory.h"
@@ -190,7 +190,7 @@ class RCGetInteriorVehicleDataConsentTest
   MockRPCPlugin mock_rpc_plugin;
   MockCommandFactory mock_command_factory;
   MockResetTimeoutHandler mock_reset_timeout_;
-  am::request_controller::RequestController request_controller;
+  am::request_controller::RequestControllerImpl request_controller;
   am::rpc_service::RPCServiceImpl rpc_service_;
   std::shared_ptr<RCAppExtension> rc_app_extention_;
   std::shared_ptr<am::plugin_manager::MockRPCPluginManager>

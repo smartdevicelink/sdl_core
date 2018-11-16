@@ -48,6 +48,7 @@
 #include "application_manager/event_engine/event_dispatcher.h"
 #include "application_manager/state_controller.h"
 #include "application_manager/resumption/resume_ctrl.h"
+#include "application_manager/commands/command_impl.h"
 
 #ifdef EXTERNAL_PROPRIETARY_MODE
 #include "policy/policy_external/include/policy/policy_types.h"
