@@ -416,27 +416,31 @@ class ApplicationImpl : public virtual Application,
   const std::string cloud_app_endpoint() OVERRIDE;
 
   /**
-   * @brief Get cloud app authtoken to be used in connection handshake after websocket open.
+   * @brief Get cloud app authtoken to be used in connection handshake after
+   * websocket open.
    * @return cloud app authtoken
    */
   const std::string cloud_app_authtoken() OVERRIDE;
 
   /**
-   * @brief Get cloud app tranpsport type. Defines the type of websocket connection used. 
+   * @brief Get cloud app tranpsport type. Defines the type of websocket
+   * connection used.
    * @return cloud app transport type
    */
   const std::string cloud_app_transport_type() OVERRIDE;
 
   /**
-   * @brief Get hybrid app preference. Defines behaviour for when a similar mobile and cloud app are connected simultaneously.
+   * @brief Get hybrid app preference. Defines behaviour for when a similar
+   * mobile and cloud app are connected simultaneously.
    * @return hybrid app preference
    */
-  const std::string hybrid_app_preference() OVERRIDE;
+  const mobile_apis::HybridAppPreference::eType hybrid_app_preference()
+      OVERRIDE;
 
   /**
    * @brief Get cloud app certificate. Used for secured websocket connections.
    * @return cloud app certificate.
-   */  
+   */
   const std::string cloud_app_certificate() OVERRIDE;
 
   /**
@@ -457,8 +461,8 @@ class ApplicationImpl : public virtual Application,
   /**
    * @brief Set hybrid app preference
    */
-  void set_hybrid_app_preference(
-      const std::string& hybrid_app_preference) OVERRIDE;
+  void set_hybrid_app_preference(const mobile_apis::HybridAppPreference::eType&
+                                     hybrid_app_preference) OVERRIDE;
 
   /**
    * @brief Set cloud app certificate
@@ -573,7 +577,7 @@ class ApplicationImpl : public virtual Application,
   std::string endpoint_;
   std::string auth_token_;
   std::string cloud_transport_type_;
-  std::string hybrid_app_preference_;
+  mobile_apis::HybridAppPreference::eType hybrid_app_preference_;
   std::string certificate_;
 
   /**

@@ -953,22 +953,26 @@ class Application : public virtual InitialApplicationData,
   const virtual std::string cloud_app_endpoint() = 0;
 
   /**
-   * @brief Get cloud app authtoken to be used in connection handshake after websocket open.
+   * @brief Get cloud app authtoken to be used in connection handshake after
+   * websocket open.
    * @return cloud app authtoken
    */
   const virtual std::string cloud_app_authtoken() = 0;
 
   /**
-   * @brief Get cloud app tranpsport type. Defines the type of websocket connection used. 
+   * @brief Get cloud app tranpsport type. Defines the type of websocket
+   * connection used.
    * @return cloud app transport type
    */
   const virtual std::string cloud_app_transport_type() = 0;
 
   /**
-   * @brief Get hybrid app preference. Defines behaviour for when a similar mobile and cloud app are connected simultaneously.
+   * @brief Get hybrid app preference. Defines behaviour for when a similar
+   * mobile and cloud app are connected simultaneously.
    * @return hybrid app preference
    */
-  const virtual std::string hybrid_app_preference() = 0;
+  const virtual mobile_apis::HybridAppPreference::eType
+  hybrid_app_preference() = 0;
 
   /**
    * @brief Get cloud app certificate. Used for secured websocket connections.
@@ -996,7 +1000,7 @@ class Application : public virtual InitialApplicationData,
    * @brief Set hybrid app preference
    */
   virtual void set_hybrid_app_preference(
-      const std::string& hybrid_app_preference) = 0;
+      const mobile_apis::HybridAppPreference::eType& hybrid_app_preference) = 0;
 
   /**
    * @brief Set cloud app certificate
