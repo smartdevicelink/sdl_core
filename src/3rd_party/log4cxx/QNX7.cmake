@@ -1,10 +1,10 @@
-set(LOG4CXX_SOURCE_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/../logging-log4cxx_qnx)
+set(LOG4CXX_SOURCE_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/logging-log4cxx_qnx)
 
 set(CONFIGURE_FLAGS
     "--host=${CMAKE_SYSTEM_PROCESSOR}-nto-qnx"
     "--bindir=${QNX_HOST}/usr/bin/"
-    "--with-apr=../apr/apr-build"
-    "--with-apr-util=../apr-util/apr-util-build"
+    "--with-apr=../../apr/apr-build"
+    "--with-apr-util=../../apr-util/apr-util-build"
     "--disable-dot"
 	  "--disable-doxygen"
     "--disable-html-docs"
