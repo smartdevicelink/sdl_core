@@ -148,7 +148,7 @@ ApplicationManagerImpl::ApplicationManagerImpl(
     , audio_pass_thru_active_(false)
     , audio_pass_thru_app_id_(0)
     , driver_distraction_state_(hmi_apis::Common_DriverDistractionState::DD_OFF)
-    , lock_screen_dismissal_enabled_(false)
+    , lock_screen_dismissal_enabled_(-1)
     , is_vr_session_strated_(false)
     , hmi_cooperating_(false)
     , is_all_apps_allowed_(true)
@@ -820,7 +820,7 @@ ApplicationManagerImpl::driver_distraction_state() const {
 }
 
 bool ApplicationManagerImpl::lock_screen_dismissal_enabled() const {
-  return lock_screen_dismissal_enabled_;
+  return static_cast<bool>(lock_screen_dismissal_enabled_);
 }
 
 void ApplicationManagerImpl::set_driver_distraction_state(
@@ -830,7 +830,8 @@ void ApplicationManagerImpl::set_driver_distraction_state(
 
 void ApplicationManagerImpl::set_lock_screen_dismissal_state(
     const bool lock_screen_dismissal_state) {
-  lock_screen_dismissal_enabled_ = lock_screen_dismissal_state;
+  lock_screen_dismissal_enabled_ =
+      static_cast<int>(lock_screen_dismissal_state);
 }
 
 void ApplicationManagerImpl::SetAllAppsAllowed(const bool allowed) {
@@ -3397,9 +3398,12 @@ void ApplicationManagerImpl::SendDriverDistractionState(
       mobile_api::FunctionID::OnDriverDistractionID;
   (*on_driver_distraction)[strings::msg_params][mobile_notification::state] =
       driver_distraction_state();
-  (*on_driver_distraction)[strings::msg_params]
-                          [mobile_notification::lock_screen_dismissal_enabled] =
-                              lock_screen_dismissal_enabled();
+  if (-1 != lock_screen_dismissal_enabled_) {
+    (*on_driver_distraction)
+        [strings::msg_params]
+        [mobile_notification::lock_screen_dismissal_enabled] =
+            lock_screen_dismissal_enabled();
+  }
   (*on_driver_distraction)[strings::params][strings::connection_key] =
       application->app_id();
 

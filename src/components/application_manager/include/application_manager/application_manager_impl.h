@@ -1381,7 +1381,15 @@ class ApplicationManagerImpl
   sync_primitives::Lock audio_pass_thru_lock_;
   sync_primitives::Lock tts_global_properties_app_list_lock_;
   hmi_apis::Common_DriverDistractionState::eType driver_distraction_state_;
-  bool lock_screen_dismissal_enabled_;
+
+  /**
+    * @brief lockScreenDismissalEnabled parameter is not mandatory in Mobile
+   * API.
+    * If message into HMI not lockScreenDismissalEnabled parameter, this
+   * parameter sets by
+    * value (-1), otherwise sets value which contains in message.
+    */
+  int lock_screen_dismissal_enabled_;
   bool is_vr_session_strated_;
   bool hmi_cooperating_;
   bool is_all_apps_allowed_;

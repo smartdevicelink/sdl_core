@@ -111,9 +111,6 @@ void OnDriverDistractionNotification::Run() {
   const hmi_apis::Common_DriverDistractionState::eType state =
       static_cast<hmi_apis::Common_DriverDistractionState::eType>(
           (*message_)[strings::msg_params][hmi_notification::state].asInt());
-  const bool is_lock_screen_dismissal_enabled =
-      (*message_)[strings::msg_params]
-                 [mobile_notification::lock_screen_dismissal_enabled].asBool();
 
   application_manager_.set_driver_distraction_state(state);
 
@@ -130,9 +127,21 @@ void OnDriverDistractionNotification::Run() {
       static_cast<int32_t>(application_manager::MessageType::kNotification);
   (*on_driver_distraction)[strings::msg_params][mobile_notification::state] =
       state;
-  (*on_driver_distraction)[strings::msg_params]
-                          [mobile_notification::lock_screen_dismissal_enabled] =
-                              is_lock_screen_dismissal_enabled;
+  if ((*message_)[strings::msg_params].keyExists(
+          mobile_notification::lock_screen_dismissal_enabled)) {
+    const bool is_lock_screen_dismissal_enabled =
+        (*message_)[strings::msg_params]
+                   [mobile_notification::lock_screen_dismissal_enabled]
+                       .asBool();
+    application_manager_.set_lock_screen_dismissal_state(
+        is_lock_screen_dismissal_enabled);
+    (*on_driver_distraction)
+        [strings::msg_params]
+        [mobile_notification::lock_screen_dismissal_enabled] =
+            is_lock_screen_dismissal_enabled;
+  } else {
+    application_manager_.set_lock_screen_dismissal_state(-1);
+  }
 
   const ApplicationSet applications =
       application_manager_.applications().GetData();
