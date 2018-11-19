@@ -554,7 +554,6 @@ class PolicyManager : public usage_statistics::StatisticsManager {
    */
   virtual const PolicySettings& get_settings() const = 0;
 
-
   /**
    * @brief Assigns new HMI types for specified application
    * @param application_id Unique application id

@@ -96,9 +96,9 @@ void GetUrls::ProcessServiceURLs(const policy::EndpointUrls& endpoints) {
   SmartObject& urls = (*message_)[strings::msg_params][hmi_response::urls];
 
   size_t index = 0;
-  for (policy::EndpointData epdata : endpoints) {
-      ApplicationSharedPtr app = application_manager_.application_by_policy_id(
-          epdata.app_policy_id);
+  for (const policy::EndpointData& epdata : endpoints) {
+    ApplicationSharedPtr app =
+        application_manager_.application_by_policy_id(epdata.app_policy_id);
 
 #ifndef PROPRIETARY_MODE
     bool registered_not_default = false;

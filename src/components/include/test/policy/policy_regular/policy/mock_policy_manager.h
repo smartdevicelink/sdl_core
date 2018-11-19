@@ -204,7 +204,7 @@ class MockPolicyManager : public PolicyManager {
                     int32_t timespan_seconds));
   MOCK_CONST_METHOD0(get_settings, const PolicySettings&());
   MOCK_METHOD1(set_settings, void(const PolicySettings* get_settings));
-  
+
   MOCK_METHOD6(CheckPermissions,
                void(const PTString& device_id,
                     const PTString& app_id,

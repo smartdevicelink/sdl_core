@@ -1485,8 +1485,9 @@ void PolicyHandler::OnSnapshotCreated(const BinaryMessage& pt_string) {
   }
 
   const uint32_t app_id = GetAppIdForSending();
+  const ApplicationSharedPtr app = application_manager_.application(app_id);
   const std::string app_policy_id =
-      application_manager_.application(app_id)->policy_app_id();
+      app != nullptr ? app->policy_app_id() : policy::kDefaultId;
 
   const auto is_appid_or_default = [app_policy_id](const EndpointData& ed) {
     return helpers::Compare<std::string, helpers::EQ, helpers::ONE>(
@@ -1501,7 +1502,7 @@ void PolicyHandler::OnSnapshotCreated(const BinaryMessage& pt_string) {
     return;
   }
 
-   // Set the ulr index to zero if this is the last ulr in the app queue
+  // Set the URL index to zero if this is the last URL in the app queue
   if (retry_sequence_[app_id] >= app_item->url.size()) {
     retry_sequence_[app_id] = 0;
   }

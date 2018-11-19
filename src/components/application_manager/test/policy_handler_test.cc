@@ -2108,8 +2108,8 @@ TEST_F(PolicyHandlerTest,
   // Expected to get 0 as application id so SDL does not have valid application
   // with such id
   EXPECT_CALL(app_manager_, application(0))
-      .WillOnce(Return(
-          utils::SharedPtr<application_manager_test::MockApplication>()));
+      .WillOnce(
+          Return(std::shared_ptr<application_manager_test::MockApplication>()));
   const uint32_t app_id = policy_handler_.GetAppIdForSending();
   EXPECT_FALSE(policy_handler_.SendMessageToSDK(msg, url, app_id));
 }
