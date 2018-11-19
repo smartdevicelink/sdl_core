@@ -47,7 +47,11 @@ VRPerformInteractionRequest::VRPerformInteractionRequest(
                    application_manager,
                    rpc_service,
                    hmi_capabilities,
-                   policy_handle) {}
+                   policy_handle) {
+  const auto& msg_params = (*message_)[strings::msg_params];
+  uint32_t request_timeout = msg_params[strings::timeout].asUInt();
+  default_timeout_ += request_timeout;
+}
 
 VRPerformInteractionRequest::~VRPerformInteractionRequest() {}
 
