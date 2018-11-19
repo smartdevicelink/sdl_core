@@ -246,7 +246,7 @@ TEST_F(SystemRequestTest, Run_FileWithBinaryDataSaveUnsuccessful_GenericError) {
   PreConditions();
 
   ON_CALL(mock_policy_handler_,
-              IsRequestTypeAllowed(kAppPolicyId, request_type))
+          IsRequestTypeAllowed(kAppPolicyId, request_type))
       .WillByDefault(Return(true));
 
   const std::string binary_folder = "test_binary_folder";
@@ -280,7 +280,7 @@ TEST_F(SystemRequestTest,
   PreConditions();
 
   ON_CALL(mock_policy_handler_,
-              IsRequestTypeAllowed(kAppPolicyId, request_type))
+          IsRequestTypeAllowed(kAppPolicyId, request_type))
       .WillByDefault(Return(true));
 
   EXPECT_CALL(app_mngr_, SaveBinary(_, _, _, _)).Times(0);
@@ -311,7 +311,7 @@ TEST_F(SystemRequestTest, Run_TypeDisallowed_DisallowedResult) {
   PreConditions();
 
   ON_CALL(mock_policy_handler_,
-              IsRequestTypeAllowed(kAppPolicyId, request_type))
+          IsRequestTypeAllowed(kAppPolicyId, request_type))
       .WillByDefault(Return(false));
 
   const std::string info;
@@ -334,15 +334,14 @@ TEST_F(SystemRequestTest, Run_FileNameContainSlash_InvalidData) {
   PreConditions();
 
   ON_CALL(mock_policy_handler_,
-              IsRequestTypeAllowed(kAppPolicyId, request_type))
+          IsRequestTypeAllowed(kAppPolicyId, request_type))
       .WillByDefault(Return(true));
 
   const std::string info = "Sync file name contains forbidden symbols.";
   EXPECT_CALL(
       mock_rpc_service_,
       ManageMobileCommand(
-          MobileResponseIs(mobile_apis::Result::INVALID_DATA, info, false),
-          _));
+          MobileResponseIs(mobile_apis::Result::INVALID_DATA, info, false), _));
   std::shared_ptr<SystemRequest> command(CreateCommand<SystemRequest>(msg));
   ASSERT_TRUE(command->Init());
   command->Run();
