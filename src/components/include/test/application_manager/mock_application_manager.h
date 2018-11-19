@@ -217,10 +217,6 @@ class MockApplicationManager : public application_manager::ApplicationManager {
                void(uint32_t connection_key,
                     uint32_t mobile_correlation_id,
                     uint32_t new_timeout_value));
-  MOCK_METHOD3(IsUpdateRequestTimeoutRequired,
-               bool(uint32_t connection_key,
-                    uint32_t mobile_correlation_id,
-                    uint32_t new_timeout_value));
   MOCK_METHOD0(state_controller, application_manager::StateController&());
   MOCK_METHOD1(SetUnregisterAllApplicationsReason,
                void(mobile_apis::AppInterfaceUnregisteredReason::eType reason));
