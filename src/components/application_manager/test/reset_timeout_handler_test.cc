@@ -38,6 +38,7 @@
 #include "application_manager/mock_event_dispatcher.h"
 #include "application_manager/commands/command_request_test.h"
 #include "application_manager/mock_message_helper.h"
+#include "application_manager/mock_request_controller.h"
 
 namespace test {
 namespace components {
@@ -50,6 +51,7 @@ using application_manager::event_engine::Event;
 using namespace application_manager::commands;
 using namespace application_manager::strings;
 using namespace application_manager::request_controller;
+using application_manager_test::MockRequestController;
 using sdl_rpc_plugin::commands::hmi::OnResetTimeoutNotification;
 using sdl_rpc_plugin::commands::SubscribeWayPointsRequest;
 
@@ -72,6 +74,8 @@ class ResetTimeoutHandlerTest : public commands_test::CommandRequestTest<
   virtual void SetUp() OVERRIDE {
     ON_CALL(app_mngr_, event_dispatcher())
         .WillByDefault(ReturnRef(event_dispatcher_));
+    ON_CALL(app_mngr_, GetRequestController())
+        .WillByDefault(ReturnRef(mock_request_controller_));
     reset_timeout_handler_ =
         std::make_shared<ResetTimeoutHandlerImpl>(app_mngr_);
     Mock::VerifyAndClearExpectations(&mock_message_helper_);
@@ -82,6 +86,7 @@ class ResetTimeoutHandlerTest : public commands_test::CommandRequestTest<
   }
 
   application_manager::MockMessageHelper* mock_message_helper_;
+  MockRequestController mock_request_controller_;
 };
 
 TEST_F(ResetTimeoutHandlerTest, on_event_OnResetTimeout_success) {
@@ -113,7 +118,8 @@ TEST_F(ResetTimeoutHandlerTest, on_event_OnResetTimeout_success) {
       .WillOnce(Return(hmi_apis::FunctionID::Navigation_SubscribeWayPoints));
   EXPECT_CALL(app_mngr_, GetResetTimeoutHandler())
       .WillOnce(ReturnRef(*reset_timeout_handler_));
-  EXPECT_CALL(app_mngr_,
+
+  EXPECT_CALL(mock_request_controller_,
               IsUpdateRequestTimeoutRequired(
                   mock_app->app_id(), command->correlation_id(), kTimeout))
       .WillOnce(Return(true));
@@ -155,7 +161,7 @@ TEST_F(ResetTimeoutHandlerTest, on_event_OnResetTimeout_missed_reset_period) {
   EXPECT_CALL(app_mngr_, GetResetTimeoutHandler())
       .WillOnce(ReturnRef(*reset_timeout_handler_));
   EXPECT_CALL(
-      app_mngr_,
+      mock_request_controller_,
       IsUpdateRequestTimeoutRequired(
           mock_app->app_id(), command->correlation_id(), kDefaultTimeout))
       .WillOnce(Return(true));
@@ -198,7 +204,8 @@ TEST_F(ResetTimeoutHandlerTest, on_event_OnResetTimeout_invalid_request_id) {
       .WillOnce(Return(hmi_apis::FunctionID::Navigation_SubscribeWayPoints));
   EXPECT_CALL(app_mngr_, GetResetTimeoutHandler())
       .WillOnce(ReturnRef(*reset_timeout_handler_));
-  EXPECT_CALL(app_mngr_, IsUpdateRequestTimeoutRequired(_, _, _)).Times(0);
+  EXPECT_CALL(mock_request_controller_, IsUpdateRequestTimeoutRequired(_, _, _))
+      .Times(0);
   EXPECT_CALL(app_mngr_, updateRequestTimeout(_, _, _)).Times(0);
 
   ASSERT_TRUE(command->Init());
@@ -235,7 +242,8 @@ TEST_F(ResetTimeoutHandlerTest, on_event_OnResetTimeout_invalid_method_name) {
       .WillOnce(Return(hmi_apis::FunctionID::INVALID_ENUM));
   EXPECT_CALL(app_mngr_, GetResetTimeoutHandler())
       .WillOnce(ReturnRef(*reset_timeout_handler_));
-  EXPECT_CALL(app_mngr_, IsUpdateRequestTimeoutRequired(_, _, _)).Times(0);
+  EXPECT_CALL(mock_request_controller_, IsUpdateRequestTimeoutRequired(_, _, _))
+      .Times(0);
   EXPECT_CALL(app_mngr_, updateRequestTimeout(_, _, _)).Times(0);
 
   ASSERT_TRUE(command->Init());

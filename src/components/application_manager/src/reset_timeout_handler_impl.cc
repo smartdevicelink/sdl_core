@@ -69,8 +69,10 @@ bool ResetTimeoutHandlerImpl::CheckConditionsForUpdate(
     hmi_apis::FunctionID::eType method_name) {
   if (static_cast<hmi_apis::FunctionID::eType>(request.hmi_function_id_) ==
       method_name) {
-    if (application_manager_.IsUpdateRequestTimeoutRequired(
-            request.connection_key_, request.mob_correlation_id_, timeout)) {
+    if (application_manager_.GetRequestController()
+            .IsUpdateRequestTimeoutRequired(request.connection_key_,
+                                            request.mob_correlation_id_,
+                                            timeout)) {
       return true;
     } else {
       LOG4CXX_WARN(logger_,
