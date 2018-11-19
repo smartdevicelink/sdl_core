@@ -950,16 +950,15 @@ void TransportAdapterImpl::RemoveFinalizedConnection(
   LOG4CXX_AUTO_TRACE(logger_);
   {
     sync_primitives::AutoWriteLock lock(connections_lock_);
-    ConnectionMap::iterator it_conn =
-        connections_.find(std::make_pair(device_uid, app_handle));
-    if (it_conn == connections_.end()) {
+    auto it_conn = connections_.find(std::make_pair(device_uid, app_handle));
+    if (connections_.end() == it_conn) {
       LOG4CXX_WARN(logger_,
                    "Device_id: " << &device_uid << ", app_handle: "
                                  << &app_handle << " connection not found");
       return;
     }
     const ConnectionInfo& info = it_conn->second;
-    if (info.state != ConnectionInfo::FINALISING) {
+    if (ConnectionInfo::FINALISING != info.state) {
       LOG4CXX_WARN(logger_,
                    "Device_id: " << &device_uid << ", app_handle: "
                                  << &app_handle << " connection not finalized");
