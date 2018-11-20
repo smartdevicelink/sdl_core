@@ -1,4 +1,7 @@
-if(boost_FOUND)
+if( TARGET boost::filesystem AND 
+    TARGET boost::system AND 
+    TARGET boost::thread)
+  set(boost_FOUND ON)
   return()
 endif()
 
@@ -6,6 +9,8 @@ include("${dependency_descriptor_dir}/boost/filesystem.cmake")
 include("${dependency_descriptor_dir}/boost/system.cmake")
 include("${dependency_descriptor_dir}/boost/thread.cmake")
 
-if(boost_filesystem_FOUND AND boost_thread_FOUND AND boost_system_FOUND)
-    set(boost_FOUND ON)
+if( TARGET boost::filesystem AND 
+    TARGET boost::system AND 
+    TARGET boost::thread)
+  set(boost_FOUND ON)
 endif()
