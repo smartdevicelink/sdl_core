@@ -1167,7 +1167,7 @@ const std::string& ApplicationImpl::cloud_app_endpoint() const {
   return endpoint_;
 }
 
-const std::string& ApplicationImpl::cloud_app_authtoken() const {
+const std::string& ApplicationImpl::cloud_app_auth_token() const {
   return auth_token_;
 }
 

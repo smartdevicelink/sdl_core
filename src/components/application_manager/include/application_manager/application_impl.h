@@ -416,11 +416,11 @@ class ApplicationImpl : public virtual Application,
   const std::string& cloud_app_endpoint() const OVERRIDE;
 
   /**
-   * @brief Get cloud app authtoken to be used in connection handshake after
+   * @brief Get cloud app auth token to be used in connection handshake after
    * websocket open.
-   * @return cloud app authtoken
+   * @return cloud app auth token
    */
-  const std::string& cloud_app_authtoken() const OVERRIDE;
+  const std::string& cloud_app_auth_token() const OVERRIDE;
 
   /**
    * @brief Get cloud app tranpsport type. Defines the type of websocket
