@@ -105,6 +105,8 @@ class MockTransportAdapter
                      transport_manager::SwitchableDevices());
   MOCK_CONST_METHOD0(GetTransportConfiguration,
                      transport_manager::transport_adapter::TransportConfig());
+  MOCK_METHOD1(CreateDevice, void(const std::string& uid));
+
 #ifdef TELEMETRY_MONITOR
   MOCK_METHOD0(GetTelemetryObserver,
                ::transport_manager::TMTelemetryObserver*());

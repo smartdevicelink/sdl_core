@@ -1163,24 +1163,24 @@ const std::list<AppExtensionPtr>& ApplicationImpl::Extensions() const {
   return extensions_;
 }
 
-const std::string ApplicationImpl::cloud_app_endpoint() {
+const std::string& ApplicationImpl::cloud_app_endpoint() const {
   return endpoint_;
 }
 
-const std::string ApplicationImpl::cloud_app_authtoken() {
+const std::string& ApplicationImpl::cloud_app_authtoken() const {
   return auth_token_;
 }
 
-const std::string ApplicationImpl::cloud_app_transport_type() {
+const std::string& ApplicationImpl::cloud_app_transport_type() const {
   return cloud_transport_type_;
 }
 
-const mobile_apis::HybridAppPreference::eType
-ApplicationImpl::hybrid_app_preference() {
+const mobile_apis::HybridAppPreference::eType&
+ApplicationImpl::hybrid_app_preference() const {
   return hybrid_app_preference_;
 }
 
-const std::string ApplicationImpl::cloud_app_certificate() {
+const std::string& ApplicationImpl::cloud_app_certificate() const {
   return certificate_;
 }
 

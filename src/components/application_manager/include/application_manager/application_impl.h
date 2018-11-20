@@ -413,35 +413,35 @@ class ApplicationImpl : public virtual Application,
    * @brief Get cloud app endpoint for websocket connection
    * @return cloud app endpoint
    */
-  const std::string cloud_app_endpoint() OVERRIDE;
+  const std::string& cloud_app_endpoint() const OVERRIDE;
 
   /**
    * @brief Get cloud app authtoken to be used in connection handshake after
    * websocket open.
    * @return cloud app authtoken
    */
-  const std::string cloud_app_authtoken() OVERRIDE;
+  const std::string& cloud_app_authtoken() const OVERRIDE;
 
   /**
    * @brief Get cloud app tranpsport type. Defines the type of websocket
    * connection used.
    * @return cloud app transport type
    */
-  const std::string cloud_app_transport_type() OVERRIDE;
+  const std::string& cloud_app_transport_type() const OVERRIDE;
 
   /**
    * @brief Get hybrid app preference. Defines behaviour for when a similar
    * mobile and cloud app are connected simultaneously.
    * @return hybrid app preference
    */
-  const mobile_apis::HybridAppPreference::eType hybrid_app_preference()
-      OVERRIDE;
+  const mobile_apis::HybridAppPreference::eType& hybrid_app_preference()
+      const OVERRIDE;
 
   /**
    * @brief Get cloud app certificate. Used for secured websocket connections.
    * @return cloud app certificate.
    */
-  const std::string cloud_app_certificate() OVERRIDE;
+  const std::string& cloud_app_certificate() const OVERRIDE;
 
   /**
    * @brief Set cloud app endpoint
