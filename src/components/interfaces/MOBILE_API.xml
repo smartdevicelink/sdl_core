@@ -547,9 +547,9 @@
     
     <enum name="HybridAppPreference" since="5.1">
         <description>Enumeration for the user's preference of which app type to use when both are available</description>
-        <element name = "MOBILE" />
-        <element name = "CLOUD" />
-        <element name = "BOTH" />
+        <element name="MOBILE" />
+        <element name="CLOUD" />
+        <element name="BOTH" />
     </enum>
 
     <enum name="ButtonName" since="1.0">
