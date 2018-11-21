@@ -57,7 +57,6 @@ target_sources(${PROJECT_NAME}
     "${CMAKE_CURRENT_LIST_DIR}/src/video/file_video_streamer_adapter.cc"
     "${CMAKE_CURRENT_LIST_DIR}/src/video/pipe_video_streamer_adapter.cc"
     "${CMAKE_CURRENT_LIST_DIR}/src/video/socket_video_streamer_adapter.cc"
-    #"${CMAKE_CURRENT_LIST_DIR}/src/video/video_stream_to_file_adapter.cc"
 )
 
 if(EXTENDED_MEDIA_MODE)

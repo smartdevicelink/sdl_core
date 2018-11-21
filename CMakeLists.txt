@@ -54,43 +54,7 @@ set(CMAKE_CXX_EXTENSIONS ON)
 # Enable PIC as static libraries may be linked to shared objects
 set(CMAKE_POSITION_INDEPENDENT_CODE TRUE)
 
-
-if(IS_DIRECTORY "${CMAKE_CURRENT_LIST_DIR}/.git")
-  find_package(Git)
-  if(GIT_FOUND)
-    execute_process(
-      COMMAND "${GIT_EXECUTABLE}" rev-parse --verify -q --short=8 HEAD
-      WORKING_DIRECTORY "${CMAKE_CURRENT_LIST_DIR}"
-      OUTPUT_VARIABLE head
-      ERROR_QUIET
-      OUTPUT_STRIP_TRAILING_WHITESPACE
-    )
-    if(head)
-      set(GIT_COMMIT "${head}")
-      execute_process(
-        COMMAND ${GIT_EXECUTABLE} update-index -q --refresh
-        WORKING_DIRECTORY "${CMAKE_CURRENT_LIST_DIR}"
-      )
-      execute_process(
-        COMMAND ${GIT_EXECUTABLE} diff-index --name-only HEAD --
-        OUTPUT_VARIABLE dirty
-        OUTPUT_STRIP_TRAILING_WHITESPACE
-        WORKING_DIRECTORY "${CMAKE_CURRENT_LIST_DIR}"
-      )
-      if(dirty)
-        set(GIT_COMMIT "${GIT_COMMIT}-dirty")
-      endif()
-      set_property(GLOBAL PROPERTY SDL_VERSION_GIT_COMMIT "${GIT_COMMIT}")
-      message(STATUS "Git commit was set to ${GIT_COMMIT}")
-      unset(GIT_COMMIT)
-      unset(head)
-    else()
-      message(WARNING "Failed to get git commit number from HEAD")
-    endif()
-  else(GIT_FOUND)
-    message(WARNING "Git package was not found in the system")
-  endif(GIT_FOUND)
-endif()
+include("${CMAKE_CURRENT_LIST_DIR}/tools/cmake/helpers/git_commit_information.cmake")
 
 #Jenkins integration section
 #dont modify this section if you dont know details about integration with Jenkins!!!
@@ -287,7 +251,7 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
 set(CMAKE_INSTALL_PREFIX ${CMAKE_CURRENT_BINARY_DIR})
 set(ARCHIVE_OUTPUT_DIRECTORY ./bin)
 
-set(CMAKE_CXX_FLAGS "-fPIC -std=gnu++11 -Wall -Werror -Wuninitialized -Wvla")
+set(CMAKE_CXX_FLAGS "-fPIC -Wall -Werror -Wuninitialized -Wvla")
 
 if (USE_CCACHE)
 # Configure CCache if available
