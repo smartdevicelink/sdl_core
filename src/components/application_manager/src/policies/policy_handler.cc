@@ -1906,6 +1906,9 @@ void PolicyHandler::OnSetCloudAppProperties(
     return;
   }
   std::string policy_app_id(msg_params[strings::app_id].asString());
+
+  policy_manager_->InitCloudApp(policy_app_id);
+
   if (msg_params.keyExists(strings::enabled)) {
     policy_manager_->SetCloudAppEnabled(policy_app_id,
                                         msg_params[strings::enabled].asBool());

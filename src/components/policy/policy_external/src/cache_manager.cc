@@ -1435,6 +1435,25 @@ void CacheManager::GetCloudAppParameters(
   }
 }
 
+void CacheManager::InitCloudApp(const std::string& policy_app_id) {
+  CACHE_MANAGER_CHECK_VOID();
+  sync_primitives::AutoLock auto_lock(cache_lock_);
+
+  policy_table::ApplicationPolicies& policies =
+      pt_->policy_table.app_policies_section.apps;
+  policy_table::ApplicationPolicies::const_iterator default_iter =
+      policies.find(kDefaultId);
+  policy_table::ApplicationPolicies::const_iterator app_iter =
+      policies.find(policy_app_id);
+  if (default_iter != policies.end()) {
+    if (app_iter == policies.end()) {
+      policies[policy_app_id] = policies[kDefaultId];
+    }
+  }
+  // Add cloud app specific policies
+  Backup();
+}
+
 void CacheManager::SetCloudAppEnabled(const std::string& policy_app_id,
                                       const bool enabled) {
   policy_table::ApplicationPolicies& policies =

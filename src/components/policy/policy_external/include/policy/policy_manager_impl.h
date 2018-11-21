@@ -603,6 +603,12 @@ class PolicyManagerImpl : public PolicyManager {
                              std::string& hybrid_app_preference) const OVERRIDE;
 
   /**
+   * @ brief Initialize new cloud app in the policy table
+   * @ param policy_app_id Application ID
+   */
+  void InitCloudApp(const std::string& policy_app_id) OVERRIDE;
+
+  /**
    * @brief Enable or disable a cloud application in the HMI
    * @param enabled Cloud app enabled state
    */

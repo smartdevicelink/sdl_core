@@ -191,6 +191,14 @@ class CacheManager : public CacheManagerInterface {
                                      std::string& hybrid_app_preference) const;
 
   /**
+   * Initializes a new cloud application with default policies
+   * Then adds cloud specific policies
+   * @param app_id application id
+   * @return true if success
+   */
+  virtual void InitCloudApp(const std::string& policy_app_id);
+
+  /**
    * @brief Enable or disable a cloud application in the HMI
    * @param enabled Cloud app enabled state
    */
