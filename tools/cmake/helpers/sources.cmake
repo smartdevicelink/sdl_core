@@ -134,12 +134,22 @@ function(collect_sources SOURCES PATHS)
   set(${SOURCES} ${SOURCES_LOCAL} PARENT_SCOPE)
 endfunction()
 
-function(create_test NAME SOURCES LIBS)
-  add_executable("${NAME}" ${CMAKE_SOURCE_DIR}/src/components/test_main.cc ${SOURCES})
-  target_link_libraries("${NAME}" ${LIBS})
-  target_link_libraries("${NAME}" Utils)
+function(create_test NAME)
+  add_executable(${NAME})
+  add_executable(${NAME}::${NAME} ALIAS ${NAME})
+
+  target_include_directories(${NAME}
+                             PUBLIC ${GMOCK_INCLUDE_DIRECTORY}
+                                    "${COMPONENTS_DIR}/utils/test/include"
+                                    "${COMPONENTS_DIR}/include")
+
+  target_sources(${NAME} PRIVATE
+                 ${CMAKE_SOURCE_DIR}/src/components/test_main.cc)
+
+  target_link_libraries(${NAME} PUBLIC utils::utils gmock)
+
   add_test(NAME ${NAME}
-  COMMAND ${NAME} --gtest_output=xml:${CMAKE_BINARY_DIR}/test_results/)
+           COMMAND ${NAME} --gtest_output=xml:${CMAKE_BINARY_DIR}/test_results/)
 endfunction()
 
 function(create_cotired_test NAME SOURCES LIBS)
