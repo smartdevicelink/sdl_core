@@ -82,6 +82,11 @@ void SetMediaClockRequest::Run() {
     msg_params[strings::app_id] = app->app_id();
     StartAwaitForInterface(HmiInterfaces::HMI_INTERFACE_UI);
 
+    if (msg_params.keyExists(strings::enable_seek)) {
+      auto enable_seek = msg_params[strings::enable_seek].asBool();
+      app->set_enable_seek(enable_seek);
+    }
+
     SendHMIRequest(
         hmi_apis::FunctionID::UI_SetMediaClockTimer, &msg_params, true);
   } else {

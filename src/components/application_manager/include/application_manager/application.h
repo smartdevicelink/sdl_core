@@ -946,6 +946,17 @@ class Application : public virtual InitialApplicationData,
    */
   virtual const std::list<AppExtensionPtr>& Extensions() const = 0;
 
+  /**
+   * @brief set_enable_seek Set enable seek for application
+   * @param enable_seek
+   */
+  virtual void set_enable_seek(bool enable_seek) = 0;
+
+  /**
+   * @brief enable_seek return enable seek
+   */
+  virtual bool enable_seek() const = 0;
+
  protected:
   mutable sync_primitives::Lock hmi_states_lock_;
 

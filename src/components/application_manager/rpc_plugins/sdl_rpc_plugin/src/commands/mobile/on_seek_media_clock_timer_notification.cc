@@ -56,13 +56,20 @@ OnSeekMediaClockTimerNotification::~OnSeekMediaClockTimerNotification() {}
 void OnSeekMediaClockTimerNotification::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  int32_t app_id = (*message_)[strings::msg_params][strings::app_id].asInt();
+  const int32_t app_id =
+      (*message_)[strings::msg_params][strings::app_id].asInt();
   auto app = application_manager_.application(app_id);
 
   if (!app) {
     LOG4CXX_ERROR(logger_, "No application associated with session key");
     return;
   }
+
+  if (!app->enable_seek()) {
+    LOG4CXX_WARN(logger_, "Enable seek parameter was set to false");
+    return;
+  }
+
   (*message_)[strings::params][strings::connection_key] = app->app_id();
   SendNotification();
 }

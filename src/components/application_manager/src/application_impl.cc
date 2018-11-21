@@ -133,6 +133,7 @@ ApplicationImpl::ApplicationImpl(
     , is_resuming_(false)
     , deferred_resumption_hmi_level_(mobile_api::HMILevel::eType::INVALID_ENUM)
     , is_hash_changed_during_suspend_(false)
+    , enable_seek_(false)
     , video_stream_retry_number_(0)
     , audio_stream_retry_number_(0)
     , video_stream_suspend_timer_(
@@ -1173,6 +1174,14 @@ void ApplicationImpl::SwapMobileMessageQueue(
     MobileMessageQueue& mobile_messages) {
   sync_primitives::AutoLock lock(mobile_message_lock_);
   mobile_messages.swap(mobile_message_queue_);
+}
+
+void ApplicationImpl::set_enable_seek(bool enable_seek) {
+  enable_seek_ = enable_seek;
+}
+
+bool ApplicationImpl::enable_seek() const {
+  return enable_seek_;
 }
 
 }  // namespace application_manager

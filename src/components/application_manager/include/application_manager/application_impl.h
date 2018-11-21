@@ -409,6 +409,17 @@ class ApplicationImpl : public virtual Application,
 
   void SwapMobileMessageQueue(MobileMessageQueue& mobile_messages) OVERRIDE;
 
+  /**
+   * @brief set_enable_seek Set enable seek for application
+   * @param enable_seek
+   */
+  void set_enable_seek(bool enable_seek) OVERRIDE;
+
+  /**
+   * @brief enable_seek return enable seek
+   */
+  bool enable_seek() const OVERRIDE;
+
  protected:
   /**
    * @brief Clean up application folder. Persistent files will stay
@@ -503,6 +514,7 @@ class ApplicationImpl : public virtual Application,
   std::atomic_bool is_resuming_;
   mobile_api::HMILevel::eType deferred_resumption_hmi_level_;
   bool is_hash_changed_during_suspend_;
+  bool enable_seek_;
 
   uint32_t video_stream_retry_number_;
   uint32_t audio_stream_retry_number_;

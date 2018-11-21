@@ -342,6 +342,8 @@ class MockApplication : public ::application_manager::Application {
                      const std::list<application_manager::AppExtensionPtr>&());
   MOCK_CONST_METHOD0(is_remote_control_supported, bool());
   MOCK_METHOD1(set_remote_control_supported, void(const bool allow));
+  MOCK_CONST_METHOD0(enable_seek, bool());
+  MOCK_METHOD1(set_enable_seek, void(bool enable_seek));
 };
 
 }  // namespace application_manager_test
