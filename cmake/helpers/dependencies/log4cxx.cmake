@@ -3,19 +3,9 @@ if(TARGET log4cxx::log4cxx)
   return()
 endif()
 
-find_path(log4cxx_INCLUDE_DIR
-  NAMES
-    log4cxx/log4cxx.h
-  PATH_SUFFIXES
-    include
-)
+find_path(log4cxx_INCLUDE_DIR NAMES log4cxx/log4cxx.h PATH_SUFFIXES include)
 
-find_library(log4cxx_LIBRARY
-  NAMES
-    log4cxx
-  PATH_SUFFIXES
-  lib
-)
+find_library(log4cxx_LIBRARY NAMES log4cxx PATH_SUFFIXES lib)
 
 mark_as_advanced(log4cxx_INCLUDE_DIR log4cxx_LIBRARY log4cxx_FOUND)
 
@@ -29,7 +19,7 @@ endif()
 
 add_library(log4cxx::log4cxx UNKNOWN IMPORTED GLOBAL)
 set_target_properties(log4cxx::log4cxx
-  PROPERTIES
-    INTERFACE_INCLUDE_DIRECTORIES "${log4cxx_INCLUDE_DIR}"
-    IMPORTED_LOCATION "${log4cxx_LIBRARY}"
-)
+                      PROPERTIES INTERFACE_INCLUDE_DIRECTORIES
+                                 "${log4cxx_INCLUDE_DIR}"
+                                 IMPORTED_LOCATION
+                                 "${log4cxx_LIBRARY}")

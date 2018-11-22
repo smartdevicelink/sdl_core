@@ -15,16 +15,24 @@ function(SDL_find_package)
   list(REMOVE_ITEM ARGV REQUIRED)
 
   find_package(${ARGV} QUIET)
-  if(NOT ${ARGV0}_FOUND AND NOT ${ARGV0} IN_LIST buildable_dependencies)
+  if(NOT ${ARGV0}_FOUND
+     AND NOT
+         ${ARGV0}
+         IN_LIST
+         buildable_dependencies)
     if(${ARGV0}_REQUIRED)
-      message(FATAL_ERROR "Required package ${ARGV0} was not found and there is no "
-        "dependency descriptor file which can provide it.")
+      message(
+        FATAL_ERROR "Required package ${ARGV0} was not found and there is no "
+                    "dependency descriptor file which can provide it.")
     endif()
   else()
     include("${dependency_descriptor_dir}/${ARGV0}.cmake")
   endif()
   if(${ARGV0}_REQUIRED AND NOT ${ARGV0}_FOUND)
-    message(FATAL_ERROR "Required package ${ARGV0} was missing and the dependency "
-      "descriptor ${dependency_descriptor_dir}/${ARGV0}.cmake did not provide it.")
+    message(
+      FATAL_ERROR
+        "Required package ${ARGV0} was missing and the dependency "
+        "descriptor ${dependency_descriptor_dir}/${ARGV0}.cmake did not provide it."
+      )
   endif()
 endfunction()

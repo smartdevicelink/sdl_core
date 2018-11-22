@@ -39,10 +39,10 @@ if(QNXNTO)
 endif()
 
 if(ENABLE_LOG)
-  SDL_find_package(apr REQUIRED)
-  SDL_find_package(apr-util REQUIRED)
-  SDL_find_package(log4cxx REQUIRED)
-  SDL_find_package(boost REQUIRED)
+  sdl_find_package(apr REQUIRED)
+  sdl_find_package(apr-util REQUIRED)
+  sdl_find_package(log4cxx REQUIRED)
+  sdl_find_package(boost REQUIRED)
 
   find_package(EXPAT REQUIRED)
 
