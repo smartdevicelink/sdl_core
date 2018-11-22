@@ -13,8 +13,6 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
- * Note: This file has been modified from its original form.
  */
 
 #include <log4cxx/spi/location/locationinfo.h>
@@ -113,8 +111,12 @@ using namespace log4cxx::helpers;
 /** Returns the method name of the caller. */
  const std::string LocationInfo::getMethodName() const
 {
-    std::string tmp = methodName;
-    size_t colonPos = tmp.find("::");
+    std::string tmp(methodName);
+    size_t parenPos = tmp.find('(');
+    if (parenPos != std::string::npos) {
+      tmp.erase(parenPos);
+    }
+    size_t colonPos = tmp.rfind("::");
     if (colonPos != std::string::npos) {
       tmp.erase(0, colonPos + 2);
     } else {
@@ -123,17 +125,17 @@ using namespace log4cxx::helpers;
         tmp.erase(0, spacePos + 1);
       }
     }
-    size_t parenPos = tmp.find('(');
-    if (parenPos != std::string::npos) {
-      tmp.erase(parenPos);
-    }
     return tmp;
 }
 
 
 const std::string LocationInfo::getClassName() const {
-        std::string tmp = methodName;
-        size_t colonPos = tmp.find("::");
+        std::string tmp(methodName);
+        size_t parenPos = tmp.find('(');
+        if (parenPos != std::string::npos) {
+          tmp.erase(parenPos);
+        }
+        size_t colonPos = tmp.rfind("::");
         if (colonPos != std::string::npos) {
            tmp.erase(colonPos);
            size_t spacePos = tmp.find_last_of(' ');
@@ -151,24 +153,26 @@ void LocationInfo::write(ObjectOutputStream& os, Pool& p) const {
          os.writeNull(p);
     } else {
         unsigned char prolog[] = {
-         0x72, 0x00, 0x21, 0x6F, 0x72, 0x67, 0x2E, 
-         0x61, 0x70, 0x61, 0x63, 0x68, 0x65, 0x2E, 0x6C, 
-         0x6F, 0x67, 0x34, 0x6A, 0x2E, 0x73, 0x70, 0x69, 
-         0x2E, 0x4C, 0x6F, 0x63, 0x61, 0x74, 0x69, 0x6F, 
-         0x6E, 0x49, 0x6E, 0x66, 0x6F, 0xED, 0x99, 0xBB, 
-         0xE1, 0x4A, 0x91, 0xA5, 0x7C, 0x02, 0x00, 0x01, 
-         0x4C, 0x00, 0x08, 0x66, 0x75, 0x6C, 0x6C, 0x49, 
-         0x6E, 0x66, 0x6F, 
-            0x74, 0x00, 0x12, 0x4C, 0x6A, 
-                0x61, 0x76, 0x61, 0x2F, 0x6C, 0x61, 0x6E, 0x67, 
-                0x2F, 0x53, 0x74, 0x72, 0x69, 0x6E, 0x67, 0x3B,
-         0x78, 0x70 };
-      os.writeProlog("org.apache.log4j.spi.LocationInfo", 2, reinterpret_cast<char *>(prolog), sizeof(prolog), p);
+         0x72,
+         0x00,
+         0x21, 0x6F, 0x72, 0x67, 0x2E, 0x61, 0x70, 0x61, 0x63, 0x68, 0x65, 0x2E,
+         0x6C, 0x6F, 0x67, 0x34, 0x6A, 0x2E, 0x73, 0x70, 0x69, 0x2E, 0x4C, 0x6F,
+         0x63, 0x61, 0x74, 0x69, 0x6F, 0x6E, 0x49, 0x6E, 0x66, 0x6F, 0xED, 0x99,
+         0xBB, 0xE1, 0x4A, 0x91, 0xA5, 0x7C, 0x02,
+         0x00,
+         0x01, 0x4C,
+         0x00,
+         0x08, 0x66, 0x75, 0x6C, 0x6C, 0x49, 0x6E, 0x66, 0x6F, 0x74,
+         0x00,
+         0x12, 0x4C, 0x6A, 0x61, 0x76, 0x61, 0x2F, 0x6C, 0x61, 0x6E, 0x67, 0x2F,
+         0x53, 0x74, 0x72, 0x69, 0x6E, 0x67, 0x3B, 0x78, 0x70
+        };
+      os.writeProlog("org.apache.log4j.spi.LocationInfo", 2, (char*) prolog, sizeof(prolog), p);
         char* line = p.itoa(lineNumber);
         //
         //   construct Java-like fullInfo (replace "::" with ".")
         //
-        std::string fullInfo = methodName;
+        std::string fullInfo(methodName);
         size_t openParen = fullInfo.find('(');
         if (openParen != std::string::npos) {
             size_t space = fullInfo.find(' ');

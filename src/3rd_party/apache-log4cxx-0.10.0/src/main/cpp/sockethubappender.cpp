@@ -13,8 +13,6 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
- * Note: This file has been modified from its original form.
  */
 #if defined(_MSC_VER)
 #pragma warning ( disable: 4231 4251 4275 4786 )
@@ -94,17 +92,15 @@ void SocketHubAppender::close()
             closed = true;
         }
 
-        //please see https://issues.apache.org/jira/browse/LOGCXX-278.
-        //LogLog::debug(LOG4CXX_STR("closing SocketHubAppender ") + getName());
+        LogLog::debug(LOG4CXX_STR("closing SocketHubAppender ") + getName());
         //
         //  wait until the server thread completes
         //
         thread.join();
 
         synchronized sync(mutex);
-        // please see https://issues.apache.org/jira/browse/LOGCXX-278.
         // close all of the connections
-        //LogLog::debug(LOG4CXX_STR("closing client connections"));
+        LogLog::debug(LOG4CXX_STR("closing client connections"));
         for (std::vector<helpers::ObjectOutputStreamPtr>::iterator iter = streams.begin();
              iter != streams.end();
              iter++) {
@@ -112,15 +108,15 @@ void SocketHubAppender::close()
                          try {
                                 (*iter)->close(pool);
                          } catch(SocketException& e) {
-                                //LogLog::error(LOG4CXX_STR("could not close socket: "), e);
+                                LogLog::error(LOG4CXX_STR("could not close socket: "), e);
                          }
                  }
          }
         streams.erase(streams.begin(), streams.end());
 
-        // please see https://issues.apache.org/jira/browse/LOGCXX-278.
-        /*LogLog::debug(LOG4CXX_STR("SocketHubAppender ")
-              + getName() + LOG4CXX_STR(" closed"));*/
+
+        LogLog::debug(LOG4CXX_STR("SocketHubAppender ")
+              + getName() + LOG4CXX_STR(" closed"));
 }
 
 void SocketHubAppender::append(const spi::LoggingEventPtr& event, Pool& p)
@@ -131,13 +127,13 @@ void SocketHubAppender::append(const spi::LoggingEventPtr& event, Pool& p)
         {
                 return;
         }
-        
+
         LogString ndcVal;
         event->getNDC(ndcVal);
         event->getThreadName();
         // Get a copy of this thread's MDC.
         event->getMDCCopy();
-       
+
 
         // loop through the current set of open connections, appending the event to each
         std::vector<ObjectOutputStreamPtr>::iterator it = streams.begin();
@@ -160,6 +156,7 @@ void SocketHubAppender::append(const spi::LoggingEventPtr& event, Pool& p)
                 {
                         // there was an io exception so just drop the connection
                         it = streams.erase(it);
+                        itEnd = streams.end();
                         LogLog::debug(LOG4CXX_STR("dropped connection"), e);
                 }
         }

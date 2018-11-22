@@ -17,7 +17,7 @@
 
 #if defined(_MSC_VER)
 #pragma warning ( disable: 4231 4251 4275 4786 )
-#endif 
+#endif
 
 #include <log4cxx/logstring.h>
 #include <log4cxx/spi/loggerfactory.h>
@@ -48,7 +48,7 @@ using namespace log4cxx::helpers;
 
 IMPLEMENT_LOG4CXX_OBJECT(Hierarchy)
 
-Hierarchy::Hierarchy() : 
+Hierarchy::Hierarchy() :
 pool(),
 mutex(pool),
 loggers(new LoggerMap()),
@@ -67,8 +67,12 @@ provisionNodes(new ProvisionNodeMap())
 
 Hierarchy::~Hierarchy()
 {
-    delete loggers;
-    delete provisionNodes;
+// TODO LOGCXX-430
+// https://issues.apache.org/jira/browse/LOGCXX-430?focusedCommentId=15175254&page=com.atlassian.jira.plugin.system.issuetabpanels:comment-tabpanel#comment-15175254
+#ifndef APR_HAS_THREADS
+	delete loggers;
+	delete provisionNodes;
+#endif
 }
 
 void Hierarchy::addRef() const {
@@ -101,12 +105,12 @@ void Hierarchy::clear()
 void Hierarchy::emitNoAppenderWarning(const LoggerPtr& logger)
 {
        bool emitWarning = false;
-       { 
+       {
            synchronized sync(mutex);
            emitWarning = !emittedNoAppenderWarning;
            emittedNoAppenderWarning = true;
        }
-          
+
         // No appender in hierarchy, warn user only once.
         if(emitWarning)
         {
@@ -163,7 +167,7 @@ void Hierarchy::fireAddAppenderEvent(const LoggerPtr& logger, const AppenderPtr&
 {
     setConfigured(true);
     HierarchyEventListenerList clonedList;
-    { 
+    {
        synchronized sync(mutex);
        clonedList = listeners;
     }
@@ -182,7 +186,7 @@ void Hierarchy::fireRemoveAppenderEvent(const LoggerPtr& logger, const AppenderP
 
 {
     HierarchyEventListenerList clonedList;
-    { 
+    {
        synchronized sync(mutex);
        clonedList = listeners;
     }
@@ -333,9 +337,9 @@ void Hierarchy::updateParents(LoggerPtr logger)
         bool parentFound = false;
 
 
-        // if name = "w.x.y.z", loop thourgh "w.x.y", "w.x" and "w", but not "w.x.y.z"
+        // if name = "w.x.y.z", loop through "w.x.y", "w.x" and "w", but not "w.x.y.z"
         for(size_t i = name.find_last_of(0x2E /* '.' */, length-1);
-            i != LogString::npos;
+            (i != LogString::npos) && (i != 0);
             i = name.find_last_of(0x2E /* '.' */, i-1))
         {
                 LogString substr = name.substr(0, i);

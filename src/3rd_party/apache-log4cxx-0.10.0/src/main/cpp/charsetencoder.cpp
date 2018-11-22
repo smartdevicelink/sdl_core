@@ -13,8 +13,6 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
- * Note: This file has been modified from its original form.
  */
 #include <log4cxx/logstring.h>
 #include <log4cxx/helpers/charsetencoder.h>
@@ -23,13 +21,19 @@
 #include <apr_xlate.h>
 #include <log4cxx/helpers/stringhelper.h>
 #include <log4cxx/helpers/transcoder.h>
+
 #if !defined(LOG4CXX)
 #define LOG4CXX 1
 #endif
+
 #include <log4cxx/private/log4cxx_private.h>
 #include <apr_portable.h>
 #include <log4cxx/helpers/mutex.h>
 #include <log4cxx/helpers/synchronized.h>
+
+#ifdef LOG4CXX_HAS_WCSTOMBS
+#include <stdlib.h>
+#endif
 
 using namespace log4cxx;
 using namespace log4cxx::helpers;
@@ -380,13 +384,13 @@ public:
             char* current = out.current();
             size_t remain = out.remaining();
             for(;
-                iter != in.end() && ((unsigned int) *iter) < 0x80 && remain > 0; 
+                iter != in.end() && ((unsigned int) *iter) < 0x80 && remain > 0;
                 iter++, remain--, current++) {
                 *current = *iter;
             }
             out.position(current - out.data());
 #endif
-            if (iter != in.end() && out.remaining() > 0) {  
+            if (iter != in.end() && out.remaining() > 0) {
                   Pool subpool;
                   const char* enc = apr_os_locale_encoding(subpool.getAPRPool());
                   {
@@ -402,7 +406,7 @@ public:
                             Transcoder::decode(encoding, ename);
                             try {
                                 encoder = CharsetEncoder::getEncoder(ename);
-                            } catch(IllegalArgumentException ex) {
+                            } catch(IllegalArgumentException &ex) {
                                 encoder = new USASCIICharsetEncoder();
                             }
                         }
@@ -440,7 +444,7 @@ CharsetEncoderPtr CharsetEncoder::getDefaultEncoder() {
   //  if invoked after static variable destruction
   //     (if logging is called in the destructor of a static object)
   //     then create a new decoder.
-  // 
+  //
   if (encoder == 0) {
        return createDefaultEncoder();
   }
@@ -488,7 +492,7 @@ CharsetEncoderPtr CharsetEncoder::getEncoder(const LogString& charset) {
     }
 #if APR_HAS_XLATE
     return new APRCharsetEncoder(charset);
-#else    
+#else
     throw IllegalArgumentException(charset);
 #endif
 }
