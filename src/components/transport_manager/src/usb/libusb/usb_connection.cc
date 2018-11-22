@@ -206,10 +206,9 @@ bool UsbConnection::PostOutTransfer() {
 
 void UsbConnection::OnOutTransfer(libusb_transfer* transfer) {
   LOG4CXX_AUTO_TRACE(logger_);
-  LOG4CXX_DEBUG(logger_,"enter with Libusb_transfer*: " << transfer);
 
   if (transfer->status == LIBUSB_TRANSFER_CANCELLED) {
-    LOG4CXX_DEBUG(logger_,"Free already canceled transfer.");
+    LOG4CXX_DEBUG(logger_, "Free already canceled transfer.");
     libusb_free_transfer(transfer);
     return;
   }
