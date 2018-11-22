@@ -28,11 +28,19 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
+
+if(NOT FORCE_APR_BUILD)
+  SDL_find_package(apr)
+endif()
+
+if(TARGET apr::apr)
+  set(apr_FOUND ON)
+  return()
+endif()
+
 set(APR_SOURCE_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/../apr-1.5.0)
 set(APR_BUILD_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../apr-build)
-
 set(APR_INCLUDE_DIRECTORY ${APR_SOURCE_DIRECTORY}/include)
-
 set(APR_LIBS_DIRECTORY ${APR_BUILD_DIRECTORY}/.libs)
 
 file(MAKE_DIRECTORY
@@ -44,11 +52,7 @@ file(COPY ${APR_SOURCE_DIRECTORY}/tools/gen_test_char.c
   DESTINATION ${APR_BUILD_DIRECTORY}/tools
 )
 
-if(DEFINED CMAKE_TOOLCHAIN_FILE)
-  include("./QNX_APR.cmake")
-else()
-  set(CONFIGURE_FLAGS "")
-endif()
+include("./${PLATFORM}.cmake")
 
 add_custom_command(OUTPUT ${APR_BUILD_DIRECTORY}/Makefile
   COMMAND CC=${CMAKE_C_COMPILER} ${APR_SOURCE_DIRECTORY}/configure ${CONFIGURE_FLAGS}
@@ -63,17 +67,23 @@ add_custom_command(OUTPUT ${APR_BUILD_DIRECTORY}/include/private/apr_escape_test
   WORKING_DIRECTORY ${APR_BUILD_DIRECTORY}
 )
 
-add_custom_target(libapr-1 ALL make
-  DEPENDS ${APR_BUILD_DIRECTORY}/include/private/apr_escape_test_char.h
-  WORKING_DIRECTORY ${APR_BUILD_DIRECTORY}
+add_library(apr::apr UNKNOWN IMPORTED GLOBAL)
+set_target_properties(apr::apr
+  PROPERTIES
+    INTERFACE_INCLUDE_DIRECTORIES "${APR_INCLUDE_DIRECTORY}"
+    IMPORTED_LOCATION "${APR_LIBS_DIRECTORY}/libapr-1.so"
 )
 
-install(
-  DIRECTORY ${APR_LIBS_DIRECTORY}/
-  DESTINATION ${3RD_PARTY_INSTALL_PREFIX_ARCH}/lib
-  USE_SOURCE_PERMISSIONS
-  FILES_MATCHING PATTERN libapr-1.so*
-)
+add_custom_target(
+  libapr-1 ALL make
+  DEPENDS ${APR_BUILD_DIRECTORY}/include/private/apr_escape_test_char.h
+  WORKING_DIRECTORY ${APR_BUILD_DIRECTORY})
+
+install(DIRECTORY ${APR_LIBS_DIRECTORY}/
+        DESTINATION ${3RD_PARTY_INSTALL_PREFIX_ARCH}/lib
+        USE_SOURCE_PERMISSIONS
+        FILES_MATCHING
+        PATTERN libapr-1.so*)
 
 install(
   DIRECTORY ${APR_INCLUDE_DIRECTORY}/

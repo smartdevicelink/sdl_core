@@ -28,6 +28,13 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
+
+SDL_find_package(log4cxx)
+
+if(TARGET log4cxx::log4cxx)
+  return()
+endif()
+
 set(LOG4CXX_SOURCE_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/../apache-log4cxx-0.10.0)
 set(LOG4CXX_BUILD_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../apache-log4cxx-build)
 
@@ -40,17 +47,7 @@ file(MAKE_DIRECTORY
   ${LOG4CXX_BUILD_DIRECTORY}
 )
 
-if(DEFINED CMAKE_TOOLCHAIN_FILE)  
-  include("./QNX_LOG4CXX.cmake")
-else()
-  set(CONFIGURE_FLAGS
-    "--with-apr=../apr-build"
-    "--with-apr-util=../apr-util-build"
-    "LDFLAGS=-L${EXPAT_LIBS_DIRECTORY}"
-    "CC=${CMAKE_C_COMPILER}"
-    "CXX=${CMAKE_CXX_COMPILER}"
-  )
-endif()
+include("./${PLATFORM}.cmake")
 
 add_custom_command(OUTPUT ${LOG4CXX_BUILD_DIRECTORY}/Makefile
    COMMAND ${LOG4CXX_SOURCE_DIRECTORY}/configure ${CONFIGURE_FLAGS}
@@ -59,22 +56,28 @@ add_custom_command(OUTPUT ${LOG4CXX_BUILD_DIRECTORY}/Makefile
    WORKING_DIRECTORY ${LOG4CXX_BUILD_DIRECTORY}
 )
 
+add_library(log4cxx::log4cxx UNKNOWN IMPORTED GLOBAL)
+set_target_properties(log4cxx::log4cxx
+                      PROPERTIES INTERFACE_INCLUDE_DIRECTORIES
+                                 "${LOG4CXX_SOURCE_INCLUDE_DIRECTORY}"
+                                 IMPORTED_LOCATION
+                                 "${LOG4CXX_LIBS_DIRECTORY}/liblog4cxx.so")
+                                 
 add_custom_target(liblog4cxx ALL make
-  COMMAND /bin/bash -c \"
-	cd ${CMAKE_CURRENT_SOURCE_DIR}\;
-	git log . 1>/dev/null 2>&1\;
+        COMMAND /bin/bash -c \"
+        cd ${CMAKE_CURRENT_SOURCE_DIR}\;
+        git log . 1>/dev/null 2>&1\;
         if [ \\$$? == 0 ]; then
-          grep \\".commit_hash\\" ${LOG4CXX_LIBS_DIRECTORY}/liblog4cxx.so 1>/dev/null 2>&1\;
-          if [ ! \\\$$? == 0 ]\; then
-            cd ${CMAKE_CURRENT_SOURCE_DIR} &&
-            git log --pretty=\\"format:%H\\" -1 ${LOG4CXX_SOURCE_DIRECTORY} > /tmp/commit_hash 2>/dev/null &&
-            echo \\"Adding .commit_hash section\\" &&
-            ${CMAKE_OBJCOPY} --add-section .commit_hash=/tmp/commit_hash ${LOG4CXX_LIBS_DIRECTORY}/liblog4cxx.so ${LOG4CXX_LIBS_DIRECTORY}/liblog4cxx.so 1>/dev/null 2>&1\;
-          fi;
+                grep \\".commit_hash\\" ${LOG4CXX_LIBS_DIRECTORY}/liblog4cxx.so 1>/dev/null 2>&1\;
+                if [ ! \\\$$? == 0 ]\; then
+                cd ${CMAKE_CURRENT_SOURCE_DIR} &&
+                git log --pretty=\\"format:%H\\" -1 ${LOG4CXX_SOURCE_DIRECTORY} > /tmp/commit_hash 2>/dev/null &&
+                echo \\"Adding .commit_hash section\\" &&
+                ${CMAKE_OBJCOPY} --add-section .commit_hash=/tmp/commit_hash ${LOG4CXX_LIBS_DIRECTORY}/liblog4cxx.so ${LOG4CXX_LIBS_DIRECTORY}/liblog4cxx.so 1>/dev/null 2>&1\;
+                fi;
         fi\"
-  DEPENDS ${LOG4CXX_BUILD_DIRECTORY}/Makefile
-  WORKING_DIRECTORY ${LOG4CXX_BUILD_DIRECTORY}
-)
+        DEPENDS ${LOG4CXX_BUILD_DIRECTORY}/Makefile
+        WORKING_DIRECTORY ${LOG4CXX_BUILD_DIRECTORY})
 
 install(
   DIRECTORY ${LOG4CXX_LIBS_DIRECTORY}/
