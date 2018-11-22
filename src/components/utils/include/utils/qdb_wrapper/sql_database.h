@@ -91,6 +91,19 @@ class SQLDatabase {
    */
   bool Backup();
 
+	/**
+   * Sets path to database
+   * If the database is already opened then need reopen it
+   */
+  void set_path(const std::string& path);
+
+   /**
+   * @brief get_path databse location path.
+   *
+   * @return the path to the database location
+   */
+  std::string get_path() const;
+
  protected:
   /**
    * Gets connection to the SQLite database
@@ -108,6 +121,11 @@ class SQLDatabase {
    * Lock for guarding connection to database
    */
   sync_primitives::Lock conn_lock_;
+
+  /**
+   * The file path of database
+   */
+  std::string path_;
 
   /**
    * The database name
