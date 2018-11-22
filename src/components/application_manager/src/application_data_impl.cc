@@ -574,8 +574,7 @@ void DynamicApplicationDataImpl::RemoveChoiceSet(uint32_t choice_set_id) {
     choice_set_map_.erase(choice_set_id);
   }
 
-  ChoiceSetAllowedMap::iterator choise_id_it =
-      choice_set_allowed_map_.find(choice_set_id);
+  auto choise_id_it = choice_set_allowed_map_.find(choice_set_id);
   if (choice_set_allowed_map_.end() == choise_id_it) {
     LOG4CXX_WARN(logger_,
                  "Choice set with id " << choice_set_id << " is not found");
@@ -644,7 +643,7 @@ void DynamicApplicationDataImpl::set_choice_set_allow_mode(
 bool DynamicApplicationDataImpl::is_choice_set_allowed(
     const uint32_t choice_set_id) const {
   LOG4CXX_DEBUG(logger_, "Choice setID: " << choice_set_id);
-  auto it = choice_set_allowed_map_.find(choice_set_id);
+  const auto it = choice_set_allowed_map_.find(choice_set_id);
   if (choice_set_allowed_map_.end() == it) {
     LOG4CXX_ERROR(logger_,
                   "Choice set with id " << choice_set_id << " is not found.");
