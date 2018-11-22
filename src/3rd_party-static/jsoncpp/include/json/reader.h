@@ -146,9 +146,9 @@ class JSON_API Reader {
   bool readCppStyleComment();
   bool readString();
   void readNumber();
-  bool readValue(int& depth_level);
-  bool readObject(Token& token, int& depth_level);
-  bool readArray(Token& token, int& depth_level);
+  bool readValue(int& out_depth_level);
+  bool readObject(Token& token, int& out_depth_level);
+  bool readArray(Token& token, int& out_depth_level);
   bool decodeNumber(Token& token);
   bool decodeString(Token& token);
   bool decodeString(Token& token, std::string& decoded);

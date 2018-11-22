@@ -114,8 +114,8 @@ bool Reader::parse(const char* beginDoc,
     nodes_.pop();
   nodes_.push(&root);
 
-  int depth_level = 0;
-  bool successful = readValue(depth_level);
+  int out_depth_level = 0;
+  bool successful = readValue(out_depth_level);
   Token token;
   skipCommentTokens(token);
   if (collectComments_ && !commentsBefore_.empty())
@@ -136,7 +136,7 @@ bool Reader::parse(const char* beginDoc,
   return successful;
 }
 
-bool Reader::readValue(int& depth_level) {
+bool Reader::readValue(int& out_depth_level) {
   Token token;
   skipCommentTokens(token);
   bool successful = true;
@@ -150,42 +150,42 @@ bool Reader::readValue(int& depth_level) {
   switch (token.type_) {
     case tokenObjectBegin:
 
-      if (max_allowed_depth_level <= depth_level) {
+      if (max_allowed_depth_level <= out_depth_level) {
         successful = false;
         break;
       }
 
-      ++depth_level;
-      successful = readObject(token, depth_level);
+      ++out_depth_level;
+      successful = readObject(token, out_depth_level);
       break;
     case tokenArrayBegin:
 
-      if (max_allowed_depth_level <= depth_level) {
+      if (max_allowed_depth_level <= out_depth_level) {
         successful = false;
         break;
       }
 
-      ++depth_level;
-      successful = readArray(token, depth_level);
+      ++out_depth_level;
+      successful = readArray(token, out_depth_level);
       break;
     case tokenNumber:
-      depth_level = 0;
+      out_depth_level = 0;
       successful = decodeNumber(token);
       break;
     case tokenString:
-      depth_level = 0;
+      out_depth_level = 0;
       successful = decodeString(token);
       break;
     case tokenTrue:
-      depth_level = 0;
+      out_depth_level = 0;
       currentValue() = true;
       break;
     case tokenFalse:
-      depth_level = 0;
+      out_depth_level = 0;
       currentValue() = false;
       break;
     case tokenNull:
-      depth_level = 0;
+      out_depth_level = 0;
       currentValue() = Value();
       break;
     default:
@@ -388,7 +388,7 @@ bool Reader::readString() {
   return c == '"';
 }
 
-bool Reader::readObject(Token& /*tokenStart*/, int& depth_level) {
+bool Reader::readObject(Token& /*tokenStart*/, int& out_depth_level) {
   Token tokenName;
   std::string name;
   currentValue() = Value(objectValue);
@@ -414,7 +414,7 @@ bool Reader::readObject(Token& /*tokenStart*/, int& depth_level) {
     }
     Value& value = currentValue()[name];
     nodes_.push(&value);
-    const bool ok = readValue(depth_level);
+    const bool ok = readValue(out_depth_level);
     nodes_.pop();
     if (!ok)  // error already set
       return recoverFromError(tokenObjectEnd);
@@ -436,7 +436,7 @@ bool Reader::readObject(Token& /*tokenStart*/, int& depth_level) {
       "Missing '}' or object member name", tokenName, tokenObjectEnd);
 }
 
-bool Reader::readArray(Token& /*tokenStart*/, int& depth_level) {
+bool Reader::readArray(Token& /*tokenStart*/, int& out_depth_level) {
   currentValue() = Value(arrayValue);
   skipSpaces();
   if (*current_ == ']')  // empty array
@@ -449,7 +449,7 @@ bool Reader::readArray(Token& /*tokenStart*/, int& depth_level) {
   for (;;) {
     Value& value = currentValue()[index++];
     nodes_.push(&value);
-    const bool ok = readValue(depth_level);
+    const bool ok = readValue(out_depth_level);
     nodes_.pop();
     if (!ok)  // error already set
       return recoverFromError(tokenArrayEnd);
