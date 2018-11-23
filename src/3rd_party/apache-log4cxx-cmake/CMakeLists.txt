@@ -40,28 +40,23 @@ file(MAKE_DIRECTORY
   ${LOG4CXX_BUILD_DIRECTORY}
 )
 
-set(COMMON_CONFIGURE_FLAGS
-  "--with-apr=../apr-build"
-  "--with-apr-util=../apr-util-build"
-  "LDFLAGS=-L${EXPAT_LIBS_DIRECTORY}"
-)
-
-if(CMAKE_SYSTEM_NAME STREQUAL "QNX")
-  if (CMAKE_SYSTEM_PROCESSOR MATCHES arm*)
-    set (ARCHITECTURE arm) # log4cxx doesn't recognize armv7
-  else ()
-    set (ARCHITECTURE ${CMAKE_SYSTEM_PROCESSOR})
-  endif ()
-  set(CONFIGURE_FLAGS "--host=${ARCHITECTURE}-nto-qnx" ${COMMON_CONFIGURE_FLAGS})
+if(DEFINED CMAKE_TOOLCHAIN_FILE)  
+  include("./QNX_LOG4CXX.cmake")
 else()
-  set(CONFIGURE_FLAGS ${COMMON_CONFIGURE_FLAGS})
+  set(CONFIGURE_FLAGS
+    "--with-apr=../apr-build"
+    "--with-apr-util=../apr-util-build"
+    "LDFLAGS=-L${EXPAT_LIBS_DIRECTORY}"
+    "CC=${CMAKE_C_COMPILER}"
+    "CXX=${CMAKE_CXX_COMPILER}"
+  )
 endif()
 
 add_custom_command(OUTPUT ${LOG4CXX_BUILD_DIRECTORY}/Makefile
-  COMMAND CC=${CMAKE_C_COMPILER} CXX=${CMAKE_CXX_COMPILER} ${LOG4CXX_SOURCE_DIRECTORY}/configure ${CONFIGURE_FLAGS}
-  DEPENDS libapr-1
-  DEPENDS apr-util
-  WORKING_DIRECTORY ${LOG4CXX_BUILD_DIRECTORY}
+   COMMAND ${LOG4CXX_SOURCE_DIRECTORY}/configure ${CONFIGURE_FLAGS}
+   DEPENDS libapr-1
+   DEPENDS apr-util
+   WORKING_DIRECTORY ${LOG4CXX_BUILD_DIRECTORY}
 )
 
 add_custom_target(liblog4cxx ALL make
@@ -74,7 +69,7 @@ add_custom_target(liblog4cxx ALL make
             cd ${CMAKE_CURRENT_SOURCE_DIR} &&
             git log --pretty=\\"format:%H\\" -1 ${LOG4CXX_SOURCE_DIRECTORY} > /tmp/commit_hash 2>/dev/null &&
             echo \\"Adding .commit_hash section\\" &&
-            objcopy --add-section .commit_hash=/tmp/commit_hash ${LOG4CXX_LIBS_DIRECTORY}/liblog4cxx.so ${LOG4CXX_LIBS_DIRECTORY}/liblog4cxx.so 1>/dev/null 2>&1\;
+            ${CMAKE_OBJCOPY} --add-section .commit_hash=/tmp/commit_hash ${LOG4CXX_LIBS_DIRECTORY}/liblog4cxx.so ${LOG4CXX_LIBS_DIRECTORY}/liblog4cxx.so 1>/dev/null 2>&1\;
           fi;
         fi\"
   DEPENDS ${LOG4CXX_BUILD_DIRECTORY}/Makefile

@@ -19,6 +19,7 @@
 #include <log4cxx/helpers/mutex.h>
 #include <log4cxx/helpers/exception.h>
 #include <apr_thread_mutex.h>
+#include <log4cxx/helpers/pool.h>
 #include <assert.h>
 #if !defined(LOG4CXX)
 #define LOG4CXX 1
@@ -52,7 +53,13 @@ Mutex::Mutex(apr_pool_t* p) {
 
 Mutex::~Mutex() {
 #if APR_HAS_THREADS
-        apr_thread_mutex_destroy(mutex);
+	// LOGCXX-322
+	if (APRInitializer::isDestructed)
+	{
+		return;
+	}
+
+	apr_thread_mutex_destroy(mutex);
 #endif
 }
 

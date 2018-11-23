@@ -1,0 +1,23 @@
+//Policy mode (PROPRIETARY, HTTP or EXTERNAL_PROPRIETARY)
+EXTENDED_POLICY:STRING=PROPRIETARY
+
+//Bluetooth support
+BUILD_BT_SUPPORT:BOOL=ON
+
+//libusb support
+BUILD_USB_SUPPORT:BOOL=ON
+
+//Security Ford protocol protection
+ENABLE_SECURITY:BOOL=ON
+
+//Turn on and off extended Madia Manager features relates to PulseAudio A2DP and GStreamer
+EXTENDED_MEDIA_MODE:BOOL=OFF
+
+//Enable profiling time test util
+TELEMETRY_MONITOR:BOOL=ON
+
+//HMI type
+HMI:STRING=web
+
+//Policy table update parsed by hmi
+ENABLE_HMI_PTU_DECRYPTION:BOOL=ON

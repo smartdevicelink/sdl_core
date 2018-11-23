@@ -188,6 +188,11 @@ if (${BSON_LIB} MATCHES "BSON_LIB-NOTFOUND")
   if (${3RD_PARTY_INSTALL_PREFIX} MATCHES "/usr/local")
     set(BSON_INSTALL_COMMAND sudo make install)
   endif()
+  if(DEFINED CMAKE_TOOLCHAIN_FILE)  
+    include("./QNX_BSON.cmake")
+  else()
+    set(BSON_CONFIGURE_FLAGS "")
+  endif()
   include(ExternalProject)
   ExternalProject_Add(libbson
       GIT_REPOSITORY "http://github.com/smartdevicelink/bson_c_lib.git"
@@ -196,7 +201,7 @@ if (${BSON_LIB} MATCHES "BSON_LIB-NOTFOUND")
       INSTALL_DIR ${3RD_PARTY_INSTALL_PREFIX}
       DOWNLOAD_DIR ${BSON_LIB_SOURCE_DIRECTORY}
       SOURCE_DIR ${BSON_LIB_SOURCE_DIRECTORY}
-      CONFIGURE_COMMAND touch aclocal.m4 configure.ac Makefile.am Makefile.in configure config.h.in && ./configure --prefix=${3RD_PARTY_INSTALL_PREFIX}
+      CONFIGURE_COMMAND touch aclocal.m4 configure.ac Makefile.am Makefile.in configure config.h.in && ./configure ${BSON_CONFIGURE_FLAGS} --prefix=${3RD_PARTY_INSTALL_PREFIX}
       BUILD_COMMAND make
       INSTALL_COMMAND ${BSON_INSTALL_COMMAND})
 else()
@@ -222,18 +227,22 @@ if (NOT ${Boost_FOUND})
   if (${3RD_PARTY_INSTALL_PREFIX} MATCHES "/usr/local")
     set(BOOST_INSTALL_COMMAND sudo ./b2 install)
   endif()
-  include(ExternalProject)
-  ExternalProject_Add(
-    Boost
-    URL https://dl.bintray.com/boostorg/release/1.66.0/source/boost_1_66_0.tar.gz
-    DOWNLOAD_DIR ${BOOST_LIB_SOURCE_DIRECTORY}
-    SOURCE_DIR ${BOOST_LIB_SOURCE_DIRECTORY}
-    CONFIGURE_COMMAND ./bootstrap.sh --with-libraries=system,thread,date_time,filesystem --prefix=${3RD_PARTY_INSTALL_PREFIX}
-    BUILD_COMMAND ./b2
-    INSTALL_COMMAND ${BOOST_INSTALL_COMMAND} --with-system --with-thread --with-date_time --with-filesystem --prefix=${3RD_PARTY_INSTALL_PREFIX} > boost_install.log
-    INSTALL_DIR ${3RD_PARTY_INSTALL_PREFIX}
-    BUILD_IN_SOURCE true
-  )
+  if(DEFINED CMAKE_TOOLCHAIN_FILE)  
+    include("./QNX_Boost.cmake")
+  else()
+    include(ExternalProject)
+    ExternalProject_Add(
+      Boost
+      URL https://dl.bintray.com/boostorg/release/1.66.0/source/boost_1_66_0.tar.gz
+      DOWNLOAD_DIR ${BOOST_LIB_SOURCE_DIRECTORY}
+      SOURCE_DIR ${BOOST_LIB_SOURCE_DIRECTORY}
+      CONFIGURE_COMMAND ./bootstrap.sh --with-libraries=system,thread,date_time,filesystem --prefix=${3RD_PARTY_INSTALL_PREFIX}
+      BUILD_COMMAND ./b2
+      INSTALL_COMMAND ${BOOST_INSTALL_COMMAND} --with-system --with-thread --with-date_time --with-filesystem --prefix=${3RD_PARTY_INSTALL_PREFIX} > boost_install.log
+      INSTALL_DIR ${3RD_PARTY_INSTALL_PREFIX}
+      BUILD_IN_SOURCE true
+    )
+  endif()
 
   set(BOOST_INCLUDE_DIR ${BOOST_ROOT_DIR}/Boost-prefix/src/Boost)
   set(BOOST_LIB_DIR ${BOOST_ROOT_DIR}/Boost-prefix/src/Boost/stage/lib/)
