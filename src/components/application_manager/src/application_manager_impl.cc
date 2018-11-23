@@ -36,7 +36,7 @@
 #include <string>
 #include <fstream>
 #include <utility>
-#include <bson_object.h>
+#include <bson/bson_object.h>
 
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/commands/command_impl.h"

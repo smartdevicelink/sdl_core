@@ -32,6 +32,7 @@ project(${PROJECT})
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH}
     "${CMAKE_SOURCE_DIR}/tools/cmake/modules/")
 
+include("${CMAKE_CURRENT_LIST_DIR}/cmake/helpers/dependencies.cmake")
 include("${CMAKE_CURRENT_LIST_DIR}/tools/cmake/helpers/install_rules.cmake")
 include(${CMAKE_SOURCE_DIR}/tools/cmake/helpers/platform.cmake)
 include(

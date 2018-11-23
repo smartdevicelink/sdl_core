@@ -23,7 +23,8 @@ target_sources(${PROJECT_NAME}
                "${CMAKE_CURRENT_LIST_DIR}/src/threads/async_runner.cc"
                "${CMAKE_CURRENT_LIST_DIR}/src/threads/thread_delegate.cc"
                "${CMAKE_CURRENT_LIST_DIR}/src/threads/thread_posix.cc"
-               "${CMAKE_CURRENT_LIST_DIR}/src/threads/thread_validator.cc")
+               "${CMAKE_CURRENT_LIST_DIR}/src/threads/thread_validator.cc"
+               "${CMAKE_CURRENT_LIST_DIR}/src/semantic_version.cc")
 
 if(BUILD_BACKTRACE_SUPPORT AND NOT QNXNTO)
   target_sources(${PROJECT_NAME} PRIVATE
@@ -37,9 +38,12 @@ if(QNXNTO)
     "${CMAKE_CURRENT_LIST_DIR}/src/threads/pulse_thread_delegate.cc")
 endif()
 
-find_package(Boost 1.66 COMPONENTS system thread REQUIRED)
-
 if(ENABLE_LOG)
+  sdl_find_package(apr REQUIRED)
+  sdl_find_package(apr-util REQUIRED)
+  sdl_find_package(log4cxx REQUIRED)
+  sdl_find_package(boost REQUIRED)
+
   find_package(EXPAT REQUIRED)
 
   target_sources(${PROJECT_NAME}
@@ -50,14 +54,14 @@ if(ENABLE_LOG)
                  "${CMAKE_CURRENT_LIST_DIR}/src/logger_status.cc"
                  "${CMAKE_CURRENT_LIST_DIR}/src/auto_trace.cc")
   target_link_libraries(${PROJECT_NAME}
-                        PUBLIC libapr-1.so
-                               libaprutil-1.so
-                               log4cxx
+                        PUBLIC apr::apr
+                               apr-util::apr-util
+                               log4cxx::log4cxx
                                EXPAT::EXPAT
                                config_profile::config_profile
-                               Boost::boost
-                               Boost::system
-                               ${Boost_LIBRARIES})
+                               boost::system
+                               boost::filesystem
+                               boost::thread)
   target_compile_definitions(${PROJECT_NAME} PUBLIC ENABLE_LOG)
 endif()
 

@@ -32,7 +32,7 @@
 
 #include "protocol_handler/handshake_handler.h"
 
-#include <bson_object.h>
+#include <bson/bson_object.h>
 
 #include "protocol_handler/protocol_handler_impl.h"
 #include "protocol_handler/protocol_packet.h"
