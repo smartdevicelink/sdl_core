@@ -40,7 +40,7 @@ target_sources(
   "${CMAKE_CURRENT_LIST_DIR}/src/protocol_packet.cc"
   "${CMAKE_CURRENT_LIST_DIR}/src/protocol_payload.cc")
 
-SDL_find_package(BSON REQUIRED)
+sdl_find_package(BSON REQUIRED)
 
 target_link_libraries(${PROJECT_NAME}
                       PUBLIC config_profile::config_profile

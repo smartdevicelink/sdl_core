@@ -107,8 +107,8 @@ target_sources(
   "${CMAKE_CURRENT_LIST_DIR}/src/state_controller_impl.cc"
   "${CMAKE_CURRENT_LIST_DIR}/src/usage_statistics.cc"
   "${CMAKE_CURRENT_LIST_DIR}/src/help_prompt_manager_impl")
-  
-SDL_find_package(BSON REQUIRED)
+
+sdl_find_package(BSON REQUIRED)
 
 target_link_libraries(${PROJECT_NAME}
                       PUBLIC utils::utils
