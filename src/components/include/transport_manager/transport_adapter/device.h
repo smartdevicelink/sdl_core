@@ -58,7 +58,9 @@ class Device {
   Device(const std::string& name, const DeviceUID& unique_device_id)
       : name_(name)
       , unique_device_id_(unique_device_id)
-      , keep_on_disconnect_(false) {}
+      , keep_on_disconnect_(false)
+      , status_(ConnectionStatus::PENDING)
+      , retry_count_(0) {}
 
   /**
    * Constructor for creating device supporting transport switch
@@ -73,7 +75,9 @@ class Device {
       : name_(name)
       , unique_device_id_(unique_device_id)
       , transport_switch_id_(transport_switch_id)
-      , keep_on_disconnect_(false) {}
+      , keep_on_disconnect_(false)
+      , status_(ConnectionStatus::PENDING)
+      , retry_count_(0) {}
 
   /**
    * @brief Destructor.

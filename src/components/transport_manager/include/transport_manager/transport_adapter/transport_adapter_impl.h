@@ -553,6 +553,7 @@ class TransportAdapterImpl : public TransportAdapter,
   TransportAdapter::Error ConnectDevice(DeviceSptr device);
 
   void RetryConnection();
+  DeviceUID GetNextRetryDevice();
 
   /**
    * @brief Remove specified device
@@ -616,6 +617,7 @@ class TransportAdapterImpl : public TransportAdapter,
   ConnectionMap connections_;
 
   std::queue<std::pair<TimerSPtr, DeviceUID> > retry_timer_pool_;
+  sync_primitives::RecursiveLock retry_timer_pool_lock_;
 
   /**
    * @brief Mutex restricting access to connections map.

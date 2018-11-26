@@ -145,7 +145,7 @@ void SDLActivateAppRequest::Run() {
   const uint32_t application_id = app_id();
 
   ApplicationConstSharedPtr app_to_activate =
-      application_manager_.application_by_hmi_app(application_id);
+      application_manager_.application(application_id);
 
   if (!app_to_activate) {
     LOG4CXX_WARN(

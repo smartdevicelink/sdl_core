@@ -239,17 +239,6 @@ TransportAdapter::Error TransportAdapterImpl::Connect(
   return err;
 }
 
-void TransportAdapterImpl::RetryConnection() {
-  if (retry_timer_pool_.empty()) {
-    LOG4CXX_ERROR(logger_,
-                  "Unable to find timer, ignoring RetryConnection request");
-    return;
-  }
-  const DeviceUID device_id = retry_timer_pool_.front().second;
-  retry_timer_pool_.pop();
-  ConnectDevice(device_id);
-}
-
 TransportAdapter::Error TransportAdapterImpl::ConnectDevice(
     const DeviceUID& device_handle) {
   LOG4CXX_TRACE(logger_, "enter with device_handle: " << &device_handle);
@@ -276,6 +265,7 @@ TransportAdapter::Error TransportAdapterImpl::ConnectDevice(
           "RetryConnectionTimer",
           new timer::TimerTaskImpl<TransportAdapterImpl>(
               this, &TransportAdapterImpl::RetryConnection)));
+      sync_primitives::AutoLock locker(retry_timer_pool_lock_);
       retry_timer_pool_.push(std::make_pair(retry_timer, device_handle));
       retry_timer->Start(get_settings().cloud_app_retry_timeout(),
                          timer::kSingleShot);
@@ -288,6 +278,28 @@ TransportAdapter::Error TransportAdapterImpl::ConnectDevice(
     LOG4CXX_TRACE(logger_, "exit with BAD_PARAM");
     return BAD_PARAM;
   }
+}
+
+void TransportAdapterImpl::RetryConnection() {
+  const DeviceUID device_id = GetNextRetryDevice();
+  if (device_id.empty()) {
+    LOG4CXX_ERROR(logger_,
+                  "Unable to find timer, ignoring RetryConnection request");
+    return;
+  }
+  ConnectDevice(device_id);
+}
+
+DeviceUID TransportAdapterImpl::GetNextRetryDevice() {
+  sync_primitives::AutoLock locker(retry_timer_pool_lock_);
+  while (!retry_timer_pool_.empty()) {
+    auto timer_entry = retry_timer_pool_.front();
+    if (timer_entry.first->is_running()) {
+      return timer_entry.second;
+    }
+    retry_timer_pool_.pop();
+  }
+  return std::string();
 }
 
 ConnectionStatus TransportAdapterImpl::GetConnectionStatus(

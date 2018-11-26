@@ -645,7 +645,7 @@ ApplicationSharedPtr ApplicationManagerImpl::RegisterApplication(
     // Set cloud app parameters
     application->set_cloud_app_endpoint((*it)->cloud_app_endpoint());
     application->set_cloud_app_certificate((*it)->cloud_app_certificate());
-    application->set_cloud_app_auth_token((*it)->cloud_app_authtoken());
+    application->set_cloud_app_auth_token((*it)->cloud_app_auth_token());
     application->set_cloud_app_transport_type(
         (*it)->cloud_app_transport_type());
     application->set_hybrid_app_preference((*it)->hybrid_app_preference());
