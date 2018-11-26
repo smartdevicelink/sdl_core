@@ -67,20 +67,28 @@ set_target_properties(apr-util::apr-util
 
 add_dependencies(apr-util::apr-util apr-util)
 
+if(3RD_PARTY_INSTALL_PREFIX)
+  install(DIRECTORY ${APR_UTIL_LIBS_DIRECTORY}/
+          DESTINATION ${3RD_PARTY_INSTALL_PREFIX_ARCH}/lib
+          USE_SOURCE_PERMISSIONS
+          FILES_MATCHING
+          PATTERN libaprutil-1.so*)
+
+  install(DIRECTORY ${APR_UTIL_INCLUDE_DIRECTORY}/
+          DESTINATION ${3RD_PARTY_INSTALL_PREFIX}/include
+          USE_SOURCE_PERMISSIONS
+          FILES_MATCHING
+          PATTERN *.h)
+
+  install(DIRECTORY ${APR_UTIL_BUILD_DIRECTORY}/include/
+          DESTINATION ${3RD_PARTY_INSTALL_PREFIX}/include
+          USE_SOURCE_PERMISSIONS
+          FILES_MATCHING
+          PATTERN *.h)
+endif()
+
 install(DIRECTORY ${APR_UTIL_LIBS_DIRECTORY}/
-        DESTINATION ${3RD_PARTY_INSTALL_PREFIX_ARCH}/lib
+        DESTINATION ${CMAKE_INSTALL_LIBDIR}
         USE_SOURCE_PERMISSIONS
         FILES_MATCHING
         PATTERN libaprutil-1.so*)
-
-install(DIRECTORY ${APR_UTIL_INCLUDE_DIRECTORY}/
-        DESTINATION ${3RD_PARTY_INSTALL_PREFIX}/include
-        USE_SOURCE_PERMISSIONS
-        FILES_MATCHING
-        PATTERN *.h)
-
-install(DIRECTORY ${APR_UTIL_BUILD_DIRECTORY}/include/
-        DESTINATION ${3RD_PARTY_INSTALL_PREFIX}/include
-        USE_SOURCE_PERMISSIONS
-        FILES_MATCHING
-        PATTERN *.h)

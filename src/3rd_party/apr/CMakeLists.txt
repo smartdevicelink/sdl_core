@@ -78,14 +78,22 @@ set_target_properties(apr::apr
 
 add_dependencies(apr::apr libapr-1)
 
+if(3RD_PARTY_INSTALL_PREFIX)
+  install(DIRECTORY ${APR_LIBS_DIRECTORY}/
+          DESTINATION ${3RD_PARTY_INSTALL_PREFIX_ARCH}/lib
+          USE_SOURCE_PERMISSIONS
+          FILES_MATCHING
+          PATTERN libapr-1.so*)
+
+  install(DIRECTORY ${APR_INCLUDE_DIRECTORY}/
+          DESTINATION ${3RD_PARTY_INSTALL_PREFIX}/include
+          USE_SOURCE_PERMISSIONS
+          FILES_MATCHING
+          PATTERN *.h)
+endif()
+
 install(DIRECTORY ${APR_LIBS_DIRECTORY}/
-        DESTINATION ${3RD_PARTY_INSTALL_PREFIX_ARCH}/lib
+        DESTINATION ${CMAKE_INSTALL_LIBDIR}
         USE_SOURCE_PERMISSIONS
         FILES_MATCHING
         PATTERN libapr-1.so*)
-
-install(DIRECTORY ${APR_INCLUDE_DIRECTORY}/
-        DESTINATION ${3RD_PARTY_INSTALL_PREFIX}/include
-        USE_SOURCE_PERMISSIONS
-        FILES_MATCHING
-        PATTERN *.h)

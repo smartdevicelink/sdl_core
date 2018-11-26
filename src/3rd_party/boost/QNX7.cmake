@@ -46,7 +46,7 @@ set(BOOTSTRAP
     ./bootstrap.sh
     --with-toolset=gcc
     --with-libraries=system,thread,date_time,filesystem
-    --prefix=${3RD_PARTY_INSTALL_PREFIX})
+    --prefix=${INSTALL_PATH})
 
 if(${CMAKE_SYSTEM_PROCESSOR} MATCHES ".*aarch64")
   set(ADDRESS_MODEL "64")
@@ -65,7 +65,7 @@ set(BOOST_BUILD_COMMAND
     
 set(BOOST_INSTALL_COMMAND ${BOOST_BUILD_COMMAND} install > boost_install.log)
 
-if(${3RD_PARTY_INSTALL_PREFIX} MATCHES "/usr/local")
+if(${INSTALL_PATH} MATCHES "/usr/local")
   set(BOOST_INSTALL_COMMAND
       sudo
       ${BOOST_BUILD_COMMAND}
@@ -100,6 +100,6 @@ externalproject_add(
   INSTALL_COMMAND
   ${BOOST_INSTALL_COMMAND}
   INSTALL_DIR
-  ${3RD_PARTY_INSTALL_PREFIX}
+  ${INSTALL_PATH}
   BUILD_IN_SOURCE
   true)

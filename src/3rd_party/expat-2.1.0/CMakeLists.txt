@@ -69,9 +69,14 @@ endif(BUILD_shared)
 
 add_library(expat ${_SHARED} ${expat_SRCS})
 
+if(3RD_PARTY_INSTALL_PREFIX)
+    install(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/libexpat.so
+    DESTINATION ${3RD_PARTY_INSTALL_PREFIX_ARCH}/lib
+    )
+endif()
+
 install(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/libexpat.so
-  DESTINATION ${3RD_PARTY_INSTALL_PREFIX_ARCH}/lib
-)
+        DESTINATION ${CMAKE_INSTALL_LIBDIR})
 
 set(prefix ${CMAKE_INSTALL_PREFIX})
 set(exec_prefix "\${prefix}/bin")

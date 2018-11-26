@@ -31,12 +31,18 @@ if(TARGET boost::filesystem AND TARGET boost::system AND TARGET boost::thread)
   return()
 endif()
 
+if(3RD_PARTY_INSTALL_PREFIX)
+  set(INSTALL_PATH "${3RD_PARTY_INSTALL_PREFIX}")
+else()
+  set(INSTALL_PATH "${3RD_PARTY_BINARY_DIRECTORY}")
+endif()
+
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}")
-set(CMAKE_SOURCE_PREFIX ${CMAKE_SOURCE_PREFIX} "${3RD_PARTY_INSTALL_PREFIX}")
+set(CMAKE_SOURCE_PREFIX ${CMAKE_SOURCE_PREFIX} "${INSTALL_PATH}")
 set(BOOST_LIB_SOURCE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/boost_src)
-set(BOOST_LIBS_DIRECTORY ${3RD_PARTY_INSTALL_PREFIX}/lib)
+set(BOOST_LIBS_DIRECTORY ${INSTALL_PATH}/lib)
 set_property(GLOBAL PROPERTY GLOBAL_BOOST_LIBS ${BOOST_LIBS_DIRECTORY})
-set(BOOST_INCLUDE_DIRECTORY ${3RD_PARTY_INSTALL_PREFIX}/include)
+set(BOOST_INCLUDE_DIRECTORY ${INSTALL_PATH}/include)
 
 include("./${PLATFORM}.cmake")
 
@@ -48,9 +54,9 @@ if(NOT TARGET boost::thread)
   add_library(boost::thread UNKNOWN IMPORTED GLOBAL)
   set_target_properties(boost::thread
                         PROPERTIES INTERFACE_INCLUDE_DIRECTORIES
-                                   ${3RD_PARTY_INSTALL_PREFIX}/include
+                                   ${INSTALL_PATH}/include
                                    IMPORTED_LOCATION
-                                   ${3RD_PARTY_INSTALL_PREFIX}/lib/libboost_thread.so)
+                                   ${INSTALL_PATH}/lib/libboost_thread.so)
   add_dependencies(boost::thread Boost)
 endif()
 
@@ -58,9 +64,9 @@ if(NOT TARGET boost::filesystem)
   add_library(boost::filesystem UNKNOWN IMPORTED GLOBAL)
   set_target_properties(boost::filesystem
                         PROPERTIES INTERFACE_INCLUDE_DIRECTORIES
-                                   ${3RD_PARTY_INSTALL_PREFIX}/include
+                                   ${INSTALL_PATH}/include
                                    IMPORTED_LOCATION
-                                   ${3RD_PARTY_INSTALL_PREFIX}/lib/libboost_filesystem.so)
+                                   ${INSTALL_PATH}/lib/libboost_filesystem.so)
   add_dependencies(boost::filesystem Boost)
 endif()
 
@@ -68,6 +74,14 @@ if(NOT TARGET boost::system)
   add_library(boost::system UNKNOWN IMPORTED GLOBAL)
   set_target_properties(boost::system
                         PROPERTIES IMPORTED_LOCATION
-                                   ${3RD_PARTY_INSTALL_PREFIX}/lib/libboost_system.so)
+                                   ${INSTALL_PATH}/lib/libboost_system.so)
   add_dependencies(boost::system Boost)
 endif()
+
+install(DIRECTORY ${3RD_PARTY_BINARY_DIRECTORY}/lib/
+        DESTINATION ${CMAKE_INSTALL_LIBDIR}
+        USE_SOURCE_PERMISSIONS
+        FILES_MATCHING
+        PATTERN libboost_filesystem.so*
+        PATTERN libboost_system.so*
+        PATTERN libboost_thread.so*)
