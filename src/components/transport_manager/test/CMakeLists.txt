@@ -75,6 +75,11 @@ if (BUILD_BT_SUPPORT)
  endif()
 endif()
 
+if(BUILD_CLOUD_APP_SUPPORT)
+  GET_PROPERTY(BOOST_LIBS_DIRECTORY GLOBAL PROPERTY GLOBAL_BOOST_LIBS)
+  list(APPEND LIBRARIES boost_system boost_regex crypto ssl -L${BOOST_LIBS_DIRECTORY})
+endif()
+
 create_test("transport_manager_test" "${SOURCES}" "${LIBRARIES}")
 
 file(COPY smartDeviceLink_test.ini DESTINATION ${CMAKE_CURRENT_BINARY_DIR})

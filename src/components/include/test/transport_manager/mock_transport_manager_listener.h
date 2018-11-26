@@ -55,6 +55,9 @@ class MockTransportManagerListener : public TransportManagerListener {
   MOCK_METHOD1(OnDeviceRemoved, void(const DeviceInfo& device_info));
   MOCK_METHOD0(OnScanDevicesFinished, void());
   MOCK_METHOD1(OnScanDevicesFailed, void(const SearchDeviceError& error));
+  MOCK_METHOD2(OnConnectionPending,
+               void(const DeviceInfo& device_info,
+                    const ConnectionUID connection_id));
   MOCK_METHOD2(OnConnectionEstablished,
                void(const DeviceInfo& device_info,
                     const ConnectionUID connection_id));
