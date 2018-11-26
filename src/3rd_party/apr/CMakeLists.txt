@@ -64,6 +64,11 @@ add_custom_command(
           ${APR_SOURCE_DIRECTORY}/include/private
   WORKING_DIRECTORY ${APR_BUILD_DIRECTORY})
 
+add_custom_target(
+  libapr-1 ALL make
+  DEPENDS ${APR_BUILD_DIRECTORY}/include/private/apr_escape_test_char.h
+  WORKING_DIRECTORY ${APR_BUILD_DIRECTORY})
+
 add_library(apr::apr UNKNOWN IMPORTED GLOBAL)
 set_target_properties(apr::apr
                       PROPERTIES INTERFACE_INCLUDE_DIRECTORIES
@@ -71,10 +76,7 @@ set_target_properties(apr::apr
                                  IMPORTED_LOCATION
                                  "${APR_LIBS_DIRECTORY}/libapr-1.so")
 
-add_custom_target(
-  libapr-1 ALL make
-  DEPENDS ${APR_BUILD_DIRECTORY}/include/private/apr_escape_test_char.h
-  WORKING_DIRECTORY ${APR_BUILD_DIRECTORY})
+add_dependencies(apr::apr libapr-1)
 
 install(DIRECTORY ${APR_LIBS_DIRECTORY}/
         DESTINATION ${3RD_PARTY_INSTALL_PREFIX_ARCH}/lib

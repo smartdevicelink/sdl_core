@@ -36,12 +36,18 @@ set(LOG4CXX_SOURCE_DIRECTORY
 set(LOG4CXX_BUILD_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../apache-log4cxx-build)
 
 set(LOG4CXX_SOURCE_INCLUDE_DIRECTORY
-    ${LOG4CXX_SOURCE_DIRECTORY}/src/main/include)
-set(LOG4CXX_BUILD_INCLUDE_DIRECTORY ${LOG4CXX_BUILD_DIRECTORY}/src/main/include)
+    ${LOG4CXX_BUILD_DIRECTORY}/src/main/include)
 
 set(LOG4CXX_LIBS_DIRECTORY ${LOG4CXX_BUILD_DIRECTORY}/src/main/cpp/.libs)
 
 file(MAKE_DIRECTORY ${LOG4CXX_BUILD_DIRECTORY})
+
+file(MAKE_DIRECTORY "${LOG4CXX_SOURCE_INCLUDE_DIRECTORY}")
+
+file(COPY
+     ${LOG4CXX_SOURCE_DIRECTORY}/src/main/include/log4cxx
+     DESTINATION
+     ${LOG4CXX_BUILD_DIRECTORY}/src/main/include/)
 
 include("./${PLATFORM}.cmake")
 
@@ -52,28 +58,32 @@ add_custom_command(OUTPUT ${LOG4CXX_BUILD_DIRECTORY}/Makefile
                    DEPENDS apr-util
                    WORKING_DIRECTORY ${LOG4CXX_BUILD_DIRECTORY})
 
+
+
+add_custom_target(liblog4cxx ALL make
+                        COMMAND /bin/bash -c \"
+                        cd ${CMAKE_CURRENT_SOURCE_DIR}\;
+                        git log . 1>/dev/null 2>&1\;
+                        if [ \\$$? == 0 ]; then
+                                grep \\".commit_hash\\" ${LOG4CXX_LIBS_DIRECTORY}/liblog4cxx.so 1>/dev/null 2>&1\;
+                                if [ ! \\\$$? == 0 ]\; then
+                                cd ${CMAKE_CURRENT_SOURCE_DIR} &&
+                                git log --pretty=\\"format:%H\\" -1 ${LOG4CXX_SOURCE_DIRECTORY} > /tmp/commit_hash 2>/dev/null &&
+                                echo \\"Adding .commit_hash section\\" &&
+                                ${CMAKE_OBJCOPY} --add-section .commit_hash=/tmp/commit_hash ${LOG4CXX_LIBS_DIRECTORY}/liblog4cxx.so ${LOG4CXX_LIBS_DIRECTORY}/liblog4cxx.so 1>/dev/null 2>&1\;
+                                fi;
+                        fi\"
+                        DEPENDS ${LOG4CXX_BUILD_DIRECTORY}/Makefile
+                        WORKING_DIRECTORY ${LOG4CXX_BUILD_DIRECTORY})
+
 add_library(log4cxx::log4cxx UNKNOWN IMPORTED GLOBAL)
 set_target_properties(log4cxx::log4cxx
-                      PROPERTIES INTERFACE_INCLUDE_DIRECTORIES
-                                 "${LOG4CXX_SOURCE_INCLUDE_DIRECTORY}"
-                                 IMPORTED_LOCATION
-                                 "${LOG4CXX_LIBS_DIRECTORY}/liblog4cxx.so")
-                                 
-add_custom_target(liblog4cxx ALL make
-        COMMAND /bin/bash -c \"
-        cd ${CMAKE_CURRENT_SOURCE_DIR}\;
-        git log . 1>/dev/null 2>&1\;
-        if [ \\$$? == 0 ]; then
-                grep \\".commit_hash\\" ${LOG4CXX_LIBS_DIRECTORY}/liblog4cxx.so 1>/dev/null 2>&1\;
-                if [ ! \\\$$? == 0 ]\; then
-                cd ${CMAKE_CURRENT_SOURCE_DIR} &&
-                git log --pretty=\\"format:%H\\" -1 ${LOG4CXX_SOURCE_DIRECTORY} > /tmp/commit_hash 2>/dev/null &&
-                echo \\"Adding .commit_hash section\\" &&
-                ${CMAKE_OBJCOPY} --add-section .commit_hash=/tmp/commit_hash ${LOG4CXX_LIBS_DIRECTORY}/liblog4cxx.so ${LOG4CXX_LIBS_DIRECTORY}/liblog4cxx.so 1>/dev/null 2>&1\;
-                fi;
-        fi\"
-        DEPENDS ${LOG4CXX_BUILD_DIRECTORY}/Makefile
-        WORKING_DIRECTORY ${LOG4CXX_BUILD_DIRECTORY})
+                        PROPERTIES INTERFACE_INCLUDE_DIRECTORIES
+                                        "${LOG4CXX_SOURCE_INCLUDE_DIRECTORY}"
+                                        IMPORTED_LOCATION
+                                        "${LOG4CXX_LIBS_DIRECTORY}/liblog4cxx.so")
+
+add_dependencies(log4cxx::log4cxx liblog4cxx)
 
 install(DIRECTORY ${LOG4CXX_LIBS_DIRECTORY}/
         DESTINATION ${3RD_PARTY_INSTALL_PREFIX_ARCH}/lib
@@ -82,12 +92,6 @@ install(DIRECTORY ${LOG4CXX_LIBS_DIRECTORY}/
         PATTERN liblog4cxx.so*)
 
 install(DIRECTORY ${LOG4CXX_SOURCE_INCLUDE_DIRECTORY}/
-        DESTINATION ${3RD_PARTY_INSTALL_PREFIX}/include
-        USE_SOURCE_PERMISSIONS
-        FILES_MATCHING
-        PATTERN *.h)
-
-install(DIRECTORY ${LOG4CXX_BUILD_INCLUDE_DIRECTORY}/
         DESTINATION ${3RD_PARTY_INSTALL_PREFIX}/include
         USE_SOURCE_PERMISSIONS
         FILES_MATCHING

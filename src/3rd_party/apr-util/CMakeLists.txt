@@ -54,6 +54,10 @@ add_custom_command(OUTPUT ${APR_UTIL_BUILD_DIRECTORY}/Makefile
                    DEPENDS expat
                    WORKING_DIRECTORY ${APR_UTIL_BUILD_DIRECTORY})
 
+add_custom_target(apr-util ALL make
+                  DEPENDS ${APR_UTIL_BUILD_DIRECTORY}/Makefile
+                  WORKING_DIRECTORY ${APR_UTIL_BUILD_DIRECTORY})
+
 add_library(apr-util::apr-util UNKNOWN IMPORTED GLOBAL)
 set_target_properties(apr-util::apr-util
                       PROPERTIES INTERFACE_INCLUDE_DIRECTORIES
@@ -61,9 +65,7 @@ set_target_properties(apr-util::apr-util
                                  IMPORTED_LOCATION
                                  "${APR_UTIL_LIBS_DIRECTORY}/libaprutil-1.so")
 
-add_custom_target(apr-util ALL make
-                  DEPENDS ${APR_UTIL_BUILD_DIRECTORY}/Makefile
-                  WORKING_DIRECTORY ${APR_UTIL_BUILD_DIRECTORY})
+add_dependencies(apr-util::apr-util apr-util)
 
 install(DIRECTORY ${APR_UTIL_LIBS_DIRECTORY}/
         DESTINATION ${3RD_PARTY_INSTALL_PREFIX_ARCH}/lib

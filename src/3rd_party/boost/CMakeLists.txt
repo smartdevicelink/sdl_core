@@ -19,28 +19,28 @@ file(MAKE_DIRECTORY ${BOOST_INCLUDE_DIRECTORY})
 
 if(NOT TARGET boost::thread)
   add_library(boost::thread UNKNOWN IMPORTED GLOBAL)
-  set_target_properties(
-    boost::thread
-    PROPERTIES INTERFACE_INCLUDE_DIRECTORIES
-               ${3RD_PARTY_INSTALL_PREFIX}/include
-               IMPORTED_LOCATION
-               ${3RD_PARTY_INSTALL_PREFIX}/lib/libboost_thread.so)
+  set_target_properties(boost::thread
+                        PROPERTIES INTERFACE_INCLUDE_DIRECTORIES
+                                   ${3RD_PARTY_INSTALL_PREFIX}/include
+                                   IMPORTED_LOCATION
+                                   ${3RD_PARTY_INSTALL_PREFIX}/lib/libboost_thread.so)
+  add_dependencies(boost::thread Boost)
 endif()
 
 if(NOT TARGET boost::filesystem)
   add_library(boost::filesystem UNKNOWN IMPORTED GLOBAL)
-  set_target_properties(
-    boost::filesystem
-    PROPERTIES INTERFACE_INCLUDE_DIRECTORIES
-               ${3RD_PARTY_INSTALL_PREFIX}/include
-               IMPORTED_LOCATION
-               ${3RD_PARTY_INSTALL_PREFIX}/lib/libboost_filesystem.so)
+  set_target_properties(boost::filesystem
+                        PROPERTIES INTERFACE_INCLUDE_DIRECTORIES
+                                   ${3RD_PARTY_INSTALL_PREFIX}/include
+                                   IMPORTED_LOCATION
+                                   ${3RD_PARTY_INSTALL_PREFIX}/lib/libboost_filesystem.so)
+  add_dependencies(boost::filesystem Boost)
 endif()
 
 if(NOT TARGET boost::system)
   add_library(boost::system UNKNOWN IMPORTED GLOBAL)
-  set_target_properties(
-    boost::system
-    PROPERTIES IMPORTED_LOCATION
-               ${3RD_PARTY_INSTALL_PREFIX}/lib/libboost_system.so)
+  set_target_properties(boost::system
+                        PROPERTIES IMPORTED_LOCATION
+                                   ${3RD_PARTY_INSTALL_PREFIX}/lib/libboost_system.so)
+  add_dependencies(boost::system Boost)
 endif()
