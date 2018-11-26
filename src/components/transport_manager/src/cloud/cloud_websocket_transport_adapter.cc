@@ -90,7 +90,8 @@ void CloudWebsocketTransportAdapter::CreateDevice(const std::string& uid) {
   pos_port = uid.find(":", pos_port + 1);
 
   // Extract host and port from endpoint string
-  boost::regex group_pattern("(wss?:\\/\\/)([A-Z\\d\\.-]{2,}\\.?([A-Z]{2,})?)(:)(\\d{2,4})(\\/)");
+  boost::regex group_pattern(
+      "(wss?:\\/\\/)([A-Z\\d\\.-]{2,}\\.?([A-Z]{2,})?)(:)(\\d{2,4})(\\/)");
   boost::smatch results;
 
   std::string host = "";
@@ -99,7 +100,10 @@ void CloudWebsocketTransportAdapter::CreateDevice(const std::string& uid) {
     host = results[2];
     port = results[5];
 
-    LOG4CXX_DEBUG(logger_, "Results: " << results[0] << " " << results[1] << " " << results[2] << " " << results[3] << " " << results[4] << " " << results[5] << " ");
+    LOG4CXX_DEBUG(logger_,
+                  "Results: " << results[0] << " " << results[1] << " "
+                              << results[2] << " " << results[3] << " "
+                              << results[4] << " " << results[5] << " ");
   } else {
     LOG4CXX_DEBUG(logger_, "Invalid Pattern: " << uid);
     return;

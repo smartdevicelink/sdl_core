@@ -1186,8 +1186,7 @@ const std::string& ApplicationImpl::cloud_app_certificate() const {
 
 bool ApplicationImpl::is_cloud_app() const {
   return !endpoint_.empty() &&
-         hybrid_app_preference_ !=
-             mobile_apis::HybridAppPreference::MOBILE;
+         hybrid_app_preference_ != mobile_apis::HybridAppPreference::MOBILE;
 }
 
 void ApplicationImpl::set_cloud_app_endpoint(const std::string& endpoint) {
