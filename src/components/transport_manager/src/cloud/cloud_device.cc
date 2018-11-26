@@ -53,7 +53,7 @@ bool CloudDevice::IsSameAs(const Device* other) const {
 // todo implement getApplicationList
 // to be populated by policies
 ApplicationList CloudDevice::GetApplicationList() const {
-  return ApplicationList{100};
+  return ApplicationList{0};
 }
 
 const std::string& CloudDevice::GetHost() {
