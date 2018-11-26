@@ -102,6 +102,8 @@ class Timer {
    */
   bool is_running() const;
 
+  bool is_completed() const;
+
   /**
    * @brief Gets current timer timeout
    * @return Current timeout in milliseconds.
@@ -119,7 +121,7 @@ class Timer {
      * @brief Constructor
      * @param timer Timer instance pointer for callback calling
      */
-    TimerDelegate(const Timer* timer, sync_primitives::Lock& state_lock_ref);
+    TimerDelegate(Timer* timer, sync_primitives::Lock& state_lock_ref);
 
     /**
      * @brief Sets timer timeout
@@ -161,7 +163,7 @@ class Timer {
     void exitThreadMain() OVERRIDE;
 
    private:
-    const Timer* timer_;
+    Timer* timer_;
     Milliseconds timeout_;
 
     /**
@@ -187,13 +189,13 @@ class Timer {
    * Not thread-safe
    * @param timeout Timer timeout
    */
-  void StartDelegate(const Milliseconds timeout) const;
+  void StartDelegate(const Milliseconds timeout);
 
   /**
    * @brief Sets up timer delegate to stop state.
    * Not thread-safe
    */
-  void StopDelegate() const;
+  void StopDelegate();
 
   /**
    * @brief Starts timer thread.
@@ -211,20 +213,22 @@ class Timer {
    * @brief Callback called on timeout.
    * Not thread-safe
    */
-  void OnTimeout() const;
+  void OnTimeout();
 
   const std::string name_;
   TimerTask* task_;
 
   mutable sync_primitives::Lock state_lock_;
 
-  mutable std::unique_ptr<TimerDelegate> delegate_;
+  std::unique_ptr<TimerDelegate> delegate_;
   threads::Thread* thread_;
 
   /**
    * @brief Single shot flag shows if timer should be fired once
    */
   bool single_shot_;
+
+  bool completed_flag_;
 
   DISALLOW_COPY_AND_ASSIGN(Timer);
 };

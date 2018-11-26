@@ -294,7 +294,7 @@ DeviceUID TransportAdapterImpl::GetNextRetryDevice() {
   sync_primitives::AutoLock locker(retry_timer_pool_lock_);
   while (!retry_timer_pool_.empty()) {
     auto timer_entry = retry_timer_pool_.front();
-    if (timer_entry.first->is_running()) {
+    if (!timer_entry.first->is_completed()) {
       return timer_entry.second;
     }
     retry_timer_pool_.pop();
