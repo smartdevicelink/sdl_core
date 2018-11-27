@@ -47,9 +47,9 @@ class CloudDevice : public Device {
  public:
   CloudDevice(std::string& host, std::string& port, std::string& name);
 
-  virtual const std::string& GetHost();
+  virtual const std::string& GetHost() const;
 
-  virtual const std::string& GetPort();
+  virtual const std::string& GetPort() const;
 
  protected:
   virtual bool IsSameAs(const Device* other_device) const;
