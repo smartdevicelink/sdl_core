@@ -25,27 +25,27 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-set(3RD_PARTY_INSTALL_PREFIX "${THIRD_PARTY_INSTALL_PREFIX}")
-set(USE_DEFAULT_3RD_PARTY_PATH "true")
-if(3RD_PARTY_INSTALL_PREFIX)
-  set(USE_DEFAULT_3RD_PARTY_PATH "false")
-  set(3RD_PARTY_INSTALL_PREFIX_ARCH "$ENV{THIRD_PARTY_INSTALL_PREFIX_ARCH}")
-  if(3RD_PARTY_INSTALL_PREFIX_ARCH)
-
-  else()
-    set(3RD_PARTY_INSTALL_PREFIX_ARCH ${3RD_PARTY_INSTALL_PREFIX})
-  endif()
-else()
-  if(CMAKE_SYSTEM_NAME STREQUAL "QNX")
-    set(3RD_PARTY_INSTALL_PREFIX "$ENV{QNX_TARGET}/usr")
-    if(CMAKE_SYSTEM_PROCESSOR STREQUAL "armv7")
-      set(QNX_ARCH "armle-v7")
-    else()
-      set(QNX_ARCH ${CMAKE_SYSTEM_PROCESSOR})
-    endif()
-    set(3RD_PARTY_INSTALL_PREFIX_ARCH "$ENV{QNX_TARGET}/${QNX_ARCH}/usr")
-  else()
-    set(3RD_PARTY_INSTALL_PREFIX "/usr/local")
-    set(3RD_PARTY_INSTALL_PREFIX_ARCH ${3RD_PARTY_INSTALL_PREFIX})
-  endif()
-endif()
+set(
+  CONFIGURE_FLAGS
+  "--host=${CMAKE_SYSTEM_PROCESSOR}-nto-qnx"
+  "--bindir=${QNX_HOST}/usr/bin/"
+  "ac_cv_file__dev_zero=yes"
+  "ac_cv_func_setpgrp_void=yes"
+  "apr_cv_process_shared_works=yes"
+  "apr_cv_mutex_recursive=yes"
+  "apr_cv_mutex_robust_shared=no"
+  "apr_cv_tcp_nodelay_with_cork=no"
+  "ac_cv_sizeof_struct_iovec=8"
+  "LDFLAGS=-L${QNX_HOST}/usr/lib"
+  "CPPFLAGS=-I${QNX_HOST}/usr/include"
+  "MAKE=${QNX_HOST}/usr/bin/make${HOST_EXECUTABLE_SUFFIX}"
+  "STRIP=${QNX_HOST}/usr/bin/nto${CMAKE_SYSTEM_PROCESSOR}-strip${HOST_EXECUTABLE_SUFFIX}"
+  "OBJDUMP=${QNX_HOST}/usr/bin/nto${CMAKE_SYSTEM_PROCESSOR}-objdump${HOST_EXECUTABLE_SUFFIX}"
+  "OBJCOPY=${QNX_HOST}/usr/bin/nto${CMAKE_SYSTEM_PROCESSOR}-objcopy${HOST_EXECUTABLE_SUFFIX}"
+  "LINKER=${QNX_HOST}/usr/bin/nto${CMAKE_SYSTEM_PROCESSOR}-ld"
+  "NM=${QNX_HOST}/usr/bin/nto${CMAKE_SYSTEM_PROCESSOR}-nm${HOST_EXECUTABLE_SUFFIX}"
+  "RANLIB=${QNX_HOST}/usr/bin/nto${CMAKE_SYSTEM_PROCESSOR}-ranlib${HOST_EXECUTABLE_SUFFIX}"
+  "AR=${QNX_HOST}/usr/bin/nto${CMAKE_SYSTEM_PROCESSOR}-ar${HOST_EXECUTABLE_SUFFIX}"
+  "CXX=${QNX_HOST}/usr/bin/nto${CMAKE_SYSTEM_PROCESSOR}-g++${HOST_EXECUTABLE_SUFFIX}"
+  "CC=${QNX_HOST}/usr/bin/nto${CMAKE_SYSTEM_PROCESSOR}-gcc${HOST_EXECUTABLE_SUFFIX}"
+  )

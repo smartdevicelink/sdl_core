@@ -25,27 +25,35 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-set(3RD_PARTY_INSTALL_PREFIX "${THIRD_PARTY_INSTALL_PREFIX}")
-set(USE_DEFAULT_3RD_PARTY_PATH "true")
-if(3RD_PARTY_INSTALL_PREFIX)
-  set(USE_DEFAULT_3RD_PARTY_PATH "false")
-  set(3RD_PARTY_INSTALL_PREFIX_ARCH "$ENV{THIRD_PARTY_INSTALL_PREFIX_ARCH}")
-  if(3RD_PARTY_INSTALL_PREFIX_ARCH)
-
-  else()
-    set(3RD_PARTY_INSTALL_PREFIX_ARCH ${3RD_PARTY_INSTALL_PREFIX})
-  endif()
-else()
-  if(CMAKE_SYSTEM_NAME STREQUAL "QNX")
-    set(3RD_PARTY_INSTALL_PREFIX "$ENV{QNX_TARGET}/usr")
-    if(CMAKE_SYSTEM_PROCESSOR STREQUAL "armv7")
-      set(QNX_ARCH "armle-v7")
-    else()
-      set(QNX_ARCH ${CMAKE_SYSTEM_PROCESSOR})
-    endif()
-    set(3RD_PARTY_INSTALL_PREFIX_ARCH "$ENV{QNX_TARGET}/${QNX_ARCH}/usr")
-  else()
-    set(3RD_PARTY_INSTALL_PREFIX "/usr/local")
-    set(3RD_PARTY_INSTALL_PREFIX_ARCH ${3RD_PARTY_INSTALL_PREFIX})
-  endif()
+set(BOOST_INSTALL_COMMAND ./b2 install)
+if(${3RD_PARTY_INSTALL_PREFIX} MATCHES "/usr/local")
+  set(BOOST_INSTALL_COMMAND sudo ./b2 install)
 endif()
+include(ExternalProject)
+externalproject_add(
+  Boost
+  URL
+  http://dl.bintray.com/boostorg/release/1.66.0/source/boost_1_66_0.tar.gz
+  DOWNLOAD_DIR
+  ${BOOST_LIB_SOURCE_DIRECTORY}
+  SOURCE_DIR
+  ${BOOST_LIB_SOURCE_DIRECTORY}
+  CONFIGURE_COMMAND
+  ./bootstrap.sh
+  --with-libraries=system,thread,date_time,filesystem
+  --prefix=${3RD_PARTY_INSTALL_PREFIX}
+  BUILD_COMMAND
+  ./b2
+  INSTALL_COMMAND
+  ${BOOST_INSTALL_COMMAND}
+  --with-system
+  --with-thread
+  --with-date_time
+  --with-filesystem
+  --prefix=${3RD_PARTY_INSTALL_PREFIX}
+  >
+  boost_install.log
+  INSTALL_DIR
+  ${3RD_PARTY_INSTALL_PREFIX}
+  BUILD_IN_SOURCE
+  true)
