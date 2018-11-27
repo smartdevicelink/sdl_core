@@ -83,8 +83,13 @@ std::string BluetoothDevice::GetUniqueDeviceId(const bdaddr_t& device_address) {
   LOG4CXX_TRACE(logger_, "enter. device_adress: " << &device_address);
   char device_address_string[32];
   ba2str(&device_address, device_address_string);
-  LOG4CXX_TRACE(logger_, "exit with BT-" << device_address_string);
-  return std::string("BT-") + device_address_string;
+  std::string device_address_lower_case(device_address_string);
+  std::transform(device_address_lower_case.begin(),
+                 device_address_lower_case.end(),
+                 device_address_lower_case.begin(),
+                 [](unsigned char c) { return std::tolower(c); });
+  LOG4CXX_TRACE(logger_, "exit with: " << device_address_lower_case);
+  return device_address_lower_case;
 }
 
 BluetoothDevice::BluetoothDevice(const bdaddr_t& device_address,
