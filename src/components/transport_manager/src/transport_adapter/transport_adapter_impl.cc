@@ -211,7 +211,8 @@ TransportAdapter::Error TransportAdapterImpl::Connect(
 
   connections_lock_.AcquireForWriting();
 
-  std::pair<DeviceUID, ApplicationHandle> connection_key;
+  std::pair<DeviceUID, ApplicationHandle> connection_key =
+      std::make_pair(device_id, app_handle);
   const bool already_exists =
       connections_.end() != connections_.find(connection_key);
   ConnectionInfo& info = connections_[connection_key];
