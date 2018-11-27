@@ -26,9 +26,10 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 set(BOOST_INSTALL_COMMAND ./b2 install)
-if(${3RD_PARTY_INSTALL_PREFIX} MATCHES "/usr/local")
+if(${INSTALL_PATH} MATCHES "/usr/local")
   set(BOOST_INSTALL_COMMAND sudo ./b2 install)
 endif()
+
 include(ExternalProject)
 externalproject_add(
   Boost
@@ -41,7 +42,7 @@ externalproject_add(
   CONFIGURE_COMMAND
   ./bootstrap.sh
   --with-libraries=system,thread,date_time,filesystem
-  --prefix=${3RD_PARTY_INSTALL_PREFIX}
+  --prefix=${INSTALL_PATH}
   BUILD_COMMAND
   ./b2
   INSTALL_COMMAND
@@ -50,10 +51,10 @@ externalproject_add(
   --with-thread
   --with-date_time
   --with-filesystem
-  --prefix=${3RD_PARTY_INSTALL_PREFIX}
+  --prefix=${INSTALL_PATH}
   >
   boost_install.log
   INSTALL_DIR
-  ${3RD_PARTY_INSTALL_PREFIX}
+  ${INSTALL_PATH}
   BUILD_IN_SOURCE
   true)

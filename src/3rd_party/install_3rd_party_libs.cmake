@@ -25,33 +25,16 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-include("./set_3rd_party_paths.cmake")
-
-set(3RD_PARTY_SOURCE_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
-set(3RD_PARTY_BINARY_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
-
-if(ENABLE_LOG)
-  # --- libexpat
-  add_subdirectory(expat-2.1.0)
-  set(EXPAT_LIBS_DIRECTORY ${3RD_PARTY_INSTALL_PREFIX_ARCH}/lib PARENT_SCOPE)
-
-  set(FORCE_APR_BUILD OFF)
-  # --- apr-util
-  add_subdirectory(apr-util)
-
-  # --- libapr-1
-  add_subdirectory(apr)
-
-  # --- log4cxx
-  add_subdirectory(log4cxx)
+if(3RD_PARTY_INSTALL_PREFIX)
+  install(DIRECTORY ${3RD_PARTY_INSTALL_PREFIX}/lib/
+          DESTINATION ${CMAKE_INSTALL_LIBDIR}
+          USE_SOURCE_PERMISSIONS
+          FILES_MATCHING
+          PATTERN libboost_filesystem.so*
+          PATTERN libboost_system.so*
+          PATTERN libboost_thread.so*
+          PATTERN libapr-1.so*
+          PATTERN liblog4cxx.so*
+          PATTERN libaprutil-1.so*
+          PATTERN libexpat.so*)
 endif()
-
-add_subdirectory(boost)
-
-include("./install_3rd_party_libs.cmake")     
-
-add_custom_target(3rd_party make
-                  WORKING_DIRECTORY ${3RD_PARTY_BINARY_DIRECTORY})
-
-add_custom_target(install_3rd_party make install
-                  WORKING_DIRECTORY ${3RD_PARTY_BINARY_DIRECTORY})
