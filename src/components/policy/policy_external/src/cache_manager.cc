@@ -1403,8 +1403,9 @@ void CacheManager::GetEnabledCloudApps(
   }
 }
 
-const bool CacheManager::GetCloudAppParameters(
+void CacheManager::GetCloudAppParameters(
     const std::string& policy_app_id,
+    bool& enabled,
     std::string& endpoint,
     std::string& certificate,
     std::string& auth_token,
@@ -1418,21 +1419,39 @@ const bool CacheManager::GetCloudAppParameters(
     auto app_policy = (*policy_iter).second;
     endpoint = app_policy.endpoint.is_initialized() ? *app_policy.endpoint
                                                     : std::string();
-    certificate = app_policy.certificate.is_initialized()
-                      ? *app_policy.certificate
-                      : std::string();
     auth_token = app_policy.auth_token.is_initialized() ? *app_policy.auth_token
                                                         : std::string();
     cloud_transport_type = app_policy.cloud_transport_type.is_initialized()
                                ? *app_policy.cloud_transport_type
                                : std::string();
+    certificate = app_policy.certificate.is_initialized()
+                      ? *app_policy.certificate
+                      : std::string();
     hybrid_app_preference =
         app_policy.hybrid_app_preference.is_initialized()
             ? EnumToJsonString(*app_policy.hybrid_app_preference)
             : std::string();
-    return app_policy.enabled.is_initialized() && *app_policy.enabled;
+    enabled = app_policy.enabled.is_initialized() && *app_policy.enabled;
   }
-  return false;
+}
+
+void CacheManager::InitCloudApp(const std::string& policy_app_id) {
+  CACHE_MANAGER_CHECK_VOID();
+  sync_primitives::AutoLock auto_lock(cache_lock_);
+
+  policy_table::ApplicationPolicies& policies =
+      pt_->policy_table.app_policies_section.apps;
+  policy_table::ApplicationPolicies::const_iterator default_iter =
+      policies.find(kDefaultId);
+  policy_table::ApplicationPolicies::const_iterator app_iter =
+      policies.find(policy_app_id);
+  if (default_iter != policies.end()) {
+    if (app_iter == policies.end()) {
+      policies[policy_app_id] = policies[kDefaultId];
+    }
+  }
+  // Add cloud app specific policies
+  Backup();
 }
 
 void CacheManager::SetCloudAppEnabled(const std::string& policy_app_id,

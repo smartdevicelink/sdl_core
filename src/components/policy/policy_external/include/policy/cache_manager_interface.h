@@ -177,7 +177,8 @@ class CacheManagerInterface {
    * @brief Get cloud app policy information, all fields that aren't set for a
    * given app will be filled with empty strings
    * @param policy_app_id Unique application id
-   * @param endpoint Filled the endpoint used to connect to the cloud
+   * @param enabled Whether or not the app is enabled
+   * @param endpoint Filled with the endpoint used to connect to the cloud
    * application
    * @param certificate Filled with the certificate used to for creating a
    * secure connection to the cloud application
@@ -185,17 +186,25 @@ class CacheManagerInterface {
    * reconnecting to the cloud app
    * @param cloud_transport_type Filled with the transport type used by the
    * cloud application (ex. "WSS")
-   * @param cloud_transport_type Filled with the hybrid app preference for the
+   * @param hybrid_app_preference Filled with the hybrid app preference for the
    * cloud application set by the user
-   * @return true if the cloud app is enabled, false otherwise
    */
-  virtual const bool GetCloudAppParameters(
+  virtual void GetCloudAppParameters(
       const std::string& policy_app_id,
+      bool& enabled,
       std::string& endpoint,
       std::string& certificate,
       std::string& auth_token,
       std::string& cloud_transport_type,
       std::string& hybrid_app_preference) const = 0;
+
+  /**
+  * Initializes a new cloud application with default policies
+  * Then adds cloud specific policies
+  * @param app_id application id
+  * @return true if success
+  */
+  virtual void InitCloudApp(const std::string& policy_app_id) = 0;
 
   /**
    * @brief Enable or disable a cloud application in the HMI
