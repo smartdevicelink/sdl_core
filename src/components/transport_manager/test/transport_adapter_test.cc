@@ -439,7 +439,8 @@ TEST_F(TransportAdapterTest, DisconnectDevice_DeviceAddedConnectionCreated) {
   EXPECT_CALL(*serverMock, IsInitialised()).WillOnce(Return(true));
   EXPECT_CALL(*serverMock, CreateConnection(uniq_id, app_handle))
       .WillOnce(Return(TransportAdapter::OK));
-  EXPECT_CALL(transport_adapter, FindDevice(uniq_id)).WillOnce(Return(mockdev));
+  EXPECT_CALL(transport_adapter, FindDevice(uniq_id))
+      .WillRepeatedly(Return(mockdev));
   TransportAdapter::Error res = transport_adapter.ConnectDevice(uniq_id);
   EXPECT_EQ(TransportAdapter::OK, res);
 

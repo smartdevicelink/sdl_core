@@ -168,7 +168,7 @@ class MockApplicationManager : public application_manager::ApplicationManager {
   MOCK_METHOD0(OnHMIStartedCooperation, void());
   MOCK_CONST_METHOD1(GetCloudAppConnectionStatus,
                      hmi_apis::Common_CloudConnectionStatus::eType(
-                         ApplicationConstSharedPtr app));
+                         application_manager::ApplicationConstSharedPtr app));
   MOCK_CONST_METHOD0(IsHMICooperating, bool());
   MOCK_METHOD2(IviInfoUpdated,
                void(mobile_apis::VehicleDataType::eType vehicle_info,
