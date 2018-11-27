@@ -367,6 +367,11 @@ class ApplicationManagerImpl
       const transport_manager::DeviceInfo& device_info,
       connection_handler::DeviceHandle device_id);
 
+  /**
+   * @brief Retrieve the current connection status of a cloud app
+   * @param app A cloud application
+   * @return The current CloudConnectionStatus of app
+   */
   hmi_apis::Common_CloudConnectionStatus::eType GetCloudAppConnectionStatus(
       ApplicationConstSharedPtr app) const;
 

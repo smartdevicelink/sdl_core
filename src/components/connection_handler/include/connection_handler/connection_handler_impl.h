@@ -102,10 +102,17 @@ class ConnectionHandlerImpl
 
   /**
    * \brief Connects to all services of device
-   * \param deviceHandle Handle of device to connect to
+   * \param device_handle Handle of device to connect to
    */
   void ConnectToDevice(connection_handler::DeviceHandle device_handle) OVERRIDE;
 
+  /**
+   * @brief Retrieves the connection status of a given device
+   *
+   * @param device_handle Handle of device to query
+   *
+   * @return The connection status of the given device
+   */
   transport_manager::ConnectionStatus GetConnectionStatus(
       const DeviceHandle& device_handle) const OVERRIDE;
 

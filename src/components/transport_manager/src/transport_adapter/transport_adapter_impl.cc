@@ -282,6 +282,7 @@ TransportAdapter::Error TransportAdapterImpl::ConnectDevice(
 }
 
 void TransportAdapterImpl::RetryConnection() {
+  ClearCompletedTimers();
   const DeviceUID device_id = GetNextRetryDevice();
   if (device_id.empty()) {
     LOG4CXX_ERROR(logger_,
@@ -291,16 +292,26 @@ void TransportAdapterImpl::RetryConnection() {
   ConnectDevice(device_id);
 }
 
+void TransportAdapterImpl::ClearCompletedTimers() {
+  sync_primitives::AutoLock locker(completed_timer_pool_lock_);
+  while (!completed_timer_pool_.empty()) {
+    auto timer_entry = completed_timer_pool_.front();
+    if (timer_entry.first->is_completed()) {
+      completed_timer_pool_.pop();
+    }
+  }
+}
+
 DeviceUID TransportAdapterImpl::GetNextRetryDevice() {
   sync_primitives::AutoLock locker(retry_timer_pool_lock_);
-  while (!retry_timer_pool_.empty()) {
-    auto timer_entry = retry_timer_pool_.front();
-    if (!timer_entry.first->is_completed()) {
-      return timer_entry.second;
-    }
-    retry_timer_pool_.pop();
+  if (retry_timer_pool_.empty()) {
+    return std::string();
   }
-  return std::string();
+  auto timer_entry = retry_timer_pool_.front();
+  retry_timer_pool_.pop();
+  sync_primitives::AutoLock locker(completed_timer_pool_lock_);
+  completed_timer_pool_.push_back(timer_entry);
+  return timer_entry.second;
 }
 
 ConnectionStatus TransportAdapterImpl::GetConnectionStatus(

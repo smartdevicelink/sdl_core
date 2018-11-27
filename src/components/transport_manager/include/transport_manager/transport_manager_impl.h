@@ -151,6 +151,13 @@ class TransportManagerImpl
    **/
   int ConnectDevice(const DeviceHandle device_id) OVERRIDE;
 
+  /**
+   * @brief Retrieves the connection status of a given device
+   *
+   * @param device_handle Handle of device to query
+   *
+   * @return The connection status of the given device
+   */
   ConnectionStatus GetConnectionStatus(
       const DeviceHandle& device_handle) const OVERRIDE;
 

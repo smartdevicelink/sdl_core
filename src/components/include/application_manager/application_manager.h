@@ -427,6 +427,11 @@ class ApplicationManager {
 
   virtual void OnHMIStartedCooperation() = 0;
 
+  /**
+   * @brief Retrieve the current connection status of a cloud app
+   * @param app A cloud application
+   * @return The current CloudConnectionStatus of app
+   */
   virtual hmi_apis::Common_CloudConnectionStatus::eType
   GetCloudAppConnectionStatus(ApplicationConstSharedPtr app) const = 0;
 

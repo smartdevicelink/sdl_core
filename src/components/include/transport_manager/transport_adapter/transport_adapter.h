@@ -217,6 +217,13 @@ class TransportAdapter {
    */
   virtual Error ConnectDevice(const DeviceUID& device_handle) = 0;
 
+  /**
+   * @brief Retrieves the connection status of a given device
+   *
+   * @param device_handle Handle of device to query
+   *
+   * @return The connection status of the given device
+   */
   virtual ConnectionStatus GetConnectionStatus(
       const DeviceUID& device_handle) const = 0;
 

@@ -128,7 +128,8 @@ void SDLActivateAppRequest::Run() {
                       "HMIDeactivate is active");
   } else if (app && !app->IsRegistered() && app->is_cloud_app()) {
     LOG4CXX_DEBUG(logger_, "Starting cloud application.");
-    const ApplicationManagerSettings& settings = application_manager_.get_settings();
+    const ApplicationManagerSettings& settings =
+        application_manager_.get_settings();
     uint32_t total_retry_timeout = (settings.cloud_app_retry_timeout() *
                                     settings.cloud_app_max_retry_attempts());
     application_manager_.updateRequestTimeout(
@@ -194,7 +195,8 @@ void SDLActivateAppRequest::Run() {
     return;
   } else if (app_to_activate->is_cloud_app()) {
     LOG4CXX_DEBUG(logger_, "Starting cloud application.");
-    const ApplicationManagerSettings& settings = application_manager_.get_settings();
+    const ApplicationManagerSettings& settings =
+        application_manager_.get_settings();
     uint32_t total_retry_timeout = (settings.cloud_app_retry_timeout() *
                                     settings.cloud_app_max_retry_attempts());
     application_manager_.updateRequestTimeout(

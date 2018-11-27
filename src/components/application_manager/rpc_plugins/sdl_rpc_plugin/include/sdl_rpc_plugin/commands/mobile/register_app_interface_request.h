@@ -124,8 +124,11 @@ class RegisterAppInterfaceRequest
   /**
    * @brief Sends OnAppRegistered notification to HMI
    *
-   *@param application_impl application with changed HMI status
-   *
+   * @param app application with changed HMI status
+   * @param resumption If true, resumption-related parameters will be sent to
+   *the HMI
+   * @param need_restore_vr If resumption is true, whether or not VR commands
+   *should be resumed
    **/
   void SendOnAppRegisteredNotificationToHMI(
       app_mngr::ApplicationConstSharedPtr app,

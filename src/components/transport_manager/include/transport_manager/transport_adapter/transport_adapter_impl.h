@@ -149,6 +149,13 @@ class TransportAdapterImpl : public TransportAdapter,
   TransportAdapter::Error ConnectDevice(
       const DeviceUID& device_handle) OVERRIDE;
 
+  /**
+   * @brief Retrieves the connection status of a given device
+   *
+   * @param device_handle Handle of device to query
+   *
+   * @return The connection status of the given device
+   */
   ConnectionStatus GetConnectionStatus(
       const DeviceUID& device_handle) const OVERRIDE;
 
@@ -552,7 +559,21 @@ class TransportAdapterImpl : public TransportAdapter,
    */
   TransportAdapter::Error ConnectDevice(DeviceSptr device);
 
+  /**
+   * @brief Reattempt the last failed connection to a device
+   */
   void RetryConnection();
+
+  /**
+   * @brief Clear any retry timers which have been completed
+   */
+  void TransportAdapterImpl::ClearCompletedTimers();
+
+  /**
+   * @brief Retrieve the next device available for a reattempted connection
+   * @return The handle first device with an expired retry timer if present,
+   * otherwise an empty string
+   */
   DeviceUID GetNextRetryDevice();
 
   /**
@@ -616,8 +637,17 @@ class TransportAdapterImpl : public TransportAdapter,
    **/
   ConnectionMap connections_;
 
+  /**
+   * @brief Queue of retry timers.
+   */
   std::queue<std::pair<TimerSPtr, DeviceUID> > retry_timer_pool_;
-  sync_primitives::RecursiveLock retry_timer_pool_lock_;
+  sync_primitives::Lock retry_timer_pool_lock_;
+
+  /**
+   * @brief Queue of completed retry timers.
+   */
+  std::queue<std::pair<TimerSPtr, DeviceUID> > completed_timer_pool_;
+  sync_primitives::Lock completed_timer_pool_lock_;
 
   /**
    * @brief Mutex restricting access to connections map.

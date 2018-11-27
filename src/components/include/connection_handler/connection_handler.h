@@ -79,6 +79,13 @@ class ConnectionHandler {
   virtual void ConnectToDevice(
       connection_handler::DeviceHandle device_handle) = 0;
 
+  /**
+   * @brief Retrieves the connection status of a given device
+   *
+   * @param device_handle Handle of device to query
+   *
+   * @return The connection status of the given device
+   */
   virtual transport_manager::ConnectionStatus GetConnectionStatus(
       const DeviceHandle& device_handle) const = 0;
 
