@@ -368,10 +368,17 @@ class ApplicationManagerImpl
       connection_handler::DeviceHandle device_id);
 
   /**
+   * @brief Notifies the applicaiton manager that a cloud connection status has
+   * updated and should trigger an UpdateAppList RPC to the HMI
+   */
+  void OnConnectionStatusUpdated();
+
+  /**
    * @brief Retrieve the current connection status of a cloud app
    * @param app A cloud application
    * @return The current CloudConnectionStatus of app
    */
+
   hmi_apis::Common_CloudConnectionStatus::eType GetCloudAppConnectionStatus(
       ApplicationConstSharedPtr app) const;
 

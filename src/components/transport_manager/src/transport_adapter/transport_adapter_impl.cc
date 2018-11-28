@@ -252,12 +252,14 @@ TransportAdapter::Error TransportAdapterImpl::ConnectDevice(
       if (device->connection_status() == ConnectionStatus::PENDING) {
         device->set_connection_status(ConnectionStatus::RETRY);
         device->reset_retry_count();
+        ConnectionStatusUpdated();
       }
 
       if (device->retry_count() >
           get_settings().cloud_app_max_retry_attempts()) {
         device->set_connection_status(ConnectionStatus::PENDING);
         device->reset_retry_count();
+        ConnectionStatusUpdated();
         return err;
       }
 
@@ -272,6 +274,7 @@ TransportAdapter::Error TransportAdapterImpl::ConnectDevice(
                          timer::kSingleShot);
     } else if (OK == err) {
       device->set_connection_status(ConnectionStatus::CONNECTED);
+      ConnectionStatusUpdated();
     }
     LOG4CXX_TRACE(logger_, "exit with error: " << err);
     return err;
@@ -303,14 +306,14 @@ void TransportAdapterImpl::ClearCompletedTimers() {
 }
 
 DeviceUID TransportAdapterImpl::GetNextRetryDevice() {
-  sync_primitives::AutoLock locker(retry_timer_pool_lock_);
+  sync_primitives::AutoLock retry_locker(retry_timer_pool_lock_);
   if (retry_timer_pool_.empty()) {
     return std::string();
   }
   auto timer_entry = retry_timer_pool_.front();
   retry_timer_pool_.pop();
-  sync_primitives::AutoLock locker(completed_timer_pool_lock_);
-  completed_timer_pool_.push_back(timer_entry);
+  sync_primitives::AutoLock completed_locker(completed_timer_pool_lock_);
+  completed_timer_pool_.push(timer_entry);
   return timer_entry.second;
 }
 
@@ -319,6 +322,14 @@ ConnectionStatus TransportAdapterImpl::GetConnectionStatus(
   DeviceSptr device = FindDevice(device_handle);
   return device.use_count() == 0 ? ConnectionStatus::INVALID
                                  : device->connection_status();
+}
+
+void TransportAdapterImpl::ConnectionStatusUpdated() {
+  for (TransportAdapterListenerList::iterator it = listeners_.begin();
+       it != listeners_.end();
+       ++it) {
+    (*it)->OnConnectionStatusUpdated(this);
+  }
 }
 
 TransportAdapter::Error TransportAdapterImpl::Disconnect(
@@ -352,6 +363,7 @@ TransportAdapter::Error TransportAdapterImpl::DisconnectDevice(
   Error error = OK;
   DeviceSptr device = FindDevice(device_id);
   device->set_connection_status(ConnectionStatus::CLOSING);
+  ConnectionStatusUpdated();
 
   std::vector<ConnectionInfo> to_disconnect;
   connections_lock_.AcquireForReading();

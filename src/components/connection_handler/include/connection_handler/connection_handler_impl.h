@@ -176,6 +176,8 @@ class ConnectionHandlerImpl
   void OnScanDevicesFailed(
       const transport_manager::SearchDeviceError& error) OVERRIDE;
 
+  void OnConnectionStatusUpdated() OVERRIDE;
+
   /**
    * \brief Notifies about pending connection.
    *

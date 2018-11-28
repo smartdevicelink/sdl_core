@@ -59,6 +59,8 @@ class MockTransportAdapterListener : public TransportAdapterListener {
                     const SearchDeviceError& error));
   MOCK_METHOD1(OnFindNewApplicationsRequest,
                void(const TransportAdapter* adapter));
+  MOCK_METHOD1(OnConnectionStatusUpdated,
+               void(const TransportAdapter* adapter));
   MOCK_METHOD3(OnConnectPending,
                void(const TransportAdapter* adapter,
                     const DeviceUID& device_handle,

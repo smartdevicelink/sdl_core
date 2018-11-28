@@ -990,6 +990,11 @@ void TransportManagerImpl::Handle(TransportAdapterEvent event) {
       LOG4CXX_DEBUG(logger_, "event_type = ON_FIND_NEW_APPLICATIONS_REQUEST");
       break;
     }
+    case EventTypeEnum::ON_CONNECTION_STATUS_UPDATED: {
+      RaiseEvent(&TransportManagerListener::OnConnectionStatusUpdated);
+      LOG4CXX_DEBUG(logger_, "event_type = ON_CONNECTION_STATUS_UPDATED");
+      break;
+    }
     case EventTypeEnum::ON_CONNECT_PENDING: {
       const DeviceHandle device_handle = converter_.UidToHandle(
           event.device_uid, event.transport_adapter->GetConnectionType());

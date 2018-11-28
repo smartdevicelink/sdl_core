@@ -159,6 +159,8 @@ class TransportAdapterImpl : public TransportAdapter,
   ConnectionStatus GetConnectionStatus(
       const DeviceUID& device_handle) const OVERRIDE;
 
+  void ConnectionStatusUpdated() OVERRIDE;
+
   /**
    * @brief Disconnect from specified session.
    *
@@ -567,7 +569,7 @@ class TransportAdapterImpl : public TransportAdapter,
   /**
    * @brief Clear any retry timers which have been completed
    */
-  void TransportAdapterImpl::ClearCompletedTimers();
+  void ClearCompletedTimers();
 
   /**
    * @brief Retrieve the next device available for a reattempted connection

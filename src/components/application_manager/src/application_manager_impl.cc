@@ -930,6 +930,10 @@ void ApplicationManagerImpl::CreatePendingApplication(
   SendUpdateAppList();
 }
 
+void ApplicationManagerImpl::OnConnectionStatusUpdated() {
+  SendUpdateAppList();
+}
+
 hmi_apis::Common_CloudConnectionStatus::eType
 ApplicationManagerImpl::GetCloudAppConnectionStatus(
     ApplicationConstSharedPtr app) const {

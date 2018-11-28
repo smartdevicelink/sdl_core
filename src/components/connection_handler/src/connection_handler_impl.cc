@@ -249,6 +249,10 @@ void ConnectionHandlerImpl::OnScanDevicesFailed(
   LOG4CXX_WARN(logger_, "Scan devices failed. " << error.text());
 }
 
+void ConnectionHandlerImpl::OnConnectionStatusUpdated() {
+  connection_handler_observer_->OnConnectionStatusUpdated();
+}
+
 void ConnectionHandlerImpl::OnConnectionPending(
     const transport_manager::DeviceInfo& device_info,
     const transport_manager::ConnectionUID connection_id) {
