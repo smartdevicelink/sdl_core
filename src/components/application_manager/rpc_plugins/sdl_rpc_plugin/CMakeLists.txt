@@ -30,9 +30,8 @@ include(GNUInstallDirs)
 
 add_library(${PROJECT_NAME} MODULE)
 
-target_sources(
-  ${PROJECT_NAME}
-  PRIVATE
+set(
+  PLUGIN_SOURCES
   "${CMAKE_CURRENT_LIST_DIR}/src/hmi_command_factory.cc"
   "${CMAKE_CURRENT_LIST_DIR}/src/mobile_command_factory.cc"
   "${CMAKE_CURRENT_LIST_DIR}/src/sdl_command_factory.cc"
@@ -354,6 +353,8 @@ target_sources(
   "${CMAKE_CURRENT_LIST_DIR}/src/commands/mobile/update_turn_list_response.cc"
   "${CMAKE_SOURCE_DIR}/src/components/utils/src/semantic_version.cc")
 
+target_sources(${PROJECT_NAME} PRIVATE ${PLUGIN_SOURCES})
+
 target_link_libraries(${PROJECT_NAME}
                       PUBLIC rpc_base::rpc_base
                              utils::utils
@@ -380,3 +381,22 @@ install(TARGETS ${PROJECT_NAME}
         GROUP_EXECUTE
         WORLD_READ
         WORLD_EXECUTE)
+
+if(BUILD_TESTS)
+  add_library("sdl_rpc_plugins_static_lib" ${PLUGIN_SOURCES})
+
+  target_link_libraries("sdl_rpc_plugins_static_lib"
+                        PUBLIC rpc_base::rpc_base
+                               utils::utils
+                               smart_objects::smart_objects
+                               interfaces::HMI_API
+                               interfaces::MOBILE_API
+                               interfaces::v4_protocol_v1_2_no_extra
+                               connection_handler::connection_handler
+                        PRIVATE application_manager::interface
+                                components::interface)
+
+  target_include_directories("sdl_rpc_plugins_static_lib"
+                             PUBLIC "${CMAKE_CURRENT_LIST_DIR}/include")
+  add_subdirectory(test)
+endif()
