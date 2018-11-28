@@ -26,9 +26,6 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 project(vehicle_info_plugin)
-include(GNUInstallDirs)
-
-add_library(${PROJECT_NAME} MODULE)
 
 set(
   PLUGIN_SOURCES
@@ -71,50 +68,9 @@ set(
   "${CMAKE_CURRENT_LIST_DIR}/src/commands/mobile/unsubscribe_vehicle_data_response.cc"
   )
 
-target_sources(${PROJECT_NAME} PRIVATE ${PLUGIN_SOURCES})
-
-target_link_libraries(${PROJECT_NAME}
-                      PUBLIC rpc_base::rpc_base
-                             utils::utils
-                             smart_objects::smart_objects
-                             interfaces::HMI_API
-                             interfaces::MOBILE_API
-                             interfaces::v4_protocol_v1_2_no_extra
-                             connection_handler::connection_handler
-                      PRIVATE application_manager::interface
-                              components::interface)
-
-target_include_directories(${PROJECT_NAME}
-                           PUBLIC "${CMAKE_CURRENT_LIST_DIR}/include")
-
-install(TARGETS ${PROJECT_NAME}
-        DESTINATION "${SDL_PLUGINS_INSTALL_DIR}"
-        COMPONENT
-        sdl_core
-        PERMISSIONS
-        OWNER_READ
-        OWNER_WRITE
-        OWNER_EXECUTE
-        GROUP_READ
-        GROUP_EXECUTE
-        WORLD_READ
-        WORLD_EXECUTE)
+add_dynamic_library(${PROJECT_NAME})
 
 if(BUILD_TESTS)
-  add_library("vehicle_info_plugin_static_lib" ${PLUGIN_SOURCES})
-
-  target_link_libraries("vehicle_info_plugin_static_lib"
-                        PUBLIC rpc_base::rpc_base
-                               utils::utils
-                               smart_objects::smart_objects
-                               interfaces::HMI_API
-                               interfaces::MOBILE_API
-                               interfaces::v4_protocol_v1_2_no_extra
-                               connection_handler::connection_handler
-                        PRIVATE application_manager::interface
-                                components::interface)
-
-  target_include_directories("vehicle_info_plugin_static_lib"
-                             PUBLIC "${CMAKE_CURRENT_LIST_DIR}/include")
+  add_static_library(${PROJECT_NAME})
   add_subdirectory(test)
 endif()

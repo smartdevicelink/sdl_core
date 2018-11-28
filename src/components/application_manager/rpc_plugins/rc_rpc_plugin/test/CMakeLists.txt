@@ -48,7 +48,7 @@ target_sources(
   )
 
 target_link_libraries(${PROJECT_NAME}
-                      PRIVATE components::interface rpc_rpc_plugin_static_lib)
+                      PRIVATE components::interface rpc_plugins_static_lib)
 
 project(rc_plugin_test)
 
@@ -67,4 +67,4 @@ target_sources(
   "${CMAKE_CURRENT_SOURCE_DIR}/interior_data_cache_test.cc")
 
 target_link_libraries(${PROJECT_NAME}
-                      PRIVATE components::interface rpc_rpc_plugin_static_lib)
+                      PRIVATE components::interface rpc_plugins_static_lib)
