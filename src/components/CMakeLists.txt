@@ -54,8 +54,6 @@ endif()
 # Just in case
 if(ENABLE_LOG)
   target_compile_definitions(${PROJECT_NAME} INTERFACE ENABLE_LOG)
-  target_include_directories(${PROJECT_NAME}
-                             INTERFACE "${THIRD_PARTY_INSTALL_PREFIX}/include")
 endif()
 
 add_subdirectory(application_manager)

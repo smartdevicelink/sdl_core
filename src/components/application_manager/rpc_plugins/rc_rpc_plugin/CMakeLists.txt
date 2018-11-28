@@ -31,9 +31,8 @@ include(GNUInstallDirs)
 
 add_library(${PROJECT_NAME} MODULE)
 
-target_sources(
-  ${PROJECT_NAME}
-  PRIVATE
+set(
+  PLUGIN_SOURCES
   "${CMAKE_CURRENT_LIST_DIR}/src/interior_data_cache_impl.cc"
   "${CMAKE_CURRENT_LIST_DIR}/src/interior_data_manager_impl.cc"
   "${CMAKE_CURRENT_LIST_DIR}/src/rc_app_extension.cc"
@@ -63,6 +62,8 @@ target_sources(
   "${CMAKE_CURRENT_LIST_DIR}/src/commands/mobile/set_interior_vehicle_data_response.cc"
   )
 
+target_sources(${PROJECT_NAME} PRIVATE ${PLUGIN_SOURCES})
+
 target_link_libraries(${PROJECT_NAME}
                       PUBLIC rpc_base::rpc_base
                              utils::utils
@@ -89,3 +90,22 @@ install(TARGETS ${PROJECT_NAME}
         GROUP_EXECUTE
         WORLD_READ
         WORLD_EXECUTE)
+
+if(BUILD_TESTS)
+  add_library("rpc_rpc_plugin_static_lib" ${PLUGIN_SOURCES})
+
+  target_link_libraries("rpc_rpc_plugin_static_lib"
+                        PUBLIC rpc_base::rpc_base
+                               utils::utils
+                               smart_objects::smart_objects
+                               interfaces::HMI_API
+                               interfaces::MOBILE_API
+                               interfaces::v4_protocol_v1_2_no_extra
+                               connection_handler::connection_handler
+                        PRIVATE application_manager::interface
+                                components::interface)
+
+  target_include_directories("rpc_rpc_plugin_static_lib"
+                             PUBLIC "${CMAKE_CURRENT_LIST_DIR}/include")
+  add_subdirectory(test)
+endif()
