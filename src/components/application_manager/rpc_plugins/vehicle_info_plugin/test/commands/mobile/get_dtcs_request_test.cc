@@ -44,7 +44,7 @@
 #include "application_manager/mock_application_manager.h"
 #include "application_manager/mock_application.h"
 #include "application_manager/event_engine/event.h"
-#include "mobile/get_dtcs_request.h"
+#include "vehicle_info_plugin/commands/mobile/get_dtcs_request.h"
 #include "application_manager/mock_message_helper.h"
 #include "interfaces/MOBILE_API.h"
 

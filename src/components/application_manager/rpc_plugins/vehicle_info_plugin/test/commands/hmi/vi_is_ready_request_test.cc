@@ -30,7 +30,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "hmi/vi_is_ready_request.h"
+#include "vehicle_info_plugin/commands/hmi/vi_is_ready_request.h"
 
 #include "gtest/gtest.h"
 

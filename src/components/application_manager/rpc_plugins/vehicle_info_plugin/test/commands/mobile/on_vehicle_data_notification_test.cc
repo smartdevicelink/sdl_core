@@ -35,7 +35,7 @@
 #include <map>
 
 #include "gtest/gtest.h"
-#include "mobile/on_vehicle_data_notification.h"
+#include "vehicle_info_plugin/commands/mobile/on_vehicle_data_notification.h"
 
 #include "utils/custom_string.h"
 #include "smart_objects/smart_object.h"

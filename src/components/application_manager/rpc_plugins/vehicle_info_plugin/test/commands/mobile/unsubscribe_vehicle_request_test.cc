@@ -38,7 +38,7 @@
 #include "application_manager/commands/command_request_test.h"
 #include "application_manager/mock_application_manager.h"
 #include "application_manager/mock_message_helper.h"
-#include "mobile/unsubscribe_vehicle_data_request.h"
+#include "vehicle_info_plugin/commands/mobile/unsubscribe_vehicle_data_request.h"
 #include "vehicle_info_plugin/vehicle_info_plugin.h"
 #include "vehicle_info_plugin/vehicle_info_app_extension.h"
 

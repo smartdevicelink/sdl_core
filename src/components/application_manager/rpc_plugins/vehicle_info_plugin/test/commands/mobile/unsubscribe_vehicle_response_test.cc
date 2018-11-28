@@ -30,7 +30,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "mobile/unsubscribe_vehicle_data_response.h"
+#include "vehicle_info_plugin/commands/mobile/unsubscribe_vehicle_data_response.h"
 #include <stdint.h>
 #include <string>
 #include "gtest/gtest.h"

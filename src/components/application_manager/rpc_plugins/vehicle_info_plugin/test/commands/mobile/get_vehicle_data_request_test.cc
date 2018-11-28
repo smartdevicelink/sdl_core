@@ -45,7 +45,7 @@
 #include "application_manager/mock_message_helper.h"
 #include "application_manager/mock_application_manager.h"
 #include "application_manager/event_engine/event.h"
-#include "mobile/get_vehicle_data_request.h"
+#include "vehicle_info_plugin/commands/mobile/get_vehicle_data_request.h"
 #include "interfaces/MOBILE_API.h"
 
 namespace test {

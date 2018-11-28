@@ -46,7 +46,7 @@
 #include "application_manager/event_engine/event.h"
 #include "application_manager/mock_event_dispatcher.h"
 #include "application_manager/policies/mock_policy_handler_interface.h"
-#include "hmi/vi_get_vehicle_data_response.h"
+#include "vehicle_info_plugin/commands/hmi/vi_get_vehicle_data_response.h"
 
 namespace test {
 namespace components {
