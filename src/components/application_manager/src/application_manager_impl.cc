@@ -614,6 +614,7 @@ ApplicationSharedPtr ApplicationManagerImpl::RegisterApplication(
   PolicyAppIdPredicate finder(application->policy_app_id());
   ApplicationSet::iterator it =
       std::find_if(apps_to_register_.begin(), apps_to_register_.end(), finder);
+  bool is_mismatched_cloud_app = false;
 
   if (apps_to_register_.end() == it) {
     DevicePredicate finder(application->device());
@@ -621,24 +622,8 @@ ApplicationSharedPtr ApplicationManagerImpl::RegisterApplication(
         apps_to_register_.begin(), apps_to_register_.end(), finder);
 
     bool found = apps_to_register_.end() != it;
-    bool is_mismatched_cloud_app = found && (*it)->is_cloud_app() &&
-                                   policy_app_id != (*it)->policy_app_id();
-
-    // Reject registration request if a cloud app registers with the incorrect
-    // appID
-    if (is_mismatched_cloud_app) {
-      std::shared_ptr<smart_objects::SmartObject> response(
-          MessageHelper::CreateNegativeResponse(
-              connection_key,
-              mobile_apis::FunctionID::RegisterAppInterfaceID,
-              message[strings::params][strings::correlation_id].asUInt(),
-              mobile_apis::Result::DISALLOWED));
-      (*response)[strings::msg_params][strings::info] =
-          "Cloud app registered with incorrect app id";
-      rpc_service_->ManageMobileCommand(response,
-                                        commands::Command::SOURCE_SDL);
-      return ApplicationSharedPtr();
-    }
+    is_mismatched_cloud_app = found && (*it)->is_cloud_app() &&
+                              policy_app_id != (*it)->policy_app_id();
   } else {
     application->set_hmi_application_id((*it)->hmi_app_id());
 
@@ -652,6 +637,21 @@ ApplicationSharedPtr ApplicationManagerImpl::RegisterApplication(
     apps_to_register_.erase(it);
   }
   apps_to_register_list_lock_ptr_->Release();
+
+  // Reject registration request if a cloud app registers with the incorrect
+  // appID
+  if (is_mismatched_cloud_app) {
+    std::shared_ptr<smart_objects::SmartObject> response(
+        MessageHelper::CreateNegativeResponse(
+            connection_key,
+            mobile_apis::FunctionID::RegisterAppInterfaceID,
+            message[strings::params][strings::correlation_id].asUInt(),
+            mobile_apis::Result::DISALLOWED));
+    (*response)[strings::msg_params][strings::info] =
+        "Cloud app registered with incorrect app id";
+    rpc_service_->ManageMobileCommand(response, commands::Command::SOURCE_SDL);
+    return ApplicationSharedPtr();
+  }
 
   if (!application->hmi_app_id()) {
     const bool is_saved =
@@ -3811,6 +3811,13 @@ void ApplicationManagerImpl::AddMockApplication(ApplicationSharedPtr mock_app) {
   applications_.insert(mock_app);
   apps_size_ = applications_.size();
   applications_list_lock_ptr_->Release();
+}
+
+void ApplicationManagerImpl::AddMockPendingApplication(
+    ApplicationSharedPtr mock_app) {
+  apps_to_register_list_lock_ptr_->Acquire();
+  apps_to_register_.insert(mock_app);
+  apps_to_register_list_lock_ptr_->Release();
 }
 
 void ApplicationManagerImpl::SetMockMediaManager(

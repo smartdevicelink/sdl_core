@@ -249,21 +249,21 @@ TransportAdapter::Error TransportAdapterImpl::ConnectDevice(
     if (FAIL == err && GetDeviceType() == DeviceType::CLOUD_WEBSOCKET) {
       LOG4CXX_TRACE(logger_,
                     "Error occurred while connecting cloud app: " << err);
-      if (device->connection_status() == ConnectionStatus::PENDING) {
-        device->set_connection_status(ConnectionStatus::RETRY);
-        device->reset_retry_count();
-        ConnectionStatusUpdated();
-      }
-
-      if (device->retry_count() >
+      // Update retry count
+      if (device->retry_count() >=
           get_settings().cloud_app_max_retry_attempts()) {
         device->set_connection_status(ConnectionStatus::PENDING);
         device->reset_retry_count();
         ConnectionStatusUpdated();
         return err;
+      } else if (device->connection_status() == ConnectionStatus::PENDING) {
+        device->set_connection_status(ConnectionStatus::RETRY);
+        ConnectionStatusUpdated();
       }
 
       device->next_retry();
+
+      // Start timer for next retry
       TimerSPtr retry_timer(std::make_shared<timer::Timer>(
           "RetryConnectionTimer",
           new timer::TimerTaskImpl<TransportAdapterImpl>(
@@ -296,6 +296,7 @@ void TransportAdapterImpl::RetryConnection() {
 }
 
 void TransportAdapterImpl::ClearCompletedTimers() {
+  // Cleanup any retry timers which have completed execution
   sync_primitives::AutoLock locker(completed_timer_pool_lock_);
   while (!completed_timer_pool_.empty()) {
     auto timer_entry = completed_timer_pool_.front();
@@ -312,8 +313,11 @@ DeviceUID TransportAdapterImpl::GetNextRetryDevice() {
   }
   auto timer_entry = retry_timer_pool_.front();
   retry_timer_pool_.pop();
+
+  // Store reference for cleanup later
   sync_primitives::AutoLock completed_locker(completed_timer_pool_lock_);
   completed_timer_pool_.push(timer_entry);
+
   return timer_entry.second;
 }
 

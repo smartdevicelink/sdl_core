@@ -70,15 +70,15 @@ class MockTransportAdapterImpl : public TransportAdapterImpl {
   }
   virtual ~MockTransportAdapterImpl() {}
 
-  virtual DeviceType GetDeviceType() const {
-    return DeviceType::UNKNOWN;
-  }
-
   MOCK_CONST_METHOD0(Store, void());
   MOCK_METHOD0(Restore, bool());
   MOCK_CONST_METHOD1(FindDevice,
                      transport_manager::transport_adapter::DeviceSptr(
                          const DeviceUID& device_id));
+  MOCK_METHOD0(ConnectionStatusUpdated, void());
+  MOCK_CONST_METHOD0(GetDeviceType,
+                     ::transport_manager::transport_adapter::DeviceType());
+  MOCK_METHOD0(RetryConnection, void());
 };
 
 }  // namespace transport_manager_test

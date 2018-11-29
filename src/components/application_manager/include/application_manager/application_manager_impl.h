@@ -1499,11 +1499,27 @@ class ApplicationManagerImpl
   void AddMockApplication(ApplicationSharedPtr mock_app);
 
   /**
+   * @brief Add a mock application to the pending application list without going
+   * through the formal registration process. Only for unit testing.
+   * @param mock_app the mock app to be added to the pending application list
+   */
+  void AddMockPendingApplication(ApplicationSharedPtr mock_app);
+
+  /**
    * @brief set a mock media manager without running Init(). Only for unit
    * testing.
-   * @param mock_app the mock app to be registered
+   * @param mock_media_manager the mock media manager to be assigned
    */
   void SetMockMediaManager(media_manager::MediaManager* mock_media_manager);
+
+  /**
+   * @brief set a mock rpc service directly. Only for unit
+   * testing.
+   * @param mock_app the mock rpc service to be assigned
+   */
+  void SetMockRPCService(rpc_service::RPCService* rpc_service) {
+    rpc_service_.reset(rpc_service);
+  }
 
   virtual void SetPluginManager(
       std::unique_ptr<plugin_manager::RPCPluginManager>& plugin_manager)
