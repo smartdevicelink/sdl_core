@@ -805,8 +805,6 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile(
       file_system::FileExists(application->app_icon_path());
 
   SendResponse(true, result_code, add_info.c_str(), &response_params);
-  SendOnAppRegisteredNotificationToHMI(
-      application, resumption, need_restore_vr);
   if (msg_params.keyExists(strings::app_hmi_type)) {
     GetPolicyHandler().SetDefaultHmiTypes(application->policy_app_id(),
                                           &(msg_params[strings::app_hmi_type]));
@@ -815,6 +813,8 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile(
   // Default HMI level should be set before any permissions validation, since it
   // relies on HMI level.
   application_manager_.OnApplicationRegistered(application);
+  SendOnAppRegisteredNotificationToHMI(
+      application, resumption, need_restore_vr);
   (*notify_upd_manager)();
 
   // Start PTU after successfull registration

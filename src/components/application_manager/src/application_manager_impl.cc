@@ -381,21 +381,6 @@ void ApplicationManagerImpl::OnApplicationRegistered(ApplicationSharedPtr app) {
         plugin.OnApplicationEvent(plugin_manager::kApplicationRegistered, app);
       };
   plugin_manager_->ForEachPlugin(on_app_registered);
-
-  // TODO(AOleynik): Is neccessary to be able to know that registration process
-  // has been completed and default HMI level is set, otherwise policy will
-  // block all the requests/notifications to mobile
-  // APPLINK-20764 - introduce usage of internal events or re-implement
-  event_engine::Event event(
-      hmi_apis::FunctionID::BasicCommunication_OnAppRegistered);
-
-  smart_objects::SmartObject msg;
-  msg[strings::params][strings::message_type] =
-      hmi_apis::messageType::notification;
-  msg[strings::params][strings::app_id] = app->app_id();
-
-  event.set_smart_object(msg);
-  event.raise(event_dispatcher());
 }
 
 void ApplicationManagerImpl::OnApplicationSwitched(ApplicationSharedPtr app) {
