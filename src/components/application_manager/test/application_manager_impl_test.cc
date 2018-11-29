@@ -46,7 +46,7 @@
 #include "application_manager/mock_rpc_service.h"
 #include "application_manager/mock_rpc_plugin_manager.h"
 #include "application_manager/resumption/resume_ctrl_impl.h"
-#include "application_manager/test/include/application_manager/mock_message_helper.h"
+#include "application_manager/mock_message_helper.h"
 #include "connection_handler/mock_connection_handler.h"
 #include "hmi_message_handler/mock_hmi_message_handler.h"
 #include "media_manager/mock_media_manager.h"

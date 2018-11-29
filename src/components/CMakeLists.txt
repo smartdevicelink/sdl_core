@@ -40,6 +40,7 @@ if("${EXTENDED_POLICY}" STREQUAL "EXTERNAL_PROPRIETARY")
     INTERFACE "${CMAKE_CURRENT_LIST_DIR}/include/policy/policy_external")
   target_compile_definitions(${PROJECT_NAME} INTERFACE
                              EXTERNAL_PROPRIETARY_MODE)
+  set(POLICY_PATH ${COMPONENTS_DIR}/policy/policy_external/)
   set(POLICY_MOCK_INCLUDE_PATH
       ${COMPONENTS_DIR}/include/test/policy/policy_external/)
   add_subdirectory(policy/policy_external)
@@ -50,9 +51,10 @@ else()
   target_include_directories(
     ${PROJECT_NAME}
     INTERFACE "${COMPONENTS_DIR}/include/policy/policy_regular")
-  add_subdirectory(policy/policy_regular)
+  set(POLICY_PATH ${COMPONENTS_DIR}/policy/policy_regular/)
   set(POLICY_MOCK_INCLUDE_PATH
       ${COMPONENTS_DIR}/include/test/policy/policy_regular/)
+  add_subdirectory(policy/policy_regular)
 endif()
 
 # Just in case

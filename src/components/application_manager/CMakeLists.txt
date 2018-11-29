@@ -135,3 +135,7 @@ target_include_directories(${PROJECT_NAME}
                            PUBLIC "${CMAKE_CURRENT_LIST_DIR}/include")
 
 add_subdirectory(rpc_plugins)
+
+if(BUILD_TESTS)
+  add_subdirectory(test)
+endif()
