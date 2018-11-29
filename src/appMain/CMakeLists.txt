@@ -158,3 +158,7 @@ configure_file(${SDL_IN_CONFIG_FILE} ${SDL_OUT_CONFIG_FILE} @ONLY
 install(FILES ${SDL_OUT_CONFIG_FILE}
         DESTINATION ${SDL_CONFIG_INSTALL_DIR}
         COMPONENT sdl_core)
+
+if(BUILD_TESTS)
+  add_subdirectory(test)
+endif()
