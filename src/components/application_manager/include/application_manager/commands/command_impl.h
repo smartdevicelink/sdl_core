@@ -39,6 +39,8 @@
 #include "application_manager/smart_object_keys.h"
 #include "utils/logger.h"
 
+#include <algorithm>
+
 namespace application_manager {
 
 /**
@@ -50,14 +52,14 @@ struct CommandParametersPermissions {
   RPCParams disallowed_params;
   RPCParams undefined_params;
 
-  bool DisallowedInclude(const RPCParams& parameters) {
+  bool IsDisallowedParamsIncluded(const RPCParams& parameters) {
     return std::includes(disallowed_params.begin(),
                          disallowed_params.end(),
                          parameters.begin(),
                          parameters.end());
   }
 
-  bool UndefindedInclude(const RPCParams& parameters) {
+  bool IsUndefindedParamsIncluded(const RPCParams& parameters) {
     return std::includes(undefined_params.begin(),
                          undefined_params.end(),
                          parameters.begin(),

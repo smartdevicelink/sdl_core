@@ -662,12 +662,12 @@ bool CommandRequestImpl::CheckAllowedParameters() {
             app->app_id());
 
     if (!params.empty()) {
-      if (parameters_permissions_.DisallowedInclude(params)) {
+      if (parameters_permissions_.IsDisallowedParamsIncluded(params)) {
         const std::string info = "RPC is disallowed by the user";
         LOG4CXX_DEBUG(logger_, info);
         (*response)[strings::msg_params][strings::info] = info;
         AddDisallowedParameters(*response);
-      } else if (parameters_permissions_.UndefindedInclude(params)) {
+      } else if (parameters_permissions_.IsUndefindedParamsIncluded(params)) {
         const std::string info =
             "Requested parameters are disallowed by Policies";
 
@@ -801,6 +801,7 @@ void CommandRequestImpl::AddDissalowedParameterToInfoString(
 
 void CommandRequestImpl::AddDisallowedParametersToInfo(
     smart_objects::SmartObject& response) const {
+  LOG4CXX_AUTO_TRACE(logger_);
   const mobile_apis::FunctionID::eType id =
       static_cast<mobile_apis::FunctionID::eType>(function_id());
 
@@ -812,6 +813,7 @@ void CommandRequestImpl::AddDisallowedParametersToInfo(
           mobile_apis::FunctionID::UnsubscribeVehicleDataID,
           mobile_apis::FunctionID::GetVehicleDataID,
           mobile_apis::FunctionID::SendLocationID)) {
+    LOG4CXX_INFO(logger_, "The function id: " << id << " is not supported.");
     return;
   }
 
@@ -822,7 +824,7 @@ void CommandRequestImpl::AddDisallowedParametersToInfo(
                 removed_parameters_permissions_.disallowed_params.end(),
                 user_info_adder);
 
-  const uint32_t min_number_of_disallowed_params = 1;
+  const size_t min_number_of_disallowed_params = 1;
   if (!disallowed_by_user_info.empty()) {
     disallowed_by_user_info +=
         min_number_of_disallowed_params <
@@ -839,7 +841,7 @@ void CommandRequestImpl::AddDisallowedParametersToInfo(
                 removed_parameters_permissions_.undefined_params.end(),
                 policy_info_adder);
 
-  const uint32_t min_number_of_undefined_params = 1;
+  const size_t min_number_of_undefined_params = 1;
   if (!disallowed_by_policy_info.empty()) {
     disallowed_by_policy_info +=
         min_number_of_undefined_params <
@@ -850,6 +852,8 @@ void CommandRequestImpl::AddDisallowedParametersToInfo(
   }
 
   if (disallowed_by_user_info.empty() && disallowed_by_policy_info.empty()) {
+    LOG4CXX_INFO(logger_,
+                 "There are not disallowed by user or by policy parameters.");
     return;
   }
 
