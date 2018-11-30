@@ -49,6 +49,7 @@
 #include <string>
 #include <thread>
 #include "transport_manager/transport_adapter/connection.h"
+#include "transport_manager/cloud/cloud_websocket_transport_adapter.h"
 #include "utils/threads/thread.h"
 #include "utils/threads/message_loop_thread.h"
 #include "utils/message_queue.h"
@@ -117,6 +118,13 @@ class WebsocketClientConnection
    */
   TransportAdapter::Error Disconnect();
 
+  /**
+   * @brief Attempt to open a secure connection with the provided certificate
+   * 
+   * @return true if secured connection was created successfully
+   */
+  bool AddCertificateAuthority(std::string cert, boost::system::error_code& ec);
+
   void Shutdown();
 
   void Recv(boost::system::error_code ec);
@@ -126,8 +134,9 @@ class WebsocketClientConnection
  private:
   TransportAdapterController* controller_;
   boost::asio::io_context ioc_;
+  ssl::context ctx_;
   tcp::resolver resolver_;
-  websocket::stream<tcp::socket> ws_;
+  websocket::stream<ssl::stream<tcp::socket>> ws_;
   boost::beast::flat_buffer buffer_;
   std::string host_;
   std::string text_;
