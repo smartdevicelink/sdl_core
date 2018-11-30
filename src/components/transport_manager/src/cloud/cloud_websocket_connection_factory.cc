@@ -56,11 +56,15 @@ TransportAdapter::Error CloudWebsocketConnectionFactory::Init() {
 TransportAdapter::Error CloudWebsocketConnectionFactory::CreateConnection(
     const DeviceUID& device_uid, const ApplicationHandle& app_handle) {
   LOG4CXX_AUTO_TRACE(logger_);
-  std::shared_ptr<WebsocketClientConnection> connection =
-      std::make_shared<WebsocketClientConnection>(
-          device_uid, app_handle, controller_);
-  controller_->ConnectionCreated(connection, device_uid, app_handle);
-  TransportAdapter::Error error = connection->Start();
+  auto connection = controller_->FindPendingConnection(device_uid, app_handle);
+
+  std::shared_ptr<WebsocketClientConnection> ws_connection =
+      std::dynamic_pointer_cast<WebsocketClientConnection>(connection);
+  if (!ws_connection) {
+    return TransportAdapter::Error::BAD_PARAM;
+  }
+
+  TransportAdapter::Error error = ws_connection->Start();
   if (TransportAdapter::OK != error) {
     LOG4CXX_ERROR(
         logger_,

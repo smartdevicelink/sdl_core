@@ -915,6 +915,33 @@ void ApplicationManagerImpl::CreatePendingApplication(
   SendUpdateAppList();
 }
 
+void ApplicationManagerImpl::SetPendingApplicationState(
+    const transport_manager::ConnectionUID connection_id,
+    const transport_manager::DeviceInfo& device_info) {
+  std::string name = device_info.name();
+  auto it = pending_device_map_.find(name);
+  if (it == pending_device_map_.end()) {
+    return;
+  }
+
+  const std::string policy_app_id = it->second;
+  auto app = application_by_policy_id(policy_app_id);
+
+  if (!app) {
+    return;
+  }
+  LOG4CXX_DEBUG(logger_,
+                "Unregister application and move into apps_to_register");
+  {
+    sync_primitives::AutoLock lock(apps_to_register_list_lock_ptr_);
+    apps_to_register_.insert(app);
+  }
+
+  UnregisterApplication(
+      app->app_id(), mobile_apis::Result::INVALID_ENUM, true, true);
+  app->MarkUnregistered();
+}
+
 void ApplicationManagerImpl::OnConnectionStatusUpdated() {
   SendUpdateAppList();
 }

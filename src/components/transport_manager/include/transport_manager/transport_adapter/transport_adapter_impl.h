@@ -260,6 +260,10 @@ class TransportAdapterImpl : public TransportAdapter,
    */
   DeviceSptr FindDevice(const DeviceUID& device_handle) const OVERRIDE;
 
+  ConnectionSPtr FindPendingConnection(
+      const DeviceUID& device_handle,
+      const ApplicationHandle& app_handle) const OVERRIDE;
+
   /**
    * @brief Search for device in container of devices, if it is not there - adds
    *it.

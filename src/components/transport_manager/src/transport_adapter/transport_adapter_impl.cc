@@ -233,7 +233,9 @@ TransportAdapter::Error TransportAdapterImpl::Connect(
       server_connection_factory_->CreateConnection(device_id, app_handle);
   if (TransportAdapter::OK != err) {
     connections_lock_.AcquireForWriting();
-    connections_.erase(std::make_pair(device_id, app_handle));
+    if (!pending_app) {
+      connections_.erase(std::make_pair(device_id, app_handle));
+    }
     connections_lock_.Release();
   }
   LOG4CXX_TRACE(logger_, "exit with error: " << err);
@@ -821,6 +823,26 @@ void TransportAdapterImpl::DeviceSwitched(const DeviceUID& device_handle) {
   UNUSED(device_handle);
 }
 
+ConnectionSPtr TransportAdapterImpl::FindPendingConnection(
+    const DeviceUID& device_id, const ApplicationHandle& app_handle) const {
+  LOG4CXX_TRACE(logger_,
+                "enter. device_id: " << &device_id
+                                     << ", app_handle: " << &app_handle);
+  ConnectionSPtr connection;
+  connections_lock_.AcquireForReading();
+  ConnectionMap::const_iterator it =
+      connections_.find(std::make_pair(device_id, app_handle));
+  if (it != connections_.end()) {
+    const ConnectionInfo& info = it->second;
+    if (info.state == ConnectionInfo::PENDING) {
+      connection = info.connection;
+    }
+  }
+  connections_lock_.Release();
+  LOG4CXX_TRACE(logger_, "exit with Connection: " << connection);
+  return connection;
+}
+
 DeviceSptr TransportAdapterImpl::FindDevice(const DeviceUID& device_id) const {
   LOG4CXX_TRACE(logger_, "enter. device_id: " << &device_id);
   DeviceSptr ret;
@@ -838,14 +860,25 @@ DeviceSptr TransportAdapterImpl::FindDevice(const DeviceUID& device_id) const {
 
 void TransportAdapterImpl::ConnectPending(const DeviceUID& device_id,
                                           const ApplicationHandle& app_handle) {
-  connections_lock_.AcquireForReading();
+  connections_lock_.AcquireForWriting();
   ConnectionMap::iterator it_conn =
       connections_.find(std::make_pair(device_id, app_handle));
   if (it_conn != connections_.end()) {
     ConnectionInfo& info = it_conn->second;
+    if (info.state == ConnectionInfo::ESTABLISHED) {
+      LOG4CXX_DEBUG(logger_, "Reset Connection Pointer");
+      connections_.erase(std::make_pair(device_id, app_handle));
+
+      connections_lock_.Release();
+      CreateDevice(device_id);
+      connections_lock_.AcquireForWriting();
+    }
     info.state = ConnectionInfo::PENDING;
   }
   connections_lock_.Release();
+
+  DeviceSptr device = FindDevice(device_id);
+  device->set_connection_status(ConnectionStatus::PENDING);
 
   for (TransportAdapterListenerList::iterator it = listeners_.begin();
        it != listeners_.end();

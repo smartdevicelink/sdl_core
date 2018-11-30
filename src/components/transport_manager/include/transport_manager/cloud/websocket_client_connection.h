@@ -42,6 +42,7 @@
 #include <boost/asio/connect.hpp>
 #include <boost/asio/ip/tcp.hpp>
 #include <boost/asio/ssl/stream.hpp>
+#include <boost/asio/thread_pool.hpp>
 #include <cstdlib>
 #include <functional>
 #include <iostream>
@@ -127,7 +128,7 @@ class WebsocketClientConnection
   TransportAdapterController* controller_;
   boost::asio::io_context ioc_;
   tcp::resolver resolver_;
-  websocket::stream<tcp::socket> ws_;
+  std::shared_ptr<websocket::stream<tcp::socket> > ws_;
   boost::beast::flat_buffer buffer_;
   std::string host_;
   std::string text_;
@@ -170,6 +171,10 @@ class WebsocketClientConnection
 
   const DeviceUID device_uid_;
   const ApplicationHandle app_handle_;
+
+  bool first_run_;
+  boost::asio::thread_pool io_pool_;
+  bool dead_;
 };
 
 }  // namespace transport_adapter

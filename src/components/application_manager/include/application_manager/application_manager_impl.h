@@ -367,6 +367,10 @@ class ApplicationManagerImpl
       const transport_manager::DeviceInfo& device_info,
       connection_handler::DeviceHandle device_id);
 
+  void SetPendingApplicationState(
+      const transport_manager::ConnectionUID connection_id,
+      const transport_manager::DeviceInfo& device_info);
+
   /**
    * @brief Notifies the applicaiton manager that a cloud connection status has
    * updated and should trigger an UpdateAppList RPC to the HMI

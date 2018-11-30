@@ -284,10 +284,12 @@ void ConnectionHandlerImpl::OnConnectionPending(
 
     connection_handler::DeviceHandle device_id =
         connection->connection_device_handle();
-    // uint32_t app_id = KeyFromPair(connection_id, session_id);
 
     connection_handler_observer_->CreatePendingApplication(
         connection_id, device_info, device_id);
+  } else {
+    connection_handler_observer_->SetPendingApplicationState(connection_id,
+                                                             device_info);
   }
 }
 
