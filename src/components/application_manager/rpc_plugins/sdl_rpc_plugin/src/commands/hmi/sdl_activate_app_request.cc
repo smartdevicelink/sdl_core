@@ -249,8 +249,10 @@ void SDLActivateAppRequest::onTimeOut() {
   using namespace hmi_apis::Common_Result;
   using namespace application_manager;
   unsubscribe_from_event(BasicCommunication_OnAppRegistered);
-  SendErrorResponse(
-      correlation_id(), SDL_ActivateApp, APPLICATION_NOT_REGISTERED, "");
+  SendErrorResponse(correlation_id(),
+                    SDL_ActivateApp,
+                    APPLICATION_NOT_REGISTERED,
+                    "App registration timed out");
 }
 
 void SDLActivateAppRequest::on_event(const event_engine::Event& event) {
