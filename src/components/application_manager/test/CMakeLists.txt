@@ -76,74 +76,10 @@ target_link_libraries(${PROJECT_NAME}
                       PRIVATE application_manager::application_manager
                               Policy::usage_statistics components::interface)
 
-project(application_manager_mock_hmi_test)
-create_test(${PROJECT_NAME})
-
-target_include_directories(${PROJECT_NAME}
-                           PRIVATE ${POLICY_MOCK_INCLUDE_PATH}
-                                   ${APPLICATION_MANAGER_DIR}/test/include/)
-
-target_sources(
-  ${PROJECT_NAME} PRIVATE
-  ${APPLICATION_MANAGER_DIR}/test/application_manager_impl_mock_hmi_test.cc)
-
-target_link_libraries(${PROJECT_NAME}
-                      PRIVATE application_manager::application_manager
-                              components::interface)
-
-project(help_prompt_manager_test)
-create_test(${PROJECT_NAME})
-
-target_include_directories(${PROJECT_NAME}
-                           PRIVATE ${POLICY_MOCK_INCLUDE_PATH}
-                                   ${APPLICATION_MANAGER_DIR}/test/include/)
-
-target_sources(${PROJECT_NAME}
-               PRIVATE
-               ${APPLICATION_MANAGER_DIR}/test/help_prompt_manager_test.cc
-               ${APPLICATION_MANAGER_DIR}/test/mock_message_helper.cc)
-
-target_link_libraries(${PROJECT_NAME}
-                      PRIVATE application_manager::application_manager
-                              components::interface sdl_rpc_plugins_static_lib)
-
-project(request_controller_test)
-create_test(${PROJECT_NAME})
-
-target_include_directories(${PROJECT_NAME}
-                           PRIVATE ${POLICY_MOCK_INCLUDE_PATH}
-                                   ${APPLICATION_MANAGER_DIR}/test/include/)
-
-target_sources(
-  ${PROJECT_NAME}
-  PRIVATE
-  ${APPLICATION_MANAGER_DIR}/test/request_controller/request_controller_test.cc
-  ${APPLICATION_MANAGER_DIR}/test/mock_message_helper.cc)
-
-target_link_libraries(${PROJECT_NAME}
-                      PRIVATE application_manager::application_manager
-                              components::interface)
-
-project(data_resumption_test)
-create_test(${PROJECT_NAME})
-
-target_include_directories(${PROJECT_NAME}
-                           PRIVATE ${POLICY_MOCK_INCLUDE_PATH}
-                                   ${APPLICATION_MANAGER_DIR}/test/include/)
-
-target_sources(
-  ${PROJECT_NAME}
-  PRIVATE
-  ${APPLICATION_MANAGER_DIR}/test/resumption/resumption_data_test.cc
-  ${APPLICATION_MANAGER_DIR}/test/resumption/resumption_data_db_test.cc
-  ${APPLICATION_MANAGER_DIR}/test/resumption/resumption_data_json_test.cc
-  ${APPLICATION_MANAGER_DIR}/test/resumption/resume_ctrl_test.cc
-  ${APPLICATION_MANAGER_DIR}/test/mock_message_helper.cc)
-
-target_link_libraries(${PROJECT_NAME}
-                      PRIVATE application_manager::application_manager
-                              components::interface)
-
+add_subdirectory(application_manager_mock_hmi)
+add_subdirectory(help_prompt_manager)
+add_subdirectory(request_controller)
+add_subdirectory(resumption)
 add_subdirectory(state_controller)
 add_subdirectory(app_launch)
 add_subdirectory(commands)

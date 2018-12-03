@@ -36,7 +36,7 @@ target_include_directories(
 target_sources(
   ${PROJECT_NAME}
   PRIVATE
-  ${APPLICATION_MANAGER_DIR}/test/state_controller/state_controller_test.cc
+  ${CMAKE_CURRENT_LIST_DIR}/state_controller_test.cc
   ${APPLICATION_MANAGER_DIR}/test/mock_message_helper.cc)
 
 target_link_libraries(${PROJECT_NAME}

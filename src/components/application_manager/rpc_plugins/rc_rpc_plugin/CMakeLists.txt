@@ -58,9 +58,9 @@ set(
   "${CMAKE_CURRENT_LIST_DIR}/src/commands/mobile/set_interior_vehicle_data_response.cc"
   )
 
-add_dynamic_library(${PROJECT_NAME})
+add_rpc_plugin_dynamic(${PROJECT_NAME})
 
 if(BUILD_TESTS)
-  add_static_library(${PROJECT_NAME})
+  add_rpc_plugin_static(${PROJECT_NAME})
   add_subdirectory(test)
 endif()

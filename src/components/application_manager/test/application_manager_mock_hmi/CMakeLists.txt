@@ -25,32 +25,17 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-project(vi_commands_test)
-
+project(application_manager_mock_hmi_test)
 create_test(${PROJECT_NAME})
 
+target_include_directories(${PROJECT_NAME}
+                           PRIVATE ${POLICY_MOCK_INCLUDE_PATH}
+                                   ${APPLICATION_MANAGER_DIR}/test/include/)
+
 target_sources(
-  ${PROJECT_NAME}
-  PRIVATE
-  ${COMPONENTS_DIR}/application_manager/test/mock_message_helper.cc
-  ${COMPONENTS_DIR}/application_manager/test/mock_application_helper.cc
-  # hmi commands
-  ${CMAKE_CURRENT_SOURCE_DIR}/commands/hmi/vi_get_vehicle_data_response_test.cc
-  ${CMAKE_CURRENT_SOURCE_DIR}/commands/hmi/vi_is_ready_request_test.cc
-  # mobile commands
-  ${CMAKE_CURRENT_SOURCE_DIR}/commands/mobile/diagnostic_message_request_test.cc
-  ${CMAKE_CURRENT_SOURCE_DIR}/commands/mobile/get_dtcs_request_test.cc
-  ${CMAKE_CURRENT_SOURCE_DIR}/commands/mobile/get_vehicle_data_request_test.cc
-  ${CMAKE_CURRENT_SOURCE_DIR}/commands/mobile/on_vehicle_data_notification_test.cc
-  ${CMAKE_CURRENT_SOURCE_DIR}/commands/mobile/read_did_request_test.cc
-  ${CMAKE_CURRENT_SOURCE_DIR}/commands/mobile/unsubscribe_vehicle_request_test.cc
-  ${CMAKE_CURRENT_SOURCE_DIR}/commands/mobile/unsubscribe_vehicle_response_test.cc
-  )
+  ${PROJECT_NAME} PRIVATE
+  ${CMAKE_CURRENT_LIST_DIR}/application_manager_impl_mock_hmi_test.cc)
 
 target_link_libraries(${PROJECT_NAME}
-                      PRIVATE components::interface
-                              vehicle_info_plugin_static_lib)
-
-target_include_directories(
-  ${PROJECT_NAME}
-  PRIVATE ${COMPONENTS_DIR} ${COMPONENTS_DIR}/application_manager/test/include/)
+                      PRIVATE application_manager::application_manager
+                              components::interface)

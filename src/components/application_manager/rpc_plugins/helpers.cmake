@@ -25,7 +25,7 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-function(add_dynamic_library NAME)
+function(add_rpc_plugin_dynamic NAME)
   include(GNUInstallDirs)
   add_library(${NAME} MODULE)
 
@@ -39,8 +39,8 @@ function(add_dynamic_library NAME)
                                interfaces::MOBILE_API
                                interfaces::v4_protocol_v1_2_no_extra
                                connection_handler::connection_handler
-                        PRIVATE application_manager::interface
-                                components::interface)
+                               application_manager::interface
+                               components::interface)
 
   target_include_directories(${NAME} PUBLIC "${CMAKE_CURRENT_LIST_DIR}/include")
 
@@ -58,7 +58,7 @@ function(add_dynamic_library NAME)
           WORLD_EXECUTE)
 endfunction()
 
-function(add_static_library NAME)
+function(add_rpc_plugin_static NAME)
   add_library("${NAME}_static_lib" ${PLUGIN_SOURCES})
 
   target_link_libraries("${NAME}_static_lib"
@@ -69,8 +69,8 @@ function(add_static_library NAME)
                                interfaces::MOBILE_API
                                interfaces::v4_protocol_v1_2_no_extra
                                connection_handler::connection_handler
-                        PRIVATE application_manager::interface
-                                components::interface)
+                               application_manager::interface
+                               components::interface)
 
   target_include_directories("${NAME}_static_lib"
                              PUBLIC "${CMAKE_CURRENT_LIST_DIR}/include")

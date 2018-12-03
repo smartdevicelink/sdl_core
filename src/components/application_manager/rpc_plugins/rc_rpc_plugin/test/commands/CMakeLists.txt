@@ -25,32 +25,26 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-project(vi_commands_test)
+project(rc_commands_test)
 
 create_test(${PROJECT_NAME})
+
+target_include_directories(${PROJECT_NAME}
+                           PRIVATE ${APPLICATION_MANAGER_DIR}/test/include
+                                   ${APPLICATION_MANAGER_DIR}/include
+                                   ${RC_PLUGIN_TEST_DIR}/include
+                                   ${COMPONENTS_DIR})
 
 target_sources(
   ${PROJECT_NAME}
   PRIVATE
-  ${COMPONENTS_DIR}/application_manager/test/mock_message_helper.cc
-  ${COMPONENTS_DIR}/application_manager/test/mock_application_helper.cc
-  # hmi commands
-  ${CMAKE_CURRENT_SOURCE_DIR}/commands/hmi/vi_get_vehicle_data_response_test.cc
-  ${CMAKE_CURRENT_SOURCE_DIR}/commands/hmi/vi_is_ready_request_test.cc
-  # mobile commands
-  ${CMAKE_CURRENT_SOURCE_DIR}/commands/mobile/diagnostic_message_request_test.cc
-  ${CMAKE_CURRENT_SOURCE_DIR}/commands/mobile/get_dtcs_request_test.cc
-  ${CMAKE_CURRENT_SOURCE_DIR}/commands/mobile/get_vehicle_data_request_test.cc
-  ${CMAKE_CURRENT_SOURCE_DIR}/commands/mobile/on_vehicle_data_notification_test.cc
-  ${CMAKE_CURRENT_SOURCE_DIR}/commands/mobile/read_did_request_test.cc
-  ${CMAKE_CURRENT_SOURCE_DIR}/commands/mobile/unsubscribe_vehicle_request_test.cc
-  ${CMAKE_CURRENT_SOURCE_DIR}/commands/mobile/unsubscribe_vehicle_response_test.cc
-  )
+  "${COMPONENTS_DIR}/application_manager/test/mock_message_helper.cc"
+  "${CMAKE_CURRENT_LIST_DIR}/button_press_request_test.cc"
+  "${CMAKE_CURRENT_LIST_DIR}/get_interior_vehicle_data_request_test.cc"
+  "${CMAKE_CURRENT_LIST_DIR}/on_interior_vehicle_data_notification_test.cc"
+  "${CMAKE_CURRENT_LIST_DIR}/on_remote_control_settings_test.cc"
+  "${CMAKE_CURRENT_LIST_DIR}/rc_get_interior_vehicle_data_consent_test.cc"
+  "${CMAKE_CURRENT_LIST_DIR}/set_interior_vehicle_data_request_test.cc")
 
 target_link_libraries(${PROJECT_NAME}
-                      PRIVATE components::interface
-                              vehicle_info_plugin_static_lib)
-
-target_include_directories(
-  ${PROJECT_NAME}
-  PRIVATE ${COMPONENTS_DIR} ${COMPONENTS_DIR}/application_manager/test/include/)
+                      PRIVATE components::interface rpc_plugins_static_lib)
