@@ -59,11 +59,21 @@ class CloudWebsocketTransportAdapter : public TransportAdapterImpl {
   virtual ~CloudWebsocketTransportAdapter();
 
   /**
-   * @brief Notification that transport's configuration is updated
+   * @brief Set CloudTransportConfig for specified app_id
    *
-   * @param new_config The new configuration of the transport
+   * @param app_id app ID string
+   * @param properties New cloud app properties for the app
    */
-  void CloudTransportConfigUpdated(const CloudAppTransportConfig& new_config);
+  void SetAppCloudTransportConfig(std::string app_id, CloudAppProperties properties);
+
+  /**
+   * @brief Get CloudTransportConfig for specified app_id
+   *
+   * @param app_id app ID string
+   * @return CloudAppProperties for the app
+   */
+  const CloudAppProperties& GetAppCloudTransportConfig(std::string app_id);
+
 
   /**
    * @brief Returns the transport's configuration information

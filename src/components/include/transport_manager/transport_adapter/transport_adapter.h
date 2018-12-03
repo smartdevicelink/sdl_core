@@ -82,8 +82,8 @@ struct CloudAppProperties {
   std::string certificate;
   bool enabled;
   std::string auth_token;
-  DeviceType cloud_transport_type;
-  HybridAppPreference hybrid_app_preference;
+  std::string cloud_transport_type;
+  std::string hybrid_app_preference;
 };
 
 typedef std::map<DeviceType, std::string> DeviceTypes;

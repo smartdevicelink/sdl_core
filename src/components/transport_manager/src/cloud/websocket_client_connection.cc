@@ -57,23 +57,7 @@ WebsocketClientConnection::WebsocketClientConnection(
     , app_handle_(app_handle) {
 
       LOG4CXX_DEBUG(logger_, "CLOUD_DEBUG_WEBSOCKETCLIENTCONNECTION");
-      // LOG4CXX_DEBUG(logger_, controller);
       
-      // CloudWebsocketTransportAdapter* cta = static_cast<CloudWebsocketTransportAdapter*>(controller);
-      // LOG4CXX_DEBUG(logger_, cta);
-      
-      // CloudAppTransportConfig temp = cta->GetCloudTransportConfiguration();
-
-
-      // LOG4CXX_DEBUG(logger_, "Printing CloudAppTransportConfig: " << temp.size());
-      // for(auto it = temp.cbegin(); it != temp.cend(); it++){
-      //   std::string txt = "DEVICE: " + it->first + "\n";
-      //   txt += "ENDPOINT: " + it->second.endpoint + "\n";
-      //   txt += "CERTIFICATE: " + it->second.certificate + "\n";
-      //   txt += "AUTH_TOKEN: " + it->second.auth_token + "\n";
-      //   LOG4CXX_DEBUG(logger_, txt); 
-
-      // }      
     }
 
 
@@ -86,10 +70,10 @@ WebsocketClientConnection::~WebsocketClientConnection() {
 }
 
 bool WebsocketClientConnection::AddCertificateAuthority(const std::string cert, boost::system::error_code& ec){
-  if(cert == "not_specified"){
-    ws_.next_layer().set_verify_mode(ssl::verify_none);
-    return false;
-  }
+  // if(cert == "not_specified"){
+  //   ws_.next_layer().set_verify_mode(ssl::verify_none);
+  //   return false;
+  // }
 
   ctx_.add_certificate_authority(boost::asio::buffer(cert.data(), cert.size()), ec);
   if(ec){
@@ -108,12 +92,19 @@ TransportAdapter::Error WebsocketClientConnection::Start() {
   LOG4CXX_AUTO_TRACE(logger_);
   DeviceSptr device = controller_->FindDevice(device_uid_);
   CloudDevice* cloud_device = static_cast<CloudDevice*>(device.get());
+  CloudWebsocketTransportAdapter* cloud_ta = static_cast<CloudWebsocketTransportAdapter*>(controller_);
+  CloudAppProperties cloud_properties = cloud_ta->GetAppCloudTransportConfig(device_uid_);
   auto const host = cloud_device->GetHost();
   auto const port = cloud_device->GetPort();
   boost::system::error_code ec;
   auto const results = resolver_.resolve(host, port, ec);
 
   LOG4CXX_DEBUG(logger_, "CLOUD_CONN_START");  
+  LOG4CXX_DEBUG(logger_, "ENDPOINT: " << cloud_properties.endpoint);
+  LOG4CXX_DEBUG(logger_, "CERTIFICATE: " << cloud_properties.certificate);
+  LOG4CXX_DEBUG(logger_, "AUTH_TOKEN: " << cloud_properties.auth_token);
+  LOG4CXX_DEBUG(logger_, "TRANSPORT_TYPE: " << cloud_properties.cloud_transport_type);
+  LOG4CXX_DEBUG(logger_, "HYBRID_APP_PREF: " << cloud_properties.hybrid_app_preference);
 
   if (ec) {
     std::string str_err = "ErrorMessage: " + ec.message();
@@ -144,21 +135,23 @@ TransportAdapter::Error WebsocketClientConnection::Start() {
   std::string invalid_cert = "-----BEGIN CERTIFICATE-----\nWjAYMRYwFAYDVQQDDA0xOTIuMTY4LjEuMTI4MIIBIjANBgkqhkiG9w0BAQEFAAOC\nAQ8AMIIBCgKCAQEAlVrHDi+XdO9fNMcknqs2Hn0AQjKQZAq0juy8r7gDqkzHw9zY\nFnfssIUzP7R6F1/80ulyjwUN6G+SI7phbivr2gmSdfkYiJVdwBKf611srIrNF/Eh\nllt/2sjwZNyTai4pzZv9/svix5nIVCHdKZD6wsxCFOdNhVJGBd9uQ4Pk1hQoW/jj\nsUF/NBUa49k31/IQiqQ6T1xQvSkEUYd1kstS7utO2V0Z9rHH4/+4HNyPMKipkCi2\n/7WuvQGDyHTnNUFmEANn4X06iQAVon9L8IVRcGwtgsWJ0fuVGK5POtU4m37Q35MW\n3RWF3OzyP/6PxRX5ljQFmkwGkqzHrNzOZN+zMQIDAQABo1MwUTAdBgNVHQ4EFgQU\nc1BN7ZNXq+OA5hT+vq1NOMoUrR8wHwYDVR0jBBgwFoAUc1BN7ZNXq+OA5hT+vq1N\nOMoUrR8wDwYDVR0TAQH/BAUwAwEB/zANBgkqhkiG9w0BAQsFAAOCAQEAUQ8MwCmb\nDrwCNGaUdGNXoiAWrltPE2buzpq8OCVxXBSqSumAe1SkjyKROBbevM7/Cl4V3qgj\nEHjUXNrzFR9WTCOOjJ9W0wiO25FDBguU5VCkuhvfL6lCgVuJRRi9LtiY2hT5fPdM\nrMvS0/iUV3RXcKNyIGOXH1OcOim+PVph2wj0x/N1Nmhqkh+2LtFHhsE/Zgygndla\nsbyRTNQ3bnzGUwMl8jPa7KSeggtfmjIFc4VXEgrOzKHhJO2C96FmVMo97QqKQvq+\nWjPfzHnI3hhr1GPPMHFQQZG5j4a708Qo9fZcKJxUvm0O7kdFFOqcMyo086cu1YUP\nGy5s8MqShPUp1Q==\n-----END CERTIFICATE-----";
   std::string test_cert = "";
 
-  bool isAdded = AddCertificateAuthority(cert, ec);
+  if(cloud_properties.cloud_transport_type == "WSS"){
+    bool isAdded = AddCertificateAuthority(cert, ec);
 
-  if(isAdded){
-    LOG4CXX_INFO(logger_, "Certificate Authority added successfully");
-  }else{
-    LOG4CXX_INFO(logger_, "Failed to add certificate authority");
-  }
+    if(isAdded){
+      LOG4CXX_INFO(logger_, "Certificate Authority added successfully");
+    }else{
+      LOG4CXX_INFO(logger_, "Failed to add certificate authority");
+    }
 
-  if(ec){
-    std::string str_err = "ErrorMessage: " + ec.message();
-    LOG4CXX_ERROR(logger_,
-                  "Failed to add certificate authority: " << invalid_cert);
-    LOG4CXX_ERROR(logger_, str_err);
-    Shutdown();
-    return TransportAdapter::FAIL;
+    if(ec){
+      std::string str_err = "ErrorMessage: " + ec.message();
+      LOG4CXX_ERROR(logger_,
+                    "Failed to add certificate authority: " << invalid_cert);
+      LOG4CXX_ERROR(logger_, str_err);
+      Shutdown();
+      return TransportAdapter::FAIL;
+    }
   }
 
   //Perform SSL Handshake
