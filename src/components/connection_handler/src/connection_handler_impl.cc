@@ -1323,11 +1323,17 @@ void ConnectionHandlerImpl::ConnectToAllDevices() {
   }
 }
 
-void ConnectionHandlerImpl::AddCloudAppDevice(
-    const std::string& policy_app_id,
-    const std::string& endpoint,
-    const std::string& cloud_transport_type) {
-  transport_manager_.AddCloudDevice(endpoint, cloud_transport_type);
+void ConnectionHandlerImpl::AddCloudAppDevice(const std::string& policy_app_id,
+    const transport_manager::transport_adapter::CloudAppProperties cloud_properties) {
+  // LOG4CXX_DEBUG(logger_, "CLOUD_DEBUG_ADDCLOUDAPPDEVICE: " << cloud_properties.endpoint);
+  // LOG4CXX_DEBUG(logger_, "ENDPOINT: " << cloud_properties.endpoint);
+  // LOG4CXX_DEBUG(logger_, "ENABLED: " << cloud_properties.enabled);
+  // LOG4CXX_DEBUG(logger_, "CERTIFICATE: " << cloud_properties.certificate);
+  // LOG4CXX_DEBUG(logger_, "AUTH_TOKEN: " << cloud_properties.auth_token);
+  // LOG4CXX_DEBUG(logger_, "TRANSPORT_TYPE: " << cloud_properties.cloud_transport_type);
+  // LOG4CXX_DEBUG(logger_, "HYBRID: " << cloud_properties.hybrid_app_preference);      
+
+  transport_manager_.AddCloudDevice(cloud_properties);
 }
 
 void ConnectionHandlerImpl::StartTransportManager() {

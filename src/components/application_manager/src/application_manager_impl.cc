@@ -808,6 +808,7 @@ void ApplicationManagerImpl::OnHMIStartedCooperation() {
 
 void ApplicationManagerImpl::CollectCloudAppInformation() {
   LOG4CXX_AUTO_TRACE(logger_);
+  LOG4CXX_DEBUG(logger_, "CLOUD_DEBUG_COLLECTCLOUDAPPINFO");
   std::vector<std::string> cloud_app_id_vector;
   GetPolicyHandler().GetEnabledCloudApps(cloud_app_id_vector);
   std::vector<std::string>::iterator it = cloud_app_id_vector.begin();
@@ -830,7 +831,17 @@ void ApplicationManagerImpl::CollectCloudAppInformation() {
     pending_device_map_.insert(
         std::pair<std::string, std::string>(endpoint, *it));
 
-    connection_handler().AddCloudAppDevice(*it, endpoint, cloud_transport_type);
+    transport_manager::transport_adapter::CloudAppProperties properties
+      {endpoint, certificate, enabled, auth_token, cloud_transport_type, hybrid_app_preference};
+    LOG4CXX_DEBUG(logger_, "CLOUD_APP_MGR: " << endpoint);
+    LOG4CXX_DEBUG(logger_, "ENDPOINT: " << properties.endpoint);
+    LOG4CXX_DEBUG(logger_, "ENABLED: " << properties.enabled);
+    LOG4CXX_DEBUG(logger_, "CERTIFICATE: " << properties.certificate);
+    LOG4CXX_DEBUG(logger_, "AUTH_TOKEN: " << properties.auth_token);
+    LOG4CXX_DEBUG(logger_, "TRANSPORT_TYPE: " << properties.cloud_transport_type);
+    LOG4CXX_DEBUG(logger_, "HYBRID: " << properties.hybrid_app_preference);      
+
+    connection_handler().AddCloudAppDevice(*it, properties);
   }
 }
 

@@ -81,7 +81,7 @@ class ConnectionHandlerImpl
   ConnectionHandlerImpl(const ConnectionHandlerSettings& settings,
                         transport_manager::TransportManager& tm);
   /**
-   * \brief Destructor
+   * @brief Destructor
    */
   ~ConnectionHandlerImpl();
 
@@ -131,8 +131,7 @@ class ConnectionHandlerImpl
   void ConnectToAllDevices() OVERRIDE;
 
   void AddCloudAppDevice(const std::string& policy_app_id,
-                         const std::string& endpoint,
-                         const std::string& cloud_transport_type) OVERRIDE;
+                        const transport_manager::transport_adapter::CloudAppProperties cloud_properties) OVERRIDE;
 
   void StartTransportManager() OVERRIDE;
 

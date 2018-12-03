@@ -71,6 +71,21 @@ enum DeviceType {
   UNKNOWN
 };
 
+enum HybridAppPreference {  // todo find correct place for this enum defintion.
+  MOBILE,
+  CLOUD,
+  BOTH
+};
+
+struct CloudAppProperties {
+  std::string endpoint;
+  std::string certificate;
+  bool enabled;
+  std::string auth_token;
+  std::string cloud_transport_type;
+  std::string hybrid_app_preference;
+};
+
 typedef std::map<DeviceType, std::string> DeviceTypes;
 
 /**
@@ -89,6 +104,7 @@ typedef std::list<TransportAdapterListener*> TransportAdapterListenerList;
  */
 typedef std::map<std::string, std::string> TransportConfig;
 
+typedef std::map<std::string, CloudAppProperties> CloudAppTransportConfig;
 /**
  * @brief TransportConfig keys
  */
