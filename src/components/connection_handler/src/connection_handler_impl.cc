@@ -270,7 +270,6 @@ void ConnectionHandlerImpl::OnConnectionPending(
   LOG4CXX_DEBUG(logger_,
                 "Add Pending Connection #" << connection_id << " to the list.");
 
-  // todo maybe create a seperate "pending_connection_list"
   sync_primitives::AutoWriteLock lock(connection_list_lock_);
   if (connection_list_.find(connection_id) == connection_list_.end()) {
     Connection* connection =
@@ -284,7 +283,6 @@ void ConnectionHandlerImpl::OnConnectionPending(
 
     connection_handler::DeviceHandle device_id =
         connection->connection_device_handle();
-    // uint32_t app_id = KeyFromPair(connection_id, session_id);
 
     connection_handler_observer_->CreatePendingApplication(
         connection_id, device_info, device_id);

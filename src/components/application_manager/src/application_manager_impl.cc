@@ -816,8 +816,10 @@ void ApplicationManagerImpl::CollectCloudAppInformation() {
   std::string auth_token = "";
   std::string cloud_transport_type = "";
   std::string hybrid_app_preference = "";
+  bool enabled = true;
   for (; it != end; ++it) {
     GetPolicyHandler().GetCloudAppParameters(*it,
+                                             enabled,
                                              endpoint,
                                              certificate,
                                              auth_token,
@@ -842,7 +844,7 @@ void ApplicationManagerImpl::CreatePendingApplication(
   std::string auth_token = "";
   std::string cloud_transport_type = "";
   std::string hybrid_app_preference_str = "";
-
+  bool enabled = true;
   std::string name = device_info.name();
   auto it = pending_device_map_.find(name);
   if (it == pending_device_map_.end()) {
@@ -879,6 +881,7 @@ void ApplicationManagerImpl::CreatePendingApplication(
   }
 
   GetPolicyHandler().GetCloudAppParameters(policy_app_id,
+                                           enabled,
                                            endpoint,
                                            certificate,
                                            auth_token,

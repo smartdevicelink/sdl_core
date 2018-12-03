@@ -46,21 +46,28 @@ CloudDevice::CloudDevice(std::string& host,
 
 bool CloudDevice::IsSameAs(const Device* other) const {
   LOG4CXX_TRACE(logger_, "enter. device: " << other);
-  bool result = false;
-  return result;
+
+  const CloudDevice* other_cloud_device =
+      dynamic_cast<const CloudDevice*>(other);
+
+  if (host_ != other_cloud_device->GetHost()) {
+    return false;
+  }
+  if (port_ != other_cloud_device->GetPort()) {
+    return false;
+  }
+  return true;
 }
 
-// todo implement getApplicationList
-// to be populated by policies
 ApplicationList CloudDevice::GetApplicationList() const {
   return ApplicationList{0};
 }
 
-const std::string& CloudDevice::GetHost() {
+const std::string& CloudDevice::GetHost() const {
   return host_;
 }
 
-const std::string& CloudDevice::GetPort() {
+const std::string& CloudDevice::GetPort() const {
   return port_;
 }
 
