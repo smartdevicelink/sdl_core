@@ -18,6 +18,7 @@ SetCloudAppPropertiesRequest::SetCloudAppPropertiesRequest(
                          policy_handler) {}
 
 SetCloudAppPropertiesRequest::~SetCloudAppPropertiesRequest() {}
+
 void SetCloudAppPropertiesRequest::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
   ApplicationSharedPtr app = application_manager_.application(connection_key());
@@ -69,6 +70,7 @@ void SetCloudAppPropertiesRequest::Run() {
   }
 
   policy_handler_.OnSetCloudAppProperties(cloud_app_properties);
+
   SendResponse(true, mobile_apis::Result::SUCCESS);
 }
 
