@@ -49,8 +49,8 @@ namespace {
 /**
  * @brief Functor for build info string
  */
-struct InfoAdder : std::unary_function<const RPCParams::value_type&, void> {
-  explicit InfoAdder(std::string& info) : info_(info) {}
+struct InfoAppender {
+  explicit InfoAppender(std::string& info) : info_(info) {}
 
   void operator()(const RPCParams::value_type& parameter) {
     if (info_.empty()) {
@@ -662,12 +662,12 @@ bool CommandRequestImpl::CheckAllowedParameters() {
             app->app_id());
 
     if (!params.empty()) {
-      if (parameters_permissions_.IsDisallowedParamsIncluded(params)) {
+      if (parameters_permissions_.AreDisallowedParamsIncluded(params)) {
         const std::string info = "RPC is disallowed by the user";
         LOG4CXX_DEBUG(logger_, info);
         (*response)[strings::msg_params][strings::info] = info;
         AddDisallowedParameters(*response);
-      } else if (parameters_permissions_.IsUndefindedParamsIncluded(params)) {
+      } else if (parameters_permissions_.AreUndefinedParamsIncluded(params)) {
         const std::string info =
             "Requested parameters are disallowed by Policies";
 
@@ -818,11 +818,11 @@ void CommandRequestImpl::AddDisallowedParametersToInfo(
   }
 
   std::string disallowed_by_user_info;
-  InfoAdder user_info_adder(disallowed_by_user_info);
+  InfoAppender user_info_appender(disallowed_by_user_info);
 
   std::for_each(removed_parameters_permissions_.disallowed_params.begin(),
                 removed_parameters_permissions_.disallowed_params.end(),
-                user_info_adder);
+                user_info_appender);
 
   const size_t min_number_of_disallowed_params = 1;
   if (!disallowed_by_user_info.empty()) {
@@ -835,11 +835,11 @@ void CommandRequestImpl::AddDisallowedParametersToInfo(
   }
 
   std::string disallowed_by_policy_info;
-  InfoAdder policy_info_adder(disallowed_by_policy_info);
+  InfoAppender policy_info_appender(disallowed_by_policy_info);
 
   std::for_each(removed_parameters_permissions_.undefined_params.begin(),
                 removed_parameters_permissions_.undefined_params.end(),
-                policy_info_adder);
+                policy_info_appender);
 
   const size_t min_number_of_undefined_params = 1;
   if (!disallowed_by_policy_info.empty()) {

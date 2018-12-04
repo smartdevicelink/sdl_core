@@ -52,14 +52,14 @@ struct CommandParametersPermissions {
   RPCParams disallowed_params;
   RPCParams undefined_params;
 
-  bool IsDisallowedParamsIncluded(const RPCParams& parameters) {
+  bool AreDisallowedParamsIncluded(const RPCParams& parameters) {
     return std::includes(disallowed_params.begin(),
                          disallowed_params.end(),
                          parameters.begin(),
                          parameters.end());
   }
 
-  bool IsUndefindedParamsIncluded(const RPCParams& parameters) {
+  bool AreUndefinedParamsIncluded(const RPCParams& parameters) {
     return std::includes(undefined_params.begin(),
                          undefined_params.end(),
                          parameters.begin(),
