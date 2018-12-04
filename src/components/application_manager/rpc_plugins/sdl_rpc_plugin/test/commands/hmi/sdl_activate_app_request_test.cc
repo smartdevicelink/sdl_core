@@ -459,7 +459,7 @@ TEST_F(SDLActivateAppRequestTest, WaitingCloudApplication_ConnectDevice) {
   const uint16_t kRetries = 3;
   const uint32_t kRetryTimeout = 2000;
   const uint32_t kMinimumTimeout = kRetries * kRetryTimeout;
-  
+
   MockApplicationManagerSettings settings;
   EXPECT_CALL(settings, cloud_app_max_retry_attempts())
       .WillOnce(Return(kRetries));
@@ -467,14 +467,14 @@ TEST_F(SDLActivateAppRequestTest, WaitingCloudApplication_ConnectDevice) {
       .WillOnce(Return(kRetryTimeout));
   EXPECT_CALL(app_mngr_, get_settings()).WillOnce(ReturnRef(settings));
 
-  EXPECT_CALL(
-      app_mngr_,
-      updateRequestTimeout(0, kCorrelationID, Gt(kMinimumTimeout)));
+  EXPECT_CALL(app_mngr_,
+              updateRequestTimeout(0, kCorrelationID, Gt(kMinimumTimeout)));
 
   MockConnectionHandler connection_handler;
   EXPECT_CALL(connection_handler, ConnectToDevice(kHandle));
 
-  EXPECT_CALL(app_mngr_, connection_handler()).WillOnce(ReturnRef(connection_handler));
+  EXPECT_CALL(app_mngr_, connection_handler())
+      .WillOnce(ReturnRef(connection_handler));
 
   command->Run();
 }

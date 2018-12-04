@@ -807,6 +807,7 @@ void ApplicationManagerImpl::OnHMIStartedCooperation() {
 }
 
 void ApplicationManagerImpl::CollectCloudAppInformation() {
+  LOG4CXX_AUTO_TRACE(logger_);
   std::vector<std::string> cloud_app_id_vector;
   GetPolicyHandler().GetEnabledCloudApps(cloud_app_id_vector);
   std::vector<std::string>::iterator it = cloud_app_id_vector.begin();
@@ -3522,6 +3523,7 @@ void ApplicationManagerImpl::OnPTUFinished(const bool ptu_result) {
   if (!ptu_result) {
     return;
   }
+  CollectCloudAppInformation();
   auto on_app_policy_updated = [](plugin_manager::RPCPlugin& plugin) {
     plugin.OnPolicyEvent(plugin_manager::kApplicationPolicyUpdated);
   };
