@@ -390,6 +390,12 @@ class ApplicationManagerImpl
   hmi_apis::Common_DriverDistractionState::eType driver_distraction_state()
       const;
 
+  /**
+   * @brief Retrieves lock screen dismissal state (not_exists/disabled/enabled).
+   * @return Current lock screen dismissal state(not_exists/disable/enable).
+   */
+  LockScreenDismissalState lock_screen_dismissal_state() const;
+
   /*
    * @brief Sets state for driver distraction
    *
@@ -397,6 +403,13 @@ class ApplicationManagerImpl
    */
   void set_driver_distraction_state(
       const hmi_apis::Common_DriverDistractionState::eType state) OVERRIDE;
+
+  /**
+   * @brief Sets state for lock screen dismissal state (enabled/disabled).
+   * @param lock_screen_dismissal_enabled - New state to be set.
+   */
+  void set_lock_screen_dismissal_state(
+      const LockScreenDismissalState lock_screen_dismissal_state) OVERRIDE;
 
   /*
    * @brief Retrieves SDL access to all mobile apps
@@ -895,7 +908,6 @@ class ApplicationManagerImpl
 
   // typedef for Applications list
   typedef std::set<std::string> ForbiddenApps;
-
   struct AppIdPredicate {
     uint32_t app_id_;
     AppIdPredicate(uint32_t app_id) : app_id_(app_id) {}
@@ -1368,6 +1380,12 @@ class ApplicationManagerImpl
   sync_primitives::Lock audio_pass_thru_lock_;
   sync_primitives::Lock tts_global_properties_app_list_lock_;
   hmi_apis::Common_DriverDistractionState::eType driver_distraction_state_;
+
+  /**
+   * @brief This variable stores last LockScreenDismissalState state,
+   * which was sent from HMI.
+   */
+  LockScreenDismissalState lock_screen_dismissal_state_;
   bool is_vr_session_strated_;
   bool hmi_cooperating_;
   bool is_all_apps_allowed_;

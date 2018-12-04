@@ -4350,6 +4350,13 @@
     <param name="state" type="Common.DriverDistractionState" mandatory="true">
       <description>See DriverDistractionState. </description>
     </param>
+    <param name="lockScreenDismissalEnabled" type="Boolean" mandatory="false">
+      <description>
+      If enabled, the lock screen will be able to be dismissed while connected to SDL, allowing users
+      the ability to interact with the app. Dismissals should include a warning to the user and ensure
+      that they are not the driver.
+      </description>
+    </param>
   </function>
   <function name="SetAppIcon" messagetype="request">
     <description>Used to set existing local file on SYNC as the app's icon.</description>

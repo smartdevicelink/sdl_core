@@ -93,6 +93,7 @@ class StateControllerImpl;
 struct CommandParametersPermissions;
 using policy::RPCParams;
 typedef std::vector<ApplicationSharedPtr> AppSharedPtrs;
+enum class LockScreenDismissalState { kNotExists = -1, kDisabled, kEnabled };
 struct ApplicationsAppIdSorter {
   bool operator()(const ApplicationSharedPtr lhs,
                   const ApplicationSharedPtr rhs) const {
@@ -108,7 +109,6 @@ struct ApplicationsPolicyAppIdSorter {
     return lhs->policy_app_id() < rhs->policy_app_id();
   }
 };
-
 typedef std::set<ApplicationSharedPtr, ApplicationsAppIdSorter> ApplicationSet;
 
 typedef std::set<ApplicationSharedPtr, ApplicationsPolicyAppIdSorter>
@@ -488,6 +488,13 @@ class ApplicationManager {
    */
   virtual void set_driver_distraction_state(
       const hmi_apis::Common_DriverDistractionState::eType state) = 0;
+
+  /**
+   * @brief Sets state for lock screen dismissal state (enabled/disabled).
+   * @param lock_screen_dismissal_enabled - New state to be set.
+   */
+  virtual void set_lock_screen_dismissal_state(
+      const LockScreenDismissalState lock_screen_dismissal_enabled) = 0;
 
   /*
    * @brief Starts audio pass thru thread

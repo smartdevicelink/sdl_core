@@ -417,6 +417,7 @@ extern const char* GET;
 
 namespace mobile_notification {
 extern const char* state;
+extern const char* lock_screen_dismissal_enabled;
 extern const char* syncp_timeout;
 extern const char* syncp_url;
 }  // namespace mobile_notification
@@ -519,6 +520,7 @@ extern const char* prndl;
 extern const char* file_name;
 extern const char* system_context;
 extern const char* state;
+extern const char* lock_screen_dismissal_enabled;
 extern const char* result;
 extern const char* statistic_type;
 extern const char* error;
