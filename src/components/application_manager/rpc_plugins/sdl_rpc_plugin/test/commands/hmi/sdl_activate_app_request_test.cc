@@ -44,6 +44,7 @@
 #include "application_manager/event_engine/event.h"
 #include "application_manager/mock_event_dispatcher.h"
 #include "application_manager/mock_state_controller.h"
+#include "connection_handler/mock_connection_handler.h"
 
 namespace test {
 namespace components {

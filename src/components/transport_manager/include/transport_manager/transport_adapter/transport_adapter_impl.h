@@ -159,7 +159,11 @@ class TransportAdapterImpl : public TransportAdapter,
   ConnectionStatus GetConnectionStatus(
       const DeviceUID& device_handle) const OVERRIDE;
 
-  void ConnectionStatusUpdated() OVERRIDE;
+  /**
+   * @brief Notifies the application manager that a cloud connection status has
+   * updated and should trigger an UpdateAppList RPC to the HMI
+   */
+  void ConnectionStatusUpdated(DeviceSptr device, ConnectionStatus status);
 
   /**
    * @brief Disconnect from specified session.

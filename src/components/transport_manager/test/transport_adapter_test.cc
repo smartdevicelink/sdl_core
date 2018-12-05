@@ -359,7 +359,6 @@ TEST_F(TransportAdapterTest, ConnectDevice_DeviceAdded) {
   EXPECT_CALL(*serverMock, CreateConnection(uniq_id, app_handle))
       .WillOnce(Return(TransportAdapter::OK));
   EXPECT_CALL(transport_adapter, FindDevice(uniq_id)).WillOnce(Return(mockdev));
-  EXPECT_CALL(transport_adapter, ConnectionStatusUpdated());
   TransportAdapter::Error res = transport_adapter.ConnectDevice(uniq_id);
   EXPECT_EQ(TransportAdapter::OK, res);
   EXPECT_EQ(ConnectionStatus::CONNECTED, mockdev->connection_status());
@@ -372,7 +371,6 @@ TEST_F(TransportAdapterTest, ConnectDevice_DeviceAdded_ConnectFailedRetry) {
   MockTransportAdapterImpl transport_adapter(
       NULL, server_mock, NULL, last_state_, transport_manager_settings);
   SetDefaultExpectations(transport_adapter);
-  // transport_adapter.SetDeviceType(DeviceType::CLOUD_WEBSOCKET);
 
   EXPECT_CALL(*server_mock, Init()).WillOnce(Return(TransportAdapter::OK));
   EXPECT_CALL(transport_adapter, Restore()).WillOnce(Return(true));
@@ -396,7 +394,6 @@ TEST_F(TransportAdapterTest, ConnectDevice_DeviceAdded_ConnectFailedRetry) {
   EXPECT_CALL(transport_adapter, FindDevice(uniq_id)).WillOnce(Return(mockdev));
   EXPECT_CALL(transport_adapter, GetDeviceType())
       .WillOnce(Return(DeviceType::CLOUD_WEBSOCKET));
-  EXPECT_CALL(transport_adapter, ConnectionStatusUpdated());
   EXPECT_CALL(transport_manager_settings, cloud_app_max_retry_attempts())
       .WillOnce(Return(0));
   TransportAdapter::Error res = transport_adapter.ConnectDevice(uniq_id);
@@ -432,7 +429,6 @@ TEST_F(TransportAdapterTest, ConnectDevice_DeviceAddedTwice) {
   EXPECT_CALL(*serverMock, CreateConnection(uniq_id, app_handle))
       .WillOnce(Return(TransportAdapter::OK));
   EXPECT_CALL(transport_adapter, FindDevice(uniq_id)).WillOnce(Return(mockdev));
-  EXPECT_CALL(transport_adapter, ConnectionStatusUpdated());
   TransportAdapter::Error res = transport_adapter.ConnectDevice(uniq_id);
   EXPECT_EQ(TransportAdapter::OK, res);
   EXPECT_EQ(ConnectionStatus::CONNECTED, mockdev->connection_status());
@@ -444,7 +440,6 @@ TEST_F(TransportAdapterTest, ConnectDevice_DeviceAddedTwice) {
   EXPECT_CALL(*serverMock, IsInitialised()).WillOnce(Return(true));
   EXPECT_CALL(*serverMock, CreateConnection(uniq_id, app_handle)).Times(0);
   EXPECT_CALL(transport_adapter, FindDevice(uniq_id)).WillOnce(Return(mockdev));
-  EXPECT_CALL(transport_adapter, ConnectionStatusUpdated());
   TransportAdapter::Error newres = transport_adapter.ConnectDevice(uniq_id);
   EXPECT_EQ(TransportAdapter::OK, newres);
   EXPECT_EQ(ConnectionStatus::CONNECTED, mockdev->connection_status());
@@ -509,7 +504,7 @@ TEST_F(TransportAdapterTest, DisconnectDevice_DeviceAddedConnectionCreated) {
       .WillOnce(Return(TransportAdapter::OK));
   EXPECT_CALL(transport_adapter, FindDevice(uniq_id))
       .WillRepeatedly(Return(mockdev));
-  EXPECT_CALL(transport_adapter, ConnectionStatusUpdated());
+  // EXPECT_CALL(transport_adapter, ConnectionStatusUpdated(_, _));
   TransportAdapter::Error res = transport_adapter.ConnectDevice(uniq_id);
   EXPECT_EQ(TransportAdapter::OK, res);
   EXPECT_EQ(ConnectionStatus::CONNECTED, mockdev->connection_status());
@@ -520,7 +515,7 @@ TEST_F(TransportAdapterTest, DisconnectDevice_DeviceAddedConnectionCreated) {
   EXPECT_CALL(*mock_connection, Disconnect())
       .WillOnce(Return(TransportAdapter::OK));
 
-  EXPECT_CALL(transport_adapter, ConnectionStatusUpdated());
+  // EXPECT_CALL(transport_adapter, ConnectionStatusUpdated(_, _));
   TransportAdapter::Error new_res = transport_adapter.DisconnectDevice(uniq_id);
   EXPECT_EQ(TransportAdapter::OK, new_res);
   EXPECT_EQ(ConnectionStatus::CLOSING, mockdev->connection_status());
@@ -556,7 +551,6 @@ TEST_F(TransportAdapterTest, DeviceDisconnected) {
   EXPECT_CALL(*serverMock, IsInitialised()).WillOnce(Return(true));
   EXPECT_CALL(*serverMock, CreateConnection(uniq_id, app_handle))
       .WillOnce(Return(TransportAdapter::OK));
-  EXPECT_CALL(transport_adapter, ConnectionStatusUpdated());
   TransportAdapter::Error res = transport_adapter.ConnectDevice(uniq_id);
   EXPECT_EQ(TransportAdapter::OK, res);
   EXPECT_EQ(ConnectionStatus::CONNECTED, mockdev->connection_status());
