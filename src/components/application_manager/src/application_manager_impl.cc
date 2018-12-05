@@ -881,6 +881,12 @@ void ApplicationManagerImpl::CreatePendingApplication(
     return;
   }
 
+  const std::string app_icon_dir(settings_.app_icons_folder());
+  const std::string full_icon_path(app_icon_dir + "/" + policy_app_id);
+  if (file_system::FileExists(full_icon_path)) {
+    application->set_app_icon_path(full_icon_path);
+  }
+
   GetPolicyHandler().GetCloudAppParameters(policy_app_id,
                                            enabled,
                                            endpoint,
