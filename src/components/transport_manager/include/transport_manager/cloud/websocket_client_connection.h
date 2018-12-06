@@ -137,13 +137,15 @@ class WebsocketClientConnection
   boost::asio::io_context ioc_;
   ssl::context ctx_;
   tcp::resolver resolver_;
-  websocket::stream<ssl::stream<tcp::socket>> ws_;
+  websocket::stream<tcp::socket> ws_;
+  websocket::stream<ssl::stream<tcp::socket>> wss_;
   boost::beast::flat_buffer buffer_;
   std::string host_;
   std::string text_;
 
   std::atomic_bool shutdown_;
 
+  CloudAppProperties cloud_properties;
   typedef std::queue<protocol_handler::RawMessagePtr> FrameQueue;
   FrameQueue frames_to_send_;
   mutable sync_primitives::Lock frames_to_send_mutex_;
