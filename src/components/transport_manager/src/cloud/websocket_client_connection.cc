@@ -132,10 +132,8 @@ TransportAdapter::Error WebsocketClientConnection::Start() {
 
   LOG4CXX_DEBUG(logger_, "CLOUD_CONN_TCP");  
   
-  std::string cert = "-----BEGIN CERTIFICATE-----\nMIIDBjCCAe6gAwIBAgIJAOs  bkrgCZxgtMA0GCSqGSIb3DQEBCwUAMBgxFjAUBgNV\nBAMMDTE5Mi4xNjguMS4xMjgwHhcNMTgxMTI4MTgxNjQwWhcNMjExMTI3MTgxNjQw\nWjAYMRYwFAYDVQQDDA0xOTIuMTY4LjEuMTI4MIIBIjANBgkqhkiG9w0BAQEFAAOC\nAQ8AMIIBCgKCAQEAlVrHDi+XdO9fNMcknqs2Hn0AQjKQZAq0juy8r7gDqkzHw9zY\nFnfssIUzP7R6F1/80ulyjwUN6G+SI7phbivr2gmSdfkYiJVdwBKf611srIrNF/Eh\nllt/2sjwZNyTai4pzZv9/svix5nIVCHdKZD6wsxCFOdNhVJGBd9uQ4Pk1hQoW/jj\nsUF/NBUa49k31/IQiqQ6T1xQvSkEUYd1kstS7utO2V0Z9rHH4/+4HNyPMKipkCi2\n/7WuvQGDyHTnNUFmEANn4X06iQAVon9L8IVRcGwtgsWJ0fuVGK5POtU4m37Q35MW\n3RWF3OzyP/6PxRX5ljQFmkwGkqzHrNzOZN+zMQIDAQABo1MwUTAdBgNVHQ4EFgQU\nc1BN7ZNXq+OA5hT+vq1NOMoUrR8wHwYDVR0jBBgwFoAUc1BN7ZNXq+OA5hT+vq1N\nOMoUrR8wDwYDVR0TAQH/BAUwAwEB/zANBgkqhkiG9w0BAQsFAAOCAQEANBnwEOwM\nRynBmaRBBVZBxcWsaWQ6h7XETLSU+Pqrv2cm+g8pS1pFwc69OS5ER730UcCADlLv\n7Lu61m9kOxHuDzeQR5ofkVbFx1swUqSZt7GZvopVtwFeto4zUfAyVfCS6n6MGSvN\nWlathEg3mlXlAjtX1qEg1JzJ5DjowiPpJ2FZMsakJrF3Ju0D0Dskg0wgqZLKcHYC\ndV7bm2SpC7kfqeuSXIC8hbfolJBaysFRjIXXWwDhtW2i4KRDq4b54EVON2af6RD7\nbsOiY4Qt4Aw5UOE+DN/dbkXXNHKDWN/VN1MI9wGJiriXf4BWSJWgrrsXHkpzqmMj\nrHR2ik90MT9pkQ==\n-----END CERTIFICATE-----";
-
   if(cloud_properties.cloud_transport_type == "WSS"){
-    bool isAdded = AddCertificateAuthority(cert, ec);
+    bool isAdded = AddCertificateAuthority(cloud_properties.certificate, ec);
 
     if(isAdded){
       LOG4CXX_INFO(logger_, "Certificate Authority added successfully");
