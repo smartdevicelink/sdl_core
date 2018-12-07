@@ -53,18 +53,13 @@ CloudWebsocketTransportAdapter::CloudWebsocketTransportAdapter(
 
 CloudWebsocketTransportAdapter::~CloudWebsocketTransportAdapter() {}
 
-void CloudWebsocketTransportAdapter::SetAppCloudTransportConfig(std::string app_id, CloudAppProperties properties) {
+void CloudWebsocketTransportAdapter::SetAppCloudTransportConfig(
+    std::string app_id, CloudAppProperties properties) {
   transport_config_[app_id] = properties;
-  // LOG4CXX_DEBUG(logger_, "CLOUD_TRANS_ADP: " << app_id);
-  // LOG4CXX_DEBUG(logger_, "ENDPOINT: " << transport_config_[app_id].endpoint);
-  // LOG4CXX_DEBUG(logger_, "ENABLED: " << transport_config_[app_id].enabled);
-  // LOG4CXX_DEBUG(logger_, "CERTIFICATE: " << transport_config_[app_id].certificate);
-  // LOG4CXX_DEBUG(logger_, "AUTH_TOKEN: " << transport_config_[app_id].auth_token);
-  // LOG4CXX_DEBUG(logger_, "TRANSPORT_TYPE: " << transport_config_[app_id].cloud_transport_type);
-  // LOG4CXX_DEBUG(logger_, "HYBRID: " << transport_config_[app_id].hybrid_app_preference);
 }
 
-const CloudAppProperties& CloudWebsocketTransportAdapter::GetAppCloudTransportConfig(std::string app_id){
+const CloudAppProperties&
+CloudWebsocketTransportAdapter::GetAppCloudTransportConfig(std::string app_id) {
   return transport_config_[app_id];
 }
 
@@ -79,7 +74,6 @@ bool CloudWebsocketTransportAdapter::Restore() {
 }
 
 void CloudWebsocketTransportAdapter::CreateDevice(const std::string& uid) {
-  LOG4CXX_DEBUG(logger_, "CLOUD_DEBUG_CreateDevice: " << uid);
   boost::regex pattern(
       "(wss?):\\/\\/([A-Z\\d\\.-]{2,})\\.?([A-Z]{2,})?(:\\d{2,4})\\/",
       boost::regex::icase);
@@ -88,8 +82,6 @@ void CloudWebsocketTransportAdapter::CreateDevice(const std::string& uid) {
     LOG4CXX_DEBUG(logger_, "Invalid Endpoint: " << uid);
     return;
   }
-
-  LOG4CXX_DEBUG(logger_, "CLOUD_DEBUG_RegexMatchPassed");
 
   LOG4CXX_DEBUG(logger_, "Valid Endpoint: " << uid);
 
@@ -117,8 +109,6 @@ void CloudWebsocketTransportAdapter::CreateDevice(const std::string& uid) {
     return;
   }
 
-  LOG4CXX_DEBUG(logger_, "CLOUD_DEBUG_RegexSearchPassed");
-
   std::string device_id = uid;
 
   LOG4CXX_DEBUG(logger_,
@@ -127,9 +117,6 @@ void CloudWebsocketTransportAdapter::CreateDevice(const std::string& uid) {
 
   auto cloud_device = std::make_shared<CloudDevice>(host, port, device_id);
 
-  LOG4CXX_DEBUG(logger_, "CLOUD_DEBUG_CreatedCloudDevice: " << host << ", " << port << ", " << device_id);
-  
-
   DeviceVector devices{cloud_device};
 
   SearchDeviceDone(devices);
@@ -137,8 +124,6 @@ void CloudWebsocketTransportAdapter::CreateDevice(const std::string& uid) {
   // Create connection object, do not start until app is activated
   std::shared_ptr<WebsocketClientConnection> connection =
       std::make_shared<WebsocketClientConnection>(uid, 0, this);
-
-  LOG4CXX_DEBUG(logger_, "CLOUD_DEBUG_CreatedConnection");
 
   ConnectionCreated(connection, uid, 0);
   ConnectPending(uid, 0);

@@ -130,13 +130,15 @@ void TransportManagerImpl::ReconnectionTimeout() {
              device_to_reconnect_);
 }
 
-void TransportManagerImpl::AddCloudDevice(const transport_manager::transport_adapter::CloudAppProperties cloud_properties) {
+void TransportManagerImpl::AddCloudDevice(
+    const transport_manager::transport_adapter::CloudAppProperties
+        cloud_properties) {
   // todo put conversion into own function
-  LOG4CXX_DEBUG(logger_, "CLOUD_DEBUG_AddCloudDevice: " << cloud_properties.cloud_transport_type);
 
   transport_adapter::DeviceType type = transport_adapter::DeviceType::UNKNOWN;
-  if ((cloud_properties.cloud_transport_type == "WS") || (cloud_properties.cloud_transport_type == "WSS")) {
-    type = transport_adapter::DeviceType::CLOUD_WEBSOCKET;  
+  if ((cloud_properties.cloud_transport_type == "WS") ||
+      (cloud_properties.cloud_transport_type == "WSS")) {
+    type = transport_adapter::DeviceType::CLOUD_WEBSOCKET;
   } else {
     return;
   }
@@ -145,15 +147,10 @@ void TransportManagerImpl::AddCloudDevice(const transport_manager::transport_ada
   for (; ta != transport_adapters_.end(); ++ta) {
     if ((*ta)->GetDeviceType() == type) {
       (*ta)->CreateDevice(cloud_properties.endpoint);
-      transport_adapter::CloudWebsocketTransportAdapter* cta = static_cast<transport_adapter::CloudWebsocketTransportAdapter*>(*ta);
-      // LOG4CXX_DEBUG(logger_, "CLOUD_TRANS_MGR: ");
-      // LOG4CXX_DEBUG(logger_, "ENDPOINT: " << cloud_properties.endpoint);
-      // LOG4CXX_DEBUG(logger_, "ENABLED: " << cloud_properties.enabled);
-      // LOG4CXX_DEBUG(logger_, "CERTIFICATE: " << cloud_properties.certificate);
-      // LOG4CXX_DEBUG(logger_, "AUTH_TOKEN: " << cloud_properties.auth_token);
-      // LOG4CXX_DEBUG(logger_, "TRANSPORT_TYPE: " << cloud_properties.cloud_transport_type);
-      // LOG4CXX_DEBUG(logger_, "HYBRID: " << cloud_properties.hybrid_app_preference);      
-      cta->SetAppCloudTransportConfig(cloud_properties.endpoint, cloud_properties);
+      transport_adapter::CloudWebsocketTransportAdapter* cta =
+          static_cast<transport_adapter::CloudWebsocketTransportAdapter*>(*ta);
+      cta->SetAppCloudTransportConfig(cloud_properties.endpoint,
+                                      cloud_properties);
     }
   }
 

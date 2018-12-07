@@ -75,7 +75,9 @@ class TransportManager {
     **/
   virtual int SearchDevices() = 0;
 
-  virtual void AddCloudDevice(const transport_manager::transport_adapter::CloudAppProperties cloud_properties) = 0;
+  virtual void AddCloudDevice(
+      const transport_manager::transport_adapter::CloudAppProperties
+          cloud_properties) = 0;
 
   /**
    * @brief Connect to all applications discovered on device.

@@ -64,7 +64,8 @@ class CloudWebsocketTransportAdapter : public TransportAdapterImpl {
    * @param app_id app ID string
    * @param properties New cloud app properties for the app
    */
-  void SetAppCloudTransportConfig(std::string app_id, CloudAppProperties properties);
+  void SetAppCloudTransportConfig(std::string app_id,
+                                  CloudAppProperties properties);
 
   /**
    * @brief Get CloudTransportConfig for specified app_id
@@ -73,7 +74,6 @@ class CloudWebsocketTransportAdapter : public TransportAdapterImpl {
    * @return CloudAppProperties for the app
    */
   const CloudAppProperties& GetAppCloudTransportConfig(std::string app_id);
-
 
  protected:
   /**
@@ -98,7 +98,7 @@ class CloudWebsocketTransportAdapter : public TransportAdapterImpl {
   void CreateDevice(const std::string& uid) OVERRIDE;
 
  private:
- CloudAppTransportConfig transport_config_;
+  CloudAppTransportConfig transport_config_;
 };
 
 }  // namespace transport_adapter

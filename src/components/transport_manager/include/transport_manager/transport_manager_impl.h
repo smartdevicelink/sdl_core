@@ -139,7 +139,9 @@ class TransportManagerImpl
    **/
   int SearchDevices() OVERRIDE;
 
-  void AddCloudDevice(const transport_manager::transport_adapter::CloudAppProperties cloud_properties) OVERRIDE;
+  void AddCloudDevice(
+      const transport_manager::transport_adapter::CloudAppProperties
+          cloud_properties) OVERRIDE;
 
   /**
    * @brief Connect to all applications discovered on device.

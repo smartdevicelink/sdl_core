@@ -64,7 +64,7 @@ using ::utils::MessageQueue;
 typedef std::queue<protocol_handler::RawMessagePtr> AsyncQueue;
 typedef protocol_handler::RawMessagePtr Message;
 typedef websocket::stream<tcp::socket> WS;
-typedef websocket::stream<ssl::stream<tcp::socket>> WSS;
+typedef websocket::stream<ssl::stream<tcp::socket> > WSS;
 typedef std::shared_ptr<WS> WSptr;
 typedef std::shared_ptr<WSS> WSSptr;
 
@@ -125,7 +125,7 @@ class WebsocketClientConnection
 
   /**
    * @brief Attempt to add provided certificate to the ssl::context
-   * 
+   *
    * @param cert Certificate string from policy table
    * @return true if certificate was not invalid and was added successfully
    */
