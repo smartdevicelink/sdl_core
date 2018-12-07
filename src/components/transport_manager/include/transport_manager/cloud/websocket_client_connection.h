@@ -42,6 +42,7 @@
 #include <boost/asio/connect.hpp>
 #include <boost/asio/ip/tcp.hpp>
 #include <boost/asio/ssl/stream.hpp>
+#include <boost/variant.hpp>
 #include <cstdlib>
 #include <functional>
 #include <iostream>
@@ -62,6 +63,10 @@ using ::utils::MessageQueue;
 
 typedef std::queue<protocol_handler::RawMessagePtr> AsyncQueue;
 typedef protocol_handler::RawMessagePtr Message;
+typedef websocket::stream<tcp::socket> WS;
+typedef websocket::stream<ssl::stream<tcp::socket>> WSS;
+typedef std::shared_ptr<WS> WSptr;
+typedef std::shared_ptr<WSS> WSSptr;
 
 namespace transport_manager {
 namespace transport_adapter {
@@ -137,11 +142,10 @@ class WebsocketClientConnection
   boost::asio::io_context ioc_;
   ssl::context ctx_;
   tcp::resolver resolver_;
-  websocket::stream<tcp::socket> ws_;
-  websocket::stream<ssl::stream<tcp::socket>> wss_;
   boost::beast::flat_buffer buffer_;
   std::string host_;
   std::string text_;
+  boost::variant<WSptr, WSSptr> dynamic_ws_;
 
   std::atomic_bool shutdown_;
 
