@@ -127,9 +127,8 @@ class WebsocketClientConnection
    * @brief Attempt to add provided certificate to the ssl::context
    *
    * @param cert Certificate string from policy table
-   * @return true if certificate was not invalid and was added successfully
    */
-  bool AddCertificateAuthority(std::string cert, boost::system::error_code& ec);
+  void AddCertificateAuthority(std::string cert, boost::system::error_code& ec);
 
   void Shutdown();
 

@@ -53,9 +53,7 @@ WebsocketClientConnection::WebsocketClientConnection(
     , thread_delegate_(new LoopThreadDelegate(&message_queue_, this))
     , write_thread_(threads::CreateThread("WS Async Send", thread_delegate_))
     , device_uid_(device_uid)
-    , app_handle_(app_handle) {
-  LOG4CXX_DEBUG(logger_, "CLOUD_DEBUG_WEBSOCKETCLIENTCONNECTION");
-}
+    , app_handle_(app_handle) {}
 
 WebsocketClientConnection::~WebsocketClientConnection() {
   ioc_.stop();
@@ -64,22 +62,17 @@ WebsocketClientConnection::~WebsocketClientConnection() {
   }
 }
 
-bool WebsocketClientConnection::AddCertificateAuthority(
+void WebsocketClientConnection::AddCertificateAuthority(
     const std::string cert, boost::system::error_code& ec) {
   ctx_.add_certificate_authority(boost::asio::buffer(cert.data(), cert.size()),
                                  ec);
   if (ec) {
-    return false;
+    return;
   }
 
   boost::get<WSSptr>(dynamic_ws_)
       ->next_layer()
       .set_verify_mode(ssl::verify_peer);
-  if (ec) {
-    return false;
-  }
-
-  return true;
 }
 
 TransportAdapter::Error WebsocketClientConnection::Start() {
@@ -93,14 +86,18 @@ TransportAdapter::Error WebsocketClientConnection::Start() {
   auto const port = cloud_device->GetPort();
   boost::system::error_code ec;
 
-  LOG4CXX_DEBUG(logger_, "CLOUD_CONN_START");
-  LOG4CXX_DEBUG(logger_, "ENDPOINT: " << cloud_properties.endpoint);
-  LOG4CXX_DEBUG(logger_, "CERTIFICATE: " << cloud_properties.certificate);
-  LOG4CXX_DEBUG(logger_, "AUTH_TOKEN: " << cloud_properties.auth_token);
+  LOG4CXX_DEBUG(logger_, "Cloud app endpoint: " << cloud_properties.endpoint);
   LOG4CXX_DEBUG(logger_,
-                "TRANSPORT_TYPE: " << cloud_properties.cloud_transport_type);
+                "Cloud app certificate: " << cloud_properties.certificate);
+  LOG4CXX_DEBUG(
+      logger_,
+      "Cloud app authentication token: " << cloud_properties.auth_token);
+  LOG4CXX_DEBUG(
+      logger_,
+      "Cloud app transport type: " << cloud_properties.cloud_transport_type);
   LOG4CXX_DEBUG(logger_,
-                "HYBRID_APP_PREF: " << cloud_properties.hybrid_app_preference);
+                "Cloud app hybrid app preference: "
+                    << cloud_properties.hybrid_app_preference);
 
   auto const results = resolver_.resolve(host, port, ec);
   if (ec) {
@@ -109,8 +106,6 @@ TransportAdapter::Error WebsocketClientConnection::Start() {
     Shutdown();
     return TransportAdapter::FAIL;
   }
-
-  LOG4CXX_DEBUG(logger_, "CLOUD_CONN_RESOLVE");
 
   if (cloud_properties.cloud_transport_type == "WSS") {
     dynamic_ws_ = std::make_shared<WSS>(ioc_, ctx_);
@@ -140,16 +135,8 @@ TransportAdapter::Error WebsocketClientConnection::Start() {
     return TransportAdapter::FAIL;
   }
 
-  LOG4CXX_DEBUG(logger_, "CLOUD_CONN_TCP");
-
   if (cloud_properties.cloud_transport_type == "WSS") {
-    bool isAdded = AddCertificateAuthority(cloud_properties.certificate, ec);
-
-    if (isAdded) {
-      LOG4CXX_INFO(logger_, "Certificate Authority added successfully");
-    } else {
-      LOG4CXX_INFO(logger_, "Failed to add certificate authority");
-    }
+    AddCertificateAuthority(cloud_properties.certificate, ec);
 
     if (ec) {
       std::string str_err = "ErrorMessage: " + ec.message();
@@ -175,8 +162,6 @@ TransportAdapter::Error WebsocketClientConnection::Start() {
       Shutdown();
       return TransportAdapter::FAIL;
     }
-
-    LOG4CXX_DEBUG(logger_, "CLOUD_CONN_SSL");
   }
 
   // Perform websocket handshake
@@ -194,8 +179,6 @@ TransportAdapter::Error WebsocketClientConnection::Start() {
     Shutdown();
     return TransportAdapter::FAIL;
   }
-
-  LOG4CXX_DEBUG(logger_, "CLOUD_CONN_WEBSOCKET");
 
   // Set the binary message write option
   if (cloud_properties.cloud_transport_type == "WSS") {
