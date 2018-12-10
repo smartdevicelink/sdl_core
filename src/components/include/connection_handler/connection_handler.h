@@ -105,7 +105,7 @@ class ConnectionHandler {
 
   virtual void AddCloudAppDevice(
       const std::string& policy_app_id,
-      const transport_manager::transport_adapter::CloudAppProperties
+      const transport_manager::transport_adapter::CloudAppProperties&
           cloud_properties) = 0;
 
   /**
