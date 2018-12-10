@@ -58,18 +58,6 @@ class CloudWebsocketTransportAdapter : public TransportAdapterImpl {
    */
   virtual ~CloudWebsocketTransportAdapter();
 
-  /**
-   * @brief Notification that transport's configuration is updated
-   *
-   * @param new_config The new configuration of the transport
-   */
-  void CloudTransportConfigUpdated(const CloudAppTransportConfig& new_config);
-
-  /**
-   * @brief Returns the transport's configuration information
-   */
-  CloudAppTransportConfig GetCloudTransportConfiguration() const;
-
  protected:
   /**
    * @brief Return type of device.
@@ -93,14 +81,6 @@ class CloudWebsocketTransportAdapter : public TransportAdapterImpl {
   void CreateDevice(const std::string& uid) OVERRIDE;
 
  private:
-  /**
-   * @brief Keeps transport specific configuration
-   *
-   * Cloud websocket transport uses following information:
-   * - "enabled": whether the transport is currently enabled or not. Value can
-   *              be "true" or "false".
-   */
-  CloudAppTransportConfig transport_config_;
 };
 
 }  // namespace transport_adapter

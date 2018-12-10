@@ -807,6 +807,7 @@ void ApplicationManagerImpl::OnHMIStartedCooperation() {
 }
 
 void ApplicationManagerImpl::CollectCloudAppInformation() {
+  LOG4CXX_AUTO_TRACE(logger_);
   std::vector<std::string> cloud_app_id_vector;
   GetPolicyHandler().GetEnabledCloudApps(cloud_app_id_vector);
   std::vector<std::string>::iterator it = cloud_app_id_vector.begin();
@@ -816,8 +817,10 @@ void ApplicationManagerImpl::CollectCloudAppInformation() {
   std::string auth_token = "";
   std::string cloud_transport_type = "";
   std::string hybrid_app_preference = "";
+  bool enabled = true;
   for (; it != end; ++it) {
     GetPolicyHandler().GetCloudAppParameters(*it,
+                                             enabled,
                                              endpoint,
                                              certificate,
                                              auth_token,
@@ -842,7 +845,7 @@ void ApplicationManagerImpl::CreatePendingApplication(
   std::string auth_token = "";
   std::string cloud_transport_type = "";
   std::string hybrid_app_preference_str = "";
-
+  bool enabled = true;
   std::string name = device_info.name();
   auto it = pending_device_map_.find(name);
   if (it == pending_device_map_.end()) {
@@ -878,7 +881,14 @@ void ApplicationManagerImpl::CreatePendingApplication(
     return;
   }
 
+  const std::string app_icon_dir(settings_.app_icons_folder());
+  const std::string full_icon_path(app_icon_dir + "/" + policy_app_id);
+  if (file_system::FileExists(full_icon_path)) {
+    application->set_app_icon_path(full_icon_path);
+  }
+
   GetPolicyHandler().GetCloudAppParameters(policy_app_id,
+                                           enabled,
                                            endpoint,
                                            certificate,
                                            auth_token,
@@ -3546,6 +3556,7 @@ void ApplicationManagerImpl::OnPTUFinished(const bool ptu_result) {
   if (!ptu_result) {
     return;
   }
+  CollectCloudAppInformation();
   auto on_app_policy_updated = [](plugin_manager::RPCPlugin& plugin) {
     plugin.OnPolicyEvent(plugin_manager::kApplicationPolicyUpdated);
   };

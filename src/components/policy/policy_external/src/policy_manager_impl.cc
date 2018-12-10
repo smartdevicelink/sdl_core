@@ -730,19 +730,25 @@ void PolicyManagerImpl::GetEnabledCloudApps(
   cache_->GetEnabledCloudApps(enabled_apps);
 }
 
-const bool PolicyManagerImpl::GetCloudAppParameters(
+void PolicyManagerImpl::GetCloudAppParameters(
     const std::string& policy_app_id,
+    bool& enabled,
     std::string& endpoint,
     std::string& certificate,
     std::string& auth_token,
     std::string& cloud_transport_type,
     std::string& hybrid_app_preference) const {
-  return cache_->GetCloudAppParameters(policy_app_id,
-                                       endpoint,
-                                       certificate,
-                                       auth_token,
-                                       cloud_transport_type,
-                                       hybrid_app_preference);
+  cache_->GetCloudAppParameters(policy_app_id,
+                                enabled,
+                                endpoint,
+                                certificate,
+                                auth_token,
+                                cloud_transport_type,
+                                hybrid_app_preference);
+}
+
+void PolicyManagerImpl::InitCloudApp(const std::string& policy_app_id) {
+  cache_->InitCloudApp(policy_app_id);
 }
 
 void PolicyManagerImpl::SetCloudAppEnabled(const std::string& policy_app_id,

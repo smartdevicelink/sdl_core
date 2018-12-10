@@ -964,7 +964,7 @@ void ApplicationImpl::CleanupFiles() {
       application_manager_.get_settings().app_storage_folder();
   directory_name += "/" + folder_name();
 
-  if (file_system::DirectoryExists(directory_name)) {
+  if (file_system::DirectoryExists(directory_name) && !folder_name().empty()) {
     std::vector<std::string> files = file_system::ListFiles(directory_name);
     AppFilesMap::const_iterator app_files_it;
 

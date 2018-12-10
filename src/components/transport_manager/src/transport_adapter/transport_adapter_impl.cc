@@ -254,13 +254,11 @@ TransportAdapter::Error TransportAdapterImpl::ConnectDevice(
       // Update retry count
       if (device->retry_count() >=
           get_settings().cloud_app_max_retry_attempts()) {
-        device->set_connection_status(ConnectionStatus::PENDING);
         device->reset_retry_count();
-        ConnectionStatusUpdated();
+        ConnectionStatusUpdated(device, ConnectionStatus::PENDING);
         return err;
       } else if (device->connection_status() == ConnectionStatus::PENDING) {
-        device->set_connection_status(ConnectionStatus::RETRY);
-        ConnectionStatusUpdated();
+        ConnectionStatusUpdated(device, ConnectionStatus::RETRY);
       }
 
       device->next_retry();
@@ -275,8 +273,7 @@ TransportAdapter::Error TransportAdapterImpl::ConnectDevice(
       retry_timer->Start(get_settings().cloud_app_retry_timeout(),
                          timer::kSingleShot);
     } else if (OK == err) {
-      device->set_connection_status(ConnectionStatus::CONNECTED);
-      ConnectionStatusUpdated();
+      ConnectionStatusUpdated(device, ConnectionStatus::CONNECTED);
     }
     LOG4CXX_TRACE(logger_, "exit with error: " << err);
     return err;
@@ -330,7 +327,9 @@ ConnectionStatus TransportAdapterImpl::GetConnectionStatus(
                                  : device->connection_status();
 }
 
-void TransportAdapterImpl::ConnectionStatusUpdated() {
+void TransportAdapterImpl::ConnectionStatusUpdated(DeviceSptr device,
+                                                   ConnectionStatus status) {
+  device->set_connection_status(status);
   for (TransportAdapterListenerList::iterator it = listeners_.begin();
        it != listeners_.end();
        ++it) {
@@ -368,8 +367,7 @@ TransportAdapter::Error TransportAdapterImpl::DisconnectDevice(
 
   Error error = OK;
   DeviceSptr device = FindDevice(device_id);
-  device->set_connection_status(ConnectionStatus::CLOSING);
-  ConnectionStatusUpdated();
+  ConnectionStatusUpdated(device, ConnectionStatus::CLOSING);
 
   std::vector<ConnectionInfo> to_disconnect;
   connections_lock_.AcquireForReading();

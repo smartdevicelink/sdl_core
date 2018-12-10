@@ -53,23 +53,13 @@ CloudWebsocketTransportAdapter::CloudWebsocketTransportAdapter(
 
 CloudWebsocketTransportAdapter::~CloudWebsocketTransportAdapter() {}
 
-void CloudWebsocketTransportAdapter::CloudTransportConfigUpdated(
-    const CloudAppTransportConfig& new_config) {}
-
-CloudAppTransportConfig
-CloudWebsocketTransportAdapter::GetCloudTransportConfiguration() const {
-  return transport_config_;
-}
-
 DeviceType CloudWebsocketTransportAdapter::GetDeviceType() const {
   return CLOUD_WEBSOCKET;
 }
 
-void CloudWebsocketTransportAdapter::Store() const {
-}  // todo decide if this is needed
+void CloudWebsocketTransportAdapter::Store() const {}
 
-bool CloudWebsocketTransportAdapter::Restore() {  // todo decide if resumption
-                                                  // is needed
+bool CloudWebsocketTransportAdapter::Restore() {
   return true;
 }
 
@@ -115,7 +105,6 @@ void CloudWebsocketTransportAdapter::CreateDevice(const std::string& uid) {
                 "Creating Cloud Device For Host: " << host
                                                    << " and Port: " << port);
 
-  // todo get nickname from policies to name device
   auto cloud_device = std::make_shared<CloudDevice>(host, port, device_id);
 
   DeviceVector devices{cloud_device};
