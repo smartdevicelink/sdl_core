@@ -1472,11 +1472,18 @@ uint32_t get_hash_id(const ProtocolPacket& packet) {
     return HASH_ID_WRONG;
   }
   if (packet.protocol_version() >= PROTOCOL_VERSION_5) {
-    BsonObject obj = bson_object_from_bytes(packet.data());
-    const uint32_t hash_id =
-        (uint32_t)bson_object_get_int32(&obj, strings::hash_id);
-    bson_object_deinitialize(&obj);
-    return hash_id;
+    BsonObject obj;
+    size_t obj_size = bson_object_from_bytes_len(
+        &obj, packet.data(), packet.total_data_bytes());
+    if (obj_size > 0) {
+      const uint32_t hash_id =
+          (uint32_t)bson_object_get_int32(&obj, strings::hash_id);
+      bson_object_deinitialize(&obj);
+      return hash_id;
+    } else {
+      LOG4CXX_WARN(logger_, "Failed to parse BSON field for hash ID");
+      return HASH_ID_WRONG;
+    }
   } else {
     const uint32_t hash_be = *(reinterpret_cast<uint32_t*>(packet.data()));
     const uint32_t hash_le = BE_TO_LE32(hash_be);
@@ -1608,7 +1615,13 @@ RESULT_CODE ProtocolHandlerImpl::HandleControlMessageStartSession(
 
   BsonObject bson_obj;
   if (packet->data() != NULL) {
-    bson_obj = bson_object_from_bytes(packet->data());
+    size_t bson_obj_size = bson_object_from_bytes_len(
+        &bson_obj, packet->data(), packet->total_data_bytes());
+    if (bson_obj_size == 0) {
+      LOG4CXX_WARN(logger_,
+                   "Failed to parse BSON field of start service packet");
+      bson_object_initialize_default(&bson_obj);
+    }
   } else {
     bson_object_initialize_default(&bson_obj);
   }
@@ -1702,33 +1715,42 @@ void ProtocolHandlerImpl::NotifySessionStarted(
   // when video service is successfully started, copy input parameters
   // ("width", "height", "videoProtocol", "videoCodec") to the ACK packet
   if (packet->service_type() == kMobileNav && packet->data() != NULL) {
-    BsonObject req_param = bson_object_from_bytes(packet->data());
-    BsonElement* element = NULL;
+    BsonObject req_param;
+    size_t req_param_size = bson_object_from_bytes_len(
+        &req_param, packet->data(), packet->total_data_bytes());
+    if (req_param_size > 0) {
+      BsonElement* element = NULL;
 
-    if ((element = bson_object_get(&req_param, strings::height)) != NULL &&
-        element->type == TYPE_INT32) {
-      bson_object_put_int32(start_session_ack_params.get(),
-                            strings::height,
-                            bson_object_get_int32(&req_param, strings::height));
+      if ((element = bson_object_get(&req_param, strings::height)) != NULL &&
+          element->type == TYPE_INT32) {
+        bson_object_put_int32(
+            start_session_ack_params.get(),
+            strings::height,
+            bson_object_get_int32(&req_param, strings::height));
+      }
+      if ((element = bson_object_get(&req_param, strings::width)) != NULL &&
+          element->type == TYPE_INT32) {
+        bson_object_put_int32(
+            start_session_ack_params.get(),
+            strings::width,
+            bson_object_get_int32(&req_param, strings::width));
+      }
+      char* protocol =
+          bson_object_get_string(&req_param, strings::video_protocol);
+      if (protocol != NULL) {
+        bson_object_put_string(
+            start_session_ack_params.get(), strings::video_protocol, protocol);
+      }
+      char* codec = bson_object_get_string(&req_param, strings::video_codec);
+      if (codec != NULL) {
+        bson_object_put_string(
+            start_session_ack_params.get(), strings::video_codec, codec);
+      }
+      bson_object_deinitialize(&req_param);
+    } else {
+      LOG4CXX_WARN(logger_,
+                   "Failed to parse BSON field of start service (video)");
     }
-    if ((element = bson_object_get(&req_param, strings::width)) != NULL &&
-        element->type == TYPE_INT32) {
-      bson_object_put_int32(start_session_ack_params.get(),
-                            strings::width,
-                            bson_object_get_int32(&req_param, strings::width));
-    }
-    char* protocol =
-        bson_object_get_string(&req_param, strings::video_protocol);
-    if (protocol != NULL) {
-      bson_object_put_string(
-          start_session_ack_params.get(), strings::video_protocol, protocol);
-    }
-    char* codec = bson_object_get_string(&req_param, strings::video_codec);
-    if (codec != NULL) {
-      bson_object_put_string(
-          start_session_ack_params.get(), strings::video_codec, codec);
-    }
-    bson_object_deinitialize(&req_param);
   }
 
   std::shared_ptr<utils::SemanticVersion> fullVersion;
@@ -1737,16 +1759,24 @@ void ProtocolHandlerImpl::NotifySessionStarted(
   // could still be a payload, in which case we can get the real protocol
   // version
   if (packet->service_type() == kRpc && packet->data() != NULL) {
-    BsonObject request_params = bson_object_from_bytes(packet->data());
-    char* version_param =
-        bson_object_get_string(&request_params, strings::protocol_version);
-    std::string version_string(version_param == NULL ? "" : version_param);
-    fullVersion = std::make_shared<utils::SemanticVersion>(version_string);
-    // Constructed payloads added in Protocol v5
-    if (fullVersion->major_version_ < PROTOCOL_VERSION_5) {
-      rejected_params.push_back(std::string(strings::protocol_version));
+    BsonObject request_params;
+    size_t request_params_size = bson_object_from_bytes_len(
+        &request_params, packet->data(), packet->total_data_bytes());
+    if (request_params_size > 0) {
+      char* version_param =
+          bson_object_get_string(&request_params, strings::protocol_version);
+      std::string version_string(version_param == NULL ? "" : version_param);
+      fullVersion = std::make_shared<utils::SemanticVersion>(version_string);
+      // Constructed payloads added in Protocol v5
+      if (fullVersion->major_version_ < PROTOCOL_VERSION_5) {
+        rejected_params.push_back(std::string(strings::protocol_version));
+      }
+      bson_object_deinitialize(&request_params);
+    } else {
+      LOG4CXX_WARN(logger_,
+                   "Failed to parse start service packet for version string");
+      fullVersion = std::make_shared<utils::SemanticVersion>();
     }
-    bson_object_deinitialize(&request_params);
   } else {
     fullVersion = std::make_shared<utils::SemanticVersion>();
   }
