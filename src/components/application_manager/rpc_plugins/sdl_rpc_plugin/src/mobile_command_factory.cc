@@ -124,6 +124,8 @@
 #include "sdl_rpc_plugin/commands/mobile/dial_number_response.h"
 #include "sdl_rpc_plugin/commands/mobile/send_haptic_data_request.h"
 #include "sdl_rpc_plugin/commands/mobile/send_haptic_data_response.h"
+#include "sdl_rpc_plugin/commands/mobile/close_application_request.h"
+#include "sdl_rpc_plugin/commands/mobile/close_application_response.h"
 #include "interfaces/MOBILE_API.h"
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "ApplicationManager")
@@ -396,6 +398,12 @@ CommandCreator& MobileCommandFactory::get_creator_factory(
       using app_mngr::commands::Command;
       return factory.GetCreator<commands::GenericResponse>();
     }
+    case mobile_apis::FunctionID::CloseApplicationID: {
+      using app_mngr::commands::Command;
+      return Command::CommandSource::SOURCE_MOBILE == source
+                 ? factory.GetCreator<commands::CloseApplicationRequest>()
+                 : factory.GetCreator<commands::CloseApplicationResponse>();
+    } break;
     default: { return factory.GetCreator<InvalidCommand>(); }
   }
 }

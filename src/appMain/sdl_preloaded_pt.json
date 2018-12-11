@@ -58,6 +58,12 @@
                         "LIMITED",
                         "NONE"]
                     },
+                    "CloseApplication": {
+                        "hmi_levels": ["BACKGROUND",
+                        "FULL",
+                        "LIMITED",
+                        "NONE"]
+                    },
                     "CreateInteractionChoiceSet": {
                         "hmi_levels": ["BACKGROUND",
                         "FULL",
