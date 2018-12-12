@@ -265,6 +265,9 @@
                         "hmi_levels": ["BACKGROUND",
                         "FULL",
                         "LIMITED"]
+                    },
+                    "OnSeekMediaClockTimer": {
+                        "hmi_levels": ["FULL"]
                     }
                 }
             },
