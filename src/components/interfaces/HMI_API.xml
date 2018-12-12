@@ -4171,6 +4171,19 @@
   </function>
   <function name="DeleteSubMenu" messagetype="response">
   </function>
+  <function name="ShowAppMenu" messagetype="request">
+    <description>Request from SDL to show an apps menu or a corresponding sub-menu.</description>
+    <param name="menuID" type="Integer" minvalue="1" maxvalue="2000000000" mandatory="false">
+      <description>If ommited the HMI opens the apps menu.
+        If set to a sub-menu ID the HMI opens the corresponding sub-menu previously added using `AddSubMenu`.
+      </description>
+    </param>
+    <param name="appID" type="Integer" mandatory="true">
+      <description>ID of application that concerns this RPC.</description>
+    </param>
+  </function>
+  <function name="ShowAppMenu" messagetype="response">
+  </function>
   <function name="PerformInteraction" messagetype="request">
     <description>Request from SDL for triggering an interaction (e.g. "Permit GPS?" - Yes, no, Always Allow).</description>
     <param name="initialText" type="Common.TextFieldStruct" mandatory="false">
