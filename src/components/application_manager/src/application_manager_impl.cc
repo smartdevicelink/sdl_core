@@ -803,21 +803,25 @@ void ApplicationManagerImpl::OnHMIStartedCooperation() {
   rpc_service_->ManageHMICommand(mixing_audio_supported_request);
   resume_controller().ResetLaunchTime();
 
-  CollectCloudAppInformation();
+  RefreshCloudAppInformation();
 }
 
-void ApplicationManagerImpl::CollectCloudAppInformation() {
+void ApplicationManagerImpl::RefreshCloudAppInformation() {
   LOG4CXX_AUTO_TRACE(logger_);
-  std::vector<std::string> cloud_app_id_vector;
-  GetPolicyHandler().GetEnabledCloudApps(cloud_app_id_vector);
-  std::vector<std::string>::iterator it = cloud_app_id_vector.begin();
-  std::vector<std::string>::iterator end = cloud_app_id_vector.end();
+  std::vector<std::string> enabled_apps;
+  GetPolicyHandler().GetEnabledCloudApps(enabled_apps);
+  std::vector<std::string>::iterator it = enabled_apps.begin();
+  std::vector<std::string>::iterator end = enabled_apps.end();
   std::string endpoint = "";
   std::string certificate = "";
   std::string auth_token = "";
   std::string cloud_transport_type = "";
   std::string hybrid_app_preference = "";
   bool enabled = true;
+
+  // Store old device map and clear the current map
+  std::map<std::string, std::string> old_device_map = pending_device_map_;
+  pending_device_map_ = std::map<std::string, std::string>();
   for (; it != end; ++it) {
     GetPolicyHandler().GetCloudAppParameters(*it,
                                              enabled,
@@ -829,8 +833,55 @@ void ApplicationManagerImpl::CollectCloudAppInformation() {
 
     pending_device_map_.insert(
         std::pair<std::string, std::string>(endpoint, *it));
+    auto old_device = old_device_map.find(endpoint);
+    if (old_device_map.find(endpoint) != old_device_map.end()) {
+      old_device_map.erase(old_device);
+      continue;
+    }
 
     connection_handler().AddCloudAppDevice(*it, endpoint, cloud_transport_type);
+  }
+
+  int removed_app_count = 0;
+  // Clear out devices for existing cloud apps that were disabled
+  for (auto& device : old_device_map) {
+    std::string policy_app_id = device.second;
+    ApplicationSharedPtr app = application_by_policy_id(policy_app_id);
+    if (app.use_count() == 0) {
+      sync_primitives::AutoLock lock(apps_to_register_list_lock_ptr_);
+      PolicyAppIdPredicate finder(policy_app_id);
+      ApplicationSet::iterator it = std::find_if(
+          apps_to_register_.begin(), apps_to_register_.end(), finder);
+      if (it == apps_to_register_.end()) {
+        continue;
+      }
+      app = *it;
+      apps_to_register_.erase(it);
+    }
+    if (app.use_count() == 0) {
+      LOG4CXX_DEBUG(logger_,
+                    "Unable to find app to remove (" << policy_app_id
+                                                     << "), skipping");
+      continue;
+    }
+    if (app->IsRegistered() && app->is_cloud_app()) {
+      LOG4CXX_DEBUG(logger_, "Disabled app is registered, unregistering now");
+      GetRPCService().ManageMobileCommand(
+          MessageHelper::GetOnAppInterfaceUnregisteredNotificationToMobile(
+              app->app_id(),
+              mobile_api::AppInterfaceUnregisteredReason::APP_UNAUTHORIZED),
+          commands::Command::SOURCE_SDL);
+
+      OnAppUnauthorized(app->app_id());
+    }
+    connection_handler().RemoveCloudAppDevice(app->device());
+    removed_app_count++;
+  }
+
+  // Update app list if disabled apps were removed
+  if (removed_app_count > 0) {
+    LOG4CXX_DEBUG(logger_, "Removed " << removed_app_count << " disabled apps");
+    SendUpdateAppList();
   }
 }
 
@@ -3529,7 +3580,7 @@ void ApplicationManagerImpl::OnPTUFinished(const bool ptu_result) {
   if (!ptu_result) {
     return;
   }
-  CollectCloudAppInformation();
+  RefreshCloudAppInformation();
   auto on_app_policy_updated = [](plugin_manager::RPCPlugin& plugin) {
     plugin.OnPolicyEvent(plugin_manager::kApplicationPolicyUpdated);
   };

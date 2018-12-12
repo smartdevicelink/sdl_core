@@ -142,6 +142,8 @@ class TransportManagerImpl
   void AddCloudDevice(const std::string& endpoint,
                       const std::string& cloud_transport_type) OVERRIDE;
 
+  void RemoveCloudDevice(const DeviceHandle device_id) OVERRIDE;
+
   /**
    * @brief Connect to all applications discovered on device.
    *

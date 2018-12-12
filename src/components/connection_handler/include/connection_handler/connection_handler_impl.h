@@ -134,6 +134,8 @@ class ConnectionHandlerImpl
                          const std::string& endpoint,
                          const std::string& cloud_transport_type) OVERRIDE;
 
+  void RemoveCloudAppDevice(const DeviceHandle device_id) OVERRIDE;
+
   void StartTransportManager() OVERRIDE;
 
   void OnDeviceListUpdated(
