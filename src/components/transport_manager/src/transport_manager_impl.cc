@@ -151,7 +151,6 @@ void TransportManagerImpl::AddCloudDevice(
 
 void TransportManagerImpl::RemoveCloudDevice(const DeviceHandle device_handle) {
   DisconnectDevice(device_handle);
-  RemoveDevice(device_handle);
 }
 
 int TransportManagerImpl::ConnectDevice(const DeviceHandle device_handle) {
