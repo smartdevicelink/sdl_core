@@ -1,5 +1,7 @@
 #include "transport_manager/tcp/platform_specific/linux/platform_specific_network_interface_listener_impl.h"
 
+#include <algorithm>
+
 #include <arpa/inet.h>
 #include <asm/types.h>
 #include <errno.h>
@@ -486,9 +488,12 @@ void PlatformSpecificNetworkInterfaceListener::NotifyIPAddresses() {
   // note that if interface_name is empty (i.e. no interface is selected),
   // the IP addresses will be empty
   if (!interface_name.empty()) {
-    InterfaceStatusTable::iterator it = FindInterfaceStatus(interface_name);
+    InterfaceStatusTable::const_iterator it =
+        std::find_if(status_table_.begin(),
+                     status_table_.end(),
+                     NamePredicate(interface_name));
     if (status_table_.end() != it) {
-      InterfaceStatus& status = it->second;
+      const InterfaceStatus& status = it->second;
       ipv4_addr = status.GetIPv4Address();
       ipv6_addr = status.GetIPv6Address();
     }
@@ -516,14 +521,16 @@ const std::string PlatformSpecificNetworkInterfaceListener::SelectInterface() {
     return designated_interface_;
   }
 
-  InterfaceStatusTable::iterator it;
+  InterfaceStatusTable::const_iterator it;
 
   if (!selected_interface_.empty()) {
     // if current network interface is still available and has IP address, then
     // we use it
-    it = FindInterfaceStatus(selected_interface_);
+    it = std::find_if(status_table_.begin(),
+                      status_table_.end(),
+                      NamePredicate(selected_interface_));
     if (it != status_table_.end()) {
-      InterfaceStatus& status = it->second;
+      const InterfaceStatus& status = it->second;
       if (status.IsAvailable() && status.HasIPAddress()) {
         return selected_interface_;
       }
@@ -532,7 +539,7 @@ const std::string PlatformSpecificNetworkInterfaceListener::SelectInterface() {
 
   // pick a network interface that has IP address
   for (it = status_table_.begin(); it != status_table_.end(); ++it) {
-    InterfaceStatus& status = it->second;
+    const InterfaceStatus& status = it->second;
     // ignore loopback interfaces
     if (status.IsLoopback()) {
       continue;
@@ -550,20 +557,6 @@ const std::string PlatformSpecificNetworkInterfaceListener::SelectInterface() {
 
   selected_interface_ = "";
   return selected_interface_;
-}
-
-InterfaceStatusTable::iterator
-PlatformSpecificNetworkInterfaceListener::FindInterfaceStatus(
-    std::string ifname) {
-  for (InterfaceStatusTable::iterator it = status_table_.begin();
-       it != status_table_.end();
-       ++it) {
-    InterfaceStatus& status = it->second;
-    if (ifname == status.GetName()) {
-      return it;
-    }
-  }
-  return status_table_.end();
 }
 
 std::vector<PlatformSpecificNetworkInterfaceListener::EventParam>

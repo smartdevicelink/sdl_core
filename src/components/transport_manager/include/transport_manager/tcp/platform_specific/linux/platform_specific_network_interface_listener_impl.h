@@ -158,6 +158,17 @@ class PlatformSpecificNetworkInterfaceListener
         : if_index(interface_index), flags(interface_flags), address() {}
   };
 
+  // use with std::find_if() to search for an entry containing specified
+  // interface name
+  struct NamePredicate {
+    NamePredicate(const std::string& name) : name_(name) {}
+    bool operator()(
+        const std::pair<unsigned int, InterfaceStatus>& entry) const {
+      return entry.second.GetName() == name_;
+    }
+    const std::string& name_;
+  };
+
   // parent class which we will notify the events to
   TcpClientListener* tcp_client_listener_;
   // if configured, NetworkInterfaceListener will always look into the IP
@@ -194,8 +205,6 @@ class PlatformSpecificNetworkInterfaceListener
   // Select an appropriate network interface that we will get IP addresses. Also
   // update selected_interface_.
   const std::string SelectInterface();
-  // return an entry from status_table_ containing specified interface name
-  InterfaceStatusTable::iterator FindInterfaceStatus(std::string ifname);
   // convert ifaddrmsg to a list of EventParam structs
   std::vector<EventParam> ParseIFAddrMessage(struct ifaddrmsg* message,
                                              unsigned int size);
