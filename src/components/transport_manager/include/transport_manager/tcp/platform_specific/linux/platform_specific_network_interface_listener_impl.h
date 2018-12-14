@@ -32,7 +32,7 @@ class InterfaceStatus {
 
   bool IsAvailable() const;
   bool IsLoopback() const;
-  std::string GetName() const {
+  const std::string& GetName() const {
     return name_;
   }
   // only for debugging output
@@ -41,10 +41,10 @@ class InterfaceStatus {
   }
 
   bool HasIPAddress() const;
-  std::string GetIPv4Address() const;
-  std::string GetIPv6Address() const;
+  const std::string GetIPv4Address() const;
+  const std::string GetIPv6Address() const;
 
-  void SetName(std::string name) {
+  void SetName(const std::string& name) {
     name_ = name;
   }
 
@@ -53,8 +53,8 @@ class InterfaceStatus {
   }
 
   // specify NULL to remove existing address
-  void SetIPv4Address(struct in_addr* addr);
-  void SetIPv6Address(struct in6_addr* addr);
+  void SetIPv4Address(const struct in_addr* addr);
+  void SetIPv6Address(const struct in6_addr* addr);
 
  private:
   std::string name_;
@@ -65,6 +65,10 @@ class InterfaceStatus {
   struct in6_addr ipv6_address_;
 };
 
+/**
+ * @brief A map to store various status (IP addresses, status flags, etc.) of
+ *        network interfaces. Keys of the map are index numbers of interfaces.
+ */
 typedef std::map<unsigned int, InterfaceStatus> InterfaceStatusTable;
 
 /**
@@ -135,7 +139,9 @@ class PlatformSpecificNetworkInterfaceListener
     return selected_interface_;
   }
 
-  void SetDummyNameMap(std::map<unsigned int, std::string> m) {
+  // for testing only: overwrites if_indextoname() by registering a dummy
+  // index-to-name mapping table
+  void SetDummyNameMap(const std::map<unsigned int, std::string>& m) {
     dummy_name_map_ = m;
   }
 #endif  // BUILD_TESTS

@@ -49,7 +49,7 @@ class NetworkInterfaceListenerTest : public ::testing::Test {
     delete interface_listener_impl_;
   }
 
-  void SetDummyInterfaceTable(struct InterfaceEntry* entries) {
+  void SetDummyInterfaceTable(const struct InterfaceEntry* entries) {
     InterfaceStatusTable dummy_table;
     std::map<unsigned int, std::string> dummy_name_map;
 

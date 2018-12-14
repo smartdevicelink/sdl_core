@@ -38,7 +38,7 @@ bool InterfaceStatus::HasIPAddress() const {
   return has_ipv4_ || has_ipv6_;
 }
 
-std::string InterfaceStatus::GetIPv4Address() const {
+const std::string InterfaceStatus::GetIPv4Address() const {
   char buf[INET_ADDRSTRLEN] = "";
   if (has_ipv4_ && IsAvailable()) {
     inet_ntop(AF_INET, &ipv4_address_, buf, sizeof(buf));
@@ -46,7 +46,7 @@ std::string InterfaceStatus::GetIPv4Address() const {
   return std::string(buf);
 }
 
-std::string InterfaceStatus::GetIPv6Address() const {
+const std::string InterfaceStatus::GetIPv6Address() const {
   char buf[INET6_ADDRSTRLEN] = "";
   if (has_ipv6_ && IsAvailable()) {
     inet_ntop(AF_INET6, &ipv6_address_, buf, sizeof(buf));
@@ -54,7 +54,7 @@ std::string InterfaceStatus::GetIPv6Address() const {
   return std::string(buf);
 }
 
-void InterfaceStatus::SetIPv4Address(struct in_addr* addr) {
+void InterfaceStatus::SetIPv4Address(const struct in_addr* addr) {
   if (addr == NULL) {
     has_ipv4_ = false;
   } else {
@@ -63,7 +63,7 @@ void InterfaceStatus::SetIPv4Address(struct in_addr* addr) {
   }
 }
 
-void InterfaceStatus::SetIPv6Address(struct in6_addr* addr) {
+void InterfaceStatus::SetIPv6Address(const struct in6_addr* addr) {
   if (addr == NULL) {
     has_ipv6_ = false;
   } else {
@@ -420,7 +420,7 @@ bool PlatformSpecificNetworkInterfaceListener::UpdateStatus(
     InterfaceStatus& status = status_table_[it->if_index];
     switch (type) {
       case RTM_NEWLINK: {
-        std::string ifname = GetInterfaceName(it->if_index);
+        const std::string& ifname = GetInterfaceName(it->if_index);
         LOG4CXX_DEBUG(
             logger_,
             "netlink event: interface " << ifname << " created or updated");
