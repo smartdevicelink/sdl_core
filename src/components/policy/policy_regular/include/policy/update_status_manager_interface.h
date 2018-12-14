@@ -105,10 +105,10 @@ class UpdateStatusManagerInterface {
   virtual void OnNewApplicationAdded(DeviceConsent device_consent) = 0;
 
   /**
-   * @brief Update status handler for policy initialization
+   * @brief Update status handler on existed application registering
    * @param is_update_required Update necessity flag
    */
-  virtual void OnPolicyInit(bool is_update_required) = 0;
+  virtual void OnExistedApplicationAdded(const bool is_update_required) = 0;
 };
 
 typedef std::shared_ptr<UpdateStatusManagerInterface>

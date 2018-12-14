@@ -951,6 +951,7 @@ void PolicyHandler::OnVehicleDataUpdated(
 
 void PolicyHandler::OnPendingPermissionChange(
     const std::string& policy_app_id) {
+  LOG4CXX_AUTO_TRACE(logger_);
   LOG4CXX_DEBUG(logger_,
                 "PolicyHandler::OnPendingPermissionChange for "
                     << policy_app_id);
@@ -989,8 +990,6 @@ void PolicyHandler::OnPendingPermissionChange(
       if (permissions.appPermissionsConsentNeeded) {
         MessageHelper::SendOnAppPermissionsChangedNotification(
             app->app_id(), permissions, application_manager_);
-
-        policy_manager_->RemovePendingPermissionChanges(policy_app_id);
         // "Break" statement has to be here to continue processing in case of
         // there is another "true" flag in permissions struct
         break;
@@ -1000,8 +999,6 @@ void PolicyHandler::OnPendingPermissionChange(
       if (permissions.isAppPermissionsRevoked) {
         MessageHelper::SendOnAppPermissionsChangedNotification(
             app->app_id(), permissions, application_manager_);
-
-        policy_manager_->RemovePendingPermissionChanges(policy_app_id);
       }
       break;
     }
@@ -1022,15 +1019,14 @@ void PolicyHandler::OnPendingPermissionChange(
         commands::Command::SOURCE_SDL);
 
     application_manager_.OnAppUnauthorized(app->app_id());
-
-    policy_manager_->RemovePendingPermissionChanges(policy_app_id);
   }
 
   if (permissions.requestTypeChanged || permissions.requestSubTypeChanged) {
     MessageHelper::SendOnAppPermissionsChangedNotification(
         app->app_id(), permissions, application_manager_);
-    policy_manager_->RemovePendingPermissionChanges(policy_app_id);
   }
+
+  policy_manager_->RemovePendingPermissionChanges(policy_app_id);
 }
 
 bool PolicyHandler::SendMessageToSDK(const BinaryMessage& pt_string,

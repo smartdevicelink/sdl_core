@@ -589,6 +589,18 @@ class Application : public virtual InitialApplicationData,
    * @return flag tts_properties_in_full
    */
   virtual bool tts_properties_in_full() = 0;
+  /**
+   * @brief sets true if application should keep it's HMI Level after an audio
+   * source change
+   * @param value of keep context
+   */
+  virtual void set_keep_context(bool keep_context) = 0;
+  /**
+   * @brief  returns true if application should keep keep it's HMI Level after
+   * an audio source change, otherwise return false
+   * @return value of keep_context flag
+   */
+  virtual bool keep_context() = 0;
   virtual void set_version(const Version& version) = 0;
   virtual void set_name(const custom_str::CustomString& name) = 0;
   virtual void set_is_media_application(bool is_media) = 0;

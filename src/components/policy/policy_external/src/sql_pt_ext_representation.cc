@@ -874,30 +874,39 @@ bool SQLPTExtRepresentation::GatherApplicationPoliciesSection(
     *params.memory_kb = query.GetInteger(5);
     *params.heart_beat_timeout_ms = query.GetUInteger(6);
 
-    if (!GatherAppGroup(app_id, &params.groups)) {
+    const auto& gather_app_id = ((*policies).apps[app_id].is_string())
+                                    ? (*policies).apps[app_id].get_string()
+                                    : app_id;
+    // Data should be gathered from db by  "default" key if application has
+    // default policies
+
+    if (!GatherAppGroup(gather_app_id, &params.groups)) {
       return false;
     }
 
     bool denied = false;
-    if (!GatherRemoteControlDenied(app_id, &denied)) {
+    if (!GatherRemoteControlDenied(gather_app_id, &denied)) {
       return false;
     }
     if (!denied) {
-      if (!GatherModuleType(app_id, &*params.moduleType)) {
+      if (!GatherModuleType(gather_app_id, &*params.moduleType)) {
         return false;
       }
     }
 
-    if (!GatherNickName(app_id, &*params.nicknames)) {
+    if (!GatherNickName(gather_app_id, &*params.nicknames)) {
       return false;
     }
-    if (!GatherAppType(app_id, &*params.AppHMIType)) {
+    if (!GatherAppType(gather_app_id, &*params.AppHMIType)) {
       return false;
     }
-    if (!GatherRequestType(app_id, &*params.RequestType)) {
+    if (!GatherRequestType(gather_app_id, &*params.RequestType)) {
       return false;
     }
-    GatherPreconsentedGroup(app_id, &*params.preconsented_groups);
+    if (!GatherRequestSubType(gather_app_id, &*params.RequestSubType)) {
+      return false;
+    }
+    GatherPreconsentedGroup(gather_app_id, &*params.preconsented_groups);
     (*policies).apps[app_id] = params;
   }
   return true;

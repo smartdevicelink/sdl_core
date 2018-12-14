@@ -63,6 +63,11 @@ enum ApplicationEvent {
 class RPCPlugin {
  public:
   /**
+   * @brief Class destructor
+   */
+  virtual ~RPCPlugin() {}
+
+  /**
     * @brief Command initialization function
     * @param app_manager ApplicationManager
     * @param rpc_service RPCService

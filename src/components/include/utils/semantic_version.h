@@ -118,7 +118,8 @@ struct SemanticVersion {
   uint16_t patch_version_ = 0;
 };
 
-extern const SemanticVersion version_4_5;
+extern const SemanticVersion base_rpc_version;
+extern const SemanticVersion rpc_version_5;
 }
 
 #endif  // SRC_COMPONENTS_INCLUDE_UTILS_CALLABLE_H

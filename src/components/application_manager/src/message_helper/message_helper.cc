@@ -2521,6 +2521,7 @@ void MessageHelper::SendUpdateSDLResponse(const std::string& result,
 
 void MessageHelper::SendOnStatusUpdate(const std::string& status,
                                        ApplicationManager& app_mngr) {
+  LOG4CXX_AUTO_TRACE(logger_);
   smart_objects::SmartObjectSPtr message =
       std::make_shared<smart_objects::SmartObject>(
           smart_objects::SmartType_Map);
@@ -2533,6 +2534,7 @@ void MessageHelper::SendOnStatusUpdate(const std::string& status,
   (*message)[strings::params][strings::message_type] =
       MessageType::kNotification;
 
+  LOG4CXX_DEBUG(logger_, "Sending new status:" << status);
   (*message)[strings::msg_params]["status"] = status;
 
   app_mngr.GetRPCService().ManageHMICommand(message);

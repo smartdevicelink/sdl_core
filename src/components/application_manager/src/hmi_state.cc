@@ -209,16 +209,17 @@ mobile_apis::HMILevel::eType DeactivateHMI::hmi_level() const {
 
 AudioSource::AudioSource(std::shared_ptr<Application> app,
                          const ApplicationManager& app_mngr)
-    : HmiState(app, app_mngr, STATE_ID_AUDIO_SOURCE) {}
+    : HmiState(app, app_mngr, STATE_ID_AUDIO_SOURCE)
+    , keep_context_(app->keep_context()) {
+  app->set_keep_context(false);
+}
 
 mobile_apis::HMILevel::eType AudioSource::hmi_level() const {
   // Checking for NONE  is necessary to avoid issue during
   // calculation of HMI level during setting default HMI level
-  if (mobile_apis::HMILevel::HMI_NONE == parent()->hmi_level()) {
-    return mobile_apis::HMILevel::HMI_NONE;
-  }
-  if (mobile_apis::HMILevel::HMI_FULL == parent()->hmi_level()) {
-    return mobile_apis::HMILevel::HMI_FULL;
+  if (keep_context_ ||
+      mobile_apis::HMILevel::HMI_NONE == parent()->hmi_level()) {
+    return parent()->hmi_level();
   }
 
   return mobile_apis::HMILevel::HMI_BACKGROUND;

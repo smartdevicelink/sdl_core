@@ -267,6 +267,32 @@ ModuleCapability GetLightNameCapabilities(
                         capabilitiesStatus::missedLightName);
 }
 
+ModuleCapability GetRadioBandByCapabilities(
+    const smart_objects::SmartObject& capabilities_status,
+    const smart_objects::SmartObject& request_parameter) {
+  mobile_apis::RadioBand::eType radio_band =
+      static_cast<mobile_apis::RadioBand::eType>(request_parameter.asUInt());
+  if (mobile_apis::RadioBand::XM == radio_band) {
+    if (!capabilities_status.keyExists(strings::kSiriusxmRadioAvailable)) {
+      LOG4CXX_DEBUG(logger_,
+                    "Capability "
+                        << strings::kSiriusxmRadioAvailable
+                        << " is missed in RemoteControl capabilities");
+      return std::make_pair(strings::kSiriusxmRadioAvailable,
+                            capabilitiesStatus::missedParam);
+    }
+    if (!capabilities_status[strings::kSiriusxmRadioAvailable].asBool()) {
+      LOG4CXX_DEBUG(logger_,
+                    "Capability "
+                        << strings::kSiriusxmRadioAvailable
+                        << " is switched off in RemoteControl capabilities");
+      return std::make_pair(strings::kSiriusxmRadioAvailable,
+                            capabilitiesStatus::missedParam);
+    }
+  }
+  return std::make_pair("", capabilitiesStatus::success);
+}
+
 /**
  * @brief Check whether the exists light data related to correspondent
  * capabilities
@@ -303,40 +329,18 @@ ModuleCapability GetControlDataCapabilities(
 
       return light_capability;
     }
-
-    const capabilitiesStatus status_item_capability =
-        GetItemCapability(capabilities[0],
-                          mapping,
-                          request_parameter,
-                          mobile_apis::Result::UNSUPPORTED_RESOURCE);
-
-    if (capabilitiesStatus::success != status_item_capability) {
-      return std::make_pair("", status_item_capability);
+    if (message_params::kBand == request_parameter) {
+      ModuleCapability radio_capability = GetRadioBandByCapabilities(
+          capabilities, control_data[request_parameter]);
+      if (capabilitiesStatus::success != radio_capability.second) {
+        return radio_capability;
+      }
     }
-  }
 
-  return std::make_pair("", capabilitiesStatus::success);
-}
-
-/**
- * @brief Check whether the exists hmi data related to correspondent
- * capabilities
- * @param smart object of capabilities
- * @param smart object of control_data
- * @return pair of state and capability status - ModuleCapability
- */
-ModuleCapability GetHmiControlDataCapabilities(
-    const smart_objects::SmartObject& capabilities,
-    const smart_objects::SmartObject& control_data) {
-  LOG4CXX_AUTO_TRACE(logger_);
-  std::map<std::string, std::string> mapping =
-      GetModuleDataToCapabilitiesMapping();
-
-  for (auto it = control_data.map_begin(); it != control_data.map_end(); ++it) {
     const capabilitiesStatus status_item_capability =
         GetItemCapability(capabilities,
                           mapping,
-                          it->first,
+                          request_parameter,
                           mobile_apis::Result::UNSUPPORTED_RESOURCE);
 
     if (capabilitiesStatus::success != status_item_capability) {
@@ -376,12 +380,13 @@ ModuleCapability GetModuleDataCapabilities(
       const smart_objects::SmartObject& caps =
           rc_capabilities[capabilities_key];
 
-      if (message_params::kHmiSettingsControlData == module_data_key) {
-        module_data_capabilities =
-            GetHmiControlDataCapabilities(caps, module_data[module_data_key]);
-      } else {
+      if (message_params::kHmiSettingsControlData == module_data_key ||
+          message_params::kLightControlData == module_data_key) {
         module_data_capabilities =
             GetControlDataCapabilities(caps, module_data[module_data_key]);
+      } else {
+        module_data_capabilities =
+            GetControlDataCapabilities(caps[0], module_data[module_data_key]);
       }
     }
   }
@@ -389,16 +394,25 @@ ModuleCapability GetModuleDataCapabilities(
   return module_data_capabilities;
 }
 
-bool isModuleTypeAndDataMatch(const std::string& module_type,
-                              const smart_objects::SmartObject& module_data) {
+/**
+ * @brief Clears unrelated module data parameters
+ * @param module type in request
+ * @param smart object of module_data
+ * @return true if the correct module parameter is present, false otherwise
+ */
+bool ClearUnrelatedModuleData(const std::string& module_type,
+                              smart_objects::SmartObject& module_data) {
   LOG4CXX_AUTO_TRACE(logger_);
   const auto& all_module_types = RCHelpers::GetModulesList();
   const auto& data_mapping = RCHelpers::GetModuleTypeToDataMapping();
   bool module_type_and_data_match = false;
   for (const auto& type : all_module_types) {
+    const std::string module_key = data_mapping(type);
     if (type == module_type) {
-      module_type_and_data_match = module_data.keyExists(data_mapping(type));
-      break;
+      module_type_and_data_match = module_data.keyExists(module_key);
+    } else if (module_data.keyExists(module_key)) {
+      // Cutting unrelated module data
+      module_data.erase(module_key);
     }
   }
   return module_type_and_data_match;
@@ -440,7 +454,7 @@ void SetInteriorVehicleDataRequest::Execute() {
       (*message_)[app_mngr::strings::msg_params][message_params::kModuleData];
   const std::string module_type = ModuleType();
 
-  if (isModuleTypeAndDataMatch(module_type, module_data)) {
+  if (ClearUnrelatedModuleData(module_type, module_data)) {
     const smart_objects::SmartObject* rc_capabilities =
         hmi_capabilities_.rc_capability();
     ModuleCapability module_data_capabilities;
@@ -488,7 +502,8 @@ void SetInteriorVehicleDataRequest::Execute() {
       CutOffReadOnlyParams(module_data);
     }
 
-    application_manager_.RemoveHMIFakeParameters(message_);
+    application_manager_.RemoveHMIFakeParameters(
+        message_, hmi_apis::FunctionID::RC_SetInteriorVehicleData);
 
     app_mngr::ApplicationSharedPtr app =
         application_manager_.application(connection_key());
@@ -500,13 +515,20 @@ void SetInteriorVehicleDataRequest::Execute() {
         module_data[message_params::kAudioControlData].keyExists(
             message_params::kSource);
 
-    if (app_wants_to_set_audio_src && !app->IsAllowedToChangeAudioSource()) {
-      LOG4CXX_WARN(logger_, "App is not allowed to change audio source");
-      SetResourceState(ModuleType(), ResourceState::FREE);
-      SendResponse(false,
-                   mobile_apis::Result::REJECTED,
-                   "App is not allowed to change audio source");
-      return;
+    if (app_wants_to_set_audio_src) {
+      if (!app->IsAllowedToChangeAudioSource()) {
+        LOG4CXX_WARN(logger_, "App is not allowed to change audio source");
+        SetResourceState(ModuleType(), ResourceState::FREE);
+        SendResponse(false,
+                     mobile_apis::Result::REJECTED,
+                     "App is not allowed to change audio source");
+        return;
+      } else if (module_data[message_params::kAudioControlData].keyExists(
+                     message_params::kKeepContext)) {
+        app->set_keep_context(
+            module_data[message_params::kAudioControlData]
+                       [message_params::kKeepContext].asBool());
+      }
     }
 
     SendHMIRequest(hmi_apis::FunctionID::RC_SetInteriorVehicleData,
@@ -549,6 +571,10 @@ void SetInteriorVehicleDataRequest::on_event(
           *message_)[app_mngr::strings::msg_params][message_params::kModuleData]
                     [message_params::kAudioControlData]);
     }
+  } else {
+    app_mngr::ApplicationSharedPtr app =
+        application_manager_.application(connection_key());
+    app->set_keep_context(false);
   }
   std::string info;
   GetInfo(hmi_response, info);
@@ -574,27 +600,10 @@ const smart_objects::SmartObject& SetInteriorVehicleDataRequest::ControlData(
 void SetInteriorVehicleDataRequest::CheckAudioSource(
     const smart_objects::SmartObject& audio_data) {
   LOG4CXX_AUTO_TRACE(logger_);
-  const bool should_keep_context =
-      audio_data.keyExists(message_params::kKeepContext) &&
-      audio_data[message_params::kKeepContext].asBool();
-  const bool switch_source_from_app =
-      mobile_apis::PrimaryAudioSource::MOBILE_APP ==
-          application_manager_.get_current_audio_source() &&
-      mobile_apis::PrimaryAudioSource::MOBILE_APP !=
-          audio_data[message_params::kSource].asInt();
-  if (!should_keep_context && switch_source_from_app) {
-    app_mngr::ApplicationSharedPtr app =
-        application_manager_.application(connection_key());
-    if (app->mobile_projection_enabled()) {
-      application_manager_.ChangeAppsHMILevel(
-          app->app_id(), mobile_apis::HMILevel::eType::HMI_LIMITED);
-    } else {
-      application_manager_.ChangeAppsHMILevel(
-          app->app_id(), mobile_apis::HMILevel::eType::HMI_BACKGROUND);
-    }
+  if (audio_data.keyExists(message_params::kSource)) {
+    application_manager_.set_current_audio_source(
+        audio_data[message_params::kSource].asUInt());
   }
-  application_manager_.set_current_audio_source(
-      audio_data[message_params::kSource].asUInt());
 }
 
 bool SetInteriorVehicleDataRequest::AreAllParamsReadOnly(

@@ -287,42 +287,6 @@ TEST_F(UpdateStatusManagerTest, ScheduleUpdate_ExpectStatusUpdateNeeded) {
 }
 
 TEST_F(UpdateStatusManagerTest,
-       OnPolicyInit_SetUpdateRequired_ExpectStatusUpdateNeeded) {
-  // Arrange
-  manager_->OnPolicyInit(true);
-  status_ = manager_->GetLastUpdateStatus();
-  // Checks
-  EXPECT_EQ(StatusUpdateRequired, status_);
-  EXPECT_FALSE(manager_->IsUpdatePending());
-  EXPECT_TRUE(manager_->IsUpdateRequired());
-}
-
-TEST_F(UpdateStatusManagerTest,
-       OnPolicyInit_SetUpdateNotRequired_ExpectStatusUpToDate) {
-  // Arrange
-  manager_->OnPolicyInit(false);
-  status_ = manager_->GetLastUpdateStatus();
-  // Checks
-  EXPECT_EQ(StatusUpToDate, status_);
-  EXPECT_FALSE(manager_->IsUpdatePending());
-  EXPECT_FALSE(manager_->IsUpdateRequired());
-}
-
-TEST_F(UpdateStatusManagerTest,
-       StringifiedUpdateStatus_SetStatuses_ExpectCorrectStringifiedStatuses) {
-  // Arrange
-  manager_->OnPolicyInit(false);
-  // Check
-  EXPECT_EQ("UP_TO_DATE", manager_->StringifiedUpdateStatus());
-  manager_->OnPolicyInit(true);
-  // Check
-  EXPECT_EQ("UPDATE_NEEDED", manager_->StringifiedUpdateStatus());
-  manager_->OnUpdateSentOut(k_timeout_);
-  // Check
-  EXPECT_EQ("UPDATING", manager_->StringifiedUpdateStatus());
-}
-
-TEST_F(UpdateStatusManagerTest,
        OnAppSearchStartedCompleted_ExpectAppSearchCorrectStatus) {
   // Arrange
   manager_->OnAppsSearchStarted();

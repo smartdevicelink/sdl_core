@@ -2880,7 +2880,8 @@ TEST_F(StateControllerImplTest,
   state_ctrl_->SetRegularState(navi_app_, hmi_state, true);
 }
 
-TEST_F(StateControllerImplTest, OnEventChangedAudioSourceAppRemainInFull) {
+TEST_F(StateControllerImplTest,
+       OnEventChangedAudioSource_KeepContext_AppRemainInFull) {
   const uint32_t app_id = simple_app_->app_id();
   InsertApplication(simple_app_);
   smart_objects::SmartObject msg;
@@ -2894,10 +2895,12 @@ TEST_F(StateControllerImplTest, OnEventChangedAudioSourceAppRemainInFull) {
   am::event_engine::Event event(event_id);
   event.set_smart_object(msg);
 
+  EXPECT_CALL(*simple_app_ptr_, keep_context()).WillOnce(Return(true));
   EXPECT_CALL(*simple_app_ptr_, IsAudioApplication())
       .WillRepeatedly(Return(true));
   EXPECT_CALL(*simple_app_ptr_, CurrentHmiState())
       .WillOnce(Return(FullAudibleState()));
+  EXPECT_CALL(*simple_app_ptr_, set_keep_context(false));
 
   HmiStatePtr new_state;
   EXPECT_CALL(*simple_app_ptr_, AddHMIState(_))

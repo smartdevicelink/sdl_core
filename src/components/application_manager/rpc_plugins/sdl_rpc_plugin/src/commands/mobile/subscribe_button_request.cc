@@ -77,7 +77,7 @@ void SubscribeButtonRequest::Run() {
     return;
   }
 
-  if (app->msg_version() <= utils::version_4_5 &&
+  if (app->msg_version() < utils::rpc_version_5 &&
       btn_id == mobile_apis::ButtonName::OK && app->is_media_application()) {
     bool ok_supported = CheckHMICapabilities(mobile_apis::ButtonName::OK);
     bool play_pause_supported =

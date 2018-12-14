@@ -36,6 +36,7 @@
 
 #include "utils/lock.h"
 #include "utils/logger.h"
+#include <boost/exception/diagnostic_information.hpp>
 
 namespace {
 const long kNanosecondsPerSecond = 1000000000;
@@ -62,23 +63,27 @@ void ConditionalVariable::Broadcast() {
 bool ConditionalVariable::Wait(BaseLock& lock) {
   // NOTE this grossness is due to boost mutex and recursive mutex not sharing a
   // superclass
-
-  lock.AssertTakenAndMarkFree();
-  // What kind of lock are we ?
-  if (Lock* test_lock = dynamic_cast<Lock*>(&lock)) {
-    // Regular lock
-    cond_var_.wait<boost::mutex>(test_lock->mutex_);
-  } else if (RecursiveLock* test_rec_lock =
-                 dynamic_cast<RecursiveLock*>(&lock)) {
-    // Recursive lock
-    cond_var_.wait<boost::recursive_mutex>(test_rec_lock->mutex_);
-  } else {
-    // unknown, give up the lock
-    LOG4CXX_ERROR(logger_, "Unknown lock type!");
+  try {
+    lock.AssertTakenAndMarkFree();
+    // What kind of lock are we ?
+    if (Lock* test_lock = dynamic_cast<Lock*>(&lock)) {
+      // Regular lock
+      cond_var_.wait<boost::mutex>(test_lock->mutex_);
+    } else if (RecursiveLock* test_rec_lock =
+                   dynamic_cast<RecursiveLock*>(&lock)) {
+      // Recursive lock
+      cond_var_.wait<boost::recursive_mutex>(test_rec_lock->mutex_);
+    } else {
+      // unknown, give up the lock
+      LOG4CXX_ERROR(logger_, "Unknown lock type!");
+      NOTREACHED();
+    }
+    lock.AssertFreeAndMarkTaken();
+  } catch (const boost::exception& error) {
+    std::string error_string = boost::diagnostic_information(error);
+    LOG4CXX_FATAL(logger_, error_string);
     NOTREACHED();
   }
-  lock.AssertFreeAndMarkTaken();
-
   return true;
 }
 
@@ -92,31 +97,37 @@ ConditionalVariable::WaitStatus ConditionalVariable::WaitFor(
   BaseLock& lock = auto_lock.GetLock();
 
   WaitStatus wait_status = kNoTimeout;
-  lock.AssertTakenAndMarkFree();
-  bool timeout = true;
+  try {
+    lock.AssertTakenAndMarkFree();
+    bool timeout = true;
 
-  // What kind of lock are we ?
-  if (Lock* test_lock = dynamic_cast<Lock*>(&lock)) {
-    // Regular lock
-    // cond_var_.wait<boost::mutex>(test_lock->mutex_);
-    timeout = cond_var_.timed_wait<boost::mutex>(
-        test_lock->mutex_, boost::posix_time::milliseconds(milliseconds));
-  } else if (RecursiveLock* test_rec_lock =
-                 dynamic_cast<RecursiveLock*>(&lock)) {
-    // Recursive lock
-    // cond_var_.wait<boost::recursive_mutex>(test_rec_lock->mutex_);
-    timeout = cond_var_.timed_wait<boost::recursive_mutex>(
-        test_rec_lock->mutex_, boost::posix_time::milliseconds(milliseconds));
-  } else {
-    // this is an unknown lock, we have an issue
-    LOG4CXX_ERROR(logger_, "Unknown lock type!");
+    // What kind of lock are we ?
+    if (Lock* test_lock = dynamic_cast<Lock*>(&lock)) {
+      // Regular lock
+      // cond_var_.wait<boost::mutex>(test_lock->mutex_);
+      timeout = cond_var_.timed_wait<boost::mutex>(
+          test_lock->mutex_, boost::posix_time::milliseconds(milliseconds));
+    } else if (RecursiveLock* test_rec_lock =
+                   dynamic_cast<RecursiveLock*>(&lock)) {
+      // Recursive lock
+      // cond_var_.wait<boost::recursive_mutex>(test_rec_lock->mutex_);
+      timeout = cond_var_.timed_wait<boost::recursive_mutex>(
+          test_rec_lock->mutex_, boost::posix_time::milliseconds(milliseconds));
+    } else {
+      // this is an unknown lock, we have an issue
+      LOG4CXX_ERROR(logger_, "Unknown lock type!");
+      NOTREACHED();
+    }
+
+    if (!timeout) {
+      wait_status = kTimeout;
+    }
+    lock.AssertFreeAndMarkTaken();
+  } catch (const boost::exception& error) {
+    std::string error_string = boost::diagnostic_information(error);
+    LOG4CXX_FATAL(logger_, error_string);
     NOTREACHED();
   }
-
-  if (!timeout) {
-    wait_status = kTimeout;
-  }
-  lock.AssertFreeAndMarkTaken();
 
   return wait_status;
 }

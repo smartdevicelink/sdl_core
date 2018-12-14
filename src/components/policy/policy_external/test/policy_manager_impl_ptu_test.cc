@@ -113,27 +113,27 @@ TEST_F(PolicyManagerImplTest2, GetNotificationsNumberAfterPTUpdate) {
   EXPECT_TRUE(policy_manager_->LoadPT(kFilePtUpdateJson, msg));
   EXPECT_FALSE(policy_manager_->GetCache()->IsPTPreloaded());
 
-  std::string priority = "emergency";
+  std::string priority = "EMERGENCY";
   uint32_t notif_number = policy_manager_->GetNotificationsNumber(priority);
   EXPECT_EQ(1u, notif_number);
 
-  priority = "navigation";
+  priority = "NAVIGATION";
   notif_number = policy_manager_->GetNotificationsNumber(priority);
   EXPECT_EQ(2u, notif_number);
 
-  priority = "emergency";
+  priority = "EMERGENCY";
   notif_number = policy_manager_->GetNotificationsNumber(priority);
   EXPECT_EQ(1u, notif_number);
 
-  priority = "VOICECOMM";
+  priority = "VOICECOM";
   notif_number = policy_manager_->GetNotificationsNumber(priority);
   EXPECT_EQ(3u, notif_number);
 
-  priority = "normal";
+  priority = "NORMAL";
   notif_number = policy_manager_->GetNotificationsNumber(priority);
   EXPECT_EQ(5u, notif_number);
 
-  priority = "none";
+  priority = "NONE";
   notif_number = policy_manager_->GetNotificationsNumber(priority);
   EXPECT_EQ(6u, notif_number);
 }

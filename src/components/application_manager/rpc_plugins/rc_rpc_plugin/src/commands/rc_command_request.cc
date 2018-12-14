@@ -52,6 +52,7 @@ RCCommandRequest::RCCommandRequest(
           params.hmi_capabilities_,
           params.policy_handler_)
     , is_subscribed(false)
+    , auto_allowed_(false)
     , resource_allocation_manager_(params.resource_allocation_manager_)
     , interior_data_cache_(params.interior_data_cache_)
     , interior_data_manager_(params.interior_data_manager_) {}

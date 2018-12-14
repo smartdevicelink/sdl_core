@@ -299,9 +299,20 @@ void CheckAppPolicy::AddResult(const std::string& app_id,
   out_results_.insert(std::make_pair(app_id, result));
 }
 
+void CheckAppPolicy::InsertPermission(const std::string& app_id,
+                                      const AppPermissions& permissions_diff) {
+  pm_->app_permissions_diff_lock_.Acquire();
+  auto result = pm_->app_permissions_diff_.insert(
+      std::make_pair(app_id, permissions_diff));
+  if (!result.second) {
+    LOG4CXX_ERROR(logger_, "App ID: " << app_id << " already exists in map.");
+  }
+  pm_->app_permissions_diff_lock_.Release();
+}
+
 bool CheckAppPolicy::operator()(const AppPoliciesValueType& app_policy) {
   const std::string app_id = app_policy.first;
-
+  AppPermissions permissions_diff(app_id);
   if (!IsKnownAppication(app_id)) {
     LOG4CXX_WARN(logger_,
                  "Application:" << app_id << " is not present in snapshot.");
@@ -309,14 +320,17 @@ bool CheckAppPolicy::operator()(const AppPoliciesValueType& app_policy) {
   }
 
   if (!IsPredefinedApp(app_policy) && IsAppRevoked(app_policy)) {
-    SetPendingPermissions(app_policy, RESULT_APP_REVOKED);
+    SetPendingPermissions(app_policy, RESULT_APP_REVOKED, permissions_diff);
     AddResult(app_id, RESULT_APP_REVOKED);
+    InsertPermission(app_id, permissions_diff);
     return true;
   }
 
   if (!IsPredefinedApp(app_policy) && !NicknamesMatch(app_policy)) {
-    SetPendingPermissions(app_policy, RESULT_NICKNAME_MISMATCH);
+    SetPendingPermissions(
+        app_policy, RESULT_NICKNAME_MISMATCH, permissions_diff);
     AddResult(app_id, RESULT_NICKNAME_MISMATCH);
+    InsertPermission(app_id, permissions_diff);
     return true;
   }
 
@@ -328,14 +342,20 @@ bool CheckAppPolicy::operator()(const AppPoliciesValueType& app_policy) {
     if (is_request_type_changed) {
       LOG4CXX_TRACE(logger_,
                     "Request types were changed for application: " << app_id);
-      SetPendingPermissions(app_policy, RESULT_REQUEST_TYPE_CHANGED);
+      SetPendingPermissions(
+          app_policy, RESULT_REQUEST_TYPE_CHANGED, permissions_diff);
       AddResult(app_id, RESULT_REQUEST_TYPE_CHANGED);
+      result =
+          (RESULT_NO_CHANGES == result) ? RESULT_REQUEST_TYPE_CHANGED : result;
     }
     if (is_request_subtype_changed) {
       LOG4CXX_TRACE(
           logger_, "Request subtypes were changed for application: " << app_id);
-      SetPendingPermissions(app_policy, RESULT_REQUEST_SUBTYPE_CHANGED);
+      SetPendingPermissions(
+          app_policy, RESULT_REQUEST_SUBTYPE_CHANGED, permissions_diff);
       AddResult(app_id, RESULT_REQUEST_SUBTYPE_CHANGED);
+      result = (RESULT_NO_CHANGES == result) ? RESULT_REQUEST_SUBTYPE_CHANGED
+                                             : result;
     }
   }
 
@@ -352,19 +372,20 @@ bool CheckAppPolicy::operator()(const AppPoliciesValueType& app_policy) {
                                               << " have been changed.");
 
   if (!IsPredefinedApp(app_policy)) {
-    SetPendingPermissions(app_policy, result);
+    SetPendingPermissions(app_policy, result, permissions_diff);
     AddResult(app_id, result);
   }
 
+  InsertPermission(app_id, permissions_diff);
   return true;
 }
 
 void policy::CheckAppPolicy::SetPendingPermissions(
     const AppPoliciesValueType& app_policy,
-    PermissionsCheckResult result) const {
+    PermissionsCheckResult result,
+    AppPermissions& permissions_diff) const {
   using namespace rpc::policy_table_interface_base;
   const std::string app_id = app_policy.first;
-  AppPermissions permissions_diff(app_id);
 
   const std::string priority =
       policy_table::EnumToJsonString(app_policy.second.priority);
@@ -421,10 +442,6 @@ void policy::CheckAppPolicy::SetPendingPermissions(
   if (need_send_priority) {
     permissions_diff.priority = priority;
   }
-
-  pm_->app_permissions_diff_lock_.Acquire();
-  pm_->app_permissions_diff_.insert(std::make_pair(app_id, permissions_diff));
-  pm_->app_permissions_diff_lock_.Release();
 }
 
 PermissionsCheckResult CheckAppPolicy::CheckPermissionsChanges(

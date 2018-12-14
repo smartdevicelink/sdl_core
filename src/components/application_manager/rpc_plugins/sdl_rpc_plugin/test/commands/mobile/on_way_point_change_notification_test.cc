@@ -98,7 +98,7 @@ MATCHER(CheckMessageData, "") {
 
 TEST_F(OnWayPointChangeNotificationTest,
        Run_NotEmptyListOfAppsSubscribedForWayPoints_SUCCESS) {
-  std::set<int32_t> apps_subscribed_for_way_points;
+  std::set<uint32_t> apps_subscribed_for_way_points;
   apps_subscribed_for_way_points.insert(kAppId);
 
   EXPECT_CALL(app_mngr_, GetAppsSubscribedForWayPoints())
