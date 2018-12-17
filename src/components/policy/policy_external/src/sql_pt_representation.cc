@@ -552,6 +552,9 @@ void SQLPTRepresentation::GatherModuleConfig(
     *config->vehicle_year = query.GetString(7);
     *config->preloaded_date = query.GetString(8);
     *config->certificate = query.GetString(9);
+    if (!query.IsNull(10)) {
+      *config->lock_screen_dismissal_enabled = query.GetBoolean(10);
+    }
   }
 
   utils::dbms::SQLQuery endpoints(db());
@@ -1267,6 +1270,17 @@ bool SQLPTRepresentation::SaveModuleConfig(
       : query.Bind(8);
   config.certificate.is_initialized() ? query.Bind(9, *(config.certificate))
                                       : query.Bind(9);
+  LOG4CXX_WARN(logger_,
+               "AKUTSAN isi ninted "
+                   << config.lock_screen_dismissal_enabled.is_initialized());
+
+  if (config.lock_screen_dismissal_enabled.is_initialized()) {
+    LOG4CXX_WARN(logger_, "AKUTSAN bind val");
+    query.Bind(10, *(config.lock_screen_dismissal_enabled));
+  } else {
+    LOG4CXX_WARN(logger_, "AKUTSAN bind null");
+    query.Bind(10);
+  }
 
   if (!query.Exec()) {
     LOG4CXX_WARN(logger_, "Incorrect update module config");

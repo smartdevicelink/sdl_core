@@ -243,6 +243,7 @@ struct ModuleConfig : CompositeType {
   Optional<String<4, 4> > vehicle_year;
   Optional<String<0, 10> > preloaded_date;
   Optional<String<0, 65535> > certificate;
+  Optional<Boolean> lock_screen_dismissal_enabled;
 
  public:
   ModuleConfig();

@@ -304,6 +304,7 @@ struct ModuleConfig : CompositeType {
   Optional<String<0, 65535> > certificate;
   Optional<Boolean> preloaded_pt;
   Optional<Boolean> full_app_id_supported;
+  Optional<Boolean> lock_screen_dismissal_enabled;
 
  public:
   ModuleConfig();
