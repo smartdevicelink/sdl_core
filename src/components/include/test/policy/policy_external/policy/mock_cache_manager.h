@@ -110,6 +110,8 @@ class MockCacheManagerInterface : public ::policy::CacheManagerInterface {
            policy_table::AppServiceParameters* app_service_parameters));
   MOCK_CONST_METHOD1(UnknownRPCPassthroughAllowed,
                      bool(const std::string& policy_app_id));
+  MOCK_CONST_METHOD0(LockScreenDismissalEnabledState,
+                     const boost::optional<bool>());
   MOCK_CONST_METHOD1(GetDeviceConsent,
                      DeviceConsent(const std::string& device_id));
   MOCK_METHOD2(SetDeviceConsent,

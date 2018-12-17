@@ -401,6 +401,17 @@ void PolicyManagerImpl::CheckPermissionsChanges(
                 CheckAppPolicy(this, pt_update, snapshot));
 }
 
+void PolicyManagerImpl::CheckPermissionsChangesAfterUpdate(
+    const policy_table::Table& update, const policy_table::Table& snapshot) {
+  const auto new_lock_screen_dismissal_enabled =
+      update.policy_table.module_config.lock_screen_dismissal_enabled;
+  const auto old_lock_screen_dismissal_enabled =
+      snapshot.policy_table.module_config.lock_screen_dismissal_enabled;
+  if (new_lock_screen_dismissal_enabled != old_lock_screen_dismissal_enabled) {
+    listener()->OnLockScreenDismissalStateChanged();
+  }
+}
+
 void PolicyManagerImpl::PrepareNotificationData(
     const policy_table::FunctionalGroupings& groups,
     const policy_table::Strings& group_names,
@@ -1066,6 +1077,11 @@ void PolicyManagerImpl::KmsChanged(int kilometers) {
     update_status_manager_.ScheduleUpdate();
     StartPTExchange();
   }
+}
+
+const boost::optional<bool> PolicyManagerImpl::LockScreenDismissalEnabledState()
+    const {
+  return cache_->LockScreenDismissalEnabledState();
 }
 
 void PolicyManagerImpl::IncrementIgnitionCycles() {
