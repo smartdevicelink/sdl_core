@@ -35,11 +35,13 @@
 
 #include <string>
 #include <vector>
+#include "boost/optional.hpp"
 
 #include "policy/policy_settings.h"
 #include "policy/policy_table/types.h"
 #include "policy/policy_types.h"
 #include "policy/usage_statistics/counter.h"
+#include "utils/optional.h"
 
 namespace policy_table = rpc::policy_table_interface_base;
 
@@ -253,6 +255,15 @@ class CacheManagerInterface {
    */
   virtual bool UnknownRPCPassthroughAllowed(
       const std::string& policy_app_id) const = 0;
+
+  /**
+   * @brief Returns state of the lock screen that could be able to be dismissed
+   * while connected to SDL, allowing users the ability to interact with the
+   * app.
+   * @return bool True if lock screen can be dismissed.
+   */
+  virtual const boost::optional<bool> LockScreenDismissalEnabledState()
+      const = 0;
 
   /**
    * @brief Allows to update 'vin' field in module_meta table.

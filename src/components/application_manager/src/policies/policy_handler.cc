@@ -1574,6 +1574,12 @@ void PolicyHandler::OnSystemReady() {
   policy_manager_->OnSystemReady();
 }
 
+const boost::optional<bool> PolicyHandler::LockScreenDismissalEnabledState()
+    const {
+  POLICY_LIB_CHECK(boost::optional<bool>());
+  return policy_manager_->LockScreenDismissalEnabledState();
+}
+
 void PolicyHandler::PTUpdatedAt(Counters counter, int value) {
   POLICY_LIB_CHECK_VOID();
   policy_manager_->PTUpdatedAt(counter, value);

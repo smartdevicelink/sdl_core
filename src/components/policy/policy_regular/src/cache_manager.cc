@@ -856,6 +856,22 @@ bool CacheManager::UnknownRPCPassthroughAllowed(
   return false;
 }
 
+const boost::optional<bool> CacheManager::LockScreenDismissalEnabledState()
+    const {
+  LOG4CXX_AUTO_TRACE(logger_);
+  boost::optional<bool> empty;
+  CACHE_MANAGER_CHECK(empty);
+  sync_primitives::AutoLock auto_lock(cache_lock_);
+  policy_table::ModuleConfig& module_config = pt_->policy_table.module_config;
+  if (module_config.lock_screen_dismissal_enabled.is_initialized()) {
+    LOG4CXX_TRACE(logger_,
+                  "state = " << *module_config.lock_screen_dismissal_enabled);
+    return boost::optional<bool>(*module_config.lock_screen_dismissal_enabled);
+  }
+  LOG4CXX_TRACE(logger_, "state = empty");
+  return empty;
+}
+
 std::vector<UserFriendlyMessage> CacheManager::GetUserFriendlyMsg(
     const std::vector<std::string>& msg_codes, const std::string& language) {
   LOG4CXX_AUTO_TRACE(logger_);

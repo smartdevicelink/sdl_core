@@ -35,6 +35,7 @@
 
 #include <cstdint>
 #include <vector>
+#include "boost/optional.hpp"
 
 #include "policy/access_remote.h"
 #include "policy/cache_manager_interface.h"
@@ -43,6 +44,7 @@
 #include "policy/policy_types.h"
 #include "policy/usage_statistics/statistics_manager.h"
 #include "utils/callable.h"
+#include "utils/optional.h"
 
 namespace policy {
 class PolicySettings;
@@ -163,6 +165,15 @@ class PolicyManager : public usage_statistics::StatisticsManager {
    * @return true if exceeded
    */
   virtual void KmsChanged(int kilometers) = 0;
+
+  /**
+   * @brief Returns state of the lock screen that could be able to be dismissed
+   * while connected to SDL, allowing users the ability to interact with the
+   * app.
+   * @return bool True if lock screen can be dismissed.
+   */
+  virtual const boost::optional<bool> LockScreenDismissalEnabledState()
+      const = 0;
 
   /**
    * @brief Increments counter of ignition cycles

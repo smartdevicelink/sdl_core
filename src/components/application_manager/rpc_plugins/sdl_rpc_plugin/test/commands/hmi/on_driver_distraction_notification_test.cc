@@ -65,7 +65,17 @@ class HMIOnDriverDistractionNotificationTest
     : public CommandsTest<CommandsTestMocks::kIsNice> {
  public:
   HMIOnDriverDistractionNotificationTest()
-      : app_set_lock_(std::make_shared<sync_primitives::Lock>()) {}
+      : mock_app_(CreateMockApp())
+      , app_set_lock_(std::make_shared<sync_primitives::Lock>())
+      , accessor(app_set_, app_set_lock_) {
+    app_set_.insert(mock_app_);
+    InitMocksRelations();
+  }
+
+  typedef std::shared_ptr<OnDriverDistractionNotification> NotificationPtr;
+  typedef boost::optional<bool> OptionalBool;
+
+  MockAppPtr mock_app_;
   std::shared_ptr<sync_primitives::Lock> app_set_lock_;
   policy_test::MockPolicyHandlerInterface mock_policy_handler_interface_;
 };
@@ -128,14 +138,8 @@ TEST_F(HMIOnDriverDistractionNotificationTest,
   NotificationPtr command(
       CreateCommand<OnDriverDistractionNotification>(commands_msg));
 
-  EXPECT_CALL(app_mngr_, set_driver_distraction_state(Eq(state)));
-
-  MockAppPtr mock_app = CreateMockApp();
-  am::ApplicationSet app_set;
-  app_set.insert(mock_app);
-
-  DataAccessor<am::ApplicationSet> accessor(app_set, app_set_lock_);
-  EXPECT_CALL(app_mngr_, applications()).WillOnce(Return(accessor));
+  ON_CALL(mock_policy_handler_interface_, LockScreenDismissalEnabledState())
+      .WillByDefault(Return(boost::optional<bool>()));
 
   policy::CheckPermissionResult result;
   result.hmi_level_permitted = policy::kRpcAllowed;
