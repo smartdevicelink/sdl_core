@@ -525,7 +525,9 @@ void SQLPTRepresentation::GatherModuleConfig(
     *config->vehicle_make = query.GetString(6);
     *config->vehicle_model = query.GetString(7);
     *config->vehicle_year = query.GetString(8);
-    *config->preloaded_date = query.GetString(9);
+    if (!query.IsNull(9)) {
+      *config->lock_screen_dismissal_enabled = query.GetBoolean(9);
+    }
   }
 
   utils::dbms::SQLQuery endpoints(db());
@@ -1225,6 +1227,9 @@ bool SQLPTRepresentation::SaveModuleConfig(
                                         : query.Bind(7);
   config.vehicle_year.is_initialized() ? query.Bind(8, *(config.vehicle_year))
                                        : query.Bind(8);
+  config.lock_screen_dismissal_enabled.is_initialized()
+      ? query.Bind(9, *(config.lock_screen_dismissal_enabled))
+      : query.Bind(9);
   if (!query.Exec()) {
     LOG4CXX_WARN(logger_, "Incorrect update module config");
     return false;

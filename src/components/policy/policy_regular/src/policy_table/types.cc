@@ -472,7 +472,9 @@ ModuleConfig::ModuleConfig(const Json::Value* value__)
     , vehicle_model(impl::ValueMember(value__, "vehicle_model"))
     , vehicle_year(impl::ValueMember(value__, "vehicle_year"))
     , preloaded_date(impl::ValueMember(value__, "preloaded_date"))
-    , certificate(impl::ValueMember(value__, "certificate")) {}
+    , certificate(impl::ValueMember(value__, "certificate"))
+    , lock_screen_dismissal_enabled(
+          impl::ValueMember(value__, "lock_screen_dismissal_enabled")) {}
 
 void ModuleConfig::SafeCopyFrom(const ModuleConfig& from) {
   //  device_certificates = from.device_certificates;  // According to the
@@ -485,6 +487,8 @@ void ModuleConfig::SafeCopyFrom(const ModuleConfig& from) {
   endpoints = from.endpoints;
   notifications_per_minute_by_priority =
       from.notifications_per_minute_by_priority;
+
+  lock_screen_dismissal_enabled = from.lock_screen_dismissal_enabled;
 
   vehicle_make.assign_if_valid(from.vehicle_make);
   vehicle_model.assign_if_valid(from.vehicle_model);
