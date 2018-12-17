@@ -159,6 +159,14 @@ class CacheManager : public CacheManagerInterface {
   virtual const VehicleInfo GetVehicleInfo() const;
 
   /**
+   * @brief Returns state of the lock screen that could be able to be dismissed
+   * while connected to SDL, allowing users the ability to interact with the
+   * app.
+   * @return bool True if lock screen is able to be dismissed.
+   */
+  const utils::OptionalVal<bool> LockScreenDismissalEnabledState() const OVERRIDE;
+
+  /**
    * @brief Allows to update 'vin' field in module_meta table.
    *
    * @param new 'vin' value.

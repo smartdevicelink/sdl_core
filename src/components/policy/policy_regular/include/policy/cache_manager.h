@@ -41,6 +41,7 @@
 #include "utils/threads/thread.h"
 #include "utils/threads/thread_delegate.h"
 
+
 #include "utils/lock.h"
 #include "utils/conditional_variable.h"
 #include "policy/policy_types.h"
@@ -145,6 +146,14 @@ class CacheManager : public CacheManagerInterface {
    * @brief Get information about vehicle
    */
   virtual const VehicleInfo GetVehicleInfo() const;
+
+  /**
+   * @brief Returns state of the lock screen that could be able to be dismissed
+   * while connected to SDL, allowing users the ability to interact with the
+   * app.
+   * @return bool True if lock screen is able to be dismissed.
+   */
+  const utils::OptionalVal<bool> LockScreenDismissalEnabledState() const OVERRIDE;
 
   /**
    * @brief Allows to update 'vin' field in module_meta table.

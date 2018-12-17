@@ -1600,6 +1600,11 @@ void PolicyHandler::OnSystemReady() {
   policy_manager_->OnSystemReady();
 }
 
+const utils::OptionalVal<bool> PolicyHandler::LockScreenDismissalEnabledState() const {
+  POLICY_LIB_CHECK(false);
+  return policy_manager_->LockScreenDismissalEnabledState();
+}
+
 void PolicyHandler::PTUpdatedAt(Counters counter, int value) {
   POLICY_LIB_CHECK_VOID();
   policy_manager_->PTUpdatedAt(counter, value);

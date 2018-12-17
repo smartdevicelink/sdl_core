@@ -35,6 +35,7 @@
 
 #include <string>
 #include <vector>
+#include "utils/optional.h"
 
 #include "policy/policy_table/types.h"
 #include "policy/pt_representation.h"
@@ -164,6 +165,14 @@ class CacheManagerInterface {
    * @brief Get information about vehicle
    */
   virtual const VehicleInfo GetVehicleInfo() const = 0;
+
+  /**
+   * @brief Returns state of the lock screen that could be able to be dismissed
+   * while connected to SDL, allowing users the ability to interact with the
+   * app.
+   * @return bool True if lock screen is able to be dismissed.
+   */
+  virtual const utils::OptionalVal<bool> LockScreenDismissalEnabledState() const = 0;
 
   /**
    * @brief Allows to update 'vin' field in module_meta table.

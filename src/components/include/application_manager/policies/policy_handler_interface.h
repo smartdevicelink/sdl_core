@@ -44,6 +44,7 @@
 #include "policy/usage_statistics/statistics_manager.h"
 #include "utils/custom_string.h"
 #include "utils/callable.h"
+#include "utils/optional.h"
 #include "policy/policy_settings.h"
 #include "smart_objects/smart_object.h"
 #include "policy/policy_types.h"
@@ -120,6 +121,7 @@ class PolicyHandlerInterface {
   virtual uint32_t TimeoutExchangeMSec() const = 0;
   virtual void OnExceededTimeout() = 0;
   virtual void OnSystemReady() = 0;
+  virtual const utils::OptionalVal<bool> LockScreenDismissalEnabledState() const = 0;
   virtual void PTUpdatedAt(Counters counter, int value) = 0;
   virtual void add_listener(PolicyHandlerObserver* listener) = 0;
   virtual void remove_listener(PolicyHandlerObserver* listener) = 0;

@@ -78,6 +78,7 @@ class MockPolicyManager : public PolicyManager {
   MOCK_METHOD0(ResetUserConsent, bool());
   MOCK_CONST_METHOD0(GetPolicyTableStatus, std::string());
   MOCK_METHOD1(KmsChanged, void(int kilometers));
+  MOCK_CONST_METHOD0(LockScreenDismissalEnabledState, const utils::OptionalVal<bool>());
   MOCK_METHOD0(IncrementIgnitionCycles, void());
   MOCK_METHOD0(ForcePTExchange, std::string());
   MOCK_METHOD0(ForcePTExchangeAtUserRequest, std::string());

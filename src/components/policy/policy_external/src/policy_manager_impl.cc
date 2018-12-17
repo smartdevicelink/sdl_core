@@ -1656,6 +1656,11 @@ void PolicyManagerImpl::KmsChanged(int kilometers) {
   }
 }
 
+const utils::OptionalVal<bool> PolicyManagerImpl::LockScreenDismissalEnabledState() const {
+  LOG4CXX_AUTO_TRACE(logger_);
+  return cache_->LockScreenDismissalEnabledState();
+}
+
 void PolicyManagerImpl::IncrementIgnitionCycles() {
   cache_->IncrementIgnitionCycles();
 }
