@@ -148,6 +148,9 @@ class PolicyManagerImpl : public PolicyManager {
    */
   void KmsChanged(int kilometers) OVERRIDE;
 
+  const utils::OptionalVal<bool> LockScreenDismissalEnabledState()
+      const OVERRIDE;
+
   /**
    * @brief Increments counter of ignition cycles
    */

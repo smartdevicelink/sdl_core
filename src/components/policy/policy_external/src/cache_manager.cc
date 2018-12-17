@@ -42,6 +42,7 @@
 
 #include "utils/file_system.h"
 #include "utils/helpers.h"
+
 #include "json/reader.h"
 #include "json/features.h"
 #include "json/writer.h"
@@ -1387,6 +1388,19 @@ const policy::VehicleInfo CacheManager::GetVehicleInfo() const {
                                           << vehicle_info.vehicle_model << ","
                                           << vehicle_info.vehicle_year);
   return vehicle_info;
+}
+
+const utils::OptionalVal<bool> CacheManager::LockScreenDismissalEnabledState()
+    const {
+  utils::OptionalVal<bool> empty(utils::OptionalVal<bool>::EMPTY);
+  CACHE_MANAGER_CHECK(empty);
+  sync_primitives::AutoLock auto_lock(cache_lock_);
+  policy_table::ModuleConfig& module_config = pt_->policy_table.module_config;
+  if (module_config.lock_screen_dismissal_enabled.is_initialized()) {
+    return utils::OptionalVal<bool>(
+        *module_config.lock_screen_dismissal_enabled);
+  }
+  return empty;
 }
 
 std::vector<UserFriendlyMessage> CacheManager::GetUserFriendlyMsg(

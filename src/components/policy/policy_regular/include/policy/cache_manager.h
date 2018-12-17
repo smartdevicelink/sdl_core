@@ -146,6 +146,9 @@ class CacheManager : public CacheManagerInterface {
    */
   virtual const VehicleInfo GetVehicleInfo() const;
 
+  const utils::OptionalVal<bool> LockScreenDismissalEnabledState()
+      const OVERRIDE;
+
   /**
    * @brief Allows to update 'vin' field in module_meta table.
    *
