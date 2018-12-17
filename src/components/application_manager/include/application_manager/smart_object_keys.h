@@ -419,6 +419,7 @@ namespace mobile_notification {
 extern const char* state;
 extern const char* syncp_timeout;
 extern const char* syncp_url;
+extern const char* lock_screen_dismissal_enabled;
 }  // namespace mobile_notification
 
 namespace hmi_levels {

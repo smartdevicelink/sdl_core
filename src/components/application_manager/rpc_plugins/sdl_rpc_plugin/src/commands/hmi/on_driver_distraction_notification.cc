@@ -127,6 +127,14 @@ void OnDriverDistractionNotification::Run() {
   (*on_driver_distraction)[strings::msg_params][mobile_notification::state] =
       state;
 
+  auto lock_screen_dismissal = application_manager_.GetPolicyHandler().LockScreenDismissalEnabledState();
+
+  if ( lock_screen_dismissal &&
+       hmi_apis::Common_DriverDistractionState::DD_ON ==  state) {
+    (*on_driver_distraction)[strings::msg_params]
+                            [mobile_notification::lock_screen_dismissal_enabled] = *lock_screen_dismissal;
+  }
+
   const ApplicationSet applications =
       application_manager_.applications().GetData();
 

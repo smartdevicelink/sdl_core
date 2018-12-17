@@ -3387,6 +3387,14 @@ void ApplicationManagerImpl::SendDriverDistractionState(
       mobile_api::FunctionID::OnDriverDistractionID;
   (*on_driver_distraction)[strings::msg_params][mobile_notification::state] =
       driver_distraction_state();
+  auto lock_screen_dismissal = policy_handler_->LockScreenDismissalEnabledState();
+
+  if ( lock_screen_dismissal &&
+       hmi_apis::Common_DriverDistractionState::DD_ON ==  driver_distraction_state()) {
+    (*on_driver_distraction)[strings::msg_params]
+                            [mobile_notification::lock_screen_dismissal_enabled] = *lock_screen_dismissal;
+  }
+
   (*on_driver_distraction)[strings::params][strings::connection_key] =
       application->app_id();
 
