@@ -1794,6 +1794,8 @@ TEST_F(HMICommandsNotificationsTest, OnDriverDistractionNotificationEmptyData) {
       CreateCommand<hmi::OnDriverDistractionNotification>(message);
 
   EXPECT_CALL(app_mngr_, set_driver_distraction_state(state));
+  EXPECT_CALL(app_mngr_, GetPolicyHandler())
+      .WillOnce(ReturnRef(mock_policy_handler_));
   EXPECT_CALL(app_mngr_, applications()).WillOnce(Return(applications_));
   EXPECT_CALL(mock_rpc_service_, ManageMobileCommand(_, _)).Times(0);
   EXPECT_CALL(*app_ptr_, app_id()).Times(0);
@@ -1811,6 +1813,8 @@ TEST_F(HMICommandsNotificationsTest,
 
   ApplicationSharedPtr invalid_app;
   application_set_.insert(invalid_app);
+  EXPECT_CALL(app_mngr_, GetPolicyHandler())
+      .WillOnce(ReturnRef(mock_policy_handler_));
   EXPECT_CALL(app_mngr_, applications()).WillOnce(Return(applications_));
   EXPECT_CALL(mock_rpc_service_, ManageMobileCommand(_, _)).Times(0);
   EXPECT_CALL(*app_ptr_, app_id()).Times(0);
@@ -1826,6 +1830,8 @@ TEST_F(HMICommandsNotificationsTest, OnDriverDistractionNotificationValidApp) {
       CreateCommand<hmi::OnDriverDistractionNotification>(message);
 
   application_set_.insert(app_);
+  EXPECT_CALL(app_mngr_, GetPolicyHandler())
+      .WillOnce(ReturnRef(mock_policy_handler_));
   EXPECT_CALL(app_mngr_, applications()).WillOnce(Return(applications_));
   policy::CheckPermissionResult result;
   result.hmi_level_permitted = policy::kRpcAllowed;
