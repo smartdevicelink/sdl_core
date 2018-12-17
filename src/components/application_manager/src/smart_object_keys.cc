@@ -379,6 +379,7 @@ namespace mobile_notification {
 const char* state = "state";
 const char* syncp_timeout = "Timeout";
 const char* syncp_url = "URL";
+const char* lock_screen_dismissal_enabled = "lockScreenDismissalEnabled";
 }  // namespace mobile_notification
 
 namespace hmi_levels {
