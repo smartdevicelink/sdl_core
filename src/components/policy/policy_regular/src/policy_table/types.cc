@@ -488,6 +488,8 @@ void ModuleConfig::SafeCopyFrom(const ModuleConfig& from) {
   notifications_per_minute_by_priority =
       from.notifications_per_minute_by_priority;
 
+  lock_screen_dismissal_enabled = from.lock_screen_dismissal_enabled;
+
   vehicle_make.assign_if_valid(from.vehicle_make);
   vehicle_model.assign_if_valid(from.vehicle_model);
   vehicle_year.assign_if_valid(from.vehicle_year);
