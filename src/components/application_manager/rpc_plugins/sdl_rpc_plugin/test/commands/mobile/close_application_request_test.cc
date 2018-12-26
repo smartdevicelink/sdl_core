@@ -155,8 +155,9 @@ class CloseApplicationRequestTest
   CloseApplicationCommandPtr command_;
 };
 
-TEST_F(CloseApplicationRequestTest,
-       CloseApplicationRequestSendsResponse_APPLICATION_NOT_REGISTERED) {
+TEST_F(
+    CloseApplicationRequestTest,
+    CloseApplicationRequest_SendsNegativeResponse_APPLICATION_NOT_REGISTERED) {
   using namespace am;
   auto message = CreateCloseAppMessage();
 
@@ -180,7 +181,7 @@ TEST_F(CloseApplicationRequestTest,
 }
 
 TEST_F(CloseApplicationRequestTest,
-       CloseApplicationRequestSendsResponse_IGNORED) {
+       CloseApplicationRequest_SendsNegativeResponse_IGNORED) {
   using namespace am;
   auto message = CreateCloseAppMessage();
 
@@ -206,7 +207,7 @@ TEST_F(CloseApplicationRequestTest,
 }
 
 TEST_F(CloseApplicationRequestTest,
-       CloseApplicationRequestSendsResponse_INVALID_DATA) {
+       CloseApplicationRequest_SendsNegativeResponse_INVALID_DATA) {
   using namespace am;
   CloseApplicationCommandPtr command(
       CreateCommand<sdl_rpc_plugin::commands::CloseApplicationRequest>(
@@ -225,7 +226,7 @@ TEST_F(CloseApplicationRequestTest,
 }
 
 TEST_F(CloseApplicationRequestTest,
-       CloseApplicationRequestSendsResponse_GENERIC_ERROR) {
+       CloseApplicationRequest_SendsNegativeResponse_GENERIC_ERROR) {
   using namespace am;
 
   CloseApplicationCommandPtr command(
@@ -254,7 +255,7 @@ TEST_F(CloseApplicationRequestTest,
 }
 
 TEST_F(CloseApplicationRequestTest,
-       CloseApplicationRequest_OnEvent_Success_INVALID_DATA) {
+       CloseApplicationRequest_OnEvent_SuccessResult_INVALID_DATA) {
   using namespace am;
 
   CloseApplicationCommandPtr command(
@@ -278,7 +279,7 @@ TEST_F(CloseApplicationRequestTest,
 }
 
 TEST_F(CloseApplicationRequestTest,
-       CloseApplicationRequest_OnEvent_Success_Result_SUCCESS) {
+       CloseApplicationRequest_OnEvent_SuccessResult_SUCCESS) {
   using namespace am;
 
   CloseApplicationCommandPtr command(

@@ -52,6 +52,10 @@ class CloseApplicationResponse
    * @brief CloseApplicationResponse class constructor
    *
    * @param message - Incoming SmartObject message
+   * @param application_manager - reference to ApplicationManager instance.
+   * @param rpc_service - reference to RPCService instance.
+   * @param hmi_capabilities - reference to HMICapabilities instance.
+   * @param policy_handler - reference to PolicyHandlerInterface instance.
    **/
   CloseApplicationResponse(const app_mngr::commands::MessageSharedPtr& message,
                            app_mngr::ApplicationManager& application_manager,

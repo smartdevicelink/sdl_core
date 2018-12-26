@@ -53,7 +53,11 @@ class CloseApplicationRequest : public app_mngr::commands::CommandRequestImpl {
   /**
     * @brief CloseApplicationRequest class constructor
     *
-    * @param message Incoming SmartObject message
+    * @param message - Incoming SmartObject message
+    * @param application_manager - reference to ApplicationManager instance.
+    * @param rpc_service - reference to RPCService instance.
+    * @param hmi_capabilities - reference to HMICapabilities instance.
+    * @param policy_handler - reference to PolicyHandlerInterface instance.
     */
   CloseApplicationRequest(const app_mngr::commands::MessageSharedPtr& message,
                           app_mngr::ApplicationManager& application_manager,
@@ -78,10 +82,8 @@ class CloseApplicationRequest : public app_mngr::commands::CommandRequestImpl {
   void on_event(const app_mngr::event_engine::Event& event) FINAL;
 
  private:
-  DISALLOW_COPY_AND_ASSIGN(CloseApplicationRequest);
-
   /**
-    * @brief Send Basic Communication Request to HMI.
+    * @brief Sends ActivateApp request to HMI.
     *
     * @param app - Application which have to set specified HMI level.
     * @param hmi_level - New HMI level for specified application.
@@ -94,6 +96,8 @@ class CloseApplicationRequest : public app_mngr::commands::CommandRequestImpl {
   bool SendBCActivateApp(app_mngr::ApplicationConstSharedPtr app,
                          const hmi_apis::Common_HMILevel::eType hmi_level,
                          const bool send_policy_priority);
+
+  DISALLOW_COPY_AND_ASSIGN(CloseApplicationRequest);
 };
 
 }  // namespace commands

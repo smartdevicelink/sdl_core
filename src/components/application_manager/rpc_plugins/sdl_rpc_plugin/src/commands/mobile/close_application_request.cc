@@ -76,10 +76,10 @@ void CloseApplicationRequest::Run() {
     return;
   }
 
-  const bool sent_success =
+  const bool sending_result =
       SendBCActivateApp(application, hmi_apis::Common_HMILevel::NONE, true);
 
-  if (!sent_success) {
+  if (!sending_result) {
     LOG4CXX_ERROR(logger_, "Unable to send BC.ActivateApp");
     SendResponse(false, mobile_apis::Result::INVALID_DATA);
   }
@@ -88,13 +88,13 @@ void CloseApplicationRequest::Run() {
 void CloseApplicationRequest::on_event(const event_engine::Event& event) {
   using namespace helpers;
   LOG4CXX_AUTO_TRACE(logger_);
-  const auto message = event.smart_object();
 
   if (hmi_apis::FunctionID::BasicCommunication_ActivateApp != event.id()) {
     LOG4CXX_ERROR(logger_, "Received unknown event" << event.id());
     return;
   }
 
+  const auto message = event.smart_object();
   const auto hmi_result = static_cast<hmi_apis::Common_Result::eType>(
       message[strings::params][hmi_response::code].asInt());
 
