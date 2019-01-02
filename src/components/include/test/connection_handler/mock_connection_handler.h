@@ -70,6 +70,7 @@ class MockConnectionHandler : public connection_handler::ConnectionHandler {
       AddCloudAppDevice,
       void(const std::string& policy_app_id,
            const transport_manager::transport_adapter::CloudAppProperties&));
+  MOCK_METHOD1(RemoveCloudAppDevice, void(const DeviceHandle device_id));
   MOCK_METHOD1(CloseRevokedConnection, void(uint32_t connection_key));
   MOCK_METHOD1(CloseConnection, void(ConnectionHandle connection_handle));
   MOCK_METHOD1(GetConnectionSessionsCount, uint32_t(uint32_t connection_key));

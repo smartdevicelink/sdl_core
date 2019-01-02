@@ -124,8 +124,8 @@
 #include "sdl_rpc_plugin/commands/mobile/dial_number_response.h"
 #include "sdl_rpc_plugin/commands/mobile/send_haptic_data_request.h"
 #include "sdl_rpc_plugin/commands/mobile/send_haptic_data_response.h"
-#include "sdl_rpc_plugin/commands/mobile/set_cloudapp_properties_request.h"
-#include "sdl_rpc_plugin/commands/mobile/set_cloudapp_properties_response.h"
+#include "sdl_rpc_plugin/commands/mobile/set_cloud_app_properties_request.h"
+#include "sdl_rpc_plugin/commands/mobile/set_cloud_app_properties_response.h"
 #include "interfaces/MOBILE_API.h"
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "ApplicationManager")

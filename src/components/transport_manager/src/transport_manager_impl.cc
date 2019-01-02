@@ -157,6 +157,10 @@ void TransportManagerImpl::AddCloudDevice(
   return;
 }
 
+void TransportManagerImpl::RemoveCloudDevice(const DeviceHandle device_handle) {
+  DisconnectDevice(device_handle);
+}
+
 int TransportManagerImpl::ConnectDevice(const DeviceHandle device_handle) {
   LOG4CXX_TRACE(logger_, "enter. DeviceHandle: " << &device_handle);
   if (!this->is_initialized_) {

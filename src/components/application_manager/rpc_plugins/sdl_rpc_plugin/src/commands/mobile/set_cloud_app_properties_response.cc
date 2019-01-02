@@ -1,6 +1,6 @@
 #include "application_manager/application_manager.h"
 #include "application_manager/rpc_service.h"
-#include "sdl_rpc_plugin/commands/mobile/set_cloudapp_properties_response.h"
+#include "sdl_rpc_plugin/commands/mobile/set_cloud_app_properties_response.h"
 
 namespace sdl_rpc_plugin {
 using namespace application_manager;

@@ -108,6 +108,8 @@ class ConnectionHandler {
       const transport_manager::transport_adapter::CloudAppProperties&
           cloud_properties) = 0;
 
+  virtual void RemoveCloudAppDevice(const DeviceHandle device_id) = 0;
+
   /**
    * @brief  Close the connection revoked by Policy
    * @param connection_key pair of connection and session id

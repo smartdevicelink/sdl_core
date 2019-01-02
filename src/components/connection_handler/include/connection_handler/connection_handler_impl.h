@@ -135,6 +135,8 @@ class ConnectionHandlerImpl
       const transport_manager::transport_adapter::CloudAppProperties&
           cloud_properties) OVERRIDE;
 
+  void RemoveCloudAppDevice(const DeviceHandle device_id) OVERRIDE;
+
   void StartTransportManager() OVERRIDE;
 
   void OnDeviceListUpdated(

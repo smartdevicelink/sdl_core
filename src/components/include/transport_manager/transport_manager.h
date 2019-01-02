@@ -79,6 +79,8 @@ class TransportManager {
       const transport_manager::transport_adapter::CloudAppProperties
           cloud_properties) = 0;
 
+  virtual void RemoveCloudDevice(const DeviceHandle device_id) = 0;
+
   /**
    * @brief Connect to all applications discovered on device.
    *

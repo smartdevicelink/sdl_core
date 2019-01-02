@@ -143,6 +143,8 @@ class TransportManagerImpl
       const transport_manager::transport_adapter::CloudAppProperties
           cloud_properties) OVERRIDE;
 
+  void RemoveCloudDevice(const DeviceHandle device_id) OVERRIDE;
+
   /**
    * @brief Connect to all applications discovered on device.
    *

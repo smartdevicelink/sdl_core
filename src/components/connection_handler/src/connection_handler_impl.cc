@@ -1330,6 +1330,10 @@ void ConnectionHandlerImpl::AddCloudAppDevice(
   transport_manager_.AddCloudDevice(cloud_properties);
 }
 
+void ConnectionHandlerImpl::RemoveCloudAppDevice(const DeviceHandle device_id) {
+  transport_manager_.RemoveCloudDevice(device_id);
+}
+
 void ConnectionHandlerImpl::StartTransportManager() {
   LOG4CXX_AUTO_TRACE(logger_);
   transport_manager_.Visibility(true);

@@ -360,7 +360,7 @@ class ApplicationManagerImpl
   void ConnectToDevice(const std::string& device_mac) OVERRIDE;
   void OnHMIStartedCooperation() OVERRIDE;
 
-  void CollectCloudAppInformation();
+  void RefreshCloudAppInformation() OVERRIDE;
 
   void CreatePendingApplication(
       const transport_manager::ConnectionUID connection_id,
