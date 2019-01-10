@@ -1794,7 +1794,13 @@ TEST_F(HMICommandsNotificationsTest, OnDriverDistractionNotificationEmptyData) {
       CreateCommand<hmi::OnDriverDistractionNotification>(message);
 
   EXPECT_CALL(app_mngr_, set_driver_distraction_state(state));
-  EXPECT_CALL(app_mngr_, applications()).WillOnce(Return(applications_));
+  ON_CALL(app_mngr_, GetPolicyHandler())
+      .WillByDefault(ReturnRef(mock_policy_handler_));
+  typedef utils::OptionalVal<bool> OptionalBool;
+  ON_CALL(mock_policy_handler_, LockScreenDismissalEnabledState())
+      .WillByDefault(Return(OptionalBool(true)));
+  ON_CALL(app_mngr_, applications()).WillByDefault(Return(applications_));
+
   EXPECT_CALL(mock_rpc_service_, ManageMobileCommand(_, _)).Times(0);
   EXPECT_CALL(*app_ptr_, app_id()).Times(0);
   command->Run();
@@ -1802,8 +1808,7 @@ TEST_F(HMICommandsNotificationsTest, OnDriverDistractionNotificationEmptyData) {
 
 TEST_F(HMICommandsNotificationsTest,
        OnDriverDistractionNotificationInvalidApp) {
-  const hmi_apis::Common_DriverDistractionState::eType state =
-      hmi_apis::Common_DriverDistractionState::DD_ON;
+  const auto state = hmi_apis::Common_DriverDistractionState::DD_ON;
   MessageSharedPtr message = CreateMessage();
   (*message)[am::strings::msg_params][am::hmi_notification::state] = state;
   std::shared_ptr<Command> command =
@@ -1811,7 +1816,14 @@ TEST_F(HMICommandsNotificationsTest,
 
   ApplicationSharedPtr invalid_app;
   application_set_.insert(invalid_app);
-  EXPECT_CALL(app_mngr_, applications()).WillOnce(Return(applications_));
+
+  ON_CALL(app_mngr_, GetPolicyHandler())
+      .WillByDefault(ReturnRef(mock_policy_handler_));
+  typedef utils::OptionalVal<bool> OptionalBool;
+  ON_CALL(mock_policy_handler_, LockScreenDismissalEnabledState())
+      .WillByDefault(Return(OptionalBool(true)));
+  ON_CALL(app_mngr_, applications()).WillByDefault(Return(applications_));
+
   EXPECT_CALL(mock_rpc_service_, ManageMobileCommand(_, _)).Times(0);
   EXPECT_CALL(*app_ptr_, app_id()).Times(0);
   command->Run();
@@ -1826,17 +1838,23 @@ TEST_F(HMICommandsNotificationsTest, OnDriverDistractionNotificationValidApp) {
       CreateCommand<hmi::OnDriverDistractionNotification>(message);
 
   application_set_.insert(app_);
-  EXPECT_CALL(app_mngr_, applications()).WillOnce(Return(applications_));
+
+  ON_CALL(app_mngr_, GetPolicyHandler())
+      .WillByDefault(ReturnRef(mock_policy_handler_));
+  typedef utils::OptionalVal<bool> OptionalBool;
+  ON_CALL(mock_policy_handler_, LockScreenDismissalEnabledState())
+      .WillByDefault(Return(OptionalBool(true)));
+  ON_CALL(app_mngr_, applications()).WillByDefault(Return(applications_));
+
   policy::CheckPermissionResult result;
   result.hmi_level_permitted = policy::kRpcAllowed;
-  EXPECT_CALL(app_mngr_, GetPolicyHandler())
-      .WillOnce(ReturnRef(mock_policy_handler_));
   EXPECT_CALL(mock_policy_handler_, CheckPermissions(_, _, _, _))
       .WillOnce(GetArg3(&result));
+
   EXPECT_CALL(mock_rpc_service_,
               ManageMobileCommand(_, Command::CommandSource::SOURCE_SDL))
       .WillOnce(GetMessage(message));
-  EXPECT_CALL(*app_ptr_, app_id()).WillRepeatedly(Return(kAppId_));
+  ON_CALL(*app_ptr_, app_id()).WillByDefault(Return(kAppId_));
 
   command->Run();
   EXPECT_EQ(
