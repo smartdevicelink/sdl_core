@@ -108,14 +108,12 @@ OnDriverDistractionNotification::~OnDriverDistractionNotification() {}
 
 void OnDriverDistractionNotification::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
-  const hmi_apis::Common_DriverDistractionState::eType state =
+  const auto state =
       static_cast<hmi_apis::Common_DriverDistractionState::eType>(
           (*message_)[strings::msg_params][hmi_notification::state].asInt());
   application_manager_.set_driver_distraction_state(state);
 
-  smart_objects::SmartObjectSPtr on_driver_distraction =
-      std::make_shared<smart_objects::SmartObject>();
-
+  auto on_driver_distraction = std::make_shared<smart_objects::SmartObject>();
   if (!on_driver_distraction) {
     LOG4CXX_ERROR(logger_, "NULL pointer");
     return;
