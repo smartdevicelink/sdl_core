@@ -54,7 +54,7 @@ std::vector<std::string> GetModuleReadOnlyParams(
     module_ro_params.push_back(kCurrentTemperature);
   } else if (enums_value::kRadio == module_type) {
     module_ro_params.push_back(kRdsData);
-    module_ro_params.push_back(kAvailableHDs);
+    module_ro_params.push_back(kAvailableHdChannels);
     module_ro_params.push_back(kSignalStrength);
     module_ro_params.push_back(kSignalChangeThreshold);
     module_ro_params.push_back(kState);
@@ -92,14 +92,16 @@ const std::map<std::string, std::string> GetModuleDataToCapabilitiesMapping() {
   mapping["heatedWindshieldEnable"] = "heatedWindshieldAvailable";
   mapping["heatedMirrorsEnable"] = "heatedMirrorsAvailable";
   mapping["heatedRearWindowEnable"] = "heatedRearWindowAvailable";
+  mapping["climateEnable"] = "climateEnable";
+  mapping["climateEnableAvailable"] = "climateEnableAvailable";
 
   // radio
   mapping["band"] = "radioBandAvailable";
   mapping["frequencyInteger"] = "radioFrequencyAvailable";
   mapping["frequencyFraction"] = "radioFrequencyAvailable";
   mapping["rdsData"] = "rdsDataAvailable";
-  mapping["availableHDs"] = "availableHDsAvailable";
-  mapping["hdChannel"] = "availableHDsAvailable";
+  mapping["availableHdChannels"] = "availableHdChannelsAvailable";
+  mapping["hdChannel"] = "availableHdChannelsAvailable";
   mapping["hdRadioEnable"] = "hdRadioEnableAvailable";
   mapping["signalStrength"] = "signalStrengthAvailable";
   mapping["signalChangeThreshold"] = "signalChangeThresholdAvailable";
