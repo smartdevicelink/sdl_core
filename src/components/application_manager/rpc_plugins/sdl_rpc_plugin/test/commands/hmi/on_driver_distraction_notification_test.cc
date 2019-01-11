@@ -62,16 +62,32 @@ using sdl_rpc_plugin::commands::hmi::OnDriverDistractionNotification;
 using namespace am::commands;
 using test::components::commands_test::MobileResultCodeIs;
 
-typedef std::shared_ptr<OnDriverDistractionNotification> NotificationPtr;
-
 class HMIOnDriverDistractionNotificationTest
     : public CommandsTest<CommandsTestMocks::kIsNice> {
  public:
   HMIOnDriverDistractionNotificationTest()
-      : app_set_lock_(std::make_shared<sync_primitives::Lock>()) {}
+      : app_set_lock_(std::make_shared<sync_primitives::Lock>())
+      , accessor(app_set_, app_set_lock_) {
+    InitMocksRelations();
+  }
+
+  typedef std::shared_ptr<OnDriverDistractionNotification> NotificationPtr;
+  typedef utils::OptionalVal<bool> OptionalBool;
+
+  MockAppPtr mock_app_;
   std::shared_ptr<sync_primitives::Lock> app_set_lock_;
+  am::ApplicationSet app_set_;
+  DataAccessor<am::ApplicationSet> accessor;
   NiceMock<policy_test::MockPolicyHandlerInterface>
       mock_policy_handler_interface_;
+
+  void InitMocksRelations() {
+    mock_app_ = CreateMockApp();
+    app_set_.insert(mock_app_);
+    ON_CALL(app_mngr_, applications()).WillByDefault(Return(accessor));
+    ON_CALL(app_mngr_, GetPolicyHandler())
+        .WillByDefault(ReturnRef(mock_policy_handler_interface_));
+  }
 };
 
 MATCHER_P2(CheckNotificationParams, function_id, state, "") {
@@ -91,37 +107,6 @@ ACTION_P(GetArg3, result) {
   arg3 = *result;
 }
 
-TEST_F(HMIOnDriverDistractionNotificationTest, Run_PushMobileMessage_SUCCESS) {
-  const auto state = hmi_apis::Common_DriverDistractionState::DD_ON;
-  MessageSharedPtr commands_msg(CreateMessage(smart_objects::SmartType_Map));
-  (*commands_msg)[am::strings::msg_params][am::hmi_notification::state] = state;
-
-  NotificationPtr command(
-      CreateCommand<OnDriverDistractionNotification>(commands_msg));
-
-  MockAppPtr mock_app = CreateMockApp();
-  am::ApplicationSet app_set;
-  app_set.insert(mock_app);
-
-  DataAccessor<am::ApplicationSet> accessor(app_set, app_set_lock_);
-  ON_CALL(app_mngr_, applications()).WillByDefault(Return(accessor));
-  ON_CALL(app_mngr_, GetPolicyHandler())
-      .WillByDefault(ReturnRef(mock_policy_handler_interface_));
-  ON_CALL(mock_policy_handler_interface_, LockScreenDismissalEnabledState())
-      .WillByDefault(Return(utils::OptionalVal<bool>(true)));
-
-  policy::CheckPermissionResult result;
-  result.hmi_level_permitted = policy::kRpcDisallowed;
-  EXPECT_CALL(mock_policy_handler_interface_, CheckPermissions(_, _, _, _))
-      .WillOnce(GetArg3(&result));
-  EXPECT_CALL(*mock_app,
-              PushMobileMessage(CheckNotificationParams(
-                  am::mobile_api::FunctionID::OnDriverDistractionID, state)));
-
-  EXPECT_CALL(app_mngr_, set_driver_distraction_state(Eq(state)));
-  command->Run();
-}
-
 TEST_F(HMIOnDriverDistractionNotificationTest,
        Run_SendNotificationToMobile_SUCCESS) {
   const auto state = hmi_apis::Common_DriverDistractionState::DD_ON;
@@ -131,18 +116,10 @@ TEST_F(HMIOnDriverDistractionNotificationTest,
   NotificationPtr command(
       CreateCommand<OnDriverDistractionNotification>(commands_msg));
 
-  MockAppPtr mock_app = CreateMockApp();
-  am::ApplicationSet app_set;
-  app_set.insert(mock_app);
-
-  DataAccessor<am::ApplicationSet> accessor(app_set, app_set_lock_);
-  ON_CALL(app_mngr_, applications()).WillByDefault(Return(accessor));
-  ON_CALL(app_mngr_, GetPolicyHandler())
-      .WillByDefault(ReturnRef(mock_policy_handler_interface_));
-  ON_CALL(mock_policy_handler_interface_, LockScreenDismissalEnabledState())
-      .WillByDefault(Return(utils::OptionalVal<bool>(true)));
-
   EXPECT_CALL(app_mngr_, set_driver_distraction_state(Eq(state)));
+
+  ON_CALL(mock_policy_handler_interface_, LockScreenDismissalEnabledState())
+      .WillByDefault(Return(OptionalBool(true)));
 
   policy::CheckPermissionResult result;
   result.hmi_level_permitted = policy::kRpcAllowed;
@@ -158,8 +135,30 @@ TEST_F(HMIOnDriverDistractionNotificationTest,
 }
 
 TEST_F(HMIOnDriverDistractionNotificationTest,
+       Run_PushMobileMessage_If_DisallowedByPolicy) {
+  const auto state = hmi_apis::Common_DriverDistractionState::DD_ON;
+  MessageSharedPtr commands_msg(CreateMessage(smart_objects::SmartType_Map));
+  (*commands_msg)[am::strings::msg_params][am::hmi_notification::state] = state;
+  NotificationPtr command(
+      CreateCommand<OnDriverDistractionNotification>(commands_msg));
+
+  ON_CALL(mock_policy_handler_interface_, LockScreenDismissalEnabledState())
+      .WillByDefault(Return(OptionalBool(true)));
+
+  policy::CheckPermissionResult result;
+  result.hmi_level_permitted = policy::kRpcDisallowed;
+  EXPECT_CALL(mock_policy_handler_interface_, CheckPermissions(_, _, _, _))
+      .WillOnce(GetArg3(&result));
+  EXPECT_CALL(*mock_app_,
+              PushMobileMessage(CheckNotificationParams(
+                  am::mobile_api::FunctionID::OnDriverDistractionID, state)));
+
+  EXPECT_CALL(app_mngr_, set_driver_distraction_state(Eq(state)));
+  command->Run();
+}
+
+TEST_F(HMIOnDriverDistractionNotificationTest,
        Run_SendNotificationIfLockScreenDismissalMissed) {
-  typedef utils::OptionalVal<bool> OptionalBool;
   const auto state = hmi_apis::Common_DriverDistractionState::DD_ON;
   MessageSharedPtr commands_msg(CreateMessage(smart_objects::SmartType_Map));
   (*commands_msg)[am::strings::msg_params][am::hmi_notification::state] = state;
@@ -167,19 +166,8 @@ TEST_F(HMIOnDriverDistractionNotificationTest,
   NotificationPtr command(
       CreateCommand<OnDriverDistractionNotification>(commands_msg));
 
-  MockAppPtr mock_app = CreateMockApp();
-  am::ApplicationSet app_set;
-  app_set.insert(mock_app);
-
-  DataAccessor<am::ApplicationSet> accessor(app_set, app_set_lock_);
-  ON_CALL(app_mngr_, applications()).WillByDefault(Return(accessor));
-  ON_CALL(app_mngr_, GetPolicyHandler())
-      .WillByDefault(ReturnRef(mock_policy_handler_interface_));
-
-  OptionalBool empty(OptionalBool::EMPTY);
-
   ON_CALL(mock_policy_handler_interface_, LockScreenDismissalEnabledState())
-      .WillByDefault(Return(empty));
+      .WillByDefault(Return(OptionalBool(OptionalBool::EMPTY)));
 
   policy::CheckPermissionResult result;
   result.hmi_level_permitted = policy::kRpcAllowed;
