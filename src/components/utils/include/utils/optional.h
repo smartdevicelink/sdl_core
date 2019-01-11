@@ -103,7 +103,7 @@ class Optional<ObjectType, ErrorType, StoragePolicy_CopyValue> {
    * @brief Copy constructor of Optional
    */
   Optional(const ClassName& copy)
-      : object_(new ObjectType(*copy))
+      : object_(copy.is_initialized_ ? new ObjectType(*copy) : nullptr)
       , error_(copy.error())
       , is_initialized_(copy) {}
 
