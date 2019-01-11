@@ -66,8 +66,10 @@ class HMIOnDriverDistractionNotificationTest
     : public CommandsTest<CommandsTestMocks::kIsNice> {
  public:
   HMIOnDriverDistractionNotificationTest()
-      : app_set_lock_(std::make_shared<sync_primitives::Lock>())
+      : mock_app_(CreateMockApp()),
+        app_set_lock_(std::make_shared<sync_primitives::Lock>())
       , accessor(app_set_, app_set_lock_) {
+    app_set_.insert(mock_app_);
     InitMocksRelations();
   }
 
@@ -82,8 +84,6 @@ class HMIOnDriverDistractionNotificationTest
       mock_policy_handler_interface_;
 
   void InitMocksRelations() {
-    mock_app_ = CreateMockApp();
-    app_set_.insert(mock_app_);
     ON_CALL(app_mngr_, applications()).WillByDefault(Return(accessor));
     ON_CALL(app_mngr_, GetPolicyHandler())
         .WillByDefault(ReturnRef(mock_policy_handler_interface_));
