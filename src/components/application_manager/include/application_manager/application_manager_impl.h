@@ -1468,6 +1468,8 @@ class ApplicationManagerImpl
 
   DeviceMap secondary_transport_devices_cache_;
 
+  mutable std::shared_ptr<sync_primitives::RecursiveLock>
+      pending_device_map_lock_ptr_;
   std::map<std::string, std::string> pending_device_map_;
 
 #ifdef TELEMETRY_MONITOR

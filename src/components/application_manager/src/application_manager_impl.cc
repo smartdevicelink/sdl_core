@@ -168,6 +168,7 @@ ApplicationManagerImpl::ApplicationManagerImpl(
     , navi_close_app_timeout_(am_settings.stop_streaming_timeout())
     , navi_end_stream_timeout_(am_settings.stop_streaming_timeout())
     , state_ctrl_(*this)
+    , pending_device_map_lock_ptr_(std::make_shared<sync_primitives::RecursiveLock>())
     , application_list_update_timer_(
           "AM ListUpdater",
           new TimerTaskImpl<ApplicationManagerImpl>(
@@ -820,6 +821,7 @@ void ApplicationManagerImpl::RefreshCloudAppInformation() {
   bool enabled = true;
 
   // Store old device map and clear the current map
+  pending_device_map_lock_ptr_->Acquire();
   std::map<std::string, std::string> old_device_map = pending_device_map_;
   pending_device_map_ = std::map<std::string, std::string>();
   for (; it != end; ++it) {
@@ -841,6 +843,7 @@ void ApplicationManagerImpl::RefreshCloudAppInformation() {
 
     connection_handler().AddCloudAppDevice(*it, endpoint, cloud_transport_type);
   }
+  pending_device_map_lock_ptr_->Release();
 
   int removed_app_count = 0;
   // Clear out devices for existing cloud apps that were disabled
@@ -898,10 +901,12 @@ void ApplicationManagerImpl::CreatePendingApplication(
   std::string hybrid_app_preference_str = "";
   bool enabled = true;
   std::string name = device_info.name();
+  pending_device_map_lock_ptr_->Acquire();
   auto it = pending_device_map_.find(name);
   if (it == pending_device_map_.end()) {
     return;
   }
+  pending_device_map_lock_ptr_->Release();
 
   const std::string policy_app_id = it->second;
 
