@@ -107,6 +107,8 @@ class ConnectionHandler {
                                  const std::string& endpoint,
                                  const std::string& cloud_transport_type) = 0;
 
+  virtual void RemoveCloudAppDevice(const DeviceHandle device_id) = 0;
+
   /**
    * @brief  Close the connection revoked by Policy
    * @param connection_key pair of connection and session id

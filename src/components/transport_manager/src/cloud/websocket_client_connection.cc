@@ -181,6 +181,7 @@ void WebsocketClientConnection::Shutdown() {
   if (buffer_.size()) {
     buffer_.consume(buffer_.size());
   }
+  controller_->DisconnectDone(device_uid_, app_handle_);
 }
 
 WebsocketClientConnection::LoopThreadDelegate::LoopThreadDelegate(
