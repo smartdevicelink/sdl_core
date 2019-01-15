@@ -838,9 +838,9 @@ void ApplicationManagerImpl::RefreshCloudAppInformation() {
     auto old_device = old_device_map.find(endpoint);
     if (old_device_map.find(endpoint) != old_device_map.end()) {
       old_device_map.erase(old_device);
-      continue;
     }
 
+    // If the device was disconnected, this will reinitialize the device
     connection_handler().AddCloudAppDevice(*it, endpoint, cloud_transport_type);
   }
   pending_device_map_lock_ptr_->Release();
@@ -1252,6 +1252,7 @@ void ApplicationManagerImpl::OnDeviceListUpdated(
   so_to_send[jhs::S_PARAMS][jhs::S_CORRELATION_ID] = GetNextHMICorrelationID();
   so_to_send[jhs::S_MSG_PARAMS] = *msg_params;
   rpc_service_->ManageHMICommand(update_list);
+  RefreshCloudAppInformation();
 }
 
 void ApplicationManagerImpl::OnFindNewApplicationsRequest() {
@@ -2728,6 +2729,7 @@ void ApplicationManagerImpl::UnregisterApplication(
           logger_, "There is no more SDL4 apps with device handle: " << handle);
 
       RemoveAppsWaitingForRegistration(handle);
+      RefreshCloudAppInformation();
       SendUpdateAppList();
     }
   }

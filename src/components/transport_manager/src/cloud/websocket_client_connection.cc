@@ -138,7 +138,6 @@ void WebsocketClientConnection::OnRead(boost::system::error_code ec,
     ws_->lowest_layer().close();
     ioc_.stop();
     Shutdown();
-    controller_->ConnectPending(device_uid_, app_handle_);
     return;
   }
   std::string data_str = boost::beast::buffers_to_string(buffer_.data());

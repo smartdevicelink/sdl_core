@@ -858,25 +858,23 @@ DeviceSptr TransportAdapterImpl::FindDevice(const DeviceUID& device_id) const {
 
 void TransportAdapterImpl::ConnectPending(const DeviceUID& device_id,
                                           const ApplicationHandle& app_handle) {
+  LOG4CXX_AUTO_TRACE(logger_);
   connections_lock_.AcquireForWriting();
   ConnectionMap::iterator it_conn =
       connections_.find(std::make_pair(device_id, app_handle));
   if (it_conn != connections_.end()) {
     ConnectionInfo& info = it_conn->second;
-    if (info.state == ConnectionInfo::ESTABLISHED) {
-      LOG4CXX_DEBUG(logger_, "Reset Connection Pointer");
-      connections_.erase(std::make_pair(device_id, app_handle));
-
-      connections_lock_.Release();
-      CreateDevice(device_id);
-      connections_lock_.AcquireForWriting();
-    }
     info.state = ConnectionInfo::PENDING;
   }
   connections_lock_.Release();
 
   DeviceSptr device = FindDevice(device_id);
-  device->set_connection_status(ConnectionStatus::PENDING);
+  if (device.use_count() == 0) {
+    LOG4CXX_ERROR(
+        logger_, "Unable to find device, cannot set connection pending status");
+  } else {
+    device->set_connection_status(ConnectionStatus::PENDING);
+  }
 
   for (TransportAdapterListenerList::iterator it = listeners_.begin();
        it != listeners_.end();
