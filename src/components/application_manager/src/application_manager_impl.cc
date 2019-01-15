@@ -168,7 +168,8 @@ ApplicationManagerImpl::ApplicationManagerImpl(
     , navi_close_app_timeout_(am_settings.stop_streaming_timeout())
     , navi_end_stream_timeout_(am_settings.stop_streaming_timeout())
     , state_ctrl_(*this)
-    , pending_device_map_lock_ptr_(std::make_shared<sync_primitives::RecursiveLock>())
+    , pending_device_map_lock_ptr_(
+          std::make_shared<sync_primitives::RecursiveLock>())
     , application_list_update_timer_(
           "AM ListUpdater",
           new TimerTaskImpl<ApplicationManagerImpl>(
@@ -811,8 +812,8 @@ void ApplicationManagerImpl::RefreshCloudAppInformation() {
   LOG4CXX_AUTO_TRACE(logger_);
   std::vector<std::string> enabled_apps;
   GetPolicyHandler().GetEnabledCloudApps(enabled_apps);
-  std::vector<std::string>::iterator it = enabled_apps.begin();
-  std::vector<std::string>::iterator end = enabled_apps.end();
+  std::vector<std::string>::iterator enabled_it = enabled_apps.begin();
+  std::vector<std::string>::iterator enabled_end = enabled_apps.end();
   std::string endpoint = "";
   std::string certificate = "";
   std::string auth_token = "";
@@ -824,8 +825,9 @@ void ApplicationManagerImpl::RefreshCloudAppInformation() {
   pending_device_map_lock_ptr_->Acquire();
   std::map<std::string, std::string> old_device_map = pending_device_map_;
   pending_device_map_ = std::map<std::string, std::string>();
-  for (; it != end; ++it) {
-    GetPolicyHandler().GetCloudAppParameters(*it,
+  // Create a device for each newly enabled cloud app
+  for (; enabled_it != enabled_end; ++enabled_it) {
+    GetPolicyHandler().GetCloudAppParameters(*enabled_it,
                                              enabled,
                                              endpoint,
                                              certificate,
@@ -834,14 +836,17 @@ void ApplicationManagerImpl::RefreshCloudAppInformation() {
                                              hybrid_app_preference);
 
     pending_device_map_.insert(
-        std::pair<std::string, std::string>(endpoint, *it));
-    auto old_device = old_device_map.find(endpoint);
-    if (old_device_map.find(endpoint) != old_device_map.end()) {
-      old_device_map.erase(old_device);
+        std::pair<std::string, std::string>(endpoint, *enabled_it));
+    // Determine which endpoints were disabled by erasing all enabled apps from
+    // the old device list
+    auto old_device_it = old_device_map.find(endpoint);
+    if (old_device_it != old_device_map.end()) {
+      old_device_map.erase(old_device_it);
       continue;
     }
 
-    connection_handler().AddCloudAppDevice(*it, endpoint, cloud_transport_type);
+    connection_handler().AddCloudAppDevice(
+        *enabled_it, endpoint, cloud_transport_type);
   }
   pending_device_map_lock_ptr_->Release();
 
@@ -849,24 +854,26 @@ void ApplicationManagerImpl::RefreshCloudAppInformation() {
   // Clear out devices for existing cloud apps that were disabled
   for (auto& device : old_device_map) {
     std::string policy_app_id = device.second;
+    // First search for the disabled app within the registered apps
     ApplicationSharedPtr app = application_by_policy_id(policy_app_id);
     if (app.use_count() == 0) {
       sync_primitives::AutoLock lock(apps_to_register_list_lock_ptr_);
+      // If the disabled app is not present in the registered app list, check
+      // the apps awaiting registration
       PolicyAppIdPredicate finder(policy_app_id);
       ApplicationSet::iterator it = std::find_if(
           apps_to_register_.begin(), apps_to_register_.end(), finder);
       if (it == apps_to_register_.end()) {
+        LOG4CXX_DEBUG(logger_,
+                      "Unable to find app to remove (" << policy_app_id
+                                                       << "), skipping");
         continue;
       }
       app = *it;
       apps_to_register_.erase(it);
     }
-    if (app.use_count() == 0) {
-      LOG4CXX_DEBUG(logger_,
-                    "Unable to find app to remove (" << policy_app_id
-                                                     << "), skipping");
-      continue;
-    }
+    // If the disabled app is registered, unregistered it before destroying the
+    // device
     if (app->IsRegistered() && app->is_cloud_app()) {
       LOG4CXX_DEBUG(logger_, "Disabled app is registered, unregistering now");
       GetRPCService().ManageMobileCommand(
@@ -877,6 +884,7 @@ void ApplicationManagerImpl::RefreshCloudAppInformation() {
 
       OnAppUnauthorized(app->app_id());
     }
+    // Delete the cloud device
     connection_handler().RemoveCloudAppDevice(app->device());
     removed_app_count++;
   }
