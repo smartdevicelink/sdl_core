@@ -168,7 +168,8 @@ ApplicationManagerImpl::ApplicationManagerImpl(
     , navi_close_app_timeout_(am_settings.stop_streaming_timeout())
     , navi_end_stream_timeout_(am_settings.stop_streaming_timeout())
     , state_ctrl_(*this)
-    , pending_device_map_lock_ptr_(std::make_shared<sync_primitives::RecursiveLock>())
+    , pending_device_map_lock_ptr_(
+          std::make_shared<sync_primitives::RecursiveLock>())
     , application_list_update_timer_(
           "AM ListUpdater",
           new TimerTaskImpl<ApplicationManagerImpl>(

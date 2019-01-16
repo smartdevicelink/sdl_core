@@ -48,7 +48,7 @@ WebsocketClientConnection::WebsocketClientConnection(
     TransportAdapterController* controller)
     : controller_(controller)
     , resolver_(ioc_)
-    , ws_(std::make_shared<websocket::stream<tcp::socket> >(ioc_))
+    , ws_(ioc_)
     , shutdown_(false)
     , thread_delegate_(new LoopThreadDelegate(&message_queue_, this))
     , write_thread_(threads::CreateThread("WS Async Send", thread_delegate_))
@@ -74,7 +74,7 @@ TransportAdapter::Error WebsocketClientConnection::Start() {
     LOG4CXX_ERROR(logger_, "Could not resolve host/port: " << str_err);
     return TransportAdapter::FAIL;
   }
-  boost::asio::connect(ws_->next_layer(), results.begin(), results.end(), ec);
+  boost::asio::connect(ws_.next_layer(), results.begin(), results.end(), ec);
   if (ec) {
     std::string str_err = "ErrorMessage: " + ec.message();
     LOG4CXX_ERROR(logger_,
@@ -82,7 +82,7 @@ TransportAdapter::Error WebsocketClientConnection::Start() {
     LOG4CXX_ERROR(logger_, str_err);
     return TransportAdapter::FAIL;
   }
-  ws_->handshake(host, "/", ec);
+  ws_.handshake(host, "/", ec);
   if (ec) {
     std::string str_err = "ErrorMessage: " + ec.message();
     LOG4CXX_ERROR(logger_,
@@ -91,16 +91,16 @@ TransportAdapter::Error WebsocketClientConnection::Start() {
     LOG4CXX_ERROR(logger_, str_err);
     return TransportAdapter::FAIL;
   }
-  ws_->binary(true);
+  ws_.binary(true);
   write_thread_->start(threads::ThreadOptions());
   controller_->ConnectDone(device_uid_, app_handle_);
 
   // Start async read
-  ws_->async_read(buffer_,
-                  std::bind(&WebsocketClientConnection::OnRead,
-                            this,
-                            std::placeholders::_1,
-                            std::placeholders::_2));
+  ws_.async_read(buffer_,
+                 std::bind(&WebsocketClientConnection::OnRead,
+                           this,
+                           std::placeholders::_1,
+                           std::placeholders::_2));
 
   boost::asio::post(io_pool_, [&]() { ioc_.run(); });
 
@@ -122,11 +122,11 @@ void WebsocketClientConnection::Recv(boost::system::error_code ec) {
     return;
   }
 
-  ws_->async_read(buffer_,
-                  std::bind(&WebsocketClientConnection::OnRead,
-                            this,
-                            std::placeholders::_1,
-                            std::placeholders::_2));
+  ws_.async_read(buffer_,
+                 std::bind(&WebsocketClientConnection::OnRead,
+                           this,
+                           std::placeholders::_1,
+                           std::placeholders::_2));
 }
 
 void WebsocketClientConnection::OnRead(boost::system::error_code ec,
@@ -135,7 +135,7 @@ void WebsocketClientConnection::OnRead(boost::system::error_code ec,
   if (ec) {
     std::string str_err = "ErrorMessage: " + ec.message();
     LOG4CXX_ERROR(logger_, str_err);
-    ws_->lowest_layer().close();
+    ws_.lowest_layer().close();
     ioc_.stop();
     Shutdown();
     return;
@@ -209,7 +209,7 @@ void WebsocketClientConnection::LoopThreadDelegate::DrainQueue() {
     message_queue_.pop(message_ptr);
     if (!shutdown_) {
       boost::system::error_code ec;
-      handler_.ws_->write(
+      handler_.ws_.write(
           boost::asio::buffer(message_ptr->data(), message_ptr->data_size()));
       if (ec) {
         LOG4CXX_ERROR(logger_, "Error writing to websocket");

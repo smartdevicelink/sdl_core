@@ -60,7 +60,7 @@ TransportAdapter::Error CloudWebsocketConnectionFactory::CreateConnection(
 
   std::shared_ptr<WebsocketClientConnection> ws_connection =
       std::dynamic_pointer_cast<WebsocketClientConnection>(connection);
-  if (!ws_connection) {
+  if (ws_connection.use_count() == 0) {
     return TransportAdapter::Error::BAD_PARAM;
   }
 
