@@ -6847,6 +6847,9 @@
         <param name="systemCapabilityType" type="SystemCapabilityType" mandatory="true">
             <description>The type of system capability to get more information on</description>
         </param>
+        <param name="subscribe" type="Boolean" mandatory="false">
+        <description>Flag to subscribe to updates of the supplied service capability type. If true, then requester will be subscribed </description>
+        </param>
     </function>
     
     <function name="GetSystemCapability" functionID="GetSystemCapabilityID" messagetype="response" since="4.5">
