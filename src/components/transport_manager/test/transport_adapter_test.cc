@@ -504,7 +504,6 @@ TEST_F(TransportAdapterTest, DisconnectDevice_DeviceAddedConnectionCreated) {
       .WillOnce(Return(TransportAdapter::OK));
   EXPECT_CALL(transport_adapter, FindDevice(uniq_id))
       .WillRepeatedly(Return(mockdev));
-  // EXPECT_CALL(transport_adapter, ConnectionStatusUpdated(_, _));
   TransportAdapter::Error res = transport_adapter.ConnectDevice(uniq_id);
   EXPECT_EQ(TransportAdapter::OK, res);
   EXPECT_EQ(ConnectionStatus::CONNECTED, mockdev->connection_status());
@@ -515,7 +514,6 @@ TEST_F(TransportAdapterTest, DisconnectDevice_DeviceAddedConnectionCreated) {
   EXPECT_CALL(*mock_connection, Disconnect())
       .WillOnce(Return(TransportAdapter::OK));
 
-  // EXPECT_CALL(transport_adapter, ConnectionStatusUpdated(_, _));
   TransportAdapter::Error new_res = transport_adapter.DisconnectDevice(uniq_id);
   EXPECT_EQ(TransportAdapter::OK, new_res);
   EXPECT_EQ(ConnectionStatus::CLOSING, mockdev->connection_status());
