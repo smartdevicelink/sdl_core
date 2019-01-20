@@ -3357,6 +3357,197 @@
       <description>The position of the haptic rectangle to be highlighted. The center of this rectangle will be "touched" when a press occurs.</description>
     </param>
   </struct>
+    
+    <struct name="SyncMsgVersion">
+        <description>Specifies the version number of the SmartDeviceLink protocol that is supported by the mobile application or app service</description>
+        
+        <param name="majorVersion" type="Integer" minvalue="1" maxvalue="10" mandatory="true">
+            <description>The major version indicates versions that is not-compatible to previous versions.</description>
+        </param>
+        <param name="minorVersion" type="Integer" minvalue="0" maxvalue="1000" mandatory="true">
+            <description>The minor version indicates a change to a previous version that should still allow to be run on an older version (with limited functionality)</description>
+        </param>
+        <param name="patchVersion" type="Integer" minvalue="0" maxvalue="1000" mandatory="false">
+            <description>The patch version indicates a fix to existing functionality in a previous version that should still be able to be run on an older version </description>
+        </param>
+    </struct>
+
+    <!-- App Services -->
+
+    <enum name="AppServiceType">
+	      <element name="MEDIA"/>
+    </enum>
+
+    <struct name="MediaServiceManifest">
+    </struct>
+
+    <enum name="MediaType">
+        <element name="MUSIC"/>
+	      <element name="PODCAST"/>
+	      <element name="AUDIOBOOK"/>
+	      <element name="OTHER"/>
+    </enum>
+
+    <struct name="MediaServiceData">
+        <description>This data is related to what a media service should provide</description>
+
+        <param name="mediaType" type="MediaType" mandatory="false">
+            <description>The type of the currently playing or paused track.</description>
+        </param>
+
+        <param name="mediaTitle" type="String" mandatory="false">
+            <description>
+                Music: The name of the current track
+                Podcast: The name of the current episode
+                Audiobook: The name of the current chapter
+            </description>
+        </param>
+
+        <param name="mediaArtist" type="String" mandatory="false">
+            <description>
+                Music: The name of the current album artist
+                Podcast: The provider of the podcast (hosts, network, company)
+                Audiobook: The book author's name
+            </description>
+        </param>
+
+        <param name="mediaAlbum" type="String" mandatory="false">
+            <description>
+                Music: The name of the current album
+                Podcast: The name of the current podcast show
+                Audiobook: The name of the current book
+            </description>
+        </param>
+
+        <param name="playlistName" type="String" mandatory="false">
+            <description>
+                Music: The name of the playlist or radio station, if the user is playing from a playlist, otherwise, Null
+                Podcast: The name of the playlist, if the user is playing from a playlist, otherwise, Null
+                Audiobook: Likely not applicable, possibly a collection or "playlist" of books
+            </description>
+        </param>
+
+        <param name="isExplicit" type="Boolean" mandatory="false">
+            <description> Whether or not the content currently playing (e.g. the track, episode, or book) contains explicit content</description>
+        </param>
+
+        <param name="trackPlaybackProgress" type="Integer" mandatory="false">
+            <description>
+                Music: The current progress of the track in seconds
+                Podcast: The current progress of the episode in seconds
+                Audiobook: The current progress of the current segment (e.g. the chapter) in seconds
+            </description>
+        </param>
+
+        <param name="trackPlaybackDuration" type="Integer" mandatory="false">
+            <description>
+                Music: The total duration of the track in seconds
+                Podcast: The total duration of the episode in seconds
+                Audiobook: The total duration of the current segment (e.g. the chapter) in seconds
+            </description>
+        </param>
+
+        <param name="queuePlaybackProgess" type="Integer" mandatory="false">
+            <description>
+            Music: The current progress of the playback queue in seconds
+            Podcast: The current progress of the playback queue in seconds
+            Audiobook: The current progress of the playback queue (e.g. the book) in seconds
+            </description>
+        </param>
+
+        <param name="queuePlaybackDuration" type="Integer" mandatory="false">
+            <description>
+                Music: The total duration of the playback queue in seconds
+                Podcast: The total duration of the playback queue in seconds
+                Audiobook: The total duration of the playback queue (e.g. the book) in seconds
+            </description>
+        </param>
+
+        <param name="queueCurrentTrackNumber" type="Integer" mandatory="false">
+            <description>
+                Music: The current number (1 based) of the track in the playback queue
+                Podcast: The current number (1 based) of the episode in the playback queue
+                Audiobook: The current number (1 based) of the episode in the playback queue (e.g. the chapter number in the book)
+            </description>
+        </param>
+
+        <param name="queueTotalTrackCount" type="Integer" mandatory="false">
+            <description>
+                Music: The total number of tracks in the playback queue
+                Podcast: The total number of episodes in the playback queue
+                Audiobook: The total number of sections in the playback queue (e.g. the number of chapters in the book)
+            </description>
+        </param>
+    </struct>
+
+    <struct name="AppServiceManifest">
+		    <description> This manfifest contains all the information necessary for the service to be published, activated, and consumers able to interact with it</description>
+
+		    <param name="serviceName" type="String" mandatory="false">
+		      	<description> Unique name of this service</description>
+    		</param>
+
+		    <param name="serviceType" type="AppServiceType" mandatory="true">
+		      	<description>The type of service that is to be offered by this app</description>
+    		</param>
+
+		    <param name="serviceIcon" type="String" mandatory="false">
+		      	<description> The file name of the icon to be associated with this service. Most likely the same as the appIcon.</description>
+    		</param>
+
+		    <param name="allowAppConsumers" type="Boolean" mandatory="false" defvalue="false">
+			      <description> If true, app service consumers beyond the IVI system will be able to access this service. If false, only the IVI system will be able consume the service. If not provided, it is assumed to be false. </description>
+		    </param>
+
+		    <param name="uriPrefix" type="String" mandatory="false">
+			      <description> The URI prefix for this service. If provided, all PerformAppServiceInteraction requests must start with it.</description>
+		    </param>
+
+    		<param name="uriScheme" type="String" mandatory="false">
+		      	<description> This is a custom schema for this service. SDL will not do any verification on this param past that it has a correctly formated JSON Object as its base. The uriScheme should contain all available actions to be taken through a PerformAppServiceInteraction request from an app service consumer. </description>
+    		</param>
+
+		    <param name="rpcSpecVersion" type="SyncMsgVersion" mandatory="false">
+			      <description> This is the max RPC Spec version the app service understands. This is important during the RPC passthrough functionality. If not included, it is assumed the max version of the module is acceptable. </description>
+		    </param>
+
+		    <param name="handledRPCs" type="Integer" array="true" mandatory="false">
+			      <description> This field contains the Function IDs for the RPCs that this service intends to handle correctly. This means the service will provide meaningful responses. </description>
+		    </param>
+
+		    <param name="mediaServiceManifest" type="MediaServiceManifest" mandatory="false"/>
+	  </struct>
+
+    <struct name="AppServiceRecord">
+	      <description> This is the record of an app service publisher that the module has. It should contain the most up to date information including the service's active state</description>
+
+	      <param name="serviceId" type="String" mandatory="true">
+		        <description> A unique ID tied to this specific service record. The ID is supplied by the module that services publish themselves. </description>
+	      </param>
+
+      	<param name="serviceManifest" type="AppServiceManifest" mandatory="true">
+		        <description> Manifest for the service that this record is for.</description>
+	      </param>
+
+	      <param name="servicePublished" type="Boolean" mandatory="true">
+		        <description> If true, the service is published and available. If false, the service has likely just been unpublished, and should be considered unavailable.</description>
+	      </param>
+
+	      <param name="serviceActive" type="Boolean" mandatory="true">
+		        <description> If true, the service is the active primary service of the supplied service type. It will receive all potential RPCs that are passed through to that service type. If false, it is not the primary service of the supplied type. See servicePublished for its availability. </description>
+	      </param>
+    </struct>
+
+    <struct name="AppServiceData">
+	    <description> Contains all the current data of the app service. The serviceType will link to which of the service data objects are included in this object. (eg if service type equals MEDIA, the mediaServiceData param should be included.</description>
+
+	    <param name="serviceType" type="AppServiceType" mandatory="true"/>
+	    <param name="serviceId" type="String" mandatory="true"/>
+
+	    <param name="mediaServiceData" type="Common.MediaServiceData" mandatory="false"/>
+    </struct>
+
+    <!-- End App Services -->
 
 </interface>
 
@@ -5836,5 +6027,30 @@
   </param>
 </function>
 
+</interface>
+
+<interface name="AppService" version="1.0.0" date="2019-01-20">
+    <description>Interface used for interacting with app services as a producer or consumer</description>
+    <function name="PublishAppService" messagetype="request">
+	      <description>Registers a service offered by this app on the module</description>
+
+      	<param name="appServiceManifest" type="Common.AppServiceManifest" mandatory="true">
+		        <description> The manifest of the service that wishes to be published.</description>
+      	</param>
+    </function>
+
+    <function name="PublishAppService" messagetype="response">
+	      <description>Response to the request to register a service offered by this app on the module</description>
+
+	      <param name="appServiceRecord" type="Common.AppServiceRecord" mandatory="false">
+	      	  <description> If the request was successful, this object will be the current status of the service record for the published service. This will include the Core supplied service ID.</description>
+	      </param>
+    </function>
+
+    <function name="OnAppServiceData" messagetype="notification">
+	      <description>This notification includes the data that is updated from the specific service. HMI->SDL if the HMI is a producer, SDL->HMI if the HMI is a consumer</description>
+
+	      <param name="serviceData" type="Common.AppServiceData" mandatory="true"/>
+    </function>
 </interface>
 </interfaces>
