@@ -3107,10 +3107,10 @@
                 <param name="availableHDs" type="Integer" minvalue="0" maxvalue="7" mandatory="false" since="5.0" until="5.1"/>
             </history>
         </param>
-        <param name="availableHdChannels" type="Integer" minvalue="0" maxvalue="7" array="true" minsize="0" maxsize="8" mandatory="false" since="5.1">
+        <param name="availableHdChannels" type="Integer" minvalue="0" maxvalue="7" array="true" minsize="0" maxsize="8" mandatory="false" since="5.0">
             <description>The list of available HD sub-channel indexes. Empty list means no Hd channel is available. Read-only. </description>
         </param>
-        <param name="hdChannel" type="Integer" minvalue="0" maxvalue="7" mandatory="false" since="5.1">
+        <param name="hdChannel" type="Integer" minvalue="0" maxvalue="7" mandatory="false" since="5.0">
             <description>Current HD sub-channel if available</description>
             <history>
                 <param name="hdChannel" type="Integer" minvalue="1" maxvalue="3" mandatory="false" since="4.5" until="5.0"/>
@@ -3208,7 +3208,7 @@
                 True: Available, False: Not Available, Not present: Not Available.
             </description>
         </param>
-        <param name="availableHDsAvailable" type="Boolean" mandatory="false" deprecated="true" since="5.1">
+        <param name="availableHDsAvailable" type="Boolean" mandatory="false" deprecated="true" since="5.0">
             <description>
                 Availability of the getting the number of available HD channels.
                 True: Available, False: Not Available, Not present: Not Available.
@@ -3217,7 +3217,7 @@
                 <param name="availableHDsAvailable" type="Boolean" mandatory="false" since="1.0" until="5.1"/>
             </history>
         </param>
-        <param name="availableHdChannelsAvailable" type="Boolean" mandatory="false" since="5.1">
+        <param name="availableHdChannelsAvailable" type="Boolean" mandatory="false" since="5.0">
             <description>
                 Availability of the list of available HD sub-channel indexes.
                 True: Available, False: Not Available, Not present: Not Available.

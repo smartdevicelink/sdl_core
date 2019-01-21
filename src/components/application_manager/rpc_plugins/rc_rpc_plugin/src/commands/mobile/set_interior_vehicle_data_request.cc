@@ -92,7 +92,7 @@ const std::map<std::string, std::string> GetModuleDataToCapabilitiesMapping() {
   mapping["heatedWindshieldEnable"] = "heatedWindshieldAvailable";
   mapping["heatedMirrorsEnable"] = "heatedMirrorsAvailable";
   mapping["heatedRearWindowEnable"] = "heatedRearWindowAvailable";
-  mapping["climateEnable"] = "climateEnable";
+  mapping["climateEnable"] = "climateEnableAvailable";
   mapping["climateEnableAvailable"] = "climateEnableAvailable";
 
   // radio
