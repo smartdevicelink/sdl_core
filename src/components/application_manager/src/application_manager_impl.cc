@@ -808,7 +808,7 @@ void ApplicationManagerImpl::CollectCloudAppInformation() {
     pending_device_map_.insert(
         std::pair<std::string, std::string>(endpoint, *it));
 
-    connection_handler().AddCloudAppDevice(*it, endpoint, cloud_transport_type);
+    connection_handler().AddCloudAppDevice(endpoint, cloud_transport_type);
   }
 }
 
@@ -873,7 +873,7 @@ void ApplicationManagerImpl::CreatePendingApplication(
       mobile_apis::HybridAppPreference::eType>::
       StringToEnum(hybrid_app_preference_str, &hybrid_app_preference_enum);
 
-  if (!convert_result) {
+  if (!hybrid_app_preference_str.empty() && !convert_result) {
     LOG4CXX_ERROR(
         logger_,
         "Could not convert string to enum: " << hybrid_app_preference_str);
