@@ -821,6 +821,8 @@ class CacheManagerInterface {
   virtual void OnDeviceSwitching(const std::string& device_id_from,
                                  const std::string& device_id_to) = 0;
 
+  virtual void OnSystemStateChanged(SystemState state) = 0;
+
 #ifdef BUILD_TESTS
   /**
    * @brief GetPT allows to obtain std::shared_ptr to PT.

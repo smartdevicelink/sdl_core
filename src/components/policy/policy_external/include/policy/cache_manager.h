@@ -735,6 +735,8 @@ class CacheManager : public CacheManagerInterface {
   void OnDeviceSwitching(const std::string& device_id_from,
                          const std::string& device_id_to) OVERRIDE;
 
+  void OnSystemStateChanged(SystemState state) OVERRIDE;
+
  private:
   std::string currentDateTime();
   struct AppHMITypeToString {
@@ -910,6 +912,7 @@ class CacheManager : public CacheManagerInterface {
                 policy_table::PolicyTable& pt);
 
   void InitBackupThread();
+  void StopBackupTread();
 
   /**
    * @brief Processes the PTU process by distinguishing the policy type.
@@ -955,6 +958,7 @@ class CacheManager : public CacheManagerInterface {
   sync_primitives::Lock backuper_locker_;
   BackgroundBackuper* backuper_;
   const PolicySettings* settings_;
+  volatile bool is_policy_table_loaded_;
 
   friend class AccessRemoteImpl;
 

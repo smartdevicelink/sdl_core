@@ -48,6 +48,7 @@
 #include "smart_objects/smart_object.h"
 #include "policy/policy_types.h"
 #include "policy/policy_table/types.h"
+#include "policy/policy_types.h"
 #include "policy/cache_manager_interface.h"
 
 using namespace ::rpc::policy_table_interface_base;
@@ -119,7 +120,7 @@ class PolicyHandlerInterface {
    */
   virtual uint32_t TimeoutExchangeMSec() const = 0;
   virtual void OnExceededTimeout() = 0;
-  virtual void OnSystemReady() = 0;
+  virtual void OnSystemStateChanged(SystemState state) = 0;
   virtual void PTUpdatedAt(Counters counter, int value) = 0;
   virtual void add_listener(PolicyHandlerObserver* listener) = 0;
   virtual void remove_listener(PolicyHandlerObserver* listener) = 0;

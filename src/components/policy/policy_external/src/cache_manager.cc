@@ -268,7 +268,9 @@ CacheManager::CacheManager()
     : CacheManagerInterface()
     , pt_(new policy_table::Table)
     , backup_(new SQLPTExtRepresentation())
-    , update_required(false) {
+    , update_required(false)
+    , backup_thread_(NULL)
+    , is_policy_table_loaded_(false) {
   InitBackupThread();
 }
 
@@ -276,16 +278,15 @@ CacheManager::CacheManager(bool in_memory)
     : CacheManagerInterface()
     , pt_(new policy_table::Table)
     , backup_(new SQLPTExtRepresentation(in_memory))
-    , update_required(false) {
+    , update_required(false)
+    , backup_thread_(NULL)
+    , is_policy_table_loaded_(false) {
   InitBackupThread();
 }
 
 CacheManager::~CacheManager() {
   LOG4CXX_AUTO_TRACE(logger_);
-  sync_primitives::AutoLock lock(backuper_locker_);
-  backup_thread_->join();
-  delete backup_thread_->delegate();
-  threads::DeleteThread(backup_thread_);
+  StopBackupTread();
 }
 
 ConsentPriorityType CacheManager::GetConsentsPriority(
@@ -797,7 +798,15 @@ bool CacheManager::AppHasHMIType(const std::string& application_id,
 
 void CacheManager::Backup() {
   sync_primitives::AutoLock lock(backuper_locker_);
-  DCHECK(backuper_);
+  if (NULL == backup_thread_) {
+    LOG4CXX_DEBUG(logger_, "No running backup thread found. Backup skipped.");
+    return;
+  }
+  if (!is_policy_table_loaded_) {
+    LOG4CXX_DEBUG(logger_, "Policy table is not loaded yet. Backup skipped.");
+    return;
+  }
+  DCHECK_OR_RETURN_VOID(backuper_);
   backuper_->DoBackup();
 }
 
@@ -2258,54 +2267,63 @@ bool CacheManager::IsApplicationRepresented(const std::string& app_id) const {
 bool CacheManager::Init(const std::string& file_name,
                         const PolicySettings* settings) {
   LOG4CXX_AUTO_TRACE(logger_);
+  DCHECK_OR_RETURN(settings, false);
   settings_ = settings;
-  InitResult init_result = backup_->Init(settings);
   ex_backup_ = std::dynamic_pointer_cast<PTExtRepresentation>(backup_);
 
-  bool result = true;
-  switch (init_result) {
+  switch (backup_->Init(settings)) {
     case InitResult::EXISTS: {
-      LOG4CXX_INFO(logger_, "Policy Table exists, was loaded correctly.");
-      result = LoadFromBackup();
-      if (result) {
-        if (!backup_->IsDBVersionActual()) {
-          if (!backup_->RefreshDB()) {
-            return false;
-          }
-          backup_->UpdateDBVersion();
-          Backup();
+      LOG4CXX_INFO(logger_, "Policy storage is loaded.");
+      LoadFromBackup();
+      if (!backup_->IsDBVersionActual()) {
+        LOG4CXX_INFO(logger_, "DB version is NOT actual");
+        if (!backup_->RefreshDB()) {
+          LOG4CXX_ERROR(logger_, "Can't cleanup policy storage.");
+          return false;
         }
-        if (!MergePreloadPT(file_name)) {
-          result = false;
-        }
+        backup_->UpdateDBVersion();
       }
+      if (!MergePreloadPT(file_name)) {
+        return false;
+      }
+
     } break;
     case InitResult::SUCCESS: {
       LOG4CXX_INFO(logger_, "Policy Table was inited successfully");
-      result = LoadFromFile(file_name, *pt_);
+      {
+        sync_primitives::AutoLock lock(cache_lock_);
+        if (!LoadFromFile(file_name, *pt_)) {
+          LOG4CXX_ERROR(logger_, "Can't load policy table from " << file_name);
+          backup_->RemoveDB();
+          return false;
+        }
+      }
       std::shared_ptr<policy_table::Table> snapshot = GenerateSnapshot();
 
-      result &= snapshot->is_valid();
-      LOG4CXX_DEBUG(logger_,
-                    "Check if snapshot valid: " << std::boolalpha << result);
-
-      if (result) {
-        backup_->UpdateDBVersion();
-        Backup();
-        *pt_->policy_table.module_config.preloaded_pt = true;
-      } else {
+      if (!snapshot->is_valid()) {
+        LOG4CXX_DEBUG(logger_, "Policy table snapshot is invalid.");
         rpc::ValidationReport report("policy_table");
         snapshot->ReportErrors(&report);
         ex_backup_->RemoveDB();
+        return false;
       }
+      if (!backup_->UpdateDBVersion()) {
+        LOG4CXX_ERROR(logger_, "Can't update storage version.");
+        ex_backup_->RemoveDB();
+        return false;
+      }
+      sync_primitives::AutoLock lock(cache_lock_);
+      *pt_->policy_table.module_config.preloaded_pt = true;
+
     } break;
     default: {
-      result = false;
-      LOG4CXX_ERROR(logger_, "Failed to init policy table.");
-    } break;
+      LOG4CXX_ERROR(logger_, "Policy storage initialization failed.");
+      return false;
+    }
   }
-
-  return result;
+  is_policy_table_loaded_ = true;
+  Backup();
+  return true;
 }
 
 void CacheManager::FillDeviceSpecificData() {
@@ -2347,7 +2365,9 @@ bool CacheManager::LoadFromBackup() {
   update_required = backup_->UpdateRequired();
 
   FillDeviceSpecificData();
-
+  LOG4CXX_DEBUG(logger_,
+                "Policy table content is:"
+                    << Json::StyledWriter().write(pt_->ToJsonValue()));
   return true;
 }
 
@@ -2767,9 +2787,22 @@ void CacheManager::MergeCFM(const policy_table::PolicyTable& new_pt,
 
 void CacheManager::InitBackupThread() {
   LOG4CXX_AUTO_TRACE(logger_);
+  sync_primitives::AutoLock lock(backuper_locker_);
   backuper_ = new BackgroundBackuper(this);
   backup_thread_ = threads::CreateThread("Backup thread", backuper_);
   backup_thread_->start();
+}
+
+void CacheManager::StopBackupTread() {
+  LOG4CXX_AUTO_TRACE(logger_);
+  sync_primitives::AutoLock lock(backuper_locker_);
+  if (NULL == backup_thread_) {
+    return;
+  }
+  backup_thread_->join();
+  delete backup_thread_->delegate();
+  threads::DeleteThread(backup_thread_);
+  backup_thread_ = NULL;
 }
 
 const PolicySettings& CacheManager::get_settings() const {
@@ -2800,6 +2833,20 @@ void CacheManager::OnDeviceSwitching(const std::string& device_id_from,
     const auto app_id = f->first;
     LOG4CXX_DEBUG(logger_, "Updating permissions for key: " << app_id);
     consents_to[app_id] = f->second;
+  }
+}
+
+void CacheManager::OnSystemStateChanged(SystemState state) {
+  switch (state) {
+    case SystemState::kStateSuspended:
+      StopBackupTread();
+      break;
+    case SystemState::kStateAwaken:
+      InitBackupThread();
+      break;
+    default:
+      LOG4CXX_ERROR(logger_, "Unknown system state.");
+      break;
   }
 }
 

@@ -68,6 +68,11 @@ void OnExitAllApplicationsNotification::Run() {
           (*message_)[strings::msg_params][hmi_request::reason].asInt());
   LOG4CXX_DEBUG(logger_, "Reason " << reason);
 
+  event_engine::Event event(
+      hmi_apis::FunctionID::BasicCommunication_OnExitAllApplications);
+  event.set_smart_object(*message_);
+  event.raise(application_manager_.event_dispatcher());
+
   mobile_api::AppInterfaceUnregisteredReason::eType mob_reason =
       mobile_api::AppInterfaceUnregisteredReason::INVALID_ENUM;
 

@@ -193,7 +193,7 @@ TEST_F(PolicyManagerImplTest2, OnSystemReady) {
   CreateLocalPT(preloaded_pt_filename_);
   // Check
   EXPECT_CALL(listener_, OnSystemInfoUpdateRequired());
-  policy_manager_->OnSystemReady();
+  policy_manager_->OnSystemStateChanged(policy::SystemState::kStateReady);
 }
 
 TEST_F(PolicyManagerImplTest2, ResetRetrySequence) {

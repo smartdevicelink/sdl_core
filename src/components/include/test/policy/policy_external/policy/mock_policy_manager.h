@@ -168,7 +168,7 @@ class MockPolicyManager : public PolicyManager {
   MOCK_METHOD0(CleanupUnpairedDevices, bool());
   MOCK_CONST_METHOD1(CanAppKeepContext, bool(const std::string& app_id));
   MOCK_CONST_METHOD1(CanAppStealFocus, bool(const std::string& app_id));
-  MOCK_METHOD0(OnSystemReady, void());
+  MOCK_METHOD1(OnSystemStateChanged, void(policy::SystemState));
   MOCK_CONST_METHOD1(GetNotificationsNumber,
                      uint32_t(const std::string& priority));
   MOCK_METHOD1(SetVINValue, void(const std::string& value));

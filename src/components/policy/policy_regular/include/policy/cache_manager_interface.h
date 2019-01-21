@@ -684,6 +684,8 @@ class CacheManagerInterface {
    */
   virtual void OnDeviceSwitching(const std::string& device_id_from,
                                  const std::string& device_id_to) = 0;
+
+  virtual void OnSystemStateChanged(SystemState state) = 0;
 };
 
 typedef std::shared_ptr<CacheManagerInterface> CacheManagerInterfaceSPtr;

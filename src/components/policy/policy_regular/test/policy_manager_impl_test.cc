@@ -871,7 +871,7 @@ TEST_F(PolicyManagerImplTest2, OnSystemReady) {
   CreateLocalPT("sdl_preloaded_pt.json");
   // Check
   EXPECT_CALL(listener, OnSystemInfoUpdateRequired());
-  manager->OnSystemReady();
+  manager->OnSystemStateChanged(policy::SystemState::kStateReady);
 }
 
 TEST_F(PolicyManagerImplTest2, ResetRetrySequence) {

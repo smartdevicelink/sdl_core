@@ -75,6 +75,11 @@ void OnAwakeSDLNotification::Run() {
   }
 
   application_manager_.resume_controller().OnAwake();
+
+  event_engine::Event event(
+      hmi_apis::FunctionID::BasicCommunication_OnAwakeSDL);
+  event.set_smart_object(*message_);
+  event.raise(application_manager_.event_dispatcher());
 }
 
 }  // namespace commands

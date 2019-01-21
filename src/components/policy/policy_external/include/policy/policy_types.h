@@ -531,6 +531,16 @@ enum ConsentPriorityType { kUserConsentPrio, kExternalConsentPrio };
  */
 enum ConsentProcessingPolicy { kTimestampBased, kExternalConsentBased };
 
+/**
+ * @brief The SystemState enum defines possible system state what policy has to
+ * be aware of
+ */
+enum class SystemState : uint32_t {
+  kStateReady,
+  kStateSuspended,
+  kStateAwaken
+};
+
 }  //  namespace policy
 
 #endif  // SRC_COMPONENTS_POLICY_POLICY_EXTERNAL_INCLUDE_POLICY_POLICY_TYPES_H_
