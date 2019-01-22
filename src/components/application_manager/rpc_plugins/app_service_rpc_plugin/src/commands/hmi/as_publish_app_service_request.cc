@@ -53,12 +53,22 @@ ASPublishAppServiceRequest::~ASPublishAppServiceRequest() {}
 
 void ASPublishAppServiceRequest::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
-
-  (*message_)[strings::params][strings::message_type] = MessageType::kResponse;
-  (*message_)[strings::params][hmi_response::code] =
-      hmi_apis::Common_Result::SUCCESS;
+  smart_objects::SmartObject response_params =
+      smart_objects::SmartObject(smart_objects::SmartType_Map);
+  smart_objects::SmartObject service_record =
+      smart_objects::SmartObject(smart_objects::SmartType_Map);
+  service_record[strings::service_manifest] =
+      (*message_)[strings::msg_params][strings::app_service_manifest];
+  service_record[strings::service_id] = "This is a service ID";
+  service_record[strings::service_published] = true;
+  service_record[strings::service_active] = true;
+  response_params[strings::app_service_record] = service_record;
   // TODO: Add AppServiceRecord to response
-  rpc_service_.ManageHMICommand(message_);
+  SendResponse(true,
+               (*message_)[strings::params][strings::correlation_id].asUInt(),
+               hmi_apis::FunctionID::AppService_PublishAppService,
+               hmi_apis::Common_Result::SUCCESS,
+               &response_params);
 }
 
 }  // namespace commands

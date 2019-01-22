@@ -300,6 +300,23 @@ extern const char* system_software_version;
 extern const char* priority;
 extern const char* engine_oil_life;
 
+// app services
+extern const char* app_service_manifest;
+extern const char* service_name;
+extern const char* service_type;
+extern const char* service_icon;
+extern const char* allow_app_consumers;
+extern const char* uri_prefix;
+extern const char* uri_scheme;
+extern const char* rpc_spec_version;
+extern const char* handled_rpcs;
+extern const char* media_service_manifest;
+extern const char* app_service_record;
+extern const char* service_id;
+extern const char* service_manifest;
+extern const char* service_published;
+extern const char* service_active;
+
 // resuming
 extern const char* application_commands;
 extern const char* application_submenus;

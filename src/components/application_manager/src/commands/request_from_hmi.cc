@@ -71,7 +71,8 @@ void RequestFromHMI::SendResponse(
     const bool success,
     const uint32_t correlation_id,
     const hmi_apis::FunctionID::eType function_id,
-    const hmi_apis::Common_Result::eType result_code) {
+    const hmi_apis::Common_Result::eType result_code,
+    const smart_objects::SmartObject* response_params) {
   smart_objects::SmartObjectSPtr message =
       std::make_shared<smart_objects::SmartObject>(
           smart_objects::SmartType_Map);
@@ -80,6 +81,10 @@ void RequestFromHMI::SendResponse(
   (*message)[strings::params][hmi_response::code] = 0;
   (*message)[strings::msg_params][strings::success] = success;
   (*message)[strings::msg_params][strings::result_code] = result_code;
+
+  if (response_params) {
+    (*message)[strings::msg_params] = *response_params;
+  }
 
   rpc_service_.ManageHMICommand(message);
 }

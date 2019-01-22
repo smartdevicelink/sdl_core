@@ -267,6 +267,23 @@ const char* system_software_version = "systemSoftwareVersion";
 const char* priority = "priority";
 const char* engine_oil_life = "engineOilLife";
 
+// app services
+const char* app_service_manifest = "appServiceManifest";
+const char* service_name = "serviceName";
+const char* service_type = "serviceType";
+const char* service_icon = "serviceIcon";
+const char* allow_app_consumers = "allowAppConsumers";
+const char* uri_prefix = "uriPrefix";
+const char* uri_scheme = "uriScheme"; 
+const char* rpc_spec_version = "rpcSpecVersion";
+const char* handled_rpcs = "handledRPCs";
+const char* media_service_manifest = "mediaServiceManifest";
+const char* app_service_record = "appServiceRecord";
+const char* service_id = "serviceID";
+const char* service_manifest = "serviceManifest";
+const char* service_published = "servicePublished";
+const char* service_active = "serviceActive";
+
 // resuming
 const char* application_commands = "applicationCommands";
 const char* application_submenus = "applicationSubMenus";

@@ -64,7 +64,8 @@ class RequestFromHMI : public CommandImpl, public event_engine::EventObserver {
   void SendResponse(const bool success,
                     const uint32_t correlation_id,
                     const hmi_apis::FunctionID::eType function_id,
-                    const hmi_apis::Common_Result::eType result_code);
+                    const hmi_apis::Common_Result::eType result_code,
+                    const smart_objects::SmartObject* response_params = NULL);
 
   /**
    * @brief SendResponse allows to send error response to hmi
