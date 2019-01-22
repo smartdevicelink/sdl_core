@@ -845,8 +845,7 @@ void ApplicationManagerImpl::RefreshCloudAppInformation() {
       continue;
     }
 
-    connection_handler().AddCloudAppDevice(
-        *enabled_it, endpoint, cloud_transport_type);
+    connection_handler().AddCloudAppDevice(endpoint, cloud_transport_type);
   }
   pending_device_map_lock_ptr_->Release();
 
@@ -965,7 +964,7 @@ void ApplicationManagerImpl::CreatePendingApplication(
       mobile_apis::HybridAppPreference::eType>::
       StringToEnum(hybrid_app_preference_str, &hybrid_app_preference_enum);
 
-  if (!convert_result) {
+  if (!hybrid_app_preference_str.empty() && !convert_result) {
     LOG4CXX_ERROR(
         logger_,
         "Could not convert string to enum: " << hybrid_app_preference_str);
