@@ -31,6 +31,8 @@
  */
 
 #include "sdl_rpc_plugin/commands/mobile/get_system_capability_request.h"
+#include "sdl_rpc_plugin/extensions/get_system_capability_app_extension.h"
+
 
 namespace sdl_rpc_plugin {
 using namespace application_manager;
@@ -131,6 +133,17 @@ void GetSystemCapabilityRequest::Run() {
     default:  // Return unsupported resource
       SendResponse(false, mobile_apis::Result::UNSUPPORTED_RESOURCE);
       return;
+  }
+
+  if((*message_)[app_mngr::strings::msg_params].keyExists(
+          strings::subscribe)){
+    auto& ext = SystemCapabilityAppExtension::ExtractVIExtension(*app);
+    if((*message_)[app_mngr::strings::msg_params][strings::subscribe].asBool() == true){
+      ext.subscribeTo(response_type);
+    }
+    else{
+      ext.unsubscribeFrom(response_type);
+    }
   }
   SendResponse(true, mobile_apis::Result::SUCCESS, NULL, &response_params);
 }
