@@ -60,6 +60,7 @@ extern const char* app_launch_last_session;
 extern const char* policy_app_id;
 extern const char* hmi_app_id;
 extern const char* device_id;
+extern const char* subscribe;
 extern const char* subscribed_for_way_points;
 extern const char* url;
 extern const char* urlScheme;
