@@ -57,7 +57,7 @@ PublishAppServiceRequest::~PublishAppServiceRequest() {}
 void PublishAppServiceRequest::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
   LOG4CXX_DEBUG(logger_, "Received a PublishAppService");
-  MessageHelper::PrintSmartObject(message_);
+  MessageHelper::PrintSmartObject(*message_);
 
   smart_objects::SmartObject response_params =
       smart_objects::SmartObject(smart_objects::SmartType_Map);
@@ -69,7 +69,7 @@ void PublishAppServiceRequest::Run() {
   service_record[strings::service_id] = "This is a service ID";
   service_record[strings::service_published] = true;
   service_record[strings::service_active] = true;
-  
+
   response_params[strings::app_service_record] = service_record;
 
   SendResponse(true, mobile_apis::Result::SUCCESS, NULL, &response_params);

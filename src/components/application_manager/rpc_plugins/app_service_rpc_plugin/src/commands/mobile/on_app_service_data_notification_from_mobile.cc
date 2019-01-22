@@ -58,7 +58,7 @@ OnAppServiceDataNotificationFromMobile::
 void OnAppServiceDataNotificationFromMobile::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
   LOG4CXX_DEBUG(logger_, "Received an OnAppServiceData");
-  MessageHelper::PrintSmartObject(message_);
+  MessageHelper::PrintSmartObject(*message_);
 }
 
 }  // namespace commands
