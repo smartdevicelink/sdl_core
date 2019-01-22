@@ -168,6 +168,8 @@ ApplicationManagerImpl::ApplicationManagerImpl(
     , navi_close_app_timeout_(am_settings.stop_streaming_timeout())
     , navi_end_stream_timeout_(am_settings.stop_streaming_timeout())
     , state_ctrl_(*this)
+    , pending_device_map_lock_ptr_(
+          std::make_shared<sync_primitives::RecursiveLock>())
     , application_list_update_timer_(
           "AM ListUpdater",
           new TimerTaskImpl<ApplicationManagerImpl>(
@@ -381,21 +383,6 @@ void ApplicationManagerImpl::OnApplicationRegistered(ApplicationSharedPtr app) {
         plugin.OnApplicationEvent(plugin_manager::kApplicationRegistered, app);
       };
   plugin_manager_->ForEachPlugin(on_app_registered);
-
-  // TODO(AOleynik): Is neccessary to be able to know that registration process
-  // has been completed and default HMI level is set, otherwise policy will
-  // block all the requests/notifications to mobile
-  // APPLINK-20764 - introduce usage of internal events or re-implement
-  event_engine::Event event(
-      hmi_apis::FunctionID::BasicCommunication_OnAppRegistered);
-
-  smart_objects::SmartObject msg;
-  msg[strings::params][strings::message_type] =
-      hmi_apis::messageType::notification;
-  msg[strings::params][strings::app_id] = app->app_id();
-
-  event.set_smart_object(msg);
-  event.raise(event_dispatcher());
 }
 
 void ApplicationManagerImpl::OnApplicationSwitched(ApplicationSharedPtr app) {
@@ -541,6 +528,7 @@ ApplicationSharedPtr ApplicationManagerImpl::RegisterApplication(
                           app_name,
                           GetPolicyHandler().GetStatisticManager(),
                           *this));
+
   if (!application) {
     std::shared_ptr<smart_objects::SmartObject> response(
         MessageHelper::CreateNegativeResponse(
@@ -610,12 +598,47 @@ ApplicationSharedPtr ApplicationManagerImpl::RegisterApplication(
 
   // Keep HMI add id in case app is present in "waiting for registration" list
   apps_to_register_list_lock_ptr_->Acquire();
-  AppsWaitRegistrationSet::iterator it = apps_to_register_.find(application);
-  if (apps_to_register_.end() != it) {
+  PolicyAppIdPredicate finder(application->policy_app_id());
+  ApplicationSet::iterator it =
+      std::find_if(apps_to_register_.begin(), apps_to_register_.end(), finder);
+  bool is_mismatched_cloud_app = false;
+
+  if (apps_to_register_.end() == it) {
+    DevicePredicate finder(application->device());
+    it = std::find_if(
+        apps_to_register_.begin(), apps_to_register_.end(), finder);
+
+    bool found = apps_to_register_.end() != it;
+    is_mismatched_cloud_app = found && (*it)->is_cloud_app() &&
+                              policy_app_id != (*it)->policy_app_id();
+  } else {
     application->set_hmi_application_id((*it)->hmi_app_id());
-    apps_to_register_.erase(application);
+
+    // Set cloud app parameters
+    application->set_cloud_app_endpoint((*it)->cloud_app_endpoint());
+    application->set_cloud_app_certificate((*it)->cloud_app_certificate());
+    application->set_cloud_app_auth_token((*it)->cloud_app_auth_token());
+    application->set_cloud_app_transport_type(
+        (*it)->cloud_app_transport_type());
+    application->set_hybrid_app_preference((*it)->hybrid_app_preference());
+    apps_to_register_.erase(it);
   }
   apps_to_register_list_lock_ptr_->Release();
+
+  // Reject registration request if a cloud app registers with the incorrect
+  // appID
+  if (is_mismatched_cloud_app) {
+    std::shared_ptr<smart_objects::SmartObject> response(
+        MessageHelper::CreateNegativeResponse(
+            connection_key,
+            mobile_apis::FunctionID::RegisterAppInterfaceID,
+            message[strings::params][strings::correlation_id].asUInt(),
+            mobile_apis::Result::DISALLOWED));
+    (*response)[strings::msg_params][strings::info] =
+        "Cloud app registered with incorrect app id";
+    rpc_service_->ManageMobileCommand(response, commands::Command::SOURCE_SDL);
+    return ApplicationSharedPtr();
+  }
 
   if (!application->hmi_app_id()) {
     const bool is_saved =
@@ -782,22 +805,29 @@ void ApplicationManagerImpl::OnHMIStartedCooperation() {
   rpc_service_->ManageHMICommand(mixing_audio_supported_request);
   resume_controller().ResetLaunchTime();
 
-  CollectCloudAppInformation();
+  RefreshCloudAppInformation();
 }
 
-void ApplicationManagerImpl::CollectCloudAppInformation() {
-  std::vector<std::string> cloud_app_id_vector;
-  GetPolicyHandler().GetEnabledCloudApps(cloud_app_id_vector);
-  std::vector<std::string>::iterator it = cloud_app_id_vector.begin();
-  std::vector<std::string>::iterator end = cloud_app_id_vector.end();
+void ApplicationManagerImpl::RefreshCloudAppInformation() {
+  LOG4CXX_AUTO_TRACE(logger_);
+  std::vector<std::string> enabled_apps;
+  GetPolicyHandler().GetEnabledCloudApps(enabled_apps);
+  std::vector<std::string>::iterator enabled_it = enabled_apps.begin();
+  std::vector<std::string>::iterator enabled_end = enabled_apps.end();
   std::string endpoint = "";
   std::string certificate = "";
   std::string auth_token = "";
   std::string cloud_transport_type = "";
   std::string hybrid_app_preference = "";
   bool enabled = true;
-  for (; it != end; ++it) {
-    GetPolicyHandler().GetCloudAppParameters(*it,
+
+  // Store old device map and clear the current map
+  pending_device_map_lock_ptr_->Acquire();
+  std::map<std::string, std::string> old_device_map = pending_device_map_;
+  pending_device_map_ = std::map<std::string, std::string>();
+  // Create a device for each newly enabled cloud app
+  for (; enabled_it != enabled_end; ++enabled_it) {
+    GetPolicyHandler().GetCloudAppParameters(*enabled_it,
                                              enabled,
                                              endpoint,
                                              certificate,
@@ -806,9 +836,62 @@ void ApplicationManagerImpl::CollectCloudAppInformation() {
                                              hybrid_app_preference);
 
     pending_device_map_.insert(
-        std::pair<std::string, std::string>(endpoint, *it));
+        std::pair<std::string, std::string>(endpoint, *enabled_it));
+    // Determine which endpoints were disabled by erasing all enabled apps from
+    // the old device list
+    auto old_device_it = old_device_map.find(endpoint);
+    if (old_device_it != old_device_map.end()) {
+      old_device_map.erase(old_device_it);
+      continue;
+    }
 
     connection_handler().AddCloudAppDevice(endpoint, cloud_transport_type);
+  }
+  pending_device_map_lock_ptr_->Release();
+
+  int removed_app_count = 0;
+  // Clear out devices for existing cloud apps that were disabled
+  for (auto& device : old_device_map) {
+    std::string policy_app_id = device.second;
+    // First search for the disabled app within the registered apps
+    ApplicationSharedPtr app = application_by_policy_id(policy_app_id);
+    if (app.use_count() == 0) {
+      sync_primitives::AutoLock lock(apps_to_register_list_lock_ptr_);
+      // If the disabled app is not present in the registered app list, check
+      // the apps awaiting registration
+      PolicyAppIdPredicate finder(policy_app_id);
+      ApplicationSet::iterator it = std::find_if(
+          apps_to_register_.begin(), apps_to_register_.end(), finder);
+      if (it == apps_to_register_.end()) {
+        LOG4CXX_DEBUG(logger_,
+                      "Unable to find app to remove (" << policy_app_id
+                                                       << "), skipping");
+        continue;
+      }
+      app = *it;
+      apps_to_register_.erase(it);
+    }
+    // If the disabled app is registered, unregistered it before destroying the
+    // device
+    if (app->IsRegistered() && app->is_cloud_app()) {
+      LOG4CXX_DEBUG(logger_, "Disabled app is registered, unregistering now");
+      GetRPCService().ManageMobileCommand(
+          MessageHelper::GetOnAppInterfaceUnregisteredNotificationToMobile(
+              app->app_id(),
+              mobile_api::AppInterfaceUnregisteredReason::APP_UNAUTHORIZED),
+          commands::Command::SOURCE_SDL);
+
+      OnAppUnauthorized(app->app_id());
+    }
+    // Delete the cloud device
+    connection_handler().RemoveCloudAppDevice(app->device());
+    removed_app_count++;
+  }
+
+  // Update app list if disabled apps were removed
+  if (removed_app_count > 0) {
+    LOG4CXX_DEBUG(logger_, "Removed " << removed_app_count << " disabled apps");
+    SendUpdateAppList();
   }
 }
 
@@ -825,10 +908,12 @@ void ApplicationManagerImpl::CreatePendingApplication(
   std::string hybrid_app_preference_str = "";
   bool enabled = true;
   std::string name = device_info.name();
+  pending_device_map_lock_ptr_->Acquire();
   auto it = pending_device_map_.find(name);
   if (it == pending_device_map_.end()) {
     return;
   }
+  pending_device_map_lock_ptr_->Release();
 
   const std::string policy_app_id = it->second;
 
@@ -855,8 +940,14 @@ void ApplicationManagerImpl::CreatePendingApplication(
                           *this));
 
   if (!application) {
-    LOG4CXX_INFO(logger_, "Could not streate application");
+    LOG4CXX_INFO(logger_, "Could not create application");
     return;
+  }
+
+  const std::string app_icon_dir(settings_.app_icons_folder());
+  const std::string full_icon_path(app_icon_dir + "/" + policy_app_id);
+  if (file_system::FileExists(full_icon_path)) {
+    application->set_app_icon_path(full_icon_path);
   }
 
   GetPolicyHandler().GetCloudAppParameters(policy_app_id,
@@ -895,6 +986,28 @@ void ApplicationManagerImpl::CreatePendingApplication(
                 "apps_to_register_ size after: " << apps_to_register_.size());
 
   SendUpdateAppList();
+}
+
+void ApplicationManagerImpl::OnConnectionStatusUpdated() {
+  SendUpdateAppList();
+}
+
+hmi_apis::Common_CloudConnectionStatus::eType
+ApplicationManagerImpl::GetCloudAppConnectionStatus(
+    ApplicationConstSharedPtr app) const {
+  transport_manager::ConnectionStatus status =
+      connection_handler().GetConnectionStatus(app->device());
+  switch (status) {
+    case transport_manager::ConnectionStatus::CONNECTED:
+      return hmi_apis::Common_CloudConnectionStatus::CONNECTED;
+    case transport_manager::ConnectionStatus::RETRY:
+      return hmi_apis::Common_CloudConnectionStatus::RETRY;
+    case transport_manager::ConnectionStatus::PENDING:
+    case transport_manager::ConnectionStatus::CLOSING:
+      return hmi_apis::Common_CloudConnectionStatus::NOT_CONNECTED;
+    default:
+      return hmi_apis::Common_CloudConnectionStatus::INVALID_ENUM;
+  }
 }
 
 uint32_t ApplicationManagerImpl::GetNextHMICorrelationID() {
@@ -3479,6 +3592,7 @@ void ApplicationManagerImpl::OnPTUFinished(const bool ptu_result) {
   if (!ptu_result) {
     return;
   }
+  RefreshCloudAppInformation();
   auto on_app_policy_updated = [](plugin_manager::RPCPlugin& plugin) {
     plugin.OnPolicyEvent(plugin_manager::kApplicationPolicyUpdated);
   };
@@ -3756,6 +3870,13 @@ void ApplicationManagerImpl::AddMockApplication(ApplicationSharedPtr mock_app) {
   applications_.insert(mock_app);
   apps_size_ = applications_.size();
   applications_list_lock_ptr_->Release();
+}
+
+void ApplicationManagerImpl::AddMockPendingApplication(
+    ApplicationSharedPtr mock_app) {
+  apps_to_register_list_lock_ptr_->Acquire();
+  apps_to_register_.insert(mock_app);
+  apps_to_register_list_lock_ptr_->Release();
 }
 
 void ApplicationManagerImpl::SetMockMediaManager(

@@ -444,6 +444,12 @@ class ApplicationImpl : public virtual Application,
   const std::string& cloud_app_certificate() const OVERRIDE;
 
   /**
+   * @brief Check whether the given application is a cloud app.
+   * @return true if the application is a cloud application, false otherwise.
+   */
+  bool is_cloud_app() const OVERRIDE;
+
+  /**
    * @brief Set cloud app endpoint
    */
   void set_cloud_app_endpoint(const std::string& endpoint) OVERRIDE;

@@ -102,9 +102,19 @@ class ConnectionHandlerImpl
 
   /**
    * \brief Connects to all services of device
-   * \param deviceHandle Handle of device to connect to
+   * \param device_handle Handle of device to connect to
    */
   void ConnectToDevice(connection_handler::DeviceHandle device_handle) OVERRIDE;
+
+  /**
+   * @brief Retrieves the connection status of a given device
+   *
+   * @param device_handle Handle of device to query
+   *
+   * @return The connection status of the given device
+   */
+  transport_manager::ConnectionStatus GetConnectionStatus(
+      const DeviceHandle& device_handle) const OVERRIDE;
 
   /**
    * @brief RunAppOnDevice allows to run specific application on the certain
@@ -122,6 +132,8 @@ class ConnectionHandlerImpl
 
   void AddCloudAppDevice(const std::string& endpoint,
                          const std::string& cloud_transport_type) OVERRIDE;
+
+  void RemoveCloudAppDevice(const DeviceHandle device_id) OVERRIDE;
 
   void StartTransportManager() OVERRIDE;
 
@@ -164,6 +176,8 @@ class ConnectionHandlerImpl
   void OnScanDevicesFinished() OVERRIDE;
   void OnScanDevicesFailed(
       const transport_manager::SearchDeviceError& error) OVERRIDE;
+
+  void OnConnectionStatusUpdated() OVERRIDE;
 
   /**
    * \brief Notifies about pending connection.

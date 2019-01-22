@@ -56,6 +56,8 @@ enum {
   E_INTERNAL_ERROR
 };
 
+enum ConnectionStatus { INVALID = -1, PENDING, RETRY, CONNECTED, CLOSING };
+
 /**
  * @brief Type definition for variable that hold handle of device.
  */

@@ -249,6 +249,10 @@ void ConnectionHandlerImpl::OnScanDevicesFailed(
   LOG4CXX_WARN(logger_, "Scan devices failed. " << error.text());
 }
 
+void ConnectionHandlerImpl::OnConnectionStatusUpdated() {
+  connection_handler_observer_->OnConnectionStatusUpdated();
+}
+
 void ConnectionHandlerImpl::OnConnectionPending(
     const transport_manager::DeviceInfo& device_info,
     const transport_manager::ConnectionUID connection_id) {
@@ -1292,6 +1296,11 @@ void ConnectionHandlerImpl::ConnectToDevice(
   }
 }
 
+transport_manager::ConnectionStatus ConnectionHandlerImpl::GetConnectionStatus(
+    const DeviceHandle& device_handle) const {
+  return transport_manager_.GetConnectionStatus(device_handle);
+}
+
 void ConnectionHandlerImpl::RunAppOnDevice(const std::string& device_mac,
                                            const std::string& bundle_id) const {
   for (DeviceMap::const_iterator i = device_list_.begin();
@@ -1317,6 +1326,10 @@ void ConnectionHandlerImpl::ConnectToAllDevices() {
 void ConnectionHandlerImpl::AddCloudAppDevice(
     const std::string& endpoint, const std::string& cloud_transport_type) {
   transport_manager_.AddCloudDevice(endpoint, cloud_transport_type);
+}
+
+void ConnectionHandlerImpl::RemoveCloudAppDevice(const DeviceHandle device_id) {
+  transport_manager_.RemoveCloudDevice(device_id);
 }
 
 void ConnectionHandlerImpl::StartTransportManager() {

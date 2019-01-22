@@ -80,6 +80,16 @@ class ConnectionHandler {
       connection_handler::DeviceHandle device_handle) = 0;
 
   /**
+   * @brief Retrieves the connection status of a given device
+   *
+   * @param device_handle Handle of device to query
+   *
+   * @return The connection status of the given device
+   */
+  virtual transport_manager::ConnectionStatus GetConnectionStatus(
+      const DeviceHandle& device_handle) const = 0;
+
+  /**
    * @brief RunAppOnDevice allows to run specific application on the certain
    *device.
    *
@@ -95,6 +105,8 @@ class ConnectionHandler {
 
   virtual void AddCloudAppDevice(const std::string& endpoint,
                                  const std::string& cloud_transport_type) = 0;
+
+  virtual void RemoveCloudAppDevice(const DeviceHandle device_id) = 0;
 
   /**
    * @brief  Close the connection revoked by Policy

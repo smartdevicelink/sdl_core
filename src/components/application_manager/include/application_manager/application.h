@@ -981,6 +981,12 @@ class Application : public virtual InitialApplicationData,
   virtual const std::string& cloud_app_certificate() const = 0;
 
   /**
+   * @brief Check whether the given application is a cloud app.
+   * @return true if the application is a cloud application, false otherwise.
+   */
+  virtual bool is_cloud_app() const = 0;
+
+  /**
    * @brief Set cloud app endpoint
    */
   virtual void set_cloud_app_endpoint(const std::string& endpoint) = 0;

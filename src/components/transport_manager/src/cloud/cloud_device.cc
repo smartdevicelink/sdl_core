@@ -60,7 +60,7 @@ bool CloudDevice::IsSameAs(const Device* other) const {
 }
 
 ApplicationList CloudDevice::GetApplicationList() const {
-  return ApplicationList{100};
+  return ApplicationList{0};
 }
 
 const std::string& CloudDevice::GetHost() const {

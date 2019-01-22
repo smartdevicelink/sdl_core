@@ -149,6 +149,10 @@ void TransportManagerImpl::AddCloudDevice(
   return;
 }
 
+void TransportManagerImpl::RemoveCloudDevice(const DeviceHandle device_handle) {
+  DisconnectDevice(device_handle);
+}
+
 int TransportManagerImpl::ConnectDevice(const DeviceHandle device_handle) {
   LOG4CXX_TRACE(logger_, "enter. DeviceHandle: " << &device_handle);
   if (!this->is_initialized_) {
@@ -175,6 +179,22 @@ int TransportManagerImpl::ConnectDevice(const DeviceHandle device_handle) {
   int err = (TransportAdapter::OK == ta_error) ? E_SUCCESS : E_INTERNAL_ERROR;
   LOG4CXX_TRACE(logger_, "exit with error: " << err);
   return err;
+}
+
+ConnectionStatus TransportManagerImpl::GetConnectionStatus(
+    const DeviceHandle& device_handle) const {
+  DeviceUID device_id = converter_.HandleToUid(device_handle);
+
+  sync_primitives::AutoReadLock lock(device_to_adapter_map_lock_);
+  DeviceToAdapterMap::const_iterator it =
+      device_to_adapter_map_.find(device_id);
+  if (it == device_to_adapter_map_.end()) {
+    LOG4CXX_ERROR(logger_, "No device adapter found by id " << device_handle);
+    LOG4CXX_TRACE(logger_, "exit with E_INVALID_HANDLE. Condition: NULL == ta");
+    return ConnectionStatus::INVALID;
+  }
+  transport_adapter::TransportAdapter* ta = it->second;
+  return ta->GetConnectionStatus(device_id);
 }
 
 int TransportManagerImpl::DisconnectDevice(const DeviceHandle device_handle) {
@@ -972,6 +992,11 @@ void TransportManagerImpl::Handle(TransportAdapterEvent event) {
     case EventTypeEnum::ON_FIND_NEW_APPLICATIONS_REQUEST: {
       RaiseEvent(&TransportManagerListener::OnFindNewApplicationsRequest);
       LOG4CXX_DEBUG(logger_, "event_type = ON_FIND_NEW_APPLICATIONS_REQUEST");
+      break;
+    }
+    case EventTypeEnum::ON_CONNECTION_STATUS_UPDATED: {
+      RaiseEvent(&TransportManagerListener::OnConnectionStatusUpdated);
+      LOG4CXX_DEBUG(logger_, "event_type = ON_CONNECTION_STATUS_UPDATED");
       break;
     }
     case EventTypeEnum::ON_CONNECT_PENDING: {

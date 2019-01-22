@@ -88,6 +88,11 @@ class TransportAdapterListenerImpl
   virtual void OnFindNewApplicationsRequest(const TransportAdapter* adapter);
 
   /**
+   * @brief Passes notification to that the cloud conection status has updated
+   */
+  virtual void OnConnectionStatusUpdated(const TransportAdapter* adapter);
+
+  /**
    * @brief Search specified device adapter in the container of shared pointers
    * to device adapters to be sure it is available,
    * launch event ON_CONNECT_PENDING in transport manager.

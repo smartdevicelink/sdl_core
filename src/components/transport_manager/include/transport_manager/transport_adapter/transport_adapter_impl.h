@@ -41,6 +41,7 @@
 
 #include "utils/lock.h"
 #include "utils/rwlock.h"
+#include "utils/timer.h"
 
 #include "transport_manager/transport_adapter/transport_adapter.h"
 #include "transport_manager/transport_adapter/transport_adapter_controller.h"
@@ -60,6 +61,8 @@ class TransportAdapterListener;
 class DeviceScanner;
 class ServerConnectionFactory;
 class ClientConnectionListener;
+
+typedef std::shared_ptr<timer::Timer> TimerSPtr;
 
 /*
  * @brief Implementation of device adapter class.
@@ -145,6 +148,22 @@ class TransportAdapterImpl : public TransportAdapter,
    */
   TransportAdapter::Error ConnectDevice(
       const DeviceUID& device_handle) OVERRIDE;
+
+  /**
+   * @brief Retrieves the connection status of a given device
+   *
+   * @param device_handle Handle of device to query
+   *
+   * @return The connection status of the given device
+   */
+  ConnectionStatus GetConnectionStatus(
+      const DeviceUID& device_handle) const OVERRIDE;
+
+  /**
+   * @brief Notifies the application manager that a cloud connection status has
+   * updated and should trigger an UpdateAppList RPC to the HMI
+   */
+  void ConnectionStatusUpdated(DeviceSptr device, ConnectionStatus status);
 
   /**
    * @brief Disconnect from specified session.
@@ -547,6 +566,23 @@ class TransportAdapterImpl : public TransportAdapter,
   TransportAdapter::Error ConnectDevice(DeviceSptr device);
 
   /**
+   * @brief Reattempt the last failed connection to a device
+   */
+  void RetryConnection();
+
+  /**
+   * @brief Clear any retry timers which have been completed
+   */
+  void ClearCompletedTimers();
+
+  /**
+   * @brief Retrieve the next device available for a reattempted connection
+   * @return The handle first device with an expired retry timer if present,
+   * otherwise an empty string
+   */
+  DeviceUID GetNextRetryDevice();
+
+  /**
    * @brief Remove specified device
    * @param device_handle Device unique identifier.
    */
@@ -578,7 +614,7 @@ class TransportAdapterImpl : public TransportAdapter,
     ConnectionSPtr connection;
     DeviceUID device_id;
     ApplicationHandle app_handle;
-    enum { NEW, ESTABLISHED, FINALISING, PENDING, RETRY } state;
+    enum { NEW, ESTABLISHED, FINALISING, PENDING } state;
   };
 
   /**
@@ -606,6 +642,18 @@ class TransportAdapterImpl : public TransportAdapter,
    * @brief Container(map) of connections.
    **/
   ConnectionMap connections_;
+
+  /**
+   * @brief Queue of retry timers.
+   */
+  std::queue<std::pair<TimerSPtr, DeviceUID> > retry_timer_pool_;
+  sync_primitives::Lock retry_timer_pool_lock_;
+
+  /**
+   * @brief Queue of completed retry timers.
+   */
+  std::queue<std::pair<TimerSPtr, DeviceUID> > completed_timer_pool_;
+  sync_primitives::Lock completed_timer_pool_lock_;
 
   /**
    * @brief Mutex restricting access to connections map.

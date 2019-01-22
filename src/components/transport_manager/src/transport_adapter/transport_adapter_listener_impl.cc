@@ -116,6 +116,23 @@ void TransportAdapterListenerImpl::OnFindNewApplicationsRequest(
   LOG4CXX_TRACE(logger_, "exit");
 }
 
+void TransportAdapterListenerImpl::OnConnectionStatusUpdated(
+    const TransportAdapter* adapter) {
+  LOG4CXX_TRACE(logger_, "enter. adapter* " << adapter);
+  const TransportAdapterEvent event(EventTypeEnum::ON_CONNECTION_STATUS_UPDATED,
+                                    transport_adapter_,
+                                    "",
+                                    0,
+                                    ::protocol_handler::RawMessagePtr(),
+                                    BaseErrorPtr(new BaseError()));
+  if (transport_manager_ != NULL &&
+      transport_manager::E_SUCCESS !=
+          transport_manager_->ReceiveEventFromDevice(event)) {
+    LOG4CXX_WARN(logger_, "Failed to receive event from device");
+  }
+  LOG4CXX_TRACE(logger_, "exit");
+}
+
 void TransportAdapterListenerImpl::OnConnectPending(
     const TransportAdapter* adapter,
     const DeviceUID& device,

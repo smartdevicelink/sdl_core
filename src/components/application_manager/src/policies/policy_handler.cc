@@ -1912,6 +1912,8 @@ void PolicyHandler::OnSetCloudAppProperties(
   if (msg_params.keyExists(strings::enabled)) {
     policy_manager_->SetCloudAppEnabled(policy_app_id,
                                         msg_params[strings::enabled].asBool());
+
+    application_manager_.RefreshCloudAppInformation();
   }
   if (msg_params.keyExists(strings::cloud_app_auth_token)) {
     policy_manager_->SetAppAuthToken(

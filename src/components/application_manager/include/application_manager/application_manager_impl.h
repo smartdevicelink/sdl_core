@@ -360,12 +360,27 @@ class ApplicationManagerImpl
   void ConnectToDevice(const std::string& device_mac) OVERRIDE;
   void OnHMIStartedCooperation() OVERRIDE;
 
-  void CollectCloudAppInformation();
+  void RefreshCloudAppInformation() OVERRIDE;
 
   void CreatePendingApplication(
       const transport_manager::ConnectionUID connection_id,
       const transport_manager::DeviceInfo& device_info,
       connection_handler::DeviceHandle device_id);
+
+  /**
+   * @brief Notifies the applicaiton manager that a cloud connection status has
+   * updated and should trigger an UpdateAppList RPC to the HMI
+   */
+  void OnConnectionStatusUpdated();
+
+  /**
+   * @brief Retrieve the current connection status of a cloud app
+   * @param app A cloud application
+   * @return The current CloudConnectionStatus of app
+   */
+
+  hmi_apis::Common_CloudConnectionStatus::eType GetCloudAppConnectionStatus(
+      ApplicationConstSharedPtr app) const;
 
   /*
    * @brief Returns unique correlation ID for HMI request
@@ -491,9 +506,6 @@ class ApplicationManagerImpl
 
   // typedef for Applications list const iterator
   typedef ApplictionSet::const_iterator ApplictionSetConstIt;
-
-  DataAccessor<AppsWaitRegistrationSet> apps_waiting_for_registration() const;
-  ApplicationConstSharedPtr waiting_app(const uint32_t hmi_id) const;
 
   /**
    * @brief Notification from PolicyHandler about PTU.
@@ -1456,6 +1468,8 @@ class ApplicationManagerImpl
 
   DeviceMap secondary_transport_devices_cache_;
 
+  mutable std::shared_ptr<sync_primitives::RecursiveLock>
+      pending_device_map_lock_ptr_;
   std::map<std::string, std::string> pending_device_map_;
 
 #ifdef TELEMETRY_MONITOR
@@ -1487,11 +1501,27 @@ class ApplicationManagerImpl
   void AddMockApplication(ApplicationSharedPtr mock_app);
 
   /**
+   * @brief Add a mock application to the pending application list without going
+   * through the formal registration process. Only for unit testing.
+   * @param mock_app the mock app to be added to the pending application list
+   */
+  void AddMockPendingApplication(ApplicationSharedPtr mock_app);
+
+  /**
    * @brief set a mock media manager without running Init(). Only for unit
    * testing.
-   * @param mock_app the mock app to be registered
+   * @param mock_media_manager the mock media manager to be assigned
    */
   void SetMockMediaManager(media_manager::MediaManager* mock_media_manager);
+
+  /**
+   * @brief set a mock rpc service directly. Only for unit
+   * testing.
+   * @param mock_app the mock rpc service to be assigned
+   */
+  void SetMockRPCService(rpc_service::RPCService* rpc_service) {
+    rpc_service_.reset(rpc_service);
+  }
 
   virtual void SetPluginManager(
       std::unique_ptr<plugin_manager::RPCPluginManager>& plugin_manager)

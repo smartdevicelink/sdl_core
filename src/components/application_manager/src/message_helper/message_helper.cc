@@ -1542,15 +1542,19 @@ bool MessageHelper::CreateHMIApplicationStruct(
   message = smart_objects::SmartObject(smart_objects::SmartType_Map);
   message[strings::app_name] = app->name();
   message[strings::app_id] = app->hmi_app_id();
+
+  const std::string policy_app_id = app->policy_app_id();
+  message[hmi_response::policy_app_id] = policy_app_id;
+
   const std::string icon_path = app->app_icon_path();
-  if (!icon_path.empty()) {
+  if (file_system::FileExists(app->app_icon_path())) {
     message[strings::icon] = icon_path;
   }
   if (app->IsRegistered()) {
     message[strings::hmi_display_language_desired] = app->ui_language();
     message[strings::is_media_application] = app->is_media_application();
   } else {
-    message[strings::greyOut] = app->is_greyed_out();
+    message[strings::grey_out] = app->is_greyed_out();
   }
   if (app->tts_name() && !app->tts_name()->empty()) {
     message[json::ttsName] = *(app->tts_name());
@@ -1564,6 +1568,46 @@ bool MessageHelper::CreateHMIApplicationStruct(
   }
   if (app_types) {
     message[strings::app_type] = *app_types;
+  }
+
+  const policy::RequestType::State app_request_types_state =
+      policy_handler.GetAppRequestTypeState(policy_app_id);
+  if (policy::RequestType::State::AVAILABLE == app_request_types_state) {
+    const auto request_types = policy_handler.GetAppRequestTypes(policy_app_id);
+    message[strings::request_type] =
+        SmartObject(smart_objects::SmartType_Array);
+    smart_objects::SmartObject& request_types_array =
+        message[strings::request_type];
+
+    size_t index = 0;
+    for (auto it : request_types) {
+      request_types_array[index] = it;
+      ++index;
+    }
+  } else if (policy::RequestType::State::EMPTY == app_request_types_state) {
+    message[strings::request_type] =
+        SmartObject(smart_objects::SmartType_Array);
+  }
+
+  const policy::RequestSubType::State app_request_subtypes_state =
+      policy_handler.GetAppRequestSubTypeState(policy_app_id);
+  if (policy::RequestSubType::State::AVAILABLE == app_request_subtypes_state) {
+    const auto request_subtypes =
+        policy_handler.GetAppRequestSubTypes(policy_app_id);
+    message[strings::request_subtype] =
+        SmartObject(smart_objects::SmartType_Array);
+    smart_objects::SmartObject& request_subtypes_array =
+        message[strings::request_subtype];
+
+    size_t index = 0;
+    for (auto it : request_subtypes) {
+      request_subtypes_array[index] = it;
+      ++index;
+    }
+  } else if (policy::RequestSubType::State::EMPTY ==
+             app_request_subtypes_state) {
+    message[strings::request_subtype] =
+        SmartObject(smart_objects::SmartType_Array);
   }
 
   if (day_color_scheme) {
@@ -1590,6 +1634,12 @@ bool MessageHelper::CreateHMIApplicationStruct(
                      policy_handler,
                      app_mngr,
                      &secondary_device_info);
+  }
+
+  message[strings::is_cloud_application] = app->is_cloud_app();
+  if (app->is_cloud_app()) {
+    message[strings::cloud_connection_status] =
+        app_mngr.GetCloudAppConnectionStatus(app);
   }
 
   return true;

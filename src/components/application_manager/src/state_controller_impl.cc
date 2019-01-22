@@ -475,7 +475,9 @@ mobile_apis::HMILevel::eType StateControllerImpl::GetAvailableHmiLevel(
     return result;
   }
 
-  const bool is_active_app_exist = (bool)app_mngr_.active_application();
+  ApplicationConstSharedPtr active_app = app_mngr_.active_application();
+  const bool is_active_app_exist =
+      (active_app.use_count() != 0) && active_app->app_id() != app->app_id();
   if (is_audio_app) {
     if (does_audio_app_with_same_type_exist) {
       result = app_mngr_.GetDefaultHmiLevel(app);

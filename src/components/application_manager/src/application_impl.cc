@@ -964,7 +964,7 @@ void ApplicationImpl::CleanupFiles() {
       application_manager_.get_settings().app_storage_folder();
   directory_name += "/" + folder_name();
 
-  if (file_system::DirectoryExists(directory_name)) {
+  if (file_system::DirectoryExists(directory_name) && !folder_name().empty()) {
     std::vector<std::string> files = file_system::ListFiles(directory_name);
     AppFilesMap::const_iterator app_files_it;
 
@@ -1182,6 +1182,11 @@ ApplicationImpl::hybrid_app_preference() const {
 
 const std::string& ApplicationImpl::cloud_app_certificate() const {
   return certificate_;
+}
+
+bool ApplicationImpl::is_cloud_app() const {
+  return !endpoint_.empty() &&
+         hybrid_app_preference_ != mobile_apis::HybridAppPreference::MOBILE;
 }
 
 void ApplicationImpl::set_cloud_app_endpoint(const std::string& endpoint) {

@@ -101,6 +101,11 @@ class TransportManagerListener {
   virtual void OnScanDevicesFailed(const SearchDeviceError& error) = 0;
 
   /**
+   * @brief Reaction to the event, when the cloud connection status is updated.
+   */
+  virtual void OnConnectionStatusUpdated() = 0;
+
+  /**
    * @brief Reaction to the event, when connection is pending.
    *
    * @param devcie_info Variable that hold information about device.

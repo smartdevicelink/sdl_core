@@ -59,6 +59,8 @@ class TransportManagerListenerEmpty : public TransportManagerListener {
 
   void OnFindNewApplicationsRequest() OVERRIDE {}
 
+  void OnConnectionStatusUpdated() OVERRIDE {}
+
   /**
    * @brief Reaction to the event, when the device is found.
    *
