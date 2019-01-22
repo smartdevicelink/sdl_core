@@ -98,7 +98,9 @@ DeviceTypes devicesType = {
     std::make_pair(std::string("USB_IOS_DEVICE_MODE"),
                    hmi_apis::Common_TransportType::USB_IOS),
     std::make_pair(std::string("CARPLAY_WIRELESS_IOS"),
-                   hmi_apis::Common_TransportType::WIFI)};
+                   hmi_apis::Common_TransportType::WIFI),
+    std::make_pair(std::string("CLOUD_WEBSOCKET"),
+                   hmi_apis::Common_TransportType::CLOUD_WEBSOCKET)};
 }
 
 /**
@@ -779,6 +781,120 @@ void ApplicationManagerImpl::OnHMIStartedCooperation() {
           *this));
   rpc_service_->ManageHMICommand(mixing_audio_supported_request);
   resume_controller().ResetLaunchTime();
+
+  CollectCloudAppInformation();
+}
+
+void ApplicationManagerImpl::CollectCloudAppInformation() {
+  std::vector<std::string> cloud_app_id_vector;
+  GetPolicyHandler().GetEnabledCloudApps(cloud_app_id_vector);
+  std::vector<std::string>::iterator it = cloud_app_id_vector.begin();
+  std::vector<std::string>::iterator end = cloud_app_id_vector.end();
+  std::string endpoint = "";
+  std::string certificate = "";
+  std::string auth_token = "";
+  std::string cloud_transport_type = "";
+  std::string hybrid_app_preference = "";
+  bool enabled = true;
+  for (; it != end; ++it) {
+    GetPolicyHandler().GetCloudAppParameters(*it,
+                                             enabled,
+                                             endpoint,
+                                             certificate,
+                                             auth_token,
+                                             cloud_transport_type,
+                                             hybrid_app_preference);
+
+    pending_device_map_.insert(
+        std::pair<std::string, std::string>(endpoint, *it));
+
+    connection_handler().AddCloudAppDevice(endpoint, cloud_transport_type);
+  }
+}
+
+void ApplicationManagerImpl::CreatePendingApplication(
+    const transport_manager::ConnectionUID connection_id,
+    const transport_manager::DeviceInfo& device_info,
+    connection_handler::DeviceHandle device_id) {
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  std::string endpoint = "";
+  std::string certificate = "";
+  std::string auth_token = "";
+  std::string cloud_transport_type = "";
+  std::string hybrid_app_preference_str = "";
+  bool enabled = true;
+  std::string name = device_info.name();
+  auto it = pending_device_map_.find(name);
+  if (it == pending_device_map_.end()) {
+    return;
+  }
+
+  const std::string policy_app_id = it->second;
+
+  policy::StringArray nicknames;
+  policy::StringArray app_hmi_types;
+
+  GetPolicyHandler().GetInitialAppData(
+      policy_app_id, &nicknames, &app_hmi_types);
+
+  if (!nicknames.size()) {
+    LOG4CXX_ERROR(logger_, "Cloud App missing nickname");
+    return;
+  }
+
+  const std::string display_name = nicknames[0];
+
+  ApplicationSharedPtr application(
+      new ApplicationImpl(0,
+                          policy_app_id,
+                          device_info.mac_address(),
+                          device_id,
+                          custom_str::CustomString(display_name),
+                          GetPolicyHandler().GetStatisticManager(),
+                          *this));
+
+  if (!application) {
+    LOG4CXX_INFO(logger_, "Could not streate application");
+    return;
+  }
+
+  GetPolicyHandler().GetCloudAppParameters(policy_app_id,
+                                           enabled,
+                                           endpoint,
+                                           certificate,
+                                           auth_token,
+                                           cloud_transport_type,
+                                           hybrid_app_preference_str);
+
+  mobile_apis::HybridAppPreference::eType hybrid_app_preference_enum;
+
+  bool convert_result = smart_objects::EnumConversionHelper<
+      mobile_apis::HybridAppPreference::eType>::
+      StringToEnum(hybrid_app_preference_str, &hybrid_app_preference_enum);
+
+  if (!hybrid_app_preference_str.empty() && !convert_result) {
+    LOG4CXX_ERROR(
+        logger_,
+        "Could not convert string to enum: " << hybrid_app_preference_str);
+    return;
+  }
+
+  application->set_hmi_application_id(GenerateNewHMIAppID());
+  application->set_cloud_app_endpoint(endpoint);
+  application->set_cloud_app_auth_token(auth_token);
+  application->set_cloud_app_transport_type(cloud_transport_type);
+  application->set_hybrid_app_preference(hybrid_app_preference_enum);
+  application->set_cloud_app_certificate(certificate);
+
+  sync_primitives::AutoLock lock(apps_to_register_list_lock_ptr_);
+  LOG4CXX_DEBUG(logger_,
+                "apps_to_register_ size before: " << apps_to_register_.size());
+  apps_to_register_.insert(application);
+  LOG4CXX_DEBUG(logger_,
+                "apps_to_register_ size after: " << apps_to_register_.size());
+
+  SendUpdateAppList();
 }
 
 uint32_t ApplicationManagerImpl::GetNextHMICorrelationID() {

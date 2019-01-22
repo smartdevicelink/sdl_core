@@ -409,6 +409,66 @@ class ApplicationImpl : public virtual Application,
 
   void SwapMobileMessageQueue(MobileMessageQueue& mobile_messages) OVERRIDE;
 
+  /**
+   * @brief Get cloud app endpoint for websocket connection
+   * @return cloud app endpoint
+   */
+  const std::string& cloud_app_endpoint() const OVERRIDE;
+
+  /**
+   * @brief Get cloud app auth token to be used in connection handshake after
+   * websocket open.
+   * @return cloud app auth token
+   */
+  const std::string& cloud_app_auth_token() const OVERRIDE;
+
+  /**
+   * @brief Get cloud app tranpsport type. Defines the type of websocket
+   * connection used.
+   * @return cloud app transport type
+   */
+  const std::string& cloud_app_transport_type() const OVERRIDE;
+
+  /**
+   * @brief Get hybrid app preference. Defines behaviour for when a similar
+   * mobile and cloud app are connected simultaneously.
+   * @return hybrid app preference
+   */
+  const mobile_apis::HybridAppPreference::eType& hybrid_app_preference()
+      const OVERRIDE;
+
+  /**
+   * @brief Get cloud app certificate. Used for secured websocket connections.
+   * @return cloud app certificate.
+   */
+  const std::string& cloud_app_certificate() const OVERRIDE;
+
+  /**
+   * @brief Set cloud app endpoint
+   */
+  void set_cloud_app_endpoint(const std::string& endpoint) OVERRIDE;
+
+  /**
+   * @brief Set cloud app auth token
+   */
+  void set_cloud_app_auth_token(const std::string& auth_token) OVERRIDE;
+
+  /**
+   * @brief Set cloud app transport type
+   */
+  void set_cloud_app_transport_type(const std::string& transport_type) OVERRIDE;
+
+  /**
+   * @brief Set hybrid app preference
+   */
+  void set_hybrid_app_preference(const mobile_apis::HybridAppPreference::eType&
+                                     hybrid_app_preference) OVERRIDE;
+
+  /**
+   * @brief Set cloud app certificate
+   */
+  void set_cloud_app_certificate(const std::string& certificate) OVERRIDE;
+
  protected:
   /**
    * @brief Clean up application folder. Persistent files will stay
@@ -512,6 +572,13 @@ class ApplicationImpl : public virtual Application,
   Timer audio_stream_suspend_timer_;
 
   std::list<AppExtensionPtr> extensions_;
+
+  // Cloud app properties
+  std::string endpoint_;
+  std::string auth_token_;
+  std::string cloud_transport_type_;
+  mobile_apis::HybridAppPreference::eType hybrid_app_preference_;
+  std::string certificate_;
 
   /**
    * @brief Defines number per time in seconds limits

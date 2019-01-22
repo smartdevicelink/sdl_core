@@ -120,6 +120,9 @@ class ConnectionHandlerImpl
 
   void ConnectToAllDevices() OVERRIDE;
 
+  void AddCloudAppDevice(const std::string& endpoint,
+                         const std::string& cloud_transport_type) OVERRIDE;
+
   void StartTransportManager() OVERRIDE;
 
   void OnDeviceListUpdated(
@@ -162,6 +165,14 @@ class ConnectionHandlerImpl
   void OnScanDevicesFailed(
       const transport_manager::SearchDeviceError& error) OVERRIDE;
 
+  /**
+   * \brief Notifies about pending connection.
+   *
+   * \param connection_id ID of new connection.
+   **/
+  void OnConnectionPending(
+      const transport_manager::DeviceInfo& device_info,
+      const transport_manager::ConnectionUID connection_id) OVERRIDE;
   /**
    * \brief Notifies about established connection.
    *

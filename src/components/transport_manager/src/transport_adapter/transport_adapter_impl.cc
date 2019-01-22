@@ -60,7 +60,9 @@ DeviceTypes devicesType = {
     std::make_pair(DeviceType::IOS_USB_DEVICE_MODE,
                    std::string("USB_IOS_DEVICE_MODE")),
     std::make_pair(DeviceType::IOS_CARPLAY_WIRELESS,
-                   std::string("CARPLAY_WIRELESS_IOS"))};
+                   std::string("CARPLAY_WIRELESS_IOS")),
+    std::make_pair(DeviceType::CLOUD_WEBSOCKET,
+                   std::string("CLOUD_WEBSOCKET"))};
 }
 
 TransportAdapterImpl::TransportAdapterImpl(
@@ -741,6 +743,24 @@ DeviceSptr TransportAdapterImpl::FindDevice(const DeviceUID& device_id) const {
   }
   LOG4CXX_TRACE(logger_, "exit with DeviceSptr: " << ret);
   return ret;
+}
+
+void TransportAdapterImpl::ConnectPending(const DeviceUID& device_id,
+                                          const ApplicationHandle& app_handle) {
+  connections_lock_.AcquireForReading();
+  ConnectionMap::iterator it_conn =
+      connections_.find(std::make_pair(device_id, app_handle));
+  if (it_conn != connections_.end()) {
+    ConnectionInfo& info = it_conn->second;
+    info.state = ConnectionInfo::PENDING;
+  }
+  connections_lock_.Release();
+
+  for (TransportAdapterListenerList::iterator it = listeners_.begin();
+       it != listeners_.end();
+       ++it) {
+    (*it)->OnConnectPending(this, device_id, app_handle);
+  }
 }
 
 void TransportAdapterImpl::ConnectDone(const DeviceUID& device_id,

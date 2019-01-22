@@ -64,6 +64,7 @@ enum DeviceType {
   IOS_BT,
   IOS_USB,
   TCP,
+  CLOUD_WEBSOCKET,
   IOS_USB_HOST_MODE,
   IOS_USB_DEVICE_MODE,
   IOS_CARPLAY_WIRELESS,  // running on iAP over Carplay wireless transport
@@ -326,6 +327,8 @@ class TransportAdapter {
    * @brief Returns the transport's configuration information
    */
   virtual TransportConfig GetTransportConfiguration() const = 0;
+
+  virtual void CreateDevice(const std::string& uid) = 0;
 
 #ifdef TELEMETRY_MONITOR
   /**

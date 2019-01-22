@@ -413,6 +413,16 @@ class Profile : public protocol_handler::ProtocolHandlerSettings,
   const std::string& transport_manager_tcp_adapter_network_interface()
       const OVERRIDE;
 
+  /**
+   * @brief Returns retry timeout for cloud app connections
+   */
+  uint32_t cloud_app_retry_timeout() const OVERRIDE;
+
+  /**
+   * @brief Returns maximum retry attempts for cloud app connections
+   */
+  uint16_t cloud_app_max_retry_attempts() const OVERRIDE;
+
   // TransportManageMMESettings interface
 
   const std::string& event_mq_name() const OVERRIDE;
@@ -960,6 +970,8 @@ class Profile : public protocol_handler::ProtocolHandlerSettings,
   std::string system_files_path_;
   uint16_t transport_manager_tcp_adapter_port_;
   std::string transport_manager_tcp_adapter_network_interface_;
+  uint32_t cloud_app_retry_timeout_;
+  uint16_t cloud_app_max_retry_attempts_;
   std::string tts_delimiter_;
   uint32_t audio_data_stopped_timeout_;
   uint32_t video_data_stopped_timeout_;

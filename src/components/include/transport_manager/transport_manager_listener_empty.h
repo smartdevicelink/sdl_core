@@ -99,6 +99,15 @@ class TransportManagerListenerEmpty : public TransportManagerListener {
   void OnScanDevicesFailed(const SearchDeviceError& error) OVERRIDE {}
 
   /**
+   * @brief Reaction to the event, when connection is pending.
+   *
+   * @param devcie_info Variable that hold information about device.
+   * @param connection_id connection unique identifier.
+   */
+  void OnConnectionPending(const DeviceInfo& device_info,
+                           const ConnectionUID connection_id) OVERRIDE {}
+
+  /**
    * @brief Reaction to the event, when connection is established.
    *
    * @param devcie_info Variable that hold information about device.

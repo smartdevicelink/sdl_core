@@ -306,6 +306,16 @@ class TransportAdapterImpl : public TransportAdapter,
                          const CommunicationError& error) OVERRIDE;
 
   /**
+   * @brief Set state of specified connection - PENDING and launch
+   *OnConnectPending event in device adapter listener.
+   *
+   * @param devcie_handle Device unique identifier.
+   * @param app_handle Handle of application.
+   */
+  void ConnectPending(const DeviceUID& device_handle,
+                      const ApplicationHandle& app_handle) OVERRIDE;
+
+  /**
    * @brief Set state of specified connection - ESTABLISHED and launch
    *OnConnectDone event in device adapter listener.
    *
@@ -432,6 +442,10 @@ class TransportAdapterImpl : public TransportAdapter,
   virtual TransportConfig GetTransportConfiguration() const OVERRIDE {
     // default is empty
     return TransportConfig();
+  }
+
+  void CreateDevice(const std::string& uid) OVERRIDE {
+    return;
   }
 
   /**
@@ -564,7 +578,7 @@ class TransportAdapterImpl : public TransportAdapter,
     ConnectionSPtr connection;
     DeviceUID device_id;
     ApplicationHandle app_handle;
-    enum { NEW, ESTABLISHED, FINALISING } state;
+    enum { NEW, ESTABLISHED, FINALISING, PENDING, RETRY } state;
   };
 
   /**

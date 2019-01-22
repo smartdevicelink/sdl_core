@@ -1,5 +1,8 @@
 /*
- * Copyright (c) 2016, Ford Motor Company
+ * \file cloud_websocket_transport_adapter.h
+ * \brief Cloud Websocket Transport Adapterclass header file.
+ *
+ * Copyright (c) 2018, Livio
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,55 +33,57 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_MANAGER_SETTINGS_H_
-#define SRC_COMPONENTS_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_MANAGER_SETTINGS_H_
+#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_CLOUD_CLOUD_WEBSOCKET_TRANSPORT_ADAPTER_H_
+#define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_CLOUD_CLOUD_WEBSOCKET_TRANSPORT_ADAPTER_H_
 
-#include "transport_manager/transport_manager_mme_settings.h"
+#include "transport_manager/transport_adapter/transport_adapter_impl.h"
+
 namespace transport_manager {
-class TransportManagerSettings : public TransportManagerMMESettings {
+namespace transport_adapter {
+
+/**
+ * @brief Cloud transport adapter that uses websockets.
+ */
+class CloudWebsocketTransportAdapter : public TransportAdapterImpl {
  public:
   /**
-   * @brief Returns true if last state singleton is used
+   * @brief Constructor.
    */
-  virtual bool use_last_state() const = 0;
+  explicit CloudWebsocketTransportAdapter(
+      resumption::LastState& last_state,
+      const TransportManagerSettings& settings);
 
   /**
-   * @brief Timeout in transport manager before disconnect
+   * @brief Destructor.
    */
-  virtual uint32_t transport_manager_disconnect_timeout() const = 0;
+  virtual ~CloudWebsocketTransportAdapter();
+
+ protected:
+  /**
+   * @brief Return type of device.
+   *
+   * @return String with device type.
+   */
+  virtual DeviceType GetDeviceType() const;
 
   /**
-   * @brief Returns port for TCP transport adapter
+   * @brief Store adapter state in last state singleton
    */
-  virtual uint16_t transport_manager_tcp_adapter_port() const = 0;
+  virtual void Store() const;
 
   /**
-   * @brief Returns the millisecond count before timeout
-   * for transport change feature occures.
+   * @brief Restore adapter state from last state singleton
+   *
+   * @return True on success false otherwise
    */
-  virtual uint32_t app_transport_change_timer() const = 0;
+  virtual bool Restore();
 
-  /**
-   * @brief Returns the millisecond count as addition to
-   * the transport change timeout value.
-   */
-  virtual uint32_t app_transport_change_timer_addition() const = 0;
+  void CreateDevice(const std::string& uid) OVERRIDE;
 
-  /**
-   * @brief Returns the network interface name for TCP transport adapter
-   */
-  virtual const std::string& transport_manager_tcp_adapter_network_interface()
-      const = 0;
-
-  /**
-   * @brief Returns retry timeout for cloud app connections
-   */
-  virtual uint32_t cloud_app_retry_timeout() const = 0;
-
-  /**
-   * @brief Returns maximum retry attempts for cloud app connections
-   */
-  virtual uint16_t cloud_app_max_retry_attempts() const = 0;
+ private:
 };
+
+}  // namespace transport_adapter
 }  // namespace transport_manager
-#endif  // SRC_COMPONENTS_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_MANAGER_SETTINGS_H_
+
+#endif  // SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TCP_TCP_TRANSPORT_ADAPTER_H_

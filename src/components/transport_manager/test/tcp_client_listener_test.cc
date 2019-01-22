@@ -73,6 +73,9 @@ class MockTransportAdapterController : public TransportAdapterController {
                void(ConnectionSPtr connection,
                     const DeviceUID& device_handle,
                     const ApplicationHandle& app_handle));
+  MOCK_METHOD2(ConnectPending,
+               void(const DeviceUID& device_handle,
+                    const ApplicationHandle& app_handle));
   MOCK_METHOD2(ConnectDone,
                void(const DeviceUID& device_handle,
                     const ApplicationHandle& app_handle));

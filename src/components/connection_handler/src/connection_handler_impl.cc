@@ -142,6 +142,11 @@ void ConnectionHandlerImpl::OnDeviceAdded(
   LOG4CXX_AUTO_TRACE(logger_);
   auto handle = device_info.device_handle();
 
+  LOG4CXX_DEBUG(logger_,
+                "OnDeviceAdded!!!: " << handle << " " << device_info.name()
+                                     << " " << device_info.mac_address() << " "
+                                     << device_info.connection_type());
+
   Device device(handle,
                 device_info.name(),
                 device_info.mac_address(),
@@ -244,11 +249,51 @@ void ConnectionHandlerImpl::OnScanDevicesFailed(
   LOG4CXX_WARN(logger_, "Scan devices failed. " << error.text());
 }
 
+void ConnectionHandlerImpl::OnConnectionPending(
+    const transport_manager::DeviceInfo& device_info,
+    const transport_manager::ConnectionUID connection_id) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  LOG4CXX_DEBUG(logger_,
+                "OnConnectionEstablished!!!: "
+                    << device_info.device_handle() << " " << device_info.name()
+                    << " " << device_info.mac_address() << " "
+                    << device_info.connection_type());
+  DeviceMap::iterator it = device_list_.find(device_info.device_handle());
+  if (device_list_.end() == it) {
+    LOG4CXX_ERROR(logger_, "Unknown device!");
+    return;
+  }
+  LOG4CXX_DEBUG(logger_,
+                "Add Pending Connection #" << connection_id << " to the list.");
+
+  sync_primitives::AutoWriteLock lock(connection_list_lock_);
+  if (connection_list_.find(connection_id) == connection_list_.end()) {
+    Connection* connection =
+        new Connection(connection_id,
+                       device_info.device_handle(),
+                       this,
+                       get_settings().heart_beat_timeout());
+
+    connection_list_.insert(
+        ConnectionList::value_type(connection_id, connection));
+
+    connection_handler::DeviceHandle device_id =
+        connection->connection_device_handle();
+
+    connection_handler_observer_->CreatePendingApplication(
+        connection_id, device_info, device_id);
+  }
+}
+
 void ConnectionHandlerImpl::OnConnectionEstablished(
     const transport_manager::DeviceInfo& device_info,
     const transport_manager::ConnectionUID connection_id) {
   LOG4CXX_AUTO_TRACE(logger_);
-
+  LOG4CXX_DEBUG(logger_,
+                "OnConnectionEstablished!!!: "
+                    << device_info.device_handle() << " " << device_info.name()
+                    << " " << device_info.mac_address() << " "
+                    << device_info.connection_type());
   DeviceMap::iterator it = device_list_.find(device_info.device_handle());
   if (device_list_.end() == it) {
     LOG4CXX_ERROR(logger_, "Unknown device!");
@@ -257,12 +302,14 @@ void ConnectionHandlerImpl::OnConnectionEstablished(
   LOG4CXX_DEBUG(logger_,
                 "Add Connection #" << connection_id << " to the list.");
   sync_primitives::AutoWriteLock lock(connection_list_lock_);
-  connection_list_.insert(ConnectionList::value_type(
-      connection_id,
-      new Connection(connection_id,
-                     device_info.device_handle(),
-                     this,
-                     get_settings().heart_beat_timeout())));
+  if (connection_list_.find(connection_id) == connection_list_.end()) {
+    connection_list_.insert(ConnectionList::value_type(
+        connection_id,
+        new Connection(connection_id,
+                       device_info.device_handle(),
+                       this,
+                       get_settings().heart_beat_timeout())));
+  }
 }
 
 void ConnectionHandlerImpl::OnConnectionFailed(
@@ -1265,6 +1312,11 @@ void ConnectionHandlerImpl::ConnectToAllDevices() {
     connection_handler::DeviceHandle device_handle = i->first;
     ConnectToDevice(device_handle);
   }
+}
+
+void ConnectionHandlerImpl::AddCloudAppDevice(
+    const std::string& endpoint, const std::string& cloud_transport_type) {
+  transport_manager_.AddCloudDevice(endpoint, cloud_transport_type);
 }
 
 void ConnectionHandlerImpl::StartTransportManager() {

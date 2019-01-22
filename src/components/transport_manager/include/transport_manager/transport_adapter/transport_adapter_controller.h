@@ -100,6 +100,16 @@ class TransportAdapterController {
                                  const ApplicationHandle& app_handle) = 0;
 
   /**
+   * @brief Set state of specified connection - PENDING and launch
+   *OnConnectPending event in device adapter listener.
+   *
+   * @param devcie_handle Device unique identifier.
+   * @param app_handle Handle of application.
+   */
+  virtual void ConnectPending(const DeviceUID& device_handle,
+                              const ApplicationHandle& app_handle) = 0;
+
+  /**
    * @brief Make state of specified connection - ESTABLISHED and launch
    *OnConnectDone event in device adapter listener.
    *

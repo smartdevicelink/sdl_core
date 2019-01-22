@@ -1087,6 +1087,10 @@ void ProtocolHandlerImpl::OnTMMessageSendFailed(
                                    << "Error_text: " << error.text());
 }
 
+void ProtocolHandlerImpl::OnConnectionPending(
+    const transport_manager::DeviceInfo& device_info,
+    const transport_manager::ConnectionUID connection_id) {}
+
 void ProtocolHandlerImpl::OnConnectionEstablished(
     const transport_manager::DeviceInfo& device_info,
     const transport_manager::ConnectionUID connection_id) {
