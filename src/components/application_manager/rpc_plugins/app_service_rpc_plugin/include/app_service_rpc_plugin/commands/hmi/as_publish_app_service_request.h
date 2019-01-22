@@ -33,6 +33,7 @@
 #ifndef SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_APP_SERVICE_RPC_PLUGIN_INCLUDE_APP_SERVICE_RPC_PLUGIN_COMMANDS_HMI_AS_PUBLISH_APP_SERVICE_REQUEST_H_
 #define SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_APP_SERVICE_RPC_PLUGIN_INCLUDE_APP_SERVICE_RPC_PLUGIN_COMMANDS_HMI_AS_PUBLISH_APP_SERVICE_REQUEST_H_
 
+#include "app_service_rpc_plugin/app_service_rpc_plugin.h"
 #include "application_manager/commands/request_from_hmi.h"
 
 namespace app_service_rpc_plugin {
@@ -68,6 +69,7 @@ class ASPublishAppServiceRequest : public app_mngr::commands::RequestFromHMI {
   virtual void Run();
 
  private:
+  AppServiceRpcPlugin* plugin_;
   DISALLOW_COPY_AND_ASSIGN(ASPublishAppServiceRequest);
 };
 

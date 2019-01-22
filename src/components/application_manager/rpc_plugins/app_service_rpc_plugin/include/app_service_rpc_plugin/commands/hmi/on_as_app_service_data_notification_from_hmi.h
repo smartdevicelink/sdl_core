@@ -33,6 +33,7 @@
 #ifndef SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_APP_SERVICE_RPC_PLUGIN_INCLUDE_APP_SERVICE_RPC_PLUGIN_COMMANDS_HMI_ON_AS_APP_SERVICE_DATA_NOTIFICATION_FROM_HMI_H_
 #define SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_APP_SERVICE_RPC_PLUGIN_INCLUDE_APP_SERVICE_RPC_PLUGIN_COMMANDS_HMI_ON_AS_APP_SERVICE_DATA_NOTIFICATION_FROM_HMI_H_
 
+#include "app_service_rpc_plugin/app_service_rpc_plugin.h"
 #include "application_manager/commands/notification_from_hmi.h"
 
 namespace app_service_rpc_plugin {
@@ -68,6 +69,7 @@ class OnASAppServiceDataNotificationFromHMI : public app_mngr::commands::Notific
   virtual void Run();
 
  private:
+  AppServiceRpcPlugin* plugin_;
   DISALLOW_COPY_AND_ASSIGN(OnASAppServiceDataNotificationFromHMI);
 };
 

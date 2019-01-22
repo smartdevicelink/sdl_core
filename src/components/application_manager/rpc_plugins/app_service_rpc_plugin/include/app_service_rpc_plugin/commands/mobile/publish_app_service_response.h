@@ -33,6 +33,7 @@
 #ifndef SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_APP_SERVICE_RPC_PLUGIN_INCLUDE_APP_SERVICE_RPC_PLUGIN_COMMANDS_MOBILE_PUBLISH_APP_SERVICE_RESPONSE_H_
 #define SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_APP_SERVICE_RPC_PLUGIN_INCLUDE_APP_SERVICE_RPC_PLUGIN_COMMANDS_MOBILE_PUBLISH_APP_SERVICE_RESPONSE_H_
 
+#include "app_service_rpc_plugin/app_service_rpc_plugin.h"
 #include "application_manager/commands/command_response_impl.h"
 
 namespace app_service_rpc_plugin {
@@ -69,6 +70,7 @@ class PublishAppServiceResponse
   virtual void Run();
 
  private:
+  AppServiceRpcPlugin* plugin_;
   DISALLOW_COPY_AND_ASSIGN(PublishAppServiceResponse);
 };
 

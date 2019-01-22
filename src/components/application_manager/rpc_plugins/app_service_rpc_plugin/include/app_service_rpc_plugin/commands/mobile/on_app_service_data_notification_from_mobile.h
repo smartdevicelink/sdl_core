@@ -33,6 +33,7 @@
 #ifndef SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_APP_SERVICE_RPC_PLUGIN_INCLUDE_APP_SERVICE_RPC_PLUGIN_COMMANDS_MOBILE_ON_APP_SERVICE_DATA_NOTIFICATION_FROM_MOBILE_H_
 #define SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_APP_SERVICE_RPC_PLUGIN_INCLUDE_APP_SERVICE_RPC_PLUGIN_COMMANDS_MOBILE_ON_APP_SERVICE_DATA_NOTIFICATION_FROM_MOBILE_H_
 
+#include "app_service_rpc_plugin/app_service_rpc_plugin.h"
 #include "application_manager/commands/command_notification_from_mobile_impl.h"
 
 namespace app_service_rpc_plugin {
@@ -69,6 +70,7 @@ class OnAppServiceDataNotificationFromMobile
   virtual void Run();
 
  private:
+  AppServiceRpcPlugin* plugin_;
   DISALLOW_COPY_AND_ASSIGN(OnAppServiceDataNotificationFromMobile);
 };
 
