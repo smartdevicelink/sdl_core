@@ -213,6 +213,12 @@ class ApplicationManagerImpl
     return *plugin_manager_;
   }
 
+  virtual application_manager::AppServiceManager& GetAppServiceManager()
+      OVERRIDE {
+    DCHECK(app_service_manager_);
+    return *app_service_manager_;
+  }
+
   std::vector<std::string> devices(
       const std::string& policy_app_id) const OVERRIDE;
 
@@ -1401,6 +1407,7 @@ class ApplicationManagerImpl
   protocol_handler::ProtocolHandler* protocol_handler_;
   request_controller::RequestController request_ctrl_;
   std::unique_ptr<plugin_manager::RPCPluginManager> plugin_manager_;
+  std::unique_ptr<application_manager::AppServiceManager> app_service_manager_;
 
   /**
    * @brief Map contains apps with HMI state before incoming call
