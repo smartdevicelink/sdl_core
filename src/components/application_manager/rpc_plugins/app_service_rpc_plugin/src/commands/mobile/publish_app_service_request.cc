@@ -62,6 +62,21 @@ PublishAppServiceRequest::PublishAppServiceRequest(
 
 PublishAppServiceRequest::~PublishAppServiceRequest() {}
 
+bool PublishAppServiceRequest::ValidateManifest(
+    smart_objects::SmartObject& manifest) {
+  if (manifest.keyExists(strings::uri_scheme)) {
+    Json::Value value;
+    Json::Reader reader;
+    if (!reader.parse(manifest[strings::uri_scheme].asString(), value)) {
+      SendResponse(false,
+                   mobile_apis::Result::INVALID_DATA,
+                   "Provided uriScheme was not valid JSON");
+      return false;
+    }
+  }
+  return true;
+}
+
 void PublishAppServiceRequest::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
   LOG4CXX_DEBUG(logger_, "Received a PublishAppService");
@@ -69,11 +84,14 @@ void PublishAppServiceRequest::Run() {
 
   smart_objects::SmartObject response_params =
       smart_objects::SmartObject(smart_objects::SmartType_Map);
-
   smart_objects::SmartObject service_record =
       smart_objects::SmartObject(smart_objects::SmartType_Map);
-  service_record[strings::service_manifest] =
+  smart_objects::SmartObject manifest =
       (*message_)[strings::msg_params][strings::app_service_manifest];
+  if (!ValidateManifest(manifest)) {
+    return;
+  }
+  service_record[strings::service_manifest] = manifest;
   service_record[strings::service_id] = "This is a service ID";
   service_record[strings::service_published] = true;
   service_record[strings::service_active] = true;
