@@ -541,6 +541,11 @@ enum FunctionID {
   OnRCStatusID = 32785,
 
   /**
+   * @brief OnSystemCapabilityUpdatedID
+   */
+  OnSystemCapabilityUpdatedID = 32787,
+
+  /**
    * @brief EncodedSyncPDataID.
    */
   EncodedSyncPDataID = 65536,
