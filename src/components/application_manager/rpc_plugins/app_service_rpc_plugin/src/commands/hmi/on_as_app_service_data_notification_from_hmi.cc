@@ -57,7 +57,8 @@ OnASAppServiceDataNotificationFromHMI::OnASAppServiceDataNotificationFromHMI(
   }
 }
 
-OnASAppServiceDataNotificationFromHMI::~OnASAppServiceDataNotificationFromHMI() {}
+OnASAppServiceDataNotificationFromHMI::
+    ~OnASAppServiceDataNotificationFromHMI() {}
 
 void OnASAppServiceDataNotificationFromHMI::Run() {
   LOG4CXX_AUTO_TRACE(logger_);

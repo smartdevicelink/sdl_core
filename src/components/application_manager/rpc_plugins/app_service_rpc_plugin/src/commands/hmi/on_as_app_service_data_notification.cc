@@ -57,8 +57,7 @@ OnASAppServiceDataNotification::OnASAppServiceDataNotification(
   }
 }
 
-OnASAppServiceDataNotification::
-    ~OnASAppServiceDataNotification() {}
+OnASAppServiceDataNotification::~OnASAppServiceDataNotification() {}
 
 void OnASAppServiceDataNotification::Run() {
   LOG4CXX_AUTO_TRACE(logger_);

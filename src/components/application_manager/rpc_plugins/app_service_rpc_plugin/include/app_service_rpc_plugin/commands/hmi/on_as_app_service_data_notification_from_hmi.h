@@ -44,7 +44,8 @@ namespace commands {
 /**
  * @brief OnASAppServiceDataNotificationFromHMI command class
  **/
-class OnASAppServiceDataNotificationFromHMI : public app_mngr::commands::NotificationFromHMI {
+class OnASAppServiceDataNotificationFromHMI
+    : public app_mngr::commands::NotificationFromHMI {
  public:
   /**
    * @brief OnASAppServiceDataNotificationFromHMI class constructor

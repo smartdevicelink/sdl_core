@@ -88,9 +88,9 @@ bool AppServiceHmiCommandFactory::IsAbleToProcess(
     const int32_t function_id,
     const app_mngr::commands::Command::CommandSource source) const {
   UNUSED(source);
-  return buildCommandCreator(
-             function_id, hmi_apis::messageType::INVALID_ENUM, source)
-      .CanBeCreated();
+  return buildCommandCreator(function_id,
+                             hmi_apis::messageType::INVALID_ENUM,
+                             source).CanBeCreated();
 }
 
 app_mngr::CommandCreator& AppServiceHmiCommandFactory::buildCommandCreator(

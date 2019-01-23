@@ -89,9 +89,9 @@ bool AppServiceMobileCommandFactory::IsAbleToProcess(
     const int32_t function_id,
     const app_mngr::commands::Command::CommandSource source) const {
   UNUSED(source);
-  return buildCommandCreator(
-             function_id, mobile_apis::messageType::INVALID_ENUM, source)
-      .CanBeCreated();
+  return buildCommandCreator(function_id,
+                             mobile_apis::messageType::INVALID_ENUM,
+                             source).CanBeCreated();
 }
 
 app_mngr::CommandCreator& AppServiceMobileCommandFactory::buildCommandCreator(
@@ -108,7 +108,8 @@ app_mngr::CommandCreator& AppServiceMobileCommandFactory::buildCommandCreator(
                  : factory.GetCreator<commands::PublishAppServiceResponse>();
     case mobile_apis::FunctionID::OnAppServiceDataID:
       return app_mngr::commands::Command::CommandSource::SOURCE_MOBILE == source
-                 ? factory.GetCreator<commands::OnAppServiceDataNotificationFromMobile>()
+                 ? factory.GetCreator<
+                       commands::OnAppServiceDataNotificationFromMobile>()
                  : factory.GetCreator<commands::OnAppServiceDataNotification>();
     default:
       LOG4CXX_WARN(logger_, "Unsupported function_id: " << function_id);
