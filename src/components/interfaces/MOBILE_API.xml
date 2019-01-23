@@ -2801,6 +2801,7 @@
         <element name="PHONE_CALL"/>
         <element name="VIDEO_STREAMING"/>
         <element name="REMOTE_CONTROL"/>
+        <element name="APP_SERVICES" />
     </enum>
     
     <struct name="NavigationCapability" since="4.5">
@@ -3614,24 +3615,6 @@
     </struct>
     
     <!-- End of RC -->
-    <struct name="SystemCapability" since="4.5">
-        <description>The systemCapabilityType indicates which type of data should be changed and identifies which data object exists in this struct. For example, if the SystemCapability Type is NAVIGATION then a "navigationCapability" should exist</description>
-        <param name="systemCapabilityType" type="SystemCapabilityType" mandatory="true">
-            <description>Used as a descriptor of what data to expect in this struct. The corresponding param to this enum should be included and the only other para included.</description>
-        </param>
-        <param name="navigationCapability" type="NavigationCapability" mandatory="false">
-            <description>Describes extended capabilities for onboard navigation system </description>
-        </param>
-        <param name="phoneCapability" type="PhoneCapability" mandatory="false">
-            <description>Describes extended capabilities of the module's phone feature</description>
-        </param>
-        <param name="videoStreamingCapability" type="VideoStreamingCapability" mandatory="false">
-            <description>Describes extended capabilities of the module's phone feature</description>
-        </param>
-        <param name="remoteControlCapability" type="RemoteControlCapabilities" mandatory="false">
-            <description>Describes extended capabilities of the module's phone feature</description>
-        </param>
-    </struct>
     
     <enum name="MetadataType" since="4.5">
         <element name="mediaTitle">
@@ -3974,8 +3957,68 @@
         <param name="weatherServiceData" type="WeatherServiceData" mandatory="false"/>
     </struct>
 
+    <enum name="ServiceUpdateReason">
+        <element name = "PUBLISHED">
+            <description> The service has just been published with the module and once activated to the primary service of its type, it will be ready for possible consumption.</description>
+        </element>
+        <element name = "REMOVED">
+            <description> The service has just been unpublished with the module and is no longer accessible</description>
+        </element>
+        <element name = "ACTIVATED">
+            <description> The service is activated as the primary service of this type. All requests dealing with this service type will be handled by this service.</description>
+        </element>
+        <element name = "DEACTIVATED">
+            <description> The service has been deactivated as the primary service of its type</description>
+        </element>
+        <element name = "MANIFEST_UPDATE">
+            <description> The service has updated its manifest. This could imply updated capabilities</description>
+        </element>
+    </enum>
+
+    <struct name="AppServiceCapability" since="5.1">
+        <param name="updateReason" type="ServiceUpdateReason" mandatory="false">
+            <description> Only included in OnSystemCapabilityUpdated. Update reason for service record.</description>
+        </param>
+        <param name="updatedAppServiceRecord" type="AppServiceRecord" mandatory="true">
+            <description>Service record for a specific app service provider</description>
+        </param>
+    </struct>
+
+    <struct name="AppServicesCapabilities" since="5.1">
+        <description>Capabilities of app services including what service types are supported and the current state of services.</description>
+        <param name="servicesSupported" type="AppServiceType" array="true" mandatory="true">
+            <description>An array of supported app service types</description>
+        </param>
+        <param name="appServices" type="AppServiceCapability" array="true" mandatory="false">
+            <description>An array of currently available services. If this is an update to the capability the affected services will include an update reason in that item</description>
+        </param>
+    </struct>
+
+
     <!-- End App Services -->
     
+    <struct name="SystemCapability" since="4.5">
+        <description>The systemCapabilityType indicates which type of data should be changed and identifies which data object exists in this struct. For example, if the SystemCapability Type is NAVIGATION then a "navigationCapability" should exist</description>
+        <param name="systemCapabilityType" type="SystemCapabilityType" mandatory="true">
+            <description>Used as a descriptor of what data to expect in this struct. The corresponding param to this enum should be included and the only other para included.</description>
+        </param>
+        <param name="navigationCapability" type="NavigationCapability" mandatory="false">
+            <description>Describes extended capabilities for onboard navigation system </description>
+        </param>
+        <param name="phoneCapability" type="PhoneCapability" mandatory="false">
+            <description>Describes extended capabilities of the module's phone feature</description>
+        </param>
+        <param name="videoStreamingCapability" type="VideoStreamingCapability" mandatory="false">
+            <description>Describes extended capabilities of the module's phone feature</description>
+        </param>
+        <param name="remoteControlCapability" type="RemoteControlCapabilities" mandatory="false">
+            <description>Describes extended capabilities of the module's phone feature</description>
+        </param>
+        <param name="appServicesCapabilities" type="AppServicesCapabilities" mandatory="false">
+            <description>An array of currently available services. If this is an update to the capability the affected services will include an update reason in that item</description>
+        </param>
+    </struct>
+
     <!-- Requests/Responses -->
     
     <function name="RegisterAppInterface" functionID="RegisterAppInterfaceID" messagetype="request" since="1.0">
