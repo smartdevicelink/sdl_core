@@ -538,7 +538,7 @@ enum FunctionID {
   /**
    * @brief OnSystemCapabilityUpdatedID
    */
-  OnSystemCapabilityUpdatedID = 32786,
+  OnSystemCapabilityUpdatedID = 32787,
 
   /**
    * @brief EncodedSyncPDataID.
