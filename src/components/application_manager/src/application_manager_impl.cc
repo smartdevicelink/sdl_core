@@ -911,6 +911,7 @@ void ApplicationManagerImpl::CreatePendingApplication(
   pending_device_map_lock_ptr_->Acquire();
   auto it = pending_device_map_.find(name);
   if (it == pending_device_map_.end()) {
+    pending_device_map_lock_ptr_->Release();
     return;
   }
   pending_device_map_lock_ptr_->Release();
@@ -992,10 +993,13 @@ void ApplicationManagerImpl::SetPendingApplicationState(
     const transport_manager::ConnectionUID connection_id,
     const transport_manager::DeviceInfo& device_info) {
   std::string name = device_info.name();
+  pending_device_map_lock_ptr_->Acquire();
   auto it = pending_device_map_.find(name);
   if (it == pending_device_map_.end()) {
+    pending_device_map_lock_ptr_->Release();
     return;
   }
+  pending_device_map_lock_ptr_->Release();
 
   const std::string policy_app_id = it->second;
   auto app = application_by_policy_id(policy_app_id);
