@@ -53,13 +53,12 @@ WebsocketClientConnection::WebsocketClientConnection(
     , thread_delegate_(new LoopThreadDelegate(&message_queue_, this))
     , write_thread_(threads::CreateThread("WS Async Send", thread_delegate_))
     , device_uid_(device_uid)
-    , app_handle_(app_handle) {}
+    , app_handle_(app_handle)
+    , io_pool_(1) {}
 
 WebsocketClientConnection::~WebsocketClientConnection() {
   ioc_.stop();
-  if (io_service_thread_.joinable()) {
-    io_service_thread_.join();
-  }
+  io_pool_.join();
 }
 
 TransportAdapter::Error WebsocketClientConnection::Start() {
@@ -73,7 +72,6 @@ TransportAdapter::Error WebsocketClientConnection::Start() {
   if (ec) {
     std::string str_err = "ErrorMessage: " + ec.message();
     LOG4CXX_ERROR(logger_, "Could not resolve host/port: " << str_err);
-    Shutdown();
     return TransportAdapter::FAIL;
   }
   boost::asio::connect(ws_.next_layer(), results.begin(), results.end(), ec);
@@ -82,7 +80,6 @@ TransportAdapter::Error WebsocketClientConnection::Start() {
     LOG4CXX_ERROR(logger_,
                   "Could not connect to websocket: " << host << ":" << port);
     LOG4CXX_ERROR(logger_, str_err);
-    Shutdown();
     return TransportAdapter::FAIL;
   }
   ws_.handshake(host, "/", ec);
@@ -92,7 +89,6 @@ TransportAdapter::Error WebsocketClientConnection::Start() {
                   "Could not complete handshake with host/port: " << host << ":"
                                                                   << port);
     LOG4CXX_ERROR(logger_, str_err);
-    Shutdown();
     return TransportAdapter::FAIL;
   }
   ws_.binary(true);
@@ -106,16 +102,11 @@ TransportAdapter::Error WebsocketClientConnection::Start() {
                            std::placeholders::_1,
                            std::placeholders::_2));
 
-  // Start IO Service thread. Allows for async reads without blocking.
-  io_service_thread_ = std::thread([&]() {
-    ioc_.run();
-    LOG4CXX_DEBUG(logger_, "Ending Boost IO Thread");
-  });
+  boost::asio::post(io_pool_, [&]() { ioc_.run(); });
 
   LOG4CXX_DEBUG(logger_,
                 "Successfully started websocket connection @: " << host << ":"
                                                                 << port);
-
   return TransportAdapter::OK;
 }
 
@@ -144,14 +135,12 @@ void WebsocketClientConnection::OnRead(boost::system::error_code ec,
   if (ec) {
     std::string str_err = "ErrorMessage: " + ec.message();
     LOG4CXX_ERROR(logger_, str_err);
+    ws_.lowest_layer().close();
+    ioc_.stop();
     Shutdown();
-    controller_->ConnectionAborted(
-        device_uid_, app_handle_, CommunicationError());
     return;
   }
-
   std::string data_str = boost::beast::buffers_to_string(buffer_.data());
-  LOG4CXX_DEBUG(logger_, "Cloud Transport Received: " << data_str);
 
   ssize_t size = (ssize_t)buffer_.size();
   const uint8_t* data = boost::asio::buffer_cast<const uint8_t*>(
@@ -224,7 +213,6 @@ void WebsocketClientConnection::LoopThreadDelegate::DrainQueue() {
           boost::asio::buffer(message_ptr->data(), message_ptr->data_size()));
       if (ec) {
         LOG4CXX_ERROR(logger_, "Error writing to websocket");
-        handler_.Shutdown();
         handler_.controller_->DataSendFailed(handler_.device_uid_,
                                              handler_.app_handle_,
                                              message_ptr,

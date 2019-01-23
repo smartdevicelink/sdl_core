@@ -42,6 +42,7 @@
 #include <boost/asio/connect.hpp>
 #include <boost/asio/ip/tcp.hpp>
 #include <boost/asio/ssl/stream.hpp>
+#include <boost/asio/thread_pool.hpp>
 #include <cstdlib>
 #include <functional>
 #include <iostream>
@@ -170,6 +171,8 @@ class WebsocketClientConnection
 
   const DeviceUID device_uid_;
   const ApplicationHandle app_handle_;
+
+  boost::asio::thread_pool io_pool_;
 };
 
 }  // namespace transport_adapter

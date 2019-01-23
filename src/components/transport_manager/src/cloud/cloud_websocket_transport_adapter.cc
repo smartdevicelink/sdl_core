@@ -64,6 +64,12 @@ bool CloudWebsocketTransportAdapter::Restore() {
 }
 
 void CloudWebsocketTransportAdapter::CreateDevice(const std::string& uid) {
+  // If the device has already been created, just ignore the request
+  DeviceSptr device = FindDevice(uid);
+  if (device.use_count() != 0) {
+    return;
+  }
+
   boost::regex pattern(
       "(wss?):\\/\\/([A-Z\\d\\.-]{2,})\\.?([A-Z]{2,})?(:\\d{2,4})\\/",
       boost::regex::icase);

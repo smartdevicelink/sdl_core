@@ -88,6 +88,10 @@ class TransportAdapterController {
    */
   virtual DeviceSptr FindDevice(const DeviceUID& device_handle) const = 0;
 
+  virtual ConnectionSPtr FindPendingConnection(
+      const DeviceUID& device_handle,
+      const ApplicationHandle& app_handle) const = 0;
+
   /**
    * @brief Create connection and fill its parameters.
    *

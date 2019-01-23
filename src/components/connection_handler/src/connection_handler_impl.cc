@@ -286,6 +286,9 @@ void ConnectionHandlerImpl::OnConnectionPending(
 
     connection_handler_observer_->CreatePendingApplication(
         connection_id, device_info, device_id);
+  } else {
+    connection_handler_observer_->SetPendingApplicationState(connection_id,
+                                                             device_info);
   }
 }
 

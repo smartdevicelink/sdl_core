@@ -842,9 +842,9 @@ void ApplicationManagerImpl::RefreshCloudAppInformation() {
     auto old_device_it = old_device_map.find(endpoint);
     if (old_device_it != old_device_map.end()) {
       old_device_map.erase(old_device_it);
-      continue;
     }
 
+    // If the device was disconnected, this will reinitialize the device
     connection_handler().AddCloudAppDevice(endpoint, cloud_transport_type);
   }
   pending_device_map_lock_ptr_->Release();
@@ -911,6 +911,7 @@ void ApplicationManagerImpl::CreatePendingApplication(
   pending_device_map_lock_ptr_->Acquire();
   auto it = pending_device_map_.find(name);
   if (it == pending_device_map_.end()) {
+    pending_device_map_lock_ptr_->Release();
     return;
   }
   pending_device_map_lock_ptr_->Release();
@@ -986,6 +987,36 @@ void ApplicationManagerImpl::CreatePendingApplication(
                 "apps_to_register_ size after: " << apps_to_register_.size());
 
   SendUpdateAppList();
+}
+
+void ApplicationManagerImpl::SetPendingApplicationState(
+    const transport_manager::ConnectionUID connection_id,
+    const transport_manager::DeviceInfo& device_info) {
+  std::string name = device_info.name();
+  pending_device_map_lock_ptr_->Acquire();
+  auto it = pending_device_map_.find(name);
+  if (it == pending_device_map_.end()) {
+    pending_device_map_lock_ptr_->Release();
+    return;
+  }
+  pending_device_map_lock_ptr_->Release();
+
+  const std::string policy_app_id = it->second;
+  auto app = application_by_policy_id(policy_app_id);
+
+  if (!app) {
+    return;
+  }
+  LOG4CXX_DEBUG(logger_,
+                "Unregister application and move into apps_to_register");
+  {
+    sync_primitives::AutoLock lock(apps_to_register_list_lock_ptr_);
+    apps_to_register_.insert(app);
+  }
+
+  UnregisterApplication(
+      app->app_id(), mobile_apis::Result::INVALID_ENUM, true, true);
+  app->MarkUnregistered();
 }
 
 void ApplicationManagerImpl::OnConnectionStatusUpdated() {
@@ -1232,6 +1263,7 @@ void ApplicationManagerImpl::OnDeviceListUpdated(
   so_to_send[jhs::S_PARAMS][jhs::S_CORRELATION_ID] = GetNextHMICorrelationID();
   so_to_send[jhs::S_MSG_PARAMS] = *msg_params;
   rpc_service_->ManageHMICommand(update_list);
+  RefreshCloudAppInformation();
 }
 
 void ApplicationManagerImpl::OnFindNewApplicationsRequest() {
@@ -2708,6 +2740,7 @@ void ApplicationManagerImpl::UnregisterApplication(
           logger_, "There is no more SDL4 apps with device handle: " << handle);
 
       RemoveAppsWaitingForRegistration(handle);
+      RefreshCloudAppInformation();
       SendUpdateAppList();
     }
   }
