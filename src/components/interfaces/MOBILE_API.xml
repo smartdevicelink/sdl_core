@@ -2643,6 +2643,7 @@
         <element name="OnWayPointChangeID" value="32784" hexvalue="8010" since="4.1" />
         <element name="OnRCStatusID" value="32785" hexvalue="8011" since="5.0" />
         <element name="OnAppServiceDataID" value="32786" hexvalue="8012" since="5.1" />
+        <element name="OnSystemCapabilityUpdatedID" value="32787" hexvalue="8013" since="5.1" />
 
         <!--
          Ford Specific Request / Response RPCs
@@ -7281,6 +7282,13 @@
         <description>This notification includes the data that is updated from the specific service</description>
 
         <param name="serviceData" type="AppServiceData" mandatory="true"/>
+    </function>
+    
+    <function name="OnSystemCapabilityUpdated" functionID="OnSystemCapabilityUpdatedID" messagetype="notification" since="5.1">
+        <description>A notification to inform the connected device that a specific system capability has changed.</description>
+        <param name="systemCapability" type="SystemCapability" mandatory="true">
+            <description>The system capability that has been updated</description>
+        </param>
     </function>
     
     <!-- ~~~~~~~~~~~~~~~~~~ -->
