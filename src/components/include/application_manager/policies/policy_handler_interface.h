@@ -488,6 +488,12 @@ class PolicyHandlerInterface {
   virtual void OnSetCloudAppProperties(
       const smart_objects::SmartObject& message) = 0;
 
+  virtual void GetAppServiceParameters(
+      const std::string& policy_app_id,
+      std::string& app_service_name,
+      std::string& service_type,
+      std::vector<uint64_t>& handled_rpcs) const = 0;
+
 #ifdef EXTERNAL_PROPRIETARY_MODE
   /**
    * @brief Gets meta information

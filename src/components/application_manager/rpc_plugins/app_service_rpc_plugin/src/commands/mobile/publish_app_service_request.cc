@@ -78,6 +78,42 @@ void PublishAppServiceRequest::Run() {
   service_record[strings::service_published] = true;
   service_record[strings::service_active] = true;
 
+  std::string requested_service_name =
+      (*message_)[strings::msg_params][strings::app_service_manifest]
+                 [strings::service_name].asString();
+  std::string requested_service_type =
+      (*message_)[strings::msg_params][strings::app_service_manifest]
+                 [strings::service_type].asString();
+  smart_objects::SmartArray* requested_handled_rpcs =
+      (*message_)[strings::msg_params][strings::app_service_manifest]
+                 [strings::handled_rpcs].asArray();
+
+  std::string service_name = std::string();
+  std::string service_type = std::string();
+  std::vector<uint64_t> handled_rpcs = {};
+  ApplicationSharedPtr app = application_manager_.application(connection_key());
+
+  policy_handler_.GetAppServiceParameters(
+      app->policy_app_id(), service_name, service_type, handled_rpcs);
+
+  if (service_name != requested_service_name) {
+    SendResponse(false, mobile_apis::Result::DISALLOWED, NULL, NULL);
+  }
+
+  if (service_type != requested_service_type) {
+    SendResponse(false, mobile_apis::Result::DISALLOWED, NULL, NULL);
+  }
+
+  for (auto requested_it = requested_handled_rpcs->begin();
+       requested_it != requested_handled_rpcs->end();
+       ++requested_it) {
+    auto find_result = std::find(
+        handled_rpcs.begin(), handled_rpcs.end(), requested_it->asUInt());
+    if (find_result == handled_rpcs.end()) {
+      SendResponse(false, mobile_apis::Result::DISALLOWED, NULL, NULL);
+    }
+  }
+
   response_params[strings::app_service_record] = service_record;
 
   SendResponse(true, mobile_apis::Result::SUCCESS, NULL, &response_params);

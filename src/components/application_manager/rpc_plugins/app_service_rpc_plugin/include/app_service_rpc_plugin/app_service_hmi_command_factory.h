@@ -43,11 +43,10 @@ namespace app_mngr = application_manager;
  */
 class AppServiceHmiCommandFactory : public app_mngr::CommandFactory {
  public:
-  AppServiceHmiCommandFactory(
-      app_mngr::ApplicationManager& application_manager,
-      app_mngr::rpc_service::RPCService& rpc_service,
-      app_mngr::HMICapabilities& hmi_capabilities,
-      policy::PolicyHandlerInterface& policy_handler);
+  AppServiceHmiCommandFactory(app_mngr::ApplicationManager& application_manager,
+                              app_mngr::rpc_service::RPCService& rpc_service,
+                              app_mngr::HMICapabilities& hmi_capabilities,
+                              policy::PolicyHandlerInterface& policy_handler);
 
   app_mngr::CommandSharedPtr CreateCommand(
       const app_mngr::commands::MessageSharedPtr& message,

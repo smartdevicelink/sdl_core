@@ -133,6 +133,8 @@ class SQLPTRepresentation : public virtual PTRepresentation {
   bool GatherRequestSubType(
       const std::string& app_id,
       policy_table::RequestSubTypes* request_subtypes) const;
+  bool GatherHandledRpcs(const std::string& app_id,
+                         policy_table::HandledRpcs* handled_rpcs) const;
   bool GatherNickName(const std::string& app_id,
                       policy_table::Strings* nicknames) const;
 
@@ -171,6 +173,8 @@ class SQLPTRepresentation : public virtual PTRepresentation {
   bool SaveRequestSubType(
       const std::string& app_id,
       const policy_table::RequestSubTypes& request_subtypes);
+  bool SaveHandledRpcs(const std::string& app_id,
+                       const policy_table::HandledRpcs& handled_rpcs);
 
  public:
   bool UpdateRequired() const;

@@ -44,20 +44,18 @@ namespace commands {
 /**
  * @brief PublishAppServiceRequest command class
  **/
-class PublishAppServiceRequest
-    : public app_mngr::commands::CommandRequestImpl {
+class PublishAppServiceRequest : public app_mngr::commands::CommandRequestImpl {
  public:
   /**
    * @brief PublishAppServiceRequest class constructor
    *
    * @param message Incoming SmartObject message
    **/
-  PublishAppServiceRequest(
-      const app_mngr::commands::MessageSharedPtr& message,
-      app_mngr::ApplicationManager& application_manager,
-      app_mngr::rpc_service::RPCService& rpc_service,
-      app_mngr::HMICapabilities& hmi_capabilities,
-      policy::PolicyHandlerInterface& policy_handle);
+  PublishAppServiceRequest(const app_mngr::commands::MessageSharedPtr& message,
+                           app_mngr::ApplicationManager& application_manager,
+                           app_mngr::rpc_service::RPCService& rpc_service,
+                           app_mngr::HMICapabilities& hmi_capabilities,
+                           policy::PolicyHandlerInterface& policy_handle);
 
   /**
    * @brief PublishAppServiceRequest class destructor

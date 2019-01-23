@@ -36,7 +36,7 @@
 #include "application_manager/command_factory.h"
 
 namespace app_service_rpc_plugin {
-//class AppServiceAppExtension;
+// class AppServiceAppExtension;
 namespace app_mngr = application_manager;
 namespace plugins = application_manager::plugin_manager;
 
@@ -67,7 +67,7 @@ class AppServiceRpcPlugin : public plugins::RPCPlugin {
    * @param ext application extension
    */
   // TODO
-  //void ProcessResumptionSubscription(app_mngr::Application& app,
+  // void ProcessResumptionSubscription(app_mngr::Application& app,
   //                                   AppServiceAppExtension& ext);
 
  private:
