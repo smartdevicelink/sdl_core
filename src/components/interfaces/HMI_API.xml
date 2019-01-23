@@ -3375,7 +3375,8 @@
     <!-- App Services -->
 
     <enum name="AppServiceType">
-	      <element name="MEDIA"/>
+        <element name="MEDIA"/>
+        <element name="WEATHER"/>
     </enum>
 
     <struct name="MediaServiceManifest">
@@ -3383,15 +3384,15 @@
 
     <enum name="MediaType">
         <element name="MUSIC"/>
-	      <element name="PODCAST"/>
-	      <element name="AUDIOBOOK"/>
-	      <element name="OTHER"/>
+        <element name="PODCAST"/>
+        <element name="AUDIOBOOK"/>
+        <element name="OTHER"/>
     </enum>
 
     <struct name="MediaServiceData">
         <description>This data is related to what a media service should provide</description>
 
-        <param name="mediaType" type="MediaType" mandatory="false">
+        <param name="mediaType" type="Common.MediaType" mandatory="false">
             <description>The type of the currently playing or paused track.</description>
         </param>
 
@@ -3449,9 +3450,9 @@
 
         <param name="queuePlaybackProgess" type="Integer" mandatory="false">
             <description>
-            Music: The current progress of the playback queue in seconds
-            Podcast: The current progress of the playback queue in seconds
-            Audiobook: The current progress of the playback queue (e.g. the book) in seconds
+                Music: The current progress of the playback queue in seconds
+                Podcast: The current progress of the playback queue in seconds
+                Audiobook: The current progress of the playback queue (e.g. the book) in seconds
             </description>
         </param>
 
@@ -3480,71 +3481,157 @@
         </param>
     </struct>
 
+    <struct name="WeatherServiceManifest" since="5.1">
+        <param name="currentForecastSupported" type="Boolean" mandatory="false"/>
+        <param name="maxMultidayForecastAmount" type="Integer" mandatory="false"/>
+        <param name="maxHourlyForecastAmount" type="Integer" mandatory="false"/>
+        <param name="maxMinutelyForecastAmount" type="Integer" mandatory="false"/>
+        <param name="weatherForLocationSupported" type="Boolean" mandatory="false"/>
+    </struct>
+
+    <struct name="WeatherAlert" since="5.1">
+        <param name="title" type="String" mandatory="false"/>
+        <param name="summary" type="String" mandatory="false"/>
+        <param name="expires" type="Common.DateTime" mandatory="false"/>
+        <param name="regions" type="String" array="true" minsize="1" maxsize="99" mandatory="false"/>
+        <param name="severity" type="String" mandatory="false"/>
+        <param name="timeIssued" type="Common.DateTime" mandatory="false"/>
+    </struct>
+
+    <struct name="WeatherData" since="5.1">
+        <param name="currentTemperature" type="Common.Temperature" mandatory="false"/>
+        <param name="temperatureHigh" type="Common.Temperature" mandatory="false"/>
+        <param name="temperatureLow" type="Common.Temperature" mandatory="false"/>
+        <param name="apparentTemperature" type="Common.Temperature" mandatory="false"/>
+        <param name="apparentTemperatureHigh" type="Common.Temperature" mandatory="false"/>
+        <param name="apparentTemperatureLow" type="Common.Temperature" mandatory="false"/>
+    
+        <param name="weatherSummary" type="String" mandatory="false"/>
+        <param name="time" type="Common.DateTime" mandatory="false"/>
+        <param name="humidity" type="Float" minvalue="0" maxvalue="1" mandatory="false">
+            <description> 0 to 1, percentage humidity </description>
+        </param>
+        <param name="cloudCover" type="Float" minvalue="0" maxvalue="1" mandatory="false">
+            <description> 0 to 1, percentage cloud cover </description>
+        </param>
+        <param name="moonPhase" type="Float" minvalue="0" maxvalue="1" mandatory="false">
+            <description> 0 to 1, percentage of the moon seen, e.g. 0 = no moon, 0.25 = quarter moon </description>
+        </param>
+
+        <param name="windBearing" type="Integer" mandatory="false">
+            <description> In degrees, true north at 0 degrees </description>
+        </param>
+        <param name="windGust" type="Float" mandatory="false">
+            <description> km/hr </description>
+        </param>
+        <param name="windSpeed" type="Float" mandatory="false">
+            <description> km/hr </description>
+        </param>
+
+        <param name="nearestStormBearing" type="Integer" mandatory="false">
+            <description> In degrees, true north at 0 degrees </description>
+        </param>
+        <param name="nearestStormDistance" type="Integer" mandatory="false">
+            <description> In km </description>
+        </param>
+        <param name="precipAccumulation" type="Float" mandatory="false">
+            <description> cm </description>
+        </param>
+        <param name="precipIntensity" type="Float" mandatory="false">
+            <description> cm of water per hour </description>
+        </param>
+        <param name="precipProbability" type="Float" minvalue="0" maxvalue="1" mandatory="false">
+            <description> 0 to 1, percentage chance </description>
+        </param>
+        <param name="precipType" type="String" mandatory="false">
+            <description> e.g. "rain", "snow", "sleet", "hail" </description>
+        </param>
+        <param name="visibility" type="Float" mandatory="false">
+            <description> In km </description>
+        </param>
+
+        <param name="weatherIconImageName" type="String" mandatory="false"/>
+    </struct>
+
+    <struct name="WeatherServiceData" since="5.1">
+        <description> This data is related to what a weather service would provide</description>
+        <param name="location" type="Common.LocationDetails" mandatory="true"/>
+        <param name="currentForecast" type="Common.WeatherData" mandatory="false"/>
+        <param name="minuteForecast" type="Common.WeatherData" array="true" minsize="15" maxsize="60" mandatory="false"/>
+        <param name="hourlyForecast" type="Common.WeatherData" array="true" minsize="1" maxsize="96" mandatory="false"/>
+        <param name="multidayForecast" type="Common.WeatherData" array="true" minsize="1" maxsize="30" mandatory="false"/>
+        <param name="alerts" type="Common.WeatherAlert" array="true" minsize="1" maxsize="10" mandatory="false">
+            <description> This array should be ordered with the first object being the current day</description>
+        </param>
+    </struct>
+
     <struct name="AppServiceManifest">
-		    <description> This manfifest contains all the information necessary for the service to be published, activated, and consumers able to interact with it</description>
+        <description> This manifest contains all the information necessary for the service to be published, activated, and consumers able to interact with it </description>
 
-		    <param name="serviceName" type="String" mandatory="false">
-		      	<description> Unique name of this service</description>
-    		</param>
+        <param name="serviceName" type="String" mandatory="false">
+            <description> Unique name of this service </description>
+        </param>
 
-		    <param name="serviceType" type="AppServiceType" mandatory="true">
-		      	<description>The type of service that is to be offered by this app</description>
-    		</param>
+        <param name="serviceType" type="Common.AppServiceType" mandatory="true">
+            <description> The type of service that is to be offered by this app </description>
+        </param>
 
-		    <param name="serviceIcon" type="String" mandatory="false">
-		      	<description> The file name of the icon to be associated with this service. Most likely the same as the appIcon.</description>
-    		</param>
+        <param name="serviceIcon" type="String" mandatory="false">
+            <description> The file name of the icon to be associated with this service. Most likely the same as the appIcon. </description>
+        </param>
 
-		    <param name="allowAppConsumers" type="Boolean" mandatory="false" defvalue="false">
-			      <description> If true, app service consumers beyond the IVI system will be able to access this service. If false, only the IVI system will be able consume the service. If not provided, it is assumed to be false. </description>
-		    </param>
+        <param name="allowAppConsumers" type="Boolean" mandatory="false" defvalue="false">
+            <description> If true, app service consumers beyond the IVI system will be able to access this service. If false, only the IVI system will be able consume the service. If not provided, it is assumed to be false. </description>
+        </param>
 
-		    <param name="uriPrefix" type="String" mandatory="false">
-			      <description> The URI prefix for this service. If provided, all PerformAppServiceInteraction requests must start with it.</description>
-		    </param>
+        <param name="uriPrefix" type="String" mandatory="false">
+            <description> The URI prefix for this service. If provided, all PerformAppServiceInteraction requests must start with it. </description>
+        </param>
 
-    		<param name="uriScheme" type="String" mandatory="false">
-		      	<description> This is a custom schema for this service. SDL will not do any verification on this param past that it has a correctly formated JSON Object as its base. The uriScheme should contain all available actions to be taken through a PerformAppServiceInteraction request from an app service consumer. </description>
-    		</param>
+        <param name="uriScheme" type="String" mandatory="false">
+            <description> This is a custom schema for this service. SDL will not do any verification on this param past that it has a correctly formated JSON Object as its base. The uriScheme should contain all available actions to be taken through a PerformAppServiceInteraction request from an app service consumer. </description>
+        </param>
 
-		    <param name="rpcSpecVersion" type="SyncMsgVersion" mandatory="false">
-			      <description> This is the max RPC Spec version the app service understands. This is important during the RPC passthrough functionality. If not included, it is assumed the max version of the module is acceptable. </description>
-		    </param>
+        <param name="rpcSpecVersion" type="Common.SyncMsgVersion" mandatory="false">
+            <description> This is the max RPC Spec version the app service understands. This is important during the RPC passthrough functionality. If not included, it is assumed the max version of the module is acceptable. </description>
+        </param>
 
-		    <param name="handledRPCs" type="Integer" array="true" mandatory="false">
-			      <description> This field contains the Function IDs for the RPCs that this service intends to handle correctly. This means the service will provide meaningful responses. </description>
-		    </param>
+        <param name="handledRPCs" type="Integer" array="true" mandatory="false">
+            <description> This field contains the Function IDs for the RPCs that this service intends to handle correctly. This means the service will provide meaningful responses. </description>
+        </param>
 
-		    <param name="mediaServiceManifest" type="MediaServiceManifest" mandatory="false"/>
-	  </struct>
+        <param name="mediaServiceManifest" type="Common.MediaServiceManifest" mandatory="false"/>
+        <param name="weatherServiceManifest" type="Common.WeatherServiceManifest" mandatory="false"/>
+    </struct>
 
     <struct name="AppServiceRecord">
-	      <description> This is the record of an app service publisher that the module has. It should contain the most up to date information including the service's active state</description>
+        <description> This is the record of an app service publisher that the module has. It should contain the most up to date information including the service's active state</description>
 
-	      <param name="serviceID" type="String" mandatory="true">
-		        <description> A unique ID tied to this specific service record. The ID is supplied by the module that services publish themselves. </description>
-	      </param>
+        <param name="serviceID" type="String" mandatory="true">
+            <description> A unique ID tied to this specific service record. The ID is supplied by the module that services publish themselves. </description>
+        </param>
 
-      	<param name="serviceManifest" type="AppServiceManifest" mandatory="true">
-		        <description> Manifest for the service that this record is for.</description>
-	      </param>
+        <param name="serviceManifest" type="Common.AppServiceManifest" mandatory="true">
+            <description> Manifest for the service that this record is for.</description>
+        </param>
 
-	      <param name="servicePublished" type="Boolean" mandatory="true">
-		        <description> If true, the service is published and available. If false, the service has likely just been unpublished, and should be considered unavailable.</description>
-	      </param>
+        <param name="servicePublished" type="Boolean" mandatory="true">
+            <description> If true, the service is published and available. If false, the service has likely just been unpublished, and should be considered unavailable.</description>
+        </param>
 
-	      <param name="serviceActive" type="Boolean" mandatory="true">
-		        <description> If true, the service is the active primary service of the supplied service type. It will receive all potential RPCs that are passed through to that service type. If false, it is not the primary service of the supplied type. See servicePublished for its availability. </description>
-	      </param>
+        <param name="serviceActive" type="Boolean" mandatory="true">
+            <description> If true, the service is the active primary service of the supplied service type. It will receive all potential RPCs that are passed through to that service type. If false, it is not the primary service of the supplied type. See servicePublished for its availability. </description>
+        </param>
     </struct>
 
     <struct name="AppServiceData">
-	    <description> Contains all the current data of the app service. The serviceType will link to which of the service data objects are included in this object. (eg if service type equals MEDIA, the mediaServiceData param should be included.</description>
+        <description> Contains all the current data of the app service. The serviceType will link to which of the service data objects are included in this object. (eg if service type equals MEDIA, the mediaServiceData param should be included.</description>
 
-	    <param name="serviceType" type="AppServiceType" mandatory="true"/>
-	    <param name="serviceID" type="String" mandatory="true"/>
+        <param name="serviceType" type="Common.AppServiceType" mandatory="true"/>
+        <param name="serviceID" type="String" mandatory="true"/>
 
-	    <param name="mediaServiceData" type="Common.MediaServiceData" mandatory="false"/>
+        <param name="mediaServiceData" type="Common.MediaServiceData" mandatory="false"/>
+        <param name="weatherServiceData" type="Common.WeatherServiceData" mandatory="false"/>
     </struct>
 
     <!-- End App Services -->
@@ -6032,25 +6119,25 @@
 <interface name="AppService" version="1.0.0" date="2019-01-20">
     <description>Interface used for interacting with app services as a producer or consumer</description>
     <function name="PublishAppService" messagetype="request">
-	      <description>Registers a service offered by this app on the module</description>
+        <description>Registers a service offered by this app on the module</description>
 
-      	<param name="appServiceManifest" type="Common.AppServiceManifest" mandatory="true">
-		        <description> The manifest of the service that wishes to be published.</description>
-      	</param>
+        <param name="appServiceManifest" type="Common.AppServiceManifest" mandatory="true">
+            <description> The manifest of the service that wishes to be published.</description>
+        </param>
     </function>
 
     <function name="PublishAppService" messagetype="response">
-	      <description>Response to the request to register a service offered by this app on the module</description>
+        <description>Response to the request to register a service offered by this app on the module</description>
 
-	      <param name="appServiceRecord" type="Common.AppServiceRecord" mandatory="false">
-	      	  <description> If the request was successful, this object will be the current status of the service record for the published service. This will include the Core supplied service ID.</description>
-	      </param>
+        <param name="appServiceRecord" type="Common.AppServiceRecord" mandatory="false">
+            <description> If the request was successful, this object will be the current status of the service record for the published service. This will include the Core supplied service ID.</description>
+        </param>
     </function>
 
     <function name="OnAppServiceData" messagetype="notification">
-	      <description>This notification includes the data that is updated from the specific service. HMI->SDL if the HMI is a producer, SDL->HMI if the HMI is a consumer</description>
+        <description>This notification includes the data that is updated from the specific service. HMI->SDL if the HMI is a producer, SDL->HMI if the HMI is a consumer</description>
 
-	      <param name="serviceData" type="Common.AppServiceData" mandatory="true"/>
+        <param name="serviceData" type="Common.AppServiceData" mandatory="true"/>
     </function>
 </interface>
 </interfaces>
