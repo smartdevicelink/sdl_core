@@ -798,7 +798,7 @@ void CacheManager::SetHybridAppPreference(
 
 void CacheManager::GetAppServiceParameters(
     const std::string& policy_app_id,
-    std::string& app_service_name,
+    std::string& service_name,
     std::string& service_type,
     std::vector<uint64_t>& handled_rpcs) const {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -808,9 +808,9 @@ void CacheManager::GetAppServiceParameters(
       policies.find(policy_app_id);
   if (policies.end() != policy_iter) {
     auto app_policy = (*policy_iter).second;
-    app_service_name = app_policy.app_service_name.is_initialized()
-                           ? *app_policy.app_service_name
-                           : std::string();
+    service_name = app_policy.service_name.is_initialized()
+                       ? *app_policy.service_name
+                       : std::string();
     service_type = app_policy.service_type.is_initialized()
                        ? *app_policy.service_type
                        : std::string();

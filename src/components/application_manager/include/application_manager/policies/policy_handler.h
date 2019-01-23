@@ -448,7 +448,7 @@ class PolicyHandler : public PolicyHandlerInterface,
       const smart_objects::SmartObject& message) OVERRIDE;
 
   void GetAppServiceParameters(const std::string& policy_app_id,
-                               std::string& app_service_name,
+                               std::string& service_name,
                                std::string& service_type,
                                std::vector<uint64_t>& handled_rpcs) const;
 

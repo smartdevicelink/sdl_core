@@ -247,8 +247,10 @@ ApplicationParams::ApplicationParams(const Json::Value* value__)
     , endpoint(impl::ValueMember(value__, "endpoint"))
     , enabled(impl::ValueMember(value__, "enabled"))
     , auth_token(impl::ValueMember(value__, "auth_token"))
-    , cloud_transport_type(impl::ValueMember(value__, "cloud_transport_type")) {
-}
+    , cloud_transport_type(impl::ValueMember(value__, "cloud_transport_type"))
+    , service_name(impl::ValueMember(value__, "service_name"))
+    , service_type(impl::ValueMember(value__, "service_type"))
+    , handled_rpcs(impl::ValueMember(value__, "handled_rpcs")) {}
 
 Json::Value ApplicationParams::ToJsonValue() const {
   Json::Value result__(PolicyBase::ToJsonValue());
@@ -267,6 +269,9 @@ Json::Value ApplicationParams::ToJsonValue() const {
   impl::WriteJsonField("enabled", enabled, &result__);
   impl::WriteJsonField("auth_token", auth_token, &result__);
   impl::WriteJsonField("cloud_transport_type", cloud_transport_type, &result__);
+  impl::WriteJsonField("service_name", service_name, &result__);
+  impl::WriteJsonField("service_type", service_type, &result__);
+  impl::WriteJsonField("handled_rpcs", handled_rpcs, &result__);
   return result__;
 }
 
@@ -307,6 +312,15 @@ bool ApplicationParams::is_valid() const {
     return false;
   }
   if (!hybrid_app_preference.is_valid()) {
+    return false;
+  }
+  if (!service_name.is_valid()) {
+    return false;
+  }
+  if (!service_type.is_valid()) {
+    return false;
+  }
+  if (!handled_rpcs.is_valid()) {
     return false;
   }
   return Validate();
@@ -357,6 +371,15 @@ bool ApplicationParams::struct_empty() const {
     return false;
   }
   if (hybrid_app_preference.is_initialized()) {
+    return false;
+  }
+  if (service_name.is_initialized()) {
+    return false;
+  }
+  if (service_type.is_initialized()) {
+    return false;
+  }
+  if (handled_rpcs.is_initialized()) {
     return false;
   }
   return true;
@@ -426,6 +449,15 @@ void ApplicationParams::ReportErrors(rpc::ValidationReport* report__) const {
     moduleType.ReportErrors(
         &report__->ReportSubobject("hybrid_app_preference"));
   }
+  if (!service_name.is_valid()) {
+    service_name.ReportErrors(&report__->ReportSubobject("service_name"));
+  }
+  if (!service_type.is_valid()) {
+    service_type.ReportErrors(&report__->ReportSubobject("service_type"));
+  }
+  if (!handled_rpcs.is_valid()) {
+    handled_rpcs.ReportErrors(&report__->ReportSubobject("handled_rpcs"));
+  }
 }
 
 void ApplicationParams::SetPolicyTableType(PolicyTableType pt_type) {
@@ -441,6 +473,9 @@ void ApplicationParams::SetPolicyTableType(PolicyTableType pt_type) {
   enabled.SetPolicyTableType(pt_type);
   cloud_transport_type.SetPolicyTableType(pt_type);
   hybrid_app_preference.SetPolicyTableType(pt_type);
+  service_name.SetPolicyTableType(pt_type);
+  service_type.SetPolicyTableType(pt_type);
+  handled_rpcs.SetPolicyTableType(pt_type);
 }
 
 // RpcParameters methods

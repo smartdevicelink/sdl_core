@@ -104,6 +104,8 @@ typedef Array<Enum<RequestType>, 0, 255> RequestsTypeArray;
 
 typedef Strings RequestSubTypes;
 
+typedef Array<Integer<uint64_t, 0u, UINT_MAX>, 0, 255> HandledRpcs;
+
 typedef Map<Strings, 0, 255> RemoteRpcs;
 typedef Map<RemoteRpcs, 0, 255> AccessModules;
 typedef Array<Enum<ModuleType>, 0, 255> ModuleTypes;
@@ -184,6 +186,11 @@ struct ApplicationParams : PolicyBase {
   Optional<Boolean> enabled;
   Optional<String<0, 65535> > auth_token;
   Optional<String<0, 255> > cloud_transport_type;
+
+  // App Service Params
+  Optional<String<0, 255> > service_name;
+  Optional<String<0, 255> > service_type;
+  Optional<HandledRpcs> handled_rpcs;
 
  public:
   ApplicationParams();

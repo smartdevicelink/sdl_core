@@ -735,7 +735,7 @@ bool SQLPTRepresentation::GatherApplicationPoliciesSection(
     *params.cloud_transport_type = query.GetString(9);
 
     // AppService Parameters
-    *params.app_service_name = query.GetString(10);
+    *params.service_name = query.GetString(10);
     *params.service_type = query.GetString(11);
 
     const auto& gather_app_id = ((*policies).apps[app_id].is_string())
@@ -1019,8 +1019,8 @@ bool SQLPTRepresentation::SaveSpecificAppPolicy(
   app.second.cloud_transport_type.is_initialized()
       ? app_query.Bind(10, *app.second.cloud_transport_type)
       : app_query.Bind(10);
-  app.second.app_service_name.is_initialized()
-      ? app_query.Bind(11, *app.second.app_service_name)
+  app.second.service_name.is_initialized()
+      ? app_query.Bind(11, *app.second.service_name)
       : app_query.Bind(11);
   app.second.service_type.is_initialized()
       ? app_query.Bind(12, *app.second.service_type)

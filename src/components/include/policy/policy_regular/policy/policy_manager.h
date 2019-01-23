@@ -573,9 +573,17 @@ class PolicyManager : public usage_statistics::StatisticsManager {
       const std::string& policy_app_id,
       const std::string& hybrid_app_preference) = 0;
 
+  /**
+   * @brief Get app service parameters from the policy table
+   * @param policy_app_id Unique application id
+   * @param service_name Service name published by app service provider
+   * @param service_type Service type published by app service provider
+   * @param handled_rpcs Vector of allowed function ids an app service provider
+   * can handle
+   */
   virtual void GetAppServiceParameters(
       const std::string& policy_app_id,
-      std::string& app_service_name,
+      std::string& service_name,
       std::string& service_type,
       std::vector<uint64_t>& handled_rpcs) const = 0;
 

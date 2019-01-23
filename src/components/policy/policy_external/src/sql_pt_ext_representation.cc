@@ -771,6 +771,12 @@ bool SQLPTExtRepresentation::SaveSpecificAppPolicy(
   app.second.cloud_transport_type.is_initialized()
       ? app_query.Bind(13, *app.second.cloud_transport_type)
       : app_query.Bind(13);
+  app.second.service_name.is_initialized()
+      ? app_query.Bind(14, *app.second.service_name)
+      : app_query.Bind(14);
+  app.second.service_type.is_initialized()
+      ? app_query.Bind(15, *app.second.service_type)
+      : app_query.Bind(15);
 
   if (!app_query.Exec() || !app_query.Reset()) {
     LOG4CXX_WARN(logger_, "Incorrect insert into application.");
@@ -802,6 +808,10 @@ bool SQLPTExtRepresentation::SaveSpecificAppPolicy(
   }
 
   if (!SaveRequestSubType(app.first, *app.second.RequestSubType)) {
+    return false;
+  }
+
+  if (!SaveHandledRpcs(app.first, *app.second.handled_rpcs)) {
     return false;
   }
 
@@ -909,6 +919,10 @@ bool SQLPTExtRepresentation::GatherApplicationPoliciesSection(
     *params.auth_token = query.GetString(11);
     *params.cloud_transport_type = query.GetString(12);
 
+    // AppService Parameters
+    *params.service_name = query.GetString(13);
+    *params.service_type = query.GetString(14);
+
     const auto& gather_app_id = ((*policies).apps[app_id].is_string())
                                     ? (*policies).apps[app_id].get_string()
                                     : app_id;
@@ -939,6 +953,9 @@ bool SQLPTExtRepresentation::GatherApplicationPoliciesSection(
       return false;
     }
     if (!GatherRequestSubType(gather_app_id, &*params.RequestSubType)) {
+      return false;
+    }
+    if (!GatherHandledRpcs(gather_app_id, &*params.handled_rpcs)) {
       return false;
     }
     GatherPreconsentedGroup(gather_app_id, &*params.preconsented_groups);

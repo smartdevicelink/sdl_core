@@ -778,6 +778,10 @@ bool SQLPTRepresentation::GatherApplicationPoliciesSection(
     *params.auth_token = query.GetString(8);
     *params.cloud_transport_type = query.GetString(9);
 
+    // AppService Parameters
+    *params.service_name = query.GetString(10);
+    *params.service_type = query.GetString(11);
+
     const auto& gather_app_id = ((*policies).apps[app_id].is_string())
                                     ? (*policies).apps[app_id].get_string()
                                     : app_id;
@@ -808,6 +812,9 @@ bool SQLPTRepresentation::GatherApplicationPoliciesSection(
       return false;
     }
     if (!GatherRequestSubType(gather_app_id, &*params.RequestSubType)) {
+      return false;
+    }
+    if (!GatherHandledRpcs(gather_app_id, &*params.handled_rpcs)) {
       return false;
     }
 
@@ -1070,6 +1077,12 @@ bool SQLPTRepresentation::SaveSpecificAppPolicy(
   app.second.cloud_transport_type.is_initialized()
       ? app_query.Bind(10, *app.second.cloud_transport_type)
       : app_query.Bind(10);
+  app.second.service_name.is_initialized()
+      ? app_query.Bind(11, *app.second.service_name)
+      : app_query.Bind(11);
+  app.second.service_type.is_initialized()
+      ? app_query.Bind(12, *app.second.service_type)
+      : app_query.Bind(12);
 
   if (!app_query.Exec() || !app_query.Reset()) {
     LOG4CXX_WARN(logger_, "Incorrect insert into application.");
@@ -1104,6 +1117,9 @@ bool SQLPTRepresentation::SaveSpecificAppPolicy(
   }
 
   if (!SaveRequestType(app.first, *app.second.RequestType)) {
+    return false;
+  }
+  if (!SaveHandledRpcs(app.first, *app.second.handled_rpcs)) {
     return false;
   }
 
@@ -1265,6 +1281,32 @@ bool SQLPTRepresentation::SaveRequestSubType(
     if (!query.Exec() || !query.Reset()) {
       LOG4CXX_WARN(logger_, "Incorrect insert into request subtypes.");
       return false;
+    }
+  }
+  return true;
+}
+
+bool SQLPTRepresentation::SaveHandledRpcs(
+    const std::string& app_id, const policy_table::HandledRpcs& handled_rpcs) {
+  utils::dbms::SQLQuery query(db());
+  if (!query.Prepare(sql_pt::kInsertHandledRpcs)) {
+    LOG4CXX_WARN(logger_, "Incorrect insert statement for handled rpcs.");
+    return false;
+  }
+
+  policy_table::HandledRpcs::const_iterator it;
+  if (!handled_rpcs.empty()) {
+    LOG4CXX_TRACE(logger_, "Handled Rpcs are not empty.");
+    for (it = handled_rpcs.begin(); it != handled_rpcs.end(); ++it) {
+      query.Bind(0, app_id);
+
+      // TODO: Bind does not like uint64_t. Only takes ints? Not sure why this
+      // is broken since seconds between retries is able to handle
+      query.Bind(1, static_cast<int>(*it));
+      if (!query.Exec() || !query.Reset()) {
+        LOG4CXX_WARN(logger_, "Incorrect insert into handled rpcs.");
+        return false;
+      }
     }
   }
   return true;
@@ -1696,6 +1738,22 @@ bool SQLPTRepresentation::GatherRequestSubType(
   return true;
 }
 
+bool SQLPTRepresentation::GatherHandledRpcs(
+    const std::string& app_id, policy_table::HandledRpcs* handled_rpcs) const {
+  utils::dbms::SQLQuery query(db());
+  if (!query.Prepare(sql_pt::kSelectHandledRpcs)) {
+    LOG4CXX_WARN(logger_, "Incorrect select from handled rpcs.");
+    return false;
+  }
+
+  query.Bind(0, app_id);
+  while (query.Next()) {
+    const uint64_t rpc_id = query.GetInteger(0);
+    handled_rpcs->push_back(rpc_id);
+  }
+  return true;
+}
+
 bool SQLPTRepresentation::GatherNickName(
     const std::string& app_id, policy_table::Strings* nicknames) const {
   utils::dbms::SQLQuery query(db());
@@ -2041,6 +2099,12 @@ bool SQLPTRepresentation::SetDefaultPolicy(const std::string& app_id) {
     return false;
   }
 
+  policy_table::HandledRpcs handled_rpcs;
+  if (!GatherHandledRpcs(kDefaultId, &handled_rpcs) ||
+      !SaveHandledRpcs(app_id, handled_rpcs)) {
+    return false;
+  }
+
   policy_table::Strings default_groups;
   bool ret = (GatherAppGroup(kDefaultId, &default_groups) &&
               SaveAppGroup(app_id, default_groups));
@@ -2172,6 +2236,10 @@ bool SQLPTRepresentation::CopyApplication(const std::string& source,
                         : query.Bind(14, source_app.GetString(13));
   source_app.IsNull(14) ? query.Bind(15)
                         : query.Bind(15, source_app.GetString(14));
+  source_app.IsNull(15) ? query.Bind(16)
+                        : query.Bind(16, source_app.GetString(15));
+  source_app.IsNull(16) ? query.Bind(17)
+                        : query.Bind(17, source_app.GetString(16));
 
   if (!query.Exec()) {
     LOG4CXX_WARN(logger_, "Failed inserting into application.");

@@ -154,7 +154,7 @@ struct ApplicationParams : PolicyBase {
   Optional<String<0, 255> > cloud_transport_type;
 
   // App Service Params
-  Optional<String<0, 255> > app_service_name;
+  Optional<String<0, 255> > service_name;
   Optional<String<0, 255> > service_type;
   Optional<HandledRpcs> handled_rpcs;
 

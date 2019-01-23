@@ -640,6 +640,20 @@ class PolicyManagerImpl : public PolicyManager {
       const std::string& hybrid_app_preference) OVERRIDE;
 
   /**
+   * @brief Get app service parameters from the policy table
+   * @param policy_app_id Unique application id
+   * @param service_name Service name published by app service provider
+   * @param service_type Service type published by app service provider
+   * @param handled_rpcs Vector of allowed function ids an app service provider
+   * can handle
+   */
+  void GetAppServiceParameters(
+      const std::string& policy_app_id,
+      std::string& service_name,
+      std::string& service_type,
+      std::vector<uint64_t>& handled_rpcs) const OVERRIDE;
+
+  /**
    * @brief OnAppRegisteredOnMobile allows to handle event when application were
    * succesfully registered on mobile device.
    * It will send OnAppPermissionSend notification and will try to start PTU. *

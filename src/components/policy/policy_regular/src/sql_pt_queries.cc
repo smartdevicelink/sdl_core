@@ -142,7 +142,7 @@ const std::string kCreateSchema =
     "  `enabled` BOOLEAN, "
     "  `auth_token` VARCHAR(65535), "
     "  `cloud_transport_type` VARCHAR(255), "
-    "  `app_service_name` VARCHAR(255), "
+    "  `service_name` VARCHAR(255), "
     "  `service_type` VARCHAR(255), "
     "  `remote_control_denied` BOOLEAN NOT NULL DEFAULT 0, "
     "  CONSTRAINT `fk_application_hmi_level1` "
@@ -609,7 +609,7 @@ const std::string kInsertApplication =
     "INSERT OR IGNORE INTO `application` (`id`, `priority_value`, "
     "`is_revoked`, `memory_kb`, `heart_beat_timeout_ms`, `certificate`, "
     "`hybrid_app_preference_value`, `endpoint`, `enabled`, `auth_token`, "
-    "`cloud_transport_type`, `app_service_name`, `service_type`) VALUES "
+    "`cloud_transport_type`, `service_name`, `service_type`) VALUES "
     "(?,?,?,?,?,?,?,?,?,?,?,?,?)";
 
 const std::string kInsertAppGroup =
@@ -726,7 +726,7 @@ const std::string kSelectAppPolicies =
     "SELECT `id`, `priority_value`, `memory_kb`, "
     " `heart_beat_timeout_ms`, `certificate`, `hybrid_app_preference_value`, "
     " `endpoint`, `enabled`, `auth_token`, `cloud_transport_type`, "
-    "`app_service_name`, `service_type` FROM "
+    "`service_name`, `service_type` FROM "
     " `application`";
 
 const std::string kCollectFriendlyMsg = "SELECT * FROM `message`";
@@ -834,7 +834,7 @@ const std::string kInsertApplicationFull =
     " `default_hmi`, `priority_value`, `is_revoked`, `is_default`, "
     " `is_predata`, `memory_kb`, `heart_beat_timeout_ms`, "
     " `certificate`, `hybrid_app_preference_value`, `endpoint`, `enabled`, "
-    " `auth_token`, `cloud_transport_type`, `app_service_name`, "
+    " `auth_token`, `cloud_transport_type`, `service_name`, "
     "`service_type`) "
     "  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
@@ -843,7 +843,7 @@ const std::string kSelectApplicationFull =
     "  `is_revoked`, `is_default`, `is_predata`, `memory_kb`,"
     "  `heart_beat_timeout_ms`, `certificate`, `hybrid_app_preference_value`, "
     "  `endpoint`, `enabled`, `auth_token`, `cloud_transport_type`, "
-    "`app_service_name`, `service_type` "
+    "`service_name`, `service_type` "
     "FROM `application` "
     "WHERE `id` = "
     "?";
