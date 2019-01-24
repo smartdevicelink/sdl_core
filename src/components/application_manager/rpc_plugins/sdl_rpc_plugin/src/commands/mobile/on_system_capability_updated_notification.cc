@@ -1,7 +1,9 @@
 #include "sdl_rpc_plugin/commands/mobile/on_system_capability_updated_notification.h"
 #include "application_manager/application_manager.h"
 #include "sdl_rpc_plugin/extensions/system_capability_app_extension.h"
+#include "application_manager/helpers/application_helper.h"
 #include "application_manager/message_helper.h"
+#include "sdl_rpc_plugin/extensions/get_system_capability_app_extension.h"
 
 // #include "interfaces/MOBILE_API.h"
 // #include "utils/file_system.h"
@@ -37,64 +39,51 @@ OnSystemCapabilityUpdatedNotification::
 }
 
 void OnSystemCapabilityUpdatedNotification::Run() {
-  //   LOG4CXX_AUTO_TRACE(logger_);
+  LOG4CXX_AUTO_TRACE(logger_);
   LOG4CXX_DEBUG(logger_, "SYSCAP: Send OnSystemCapabilityUpdatedNotification");
 
-  app_mngr::ApplicationSharedPtr app =
-      application_manager_.application(connection_key());
-  auto& ext = SystemCapabilityAppExtension::ExtractExtension(*app);
-  smart_objects::SmartObject notification_params(smart_objects::SmartType_Map);
-  // const app_mngr::HMICapabilities& hmi_capabilities = hmi_capabilities_;
+  std::vector<ApplicationSharedPtr> app_notification;
+  std::vector<ApplicationSharedPtr>::iterator app_notification_it =
+      app_notification.begin();
+  std::vector<smart_objects::SmartObject> app_so;
 
-  if (ext.isSubscribedTo(mobile_apis::SystemCapabilityType::APP_SERVICES)) {
-    notification_params[app_mngr::strings::system_capability]
-                       [app_mngr::strings::system_capability_type] =
-                           mobile_apis::SystemCapabilityType::APP_SERVICES;
+  // TODO, figure out how to handle unknown enums for SystemCapabilityType
+  mobile_apis::SystemCapabilityType::eType system_capability_type =
+      static_cast<mobile_apis::SystemCapabilityType::eType>(
+          (*message_)[strings::msg_params][strings::system_capability]
+                     [strings::system_capability_type].asInt());
 
-    smart_objects::SmartObject app_service_capabilities(
-        smart_objects::SmartType_Map);
-    smart_objects::SmartObject supported_types(smart_objects::SmartType_Array);
-    smart_objects::SmartObject app_services(smart_objects::SmartType_Array);
+  const char* capability_type_string;
+  ns_smart_device_link::ns_smart_objects::EnumConversionHelper<
+      mobile_apis::SystemCapabilityType::eType>::
+      EnumToCString(system_capability_type, &capability_type_string);
 
-    std::vector<smart_objects::SmartObject> service_records =
-        application_manager_.GetAppServiceManager().GetAllServices();
-    std::set<mobile_apis::AppServiceType::eType> service_types;
+  auto subscribed_to_capability_predicate =
+      [&system_capability_type](const ApplicationSharedPtr app) {
+        DCHECK_OR_RETURN(app, false);
+        auto& ext = SystemCapabilityAppExtension::ExtractExtension(*app);
+        return ext.isSubscribedTo(system_capability_type);
+      };
 
-    for (auto& record : service_records) {
-      // SUPPORTED TYPES
-      mobile_apis::AppServiceType::eType service_type =
-          static_cast<mobile_apis::AppServiceType::eType>(
-              record[strings::service_manifest][strings::service_type]
-                  .asUInt());
-      service_types.insert(service_type);
+  const std::vector<ApplicationSharedPtr>& applications = FindAllApps(
+      application_manager_.applications(), subscribed_to_capability_predicate);
 
-      // APP SERVICES
-      smart_objects::SmartObject app_services_capability(
-          smart_objects::SmartType_Map);
-      app_services_capability[strings::update_reason] =
-          mobile_apis::ServiceUpdateReason::PUBLISHED;
-      app_services_capability[strings::updated_app_service_record] = record;
-      app_services.asArray()->push_back(app_services_capability);
-    }
+  LOG4CXX_DEBUG(logger_,
+                "Number of Notifications to be sent: " << applications.size());
 
-    int i = 0;
-    for (auto type_ : service_types) {
-      supported_types[i] = type_;
-      i++;
-    }
+  std::vector<ApplicationSharedPtr>::const_iterator app_it =
+      applications.begin();
 
-    app_service_capabilities[strings::services_supported] = supported_types;
-    app_service_capabilities[strings::app_services] = app_services;
-    notification_params[strings::system_capability]
-                       [strings::app_services_capability] =
-                           app_service_capabilities;
-
-    MessageHelper::PrintSmartObject(notification_params);
-
-  } else {
-    LOG4CXX_ERROR(logger_, "Invalid system capability");
-    return;
+  for (; applications.end() != app_it; ++app_it) {
+    const ApplicationSharedPtr app = *app_it;
+    LOG4CXX_INFO(logger_,
+                 "Sending OnSystemCapabilityUpdated " << capability_type_string
+                                                      << " application id "
+                                                      << app->app_id());
+    (*message_)[strings::params][strings::connection_key] = app->app_id();
+    SendNotification();
   }
+}
 
   (*message_)[app_mngr::strings::msg_params] = notification_params;
   SendNotification();

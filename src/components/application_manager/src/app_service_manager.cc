@@ -77,6 +77,36 @@ smart_objects::SmartObject AppServiceManager::PublishAppService(
   service_record[strings::service_active] = true;
   published_services_.insert(std::pair<std::string, smart_objects::SmartObject>(
       service_id, service_record));
+
+  smart_objects::SmartObjectSPtr notification =
+      std::make_shared<smart_objects::SmartObject>(
+          smart_objects::SmartType_Map);
+
+  smart_objects::SmartObject& message = *notification;
+
+  message[strings::params][strings::message_type] = MessageType::kNotification;
+  message[strings::params][strings::function_id] =
+      mobile_apis::FunctionID::OnSystemCapabilityUpdatedID;
+
+  smart_objects::SmartObject system_capability =
+      smart_objects::SmartObject(smart_objects::SmartType_Map);
+  system_capability[strings::system_capability_type] =
+      mobile_apis::SystemCapabilityType::APP_SERVICES;
+  system_capability[strings::app_services_capabilities] =
+      smart_objects::SmartObject(smart_objects::SmartType_Map);
+
+  smart_objects::SmartObject app_services =
+      smart_objects::SmartObject(smart_objects::SmartType_Array);
+  app_services[0] = smart_objects::SmartObject(smart_objects::SmartType_Map);
+  app_services[0][strings::update_reason] =
+      mobile_apis::ServiceUpdateReason::PUBLISHED;
+  app_services[0][strings::updated_app_service_record] = service_record;
+
+  system_capability[strings::app_services_capabilities][strings::app_services] =
+      app_services;
+
+  message[strings::msg_params][strings::system_capability] = system_capability;
+  app_manager_.GetRPCService().ManageHMICommand(notification);
   return service_record;
 }
 
