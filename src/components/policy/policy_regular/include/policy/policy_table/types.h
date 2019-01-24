@@ -98,7 +98,7 @@ typedef Array<Enum<RequestType>, 0, 255> RequestTypes;
 
 typedef Strings RequestSubTypes;
 
-typedef Array<Integer<uint64_t, 0u, UINT_MAX>, 0, 255> HandledRpcs;
+typedef Array<Integer<uint32_t, 0, UINT32_MAX>, 0, 255> HandledRpcs;
 
 typedef Map<Strings, 0, 255> RemoteRpcs;
 typedef Map<RemoteRpcs, 0, 255> AccessModules;

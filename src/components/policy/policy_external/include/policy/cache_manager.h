@@ -240,7 +240,7 @@ class CacheManager : public CacheManagerInterface {
       const std::string& policy_app_id,
       std::string& service_name,
       std::string& service_type,
-      std::vector<uint64_t>& handled_rpcs) const;
+      std::vector<uint32_t>& handled_rpcs) const;
 
   /**
    * @brief Allows to update 'vin' field in module_meta table.

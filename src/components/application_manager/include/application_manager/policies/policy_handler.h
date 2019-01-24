@@ -450,7 +450,7 @@ class PolicyHandler : public PolicyHandlerInterface,
   void GetAppServiceParameters(const std::string& policy_app_id,
                                std::string& service_name,
                                std::string& service_type,
-                               std::vector<uint64_t>& handled_rpcs) const;
+                               std::vector<uint32_t>& handled_rpcs) const;
 
   virtual void OnUpdateHMIAppType(
       std::map<std::string, StringArray> app_hmi_types) OVERRIDE;

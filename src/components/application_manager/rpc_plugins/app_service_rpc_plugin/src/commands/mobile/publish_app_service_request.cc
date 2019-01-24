@@ -90,7 +90,7 @@ void PublishAppServiceRequest::Run() {
 
   std::string service_name = std::string();
   std::string service_type = std::string();
-  std::vector<uint64_t> handled_rpcs = {};
+  std::vector<uint32_t> handled_rpcs = {};
   ApplicationSharedPtr app = application_manager_.application(connection_key());
 
   policy_handler_.GetAppServiceParameters(

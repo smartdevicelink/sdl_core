@@ -1505,7 +1505,7 @@ void CacheManager::GetAppServiceParameters(
     const std::string& policy_app_id,
     std::string& service_name,
     std::string& service_type,
-    std::vector<uint64_t>& handled_rpcs) const {
+    std::vector<uint32_t>& handled_rpcs) const {
   LOG4CXX_AUTO_TRACE(logger_);
   const policy_table::ApplicationPolicies& policies =
       pt_->policy_table.app_policies_section.apps;

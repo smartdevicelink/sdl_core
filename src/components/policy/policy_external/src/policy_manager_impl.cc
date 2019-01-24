@@ -776,7 +776,7 @@ void PolicyManagerImpl::GetAppServiceParameters(
     const std::string& policy_app_id,
     std::string& service_name,
     std::string& service_type,
-    std::vector<uint64_t>& handled_rpcs) const {
+    std::vector<uint32_t>& handled_rpcs) const {
   cache_->GetAppServiceParameters(
       policy_app_id, service_name, service_type, handled_rpcs);
 }

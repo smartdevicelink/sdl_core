@@ -646,7 +646,7 @@ class PolicyManagerImpl : public PolicyManager {
       const std::string& policy_app_id,
       std::string& service_name,
       std::string& service_type,
-      std::vector<uint64_t>& handled_rpcs) const OVERRIDE;
+      std::vector<uint32_t>& handled_rpcs) const OVERRIDE;
 
   /**
    * @brief OnAppRegisteredOnMobile allows to handle event when application were

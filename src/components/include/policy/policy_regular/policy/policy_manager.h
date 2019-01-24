@@ -585,7 +585,7 @@ class PolicyManager : public usage_statistics::StatisticsManager {
       const std::string& policy_app_id,
       std::string& service_name,
       std::string& service_type,
-      std::vector<uint64_t>& handled_rpcs) const = 0;
+      std::vector<uint32_t>& handled_rpcs) const = 0;
 
   /**
    * @brief OnAppRegisteredOnMobile allows to handle event when application were
