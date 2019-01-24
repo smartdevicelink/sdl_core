@@ -59,7 +59,6 @@ namespace test {
 namespace components {
 namespace application_manager_test {
 using application_manager::plugin_manager::RPCPluginManager;
-using application_manager::AppServiceManager;
 
 class MockApplicationManager : public application_manager::ApplicationManager {
  public:
@@ -92,7 +91,7 @@ class MockApplicationManager : public application_manager::ApplicationManager {
   MOCK_METHOD1(SetPluginManager,
                void(std::unique_ptr<RPCPluginManager>& plugin_manager));
 
-  MOCK_METHOD0(GetAppServiceManager, AppServiceManager&());
+  MOCK_METHOD0(GetAppServiceManager, application_manager::AppServiceManager&());
 
   MOCK_CONST_METHOD1(
       application_by_hmi_app,

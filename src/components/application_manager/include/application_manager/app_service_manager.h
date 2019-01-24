@@ -59,7 +59,8 @@ class AppServiceManager {
    * @brief TODO
    * @param manifest
    */
-  bool PublishAppService(const smart_objects::SmartObject& manifest);
+  smart_objects::SmartObject PublishAppService(
+      const smart_objects::SmartObject& manifest);
 
   /**
    * @brief TODO

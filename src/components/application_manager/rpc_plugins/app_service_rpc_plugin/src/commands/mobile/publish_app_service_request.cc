@@ -84,17 +84,13 @@ void PublishAppServiceRequest::Run() {
 
   smart_objects::SmartObject response_params =
       smart_objects::SmartObject(smart_objects::SmartType_Map);
-  smart_objects::SmartObject service_record =
-      smart_objects::SmartObject(smart_objects::SmartType_Map);
   smart_objects::SmartObject manifest =
       (*message_)[strings::msg_params][strings::app_service_manifest];
   if (!ValidateManifest(manifest)) {
     return;
   }
-  service_record[strings::service_manifest] = manifest;
-  service_record[strings::service_id] = "This is a service ID";
-  service_record[strings::service_published] = true;
-  service_record[strings::service_active] = true;
+  smart_objects::SmartObject service_record =
+      application_manager_.GetAppServiceManager().PublishAppService(manifest);
 
   response_params[strings::app_service_record] = service_record;
 
