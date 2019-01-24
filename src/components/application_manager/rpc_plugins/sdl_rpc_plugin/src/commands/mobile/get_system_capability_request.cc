@@ -131,62 +131,71 @@ void GetSystemCapabilityRequest::Run() {
         return;
       }
       break;
-    case mobile_apis::SystemCapabilityType::APP_SERVICES:{
-
-      smart_objects::SmartObject app_service_capabilities(smart_objects::SmartType_Map);
-      smart_objects::SmartObject supported_types(smart_objects::SmartType_Array);
+    case mobile_apis::SystemCapabilityType::APP_SERVICES: {
+      smart_objects::SmartObject app_service_capabilities(
+          smart_objects::SmartType_Map);
+      smart_objects::SmartObject supported_types(
+          smart_objects::SmartType_Array);
       smart_objects::SmartObject app_services(smart_objects::SmartType_Array);
 
-      std::vector<smart_objects::SmartObject> service_records = application_manager_.GetAppServiceManager().GetAllServices();
+      std::vector<smart_objects::SmartObject> service_records =
+          application_manager_.GetAppServiceManager().GetAllServices();
       std::set<mobile_apis::AppServiceType::eType> service_types;
-      
-      for(auto& record : service_records){
-        //SUPPORTED TYPES
-        mobile_apis::AppServiceType::eType service_type = static_cast<mobile_apis::AppServiceType::eType>(record[strings::service_manifest][strings::service_type].asUInt());
+
+      for (auto& record : service_records) {
+        // SUPPORTED TYPES
+        mobile_apis::AppServiceType::eType service_type =
+            static_cast<mobile_apis::AppServiceType::eType>(
+                record[strings::service_manifest][strings::service_type]
+                    .asUInt());
         service_types.insert(service_type);
 
-        //APP SERVICES
-        smart_objects::SmartObject app_services_capability(smart_objects::SmartType_Map);
-        app_services_capability[strings::update_reason] = mobile_apis::ServiceUpdateReason::PUBLISHED;
-        app_services_capability[strings::updated_app_service_record] = record;
-        app_services.asArray()->push_back(app_services_capability);
+        // APP SERVICES
+        smart_objects::SmartObject app_services_capabilities(
+            smart_objects::SmartType_Map);
+        app_services_capabilities[strings::updated_app_service_record] = record;
+        app_services.asArray()->push_back(app_services_capabilities);
       }
 
       int i = 0;
-      for(auto type_ : service_types){
+      for (auto type_ : service_types) {
         supported_types[i] = type_;
         i++;
       }
-      
-      app_service_capabilities[strings::services_supported] = supported_types;      
+
+      app_service_capabilities[strings::services_supported] = supported_types;
       app_service_capabilities[strings::app_services] = app_services;
-      response_params[strings::system_capability][strings::app_services_capability] = app_service_capabilities;
+      response_params[strings::system_capability]
+                     [strings::app_services_capabilities] =
+                         app_service_capabilities;
 
       MessageHelper::PrintSmartObject(response_params);
 
-      }
-      break;
+    } break;
 
     default:  // Return unsupported resource
       SendResponse(false, mobile_apis::Result::UNSUPPORTED_RESOURCE);
       return;
   }
 
-  if((*message_)[app_mngr::strings::msg_params].keyExists(
-          strings::subscribe)){
-    auto& ext = SystemCapabilityAppExtension::ExtractVIExtension(*app);
-    if((*message_)[app_mngr::strings::msg_params][strings::subscribe].asBool() == true){
-      LOG4CXX_DEBUG(logger_, "SYSCAP: Subscribe to system capability - " << response_type);
+  if ((*message_)[app_mngr::strings::msg_params].keyExists(
+          strings::subscribe)) {
+    auto& ext = SystemCapabilityAppExtension::ExtractExtension(*app);
+    if ((*message_)[app_mngr::strings::msg_params][strings::subscribe]
+            .asBool() == true) {
+      LOG4CXX_DEBUG(logger_,
+                    "SYSCAP: Subscribe to system capability - "
+                        << response_type);
       ext.subscribeTo(response_type);
-    }
-    else{
-      LOG4CXX_DEBUG(logger_, "SYSCAP: Unsubscribe from system capability - " << response_type);
+    } else {
+      LOG4CXX_DEBUG(logger_,
+                    "SYSCAP: Unsubscribe from system capability - "
+                        << response_type);
       ext.unsubscribeFrom(response_type);
     }
   }
 
   SendResponse(true, mobile_apis::Result::SUCCESS, NULL, &response_params);
-
 }
 
 void GetSystemCapabilityRequest::on_event(const event_engine::Event& event) {

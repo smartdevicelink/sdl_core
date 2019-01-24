@@ -390,7 +390,8 @@ CommandCreator& MobileCommandFactory::get_creator_factory(
       return factory.GetCreator<commands::mobile::OnTouchEventNotification>();
     }
     case mobile_apis::FunctionID::OnSystemCapabilityUpdatedID: {
-      return factory.GetCreator<commands::mobile::OnSystemCapabilityUpdatedNotification>();
+      return factory.GetCreator<
+          commands::mobile::OnSystemCapabilityUpdatedNotification>();
     }
     case mobile_apis::FunctionID::OnSystemRequestID: {
       return factory
