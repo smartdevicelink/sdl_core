@@ -31,7 +31,7 @@
  */
 
 #include "sdl_rpc_plugin/commands/mobile/get_system_capability_request.h"
-#include "sdl_rpc_plugin/extensions/get_system_capability_app_extension.h"
+#include "sdl_rpc_plugin/extensions/system_capability_app_extension.h"
 #include "application_manager/message_helper.h"
 #include <set>
 

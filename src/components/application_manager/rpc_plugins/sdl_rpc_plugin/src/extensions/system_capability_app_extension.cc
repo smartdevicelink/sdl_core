@@ -1,4 +1,4 @@
-#include "sdl_rpc_plugin/extensions/get_system_capability_app_extension.h"
+#include "sdl_rpc_plugin/extensions/system_capability_app_extension.h"
 
 namespace sdl_rpc_plugin {
 CREATE_LOGGERPTR_GLOBAL(logger_, "GetSystemCapabilitiesAppExtension")

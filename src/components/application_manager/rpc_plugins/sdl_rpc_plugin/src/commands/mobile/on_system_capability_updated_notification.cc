@@ -2,7 +2,7 @@
 #include "application_manager/application_manager.h"
 #include "application_manager/helpers/application_helper.h"
 #include "application_manager/message_helper.h"
-#include "sdl_rpc_plugin/extensions/get_system_capability_app_extension.h"
+#include "sdl_rpc_plugin/extensions/system_capability_app_extension.h"
 
 // #include "interfaces/MOBILE_API.h"
 // #include "utils/file_system.h"
