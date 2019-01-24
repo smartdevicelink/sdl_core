@@ -3,7 +3,8 @@
 #include "sdl_rpc_plugin/extensions/system_capability_app_extension.h"
 #include "application_manager/helpers/application_helper.h"
 #include "application_manager/message_helper.h"
-#include "sdl_rpc_plugin/extensions/get_system_capability_app_extension.h"
+#include "sdl_rpc_plugin/extensions/system_capability_app_extension.h"
+#include "smart_objects/enum_schema_item.h"
 
 // #include "interfaces/MOBILE_API.h"
 // #include "utils/file_system.h"
@@ -41,11 +42,6 @@ OnSystemCapabilityUpdatedNotification::
 void OnSystemCapabilityUpdatedNotification::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
   LOG4CXX_DEBUG(logger_, "SYSCAP: Send OnSystemCapabilityUpdatedNotification");
-
-  std::vector<ApplicationSharedPtr> app_notification;
-  std::vector<ApplicationSharedPtr>::iterator app_notification_it =
-      app_notification.begin();
-  std::vector<smart_objects::SmartObject> app_so;
 
   // TODO, figure out how to handle unknown enums for SystemCapabilityType
   mobile_apis::SystemCapabilityType::eType system_capability_type =
