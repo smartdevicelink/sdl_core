@@ -67,6 +67,22 @@ void OnAppServiceDataNotificationFromMobile::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
   LOG4CXX_DEBUG(logger_, "Received an OnAppServiceData");
   MessageHelper::PrintSmartObject(*message_);
+
+  std::string service_type =
+      (*message_)[strings::msg_params][strings::app_service_manifest]
+                 [strings::service_type].asString();
+
+  ApplicationSharedPtr app = application_manager_.application(connection_key());
+
+  bool result = policy_handler_.CheckAppServiceParameters(
+      app->policy_app_id(), std::string(), service_type, {});
+
+  if (!result) {
+    LOG4CXX_DEBUG(logger_,
+                  "Incorrect service type received in "
+                  "OnAppServiceDataNotificationFromMobile");
+    return;
+  }
 }
 
 }  // namespace commands

@@ -1957,7 +1957,8 @@ bool PolicyHandler::CheckAppServiceParameters(
   std::vector<uint32_t> handled_rpcs = {};
   this->GetAppServiceParameters(
       policy_app_id, service_name, service_type, handled_rpcs);
-  if (service_name != requested_service_name) {
+  if (!requested_service_name.empty() &&
+      service_name != requested_service_name) {
     return false;
   }
 
