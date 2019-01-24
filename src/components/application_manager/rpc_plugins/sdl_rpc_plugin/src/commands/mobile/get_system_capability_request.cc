@@ -168,7 +168,7 @@ void GetSystemCapabilityRequest::Run() {
       app_service_capabilities[strings::services_supported] = supported_types;
       app_service_capabilities[strings::app_services] = app_services;
       response_params[strings::system_capability]
-                     [strings::app_services_capability] =
+                     [strings::app_services_capabilities] =
                          app_service_capabilities;
 
       MessageHelper::PrintSmartObject(response_params);

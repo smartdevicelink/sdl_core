@@ -179,7 +179,7 @@ extern const char* navigation_capability;
 extern const char* phone_capability;
 extern const char* video_streaming_capability;
 extern const char* rc_capability;
-extern const char* app_services_capability;
+extern const char* app_services_capabilities;
 extern const char* day_color_scheme;
 extern const char* night_color_scheme;
 extern const char* primary_color;
