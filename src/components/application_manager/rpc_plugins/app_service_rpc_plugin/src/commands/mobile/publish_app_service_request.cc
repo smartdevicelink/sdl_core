@@ -90,8 +90,11 @@ void PublishAppServiceRequest::Run() {
 
   ApplicationSharedPtr app = application_manager_.application(connection_key());
 
-  bool result = policy_handler_.CheckAppServiceParameters(
-      app->policy_app_id(), requested_service_name, requested_service_type, requested_handled_rpcs);
+  bool result =
+      policy_handler_.CheckAppServiceParameters(app->policy_app_id(),
+                                                requested_service_name,
+                                                requested_service_type,
+                                                requested_handled_rpcs);
 
   if (!result) {
     SendResponse(false, mobile_apis::Result::DISALLOWED, NULL, NULL);
