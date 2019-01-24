@@ -30,6 +30,7 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
+
 #ifndef SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_EXTENSIONS_SYSTEM_CAPABILITY_APP_EXTENSION_H
 #define SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_EXTENSIONS_SYSTEM_CAPABILITY_APP_EXTENSION_H
 #include <application_manager/application_manager.h>
@@ -43,41 +44,39 @@ class SDLRPCPlugin;
 namespace app_mngr_ = application_manager;
 
 typedef mobile_apis::SystemCapabilityType::eType SystemCapabilityType;
-typedef std::set<mobile_apis::SystemCapabilityType::eType>
-    SystemCapabilitySubscriptions;
+typedef std::set<mobile_apis::SystemCapabilityType::eType> SystemCapabilitySubscriptions;
 
 class SystemCapabilityAppExtension : public app_mngr_::AppExtension {
- public:
-  SystemCapabilityAppExtension(SDLRPCPlugin& plugin,
-                               app_mngr_::Application& app);
-  virtual ~SystemCapabilityAppExtension();
+public:
+    SystemCapabilityAppExtension(SDLRPCPlugin& plugin, app_mngr_::Application& app);
+    virtual ~SystemCapabilityAppExtension();
 
-  bool subscribeTo(const SystemCapabilityType system_capability_type);
+    bool subscribeTo(const SystemCapabilityType system_capability_type);
 
-  bool unsubscribeFrom(const SystemCapabilityType system_capability_type);
+    bool unsubscribeFrom(const SystemCapabilityType system_capability_type);
 
-  void unsubscribeFrom();
+    void unsubscribeFrom();
 
-  bool isSubscribedTo(const SystemCapabilityType system_capability_type) const;
+    bool isSubscribedTo(const SystemCapabilityType system_capability_type) const;
 
-  SystemCapabilitySubscriptions Subscriptions();
+    SystemCapabilitySubscriptions Subscriptions();
 
-  void SaveResumptionData(ns_smart_device_link::ns_smart_objects::SmartObject&
+    void SaveResumptionData(ns_smart_device_link::ns_smart_objects::SmartObject&
                               resumption_data) OVERRIDE;
+    
 
-  void ProcessResumption(
-      const smart_objects::SmartObject& resumption_data) OVERRIDE;
+    void ProcessResumption(const smart_objects::SmartObject& resumption_data) OVERRIDE;
 
-  static unsigned SystemCapabilityAppExtensionUID;
+    static unsigned SystemCapabilityAppExtensionUID;
 
-  static SystemCapabilityAppExtension& ExtractExtension(
-      app_mngr_::Application& app);
+    static SystemCapabilityAppExtension& ExtractExtension(app_mngr_::Application& app);
 
- private:
-  SystemCapabilitySubscriptions subscribed_data_;
-  SDLRPCPlugin& plugin_;
-  app_mngr_::Application& app_;
+private:
+    SystemCapabilitySubscriptions subscribed_data_;
+    SDLRPCPlugin& plugin_;
+    app_mngr_::Application& app_;
 };
+
 }
 
 #endif  // SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_EXTENSIONS_SYSTEM_CAPABILITY_APP_EXTENSION_H
