@@ -179,6 +179,7 @@ extern const char* navigation_capability;
 extern const char* phone_capability;
 extern const char* video_streaming_capability;
 extern const char* rc_capability;
+extern const char* app_services_capability;
 extern const char* day_color_scheme;
 extern const char* night_color_scheme;
 extern const char* primary_color;
@@ -317,6 +318,10 @@ extern const char* service_id;
 extern const char* service_manifest;
 extern const char* service_published;
 extern const char* service_active;
+extern const char* services_supported;
+extern const char* app_services;
+extern const char* update_reason;
+extern const char* updated_app_service_record;
 
 // resuming
 extern const char* application_commands;

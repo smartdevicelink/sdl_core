@@ -32,7 +32,8 @@
 
 #include "sdl_rpc_plugin/commands/mobile/get_system_capability_request.h"
 #include "sdl_rpc_plugin/extensions/get_system_capability_app_extension.h"
-
+#include "application_manager/message_helper.h"
+#include <set>
 
 namespace sdl_rpc_plugin {
 using namespace application_manager;
@@ -130,6 +131,42 @@ void GetSystemCapabilityRequest::Run() {
         return;
       }
       break;
+    case mobile_apis::SystemCapabilityType::APP_SERVICES:{
+
+      smart_objects::SmartObject app_service_capabilities(smart_objects::SmartType_Map);
+      smart_objects::SmartObject supported_types(smart_objects::SmartType_Array);
+      smart_objects::SmartObject app_services(smart_objects::SmartType_Array);
+
+      std::vector<smart_objects::SmartObject> service_records = application_manager_.GetAppServiceManager().GetAllServices();
+      std::set<mobile_apis::AppServiceType::eType> service_types;
+      
+      for(auto& record : service_records){
+        //SUPPORTED TYPES
+        mobile_apis::AppServiceType::eType service_type = static_cast<mobile_apis::AppServiceType::eType>(record[strings::service_manifest][strings::service_type].asUInt());
+        service_types.insert(service_type);
+
+        //APP SERVICES
+        smart_objects::SmartObject app_services_capability(smart_objects::SmartType_Map);
+        app_services_capability[strings::update_reason] = mobile_apis::ServiceUpdateReason::PUBLISHED;
+        app_services_capability[strings::updated_app_service_record] = record;
+        app_services.asArray()->push_back(app_services_capability);
+      }
+
+      int i = 0;
+      for(auto type_ : service_types){
+        supported_types[i] = type_;
+        i++;
+      }
+      
+      app_service_capabilities[strings::services_supported] = supported_types;      
+      app_service_capabilities[strings::app_services] = app_services;
+      response_params[strings::system_capability][strings::app_services_capability] = app_service_capabilities;
+
+      MessageHelper::PrintSmartObject(response_params);
+
+      }
+      break;
+
     default:  // Return unsupported resource
       SendResponse(false, mobile_apis::Result::UNSUPPORTED_RESOURCE);
       return;
@@ -147,7 +184,9 @@ void GetSystemCapabilityRequest::Run() {
       ext.unsubscribeFrom(response_type);
     }
   }
+
   SendResponse(true, mobile_apis::Result::SUCCESS, NULL, &response_params);
+
 }
 
 void GetSystemCapabilityRequest::on_event(const event_engine::Event& event) {

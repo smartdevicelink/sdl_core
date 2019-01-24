@@ -1,6 +1,7 @@
 #include "sdl_rpc_plugin/commands/mobile/on_system_capability_updated_notification.h"
 #include "application_manager/application_manager.h"
 #include "sdl_rpc_plugin/extensions/get_system_capability_app_extension.h"
+#include "application_manager/message_helper.h"
 
 // #include "interfaces/MOBILE_API.h"
 // #include "utils/file_system.h"
@@ -10,7 +11,7 @@
 // #include "application_manager/policies/policy_handler_interface.h"
 
 namespace sdl_rpc_plugin {
-namespace app_mngr = application_manager;
+using namespace application_manager;
 namespace commands {
 namespace mobile {
 
@@ -40,34 +41,43 @@ namespace mobile {
     app_mngr::ApplicationSharedPtr app = application_manager_.application(connection_key());
     auto& ext = SystemCapabilityAppExtension::ExtractVIExtension(*app);  
     smart_objects::SmartObject notification_params(smart_objects::SmartType_Map);
-    const app_mngr::HMICapabilities& hmi_capabilities = hmi_capabilities_;
+    // const app_mngr::HMICapabilities& hmi_capabilities = hmi_capabilities_;
 
-    if(ext.isSubscribedTo(mobile_apis::SystemCapabilityType::NAVIGATION)){
+    if(ext.isSubscribedTo(mobile_apis::SystemCapabilityType::APP_SERVICES)){
         notification_params[app_mngr::strings::system_capability][app_mngr::strings::system_capability_type]
-        = mobile_apis::SystemCapabilityType::NAVIGATION;
-        notification_params[app_mngr::strings::system_capability][app_mngr::strings::navigation_capability]
-            = *hmi_capabilities.navigation_capability();
-    }
-    else if(ext.isSubscribedTo(mobile_apis::SystemCapabilityType::PHONE_CALL)){
-        notification_params[app_mngr::strings::system_capability][app_mngr::strings::system_capability_type]
-        = mobile_apis::SystemCapabilityType::PHONE_CALL;
+        = mobile_apis::SystemCapabilityType::APP_SERVICES;
 
-        notification_params[app_mngr::strings::system_capability][app_mngr::strings::phone_capability]
-            = *hmi_capabilities.phone_capability();
-    }
-    else if(ext.isSubscribedTo(mobile_apis::SystemCapabilityType::REMOTE_CONTROL)){
-        notification_params[app_mngr::strings::system_capability][app_mngr::strings::system_capability_type]
-        = mobile_apis::SystemCapabilityType::REMOTE_CONTROL;
+        smart_objects::SmartObject app_service_capabilities(smart_objects::SmartType_Map);
+        smart_objects::SmartObject supported_types(smart_objects::SmartType_Array);
+        smart_objects::SmartObject app_services(smart_objects::SmartType_Array);
 
-        notification_params[app_mngr::strings::system_capability][app_mngr::strings::rc_capability]
-            = *hmi_capabilities.rc_capability();
-    }
-    else if(ext.isSubscribedTo(mobile_apis::SystemCapabilityType::VIDEO_STREAMING)){
-        notification_params[app_mngr::strings::system_capability][app_mngr::strings::system_capability_type]
-        = mobile_apis::SystemCapabilityType::VIDEO_STREAMING;
+        std::vector<smart_objects::SmartObject> service_records = application_manager_.GetAppServiceManager().GetAllServices();
+        std::set<mobile_apis::AppServiceType::eType> service_types;
+        
+        for(auto& record : service_records){
+        //SUPPORTED TYPES
+        mobile_apis::AppServiceType::eType service_type = static_cast<mobile_apis::AppServiceType::eType>(record[strings::service_manifest][strings::service_type].asUInt());
+        service_types.insert(service_type);
 
-        notification_params[app_mngr::strings::system_capability][app_mngr::strings::video_streaming_capability]
-            = *hmi_capabilities.video_streaming_capability();
+        //APP SERVICES
+        smart_objects::SmartObject app_services_capability(smart_objects::SmartType_Map);
+        app_services_capability[strings::update_reason] = mobile_apis::ServiceUpdateReason::PUBLISHED;
+        app_services_capability[strings::updated_app_service_record] = record;
+        app_services.asArray()->push_back(app_services_capability);
+        }
+
+        int i = 0;
+        for(auto type_ : service_types){
+        supported_types[i] = type_;
+        i++;
+        }
+        
+        app_service_capabilities[strings::services_supported] = supported_types;      
+        app_service_capabilities[strings::app_services] = app_services;
+        notification_params[strings::system_capability][strings::app_services_capability] = app_service_capabilities;
+
+        MessageHelper::PrintSmartObject(notification_params);
+
     }
     else{
         LOG4CXX_ERROR(logger_, "Invalid system capability");
