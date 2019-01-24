@@ -1,4 +1,4 @@
-#include "sdl_rpc_plugin/extensions/get_system_capability_app_extension.h"
+#include "sdl_rpc_plugin/extensions/system_capability_app_extension.h"
 
 
 namespace sdl_rpc_plugin{
@@ -81,7 +81,7 @@ void SystemCapabilityAppExtension::ProcessResumption(const smart_objects::SmartO
     }
 }
 
-SystemCapabilityAppExtension& SystemCapabilityAppExtension::ExtractVIExtension(app_mngr_::Application& app){
+SystemCapabilityAppExtension& SystemCapabilityAppExtension::ExtractExtension(app_mngr_::Application& app){
     LOG4CXX_AUTO_TRACE(logger_);
     auto ext_ptr = app.QueryInterface(SystemCapabilityAppExtension::SystemCapabilityAppExtensionUID);
     DCHECK(ext_ptr);

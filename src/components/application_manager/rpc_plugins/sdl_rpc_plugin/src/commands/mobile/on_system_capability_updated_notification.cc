@@ -1,6 +1,6 @@
 #include "sdl_rpc_plugin/commands/mobile/on_system_capability_updated_notification.h"
 #include "application_manager/application_manager.h"
-#include "sdl_rpc_plugin/extensions/get_system_capability_app_extension.h"
+#include "sdl_rpc_plugin/extensions/system_capability_app_extension.h"
 #include "application_manager/message_helper.h"
 
 // #include "interfaces/MOBILE_API.h"
@@ -39,7 +39,7 @@ namespace mobile {
     LOG4CXX_DEBUG(logger_, "SYSCAP: Send OnSystemCapabilityUpdatedNotification");
 
     app_mngr::ApplicationSharedPtr app = application_manager_.application(connection_key());
-    auto& ext = SystemCapabilityAppExtension::ExtractVIExtension(*app);  
+    auto& ext = SystemCapabilityAppExtension::ExtractExtension(*app);  
     smart_objects::SmartObject notification_params(smart_objects::SmartType_Map);
     // const app_mngr::HMICapabilities& hmi_capabilities = hmi_capabilities_;
 
