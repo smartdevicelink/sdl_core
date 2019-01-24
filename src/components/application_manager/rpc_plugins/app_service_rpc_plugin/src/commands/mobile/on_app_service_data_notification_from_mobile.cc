@@ -75,7 +75,7 @@ void OnAppServiceDataNotificationFromMobile::Run() {
   ApplicationSharedPtr app = application_manager_.application(connection_key());
 
   bool result = policy_handler_.CheckAppServiceParameters(
-      app->policy_app_id(), std::string(), service_type, {});
+      app->policy_app_id(), std::string(), service_type, NULL);
 
   if (!result) {
     LOG4CXX_DEBUG(logger_,

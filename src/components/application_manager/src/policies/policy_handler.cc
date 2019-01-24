@@ -1966,13 +1966,15 @@ bool PolicyHandler::CheckAppServiceParameters(
     return false;
   }
 
-  for (auto requested_it = requested_handled_rpcs->begin();
-       requested_it != requested_handled_rpcs->end();
-       ++requested_it) {
-    auto find_result = std::find(
-        handled_rpcs.begin(), handled_rpcs.end(), requested_it->asUInt());
-    if (find_result == handled_rpcs.end()) {
-      return false;
+  if (requested_handled_rpcs) {
+    for (auto requested_it = requested_handled_rpcs->begin();
+         requested_it != requested_handled_rpcs->end();
+         ++requested_it) {
+      auto find_result = std::find(
+          handled_rpcs.begin(), handled_rpcs.end(), requested_it->asUInt());
+      if (find_result == handled_rpcs.end()) {
+        return false;
+      }
     }
   }
   return true;
