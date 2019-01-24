@@ -40,11 +40,10 @@ namespace plugins = application_manager::plugin_manager;
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "SdlRPCPlugin")
 
-bool SDLRPCPlugin::Init(
-    app_mngr::ApplicationManager& app_manager,
-    app_mngr::rpc_service::RPCService& rpc_service,
-    app_mngr::HMICapabilities& hmi_capabilities,
-    policy::PolicyHandlerInterface& policy_handler) {
+bool SDLRPCPlugin::Init(app_mngr::ApplicationManager& app_manager,
+                        app_mngr::rpc_service::RPCService& rpc_service,
+                        app_mngr::HMICapabilities& hmi_capabilities,
+                        policy::PolicyHandlerInterface& policy_handler) {
   command_factory_.reset(new sdl_rpc_plugin::SDLCommandFactory(
       app_manager, rpc_service, hmi_capabilities, policy_handler));
   return true;
@@ -52,8 +51,7 @@ bool SDLRPCPlugin::Init(
 
 bool SDLRPCPlugin::IsAbleToProcess(
     const int32_t function_id,
-    const app_mngr::commands::Command::CommandSource
-        message_source) {
+    const app_mngr::commands::Command::CommandSource message_source) {
   return command_factory_->IsAbleToProcess(function_id, message_source);
 }
 
@@ -65,13 +63,11 @@ app_mngr::CommandFactory& SDLRPCPlugin::GetCommandFactory() {
   return *command_factory_;
 }
 
-void SDLRPCPlugin::OnPolicyEvent(
-    plugins::PolicyEvent event) {}
+void SDLRPCPlugin::OnPolicyEvent(plugins::PolicyEvent event) {}
 
 void SDLRPCPlugin::OnApplicationEvent(
     plugins::ApplicationEvent event,
     app_mngr::ApplicationSharedPtr application) {
-
   if (plugins::ApplicationEvent::kApplicationRegistered == event) {
     application->AddExtension(
         std::make_shared<SystemCapabilityAppExtension>(*this, *application));
@@ -80,8 +76,7 @@ void SDLRPCPlugin::OnApplicationEvent(
   }
 }
 
-void SDLRPCPlugin::DeleteSubscriptions(
-    app_mngr::ApplicationSharedPtr app) {
+void SDLRPCPlugin::DeleteSubscriptions(app_mngr::ApplicationSharedPtr app) {
   auto& ext = SystemCapabilityAppExtension::ExtractExtension(*app);
   auto subscriptions = ext.Subscriptions();
   for (auto& ivi : subscriptions) {
