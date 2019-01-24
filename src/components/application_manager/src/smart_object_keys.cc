@@ -146,6 +146,7 @@ const char* navigation_capability = "navigationCapability";
 const char* phone_capability = "phoneCapability";
 const char* video_streaming_capability = "videoStreamingCapability";
 const char* rc_capability = "remoteControlCapability";
+const char* app_services_capability = "appServicesCapability";
 const char* day_color_scheme = "dayColorScheme";
 const char* night_color_scheme = "nightColorScheme";
 const char* primary_color = "primaryColor";
@@ -284,6 +285,10 @@ const char* service_id = "serviceID";
 const char* service_manifest = "serviceManifest";
 const char* service_published = "servicePublished";
 const char* service_active = "serviceActive";
+const char* services_supported = "servicesSupported";
+const char* app_services = "appServices";
+const char* update_reason = "updateReason";
+const char* updated_app_service_record = "updatedAppServiceRecord";
 
 // resuming
 const char* application_commands = "applicationCommands";
