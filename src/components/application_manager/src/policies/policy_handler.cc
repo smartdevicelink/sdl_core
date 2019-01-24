@@ -1947,6 +1947,34 @@ void PolicyHandler::GetAppServiceParameters(
       policy_app_id, service_name, service_type, handled_rpcs);
 }
 
+bool PolicyHandler::CheckAppServiceParameters(const std::string& policy_app_id,
+    const std::string& requested_service_name,
+    const std::string& requested_service_type,
+    smart_objects::SmartArray* requested_handled_rpcs) const {
+  std::string service_name = std::string();
+  std::string service_type = std::string();
+  std::vector<uint32_t> handled_rpcs = {};
+  this->GetAppServiceParameters(policy_app_id, service_name, service_type, handled_rpcs);
+  if (service_name != requested_service_name) {
+    return false;
+  }
+
+  if (service_type != requested_service_type) {
+    return false;
+  }
+
+  for (auto requested_it = requested_handled_rpcs->begin();
+       requested_it != requested_handled_rpcs->end();
+       ++requested_it) {
+    auto find_result = std::find(
+        handled_rpcs.begin(), handled_rpcs.end(), requested_it->asUInt());
+    if (find_result == handled_rpcs.end()) {
+      return false;
+    }
+  }
+  return true;  
+}
+
 uint32_t PolicyHandler::HeartBeatTimeout(const std::string& app_id) const {
   POLICY_LIB_CHECK(0);
   return policy_manager_->HeartBeatTimeout(app_id);
