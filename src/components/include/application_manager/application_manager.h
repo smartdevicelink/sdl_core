@@ -51,6 +51,7 @@
 #include "application_manager/hmi_interfaces.h"
 #include "policy/policy_types.h"
 #include "application_manager/plugin_manager/rpc_plugin_manager.h"
+#include "application_manager/app_service_manager.h"
 namespace resumption {
 class LastState;
 }
@@ -187,6 +188,8 @@ class ApplicationManager {
       const std::string& policy_app_id) const = 0;
 
   virtual plugin_manager::RPCPluginManager& GetPluginManager() = 0;
+
+  virtual application_manager::AppServiceManager& GetAppServiceManager() = 0;
 
 #ifdef BUILD_TESTS
   virtual void SetPluginManager(

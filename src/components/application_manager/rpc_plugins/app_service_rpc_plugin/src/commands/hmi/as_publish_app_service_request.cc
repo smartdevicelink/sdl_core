@@ -59,14 +59,35 @@ ASPublishAppServiceRequest::ASPublishAppServiceRequest(
 
 ASPublishAppServiceRequest::~ASPublishAppServiceRequest() {}
 
+bool ASPublishAppServiceRequest::ValidateManifest(
+    smart_objects::SmartObject& manifest) {
+  if (manifest.keyExists(strings::uri_scheme)) {
+    Json::Value value;
+    Json::Reader reader;
+    if (!reader.parse(manifest[strings::uri_scheme].asString(), value)) {
+      SendResponse(
+          false,
+          (*message_)[strings::params][strings::correlation_id].asUInt(),
+          hmi_apis::FunctionID::AppService_PublishAppService,
+          hmi_apis::Common_Result::INVALID_DATA);
+      return false;
+    }
+  }
+  return true;
+}
+
 void ASPublishAppServiceRequest::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
   smart_objects::SmartObject response_params =
       smart_objects::SmartObject(smart_objects::SmartType_Map);
   smart_objects::SmartObject service_record =
       smart_objects::SmartObject(smart_objects::SmartType_Map);
-  service_record[strings::service_manifest] =
+  smart_objects::SmartObject manifest =
       (*message_)[strings::msg_params][strings::app_service_manifest];
+  if (!ValidateManifest(manifest)) {
+    return;
+  }
+  service_record[strings::service_manifest] = manifest;
   service_record[strings::service_id] = "This is a service ID";
   service_record[strings::service_published] = true;
   service_record[strings::service_active] = true;
