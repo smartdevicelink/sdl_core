@@ -1049,7 +1049,7 @@ const char* EnumToJsonString(FunctionID val) {
     case OnSyncPDataID:
       return "OnSyncPData";
     case OnSystemCapabilityUpdatedID:
-      return "OnSystemCapabilityUpdated"; 
+      return "OnSystemCapabilityUpdated";
     default:
       return "";
   }
@@ -1395,7 +1395,7 @@ bool EnumFromJsonString(const std::string& literal, FunctionID* result) {
     return true;
   }
 
-  if ("OnSystemCapabilityUpdated" == literal){
+  if ("OnSystemCapabilityUpdated" == literal) {
     *result = OnSystemCapabilityUpdatedID;
     return true;
   }
