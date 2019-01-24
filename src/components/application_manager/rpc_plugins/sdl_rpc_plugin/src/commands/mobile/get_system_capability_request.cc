@@ -31,7 +31,7 @@
  */
 
 #include "sdl_rpc_plugin/commands/mobile/get_system_capability_request.h"
-#include "sdl_rpc_plugin/extensions/get_system_capability_app_extension.h"
+#include "sdl_rpc_plugin/extensions/system_capability_app_extension.h"
 #include "application_manager/message_helper.h"
 #include <set>
 
@@ -174,7 +174,7 @@ void GetSystemCapabilityRequest::Run() {
 
   if((*message_)[app_mngr::strings::msg_params].keyExists(
           strings::subscribe)){
-    auto& ext = SystemCapabilityAppExtension::ExtractVIExtension(*app);
+    auto& ext = SystemCapabilityAppExtension::ExtractExtension(*app);
     if((*message_)[app_mngr::strings::msg_params][strings::subscribe].asBool() == true){
       LOG4CXX_DEBUG(logger_, "SYSCAP: Subscribe to system capability - " << response_type);
       ext.subscribeTo(response_type);
