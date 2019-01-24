@@ -51,16 +51,13 @@ class SDLRPCPlugin : public plugins::RPCPlugin {
 
   bool IsAbleToProcess(
       const int32_t function_id,
-      const app_mngr::commands::Command::CommandSource
-          message_source) OVERRIDE;
+      const app_mngr::commands::Command::CommandSource message_source) OVERRIDE;
   std::string PluginName() OVERRIDE;
 
   app_mngr::CommandFactory& GetCommandFactory() OVERRIDE;
-  void OnPolicyEvent(
-      plugins::PolicyEvent event) OVERRIDE;
-  void OnApplicationEvent(
-      plugins::ApplicationEvent event,
-      app_mngr::ApplicationSharedPtr application) OVERRIDE;
+  void OnPolicyEvent(plugins::PolicyEvent event) OVERRIDE;
+  void OnApplicationEvent(plugins::ApplicationEvent event,
+                          app_mngr::ApplicationSharedPtr application) OVERRIDE;
 
  private:
   void DeleteSubscriptions(app_mngr::ApplicationSharedPtr app);
