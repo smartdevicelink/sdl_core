@@ -68,13 +68,6 @@ void OnSystemCapabilityUpdatedNotification::Run() {
   }
 }
 
-  (*message_)[app_mngr::strings::msg_params] = notification_params;
-  SendNotification();
-}
-
-  (*message_)[app_mngr::strings::msg_params] = notification_params;
-  SendNotification();
-}
 
 }  // namespace mobile
 }  // namespace commands
