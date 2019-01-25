@@ -79,8 +79,8 @@ void SDLRPCPlugin::OnApplicationEvent(
 void SDLRPCPlugin::DeleteSubscriptions(app_mngr::ApplicationSharedPtr app) {
   auto& ext = SystemCapabilityAppExtension::ExtractExtension(*app);
   auto subscriptions = ext.Subscriptions();
-  for (auto& ivi : subscriptions) {
-    ext.unsubscribeFrom(ivi);
+  for (auto& sub : subscriptions) {
+    ext.unsubscribeFrom(sub);
   }
 }
 
