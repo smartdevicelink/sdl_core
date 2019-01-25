@@ -5,13 +5,6 @@
 #include "sdl_rpc_plugin/extensions/system_capability_app_extension.h"
 #include "smart_objects/enum_schema_item.h"
 
-// #include "interfaces/MOBILE_API.h"
-// #include "utils/file_system.h"
-// #include "utils/helpers.h"
-// #include "policy/policy_table/enums.h"
-// #include "application_manager/application_manager.h"
-// #include "application_manager/policies/policy_handler_interface.h"
-
 namespace sdl_rpc_plugin {
 using namespace application_manager;
 namespace commands {
@@ -27,16 +20,10 @@ OnSystemCapabilityUpdatedNotification::OnSystemCapabilityUpdatedNotification(
                               application_manager,
                               rpc_service,
                               hmi_capabilities,
-                              policy_handler) {
-  LOG4CXX_DEBUG(logger_,
-                "SYSCAP: Initialize OnSystemCapabilityUpdatedNotification");
-}
+                              policy_handler) {}
 
 OnSystemCapabilityUpdatedNotification::
-    ~OnSystemCapabilityUpdatedNotification() {
-  LOG4CXX_DEBUG(logger_,
-                "SYSCAP: Destroy OnSystemCapabilityUpdatedNotification");
-}
+    ~OnSystemCapabilityUpdatedNotification() {}
 
 void OnSystemCapabilityUpdatedNotification::Run() {
   LOG4CXX_AUTO_TRACE(logger_);

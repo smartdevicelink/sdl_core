@@ -11,23 +11,22 @@ SystemCapabilityAppExtension::SystemCapabilityAppExtension(
     : app_mngr_::AppExtension(
           SystemCapabilityAppExtension::SystemCapabilityAppExtensionUID)
     , plugin_(plugin)
-    , app_(app) {
-  LOG4CXX_AUTO_TRACE(logger_);
-}
+    , app_(app) {}
 
-SystemCapabilityAppExtension::~SystemCapabilityAppExtension() {
-  LOG4CXX_AUTO_TRACE(logger_);
-}
+SystemCapabilityAppExtension::~SystemCapabilityAppExtension() {}
 
 bool SystemCapabilityAppExtension::subscribeTo(
     const SystemCapabilityType system_capability_type) {
-  LOG4CXX_DEBUG(logger_, system_capability_type);
+  LOG4CXX_INFO(logger_,
+               "Subscribing to System Capability " << system_capability_type);
   return subscribed_data_.insert(system_capability_type).second;
 }
 
 bool SystemCapabilityAppExtension::unsubscribeFrom(
     const SystemCapabilityType system_capability_type) {
-  LOG4CXX_DEBUG(logger_, system_capability_type);
+  LOG4CXX_INFO(logger_,
+               "Unsubscribing from System Capability "
+                   << system_capability_type);
   auto it = subscribed_data_.find(system_capability_type);
   if (it != subscribed_data_.end()) {
     subscribed_data_.erase(it);
@@ -37,7 +36,7 @@ bool SystemCapabilityAppExtension::unsubscribeFrom(
 }
 
 void SystemCapabilityAppExtension::unsubscribeFrom() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOG4CXX_INFO(logger_, "Unsubscribing from ALL System Capabilities");
   subscribed_data_.clear();
 }
 
@@ -73,14 +72,13 @@ void SystemCapabilityAppExtension::ProcessResumption(
 
   const char* application_system_capability = "systemCapability";
   if (resumption_data.keyExists(application_system_capability)) {
-    const smart_objects::SmartObject& subscriptions_ivi =
+    const smart_objects::SmartObject& subscriptions =
         resumption_data[application_system_capability];
-    for (size_t i = 0; i < subscriptions_ivi.length(); ++i) {
-      SystemCapabilityType ivi =
+    for (size_t i = 0; i < subscriptions.length(); ++i) {
+      SystemCapabilityType capability_type =
           static_cast<SystemCapabilityType>((resumption_data[i]).asInt());
-      subscribeTo(ivi);
+      subscribeTo(capability_type);
     }
-    // plugin_.ProcessResumptionSubscription(app_, *this);
   }
 }
 
@@ -91,9 +89,9 @@ SystemCapabilityAppExtension& SystemCapabilityAppExtension::ExtractExtension(
       SystemCapabilityAppExtension::SystemCapabilityAppExtensionUID);
   DCHECK(ext_ptr);
   DCHECK(dynamic_cast<SystemCapabilityAppExtension*>(ext_ptr.get()));
-  auto vi_app_extension =
+  auto app_extension =
       std::static_pointer_cast<SystemCapabilityAppExtension>(ext_ptr);
-  DCHECK(vi_app_extension);
-  return *vi_app_extension;
+  DCHECK(app_extension);
+  return *app_extension;
 }
 }
