@@ -106,7 +106,8 @@ smart_objects::SmartObject AppServiceManager::PublishAppService(
       app_services;
 
   message[strings::msg_params][strings::system_capability] = system_capability;
-  app_manager_.GetRPCService().ManageHMICommand(notification);
+  app_manager_.GetRPCService().ManageMobileCommand(
+      notification, commands::Command::CommandSource::SOURCE_SDL);
   return service_record;
 }
 
