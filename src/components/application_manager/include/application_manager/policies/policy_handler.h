@@ -447,11 +447,9 @@ class PolicyHandler : public PolicyHandlerInterface,
   void OnSetCloudAppProperties(
       const smart_objects::SmartObject& message) OVERRIDE;
 
-  void GetAppServiceParameters(
-      const std::string& policy_app_id,
-      std::string& service_name,
-      std::string& service_type,
-      std::vector<uint32_t>& handled_rpcs) const OVERRIDE;
+  void GetAppServiceParameters(const std::string& policy_app_id,
+                               policy_table::AppServiceParameters*
+                                   app_service_parameters) const OVERRIDE;
 
   bool CheckAppServiceParameters(
       const std::string& policy_app_id,

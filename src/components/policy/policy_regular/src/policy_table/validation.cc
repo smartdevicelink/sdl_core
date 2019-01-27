@@ -177,6 +177,10 @@ bool ApplicationParams::ValidateModuleTypes() const {
   return true;
 }
 
+bool AppServiceInfo::Validate() const {
+  return true;  // todo add validation
+}
+
 bool ApplicationParams::Validate() const {
   return ValidateModuleTypes();
 }

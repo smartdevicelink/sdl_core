@@ -583,9 +583,7 @@ class PolicyManager : public usage_statistics::StatisticsManager {
    */
   virtual void GetAppServiceParameters(
       const std::string& policy_app_id,
-      std::string& service_name,
-      std::string& service_type,
-      std::vector<uint32_t>& handled_rpcs) const = 0;
+      policy_table::AppServiceParameters* app_service_parameters) const = 0;
 
   /**
    * @brief OnAppRegisteredOnMobile allows to handle event when application were

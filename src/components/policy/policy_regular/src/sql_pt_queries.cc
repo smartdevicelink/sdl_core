@@ -142,8 +142,6 @@ const std::string kCreateSchema =
     "  `enabled` BOOLEAN, "
     "  `auth_token` VARCHAR(65535), "
     "  `cloud_transport_type` VARCHAR(255), "
-    "  `service_name` VARCHAR(255), "
-    "  `service_type` VARCHAR(255), "
     "  `remote_control_denied` BOOLEAN NOT NULL DEFAULT 0, "
     "  CONSTRAINT `fk_application_hmi_level1` "
     "    FOREIGN KEY(`default_hmi`) "
@@ -289,13 +287,29 @@ const std::string kCreateSchema =
     "    FOREIGN KEY(`application_id`) "
     "    REFERENCES `application`(`id`) "
     "); "
-    "CREATE TABLE IF NOT EXISTS `handled_rpcs`( "
-    "  `handled_rpcs` INTEGER, "
+    "CREATE TABLE IF NOT EXISTS `app_service_types`( "
+    "  `id` INTEGER PRIMARY KEY NOT NULL, "
+    "  `service_type` VARCHAR(50), "
     "  `application_id` VARCHAR(45) NOT NULL COLLATE NOCASE, "
-    "  PRIMARY KEY(`handled_rpcs`,`application_id`), "
-    "  CONSTRAINT `fk_handled_rpcs_app_id` "
+    "  CONSTRAINT `fk_service_type_app_id` "
     "    FOREIGN KEY(`application_id`) "
     "    REFERENCES `application`(`id`) "
+    "); "
+    "CREATE TABLE IF NOT EXISTS `app_service_names`( "
+    "  `service_type_id` INTEGER NOT NULL, "
+    "  `service_name` VARCHAR(45), "
+    "  PRIMARY KEY(`service_name`,`service_type_id`), "
+    "  CONSTRAINT `fk_service_name_service_type_id` "
+    "    FOREIGN KEY(`service_type_id`) "
+    "    REFERENCES `app_service_types`(`id`) "
+    "); "
+    "CREATE TABLE IF NOT EXISTS `app_service_handled_rpcs`( "
+    "  `service_type_id` INTEGER NOT NULL, "
+    "  `function_id` INTEGER, "
+    "  PRIMARY KEY(`function_id`,`service_type_id`), "
+    "  CONSTRAINT `fk_function_id_service_type_id` "
+    "    FOREIGN KEY(`service_type_id`) "
+    "    REFERENCES `app_service_types`(`id`) "
     "); "
     "CREATE INDEX IF NOT EXISTS `app_type.fk_app_type_application1_idx` "
     "  ON `app_type`(`application_id` COLLATE NOCASE); "
@@ -477,7 +491,9 @@ const std::string kDropSchema =
     "DROP TABLE IF EXISTS `app_type`; "
     "DROP TABLE IF EXISTS `request_type`; "
     "DROP TABLE IF EXISTS `request_subtype`; "
-    "DROP TABLE IF EXISTS `handled_rpcs`; "
+    "DROP TABLE IF EXISTS `app_service_types`; "
+    "DROP TABLE IF EXISTS `app_service_names`; "
+    "DROP TABLE IF EXISTS `app_service_handled_rpcs`; "
     "DROP INDEX IF EXISTS `nickname.fk_nickname_application1_idx`; "
     "DROP TABLE IF EXISTS `nickname`; "
     "DROP INDEX IF EXISTS `app_level.fk_app_level_language2_idx`; "
@@ -609,8 +625,8 @@ const std::string kInsertApplication =
     "INSERT OR IGNORE INTO `application` (`id`, `priority_value`, "
     "`is_revoked`, `memory_kb`, `heart_beat_timeout_ms`, `certificate`, "
     "`hybrid_app_preference_value`, `endpoint`, `enabled`, `auth_token`, "
-    "`cloud_transport_type`, `service_name`, `service_type`) VALUES "
-    "(?,?,?,?,?,?,?,?,?,?,?,?,?)";
+    "`cloud_transport_type`) VALUES "
+    "(?,?,?,?,?,?,?,?,?,?,?)";
 
 const std::string kInsertAppGroup =
     "INSERT INTO `app_group` (`application_id`, `functional_group_id`)"
@@ -631,9 +647,19 @@ const std::string kInsertRequestSubType =
     "`request_subtype`) "
     "VALUES (?, ?)";
 
-const std::string kInsertHandledRpcs =
-    "INSERT INTO `handled_rpcs` (`application_id`, "
-    "`handled_rpcs`) "
+const std::string kInsertAppServiceTypes =
+    "INSERT INTO `app_service_types` (`id`, "
+    "`service_type`, `application_id`) "
+    "VALUES (?, ?, ?)";
+
+const std::string kInsertAppServiceNames =
+    "INSERT INTO `app_service_names` (`service_type_id`, "
+    "`service_name`) "
+    "VALUES (?, ?)";
+
+const std::string kInsertAppServiceHandledRpcs =
+    "INSERT INTO `app_service_handled_rpcs` (`service_type_id`, "
+    "`function_id`) "
     "VALUES (?, ?)";
 
 const std::string kUpdateVersion = "UPDATE `version` SET `number`= ?";
@@ -725,8 +751,7 @@ const std::string kSelectUserMsgsVersion =
 const std::string kSelectAppPolicies =
     "SELECT `id`, `priority_value`, `memory_kb`, "
     " `heart_beat_timeout_ms`, `certificate`, `hybrid_app_preference_value`, "
-    " `endpoint`, `enabled`, `auth_token`, `cloud_transport_type`, "
-    "`service_name`, `service_type` FROM "
+    " `endpoint`, `enabled`, `auth_token`, `cloud_transport_type` FROM "
     " `application`";
 
 const std::string kCollectFriendlyMsg = "SELECT * FROM `message`";
@@ -754,9 +779,19 @@ const std::string kSelectRequestSubTypes =
     "`application_id` "
     "= ?";
 
-const std::string kSelectHandledRpcs =
-    "SELECT DISTINCT `handled_rpcs` FROM `handled_rpcs` WHERE "
+const std::string kSelectAppServiceTypes =
+    "SELECT `id`, `service_type`` FROM `app_service_types` WHERE "
     "`application_id` "
+    "= ?";
+
+const std::string kSelectAppServiceNames =
+    "SELECT DISTINCT `service_name` FROM `app_service_names` WHERE "
+    "`service_type_id` "
+    "= ?";
+
+const std::string kSelectAppServiceHandledRpcs =
+    "SELECT DISTINCT `function_id` FROM `app_service_handled_rpcs` WHERE "
+    "`service_type_id` "
     "= ?";
 
 const std::string kSelectSecondsBetweenRetries =
@@ -806,7 +841,12 @@ const std::string kDeleteRequestType = "DELETE FROM `request_type`";
 
 const std::string kDeleteRequestSubType = "DELETE FROM `request_subtype`";
 
-const std::string kDeleteHandledRpcs = "DELETE FROM `handled_rpcs`";
+const std::string kDeleteAppServiceTypes = "DELETE FROM `app_service_types`";
+
+const std::string kDeleteAppServiceNames = "DELETE FROM `app_service_names`";
+
+const std::string kDeleteAppServiceHandledRpcs =
+    "DELETE FROM `app_service_handled_rpcs`";
 
 const std::string kSelectApplicationRevoked =
     "SELECT `is_revoked` FROM `application` WHERE `id` = ?";
@@ -834,16 +874,14 @@ const std::string kInsertApplicationFull =
     " `default_hmi`, `priority_value`, `is_revoked`, `is_default`, "
     " `is_predata`, `memory_kb`, `heart_beat_timeout_ms`, "
     " `certificate`, `hybrid_app_preference_value`, `endpoint`, `enabled`, "
-    " `auth_token`, `cloud_transport_type`, `service_name`, "
-    "`service_type`) "
-    "  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+    " `auth_token`, `cloud_transport_type`) "
+    "  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
 const std::string kSelectApplicationFull =
     "SELECT `keep_context`, `steal_focus`, `default_hmi`, `priority_value`, "
     "  `is_revoked`, `is_default`, `is_predata`, `memory_kb`,"
     "  `heart_beat_timeout_ms`, `certificate`, `hybrid_app_preference_value`, "
-    "  `endpoint`, `enabled`, `auth_token`, `cloud_transport_type`, "
-    "`service_name`, `service_type` "
+    "  `endpoint`, `enabled`, `auth_token`, `cloud_transport_type` "
     "FROM `application` "
     "WHERE `id` = "
     "?";

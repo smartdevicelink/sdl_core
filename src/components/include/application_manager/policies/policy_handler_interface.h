@@ -490,9 +490,7 @@ class PolicyHandlerInterface {
 
   virtual void GetAppServiceParameters(
       const std::string& policy_app_id,
-      std::string& service_name,
-      std::string& service_type,
-      std::vector<uint32_t>& handled_rpcs) const = 0;
+      policy_table::AppServiceParameters* app_service_parameters) const = 0;
 
   virtual bool CheckAppServiceParameters(
       const std::string& policy_app_id,

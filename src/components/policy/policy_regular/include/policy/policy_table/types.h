@@ -50,6 +50,7 @@ struct MessageLanguages;
 struct MessageString;
 struct RpcParameters;
 struct Rpcs;
+struct AppServiceInfo;
 }  // namespace policy_table_interface_base
 }  // namespace rpc
 
@@ -98,7 +99,12 @@ typedef Array<Enum<RequestType>, 0, 255> RequestTypes;
 
 typedef Strings RequestSubTypes;
 
-typedef Array<Integer<uint32_t, 0, UINT32_MAX>, 0, 255> HandledRpcs;
+typedef String<0, 255> AppServiceType;
+typedef String<0, 255> AppServiceName;
+typedef Array<AppServiceName, 0, 255> AppServiceNames;
+typedef Array<Integer<uint32_t, 0, UINT32_MAX>, 0, 255> AppServiceHandledRpcs;
+
+typedef Map<AppServiceInfo, 0, 255> AppServiceParameters;
 
 typedef Map<Strings, 0, 255> RemoteRpcs;
 typedef Map<RemoteRpcs, 0, 255> AccessModules;
@@ -106,6 +112,24 @@ typedef Array<Enum<ModuleType>, 0, 255> ModuleTypes;
 
 typedef AppHMIType AppHmiType;
 typedef std::vector<AppHMIType> AppHmiTypes;
+
+struct AppServiceInfo : CompositeType {
+ public:
+  Optional<AppServiceNames> service_names;
+  Optional<AppServiceHandledRpcs> handled_rpcs;
+  AppServiceInfo();
+  ~AppServiceInfo();
+  AppServiceInfo(const Json::Value* value__);
+  Json::Value ToJsonValue() const;
+  bool is_valid() const;
+  bool is_initialized() const;
+  bool struct_empty() const;
+  virtual void SetPolicyTableType(PolicyTableType pt_type);
+  void ReportErrors(rpc::ValidationReport* report__) const;
+
+ private:
+  bool Validate() const;
+};
 
 struct PolicyBase : CompositeType {
  public:
@@ -154,9 +178,7 @@ struct ApplicationParams : PolicyBase {
   Optional<String<0, 255> > cloud_transport_type;
 
   // App Service Params
-  Optional<String<0, 255> > service_name;
-  Optional<String<0, 255> > service_type;
-  Optional<HandledRpcs> handled_rpcs;
+  Optional<AppServiceParameters> app_service_parameters;
 
  public:
   ApplicationParams();

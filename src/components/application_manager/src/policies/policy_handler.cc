@@ -1939,12 +1939,10 @@ void PolicyHandler::OnSetCloudAppProperties(
 
 void PolicyHandler::GetAppServiceParameters(
     const std::string& policy_app_id,
-    std::string& service_name,
-    std::string& service_type,
-    std::vector<uint32_t>& handled_rpcs) const {
+    policy_table::AppServiceParameters* app_service_parameters) const {
   POLICY_LIB_CHECK_VOID();
-  policy_manager_->GetAppServiceParameters(
-      policy_app_id, service_name, service_type, handled_rpcs);
+  policy_manager_->GetAppServiceParameters(policy_app_id,
+                                           app_service_parameters);
 }
 
 bool PolicyHandler::CheckAppServiceParameters(
@@ -1955,18 +1953,32 @@ bool PolicyHandler::CheckAppServiceParameters(
   std::string service_name = std::string();
   std::string service_type = std::string();
   std::vector<uint32_t> handled_rpcs = {};
-  this->GetAppServiceParameters(
-      policy_app_id, service_name, service_type, handled_rpcs);
-  if (!requested_service_name.empty() &&
-      service_name != requested_service_name) {
+
+  policy_table::AppServiceParameters app_service_parameters =
+      policy_table::AppServiceParameters();
+  this->GetAppServiceParameters(policy_app_id, &app_service_parameters);
+
+  if (app_service_parameters.find(requested_service_type) ==
+      app_service_parameters.end()) {
+    LOG4CXX_DEBUG(logger_,
+                  "Disallowed service type: " << requested_service_type);
     return false;
   }
 
-  if (service_type != requested_service_type) {
-    return false;
+  if (!requested_service_name.empty()) {
+    auto service_names =
+        *(app_service_parameters[requested_service_type].service_names);
+    auto find_name_result =
+        std::find(service_names.begin(),
+                  service_names.end(),
+                  rpc::String<0, 255>(requested_service_name));
+    if (find_name_result == service_names.end()) {
+      return false;
+    }
   }
 
-  if (requested_handled_rpcs) {
+  // todo handled rpcs check
+  /*if (requested_handled_rpcs) {
     for (auto requested_it = requested_handled_rpcs->begin();
          requested_it != requested_handled_rpcs->end();
          ++requested_it) {
@@ -1976,7 +1988,7 @@ bool PolicyHandler::CheckAppServiceParameters(
         return false;
       }
     }
-  }
+  }*/
   return true;
 }
 
