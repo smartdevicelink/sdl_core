@@ -1291,7 +1291,7 @@ bool SQLPTRepresentation::SaveAppServiceParameters(
     for (rpc_it = handled_rpcs->begin(); rpc_it != handled_rpcs->end();
          ++rpc_it) {
       handled_rpcs_query.Bind(0, static_cast<int64_t>(id));
-      handled_rpcs_query.Bind(1, static_cast<int64_t>(*rpc_it));
+      handled_rpcs_query.Bind(1, static_cast<int32_t>(rpc_it->function_id));
       if (!handled_rpcs_query.Exec() || !handled_rpcs_query.Reset()) {
         LOG4CXX_WARN(logger_, "Incorrect insert into app service handled rpcs");
         return false;
@@ -1775,8 +1775,10 @@ bool SQLPTRepresentation::GatherAppServiceParameters(
 
     handled_rpcs_query.Bind(0, service_type_id);
     while (handled_rpcs_query.Next()) {
+      policy_table::AppServiceHandledRpc handled_rpc;
+      handled_rpc.function_id = handled_rpcs_query.GetInteger(0);
       (*app_service_parameters)[service_type].handled_rpcs->push_back(
-          handled_rpcs_query.GetInteger(0));
+          handled_rpc);
     }
 
     service_name_query.Reset();
@@ -2136,9 +2138,9 @@ bool SQLPTRepresentation::SetDefaultPolicy(const std::string& app_id) {
     return false;
   }
 
-  policy_table::HandledRpcs handled_rpcs;
-  if (!GatherAppServiceParameters(kDefaultId, &handled_rpcs) ||
-      !SaveAppServiceParameters(app_id, handled_rpcs)) {
+  policy_table::AppServiceParameters app_service_parameters;
+  if (!GatherAppServiceParameters(kDefaultId, &app_service_parameters) ||
+      !SaveAppServiceParameters(app_id, app_service_parameters)) {
     return false;
   }
 

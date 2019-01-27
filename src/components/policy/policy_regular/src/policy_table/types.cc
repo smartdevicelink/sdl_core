@@ -149,6 +149,51 @@ void ApplicationPoliciesSection::SetPolicyTableType(PolicyTableType pt_type) {
   device.SetPolicyTableType(pt_type);
   apps.SetPolicyTableType(pt_type);
 }
+// Handled RPC Methods
+AppServiceHandledRpc::AppServiceHandledRpc() : CompositeType(kUninitialized) {}
+
+AppServiceHandledRpc::~AppServiceHandledRpc() {}
+
+AppServiceHandledRpc::AppServiceHandledRpc(const Json::Value* value__)
+    : CompositeType(InitHelper(value__, &Json::Value::isObject))
+    , function_id(impl::ValueMember(value__, "function_id")) {}
+
+Json::Value AppServiceHandledRpc::ToJsonValue() const {
+  Json::Value result__(Json::objectValue);
+  impl::WriteJsonField("function_id", function_id, &result__);
+  return result__;
+}
+
+bool AppServiceHandledRpc::is_valid() const {
+  if (!function_id.is_valid()) {
+    return false;
+  }
+  return Validate();
+}
+
+bool AppServiceHandledRpc::is_initialized() const {
+  return (initialization_state__ != kUninitialized) || (!struct_empty());
+}
+
+bool AppServiceHandledRpc::struct_empty() const {
+  if (function_id.is_initialized()) {
+    return false;
+  }
+  return true;
+}
+
+void AppServiceHandledRpc::SetPolicyTableType(PolicyTableType pt_type) {
+  function_id.SetPolicyTableType(pt_type);
+}
+
+void AppServiceHandledRpc::ReportErrors(rpc::ValidationReport* report__) const {
+  if (struct_empty()) {
+    rpc::CompositeType::ReportErrors(report__);
+  }
+  if (!function_id.is_valid()) {
+    function_id.ReportErrors(&report__->ReportSubobject("function_id"));
+  }
+}
 
 // AppServiceInfo methods
 AppServiceInfo::AppServiceInfo() : CompositeType(kUninitialized) {}

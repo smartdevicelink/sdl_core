@@ -1952,7 +1952,7 @@ bool PolicyHandler::CheckAppServiceParameters(
     smart_objects::SmartArray* requested_handled_rpcs) const {
   std::string service_name = std::string();
   std::string service_type = std::string();
-  std::vector<uint32_t> handled_rpcs = {};
+  std::vector<int32_t> handled_rpcs = {};
 
   policy_table::AppServiceParameters app_service_parameters =
       policy_table::AppServiceParameters();
@@ -1978,17 +1978,24 @@ bool PolicyHandler::CheckAppServiceParameters(
   }
 
   // todo handled rpcs check
-  /*if (requested_handled_rpcs) {
+  if (requested_handled_rpcs) {
+    auto temp_rpcs =
+        *(app_service_parameters[requested_service_type].handled_rpcs);
+    for (auto handled_it = temp_rpcs.begin(); handled_it != temp_rpcs.end();
+         ++handled_it) {
+      handled_rpcs.push_back(handled_it->function_id);
+    }
+
     for (auto requested_it = requested_handled_rpcs->begin();
          requested_it != requested_handled_rpcs->end();
          ++requested_it) {
       auto find_result = std::find(
-          handled_rpcs.begin(), handled_rpcs.end(), requested_it->asUInt());
+          handled_rpcs.begin(), handled_rpcs.end(), requested_it->asInt());
       if (find_result == handled_rpcs.end()) {
         return false;
       }
     }
-  }*/
+  }
   return true;
 }
 
