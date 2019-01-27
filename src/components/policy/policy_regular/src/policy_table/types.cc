@@ -279,7 +279,7 @@ ApplicationParams::ApplicationParams(const Json::Value* value__)
     , auth_token(impl::ValueMember(value__, "auth_token"))
     , cloud_transport_type(impl::ValueMember(value__, "cloud_transport_type"))
     , app_service_parameters(
-          impl::ValueMember(value__, "app_service_parameters")) {}
+          impl::ValueMember(value__, "app_services")) {}
 
 Json::Value ApplicationParams::ToJsonValue() const {
   Json::Value result__(PolicyBase::ToJsonValue());
@@ -300,7 +300,7 @@ Json::Value ApplicationParams::ToJsonValue() const {
   impl::WriteJsonField("auth_token", auth_token, &result__);
   impl::WriteJsonField("cloud_transport_type", cloud_transport_type, &result__);
   impl::WriteJsonField(
-      "app_service_parameters", app_service_parameters, &result__);
+      "app_services", app_service_parameters, &result__);
   return result__;
 }
 
@@ -462,7 +462,7 @@ void ApplicationParams::ReportErrors(rpc::ValidationReport* report__) const {
   }
   if (!app_service_parameters.is_valid()) {
     app_service_parameters.ReportErrors(
-        &report__->ReportSubobject("app_service_parameters"));
+        &report__->ReportSubobject("app_services"));
   }
 }
 

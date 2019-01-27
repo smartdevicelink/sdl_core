@@ -780,7 +780,7 @@ const std::string kSelectRequestSubTypes =
     "= ?";
 
 const std::string kSelectAppServiceTypes =
-    "SELECT `id`, `service_type`` FROM `app_service_types` WHERE "
+    "SELECT `id`, `service_type` FROM `app_service_types` WHERE "
     "`application_id` "
     "= ?";
 
