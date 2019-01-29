@@ -27,7 +27,6 @@ OnSystemCapabilityUpdatedNotification::
 
 void OnSystemCapabilityUpdatedNotification::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
-  LOG4CXX_DEBUG(logger_, "SYSCAP: Send OnSystemCapabilityUpdatedNotification");
 
   // TODO, figure out how to handle unknown enums for SystemCapabilityType
   mobile_apis::SystemCapabilityType::eType system_capability_type =
@@ -58,6 +57,8 @@ void OnSystemCapabilityUpdatedNotification::Run() {
 
   for (; applications.end() != app_it; ++app_it) {
     const ApplicationSharedPtr app = *app_it;
+    LOG4CXX_DEBUG(logger_,
+                  "ONSYSCAP: Send OnSystemCapabilityUpdatedNotification");
     LOG4CXX_INFO(logger_,
                  "Sending OnSystemCapabilityUpdated " << capability_type_string
                                                       << " application id "
