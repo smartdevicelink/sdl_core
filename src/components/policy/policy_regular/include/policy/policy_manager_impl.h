@@ -637,10 +637,7 @@ class PolicyManagerImpl : public PolicyManager {
   /**
    * @brief Get app service parameters from the policy table
    * @param policy_app_id Unique application id
-   * @param service_name Service name published by app service provider
-   * @param service_type Service type published by app service provider
-   * @param handled_rpcs Vector of allowed function ids an app service provider
-   * can handle
+   * @param app_service_parameters Pointer to struct containing all app service information
    */
   void GetAppServiceParameters(const std::string& policy_app_id,
                                policy_table::AppServiceParameters*

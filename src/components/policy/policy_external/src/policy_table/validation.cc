@@ -194,6 +194,14 @@ bool ApplicationParams::ValidateModuleTypes() const {
   return true;
 }
 
+bool AppServiceHandledRpc::Validate() const {
+  return true;  // todo add validation
+}
+
+bool AppServiceInfo::Validate() const {
+  return true;  // todo add validation
+}
+
 bool ApplicationParams::Validate() const {
   if (is_initialized()) {
     if (preconsented_groups.is_initialized()) {

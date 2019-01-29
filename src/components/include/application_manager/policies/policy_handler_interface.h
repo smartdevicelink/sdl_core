@@ -488,10 +488,22 @@ class PolicyHandlerInterface {
   virtual void OnSetCloudAppProperties(
       const smart_objects::SmartObject& message) = 0;
 
+  /**
+   * @brief Get app service parameters from the policy table
+   * @param policy_app_id Unique application id
+   * @param app_service_parameters Pointer to struct containing all app service information
+   */
   virtual void GetAppServiceParameters(
       const std::string& policy_app_id,
       policy_table::AppServiceParameters* app_service_parameters) const = 0;
 
+  /**
+   * @brief Check app service parameters from an app against policies
+   * @param policy_app_id Unique application id
+   * @param requested_service_name Service name published by app service provider
+   * @param requested_service_type Service type published by app service provider
+   * @param requested_handled_rpcs Vector of requested function ids an app service wants to handle from consumers
+   */
   virtual bool CheckAppServiceParameters(
       const std::string& policy_app_id,
       const std::string& requested_service_name,

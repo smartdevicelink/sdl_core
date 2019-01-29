@@ -204,7 +204,7 @@ AppServiceInfo::AppServiceInfo(const Json::Value* value__)
     : CompositeType(InitHelper(value__, &Json::Value::isObject))
     , service_names(impl::ValueMember(value__, "service_names"))
     , handled_rpcs(impl::ValueMember(value__, "handled_rpcs")) {
-}  // todo handled_rpcs struct
+}
 
 Json::Value AppServiceInfo::ToJsonValue() const {
   Json::Value result__(Json::objectValue);

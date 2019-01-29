@@ -778,10 +778,6 @@ bool SQLPTRepresentation::GatherApplicationPoliciesSection(
     *params.auth_token = query.GetString(8);
     *params.cloud_transport_type = query.GetString(9);
 
-    // AppService Parameters
-    *params.service_name = query.GetString(10);
-    *params.service_type = query.GetString(11);
-
     const auto& gather_app_id = ((*policies).apps[app_id].is_string())
                                     ? (*policies).apps[app_id].get_string()
                                     : app_id;
@@ -814,7 +810,7 @@ bool SQLPTRepresentation::GatherApplicationPoliciesSection(
     if (!GatherRequestSubType(gather_app_id, &*params.RequestSubType)) {
       return false;
     }
-    if (!GatherHandledRpcs(gather_app_id, &*params.handled_rpcs)) {
+    if (!GatherAppServiceParameters(gather_app_id, &*params.app_service_parameters)) {
       return false;
     }
 
@@ -1008,6 +1004,21 @@ bool SQLPTRepresentation::SaveApplicationPoliciesSection(
     return false;
   }
 
+  if (!query_delete.Exec(sql_pt::kDeleteAppServiceHandledRpcs)) {
+    LOG4CXX_WARN(logger_, "Incorrect delete from handled rpcs.");
+    return false;
+  }
+
+  if (!query_delete.Exec(sql_pt::kDeleteAppServiceNames)) {
+    LOG4CXX_WARN(logger_, "Incorrect delete from service names.");
+    return false;
+  }
+
+  if (!query_delete.Exec(sql_pt::kDeleteAppServiceTypes)) {
+    LOG4CXX_WARN(logger_, "Incorrect delete from handled service types.");
+    return false;
+  }
+
   // All predefined apps (e.g. default, pre_DataConsent) should be saved first,
   // otherwise another app with the predefined permissions can get incorrect
   // permissions
@@ -1077,12 +1088,6 @@ bool SQLPTRepresentation::SaveSpecificAppPolicy(
   app.second.cloud_transport_type.is_initialized()
       ? app_query.Bind(10, *app.second.cloud_transport_type)
       : app_query.Bind(10);
-  app.second.service_name.is_initialized()
-      ? app_query.Bind(11, *app.second.service_name)
-      : app_query.Bind(11);
-  app.second.service_type.is_initialized()
-      ? app_query.Bind(12, *app.second.service_type)
-      : app_query.Bind(12);
 
   if (!app_query.Exec() || !app_query.Reset()) {
     LOG4CXX_WARN(logger_, "Incorrect insert into application.");
@@ -1119,7 +1124,8 @@ bool SQLPTRepresentation::SaveSpecificAppPolicy(
   if (!SaveRequestType(app.first, *app.second.RequestType)) {
     return false;
   }
-  if (!SaveHandledRpcs(app.first, *app.second.handled_rpcs)) {
+  if (!SaveAppServiceParameters(app.first,
+                                *app.second.app_service_parameters)) {
     return false;
   }
 
@@ -1286,31 +1292,73 @@ bool SQLPTRepresentation::SaveRequestSubType(
   return true;
 }
 
-bool SQLPTRepresentation::SaveHandledRpcs(
-    const std::string& app_id, const policy_table::HandledRpcs& handled_rpcs) {
+bool SQLPTRepresentation::SaveAppServiceParameters(
+    const std::string& app_id,
+    const policy_table::AppServiceParameters& app_service_parameters) {
+  LOG4CXX_INFO(logger_, "Save app service parameters");
   utils::dbms::SQLQuery query(db());
-  if (!query.Prepare(sql_pt::kInsertHandledRpcs)) {
-    LOG4CXX_WARN(logger_, "Incorrect insert statement for handled rpcs.");
+
+  if (!query.Prepare(sql_pt::kInsertAppServiceTypes)) {
+    LOG4CXX_WARN(logger_, "Incorrect insert statement for app service types");
     return false;
   }
+  policy_table::AppServiceParameters::const_iterator it;
+  for (it = app_service_parameters.begin(); it != app_service_parameters.end();
+        ++it) {
+    // Create service type id from hashing app_id and service_type
+    std::string str_to_hash = std::string(app_id + it->first);
+    const long int id = abs(CacheManager::GenerateHash(str_to_hash));
+    query.Bind(0, static_cast<int64_t>(id));
+    query.Bind(1, it->first);
+    query.Bind(2, app_id);
+    if (!query.Exec() || !query.Reset()) {
+      LOG4CXX_WARN(logger_, "Insert execute failed for into app service types");
+      return false;
+    }
 
-  policy_table::HandledRpcs::const_iterator it;
-  if (!handled_rpcs.empty()) {
-    LOG4CXX_TRACE(logger_, "Handled Rpcs are not empty.");
-    for (it = handled_rpcs.begin(); it != handled_rpcs.end(); ++it) {
-      query.Bind(0, app_id);
+    // Insert app names array into db
+    utils::dbms::SQLQuery service_name_query(db());
+    if (!service_name_query.Prepare(sql_pt::kInsertAppServiceNames)) {
+      LOG4CXX_WARN(logger_, "Incorrect insert statement for app service names");
+      return false;
+    }
 
-      // TODO: Bind does not like uint64_t. Only takes ints? Not sure why this
-      // is broken since seconds between retries is able to handle
-      query.Bind(1, static_cast<int>(*it));
-      if (!query.Exec() || !query.Reset()) {
-        LOG4CXX_WARN(logger_, "Incorrect insert into handled rpcs.");
+    auto app_service_names = it->second.service_names;
+    policy_table::AppServiceNames::const_iterator names_it;
+    for (names_it = app_service_names->begin();
+          names_it != app_service_names->end();
+          ++names_it) {
+      service_name_query.Bind(0, static_cast<int64_t>(id));
+      service_name_query.Bind(1, *names_it);
+      if (!service_name_query.Exec() || !service_name_query.Reset()) {
+        LOG4CXX_WARN(logger_, "Incorrect insert into app service names");
+        return false;
+      }
+    }
+
+    // Insert handled rpcs array into db
+    utils::dbms::SQLQuery handled_rpcs_query(db());
+    if (!handled_rpcs_query.Prepare(sql_pt::kInsertAppServiceHandledRpcs)) {
+      LOG4CXX_WARN(logger_,
+                    "Incorrect insert statement for app service handled rpcs");
+      return false;
+    }
+
+    auto handled_rpcs = it->second.handled_rpcs;
+    policy_table::AppServiceHandledRpcs::const_iterator rpc_it;
+    for (rpc_it = handled_rpcs->begin(); rpc_it != handled_rpcs->end();
+          ++rpc_it) {
+      handled_rpcs_query.Bind(0, static_cast<int64_t>(id));
+      handled_rpcs_query.Bind(1, static_cast<int32_t>(rpc_it->function_id));
+      if (!handled_rpcs_query.Exec() || !handled_rpcs_query.Reset()) {
+        LOG4CXX_WARN(logger_, "Incorrect insert into app service handled rpcs");
         return false;
       }
     }
   }
   return true;
 }
+	
 
 bool SQLPTRepresentation::SaveModuleMeta(const policy_table::ModuleMeta& meta) {
   // Section Module Meta is empty for SDL specific
@@ -1738,21 +1786,55 @@ bool SQLPTRepresentation::GatherRequestSubType(
   return true;
 }
 
-bool SQLPTRepresentation::GatherHandledRpcs(
-    const std::string& app_id, policy_table::HandledRpcs* handled_rpcs) const {
-  utils::dbms::SQLQuery query(db());
-  if (!query.Prepare(sql_pt::kSelectHandledRpcs)) {
-    LOG4CXX_WARN(logger_, "Incorrect select from handled rpcs.");
+bool SQLPTRepresentation::GatherAppServiceParameters(
+    const std::string& app_id,
+    policy_table::AppServiceParameters* app_service_parameters) const {
+  LOG4CXX_INFO(logger_, "Gather app service info");
+  utils::dbms::SQLQuery service_type_query(db());
+  if (!service_type_query.Prepare(sql_pt::kSelectAppServiceTypes)) {
+    LOG4CXX_WARN(logger_, "Incorrect select from service_types");
     return false;
   }
 
-  query.Bind(0, app_id);
-  while (query.Next()) {
-    const uint64_t rpc_id = query.GetInteger(0);
-    handled_rpcs->push_back(rpc_id);
+  utils::dbms::SQLQuery service_name_query(db());
+  if (!service_name_query.Prepare(sql_pt::kSelectAppServiceNames)) {
+    LOG4CXX_WARN(logger_, "Incorrect select all from app_service_names");
+    return false;
   }
+
+  utils::dbms::SQLQuery handled_rpcs_query(db());
+  if (!handled_rpcs_query.Prepare(sql_pt::kSelectAppServiceHandledRpcs)) {
+    LOG4CXX_WARN(logger_, "Incorrect select all from app_service_handled_rpcs");
+    return false;
+  }
+
+  service_type_query.Bind(2, app_id);
+  while (service_type_query.Next()) {
+    const int service_type_id = service_type_query.GetInteger(0);
+    std::string service_type = service_type_query.GetString(1);
+    (*app_service_parameters)[service_type] = policy_table::AppServiceInfo();
+
+    service_name_query.Bind(0, service_type_id);
+    while (service_name_query.Next()) {
+      (*app_service_parameters)[service_type].service_names->push_back(
+          service_name_query.GetString(0));
+    }
+
+    handled_rpcs_query.Bind(0, service_type_id);
+    while (handled_rpcs_query.Next()) {
+      policy_table::AppServiceHandledRpc handled_rpc;
+      handled_rpc.function_id = handled_rpcs_query.GetInteger(0);
+      (*app_service_parameters)[service_type].handled_rpcs->push_back(
+          handled_rpc);
+    }
+
+    service_name_query.Reset();
+    handled_rpcs_query.Reset();
+  }
+
   return true;
 }
+	
 
 bool SQLPTRepresentation::GatherNickName(
     const std::string& app_id, policy_table::Strings* nicknames) const {
@@ -2099,9 +2181,9 @@ bool SQLPTRepresentation::SetDefaultPolicy(const std::string& app_id) {
     return false;
   }
 
-  policy_table::HandledRpcs handled_rpcs;
-  if (!GatherHandledRpcs(kDefaultId, &handled_rpcs) ||
-      !SaveHandledRpcs(app_id, handled_rpcs)) {
+  policy_table::AppServiceParameters app_service_parameters;
+  if (!GatherAppServiceParameters(kDefaultId, &app_service_parameters) ||
+      !SaveAppServiceParameters(app_id, app_service_parameters)) {
     return false;
   }
 
@@ -2206,7 +2288,7 @@ bool SQLPTRepresentation::CopyApplication(const std::string& source,
 
   utils::dbms::SQLQuery query(db());
   if (!query.Prepare(sql_pt::kInsertApplicationFull)) {
-    LOG4CXX_WARN(logger_, "Incorrect insert statement into application.");
+    LOG4CXX_WARN(logger_, "Incorrect insert statement into application full.");
     return false;
   }
   query.Bind(0, destination);
@@ -2236,10 +2318,6 @@ bool SQLPTRepresentation::CopyApplication(const std::string& source,
                         : query.Bind(14, source_app.GetString(13));
   source_app.IsNull(14) ? query.Bind(15)
                         : query.Bind(15, source_app.GetString(14));
-  source_app.IsNull(15) ? query.Bind(16)
-                        : query.Bind(16, source_app.GetString(15));
-  source_app.IsNull(16) ? query.Bind(17)
-                        : query.Bind(17, source_app.GetString(16));
 
   if (!query.Exec()) {
     LOG4CXX_WARN(logger_, "Failed inserting into application.");

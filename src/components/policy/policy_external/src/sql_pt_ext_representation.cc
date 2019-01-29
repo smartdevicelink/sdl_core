@@ -675,6 +675,22 @@ bool SQLPTExtRepresentation::SaveApplicationPoliciesSection(
     return false;
   }
 
+  if (!query_delete.Exec(sql_pt::kDeleteAppServiceHandledRpcs)) {
+    LOG4CXX_WARN(logger_, "Incorrect delete from handled rpcs.");
+    return false;
+  }
+
+  if (!query_delete.Exec(sql_pt::kDeleteAppServiceNames)) {
+    LOG4CXX_WARN(logger_, "Incorrect delete from service names.");
+    return false;
+  }
+
+  if (!query_delete.Exec(sql_pt::kDeleteAppServiceTypes)) {
+    LOG4CXX_WARN(logger_, "Incorrect delete from handled service types.");
+    return false;
+  }
+	
+
   // First, all predefined apps (e.g. default, pre_DataConsent) should be saved,
   // otherwise another app with the predefined permissions can get incorrect
   // permissions
@@ -729,6 +745,10 @@ bool SQLPTExtRepresentation::SaveSpecificAppPolicy(
     if (!SaveRequestSubType(app.first, *app.second.RequestSubType)) {
       return false;
     }
+    if (!SaveAppServiceParameters(app.first,
+	                                *app.second.app_service_parameters)) {
+	    return false;
+	  }
     // Stop saving other params, since predefined permissions already set
     return true;
   }
@@ -771,12 +791,6 @@ bool SQLPTExtRepresentation::SaveSpecificAppPolicy(
   app.second.cloud_transport_type.is_initialized()
       ? app_query.Bind(13, *app.second.cloud_transport_type)
       : app_query.Bind(13);
-  app.second.service_name.is_initialized()
-      ? app_query.Bind(14, *app.second.service_name)
-      : app_query.Bind(14);
-  app.second.service_type.is_initialized()
-      ? app_query.Bind(15, *app.second.service_type)
-      : app_query.Bind(15);
 
   if (!app_query.Exec() || !app_query.Reset()) {
     LOG4CXX_WARN(logger_, "Incorrect insert into application.");
@@ -811,7 +825,8 @@ bool SQLPTExtRepresentation::SaveSpecificAppPolicy(
     return false;
   }
 
-  if (!SaveHandledRpcs(app.first, *app.second.handled_rpcs)) {
+  if (!SaveAppServiceParameters(app.first,
+                                *app.second.app_service_parameters)) {
     return false;
   }
 
@@ -919,10 +934,6 @@ bool SQLPTExtRepresentation::GatherApplicationPoliciesSection(
     *params.auth_token = query.GetString(11);
     *params.cloud_transport_type = query.GetString(12);
 
-    // AppService Parameters
-    *params.service_name = query.GetString(13);
-    *params.service_type = query.GetString(14);
-
     const auto& gather_app_id = ((*policies).apps[app_id].is_string())
                                     ? (*policies).apps[app_id].get_string()
                                     : app_id;
@@ -955,7 +966,8 @@ bool SQLPTExtRepresentation::GatherApplicationPoliciesSection(
     if (!GatherRequestSubType(gather_app_id, &*params.RequestSubType)) {
       return false;
     }
-    if (!GatherHandledRpcs(gather_app_id, &*params.handled_rpcs)) {
+    if (!GatherAppServiceParameters(gather_app_id,
+                                    &*params.app_service_parameters)) {
       return false;
     }
     GatherPreconsentedGroup(gather_app_id, &*params.preconsented_groups);
