@@ -1,6 +1,5 @@
 #include "sdl_rpc_plugin/commands/mobile/on_system_capability_updated_notification.h"
 #include "application_manager/application_manager.h"
-#include "sdl_rpc_plugin/extensions/system_capability_app_extension.h"
 #include "application_manager/helpers/application_helper.h"
 #include "application_manager/message_helper.h"
 #include "sdl_rpc_plugin/extensions/system_capability_app_extension.h"
@@ -67,10 +66,6 @@ void OnSystemCapabilityUpdatedNotification::Run() {
     (*message_)[strings::params][strings::connection_key] = app->app_id();
     SendNotification();
   }
-}
-
-  (*message_)[app_mngr::strings::msg_params] = notification_params;
-  SendNotification();
 }
 
 }  // namespace mobile

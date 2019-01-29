@@ -151,12 +151,10 @@ void GetSystemCapabilityRequest::Run() {
         service_types.insert(service_type);
 
         // APP SERVICES
-        smart_objects::SmartObject app_services_capability(
+        smart_objects::SmartObject app_services_capabilities(
             smart_objects::SmartType_Map);
-        app_services_capability[strings::update_reason] =
-            mobile_apis::ServiceUpdateReason::PUBLISHED;
-        app_services_capability[strings::updated_app_service_record] = record;
-        app_services.asArray()->push_back(app_services_capability);
+        app_services_capabilities[strings::updated_app_service_record] = record;
+        app_services.asArray()->push_back(app_services_capabilities);
       }
 
       int i = 0;
