@@ -96,8 +96,9 @@ void PublishAppServiceRequest::Run() {
   response_params[strings::app_service_record] = service_record;
 
   ApplicationSharedPtr app = application_manager_.application(connection_key());
-  auto& ext = sdl_rpc_plugin::SystemCapabilityAppExtension::ExtractExtension(*app);
-  ext.subscribeTo(mobile_apis::SystemCapabilityType::APP_SERVICES); 
+  auto& ext =
+      sdl_rpc_plugin::SystemCapabilityAppExtension::ExtractExtension(*app);
+  ext.subscribeTo(mobile_apis::SystemCapabilityType::APP_SERVICES);
 
   SendResponse(true, mobile_apis::Result::SUCCESS, NULL, &response_params);
 }
