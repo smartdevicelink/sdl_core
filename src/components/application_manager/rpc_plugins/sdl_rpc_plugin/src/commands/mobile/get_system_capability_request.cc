@@ -184,12 +184,12 @@ void GetSystemCapabilityRequest::Run() {
     if ((*message_)[app_mngr::strings::msg_params][strings::subscribe]
             .asBool() == true) {
       LOG4CXX_DEBUG(logger_,
-                    "SYSCAP: Subscribe to system capability - "
+                    "GETSYSCAP: Subscribe to system capability - "
                         << response_type);
       ext.subscribeTo(response_type);
     } else {
       LOG4CXX_DEBUG(logger_,
-                    "SYSCAP: Unsubscribe from system capability - "
+                    "GETSYSCAP: Unsubscribe from system capability - "
                         << response_type);
       ext.unsubscribeFrom(response_type);
     }
