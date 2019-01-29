@@ -275,8 +275,7 @@ AppServiceInfo::~AppServiceInfo() {}
 AppServiceInfo::AppServiceInfo(const Json::Value* value__)
     : CompositeType(InitHelper(value__, &Json::Value::isObject))
     , service_names(impl::ValueMember(value__, "service_names"))
-    , handled_rpcs(impl::ValueMember(value__, "handled_rpcs")) {
-}
+    , handled_rpcs(impl::ValueMember(value__, "handled_rpcs")) {}
 
 Json::Value AppServiceInfo::ToJsonValue() const {
   Json::Value result__(Json::objectValue);
@@ -325,7 +324,6 @@ void AppServiceInfo::ReportErrors(rpc::ValidationReport* report__) const {
     handled_rpcs.ReportErrors(&report__->ReportSubobject("handled_rpcs"));
   }
 }
-	
 
 // ApplicationParams methods
 ApplicationParams::ApplicationParams() : PolicyBase() {}
@@ -417,8 +415,8 @@ bool ApplicationParams::is_valid() const {
     return false;
   }
   if (!app_service_parameters.is_valid()) {
-	    return false;
-	}
+    return false;
+  }
   return Validate();
 }
 

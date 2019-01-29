@@ -135,8 +135,8 @@ class SQLPTRepresentation : public virtual PTRepresentation {
       const std::string& app_id,
       policy_table::RequestSubTypes* request_subtypes) const;
   bool GatherAppServiceParameters(
-	      const std::string& app_id,
-	      policy_table::AppServiceParameters* app_service_parameters) const;
+      const std::string& app_id,
+      policy_table::AppServiceParameters* app_service_parameters) const;
   bool GatherNickName(const std::string& app_id,
                       policy_table::Strings* nicknames) const;
 
@@ -176,8 +176,8 @@ class SQLPTRepresentation : public virtual PTRepresentation {
       const std::string& app_id,
       const policy_table::RequestSubTypes& request_subtypes);
   bool SaveAppServiceParameters(
-	      const std::string& app_id,
-	      const policy_table::AppServiceParameters& app_service_parameters);
+      const std::string& app_id,
+      const policy_table::AppServiceParameters& app_service_parameters);
 
  public:
   virtual std::string GetLockScreenIconUrl() const;

@@ -689,7 +689,6 @@ bool SQLPTExtRepresentation::SaveApplicationPoliciesSection(
     LOG4CXX_WARN(logger_, "Incorrect delete from handled service types.");
     return false;
   }
-	
 
   // First, all predefined apps (e.g. default, pre_DataConsent) should be saved,
   // otherwise another app with the predefined permissions can get incorrect
@@ -746,9 +745,9 @@ bool SQLPTExtRepresentation::SaveSpecificAppPolicy(
       return false;
     }
     if (!SaveAppServiceParameters(app.first,
-	                                *app.second.app_service_parameters)) {
-	    return false;
-	  }
+                                  *app.second.app_service_parameters)) {
+      return false;
+    }
     // Stop saving other params, since predefined permissions already set
     return true;
   }

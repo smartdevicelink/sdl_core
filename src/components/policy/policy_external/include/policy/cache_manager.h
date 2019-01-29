@@ -231,11 +231,12 @@ class CacheManager : public CacheManagerInterface {
   /**
    * @brief Get app service parameters from the policy table
    * @param policy_app_id Unique application id
-   * @param app_service_parameters Pointer to struct containing all app service information
+   * @param app_service_parameters Pointer to struct containing all app service
+   * information
    */
   virtual void GetAppServiceParameters(
-	      const std::string& policy_app_id,
-	      policy_table::AppServiceParameters* app_service_parameters) const;
+      const std::string& policy_app_id,
+      policy_table::AppServiceParameters* app_service_parameters) const;
 
   /**
    * @brief Allows to update 'vin' field in module_meta table.

@@ -642,11 +642,12 @@ class PolicyManagerImpl : public PolicyManager {
   /**
    * @brief Get app service parameters from the policy table
    * @param policy_app_id Unique application id
-   * @param app_service_parameters Pointer to struct containing all app service information
+   * @param app_service_parameters Pointer to struct containing all app service
+   * information
    */
   void GetAppServiceParameters(const std::string& policy_app_id,
-      policy_table::AppServiceParameters*
-      app_service_parameters) const OVERRIDE;
+                               policy_table::AppServiceParameters*
+                                   app_service_parameters) const OVERRIDE;
 
   /**
    * @brief OnAppRegisteredOnMobile allows to handle event when application were

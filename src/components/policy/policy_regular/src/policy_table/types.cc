@@ -203,8 +203,7 @@ AppServiceInfo::~AppServiceInfo() {}
 AppServiceInfo::AppServiceInfo(const Json::Value* value__)
     : CompositeType(InitHelper(value__, &Json::Value::isObject))
     , service_names(impl::ValueMember(value__, "service_names"))
-    , handled_rpcs(impl::ValueMember(value__, "handled_rpcs")) {
-}
+    , handled_rpcs(impl::ValueMember(value__, "handled_rpcs")) {}
 
 Json::Value AppServiceInfo::ToJsonValue() const {
   Json::Value result__(Json::objectValue);
@@ -278,8 +277,7 @@ ApplicationParams::ApplicationParams(const Json::Value* value__)
     , enabled(impl::ValueMember(value__, "enabled"))
     , auth_token(impl::ValueMember(value__, "auth_token"))
     , cloud_transport_type(impl::ValueMember(value__, "cloud_transport_type"))
-    , app_service_parameters(
-          impl::ValueMember(value__, "app_services")) {}
+    , app_service_parameters(impl::ValueMember(value__, "app_services")) {}
 
 Json::Value ApplicationParams::ToJsonValue() const {
   Json::Value result__(PolicyBase::ToJsonValue());
@@ -299,8 +297,7 @@ Json::Value ApplicationParams::ToJsonValue() const {
   impl::WriteJsonField("enabled", enabled, &result__);
   impl::WriteJsonField("auth_token", auth_token, &result__);
   impl::WriteJsonField("cloud_transport_type", cloud_transport_type, &result__);
-  impl::WriteJsonField(
-      "app_services", app_service_parameters, &result__);
+  impl::WriteJsonField("app_services", app_service_parameters, &result__);
   return result__;
 }
 

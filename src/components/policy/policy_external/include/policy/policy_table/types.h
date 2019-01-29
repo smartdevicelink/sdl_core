@@ -138,7 +138,7 @@ struct AppServiceHandledRpc : CompositeType {
  private:
   bool Validate() const;
 };
-	
+
 struct AppServiceInfo : CompositeType {
  public:
   Optional<AppServiceNames> service_names;

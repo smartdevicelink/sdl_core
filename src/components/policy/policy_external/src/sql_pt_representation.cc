@@ -810,7 +810,8 @@ bool SQLPTRepresentation::GatherApplicationPoliciesSection(
     if (!GatherRequestSubType(gather_app_id, &*params.RequestSubType)) {
       return false;
     }
-    if (!GatherAppServiceParameters(gather_app_id, &*params.app_service_parameters)) {
+    if (!GatherAppServiceParameters(gather_app_id,
+                                    &*params.app_service_parameters)) {
       return false;
     }
 
@@ -1304,7 +1305,7 @@ bool SQLPTRepresentation::SaveAppServiceParameters(
   }
   policy_table::AppServiceParameters::const_iterator it;
   for (it = app_service_parameters.begin(); it != app_service_parameters.end();
-        ++it) {
+       ++it) {
     // Create service type id from hashing app_id and service_type
     std::string str_to_hash = std::string(app_id + it->first);
     const long int id = abs(CacheManager::GenerateHash(str_to_hash));
@@ -1326,8 +1327,8 @@ bool SQLPTRepresentation::SaveAppServiceParameters(
     auto app_service_names = it->second.service_names;
     policy_table::AppServiceNames::const_iterator names_it;
     for (names_it = app_service_names->begin();
-          names_it != app_service_names->end();
-          ++names_it) {
+         names_it != app_service_names->end();
+         ++names_it) {
       service_name_query.Bind(0, static_cast<int64_t>(id));
       service_name_query.Bind(1, *names_it);
       if (!service_name_query.Exec() || !service_name_query.Reset()) {
@@ -1340,14 +1341,14 @@ bool SQLPTRepresentation::SaveAppServiceParameters(
     utils::dbms::SQLQuery handled_rpcs_query(db());
     if (!handled_rpcs_query.Prepare(sql_pt::kInsertAppServiceHandledRpcs)) {
       LOG4CXX_WARN(logger_,
-                    "Incorrect insert statement for app service handled rpcs");
+                   "Incorrect insert statement for app service handled rpcs");
       return false;
     }
 
     auto handled_rpcs = it->second.handled_rpcs;
     policy_table::AppServiceHandledRpcs::const_iterator rpc_it;
     for (rpc_it = handled_rpcs->begin(); rpc_it != handled_rpcs->end();
-          ++rpc_it) {
+         ++rpc_it) {
       handled_rpcs_query.Bind(0, static_cast<int64_t>(id));
       handled_rpcs_query.Bind(1, static_cast<int32_t>(rpc_it->function_id));
       if (!handled_rpcs_query.Exec() || !handled_rpcs_query.Reset()) {
@@ -1358,7 +1359,6 @@ bool SQLPTRepresentation::SaveAppServiceParameters(
   }
   return true;
 }
-	
 
 bool SQLPTRepresentation::SaveModuleMeta(const policy_table::ModuleMeta& meta) {
   // Section Module Meta is empty for SDL specific
@@ -1834,7 +1834,6 @@ bool SQLPTRepresentation::GatherAppServiceParameters(
 
   return true;
 }
-	
 
 bool SQLPTRepresentation::GatherNickName(
     const std::string& app_id, policy_table::Strings* nicknames) const {

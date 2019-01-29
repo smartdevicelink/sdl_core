@@ -907,12 +907,11 @@ const std::string kDeleteRequestType = "DELETE FROM `request_type`";
 const std::string kDeleteRequestSubType = "DELETE FROM `request_subtype`";
 
 const std::string kDeleteAppServiceTypes = "DELETE FROM `app_service_types`";
-	
+
 const std::string kDeleteAppServiceNames = "DELETE FROM `app_service_names`";
 
 const std::string kDeleteAppServiceHandledRpcs =
     "DELETE FROM `app_service_handled_rpcs`";
-	
 
 const std::string kSelectApplicationRevoked =
     "SELECT `is_revoked` FROM `application` WHERE `id` = ?";
