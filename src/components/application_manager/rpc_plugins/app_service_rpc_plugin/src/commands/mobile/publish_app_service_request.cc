@@ -35,6 +35,7 @@
 #include "application_manager/message_helper.h"
 #include "application_manager/rpc_service.h"
 #include "interfaces/MOBILE_API.h"
+#include "sdl_rpc_plugin/extensions/system_capability_app_extension.h"
 
 namespace app_service_rpc_plugin {
 using namespace application_manager;
@@ -93,6 +94,10 @@ void PublishAppServiceRequest::Run() {
       application_manager_.GetAppServiceManager().PublishAppService(manifest);
 
   response_params[strings::app_service_record] = service_record;
+
+  ApplicationSharedPtr app = application_manager_.application(connection_key());
+  auto& ext = sdl_rpc_plugin::SystemCapabilityAppExtension::ExtractExtension(*app);
+  ext.subscribeTo(mobile_apis::SystemCapabilityType::APP_SERVICES); 
 
   SendResponse(true, mobile_apis::Result::SUCCESS, NULL, &response_params);
 }
