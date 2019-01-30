@@ -1948,7 +1948,7 @@ void PolicyHandler::GetAppServiceParameters(
 bool PolicyHandler::CheckAppServiceParameters(
     const std::string& policy_app_id,
     const std::string& requested_service_name,
-    const std::string& requested_service_type,
+    const mobile_apis::AppServiceType::eType& requested_service_type,
     smart_objects::SmartArray* requested_handled_rpcs) const {
   std::string service_name = std::string();
   std::string service_type = std::string();
@@ -1958,7 +1958,12 @@ bool PolicyHandler::CheckAppServiceParameters(
       policy_table::AppServiceParameters();
   this->GetAppServiceParameters(policy_app_id, &app_service_parameters);
 
-  if (app_service_parameters.find(requested_service_type) ==
+  std::string requested_service_type_str = std::string();
+  smart_objects::EnumConversionHelper<
+    mobile_apis::AppServiceType::eType>::
+    EnumToString(requested_service_type, &requested_service_type_str);
+
+  if (app_service_parameters.find(requested_service_type_str) ==
       app_service_parameters.end()) {
     LOG4CXX_DEBUG(logger_,
                   "Disallowed service type: " << requested_service_type);
@@ -1967,7 +1972,7 @@ bool PolicyHandler::CheckAppServiceParameters(
 
   if (!requested_service_name.empty()) {
     auto service_names =
-        *(app_service_parameters[requested_service_type].service_names);
+        *(app_service_parameters[requested_service_type_str].service_names);
     auto find_name_result =
         std::find(service_names.begin(),
                   service_names.end(),
@@ -1980,7 +1985,7 @@ bool PolicyHandler::CheckAppServiceParameters(
   // todo handled rpcs check
   if (requested_handled_rpcs) {
     auto temp_rpcs =
-        *(app_service_parameters[requested_service_type].handled_rpcs);
+        *(app_service_parameters[requested_service_type_str].handled_rpcs);
     for (auto handled_it = temp_rpcs.begin(); handled_it != temp_rpcs.end();
          ++handled_it) {
       handled_rpcs.push_back(handled_it->function_id);

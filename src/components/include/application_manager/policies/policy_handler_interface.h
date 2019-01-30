@@ -511,7 +511,7 @@ class PolicyHandlerInterface {
   virtual bool CheckAppServiceParameters(
       const std::string& policy_app_id,
       const std::string& requested_service_name,
-      const std::string& requested_service_type,
+      const mobile_apis::AppServiceType::eType& requested_service_type,
       smart_objects::SmartArray* requested_handled_rpcs) const = 0;
 
 #ifdef EXTERNAL_PROPRIETARY_MODE
