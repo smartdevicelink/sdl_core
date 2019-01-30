@@ -189,7 +189,7 @@ class ApplicationManager {
 
   virtual plugin_manager::RPCPluginManager& GetPluginManager() = 0;
 
-  virtual application_manager::AppServiceManager& GetAppServiceManager() = 0;
+  virtual AppServiceManager& GetAppServiceManager() = 0;
 
 #ifdef BUILD_TESTS
   virtual void SetPluginManager(

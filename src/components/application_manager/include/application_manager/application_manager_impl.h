@@ -213,8 +213,7 @@ class ApplicationManagerImpl
     return *plugin_manager_;
   }
 
-  virtual application_manager::AppServiceManager& GetAppServiceManager()
-      OVERRIDE {
+  virtual AppServiceManager& GetAppServiceManager() OVERRIDE {
     DCHECK(app_service_manager_);
     return *app_service_manager_;
   }

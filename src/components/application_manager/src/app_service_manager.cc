@@ -58,12 +58,17 @@ AppServiceManager::~AppServiceManager() {
   LOG4CXX_AUTO_TRACE(logger_);
 }
 
-bool AppServiceManager::PublishAppService(
+smart_objects::SmartObject AppServiceManager::PublishAppService(
     const smart_objects::SmartObject& manifest) {
   std::string service_id = "SERVICE_UUID";  // TODO: Generate UUID
-  published_services_.insert(
-      std::pair<std::string, smart_objects::SmartObject>(service_id, manifest));
-  return true;
+  smart_objects::SmartObject service_record;
+  service_record[strings::service_manifest] = manifest;
+  service_record[strings::service_id] = service_id;
+  service_record[strings::service_published] = true;
+  service_record[strings::service_active] = true;
+  published_services_.insert(std::pair<std::string, smart_objects::SmartObject>(
+      service_id, service_record));
+  return service_record;
 }
 
 bool AppServiceManager::UnpublishAppService(const std::string service_id) {
