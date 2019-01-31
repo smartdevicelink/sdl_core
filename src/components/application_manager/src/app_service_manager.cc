@@ -42,6 +42,7 @@
 #include "application_manager/smart_object_keys.h"
 #include "smart_objects/smart_object.h"
 #include "utils/logger.h"
+#include "encryption/hashing.h"
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "AppServiceManager")
 
@@ -60,7 +61,15 @@ AppServiceManager::~AppServiceManager() {
 
 smart_objects::SmartObject AppServiceManager::PublishAppService(
     const smart_objects::SmartObject& manifest) {
-  std::string service_id = "SERVICE_UUID";  // TODO: Generate UUID
+  std::string str_to_hash = "";
+  std::string service_id = "";
+
+  do {
+    str_to_hash = manifest[strings::service_type].asString() +
+                  std::to_string(std::rand());
+    service_id = encryption::MakeHash(str_to_hash);
+  } while (published_services_.find(service_id) != published_services_.end());
+
   smart_objects::SmartObject service_record;
   service_record[strings::service_manifest] = manifest;
   service_record[strings::service_id] = service_id;
