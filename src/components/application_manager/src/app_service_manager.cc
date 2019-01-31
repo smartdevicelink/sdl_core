@@ -92,18 +92,41 @@ smart_objects::SmartObject AppServiceManager::PublishAppService(
       smart_objects::SmartObject(smart_objects::SmartType_Map);
   system_capability[strings::system_capability_type] =
       mobile_apis::SystemCapabilityType::APP_SERVICES;
+
+  smart_objects::SmartObject app_service_capabilities(
+      smart_objects::SmartType_Map);
+  smart_objects::SmartObject supported_types(smart_objects::SmartType_Array);
+  smart_objects::SmartObject app_services(smart_objects::SmartType_Array);
+
+  std::vector<smart_objects::SmartObject> service_records = GetAllServices();
+  std::set<mobile_apis::AppServiceType::eType> service_types;
+
+  for (auto& record : service_records) {
+    // SUPPORTED TYPES
+    mobile_apis::AppServiceType::eType service_type =
+        static_cast<mobile_apis::AppServiceType::eType>(
+            record[strings::service_manifest][strings::service_type].asUInt());
+    service_types.insert(service_type);
+
+    // APP SERVICES
+    smart_objects::SmartObject app_services_capabilities(
+        smart_objects::SmartType_Map);
+    app_services_capabilities[strings::updated_app_service_record] = record;
+    app_services_capabilities[strings::update_reason] =
+        mobile_apis::ServiceUpdateReason::PUBLISHED;
+    app_services.asArray()->push_back(app_services_capabilities);
+  }
+
+  int i = 0;
+  for (auto type_ : service_types) {
+    supported_types[i] = type_;
+    i++;
+  }
+
+  app_service_capabilities[strings::services_supported] = supported_types;
+  app_service_capabilities[strings::app_services] = app_services;
   system_capability[strings::app_services_capabilities] =
-      smart_objects::SmartObject(smart_objects::SmartType_Map);
-
-  smart_objects::SmartObject app_services =
-      smart_objects::SmartObject(smart_objects::SmartType_Array);
-  app_services[0] = smart_objects::SmartObject(smart_objects::SmartType_Map);
-  app_services[0][strings::update_reason] =
-      mobile_apis::ServiceUpdateReason::PUBLISHED;
-  app_services[0][strings::updated_app_service_record] = service_record;
-
-  system_capability[strings::app_services_capabilities][strings::app_services] =
-      app_services;
+      app_service_capabilities;
 
   message[strings::msg_params][strings::system_capability] = system_capability;
   app_manager_.GetRPCService().ManageMobileCommand(
