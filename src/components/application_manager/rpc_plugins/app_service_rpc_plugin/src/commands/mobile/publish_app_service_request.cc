@@ -90,15 +90,16 @@ void PublishAppServiceRequest::Run() {
   if (!ValidateManifest(manifest)) {
     return;
   }
-  smart_objects::SmartObject service_record =
-      application_manager_.GetAppServiceManager().PublishAppService(manifest);
-
-  response_params[strings::app_service_record] = service_record;
 
   ApplicationSharedPtr app = application_manager_.application(connection_key());
   auto& ext =
       sdl_rpc_plugin::SystemCapabilityAppExtension::ExtractExtension(*app);
   ext.subscribeTo(mobile_apis::SystemCapabilityType::APP_SERVICES);
+
+  smart_objects::SmartObject service_record =
+      application_manager_.GetAppServiceManager().PublishAppService(manifest);
+
+  response_params[strings::app_service_record] = service_record;
 
   SendResponse(true, mobile_apis::Result::SUCCESS, NULL, &response_params);
 }
