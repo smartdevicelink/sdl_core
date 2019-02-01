@@ -68,7 +68,6 @@ void OnSystemCapabilityUpdatedNotification::Run() {
   }
 }
 
-
 }  // namespace mobile
 }  // namespace commands
 }  // namespace application_manager
