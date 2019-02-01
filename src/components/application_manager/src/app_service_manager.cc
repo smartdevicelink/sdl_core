@@ -112,8 +112,10 @@ smart_objects::SmartObject AppServiceManager::PublishAppService(
     smart_objects::SmartObject app_services_capabilities(
         smart_objects::SmartType_Map);
     app_services_capabilities[strings::updated_app_service_record] = record;
-    app_services_capabilities[strings::update_reason] =
-        mobile_apis::ServiceUpdateReason::PUBLISHED;
+    if (record[strings::service_id].asString() == service_id) {
+      app_services_capabilities[strings::update_reason] =
+          mobile_apis::ServiceUpdateReason::PUBLISHED;
+    }
     app_services.asArray()->push_back(app_services_capabilities);
   }
 
