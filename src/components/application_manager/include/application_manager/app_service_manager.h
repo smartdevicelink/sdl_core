@@ -74,6 +74,9 @@ class AppServiceManager {
    */
   std::vector<smart_objects::SmartObject> GetAllServices();
 
+  /*
+    void NotifyConsumers(const MessageSharedPtr& message);*/
+
  private:
   ApplicationManager& app_manager_;
   std::map<std::string, smart_objects::SmartObject> published_services_;

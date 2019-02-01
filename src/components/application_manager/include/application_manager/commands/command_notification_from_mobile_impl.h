@@ -53,6 +53,8 @@ class CommandNotificationFromMobileImpl : public CommandImpl {
   virtual bool CleanUp();
   virtual void Run();
   void SendNotification();
+  void SendNotificationToHMI();
+  void SendNotificationToConsumers();
 
  private:
   DISALLOW_COPY_AND_ASSIGN(CommandNotificationFromMobileImpl);

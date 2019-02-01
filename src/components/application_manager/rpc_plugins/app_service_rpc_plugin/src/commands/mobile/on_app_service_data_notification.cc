@@ -31,7 +31,9 @@
  */
 
 #include "app_service_rpc_plugin/commands/mobile/on_app_service_data_notification.h"
+#include "app_service_rpc_plugin/app_service_app_extension.h"
 #include "application_manager/application_impl.h"
+#include "application_manager/helpers/application_helper.h"
 #include "application_manager/message_helper.h"
 #include "application_manager/rpc_service.h"
 #include "interfaces/MOBILE_API.h"
@@ -66,7 +68,35 @@ void OnAppServiceDataNotification::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
   LOG4CXX_DEBUG(logger_, "Sending OnAppServiceData to consumer");
   MessageHelper::PrintSmartObject(*message_);
-  SendNotification();
+
+  auto appServiceType = (*message_)[strings::msg_params][strings::service_data]
+                                   [strings::service_type].asString();
+
+  auto subscribed_to_app_service_predicate =
+      [appServiceType](const ApplicationSharedPtr app) {
+        DCHECK_OR_RETURN(app, false);
+        auto& ext = AppServiceAppExtension::ExtractVIExtension(*app);
+        return ext.isSubscribedToAppService(appServiceType);
+      };
+
+  const std::vector<ApplicationSharedPtr>& applications =
+      application_manager::FindAllApps(application_manager_.applications(),
+                                       subscribed_to_app_service_predicate);
+
+  std::vector<ApplicationSharedPtr>::const_iterator app_it =
+      applications.begin();
+
+  for (; applications.end() != app_it; ++app_it) {
+    const ApplicationSharedPtr app = *app_it;
+    if (!app) {
+      LOG4CXX_ERROR(logger_, "NULL pointer");
+      continue;
+    }
+
+    (*message_)[app_mngr::strings::params][app_mngr::strings::connection_key] =
+        app->app_id();
+    SendNotification();
+  }
 }
 
 }  // namespace commands

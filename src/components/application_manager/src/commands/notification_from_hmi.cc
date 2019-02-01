@@ -106,6 +106,10 @@ void NotificationFromHMI::CreateHMIRequest(
   }
 }
 
+void NotificationFromHMI::SendNotificationToConsumers() {
+  // application_manager.GetAppServiceManager().NotifyConsumers(message_);
+}
+
 }  // namespace commands
 
 }  // namespace application_manager

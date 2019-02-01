@@ -283,6 +283,7 @@ const char* service_id = "serviceID";
 const char* service_manifest = "serviceManifest";
 const char* service_published = "servicePublished";
 const char* service_active = "serviceActive";
+const char* service_data = "serviceData";
 
 // resuming
 const char* application_commands = "applicationCommands";

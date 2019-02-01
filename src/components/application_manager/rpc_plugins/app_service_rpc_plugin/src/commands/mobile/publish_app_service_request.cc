@@ -89,16 +89,15 @@ void PublishAppServiceRequest::Run() {
   if (!ValidateManifest(manifest)) {
     return;
   }
-  smart_objects::SmartObject service_record =
-      application_manager_.GetAppServiceManager().PublishAppService(manifest);
 
   std::string requested_service_name =
       (*message_)[strings::msg_params][strings::app_service_manifest]
                  [strings::service_name].asString();
   // Todo: revision make service type string.
-  mobile_apis::AppServiceType::eType requested_service_type = static_cast<mobile_apis::AppServiceType::eType>(
-      (*message_)[strings::msg_params][strings::app_service_manifest]
-                 [strings::service_type].asUInt());
+  mobile_apis::AppServiceType::eType requested_service_type =
+      static_cast<mobile_apis::AppServiceType::eType>(
+          (*message_)[strings::msg_params][strings::app_service_manifest]
+                     [strings::service_type].asUInt());
   smart_objects::SmartArray* requested_handled_rpcs =
       (*message_)[strings::msg_params][strings::app_service_manifest]
                  [strings::handled_rpcs].asArray();
@@ -114,6 +113,9 @@ void PublishAppServiceRequest::Run() {
   if (!result) {
     SendResponse(false, mobile_apis::Result::DISALLOWED, NULL, NULL);
   }
+
+  smart_objects::SmartObject service_record =
+      application_manager_.GetAppServiceManager().PublishAppService(manifest);
 
   response_params[strings::app_service_record] = service_record;
 

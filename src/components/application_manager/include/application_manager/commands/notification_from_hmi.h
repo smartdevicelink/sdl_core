@@ -55,6 +55,7 @@ class NotificationFromHMI : public CommandImpl {
   void SendNotificationToMobile(const MessageSharedPtr& message);
   void CreateHMIRequest(const hmi_apis::FunctionID::eType& function_id,
                         const smart_objects::SmartObject& msg_params) const;
+  void SendNotificationToConsumers();
 
  private:
   DISALLOW_COPY_AND_ASSIGN(NotificationFromHMI);

@@ -61,8 +61,9 @@ OnASAppServiceDataNotification::~OnASAppServiceDataNotification() {}
 
 void OnASAppServiceDataNotification::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
-  LOG4CXX_DEBUG(logger_, "Received an OnAppServiceData from HMI");
+  LOG4CXX_DEBUG(logger_, "Sending AS data to HMI");
   MessageHelper::PrintSmartObject(*message_);
+  SendNotification();
 }
 
 }  // namespace commands

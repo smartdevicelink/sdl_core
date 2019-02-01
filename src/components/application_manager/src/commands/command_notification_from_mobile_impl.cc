@@ -75,6 +75,19 @@ void CommandNotificationFromMobileImpl::SendNotification() {
   rpc_service_.SendMessageToMobile(message_);
 }
 
+void CommandNotificationFromMobileImpl::SendNotificationToHMI() {
+  (*message_)[strings::params][strings::protocol_type] = hmi_protocol_type_;
+  (*message_)[strings::params][strings::protocol_version] = protocol_version_;
+  rpc_service_.SendMessageToHMI(message_);
+}
+
+void CommandNotificationFromMobileImpl::SendNotificationToConsumers() {
+  // This may have to change when handling future / unknown app services
+  SendNotification();
+  SendNotificationToHMI();
+  // application_manager.GetAppServiceManager().NotifyConsumers(message_);
+}
+
 }  // namespace commands
 
 }  // namespace application_manager

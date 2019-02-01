@@ -32,7 +32,7 @@
 
 #include "application_manager/message_helper.h"
 #include "application_manager/smart_object_keys.h"
-//#include "app_service_rpc_plugin/app_service_app_extension.h"
+#include "app_service_rpc_plugin/app_service_app_extension.h"
 #include "app_service_rpc_plugin/app_service_command_factory.h"
 #include "app_service_rpc_plugin/app_service_rpc_plugin.h"
 
@@ -71,7 +71,15 @@ void AppServiceRpcPlugin::OnPolicyEvent(plugins::PolicyEvent event) {}
 
 void AppServiceRpcPlugin::OnApplicationEvent(
     plugins::ApplicationEvent event,
-    app_mngr::ApplicationSharedPtr application) {}
+    app_mngr::ApplicationSharedPtr application) {
+  if (plugins::ApplicationEvent::kApplicationRegistered == event) {
+    application->AddExtension(
+        std::make_shared<AppServiceAppExtension>(*this, *application));
+  } else if (plugins::ApplicationEvent::kDeleteApplicationData == event) {
+    // Todo notify consumer of unregister
+    // DeleteSubscriptions(application);
+  }
+}
 
 /*void AppServiceRpcPlugin::ProcessResumptionSubscription(
     application_manager::Application& app, AppServiceAppExtension& ext) {
