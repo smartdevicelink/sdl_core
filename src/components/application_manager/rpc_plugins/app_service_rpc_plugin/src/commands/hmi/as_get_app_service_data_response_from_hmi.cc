@@ -30,7 +30,7 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "app_service_rpc_plugin/commands/hmi/as_get_app_service_data_to_hmi_response.h"
+#include "app_service_rpc_plugin/commands/hmi/as_get_app_service_data_response_from_hmi.h"
 #include "application_manager/application_impl.h"
 #include "application_manager/rpc_service.h"
 #include "interfaces/MOBILE_API.h"
@@ -39,7 +39,7 @@ namespace app_service_rpc_plugin {
 using namespace application_manager;
 namespace commands {
 
-ASGetAppServiceDataToHMIResponse::ASGetAppServiceDataToHMIResponse(
+ASGetAppServiceDataResponseFromHMI::ASGetAppServiceDataResponseFromHMI(
     const application_manager::commands::MessageSharedPtr& message,
     ApplicationManager& application_manager,
     app_mngr::rpc_service::RPCService& rpc_service,
@@ -51,9 +51,9 @@ ASGetAppServiceDataToHMIResponse::ASGetAppServiceDataToHMIResponse(
                          hmi_capabilities,
                          policy_handler) {}
 
-ASGetAppServiceDataToHMIResponse::~ASGetAppServiceDataToHMIResponse() {}
+ASGetAppServiceDataResponseFromHMI::~ASGetAppServiceDataResponseFromHMI() {}
 
-void ASGetAppServiceDataToHMIResponse::Run() {
+void ASGetAppServiceDataResponseFromHMI::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
 }
 

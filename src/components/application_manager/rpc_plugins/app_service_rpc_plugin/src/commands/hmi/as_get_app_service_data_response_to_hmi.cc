@@ -30,49 +30,32 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_APP_SERVICE_RPC_PLUGIN_INCLUDE_APP_SERVICE_RPC_PLUGIN_COMMANDS_HMI_AS_GET_APP_SERVICE_DATA_TO_HMI_REQUEST_H_
-#define SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_APP_SERVICE_RPC_PLUGIN_INCLUDE_APP_SERVICE_RPC_PLUGIN_COMMANDS_HMI_AS_GET_APP_SERVICE_DATA_TO_HMI_REQUEST_H_
-
-#include "application_manager/commands/request_to_hmi.h"
+#include "app_service_rpc_plugin/commands/hmi/as_get_app_service_data_response_to_hmi.h"
+#include "application_manager/application_impl.h"
+#include "application_manager/rpc_service.h"
+#include "interfaces/MOBILE_API.h"
 
 namespace app_service_rpc_plugin {
-namespace app_mngr = application_manager;
-
+using namespace application_manager;
 namespace commands {
 
-/**
- * @brief ASGetAppServiceDataToHMIRequest command class
- **/
-class ASGetAppServiceDataToHMIRequest : public app_mngr::commands::RequestToHMI {
- public:
-  /**
-   * @brief ASGetAppServiceDataToHMIRequest class constructor
-   *
-   * @param message Incoming SmartObject message
-   **/
-  ASGetAppServiceDataToHMIRequest(
-      const app_mngr::commands::MessageSharedPtr& message,
-      app_mngr::ApplicationManager& application_manager,
-      app_mngr::rpc_service::RPCService& rpc_service,
-      app_mngr::HMICapabilities& hmi_capabilities,
-      policy::PolicyHandlerInterface& policy_handle);
+ASGetAppServiceDataResponseToHMI::ASGetAppServiceDataResponseToHMI(
+    const application_manager::commands::MessageSharedPtr& message,
+    ApplicationManager& application_manager,
+    app_mngr::rpc_service::RPCService& rpc_service,
+    app_mngr::HMICapabilities& hmi_capabilities,
+    policy::PolicyHandlerInterface& policy_handler)
+    : ResponseToHMI(message,
+                         application_manager,
+                         rpc_service,
+                         hmi_capabilities,
+                         policy_handler) {}
 
-  /**
-   * @brief ASGetAppServiceDataToHMIRequest class destructor
-   **/
-  virtual ~ASGetAppServiceDataToHMIRequest();
+ASGetAppServiceDataResponseToHMI::~ASGetAppServiceDataResponseToHMI() {}
 
-  /**
-   * @brief Execute command
-   **/
-  virtual void Run();
-
- private:
-  DISALLOW_COPY_AND_ASSIGN(ASGetAppServiceDataToHMIRequest);
-};
+void ASGetAppServiceDataResponseToHMI::Run() {
+  LOG4CXX_AUTO_TRACE(logger_);
+}
 
 }  // namespace commands
-
 }  // namespace app_service_rpc_plugin
-
-#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_APP_SERVICE_RPC_PLUGIN_INCLUDE_APP_SERVICE_RPC_PLUGIN_COMMANDS_HMI_AS_GET_APP_SERVICE_DATA_TO_HMI_REQUEST_H_

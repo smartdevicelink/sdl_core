@@ -30,8 +30,8 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_APP_SERVICE_RPC_PLUGIN_INCLUDE_APP_SERVICE_RPC_PLUGIN_COMMANDS_HMI_AS_GET_APP_SERVICE_DATA_FROM_HMI_RESPONSE_H_
-#define SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_APP_SERVICE_RPC_PLUGIN_INCLUDE_APP_SERVICE_RPC_PLUGIN_COMMANDS_HMI_AS_GET_APP_SERVICE_DATA_FROM_HMI_RESPONSE_H_
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_APP_SERVICE_RPC_PLUGIN_INCLUDE_APP_SERVICE_RPC_PLUGIN_COMMANDS_HMI_AS_GET_APP_SERVICE_DATA_RESPONSE_TO_HMI_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_APP_SERVICE_RPC_PLUGIN_INCLUDE_APP_SERVICE_RPC_PLUGIN_COMMANDS_HMI_AS_GET_APP_SERVICE_DATA_RESPONSE_TO_HMI_H_
 
 #include "application_manager/commands/response_to_hmi.h"
 
@@ -41,16 +41,16 @@ namespace app_mngr = application_manager;
 namespace commands {
 
 /**
- * @brief ASGetAppServiceDataFromHMIResponse command class
+ * @brief ASGetAppServiceDataResponseToHMI command class
  **/
-class ASGetAppServiceDataFromHMIResponse : public app_mngr::commands::ResponseToHMI {
+class ASGetAppServiceDataResponseToHMI : public app_mngr::commands::ResponseToHMI {
  public:
   /**
-   * @brief ASGetAppServiceDataFromHMIResponse class constructor
+   * @brief ASGetAppServiceDataResponseToHMI class constructor
    *
    * @param message Incoming SmartObject message
    **/
-  ASGetAppServiceDataFromHMIResponse(
+  ASGetAppServiceDataResponseToHMI(
       const app_mngr::commands::MessageSharedPtr& message,
       app_mngr::ApplicationManager& application_manager,
       app_mngr::rpc_service::RPCService& rpc_service,
@@ -58,9 +58,9 @@ class ASGetAppServiceDataFromHMIResponse : public app_mngr::commands::ResponseTo
       policy::PolicyHandlerInterface& policy_handle);
 
   /**
-   * @brief ASGetAppServiceDataFromHMIResponse class destructor
+   * @brief ASGetAppServiceDataResponseToHMI class destructor
    **/
-  virtual ~ASGetAppServiceDataFromHMIResponse();
+  virtual ~ASGetAppServiceDataResponseToHMI();
 
   /**
    * @brief Execute command
@@ -68,11 +68,11 @@ class ASGetAppServiceDataFromHMIResponse : public app_mngr::commands::ResponseTo
   virtual void Run();
 
  private:
-  DISALLOW_COPY_AND_ASSIGN(ASGetAppServiceDataFromHMIResponse);
+  DISALLOW_COPY_AND_ASSIGN(ASGetAppServiceDataResponseToHMI);
 };
 
 }  // namespace commands
 
 }  // namespace app_service_rpc_plugin
 
-#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_APP_SERVICE_RPC_PLUGIN_INCLUDE_APP_SERVICE_RPC_PLUGIN_COMMANDS_HMI_AS_GET_APP_SERVICE_DATA_FROM_HMI_RESPONSE_H_
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_APP_SERVICE_RPC_PLUGIN_INCLUDE_APP_SERVICE_RPC_PLUGIN_COMMANDS_HMI_AS_GET_APP_SERVICE_DATA_RESPONSE_TO_HMI_H_

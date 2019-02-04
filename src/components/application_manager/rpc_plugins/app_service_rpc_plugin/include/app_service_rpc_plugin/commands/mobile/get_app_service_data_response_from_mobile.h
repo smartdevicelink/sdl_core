@@ -30,8 +30,8 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_APP_SERVICE_RPC_PLUGIN_INCLUDE_APP_SERVICE_RPC_PLUGIN_COMMANDS_MOBILE_GET_APP_SERVICE_DATA_RESPONSE_TO_MOBILE_H_
-#define SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_APP_SERVICE_RPC_PLUGIN_INCLUDE_APP_SERVICE_RPC_PLUGIN_COMMANDS_MOBILE_GET_APP_SERVICE_DATA_RESPONSE_TO_MOBILE_H_
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_APP_SERVICE_RPC_PLUGIN_INCLUDE_APP_SERVICE_RPC_PLUGIN_COMMANDS_MOBILE_GET_APP_SERVICE_DATA_RESPONSE_FROM_MOBILE_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_APP_SERVICE_RPC_PLUGIN_INCLUDE_APP_SERVICE_RPC_PLUGIN_COMMANDS_MOBILE_GET_APP_SERVICE_DATA_RESPONSE_FROM_MOBILE_H_
 
 #include "application_manager/commands/command_response_from_mobile.h"
 
@@ -41,16 +41,16 @@ namespace app_mngr = application_manager;
 namespace commands {
 
 /**
- * @brief GetAppServiceDataResponseToMobile command class
+ * @brief GetAppServiceDataResponseFromMobile command class
  **/
-class GetAppServiceDataResponseToMobile : public app_mngr::commands::CommandResponseFromMobile {
+class GetAppServiceDataResponseFromMobile : public app_mngr::commands::CommandResponseFromMobile {
  public:
   /**
-   * @brief GetAppServiceDataResponseToMobile class constructor
+   * @brief GetAppServiceDataResponseFromMobile class constructor
    *
    * @param message Incoming SmartObject message
    **/
-  GetAppServiceDataResponseToMobile(
+  GetAppServiceDataResponseFromMobile(
       const app_mngr::commands::MessageSharedPtr& message,
       app_mngr::ApplicationManager& application_manager,
       app_mngr::rpc_service::RPCService& rpc_service,
@@ -58,9 +58,9 @@ class GetAppServiceDataResponseToMobile : public app_mngr::commands::CommandResp
       policy::PolicyHandlerInterface& policy_handle);
 
   /**
-   * @brief GetAppServiceDataResponseToMobile class destructor
+   * @brief GetAppServiceDataResponseFromMobile class destructor
    **/
-  virtual ~GetAppServiceDataResponseToMobile();
+  virtual ~GetAppServiceDataResponseFromMobile();
 
   /**
    * @brief Execute command
@@ -68,11 +68,11 @@ class GetAppServiceDataResponseToMobile : public app_mngr::commands::CommandResp
   virtual void Run();
 
  private:
-  DISALLOW_COPY_AND_ASSIGN(GetAppServiceDataResponseToMobile);
+  DISALLOW_COPY_AND_ASSIGN(GetAppServiceDataResponseFromMobile);
 };
 
 }  // namespace commands
 
 }  // namespace app_service_rpc_plugin
 
-#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_APP_SERVICE_RPC_PLUGIN_INCLUDE_APP_SERVICE_RPC_PLUGIN_COMMANDS_MOBILE_GET_APP_SERVICE_DATA_RESPONSE_TO_MOBILE_H_
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_APP_SERVICE_RPC_PLUGIN_INCLUDE_APP_SERVICE_RPC_PLUGIN_COMMANDS_MOBILE_GET_APP_SERVICE_DATA_RESPONSE_FROM_MOBILE_H_
