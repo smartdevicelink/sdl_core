@@ -115,7 +115,8 @@ void PublishAppServiceRequest::Run() {
   }
 
   smart_objects::SmartObject service_record =
-      application_manager_.GetAppServiceManager().PublishAppService(manifest);
+      application_manager_.GetAppServiceManager().PublishAppService(
+          manifest, true, connection_key());
 
   response_params[strings::app_service_record] = service_record;
 
