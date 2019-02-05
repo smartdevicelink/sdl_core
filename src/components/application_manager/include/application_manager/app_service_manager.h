@@ -79,6 +79,15 @@ class AppServiceManager {
   std::map<std::string, smart_objects::SmartObject> published_services_;
 };
 
+smart_objects::SmartObject CreateMobileSystemCapabilityNotification(
+    AppServiceManager& app_service_manager,
+    const std::string service_id,
+    mobile_apis::ServiceUpdateReason::eType update_reason);
+smart_objects::SmartObject CreateHMISystemCapabilityNotification(
+    AppServiceManager& app_service_manager,
+    const std::string service_id,
+    mobile_apis::ServiceUpdateReason::eType update_reason);
+
 }  //  namespace application_manager
 
 #endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_APP_SERVICE_MANAGER_H_
