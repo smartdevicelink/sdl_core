@@ -90,7 +90,6 @@ void ASPublishAppServiceRequest::Run() {
           manifest, false, UINT32_MAX);
 
   response_params[strings::app_service_record] = service_record;
-  // TODO: Add AppServiceRecord to response
   SendResponse(true,
                (*message_)[strings::params][strings::correlation_id].asUInt(),
                hmi_apis::FunctionID::AppService_PublishAppService,
