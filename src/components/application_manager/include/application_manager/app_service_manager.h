@@ -37,6 +37,12 @@
 
 namespace application_manager {
 
+struct AppService {
+  uint32_t connection_key;
+  bool mobile_service;
+  smart_objects::SmartObject record;
+};
+
 class ApplicationManager;
 
 /**
@@ -60,7 +66,9 @@ class AppServiceManager {
    * @param manifest
    */
   smart_objects::SmartObject PublishAppService(
-      const smart_objects::SmartObject& manifest);
+      const smart_objects::SmartObject& manifest,
+      const bool mobile_service,
+      const uint32_t connection_key);
 
   /**
    * @brief TODO
@@ -76,7 +84,7 @@ class AppServiceManager {
 
  private:
   ApplicationManager& app_manager_;
-  std::map<std::string, smart_objects::SmartObject> published_services_;
+  std::map<std::string, AppService> published_services_;
 };
 
 smart_objects::SmartObject CreateMobileSystemCapabilityNotification(
