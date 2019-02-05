@@ -133,6 +133,12 @@ smart_objects::SmartObject AppServiceManager::PublishAppService(
   message[strings::msg_params][strings::system_capability] = system_capability;
   app_manager_.GetRPCService().ManageMobileCommand(
       notification, commands::Command::CommandSource::SOURCE_SDL);
+
+  smart_objects::SmartObjectSPtr hmi_notification =
+      std::make_shared<smart_objects::SmartObject>(*notification);
+  (*hmi_notification)[strings::params][strings::function_id] =
+      hmi_apis::FunctionID::SystemCapability_OnSystemCapabilityUpdated;
+  app_manager_.GetRPCService().ManageHMICommand(hmi_notification);
   return service_record;
 }
 
