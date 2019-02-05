@@ -56,7 +56,7 @@ class SystemCapabilityAppExtension : public app_mngr_::AppExtension {
 
   bool unsubscribeFrom(const SystemCapabilityType system_capability_type);
 
-  void unsubscribeFrom();
+  void unsubscribeFromAll();
 
   bool isSubscribedTo(const SystemCapabilityType system_capability_type) const;
 

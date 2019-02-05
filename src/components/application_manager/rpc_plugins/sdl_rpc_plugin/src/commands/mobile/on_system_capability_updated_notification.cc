@@ -28,7 +28,6 @@ OnSystemCapabilityUpdatedNotification::
 void OnSystemCapabilityUpdatedNotification::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  // TODO, figure out how to handle unknown enums for SystemCapabilityType
   mobile_apis::SystemCapabilityType::eType system_capability_type =
       static_cast<mobile_apis::SystemCapabilityType::eType>(
           (*message_)[strings::msg_params][strings::system_capability]

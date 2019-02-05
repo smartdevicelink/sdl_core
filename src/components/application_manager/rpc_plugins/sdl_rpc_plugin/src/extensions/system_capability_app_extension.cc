@@ -35,7 +35,7 @@ bool SystemCapabilityAppExtension::unsubscribeFrom(
   return false;
 }
 
-void SystemCapabilityAppExtension::unsubscribeFrom() {
+void SystemCapabilityAppExtension::unsubscribeFromAll() {
   LOG4CXX_INFO(logger_, "Unsubscribing from ALL System Capabilities");
   subscribed_data_.clear();
 }

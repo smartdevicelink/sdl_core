@@ -3957,7 +3957,7 @@
         <param name="weatherServiceData" type="WeatherServiceData" mandatory="false"/>
     </struct>
 
-    <enum name="ServiceUpdateReason">
+    <enum name="ServiceUpdateReason" since="5.1">
         <element name = "PUBLISHED">
             <description> The service has just been published with the module and once activated to the primary service of its type, it will be ready for possible consumption.</description>
         </element>
@@ -6891,7 +6891,7 @@
         <param name="systemCapabilityType" type="SystemCapabilityType" mandatory="true">
             <description>The type of system capability to get more information on</description>
         </param>
-        <param name="subscribe" type="Boolean" mandatory="false">
+        <param name="subscribe" type="Boolean" mandatory="false" since="5.1">
         <description>Flag to subscribe to updates of the supplied service capability type. If true, then requester will be subscribed </description>
         </param>
     </function>
