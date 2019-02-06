@@ -76,6 +76,12 @@ class AppServiceManager {
    */
   bool UnpublishAppService(const std::string service_id);
 
+  void UnpublishAppServices(const uint32_t connection_key);
+
+  void setServicePublished(const std::string service_id,
+                           bool service_published);
+  void setServiceActive(const std::string service_id, bool service_activated);
+
   /**
    * @brief TODO
    * @param manifest

@@ -82,6 +82,8 @@ void OnExitApplicationNotification::Run() {
   reason = static_cast<Common_ApplicationExitReason::eType>(
       (*message_)[strings::msg_params][strings::reason].asInt());
 
+  application_manager_.GetAppServiceManager().UnpublishAppServices(app_id);
+
   switch (reason) {
     case Common_ApplicationExitReason::DRIVER_DISTRACTION_VIOLATION: {
       break;
