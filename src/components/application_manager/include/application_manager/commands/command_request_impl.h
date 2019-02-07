@@ -149,6 +149,8 @@ class CommandRequestImpl : public CommandImpl,
    */
   virtual void on_event(const event_engine::Event& event);
 
+  virtual void on_event(const event_engine::MobileEvent& event);
+
   /*
    * @brief Creates Mobile response
    *
@@ -169,6 +171,16 @@ class CommandRequestImpl : public CommandImpl,
    * @return true if success otherwise return false
    */
   bool CheckSyntax(const std::string& str, bool allow_empty_line = false);
+
+  void SendProviderRequest(
+      const mobile_apis::FunctionID::eType& mobile_function_id,
+      const hmi_apis::FunctionID::eType& hmi_function_id,
+      const smart_objects::SmartObject* msg,
+      bool use_events = false);
+
+  void SendMobileRequest(const mobile_apis::FunctionID::eType& function_id,
+                         smart_objects::SmartObjectSPtr msg,
+                         bool use_events = false);
 
   /*
    * @brief Sends HMI request

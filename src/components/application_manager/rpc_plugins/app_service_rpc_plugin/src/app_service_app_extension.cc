@@ -93,7 +93,7 @@ void AppServiceAppExtension::ProcessResumption(
   // todo
 }
 
-AppServiceAppExtension& AppServiceAppExtension::ExtractVIExtension(
+AppServiceAppExtension& AppServiceAppExtension::ExtractASExtension(
     application_manager::Application& app) {
   auto ext_ptr =
       app.QueryInterface(AppServiceAppExtension::AppServiceAppExtensionUID);

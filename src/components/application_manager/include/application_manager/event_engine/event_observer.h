@@ -72,6 +72,8 @@ class EventObserver {
    */
   virtual void on_event(const Event& event) = 0;
 
+  void on_event(const MobileEvent& event);
+
  protected:
   /*
    * @brief Subscribe to an event
@@ -94,7 +96,32 @@ class EventObserver {
    * @brief Unsubscribes the observer from all events
    *
    */
-  void unsubscribe_from_all_events();
+  void unsubscribe_from_all_hmi_events();
+
+  // Mobile Events
+
+  /*
+   * @brief Subscribe to an event
+   *
+   * @param event_id            The event ID to subscribe for
+   * @param mobile_correlation_id  The event mobile correlation ID.
+   * If param is omitted, it means subscription for mobile notification
+   */
+  void subscribe_on_event(const MobileEvent::MobileEventID& event_id,
+                          int32_t mobile_correlation_id = 0);
+
+  /*
+   * @brief Unsubscribes the observer from specific event
+   *
+   * @param event_id    The event ID to unsubscribe from
+   */
+  void unsubscribe_from_event(const MobileEvent::MobileEventID& event_id);
+
+  /*
+   * @brief Unsubscribes the observer from all events
+   *
+   */
+  void unsubscribe_from_all_mobile_events();
 
  private:
   ObserverID id_;

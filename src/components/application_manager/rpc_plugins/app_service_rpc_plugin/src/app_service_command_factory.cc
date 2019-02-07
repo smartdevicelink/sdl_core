@@ -65,6 +65,9 @@ app_mngr::CommandSharedPtr AppServiceCommandFactory::CreateCommand(
 bool AppServiceCommandFactory::IsAbleToProcess(
     const int32_t function_id,
     const commands::Command::CommandSource source) const {
+  LOG4CXX_DEBUG(logger_,
+                "AppServiceCommandFactory::IsAbleToProcess" << function_id
+                                                            << " " << source);
   return commands::Command::SOURCE_HMI == source
              ? hmi_command_factory_->IsAbleToProcess(function_id, source)
              : mobile_command_factory_->IsAbleToProcess(function_id, source);

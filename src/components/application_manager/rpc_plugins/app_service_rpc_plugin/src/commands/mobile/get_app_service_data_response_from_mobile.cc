@@ -32,6 +32,7 @@
 
 #include "app_service_rpc_plugin/commands/mobile/get_app_service_data_response_from_mobile.h"
 #include "application_manager/application_impl.h"
+#include "application_manager/message_helper.h"
 #include "application_manager/rpc_service.h"
 #include "interfaces/MOBILE_API.h"
 
@@ -46,15 +47,25 @@ GetAppServiceDataResponseFromMobile::GetAppServiceDataResponseFromMobile(
     app_mngr::HMICapabilities& hmi_capabilities,
     policy::PolicyHandlerInterface& policy_handler)
     : CommandResponseFromMobile(message,
-                         application_manager,
-                         rpc_service,
-                         hmi_capabilities,
-                         policy_handler) {}
+                                application_manager,
+                                rpc_service,
+                                hmi_capabilities,
+                                policy_handler)
+    , plugin_(NULL) {
+  auto plugin = (application_manager.GetPluginManager().FindPluginToProcess(
+      mobile_apis::FunctionID::PublishAppServiceID,
+      app_mngr::commands::Command::CommandSource::SOURCE_MOBILE));
+  if (plugin) {
+    plugin_ = dynamic_cast<AppServiceRpcPlugin*>(&(*plugin));
+  }
+}
 
 GetAppServiceDataResponseFromMobile::~GetAppServiceDataResponseFromMobile() {}
 
 void GetAppServiceDataResponseFromMobile::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
+
+  // SendResponse(true, mobile_apis::Result::SUCCESS, NULL, &response_params);
 }
 
 }  // namespace commands

@@ -1,5 +1,5 @@
 /*
- Copyright (c) 2019, Ford Motor Company, Livio
+ Copyright (c) 2013, Ford Motor Company
  All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -13,9 +13,9 @@
  disclaimer in the documentation and/or other materials provided with the
  distribution.
 
- Neither the name of the the copyright holders nor the names of their
- contributors may be used to endorse or promote products derived from this
- software without specific prior written permission.
+ Neither the name of the Ford Motor Company nor the names of its contributors
+ may be used to endorse or promote products derived from this software
+ without specific prior written permission.
 
  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
@@ -30,32 +30,42 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "app_service_rpc_plugin/commands/hmi/as_get_app_service_data_request_to_hmi.h"
-#include "application_manager/application_impl.h"
+#include "application_manager/commands/command_response_from_mobile.h"
 #include "application_manager/rpc_service.h"
-#include "interfaces/MOBILE_API.h"
+#include "smart_objects/smart_object.h"
 
-namespace app_service_rpc_plugin {
-using namespace application_manager;
+namespace application_manager {
+
 namespace commands {
 
-ASGetAppServiceDataRequestToHMI::ASGetAppServiceDataRequestToHMI(
-    const application_manager::commands::MessageSharedPtr& message,
+CommandResponseFromMobile::CommandResponseFromMobile(
+    const MessageSharedPtr& message,
     ApplicationManager& application_manager,
-    app_mngr::rpc_service::RPCService& rpc_service,
-    app_mngr::HMICapabilities& hmi_capabilities,
-    policy::PolicyHandlerInterface& policy_handler)
-    : RequestToHMI(message,
-                   application_manager,
-                   rpc_service,
-                   hmi_capabilities,
-                   policy_handler) {}
+    rpc_service::RPCService& rpc_service,
+    HMICapabilities& hmi_capabilities,
+    policy::PolicyHandlerInterface& policy_handle)
+    : CommandImpl(message,
+                  application_manager,
+                  rpc_service,
+                  hmi_capabilities,
+                  policy_handle) {}
 
-ASGetAppServiceDataRequestToHMI::~ASGetAppServiceDataRequestToHMI() {}
+CommandResponseFromMobile::~CommandResponseFromMobile() {}
 
-void ASGetAppServiceDataRequestToHMI::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+bool CommandResponseFromMobile::Init() {
+  return true;
+}
+
+bool CommandResponseFromMobile::CleanUp() {
+  return true;
+}
+
+void CommandResponseFromMobile::Run() {}
+
+void CommandResponseFromMobile::SendResponse() {
+  rpc_service_.ManageMobileCommand(message_, SOURCE_SDL);
 }
 
 }  // namespace commands
-}  // namespace app_service_rpc_plugin
+
+}  // namespace application_manager

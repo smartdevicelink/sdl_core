@@ -75,7 +75,7 @@ void OnAppServiceDataNotification::Run() {
   auto subscribed_to_app_service_predicate =
       [appServiceType](const ApplicationSharedPtr app) {
         DCHECK_OR_RETURN(app, false);
-        auto& ext = AppServiceAppExtension::ExtractVIExtension(*app);
+        auto& ext = AppServiceAppExtension::ExtractASExtension(*app);
         return ext.isSubscribedToAppService(appServiceType);
       };
 

@@ -624,6 +624,7 @@ void StateControllerImpl::ApplyRegularState(ApplicationSharedPtr app,
                 "Resolving HMI level conflicts for app " << app->app_id());
   ForEachApplication(HmiLevelConflictResolver(app, state, this));
 }
+void StateControllerImpl::on_event(const event_engine::MobileEvent& event) {}
 
 void StateControllerImpl::on_event(const event_engine::Event& event) {
   using smart_objects::SmartObject;

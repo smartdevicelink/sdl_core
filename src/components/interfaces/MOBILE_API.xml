@@ -2618,6 +2618,7 @@
         <element name="SendHapticDataID" value="49" hexvalue="31" since="4.5" />
         <element name="SetCloudAppPropertiesID" value="50" hexvalue="32" since="5.1" />
         <element name="PublishAppServiceID" value="52" hexvalue="34" since="5.1" />
+        <element name="GetAppServiceDataID" value="53" hexvalue="35" since="5.1" />
         
         <!--
          Base Notifications
@@ -6979,6 +6980,48 @@
         <param name="appServiceRecord" type="AppServiceRecord" mandatory="false">
             <description> If the request was successful, this object will be the current status of the service record for the published service. This will include the Core supplied service ID.</description>
         </param>
+    </function>
+
+    <function name="GetAppServiceData" functionID="GetAppServiceDataID" messagetype="request" since="5.1">
+        <description> This request asks the module for current data related to the specific service. It also includes an option to subscribe to that service for future updates</description>
+        
+        <param name="serviceType" type="String" mandatory="true">
+            <description>See AppServiceType</description>
+        </param>
+        
+        <param name="subscribe" type="Boolean" mandatory="false">
+            <description> If true, the consumer is requesting to subscribe to all future updates from the service publisher. If false, the consumer doesn't wish to subscribe and should be unsubscribed if it was previously subscribed.</description>
+        </param>
+        
+    </function>
+
+    <function name="GetAppServiceData" functionID="GetAppServiceDataID" messagetype="response" since="5.1">
+        <description> This response includes the data that is requested from the specific service</description>
+
+        <param name="success" type="Boolean" platform="documentation" mandatory="true">
+            <description> true, if successful; false, if failed </description>
+        </param>
+        
+        <param name="resultCode" type="Result" platform="documentation" mandatory="true">
+            <description>See Result</description>
+            <element name="SUCCESS"/>
+            <element name="REJECTED"/>
+            <element name="DISALLOWED"/>
+            <element name="INVALID_DATA"/>
+            <element name="OUT_OF_MEMORY"/>
+            <element name="TOO_MANY_PENDING_REQUESTS"/>
+            <element name="APPLICATION_NOT_REGISTERED"/>
+            <element name="GENERIC_ERROR"/>
+        </param>
+        
+        <param name="info" type="String" maxlength="1000" mandatory="false" platform="documentation">
+            <description>Provides additional human readable info regarding the result.</description>
+        </param>
+        
+        <!-- Specific response data -->
+        
+        <param name="serviceData" type="AppServiceData" mandatory="true"/>
+            
     </function>
     
     <!-- Notifications -->

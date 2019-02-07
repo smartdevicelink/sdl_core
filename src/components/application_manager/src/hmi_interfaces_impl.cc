@@ -227,6 +227,10 @@ generate_function_to_interface_convert_map() {
       HmiInterfaces::HMI_INTERFACE_RC;
   convert_map[RC_OnInteriorVehicleData] = HmiInterfaces::HMI_INTERFACE_RC;
   convert_map[RC_OnRemoteControlSettings] = HmiInterfaces::HMI_INTERFACE_RC;
+  convert_map[AppService_PublishAppService] =
+      HmiInterfaces::HMI_INTERFACE_AppService;
+  convert_map[AppService_GetAppServiceData] =
+      HmiInterfaces::HMI_INTERFACE_AppService;
   return convert_map;
 }
 
@@ -249,6 +253,8 @@ HmiInterfacesImpl::HmiInterfacesImpl() {
   interfaces_states_[HmiInterfaces::HMI_INTERFACE_VR] =
       HmiInterfaces::STATE_NOT_RESPONSE;
   interfaces_states_[HmiInterfaces::HMI_INTERFACE_RC] =
+      HmiInterfaces::STATE_NOT_RESPONSE;
+  interfaces_states_[HmiInterfaces::HMI_INTERFACE_AppService] =
       HmiInterfaces::STATE_NOT_RESPONSE;
 }
 

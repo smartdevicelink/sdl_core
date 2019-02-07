@@ -43,7 +43,8 @@ namespace commands {
 /**
  * @brief GetAppServiceDataRequestToMobile command class
  **/
-class GetAppServiceDataRequestToMobile : public app_mngr::commands::CommandRequestToMobile {
+class GetAppServiceDataRequestToMobile
+    : public app_mngr::commands::CommandRequestToMobile {
  public:
   /**
    * @brief GetAppServiceDataRequestToMobile class constructor

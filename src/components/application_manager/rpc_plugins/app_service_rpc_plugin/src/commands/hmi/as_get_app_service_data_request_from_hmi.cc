@@ -46,10 +46,10 @@ ASGetAppServiceDataRequestFromHMI::ASGetAppServiceDataRequestFromHMI(
     app_mngr::HMICapabilities& hmi_capabilities,
     policy::PolicyHandlerInterface& policy_handler)
     : RequestFromHMI(message,
-                         application_manager,
-                         rpc_service,
-                         hmi_capabilities,
-                         policy_handler) {}
+                     application_manager,
+                     rpc_service,
+                     hmi_capabilities,
+                     policy_handler) {}
 
 ASGetAppServiceDataRequestFromHMI::~ASGetAppServiceDataRequestFromHMI() {}
 

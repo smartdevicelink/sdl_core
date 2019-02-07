@@ -397,6 +397,7 @@ class ApplicationManager {
   virtual bool is_stopping() const = 0;
   virtual bool is_audio_pass_thru_active() const = 0;
 
+  virtual uint32_t GetNextMobileCorrelationID() = 0;
   virtual uint32_t GetNextHMICorrelationID() = 0;
   virtual uint32_t GenerateNewHMIAppID() = 0;
 

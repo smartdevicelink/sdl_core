@@ -55,6 +55,8 @@ void PolicyEventObserver::set_policy_handler(
   policy_handler_ = policy_handler;
 }
 
+void PolicyEventObserver::on_event(const event_engine::MobileEvent& event) {}
+
 void PolicyEventObserver::on_event(const event_engine::Event& event) {
   sync_primitives::AutoLock auto_lock(policy_handler_lock_);
   if (!policy_handler_) {

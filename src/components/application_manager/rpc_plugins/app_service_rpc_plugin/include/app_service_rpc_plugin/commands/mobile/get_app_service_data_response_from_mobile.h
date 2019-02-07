@@ -33,6 +33,7 @@
 #ifndef SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_APP_SERVICE_RPC_PLUGIN_INCLUDE_APP_SERVICE_RPC_PLUGIN_COMMANDS_MOBILE_GET_APP_SERVICE_DATA_RESPONSE_FROM_MOBILE_H_
 #define SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_APP_SERVICE_RPC_PLUGIN_INCLUDE_APP_SERVICE_RPC_PLUGIN_COMMANDS_MOBILE_GET_APP_SERVICE_DATA_RESPONSE_FROM_MOBILE_H_
 
+#include "app_service_rpc_plugin/app_service_rpc_plugin.h"
 #include "application_manager/commands/command_response_from_mobile.h"
 
 namespace app_service_rpc_plugin {
@@ -43,7 +44,8 @@ namespace commands {
 /**
  * @brief GetAppServiceDataResponseFromMobile command class
  **/
-class GetAppServiceDataResponseFromMobile : public app_mngr::commands::CommandResponseFromMobile {
+class GetAppServiceDataResponseFromMobile
+    : public app_mngr::commands::CommandResponseFromMobile {
  public:
   /**
    * @brief GetAppServiceDataResponseFromMobile class constructor
@@ -68,6 +70,7 @@ class GetAppServiceDataResponseFromMobile : public app_mngr::commands::CommandRe
   virtual void Run();
 
  private:
+  AppServiceRpcPlugin* plugin_;
   DISALLOW_COPY_AND_ASSIGN(GetAppServiceDataResponseFromMobile);
 };
 

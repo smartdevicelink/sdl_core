@@ -33,6 +33,7 @@
 #ifndef SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_APP_SERVICE_RPC_PLUGIN_INCLUDE_APP_SERVICE_RPC_PLUGIN_COMMANDS_MOBILE_GET_APP_SERVICE_DATA_REQUEST_H_
 #define SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_APP_SERVICE_RPC_PLUGIN_INCLUDE_APP_SERVICE_RPC_PLUGIN_COMMANDS_MOBILE_GET_APP_SERVICE_DATA_REQUEST_H_
 
+#include "app_service_rpc_plugin/app_service_rpc_plugin.h"
 #include "application_manager/commands/command_request_impl.h"
 
 namespace app_service_rpc_plugin {
@@ -50,12 +51,11 @@ class GetAppServiceDataRequest : public app_mngr::commands::CommandRequestImpl {
    *
    * @param message Incoming SmartObject message
    **/
-  GetAppServiceDataRequest(
-      const app_mngr::commands::MessageSharedPtr& message,
-      app_mngr::ApplicationManager& application_manager,
-      app_mngr::rpc_service::RPCService& rpc_service,
-      app_mngr::HMICapabilities& hmi_capabilities,
-      policy::PolicyHandlerInterface& policy_handle);
+  GetAppServiceDataRequest(const app_mngr::commands::MessageSharedPtr& message,
+                           app_mngr::ApplicationManager& application_manager,
+                           app_mngr::rpc_service::RPCService& rpc_service,
+                           app_mngr::HMICapabilities& hmi_capabilities,
+                           policy::PolicyHandlerInterface& policy_handle);
 
   /**
    * @brief GetAppServiceDataRequest class destructor
@@ -67,7 +67,15 @@ class GetAppServiceDataRequest : public app_mngr::commands::CommandRequestImpl {
    **/
   virtual void Run();
 
+  /**
+   * @brief Interface method that is called whenever new event received
+   *
+   * @param event The received event
+   */
+  virtual void on_event(const app_mngr::event_engine::Event& event);
+
  private:
+  AppServiceRpcPlugin* plugin_;
   DISALLOW_COPY_AND_ASSIGN(GetAppServiceDataRequest);
 };
 

@@ -85,6 +85,10 @@ class AppServiceManager {
   /*
     void NotifyConsumers(const MessageSharedPtr& message);*/
 
+  void GetProvider(const std::string& service_type,
+                   ApplicationSharedPtr& app,
+                   bool& hmi_service);
+
  private:
   ApplicationManager& app_manager_;
   std::map<std::string, AppService> published_services_;

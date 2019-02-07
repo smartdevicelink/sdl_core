@@ -31,9 +31,12 @@
  */
 
 #include "app_service_rpc_plugin/commands/mobile/get_app_service_data_request.h"
+#include "app_service_rpc_plugin/app_service_app_extension.h"
 #include "application_manager/application_impl.h"
+#include "application_manager/message_helper.h"
 #include "application_manager/rpc_service.h"
 #include "interfaces/MOBILE_API.h"
+#include "smart_objects/enum_schema_item.h"
 
 namespace app_service_rpc_plugin {
 using namespace application_manager;
@@ -49,12 +52,51 @@ GetAppServiceDataRequest::GetAppServiceDataRequest(
                          application_manager,
                          rpc_service,
                          hmi_capabilities,
-                         policy_handler) {}
+                         policy_handler)
+    , plugin_(NULL) {
+  auto plugin = (application_manager.GetPluginManager().FindPluginToProcess(
+      mobile_apis::FunctionID::PublishAppServiceID,
+      app_mngr::commands::Command::CommandSource::SOURCE_MOBILE));
+  if (plugin) {
+    plugin_ = dynamic_cast<AppServiceRpcPlugin*>(&(*plugin));
+  }
+}
 
 GetAppServiceDataRequest::~GetAppServiceDataRequest() {}
 
 void GetAppServiceDataRequest::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
+  MessageHelper::PrintSmartObject(*message_);
+
+  mobile_apis::AppServiceType::eType service_type =
+      static_cast<mobile_apis::AppServiceType::eType>(
+          (*message_)[strings::msg_params][strings::service_type].asUInt());
+
+  std::string service_type_str = std::string();
+  smart_objects::EnumConversionHelper<
+      mobile_apis::AppServiceType::eType>::EnumToString(service_type,
+                                                        &service_type_str);
+
+  bool subscribe = false;
+  if ((*message_)[strings::msg_params].keyExists(strings::subscribe)) {
+    subscribe = (*message_)[strings::msg_params][strings::subscribe].asBool();
+  }
+
+  ApplicationSharedPtr app = application_manager_.application(connection_key());
+
+  if (subscribe) {
+    auto& ext = AppServiceAppExtension::ExtractASExtension(*app);
+    ext.subscribeToAppService(service_type_str);
+  }
+
+  SendProviderRequest(mobile_apis::FunctionID::GetAppServiceDataID,
+                      hmi_apis::FunctionID::AppService_GetAppServiceData,
+                      &(*message_),
+                      true);
+}
+
+void GetAppServiceDataRequest::on_event(const event_engine::Event& event) {
+  // todo on response from hmi or mobile app service provider
 }
 
 }  // namespace commands

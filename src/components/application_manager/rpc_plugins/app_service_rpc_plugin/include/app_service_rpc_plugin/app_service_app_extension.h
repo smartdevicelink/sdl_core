@@ -122,7 +122,7 @@ class AppServiceAppExtension : public app_mngr::AppExtension {
    * @param app : applicaiton that contains vehicle info app_extension
    * @return application extension extracted from application
    */
-  static AppServiceAppExtension& ExtractVIExtension(
+  static AppServiceAppExtension& ExtractASExtension(
       application_manager::Application& app);
 
  private:

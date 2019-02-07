@@ -43,7 +43,8 @@ namespace commands {
 /**
  * @brief ASGetAppServiceDataResponseToHMI command class
  **/
-class ASGetAppServiceDataResponseToHMI : public app_mngr::commands::ResponseToHMI {
+class ASGetAppServiceDataResponseToHMI
+    : public app_mngr::commands::ResponseToHMI {
  public:
   /**
    * @brief ASGetAppServiceDataResponseToHMI class constructor

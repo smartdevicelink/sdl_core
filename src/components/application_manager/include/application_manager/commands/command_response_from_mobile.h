@@ -45,14 +45,14 @@ namespace commands {
 class CommandResponseFromMobile : public CommandImpl {
  public:
   CommandResponseFromMobile(const MessageSharedPtr& message,
-               ApplicationManager& application_manager,
-               rpc_service::RPCService& rpc_service,
-               HMICapabilities& hmi_capabilities,
-               policy::PolicyHandlerInterface& policy_handler);
-  virtual ~CommandResponseFromMobile();
-  virtual bool Init();
-  virtual bool CleanUp();
-  virtual void Run();
+                            ApplicationManager& application_manager,
+                            rpc_service::RPCService& rpc_service,
+                            HMICapabilities& hmi_capabilities,
+                            policy::PolicyHandlerInterface& policy_handler);
+  ~CommandResponseFromMobile();
+  bool Init() OVERRIDE;
+  bool CleanUp() OVERRIDE;
+  void Run() OVERRIDE;
   void SendResponse();
 
   /*

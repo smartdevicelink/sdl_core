@@ -46,10 +46,10 @@ GetAppServiceDataRequestToMobile::GetAppServiceDataRequestToMobile(
     app_mngr::HMICapabilities& hmi_capabilities,
     policy::PolicyHandlerInterface& policy_handler)
     : CommandRequestToMobile(message,
-                         application_manager,
-                         rpc_service,
-                         hmi_capabilities,
-                         policy_handler) {}
+                             application_manager,
+                             rpc_service,
+                             hmi_capabilities,
+                             policy_handler) {}
 
 GetAppServiceDataRequestToMobile::~GetAppServiceDataRequestToMobile() {}
 

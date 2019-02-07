@@ -284,7 +284,7 @@ void HMILanguageHandler::VerifyWithPersistedLanguages() {
     LOG4CXX_DEBUG(logger_,
                   "No registered apps found. HMILanguageHandler unsubscribed "
                   "from all events.");
-    unsubscribe_from_all_events();
+    unsubscribe_from_all_hmi_events();
   }
 }
 
@@ -304,7 +304,7 @@ void HMILanguageHandler::HandleWrongLanguageApp(const Apps::value_type& app) {
     if (0 == apps_.size()) {
       LOG4CXX_DEBUG(logger_,
                     "HMILanguageHandler unsubscribed from all events.");
-      unsubscribe_from_all_events();
+      unsubscribe_from_all_hmi_events();
     }
   }
   SendOnLanguageChangeToMobile(app.first);

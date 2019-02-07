@@ -6139,5 +6139,29 @@
 
         <param name="serviceData" type="Common.AppServiceData" mandatory="true"/>
     </function>
+
+  <function name="GetAppServiceData" functionID="GetAppServiceDataID" messagetype="request">
+    <description> This request asks the module for current data related to the specific service. It also includes an option to subscribe to that service for future updates</description>
+    
+    <param name="serviceType" type="Common.AppServiceType" mandatory="true"/>
+    
+    <param name="subscribe" type="Boolean" mandatory="false">
+      <description> If true, the consumer is requesting to subscribe to all future updates from the service publisher. If false, the consumer doesn't wish to subscribe and should be unsubscribed if it was previously subscribed.</description>
+    </param>
+    
+  </function>
+
+  <function name="GetAppServiceData" functionID="GetAppServiceDataID" messagetype="response">
+    <description> This response includes the data that is requested from the specific service</description>
+
+    <param name="success" type="Boolean" platform="documentation" mandatory="true">
+      <description> true, if successful; false, if failed </description>
+    </param>
+    
+    <!-- Specific response data -->
+    
+    <param name="serviceData" type="Common.AppServiceData" mandatory="true"/>
+      
+  </function>
 </interface>
 </interfaces>

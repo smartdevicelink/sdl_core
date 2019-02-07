@@ -87,6 +87,8 @@ app_mngr::CommandSharedPtr AppServiceHmiCommandFactory::CreateCommand(
 bool AppServiceHmiCommandFactory::IsAbleToProcess(
     const int32_t function_id,
     const app_mngr::commands::Command::CommandSource source) const {
+  LOG4CXX_DEBUG(logger_,
+                "HMI App Service Plugin IsAbleToProcess: " << function_id);
   UNUSED(source);
   return buildCommandCreator(function_id,
                              hmi_apis::messageType::INVALID_ENUM,

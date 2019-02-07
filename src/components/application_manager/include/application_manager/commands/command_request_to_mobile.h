@@ -45,14 +45,14 @@ namespace commands {
 class CommandRequestToMobile : public CommandImpl {
  public:
   CommandRequestToMobile(const MessageSharedPtr& message,
-               ApplicationManager& application_manager,
-               rpc_service::RPCService& rpc_service,
-               HMICapabilities& hmi_capabilities,
-               policy::PolicyHandlerInterface& policy_handler);
-  virtual ~CommandRequestToMobile();
-  virtual bool Init();
-  virtual bool CleanUp();
-  virtual void Run();
+                         ApplicationManager& application_manager,
+                         rpc_service::RPCService& rpc_service,
+                         HMICapabilities& hmi_capabilities,
+                         policy::PolicyHandlerInterface& policy_handler);
+  ~CommandRequestToMobile();
+  bool Init() OVERRIDE;
+  bool CleanUp() OVERRIDE;
+  void Run() OVERRIDE;
   void SendRequest();
 
   /*

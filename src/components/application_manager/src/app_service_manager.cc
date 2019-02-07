@@ -106,4 +106,34 @@ std::vector<smart_objects::SmartObject> AppServiceManager::GetAllServices() {
   return services;
 }
 
+void AppServiceManager::GetProvider(const std::string& service_type,
+                                    ApplicationSharedPtr& app,
+                                    bool& hmi_service) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  auto service_it = published_services_.begin();
+  auto end = published_services_.end();
+
+  for (; service_it != end; ++service_it) {
+    auto service = service_it->second;
+    auto record = service_it->second.record;
+    if (record[strings::service_published].asBool() == false ||
+        record[strings::service_active].asBool() == false) {
+      continue;
+    }
+    if (record[strings::service_manifest][strings::service_type].asString() ==
+        service_type) {
+      LOG4CXX_DEBUG(logger_,
+                    "Found provider for service type: " << service_type);
+      bool mobile_service = service.mobile_service;
+      if (mobile_service) {
+        app = app_manager_.application(service.connection_key);
+        hmi_service = false;
+        return;
+      }
+      hmi_service = true;
+      return;
+    }
+  }
+}
+
 }  //  namespace application_manager

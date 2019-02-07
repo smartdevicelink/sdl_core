@@ -284,6 +284,7 @@ const char* service_manifest = "serviceManifest";
 const char* service_published = "servicePublished";
 const char* service_active = "serviceActive";
 const char* service_data = "serviceData";
+const char* subscribe = "subscribe";
 
 // resuming
 const char* application_commands = "applicationCommands";
