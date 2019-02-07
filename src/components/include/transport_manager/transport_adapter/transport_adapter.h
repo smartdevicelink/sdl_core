@@ -71,12 +71,6 @@ enum DeviceType {
   UNKNOWN
 };
 
-enum HybridAppPreference {  // todo find correct place for this enum defintion.
-  MOBILE,
-  CLOUD,
-  BOTH
-};
-
 struct CloudAppProperties {
   std::string endpoint;
   std::string certificate;

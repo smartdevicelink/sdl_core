@@ -144,7 +144,8 @@ class WebsocketClientConnection
   boost::beast::flat_buffer buffer_;
   std::string host_;
   std::string text_;
-  boost::variant<WSptr, WSSptr> dynamic_ws_;
+  WSptr ws_;
+  WSSptr wss_;
 
   std::atomic_bool shutdown_;
 
