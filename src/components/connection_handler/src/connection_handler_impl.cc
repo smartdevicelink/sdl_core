@@ -1324,7 +1324,6 @@ void ConnectionHandlerImpl::ConnectToAllDevices() {
 }
 
 void ConnectionHandlerImpl::AddCloudAppDevice(
-    const std::string& policy_app_id,
     const transport_manager::transport_adapter::CloudAppProperties&
         cloud_properties) {
   transport_manager_.AddCloudDevice(cloud_properties);
