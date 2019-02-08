@@ -40,6 +40,7 @@ namespace application_manager {
 struct AppService {
   uint32_t connection_key;
   bool mobile_service;
+  bool default_service = false;
   smart_objects::SmartObject record;
 };
 
@@ -54,7 +55,8 @@ class AppServiceManager {
    * @brief Class constructor
    * @param app_manager
    */
-  AppServiceManager(ApplicationManager& app_manager);
+  AppServiceManager(ApplicationManager& app_manager,
+                    resumption::LastState& last_state);
 
   /**
    * @brief Class destructor
@@ -78,6 +80,30 @@ class AppServiceManager {
 
   /**
    * @brief TODO
+   * @param service_id
+   */
+  bool SetDefaultService(const std::string service_id);
+
+  /**
+   * @brief TODO
+   * @param service_id
+   */
+  bool RemoveDefaultService(const std::string service_id);
+
+  /**
+   * @brief TODO
+   * @param service_id
+   */
+  bool ActivateAppService(const std::string service_id);
+
+  /**
+   * @brief TODO
+   * @param service_id
+   */
+  bool DeactivateAppService(const std::string service_id);
+
+  /**
+   * @brief TODO
    * @param manifest
    */
   std::vector<smart_objects::SmartObject> GetAllServices();
@@ -87,8 +113,11 @@ class AppServiceManager {
 
   std::pair<std::string, AppService> FindServiceByName(std::string name);
 
+  std::string DefaultServiceByType(std::string service_type);
+
  private:
   ApplicationManager& app_manager_;
+  resumption::LastState& last_state_;
   std::map<std::string, AppService> published_services_;
 };
 
