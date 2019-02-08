@@ -4112,6 +4112,12 @@
         <description>Must be 'true' - when the event is started on HMI. Must be 'false' when the event is ended on HMI</description>
      </param>
    </function>
+  <function name="OnSystemCapabilityUpdated" messagetype="notification">
+    <description>A notifcation to inform the connected device that a specific system capability has changed.</description>
+    <param name="systemCapability" type="Common.SystemCapabilities" mandatory="true">
+      <description>The system capability that has been updated</description>
+    </param>
+  </function> 
 </interface>
 
 <interface name="VR" version="1.1.0" date="2017-04-27">
@@ -6161,16 +6167,6 @@
   </param>
 </function>
 
-</interface>
-
-<interface name="SystemCapability" version="1.0" date="2019-02-01">
-  <description>Interface used for getting System Capabilities</description>
-  <function name="OnSystemCapabilityUpdated" messagetype="notification">
-    <description>A notifcation to inform the connected device that a specific system capability has changed.</description>
-    <param name="systemCapability" type="Common.SystemCapabilities" mandatory="true">
-      <description>The system capability that has been updated</description>
-    </param>
-  </function> 
 </interface>
 
 <interface name="AppService" version="1.0.0" date="2019-01-20">

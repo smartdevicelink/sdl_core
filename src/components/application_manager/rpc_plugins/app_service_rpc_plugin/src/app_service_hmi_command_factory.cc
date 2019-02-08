@@ -38,7 +38,6 @@
 #include "app_service_rpc_plugin/commands/hmi/as_publish_app_service_response.h"
 #include "app_service_rpc_plugin/commands/hmi/on_as_app_service_data_notification.h"
 #include "app_service_rpc_plugin/commands/hmi/on_as_app_service_data_notification_from_hmi.h"
-#include "app_service_rpc_plugin/commands/hmi/on_as_system_capability_updated_notification.h"
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "AppServiceRpcPlugin")
 
@@ -106,9 +105,6 @@ app_mngr::CommandCreator& AppServiceHmiCommandFactory::buildCommandCreator(
       return hmi_apis::messageType::request == message_type
                  ? factory.GetCreator<commands::ASPublishAppServiceRequest>()
                  : factory.GetCreator<commands::ASPublishAppServiceResponse>();
-    case hmi_apis::FunctionID::SystemCapability_OnSystemCapabilityUpdated:
-      return factory
-          .GetCreator<commands::OnASSystemCapabilityUpdatedNotification>();
     case hmi_apis::FunctionID::AppService_OnAppServiceData:
       return app_mngr::commands::Command::CommandSource::SOURCE_HMI == source
                  ? factory.GetCreator<

@@ -232,7 +232,7 @@ AppServiceManager::CreateHMISystemCapabilityNotification(
   auto message =
       CreateMobileSystemCapabilityNotification(service_id, update_reason);
   message[strings::params][strings::function_id] =
-      hmi_apis::FunctionID::SystemCapability_OnSystemCapabilityUpdated;
+      hmi_apis::FunctionID::BasicCommunication_OnSystemCapabilityUpdated;
   return message;
 }
 

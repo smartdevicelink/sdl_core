@@ -30,50 +30,38 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_APP_SERVICE_RPC_PLUGIN_INCLUDE_APP_SERVICE_RPC_PLUGIN_COMMANDS_HMI_ON_AS_SYSTEM_CAPABILITY_UPDATED_NOTIFICATION_H_
-#define SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_APP_SERVICE_RPC_PLUGIN_INCLUDE_APP_SERVICE_RPC_PLUGIN_COMMANDS_HMI_ON_AS_SYSTEM_CAPABILITY_UPDATED_NOTIFICATION_H_
+#include "sdl_rpc_plugin/commands/hmi/on_bc_system_capability_updated_notification.h"
+#include "application_manager/application_impl.h"
+#include "application_manager/rpc_service.h"
+#include "interfaces/HMI_API.h"
 
-#include "application_manager/commands/notification_to_hmi.h"
-
-namespace app_service_rpc_plugin {
-namespace app_mngr = application_manager;
-
+namespace sdl_rpc_plugin {
+using namespace application_manager;
 namespace commands {
 
-/**
- * @brief OnASSystemCapabilityUpdatedNotification command class
- **/
-class OnASSystemCapabilityUpdatedNotification
-    : public app_mngr::commands::NotificationToHMI {
- public:
-  /**
-   * @brief OnASSystemCapabilityUpdatedNotification class constructor
-   *
-   * @param message Incoming SmartObject message
-   **/
-  OnASSystemCapabilityUpdatedNotification(
-      const app_mngr::commands::MessageSharedPtr& message,
-      app_mngr::ApplicationManager& application_manager,
-      app_mngr::rpc_service::RPCService& rpc_service,
-      app_mngr::HMICapabilities& hmi_capabilities,
-      policy::PolicyHandlerInterface& policy_handle);
+OnBCSystemCapabilityUpdatedNotification::
+    OnBCSystemCapabilityUpdatedNotification(
+        const application_manager::commands::MessageSharedPtr& message,
+        ApplicationManager& application_manager,
+        app_mngr::rpc_service::RPCService& rpc_service,
+        app_mngr::HMICapabilities& hmi_capabilities,
+        policy::PolicyHandlerInterface& policy_handler)
+    : NotificationToHMI(message,
+                        application_manager,
+                        rpc_service,
+                        hmi_capabilities,
+                        policy_handler) {}
 
-  /**
-   * @brief OnASSystemCapabilityUpdatedNotification class destructor
-   **/
-  virtual ~OnASSystemCapabilityUpdatedNotification();
+OnBCSystemCapabilityUpdatedNotification::
+    ~OnBCSystemCapabilityUpdatedNotification() {}
 
-  /**
-   * @brief Execute command
-   **/
-  virtual void Run();
-
- private:
-  DISALLOW_COPY_AND_ASSIGN(OnASSystemCapabilityUpdatedNotification);
-};
+void OnBCSystemCapabilityUpdatedNotification::Run() {
+  LOG4CXX_AUTO_TRACE(logger_);
+  LOG4CXX_DEBUG(logger_,
+                "Sending BasicCommunication.OnSystemCapabilityUpdated "
+                "Notification to HMI");
+  SendNotification();
+}
 
 }  // namespace commands
-
 }  // namespace app_service_rpc_plugin
-
-#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_APP_SERVICE_RPC_PLUGIN_INCLUDE_APP_SERVICE_RPC_PLUGIN_COMMANDS_HMI_ON_AS_SYSTEM_CAPABILITY_UPDATED_NOTIFICATION_H_
