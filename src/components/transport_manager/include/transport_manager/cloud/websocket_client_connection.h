@@ -65,8 +65,6 @@ typedef std::queue<protocol_handler::RawMessagePtr> AsyncQueue;
 typedef protocol_handler::RawMessagePtr Message;
 typedef websocket::stream<tcp::socket> WS;
 typedef websocket::stream<ssl::stream<tcp::socket> > WSS;
-typedef std::shared_ptr<WS> WSptr;
-typedef std::shared_ptr<WSS> WSSptr;
 
 namespace transport_manager {
 namespace transport_adapter {
@@ -144,8 +142,8 @@ class WebsocketClientConnection
   boost::beast::flat_buffer buffer_;
   std::string host_;
   std::string text_;
-  WSptr ws_;
-  WSSptr wss_;
+  std::shared_ptr<WS> ws_;
+  std::shared_ptr<WSS> wss_;
 
   std::atomic_bool shutdown_;
 
