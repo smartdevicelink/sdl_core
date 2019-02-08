@@ -91,16 +91,14 @@ class AppServiceManager {
  private:
   ApplicationManager& app_manager_;
   std::map<std::string, AppService> published_services_;
-};
 
-smart_objects::SmartObject CreateMobileSystemCapabilityNotification(
-    AppServiceManager& app_service_manager,
-    const std::string service_id,
-    mobile_apis::ServiceUpdateReason::eType update_reason);
-smart_objects::SmartObject CreateHMISystemCapabilityNotification(
-    AppServiceManager& app_service_manager,
-    const std::string service_id,
-    mobile_apis::ServiceUpdateReason::eType update_reason);
+  smart_objects::SmartObject CreateMobileSystemCapabilityNotification(
+      const std::string service_id,
+      mobile_apis::ServiceUpdateReason::eType update_reason);
+  smart_objects::SmartObject CreateHMISystemCapabilityNotification(
+      const std::string service_id,
+      mobile_apis::ServiceUpdateReason::eType update_reason);
+};
 
 }  //  namespace application_manager
 

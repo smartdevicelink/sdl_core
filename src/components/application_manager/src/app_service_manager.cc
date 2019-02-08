@@ -36,6 +36,7 @@
 #include <iterator>
 
 #include "application_manager/application.h"
+#include "application_manager/app_service_manager.h"
 #include "application_manager/application_manager.h"
 #include "application_manager/commands/command_impl.h"
 #include "application_manager/message_helper.h"
@@ -89,13 +90,13 @@ smart_objects::SmartObject AppServiceManager::PublishAppService(
   smart_objects::SmartObjectSPtr notification =
       std::make_shared<smart_objects::SmartObject>(
           CreateMobileSystemCapabilityNotification(
-              *this, service_id, mobile_apis::ServiceUpdateReason::PUBLISHED));
+              service_id, mobile_apis::ServiceUpdateReason::PUBLISHED));
   app_manager_.GetRPCService().ManageMobileCommand(
       notification, commands::Command::CommandSource::SOURCE_SDL);
   smart_objects::SmartObjectSPtr hmi_notification =
       std::make_shared<smart_objects::SmartObject>(
           CreateHMISystemCapabilityNotification(
-              *this, service_id, mobile_apis::ServiceUpdateReason::PUBLISHED));
+              service_id, mobile_apis::ServiceUpdateReason::PUBLISHED));
   app_manager_.GetRPCService().ManageHMICommand(hmi_notification);
   return service_record;
 }
@@ -114,13 +115,13 @@ bool AppServiceManager::UnpublishAppService(const std::string service_id) {
   smart_objects::SmartObjectSPtr notification =
       std::make_shared<smart_objects::SmartObject>(
           CreateMobileSystemCapabilityNotification(
-              *this, service_id, mobile_apis::ServiceUpdateReason::REMOVED));
+              service_id, mobile_apis::ServiceUpdateReason::REMOVED));
   app_manager_.GetRPCService().ManageMobileCommand(
       notification, commands::Command::CommandSource::SOURCE_SDL);
   smart_objects::SmartObjectSPtr hmi_notification =
       std::make_shared<smart_objects::SmartObject>(
           CreateHMISystemCapabilityNotification(
-              *this, service_id, mobile_apis::ServiceUpdateReason::REMOVED));
+              service_id, mobile_apis::ServiceUpdateReason::REMOVED));
   app_manager_.GetRPCService().ManageHMICommand(hmi_notification);
 
   published_services_.erase(it);
@@ -169,8 +170,8 @@ void AppServiceManager::setServiceActive(const std::string service_id,
   it->second.record[strings::service_active] = service_activated;
 }
 
-smart_objects::SmartObject CreateMobileSystemCapabilityNotification(
-    AppServiceManager& app_service_manager,
+smart_objects::SmartObject
+AppServiceManager::CreateMobileSystemCapabilityNotification(
     const std::string service_id,
     mobile_apis::ServiceUpdateReason::eType update_reason) {
   smart_objects::SmartObject message(smart_objects::SmartType_Map);
@@ -189,8 +190,7 @@ smart_objects::SmartObject CreateMobileSystemCapabilityNotification(
   smart_objects::SmartObject supported_types(smart_objects::SmartType_Array);
   smart_objects::SmartObject app_services(smart_objects::SmartType_Array);
 
-  std::vector<smart_objects::SmartObject> service_records =
-      app_service_manager.GetAllServices();
+  std::vector<smart_objects::SmartObject> service_records = GetAllServices();
   std::set<mobile_apis::AppServiceType::eType> service_types;
 
   for (auto& record : service_records) {
@@ -225,12 +225,12 @@ smart_objects::SmartObject CreateMobileSystemCapabilityNotification(
   return message;
 }
 
-smart_objects::SmartObject CreateHMISystemCapabilityNotification(
-    AppServiceManager& app_service_manager,
+smart_objects::SmartObject
+AppServiceManager::CreateHMISystemCapabilityNotification(
     const std::string service_id,
     mobile_apis::ServiceUpdateReason::eType update_reason) {
-  auto message = CreateMobileSystemCapabilityNotification(
-      app_service_manager, service_id, update_reason);
+  auto message =
+      CreateMobileSystemCapabilityNotification(service_id, update_reason);
   message[strings::params][strings::function_id] =
       hmi_apis::FunctionID::SystemCapability_OnSystemCapabilityUpdated;
   return message;
