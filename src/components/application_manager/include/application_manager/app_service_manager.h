@@ -72,7 +72,7 @@ class AppServiceManager {
 
   /**
    * @brief TODO
-   * @param manifest
+   * @param service_id
    */
   bool UnpublishAppService(const std::string service_id);
 
@@ -81,6 +81,11 @@ class AppServiceManager {
    * @param manifest
    */
   std::vector<smart_objects::SmartObject> GetAllServices();
+
+  std::pair<std::string, AppService> ActiveServiceByType(
+      std::string service_type);
+
+  std::pair<std::string, AppService> FindServiceByName(std::string name);
 
  private:
   ApplicationManager& app_manager_;
