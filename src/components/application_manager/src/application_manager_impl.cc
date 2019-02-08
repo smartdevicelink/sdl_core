@@ -2010,7 +2010,8 @@ bool ApplicationManagerImpl::Init(resumption::LastState& last_state,
   app_launch_ctrl_.reset(new app_launch::AppLaunchCtrlImpl(
       *app_launch_dto_.get(), *this, settings_));
 
-  app_service_manager_.reset(new application_manager::AppServiceManager(*this));
+  app_service_manager_.reset(
+      new application_manager::AppServiceManager(*this, last_state));
   return true;
 }
 

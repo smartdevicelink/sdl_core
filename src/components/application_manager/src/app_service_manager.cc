@@ -40,9 +40,10 @@
 #include "application_manager/commands/command_impl.h"
 #include "application_manager/message_helper.h"
 #include "application_manager/smart_object_keys.h"
+#include "encryption/hashing.h"
+#include "resumption/last_state.h"
 #include "smart_objects/smart_object.h"
 #include "utils/logger.h"
-#include "encryption/hashing.h"
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "AppServiceManager")
 
@@ -52,8 +53,12 @@ const size_t kLimitCommand = 30;
 
 namespace application_manager {
 
-AppServiceManager::AppServiceManager(ApplicationManager& app_manager)
-    : app_manager_(app_manager) {}
+const char* kAppServiceSection = "AppServices";
+const char* kDefaults = "defaults";
+
+AppServiceManager::AppServiceManager(ApplicationManager& app_manager,
+                                     resumption::LastState& last_state)
+    : app_manager_(app_manager), last_state_(last_state) {}
 
 AppServiceManager::~AppServiceManager() {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -84,8 +89,21 @@ smart_objects::SmartObject AppServiceManager::PublishAppService(
 
   app_service.record = service_record;
 
+  std::string service_type =
+      manifest[strings::app_service_manifest][strings::service_type].asString();
+  Json::Value dictionary = last_state_.get_dictionary();
+  app_service.default_service =
+      (dictionary[kAppServiceSection][kDefaults][service_type].asString() ==
+       manifest[strings::service_name].asString());
+
   published_services_.insert(
       std::pair<std::string, AppService>(service_id, app_service));
+
+  std::pair<std::string, AppService> active_service =
+      ActiveServiceByType(service_type);
+  if (active_service.first.empty() || app_service.default_service) {
+    ActivateAppService(service_id);
+  }
 
   return service_record;
 }
@@ -106,6 +124,86 @@ std::vector<smart_objects::SmartObject> AppServiceManager::GetAllServices() {
   return services;
 }
 
+bool AppServiceManager::SetDefaultService(const std::string service_id) {
+  auto it = published_services_.find(service_id);
+  if (it == published_services_.end()) {
+    LOG4CXX_ERROR(logger_, "Unable to find published service " << service_id);
+    return false;
+  }
+  AppService service = it->second;
+
+  std::string service_type =
+      service.record[strings::app_service_manifest][strings::service_type]
+          .asString();
+  std::string default_service_name = DefaultServiceByType(service_type);
+  if (!default_service_name.empty()) {
+    auto default_service = FindServiceByName(default_service_name);
+    if (!default_service.first.empty()) {
+      default_service.second.default_service = false;
+    }
+  }
+  service.default_service = true;
+
+  Json::Value dictionary = last_state_.get_dictionary();
+  dictionary[kAppServiceSection][kDefaults][service_type] =
+      service.record[strings::app_service_manifest][strings::service_name]
+          .asString();
+  return true;
+}
+
+bool AppServiceManager::RemoveDefaultService(const std::string service_id) {
+  auto it = published_services_.find(service_id);
+  if (it == published_services_.end()) {
+    LOG4CXX_ERROR(logger_, "Unable to find published service " << service_id);
+    return false;
+  }
+
+  AppService service = it->second;
+  if (!service.default_service) {
+    LOG4CXX_ERROR(logger_, "Service was not default " << service_id);
+    return false;
+  }
+  service.default_service = false;
+
+  std::string service_type =
+      service.record[strings::app_service_manifest][strings::service_type]
+          .asString();
+  Json::Value dictionary = last_state_.get_dictionary();
+  dictionary[kAppServiceSection][kDefaults].removeMember(service_type);
+  return true;
+}
+
+bool AppServiceManager::ActivateAppService(const std::string service_id) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  auto it = published_services_.find(service_id);
+  if (it == published_services_.end()) {
+    LOG4CXX_ERROR(logger_, "Unable to find published service " << service_id);
+    return false;
+  }
+  smart_objects::SmartObject service = it->second.record;
+
+  std::string service_type =
+      service[strings::app_service_manifest][strings::service_type].asString();
+  auto active_service = ActiveServiceByType(service_type);
+  if (!active_service.first.empty()) {
+    active_service.second.record[strings::service_active] = false;
+  }
+  service[strings::service_active] = true;
+
+  return true;
+}
+
+bool AppServiceManager::DeactivateAppService(const std::string service_id) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  auto it = published_services_.find(service_id);
+  if (it == published_services_.end()) {
+    LOG4CXX_ERROR(logger_, "Unable to find published service " << service_id);
+    return false;
+  }
+  smart_objects::SmartObject service = it->second.record;
+  service[strings::service_active] = false;
+  return true;
+}
 
 std::pair<std::string, AppService> AppServiceManager::ActiveServiceByType(
     std::string service_type) {
@@ -133,4 +231,13 @@ std::pair<std::string, AppService> AppServiceManager::FindServiceByName(
   AppService empty;
   return std::make_pair(std::string(), empty);
 }
+
+std::string AppServiceManager::DefaultServiceByType(std::string service_type) {
+  Json::Value dictionary = last_state_.get_dictionary();
+  if (dictionary[kAppServiceSection][kDefaults].isMember(service_type)) {
+    return dictionary[kAppServiceSection][kDefaults][service_type].asString();
+  }
+  return std::string();
+}
+
 }  //  namespace application_manager

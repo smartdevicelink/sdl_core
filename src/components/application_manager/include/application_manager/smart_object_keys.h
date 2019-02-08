@@ -316,6 +316,9 @@ extern const char* service_id;
 extern const char* service_manifest;
 extern const char* service_published;
 extern const char* service_active;
+extern const char* service_records;
+extern const char* activate;
+extern const char* set_as_default;
 
 // resuming
 extern const char* application_commands;
