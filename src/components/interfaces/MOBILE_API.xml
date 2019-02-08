@@ -2618,6 +2618,7 @@
         <element name="SendHapticDataID" value="49" hexvalue="31" since="4.5" />
         <element name="SetCloudAppPropertiesID" value="50" hexvalue="32" since="5.1" />
         <element name="PublishAppServiceID" value="52" hexvalue="34" since="5.1" />
+        <element name="GetFileID" value="53" hexvalue="35" since="5.1" />
         
         <!--
          Base Notifications
@@ -6304,6 +6305,60 @@
         
         <param name="info" type="String" maxlength="1000" mandatory="false" platform="documentation">
             <description>Provides additional human readable info regarding the result.</description>
+        </param>
+    </function>
+    
+    <function name ="GetFile" functionID="GetFileID" messagetype="request">
+        <description>This request is sent to the module to retrieve a file</description>
+        <param name="fileName" type="String" maxlength="255" mandatory="true">
+            <description>File name that should be retrieved</description>
+        </param>
+        <param name="appServiceId" type="String" mandatory="false">
+            <description>ID of the service that should have uploaded the requested file.</description>
+        </param>
+        <param name="fileType" type="FileType" mandatory="false">
+            <description>Selected file type.</description>
+        </param>
+        <param name = "offset" type="Integer" minvalue="0" maxvalue="2000000000" mandatory="false">
+            <description>Optional length in bytes for resuming partial data chunks if offset is set to 0, then length is the total length of the file to be downloaded</description>
+        </param>
+    </function>
+
+    <function name="GetFile" functionID="GetFileID" messagetype="response">
+        <description>This response includes the data that is requested from the specific service</description>
+        <param name="success" type="Boolean" platform="documentation" mandatory="true">
+            <description> true, if successful; false, if failed </description>
+        </param>
+        <param name="resultCode" type="Result" platform="documentation" mandatory="true">
+            <description>See Result</description>
+            <element name="SUCCESS"/>
+            <element name="REJECTED"/>
+            <element name="DISALLOWED"/>
+            <element name="INVALID_DATA"/>
+            <element name="OUT_OF_MEMORY"/>
+            <element name="TOO_MANY_PENDING_REQUESTS"/>
+            <element name="APPLICATION_NOT_REGISTERED"/>
+            <element name="GENERIC_ERROR"/>
+    	</param>
+	    <param name="info" type="String" maxlength="1000" mandatory="false" platform="documentation">
+		    <description>Provides additional human readable info regarding the result.</description>
+	    </param>
+
+        <!-- Specific response data -->
+        <param name="offset" type="Integer" minvalue="0" maxvalue="2000000000" mandatory="false">
+            <description>Optional offset in bytes for resuming partial data chunks</description>
+        </param>
+        
+        <param name="length" type="Integer" minvalue="0" maxvalue="2000000000" mandatory="false">
+            <description>Optional length in bytes for resuming partial data chunks if offset is set to 0, then length is the total length of the file to be downloaded</description>
+        </param>
+        
+        <param name="fileType" type="FileType" mandatory="false">
+            <description>File type that is being sent in response.</description>
+        </param>
+        
+        <param name="crc" type="Integer" minvalue="0" maxvalue="4294967295" mandatory="false">
+            <description> Additional CRC32 checksum to protect data integrity up to 512 Mbits</description>
         </param>
     </function>
     
