@@ -55,8 +55,7 @@ class AppServiceManager {
    * @brief Class constructor
    * @param app_manager
    */
-  AppServiceManager(ApplicationManager& app_manager,
-                    resumption::LastState& last_state);
+  AppServiceManager(ApplicationManager& app_manager);
 
   /**
    * @brief Class destructor
@@ -117,7 +116,6 @@ class AppServiceManager {
 
  private:
   ApplicationManager& app_manager_;
-  resumption::LastState& last_state_;
   std::map<std::string, AppService> published_services_;
 };
 
