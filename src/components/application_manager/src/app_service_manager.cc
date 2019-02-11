@@ -117,7 +117,7 @@ bool AppServiceManager::UnpublishAppService(const std::string service_id) {
   LOG4CXX_DEBUG(logger_, "Unpublishing app service: " << service_id);
 
   setServicePublished(service_id, false);
-  
+
   auto all_services = GetAllServices();
   smart_objects::SmartObjectSPtr notification =
       std::make_shared<smart_objects::SmartObject>(

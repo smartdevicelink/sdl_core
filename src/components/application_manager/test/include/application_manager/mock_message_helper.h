@@ -308,18 +308,16 @@ class MockMessageHelper {
                void(mobile_apis::ButtonName::eType button,
                     ApplicationSharedPtr application,
                     ApplicationManager& app_mngr));
-  MOCK_METHOD3(
-      CreateMobileSystemCapabilityNotification,
-      smart_objects::SmartObject(
-          std::vector<smart_objects::SmartObject>& all_services,
-          const std::string service_id,
-          mobile_apis::ServiceUpdateReason::eType update_reason));
-  MOCK_METHOD3(
-      CreateHMISystemCapabilityNotification,
-      smart_objects::SmartObject(
-          std::vector<smart_objects::SmartObject>& all_services,
-          const std::string service_id,
-          mobile_apis::ServiceUpdateReason::eType update_reason));
+  MOCK_METHOD3(CreateMobileSystemCapabilityNotification,
+               smart_objects::SmartObject(
+                   std::vector<smart_objects::SmartObject>& all_services,
+                   const std::string service_id,
+                   mobile_apis::ServiceUpdateReason::eType update_reason));
+  MOCK_METHOD3(CreateHMISystemCapabilityNotification,
+               smart_objects::SmartObject(
+                   std::vector<smart_objects::SmartObject>& all_services,
+                   const std::string service_id,
+                   mobile_apis::ServiceUpdateReason::eType update_reason));
 
   static MockMessageHelper* message_helper_mock();
 };

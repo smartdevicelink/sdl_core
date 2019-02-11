@@ -348,8 +348,7 @@ MessageHelper::CreateMobileSystemCapabilityNotification(
   smart_objects::SmartObject supported_types(smart_objects::SmartType_Array);
   smart_objects::SmartObject app_services(smart_objects::SmartType_Array);
 
-  std::vector<smart_objects::SmartObject> service_records =
-      all_services;
+  std::vector<smart_objects::SmartObject> service_records = all_services;
   std::set<mobile_apis::AppServiceType::eType> service_types;
 
   for (auto& record : service_records) {
