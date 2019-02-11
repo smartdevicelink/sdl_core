@@ -78,6 +78,12 @@ class AppServiceManager {
    */
   bool UnpublishAppService(const std::string service_id);
 
+  void UnpublishAppServices(const uint32_t connection_key);
+
+  void setServicePublished(const std::string service_id,
+                           bool service_published);
+  void setServiceActive(const std::string service_id, bool service_activated);
+
   /**
    * @brief TODO
    * @param service_id
@@ -119,6 +125,13 @@ class AppServiceManager {
   ApplicationManager& app_manager_;
   resumption::LastState& last_state_;
   std::map<std::string, AppService> published_services_;
+
+  smart_objects::SmartObject CreateMobileSystemCapabilityNotification(
+      const std::string service_id,
+      mobile_apis::ServiceUpdateReason::eType update_reason);
+  smart_objects::SmartObject CreateHMISystemCapabilityNotification(
+      const std::string service_id,
+      mobile_apis::ServiceUpdateReason::eType update_reason);
 };
 
 }  //  namespace application_manager

@@ -35,6 +35,7 @@
 #include "application_manager/message_helper.h"
 #include "application_manager/rpc_service.h"
 #include "interfaces/MOBILE_API.h"
+#include "sdl_rpc_plugin/extensions/system_capability_app_extension.h"
 
 namespace app_service_rpc_plugin {
 using namespace application_manager;
@@ -79,7 +80,7 @@ bool PublishAppServiceRequest::ValidateManifest(
 
 void PublishAppServiceRequest::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
-  LOG4CXX_DEBUG(logger_, "Received a PublishAppService");
+  LOG4CXX_DEBUG(logger_, "Received a PublishAppService " << connection_key());
   MessageHelper::PrintSmartObject(*message_);
 
   smart_objects::SmartObject response_params =
@@ -89,6 +90,12 @@ void PublishAppServiceRequest::Run() {
   if (!ValidateManifest(manifest)) {
     return;
   }
+
+  ApplicationSharedPtr app = application_manager_.application(connection_key());
+  auto& ext =
+      sdl_rpc_plugin::SystemCapabilityAppExtension::ExtractExtension(*app);
+  ext.subscribeTo(mobile_apis::SystemCapabilityType::APP_SERVICES);
+
   smart_objects::SmartObject service_record =
       application_manager_.GetAppServiceManager().PublishAppService(
           manifest, true, connection_key());

@@ -78,6 +78,7 @@ bool ASPublishAppServiceRequest::ValidateManifest(
 
 void ASPublishAppServiceRequest::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
+  LOG4CXX_DEBUG(logger_, "Received a PublishAppService request from HMI");
   smart_objects::SmartObject response_params =
       smart_objects::SmartObject(smart_objects::SmartType_Map);
   smart_objects::SmartObject manifest =
