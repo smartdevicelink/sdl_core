@@ -1131,6 +1131,11 @@ bool EnumFromJsonString(const std::string& literal, FunctionID* result) {
     return true;
   }
 
+  if ("GetFile" == literal) {
+    *result = GetFileID;
+    return true;
+  }
+
   if ("OnHMIStatus" == literal) {
     *result = OnHMIStatusID;
     return true;

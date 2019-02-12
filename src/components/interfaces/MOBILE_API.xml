@@ -2618,7 +2618,8 @@
         <element name="SendHapticDataID" value="49" hexvalue="31" since="4.5" />
         <element name="SetCloudAppPropertiesID" value="50" hexvalue="32" since="5.1" />
         <element name="PublishAppServiceID" value="52" hexvalue="34" since="5.1" />
-        <element name="GetFileID" value="53" hexvalue="35" since="5.1" />
+        
+        <element name="GetFileID" value="54" hexvalue="36" since="5.1" />
         
         <!--
          Base Notifications

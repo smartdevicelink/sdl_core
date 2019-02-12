@@ -194,6 +194,12 @@
                         "LIMITED",
                         "NONE"]
                     },
+                    "GetFile": {
+                        "hmi_levels": ["BACKGROUND",
+                        "FULL",
+                        "LIMITED",
+                        "NONE"]
+                    },                    
                     "RegisterAppInterface": {
                         "hmi_levels": ["BACKGROUND",
                         "FULL",

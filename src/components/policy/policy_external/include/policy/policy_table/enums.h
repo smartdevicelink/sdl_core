@@ -451,6 +451,11 @@ enum FunctionID {
   PublishAppServiceID = 52,
 
   /**
+   * @brief GetFileID
+   */
+  GetFileID = 54,
+
+  /**
    * @brief OnHMIStatusID.
    */
   OnHMIStatusID = 32768,
