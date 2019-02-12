@@ -55,6 +55,7 @@ ASGetAppServiceDataRequestToHMI::~ASGetAppServiceDataRequestToHMI() {}
 
 void ASGetAppServiceDataRequestToHMI::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
+  SendRequest();
 }
 
 }  // namespace commands

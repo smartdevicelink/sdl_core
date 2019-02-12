@@ -35,6 +35,8 @@
 #include "application_manager/rpc_service.h"
 #include "interfaces/MOBILE_API.h"
 
+#include "application_manager/message_helper.h"
+
 namespace app_service_rpc_plugin {
 using namespace application_manager;
 namespace commands {
@@ -55,6 +57,16 @@ ASGetAppServiceDataResponseFromHMI::~ASGetAppServiceDataResponseFromHMI() {}
 
 void ASGetAppServiceDataResponseFromHMI::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
+
+  const smart_objects::SmartObject& msg_params =
+      (*message_)[strings::msg_params];
+
+  if (msg_params.keyExists(strings::service_data)) {
+    event_engine::Event event(
+        hmi_apis::FunctionID::AppService_GetAppServiceData);
+    event.set_smart_object(*message_);
+    event.raise(application_manager_.event_dispatcher());
+  }
 }
 
 }  // namespace commands

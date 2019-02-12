@@ -61,11 +61,13 @@ class RequestFromHMI : public CommandImpl, public event_engine::EventObserver {
    * @param function_id the function id for which response will be sent
    * @param result_code the result code.
    */
-  void SendResponse(const bool success,
-                    const uint32_t correlation_id,
-                    const hmi_apis::FunctionID::eType function_id,
-                    const hmi_apis::Common_Result::eType result_code,
-                    const smart_objects::SmartObject* response_params = NULL);
+  void SendResponse(
+      const bool success,
+      const uint32_t correlation_id,
+      const hmi_apis::FunctionID::eType function_id,
+      const hmi_apis::Common_Result::eType result_code,
+      const smart_objects::SmartObject* response_params = NULL,
+      commands::Command::CommandSource source = commands::Command::SOURCE_HMI);
 
   /**
    * @brief SendResponse allows to send error response to hmi
@@ -78,6 +80,20 @@ class RequestFromHMI : public CommandImpl, public event_engine::EventObserver {
                          const hmi_apis::FunctionID::eType function_id,
                          const hmi_apis::Common_Result::eType result_code,
                          const std::string error_message);
+
+  void SendProviderRequest(
+      const mobile_apis::FunctionID::eType& mobile_function_id,
+      const hmi_apis::FunctionID::eType& hmi_function_id,
+      const smart_objects::SmartObject* msg,
+      bool use_events = false);
+
+  uint32_t SendHMIRequest(const hmi_apis::FunctionID::eType& function_id,
+                          const smart_objects::SmartObject* msg_params,
+                          bool use_events);
+
+  bool ProcessHMIInterfacesAvailability(
+      const uint32_t hmi_correlation_id,
+      const hmi_apis::FunctionID::eType& function_id);
 
  private:
   /**

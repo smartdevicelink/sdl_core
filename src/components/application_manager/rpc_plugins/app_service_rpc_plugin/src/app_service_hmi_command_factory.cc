@@ -38,6 +38,10 @@
 #include "app_service_rpc_plugin/commands/hmi/as_publish_app_service_response.h"
 #include "app_service_rpc_plugin/commands/hmi/on_as_app_service_data_notification.h"
 #include "app_service_rpc_plugin/commands/hmi/on_as_app_service_data_notification_from_hmi.h"
+#include "app_service_rpc_plugin/commands/hmi/as_get_app_service_data_request_from_hmi.h"
+#include "app_service_rpc_plugin/commands/hmi/as_get_app_service_data_response_from_hmi.h"
+#include "app_service_rpc_plugin/commands/hmi/as_get_app_service_data_request_to_hmi.h"
+#include "app_service_rpc_plugin/commands/hmi/as_get_app_service_data_response_to_hmi.h"
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "AppServiceRpcPlugin")
 
@@ -102,6 +106,9 @@ app_mngr::CommandCreator& AppServiceHmiCommandFactory::buildCommandCreator(
   auto factory = app_mngr::CommandCreatorFactory(
       application_manager_, rpc_service_, hmi_capabilities_, policy_handler_);
 
+  LOG4CXX_DEBUG(logger_,
+                "buildCommandCreator: " << function_id << " " << source);
+
   switch (function_id) {
     case hmi_apis::FunctionID::AppService_PublishAppService:
       return hmi_apis::messageType::request == message_type
@@ -113,8 +120,24 @@ app_mngr::CommandCreator& AppServiceHmiCommandFactory::buildCommandCreator(
                        commands::OnASAppServiceDataNotificationFromHMI>()
                  : factory
                        .GetCreator<commands::OnASAppServiceDataNotification>();
+    case hmi_apis::FunctionID::AppService_GetAppServiceData:
+      if (app_mngr::commands::Command::CommandSource::SOURCE_HMI == source) {
+        return hmi_apis::messageType::request == message_type
+                   ? factory.GetCreator<
+                         commands::ASGetAppServiceDataRequestFromHMI>()
+                   : factory.GetCreator<
+                         commands::ASGetAppServiceDataResponseFromHMI>();
+      } else if (app_mngr::commands::Command::CommandSource::SOURCE_TO_HMI ==
+                 source) {
+        return hmi_apis::messageType::request == message_type
+                   ? factory.GetCreator<
+                         commands::ASGetAppServiceDataRequestToHMI>()
+                   : factory.GetCreator<
+                         commands::ASGetAppServiceDataResponseToHMI>();
+      }
+
     default:
-      LOG4CXX_WARN(logger_, "Unsupported function_id: " << function_id);
+      LOG4CXX_WARN(logger_, "Unsupported HMI function_id: " << function_id);
       return factory.GetCreator<app_mngr::InvalidCommand>();
   }
 }

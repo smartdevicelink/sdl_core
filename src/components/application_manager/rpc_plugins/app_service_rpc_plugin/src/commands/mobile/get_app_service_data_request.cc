@@ -55,7 +55,7 @@ GetAppServiceDataRequest::GetAppServiceDataRequest(
                          policy_handler)
     , plugin_(NULL) {
   auto plugin = (application_manager.GetPluginManager().FindPluginToProcess(
-      mobile_apis::FunctionID::PublishAppServiceID,
+      mobile_apis::FunctionID::GetAppServiceDataID,
       app_mngr::commands::Command::CommandSource::SOURCE_MOBILE));
   if (plugin) {
     plugin_ = dynamic_cast<AppServiceRpcPlugin*>(&(*plugin));
@@ -97,6 +97,7 @@ void GetAppServiceDataRequest::Run() {
 
 void GetAppServiceDataRequest::on_event(const event_engine::Event& event) {
   // todo on response from hmi or mobile app service provider
+  LOG4CXX_DEBUG(logger_, "Mobile GetAppServiceRequest on_event");
 }
 
 }  // namespace commands

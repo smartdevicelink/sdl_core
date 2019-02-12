@@ -34,6 +34,9 @@
 #include "application_manager/application_impl.h"
 #include "application_manager/rpc_service.h"
 #include "interfaces/MOBILE_API.h"
+#include "smart_objects/enum_schema_item.h"
+
+#include "application_manager/message_helper.h"
 
 namespace app_service_rpc_plugin {
 using namespace application_manager;
@@ -55,6 +58,35 @@ ASGetAppServiceDataRequestFromHMI::~ASGetAppServiceDataRequestFromHMI() {}
 
 void ASGetAppServiceDataRequestFromHMI::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
+
+  // Todo enum or string?
+  hmi_apis::Common_AppServiceType::eType service_type =
+      static_cast<hmi_apis::Common_AppServiceType::eType>(
+          (*message_)[strings::msg_params][strings::service_type].asUInt());
+
+  std::string service_type_str = std::string();
+  smart_objects::EnumConversionHelper<
+      hmi_apis::Common_AppServiceType::eType>::EnumToString(service_type,
+                                                            &service_type_str);
+  LOG4CXX_DEBUG(logger_, "Get Service Type: " << service_type_str);
+
+  SendProviderRequest(mobile_apis::FunctionID::GetAppServiceDataID,
+                      hmi_apis::FunctionID::AppService_GetAppServiceData,
+                      &(*message_),
+                      true);
+}
+
+void ASGetAppServiceDataRequestFromHMI::on_event(
+    const event_engine::Event& event) {
+  const smart_objects::SmartObject& event_message = event.smart_object();
+
+  auto msg_params = event_message[strings::msg_params];
+  SendResponse(true,
+               correlation_id(),
+               hmi_apis::FunctionID::AppService_GetAppServiceData,
+               hmi_apis::Common_Result::SUCCESS,
+               &msg_params,
+               application_manager::commands::Command::SOURCE_TO_HMI);
 }
 
 }  // namespace commands

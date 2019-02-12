@@ -6152,16 +6152,8 @@
   </function>
 
   <function name="GetAppServiceData" functionID="GetAppServiceDataID" messagetype="response">
-    <description> This response includes the data that is requested from the specific service</description>
-
-    <param name="success" type="Boolean" platform="documentation" mandatory="true">
-      <description> true, if successful; false, if failed </description>
-    </param>
-    
-    <!-- Specific response data -->
-    
-    <param name="serviceData" type="Common.AppServiceData" mandatory="true"/>
-      
+    <description> This response includes the data that is requested from the specific service</description>    
+    <param name="serviceData" type="Common.AppServiceData" mandatory="true"/>      
   </function>
 </interface>
 </interfaces>

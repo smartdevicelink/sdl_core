@@ -458,12 +458,6 @@ void CommandRequestImpl::SendProviderRequest(
   request[strings::params][strings::connection_key] = app->app_id();
 
   SendMobileRequest(mobile_function_id, new_msg, use_events);
-
-  /*if (use_events) {
-    LOG4CXX_DEBUG(logger_, "App Service subscribe to provider response");
-    subscribe_on_mobile_event(mobile_function_id,
-  static_cast<uint32_t>((*msg)[strings::correlation_id].asUInt()));
-  }*/
 }
 
 void CommandRequestImpl::SendMobileRequest(
