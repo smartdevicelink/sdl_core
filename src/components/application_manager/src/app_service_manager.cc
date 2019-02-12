@@ -116,7 +116,7 @@ bool AppServiceManager::UnpublishAppService(const std::string service_id) {
   }
   LOG4CXX_DEBUG(logger_, "Unpublishing app service: " << service_id);
 
-  setServicePublished(service_id, false);
+  SetServicePublished(service_id, false);
 
   auto all_services = GetAllServices();
   smart_objects::SmartObjectSPtr notification =
@@ -161,7 +161,7 @@ std::vector<smart_objects::SmartObject> AppServiceManager::GetAllServices() {
   return services;
 }
 
-void AppServiceManager::setServicePublished(const std::string service_id,
+void AppServiceManager::SetServicePublished(const std::string service_id,
                                             bool service_published) {
   auto it = published_services_.find(service_id);
   if (it == published_services_.end()) {
@@ -169,16 +169,6 @@ void AppServiceManager::setServicePublished(const std::string service_id,
     return;
   }
   it->second.record[strings::service_published] = service_published;
-}
-
-void AppServiceManager::setServiceActive(const std::string service_id,
-                                         bool service_activated) {
-  auto it = published_services_.find(service_id);
-  if (it == published_services_.end()) {
-    LOG4CXX_ERROR(logger_, "Service id does not exist in published services");
-    return;
-  }
-  it->second.record[strings::service_active] = service_activated;
 }
 
 std::pair<std::string, AppService> AppServiceManager::ActiveServiceByType(
