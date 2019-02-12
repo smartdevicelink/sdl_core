@@ -55,8 +55,7 @@ class AppServiceManager {
    * @brief Class constructor
    * @param app_manager
    */
-  AppServiceManager(ApplicationManager& app_manager,
-                    resumption::LastState& last_state);
+  AppServiceManager(ApplicationManager& app_manager);
 
   /**
    * @brief Class destructor
@@ -80,9 +79,8 @@ class AppServiceManager {
 
   void UnpublishAppServices(const uint32_t connection_key);
 
-  void setServicePublished(const std::string service_id,
+  void SetServicePublished(const std::string service_id,
                            bool service_published);
-  void setServiceActive(const std::string service_id, bool service_activated);
 
   /**
    * @brief TODO
@@ -123,15 +121,7 @@ class AppServiceManager {
 
  private:
   ApplicationManager& app_manager_;
-  resumption::LastState& last_state_;
   std::map<std::string, AppService> published_services_;
-
-  smart_objects::SmartObject CreateMobileSystemCapabilityNotification(
-      const std::string service_id,
-      mobile_apis::ServiceUpdateReason::eType update_reason);
-  smart_objects::SmartObject CreateHMISystemCapabilityNotification(
-      const std::string service_id,
-      mobile_apis::ServiceUpdateReason::eType update_reason);
 };
 
 }  //  namespace application_manager
