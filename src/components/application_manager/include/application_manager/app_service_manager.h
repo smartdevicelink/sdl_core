@@ -82,6 +82,12 @@ class AppServiceManager {
    */
   std::vector<smart_objects::SmartObject> GetAllServices();
 
+  /**
+   * @brief TODO
+   * @param service_id
+   */
+  bool GetAppServiceInfo(std::string service_id, AppService& app_service_info);
+
  private:
   ApplicationManager& app_manager_;
   std::map<std::string, AppService> published_services_;

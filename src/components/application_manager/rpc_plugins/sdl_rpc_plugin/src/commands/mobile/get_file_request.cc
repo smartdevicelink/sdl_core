@@ -34,6 +34,24 @@
 #include "application_manager/application_impl.h"
 #include "application_manager/rpc_service.h"
 #include "interfaces/MOBILE_API.h"
+#include "application_manager/app_service_manager.h"
+#include "utils/file_system.h"
+#include <boost/crc.hpp>
+
+namespace {
+/**
+* Calculates CRC32 checksum
+* @param binary_data - input data for which CRC32 should be calculated
+* @return calculated CRC32 checksum
+*/
+uint32_t GetCrc32CheckSum(const std::vector<uint8_t>& binary_data) {
+  const std::size_t file_size = binary_data.size();
+  boost::crc_32_type result;
+  result.process_bytes(&binary_data[0], file_size);
+  return result.checksum();
+}
+
+}  // namespace
 
 namespace sdl_rpc_plugin {
 using namespace application_manager;
@@ -53,9 +71,115 @@ GetFileRequest::GetFileRequest(
 
 GetFileRequest::~GetFileRequest() {}
 
+std::string GetFileRequest::GetFilePath() {
+  std::string file_path =
+      application_manager_.get_settings().app_storage_folder();
+  auto connect_key = connection_key();
+  if ((*message_)[strings::msg_params].keyExists(strings::app_service_id)) {
+    std::string service_id =
+        (*message_)[strings::msg_params][strings::app_service_id].asString();
+    LOG4CXX_DEBUG(logger_,
+                  "Finding storage directory for service id: " << service_id);
+
+    AppService app_service_info;
+    if (application_manager_.GetAppServiceManager().GetAppServiceInfo(
+            service_id, app_service_info)) {
+      // TODO Figure how to handle hmi case (AppService mobile service = false)
+      connect_key = app_service_info.connection_key;
+    } else {
+      return "";
+    }
+  } else {
+    LOG4CXX_DEBUG(logger_, "Using current storage directory");
+  }
+
+  ApplicationSharedPtr app = application_manager_.application(connect_key);
+  file_path += "/" + app->folder_name();
+  return file_path;
+}
+
 void GetFileRequest::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
   LOG4CXX_INFO(logger_, "Received GetFile request");
+
+  ApplicationSharedPtr app = application_manager_.application(connection_key());
+  smart_objects::SmartObject response_params =
+      smart_objects::SmartObject(smart_objects::SmartType_Map);
+
+  if (!app) {
+    LOG4CXX_ERROR(logger_, "Application is not registered");
+    SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
+    return;
+  }
+
+  // Check that file name param exists else Return
+  if (!(*message_)[strings::msg_params].keyExists(strings::file_name)) {
+    LOG4CXX_ERROR(logger_, "File name parameter not specified");
+    SendResponse(false,
+                 mobile_apis::Result::INVALID_DATA,
+                 "No file name",
+                 &response_params);
+    return;
+  }
+
+  // Initialize other params with default values. If exists overwrite the values
+  file_name_ = (*message_)[strings::msg_params][strings::file_name].asString();
+  offset_ = 0;
+
+  if ((*message_)[strings::msg_params].keyExists(strings::file_type)) {
+    file_type_ = static_cast<mobile_apis::FileType::eType>(
+        (*message_)[strings::msg_params][strings::file_type].asInt());
+  }
+
+  if ((*message_)[strings::msg_params].keyExists(strings::length)) {
+    length_ = (*message_)[strings::msg_params][strings::length].asInt();
+  }
+
+  if ((*message_)[strings::msg_params].keyExists(strings::offset)) {
+    offset_ = (*message_)[strings::msg_params][strings::offset].asInt();
+  }
+
+  // Check if file exists on system (may have to use app service id to get the
+  // correct app folder)
+  std::string file_path = GetFilePath();
+  const std::string full_path = file_path + "/" + file_name_;
+  if (!file_system::FileExists(full_path)) {
+    LOG4CXX_ERROR(logger_, "File " << full_path << " does not exist");
+    SendResponse(false,
+                 mobile_apis::Result::INVALID_DATA,
+                 "File does not exist",
+                 &response_params);
+    return;
+  }
+
+  // Handle offset
+  // Load data from file as binary data
+  std::vector<uint8_t> bin_data;
+  if (!file_system::ReadBinaryFile(full_path, bin_data)) {
+    LOG4CXX_ERROR(logger_, "Failed to read from file: " << full_path);
+    SendResponse(false,
+                 mobile_apis::Result::GENERIC_ERROR,
+                 "Unable to read from file",
+                 &response_params);
+    return;
+  }
+  (*message_)[strings::params][strings::binary_data] = bin_data;
+
+  // Construct response message
+  response_params[strings::offset] = offset_;
+  response_params[strings::length] = length_;
+  response_params[strings::file_type] = file_type_;
+  const uint32_t crc_calculated = GetCrc32CheckSum(bin_data);
+  response_params[strings::crc32_check_sum] = crc_calculated;
+
+  LOG4CXX_DEBUG(logger_, "file_name: " << file_name_);
+  LOG4CXX_DEBUG(logger_, "file_type: " << file_type_);
+  LOG4CXX_DEBUG(logger_, "offset: " << offset_);
+  LOG4CXX_DEBUG(logger_, "length: " << length_);
+  LOG4CXX_DEBUG(logger_, "file_path: " << file_path);
+
+  SendResponse(
+      true, mobile_apis::Result::SUCCESS, "File uploaded", &response_params);
 }
 
 }  // namespace commands

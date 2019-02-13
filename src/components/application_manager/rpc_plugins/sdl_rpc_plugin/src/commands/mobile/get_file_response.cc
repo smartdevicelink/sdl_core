@@ -56,6 +56,7 @@ GetFileResponse::~GetFileResponse() {}
 void GetFileResponse::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
   LOG4CXX_INFO(logger_, "Sending GetFile response");
+  rpc_service_.SendMessageToMobile(message_);
 }
 
 }  // namespace commands
