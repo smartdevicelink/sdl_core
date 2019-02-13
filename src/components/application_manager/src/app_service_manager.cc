@@ -106,7 +106,6 @@ std::vector<smart_objects::SmartObject> AppServiceManager::GetAllServices() {
   return services;
 }
 
-
 std::pair<std::string, AppService> AppServiceManager::ActiveServiceByType(
     std::string service_type) {
   for (auto it = published_services_.begin(); it != published_services_.end();

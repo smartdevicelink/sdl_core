@@ -1808,7 +1808,7 @@ bool SQLPTRepresentation::GatherAppServiceParameters(
     return false;
   }
 
-  service_type_query.Bind(2, app_id);
+  service_type_query.Bind(0, app_id);
   while (service_type_query.Next()) {
     const int service_type_id = service_type_query.GetInteger(0);
     std::string service_type = service_type_query.GetString(1);

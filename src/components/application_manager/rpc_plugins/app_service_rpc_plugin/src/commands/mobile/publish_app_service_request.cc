@@ -93,16 +93,28 @@ void PublishAppServiceRequest::Run() {
       application_manager_.GetAppServiceManager().PublishAppService(
           manifest, true, connection_key());
 
-  std::string requested_service_name =
-      (*message_)[strings::msg_params][strings::app_service_manifest]
-                 [strings::service_name].asString();
+  std::string requested_service_name = "";
+
+  if ((*message_)[strings::msg_params][strings::app_service_manifest].keyExists(
+          strings::service_name)) {
+    requested_service_name =
+        (*message_)[strings::msg_params][strings::app_service_manifest]
+                   [strings::service_name].asString();
+  }
+
   // Todo: revision make service type string.
-  mobile_apis::AppServiceType::eType requested_service_type = static_cast<mobile_apis::AppServiceType::eType>(
-      (*message_)[strings::msg_params][strings::app_service_manifest]
-                 [strings::service_type].asUInt());
-  smart_objects::SmartArray* requested_handled_rpcs =
-      (*message_)[strings::msg_params][strings::app_service_manifest]
-                 [strings::handled_rpcs].asArray();
+  mobile_apis::AppServiceType::eType requested_service_type =
+      static_cast<mobile_apis::AppServiceType::eType>(
+          (*message_)[strings::msg_params][strings::app_service_manifest]
+                     [strings::service_type].asUInt());
+
+  smart_objects::SmartArray* requested_handled_rpcs;
+  if ((*message_)[strings::msg_params][strings::app_service_manifest].keyExists(
+          strings::handled_rpcs)) {
+    requested_handled_rpcs =
+        (*message_)[strings::msg_params][strings::app_service_manifest]
+                   [strings::handled_rpcs].asArray();
+  }
 
   ApplicationSharedPtr app = application_manager_.application(connection_key());
 

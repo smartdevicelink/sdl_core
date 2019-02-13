@@ -1959,9 +1959,8 @@ bool PolicyHandler::CheckAppServiceParameters(
   this->GetAppServiceParameters(policy_app_id, &app_service_parameters);
 
   std::string requested_service_type_str = std::string();
-  smart_objects::EnumConversionHelper<
-    mobile_apis::AppServiceType::eType>::
-    EnumToString(requested_service_type, &requested_service_type_str);
+  smart_objects::EnumConversionHelper<mobile_apis::AppServiceType::eType>::
+      EnumToString(requested_service_type, &requested_service_type_str);
 
   if (app_service_parameters.find(requested_service_type_str) ==
       app_service_parameters.end()) {
@@ -1982,7 +1981,6 @@ bool PolicyHandler::CheckAppServiceParameters(
     }
   }
 
-  // todo handled rpcs check
   if (requested_handled_rpcs) {
     auto temp_rpcs =
         *(app_service_parameters[requested_service_type_str].handled_rpcs);
