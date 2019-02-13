@@ -52,9 +52,9 @@ PublishAppServiceRequest::PublishAppServiceRequest(
                          hmi_capabilities,
                          policy_handler)
     , plugin_(NULL) {
-  auto plugin = (application_manager.GetPluginManager().FindPluginToProcess(
+  auto plugin = application_manager.GetPluginManager().FindPluginToProcess(
       mobile_apis::FunctionID::PublishAppServiceID,
-      app_mngr::commands::Command::CommandSource::SOURCE_MOBILE));
+      app_mngr::commands::Command::CommandSource::SOURCE_MOBILE);
   if (plugin) {
     plugin_ = dynamic_cast<AppServiceRpcPlugin*>(&(*plugin));
   }
@@ -90,7 +90,8 @@ void PublishAppServiceRequest::Run() {
     return;
   }
   smart_objects::SmartObject service_record =
-      application_manager_.GetAppServiceManager().PublishAppService(manifest);
+      application_manager_.GetAppServiceManager().PublishAppService(
+          manifest, true, connection_key());
 
   std::string requested_service_name =
       (*message_)[strings::msg_params][strings::app_service_manifest]

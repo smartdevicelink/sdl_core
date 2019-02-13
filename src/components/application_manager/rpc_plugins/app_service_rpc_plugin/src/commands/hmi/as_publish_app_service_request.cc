@@ -49,9 +49,9 @@ ASPublishAppServiceRequest::ASPublishAppServiceRequest(
                      hmi_capabilities,
                      policy_handler)
     , plugin_(NULL) {
-  auto plugin = (application_manager.GetPluginManager().FindPluginToProcess(
+  auto plugin = application_manager.GetPluginManager().FindPluginToProcess(
       hmi_apis::FunctionID::AppService_PublishAppService,
-      app_mngr::commands::Command::CommandSource::SOURCE_HMI));
+      app_mngr::commands::Command::CommandSource::SOURCE_HMI);
   if (plugin) {
     plugin_ = dynamic_cast<AppServiceRpcPlugin*>(&(*plugin));
   }
@@ -86,10 +86,10 @@ void ASPublishAppServiceRequest::Run() {
     return;
   }
   smart_objects::SmartObject service_record =
-      application_manager_.GetAppServiceManager().PublishAppService(manifest);
+      application_manager_.GetAppServiceManager().PublishAppService(
+          manifest, false, UINT32_MAX);
 
   response_params[strings::app_service_record] = service_record;
-  // TODO: Add AppServiceRecord to response
   SendResponse(true,
                (*message_)[strings::params][strings::correlation_id].asUInt(),
                hmi_apis::FunctionID::AppService_PublishAppService,

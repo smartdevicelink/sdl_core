@@ -60,7 +60,9 @@ AppServiceManager::~AppServiceManager() {
 }
 
 smart_objects::SmartObject AppServiceManager::PublishAppService(
-    const smart_objects::SmartObject& manifest) {
+    const smart_objects::SmartObject& manifest,
+    const bool mobile_service,
+    const uint32_t connection_key) {
   std::string str_to_hash = "";
   std::string service_id = "";
 
@@ -70,13 +72,21 @@ smart_objects::SmartObject AppServiceManager::PublishAppService(
     service_id = encryption::MakeHash(str_to_hash);
   } while (published_services_.find(service_id) != published_services_.end());
 
+  AppService app_service;
+  app_service.connection_key = connection_key;
+  app_service.mobile_service = mobile_service;
+
   smart_objects::SmartObject service_record;
   service_record[strings::service_manifest] = manifest;
   service_record[strings::service_id] = service_id;
   service_record[strings::service_published] = true;
   service_record[strings::service_active] = true;
-  published_services_.insert(std::pair<std::string, smart_objects::SmartObject>(
-      service_id, service_record));
+
+  app_service.record = service_record;
+
+  published_services_.insert(
+      std::pair<std::string, AppService>(service_id, app_service));
+
   return service_record;
 }
 
@@ -91,9 +101,36 @@ std::vector<smart_objects::SmartObject> AppServiceManager::GetAllServices() {
   std::vector<smart_objects::SmartObject> services;
   for (auto it = published_services_.begin(); it != published_services_.end();
        ++it) {
-    services.push_back(it->second);
+    services.push_back(it->second.record);
   }
   return services;
 }
 
+
+std::pair<std::string, AppService> AppServiceManager::ActiveServiceByType(
+    std::string service_type) {
+  for (auto it = published_services_.begin(); it != published_services_.end();
+       ++it) {
+    if (it->second.record[strings::app_service_manifest][strings::service_type]
+                .asString() == service_type &&
+        it->second.record[strings::service_active].asBool()) {
+      return *it;
+    }
+  }
+  AppService empty;
+  return std::make_pair(std::string(), empty);
+}
+
+std::pair<std::string, AppService> AppServiceManager::FindServiceByName(
+    std::string name) {
+  for (auto it = published_services_.begin(); it != published_services_.end();
+       ++it) {
+    if (it->second.record[strings::app_service_manifest][strings::service_name]
+            .asString() == name) {
+      return *it;
+    }
+  }
+  AppService empty;
+  return std::make_pair(std::string(), empty);
+}
 }  //  namespace application_manager
