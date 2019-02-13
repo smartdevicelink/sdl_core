@@ -71,8 +71,8 @@ class GetFileRequest : public app_mngr::commands::CommandRequestImpl {
  private:
   std::string file_name_;
   mobile_apis::FileType::eType file_type_;
-  int64_t length_;
-  int64_t offset_;
+  uint64_t length_;
+  uint64_t offset_;
 
   DISALLOW_COPY_AND_ASSIGN(GetFileRequest);
 };

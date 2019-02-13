@@ -261,7 +261,8 @@ void CommandRequestImpl::SendResponse(
     const bool success,
     const mobile_apis::Result::eType& result_code,
     const char* info,
-    const smart_objects::SmartObject* response_params) {
+    const smart_objects::SmartObject* response_params,
+    const std::vector<uint8_t> binary_data) {
   LOG4CXX_AUTO_TRACE(logger_);
   {
     sync_primitives::AutoLock auto_lock(state_lock_);
@@ -286,7 +287,9 @@ void CommandRequestImpl::SendResponse(
       CommandImpl::protocol_version_;
   response[strings::params][strings::connection_key] = connection_key();
   response[strings::params][strings::function_id] = function_id();
-
+  if (!binary_data.empty()) {
+    response[strings::params][strings::binary_data] = binary_data;
+  }
   if (response_params) {
     response[strings::msg_params] = *response_params;
   }

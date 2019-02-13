@@ -157,10 +157,12 @@ class CommandRequestImpl : public CommandImpl,
    * @param info Provides additional human readable info regarding the result
    * @param response_params Additional params in response
    */
-  void SendResponse(const bool success,
-                    const mobile_apis::Result::eType& result_code,
-                    const char* info = NULL,
-                    const smart_objects::SmartObject* response_params = NULL);
+  void SendResponse(
+      const bool success,
+      const mobile_apis::Result::eType& result_code,
+      const char* info = NULL,
+      const smart_objects::SmartObject* response_params = NULL,
+      const std::vector<uint8_t> binary_data = std::vector<uint8_t>());
 
   /**
    * @brief Check syntax of string from mobile

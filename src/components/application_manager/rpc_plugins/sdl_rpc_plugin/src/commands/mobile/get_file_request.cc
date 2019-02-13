@@ -113,6 +113,7 @@ void GetFileRequest::Run() {
   }
 
   // Check that file name param exists else Return
+  LOG4CXX_DEBUG(logger_, "Check if file name param exists");
   if (!(*message_)[strings::msg_params].keyExists(strings::file_name)) {
     LOG4CXX_ERROR(logger_, "File name parameter not specified");
     SendResponse(false,
@@ -123,6 +124,7 @@ void GetFileRequest::Run() {
   }
 
   // Initialize other params with default values. If exists overwrite the values
+  LOG4CXX_DEBUG(logger_, "Intialize non manadatory params with default values");
   file_name_ = (*message_)[strings::msg_params][strings::file_name].asString();
   offset_ = 0;
 
@@ -141,6 +143,7 @@ void GetFileRequest::Run() {
 
   // Check if file exists on system (may have to use app service id to get the
   // correct app folder)
+  LOG4CXX_DEBUG(logger_, "Check if file exists on system");
   std::string file_path = GetFilePath();
   const std::string full_path = file_path + "/" + file_name_;
   if (!file_system::FileExists(full_path)) {
@@ -153,7 +156,22 @@ void GetFileRequest::Run() {
   }
 
   // Handle offset
+  LOG4CXX_DEBUG(logger_, "Handle offset parameter");
+  const uint64_t file_size = file_system::FileSize(full_path);
+  length_ = file_size;
+  if (offset_ > file_size) {
+    LOG4CXX_ERROR(logger_,
+                  "Offset " << offset_ << " greater than file size "
+                            << file_size);
+    SendResponse(false,
+                 mobile_apis::Result::INVALID_DATA,
+                 "Offset greater than file size",
+                 &response_params);
+    return;
+  }
+
   // Load data from file as binary data
+  LOG4CXX_DEBUG(logger_, "Load binary data from file");
   std::vector<uint8_t> bin_data;
   if (!file_system::ReadBinaryFile(full_path, bin_data)) {
     LOG4CXX_ERROR(logger_, "Failed to read from file: " << full_path);
@@ -163,12 +181,18 @@ void GetFileRequest::Run() {
                  &response_params);
     return;
   }
-  (*message_)[strings::params][strings::binary_data] = bin_data;
 
   // Construct response message
-  response_params[strings::offset] = offset_;
-  response_params[strings::length] = length_;
-  response_params[strings::file_type] = file_type_;
+  LOG4CXX_DEBUG(logger_, "Construct response");
+  if ((*message_)[strings::msg_params].keyExists(strings::offset)) {
+    response_params[strings::offset] = offset_;
+  }
+  if ((*message_)[strings::msg_params].keyExists(strings::length)) {
+    response_params[strings::length] = length_;
+  }
+  if ((*message_)[strings::msg_params].keyExists(strings::file_type)) {
+    response_params[strings::file_type] = file_type_;
+  }
   const uint32_t crc_calculated = GetCrc32CheckSum(bin_data);
   response_params[strings::crc32_check_sum] = crc_calculated;
 
@@ -177,9 +201,15 @@ void GetFileRequest::Run() {
   LOG4CXX_DEBUG(logger_, "offset: " << offset_);
   LOG4CXX_DEBUG(logger_, "length: " << length_);
   LOG4CXX_DEBUG(logger_, "file_path: " << file_path);
+  LOG4CXX_DEBUG(logger_, "crc: " << crc_calculated);
+  std::string st(bin_data.begin(), bin_data.end());
+  LOG4CXX_DEBUG(logger_, "Binary data: " << st);
 
-  SendResponse(
-      true, mobile_apis::Result::SUCCESS, "File uploaded", &response_params);
+  SendResponse(true,
+               mobile_apis::Result::SUCCESS,
+               "File uploaded",
+               &response_params,
+               bin_data);
 }
 
 }  // namespace commands
