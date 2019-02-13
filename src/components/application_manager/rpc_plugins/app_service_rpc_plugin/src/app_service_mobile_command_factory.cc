@@ -122,14 +122,14 @@ app_mngr::CommandCreator& AppServiceMobileCommandFactory::buildCommandCreator(
                    ? factory.GetCreator<
                          commands::GetAppServiceDataRequest>()
                    : factory.GetCreator<
-                         commands::GetAppServiceDataResponse>();
+                         commands::GetAppServiceDataResponseFromMobile>();
       } else if (app_mngr::commands::Command::CommandSource::SOURCE_SDL ==
                  source) {
         return mobile_apis::messageType::request == message_type
                    ? factory.GetCreator<
                          commands::GetAppServiceDataRequestToMobile>()
                    : factory.GetCreator<
-                         commands::GetAppServiceDataResponseFromMobile>();
+                         commands::GetAppServiceDataResponse>();
       }          
     default:
       LOG4CXX_WARN(logger_, "Unsupported function_id: " << function_id);

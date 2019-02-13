@@ -69,6 +69,8 @@ void RequestFromHMI::Run() {}
 
 void RequestFromHMI::on_event(const event_engine::Event& event) {}
 
+void RequestFromHMI::on_event(const event_engine::MobileEvent& event) {}
+
 void RequestFromHMI::SendResponse(
     const bool success,
     const uint32_t correlation_id,

@@ -112,6 +112,7 @@ void PublishAppServiceRequest::Run() {
 
   if (!result) {
     SendResponse(false, mobile_apis::Result::DISALLOWED, NULL, NULL);
+    return;
   }
 
   smart_objects::SmartObject service_record =

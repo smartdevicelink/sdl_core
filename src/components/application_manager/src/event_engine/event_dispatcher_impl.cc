@@ -145,7 +145,7 @@ void EventDispatcherImpl::raise_mobile_event(const MobileEvent& event) {
   // Call observers
   while (!mobile_observers_.empty()) {
     EventObserver* temp = *mobile_observers_.begin();
-    mobile_observers_.erase(observers_.begin());
+    mobile_observers_.erase(mobile_observers_.begin());
     AutoUnlock unlock_observer(observer_lock);
     temp->on_event(event);
   }

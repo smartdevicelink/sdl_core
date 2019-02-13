@@ -72,7 +72,7 @@ class EventObserver {
    */
   virtual void on_event(const Event& event) = 0;
 
-  void on_event(const MobileEvent& event);
+  virtual void on_event(const MobileEvent& event);
 
  protected:
   /*

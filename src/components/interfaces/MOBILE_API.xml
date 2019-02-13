@@ -6985,7 +6985,7 @@
     <function name="GetAppServiceData" functionID="GetAppServiceDataID" messagetype="request" since="5.1">
         <description> This request asks the module for current data related to the specific service. It also includes an option to subscribe to that service for future updates</description>
         
-        <param name="serviceType" type="String" mandatory="true">
+        <param name="serviceType" type="AppServiceType" mandatory="true">
             <description>See AppServiceType</description>
         </param>
         
