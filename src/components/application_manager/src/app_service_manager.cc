@@ -147,4 +147,31 @@ void AppServiceManager::GetProvider(const std::string& service_type,
   }
 }
 
+
+std::pair<std::string, AppService> AppServiceManager::ActiveServiceByType(
+    std::string service_type) {
+  for (auto it = published_services_.begin(); it != published_services_.end();
+       ++it) {
+    if (it->second.record[strings::app_service_manifest][strings::service_type]
+                .asString() == service_type &&
+        it->second.record[strings::service_active].asBool()) {
+      return *it;
+    }
+  }
+  AppService empty;
+  return std::make_pair(std::string(), empty);
+}
+
+std::pair<std::string, AppService> AppServiceManager::FindServiceByName(
+    std::string name) {
+  for (auto it = published_services_.begin(); it != published_services_.end();
+       ++it) {
+    if (it->second.record[strings::app_service_manifest][strings::service_name]
+            .asString() == name) {
+      return *it;
+    }
+  }
+  AppService empty;
+  return std::make_pair(std::string(), empty);
+}
 }  //  namespace application_manager

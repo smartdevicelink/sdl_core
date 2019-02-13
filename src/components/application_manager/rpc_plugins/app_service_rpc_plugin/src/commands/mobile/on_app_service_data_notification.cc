@@ -54,9 +54,9 @@ OnAppServiceDataNotification::OnAppServiceDataNotification(
                               hmi_capabilities,
                               policy_handler)
     , plugin_(NULL) {
-  auto plugin = (application_manager.GetPluginManager().FindPluginToProcess(
+  auto plugin = application_manager.GetPluginManager().FindPluginToProcess(
       mobile_apis::FunctionID::OnAppServiceDataID,
-      app_mngr::commands::Command::CommandSource::SOURCE_MOBILE));
+      app_mngr::commands::Command::CommandSource::SOURCE_MOBILE);
   if (plugin) {
     plugin_ = dynamic_cast<AppServiceRpcPlugin*>(&(*plugin));
   }
