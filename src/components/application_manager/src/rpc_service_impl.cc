@@ -154,7 +154,15 @@ bool RPCServiceImpl::ManageMobileCommand(
     return true;
   }
 
-  if (message_type == mobile_apis::messageType::request) {
+  if (message_type == mobile_apis::messageType::request && source == commands::Command::CommandSource::SOURCE_SDL) {
+    if (command->Init()) {
+      command->Run();
+      command->CleanUp();
+      return true;
+    }
+  }
+
+  if (message_type == mobile_apis::messageType::request && source == commands::Command::CommandSource::SOURCE_MOBILE) {
     // commands will be launched from requesr_ctrl
     mobile_apis::HMILevel::eType app_hmi_level =
         mobile_apis::HMILevel::INVALID_ENUM;

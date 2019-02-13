@@ -75,6 +75,13 @@ class ASGetAppServiceDataRequestFromHMI
    */
   void on_event(const app_mngr::event_engine::Event& event) OVERRIDE;
 
+  /**
+   * @brief on_event allows to handle events
+   *
+   * @param event event type that current request subscribed on.
+   */
+  void on_event(const app_mngr::event_engine::MobileEvent& event);
+
  private:
   DISALLOW_COPY_AND_ASSIGN(ASGetAppServiceDataRequestFromHMI);
 };

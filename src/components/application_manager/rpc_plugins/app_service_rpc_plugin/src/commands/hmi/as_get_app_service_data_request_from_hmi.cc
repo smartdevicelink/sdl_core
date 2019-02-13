@@ -89,5 +89,18 @@ void ASGetAppServiceDataRequestFromHMI::on_event(
                application_manager::commands::Command::SOURCE_TO_HMI);
 }
 
+void ASGetAppServiceDataRequestFromHMI::on_event(
+    const event_engine::MobileEvent& event) {
+  const smart_objects::SmartObject& event_message = event.smart_object();
+
+  auto msg_params = event_message[strings::msg_params];
+  SendResponse(true,
+               correlation_id(),
+               hmi_apis::FunctionID::AppService_GetAppServiceData,
+               hmi_apis::Common_Result::SUCCESS,
+               &msg_params,
+               application_manager::commands::Command::SOURCE_TO_HMI);
+}
+
 }  // namespace commands
 }  // namespace app_service_rpc_plugin

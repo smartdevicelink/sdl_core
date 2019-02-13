@@ -74,6 +74,8 @@ class GetAppServiceDataRequest : public app_mngr::commands::CommandRequestImpl {
    */
   virtual void on_event(const app_mngr::event_engine::Event& event);
 
+  virtual void on_event(const app_mngr::event_engine::MobileEvent& event);
+
  private:
   AppServiceRpcPlugin* plugin_;
   DISALLOW_COPY_AND_ASSIGN(GetAppServiceDataRequest);

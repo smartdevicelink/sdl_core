@@ -55,6 +55,7 @@ GetAppServiceDataResponse::~GetAppServiceDataResponse() {}
 
 void GetAppServiceDataResponse::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
+  rpc_service_.SendMessageToMobile(message_);
 }
 
 }  // namespace commands

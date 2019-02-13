@@ -153,16 +153,48 @@ void RequestFromHMI::SendProviderRequest(
     return;
   }
 
-  smart_objects::SmartObjectSPtr new_msg =
-      std::make_shared<smart_objects::SmartObject>();
-  smart_objects::SmartObject& request = *new_msg;
+  SendMobileRequest(mobile_function_id, app->app_id(), &(*msg)[strings::msg_params], use_events);
+}
 
-  request[strings::params] = (*msg)[strings::params];
-  request[strings::msg_params] = (*msg)[strings::msg_params];
-  request[strings::params][strings::connection_key] = app->app_id();
+void RequestFromHMI::SendMobileRequest(    const mobile_apis::FunctionID::eType& function_id,
+    const uint32_t correlation_id,
+    const smart_objects::SmartObject* msg_params,
+    bool use_events) {
 
-  // todo
-  // SendMobileRequest(mobile_function_id, new_msg, use_events);
+  smart_objects::SmartObjectSPtr result =
+    std::make_shared<smart_objects::SmartObject>();
+  
+  const uint32_t mobile_correlation_id =
+    application_manager_.GetNextMobileCorrelationID();
+
+  smart_objects::SmartObject& request = *result;
+
+  request[strings::params][strings::message_type] = MessageType::kRequest;
+  request[strings::params][strings::function_id] = function_id;
+  request[strings::params][strings::correlation_id] = mobile_correlation_id;
+  request[strings::params][strings::protocol_version] =
+      CommandImpl::protocol_version_;
+  request[strings::params][strings::protocol_type] =
+      CommandImpl::mobile_protocol_type_;
+
+  request[strings::params][strings::connection_key] = correlation_id;
+
+  if (msg_params) {
+    request[strings::msg_params] = *msg_params;
+  }
+
+  if (use_events) {
+    LOG4CXX_DEBUG(logger_,
+                  "subscribe_on_event " << function_id << " "
+                                        << mobile_correlation_id);
+    subscribe_on_event(function_id, mobile_correlation_id);
+  }
+  if (!rpc_service_.ManageMobileCommand(
+          result, commands::Command::CommandSource::SOURCE_SDL)) {
+    LOG4CXX_ERROR(logger_, "Unable to send request to mobile");
+    // SendErrorResponse(false, mobile_apis::Result::OUT_OF_MEMORY);
+  }
+
 }
 
 // todo this method is duplicate code from command request impl. Move to command
