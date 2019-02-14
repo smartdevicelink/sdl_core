@@ -285,7 +285,6 @@ const char* service_id = "serviceID";
 const char* service_manifest = "serviceManifest";
 const char* service_published = "servicePublished";
 const char* service_active = "serviceActive";
-const char* services_supported = "servicesSupported";
 const char* app_services = "appServices";
 const char* update_reason = "updateReason";
 const char* updated_app_service_record = "updatedAppServiceRecord";

@@ -3654,9 +3654,6 @@
 
     <struct name="AppServicesCapabilities" since="5.1">
         <description>Capabilities of app services including what service types are supported and the current state of services.</description>
-        <param name="servicesSupported" type="AppServiceType" array="true" mandatory="true">
-            <description>An array of supported app service types</description>
-        </param>
         <param name="appServices" type="AppServiceCapability" array="true" mandatory="false">
             <description>An array of currently available services. If this is an update to the capability the affected services will include an update reason in that item</description>
         </param>
