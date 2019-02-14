@@ -67,7 +67,11 @@ GetFileRequest::GetFileRequest(
                          application_manager,
                          rpc_service,
                          hmi_capabilities,
-                         policy_handler) {}
+                         policy_handler)
+    , file_name_("")
+    , file_type_(mobile_apis::FileType::INVALID_ENUM)
+    , length_(0)
+    , offset_(0) {}
 
 GetFileRequest::~GetFileRequest() {}
 
@@ -123,10 +127,20 @@ void GetFileRequest::Run() {
     return;
   }
 
+  file_name_ = (*message_)[strings::msg_params][strings::file_name].asString();
+
+  if (!file_system::IsFileNameValid(file_name_)) {
+    LOG4CXX_ERROR(logger_,
+                  "File name " << file_name_ << " contains forbidden symbols.");
+    SendResponse(false,
+                 mobile_apis::Result::INVALID_DATA,
+                 "File name contains forbidden symbols",
+                 &response_params);
+    return;
+  }
+
   // Initialize other params with default values. If exists overwrite the values
   LOG4CXX_DEBUG(logger_, "Intialize non manadatory params with default values");
-  file_name_ = (*message_)[strings::msg_params][strings::file_name].asString();
-  offset_ = 0;
 
   if ((*message_)[strings::msg_params].keyExists(strings::file_type)) {
     file_type_ = static_cast<mobile_apis::FileType::eType>(
@@ -158,7 +172,6 @@ void GetFileRequest::Run() {
   // Handle offset
   LOG4CXX_DEBUG(logger_, "Handle offset parameter");
   const uint64_t file_size = file_system::FileSize(full_path);
-  length_ = file_size;
   if (offset_ > file_size) {
     LOG4CXX_ERROR(logger_,
                   "Offset " << offset_ << " greater than file size "
@@ -173,7 +186,7 @@ void GetFileRequest::Run() {
   // Load data from file as binary data
   LOG4CXX_DEBUG(logger_, "Load binary data from file");
   std::vector<uint8_t> bin_data;
-  if (!file_system::ReadBinaryFile(full_path, bin_data)) {
+  if (!file_system::ReadBinaryFile(full_path, bin_data, offset_)) {
     LOG4CXX_ERROR(logger_, "Failed to read from file: " << full_path);
     SendResponse(false,
                  mobile_apis::Result::GENERIC_ERROR,
@@ -202,8 +215,8 @@ void GetFileRequest::Run() {
   LOG4CXX_DEBUG(logger_, "length: " << length_);
   LOG4CXX_DEBUG(logger_, "file_path: " << file_path);
   LOG4CXX_DEBUG(logger_, "crc: " << crc_calculated);
-  std::string st(bin_data.begin(), bin_data.end());
-  LOG4CXX_DEBUG(logger_, "Binary data: " << st);
+  // std::string st(bin_data.begin(), bin_data.end());
+  // LOG4CXX_DEBUG(logger_, "Binary data: " << st);
 
   SendResponse(true,
                mobile_apis::Result::SUCCESS,

@@ -33,7 +33,6 @@
 #include "sdl_rpc_plugin/commands/mobile/get_file_response.h"
 #include "application_manager/application_impl.h"
 #include "application_manager/rpc_service.h"
-#include "application_manager/message_helper.h"
 #include "interfaces/MOBILE_API.h"
 
 namespace sdl_rpc_plugin {
@@ -57,7 +56,6 @@ GetFileResponse::~GetFileResponse() {}
 void GetFileResponse::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
   LOG4CXX_INFO(logger_, "Sending GetFile response");
-  MessageHelper::PrintSmartObject(*message_);
   rpc_service_.SendMessageToMobile(message_);
 }
 

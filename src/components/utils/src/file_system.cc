@@ -316,6 +316,24 @@ bool file_system::ReadBinaryFile(const std::string& name,
   return true;
 }
 
+bool file_system::ReadBinaryFile(const std::string& name,
+                                 std::vector<uint8_t>& result,
+                                 uint32_t offset) {
+  if (!FileExists(name) || !IsAccessible(name, R_OK)) {
+    return false;
+  }
+
+  std::ifstream file(name.c_str(), std::ios_base::binary);
+  file.ignore(offset);
+  std::ostringstream ss;
+  ss << file.rdbuf();
+  const std::string s = ss.str();
+
+  result.resize(s.length());
+  std::copy(s.begin(), s.end(), result.begin());
+  return true;
+}
+
 bool file_system::ReadFile(const std::string& name, std::string& result) {
   if (!FileExists(name) || !IsAccessible(name, R_OK)) {
     return false;

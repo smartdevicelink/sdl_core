@@ -6320,7 +6320,10 @@
         <param name="fileType" type="FileType" mandatory="false">
             <description>Selected file type.</description>
         </param>
-        <param name = "offset" type="Integer" minvalue="0" maxvalue="2000000000" mandatory="false">
+        <param name="offset" type="Integer" minvalue="0" maxvalue="2000000000" mandatory="false">
+		    <description>Optional offset in bytes for resuming partial data chunks</description>
+	    </param>
+        <param name = "length" type="Integer" minvalue="0" maxvalue="2000000000" mandatory="false">
             <description>Optional length in bytes for resuming partial data chunks if offset is set to 0, then length is the total length of the file to be downloaded</description>
         </param>
     </function>
@@ -6358,9 +6361,9 @@
             <description>File type that is being sent in response.</description>
         </param>
         
-        <param name="crc" type="Integer" minvalue="0" maxvalue="4294967295" mandatory="false">
-            <description> Additional CRC32 checksum to protect data integrity up to 512 Mbits</description>
-        </param>
+       <param name="crc" type="Integer" minvalue="0" maxvalue="4294967295" mandatory="false">
+	        <description>Additional CRC32 checksum to protect data integrity up to 512 Mbits</description>
+	    </param>
     </function>
     
     <function name="DeleteFile" functionID="DeleteFileID" messagetype="request" since="3.0">
