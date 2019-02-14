@@ -3895,7 +3895,7 @@
             <description> Unique name of this service</description>
         </param>
 
-        <param name="serviceType" type="AppServiceType" mandatory="true">
+        <param name="serviceType" type="String" mandatory="true">
             <description>The type of service that is to be offered by this app</description>
         </param>
 
@@ -3950,7 +3950,7 @@
     <struct name="AppServiceData" since="5.1">
         <description> Contains all the current data of the app service. The serviceType will link to which of the service data objects are included in this object. (eg if service type equals MEDIA, the mediaServiceData param should be included.</description>
 
-        <param name="serviceType" type="AppServiceType" mandatory="true"/>
+        <param name="serviceType" type="String" mandatory="true"/>
         <param name="serviceID" type="String" mandatory="true"/>
 
         <param name="mediaServiceData" type="MediaServiceData" mandatory="false"/>
@@ -3986,7 +3986,7 @@
 
     <struct name="AppServicesCapabilities" since="5.1">
         <description>Capabilities of app services including what service types are supported and the current state of services.</description>
-        <param name="servicesSupported" type="AppServiceType" array="true" mandatory="true">
+        <param name="servicesSupported" type="String" array="true" mandatory="true">
             <description>An array of supported app service types</description>
         </param>
         <param name="appServices" type="AppServiceCapability" array="true" mandatory="false">
@@ -3998,7 +3998,7 @@
     <!-- End App Services -->
     
     <struct name="SystemCapability" since="4.5">
-        <description>The systemCapabilityType indicates which type of data should be changed and identifies which data object exists in this struct. For example, if the SystemCapability Type is NAVIGATION then a "navigationCapability" should exist</description>
+        <description>The systemCapabilityType identifies which data object exists in this struct. For example, if the SystemCapability Type is NAVIGATION then a "navigationCapability" should exist</description>
         <param name="systemCapabilityType" type="SystemCapabilityType" mandatory="true">
             <description>Used as a descriptor of what data to expect in this struct. The corresponding param to this enum should be included and the only other para included.</description>
         </param>

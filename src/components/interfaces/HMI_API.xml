@@ -3563,7 +3563,7 @@
             <description> Unique name of this service </description>
         </param>
 
-        <param name="serviceType" type="Common.AppServiceType" mandatory="true">
+        <param name="serviceType" type="String" mandatory="true">
             <description> The type of service that is to be offered by this app </description>
         </param>
 
@@ -3618,7 +3618,7 @@
     <struct name="AppServiceData">
         <description> Contains all the current data of the app service. The serviceType will link to which of the service data objects are included in this object. (eg if service type equals MEDIA, the mediaServiceData param should be included.</description>
 
-        <param name="serviceType" type="Common.AppServiceType" mandatory="true"/>
+        <param name="serviceType" type="String" mandatory="true"/>
         <param name="serviceID" type="String" mandatory="true"/>
 
         <param name="mediaServiceData" type="Common.MediaServiceData" mandatory="false"/>
@@ -3664,7 +3664,20 @@
 
     <!-- End App Services -->
 
-  <struct name="SystemCapabilities">
+    <enum name="SystemCapabilityType">
+        <description>Enumerations of all available system capability types</description>
+        <element name="NAVIGATION"/>
+        <element name="PHONE_CALL"/>
+        <element name="VIDEO_STREAMING"/>
+        <element name="REMOTE_CONTROL"/>
+        <element name="APP_SERVICES" />
+    </enum>
+
+    <struct name="SystemCapabilities">
+        <description>The systemCapabilityType identifies which data object exists in this struct. For example, if the SystemCapability Type is NAVIGATION then a "navigationCapability" should exist</description>
+        <param name="systemCapabilityType" type="SystemCapabilityType" mandatory="true">
+            <description>Used as a descriptor of what data to expect in this struct. The corresponding param to this enum should be included and the only other para included.</description>
+        </param>
         <param name="navigationCapability" type="NavigationCapability" mandatory="false">
             <description>Describes extended capabilities for onboard navigation system </description>
         </param>
@@ -3680,8 +3693,7 @@
         <param name="appServicesCapabilities" type="AppServicesCapabilities" mandatory="false">
             <description>An array of currently available services. If this is an update to the capability the affected services will include an update reason in that item</description>
         </param>      
-  </struct>
-
+    </struct>
 
 </interface>
 
@@ -6209,9 +6221,6 @@
         <param name="serviceID" type="String" mandatory="true">
             <description>The ID of the service that should have an activation event take place on</description>
         </param>
-        <param name="serviceType" type="String" mandatory="true">
-            <description>The service type the service should have the activation event occur on. See Common.AppServiceType.</description>
-        </param>
         <param name="activate" type="Boolean" mandatory="true">
             <description>True if the service is to be activated. False if the app is to be deactivated</description>
         </param>
@@ -6223,9 +6232,6 @@
     <function name="AppServiceActivation" messagetype="response">
         <param name="serviceID" type="String" mandatory="true">
             <description>The ID of the service that was requested to have an activation event take place</description>
-        </param>
-        <param name="serviceType" type="String" mandatory="true">
-            <description>The service type the service that was requested to have an activation event take place. See Common.AppServiceType.</description>
         </param>
         <param name="activate" type="Boolean" mandatory="true">
             <description>True if the service was activated. False if the app was deactivated or unable to be activated</description>

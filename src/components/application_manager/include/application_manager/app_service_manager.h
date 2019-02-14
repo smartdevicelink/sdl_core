@@ -34,6 +34,11 @@
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_APP_SERVICE_MANAGER_H_
 
 #include "smart_objects/smart_object.h"
+#include "interfaces/MOBILE_API.h"
+
+namespace resumption {
+class LastState;
+}
 
 namespace application_manager {
 
@@ -55,7 +60,8 @@ class AppServiceManager {
    * @brief Class constructor
    * @param app_manager
    */
-  AppServiceManager(ApplicationManager& app_manager);
+  AppServiceManager(ApplicationManager& app_manager,
+                    resumption::LastState& last_state);
 
   /**
    * @brief Class destructor
@@ -121,7 +127,14 @@ class AppServiceManager {
 
  private:
   ApplicationManager& app_manager_;
+  resumption::LastState& last_state_;
   std::map<std::string, AppService> published_services_;
+
+  void BroadcastAppServiceUpdate(smart_objects::SmartObject& msg_params);
+  bool AppServiceUpdated(
+      const std::string service_id,
+      const mobile_apis::ServiceUpdateReason::eType update_reason,
+      smart_objects::SmartObject& msg_params);
 };
 
 }  //  namespace application_manager

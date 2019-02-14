@@ -63,20 +63,32 @@ void ASAppServiceActivationRequest::Run() {
   AppServiceManager& service_manager =
       application_manager_.GetAppServiceManager();
   smart_objects::SmartObject params = (*message_)[strings::msg_params];
+  smart_objects::SmartObject response_params(smart_objects::SmartType_Map);
   std::string service_id = params[strings::service_id].asString();
+  response_params[strings::service_id] = service_id;
   if (params[strings::activate].asBool()) {
-    service_manager.ActivateAppService(service_id);
+    response_params[strings::activate] =
+        service_manager.ActivateAppService(service_id);
   } else {
     service_manager.DeactivateAppService(service_id);
+    response_params[strings::activate] = false;
   }
 
   if (params.keyExists(strings::set_as_default)) {
     if (params[strings::set_as_default].asBool()) {
-      service_manager.SetDefaultService(service_id);
+      response_params[strings::set_as_default] =
+          service_manager.SetDefaultService(service_id);
     } else {
       service_manager.RemoveDefaultService(service_id);
+      response_params[strings::set_as_default] = false;
     }
   }
+
+  SendResponse(true,
+               (*message_)[strings::params][strings::correlation_id].asUInt(),
+               hmi_apis::FunctionID::AppService_AppServiceActivation,
+               hmi_apis::Common_Result::SUCCESS,
+               &response_params);
 }
 
 }  // namespace commands

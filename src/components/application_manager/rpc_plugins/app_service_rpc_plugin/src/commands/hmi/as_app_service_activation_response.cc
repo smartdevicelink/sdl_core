@@ -60,6 +60,7 @@ ASAppServiceActivationResponse::~ASAppServiceActivationResponse() {}
 
 void ASAppServiceActivationResponse::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
+  rpc_service_.SendMessageToHMI(message_);
 }
 
 }  // namespace commands
