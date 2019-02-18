@@ -6155,5 +6155,29 @@
     <description> This response includes the data that is requested from the specific service</description>    
     <param name="serviceData" type="Common.AppServiceData" mandatory="true"/>      
   </function>
+
+    <function name="PerformAppServiceInteraction" functionID="PerformAppServiceInteractionID" messagetype="request">
+        <param name="serviceUri" type="String"  mandatory="true">
+            <description>Fully qualified URI based on the URI prefix and URI scheme the app service provided. SDL makes no gurantee that this URI is correct.</description>
+        </param>
+        
+        <param name="serviceID" type="String" mandatory="true">
+            <description>The service ID that the app consumer wishes to send this URI.</description>
+        </param>
+        
+        <param name="originApp" type="String" mandatory="true">
+            <description>This string is the appID of the app requesting the app service provider take the specific action.</description>
+        </param>
+        
+        <param name="requestServiceActive" type="Boolean" mandatory="false">
+            <description>This flag signals the requesting consumer would like this service to become the active primary service of the destination's type.</description>
+        </param>
+    </function>
+
+    <function name="PerformAppServiceInteraction" functionID="PerformAppServiceInteractionID" messagetype="response">
+        <param name="serviceSpecificResult" type="String" mandatory="false">
+            <description>The service can provide specific result strings to the consumer through this param. These results should be described in the URI schema set in the Service Manifest</description>
+        </param>
+    </function>
 </interface>
 </interfaces>

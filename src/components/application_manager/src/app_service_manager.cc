@@ -105,45 +105,48 @@ std::vector<smart_objects::SmartObject> AppServiceManager::GetAllServices() {
   return services;
 }
 
-void AppServiceManager::GetProvider(const std::string& service_type,
-                                    ApplicationSharedPtr& app,
-                                    bool& hmi_service) {
+void AppServiceManager::GetProviderByType(const std::string& service_type,
+                                          ApplicationSharedPtr& app,
+                                          bool& hmi_service) {
   LOG4CXX_AUTO_TRACE(logger_);
-  auto service_it = published_services_.begin();
-  auto end = published_services_.end();
-
-  for (; service_it != end; ++service_it) {
-    auto service = service_it->second;
-    auto record = service_it->second.record;
-    if (record[strings::service_published].asBool() == false ||
-        record[strings::service_active].asBool() == false) {
-      continue;
-    }
-
-    // Todo: decided final type of serviceType. String or enum
-    mobile_apis::AppServiceType::eType record_service_type =
-        static_cast<mobile_apis::AppServiceType::eType>(
-            record[strings::service_manifest][strings::service_type].asUInt());
-
-    std::string record_service_type_str = std::string();
-    smart_objects::EnumConversionHelper<mobile_apis::AppServiceType::eType>::
-        EnumToString(record_service_type, &record_service_type_str);
-
-    if (record_service_type_str == service_type) {
-      LOG4CXX_DEBUG(logger_,
-                    "Found provider for service type: " << service_type);
-      bool mobile_service = service.mobile_service;
-      if (mobile_service) {
-        app = app_manager_.application(service.connection_key);
-        hmi_service = false;
-        return;
-      }
-      hmi_service = true;
-      return;
-    }
+  auto active_service = ActiveServiceByType(service_type);
+  if (active_service.first.empty()) {
+    LOG4CXX_ERROR(logger_,
+                  "There is no active service for the given service type: "
+                      << service_type);
+    return;
   }
+
+  LOG4CXX_DEBUG(logger_, "Found provider for service type: " << service_type);
+  GetProviderFromService(active_service.second, app, hmi_service);
 }
 
+void AppServiceManager::GetProviderByID(const std::string& service_id,
+                                        ApplicationSharedPtr& app,
+                                        bool& hmi_service) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  auto it = published_services_.find(service_id);
+  if (it == published_services_.end()) {
+    LOG4CXX_ERROR(logger_, "Service id does not exist in published services");
+    return;
+  }
+
+  LOG4CXX_DEBUG(logger_, "Found provider with service ID: " << service_id);
+  GetProviderFromService(it->second, app, hmi_service);
+}
+
+void AppServiceManager::GetProviderFromService(const AppService& service,
+                                               ApplicationSharedPtr& app,
+                                               bool& hmi_service) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  bool mobile_service = service.mobile_service;
+  if (mobile_service) {
+    app = app_manager_.application(service.connection_key);
+    hmi_service = false;
+    return;
+  }
+  hmi_service = true;
+}
 
 std::pair<std::string, AppService> AppServiceManager::ActiveServiceByType(
     std::string service_type) {

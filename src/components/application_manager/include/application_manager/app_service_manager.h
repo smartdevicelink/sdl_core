@@ -110,9 +110,12 @@ class AppServiceManager {
   /*
     void NotifyConsumers(const MessageSharedPtr& message);*/
 
-  void GetProvider(const std::string& service_type,
-                   ApplicationSharedPtr& app,
-                   bool& hmi_service);
+  void GetProviderByType(const std::string& service_type,
+                         ApplicationSharedPtr& app,
+                         bool& hmi_service);
+  void GetProviderByID(const std::string& service_id,
+                       ApplicationSharedPtr& app,
+                       bool& hmi_service);
   std::pair<std::string, AppService> ActiveServiceByType(
       std::string service_type);
 
@@ -121,6 +124,9 @@ class AppServiceManager {
   std::string DefaultServiceByType(std::string service_type);
 
  private:
+  void GetProviderFromService(const AppService& service,
+                              ApplicationSharedPtr& app,
+                              bool& hmi_service);
   ApplicationManager& app_manager_;
   std::map<std::string, AppService> published_services_;
 };

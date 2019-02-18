@@ -2619,6 +2619,7 @@
         <element name="SetCloudAppPropertiesID" value="50" hexvalue="32" since="5.1" />
         <element name="PublishAppServiceID" value="52" hexvalue="34" since="5.1" />
         <element name="GetAppServiceDataID" value="53" hexvalue="35" since="5.1" />
+        <element name="PerformAppServiceInteractionID" value="55" hexvalue="37" since="5.1" />
         
         <!--
          Base Notifications
@@ -7023,7 +7024,43 @@
         <param name="serviceData" type="AppServiceData" mandatory="true"/>
             
     </function>
-    
+
+    <function name="PerformAppServiceInteraction" functionID="PerformAppServiceInteractionID" messagetype="request">
+        <param name="serviceUri" type="String"  mandatory="true">
+            <description>Fully qualified URI based on the URI prefix and URI scheme the app service provided. SDL makes no gurantee that this URI is correct.</description>
+        </param>
+        
+        <param name="serviceID" type="String" mandatory="true">
+            <description>The service ID that the app consumer wishes to send this URI.</description>
+        </param>
+        
+        <param name="originApp" type="String" mandatory="true">
+            <description>This string is the appID of the app requesting the app service provider take the specific action.</description>
+        </param>
+        
+        <param name="requestServiceActive" type="Boolean" mandatory="false">
+            <description>This flag signals the requesting consumer would like this service to become the active primary service of the destination's type.</description>
+        </param>
+    </function>
+
+    <function name="PerformAppServiceInteraction" functionID="PerformAppServiceInteractionID" messagetype="response">
+        <param name="success" type="Boolean" platform="documentation" mandatory="true">
+            <description> true, if successful; false, if failed </description>
+        </param>       
+            
+        <param name="resultCode" type="Result" platform="documentation" mandatory="true">
+            <description>See Result. All results will be available for this response.</description>
+        </param>
+        
+        <param name="info" type="String" maxlength="1000" mandatory="false" platform="documentation">
+            <description>Provides additional human readable info regarding the result.</description>
+        </param>
+
+        <param name="serviceSpecificResult" type="String" mandatory="false">
+            <description>The service can provide specific result strings to the consumer through this param. These results should be described in the URI schema set in the Service Manifest</description>
+        </param>
+    </function>
+
     <!-- Notifications -->
     
     <function name="OnHMIStatus" functionID="OnHMIStatusID" messagetype="notification" since="1.0">

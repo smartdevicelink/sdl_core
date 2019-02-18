@@ -231,6 +231,8 @@ generate_function_to_interface_convert_map() {
       HmiInterfaces::HMI_INTERFACE_AppService;
   convert_map[AppService_GetAppServiceData] =
       HmiInterfaces::HMI_INTERFACE_AppService;
+  convert_map[AppService_PerformAppServiceInteraction] =
+      HmiInterfaces::HMI_INTERFACE_AppService;
   return convert_map;
 }
 

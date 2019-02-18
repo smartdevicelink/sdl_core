@@ -577,10 +577,20 @@
             "AppService":{
                 "rpcs":{
                     "PublishAppService":{
-                        "hmi_levels":["BACKGROUND",
-                            "FULL",
-                            "LIMITED",
-                            "NONE"]
+                      "hmi_levels": [
+                        "BACKGROUND",
+                        "FULL",
+                        "LIMITED",
+                        "NONE"
+                      ]
+                    },
+                    "PerformAppServiceInteraction": {
+                      "hmi_levels": [
+                        "BACKGROUND",
+                        "FULL",
+                        "LIMITED",
+                        "NONE"
+                      ]
                     }
                 }
             },
