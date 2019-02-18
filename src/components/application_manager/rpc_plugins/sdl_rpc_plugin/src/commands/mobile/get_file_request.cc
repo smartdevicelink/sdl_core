@@ -75,10 +75,11 @@ GetFileRequest::GetFileRequest(
 
 GetFileRequest::~GetFileRequest() {}
 
-std::string GetFileRequest::GetFilePath() {
-  std::string file_path =
-      application_manager_.get_settings().app_storage_folder();
+bool GetFileRequest::GetFilePath(std::string& file_path, bool& forward_to_hmi) {
+  std::string path = application_manager_.get_settings().app_storage_folder();
   auto connect_key = connection_key();
+  forward_to_hmi = false;
+
   if ((*message_)[strings::msg_params].keyExists(strings::app_service_id)) {
     std::string service_id =
         (*message_)[strings::msg_params][strings::app_service_id].asString();
@@ -89,17 +90,22 @@ std::string GetFileRequest::GetFilePath() {
     if (application_manager_.GetAppServiceManager().GetAppServiceInfo(
             service_id, app_service_info)) {
       // TODO Figure how to handle hmi case (AppService mobile service = false)
-      connect_key = app_service_info.connection_key;
+      if (app_service_info.mobile_service) {
+        connect_key = app_service_info.connection_key;
+      } else {
+        forward_to_hmi = true;
+        return true;
+      }
     } else {
-      return "";
+      return false;
     }
   } else {
     LOG4CXX_DEBUG(logger_, "Using current storage directory");
   }
 
   ApplicationSharedPtr app = application_manager_.application(connect_key);
-  file_path += "/" + app->folder_name();
-  return file_path;
+  file_path = path + "/" + app->folder_name();
+  return true;
 }
 
 void GetFileRequest::Run() {
@@ -158,7 +164,26 @@ void GetFileRequest::Run() {
   // Check if file exists on system (may have to use app service id to get the
   // correct app folder)
   LOG4CXX_DEBUG(logger_, "Check if file exists on system");
-  std::string file_path = GetFilePath();
+  std::string file_path;
+  bool forward_to_hmi;
+
+  if (GetFilePath(file_path, forward_to_hmi)) {
+    if (forward_to_hmi) {
+      LOG4CXX_DEBUG(logger_, "Forwarding GetFile request to HMI");
+      (*message_)[strings::msg_params][strings::app_id] = connection_key();
+
+      SendHMIRequest(hmi_apis::FunctionID::BasicCommunication_GetFileFromHMI,
+                     &(*message_)[strings::msg_params]);
+      return;
+    }
+  } else {
+    LOG4CXX_ERROR(logger_, "Could not get file path");
+    SendResponse(false,
+                 mobile_apis::Result::INVALID_DATA,
+                 "Could not get file path",
+                 &response_params);
+  }
+
   const std::string full_path = file_path + "/" + file_name_;
   if (!file_system::FileExists(full_path)) {
     LOG4CXX_ERROR(logger_, "File " << full_path << " does not exist");

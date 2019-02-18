@@ -4024,6 +4024,46 @@
     </param>
   </function>
 
+  <function name="GetFileFromHMI" messagetype="request">
+    <description>This request is sent to retrieve a file from the HMI.</description>
+    <param name="fileName" type="String" maxlength="255" mandatory="true">
+		  <description>File name that should be retrieved.</description>
+	  </param>
+    <param name="fileType" type="Common.FileType" mandatory="false">
+		  <description>Selected file type.</description>
+	  </param>
+    <param name="appServiceId" type="String" mandatory="false">
+		  <description> ID of the service that should have uploaded the requested file.</description>
+	  </param>
+    <param name="offset" type="Integer" minvalue="0" maxvalue="2000000000" mandatory="false">
+		  <description>Optional offset in bytes for resuming partial data chunks</description>
+	  </param>
+	  <param name="length" type="Integer" minvalue="0" maxvalue="2000000000" mandatory="false">
+		  <description>Optional length in bytes for resuming partial data chunks if offset is set to 0, then length is the total length of the file to be downloaded</description>
+	  </param>  
+    <param name="appID" type="Integer" mandatory="false">
+      <description>ID of application that requested this RPC.</description>
+    </param>
+   </function>
+   <function name="GetFileFromHMI" messagetype="response">
+		  <description> HMI handles the request internally and returns the file binary data with the response.</description>
+    <param name="filePath" type="String" mandatory="false">
+	    <description>Path to file in hmi</description>
+	  </param>
+    <param name="fileType" type="Common.FileType" mandatory="false">
+		  <description>Selected file type.</description>
+	  </param>
+    <param name="offset" type="Integer" minvalue="0" maxvalue="2000000000" mandatory="false">
+		  <description>Optional offset in bytes for resuming partial data chunks</description>
+	  </param>
+	  <param name="length" type="Integer" minvalue="0" maxvalue="2000000000" mandatory="false">
+		  <description>Optional length in bytes for resuming partial data chunks if offset is set to 0, then length is the total length of the file to be downloaded</description>
+	  </param>
+    <param name="appID" type="Integer" mandatory="false">
+      <description>ID of application that requested this RPC.</description>
+    </param>
+  </function>
+  
 <!-- Policies -->
   <function name="GetSystemInfo" messagetype="request">
     <description>Request from SDL to HMI to obtain information about head unit system.</description>

@@ -198,6 +198,7 @@ extern const char* cloud_connection_status;
 // PutFile
 extern const char* sync_file_name;
 extern const char* file_name;
+extern const char* file_path;
 extern const char* file_type;
 extern const char* file_size;
 extern const char* crc32_check_sum;

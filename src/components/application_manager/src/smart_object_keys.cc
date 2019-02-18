@@ -165,6 +165,7 @@ const char* cloud_connection_status = "cloudConnectionStatus";
 // PutFile
 const char* sync_file_name = "syncFileName";
 const char* file_name = "fileName";
+const char* file_path = "filePath";
 const char* file_type = "fileType";
 const char* file_size = "fileSize";
 const char* crc32_check_sum = "crc";

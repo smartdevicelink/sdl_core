@@ -30,10 +30,10 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_MOBILE_GET_FILE_REQUEST_H_
-#define SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_MOBILE_GET_FILE_REQUEST_H_
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_HMI_BC_GET_FILE_FROM_HMI_REQUEST_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_HMI_BC_GET_FILE_FROM_HMI_REQUEST_H_
 
-#include "application_manager/commands/command_request_impl.h"
+#include "application_manager/commands/request_to_hmi.h"
 
 namespace sdl_rpc_plugin {
 namespace app_mngr = application_manager;
@@ -41,44 +41,37 @@ namespace app_mngr = application_manager;
 namespace commands {
 
 /**
- * @brief GetFileRequest command class
+ * @brief BCGetFileFromHMIRequest command class
  **/
-class GetFileRequest : public app_mngr::commands::CommandRequestImpl {
+class BCGetFileFromHMIRequest : public app_mngr::commands::RequestToHMI {
  public:
   /**
-   * @brief GetFileRequest class constructor
+   * @brief BCGetFileFromHMIRequest class constructor
    *
    * @param message Incoming SmartObject message
    **/
-  GetFileRequest(const app_mngr::commands::MessageSharedPtr& message,
-                 app_mngr::ApplicationManager& application_manager,
-                 app_mngr::rpc_service::RPCService& rpc_service,
-                 app_mngr::HMICapabilities& hmi_capabilities,
-                 policy::PolicyHandlerInterface& policy_handle);
+  BCGetFileFromHMIRequest(const app_mngr::commands::MessageSharedPtr& message,
+                          app_mngr::ApplicationManager& application_manager,
+                          app_mngr::rpc_service::RPCService& rpc_service,
+                          app_mngr::HMICapabilities& hmi_capabilities,
+                          policy::PolicyHandlerInterface& policy_handle);
 
   /**
-   * @brief GetFileRequest class destructor
+   * @brief BCGetFileFromHMIRequest class destructor
    **/
-  virtual ~GetFileRequest();
+  virtual ~BCGetFileFromHMIRequest();
 
   /**
    * @brief Execute command
    **/
   virtual void Run();
 
-  bool GetFilePath(std::string& file_path, bool& forward_to_hmi);
-
  private:
-  std::string file_name_;
-  mobile_apis::FileType::eType file_type_;
-  uint32_t length_;
-  uint32_t offset_;
-
-  DISALLOW_COPY_AND_ASSIGN(GetFileRequest);
+  DISALLOW_COPY_AND_ASSIGN(BCGetFileFromHMIRequest);
 };
 
 }  // namespace commands
 
 }  // namespace sdl_rpc_plugin
 
-#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_MOBILE_GET_FILE_REQUEST_H_
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_sdl_RPC_PLUGIN_INCLUDE_sdl_RPC_PLUGIN_COMMANDS_HMI_BC_GET_FILE_FROM_HMI_REQUEST_H_
