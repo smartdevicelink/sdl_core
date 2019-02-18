@@ -318,7 +318,6 @@ extern const char* service_id;
 extern const char* service_manifest;
 extern const char* service_published;
 extern const char* service_active;
-extern const char* services_supported;
 extern const char* app_services;
 extern const char* update_reason;
 extern const char* updated_app_service_record;

@@ -3986,19 +3986,15 @@
 
     <struct name="AppServicesCapabilities" since="5.1">
         <description>Capabilities of app services including what service types are supported and the current state of services.</description>
-        <param name="servicesSupported" type="AppServiceType" array="true" mandatory="true">
-            <description>An array of supported app service types</description>
-        </param>
         <param name="appServices" type="AppServiceCapability" array="true" mandatory="false">
             <description>An array of currently available services. If this is an update to the capability the affected services will include an update reason in that item</description>
         </param>
     </struct>
 
-
     <!-- End App Services -->
     
     <struct name="SystemCapability" since="4.5">
-        <description>The systemCapabilityType indicates which type of data should be changed and identifies which data object exists in this struct. For example, if the SystemCapability Type is NAVIGATION then a "navigationCapability" should exist</description>
+        <description>The systemCapabilityType identifies which data object exists in this struct. For example, if the SystemCapability Type is NAVIGATION then a "navigationCapability" should exist</description>
         <param name="systemCapabilityType" type="SystemCapabilityType" mandatory="true">
             <description>Used as a descriptor of what data to expect in this struct. The corresponding param to this enum should be included and the only other para included.</description>
         </param>
