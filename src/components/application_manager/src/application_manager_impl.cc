@@ -699,6 +699,8 @@ bool ApplicationManagerImpl::ActivateApplication(ApplicationSharedPtr app) {
 
   // remove from resumption if app was activated by user
   resume_controller().OnAppActivated(app);
+  // Activate any app services published by the app
+  GetAppServiceManager().OnAppActivated(app);
   const HMILevel::eType hmi_level = HMILevel::HMI_FULL;
   const AudioStreamingState::eType audio_state =
       app->IsAudioApplication() ? AudioStreamingState::AUDIBLE

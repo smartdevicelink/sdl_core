@@ -97,7 +97,7 @@ smart_objects::SmartObject AppServiceManager::PublishAppService(
 
   smart_objects::SmartObject msg_params;
   AppServiceUpdated(
-      service_id, mobile_apis::ServiceUpdateReason::PUBLISHED, msg_params);
+      service_record, mobile_apis::ServiceUpdateReason::PUBLISHED, msg_params);
   BroadcastAppServiceUpdate(msg_params);
 
   // Activate the new service if it is the default for its service type, or if
@@ -123,8 +123,23 @@ bool AppServiceManager::UnpublishAppService(const std::string service_id) {
 
   SetServicePublished(service_id, false);
   smart_objects::SmartObject msg_params;
+
+  auto record = it->second.record;
+  if (record[strings::service_active].asBool()) {
+    record[strings::service_active] = false;
+
+    // Activate embedded service, if available
+    auto embedded_service = EmbeddedServiceForType(
+        record[strings::service_manifest][strings::service_type].asString());
+    if (!embedded_service.first.empty()) {
+      embedded_service.second.record[strings::service_active] = true;
+      AppServiceUpdated(embedded_service.second.record,
+                        mobile_apis::ServiceUpdateReason::ACTIVATED,
+                        msg_params);
+    }
+  }
   AppServiceUpdated(
-      service_id, mobile_apis::ServiceUpdateReason::REMOVED, msg_params);
+      it->second.record, mobile_apis::ServiceUpdateReason::REMOVED, msg_params);
   BroadcastAppServiceUpdate(msg_params);
   published_services_.erase(it);
 
@@ -138,6 +153,17 @@ void AppServiceManager::UnpublishAppServices(const uint32_t connection_key) {
        ++it) {
     if (it->second.connection_key == connection_key) {
       UnpublishAppService(it->first);
+    }
+  }
+}
+
+void AppServiceManager::OnAppActivated(ApplicationConstSharedPtr app) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  auto it = published_services_.begin();
+  // Activate all services published by the app
+  for (; it != published_services_.end(); ++it) {
+    if (it->second.connection_key == app->app_id()) {
+      ActivateAppService(it->first);
     }
   }
 }
@@ -162,7 +188,7 @@ bool AppServiceManager::SetDefaultService(const std::string service_id) {
   AppService& service = it->second;
 
   std::string service_type =
-      service.record[strings::app_service_manifest][strings::service_type]
+      service.record[strings::service_manifest][strings::service_type]
           .asString();
   std::string default_service_name = DefaultServiceByType(service_type);
   if (!default_service_name.empty()) {
@@ -175,7 +201,7 @@ bool AppServiceManager::SetDefaultService(const std::string service_id) {
 
   Json::Value dictionary = last_state_.get_dictionary();
   dictionary[kAppServiceSection][kDefaults][service_type] =
-      service.record[strings::app_service_manifest][strings::service_name]
+      service.record[strings::service_manifest][strings::service_name]
           .asString();
   return true;
 }
@@ -196,7 +222,7 @@ bool AppServiceManager::RemoveDefaultService(const std::string service_id) {
   service.default_service = false;
 
   std::string service_type =
-      service.record[strings::app_service_manifest][strings::service_type]
+      service.record[strings::service_manifest][strings::service_type]
           .asString();
   Json::Value dictionary = last_state_.get_dictionary();
   dictionary[kAppServiceSection][kDefaults].removeMember(service_type);
@@ -210,21 +236,27 @@ bool AppServiceManager::ActivateAppService(const std::string service_id) {
     LOG4CXX_ERROR(logger_, "Unable to find published service " << service_id);
     return false;
   }
+
   smart_objects::SmartObject& service = it->second.record;
+  if (service[strings::service_active].asBool()) {
+    LOG4CXX_DEBUG(logger_, "Service was already active " << service_id);
+    return true;
+  }
+
   smart_objects::SmartObject msg_params;
 
-  std::string service_type =
-      service[strings::app_service_manifest][strings::service_type].asString();
+  const std::string service_type =
+      service[strings::service_manifest][strings::service_type].asString();
   auto active_service = ActiveServiceByType(service_type);
   if (!active_service.first.empty()) {
     active_service.second.record[strings::service_active] = false;
-    AppServiceUpdated(active_service.first,
+    AppServiceUpdated(active_service.second.record,
                       mobile_apis::ServiceUpdateReason::DEACTIVATED,
                       msg_params);
   }
   service[strings::service_active] = true;
   AppServiceUpdated(
-      service_id, mobile_apis::ServiceUpdateReason::ACTIVATED, msg_params);
+      service, mobile_apis::ServiceUpdateReason::ACTIVATED, msg_params);
 
   BroadcastAppServiceUpdate(msg_params);
   return true;
@@ -243,8 +275,20 @@ bool AppServiceManager::DeactivateAppService(const std::string service_id) {
 
   if (service[strings::service_active].asBool()) {
     service[strings::service_active] = false;
-    send_update = AppServiceUpdated(
-        service_id, mobile_apis::ServiceUpdateReason::DEACTIVATED, msg_params);
+    AppServiceUpdated(
+        service, mobile_apis::ServiceUpdateReason::DEACTIVATED, msg_params);
+
+    // Activate embedded service, if available
+    const std::string service_type =
+        service[strings::service_manifest][strings::service_type].asString();
+    auto embedded_service = EmbeddedServiceForType(service_type);
+    if (!embedded_service.first.empty()) {
+      embedded_service.second.record[strings::service_active] = true;
+      AppServiceUpdated(embedded_service.second.record,
+                        mobile_apis::ServiceUpdateReason::ACTIVATED,
+                        msg_params);
+    }
+    send_update = true;
   }
 
   if (send_update) {
@@ -262,6 +306,21 @@ std::pair<std::string, AppService> AppServiceManager::ActiveServiceByType(
                 .asString() == service_type &&
         it->second.record[strings::service_published].asBool() &&
         it->second.record[strings::service_active].asBool()) {
+      return *it;
+    }
+  }
+  AppService empty;
+  return std::make_pair(std::string(), empty);
+}
+
+std::pair<std::string, AppService> AppServiceManager::EmbeddedServiceForType(
+    std::string service_type) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  for (auto it = published_services_.begin(); it != published_services_.end();
+       ++it) {
+    if (it->second.record[strings::service_manifest][strings::service_type]
+                .asString() == service_type &&
+        !it->second.mobile_service) {
       return *it;
     }
   }
@@ -329,24 +388,18 @@ void AppServiceManager::BroadcastAppServiceUpdate(
   app_manager_.GetRPCService().ManageHMICommand(hmi_notification);
 }
 
-bool AppServiceManager::AppServiceUpdated(
-    const std::string service_id,
+void AppServiceManager::AppServiceUpdated(
+    const smart_objects::SmartObject& service_record,
     const mobile_apis::ServiceUpdateReason::eType update_reason,
     smart_objects::SmartObject& msg_params) {
   LOG4CXX_AUTO_TRACE(logger_);
-  auto it = published_services_.find(service_id);
-  if (it == published_services_.end()) {
-    LOG4CXX_ERROR(logger_, "Service id does not exist in published services");
-    return false;
-  }
   smart_objects::SmartObject& services =
       msg_params[strings::system_capability][strings::app_services_capabilities]
                 [strings::app_services];
   smart_objects::SmartObject service(smart_objects::SmartType_Map);
   service[strings::update_reason] = update_reason;
-  service[strings::updated_app_service_record] = it->second.record;
+  service[strings::updated_app_service_record] = service_record;
   services[-1] = service;
-  return true;
 }
 
 }  //  namespace application_manager

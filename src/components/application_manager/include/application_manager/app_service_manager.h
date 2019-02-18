@@ -33,8 +33,9 @@
 #ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_APP_SERVICE_MANAGER_H_
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_APP_SERVICE_MANAGER_H_
 
-#include "smart_objects/smart_object.h"
+#include "application_manager/application.h"
 #include "interfaces/MOBILE_API.h"
+#include "smart_objects/smart_object.h"
 
 namespace resumption {
 class LastState;
@@ -85,6 +86,8 @@ class AppServiceManager {
 
   void UnpublishAppServices(const uint32_t connection_key);
 
+  void OnAppActivated(ApplicationConstSharedPtr app);
+
   void SetServicePublished(const std::string service_id,
                            bool service_published);
 
@@ -121,6 +124,9 @@ class AppServiceManager {
   std::pair<std::string, AppService> ActiveServiceByType(
       std::string service_type);
 
+  std::pair<std::string, AppService> EmbeddedServiceForType(
+      std::string service_type);
+
   std::pair<std::string, AppService> FindServiceByName(std::string name);
 
   std::string DefaultServiceByType(std::string service_type);
@@ -131,8 +137,8 @@ class AppServiceManager {
   std::map<std::string, AppService> published_services_;
 
   void BroadcastAppServiceUpdate(smart_objects::SmartObject& msg_params);
-  bool AppServiceUpdated(
-      const std::string service_id,
+  void AppServiceUpdated(
+      const smart_objects::SmartObject& service_record,
       const mobile_apis::ServiceUpdateReason::eType update_reason,
       smart_objects::SmartObject& msg_params);
 };
