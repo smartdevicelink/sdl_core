@@ -35,20 +35,16 @@
 #include <algorithm>
 #include <iterator>
 
+#include "application_manager/app_service_manager.h"
 #include "application_manager/application.h"
 #include "application_manager/application_manager.h"
 #include "application_manager/commands/command_impl.h"
 #include "application_manager/message_helper.h"
 #include "application_manager/smart_object_keys.h"
-#include "smart_objects/smart_object.h"
-#include "utils/logger.h"
 #include "encryption/hashing.h"
+#include "utils/logger.h"
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "AppServiceManager")
-
-namespace {
-const size_t kLimitCommand = 30;
-}
 
 namespace application_manager {
 
@@ -63,6 +59,7 @@ smart_objects::SmartObject AppServiceManager::PublishAppService(
     const smart_objects::SmartObject& manifest,
     const bool mobile_service,
     const uint32_t connection_key) {
+  LOG4CXX_AUTO_TRACE(logger_);
   std::string str_to_hash = "";
   std::string service_id = "";
 
@@ -109,10 +106,12 @@ std::vector<smart_objects::SmartObject> AppServiceManager::GetAllServices() {
 
 std::pair<std::string, AppService> AppServiceManager::ActiveServiceByType(
     std::string service_type) {
+  LOG4CXX_AUTO_TRACE(logger_);
   for (auto it = published_services_.begin(); it != published_services_.end();
        ++it) {
-    if (it->second.record[strings::app_service_manifest][strings::service_type]
+    if (it->second.record[strings::service_manifest][strings::service_type]
                 .asString() == service_type &&
+        it->second.record[strings::service_published].asBool() &&
         it->second.record[strings::service_active].asBool()) {
       return *it;
     }
@@ -123,9 +122,10 @@ std::pair<std::string, AppService> AppServiceManager::ActiveServiceByType(
 
 std::pair<std::string, AppService> AppServiceManager::FindServiceByName(
     std::string name) {
+  LOG4CXX_AUTO_TRACE(logger_);
   for (auto it = published_services_.begin(); it != published_services_.end();
        ++it) {
-    if (it->second.record[strings::app_service_manifest][strings::service_name]
+    if (it->second.record[strings::service_manifest][strings::service_name]
             .asString() == name) {
       return *it;
     }
