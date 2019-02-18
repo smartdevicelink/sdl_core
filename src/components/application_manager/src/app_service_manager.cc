@@ -258,8 +258,9 @@ std::pair<std::string, AppService> AppServiceManager::ActiveServiceByType(
   LOG4CXX_AUTO_TRACE(logger_);
   for (auto it = published_services_.begin(); it != published_services_.end();
        ++it) {
-    if (it->second.record[strings::app_service_manifest][strings::service_type]
+    if (it->second.record[strings::service_manifest][strings::service_type]
                 .asString() == service_type &&
+        it->second.record[strings::service_published].asBool() &&
         it->second.record[strings::service_active].asBool()) {
       return *it;
     }
@@ -273,7 +274,7 @@ std::pair<std::string, AppService> AppServiceManager::FindServiceByName(
   LOG4CXX_AUTO_TRACE(logger_);
   for (auto it = published_services_.begin(); it != published_services_.end();
        ++it) {
-    if (it->second.record[strings::app_service_manifest][strings::service_name]
+    if (it->second.record[strings::service_manifest][strings::service_name]
             .asString() == name) {
       return *it;
     }
