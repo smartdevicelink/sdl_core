@@ -4041,9 +4041,6 @@
 	  <param name="length" type="Integer" minvalue="0" maxvalue="2000000000" mandatory="false">
 		  <description>Optional length in bytes for resuming partial data chunks if offset is set to 0, then length is the total length of the file to be downloaded</description>
 	  </param>  
-    <param name="appID" type="Integer" mandatory="false">
-      <description>ID of application that requested this RPC.</description>
-    </param>
    </function>
    <function name="GetFileFromHMI" messagetype="response">
 		  <description> HMI handles the request internally and returns the file binary data with the response.</description>
@@ -4059,9 +4056,6 @@
 	  <param name="length" type="Integer" minvalue="0" maxvalue="2000000000" mandatory="false">
 		  <description>Optional length in bytes for resuming partial data chunks if offset is set to 0, then length is the total length of the file to be downloaded</description>
 	  </param>
-    <param name="appID" type="Integer" mandatory="false">
-      <description>ID of application that requested this RPC.</description>
-    </param>
   </function>
   
 <!-- Policies -->

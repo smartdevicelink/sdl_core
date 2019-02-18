@@ -34,24 +34,7 @@
 #include "application_manager/application_impl.h"
 #include "application_manager/rpc_service.h"
 #include "interfaces/MOBILE_API.h"
-#include "application_manager/message_helper.h"
-#include "utils/file_system.h"
-#include <boost/crc.hpp>
-
-namespace {
-/**
-* Calculates CRC32 checksum
-* @param binary_data - input data for which CRC32 should be calculated
-* @return calculated CRC32 checksum
-*/
-uint32_t GetCrc32CheckSum(const std::vector<uint8_t>& binary_data) {
-  const std::size_t file_size = binary_data.size();
-  boost::crc_32_type result;
-  result.process_bytes(&binary_data[0], file_size);
-  return result.checksum();
-}
-
-}  // namespace
+#include "application_manager/event_engine/event.h"
 
 namespace sdl_rpc_plugin {
 using namespace application_manager;
@@ -76,68 +59,10 @@ BCGetFileFromHMIResponse::~BCGetFileFromHMIResponse() {}
 void BCGetFileFromHMIResponse::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
   LOG4CXX_DEBUG(logger_, "GETFILE_FROMHMI_RESPONSE");
-
-  MessageHelper::PrintSmartObject(*message_);
-  smart_objects::SmartObjectSPtr result =
-      std::make_shared<smart_objects::SmartObject>();
-
-  smart_objects::SmartObject& response = *result;
-
-  response[strings::params][strings::message_type] = MessageType::kResponse;
-  response[strings::params][strings::correlation_id] = correlation_id();
-  response[strings::params][strings::protocol_type] =
-      CommandImpl::mobile_protocol_type_;
-  response[strings::params][strings::protocol_version] =
-      CommandImpl::protocol_version_;
-  response[strings::params][strings::connection_key] =
-      (*message_)[strings::msg_params][strings::app_id];
-  response[strings::params][strings::function_id] = function_id();
-
-  if ((*message_)[strings::msg_params].keyExists(strings::file_type)) {
-    response[strings::msg_params][strings::file_type] =
-        (*message_)[strings::msg_params][strings::file_type];
-  }
-  if ((*message_)[strings::msg_params].keyExists(strings::offset)) {
-    response[strings::msg_params][strings::offset] =
-        (*message_)[strings::msg_params][strings::offset];
-    offset_ = (*message_)[strings::msg_params][strings::offset].asInt();
-  }
-  if ((*message_)[strings::msg_params].keyExists(strings::length)) {
-    response[strings::msg_params][strings::length] =
-        (*message_)[strings::msg_params][strings::length];
-    length_ = (*message_)[strings::msg_params][strings::length].asInt();
-  }
-
-  if ((*message_)[strings::msg_params].keyExists(strings::file_path)) {
-    std::vector<uint8_t> bin_data;
-    std::string full_path =
-        (*message_)[strings::msg_params][strings::file_path].asString();
-    if (!file_system::ReadBinaryFile(full_path, bin_data, offset_)) {
-      LOG4CXX_ERROR(logger_, "Failed to read from file: " << full_path);
-      response[strings::msg_params][strings::success] = false;
-      response[strings::msg_params][strings::result_code] =
-          mobile_apis::Result::GENERIC_ERROR;
-      SendResponseToMobile(result, application_manager_);
-      return;
-    }
-    response[strings::params][strings::binary_data] = bin_data;
-
-    const uint32_t crc_calculated = GetCrc32CheckSum(bin_data);
-    response[strings::msg_params][strings::crc32_check_sum] = crc_calculated;
-  } else {
-    LOG4CXX_ERROR(logger_, "HMI did not return a file path: ");
-    response[strings::msg_params][strings::success] = false;
-    response[strings::msg_params][strings::result_code] =
-        mobile_apis::Result::INVALID_DATA;
-    SendResponseToMobile(result, application_manager_);
-    return;
-  }
-
-  response[strings::msg_params][strings::success] = true;
-  response[strings::msg_params][strings::result_code] =
-      mobile_apis::Result::SUCCESS;
-
-  SendResponseToMobile(result, application_manager_);
+  application_manager::event_engine::Event event(
+      hmi_apis::FunctionID::BasicCommunication_GetFileFromHMI);
+  event.set_smart_object(*message_);
+  event.raise(application_manager_.event_dispatcher());
 }
 
 }  // namespace commands

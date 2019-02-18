@@ -34,6 +34,7 @@
 #include "application_manager/application_impl.h"
 #include "application_manager/rpc_service.h"
 #include "interfaces/MOBILE_API.h"
+#include "application_manager/message_helper.h"
 #include "application_manager/app_service_manager.h"
 #include "utils/file_system.h"
 #include <boost/crc.hpp>
@@ -170,10 +171,9 @@ void GetFileRequest::Run() {
   if (GetFilePath(file_path, forward_to_hmi)) {
     if (forward_to_hmi) {
       LOG4CXX_DEBUG(logger_, "Forwarding GetFile request to HMI");
-      (*message_)[strings::msg_params][strings::app_id] = connection_key();
-
       SendHMIRequest(hmi_apis::FunctionID::BasicCommunication_GetFileFromHMI,
-                     &(*message_)[strings::msg_params]);
+                     &(*message_)[strings::msg_params],
+                     true);
       return;
     }
   } else {
@@ -242,6 +242,65 @@ void GetFileRequest::Run() {
   LOG4CXX_DEBUG(logger_, "crc: " << crc_calculated);
   // std::string st(bin_data.begin(), bin_data.end());
   // LOG4CXX_DEBUG(logger_, "Binary data: " << st);
+
+  SendResponse(true,
+               mobile_apis::Result::SUCCESS,
+               "File uploaded",
+               &response_params,
+               bin_data);
+}
+
+void GetFileRequest::on_event(const app_mngr::event_engine::Event& event) {
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  if (hmi_apis::FunctionID::BasicCommunication_GetFileFromHMI != event.id()) {
+    return;
+  }
+  const smart_objects::SmartObject& hmi_response = event.smart_object();
+  smart_objects::SmartObject response_params =
+      smart_objects::SmartObject(smart_objects::SmartType_Map);
+  std::vector<uint8_t> bin_data;
+
+  if (hmi_response[strings::msg_params].keyExists(strings::file_type)) {
+    response_params[strings::file_type] =
+        hmi_response[strings::msg_params][strings::file_type];
+  }
+
+  if (hmi_response[strings::msg_params].keyExists(strings::offset)) {
+    response_params[strings::offset] =
+        hmi_response[strings::msg_params][strings::offset];
+    offset_ = hmi_response[strings::msg_params][strings::offset].asInt();
+  }
+
+  if (hmi_response[strings::msg_params].keyExists(strings::length)) {
+    response_params[strings::length] =
+        hmi_response[strings::msg_params][strings::length];
+    length_ = hmi_response[strings::msg_params][strings::length].asInt();
+  }
+
+  if (hmi_response[strings::msg_params].keyExists(strings::file_path)) {
+    std::string full_path =
+        hmi_response[strings::msg_params][strings::file_path].asString();
+    if (!file_system::ReadBinaryFile(full_path, bin_data, offset_)) {
+      LOG4CXX_ERROR(logger_, "Failed to read from file: " << full_path);
+      SendResponse(false,
+                   mobile_apis::Result::GENERIC_ERROR,
+                   "Failed to read from file",
+                   &response_params);
+      return;
+    }
+
+    const uint32_t crc_calculated = GetCrc32CheckSum(bin_data);
+    response_params[strings::crc32_check_sum] = crc_calculated;
+
+  } else {
+    LOG4CXX_ERROR(logger_, "HMI did not return a file path: ");
+    SendResponse(false,
+                 mobile_apis::Result::INVALID_DATA,
+                 "HMI did not return a file path",
+                 &response_params);
+    return;
+  }
 
   SendResponse(true,
                mobile_apis::Result::SUCCESS,
