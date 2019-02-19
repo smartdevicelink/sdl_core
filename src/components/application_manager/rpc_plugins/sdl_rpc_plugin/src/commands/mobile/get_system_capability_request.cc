@@ -134,8 +134,7 @@ void GetSystemCapabilityRequest::Run() {
     case mobile_apis::SystemCapabilityType::APP_SERVICES: {
       smart_objects::SmartObject app_service_capabilities(
           smart_objects::SmartType_Map);
-      smart_objects::SmartObject supported_types(
-          smart_objects::SmartType_Array);
+      smart_objects::SmartObject app_services(smart_objects::SmartType_Array);
 
       std::vector<smart_objects::SmartObject> service_records =
           application_manager_.GetAppServiceManager().GetAllServices();
@@ -147,8 +146,6 @@ void GetSystemCapabilityRequest::Run() {
         app_services.asArray()->push_back(app_services_capabilities);
       }
 
-
-      app_service_capabilities[strings::services_supported] = supported_types;
       app_service_capabilities[strings::app_services] = app_services;
       response_params[strings::system_capability]
                      [strings::app_services_capabilities] =
@@ -170,12 +167,12 @@ void GetSystemCapabilityRequest::Run() {
       LOG4CXX_DEBUG(logger_,
                     "GETSYSCAP: Subscribe to system capability - "
                         << response_type);
-      ext.subscribeTo(response_type);
+      ext.SubscribeTo(response_type);
     } else {
       LOG4CXX_DEBUG(logger_,
                     "GETSYSCAP: Unsubscribe from system capability - "
                         << response_type);
-      ext.unsubscribeFrom(response_type);
+      ext.UnsubscribeFrom(response_type);
     }
   }
 

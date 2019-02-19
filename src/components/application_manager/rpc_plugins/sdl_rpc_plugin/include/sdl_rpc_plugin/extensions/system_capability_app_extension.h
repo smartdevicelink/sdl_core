@@ -52,13 +52,13 @@ class SystemCapabilityAppExtension : public app_mngr_::AppExtension {
                                app_mngr_::Application& app);
   virtual ~SystemCapabilityAppExtension();
 
-  bool subscribeTo(const SystemCapabilityType system_capability_type);
+  bool SubscribeTo(const SystemCapabilityType system_capability_type);
 
-  bool unsubscribeFrom(const SystemCapabilityType system_capability_type);
+  bool UnsubscribeFrom(const SystemCapabilityType system_capability_type);
 
-  void unsubscribeFromAll();
+  void UnsubscribeFromAll();
 
-  bool isSubscribedTo(const SystemCapabilityType system_capability_type) const;
+  bool IsSubscribedTo(const SystemCapabilityType system_capability_type) const;
 
   SystemCapabilitySubscriptions Subscriptions();
 

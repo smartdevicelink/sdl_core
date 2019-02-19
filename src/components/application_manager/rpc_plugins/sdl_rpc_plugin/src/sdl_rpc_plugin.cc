@@ -78,7 +78,7 @@ void SDLRPCPlugin::OnApplicationEvent(
 
 void SDLRPCPlugin::DeleteSubscriptions(app_mngr::ApplicationSharedPtr app) {
   auto& ext = SystemCapabilityAppExtension::ExtractExtension(*app);
-  ext.unsubscribeFromAll();
+  ext.UnsubscribeFromAll();
 }
 
 }  // namespace sdl_rpc_plugin

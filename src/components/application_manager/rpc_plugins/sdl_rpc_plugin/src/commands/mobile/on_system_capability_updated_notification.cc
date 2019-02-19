@@ -42,7 +42,7 @@ void OnSystemCapabilityUpdatedNotification::Run() {
       [&system_capability_type](const ApplicationSharedPtr app) {
         DCHECK_OR_RETURN(app, false);
         auto& ext = SystemCapabilityAppExtension::ExtractExtension(*app);
-        return ext.isSubscribedTo(system_capability_type);
+        return ext.IsSubscribedTo(system_capability_type);
       };
 
   const std::vector<ApplicationSharedPtr>& applications = FindAllApps(
