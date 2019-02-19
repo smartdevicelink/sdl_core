@@ -102,11 +102,9 @@ void PublishAppServiceRequest::Run() {
                    [strings::service_name].asString();
   }
 
-  // Todo: revision make service type string.
-  mobile_apis::AppServiceType::eType requested_service_type =
-      static_cast<mobile_apis::AppServiceType::eType>(
-          (*message_)[strings::msg_params][strings::app_service_manifest]
-                     [strings::service_type].asUInt());
+  std::string requested_service_type =
+      (*message_)[strings::msg_params][strings::app_service_manifest]
+                 [strings::service_type].asString();
 
   smart_objects::SmartArray* requested_handled_rpcs;
   if ((*message_)[strings::msg_params][strings::app_service_manifest].keyExists(

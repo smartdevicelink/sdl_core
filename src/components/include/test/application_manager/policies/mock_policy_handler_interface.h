@@ -231,12 +231,11 @@ class MockPolicyHandlerInterface : public policy::PolicyHandlerInterface {
       GetAppServiceParameters,
       void(const std::string& policy_app_id,
            policy_table::AppServiceParameters* app_service_parameters));
-  MOCK_CONST_METHOD4(
-      CheckAppServiceParameters,
-      bool(const std::string& policy_app_id,
-           const std::string& requested_service_name,
-           const mobile_apis::AppServiceType::eType& requested_service_type,
-           smart_objects::SmartArray* requested_handled_rpcs));
+  MOCK_CONST_METHOD4(CheckAppServiceParameters,
+                     bool(const std::string& policy_app_id,
+                          const std::string& requested_service_name,
+                          const std::string& requested_service_type,
+                          smart_objects::SmartArray* requested_handled_rpcs));
 
 #ifdef EXTERNAL_PROPRIETARY_MODE
   MOCK_CONST_METHOD0(GetMetaInfo, const policy::MetaInfo());

@@ -68,11 +68,9 @@ void OnAppServiceDataNotificationFromMobile::Run() {
   LOG4CXX_DEBUG(logger_, "Received an OnAppServiceData");
   MessageHelper::PrintSmartObject(*message_);
 
-  // Todo: revision make service type string.
-  mobile_apis::AppServiceType::eType service_type =
-      static_cast<mobile_apis::AppServiceType::eType>(
-          (*message_)[strings::msg_params][strings::app_service_manifest]
-                     [strings::service_type].asUInt());
+  std::string service_type =
+      (*message_)[strings::msg_params][strings::app_service_manifest]
+                 [strings::service_type].asString();
 
   ApplicationSharedPtr app = application_manager_.application(connection_key());
 
