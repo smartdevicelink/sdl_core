@@ -60,7 +60,7 @@ class SDLRPCPlugin : public plugins::RPCPlugin {
                           app_mngr::ApplicationSharedPtr application) OVERRIDE;
 
  private:
-  void DeleteSubscriptions(app_mngr::ApplicationSharedPtr app);
+  void ClearSubscriptions(app_mngr::ApplicationSharedPtr app);
 
   std::unique_ptr<application_manager::CommandFactory> command_factory_;
 };

@@ -72,11 +72,11 @@ void SDLRPCPlugin::OnApplicationEvent(
     application->AddExtension(
         std::make_shared<SystemCapabilityAppExtension>(*this, *application));
   } else if (plugins::ApplicationEvent::kDeleteApplicationData == event) {
-    DeleteSubscriptions(application);
+    ClearSubscriptions(application);
   }
 }
 
-void SDLRPCPlugin::DeleteSubscriptions(app_mngr::ApplicationSharedPtr app) {
+void SDLRPCPlugin::ClearSubscriptions(app_mngr::ApplicationSharedPtr app) {
   auto& ext = SystemCapabilityAppExtension::ExtractExtension(*app);
   ext.UnsubscribeFromAll();
 }

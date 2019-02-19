@@ -137,7 +137,7 @@ bool AppServiceManager::UnpublishAppService(const std::string service_id) {
   return true;
 }
 
-void AppServiceManager::UnpublishAppServices(const uint32_t connection_key) {
+void AppServiceManager::UnpublishServices(const uint32_t connection_key) {
   LOG4CXX_AUTO_TRACE(logger_);
   LOG4CXX_DEBUG(logger_, "Unpublishing all app services: " << connection_key);
   for (auto it = published_services_.begin(); it != published_services_.end();
