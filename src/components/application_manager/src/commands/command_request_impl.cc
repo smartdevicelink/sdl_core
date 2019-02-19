@@ -441,10 +441,12 @@ void CommandRequestImpl::SendProviderRequest(
   if (hmi_destination) {
     LOG4CXX_DEBUG(logger_, "Sending Request to HMI Provider");
     SendHMIRequest(hmi_function_id, &(*msg)[strings::msg_params], use_events);
+    return;
   }
 
   if (!app) {
     LOG4CXX_DEBUG(logger_, "Invalid App Provider pointer");
+    // todo construct reponse for error case, no provider
     return;
   }
 
@@ -472,8 +474,8 @@ void CommandRequestImpl::SendMobileRequest(
   request[strings::params][strings::message_type] = MessageType::kRequest;
   if (use_events) {
     LOG4CXX_DEBUG(logger_,
-                  "subscribe_on_event " << function_id << " "
-                                        << mobile_correlation_id);
+                  "SendMobileRequest subscribe_on_event "
+                      << function_id << " " << mobile_correlation_id);
     subscribe_on_event(function_id, mobile_correlation_id);
   }
 
@@ -507,12 +509,12 @@ uint32_t CommandRequestImpl::SendHMIRequest(
 
   if (use_events) {
     LOG4CXX_DEBUG(logger_,
-                  "subscribe_on_event " << function_id << " "
-                                        << hmi_correlation_id);
+                  "SendHMIRequest subscribe_on_event " << function_id << " "
+                                                       << hmi_correlation_id);
     subscribe_on_event(function_id, hmi_correlation_id);
   }
   if (ProcessHMIInterfacesAvailability(hmi_correlation_id, function_id)) {
-    if (!rpc_service_.ManageHMICommand(result)) {
+    if (!rpc_service_.ManageHMICommand(result, SOURCE_TO_HMI)) {
       LOG4CXX_ERROR(logger_, "Unable to send request");
       SendResponse(false, mobile_apis::Result::OUT_OF_MEMORY);
     }
@@ -542,7 +544,7 @@ void CommandRequestImpl::CreateHMINotification(
   notify[strings::params][strings::function_id] = function_id;
   notify[strings::msg_params] = msg_params;
 
-  if (!rpc_service_.ManageHMICommand(result)) {
+  if (!rpc_service_.ManageHMICommand(result, SOURCE_TO_HMI)) {
     LOG4CXX_ERROR(logger_, "Unable to send HMI notification");
   }
 }

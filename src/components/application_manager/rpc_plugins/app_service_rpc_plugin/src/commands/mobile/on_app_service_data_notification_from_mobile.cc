@@ -86,7 +86,8 @@ void OnAppServiceDataNotificationFromMobile::Run() {
     return;
   }
 
-  SendNotificationToConsumers();
+  SendNotificationToConsumers(
+      hmi_apis::FunctionID::eType::AppService_OnAppServiceData);
 }
 
 }  // namespace commands

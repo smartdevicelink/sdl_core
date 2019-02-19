@@ -38,6 +38,8 @@
 #include "application_manager/rpc_service.h"
 #include "interfaces/MOBILE_API.h"
 
+#include "smart_objects/enum_schema_item.h"
+
 namespace app_service_rpc_plugin {
 using namespace application_manager;
 namespace commands {
@@ -69,15 +71,22 @@ void OnAppServiceDataNotification::Run() {
   LOG4CXX_DEBUG(logger_, "Sending OnAppServiceData to consumer");
   MessageHelper::PrintSmartObject(*message_);
 
-  auto appServiceType = (*message_)[strings::msg_params][strings::service_data]
-                                   [strings::service_type].asString();
+  mobile_apis::AppServiceType::eType service_type =
+      static_cast<mobile_apis::AppServiceType::eType>(
+          (*message_)[strings::msg_params][strings::service_type].asUInt());
 
-  auto subscribed_to_app_service_predicate =
-      [appServiceType](const ApplicationSharedPtr app) {
-        DCHECK_OR_RETURN(app, false);
-        auto& ext = AppServiceAppExtension::ExtractASExtension(*app);
-        return ext.isSubscribedToAppService(appServiceType);
-      };
+  std::string service_type_str = std::string();
+  smart_objects::EnumConversionHelper<
+      mobile_apis::AppServiceType::eType>::EnumToString(service_type,
+                                                        &service_type_str);
+
+  auto subscribed_to_app_service_predicate = [service_type_str](
+      const ApplicationSharedPtr app) {
+    DCHECK_OR_RETURN(app, false);
+    auto& ext = AppServiceAppExtension::ExtractASExtension(*app);
+    LOG4CXX_DEBUG(logger_, "Check subscription for type: " << service_type_str);
+    return ext.isSubscribedToAppService(service_type_str);
+  };
 
   const std::vector<ApplicationSharedPtr>& applications =
       application_manager::FindAllApps(application_manager_.applications(),
@@ -92,7 +101,9 @@ void OnAppServiceDataNotification::Run() {
       LOG4CXX_ERROR(logger_, "NULL pointer");
       continue;
     }
-
+    LOG4CXX_DEBUG(logger_,
+                  "Sending OnAppServiceDataNotification to mobile connection: "
+                      << app->app_id());
     (*message_)[app_mngr::strings::params][app_mngr::strings::connection_key] =
         app->app_id();
     SendNotification();

@@ -143,8 +143,6 @@ void RequestFromHMI::SendProviderRequest(
 
   if (hmi_destination) {
     LOG4CXX_DEBUG(logger_, "Sending Request to HMI Provider");
-
-    // todo
     SendHMIRequest(hmi_function_id, &(*msg)[strings::msg_params], use_events);
     return;
   }
@@ -154,6 +152,7 @@ void RequestFromHMI::SendProviderRequest(
     return;
   }
 
+  LOG4CXX_DEBUG(logger_, "Sending Request to Mobile Provider");
   SendMobileRequest(mobile_function_id,
                     app->app_id(),
                     &(*msg)[strings::msg_params],
@@ -189,19 +188,16 @@ void RequestFromHMI::SendMobileRequest(
 
   if (use_events) {
     LOG4CXX_DEBUG(logger_,
-                  "subscribe_on_event " << function_id << " "
-                                        << mobile_correlation_id);
+                  "RequestFromHMI subscribe_on_event "
+                      << function_id << " " << mobile_correlation_id);
     subscribe_on_event(function_id, mobile_correlation_id);
   }
   if (!rpc_service_.ManageMobileCommand(
           result, commands::Command::CommandSource::SOURCE_SDL)) {
     LOG4CXX_ERROR(logger_, "Unable to send request to mobile");
-    // SendErrorResponse(false, mobile_apis::Result::OUT_OF_MEMORY);
   }
 }
 
-// todo this method is duplicate code from command request impl. Move to command
-// impl
 uint32_t RequestFromHMI::SendHMIRequest(
     const hmi_apis::FunctionID::eType& function_id,
     const smart_objects::SmartObject* msg_params,
@@ -227,15 +223,14 @@ uint32_t RequestFromHMI::SendHMIRequest(
 
   if (use_events) {
     LOG4CXX_DEBUG(logger_,
-                  "subscribe_on_event " << function_id << " "
-                                        << hmi_correlation_id);
+                  "RequestFromHMI subscribe_on_event " << function_id << " "
+                                                       << hmi_correlation_id);
     subscribe_on_event(function_id, hmi_correlation_id);
   }
   if (ProcessHMIInterfacesAvailability(hmi_correlation_id, function_id)) {
     if (!rpc_service_.ManageHMICommand(
             result, commands::Command::CommandSource::SOURCE_TO_HMI)) {
       LOG4CXX_ERROR(logger_, "Unable to send request");
-      // SendErrorResponse(false, mobile_apis::Result::OUT_OF_MEMORY);
     }
   } else {
     LOG4CXX_DEBUG(logger_, "Interface is not available");

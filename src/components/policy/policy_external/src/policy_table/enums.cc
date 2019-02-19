@@ -1131,6 +1131,11 @@ bool EnumFromJsonString(const std::string& literal, FunctionID* result) {
     return true;
   }
 
+  if ("GetAppServiceData" == literal) {
+    *result = GetAppServiceDataID;
+    return true;
+  }
+
   if ("PerformAppServiceInteraction" == literal) {
     *result = PerformAppServiceInteractionID;
     return true;

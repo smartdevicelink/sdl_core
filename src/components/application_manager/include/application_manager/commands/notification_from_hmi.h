@@ -53,9 +53,14 @@ class NotificationFromHMI : public CommandImpl {
   virtual bool CleanUp();
   virtual void Run();
   void SendNotificationToMobile(const MessageSharedPtr& message);
+  void SendNotificationToMobile(
+      const MessageSharedPtr& message,
+      const mobile_apis::FunctionID::eType& mobile_function_id);
+  void SendNotificationToHMI(MessageSharedPtr& message);
   void CreateHMIRequest(const hmi_apis::FunctionID::eType& function_id,
                         const smart_objects::SmartObject& msg_params) const;
-  void SendNotificationToConsumers();
+  void SendNotificationToConsumers(
+      const mobile_apis::FunctionID::eType& mobile_function_id);
 
  private:
   DISALLOW_COPY_AND_ASSIGN(NotificationFromHMI);

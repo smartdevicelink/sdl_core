@@ -66,7 +66,6 @@ GetAppServiceDataRequest::~GetAppServiceDataRequest() {}
 
 void GetAppServiceDataRequest::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
-  MessageHelper::PrintSmartObject(*message_);
 
   mobile_apis::AppServiceType::eType service_type =
       static_cast<mobile_apis::AppServiceType::eType>(
@@ -95,28 +94,19 @@ void GetAppServiceDataRequest::Run() {
                       true);
 }
 
-void GetAppServiceDataRequest::on_event(const event_engine::MobileEvent& event) {
-  // todo on response from hmi or mobile app service provider
-  LOG4CXX_DEBUG(logger_, "Mobile GetAppServiceRequest on_event");
+void GetAppServiceDataRequest::on_event(
+    const event_engine::MobileEvent& event) {
   const smart_objects::SmartObject& event_message = event.smart_object();
 
   auto msg_params = event_message[strings::msg_params];
-  SendResponse(true,
-               mobile_apis::Result::SUCCESS,
-               "",
-               &msg_params);
+  SendResponse(true, mobile_apis::Result::SUCCESS, "", &msg_params);
 }
 
 void GetAppServiceDataRequest::on_event(const event_engine::Event& event) {
-  // todo on response from hmi or mobile app service provider
-  LOG4CXX_DEBUG(logger_, "Mobile GetAppServiceRequest on_event");
   const smart_objects::SmartObject& event_message = event.smart_object();
 
   auto msg_params = event_message[strings::msg_params];
-  SendResponse(true,
-               mobile_apis::Result::SUCCESS,
-               "",
-               &msg_params);
+  SendResponse(true, mobile_apis::Result::SUCCESS, "", &msg_params);
 }
 
 }  // namespace commands
