@@ -3912,7 +3912,7 @@
             <description> Unique name of this service</description>
         </param>
 
-        <param name="serviceType" type="AppServiceType" mandatory="true">
+        <param name="serviceType" type="String" mandatory="true">
             <description>The type of service that is to be offered by this app</description>
         </param>
 
@@ -3967,7 +3967,7 @@
     <struct name="AppServiceData" since="5.1">
         <description> Contains all the current data of the app service. The serviceType will link to which of the service data objects are included in this object. (eg if service type equals MEDIA, the mediaServiceData param should be included.</description>
 
-        <param name="serviceType" type="AppServiceType" mandatory="true"/>
+        <param name="serviceType" type="String" mandatory="true"/>
         <param name="serviceID" type="String" mandatory="true"/>
 
         <param name="mediaServiceData" type="MediaServiceData" mandatory="false"/>

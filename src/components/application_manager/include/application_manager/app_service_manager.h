@@ -34,6 +34,7 @@
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_APP_SERVICE_MANAGER_H_
 
 #include "smart_objects/smart_object.h"
+#include "application_manager/application.h"
 
 namespace application_manager {
 

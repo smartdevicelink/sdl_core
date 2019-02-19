@@ -49,6 +49,9 @@
 #include "application_manager/state_controller.h"
 #include "application_manager/resumption/resume_ctrl.h"
 
+#include "policy/policy_table/types.h"
+#include "rpc_base/rpc_base_json_inl.h"
+
 #ifdef EXTERNAL_PROPRIETARY_MODE
 #include "policy/policy_external/include/policy/policy_types.h"
 #endif
