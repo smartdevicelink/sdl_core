@@ -78,6 +78,8 @@ app_mngr::CommandSharedPtr AppServiceHmiCommandFactory::CreateCommand(
     message_type_str = "response";
   } else if (hmi_apis::messageType::error_response == message_type) {
     message_type_str = "error response";
+  } else if (hmi_apis::messageType::notification == message_type) {
+    message_type_str = "notification";
   }
 
   UNUSED(message_type_str);

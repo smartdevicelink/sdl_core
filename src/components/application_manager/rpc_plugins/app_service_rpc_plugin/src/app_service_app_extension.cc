@@ -75,7 +75,8 @@ void AppServiceAppExtension::unsubscribeFromAppService() {
 
 bool AppServiceAppExtension::isSubscribedToAppService(
     const std::string app_service_type) const {
-  LOG4CXX_DEBUG(logger_, app_service_type);
+  LOG4CXX_DEBUG(logger_,
+                "isSubscribedToAppService for type: " << app_service_type);
   return subscribed_data_.find(app_service_type) != subscribed_data_.end();
 }
 

@@ -44,7 +44,6 @@
 #include "app_service_rpc_plugin/commands/mobile/get_app_service_data_request_to_mobile.h"
 #include "app_service_rpc_plugin/commands/mobile/get_app_service_data_response_from_mobile.h"
 
-
 CREATE_LOGGERPTR_GLOBAL(logger_, "AppServiceRpcPlugin")
 
 namespace app_service_rpc_plugin {
@@ -119,8 +118,7 @@ app_mngr::CommandCreator& AppServiceMobileCommandFactory::buildCommandCreator(
     case mobile_apis::FunctionID::GetAppServiceDataID:
       if (app_mngr::commands::Command::CommandSource::SOURCE_MOBILE == source) {
         return mobile_apis::messageType::request == message_type
-                   ? factory.GetCreator<
-                         commands::GetAppServiceDataRequest>()
+                   ? factory.GetCreator<commands::GetAppServiceDataRequest>()
                    : factory.GetCreator<
                          commands::GetAppServiceDataResponseFromMobile>();
       } else if (app_mngr::commands::Command::CommandSource::SOURCE_SDL ==
@@ -128,9 +126,8 @@ app_mngr::CommandCreator& AppServiceMobileCommandFactory::buildCommandCreator(
         return mobile_apis::messageType::request == message_type
                    ? factory.GetCreator<
                          commands::GetAppServiceDataRequestToMobile>()
-                   : factory.GetCreator<
-                         commands::GetAppServiceDataResponse>();
-      }          
+                   : factory.GetCreator<commands::GetAppServiceDataResponse>();
+      }
     default:
       LOG4CXX_WARN(logger_, "Unsupported function_id: " << function_id);
       return factory.GetCreator<app_mngr::InvalidCommand>();

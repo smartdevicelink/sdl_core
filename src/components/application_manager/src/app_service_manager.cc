@@ -147,7 +147,6 @@ void AppServiceManager::GetProvider(const std::string& service_type,
   }
 }
 
-
 std::pair<std::string, AppService> AppServiceManager::ActiveServiceByType(
     std::string service_type) {
   for (auto it = published_services_.begin(); it != published_services_.end();

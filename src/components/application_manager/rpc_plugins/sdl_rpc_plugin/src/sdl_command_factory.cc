@@ -55,7 +55,8 @@ SDLCommandFactory::SDLCommandFactory(
 app_mngr::CommandSharedPtr SDLCommandFactory::CreateCommand(
     const app_mngr::commands::MessageSharedPtr& message,
     app_mngr::commands::Command::CommandSource source) {
-  if (app_mngr::commands::Command::SOURCE_HMI == source) {
+  if (app_mngr::commands::Command::SOURCE_HMI == source ||
+      app_mngr::commands::Command::SOURCE_TO_HMI == source) {
     return hmi_command_factory_->CreateCommand(message, source);
   } else {
     return mobile_command_factory_->CreateCommand(message, source);
@@ -70,7 +71,8 @@ bool SDLCommandFactory::IsAbleToProcess(
   bool is_mobile_command_factory_able_to_process =
       mobile_command_factory_->IsAbleToProcess(FunctionID, source);
 
-  return app_mngr::commands::Command::SOURCE_HMI == source
+  return (app_mngr::commands::Command::SOURCE_HMI == source ||
+          app_mngr::commands::Command::SOURCE_TO_HMI == source)
              ? is_hmi_command_factory_able_to_process
              : is_mobile_command_factory_able_to_process;
 }

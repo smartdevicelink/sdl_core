@@ -144,8 +144,6 @@ void RequestFromHMI::SendProviderRequest(
 
   if (hmi_destination) {
     LOG4CXX_DEBUG(logger_, "Sending Request to HMI Provider");
-
-    // todo
     SendHMIRequest(hmi_function_id, &(*msg)[strings::msg_params], use_events);
     return;
   }
@@ -154,20 +152,23 @@ void RequestFromHMI::SendProviderRequest(
     LOG4CXX_DEBUG(logger_, "Invalid App Provider pointer");
     return;
   }
-
-  SendMobileRequest(mobile_function_id, app->app_id(), &(*msg)[strings::msg_params], use_events);
+  LOG4CXX_DEBUG(logger_, "Sending Request to Mobile Provider");
+  SendMobileRequest(mobile_function_id,
+                    app->app_id(),
+                    &(*msg)[strings::msg_params],
+                    use_events);
 }
 
-void RequestFromHMI::SendMobileRequest(    const mobile_apis::FunctionID::eType& function_id,
+void RequestFromHMI::SendMobileRequest(
+    const mobile_apis::FunctionID::eType& function_id,
     const uint32_t correlation_id,
     const smart_objects::SmartObject* msg_params,
     bool use_events) {
-
   smart_objects::SmartObjectSPtr result =
-    std::make_shared<smart_objects::SmartObject>();
-  
+      std::make_shared<smart_objects::SmartObject>();
+
   const uint32_t mobile_correlation_id =
-    application_manager_.GetNextMobileCorrelationID();
+      application_manager_.GetNextMobileCorrelationID();
 
   smart_objects::SmartObject& request = *result;
 
@@ -187,20 +188,16 @@ void RequestFromHMI::SendMobileRequest(    const mobile_apis::FunctionID::eType&
 
   if (use_events) {
     LOG4CXX_DEBUG(logger_,
-                  "subscribe_on_event " << function_id << " "
-                                        << mobile_correlation_id);
+                  "RequestFromHMI subscribe_on_event "
+                      << function_id << " " << mobile_correlation_id);
     subscribe_on_event(function_id, mobile_correlation_id);
   }
   if (!rpc_service_.ManageMobileCommand(
           result, commands::Command::CommandSource::SOURCE_SDL)) {
     LOG4CXX_ERROR(logger_, "Unable to send request to mobile");
-    // SendErrorResponse(false, mobile_apis::Result::OUT_OF_MEMORY);
   }
-
 }
 
-// todo this method is duplicate code from command request impl. Move to command
-// impl
 uint32_t RequestFromHMI::SendHMIRequest(
     const hmi_apis::FunctionID::eType& function_id,
     const smart_objects::SmartObject* msg_params,
@@ -226,15 +223,14 @@ uint32_t RequestFromHMI::SendHMIRequest(
 
   if (use_events) {
     LOG4CXX_DEBUG(logger_,
-                  "subscribe_on_event " << function_id << " "
-                                        << hmi_correlation_id);
+                  "RequestFromHMI subscribe_on_event " << function_id << " "
+                                                       << hmi_correlation_id);
     subscribe_on_event(function_id, hmi_correlation_id);
   }
   if (ProcessHMIInterfacesAvailability(hmi_correlation_id, function_id)) {
     if (!rpc_service_.ManageHMICommand(
             result, commands::Command::CommandSource::SOURCE_TO_HMI)) {
       LOG4CXX_ERROR(logger_, "Unable to send request");
-      // SendErrorResponse(false, mobile_apis::Result::OUT_OF_MEMORY);
     }
   } else {
     LOG4CXX_DEBUG(logger_, "Interface is not available");

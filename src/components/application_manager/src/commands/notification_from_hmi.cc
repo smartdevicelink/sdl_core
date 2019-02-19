@@ -73,6 +73,21 @@ void NotificationFromHMI::SendNotificationToMobile(
   rpc_service_.ManageMobileCommand(message, SOURCE_SDL);
 }
 
+void NotificationFromHMI::SendNotificationToMobile(
+    const MessageSharedPtr& message,
+    const mobile_apis::FunctionID::eType& mobile_function_id) {
+  (*message)[strings::params][strings::message_type] =
+      static_cast<int32_t>(application_manager::MessageType::kNotification);
+  (*message)[strings::params][strings::function_id] = mobile_function_id;
+  rpc_service_.ManageMobileCommand(message, SOURCE_SDL);
+}
+
+void NotificationFromHMI::SendNotificationToHMI(MessageSharedPtr& message) {
+  (*message)[strings::params][strings::protocol_type] = hmi_protocol_type_;
+  (*message)[strings::params][strings::protocol_version] = protocol_version_;
+  rpc_service_.SendMessageToHMI(message);
+}
+
 void NotificationFromHMI::CreateHMIRequest(
     const hmi_apis::FunctionID::eType& function_id,
     const smart_objects::SmartObject& msg_params) const {
@@ -106,8 +121,10 @@ void NotificationFromHMI::CreateHMIRequest(
   }
 }
 
-void NotificationFromHMI::SendNotificationToConsumers() {
-  // application_manager.GetAppServiceManager().NotifyConsumers(message_);
+void NotificationFromHMI::SendNotificationToConsumers(
+    const mobile_apis::FunctionID::eType& mobile_function_id) {
+  SendNotificationToHMI(message_);
+  SendNotificationToMobile(message_, mobile_function_id);
 }
 
 }  // namespace commands
