@@ -94,7 +94,7 @@ void PublishAppServiceRequest::Run() {
   ApplicationSharedPtr app = application_manager_.application(connection_key());
   auto& ext =
       sdl_rpc_plugin::SystemCapabilityAppExtension::ExtractExtension(*app);
-  ext.subscribeTo(mobile_apis::SystemCapabilityType::APP_SERVICES);
+  ext.SubscribeTo(mobile_apis::SystemCapabilityType::APP_SERVICES);
 
   smart_objects::SmartObject service_record =
       application_manager_.GetAppServiceManager().PublishAppService(

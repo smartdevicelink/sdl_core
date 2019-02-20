@@ -3958,19 +3958,19 @@
     </struct>
 
     <enum name="ServiceUpdateReason" since="5.1">
-        <element name = "PUBLISHED">
+        <element name="PUBLISHED">
             <description> The service has just been published with the module and once activated to the primary service of its type, it will be ready for possible consumption.</description>
         </element>
-        <element name = "REMOVED">
+        <element name="REMOVED">
             <description> The service has just been unpublished with the module and is no longer accessible</description>
         </element>
-        <element name = "ACTIVATED">
+        <element name="ACTIVATED">
             <description> The service is activated as the primary service of this type. All requests dealing with this service type will be handled by this service.</description>
         </element>
-        <element name = "DEACTIVATED">
+        <element name="DEACTIVATED">
             <description> The service has been deactivated as the primary service of its type</description>
         </element>
-        <element name = "MANIFEST_UPDATE">
+        <element name="MANIFEST_UPDATE">
             <description> The service has updated its manifest. This could imply updated capabilities</description>
         </element>
     </enum>
@@ -3986,14 +3986,10 @@
 
     <struct name="AppServicesCapabilities" since="5.1">
         <description>Capabilities of app services including what service types are supported and the current state of services.</description>
-        <param name="servicesSupported" type="String" array="true" mandatory="true">
-            <description>An array of supported app service types</description>
-        </param>
         <param name="appServices" type="AppServiceCapability" array="true" mandatory="false">
             <description>An array of currently available services. If this is an update to the capability the affected services will include an update reason in that item</description>
         </param>
     </struct>
-
 
     <!-- End App Services -->
     
@@ -6892,7 +6888,7 @@
             <description>The type of system capability to get more information on</description>
         </param>
         <param name="subscribe" type="Boolean" mandatory="false" since="5.1">
-        <description>Flag to subscribe to updates of the supplied service capability type. If true, then requester will be subscribed </description>
+            <description>Flag to subscribe to updates of the supplied service capability type. If true, then requester will be subscribed</description>
         </param>
     </function>
     

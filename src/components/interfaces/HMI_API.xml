@@ -3626,19 +3626,19 @@
     </struct>
 
     <enum name="ServiceUpdateReason">
-        <element name = "PUBLISHED">
+        <element name="PUBLISHED">
             <description> The service has just been published with the module and once activated to the primary service of its type, it will be ready for possible consumption.</description>
         </element>
-        <element name = "REMOVED">
+        <element name="REMOVED">
             <description> The service has just been unpublished with the module and is no longer accessible</description>
         </element>
-        <element name = "ACTIVATED">
+        <element name="ACTIVATED">
             <description> The service is activated as the primary service of this type. All requests dealing with this service type will be handled by this service.</description>
         </element>
-        <element name = "DEACTIVATED">
+        <element name="DEACTIVATED">
             <description> The service has been deactivated as the primary service of its type</description>
         </element>
-        <element name = "MANIFEST_UPDATE">
+        <element name="MANIFEST_UPDATE">
             <description> The service has updated its manifest. This could imply updated capabilities</description>
         </element>
     </enum>
@@ -4122,7 +4122,7 @@
      </param>
    </function>
   <function name="OnSystemCapabilityUpdated" messagetype="notification">
-    <description>A notifcation to inform the connected device that a specific system capability has changed.</description>
+    <description>A notification to inform the connected device that a specific system capability has changed.</description>
     <param name="systemCapability" type="Common.SystemCapabilities" mandatory="true">
       <description>The system capability that has been updated</description>
     </param>

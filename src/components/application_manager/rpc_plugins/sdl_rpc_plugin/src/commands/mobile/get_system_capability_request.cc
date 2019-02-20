@@ -153,12 +153,12 @@ void GetSystemCapabilityRequest::Run() {
       LOG4CXX_DEBUG(logger_,
                     "GETSYSCAP: Subscribe to system capability - "
                         << response_type);
-      ext.subscribeTo(response_type);
+      ext.SubscribeTo(response_type);
     } else {
       LOG4CXX_DEBUG(logger_,
                     "GETSYSCAP: Unsubscribe from system capability - "
                         << response_type);
-      ext.unsubscribeFrom(response_type);
+      ext.UnsubscribeFrom(response_type);
     }
   }
 
