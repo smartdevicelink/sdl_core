@@ -199,9 +199,10 @@ TEST_F(GetInteriorVehicleDataRequestTest,
           mobile_message);
 
   // Expectations
-  EXPECT_CALL(mock_rpc_service_,
-              ManageHMICommand(HMIResultCodeIs(
-                  hmi_apis::FunctionID::RC_GetInteriorVehicleData)))
+  EXPECT_CALL(
+      mock_rpc_service_,
+      ManageHMICommand(
+          HMIResultCodeIs(hmi_apis::FunctionID::RC_GetInteriorVehicleData), _))
       .WillOnce(Return(true));
   // Act
   command->Run();
@@ -225,9 +226,10 @@ TEST_F(GetInteriorVehicleDataRequestTest,
           mobile_message);
 
   // Expectations
-  EXPECT_CALL(mock_rpc_service_,
-              ManageHMICommand(HMIResultCodeIs(
-                  hmi_apis::FunctionID::RC_GetInteriorVehicleData)))
+  EXPECT_CALL(
+      mock_rpc_service_,
+      ManageHMICommand(
+          HMIResultCodeIs(hmi_apis::FunctionID::RC_GetInteriorVehicleData), _))
       .WillOnce(Return(true));
   // Act
   command->Run();
@@ -253,7 +255,7 @@ TEST_F(
       .WillOnce(Return(true));
   EXPECT_CALL(mock_interior_data_cache_, Retrieve(enums_value::kRadio))
       .WillOnce(Return(radio_data));
-  EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_)).Times(0);
+  EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_, _)).Times(0);
   MessageSharedPtr command_result;
   EXPECT_CALL(
       mock_rpc_service_,
@@ -295,9 +297,10 @@ TEST_F(
       .WillByDefault(Return(true));
 
   // Expectations
-  EXPECT_CALL(mock_rpc_service_,
-              ManageHMICommand(HMIResultCodeIs(
-                  hmi_apis::FunctionID::RC_GetInteriorVehicleData)))
+  EXPECT_CALL(
+      mock_rpc_service_,
+      ManageHMICommand(
+          HMIResultCodeIs(hmi_apis::FunctionID::RC_GetInteriorVehicleData), _))
       .WillOnce(Return(true));
   EXPECT_CALL(
       mock_rpc_service_,
@@ -347,7 +350,7 @@ TEST_F(GetInteriorVehicleDataRequestTest,
   EXPECT_CALL(mock_interior_data_cache_, Retrieve(enums_value::kRadio))
       .WillOnce(Return(radio_data));
 
-  EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_)).Times(0);
+  EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_, _)).Times(0);
   MessageSharedPtr command_result;
   EXPECT_CALL(
       mock_rpc_service_,
@@ -383,7 +386,7 @@ TEST_F(
       .WillByDefault(Return(&rc_capabilities));
 
   // Expectations
-  EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_)).Times(0);
+  EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_, _)).Times(0);
   EXPECT_CALL(mock_rpc_service_,
               ManageMobileCommand(
                   MobileResultCodeIs(mobile_apis::Result::UNSUPPORTED_RESOURCE),
@@ -407,7 +410,7 @@ TEST_F(
   ON_CALL(mock_policy_handler_, CheckModule(_, _)).WillByDefault(Return(false));
 
   // Expectations
-  EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_)).Times(0);
+  EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_, _)).Times(0);
   EXPECT_CALL(mock_rpc_service_,
               ManageMobileCommand(
                   MobileResultCodeIs(mobile_apis::Result::DISALLOWED), _))
@@ -443,9 +446,10 @@ TEST_F(GetInteriorVehicleDataRequestTest,
       ManageMobileCommand(MobileResultCodeIs(mobile_apis::Result::SUCCESS), _))
       .WillOnce(Return(true));
 
-  EXPECT_CALL(mock_rpc_service_,
-              ManageHMICommand(HMIResultCodeIs(
-                  hmi_apis::FunctionID::RC_GetInteriorVehicleData)))
+  EXPECT_CALL(
+      mock_rpc_service_,
+      ManageHMICommand(
+          HMIResultCodeIs(hmi_apis::FunctionID::RC_GetInteriorVehicleData), _))
       .WillOnce(Return(true));
 
   // Act
@@ -478,9 +482,10 @@ TEST_F(GetInteriorVehicleDataRequestTest,
       .WillByDefault(Return(true));
 
   // Expectations
-  EXPECT_CALL(mock_rpc_service_,
-              ManageHMICommand(HMIResultCodeIs(
-                  hmi_apis::FunctionID::RC_GetInteriorVehicleData)))
+  EXPECT_CALL(
+      mock_rpc_service_,
+      ManageHMICommand(
+          HMIResultCodeIs(hmi_apis::FunctionID::RC_GetInteriorVehicleData), _))
       .WillOnce(Return(true));
   EXPECT_CALL(mock_rpc_service_,
               ManageMobileCommand(
@@ -519,9 +524,10 @@ TEST_F(GetInteriorVehicleDataRequestTest,
       .WillByDefault(Return(true));
 
   // Expectations
-  EXPECT_CALL(mock_rpc_service_,
-              ManageHMICommand(HMIResultCodeIs(
-                  hmi_apis::FunctionID::RC_GetInteriorVehicleData)))
+  EXPECT_CALL(
+      mock_rpc_service_,
+      ManageHMICommand(
+          HMIResultCodeIs(hmi_apis::FunctionID::RC_GetInteriorVehicleData), _))
       .WillOnce(Return(true));
   EXPECT_CALL(mock_rpc_service_,
               ManageMobileCommand(
@@ -569,10 +575,11 @@ TEST_F(GetInteriorVehicleDataRequestTest,
                 StoreRequestToHMITime(enums_value::kRadio));
     EXPECT_CALL(mock_interior_data_cache_, Contains(enums_value::kRadio))
         .WillRepeatedly(Return(false));
-    EXPECT_CALL(mock_rpc_service_,
-                ManageHMICommand(HMIResultCodeIs(
-                    hmi_apis::FunctionID::RC_GetInteriorVehicleData)))
-        .WillRepeatedly(Return(true));
+    EXPECT_CALL(
+        mock_rpc_service_,
+        ManageHMICommand(
+            HMIResultCodeIs(hmi_apis::FunctionID::RC_GetInteriorVehicleData),
+            _)).WillRepeatedly(Return(true));
     // Act
     command->Run();
   }
@@ -585,7 +592,7 @@ TEST_F(GetInteriorVehicleDataRequestTest,
       mock_rpc_service_,
       ManageMobileCommand(MobileResultCodeIs(mobile_apis::Result::REJECTED), _))
       .WillOnce(Return(false));
-  EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_)).Times(0);
+  EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_, _)).Times(0);
 
   // Act
   command->Run();

@@ -201,7 +201,7 @@ TEST_F(SetDisplayLayoutRequestTest, Run_SUCCESS) {
               GetInterfaceState(am::HmiInterfaces::HMI_INTERFACE_UI))
       .WillRepeatedly(Return(am::HmiInterfaces::STATE_AVAILABLE));
   EXPECT_CALL(mock_rpc_service_,
-              ManageHMICommand(CheckMshCorrId(kCorrelationKey)))
+              ManageHMICommand(CheckMshCorrId(kCorrelationKey), _))
       .WillOnce(Return(true));
 
   command->Run();

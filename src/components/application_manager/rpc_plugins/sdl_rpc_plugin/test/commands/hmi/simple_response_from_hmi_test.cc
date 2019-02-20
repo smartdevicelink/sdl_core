@@ -310,7 +310,7 @@ TEST_F(NotificationFromHMITest, CreateHMIRequest_UNSUCCESS) {
   EXPECT_CALL(app_mngr_, GetNextHMICorrelationID())
       .WillOnce(Return(correlation_id));
   EXPECT_CALL(mock_rpc_service_,
-              ManageHMICommand(CheckMsgType(am::MessageType::kRequest)))
+              ManageHMICommand(CheckMsgType(am::MessageType::kRequest), _))
       .WillOnce(Return(false));
 
   command->CreateHMIRequest(hmi_apis::FunctionID::INVALID_ENUM,

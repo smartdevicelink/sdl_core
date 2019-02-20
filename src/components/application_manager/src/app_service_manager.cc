@@ -119,16 +119,11 @@ void AppServiceManager::GetProvider(const std::string& service_type,
         record[strings::service_active].asBool() == false) {
       continue;
     }
-    
-    mobile_apis::AppServiceType::eType record_service_type =
-        static_cast<mobile_apis::AppServiceType::eType>(
-            record[strings::service_manifest][strings::service_type].asUInt());
 
-    std::string record_service_type_str = std::string();
-    smart_objects::EnumConversionHelper<mobile_apis::AppServiceType::eType>::
-        EnumToString(record_service_type, &record_service_type_str);
+    std::string record_service_type =
+        record[strings::service_manifest][strings::service_type].asString();
 
-    if (record_service_type_str == service_type) {
+    if (record_service_type == service_type) {
       LOG4CXX_DEBUG(logger_,
                     "Found provider for service type: " << service_type);
       bool mobile_service = service.mobile_service;

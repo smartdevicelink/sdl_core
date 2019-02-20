@@ -71,22 +71,16 @@ void OnAppServiceDataNotification::Run() {
   LOG4CXX_DEBUG(logger_, "Sending OnAppServiceData to consumer");
   MessageHelper::PrintSmartObject(*message_);
 
-  mobile_apis::AppServiceType::eType service_type =
-      static_cast<mobile_apis::AppServiceType::eType>(
-          (*message_)[strings::msg_params][strings::service_type].asUInt());
+  std::string service_type =
+      (*message_)[strings::msg_params][strings::service_type].asString();
 
-  std::string service_type_str = std::string();
-  smart_objects::EnumConversionHelper<
-      mobile_apis::AppServiceType::eType>::EnumToString(service_type,
-                                                        &service_type_str);
-
-  auto subscribed_to_app_service_predicate = [service_type_str](
-      const ApplicationSharedPtr app) {
-    DCHECK_OR_RETURN(app, false);
-    auto& ext = AppServiceAppExtension::ExtractASExtension(*app);
-    LOG4CXX_DEBUG(logger_, "Check subscription for type: " << service_type_str);
-    return ext.isSubscribedToAppService(service_type_str);
-  };
+  auto subscribed_to_app_service_predicate =
+      [service_type](const ApplicationSharedPtr app) {
+        DCHECK_OR_RETURN(app, false);
+        auto& ext = AppServiceAppExtension::ExtractASExtension(*app);
+        LOG4CXX_DEBUG(logger_, "Check subscription for type: " << service_type);
+        return ext.isSubscribedToAppService(service_type);
+      };
 
   const std::vector<ApplicationSharedPtr>& applications =
       application_manager::FindAllApps(application_manager_.applications(),

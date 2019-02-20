@@ -126,21 +126,13 @@ void RequestFromHMI::SendProviderRequest(
     const hmi_apis::FunctionID::eType& hmi_function_id,
     const smart_objects::SmartObject* msg,
     bool use_events) {
-  // Todo: decided final type of serviceType. String or enum
-
-  mobile_apis::AppServiceType::eType service_type =
-      static_cast<mobile_apis::AppServiceType::eType>(
-          (*msg)[strings::msg_params][strings::service_type].asUInt());
-
-  std::string service_type_str = std::string();
-  smart_objects::EnumConversionHelper<
-      mobile_apis::AppServiceType::eType>::EnumToString(service_type,
-                                                        &service_type_str);
+  std::string service_type =
+      (*msg)[strings::msg_params][strings::service_type].asString();
 
   bool hmi_destination = false;
   ApplicationSharedPtr app;
   application_manager_.GetAppServiceManager().GetProvider(
-      service_type_str, app, hmi_destination);
+      service_type, app, hmi_destination);
 
   if (hmi_destination) {
     LOG4CXX_DEBUG(logger_, "Sending Request to HMI Provider");

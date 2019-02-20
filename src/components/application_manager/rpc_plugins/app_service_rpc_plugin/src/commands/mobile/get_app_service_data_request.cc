@@ -67,14 +67,8 @@ GetAppServiceDataRequest::~GetAppServiceDataRequest() {}
 void GetAppServiceDataRequest::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  mobile_apis::AppServiceType::eType service_type =
-      static_cast<mobile_apis::AppServiceType::eType>(
-          (*message_)[strings::msg_params][strings::service_type].asUInt());
-
-  std::string service_type_str = std::string();
-  smart_objects::EnumConversionHelper<
-      mobile_apis::AppServiceType::eType>::EnumToString(service_type,
-                                                        &service_type_str);
+  std::string service_type =
+      (*message_)[strings::msg_params][strings::service_type].asString();
 
   bool subscribe = false;
   if ((*message_)[strings::msg_params].keyExists(strings::subscribe)) {
@@ -85,7 +79,7 @@ void GetAppServiceDataRequest::Run() {
 
   if (subscribe) {
     auto& ext = AppServiceAppExtension::ExtractASExtension(*app);
-    ext.subscribeToAppService(service_type_str);
+    ext.subscribeToAppService(service_type);
   }
 
   SendProviderRequest(mobile_apis::FunctionID::GetAppServiceDataID,

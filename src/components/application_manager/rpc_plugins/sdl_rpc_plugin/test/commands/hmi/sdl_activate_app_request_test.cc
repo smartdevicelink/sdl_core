@@ -166,9 +166,9 @@ TEST_F(SDLActivateAppRequestTest, DISABLED_Run_DeactivateApp_REJECTED) {
               IsStateActive(am::HmiState::StateID::STATE_ID_DEACTIVATE_HMI))
       .WillOnce(Return(true));
 
-  EXPECT_CALL(
-      mock_rpc_service_,
-      ManageHMICommand(HMIResultCodeIs(hmi_apis::FunctionID::SDL_ActivateApp)))
+  EXPECT_CALL(mock_rpc_service_,
+              ManageHMICommand(
+                  HMIResultCodeIs(hmi_apis::FunctionID::SDL_ActivateApp), _))
       .WillOnce(Return(true));
 
   command->Run();
@@ -487,7 +487,7 @@ TEST_F(SDLActivateAppRequestTest, OnTimeout_SUCCESS) {
   std::shared_ptr<SDLActivateAppRequest> command(
       CreateCommand<SDLActivateAppRequest>(msg));
   ON_CALL(mock_event_dispatcher_, remove_observer(_, _));
-  EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_)).WillOnce(Return(true));
+  EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_, _)).WillOnce(Return(true));
 
   command->onTimeOut();
 }

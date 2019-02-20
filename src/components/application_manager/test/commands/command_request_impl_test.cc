@@ -258,7 +258,7 @@ TEST_F(CommandRequestImplTest, CreateHMINotification_SUCCESS) {
 
   MessageSharedPtr result;
 
-  EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_))
+  EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_, _))
       .WillOnce(DoAll(SaveArg<0>(&result), Return(true)));
 
   command->CreateHMINotification(kInvalidFunctionId, *msg_params);
@@ -280,7 +280,7 @@ TEST_F(CommandRequestImplTest, SendHMIRequest_NoUseEvent_SUCCESS) {
       .WillRepeatedly(Return(am::HmiInterfaces::STATE_AVAILABLE));
   // Return `true` prevents call of `SendResponse` method;
 
-  EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_)).WillOnce(Return(true));
+  EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_, _)).WillOnce(Return(true));
 
   EXPECT_EQ(kCorrelationId,
             command->SendHMIRequest(kInvalidFunctionId, NULL, false));
@@ -298,7 +298,7 @@ TEST_F(CommandRequestImplTest, SendHMIRequest_UseEvent_SUCCESS) {
       .WillRepeatedly(Return(am::HmiInterfaces::STATE_AVAILABLE));
   // Return `true` prevents call of `SendResponse` method;
 
-  EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_)).WillOnce(Return(true));
+  EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_, _)).WillOnce(Return(true));
   EXPECT_CALL(event_dispatcher_, add_observer(_, _, _));
 
   EXPECT_EQ(kCorrelationId,
