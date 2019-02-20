@@ -87,8 +87,8 @@ smart_objects::SmartObject AppServiceManager::PublishAppService(
   app_service.record = service_record;
 
   std::string service_type =
-      manifest[strings::app_service_manifest][strings::service_type].asString();
-  Json::Value dictionary = last_state_.get_dictionary();
+      manifest[strings::service_type].asString();
+  Json::Value& dictionary = last_state_.get_dictionary();
   app_service.default_service =
       (dictionary[kAppServiceSection][kDefaults][service_type].asString() ==
        manifest[strings::service_name].asString());
@@ -200,7 +200,7 @@ bool AppServiceManager::SetDefaultService(const std::string service_id) {
   }
   service.default_service = true;
 
-  Json::Value dictionary = last_state_.get_dictionary();
+  Json::Value& dictionary = last_state_.get_dictionary();
   dictionary[kAppServiceSection][kDefaults][service_type] =
       service.record[strings::service_manifest][strings::service_name]
           .asString();
@@ -225,7 +225,7 @@ bool AppServiceManager::RemoveDefaultService(const std::string service_id) {
   std::string service_type =
       service.record[strings::service_manifest][strings::service_type]
           .asString();
-  Json::Value dictionary = last_state_.get_dictionary();
+  Json::Value& dictionary = last_state_.get_dictionary();
   dictionary[kAppServiceSection][kDefaults].removeMember(service_type);
   return true;
 }
@@ -345,7 +345,7 @@ std::pair<std::string, AppService> AppServiceManager::FindServiceByName(
 
 std::string AppServiceManager::DefaultServiceByType(std::string service_type) {
   LOG4CXX_AUTO_TRACE(logger_);
-  Json::Value dictionary = last_state_.get_dictionary();
+  Json::Value& dictionary = last_state_.get_dictionary();
   if (dictionary[kAppServiceSection][kDefaults].isMember(service_type)) {
     return dictionary[kAppServiceSection][kDefaults][service_type].asString();
   }
