@@ -140,7 +140,7 @@ void OnSystemCapabilityUpdatedNotification::Run() {
               << " was subcribed to REMOTE_CONTROL system capabilities, but "
                  "does not have RC permissions. Unsubscribing");
       auto& ext = SystemCapabilityAppExtension::ExtractExtension(*app);
-      ext.unsubscribeFrom(system_capability_type);
+      ext.UnsubscribeFrom(system_capability_type);
       continue;
     }
     LOG4CXX_DEBUG(logger_,

@@ -70,7 +70,6 @@ class ASAppServiceActivationRequest
   virtual void Run();
 
  private:
-  AppServiceRpcPlugin* plugin_;
   DISALLOW_COPY_AND_ASSIGN(ASAppServiceActivationRequest);
 };
 
