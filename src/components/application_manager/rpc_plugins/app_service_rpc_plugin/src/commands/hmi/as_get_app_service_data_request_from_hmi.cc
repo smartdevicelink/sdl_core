@@ -80,7 +80,7 @@ void ASGetAppServiceDataRequestFromHMI::on_event(
                hmi_apis::FunctionID::AppService_GetAppServiceData,
                hmi_apis::Common_Result::SUCCESS,
                &msg_params,
-               application_manager::commands::Command::SOURCE_TO_HMI);
+               application_manager::commands::Command::SOURCE_SDL_TO_HMI);
 }
 
 void ASGetAppServiceDataRequestFromHMI::on_event(
@@ -93,7 +93,7 @@ void ASGetAppServiceDataRequestFromHMI::on_event(
                hmi_apis::FunctionID::AppService_GetAppServiceData,
                hmi_apis::Common_Result::SUCCESS,
                &msg_params,
-               application_manager::commands::Command::SOURCE_TO_HMI);
+               application_manager::commands::Command::SOURCE_SDL_TO_HMI);
 }
 
 }  // namespace commands

@@ -34,6 +34,7 @@
 #define SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_APP_SERVICE_RPC_PLUGIN_INCLUDE_APP_SERVICE_RPC_PLUGIN_APP_SERVICE_APP_EXTENSION_H
 
 #include <application_manager/application_manager.h>
+#include "application_manager/app_extension.h"
 
 #include <set>
 #include <string>
@@ -43,6 +44,7 @@ class AppServiceRpcPlugin;
 
 namespace app_mngr = application_manager;
 
+typedef int AppExtensionUID;
 typedef mobile_apis::VehicleDataType::eType VehicleDataType;
 /**
  * @brief Defines set of app service types
@@ -61,12 +63,12 @@ class AppServiceAppExtension : public app_mngr::AppExtension {
   virtual ~AppServiceAppExtension();
 
   /**
- * @brief subscribeToAppService add vehicle_data to list of subscriptions of
- * application extension
- * @param vehicle_data data to subscribe
- * @return true in case if subscription is successful
- */
-  bool subscribeToAppService(const std::string app_service_type);
+   * @brief subscribeToAppService add vehicle_data to list of subscriptions of
+   * application extension
+   * @param vehicle_data data to subscribe
+   * @return true in case if subscription is successful
+   */
+  bool SubscribeToAppService(const std::string app_service_type);
 
   /**
    * @brief unsubscribeFromAppService remove vehicle_data from list of
@@ -74,11 +76,11 @@ class AppServiceAppExtension : public app_mngr::AppExtension {
    * @param vehicle_data data to unsubscribe
    * @return true in case if unsubscription is successful
    */
-  bool unsubscribeFromAppService(const std::string app_service_type);
+  bool UnsubscribeFromAppService(const std::string app_service_type);
   /**
    * @brief unsubscribeFromAppService unsubscribe from all app service types
    */
-  void unsubscribeFromAppService();
+  void UnsubscribeFromAppService();
 
   /**
    * @brief isSubscribedToAppService checks if extension is subscribed to
@@ -87,7 +89,7 @@ class AppServiceAppExtension : public app_mngr::AppExtension {
    * @return true if extension is subscribed this app_service_type, otherwise
    * return false
    */
-  bool isSubscribedToAppService(const std::string app_service_type) const;
+  bool IsSubscribedToAppService(const std::string app_service_type) const;
 
   /**
    * @brief Subscriptions get list of subscriptions for application extension
@@ -109,12 +111,6 @@ class AppServiceAppExtension : public app_mngr::AppExtension {
    */
   void ProcessResumption(
       const smart_objects::SmartObject& resumption_data) OVERRIDE;
-
-  /**
-   * @brief AppServiceAppExtensionUID unique identifier of AppService
-   * aplication extension
-   */
-  static unsigned AppServiceAppExtensionUID;
 
   /**
    * @brief ExtractVIExtension utility function to extract application extension

@@ -318,6 +318,7 @@ extern const char* service_published;
 extern const char* service_active;
 extern const char* service_data;
 extern const char* subscribe;
+
 // resuming
 extern const char* application_commands;
 extern const char* application_submenus;

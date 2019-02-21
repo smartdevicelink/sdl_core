@@ -76,8 +76,10 @@ void CommandNotificationFromMobileImpl::SendNotification() {
 }
 
 void CommandNotificationFromMobileImpl::SendNotificationToMobile() {
+  auto app = application_manager_.application(connection_key());
   (*message_)[strings::params][strings::protocol_type] = mobile_protocol_type_;
-  (*message_)[strings::params][strings::protocol_version] = protocol_version_;
+  (*message_)[strings::params][strings::protocol_version] =
+      app->protocol_version();
   (*message_)[strings::params][strings::message_type] =
       static_cast<int32_t>(application_manager::MessageType::kNotification);
 

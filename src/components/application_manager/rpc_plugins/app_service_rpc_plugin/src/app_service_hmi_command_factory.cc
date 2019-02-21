@@ -129,8 +129,8 @@ app_mngr::CommandCreator& AppServiceHmiCommandFactory::buildCommandCreator(
                          commands::ASGetAppServiceDataRequestFromHMI>()
                    : factory.GetCreator<
                          commands::ASGetAppServiceDataResponseFromHMI>();
-      } else if (app_mngr::commands::Command::CommandSource::SOURCE_TO_HMI ==
-                 source) {
+      } else if (app_mngr::commands::Command::CommandSource::
+                     SOURCE_SDL_TO_HMI == source) {
         return hmi_apis::messageType::request == message_type
                    ? factory.GetCreator<
                          commands::ASGetAppServiceDataRequestToHMI>()

@@ -108,9 +108,6 @@ class AppServiceManager {
    */
   std::vector<smart_objects::SmartObject> GetAllServices();
 
-  /*
-    void NotifyConsumers(const MessageSharedPtr& message);*/
-
   void GetProvider(const std::string& service_type,
                    ApplicationSharedPtr& app,
                    bool& hmi_service);

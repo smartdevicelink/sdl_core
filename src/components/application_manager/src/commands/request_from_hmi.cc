@@ -145,15 +145,13 @@ void RequestFromHMI::SendProviderRequest(
     return;
   }
   LOG4CXX_DEBUG(logger_, "Sending Request to Mobile Provider");
-  SendMobileRequest(mobile_function_id,
-                    app->app_id(),
-                    &(*msg)[strings::msg_params],
-                    use_events);
+  SendMobileRequest(
+      mobile_function_id, app, &(*msg)[strings::msg_params], use_events);
 }
 
 void RequestFromHMI::SendMobileRequest(
     const mobile_apis::FunctionID::eType& function_id,
-    const uint32_t correlation_id,
+    const ApplicationSharedPtr app,
     const smart_objects::SmartObject* msg_params,
     bool use_events) {
   smart_objects::SmartObjectSPtr result =
@@ -167,12 +165,11 @@ void RequestFromHMI::SendMobileRequest(
   request[strings::params][strings::message_type] = MessageType::kRequest;
   request[strings::params][strings::function_id] = function_id;
   request[strings::params][strings::correlation_id] = mobile_correlation_id;
-  request[strings::params][strings::protocol_version] =
-      CommandImpl::protocol_version_;
+  request[strings::params][strings::protocol_version] = app->protocol_version();
   request[strings::params][strings::protocol_type] =
       CommandImpl::mobile_protocol_type_;
 
-  request[strings::params][strings::connection_key] = correlation_id;
+  request[strings::params][strings::connection_key] = app->app_id();
 
   if (msg_params) {
     request[strings::msg_params] = *msg_params;
@@ -190,7 +187,7 @@ void RequestFromHMI::SendMobileRequest(
   }
 }
 
-uint32_t RequestFromHMI::SendHMIRequest(
+void RequestFromHMI::SendHMIRequest(
     const hmi_apis::FunctionID::eType& function_id,
     const smart_objects::SmartObject* msg_params,
     bool use_events) {
@@ -221,13 +218,12 @@ uint32_t RequestFromHMI::SendHMIRequest(
   }
   if (ProcessHMIInterfacesAvailability(hmi_correlation_id, function_id)) {
     if (!rpc_service_.ManageHMICommand(
-            result, commands::Command::CommandSource::SOURCE_TO_HMI)) {
+            result, commands::Command::CommandSource::SOURCE_SDL_TO_HMI)) {
       LOG4CXX_ERROR(logger_, "Unable to send request");
     }
   } else {
     LOG4CXX_DEBUG(logger_, "Interface is not available");
   }
-  return hmi_correlation_id;
 }
 
 bool RequestFromHMI::ProcessHMIInterfacesAvailability(

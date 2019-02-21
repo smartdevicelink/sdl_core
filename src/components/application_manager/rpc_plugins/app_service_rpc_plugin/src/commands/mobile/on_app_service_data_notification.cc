@@ -79,7 +79,7 @@ void OnAppServiceDataNotification::Run() {
         DCHECK_OR_RETURN(app, false);
         auto& ext = AppServiceAppExtension::ExtractASExtension(*app);
         LOG4CXX_DEBUG(logger_, "Check subscription for type: " << service_type);
-        return ext.isSubscribedToAppService(service_type);
+        return ext.IsSubscribedToAppService(service_type);
       };
 
   const std::vector<ApplicationSharedPtr>& applications =

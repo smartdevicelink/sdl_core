@@ -58,15 +58,9 @@ ASGetAppServiceDataResponseFromHMI::~ASGetAppServiceDataResponseFromHMI() {}
 void ASGetAppServiceDataResponseFromHMI::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  const smart_objects::SmartObject& msg_params =
-      (*message_)[strings::msg_params];
-
-  if (msg_params.keyExists(strings::service_data)) {
-    event_engine::Event event(
-        hmi_apis::FunctionID::AppService_GetAppServiceData);
-    event.set_smart_object(*message_);
-    event.raise(application_manager_.event_dispatcher());
-  }
+  event_engine::Event event(hmi_apis::FunctionID::AppService_GetAppServiceData);
+  event.set_smart_object(*message_);
+  event.raise(application_manager_.event_dispatcher());
 }
 
 }  // namespace commands

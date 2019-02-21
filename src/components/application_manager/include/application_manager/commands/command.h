@@ -112,8 +112,12 @@ class Command {
  */
   virtual void SetAllowedToTerminate(const bool allowed) = 0;
 
-  // todo rename commandSource
-  enum CommandSource { SOURCE_SDL, SOURCE_MOBILE, SOURCE_HMI, SOURCE_TO_HMI };
+  enum CommandSource {
+    SOURCE_SDL,
+    SOURCE_MOBILE,
+    SOURCE_HMI,
+    SOURCE_SDL_TO_HMI
+  };
 };
 
 typedef smart_objects::SmartObjectSPtr MessageSharedPtr;

@@ -173,14 +173,14 @@ class MobileEvent {
   /*
    * @brief Sets event smart object
    *
-   * @param so The smart_object received in HMI response
+   * @param so The smart_object received in Mobile response
    */
   void set_smart_object(const smart_objects::SmartObject& so);
 
   /*
    * @brief Retrieves event smart object
    *
-   * @return The smart_object received in HMI response
+   * @return The smart_object received in Mobile response
    */
   inline const smart_objects::SmartObject& smart_object() const;
 

@@ -443,6 +443,14 @@ void CommandRequestImpl::SendProviderRequest(
     return;
   }
 
+  if (connection_key() == app->app_id()) {
+    SendResponse(false,
+                 mobile_apis::Result::IGNORED,
+                 "Consumer app is same as producer app",
+                 NULL);
+    return;
+  }
+
   smart_objects::SmartObjectSPtr new_msg =
       std::make_shared<smart_objects::SmartObject>();
   smart_objects::SmartObject& request = *new_msg;
@@ -507,7 +515,7 @@ uint32_t CommandRequestImpl::SendHMIRequest(
     subscribe_on_event(function_id, hmi_correlation_id);
   }
   if (ProcessHMIInterfacesAvailability(hmi_correlation_id, function_id)) {
-    if (!rpc_service_.ManageHMICommand(result, SOURCE_TO_HMI)) {
+    if (!rpc_service_.ManageHMICommand(result, SOURCE_SDL_TO_HMI)) {
       LOG4CXX_ERROR(logger_, "Unable to send request");
       SendResponse(false, mobile_apis::Result::OUT_OF_MEMORY);
     }
@@ -537,7 +545,7 @@ void CommandRequestImpl::CreateHMINotification(
   notify[strings::params][strings::function_id] = function_id;
   notify[strings::msg_params] = msg_params;
 
-  if (!rpc_service_.ManageHMICommand(result, SOURCE_TO_HMI)) {
+  if (!rpc_service_.ManageHMICommand(result, SOURCE_SDL_TO_HMI)) {
     LOG4CXX_ERROR(logger_, "Unable to send HMI notification");
   }
 }

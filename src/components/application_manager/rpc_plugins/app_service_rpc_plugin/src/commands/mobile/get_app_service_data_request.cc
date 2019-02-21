@@ -79,7 +79,7 @@ void GetAppServiceDataRequest::Run() {
 
   if (subscribe) {
     auto& ext = AppServiceAppExtension::ExtractASExtension(*app);
-    ext.subscribeToAppService(service_type);
+    ext.SubscribeToAppService(service_type);
   }
 
   SendProviderRequest(mobile_apis::FunctionID::GetAppServiceDataID,
@@ -93,14 +93,14 @@ void GetAppServiceDataRequest::on_event(
   const smart_objects::SmartObject& event_message = event.smart_object();
 
   auto msg_params = event_message[strings::msg_params];
-  SendResponse(true, mobile_apis::Result::SUCCESS, "", &msg_params);
+  SendResponse(true, mobile_apis::Result::SUCCESS, NULL, &msg_params);
 }
 
 void GetAppServiceDataRequest::on_event(const event_engine::Event& event) {
   const smart_objects::SmartObject& event_message = event.smart_object();
 
   auto msg_params = event_message[strings::msg_params];
-  SendResponse(true, mobile_apis::Result::SUCCESS, "", &msg_params);
+  SendResponse(true, mobile_apis::Result::SUCCESS, NULL, &msg_params);
 }
 
 }  // namespace commands

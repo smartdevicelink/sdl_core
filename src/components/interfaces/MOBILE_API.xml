@@ -7018,10 +7018,8 @@
             <description>Provides additional human readable info regarding the result.</description>
         </param>
         
-        <!-- Specific response data -->
-        
-        <param name="serviceData" type="AppServiceData" mandatory="true"/>
-            
+        <!-- Specific response data -->        
+        <param name="serviceData" type="AppServiceData" mandatory="false"/>            
     </function>
     
     <!-- Notifications -->

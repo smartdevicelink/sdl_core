@@ -89,13 +89,13 @@ class RequestFromHMI : public CommandImpl, public event_engine::EventObserver {
       bool use_events = false);
 
   void SendMobileRequest(const mobile_apis::FunctionID::eType& function_id,
-                         const uint32_t correlation_id,
+                         const ApplicationSharedPtr app,
                          const smart_objects::SmartObject* msg_params,
                          bool use_events);
 
-  uint32_t SendHMIRequest(const hmi_apis::FunctionID::eType& function_id,
-                          const smart_objects::SmartObject* msg_params,
-                          bool use_events);
+  void SendHMIRequest(const hmi_apis::FunctionID::eType& function_id,
+                      const smart_objects::SmartObject* msg_params,
+                      bool use_events);
 
   bool ProcessHMIInterfacesAvailability(
       const uint32_t hmi_correlation_id,

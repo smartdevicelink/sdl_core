@@ -54,7 +54,7 @@ app_mngr::CommandSharedPtr VehicleInfoCommandFactory::CreateCommand(
     const app_mngr::commands::MessageSharedPtr& message,
     app_mngr::commands::Command::CommandSource source) {
   if (app_mngr::commands::Command::SOURCE_HMI == source ||
-      app_mngr::commands::Command::SOURCE_TO_HMI == source) {
+      app_mngr::commands::Command::SOURCE_SDL_TO_HMI == source) {
     return hmi_command_factory_->CreateCommand(message, source);
   } else {
     return mob_command_factory_->CreateCommand(message, source);
@@ -65,7 +65,7 @@ bool VehicleInfoCommandFactory::IsAbleToProcess(
     const int32_t function_id,
     const commands::Command::CommandSource source) const {
   return (commands::Command::SOURCE_HMI == source ||
-          app_mngr::commands::Command::SOURCE_TO_HMI == source)
+          app_mngr::commands::Command::SOURCE_SDL_TO_HMI == source)
              ? hmi_command_factory_->IsAbleToProcess(function_id, source)
              : mob_command_factory_->IsAbleToProcess(function_id, source);
 }

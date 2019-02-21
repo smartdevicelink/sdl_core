@@ -52,7 +52,6 @@ CommandRequestToMobile::CommandRequestToMobile(
 CommandRequestToMobile::~CommandRequestToMobile() {}
 
 bool CommandRequestToMobile::Init() {
-  // Replace Mobile connection id with HMI app id
   return true;
 }
 
