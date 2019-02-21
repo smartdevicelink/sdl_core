@@ -37,6 +37,7 @@
 
 #include "application_manager/app_service_manager.h"
 #include "application_manager/application.h"
+#include "application_manager/app_service_manager.h"
 #include "application_manager/application_manager.h"
 #include "application_manager/commands/command_impl.h"
 #include "application_manager/message_helper.h"
@@ -78,19 +79,73 @@ smart_objects::SmartObject AppServiceManager::PublishAppService(
   service_record[strings::service_id] = service_id;
   service_record[strings::service_published] = true;
   service_record[strings::service_active] = true;
-
   app_service.record = service_record;
 
   published_services_.insert(
       std::pair<std::string, AppService>(service_id, app_service));
 
+  auto all_services = GetAllServices();
+  smart_objects::SmartObjectSPtr notification =
+      std::make_shared<smart_objects::SmartObject>(
+          MessageHelper::CreateMobileSystemCapabilityNotification(
+              all_services,
+              service_id,
+              mobile_apis::ServiceUpdateReason::PUBLISHED));
+  app_manager_.GetRPCService().ManageMobileCommand(
+      notification, commands::Command::CommandSource::SOURCE_SDL);
+  smart_objects::SmartObjectSPtr hmi_notification =
+      std::make_shared<smart_objects::SmartObject>(
+          MessageHelper::CreateHMISystemCapabilityNotification(
+              all_services,
+              service_id,
+              mobile_apis::ServiceUpdateReason::PUBLISHED));
+  app_manager_.GetRPCService().ManageHMICommand(hmi_notification);
   return service_record;
 }
 
 bool AppServiceManager::UnpublishAppService(const std::string service_id) {
   LOG4CXX_AUTO_TRACE(logger_);
-  // TODO
-  return false;
+
+  auto it = published_services_.find(service_id);
+  if (it == published_services_.end()) {
+    LOG4CXX_ERROR(logger_, "Service id does not exist in published services");
+    return false;
+  }
+  LOG4CXX_DEBUG(logger_, "Unpublishing app service: " << service_id);
+
+  SetServicePublished(service_id, false);
+
+  auto all_services = GetAllServices();
+  smart_objects::SmartObjectSPtr notification =
+      std::make_shared<smart_objects::SmartObject>(
+          MessageHelper::CreateMobileSystemCapabilityNotification(
+              all_services,
+              service_id,
+              mobile_apis::ServiceUpdateReason::REMOVED));
+  app_manager_.GetRPCService().ManageMobileCommand(
+      notification, commands::Command::CommandSource::SOURCE_SDL);
+  smart_objects::SmartObjectSPtr hmi_notification =
+      std::make_shared<smart_objects::SmartObject>(
+          MessageHelper::CreateHMISystemCapabilityNotification(
+              all_services,
+              service_id,
+              mobile_apis::ServiceUpdateReason::REMOVED));
+  app_manager_.GetRPCService().ManageHMICommand(hmi_notification);
+
+  published_services_.erase(it);
+
+  return true;
+}
+
+void AppServiceManager::UnpublishServices(const uint32_t connection_key) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  LOG4CXX_DEBUG(logger_, "Unpublishing all app services: " << connection_key);
+  for (auto it = published_services_.begin(); it != published_services_.end();
+       ++it) {
+    if (it->second.connection_key == connection_key) {
+      UnpublishAppService(it->first);
+    }
+  }
 }
 
 std::vector<smart_objects::SmartObject> AppServiceManager::GetAllServices() {
@@ -103,6 +158,15 @@ std::vector<smart_objects::SmartObject> AppServiceManager::GetAllServices() {
   return services;
 }
 
+void AppServiceManager::SetServicePublished(const std::string service_id,
+                                            bool service_published) {
+  auto it = published_services_.find(service_id);
+  if (it == published_services_.end()) {
+    LOG4CXX_ERROR(logger_, "Service id does not exist in published services");
+    return;
+  }
+  it->second.record[strings::service_published] = service_published;
+}
 
 std::pair<std::string, AppService> AppServiceManager::ActiveServiceByType(
     std::string service_type) {

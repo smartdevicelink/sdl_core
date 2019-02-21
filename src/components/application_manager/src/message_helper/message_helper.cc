@@ -327,6 +327,57 @@ smart_objects::SmartObjectSPtr MessageHelper::CreateMessageForHMI(
   return message;
 }
 
+smart_objects::SmartObject
+MessageHelper::CreateMobileSystemCapabilityNotification(
+    std::vector<smart_objects::SmartObject>& all_services,
+    const std::string service_id,
+    mobile_apis::ServiceUpdateReason::eType update_reason) {
+  smart_objects::SmartObject message(smart_objects::SmartType_Map);
+
+  message[strings::params][strings::message_type] = MessageType::kNotification;
+  message[strings::params][strings::function_id] =
+      mobile_apis::FunctionID::OnSystemCapabilityUpdatedID;
+
+  smart_objects::SmartObject system_capability =
+      smart_objects::SmartObject(smart_objects::SmartType_Map);
+  system_capability[strings::system_capability_type] =
+      mobile_apis::SystemCapabilityType::APP_SERVICES;
+
+  smart_objects::SmartObject app_service_capabilities(
+      smart_objects::SmartType_Map);
+  smart_objects::SmartObject app_services(smart_objects::SmartType_Array);
+
+  std::vector<smart_objects::SmartObject> service_records = all_services;
+
+  for (auto& record : service_records) {
+    smart_objects::SmartObject app_services_capabilities(
+        smart_objects::SmartType_Map);
+    app_services_capabilities[strings::updated_app_service_record] = record;
+    if (record[strings::service_id].asString() == service_id) {
+      app_services_capabilities[strings::update_reason] = update_reason;
+    }
+    app_services.asArray()->push_back(app_services_capabilities);
+  }
+
+  app_service_capabilities[strings::app_services] = app_services;
+  system_capability[strings::app_services_capabilities] =
+      app_service_capabilities;
+
+  message[strings::msg_params][strings::system_capability] = system_capability;
+  return message;
+}
+
+smart_objects::SmartObject MessageHelper::CreateHMISystemCapabilityNotification(
+    std::vector<smart_objects::SmartObject>& all_services,
+    const std::string service_id,
+    mobile_apis::ServiceUpdateReason::eType update_reason) {
+  auto message = CreateMobileSystemCapabilityNotification(
+      all_services, service_id, update_reason);
+  message[strings::params][strings::function_id] =
+      hmi_apis::FunctionID::BasicCommunication_OnSystemCapabilityUpdated;
+  return message;
+}
+
 smart_objects::SmartObjectSPtr MessageHelper::CreateHashUpdateNotification(
     const uint32_t app_id) {
   LOG4CXX_AUTO_TRACE(logger_);

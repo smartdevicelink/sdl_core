@@ -138,6 +138,9 @@ class ApplicationManagerImplTest : public ::testing::Test {
     app_manager_impl_->resume_controller().set_resumption_storage(
         mock_storage_);
     app_manager_impl_->set_connection_handler(&mock_connection_handler_);
+    std::unique_ptr<AppServiceManager> app_service_manager_ptr(
+        new AppServiceManager(*app_manager_impl_));
+    app_manager_impl_->SetAppServiceManager(app_service_manager_ptr);
   }
 
   void CreateAppManager() {
