@@ -247,6 +247,14 @@ class CommandRequestImpl : public CommandImpl,
   bool HasDisallowedParams() const;
 
   /**
+   * @brief Checks result code from Mobile for single RPC
+   * @param result_code contains result code from Mobile response
+   * @return true if result code complies successful result codes,
+   * false otherwise.
+   */
+  bool IsMobileResultSuccess(mobile_apis::Result::eType result_code) const;
+
+  /**
    * @brief Checks result code from HMI for single RPC
    * and returns parameter for sending to mobile app.
    * @param result_code contains result code from HMI response

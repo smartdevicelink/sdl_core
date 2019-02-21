@@ -47,15 +47,7 @@ ASPerformAppServiceInteractionResponseToHMI::
                     application_manager,
                     rpc_service,
                     hmi_capabilities,
-                    policy_handler)
-    , plugin_(NULL) {
-  auto plugin = application_manager.GetPluginManager().FindPluginToProcess(
-      hmi_apis::FunctionID::AppService_PerformAppServiceInteraction,
-      app_mngr::commands::Command::CommandSource::SOURCE_SDL);
-  if (plugin) {
-    plugin_ = dynamic_cast<AppServiceRpcPlugin*>(&(*plugin));
-  }
-}
+                    policy_handler) {}
 
 ASPerformAppServiceInteractionResponseToHMI::
     ~ASPerformAppServiceInteractionResponseToHMI() {}

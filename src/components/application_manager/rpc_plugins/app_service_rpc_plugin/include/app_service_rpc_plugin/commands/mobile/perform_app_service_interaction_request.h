@@ -79,7 +79,6 @@ class PerformAppServiceInteractionRequest
   virtual void on_event(const app_mngr::event_engine::MobileEvent& event);
 
  private:
-  AppServiceRpcPlugin* plugin_;
   DISALLOW_COPY_AND_ASSIGN(PerformAppServiceInteractionRequest);
 };
 

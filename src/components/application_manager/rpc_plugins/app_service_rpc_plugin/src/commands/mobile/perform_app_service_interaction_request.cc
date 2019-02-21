@@ -32,6 +32,7 @@
 
 #include "app_service_rpc_plugin/commands/mobile/perform_app_service_interaction_request.h"
 #include "application_manager/application_impl.h"
+#include "application_manager/message_helper.h"
 #include "interfaces/MOBILE_API.h"
 
 namespace app_service_rpc_plugin {
@@ -48,22 +49,58 @@ PerformAppServiceInteractionRequest::PerformAppServiceInteractionRequest(
                          application_manager,
                          rpc_service,
                          hmi_capabilities,
-                         policy_handler)
-    , plugin_(NULL) {
-  auto plugin = application_manager.GetPluginManager().FindPluginToProcess(
-      mobile_apis::FunctionID::PerformAppServiceInteractionID,
-      app_mngr::commands::Command::CommandSource::SOURCE_MOBILE);
-  if (plugin) {
-    plugin_ = dynamic_cast<AppServiceRpcPlugin*>(&(*plugin));
-  }
-}
+                         policy_handler) {}
 
 PerformAppServiceInteractionRequest::~PerformAppServiceInteractionRequest() {}
 
 void PerformAppServiceInteractionRequest::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
-  // TODO: Add logic for requestServiceActive and erase key before sending to
-  // provider
+
+  auto app = application_manager_.application(connection_key());
+  if (!app) {
+    SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
+    return;
+  }
+
+  smart_objects::SmartObject& msg_params = (*message_)[strings::msg_params];
+  std::string service_id = msg_params[strings::service_id].asString();
+  auto service =
+      application_manager_.GetAppServiceManager().FindServiceByID(service_id);
+  if (service.first.empty()) {
+    SendResponse(false,
+                 mobile_apis::Result::INVALID_ID,
+                 "The requested service ID does not exist");
+    return;
+  }
+
+  bool request_service_active = false;
+  if (msg_params.keyExists(strings::request_service_active)) {
+    request_service_active =
+        msg_params[strings::request_service_active].asBool();
+    msg_params.erase(strings::request_service_active);
+  }
+
+  // Only activate service if it is not already active
+  bool activate_service =
+      request_service_active &&
+      !service.second.record[strings::service_active].asBool();
+  if (activate_service) {
+    if (app->is_foreground()) {
+      // App is in foreground, we can just activate the service
+      application_manager_.GetAppServiceManager().ActivateAppService(
+          service_id);
+    } else {
+      // App is not in foreground, we need to prompt the user to activate the
+      // service
+      smart_objects::SmartObject request_params;
+      request_params[strings::service_id] = service_id;
+      SendHMIRequest(hmi_apis::FunctionID::AppService_GetActiveServiceConsent,
+                     &request_params,
+                     true);
+      return;
+    }
+  }
+
   SendProviderRequest(
       mobile_apis::FunctionID::PerformAppServiceInteractionID,
       hmi_apis::FunctionID::AppService_PerformAppServiceInteraction,
@@ -72,21 +109,67 @@ void PerformAppServiceInteractionRequest::Run() {
 }
 
 void PerformAppServiceInteractionRequest::on_event(
-    const event_engine::MobileEvent& event) {
-  LOG4CXX_DEBUG(logger_, "Mobile GetAppServiceRequest on_event");
+    const event_engine::Event& event) {
+  LOG4CXX_DEBUG(logger_, "HMI PerformAppServiceInteraction on_event");
   const smart_objects::SmartObject& event_message = event.smart_object();
 
   auto msg_params = event_message[strings::msg_params];
-  SendResponse(true, mobile_apis::Result::SUCCESS, NULL, &msg_params);
+
+  const char* info = msg_params.keyExists(strings::info)
+                   ? msg_params[strings::info].asCharArray()
+                   : NULL;
+  hmi_apis::Common_Result::eType hmi_result =
+      static_cast<hmi_apis::Common_Result::eType>(
+          event_message[strings::params][hmi_response::code].asInt());
+  mobile_apis::Result::eType result =
+      MessageHelper::HMIToMobileResult(hmi_result);
+  bool success = PrepareResultForMobileResponse(
+      hmi_result, HmiInterfaces::HMI_INTERFACE_AppService);
+
+  switch (event.id()) {
+    case hmi_apis::FunctionID::AppService_PerformAppServiceInteraction:
+      SendResponse(success, result, info, &msg_params);
+      break;
+    case hmi_apis::FunctionID::AppService_GetActiveServiceConsent:
+      if (msg_params[strings::activate].asBool()) {
+        // User agreed to activate service, we can now send the provider request
+        application_manager_.GetAppServiceManager().ActivateAppService(
+            (*message_)[strings::msg_params][strings::service_id].asString());
+        SendProviderRequest(
+            mobile_apis::FunctionID::PerformAppServiceInteractionID,
+            hmi_apis::FunctionID::AppService_PerformAppServiceInteraction,
+            &(*message_),
+            true);
+      } else if (mobile_apis::Result::SUCCESS == result) {
+        // Request was successful, but user denied the request to activate the
+        // service
+        SendResponse(false,
+                     mobile_apis::Result::USER_DISALLOWED,
+                     "Request to activate service was denied by driver");
+      } else {
+        SendResponse(success, result, info);
+      }
+      break;
+    default:
+      break;
+  }
 }
 
 void PerformAppServiceInteractionRequest::on_event(
-    const event_engine::Event& event) {
-  LOG4CXX_DEBUG(logger_, "Mobile GetAppServiceRequest on_event");
+    const event_engine::MobileEvent& event) {
+  LOG4CXX_DEBUG(logger_, "Mobile PerformAppServiceInteraction on_event");
   const smart_objects::SmartObject& event_message = event.smart_object();
 
   auto msg_params = event_message[strings::msg_params];
-  SendResponse(true, mobile_apis::Result::SUCCESS, NULL, &msg_params);
+
+  const char* info = msg_params.keyExists(strings::info)
+                         ? msg_params[strings::info].asCharArray()
+                         : NULL;
+  mobile_apis::Result::eType result = static_cast<mobile_apis::Result::eType>(
+      msg_params[strings::result_code].asInt());
+  bool success = IsMobileResultSuccess(result);
+
+  SendResponse(success, result, info, &msg_params);
 }
 
 }  // namespace commands

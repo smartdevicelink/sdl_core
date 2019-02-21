@@ -33,6 +33,7 @@
 #include "application_manager/commands/request_from_hmi.h"
 #include "application_manager/application_manager.h"
 #include "application_manager/rpc_service.h"
+#include "utils/helpers.h"
 
 #include "smart_objects/enum_schema_item.h"
 
@@ -121,6 +122,43 @@ void RequestFromHMI::FillCommonParametersOfSO(
   (message)[strings::params][strings::correlation_id] = correlation_id;
 }
 
+bool RequestFromHMI::IsMobileResultSuccess(
+    mobile_apis::Result::eType result_code) const {
+  LOG4CXX_AUTO_TRACE(logger_);
+  using namespace helpers;
+  return Compare<mobile_apis::Result::eType, EQ, ONE>(
+      result_code,
+      mobile_apis::Result::SUCCESS,
+      mobile_apis::Result::WARNINGS,
+      mobile_apis::Result::WRONG_LANGUAGE,
+      mobile_apis::Result::RETRY,
+      mobile_apis::Result::SAVED);
+}
+
+bool RequestFromHMI::IsHMIResultSuccess(
+    hmi_apis::Common_Result::eType result_code,
+    HmiInterfaces::InterfaceID interface) const {
+  LOG4CXX_AUTO_TRACE(logger_);
+  using namespace helpers;
+  if (Compare<hmi_apis::Common_Result::eType, EQ, ONE>(
+          result_code,
+          hmi_apis::Common_Result::SUCCESS,
+          hmi_apis::Common_Result::WARNINGS,
+          hmi_apis::Common_Result::WRONG_LANGUAGE,
+          hmi_apis::Common_Result::RETRY,
+          hmi_apis::Common_Result::SAVED)) {
+    return true;
+  }
+
+  const HmiInterfaces::InterfaceState state =
+      application_manager_.hmi_interfaces().GetInterfaceState(interface);
+  if ((hmi_apis::Common_Result::UNSUPPORTED_RESOURCE == result_code) &&
+      (HmiInterfaces::STATE_NOT_AVAILABLE != state)) {
+    return true;
+  }
+  return false;
+}
+
 void RequestFromHMI::SendProviderRequest(
     const mobile_apis::FunctionID::eType& mobile_function_id,
     const hmi_apis::FunctionID::eType& hmi_function_id,
@@ -153,15 +191,13 @@ void RequestFromHMI::SendProviderRequest(
   }
 
   LOG4CXX_DEBUG(logger_, "Sending Request to Mobile Provider");
-  SendMobileRequest(mobile_function_id,
-                    app->app_id(),
-                    &(*msg)[strings::msg_params],
-                    use_events);
+  SendMobileRequest(
+      mobile_function_id, app, &(*msg)[strings::msg_params], use_events);
 }
 
 void RequestFromHMI::SendMobileRequest(
     const mobile_apis::FunctionID::eType& function_id,
-    const uint32_t correlation_id,
+    const ApplicationSharedPtr app,
     const smart_objects::SmartObject* msg_params,
     bool use_events) {
   smart_objects::SmartObjectSPtr result =
@@ -175,12 +211,11 @@ void RequestFromHMI::SendMobileRequest(
   request[strings::params][strings::message_type] = MessageType::kRequest;
   request[strings::params][strings::function_id] = function_id;
   request[strings::params][strings::correlation_id] = mobile_correlation_id;
-  request[strings::params][strings::protocol_version] =
-      CommandImpl::protocol_version_;
+  request[strings::params][strings::protocol_version] = app->protocol_version();
   request[strings::params][strings::protocol_type] =
       CommandImpl::mobile_protocol_type_;
 
-  request[strings::params][strings::connection_key] = correlation_id;
+  request[strings::params][strings::connection_key] = app->app_id();
 
   if (msg_params) {
     request[strings::msg_params] = *msg_params;
@@ -198,7 +233,7 @@ void RequestFromHMI::SendMobileRequest(
   }
 }
 
-uint32_t RequestFromHMI::SendHMIRequest(
+void RequestFromHMI::SendHMIRequest(
     const hmi_apis::FunctionID::eType& function_id,
     const smart_objects::SmartObject* msg_params,
     bool use_events) {
@@ -229,13 +264,12 @@ uint32_t RequestFromHMI::SendHMIRequest(
   }
   if (ProcessHMIInterfacesAvailability(hmi_correlation_id, function_id)) {
     if (!rpc_service_.ManageHMICommand(
-            result, commands::Command::CommandSource::SOURCE_TO_HMI)) {
+            result, commands::Command::CommandSource::SOURCE_SDL_TO_HMI)) {
       LOG4CXX_ERROR(logger_, "Unable to send request");
     }
   } else {
     LOG4CXX_DEBUG(logger_, "Interface is not available");
   }
-  return hmi_correlation_id;
 }
 
 bool RequestFromHMI::ProcessHMIInterfacesAvailability(

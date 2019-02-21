@@ -37,11 +37,11 @@ CREATE_LOGGERPTR_GLOBAL(logger_, "AppServiceRpcPlugin")
 
 namespace app_service_rpc_plugin {
 
-unsigned AppServiceAppExtension::AppServiceAppExtensionUID = 455;
+const AppExtensionUID AppServiceAppExtensionUID = 455;
 
 AppServiceAppExtension::AppServiceAppExtension(
     AppServiceRpcPlugin& plugin, application_manager::Application& app)
-    : app_mngr::AppExtension(AppServiceAppExtension::AppServiceAppExtensionUID)
+    : app_mngr::AppExtension(AppServiceAppExtensionUID)
     , plugin_(plugin)
     , app_(app) {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -51,13 +51,13 @@ AppServiceAppExtension::~AppServiceAppExtension() {
   LOG4CXX_AUTO_TRACE(logger_);
 }
 
-bool AppServiceAppExtension::subscribeToAppService(
+bool AppServiceAppExtension::SubscribeToAppService(
     const std::string app_service_type) {
   LOG4CXX_DEBUG(logger_, "Subscribe to app service: " << app_service_type);
   return subscribed_data_.insert(app_service_type).second;
 }
 
-bool AppServiceAppExtension::unsubscribeFromAppService(
+bool AppServiceAppExtension::UnsubscribeFromAppService(
     const std::string app_service_type) {
   LOG4CXX_DEBUG(logger_, app_service_type);
   auto it = subscribed_data_.find(app_service_type);
@@ -68,12 +68,12 @@ bool AppServiceAppExtension::unsubscribeFromAppService(
   return false;
 }
 
-void AppServiceAppExtension::unsubscribeFromAppService() {
+void AppServiceAppExtension::UnsubscribeFromAppService() {
   LOG4CXX_AUTO_TRACE(logger_);
   subscribed_data_.clear();
 }
 
-bool AppServiceAppExtension::isSubscribedToAppService(
+bool AppServiceAppExtension::IsSubscribedToAppService(
     const std::string app_service_type) const {
   LOG4CXX_DEBUG(logger_,
                 "isSubscribedToAppService for type: " << app_service_type);
@@ -86,18 +86,32 @@ AppServiceSubscriptions AppServiceAppExtension::Subscriptions() {
 
 void AppServiceAppExtension::SaveResumptionData(
     smart_objects::SmartObject& resumption_data) {
-  // todo
+  const char* app_service_info = "appService";
+  resumption_data[app_service_info] =
+      smart_objects::SmartObject(smart_objects::SmartType_Array);
+  int i = 0;
+  for (const auto& subscription : subscribed_data_) {
+    resumption_data[app_service_info][i] = subscription;
+    i++;
+  }
 }
 
 void AppServiceAppExtension::ProcessResumption(
     const smart_objects::SmartObject& resumption_data) {
-  // todo
+  const char* app_service_info = "appService";
+  if (resumption_data.keyExists(app_service_info)) {
+    const smart_objects::SmartObject& subscriptions_app_services =
+        resumption_data[app_service_info];
+    for (size_t i = 0; i < subscriptions_app_services.length(); ++i) {
+      std::string service_type = resumption_data[i].asString();
+      SubscribeToAppService(service_type);
+    }
+  }
 }
 
 AppServiceAppExtension& AppServiceAppExtension::ExtractASExtension(
     application_manager::Application& app) {
-  auto ext_ptr =
-      app.QueryInterface(AppServiceAppExtension::AppServiceAppExtensionUID);
+  auto ext_ptr = app.QueryInterface(AppServiceAppExtensionUID);
   DCHECK(ext_ptr);
   DCHECK(dynamic_cast<AppServiceAppExtension*>(ext_ptr.get()));
   auto vi_app_extension =

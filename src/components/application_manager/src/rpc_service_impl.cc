@@ -160,6 +160,8 @@ bool RPCServiceImpl::ManageMobileCommand(
       command->Run();
       command->CleanUp();
       return true;
+    } else {
+      return false;
     }
   }
 

@@ -34,6 +34,8 @@
 #include "application_manager/message.h"
 #include "interfaces/HMI_API.h"
 
+#include "app_service_rpc_plugin/commands/hmi/as_get_active_service_consent_request.h"
+#include "app_service_rpc_plugin/commands/hmi/as_get_active_service_consent_response.h"
 #include "app_service_rpc_plugin/commands/hmi/as_get_app_service_data_request_from_hmi.h"
 #include "app_service_rpc_plugin/commands/hmi/as_get_app_service_data_request_to_hmi.h"
 #include "app_service_rpc_plugin/commands/hmi/as_get_app_service_data_response_from_hmi.h"
@@ -133,8 +135,8 @@ app_mngr::CommandCreator& AppServiceHmiCommandFactory::buildCommandCreator(
                          commands::ASGetAppServiceDataRequestFromHMI>()
                    : factory.GetCreator<
                          commands::ASGetAppServiceDataResponseFromHMI>();
-      } else if (app_mngr::commands::Command::CommandSource::SOURCE_TO_HMI ==
-                 source) {
+      } else if (app_mngr::commands::Command::CommandSource::
+                     SOURCE_SDL_TO_HMI == source) {
         return hmi_apis::messageType::request == message_type
                    ? factory.GetCreator<
                          commands::ASGetAppServiceDataRequestToHMI>()
@@ -160,6 +162,12 @@ app_mngr::CommandCreator& AppServiceHmiCommandFactory::buildCommandCreator(
                              ASPerformAppServiceInteractionResponseToHMI>();
       }
       break;
+    case hmi_apis::FunctionID::AppService_GetActiveServiceConsent:
+      return hmi_apis::messageType::request == message_type
+                 ? factory
+                       .GetCreator<commands::ASGetActiveServiceConsentRequest>()
+                 : factory.GetCreator<
+                       commands::ASGetActiveServiceConsentResponse>();
     default:
       LOG4CXX_WARN(logger_, "Unsupported HMI function_id: " << function_id);
   }

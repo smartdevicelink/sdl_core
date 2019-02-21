@@ -60,17 +60,9 @@ class AppServiceRpcPlugin : public plugins::RPCPlugin {
   void OnApplicationEvent(plugins::ApplicationEvent event,
                           app_mngr::ApplicationSharedPtr application) OVERRIDE;
 
-  /**
-   * @brief ProcessResumptionSubscription send Subscribe vehicle data requests
-   * to HMI
-   * @param app application for subscription
-   * @param ext application extension
-   */
-  // TODO
-  // void ProcessResumptionSubscription(app_mngr::Application& app,
-  //                                   AppServiceAppExtension& ext);
-
  private:
+  void DeleteSubscriptions(app_mngr::ApplicationSharedPtr app);
+
   std::unique_ptr<app_mngr::CommandFactory> command_factory_;
   app_mngr::ApplicationManager* application_manager_;
 };

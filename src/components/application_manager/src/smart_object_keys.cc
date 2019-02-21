@@ -285,6 +285,8 @@ const char* service_published = "servicePublished";
 const char* service_active = "serviceActive";
 const char* service_data = "serviceData";
 const char* subscribe = "subscribe";
+const char* request_service_active = "requestServiceActive";
+const char* activate = "activate";
 
 // resuming
 const char* application_commands = "applicationCommands";

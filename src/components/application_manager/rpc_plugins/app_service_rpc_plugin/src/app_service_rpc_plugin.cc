@@ -76,16 +76,19 @@ void AppServiceRpcPlugin::OnApplicationEvent(
     application->AddExtension(
         std::make_shared<AppServiceAppExtension>(*this, *application));
   } else if (plugins::ApplicationEvent::kDeleteApplicationData == event) {
-    // Todo notify consumer of unregister
-    // DeleteSubscriptions(application);
+    DeleteSubscriptions(application);
   }
 }
 
-/*void AppServiceRpcPlugin::ProcessResumptionSubscription(
-    application_manager::Application& app, AppServiceAppExtension& ext) {
-  LOG4CXX_AUTO_TRACE(logger_);
-  // TODO
-}*/
+void AppServiceRpcPlugin::DeleteSubscriptions(
+    application_manager::ApplicationSharedPtr app) {
+  auto& ext = AppServiceAppExtension::ExtractASExtension(*app);
+  auto subscriptions = ext.Subscriptions();
+  for (auto& service_type : subscriptions) {
+    ext.UnsubscribeFromAppService(service_type);
+  }
+}
+
 }  // namespace app_service_rpc_plugin
 
 extern "C" application_manager::plugin_manager::RPCPlugin* Create() {

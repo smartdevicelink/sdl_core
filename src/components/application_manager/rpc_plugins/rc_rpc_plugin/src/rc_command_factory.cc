@@ -125,7 +125,7 @@ CommandSharedPtr RCCommandFactory::CreateCommand(
     const app_mngr::commands::MessageSharedPtr& message,
     app_mngr::commands::Command::CommandSource source) {
   if (app_mngr::commands::Command::SOURCE_HMI == source ||
-      app_mngr::commands::Command::SOURCE_TO_HMI == source) {
+      app_mngr::commands::Command::SOURCE_SDL_TO_HMI == source) {
     hmi_apis::messageType::eType message_type =
         static_cast<hmi_apis::messageType::eType>(
             (*message)[strings::params][strings::message_type].asInt());
@@ -155,7 +155,7 @@ bool RCCommandFactory::IsAbleToProcess(
     const {
   using app_mngr::commands::Command;
   if (Command::SOURCE_HMI == message_source ||
-      Command::SOURCE_TO_HMI == message_source) {
+      Command::SOURCE_SDL_TO_HMI == message_source) {
     return get_hmi_creator_factory(
                static_cast<hmi_apis::FunctionID::eType>(function_id),
                hmi_apis::messageType::INVALID_ENUM).CanBeCreated();

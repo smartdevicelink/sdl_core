@@ -98,9 +98,10 @@ TEST_F(GetDTCsRequestTest, Run_SUCCESS) {
   MockAppPtr app(CreateMockApp());
   EXPECT_CALL(app_mngr_, application(kConnectionKey)).WillOnce(Return(app));
 
-  EXPECT_CALL(mock_rpc_service_,
-              ManageHMICommand(
-                  HMIResultCodeIs(hmi_apis::FunctionID::VehicleInfo_GetDTCs)));
+  EXPECT_CALL(
+      mock_rpc_service_,
+      ManageHMICommand(
+          HMIResultCodeIs(hmi_apis::FunctionID::VehicleInfo_GetDTCs), _));
 
   command->Run();
 }

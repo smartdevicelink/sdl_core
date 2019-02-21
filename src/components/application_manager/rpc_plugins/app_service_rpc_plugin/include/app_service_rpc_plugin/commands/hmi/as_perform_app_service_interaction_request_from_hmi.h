@@ -84,7 +84,6 @@ class ASPerformAppServiceInteractionRequestFromHMI
   void on_event(const app_mngr::event_engine::MobileEvent& event) OVERRIDE;
 
  private:
-  AppServiceRpcPlugin* plugin_;
   DISALLOW_COPY_AND_ASSIGN(ASPerformAppServiceInteractionRequestFromHMI);
 };
 

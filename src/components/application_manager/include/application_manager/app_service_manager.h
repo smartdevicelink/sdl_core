@@ -33,7 +33,9 @@
 #ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_APP_SERVICE_MANAGER_H_
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_APP_SERVICE_MANAGER_H_
 
+#include "application_manager/application.h"
 #include "smart_objects/smart_object.h"
+#include "application_manager/application.h"
 
 namespace application_manager {
 
@@ -107,19 +109,20 @@ class AppServiceManager {
    */
   std::vector<smart_objects::SmartObject> GetAllServices();
 
-  /*
-    void NotifyConsumers(const MessageSharedPtr& message);*/
-
   void GetProviderByType(const std::string& service_type,
                          ApplicationSharedPtr& app,
                          bool& hmi_service);
+
   void GetProviderByID(const std::string& service_id,
                        ApplicationSharedPtr& app,
                        bool& hmi_service);
+
   std::pair<std::string, AppService> ActiveServiceByType(
       std::string service_type);
 
   std::pair<std::string, AppService> FindServiceByName(std::string name);
+
+  std::pair<std::string, AppService> FindServiceByID(std::string service_id);
 
   std::string DefaultServiceByType(std::string service_type);
 

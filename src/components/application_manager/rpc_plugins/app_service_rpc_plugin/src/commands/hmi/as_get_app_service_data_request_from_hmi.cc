@@ -59,16 +59,10 @@ ASGetAppServiceDataRequestFromHMI::~ASGetAppServiceDataRequestFromHMI() {}
 void ASGetAppServiceDataRequestFromHMI::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  // Todo enum or string?
-  hmi_apis::Common_AppServiceType::eType service_type =
-      static_cast<hmi_apis::Common_AppServiceType::eType>(
-          (*message_)[strings::msg_params][strings::service_type].asUInt());
+  std::string service_type =
+      (*message_)[strings::msg_params][strings::service_type].asString();
 
-  std::string service_type_str = std::string();
-  smart_objects::EnumConversionHelper<
-      hmi_apis::Common_AppServiceType::eType>::EnumToString(service_type,
-                                                            &service_type_str);
-  LOG4CXX_DEBUG(logger_, "Get Service Type: " << service_type_str);
+  LOG4CXX_DEBUG(logger_, "Get Service Type: " << service_type);
 
   SendProviderRequest(mobile_apis::FunctionID::GetAppServiceDataID,
                       hmi_apis::FunctionID::AppService_GetAppServiceData,
@@ -86,7 +80,7 @@ void ASGetAppServiceDataRequestFromHMI::on_event(
                hmi_apis::FunctionID::AppService_GetAppServiceData,
                hmi_apis::Common_Result::SUCCESS,
                &msg_params,
-               application_manager::commands::Command::SOURCE_TO_HMI);
+               application_manager::commands::Command::SOURCE_SDL_TO_HMI);
 }
 
 void ASGetAppServiceDataRequestFromHMI::on_event(
@@ -99,7 +93,7 @@ void ASGetAppServiceDataRequestFromHMI::on_event(
                hmi_apis::FunctionID::AppService_GetAppServiceData,
                hmi_apis::Common_Result::SUCCESS,
                &msg_params,
-               application_manager::commands::Command::SOURCE_TO_HMI);
+               application_manager::commands::Command::SOURCE_SDL_TO_HMI);
 }
 
 }  // namespace commands

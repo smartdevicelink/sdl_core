@@ -36,7 +36,6 @@
 #include <iterator>
 
 #include "application_manager/app_service_manager.h"
-#include "application_manager/application.h"
 #include "application_manager/application_manager.h"
 #include "application_manager/commands/command_impl.h"
 #include "application_manager/message_helper.h"
@@ -176,5 +175,19 @@ std::pair<std::string, AppService> AppServiceManager::FindServiceByName(
   }
   AppService empty;
   return std::make_pair(std::string(), empty);
+}
+
+std::pair<std::string, AppService> AppServiceManager::FindServiceByID(
+    std::string service_id) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  
+  auto it = published_services_.find(service_id);
+  if (it == published_services_.end()) {
+    LOG4CXX_ERROR(logger_, "Service id does not exist in published services");
+    AppService empty;
+    return std::make_pair(std::string(), empty);
+  }
+  
+  return *it;
 }
 }  //  namespace application_manager

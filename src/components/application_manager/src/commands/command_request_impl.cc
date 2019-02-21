@@ -236,6 +236,7 @@ void CommandRequestImpl::onTimeOut() {
   LOG4CXX_AUTO_TRACE(logger_);
 
   unsubscribe_from_all_hmi_events();
+  unsubscribe_from_all_mobile_events();
   {
     // FIXME (dchmerev@luxoft.com): atomic_xchg fits better
     sync_primitives::AutoLock auto_lock(state_lock_);
@@ -450,6 +451,14 @@ void CommandRequestImpl::SendProviderRequest(
     return;
   }
 
+  if (connection_key() == app->app_id()) {
+    SendResponse(false,
+                 mobile_apis::Result::IGNORED,
+                 "Consumer app is same as producer app",
+                 NULL);
+    return;
+  }
+
   smart_objects::SmartObjectSPtr new_msg =
       std::make_shared<smart_objects::SmartObject>();
   smart_objects::SmartObject& request = *new_msg;
@@ -514,7 +523,7 @@ uint32_t CommandRequestImpl::SendHMIRequest(
     subscribe_on_event(function_id, hmi_correlation_id);
   }
   if (ProcessHMIInterfacesAvailability(hmi_correlation_id, function_id)) {
-    if (!rpc_service_.ManageHMICommand(result, SOURCE_TO_HMI)) {
+    if (!rpc_service_.ManageHMICommand(result, SOURCE_SDL_TO_HMI)) {
       LOG4CXX_ERROR(logger_, "Unable to send request");
       SendResponse(false, mobile_apis::Result::OUT_OF_MEMORY);
     }
@@ -544,7 +553,7 @@ void CommandRequestImpl::CreateHMINotification(
   notify[strings::params][strings::function_id] = function_id;
   notify[strings::msg_params] = msg_params;
 
-  if (!rpc_service_.ManageHMICommand(result, SOURCE_TO_HMI)) {
+  if (!rpc_service_.ManageHMICommand(result, SOURCE_SDL_TO_HMI)) {
     LOG4CXX_ERROR(logger_, "Unable to send HMI notification");
   }
 }
@@ -879,6 +888,19 @@ void CommandRequestImpl::AddDisallowedParameters(
 bool CommandRequestImpl::HasDisallowedParams() const {
   return ((!removed_parameters_permissions_.disallowed_params.empty()) ||
           (!removed_parameters_permissions_.undefined_params.empty()));
+}
+
+bool CommandRequestImpl::IsMobileResultSuccess(
+    mobile_apis::Result::eType result_code) const {
+  LOG4CXX_AUTO_TRACE(logger_);
+  using namespace helpers;
+  return Compare<mobile_apis::Result::eType, EQ, ONE>(
+      result_code,
+      mobile_apis::Result::SUCCESS,
+      mobile_apis::Result::WARNINGS,
+      mobile_apis::Result::WRONG_LANGUAGE,
+      mobile_apis::Result::RETRY,
+      mobile_apis::Result::SAVED);
 }
 
 bool CommandRequestImpl::PrepareResultForMobileResponse(
