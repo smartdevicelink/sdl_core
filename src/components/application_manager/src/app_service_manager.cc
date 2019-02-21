@@ -103,7 +103,6 @@ std::vector<smart_objects::SmartObject> AppServiceManager::GetAllServices() {
   return services;
 }
 
-
 std::pair<std::string, AppService> AppServiceManager::ActiveServiceByType(
     std::string service_type) {
   LOG4CXX_AUTO_TRACE(logger_);

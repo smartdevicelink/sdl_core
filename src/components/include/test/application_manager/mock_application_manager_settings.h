@@ -127,6 +127,7 @@ class MockApplicationManagerSettings
   MOCK_CONST_METHOD0(app_time_scale, const uint32_t&());
   MOCK_CONST_METHOD0(app_time_scale_max_requests, const uint32_t&());
   MOCK_CONST_METHOD0(pending_requests_amount, const uint32_t&());
+  MOCK_CONST_METHOD0(rpc_pass_through_timeout, uint32_t());
 
   // app_launch::AppLaunchSettings
   MOCK_CONST_METHOD0(app_launch_wait_time, const uint16_t());
