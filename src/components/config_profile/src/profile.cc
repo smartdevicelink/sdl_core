@@ -91,6 +91,7 @@ const char* kSDL5Section = "SDL5";
 const char* kResumptionSection = "Resumption";
 const char* kAppLaunchSection = "AppLaunch";
 const char* kMultipleTransportsSection = "MultipleTransports";
+const char* kAppServicesSection = "AppServices";
 const char* kServicesMapSection = "ServicesMap";
 const char* kTransportRequiredForResumptionSection =
     "TransportRequiredForResumption";
@@ -238,6 +239,7 @@ const char* kSecondaryTransportForUSBKey = "SecondaryTransportForUSB";
 const char* kSecondaryTransportForWiFiKey = "SecondaryTransportForWiFi";
 const char* kAudioServiceTransportsKey = "AudioServiceTransports";
 const char* kVideoServiceTransportsKey = "VideoServiceTransports";
+const char* kRpcPassThroughTimeoutKey = "RpcPassThroughTimeout";
 
 const char* kDefaultTransportRequiredForResumptionKey =
     "DefaultTransportRequiredForResumption";
@@ -391,6 +393,7 @@ const std::string kAllowedSymbols =
     "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ01234567890_.-";
 const bool kDefaultMultipleTransportsEnabled = false;
 const char* kDefaultLowBandwidthResumptionLevel = "NONE";
+const uint32_t kDefaultRpcPassThroughTimeout = 10000;
 }  // namespace
 
 namespace profile {
@@ -506,7 +509,8 @@ Profile::Profile()
     , error_description_()
     , low_voltage_signal_offset_(kDefaultLowVoltageSignalOffset)
     , wake_up_signal_offset_(kDefaultWakeUpSignalOffset)
-    , ignition_off_signal_offset_(kDefaultIgnitionOffSignalOffset) {
+    , ignition_off_signal_offset_(kDefaultIgnitionOffSignalOffset)
+    , rpc_pass_through_timeout_(kDefaultRpcPassThroughTimeout) {
   // SDL version
   ReadStringValue(
       &sdl_version_, kDefaultSDLVersion, kMainSection, kSDLVersionKey);
@@ -1076,6 +1080,10 @@ const uint16_t Profile::wait_time_between_apps() const {
 
 const bool Profile::multiple_transports_enabled() const {
   return multiple_transports_enabled_;
+}
+
+uint32_t Profile::rpc_pass_through_timeout() const {
+  return rpc_pass_through_timeout_;
 }
 
 const std::vector<std::string>& Profile::secondary_transports_for_bluetooth()
@@ -2234,6 +2242,15 @@ void Profile::UpdateValues() {
   LOG_UPDATED_BOOL_VALUE(multiple_transports_enabled_,
                          kMultipleTransportsEnabledKey,
                          kMultipleTransportsSection);
+
+  ReadUIntValue(&rpc_pass_through_timeout_,
+                kDefaultRpcPassThroughTimeout,
+                kAppServicesSection,
+                kRpcPassThroughTimeoutKey);
+
+  LOG_UPDATED_VALUE(rpc_pass_through_timeout_,
+                    kRpcPassThroughTimeoutKey,
+                    kAppServicesSection);
 
   {  // Secondary Transports and ServicesMap
     struct KeyPair {

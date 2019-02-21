@@ -559,6 +559,9 @@ class ApplicationManager {
                                     uint32_t mobile_correlation_id,
                                     uint32_t new_timeout_value) = 0;
 
+  virtual void IncreaseForwardedRequestTimeout(
+      uint32_t connection_key, uint32_t mobile_correlation_id) = 0;
+
   virtual StateController& state_controller() = 0;
 
   virtual void SetUnregisterAllApplicationsReason(

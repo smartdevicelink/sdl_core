@@ -702,6 +702,15 @@ class ApplicationManagerImpl
                             uint32_t new_timeout_value) OVERRIDE;
 
   /**
+   * @brief TODO
+   *
+   * @param connection_key Connection key of application
+   * @param mobile_correlation_id Correlation ID of the mobile request
+   */
+  void IncreaseForwardedRequestTimeout(uint32_t connection_key,
+                                       uint32_t mobile_correlation_id) OVERRIDE;
+
+  /**
    * @brief AddPolicyObserver allows to subscribe needed component to events
    * from policy.
    *
