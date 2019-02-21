@@ -50,15 +50,12 @@ BCGetFileFromHMIResponse::BCGetFileFromHMIResponse(
                       application_manager,
                       rpc_service,
                       hmi_capabilities,
-                      policy_handler)
-    , length_(0)
-    , offset_(0) {}
+                      policy_handler) {}
 
 BCGetFileFromHMIResponse::~BCGetFileFromHMIResponse() {}
 
 void BCGetFileFromHMIResponse::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
-  LOG4CXX_DEBUG(logger_, "GETFILE_FROMHMI_RESPONSE");
   application_manager::event_engine::Event event(
       hmi_apis::FunctionID::BasicCommunication_GetFileFromHMI);
   event.set_smart_object(*message_);

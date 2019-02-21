@@ -67,8 +67,6 @@ class BCGetFileFromHMIResponse : public app_mngr::commands::ResponseFromHMI {
   virtual void Run();
 
  private:
-  uint32_t length_;
-  uint32_t offset_;
   DISALLOW_COPY_AND_ASSIGN(BCGetFileFromHMIResponse);
 };
 

@@ -55,7 +55,6 @@ BCGetFileFromHMIRequest::~BCGetFileFromHMIRequest() {}
 
 void BCGetFileFromHMIRequest::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
-  LOG4CXX_DEBUG(logger_, "GETFILE_FROMHMI_REQUEST");
   SendRequest();
 }
 

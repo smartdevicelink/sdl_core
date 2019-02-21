@@ -90,7 +90,6 @@ bool GetFileRequest::GetFilePath(std::string& file_path, bool& forward_to_hmi) {
     AppService app_service_info;
     if (application_manager_.GetAppServiceManager().GetAppServiceInfo(
             service_id, app_service_info)) {
-      // TODO Figure how to handle hmi case (AppService mobile service = false)
       if (app_service_info.mobile_service) {
         connect_key = app_service_info.connection_key;
       } else {
@@ -221,7 +220,6 @@ void GetFileRequest::Run() {
   }
 
   // Construct response message
-  LOG4CXX_DEBUG(logger_, "Construct response");
   if ((*message_)[strings::msg_params].keyExists(strings::offset)) {
     response_params[strings::offset] = offset_;
   }
@@ -240,8 +238,6 @@ void GetFileRequest::Run() {
   LOG4CXX_DEBUG(logger_, "length: " << length_);
   LOG4CXX_DEBUG(logger_, "file_path: " << file_path);
   LOG4CXX_DEBUG(logger_, "crc: " << crc_calculated);
-  // std::string st(bin_data.begin(), bin_data.end());
-  // LOG4CXX_DEBUG(logger_, "Binary data: " << st);
 
   SendResponse(true,
                mobile_apis::Result::SUCCESS,
