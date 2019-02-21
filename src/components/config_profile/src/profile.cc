@@ -285,7 +285,7 @@ const char* kProjectionLowBandwidthResumptionLevelKey =
     "ProjectionLowBandwidthResumptionLevel";
 const char* kMediaLowBandwidthResumptionLevelKey =
     "MediaLowBandwidthResumptionLevel";
-const char* kCoresOriginIdKey = "CoresOriginId";
+const char* kHMIOriginIDKey = "HMIOriginID";
 const char* kEmbeddedServicesKey = "EmbeddedServices";
 
 #ifdef WEB_HMI
@@ -394,7 +394,7 @@ const std::string kAllowedSymbols =
     "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ01234567890_.-";
 const bool kDefaultMultipleTransportsEnabled = false;
 const char* kDefaultLowBandwidthResumptionLevel = "NONE";
-const char* kDefaultCoresOriginId = "sdl_core";
+const char* kDefaultHMIOriginId = "HMI_ID";
 }  // namespace
 
 namespace profile {
@@ -1122,8 +1122,8 @@ const std::vector<std::string>& Profile::embedded_services() const {
   return embedded_services_;
 }
 
-const std::string Profile::cores_origin_id() const {
-  return cores_origin_id_;
+const std::string Profile::hmi_origin_id() const {
+  return hmi_origin_id_;
 }
 
 void Profile::UpdateValues() {
@@ -2291,12 +2291,12 @@ void Profile::UpdateValues() {
     }
   }
 
-  ReadStringValue(&cores_origin_id_,
-                  kDefaultCoresOriginId,
+  ReadStringValue(&hmi_origin_id_,
+                  kDefaultHMIOriginId,
                   kAppServicesSection,
-                  kCoresOriginIdKey);
+                  kHMIOriginIDKey);
 
-  LOG_UPDATED_VALUE(cores_origin_id_, kCoresOriginIdKey, kAppServicesSection);
+  LOG_UPDATED_VALUE(hmi_origin_id_, kHMIOriginIDKey, kAppServicesSection);
 
   {  // App Services map
     struct KeyPair {

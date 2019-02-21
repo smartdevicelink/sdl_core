@@ -527,7 +527,7 @@ class Profile : public protocol_handler::ProtocolHandlerSettings,
   const std::vector<std::string>& video_service_transports() const OVERRIDE;
 
   const std::vector<std::string>& embedded_services() const OVERRIDE;
-  const std::string cores_origin_id() const OVERRIDE;
+  const std::string hmi_origin_id() const OVERRIDE;
   /**
    * @brief Reads a string value from the profile
    *
@@ -1068,7 +1068,7 @@ class Profile : public protocol_handler::ProtocolHandlerSettings,
 
   std::vector<std::string> embedded_services_;
 
-  std::string cores_origin_id_;
+  std::string hmi_origin_id_;
 
   DISALLOW_COPY_AND_ASSIGN(Profile);
 };

@@ -139,7 +139,7 @@ class MockApplicationManagerSettings
 
   // AppServices
   MOCK_CONST_METHOD0(embedded_services, const std::vector<std::string>&());
-  MOCK_CONST_METHOD0(cores_origin_id, const std::string());
+  MOCK_CONST_METHOD0(hmi_origin_id, const std::string());
 };
 
 }  // namespace application_manager_test
