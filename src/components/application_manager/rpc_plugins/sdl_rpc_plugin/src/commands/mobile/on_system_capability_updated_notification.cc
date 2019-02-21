@@ -56,8 +56,6 @@ void OnSystemCapabilityUpdatedNotification::Run() {
 
   for (; applications.end() != app_it; ++app_it) {
     const ApplicationSharedPtr app = *app_it;
-    LOG4CXX_DEBUG(logger_,
-                  "ONSYSCAP: Send OnSystemCapabilityUpdatedNotification");
     LOG4CXX_INFO(logger_,
                  "Sending OnSystemCapabilityUpdated " << capability_type_string
                                                       << " application id "

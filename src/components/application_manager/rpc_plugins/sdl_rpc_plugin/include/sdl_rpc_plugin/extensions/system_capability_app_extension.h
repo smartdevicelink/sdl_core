@@ -68,7 +68,7 @@ class SystemCapabilityAppExtension : public app_mngr_::AppExtension {
   void ProcessResumption(
       const smart_objects::SmartObject& resumption_data) OVERRIDE;
 
-  static unsigned SystemCapabilityAppExtensionUID;
+  static const app_mngr_::AppExtensionUID SystemCapabilityAppExtensionUID;
 
   static SystemCapabilityAppExtension& ExtractExtension(
       app_mngr_::Application& app);
