@@ -123,7 +123,7 @@ void PublishAppServiceRequest::Run() {
                                                 requested_handled_rpcs);
 
   if (!result) {
-    SendResponse(false, mobile_apis::Result::DISALLOWED, NULL, NULL);
+    SendResponse(false, mobile_apis::Result::DISALLOWED, "Service disallowed by policies", NULL);
   }
 
   response_params[strings::app_service_record] = service_record;
