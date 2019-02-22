@@ -75,10 +75,16 @@ void ASGetAppServiceDataRequestFromHMI::on_event(
   const smart_objects::SmartObject& event_message = event.smart_object();
 
   auto msg_params = event_message[strings::msg_params];
-  SendResponse(true,
+
+  hmi_apis::Common_Result::eType result =
+      static_cast<hmi_apis::Common_Result::eType>(
+          event_message[strings::params][hmi_response::code].asInt());
+  bool success =
+      IsHMIResultSuccess(result, HmiInterfaces::HMI_INTERFACE_AppService);
+  SendResponse(success,
                correlation_id(),
                hmi_apis::FunctionID::AppService_GetAppServiceData,
-               hmi_apis::Common_Result::SUCCESS,
+               result,
                &msg_params,
                application_manager::commands::Command::SOURCE_SDL_TO_HMI);
 }
@@ -88,10 +94,18 @@ void ASGetAppServiceDataRequestFromHMI::on_event(
   const smart_objects::SmartObject& event_message = event.smart_object();
 
   auto msg_params = event_message[strings::msg_params];
-  SendResponse(true,
+
+  mobile_apis::Result::eType mobile_result =
+      static_cast<mobile_apis::Result::eType>(
+          msg_params[strings::result_code].asInt());
+  hmi_apis::Common_Result::eType result =
+      MessageHelper::MobileToHMIResult(mobile_result);
+  bool success = IsMobileResultSuccess(mobile_result);
+
+  SendResponse(success,
                correlation_id(),
                hmi_apis::FunctionID::AppService_GetAppServiceData,
-               hmi_apis::Common_Result::SUCCESS,
+               result,
                &msg_params,
                application_manager::commands::Command::SOURCE_SDL_TO_HMI);
 }

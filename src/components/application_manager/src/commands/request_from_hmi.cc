@@ -121,6 +121,43 @@ void RequestFromHMI::FillCommonParametersOfSO(
   (message)[strings::params][strings::correlation_id] = correlation_id;
 }
 
+bool RequestFromHMI::IsMobileResultSuccess(
+    mobile_apis::Result::eType result_code) const {
+  LOG4CXX_AUTO_TRACE(logger_);
+  using namespace helpers;
+  return Compare<mobile_apis::Result::eType, EQ, ONE>(
+      result_code,
+      mobile_apis::Result::SUCCESS,
+      mobile_apis::Result::WARNINGS,
+      mobile_apis::Result::WRONG_LANGUAGE,
+      mobile_apis::Result::RETRY,
+      mobile_apis::Result::SAVED);
+}
+
+bool RequestFromHMI::IsHMIResultSuccess(
+    hmi_apis::Common_Result::eType result_code,
+    HmiInterfaces::InterfaceID interface) const {
+  LOG4CXX_AUTO_TRACE(logger_);
+  using namespace helpers;
+  if (Compare<hmi_apis::Common_Result::eType, EQ, ONE>(
+          result_code,
+          hmi_apis::Common_Result::SUCCESS,
+          hmi_apis::Common_Result::WARNINGS,
+          hmi_apis::Common_Result::WRONG_LANGUAGE,
+          hmi_apis::Common_Result::RETRY,
+          hmi_apis::Common_Result::SAVED)) {
+    return true;
+  }
+
+  const HmiInterfaces::InterfaceState state =
+      application_manager_.hmi_interfaces().GetInterfaceState(interface);
+  if ((hmi_apis::Common_Result::UNSUPPORTED_RESOURCE == result_code) &&
+      (HmiInterfaces::STATE_NOT_AVAILABLE != state)) {
+    return true;
+  }
+  return false;
+}
+
 void RequestFromHMI::SendProviderRequest(
     const mobile_apis::FunctionID::eType& mobile_function_id,
     const hmi_apis::FunctionID::eType& hmi_function_id,

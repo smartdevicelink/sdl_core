@@ -441,16 +441,14 @@ void CommandRequestImpl::SendProviderRequest(
     LOG4CXX_DEBUG(logger_, "Invalid App Provider pointer");
     SendResponse(false,
                  mobile_apis::Result::DATA_NOT_AVAILABLE,
-                 "No app service provider available",
-                 NULL);
+                 "No app service provider available");
     return;
   }
 
   if (connection_key() == app->app_id()) {
     SendResponse(false,
                  mobile_apis::Result::IGNORED,
-                 "Consumer app is same as producer app",
-                 NULL);
+                 "Consumer app is same as producer app");
     return;
   }
 
@@ -883,6 +881,19 @@ void CommandRequestImpl::AddDisallowedParameters(
 bool CommandRequestImpl::HasDisallowedParams() const {
   return ((!removed_parameters_permissions_.disallowed_params.empty()) ||
           (!removed_parameters_permissions_.undefined_params.empty()));
+}
+
+bool CommandRequestImpl::IsMobileResultSuccess(
+    mobile_apis::Result::eType result_code) const {
+  LOG4CXX_AUTO_TRACE(logger_);
+  using namespace helpers;
+  return Compare<mobile_apis::Result::eType, EQ, ONE>(
+      result_code,
+      mobile_apis::Result::SUCCESS,
+      mobile_apis::Result::WARNINGS,
+      mobile_apis::Result::WRONG_LANGUAGE,
+      mobile_apis::Result::RETRY,
+      mobile_apis::Result::SAVED);
 }
 
 bool CommandRequestImpl::PrepareResultForMobileResponse(
