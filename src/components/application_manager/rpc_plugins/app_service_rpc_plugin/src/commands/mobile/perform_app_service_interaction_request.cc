@@ -116,8 +116,8 @@ void PerformAppServiceInteractionRequest::on_event(
   auto msg_params = event_message[strings::msg_params];
 
   const char* info = msg_params.keyExists(strings::info)
-                   ? msg_params[strings::info].asCharArray()
-                   : NULL;
+                         ? msg_params[strings::info].asCharArray()
+                         : NULL;
   hmi_apis::Common_Result::eType hmi_result =
       static_cast<hmi_apis::Common_Result::eType>(
           event_message[strings::params][hmi_response::code].asInt());

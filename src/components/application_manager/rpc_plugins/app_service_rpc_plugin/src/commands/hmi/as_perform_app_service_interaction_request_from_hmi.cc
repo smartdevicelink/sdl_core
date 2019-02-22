@@ -68,7 +68,7 @@ void ASPerformAppServiceInteractionRequestFromHMI::Run() {
                  hmi_apis::FunctionID::AppService_PerformAppServiceInteraction,
                  hmi_apis::Common_Result::INVALID_ID,
                  &response_params,
-                 application_manager::commands::Command::SOURCE_TO_HMI);
+                 application_manager::commands::Command::SOURCE_SDL_TO_HMI);
     return;
   }
 
@@ -110,7 +110,7 @@ void ASPerformAppServiceInteractionRequestFromHMI::on_event(
                hmi_apis::FunctionID::AppService_PerformAppServiceInteraction,
                result,
                &msg_params,
-               application_manager::commands::Command::SOURCE_TO_HMI);
+               application_manager::commands::Command::SOURCE_SDL_TO_HMI);
 }
 
 void ASPerformAppServiceInteractionRequestFromHMI::on_event(
@@ -122,14 +122,15 @@ void ASPerformAppServiceInteractionRequestFromHMI::on_event(
   mobile_apis::Result::eType mobile_result =
       static_cast<mobile_apis::Result::eType>(
           msg_params[strings::result_code].asInt());
-  hmi_apis::Common_Result::eType result = MessageHelper::MobileToHMIResult(mobile_result);
+  hmi_apis::Common_Result::eType result =
+      MessageHelper::MobileToHMIResult(mobile_result);
   bool success = IsMobileResultSuccess(mobile_result);
   SendResponse(success,
                correlation_id(),
                hmi_apis::FunctionID::AppService_PerformAppServiceInteraction,
                result,
                &msg_params,
-               application_manager::commands::Command::SOURCE_TO_HMI);
+               application_manager::commands::Command::SOURCE_SDL_TO_HMI);
 }
 
 }  // namespace commands

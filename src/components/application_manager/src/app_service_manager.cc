@@ -180,14 +180,14 @@ std::pair<std::string, AppService> AppServiceManager::FindServiceByName(
 std::pair<std::string, AppService> AppServiceManager::FindServiceByID(
     std::string service_id) {
   LOG4CXX_AUTO_TRACE(logger_);
-  
+
   auto it = published_services_.find(service_id);
   if (it == published_services_.end()) {
     LOG4CXX_ERROR(logger_, "Service id does not exist in published services");
     AppService empty;
     return std::make_pair(std::string(), empty);
   }
-  
+
   return *it;
 }
 }  //  namespace application_manager

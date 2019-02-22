@@ -44,7 +44,8 @@ namespace commands {
 /**
  * @brief ASGetActiveServiceConsentResponse command class
  **/
-class ASGetActiveServiceConsentResponse : public app_mngr::commands::ResponseFromHMI {
+class ASGetActiveServiceConsentResponse
+    : public app_mngr::commands::ResponseFromHMI {
  public:
   /**
    * @brief ASGetActiveServiceConsentResponse class constructor
