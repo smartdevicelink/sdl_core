@@ -143,8 +143,6 @@ void OnSystemCapabilityUpdatedNotification::Run() {
       ext.UnsubscribeFrom(system_capability_type);
       continue;
     }
-    LOG4CXX_DEBUG(logger_,
-                  "ONSYSCAP: Send OnSystemCapabilityUpdatedNotification");
     LOG4CXX_INFO(logger_,
                  "Sending OnSystemCapabilityUpdated " << capability_type_string
                                                       << " application id "

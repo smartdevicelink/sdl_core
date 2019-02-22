@@ -4,7 +4,8 @@ namespace sdl_rpc_plugin {
 CREATE_LOGGERPTR_GLOBAL(logger_, "GetSystemCapabilitiesAppExtension")
 
 namespace app_mngr_ = application_manager;
-unsigned SystemCapabilityAppExtension::SystemCapabilityAppExtensionUID = 200;
+const app_mngr_::AppExtensionUID
+    SystemCapabilityAppExtension::SystemCapabilityAppExtensionUID = 200;
 
 SystemCapabilityAppExtension::SystemCapabilityAppExtension(
     sdl_rpc_plugin::SDLRPCPlugin& plugin, app_mngr_::Application& app)

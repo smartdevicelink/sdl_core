@@ -137,7 +137,6 @@ void GetSystemCapabilityRequest::Run() {
       response_params
           [strings::system_capability][strings::app_services_capabilities] =
               MessageHelper::CreateAppServiceCapabilities(all_services);
-
       break;
     }
     default:  // Return unsupported resource
@@ -151,13 +150,11 @@ void GetSystemCapabilityRequest::Run() {
     if ((*message_)[app_mngr::strings::msg_params][strings::subscribe]
             .asBool() == true) {
       LOG4CXX_DEBUG(logger_,
-                    "GETSYSCAP: Subscribe to system capability - "
-                        << response_type);
+                    "Subscribe to system capability: " << response_type);
       ext.SubscribeTo(response_type);
     } else {
       LOG4CXX_DEBUG(logger_,
-                    "GETSYSCAP: Unsubscribe from system capability - "
-                        << response_type);
+                    "Unsubscribe from system capability: " << response_type);
       ext.UnsubscribeFrom(response_type);
     }
   }
