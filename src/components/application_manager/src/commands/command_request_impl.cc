@@ -439,7 +439,10 @@ void CommandRequestImpl::SendProviderRequest(
 
   if (!app) {
     LOG4CXX_DEBUG(logger_, "Invalid App Provider pointer");
-    // todo construct reponse for error case, no provider
+    SendResponse(false,
+                 mobile_apis::Result::DATA_NOT_AVAILABLE,
+                 "No app service provider available",
+                 NULL);
     return;
   }
 
