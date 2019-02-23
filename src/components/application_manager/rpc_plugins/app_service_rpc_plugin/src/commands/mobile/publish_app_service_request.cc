@@ -113,15 +113,13 @@ void PublishAppServiceRequest::Run() {
       (*message_)[strings::msg_params][strings::app_service_manifest]
                  [strings::service_type].asString();
 
-  smart_objects::SmartArray* requested_handled_rpcs;
+  smart_objects::SmartArray* requested_handled_rpcs = NULL;
   if ((*message_)[strings::msg_params][strings::app_service_manifest].keyExists(
           strings::handled_rpcs)) {
     requested_handled_rpcs =
         (*message_)[strings::msg_params][strings::app_service_manifest]
                    [strings::handled_rpcs].asArray();
   }
-
-  ApplicationSharedPtr app = application_manager_.application(connection_key());
 
   bool result =
       policy_handler_.CheckAppServiceParameters(app->policy_app_id(),

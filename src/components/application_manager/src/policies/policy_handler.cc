@@ -1965,21 +1965,26 @@ bool PolicyHandler::CheckAppServiceParameters(
     return false;
   }
 
-  if (!requested_service_name.empty()) {
-    auto service_names =
-        *(app_service_parameters[requested_service_type].service_names);
+  auto service_names =
+      *(app_service_parameters[requested_service_type].service_names);
+  if (!service_names.is_initialized()) {
+    LOG4CXX_DEBUG(logger_,
+                  "Pt Service Name is Null, All service names accepted");
+  } else if (!requested_service_name.empty()) {
     auto find_name_result =
         std::find(service_names.begin(),
                   service_names.end(),
                   rpc::String<0, 255>(requested_service_name));
     if (find_name_result == service_names.end()) {
+      LOG4CXX_DEBUG(logger_,
+                    "Disallowed service name: " << requested_service_name);
       return false;
     }
   }
 
   if (requested_handled_rpcs) {
     auto temp_rpcs =
-        *(app_service_parameters[requested_service_type].handled_rpcs);
+        app_service_parameters[requested_service_type].handled_rpcs;
     for (auto handled_it = temp_rpcs.begin(); handled_it != temp_rpcs.end();
          ++handled_it) {
       handled_rpcs.push_back(handled_it->function_id);
@@ -1991,6 +1996,8 @@ bool PolicyHandler::CheckAppServiceParameters(
       auto find_result = std::find(
           handled_rpcs.begin(), handled_rpcs.end(), requested_it->asInt());
       if (find_result == handled_rpcs.end()) {
+        LOG4CXX_DEBUG(logger_,
+                      "Disallowed by handled rpc: " << requested_it->asInt());
         return false;
       }
     }
