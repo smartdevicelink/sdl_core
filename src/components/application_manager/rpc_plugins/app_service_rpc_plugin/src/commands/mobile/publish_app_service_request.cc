@@ -92,13 +92,6 @@ void PublishAppServiceRequest::Run() {
   }
 
   ApplicationSharedPtr app = application_manager_.application(connection_key());
-  auto& ext =
-      sdl_rpc_plugin::SystemCapabilityAppExtension::ExtractExtension(*app);
-  ext.SubscribeTo(mobile_apis::SystemCapabilityType::APP_SERVICES);
-
-  smart_objects::SmartObject service_record =
-      application_manager_.GetAppServiceManager().PublishAppService(
-          manifest, true, connection_key());
 
   std::string requested_service_name = "";
 
@@ -133,6 +126,14 @@ void PublishAppServiceRequest::Run() {
                  "Service disallowed by policies",
                  NULL);
   }
+
+  auto& ext =
+      sdl_rpc_plugin::SystemCapabilityAppExtension::ExtractExtension(*app);
+  ext.SubscribeTo(mobile_apis::SystemCapabilityType::APP_SERVICES);
+
+  smart_objects::SmartObject service_record =
+      application_manager_.GetAppServiceManager().PublishAppService(
+          manifest, true, connection_key());
 
   response_params[strings::app_service_record] = service_record;
 
