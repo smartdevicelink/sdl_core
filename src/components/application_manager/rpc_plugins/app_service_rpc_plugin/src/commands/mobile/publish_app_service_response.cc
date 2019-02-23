@@ -50,15 +50,7 @@ PublishAppServiceResponse::PublishAppServiceResponse(
                           application_manager,
                           rpc_service,
                           hmi_capabilities,
-                          policy_handler)
-    , plugin_(NULL) {
-  auto plugin = application_manager.GetPluginManager().FindPluginToProcess(
-      mobile_apis::FunctionID::PublishAppServiceID,
-      app_mngr::commands::Command::CommandSource::SOURCE_MOBILE);
-  if (plugin) {
-    plugin_ = dynamic_cast<AppServiceRpcPlugin*>(&(*plugin));
-  }
-}
+                          policy_handler) {}
 
 PublishAppServiceResponse::~PublishAppServiceResponse() {}
 

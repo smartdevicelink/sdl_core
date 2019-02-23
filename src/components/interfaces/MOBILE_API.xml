@@ -3771,7 +3771,7 @@
             </description>
         </param>
 
-        <param name="queuePlaybackProgess" type="Integer" mandatory="false">
+        <param name="queuePlaybackProgress" type="Integer" mandatory="false">
             <description>
                 Music: The current progress of the playback queue in seconds
                 Podcast: The current progress of the playback queue in seconds
@@ -3889,26 +3889,26 @@
     </struct>
 
     <struct name="AppServiceManifest" since="5.1">
-        <description> This manifest contains all the information necessary for the service to be published, activated, and consumers able to interact with it</description>
+        <description> This manifest contains all the information necessary for the service to be published, activated, and consumers able to interact with it </description>
 
         <param name="serviceName" type="String" mandatory="false">
-            <description> Unique name of this service</description>
+            <description> Unique name of this service </description>
         </param>
 
         <param name="serviceType" type="String" mandatory="true">
-            <description>The type of service that is to be offered by this app</description>
+            <description> The type of service that is to be offered by this app </description>
         </param>
 
         <param name="serviceIcon" type="String" mandatory="false">
-            <description> The file name of the icon to be associated with this service. Most likely the same as the appIcon.</description>
+            <description> The file name of the icon to be associated with this service. Most likely the same as the appIcon. </description>
         </param>
 
         <param name="allowAppConsumers" type="Boolean" mandatory="false" defvalue="false">
-            <description>If true, app service consumers beyond the IVI system will be able to access this service. If false, only the IVI system will be able consume the service. If not provided, it is assumed to be false. </description>
+            <description> If true, app service consumers beyond the IVI system will be able to access this service. If false, only the IVI system will be able consume the service. If not provided, it is assumed to be false. </description>
         </param>
 
         <param name="uriPrefix" type="String" mandatory="false">
-            <description> The URI prefix for this service. If provided, all PerformAppServiceInteraction requests must start with it.</description>
+            <description> The URI prefix for this service. If provided, all PerformAppServiceInteraction requests must start with it. </description>
         </param>
 
         <param name="uriScheme" type="String" mandatory="false">
