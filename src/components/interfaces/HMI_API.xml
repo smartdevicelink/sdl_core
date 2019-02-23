@@ -3368,6 +3368,7 @@
     <enum name="AppServiceType">
         <element name="MEDIA"/>
         <element name="WEATHER"/>
+        <element name="NAVIGATION"/>
     </enum>
 
     <struct name="MediaServiceManifest">
@@ -3556,6 +3557,110 @@
         </param>
     </struct>
 
+    <struct name="NavigationServiceManifest">
+        <param name="acceptsWayPoints" type="Boolean" mandatory="false">
+            <description> Informs the subscriber if this service can actually accept way points. </description>
+        </param>
+    </struct>
+
+    <enum name="NavigationAction">
+        <element name="TURN">
+            <description> Using this action plus a supplied direction can give the type of turn. </description>
+        </element>
+        <element name="EXIT"/>
+        <element name="STAY"/>    
+        <element name="MERGE"/>
+        <element name="FERRY"/>
+        <element name="CAR_SHUTTLE_TRAIN"/>
+        <element name="WAYPOINT"/>
+    </enum>
+
+    <enum name="NavigationJunction">
+        <element name="REGULAR">
+            <description> A junction that represents a standard intersection with a single road crossing another. </description>
+        </element>
+        <element name="BIFURCATION">
+            <description> A junction where the road splits off into two paths; a fork in the road. </description>
+        </element>
+        <element name="MULTI_CARRIAGEWAY">
+            <description> A junction that has multiple intersections and paths. </description>
+        </element>
+        <element name="ROUNDABOUT">
+            <description> A junction where traffic moves in a single direction around a central, non-traversable point to reach one of the connecting roads. </description>
+        </element>
+        <element name="TRAVERSABLE_ROUNDABOUT">
+            <description> Similar to a roundabout, however the center of the roundabout is fully traversable. Also known as a mini-roundabout. </description>
+        </element>
+        <element name="JUGHANDLE">
+            <description> A junction where lefts diverge to the right, then curve to the left, converting a left turn to a crossing maneuver. </description>
+        </element>
+        <element name="ALL_WAY_YIELD">
+            <description> Multiple way intersection that allows traffic to flow based on priority; most commonly right of way and first in, first out. </description>
+        </element>
+        <element name="TURN_AROUND">
+            <description> A junction designated for traffic turn arounds. </description>
+        </element>
+    </enum>
+
+    <enum name="Direction">
+        <element name="LEFT"/>
+        <element name="RIGHT"/>
+    </enum>
+
+    <struct name="NavigationInstruction">
+        <param name="locationDetails" type="Common.LocationDetails" mandatory="true"/>
+
+        <param name="action" type="Common.NavigationAction" mandatory="true"/>
+
+        <param name="eta" type="Common.DateTime" mandatory="false"/>
+
+        <param name="bearing" type="Integer" minvalue="0" maxvalue="359" mandatory="false">
+            <description> The angle at which this instruction takes place. For example, 0 would mean straight, less than 45 is bearing right, greater than 135 is sharp right, between 45 and 135 is a regular right, and 180 is a U-Turn, etc. </description>
+        </param>
+
+        <param name="junctionType" type="Common.NavigationJunction" mandatory="false"/>
+
+        <param name="drivingSide" type="Common.Direction" mandatory="false">
+            <description> Used to infer which side of the road this instruction takes place. For a U-Turn (Action=Turn, direction=180) this will determine which direction the turn should take place. </description>
+        </param>
+
+        <param name="details" type="String" mandatory="false">
+            <description> This is a string representation of this instruction, used to display instructions to the users. This is not intended to be read aloud to the users, see the param prompt in NavigationServiceData for that. </description>
+        </param>
+
+        <param name="image" type="Common.Image" mandatory="false">
+            <description> An image representation of this instruction. </description>
+        </param>
+    </struct>
+
+    <struct name="NavigationServiceData">
+        <description> This data is related to what a navigation service would provide.</description>
+
+        <param name="timestamp" type="Common.DateTime" mandatory="true">
+            <description> This is the timestamp of when the data was generated. This is to ensure any time or distance given in the data can accurately be adjusted if necessary. </description>
+        </param>
+
+        <param name="origin" type="Common.LocationDetails" mandatory="false"/>
+        <param name="destination" type="Common.LocationDetails" mandatory="false"/>
+        <param name="destinationETA" type="Common.DateTime" mandatory="false"/>
+
+        <param name="instructions" type="Common.NavigationInstruction" array="true" mandatory="false">
+            <description> This array should be ordered with all remaining instructions. The start of this array should always contain the next instruction.</description>
+        </param>
+
+        <param name="nextInstructionETA" type="Common.DateTime" mandatory="false"/>
+        <param name="nextInstructionDistance" type="Float" mandatory="false">
+            <description>The distance to this instruction from current location. This should only be updated ever .1 unit of distance. For more accuracy the consumer can use the GPS location of itself and the next instruction. </description>
+        </param>
+        <param name="nextInstructionDistanceScale" type="Float" mandatory="false">
+            <description>Distance till next maneuver (starting from) from previous maneuver.</description>
+        </param>
+
+        <param name="prompt" type="String" mandatory="false">
+            <description>This is a prompt message that should be conveyed to the user through either display or voice (TTS). This param will change often as it should represent the following: approaching instruction, post instruction, alerts that affect the current navigation session, etc.</description>
+        </param>
+    </struct>
+
     <struct name="AppServiceManifest">
         <description> This manifest contains all the information necessary for the service to be published, activated, and consumers able to interact with it </description>
 
@@ -3593,6 +3698,7 @@
 
         <param name="mediaServiceManifest" type="Common.MediaServiceManifest" mandatory="false"/>
         <param name="weatherServiceManifest" type="Common.WeatherServiceManifest" mandatory="false"/>
+        <param name="navigationServiceManifest" type="Common.NavigationServiceManifest" mandatory="false"/>
     </struct>
 
     <struct name="AppServiceRecord">
@@ -3623,6 +3729,7 @@
 
         <param name="mediaServiceData" type="Common.MediaServiceData" mandatory="false"/>
         <param name="weatherServiceData" type="Common.WeatherServiceData" mandatory="false"/>
+        <param name="navigationServiceData" type="Common.NavigationServiceData" mandatory="false"/>
     </struct>
 
     <enum name="ServiceUpdateReason">
