@@ -86,8 +86,7 @@ smart_objects::SmartObject AppServiceManager::PublishAppService(
   service_record[strings::service_active] = false;
   app_service.record = service_record;
 
-  std::string service_type =
-      manifest[strings::service_type].asString();
+  std::string service_type = manifest[strings::service_type].asString();
   Json::Value& dictionary = last_state_.get_dictionary();
   app_service.default_service =
       (dictionary[kAppServiceSection][kDefaults][service_type].asString() ==
