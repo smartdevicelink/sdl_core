@@ -33,7 +33,13 @@
 #ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_APP_SERVICE_MANAGER_H_
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_APP_SERVICE_MANAGER_H_
 
+#include "application_manager/application.h"
+#include "interfaces/MOBILE_API.h"
 #include "smart_objects/smart_object.h"
+
+namespace resumption {
+class LastState;
+}
 
 namespace application_manager {
 
@@ -55,7 +61,8 @@ class AppServiceManager {
    * @brief Class constructor
    * @param app_manager
    */
-  AppServiceManager(ApplicationManager& app_manager);
+  AppServiceManager(ApplicationManager& app_manager,
+                    resumption::LastState& last_state);
 
   /**
    * @brief Class destructor
@@ -76,6 +83,8 @@ class AppServiceManager {
    * @param service_id
    */
   bool UnpublishAppService(const std::string service_id);
+
+  void OnAppActivated(ApplicationConstSharedPtr app);
 
   /**
    * @brief TODO
@@ -124,13 +133,23 @@ class AppServiceManager {
   std::pair<std::string, AppService> ActiveServiceByType(
       std::string service_type);
 
+  std::pair<std::string, AppService> EmbeddedServiceForType(
+      std::string service_type);
+
   std::pair<std::string, AppService> FindServiceByName(std::string name);
 
   std::string DefaultServiceByType(std::string service_type);
 
  private:
   ApplicationManager& app_manager_;
+  resumption::LastState& last_state_;
   std::map<std::string, AppService> published_services_;
+
+  void BroadcastAppServiceUpdate(smart_objects::SmartObject& msg_params);
+  void AppServiceUpdated(
+      const smart_objects::SmartObject& service_record,
+      const mobile_apis::ServiceUpdateReason::eType update_reason,
+      smart_objects::SmartObject& msg_params);
 };
 
 }  //  namespace application_manager

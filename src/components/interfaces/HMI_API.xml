@@ -6201,5 +6201,41 @@
 
         <param name="serviceData" type="Common.AppServiceData" mandatory="true"/>
     </function>
+
+    <function name="GetAppServiceRecords" messagetype="request">
+        <param name="serviceType" type="String" mandatory="false">
+            <description>If included, only service records of supplied type will be returned in response. If not included, all service records for all types will be returned. See Common.AppServiceType.</description>
+        </param>
+    </function>
+
+    <function name="GetAppServiceRecords" messagetype="response">
+        <param name="serviceRecords" type="Common.AppServiceRecord" array="true" mandatory="false">
+            <description>All app service records of requested type.</description>
+        </param>
+    </function>
+
+    <function name="AppServiceActivation" messagetype="request">
+        <param name="serviceID" type="String" mandatory="true">
+            <description>The ID of the service that should have an activation event take place on</description>
+        </param>
+        <param name="activate" type="Boolean" mandatory="true">
+            <description>True if the service is to be activated. False if the app is to be deactivated</description>
+        </param>
+        <param name="setAsDefault" type="Boolean" mandatory="false">
+            <description>True if the service is to be the default service of this type. False if the app is not to be the default</description>
+        </param>
+    </function>
+
+    <function name="AppServiceActivation" messagetype="response">
+        <param name="serviceID" type="String" mandatory="true">
+            <description>The ID of the service that was requested to have an activation event take place</description>
+        </param>
+        <param name="activate" type="Boolean" mandatory="true">
+            <description>True if the service was activated. False if the app was deactivated or unable to be activated</description>
+        </param>
+        <param name="setAsDefault" type="Boolean" mandatory="false">
+            <description>True if the service was set to the default service of this type. False if the app was not to be the default</description>
+        </param> 
+    </function>
 </interface>
 </interfaces>

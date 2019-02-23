@@ -288,6 +288,9 @@ const char* service_active = "serviceActive";
 const char* app_services = "appServices";
 const char* update_reason = "updateReason";
 const char* updated_app_service_record = "updatedAppServiceRecord";
+const char* service_records = "serviceRecords";
+const char* activate = "activate";
+const char* set_as_default = "setAsDefault";
 
 // resuming
 const char* application_commands = "applicationCommands";

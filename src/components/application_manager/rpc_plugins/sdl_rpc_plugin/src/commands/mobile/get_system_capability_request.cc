@@ -132,25 +132,11 @@ void GetSystemCapabilityRequest::Run() {
       }
       break;
     case mobile_apis::SystemCapabilityType::APP_SERVICES: {
-      smart_objects::SmartObject app_service_capabilities(
-          smart_objects::SmartType_Map);
-      smart_objects::SmartObject app_services(smart_objects::SmartType_Array);
-
-      std::vector<smart_objects::SmartObject> service_records =
+      auto all_services =
           application_manager_.GetAppServiceManager().GetAllServices();
-
-      for (auto& record : service_records) {
-        smart_objects::SmartObject app_services_capabilities(
-            smart_objects::SmartType_Map);
-        app_services_capabilities[strings::updated_app_service_record] = record;
-        app_services.asArray()->push_back(app_services_capabilities);
-      }
-
-      app_service_capabilities[strings::app_services] = app_services;
-      response_params[strings::system_capability]
-                     [strings::app_services_capabilities] =
-                         app_service_capabilities;
-
+      response_params
+          [strings::system_capability][strings::app_services_capabilities] =
+              MessageHelper::CreateAppServiceCapabilities(all_services);
       break;
     }
     default:  // Return unsupported resource

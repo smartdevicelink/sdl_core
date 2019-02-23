@@ -321,6 +321,9 @@ extern const char* service_active;
 extern const char* app_services;
 extern const char* update_reason;
 extern const char* updated_app_service_record;
+extern const char* service_records;
+extern const char* activate;
+extern const char* set_as_default;
 
 // resuming
 extern const char* application_commands;
