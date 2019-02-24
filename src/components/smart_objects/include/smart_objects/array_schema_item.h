@@ -79,12 +79,12 @@ class CArraySchemaItem : public ISchemaItem {
    * @brief Apply schema.
    *
    * @param Object Object to apply schema.
-   *
-   * @param RemoveFakeParameters contains true if need to remove fake parameters
+   * @param RemoveUnknownParameters contains true if need to remove unknown
+   *parameters
    * from smart object otherwise contains false.
    **/
   void applySchema(SmartObject& Object,
-                   const bool RemoveFakeParameters,
+                   const bool RemoveUnknownParameters,
                    const utils::SemanticVersion& MessageVersion =
                        utils::SemanticVersion()) OVERRIDE;
 
@@ -92,8 +92,11 @@ class CArraySchemaItem : public ISchemaItem {
    * @brief Unapply schema.
    *
    * @param Object Object to unapply schema.
+   * @param RemoveUnknownParameters contains true if need to remove unknown
+   *parameters
    **/
-  void unapplySchema(SmartObject& Object) OVERRIDE;
+  void unapplySchema(SmartObject& Object,
+                     const bool RemoveUnknownParameters) OVERRIDE;
 
   /**
    * @brief Build smart object by smart schema having copied matched

@@ -2049,7 +2049,9 @@ bool ApplicationManagerImpl::Stop() {
 }
 
 bool ApplicationManagerImpl::ConvertSOtoMessage(
-    const smart_objects::SmartObject& message, Message& output) {
+    const smart_objects::SmartObject& message,
+    Message& output,
+    const bool RemoveUnknownParameters) {
   LOG4CXX_AUTO_TRACE(logger_);
 
   if (smart_objects::SmartType_Null == message.getType() ||
@@ -2074,16 +2076,16 @@ bool ApplicationManagerImpl::ConvertSOtoMessage(
   switch (protocol_type) {
     case 0: {
       if (protocol_version == 1) {
-        if (!formatters::CFormatterJsonSDLRPCv1::toString(message,
-                                                          output_string)) {
+        if (!formatters::CFormatterJsonSDLRPCv1::toString(
+                message, output_string, RemoveUnknownParameters)) {
           LOG4CXX_WARN(logger_, "Failed to serialize smart object");
           return false;
         }
         output.set_protocol_version(
             protocol_handler::MajorProtocolVersion::PROTOCOL_VERSION_1);
       } else {
-        if (!formatters::CFormatterJsonSDLRPCv2::toString(message,
-                                                          output_string)) {
+        if (!formatters::CFormatterJsonSDLRPCv2::toString(
+                message, output_string, RemoveUnknownParameters)) {
           LOG4CXX_WARN(logger_, "Failed to serialize smart object");
           return false;
         }
@@ -2095,7 +2097,8 @@ bool ApplicationManagerImpl::ConvertSOtoMessage(
       break;
     }
     case 1: {
-      if (!formatters::FormatterJsonRpc::ToString(message, output_string)) {
+      if (!formatters::FormatterJsonRpc::ToString(
+              message, output_string, RemoveUnknownParameters)) {
         LOG4CXX_WARN(logger_, "Failed to serialize smart object");
         return false;
       }

@@ -228,7 +228,8 @@ void RPCHandlerImpl::GetMessageVersion(
 
 bool RPCHandlerImpl::ConvertMessageToSO(
     const Message& message,
-    ns_smart_device_link::ns_smart_objects::SmartObject& output) {
+    ns_smart_device_link::ns_smart_objects::SmartObject& output,
+    const bool RemoveUnknownParameters) {
   LOG4CXX_AUTO_TRACE(logger_);
   LOG4CXX_DEBUG(logger_,
                 "\t\t\tMessage to convert: protocol "
@@ -262,7 +263,8 @@ bool RPCHandlerImpl::ConvertMessageToSO(
       }
 
       if (!conversion_result ||
-          !mobile_so_factory().attachSchema(output, true, msg_version) ||
+          !mobile_so_factory().attachSchema(
+              output, RemoveUnknownParameters, msg_version) ||
           ((output.validate(&report, msg_version) !=
             smart_objects::errors::OK))) {
         LOG4CXX_WARN(logger_,

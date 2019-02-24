@@ -90,20 +90,21 @@ errors::eType CArraySchemaItem::validate(
 
 void CArraySchemaItem::applySchema(
     SmartObject& Object,
-    const bool RemoveFakeParameters,
+    const bool RemoveUnknownParameters,
     const utils::SemanticVersion& MessageVersion) {
   if (SmartType_Array == Object.getType()) {
     for (size_t i = 0U; i < Object.length(); ++i) {
       mElementSchemaItem->applySchema(
-          Object[i], RemoveFakeParameters, MessageVersion);
+          Object[i], RemoveUnknownParameters, MessageVersion);
     }
   }
 }
 
-void CArraySchemaItem::unapplySchema(SmartObject& Object) {
+void CArraySchemaItem::unapplySchema(SmartObject& Object,
+                                     const bool RemoveUnknownParameters) {
   if (SmartType_Array == Object.getType()) {
     for (size_t i = 0U; i < Object.length(); ++i) {
-      mElementSchemaItem->unapplySchema(Object[i]);
+      mElementSchemaItem->unapplySchema(Object[i], RemoveUnknownParameters);
     }
   }
 }

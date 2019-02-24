@@ -154,13 +154,13 @@ errors::eType CObjectSchemaItem::validate(
 
 void CObjectSchemaItem::applySchema(
     SmartObject& Object,
-    const bool RemoveFakeParameters,
+    const bool RemoveUnknownParameters,
     const utils::SemanticVersion& MessageVersion) {
   if (SmartType_Map != Object.getType()) {
     return;
   }
 
-  if (RemoveFakeParameters) {
+  if (RemoveUnknownParameters) {
     RemoveFakeParams(Object, MessageVersion);
   }
 
@@ -173,16 +173,17 @@ void CObjectSchemaItem::applySchema(
       if (member.mSchemaItem->setDefaultValue(default_value)) {
         Object[key] = default_value;
         member.mSchemaItem->applySchema(
-            Object[key], RemoveFakeParameters, MessageVersion);
+            Object[key], RemoveUnknownParameters, MessageVersion);
       }
     } else {
       member.mSchemaItem->applySchema(
-          Object[key], RemoveFakeParameters, MessageVersion);
+          Object[key], RemoveUnknownParameters, MessageVersion);
     }
   }
 }
 
-void CObjectSchemaItem::unapplySchema(SmartObject& Object) {
+void CObjectSchemaItem::unapplySchema(SmartObject& Object,
+                                      const bool RemoveUnknownParameters) {
   if (SmartType_Map != Object.getType()) {
     return;
   }
@@ -191,7 +192,7 @@ void CObjectSchemaItem::unapplySchema(SmartObject& Object) {
     const std::string& key = it->first;
     // move next to avoid wrong iterator on erase
     ++it;
-    if (mMembers.end() == mMembers.find(key)) {
+    if (mMembers.end() == mMembers.find(key) && RemoveUnknownParameters) {
       // remove fake params
       Object.erase(key);
     }
@@ -202,7 +203,7 @@ void CObjectSchemaItem::unapplySchema(SmartObject& Object) {
     const std::string& key = it->first;
     const SMember& member = it->second;
     if (Object.keyExists(key)) {
-      member.mSchemaItem->unapplySchema(Object[key]);
+      member.mSchemaItem->unapplySchema(Object[key], RemoveUnknownParameters);
     }
   }
 }

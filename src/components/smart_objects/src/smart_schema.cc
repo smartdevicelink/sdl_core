@@ -52,13 +52,14 @@ void CSmartSchema::setSchemaItem(const ISchemaItemPtr schemaItem) {
 }
 
 void CSmartSchema::applySchema(SmartObject& Object,
-                               const bool RemoveFakeParameters,
+                               const bool RemoveUnknownParameters,
                                const utils::SemanticVersion& MessageVersion) {
-  mSchemaItem->applySchema(Object, RemoveFakeParameters, MessageVersion);
+  mSchemaItem->applySchema(Object, RemoveUnknownParameters, MessageVersion);
 }
 
-void CSmartSchema::unapplySchema(SmartObject& Object) {
-  mSchemaItem->unapplySchema(Object);
+void CSmartSchema::unapplySchema(SmartObject& Object,
+                                 const bool RemoveUnknownParameters) {
+  mSchemaItem->unapplySchema(Object, RemoveUnknownParameters);
 }
 
 void CSmartSchema::BuildObjectBySchema(const SmartObject& pattern_object,

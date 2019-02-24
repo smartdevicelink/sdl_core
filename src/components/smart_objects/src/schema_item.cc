@@ -51,10 +51,11 @@ bool ISchemaItem::hasDefaultValue(SmartObject& Object) {
 }
 
 void ISchemaItem::applySchema(SmartObject& Object,
-                              const bool RemoveFakeParameters,
+                              const bool RemoveUnknownParameters,
                               const utils::SemanticVersion& MessageVersion) {}
 
-void ISchemaItem::unapplySchema(SmartObject& Object) {}
+void ISchemaItem::unapplySchema(SmartObject& Object,
+                                const bool RemoveUnknownParameters) {}
 
 void ISchemaItem::BuildObjectBySchema(const SmartObject& pattern_object,
                                       SmartObject& result_object) {}

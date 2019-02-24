@@ -148,14 +148,14 @@ class CSmartFactory {
    *
    * @param object SmartObject to attach schema for.
    *
-   * @param RemoveFakeParameters contains true if need
+   * @param RemoveUnknownParameters contains true if need
    * to remove fake parameters from smart object otherwise contains false.
    *
    * @return True if operation was successful or false otherwise.
    */
   bool attachSchema(
       ns_smart_device_link::ns_smart_objects::SmartObject& object,
-      const bool RemoveFakeParameters,
+      const bool RemoveUnknownParameters,
       const utils::SemanticVersion& MessageVersion = utils::SemanticVersion());
 
   /**
@@ -276,7 +276,7 @@ CSmartFactory<FunctionIdEnum, MessageTypeEnum, StructIdEnum>::CSmartFactory(
 template <class FunctionIdEnum, class MessageTypeEnum, class StructIdEnum>
 bool CSmartFactory<FunctionIdEnum, MessageTypeEnum, StructIdEnum>::attachSchema(
     ns_smart_device_link::ns_smart_objects::SmartObject& object,
-    const bool RemoveFakeParameters,
+    const bool RemoveUnknownParameters,
     const utils::SemanticVersion& MessageVersion) {
   if (false == object.keyExists(strings::S_PARAMS))
     return false;
@@ -305,7 +305,7 @@ bool CSmartFactory<FunctionIdEnum, MessageTypeEnum, StructIdEnum>::attachSchema(
   object.setSchema(schemaIterator->second);
 
   schemaIterator->second.applySchema(
-      object, RemoveFakeParameters, MessageVersion);
+      object, RemoveUnknownParameters, MessageVersion);
 
   return true;
 }

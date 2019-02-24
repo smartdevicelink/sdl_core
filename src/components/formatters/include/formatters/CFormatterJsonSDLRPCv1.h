@@ -126,11 +126,14 @@ class CFormatterJsonSDLRPCv1 : public CFormatterJsonBase {
    *
    * @param obj input SmartObject
    * @param outStr resulting JSON string
+   * @param RemoveUnknownParameters contains true if need to remove unknown
+   *parameters
    * @return true if success, false otherwise
    */
   static bool toString(
       const ns_smart_device_link::ns_smart_objects::SmartObject& obj,
-      std::string& outStr);
+      std::string& outStr,
+      const bool RemoveUnknownParameters = true);
 
   /**
    * @brief Creates a SmartObject from a JSON string.
@@ -151,12 +154,15 @@ class CFormatterJsonSDLRPCv1 : public CFormatterJsonBase {
    * @param schema Smart schema which describes 'fake' smart object to be
    *formatted
    * @param outStr Resulting JSON string
+   * @param RemoveUnknownParameters contains true if need to remove unknown
+   *parameters
    * @return formatting error code
    */
   static tMetaFormatterErrorCode MetaFormatToString(
       const ns_smart_device_link::ns_smart_objects::SmartObject& object,
       const ns_smart_device_link::ns_smart_objects::CSmartSchema& schema,
-      std::string& outStr);
+      std::string& outStr,
+      const bool RemoveUnknownParameters = true);
 };
 
 // ----------------------------------------------------------------------------

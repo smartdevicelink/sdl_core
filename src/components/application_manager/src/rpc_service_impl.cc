@@ -530,7 +530,8 @@ void RPCServiceImpl::set_hmi_message_handler(
 
 bool RPCServiceImpl::ConvertSOtoMessage(
     const ns_smart_device_link::ns_smart_objects::SmartObject& message,
-    Message& output) {
+    Message& output,
+    const bool RemoveUnknownParameters) {
   LOG4CXX_AUTO_TRACE(logger_);
 
   if (smart_objects::SmartType_Null == message.getType() ||
@@ -555,16 +556,16 @@ bool RPCServiceImpl::ConvertSOtoMessage(
   switch (protocol_type) {
     case 0: {
       if (protocol_version == 1) {
-        if (!formatters::CFormatterJsonSDLRPCv1::toString(message,
-                                                          output_string)) {
+        if (!formatters::CFormatterJsonSDLRPCv1::toString(
+                message, output_string, RemoveUnknownParameters)) {
           LOG4CXX_WARN(logger_, "Failed to serialize smart object");
           return false;
         }
         output.set_protocol_version(
             protocol_handler::MajorProtocolVersion::PROTOCOL_VERSION_1);
       } else {
-        if (!formatters::CFormatterJsonSDLRPCv2::toString(message,
-                                                          output_string)) {
+        if (!formatters::CFormatterJsonSDLRPCv2::toString(
+                message, output_string, RemoveUnknownParameters)) {
           LOG4CXX_WARN(logger_, "Failed to serialize smart object");
           return false;
         }
@@ -576,7 +577,8 @@ bool RPCServiceImpl::ConvertSOtoMessage(
       break;
     }
     case 1: {
-      if (!formatters::FormatterJsonRpc::ToString(message, output_string)) {
+      if (!formatters::FormatterJsonRpc::ToString(
+              message, output_string, RemoveUnknownParameters)) {
         LOG4CXX_WARN(logger_, "Failed to serialize smart object");
         return false;
       }
@@ -589,7 +591,7 @@ bool RPCServiceImpl::ConvertSOtoMessage(
       return false;
   }
 
-  LOG4CXX_DEBUG(logger_, "Convertion result: " << output_string);
+  LOG4CXX_DEBUG(logger_, "Conversion result: " << output_string);
 
   output.set_connection_key(message.getElement(jhs::S_PARAMS)
                                 .getElement(strings::connection_key)
