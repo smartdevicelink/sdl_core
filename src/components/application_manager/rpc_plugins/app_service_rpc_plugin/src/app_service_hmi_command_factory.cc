@@ -34,6 +34,10 @@
 #include "application_manager/message.h"
 #include "interfaces/HMI_API.h"
 
+#include "app_service_rpc_plugin/commands/hmi/as_app_service_activation_request.h"
+#include "app_service_rpc_plugin/commands/hmi/as_app_service_activation_response.h"
+#include "app_service_rpc_plugin/commands/hmi/as_get_app_service_records_request.h"
+#include "app_service_rpc_plugin/commands/hmi/as_get_app_service_records_response.h"
 #include "app_service_rpc_plugin/commands/hmi/as_publish_app_service_request.h"
 #include "app_service_rpc_plugin/commands/hmi/as_publish_app_service_response.h"
 #include "app_service_rpc_plugin/commands/hmi/on_as_app_service_data_notification.h"
@@ -138,6 +142,16 @@ app_mngr::CommandCreator& AppServiceHmiCommandFactory::buildCommandCreator(
                          commands::ASGetAppServiceDataResponseToHMI>();
       }
 
+    case hmi_apis::FunctionID::AppService_GetAppServiceRecords:
+      return hmi_apis::messageType::request == message_type
+                 ? factory.GetCreator<commands::ASGetAppServiceRecordsRequest>()
+                 : factory
+                       .GetCreator<commands::ASGetAppServiceRecordsResponse>();
+    case hmi_apis::FunctionID::AppService_AppServiceActivation:
+      return hmi_apis::messageType::request == message_type
+                 ? factory.GetCreator<commands::ASAppServiceActivationRequest>()
+                 : factory
+                       .GetCreator<commands::ASAppServiceActivationResponse>();
     default:
       LOG4CXX_WARN(logger_, "Unsupported HMI function_id: " << function_id);
       return factory.GetCreator<app_mngr::InvalidCommand>();

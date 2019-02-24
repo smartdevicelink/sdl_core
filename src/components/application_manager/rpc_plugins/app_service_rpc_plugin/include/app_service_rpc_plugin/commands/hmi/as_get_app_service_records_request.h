@@ -30,33 +30,51 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "app_service_rpc_plugin/commands/hmi/on_as_app_service_data_notification_from_hmi.h"
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_APP_SERVICE_RPC_PLUGIN_INCLUDE_APP_SERVICE_RPC_PLUGIN_COMMANDS_HMI_AS_GET_APP_SERVICE_RECORDS_REQUEST_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_APP_SERVICE_RPC_PLUGIN_INCLUDE_APP_SERVICE_RPC_PLUGIN_COMMANDS_HMI_AS_GET_APP_SERVICE_RECORDS_REQUEST_H_
+
+#include "app_service_rpc_plugin/app_service_rpc_plugin.h"
+#include "application_manager/commands/request_from_hmi.h"
 
 namespace app_service_rpc_plugin {
-using namespace application_manager;
+namespace app_mngr = application_manager;
+
 namespace commands {
 
-OnASAppServiceDataNotificationFromHMI::OnASAppServiceDataNotificationFromHMI(
-    const application_manager::commands::MessageSharedPtr& message,
-    ApplicationManager& application_manager,
-    app_mngr::rpc_service::RPCService& rpc_service,
-    app_mngr::HMICapabilities& hmi_capabilities,
-    policy::PolicyHandlerInterface& policy_handler)
-    : NotificationFromHMI(message,
-                          application_manager,
-                          rpc_service,
-                          hmi_capabilities,
-                          policy_handler) {}
+/**
+ * @brief ASGetAppServiceRecordsRequest command class
+ **/
+class ASGetAppServiceRecordsRequest
+    : public app_mngr::commands::RequestFromHMI {
+ public:
+  /**
+   * @brief ASGetAppServiceRecordsRequest class constructor
+   *
+   * @param message Incoming SmartObject message
+   **/
+  ASGetAppServiceRecordsRequest(
+      const app_mngr::commands::MessageSharedPtr& message,
+      app_mngr::ApplicationManager& application_manager,
+      app_mngr::rpc_service::RPCService& rpc_service,
+      app_mngr::HMICapabilities& hmi_capabilities,
+      policy::PolicyHandlerInterface& policy_handle);
 
-OnASAppServiceDataNotificationFromHMI::
-    ~OnASAppServiceDataNotificationFromHMI() {}
+  /**
+   * @brief ASGetAppServiceRecordsRequest class destructor
+   **/
+  virtual ~ASGetAppServiceRecordsRequest();
 
-void OnASAppServiceDataNotificationFromHMI::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
-  LOG4CXX_DEBUG(logger_, "Received an OnAppServiceData from HMI");
-  SendNotificationToConsumers(
-      mobile_apis::FunctionID::eType::OnAppServiceDataID);
-}
+  /**
+   * @brief Execute command
+   **/
+  virtual void Run();
+
+ private:
+  DISALLOW_COPY_AND_ASSIGN(ASGetAppServiceRecordsRequest);
+};
 
 }  // namespace commands
+
 }  // namespace app_service_rpc_plugin
+
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_APP_SERVICE_RPC_PLUGIN_INCLUDE_APP_SERVICE_RPC_PLUGIN_COMMANDS_HMI_AS_GET_APP_SERVICE_RECORDS_REQUEST_H_

@@ -700,6 +700,8 @@ bool ApplicationManagerImpl::ActivateApplication(ApplicationSharedPtr app) {
 
   // remove from resumption if app was activated by user
   resume_controller().OnAppActivated(app);
+  // Activate any app services published by the app
+  GetAppServiceManager().OnAppActivated(app);
   const HMILevel::eType hmi_level = HMILevel::HMI_FULL;
   const AudioStreamingState::eType audio_state =
       app->IsAudioApplication() ? AudioStreamingState::AUDIBLE
@@ -2021,7 +2023,8 @@ bool ApplicationManagerImpl::Init(resumption::LastState& last_state,
   app_launch_ctrl_.reset(new app_launch::AppLaunchCtrlImpl(
       *app_launch_dto_.get(), *this, settings_));
 
-  app_service_manager_.reset(new application_manager::AppServiceManager(*this));
+  app_service_manager_.reset(
+      new application_manager::AppServiceManager(*this, last_state));
   return true;
 }
 

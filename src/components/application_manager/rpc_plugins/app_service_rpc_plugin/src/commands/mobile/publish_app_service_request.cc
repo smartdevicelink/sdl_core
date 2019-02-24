@@ -51,15 +51,7 @@ PublishAppServiceRequest::PublishAppServiceRequest(
                          application_manager,
                          rpc_service,
                          hmi_capabilities,
-                         policy_handler)
-    , plugin_(NULL) {
-  auto plugin = application_manager.GetPluginManager().FindPluginToProcess(
-      mobile_apis::FunctionID::PublishAppServiceID,
-      app_mngr::commands::Command::CommandSource::SOURCE_MOBILE);
-  if (plugin) {
-    plugin_ = dynamic_cast<AppServiceRpcPlugin*>(&(*plugin));
-  }
-}
+                         policy_handler) {}
 
 PublishAppServiceRequest::~PublishAppServiceRequest() {}
 
@@ -135,6 +127,11 @@ void PublishAppServiceRequest::Run() {
   smart_objects::SmartObject service_record =
       application_manager_.GetAppServiceManager().PublishAppService(
           manifest, true, connection_key());
+  if (app->is_foreground()) {
+    // Service should be activated if app is in the foreground
+    application_manager_.GetAppServiceManager().ActivateAppService(
+        service_record[strings::service_id].asString());
+  }
 
   response_params[strings::app_service_record] = service_record;
 

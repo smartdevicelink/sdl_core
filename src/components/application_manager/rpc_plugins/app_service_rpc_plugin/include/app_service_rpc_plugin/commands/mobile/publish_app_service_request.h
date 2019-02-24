@@ -70,7 +70,6 @@ class PublishAppServiceRequest : public app_mngr::commands::CommandRequestImpl {
  private:
   bool ValidateManifest(smart_objects::SmartObject& manifest);
 
-  AppServiceRpcPlugin* plugin_;
   DISALLOW_COPY_AND_ASSIGN(PublishAppServiceRequest);
 };
 

@@ -572,22 +572,9 @@ void MessageHelper::SendUnsubscribeButtonNotification(
       ->SendUnsubscribeButtonNotification(button, application, app_mngr);
 }
 
-smart_objects::SmartObject
-MessageHelper::CreateMobileSystemCapabilityNotification(
-    std::vector<smart_objects::SmartObject>& all_services,
-    const std::string service_id,
-    mobile_apis::ServiceUpdateReason::eType update_reason) {
-  return MockMessageHelper::message_helper_mock()
-      ->CreateMobileSystemCapabilityNotification(
-          all_services, service_id, update_reason);
-}
-
-smart_objects::SmartObject MessageHelper::CreateHMISystemCapabilityNotification(
-    std::vector<smart_objects::SmartObject>& all_services,
-    const std::string service_id,
-    mobile_apis::ServiceUpdateReason::eType update_reason) {
-  return MockMessageHelper::message_helper_mock()
-      ->CreateHMISystemCapabilityNotification(
-          all_services, service_id, update_reason);
+smart_objects::SmartObject MessageHelper::CreateAppServiceCapabilities(
+    std::vector<smart_objects::SmartObject>& all_services) {
+  return MockMessageHelper::message_helper_mock()->CreateAppServiceCapabilities(
+      all_services);
 }
 }  // namespace application_manager

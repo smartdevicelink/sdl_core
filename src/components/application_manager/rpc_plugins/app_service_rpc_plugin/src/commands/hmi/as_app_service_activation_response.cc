@@ -30,32 +30,29 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "app_service_rpc_plugin/commands/hmi/on_as_app_service_data_notification_from_hmi.h"
+#include "app_service_rpc_plugin/commands/hmi/as_app_service_activation_response.h"
 
 namespace app_service_rpc_plugin {
 using namespace application_manager;
 namespace commands {
 
-OnASAppServiceDataNotificationFromHMI::OnASAppServiceDataNotificationFromHMI(
+ASAppServiceActivationResponse::ASAppServiceActivationResponse(
     const application_manager::commands::MessageSharedPtr& message,
     ApplicationManager& application_manager,
     app_mngr::rpc_service::RPCService& rpc_service,
     app_mngr::HMICapabilities& hmi_capabilities,
     policy::PolicyHandlerInterface& policy_handler)
-    : NotificationFromHMI(message,
-                          application_manager,
-                          rpc_service,
-                          hmi_capabilities,
-                          policy_handler) {}
+    : ResponseToHMI(message,
+                    application_manager,
+                    rpc_service,
+                    hmi_capabilities,
+                    policy_handler) {}
 
-OnASAppServiceDataNotificationFromHMI::
-    ~OnASAppServiceDataNotificationFromHMI() {}
+ASAppServiceActivationResponse::~ASAppServiceActivationResponse() {}
 
-void OnASAppServiceDataNotificationFromHMI::Run() {
+void ASAppServiceActivationResponse::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
-  LOG4CXX_DEBUG(logger_, "Received an OnAppServiceData from HMI");
-  SendNotificationToConsumers(
-      mobile_apis::FunctionID::eType::OnAppServiceDataID);
+  rpc_service_.SendMessageToHMI(message_);
 }
 
 }  // namespace commands

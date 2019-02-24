@@ -878,15 +878,8 @@ class MessageHelper {
   static smart_objects::SmartObjectSPtr CreateMessageForHMI(
       hmi_apis::messageType::eType message_type, const uint32_t correlation_id);
 
-  static smart_objects::SmartObject CreateMobileSystemCapabilityNotification(
-      std::vector<smart_objects::SmartObject>& all_services,
-      const std::string service_id,
-      mobile_apis::ServiceUpdateReason::eType update_reason);
-
-  static smart_objects::SmartObject CreateHMISystemCapabilityNotification(
-      std::vector<smart_objects::SmartObject>& all_services,
-      const std::string service_id,
-      mobile_apis::ServiceUpdateReason::eType update_reason);
+  static smart_objects::SmartObject CreateAppServiceCapabilities(
+      std::vector<smart_objects::SmartObject>& all_services);
 
  private:
   /**

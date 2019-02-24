@@ -30,32 +30,57 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "app_service_rpc_plugin/commands/hmi/on_as_app_service_data_notification_from_hmi.h"
+#include "app_service_rpc_plugin/commands/hmi/as_app_service_activation_request.h"
 
 namespace app_service_rpc_plugin {
 using namespace application_manager;
 namespace commands {
 
-OnASAppServiceDataNotificationFromHMI::OnASAppServiceDataNotificationFromHMI(
+ASAppServiceActivationRequest::ASAppServiceActivationRequest(
     const application_manager::commands::MessageSharedPtr& message,
     ApplicationManager& application_manager,
     app_mngr::rpc_service::RPCService& rpc_service,
     app_mngr::HMICapabilities& hmi_capabilities,
     policy::PolicyHandlerInterface& policy_handler)
-    : NotificationFromHMI(message,
-                          application_manager,
-                          rpc_service,
-                          hmi_capabilities,
-                          policy_handler) {}
+    : RequestFromHMI(message,
+                     application_manager,
+                     rpc_service,
+                     hmi_capabilities,
+                     policy_handler) {}
 
-OnASAppServiceDataNotificationFromHMI::
-    ~OnASAppServiceDataNotificationFromHMI() {}
+ASAppServiceActivationRequest::~ASAppServiceActivationRequest() {}
 
-void OnASAppServiceDataNotificationFromHMI::Run() {
+void ASAppServiceActivationRequest::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
-  LOG4CXX_DEBUG(logger_, "Received an OnAppServiceData from HMI");
-  SendNotificationToConsumers(
-      mobile_apis::FunctionID::eType::OnAppServiceDataID);
+  AppServiceManager& service_manager =
+      application_manager_.GetAppServiceManager();
+  smart_objects::SmartObject params = (*message_)[strings::msg_params];
+  smart_objects::SmartObject response_params(smart_objects::SmartType_Map);
+  std::string service_id = params[strings::service_id].asString();
+  response_params[strings::service_id] = service_id;
+  if (params[strings::activate].asBool()) {
+    response_params[strings::activate] =
+        service_manager.ActivateAppService(service_id);
+  } else {
+    service_manager.DeactivateAppService(service_id);
+    response_params[strings::activate] = false;
+  }
+
+  if (params.keyExists(strings::set_as_default)) {
+    if (params[strings::set_as_default].asBool()) {
+      response_params[strings::set_as_default] =
+          service_manager.SetDefaultService(service_id);
+    } else {
+      service_manager.RemoveDefaultService(service_id);
+      response_params[strings::set_as_default] = false;
+    }
+  }
+
+  SendResponse(true,
+               (*message_)[strings::params][strings::correlation_id].asUInt(),
+               hmi_apis::FunctionID::AppService_AppServiceActivation,
+               hmi_apis::Common_Result::SUCCESS,
+               &response_params);
 }
 
 }  // namespace commands
