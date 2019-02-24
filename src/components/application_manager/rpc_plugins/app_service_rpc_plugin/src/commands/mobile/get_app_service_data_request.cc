@@ -97,7 +97,12 @@ void GetAppServiceDataRequest::on_event(
   mobile_apis::Result::eType result = static_cast<mobile_apis::Result::eType>(
       msg_params[strings::result_code].asInt());
   bool success = IsMobileResultSuccess(result);
-  SendResponse(success, result, NULL, &msg_params);
+
+  const char* info = msg_params.keyExists(strings::info)
+                         ? msg_params[strings::info].asCharArray()
+                         : NULL;
+
+  SendResponse(success, result, info, &msg_params);
 }
 
 void GetAppServiceDataRequest::on_event(const event_engine::Event& event) {
@@ -114,7 +119,11 @@ void GetAppServiceDataRequest::on_event(const event_engine::Event& event) {
   bool success = PrepareResultForMobileResponse(
       hmi_result, HmiInterfaces::HMI_INTERFACE_AppService);
 
-  SendResponse(success, result, NULL, &msg_params);
+  const char* info = msg_params.keyExists(strings::info)
+                         ? msg_params[strings::info].asCharArray()
+                         : NULL;
+
+  SendResponse(success, result, info, &msg_params);
 }
 
 }  // namespace commands
