@@ -91,7 +91,8 @@ RequestTypeMap TypeToString = {
     {mobile_apis::RequestType::EMERGENCY, "EMERGENCY"},
     {mobile_apis::RequestType::MEDIA, "MEDIA"},
     {mobile_apis::RequestType::FOTA, "FOTA"},
-    {mobile_apis::RequestType::OEM_SPECIFIC, "OEM_SPECIFIC"}};
+    {mobile_apis::RequestType::OEM_SPECIFIC, "OEM_SPECIFIC"},
+    {mobile_apis::RequestType::ICON_URL, "ICON_URL"}};
 
 const std::string RequestTypeToString(mobile_apis::RequestType::eType type) {
   RequestTypeMap::const_iterator it = TypeToString.find(type);
@@ -1574,6 +1575,11 @@ void PolicyHandler::GetUpdateUrls(const uint32_t service_type,
 std::string PolicyHandler::GetLockScreenIconUrl() const {
   POLICY_LIB_CHECK(std::string(""));
   return policy_manager_->GetLockScreenIconUrl();
+}
+
+std::string PolicyHandler::GetIconUrl(const std::string& policy_app_id) const {
+  POLICY_LIB_CHECK(std::string(""));
+  return policy_manager_->GetIconUrl(policy_app_id);
 }
 
 uint32_t PolicyHandler::NextRetryTimeout() {

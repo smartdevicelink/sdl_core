@@ -117,6 +117,14 @@ class PolicyManagerImpl : public PolicyManager {
   std::string GetLockScreenIconUrl() const OVERRIDE;
 
   /**
+   * @brief Get Icon Url used for showing a cloud apps icon before the intial registration
+   *
+   * @return url which point to the resourse where icon could be
+   *obtained.
+   */
+  std::string GetIconUrl(const std::string& policy_app_id) const OVERRIDE;
+
+  /**
    * @brief PTU is needed, for this PTS has to be formed and sent.
    */
   bool RequestPTUpdate() OVERRIDE;

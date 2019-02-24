@@ -771,6 +771,9 @@ bool SQLPTExtRepresentation::SaveSpecificAppPolicy(
   app.second.cloud_transport_type.is_initialized()
       ? app_query.Bind(13, *app.second.cloud_transport_type)
       : app_query.Bind(13);
+   app.second.icon_url.is_initialized()
+      ? app_query.Bind(14, *app.second.icon_url)
+      : app_query.Bind(14); 
 
   if (!app_query.Exec() || !app_query.Reset()) {
     LOG4CXX_WARN(logger_, "Incorrect insert into application.");
@@ -908,6 +911,7 @@ bool SQLPTExtRepresentation::GatherApplicationPoliciesSection(
     }
     *params.auth_token = query.GetString(11);
     *params.cloud_transport_type = query.GetString(12);
+    *params.icon_url = query.GetString(13);
 
     const auto& gather_app_id = ((*policies).apps[app_id].is_string())
                                     ? (*policies).apps[app_id].get_string()

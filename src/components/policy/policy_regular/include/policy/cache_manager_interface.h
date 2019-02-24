@@ -264,6 +264,14 @@ class CacheManagerInterface {
   virtual std::string GetLockScreenIconUrl() const = 0;
 
   /**
+   * @brief Get Icon Url used for showing a cloud apps icon before the intial registration
+   *
+   * @return url which point to the resourse where icon could be
+   *obtained.
+   */
+  virtual std::string GetIconUrl(const std::string& policy_app_id) const = 0;
+
+  /**
    * @brief Get allowed number of notifications
    * depending on application priority.
    * @param priority Priority of application

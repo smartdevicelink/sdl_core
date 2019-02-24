@@ -443,6 +443,10 @@ std::string PolicyManagerImpl::GetLockScreenIconUrl() const {
   return cache_->GetLockScreenIconUrl();
 }
 
+std::string PolicyManagerImpl::GetIconUrl(const std::string& policy_app_id) const {
+  return cache_->GetIconUrl(policy_app_id);
+}
+
 void PolicyManagerImpl::StartPTExchange() {
   LOG4CXX_AUTO_TRACE(logger_);
 

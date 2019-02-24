@@ -173,7 +173,8 @@ ApplicationParams::ApplicationParams(const Json::Value* value__)
     , endpoint(impl::ValueMember(value__, "endpoint"))
     , enabled(impl::ValueMember(value__, "enabled"))
     , auth_token(impl::ValueMember(value__, "auth_token"))
-    , cloud_transport_type(impl::ValueMember(value__, "cloud_transport_type")) {
+    , cloud_transport_type(impl::ValueMember(value__, "cloud_transport_type"))
+    , icon_url(impl::ValueMember(value__, "icon_url")) {
 }
 
 Json::Value ApplicationParams::ToJsonValue() const {
@@ -194,6 +195,7 @@ Json::Value ApplicationParams::ToJsonValue() const {
   impl::WriteJsonField("enabled", enabled, &result__);
   impl::WriteJsonField("auth_token", auth_token, &result__);
   impl::WriteJsonField("cloud_transport_type", cloud_transport_type, &result__);
+  impl::WriteJsonField("icon_url", auth_token, &result__);
   return result__;
 }
 
@@ -238,6 +240,9 @@ bool ApplicationParams::is_valid() const {
     return false;
   }
   if (!hybrid_app_preference.is_valid()) {
+    return false;
+  }
+  if (!icon_url.is_valid()) {
     return false;
   }
   return Validate();
@@ -291,6 +296,9 @@ bool ApplicationParams::struct_empty() const {
     return false;
   }
   if (hybrid_app_preference.is_initialized()) {
+    return false;
+  }
+  if (icon_url.is_initialized()) {
     return false;
   }
   return true;
@@ -347,6 +355,9 @@ void ApplicationParams::ReportErrors(rpc::ValidationReport* report__) const {
     moduleType.ReportErrors(
         &report__->ReportSubobject("hybrid_app_preference"));
   }
+  if (!icon_url.is_valid()) {
+    moduleType.ReportErrors(&report__->ReportSubobject("icon_url"));
+  }
 }
 
 void ApplicationParams::SetPolicyTableType(PolicyTableType pt_type) {
@@ -363,6 +374,7 @@ void ApplicationParams::SetPolicyTableType(PolicyTableType pt_type) {
   enabled.SetPolicyTableType(pt_type);
   cloud_transport_type.SetPolicyTableType(pt_type);
   hybrid_app_preference.SetPolicyTableType(pt_type);
+  icon_url.SetPolicyTableType(pt_type);
 }
 
 // RpcParameters methods

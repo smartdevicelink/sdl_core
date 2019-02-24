@@ -108,6 +108,8 @@
         <param name="cloud_transport_type" type="String" minlength="0" maxlength="255"
             mandatory="false" />
         <param name="hybrid_app_preference" type="HybridAppPreference" mandatory="false" />
+        <param name="icon_url" type="String" minlength="0" maxlength="65535"
+            mandatory="false" />
     </struct>
 
     <typedef name="HmiLevels" type="HmiLevel" array="true"

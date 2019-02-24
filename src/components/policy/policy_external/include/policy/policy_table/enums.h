@@ -154,6 +154,7 @@ enum RequestType {
   RT_MEDIA,
   RT_FOTA,
   RT_OEM_SPECIFIC,
+  RT_ICON_URL,
   RT_EMPTY  // Added to allow empty Request Types handling
 };
 

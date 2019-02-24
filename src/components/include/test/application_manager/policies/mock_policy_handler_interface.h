@@ -102,6 +102,7 @@ class MockPolicyHandlerInterface : public policy::PolicyHandlerInterface {
                void(const uint32_t service_type,
                     policy::EndpointUrls& end_points));
   MOCK_CONST_METHOD0(GetLockScreenIconUrl, std::string());
+  MOCK_CONST_METHOD1(GetIconUrl, std::string(const std::string& policy_app_id));
   MOCK_METHOD0(ResetRetrySequence, void());
   MOCK_METHOD0(NextRetryTimeout, uint32_t());
   MOCK_CONST_METHOD0(TimeoutExchangeSec, uint32_t());

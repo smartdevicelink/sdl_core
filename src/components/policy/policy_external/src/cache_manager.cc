@@ -1603,6 +1603,20 @@ std::string CacheManager::GetLockScreenIconUrl() const {
   return std::string("");
 }
 
+std::string CacheManager::GetIconUrl(const std::string& policy_app_id) const {
+  std::string url = "";
+  const policy_table::ApplicationPolicies& policies =
+      pt_->policy_table.app_policies_section.apps;
+  policy_table::ApplicationPolicies::const_iterator policy_iter =
+      policies.find(policy_app_id);
+  if (policies.end() != policy_iter) {
+    auto app_policy = (*policy_iter).second;
+    url = app_policy.icon_url.is_initialized() ? *app_policy.icon_url
+                                                        : std::string();
+  }
+  return url;
+}
+
 rpc::policy_table_interface_base::NumberOfNotificationsType
 CacheManager::GetNotificationsNumber(const std::string& priority) {
   CACHE_MANAGER_CHECK(0);

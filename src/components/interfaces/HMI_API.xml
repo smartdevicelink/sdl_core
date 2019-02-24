@@ -1268,6 +1268,7 @@
   <element name="MEDIA" />
   <element name="FOTA" />
   <element name="OEM_SPECIFIC"/>
+  <element name="ICON_URL"/>
 </enum>
 
 <enum name="ECallConfirmationStatus">
