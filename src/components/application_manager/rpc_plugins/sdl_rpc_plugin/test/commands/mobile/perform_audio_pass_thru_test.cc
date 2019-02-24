@@ -239,7 +239,7 @@ TEST_F(PerformAudioPassThruRequestTest,
   MessageSharedPtr response_to_mobile;
   uint32_t app_id = kConnectionKey;
   EXPECT_CALL(app_mngr_, EndAudioPassThru(app_id)).WillOnce(Return(false));
-  EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_))
+  EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_, _))
       .WillRepeatedly(Return(true));
   EXPECT_CALL(
       mock_rpc_service_,
@@ -342,7 +342,7 @@ TEST_F(PerformAudioPassThruRequestTest,
     ON_CALL(mock_hmi_interfaces_, GetInterfaceState(_))
         .WillByDefault(Return(am::HmiInterfaces::STATE_AVAILABLE));
 
-    EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_))
+    EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_, _))
         .WillOnce(DoAll(SaveArg<0>(&speak_reqeust_result_msg), Return(true)));
 
     // Perform audio path thru request sending
@@ -355,7 +355,7 @@ TEST_F(PerformAudioPassThruRequestTest,
     ON_CALL(mock_hmi_interfaces_, GetInterfaceState(_))
         .WillByDefault(Return(am::HmiInterfaces::STATE_AVAILABLE));
 
-    EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_))
+    EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_, _))
         .WillOnce(DoAll(SaveArg<0>(&perform_result_msg), Return(true)));
   }
   CallRun run_caller(*command_sptr_);
@@ -431,7 +431,7 @@ TEST_F(PerformAudioPassThruRequestTest,
     ON_CALL(mock_hmi_interfaces_, GetInterfaceState(_))
         .WillByDefault(Return(am::HmiInterfaces::STATE_AVAILABLE));
 
-    EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_))
+    EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_, _))
         .WillOnce(DoAll(SaveArg<0>(&speak_reqeust_result_msg), Return(true)));
 
     // Perform audio path thru request sending
@@ -444,7 +444,7 @@ TEST_F(PerformAudioPassThruRequestTest,
     ON_CALL(mock_hmi_interfaces_, GetInterfaceState(_))
         .WillByDefault(Return(am::HmiInterfaces::STATE_AVAILABLE));
 
-    EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_))
+    EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_, _))
         .WillOnce(DoAll(SaveArg<0>(&perform_result_msg), Return(true)));
   }
   CallRun caller(*command_sptr_);
@@ -505,7 +505,7 @@ TEST_F(PerformAudioPassThruRequestTest,
     ON_CALL(mock_hmi_interfaces_, GetInterfaceState(_))
         .WillByDefault(Return(am::HmiInterfaces::STATE_AVAILABLE));
 
-    EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_))
+    EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_, _))
         .WillOnce(DoAll(SaveArg<0>(&speak_reqeust_result_msg), Return(true)));
 
     // Perform audio path thru request sending
@@ -518,7 +518,7 @@ TEST_F(PerformAudioPassThruRequestTest,
     ON_CALL(mock_hmi_interfaces_, GetInterfaceState(_))
         .WillByDefault(Return(am::HmiInterfaces::STATE_AVAILABLE));
 
-    EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_))
+    EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_, _))
         .WillOnce(DoAll(SaveArg<0>(&perform_result_msg), Return(true)));
   }
   CallRun caller(*command_sptr_);
@@ -551,7 +551,7 @@ TEST_F(
         .WillByDefault(Return(am::HmiInterfaces::STATE_AVAILABLE));
     // Perform audio path thru request sending
 
-    EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_))
+    EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_, _))
         .WillOnce(DoAll(SaveArg<0>(&perform_result_msg), Return(true)));
 
     // Perform audio path thru request sending
@@ -564,7 +564,7 @@ TEST_F(
         .WillByDefault(Return(am::HmiInterfaces::STATE_AVAILABLE));
     // Start recording notification sending
 
-    EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_))
+    EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_, _))
         .WillOnce(DoAll(SaveArg<0>(&start_record_result_msg), Return(true)));
   }
 
@@ -613,7 +613,7 @@ TEST_F(PerformAudioPassThruRequestTest,
 
   // Start recording notification sending
 
-  EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_)).WillOnce(Return(true));
+  EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_, _)).WillOnce(Return(true));
 
   // Start microphone recording cals
   uint32_t app_id = kConnectionKey;
@@ -676,7 +676,7 @@ TEST_F(PerformAudioPassThruRequestTest,
   msg_params_[am::strings::function_id] = kFunctionId;
   msg_params_[am::strings::correlation_id] = kCorrelationId;
 
-  EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_)).WillOnce(Return(true));
+  EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_, _)).WillOnce(Return(true));
 
   uint32_t app_id = kConnectionKey;
   EXPECT_CALL(app_mngr_, BeginAudioPassThru(app_id)).WillOnce(Return(true));
@@ -703,7 +703,7 @@ TEST_F(PerformAudioPassThruRequestTest,
   msg_params_[am::strings::function_id] = kFunctionId;
 
   uint32_t app_id = kConnectionKey;
-  EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_)).WillOnce(Return(true));
+  EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_, _)).WillOnce(Return(true));
   EXPECT_CALL(app_mngr_, BeginAudioPassThru(app_id)).WillOnce(Return(true));
 
   EXPECT_CALL(
@@ -751,7 +751,7 @@ TEST_F(PerformAudioPassThruRequestTest,
 
   EXPECT_CALL(mock_rpc_service_, ManageMobileCommand(_, _));
   command_sptr_->SendResponse(true, am::mobile_api::Result::SUCCESS);
-  EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_)).Times(0);
+  EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_, _)).Times(0);
 
   command_sptr_->onTimeOut();
 }
@@ -783,7 +783,7 @@ TEST_F(PerformAudioPassThruRequestTest,
   ON_CALL(mock_hmi_interfaces_, GetInterfaceState(_))
       .WillByDefault(Return(am::HmiInterfaces::STATE_AVAILABLE));
 
-  EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_))
+  EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_, _))
       .WillOnce(DoAll(SaveArg<0>(&speak_reqeust_result_msg), Return(true)));
 
   // Perform audio path thru request sending
@@ -796,7 +796,7 @@ TEST_F(PerformAudioPassThruRequestTest,
   ON_CALL(mock_hmi_interfaces_, GetInterfaceState(_))
       .WillByDefault(Return(am::HmiInterfaces::STATE_AVAILABLE));
 
-  EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_))
+  EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_, _))
       .WillOnce(DoAll(SaveArg<0>(&perform_result_msg), Return(true)));
 
   MessageSharedPtr msg = CreateMessage(smart_objects::SmartType_Map);
@@ -807,7 +807,7 @@ TEST_F(PerformAudioPassThruRequestTest,
 
   // For setting is_active_tts_speak -> true
 
-  EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_))
+  EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_, _))
       .Times(2)
       .WillRepeatedly(Return(false));
   CallRun caller(*command_sptr_);
@@ -819,9 +819,9 @@ TEST_F(PerformAudioPassThruRequestTest,
               ManageMobileCommand(_, am::commands::Command::SOURCE_SDL));
   command_sptr_->SendResponse(true, am::mobile_api::Result::SUCCESS);
 
-  EXPECT_CALL(
-      mock_rpc_service_,
-      ManageHMICommand(HMIResultCodeIs(hmi_apis::FunctionID::TTS_StopSpeaking)))
+  EXPECT_CALL(mock_rpc_service_,
+              ManageHMICommand(
+                  HMIResultCodeIs(hmi_apis::FunctionID::TTS_StopSpeaking), _))
       .WillOnce(Return(false));
 
   command_sptr_->onTimeOut();

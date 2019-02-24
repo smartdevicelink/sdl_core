@@ -252,7 +252,7 @@ TEST_F(DeleteInteractionChoiceSetRequestTest, Run_SendVrDeleteCommand_SUCCESS) {
     EXPECT_CALL(*app_, UpdateHash());
   }
 
-  EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_)).WillOnce(Return(true));
+  EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_, _)).WillOnce(Return(true));
   EXPECT_CALL(mock_rpc_service_, ManageMobileCommand(_, _));
 
   DeleteInteractionChoiceSetRequestPtr command =

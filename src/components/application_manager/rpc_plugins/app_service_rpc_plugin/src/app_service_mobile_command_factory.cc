@@ -39,6 +39,10 @@
 #include "app_service_rpc_plugin/commands/mobile/on_app_service_data_notification_from_mobile.h"
 #include "app_service_rpc_plugin/commands/mobile/publish_app_service_request.h"
 #include "app_service_rpc_plugin/commands/mobile/publish_app_service_response.h"
+#include "app_service_rpc_plugin/commands/mobile/get_app_service_data_request.h"
+#include "app_service_rpc_plugin/commands/mobile/get_app_service_data_response.h"
+#include "app_service_rpc_plugin/commands/mobile/get_app_service_data_request_to_mobile.h"
+#include "app_service_rpc_plugin/commands/mobile/get_app_service_data_response_from_mobile.h"
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "AppServiceRpcPlugin")
 
@@ -111,6 +115,19 @@ app_mngr::CommandCreator& AppServiceMobileCommandFactory::buildCommandCreator(
                  ? factory.GetCreator<
                        commands::OnAppServiceDataNotificationFromMobile>()
                  : factory.GetCreator<commands::OnAppServiceDataNotification>();
+    case mobile_apis::FunctionID::GetAppServiceDataID:
+      if (app_mngr::commands::Command::CommandSource::SOURCE_MOBILE == source) {
+        return mobile_apis::messageType::request == message_type
+                   ? factory.GetCreator<commands::GetAppServiceDataRequest>()
+                   : factory.GetCreator<
+                         commands::GetAppServiceDataResponseFromMobile>();
+      } else if (app_mngr::commands::Command::CommandSource::SOURCE_SDL ==
+                 source) {
+        return mobile_apis::messageType::request == message_type
+                   ? factory.GetCreator<
+                         commands::GetAppServiceDataRequestToMobile>()
+                   : factory.GetCreator<commands::GetAppServiceDataResponse>();
+      }
     default:
       LOG4CXX_WARN(logger_, "Unsupported function_id: " << function_id);
       return factory.GetCreator<app_mngr::InvalidCommand>();

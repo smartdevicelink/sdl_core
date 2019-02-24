@@ -31,7 +31,6 @@
  */
 
 #include "app_service_rpc_plugin/commands/hmi/on_as_app_service_data_notification_from_hmi.h"
-#include "application_manager/message_helper.h"
 
 namespace app_service_rpc_plugin {
 using namespace application_manager;
@@ -55,7 +54,8 @@ OnASAppServiceDataNotificationFromHMI::
 void OnASAppServiceDataNotificationFromHMI::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
   LOG4CXX_DEBUG(logger_, "Received an OnAppServiceData from HMI");
-  MessageHelper::PrintSmartObject(*message_);
+  SendNotificationToConsumers(
+      mobile_apis::FunctionID::eType::OnAppServiceDataID);
 }
 
 }  // namespace commands

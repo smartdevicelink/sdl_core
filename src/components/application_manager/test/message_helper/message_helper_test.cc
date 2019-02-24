@@ -967,7 +967,7 @@ TEST_F(MessageHelperTest, SendGetListOfPermissionsResponse_SUCCESS) {
 
   ON_CALL(mock_application_manager, GetRPCService())
       .WillByDefault(ReturnRef(mock_rpc_service_));
-  EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_))
+  EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_, _))
       .WillOnce(DoAll(SaveArg<0>(&result), Return(true)));
 
   const uint32_t correlation_id = 0u;
@@ -1007,7 +1007,7 @@ TEST_F(MessageHelperTest,
 
   ON_CALL(mock_application_manager, GetRPCService())
       .WillByDefault(ReturnRef(mock_rpc_service_));
-  EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_))
+  EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_, _))
       .WillOnce(DoAll(SaveArg<0>(&result), Return(true)));
 
   const uint32_t correlation_id = 0u;
@@ -1053,7 +1053,7 @@ TEST_F(MessageHelperTest, SendNaviSetVideoConfigRequest) {
   smart_objects::SmartObjectSPtr result;
   ON_CALL(mock_application_manager, GetRPCService())
       .WillByDefault(ReturnRef(mock_rpc_service_));
-  EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_))
+  EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_, _))
       .WillOnce(DoAll(SaveArg<0>(&result), Return(true)));
 
   int32_t app_id = 123;

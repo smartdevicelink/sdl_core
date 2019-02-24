@@ -117,6 +117,7 @@ void PublishAppServiceRequest::Run() {
                  mobile_apis::Result::DISALLOWED,
                  "Service disallowed by policies",
                  NULL);
+    return;
   }
 
   auto& ext =

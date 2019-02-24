@@ -36,6 +36,7 @@
 #include "application_manager/application.h"
 #include "interfaces/MOBILE_API.h"
 #include "smart_objects/smart_object.h"
+#include "application_manager/application.h"
 
 namespace resumption {
 class LastState;
@@ -130,6 +131,9 @@ class AppServiceManager {
    */
   std::vector<smart_objects::SmartObject> GetAllServices();
 
+  void GetProvider(const std::string& service_type,
+                   ApplicationSharedPtr& app,
+                   bool& hmi_service);
   std::pair<std::string, AppService> ActiveServiceByType(
       std::string service_type);
 

@@ -132,6 +132,7 @@ bool policy_app_id_comparator(const std::string& policy_app_id,
   return app->policy_app_id() == policy_app_id;
 }
 
+uint32_t ApplicationManagerImpl::mobile_corelation_id_ = 0;
 uint32_t ApplicationManagerImpl::corelation_id_ = 0;
 const uint32_t ApplicationManagerImpl::max_corelation_id_ = UINT_MAX;
 
@@ -1011,6 +1012,16 @@ ApplicationManagerImpl::GetCloudAppConnectionStatus(
     default:
       return hmi_apis::Common_CloudConnectionStatus::INVALID_ENUM;
   }
+}
+
+uint32_t ApplicationManagerImpl::GetNextMobileCorrelationID() {
+  if (mobile_corelation_id_ < max_corelation_id_) {
+    mobile_corelation_id_++;
+  } else {
+    mobile_corelation_id_ = 0;
+  }
+
+  return mobile_corelation_id_;
 }
 
 uint32_t ApplicationManagerImpl::GetNextHMICorrelationID() {

@@ -75,6 +75,30 @@ void CommandNotificationFromMobileImpl::SendNotification() {
   rpc_service_.SendMessageToMobile(message_);
 }
 
+void CommandNotificationFromMobileImpl::SendNotificationToMobile() {
+  auto app = application_manager_.application(connection_key());
+  (*message_)[strings::params][strings::protocol_type] = mobile_protocol_type_;
+  (*message_)[strings::params][strings::protocol_version] =
+      app->protocol_version();
+  (*message_)[strings::params][strings::message_type] =
+      static_cast<int32_t>(application_manager::MessageType::kNotification);
+
+  rpc_service_.ManageMobileCommand(message_, SOURCE_SDL);
+}
+
+void CommandNotificationFromMobileImpl::SendNotificationToHMI(
+    const hmi_apis::FunctionID::eType& hmi_function_id) {
+  (*message_)[strings::params][strings::protocol_type] = hmi_protocol_type_;
+  (*message_)[strings::params][strings::function_id] = hmi_function_id;
+  rpc_service_.SendMessageToHMI(message_);
+}
+
+void CommandNotificationFromMobileImpl::SendNotificationToConsumers(
+    const hmi_apis::FunctionID::eType& hmi_function_id) {
+  SendNotificationToMobile();
+  SendNotificationToHMI(hmi_function_id);
+}
+
 }  // namespace commands
 
 }  // namespace application_manager
