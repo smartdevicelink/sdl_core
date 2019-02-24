@@ -103,7 +103,8 @@ class ConnectionHandler {
 
   virtual void ConnectToAllDevices() = 0;
 
-  virtual void AddCloudAppDevice(const std::string& endpoint,
+  virtual void AddCloudAppDevice(const std::string& policy_app_id,
+                                 const std::string& endpoint,
                                  const std::string& cloud_transport_type) = 0;
 
   virtual void RemoveCloudAppDevice(const DeviceHandle device_id) = 0;
