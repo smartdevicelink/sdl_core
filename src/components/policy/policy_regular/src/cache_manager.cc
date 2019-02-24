@@ -796,6 +796,22 @@ void CacheManager::SetHybridAppPreference(
   }
 }
 
+void CacheManager::GetAppServiceParameters(
+    const std::string& policy_app_id,
+    policy_table::AppServiceParameters* app_service_parameters) const {
+  LOG4CXX_AUTO_TRACE(logger_);
+  const policy_table::ApplicationPolicies& policies =
+      pt_->policy_table.app_policies_section.apps;
+  policy_table::ApplicationPolicies::const_iterator policy_iter =
+      policies.find(policy_app_id);
+  if (policies.end() != policy_iter) {
+    auto app_policy = (*policy_iter).second;
+    if (app_policy.app_service_parameters.is_initialized()) {
+      *app_service_parameters = *(app_policy.app_service_parameters);
+    }
+  }
+}
+
 std::vector<UserFriendlyMessage> CacheManager::GetUserFriendlyMsg(
     const std::vector<std::string>& msg_codes, const std::string& language) {
   LOG4CXX_AUTO_TRACE(logger_);
