@@ -80,6 +80,20 @@ class AppServiceManager {
 
   /**
    * @brief TODO
+   * @param connection_key
+   */
+  void UnpublishServices(const uint32_t connection_key);
+
+  /**
+   * @brief TODO
+   * @param service_id
+   * @param service_published
+   */
+  void SetServicePublished(const std::string service_id,
+                           bool service_published);
+
+  /**
+   * @brief TODO
    * @param service_id
    */
   bool SetDefaultService(const std::string service_id);

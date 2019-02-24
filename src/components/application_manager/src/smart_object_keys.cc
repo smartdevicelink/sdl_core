@@ -27,6 +27,7 @@ const char* app_launch_last_session = "app_launch_last_session";
 const char* policy_app_id = "policyAppID";
 const char* hmi_app_id = "hmiAppID";
 const char* device_id = "deviceID";
+const char* subscribe = "subscribe";
 const char* subscribed_for_way_points = "subscribed_for_way_points";
 const char* url = "url";
 const char* urlScheme = "urlScheme";
@@ -145,6 +146,7 @@ const char* navigation_capability = "navigationCapability";
 const char* phone_capability = "phoneCapability";
 const char* video_streaming_capability = "videoStreamingCapability";
 const char* rc_capability = "remoteControlCapability";
+const char* app_services_capabilities = "appServicesCapabilities";
 const char* day_color_scheme = "dayColorScheme";
 const char* night_color_scheme = "nightColorScheme";
 const char* primary_color = "primaryColor";
@@ -284,7 +286,9 @@ const char* service_manifest = "serviceManifest";
 const char* service_published = "servicePublished";
 const char* service_active = "serviceActive";
 const char* service_data = "serviceData";
-const char* subscribe = "subscribe";
+const char* app_services = "appServices";
+const char* update_reason = "updateReason";
+const char* updated_app_service_record = "updatedAppServiceRecord";
 
 // resuming
 const char* application_commands = "applicationCommands";

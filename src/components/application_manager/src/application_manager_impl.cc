@@ -2630,6 +2630,8 @@ void ApplicationManagerImpl::UnregisterApplication(
                             << is_unexpected_disconnect);
   size_t subscribed_for_way_points_app_count = 0;
 
+  GetAppServiceManager().UnpublishServices(app_id);
+
   // SDL sends UnsubscribeWayPoints only for last application
   {
     sync_primitives::AutoLock lock(subscribed_way_points_apps_lock_);

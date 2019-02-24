@@ -35,6 +35,7 @@
 #include "application_manager/message_helper.h"
 #include "application_manager/rpc_service.h"
 #include "interfaces/MOBILE_API.h"
+#include "sdl_rpc_plugin/extensions/system_capability_app_extension.h"
 
 namespace app_service_rpc_plugin {
 using namespace application_manager;
@@ -79,7 +80,7 @@ bool PublishAppServiceRequest::ValidateManifest(
 
 void PublishAppServiceRequest::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
-  LOG4CXX_DEBUG(logger_, "Received a PublishAppService");
+  LOG4CXX_DEBUG(logger_, "Received a PublishAppService " << connection_key());
   MessageHelper::PrintSmartObject(*message_);
 
   smart_objects::SmartObject response_params =
@@ -89,6 +90,8 @@ void PublishAppServiceRequest::Run() {
   if (!ValidateManifest(manifest)) {
     return;
   }
+
+  ApplicationSharedPtr app = application_manager_.application(connection_key());
 
   std::string requested_service_name = "";
 
@@ -103,15 +106,13 @@ void PublishAppServiceRequest::Run() {
       (*message_)[strings::msg_params][strings::app_service_manifest]
                  [strings::service_type].asString();
 
-  smart_objects::SmartArray* requested_handled_rpcs;
+  smart_objects::SmartArray* requested_handled_rpcs = NULL;
   if ((*message_)[strings::msg_params][strings::app_service_manifest].keyExists(
           strings::handled_rpcs)) {
     requested_handled_rpcs =
         (*message_)[strings::msg_params][strings::app_service_manifest]
                    [strings::handled_rpcs].asArray();
   }
-
-  ApplicationSharedPtr app = application_manager_.application(connection_key());
 
   bool result =
       policy_handler_.CheckAppServiceParameters(app->policy_app_id(),
@@ -120,9 +121,16 @@ void PublishAppServiceRequest::Run() {
                                                 requested_handled_rpcs);
 
   if (!result) {
-    SendResponse(false, mobile_apis::Result::DISALLOWED, NULL, NULL);
+    SendResponse(false,
+                 mobile_apis::Result::DISALLOWED,
+                 "Service disallowed by policies",
+                 NULL);
     return;
   }
+
+  auto& ext =
+      sdl_rpc_plugin::SystemCapabilityAppExtension::ExtractExtension(*app);
+  ext.SubscribeTo(mobile_apis::SystemCapabilityType::APP_SERVICES);
 
   smart_objects::SmartObject service_record =
       application_manager_.GetAppServiceManager().PublishAppService(
