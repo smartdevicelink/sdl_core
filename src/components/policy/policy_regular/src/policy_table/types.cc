@@ -174,8 +174,7 @@ ApplicationParams::ApplicationParams(const Json::Value* value__)
     , enabled(impl::ValueMember(value__, "enabled"))
     , auth_token(impl::ValueMember(value__, "auth_token"))
     , cloud_transport_type(impl::ValueMember(value__, "cloud_transport_type"))
-    , icon_url(impl::ValueMember(value__, "icon_url")) {
-}
+    , icon_url(impl::ValueMember(value__, "icon_url")) {}
 
 Json::Value ApplicationParams::ToJsonValue() const {
   Json::Value result__(PolicyBase::ToJsonValue());

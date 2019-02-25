@@ -117,6 +117,15 @@ struct CommandParametersPermissions;
 typedef std::map<std::string, hmi_apis::Common_TransportType::eType>
     DeviceTypes;
 
+struct AppIconInfo {
+  std::string endpoint;
+  bool icon_exists;
+  bool pending_request;
+  AppIconInfo();
+  AppIconInfo(std::string url, bool exists, bool pending)
+      : endpoint(url), icon_exists(exists), pending_request(pending) {}
+};
+
 CREATE_LOGGERPTR_GLOBAL(logger_, "ApplicationManager")
 typedef std::shared_ptr<timer::Timer> TimerSPtr;
 
@@ -193,6 +202,9 @@ class ApplicationManagerImpl
       const std::shared_ptr<Application> app) OVERRIDE;
 
   void SendDriverDistractionState(ApplicationSharedPtr application);
+
+  void SendGetIconUrlNotifications(const uint32_t connection_key,
+                                   ApplicationSharedPtr application);
 
   ApplicationSharedPtr application(
       const std::string& device_id,
@@ -370,6 +382,10 @@ class ApplicationManagerImpl
   void SetPendingApplicationState(
       const transport_manager::ConnectionUID connection_id,
       const transport_manager::DeviceInfo& device_info);
+
+  std::string PolicyIDByIconUrl(const std::string url) OVERRIDE;
+
+  void SetIconExists(const std::string policy_id) OVERRIDE;
 
   /**
    * @brief Notifies the applicaiton manager that a cloud connection status has
@@ -1475,6 +1491,9 @@ class ApplicationManagerImpl
   mutable std::shared_ptr<sync_primitives::RecursiveLock>
       pending_device_map_lock_ptr_;
   std::map<std::string, std::string> pending_device_map_;
+
+  sync_primitives::Lock app_icon_map_lock_ptr_;
+  std::map<std::string, AppIconInfo> app_icon_map_;
 
 #ifdef TELEMETRY_MONITOR
   AMTelemetryObserver* metric_observer_;

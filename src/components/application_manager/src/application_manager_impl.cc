@@ -808,6 +808,32 @@ void ApplicationManagerImpl::OnHMIStartedCooperation() {
   RefreshCloudAppInformation();
 }
 
+std::string ApplicationManagerImpl::PolicyIDByIconUrl(const std::string url) {
+  app_icon_map_lock_ptr_.Acquire();
+  for (auto& x : app_icon_map_) {
+    auto policy_id = x.first;
+    std::string icon_url = GetPolicyHandler().GetIconUrl(policy_id);
+    if (icon_url == url) {
+      LOG4CXX_DEBUG(logger_, "Matched icon url: " << url);
+    }
+    x.second.pending_request = false;
+    app_icon_map_lock_ptr_.Release();
+    return policy_id;
+  }
+  app_icon_map_lock_ptr_.Release();
+  return std::string("");
+}
+
+void ApplicationManagerImpl::SetIconExists(const std::string policy_id) {
+  app_icon_map_lock_ptr_.Acquire();
+  auto app_icon_it = app_icon_map_.find(policy_id);
+  if (app_icon_it != app_icon_map_.end()) {
+    LOG4CXX_DEBUG(logger_, "Updaing icon exists status");
+    app_icon_it->second.icon_exists = true;
+  }
+  app_icon_map_lock_ptr_.Release();
+}
+
 void ApplicationManagerImpl::RefreshCloudAppInformation() {
   LOG4CXX_AUTO_TRACE(logger_);
   std::vector<std::string> enabled_apps;
@@ -823,6 +849,7 @@ void ApplicationManagerImpl::RefreshCloudAppInformation() {
 
   // Store old device map and clear the current map
   pending_device_map_lock_ptr_->Acquire();
+  app_icon_map_lock_ptr_.Acquire();
   std::map<std::string, std::string> old_device_map = pending_device_map_;
   pending_device_map_ = std::map<std::string, std::string>();
   // Create a device for each newly enabled cloud app
@@ -846,7 +873,43 @@ void ApplicationManagerImpl::RefreshCloudAppInformation() {
 
     // If the device was disconnected, this will reinitialize the device
     connection_handler().AddCloudAppDevice(endpoint, cloud_transport_type);
+
+    // Look for app icon url data and add to app_icon_url_map
+
+    std::string url = GetPolicyHandler().GetIconUrl(*enabled_it);
+
+    if (url.empty()) {
+      LOG4CXX_DEBUG(logger_, "No Icon Url for cloud app");
+      continue;
+    }
+
+    auto app_icon_it = app_icon_map_.find(*enabled_it);
+    if (app_icon_it != app_icon_map_.end()) {
+      LOG4CXX_DEBUG(logger_, "Cloud App Already Exists in Icon Map");
+      continue;
+    }
+
+    bool icon_exists = false;
+
+    const std::string app_icon_dir(settings_.app_icons_folder());
+    const std::string full_icon_path(app_icon_dir + "/" + *enabled_it);
+    if (file_system::FileExists(full_icon_path)) {
+      LOG4CXX_DEBUG(logger_, "Cloud app icon already exists");
+      icon_exists = true;
+    }
+
+    // icon_map_size is used as the idex for identifying the request_sub_type to
+    // the
+    // cloud app that the GetIconUrl request is later made for.
+    int icon_map_size = app_icon_map_.size();
+
+    AppIconInfo icon_info(endpoint, icon_exists, false);
+    LOG4CXX_DEBUG(logger_,
+                  "Inserting cloud app into icon map: " << icon_map_size);
+    app_icon_map_.insert(
+        std::pair<std::string, AppIconInfo>(*enabled_it, icon_info));
   }
+  app_icon_map_lock_ptr_.Release();
   pending_device_map_lock_ptr_->Release();
 
   int removed_app_count = 0;
@@ -3666,6 +3729,66 @@ void ApplicationManagerImpl::SendDriverDistractionState(
   } else {
     application->PushMobileMessage(on_driver_distraction);
   }
+}
+
+void ApplicationManagerImpl::SendGetIconUrlNotifications(
+    const uint32_t connection_key, ApplicationSharedPtr application) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  std::vector<std::string> enabled_apps;
+  GetPolicyHandler().GetEnabledCloudApps(enabled_apps);
+  std::vector<std::string>::iterator enabled_it = enabled_apps.begin();
+  std::vector<std::string>::iterator enabled_end = enabled_apps.end();
+  app_icon_map_lock_ptr_.Acquire();
+  for (; enabled_it != enabled_end; ++enabled_it) {
+    auto app_icon_it = app_icon_map_.find(*enabled_it);
+    if (app_icon_it == app_icon_map_.end()) {
+      LOG4CXX_WARN(logger_, "Could not find cloud app in icon map");
+      continue;
+    }
+
+    std::string endpoint = app_icon_it->second.endpoint;
+    bool icon_exists = app_icon_it->second.icon_exists;
+    bool pending_request = app_icon_it->second.pending_request;
+
+    if (pending_request) {
+      LOG4CXX_DEBUG(logger_, "Cloud app has already sent request");
+      continue;
+    }
+
+    if (icon_exists) {
+      LOG4CXX_DEBUG(logger_, "Cloud app has already registered");
+      continue;
+    }
+
+    std::string url = GetPolicyHandler().GetIconUrl(*enabled_it);
+
+    if (url.empty()) {
+      LOG4CXX_DEBUG(logger_, "No Icon Url for cloud app");
+      continue;
+    }
+
+    LOG4CXX_DEBUG(logger_, "Creating Get Icon Request");
+
+    smart_objects::SmartObjectSPtr message =
+        std::make_shared<smart_objects::SmartObject>(
+            smart_objects::SmartType_Map);
+    (*message)[strings::params][strings::function_id] =
+        mobile_apis::FunctionID::OnSystemRequestID;
+    (*message)[strings::params][strings::connection_key] = connection_key;
+    (*message)[strings::params][strings::message_type] =
+        mobile_apis::messageType::notification;
+    (*message)[strings::params][strings::protocol_version] =
+        application->protocol_version();
+    (*message)[strings::msg_params][strings::request_type] =
+        mobile_apis::RequestType::ICON_URL;
+    (*message)[strings::msg_params][strings::url] = url;
+
+    // todo update to false when this request comes back
+    app_icon_it->second.pending_request = true;
+
+    rpc_service_->ManageMobileCommand(message, commands::Command::SOURCE_SDL);
+  }
+  app_icon_map_lock_ptr_.Release();
 }
 
 protocol_handler::MajorProtocolVersion

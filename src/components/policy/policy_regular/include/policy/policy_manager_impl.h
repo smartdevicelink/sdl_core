@@ -117,7 +117,8 @@ class PolicyManagerImpl : public PolicyManager {
   std::string GetLockScreenIconUrl() const OVERRIDE;
 
   /**
-   * @brief Get Icon Url used for showing a cloud apps icon before the intial registration
+   * @brief Get Icon Url used for showing a cloud apps icon before the intial
+   *registration
    *
    * @return url which point to the resourse where icon could be
    *obtained.

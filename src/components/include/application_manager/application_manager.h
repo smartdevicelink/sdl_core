@@ -283,6 +283,9 @@ class ApplicationManager {
    */
   virtual void SendDriverDistractionState(ApplicationSharedPtr application) = 0;
 
+  virtual void SendGetIconUrlNotifications(
+      const uint32_t connection_key, ApplicationSharedPtr application) = 0;
+
   /**
    * @brief Checks if Application is subscribed for way points
    * @param Application pointer
@@ -428,6 +431,10 @@ class ApplicationManager {
   virtual void OnHMIStartedCooperation() = 0;
 
   virtual void RefreshCloudAppInformation() = 0;
+
+  virtual std::string PolicyIDByIconUrl(const std::string url) = 0;
+
+  virtual void SetIconExists(const std::string policy_id) = 0;
 
   /**
    * @brief Retrieve the current connection status of a cloud app

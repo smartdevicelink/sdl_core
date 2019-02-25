@@ -1612,7 +1612,7 @@ std::string CacheManager::GetIconUrl(const std::string& policy_app_id) const {
   if (policies.end() != policy_iter) {
     auto app_policy = (*policy_iter).second;
     url = app_policy.icon_url.is_initialized() ? *app_policy.icon_url
-                                                        : std::string();
+                                               : std::string();
   }
   return url;
 }

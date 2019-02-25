@@ -447,6 +447,9 @@ void RegisterAppInterfaceRequest::Run() {
       GetLockScreenIconUrlNotification(connection_key(), application);
   rpc_service_.ManageMobileCommand(so, SOURCE_SDL);
   application_manager_.SendDriverDistractionState(application);
+  // Create onSystemRequest to mobile to obtain cloud app icons
+  application_manager_.SendGetIconUrlNotifications(connection_key(),
+                                                   application);
 }
 
 smart_objects::SmartObjectSPtr

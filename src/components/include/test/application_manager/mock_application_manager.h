@@ -124,6 +124,9 @@ class MockApplicationManager : public application_manager::ApplicationManager {
       void(const std::shared_ptr<application_manager::Application> app));
   MOCK_METHOD1(SendDriverDistractionState,
                void(application_manager::ApplicationSharedPtr app));
+  MOCK_METHOD2(SendGetIconUrlNotifications,
+               void(const uint32_t connection_key,
+                    application_manager::ApplicationSharedPtr application));
   MOCK_METHOD2(RemoveHMIFakeParameters,
                void(application_manager::commands::MessageSharedPtr& message,
                     const hmi_apis::FunctionID::eType& function_id));
@@ -170,6 +173,8 @@ class MockApplicationManager : public application_manager::ApplicationManager {
   MOCK_CONST_METHOD1(GetCloudAppConnectionStatus,
                      hmi_apis::Common_CloudConnectionStatus::eType(
                          application_manager::ApplicationConstSharedPtr app));
+  MOCK_METHOD1(PolicyIDByIconUrl, std::string(const std::string url));
+  MOCK_METHOD1(SetIconExists, void(const std::string policy_id));
   MOCK_CONST_METHOD0(IsHMICooperating, bool());
   MOCK_METHOD2(IviInfoUpdated,
                void(mobile_apis::VehicleDataType::eType vehicle_info,
