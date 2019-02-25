@@ -32,6 +32,7 @@
 
 #include "sdl_rpc_plugin/sdl_rpc_plugin.h"
 #include "sdl_rpc_plugin/sdl_command_factory.h"
+#include "application_manager/plugin_manager/plugin_keys.h"
 
 namespace sdl_rpc_plugin {
 namespace plugins = application_manager::plugin_manager;
@@ -54,7 +55,7 @@ bool SDLRPCPlugin::IsAbleToProcess(
 }
 
 std::string SDLRPCPlugin::PluginName() {
-  return "SDL RPC Plugin";
+  return plugins::plugin_names::sdl_rpc_plugin;
 }
 
 application_manager::CommandFactory& SDLRPCPlugin::GetCommandFactory() {
