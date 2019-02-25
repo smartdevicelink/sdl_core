@@ -31,6 +31,7 @@
  */
 
 #include "application_manager/rpc_service_impl.h"
+#include "application_manager/plugin_manager/plugin_keys.h"
 
 namespace application_manager {
 namespace rpc_service {
@@ -38,6 +39,7 @@ namespace rpc_service {
 CREATE_LOGGERPTR_LOCAL(logger_, "RPCServiceImpl")
 namespace formatters = ns_smart_device_link::ns_json_handler::formatters;
 namespace jhs = ns_smart_device_link::ns_json_handler::strings;
+namespace plugin_names = application_manager::plugin_manager::plugin_names;
 
 RPCServiceImpl::RPCServiceImpl(
     ApplicationManager& app_manager,
@@ -386,6 +388,7 @@ void RPCServiceImpl::SendMessageToMobile(
 
   const bool is_result_code_exists =
       (*message)[strings::msg_params].keyExists(strings::result_code);
+  bool RemoveUnknownParameters = true;
 
   if (!app) {
     LOG4CXX_ERROR(logger_, "No application associated with connection key");
@@ -417,7 +420,20 @@ void RPCServiceImpl::SendMessageToMobile(
   // Messages to mobile are not yet prioritized so use default priority value
   std::shared_ptr<Message> message_to_send(
       new Message(protocol_handler::MessagePriority::kDefault));
-  if (!ConvertSOtoMessage((*message), (*message_to_send))) {
+
+  bool rpc_passing = false;
+  if (HandleRpcUsingAppServices(
+          (*message)[jhs::S_PARAMS][jhs::S_FUNCTION_ID].asInt(),
+          commands::Command::CommandSource::SOURCE_SDL,
+          rpc_passing)) {
+    LOG4CXX_DEBUG(logger_,
+                  "Can handle app services response function "
+                      << (*message)[jhs::S_PARAMS][jhs::S_FUNCTION_ID].asInt());
+    RemoveUnknownParameters = false;
+  }
+
+  if (!ConvertSOtoMessage(
+          (*message), (*message_to_send), RemoveUnknownParameters)) {
     LOG4CXX_WARN(logger_, "Can't send msg to Mobile: failed to create string");
     return;
   }
@@ -496,6 +512,7 @@ void RPCServiceImpl::SendMessageToHMI(
     return;
   }
 
+  bool RemoveUnknownParameters = true;
   // SmartObject |message| has no way to declare priority for now
   std::shared_ptr<Message> message_to_send(
       new Message(protocol_handler::MessagePriority::kDefault));
@@ -509,13 +526,69 @@ void RPCServiceImpl::SendMessageToHMI(
       logger_,
       "Attached schema to message, result if valid: " << message->isValid());
 
-  if (!ConvertSOtoMessage(*message, *message_to_send)) {
+  bool rpc_passing = false;
+  if (HandleRpcUsingAppServices(
+          (*message)[jhs::S_PARAMS][jhs::S_FUNCTION_ID].asInt(),
+          commands::Command::CommandSource::SOURCE_SDL_TO_HMI,
+          rpc_passing)) {
+    LOG4CXX_DEBUG(logger_,
+                  "Can handle app services response function "
+                      << (*message)[jhs::S_PARAMS][jhs::S_FUNCTION_ID].asInt());
+
+    RemoveUnknownParameters = false;
+  }
+
+  if (!ConvertSOtoMessage(
+          *message, *message_to_send, RemoveUnknownParameters)) {
     LOG4CXX_WARN(logger_,
                  "Cannot send message to HMI: failed to create string");
     return;
   }
 
   messages_to_hmi_.PostMessage(impl::MessageToHmi(message_to_send));
+}
+
+bool RPCServiceImpl::HandleRpcUsingAppServices(
+    int32_t function_id,
+    commands::Command::CommandSource source,
+    bool& rpc_passing) {
+  rpc_passing = false;
+
+  // General RPCs related to App Services
+  if ((source == commands::Command::CommandSource::SOURCE_MOBILE) ||
+      (source ==
+       commands::Command::CommandSource::SOURCE_SDL)) {  // MOBILE COMMANDS
+    switch (function_id) {
+      case mobile_apis::FunctionID::GetSystemCapabilityID:
+        // TODO Add case after merging systemcapability subscription changes
+        /*case mobile_apis::FunctionID::OnSystemCapabilityUpdatedID:*/
+        return true;
+        break;
+    }
+  } else if ((source == commands::Command::CommandSource::SOURCE_HMI) ||
+             (source == commands::Command::CommandSource::
+                            SOURCE_SDL_TO_HMI)) {  // HMI COMMANDS
+    // switch (function_id) {
+    // TODO Add case after merging systemcapability subscription changes
+    /*case
+     * hmi_apis::FunctionID::BasicCommunication_OnSystemCapabilityUpdated:*/
+    // return true;
+    // break;
+    //}
+  }
+
+  // RPCs handled by app services plugin
+  auto plugin =
+      app_manager_.GetPluginManager().FindPluginToProcess(function_id, source);
+  if (!plugin) {
+    return false;
+  }
+  if ((*plugin).PluginName() != plugin_names::app_service_rpc_plugin) {
+    return false;
+  }
+  application_manager::CommandFactory& factory = (*plugin).GetCommandFactory();
+
+  return factory.IsAbleToProcess(function_id, source);
 }
 
 void RPCServiceImpl::set_protocol_handler(

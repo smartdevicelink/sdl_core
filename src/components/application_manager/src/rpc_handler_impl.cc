@@ -31,6 +31,7 @@
  */
 
 #include "application_manager/rpc_handler_impl.h"
+#include "application_manager/plugin_manager/plugin_keys.h"
 
 namespace application_manager {
 namespace rpc_handler {
@@ -38,6 +39,7 @@ namespace rpc_handler {
 CREATE_LOGGERPTR_LOCAL(logger_, "RPCHandlerImpl")
 namespace formatters = ns_smart_device_link::ns_json_handler::formatters;
 namespace jhs = ns_smart_device_link::ns_json_handler::strings;
+namespace plugin_names = application_manager::plugin_manager::plugin_names;
 
 RPCHandlerImpl::RPCHandlerImpl(ApplicationManager& app_manager)
     : app_manager_(app_manager)
@@ -63,14 +65,25 @@ void RPCHandlerImpl::ProcessMessageFromMobile(
 #endif  // TELEMETRY_MONITOR
   smart_objects::SmartObjectSPtr so_from_mobile =
       std::make_shared<smart_objects::SmartObject>();
-
+  bool RemoveUnknownParameters = true;
   DCHECK_OR_RETURN_VOID(so_from_mobile);
   if (!so_from_mobile) {
     LOG4CXX_ERROR(logger_, "Null pointer");
     return;
   }
 
-  if (!ConvertMessageToSO(*message, *so_from_mobile)) {
+  bool rpc_passing = false;
+  if (app_manager_.GetRPCService().HandleRpcUsingAppServices(
+          message->function_id(),
+          commands::Command::SOURCE_MOBILE,
+          rpc_passing)) {
+    LOG4CXX_DEBUG(logger_,
+                  "Can handle app services request function "
+                      << message->function_id());
+    RemoveUnknownParameters = false;
+  }
+
+  if (!ConvertMessageToSO(*message, *so_from_mobile, RemoveUnknownParameters)) {
     LOG4CXX_ERROR(logger_, "Cannot create smart object from message");
     return;
   }
@@ -95,13 +108,30 @@ void RPCHandlerImpl::ProcessMessageFromHMI(
   LOG4CXX_AUTO_TRACE(logger_);
   smart_objects::SmartObjectSPtr smart_object =
       std::make_shared<smart_objects::SmartObject>();
-
+  bool RemoveUnknownParameters = true;
   if (!smart_object) {
     LOG4CXX_ERROR(logger_, "Null pointer");
     return;
   }
 
-  if (!ConvertMessageToSO(*message, *smart_object)) {
+  smart_objects::SmartObject converted_result;
+  formatters::FormatterJsonRpc::FromString<hmi_apis::FunctionID::eType,
+                                           hmi_apis::messageType::eType>(
+      message->json_message(), converted_result);
+
+  bool rpc_passing = false;
+  if (app_manager_.GetRPCService().HandleRpcUsingAppServices(
+          converted_result[jhs::S_PARAMS][jhs::S_FUNCTION_ID].asInt(),
+          commands::Command::SOURCE_HMI,
+          rpc_passing)) {
+    LOG4CXX_DEBUG(
+        logger_,
+        "Can handle app services request function "
+            << converted_result[jhs::S_PARAMS][jhs::S_FUNCTION_ID].asInt());
+    RemoveUnknownParameters = false;
+  }
+
+  if (!ConvertMessageToSO(*message, *smart_object, RemoveUnknownParameters)) {
     if (application_manager::MessageType::kResponse ==
         (*smart_object)[strings::params][strings::message_type].asInt()) {
       (*smart_object).erase(strings::msg_params);
@@ -326,6 +356,8 @@ bool RPCHandlerImpl::ConvertMessageToSO(
                     "Convertion result: "
                         << result << " function id "
                         << output[jhs::S_PARAMS][jhs::S_FUNCTION_ID].asInt());
+      // TODO Figure out whether to use the RemoveUnknownParams bool for hmi
+      // requests
       if (!hmi_so_factory().attachSchema(output, false)) {
         LOG4CXX_WARN(logger_, "Failed to attach schema to object.");
         return false;

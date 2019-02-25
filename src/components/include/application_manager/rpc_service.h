@@ -77,6 +77,15 @@ class RPCService {
   virtual void SendMessageToHMI(const commands::MessageSharedPtr message) = 0;
 
   /**
+ * @ brief TODO
+ * @ rpc_passing assign true if rpc_passing can be used for rpc
+ */
+  virtual bool HandleRpcUsingAppServices(
+      int32_t function_id,
+      commands::Command::CommandSource source,
+      bool& rpc_passing) = 0;
+
+  /**
    * @brief set_protocol_handler
    * @param handler
    * set protocol handler
