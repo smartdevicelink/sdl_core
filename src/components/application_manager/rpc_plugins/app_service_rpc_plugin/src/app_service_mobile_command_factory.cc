@@ -47,6 +47,10 @@
 #include "app_service_rpc_plugin/commands/mobile/perform_app_service_interaction_response_from_mobile.h"
 #include "app_service_rpc_plugin/commands/mobile/publish_app_service_request.h"
 #include "app_service_rpc_plugin/commands/mobile/publish_app_service_response.h"
+#include "app_service_rpc_plugin/commands/mobile/get_app_service_data_request.h"
+#include "app_service_rpc_plugin/commands/mobile/get_app_service_data_response.h"
+#include "app_service_rpc_plugin/commands/mobile/get_app_service_data_request_to_mobile.h"
+#include "app_service_rpc_plugin/commands/mobile/get_app_service_data_response_from_mobile.h"
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "AppServiceRpcPlugin")
 

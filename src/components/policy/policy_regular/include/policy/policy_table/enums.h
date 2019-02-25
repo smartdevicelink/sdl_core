@@ -542,6 +542,11 @@ enum FunctionID {
   OnAppServiceDataID = 32786,
 
   /**
+   * @brief OnSystemCapabilityUpdatedID
+   */
+  OnSystemCapabilityUpdatedID = 32787,
+
+  /**
    * @brief EncodedSyncPDataID.
    */
   EncodedSyncPDataID = 65536,

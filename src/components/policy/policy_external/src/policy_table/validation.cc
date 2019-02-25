@@ -195,11 +195,11 @@ bool ApplicationParams::ValidateModuleTypes() const {
 }
 
 bool AppServiceHandledRpc::Validate() const {
-  return true;  // todo add validation
+  return true;
 }
 
 bool AppServiceInfo::Validate() const {
-  return true;  // todo add validation
+  return true;
 }
 
 bool ApplicationParams::Validate() const {

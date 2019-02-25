@@ -37,6 +37,8 @@
 
 #include "smart_objects/enum_schema_item.h"
 
+#include "smart_objects/enum_schema_item.h"
+
 namespace application_manager {
 
 namespace commands {
@@ -247,8 +249,6 @@ void RequestFromHMI::SendHMIRequest(
   request[strings::params][strings::message_type] = MessageType::kRequest;
   request[strings::params][strings::function_id] = function_id;
   request[strings::params][strings::correlation_id] = hmi_correlation_id;
-  request[strings::params][strings::protocol_version] =
-      CommandImpl::protocol_version_;
   request[strings::params][strings::protocol_type] =
       CommandImpl::hmi_protocol_type_;
 

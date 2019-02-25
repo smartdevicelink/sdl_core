@@ -96,6 +96,7 @@ const char* kTransportRequiredForResumptionSection =
     "TransportRequiredForResumption";
 const char* kLowBandwidthTransportResumptionLevelSection =
     "LowBandwidthTransportResumptionLevel";
+const char* kAppServicesSection = "AppServices";
 
 const char* kSDLVersionKey = "SDLVersion";
 const char* kHmiCapabilitiesKey = "HMICapabilities";
@@ -284,6 +285,8 @@ const char* kProjectionLowBandwidthResumptionLevelKey =
     "ProjectionLowBandwidthResumptionLevel";
 const char* kMediaLowBandwidthResumptionLevelKey =
     "MediaLowBandwidthResumptionLevel";
+const char* kHMIOriginIDKey = "HMIOriginID";
+const char* kEmbeddedServicesKey = "EmbeddedServices";
 
 #ifdef WEB_HMI
 const char* kDefaultLinkToWebHMI = "HMI/index.html";
@@ -391,6 +394,7 @@ const std::string kAllowedSymbols =
     "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ01234567890_.-";
 const bool kDefaultMultipleTransportsEnabled = false;
 const char* kDefaultLowBandwidthResumptionLevel = "NONE";
+const char* kDefaultHMIOriginId = "HMI_ID";
 }  // namespace
 
 namespace profile {
@@ -1112,6 +1116,14 @@ bool Profile::IsFileNamePortable(const std::string& file_name) const {
     return false;
   }
   return true;
+}
+
+const std::vector<std::string>& Profile::embedded_services() const {
+  return embedded_services_;
+}
+
+const std::string Profile::hmi_origin_id() const {
+  return hmi_origin_id_;
 }
 
 void Profile::UpdateValues() {
@@ -2256,6 +2268,44 @@ void Profile::UpdateValues() {
                  kServicesMapSection,
                  kVideoServiceTransportsKey},
                 {NULL, NULL, NULL}};
+    struct KeyPair* entry = keys;
+
+    while (entry->ini_vector != NULL) {
+      bool exist = false;
+      std::vector<std::string> profile_entry = ReadStringContainer(
+          entry->ini_section_name, entry->ini_key_name, &exist, true);
+      if (exist) {
+        *entry->ini_vector = profile_entry;
+
+        const std::string list_with_comma = std::accumulate(
+            profile_entry.begin(),
+            profile_entry.end(),
+            std::string(""),
+            [](std::string& first, std::string& second) {
+              return first.empty() ? second : first + ", " + second;
+            });
+        LOG_UPDATED_VALUE(
+            list_with_comma, entry->ini_key_name, entry->ini_section_name);
+      }
+      entry++;
+    }
+  }
+
+  ReadStringValue(&hmi_origin_id_,
+                  kDefaultHMIOriginId,
+                  kAppServicesSection,
+                  kHMIOriginIDKey);
+
+  LOG_UPDATED_VALUE(hmi_origin_id_, kHMIOriginIDKey, kAppServicesSection);
+
+  {  // App Services map
+    struct KeyPair {
+      std::vector<std::string>* ini_vector;
+      const char* ini_section_name;
+      const char* ini_key_name;
+    } keys[] = {
+        {&embedded_services_, kAppServicesSection, kEmbeddedServicesKey},
+        {NULL, NULL, NULL}};
     struct KeyPair* entry = keys;
 
     while (entry->ini_vector != NULL) {

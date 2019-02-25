@@ -3298,15 +3298,6 @@
     </param>
   </struct>
 
-  <struct name="SystemCapabilities">
-      <param name="navigationCapability" type="NavigationCapability" mandatory="false">
-      </param>
-      <param name="phoneCapability" type="PhoneCapability" mandatory="false">
-      </param>
-      <param name="videoStreamingCapability" type="VideoStreamingCapability" mandatory="false">
-      </param>
-  </struct>
-
   <struct name="RemoteControlCapabilities">
     <param name="climateControlCapabilities" type="ClimateControlCapabilities" mandatory="false" minsize="1" maxsize="100" array="true">
       <description>If included, the platform supports RC climate controls. For this baseline version, maxsize=1. i.e. only one climate control module is supported.</description >
@@ -3448,7 +3439,7 @@
             </description>
         </param>
 
-        <param name="queuePlaybackProgess" type="Integer" mandatory="false">
+        <param name="queuePlaybackProgress" type="Integer" mandatory="false">
             <description>
                 Music: The current progress of the playback queue in seconds
                 Podcast: The current progress of the playback queue in seconds
@@ -3481,7 +3472,7 @@
         </param>
     </struct>
 
-    <struct name="WeatherServiceManifest" since="5.1">
+    <struct name="WeatherServiceManifest">
         <param name="currentForecastSupported" type="Boolean" mandatory="false"/>
         <param name="maxMultidayForecastAmount" type="Integer" mandatory="false"/>
         <param name="maxHourlyForecastAmount" type="Integer" mandatory="false"/>
@@ -3489,7 +3480,7 @@
         <param name="weatherForLocationSupported" type="Boolean" mandatory="false"/>
     </struct>
 
-    <struct name="WeatherAlert" since="5.1">
+    <struct name="WeatherAlert">
         <param name="title" type="String" mandatory="false"/>
         <param name="summary" type="String" mandatory="false"/>
         <param name="expires" type="Common.DateTime" mandatory="false"/>
@@ -3498,7 +3489,7 @@
         <param name="timeIssued" type="Common.DateTime" mandatory="false"/>
     </struct>
 
-    <struct name="WeatherData" since="5.1">
+    <struct name="WeatherData">
         <param name="currentTemperature" type="Common.Temperature" mandatory="false"/>
         <param name="temperatureHigh" type="Common.Temperature" mandatory="false"/>
         <param name="temperatureLow" type="Common.Temperature" mandatory="false"/>
@@ -3553,7 +3544,7 @@
         <param name="weatherIconImageName" type="String" mandatory="false"/>
     </struct>
 
-    <struct name="WeatherServiceData" since="5.1">
+    <struct name="WeatherServiceData">
         <description> This data is related to what a weather service would provide</description>
         <param name="location" type="Common.LocationDetails" mandatory="true"/>
         <param name="currentForecast" type="Common.WeatherData" mandatory="false"/>
@@ -3634,7 +3625,72 @@
         <param name="weatherServiceData" type="Common.WeatherServiceData" mandatory="false"/>
     </struct>
 
+    <enum name="ServiceUpdateReason">
+        <element name="PUBLISHED">
+            <description> The service has just been published with the module and once activated to the primary service of its type, it will be ready for possible consumption.</description>
+        </element>
+        <element name="REMOVED">
+            <description> The service has just been unpublished with the module and is no longer accessible</description>
+        </element>
+        <element name="ACTIVATED">
+            <description> The service is activated as the primary service of this type. All requests dealing with this service type will be handled by this service.</description>
+        </element>
+        <element name="DEACTIVATED">
+            <description> The service has been deactivated as the primary service of its type</description>
+        </element>
+        <element name="MANIFEST_UPDATE">
+            <description> The service has updated its manifest. This could imply updated capabilities</description>
+        </element>
+    </enum>
+
+    <struct name="AppServiceCapability">
+        <param name="updateReason" type="ServiceUpdateReason" mandatory="false">
+            <description> Only included in OnSystemCapabilityUpdated. Update reason for service record.</description>
+        </param>
+        <param name="updatedAppServiceRecord" type="AppServiceRecord" mandatory="true">
+            <description>Service record for a specific app service provider</description>
+        </param>
+    </struct>
+
+    <struct name="AppServicesCapabilities">
+        <description>Capabilities of app services including what service types are supported and the current state of services.</description>
+        <param name="appServices" type="AppServiceCapability" array="true" mandatory="false">
+            <description>An array of currently available services. If this is an update to the capability the affected services will include an update reason in that item</description>
+        </param>
+    </struct>
+
     <!-- End App Services -->
+
+    <enum name="SystemCapabilityType">
+        <description>Enumerations of all available system capability types</description>
+        <element name="NAVIGATION"/>
+        <element name="PHONE_CALL"/>
+        <element name="VIDEO_STREAMING"/>
+        <element name="REMOTE_CONTROL"/>
+        <element name="APP_SERVICES" />
+    </enum>
+
+    <struct name="SystemCapabilities">
+        <description>The systemCapabilityType identifies which data object exists in this struct. For example, if the SystemCapability Type is NAVIGATION then a "navigationCapability" should exist</description>
+        <param name="systemCapabilityType" type="SystemCapabilityType" mandatory="true">
+            <description>Used as a descriptor of what data to expect in this struct. The corresponding param to this enum should be included and the only other para included.</description>
+        </param>
+        <param name="navigationCapability" type="NavigationCapability" mandatory="false">
+            <description>Describes extended capabilities for onboard navigation system </description>
+        </param>
+        <param name="phoneCapability" type="PhoneCapability" mandatory="false">
+            <description>Describes extended capabilities of the module's phone feature</description>
+        </param>
+        <param name="videoStreamingCapability" type="VideoStreamingCapability" mandatory="false">
+            <description>Describes extended capabilities of the module's phone feature</description>
+        </param>
+        <param name="remoteControlCapability" type="RemoteControlCapabilities" mandatory="false">
+            <description>Describes extended capabilities of the module's phone feature</description>
+        </param>
+        <param name="appServicesCapabilities" type="AppServicesCapabilities" mandatory="false">
+            <description>An array of currently available services. If this is an update to the capability the affected services will include an update reason in that item</description>
+        </param>      
+    </struct>
 
 </interface>
 
@@ -4065,6 +4121,12 @@
         <description>Must be 'true' - when the event is started on HMI. Must be 'false' when the event is ended on HMI</description>
      </param>
    </function>
+  <function name="OnSystemCapabilityUpdated" messagetype="notification">
+    <description>A notification to inform the connected device that a specific system capability has changed.</description>
+    <param name="systemCapability" type="Common.SystemCapabilities" mandatory="true">
+      <description>The system capability that has been updated</description>
+    </param>
+  </function> 
 </interface>
 
 <interface name="VR" version="1.1.0" date="2017-04-27">
@@ -6152,7 +6214,43 @@
 
     <function name="GetAppServiceData" messagetype="response">
         <description> This response includes the data that is requested from the specific service</description>    
-        <param name="serviceData" type="Common.AppServiceData" mandatory="false"/>      
+        <param name="serviceData" type="Common.AppServiceData" mandatory="false"/>
+    </function>
+
+    <function name="GetAppServiceRecords" messagetype="request">
+        <param name="serviceType" type="String" mandatory="false">
+            <description>If included, only service records of supplied type will be returned in response. If not included, all service records for all types will be returned. See Common.AppServiceType.</description>
+        </param>
+    </function>
+
+    <function name="GetAppServiceRecords" messagetype="response">
+        <param name="serviceRecords" type="Common.AppServiceRecord" array="true" mandatory="false">
+            <description>All app service records of requested type.</description>
+        </param>
+    </function>
+
+    <function name="AppServiceActivation" messagetype="request">
+        <param name="serviceID" type="String" mandatory="true">
+            <description>The ID of the service that should have an activation event take place on</description>
+        </param>
+        <param name="activate" type="Boolean" mandatory="true">
+            <description>True if the service is to be activated. False if the app is to be deactivated</description>
+        </param>
+        <param name="setAsDefault" type="Boolean" mandatory="false">
+            <description>True if the service is to be the default service of this type. False if the app is not to be the default</description>
+        </param>
+    </function>
+
+    <function name="AppServiceActivation" messagetype="response">
+        <param name="serviceID" type="String" mandatory="true">
+            <description>The ID of the service that was requested to have an activation event take place</description>
+        </param>
+        <param name="activate" type="Boolean" mandatory="true">
+            <description>True if the service was activated. False if the app was deactivated or unable to be activated</description>
+        </param>
+        <param name="setAsDefault" type="Boolean" mandatory="false">
+            <description>True if the service was set to the default service of this type. False if the app was not to be the default</description>
+        </param> 
     </function>
 
     <function name="PerformAppServiceInteraction" messagetype="request">

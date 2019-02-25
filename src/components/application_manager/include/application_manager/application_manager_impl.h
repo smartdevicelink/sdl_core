@@ -1544,6 +1544,11 @@ class ApplicationManagerImpl
     plugin_manager_.reset(plugin_manager.release());
   }
 
+  virtual void SetAppServiceManager(
+      std::unique_ptr<AppServiceManager>& app_service_manager) {
+    app_service_manager_.reset(app_service_manager.release());
+  }
+
  private:
 #endif
 

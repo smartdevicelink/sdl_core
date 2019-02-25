@@ -447,15 +447,16 @@ void CommandRequestImpl::SendProviderRequest(
 
   if (!app) {
     LOG4CXX_DEBUG(logger_, "Invalid App Provider pointer");
-    // todo construct reponse for error case, no provider
+    SendResponse(false,
+                 mobile_apis::Result::DATA_NOT_AVAILABLE,
+                 "No app service provider available");
     return;
   }
 
   if (connection_key() == app->app_id()) {
     SendResponse(false,
                  mobile_apis::Result::IGNORED,
-                 "Consumer app is same as producer app",
-                 NULL);
+                 "Consumer app is same as producer app");
     return;
   }
 
