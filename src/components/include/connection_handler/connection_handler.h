@@ -128,6 +128,15 @@ class ConnectionHandler {
   virtual uint32_t GetConnectionSessionsCount(uint32_t connection_key) = 0;
 
   /**
+   * @brief Get cloud app id by connection id
+   * @param connection_id unique connection id
+   * @return the policy app id of the cloud app if the connection is tied to a
+   * cloud app, an empty string otherwise.
+   */
+  virtual std::string GetCloudAppID(
+      const transport_manager::ConnectionUID connection_id) const = 0;
+
+  /**
    * Gets device id by mac address
    * @param mac_address
    * @return true if successfully

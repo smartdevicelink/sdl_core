@@ -113,6 +113,16 @@ class PolicyListener {
   virtual void OnCertificateUpdated(const std::string& certificate_data) = 0;
 
   /**
+   * @brief OnAuthTokenUpdated the callback which signals if an app's auth token
+   * field has been updated during a PTU
+   *
+   * @param policy_app_id the policy app id tied to the updated field.
+   * @param auth_token the value of the updated field.
+   */
+  virtual void OnAuthTokenUpdated(const std::string& policy_app_id,
+                                  const std::string& auth_token) = 0;
+
+  /**
    * Gets devices ids by policy application id
    * @param policy_app_id
    * @return list devices ids
