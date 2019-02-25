@@ -37,6 +37,8 @@
 
 #include "smart_objects/enum_schema_item.h"
 
+#include "smart_objects/enum_schema_item.h"
+
 namespace application_manager {
 
 namespace commands {

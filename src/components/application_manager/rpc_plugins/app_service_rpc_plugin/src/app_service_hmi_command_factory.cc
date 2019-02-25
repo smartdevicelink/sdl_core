@@ -52,6 +52,10 @@
 #include "app_service_rpc_plugin/commands/hmi/as_publish_app_service_response.h"
 #include "app_service_rpc_plugin/commands/hmi/on_as_app_service_data_notification.h"
 #include "app_service_rpc_plugin/commands/hmi/on_as_app_service_data_notification_from_hmi.h"
+#include "app_service_rpc_plugin/commands/hmi/as_get_app_service_data_request_from_hmi.h"
+#include "app_service_rpc_plugin/commands/hmi/as_get_app_service_data_response_from_hmi.h"
+#include "app_service_rpc_plugin/commands/hmi/as_get_app_service_data_request_to_hmi.h"
+#include "app_service_rpc_plugin/commands/hmi/as_get_app_service_data_response_to_hmi.h"
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "AppServiceRpcPlugin")
 

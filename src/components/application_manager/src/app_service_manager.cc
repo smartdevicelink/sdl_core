@@ -399,7 +399,7 @@ std::pair<std::string, AppService> AppServiceManager::FindServiceByID(
 
   return *it;
 }
-  
+
 std::string AppServiceManager::DefaultServiceByType(std::string service_type) {
   LOG4CXX_AUTO_TRACE(logger_);
   Json::Value& dictionary = last_state_.get_dictionary();

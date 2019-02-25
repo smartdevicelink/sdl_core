@@ -36,6 +36,7 @@
 #include "application_manager/application.h"
 #include "interfaces/MOBILE_API.h"
 #include "smart_objects/smart_object.h"
+#include "application_manager/application.h"
 
 namespace resumption {
 class LastState;
