@@ -93,14 +93,37 @@ void GetAppServiceDataRequest::on_event(
   const smart_objects::SmartObject& event_message = event.smart_object();
 
   auto msg_params = event_message[strings::msg_params];
-  SendResponse(true, mobile_apis::Result::SUCCESS, NULL, &msg_params);
+
+  mobile_apis::Result::eType result = static_cast<mobile_apis::Result::eType>(
+      msg_params[strings::result_code].asInt());
+  bool success = IsMobileResultSuccess(result);
+
+  const char* info = msg_params.keyExists(strings::info)
+                         ? msg_params[strings::info].asCharArray()
+                         : NULL;
+
+  SendResponse(success, result, info, &msg_params);
 }
 
 void GetAppServiceDataRequest::on_event(const event_engine::Event& event) {
   const smart_objects::SmartObject& event_message = event.smart_object();
 
   auto msg_params = event_message[strings::msg_params];
-  SendResponse(true, mobile_apis::Result::SUCCESS, NULL, &msg_params);
+
+  hmi_apis::Common_Result::eType hmi_result =
+      static_cast<hmi_apis::Common_Result::eType>(
+          event_message[strings::params][hmi_response::code].asInt());
+
+  mobile_apis::Result::eType result =
+      MessageHelper::HMIToMobileResult(hmi_result);
+  bool success = PrepareResultForMobileResponse(
+      hmi_result, HmiInterfaces::HMI_INTERFACE_AppService);
+
+  const char* info = msg_params.keyExists(strings::info)
+                         ? msg_params[strings::info].asCharArray()
+                         : NULL;
+
+  SendResponse(success, result, info, &msg_params);
 }
 
 }  // namespace commands

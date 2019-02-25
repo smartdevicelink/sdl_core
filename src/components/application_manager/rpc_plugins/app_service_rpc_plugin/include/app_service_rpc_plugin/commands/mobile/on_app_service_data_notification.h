@@ -70,7 +70,6 @@ class OnAppServiceDataNotification
   virtual void Run();
 
  private:
-  AppServiceRpcPlugin* plugin_;
   DISALLOW_COPY_AND_ASSIGN(OnAppServiceDataNotification);
 };
 

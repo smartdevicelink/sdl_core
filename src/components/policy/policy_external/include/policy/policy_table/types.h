@@ -142,7 +142,7 @@ struct AppServiceHandledRpc : CompositeType {
 struct AppServiceInfo : CompositeType {
  public:
   Optional<AppServiceNames> service_names;
-  Optional<AppServiceHandledRpcs> handled_rpcs;
+  AppServiceHandledRpcs handled_rpcs;
 
  public:
   AppServiceInfo();

@@ -46,15 +46,7 @@ OnASAppServiceDataNotificationFromHMI::OnASAppServiceDataNotificationFromHMI(
                           application_manager,
                           rpc_service,
                           hmi_capabilities,
-                          policy_handler)
-    , plugin_(NULL) {
-  auto plugin = application_manager.GetPluginManager().FindPluginToProcess(
-      hmi_apis::FunctionID::AppService_OnAppServiceData,
-      app_mngr::commands::Command::CommandSource::SOURCE_HMI);
-  if (plugin) {
-    plugin_ = dynamic_cast<AppServiceRpcPlugin*>(&(*plugin));
-  }
-}
+                          policy_handler) {}
 
 OnASAppServiceDataNotificationFromHMI::
     ~OnASAppServiceDataNotificationFromHMI() {}

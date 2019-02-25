@@ -57,6 +57,10 @@ void EventObserver::unsubscribe_from_event(const Event::EventID& event_id) {
   event_dispatcher_.remove_observer(event_id, *this);
 }
 
+void EventObserver::unsubscribe_from_all_events() {
+  event_dispatcher_.remove_observer(*this);
+}
+
 void EventObserver::unsubscribe_from_all_hmi_events() {
   event_dispatcher_.remove_observer(*this);
 }

@@ -96,11 +96,12 @@ class EventObserver {
    * @brief Unsubscribes the observer from all events
    *
    */
-  void unsubscribe_from_all_events() DEPRECATED;
+  DEPRECATED void unsubscribe_from_all_events();
+
   /*
- * @brief Unsubscribes the observer from all events
- *
-*/
+   * @brief Unsubscribes the observer from all events
+   *
+   */
   void unsubscribe_from_all_hmi_events();
 
   // Mobile Events

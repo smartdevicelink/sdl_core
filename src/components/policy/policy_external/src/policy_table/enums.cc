@@ -1236,6 +1236,11 @@ bool EnumFromJsonString(const std::string& literal, FunctionID* result) {
     return true;
   }
 
+  if ("OnSystemCapabilityUpdated" == literal) {
+    *result = OnSystemCapabilityUpdatedID;
+    return true;
+  }
+
   if ("EncodedSyncPData" == literal) {
     *result = EncodedSyncPDataID;
     return true;

@@ -901,6 +901,8 @@ bool IsValidEnum(FunctionID val) {
       return true;
     case OnSyncPDataID:
       return true;
+    case OnSystemCapabilityUpdatedID:
+      return true;
     default:
       return false;
   }
@@ -1058,6 +1060,8 @@ const char* EnumToJsonString(FunctionID val) {
       return "OnEncodedSyncPData";
     case OnSyncPDataID:
       return "OnSyncPData";
+    case OnSystemCapabilityUpdatedID:
+      return "OnSystemCapabilityUpdated";
     default:
       return "";
   }
@@ -1416,6 +1420,11 @@ bool EnumFromJsonString(const std::string& literal, FunctionID* result) {
 
   if ("OnAppServiceData" == literal) {
     *result = OnAppServiceDataID;
+    return true;
+  }
+
+  if ("OnSystemCapabilityUpdated" == literal) {
+    *result = OnSystemCapabilityUpdatedID;
     return true;
   }
 

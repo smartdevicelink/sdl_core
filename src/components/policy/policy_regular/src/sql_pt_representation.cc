@@ -1266,15 +1266,27 @@ bool SQLPTRepresentation::SaveAppServiceParameters(
     }
 
     auto app_service_names = it->second.service_names;
-    policy_table::AppServiceNames::const_iterator names_it;
-    for (names_it = app_service_names->begin();
-         names_it != app_service_names->end();
-         ++names_it) {
+
+    if (app_service_names.is_initialized() && app_service_names->empty()) {
+      // App service names is an empty array
+      LOG4CXX_DEBUG(logger_, "App Service Names is Empty Array");
       service_name_query.Bind(0, static_cast<int64_t>(id));
-      service_name_query.Bind(1, *names_it);
+      service_name_query.Bind(1);
       if (!service_name_query.Exec() || !service_name_query.Reset()) {
-        LOG4CXX_WARN(logger_, "Incorrect insert into app service names");
+        LOG4CXX_WARN(logger_, "Incorrect insert into empty app service names");
         return false;
+      }
+    } else {
+      policy_table::AppServiceNames::const_iterator names_it;
+      for (names_it = app_service_names->begin();
+           names_it != app_service_names->end();
+           ++names_it) {
+        service_name_query.Bind(0, static_cast<int64_t>(id));
+        service_name_query.Bind(1, *names_it);
+        if (!service_name_query.Exec() || !service_name_query.Reset()) {
+          LOG4CXX_WARN(logger_, "Incorrect insert into app service names");
+          return false;
+        }
       }
     }
 
@@ -1288,7 +1300,7 @@ bool SQLPTRepresentation::SaveAppServiceParameters(
 
     auto handled_rpcs = it->second.handled_rpcs;
     policy_table::AppServiceHandledRpcs::const_iterator rpc_it;
-    for (rpc_it = handled_rpcs->begin(); rpc_it != handled_rpcs->end();
+    for (rpc_it = handled_rpcs.begin(); rpc_it != handled_rpcs.end();
          ++rpc_it) {
       handled_rpcs_query.Bind(0, static_cast<int64_t>(id));
       handled_rpcs_query.Bind(1, static_cast<int32_t>(rpc_it->function_id));
@@ -1770,15 +1782,17 @@ bool SQLPTRepresentation::GatherAppServiceParameters(
 
     service_name_query.Bind(0, service_type_id);
     while (service_name_query.Next()) {
+      LOG4CXX_DEBUG(logger_, "Loading service name");
       (*app_service_parameters)[service_type].service_names->push_back(
           service_name_query.GetString(0));
+      (*app_service_parameters)[service_type].service_names->mark_initialized();
     }
 
     handled_rpcs_query.Bind(0, service_type_id);
     while (handled_rpcs_query.Next()) {
       policy_table::AppServiceHandledRpc handled_rpc;
       handled_rpc.function_id = handled_rpcs_query.GetInteger(0);
-      (*app_service_parameters)[service_type].handled_rpcs->push_back(
+      (*app_service_parameters)[service_type].handled_rpcs.push_back(
           handled_rpc);
     }
 
