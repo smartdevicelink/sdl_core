@@ -27,6 +27,10 @@ class MockRPCService : public application_manager::rpc_service::RPCService {
                void(protocol_handler::ProtocolHandler* handler));
   MOCK_METHOD1(set_hmi_message_handler,
                void(hmi_message_handler::HMIMessageHandler* handler));
+  MOCK_METHOD3(HandleRpcUsingAppServices,
+               bool(int32_t function_id,
+                    commands::Command::CommandSource source,
+                    bool& rpc_passing));
 };
 }
 }

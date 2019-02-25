@@ -560,21 +560,18 @@ bool RPCServiceImpl::HandleRpcUsingAppServices(
        commands::Command::CommandSource::SOURCE_SDL)) {  // MOBILE COMMANDS
     switch (function_id) {
       case mobile_apis::FunctionID::GetSystemCapabilityID:
-        // TODO Add case after merging systemcapability subscription changes
-        /*case mobile_apis::FunctionID::OnSystemCapabilityUpdatedID:*/
+      case mobile_apis::FunctionID::OnSystemCapabilityUpdatedID:
         return true;
         break;
     }
   } else if ((source == commands::Command::CommandSource::SOURCE_HMI) ||
              (source == commands::Command::CommandSource::
                             SOURCE_SDL_TO_HMI)) {  // HMI COMMANDS
-    // switch (function_id) {
-    // TODO Add case after merging systemcapability subscription changes
-    /*case
-     * hmi_apis::FunctionID::BasicCommunication_OnSystemCapabilityUpdated:*/
-    // return true;
-    // break;
-    //}
+    switch (function_id) {
+      case hmi_apis::FunctionID::BasicCommunication_OnSystemCapabilityUpdated:
+        return true;
+        break;
+    }
   }
 
   // RPCs handled by app services plugin
