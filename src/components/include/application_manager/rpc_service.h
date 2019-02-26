@@ -80,7 +80,7 @@ class RPCService {
  * @ brief TODO
  * @ rpc_passing assign true if rpc_passing can be used for rpc
  */
-  virtual bool HandleRpcUsingAppServices(
+  virtual bool CanHandleRPCUsingAppServices(
       int32_t function_id,
       commands::Command::CommandSource source,
       bool& rpc_passing) = 0;

@@ -28,7 +28,7 @@ class MockRPCService : public application_manager::rpc_service::RPCService {
   MOCK_METHOD1(set_hmi_message_handler,
                void(hmi_message_handler::HMIMessageHandler* handler));
   MOCK_METHOD3(
-      HandleRpcUsingAppServices,
+      CanHandleRPCUsingAppServices,
       bool(int32_t function_id,
            application_manager::commands::Command::CommandSource source,
            bool& rpc_passing));

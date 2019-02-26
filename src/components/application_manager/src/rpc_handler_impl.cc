@@ -73,12 +73,12 @@ void RPCHandlerImpl::ProcessMessageFromMobile(
   }
 
   bool rpc_passing = false;
-  if (app_manager_.GetRPCService().HandleRpcUsingAppServices(
+  if (app_manager_.GetRPCService().CanHandleRPCUsingAppServices(
           message->function_id(),
           commands::Command::SOURCE_MOBILE,
           rpc_passing)) {
     LOG4CXX_DEBUG(logger_,
-                  "Can handle app services request function "
+                  "Allowing unknown parameters for request function "
                       << message->function_id());
     RemoveUnknownParameters = false;
   }
@@ -120,13 +120,13 @@ void RPCHandlerImpl::ProcessMessageFromHMI(
       message->json_message(), converted_result);
 
   bool rpc_passing = false;
-  if (app_manager_.GetRPCService().HandleRpcUsingAppServices(
+  if (app_manager_.GetRPCService().CanHandleRPCUsingAppServices(
           converted_result[jhs::S_PARAMS][jhs::S_FUNCTION_ID].asInt(),
           commands::Command::SOURCE_HMI,
           rpc_passing)) {
     LOG4CXX_DEBUG(
         logger_,
-        "Can handle app services request function "
+        "Allowing unknown parameters for request function "
             << converted_result[jhs::S_PARAMS][jhs::S_FUNCTION_ID].asInt());
     RemoveUnknownParameters = false;
   }

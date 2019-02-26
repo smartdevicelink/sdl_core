@@ -422,12 +422,12 @@ void RPCServiceImpl::SendMessageToMobile(
       new Message(protocol_handler::MessagePriority::kDefault));
 
   bool rpc_passing = false;
-  if (HandleRpcUsingAppServices(
+  if (CanHandleRPCUsingAppServices(
           (*message)[jhs::S_PARAMS][jhs::S_FUNCTION_ID].asInt(),
           commands::Command::CommandSource::SOURCE_SDL,
           rpc_passing)) {
     LOG4CXX_DEBUG(logger_,
-                  "Can handle app services response function "
+                  "Allowing unknown parameters for response function "
                       << (*message)[jhs::S_PARAMS][jhs::S_FUNCTION_ID].asInt());
     RemoveUnknownParameters = false;
   }
@@ -527,12 +527,12 @@ void RPCServiceImpl::SendMessageToHMI(
       "Attached schema to message, result if valid: " << message->isValid());
 
   bool rpc_passing = false;
-  if (HandleRpcUsingAppServices(
+  if (CanHandleRPCUsingAppServices(
           (*message)[jhs::S_PARAMS][jhs::S_FUNCTION_ID].asInt(),
           commands::Command::CommandSource::SOURCE_SDL_TO_HMI,
           rpc_passing)) {
     LOG4CXX_DEBUG(logger_,
-                  "Can handle app services response function "
+                  "Allowing unknown parameters for response function "
                       << (*message)[jhs::S_PARAMS][jhs::S_FUNCTION_ID].asInt());
 
     RemoveUnknownParameters = false;
@@ -548,7 +548,7 @@ void RPCServiceImpl::SendMessageToHMI(
   messages_to_hmi_.PostMessage(impl::MessageToHmi(message_to_send));
 }
 
-bool RPCServiceImpl::HandleRpcUsingAppServices(
+bool RPCServiceImpl::CanHandleRPCUsingAppServices(
     int32_t function_id,
     commands::Command::CommandSource source,
     bool& rpc_passing) {
@@ -571,6 +571,19 @@ bool RPCServiceImpl::HandleRpcUsingAppServices(
       case hmi_apis::FunctionID::BasicCommunication_OnSystemCapabilityUpdated:
         return true;
         break;
+    }
+  }
+
+  // Check if rpc passing can be used for request
+  if ((source == commands::Command::CommandSource::SOURCE_MOBILE) ||
+      (source ==
+       commands::Command::CommandSource::SOURCE_SDL)) {  // MOBILE COMMANDS
+
+    if (app_manager_.GetAppServiceManager().CanUseRPCPassing(function_id)) {
+      LOG4CXX_DEBUG(logger_,
+                    "RPC passing can be used for function " << function_id);
+      rpc_passing = true;
+      return true;
     }
   }
 

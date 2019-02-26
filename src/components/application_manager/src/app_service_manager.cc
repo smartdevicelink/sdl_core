@@ -460,4 +460,22 @@ void AppServiceManager::AppServiceUpdated(
   services[-1] = service;
 }
 
+bool AppServiceManager::CanUseRPCPassing(int32_t function_id) {
+  for (auto it = published_services_.begin(); it != published_services_.end();
+       ++it) {
+    if (it->second.record[strings::service_active].asBool() == false) {
+      continue;
+    }
+    auto handled_rpcs =
+        it->second.record[strings::service_manifest][strings::handled_rpcs];
+    for (size_t i = 0; i < handled_rpcs.length(); i++) {
+      if (handled_rpcs[i].asInt() == function_id) {
+        return true;
+      }
+    }
+  }
+
+  return false;
+}
+
 }  //  namespace application_manager

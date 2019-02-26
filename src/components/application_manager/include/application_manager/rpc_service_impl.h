@@ -121,9 +121,9 @@ class RPCServiceImpl : public RPCService,
                            bool final_message = false) OVERRIDE;
   void SendMessageToHMI(const commands::MessageSharedPtr message) OVERRIDE;
 
-  bool HandleRpcUsingAppServices(int32_t function_id,
-                                 commands::Command::CommandSource source,
-                                 bool& rpc_passing);
+  bool CanHandleRPCUsingAppServices(int32_t function_id,
+                                    commands::Command::CommandSource source,
+                                    bool& rpc_passing);
 
   void set_protocol_handler(
       protocol_handler::ProtocolHandler* handler) OVERRIDE;

@@ -151,6 +151,13 @@ class AppServiceManager {
 
   std::string DefaultServiceByType(std::string service_type);
 
+  /**
+   * @brief TODO
+   * @param functionId RPC function Id
+   * @param correlation_id request correlation id
+   */
+  bool CanUseRPCPassing(int32_t function_id);
+
  private:
   void GetProviderFromService(const AppService& service,
                               ApplicationSharedPtr& app,
