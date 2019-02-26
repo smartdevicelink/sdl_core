@@ -30,28 +30,29 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "app_service_rpc_plugin/commands/hmi/as_perform_app_service_interaction_request.h"
+#include "app_service_rpc_plugin/commands/hmi/as_perform_app_service_interaction_request_to_hmi.h"
 
 namespace app_service_rpc_plugin {
 using namespace application_manager;
 namespace commands {
 
-ASPerformAppServiceInteractionRequest::ASPerformAppServiceInteractionRequest(
-    const application_manager::commands::MessageSharedPtr& message,
-    ApplicationManager& application_manager,
-    app_mngr::rpc_service::RPCService& rpc_service,
-    app_mngr::HMICapabilities& hmi_capabilities,
-    policy::PolicyHandlerInterface& policy_handler)
+ASPerformAppServiceInteractionRequestToHMI::
+    ASPerformAppServiceInteractionRequestToHMI(
+        const application_manager::commands::MessageSharedPtr& message,
+        ApplicationManager& application_manager,
+        app_mngr::rpc_service::RPCService& rpc_service,
+        app_mngr::HMICapabilities& hmi_capabilities,
+        policy::PolicyHandlerInterface& policy_handler)
     : RequestToHMI(message,
                    application_manager,
                    rpc_service,
                    hmi_capabilities,
                    policy_handler) {}
 
-ASPerformAppServiceInteractionRequest::
-    ~ASPerformAppServiceInteractionRequest() {}
+ASPerformAppServiceInteractionRequestToHMI::
+    ~ASPerformAppServiceInteractionRequestToHMI() {}
 
-void ASPerformAppServiceInteractionRequest::Run() {
+void ASPerformAppServiceInteractionRequestToHMI::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
   SendRequest();
 }

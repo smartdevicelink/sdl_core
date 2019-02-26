@@ -30,51 +30,35 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_APP_SERVICE_RPC_PLUGIN_INCLUDE_APP_SERVICE_RPC_PLUGIN_COMMANDS_HMI_AS_PERFORM_APP_SERVICE_INTERACTION_RESPONSE_H_
-#define SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_APP_SERVICE_RPC_PLUGIN_INCLUDE_APP_SERVICE_RPC_PLUGIN_COMMANDS_HMI_AS_PERFORM_APP_SERVICE_INTERACTION_RESPONSE_H_
-
-#include "app_service_rpc_plugin/app_service_rpc_plugin.h"
-#include "application_manager/commands/response_from_hmi.h"
+#include "app_service_rpc_plugin/commands/hmi/as_perform_app_service_interaction_response_from_hmi.h"
 
 namespace app_service_rpc_plugin {
-namespace app_mngr = application_manager;
-
+using namespace application_manager;
 namespace commands {
 
-/**
- * @brief ASPerformAppServiceInteractionResponse command class
- **/
-class ASPerformAppServiceInteractionResponse
-    : public app_mngr::commands::ResponseFromHMI {
- public:
-  /**
-   * @brief ASPerformAppServiceInteractionResponse class constructor
-   *
-   * @param message Incoming SmartObject message
-   **/
-  ASPerformAppServiceInteractionResponse(
-      const app_mngr::commands::MessageSharedPtr& message,
-      app_mngr::ApplicationManager& application_manager,
-      app_mngr::rpc_service::RPCService& rpc_service,
-      app_mngr::HMICapabilities& hmi_capabilities,
-      policy::PolicyHandlerInterface& policy_handle);
+ASPerformAppServiceInteractionResponseFromHMI::
+    ASPerformAppServiceInteractionResponseFromHMI(
+        const application_manager::commands::MessageSharedPtr& message,
+        ApplicationManager& application_manager,
+        app_mngr::rpc_service::RPCService& rpc_service,
+        app_mngr::HMICapabilities& hmi_capabilities,
+        policy::PolicyHandlerInterface& policy_handler)
+    : ResponseFromHMI(message,
+                      application_manager,
+                      rpc_service,
+                      hmi_capabilities,
+                      policy_handler) {}
 
-  /**
-   * @brief ASPerformAppServiceInteractionResponse class destructor
-   **/
-  virtual ~ASPerformAppServiceInteractionResponse();
+ASPerformAppServiceInteractionResponseFromHMI::
+    ~ASPerformAppServiceInteractionResponseFromHMI() {}
 
-  /**
-   * @brief Execute command
-   **/
-  virtual void Run();
-
- private:
-  DISALLOW_COPY_AND_ASSIGN(ASPerformAppServiceInteractionResponse);
-};
+void ASPerformAppServiceInteractionResponseFromHMI::Run() {
+  LOG4CXX_AUTO_TRACE(logger_);
+  event_engine::Event event(
+      hmi_apis::FunctionID::AppService_PerformAppServiceInteraction);
+  event.set_smart_object(*message_);
+  event.raise(application_manager_.event_dispatcher());
+}
 
 }  // namespace commands
-
 }  // namespace app_service_rpc_plugin
-
-#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_APP_SERVICE_RPC_PLUGIN_INCLUDE_APP_SERVICE_RPC_PLUGIN_COMMANDS_HMI_AS_PERFORM_APP_SERVICE_INTERACTION_RESPONSE_H_

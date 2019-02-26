@@ -30,8 +30,8 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_APP_SERVICE_RPC_PLUGIN_INCLUDE_APP_SERVICE_RPC_PLUGIN_COMMANDS_HMI_AS_PERFORM_APP_SERVICE_INTERACTION_REQUEST_H_
-#define SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_APP_SERVICE_RPC_PLUGIN_INCLUDE_APP_SERVICE_RPC_PLUGIN_COMMANDS_HMI_AS_PERFORM_APP_SERVICE_INTERACTION_REQUEST_H_
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_APP_SERVICE_RPC_PLUGIN_INCLUDE_APP_SERVICE_RPC_PLUGIN_COMMANDS_HMI_AS_PERFORM_APP_SERVICE_INTERACTION_REQUEST_TO_HMI_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_APP_SERVICE_RPC_PLUGIN_INCLUDE_APP_SERVICE_RPC_PLUGIN_COMMANDS_HMI_AS_PERFORM_APP_SERVICE_INTERACTION_REQUEST_TO_HMI_H_
 
 #include "app_service_rpc_plugin/app_service_rpc_plugin.h"
 #include "application_manager/commands/request_to_hmi.h"
@@ -42,17 +42,17 @@ namespace app_mngr = application_manager;
 namespace commands {
 
 /**
- * @brief ASPerformAppServiceInteractionRequest command class
+ * @brief ASPerformAppServiceInteractionRequestToHMI command class
  **/
-class ASPerformAppServiceInteractionRequest
+class ASPerformAppServiceInteractionRequestToHMI
     : public app_mngr::commands::RequestToHMI {
  public:
   /**
-   * @brief ASPerformAppServiceInteractionRequest class constructor
+   * @brief ASPerformAppServiceInteractionRequestToHMI class constructor
    *
    * @param message Incoming SmartObject message
    **/
-  ASPerformAppServiceInteractionRequest(
+  ASPerformAppServiceInteractionRequestToHMI(
       const app_mngr::commands::MessageSharedPtr& message,
       app_mngr::ApplicationManager& application_manager,
       app_mngr::rpc_service::RPCService& rpc_service,
@@ -60,9 +60,9 @@ class ASPerformAppServiceInteractionRequest
       policy::PolicyHandlerInterface& policy_handle);
 
   /**
-   * @brief ASPerformAppServiceInteractionRequest class destructor
+   * @brief ASPerformAppServiceInteractionRequestToHMI class destructor
    **/
-  virtual ~ASPerformAppServiceInteractionRequest();
+  virtual ~ASPerformAppServiceInteractionRequestToHMI();
 
   /**
    * @brief Execute command
@@ -70,11 +70,11 @@ class ASPerformAppServiceInteractionRequest
   virtual void Run();
 
  private:
-  DISALLOW_COPY_AND_ASSIGN(ASPerformAppServiceInteractionRequest);
+  DISALLOW_COPY_AND_ASSIGN(ASPerformAppServiceInteractionRequestToHMI);
 };
 
 }  // namespace commands
 
 }  // namespace app_service_rpc_plugin
 
-#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_APP_SERVICE_RPC_PLUGIN_INCLUDE_APP_SERVICE_RPC_PLUGIN_COMMANDS_HMI_AS_PERFORM_APP_SERVICE_INTERACTION_REQUEST_H_
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_APP_SERVICE_RPC_PLUGIN_INCLUDE_APP_SERVICE_RPC_PLUGIN_COMMANDS_HMI_AS_PERFORM_APP_SERVICE_INTERACTION_REQUEST_TO_HMI_H_
