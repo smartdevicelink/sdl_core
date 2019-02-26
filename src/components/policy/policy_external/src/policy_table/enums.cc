@@ -1126,6 +1126,11 @@ bool EnumFromJsonString(const std::string& literal, FunctionID* result) {
     return true;
   }
 
+    if ("GetCloudAppProperties" == literal) {
+    *result = GetCloudAppPropertiesID;
+    return true;
+  }
+
   if ("OnHMIStatus" == literal) {
     *result = OnHMIStatusID;
     return true;

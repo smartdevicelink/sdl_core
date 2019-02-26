@@ -1915,9 +1915,9 @@ void PolicyHandler::OnSetCloudAppProperties(
 
     application_manager_.RefreshCloudAppInformation();
   }
-  if (msg_params.keyExists(strings::cloud_app_auth_token)) {
+  if (msg_params.keyExists(strings::auth_token)) {
     policy_manager_->SetAppAuthToken(
-        policy_app_id, msg_params[strings::cloud_app_auth_token].asString());
+        policy_app_id, msg_params[strings::auth_token].asString());
   }
   if (msg_params.keyExists(strings::cloud_transport_type)) {
     policy_manager_->SetAppCloudTransportType(
