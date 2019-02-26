@@ -50,15 +50,7 @@ OnAppServiceDataNotificationFromMobile::OnAppServiceDataNotificationFromMobile(
                                         application_manager,
                                         rpc_service,
                                         hmi_capabilities,
-                                        policy_handler)
-    , plugin_(NULL) {
-  auto plugin = application_manager.GetPluginManager().FindPluginToProcess(
-      mobile_apis::FunctionID::OnAppServiceDataID,
-      app_mngr::commands::Command::CommandSource::SOURCE_MOBILE);
-  if (plugin) {
-    plugin_ = dynamic_cast<AppServiceRpcPlugin*>(&(*plugin));
-  }
-}
+                                        policy_handler) {}
 
 OnAppServiceDataNotificationFromMobile::
     ~OnAppServiceDataNotificationFromMobile() {}
@@ -67,6 +59,25 @@ void OnAppServiceDataNotificationFromMobile::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
   LOG4CXX_DEBUG(logger_, "Received an OnAppServiceData");
   MessageHelper::PrintSmartObject(*message_);
+
+  std::string service_type =
+      (*message_)[strings::msg_params][strings::app_service_manifest]
+                 [strings::service_type].asString();
+
+  ApplicationSharedPtr app = application_manager_.application(connection_key());
+
+  bool result = policy_handler_.CheckAppServiceParameters(
+      app->policy_app_id(), std::string(), service_type, NULL);
+
+  if (!result) {
+    LOG4CXX_DEBUG(logger_,
+                  "Incorrect service type received in "
+                  "OnAppServiceDataNotificationFromMobile");
+    return;
+  }
+
+  SendNotificationToConsumers(
+      hmi_apis::FunctionID::eType::AppService_OnAppServiceData);
 }
 
 }  // namespace commands

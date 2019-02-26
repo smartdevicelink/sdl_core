@@ -102,7 +102,7 @@ TEST_F(SendHapticDataRequestTest, Run_SUCCESS) {
 
   EXPECT_CALL(mock_rpc_service_,
               ManageHMICommand(
-                  HMIResultCodeIs(hmi_apis::FunctionID::UI_SendHapticData)))
+                  HMIResultCodeIs(hmi_apis::FunctionID::UI_SendHapticData), _))
       .WillOnce(Return(true));
 
   SendHapticDataRequestPtr command(CreateCommand<SendHapticDataRequest>(msg_));

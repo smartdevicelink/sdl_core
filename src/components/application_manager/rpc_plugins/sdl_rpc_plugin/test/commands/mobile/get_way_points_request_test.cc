@@ -205,7 +205,7 @@ TEST_F(GetWayPointsRequestTest, OnEvent_DefaultCase) {
 
   EXPECT_CALL(app_mngr_, updateRequestTimeout(_, _, _)).Times(0);
 
-  EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_)).Times(0);
+  EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_, _)).Times(0);
 
   CallOnEvent caller(*command_sptr_, event);
   caller();

@@ -47,15 +47,7 @@ ASPublishAppServiceRequest::ASPublishAppServiceRequest(
                      application_manager,
                      rpc_service,
                      hmi_capabilities,
-                     policy_handler)
-    , plugin_(NULL) {
-  auto plugin = application_manager.GetPluginManager().FindPluginToProcess(
-      hmi_apis::FunctionID::AppService_PublishAppService,
-      app_mngr::commands::Command::CommandSource::SOURCE_HMI);
-  if (plugin) {
-    plugin_ = dynamic_cast<AppServiceRpcPlugin*>(&(*plugin));
-  }
-}
+                     policy_handler) {}
 
 ASPublishAppServiceRequest::~ASPublishAppServiceRequest() {}
 
@@ -78,6 +70,7 @@ bool ASPublishAppServiceRequest::ValidateManifest(
 
 void ASPublishAppServiceRequest::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
+  LOG4CXX_DEBUG(logger_, "Received a PublishAppService request from HMI");
   smart_objects::SmartObject response_params =
       smart_objects::SmartObject(smart_objects::SmartType_Map);
   smart_objects::SmartObject manifest =

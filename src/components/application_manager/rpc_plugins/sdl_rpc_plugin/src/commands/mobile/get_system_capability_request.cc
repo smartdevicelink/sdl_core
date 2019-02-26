@@ -31,6 +31,9 @@
  */
 
 #include "sdl_rpc_plugin/commands/mobile/get_system_capability_request.h"
+#include "sdl_rpc_plugin/extensions/system_capability_app_extension.h"
+#include "application_manager/message_helper.h"
+#include <set>
 
 namespace sdl_rpc_plugin {
 using namespace application_manager;
@@ -128,10 +131,34 @@ void GetSystemCapabilityRequest::Run() {
         return;
       }
       break;
+    case mobile_apis::SystemCapabilityType::APP_SERVICES: {
+      auto all_services =
+          application_manager_.GetAppServiceManager().GetAllServices();
+      response_params
+          [strings::system_capability][strings::app_services_capabilities] =
+              MessageHelper::CreateAppServiceCapabilities(all_services);
+      break;
+    }
     default:  // Return unsupported resource
       SendResponse(false, mobile_apis::Result::UNSUPPORTED_RESOURCE);
       return;
   }
+
+  if ((*message_)[app_mngr::strings::msg_params].keyExists(
+          strings::subscribe)) {
+    auto& ext = SystemCapabilityAppExtension::ExtractExtension(*app);
+    if ((*message_)[app_mngr::strings::msg_params][strings::subscribe]
+            .asBool() == true) {
+      LOG4CXX_DEBUG(logger_,
+                    "Subscribe to system capability: " << response_type);
+      ext.SubscribeTo(response_type);
+    } else {
+      LOG4CXX_DEBUG(logger_,
+                    "Unsubscribe from system capability: " << response_type);
+      ext.UnsubscribeFrom(response_type);
+    }
+  }
+
   SendResponse(true, mobile_apis::Result::SUCCESS, NULL, &response_params);
 }
 

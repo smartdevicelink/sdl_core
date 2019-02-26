@@ -81,7 +81,7 @@ TEST_F(RequestFromHMITest, SendResponse_SUCCESS) {
 
   const bool success = false;
   const uint32_t correlation_id = 1u;
-  EXPECT_CALL(mock_rpc_service_, ManageHMICommand(NotNull()));
+  EXPECT_CALL(mock_rpc_service_, ManageHMICommand(NotNull(), _));
 
   command->SendResponse(success,
                         correlation_id,

@@ -992,7 +992,7 @@ class StateControllerImplTest : public ::testing::Test {
         .WillByDefault(Return(bc_activate_app_request));
     ON_CALL(app_manager_mock_, GetRPCService())
         .WillByDefault(ReturnRef(mock_rpc_service_));
-    ON_CALL(mock_rpc_service_, ManageHMICommand(bc_activate_app_request))
+    ON_CALL(mock_rpc_service_, ManageHMICommand(bc_activate_app_request, _))
         .WillByDefault(Return(true));
   }
 
@@ -1941,7 +1941,7 @@ TEST_F(StateControllerImplTest, DISABLED_ActivateAppSuccessReceivedFromHMI) {
     SetBCActivateAppRequestToHMI(hmi_level, corr_id);
     ON_CALL(app_manager_mock_, GetRPCService())
         .WillByDefault(ReturnRef(mock_rpc_service_));
-    ON_CALL(mock_rpc_service_, ManageHMICommand(bc_activate_app_request))
+    ON_CALL(mock_rpc_service_, ManageHMICommand(bc_activate_app_request, _))
         .WillByDefault(Return(true));
 
     EXPECT_CALL(app_manager_mock_, application_id(corr_id))

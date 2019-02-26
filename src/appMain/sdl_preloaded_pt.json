@@ -180,6 +180,12 @@
                         "LIMITED",
                         "NONE"]
                     },
+                    "OnSystemCapabilityUpdated": {
+                        "hmi_levels": ["BACKGROUND",
+                        "FULL",
+                        "LIMITED",
+                        "NONE"]
+                    },
                     "PerformAudioPassThru": {
                         "hmi_levels": ["FULL",
                         "LIMITED"]
@@ -577,10 +583,20 @@
             "AppService":{
                 "rpcs":{
                     "PublishAppService":{
-                        "hmi_levels":["BACKGROUND",
+                        "hmi_levels": [
+                            "BACKGROUND",
                             "FULL",
                             "LIMITED",
-                            "NONE"]
+                            "NONE"
+                        ]
+                    },
+                    "PerformAppServiceInteraction": {
+                        "hmi_levels": [
+                            "BACKGROUND",
+                            "FULL",
+                            "LIMITED",
+                            "NONE"
+                        ]
                     }
                 }
             },

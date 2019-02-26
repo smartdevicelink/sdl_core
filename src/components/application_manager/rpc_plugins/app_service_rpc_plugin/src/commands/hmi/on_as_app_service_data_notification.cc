@@ -31,7 +31,6 @@
  */
 
 #include "app_service_rpc_plugin/commands/hmi/on_as_app_service_data_notification.h"
-#include "application_manager/message_helper.h"
 
 namespace app_service_rpc_plugin {
 using namespace application_manager;
@@ -47,22 +46,14 @@ OnASAppServiceDataNotification::OnASAppServiceDataNotification(
                         application_manager,
                         rpc_service,
                         hmi_capabilities,
-                        policy_handler)
-    , plugin_(NULL) {
-  auto plugin = application_manager.GetPluginManager().FindPluginToProcess(
-      hmi_apis::FunctionID::AppService_OnAppServiceData,
-      app_mngr::commands::Command::CommandSource::SOURCE_HMI);
-  if (plugin) {
-    plugin_ = dynamic_cast<AppServiceRpcPlugin*>(&(*plugin));
-  }
-}
+                        policy_handler) {}
 
 OnASAppServiceDataNotification::~OnASAppServiceDataNotification() {}
 
 void OnASAppServiceDataNotification::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
-  LOG4CXX_DEBUG(logger_, "Received an OnAppServiceData from HMI");
-  MessageHelper::PrintSmartObject(*message_);
+  LOG4CXX_DEBUG(logger_, "Sending AS data to HMI");
+  SendNotification();
 }
 
 }  // namespace commands

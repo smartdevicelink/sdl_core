@@ -675,6 +675,21 @@ bool SQLPTExtRepresentation::SaveApplicationPoliciesSection(
     return false;
   }
 
+  if (!query_delete.Exec(sql_pt::kDeleteAppServiceHandledRpcs)) {
+    LOG4CXX_WARN(logger_, "Incorrect delete from handled rpcs.");
+    return false;
+  }
+
+  if (!query_delete.Exec(sql_pt::kDeleteAppServiceNames)) {
+    LOG4CXX_WARN(logger_, "Incorrect delete from service names.");
+    return false;
+  }
+
+  if (!query_delete.Exec(sql_pt::kDeleteAppServiceTypes)) {
+    LOG4CXX_WARN(logger_, "Incorrect delete from handled service types.");
+    return false;
+  }
+
   // First, all predefined apps (e.g. default, pre_DataConsent) should be saved,
   // otherwise another app with the predefined permissions can get incorrect
   // permissions
@@ -727,6 +742,10 @@ bool SQLPTExtRepresentation::SaveSpecificAppPolicy(
       return false;
     }
     if (!SaveRequestSubType(app.first, *app.second.RequestSubType)) {
+      return false;
+    }
+    if (!SaveAppServiceParameters(app.first,
+                                  *app.second.app_service_parameters)) {
       return false;
     }
     // Stop saving other params, since predefined permissions already set
@@ -802,6 +821,11 @@ bool SQLPTExtRepresentation::SaveSpecificAppPolicy(
   }
 
   if (!SaveRequestSubType(app.first, *app.second.RequestSubType)) {
+    return false;
+  }
+
+  if (!SaveAppServiceParameters(app.first,
+                                *app.second.app_service_parameters)) {
     return false;
   }
 
@@ -939,6 +963,10 @@ bool SQLPTExtRepresentation::GatherApplicationPoliciesSection(
       return false;
     }
     if (!GatherRequestSubType(gather_app_id, &*params.RequestSubType)) {
+      return false;
+    }
+    if (!GatherAppServiceParameters(gather_app_id,
+                                    &*params.app_service_parameters)) {
       return false;
     }
     GatherPreconsentedGroup(gather_app_id, &*params.preconsented_groups);

@@ -53,6 +53,11 @@ class CommandNotificationFromMobileImpl : public CommandImpl {
   virtual bool CleanUp();
   virtual void Run();
   void SendNotification();
+  void SendNotificationToMobile();
+  void SendNotificationToHMI(
+      const hmi_apis::FunctionID::eType& hmi_function_id);
+  void SendNotificationToConsumers(
+      const hmi_apis::FunctionID::eType& hmi_function_id);
 
  private:
   DISALLOW_COPY_AND_ASSIGN(CommandNotificationFromMobileImpl);

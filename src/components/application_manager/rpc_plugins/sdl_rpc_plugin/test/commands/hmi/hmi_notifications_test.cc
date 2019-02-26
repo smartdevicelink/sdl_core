@@ -945,7 +945,7 @@ TEST_F(HMICommandsNotificationsTest,
 
   EXPECT_CALL(app_mngr_, GetNextHMICorrelationID())
       .WillOnce(Return(kCorrelationId_));
-  EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_))
+  EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_, _))
       .WillOnce(GetMessage(temp_message));
 
   command->Run();
@@ -973,7 +973,7 @@ TEST_F(HMICommandsNotificationsTest,
   EXPECT_CALL(app_mngr_, SetUnregisterAllApplicationsReason(_)).Times(0);
   EXPECT_CALL(app_mngr_, HeadUnitReset(_)).Times(0);
   EXPECT_CALL(app_mngr_, GetNextHMICorrelationID()).Times(0);
-  EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_)).Times(0);
+  EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_, _)).Times(0);
   command->Run();
 }
 

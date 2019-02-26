@@ -170,7 +170,7 @@ TEST_F(ResetGlobalPropertiesRequestTest, Run_InvalidVrHelp_UNSUCCESS) {
   EXPECT_CALL(mock_message_helper_, CreateAppVrHelp(_))
       .WillOnce(Return(vr_help));
 
-  EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_)).Times(0);
+  EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_, _)).Times(0);
 
   command_->Run();
 }
@@ -238,12 +238,13 @@ TEST_F(ResetGlobalPropertiesRequestTest, Run_SUCCESS) {
       .WillOnce(Return(so_help_prompt.get()));
 
   EXPECT_CALL(mock_rpc_service_,
-              ManageHMICommand(HMIResultCodeIs(
-                  hmi_apis::FunctionID::UI_SetGlobalProperties)))
-      .WillOnce(Return(true));
-  EXPECT_CALL(mock_rpc_service_,
-              ManageHMICommand(HMIResultCodeIs(
-                  hmi_apis::FunctionID::TTS_SetGlobalProperties)))
+              ManageHMICommand(
+                  HMIResultCodeIs(hmi_apis::FunctionID::UI_SetGlobalProperties),
+                  _)).WillOnce(Return(true));
+  EXPECT_CALL(
+      mock_rpc_service_,
+      ManageHMICommand(
+          HMIResultCodeIs(hmi_apis::FunctionID::TTS_SetGlobalProperties), _))
       .WillOnce(Return(true));
 
   command_->Run();
@@ -275,9 +276,9 @@ TEST_F(ResetGlobalPropertiesRequestTest,
   EXPECT_CALL(mock_message_helper_, CreateAppVrHelp(_))
       .WillOnce(Return(vr_help));
   EXPECT_CALL(mock_rpc_service_,
-              ManageHMICommand(HMIResultCodeIs(
-                  hmi_apis::FunctionID::UI_SetGlobalProperties)))
-      .WillOnce(Return(true));
+              ManageHMICommand(
+                  HMIResultCodeIs(hmi_apis::FunctionID::UI_SetGlobalProperties),
+                  _)).WillOnce(Return(true));
 
   command_->Run();
 
@@ -321,12 +322,13 @@ TEST_F(ResetGlobalPropertiesRequestTest,
   (*ui_msg)[am::strings::params][am::hmi_response::code] =
       hmi_apis::Common_Result::eType::SUCCESS;
   EXPECT_CALL(mock_rpc_service_,
-              ManageHMICommand(HMIResultCodeIs(
-                  hmi_apis::FunctionID::UI_SetGlobalProperties)))
-      .WillOnce(Return(true));
-  EXPECT_CALL(mock_rpc_service_,
-              ManageHMICommand(HMIResultCodeIs(
-                  hmi_apis::FunctionID::TTS_SetGlobalProperties)))
+              ManageHMICommand(
+                  HMIResultCodeIs(hmi_apis::FunctionID::UI_SetGlobalProperties),
+                  _)).WillOnce(Return(true));
+  EXPECT_CALL(
+      mock_rpc_service_,
+      ManageHMICommand(
+          HMIResultCodeIs(hmi_apis::FunctionID::TTS_SetGlobalProperties), _))
       .WillOnce(Return(true));
   Event ui_event(hmi_apis::FunctionID::UI_SetGlobalProperties);
   ui_event.set_smart_object(*ui_msg);
@@ -363,9 +365,9 @@ TEST_F(ResetGlobalPropertiesRequestTest, OnEvent_InvalidApp_NoHashUpdate) {
 
   EXPECT_CALL(*mock_app_, set_reset_global_properties_active(true));
   EXPECT_CALL(mock_rpc_service_,
-              ManageHMICommand(HMIResultCodeIs(
-                  hmi_apis::FunctionID::UI_SetGlobalProperties)))
-      .WillOnce(Return(true));
+              ManageHMICommand(
+                  HMIResultCodeIs(hmi_apis::FunctionID::UI_SetGlobalProperties),
+                  _)).WillOnce(Return(true));
   smart_objects::SmartObjectSPtr vr_help =
       std::make_shared<smart_objects::SmartObject>(
           smart_objects::SmartType_Map);
@@ -413,12 +415,13 @@ TEST_F(ResetGlobalPropertiesRequestTest,
   EXPECT_CALL(*mock_app_, set_reset_global_properties_active(true));
 
   EXPECT_CALL(mock_rpc_service_,
-              ManageHMICommand(HMIResultCodeIs(
-                  hmi_apis::FunctionID::UI_SetGlobalProperties)))
-      .WillOnce(Return(true));
-  EXPECT_CALL(mock_rpc_service_,
-              ManageHMICommand(HMIResultCodeIs(
-                  hmi_apis::FunctionID::TTS_SetGlobalProperties)))
+              ManageHMICommand(
+                  HMIResultCodeIs(hmi_apis::FunctionID::UI_SetGlobalProperties),
+                  _)).WillOnce(Return(true));
+  EXPECT_CALL(
+      mock_rpc_service_,
+      ManageHMICommand(
+          HMIResultCodeIs(hmi_apis::FunctionID::TTS_SetGlobalProperties), _))
       .WillOnce(Return(true));
 
   ResetGlobalPropertiesRequestPtr command =
@@ -478,12 +481,13 @@ TEST_F(ResetGlobalPropertiesRequestTest,
   EXPECT_CALL(*mock_app_, set_reset_global_properties_active(true));
 
   EXPECT_CALL(mock_rpc_service_,
-              ManageHMICommand(HMIResultCodeIs(
-                  hmi_apis::FunctionID::UI_SetGlobalProperties)))
-      .WillOnce(Return(true));
-  EXPECT_CALL(mock_rpc_service_,
-              ManageHMICommand(HMIResultCodeIs(
-                  hmi_apis::FunctionID::TTS_SetGlobalProperties)))
+              ManageHMICommand(
+                  HMIResultCodeIs(hmi_apis::FunctionID::UI_SetGlobalProperties),
+                  _)).WillOnce(Return(true));
+  EXPECT_CALL(
+      mock_rpc_service_,
+      ManageHMICommand(
+          HMIResultCodeIs(hmi_apis::FunctionID::TTS_SetGlobalProperties), _))
       .WillOnce(Return(true));
 
   command_->Run();
@@ -542,12 +546,13 @@ TEST_F(ResetGlobalPropertiesRequestTest,
   EXPECT_CALL(*mock_app_, set_reset_global_properties_active(true));
 
   EXPECT_CALL(mock_rpc_service_,
-              ManageHMICommand(HMIResultCodeIs(
-                  hmi_apis::FunctionID::UI_SetGlobalProperties)))
-      .WillOnce(Return(true));
-  EXPECT_CALL(mock_rpc_service_,
-              ManageHMICommand(HMIResultCodeIs(
-                  hmi_apis::FunctionID::TTS_SetGlobalProperties)))
+              ManageHMICommand(
+                  HMIResultCodeIs(hmi_apis::FunctionID::UI_SetGlobalProperties),
+                  _)).WillOnce(Return(true));
+  EXPECT_CALL(
+      mock_rpc_service_,
+      ManageHMICommand(
+          HMIResultCodeIs(hmi_apis::FunctionID::TTS_SetGlobalProperties), _))
       .WillOnce(Return(true));
 
   command_->Run();

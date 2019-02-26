@@ -162,6 +162,7 @@ class MockApplicationManager : public application_manager::ApplicationManager {
   MOCK_CONST_METHOD0(is_stopping, bool());
   MOCK_CONST_METHOD0(is_audio_pass_thru_active, bool());
   MOCK_METHOD0(GetNextHMICorrelationID, uint32_t());
+  MOCK_METHOD0(GetNextMobileCorrelationID, uint32_t());
   MOCK_METHOD0(GenerateNewHMIAppID, uint32_t());
   MOCK_METHOD1(EndNaviServices, void(uint32_t app_id));
   MOCK_METHOD1(BeginAudioPassThru, bool(uint32_t app_id));

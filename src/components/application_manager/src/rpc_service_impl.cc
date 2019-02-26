@@ -154,7 +154,19 @@ bool RPCServiceImpl::ManageMobileCommand(
     return true;
   }
 
-  if (message_type == mobile_apis::messageType::request) {
+  if (message_type == mobile_apis::messageType::request &&
+      source == commands::Command::CommandSource::SOURCE_SDL) {
+    if (command->Init()) {
+      command->Run();
+      command->CleanUp();
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  if (message_type == mobile_apis::messageType::request &&
+      source == commands::Command::CommandSource::SOURCE_MOBILE) {
     // commands will be launched from requesr_ctrl
     mobile_apis::HMILevel::eType app_hmi_level =
         mobile_apis::HMILevel::INVALID_ENUM;
@@ -241,8 +253,8 @@ bool RPCServiceImpl::ManageMobileCommand(
   return false;
 }
 
-bool RPCServiceImpl::ManageHMICommand(
-    const commands::MessageSharedPtr message) {
+bool RPCServiceImpl::ManageHMICommand(const commands::MessageSharedPtr message,
+                                      commands::Command::CommandSource source) {
   LOG4CXX_AUTO_TRACE(logger_);
 
   if (!message) {
@@ -258,15 +270,15 @@ bool RPCServiceImpl::ManageHMICommand(
   MessageHelper::PrintSmartObject(*message);
   const int32_t function_id =
       (*(message.get()))[strings::params][strings::function_id].asInt();
-  auto plugin = app_manager_.GetPluginManager().FindPluginToProcess(
-      function_id, commands::Command::SOURCE_HMI);
+  auto plugin =
+      app_manager_.GetPluginManager().FindPluginToProcess(function_id, source);
   if (!plugin) {
     LOG4CXX_WARN(logger_, "Filed to find plugin : " << plugin.error());
     return false;
   }
 
   application_manager::CommandFactory& factory = (*plugin).GetCommandFactory();
-  auto command = factory.CreateCommand(message, commands::Command::SOURCE_HMI);
+  auto command = factory.CreateCommand(message, source);
 
   if (!command) {
     LOG4CXX_WARN(logger_, "Failed to create command from smart object");

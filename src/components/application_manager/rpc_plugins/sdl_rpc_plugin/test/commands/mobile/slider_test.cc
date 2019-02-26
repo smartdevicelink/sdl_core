@@ -268,7 +268,7 @@ TEST_F(SliderRequestTest, Run_SUCCESS) {
 
   EXPECT_CALL(
       mock_rpc_service_,
-      ManageHMICommand(HMIResultCodeIs(hmi_apis::FunctionID::UI_Slider)));
+      ManageHMICommand(HMIResultCodeIs(hmi_apis::FunctionID::UI_Slider), _));
 
   CommandPtr command(CreateCommand<SliderRequest>(msg_));
   command->Run();

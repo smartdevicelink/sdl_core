@@ -123,8 +123,10 @@ TEST_F(UnsubscribeWayPointsRequestTest, Run_AppSubscribedForWayPoints_SUCCESS) {
       .WillOnce(Return(true));
 
   EXPECT_CALL(mock_rpc_service_,
-              ManageHMICommand(HMIResultCodeIs(
-                  hmi_apis::FunctionID::Navigation_UnsubscribeWayPoints)));
+              ManageHMICommand(
+                  HMIResultCodeIs(
+                      hmi_apis::FunctionID::Navigation_UnsubscribeWayPoints),
+                  _));
 
   command_->Run();
 }

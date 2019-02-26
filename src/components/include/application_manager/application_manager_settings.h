@@ -110,6 +110,8 @@ class ApplicationManagerSettings : public RequestControlerSettings,
   virtual const uint32_t& app_icons_amount_to_remove() const = 0;
   virtual const uint32_t& list_files_response_size() const = 0;
   virtual const std::string& plugins_folder() const = 0;
+  virtual const std::vector<std::string>& embedded_services() const = 0;
+  virtual const std::string hmi_origin_id() const = 0;
 };
 
 }  // namespace application_manager

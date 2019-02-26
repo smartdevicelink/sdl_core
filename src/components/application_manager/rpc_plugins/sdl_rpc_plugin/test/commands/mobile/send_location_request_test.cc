@@ -137,15 +137,16 @@ class SendLocationRequestTest
   void FinishSetup() {
     EXPECT_CALL(*mock_app_, hmi_app_id()).WillOnce(Return(kAppID));
 
-    EXPECT_CALL(mock_rpc_service_,
-                ManageHMICommand(HMIResultCodeIs(
-                    hmi_apis::FunctionID::Navigation_SendLocation)));
+    EXPECT_CALL(
+        mock_rpc_service_,
+        ManageHMICommand(
+            HMIResultCodeIs(hmi_apis::FunctionID::Navigation_SendLocation), _));
   }
 
   void FinishSetupCancelled(mobile_apis::Result::eType result) {
     EXPECT_CALL(*mock_app_, hmi_app_id()).Times(0);
 
-    EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_)).Times(0);
+    EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_, _)).Times(0);
     EXPECT_CALL(mock_rpc_service_,
                 ManageMobileCommand(MobileResultCodeIs(result), _));
   }

@@ -179,7 +179,7 @@ TEST_F(SetMediaClockRequestTest, Run_UpdateCountUp_SUCCESS) {
           GetInterfaceState(am::HmiInterfaces::HMI_INTERFACE_UI))
       .WillByDefault(Return(am::HmiInterfaces::STATE_AVAILABLE));
 
-  EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_)).WillOnce(Return(true));
+  EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_, _)).WillOnce(Return(true));
 
   command->Run();
 }
@@ -217,7 +217,7 @@ TEST_F(SetMediaClockRequestTest, Run_UpdateCountDown_SUCCESS) {
           GetInterfaceState(am::HmiInterfaces::HMI_INTERFACE_UI))
       .WillByDefault(Return(am::HmiInterfaces::STATE_AVAILABLE));
 
-  EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_)).WillOnce(Return(true));
+  EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_, _)).WillOnce(Return(true));
 
   command->Run();
 }

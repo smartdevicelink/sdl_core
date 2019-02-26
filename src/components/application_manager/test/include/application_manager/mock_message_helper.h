@@ -308,6 +308,9 @@ class MockMessageHelper {
                void(mobile_apis::ButtonName::eType button,
                     ApplicationSharedPtr application,
                     ApplicationManager& app_mngr));
+  MOCK_METHOD1(CreateAppServiceCapabilities,
+               smart_objects::SmartObject(
+                   std::vector<smart_objects::SmartObject>& all_services));
 
   static MockMessageHelper* message_helper_mock();
 };

@@ -437,6 +437,16 @@ enum FunctionID {
   PublishAppServiceID = 52,
 
   /**
+   * @brief GetAppServiceDataID.
+   */
+  GetAppServiceDataID = 53,
+
+  /**
+   * @brief PerformAppServiceInteractionID.
+   */
+  PerformAppServiceInteractionID = 55,
+
+  /**
    * @brief OnHMIStatusID.
    */
   OnHMIStatusID = 32768,
@@ -530,6 +540,11 @@ enum FunctionID {
    * @brief OnAppServiceDataID.
    */
   OnAppServiceDataID = 32786,
+
+  /**
+   * @brief OnSystemCapabilityUpdatedID
+   */
+  OnSystemCapabilityUpdatedID = 32787,
 
   /**
    * @brief EncodedSyncPDataID.
