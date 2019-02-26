@@ -418,8 +418,9 @@ void ProtocolHandlerImpl::SendStartSessionAck(
         sync_primitives::AutoLock lock(auth_token_map_lock_);
         auto it = auth_token_map_.find(policy_app_id);
         if (it != auth_token_map_.end()) {
-          char auth_token[256];
-          strncpy(auth_token, it->second.c_str(), 255);
+          char auth_token[65536];
+          strncpy(auth_token, it->second.c_str(), 65535);
+          auth_token[sizeof(auth_token) - 1] = '\0';
           bson_object_put_string(&params, strings::auth_token, auth_token);
         }
       }
