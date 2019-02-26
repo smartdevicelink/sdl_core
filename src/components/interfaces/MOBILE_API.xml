@@ -3968,7 +3968,7 @@
     <struct name="NavigationServiceData">
         <description> This data is related to what a navigation service would provide.</description>
 
-        <param name="timestamp" type="DateTime" mandatory="true">
+        <param name="timeStamp" type="DateTime" mandatory="true">
             <description> This is the timestamp of when the data was generated. This is to ensure any time or distance given in the data can accurately be adjusted if necessary. </description>
         </param>
 

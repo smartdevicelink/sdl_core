@@ -351,6 +351,8 @@ const char* const keypress_mode_supported = "keypressModeSupported";
 const char* const limited_characters_list_supported =
     "limitedCharactersListSupported";
 const char* const auto_complete_text_supported = "autoCompleteTextSupported";
+const char* const send_location_enabled = "sendLocationEnabled";
+const char* const get_way_points_enabled = "getWayPointsEnabled";
 const char* const entity_type = "entityType";
 const char* const entity_id = "entityID";
 const char* const status = "status";
