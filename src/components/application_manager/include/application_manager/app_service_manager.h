@@ -131,9 +131,14 @@ class AppServiceManager {
    */
   std::vector<smart_objects::SmartObject> GetAllServices();
 
-  void GetProvider(const std::string& service_type,
-                   ApplicationSharedPtr& app,
-                   bool& hmi_service);
+  void GetProviderByType(const std::string& service_type,
+                         ApplicationSharedPtr& app,
+                         bool& hmi_service);
+
+  void GetProviderByID(const std::string& service_id,
+                       ApplicationSharedPtr& app,
+                       bool& hmi_service);
+
   std::pair<std::string, AppService> ActiveServiceByType(
       std::string service_type);
 
@@ -142,9 +147,14 @@ class AppServiceManager {
 
   std::pair<std::string, AppService> FindServiceByName(std::string name);
 
+  std::pair<std::string, AppService> FindServiceByID(std::string service_id);
+
   std::string DefaultServiceByType(std::string service_type);
 
  private:
+  void GetProviderFromService(const AppService& service,
+                              ApplicationSharedPtr& app,
+                              bool& hmi_service);
   ApplicationManager& app_manager_;
   resumption::LastState& last_state_;
   std::map<std::string, AppService> published_services_;

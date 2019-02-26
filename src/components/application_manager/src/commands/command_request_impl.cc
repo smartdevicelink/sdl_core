@@ -236,6 +236,7 @@ void CommandRequestImpl::onTimeOut() {
   LOG4CXX_AUTO_TRACE(logger_);
 
   unsubscribe_from_all_hmi_events();
+  unsubscribe_from_all_mobile_events();
   {
     // FIXME (dchmerev@luxoft.com): atomic_xchg fits better
     sync_primitives::AutoLock auto_lock(state_lock_);
@@ -423,13 +424,20 @@ void CommandRequestImpl::SendProviderRequest(
     const hmi_apis::FunctionID::eType& hmi_function_id,
     const smart_objects::SmartObject* msg,
     bool use_events) {
-  std::string service_type =
-      (*msg)[strings::msg_params][strings::service_type].asString();
-
+  LOG4CXX_AUTO_TRACE(logger_);
   bool hmi_destination = false;
   ApplicationSharedPtr app;
-  application_manager_.GetAppServiceManager().GetProvider(
-      service_type, app, hmi_destination);
+  if ((*msg)[strings::msg_params].keyExists(strings::service_type)) {
+    std::string service_type =
+        (*msg)[strings::msg_params][strings::service_type].asString();
+    application_manager_.GetAppServiceManager().GetProviderByType(
+        service_type, app, hmi_destination);
+  } else if ((*msg)[strings::msg_params].keyExists(strings::service_id)) {
+    std::string service_id =
+        (*msg)[strings::msg_params][strings::service_id].asString();
+    application_manager_.GetAppServiceManager().GetProviderByID(
+        service_id, app, hmi_destination);
+  }
 
   if (hmi_destination) {
     LOG4CXX_DEBUG(logger_, "Sending Request to HMI Provider");

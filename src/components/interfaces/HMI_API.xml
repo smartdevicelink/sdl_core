@@ -6252,5 +6252,47 @@
             <description>True if the service was set to the default service of this type. False if the app was not to be the default</description>
         </param> 
     </function>
+
+    <function name="PerformAppServiceInteraction" messagetype="request">
+        <param name="serviceUri" type="String"  mandatory="true">
+            <description>Fully qualified URI based on the URI prefix and URI scheme the app service provided. SDL makes no gurantee that this URI is correct.</description>
+        </param>
+        
+        <param name="serviceID" type="String" mandatory="true">
+            <description>The service ID that the app consumer wishes to send this URI.</description>
+        </param>
+        
+        <param name="originApp" type="String" mandatory="false">
+            <description>This string is the appID of the app requesting the app service provider take the specific action. This will automatically be set by SDL Core in requests originating from the HMI</description>
+        </param>
+        
+        <param name="requestServiceActive" type="Boolean" mandatory="false">
+            <description>This flag signals the requesting consumer would like this service to become the active primary service of the destination's type.</description>
+        </param>
+    </function>
+
+    <function name="PerformAppServiceInteraction" messagetype="response">
+        <param name="serviceSpecificResult" type="String" mandatory="false">
+            <description>The service can provide specific result strings to the consumer through this param. These results should be described in the URI schema set in the Service Manifest</description>
+        </param>
+    </function>
+
+    <function name="GetActiveServiceConsent" messagetype="request">
+        <description>
+            SDL->HMI. HMI is expected to prompt the user for permission for the app service to take over as the active service.
+        </description>
+        <param name="serviceID" type="String" mandatory="true">
+            <description>The ID of the service to be activated</description>
+        </param>
+    </function>
+    
+    <function name="GetActiveServiceConsent" messagetype="response">
+        <param name="activate" type="Boolean" mandatory="true">
+            <description>
+                "true" - If the driver grants permission for the app service to take over as the active service.
+                "false" - If the driver denies permission for the app service to take over as the active service.
+            </description>
+        </param>
+    </function>
 </interface>
 </interfaces>
