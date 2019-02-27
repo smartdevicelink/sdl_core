@@ -872,6 +872,7 @@ void TransportAdapterImpl::ConnectPending(const DeviceUID& device_id,
   if (device.use_count() == 0) {
     LOG4CXX_ERROR(
         logger_, "Unable to find device, cannot set connection pending status");
+    return;
   } else {
     device->set_connection_status(ConnectionStatus::PENDING);
   }
@@ -1146,7 +1147,7 @@ TransportAdapter::Error TransportAdapterImpl::ConnectDevice(DeviceSptr device) {
                                            << app_handle
                                            << " failed with error " << error);
         errors_occurred = true;
-        LOG4CXX_DEBUG(logger_, "switch (error), default case");
+        LOG4CXX_DEBUG(logger_, "switch (error), default case error: " << error);
         break;
     }
   }
@@ -1176,12 +1177,13 @@ void TransportAdapterImpl::RunAppOnDevice(const DeviceUID& device_uid,
 
 void TransportAdapterImpl::RemoveDevice(const DeviceUID& device_handle) {
   LOG4CXX_AUTO_TRACE(logger_);
-  LOG4CXX_DEBUG(logger_, "Device_handle: " << &device_handle);
+  LOG4CXX_DEBUG(logger_, "Remove Device_handle: " << &device_handle);
   sync_primitives::AutoLock locker(devices_mutex_);
   DeviceMap::iterator i = devices_.find(device_handle);
   if (i != devices_.end()) {
     DeviceSptr device = i->second;
-    if (!device->keep_on_disconnect()) {
+    bool is_cloud_device = (GetDeviceType() == DeviceType::CLOUD_WEBSOCKET);
+    if (!device->keep_on_disconnect() || is_cloud_device) {
       devices_.erase(i);
       for (TransportAdapterListenerList::iterator it = listeners_.begin();
            it != listeners_.end();
