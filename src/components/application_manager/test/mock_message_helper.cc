@@ -577,4 +577,10 @@ smart_objects::SmartObject MessageHelper::CreateAppServiceCapabilities(
   return MockMessageHelper::message_helper_mock()->CreateAppServiceCapabilities(
       all_services);
 }
+
+void MessageHelper::BroadcastCapabilityUpdate(
+    smart_objects::SmartObject& msg_params, ApplicationManager& app_mngr) {
+  MockMessageHelper::message_helper_mock()->BroadcastCapabilityUpdate(
+      msg_params, app_mngr);
+}
 }  // namespace application_manager

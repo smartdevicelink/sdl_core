@@ -83,10 +83,20 @@ void GetSystemCapabilityRequest::Run() {
 
   switch (response_type) {
     case mobile_apis::SystemCapabilityType::NAVIGATION: {
+      smart_objects::SmartObject nav_capability(smart_objects::SmartType_Map);
+      bool has_nav_capability = false;
       if (hmi_capabilities.navigation_capability()) {
+        has_nav_capability = true;
+        auto nav_capability = *hmi_capabilities.navigation_capability();
+      }
+
+      has_nav_capability = application_manager_.GetAppServiceManager()
+                               .UpdateNavigationCapabilities(nav_capability) ||
+                           has_nav_capability;
+
+      if (has_nav_capability) {
         response_params[strings::system_capability]
-                       [strings::navigation_capability] =
-                           *hmi_capabilities.navigation_capability();
+                       [strings::navigation_capability] = nav_capability;
       } else {
         SendResponse(false, mobile_apis::Result::DATA_NOT_AVAILABLE);
         return;
