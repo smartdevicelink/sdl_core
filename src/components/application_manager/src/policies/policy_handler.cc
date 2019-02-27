@@ -1771,6 +1771,17 @@ void PolicyHandler::OnCertificateUpdated(const std::string& certificate_data) {
 }
 #endif  // EXTERNAL_PROPRIETARY_MODE
 
+void PolicyHandler::OnAuthTokenUpdated(const std::string& policy_app_id,
+                                       const std::string& auth_token) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  sync_primitives::AutoLock lock(listeners_lock_);
+  HandlersCollection::const_iterator it = listeners_.begin();
+  for (; it != listeners_.end(); ++it) {
+    PolicyHandlerObserver* observer = *it;
+    observer->OnAuthTokenUpdated(policy_app_id, auth_token);
+  }
+}
+
 void PolicyHandler::OnPTUFinished(const bool ptu_result) {
   LOG4CXX_AUTO_TRACE(logger_);
   sync_primitives::AutoLock lock(listeners_lock_);
@@ -1909,15 +1920,18 @@ void PolicyHandler::OnSetCloudAppProperties(
 
   policy_manager_->InitCloudApp(policy_app_id);
 
+  bool auth_token_update = false;
   if (msg_params.keyExists(strings::enabled)) {
-    policy_manager_->SetCloudAppEnabled(policy_app_id,
-                                        msg_params[strings::enabled].asBool());
-
+    bool enabled = msg_params[strings::enabled].asBool();
+    policy_manager_->SetCloudAppEnabled(policy_app_id, enabled);
+    auth_token_update = enabled;
     application_manager_.RefreshCloudAppInformation();
   }
   if (msg_params.keyExists(strings::cloud_app_auth_token)) {
-    policy_manager_->SetAppAuthToken(
-        policy_app_id, msg_params[strings::cloud_app_auth_token].asString());
+    std::string auth_token =
+        msg_params[strings::cloud_app_auth_token].asString();
+    policy_manager_->SetAppAuthToken(policy_app_id, auth_token);
+    auth_token_update = true;
   }
   if (msg_params.keyExists(strings::cloud_transport_type)) {
     policy_manager_->SetAppCloudTransportType(
@@ -1934,6 +1948,16 @@ void PolicyHandler::OnSetCloudAppProperties(
         EnumToString(value, &hybrid_app_preference);
     policy_manager_->SetHybridAppPreference(policy_app_id,
                                             hybrid_app_preference);
+  }
+
+  if (auth_token_update) {
+    bool enabled;
+    std::string end, cert, ctt, hap;
+    std::string auth_token;
+
+    policy_manager_->GetCloudAppParameters(
+        policy_app_id, enabled, end, cert, auth_token, ctt, hap);
+    OnAuthTokenUpdated(policy_app_id, auth_token);
   }
 }
 
