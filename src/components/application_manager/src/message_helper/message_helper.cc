@@ -327,6 +327,30 @@ smart_objects::SmartObjectSPtr MessageHelper::CreateMessageForHMI(
   return message;
 }
 
+void MessageHelper::BroadcastCapabilityUpdate(
+    smart_objects::SmartObject& msg_params, ApplicationManager& app_mngr) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  smart_objects::SmartObject message(smart_objects::SmartType_Map);
+
+  message[strings::params][strings::message_type] = MessageType::kNotification;
+  message[strings::msg_params] = msg_params;
+
+  // Construct and send mobile notification
+  message[strings::params][strings::function_id] =
+      mobile_apis::FunctionID::OnSystemCapabilityUpdatedID;
+  smart_objects::SmartObjectSPtr notification =
+      std::make_shared<smart_objects::SmartObject>(message);
+  app_mngr.GetRPCService().ManageMobileCommand(
+      notification, commands::Command::CommandSource::SOURCE_SDL);
+
+  // Construct and send HMI notification
+  message[strings::params][strings::function_id] =
+      hmi_apis::FunctionID::BasicCommunication_OnSystemCapabilityUpdated;
+  smart_objects::SmartObjectSPtr hmi_notification =
+      std::make_shared<smart_objects::SmartObject>(message);
+  app_mngr.GetRPCService().ManageHMICommand(hmi_notification);
+}
+
 smart_objects::SmartObject MessageHelper::CreateAppServiceCapabilities(
     std::vector<smart_objects::SmartObject>& all_services) {
   smart_objects::SmartObject app_service_capabilities(

@@ -96,14 +96,6 @@ class AppServiceManager {
   /**
    * @brief TODO
    * @param service_id
-   * @param service_published
-   */
-  void SetServicePublished(const std::string service_id,
-                           bool service_published);
-
-  /**
-   * @brief TODO
-   * @param service_id
    */
   bool SetDefaultService(const std::string service_id);
 
@@ -151,6 +143,20 @@ class AppServiceManager {
 
   std::string DefaultServiceByType(std::string service_type);
 
+  /**
+   * @brief TODO
+   * @param service_id
+   * @param service_published
+   */
+  void SetServicePublished(const std::string service_id,
+                           bool service_published);
+
+  /**
+   * @brief TODO
+   * @param out_params
+   */
+  bool UpdateNavigationCapabilities(smart_objects::SmartObject& out_params);
+
  private:
   void GetProviderFromService(const AppService& service,
                               ApplicationSharedPtr& app,
@@ -159,7 +165,6 @@ class AppServiceManager {
   resumption::LastState& last_state_;
   std::map<std::string, AppService> published_services_;
 
-  void BroadcastAppServiceUpdate(smart_objects::SmartObject& msg_params);
   void AppServiceUpdated(
       const smart_objects::SmartObject& service_record,
       const mobile_apis::ServiceUpdateReason::eType update_reason,
