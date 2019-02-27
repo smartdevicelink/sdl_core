@@ -58,6 +58,8 @@ class ApplicationManager;
  */
 class AppServiceManager {
  public:
+  const std::string kEmbeddedService = "EMBEDDED_SERVICE";
+
   /**
    * @brief Class constructor
    * @param app_manager
@@ -152,9 +154,6 @@ class AppServiceManager {
   std::string DefaultServiceByType(std::string service_type);
 
  private:
-  void GetProviderFromService(const AppService& service,
-                              ApplicationSharedPtr& app,
-                              bool& hmi_service);
   ApplicationManager& app_manager_;
   resumption::LastState& last_state_;
   std::map<std::string, AppService> published_services_;
@@ -164,6 +163,12 @@ class AppServiceManager {
       const smart_objects::SmartObject& service_record,
       const mobile_apis::ServiceUpdateReason::eType update_reason,
       smart_objects::SmartObject& msg_params);
+  void GetProviderFromService(const AppService& service,
+                              ApplicationSharedPtr& app,
+                              bool& hmi_service);
+  std::pair<std::string, AppService> FindServiceByAppID(std::string name,
+                                                        std::string type);
+  std::string GetServiceAppID(AppService service);
 };
 
 }  //  namespace application_manager
