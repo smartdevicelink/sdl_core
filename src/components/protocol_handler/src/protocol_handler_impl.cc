@@ -59,7 +59,7 @@ CREATE_LOGGERPTR_GLOBAL(logger_, "ProtocolHandler")
 std::string ConvertPacketDataToString(const uint8_t* data,
                                       const size_t data_size);
 
-const size_t kStackSize = 65536;
+const size_t kStackSize = 131072;
 
 utils::SemanticVersion default_protocol_version(5, 2, 0);
 utils::SemanticVersion min_multiple_transports_version(5, 1, 0);
