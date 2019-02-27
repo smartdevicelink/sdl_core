@@ -57,6 +57,25 @@ void ASPerformAppServiceInteractionRequestFromHMI::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
 
   smart_objects::SmartObject& msg_params = (*message_)[strings::msg_params];
+  std::string hmi_origin_id =
+      application_manager_.get_settings().hmi_origin_id();
+  if (!msg_params.keyExists(strings::origin_app)) {
+    if (hmi_origin_id.empty()) {
+      smart_objects::SmartObject response_params;
+      response_params[strings::info] =
+          "No HMI origin ID to use for interaction passthrough";
+      SendResponse(
+          false,
+          correlation_id(),
+          hmi_apis::FunctionID::AppService_PerformAppServiceInteraction,
+          hmi_apis::Common_Result::INVALID_DATA,
+          &response_params,
+          application_manager::commands::Command::SOURCE_SDL_TO_HMI);
+      return;
+    }
+    msg_params[strings::origin_app] = hmi_origin_id;
+  }
+
   std::string service_id = msg_params[strings::service_id].asString();
   auto service =
       application_manager_.GetAppServiceManager().FindServiceByID(service_id);

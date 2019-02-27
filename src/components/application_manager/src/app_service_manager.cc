@@ -88,10 +88,21 @@ smart_objects::SmartObject AppServiceManager::PublishAppService(
   app_service.record = service_record;
 
   std::string service_type = manifest[strings::service_type].asString();
-  Json::Value& dictionary = last_state_.get_dictionary();
-  app_service.default_service =
-      (dictionary[kAppServiceSection][kDefaults][service_type].asString() ==
-       manifest[strings::service_name].asString());
+
+  std::string default_app_id = DefaultServiceByType(service_type);
+  if (default_app_id.empty() && !mobile_service) {
+    auto embedded_services = app_manager_.get_settings().embedded_services();
+    for (auto it = embedded_services.begin(); it != embedded_services.end();
+         ++it) {
+      if (*it == service_type) {
+        Json::Value& dictionary = last_state_.get_dictionary();
+        dictionary[kAppServiceSection][kDefaults][service_type] =
+            kEmbeddedService;
+        default_app_id = kEmbeddedService;
+      }
+    }
+  }
+  app_service.default_service = GetPolicyAppID(app_service) == default_app_id;
 
   published_services_.insert(
       std::pair<std::string, AppService>(service_id, app_service));
@@ -239,9 +250,10 @@ bool AppServiceManager::SetDefaultService(const std::string service_id) {
   std::string service_type =
       service.record[strings::service_manifest][strings::service_type]
           .asString();
-  std::string default_service_name = DefaultServiceByType(service_type);
-  if (!default_service_name.empty()) {
-    auto default_service = FindServiceByName(default_service_name);
+  std::string default_app_id = DefaultServiceByType(service_type);
+  if (!default_app_id.empty()) {
+    auto default_service =
+        FindServiceByPolicyAppID(default_app_id, service_type);
     if (!default_service.first.empty()) {
       default_service.second.default_service = false;
     }
@@ -250,8 +262,7 @@ bool AppServiceManager::SetDefaultService(const std::string service_id) {
 
   Json::Value& dictionary = last_state_.get_dictionary();
   dictionary[kAppServiceSection][kDefaults][service_type] =
-      service.record[strings::service_manifest][strings::service_name]
-          .asString();
+      GetPolicyAppID(service);
   return true;
 }
 
@@ -406,6 +417,24 @@ std::pair<std::string, AppService> AppServiceManager::FindServiceByName(
   return std::make_pair(std::string(), empty);
 }
 
+std::pair<std::string, AppService> AppServiceManager::FindServiceByPolicyAppID(
+    std::string policy_app_id, std::string type) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  for (auto it = published_services_.begin(); it != published_services_.end();
+       ++it) {
+    if (it->second.record[strings::service_manifest][strings::service_type]
+            .asString() != type) {
+      continue;
+    }
+
+    if (policy_app_id == GetPolicyAppID(it->second)) {
+      return *it;
+    }
+  }
+  AppService empty;
+  return std::make_pair(std::string(), empty);
+}
+
 std::pair<std::string, AppService> AppServiceManager::FindServiceByID(
     std::string service_id) {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -438,6 +467,14 @@ void AppServiceManager::SetServicePublished(const std::string service_id,
     return;
   }
   it->second.record[strings::service_published] = service_published;
+}
+
+std::string AppServiceManager::GetPolicyAppID(AppService service) {
+  if (service.mobile_service) {
+    auto app = app_manager_.application(service.connection_key);
+    return app ? app->policy_app_id() : std::string();
+  }
+  return kEmbeddedService;
 }
 
 bool AppServiceManager::UpdateNavigationCapabilities(
