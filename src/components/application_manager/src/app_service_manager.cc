@@ -70,11 +70,13 @@ smart_objects::SmartObject AppServiceManager::PublishAppService(
   std::string str_to_hash = "";
   std::string service_id = "";
 
+  published_services_lock_.Acquire();
   do {
     str_to_hash = manifest[strings::service_type].asString() +
                   std::to_string(std::rand());
     service_id = encryption::MakeHash(str_to_hash);
   } while (published_services_.find(service_id) != published_services_.end());
+  published_services_lock_.Release();
 
   AppService app_service;
   app_service.connection_key = connection_key;
@@ -104,9 +106,11 @@ smart_objects::SmartObject AppServiceManager::PublishAppService(
   }
   app_service.default_service = GetPolicyAppID(app_service) == default_app_id;
 
-  published_services_.insert(
-      std::pair<std::string, AppService>(service_id, app_service));
-
+  {
+    sync_primitives::AutoLock lock(published_services_lock_);
+    published_services_.insert(
+        std::pair<std::string, AppService>(service_id, app_service));
+  }
   smart_objects::SmartObject msg_params;
   msg_params[strings::system_capability][strings::system_capability_type] =
       mobile_apis::SystemCapabilityType::APP_SERVICES;
@@ -117,9 +121,8 @@ smart_objects::SmartObject AppServiceManager::PublishAppService(
 
   // Activate the new service if it is the default for its service type, or if
   // no service is active of its service type
-  std::pair<std::string, AppService> active_service =
-      ActiveServiceByType(service_type);
-  if (active_service.first.empty() || app_service.default_service) {
+  AppService* active_service = ActiveServiceByType(service_type);
+  if (!active_service || app_service.default_service) {
     ActivateAppService(service_id);
   }
 
@@ -128,7 +131,7 @@ smart_objects::SmartObject AppServiceManager::PublishAppService(
 
 bool AppServiceManager::UnpublishAppService(const std::string service_id) {
   LOG4CXX_AUTO_TRACE(logger_);
-
+  sync_primitives::AutoLock lock(published_services_lock_);
   auto it = published_services_.find(service_id);
   if (it == published_services_.end()) {
     LOG4CXX_ERROR(logger_, "Service id does not exist in published services");
@@ -141,22 +144,22 @@ bool AppServiceManager::UnpublishAppService(const std::string service_id) {
   msg_params[strings::system_capability][strings::system_capability_type] =
       mobile_apis::SystemCapabilityType::APP_SERVICES;
 
-  auto record = it->second.record;
+  auto& record = it->second.record;
   if (record[strings::service_active].asBool()) {
     record[strings::service_active] = false;
 
     // Activate embedded service, if available
     auto embedded_service = EmbeddedServiceForType(
         record[strings::service_manifest][strings::service_type].asString());
-    if (!embedded_service.first.empty()) {
-      embedded_service.second.record[strings::service_active] = true;
-      AppServiceUpdated(embedded_service.second.record,
+    if (embedded_service) {
+      embedded_service->record[strings::service_active] = true;
+      AppServiceUpdated(embedded_service->record,
                         mobile_apis::ServiceUpdateReason::ACTIVATED,
                         msg_params);
     }
   }
   AppServiceUpdated(
-      it->second.record, mobile_apis::ServiceUpdateReason::REMOVED, msg_params);
+      record, mobile_apis::ServiceUpdateReason::REMOVED, msg_params);
   MessageHelper::BroadcastCapabilityUpdate(msg_params, app_manager_);
   published_services_.erase(it);
 
@@ -166,6 +169,7 @@ bool AppServiceManager::UnpublishAppService(const std::string service_id) {
 void AppServiceManager::UnpublishServices(const uint32_t connection_key) {
   LOG4CXX_AUTO_TRACE(logger_);
   LOG4CXX_DEBUG(logger_, "Unpublishing all app services: " << connection_key);
+  sync_primitives::AutoLock lock(published_services_lock_);
   for (auto it = published_services_.begin(); it != published_services_.end();
        ++it) {
     if (it->second.connection_key == connection_key) {
@@ -176,6 +180,7 @@ void AppServiceManager::UnpublishServices(const uint32_t connection_key) {
 
 void AppServiceManager::OnAppActivated(ApplicationConstSharedPtr app) {
   LOG4CXX_AUTO_TRACE(logger_);
+  sync_primitives::AutoLock lock(published_services_lock_);
   auto it = published_services_.begin();
   // Activate all services published by the app
   for (; it != published_services_.end(); ++it) {
@@ -188,6 +193,7 @@ void AppServiceManager::OnAppActivated(ApplicationConstSharedPtr app) {
 std::vector<smart_objects::SmartObject> AppServiceManager::GetAllServices() {
   LOG4CXX_AUTO_TRACE(logger_);
   std::vector<smart_objects::SmartObject> services;
+  sync_primitives::AutoLock lock(published_services_lock_);
   for (auto it = published_services_.begin(); it != published_services_.end();
        ++it) {
     services.push_back(it->second.record);
@@ -200,7 +206,7 @@ void AppServiceManager::GetProviderByType(const std::string& service_type,
                                           bool& hmi_service) {
   LOG4CXX_AUTO_TRACE(logger_);
   auto active_service = ActiveServiceByType(service_type);
-  if (active_service.first.empty()) {
+  if (!active_service) {
     LOG4CXX_ERROR(logger_,
                   "There is no active service for the given service type: "
                       << service_type);
@@ -208,13 +214,14 @@ void AppServiceManager::GetProviderByType(const std::string& service_type,
   }
 
   LOG4CXX_DEBUG(logger_, "Found provider for service type: " << service_type);
-  GetProviderFromService(active_service.second, app, hmi_service);
+  GetProviderFromService(*active_service, app, hmi_service);
 }
 
 void AppServiceManager::GetProviderByID(const std::string& service_id,
                                         ApplicationSharedPtr& app,
                                         bool& hmi_service) {
   LOG4CXX_AUTO_TRACE(logger_);
+  sync_primitives::AutoLock lock(published_services_lock_);
   auto it = published_services_.find(service_id);
   if (it == published_services_.end()) {
     LOG4CXX_ERROR(logger_, "Service id does not exist in published services");
@@ -240,6 +247,7 @@ void AppServiceManager::GetProviderFromService(const AppService& service,
 
 bool AppServiceManager::SetDefaultService(const std::string service_id) {
   LOG4CXX_AUTO_TRACE(logger_);
+  sync_primitives::AutoLock lock(published_services_lock_);
   auto it = published_services_.find(service_id);
   if (it == published_services_.end()) {
     LOG4CXX_ERROR(logger_, "Unable to find published service " << service_id);
@@ -254,8 +262,8 @@ bool AppServiceManager::SetDefaultService(const std::string service_id) {
   if (!default_app_id.empty()) {
     auto default_service =
         FindServiceByPolicyAppID(default_app_id, service_type);
-    if (!default_service.first.empty()) {
-      default_service.second.default_service = false;
+    if (default_service) {
+      default_service->default_service = false;
     }
   }
   service.default_service = true;
@@ -268,6 +276,7 @@ bool AppServiceManager::SetDefaultService(const std::string service_id) {
 
 bool AppServiceManager::RemoveDefaultService(const std::string service_id) {
   LOG4CXX_AUTO_TRACE(logger_);
+  sync_primitives::AutoLock lock(published_services_lock_);
   auto it = published_services_.find(service_id);
   if (it == published_services_.end()) {
     LOG4CXX_ERROR(logger_, "Unable to find published service " << service_id);
@@ -291,6 +300,7 @@ bool AppServiceManager::RemoveDefaultService(const std::string service_id) {
 
 bool AppServiceManager::ActivateAppService(const std::string service_id) {
   LOG4CXX_AUTO_TRACE(logger_);
+  sync_primitives::AutoLock lock(published_services_lock_);
   auto it = published_services_.find(service_id);
   if (it == published_services_.end()) {
     LOG4CXX_ERROR(logger_, "Unable to find published service " << service_id);
@@ -310,9 +320,9 @@ bool AppServiceManager::ActivateAppService(const std::string service_id) {
   const std::string service_type =
       service[strings::service_manifest][strings::service_type].asString();
   auto active_service = ActiveServiceByType(service_type);
-  if (!active_service.first.empty()) {
-    active_service.second.record[strings::service_active] = false;
-    AppServiceUpdated(active_service.second.record,
+  if (active_service) {
+    active_service->record[strings::service_active] = false;
+    AppServiceUpdated(active_service->record,
                       mobile_apis::ServiceUpdateReason::DEACTIVATED,
                       msg_params);
   }
@@ -337,6 +347,7 @@ bool AppServiceManager::ActivateAppService(const std::string service_id) {
 
 bool AppServiceManager::DeactivateAppService(const std::string service_id) {
   LOG4CXX_AUTO_TRACE(logger_);
+  sync_primitives::AutoLock lock(published_services_lock_);
   auto it = published_services_.find(service_id);
   if (it == published_services_.end()) {
     LOG4CXX_ERROR(logger_, "Unable to find published service " << service_id);
@@ -355,9 +366,9 @@ bool AppServiceManager::DeactivateAppService(const std::string service_id) {
     const std::string service_type =
         service[strings::service_manifest][strings::service_type].asString();
     auto embedded_service = EmbeddedServiceForType(service_type);
-    if (!embedded_service.first.empty()) {
-      embedded_service.second.record[strings::service_active] = true;
-      AppServiceUpdated(embedded_service.second.record,
+    if (embedded_service) {
+      embedded_service->record[strings::service_active] = true;
+      AppServiceUpdated(embedded_service->record,
                         mobile_apis::ServiceUpdateReason::ACTIVATED,
                         msg_params);
     }
@@ -372,54 +383,53 @@ bool AppServiceManager::DeactivateAppService(const std::string service_id) {
   return true;
 }
 
-std::pair<std::string, AppService> AppServiceManager::ActiveServiceByType(
-    std::string service_type) {
+AppService* AppServiceManager::ActiveServiceByType(std::string service_type) {
   LOG4CXX_AUTO_TRACE(logger_);
+  sync_primitives::AutoLock lock(published_services_lock_);
   for (auto it = published_services_.begin(); it != published_services_.end();
        ++it) {
     if (it->second.record[strings::service_manifest][strings::service_type]
                 .asString() == service_type &&
         it->second.record[strings::service_published].asBool() &&
         it->second.record[strings::service_active].asBool()) {
-      return *it;
+      return &(it->second);
     }
   }
-  AppService empty;
-  return std::make_pair(std::string(), empty);
+  return NULL;
 }
 
-std::pair<std::string, AppService> AppServiceManager::EmbeddedServiceForType(
+AppService* AppServiceManager::EmbeddedServiceForType(
     std::string service_type) {
   LOG4CXX_AUTO_TRACE(logger_);
+  sync_primitives::AutoLock lock(published_services_lock_);
   for (auto it = published_services_.begin(); it != published_services_.end();
        ++it) {
     if (it->second.record[strings::service_manifest][strings::service_type]
                 .asString() == service_type &&
         !it->second.mobile_service) {
-      return *it;
+      return &(it->second);
     }
   }
-  AppService empty;
-  return std::make_pair(std::string(), empty);
+  return NULL;
 }
 
-std::pair<std::string, AppService> AppServiceManager::FindServiceByName(
-    std::string name) {
+AppService* AppServiceManager::FindServiceByName(std::string name) {
   LOG4CXX_AUTO_TRACE(logger_);
+  sync_primitives::AutoLock lock(published_services_lock_);
   for (auto it = published_services_.begin(); it != published_services_.end();
        ++it) {
     if (it->second.record[strings::service_manifest][strings::service_name]
             .asString() == name) {
-      return *it;
+      return &(it->second);
     }
   }
-  AppService empty;
-  return std::make_pair(std::string(), empty);
+  return NULL;
 }
 
-std::pair<std::string, AppService> AppServiceManager::FindServiceByPolicyAppID(
+AppService* AppServiceManager::FindServiceByPolicyAppID(
     std::string policy_app_id, std::string type) {
   LOG4CXX_AUTO_TRACE(logger_);
+  sync_primitives::AutoLock lock(published_services_lock_);
   for (auto it = published_services_.begin(); it != published_services_.end();
        ++it) {
     if (it->second.record[strings::service_manifest][strings::service_type]
@@ -428,25 +438,22 @@ std::pair<std::string, AppService> AppServiceManager::FindServiceByPolicyAppID(
     }
 
     if (policy_app_id == GetPolicyAppID(it->second)) {
-      return *it;
+      return &(it->second);
     }
   }
-  AppService empty;
-  return std::make_pair(std::string(), empty);
+  return NULL;
 }
 
-std::pair<std::string, AppService> AppServiceManager::FindServiceByID(
-    std::string service_id) {
+AppService* AppServiceManager::FindServiceByID(std::string service_id) {
   LOG4CXX_AUTO_TRACE(logger_);
+  sync_primitives::AutoLock lock(published_services_lock_);
 
   auto it = published_services_.find(service_id);
   if (it == published_services_.end()) {
     LOG4CXX_ERROR(logger_, "Service id does not exist in published services");
-    AppService empty;
-    return std::make_pair(std::string(), empty);
+    return NULL;
   }
-
-  return *it;
+  return &(it->second);
 }
 
 std::string AppServiceManager::DefaultServiceByType(std::string service_type) {
@@ -461,6 +468,7 @@ std::string AppServiceManager::DefaultServiceByType(std::string service_type) {
 void AppServiceManager::SetServicePublished(const std::string service_id,
                                             bool service_published) {
   LOG4CXX_AUTO_TRACE(logger_);
+  sync_primitives::AutoLock lock(published_services_lock_);
   auto it = published_services_.find(service_id);
   if (it == published_services_.end()) {
     LOG4CXX_ERROR(logger_, "Service id does not exist in published services");
@@ -485,7 +493,7 @@ bool AppServiceManager::UpdateNavigationCapabilities(
       EnumConversionHelper<mobile_apis::AppServiceType::eType>::EnumToString(
           mobile_apis::AppServiceType::NAVIGATION, &navi_service_type);
   auto service = ActiveServiceByType(navi_service_type);
-  if (service.first.empty()) {
+  if (!service) {
     return false;
   }
 
@@ -496,13 +504,13 @@ bool AppServiceManager::UpdateNavigationCapabilities(
     out_params[strings::get_way_points_enabled] = false;
   }
 
-  if (!service.second.record[strings::service_manifest].keyExists(
+  if (!service->record[strings::service_manifest].keyExists(
           strings::handled_rpcs)) {
     return true;
   }
 
   smart_objects::SmartObject& handled_rpcs =
-      service.second.record[strings::service_manifest][strings::handled_rpcs];
+      service->record[strings::service_manifest][strings::handled_rpcs];
   for (size_t i = 0; i < handled_rpcs.length(); ++i) {
     if (handled_rpcs[i].asInt() == mobile_apis::FunctionID::SendLocationID) {
       out_params[strings::send_location_enabled] = true;

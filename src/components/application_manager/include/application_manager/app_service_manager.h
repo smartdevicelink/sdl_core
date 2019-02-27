@@ -133,15 +133,13 @@ class AppServiceManager {
                        ApplicationSharedPtr& app,
                        bool& hmi_service);
 
-  std::pair<std::string, AppService> ActiveServiceByType(
-      std::string service_type);
+  AppService* ActiveServiceByType(std::string service_type);
 
-  std::pair<std::string, AppService> EmbeddedServiceForType(
-      std::string service_type);
+  AppService* EmbeddedServiceForType(std::string service_type);
 
-  std::pair<std::string, AppService> FindServiceByName(std::string name);
+  AppService* FindServiceByName(std::string name);
 
-  std::pair<std::string, AppService> FindServiceByID(std::string service_id);
+  AppService* FindServiceByID(std::string service_id);
 
   std::string DefaultServiceByType(std::string service_type);
 
@@ -162,6 +160,8 @@ class AppServiceManager {
  private:
   ApplicationManager& app_manager_;
   resumption::LastState& last_state_;
+
+  sync_primitives::RecursiveLock published_services_lock_;
   std::map<std::string, AppService> published_services_;
 
   void AppServiceUpdated(
@@ -171,8 +171,8 @@ class AppServiceManager {
   void GetProviderFromService(const AppService& service,
                               ApplicationSharedPtr& app,
                               bool& hmi_service);
-  std::pair<std::string, AppService> FindServiceByPolicyAppID(
-      std::string policy_app_id, std::string type);
+  AppService* FindServiceByPolicyAppID(std::string policy_app_id,
+                                       std::string type);
   std::string GetPolicyAppID(AppService service);
 };
 
