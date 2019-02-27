@@ -809,11 +809,11 @@ void ApplicationManagerImpl::OnHMIStartedCooperation() {
 }
 
 void ApplicationManagerImpl::DisconnectCloudApp(ApplicationSharedPtr app) {
-  std::string endpoint = "";
-  std::string certificate = "";
-  std::string auth_token = "";
-  std::string cloud_transport_type = "";
-  std::string hybrid_app_preference = "";
+  std::string endpoint;
+  std::string certificate;
+  std::string auth_token;
+  std::string cloud_transport_type;
+  std::string hybrid_app_preference;
   bool enabled = true;
   GetPolicyHandler().GetCloudAppParameters(app->policy_app_id(),
                                            enabled,

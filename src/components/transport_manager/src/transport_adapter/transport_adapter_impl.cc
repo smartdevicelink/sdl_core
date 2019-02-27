@@ -1147,7 +1147,7 @@ TransportAdapter::Error TransportAdapterImpl::ConnectDevice(DeviceSptr device) {
                                            << app_handle
                                            << " failed with error " << error);
         errors_occurred = true;
-        LOG4CXX_DEBUG(logger_, "switch (error), default case error: " << error);
+        LOG4CXX_DEBUG(logger_, "switch (error), default case");
         break;
     }
   }
