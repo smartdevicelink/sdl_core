@@ -845,7 +845,8 @@ void ApplicationManagerImpl::RefreshCloudAppInformation() {
     }
 
     // If the device was disconnected, this will reinitialize the device
-    connection_handler().AddCloudAppDevice(endpoint, cloud_transport_type);
+    connection_handler().AddCloudAppDevice(
+        *enabled_it, endpoint, cloud_transport_type);
   }
   pending_device_map_lock_ptr_->Release();
 

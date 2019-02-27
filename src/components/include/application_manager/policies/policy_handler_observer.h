@@ -48,6 +48,9 @@ class PolicyHandlerObserver {
     return false;
   }
 
+  virtual void OnAuthTokenUpdated(const std::string& policy_app_id,
+                                  const std::string& auth_token) {}
+
   virtual void OnPTUFinished(const bool ptu_result) {}
 
   virtual ~PolicyHandlerObserver() {}

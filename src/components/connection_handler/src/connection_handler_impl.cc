@@ -270,6 +270,17 @@ void ConnectionHandlerImpl::OnConnectionPending(
   LOG4CXX_DEBUG(logger_,
                 "Add Pending Connection #" << connection_id << " to the list.");
 
+  std::string endpoint = device_info.mac_address();
+  cloud_app_id_map_lock_.Acquire();
+  for (auto it = cloud_app_id_map_.begin(); it != cloud_app_id_map_.end();
+       ++it) {
+    if (endpoint == it->second.first) {
+      it->second.second = connection_id;
+      break;
+    }
+  }
+  cloud_app_id_map_lock_.Release();
+
   sync_primitives::AutoWriteLock lock(connection_list_lock_);
   if (connection_list_.find(connection_id) == connection_list_.end()) {
     Connection* connection =
@@ -1111,6 +1122,18 @@ const uint8_t ConnectionHandlerImpl::GetSessionIdFromSecondaryTransport(
   return 0;
 }
 
+std::string ConnectionHandlerImpl::GetCloudAppID(
+    const transport_manager::ConnectionUID connection_id) const {
+  sync_primitives::AutoLock auto_lock(cloud_app_id_map_lock_);
+  for (auto it = cloud_app_id_map_.begin(); it != cloud_app_id_map_.end();
+       ++it) {
+    if (connection_id == it->second.second) {
+      return it->first;
+    }
+  }
+  return std::string();
+}
+
 struct CompareMAC {
   explicit CompareMAC(const std::string& mac) : mac_(mac) {}
   bool operator()(const DeviceMap::value_type& device) {
@@ -1327,7 +1350,12 @@ void ConnectionHandlerImpl::ConnectToAllDevices() {
 }
 
 void ConnectionHandlerImpl::AddCloudAppDevice(
-    const std::string& endpoint, const std::string& cloud_transport_type) {
+    const std::string& policy_app_id,
+    const std::string& endpoint,
+    const std::string& cloud_transport_type) {
+  cloud_app_id_map_lock_.Acquire();
+  cloud_app_id_map_[policy_app_id] = std::make_pair(endpoint, 0);
+  cloud_app_id_map_lock_.Release();
   transport_manager_.AddCloudDevice(endpoint, cloud_transport_type);
 }
 

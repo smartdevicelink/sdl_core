@@ -111,6 +111,7 @@ bool LifeCycleImpl::StartComponents() {
 
   media_manager_ = new media_manager::MediaManagerImpl(*app_manager_, profile_);
   app_manager_->set_connection_handler(connection_handler_);
+  app_manager_->AddPolicyObserver(protocol_handler_);
   if (!app_manager_->Init(*last_state_, media_manager_)) {
     LOG4CXX_ERROR(logger_, "Application manager init failed.");
     return false;
@@ -134,7 +135,6 @@ bool LifeCycleImpl::StartComponents() {
   security_manager_->AddListener(app_manager_);
 
   app_manager_->AddPolicyObserver(security_manager_);
-  app_manager_->AddPolicyObserver(protocol_handler_);
   if (!crypto_manager_->Init()) {
     LOG4CXX_ERROR(logger_, "CryptoManager initialization fail.");
     return false;
