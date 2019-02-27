@@ -166,9 +166,9 @@ class AppServiceManager {
   void GetProviderFromService(const AppService& service,
                               ApplicationSharedPtr& app,
                               bool& hmi_service);
-  std::pair<std::string, AppService> FindServiceByAppID(std::string name,
-                                                        std::string type);
-  std::string GetServiceAppID(AppService service);
+  std::pair<std::string, AppService> FindServiceByPolicyAppID(
+      std::string policy_app_id, std::string type);
+  std::string GetPolicyAppID(AppService service);
 };
 
 }  //  namespace application_manager

@@ -102,7 +102,7 @@ smart_objects::SmartObject AppServiceManager::PublishAppService(
       }
     }
   }
-  app_service.default_service = GetServiceAppID(app_service) == default_app_id;
+  app_service.default_service = GetPolicyAppID(app_service) == default_app_id;
 
   published_services_.insert(
       std::pair<std::string, AppService>(service_id, app_service));
@@ -247,7 +247,8 @@ bool AppServiceManager::SetDefaultService(const std::string service_id) {
           .asString();
   std::string default_app_id = DefaultServiceByType(service_type);
   if (!default_app_id.empty()) {
-    auto default_service = FindServiceByAppID(default_app_id, service_type);
+    auto default_service =
+        FindServiceByPolicyAppID(default_app_id, service_type);
     if (!default_service.first.empty()) {
       default_service.second.default_service = false;
     }
@@ -256,7 +257,7 @@ bool AppServiceManager::SetDefaultService(const std::string service_id) {
 
   Json::Value& dictionary = last_state_.get_dictionary();
   dictionary[kAppServiceSection][kDefaults][service_type] =
-      GetServiceAppID(service);
+      GetPolicyAppID(service);
   return true;
 }
 
@@ -396,8 +397,8 @@ std::pair<std::string, AppService> AppServiceManager::FindServiceByName(
   return std::make_pair(std::string(), empty);
 }
 
-std::pair<std::string, AppService> AppServiceManager::FindServiceByAppID(
-    std::string name, std::string type) {
+std::pair<std::string, AppService> AppServiceManager::FindServiceByPolicyAppID(
+    std::string policy_app_id, std::string type) {
   LOG4CXX_AUTO_TRACE(logger_);
   for (auto it = published_services_.begin(); it != published_services_.end();
        ++it) {
@@ -406,7 +407,7 @@ std::pair<std::string, AppService> AppServiceManager::FindServiceByAppID(
       continue;
     }
 
-    if (name == GetServiceAppID(it->second)) {
+    if (policy_app_id == GetPolicyAppID(it->second)) {
       return *it;
     }
   }
@@ -448,7 +449,7 @@ void AppServiceManager::SetServicePublished(const std::string service_id,
   it->second.record[strings::service_published] = service_published;
 }
 
-std::string AppServiceManager::GetServiceAppID(AppService service) {
+std::string AppServiceManager::GetPolicyAppID(AppService service) {
   if (service.mobile_service) {
     auto app = app_manager_.application(service.connection_key);
     return app ? app->policy_app_id() : std::string();
