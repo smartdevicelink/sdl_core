@@ -815,7 +815,8 @@ void ApplicationManagerImpl::DisconnectCloudApp(ApplicationSharedPtr app) {
   std::string cloud_transport_type;
   std::string hybrid_app_preference;
   bool enabled = true;
-  GetPolicyHandler().GetCloudAppParameters(app->policy_app_id(),
+  std::string policy_app_id = app->policy_app_id();
+  GetPolicyHandler().GetCloudAppParameters(policy_app_id,
                                            enabled,
                                            endpoint,
                                            certificate,
@@ -837,7 +838,8 @@ void ApplicationManagerImpl::DisconnectCloudApp(ApplicationSharedPtr app) {
 
   // Create device in pending state
   LOG4CXX_DEBUG(logger_, "Re-adding the cloud app device");
-  connection_handler().AddCloudAppDevice(endpoint, cloud_transport_type);
+  connection_handler().AddCloudAppDevice(
+      policy_app_id, endpoint, cloud_transport_type);
 }
 
 void ApplicationManagerImpl::RefreshCloudAppInformation() {
