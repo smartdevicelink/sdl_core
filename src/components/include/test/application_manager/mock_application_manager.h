@@ -169,6 +169,8 @@ class MockApplicationManager : public application_manager::ApplicationManager {
   MOCK_METHOD1(EndAudioPassThru, bool(uint32_t app_id));
   MOCK_METHOD1(ConnectToDevice, void(const std::string& device_mac));
   MOCK_METHOD0(OnHMIStartedCooperation, void());
+  MOCK_METHOD1(DisconnectCloudApp,
+               void(application_manager::ApplicationSharedPtr app));
   MOCK_METHOD0(RefreshCloudAppInformation, void());
   MOCK_CONST_METHOD1(GetCloudAppConnectionStatus,
                      hmi_apis::Common_CloudConnectionStatus::eType(

@@ -372,6 +372,8 @@ class ApplicationManagerImpl
   void ConnectToDevice(const std::string& device_mac) OVERRIDE;
   void OnHMIStartedCooperation() OVERRIDE;
 
+  void DisconnectCloudApp(ApplicationSharedPtr app) OVERRIDE;
+
   void RefreshCloudAppInformation() OVERRIDE;
 
   void CreatePendingApplication(

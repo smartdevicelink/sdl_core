@@ -970,6 +970,12 @@ class PolicyManagerImpl : public PolicyManager {
                                  const std::string& application_id) OVERRIDE;
 
   /**
+   * @brief notify listener of updated auth token for a given policy id
+   * @param policy_app_id the app id that has an updated auth token
+   */
+  void SendAuthTokenUpdated(const std::string policy_app_id);
+
+  /**
     * @brief Gets all allowed module types
     * @param policy_app_id unique identifier of application
     * @param modules list of allowed module types

@@ -832,6 +832,38 @@ void ApplicationManagerImpl::SetIconExists(const std::string policy_id) {
     app_icon_it->second.icon_exists = true;
   }
   app_icon_map_lock_ptr_.Release();
+void ApplicationManagerImpl::DisconnectCloudApp(ApplicationSharedPtr app) {
+  std::string endpoint;
+  std::string certificate;
+  std::string auth_token;
+  std::string cloud_transport_type;
+  std::string hybrid_app_preference;
+  bool enabled = true;
+  std::string policy_app_id = app->policy_app_id();
+  GetPolicyHandler().GetCloudAppParameters(policy_app_id,
+                                           enabled,
+                                           endpoint,
+                                           certificate,
+                                           auth_token,
+                                           cloud_transport_type,
+                                           hybrid_app_preference);
+  if (app->IsRegistered() && app->is_cloud_app()) {
+    LOG4CXX_DEBUG(logger_, "Disabled app is registered, unregistering now");
+    GetRPCService().ManageMobileCommand(
+        MessageHelper::GetOnAppInterfaceUnregisteredNotificationToMobile(
+            app->app_id(),
+            mobile_api::AppInterfaceUnregisteredReason::APP_UNAUTHORIZED),
+        commands::Command::SOURCE_SDL);
+
+    OnAppUnauthorized(app->app_id());
+  }
+  // Delete the cloud device
+  connection_handler().RemoveCloudAppDevice(app->device());
+
+  // Create device in pending state
+  LOG4CXX_DEBUG(logger_, "Re-adding the cloud app device");
+  connection_handler().AddCloudAppDevice(
+      policy_app_id, endpoint, cloud_transport_type);
 }
 
 void ApplicationManagerImpl::RefreshCloudAppInformation() {
@@ -872,6 +904,7 @@ void ApplicationManagerImpl::RefreshCloudAppInformation() {
     }
 
     // If the device was disconnected, this will reinitialize the device
+<<<<<<< HEAD
     connection_handler().AddCloudAppDevice(endpoint, cloud_transport_type);
 
     // Look for app icon url data and add to app_icon_url_map
@@ -908,6 +941,10 @@ void ApplicationManagerImpl::RefreshCloudAppInformation() {
                   "Inserting cloud app into icon map: " << icon_map_size);
     app_icon_map_.insert(
         std::pair<std::string, AppIconInfo>(*enabled_it, icon_info));
+=======
+    connection_handler().AddCloudAppDevice(
+        *enabled_it, endpoint, cloud_transport_type);
+>>>>>>> origin/feature/cloud_app_transport
   }
   app_icon_map_lock_ptr_.Release();
   pending_device_map_lock_ptr_->Release();

@@ -487,6 +487,9 @@
   <element name="UNSUPPORTED_HMI_RESOURCE">
     <description>By getting this value, SDL unregisters the named application</description>
   </element>
+  <element name="CLOSE_CLOUD_CONNECTION">
+    <description>By getting this value, SDL puts the named app to NONE HMILevel. Used by the HMI to close a cloud app connection.</description>
+  </element>
 </enum>
 
 <enum name="TextFieldName">
