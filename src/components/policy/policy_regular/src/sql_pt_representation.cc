@@ -733,7 +733,7 @@ bool SQLPTRepresentation::GatherApplicationPoliciesSection(
     }
     *params.auth_token = query.GetString(8);
     *params.cloud_transport_type = query.GetString(9);
-    *params.icon_url = query.GetString(9);
+    *params.icon_url = query.GetString(10);
 
     const auto& gather_app_id = ((*policies).apps[app_id].is_string())
                                     ? (*policies).apps[app_id].get_string()

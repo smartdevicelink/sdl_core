@@ -1547,6 +1547,8 @@ bool MessageHelper::CreateHMIApplicationStruct(
   message[hmi_response::policy_app_id] = policy_app_id;
 
   const std::string icon_path = app->app_icon_path();
+
+  LOG4CXX_DEBUG(logger_, "Get ICON PATH" << icon_path); 
   if (file_system::FileExists(app->app_icon_path())) {
     message[strings::icon] = icon_path;
   }

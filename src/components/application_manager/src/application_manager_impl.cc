@@ -240,6 +240,12 @@ DataAccessor<ApplicationSet> ApplicationManagerImpl::applications() const {
   return accessor;
 }
 
+DataAccessor<AppsWaitRegistrationSet> ApplicationManagerImpl::pending_applications() const {
+  DataAccessor<AppsWaitRegistrationSet> accessor(apps_to_register_,
+                                        apps_to_register_list_lock_ptr_);
+  return accessor;
+}
+
 ApplicationSharedPtr ApplicationManagerImpl::application(
     uint32_t app_id) const {
   AppIdPredicate finder(app_id);
@@ -259,6 +265,13 @@ ApplicationSharedPtr ApplicationManagerImpl::application_by_policy_id(
   PolicyAppIdPredicate finder(policy_app_id);
   DataAccessor<ApplicationSet> accessor = applications();
   return FindApp(accessor, finder);
+}
+
+ApplicationSharedPtr ApplicationManagerImpl::pending_application_by_policy_id(
+    const std::string& policy_app_id) const {
+  PolicyAppIdPredicate finder(policy_app_id);
+  DataAccessor<AppsWaitRegistrationSet> accessor = pending_applications();
+  return FindPendingApp(accessor, finder);
 }
 
 bool ActiveAppPredicate(const ApplicationSharedPtr app) {
@@ -832,6 +845,28 @@ void ApplicationManagerImpl::SetIconExists(const std::string policy_id) {
     app_icon_it->second.icon_exists = true;
   }
   app_icon_map_lock_ptr_.Release();
+
+  // Find pending application and set icon path
+  auto app = pending_application_by_policy_id(policy_id);
+  if (!app) {
+    return;
+  }
+  const std::string app_icon_dir(settings_.app_icons_folder());
+  const std::string full_icon_path(app_icon_dir + "/" + policy_id);
+  if (file_system::FileExists(full_icon_path)) {
+    LOG4CXX_DEBUG(logger_, "Set Icon Path: " << full_icon_path);
+    AppFile file;
+    file.is_persistent = true;
+    file.is_download_complete = true;
+    file.file_name = full_icon_path;
+    file.file_type = mobile_apis::FileType::GRAPHIC_PNG;
+    app->AddFile(file);
+    app->set_app_icon_path(full_icon_path);
+
+  }
+  SendUpdateAppList();
+}
+
 void ApplicationManagerImpl::DisconnectCloudApp(ApplicationSharedPtr app) {
   std::string endpoint;
   std::string certificate;
@@ -904,8 +939,8 @@ void ApplicationManagerImpl::RefreshCloudAppInformation() {
     }
 
     // If the device was disconnected, this will reinitialize the device
-<<<<<<< HEAD
-    connection_handler().AddCloudAppDevice(endpoint, cloud_transport_type);
+    connection_handler().AddCloudAppDevice(
+        *enabled_it, endpoint, cloud_transport_type);
 
     // Look for app icon url data and add to app_icon_url_map
 
@@ -941,10 +976,6 @@ void ApplicationManagerImpl::RefreshCloudAppInformation() {
                   "Inserting cloud app into icon map: " << icon_map_size);
     app_icon_map_.insert(
         std::pair<std::string, AppIconInfo>(*enabled_it, icon_info));
-=======
-    connection_handler().AddCloudAppDevice(
-        *enabled_it, endpoint, cloud_transport_type);
->>>>>>> origin/feature/cloud_app_transport
   }
   app_icon_map_lock_ptr_.Release();
   pending_device_map_lock_ptr_->Release();

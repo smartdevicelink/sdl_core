@@ -165,6 +165,7 @@ class ApplicationManagerImpl
   bool Stop() OVERRIDE;
 
   DataAccessor<ApplicationSet> applications() const OVERRIDE;
+  DataAccessor<AppsWaitRegistrationSet> pending_applications() const OVERRIDE;
   ApplicationSharedPtr application(uint32_t app_id) const OVERRIDE;
 
   ApplicationSharedPtr active_application() const OVERRIDE;
@@ -172,6 +173,8 @@ class ApplicationManagerImpl
   ApplicationSharedPtr application_by_hmi_app(
       uint32_t hmi_app_id) const OVERRIDE;
   ApplicationSharedPtr application_by_policy_id(
+      const std::string& policy_app_id) const OVERRIDE;
+  ApplicationSharedPtr pending_application_by_policy_id(
       const std::string& policy_app_id) const OVERRIDE;
 
   std::vector<ApplicationSharedPtr> applications_by_button(
@@ -520,8 +523,8 @@ class ApplicationManagerImpl
   // typedef for Applications list
   typedef std::set<ApplicationSharedPtr, ApplicationsAppIdSorter> ApplictionSet;
 
-  typedef std::set<ApplicationSharedPtr, ApplicationsPolicyAppIdSorter>
-      AppsWaitRegistrationSet;
+  //typedef std::set<ApplicationSharedPtr, ApplicationsPolicyAppIdSorter>
+  //    AppsWaitRegistrationSet;
 
   // typedef for Applications list iterator
   typedef ApplictionSet::iterator ApplictionSetIt;

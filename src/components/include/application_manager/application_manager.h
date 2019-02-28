@@ -152,6 +152,7 @@ class ApplicationManager {
       connection_handler::ConnectionHandler* handler) = 0;
 
   virtual DataAccessor<ApplicationSet> applications() const = 0;
+  virtual DataAccessor<AppsWaitRegistrationSet> pending_applications() const = 0;
 
   virtual ApplicationSharedPtr application(uint32_t app_id) const = 0;
   virtual ApplicationSharedPtr active_application() const = 0;
@@ -165,6 +166,9 @@ class ApplicationManager {
       uint32_t hmi_app_id) const = 0;
 
   virtual ApplicationSharedPtr application_by_policy_id(
+      const std::string& policy_app_id) const = 0;
+
+  virtual ApplicationSharedPtr pending_application_by_policy_id(
       const std::string& policy_app_id) const = 0;
 
   virtual AppSharedPtrs applications_by_button(uint32_t button) = 0;

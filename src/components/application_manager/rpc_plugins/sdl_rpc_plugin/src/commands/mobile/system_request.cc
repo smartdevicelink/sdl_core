@@ -511,7 +511,7 @@ void SystemRequest::Run() {
     return;
   }
 
-  if (!file_system::IsFileNameValid(file_name)) {
+  if (!file_system::IsFileNameValid(file_name) && mobile_apis::RequestType::ICON_URL != request_type) {
     const std::string err_msg = "Sync file name contains forbidden symbols.";
     LOG4CXX_ERROR(logger_, err_msg);
     SendResponse(false, mobile_apis::Result::INVALID_DATA, err_msg.c_str());
@@ -539,6 +539,7 @@ void SystemRequest::Run() {
       // Use the URL file name to identify the policy id.
       // Save the icon file with the policy id as the name.
       file_name = application_manager_.PolicyIDByIconUrl(file_name);
+      LOG4CXX_DEBUG(logger_, "Got ICON_URL Request. File name: " << file_name);
     } else {
       binary_data_folder =
           application_manager_.get_settings().system_files_path();
