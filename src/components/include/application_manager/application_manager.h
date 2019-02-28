@@ -152,7 +152,8 @@ class ApplicationManager {
       connection_handler::ConnectionHandler* handler) = 0;
 
   virtual DataAccessor<ApplicationSet> applications() const = 0;
-  virtual DataAccessor<AppsWaitRegistrationSet> pending_applications() const = 0;
+  virtual DataAccessor<AppsWaitRegistrationSet> pending_applications()
+      const = 0;
 
   virtual ApplicationSharedPtr application(uint32_t app_id) const = 0;
   virtual ApplicationSharedPtr active_application() const = 0;

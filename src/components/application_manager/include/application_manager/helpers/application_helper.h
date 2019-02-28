@@ -58,8 +58,8 @@ ApplicationSharedPtr FindApp(DataAccessor<ApplicationSet> accessor,
 }
 
 template <class UnaryPredicate>
-ApplicationSharedPtr FindPendingApp(DataAccessor<AppsWaitRegistrationSet> accessor,
-                             UnaryPredicate finder) {
+ApplicationSharedPtr FindPendingApp(
+    DataAccessor<AppsWaitRegistrationSet> accessor, UnaryPredicate finder) {
   AppsWaitRegistrationSet::iterator it = std::find_if(
       accessor.GetData().begin(), accessor.GetData().end(), finder);
   if (accessor.GetData().end() == it) {

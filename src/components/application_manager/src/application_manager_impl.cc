@@ -240,9 +240,10 @@ DataAccessor<ApplicationSet> ApplicationManagerImpl::applications() const {
   return accessor;
 }
 
-DataAccessor<AppsWaitRegistrationSet> ApplicationManagerImpl::pending_applications() const {
-  DataAccessor<AppsWaitRegistrationSet> accessor(apps_to_register_,
-                                        apps_to_register_list_lock_ptr_);
+DataAccessor<AppsWaitRegistrationSet>
+ApplicationManagerImpl::pending_applications() const {
+  DataAccessor<AppsWaitRegistrationSet> accessor(
+      apps_to_register_, apps_to_register_list_lock_ptr_);
   return accessor;
 }
 
@@ -862,7 +863,6 @@ void ApplicationManagerImpl::SetIconExists(const std::string policy_id) {
     file.file_type = mobile_apis::FileType::GRAPHIC_PNG;
     app->AddFile(file);
     app->set_app_icon_path(full_icon_path);
-
   }
   SendUpdateAppList();
 }

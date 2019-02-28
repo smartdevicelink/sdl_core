@@ -511,7 +511,8 @@ void SystemRequest::Run() {
     return;
   }
 
-  if (!file_system::IsFileNameValid(file_name) && mobile_apis::RequestType::ICON_URL != request_type) {
+  if (!file_system::IsFileNameValid(file_name) &&
+      mobile_apis::RequestType::ICON_URL != request_type) {
     const std::string err_msg = "Sync file name contains forbidden symbols.";
     LOG4CXX_ERROR(logger_, err_msg);
     SendResponse(false, mobile_apis::Result::INVALID_DATA, err_msg.c_str());

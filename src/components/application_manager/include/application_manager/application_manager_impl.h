@@ -523,7 +523,7 @@ class ApplicationManagerImpl
   // typedef for Applications list
   typedef std::set<ApplicationSharedPtr, ApplicationsAppIdSorter> ApplictionSet;
 
-  //typedef std::set<ApplicationSharedPtr, ApplicationsPolicyAppIdSorter>
+  // typedef std::set<ApplicationSharedPtr, ApplicationsPolicyAppIdSorter>
   //    AppsWaitRegistrationSet;
 
   // typedef for Applications list iterator
