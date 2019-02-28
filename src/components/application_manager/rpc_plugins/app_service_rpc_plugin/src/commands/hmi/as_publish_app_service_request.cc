@@ -51,11 +51,6 @@ ASPublishAppServiceRequest::ASPublishAppServiceRequest(
 
 ASPublishAppServiceRequest::~ASPublishAppServiceRequest() {}
 
-bool ASPublishAppServiceRequest::ValidateManifest(
-    smart_objects::SmartObject& manifest) {
-  return true;
-}
-
 void ASPublishAppServiceRequest::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
   LOG4CXX_DEBUG(logger_, "Received a PublishAppService request from HMI");
@@ -63,9 +58,6 @@ void ASPublishAppServiceRequest::Run() {
       smart_objects::SmartObject(smart_objects::SmartType_Map);
   smart_objects::SmartObject manifest =
       (*message_)[strings::msg_params][strings::app_service_manifest];
-  if (!ValidateManifest(manifest)) {
-    return;
-  }
   smart_objects::SmartObject service_record =
       application_manager_.GetAppServiceManager().PublishAppService(
           manifest, false, UINT32_MAX);

@@ -55,11 +55,6 @@ PublishAppServiceRequest::PublishAppServiceRequest(
 
 PublishAppServiceRequest::~PublishAppServiceRequest() {}
 
-bool PublishAppServiceRequest::ValidateManifest(
-    smart_objects::SmartObject& manifest) {
-  return true;
-}
-
 void PublishAppServiceRequest::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
   LOG4CXX_DEBUG(logger_, "Received a PublishAppService " << connection_key());
@@ -69,9 +64,6 @@ void PublishAppServiceRequest::Run() {
       smart_objects::SmartObject(smart_objects::SmartType_Map);
   smart_objects::SmartObject manifest =
       (*message_)[strings::msg_params][strings::app_service_manifest];
-  if (!ValidateManifest(manifest)) {
-    return;
-  }
 
   ApplicationSharedPtr app = application_manager_.application(connection_key());
 
