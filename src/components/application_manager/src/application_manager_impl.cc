@@ -829,10 +829,10 @@ std::string ApplicationManagerImpl::PolicyIDByIconUrl(const std::string url) {
     std::string icon_url = GetPolicyHandler().GetIconUrl(policy_id);
     if (icon_url == url) {
       LOG4CXX_DEBUG(logger_, "Matched icon url: " << url);
+      x.second.pending_request = false;
+      app_icon_map_lock_ptr_.Release();
+      return policy_id;
     }
-    x.second.pending_request = false;
-    app_icon_map_lock_ptr_.Release();
-    return policy_id;
   }
   app_icon_map_lock_ptr_.Release();
   return std::string("");
@@ -3756,7 +3756,15 @@ void ApplicationManagerImpl::OnPTUFinished(const bool ptu_result) {
   if (!ptu_result) {
     return;
   }
+
   RefreshCloudAppInformation();
+
+  auto app_id = policy_handler_->GetAppIdForSending();
+  auto app = application(app_id);
+  if (app) {
+    SendGetIconUrlNotifications(app->app_id(), app);
+  } 
+
   auto on_app_policy_updated = [](plugin_manager::RPCPlugin& plugin) {
     plugin.OnPolicyEvent(plugin_manager::kApplicationPolicyUpdated);
   };
