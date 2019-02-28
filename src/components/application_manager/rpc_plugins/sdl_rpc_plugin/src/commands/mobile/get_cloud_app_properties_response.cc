@@ -14,17 +14,17 @@ GetCloudAppPropertiesResponse::GetCloudAppPropertiesResponse(
     app_mngr::HMICapabilities& hmi_capabilities,
     policy::PolicyHandlerInterface& policy_handler)
     : CommandResponseImpl(message,
-                            application_manager,
-                            rpc_service,
-                            hmi_capabilities,
-                            policy_handler) {}
+                          application_manager,
+                          rpc_service,
+                          hmi_capabilities,
+                          policy_handler) {}
 
 GetCloudAppPropertiesResponse::~GetCloudAppPropertiesResponse() {}
 
 void GetCloudAppPropertiesResponse::Run() {
-    LOG4CXX_AUTO_TRACE(logger_);
+  LOG4CXX_AUTO_TRACE(logger_);
 
-    rpc_service_.SendMessageToMobile(message_);
+  rpc_service_.SendMessageToMobile(message_);
 }
 
 }  // namespace commands

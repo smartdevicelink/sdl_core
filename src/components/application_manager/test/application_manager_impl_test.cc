@@ -1428,8 +1428,7 @@ TEST_F(ApplicationManagerImplTest,
   ON_CALL(*waiting_app, device()).WillByDefault(Return(kDeviceId));
   EXPECT_CALL(*waiting_app, cloud_app_endpoint())
       .WillOnce(ReturnRef(kEndpoint));
-  EXPECT_CALL(*waiting_app, auth_token())
-      .WillOnce(ReturnRef(kAuthToken));
+  EXPECT_CALL(*waiting_app, auth_token()).WillOnce(ReturnRef(kAuthToken));
   EXPECT_CALL(*waiting_app, cloud_app_certificate())
       .WillOnce(ReturnRef(kCertificate));
   EXPECT_CALL(*waiting_app, cloud_app_transport_type())
