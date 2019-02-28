@@ -87,6 +87,21 @@ void RPCHandlerImpl::ProcessMessageFromMobile(
     LOG4CXX_ERROR(logger_, "Cannot create smart object from message");
     return;
   }
+  if (rpc_passing) {
+    if (app_manager_.GetAppServiceManager().RPCPassThrough(*so_from_mobile)) {
+      LOG4CXX_ERROR(
+          logger_,
+          "RPC_PASS_THROUGH_FROMMOBILE: Cancelling current request and "
+          "switching to next one");
+      return;
+    } else {
+      if (!ConvertMessageToSO(*message, *so_from_mobile, true)) {
+        LOG4CXX_ERROR(logger_, "Cannot create smart object from message");
+        return;
+      }
+    }
+  }
+
 #ifdef TELEMETRY_MONITOR
   metric->message = so_from_mobile;
 #endif  // TELEMETRY_MONITOR
@@ -296,7 +311,8 @@ bool RPCHandlerImpl::ConvertMessageToSO(
           !mobile_so_factory().attachSchema(
               output, RemoveUnknownParameters, msg_version) ||
           ((output.validate(&report, msg_version) !=
-            smart_objects::errors::OK))) {
+                smart_objects::errors::OK &&
+            RemoveUnknownParameters))) {
         LOG4CXX_WARN(logger_,
                      "Failed to parse string to smart object with API version "
                          << msg_version.toString() << " : "

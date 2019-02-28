@@ -37,6 +37,7 @@
 #include "interfaces/MOBILE_API.h"
 #include "smart_objects/smart_object.h"
 #include "application_manager/application.h"
+#include <queue>
 
 namespace resumption {
 class LastState;
@@ -51,6 +52,11 @@ struct AppService {
   smart_objects::SmartObject record;
 };
 
+struct RpcPassThroughRequest {
+  uint32_t origin_connection_key;
+  uint32_t destination_connection_key;
+  smart_objects::SmartObject message;
+};
 class ApplicationManager;
 
 /**
@@ -158,13 +164,25 @@ class AppServiceManager {
    */
   bool CanUseRPCPassing(int32_t function_id);
 
+  /**
+     * @brief TODO
+     * @param message RPC message SmartObject
+     */
+  bool RPCPassThrough(smart_objects::SmartObject rpc_message);
+
  private:
+  bool CycleThroughRPCPassingRequests(uint32_t correlation_id);
+
   void GetProviderFromService(const AppService& service,
                               ApplicationSharedPtr& app,
                               bool& hmi_service);
   ApplicationManager& app_manager_;
   resumption::LastState& last_state_;
   std::map<std::string, AppService> published_services_;
+
+  std::map<uint32_t, std::queue<RpcPassThroughRequest> >
+      rpc_pass_through_requests_;
+  std::map<uint32_t, RpcPassThroughRequest> current_rpc_pass_through_request_;
 
   void BroadcastAppServiceUpdate(smart_objects::SmartObject& msg_params);
   void AppServiceUpdated(
