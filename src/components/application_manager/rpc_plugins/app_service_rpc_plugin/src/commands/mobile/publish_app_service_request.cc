@@ -57,16 +57,6 @@ PublishAppServiceRequest::~PublishAppServiceRequest() {}
 
 bool PublishAppServiceRequest::ValidateManifest(
     smart_objects::SmartObject& manifest) {
-  if (manifest.keyExists(strings::uri_scheme)) {
-    Json::Value value;
-    Json::Reader reader;
-    if (!reader.parse(manifest[strings::uri_scheme].asString(), value)) {
-      SendResponse(false,
-                   mobile_apis::Result::INVALID_DATA,
-                   "Provided uriScheme was not valid JSON");
-      return false;
-    }
-  }
   return true;
 }
 

@@ -308,8 +308,6 @@ extern const char* service_name;
 extern const char* service_type;
 extern const char* service_icon;
 extern const char* allow_app_consumers;
-extern const char* uri_prefix;
-extern const char* uri_scheme;
 extern const char* rpc_spec_version;
 extern const char* handled_rpcs;
 extern const char* media_service_manifest;
