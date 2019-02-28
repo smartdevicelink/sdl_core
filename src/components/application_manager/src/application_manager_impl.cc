@@ -808,6 +808,40 @@ void ApplicationManagerImpl::OnHMIStartedCooperation() {
   RefreshCloudAppInformation();
 }
 
+void ApplicationManagerImpl::DisconnectCloudApp(ApplicationSharedPtr app) {
+  std::string endpoint;
+  std::string certificate;
+  std::string auth_token;
+  std::string cloud_transport_type;
+  std::string hybrid_app_preference;
+  bool enabled = true;
+  std::string policy_app_id = app->policy_app_id();
+  GetPolicyHandler().GetCloudAppParameters(policy_app_id,
+                                           enabled,
+                                           endpoint,
+                                           certificate,
+                                           auth_token,
+                                           cloud_transport_type,
+                                           hybrid_app_preference);
+  if (app->IsRegistered() && app->is_cloud_app()) {
+    LOG4CXX_DEBUG(logger_, "Disabled app is registered, unregistering now");
+    GetRPCService().ManageMobileCommand(
+        MessageHelper::GetOnAppInterfaceUnregisteredNotificationToMobile(
+            app->app_id(),
+            mobile_api::AppInterfaceUnregisteredReason::APP_UNAUTHORIZED),
+        commands::Command::SOURCE_SDL);
+
+    OnAppUnauthorized(app->app_id());
+  }
+  // Delete the cloud device
+  connection_handler().RemoveCloudAppDevice(app->device());
+
+  // Create device in pending state
+  LOG4CXX_DEBUG(logger_, "Re-adding the cloud app device");
+  connection_handler().AddCloudAppDevice(
+      policy_app_id, endpoint, cloud_transport_type);
+}
+
 void ApplicationManagerImpl::RefreshCloudAppInformation() {
   LOG4CXX_AUTO_TRACE(logger_);
   std::vector<std::string> enabled_apps;

@@ -427,6 +427,8 @@ class ApplicationManager {
 
   virtual void OnHMIStartedCooperation() = 0;
 
+  virtual void DisconnectCloudApp(ApplicationSharedPtr app) = 0;
+
   virtual void RefreshCloudAppInformation() = 0;
 
   /**
