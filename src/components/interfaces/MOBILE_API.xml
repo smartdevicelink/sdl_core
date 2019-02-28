@@ -6657,19 +6657,8 @@
         <description>
             RPC used to enable/disable a cloud application and set authentication data
         </description>
-        <param name="appName" type="String" maxlength="100" mandatory="true"></param>
-        <param name="appID" type="String" maxlength="100" mandatory="true"></param>
-        <param name="enabled" type="Boolean" mandatory="false">
-            <description>If true, cloud app will be included in HMI RPC UpdateAppList</description>
-        </param>
-        <param name="cloudAppAuthToken" type="String" maxlength="100" mandatory="false">
-            <description>Used to authenticate websocket connection on app activation</description>
-        </param>
-        <param name="cloudTransportType" type="String" maxlength="100" mandatory="false">
-            <description>Specifies the connection type Core should use</description>
-        </param>
-        <param name="hybridAppPreference" type="HybridAppPreference" mandatory="false">
-            <description>Specifies the user preference to use the cloud app version or mobile app version when both are available</description>
+        <param name="properties" type="CloudAppProperties" mandatory="false">
+            <description> The requested cloud application properties </description>
         </param>
     </function>
 

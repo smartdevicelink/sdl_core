@@ -59,10 +59,11 @@ CREATE_LOGGERPTR_GLOBAL(logger_, "ProtocolHandler")
 std::string ConvertPacketDataToString(const uint8_t* data,
                                       const size_t data_size);
 
-const size_t kStackSize = 65536;
+const size_t kStackSize = 131072;
 
-utils::SemanticVersion defaultProtocolVersion(5, 1, 0);
-utils::SemanticVersion minMultipleTransportsVersion(5, 1, 0);
+utils::SemanticVersion default_protocol_version(5, 2, 0);
+utils::SemanticVersion min_multiple_transports_version(5, 1, 0);
+utils::SemanticVersion min_cloud_app_version(5, 2, 0);
 
 ProtocolHandlerImpl::ProtocolHandlerImpl(
     const ProtocolHandlerSettings& settings,
@@ -309,16 +310,16 @@ void ProtocolHandlerImpl::SendStartSessionAck(
                                &params, strings::hash_id)));
 
       // Minimum protocol version supported by both
-      utils::SemanticVersion* minVersion =
+      utils::SemanticVersion* min_version =
           (full_version.major_version_ < PROTOCOL_VERSION_5)
-              ? &defaultProtocolVersion
+              ? &default_protocol_version
               : utils::SemanticVersion::min(full_version,
-                                            defaultProtocolVersion);
-      char protocolVersionString[256];
-      strncpy(protocolVersionString, (*minVersion).toString().c_str(), 255);
+                                            default_protocol_version);
+      char protocol_version_string[256];
+      strncpy(protocol_version_string, (*min_version).toString().c_str(), 255);
 
       const bool protocol_ver_written = bson_object_put_string(
-          &params, strings::protocol_version, protocolVersionString);
+          &params, strings::protocol_version, protocol_version_string);
       UNUSED(protocol_ver_written);
       LOG4CXX_DEBUG(
           logger_,
@@ -327,12 +328,12 @@ void ProtocolHandlerImpl::SendStartSessionAck(
               << bson_object_get_string(&params, strings::protocol_version));
 
       LOG4CXX_INFO(logger_,
-                   "Protocol Version String " << protocolVersionString);
+                   "Protocol Version String " << protocol_version_string);
 
       std::vector<std::string> secondaryTransports;
       std::vector<int32_t> audioServiceTransports;
       std::vector<int32_t> videoServiceTransports;
-      if (*minVersion >= minMultipleTransportsVersion) {
+      if (*min_version >= min_multiple_transports_version) {
         if (ParseSecondaryTransportConfiguration(connection_id,
                                                  secondaryTransports,
                                                  audioServiceTransports,
@@ -410,10 +411,23 @@ void ProtocolHandlerImpl::SendStartSessionAck(
         connection_handler_.SetSecondaryTransportID(session_id,
                                                     kDisabledSecondary);
       }
+
+      std::string policy_app_id =
+          connection_handler_.GetCloudAppID(connection_id);
+      if (*min_version >= min_cloud_app_version && !policy_app_id.empty()) {
+        sync_primitives::AutoLock lock(auth_token_map_lock_);
+        auto it = auth_token_map_.find(policy_app_id);
+        if (it != auth_token_map_.end()) {
+          char auth_token[65536];
+          strncpy(auth_token, it->second.c_str(), 65535);
+          auth_token[sizeof(auth_token) - 1] = '\0';
+          bson_object_put_string(&params, strings::auth_token, auth_token);
+        }
+      }
     }
-    uint8_t* payloadBytes = bson_object_to_bytes(&params);
-    ptr->set_data(payloadBytes, bson_object_size(&params));
-    free(payloadBytes);
+    uint8_t* payload_bytes = bson_object_to_bytes(&params);
+    ptr->set_data(payload_bytes, bson_object_size(&params));
+    free(payload_bytes);
   } else {
     set_hash_id(hash_id, *ptr);
   }
@@ -1182,6 +1196,17 @@ void ProtocolHandlerImpl::OnTransportConfigUpdated(
       SendTransportUpdateEvent(st.primary_transport, itr->first);
     }
     itr++;
+  }
+}
+
+void ProtocolHandlerImpl::OnAuthTokenUpdated(const std::string& policy_app_id,
+                                             const std::string& auth_token) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  sync_primitives::AutoLock lock(auth_token_map_lock_);
+  if (auth_token.empty()) {
+    auth_token_map_.erase(policy_app_id);
+  } else {
+    auth_token_map_[policy_app_id] = auth_token;
   }
 }
 
