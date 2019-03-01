@@ -82,6 +82,12 @@ class MockCacheManagerInterface : public CacheManagerInterface {
   MOCK_METHOD2(SetAppCloudTransportType,
                void(const std::string& policy_app_id,
                     const std::string& cloud_transport_type));
+  MOCK_METHOD2(SetAppEndpoint,
+               void(const std::string& policy_app_id,
+                    const std::string& endpoint));
+  MOCK_METHOD2(SetAppName,
+               void(const std::string& policy_app_id,
+                    const std::string& app_name));
   MOCK_METHOD2(SetHybridAppPreference,
                void(const std::string& policy_app_id,
                     const std::string& hybrid_app_preference));

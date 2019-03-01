@@ -584,6 +584,20 @@ class PolicyManager : public usage_statistics::StatisticsManager {
       const std::string& cloud_transport_type) = 0;
 
   /**
+   * @brief Set a cloud app's endpoint url
+   * @param endpoint URL for websocket connection
+   */
+  virtual void SetAppEndpoint(const std::string& policy_app_id,
+                              const std::string& endpoint) = 0;
+
+  /**
+   * @brief Set a cloud app's name
+   * @param app_name Nickname for cloud app
+   */
+  virtual void SetAppName(const std::string& policy_app_id,
+                          const std::string& app_name) = 0;
+
+  /**
    * @brief Set the user preference for how a hybrid (cloud and mobile) app
    * should be used
    * @param hybrid_app_preference Hybrid app user preference

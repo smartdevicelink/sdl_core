@@ -591,6 +591,16 @@ void PolicyManagerImpl::SetAppCloudTransportType(
   cache_->SetAppCloudTransportType(policy_app_id, cloud_transport_type);
 }
 
+void PolicyManagerImpl::SetAppEndpoint(const std::string& policy_app_id,
+                                       const std::string& endpoint) {
+  cache_->SetAppEndpoint(policy_app_id, endpoint);
+}
+
+void PolicyManagerImpl::SetAppName(const std::string& policy_app_id,
+                                   const std::string& app_name) {
+  cache_->SetAppName(policy_app_id, app_name);
+}
+
 void PolicyManagerImpl::SetHybridAppPreference(
     const std::string& policy_app_id,
     const std::string& hybrid_app_preference) {
