@@ -1948,10 +1948,6 @@ void PolicyHandler::OnSetCloudAppProperties(
     policy_manager_->SetAppEndpoint(policy_app_id,
                                     properties[strings::endpoint].asString());
   }
-  if (properties.keyExists(strings::app_name)) {
-    policy_manager_->SetAppName(policy_app_id,
-                                properties[strings::app_name].asString());
-  }
   if (properties.keyExists(strings::hybrid_app_preference)) {
     std::string hybrid_app_preference;
 
