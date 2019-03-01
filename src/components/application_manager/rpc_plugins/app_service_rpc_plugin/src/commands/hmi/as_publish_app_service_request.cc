@@ -51,23 +51,6 @@ ASPublishAppServiceRequest::ASPublishAppServiceRequest(
 
 ASPublishAppServiceRequest::~ASPublishAppServiceRequest() {}
 
-bool ASPublishAppServiceRequest::ValidateManifest(
-    smart_objects::SmartObject& manifest) {
-  if (manifest.keyExists(strings::uri_scheme)) {
-    Json::Value value;
-    Json::Reader reader;
-    if (!reader.parse(manifest[strings::uri_scheme].asString(), value)) {
-      SendResponse(
-          false,
-          (*message_)[strings::params][strings::correlation_id].asUInt(),
-          hmi_apis::FunctionID::AppService_PublishAppService,
-          hmi_apis::Common_Result::INVALID_DATA);
-      return false;
-    }
-  }
-  return true;
-}
-
 void ASPublishAppServiceRequest::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
   LOG4CXX_DEBUG(logger_, "Received a PublishAppService request from HMI");
@@ -75,9 +58,6 @@ void ASPublishAppServiceRequest::Run() {
       smart_objects::SmartObject(smart_objects::SmartType_Map);
   smart_objects::SmartObject manifest =
       (*message_)[strings::msg_params][strings::app_service_manifest];
-  if (!ValidateManifest(manifest)) {
-    return;
-  }
   smart_objects::SmartObject service_record =
       application_manager_.GetAppServiceManager().PublishAppService(
           manifest, false, UINT32_MAX);
