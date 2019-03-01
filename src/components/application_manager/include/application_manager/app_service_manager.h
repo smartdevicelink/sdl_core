@@ -64,6 +64,8 @@ class ApplicationManager;
  */
 class AppServiceManager {
  public:
+  const std::string kEmbeddedService = "EMBEDDED_SERVICE";
+
   /**
    * @brief Class constructor
    * @param app_manager
@@ -98,14 +100,6 @@ class AppServiceManager {
    * @param connection_key
    */
   void UnpublishServices(const uint32_t connection_key);
-
-  /**
-   * @brief TODO
-   * @param service_id
-   * @param service_published
-   */
-  void SetServicePublished(const std::string service_id,
-                           bool service_published);
 
   /**
    * @brief TODO
@@ -170,12 +164,21 @@ class AppServiceManager {
      */
   bool RPCPassThrough(smart_objects::SmartObject rpc_message);
 
- private:
-  bool CycleThroughRPCPassingRequests(uint32_t correlation_id);
+  /**
+     * @brief TODO
+   * @param service_id
+   * @param service_published
+   */
+  void SetServicePublished(const std::string service_id,
+                           bool service_published);
 
-  void GetProviderFromService(const AppService& service,
-                              ApplicationSharedPtr& app,
-                              bool& hmi_service);
+  /**
+   * @brief TODO
+   * @param out_params
+   */
+  bool UpdateNavigationCapabilities(smart_objects::SmartObject& out_params);
+
+ private:
   ApplicationManager& app_manager_;
   resumption::LastState& last_state_;
   std::map<std::string, AppService> published_services_;
@@ -184,11 +187,18 @@ class AppServiceManager {
       rpc_pass_through_requests_;
   std::map<uint32_t, RpcPassThroughRequest> current_rpc_pass_through_request_;
 
-  void BroadcastAppServiceUpdate(smart_objects::SmartObject& msg_params);
+  bool CycleThroughRPCPassingRequests(uint32_t correlation_id);
+
   void AppServiceUpdated(
       const smart_objects::SmartObject& service_record,
       const mobile_apis::ServiceUpdateReason::eType update_reason,
       smart_objects::SmartObject& msg_params);
+  void GetProviderFromService(const AppService& service,
+                              ApplicationSharedPtr& app,
+                              bool& hmi_service);
+  std::pair<std::string, AppService> FindServiceByPolicyAppID(
+      std::string policy_app_id, std::string type);
+  std::string GetPolicyAppID(AppService service);
 };
 
 }  //  namespace application_manager

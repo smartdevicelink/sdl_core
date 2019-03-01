@@ -326,6 +326,7 @@ extern const char* updated_app_service_record;
 extern const char* service_records;
 extern const char* activate;
 extern const char* set_as_default;
+extern const char* origin_app;
 
 // resuming
 extern const char* application_commands;
@@ -393,6 +394,8 @@ extern const char* const keyboard_layout_supported;
 extern const char* const keypress_mode_supported;
 extern const char* const limited_characters_list_supported;
 extern const char* const auto_complete_text_supported;
+extern const char* const send_location_enabled;
+extern const char* const get_way_points_enabled;
 extern const char* const entity_type;
 extern const char* const entity_id;
 extern const char* const status;

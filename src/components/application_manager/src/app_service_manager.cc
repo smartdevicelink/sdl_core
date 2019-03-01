@@ -36,13 +36,13 @@
 #include <iterator>
 
 #include "application_manager/application.h"
-#include "application_manager/app_service_manager.h"
 #include "application_manager/application_manager.h"
 #include "application_manager/commands/command_impl.h"
 #include "application_manager/message_helper.h"
 #include "application_manager/smart_object_keys.h"
 #include "encryption/hashing.h"
 #include "resumption/last_state.h"
+#include "smart_objects/enum_schema_item.h"
 #include "utils/logger.h"
 
 #include "smart_objects/enum_schema_item.h"
@@ -88,18 +88,32 @@ smart_objects::SmartObject AppServiceManager::PublishAppService(
   app_service.record = service_record;
 
   std::string service_type = manifest[strings::service_type].asString();
-  Json::Value& dictionary = last_state_.get_dictionary();
-  app_service.default_service =
-      (dictionary[kAppServiceSection][kDefaults][service_type].asString() ==
-       manifest[strings::service_name].asString());
+
+  std::string default_app_id = DefaultServiceByType(service_type);
+  if (default_app_id.empty() && !mobile_service) {
+    auto embedded_services = app_manager_.get_settings().embedded_services();
+    for (auto it = embedded_services.begin(); it != embedded_services.end();
+         ++it) {
+      if (*it == service_type) {
+        Json::Value& dictionary = last_state_.get_dictionary();
+        dictionary[kAppServiceSection][kDefaults][service_type] =
+            kEmbeddedService;
+        default_app_id = kEmbeddedService;
+      }
+    }
+  }
+  app_service.default_service = GetPolicyAppID(app_service) == default_app_id;
 
   published_services_.insert(
       std::pair<std::string, AppService>(service_id, app_service));
 
   smart_objects::SmartObject msg_params;
+  msg_params[strings::system_capability][strings::system_capability_type] =
+      mobile_apis::SystemCapabilityType::APP_SERVICES;
   AppServiceUpdated(
       service_record, mobile_apis::ServiceUpdateReason::PUBLISHED, msg_params);
-  BroadcastAppServiceUpdate(msg_params);
+
+  MessageHelper::BroadcastCapabilityUpdate(msg_params, app_manager_);
 
   // Activate the new service if it is the default for its service type, or if
   // no service is active of its service type
@@ -124,6 +138,8 @@ bool AppServiceManager::UnpublishAppService(const std::string service_id) {
 
   SetServicePublished(service_id, false);
   smart_objects::SmartObject msg_params;
+  msg_params[strings::system_capability][strings::system_capability_type] =
+      mobile_apis::SystemCapabilityType::APP_SERVICES;
 
   auto record = it->second.record;
   if (record[strings::service_active].asBool()) {
@@ -141,7 +157,7 @@ bool AppServiceManager::UnpublishAppService(const std::string service_id) {
   }
   AppServiceUpdated(
       it->second.record, mobile_apis::ServiceUpdateReason::REMOVED, msg_params);
-  BroadcastAppServiceUpdate(msg_params);
+  MessageHelper::BroadcastCapabilityUpdate(msg_params, app_manager_);
   published_services_.erase(it);
 
   return true;
@@ -234,9 +250,10 @@ bool AppServiceManager::SetDefaultService(const std::string service_id) {
   std::string service_type =
       service.record[strings::service_manifest][strings::service_type]
           .asString();
-  std::string default_service_name = DefaultServiceByType(service_type);
-  if (!default_service_name.empty()) {
-    auto default_service = FindServiceByName(default_service_name);
+  std::string default_app_id = DefaultServiceByType(service_type);
+  if (!default_app_id.empty()) {
+    auto default_service =
+        FindServiceByPolicyAppID(default_app_id, service_type);
     if (!default_service.first.empty()) {
       default_service.second.default_service = false;
     }
@@ -245,8 +262,7 @@ bool AppServiceManager::SetDefaultService(const std::string service_id) {
 
   Json::Value& dictionary = last_state_.get_dictionary();
   dictionary[kAppServiceSection][kDefaults][service_type] =
-      service.record[strings::service_manifest][strings::service_name]
-          .asString();
+      GetPolicyAppID(service);
   return true;
 }
 
@@ -288,6 +304,8 @@ bool AppServiceManager::ActivateAppService(const std::string service_id) {
   }
 
   smart_objects::SmartObject msg_params;
+  msg_params[strings::system_capability][strings::system_capability_type] =
+      mobile_apis::SystemCapabilityType::APP_SERVICES;
 
   const std::string service_type =
       service[strings::service_manifest][strings::service_type].asString();
@@ -302,7 +320,18 @@ bool AppServiceManager::ActivateAppService(const std::string service_id) {
   AppServiceUpdated(
       service, mobile_apis::ServiceUpdateReason::ACTIVATED, msg_params);
 
-  BroadcastAppServiceUpdate(msg_params);
+  MessageHelper::BroadcastCapabilityUpdate(msg_params, app_manager_);
+
+  std::string navi_service_type;
+  ns_smart_device_link::ns_smart_objects::
+      EnumConversionHelper<mobile_apis::AppServiceType::eType>::EnumToString(
+          mobile_apis::AppServiceType::NAVIGATION, &navi_service_type);
+  if (service_type == navi_service_type) {
+    smart_objects::SmartObject msg_params;
+    msg_params[strings::system_capability][strings::system_capability_type] =
+        mobile_apis::SystemCapabilityType::NAVIGATION;
+    MessageHelper::BroadcastCapabilityUpdate(msg_params, app_manager_);
+  }
   return true;
 }
 
@@ -336,7 +365,9 @@ bool AppServiceManager::DeactivateAppService(const std::string service_id) {
   }
 
   if (send_update) {
-    BroadcastAppServiceUpdate(msg_params);
+    msg_params[strings::system_capability][strings::system_capability_type] =
+        mobile_apis::SystemCapabilityType::APP_SERVICES;
+    MessageHelper::BroadcastCapabilityUpdate(msg_params, app_manager_);
   }
   return true;
 }
@@ -386,6 +417,24 @@ std::pair<std::string, AppService> AppServiceManager::FindServiceByName(
   return std::make_pair(std::string(), empty);
 }
 
+std::pair<std::string, AppService> AppServiceManager::FindServiceByPolicyAppID(
+    std::string policy_app_id, std::string type) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  for (auto it = published_services_.begin(); it != published_services_.end();
+       ++it) {
+    if (it->second.record[strings::service_manifest][strings::service_type]
+            .asString() != type) {
+      continue;
+    }
+
+    if (policy_app_id == GetPolicyAppID(it->second)) {
+      return *it;
+    }
+  }
+  AppService empty;
+  return std::make_pair(std::string(), empty);
+}
+
 std::pair<std::string, AppService> AppServiceManager::FindServiceByID(
     std::string service_id) {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -420,30 +469,49 @@ void AppServiceManager::SetServicePublished(const std::string service_id,
   it->second.record[strings::service_published] = service_published;
 }
 
-void AppServiceManager::BroadcastAppServiceUpdate(
-    smart_objects::SmartObject& msg_params) {
+std::string AppServiceManager::GetPolicyAppID(AppService service) {
+  if (service.mobile_service) {
+    auto app = app_manager_.application(service.connection_key);
+    return app ? app->policy_app_id() : std::string();
+  }
+  return kEmbeddedService;
+}
+
+bool AppServiceManager::UpdateNavigationCapabilities(
+    smart_objects::SmartObject& out_params) {
   LOG4CXX_AUTO_TRACE(logger_);
-  smart_objects::SmartObject message(smart_objects::SmartType_Map);
+  std::string navi_service_type;
+  ns_smart_device_link::ns_smart_objects::
+      EnumConversionHelper<mobile_apis::AppServiceType::eType>::EnumToString(
+          mobile_apis::AppServiceType::NAVIGATION, &navi_service_type);
+  auto service = ActiveServiceByType(navi_service_type);
+  if (service.first.empty()) {
+    return false;
+  }
 
-  msg_params[strings::system_capability][strings::system_capability_type] =
-      mobile_apis::SystemCapabilityType::APP_SERVICES;
-  message[strings::params][strings::message_type] = MessageType::kNotification;
-  message[strings::msg_params] = msg_params;
+  if (!out_params.keyExists(strings::send_location_enabled)) {
+    out_params[strings::send_location_enabled] = false;
+  }
+  if (!out_params.keyExists(strings::get_way_points_enabled)) {
+    out_params[strings::get_way_points_enabled] = false;
+  }
 
-  // Construct and send mobile notification
-  message[strings::params][strings::function_id] =
-      mobile_apis::FunctionID::OnSystemCapabilityUpdatedID;
-  smart_objects::SmartObjectSPtr notification =
-      std::make_shared<smart_objects::SmartObject>(message);
-  app_manager_.GetRPCService().ManageMobileCommand(
-      notification, commands::Command::CommandSource::SOURCE_SDL);
+  if (!service.second.record[strings::service_manifest].keyExists(
+          strings::handled_rpcs)) {
+    return true;
+  }
 
-  // Construct and send HMI notification
-  message[strings::params][strings::function_id] =
-      hmi_apis::FunctionID::BasicCommunication_OnSystemCapabilityUpdated;
-  smart_objects::SmartObjectSPtr hmi_notification =
-      std::make_shared<smart_objects::SmartObject>(message);
-  app_manager_.GetRPCService().ManageHMICommand(hmi_notification);
+  smart_objects::SmartObject& handled_rpcs =
+      service.second.record[strings::service_manifest][strings::handled_rpcs];
+  for (size_t i = 0; i < handled_rpcs.length(); ++i) {
+    if (handled_rpcs[i].asInt() == mobile_apis::FunctionID::SendLocationID) {
+      out_params[strings::send_location_enabled] = true;
+    } else if (handled_rpcs[i].asInt() ==
+               mobile_apis::FunctionID::GetWayPointsID) {
+      out_params[strings::get_way_points_enabled] = true;
+    }
+  }
+  return true;
 }
 
 void AppServiceManager::AppServiceUpdated(

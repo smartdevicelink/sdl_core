@@ -36,9 +36,21 @@ void OnSystemCapabilityUpdatedNotification::Run() {
 
   switch (system_capability_type) {
     case mobile_apis::SystemCapabilityType::NAVIGATION: {
+      smart_objects::SmartObject nav_capability(smart_objects::SmartType_Map);
+      bool has_nav_capability = false;
       if (hmi_capabilities_.navigation_capability()) {
+        has_nav_capability = true;
+        nav_capability = *hmi_capabilities_.navigation_capability();
+      }
+      has_nav_capability = application_manager_.GetAppServiceManager()
+                               .UpdateNavigationCapabilities(nav_capability) ||
+                           has_nav_capability;
+
+      if (has_nav_capability) {
         msg_params[strings::system_capability][strings::navigation_capability] =
-            *hmi_capabilities_.navigation_capability();
+            nav_capability;
+      } else {
+        return;
       }
       break;
     }
@@ -46,6 +58,8 @@ void OnSystemCapabilityUpdatedNotification::Run() {
       if (hmi_capabilities_.phone_capability()) {
         msg_params[strings::system_capability][strings::phone_capability] =
             *hmi_capabilities_.phone_capability();
+      } else {
+        return;
       }
       break;
     }
@@ -56,6 +70,8 @@ void OnSystemCapabilityUpdatedNotification::Run() {
       if (hmi_capabilities_.rc_capability()) {
         msg_params[strings::system_capability][strings::rc_capability] =
             *hmi_capabilities_.rc_capability();
+      } else {
+        return;
       }
       break;
     }
@@ -64,6 +80,8 @@ void OnSystemCapabilityUpdatedNotification::Run() {
         msg_params[strings::system_capability]
                   [strings::video_streaming_capability] =
                       *hmi_capabilities_.video_streaming_capability();
+      } else {
+        return;
       }
       break;
     case mobile_apis::SystemCapabilityType::APP_SERVICES: {
