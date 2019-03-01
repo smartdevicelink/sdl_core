@@ -68,7 +68,6 @@ class PublishAppServiceRequest : public app_mngr::commands::CommandRequestImpl {
   virtual void Run();
 
  private:
-
   DISALLOW_COPY_AND_ASSIGN(PublishAppServiceRequest);
 };
 

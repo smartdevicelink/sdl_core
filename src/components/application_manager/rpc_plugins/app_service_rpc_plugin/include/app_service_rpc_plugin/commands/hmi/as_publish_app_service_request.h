@@ -69,7 +69,6 @@ class ASPublishAppServiceRequest : public app_mngr::commands::RequestFromHMI {
   virtual void Run();
 
  private:
-
   DISALLOW_COPY_AND_ASSIGN(ASPublishAppServiceRequest);
 };
 
