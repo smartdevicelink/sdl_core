@@ -226,6 +226,7 @@ class MockPolicyManager : public PolicyManager {
   MOCK_CONST_METHOD0(get_settings, const PolicySettings&());
   MOCK_METHOD1(set_settings, void(const PolicySettings* get_settings));
   MOCK_CONST_METHOD0(GetLockScreenIconUrl, std::string());
+  MOCK_CONST_METHOD1(GetIconUrl, std::string(const std::string& policy_app_id));
   MOCK_METHOD1(GetNextUpdateUrl, AppIdURL(const EndpointUrls& urls));
   MOCK_CONST_METHOD2(RetrySequenceUrl,
                      AppIdURL(const struct RetrySequenceURL&,

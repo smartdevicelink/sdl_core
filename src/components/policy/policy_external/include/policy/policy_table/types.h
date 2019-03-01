@@ -184,6 +184,7 @@ struct ApplicationParams : PolicyBase {
   Optional<Boolean> enabled;
   Optional<String<0, 65535> > auth_token;
   Optional<String<0, 255> > cloud_transport_type;
+  Optional<String<0, 65535> > icon_url;
 
  public:
   ApplicationParams();

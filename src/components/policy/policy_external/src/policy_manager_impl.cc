@@ -271,6 +271,11 @@ std::string PolicyManagerImpl::GetLockScreenIconUrl() const {
   return cache_->GetLockScreenIconUrl();
 }
 
+std::string PolicyManagerImpl::GetIconUrl(
+    const std::string& policy_app_id) const {
+  return cache_->GetIconUrl(policy_app_id);
+}
+
 /**
  * @brief FilterInvalidFunctions filter functions that are absent in schema
  * @param rpcs list of functions to filter

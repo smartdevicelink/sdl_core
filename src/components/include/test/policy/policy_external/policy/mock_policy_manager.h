@@ -180,6 +180,7 @@ class MockPolicyManager : public PolicyManager {
   MOCK_METHOD1(OnAppRegisteredOnMobile,
                void(const std::string& application_id));
   MOCK_CONST_METHOD0(GetLockScreenIconUrl, std::string());
+  MOCK_CONST_METHOD1(GetIconUrl, std::string(const std::string& policy_app_id));
   MOCK_CONST_METHOD1(
       GetAppRequestTypes,
       const std::vector<std::string>(const std::string policy_app_id));

@@ -105,6 +105,7 @@ class PolicyHandlerInterface {
   virtual void GetUpdateUrls(const uint32_t service_type,
                              EndpointUrls& out_end_points) = 0;
   virtual std::string GetLockScreenIconUrl() const = 0;
+  virtual std::string GetIconUrl(const std::string& policy_app_id) const = 0;
   virtual uint32_t NextRetryTimeout() = 0;
 
   /**

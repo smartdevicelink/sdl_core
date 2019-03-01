@@ -2419,6 +2419,7 @@
         <element name="MEDIA" />
         <element name="FOTA" />
         <element name="OEM_SPECIFIC" since="5.0" />
+        <element name="ICON_URL" since="5.1" />
     </enum>         
  
     <enum name="AppHMIType" since="2.0">

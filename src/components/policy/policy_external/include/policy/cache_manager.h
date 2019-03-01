@@ -262,6 +262,15 @@ class CacheManager : public CacheManagerInterface {
   virtual std::string GetLockScreenIconUrl() const;
 
   /**
+   * @brief Get Icon Url used for showing a cloud apps icon before the intial
+   *registration
+   *
+   * @return url which point to the resourse where icon could be
+   *obtained.
+   */
+  virtual std::string GetIconUrl(const std::string& policy_app_id) const;
+
+  /**
    * @brief Gets list of URL to send PTS to
    * @param service_type If URLs for specific service are preset,
    * return them otherwise default URLs.
