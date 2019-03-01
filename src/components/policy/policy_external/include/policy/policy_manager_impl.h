@@ -594,7 +594,7 @@ class PolicyManagerImpl : public PolicyManager {
    * @param hybrid_app_preference Filled with the hybrid app preference for the
    * cloud application set by the user
    */
-  void GetCloudAppParameters(const std::string& policy_app_id,
+  bool GetCloudAppParameters(const std::string& policy_app_id,
                              bool& enabled,
                              std::string& endpoint,
                              std::string& certificate,

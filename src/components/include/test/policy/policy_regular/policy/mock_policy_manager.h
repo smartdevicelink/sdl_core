@@ -184,7 +184,7 @@ class MockPolicyManager : public PolicyManager {
   MOCK_CONST_METHOD1(GetEnabledCloudApps,
                      void(std::vector<std::string>& enabled_apps));
   MOCK_CONST_METHOD7(GetCloudAppParameters,
-                     void(const std::string& policy_app_id,
+                     bool(const std::string& policy_app_id,
                           bool& enabled,
                           std::string& endpoint,
                           std::string& certificate,

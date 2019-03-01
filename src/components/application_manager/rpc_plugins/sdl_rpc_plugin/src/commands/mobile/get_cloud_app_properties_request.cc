@@ -39,13 +39,19 @@ void GetCloudAppPropertiesRequest::Run() {
   std::string cloud_transport_type;
   std::string hybrid_app_preference;
 
-  policy_handler_.GetCloudAppParameters(policy_app_id,
-                                        enabled,
-                                        endpoint,
-                                        certificate,
-                                        auth_token,
-                                        cloud_transport_type,
-                                        hybrid_app_preference);
+  bool result = policy_handler_.GetCloudAppParameters(policy_app_id,
+                                                      enabled,
+                                                      endpoint,
+                                                      certificate,
+                                                      auth_token,
+                                                      cloud_transport_type,
+                                                      hybrid_app_preference);
+
+  if (!result) {
+    SendResponse(false,
+                 mobile_apis::Result::DATA_NOT_AVAILABLE,
+                 "Cloud app does not exist on module");
+  }
 
   ApplicationSharedPtr cloud_app =
       application_manager_.application_by_policy_id(policy_app_id);
