@@ -51,6 +51,7 @@ void GetCloudAppPropertiesRequest::Run() {
     SendResponse(false,
                  mobile_apis::Result::DATA_NOT_AVAILABLE,
                  "Cloud app does not exist on module");
+    return;
   }
 
   ApplicationSharedPtr cloud_app =
