@@ -864,7 +864,8 @@ void ApplicationManagerImpl::SetIconFileFromSystemRequest(
     std::string extension = boost::filesystem::extension(icon_url);
     if (extension == "bmp" || extension == "BMP") {
       file.file_type = mobile_apis::FileType::GRAPHIC_BMP;
-    } else if (extension == "JPEG" || extension == "jpeg") {
+    } else if (extension == "JPEG" || extension == "jpeg" ||
+               extension == "JPG" || extension == "jpg") {
       file.file_type = mobile_apis::FileType::GRAPHIC_JPEG;
     } else {
       file.file_type = mobile_apis::FileType::GRAPHIC_PNG;
