@@ -420,7 +420,7 @@ class ApplicationImpl : public virtual Application,
    * websocket open.
    * @return cloud app auth token
    */
-  const std::string& cloud_app_auth_token() const OVERRIDE;
+  const std::string& auth_token() const OVERRIDE;
 
   /**
    * @brief Get cloud app tranpsport type. Defines the type of websocket
@@ -457,7 +457,7 @@ class ApplicationImpl : public virtual Application,
   /**
    * @brief Set cloud app auth token
    */
-  void set_cloud_app_auth_token(const std::string& auth_token) OVERRIDE;
+  void set_auth_token(const std::string& auth_token) OVERRIDE;
 
   /**
    * @brief Set cloud app transport type

@@ -1428,8 +1428,7 @@ TEST_F(ApplicationManagerImplTest,
   ON_CALL(*waiting_app, device()).WillByDefault(Return(kDeviceId));
   EXPECT_CALL(*waiting_app, cloud_app_endpoint())
       .WillOnce(ReturnRef(kEndpoint));
-  EXPECT_CALL(*waiting_app, cloud_app_auth_token())
-      .WillOnce(ReturnRef(kAuthToken));
+  EXPECT_CALL(*waiting_app, auth_token()).WillOnce(ReturnRef(kAuthToken));
   EXPECT_CALL(*waiting_app, cloud_app_certificate())
       .WillOnce(ReturnRef(kCertificate));
   EXPECT_CALL(*waiting_app, cloud_app_transport_type())
@@ -1482,7 +1481,7 @@ TEST_F(ApplicationManagerImplTest,
   EXPECT_EQ(APIVersion::kAPIV3,
             application->version().max_supported_api_version);
   EXPECT_EQ(kEndpoint, application->cloud_app_endpoint());
-  EXPECT_EQ(kAuthToken, application->cloud_app_auth_token());
+  EXPECT_EQ(kAuthToken, application->auth_token());
   EXPECT_EQ(kCertificate, application->cloud_app_certificate());
   EXPECT_EQ(kTransportType, application->cloud_app_transport_type());
   EXPECT_EQ(kHybridAppPreference, application->hybrid_app_preference());

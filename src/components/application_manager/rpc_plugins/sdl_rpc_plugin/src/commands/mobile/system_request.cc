@@ -511,7 +511,8 @@ void SystemRequest::Run() {
     return;
   }
 
-  if (!file_system::IsFileNameValid(file_name)) {
+  if (!file_system::IsFileNameValid(file_name) &&
+      mobile_apis::RequestType::ICON_URL != request_type) {
     const std::string err_msg = "Sync file name contains forbidden symbols.";
     LOG4CXX_ERROR(logger_, err_msg);
     SendResponse(false, mobile_apis::Result::INVALID_DATA, err_msg.c_str());
@@ -533,8 +534,21 @@ void SystemRequest::Run() {
   std::string binary_data_folder;
   if ((*message_)[strings::params].keyExists(strings::binary_data)) {
     binary_data = (*message_)[strings::params][strings::binary_data].asBinary();
-    binary_data_folder =
-        application_manager_.get_settings().system_files_path();
+    if (mobile_apis::RequestType::ICON_URL == request_type) {
+      binary_data_folder =
+          application_manager_.get_settings().app_icons_folder();
+      // Use the URL file name to identify the policy id.
+      // Save the icon file with the policy id as the name.
+      file_name = application_manager_.PolicyIDByIconUrl(file_name);
+      if (file_name.empty()) {
+        const std::string err_msg = "Invalid file name";
+        SendResponse(false, mobile_apis::Result::INVALID_DATA, err_msg.c_str());
+      }
+      LOG4CXX_DEBUG(logger_, "Got ICON_URL Request. File name: " << file_name);
+    } else {
+      binary_data_folder =
+          application_manager_.get_settings().system_files_path();
+    }
   } else {
     binary_data_folder =
         application_manager_.get_settings().app_storage_folder();
@@ -580,6 +594,12 @@ void SystemRequest::Run() {
   }
 
   LOG4CXX_DEBUG(logger_, "Binary data ok.");
+
+  if (mobile_apis::RequestType::ICON_URL == request_type) {
+    application_manager_.SetIconFileFromSystemRequest(file_name);
+    SendResponse(true, mobile_apis::Result::SUCCESS);
+    return;
+  }
 
   if (mobile_apis::RequestType::HTTP == request_type &&
       (*message_)[strings::msg_params].keyExists(strings::file_name)) {

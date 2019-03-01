@@ -540,6 +540,11 @@
                         "FULL",
                         "LIMITED"]
                     },
+                    "GetCloudAppProperties":{
+                        "hmi_levels":["BACKGROUND",
+                        "FULL",
+                        "LIMITED"]
+                    },
                     "GetVehicleData": {
                         "hmi_levels": ["BACKGROUND",
                         "FULL",

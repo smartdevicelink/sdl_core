@@ -209,6 +209,15 @@ class PolicyManagerImpl : public PolicyManager {
   std::string GetLockScreenIconUrl() const OVERRIDE;
 
   /**
+   * @brief Get Icon Url used for showing a cloud apps icon before the intial
+   *registration
+   *
+   * @return url which point to the resourse where icon could be
+   *obtained.
+   */
+  std::string GetIconUrl(const std::string& policy_app_id) const OVERRIDE;
+
+  /**
    * @brief Handler of PTS sending out
    */
   void OnUpdateStarted() OVERRIDE;
@@ -594,7 +603,7 @@ class PolicyManagerImpl : public PolicyManager {
    * @param hybrid_app_preference Filled with the hybrid app preference for the
    * cloud application set by the user
    */
-  void GetCloudAppParameters(const std::string& policy_app_id,
+  bool GetCloudAppParameters(const std::string& policy_app_id,
                              bool& enabled,
                              std::string& endpoint,
                              std::string& certificate,
@@ -629,6 +638,13 @@ class PolicyManagerImpl : public PolicyManager {
   void SetAppCloudTransportType(
       const std::string& policy_app_id,
       const std::string& cloud_transport_type) OVERRIDE;
+
+  /**
+   * @brief Set a cloud app's endpoint url
+   * @param endpoint URL for websocket connection
+   */
+  void SetAppEndpoint(const std::string& policy_app_id,
+                      const std::string& endpoint) OVERRIDE;
 
   /**
    * @brief Set the user preference for how a hybrid (cloud and mobile) app
@@ -959,6 +975,12 @@ class PolicyManagerImpl : public PolicyManager {
    */
   void SendAppPermissionsChanged(const std::string& device_id,
                                  const std::string& application_id) OVERRIDE;
+
+  /**
+   * @brief notify listener of updated auth token for a given policy id
+   * @param policy_app_id the app id that has an updated auth token
+   */
+  void SendAuthTokenUpdated(const std::string policy_app_id);
 
   /**
     * @brief Gets all allowed module types
