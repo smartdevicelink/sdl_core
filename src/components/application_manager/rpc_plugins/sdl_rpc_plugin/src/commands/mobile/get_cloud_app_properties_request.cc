@@ -52,6 +52,21 @@ void GetCloudAppPropertiesRequest::Run() {
   std::string cloud_name;
   if (cloud_app) {
     cloud_name = cloud_app->name().AsMBString();
+  } else {
+    policy::StringArray nicknames;
+    policy::StringArray app_hmi_types;
+
+    policy_handler_.GetInitialAppData(
+        policy_app_id, &nicknames, &app_hmi_types);
+
+    if (!nicknames.size()) {
+      LOG4CXX_ERROR(logger_, "Cloud App missing nickname");
+      SendResponse(false,
+                   mobile_apis::Result::DATA_NOT_AVAILABLE,
+                   "No available nick names for the requested app");
+      return;
+    }
+    cloud_name = nicknames[0];
   }
 
   smart_objects::SmartObject response_params(smart_objects::SmartType_Map);
@@ -60,10 +75,19 @@ void GetCloudAppPropertiesRequest::Run() {
   properties[strings::app_name] = cloud_name;
   properties[strings::app_id] = policy_app_id;
   properties[strings::enabled] = enabled;
-  properties[strings::auth_token] = auth_token;
-  properties[strings::cloud_transport_type] = cloud_transport_type;
-  properties[strings::hybrid_app_preference] = hybrid_app_preference;
-  properties[strings::endpoint] = endpoint;
+
+  if (!auth_token.empty()) {
+    properties[strings::auth_token] = auth_token;
+  }
+  if (!cloud_transport_type.empty()) {
+    properties[strings::cloud_transport_type] = cloud_transport_type;
+  }
+  if (!hybrid_app_preference.empty()) {
+    properties[strings::hybrid_app_preference] = hybrid_app_preference;
+  }
+  if (!endpoint.empty()) {
+    properties[strings::endpoint] = endpoint;
+  }
 
   response_params[strings::properties] = properties;
 
