@@ -35,9 +35,7 @@ void SetCloudAppPropertiesRequest::Run() {
     return;
   }
 
-  if ((*message_)[strings::msg_params].keyExists(strings::properties)) {
-    policy_handler_.OnSetCloudAppProperties(*message_);
-  }
+  policy_handler_.OnSetCloudAppProperties(*message_);
 
   SendResponse(true, mobile_apis::Result::SUCCESS);
 }
