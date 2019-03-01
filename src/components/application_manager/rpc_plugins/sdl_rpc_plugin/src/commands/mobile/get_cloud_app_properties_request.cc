@@ -29,14 +29,9 @@ void GetCloudAppPropertiesRequest::Run() {
     return;
   }
 
-  if ((*message_)[strings::msg_params].empty()) {
-    LOG4CXX_ERROR(logger_, strings::msg_params << " is empty.");
-    SendResponse(false, mobile_apis::Result::INVALID_DATA);
-    return;
-  }
-
   std::string policy_app_id =
       (*message_)[strings::msg_params][strings::app_id].asString();
+
   bool enabled = true;
   std::string endpoint;
   std::string auth_token;
@@ -54,7 +49,7 @@ void GetCloudAppPropertiesRequest::Run() {
 
   ApplicationSharedPtr cloud_app =
       application_manager_.application_by_policy_id(policy_app_id);
-  std::string cloud_name = "";
+  std::string cloud_name;
   if (cloud_app) {
     cloud_name = cloud_app->name().AsMBString();
   }

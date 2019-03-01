@@ -6657,7 +6657,7 @@
         <description>
             RPC used to enable/disable a cloud application and set authentication data
         </description>
-        <param name="properties" type="CloudAppProperties" mandatory="false">
+        <param name="properties" type="CloudAppProperties" mandatory="true">
             <description> The requested cloud application properties </description>
         </param>
     </function>
