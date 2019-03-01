@@ -447,6 +447,11 @@ enum FunctionID {
   SetCloudAppPropertiesID = 50,
 
   /**
+   * @brief GetCloudAppPropertiesID.
+   */
+  GetCloudAppPropertiesID = 51,
+
+  /**
    * @brief OnHMIStatusID.
    */
   OnHMIStatusID = 32768,

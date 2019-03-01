@@ -170,7 +170,7 @@ class CacheManager : public CacheManagerInterface {
    * @param hybrid_app_preference Filled with the hybrid app preference for the
    * cloud application set by the user
    */
-  virtual void GetCloudAppParameters(const std::string& policy_app_id,
+  virtual bool GetCloudAppParameters(const std::string& policy_app_id,
                                      bool& enabled,
                                      std::string& endpoint,
                                      std::string& certificate,
@@ -207,6 +207,13 @@ class CacheManager : public CacheManagerInterface {
   virtual void SetAppCloudTransportType(
       const std::string& policy_app_id,
       const std::string& cloud_transport_type);
+
+  /**
+   * @brief Set a cloud app's endpoint url
+   * @param endpoint URL for websocket connection
+   */
+  virtual void SetAppEndpoint(const std::string& policy_app_id,
+                              const std::string& endpoint);
 
   /**
    * @brief Set the user preference for how a hybrid (cloud and mobile) app

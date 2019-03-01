@@ -1869,7 +1869,7 @@ void PolicyHandler::GetEnabledCloudApps(
   policy_manager_->GetEnabledCloudApps(enabled_apps);
 }
 
-void PolicyHandler::GetCloudAppParameters(
+bool PolicyHandler::GetCloudAppParameters(
     const std::string& policy_app_id,
     bool& enabled,
     std::string& endpoint,
@@ -1877,14 +1877,14 @@ void PolicyHandler::GetCloudAppParameters(
     std::string& auth_token,
     std::string& cloud_transport_type,
     std::string& hybrid_app_preference) const {
-  POLICY_LIB_CHECK_VOID();
-  policy_manager_->GetCloudAppParameters(policy_app_id,
-                                         enabled,
-                                         endpoint,
-                                         certificate,
-                                         auth_token,
-                                         cloud_transport_type,
-                                         hybrid_app_preference);
+  POLICY_LIB_CHECK(false);
+  return policy_manager_->GetCloudAppParameters(policy_app_id,
+                                                enabled,
+                                                endpoint,
+                                                certificate,
+                                                auth_token,
+                                                cloud_transport_type,
+                                                hybrid_app_preference);
 }
 
 const bool PolicyHandler::CheckCloudAppEnabled(
@@ -1915,40 +1915,51 @@ void PolicyHandler::OnSetCloudAppProperties(
                       << strings::msg_params);
     return;
   }
-  const smart_objects::SmartObject& msg_params = message[strings::msg_params];
-  if (!msg_params.keyExists(strings::app_id)) {
+  if (!message[strings::msg_params].keyExists(strings::properties)) {
+    LOG4CXX_ERROR(logger_,
+                  "Message does not contain app properties "
+                      << strings::msg_params);
+    return;
+  }
+
+  const smart_objects::SmartObject& properties =
+      message[strings::msg_params][strings::properties];
+  if (!properties.keyExists(strings::app_id)) {
     LOG4CXX_ERROR(logger_,
                   "Message does not contain mandatory parameter "
                       << strings::app_id);
     return;
   }
-  std::string policy_app_id(msg_params[strings::app_id].asString());
+  std::string policy_app_id(properties[strings::app_id].asString());
 
   policy_manager_->InitCloudApp(policy_app_id);
 
   bool auth_token_update = false;
-  if (msg_params.keyExists(strings::enabled)) {
-    bool enabled = msg_params[strings::enabled].asBool();
+  if (properties.keyExists(strings::enabled)) {
+    bool enabled = properties[strings::enabled].asBool();
     policy_manager_->SetCloudAppEnabled(policy_app_id, enabled);
     auth_token_update = enabled;
     application_manager_.RefreshCloudAppInformation();
   }
-  if (msg_params.keyExists(strings::cloud_app_auth_token)) {
-    std::string auth_token =
-        msg_params[strings::cloud_app_auth_token].asString();
+  if (properties.keyExists(strings::auth_token)) {
+    std::string auth_token = properties[strings::auth_token].asString();
     policy_manager_->SetAppAuthToken(policy_app_id, auth_token);
     auth_token_update = true;
   }
-  if (msg_params.keyExists(strings::cloud_transport_type)) {
+  if (properties.keyExists(strings::cloud_transport_type)) {
     policy_manager_->SetAppCloudTransportType(
-        policy_app_id, msg_params[strings::cloud_transport_type].asString());
+        policy_app_id, properties[strings::cloud_transport_type].asString());
   }
-  if (msg_params.keyExists(strings::hybrid_app_preference)) {
+  if (properties.keyExists(strings::endpoint)) {
+    policy_manager_->SetAppEndpoint(policy_app_id,
+                                    properties[strings::endpoint].asString());
+  }
+  if (properties.keyExists(strings::hybrid_app_preference)) {
     std::string hybrid_app_preference;
 
     mobile_apis::HybridAppPreference::eType value =
         static_cast<mobile_apis::HybridAppPreference::eType>(
-            msg_params[strings::hybrid_app_preference].asUInt());
+            properties[strings::hybrid_app_preference].asUInt());
     smart_objects::EnumConversionHelper<
         mobile_apis::HybridAppPreference::eType>::
         EnumToString(value, &hybrid_app_preference);

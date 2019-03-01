@@ -603,7 +603,7 @@ class PolicyManagerImpl : public PolicyManager {
    * @param hybrid_app_preference Filled with the hybrid app preference for the
    * cloud application set by the user
    */
-  void GetCloudAppParameters(const std::string& policy_app_id,
+  bool GetCloudAppParameters(const std::string& policy_app_id,
                              bool& enabled,
                              std::string& endpoint,
                              std::string& certificate,
@@ -638,6 +638,13 @@ class PolicyManagerImpl : public PolicyManager {
   void SetAppCloudTransportType(
       const std::string& policy_app_id,
       const std::string& cloud_transport_type) OVERRIDE;
+
+  /**
+   * @brief Set a cloud app's endpoint url
+   * @param endpoint URL for websocket connection
+   */
+  void SetAppEndpoint(const std::string& policy_app_id,
+                      const std::string& endpoint) OVERRIDE;
 
   /**
    * @brief Set the user preference for how a hybrid (cloud and mobile) app
