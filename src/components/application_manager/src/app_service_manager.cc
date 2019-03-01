@@ -738,7 +738,7 @@ bool AppServiceManager::RPCPassThrough(smart_objects::SmartObject rpc_message) {
           rpc_pass_through_requests_.erase(correlation_id);
           current_rpc_pass_through_request_.erase(correlation_id);
           app_manager_.GetRPCService().ManageMobileCommand(
-              result, commands::Command::SOURCE_SDL);
+              result, commands::Command::SOURCE_MOBILE);
 
         } else {
           LOG4CXX_DEBUG(logger_,
