@@ -119,11 +119,10 @@ typedef std::map<std::string, hmi_apis::Common_TransportType::eType>
 
 struct AppIconInfo {
   std::string endpoint;
-  bool icon_exists;
   bool pending_request;
   AppIconInfo();
-  AppIconInfo(std::string url, bool exists, bool pending)
-      : endpoint(url), icon_exists(exists), pending_request(pending) {}
+  AppIconInfo(std::string ws_endpoint, bool pending)
+      : endpoint(ws_endpoint), pending_request(pending) {}
 };
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "ApplicationManager")
@@ -390,7 +389,7 @@ class ApplicationManagerImpl
 
   std::string PolicyIDByIconUrl(const std::string url) OVERRIDE;
 
-  void SetIconExists(const std::string policy_id) OVERRIDE;
+  void SetIconFileFromSystemRequest(const std::string policy_id) OVERRIDE;
 
   /**
    * @brief Notifies the applicaiton manager that a cloud connection status has
@@ -522,9 +521,6 @@ class ApplicationManagerImpl
 
   // typedef for Applications list
   typedef std::set<ApplicationSharedPtr, ApplicationsAppIdSorter> ApplictionSet;
-
-  // typedef std::set<ApplicationSharedPtr, ApplicationsPolicyAppIdSorter>
-  //    AppsWaitRegistrationSet;
 
   // typedef for Applications list iterator
   typedef ApplictionSet::iterator ApplictionSetIt;

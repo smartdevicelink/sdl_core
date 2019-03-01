@@ -182,7 +182,7 @@ class MockApplicationManager : public application_manager::ApplicationManager {
                      hmi_apis::Common_CloudConnectionStatus::eType(
                          application_manager::ApplicationConstSharedPtr app));
   MOCK_METHOD1(PolicyIDByIconUrl, std::string(const std::string url));
-  MOCK_METHOD1(SetIconExists, void(const std::string policy_id));
+  MOCK_METHOD1(SetIconFileFromSystemRequest, void(const std::string policy_id));
   MOCK_CONST_METHOD0(IsHMICooperating, bool());
   MOCK_METHOD2(IviInfoUpdated,
                void(mobile_apis::VehicleDataType::eType vehicle_info,

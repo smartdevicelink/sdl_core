@@ -1604,7 +1604,8 @@ std::string CacheManager::GetLockScreenIconUrl() const {
 }
 
 std::string CacheManager::GetIconUrl(const std::string& policy_app_id) const {
-  std::string url = "";
+  CACHE_MANAGER_CHECK(std::string());
+  std::string url;
   const policy_table::ApplicationPolicies& policies =
       pt_->policy_table.app_policies_section.apps;
   policy_table::ApplicationPolicies::const_iterator policy_iter =

@@ -1072,8 +1072,8 @@ bool SQLPTRepresentation::SaveSpecificAppPolicy(
       ? app_query.Bind(10, *app.second.cloud_transport_type)
       : app_query.Bind(10);
   app.second.icon_url.is_initialized()
-      ? app_query.Bind(10, *app.second.icon_url)
-      : app_query.Bind(10);
+      ? app_query.Bind(11, *app.second.icon_url)
+      : app_query.Bind(11);
 
   if (!app_query.Exec() || !app_query.Reset()) {
     LOG4CXX_WARN(logger_, "Incorrect insert into application.");

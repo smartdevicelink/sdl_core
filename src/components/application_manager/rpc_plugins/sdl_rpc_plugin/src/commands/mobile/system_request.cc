@@ -540,6 +540,10 @@ void SystemRequest::Run() {
       // Use the URL file name to identify the policy id.
       // Save the icon file with the policy id as the name.
       file_name = application_manager_.PolicyIDByIconUrl(file_name);
+      if (file_name.empty()) {
+        const std::string err_msg = "Invalid file name";
+        SendResponse(false, mobile_apis::Result::INVALID_DATA, err_msg.c_str());
+      }
       LOG4CXX_DEBUG(logger_, "Got ICON_URL Request. File name: " << file_name);
     } else {
       binary_data_folder =
@@ -592,7 +596,7 @@ void SystemRequest::Run() {
   LOG4CXX_DEBUG(logger_, "Binary data ok.");
 
   if (mobile_apis::RequestType::ICON_URL == request_type) {
-    application_manager_.SetIconExists(file_name);
+    application_manager_.SetIconFileFromSystemRequest(file_name);
     SendResponse(true, mobile_apis::Result::SUCCESS);
     return;
   }

@@ -441,7 +441,7 @@ class ApplicationManager {
 
   virtual std::string PolicyIDByIconUrl(const std::string url) = 0;
 
-  virtual void SetIconExists(const std::string policy_id) = 0;
+  virtual void SetIconFileFromSystemRequest(const std::string policy_id) = 0;
 
   /**
    * @brief Retrieve the current connection status of a cloud app

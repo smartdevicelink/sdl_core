@@ -87,16 +87,16 @@ class PolicyManager : public usage_statistics::StatisticsManager {
 
   /**
    * @brief GetLockScreenIcon allows to obtain lock screen icon url;
-   * @return url which point to the resourse where lock screen icon could be
+   * @return url which point to the resource where lock screen icon could be
    *obtained.
    */
   virtual std::string GetLockScreenIconUrl() const = 0;
 
   /**
-   * @brief Get Icon Url used for showing a cloud apps icon before the intial
+   * @brief Get Icon Url used for showing a cloud apps icon before the initial
    *registration
    *
-   * @return url which point to the resourse where icon could be
+   * @return url which point to the resource where icon could be
    *obtained.
    */
   virtual std::string GetIconUrl(const std::string& policy_app_id) const = 0;
