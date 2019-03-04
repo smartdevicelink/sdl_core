@@ -10,6 +10,7 @@
 #include "utils/timer.h"
 #include "utils/timer_task_impl.h"
 #include <iostream>
+#include <boost/bind.hpp>
 
 namespace app_launch {
 CREATE_LOGGERPTR_GLOBAL(logger_, "AppLaunch")
@@ -168,6 +169,24 @@ bool DeviceAppsLauncherImpl::StopLaunchingAppsOnDevice(
   return true;
 }
 
+void DeviceAppsLauncherImpl::StopLauncher(LauncherPtr launcher) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  launcher->Clear();
+  free_launchers_.push_back(launcher);
+}
+
+void DeviceAppsLauncherImpl::StopLaunchingAppsOnAllDevices() {
+  LOG4CXX_AUTO_TRACE(logger_);
+  sync_primitives::AutoLock lock(launchers_lock_);
+
+  std::for_each(
+      works_launchers_.begin(),
+      works_launchers_.end(),
+      boost::bind(&DeviceAppsLauncherImpl::StopLauncher, this, _1));
+
+  works_launchers_.clear();
+}
+
 bool DeviceAppsLauncher::LaunchAppsOnDevice(
     const std::string& device_mac,
     const std::vector<ApplicationDataPtr>& applications_to_launch) {
@@ -185,6 +204,10 @@ DeviceAppsLauncher::DeviceAppsLauncher(
 bool DeviceAppsLauncher::StopLaunchingAppsOnDevice(
     const std::string& device_mac) {
   return impl_->StopLaunchingAppsOnDevice(device_mac);
+}
+
+void DeviceAppsLauncher::StopLaunchingAppsOnAllDevices() {
+  impl_->StopLaunchingAppsOnAllDevices();
 }
 
 const AppLaunchSettings& DeviceAppsLauncher::settings() const {

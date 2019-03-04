@@ -49,23 +49,29 @@ namespace app_launch {
 class AppLaunchCtrl {
  public:
   /**
- * @brief OnAppRegistered should be called when application registered
- * Save application parameters to database
- * @param app application to save
- */
+   * @brief OnAppRegistered should be called when application registered
+   * Save application parameters to database
+   * @param app application to save
+   */
   virtual void OnAppRegistered(const application_manager::Application& app) = 0;
 
   /**
- * @brief OnDeviceConnected shoudl be called on device connected event
- * Start launching saaved applications on ios device
- * @param device_mac
- */
+   * @brief OnDeviceConnected should be called on device connected event
+   * Start launching saved applications on ios device
+   * @param device_mac
+   */
   virtual void OnDeviceConnected(const std::string& device_mac) = 0;
 
   /**
- * @brief OnMasterReset clear database of saved applications
- */
+   * @brief OnMasterReset clear database of saved applications
+   */
   virtual void OnMasterReset() = 0;
+
+  /**
+   * @brief Stop - allows to stop app launcher.
+   */
+  virtual void Stop() = 0;
+
   virtual ~AppLaunchCtrl() {}
 };
 

@@ -83,6 +83,7 @@ bool HmiLevelSorter(const std::pair<int32_t, ApplicationDataPtr>& lval,
 
 void AppLaunchCtrlImpl::OnDeviceConnected(const std::string& device_mac) {
   LOG4CXX_AUTO_TRACE(logger_);
+  sync_primitives::AutoLock lock(launch_ctrl_lock_);
   std::vector<ApplicationDataPtr> apps_on_device =
       app_launch_data_.GetApplicationDataByDevice(device_mac);
   std::vector<std::pair<int32_t, ApplicationDataPtr> > apps_hmi_levels;
@@ -111,5 +112,11 @@ void AppLaunchCtrlImpl::OnDeviceConnected(const std::string& device_mac) {
 void AppLaunchCtrlImpl::OnMasterReset() {
   LOG4CXX_AUTO_TRACE(logger_);
   app_launch_data_.Clear();
+}
+
+void AppLaunchCtrlImpl::Stop() {
+  LOG4CXX_AUTO_TRACE(logger_);
+  sync_primitives::AutoLock lock(launch_ctrl_lock_);
+  device_apps_launcher_.StopLaunchingAppsOnAllDevices();
 }
 }  // namespace app_launch

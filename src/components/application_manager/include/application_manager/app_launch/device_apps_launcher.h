@@ -35,8 +35,11 @@ class DeviceAppsLauncherImpl {
   };
 
   bool StopLaunchingAppsOnDevice(const std::string& device_mac);
+  void StopLaunchingAppsOnAllDevices();
 
  private:
+  void StopLauncher(std::shared_ptr<Launcher> launcher);
+
   sync_primitives::Lock launchers_lock_;
   std::vector<std::shared_ptr<Launcher> > free_launchers_;
   std::vector<std::shared_ptr<Launcher> > works_launchers_;
@@ -60,6 +63,7 @@ class DeviceAppsLauncher {
       const std::string& device_mac,
       const std::vector<ApplicationDataPtr>& applications_to_launch);
   bool StopLaunchingAppsOnDevice(const std::string& device_mac);
+  void StopLaunchingAppsOnAllDevices();
 
   const AppLaunchSettings& settings() const;
 
