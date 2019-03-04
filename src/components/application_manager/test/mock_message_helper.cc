@@ -277,6 +277,12 @@ hmi_apis::Common_Language::eType MessageHelper::CommonLanguageFromString(
       language);
 }
 
+hmi_apis::Common_LightName::eType MessageHelper::CommonLightNameFromString(
+    const std::string& lightName) {
+  return MockMessageHelper::message_helper_mock()->CommonLightNameFromString(
+      lightName);
+}
+
 smart_objects::SmartObjectSPtr MessageHelper::CreateModuleInfoSO(
     uint32_t function_id, ApplicationManager& app_mngr) {
   return MockMessageHelper::message_helper_mock()->CreateModuleInfoSO(

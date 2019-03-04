@@ -1170,6 +1170,20 @@ bool HMICapabilitiesImpl::load_capabilities_from_file() {
           smart_objects::SmartObject rc_capability_so;
           formatters::CFormatterJsonBase::jsonValueToObj(rc_capability,
                                                          rc_capability_so);
+          if (rc_capability_so.keyExists("lightControlCapabilities")) {
+            if (rc_capability_so["lightControlCapabilities"].keyExists(
+                    "supportedLights")) {
+              auto& lights = rc_capability_so["lightControlCapabilities"]
+                                             ["supportedLights"];
+              auto it = lights.asArray()->begin();
+              for (; it != lights.asArray()->end(); ++it) {
+                smart_objects::SmartObject& light_name_so = (*it)["name"];
+                auto light_name = MessageHelper::CommonLightNameFromString(
+                    light_name_so.asString());
+                light_name_so = light_name;
+              }
+            }
+          }
           set_rc_capability(rc_capability_so);
           if (!rc_capability_so.empty()) {
             set_rc_supported(true);
