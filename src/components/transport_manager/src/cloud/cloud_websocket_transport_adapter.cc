@@ -87,7 +87,8 @@ void CloudWebsocketTransportAdapter::CreateDevice(const std::string& uid) {
 
   // Extract host and port from endpoint string
   boost::regex group_pattern(
-      "(wss?:\\/\\/)([A-Z\\d\\.-]{2,}\\.?([A-Z]{2,})?)(:)(\\d{2,5})(\\/[A-Z\\d\\.-]+)*\\/?");
+      "(wss?:\\/\\/)([A-Z\\d\\.-]{2,}\\.?([A-Z]{2,})?)(:)(\\d{2,5})(\\/"
+      "[A-Z\\d\\.-]+)*\\/?");
   boost::smatch results;
 
   std::string host = "";
