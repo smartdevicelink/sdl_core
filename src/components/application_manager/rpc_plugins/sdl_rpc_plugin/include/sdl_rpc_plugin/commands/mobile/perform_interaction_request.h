@@ -232,6 +232,17 @@ class PerformInteractionRequest
    */
   void SendBothModeResponse(const smart_objects::SmartObject& msg_param);
 
+  /**
+   * @brief Checks for all choice set ids are allowed to perform.
+   * @param app Contains pointer to application.
+   * @param choice_set_id_list Array of choice set ids
+   * @return If all at-least one choice list is disallowed to perform returns
+   * false, otherwise returns true.
+   */
+  bool IsAllChoiceSetIdsAllowed(
+      app_mngr::ApplicationSharedPtr app,
+      const smart_objects::SmartObject& choice_set_id_list) const;
+
   mobile_apis::InteractionMode::eType interaction_mode_;
   bool ui_response_received_;
   bool vr_response_received_;

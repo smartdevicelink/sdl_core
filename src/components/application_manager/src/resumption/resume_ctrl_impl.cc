@@ -698,6 +698,7 @@ void ResumeCtrlImpl::AddChoicesets(
       const int32_t choice_set_id =
           choice_set[strings::interaction_choice_set_id].asInt();
       application->AddChoiceSet(choice_set_id, choice_set);
+      application->set_choice_set_allow_mode(choice_set_id, true);
     }
     ProcessHMIRequests(MessageHelper::CreateAddVRCommandRequestFromChoiceToHMI(
         application, application_manager_));

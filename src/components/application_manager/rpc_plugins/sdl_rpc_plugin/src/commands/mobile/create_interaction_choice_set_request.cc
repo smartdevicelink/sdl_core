@@ -152,6 +152,11 @@ void CreateInteractionChoiceSetRequest::Run() {
     // we have VR commands
     SendVRAddCommandRequests(app);
   } else {
+    if (MessageHelper::ChoiceSetVRCommandsStatus::NONE == vr_status) {
+      // Because on_event will not be called for this choice, we set is allowed
+      // right after added.
+      app->set_choice_set_allow_mode(choice_set_id_, true);
+    }
     // we have none, just return with success
     SendResponse(true, Result::SUCCESS);
   }
@@ -466,6 +471,14 @@ void CreateInteractionChoiceSetRequest::DeleteChoices() {
 void CreateInteractionChoiceSetRequest::OnAllHMIResponsesReceived() {
   LOG4CXX_AUTO_TRACE(logger_);
 
+  ApplicationSharedPtr application =
+      application_manager_.application(connection_key());
+  if (!error_from_hmi_) {
+    application->set_choice_set_allow_mode(choice_set_id_, true);
+    LOG4CXX_DEBUG(logger_,
+                  "Choice set with id " << choice_set_id_
+                                        << " is allowed to perform.");
+  }
   if (!error_from_hmi_ && should_send_warnings_) {
     SendResponse(true, mobile_apis::Result::WARNINGS, kInvalidImageWarningInfo);
   } else if (!error_from_hmi_) {

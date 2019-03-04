@@ -97,9 +97,10 @@ class CommandsTest : public ::testing::Test {
 
   typedef NiceMock<MockApplicationManagerSettings> MockAppManagerSettings;
   typedef NiceMock<application_manager_test::MockRPCService> MockRPCService;
-  typedef typename TypeIf<kIsNice,
-                          NiceMock<MockApplicationManager>,
-                          MockApplicationManager>::Result MockAppManager;
+  typedef
+      typename TypeIf<kIsNice,
+                      NiceMock<MockApplicationManager>,
+                      NiceMock<MockApplicationManager> >::Result MockAppManager;
   typedef typename TypeIf<kIsNice,
                           NiceMock<MockApplication>,
                           MockApplication>::Result MockApp;

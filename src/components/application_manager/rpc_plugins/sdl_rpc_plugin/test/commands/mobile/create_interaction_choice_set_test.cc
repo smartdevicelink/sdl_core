@@ -833,14 +833,17 @@ TEST_F(CreateInteractionChoiceSetRequestTest,
   FillMessageFieldsItem2(message_);
 
   EXPECT_CALL(app_mngr_, updateRequestTimeout(_, _, _)).Times(0);
-  EXPECT_CALL(app_mngr_, TerminateRequest(_, _, _));
+  EXPECT_CALL(app_mngr_, application(kConnectionKey))
+      .WillOnce(Return(mock_app_));
+  EXPECT_CALL(*mock_app_, set_choice_set_allow_mode(kChoiceSetId, true));
+  EXPECT_CALL(app_mngr_, TerminateRequest(kConnectionKey, kCorrelationId, _));
 
   Event event(hmi_apis::FunctionID::VR_AddCommand);
   event.set_smart_object(*message_);
 
   command_->on_event(event);
 
-  EXPECT_CALL(app_mngr_, TerminateRequest(_, _, _));
+  EXPECT_CALL(app_mngr_, TerminateRequest(kConnectionKey, kCorrelationId, _));
   EXPECT_CALL(app_mngr_, application(kConnectionKey))
       .WillOnce(Return(mock_app_));
   EXPECT_CALL(*mock_app_, RemoveChoiceSet(_));

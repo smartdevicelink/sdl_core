@@ -34,6 +34,9 @@
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_APPLICATION_DATA_IMPL_H_
 
 #include <string>
+#include <map>
+#include <cstdint>
+
 #include "utils/lock.h"
 #include "utils/semantic_version.h"
 #include "smart_objects/smart_object.h"
@@ -43,6 +46,7 @@
 namespace application_manager {
 
 namespace mobile_api = mobile_apis;
+typedef std::map<uint32_t, bool> ChoiceSetAllowedMap;
 
 class InitialApplicationDataImpl : public virtual Application {
  public:
@@ -263,6 +267,10 @@ class DynamicApplicationDataImpl : public virtual Application {
    */
   inline bool is_reset_global_properties_active() const;
 
+  void set_choice_set_allow_mode(const uint32_t choice_set_id,
+                                 const bool is_allowed) FINAL;
+  bool is_choice_set_allowed(const uint32_t choice_set_id) const;
+
  protected:
   smart_objects::SmartObject* help_prompt_;
   smart_objects::SmartObject* timeout_prompt_;
@@ -290,6 +298,7 @@ class DynamicApplicationDataImpl : public virtual Application {
   uint32_t is_perform_interaction_active_;
   bool is_reset_global_properties_active_;
   int32_t perform_interaction_mode_;
+  ChoiceSetAllowedMap choice_set_allowed_map_;
 
  private:
   void SetGlobalProperties(

@@ -561,6 +561,7 @@ void DynamicApplicationDataImpl::AddChoiceSet(
   ChoiceSetMap::const_iterator it = choice_set_map_.find(choice_set_id);
   if (choice_set_map_.end() == it) {
     choice_set_map_[choice_set_id] = new smart_objects::SmartObject(choice_set);
+    choice_set_allowed_map_.insert(std::make_pair(choice_set_id, false));
   }
 }
 
@@ -572,6 +573,14 @@ void DynamicApplicationDataImpl::RemoveChoiceSet(uint32_t choice_set_id) {
     delete it->second;
     choice_set_map_.erase(choice_set_id);
   }
+
+  auto choise_id_it = choice_set_allowed_map_.find(choice_set_id);
+  if (choice_set_allowed_map_.end() == choise_id_it) {
+    LOG4CXX_WARN(logger_,
+                 "Choice set with id " << choice_set_id << " is not found");
+    return;
+  }
+  choice_set_allowed_map_.erase(choise_id_it);
 }
 
 smart_objects::SmartObject* DynamicApplicationDataImpl::FindChoiceSet(
@@ -614,6 +623,33 @@ void DynamicApplicationDataImpl::set_perform_interaction_active(
 void DynamicApplicationDataImpl::set_reset_global_properties_active(
     bool active) {
   is_reset_global_properties_active_ = active;
+}
+
+void DynamicApplicationDataImpl::set_choice_set_allow_mode(
+    const uint32_t choice_set_id, const bool is_allowed) {
+  auto choice_set = choice_set_allowed_map_.find(choice_set_id);
+  if (choice_set_allowed_map_.end() == choice_set) {
+    LOG4CXX_WARN(logger_,
+                 "Choice set with id " << choice_set_id << " is not found.");
+    return;
+  }
+  choice_set->second = is_allowed;
+  LOG4CXX_DEBUG(logger_,
+                "choice_set_id: "
+                    << choice_set_id
+                    << (choice_set->second ? " is allowed" : " disallowed"));
+}
+
+bool DynamicApplicationDataImpl::is_choice_set_allowed(
+    const uint32_t choice_set_id) const {
+  LOG4CXX_DEBUG(logger_, "Choice setID: " << choice_set_id);
+  const auto it = choice_set_allowed_map_.find(choice_set_id);
+  if (choice_set_allowed_map_.end() == it) {
+    LOG4CXX_ERROR(logger_,
+                  "Choice set with id " << choice_set_id << " is not found.");
+    return false;
+  }
+  return it->second;
 }
 
 void DynamicApplicationDataImpl::set_perform_interaction_mode(int32_t mode) {
