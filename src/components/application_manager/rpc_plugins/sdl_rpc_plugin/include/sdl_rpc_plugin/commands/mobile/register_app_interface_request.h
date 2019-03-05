@@ -148,7 +148,8 @@ class RegisterAppInterfaceRequest
    * return SUCCESS if there is no coincidence of app.name/TTS/VR synonyms,
    * otherwise appropriate error code returns
   */
-  mobile_apis::Result::eType CheckCoincidence();
+  mobile_apis::Result::eType CheckCoincidence(
+      app_mngr::ApplicationSharedPtr& app);
 
   /*
   * @brief Predicate for using with CheckCoincidence method to compare with VR

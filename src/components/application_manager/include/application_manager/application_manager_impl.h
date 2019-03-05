@@ -173,6 +173,8 @@ class ApplicationManagerImpl
       uint32_t hmi_app_id) const OVERRIDE;
   ApplicationSharedPtr application_by_policy_id(
       const std::string& policy_app_id) const OVERRIDE;
+  ApplicationSharedPtr application_by_name(
+      const std::string& app_name) const OVERRIDE;
   ApplicationSharedPtr pending_application_by_policy_id(
       const std::string& policy_app_id) const OVERRIDE;
 
@@ -999,6 +1001,14 @@ class ApplicationManagerImpl
     GrammarIdPredicate(uint32_t grammar_id) : grammar_id_(grammar_id) {}
     bool operator()(const ApplicationSharedPtr app) const {
       return app ? grammar_id_ == app->get_grammar_id() : false;
+    }
+  };
+
+  struct AppNamePredicate {
+    std::string app_name_;
+    AppNamePredicate(const std::string& app_name) : app_name_(app_name) {}
+    bool operator()(const ApplicationSharedPtr app) const {
+      return app ? app->name() == app_name_ : false;
     }
   };
 

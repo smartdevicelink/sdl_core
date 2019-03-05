@@ -269,6 +269,13 @@ ApplicationSharedPtr ApplicationManagerImpl::application_by_policy_id(
   return FindApp(accessor, finder);
 }
 
+ApplicationSharedPtr ApplicationManagerImpl::application_by_name(
+    const std::string& app_name) const {
+  AppNamePredicate finder(app_name);
+  DataAccessor<ApplicationSet> accessor = applications();
+  return FindApp(accessor, finder);
+}
+
 ApplicationSharedPtr ApplicationManagerImpl::pending_application_by_policy_id(
     const std::string& policy_app_id) const {
   PolicyAppIdPredicate finder(policy_app_id);
@@ -690,6 +697,10 @@ ApplicationSharedPtr ApplicationManagerImpl::RegisterApplication(
   apps_size_ = applications_.size();
   applications_list_lock_ptr_->Release();
 
+  // Update cloud app information, in case any pending apps are unable to be
+  // registered due to a mobile app taking precedence
+  RefreshCloudAppInformation();
+
   // It is possible that secondary transport of this app has been already
   // established. Make sure that the information is reflected to application
   // instance.
@@ -917,11 +928,11 @@ void ApplicationManagerImpl::RefreshCloudAppInformation() {
   GetPolicyHandler().GetEnabledCloudApps(enabled_apps);
   std::vector<std::string>::iterator enabled_it = enabled_apps.begin();
   std::vector<std::string>::iterator enabled_end = enabled_apps.end();
-  std::string endpoint = "";
-  std::string certificate = "";
-  std::string auth_token = "";
-  std::string cloud_transport_type = "";
-  std::string hybrid_app_preference = "";
+  std::string endpoint;
+  std::string certificate;
+  std::string auth_token;
+  std::string cloud_transport_type;
+  std::string hybrid_app_preference_str;
   bool enabled = true;
 
   // Store old device map and clear the current map
@@ -937,8 +948,36 @@ void ApplicationManagerImpl::RefreshCloudAppInformation() {
                                              certificate,
                                              auth_token,
                                              cloud_transport_type,
-                                             hybrid_app_preference);
+                                             hybrid_app_preference_str);
+
+    mobile_apis::HybridAppPreference::eType hybrid_app_preference =
+        mobile_apis::HybridAppPreference::INVALID_ENUM;
+    smart_objects::EnumConversionHelper<
+        mobile_apis::HybridAppPreference::eType>::
+        StringToEnum(hybrid_app_preference_str, &hybrid_app_preference);
+
     auto policy_id = *enabled_it;
+    policy::StringArray nicknames;
+    policy::StringArray app_hmi_types;
+    GetPolicyHandler().GetInitialAppData(policy_id, &nicknames, &app_hmi_types);
+
+    if (nicknames.empty()) {
+      LOG4CXX_ERROR(logger_, "Cloud App missing nickname");
+      continue;
+    } else if (mobile_apis::HybridAppPreference::MOBILE ==
+               hybrid_app_preference) {
+      auto nickname_it = nicknames.begin();
+      for (; nickname_it != nicknames.end(); ++nickname_it) {
+        auto app = application_by_name(*nickname_it);
+        if (app.use_count() != 0) {
+          LOG4CXX_ERROR(
+              logger_,
+              "Mobile app already registered for cloud app: " << *nickname_it);
+          continue;
+        }
+      }
+    }
+
     pending_device_map_.insert(
         std::pair<std::string, std::string>(endpoint, policy_id));
     // Determine which endpoints were disabled by erasing all enabled apps from
@@ -1032,11 +1071,11 @@ void ApplicationManagerImpl::CreatePendingApplication(
     connection_handler::DeviceHandle device_id) {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  std::string endpoint = "";
-  std::string certificate = "";
-  std::string auth_token = "";
-  std::string cloud_transport_type = "";
-  std::string hybrid_app_preference_str = "";
+  std::string endpoint;
+  std::string certificate;
+  std::string auth_token;
+  std::string cloud_transport_type;
+  std::string hybrid_app_preference_str;
   bool enabled = true;
   std::string name = device_info.name();
   pending_device_map_lock_ptr_->Acquire();
@@ -1055,7 +1094,7 @@ void ApplicationManagerImpl::CreatePendingApplication(
   GetPolicyHandler().GetInitialAppData(
       policy_app_id, &nicknames, &app_hmi_types);
 
-  if (!nicknames.size()) {
+  if (nicknames.empty()) {
     LOG4CXX_ERROR(logger_, "Cloud App missing nickname");
     return;
   }
