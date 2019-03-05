@@ -404,7 +404,6 @@ class ApplicationManagerImpl
    * @param app A cloud application
    * @return The current CloudConnectionStatus of app
    */
-
   hmi_apis::Common_CloudConnectionStatus::eType GetCloudAppConnectionStatus(
       ApplicationConstSharedPtr app) const;
 
