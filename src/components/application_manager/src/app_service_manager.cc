@@ -76,7 +76,6 @@ smart_objects::SmartObject AppServiceManager::PublishAppService(
                   std::to_string(std::rand());
     service_id = encryption::MakeHash(str_to_hash);
   } while (published_services_.find(service_id) != published_services_.end());
-  published_services_lock_.Release();
 
   AppService app_service;
   app_service.connection_key = connection_key;
@@ -106,11 +105,11 @@ smart_objects::SmartObject AppServiceManager::PublishAppService(
   }
   app_service.default_service = GetPolicyAppID(app_service) == default_app_id;
 
-  {
-    sync_primitives::AutoLock lock(published_services_lock_);
-    published_services_.insert(
-        std::pair<std::string, AppService>(service_id, app_service));
-  }
+  auto ret = published_services_.insert(
+      std::pair<std::string, AppService>(service_id, app_service));
+  smart_objects::SmartObject& published_record = ret.first->second.record;
+  published_services_lock_.Release();
+  
   smart_objects::SmartObject msg_params;
   msg_params[strings::system_capability][strings::system_capability_type] =
       mobile_apis::SystemCapabilityType::APP_SERVICES;
@@ -126,7 +125,7 @@ smart_objects::SmartObject AppServiceManager::PublishAppService(
     ActivateAppService(service_id);
   }
 
-  return service_record;
+  return published_record;
 }
 
 bool AppServiceManager::UnpublishAppService(const std::string service_id) {
