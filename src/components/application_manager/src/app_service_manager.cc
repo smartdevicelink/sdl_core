@@ -46,6 +46,7 @@
 #include "utils/logger.h"
 
 #include "smart_objects/enum_schema_item.h"
+#include "utils/timer_task_impl.h"
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "AppServiceManager")
 
@@ -554,7 +555,11 @@ RPCPassingHandler::RPCPassingHandler(AppServiceManager& asm_ref,
     : app_service_manager_(asm_ref), app_manager_(am_ref) {}
 
 bool RPCPassingHandler::UsingAppServices(uint32_t correlation_id) {
-  return !request_queue_[correlation_id].empty();
+  if (messages_using_core_.find(correlation_id) == messages_using_core_.end()) {
+    return true;
+  }
+  messages_using_core_.erase(correlation_id);
+  return false;
 }
 
 bool RPCPassingHandler::CanUseRPCPassing(int32_t function_id) {
@@ -621,6 +626,8 @@ bool RPCPassingHandler::RPCPassThrough(smart_objects::SmartObject rpc_message) {
                                                services_it->connection_key,
                                                rpc_message};
               request_queue_[correlation_id].push(req);
+              app_manager_.IncreaseForwardedRequestTimeout(
+                  origin_connection_key, correlation_id);
               break;
             }
           }
@@ -635,7 +642,6 @@ bool RPCPassingHandler::RPCPassThrough(smart_objects::SmartObject rpc_message) {
         LOG4CXX_DEBUG(logger_,
                       "Added " << request_queue_[correlation_id].size()
                                << " requests to the queue");
-
         CycleThroughRPCPassingRequests(correlation_id);
 
       } else {
@@ -647,6 +653,8 @@ bool RPCPassingHandler::RPCPassThrough(smart_objects::SmartObject rpc_message) {
         LOG4CXX_DEBUG(logger_,
                       "No services left in map. using core to handle request");
         request_queue_.erase(correlation_id);
+        current_request_.erase(correlation_id);
+        messages_using_core_.insert(correlation_id);
         return false;
       } else {
         LOG4CXX_DEBUG(
@@ -656,7 +664,7 @@ bool RPCPassingHandler::RPCPassThrough(smart_objects::SmartObject rpc_message) {
         smart_objects::SmartObjectSPtr result =
             std::make_shared<smart_objects::SmartObject>(
                 current_request_[correlation_id].message);
-
+        AddTimeoutTimer(correlation_id);
         app_manager_.GetRPCService().SendMessageToMobile(result);
         return true;
       }
@@ -684,6 +692,8 @@ bool RPCPassingHandler::RPCPassThrough(smart_objects::SmartObject rpc_message) {
                   current_request_[correlation_id].message);
           request_queue_.erase(correlation_id);
           current_request_.erase(correlation_id);
+          messages_using_core_.insert(correlation_id);
+          RemoveTimeoutTimer(correlation_id);
           app_manager_.GetRPCService().ManageMobileCommand(
               result, commands::Command::SOURCE_MOBILE);
         } else {
@@ -694,6 +704,7 @@ bool RPCPassingHandler::RPCPassThrough(smart_objects::SmartObject rpc_message) {
           smart_objects::SmartObjectSPtr result =
               std::make_shared<smart_objects::SmartObject>(
                   current_request_[correlation_id].message);
+          AddTimeoutTimer(correlation_id);
           app_manager_.GetRPCService().SendMessageToMobile(result);
         }
         return true;
@@ -713,7 +724,7 @@ bool RPCPassingHandler::RPCPassThrough(smart_objects::SmartObject rpc_message) {
 
         request_queue_.erase(correlation_id);
         current_request_.erase(correlation_id);
-
+        RemoveTimeoutTimer(correlation_id);
         app_manager_.GetRPCService().SendMessageToMobile(result);
         return true;
       }
@@ -738,6 +749,39 @@ bool RPCPassingHandler::CycleThroughRPCPassingRequests(
 
   MessageHelper::PrintSmartObject(current_request_[correlation_id].message);
   return true;
+}
+
+void RPCPassingHandler::OnPassThroughRequestTimeout() {
+  LOG4CXX_DEBUG(logger_, "RPC Passing request timeout");
+  auto timeout_entry = timeout_queue_.front();
+  uint32_t correlation_id = std::get<1>(timeout_entry);
+  timeout_queue_.pop();
+  LOG4CXX_DEBUG(logger_,
+                "Cycling through requests for correlation_id "
+                    << correlation_id);
+  CycleThroughRPCPassingRequests(correlation_id);
+}
+
+void RPCPassingHandler::AddTimeoutTimer(uint32_t correlation_id) {
+  TimerSPtr rpc_passing_timer(std::make_shared<timer::Timer>(
+      "RPCPassingTimeoutTimer",
+      new timer::TimerTaskImpl<RPCPassingHandler>(
+          this, &RPCPassingHandler::OnPassThroughRequestTimeout)));
+  const uint32_t timeout_ms =
+      app_manager_.get_settings().rpc_pass_through_timeout();
+  rpc_passing_timer->Start(timeout_ms, timer::kSingleShot);
+  timeout_queue_.push(std::make_pair(rpc_passing_timer, correlation_id));
+}
+
+void RPCPassingHandler::RemoveTimeoutTimer(uint32_t correlation_id) {
+  auto timeout_entry = timeout_queue_.front();
+  TimerSPtr timer = std::get<0>(timeout_entry);
+  uint32_t cid = std::get<1>(timeout_entry);
+  if (cid != correlation_id) {
+    LOG4CXX_ERROR(logger_, "Deleting incorrect timer");
+  }
+  timer->Stop();
+  timeout_queue_.pop();
 }
 
 }  //  namespace application_manager

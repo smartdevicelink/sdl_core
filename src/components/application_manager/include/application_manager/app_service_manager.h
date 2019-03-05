@@ -38,6 +38,7 @@
 #include "smart_objects/smart_object.h"
 #include "application_manager/application.h"
 #include <queue>
+#include "utils/timer.h"
 
 namespace resumption {
 class LastState;
@@ -57,6 +58,8 @@ struct RpcPassThroughRequest {
   uint32_t destination_connection_key;
   smart_objects::SmartObject message;
 };
+typedef std::shared_ptr<timer::Timer> TimerSPtr;
+
 class ApplicationManager;
 class RPCPassingHandler;
 /**
@@ -207,10 +210,15 @@ class RPCPassingHandler {
 
  private:
   bool CycleThroughRPCPassingRequests(uint32_t correlation_id);
+  void OnPassThroughRequestTimeout();
+  void AddTimeoutTimer(uint32_t correlation_id);
+  void RemoveTimeoutTimer(uint32_t correlation_id);
   AppServiceManager& app_service_manager_;
   ApplicationManager& app_manager_;
   std::map<uint32_t, RpcPassThroughRequest> current_request_;
   std::map<uint32_t, std::queue<RpcPassThroughRequest> > request_queue_;
+  std::set<uint32_t> messages_using_core_;
+  std::queue<std::pair<TimerSPtr, uint32_t> > timeout_queue_;
 };
 
 }  //  namespace application_manager
