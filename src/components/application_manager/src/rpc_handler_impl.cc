@@ -88,7 +88,9 @@ void RPCHandlerImpl::ProcessMessageFromMobile(
     return;
   }
   if (rpc_passing) {
-    if (app_manager_.GetAppServiceManager().RPCPassThrough(*so_from_mobile)) {
+    if (app_manager_.GetAppServiceManager()
+            .GetRPCPassingHandler()
+            .RPCPassThrough(*so_from_mobile)) {
       LOG4CXX_ERROR(
           logger_,
           "RPC_PASS_THROUGH_FROMMOBILE: Cancelling current request and "

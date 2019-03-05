@@ -432,6 +432,13 @@ void RPCServiceImpl::SendMessageToMobile(
     RemoveUnknownParameters = false;
   }
 
+  if (rpc_passing &&
+      !app_manager_.GetAppServiceManager()
+           .GetRPCPassingHandler()
+           .UsingAppServices(
+               (*message)[jhs::S_PARAMS][jhs::S_CORRELATION_ID].asUInt())) {
+    RemoveUnknownParameters = true;
+  }
   if (!ConvertSOtoMessage(
           (*message), (*message_to_send), RemoveUnknownParameters)) {
     LOG4CXX_WARN(logger_, "Can't send msg to Mobile: failed to create string");
@@ -579,7 +586,9 @@ bool RPCServiceImpl::CanHandleRPCUsingAppServices(
       (source ==
        commands::Command::CommandSource::SOURCE_SDL)) {  // MOBILE COMMANDS
 
-    if (app_manager_.GetAppServiceManager().CanUseRPCPassing(function_id)) {
+    if (app_manager_.GetAppServiceManager()
+            .GetRPCPassingHandler()
+            .CanUseRPCPassing(function_id)) {
       LOG4CXX_DEBUG(logger_,
                     "RPC passing can be used for function " << function_id);
       rpc_passing = true;

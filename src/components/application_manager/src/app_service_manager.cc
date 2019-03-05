@@ -56,7 +56,10 @@ const char* kDefaults = "defaults";
 
 AppServiceManager::AppServiceManager(ApplicationManager& app_manager,
                                      resumption::LastState& last_state)
-    : app_manager_(app_manager), last_state_(last_state) {}
+    : app_manager_(app_manager), last_state_(last_state) {
+  RPCPassingHandler rpc_handler(*this, app_manager_);
+  rpc_passing_handler_ = std::make_shared<RPCPassingHandler>(rpc_handler);
+}
 
 AppServiceManager::~AppServiceManager() {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -528,43 +531,50 @@ void AppServiceManager::AppServiceUpdated(
   services[-1] = service;
 }
 
-bool AppServiceManager::CanUseRPCPassing(int32_t function_id) {
+std::vector<AppService> AppServiceManager::GetActiveServices() {
+  std::vector<AppService> active_services;
   for (auto it = published_services_.begin(); it != published_services_.end();
        ++it) {
     if (it->second.record[strings::service_active].asBool() == false) {
       continue;
     }
+    active_services.push_back(it->second);
+  }
+  return active_services;
+}
+
+RPCPassingHandler& AppServiceManager::GetRPCPassingHandler() {
+  return *rpc_passing_handler_;
+}
+
+// RPC Passing Handler
+
+RPCPassingHandler::RPCPassingHandler(AppServiceManager& asm_ref,
+                                     ApplicationManager& am_ref)
+    : app_service_manager_(asm_ref), app_manager_(am_ref) {}
+
+bool RPCPassingHandler::UsingAppServices(uint32_t correlation_id) {
+  return !request_queue_[correlation_id].empty();
+}
+
+bool RPCPassingHandler::CanUseRPCPassing(int32_t function_id) {
+  auto services = app_service_manager_.GetActiveServices();
+  for (auto it = services.begin(); it != services.end(); ++it) {
+    if (it->record[strings::service_active].asBool() == false) {
+      continue;
+    }
     auto handled_rpcs =
-        it->second.record[strings::service_manifest][strings::handled_rpcs];
+        it->record[strings::service_manifest][strings::handled_rpcs];
     for (size_t i = 0; i < handled_rpcs.length(); i++) {
       if (handled_rpcs[i].asInt() == function_id) {
         return true;
       }
     }
   }
-
   return false;
 }
 
-bool AppServiceManager::CycleThroughRPCPassingRequests(
-    uint32_t correlation_id) {
-  LOG4CXX_DEBUG(logger_, "Cycling through pass through requests");
-  if (rpc_pass_through_requests_.find(correlation_id) ==
-      rpc_pass_through_requests_.end()) {
-    LOG4CXX_ERROR(logger_, "Correlation id does NOT exist in map");
-    return false;
-  }
-
-  current_rpc_pass_through_request_[correlation_id] =
-      rpc_pass_through_requests_[correlation_id].front();
-  rpc_pass_through_requests_[correlation_id].pop();
-
-  MessageHelper::PrintSmartObject(
-      current_rpc_pass_through_request_[correlation_id].message);
-  return true;
-}
-
-bool AppServiceManager::RPCPassThrough(smart_objects::SmartObject rpc_message) {
+bool RPCPassingHandler::RPCPassThrough(smart_objects::SmartObject rpc_message) {
   uint32_t origin_connection_key, correlation_id;
   int32_t function_id, message_type;
 
@@ -580,98 +590,37 @@ bool AppServiceManager::RPCPassThrough(smart_objects::SmartObject rpc_message) {
   LOG4CXX_DEBUG(logger_, "correlation_id: " << correlation_id);
   LOG4CXX_DEBUG(logger_, "function_id: " << function_id);
   LOG4CXX_DEBUG(logger_, "message_type: " << message_type);
-  LOG4CXX_DEBUG(logger_, "map_size: " << rpc_pass_through_requests_.size());
-  if (rpc_pass_through_requests_.find(correlation_id) !=
-      rpc_pass_through_requests_.end()) {
-    LOG4CXX_DEBUG(
-        logger_,
-        "queue_size: " << rpc_pass_through_requests_[correlation_id].size());
-  }
-
-  /* Only have to check messages from mobile
-  //Data structs:
-
-  //Method: CycleThroughRequests(correlation_id)
-    Check if correlation_id in request_queue map
-      TRUE:
-        continue
-      FALSE: // Should neve reach this state
-        return false to continue
-    current_passthrough_request[correlation_id] = request_queue.front()
-    request_queue.pop()
-
-  //Method: HandleRPCPassing(rpc_message)
-  Switch on message type
-    Case Request: // Request from mobile to core
-      Check if correlation_id in request_queue map
-        TRUE:
-          Do nothing
-        FALSE:
-          Populate request_queue[correlation_id] with pass through requests
-  which can be sent to compatible active app services
-          Add request to core at the end
-          CycleThroughRequests(correlation_id)
-
-      Check if request_queue[correlation_id] is empty
-        TRUE: //Request to core
-          request_queue map.erase(correlation_id)
-          return false to continue
-        FALSE:
-          Send current_passthrough_request to mobile
-          return true to branch
-
-    Case Response: // Response from mobile to core
-      Check if result code is UNSUPPORTED_REQUEST:
-        TRUE: //Need to forward request to core or next service
-          CycleThroughRequest()
-          Send current_passthrough_request to mobile
-
-        FALSE: // Need to forward response to mobile
-          Check if current_request[correlation_id] exists
-            TRUE:
-              request_queue map.erase(correlation_id)
-              current_request map.rease(correlation_id)
-              SendMessageToMobile(rpc_message)
-              return true to branch
-            FALSE
-              return false to continue
-  */
 
   switch (message_type) {
     case MessageType::kRequest: {
       LOG4CXX_DEBUG(logger_, "Handle request");
 
-      auto it = rpc_pass_through_requests_.find(correlation_id);
+      auto it = request_queue_.find(correlation_id);
       if (it ==
-          rpc_pass_through_requests_
+          request_queue_
               .end()) {  // If correlation_id not in pass_through_requests
 
         LOG4CXX_DEBUG(logger_,
                       "Correlation id does NOT exist in map. Constructing "
                       "PassThroughRequests");
         // Construct list of pass through services
-        rpc_pass_through_requests_[correlation_id] =
-            std::queue<RpcPassThroughRequest>();
-        for (auto services_it = published_services_.begin();
-             services_it != published_services_.end();
+        request_queue_[correlation_id] = std::queue<RpcPassThroughRequest>();
+        auto services = app_service_manager_.GetActiveServices();
+
+        for (auto services_it = services.begin(); services_it != services.end();
              ++services_it) {
-          if (services_it->second.record[strings::service_active].asBool() ==
-              false) {
-            continue;
-          }
           auto handled_rpcs =
-              services_it->second
-                  .record[strings::service_manifest][strings::handled_rpcs];
+              services_it
+                  ->record[strings::service_manifest][strings::handled_rpcs];
           for (size_t i = 0; i < handled_rpcs.length(); i++) {
             if (handled_rpcs[i].asInt() == function_id) {
               // Add Passtrhough requests to queue
               rpc_message[strings::params][strings::connection_key] =
-                  services_it->second.connection_key;
-              auto req =
-                  RpcPassThroughRequest{origin_connection_key,
-                                        services_it->second.connection_key,
-                                        rpc_message};
-              rpc_pass_through_requests_[correlation_id].push(req);
+                  services_it->connection_key;
+              auto req = RpcPassThroughRequest{origin_connection_key,
+                                               services_it->connection_key,
+                                               rpc_message};
+              request_queue_[correlation_id].push(req);
               break;
             }
           }
@@ -681,12 +630,11 @@ bool AppServiceManager::RPCPassThrough(smart_objects::SmartObject rpc_message) {
             origin_connection_key;
         auto req = RpcPassThroughRequest{
             origin_connection_key, origin_connection_key, rpc_message};
-        rpc_pass_through_requests_[correlation_id].push(req);
+        request_queue_[correlation_id].push(req);
 
         LOG4CXX_DEBUG(logger_,
-                      "Added "
-                          << rpc_pass_through_requests_[correlation_id].size()
-                          << " requests to the queue");
+                      "Added " << request_queue_[correlation_id].size()
+                               << " requests to the queue");
 
         CycleThroughRPCPassingRequests(correlation_id);
 
@@ -695,19 +643,19 @@ bool AppServiceManager::RPCPassThrough(smart_objects::SmartObject rpc_message) {
         return false;
       }
 
-      if (rpc_pass_through_requests_[correlation_id].empty()) {
+      if (request_queue_[correlation_id].empty()) {
         LOG4CXX_DEBUG(logger_,
                       "No services left in map. using core to handle request");
-        rpc_pass_through_requests_.erase(correlation_id);
+        request_queue_.erase(correlation_id);
         return false;
       } else {
-        LOG4CXX_DEBUG(logger_,
-                      "Forwarding request to service with app id "
-                          << current_rpc_pass_through_request_[correlation_id]
-                                 .destination_connection_key);
+        LOG4CXX_DEBUG(
+            logger_,
+            "Forwarding request to service with app id "
+                << current_request_[correlation_id].destination_connection_key);
         smart_objects::SmartObjectSPtr result =
             std::make_shared<smart_objects::SmartObject>(
-                current_rpc_pass_through_request_[correlation_id].message);
+                current_request_[correlation_id].message);
 
         app_manager_.GetRPCService().SendMessageToMobile(result);
         return true;
@@ -725,29 +673,27 @@ bool AppServiceManager::RPCPassThrough(smart_objects::SmartObject rpc_message) {
       if (result_code == mobile_apis::Result::UNSUPPORTED_REQUEST) {
         LOG4CXX_DEBUG(logger_, "Service sent unsupported request");
         CycleThroughRPCPassingRequests(correlation_id);
-        if (rpc_pass_through_requests_[correlation_id].empty()) {
+        if (request_queue_[correlation_id].empty()) {
           LOG4CXX_DEBUG(
               logger_, "No services left in map. using core to handle request");
-          current_rpc_pass_through_request_[correlation_id]
+          current_request_[correlation_id]
               .message[strings::params][strings::connection_key] =
-              current_rpc_pass_through_request_[correlation_id]
-                  .origin_connection_key;
+              current_request_[correlation_id].origin_connection_key;
           smart_objects::SmartObjectSPtr result =
               std::make_shared<smart_objects::SmartObject>(
-                  current_rpc_pass_through_request_[correlation_id].message);
-          rpc_pass_through_requests_.erase(correlation_id);
-          current_rpc_pass_through_request_.erase(correlation_id);
+                  current_request_[correlation_id].message);
+          request_queue_.erase(correlation_id);
+          current_request_.erase(correlation_id);
           app_manager_.GetRPCService().ManageMobileCommand(
               result, commands::Command::SOURCE_MOBILE);
-
         } else {
           LOG4CXX_DEBUG(logger_,
                         "Forwarding request to service with app id "
-                            << current_rpc_pass_through_request_[correlation_id]
+                            << current_request_[correlation_id]
                                    .destination_connection_key);
           smart_objects::SmartObjectSPtr result =
               std::make_shared<smart_objects::SmartObject>(
-                  current_rpc_pass_through_request_[correlation_id].message);
+                  current_request_[correlation_id].message);
           app_manager_.GetRPCService().SendMessageToMobile(result);
         }
         return true;
@@ -755,20 +701,18 @@ bool AppServiceManager::RPCPassThrough(smart_objects::SmartObject rpc_message) {
 
       LOG4CXX_DEBUG(logger_, "Valid RPC passing response");
 
-      if (current_rpc_pass_through_request_.find(correlation_id) !=
-          current_rpc_pass_through_request_.end()) {
-        LOG4CXX_DEBUG(logger_,
-                      "Forwarding response to mobile app "
-                          << current_rpc_pass_through_request_[correlation_id]
-                                 .origin_connection_key);
+      if (current_request_.find(correlation_id) != current_request_.end()) {
+        LOG4CXX_DEBUG(
+            logger_,
+            "Forwarding response to mobile app "
+                << current_request_[correlation_id].origin_connection_key);
         rpc_message[strings::params][strings::connection_key] =
-            current_rpc_pass_through_request_[correlation_id]
-                .origin_connection_key;
+            current_request_[correlation_id].origin_connection_key;
         smart_objects::SmartObjectSPtr result =
             std::make_shared<smart_objects::SmartObject>(rpc_message);
 
-        rpc_pass_through_requests_.erase(correlation_id);
-        current_rpc_pass_through_request_.erase(correlation_id);
+        request_queue_.erase(correlation_id);
+        current_request_.erase(correlation_id);
 
         app_manager_.GetRPCService().SendMessageToMobile(result);
         return true;
@@ -779,6 +723,21 @@ bool AppServiceManager::RPCPassThrough(smart_objects::SmartObject rpc_message) {
   }
 
   return false;
+}
+
+bool RPCPassingHandler::CycleThroughRPCPassingRequests(
+    uint32_t correlation_id) {
+  LOG4CXX_DEBUG(logger_, "Cycling through pass through requests");
+  if (request_queue_.find(correlation_id) == request_queue_.end()) {
+    LOG4CXX_ERROR(logger_, "Correlation id does NOT exist in map");
+    return false;
+  }
+
+  current_request_[correlation_id] = request_queue_[correlation_id].front();
+  request_queue_[correlation_id].pop();
+
+  MessageHelper::PrintSmartObject(current_request_[correlation_id].message);
+  return true;
 }
 
 }  //  namespace application_manager

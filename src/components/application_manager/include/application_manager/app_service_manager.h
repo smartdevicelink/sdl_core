@@ -58,7 +58,7 @@ struct RpcPassThroughRequest {
   smart_objects::SmartObject message;
 };
 class ApplicationManager;
-
+class RPCPassingHandler;
 /**
  * @brief The AppServiceManager is TODO.
  */
@@ -130,6 +130,7 @@ class AppServiceManager {
    * @param manifest
    */
   std::vector<smart_objects::SmartObject> GetAllServices();
+  std::vector<AppService> GetActiveServices();
 
   void GetProviderByType(const std::string& service_type,
                          ApplicationSharedPtr& app,
@@ -152,19 +153,6 @@ class AppServiceManager {
   std::string DefaultServiceByType(std::string service_type);
 
   /**
-   * @brief TODO
-   * @param functionId RPC function Id
-   * @param correlation_id request correlation id
-   */
-  bool CanUseRPCPassing(int32_t function_id);
-
-  /**
-     * @brief TODO
-     * @param message RPC message SmartObject
-     */
-  bool RPCPassThrough(smart_objects::SmartObject rpc_message);
-
-  /**
      * @brief TODO
    * @param service_id
    * @param service_published
@@ -178,16 +166,13 @@ class AppServiceManager {
    */
   bool UpdateNavigationCapabilities(smart_objects::SmartObject& out_params);
 
+  RPCPassingHandler& GetRPCPassingHandler();
+
  private:
   ApplicationManager& app_manager_;
   resumption::LastState& last_state_;
   std::map<std::string, AppService> published_services_;
-
-  std::map<uint32_t, std::queue<RpcPassThroughRequest> >
-      rpc_pass_through_requests_;
-  std::map<uint32_t, RpcPassThroughRequest> current_rpc_pass_through_request_;
-
-  bool CycleThroughRPCPassingRequests(uint32_t correlation_id);
+  std::shared_ptr<RPCPassingHandler> rpc_passing_handler_;
 
   void AppServiceUpdated(
       const smart_objects::SmartObject& service_record,
@@ -199,6 +184,33 @@ class AppServiceManager {
   std::pair<std::string, AppService> FindServiceByPolicyAppID(
       std::string policy_app_id, std::string type);
   std::string GetPolicyAppID(AppService service);
+};
+
+class RPCPassingHandler {
+ public:
+  RPCPassingHandler(AppServiceManager& asm_ref, ApplicationManager& am_ref);
+  /**
+ * @brief TODO
+ * @param functionId RPC function Id
+ * @param correlation_id request correlation id
+ */
+
+  bool CanUseRPCPassing(int32_t function_id);
+
+  bool UsingAppServices(uint32_t correlation_id);
+  /**
+   * @brief TODO
+   * @param message RPC message SmartObject
+   */
+
+  bool RPCPassThrough(smart_objects::SmartObject rpc_message);
+
+ private:
+  bool CycleThroughRPCPassingRequests(uint32_t correlation_id);
+  AppServiceManager& app_service_manager_;
+  ApplicationManager& app_manager_;
+  std::map<uint32_t, RpcPassThroughRequest> current_request_;
+  std::map<uint32_t, std::queue<RpcPassThroughRequest> > request_queue_;
 };
 
 }  //  namespace application_manager
