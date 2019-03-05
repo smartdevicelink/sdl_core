@@ -2400,6 +2400,17 @@ void ApplicationManagerImpl::updateRequestTimeout(
       connection_key, mobile_correlation_id, new_timeout_value);
 }
 
+void ApplicationManagerImpl::IncreaseForwardedRequestTimeout(
+    uint32_t connection_key, uint32_t mobile_correlation_id) {
+  LOG4CXX_DEBUG(logger_,
+                "Increasing Request Timeout by "
+                    << get_settings().rpc_pass_through_timeout());
+  uint32_t new_timeout_value = get_settings().default_timeout() +
+                               get_settings().rpc_pass_through_timeout();
+  request_ctrl_.updateRequestTimeout(
+      connection_key, mobile_correlation_id, new_timeout_value);
+}
+
 uint32_t ApplicationManagerImpl::application_id(const int32_t correlation_id) {
   // ykazakov: there is no erase for const iterator for QNX
   std::map<const int32_t, const uint32_t>::iterator it =
