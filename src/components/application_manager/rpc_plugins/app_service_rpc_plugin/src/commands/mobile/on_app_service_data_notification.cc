@@ -64,17 +64,15 @@ void OnAppServiceDataNotification::Run() {
 
   std::string service_id =
       (*message_)[strings::msg_params][strings::service_data]
-                 [strings::service_id]
-                     .asString();
-  auto service = application_manager_.GetAppServiceManager().FindServiceByID(service_id);
-  
+                 [strings::service_id].asString();
+  auto service =
+      application_manager_.GetAppServiceManager().FindServiceByID(service_id);
+
   if (!service) {
     LOG4CXX_ERROR(logger_, "Service sending OnAppServiceData is not published");
     return;
-  } else if (!service
-                 ->record[strings::service_manifest]
-                         [strings::allow_app_consumers]
-                 .asBool()) {
+  } else if (!service->record[strings::service_manifest]
+                             [strings::allow_app_consumers].asBool()) {
     LOG4CXX_ERROR(logger_,
                   "Service does not allow for app consumers, skipping mobile "
                   "OnAppServiceData notification");
@@ -83,8 +81,7 @@ void OnAppServiceDataNotification::Run() {
 
   std::string service_type =
       (*message_)[strings::msg_params][strings::service_data]
-                 [strings::service_type]
-                     .asString();
+                 [strings::service_type].asString();
 
   auto subscribed_to_app_service_predicate =
       [service_type](const ApplicationSharedPtr app) {

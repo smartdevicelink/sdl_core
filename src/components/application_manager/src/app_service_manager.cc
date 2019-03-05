@@ -109,7 +109,7 @@ smart_objects::SmartObject AppServiceManager::PublishAppService(
       std::pair<std::string, AppService>(service_id, app_service));
   smart_objects::SmartObject& published_record = ret.first->second.record;
   published_services_lock_.Release();
-  
+
   smart_objects::SmartObject msg_params;
   msg_params[strings::system_capability][strings::system_capability_type] =
       mobile_apis::SystemCapabilityType::APP_SERVICES;
