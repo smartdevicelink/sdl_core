@@ -126,10 +126,12 @@ class AppServiceManager {
   std::vector<smart_objects::SmartObject> GetAllServices();
 
   void GetProviderByType(const std::string& service_type,
+                         bool mobile_consumer,
                          ApplicationSharedPtr& app,
                          bool& hmi_service);
 
   void GetProviderByID(const std::string& service_id,
+                       bool mobile_consumer,
                        ApplicationSharedPtr& app,
                        bool& hmi_service);
 
@@ -169,6 +171,7 @@ class AppServiceManager {
       const mobile_apis::ServiceUpdateReason::eType update_reason,
       smart_objects::SmartObject& msg_params);
   void GetProviderFromService(const AppService& service,
+                              bool mobile_consumer,
                               ApplicationSharedPtr& app,
                               bool& hmi_service);
   AppService* FindServiceByPolicyAppID(std::string policy_app_id,

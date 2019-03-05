@@ -201,6 +201,7 @@ std::vector<smart_objects::SmartObject> AppServiceManager::GetAllServices() {
 }
 
 void AppServiceManager::GetProviderByType(const std::string& service_type,
+                                          bool mobile_consumer,
                                           ApplicationSharedPtr& app,
                                           bool& hmi_service) {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -213,10 +214,11 @@ void AppServiceManager::GetProviderByType(const std::string& service_type,
   }
 
   LOG4CXX_DEBUG(logger_, "Found provider for service type: " << service_type);
-  GetProviderFromService(*active_service, app, hmi_service);
+  GetProviderFromService(*active_service, mobile_consumer, app, hmi_service);
 }
 
 void AppServiceManager::GetProviderByID(const std::string& service_id,
+                                        bool mobile_consumer,
                                         ApplicationSharedPtr& app,
                                         bool& hmi_service) {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -228,13 +230,20 @@ void AppServiceManager::GetProviderByID(const std::string& service_id,
   }
 
   LOG4CXX_DEBUG(logger_, "Found provider with service ID: " << service_id);
-  GetProviderFromService(it->second, app, hmi_service);
+  GetProviderFromService(it->second, mobile_consumer, app, hmi_service);
 }
 
 void AppServiceManager::GetProviderFromService(const AppService& service,
+                                               bool mobile_consumer,
                                                ApplicationSharedPtr& app,
                                                bool& hmi_service) {
   LOG4CXX_AUTO_TRACE(logger_);
+  if (mobile_consumer &&
+      !service.record[strings::service_manifest][strings::allow_app_consumers]
+           .asBool()) {
+    LOG4CXX_ERROR(logger_, "Service does not support app consumers");
+    return;
+  }
   bool mobile_service = service.mobile_service;
   if (mobile_service) {
     app = app_manager_.application(service.connection_key);
