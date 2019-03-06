@@ -701,6 +701,9 @@ void SmartObject::duplicate(const SmartObject& OtherObject) {
     case SmartType_Integer:
       newData.int_value = OtherObject.m_data.int_value;
       break;
+    case SmartType_UInteger:
+      newData.int_value = OtherObject.m_data.int_value;
+      break;
     case SmartType_Double:
       newData.double_value = OtherObject.m_data.double_value;
       break;

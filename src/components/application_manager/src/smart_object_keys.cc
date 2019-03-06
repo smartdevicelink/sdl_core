@@ -167,6 +167,7 @@ const char* cloud_connection_status = "cloudConnectionStatus";
 // PutFile
 const char* sync_file_name = "syncFileName";
 const char* file_name = "fileName";
+const char* file_path = "filePath";
 const char* file_type = "fileType";
 const char* file_size = "fileSize";
 const char* crc32_check_sum = "crc";
@@ -283,6 +284,7 @@ const char* service_id = "serviceID";
 const char* service_manifest = "serviceManifest";
 const char* service_published = "servicePublished";
 const char* service_active = "serviceActive";
+const char* app_service_id = "appServiceId";
 const char* service_data = "serviceData";
 const char* request_service_active = "requestServiceActive";
 const char* app_services = "appServices";
