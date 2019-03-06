@@ -6464,7 +6464,7 @@
         <param name="offset" type="Integer" minvalue="0" maxvalue="2000000000" mandatory="false">
 		    <description>Optional offset in bytes for resuming partial data chunks</description>
 	    </param>
-        <param name = "length" type="Integer" minvalue="0" maxvalue="2000000000" mandatory="false">
+        <param name="length" type="Integer" minvalue="0" maxvalue="2000000000" mandatory="false">
             <description>Optional length in bytes for resuming partial data chunks if offset is set to 0, then length is the total length of the file to be downloaded</description>
         </param>
     </function>
@@ -6484,6 +6484,7 @@
             <element name="TOO_MANY_PENDING_REQUESTS"/>
             <element name="APPLICATION_NOT_REGISTERED"/>
             <element name="GENERIC_ERROR"/>
+            <element name="FILE_NOT_FOUND"/>
     	</param>
 	    <param name="info" type="String" maxlength="1000" mandatory="false" platform="documentation">
 		    <description>Provides additional human readable info regarding the result.</description>
@@ -6504,7 +6505,7 @@
         
        <param name="crc" type="Integer" minvalue="0" maxvalue="4294967295" mandatory="false">
 	        <description>Additional CRC32 checksum to protect data integrity up to 512 Mbits</description>
-	    </param>
+	   </param>
     </function>
     
     <function name="DeleteFile" functionID="DeleteFileID" messagetype="request" since="3.0">

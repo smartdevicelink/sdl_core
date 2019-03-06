@@ -122,17 +122,6 @@ void GetFileRequest::Run() {
     return;
   }
 
-  // Check that file name param exists else Return
-  LOG4CXX_DEBUG(logger_, "Check if file name param exists");
-  if (!(*message_)[strings::msg_params].keyExists(strings::file_name)) {
-    LOG4CXX_ERROR(logger_, "File name parameter not specified");
-    SendResponse(false,
-                 mobile_apis::Result::INVALID_DATA,
-                 "No file name",
-                 &response_params);
-    return;
-  }
-
   file_name_ = (*message_)[strings::msg_params][strings::file_name].asString();
 
   if (!file_system::IsFileNameValid(file_name_)) {
@@ -181,13 +170,14 @@ void GetFileRequest::Run() {
                  mobile_apis::Result::INVALID_DATA,
                  "Could not get file path",
                  &response_params);
+    return;
   }
 
   const std::string full_path = file_path + "/" + file_name_;
   if (!file_system::FileExists(full_path)) {
     LOG4CXX_ERROR(logger_, "File " << full_path << " does not exist");
     SendResponse(false,
-                 mobile_apis::Result::INVALID_DATA,
+                 mobile_apis::Result::FILE_NOT_FOUND,
                  "File does not exist",
                  &response_params);
     return;
@@ -232,13 +222,6 @@ void GetFileRequest::Run() {
   const uint32_t crc_calculated = GetCrc32CheckSum(bin_data);
   response_params[strings::crc32_check_sum] = crc_calculated;
 
-  LOG4CXX_DEBUG(logger_, "file_name: " << file_name_);
-  LOG4CXX_DEBUG(logger_, "file_type: " << file_type_);
-  LOG4CXX_DEBUG(logger_, "offset: " << offset_);
-  LOG4CXX_DEBUG(logger_, "length: " << length_);
-  LOG4CXX_DEBUG(logger_, "file_path: " << file_path);
-  LOG4CXX_DEBUG(logger_, "crc: " << crc_calculated);
-
   SendResponse(true,
                mobile_apis::Result::SUCCESS,
                "File uploaded",
@@ -252,31 +235,59 @@ void GetFileRequest::on_event(const app_mngr::event_engine::Event& event) {
   if (hmi_apis::FunctionID::BasicCommunication_GetFileFromHMI != event.id()) {
     return;
   }
-  const smart_objects::SmartObject& hmi_response = event.smart_object();
+  const smart_objects::SmartObject& event_message = event.smart_object();
+
+  hmi_apis::Common_Result::eType hmi_result =
+      static_cast<hmi_apis::Common_Result::eType>(
+          event_message[strings::params][hmi_response::code].asInt());
+
+  mobile_apis::Result::eType result =
+      MessageHelper::HMIToMobileResult(hmi_result);
+  bool success = PrepareResultForMobileResponse(
+      hmi_result, HmiInterfaces::HMI_INTERFACE_AppService);
+
+  if (result != mobile_apis::Result::SUCCESS) {
+    auto msg_params = event_message[strings::msg_params];
+    const char* info = msg_params.keyExists(strings::info)
+                           ? msg_params[strings::info].asCharArray()
+                           : NULL;
+
+    SendResponse(success, result, info, &msg_params);
+    return;
+  }
   smart_objects::SmartObject response_params =
       smart_objects::SmartObject(smart_objects::SmartType_Map);
   std::vector<uint8_t> bin_data;
 
-  if (hmi_response[strings::msg_params].keyExists(strings::file_type)) {
+  if (event_message[strings::msg_params].keyExists(strings::file_type)) {
     response_params[strings::file_type] =
-        hmi_response[strings::msg_params][strings::file_type];
+        event_message[strings::msg_params][strings::file_type];
   }
 
-  if (hmi_response[strings::msg_params].keyExists(strings::offset)) {
+  if (event_message[strings::msg_params].keyExists(strings::offset)) {
     response_params[strings::offset] =
-        hmi_response[strings::msg_params][strings::offset];
-    offset_ = hmi_response[strings::msg_params][strings::offset].asInt();
+        event_message[strings::msg_params][strings::offset];
+    offset_ = event_message[strings::msg_params][strings::offset].asInt();
   }
 
-  if (hmi_response[strings::msg_params].keyExists(strings::length)) {
+  if (event_message[strings::msg_params].keyExists(strings::length)) {
     response_params[strings::length] =
-        hmi_response[strings::msg_params][strings::length];
-    length_ = hmi_response[strings::msg_params][strings::length].asInt();
+        event_message[strings::msg_params][strings::length];
+    length_ = event_message[strings::msg_params][strings::length].asInt();
   }
 
-  if (hmi_response[strings::msg_params].keyExists(strings::file_path)) {
+  if (event_message[strings::msg_params].keyExists(strings::file_path)) {
     std::string full_path =
-        hmi_response[strings::msg_params][strings::file_path].asString();
+        event_message[strings::msg_params][strings::file_path].asString();
+
+    if (!file_system::FileExists(full_path)) {
+      LOG4CXX_ERROR(logger_, "File " << full_path << " does not exist");
+      SendResponse(false,
+                   mobile_apis::Result::FILE_NOT_FOUND,
+                   "File does not exist",
+                   &response_params);
+      return;
+    }
     if (!file_system::ReadBinaryFile(full_path, bin_data, offset_)) {
       LOG4CXX_ERROR(logger_, "Failed to read from file: " << full_path);
       SendResponse(false,
