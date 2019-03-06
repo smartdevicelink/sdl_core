@@ -251,7 +251,8 @@ bool ReadBinaryFile(const std::string& name, std::vector<uint8_t>& result);
  */
 bool ReadBinaryFile(const std::string& name,
                     std::vector<uint8_t>& result,
-                    uint32_t offset);
+                    uint32_t offset,
+                    uint32_t length);
 
 bool ReadFile(const std::string& name, std::string& result);
 

@@ -142,14 +142,6 @@ void GetFileRequest::Run() {
         (*message_)[strings::msg_params][strings::file_type].asInt());
   }
 
-  if ((*message_)[strings::msg_params].keyExists(strings::length)) {
-    length_ = (*message_)[strings::msg_params][strings::length].asInt();
-  }
-
-  if ((*message_)[strings::msg_params].keyExists(strings::offset)) {
-    offset_ = (*message_)[strings::msg_params][strings::offset].asInt();
-  }
-
   // Check if file exists on system (may have to use app service id to get the
   // correct app folder)
   LOG4CXX_DEBUG(logger_, "Check if file exists on system");
@@ -184,8 +176,18 @@ void GetFileRequest::Run() {
   }
 
   // Handle offset
-  LOG4CXX_DEBUG(logger_, "Handle offset parameter");
+  LOG4CXX_DEBUG(logger_, "Handle offset and length parameters");
   const uint64_t file_size = file_system::FileSize(full_path);
+
+  if ((*message_)[strings::msg_params].keyExists(strings::length)) {
+    length_ = (*message_)[strings::msg_params][strings::length].asInt();
+  } else {
+    length_ = file_size;
+  }
+  if ((*message_)[strings::msg_params].keyExists(strings::offset)) {
+    offset_ = (*message_)[strings::msg_params][strings::offset].asInt();
+  }
+
   if (offset_ > file_size) {
     LOG4CXX_ERROR(logger_,
                   "Offset " << offset_ << " greater than file size "
@@ -196,11 +198,21 @@ void GetFileRequest::Run() {
                  &response_params);
     return;
   }
+  if (length_ > file_size - offset_) {
+    LOG4CXX_ERROR(logger_,
+                  "Length " << length_ << " greater than file size - offset"
+                            << file_size);
+    SendResponse(false,
+                 mobile_apis::Result::INVALID_DATA,
+                 "Length greater than file size - offset",
+                 &response_params);
+    return;
+  }
 
   // Load data from file as binary data
   LOG4CXX_DEBUG(logger_, "Load binary data from file");
   std::vector<uint8_t> bin_data;
-  if (!file_system::ReadBinaryFile(full_path, bin_data, offset_)) {
+  if (!file_system::ReadBinaryFile(full_path, bin_data, offset_, length_)) {
     LOG4CXX_ERROR(logger_, "Failed to read from file: " << full_path);
     SendResponse(false,
                  mobile_apis::Result::GENERIC_ERROR,
@@ -264,18 +276,6 @@ void GetFileRequest::on_event(const app_mngr::event_engine::Event& event) {
         event_message[strings::msg_params][strings::file_type];
   }
 
-  if (event_message[strings::msg_params].keyExists(strings::offset)) {
-    response_params[strings::offset] =
-        event_message[strings::msg_params][strings::offset];
-    offset_ = event_message[strings::msg_params][strings::offset].asInt();
-  }
-
-  if (event_message[strings::msg_params].keyExists(strings::length)) {
-    response_params[strings::length] =
-        event_message[strings::msg_params][strings::length];
-    length_ = event_message[strings::msg_params][strings::length].asInt();
-  }
-
   if (event_message[strings::msg_params].keyExists(strings::file_path)) {
     std::string full_path =
         event_message[strings::msg_params][strings::file_path].asString();
@@ -288,7 +288,38 @@ void GetFileRequest::on_event(const app_mngr::event_engine::Event& event) {
                    &response_params);
       return;
     }
-    if (!file_system::ReadBinaryFile(full_path, bin_data, offset_)) {
+
+    const uint64_t file_size = file_system::FileSize(full_path);
+    if ((*message_)[strings::msg_params].keyExists(strings::length)) {
+      length_ = (*message_)[strings::msg_params][strings::length].asInt();
+    } else {
+      length_ = file_size;
+    }
+    if ((*message_)[strings::msg_params].keyExists(strings::offset)) {
+      offset_ = (*message_)[strings::msg_params][strings::offset].asInt();
+    }
+
+    if (offset_ > file_size) {
+      LOG4CXX_ERROR(logger_,
+                    "Offset " << offset_ << " greater than file size "
+                              << file_size);
+      SendResponse(false,
+                   mobile_apis::Result::INVALID_DATA,
+                   "Offset greater than file size",
+                   &response_params);
+      return;
+    }
+    if (length_ > file_size - offset_) {
+      LOG4CXX_ERROR(logger_,
+                    "Length " << length_ << " greater than file size - offset"
+                              << file_size);
+      SendResponse(false,
+                   mobile_apis::Result::INVALID_DATA,
+                   "Length greater than file size - offset",
+                   &response_params);
+      return;
+    }
+    if (!file_system::ReadBinaryFile(full_path, bin_data, offset_, length_)) {
       LOG4CXX_ERROR(logger_, "Failed to read from file: " << full_path);
       SendResponse(false,
                    mobile_apis::Result::GENERIC_ERROR,
