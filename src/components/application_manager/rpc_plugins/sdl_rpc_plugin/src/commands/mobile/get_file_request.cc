@@ -151,7 +151,7 @@ void GetFileRequest::Run() {
   if (GetFilePath(file_path, forward_to_hmi)) {
     if (forward_to_hmi) {
       LOG4CXX_DEBUG(logger_, "Forwarding GetFile request to HMI");
-      SendHMIRequest(hmi_apis::FunctionID::BasicCommunication_GetFileFromHMI,
+      SendHMIRequest(hmi_apis::FunctionID::BasicCommunication_GetFilePath,
                      &(*message_)[strings::msg_params],
                      true);
       return;
@@ -244,7 +244,7 @@ void GetFileRequest::Run() {
 void GetFileRequest::on_event(const app_mngr::event_engine::Event& event) {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  if (hmi_apis::FunctionID::BasicCommunication_GetFileFromHMI != event.id()) {
+  if (hmi_apis::FunctionID::BasicCommunication_GetFilePath != event.id()) {
     return;
   }
   const smart_objects::SmartObject& event_message = event.smart_object();

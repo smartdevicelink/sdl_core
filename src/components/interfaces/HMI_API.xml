@@ -4179,7 +4179,7 @@
     </param>
   </function>
 
-  <function name="GetFileFromHMI" messagetype="request">
+  <function name="GetFilePath" messagetype="request">
     <description>This request is sent to retrieve a file path from the HMI.</description>
     <param name="fileName" type="String" maxlength="255" mandatory="true">
 		  <description>File name that should be retrieved.</description>
@@ -4191,7 +4191,7 @@
 		  <description> ID of the service that should have uploaded the requested file.</description>
 	  </param>
    </function>
-   <function name="GetFileFromHMI" messagetype="response">
+   <function name="GetFilePath" messagetype="response">
 		  <description> HMI handles the request internally and returns the file path with the response.</description>
     <param name="filePath" type="String" mandatory="false">
 	    <description>Path to file in hmi</description>

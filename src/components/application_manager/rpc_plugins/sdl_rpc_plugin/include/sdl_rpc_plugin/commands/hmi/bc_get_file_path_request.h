@@ -30,8 +30,8 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_HMI_BC_GET_FILE_FROM_HMI_REQUEST_H_
-#define SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_HMI_BC_GET_FILE_FROM_HMI_REQUEST_H_
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_HMI_BC_GET_FILE_PATH_REQUEST_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_HMI_BC_GET_FILE_PATH_REQUEST_H_
 
 #include "application_manager/commands/request_to_hmi.h"
 
@@ -41,25 +41,25 @@ namespace app_mngr = application_manager;
 namespace commands {
 
 /**
- * @brief BCGetFileFromHMIRequest command class
+ * @brief BCGetFilePathRequest command class
  **/
-class BCGetFileFromHMIRequest : public app_mngr::commands::RequestToHMI {
+class BCGetFilePathRequest : public app_mngr::commands::RequestToHMI {
  public:
   /**
-   * @brief BCGetFileFromHMIRequest class constructor
+   * @brief BCGetFilePathRequest class constructor
    *
    * @param message Incoming SmartObject message
    **/
-  BCGetFileFromHMIRequest(const app_mngr::commands::MessageSharedPtr& message,
-                          app_mngr::ApplicationManager& application_manager,
-                          app_mngr::rpc_service::RPCService& rpc_service,
-                          app_mngr::HMICapabilities& hmi_capabilities,
-                          policy::PolicyHandlerInterface& policy_handler);
+  BCGetFilePathRequest(const app_mngr::commands::MessageSharedPtr& message,
+                       app_mngr::ApplicationManager& application_manager,
+                       app_mngr::rpc_service::RPCService& rpc_service,
+                       app_mngr::HMICapabilities& hmi_capabilities,
+                       policy::PolicyHandlerInterface& policy_handler);
 
   /**
-   * @brief BCGetFileFromHMIRequest class destructor
+   * @brief BCGetFilePathRequest class destructor
    **/
-  virtual ~BCGetFileFromHMIRequest();
+  virtual ~BCGetFilePathRequest();
 
   /**
    * @brief Execute command
@@ -67,11 +67,11 @@ class BCGetFileFromHMIRequest : public app_mngr::commands::RequestToHMI {
   virtual void Run();
 
  private:
-  DISALLOW_COPY_AND_ASSIGN(BCGetFileFromHMIRequest);
+  DISALLOW_COPY_AND_ASSIGN(BCGetFilePathRequest);
 };
 
 }  // namespace commands
 
 }  // namespace sdl_rpc_plugin
 
-#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_sdl_RPC_PLUGIN_INCLUDE_sdl_RPC_PLUGIN_COMMANDS_HMI_BC_GET_FILE_FROM_HMI_REQUEST_H_
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_sdl_RPC_PLUGIN_INCLUDE_sdl_RPC_PLUGIN_COMMANDS_HMI_BC_GET_FILE_PATH_REQUEST_H_

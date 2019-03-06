@@ -30,48 +30,33 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_HMI_BC_GET_FILE_FROM_HMI_RESPONSE_H_
-#define SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_HMI_BC_GET_FILE_FROM_HMI_RESPONSE_H_
-
-#include "application_manager/commands/response_from_hmi.h"
+#include "sdl_rpc_plugin/commands/hmi/bc_get_file_path_request.h"
+#include "application_manager/application_impl.h"
+#include "application_manager/rpc_service.h"
+#include "interfaces/MOBILE_API.h"
 
 namespace sdl_rpc_plugin {
-namespace app_mngr = application_manager;
-
+using namespace application_manager;
 namespace commands {
 
-/**
- * @brief BCGetFileFromHMIResponse command class
- **/
-class BCGetFileFromHMIResponse : public app_mngr::commands::ResponseFromHMI {
- public:
-  /**
-   * @brief BCGetFileFromHMIResponse class constructor
-   *
-   * @param message Incoming SmartObject message
-   **/
-  BCGetFileFromHMIResponse(const app_mngr::commands::MessageSharedPtr& message,
-                           app_mngr::ApplicationManager& application_manager,
-                           app_mngr::rpc_service::RPCService& rpc_service,
-                           app_mngr::HMICapabilities& hmi_capabilities,
-                           policy::PolicyHandlerInterface& policy_handler);
+BCGetFilePathRequest::BCGetFilePathRequest(
+    const application_manager::commands::MessageSharedPtr& message,
+    ApplicationManager& application_manager,
+    app_mngr::rpc_service::RPCService& rpc_service,
+    app_mngr::HMICapabilities& hmi_capabilities,
+    policy::PolicyHandlerInterface& policy_handler)
+    : RequestToHMI(message,
+                   application_manager,
+                   rpc_service,
+                   hmi_capabilities,
+                   policy_handler) {}
 
-  /**
-   * @brief BCGetFileFromHMIResponse class destructor
-   **/
-  virtual ~BCGetFileFromHMIResponse();
+BCGetFilePathRequest::~BCGetFilePathRequest() {}
 
-  /**
-   * @brief Execute command
-   **/
-  virtual void Run();
-
- private:
-  DISALLOW_COPY_AND_ASSIGN(BCGetFileFromHMIResponse);
-};
+void BCGetFilePathRequest::Run() {
+  LOG4CXX_AUTO_TRACE(logger_);
+  SendRequest();
+}
 
 }  // namespace commands
-
 }  // namespace sdl_rpc_plugin
-
-#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_HMI_BC_GET_FILE_FROM_HMI_RESPONSE_H_

@@ -30,37 +30,48 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "sdl_rpc_plugin/commands/hmi/bc_get_file_from_hmi_response.h"
-#include "application_manager/application_impl.h"
-#include "application_manager/rpc_service.h"
-#include "interfaces/MOBILE_API.h"
-#include "application_manager/event_engine/event.h"
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_HMI_BC_GET_FILE_PATH_RESPONSE_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_HMI_BC_GET_FILE_PATH_RESPONSE_H_
+
+#include "application_manager/commands/response_from_hmi.h"
 
 namespace sdl_rpc_plugin {
-using namespace application_manager;
+namespace app_mngr = application_manager;
+
 namespace commands {
 
-BCGetFileFromHMIResponse::BCGetFileFromHMIResponse(
-    const application_manager::commands::MessageSharedPtr& message,
-    ApplicationManager& application_manager,
-    app_mngr::rpc_service::RPCService& rpc_service,
-    app_mngr::HMICapabilities& hmi_capabilities,
-    policy::PolicyHandlerInterface& policy_handler)
-    : ResponseFromHMI(message,
-                      application_manager,
-                      rpc_service,
-                      hmi_capabilities,
-                      policy_handler) {}
+/**
+ * @brief BCGetFilePathResponse command class
+ **/
+class BCGetFilePathResponse : public app_mngr::commands::ResponseFromHMI {
+ public:
+  /**
+   * @brief BCGetFilePathResponse class constructor
+   *
+   * @param message Incoming SmartObject message
+   **/
+  BCGetFilePathResponse(const app_mngr::commands::MessageSharedPtr& message,
+                        app_mngr::ApplicationManager& application_manager,
+                        app_mngr::rpc_service::RPCService& rpc_service,
+                        app_mngr::HMICapabilities& hmi_capabilities,
+                        policy::PolicyHandlerInterface& policy_handler);
 
-BCGetFileFromHMIResponse::~BCGetFileFromHMIResponse() {}
+  /**
+   * @brief BCGetFilePathResponse class destructor
+   **/
+  virtual ~BCGetFilePathResponse();
 
-void BCGetFileFromHMIResponse::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
-  application_manager::event_engine::Event event(
-      hmi_apis::FunctionID::BasicCommunication_GetFileFromHMI);
-  event.set_smart_object(*message_);
-  event.raise(application_manager_.event_dispatcher());
-}
+  /**
+   * @brief Execute command
+   **/
+  virtual void Run();
+
+ private:
+  DISALLOW_COPY_AND_ASSIGN(BCGetFilePathResponse);
+};
 
 }  // namespace commands
+
 }  // namespace sdl_rpc_plugin
+
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_HMI_BC_GET_FILE_PATH_RESPONSE_H_
