@@ -261,13 +261,13 @@ void GetFileRequest::on_event(const app_mngr::event_engine::Event& event) {
   bool success = PrepareResultForMobileResponse(
       hmi_result, HmiInterfaces::HMI_INTERFACE_AppService);
 
-  if (result != mobile_apis::Result::SUCCESS) {
+  if (!success) {
     auto msg_params = event_message[strings::msg_params];
     const char* info = msg_params.keyExists(strings::info)
                            ? msg_params[strings::info].asCharArray()
                            : NULL;
 
-    SendResponse(success, result, info, &msg_params);
+    SendResponse(false, result, info, &msg_params);
     return;
   }
   smart_objects::SmartObject response_params =
