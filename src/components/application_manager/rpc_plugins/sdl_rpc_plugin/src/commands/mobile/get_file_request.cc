@@ -151,6 +151,8 @@ void GetFileRequest::Run() {
   if (GetFilePath(file_path, forward_to_hmi)) {
     if (forward_to_hmi) {
       LOG4CXX_DEBUG(logger_, "Forwarding GetFile request to HMI");
+      application_manager_.IncreaseForwardedRequestTimeout(connection_key(),
+                                                           correlation_id());
       SendHMIRequest(hmi_apis::FunctionID::BasicCommunication_GetFilePath,
                      &(*message_)[strings::msg_params],
                      true);
