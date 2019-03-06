@@ -58,7 +58,9 @@ class RPCService {
    * @param message pointer to received message
    * @return true if command is executed, otherwise return false
    */
-  virtual bool ManageHMICommand(const commands::MessageSharedPtr message) = 0;
+  virtual bool ManageHMICommand(const commands::MessageSharedPtr message,
+                                commands::Command::CommandSource
+                                    source = commands::Command::SOURCE_HMI) = 0;
 
   /**
    * @brief SendMessageToMobile Put message to the queue to be sent to mobile.

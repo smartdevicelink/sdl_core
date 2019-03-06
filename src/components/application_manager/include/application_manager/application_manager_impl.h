@@ -388,6 +388,13 @@ class ApplicationManagerImpl
       ApplicationConstSharedPtr app) const;
 
   /*
+   * @brief Returns unique correlation ID for to mobile request
+   *
+   * @return Unique correlation ID
+   */
+  uint32_t GetNextMobileCorrelationID() OVERRIDE;
+
+  /*
    * @brief Returns unique correlation ID for HMI request
    *
    * @return Unique correlation ID
@@ -1429,6 +1436,7 @@ class ApplicationManagerImpl
   hmi_apis::HMI_API* hmi_so_factory_;
   mobile_apis::MOBILE_API* mobile_so_factory_;
 
+  static uint32_t mobile_corelation_id_;
   static uint32_t corelation_id_;
   static const uint32_t max_corelation_id_;
 
@@ -1533,6 +1541,11 @@ class ApplicationManagerImpl
       std::unique_ptr<plugin_manager::RPCPluginManager>& plugin_manager)
       OVERRIDE {
     plugin_manager_.reset(plugin_manager.release());
+  }
+
+  virtual void SetAppServiceManager(
+      std::unique_ptr<AppServiceManager>& app_service_manager) {
+    app_service_manager_.reset(app_service_manager.release());
   }
 
  private:

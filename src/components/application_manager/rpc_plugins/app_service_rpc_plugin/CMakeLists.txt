@@ -28,7 +28,10 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-include_directories(include)
+include_directories(
+  include
+  ${COMPONENTS_DIR}/application_manager/rpc_plugins/sdl_rpc_plugin/include
+  )
 
 set (COMMANDS_SOURCE_DIR
   ${CMAKE_CURRENT_SOURCE_DIR}/src/commands
@@ -54,6 +57,7 @@ set(LIBRARIES
   v4_protocol_v1_2_no_extra
   SmartObjects
   Utils
+  sdl_rpc_plugin
 )
 
 if(ENABLE_LOG)

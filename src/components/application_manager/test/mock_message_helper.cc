@@ -572,4 +572,15 @@ void MessageHelper::SendUnsubscribeButtonNotification(
       ->SendUnsubscribeButtonNotification(button, application, app_mngr);
 }
 
+smart_objects::SmartObject MessageHelper::CreateAppServiceCapabilities(
+    std::vector<smart_objects::SmartObject>& all_services) {
+  return MockMessageHelper::message_helper_mock()->CreateAppServiceCapabilities(
+      all_services);
+}
+
+void MessageHelper::BroadcastCapabilityUpdate(
+    smart_objects::SmartObject& msg_params, ApplicationManager& app_mngr) {
+  MockMessageHelper::message_helper_mock()->BroadcastCapabilityUpdate(
+      msg_params, app_mngr);
+}
 }  // namespace application_manager

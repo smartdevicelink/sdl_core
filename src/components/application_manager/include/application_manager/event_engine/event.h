@@ -34,6 +34,7 @@
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_EVENT_ENGINE_EVENT_H_
 
 #include <interfaces/HMI_API.h>
+#include <interfaces/MOBILE_API.h>
 
 #include "smart_objects/smart_object.h"
 #include "application_manager/smart_object_keys.h"
@@ -136,6 +137,104 @@ int32_t Event::smart_object_correlation_id() const {
 }
 
 int32_t Event::smart_object_type() const {
+  return response_so_.getElement(strings::params)
+      .getElement(strings::message_type)
+      .asInt();
+}
+
+class MobileEvent {
+ public:
+  // Typedef for possible Event ID's from mobile_apis functionID enum
+  typedef mobile_apis::FunctionID::eType MobileEventID;
+
+  /*
+   * @brief Constructor with parameters
+   *
+   * @param id Event ID. Please see mobile_apis::FunctionID for possible ID's
+   */
+  explicit MobileEvent(const MobileEventID& id);
+
+  /*
+   * @brief Destructor
+   */
+  virtual ~MobileEvent();
+
+  /*
+   * @brief Sends synchronously event to all subscribers.
+   *
+   */
+  void raise(EventDispatcher& event_dispatcher);
+
+  /*
+   * @brief Provides event ID
+   */
+  inline const MobileEventID& id() const;
+
+  /*
+   * @brief Sets event smart object
+   *
+   * @param so The smart_object received in Mobile response
+   */
+  void set_smart_object(const smart_objects::SmartObject& so);
+
+  /*
+   * @brief Retrieves event smart object
+   *
+   * @return The smart_object received in Mobile response
+   */
+  inline const smart_objects::SmartObject& smart_object() const;
+
+  /*
+   * @brief Retrieves smart object request ID
+   */
+  inline int32_t smart_object_function_id() const;
+
+  /*
+   * @brief Retrieves smart object correlation ID
+   */
+  inline int32_t smart_object_correlation_id() const;
+
+  /*
+   * @brief Retrieves smart_object response type
+   */
+  inline int32_t smart_object_type() const;
+
+ protected:
+ private:
+  MobileEventID id_;
+  smart_objects::SmartObject response_so_;
+
+  /*
+   * @brief Default constructor
+   *
+   * Unimplemented to avoid misusing
+   */
+  MobileEvent();
+
+  DISALLOW_COPY_AND_ASSIGN(MobileEvent);
+};
+
+const MobileEvent::MobileEventID& MobileEvent::id() const {
+  return id_;
+}
+
+const smart_objects::SmartObject& MobileEvent::smart_object() const {
+  return response_so_;
+}
+
+int32_t MobileEvent::smart_object_function_id() const {
+  return response_so_.getElement(strings::params)
+      .getElement(strings::function_id)
+      .asInt();
+}
+
+int32_t MobileEvent::smart_object_correlation_id() const {
+  return response_so_.getElement(strings::params)
+      .getElement(strings::correlation_id)
+      .asInt();
+}
+
+int32_t MobileEvent::smart_object_type() const {
   return response_so_.getElement(strings::params)
       .getElement(strings::message_type)
       .asInt();

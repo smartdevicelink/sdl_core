@@ -574,6 +574,16 @@ class PolicyManager : public usage_statistics::StatisticsManager {
       const std::string& hybrid_app_preference) = 0;
 
   /**
+   * @brief Get app service parameters from the policy table
+   * @param policy_app_id Unique application id
+   * @param app_service_parameters Pointer to struct containing all app service
+   * information
+   */
+  virtual void GetAppServiceParameters(
+      const std::string& policy_app_id,
+      policy_table::AppServiceParameters* app_service_parameters) const = 0;
+
+  /**
    * @brief OnAppRegisteredOnMobile allows to handle event when application were
    * succesfully registered on mobile device.
    * It will send OnAppPermissionSend notification and will try to start PTU. *

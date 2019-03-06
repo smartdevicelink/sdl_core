@@ -322,12 +322,13 @@ TEST_F(SetGlobalPropertiesRequestTest,
           (*msg_vr)[am::strings::msg_params][am::strings::help_prompt], _, _))
       .WillOnce(Return(mobile_apis::Result::SUCCESS));
   EXPECT_CALL(mock_rpc_service_,
-              ManageHMICommand(HMIResultCodeIs(
-                  hmi_apis::FunctionID::UI_SetGlobalProperties)))
-      .WillOnce(Return(true));
-  EXPECT_CALL(mock_rpc_service_,
-              ManageHMICommand(HMIResultCodeIs(
-                  hmi_apis::FunctionID::TTS_SetGlobalProperties)))
+              ManageHMICommand(
+                  HMIResultCodeIs(hmi_apis::FunctionID::UI_SetGlobalProperties),
+                  _)).WillOnce(Return(true));
+  EXPECT_CALL(
+      mock_rpc_service_,
+      ManageHMICommand(
+          HMIResultCodeIs(hmi_apis::FunctionID::TTS_SetGlobalProperties), _))
       .WillOnce(Return(true));
   (*msg_vr)[am::strings::params][am::hmi_response::code] =
       hmi_apis::Common_Result::SUCCESS;

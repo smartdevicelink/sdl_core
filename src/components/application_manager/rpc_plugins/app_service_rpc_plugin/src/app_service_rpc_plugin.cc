@@ -32,7 +32,7 @@
 
 #include "application_manager/message_helper.h"
 #include "application_manager/smart_object_keys.h"
-//#include "app_service_rpc_plugin/app_service_app_extension.h"
+#include "app_service_rpc_plugin/app_service_app_extension.h"
 #include "app_service_rpc_plugin/app_service_command_factory.h"
 #include "app_service_rpc_plugin/app_service_rpc_plugin.h"
 
@@ -71,13 +71,24 @@ void AppServiceRpcPlugin::OnPolicyEvent(plugins::PolicyEvent event) {}
 
 void AppServiceRpcPlugin::OnApplicationEvent(
     plugins::ApplicationEvent event,
-    app_mngr::ApplicationSharedPtr application) {}
+    app_mngr::ApplicationSharedPtr application) {
+  if (plugins::ApplicationEvent::kApplicationRegistered == event) {
+    application->AddExtension(
+        std::make_shared<AppServiceAppExtension>(*this, *application));
+  } else if (plugins::ApplicationEvent::kDeleteApplicationData == event) {
+    DeleteSubscriptions(application);
+  }
+}
 
-/*void AppServiceRpcPlugin::ProcessResumptionSubscription(
-    application_manager::Application& app, AppServiceAppExtension& ext) {
-  LOG4CXX_AUTO_TRACE(logger_);
-  // TODO
-}*/
+void AppServiceRpcPlugin::DeleteSubscriptions(
+    application_manager::ApplicationSharedPtr app) {
+  auto& ext = AppServiceAppExtension::ExtractASExtension(*app);
+  auto subscriptions = ext.Subscriptions();
+  for (auto& service_type : subscriptions) {
+    ext.UnsubscribeFromAppService(service_type);
+  }
+}
+
 }  // namespace app_service_rpc_plugin
 
 extern "C" application_manager::plugin_manager::RPCPlugin* Create() {

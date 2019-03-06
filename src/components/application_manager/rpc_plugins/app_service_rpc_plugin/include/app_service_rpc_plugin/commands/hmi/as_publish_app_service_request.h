@@ -69,9 +69,6 @@ class ASPublishAppServiceRequest : public app_mngr::commands::RequestFromHMI {
   virtual void Run();
 
  private:
-  bool ValidateManifest(smart_objects::SmartObject& manifest);
-
-  AppServiceRpcPlugin* plugin_;
   DISALLOW_COPY_AND_ASSIGN(ASPublishAppServiceRequest);
 };
 

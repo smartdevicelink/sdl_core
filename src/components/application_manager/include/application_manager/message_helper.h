@@ -878,6 +878,12 @@ class MessageHelper {
   static smart_objects::SmartObjectSPtr CreateMessageForHMI(
       hmi_apis::messageType::eType message_type, const uint32_t correlation_id);
 
+  static smart_objects::SmartObject CreateAppServiceCapabilities(
+      std::vector<smart_objects::SmartObject>& all_services);
+
+  static void BroadcastCapabilityUpdate(smart_objects::SmartObject& msg_params,
+                                        ApplicationManager& app_mngr);
+
  private:
   /**
    * @brief Allows to fill SO according to the  current permissions.

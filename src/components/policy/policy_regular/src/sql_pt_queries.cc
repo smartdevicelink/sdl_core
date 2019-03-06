@@ -287,6 +287,30 @@ const std::string kCreateSchema =
     "    FOREIGN KEY(`application_id`) "
     "    REFERENCES `application`(`id`) "
     "); "
+    "CREATE TABLE IF NOT EXISTS `app_service_types`( "
+    "  `id` INTEGER PRIMARY KEY NOT NULL, "
+    "  `service_type` VARCHAR(50), "
+    "  `application_id` VARCHAR(45) NOT NULL COLLATE NOCASE, "
+    "  CONSTRAINT `fk_service_type_app_id` "
+    "    FOREIGN KEY(`application_id`) "
+    "    REFERENCES `application`(`id`) "
+    "); "
+    "CREATE TABLE IF NOT EXISTS `app_service_names`( "
+    "  `service_type_id` INTEGER NOT NULL, "
+    "  `service_name` VARCHAR(45), "
+    "  PRIMARY KEY(`service_name`,`service_type_id`), "
+    "  CONSTRAINT `fk_service_name_service_type_id` "
+    "    FOREIGN KEY(`service_type_id`) "
+    "    REFERENCES `app_service_types`(`id`) "
+    "); "
+    "CREATE TABLE IF NOT EXISTS `app_service_handled_rpcs`( "
+    "  `service_type_id` INTEGER NOT NULL, "
+    "  `function_id` INTEGER, "
+    "  PRIMARY KEY(`function_id`,`service_type_id`), "
+    "  CONSTRAINT `fk_function_id_service_type_id` "
+    "    FOREIGN KEY(`service_type_id`) "
+    "    REFERENCES `app_service_types`(`id`) "
+    "); "
     "CREATE INDEX IF NOT EXISTS `app_type.fk_app_type_application1_idx` "
     "  ON `app_type`(`application_id` COLLATE NOCASE); "
     "CREATE TABLE IF NOT EXISTS `consent_group`( "
@@ -467,6 +491,9 @@ const std::string kDropSchema =
     "DROP TABLE IF EXISTS `app_type`; "
     "DROP TABLE IF EXISTS `request_type`; "
     "DROP TABLE IF EXISTS `request_subtype`; "
+    "DROP TABLE IF EXISTS `app_service_types`; "
+    "DROP TABLE IF EXISTS `app_service_names`; "
+    "DROP TABLE IF EXISTS `app_service_handled_rpcs`; "
     "DROP INDEX IF EXISTS `nickname.fk_nickname_application1_idx`; "
     "DROP TABLE IF EXISTS `nickname`; "
     "DROP INDEX IF EXISTS `app_level.fk_app_level_language2_idx`; "
@@ -620,6 +647,21 @@ const std::string kInsertRequestSubType =
     "`request_subtype`) "
     "VALUES (?, ?)";
 
+const std::string kInsertAppServiceTypes =
+    "INSERT INTO `app_service_types` (`id`, "
+    "`service_type`, `application_id`) "
+    "VALUES (?, ?, ?)";
+
+const std::string kInsertAppServiceNames =
+    "INSERT INTO `app_service_names` (`service_type_id`, "
+    "`service_name`) "
+    "VALUES (?, ?)";
+
+const std::string kInsertAppServiceHandledRpcs =
+    "INSERT INTO `app_service_handled_rpcs` (`service_type_id`, "
+    "`function_id`) "
+    "VALUES (?, ?)";
+
 const std::string kUpdateVersion = "UPDATE `version` SET `number`= ?";
 
 const std::string kInsertMessageType =
@@ -737,6 +779,21 @@ const std::string kSelectRequestSubTypes =
     "`application_id` "
     "= ?";
 
+const std::string kSelectAppServiceTypes =
+    "SELECT `id`, `service_type` FROM `app_service_types` WHERE "
+    "`application_id` "
+    "= ?";
+
+const std::string kSelectAppServiceNames =
+    "SELECT DISTINCT `service_name` FROM `app_service_names` WHERE "
+    "`service_type_id` "
+    "= ?";
+
+const std::string kSelectAppServiceHandledRpcs =
+    "SELECT DISTINCT `function_id` FROM `app_service_handled_rpcs` WHERE "
+    "`service_type_id` "
+    "= ?";
+
 const std::string kSelectSecondsBetweenRetries =
     "SELECT `value` FROM `seconds_between_retry` ORDER BY `index`";
 
@@ -783,6 +840,13 @@ const std::string kDeleteApplication = "DELETE FROM `application`";
 const std::string kDeleteRequestType = "DELETE FROM `request_type`";
 
 const std::string kDeleteRequestSubType = "DELETE FROM `request_subtype`";
+
+const std::string kDeleteAppServiceTypes = "DELETE FROM `app_service_types`";
+
+const std::string kDeleteAppServiceNames = "DELETE FROM `app_service_names`";
+
+const std::string kDeleteAppServiceHandledRpcs =
+    "DELETE FROM `app_service_handled_rpcs`";
 
 const std::string kSelectApplicationRevoked =
     "SELECT `is_revoked` FROM `application` WHERE `id` = ?";

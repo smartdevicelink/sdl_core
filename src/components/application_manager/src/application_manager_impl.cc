@@ -132,6 +132,7 @@ bool policy_app_id_comparator(const std::string& policy_app_id,
   return app->policy_app_id() == policy_app_id;
 }
 
+uint32_t ApplicationManagerImpl::mobile_corelation_id_ = 0;
 uint32_t ApplicationManagerImpl::corelation_id_ = 0;
 const uint32_t ApplicationManagerImpl::max_corelation_id_ = UINT_MAX;
 
@@ -699,6 +700,8 @@ bool ApplicationManagerImpl::ActivateApplication(ApplicationSharedPtr app) {
 
   // remove from resumption if app was activated by user
   resume_controller().OnAppActivated(app);
+  // Activate any app services published by the app
+  GetAppServiceManager().OnAppActivated(app);
   const HMILevel::eType hmi_level = HMILevel::HMI_FULL;
   const AudioStreamingState::eType audio_state =
       app->IsAudioApplication() ? AudioStreamingState::AUDIBLE
@@ -1009,6 +1012,16 @@ ApplicationManagerImpl::GetCloudAppConnectionStatus(
     default:
       return hmi_apis::Common_CloudConnectionStatus::INVALID_ENUM;
   }
+}
+
+uint32_t ApplicationManagerImpl::GetNextMobileCorrelationID() {
+  if (mobile_corelation_id_ < max_corelation_id_) {
+    mobile_corelation_id_++;
+  } else {
+    mobile_corelation_id_ = 0;
+  }
+
+  return mobile_corelation_id_;
 }
 
 uint32_t ApplicationManagerImpl::GetNextHMICorrelationID() {
@@ -2010,7 +2023,8 @@ bool ApplicationManagerImpl::Init(resumption::LastState& last_state,
   app_launch_ctrl_.reset(new app_launch::AppLaunchCtrlImpl(
       *app_launch_dto_.get(), *this, settings_));
 
-  app_service_manager_.reset(new application_manager::AppServiceManager(*this));
+  app_service_manager_.reset(
+      new application_manager::AppServiceManager(*this, last_state));
   return true;
 }
 
@@ -2618,6 +2632,8 @@ void ApplicationManagerImpl::UnregisterApplication(
                             << "; is_unexpected_disconnect = "
                             << is_unexpected_disconnect);
   size_t subscribed_for_way_points_app_count = 0;
+
+  GetAppServiceManager().UnpublishServices(app_id);
 
   // SDL sends UnsubscribeWayPoints only for last application
   {

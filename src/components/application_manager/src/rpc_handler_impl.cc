@@ -269,6 +269,7 @@ bool RPCHandlerImpl::ConvertMessageToSO(
                      "Failed to parse string to smart object with API version "
                          << msg_version.toString() << " : "
                          << message.json_message());
+
         std::shared_ptr<smart_objects::SmartObject> response(
             MessageHelper::CreateNegativeResponse(
                 message.connection_key(),

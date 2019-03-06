@@ -327,6 +327,51 @@ smart_objects::SmartObjectSPtr MessageHelper::CreateMessageForHMI(
   return message;
 }
 
+void MessageHelper::BroadcastCapabilityUpdate(
+    smart_objects::SmartObject& msg_params, ApplicationManager& app_mngr) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  smart_objects::SmartObject message(smart_objects::SmartType_Map);
+
+  message[strings::params][strings::message_type] = MessageType::kNotification;
+  message[strings::msg_params] = msg_params;
+
+  // Construct and send mobile notification
+  message[strings::params][strings::function_id] =
+      mobile_apis::FunctionID::OnSystemCapabilityUpdatedID;
+  smart_objects::SmartObjectSPtr notification =
+      std::make_shared<smart_objects::SmartObject>(message);
+  app_mngr.GetRPCService().ManageMobileCommand(
+      notification, commands::Command::CommandSource::SOURCE_SDL);
+
+  // Construct and send HMI notification
+  message[strings::params][strings::function_id] =
+      hmi_apis::FunctionID::BasicCommunication_OnSystemCapabilityUpdated;
+  smart_objects::SmartObjectSPtr hmi_notification =
+      std::make_shared<smart_objects::SmartObject>(message);
+  app_mngr.GetRPCService().ManageHMICommand(hmi_notification);
+}
+
+smart_objects::SmartObject MessageHelper::CreateAppServiceCapabilities(
+    std::vector<smart_objects::SmartObject>& all_services) {
+  smart_objects::SmartObject app_service_capabilities(
+      smart_objects::SmartType_Map);
+  smart_objects::SmartObject app_services(smart_objects::SmartType_Array);
+
+  std::vector<smart_objects::SmartObject> service_records = all_services;
+
+  int i = 0;
+  for (auto& record : service_records) {
+    smart_objects::SmartObject app_service_capability(
+        smart_objects::SmartType_Map);
+    app_service_capability[strings::updated_app_service_record] = record;
+    app_services[i] = app_service_capability;
+    i++;
+  }
+
+  app_service_capabilities[strings::app_services] = app_services;
+  return app_service_capabilities;
+}
+
 smart_objects::SmartObjectSPtr MessageHelper::CreateHashUpdateNotification(
     const uint32_t app_id) {
   LOG4CXX_AUTO_TRACE(logger_);

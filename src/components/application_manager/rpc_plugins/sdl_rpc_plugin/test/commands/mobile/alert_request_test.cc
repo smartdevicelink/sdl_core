@@ -169,11 +169,11 @@ class AlertRequestTest : public CommandRequestTest<CommandsTestMocks::kIsNice> {
   void ExpectManageHmiCommandTTSAndUI() {
     EXPECT_CALL(
         mock_rpc_service_,
-        ManageHMICommand(HMIResultCodeIs(hmi_apis::FunctionID::UI_Alert)))
+        ManageHMICommand(HMIResultCodeIs(hmi_apis::FunctionID::UI_Alert), _))
         .WillOnce(Return(true));
     EXPECT_CALL(
         mock_rpc_service_,
-        ManageHMICommand(HMIResultCodeIs(hmi_apis::FunctionID::TTS_Speak)))
+        ManageHMICommand(HMIResultCodeIs(hmi_apis::FunctionID::TTS_Speak), _))
         .WillOnce(Return(true));
   }
   sync_primitives::Lock lock_;
@@ -452,7 +452,7 @@ TEST_F(AlertRequestTest, OnEvent_UIAlertHasHmiResponsesToWait_UNSUCCESS) {
 
   EXPECT_CALL(mock_rpc_service_,
               ManageHMICommand(
-                  HMIResultCodeIs(hmi_apis::FunctionID::TTS_StopSpeaking)));
+                  HMIResultCodeIs(hmi_apis::FunctionID::TTS_StopSpeaking), _));
 
   command->on_event(event);
 }
@@ -477,10 +477,9 @@ TEST_F(AlertRequestTest, DISABLED_OnEvent_TTSWarnings_SUCCESS) {
           (*msg_)[am::strings::msg_params][am::strings::tts_chunks], _, _))
       .WillOnce(Return(mobile_apis::Result::SUCCESS));
 
-  EXPECT_CALL(
-      mock_rpc_service_,
-      ManageHMICommand(HMIResultCodeIs(hmi_apis::FunctionID::TTS_Speak)))
-      .WillOnce(Return(true));
+  EXPECT_CALL(mock_rpc_service_,
+              ManageHMICommand(HMIResultCodeIs(hmi_apis::FunctionID::TTS_Speak),
+                               _)).WillOnce(Return(true));
 
   CommandPtr command(CreateCommand<AlertRequest>(msg_));
   command->Run();
@@ -509,10 +508,9 @@ TEST_F(AlertRequestTest, DISABLED_OnEvent_TTSUnsupportedResource_SUCCESS) {
       VerifyTtsFiles(
           (*msg_)[am::strings::msg_params][am::strings::tts_chunks], _, _))
       .WillOnce(Return(mobile_apis::Result::SUCCESS));
-  EXPECT_CALL(
-      mock_rpc_service_,
-      ManageHMICommand(HMIResultCodeIs(hmi_apis::FunctionID::TTS_Speak)))
-      .WillOnce(Return(true));
+  EXPECT_CALL(mock_rpc_service_,
+              ManageHMICommand(HMIResultCodeIs(hmi_apis::FunctionID::TTS_Speak),
+                               _)).WillOnce(Return(true));
 
   CommandPtr command(CreateCommand<AlertRequest>(msg_));
   command->Run();
@@ -556,9 +554,9 @@ TEST_F(AlertRequestTest,
   CommandPtr command(CreateCommand<AlertRequest>(msg_));
   command->Run();
 
-  EXPECT_CALL(
-      mock_rpc_service_,
-      ManageHMICommand(HMIResultCodeIs(hmi_apis::FunctionID::TTS_StopSpeaking)))
+  EXPECT_CALL(mock_rpc_service_,
+              ManageHMICommand(
+                  HMIResultCodeIs(hmi_apis::FunctionID::TTS_StopSpeaking), _))
       .WillOnce(Return(true));
 
   Event ui_event(hmi_apis::FunctionID::UI_Alert);
@@ -605,9 +603,9 @@ TEST_F(AlertRequestTest, OnEvent_TTSUnsupportedResourceUiAlertSuccess_SUCCESS) {
   (*msg_)[am::strings::params][am::hmi_response::code] =
       hmi_apis::Common_Result::SUCCESS;
 
-  EXPECT_CALL(
-      mock_rpc_service_,
-      ManageHMICommand(HMIResultCodeIs(hmi_apis::FunctionID::TTS_StopSpeaking)))
+  EXPECT_CALL(mock_rpc_service_,
+              ManageHMICommand(
+                  HMIResultCodeIs(hmi_apis::FunctionID::TTS_StopSpeaking), _))
       .WillOnce(Return(true));
 
   Event ui_event(hmi_apis::FunctionID::UI_Alert);
@@ -643,10 +641,9 @@ TEST_F(AlertRequestTest, OnEvent_TTSSuccesUiAlertInvalidEnum_SUCCESS) {
       VerifyTtsFiles(
           (*msg_)[am::strings::msg_params][am::strings::tts_chunks], _, _))
       .WillOnce(Return(mobile_apis::Result::SUCCESS));
-  EXPECT_CALL(
-      mock_rpc_service_,
-      ManageHMICommand(HMIResultCodeIs(hmi_apis::FunctionID::TTS_Speak)))
-      .WillOnce(Return(true));
+  EXPECT_CALL(mock_rpc_service_,
+              ManageHMICommand(HMIResultCodeIs(hmi_apis::FunctionID::TTS_Speak),
+                               _)).WillOnce(Return(true));
 
   CommandPtr command(CreateCommand<AlertRequest>(msg_));
   command->Run();
@@ -654,9 +651,9 @@ TEST_F(AlertRequestTest, OnEvent_TTSSuccesUiAlertInvalidEnum_SUCCESS) {
   (*msg_)[am::strings::params][am::hmi_response::code] =
       hmi_apis::Common_Result::INVALID_ENUM;
 
-  EXPECT_CALL(
-      mock_rpc_service_,
-      ManageHMICommand(HMIResultCodeIs(hmi_apis::FunctionID::TTS_StopSpeaking)))
+  EXPECT_CALL(mock_rpc_service_,
+              ManageHMICommand(
+                  HMIResultCodeIs(hmi_apis::FunctionID::TTS_StopSpeaking), _))
       .WillOnce(Return(true));
 
   Event ui_event(hmi_apis::FunctionID::UI_Alert);
@@ -693,10 +690,9 @@ TEST_F(AlertRequestTest, DISABLED_OnEvent_TTSAbortedUiAlertNotSent_SUCCESS) {
       VerifyTtsFiles(
           (*msg_)[am::strings::msg_params][am::strings::tts_chunks], _, _))
       .WillOnce(Return(mobile_apis::Result::SUCCESS));
-  EXPECT_CALL(
-      mock_rpc_service_,
-      ManageHMICommand(HMIResultCodeIs(hmi_apis::FunctionID::TTS_Speak)))
-      .WillOnce(Return(true));
+  EXPECT_CALL(mock_rpc_service_,
+              ManageHMICommand(HMIResultCodeIs(hmi_apis::FunctionID::TTS_Speak),
+                               _)).WillOnce(Return(true));
 
   CommandPtr command(CreateCommand<AlertRequest>(msg_));
   command->Run();
@@ -704,9 +700,9 @@ TEST_F(AlertRequestTest, DISABLED_OnEvent_TTSAbortedUiAlertNotSent_SUCCESS) {
   (*msg_)[am::strings::params][am::hmi_response::code] =
       hmi_apis::Common_Result::INVALID_ENUM;
 
-  EXPECT_CALL(
-      mock_rpc_service_,
-      ManageHMICommand(HMIResultCodeIs(hmi_apis::FunctionID::TTS_StopSpeaking)))
+  EXPECT_CALL(mock_rpc_service_,
+              ManageHMICommand(
+                  HMIResultCodeIs(hmi_apis::FunctionID::TTS_StopSpeaking), _))
       .WillOnce(Return(true));
 
   Event ui_event(hmi_apis::FunctionID::UI_Alert);
@@ -743,9 +739,9 @@ TEST_F(AlertRequestTest, DISABLED_OnEvent_TTSWarningUiAlertWarning_SUCCESS) {
   CommandPtr command(CreateCommand<AlertRequest>(msg_));
   command->Run();
 
-  EXPECT_CALL(
-      mock_rpc_service_,
-      ManageHMICommand(HMIResultCodeIs(hmi_apis::FunctionID::TTS_StopSpeaking)))
+  EXPECT_CALL(mock_rpc_service_,
+              ManageHMICommand(
+                  HMIResultCodeIs(hmi_apis::FunctionID::TTS_StopSpeaking), _))
       .WillOnce(Return(true));
 
   Event ui_event(hmi_apis::FunctionID::UI_Alert);

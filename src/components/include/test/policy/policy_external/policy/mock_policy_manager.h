@@ -206,6 +206,10 @@ class MockPolicyManager : public PolicyManager {
   MOCK_METHOD2(SetHybridAppPreference,
                void(const std::string& policy_app_id,
                     const std::string& hybrid_app_preference));
+  MOCK_CONST_METHOD2(
+      GetAppServiceParameters,
+      void(const std::string& policy_app_id,
+           policy_table::AppServiceParameters* app_service_parameters));
   MOCK_CONST_METHOD0(GetMetaInfo, const policy::MetaInfo());
   MOCK_CONST_METHOD0(RetrieveCertificate, std::string());
   MOCK_CONST_METHOD0(HasCertificate, bool());

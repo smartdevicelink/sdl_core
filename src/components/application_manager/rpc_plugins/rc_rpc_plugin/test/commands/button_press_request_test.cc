@@ -196,8 +196,8 @@ TEST_F(ButtonPressRequestTest,
       SetResourceState(resource, kAppId, rc_rpc_plugin::ResourceState::BUSY));
   EXPECT_CALL(mock_rpc_service_,
               ManageHMICommand(
-                  HMIResultCodeIs(hmi_apis::FunctionID::Buttons_ButtonPress)))
-      .WillOnce(Return(true));
+                  HMIResultCodeIs(hmi_apis::FunctionID::Buttons_ButtonPress),
+                  _)).WillOnce(Return(true));
 
   // Act
   std::shared_ptr<rc_rpc_plugin::commands::ButtonPressRequest> command =
@@ -230,8 +230,9 @@ TEST_F(
       .Times(2);
 
   EXPECT_CALL(mock_rpc_service_,
-              ManageHMICommand(HMIResultCodeIs(
-                  hmi_apis::FunctionID::Buttons_ButtonPress))).Times(0);
+              ManageHMICommand(
+                  HMIResultCodeIs(hmi_apis::FunctionID::Buttons_ButtonPress),
+                  _)).Times(0);
   MessageSharedPtr command_result;
   EXPECT_CALL(mock_rpc_service_,
               ManageMobileCommand(
