@@ -905,10 +905,16 @@ void ApplicationManagerImpl::DisconnectCloudApp(ApplicationSharedPtr app) {
   // Delete the cloud device
   connection_handler().RemoveCloudAppDevice(app->device());
 
+  transport_manager::transport_adapter::CloudAppProperties properties{
+      endpoint,
+      certificate,
+      enabled,
+      auth_token,
+      cloud_transport_type,
+      hybrid_app_preference};
   // Create device in pending state
   LOG4CXX_DEBUG(logger_, "Re-adding the cloud app device");
-  connection_handler().AddCloudAppDevice(
-      policy_app_id, endpoint, cloud_transport_type);
+  connection_handler().AddCloudAppDevice(policy_app_id, properties);
 }
 
 void ApplicationManagerImpl::RefreshCloudAppInformation() {
