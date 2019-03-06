@@ -37,8 +37,7 @@
 #include "interfaces/MOBILE_API.h"
 #include "smart_objects/smart_object.h"
 #include "application_manager/application.h"
-#include <queue>
-#include "utils/timer.h"
+#include "application_manager/rpc_passing_handler.h"
 
 namespace resumption {
 class LastState;
@@ -53,15 +52,7 @@ struct AppService {
   smart_objects::SmartObject record;
 };
 
-struct RpcPassThroughRequest {
-  uint32_t origin_connection_key;
-  uint32_t destination_connection_key;
-  smart_objects::SmartObject message;
-};
-typedef std::shared_ptr<timer::Timer> TimerSPtr;
-
 class ApplicationManager;
-class RPCPassingHandler;
 /**
  * @brief The AppServiceManager is TODO.
  */
@@ -187,47 +178,6 @@ class AppServiceManager {
   std::pair<std::string, AppService> FindServiceByPolicyAppID(
       std::string policy_app_id, std::string type);
   std::string GetPolicyAppID(AppService service);
-};
-
-class RPCPassingHandler {
- public:
-  RPCPassingHandler(AppServiceManager& asm_ref, ApplicationManager& am_ref);
-
-  /**
-   * @brief Check if function id is in the handled_rpcs list of an active app
-   * service
-   * @param function_id RPC function id
-   * @return true if function id exists in handled_rpcs list of an active app
-   * service
-   */
-  bool CanUseRPCPassing(int32_t function_id);
-
-  /**
-   * @brief Check if app services or core is being used to handle the RPC
-   * @param correlation_id correlation id of RPC response
-   * @return true if an app service was used to handle the RPC
-   */
-  bool UsingAppServices(uint32_t correlation_id);
-
-  /**
-   * @brief Function to handle sending and receiving RPC Passing
-   * requests/responses
-   * @param rpc_message RPC message SmartObject
-   * @return true to stop current request/response and forward it
-   */
-  bool RPCPassThrough(smart_objects::SmartObject rpc_message);
-
- private:
-  bool CycleThroughRPCPassingRequests(uint32_t correlation_id);
-  void OnPassThroughRequestTimeout();
-  void AddTimeoutTimer(uint32_t correlation_id);
-  void RemoveTimeoutTimer(uint32_t correlation_id);
-  AppServiceManager& app_service_manager_;
-  ApplicationManager& app_manager_;
-  std::map<uint32_t, RpcPassThroughRequest> current_request_;
-  std::map<uint32_t, std::queue<RpcPassThroughRequest> > request_queue_;
-  std::set<uint32_t> messages_using_core_;
-  std::queue<std::pair<TimerSPtr, uint32_t> > timeout_queue_;
 };
 
 }  //  namespace application_manager
