@@ -207,7 +207,7 @@ class HmiState {
   }
 
  protected:
-  std::shared_ptr<Application> app_;
+  uint32_t hmi_app_id_;
   StateID state_id_;
   const ApplicationManager& app_mngr_;
   HmiStatePtr parent_;
