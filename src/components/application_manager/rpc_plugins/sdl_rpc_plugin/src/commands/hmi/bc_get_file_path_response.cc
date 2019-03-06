@@ -30,50 +30,37 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_APP_SERVICE_RPC_PLUGIN_INCLUDE_APP_SERVICE_RPC_PLUGIN_COMMANDS_HMI_AS_PUBLISH_APP_SERVICE_REQUEST_H_
-#define SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_APP_SERVICE_RPC_PLUGIN_INCLUDE_APP_SERVICE_RPC_PLUGIN_COMMANDS_HMI_AS_PUBLISH_APP_SERVICE_REQUEST_H_
+#include "sdl_rpc_plugin/commands/hmi/bc_get_file_path_response.h"
+#include "application_manager/application_impl.h"
+#include "application_manager/rpc_service.h"
+#include "interfaces/MOBILE_API.h"
+#include "application_manager/event_engine/event.h"
 
-#include "app_service_rpc_plugin/app_service_rpc_plugin.h"
-#include "application_manager/commands/request_from_hmi.h"
-
-namespace app_service_rpc_plugin {
-namespace app_mngr = application_manager;
-
+namespace sdl_rpc_plugin {
+using namespace application_manager;
 namespace commands {
 
-/**
- * @brief ASPublishAppServiceRequest command class
- **/
-class ASPublishAppServiceRequest : public app_mngr::commands::RequestFromHMI {
- public:
-  /**
-   * @brief ASPublishAppServiceRequest class constructor
-   *
-   * @param message Incoming SmartObject message
-   **/
-  ASPublishAppServiceRequest(
-      const app_mngr::commands::MessageSharedPtr& message,
-      app_mngr::ApplicationManager& application_manager,
-      app_mngr::rpc_service::RPCService& rpc_service,
-      app_mngr::HMICapabilities& hmi_capabilities,
-      policy::PolicyHandlerInterface& policy_handle);
+BCGetFilePathResponse::BCGetFilePathResponse(
+    const application_manager::commands::MessageSharedPtr& message,
+    ApplicationManager& application_manager,
+    app_mngr::rpc_service::RPCService& rpc_service,
+    app_mngr::HMICapabilities& hmi_capabilities,
+    policy::PolicyHandlerInterface& policy_handler)
+    : ResponseFromHMI(message,
+                      application_manager,
+                      rpc_service,
+                      hmi_capabilities,
+                      policy_handler) {}
 
-  /**
-   * @brief ASPublishAppServiceRequest class destructor
-   **/
-  virtual ~ASPublishAppServiceRequest();
+BCGetFilePathResponse::~BCGetFilePathResponse() {}
 
-  /**
-   * @brief Execute command
-   **/
-  virtual void Run();
-
- private:
-  DISALLOW_COPY_AND_ASSIGN(ASPublishAppServiceRequest);
-};
+void BCGetFilePathResponse::Run() {
+  LOG4CXX_AUTO_TRACE(logger_);
+  application_manager::event_engine::Event event(
+      hmi_apis::FunctionID::BasicCommunication_GetFilePath);
+  event.set_smart_object(*message_);
+  event.raise(application_manager_.event_dispatcher());
+}
 
 }  // namespace commands
-
-}  // namespace app_service_rpc_plugin
-
-#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_APP_SERVICE_RPC_PLUGIN_INCLUDE_APP_SERVICE_RPC_PLUGIN_COMMANDS_HMI_AS_PUBLISH_APP_SERVICE_REQUEST_H_
+}  // namespace sdl_rpc_plugin
