@@ -228,11 +228,11 @@ class CacheManager : public CacheManagerInterface {
                               const std::string& endpoint);
 
   /**
-   * @brief Set a cloud app's name
-   * @param app_name Nickname for cloud app
+   * @brief Set a cloud app's nicknames
+   * @param nicknames Nicknames for cloud app
    */
-  virtual void SetAppName(const std::string& policy_app_id,
-                          const std::string& app_name);
+  virtual void SetAppNicknames(const std::string& policy_app_id,
+                               const StringArray& nicknames);
 
   /**
    * @brief Set the user preference for how a hybrid (cloud and mobile) app

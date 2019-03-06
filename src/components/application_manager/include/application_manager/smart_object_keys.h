@@ -188,6 +188,7 @@ extern const char* green;
 extern const char* blue;
 extern const char* display_layout;
 extern const char* icon_resumed;
+extern const char* nicknames;
 extern const char* enabled;
 extern const char* auth_token;
 extern const char* cloud_transport_type;

@@ -642,11 +642,11 @@ class PolicyManagerImpl : public PolicyManager {
                       const std::string& endpoint) OVERRIDE;
 
   /**
-   * @brief Set a cloud app's name
-   * @param app_name Nickname for cloud app
+   * @brief Set a cloud app's nicknames
+   * @param nicknames Nicknames for cloud app
    */
-  void SetAppName(const std::string& policy_app_id,
-                  const std::string& app_name) OVERRIDE;
+  void SetAppNicknames(const std::string& policy_app_id,
+                       const StringArray& nicknames) OVERRIDE;
 
   /**
    * @brief Set the user preference for how a hybrid (cloud and mobile) app
