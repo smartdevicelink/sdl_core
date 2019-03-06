@@ -343,14 +343,14 @@ class MockApplication : public ::application_manager::Application {
   MOCK_CONST_METHOD0(is_remote_control_supported, bool());
   MOCK_METHOD1(set_remote_control_supported, void(const bool allow));
   MOCK_CONST_METHOD0(cloud_app_endpoint, const std::string&());
-  MOCK_CONST_METHOD0(cloud_app_auth_token, const std::string&());
+  MOCK_CONST_METHOD0(auth_token, const std::string&());
   MOCK_CONST_METHOD0(cloud_app_transport_type, const std::string&());
   MOCK_CONST_METHOD0(hybrid_app_preference,
                      const mobile_apis::HybridAppPreference::eType&());
   MOCK_CONST_METHOD0(cloud_app_certificate, const std::string&());
   MOCK_CONST_METHOD0(is_cloud_app, bool());
   MOCK_METHOD1(set_cloud_app_endpoint, void(const std::string& endpoint));
-  MOCK_METHOD1(set_cloud_app_auth_token, void(const std::string& auth_token));
+  MOCK_METHOD1(set_auth_token, void(const std::string& auth_token));
   MOCK_METHOD1(set_cloud_app_transport_type,
                void(const std::string& transport_type));
   MOCK_METHOD1(set_hybrid_app_preference,

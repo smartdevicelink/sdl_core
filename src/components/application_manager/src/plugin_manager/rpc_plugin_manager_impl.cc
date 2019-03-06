@@ -54,7 +54,6 @@ RPCPluginPtr LoadPlugin(const std::string& full_plugin_path) {
     return RPCPluginPtr();
   }
   RPCPlugin* plugin = create_plugin();
-  dlclose(plugin_dll);
   return RPCPluginPtr(plugin);
 }
 

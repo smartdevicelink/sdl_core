@@ -696,7 +696,7 @@ void CacheManager::GetEnabledCloudApps(
   }
 }
 
-void CacheManager::GetCloudAppParameters(
+bool CacheManager::GetCloudAppParameters(
     const std::string& policy_app_id,
     bool& enabled,
     std::string& endpoint,
@@ -725,7 +725,9 @@ void CacheManager::GetCloudAppParameters(
             ? EnumToJsonString(*app_policy.hybrid_app_preference)
             : std::string();
     enabled = app_policy.enabled.is_initialized() && *app_policy.enabled;
+    return true;
   }
+  return false;
 }
 
 void CacheManager::InitCloudApp(const std::string& policy_app_id) {
@@ -779,6 +781,17 @@ void CacheManager::SetAppCloudTransportType(
       policies.find(policy_app_id);
   if (policies.end() != policy_iter) {
     *(*policy_iter).second.cloud_transport_type = cloud_transport_type;
+  }
+}
+
+void CacheManager::SetAppEndpoint(const std::string& policy_app_id,
+                                  const std::string& endpoint) {
+  policy_table::ApplicationPolicies& policies =
+      pt_->policy_table.app_policies_section.apps;
+  policy_table::ApplicationPolicies::iterator policy_iter =
+      policies.find(policy_app_id);
+  if (policies.end() != policy_iter) {
+    *(*policy_iter).second.endpoint = endpoint;
   }
 }
 
@@ -890,6 +903,21 @@ std::string CacheManager::GetLockScreenIconUrl() const {
     return backup_->GetLockScreenIconUrl();
   }
   return std::string("");
+}
+
+std::string CacheManager::GetIconUrl(const std::string& policy_app_id) const {
+  CACHE_MANAGER_CHECK(std::string());
+  std::string url;
+  const policy_table::ApplicationPolicies& policies =
+      pt_->policy_table.app_policies_section.apps;
+  policy_table::ApplicationPolicies::const_iterator policy_iter =
+      policies.find(policy_app_id);
+  if (policies.end() != policy_iter) {
+    auto app_policy = (*policy_iter).second;
+    url = app_policy.icon_url.is_initialized() ? *app_policy.icon_url
+                                               : std::string();
+  }
+  return url;
 }
 
 rpc::policy_table_interface_base::NumberOfNotificationsType

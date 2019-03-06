@@ -68,8 +68,12 @@ void ButtonGetCapabilitiesResponse::Run() {
   hmi_capabilities.set_button_capabilities(
       (*message_)[strings::msg_params][hmi_response::capabilities]);
 
-  hmi_capabilities.set_preset_bank_capabilities(
-      (*message_)[strings::msg_params][hmi_response::preset_bank_capabilities]);
+  if ((*message_)[strings::msg_params].keyExists(
+          hmi_response::preset_bank_capabilities)) {
+    hmi_capabilities.set_preset_bank_capabilities(
+        (*message_)[strings::msg_params]
+                   [hmi_response::preset_bank_capabilities]);
+  }
 }
 
 }  // namespace commands

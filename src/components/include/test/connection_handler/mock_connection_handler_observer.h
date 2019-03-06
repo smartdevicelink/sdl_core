@@ -79,6 +79,9 @@ class MockConnectionHandlerObserver
                void(const transport_manager::ConnectionUID connection_id,
                     const transport_manager::DeviceInfo& device_info,
                     connection_handler::DeviceHandle device_id));
+  MOCK_METHOD2(SetPendingApplicationState,
+               void(const transport_manager::ConnectionUID connection_id,
+                    const transport_manager::DeviceInfo& device_info));
 };
 
 }  // namespace connection_handler_test

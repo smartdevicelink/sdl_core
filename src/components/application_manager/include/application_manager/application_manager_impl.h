@@ -117,6 +117,14 @@ struct CommandParametersPermissions;
 typedef std::map<std::string, hmi_apis::Common_TransportType::eType>
     DeviceTypes;
 
+struct AppIconInfo {
+  std::string endpoint;
+  bool pending_request;
+  AppIconInfo();
+  AppIconInfo(std::string ws_endpoint, bool pending)
+      : endpoint(ws_endpoint), pending_request(pending) {}
+};
+
 CREATE_LOGGERPTR_GLOBAL(logger_, "ApplicationManager")
 typedef std::shared_ptr<timer::Timer> TimerSPtr;
 
@@ -156,6 +164,7 @@ class ApplicationManagerImpl
   bool Stop() OVERRIDE;
 
   DataAccessor<ApplicationSet> applications() const OVERRIDE;
+  DataAccessor<AppsWaitRegistrationSet> pending_applications() const OVERRIDE;
   ApplicationSharedPtr application(uint32_t app_id) const OVERRIDE;
 
   ApplicationSharedPtr active_application() const OVERRIDE;
@@ -163,6 +172,8 @@ class ApplicationManagerImpl
   ApplicationSharedPtr application_by_hmi_app(
       uint32_t hmi_app_id) const OVERRIDE;
   ApplicationSharedPtr application_by_policy_id(
+      const std::string& policy_app_id) const OVERRIDE;
+  ApplicationSharedPtr pending_application_by_policy_id(
       const std::string& policy_app_id) const OVERRIDE;
 
   std::vector<ApplicationSharedPtr> applications_by_button(
@@ -193,6 +204,9 @@ class ApplicationManagerImpl
       const std::shared_ptr<Application> app) OVERRIDE;
 
   void SendDriverDistractionState(ApplicationSharedPtr application);
+
+  void SendGetIconUrlNotifications(const uint32_t connection_key,
+                                   ApplicationSharedPtr application);
 
   ApplicationSharedPtr application(
       const std::string& device_id,
@@ -360,12 +374,22 @@ class ApplicationManagerImpl
   void ConnectToDevice(const std::string& device_mac) OVERRIDE;
   void OnHMIStartedCooperation() OVERRIDE;
 
+  void DisconnectCloudApp(ApplicationSharedPtr app) OVERRIDE;
+
   void RefreshCloudAppInformation() OVERRIDE;
 
   void CreatePendingApplication(
       const transport_manager::ConnectionUID connection_id,
       const transport_manager::DeviceInfo& device_info,
       connection_handler::DeviceHandle device_id);
+
+  void SetPendingApplicationState(
+      const transport_manager::ConnectionUID connection_id,
+      const transport_manager::DeviceInfo& device_info);
+
+  std::string PolicyIDByIconUrl(const std::string url) OVERRIDE;
+
+  void SetIconFileFromSystemRequest(const std::string policy_id) OVERRIDE;
 
   /**
    * @brief Notifies the applicaiton manager that a cloud connection status has
@@ -497,9 +521,6 @@ class ApplicationManagerImpl
 
   // typedef for Applications list
   typedef std::set<ApplicationSharedPtr, ApplicationsAppIdSorter> ApplictionSet;
-
-  typedef std::set<ApplicationSharedPtr, ApplicationsPolicyAppIdSorter>
-      AppsWaitRegistrationSet;
 
   // typedef for Applications list iterator
   typedef ApplictionSet::iterator ApplictionSetIt;
@@ -1471,6 +1492,9 @@ class ApplicationManagerImpl
   mutable std::shared_ptr<sync_primitives::RecursiveLock>
       pending_device_map_lock_ptr_;
   std::map<std::string, std::string> pending_device_map_;
+
+  sync_primitives::Lock app_icon_map_lock_ptr_;
+  std::map<std::string, AppIconInfo> app_icon_map_;
 
 #ifdef TELEMETRY_MONITOR
   AMTelemetryObserver* metric_observer_;

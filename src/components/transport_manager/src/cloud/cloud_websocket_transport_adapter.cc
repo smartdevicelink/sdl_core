@@ -74,6 +74,12 @@ bool CloudWebsocketTransportAdapter::Restore() {
 }
 
 void CloudWebsocketTransportAdapter::CreateDevice(const std::string& uid) {
+  // If the device has already been created, just ignore the request
+  DeviceSptr device = FindDevice(uid);
+  if (device.use_count() != 0) {
+    return;
+  }
+
   boost::regex pattern(
       "(wss?):\\/\\/([A-Z\\d\\.-]{2,})\\.?([A-Z]{2,})?(:\\d{2,4})\\/",
       boost::regex::icase);
@@ -91,7 +97,8 @@ void CloudWebsocketTransportAdapter::CreateDevice(const std::string& uid) {
 
   // Extract host and port from endpoint string
   boost::regex group_pattern(
-      "(wss?:\\/\\/)([A-Z\\d\\.-]{2,}\\.?([A-Z]{2,})?)(:)(\\d{2,4})(\\/)");
+      "(wss?:\\/\\/)([A-Z\\d\\.-]{2,}\\.?([A-Z]{2,})?)(:)(\\d{2,5})(\\/"
+      "[A-Z\\d\\.-]+)*\\/?");
   boost::smatch results;
 
   std::string host = "";
