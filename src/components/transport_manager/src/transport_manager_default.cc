@@ -107,9 +107,8 @@ int TransportManagerDefault::Init(resumption::LastState& last_state) {
 
 #if defined CLOUD_APP_WEBSOCKET_TRANSPORT_SUPPORT
   transport_adapter::TransportAdapterImpl* ta_cloud =
-      new transport_adapter::CloudWebsocketTransportAdapter(
-          last_state, get_settings());  // Todo add retry connection logic from
-                                        // ini to initializer.
+      new transport_adapter::CloudWebsocketTransportAdapter(last_state,
+                                                            get_settings());
 #ifdef TELEMETRY_MONITOR
   if (metric_observer_) {
     ta_cloud->SetTelemetryObserver(metric_observer_);

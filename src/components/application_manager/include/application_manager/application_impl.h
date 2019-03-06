@@ -423,7 +423,7 @@ class ApplicationImpl : public virtual Application,
   const std::string& auth_token() const OVERRIDE;
 
   /**
-   * @brief Get cloud app tranpsport type. Defines the type of websocket
+   * @brief Get cloud app transport type. Defines the type of websocket
    * connection used.
    * @return cloud app transport type
    */

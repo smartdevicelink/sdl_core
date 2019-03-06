@@ -960,7 +960,7 @@ class Application : public virtual InitialApplicationData,
   virtual const std::string& auth_token() const = 0;
 
   /**
-   * @brief Get cloud app tranpsport type. Defines the type of websocket
+   * @brief Get cloud app transport type. Defines the type of websocket
    * connection used.
    * @return cloud app transport type
    */

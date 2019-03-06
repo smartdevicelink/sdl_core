@@ -133,8 +133,6 @@ void TransportManagerImpl::ReconnectionTimeout() {
 void TransportManagerImpl::AddCloudDevice(
     const transport_manager::transport_adapter::CloudAppProperties
         cloud_properties) {
-  // todo put conversion into own function
-
   transport_adapter::DeviceType type = transport_adapter::DeviceType::UNKNOWN;
   if ((cloud_properties.cloud_transport_type == "WS") ||
       (cloud_properties.cloud_transport_type == "WSS")) {
