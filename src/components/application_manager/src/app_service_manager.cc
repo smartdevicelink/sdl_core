@@ -200,17 +200,6 @@ std::vector<smart_objects::SmartObject> AppServiceManager::GetAllServices() {
   return services;
 }
 
-bool AppServiceManager::GetAppServiceInfo(std::string service_id,
-                                          AppService& app_service_info) {
-  auto it = published_services_.find(service_id);
-  if (it == published_services_.end()) {
-    LOG4CXX_ERROR(logger_, "Service id does not exist in published services");
-    return false;
-  }
-  app_service_info = AppService(it->second);
-  return true;
-}
-
 void AppServiceManager::GetProviderByType(const std::string& service_type,
                                           bool mobile_consumer,
                                           ApplicationSharedPtr& app,

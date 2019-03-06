@@ -87,11 +87,11 @@ bool GetFileRequest::GetFilePath(std::string& file_path, bool& forward_to_hmi) {
     LOG4CXX_DEBUG(logger_,
                   "Finding storage directory for service id: " << service_id);
 
-    AppService app_service_info;
-    if (application_manager_.GetAppServiceManager().GetAppServiceInfo(
-            service_id, app_service_info)) {
-      if (app_service_info.mobile_service) {
-        connect_key = app_service_info.connection_key;
+    AppService* app_service_info =
+        application_manager_.GetAppServiceManager().FindServiceByID(service_id);
+    if (app_service_info) {
+      if (app_service_info->mobile_service) {
+        connect_key = app_service_info->connection_key;
       } else {
         forward_to_hmi = true;
         return true;
@@ -179,13 +179,16 @@ void GetFileRequest::Run() {
   LOG4CXX_DEBUG(logger_, "Handle offset and length parameters");
   const uint64_t file_size = file_system::FileSize(full_path);
 
-  if ((*message_)[strings::msg_params].keyExists(strings::length)) {
-    length_ = (*message_)[strings::msg_params][strings::length].asInt();
-  } else {
-    length_ = file_size;
-  }
   if ((*message_)[strings::msg_params].keyExists(strings::offset)) {
-    offset_ = (*message_)[strings::msg_params][strings::offset].asInt();
+    offset_ = (*message_)[strings::msg_params][strings::offset].asUInt();
+  }
+
+  length_ = file_size - offset_;
+  if ((*message_)[strings::msg_params].keyExists(strings::length)) {
+    length_ = std::min(
+        static_cast<uint32_t>(
+            (*message_)[strings::msg_params][strings::length].asUInt()),
+        length_);
   }
 
   if (offset_ > file_size) {
@@ -290,13 +293,16 @@ void GetFileRequest::on_event(const app_mngr::event_engine::Event& event) {
     }
 
     const uint64_t file_size = file_system::FileSize(full_path);
-    if ((*message_)[strings::msg_params].keyExists(strings::length)) {
-      length_ = (*message_)[strings::msg_params][strings::length].asInt();
-    } else {
-      length_ = file_size;
-    }
     if ((*message_)[strings::msg_params].keyExists(strings::offset)) {
-      offset_ = (*message_)[strings::msg_params][strings::offset].asInt();
+      offset_ = (*message_)[strings::msg_params][strings::offset].asUInt();
+    }
+
+    length_ = file_size - offset_;
+    if ((*message_)[strings::msg_params].keyExists(strings::length)) {
+      length_ = std::min(
+          static_cast<uint32_t>(
+              (*message_)[strings::msg_params][strings::length].asUInt()),
+          length_);
     }
 
     if (offset_ > file_size) {
@@ -340,11 +346,7 @@ void GetFileRequest::on_event(const app_mngr::event_engine::Event& event) {
     return;
   }
 
-  SendResponse(true,
-               mobile_apis::Result::SUCCESS,
-               "File uploaded",
-               &response_params,
-               bin_data);
+  SendResponse(true, result, "File uploaded", &response_params, bin_data);
 }
 
 }  // namespace commands

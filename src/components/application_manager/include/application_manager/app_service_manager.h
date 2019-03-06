@@ -125,14 +125,6 @@ class AppServiceManager {
    */
   std::vector<smart_objects::SmartObject> GetAllServices();
 
-  /**
-   * @brief Get AppService information based on service id
-   * @param service_id app service id
-   * @param app_service_info reference to AppService object to be overwritten
-   * with AppService information
-   * @return true if app service with id=service_id exists
-   */
-  bool GetAppServiceInfo(std::string service_id, AppService& app_service_info);
   void GetProviderByType(const std::string& service_type,
                          bool mobile_consumer,
                          ApplicationSharedPtr& app,
