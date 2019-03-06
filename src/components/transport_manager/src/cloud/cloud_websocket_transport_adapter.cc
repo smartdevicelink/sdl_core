@@ -53,6 +53,16 @@ CloudWebsocketTransportAdapter::CloudWebsocketTransportAdapter(
 
 CloudWebsocketTransportAdapter::~CloudWebsocketTransportAdapter() {}
 
+void CloudWebsocketTransportAdapter::SetAppCloudTransportConfig(
+    std::string app_id, CloudAppProperties properties) {
+  transport_config_[app_id] = properties;
+}
+
+const CloudAppProperties&
+CloudWebsocketTransportAdapter::GetAppCloudTransportConfig(std::string app_id) {
+  return transport_config_[app_id];
+}
+
 DeviceType CloudWebsocketTransportAdapter::GetDeviceType() const {
   return CLOUD_WEBSOCKET;
 }

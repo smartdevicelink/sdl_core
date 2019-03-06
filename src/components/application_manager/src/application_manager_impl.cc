@@ -905,10 +905,16 @@ void ApplicationManagerImpl::DisconnectCloudApp(ApplicationSharedPtr app) {
   // Delete the cloud device
   connection_handler().RemoveCloudAppDevice(app->device());
 
+  transport_manager::transport_adapter::CloudAppProperties properties{
+      endpoint,
+      certificate,
+      enabled,
+      auth_token,
+      cloud_transport_type,
+      hybrid_app_preference};
   // Create device in pending state
   LOG4CXX_DEBUG(logger_, "Re-adding the cloud app device");
-  connection_handler().AddCloudAppDevice(
-      policy_app_id, endpoint, cloud_transport_type);
+  connection_handler().AddCloudAppDevice(policy_app_id, properties);
 }
 
 void ApplicationManagerImpl::RefreshCloudAppInformation() {
@@ -948,9 +954,16 @@ void ApplicationManagerImpl::RefreshCloudAppInformation() {
       old_device_map.erase(old_device_it);
     }
 
+    transport_manager::transport_adapter::CloudAppProperties properties{
+        endpoint,
+        certificate,
+        enabled,
+        auth_token,
+        cloud_transport_type,
+        hybrid_app_preference};
+
     // If the device was disconnected, this will reinitialize the device
-    connection_handler().AddCloudAppDevice(
-        policy_id, endpoint, cloud_transport_type);
+    connection_handler().AddCloudAppDevice(policy_id, properties);
 
     // Look for app icon url data and add to app_icon_url_map
     std::string url = GetPolicyHandler().GetIconUrl(policy_id);

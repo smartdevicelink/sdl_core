@@ -1351,12 +1351,13 @@ void ConnectionHandlerImpl::ConnectToAllDevices() {
 
 void ConnectionHandlerImpl::AddCloudAppDevice(
     const std::string& policy_app_id,
-    const std::string& endpoint,
-    const std::string& cloud_transport_type) {
+    const transport_manager::transport_adapter::CloudAppProperties&
+        cloud_properties) {
   cloud_app_id_map_lock_.Acquire();
-  cloud_app_id_map_[policy_app_id] = std::make_pair(endpoint, 0);
+  cloud_app_id_map_[policy_app_id] =
+      std::make_pair(cloud_properties.endpoint, 0);
   cloud_app_id_map_lock_.Release();
-  transport_manager_.AddCloudDevice(endpoint, cloud_transport_type);
+  transport_manager_.AddCloudDevice(cloud_properties);
 }
 
 void ConnectionHandlerImpl::RemoveCloudAppDevice(const DeviceHandle device_id) {

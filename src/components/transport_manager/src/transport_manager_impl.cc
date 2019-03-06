@@ -50,6 +50,7 @@
 #include "transport_manager/transport_manager_listener.h"
 #include "transport_manager/transport_manager_listener_empty.h"
 #include "transport_manager/transport_adapter/transport_adapter.h"
+#include "transport_manager/cloud/cloud_websocket_transport_adapter.h"
 #include "transport_manager/transport_adapter/transport_adapter_event.h"
 #include "config_profile/profile.h"
 
@@ -130,10 +131,13 @@ void TransportManagerImpl::ReconnectionTimeout() {
 }
 
 void TransportManagerImpl::AddCloudDevice(
-    const std::string& endpoint, const std::string& cloud_transport_type) {
+    const transport_manager::transport_adapter::CloudAppProperties
+        cloud_properties) {
   // todo put conversion into own function
+
   transport_adapter::DeviceType type = transport_adapter::DeviceType::UNKNOWN;
-  if (cloud_transport_type == "WS") {
+  if ((cloud_properties.cloud_transport_type == "WS") ||
+      (cloud_properties.cloud_transport_type == "WSS")) {
     type = transport_adapter::DeviceType::CLOUD_WEBSOCKET;
   } else {
     return;
@@ -142,7 +146,11 @@ void TransportManagerImpl::AddCloudDevice(
   std::vector<TransportAdapter*>::iterator ta = transport_adapters_.begin();
   for (; ta != transport_adapters_.end(); ++ta) {
     if ((*ta)->GetDeviceType() == type) {
-      (*ta)->CreateDevice(endpoint);
+      (*ta)->CreateDevice(cloud_properties.endpoint);
+      transport_adapter::CloudWebsocketTransportAdapter* cta =
+          static_cast<transport_adapter::CloudWebsocketTransportAdapter*>(*ta);
+      cta->SetAppCloudTransportConfig(cloud_properties.endpoint,
+                                      cloud_properties);
     }
   }
 
