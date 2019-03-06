@@ -105,13 +105,13 @@ class FormatterJsonRpc : public CFormatterJsonBase {
    *
    * @param obj Input SmartObject.
    * @param out_str Resulting JSON string.
-   * @param RemoveUnknownParameters contains true if need to remove unknown
+   * @param remove_unknown_parameters contains true if need to remove unknown
    *parameters
    * @return true if success, false otherwise.
    */
   static bool ToString(const ns_smart_objects::SmartObject& obj,
                        std::string& out_str,
-                       const bool RemoveUnknownParameters = true);
+                       const bool remove_unknown_parameters = true);
 
   /**
    * @brief Creates a SmartObject from a JSON string.

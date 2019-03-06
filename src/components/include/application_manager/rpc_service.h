@@ -77,9 +77,13 @@ class RPCService {
   virtual void SendMessageToHMI(const commands::MessageSharedPtr message) = 0;
 
   /**
- * @ brief TODO
- * @ rpc_passing assign true if rpc_passing can be used for rpc
- */
+   * @brief Check if RPC with function_id can be handled by app services(related
+   * to app services or handled by app services plugin)
+   * @param function_id RPC function id
+   * @param source RPC command source
+   * @param rpc_passing Reference to bool. Set to true to enable rpc pasing
+   * @return true if App Services can handle RPC
+   */
   virtual bool CanHandleRPCUsingAppServices(
       int32_t function_id,
       commands::Command::CommandSource source,

@@ -58,7 +58,7 @@ const char* FormatterJsonRpc::kMessage = "message";
 
 bool FormatterJsonRpc::ToString(const ns_smart_objects::SmartObject& obj,
                                 std::string& out_str,
-                                const bool RemoveUnknownParameters) {
+                                const bool remove_unknown_parameters) {
   bool result = true;
   try {
     Json::Value root(Json::objectValue);
@@ -68,7 +68,7 @@ bool FormatterJsonRpc::ToString(const ns_smart_objects::SmartObject& obj,
     ns_smart_objects::SmartObject formatted_object(obj);
     Json::Value msg_params_json(Json::objectValue);
     formatted_object.getSchema().unapplySchema(formatted_object,
-                                               RemoveUnknownParameters);
+                                               remove_unknown_parameters);
 
     bool is_message_params = formatted_object.keyExists(strings::S_MSG_PARAMS);
     bool empty_message_params = true;

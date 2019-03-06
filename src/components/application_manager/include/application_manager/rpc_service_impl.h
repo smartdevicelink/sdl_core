@@ -133,7 +133,7 @@ class RPCServiceImpl : public RPCService,
  private:
   bool ConvertSOtoMessage(const smart_objects::SmartObject& message,
                           Message& output,
-                          const bool RemoveUnknownParameters = true);
+                          const bool remove_unknown_parameters = true);
   hmi_apis::HMI_API& hmi_so_factory();
   mobile_apis::MOBILE_API& mobile_so_factory();
 

@@ -118,22 +118,22 @@ class CObjectSchemaItem : public ISchemaItem {
   /**
    * @brief Apply schema.
    * @param Object Object to apply schema.
-   * @param RemoveUnknownParameters contains true if need to remove unknown
+   * @param remove_unknown_parameters contains true if need to remove unknown
    *parameters
    * from smart object otherwise contains false.
    **/
   void applySchema(SmartObject& Object,
-                   const bool RemoveUnknownParameters,
+                   const bool remove_unknown_parameters,
                    const utils::SemanticVersion& MessageVersion =
                        utils::SemanticVersion()) OVERRIDE;
   /**
    * @brief Unapply schema.
    * @param Object Object to unapply schema.
-   * @param RemoveUnknownParameters contains true if need to remove unknown
+   * @param remove_unknown_parameters contains true if need to remove unknown
    *parameters
    **/
   void unapplySchema(SmartObject& Object,
-                     const bool RemoveUnknownParameters) OVERRIDE;
+                     const bool remove_unknown_parameters) OVERRIDE;
   /**
    * @brief Build smart object by smart schema having copied matched
    *        parameters from pattern smart object

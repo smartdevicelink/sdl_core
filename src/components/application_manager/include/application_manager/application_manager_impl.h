@@ -1119,7 +1119,7 @@ class ApplicationManagerImpl
 
   bool ConvertSOtoMessage(const smart_objects::SmartObject& message,
                           Message& output,
-                          const bool RemoveUnknownParameters = true);
+                          const bool remove_unknown_parameters = true);
 
   template <typename ApplicationList>
   void PrepareApplicationListSO(ApplicationList app_list,

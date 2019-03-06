@@ -388,7 +388,7 @@ void RPCServiceImpl::SendMessageToMobile(
 
   const bool is_result_code_exists =
       (*message)[strings::msg_params].keyExists(strings::result_code);
-  bool RemoveUnknownParameters = true;
+  bool remove_unknown_parameters = true;
 
   if (!app) {
     LOG4CXX_ERROR(logger_, "No application associated with connection key");
@@ -429,7 +429,7 @@ void RPCServiceImpl::SendMessageToMobile(
     LOG4CXX_DEBUG(logger_,
                   "Allowing unknown parameters for response function "
                       << (*message)[jhs::S_PARAMS][jhs::S_FUNCTION_ID].asInt());
-    RemoveUnknownParameters = false;
+    remove_unknown_parameters = false;
   }
 
   if (rpc_passing &&
@@ -437,10 +437,10 @@ void RPCServiceImpl::SendMessageToMobile(
            .GetRPCPassingHandler()
            .UsingAppServices(
                (*message)[jhs::S_PARAMS][jhs::S_CORRELATION_ID].asUInt())) {
-    RemoveUnknownParameters = true;
+    remove_unknown_parameters = true;
   }
   if (!ConvertSOtoMessage(
-          (*message), (*message_to_send), RemoveUnknownParameters)) {
+          (*message), (*message_to_send), remove_unknown_parameters)) {
     LOG4CXX_WARN(logger_, "Can't send msg to Mobile: failed to create string");
     return;
   }
@@ -519,7 +519,7 @@ void RPCServiceImpl::SendMessageToHMI(
     return;
   }
 
-  bool RemoveUnknownParameters = true;
+  bool remove_unknown_parameters = true;
   // SmartObject |message| has no way to declare priority for now
   std::shared_ptr<Message> message_to_send(
       new Message(protocol_handler::MessagePriority::kDefault));
@@ -542,11 +542,11 @@ void RPCServiceImpl::SendMessageToHMI(
                   "Allowing unknown parameters for response function "
                       << (*message)[jhs::S_PARAMS][jhs::S_FUNCTION_ID].asInt());
 
-    RemoveUnknownParameters = false;
+    remove_unknown_parameters = false;
   }
 
   if (!ConvertSOtoMessage(
-          *message, *message_to_send, RemoveUnknownParameters)) {
+          *message, *message_to_send, remove_unknown_parameters)) {
     LOG4CXX_WARN(logger_,
                  "Cannot send message to HMI: failed to create string");
     return;
@@ -623,7 +623,7 @@ void RPCServiceImpl::set_hmi_message_handler(
 bool RPCServiceImpl::ConvertSOtoMessage(
     const ns_smart_device_link::ns_smart_objects::SmartObject& message,
     Message& output,
-    const bool RemoveUnknownParameters) {
+    const bool remove_unknown_parameters) {
   LOG4CXX_AUTO_TRACE(logger_);
 
   if (smart_objects::SmartType_Null == message.getType() ||
@@ -649,7 +649,7 @@ bool RPCServiceImpl::ConvertSOtoMessage(
     case 0: {
       if (protocol_version == 1) {
         if (!formatters::CFormatterJsonSDLRPCv1::toString(
-                message, output_string, RemoveUnknownParameters)) {
+                message, output_string, remove_unknown_parameters)) {
           LOG4CXX_WARN(logger_, "Failed to serialize smart object");
           return false;
         }
@@ -657,7 +657,7 @@ bool RPCServiceImpl::ConvertSOtoMessage(
             protocol_handler::MajorProtocolVersion::PROTOCOL_VERSION_1);
       } else {
         if (!formatters::CFormatterJsonSDLRPCv2::toString(
-                message, output_string, RemoveUnknownParameters)) {
+                message, output_string, remove_unknown_parameters)) {
           LOG4CXX_WARN(logger_, "Failed to serialize smart object");
           return false;
         }
@@ -670,7 +670,7 @@ bool RPCServiceImpl::ConvertSOtoMessage(
     }
     case 1: {
       if (!formatters::FormatterJsonRpc::ToString(
-              message, output_string, RemoveUnknownParameters)) {
+              message, output_string, remove_unknown_parameters)) {
         LOG4CXX_WARN(logger_, "Failed to serialize smart object");
         return false;
       }

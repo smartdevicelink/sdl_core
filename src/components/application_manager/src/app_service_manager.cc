@@ -601,10 +601,8 @@ bool RPCPassingHandler::RPCPassThrough(smart_objects::SmartObject rpc_message) {
       LOG4CXX_DEBUG(logger_, "Handle request");
 
       auto it = request_queue_.find(correlation_id);
-      if (it ==
-          request_queue_
-              .end()) {  // If correlation_id not in pass_through_requests
-
+      // If correlation_id not in pass_through_requests
+      if (it == request_queue_.end()) {
         LOG4CXX_DEBUG(logger_,
                       "Correlation id does NOT exist in map. Constructing "
                       "PassThroughRequests");
@@ -619,7 +617,7 @@ bool RPCPassingHandler::RPCPassThrough(smart_objects::SmartObject rpc_message) {
                   ->record[strings::service_manifest][strings::handled_rpcs];
           for (size_t i = 0; i < handled_rpcs.length(); i++) {
             if (handled_rpcs[i].asInt() == function_id) {
-              // Add Passtrhough requests to queue
+              // Add Passthrough requests to queue
               rpc_message[strings::params][strings::connection_key] =
                   services_it->connection_key;
               auto req = RpcPassThroughRequest{origin_connection_key,
@@ -669,7 +667,8 @@ bool RPCPassingHandler::RPCPassThrough(smart_objects::SmartObject rpc_message) {
         return true;
       }
 
-    } break;
+      break;
+    }
 
     case MessageType::kResponse: {
       LOG4CXX_DEBUG(logger_, "Handle response");
@@ -730,7 +729,8 @@ bool RPCPassingHandler::RPCPassThrough(smart_objects::SmartObject rpc_message) {
       }
 
       return false;
-    } break;
+      break;
+    }
   }
 
   return false;

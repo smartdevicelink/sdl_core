@@ -156,7 +156,7 @@ class AppServiceManager {
   std::string DefaultServiceByType(std::string service_type);
 
   /**
-     * @brief TODO
+   * @brief TODO
    * @param service_id
    * @param service_published
    */
@@ -192,20 +192,29 @@ class AppServiceManager {
 class RPCPassingHandler {
  public:
   RPCPassingHandler(AppServiceManager& asm_ref, ApplicationManager& am_ref);
-  /**
- * @brief TODO
- * @param functionId RPC function Id
- * @param correlation_id request correlation id
- */
 
+  /**
+   * @brief Check if function id is in the handled_rpcs list of an active app
+   * service
+   * @param function_id RPC function id
+   * @return true if function id exists in handled_rpcs list of an active app
+   * service
+   */
   bool CanUseRPCPassing(int32_t function_id);
 
-  bool UsingAppServices(uint32_t correlation_id);
   /**
-   * @brief TODO
-   * @param message RPC message SmartObject
+   * @brief Check if app services or core is being used to handle the RPC
+   * @param correlation_id correlation id of RPC response
+   * @return true if an app service was used to handle the RPC
    */
+  bool UsingAppServices(uint32_t correlation_id);
 
+  /**
+   * @brief Function to handle sending and receiving RPC Passing
+   * requests/responses
+   * @param rpc_message RPC message SmartObject
+   * @return true to stop current request/response and forward it
+   */
   bool RPCPassThrough(smart_objects::SmartObject rpc_message);
 
  private:
