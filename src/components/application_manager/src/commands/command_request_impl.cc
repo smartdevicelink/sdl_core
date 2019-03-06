@@ -441,6 +441,8 @@ void CommandRequestImpl::SendProviderRequest(
 
   if (hmi_destination) {
     LOG4CXX_DEBUG(logger_, "Sending Request to HMI Provider");
+    application_manager_.IncreaseForwardedRequestTimeout(connection_key(),
+                                                         correlation_id());
     SendHMIRequest(hmi_function_id, &(*msg)[strings::msg_params], use_events);
     return;
   }
@@ -468,6 +470,8 @@ void CommandRequestImpl::SendProviderRequest(
   request[strings::msg_params] = (*msg)[strings::msg_params];
   request[strings::params][strings::connection_key] = app->app_id();
 
+  application_manager_.IncreaseForwardedRequestTimeout(connection_key(),
+                                                       correlation_id());
   SendMobileRequest(mobile_function_id, new_msg, use_events);
 }
 
