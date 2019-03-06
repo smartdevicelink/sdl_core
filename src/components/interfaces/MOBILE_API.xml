@@ -2620,6 +2620,7 @@
         <element name="PublishAppServiceID" value="52" hexvalue="34" since="5.1" />
         <element name="GetAppServiceDataID" value="53" hexvalue="35" since="5.1" />
         <element name="PerformAppServiceInteractionID" value="55" hexvalue="37" since="5.1" />
+        <element name="GetFileID" value="54" hexvalue="36" since="5.1" />
         
         <!--
          Base Notifications
@@ -4012,14 +4013,6 @@
 
         <param name="allowAppConsumers" type="Boolean" mandatory="false" defvalue="false">
             <description> If true, app service consumers beyond the IVI system will be able to access this service. If false, only the IVI system will be able consume the service. If not provided, it is assumed to be false. </description>
-        </param>
-
-        <param name="uriPrefix" type="String" mandatory="false">
-            <description> The URI prefix for this service. If provided, all PerformAppServiceInteraction requests must start with it. </description>
-        </param>
-
-        <param name="uriScheme" type="String" mandatory="false">
-            <description> This is a custom schema for this service. SDL will not do any verification on this param past that it has a correctly formated JSON Object as its base. The uriScheme should contain all available actions to be taken through a PerformAppServiceInteraction request from an app service consumer. </description>
         </param>
 
         <param name="rpcSpecVersion" type="SyncMsgVersion" mandatory="false">
@@ -6453,6 +6446,64 @@
         
         <param name="info" type="String" maxlength="1000" mandatory="false" platform="documentation">
             <description>Provides additional human readable info regarding the result.</description>
+        </param>
+    </function>
+    
+    <function name ="GetFile" functionID="GetFileID" messagetype="request">
+        <description>This request is sent to the module to retrieve a file</description>
+        <param name="fileName" type="String" maxlength="255" mandatory="true">
+            <description>File name that should be retrieved</description>
+        </param>
+        <param name="appServiceId" type="String" mandatory="false">
+            <description>ID of the service that should have uploaded the requested file.</description>
+        </param>
+        <param name="fileType" type="FileType" mandatory="false">
+            <description>Selected file type.</description>
+        </param>
+        <param name="offset" type="Integer" minvalue="0" maxvalue="2000000000" mandatory="false">
+            <description>Optional offset in bytes for resuming partial data chunks</description>
+        </param>
+        <param name="length" type="Integer" minvalue="0" maxvalue="2000000000" mandatory="false">
+            <description>Optional length in bytes for resuming partial data chunks if offset is set to 0, then length is the total length of the file to be downloaded</description>
+        </param>
+    </function>
+
+    <function name="GetFile" functionID="GetFileID" messagetype="response">
+        <description>This response includes the data that is requested from the specific service</description>
+        <param name="success" type="Boolean" platform="documentation" mandatory="true">
+            <description> true, if successful; false, if failed </description>
+        </param>
+        <param name="resultCode" type="Result" platform="documentation" mandatory="true">
+            <description>See Result</description>
+            <element name="SUCCESS"/>
+            <element name="REJECTED"/>
+            <element name="DISALLOWED"/>
+            <element name="INVALID_DATA"/>
+            <element name="OUT_OF_MEMORY"/>
+            <element name="TOO_MANY_PENDING_REQUESTS"/>
+            <element name="APPLICATION_NOT_REGISTERED"/>
+            <element name="GENERIC_ERROR"/>
+            <element name="FILE_NOT_FOUND"/>
+    	</param>
+        <param name="info" type="String" maxlength="1000" mandatory="false" platform="documentation">
+            <description>Provides additional human readable info regarding the result.</description>
+        </param>
+
+        <!-- Specific response data -->
+        <param name="offset" type="Integer" minvalue="0" maxvalue="2000000000" mandatory="false">
+            <description>Optional offset in bytes for resuming partial data chunks</description>
+        </param>
+        
+        <param name="length" type="Integer" minvalue="0" maxvalue="2000000000" mandatory="false">
+            <description>Optional length in bytes for resuming partial data chunks if offset is set to 0, then length is the total length of the file to be downloaded</description>
+        </param>
+        
+        <param name="fileType" type="FileType" mandatory="false">
+            <description>File type that is being sent in response.</description>
+        </param>
+        
+        <param name="crc" type="Integer" minvalue="0" maxvalue="4294967295" mandatory="false">
+            <description>Additional CRC32 checksum to protect data integrity up to 512 Mbits</description>
         </param>
     </function>
     

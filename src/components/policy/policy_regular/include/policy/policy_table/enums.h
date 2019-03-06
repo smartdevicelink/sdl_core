@@ -442,6 +442,11 @@ enum FunctionID {
   GetAppServiceDataID = 53,
 
   /**
+   * @brief GetFileID
+   */
+  GetFileID = 54,
+
+  /**
    * @brief PerformAppServiceInteractionID.
    */
   PerformAppServiceInteractionID = 55,

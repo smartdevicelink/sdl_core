@@ -3680,14 +3680,6 @@
             <description> If true, app service consumers beyond the IVI system will be able to access this service. If false, only the IVI system will be able consume the service. If not provided, it is assumed to be false. </description>
         </param>
 
-        <param name="uriPrefix" type="String" mandatory="false">
-            <description> The URI prefix for this service. If provided, all PerformAppServiceInteraction requests must start with it. </description>
-        </param>
-
-        <param name="uriScheme" type="String" mandatory="false">
-            <description> This is a custom schema for this service. SDL will not do any verification on this param past that it has a correctly formated JSON Object as its base. The uriScheme should contain all available actions to be taken through a PerformAppServiceInteraction request from an app service consumer. </description>
-        </param>
-
         <param name="rpcSpecVersion" type="Common.SyncMsgVersion" mandatory="false">
             <description> This is the max RPC Spec version the app service understands. This is important during the RPC passthrough functionality. If not included, it is assumed the max version of the module is acceptable. </description>
         </param>
@@ -3751,17 +3743,17 @@
     </enum>
 
     <struct name="AppServiceCapability">
-        <param name="updateReason" type="ServiceUpdateReason" mandatory="false">
+        <param name="updateReason" type="Common.ServiceUpdateReason" mandatory="false">
             <description> Only included in OnSystemCapabilityUpdated. Update reason for service record.</description>
         </param>
-        <param name="updatedAppServiceRecord" type="AppServiceRecord" mandatory="true">
+        <param name="updatedAppServiceRecord" type="Common.AppServiceRecord" mandatory="true">
             <description>Service record for a specific app service provider</description>
         </param>
     </struct>
 
     <struct name="AppServicesCapabilities">
         <description>Capabilities of app services including what service types are supported and the current state of services.</description>
-        <param name="appServices" type="AppServiceCapability" array="true" mandatory="false">
+        <param name="appServices" type="Common.AppServiceCapability" array="true" mandatory="false">
             <description>An array of currently available services. If this is an update to the capability the affected services will include an update reason in that item</description>
         </param>
     </struct>
@@ -3779,22 +3771,22 @@
 
     <struct name="SystemCapabilities">
         <description>The systemCapabilityType identifies which data object exists in this struct. For example, if the SystemCapability Type is NAVIGATION then a "navigationCapability" should exist</description>
-        <param name="systemCapabilityType" type="SystemCapabilityType" mandatory="true">
+        <param name="systemCapabilityType" type="Common.SystemCapabilityType" mandatory="true">
             <description>Used as a descriptor of what data to expect in this struct. The corresponding param to this enum should be included and the only other para included.</description>
         </param>
-        <param name="navigationCapability" type="NavigationCapability" mandatory="false">
+        <param name="navigationCapability" type="Common.NavigationCapability" mandatory="false">
             <description>Describes extended capabilities for onboard navigation system </description>
         </param>
-        <param name="phoneCapability" type="PhoneCapability" mandatory="false">
+        <param name="phoneCapability" type="Common.PhoneCapability" mandatory="false">
             <description>Describes extended capabilities of the module's phone feature</description>
         </param>
-        <param name="videoStreamingCapability" type="VideoStreamingCapability" mandatory="false">
+        <param name="videoStreamingCapability" type="Common.VideoStreamingCapability" mandatory="false">
             <description>Describes extended capabilities of the module's phone feature</description>
         </param>
-        <param name="remoteControlCapability" type="RemoteControlCapabilities" mandatory="false">
+        <param name="remoteControlCapability" type="Common.RemoteControlCapabilities" mandatory="false">
             <description>Describes extended capabilities of the module's phone feature</description>
         </param>
-        <param name="appServicesCapabilities" type="AppServicesCapabilities" mandatory="false">
+        <param name="appServicesCapabilities" type="Common.AppServicesCapabilities" mandatory="false">
             <description>An array of currently available services. If this is an update to the capability the affected services will include an update reason in that item</description>
         </param>      
     </struct>
@@ -4187,6 +4179,29 @@
     </param>
   </function>
 
+  <function name="GetFilePath" messagetype="request">
+    <description>This request is sent to retrieve a file path from the HMI.</description>
+    <param name="fileName" type="String" maxlength="255" mandatory="true">
+      <description>File name that should be retrieved.</description>
+    </param>
+    <param name="fileType" type="Common.FileType" mandatory="false">
+      <description>Selected file type.</description>
+    </param>
+    <param name="appServiceId" type="String" mandatory="false">
+      <description> ID of the service that should have uploaded the requested file.</description>
+    </param>
+  </function>
+
+  <function name="GetFilePath" messagetype="response">
+    <description> HMI handles the request internally and returns the file path with the response.</description>
+    <param name="filePath" type="String" mandatory="false">
+      <description>Path to file in hmi</description>
+    </param>
+    <param name="fileType" type="Common.FileType" mandatory="false">
+      <description>Selected file type.</description>
+    </param>
+  </function>
+  
 <!-- Policies -->
   <function name="GetSystemInfo" messagetype="request">
     <description>Request from SDL to HMI to obtain information about head unit system.</description>

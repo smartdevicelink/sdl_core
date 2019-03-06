@@ -30,38 +30,36 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_APP_SERVICE_RPC_PLUGIN_INCLUDE_APP_SERVICE_RPC_PLUGIN_COMMANDS_HMI_AS_PUBLISH_APP_SERVICE_REQUEST_H_
-#define SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_APP_SERVICE_RPC_PLUGIN_INCLUDE_APP_SERVICE_RPC_PLUGIN_COMMANDS_HMI_AS_PUBLISH_APP_SERVICE_REQUEST_H_
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_MOBILE_GET_FILE_RESPONSE_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_MOBILE_GET_FILE_RESPONSE_H_
 
-#include "app_service_rpc_plugin/app_service_rpc_plugin.h"
-#include "application_manager/commands/request_from_hmi.h"
+#include "application_manager/commands/command_response_impl.h"
 
-namespace app_service_rpc_plugin {
+namespace sdl_rpc_plugin {
 namespace app_mngr = application_manager;
 
 namespace commands {
 
 /**
- * @brief ASPublishAppServiceRequest command class
+ * @brief GetFileResponse command class
  **/
-class ASPublishAppServiceRequest : public app_mngr::commands::RequestFromHMI {
+class GetFileResponse : public app_mngr::commands::CommandResponseImpl {
  public:
   /**
-   * @brief ASPublishAppServiceRequest class constructor
+   * @brief GetFileResponse class constructor
    *
    * @param message Incoming SmartObject message
    **/
-  ASPublishAppServiceRequest(
-      const app_mngr::commands::MessageSharedPtr& message,
-      app_mngr::ApplicationManager& application_manager,
-      app_mngr::rpc_service::RPCService& rpc_service,
-      app_mngr::HMICapabilities& hmi_capabilities,
-      policy::PolicyHandlerInterface& policy_handle);
+  GetFileResponse(const app_mngr::commands::MessageSharedPtr& message,
+                  app_mngr::ApplicationManager& application_manager,
+                  app_mngr::rpc_service::RPCService& rpc_service,
+                  app_mngr::HMICapabilities& hmi_capabilities,
+                  policy::PolicyHandlerInterface& policy_handle);
 
   /**
-   * @brief ASPublishAppServiceRequest class destructor
+   * @brief GetFileResponse class destructor
    **/
-  virtual ~ASPublishAppServiceRequest();
+  virtual ~GetFileResponse();
 
   /**
    * @brief Execute command
@@ -69,11 +67,11 @@ class ASPublishAppServiceRequest : public app_mngr::commands::RequestFromHMI {
   virtual void Run();
 
  private:
-  DISALLOW_COPY_AND_ASSIGN(ASPublishAppServiceRequest);
+  DISALLOW_COPY_AND_ASSIGN(GetFileResponse);
 };
 
 }  // namespace commands
 
-}  // namespace app_service_rpc_plugin
+}  // namespace sdl_rpc_plugin
 
-#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_APP_SERVICE_RPC_PLUGIN_INCLUDE_APP_SERVICE_RPC_PLUGIN_COMMANDS_HMI_AS_PUBLISH_APP_SERVICE_REQUEST_H_
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_MOBILE_GET_FILE_RESPONSE_H_

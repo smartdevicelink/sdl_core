@@ -70,16 +70,16 @@ void GetAppServiceDataRequest::Run() {
   std::string service_type =
       (*message_)[strings::msg_params][strings::service_type].asString();
 
-  bool subscribe = false;
-  if ((*message_)[strings::msg_params].keyExists(strings::subscribe)) {
-    subscribe = (*message_)[strings::msg_params][strings::subscribe].asBool();
-  }
-
   ApplicationSharedPtr app = application_manager_.application(connection_key());
-
-  if (subscribe) {
+  if ((*message_)[strings::msg_params].keyExists(strings::subscribe)) {
+    bool subscribe =
+        (*message_)[strings::msg_params][strings::subscribe].asBool();
     auto& ext = AppServiceAppExtension::ExtractASExtension(*app);
-    ext.SubscribeToAppService(service_type);
+    if (subscribe) {
+      ext.SubscribeToAppService(service_type);
+    } else {
+      ext.UnsubscribeFromAppService(service_type);
+    }
   }
 
   SendProviderRequest(mobile_apis::FunctionID::GetAppServiceDataID,
