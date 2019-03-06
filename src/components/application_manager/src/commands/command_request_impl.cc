@@ -434,12 +434,12 @@ void CommandRequestImpl::SendProviderRequest(
     std::string service_type =
         (*msg)[strings::msg_params][strings::service_type].asString();
     application_manager_.GetAppServiceManager().GetProviderByType(
-        service_type, app, hmi_destination);
+        service_type, true, app, hmi_destination);
   } else if ((*msg)[strings::msg_params].keyExists(strings::service_id)) {
     std::string service_id =
         (*msg)[strings::msg_params][strings::service_id].asString();
     application_manager_.GetAppServiceManager().GetProviderByID(
-        service_id, app, hmi_destination);
+        service_id, true, app, hmi_destination);
   }
 
   if (hmi_destination) {

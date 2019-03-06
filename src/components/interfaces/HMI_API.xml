@@ -3743,17 +3743,17 @@
     </enum>
 
     <struct name="AppServiceCapability">
-        <param name="updateReason" type="ServiceUpdateReason" mandatory="false">
+        <param name="updateReason" type="Common.ServiceUpdateReason" mandatory="false">
             <description> Only included in OnSystemCapabilityUpdated. Update reason for service record.</description>
         </param>
-        <param name="updatedAppServiceRecord" type="AppServiceRecord" mandatory="true">
+        <param name="updatedAppServiceRecord" type="Common.AppServiceRecord" mandatory="true">
             <description>Service record for a specific app service provider</description>
         </param>
     </struct>
 
     <struct name="AppServicesCapabilities">
         <description>Capabilities of app services including what service types are supported and the current state of services.</description>
-        <param name="appServices" type="AppServiceCapability" array="true" mandatory="false">
+        <param name="appServices" type="Common.AppServiceCapability" array="true" mandatory="false">
             <description>An array of currently available services. If this is an update to the capability the affected services will include an update reason in that item</description>
         </param>
     </struct>
@@ -3771,22 +3771,22 @@
 
     <struct name="SystemCapabilities">
         <description>The systemCapabilityType identifies which data object exists in this struct. For example, if the SystemCapability Type is NAVIGATION then a "navigationCapability" should exist</description>
-        <param name="systemCapabilityType" type="SystemCapabilityType" mandatory="true">
+        <param name="systemCapabilityType" type="Common.SystemCapabilityType" mandatory="true">
             <description>Used as a descriptor of what data to expect in this struct. The corresponding param to this enum should be included and the only other para included.</description>
         </param>
-        <param name="navigationCapability" type="NavigationCapability" mandatory="false">
+        <param name="navigationCapability" type="Common.NavigationCapability" mandatory="false">
             <description>Describes extended capabilities for onboard navigation system </description>
         </param>
-        <param name="phoneCapability" type="PhoneCapability" mandatory="false">
+        <param name="phoneCapability" type="Common.PhoneCapability" mandatory="false">
             <description>Describes extended capabilities of the module's phone feature</description>
         </param>
-        <param name="videoStreamingCapability" type="VideoStreamingCapability" mandatory="false">
+        <param name="videoStreamingCapability" type="Common.VideoStreamingCapability" mandatory="false">
             <description>Describes extended capabilities of the module's phone feature</description>
         </param>
-        <param name="remoteControlCapability" type="RemoteControlCapabilities" mandatory="false">
+        <param name="remoteControlCapability" type="Common.RemoteControlCapabilities" mandatory="false">
             <description>Describes extended capabilities of the module's phone feature</description>
         </param>
-        <param name="appServicesCapabilities" type="AppServicesCapabilities" mandatory="false">
+        <param name="appServicesCapabilities" type="Common.AppServicesCapabilities" mandatory="false">
             <description>An array of currently available services. If this is an update to the capability the affected services will include an update reason in that item</description>
         </param>      
     </struct>

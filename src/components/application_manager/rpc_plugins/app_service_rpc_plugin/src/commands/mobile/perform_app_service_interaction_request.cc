@@ -66,7 +66,7 @@ void PerformAppServiceInteractionRequest::Run() {
   std::string service_id = msg_params[strings::service_id].asString();
   auto service =
       application_manager_.GetAppServiceManager().FindServiceByID(service_id);
-  if (service.first.empty()) {
+  if (!service) {
     SendResponse(false,
                  mobile_apis::Result::INVALID_ID,
                  "The requested service ID does not exist");
@@ -81,9 +81,8 @@ void PerformAppServiceInteractionRequest::Run() {
   }
 
   // Only activate service if it is not already active
-  bool activate_service =
-      request_service_active &&
-      !service.second.record[strings::service_active].asBool();
+  bool activate_service = request_service_active &&
+                          !service->record[strings::service_active].asBool();
   if (activate_service) {
     if (app->is_foreground()) {
       // App is in foreground, we can just activate the service
