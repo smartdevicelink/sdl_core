@@ -795,6 +795,17 @@ void CacheManager::SetAppEndpoint(const std::string& policy_app_id,
   }
 }
 
+void CacheManager::SetAppName(const std::string& policy_app_id,
+                              const std::string& app_name) {
+  policy_table::ApplicationPolicies& policies =
+      pt_->policy_table.app_policies_section.apps;
+  policy_table::ApplicationPolicies::iterator policy_iter =
+      policies.find(policy_app_id);
+  if (policies.end() != policy_iter) {
+    (*policy_iter).second.nicknames->push_back(app_name);
+  }
+}
+
 void CacheManager::SetHybridAppPreference(
     const std::string& policy_app_id,
     const std::string& hybrid_app_preference) {
