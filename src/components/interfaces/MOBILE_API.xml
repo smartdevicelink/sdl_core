@@ -4007,7 +4007,7 @@
             <description> The type of service that is to be offered by this app </description>
         </param>
 
-        <param name="serviceIcon" type="String" mandatory="false">
+        <param name="serviceIcon" type="Image" mandatory="false">
             <description> The file name of the icon to be associated with this service. Most likely the same as the appIcon. </description>
         </param>
 
