@@ -72,11 +72,12 @@ void RPCHandlerImpl::ProcessMessageFromMobile(
     return;
   }
 
-  bool rpc_passing = false;
-  if (app_manager_.GetRPCService().CanHandleRPCUsingAppServices(
-          message->function_id(),
-          commands::Command::SOURCE_MOBILE,
-          rpc_passing)) {
+  bool rpc_passing = app_manager_.GetAppServiceManager()
+                         .GetRPCPassingHandler()
+                         .CanHandleFunctionID(message->function_id());
+  if (app_manager_.GetRPCService().IsAppServiceRPC(
+          message->function_id(), commands::Command::SOURCE_MOBILE) ||
+      rpc_passing) {
     LOG4CXX_DEBUG(logger_,
                   "Allowing unknown parameters for request function "
                       << message->function_id());
@@ -88,7 +89,12 @@ void RPCHandlerImpl::ProcessMessageFromMobile(
     LOG4CXX_ERROR(logger_, "Cannot create smart object from message");
     return;
   }
+
   if (rpc_passing) {
+    uint32_t correlation_id =
+        (*so_from_mobile)[strings::params][strings::correlation_id].asUInt();
+    int32_t message_type =
+        (*so_from_mobile)[strings::params][strings::message_type].asInt();
     if (app_manager_.GetAppServiceManager()
             .GetRPCPassingHandler()
             .RPCPassThrough(*so_from_mobile)) {
@@ -97,7 +103,11 @@ void RPCHandlerImpl::ProcessMessageFromMobile(
           "RPC_PASS_THROUGH_FROMMOBILE: Cancelling current request and "
           "switching to next one");
       return;
-    } else {
+    } else if (!app_manager_.GetAppServiceManager()
+                    .GetRPCPassingHandler()
+                    .IsPassThroughMessage(correlation_id,
+                                          commands::Command::SOURCE_MOBILE,
+                                          message_type)) {
       if (!ConvertMessageToSO(*message, *so_from_mobile, true)) {
         LOG4CXX_ERROR(logger_, "Cannot create smart object from message");
         return;
@@ -137,11 +147,9 @@ void RPCHandlerImpl::ProcessMessageFromHMI(
                                            hmi_apis::messageType::eType>(
       message->json_message(), converted_result);
 
-  bool rpc_passing = false;
-  if (app_manager_.GetRPCService().CanHandleRPCUsingAppServices(
+  if (app_manager_.GetRPCService().IsAppServiceRPC(
           converted_result[jhs::S_PARAMS][jhs::S_FUNCTION_ID].asInt(),
-          commands::Command::SOURCE_HMI,
-          rpc_passing)) {
+          commands::Command::SOURCE_HMI)) {
     LOG4CXX_DEBUG(
         logger_,
         "Allowing unknown parameters for request function "

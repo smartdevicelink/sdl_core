@@ -57,15 +57,21 @@ RPCPassingHandler::RPCPassingHandler(AppServiceManager& asm_ref,
                                      ApplicationManager& am_ref)
     : app_service_manager_(asm_ref), app_manager_(am_ref) {}
 
-bool RPCPassingHandler::UsingAppServices(uint32_t correlation_id) {
-  if (messages_using_core_.find(correlation_id) == messages_using_core_.end()) {
+bool RPCPassingHandler::IsPassThroughMessage(
+    uint32_t correlation_id,
+    commands::Command::CommandSource source,
+    int32_t message_type) {
+  if (rpc_request_queue.find(correlation_id) != rpc_request_queue.end()) {
+    if (message_type == MessageType::kResponse &&
+        source == commands::Command::CommandSource::SOURCE_SDL) {
+      rpc_request_queue.erase(correlation_id);
+    }
     return true;
   }
-  messages_using_core_.erase(correlation_id);
   return false;
 }
 
-bool RPCPassingHandler::CanUseRPCPassing(int32_t function_id) {
+bool RPCPassingHandler::CanHandleFunctionID(int32_t function_id) {
   auto services = app_service_manager_.GetActiveServices();
   for (auto it = services.begin(); it != services.end(); ++it) {
     auto handled_rpcs =
@@ -106,7 +112,6 @@ bool RPCPassingHandler::RPCPassThrough(smart_objects::SmartObject rpc_message) {
         LOG4CXX_DEBUG(logger_,
                       "No services left in map. Using core to handle request");
         rpc_request_queue.erase(correlation_id);
-        messages_using_core_.insert(correlation_id);
         return false;
       } else {
         ForwardRequestToMobile(correlation_id);
@@ -194,7 +199,6 @@ void RPCPassingHandler::ForwardRequestToCore(uint32_t correlation_id) {
   smart_objects::SmartObjectSPtr result =
       std::make_shared<smart_objects::SmartObject>(message);
   rpc_request_queue.erase(correlation_id);
-  messages_using_core_.insert(correlation_id);
   app_manager_.GetRPCService().ManageMobileCommand(
       result, commands::Command::SOURCE_MOBILE);
 }
@@ -212,7 +216,6 @@ void RPCPassingHandler::ForwardResponseToMobile(
   message[strings::params][strings::connection_key] = origin_connection_key;
   smart_objects::SmartObjectSPtr result =
       std::make_shared<smart_objects::SmartObject>(message);
-  rpc_request_queue.erase(correlation_id);
   app_manager_.GetRPCService().SendMessageToMobile(result);
 }
 

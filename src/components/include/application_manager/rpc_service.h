@@ -84,10 +84,8 @@ class RPCService {
    * @param rpc_passing Reference to bool. Set to true to enable rpc pasing
    * @return true if App Services can handle RPC
    */
-  virtual bool CanHandleRPCUsingAppServices(
-      int32_t function_id,
-      commands::Command::CommandSource source,
-      bool& rpc_passing) = 0;
+  virtual bool IsAppServiceRPC(int32_t function_id,
+                               commands::Command::CommandSource source) = 0;
 
   /**
    * @brief set_protocol_handler

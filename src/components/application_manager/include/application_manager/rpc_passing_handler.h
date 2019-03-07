@@ -62,14 +62,16 @@ class RPCPassingHandler {
    * @return true if function id exists in handled_rpcs list of an active app
    * service
    */
-  bool CanUseRPCPassing(int32_t function_id);
+  bool CanHandleFunctionID(int32_t function_id);
 
   /**
    * @brief Check if app services or core is being used to handle the RPC
    * @param correlation_id correlation id of RPC response
    * @return true if an app service was used to handle the RPC
    */
-  bool UsingAppServices(uint32_t correlation_id);
+  bool IsPassThroughMessage(uint32_t correlation_id,
+                            commands::Command::CommandSource source,
+                            int32_t message_type);
 
   /**
    * @brief Function to handle sending and receiving RPC Passing
@@ -93,7 +95,6 @@ class RPCPassingHandler {
 
   AppServiceManager& app_service_manager_;
   ApplicationManager& app_manager_;
-  std::set<uint32_t> messages_using_core_;
   std::map<uint32_t,
            std::pair<smart_objects::SmartObject, std::deque<ServiceInfo> > >
       rpc_request_queue;

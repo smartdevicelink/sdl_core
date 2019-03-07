@@ -421,22 +421,26 @@ void RPCServiceImpl::SendMessageToMobile(
   std::shared_ptr<Message> message_to_send(
       new Message(protocol_handler::MessagePriority::kDefault));
 
-  bool rpc_passing = false;
-  if (CanHandleRPCUsingAppServices(
-          (*message)[jhs::S_PARAMS][jhs::S_FUNCTION_ID].asInt(),
-          commands::Command::CommandSource::SOURCE_SDL,
-          rpc_passing)) {
+  int32_t function_id = (*message)[jhs::S_PARAMS][jhs::S_FUNCTION_ID].asInt();
+  bool rpc_passing = app_manager_.GetAppServiceManager()
+                         .GetRPCPassingHandler()
+                         .CanHandleFunctionID(function_id);
+  if (IsAppServiceRPC(function_id,
+                      commands::Command::CommandSource::SOURCE_SDL) ||
+      rpc_passing) {
     LOG4CXX_DEBUG(logger_,
                   "Allowing unknown parameters for response function "
-                      << (*message)[jhs::S_PARAMS][jhs::S_FUNCTION_ID].asInt());
+                      << function_id);
     remove_unknown_parameters = false;
   }
 
   if (rpc_passing &&
       !app_manager_.GetAppServiceManager()
            .GetRPCPassingHandler()
-           .UsingAppServices(
-               (*message)[jhs::S_PARAMS][jhs::S_CORRELATION_ID].asUInt())) {
+           .IsPassThroughMessage(
+               (*message)[jhs::S_PARAMS][jhs::S_CORRELATION_ID].asUInt(),
+               commands::Command::CommandSource::SOURCE_SDL,
+               (*message)[jhs::S_PARAMS][jhs::S_MESSAGE_TYPE].asInt())) {
     remove_unknown_parameters = true;
   }
   if (!ConvertSOtoMessage(
@@ -533,11 +537,8 @@ void RPCServiceImpl::SendMessageToHMI(
       logger_,
       "Attached schema to message, result if valid: " << message->isValid());
 
-  bool rpc_passing = false;
-  if (CanHandleRPCUsingAppServices(
-          (*message)[jhs::S_PARAMS][jhs::S_FUNCTION_ID].asInt(),
-          commands::Command::CommandSource::SOURCE_SDL_TO_HMI,
-          rpc_passing)) {
+  if (IsAppServiceRPC((*message)[jhs::S_PARAMS][jhs::S_FUNCTION_ID].asInt(),
+                      commands::Command::CommandSource::SOURCE_SDL_TO_HMI)) {
     LOG4CXX_DEBUG(logger_,
                   "Allowing unknown parameters for response function "
                       << (*message)[jhs::S_PARAMS][jhs::S_FUNCTION_ID].asInt());
@@ -555,12 +556,8 @@ void RPCServiceImpl::SendMessageToHMI(
   messages_to_hmi_.PostMessage(impl::MessageToHmi(message_to_send));
 }
 
-bool RPCServiceImpl::CanHandleRPCUsingAppServices(
-    int32_t function_id,
-    commands::Command::CommandSource source,
-    bool& rpc_passing) {
-  rpc_passing = false;
-
+bool RPCServiceImpl::IsAppServiceRPC(int32_t function_id,
+                                     commands::Command::CommandSource source) {
   // General RPCs related to App Services
   if ((source == commands::Command::CommandSource::SOURCE_MOBILE) ||
       (source ==
@@ -578,21 +575,6 @@ bool RPCServiceImpl::CanHandleRPCUsingAppServices(
       case hmi_apis::FunctionID::BasicCommunication_OnSystemCapabilityUpdated:
         return true;
         break;
-    }
-  }
-
-  // Check if rpc passing can be used for request
-  if ((source == commands::Command::CommandSource::SOURCE_MOBILE) ||
-      (source ==
-       commands::Command::CommandSource::SOURCE_SDL)) {  // MOBILE COMMANDS
-
-    if (app_manager_.GetAppServiceManager()
-            .GetRPCPassingHandler()
-            .CanUseRPCPassing(function_id)) {
-      LOG4CXX_DEBUG(logger_,
-                    "RPC passing can be used for function " << function_id);
-      rpc_passing = true;
-      return true;
     }
   }
 
