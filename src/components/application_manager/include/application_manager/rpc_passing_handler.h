@@ -95,6 +95,7 @@ class RPCPassingHandler {
   void ForwardRequestToCore(uint32_t correlation_id);
   void ForwardResponseToMobile(uint32_t correlation_id,
                                smart_objects::SmartObject response_message);
+  void PopulateRPCRequestQueue(smart_objects::SmartObject request_message);
 
   AppServiceManager& app_service_manager_;
   ApplicationManager& app_manager_;
