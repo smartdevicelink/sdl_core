@@ -90,7 +90,7 @@ class RPCPassingHandler {
   std::map<uint32_t, RpcPassThroughRequest> current_request_;
   std::map<uint32_t, std::queue<RpcPassThroughRequest> > request_queue_;
   std::set<uint32_t> messages_using_core_;
-  std::queue<std::pair<TimerSPtr, uint32_t> > timeout_queue_;
+  std::vector<std::pair<TimerSPtr, uint32_t> > timeout_queue_;
 };
 
 }  //  namespace application_manager

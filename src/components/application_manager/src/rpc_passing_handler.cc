@@ -254,34 +254,73 @@ bool RPCPassingHandler::CycleThroughRPCPassingRequests(
 void RPCPassingHandler::OnPassThroughRequestTimeout() {
   LOG4CXX_DEBUG(logger_, "RPC Passing request timeout");
   auto timeout_entry = timeout_queue_.front();
-  uint32_t correlation_id = std::get<1>(timeout_entry);
-  timeout_queue_.pop();
+  uint32_t correlation_id = timeout_entry.second;
+  RemoveTimeoutTimer(correlation_id);
   LOG4CXX_DEBUG(logger_,
                 "Cycling through requests for correlation_id "
                     << correlation_id);
   CycleThroughRPCPassingRequests(correlation_id);
+  if (request_queue_[correlation_id].empty()) {
+    LOG4CXX_DEBUG(logger_,
+                  "No services left in map. using core to handle request");
+    current_request_[correlation_id]
+        .message[strings::params][strings::connection_key] =
+        current_request_[correlation_id].origin_connection_key;
+    smart_objects::SmartObjectSPtr result =
+        std::make_shared<smart_objects::SmartObject>(
+            current_request_[correlation_id].message);
+    request_queue_.erase(correlation_id);
+    current_request_.erase(correlation_id);
+    messages_using_core_.insert(correlation_id);
+    RemoveTimeoutTimer(correlation_id);
+    app_manager_.GetRPCService().ManageMobileCommand(
+        result, commands::Command::SOURCE_MOBILE);
+  } else {
+    LOG4CXX_DEBUG(
+        logger_,
+        "Forwarding request to service with app id "
+            << current_request_[correlation_id].destination_connection_key);
+    smart_objects::SmartObjectSPtr result =
+        std::make_shared<smart_objects::SmartObject>(
+            current_request_[correlation_id].message);
+    AddTimeoutTimer(correlation_id);
+    app_manager_.GetRPCService().SendMessageToMobile(result);
+  }
 }
 
 void RPCPassingHandler::AddTimeoutTimer(uint32_t correlation_id) {
   TimerSPtr rpc_passing_timer(std::make_shared<timer::Timer>(
-      "RPCPassingTimeoutTimer",
+      "RPCPassingTimeoutTimer_" + std::to_string(correlation_id),
       new timer::TimerTaskImpl<RPCPassingHandler>(
           this, &RPCPassingHandler::OnPassThroughRequestTimeout)));
   const uint32_t timeout_ms =
       app_manager_.get_settings().rpc_pass_through_timeout();
   rpc_passing_timer->Start(timeout_ms, timer::kSingleShot);
-  timeout_queue_.push(std::make_pair(rpc_passing_timer, correlation_id));
+  LOG4CXX_DEBUG(logger_,
+                "Adding and starting timer for correlation id "
+                    << correlation_id);
+  timeout_queue_.push_back(std::make_pair(rpc_passing_timer, correlation_id));
 }
 
 void RPCPassingHandler::RemoveTimeoutTimer(uint32_t correlation_id) {
-  auto timeout_entry = timeout_queue_.front();
-  TimerSPtr timer = std::get<0>(timeout_entry);
-  uint32_t cid = std::get<1>(timeout_entry);
-  if (cid != correlation_id) {
-    LOG4CXX_ERROR(logger_, "Deleting incorrect timer");
+  std::vector<std::vector<std::pair<TimerSPtr, uint32_t> >::iterator>
+      timers_to_remove;
+
+  for (auto it = timeout_queue_.begin(); it != timeout_queue_.end(); ++it) {
+    uint32_t cid = it->second;
+    if (cid == correlation_id) {
+      timers_to_remove.push_back(it);
+    }
   }
-  timer->Stop();
-  timeout_queue_.pop();
+
+  for (auto it = timers_to_remove.begin(); it != timers_to_remove.end(); ++it) {
+    LOG4CXX_DEBUG(logger_,
+                  "Removing RPCPassing timer for correlation id "
+                      << correlation_id);
+    TimerSPtr timer = (*it)->first;
+    timer->Stop();
+    timeout_queue_.erase(*it);
+  }
 }
 
 }  //  namespace application_manager
