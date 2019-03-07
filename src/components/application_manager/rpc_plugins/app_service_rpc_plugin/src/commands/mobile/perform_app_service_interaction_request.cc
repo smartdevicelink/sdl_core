@@ -93,6 +93,8 @@ void PerformAppServiceInteractionRequest::Run() {
       // service
       smart_objects::SmartObject request_params;
       request_params[strings::service_id] = service_id;
+      application_manager_.IncreaseForwardedRequestTimeout(connection_key(),
+                                                           correlation_id());
       SendHMIRequest(hmi_apis::FunctionID::AppService_GetActiveServiceConsent,
                      &request_params,
                      true);

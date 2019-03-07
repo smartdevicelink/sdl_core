@@ -32,6 +32,7 @@
 
 #include "application_manager/commands/request_from_hmi.h"
 #include "application_manager/application_manager.h"
+#include "application_manager/request_info.h"
 #include "application_manager/rpc_service.h"
 #include "utils/helpers.h"
 
@@ -183,6 +184,9 @@ void RequestFromHMI::SendProviderRequest(
 
   if (hmi_destination) {
     LOG4CXX_DEBUG(logger_, "Sending Request to HMI Provider");
+    application_manager_.IncreaseForwardedRequestTimeout(
+        application_manager::request_controller::RequestInfo::HmiConnectoinKey,
+        correlation_id());
     SendHMIRequest(hmi_function_id, &(*msg)[strings::msg_params], use_events);
     return;
   }
@@ -193,6 +197,9 @@ void RequestFromHMI::SendProviderRequest(
   }
 
   LOG4CXX_DEBUG(logger_, "Sending Request to Mobile Provider");
+  application_manager_.IncreaseForwardedRequestTimeout(
+      application_manager::request_controller::RequestInfo::HmiConnectoinKey,
+      correlation_id());
   SendMobileRequest(
       mobile_function_id, app, &(*msg)[strings::msg_params], use_events);
 }
