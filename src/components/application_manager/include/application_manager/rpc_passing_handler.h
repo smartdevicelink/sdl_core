@@ -37,7 +37,6 @@
 #include "interfaces/MOBILE_API.h"
 #include "smart_objects/smart_object.h"
 #include "application_manager/app_service_manager.h"
-#include <queue>
 #include <deque>
 #include "utils/timer.h"
 
@@ -81,10 +80,11 @@ class RPCPassingHandler {
   bool RPCPassThrough(smart_objects::SmartObject rpc_message);
 
  private:
-  bool CycleThroughRequests(uint32_t correlation_id);
+  bool PerformNextRequest(uint32_t correlation_id);
   void OnPassThroughRequestTimeout();
-  void AddTimeoutTimer(uint32_t correlation_id);
-  void RemoveTimeoutTimer(uint32_t correlation_id);
+  void AddRequestTimer(uint32_t correlation_id);
+  void RemoveRequestTimer(uint32_t correlation_id);
+  void ClearCompletedTimers();
   void ForwardRequestToMobile(uint32_t correlation_id);
   void ForwardRequestToCore(uint32_t correlation_id);
   void ForwardResponseToMobile(uint32_t correlation_id,
@@ -97,7 +97,7 @@ class RPCPassingHandler {
   std::map<uint32_t,
            std::pair<smart_objects::SmartObject, std::deque<ServiceInfo> > >
       rpc_request_queue;
-  std::vector<std::pair<TimerSPtr, uint32_t> > timeout_queue_;
+  std::deque<std::pair<TimerSPtr, uint32_t> > timeout_queue_;
 };
 
 }  //  namespace application_manager

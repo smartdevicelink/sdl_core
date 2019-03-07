@@ -375,8 +375,6 @@ bool RPCHandlerImpl::ConvertMessageToSO(
                     "Convertion result: "
                         << result << " function id "
                         << output[jhs::S_PARAMS][jhs::S_FUNCTION_ID].asInt());
-      // TODO Figure out whether to use the RemoveUnknownParams bool for hmi
-      // requests
       if (!hmi_so_factory().attachSchema(output, false)) {
         LOG4CXX_WARN(logger_, "Failed to attach schema to object.");
         return false;
