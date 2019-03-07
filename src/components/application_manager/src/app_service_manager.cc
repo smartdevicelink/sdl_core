@@ -54,10 +54,9 @@ const char* kDefaults = "defaults";
 
 AppServiceManager::AppServiceManager(ApplicationManager& app_manager,
                                      resumption::LastState& last_state)
-    : app_manager_(app_manager), last_state_(last_state) {
-  RPCPassingHandler rpc_handler(*this, app_manager_);
-  rpc_passing_handler_ = std::make_shared<RPCPassingHandler>(rpc_handler);
-}
+    : app_manager_(app_manager)
+    , last_state_(last_state)
+    , rpc_passing_handler_{*this, app_manager_} {}
 
 AppServiceManager::~AppServiceManager() {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -549,7 +548,7 @@ std::vector<AppService> AppServiceManager::GetActiveServices() {
   std::vector<AppService> active_services;
   for (auto it = published_services_.begin(); it != published_services_.end();
        ++it) {
-    if (it->second.record[strings::service_active].asBool() == true) {
+    if (it->second.record[strings::service_active].asBool()) {
       active_services.push_back(it->second);
     }
   }
@@ -557,7 +556,7 @@ std::vector<AppService> AppServiceManager::GetActiveServices() {
 }
 
 RPCPassingHandler& AppServiceManager::GetRPCPassingHandler() {
-  return *rpc_passing_handler_;
+  return rpc_passing_handler_;
 }
 
 }  //  namespace application_manager

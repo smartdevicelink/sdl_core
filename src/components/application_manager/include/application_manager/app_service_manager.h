@@ -168,7 +168,7 @@ class AppServiceManager {
 
   sync_primitives::RecursiveLock published_services_lock_;
   std::map<std::string, AppService> published_services_;
-  std::shared_ptr<RPCPassingHandler> rpc_passing_handler_;
+  RPCPassingHandler rpc_passing_handler_;
 
   void AppServiceUpdated(
       const smart_objects::SmartObject& service_record,

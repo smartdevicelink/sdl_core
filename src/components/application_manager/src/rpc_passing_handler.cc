@@ -49,7 +49,7 @@
 #include "smart_objects/enum_schema_item.h"
 #include "utils/timer_task_impl.h"
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "AppServiceManager")
+CREATE_LOGGERPTR_GLOBAL(logger_, "RPCPassingHandler")
 
 namespace application_manager {
 
@@ -57,10 +57,14 @@ RPCPassingHandler::RPCPassingHandler(AppServiceManager& asm_ref,
                                      ApplicationManager& am_ref)
     : app_service_manager_(asm_ref), app_manager_(am_ref) {}
 
+RPCPassingHandler::~RPCPassingHandler() {}
+
 bool RPCPassingHandler::IsPassThroughMessage(
     uint32_t correlation_id,
     commands::Command::CommandSource source,
     int32_t message_type) {
+  sync_primitives::AutoLock lock(rpc_request_queue_lock_);
+
   if (rpc_request_queue.find(correlation_id) != rpc_request_queue.end()) {
     if (message_type == MessageType::kResponse &&
         source == commands::Command::CommandSource::SOURCE_SDL) {
@@ -86,6 +90,9 @@ bool RPCPassingHandler::CanHandleFunctionID(int32_t function_id) {
 }
 
 bool RPCPassingHandler::RPCPassThrough(smart_objects::SmartObject rpc_message) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  sync_primitives::AutoLock lock(rpc_request_queue_lock_);
+
   uint32_t correlation_id =
       rpc_message[strings::params][strings::correlation_id].asUInt();
   int32_t message_type =
@@ -146,6 +153,8 @@ bool RPCPassingHandler::RPCPassThrough(smart_objects::SmartObject rpc_message) {
 
 void RPCPassingHandler::PopulateRPCRequestQueue(
     smart_objects::SmartObject request_message) {
+  sync_primitives::AutoLock lock(rpc_request_queue_lock_);
+
   uint32_t origin_connection_key =
       request_message[strings::params][strings::connection_key].asUInt();
   uint32_t correlation_id =
@@ -179,6 +188,8 @@ void RPCPassingHandler::PopulateRPCRequestQueue(
                          << " requests to the queue");
 }
 void RPCPassingHandler::ForwardRequestToMobile(uint32_t correlation_id) {
+  sync_primitives::AutoLock lock(rpc_request_queue_lock_);
+
   uint32_t connection_key =
       rpc_request_queue[correlation_id].second.front().connection_key;
   LOG4CXX_DEBUG(logger_,
@@ -205,6 +216,8 @@ void RPCPassingHandler::ForwardRequestToCore(uint32_t correlation_id) {
 
 void RPCPassingHandler::ForwardResponseToMobile(
     uint32_t correlation_id, smart_objects::SmartObject response_message) {
+  sync_primitives::AutoLock lock(rpc_request_queue_lock_);
+
   uint32_t origin_connection_key =
       rpc_request_queue[correlation_id]
           .first[strings::params][strings::connection_key]
@@ -220,6 +233,8 @@ void RPCPassingHandler::ForwardResponseToMobile(
 }
 
 bool RPCPassingHandler::PerformNextRequest(uint32_t correlation_id) {
+  sync_primitives::AutoLock lock(rpc_request_queue_lock_);
+
   LOG4CXX_DEBUG(logger_, "Performing next request in queue");
   if (rpc_request_queue.find(correlation_id) == rpc_request_queue.end()) {
     LOG4CXX_ERROR(logger_, "Correlation id does NOT exist in map");
@@ -236,6 +251,8 @@ bool RPCPassingHandler::PerformNextRequest(uint32_t correlation_id) {
 }
 
 void RPCPassingHandler::OnPassThroughRequestTimeout() {
+  sync_primitives::AutoLock lock(timeout_queue_lock_);
+
   LOG4CXX_DEBUG(logger_, "Request Timed out");
   auto timeout_entry = timeout_queue_.front();
   uint32_t correlation_id = timeout_entry.second;
@@ -243,6 +260,8 @@ void RPCPassingHandler::OnPassThroughRequestTimeout() {
 }
 
 void RPCPassingHandler::ClearCompletedTimers() {
+  sync_primitives::AutoLock lock(timeout_queue_lock_);
+
   LOG4CXX_DEBUG(logger_, "Clearing Completed Timers");
   for (auto it = timeout_queue_.begin(); it != timeout_queue_.end();) {
     TimerSPtr timer = it->first;
@@ -258,6 +277,8 @@ void RPCPassingHandler::ClearCompletedTimers() {
 }
 
 void RPCPassingHandler::AddRequestTimer(uint32_t correlation_id) {
+  sync_primitives::AutoLock lock(timeout_queue_lock_);
+
   TimerSPtr rpc_passing_timer(std::make_shared<timer::Timer>(
       "RPCPassingTimeoutTimer_" + std::to_string(correlation_id),
       new timer::TimerTaskImpl<RPCPassingHandler>(
@@ -272,6 +293,8 @@ void RPCPassingHandler::AddRequestTimer(uint32_t correlation_id) {
 }
 
 void RPCPassingHandler::RemoveRequestTimer(uint32_t correlation_id) {
+  sync_primitives::AutoLock lock(timeout_queue_lock_);
+
   for (auto it = timeout_queue_.begin(); it != timeout_queue_.end();) {
     TimerSPtr timer = it->first;
     uint32_t cid = it->second;

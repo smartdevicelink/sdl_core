@@ -98,10 +98,7 @@ void RPCHandlerImpl::ProcessMessageFromMobile(
     if (app_manager_.GetAppServiceManager()
             .GetRPCPassingHandler()
             .RPCPassThrough(*so_from_mobile)) {
-      LOG4CXX_ERROR(
-          logger_,
-          "RPC_PASS_THROUGH_FROMMOBILE: Cancelling current request and "
-          "switching to next one");
+      // RPC was forwarded. Skip handling by Core
       return;
     } else if (!app_manager_.GetAppServiceManager()
                     .GetRPCPassingHandler()

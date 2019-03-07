@@ -56,6 +56,11 @@ class RPCPassingHandler {
   RPCPassingHandler(AppServiceManager& asm_ref, ApplicationManager& am_ref);
 
   /**
+   * @brief Class destructor
+   */
+  ~RPCPassingHandler();
+
+  /**
    * @brief Check if function id is in the handled_rpcs list of an active app
    * service
    * @param function_id RPC function id
@@ -95,10 +100,12 @@ class RPCPassingHandler {
 
   AppServiceManager& app_service_manager_;
   ApplicationManager& app_manager_;
+  sync_primitives::RecursiveLock rpc_request_queue_lock_;
   std::map<uint32_t,
            std::pair<smart_objects::SmartObject, std::deque<ServiceInfo> > >
       rpc_request_queue;
-  std::deque<std::pair<TimerSPtr, uint32_t> > timeout_queue_;
+  sync_primitives::RecursiveLock timeout_queue_lock_;
+  std::vector<std::pair<TimerSPtr, uint32_t> > timeout_queue_;
 };
 
 }  //  namespace application_manager
