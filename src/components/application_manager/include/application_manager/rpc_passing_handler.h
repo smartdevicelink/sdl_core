@@ -38,6 +38,7 @@
 #include "smart_objects/smart_object.h"
 #include "application_manager/app_service_manager.h"
 #include <queue>
+#include <deque>
 #include "utils/timer.h"
 
 namespace application_manager {
@@ -46,6 +47,11 @@ struct RpcPassThroughRequest {
   uint32_t origin_connection_key;
   uint32_t destination_connection_key;
   smart_objects::SmartObject message;
+};
+
+struct ServiceInfo {
+  std::string service_id;
+  uint32_t connection_key;
 };
 
 typedef std::shared_ptr<timer::Timer> TimerSPtr;
@@ -81,15 +87,23 @@ class RPCPassingHandler {
   bool RPCPassThrough(smart_objects::SmartObject rpc_message);
 
  private:
-  bool CycleThroughRPCPassingRequests(uint32_t correlation_id);
+  bool CycleThroughRequests(uint32_t correlation_id);
   void OnPassThroughRequestTimeout();
   void AddTimeoutTimer(uint32_t correlation_id);
   void RemoveTimeoutTimer(uint32_t correlation_id);
+  void ForwardRequestToMobile(uint32_t correlation_id);
+  void ForwardRequestToCore(uint32_t correlation_id);
+  void ForwardResponseToMobile(uint32_t correlation_id,
+                               smart_objects::SmartObject response_message);
+
   AppServiceManager& app_service_manager_;
   ApplicationManager& app_manager_;
   std::map<uint32_t, RpcPassThroughRequest> current_request_;
   std::map<uint32_t, std::queue<RpcPassThroughRequest> > request_queue_;
   std::set<uint32_t> messages_using_core_;
+  std::map<uint32_t,
+           std::pair<smart_objects::SmartObject, std::deque<ServiceInfo> > >
+      rpc_request_queue;
   std::vector<std::pair<TimerSPtr, uint32_t> > timeout_queue_;
 };
 
