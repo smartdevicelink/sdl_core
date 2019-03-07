@@ -43,12 +43,6 @@
 
 namespace application_manager {
 
-struct RpcPassThroughRequest {
-  uint32_t origin_connection_key;
-  uint32_t destination_connection_key;
-  smart_objects::SmartObject message;
-};
-
 struct ServiceInfo {
   std::string service_id;
   uint32_t connection_key;
@@ -99,8 +93,6 @@ class RPCPassingHandler {
 
   AppServiceManager& app_service_manager_;
   ApplicationManager& app_manager_;
-  std::map<uint32_t, RpcPassThroughRequest> current_request_;
-  std::map<uint32_t, std::queue<RpcPassThroughRequest> > request_queue_;
   std::set<uint32_t> messages_using_core_;
   std::map<uint32_t,
            std::pair<smart_objects::SmartObject, std::deque<ServiceInfo> > >
