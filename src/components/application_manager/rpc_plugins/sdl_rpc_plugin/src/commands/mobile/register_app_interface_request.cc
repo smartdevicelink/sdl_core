@@ -281,11 +281,13 @@ void RegisterAppInterfaceRequest::Run() {
     return;
   }
 
-  ApplicationSharedPtr duplicate_app;
+  std::vector<ApplicationSharedPtr> duplicate_apps;
   mobile_apis::Result::eType coincidence_result =
-      CheckCoincidence(duplicate_app);
+      CheckCoincidence(duplicate_apps);
 
-  if (mobile_apis::Result::DUPLICATE_NAME == coincidence_result) {
+  if (mobile_apis::Result::DUPLICATE_NAME == coincidence_result &&
+      duplicate_apps.size() == 1) {
+    ApplicationSharedPtr duplicate_app = duplicate_apps.front();
     bool error_response = true;
     if (duplicate_app->is_cloud_app()) {
       if (duplicate_app->hybrid_app_preference() ==
@@ -955,7 +957,7 @@ void RegisterAppInterfaceRequest::SendOnAppRegisteredNotificationToHMI(
 }
 
 mobile_apis::Result::eType RegisterAppInterfaceRequest::CheckCoincidence(
-    ApplicationSharedPtr& out_app) {
+    std::vector<ApplicationSharedPtr>& out_duplicate_apps) {
   LOG4CXX_AUTO_TRACE(logger_);
   const smart_objects::SmartObject& msg_params =
       (*message_)[strings::msg_params];
@@ -971,8 +973,8 @@ mobile_apis::Result::eType RegisterAppInterfaceRequest::CheckCoincidence(
     const custom_str::CustomString& cur_name = (*it)->name();
     if (app_name.CompareIgnoreCase(cur_name)) {
       LOG4CXX_ERROR(logger_, "Application name is known already.");
-      out_app = *it;
-      return mobile_apis::Result::DUPLICATE_NAME;
+      out_duplicate_apps.push_back(*it);
+      continue;
     }
 
     const smart_objects::SmartObject* vr = (*it)->vr_synonyms();
@@ -983,8 +985,8 @@ mobile_apis::Result::eType RegisterAppInterfaceRequest::CheckCoincidence(
 
       if (0 != std::count_if(curr_vr->begin(), curr_vr->end(), v)) {
         LOG4CXX_ERROR(logger_, "Application name is known already.");
-        out_app = *it;
-        return mobile_apis::Result::DUPLICATE_NAME;
+        out_duplicate_apps.push_back(*it);
+        continue;
       }
     }
 
@@ -996,13 +998,16 @@ mobile_apis::Result::eType RegisterAppInterfaceRequest::CheckCoincidence(
       CoincidencePredicateVR v(cur_name);
       if (0 != std::count_if(new_vr->begin(), new_vr->end(), v)) {
         LOG4CXX_ERROR(logger_, "vr_synonyms duplicated with app_name .");
-        out_app = *it;
-        return mobile_apis::Result::DUPLICATE_NAME;
+        out_duplicate_apps.push_back(*it);
+        continue;
       }
     }  // end vr check
 
   }  // application for end
 
+  if (!out_duplicate_apps.empty()) {
+    return mobile_apis::Result::DUPLICATE_NAME;
+  }
   return mobile_apis::Result::SUCCESS;
 }  // method end
 
