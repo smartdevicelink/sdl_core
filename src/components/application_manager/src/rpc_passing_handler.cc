@@ -68,6 +68,8 @@ bool RPCPassingHandler::IsPassThroughMessage(
   if (rpc_request_queue.find(correlation_id) != rpc_request_queue.end()) {
     if (message_type == MessageType::kResponse &&
         source == commands::Command::CommandSource::SOURCE_SDL) {
+      // Checks if response is being sent to mobile then removes the correlation
+      // id from the map
       rpc_request_queue.erase(correlation_id);
     }
     return true;
@@ -101,6 +103,7 @@ bool RPCPassingHandler::RPCPassThrough(smart_objects::SmartObject rpc_message) {
   LOG4CXX_DEBUG(logger_, "RPC_PASSING: ");
   MessageHelper::PrintSmartObject(rpc_message);
 
+  // Clear timers for timed out requests
   ClearCompletedTimers();
   switch (message_type) {
     case MessageType::kRequest: {
