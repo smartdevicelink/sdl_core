@@ -82,7 +82,7 @@ class RPCPassingHandler {
    * @brief Function to handle sending and receiving RPC Passing
    * requests/responses
    * @param rpc_message RPC message SmartObject
-   * @return true to stop current request/response and forward it
+   * @return true if the request was forwarded, false otherwise
    */
   bool RPCPassThrough(smart_objects::SmartObject rpc_message);
 

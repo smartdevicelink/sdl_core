@@ -124,7 +124,7 @@ class AppServiceManager {
    * @param manifest
    */
   std::vector<smart_objects::SmartObject> GetAllServices();
-  std::vector<AppService> GetActiveServices();
+  std::vector<std::pair<std::string, AppService> > GetActiveServices();
 
   void GetProviderByType(const std::string& service_type,
                          bool mobile_consumer,

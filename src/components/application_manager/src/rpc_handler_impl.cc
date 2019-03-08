@@ -105,6 +105,7 @@ void RPCHandlerImpl::ProcessMessageFromMobile(
                     .IsPassThroughMessage(correlation_id,
                                           commands::Command::SOURCE_MOBILE,
                                           message_type)) {
+      // Since PassThrough failed, refiltering the message
       if (!ConvertMessageToSO(*message, *so_from_mobile, true)) {
         LOG4CXX_ERROR(logger_, "Cannot create smart object from message");
         return;

@@ -79,7 +79,7 @@ bool RPCPassingHandler::CanHandleFunctionID(int32_t function_id) {
   auto services = app_service_manager_.GetActiveServices();
   for (auto it = services.begin(); it != services.end(); ++it) {
     auto handled_rpcs =
-        it->record[strings::service_manifest][strings::handled_rpcs];
+        it->second.record[strings::service_manifest][strings::handled_rpcs];
     for (size_t i = 0; i < handled_rpcs.length(); i++) {
       if (handled_rpcs[i].asInt() == function_id) {
         return true;
@@ -130,6 +130,9 @@ bool RPCPassingHandler::RPCPassThrough(smart_objects::SmartObject rpc_message) {
 
     case MessageType::kResponse: {
       LOG4CXX_DEBUG(logger_, "Handle response");
+      if (rpc_request_queue.find(correlation_id) == rpc_request_queue.end()) {
+        return false;
+      }
       RemoveRequestTimer(correlation_id);
       auto result_code = static_cast<mobile_apis::Result::eType>(
           rpc_message[strings::msg_params][strings::result_code].asInt());
@@ -170,11 +173,13 @@ void RPCPassingHandler::PopulateRPCRequestQueue(
   for (auto services_it = services.begin(); services_it != services.end();
        ++services_it) {
     auto handled_rpcs =
-        services_it->record[strings::service_manifest][strings::handled_rpcs];
+        services_it->second
+            .record[strings::service_manifest][strings::handled_rpcs];
     for (size_t i = 0; i < handled_rpcs.length(); i++) {
       if (handled_rpcs[i].asInt() == function_id) {
         // Add requests to queue
-        ServiceInfo service_info{std::string(), services_it->connection_key};
+        ServiceInfo service_info{services_it->first,
+                                 services_it->second.connection_key};
         rpc_request_queue[correlation_id].second.push_back(service_info);
         app_manager_.IncreaseForwardedRequestTimeout(origin_connection_key,
                                                      correlation_id);
