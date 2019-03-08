@@ -168,6 +168,10 @@ class ConnectionHandlerObserver {
       const transport_manager::DeviceInfo& device_info,
       connection_handler::DeviceHandle device_id) = 0;
 
+  virtual void SetPendingApplicationState(
+      const transport_manager::ConnectionUID connection_id,
+      const transport_manager::DeviceInfo& device_info) = 0;
+
  protected:
   /**
    * \brief Destructor

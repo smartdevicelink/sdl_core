@@ -59,9 +59,9 @@ class MockTransportManager : public ::transport_manager::TransportManager,
   MOCK_METHOD1(Init, int(resumption::LastState& last_state));
   MOCK_METHOD0(Reinit, int());
   MOCK_METHOD0(SearchDevices, int());
-  MOCK_METHOD2(AddCloudDevice,
-               void(const std::string& endpoint,
-                    const std::string& cloud_transport_type));
+  MOCK_METHOD1(
+      AddCloudDevice,
+      void(const transport_manager::transport_adapter::CloudAppProperties));
   MOCK_METHOD1(RemoveCloudDevice, void(const DeviceHandle device_id));
   MOCK_METHOD1(ConnectDevice, int(const DeviceHandle));
   MOCK_CONST_METHOD1(

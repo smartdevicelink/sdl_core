@@ -29,12 +29,6 @@ void SetCloudAppPropertiesRequest::Run() {
     return;
   }
 
-  if ((*message_)[strings::msg_params].empty()) {
-    LOG4CXX_ERROR(logger_, strings::msg_params << " is empty.");
-    SendResponse(false, mobile_apis::Result::INVALID_DATA);
-    return;
-  }
-
   policy_handler_.OnSetCloudAppProperties(*message_);
 
   SendResponse(true, mobile_apis::Result::SUCCESS);

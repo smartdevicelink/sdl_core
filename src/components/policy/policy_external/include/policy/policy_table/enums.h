@@ -154,6 +154,7 @@ enum RequestType {
   RT_MEDIA,
   RT_FOTA,
   RT_OEM_SPECIFIC,
+  RT_ICON_URL,
   RT_EMPTY  // Added to allow empty Request Types handling
 };
 
@@ -444,6 +445,11 @@ enum FunctionID {
    * @brief SetCloudAppPropertiesID.
    */
   SetCloudAppPropertiesID = 50,
+
+  /**
+   * @brief GetCloudAppPropertiesID.
+   */
+  GetCloudAppPropertiesID = 51,
 
   /**
    * @brief PublishAppServiceID.

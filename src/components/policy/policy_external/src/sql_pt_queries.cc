@@ -156,6 +156,7 @@ const std::string kCreateSchema =
     "  `enabled` BOOLEAN, "
     "  `auth_token` VARCHAR(65535), "
     "  `cloud_transport_type` VARCHAR(255), "
+    "  `icon_url` VARCHAR(65535), "
     "  `remote_control_denied` BOOLEAN NOT NULL DEFAULT 0, "
     "  CONSTRAINT `fk_application_hmi_level1` "
     "    FOREIGN KEY(`default_hmi`) "
@@ -676,8 +677,8 @@ const std::string kInsertApplication =
     "INSERT OR IGNORE INTO `application` (`id`, `priority_value`, "
     "`is_revoked`, `memory_kb`, `heart_beat_timeout_ms`, `certificate`, "
     "`hybrid_app_preference_value`, `endpoint`, `enabled`, `auth_token`, "
-    "`cloud_transport_type`) VALUES "
-    "(?,?,?,?,?,?,?,?,?,?,?)";
+    "`cloud_transport_type`, `icon_url`) VALUES "
+    "(?,?,?,?,?,?,?,?,?,?,?,?)";
 
 const std::string kInsertAppGroup =
     "INSERT INTO `app_group` (`application_id`, `functional_group_id`)"
@@ -816,7 +817,8 @@ const std::string kSelectUserMsgsVersion =
 const std::string kSelectAppPolicies =
     "SELECT `id`, `priority_value`, `memory_kb`, "
     " `heart_beat_timeout_ms`, `certificate`, `hybrid_app_preference_value`, "
-    " `endpoint`, `enabled`, `auth_token`, `cloud_transport_type` FROM "
+    " `endpoint`, `enabled`, `auth_token`, `cloud_transport_type`, `icon_url` "
+    "FROM "
     " `application`";
 
 const std::string kCollectFriendlyMsg = "SELECT * FROM `message`";
@@ -939,14 +941,14 @@ const std::string kInsertApplicationFull =
     " `default_hmi`, `priority_value`, `is_revoked`, `is_default`, "
     " `is_predata`, `memory_kb`, `heart_beat_timeout_ms`, "
     " `certificate`, `hybrid_app_preference_value`, `endpoint`, `enabled`, "
-    " `auth_token`, `cloud_transport_type`) "
-    "  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+    " `auth_token`, `cloud_transport_type`, `icon_url`) "
+    "  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
 const std::string kSelectApplicationFull =
     "SELECT `keep_context`, `steal_focus`, `default_hmi`, `priority_value`, "
     "  `is_revoked`, `is_default`, `is_predata`, `memory_kb`,"
     "  `heart_beat_timeout_ms`, `certificate`, `hybrid_app_preference_value`, "
-    "  `endpoint`, `enabled`, `auth_token`, `cloud_transport_type`"
+    "  `endpoint`, `enabled`, `auth_token`, `cloud_transport_type`, `icon_url` "
     "FROM `application` "
     "WHERE `id` = ?";
 

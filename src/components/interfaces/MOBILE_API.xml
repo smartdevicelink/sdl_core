@@ -552,6 +552,26 @@
         <element name="BOTH" />
     </enum>
 
+    <struct name="CloudAppProperties" since="5.1">
+        <param name="nicknames" type="String" minlength="0" maxlength="100" array="true" minsize="0" maxsize="100" mandatory="false">
+            <description>An array of app names a cloud app is allowed to register with. If included in a SetCloudAppProperties request, this value will overwrite the existing "nicknames" field in the app policies section of the policy table.</description>
+        </param>
+        <param name="appID" type="String" maxlength="100" mandatory="true"></param>
+        <param name="enabled" type="Boolean" mandatory="false">
+            <description>If true, cloud app will be included in HMI RPC UpdateAppList</description>
+        </param>
+        <param name="authToken" type="String" maxlength="65535" mandatory="false">
+            <description>Used to authenticate websocket connection on app activation</description>
+        </param>
+        <param name="cloudTransportType" type="String" maxlength="100" mandatory="false">
+            <description>Specifies the connection type Core should use</description>
+        </param>
+        <param name="hybridAppPreference" type="HybridAppPreference" mandatory="false">
+            <description>Specifies the user preference to use the cloud app version or mobile app version when both are available</description>
+        </param>
+        <param name="endpoint" type="String" maxlength="65535" mandatory="false"></param>
+    </struct>
+
     <enum name="ButtonName" since="1.0">
         <description>Defines the hard (physical) and soft (touchscreen) buttons available from the module</description>
         <element name="OK" />
@@ -2419,6 +2439,7 @@
         <element name="MEDIA" />
         <element name="FOTA" />
         <element name="OEM_SPECIFIC" since="5.0" />
+        <element name="ICON_URL" since="5.1" />
     </enum>         
  
     <enum name="AppHMIType" since="2.0">
@@ -2617,10 +2638,11 @@
         <element name="GetSystemCapabilityID" value="48" hexvalue="30" since="4.5" />
         <element name="SendHapticDataID" value="49" hexvalue="31" since="4.5" />
         <element name="SetCloudAppPropertiesID" value="50" hexvalue="32" since="5.1" />
+        <element name="GetCloudAppPropertiesID" value="51" hexvalue="33" since="5.1" />
         <element name="PublishAppServiceID" value="52" hexvalue="34" since="5.1" />
         <element name="GetAppServiceDataID" value="53" hexvalue="35" since="5.1" />
-        <element name="PerformAppServiceInteractionID" value="55" hexvalue="37" since="5.1" />
         <element name="GetFileID" value="54" hexvalue="36" since="5.1" />
+        <element name="PerformAppServiceInteractionID" value="55" hexvalue="37" since="5.1" />
         
         <!--
          Base Notifications
@@ -7107,19 +7129,8 @@
         <description>
             RPC used to enable/disable a cloud application and set authentication data
         </description>
-        <param name="appName" type="String" maxlength="100" mandatory="true"></param>
-        <param name="appID" type="String" maxlength="100" mandatory="true"></param>
-        <param name="enabled" type="Boolean" mandatory="false">
-            <description>If true, cloud app will be included in HMI RPC UpdateAppList</description>
-        </param>
-        <param name="cloudAppAuthToken" type="String" maxlength="100" mandatory="false">
-            <description>Used to authenticate websocket connection on app activation</description>
-        </param>
-        <param name="cloudTransportType" type="String" maxlength="100" mandatory="false">
-            <description>Specifies the connection type Core should use</description>
-        </param>
-        <param name="hybridAppPreference" type="HybridAppPreference" mandatory="false">
-            <description>Specifies the user preference to use the cloud app version or mobile app version when both are available</description>
+        <param name="properties" type="CloudAppProperties" mandatory="true">
+            <description> The requested cloud application properties </description>
         </param>
     </function>
 
@@ -7132,19 +7143,40 @@
         </param>
         <param name="resultCode" type="Result" platform="documentation" mandatory="true">
             <description>See Result</description>
-            <element name="SUCCESS" />
-            <element name="INVALID_DATA" />
-            <element name="OUT_OF_MEMORY" />
-            <element name="TOO_MANY_PENDING_REQUESTS" />
-            <element name="GENERIC_ERROR" />
-            <element name="DUPLICATE_NAME" />
-            <element name="TOO_MANY_APPLICATIONS" />
-            <element name="APPLICATION_REGISTERED_ALREADY" />
-            <element name="UNSUPPORTED_VERSION" />
-            <element name="WRONG_LANGUAGE" />
-            <element name="DISALLOWED" />
-            <element name="WARNINGS" />
-            <element name="RESUME_FAILED" />
+            <element name="SUCCESS"/>
+            <element name="INVALID_DATA"/>
+            <element name="OUT_OF_MEMORY"/>
+            <element name="TOO_MANY_PENDING_REQUESTS"/>
+            <element name="GENERIC_ERROR"/>
+            <element name="DISALLOWED"/>
+            <element name="WARNINGS"/>
+        </param>
+    </function>
+
+    <function name="GetCloudAppProperties" functionID="GetCloudAppPropertiesID" messagetype="request" since="5.1">
+        <description>
+            RPC used to get the current properties of a cloud application
+        </description> 
+        <param name="appID" type="String" maxlength="100" mandatory="true"></param>
+    </function>
+
+    <function name="GetCloudAppProperties" functionID="GetCloudAppPropertiesID" messagetype="response" since="5.1">
+        <description>The response to GetCloudAppProperties</description>
+        <param name="properties" type="CloudAppProperties" mandatory="false">
+            <description> The requested cloud application properties </description>
+        </param>
+        <param name="success" type="Boolean" platform="documentation" mandatory="true">
+            <description> true if successful; false if failed </description>
+        </param>
+        <param name="resultCode" type="Result" platform="documentation" mandatory="true">
+            <description>See Result</description>
+            <element name="SUCCESS"/>
+            <element name="INVALID_DATA"/>
+            <element name="OUT_OF_MEMORY"/>
+            <element name="TOO_MANY_PENDING_REQUESTS"/>
+            <element name="GENERIC_ERROR"/>
+            <element name="DISALLOWED"/>
+            <element name="WARNINGS"/>
         </param>
     </function>
 

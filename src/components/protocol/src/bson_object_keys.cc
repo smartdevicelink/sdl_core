@@ -18,6 +18,7 @@ const char* video_service_transports = "videoServiceTransports";
 const char* tcp_ip_address = "tcpIpAddress";
 const char* tcp_port = "tcpPort";
 const char* reason = "reason";
+const char* auth_token = "authToken";
 
 }  // namespace strings
 

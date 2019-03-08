@@ -139,8 +139,9 @@ class TransportManagerImpl
    **/
   int SearchDevices() OVERRIDE;
 
-  void AddCloudDevice(const std::string& endpoint,
-                      const std::string& cloud_transport_type) OVERRIDE;
+  void AddCloudDevice(
+      const transport_manager::transport_adapter::CloudAppProperties
+          cloud_properties) OVERRIDE;
 
   void RemoveCloudDevice(const DeviceHandle device_id) OVERRIDE;
 

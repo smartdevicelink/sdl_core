@@ -118,6 +118,13 @@ class ApplicationImplTest : public ::testing::Test {
                               AddSet hmi_action);
 
   void CheckCurrentHMIState();
+  // 'directory_name' has to be declared prior to 'app_impl' so that when
+  // deleting ApplicationImplTest class, 'directory_name' will be removed
+  // after 'app_impl' runs its destructor.
+  // (ApplicationImpl's destructor calls CleanupFiles(), which will call
+  // application_manager_.get_settings().app_storage_folder() and will
+  // access 'directory_name'.)
+  const std::string directory_name = "./test_storage";
   MockApplicationManagerSettings mock_application_manager_settings_;
   MockApplicationManager mock_application_manager_;
   std::shared_ptr<ApplicationImpl> app_impl;
@@ -126,7 +133,6 @@ class ApplicationImplTest : public ::testing::Test {
   std::string mac_address;
   connection_handler::DeviceHandle device_handle;
   custom_str::CustomString app_name;
-  const std::string directory_name = "./test_storage";
   HmiState::StateID state_id;
   HmiStatePtr testHmiState;
   HMILevel::eType test_lvl;

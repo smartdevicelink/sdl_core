@@ -103,9 +103,10 @@ class ConnectionHandler {
 
   virtual void ConnectToAllDevices() = 0;
 
-  virtual void AddCloudAppDevice(const std::string& policy_app_id,
-                                 const std::string& endpoint,
-                                 const std::string& cloud_transport_type) = 0;
+  virtual void AddCloudAppDevice(
+      const std::string& policy_app_id,
+      const transport_manager::transport_adapter::CloudAppProperties&
+          cloud_properties) = 0;
 
   virtual void RemoveCloudAppDevice(const DeviceHandle device_id) = 0;
 
@@ -126,6 +127,15 @@ class ConnectionHandler {
    * \param connection_key pair of connection handle and session id
    */
   virtual uint32_t GetConnectionSessionsCount(uint32_t connection_key) = 0;
+
+  /**
+   * @brief Get cloud app id by connection id
+   * @param connection_id unique connection id
+   * @return the policy app id of the cloud app if the connection is tied to a
+   * cloud app, an empty string otherwise.
+   */
+  virtual std::string GetCloudAppID(
+      const transport_manager::ConnectionUID connection_id) const = 0;
 
   /**
    * Gets device id by mac address

@@ -290,6 +290,17 @@ hmi_apis::Common_Language::eType MessageHelper::CommonLanguageFromString(
   return hmi_apis::Common_Language::INVALID_ENUM;
 }
 
+hmi_apis::Common_LightName::eType MessageHelper::CommonLightNameFromString(
+    const std::string& lightName) {
+  using namespace ns_smart_device_link::ns_smart_objects;
+  hmi_apis::Common_LightName::eType value;
+  if (EnumConversionHelper<hmi_apis::Common_LightName::eType>::StringToEnum(
+          lightName, &value)) {
+    return value;
+  }
+  return hmi_apis::Common_LightName::INVALID_ENUM;
+}
+
 std::string MessageHelper::GetDeviceMacAddressForHandle(
     const transport_manager::DeviceHandle device_handle,
     const ApplicationManager& app_mngr) {
@@ -1592,6 +1603,7 @@ bool MessageHelper::CreateHMIApplicationStruct(
   message[hmi_response::policy_app_id] = policy_app_id;
 
   const std::string icon_path = app->app_icon_path();
+
   if (file_system::FileExists(app->app_icon_path())) {
     message[strings::icon] = icon_path;
   }

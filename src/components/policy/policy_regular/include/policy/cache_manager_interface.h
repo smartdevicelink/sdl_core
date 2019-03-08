@@ -175,7 +175,7 @@ class CacheManagerInterface {
    * @param hybrid_app_preference Filled with the hybrid app preference for the
    * cloud application set by the user
    */
-  virtual void GetCloudAppParameters(
+  virtual bool GetCloudAppParameters(
       const std::string& policy_app_id,
       bool& enabled,
       std::string& endpoint,
@@ -214,6 +214,19 @@ class CacheManagerInterface {
       const std::string& policy_app_id,
       const std::string& cloud_transport_type) = 0;
 
+  /**
+   * @brief Set a cloud app's endpoint url
+   * @param endpoint URL for websocket connection
+   */
+  virtual void SetAppEndpoint(const std::string& policy_app_id,
+                              const std::string& endpoint) = 0;
+
+  /**
+   * @brief Set a cloud app's nicknames
+   * @param nicknames Nicknames for cloud app
+   */
+  virtual void SetAppNicknames(const std::string& policy_app_id,
+                               const StringArray& nicknames) = 0;
   /**
    * @brief Set the user preference for how a hybrid (cloud and mobile) app
    * should be used
@@ -272,6 +285,15 @@ class CacheManagerInterface {
    *obtained.
    */
   virtual std::string GetLockScreenIconUrl() const = 0;
+
+  /**
+   * @brief Get Icon Url used for showing a cloud apps icon before the intial
+   *registration
+   *
+   * @return url which point to the resourse where icon could be
+   *obtained.
+   */
+  virtual std::string GetIconUrl(const std::string& policy_app_id) const = 0;
 
   /**
    * @brief Get allowed number of notifications

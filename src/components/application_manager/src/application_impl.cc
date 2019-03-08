@@ -1167,7 +1167,7 @@ const std::string& ApplicationImpl::cloud_app_endpoint() const {
   return endpoint_;
 }
 
-const std::string& ApplicationImpl::cloud_app_auth_token() const {
+const std::string& ApplicationImpl::auth_token() const {
   return auth_token_;
 }
 
@@ -1185,15 +1185,14 @@ const std::string& ApplicationImpl::cloud_app_certificate() const {
 }
 
 bool ApplicationImpl::is_cloud_app() const {
-  return !endpoint_.empty() &&
-         hybrid_app_preference_ != mobile_apis::HybridAppPreference::MOBILE;
+  return !endpoint_.empty();
 }
 
 void ApplicationImpl::set_cloud_app_endpoint(const std::string& endpoint) {
   endpoint_ = endpoint;
 }
 
-void ApplicationImpl::set_cloud_app_auth_token(const std::string& auth_token) {
+void ApplicationImpl::set_auth_token(const std::string& auth_token) {
   auth_token_ = auth_token;
 }
 

@@ -187,6 +187,8 @@ class PolicyHandler : public PolicyHandlerInterface,
   void GetUpdateUrls(const uint32_t service_type,
                      EndpointUrls& out_end_points) OVERRIDE;
   virtual std::string GetLockScreenIconUrl() const OVERRIDE;
+  virtual std::string GetIconUrl(
+      const std::string& policy_app_id) const OVERRIDE;
   uint32_t NextRetryTimeout() OVERRIDE;
 
   /**
@@ -431,7 +433,7 @@ class PolicyHandler : public PolicyHandlerInterface,
    * @param hybrid_app_preference Filled with the hybrid app preference for the
    * cloud application set by the user
    */
-  void GetCloudAppParameters(const std::string& policy_app_id,
+  bool GetCloudAppParameters(const std::string& policy_app_id,
                              bool& enabled,
                              std::string& endpoint,
                              std::string& certificate,
@@ -480,6 +482,9 @@ class PolicyHandler : public PolicyHandlerInterface,
 #ifdef EXTERNAL_PROPRIETARY_MODE
   void OnCertificateDecrypted(bool is_succeeded) OVERRIDE;
 #endif  // EXTERNAL_PROPRIETARY_MODE
+  void OnAuthTokenUpdated(const std::string& policy_app_id,
+                          const std::string& auth_token);
+
   virtual bool CanUpdate() OVERRIDE;
 
   virtual void OnDeviceConsentChanged(const std::string& device_id,

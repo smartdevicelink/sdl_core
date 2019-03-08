@@ -105,6 +105,7 @@ class PolicyHandlerInterface {
   virtual void GetUpdateUrls(const uint32_t service_type,
                              EndpointUrls& out_end_points) = 0;
   virtual std::string GetLockScreenIconUrl() const = 0;
+  virtual std::string GetIconUrl(const std::string& policy_app_id) const = 0;
   virtual uint32_t NextRetryTimeout() = 0;
 
   /**
@@ -471,7 +472,7 @@ class PolicyHandlerInterface {
    * @param hybrid_app_preference Filled with the hybrid app preference for the
    * cloud application set by the user
    */
-  virtual void GetCloudAppParameters(
+  virtual bool GetCloudAppParameters(
       const std::string& policy_app_id,
       bool& enabled,
       std::string& endpoint,

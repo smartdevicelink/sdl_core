@@ -81,7 +81,7 @@ class ConnectionHandlerImpl
   ConnectionHandlerImpl(const ConnectionHandlerSettings& settings,
                         transport_manager::TransportManager& tm);
   /**
-   * \brief Destructor
+   * @brief Destructor
    */
   ~ConnectionHandlerImpl();
 
@@ -130,9 +130,10 @@ class ConnectionHandlerImpl
 
   void ConnectToAllDevices() OVERRIDE;
 
-  void AddCloudAppDevice(const std::string& policy_app_id,
-                         const std::string& endpoint,
-                         const std::string& cloud_transport_type) OVERRIDE;
+  void AddCloudAppDevice(
+      const std::string& policy_app_id,
+      const transport_manager::transport_adapter::CloudAppProperties&
+          cloud_properties) OVERRIDE;
 
   void RemoveCloudAppDevice(const DeviceHandle device_id) OVERRIDE;
 
@@ -376,6 +377,15 @@ class ConnectionHandlerImpl
   bool SessionServiceExists(
       const uint32_t connection_key,
       const protocol_handler::ServiceType& service_type) const OVERRIDE;
+
+  /**
+   * @brief Get cloud app id by connection id
+   * @param connection_id unique connection id
+   * @return the policy app id of the cloud app if the connection is tied to a
+   * cloud app, an empty string otherwise.
+   */
+  std::string GetCloudAppID(
+      const transport_manager::ConnectionUID connection_id) const OVERRIDE;
 
   /**
    * \brief Get device handle by mac address
@@ -654,6 +664,12 @@ class ConnectionHandlerImpl
   sync_primitives::Lock start_service_context_map_lock_;
   std::map<uint32_t, protocol_handler::SessionContext>
       start_service_context_map_;
+
+  // Map app id -> (cloud_app_endpoint, connection_uid)
+  mutable sync_primitives::Lock cloud_app_id_map_lock_;
+  std::map<std::string,
+           std::pair<std::string, transport_manager::ConnectionUID> >
+      cloud_app_id_map_;
 
   /**
    * @brief connection object as it's being closed

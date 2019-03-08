@@ -957,10 +957,10 @@ class Application : public virtual InitialApplicationData,
    * websocket open.
    * @return cloud app auth token
    */
-  virtual const std::string& cloud_app_auth_token() const = 0;
+  virtual const std::string& auth_token() const = 0;
 
   /**
-   * @brief Get cloud app tranpsport type. Defines the type of websocket
+   * @brief Get cloud app transport type. Defines the type of websocket
    * connection used.
    * @return cloud app transport type
    */
@@ -994,7 +994,7 @@ class Application : public virtual InitialApplicationData,
   /**
    * @brief Set cloud app auth token
    */
-  virtual void set_cloud_app_auth_token(const std::string& auth_token) = 0;
+  virtual void set_auth_token(const std::string& auth_token) = 0;
 
   /**
    * @brief Set cloud app transport type

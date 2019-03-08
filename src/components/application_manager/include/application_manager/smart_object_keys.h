@@ -190,12 +190,14 @@ extern const char* green;
 extern const char* blue;
 extern const char* display_layout;
 extern const char* icon_resumed;
+extern const char* nicknames;
 extern const char* enabled;
-extern const char* cloud_app_auth_token;
+extern const char* auth_token;
 extern const char* cloud_transport_type;
 extern const char* hybrid_app_preference;
 extern const char* is_cloud_application;
 extern const char* cloud_connection_status;
+extern const char* endpoint;
 
 // PutFile
 extern const char* sync_file_name;

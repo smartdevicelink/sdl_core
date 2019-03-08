@@ -346,12 +346,13 @@ ApplicationParams::ApplicationParams(const Json::Value* value__)
     , memory_kb(impl::ValueMember(value__, "memory_kb"), 0)
     , heart_beat_timeout_ms(impl::ValueMember(value__, "heart_beat_timeout_ms"))
     , moduleType(impl::ValueMember(value__, "moduleType"))
-    , certificate(impl::ValueMember(value__, "certificate"), "not_specified")
+    , certificate(impl::ValueMember(value__, "certificate"))
     , hybrid_app_preference(impl::ValueMember(value__, "hybrid_app_preference"))
     , endpoint(impl::ValueMember(value__, "endpoint"))
     , enabled(impl::ValueMember(value__, "enabled"))
     , auth_token(impl::ValueMember(value__, "auth_token"))
     , cloud_transport_type(impl::ValueMember(value__, "cloud_transport_type"))
+    , icon_url(impl::ValueMember(value__, "icon_url"))
     , app_service_parameters(impl::ValueMember(value__, "app_services")) {}
 
 Json::Value ApplicationParams::ToJsonValue() const {
@@ -371,6 +372,7 @@ Json::Value ApplicationParams::ToJsonValue() const {
   impl::WriteJsonField("enabled", enabled, &result__);
   impl::WriteJsonField("auth_token", auth_token, &result__);
   impl::WriteJsonField("cloud_transport_type", cloud_transport_type, &result__);
+  impl::WriteJsonField("icon_url", auth_token, &result__);
   impl::WriteJsonField("app_services", app_service_parameters, &result__);
   return result__;
 }
@@ -412,6 +414,9 @@ bool ApplicationParams::is_valid() const {
     return false;
   }
   if (!hybrid_app_preference.is_valid()) {
+    return false;
+  }
+  if (!icon_url.is_valid()) {
     return false;
   }
   if (!app_service_parameters.is_valid()) {
@@ -465,6 +470,9 @@ bool ApplicationParams::struct_empty() const {
     return false;
   }
   if (hybrid_app_preference.is_initialized()) {
+    return false;
+  }
+  if (icon_url.is_initialized()) {
     return false;
   }
   if (app_service_parameters.is_initialized()) {
@@ -537,6 +545,9 @@ void ApplicationParams::ReportErrors(rpc::ValidationReport* report__) const {
     moduleType.ReportErrors(
         &report__->ReportSubobject("hybrid_app_preference"));
   }
+  if (!icon_url.is_valid()) {
+    moduleType.ReportErrors(&report__->ReportSubobject("icon_url"));
+  }
   if (!app_service_parameters.is_valid()) {
     app_service_parameters.ReportErrors(
         &report__->ReportSubobject("app_services"));
@@ -556,6 +567,7 @@ void ApplicationParams::SetPolicyTableType(PolicyTableType pt_type) {
   enabled.SetPolicyTableType(pt_type);
   cloud_transport_type.SetPolicyTableType(pt_type);
   hybrid_app_preference.SetPolicyTableType(pt_type);
+  icon_url.SetPolicyTableType(pt_type);
   app_service_parameters.SetPolicyTableType(pt_type);
 }
 

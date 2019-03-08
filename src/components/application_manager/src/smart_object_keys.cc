@@ -157,12 +157,14 @@ const char* green = "green";
 const char* blue = "blue";
 const char* display_layout = "displayLayout";
 const char* icon_resumed = "iconResumed";
+const char* nicknames = "nicknames";
 const char* enabled = "enabled";
-const char* cloud_app_auth_token = "cloudAppAuthToken";
+const char* auth_token = "authToken";
 const char* cloud_transport_type = "cloudTransportType";
 const char* hybrid_app_preference = "hybridAppPreference";
 const char* is_cloud_application = "isCloudApplication";
 const char* cloud_connection_status = "cloudConnectionStatus";
+const char* endpoint = "endpoint";
 
 // PutFile
 const char* sync_file_name = "syncFileName";

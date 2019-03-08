@@ -42,6 +42,7 @@
 #include <boost/asio/connect.hpp>
 #include <boost/asio/ip/tcp.hpp>
 #include <boost/asio/ssl/stream.hpp>
+#include <boost/asio/thread_pool.hpp>
 #include <cstdlib>
 #include <functional>
 #include <iostream>
@@ -49,6 +50,7 @@
 #include <string>
 #include <thread>
 #include "transport_manager/transport_adapter/connection.h"
+#include "transport_manager/cloud/cloud_websocket_transport_adapter.h"
 #include "utils/threads/thread.h"
 #include "utils/threads/message_loop_thread.h"
 #include "utils/message_queue.h"
@@ -61,6 +63,8 @@ using ::utils::MessageQueue;
 
 typedef std::queue<protocol_handler::RawMessagePtr> AsyncQueue;
 typedef protocol_handler::RawMessagePtr Message;
+typedef websocket::stream<tcp::socket> WS;
+typedef websocket::stream<ssl::stream<tcp::socket> > WSS;
 
 namespace transport_manager {
 namespace transport_adapter {
@@ -117,6 +121,13 @@ class WebsocketClientConnection
    */
   TransportAdapter::Error Disconnect();
 
+  /**
+   * @brief Attempt to add provided certificate to the ssl::context
+   *
+   * @param cert Certificate string from policy table
+   */
+  void AddCertificateAuthority(std::string cert, boost::system::error_code& ec);
+
   void Shutdown();
 
   void Recv(boost::system::error_code ec);
@@ -126,14 +137,17 @@ class WebsocketClientConnection
  private:
   TransportAdapterController* controller_;
   boost::asio::io_context ioc_;
+  ssl::context ctx_;
   tcp::resolver resolver_;
-  websocket::stream<tcp::socket> ws_;
   boost::beast::flat_buffer buffer_;
   std::string host_;
   std::string text_;
+  WS ws_;
+  WSS wss_;
 
   std::atomic_bool shutdown_;
 
+  CloudAppProperties cloud_properties;
   typedef std::queue<protocol_handler::RawMessagePtr> FrameQueue;
   FrameQueue frames_to_send_;
   mutable sync_primitives::Lock frames_to_send_mutex_;
@@ -170,6 +184,8 @@ class WebsocketClientConnection
 
   const DeviceUID device_uid_;
   const ApplicationHandle app_handle_;
+
+  boost::asio::thread_pool io_pool_;
 };
 
 }  // namespace transport_adapter
