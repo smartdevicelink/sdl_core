@@ -45,8 +45,6 @@
 #include "smart_objects/enum_schema_item.h"
 #include "utils/logger.h"
 
-#include "smart_objects/enum_schema_item.h"
-
 CREATE_LOGGERPTR_GLOBAL(logger_, "AppServiceManager")
 
 namespace application_manager {
@@ -56,7 +54,9 @@ const char* kDefaults = "defaults";
 
 AppServiceManager::AppServiceManager(ApplicationManager& app_manager,
                                      resumption::LastState& last_state)
-    : app_manager_(app_manager), last_state_(last_state) {}
+    : app_manager_(app_manager)
+    , last_state_(last_state)
+    , rpc_passing_handler_(*this, app_manager_) {}
 
 AppServiceManager::~AppServiceManager() {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -542,6 +542,22 @@ void AppServiceManager::AppServiceUpdated(
   service[strings::update_reason] = update_reason;
   service[strings::updated_app_service_record] = service_record;
   services[-1] = service;
+}
+
+std::vector<std::pair<std::string, AppService> >
+AppServiceManager::GetActiveServices() {
+  std::vector<std::pair<std::string, AppService> > active_services;
+  for (auto it = published_services_.begin(); it != published_services_.end();
+       ++it) {
+    if (it->second.record[strings::service_active].asBool()) {
+      active_services.push_back(*it);
+    }
+  }
+  return active_services;
+}
+
+RPCPassingHandler& AppServiceManager::GetRPCPassingHandler() {
+  return rpc_passing_handler_;
 }
 
 }  //  namespace application_manager

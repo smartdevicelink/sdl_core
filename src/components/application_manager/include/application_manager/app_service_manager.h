@@ -37,6 +37,7 @@
 #include "interfaces/MOBILE_API.h"
 #include "smart_objects/smart_object.h"
 #include "application_manager/application.h"
+#include "application_manager/rpc_passing_handler.h"
 
 namespace resumption {
 class LastState;
@@ -52,7 +53,6 @@ struct AppService {
 };
 
 class ApplicationManager;
-
 /**
  * @brief The AppServiceManager is TODO.
  */
@@ -124,6 +124,7 @@ class AppServiceManager {
    * @param manifest
    */
   std::vector<smart_objects::SmartObject> GetAllServices();
+  std::vector<std::pair<std::string, AppService> > GetActiveServices();
 
   void GetProviderByType(const std::string& service_type,
                          bool mobile_consumer,
@@ -159,12 +160,15 @@ class AppServiceManager {
    */
   bool UpdateNavigationCapabilities(smart_objects::SmartObject& out_params);
 
+  RPCPassingHandler& GetRPCPassingHandler();
+
  private:
   ApplicationManager& app_manager_;
   resumption::LastState& last_state_;
 
   sync_primitives::RecursiveLock published_services_lock_;
   std::map<std::string, AppService> published_services_;
+  RPCPassingHandler rpc_passing_handler_;
 
   void AppServiceUpdated(
       const smart_objects::SmartObject& service_record,

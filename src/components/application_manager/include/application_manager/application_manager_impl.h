@@ -1118,7 +1118,8 @@ class ApplicationManagerImpl
   mobile_apis::MOBILE_API& mobile_so_factory();
 
   bool ConvertSOtoMessage(const smart_objects::SmartObject& message,
-                          Message& output);
+                          Message& output,
+                          const bool remove_unknown_parameters = true);
 
   template <typename ApplicationList>
   void PrepareApplicationListSO(ApplicationList app_list,

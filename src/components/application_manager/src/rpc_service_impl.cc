@@ -31,6 +31,7 @@
  */
 
 #include "application_manager/rpc_service_impl.h"
+#include "application_manager/plugin_manager/plugin_keys.h"
 
 namespace application_manager {
 namespace rpc_service {
@@ -38,6 +39,7 @@ namespace rpc_service {
 CREATE_LOGGERPTR_LOCAL(logger_, "RPCServiceImpl")
 namespace formatters = ns_smart_device_link::ns_json_handler::formatters;
 namespace jhs = ns_smart_device_link::ns_json_handler::strings;
+namespace plugin_names = application_manager::plugin_manager::plugin_names;
 
 RPCServiceImpl::RPCServiceImpl(
     ApplicationManager& app_manager,
@@ -386,6 +388,7 @@ void RPCServiceImpl::SendMessageToMobile(
 
   const bool is_result_code_exists =
       (*message)[strings::msg_params].keyExists(strings::result_code);
+  bool remove_unknown_parameters = true;
 
   if (!app) {
     LOG4CXX_ERROR(logger_, "No application associated with connection key");
@@ -417,7 +420,31 @@ void RPCServiceImpl::SendMessageToMobile(
   // Messages to mobile are not yet prioritized so use default priority value
   std::shared_ptr<Message> message_to_send(
       new Message(protocol_handler::MessagePriority::kDefault));
-  if (!ConvertSOtoMessage((*message), (*message_to_send))) {
+
+  int32_t function_id = (*message)[jhs::S_PARAMS][jhs::S_FUNCTION_ID].asInt();
+  bool rpc_passing = app_manager_.GetAppServiceManager()
+                         .GetRPCPassingHandler()
+                         .CanHandleFunctionID(function_id);
+  if (IsAppServiceRPC(function_id,
+                      commands::Command::CommandSource::SOURCE_SDL) ||
+      rpc_passing) {
+    LOG4CXX_DEBUG(logger_,
+                  "Allowing unknown parameters for response function "
+                      << function_id);
+    remove_unknown_parameters = false;
+  }
+
+  if (rpc_passing &&
+      !app_manager_.GetAppServiceManager()
+           .GetRPCPassingHandler()
+           .IsPassThroughMessage(
+               (*message)[jhs::S_PARAMS][jhs::S_CORRELATION_ID].asUInt(),
+               commands::Command::CommandSource::SOURCE_SDL,
+               (*message)[jhs::S_PARAMS][jhs::S_MESSAGE_TYPE].asInt())) {
+    remove_unknown_parameters = true;
+  }
+  if (!ConvertSOtoMessage(
+          (*message), (*message_to_send), remove_unknown_parameters)) {
     LOG4CXX_WARN(logger_, "Can't send msg to Mobile: failed to create string");
     return;
   }
@@ -496,6 +523,7 @@ void RPCServiceImpl::SendMessageToHMI(
     return;
   }
 
+  bool remove_unknown_parameters = true;
   // SmartObject |message| has no way to declare priority for now
   std::shared_ptr<Message> message_to_send(
       new Message(protocol_handler::MessagePriority::kDefault));
@@ -509,13 +537,59 @@ void RPCServiceImpl::SendMessageToHMI(
       logger_,
       "Attached schema to message, result if valid: " << message->isValid());
 
-  if (!ConvertSOtoMessage(*message, *message_to_send)) {
+  if (IsAppServiceRPC((*message)[jhs::S_PARAMS][jhs::S_FUNCTION_ID].asInt(),
+                      commands::Command::CommandSource::SOURCE_SDL_TO_HMI)) {
+    LOG4CXX_DEBUG(logger_,
+                  "Allowing unknown parameters for response function "
+                      << (*message)[jhs::S_PARAMS][jhs::S_FUNCTION_ID].asInt());
+
+    remove_unknown_parameters = false;
+  }
+
+  if (!ConvertSOtoMessage(
+          *message, *message_to_send, remove_unknown_parameters)) {
     LOG4CXX_WARN(logger_,
                  "Cannot send message to HMI: failed to create string");
     return;
   }
 
   messages_to_hmi_.PostMessage(impl::MessageToHmi(message_to_send));
+}
+
+bool RPCServiceImpl::IsAppServiceRPC(int32_t function_id,
+                                     commands::Command::CommandSource source) {
+  // General RPCs related to App Services
+  if ((source == commands::Command::CommandSource::SOURCE_MOBILE) ||
+      (source ==
+       commands::Command::CommandSource::SOURCE_SDL)) {  // MOBILE COMMANDS
+    switch (function_id) {
+      case mobile_apis::FunctionID::GetSystemCapabilityID:
+      case mobile_apis::FunctionID::OnSystemCapabilityUpdatedID:
+        return true;
+        break;
+    }
+  } else if ((source == commands::Command::CommandSource::SOURCE_HMI) ||
+             (source == commands::Command::CommandSource::
+                            SOURCE_SDL_TO_HMI)) {  // HMI COMMANDS
+    switch (function_id) {
+      case hmi_apis::FunctionID::BasicCommunication_OnSystemCapabilityUpdated:
+        return true;
+        break;
+    }
+  }
+
+  // RPCs handled by app services plugin
+  auto plugin =
+      app_manager_.GetPluginManager().FindPluginToProcess(function_id, source);
+  if (!plugin) {
+    return false;
+  }
+  if ((*plugin).PluginName() != plugin_names::app_service_rpc_plugin) {
+    return false;
+  }
+  application_manager::CommandFactory& factory = (*plugin).GetCommandFactory();
+
+  return factory.IsAbleToProcess(function_id, source);
 }
 
 void RPCServiceImpl::set_protocol_handler(
@@ -530,7 +604,8 @@ void RPCServiceImpl::set_hmi_message_handler(
 
 bool RPCServiceImpl::ConvertSOtoMessage(
     const ns_smart_device_link::ns_smart_objects::SmartObject& message,
-    Message& output) {
+    Message& output,
+    const bool remove_unknown_parameters) {
   LOG4CXX_AUTO_TRACE(logger_);
 
   if (smart_objects::SmartType_Null == message.getType() ||
@@ -555,16 +630,16 @@ bool RPCServiceImpl::ConvertSOtoMessage(
   switch (protocol_type) {
     case 0: {
       if (protocol_version == 1) {
-        if (!formatters::CFormatterJsonSDLRPCv1::toString(message,
-                                                          output_string)) {
+        if (!formatters::CFormatterJsonSDLRPCv1::toString(
+                message, output_string, remove_unknown_parameters)) {
           LOG4CXX_WARN(logger_, "Failed to serialize smart object");
           return false;
         }
         output.set_protocol_version(
             protocol_handler::MajorProtocolVersion::PROTOCOL_VERSION_1);
       } else {
-        if (!formatters::CFormatterJsonSDLRPCv2::toString(message,
-                                                          output_string)) {
+        if (!formatters::CFormatterJsonSDLRPCv2::toString(
+                message, output_string, remove_unknown_parameters)) {
           LOG4CXX_WARN(logger_, "Failed to serialize smart object");
           return false;
         }
@@ -576,7 +651,8 @@ bool RPCServiceImpl::ConvertSOtoMessage(
       break;
     }
     case 1: {
-      if (!formatters::FormatterJsonRpc::ToString(message, output_string)) {
+      if (!formatters::FormatterJsonRpc::ToString(
+              message, output_string, remove_unknown_parameters)) {
         LOG4CXX_WARN(logger_, "Failed to serialize smart object");
         return false;
       }
@@ -589,7 +665,7 @@ bool RPCServiceImpl::ConvertSOtoMessage(
       return false;
   }
 
-  LOG4CXX_DEBUG(logger_, "Convertion result: " << output_string);
+  LOG4CXX_DEBUG(logger_, "Conversion result: " << output_string);
 
   output.set_connection_key(message.getElement(jhs::S_PARAMS)
                                 .getElement(strings::connection_key)

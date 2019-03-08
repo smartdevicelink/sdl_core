@@ -35,11 +35,13 @@
 #include "app_service_rpc_plugin/app_service_app_extension.h"
 #include "app_service_rpc_plugin/app_service_command_factory.h"
 #include "app_service_rpc_plugin/app_service_rpc_plugin.h"
+#include "application_manager/plugin_manager/plugin_keys.h"
 
 namespace app_service_rpc_plugin {
 CREATE_LOGGERPTR_GLOBAL(logger_, "AppServiceRpcPlugin")
 
 namespace strings = application_manager::strings;
+namespace plugins = application_manager::plugin_manager;
 
 AppServiceRpcPlugin::AppServiceRpcPlugin() : application_manager_(nullptr) {}
 
@@ -60,7 +62,7 @@ bool AppServiceRpcPlugin::IsAbleToProcess(
 }
 
 std::string AppServiceRpcPlugin::PluginName() {
-  return "App Service RPC Plugin";
+  return plugins::plugin_names::app_service_rpc_plugin;
 }
 
 app_mngr::CommandFactory& AppServiceRpcPlugin::GetCommandFactory() {

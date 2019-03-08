@@ -121,6 +121,9 @@ class RPCServiceImpl : public RPCService,
                            bool final_message = false) OVERRIDE;
   void SendMessageToHMI(const commands::MessageSharedPtr message) OVERRIDE;
 
+  bool IsAppServiceRPC(int32_t function_id,
+                       commands::Command::CommandSource source);
+
   void set_protocol_handler(
       protocol_handler::ProtocolHandler* handler) OVERRIDE;
   void set_hmi_message_handler(
@@ -128,7 +131,8 @@ class RPCServiceImpl : public RPCService,
 
  private:
   bool ConvertSOtoMessage(const smart_objects::SmartObject& message,
-                          Message& output);
+                          Message& output,
+                          const bool remove_unknown_parameters = true);
   hmi_apis::HMI_API& hmi_so_factory();
   mobile_apis::MOBILE_API& mobile_so_factory();
 

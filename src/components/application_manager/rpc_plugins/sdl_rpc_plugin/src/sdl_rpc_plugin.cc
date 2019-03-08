@@ -30,6 +30,7 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "application_manager/plugin_manager/plugin_keys.h"
 #include "sdl_rpc_plugin/sdl_rpc_plugin.h"
 #include "sdl_rpc_plugin/sdl_command_factory.h"
 #include "sdl_rpc_plugin/extensions/system_capability_app_extension.h"
@@ -56,7 +57,7 @@ bool SDLRPCPlugin::IsAbleToProcess(
 }
 
 std::string SDLRPCPlugin::PluginName() {
-  return "SDL RPC Plugin";
+  return plugins::plugin_names::sdl_rpc_plugin;
 }
 
 app_mngr::CommandFactory& SDLRPCPlugin::GetCommandFactory() {
