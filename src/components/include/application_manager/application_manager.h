@@ -169,6 +169,9 @@ class ApplicationManager {
   virtual ApplicationSharedPtr application_by_policy_id(
       const std::string& policy_app_id) const = 0;
 
+  virtual ApplicationSharedPtr application_by_name(
+      const std::string& app_name) const = 0;
+
   virtual ApplicationSharedPtr pending_application_by_policy_id(
       const std::string& policy_app_id) const = 0;
 

@@ -144,11 +144,14 @@ class RegisterAppInterfaceRequest
   /*
    * @brief Check new application parameters (name, tts, vr) for
    * coincidence with already known parameters of registered applications
+   * @param out_duplicate_apps In the case other apps was found with duplicate
+   * names, this field will be filled with a list of said apps
    *
    * return SUCCESS if there is no coincidence of app.name/TTS/VR synonyms,
    * otherwise appropriate error code returns
-  */
-  mobile_apis::Result::eType CheckCoincidence();
+   */
+  mobile_apis::Result::eType CheckCoincidence(
+      std::vector<app_mngr::ApplicationSharedPtr>& out_duplicate_apps);
 
   /*
   * @brief Predicate for using with CheckCoincidence method to compare with VR
