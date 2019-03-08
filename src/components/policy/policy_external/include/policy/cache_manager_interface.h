@@ -166,6 +166,92 @@ class CacheManagerInterface {
   virtual const VehicleInfo GetVehicleInfo() const = 0;
 
   /**
+   * @brief Get a list of enabled cloud applications
+   * @param enabled_apps List filled with the policy app id of each enabled
+   * cloud application
+   */
+  virtual void GetEnabledCloudApps(
+      std::vector<std::string>& enabled_apps) const = 0;
+
+  /**
+   * @brief Get cloud app policy information, all fields that aren't set for a
+   * given app will be filled with empty strings
+   * @param policy_app_id Unique application id
+   * @param enabled Whether or not the app is enabled
+   * @param endpoint Filled with the endpoint used to connect to the cloud
+   * application
+   * @param certificate Filled with the certificate used to for creating a
+   * secure connection to the cloud application
+   * @param auth_token Filled with the token used for authentication when
+   * reconnecting to the cloud app
+   * @param cloud_transport_type Filled with the transport type used by the
+   * cloud application (ex. "WSS")
+   * @param hybrid_app_preference Filled with the hybrid app preference for the
+   * cloud application set by the user
+   */
+  virtual bool GetCloudAppParameters(
+      const std::string& policy_app_id,
+      bool& enabled,
+      std::string& endpoint,
+      std::string& certificate,
+      std::string& auth_token,
+      std::string& cloud_transport_type,
+      std::string& hybrid_app_preference) const = 0;
+
+  /**
+  * Initializes a new cloud application with default policies
+  * Then adds cloud specific policies
+  * @param app_id application id
+  * @return true if success
+  */
+  virtual void InitCloudApp(const std::string& policy_app_id) = 0;
+
+  /**
+   * @brief Enable or disable a cloud application in the HMI
+   * @param enabled Cloud app enabled state
+   */
+  virtual void SetCloudAppEnabled(const std::string& policy_app_id,
+                                  const bool enabled) = 0;
+
+  /**
+   * @brief Set an app's auth token
+   * @param auth_token Cloud app authentication token
+   */
+  virtual void SetAppAuthToken(const std::string& policy_app_id,
+                               const std::string& auth_token) = 0;
+
+  /**
+   * @brief Set a cloud app's transport type
+   * @param cloud_transport_type Cloud app transport type
+   */
+  virtual void SetAppCloudTransportType(
+      const std::string& policy_app_id,
+      const std::string& cloud_transport_type) = 0;
+
+  /**
+   * @brief Set a cloud app's endpoint url
+   * @param endpoint URL for websocket connection
+   */
+  virtual void SetAppEndpoint(const std::string& policy_app_id,
+                              const std::string& endpoint) = 0;
+
+  /**
+   * @brief Set a cloud app's nicknames
+   * @param nicknames Nicknames for cloud app
+   */
+  virtual void SetAppNicknames(const std::string& policy_app_id,
+                               const StringArray& nicknames) = 0;
+
+  /**
+   * @brief Set the user preference for how a hybrid (cloud and mobile) app
+   * should be used
+   * @param hybrid_app_preference Hybrid app user preference
+   */
+  virtual void SetHybridAppPreference(
+      const std::string& policy_app_id,
+      const std::string& hybrid_app_preference) = 0;
+
+  /**
    * @brief Allows to update 'vin' field in module_meta table.
    *
    * @param new 'vin' value.
@@ -206,6 +292,15 @@ class CacheManagerInterface {
    *obtained.
    */
   virtual std::string GetLockScreenIconUrl() const = 0;
+
+  /**
+   * @brief Get Icon Url used for showing a cloud apps icon before the intial
+   *registration
+   *
+   * @return url which point to the resourse where icon could be
+   *obtained.
+   */
+  virtual std::string GetIconUrl(const std::string& policy_app_id) const = 0;
 
   /**
    * @brief Get allowed number of notifications

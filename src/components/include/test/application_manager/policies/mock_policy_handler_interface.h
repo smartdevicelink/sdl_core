@@ -102,6 +102,7 @@ class MockPolicyHandlerInterface : public policy::PolicyHandlerInterface {
                void(const uint32_t service_type,
                     policy::EndpointUrls& end_points));
   MOCK_CONST_METHOD0(GetLockScreenIconUrl, std::string());
+  MOCK_CONST_METHOD1(GetIconUrl, std::string(const std::string& policy_app_id));
   MOCK_METHOD0(ResetRetrySequence, void());
   MOCK_METHOD0(NextRetryTimeout, uint32_t());
   MOCK_CONST_METHOD0(TimeoutExchangeSec, uint32_t());
@@ -213,6 +214,20 @@ class MockPolicyHandlerInterface : public policy::PolicyHandlerInterface {
       GetAppRequestTypes,
       const std::vector<std::string>(const std::string& policy_app_id));
   MOCK_CONST_METHOD0(GetVehicleInfo, const policy::VehicleInfo());
+  MOCK_CONST_METHOD1(GetEnabledCloudApps,
+                     void(std::vector<std::string>& enabled_apps));
+  MOCK_CONST_METHOD1(CheckCloudAppEnabled,
+                     const bool(const std::string& policy_app_id));
+  MOCK_CONST_METHOD7(GetCloudAppParameters,
+                     bool(const std::string& policy_app_id,
+                          bool& enabled,
+                          std::string& endpoint,
+                          std::string& certificate,
+                          std::string& auth_token,
+                          std::string& cloud_transport_type,
+                          std::string& hybrid_app_preference));
+  MOCK_METHOD1(OnSetCloudAppProperties,
+               void(const smart_objects::SmartObject& message));
 
 #ifdef EXTERNAL_PROPRIETARY_MODE
   MOCK_CONST_METHOD0(GetMetaInfo, const policy::MetaInfo());

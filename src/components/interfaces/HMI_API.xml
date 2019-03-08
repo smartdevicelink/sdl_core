@@ -72,6 +72,7 @@
   <element name="USB_IOS"/>
   <element name="USB_AOA"/>
   <element name="WIFI"/>
+  <element name="CLOUD_WEBSOCKET"/>
 </enum>
 
 <enum name="ButtonName">
@@ -291,6 +292,18 @@
   <element name="REMOTE_CONTROL" />
 </enum>
 
+<enum name="CloudConnectionStatus">
+  <element name="NOT_CONNECTED">
+    <description>No active websocket session or ongoing connection attempts</description>
+  </element>
+  <element name="CONNECTED">
+    <description>Websocket is active</description>
+  </element>
+  <element name="RETRY">
+    <description>Websocket connection failed and retry attempts are ongoing</description>
+  </element>
+</enum>
+
   <enum name="WayPointType">
     <description>Describes what kind of waypoint is requested/provided.</description>
     <element name="ALL" />
@@ -473,6 +486,9 @@
   </element>
   <element name="UNSUPPORTED_HMI_RESOURCE">
     <description>By getting this value, SDL unregisters the named application</description>
+  </element>
+  <element name="CLOSE_CLOUD_CONNECTION">
+    <description>By getting this value, SDL puts the named app to NONE HMILevel. Used by the HMI to close a cloud app connection.</description>
   </element>
 </enum>
 
@@ -1094,6 +1110,7 @@
   <element name="VEHICLEDATA_FUELRANGE" />
   <element name="VEHICLEDATA_ENGINEOILLIFE" />
   <element name="VEHICLEDATA_ELECTRONICPARKBRAKESTATUS" />
+  <element name="VEHICLEDATA_CLOUDAPPVEHICLEID" />
 </enum>
 
 <enum name="WiperStatus">
@@ -1254,6 +1271,7 @@
   <element name="MEDIA" />
   <element name="FOTA" />
   <element name="OEM_SPECIFIC"/>
+  <element name="ICON_URL"/>
 </enum>
 
 <enum name="ECallConfirmationStatus">
@@ -2618,16 +2636,18 @@
       <description>If SDL omits this parameter - none RequestType is allowed for this app</description>
       <description>(either this is a pre-registered app or such is dictated by policies).</description>
     </param>
-	<param name="requestSubType" type="String" maxlength="100" minsize="0" maxsize="100" array="true" mandatory="false">
-        <description>
-            The list of SystemRequest's requestSubTypes allowed by policies for the named application.
-            If the app sends a requestSubType which is not specified in this list, then that request should be rejected.
-            An empty array signifies that any value of requestSubType is allowed for this app.
-            If this parameter is omitted, then a request with any value of requestSubType is now allowed for this app
-        </description>
+    <param name="requestSubType" type="String" maxlength="100" minsize="0" maxsize="100" array="true" mandatory="false">
+      <description>
+        The list of SystemRequest's requestSubTypes allowed by policies for the named application.
+        If the app sends a requestSubType which is not specified in this list, then that request should be rejected.
+        An empty array signifies that any value of requestSubType is allowed for this app.
+        If this parameter is omitted, then a request with any value of requestSubType is now allowed for this app
+      </description>
     </param>
     <param name="dayColorScheme" type="Common.TemplateColorScheme" mandatory="false"></param>
     <param name="nightColorScheme" type="Common.TemplateColorScheme" mandatory="false"></param>
+    <param name="isCloudApplication" type="Boolean" mandatory="false"></param>
+    <param name="cloudConnectionStatus" type="Common.CloudConnectionStatus" mandatory="false"></param>
 </struct>
 
 <struct name="MenuParams">
@@ -4950,6 +4970,10 @@
     <param name="electronicParkBrakeStatus" type="Boolean" mandatory="false">
       <description>The status of the park brake as provided by Electric Park Brake (EPB) system.</description>
     </param>
+    <param name="cloudAppVehicleID" type="Boolean" mandatory="false">
+      <description>Parameter used by cloud apps to identify a head unit</description>
+    </param>
+
         <!-- Ford Specific Data Items -->
     <param name="eCallInfo" type="Boolean" mandatory="false">
       <description>Emergency Call notification and confirmation data</description>
@@ -4967,6 +4991,7 @@
       <description>Information related to the MyKey feature</description>
     </param>
         <!-- / Ford Specific Data Items -->
+
   </function>
   <function name="SubscribeVehicleData" messagetype="response">
     <param name="gps" type="Common.VehicleDataResult" mandatory="false">
@@ -5038,6 +5063,10 @@
     <param name="electronicParkBrakeStatus" type="Common.VehicleDataResult" mandatory="false">
       <description>The status of the park brake as provided by Electric Park Brake (EPB) system.</description>
     </param>
+    <param name="cloudAppVehicleID" type="Common.VehicleDataResult" mandatory="false">
+      <description>Parameter used by cloud apps to identify a head unit</description>
+    </param>
+
         <!-- Ford Specific Data Items -->
     <param name="eCallInfo" type="Common.VehicleDataResult" mandatory="false">
       <description>Emergency Call notification and confirmation data</description>
@@ -5055,6 +5084,7 @@
       <description>Information related to the MyKey feature</description>
     </param>
         <!-- / Ford Specific Data Items -->
+
   </function>
   <function name="UnsubscribeVehicleData" messagetype="request">
     <description>
@@ -5132,6 +5162,10 @@
     <param name="electronicParkBrakeStatus" type="Boolean" mandatory="false">
       <description>The status of the park brake as provided by Electric Park Brake (EPB) system.</description>
     </param>
+    <param name="cloudAppVehicleID" type="Boolean" mandatory="false">
+      <description>Parameter used by cloud apps to identify a head unit</description>
+    </param>
+
         <!-- Ford Specific Data Items -->
     <param name="eCallInfo" type="Boolean" mandatory="false">
       <description>Emergency Call notification and confirmation data</description>
@@ -5149,6 +5183,7 @@
       <description>Information related to the MyKey feature</description>
     </param>
         <!-- / Ford Specific Data Items -->
+
   </function>
   <function name="UnsubscribeVehicleData" messagetype="response">
     <param name="gps" type="Common.VehicleDataResult" mandatory="false">
@@ -5220,6 +5255,10 @@
     <param name="electronicParkBrakeStatus" type="Common.VehicleDataResult" mandatory="false">
       <description>The status of the park brake as provided by Electric Park Brake (EPB) system.</description>
     </param>
+    <param name="cloudAppVehicleID" type="Common.VehicleDataResult" mandatory="false">
+      <description>Parameter used by cloud apps to identify a head unit</description>
+    </param>
+
         <!-- Ford Specific Data Items -->
     <param name="eCallInfo" type="Common.VehicleDataResult" mandatory="false">
       <description>Emergency Call notification and confirmation data</description>
@@ -5237,6 +5276,7 @@
       <description>Information related to the MyKey feature</description>
     </param>
         <!-- / Ford Specific Data Items -->
+
   </function>
   <function name="GetVehicleData" messagetype="request">
     <description>Non periodic vehicle data read request.</description>
@@ -5312,6 +5352,11 @@
     <param name="electronicParkBrakeStatus" type="Boolean" mandatory="false">
       <description>The status of the park brake as provided by Electric Park Brake (EPB) system.</description>
     </param>
+    <param name="cloudAppVehicleID" type="Boolean" mandatory="false">
+      <description>Parameter used by cloud apps to identify a head unit</description>
+    </param>
+
+        <!-- Ford Specific Data Items -->
     <param name="eCallInfo" type="Boolean" mandatory="false">
       <description>Emergency Call notification and confirmation data</description>
     </param>
@@ -5327,6 +5372,8 @@
     <param name="myKey" type="Boolean" mandatory="false">
       <description>Information related to the MyKey feature</description>
     </param>
+        <!-- / Ford Specific Data Items -->
+
   </function>
   <function name="GetVehicleData" messagetype="response">
     <param name="gps" type="Common.GPSData" mandatory="false">
@@ -5401,6 +5448,11 @@
     <param name="electronicParkBrakeStatus" type="Common.ElectronicParkBrakeStatus" mandatory="false">
       <description>The status of the park brake as provided by Electric Park Brake (EPB) system.</description>
     </param>
+    <param name="cloudAppVehicleID" type="String" mandatory="false">
+      <description>Parameter used by cloud apps to identify a head unit</description>
+    </param>
+
+        <!-- Ford Specific Data Items -->
     <param name="eCallInfo" type="Common.ECallInfo" mandatory="false">
       <description>Emergency Call notification and confirmation data</description>
     </param>
@@ -5416,6 +5468,8 @@
     <param name="myKey" type="Common.MyKey" mandatory="false">
       <description>Information related to the MyKey feature</description>
     </param>
+        <!-- / Ford Specific Data Items -->
+
   </function>
   <function name="OnVehicleData" messagetype="notification">
     <description>Callback for the periodic and non periodic vehicle data read function.</description>
@@ -5488,6 +5542,11 @@
     <param name="steeringWheelAngle" type="Float" minvalue="-2000" maxvalue="2000" mandatory="false">
       <description>Current angle of the steering wheel (in deg)</description>
     </param>
+    <param name="cloudAppVehicleID" type="String" mandatory="false">
+      <description>Parameter used by cloud apps to identify a head unit</description>
+    </param>
+
+        <!-- Ford Specific Data Items -->
     <param name="eCallInfo" type="Common.ECallInfo" mandatory="false">
       <description>Emergency Call notification and confirmation data</description>
     </param>
@@ -5503,6 +5562,8 @@
     <param name="myKey" type="Common.MyKey" mandatory="false">
       <description>Information related to the MyKey feature</description>
     </param>
+        <!-- / Ford Specific Data Items -->
+
   </function>
 </interface>
 

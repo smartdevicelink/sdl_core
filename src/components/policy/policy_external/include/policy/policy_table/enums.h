@@ -96,6 +96,7 @@ enum Parameter {
   P_FUEL_RANGE,
   P_TIRE_PRESSURE_VALUE,
   P_TPMS,
+  P_CLOUD_APP_VEHICLE_ID,
   P_LONGTITUDE_DEGREES,
   P_LATITUDE_DEGREES,
   P_LOCATION_NAME,
@@ -153,6 +154,7 @@ enum RequestType {
   RT_MEDIA,
   RT_FOTA,
   RT_OEM_SPECIFIC,
+  RT_ICON_URL,
   RT_EMPTY  // Added to allow empty Request Types handling
 };
 
@@ -180,6 +182,12 @@ enum ModuleType {
 bool IsValidEnum(ModuleType val);
 const char* EnumToJsonString(ModuleType val);
 bool EnumFromJsonString(const std::string& literal, ModuleType* result);
+
+enum HybridAppPreference { HAP_MOBILE, HAP_CLOUD, HAP_BOTH };
+bool IsValidEnum(HybridAppPreference val);
+const char* EnumToJsonString(HybridAppPreference val);
+bool EnumFromJsonString(const std::string& literal,
+                        HybridAppPreference* result);
 
 /**
  * @brief Enumeration FunctionID.
@@ -432,6 +440,16 @@ enum FunctionID {
    * @brief SendHapticDataID.
    */
   SendHapticDataID = 49,
+
+  /**
+   * @brief SetCloudAppPropertiesID.
+   */
+  SetCloudAppPropertiesID = 50,
+
+  /**
+   * @brief GetCloudAppPropertiesID.
+   */
+  GetCloudAppPropertiesID = 51,
 
   /**
    * @brief OnHMIStatusID.

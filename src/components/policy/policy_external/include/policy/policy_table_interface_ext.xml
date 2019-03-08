@@ -56,6 +56,7 @@
         <element name="fuelRange" />
         <element name="tirePressureValue" />
         <element name="tpms" />
+        <element name="cloudAppVehicleID" />
     </enum>
 
     <enum name="AppHMIType">
@@ -69,6 +70,12 @@
         <element name="BACKGROUND_PROCESS" />
         <element name="TESTING" />
         <element name="SYSTEM" />
+    </enum>
+
+    <enum name="HybridAppPreference">
+        <element name="MOBILE" />
+        <element name="CLOUD" />
+        <element name="BOTH" />
     </enum>
     <!-- Common parameters end -->
 
@@ -92,7 +99,16 @@
         <param name="memory_kb" type="Integer" minvalue="1" maxvalue="65225" mandatory="false"/>
         <param name="watchdog_timer_ms" type="Integer" minvalue="1"
             maxvalue="65225" mandatory="false"/>
-        <param name="certificate" type="String" minlength="0" maxlength="255"
+        <param name="certificate" type="String" minlength="0" maxlength="65535"
+            mandatory="false" />
+        <param name="endpoint" type="String" minlength="0" maxlength="255" mandatory="false" />
+        <param name="enabled" type="Boolean" mandatory="false" />
+        <param name="auth_token" type="String" minlength="0" maxlength="65535"
+            mandatory="false" />
+        <param name="cloud_transport_type" type="String" minlength="0" maxlength="255"
+            mandatory="false" />
+        <param name="hybrid_app_preference" type="HybridAppPreference" mandatory="false" />
+        <param name="icon_url" type="String" minlength="0" maxlength="65535"
             mandatory="false" />
     </struct>
 

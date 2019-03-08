@@ -54,6 +54,7 @@
 #include "interfaces/MOBILE_API.h"
 #include "utils/file_system.h"
 #include "utils/scope_guard.h"
+#include "smart_objects/enum_schema_item.h"
 
 #include "utils/helpers.h"
 #include "policy/policy_manager.h"
@@ -90,7 +91,8 @@ RequestTypeMap TypeToString = {
     {mobile_apis::RequestType::EMERGENCY, "EMERGENCY"},
     {mobile_apis::RequestType::MEDIA, "MEDIA"},
     {mobile_apis::RequestType::FOTA, "FOTA"},
-    {mobile_apis::RequestType::OEM_SPECIFIC, "OEM_SPECIFIC"}};
+    {mobile_apis::RequestType::OEM_SPECIFIC, "OEM_SPECIFIC"},
+    {mobile_apis::RequestType::ICON_URL, "ICON_URL"}};
 
 const std::string RequestTypeToString(mobile_apis::RequestType::eType type) {
   RequestTypeMap::const_iterator it = TypeToString.find(type);
@@ -1575,6 +1577,11 @@ std::string PolicyHandler::GetLockScreenIconUrl() const {
   return policy_manager_->GetLockScreenIconUrl();
 }
 
+std::string PolicyHandler::GetIconUrl(const std::string& policy_app_id) const {
+  POLICY_LIB_CHECK(std::string(""));
+  return policy_manager_->GetIconUrl(policy_app_id);
+}
+
 uint32_t PolicyHandler::NextRetryTimeout() {
   POLICY_LIB_CHECK(0);
   LOG4CXX_AUTO_TRACE(logger_);
@@ -1770,6 +1777,17 @@ void PolicyHandler::OnCertificateUpdated(const std::string& certificate_data) {
 }
 #endif  // EXTERNAL_PROPRIETARY_MODE
 
+void PolicyHandler::OnAuthTokenUpdated(const std::string& policy_app_id,
+                                       const std::string& auth_token) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  sync_primitives::AutoLock lock(listeners_lock_);
+  HandlersCollection::const_iterator it = listeners_.begin();
+  for (; it != listeners_.end(); ++it) {
+    PolicyHandlerObserver* observer = *it;
+    observer->OnAuthTokenUpdated(policy_app_id, auth_token);
+  }
+}
+
 void PolicyHandler::OnPTUFinished(const bool ptu_result) {
   LOG4CXX_AUTO_TRACE(logger_);
   sync_primitives::AutoLock lock(listeners_lock_);
@@ -1843,6 +1861,130 @@ bool PolicyHandler::CheckSystemAction(
   }
   LOG4CXX_DEBUG(logger_, "Unknown system action");
   return false;
+}
+
+void PolicyHandler::GetEnabledCloudApps(
+    std::vector<std::string>& enabled_apps) const {
+  POLICY_LIB_CHECK_VOID();
+  policy_manager_->GetEnabledCloudApps(enabled_apps);
+}
+
+bool PolicyHandler::GetCloudAppParameters(
+    const std::string& policy_app_id,
+    bool& enabled,
+    std::string& endpoint,
+    std::string& certificate,
+    std::string& auth_token,
+    std::string& cloud_transport_type,
+    std::string& hybrid_app_preference) const {
+  POLICY_LIB_CHECK(false);
+  return policy_manager_->GetCloudAppParameters(policy_app_id,
+                                                enabled,
+                                                endpoint,
+                                                certificate,
+                                                auth_token,
+                                                cloud_transport_type,
+                                                hybrid_app_preference);
+}
+
+const bool PolicyHandler::CheckCloudAppEnabled(
+    const std::string& policy_app_id) const {
+  POLICY_LIB_CHECK(false);
+  bool enabled = false;
+  std::string endpoint;
+  std::string auth_token;
+  std::string certificate;
+  std::string cloud_transport_type;
+  std::string hybrid_app_preference;
+  policy_manager_->GetCloudAppParameters(policy_app_id,
+                                         enabled,
+                                         endpoint,
+                                         certificate,
+                                         auth_token,
+                                         cloud_transport_type,
+                                         hybrid_app_preference);
+  return enabled;
+}
+
+void PolicyHandler::OnSetCloudAppProperties(
+    const smart_objects::SmartObject& message) {
+  POLICY_LIB_CHECK_VOID();
+  if (!message.keyExists(strings::msg_params)) {
+    LOG4CXX_ERROR(logger_,
+                  "Message does not contain mandatory section "
+                      << strings::msg_params);
+    return;
+  }
+  if (!message[strings::msg_params].keyExists(strings::properties)) {
+    LOG4CXX_ERROR(logger_,
+                  "Message does not contain app properties "
+                      << strings::msg_params);
+    return;
+  }
+
+  const smart_objects::SmartObject& properties =
+      message[strings::msg_params][strings::properties];
+  if (!properties.keyExists(strings::app_id)) {
+    LOG4CXX_ERROR(logger_,
+                  "Message does not contain mandatory parameter "
+                      << strings::app_id);
+    return;
+  }
+  std::string policy_app_id(properties[strings::app_id].asString());
+
+  policy_manager_->InitCloudApp(policy_app_id);
+
+  bool auth_token_update = false;
+  if (properties.keyExists(strings::enabled)) {
+    bool enabled = properties[strings::enabled].asBool();
+    policy_manager_->SetCloudAppEnabled(policy_app_id, enabled);
+    auth_token_update = enabled;
+    application_manager_.RefreshCloudAppInformation();
+  }
+  if (properties.keyExists(strings::auth_token)) {
+    std::string auth_token = properties[strings::auth_token].asString();
+    policy_manager_->SetAppAuthToken(policy_app_id, auth_token);
+    auth_token_update = true;
+  }
+  if (properties.keyExists(strings::cloud_transport_type)) {
+    policy_manager_->SetAppCloudTransportType(
+        policy_app_id, properties[strings::cloud_transport_type].asString());
+  }
+  if (properties.keyExists(strings::endpoint)) {
+    policy_manager_->SetAppEndpoint(policy_app_id,
+                                    properties[strings::endpoint].asString());
+  }
+  if (properties.keyExists(strings::nicknames)) {
+    StringArray nicknames;
+    const smart_objects::SmartObject& nicknames_array =
+        properties[strings::nicknames];
+    for (size_t i = 0; i < nicknames_array.length(); ++i) {
+      nicknames.push_back(nicknames_array[i].asString());
+    }
+    policy_manager_->SetAppNicknames(policy_app_id, nicknames);
+  }
+  if (properties.keyExists(strings::hybrid_app_preference)) {
+    std::string hybrid_app_preference;
+
+    mobile_apis::HybridAppPreference::eType value =
+        static_cast<mobile_apis::HybridAppPreference::eType>(
+            properties[strings::hybrid_app_preference].asUInt());
+    smart_objects::EnumConversionHelper<
+        mobile_apis::HybridAppPreference::eType>::
+        EnumToString(value, &hybrid_app_preference);
+    policy_manager_->SetHybridAppPreference(policy_app_id,
+                                            hybrid_app_preference);
+  }
+
+  if (auth_token_update) {
+    bool enabled;
+    std::string end, cert, ctt, hap;
+    std::string auth_token;
+
+    policy_manager_->GetCloudAppParameters(
+        policy_app_id, enabled, end, cert, auth_token, ctt, hap);
+    OnAuthTokenUpdated(policy_app_id, auth_token);
+  }
 }
 
 uint32_t PolicyHandler::HeartBeatTimeout(const std::string& app_id) const {

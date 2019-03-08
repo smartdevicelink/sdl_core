@@ -60,12 +60,23 @@ class MockConnectionHandler : public connection_handler::ConnectionHandler {
   MOCK_METHOD0(StartTransportManager, void());
   MOCK_METHOD1(ConnectToDevice,
                void(connection_handler::DeviceHandle device_handle));
+  MOCK_CONST_METHOD1(
+      GetConnectionStatus,
+      transport_manager::ConnectionStatus(const DeviceHandle& device_handle));
   MOCK_CONST_METHOD2(RunAppOnDevice,
                      void(const std::string&, const std::string&));
   MOCK_METHOD0(ConnectToAllDevices, void());
+  MOCK_METHOD2(
+      AddCloudAppDevice,
+      void(const std::string& policy_app_id,
+           const transport_manager::transport_adapter::CloudAppProperties&));
+  MOCK_METHOD1(RemoveCloudAppDevice, void(const DeviceHandle device_id));
   MOCK_METHOD1(CloseRevokedConnection, void(uint32_t connection_key));
   MOCK_METHOD1(CloseConnection, void(ConnectionHandle connection_handle));
   MOCK_METHOD1(GetConnectionSessionsCount, uint32_t(uint32_t connection_key));
+  MOCK_CONST_METHOD1(
+      GetCloudAppID,
+      std::string(const transport_manager::ConnectionUID connection_id));
   MOCK_METHOD2(GetDeviceID,
                bool(const std::string& mac_address,
                     DeviceHandle* device_handle));

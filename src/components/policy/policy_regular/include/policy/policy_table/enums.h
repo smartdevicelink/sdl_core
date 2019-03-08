@@ -86,6 +86,7 @@ enum Parameter {
   P_STEERINGWHEELANGLE,
   P_ENGINEOILLIFE,
   P_MYKEY,
+  P_CLOUD_APP_VEHICLE_ID,
   P_AIRBAGSTATUS,
   P_BODYINFORMATION,
   P_CLUSTERMODESTATUS,
@@ -166,6 +167,12 @@ enum ModuleType {
 bool IsValidEnum(ModuleType val);
 const char* EnumToJsonString(ModuleType val);
 bool EnumFromJsonString(const std::string& literal, ModuleType* result);
+
+enum HybridAppPreference { HAP_MOBILE, HAP_CLOUD, HAP_BOTH };
+bool IsValidEnum(HybridAppPreference val);
+const char* EnumToJsonString(HybridAppPreference val);
+bool EnumFromJsonString(const std::string& literal,
+                        HybridAppPreference* result);
 
 /**
  * @brief Enumeration FunctionID.
@@ -418,6 +425,16 @@ enum FunctionID {
    * @brief SendHapticDataID.
    */
   SendHapticDataID = 49,
+
+  /**
+   * @brief SetCloudAppPropertiesID.
+   */
+  SetCloudAppPropertiesID = 50,
+
+  /**
+   * @brief GetCloudAppPropertiesID.
+   */
+  GetCloudAppPropertiesID = 51,
 
   /**
    * @brief OnHMIStatusID.

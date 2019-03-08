@@ -96,6 +96,14 @@ connection_handler::DeviceHandle kDeviceId = 12345u;
 const std::string kAppId = "someID";
 const uint32_t kConnectionKey = 1232u;
 const std::string kAppName = "appName";
+
+// Cloud application params
+const std::string kEndpoint = "endpoint";
+const std::string kAuthToken = "auth_token";
+const std::string kCertificate = "cert";
+const std::string kTransportType = "WS";
+const mobile_api::HybridAppPreference::eType kHybridAppPreference =
+    mobile_api::HybridAppPreference::CLOUD;
 }  // namespace
 
 class ApplicationManagerImplTest : public ::testing::Test {
@@ -122,11 +130,11 @@ class ApplicationManagerImplTest : public ::testing::Test {
  protected:
   void SetUp() OVERRIDE {
     CreateAppManager();
-    ON_CALL(mock_connection_handler_, GetDataOnSessionKey(_, _, _, &kDeviceId))
-        .WillByDefault(DoAll(SetArgPointee<3u>(app_id_), Return(0)));
+    ON_CALL(mock_session_observer_, GetDataOnSessionKey(_, _, _, _))
+        .WillByDefault(DoAll(SetArgPointee<3u>(kDeviceId), Return(0)));
     ON_CALL(mock_connection_handler_, get_session_observer())
         .WillByDefault(ReturnRef(mock_session_observer_));
-    app_manager_impl_->SetRPCService(mock_rpc_service_);
+    app_manager_impl_->SetMockRPCService(mock_rpc_service_);
     app_manager_impl_->resume_controller().set_resumption_storage(
         mock_storage_);
     app_manager_impl_->set_connection_handler(&mock_connection_handler_);
@@ -200,7 +208,7 @@ class ApplicationManagerImplTest : public ::testing::Test {
   NiceMock<policy_test::MockPolicySettings> mock_policy_settings_;
   std::shared_ptr<NiceMock<resumption_test::MockResumptionData> > mock_storage_;
 
-  std::unique_ptr<rpc_service::RPCService> mock_rpc_service_;
+  MockRPCService* mock_rpc_service_;
   NiceMock<con_test::MockConnectionHandler> mock_connection_handler_;
   NiceMock<protocol_handler_test::MockSessionObserver> mock_session_observer_;
   NiceMock<MockApplicationManagerSettings> mock_application_manager_settings_;
@@ -1411,6 +1419,120 @@ TEST_F(ApplicationManagerImplTest,
             application->version().max_supported_api_version);
 
   EXPECT_TRUE(file_system::RemoveDirectory(kDirectoryName, true));
+}
+
+TEST_F(ApplicationManagerImplTest,
+       RegisterApplication_CloudAppRegisterSuccess) {
+  std::shared_ptr<MockApplication> waiting_app =
+      std::make_shared<MockApplication>();
+  ON_CALL(*waiting_app, device()).WillByDefault(Return(kDeviceId));
+  EXPECT_CALL(*waiting_app, cloud_app_endpoint())
+      .WillOnce(ReturnRef(kEndpoint));
+  EXPECT_CALL(*waiting_app, auth_token()).WillOnce(ReturnRef(kAuthToken));
+  EXPECT_CALL(*waiting_app, cloud_app_certificate())
+      .WillOnce(ReturnRef(kCertificate));
+  EXPECT_CALL(*waiting_app, cloud_app_transport_type())
+      .WillOnce(ReturnRef(kTransportType));
+  EXPECT_CALL(*waiting_app, hybrid_app_preference())
+      .WillOnce(ReturnRef(kHybridAppPreference));
+  ON_CALL(*waiting_app, is_cloud_app()).WillByDefault(Return(true));
+  EXPECT_CALL(*waiting_app, policy_app_id()).WillRepeatedly(Return(kAppId));
+  app_manager_impl_->AddMockPendingApplication(waiting_app);
+
+  EXPECT_CALL(
+      mock_session_observer_,
+      GetDataOnSessionKey(kConnectionKey,
+                          _,
+                          _,
+                          testing::An<connection_handler::DeviceHandle*>()))
+      .WillOnce(DoAll(SetArgPointee<3u>(kDeviceId), Return(0)));
+  EXPECT_CALL(*mock_rpc_service_,
+              ManageMobileCommand(_, commands::Command::SOURCE_SDL)).Times(0);
+  smart_objects::SmartObject request_for_registration(
+      smart_objects::SmartType_Map);
+
+  smart_objects::SmartObject& params =
+      request_for_registration[strings::msg_params];
+  params[strings::app_id] = kAppId;
+  params[strings::language_desired] = mobile_api::Language::EN_US;
+  params[strings::hmi_display_language_desired] = mobile_api::Language::EN_US;
+
+  request_for_registration[strings::params][strings::connection_key] =
+      kConnectionKey;
+  request_for_registration[strings::msg_params][strings::app_name] = kAppName;
+  request_for_registration[strings::msg_params][strings::sync_msg_version]
+                          [strings::minor_version] = APIVersion::kAPIV2;
+  request_for_registration[strings::msg_params][strings::sync_msg_version]
+                          [strings::major_version] = APIVersion::kAPIV3;
+
+  request_for_registration[strings::params][strings::protocol_version] =
+      protocol_handler::MajorProtocolVersion::PROTOCOL_VERSION_2;
+
+  smart_objects::SmartObjectSPtr request_for_registration_ptr =
+      std::make_shared<smart_objects::SmartObject>(request_for_registration);
+
+  ApplicationSharedPtr application =
+      app_manager_impl_->RegisterApplication(request_for_registration_ptr);
+
+  EXPECT_EQ(protocol_handler::MajorProtocolVersion::PROTOCOL_VERSION_2,
+            application->protocol_version());
+  EXPECT_EQ(APIVersion::kAPIV2,
+            application->version().min_supported_api_version);
+  EXPECT_EQ(APIVersion::kAPIV3,
+            application->version().max_supported_api_version);
+  EXPECT_EQ(kEndpoint, application->cloud_app_endpoint());
+  EXPECT_EQ(kAuthToken, application->auth_token());
+  EXPECT_EQ(kCertificate, application->cloud_app_certificate());
+  EXPECT_EQ(kTransportType, application->cloud_app_transport_type());
+  EXPECT_EQ(kHybridAppPreference, application->hybrid_app_preference());
+}
+
+TEST_F(ApplicationManagerImplTest,
+       RegisterApplication_CloudAppRegisterFailed_DISALLOWED) {
+  std::shared_ptr<MockApplication> waiting_app =
+      std::make_shared<MockApplication>();
+  EXPECT_CALL(*waiting_app, device()).WillRepeatedly(Return(kDeviceId));
+  EXPECT_CALL(*waiting_app, is_cloud_app()).WillRepeatedly(Return(true));
+  EXPECT_CALL(*waiting_app, policy_app_id())
+      .WillRepeatedly(Return("Fake" + kAppId));
+  app_manager_impl_->AddMockPendingApplication(waiting_app);
+
+  EXPECT_CALL(
+      mock_session_observer_,
+      GetDataOnSessionKey(kConnectionKey,
+                          _,
+                          _,
+                          testing::An<connection_handler::DeviceHandle*>()))
+      .WillOnce(DoAll(SetArgPointee<3u>(kDeviceId), Return(0)));
+  EXPECT_CALL(*mock_rpc_service_,
+              ManageMobileCommand(_, commands::Command::SOURCE_SDL))
+      .WillOnce(Return(true));
+  smart_objects::SmartObject request_for_registration(
+      smart_objects::SmartType_Map);
+
+  smart_objects::SmartObject& params =
+      request_for_registration[strings::msg_params];
+  params[strings::app_id] = kAppId;
+  params[strings::language_desired] = mobile_api::Language::EN_US;
+  params[strings::hmi_display_language_desired] = mobile_api::Language::EN_US;
+
+  request_for_registration[strings::params][strings::connection_key] =
+      kConnectionKey;
+  request_for_registration[strings::msg_params][strings::app_name] = kAppName;
+  request_for_registration[strings::msg_params][strings::sync_msg_version]
+                          [strings::minor_version] = APIVersion::kAPIV2;
+  request_for_registration[strings::msg_params][strings::sync_msg_version]
+                          [strings::major_version] = APIVersion::kAPIV3;
+
+  request_for_registration[strings::params][strings::protocol_version] =
+      protocol_handler::MajorProtocolVersion::PROTOCOL_VERSION_2;
+
+  smart_objects::SmartObjectSPtr request_for_registration_ptr =
+      std::make_shared<smart_objects::SmartObject>(request_for_registration);
+
+  ApplicationSharedPtr application =
+      app_manager_impl_->RegisterApplication(request_for_registration_ptr);
+  EXPECT_EQ(0, application.use_count());
 }
 
 }  // application_manager_test

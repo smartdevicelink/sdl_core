@@ -682,6 +682,144 @@ const policy::VehicleInfo CacheManager::GetVehicleInfo() const {
   return vehicle_info;
 }
 
+void CacheManager::GetEnabledCloudApps(
+    std::vector<std::string>& enabled_apps) const {
+  const policy_table::ApplicationPolicies& policies =
+      pt_->policy_table.app_policies_section.apps;
+  for (policy_table::ApplicationPolicies::const_iterator it = policies.begin();
+       it != policies.end();
+       ++it) {
+    auto app_policy = (*it).second;
+    if (app_policy.enabled.is_initialized() && *app_policy.enabled) {
+      enabled_apps.push_back((*it).first);
+    }
+  }
+}
+
+bool CacheManager::GetCloudAppParameters(
+    const std::string& policy_app_id,
+    bool& enabled,
+    std::string& endpoint,
+    std::string& certificate,
+    std::string& auth_token,
+    std::string& cloud_transport_type,
+    std::string& hybrid_app_preference) const {
+  const policy_table::ApplicationPolicies& policies =
+      pt_->policy_table.app_policies_section.apps;
+  policy_table::ApplicationPolicies::const_iterator policy_iter =
+      policies.find(policy_app_id);
+  if (policies.end() != policy_iter) {
+    auto app_policy = (*policy_iter).second;
+    endpoint = app_policy.endpoint.is_initialized() ? *app_policy.endpoint
+                                                    : std::string();
+    auth_token = app_policy.auth_token.is_initialized() ? *app_policy.auth_token
+                                                        : std::string();
+    cloud_transport_type = app_policy.cloud_transport_type.is_initialized()
+                               ? *app_policy.cloud_transport_type
+                               : std::string();
+    certificate = app_policy.certificate.is_initialized()
+                      ? *app_policy.certificate
+                      : std::string();
+    hybrid_app_preference =
+        app_policy.hybrid_app_preference.is_initialized()
+            ? EnumToJsonString(*app_policy.hybrid_app_preference)
+            : std::string();
+    enabled = app_policy.enabled.is_initialized() && *app_policy.enabled;
+    return true;
+  }
+  return false;
+}
+
+void CacheManager::InitCloudApp(const std::string& policy_app_id) {
+  CACHE_MANAGER_CHECK_VOID();
+  sync_primitives::AutoLock auto_lock(cache_lock_);
+
+  policy_table::ApplicationPolicies& policies =
+      pt_->policy_table.app_policies_section.apps;
+  policy_table::ApplicationPolicies::const_iterator default_iter =
+      policies.find(kDefaultId);
+  policy_table::ApplicationPolicies::const_iterator app_iter =
+      policies.find(policy_app_id);
+
+  if (default_iter != policies.end()) {
+    if (app_iter == policies.end()) {
+      policies[policy_app_id] = policies[kDefaultId];
+    }
+  }
+  // Add cloud app specific policies
+
+  Backup();
+}
+
+void CacheManager::SetCloudAppEnabled(const std::string& policy_app_id,
+                                      const bool enabled) {
+  policy_table::ApplicationPolicies& policies =
+      pt_->policy_table.app_policies_section.apps;
+  policy_table::ApplicationPolicies::iterator policy_iter =
+      policies.find(policy_app_id);
+  if (policies.end() != policy_iter) {
+    *(*policy_iter).second.enabled = enabled;
+  }
+}
+
+void CacheManager::SetAppAuthToken(const std::string& policy_app_id,
+                                   const std::string& auth_token) {
+  policy_table::ApplicationPolicies& policies =
+      pt_->policy_table.app_policies_section.apps;
+  policy_table::ApplicationPolicies::iterator policy_iter =
+      policies.find(policy_app_id);
+  if (policies.end() != policy_iter) {
+    *(*policy_iter).second.auth_token = auth_token;
+  }
+}
+
+void CacheManager::SetAppCloudTransportType(
+    const std::string& policy_app_id, const std::string& cloud_transport_type) {
+  policy_table::ApplicationPolicies& policies =
+      pt_->policy_table.app_policies_section.apps;
+  policy_table::ApplicationPolicies::iterator policy_iter =
+      policies.find(policy_app_id);
+  if (policies.end() != policy_iter) {
+    *(*policy_iter).second.cloud_transport_type = cloud_transport_type;
+  }
+}
+
+void CacheManager::SetAppEndpoint(const std::string& policy_app_id,
+                                  const std::string& endpoint) {
+  policy_table::ApplicationPolicies& policies =
+      pt_->policy_table.app_policies_section.apps;
+  policy_table::ApplicationPolicies::iterator policy_iter =
+      policies.find(policy_app_id);
+  if (policies.end() != policy_iter) {
+    *(*policy_iter).second.endpoint = endpoint;
+  }
+}
+
+void CacheManager::SetAppNicknames(const std::string& policy_app_id,
+                                   const StringArray& nicknames) {
+  policy_table::ApplicationPolicies& policies =
+      pt_->policy_table.app_policies_section.apps;
+  policy_table::ApplicationPolicies::iterator policy_iter =
+      policies.find(policy_app_id);
+  if (policies.end() != policy_iter) {
+    (*(*policy_iter).second.nicknames) = nicknames;
+  }
+}
+
+void CacheManager::SetHybridAppPreference(
+    const std::string& policy_app_id,
+    const std::string& hybrid_app_preference) {
+  policy_table::HybridAppPreference value;
+  bool valid = EnumFromJsonString(hybrid_app_preference, &value);
+  policy_table::ApplicationPolicies& policies =
+      pt_->policy_table.app_policies_section.apps;
+  policy_table::ApplicationPolicies::iterator policy_iter =
+      policies.find(policy_app_id);
+  if (policies.end() != policy_iter && valid) {
+    *(*policy_iter).second.hybrid_app_preference = value;
+  }
+}
+
 std::vector<UserFriendlyMessage> CacheManager::GetUserFriendlyMsg(
     const std::vector<std::string>& msg_codes, const std::string& language) {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -776,6 +914,21 @@ std::string CacheManager::GetLockScreenIconUrl() const {
     return backup_->GetLockScreenIconUrl();
   }
   return std::string("");
+}
+
+std::string CacheManager::GetIconUrl(const std::string& policy_app_id) const {
+  CACHE_MANAGER_CHECK(std::string());
+  std::string url;
+  const policy_table::ApplicationPolicies& policies =
+      pt_->policy_table.app_policies_section.apps;
+  policy_table::ApplicationPolicies::const_iterator policy_iter =
+      policies.find(policy_app_id);
+  if (policies.end() != policy_iter) {
+    auto app_policy = (*policy_iter).second;
+    url = app_policy.icon_url.is_initialized() ? *app_policy.icon_url
+                                               : std::string();
+  }
+  return url;
 }
 
 rpc::policy_table_interface_base::NumberOfNotificationsType

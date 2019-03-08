@@ -43,7 +43,6 @@
 #include <functional>
 
 #include "utils/timer.h"
-#include "utils/timer_task_impl.h"
 #include "utils/rwlock.h"
 
 #include "transport_manager/transport_manager.h"
@@ -140,6 +139,12 @@ class TransportManagerImpl
    **/
   int SearchDevices() OVERRIDE;
 
+  void AddCloudDevice(
+      const transport_manager::transport_adapter::CloudAppProperties
+          cloud_properties) OVERRIDE;
+
+  void RemoveCloudDevice(const DeviceHandle device_id) OVERRIDE;
+
   /**
    * @brief Connect to all applications discovered on device.
    *
@@ -148,6 +153,16 @@ class TransportManagerImpl
    * @return Code error.
    **/
   int ConnectDevice(const DeviceHandle device_id) OVERRIDE;
+
+  /**
+   * @brief Retrieves the connection status of a given device
+   *
+   * @param device_handle Handle of device to query
+   *
+   * @return The connection status of the given device
+   */
+  ConnectionStatus GetConnectionStatus(
+      const DeviceHandle& device_handle) const OVERRIDE;
 
   /**
    * @brief Disconnect from all applications connected on device.
@@ -365,7 +380,7 @@ class TransportManagerImpl
    * @brief Converter variable (Device ID -> Device Handle; Device Handle ->
    * Device ID)
    */
-  Handle2GUIDConverter converter_;
+  mutable Handle2GUIDConverter converter_;
 
 #ifdef BUILD_TESTS
  public:
@@ -380,7 +395,7 @@ class TransportManagerImpl
   int connection_id_counter_;
   sync_primitives::RWLock connections_lock_;
   std::vector<ConnectionInternal> connections_;
-  sync_primitives::RWLock device_to_adapter_map_lock_;
+  mutable sync_primitives::RWLock device_to_adapter_map_lock_;
   typedef std::map<DeviceUID, TransportAdapter*> DeviceToAdapterMap;
   DeviceToAdapterMap device_to_adapter_map_;
   std::vector<TransportAdapter*> transport_adapters_;

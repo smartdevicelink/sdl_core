@@ -946,6 +946,73 @@ class Application : public virtual InitialApplicationData,
    */
   virtual const std::list<AppExtensionPtr>& Extensions() const = 0;
 
+  /**
+   * @brief Get cloud app endpoint for websocket connection
+   * @return cloud app endpoint
+   */
+  virtual const std::string& cloud_app_endpoint() const = 0;
+
+  /**
+   * @brief Get cloud app auth token to be used in connection handshake after
+   * websocket open.
+   * @return cloud app auth token
+   */
+  virtual const std::string& auth_token() const = 0;
+
+  /**
+   * @brief Get cloud app transport type. Defines the type of websocket
+   * connection used.
+   * @return cloud app transport type
+   */
+  virtual const std::string& cloud_app_transport_type() const = 0;
+
+  /**
+   * @brief Get hybrid app preference. Defines behaviour for when a similar
+   * mobile and cloud app are connected simultaneously.
+   * @return hybrid app preference
+   */
+  virtual const mobile_apis::HybridAppPreference::eType& hybrid_app_preference()
+      const = 0;
+
+  /**
+   * @brief Get cloud app certificate. Used for secured websocket connections.
+   * @return cloud app certificate.
+   */
+  virtual const std::string& cloud_app_certificate() const = 0;
+
+  /**
+   * @brief Check whether the given application is a cloud app.
+   * @return true if the application is a cloud application, false otherwise.
+   */
+  virtual bool is_cloud_app() const = 0;
+
+  /**
+   * @brief Set cloud app endpoint
+   */
+  virtual void set_cloud_app_endpoint(const std::string& endpoint) = 0;
+
+  /**
+   * @brief Set cloud app auth token
+   */
+  virtual void set_auth_token(const std::string& auth_token) = 0;
+
+  /**
+   * @brief Set cloud app transport type
+   */
+  virtual void set_cloud_app_transport_type(
+      const std::string& transport_type) = 0;
+
+  /**
+   * @brief Set hybrid app preference
+   */
+  virtual void set_hybrid_app_preference(
+      const mobile_apis::HybridAppPreference::eType& hybrid_app_preference) = 0;
+
+  /**
+   * @brief Set cloud app certificate
+   */
+  virtual void set_cloud_app_certificate(const std::string& certificate) = 0;
+
  protected:
   mutable sync_primitives::Lock hmi_states_lock_;
 

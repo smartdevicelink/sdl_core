@@ -220,11 +220,10 @@ class EnumConversionHelper {
 
   static bool EnumToString(const EnumType value, std::string* str) {
     const char* cstr;
-    if (EnumToCString(value, &cstr)) {
-      return false;
-    }
-    if (str) {
+    bool success = EnumToCString(value, &cstr);
+    if (success && str) {
       *str = cstr;
+      return true;
     }
     return false;
   }

@@ -142,6 +142,11 @@ void ConnectionHandlerImpl::OnDeviceAdded(
   LOG4CXX_AUTO_TRACE(logger_);
   auto handle = device_info.device_handle();
 
+  LOG4CXX_DEBUG(logger_,
+                "OnDeviceAdded!!!: " << handle << " " << device_info.name()
+                                     << " " << device_info.mac_address() << " "
+                                     << device_info.connection_type());
+
   Device device(handle,
                 device_info.name(),
                 device_info.mac_address(),
@@ -244,11 +249,69 @@ void ConnectionHandlerImpl::OnScanDevicesFailed(
   LOG4CXX_WARN(logger_, "Scan devices failed. " << error.text());
 }
 
+void ConnectionHandlerImpl::OnConnectionStatusUpdated() {
+  connection_handler_observer_->OnConnectionStatusUpdated();
+}
+
+void ConnectionHandlerImpl::OnConnectionPending(
+    const transport_manager::DeviceInfo& device_info,
+    const transport_manager::ConnectionUID connection_id) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  LOG4CXX_DEBUG(logger_,
+                "OnConnectionEstablished!!!: "
+                    << device_info.device_handle() << " " << device_info.name()
+                    << " " << device_info.mac_address() << " "
+                    << device_info.connection_type());
+  DeviceMap::iterator it = device_list_.find(device_info.device_handle());
+  if (device_list_.end() == it) {
+    LOG4CXX_ERROR(logger_, "Unknown device!");
+    return;
+  }
+  LOG4CXX_DEBUG(logger_,
+                "Add Pending Connection #" << connection_id << " to the list.");
+
+  std::string endpoint = device_info.mac_address();
+  cloud_app_id_map_lock_.Acquire();
+  for (auto it = cloud_app_id_map_.begin(); it != cloud_app_id_map_.end();
+       ++it) {
+    if (endpoint == it->second.first) {
+      it->second.second = connection_id;
+      break;
+    }
+  }
+  cloud_app_id_map_lock_.Release();
+
+  sync_primitives::AutoWriteLock lock(connection_list_lock_);
+  if (connection_list_.find(connection_id) == connection_list_.end()) {
+    Connection* connection =
+        new Connection(connection_id,
+                       device_info.device_handle(),
+                       this,
+                       get_settings().heart_beat_timeout());
+
+    connection_list_.insert(
+        ConnectionList::value_type(connection_id, connection));
+
+    connection_handler::DeviceHandle device_id =
+        connection->connection_device_handle();
+
+    connection_handler_observer_->CreatePendingApplication(
+        connection_id, device_info, device_id);
+  } else {
+    connection_handler_observer_->SetPendingApplicationState(connection_id,
+                                                             device_info);
+  }
+}
+
 void ConnectionHandlerImpl::OnConnectionEstablished(
     const transport_manager::DeviceInfo& device_info,
     const transport_manager::ConnectionUID connection_id) {
   LOG4CXX_AUTO_TRACE(logger_);
-
+  LOG4CXX_DEBUG(logger_,
+                "OnConnectionEstablished!!!: "
+                    << device_info.device_handle() << " " << device_info.name()
+                    << " " << device_info.mac_address() << " "
+                    << device_info.connection_type());
   DeviceMap::iterator it = device_list_.find(device_info.device_handle());
   if (device_list_.end() == it) {
     LOG4CXX_ERROR(logger_, "Unknown device!");
@@ -257,12 +320,14 @@ void ConnectionHandlerImpl::OnConnectionEstablished(
   LOG4CXX_DEBUG(logger_,
                 "Add Connection #" << connection_id << " to the list.");
   sync_primitives::AutoWriteLock lock(connection_list_lock_);
-  connection_list_.insert(ConnectionList::value_type(
-      connection_id,
-      new Connection(connection_id,
-                     device_info.device_handle(),
-                     this,
-                     get_settings().heart_beat_timeout())));
+  if (connection_list_.find(connection_id) == connection_list_.end()) {
+    connection_list_.insert(ConnectionList::value_type(
+        connection_id,
+        new Connection(connection_id,
+                       device_info.device_handle(),
+                       this,
+                       get_settings().heart_beat_timeout())));
+  }
 }
 
 void ConnectionHandlerImpl::OnConnectionFailed(
@@ -1057,6 +1122,18 @@ const uint8_t ConnectionHandlerImpl::GetSessionIdFromSecondaryTransport(
   return 0;
 }
 
+std::string ConnectionHandlerImpl::GetCloudAppID(
+    const transport_manager::ConnectionUID connection_id) const {
+  sync_primitives::AutoLock auto_lock(cloud_app_id_map_lock_);
+  for (auto it = cloud_app_id_map_.begin(); it != cloud_app_id_map_.end();
+       ++it) {
+    if (connection_id == it->second.second) {
+      return it->first;
+    }
+  }
+  return std::string();
+}
+
 struct CompareMAC {
   explicit CompareMAC(const std::string& mac) : mac_(mac) {}
   bool operator()(const DeviceMap::value_type& device) {
@@ -1245,6 +1322,11 @@ void ConnectionHandlerImpl::ConnectToDevice(
   }
 }
 
+transport_manager::ConnectionStatus ConnectionHandlerImpl::GetConnectionStatus(
+    const DeviceHandle& device_handle) const {
+  return transport_manager_.GetConnectionStatus(device_handle);
+}
+
 void ConnectionHandlerImpl::RunAppOnDevice(const std::string& device_mac,
                                            const std::string& bundle_id) const {
   for (DeviceMap::const_iterator i = device_list_.begin();
@@ -1265,6 +1347,21 @@ void ConnectionHandlerImpl::ConnectToAllDevices() {
     connection_handler::DeviceHandle device_handle = i->first;
     ConnectToDevice(device_handle);
   }
+}
+
+void ConnectionHandlerImpl::AddCloudAppDevice(
+    const std::string& policy_app_id,
+    const transport_manager::transport_adapter::CloudAppProperties&
+        cloud_properties) {
+  cloud_app_id_map_lock_.Acquire();
+  cloud_app_id_map_[policy_app_id] =
+      std::make_pair(cloud_properties.endpoint, 0);
+  cloud_app_id_map_lock_.Release();
+  transport_manager_.AddCloudDevice(cloud_properties);
+}
+
+void ConnectionHandlerImpl::RemoveCloudAppDevice(const DeviceHandle device_id) {
+  transport_manager_.RemoveCloudDevice(device_id);
 }
 
 void ConnectionHandlerImpl::StartTransportManager() {

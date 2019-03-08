@@ -181,6 +181,34 @@ class MockPolicyManager : public PolicyManager {
       GetAppRequestTypes,
       const std::vector<std::string>(const std::string policy_app_id));
   MOCK_CONST_METHOD0(GetVehicleInfo, const policy::VehicleInfo());
+  MOCK_CONST_METHOD1(GetEnabledCloudApps,
+                     void(std::vector<std::string>& enabled_apps));
+  MOCK_CONST_METHOD7(GetCloudAppParameters,
+                     bool(const std::string& policy_app_id,
+                          bool& enabled,
+                          std::string& endpoint,
+                          std::string& certificate,
+                          std::string& auth_token,
+                          std::string& cloud_transport_type,
+                          std::string& hybrid_app_preference));
+  MOCK_METHOD1(InitCloudApp, void(const std::string& policy_app_id));
+  MOCK_METHOD2(SetCloudAppEnabled,
+               void(const std::string& policy_app_id, const bool enabled));
+  MOCK_METHOD2(SetAppAuthToken,
+               void(const std::string& policy_app_id,
+                    const std::string& auth_token));
+  MOCK_METHOD2(SetAppCloudTransportType,
+               void(const std::string& policy_app_id,
+                    const std::string& cloud_transport_type));
+  MOCK_METHOD2(SetAppEndpoint,
+               void(const std::string& policy_app_id,
+                    const std::string& endpoint));
+  MOCK_METHOD2(SetAppNicknames,
+               void(const std::string& policy_app_id,
+                    const StringArray& nicknames));
+  MOCK_METHOD2(SetHybridAppPreference,
+               void(const std::string& policy_app_id,
+                    const std::string& hybrid_app_preference));
   MOCK_CONST_METHOD0(GetMetaInfo, const policy::MetaInfo());
   MOCK_CONST_METHOD0(RetrieveCertificate, std::string());
   MOCK_CONST_METHOD0(HasCertificate, bool());
@@ -204,6 +232,7 @@ class MockPolicyManager : public PolicyManager {
   MOCK_CONST_METHOD0(get_settings, const PolicySettings&());
   MOCK_METHOD1(set_settings, void(const PolicySettings* get_settings));
   MOCK_CONST_METHOD0(GetLockScreenIconUrl, std::string());
+  MOCK_CONST_METHOD1(GetIconUrl, std::string(const std::string& policy_app_id));
   MOCK_METHOD1(GetNextUpdateUrl, AppIdURL(const EndpointUrls& urls));
   MOCK_CONST_METHOD2(RetrySequenceUrl,
                      AppIdURL(const struct RetrySequenceURL&,

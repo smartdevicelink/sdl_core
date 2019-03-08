@@ -1,4 +1,5 @@
 #include "policy/policy_table/enums.h"
+#include <cstring>
 
 namespace rpc {
 namespace policy_table_interface_base {
@@ -137,6 +138,8 @@ bool IsValidEnum(Parameter val) {
       return true;
     case P_FUELRANGE:
       return true;
+    case P_CLOUD_APP_VEHICLE_ID:
+      return true;
     case P_ODOMETER:
       return true;
     case P_TIREPRESSURE:
@@ -232,6 +235,8 @@ const char* EnumToJsonString(Parameter val) {
       return "instantFuelConsumption";
     case P_FUELRANGE:
       return "fuelRange";
+    case P_CLOUD_APP_VEHICLE_ID:
+      return "cloudAppVehicleID";
     case P_ODOMETER:
       return "odometer";
     case P_TIREPRESSURE:
@@ -335,6 +340,9 @@ bool EnumFromJsonString(const std::string& literal, Parameter* result) {
     return true;
   } else if ("fuelRange" == literal) {
     *result = P_FUELRANGE;
+    return true;
+  } else if ("cloudAppVehicleID" == literal) {
+    *result = P_CLOUD_APP_VEHICLE_ID;
     return true;
   } else if ("odometer" == literal) {
     *result = P_ODOMETER;
@@ -621,6 +629,8 @@ bool IsValidEnum(RequestType val) {
       return true;
     case RT_OEM_SPECIFIC:
       return true;
+    case RT_ICON_URL:
+      return true;
     case RT_EMPTY:
       return true;
     default:
@@ -672,6 +682,8 @@ const char* EnumToJsonString(RequestType val) {
       return "FOTA";
     case RT_OEM_SPECIFIC:
       return "OEM_SPECIFIC";
+    case RT_ICON_URL:
+      return "ICON_URL";
     case RT_EMPTY:
       return "EMPTY";
     default:
@@ -764,6 +776,10 @@ bool EnumFromJsonString(const std::string& literal, RequestType* result) {
     *result = RT_OEM_SPECIFIC;
     return true;
   }
+  if ("ICON_URL" == literal) {
+    *result = RT_ICON_URL;
+    return true;
+  }
   if ("EMPTY" == literal) {
     *result = RT_EMPTY;
     return true;
@@ -838,6 +854,38 @@ bool EnumFromJsonString(const std::string& literal, ModuleType* result) {
   } else {
     return false;
   }
+}
+
+bool IsValidEnum(HybridAppPreference val) {
+  return strlen(EnumToJsonString(val)) > 0;
+}
+
+const char* EnumToJsonString(HybridAppPreference val) {
+  switch (val) {
+    case HAP_MOBILE:
+      return "MOBILE";
+    case HAP_CLOUD:
+      return "CLOUD";
+    case HAP_BOTH:
+      return "BOTH";
+    default:
+      return "";
+  }
+}
+
+bool EnumFromJsonString(const std::string& literal,
+                        HybridAppPreference* result) {
+  if ("MOBILE" == literal) {
+    *result = HAP_MOBILE;
+    return true;
+  } else if ("CLOUD" == literal) {
+    *result = HAP_CLOUD;
+    return true;
+  } else if ("BOTH" == literal) {
+    *result = HAP_BOTH;
+    return true;
+  }
+  return false;
 }
 
 bool EnumFromJsonString(const std::string& literal, FunctionID* result) {
@@ -1078,6 +1126,16 @@ bool EnumFromJsonString(const std::string& literal, FunctionID* result) {
 
   if ("SendHapticData" == literal) {
     *result = SendHapticDataID;
+    return true;
+  }
+
+  if ("SetCloudAppProperties" == literal) {
+    *result = SetCloudAppPropertiesID;
+    return true;
+  }
+
+  if ("GetCloudAppProperties" == literal) {
+    *result = GetCloudAppPropertiesID;
     return true;
   }
 

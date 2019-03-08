@@ -50,6 +50,7 @@
 #include "transport_manager/transport_manager_listener.h"
 #include "transport_manager/transport_manager_listener_empty.h"
 #include "transport_manager/transport_adapter/transport_adapter.h"
+#include "transport_manager/cloud/cloud_websocket_transport_adapter.h"
 #include "transport_manager/transport_adapter/transport_adapter_event.h"
 #include "config_profile/profile.h"
 
@@ -129,6 +130,35 @@ void TransportManagerImpl::ReconnectionTimeout() {
              device_to_reconnect_);
 }
 
+void TransportManagerImpl::AddCloudDevice(
+    const transport_manager::transport_adapter::CloudAppProperties
+        cloud_properties) {
+  transport_adapter::DeviceType type = transport_adapter::DeviceType::UNKNOWN;
+  if ((cloud_properties.cloud_transport_type == "WS") ||
+      (cloud_properties.cloud_transport_type == "WSS")) {
+    type = transport_adapter::DeviceType::CLOUD_WEBSOCKET;
+  } else {
+    return;
+  }
+
+  std::vector<TransportAdapter*>::iterator ta = transport_adapters_.begin();
+  for (; ta != transport_adapters_.end(); ++ta) {
+    if ((*ta)->GetDeviceType() == type) {
+      (*ta)->CreateDevice(cloud_properties.endpoint);
+      transport_adapter::CloudWebsocketTransportAdapter* cta =
+          static_cast<transport_adapter::CloudWebsocketTransportAdapter*>(*ta);
+      cta->SetAppCloudTransportConfig(cloud_properties.endpoint,
+                                      cloud_properties);
+    }
+  }
+
+  return;
+}
+
+void TransportManagerImpl::RemoveCloudDevice(const DeviceHandle device_handle) {
+  DisconnectDevice(device_handle);
+}
+
 int TransportManagerImpl::ConnectDevice(const DeviceHandle device_handle) {
   LOG4CXX_TRACE(logger_, "enter. DeviceHandle: " << &device_handle);
   if (!this->is_initialized_) {
@@ -155,6 +185,22 @@ int TransportManagerImpl::ConnectDevice(const DeviceHandle device_handle) {
   int err = (TransportAdapter::OK == ta_error) ? E_SUCCESS : E_INTERNAL_ERROR;
   LOG4CXX_TRACE(logger_, "exit with error: " << err);
   return err;
+}
+
+ConnectionStatus TransportManagerImpl::GetConnectionStatus(
+    const DeviceHandle& device_handle) const {
+  DeviceUID device_id = converter_.HandleToUid(device_handle);
+
+  sync_primitives::AutoReadLock lock(device_to_adapter_map_lock_);
+  DeviceToAdapterMap::const_iterator it =
+      device_to_adapter_map_.find(device_id);
+  if (it == device_to_adapter_map_.end()) {
+    LOG4CXX_ERROR(logger_, "No device adapter found by id " << device_handle);
+    LOG4CXX_TRACE(logger_, "exit with E_INVALID_HANDLE. Condition: NULL == ta");
+    return ConnectionStatus::INVALID;
+  }
+  transport_adapter::TransportAdapter* ta = it->second;
+  return ta->GetConnectionStatus(device_id);
 }
 
 int TransportManagerImpl::DisconnectDevice(const DeviceHandle device_handle) {
@@ -954,22 +1000,93 @@ void TransportManagerImpl::Handle(TransportAdapterEvent event) {
       LOG4CXX_DEBUG(logger_, "event_type = ON_FIND_NEW_APPLICATIONS_REQUEST");
       break;
     }
+    case EventTypeEnum::ON_CONNECTION_STATUS_UPDATED: {
+      RaiseEvent(&TransportManagerListener::OnConnectionStatusUpdated);
+      LOG4CXX_DEBUG(logger_, "event_type = ON_CONNECTION_STATUS_UPDATED");
+      break;
+    }
+    case EventTypeEnum::ON_CONNECT_PENDING: {
+      const DeviceHandle device_handle = converter_.UidToHandle(
+          event.device_uid, event.transport_adapter->GetConnectionType());
+      int connection_id = 0;
+      std::vector<ConnectionInternal>::iterator it = connections_.begin();
+      std::vector<ConnectionInternal>::iterator end = connections_.end();
+      for (; it != end; ++it) {
+        if (it->transport_adapter != event.transport_adapter) {
+          continue;
+        } else if (it->Connection::device != event.device_uid) {
+          continue;
+        } else if (it->Connection::application != event.application_id) {
+          continue;
+        } else if (it->device_handle_ != device_handle) {
+          continue;
+        } else {
+          LOG4CXX_DEBUG(logger_, "Connection Object Already Exists");
+          connection_id = it->Connection::id;
+          break;
+        }
+      }
+
+      if (it == end) {
+        AddConnection(ConnectionInternal(this,
+                                         event.transport_adapter,
+                                         ++connection_id_counter_,
+                                         event.device_uid,
+                                         event.application_id,
+                                         device_handle));
+        connection_id = connection_id_counter_;
+      }
+
+      RaiseEvent(
+          &TransportManagerListener::OnConnectionPending,
+          DeviceInfo(device_handle,
+                     event.device_uid,
+                     event.transport_adapter->DeviceName(event.device_uid),
+                     event.transport_adapter->GetConnectionType()),
+          connection_id);
+      LOG4CXX_DEBUG(logger_, "event_type = ON_CONNECT_PENDING");
+      break;
+    }
     case EventTypeEnum::ON_CONNECT_DONE: {
       const DeviceHandle device_handle = converter_.UidToHandle(
           event.device_uid, event.transport_adapter->GetConnectionType());
-      AddConnection(ConnectionInternal(this,
-                                       event.transport_adapter,
-                                       ++connection_id_counter_,
-                                       event.device_uid,
-                                       event.application_id,
-                                       device_handle));
+
+      int connection_id = 0;
+      std::vector<ConnectionInternal>::iterator it = connections_.begin();
+      std::vector<ConnectionInternal>::iterator end = connections_.end();
+      for (; it != end; ++it) {
+        if (it->transport_adapter != event.transport_adapter) {
+          continue;
+        } else if (it->Connection::device != event.device_uid) {
+          continue;
+        } else if (it->Connection::application != event.application_id) {
+          continue;
+        } else if (it->device_handle_ != device_handle) {
+          continue;
+        } else {
+          LOG4CXX_DEBUG(logger_, "Connection Object Already Exists");
+          connection_id = it->Connection::id;
+          break;
+        }
+      }
+
+      if (it == end) {
+        AddConnection(ConnectionInternal(this,
+                                         event.transport_adapter,
+                                         ++connection_id_counter_,
+                                         event.device_uid,
+                                         event.application_id,
+                                         device_handle));
+        connection_id = connection_id_counter_;
+      }
+
       RaiseEvent(
           &TransportManagerListener::OnConnectionEstablished,
           DeviceInfo(device_handle,
                      event.device_uid,
                      event.transport_adapter->DeviceName(event.device_uid),
                      event.transport_adapter->GetConnectionType()),
-          connection_id_counter_);
+          connection_id);
       LOG4CXX_DEBUG(logger_, "event_type = ON_CONNECT_DONE");
       break;
     }
