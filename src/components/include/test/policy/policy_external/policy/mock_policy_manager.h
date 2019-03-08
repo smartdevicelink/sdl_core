@@ -207,6 +207,9 @@ class MockPolicyManager : public PolicyManager {
   MOCK_METHOD2(SetAppEndpoint,
                void(const std::string& policy_app_id,
                     const std::string& endpoint));
+  MOCK_METHOD2(SetAppNicknames,
+               void(const std::string& policy_app_id,
+                    const StringArray& nicknames));
   MOCK_METHOD2(SetHybridAppPreference,
                void(const std::string& policy_app_id,
                     const std::string& hybrid_app_preference));

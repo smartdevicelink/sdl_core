@@ -553,7 +553,9 @@
     </enum>
 
     <struct name="CloudAppProperties" since="5.1">
-        <param name="appName" type="String" maxlength="100" mandatory="true"></param>
+        <param name="nicknames" type="String" minlength="0" maxlength="100" array="true" minsize="0" maxsize="100" mandatory="false">
+            <description>An array of app names a cloud app is allowed to register with. If included in a SetCloudAppProperties request, this value will overwrite the existing "nicknames" field in the app policies section of the policy table.</description>
+        </param>
         <param name="appID" type="String" maxlength="100" mandatory="true"></param>
         <param name="enabled" type="Boolean" mandatory="false">
             <description>If true, cloud app will be included in HMI RPC UpdateAppList</description>
@@ -963,7 +965,7 @@
             <description>Similar to VP8, but VP9 is customized for video resolutions beyond high-definition video (UHD) and also enables lossless compression.</description>
         </element>
     </enum>
-	
+
     <enum name="AudioStreamingIndicator" since="5.0">
         <element name="PLAY_PAUSE">
             <description>

@@ -54,32 +54,20 @@ void GetCloudAppPropertiesRequest::Run() {
     return;
   }
 
-  ApplicationSharedPtr cloud_app =
-      application_manager_.application_by_policy_id(policy_app_id);
-  std::string cloud_name;
-  if (cloud_app) {
-    cloud_name = cloud_app->name().AsMBString();
-  } else {
-    policy::StringArray nicknames;
-    policy::StringArray app_hmi_types;
+  policy::StringArray nicknames;
+  policy::StringArray app_hmi_types;
 
-    policy_handler_.GetInitialAppData(
-        policy_app_id, &nicknames, &app_hmi_types);
-
-    if (!nicknames.size()) {
-      LOG4CXX_ERROR(logger_, "Cloud App missing nickname");
-      SendResponse(false,
-                   mobile_apis::Result::DATA_NOT_AVAILABLE,
-                   "No available nick names for the requested app");
-      return;
-    }
-    cloud_name = nicknames[0];
-  }
+  policy_handler_.GetInitialAppData(policy_app_id, &nicknames, &app_hmi_types);
 
   smart_objects::SmartObject response_params(smart_objects::SmartType_Map);
   smart_objects::SmartObject properties(smart_objects::SmartType_Map);
-
-  properties[strings::app_name] = cloud_name;
+  smart_objects::SmartObject nicknames_array(smart_objects::SmartType_Array);
+  size_t i = 0;
+  for (std::string nickname : nicknames) {
+    nicknames_array[i] = nickname;
+    ++i;
+  }
+  properties[strings::nicknames] = nicknames_array;
   properties[strings::app_id] = policy_app_id;
   properties[strings::enabled] = enabled;
 

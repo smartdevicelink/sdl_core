@@ -782,6 +782,11 @@ void PolicyManagerImpl::SetAppEndpoint(const std::string& policy_app_id,
   cache_->SetAppEndpoint(policy_app_id, endpoint);
 }
 
+void PolicyManagerImpl::SetAppNicknames(const std::string& policy_app_id,
+                                        const StringArray& nicknames) {
+  cache_->SetAppNicknames(policy_app_id, nicknames);
+}
+
 void PolicyManagerImpl::SetHybridAppPreference(
     const std::string& policy_app_id,
     const std::string& hybrid_app_preference) {

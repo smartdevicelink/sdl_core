@@ -581,6 +581,13 @@ class PolicyManager : public usage_statistics::StatisticsManager {
                               const std::string& endpoint) = 0;
 
   /**
+   * @brief Set a cloud app's nicknames
+   * @param nicknames Nicknames for cloud app
+   */
+  virtual void SetAppNicknames(const std::string& policy_app_id,
+                               const StringArray& nicknames) = 0;
+
+  /**
    * @brief Set the user preference for how a hybrid (cloud and mobile) app
    * should be used
    * @param hybrid_app_preference Hybrid app user preference

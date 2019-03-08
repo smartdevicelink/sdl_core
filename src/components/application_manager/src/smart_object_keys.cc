@@ -155,6 +155,7 @@ const char* green = "green";
 const char* blue = "blue";
 const char* display_layout = "displayLayout";
 const char* icon_resumed = "iconResumed";
+const char* nicknames = "nicknames";
 const char* enabled = "enabled";
 const char* auth_token = "authToken";
 const char* cloud_transport_type = "cloudTransportType";
