@@ -199,12 +199,6 @@
                         "FULL",
                         "LIMITED",
                         "NONE"]
-                    },
-                    "GetFile": {
-                        "hmi_levels": ["BACKGROUND",
-                        "FULL",
-                        "LIMITED",
-                        "NONE"]
                     },                    
                     "RegisterAppInterface": {
                         "hmi_levels": ["BACKGROUND",
@@ -591,21 +585,73 @@
                     }
                 }
             },
-            "AppService":{
+            "AppServiceProducer":{
                 "rpcs":{
                     "PublishAppService":{
                         "hmi_levels": [
-                            "BACKGROUND",
                             "FULL",
                             "LIMITED",
+                            "BACKGROUND",
+                            "NONE"
+                        ]
+                    },
+                    "GetAppServiceData": {
+                        "hmi_levels": [
+                            "FULL",
+                            "LIMITED",
+                            "BACKGROUND",
+                            "NONE"
+                        ]
+                    },
+                    "OnAppServiceData": {
+                        "hmi_levels": [
+                            "FULL",
+                            "LIMITED",
+                            "BACKGROUND",
                             "NONE"
                         ]
                     },
                     "PerformAppServiceInteraction": {
                         "hmi_levels": [
-                            "BACKGROUND",
                             "FULL",
                             "LIMITED",
+                            "BACKGROUND",
+                            "NONE"
+                        ]
+                    }
+                }
+            },
+            "AppServiceConsumer": {
+                "rpcs": {
+                    "GetFile": {
+                        "hmi_levels": [
+                            "FULL",
+                            "LIMITED",
+                            "BACKGROUND",
+                            "NONE"
+                        ]
+                    },
+                    "GetAppServiceData": {
+                        "hmi_levels": [
+                            "FULL",
+                            "LIMITED",
+                            "BACKGROUND",
+                            "NONE"
+                        ]
+                    },
+                    "OnAppServiceData": {
+                        "hmi_levels": [
+                            "FULL",
+                            "LIMITED",
+                            "BACKGROUND",
+                            "NONE"
+                        ]
+                    },
+                    "PerformAppServiceInteraction": {
+                        "hmi_levels": [
+                            "FULL",
+                            "LIMITED",
+                            "BACKGROUND",
                             "NONE"
                         ]
                     }
@@ -2451,7 +2497,7 @@
                 "steal_focus": false,
                 "priority": "NONE",
                 "default_hmi": "NONE",
-                "groups": ["Base-4", "AppService"],
+                "groups": ["Base-4"],
                 "RequestType": [],
                 "RequestSubType": []
             },
