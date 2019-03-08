@@ -88,21 +88,25 @@ class ISchemaItem {
    * @brief Apply schema.
    *
    * @param Object Object to apply schema.
-   * @param RemoveFakeParameters contains true if need to remove fake parameters
+   * @param remove_unknown_parameters contains true if need to remove unknown
+   *parameters
    * from smart object otherwise contains false.
    **/
   virtual void applySchema(
       ns_smart_device_link::ns_smart_objects::SmartObject& Object,
-      const bool RemoveFakeParameters,
+      const bool remove_unknown_parameters,
       const utils::SemanticVersion& MessageVersion = utils::SemanticVersion());
 
   /**
    * @brief Unapply schema.
    *
    * @param Object Object to unapply schema.
+   * @param remove_unknown_parameters contains true if need to remove unknown
+   *parameters
    **/
   virtual void unapplySchema(
-      ns_smart_device_link::ns_smart_objects::SmartObject& Object);
+      ns_smart_device_link::ns_smart_objects::SmartObject& Object,
+      const bool remove_unknown_parameters = true);
 
   /**
    * @brief Build smart object by smart schema having copied matched

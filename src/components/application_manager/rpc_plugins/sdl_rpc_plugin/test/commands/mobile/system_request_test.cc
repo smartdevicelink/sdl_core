@@ -160,7 +160,7 @@ TEST_F(SystemRequestTest,
       .WillOnce(Return(mobile_apis::Result::SUCCESS));
 
   smart_objects::SmartObjectSPtr result;
-  EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_))
+  EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_, _))
       .WillOnce(DoAll(SaveArg<0>(&result), Return(true)));
 
   std::shared_ptr<SystemRequest> command(CreateCommand<SystemRequest>(msg));
@@ -201,7 +201,7 @@ TEST_F(
       .WillOnce(Return(false));
 
   ExpectManageMobileCommandWithResultCode(mobile_apis::Result::DISALLOWED);
-  EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_)).Times(0);
+  EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_, _)).Times(0);
 
   std::shared_ptr<SystemRequest> command(CreateCommand<SystemRequest>(msg));
   ASSERT_TRUE(command->Init());
@@ -222,7 +222,7 @@ TEST_F(SystemRequestTest, Run_RequestTypeDisallowed_SendDisallowedResponse) {
       .WillOnce(Return(false));
 
   ExpectManageMobileCommandWithResultCode(mobile_apis::Result::DISALLOWED);
-  EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_)).Times(0);
+  EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_, _)).Times(0);
 
   std::shared_ptr<SystemRequest> command(CreateCommand<SystemRequest>(msg));
   ASSERT_TRUE(command->Init());

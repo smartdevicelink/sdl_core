@@ -129,18 +129,22 @@ class TEnumSchemaItem : public CDefaultSchemaItem<EnumType> {
    * and tries to convert it to integer according to element-to-string
    * map.
    * @param Object Object to apply schema.
-   * @param RemoveFakeParameters contains true if need to remove fake parameters
+   * @param remove_unknown_parameters contains true if need to remove unknown
+   *parameters
    * from smart object otherwise contains false.
    **/
   void applySchema(SmartObject& Object,
-                   const bool RemoveFakeParameters,
+                   const bool remove_unknown_parameters,
                    const utils::SemanticVersion& MessageVersion =
                        utils::SemanticVersion()) OVERRIDE;
   /**
    * @brief Unapply schema.
    * @param Object Object to unapply schema.
+   * @param remove_unknown_parameters contains true if need to remove unknown
+   *parameters
    **/
-  void unapplySchema(SmartObject& Object) OVERRIDE;
+  void unapplySchema(SmartObject& Object,
+                     const bool remove_unknown_parameters) OVERRIDE;
 
  private:
   /**
@@ -365,7 +369,7 @@ errors::eType TEnumSchemaItem<EnumType>::validate(
 template <typename EnumType>
 void TEnumSchemaItem<EnumType>::applySchema(
     SmartObject& Object,
-    const bool RemoveFakeParameters,
+    const bool remove_unknown_parameters,
     const utils::SemanticVersion& MessageVersion) {
   if (SmartType_String == Object.getType()) {
     EnumType enum_val = static_cast<EnumType>(-1);
@@ -376,7 +380,8 @@ void TEnumSchemaItem<EnumType>::applySchema(
 }
 
 template <typename EnumType>
-void TEnumSchemaItem<EnumType>::unapplySchema(SmartObject& Object) {
+void TEnumSchemaItem<EnumType>::unapplySchema(
+    SmartObject& Object, const bool remove_unknown_parameters) {
   if (SmartType_Integer == Object.getType()) {
     const char* str;
     if (ConversionHelper::EnumToCString(static_cast<EnumType>(Object.asInt()),

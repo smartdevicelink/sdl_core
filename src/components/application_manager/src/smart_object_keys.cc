@@ -27,6 +27,7 @@ const char* app_launch_last_session = "app_launch_last_session";
 const char* policy_app_id = "policyAppID";
 const char* hmi_app_id = "hmiAppID";
 const char* device_id = "deviceID";
+const char* subscribe = "subscribe";
 const char* subscribed_for_way_points = "subscribed_for_way_points";
 const char* url = "url";
 const char* urlScheme = "urlScheme";
@@ -145,6 +146,7 @@ const char* navigation_capability = "navigationCapability";
 const char* phone_capability = "phoneCapability";
 const char* video_streaming_capability = "videoStreamingCapability";
 const char* rc_capability = "remoteControlCapability";
+const char* app_services_capabilities = "appServicesCapabilities";
 const char* day_color_scheme = "dayColorScheme";
 const char* night_color_scheme = "nightColorScheme";
 const char* primary_color = "primaryColor";
@@ -167,6 +169,7 @@ const char* endpoint = "endpoint";
 // PutFile
 const char* sync_file_name = "syncFileName";
 const char* file_name = "fileName";
+const char* file_path = "filePath";
 const char* file_type = "fileType";
 const char* file_size = "fileSize";
 const char* crc32_check_sum = "crc";
@@ -269,6 +272,31 @@ const char* system_software_version = "systemSoftwareVersion";
 const char* priority = "priority";
 const char* engine_oil_life = "engineOilLife";
 
+// app services
+const char* app_service_manifest = "appServiceManifest";
+const char* service_name = "serviceName";
+const char* service_type = "serviceType";
+const char* service_icon = "serviceIcon";
+const char* allow_app_consumers = "allowAppConsumers";
+const char* rpc_spec_version = "rpcSpecVersion";
+const char* handled_rpcs = "handledRPCs";
+const char* media_service_manifest = "mediaServiceManifest";
+const char* app_service_record = "appServiceRecord";
+const char* service_id = "serviceID";
+const char* service_manifest = "serviceManifest";
+const char* service_published = "servicePublished";
+const char* service_active = "serviceActive";
+const char* app_service_id = "appServiceId";
+const char* service_data = "serviceData";
+const char* request_service_active = "requestServiceActive";
+const char* app_services = "appServices";
+const char* update_reason = "updateReason";
+const char* updated_app_service_record = "updatedAppServiceRecord";
+const char* service_records = "serviceRecords";
+const char* activate = "activate";
+const char* set_as_default = "setAsDefault";
+const char* origin_app = "originApp";
+
 // resuming
 const char* application_commands = "applicationCommands";
 const char* application_submenus = "applicationSubMenus";
@@ -328,6 +356,8 @@ const char* const keypress_mode_supported = "keypressModeSupported";
 const char* const limited_characters_list_supported =
     "limitedCharactersListSupported";
 const char* const auto_complete_text_supported = "autoCompleteTextSupported";
+const char* const send_location_enabled = "sendLocationEnabled";
+const char* const get_way_points_enabled = "getWayPointsEnabled";
 const char* const entity_type = "entityType";
 const char* const entity_id = "entityID";
 const char* const status = "status";

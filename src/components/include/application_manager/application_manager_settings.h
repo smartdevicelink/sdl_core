@@ -85,6 +85,7 @@ class ApplicationManagerSettings : public RequestControlerSettings,
   virtual const std::string& audio_stream_file() const = 0;
 
   virtual bool use_full_app_id() const = 0;
+  virtual uint32_t rpc_pass_through_timeout() const = 0;
   virtual uint32_t cloud_app_retry_timeout() const = 0;
   virtual uint16_t cloud_app_max_retry_attempts() const = 0;
   virtual bool use_db_for_resumption() const = 0;
@@ -109,6 +110,8 @@ class ApplicationManagerSettings : public RequestControlerSettings,
   virtual const uint32_t& app_icons_amount_to_remove() const = 0;
   virtual const uint32_t& list_files_response_size() const = 0;
   virtual const std::string& plugins_folder() const = 0;
+  virtual const std::vector<std::string>& embedded_services() const = 0;
+  virtual const std::string hmi_origin_id() const = 0;
 };
 
 }  // namespace application_manager

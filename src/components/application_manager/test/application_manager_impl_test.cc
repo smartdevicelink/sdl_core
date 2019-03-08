@@ -36,25 +36,26 @@
 #include <vector>
 #include <bson_object.h>
 
-#include "gtest/gtest.h"
 #include "application_manager/application.h"
 #include "application_manager/application_impl.h"
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/mock_application.h"
 #include "application_manager/mock_application_manager_settings.h"
 #include "application_manager/mock_resumption_data.h"
-#include "application_manager/mock_rpc_service.h"
 #include "application_manager/mock_rpc_plugin_manager.h"
+#include "application_manager/mock_rpc_service.h"
 #include "application_manager/resumption/resume_ctrl_impl.h"
 #include "application_manager/test/include/application_manager/mock_message_helper.h"
 #include "connection_handler/mock_connection_handler.h"
+#include "gtest/gtest.h"
 #include "hmi_message_handler/mock_hmi_message_handler.h"
 #include "media_manager/mock_media_manager.h"
 #include "policy/mock_policy_settings.h"
 #include "policy/usage_statistics/mock_statistics_manager.h"
 #include "protocol/bson_object_keys.h"
-#include "protocol_handler/mock_session_observer.h"
 #include "protocol_handler/mock_protocol_handler.h"
+#include "protocol_handler/mock_session_observer.h"
+#include "resumption/mock_last_state.h"
 #include "utils/custom_string.h"
 #include "utils/file_system.h"
 #include "utils/lock.h"
@@ -138,6 +139,11 @@ class ApplicationManagerImplTest : public ::testing::Test {
     app_manager_impl_->resume_controller().set_resumption_storage(
         mock_storage_);
     app_manager_impl_->set_connection_handler(&mock_connection_handler_);
+    Json::Value empty;
+    ON_CALL(mock_last_state_, get_dictionary()).WillByDefault(ReturnRef(empty));
+    std::unique_ptr<AppServiceManager> app_service_manager_ptr(
+        new AppServiceManager(*app_manager_impl_, mock_last_state_));
+    app_manager_impl_->SetAppServiceManager(app_service_manager_ptr);
   }
 
   void CreateAppManager() {
@@ -209,6 +215,7 @@ class ApplicationManagerImplTest : public ::testing::Test {
   std::shared_ptr<NiceMock<resumption_test::MockResumptionData> > mock_storage_;
 
   MockRPCService* mock_rpc_service_;
+  resumption_test::MockLastState mock_last_state_;
   NiceMock<con_test::MockConnectionHandler> mock_connection_handler_;
   NiceMock<protocol_handler_test::MockSessionObserver> mock_session_observer_;
   NiceMock<MockApplicationManagerSettings> mock_application_manager_settings_;

@@ -1139,6 +1139,26 @@ bool EnumFromJsonString(const std::string& literal, FunctionID* result) {
     return true;
   }
 
+  if ("PublishAppService" == literal) {
+    *result = PublishAppServiceID;
+    return true;
+  }
+
+  if ("GetFile" == literal) {
+    *result = GetFileID;
+    return true;
+  }
+
+  if ("GetAppServiceData" == literal) {
+    *result = GetAppServiceDataID;
+    return true;
+  }
+
+  if ("PerformAppServiceInteraction" == literal) {
+    *result = PerformAppServiceInteractionID;
+    return true;
+  }
+
   if ("OnHMIStatus" == literal) {
     *result = OnHMIStatusID;
     return true;
@@ -1226,6 +1246,16 @@ bool EnumFromJsonString(const std::string& literal, FunctionID* result) {
 
   if ("OnRCStatus" == literal) {
     *result = OnRCStatusID;
+    return true;
+  }
+
+  if ("OnAppServiceData" == literal) {
+    *result = OnAppServiceDataID;
+    return true;
+  }
+
+  if ("OnSystemCapabilityUpdated" == literal) {
+    *result = OnSystemCapabilityUpdatedID;
     return true;
   }
 

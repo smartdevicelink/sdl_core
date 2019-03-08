@@ -110,6 +110,9 @@
         <param name="hybrid_app_preference" type="HybridAppPreference" mandatory="false" />
         <param name="icon_url" type="String" minlength="0" maxlength="65535"
             mandatory="false" />
+        <param name="service_name" type="String" mandatory="false" />
+        <param name="service_type" type="String" mandatory="false" />
+        <param name="handled_rpcs" array="true"  mandatory="false" />
     </struct>
 
     <typedef name="HmiLevels" type="HmiLevel" array="true"

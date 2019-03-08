@@ -31,6 +31,7 @@
  */
 
 #include "application_manager/rpc_handler_impl.h"
+#include "application_manager/plugin_manager/plugin_keys.h"
 
 namespace application_manager {
 namespace rpc_handler {
@@ -38,6 +39,7 @@ namespace rpc_handler {
 CREATE_LOGGERPTR_LOCAL(logger_, "RPCHandlerImpl")
 namespace formatters = ns_smart_device_link::ns_json_handler::formatters;
 namespace jhs = ns_smart_device_link::ns_json_handler::strings;
+namespace plugin_names = application_manager::plugin_manager::plugin_names;
 
 RPCHandlerImpl::RPCHandlerImpl(ApplicationManager& app_manager)
     : app_manager_(app_manager)
@@ -63,17 +65,54 @@ void RPCHandlerImpl::ProcessMessageFromMobile(
 #endif  // TELEMETRY_MONITOR
   smart_objects::SmartObjectSPtr so_from_mobile =
       std::make_shared<smart_objects::SmartObject>();
-
+  bool remove_unknown_parameters = true;
   DCHECK_OR_RETURN_VOID(so_from_mobile);
   if (!so_from_mobile) {
     LOG4CXX_ERROR(logger_, "Null pointer");
     return;
   }
 
-  if (!ConvertMessageToSO(*message, *so_from_mobile)) {
+  bool rpc_passing = app_manager_.GetAppServiceManager()
+                         .GetRPCPassingHandler()
+                         .CanHandleFunctionID(message->function_id());
+  if (app_manager_.GetRPCService().IsAppServiceRPC(
+          message->function_id(), commands::Command::SOURCE_MOBILE) ||
+      rpc_passing) {
+    LOG4CXX_DEBUG(logger_,
+                  "Allowing unknown parameters for request function "
+                      << message->function_id());
+    remove_unknown_parameters = false;
+  }
+
+  if (!ConvertMessageToSO(
+          *message, *so_from_mobile, remove_unknown_parameters)) {
     LOG4CXX_ERROR(logger_, "Cannot create smart object from message");
     return;
   }
+
+  if (rpc_passing) {
+    uint32_t correlation_id =
+        (*so_from_mobile)[strings::params][strings::correlation_id].asUInt();
+    int32_t message_type =
+        (*so_from_mobile)[strings::params][strings::message_type].asInt();
+    if (app_manager_.GetAppServiceManager()
+            .GetRPCPassingHandler()
+            .RPCPassThrough(*so_from_mobile)) {
+      // RPC was forwarded. Skip handling by Core
+      return;
+    } else if (!app_manager_.GetAppServiceManager()
+                    .GetRPCPassingHandler()
+                    .IsPassThroughMessage(correlation_id,
+                                          commands::Command::SOURCE_MOBILE,
+                                          message_type)) {
+      // Since PassThrough failed, refiltering the message
+      if (!ConvertMessageToSO(*message, *so_from_mobile, true)) {
+        LOG4CXX_ERROR(logger_, "Cannot create smart object from message");
+        return;
+      }
+    }
+  }
+
 #ifdef TELEMETRY_MONITOR
   metric->message = so_from_mobile;
 #endif  // TELEMETRY_MONITOR
@@ -95,13 +134,28 @@ void RPCHandlerImpl::ProcessMessageFromHMI(
   LOG4CXX_AUTO_TRACE(logger_);
   smart_objects::SmartObjectSPtr smart_object =
       std::make_shared<smart_objects::SmartObject>();
-
+  bool remove_unknown_parameters = true;
   if (!smart_object) {
     LOG4CXX_ERROR(logger_, "Null pointer");
     return;
   }
 
-  if (!ConvertMessageToSO(*message, *smart_object)) {
+  smart_objects::SmartObject converted_result;
+  formatters::FormatterJsonRpc::FromString<hmi_apis::FunctionID::eType,
+                                           hmi_apis::messageType::eType>(
+      message->json_message(), converted_result);
+
+  if (app_manager_.GetRPCService().IsAppServiceRPC(
+          converted_result[jhs::S_PARAMS][jhs::S_FUNCTION_ID].asInt(),
+          commands::Command::SOURCE_HMI)) {
+    LOG4CXX_DEBUG(
+        logger_,
+        "Allowing unknown parameters for request function "
+            << converted_result[jhs::S_PARAMS][jhs::S_FUNCTION_ID].asInt());
+    remove_unknown_parameters = false;
+  }
+
+  if (!ConvertMessageToSO(*message, *smart_object, remove_unknown_parameters)) {
     if (application_manager::MessageType::kResponse ==
         (*smart_object)[strings::params][strings::message_type].asInt()) {
       (*smart_object).erase(strings::msg_params);
@@ -228,7 +282,8 @@ void RPCHandlerImpl::GetMessageVersion(
 
 bool RPCHandlerImpl::ConvertMessageToSO(
     const Message& message,
-    ns_smart_device_link::ns_smart_objects::SmartObject& output) {
+    ns_smart_device_link::ns_smart_objects::SmartObject& output,
+    const bool remove_unknown_parameters) {
   LOG4CXX_AUTO_TRACE(logger_);
   LOG4CXX_DEBUG(logger_,
                 "\t\t\tMessage to convert: protocol "
@@ -262,13 +317,16 @@ bool RPCHandlerImpl::ConvertMessageToSO(
       }
 
       if (!conversion_result ||
-          !mobile_so_factory().attachSchema(output, true, msg_version) ||
+          !mobile_so_factory().attachSchema(
+              output, remove_unknown_parameters, msg_version) ||
           ((output.validate(&report, msg_version) !=
-            smart_objects::errors::OK))) {
+                smart_objects::errors::OK &&
+            remove_unknown_parameters))) {
         LOG4CXX_WARN(logger_,
                      "Failed to parse string to smart object with API version "
                          << msg_version.toString() << " : "
                          << message.json_message());
+
         std::shared_ptr<smart_objects::SmartObject> response(
             MessageHelper::CreateNegativeResponse(
                 message.connection_key(),

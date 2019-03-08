@@ -51,6 +51,7 @@
 #include "application_manager/hmi_interfaces.h"
 #include "policy/policy_types.h"
 #include "application_manager/plugin_manager/rpc_plugin_manager.h"
+#include "application_manager/app_service_manager.h"
 namespace resumption {
 class LastState;
 }
@@ -195,6 +196,8 @@ class ApplicationManager {
       const std::string& policy_app_id) const = 0;
 
   virtual plugin_manager::RPCPluginManager& GetPluginManager() = 0;
+
+  virtual AppServiceManager& GetAppServiceManager() = 0;
 
 #ifdef BUILD_TESTS
   virtual void SetPluginManager(
@@ -405,6 +408,7 @@ class ApplicationManager {
   virtual bool is_stopping() const = 0;
   virtual bool is_audio_pass_thru_active() const = 0;
 
+  virtual uint32_t GetNextMobileCorrelationID() = 0;
   virtual uint32_t GetNextHMICorrelationID() = 0;
   virtual uint32_t GenerateNewHMIAppID() = 0;
 
@@ -572,6 +576,9 @@ class ApplicationManager {
   virtual void updateRequestTimeout(uint32_t connection_key,
                                     uint32_t mobile_correlation_id,
                                     uint32_t new_timeout_value) = 0;
+
+  virtual void IncreaseForwardedRequestTimeout(
+      uint32_t connection_key, uint32_t mobile_correlation_id) = 0;
 
   virtual StateController& state_controller() = 0;
 

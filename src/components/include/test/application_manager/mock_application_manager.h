@@ -94,6 +94,8 @@ class MockApplicationManager : public application_manager::ApplicationManager {
   MOCK_METHOD1(SetPluginManager,
                void(std::unique_ptr<RPCPluginManager>& plugin_manager));
 
+  MOCK_METHOD0(GetAppServiceManager, application_manager::AppServiceManager&());
+
   MOCK_CONST_METHOD1(
       application_by_hmi_app,
       application_manager::ApplicationSharedPtr(uint32_t hmi_app_id));
@@ -172,6 +174,7 @@ class MockApplicationManager : public application_manager::ApplicationManager {
   MOCK_CONST_METHOD0(is_stopping, bool());
   MOCK_CONST_METHOD0(is_audio_pass_thru_active, bool());
   MOCK_METHOD0(GetNextHMICorrelationID, uint32_t());
+  MOCK_METHOD0(GetNextMobileCorrelationID, uint32_t());
   MOCK_METHOD0(GenerateNewHMIAppID, uint32_t());
   MOCK_METHOD1(EndNaviServices, void(uint32_t app_id));
   MOCK_METHOD1(BeginAudioPassThru, bool(uint32_t app_id));
@@ -231,6 +234,8 @@ class MockApplicationManager : public application_manager::ApplicationManager {
                void(uint32_t connection_key,
                     uint32_t mobile_correlation_id,
                     uint32_t new_timeout_value));
+  MOCK_METHOD2(IncreaseForwardedRequestTimeout,
+               void(uint32_t connection_key, uint32_t mobile_correlation_id));
   MOCK_METHOD0(state_controller, application_manager::StateController&());
   MOCK_METHOD1(SetUnregisterAllApplicationsReason,
                void(mobile_apis::AppInterfaceUnregisteredReason::eType reason));

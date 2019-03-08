@@ -3302,15 +3302,6 @@
     </param>
   </struct>
 
-  <struct name="SystemCapabilities">
-      <param name="navigationCapability" type="NavigationCapability" mandatory="false">
-      </param>
-      <param name="phoneCapability" type="PhoneCapability" mandatory="false">
-      </param>
-      <param name="videoStreamingCapability" type="VideoStreamingCapability" mandatory="false">
-      </param>
-  </struct>
-
   <struct name="RemoteControlCapabilities">
     <param name="climateControlCapabilities" type="ClimateControlCapabilities" mandatory="false" minsize="1" maxsize="100" array="true">
       <description>If included, the platform supports RC climate controls. For this baseline version, maxsize=1. i.e. only one climate control module is supported.</description >
@@ -3361,6 +3352,448 @@
       <description>The position of the haptic rectangle to be highlighted. The center of this rectangle will be "touched" when a press occurs.</description>
     </param>
   </struct>
+    
+    <struct name="SyncMsgVersion">
+        <description>Specifies the version number of the SmartDeviceLink protocol that is supported by the mobile application or app service</description>
+        
+        <param name="majorVersion" type="Integer" minvalue="1" maxvalue="10" mandatory="true">
+            <description>The major version indicates versions that is not-compatible to previous versions.</description>
+        </param>
+        <param name="minorVersion" type="Integer" minvalue="0" maxvalue="1000" mandatory="true">
+            <description>The minor version indicates a change to a previous version that should still allow to be run on an older version (with limited functionality)</description>
+        </param>
+        <param name="patchVersion" type="Integer" minvalue="0" maxvalue="1000" mandatory="false">
+            <description>The patch version indicates a fix to existing functionality in a previous version that should still be able to be run on an older version </description>
+        </param>
+    </struct>
+
+    <!-- App Services -->
+
+    <enum name="AppServiceType">
+        <element name="MEDIA"/>
+        <element name="WEATHER"/>
+        <element name="NAVIGATION"/>
+    </enum>
+
+    <struct name="MediaServiceManifest">
+    </struct>
+
+    <enum name="MediaType">
+        <element name="MUSIC"/>
+        <element name="PODCAST"/>
+        <element name="AUDIOBOOK"/>
+        <element name="OTHER"/>
+    </enum>
+
+    <struct name="MediaServiceData">
+        <description>This data is related to what a media service should provide</description>
+
+        <param name="mediaType" type="Common.MediaType" mandatory="false">
+            <description>The type of the currently playing or paused track.</description>
+        </param>
+
+        <param name="mediaTitle" type="String" mandatory="false">
+            <description>
+                Music: The name of the current track
+                Podcast: The name of the current episode
+                Audiobook: The name of the current chapter
+            </description>
+        </param>
+
+        <param name="mediaArtist" type="String" mandatory="false">
+            <description>
+                Music: The name of the current album artist
+                Podcast: The provider of the podcast (hosts, network, company)
+                Audiobook: The book author's name
+            </description>
+        </param>
+
+        <param name="mediaAlbum" type="String" mandatory="false">
+            <description>
+                Music: The name of the current album
+                Podcast: The name of the current podcast show
+                Audiobook: The name of the current book
+            </description>
+        </param>
+
+        <param name="playlistName" type="String" mandatory="false">
+            <description>
+                Music: The name of the playlist or radio station, if the user is playing from a playlist, otherwise, Null
+                Podcast: The name of the playlist, if the user is playing from a playlist, otherwise, Null
+                Audiobook: Likely not applicable, possibly a collection or "playlist" of books
+            </description>
+        </param>
+
+        <param name="isExplicit" type="Boolean" mandatory="false">
+            <description> Whether or not the content currently playing (e.g. the track, episode, or book) contains explicit content</description>
+        </param>
+
+        <param name="trackPlaybackProgress" type="Integer" mandatory="false">
+            <description>
+                Music: The current progress of the track in seconds
+                Podcast: The current progress of the episode in seconds
+                Audiobook: The current progress of the current segment (e.g. the chapter) in seconds
+            </description>
+        </param>
+
+        <param name="trackPlaybackDuration" type="Integer" mandatory="false">
+            <description>
+                Music: The total duration of the track in seconds
+                Podcast: The total duration of the episode in seconds
+                Audiobook: The total duration of the current segment (e.g. the chapter) in seconds
+            </description>
+        </param>
+
+        <param name="queuePlaybackProgress" type="Integer" mandatory="false">
+            <description>
+                Music: The current progress of the playback queue in seconds
+                Podcast: The current progress of the playback queue in seconds
+                Audiobook: The current progress of the playback queue (e.g. the book) in seconds
+            </description>
+        </param>
+
+        <param name="queuePlaybackDuration" type="Integer" mandatory="false">
+            <description>
+                Music: The total duration of the playback queue in seconds
+                Podcast: The total duration of the playback queue in seconds
+                Audiobook: The total duration of the playback queue (e.g. the book) in seconds
+            </description>
+        </param>
+
+        <param name="queueCurrentTrackNumber" type="Integer" mandatory="false">
+            <description>
+                Music: The current number (1 based) of the track in the playback queue
+                Podcast: The current number (1 based) of the episode in the playback queue
+                Audiobook: The current number (1 based) of the episode in the playback queue (e.g. the chapter number in the book)
+            </description>
+        </param>
+
+        <param name="queueTotalTrackCount" type="Integer" mandatory="false">
+            <description>
+                Music: The total number of tracks in the playback queue
+                Podcast: The total number of episodes in the playback queue
+                Audiobook: The total number of sections in the playback queue (e.g. the number of chapters in the book)
+            </description>
+        </param>
+    </struct>
+
+    <struct name="WeatherServiceManifest">
+        <param name="currentForecastSupported" type="Boolean" mandatory="false"/>
+        <param name="maxMultidayForecastAmount" type="Integer" mandatory="false"/>
+        <param name="maxHourlyForecastAmount" type="Integer" mandatory="false"/>
+        <param name="maxMinutelyForecastAmount" type="Integer" mandatory="false"/>
+        <param name="weatherForLocationSupported" type="Boolean" mandatory="false"/>
+    </struct>
+
+    <struct name="WeatherAlert">
+        <param name="title" type="String" mandatory="false"/>
+        <param name="summary" type="String" mandatory="false"/>
+        <param name="expires" type="Common.DateTime" mandatory="false"/>
+        <param name="regions" type="String" array="true" minsize="1" maxsize="99" mandatory="false"/>
+        <param name="severity" type="String" mandatory="false"/>
+        <param name="timeIssued" type="Common.DateTime" mandatory="false"/>
+    </struct>
+
+    <struct name="WeatherData">
+        <param name="currentTemperature" type="Common.Temperature" mandatory="false"/>
+        <param name="temperatureHigh" type="Common.Temperature" mandatory="false"/>
+        <param name="temperatureLow" type="Common.Temperature" mandatory="false"/>
+        <param name="apparentTemperature" type="Common.Temperature" mandatory="false"/>
+        <param name="apparentTemperatureHigh" type="Common.Temperature" mandatory="false"/>
+        <param name="apparentTemperatureLow" type="Common.Temperature" mandatory="false"/>
+    
+        <param name="weatherSummary" type="String" mandatory="false"/>
+        <param name="time" type="Common.DateTime" mandatory="false"/>
+        <param name="humidity" type="Float" minvalue="0" maxvalue="1" mandatory="false">
+            <description> 0 to 1, percentage humidity </description>
+        </param>
+        <param name="cloudCover" type="Float" minvalue="0" maxvalue="1" mandatory="false">
+            <description> 0 to 1, percentage cloud cover </description>
+        </param>
+        <param name="moonPhase" type="Float" minvalue="0" maxvalue="1" mandatory="false">
+            <description> 0 to 1, percentage of the moon seen, e.g. 0 = no moon, 0.25 = quarter moon </description>
+        </param>
+
+        <param name="windBearing" type="Integer" mandatory="false">
+            <description> In degrees, true north at 0 degrees </description>
+        </param>
+        <param name="windGust" type="Float" mandatory="false">
+            <description> km/hr </description>
+        </param>
+        <param name="windSpeed" type="Float" mandatory="false">
+            <description> km/hr </description>
+        </param>
+
+        <param name="nearestStormBearing" type="Integer" mandatory="false">
+            <description> In degrees, true north at 0 degrees </description>
+        </param>
+        <param name="nearestStormDistance" type="Integer" mandatory="false">
+            <description> In km </description>
+        </param>
+        <param name="precipAccumulation" type="Float" mandatory="false">
+            <description> cm </description>
+        </param>
+        <param name="precipIntensity" type="Float" mandatory="false">
+            <description> cm of water per hour </description>
+        </param>
+        <param name="precipProbability" type="Float" minvalue="0" maxvalue="1" mandatory="false">
+            <description> 0 to 1, percentage chance </description>
+        </param>
+        <param name="precipType" type="String" mandatory="false">
+            <description> e.g. "rain", "snow", "sleet", "hail" </description>
+        </param>
+        <param name="visibility" type="Float" mandatory="false">
+            <description> In km </description>
+        </param>
+
+        <param name="weatherIconImageName" type="String" mandatory="false"/>
+    </struct>
+
+    <struct name="WeatherServiceData">
+        <description> This data is related to what a weather service would provide</description>
+        <param name="location" type="Common.LocationDetails" mandatory="true"/>
+        <param name="currentForecast" type="Common.WeatherData" mandatory="false"/>
+        <param name="minuteForecast" type="Common.WeatherData" array="true" minsize="15" maxsize="60" mandatory="false"/>
+        <param name="hourlyForecast" type="Common.WeatherData" array="true" minsize="1" maxsize="96" mandatory="false"/>
+        <param name="multidayForecast" type="Common.WeatherData" array="true" minsize="1" maxsize="30" mandatory="false"/>
+        <param name="alerts" type="Common.WeatherAlert" array="true" minsize="1" maxsize="10" mandatory="false">
+            <description> This array should be ordered with the first object being the current day</description>
+        </param>
+    </struct>
+
+    <struct name="NavigationServiceManifest">
+        <param name="acceptsWayPoints" type="Boolean" mandatory="false">
+            <description> Informs the subscriber if this service can actually accept way points. </description>
+        </param>
+    </struct>
+
+    <enum name="NavigationAction">
+        <element name="TURN">
+            <description> Using this action plus a supplied direction can give the type of turn. </description>
+        </element>
+        <element name="EXIT"/>
+        <element name="STAY"/>    
+        <element name="MERGE"/>
+        <element name="FERRY"/>
+        <element name="CAR_SHUTTLE_TRAIN"/>
+        <element name="WAYPOINT"/>
+    </enum>
+
+    <enum name="NavigationJunction">
+        <element name="REGULAR">
+            <description> A junction that represents a standard intersection with a single road crossing another. </description>
+        </element>
+        <element name="BIFURCATION">
+            <description> A junction where the road splits off into two paths; a fork in the road. </description>
+        </element>
+        <element name="MULTI_CARRIAGEWAY">
+            <description> A junction that has multiple intersections and paths. </description>
+        </element>
+        <element name="ROUNDABOUT">
+            <description> A junction where traffic moves in a single direction around a central, non-traversable point to reach one of the connecting roads. </description>
+        </element>
+        <element name="TRAVERSABLE_ROUNDABOUT">
+            <description> Similar to a roundabout, however the center of the roundabout is fully traversable. Also known as a mini-roundabout. </description>
+        </element>
+        <element name="JUGHANDLE">
+            <description> A junction where lefts diverge to the right, then curve to the left, converting a left turn to a crossing maneuver. </description>
+        </element>
+        <element name="ALL_WAY_YIELD">
+            <description> Multiple way intersection that allows traffic to flow based on priority; most commonly right of way and first in, first out. </description>
+        </element>
+        <element name="TURN_AROUND">
+            <description> A junction designated for traffic turn arounds. </description>
+        </element>
+    </enum>
+
+    <enum name="Direction">
+        <element name="LEFT"/>
+        <element name="RIGHT"/>
+    </enum>
+
+    <struct name="NavigationInstruction">
+        <param name="locationDetails" type="Common.LocationDetails" mandatory="true"/>
+
+        <param name="action" type="Common.NavigationAction" mandatory="true"/>
+
+        <param name="eta" type="Common.DateTime" mandatory="false"/>
+
+        <param name="bearing" type="Integer" minvalue="0" maxvalue="359" mandatory="false">
+            <description> The angle at which this instruction takes place. For example, 0 would mean straight, less than 45 is bearing right, greater than 135 is sharp right, between 45 and 135 is a regular right, and 180 is a U-Turn, etc. </description>
+        </param>
+
+        <param name="junctionType" type="Common.NavigationJunction" mandatory="false"/>
+
+        <param name="drivingSide" type="Common.Direction" mandatory="false">
+            <description> Used to infer which side of the road this instruction takes place. For a U-Turn (Action=Turn, direction=180) this will determine which direction the turn should take place. </description>
+        </param>
+
+        <param name="details" type="String" mandatory="false">
+            <description> This is a string representation of this instruction, used to display instructions to the users. This is not intended to be read aloud to the users, see the param prompt in NavigationServiceData for that. </description>
+        </param>
+
+        <param name="image" type="Common.Image" mandatory="false">
+            <description> An image representation of this instruction. </description>
+        </param>
+    </struct>
+
+    <struct name="NavigationServiceData">
+        <description> This data is related to what a navigation service would provide.</description>
+
+        <param name="timeStamp" type="Common.DateTime" mandatory="true">
+            <description> This is the timestamp of when the data was generated. This is to ensure any time or distance given in the data can accurately be adjusted if necessary. </description>
+        </param>
+
+        <param name="origin" type="Common.LocationDetails" mandatory="false"/>
+        <param name="destination" type="Common.LocationDetails" mandatory="false"/>
+        <param name="destinationETA" type="Common.DateTime" mandatory="false"/>
+
+        <param name="instructions" type="Common.NavigationInstruction" array="true" mandatory="false">
+            <description> This array should be ordered with all remaining instructions. The start of this array should always contain the next instruction.</description>
+        </param>
+
+        <param name="nextInstructionETA" type="Common.DateTime" mandatory="false"/>
+        <param name="nextInstructionDistance" type="Float" mandatory="false">
+            <description>The distance to this instruction from current location. This should only be updated ever .1 unit of distance. For more accuracy the consumer can use the GPS location of itself and the next instruction. </description>
+        </param>
+        <param name="nextInstructionDistanceScale" type="Float" mandatory="false">
+            <description>Distance till next maneuver (starting from) from previous maneuver.</description>
+        </param>
+
+        <param name="prompt" type="String" mandatory="false">
+            <description>This is a prompt message that should be conveyed to the user through either display or voice (TTS). This param will change often as it should represent the following: approaching instruction, post instruction, alerts that affect the current navigation session, etc.</description>
+        </param>
+    </struct>
+
+    <struct name="AppServiceManifest">
+        <description> This manifest contains all the information necessary for the service to be published, activated, and consumers able to interact with it </description>
+
+        <param name="serviceName" type="String" mandatory="false">
+            <description> Unique name of this service </description>
+        </param>
+
+        <param name="serviceType" type="String" mandatory="true">
+            <description> The type of service that is to be offered by this app </description>
+        </param>
+
+        <param name="serviceIcon" type="String" mandatory="false">
+            <description> The file name of the icon to be associated with this service. Most likely the same as the appIcon. </description>
+        </param>
+
+        <param name="allowAppConsumers" type="Boolean" mandatory="false" defvalue="false">
+            <description> If true, app service consumers beyond the IVI system will be able to access this service. If false, only the IVI system will be able consume the service. If not provided, it is assumed to be false. </description>
+        </param>
+
+        <param name="rpcSpecVersion" type="Common.SyncMsgVersion" mandatory="false">
+            <description> This is the max RPC Spec version the app service understands. This is important during the RPC passthrough functionality. If not included, it is assumed the max version of the module is acceptable. </description>
+        </param>
+
+        <param name="handledRPCs" type="Integer" array="true" mandatory="false">
+            <description> This field contains the Function IDs for the RPCs that this service intends to handle correctly. This means the service will provide meaningful responses. </description>
+        </param>
+
+        <param name="mediaServiceManifest" type="Common.MediaServiceManifest" mandatory="false"/>
+        <param name="weatherServiceManifest" type="Common.WeatherServiceManifest" mandatory="false"/>
+        <param name="navigationServiceManifest" type="Common.NavigationServiceManifest" mandatory="false"/>
+    </struct>
+
+    <struct name="AppServiceRecord">
+        <description> This is the record of an app service publisher that the module has. It should contain the most up to date information including the service's active state</description>
+
+        <param name="serviceID" type="String" mandatory="true">
+            <description> A unique ID tied to this specific service record. The ID is supplied by the module that services publish themselves. </description>
+        </param>
+
+        <param name="serviceManifest" type="Common.AppServiceManifest" mandatory="true">
+            <description> Manifest for the service that this record is for.</description>
+        </param>
+
+        <param name="servicePublished" type="Boolean" mandatory="true">
+            <description> If true, the service is published and available. If false, the service has likely just been unpublished, and should be considered unavailable.</description>
+        </param>
+
+        <param name="serviceActive" type="Boolean" mandatory="true">
+            <description> If true, the service is the active primary service of the supplied service type. It will receive all potential RPCs that are passed through to that service type. If false, it is not the primary service of the supplied type. See servicePublished for its availability. </description>
+        </param>
+    </struct>
+
+    <struct name="AppServiceData">
+        <description> Contains all the current data of the app service. The serviceType will link to which of the service data objects are included in this object. (eg if service type equals MEDIA, the mediaServiceData param should be included.</description>
+
+        <param name="serviceType" type="String" mandatory="true"/>
+        <param name="serviceID" type="String" mandatory="true"/>
+
+        <param name="mediaServiceData" type="Common.MediaServiceData" mandatory="false"/>
+        <param name="weatherServiceData" type="Common.WeatherServiceData" mandatory="false"/>
+        <param name="navigationServiceData" type="Common.NavigationServiceData" mandatory="false"/>
+    </struct>
+
+    <enum name="ServiceUpdateReason">
+        <element name="PUBLISHED">
+            <description> The service has just been published with the module and once activated to the primary service of its type, it will be ready for possible consumption.</description>
+        </element>
+        <element name="REMOVED">
+            <description> The service has just been unpublished with the module and is no longer accessible</description>
+        </element>
+        <element name="ACTIVATED">
+            <description> The service is activated as the primary service of this type. All requests dealing with this service type will be handled by this service.</description>
+        </element>
+        <element name="DEACTIVATED">
+            <description> The service has been deactivated as the primary service of its type</description>
+        </element>
+        <element name="MANIFEST_UPDATE">
+            <description> The service has updated its manifest. This could imply updated capabilities</description>
+        </element>
+    </enum>
+
+    <struct name="AppServiceCapability">
+        <param name="updateReason" type="Common.ServiceUpdateReason" mandatory="false">
+            <description> Only included in OnSystemCapabilityUpdated. Update reason for service record.</description>
+        </param>
+        <param name="updatedAppServiceRecord" type="Common.AppServiceRecord" mandatory="true">
+            <description>Service record for a specific app service provider</description>
+        </param>
+    </struct>
+
+    <struct name="AppServicesCapabilities">
+        <description>Capabilities of app services including what service types are supported and the current state of services.</description>
+        <param name="appServices" type="Common.AppServiceCapability" array="true" mandatory="false">
+            <description>An array of currently available services. If this is an update to the capability the affected services will include an update reason in that item</description>
+        </param>
+    </struct>
+
+    <!-- End App Services -->
+
+    <enum name="SystemCapabilityType">
+        <description>Enumerations of all available system capability types</description>
+        <element name="NAVIGATION"/>
+        <element name="PHONE_CALL"/>
+        <element name="VIDEO_STREAMING"/>
+        <element name="REMOTE_CONTROL"/>
+        <element name="APP_SERVICES" />
+    </enum>
+
+    <struct name="SystemCapabilities">
+        <description>The systemCapabilityType identifies which data object exists in this struct. For example, if the SystemCapability Type is NAVIGATION then a "navigationCapability" should exist</description>
+        <param name="systemCapabilityType" type="Common.SystemCapabilityType" mandatory="true">
+            <description>Used as a descriptor of what data to expect in this struct. The corresponding param to this enum should be included and the only other para included.</description>
+        </param>
+        <param name="navigationCapability" type="Common.NavigationCapability" mandatory="false">
+            <description>Describes extended capabilities for onboard navigation system </description>
+        </param>
+        <param name="phoneCapability" type="Common.PhoneCapability" mandatory="false">
+            <description>Describes extended capabilities of the module's phone feature</description>
+        </param>
+        <param name="videoStreamingCapability" type="Common.VideoStreamingCapability" mandatory="false">
+            <description>Describes extended capabilities of the module's phone feature</description>
+        </param>
+        <param name="remoteControlCapability" type="Common.RemoteControlCapabilities" mandatory="false">
+            <description>Describes extended capabilities of the module's phone feature</description>
+        </param>
+        <param name="appServicesCapabilities" type="Common.AppServicesCapabilities" mandatory="false">
+            <description>An array of currently available services. If this is an update to the capability the affected services will include an update reason in that item</description>
+        </param>      
+    </struct>
 
 </interface>
 
@@ -3750,6 +4183,29 @@
     </param>
   </function>
 
+  <function name="GetFilePath" messagetype="request">
+    <description>This request is sent to retrieve a file path from the HMI.</description>
+    <param name="fileName" type="String" maxlength="255" mandatory="true">
+      <description>File name that should be retrieved.</description>
+    </param>
+    <param name="fileType" type="Common.FileType" mandatory="false">
+      <description>Selected file type.</description>
+    </param>
+    <param name="appServiceId" type="String" mandatory="false">
+      <description> ID of the service that should have uploaded the requested file.</description>
+    </param>
+  </function>
+
+  <function name="GetFilePath" messagetype="response">
+    <description> HMI handles the request internally and returns the file path with the response.</description>
+    <param name="filePath" type="String" mandatory="false">
+      <description>Path to file in hmi</description>
+    </param>
+    <param name="fileType" type="Common.FileType" mandatory="false">
+      <description>Selected file type.</description>
+    </param>
+  </function>
+  
 <!-- Policies -->
   <function name="GetSystemInfo" messagetype="request">
     <description>Request from SDL to HMI to obtain information about head unit system.</description>
@@ -3791,6 +4247,12 @@
         <description>Must be 'true' - when the event is started on HMI. Must be 'false' when the event is ended on HMI</description>
      </param>
    </function>
+  <function name="OnSystemCapabilityUpdated" messagetype="notification">
+    <description>A notification to inform the connected device that a specific system capability has changed.</description>
+    <param name="systemCapability" type="Common.SystemCapabilities" mandatory="true">
+      <description>The system capability that has been updated</description>
+    </param>
+  </function> 
 </interface>
 
 <interface name="VR" version="1.1.0" date="2017-04-27">
@@ -5840,5 +6302,123 @@
   </param>
 </function>
 
+</interface>
+
+<interface name="AppService" version="1.0.0" date="2019-01-20">
+    <description>Interface used for interacting with app services as a producer or consumer</description>
+    <function name="PublishAppService" messagetype="request">
+        <description>Registers a service offered by this app on the module</description>
+
+        <param name="appServiceManifest" type="Common.AppServiceManifest" mandatory="true">
+            <description> The manifest of the service that wishes to be published.</description>
+        </param>
+    </function>
+
+    <function name="PublishAppService" messagetype="response">
+        <description>Response to the request to register a service offered by this app on the module</description>
+
+        <param name="appServiceRecord" type="Common.AppServiceRecord" mandatory="false">
+            <description> If the request was successful, this object will be the current status of the service record for the published service. This will include the Core supplied service ID.</description>
+        </param>
+    </function>
+
+    <function name="OnAppServiceData" messagetype="notification">
+        <description>This notification includes the data that is updated from the specific service. HMI->SDL if the HMI is a producer, SDL->HMI if the HMI is a consumer</description>
+
+        <param name="serviceData" type="Common.AppServiceData" mandatory="true"/>
+    </function>
+
+    <function name="GetAppServiceData" messagetype="request">
+        <description> This request asks the module for current data related to the specific service. It also includes an option to subscribe to that service for future updates</description>
+        
+        <param name="serviceType" type="String" mandatory="true"/>
+        
+        <param name="subscribe" type="Boolean" mandatory="false">
+            <description> If true, the consumer is requesting to subscribe to all future updates from the service publisher. If false, the consumer doesn't wish to subscribe and should be unsubscribed if it was previously subscribed.</description>
+        </param>      
+    </function>
+
+    <function name="GetAppServiceData" messagetype="response">
+        <description> This response includes the data that is requested from the specific service</description>    
+        <param name="serviceData" type="Common.AppServiceData" mandatory="false"/>
+    </function>
+
+    <function name="GetAppServiceRecords" messagetype="request">
+        <param name="serviceType" type="String" mandatory="false">
+            <description>If included, only service records of supplied type will be returned in response. If not included, all service records for all types will be returned. See Common.AppServiceType.</description>
+        </param>
+    </function>
+
+    <function name="GetAppServiceRecords" messagetype="response">
+        <param name="serviceRecords" type="Common.AppServiceRecord" array="true" mandatory="false">
+            <description>All app service records of requested type.</description>
+        </param>
+    </function>
+
+    <function name="AppServiceActivation" messagetype="request">
+        <param name="serviceID" type="String" mandatory="true">
+            <description>The ID of the service that should have an activation event take place on</description>
+        </param>
+        <param name="activate" type="Boolean" mandatory="true">
+            <description>True if the service is to be activated. False if the app is to be deactivated</description>
+        </param>
+        <param name="setAsDefault" type="Boolean" mandatory="false">
+            <description>True if the service is to be the default service of this type. False if the app is not to be the default</description>
+        </param>
+    </function>
+
+    <function name="AppServiceActivation" messagetype="response">
+        <param name="serviceID" type="String" mandatory="true">
+            <description>The ID of the service that was requested to have an activation event take place</description>
+        </param>
+        <param name="activate" type="Boolean" mandatory="true">
+            <description>True if the service was activated. False if the app was deactivated or unable to be activated</description>
+        </param>
+        <param name="setAsDefault" type="Boolean" mandatory="false">
+            <description>True if the service was set to the default service of this type. False if the app was not to be the default</description>
+        </param> 
+    </function>
+
+    <function name="PerformAppServiceInteraction" messagetype="request">
+        <param name="serviceUri" type="String"  mandatory="true">
+            <description>Fully qualified URI based on the URI prefix and URI scheme the app service provided. SDL makes no gurantee that this URI is correct.</description>
+        </param>
+        
+        <param name="serviceID" type="String" mandatory="true">
+            <description>The service ID that the app consumer wishes to send this URI.</description>
+        </param>
+        
+        <param name="originApp" type="String" mandatory="false">
+            <description>This string is the appID of the app requesting the app service provider take the specific action. This will automatically be set by SDL Core in requests originating from the HMI</description>
+        </param>
+        
+        <param name="requestServiceActive" type="Boolean" mandatory="false">
+            <description>This flag signals the requesting consumer would like this service to become the active primary service of the destination's type.</description>
+        </param>
+    </function>
+
+    <function name="PerformAppServiceInteraction" messagetype="response">
+        <param name="serviceSpecificResult" type="String" mandatory="false">
+            <description>The service can provide specific result strings to the consumer through this param. These results should be described in the URI schema set in the Service Manifest</description>
+        </param>
+    </function>
+
+    <function name="GetActiveServiceConsent" messagetype="request">
+        <description>
+            SDL->HMI. HMI is expected to prompt the user for permission for the app service to take over as the active service.
+        </description>
+        <param name="serviceID" type="String" mandatory="true">
+            <description>The ID of the service to be activated</description>
+        </param>
+    </function>
+    
+    <function name="GetActiveServiceConsent" messagetype="response">
+        <param name="activate" type="Boolean" mandatory="true">
+            <description>
+                "true" - If the driver grants permission for the app service to take over as the active service.
+                "false" - If the driver denies permission for the app service to take over as the active service.
+            </description>
+        </param>
+    </function>
 </interface>
 </interfaces>

@@ -232,7 +232,7 @@ TEST_F(CreateInteractionChoiceSetRequestTest, OnEvent_VR_UNSUPPORTED_RESOURCE) {
       .WillByDefault(
           Return(am::HmiInterfaces::HMI_INTERFACE_BasicCommunication));
 
-  EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_)).WillOnce(Return(true));
+  EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_, _)).WillOnce(Return(true));
   ON_CALL(mock_message_helper_, CheckChoiceSetVRCommands(_))
       .WillByDefault(Return(am::MessageHelper::ChoiceSetVRCommandsStatus::ALL));
   req_vr->Run();

@@ -229,6 +229,11 @@ class ApplicationManagerImpl
     return *plugin_manager_;
   }
 
+  virtual AppServiceManager& GetAppServiceManager() OVERRIDE {
+    DCHECK(app_service_manager_);
+    return *app_service_manager_;
+  }
+
   std::vector<std::string> devices(
       const std::string& policy_app_id) const OVERRIDE;
 
@@ -406,6 +411,13 @@ class ApplicationManagerImpl
    */
   hmi_apis::Common_CloudConnectionStatus::eType GetCloudAppConnectionStatus(
       ApplicationConstSharedPtr app) const;
+
+  /*
+   * @brief Returns unique correlation ID for to mobile request
+   *
+   * @return Unique correlation ID
+   */
+  uint32_t GetNextMobileCorrelationID() OVERRIDE;
 
   /*
    * @brief Returns unique correlation ID for HMI request
@@ -717,6 +729,15 @@ class ApplicationManagerImpl
   void updateRequestTimeout(uint32_t connection_key,
                             uint32_t mobile_correlation_id,
                             uint32_t new_timeout_value) OVERRIDE;
+
+  /**
+   * @brief TODO
+   *
+   * @param connection_key Connection key of application
+   * @param mobile_correlation_id Correlation ID of the mobile request
+   */
+  void IncreaseForwardedRequestTimeout(uint32_t connection_key,
+                                       uint32_t mobile_correlation_id) OVERRIDE;
 
   /**
    * @brief AddPolicyObserver allows to subscribe needed component to events
@@ -1127,7 +1148,8 @@ class ApplicationManagerImpl
   mobile_apis::MOBILE_API& mobile_so_factory();
 
   bool ConvertSOtoMessage(const smart_objects::SmartObject& message,
-                          Message& output);
+                          Message& output,
+                          const bool remove_unknown_parameters = true);
 
   template <typename ApplicationList>
   void PrepareApplicationListSO(ApplicationList app_list,
@@ -1431,6 +1453,7 @@ class ApplicationManagerImpl
   protocol_handler::ProtocolHandler* protocol_handler_;
   request_controller::RequestController request_ctrl_;
   std::unique_ptr<plugin_manager::RPCPluginManager> plugin_manager_;
+  std::unique_ptr<application_manager::AppServiceManager> app_service_manager_;
 
   /**
    * @brief Map contains apps with HMI state before incoming call
@@ -1453,6 +1476,7 @@ class ApplicationManagerImpl
   hmi_apis::HMI_API* hmi_so_factory_;
   mobile_apis::MOBILE_API* mobile_so_factory_;
 
+  static uint32_t mobile_corelation_id_;
   static uint32_t corelation_id_;
   static const uint32_t max_corelation_id_;
 
@@ -1560,6 +1584,11 @@ class ApplicationManagerImpl
       std::unique_ptr<plugin_manager::RPCPluginManager>& plugin_manager)
       OVERRIDE {
     plugin_manager_.reset(plugin_manager.release());
+  }
+
+  virtual void SetAppServiceManager(
+      std::unique_ptr<AppServiceManager>& app_service_manager) {
+    app_service_manager_.reset(app_service_manager.release());
   }
 
  private:

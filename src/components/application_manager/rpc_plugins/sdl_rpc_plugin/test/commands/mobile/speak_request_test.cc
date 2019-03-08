@@ -295,7 +295,7 @@ TEST_F(SpeakRequestTest, Run_MsgWithEmptyString_Success) {
 
   EXPECT_CALL(
       mock_rpc_service_,
-      ManageHMICommand(HMIResultCodeIs(hmi_apis::FunctionID::TTS_Speak)));
+      ManageHMICommand(HMIResultCodeIs(hmi_apis::FunctionID::TTS_Speak), _));
 
   command->Run();
 }
@@ -315,7 +315,7 @@ TEST_F(SpeakRequestTest, Run_MsgCorrect_Success) {
 
   EXPECT_CALL(
       mock_rpc_service_,
-      ManageHMICommand(HMIResultCodeIs(hmi_apis::FunctionID::TTS_Speak)));
+      ManageHMICommand(HMIResultCodeIs(hmi_apis::FunctionID::TTS_Speak), _));
 
   command->Run();
 }

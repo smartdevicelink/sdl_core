@@ -200,9 +200,11 @@ TEST_F(GetVehicleDataRequestTest, Run_SUCCESS) {
   MockAppPtr app(CreateMockApp());
   EXPECT_CALL(app_mngr_, application(kConnectionKey)).WillOnce(Return(app));
 
-  EXPECT_CALL(mock_rpc_service_,
-              ManageHMICommand(HMIResultCodeIs(
-                  hmi_apis::FunctionID::VehicleInfo_GetVehicleData)));
+  EXPECT_CALL(
+      mock_rpc_service_,
+      ManageHMICommand(
+          HMIResultCodeIs(hmi_apis::FunctionID::VehicleInfo_GetVehicleData),
+          _));
 
   command->Run();
 }

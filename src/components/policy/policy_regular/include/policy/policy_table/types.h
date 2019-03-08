@@ -50,6 +50,8 @@ struct MessageLanguages;
 struct MessageString;
 struct RpcParameters;
 struct Rpcs;
+struct AppServiceHandledRpc;
+struct AppServiceInfo;
 }  // namespace policy_table_interface_base
 }  // namespace rpc
 
@@ -98,12 +100,58 @@ typedef Array<Enum<RequestType>, 0, 255> RequestTypes;
 
 typedef Strings RequestSubTypes;
 
+typedef String<0, 255> AppServiceType;
+typedef String<0, 255> AppServiceName;
+typedef Array<AppServiceName, 0, 255> AppServiceNames;
+typedef Array<AppServiceHandledRpc, 0, 255> AppServiceHandledRpcs;
+typedef Map<AppServiceInfo, 0, 255> AppServiceParameters;
+typedef Integer<int32_t, 0, INT32_MAX> FunctionIDInt;
+
 typedef Map<Strings, 0, 255> RemoteRpcs;
 typedef Map<RemoteRpcs, 0, 255> AccessModules;
 typedef Array<Enum<ModuleType>, 0, 255> ModuleTypes;
 
 typedef AppHMIType AppHmiType;
 typedef std::vector<AppHMIType> AppHmiTypes;
+
+struct AppServiceHandledRpc : CompositeType {
+ public:
+  FunctionIDInt function_id;
+
+ public:
+  AppServiceHandledRpc();
+  ~AppServiceHandledRpc();
+  AppServiceHandledRpc(const Json::Value* value__);
+  Json::Value ToJsonValue() const;
+  bool is_valid() const;
+  bool is_initialized() const;
+  bool struct_empty() const;
+  virtual void SetPolicyTableType(PolicyTableType pt_type);
+  void ReportErrors(rpc::ValidationReport* report__) const;
+
+ private:
+  bool Validate() const;
+};
+
+struct AppServiceInfo : CompositeType {
+ public:
+  Optional<AppServiceNames> service_names;
+  AppServiceHandledRpcs handled_rpcs;
+
+ public:
+  AppServiceInfo();
+  ~AppServiceInfo();
+  AppServiceInfo(const Json::Value* value__);
+  Json::Value ToJsonValue() const;
+  bool is_valid() const;
+  bool is_initialized() const;
+  bool struct_empty() const;
+  virtual void SetPolicyTableType(PolicyTableType pt_type);
+  void ReportErrors(rpc::ValidationReport* report__) const;
+
+ private:
+  bool Validate() const;
+};
 
 struct PolicyBase : CompositeType {
  public:
@@ -151,6 +199,9 @@ struct ApplicationParams : PolicyBase {
   Optional<String<0, 65535> > auth_token;
   Optional<String<0, 255> > cloud_transport_type;
   Optional<String<0, 65535> > icon_url;
+
+  // App Service Params
+  Optional<AppServiceParameters> app_service_parameters;
 
  public:
   ApplicationParams();

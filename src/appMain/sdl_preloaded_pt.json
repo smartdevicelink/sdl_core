@@ -180,6 +180,12 @@
                         "LIMITED",
                         "NONE"]
                     },
+                    "OnSystemCapabilityUpdated": {
+                        "hmi_levels": ["BACKGROUND",
+                        "FULL",
+                        "LIMITED",
+                        "NONE"]
+                    },
                     "PerformAudioPassThru": {
                         "hmi_levels": ["FULL",
                         "LIMITED"]
@@ -193,7 +199,7 @@
                         "FULL",
                         "LIMITED",
                         "NONE"]
-                    },
+                    },                    
                     "RegisterAppInterface": {
                         "hmi_levels": ["BACKGROUND",
                         "FULL",
@@ -575,6 +581,78 @@
                         "LIMITED"],
                         "parameters": [
                         "cloudAppVehicleID"
+                        ]
+                    }
+                }
+            },
+            "AppServiceProducer":{
+                "rpcs":{
+                    "PublishAppService":{
+                        "hmi_levels": [
+                            "FULL",
+                            "LIMITED",
+                            "BACKGROUND",
+                            "NONE"
+                        ]
+                    },
+                    "GetAppServiceData": {
+                        "hmi_levels": [
+                            "FULL",
+                            "LIMITED",
+                            "BACKGROUND",
+                            "NONE"
+                        ]
+                    },
+                    "OnAppServiceData": {
+                        "hmi_levels": [
+                            "FULL",
+                            "LIMITED",
+                            "BACKGROUND",
+                            "NONE"
+                        ]
+                    },
+                    "PerformAppServiceInteraction": {
+                        "hmi_levels": [
+                            "FULL",
+                            "LIMITED",
+                            "BACKGROUND",
+                            "NONE"
+                        ]
+                    }
+                }
+            },
+            "AppServiceConsumer": {
+                "rpcs": {
+                    "GetFile": {
+                        "hmi_levels": [
+                            "FULL",
+                            "LIMITED",
+                            "BACKGROUND",
+                            "NONE"
+                        ]
+                    },
+                    "GetAppServiceData": {
+                        "hmi_levels": [
+                            "FULL",
+                            "LIMITED",
+                            "BACKGROUND",
+                            "NONE"
+                        ]
+                    },
+                    "OnAppServiceData": {
+                        "hmi_levels": [
+                            "FULL",
+                            "LIMITED",
+                            "BACKGROUND",
+                            "NONE"
+                        ]
+                    },
+                    "PerformAppServiceInteraction": {
+                        "hmi_levels": [
+                            "FULL",
+                            "LIMITED",
+                            "BACKGROUND",
+                            "NONE"
                         ]
                     }
                 }

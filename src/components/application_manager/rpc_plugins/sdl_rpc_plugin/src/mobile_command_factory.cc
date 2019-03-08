@@ -73,6 +73,7 @@
 #include "sdl_rpc_plugin/commands/mobile/on_tbt_client_state_notification.h"
 #include "sdl_rpc_plugin/commands/mobile/on_hash_change_notification.h"
 #include "sdl_rpc_plugin/commands/mobile/on_way_point_change_notification.h"
+#include "sdl_rpc_plugin/commands/mobile/on_system_capability_updated_notification.h"
 #include "sdl_rpc_plugin/commands/mobile/perform_audio_pass_thru_request.h"
 #include "sdl_rpc_plugin/commands/mobile/perform_audio_pass_thru_response.h"
 #include "sdl_rpc_plugin/commands/mobile/perform_interaction_request.h"
@@ -128,6 +129,8 @@
 #include "sdl_rpc_plugin/commands/mobile/set_cloud_app_properties_response.h"
 #include "sdl_rpc_plugin/commands/mobile/get_cloud_app_properties_request.h"
 #include "sdl_rpc_plugin/commands/mobile/get_cloud_app_properties_response.h"
+#include "sdl_rpc_plugin/commands/mobile/get_file_request.h"
+#include "sdl_rpc_plugin/commands/mobile/get_file_response.h"
 #include "interfaces/MOBILE_API.h"
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "ApplicationManager")
@@ -234,6 +237,11 @@ CommandCreator& MobileCommandFactory::get_creator_factory(
       return mobile_api::messageType::request == message_type
                  ? factory.GetCreator<commands::PutFileRequest>()
                  : factory.GetCreator<commands::PutFileResponse>();
+    }
+    case mobile_apis::FunctionID::GetFileID: {
+      return mobile_api::messageType::request == message_type
+                 ? factory.GetCreator<commands::GetFileRequest>()
+                 : factory.GetCreator<commands::GetFileResponse>();
     }
     case mobile_apis::FunctionID::DeleteFileID: {
       return mobile_api::messageType::request == message_type
@@ -395,6 +403,10 @@ CommandCreator& MobileCommandFactory::get_creator_factory(
     }
     case mobile_apis::FunctionID::OnTouchEventID: {
       return factory.GetCreator<commands::mobile::OnTouchEventNotification>();
+    }
+    case mobile_apis::FunctionID::OnSystemCapabilityUpdatedID: {
+      return factory.GetCreator<
+          commands::mobile::OnSystemCapabilityUpdatedNotification>();
     }
     case mobile_apis::FunctionID::OnSystemRequestID: {
       return factory

@@ -315,10 +315,11 @@ TEST_F(PutFileRequestTest, Run_SendOnPutFileNotification_SUCCESS) {
   EXPECT_CALL(app_mngr_,
               SaveBinary(binary_data_, kStorageFolder, kFileName, kZeroOffset))
       .WillOnce(Return(mobile_apis::Result::SUCCESS));
-  EXPECT_CALL(mock_rpc_service_,
-              ManageHMICommand(HMIResultCodeIs(
-                  hmi_apis::FunctionID::BasicCommunication_OnPutFile)))
-      .WillOnce(Return(true));
+  EXPECT_CALL(
+      mock_rpc_service_,
+      ManageHMICommand(
+          HMIResultCodeIs(hmi_apis::FunctionID::BasicCommunication_OnPutFile),
+          _)).WillOnce(Return(true));
   ExpectManageMobileCommandWithResultCode(mobile_apis::Result::SUCCESS);
 
   PutFileRequestPtr command(CreateCommand<PutFileRequest>(msg_));

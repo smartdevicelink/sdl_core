@@ -240,6 +240,10 @@
 #include "sdl_rpc_plugin/commands/hmi/rc_is_ready_response.h"
 #include "sdl_rpc_plugin/commands/hmi/rc_get_capabilities_request.h"
 #include "sdl_rpc_plugin/commands/hmi/rc_get_capabilities_response.h"
+#include "sdl_rpc_plugin/commands/hmi/bc_get_file_path_request.h"
+#include "sdl_rpc_plugin/commands/hmi/bc_get_file_path_response.h"
+
+#include "sdl_rpc_plugin/commands/hmi/on_bc_system_capability_updated_notification.h"
 
 namespace sdl_rpc_plugin {
 using namespace application_manager;
@@ -839,6 +843,15 @@ CommandCreator& HMICommandFactory::get_creator_factory(
       return hmi_apis::messageType::request == message_type
                  ? factory.GetCreator<commands::UISendHapticDataRequest>()
                  : factory.GetCreator<commands::UISendHapticDataResponse>();
+    }
+    case hmi_apis::FunctionID::BasicCommunication_GetFilePath: {
+      return hmi_apis::messageType::request == message_type
+                 ? factory.GetCreator<commands::BCGetFilePathRequest>()
+                 : factory.GetCreator<commands::BCGetFilePathResponse>();
+    }
+    case hmi_apis::FunctionID::BasicCommunication_OnSystemCapabilityUpdated: {
+      return factory
+          .GetCreator<commands::OnBCSystemCapabilityUpdatedNotification>();
     }
     default: { return factory.GetCreator<InvalidCommand>(); }
   }

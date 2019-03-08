@@ -133,6 +133,7 @@ bool policy_app_id_comparator(const std::string& policy_app_id,
   return app->policy_app_id() == policy_app_id;
 }
 
+uint32_t ApplicationManagerImpl::mobile_corelation_id_ = 0;
 uint32_t ApplicationManagerImpl::corelation_id_ = 0;
 const uint32_t ApplicationManagerImpl::max_corelation_id_ = UINT_MAX;
 
@@ -725,6 +726,8 @@ bool ApplicationManagerImpl::ActivateApplication(ApplicationSharedPtr app) {
 
   // remove from resumption if app was activated by user
   resume_controller().OnAppActivated(app);
+  // Activate any app services published by the app
+  GetAppServiceManager().OnAppActivated(app);
   const HMILevel::eType hmi_level = HMILevel::HMI_FULL;
   const AudioStreamingState::eType audio_state =
       app->IsAudioApplication() ? AudioStreamingState::AUDIBLE
@@ -1222,6 +1225,16 @@ ApplicationManagerImpl::GetCloudAppConnectionStatus(
     default:
       return hmi_apis::Common_CloudConnectionStatus::INVALID_ENUM;
   }
+}
+
+uint32_t ApplicationManagerImpl::GetNextMobileCorrelationID() {
+  if (mobile_corelation_id_ < max_corelation_id_) {
+    mobile_corelation_id_++;
+  } else {
+    mobile_corelation_id_ = 0;
+  }
+
+  return mobile_corelation_id_;
 }
 
 uint32_t ApplicationManagerImpl::GetNextHMICorrelationID() {
@@ -2223,6 +2236,9 @@ bool ApplicationManagerImpl::Init(resumption::LastState& last_state,
   }
   app_launch_ctrl_.reset(new app_launch::AppLaunchCtrlImpl(
       *app_launch_dto_.get(), *this, settings_));
+
+  app_service_manager_.reset(
+      new application_manager::AppServiceManager(*this, last_state));
   return true;
 }
 
@@ -2250,7 +2266,9 @@ bool ApplicationManagerImpl::Stop() {
 }
 
 bool ApplicationManagerImpl::ConvertSOtoMessage(
-    const smart_objects::SmartObject& message, Message& output) {
+    const smart_objects::SmartObject& message,
+    Message& output,
+    const bool remove_unknown_parameters) {
   LOG4CXX_AUTO_TRACE(logger_);
 
   if (smart_objects::SmartType_Null == message.getType() ||
@@ -2275,16 +2293,16 @@ bool ApplicationManagerImpl::ConvertSOtoMessage(
   switch (protocol_type) {
     case 0: {
       if (protocol_version == 1) {
-        if (!formatters::CFormatterJsonSDLRPCv1::toString(message,
-                                                          output_string)) {
+        if (!formatters::CFormatterJsonSDLRPCv1::toString(
+                message, output_string, remove_unknown_parameters)) {
           LOG4CXX_WARN(logger_, "Failed to serialize smart object");
           return false;
         }
         output.set_protocol_version(
             protocol_handler::MajorProtocolVersion::PROTOCOL_VERSION_1);
       } else {
-        if (!formatters::CFormatterJsonSDLRPCv2::toString(message,
-                                                          output_string)) {
+        if (!formatters::CFormatterJsonSDLRPCv2::toString(
+                message, output_string, remove_unknown_parameters)) {
           LOG4CXX_WARN(logger_, "Failed to serialize smart object");
           return false;
         }
@@ -2296,7 +2314,8 @@ bool ApplicationManagerImpl::ConvertSOtoMessage(
       break;
     }
     case 1: {
-      if (!formatters::FormatterJsonRpc::ToString(message, output_string)) {
+      if (!formatters::FormatterJsonRpc::ToString(
+              message, output_string, remove_unknown_parameters)) {
         LOG4CXX_WARN(logger_, "Failed to serialize smart object");
         return false;
       }
@@ -2595,6 +2614,17 @@ void ApplicationManagerImpl::updateRequestTimeout(
       connection_key, mobile_correlation_id, new_timeout_value);
 }
 
+void ApplicationManagerImpl::IncreaseForwardedRequestTimeout(
+    uint32_t connection_key, uint32_t mobile_correlation_id) {
+  LOG4CXX_DEBUG(logger_,
+                "Increasing Request Timeout by "
+                    << get_settings().rpc_pass_through_timeout());
+  uint32_t new_timeout_value = get_settings().default_timeout() +
+                               get_settings().rpc_pass_through_timeout();
+  request_ctrl_.updateRequestTimeout(
+      connection_key, mobile_correlation_id, new_timeout_value);
+}
+
 uint32_t ApplicationManagerImpl::application_id(const int32_t correlation_id) {
   // ykazakov: there is no erase for const iterator for QNX
   std::map<const int32_t, const uint32_t>::iterator it =
@@ -2830,6 +2860,8 @@ void ApplicationManagerImpl::UnregisterApplication(
                             << "; is_unexpected_disconnect = "
                             << is_unexpected_disconnect);
   size_t subscribed_for_way_points_app_count = 0;
+
+  GetAppServiceManager().UnpublishServices(app_id);
 
   // SDL sends UnsubscribeWayPoints only for last application
   {

@@ -1987,6 +1987,74 @@ void PolicyHandler::OnSetCloudAppProperties(
   }
 }
 
+void PolicyHandler::GetAppServiceParameters(
+    const std::string& policy_app_id,
+    policy_table::AppServiceParameters* app_service_parameters) const {
+  POLICY_LIB_CHECK_VOID();
+  policy_manager_->GetAppServiceParameters(policy_app_id,
+                                           app_service_parameters);
+}
+
+bool PolicyHandler::CheckAppServiceParameters(
+    const std::string& policy_app_id,
+    const std::string& requested_service_name,
+    const std::string& requested_service_type,
+    smart_objects::SmartArray* requested_handled_rpcs) const {
+  std::string service_name = std::string();
+  std::string service_type = std::string();
+  std::vector<int32_t> handled_rpcs = {};
+
+  policy_table::AppServiceParameters app_service_parameters =
+      policy_table::AppServiceParameters();
+  this->GetAppServiceParameters(policy_app_id, &app_service_parameters);
+
+  if (app_service_parameters.find(requested_service_type) ==
+      app_service_parameters.end()) {
+    LOG4CXX_DEBUG(logger_,
+                  "Disallowed service type: " << requested_service_type);
+    return false;
+  }
+
+  auto service_names =
+      *(app_service_parameters[requested_service_type].service_names);
+  if (!service_names.is_initialized()) {
+    LOG4CXX_DEBUG(logger_,
+                  "Pt Service Name is Null, All service names accepted");
+  } else if (!requested_service_name.empty()) {
+    auto find_name_result =
+        std::find(service_names.begin(),
+                  service_names.end(),
+                  rpc::String<0, 255>(requested_service_name));
+    if (find_name_result == service_names.end()) {
+      LOG4CXX_DEBUG(logger_,
+                    "Disallowed service name: " << requested_service_name);
+      return false;
+    }
+  }
+
+  if (requested_handled_rpcs) {
+    auto temp_rpcs =
+        app_service_parameters[requested_service_type].handled_rpcs;
+    for (auto handled_it = temp_rpcs.begin(); handled_it != temp_rpcs.end();
+         ++handled_it) {
+      handled_rpcs.push_back(handled_it->function_id);
+    }
+
+    for (auto requested_it = requested_handled_rpcs->begin();
+         requested_it != requested_handled_rpcs->end();
+         ++requested_it) {
+      auto find_result = std::find(
+          handled_rpcs.begin(), handled_rpcs.end(), requested_it->asInt());
+      if (find_result == handled_rpcs.end()) {
+        LOG4CXX_DEBUG(logger_,
+                      "Disallowed by handled rpc: " << requested_it->asInt());
+        return false;
+      }
+    }
+  }
+  return true;
+}
+
 uint32_t PolicyHandler::HeartBeatTimeout(const std::string& app_id) const {
   POLICY_LIB_CHECK(0);
   return policy_manager_->HeartBeatTimeout(app_id);

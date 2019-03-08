@@ -29,7 +29,7 @@
  ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  POSSIBILITY OF SUCH DAMAGE.
  */
-
+#include "application_manager/plugin_manager/plugin_keys.h"
 #include "rc_rpc_plugin/rc_rpc_plugin.h"
 #include "rc_rpc_plugin/rc_command_factory.h"
 #include "rc_rpc_plugin/rc_app_extension.h"
@@ -77,7 +77,7 @@ bool RCRPCPlugin::IsAbleToProcess(
 }
 
 std::string RCRPCPlugin::PluginName() {
-  return "RC RPC Plugin";
+  return plugins::plugin_names::rc_rpc_plugin;
 }
 
 application_manager::CommandFactory& RCRPCPlugin::GetCommandFactory() {

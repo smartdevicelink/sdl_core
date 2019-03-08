@@ -612,6 +612,12 @@ void PolicyManagerImpl::SetHybridAppPreference(
   cache_->SetHybridAppPreference(policy_app_id, hybrid_app_preference);
 }
 
+void PolicyManagerImpl::GetAppServiceParameters(
+    const std::string& policy_app_id,
+    policy_table::AppServiceParameters* app_service_parameters) const {
+  cache_->GetAppServiceParameters(policy_app_id, app_service_parameters);
+}
+
 void PolicyManagerImpl::CheckPermissions(const PTString& device_id,
                                          const PTString& app_id,
                                          const PTString& hmi_level,

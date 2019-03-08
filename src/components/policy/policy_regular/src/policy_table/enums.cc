@@ -851,6 +851,14 @@ bool IsValidEnum(FunctionID val) {
       return true;
     case GetCloudAppPropertiesID:
       return true;
+    case PublishAppServiceID:
+      return true;
+    case GetFileID:
+      return true;
+    case GetAppServiceDataID:
+      return true;
+    case PerformAppServiceInteractionID:
+      return true;
     case OnHMIStatusID:
       return true;
     case OnAppInterfaceUnregisteredID:
@@ -887,6 +895,8 @@ bool IsValidEnum(FunctionID val) {
       return true;
     case OnRCStatusID:
       return true;
+    case OnAppServiceDataID:
+      return true;
     case EncodedSyncPDataID:
       return true;
     case SyncPDataID:
@@ -894,6 +904,8 @@ bool IsValidEnum(FunctionID val) {
     case OnEncodedSyncPDataID:
       return true;
     case OnSyncPDataID:
+      return true;
+    case OnSystemCapabilityUpdatedID:
       return true;
     default:
       return false;
@@ -1002,6 +1014,14 @@ const char* EnumToJsonString(FunctionID val) {
       return "SetCloudAppProperties";
     case GetCloudAppPropertiesID:
       return "GetCloudAppProperties";
+    case PublishAppServiceID:
+      return "PublishAppService";
+    case GetFileID:
+      return "GetFile";
+    case GetAppServiceDataID:
+      return "GetAppServiceData";
+    case PerformAppServiceInteractionID:
+      return "PerformAppServiceInteraction";
     case OnHMIStatusID:
       return "OnHMIStatus";
     case OnAppInterfaceUnregisteredID:
@@ -1038,6 +1058,8 @@ const char* EnumToJsonString(FunctionID val) {
       return "OnWayPointChange";
     case OnRCStatusID:
       return "OnRCStatus";
+    case OnAppServiceDataID:
+      return "OnAppServiceData";
     case EncodedSyncPDataID:
       return "EncodedSyncPData";
     case SyncPDataID:
@@ -1046,6 +1068,8 @@ const char* EnumToJsonString(FunctionID val) {
       return "OnEncodedSyncPData";
     case OnSyncPDataID:
       return "OnSyncPData";
+    case OnSystemCapabilityUpdatedID:
+      return "OnSystemCapabilityUpdated";
     default:
       return "";
   }
@@ -1302,6 +1326,26 @@ bool EnumFromJsonString(const std::string& literal, FunctionID* result) {
     return true;
   }
 
+  if ("PublishAppService" == literal) {
+    *result = PublishAppServiceID;
+    return true;
+  }
+
+  if ("GetFile" == literal) {
+    *result = GetFileID;
+    return true;
+  }
+
+  if ("GetAppServiceData" == literal) {
+    *result = GetAppServiceDataID;
+    return true;
+  }
+
+  if ("PerformAppServiceInteraction" == literal) {
+    *result = PerformAppServiceInteractionID;
+    return true;
+  }
+
   if ("OnHMIStatus" == literal) {
     *result = OnHMIStatusID;
     return true;
@@ -1389,6 +1433,16 @@ bool EnumFromJsonString(const std::string& literal, FunctionID* result) {
 
   if ("OnRCStatus" == literal) {
     *result = OnRCStatusID;
+    return true;
+  }
+
+  if ("OnAppServiceData" == literal) {
+    *result = OnAppServiceDataID;
+    return true;
+  }
+
+  if ("OnSystemCapabilityUpdated" == literal) {
+    *result = OnSystemCapabilityUpdatedID;
     return true;
   }
 
