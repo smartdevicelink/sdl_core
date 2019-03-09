@@ -64,7 +64,8 @@ class ISchemaItem {
   virtual errors::eType validate(
       const SmartObject& Object,
       rpc::ValidationReport* report__,
-      const utils::SemanticVersion& MessageVersion = utils::SemanticVersion());
+      const utils::SemanticVersion& MessageVersion = utils::SemanticVersion(),
+      const bool allow_unknown_parameters = false);
 
   /**
    * @brief Set default value to an object.

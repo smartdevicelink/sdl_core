@@ -45,7 +45,8 @@ std::shared_ptr<CArraySchemaItem> CArraySchemaItem::create(
 errors::eType CArraySchemaItem::validate(
     const SmartObject& Object,
     rpc::ValidationReport* report__,
-    const utils::SemanticVersion& MessageVersion) {
+    const utils::SemanticVersion& MessageVersion,
+    const bool allow_unknown_parameters) {
   if (SmartType_Array != Object.getType()) {
     std::string validation_info = "Incorrect type, expected: " +
                                   SmartObject::typeToString(SmartType_Array) +
@@ -80,7 +81,8 @@ errors::eType CArraySchemaItem::validate(
     const errors::eType result =
         mElementSchemaItem->validate(Object.getElement(i),
                                      &report__->ReportSubobject(strVal.str()),
-                                     MessageVersion);
+                                     MessageVersion,
+                                     allow_unknown_parameters);
     if (errors::OK != result) {
       return result;
     }

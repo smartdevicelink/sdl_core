@@ -319,9 +319,8 @@ bool RPCHandlerImpl::ConvertMessageToSO(
       if (!conversion_result ||
           !mobile_so_factory().attachSchema(
               output, remove_unknown_parameters, msg_version) ||
-          ((output.validate(&report, msg_version) !=
-                smart_objects::errors::OK &&
-            remove_unknown_parameters))) {
+          output.validate(&report, msg_version, !remove_unknown_parameters) !=
+              smart_objects::errors::OK) {
         LOG4CXX_WARN(logger_,
                      "Failed to parse string to smart object with API version "
                          << msg_version.toString() << " : "
@@ -387,10 +386,11 @@ bool RPCHandlerImpl::ConvertMessageToSO(
       }
 
       rpc::ValidationReport report("RPC");
-
-      if (output.validate(&report) != smart_objects::errors::OK) {
+      utils::SemanticVersion empty_version;
+      if (output.validate(&report, empty_version, !remove_unknown_parameters) !=
+          smart_objects::errors::OK) {
         LOG4CXX_ERROR(logger_,
-                      "Incorrect parameter from HMI"
+                      "Incorrect parameter from HMI - "
                           << rpc::PrettyFormat(report));
 
         output.erase(strings::msg_params);

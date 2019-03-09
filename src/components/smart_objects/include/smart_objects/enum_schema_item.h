@@ -110,10 +110,11 @@ class TEnumSchemaItem : public CDefaultSchemaItem<EnumType> {
    * @param MessageVersion to check mobile RPC version against RPC Spec History
    * @return ns_smart_objects::errors::eType
    **/
-  errors::eType validate(const SmartObject& Object,
-                         rpc::ValidationReport* report__,
-                         const utils::SemanticVersion& MessageVersion =
-                             utils::SemanticVersion()) OVERRIDE;
+  errors::eType validate(
+      const SmartObject& Object,
+      rpc::ValidationReport* report__,
+      const utils::SemanticVersion& MessageVersion = utils::SemanticVersion(),
+      const bool allow_unknown_parameters = false) OVERRIDE;
   /**
    * @brief Return the correct history signature based on message version.
    * @param signatures Vector reference of enums history items.
@@ -310,10 +311,14 @@ template <typename EnumType>
 errors::eType TEnumSchemaItem<EnumType>::validate(
     const SmartObject& Object,
     rpc::ValidationReport* report__,
-    const utils::SemanticVersion& MessageVersion) {
+    const utils::SemanticVersion& MessageVersion,
+    const bool allow_unknown_parameters) {
   if (SmartType_Integer != Object.getType()) {
     std::string validation_info;
     if (SmartType_String == Object.getType()) {
+      if (allow_unknown_parameters) {
+        return errors::OK;
+      }
       validation_info = "Invalid enum value: " + Object.asString();
     } else {
       validation_info = "Incorrect type, expected: " +

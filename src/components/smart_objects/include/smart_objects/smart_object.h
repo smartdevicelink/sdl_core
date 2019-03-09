@@ -680,7 +680,8 @@ class SmartObject FINAL {
    */
   errors::eType validate(
       rpc::ValidationReport* report__,
-      const utils::SemanticVersion& MessageVersion = utils::SemanticVersion());
+      const utils::SemanticVersion& MessageVersion = utils::SemanticVersion(),
+      const bool allow_unknown_parameters = false);
 
   /**
    * @brief Sets new schema

@@ -72,10 +72,11 @@ class TNumberSchemaItem : public CDefaultSchemaItem<NumberType> {
    * @param MessageVersion to check mobile RPC version against RPC Spec History
    * @return ns_smart_objects::errors::eType
    **/
-  errors::eType validate(const SmartObject& Object,
-                         rpc::ValidationReport* report__,
-                         const utils::SemanticVersion& MessageVersion =
-                             utils::SemanticVersion()) OVERRIDE;
+  errors::eType validate(
+      const SmartObject& Object,
+      rpc::ValidationReport* report__,
+      const utils::SemanticVersion& MessageVersion = utils::SemanticVersion(),
+      const bool allow_unknown_parameters = false) OVERRIDE;
 
  private:
   /**
@@ -137,7 +138,8 @@ template <typename NumberType>
 errors::eType TNumberSchemaItem<NumberType>::validate(
     const SmartObject& Object,
     rpc::ValidationReport* report__,
-    const utils::SemanticVersion& MessageVersion) {
+    const utils::SemanticVersion& MessageVersion,
+    const bool allow_unknown_parameters) {
   if (!isValidNumberType(Object.getType())) {
     SmartType expectedType = (typeid(double) == typeid(Object.getType()))
                                  ? SmartType_Double

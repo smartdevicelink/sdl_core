@@ -49,7 +49,8 @@ std::shared_ptr<CStringSchemaItem> CStringSchemaItem::create(
 errors::eType CStringSchemaItem::validate(
     const SmartObject& Object,
     rpc::ValidationReport* report__,
-    const utils::SemanticVersion& MessageVersion) {
+    const utils::SemanticVersion& MessageVersion,
+    const bool allow_unknown_parameters) {
   if (SmartType_String != Object.getType()) {
     std::string validation_info = "Incorrect type, expected: " +
                                   SmartObject::typeToString(SmartType_String) +

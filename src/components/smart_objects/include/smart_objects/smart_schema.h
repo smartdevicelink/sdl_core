@@ -68,10 +68,11 @@ class CSmartSchema FINAL {
    * @param MessageVersion to check mobile RPC version against RPC Spec History
    * @return ns_smart_objects::errors::eType
    **/
-  errors::eType validate(const SmartObject& Object,
-                         rpc::ValidationReport* report__,
-                         const utils::SemanticVersion& messageVersion =
-                             utils::SemanticVersion()) const;
+  errors::eType validate(
+      const SmartObject& Object,
+      rpc::ValidationReport* report__,
+      const utils::SemanticVersion& messageVersion = utils::SemanticVersion(),
+      const bool allow_unknown_parameters = false) const;
 
   /**
    * @brief Set new root schema item.

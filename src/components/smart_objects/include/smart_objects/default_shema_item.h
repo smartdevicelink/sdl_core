@@ -55,10 +55,11 @@ class CDefaultSchemaItem : public ISchemaItem {
    * @param MessageVersion to check mobile RPC version against RPC Spec History
    * @return ns_smart_objects::errors::eType
    **/
-  errors::eType validate(const SmartObject& Object,
-                         rpc::ValidationReport* report__,
-                         const utils::SemanticVersion& MessageVersion =
-                             utils::SemanticVersion()) OVERRIDE;
+  errors::eType validate(
+      const SmartObject& Object,
+      rpc::ValidationReport* report__,
+      const utils::SemanticVersion& MessageVersion = utils::SemanticVersion(),
+      const bool allow_unknown_parameters = false) OVERRIDE;
 
   /**
    * @brief Set default value to an object.
@@ -105,7 +106,8 @@ template <typename Type>
 errors::eType CDefaultSchemaItem<Type>::validate(
     const SmartObject& Object,
     rpc::ValidationReport* report__,
-    const utils::SemanticVersion& MessageVersion) {
+    const utils::SemanticVersion& MessageVersion,
+    const bool allow_unknown_parameters) {
   if (getSmartType() != Object.getType()) {
     std::string validation_info = "Incorrect type, expected: " +
                                   SmartObject::typeToString(getSmartType()) +

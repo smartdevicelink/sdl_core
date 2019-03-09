@@ -55,10 +55,11 @@ class CAlwaysFalseSchemaItem : public ISchemaItem {
    * @param MessageVersion to check mobile RPC version against RPC Spec History
    * @return ns_smart_objects::errors::eType
    **/
-  errors::eType validate(const SmartObject& Object,
-                         rpc::ValidationReport* report__,
-                         const utils::SemanticVersion& MessageVersion =
-                             utils::SemanticVersion()) OVERRIDE;
+  errors::eType validate(
+      const SmartObject& Object,
+      rpc::ValidationReport* report__,
+      const utils::SemanticVersion& MessageVersion = utils::SemanticVersion(),
+      const bool allow_unknown_parameters = false) OVERRIDE;
 
  private:
   CAlwaysFalseSchemaItem();

@@ -38,7 +38,8 @@ namespace ns_smart_objects {
 errors::eType ISchemaItem::validate(
     const SmartObject& object,
     rpc::ValidationReport* report__,
-    const utils::SemanticVersion& MessageVersion) {
+    const utils::SemanticVersion& MessageVersion,
+    const bool allow_unknown_parameters) {
   return errors::ERROR;
 }
 

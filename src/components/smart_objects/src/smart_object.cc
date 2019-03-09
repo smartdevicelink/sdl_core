@@ -878,8 +878,10 @@ bool SmartObject::isValid() const {
 
 errors::eType SmartObject::validate(
     rpc::ValidationReport* report__,
-    const utils::SemanticVersion& MessageVersion) {
-  return m_schema.validate(*this, report__, MessageVersion);
+    const utils::SemanticVersion& MessageVersion,
+    const bool allow_unknown_parameters) {
+  return m_schema.validate(
+      *this, report__, MessageVersion, allow_unknown_parameters);
 }
 
 void SmartObject::setSchema(const CSmartSchema& schema) {
