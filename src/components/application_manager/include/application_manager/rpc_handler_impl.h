@@ -154,12 +154,20 @@ class RPCHandlerImpl : public RPCHandler,
       ns_smart_device_link::ns_smart_objects::SmartObject& output,
       utils::SemanticVersion& message_version);
 
+  bool ValidateRPCSO(smart_objects::SmartObject* message,
+                     uint32_t connection_key,
+                     uint32_t correlation_id,
+                     int32_t function_id,
+                     utils::SemanticVersion& msg_version,
+                     bool remove_unknown_params);
+
  private:
   void ProcessMessageFromMobile(const std::shared_ptr<Message> message);
   void ProcessMessageFromHMI(const std::shared_ptr<Message> message);
   bool ConvertMessageToSO(const Message& message,
                           smart_objects::SmartObject& output,
-                          const bool remove_unknown_parameters = true);
+                          const bool remove_unknown_parameters = true,
+                          const bool validate_existing_params = true);
   std::shared_ptr<Message> ConvertRawMsgToMessage(
       const ::protocol_handler::RawMessagePtr message);
   hmi_apis::HMI_API& hmi_so_factory();

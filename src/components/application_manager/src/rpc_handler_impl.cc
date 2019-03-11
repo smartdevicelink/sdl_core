@@ -85,7 +85,7 @@ void RPCHandlerImpl::ProcessMessageFromMobile(
   }
 
   if (!ConvertMessageToSO(
-          *message, *so_from_mobile, remove_unknown_parameters)) {
+          *message, *so_from_mobile, remove_unknown_parameters, !rpc_passing)) {
     LOG4CXX_ERROR(logger_, "Cannot create smart object from message");
     return;
   }
@@ -106,7 +106,7 @@ void RPCHandlerImpl::ProcessMessageFromMobile(
                                           commands::Command::SOURCE_MOBILE,
                                           message_type)) {
       // Since PassThrough failed, refiltering the message
-      if (!ConvertMessageToSO(*message, *so_from_mobile, true)) {
+      if (!ConvertMessageToSO(*message, *so_from_mobile, true, true)) {
         LOG4CXX_ERROR(logger_, "Cannot create smart object from message");
         return;
       }
@@ -283,7 +283,8 @@ void RPCHandlerImpl::GetMessageVersion(
 bool RPCHandlerImpl::ConvertMessageToSO(
     const Message& message,
     ns_smart_device_link::ns_smart_objects::SmartObject& output,
-    const bool remove_unknown_parameters) {
+    const bool remove_unknown_parameters,
+    const bool validate_existing_params) {
   LOG4CXX_AUTO_TRACE(logger_);
   LOG4CXX_DEBUG(logger_,
                 "\t\t\tMessage to convert: protocol "
@@ -303,7 +304,7 @@ bool RPCHandlerImpl::ConvertMessageToSO(
               message.type(),
               message.correlation_id());
 
-      rpc::ValidationReport report("RPC");
+      smart_objects::SmartObject* so_ptr = (conversion_result) ? &output : NULL;
 
       // Attach RPC version to SmartObject if it does not exist yet.
       auto app_ptr = app_manager_.application(message.connection_key());
@@ -316,30 +317,22 @@ bool RPCHandlerImpl::ConvertMessageToSO(
         GetMessageVersion(output, msg_version);
       }
 
-      if (!conversion_result ||
-          !mobile_so_factory().attachSchema(
-              output, remove_unknown_parameters, msg_version) ||
-          ((output.validate(&report, msg_version) !=
-                smart_objects::errors::OK &&
-            remove_unknown_parameters))) {
-        LOG4CXX_WARN(logger_,
-                     "Failed to parse string to smart object with API version "
-                         << msg_version.toString() << " : "
-                         << message.json_message());
+      if (validate_existing_params) {
+        if (!ValidateRPCSO(so_ptr,
+                           message.connection_key(),
+                           message.correlation_id(),
+                           message.function_id(),
+                           msg_version,
+                           remove_unknown_parameters)) {
+          LOG4CXX_WARN(
+              logger_,
+              "Failed to parse string to smart object with API version "
+                  << msg_version.toString() << " : " << message.json_message());
 
-        std::shared_ptr<smart_objects::SmartObject> response(
-            MessageHelper::CreateNegativeResponse(
-                message.connection_key(),
-                message.function_id(),
-                message.correlation_id(),
-                mobile_apis::Result::INVALID_DATA));
-
-        (*response)[strings::msg_params][strings::info] =
-            rpc::PrettyFormat(report);
-        app_manager_.GetRPCService().ManageMobileCommand(
-            response, commands::Command::SOURCE_SDL);
-        return false;
+          return false;
+        }
       }
+
       LOG4CXX_DEBUG(logger_,
                     "Convertion result for sdl object is true function_id "
                         << output[jhs::S_PARAMS][jhs::S_FUNCTION_ID].asInt());
@@ -388,16 +381,19 @@ bool RPCHandlerImpl::ConvertMessageToSO(
 
       rpc::ValidationReport report("RPC");
 
-      if (output.validate(&report) != smart_objects::errors::OK) {
-        LOG4CXX_ERROR(logger_,
-                      "Incorrect parameter from HMI"
-                          << rpc::PrettyFormat(report));
+      if (validate_existing_params) {
+        if (output.validate(&report) != smart_objects::errors::OK) {
+          LOG4CXX_ERROR(logger_,
+                        "Incorrect parameter from HMI"
+                            << rpc::PrettyFormat(report));
 
-        output.erase(strings::msg_params);
-        output[strings::params][hmi_response::code] =
-            hmi_apis::Common_Result::INVALID_DATA;
-        output[strings::msg_params][strings::info] = rpc::PrettyFormat(report);
-        return false;
+          output.erase(strings::msg_params);
+          output[strings::params][hmi_response::code] =
+              hmi_apis::Common_Result::INVALID_DATA;
+          output[strings::msg_params][strings::info] =
+              rpc::PrettyFormat(report);
+          return false;
+        }
       }
       break;
     }
@@ -446,6 +442,37 @@ bool RPCHandlerImpl::ConvertMessageToSO(
   }
 
   LOG4CXX_DEBUG(logger_, "Successfully parsed message into smart object");
+  return true;
+}
+
+bool RPCHandlerImpl::ValidateRPCSO(smart_objects::SmartObject* message,
+                                   uint32_t connection_key,
+                                   uint32_t correlation_id,
+                                   int32_t function_id,
+                                   utils::SemanticVersion& msg_version,
+                                   bool remove_unknown_params) {
+  rpc::ValidationReport report("RPC");
+  if (!message ||
+      !mobile_so_factory().attachSchema(
+          *message, remove_unknown_params, msg_version) ||
+      ((message->validate(&report, msg_version) !=
+        smart_objects::errors::OK))) {
+    LOG4CXX_WARN(logger_,
+                 "Failed to parse string to smart object with API version "
+                     << msg_version.toString() << " : " << message->asString());
+
+    std::shared_ptr<smart_objects::SmartObject> response(
+        MessageHelper::CreateNegativeResponse(
+            connection_key,
+            function_id,
+            correlation_id,
+            mobile_apis::Result::INVALID_DATA));
+
+    (*response)[strings::msg_params][strings::info] = rpc::PrettyFormat(report);
+    app_manager_.GetRPCService().ManageMobileCommand(
+        response, commands::Command::SOURCE_SDL);
+    return false;
+  }
   return true;
 }
 

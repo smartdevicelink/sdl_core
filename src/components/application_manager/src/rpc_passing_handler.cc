@@ -38,6 +38,7 @@
 #include "application_manager/application.h"
 #include "application_manager/application_manager.h"
 #include "application_manager/rpc_passing_handler.h"
+#include "application_manager/rpc_handler_impl.h"
 #include "application_manager/commands/command_impl.h"
 #include "application_manager/message_helper.h"
 #include "application_manager/smart_object_keys.h"
@@ -145,8 +146,12 @@ bool RPCPassingHandler::RPCPassThrough(smart_objects::SmartObject rpc_message) {
       }
       rpc_request_queue_lock_.Release();
       RemoveRequestTimer(correlation_id);
-      auto result_code = static_cast<mobile_apis::Result::eType>(
-          rpc_message[strings::msg_params][strings::result_code].asInt());
+
+      mobile_apis::Result::eType result_code;
+      smart_objects::EnumConversionHelper<mobile_apis::Result::eType>::
+          StringToEnum(
+              rpc_message[strings::msg_params][strings::result_code].asString(),
+              &result_code);
 
       if (result_code == mobile_apis::Result::UNSUPPORTED_REQUEST) {
         LOG4CXX_DEBUG(logger_, "Service sent UNSUPPORTED_REQUEST");
@@ -228,6 +233,21 @@ void RPCPassingHandler::ForwardRequestToCore(uint32_t correlation_id) {
       std::make_shared<smart_objects::SmartObject>(message);
   rpc_request_queue.erase(correlation_id);
   rpc_request_queue_lock_.Release();
+
+  // Revalidate rpc message before forwarding to core
+  uint32_t connection_key =
+      message[strings::params][strings::connection_key].asUInt();
+  int32_t function_id = message[strings::params][strings::function_id].asInt();
+
+  auto app_ptr = app_manager_.application(connection_key);
+  utils::SemanticVersion msg_version(0, 0, 0);
+  if (app_ptr) {
+    msg_version = app_ptr->msg_version();
+  }
+  auto rpc_handler_impl =
+      dynamic_cast<rpc_handler::RPCHandlerImpl*>(&app_manager_.GetRPCHandler());
+  rpc_handler_impl->ValidateRPCSO(
+      &message, connection_key, correlation_id, function_id, msg_version, true);
   app_manager_.GetRPCService().ManageMobileCommand(
       result, commands::Command::SOURCE_MOBILE);
 }
