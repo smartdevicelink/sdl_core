@@ -235,18 +235,31 @@ void RPCPassingHandler::ForwardRequestToCore(uint32_t correlation_id) {
   rpc_request_queue_lock_.Release();
 
   // Validate rpc message before forwarding to core
+  rpc::ValidationReport report("RPC");
   uint32_t connection_key =
       message[strings::params][strings::connection_key].asUInt();
   int32_t function_id = message[strings::params][strings::function_id].asInt();
-
   auto app_ptr = app_manager_.application(connection_key);
   utils::SemanticVersion msg_version(0, 0, 0);
   if (app_ptr) {
     msg_version = app_ptr->msg_version();
   }
 
-  app_manager_.GetRPCHandler().ValidateRpcSO(
-      &message, connection_key, correlation_id, function_id, msg_version, true);
+  if (!app_manager_.GetRPCHandler().ValidateRpcSO(
+          &message, msg_version, report, true)) {
+    std::shared_ptr<smart_objects::SmartObject> response(
+        MessageHelper::CreateNegativeResponse(
+            connection_key,
+            function_id,
+            correlation_id,
+            mobile_apis::Result::INVALID_DATA));
+
+    (*response)[strings::msg_params][strings::info] = rpc::PrettyFormat(report);
+    app_manager_.GetRPCService().ManageMobileCommand(
+        response, commands::Command::SOURCE_SDL);
+    return;
+  }
+
   app_manager_.GetRPCService().ManageMobileCommand(
       result, commands::Command::SOURCE_MOBILE);
 }

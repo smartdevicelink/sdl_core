@@ -155,10 +155,8 @@ class RPCHandlerImpl : public RPCHandler,
       utils::SemanticVersion& message_version);
 
   bool ValidateRpcSO(smart_objects::SmartObject* message,
-                     uint32_t connection_key,
-                     uint32_t correlation_id,
-                     int32_t function_id,
                      utils::SemanticVersion& msg_version,
+                     rpc::ValidationReport& report_out,
                      bool remove_unknown_params) OVERRIDE;
 
  private:
@@ -167,7 +165,7 @@ class RPCHandlerImpl : public RPCHandler,
   bool ConvertMessageToSO(const Message& message,
                           smart_objects::SmartObject& output,
                           const bool remove_unknown_parameters = true,
-                          const bool validate_existing_params = true);
+                          const bool validate_params = true);
   std::shared_ptr<Message> ConvertRawMsgToMessage(
       const ::protocol_handler::RawMessagePtr message);
   hmi_apis::HMI_API& hmi_so_factory();

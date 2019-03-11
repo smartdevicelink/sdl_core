@@ -53,10 +53,8 @@ class RPCHandler
       {
  public:
   virtual bool ValidateRpcSO(smart_objects::SmartObject* message,
-                             uint32_t connection_key,
-                             uint32_t correlation_id,
-                             int32_t function_id,
                              utils::SemanticVersion& msg_version,
+                             rpc::ValidationReport& report_out,
                              bool remove_unknown_params) = 0;
 
   virtual ~RPCHandler() {}
