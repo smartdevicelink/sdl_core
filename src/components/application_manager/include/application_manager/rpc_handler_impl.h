@@ -159,7 +159,7 @@ class RPCHandlerImpl : public RPCHandler,
                      uint32_t correlation_id,
                      int32_t function_id,
                      utils::SemanticVersion& msg_version,
-                     bool remove_unknown_params);
+                     bool remove_unknown_params) OVERRIDE;
 
  private:
   void ProcessMessageFromMobile(const std::shared_ptr<Message> message);

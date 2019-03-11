@@ -38,7 +38,7 @@
 #include "application_manager/application.h"
 #include "application_manager/application_manager.h"
 #include "application_manager/rpc_passing_handler.h"
-#include "application_manager/rpc_handler_impl.h"
+#include "application_manager/rpc_handler.h"
 #include "application_manager/commands/command_impl.h"
 #include "application_manager/message_helper.h"
 #include "application_manager/smart_object_keys.h"
@@ -244,9 +244,8 @@ void RPCPassingHandler::ForwardRequestToCore(uint32_t correlation_id) {
   if (app_ptr) {
     msg_version = app_ptr->msg_version();
   }
-  auto rpc_handler_impl =
-      dynamic_cast<rpc_handler::RPCHandlerImpl*>(&app_manager_.GetRPCHandler());
-  rpc_handler_impl->ValidateRPCSO(
+
+  app_manager_.GetRPCHandler().ValidateRPCSO(
       &message, connection_key, correlation_id, function_id, msg_version, true);
   app_manager_.GetRPCService().ManageMobileCommand(
       result, commands::Command::SOURCE_MOBILE);

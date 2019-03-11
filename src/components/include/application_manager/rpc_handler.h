@@ -52,6 +52,13 @@ class RPCHandler
 #endif  // TELEMETRY_MONITOR
       {
  public:
+  virtual bool ValidateRPCSO(smart_objects::SmartObject* message,
+                             uint32_t connection_key,
+                             uint32_t correlation_id,
+                             int32_t function_id,
+                             utils::SemanticVersion& msg_version,
+                             bool remove_unknown_params) = 0;
+
   virtual ~RPCHandler() {}
 };
 
