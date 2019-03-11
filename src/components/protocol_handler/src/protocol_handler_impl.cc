@@ -2274,7 +2274,10 @@ const impl::TransportTypes transportTypes = {
         impl::TransportDescription(impl::TransportType::TT_USB, true, false)),
     std::make_pair(
         std::string("IAP_CARPLAY"),
-        impl::TransportDescription(impl::TransportType::TT_WIFI, true, false))};
+        impl::TransportDescription(impl::TransportType::TT_WIFI, true, false)),
+    std::make_pair(std::string("WEBSOCKET"),
+                   impl::TransportDescription(
+                       impl::TransportType::TT_WEBSOCKET, false, false))};
 
 const impl::TransportDescription
 ProtocolHandlerImpl::GetTransportTypeFromConnectionType(
