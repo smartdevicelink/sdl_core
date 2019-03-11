@@ -140,8 +140,6 @@ class AppServiceManager {
 
   AppService* EmbeddedServiceForType(std::string service_type);
 
-  AppService* FindServiceByName(std::string name);
-
   AppService* FindServiceByID(std::string service_id);
 
   std::string DefaultServiceByType(std::string service_type);

@@ -421,19 +421,6 @@ AppService* AppServiceManager::EmbeddedServiceForType(
   return NULL;
 }
 
-AppService* AppServiceManager::FindServiceByName(std::string name) {
-  LOG4CXX_AUTO_TRACE(logger_);
-  sync_primitives::AutoLock lock(published_services_lock_);
-  for (auto it = published_services_.begin(); it != published_services_.end();
-       ++it) {
-    if (it->second.record[strings::service_manifest][strings::service_name]
-            .asString() == name) {
-      return &(it->second);
-    }
-  }
-  return NULL;
-}
-
 AppService* AppServiceManager::FindServiceByPolicyAppID(
     std::string policy_app_id, std::string type) {
   LOG4CXX_AUTO_TRACE(logger_);

@@ -33,7 +33,6 @@
 #include "app_service_rpc_plugin/commands/hmi/as_get_app_service_data_response_to_hmi.h"
 #include "application_manager/application_impl.h"
 #include "application_manager/rpc_service.h"
-#include "interfaces/MOBILE_API.h"
 
 namespace app_service_rpc_plugin {
 using namespace application_manager;
