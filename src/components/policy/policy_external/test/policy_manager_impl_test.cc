@@ -346,6 +346,39 @@ TEST_F(PolicyManagerImplTest2, GetCurrentDeviceId) {
 }
 
 TEST_F(
+    PolicyManagerImplTest2,
+    UpdateApplication_AppServices) {
+  // Arrange
+  CreateLocalPT(preloaded_pt_filename_);
+  EXPECT_EQ("UP_TO_DATE", policy_manager_->GetPolicyTableStatus());
+  GetPTU("json/valid_sdl_pt_update.json");
+  EXPECT_EQ("UP_TO_DATE", policy_manager_->GetPolicyTableStatus());
+  // Try to add existing app
+  policy_table::AppServiceParameters app_service_parameters =
+      policy_table::AppServiceParameters();
+  policy_manager_->GetAppServiceParameters(app_id_2_, &app_service_parameters);
+
+  ASSERT_FALSE(app_service_parameters.find("MEDIA") ==
+      app_service_parameters.end());
+
+  auto service_names =
+    *(app_service_parameters["MEDIA"].service_names);
+
+  EXPECT_TRUE(service_names.is_initialized());
+  EXPECT_EQ(static_cast<std::string>(service_names[0]), "SDL App");
+  EXPECT_EQ(static_cast<std::string>(service_names[1]), "SDL Music");
+
+  auto handled_rpcs =
+    app_service_parameters["MEDIA"].handled_rpcs;
+
+  EXPECT_TRUE(handled_rpcs.is_initialized());
+  EXPECT_EQ(handled_rpcs[0].function_id, 41);
+  
+  // Check no update required
+  EXPECT_EQ("UP_TO_DATE", policy_manager_->GetPolicyTableStatus());
+}
+
+TEST_F(
     PolicyManagerImplTest_ExternalConsent,
     ExternalConsent_SetExternalConsentStatusWhileAppExists_ExpectUserConsentsUpdateForApp) {
   using namespace policy_table;

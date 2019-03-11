@@ -124,6 +124,12 @@ class SQLPTRepresentationTest : public SQLPTRepresentation,
       policy_table::ApplicationPoliciesSection* policies) const {
     return ::SQLPTRepresentation::GatherApplicationPoliciesSection(policies);
   }
+
+  bool GatherAppServiceParameters(const std::string& app_id,
+      policy_table::AppServiceParameters* policies) const {
+    return ::SQLPTRepresentation::GatherAppServiceParameters(app_id, policies);
+  }
+
   virtual void GatherDeviceData(policy_table::DeviceData* data) const {
     ::SQLPTRepresentation::GatherDeviceData(data);
   }
@@ -314,6 +320,15 @@ class SQLPTRepresentationTest : public SQLPTRepresentation,
     app_policies["1234"]["keep_context"] = Json::Value(false);
     app_policies["1234"]["steal_focus"] = Json::Value(false);
     app_policies["1234"]["RequestType"] = Json::Value(Json::arrayValue);
+    app_policies["1234"]["app_services"] = Json::Value(Json::objectValue);
+    app_policies["1234"]["app_services"]["MEDIA"] = Json::Value(Json::objectValue);
+    app_policies["1234"]["app_services"]["MEDIA"]["service_names"] = Json::Value(Json::arrayValue);
+    app_policies["1234"]["app_services"]["MEDIA"]["service_names"][0] = Json::Value("SDL App");
+    app_policies["1234"]["app_services"]["MEDIA"]["service_names"][1] = Json::Value("SDL Music");
+    app_policies["1234"]["app_services"]["MEDIA"]["handled_rpcs"] = Json::Value(Json::arrayValue);
+    app_policies["1234"]["app_services"]["MEDIA"]["handled_rpcs"][0] = Json::Value(Json::objectValue);
+    app_policies["1234"]["app_services"]["MEDIA"]["handled_rpcs"][0]["function_id"] = Json::Value(41);
+
 
     app_policies["device"] = Json::Value(Json::objectValue);
     app_policies["device"]["groups"] = Json::Value(Json::arrayValue);
@@ -1706,6 +1721,23 @@ TEST_F(SQLPTRepresentationTest, Save_SetPolicyTableThenSave_ExpectSavedToPT) {
 
   GatherDeviceData(&devices);
   EXPECT_EQ(3u, devices.size());
+
+  const std::string kAppId = "1234";
+  policy_table::AppServiceParameters app_service_parameters;
+  GatherAppServiceParameters(kAppId , &app_service_parameters);
+  ASSERT_FALSE(app_service_parameters.find("MEDIA") ==
+      app_service_parameters.end());
+  auto service_names =
+    *(app_service_parameters["MEDIA"].service_names);
+  EXPECT_TRUE(service_names.is_initialized());
+  EXPECT_EQ(static_cast<std::string>(service_names[0]), "SDL App");
+  EXPECT_EQ(static_cast<std::string>(service_names[1]), "SDL Music");
+
+  auto handled_rpcs =
+    app_service_parameters["MEDIA"].handled_rpcs;
+
+  EXPECT_TRUE(handled_rpcs.is_initialized());
+  EXPECT_EQ(handled_rpcs[0].function_id, 41);
 }
 
 }  // namespace policy_test
