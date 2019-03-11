@@ -317,20 +317,19 @@ bool RPCHandlerImpl::ConvertMessageToSO(
         GetMessageVersion(output, msg_version);
       }
 
-      if (validate_existing_params) {
-        if (!ValidateRPCSO(so_ptr,
-                           message.connection_key(),
-                           message.correlation_id(),
-                           message.function_id(),
-                           msg_version,
-                           remove_unknown_parameters)) {
-          LOG4CXX_WARN(
-              logger_,
-              "Failed to parse string to smart object with API version "
-                  << msg_version.toString() << " : " << message.json_message());
+      if (validate_existing_params &&
+          !ValidateRpcSO(so_ptr,
+                         message.connection_key(),
+                         message.correlation_id(),
+                         message.function_id(),
+                         msg_version,
+                         remove_unknown_parameters)) {
+        LOG4CXX_WARN(logger_,
+                     "Failed to parse string to smart object with API version "
+                         << msg_version.toString() << " : "
+                         << message.json_message());
 
-          return false;
-        }
+        return false;
       }
 
       LOG4CXX_DEBUG(logger_,
@@ -381,19 +380,17 @@ bool RPCHandlerImpl::ConvertMessageToSO(
 
       rpc::ValidationReport report("RPC");
 
-      if (validate_existing_params) {
-        if (output.validate(&report) != smart_objects::errors::OK) {
-          LOG4CXX_ERROR(logger_,
-                        "Incorrect parameter from HMI"
-                            << rpc::PrettyFormat(report));
+      if (validate_existing_params &&
+          output.validate(&report) != smart_objects::errors::OK) {
+        LOG4CXX_ERROR(logger_,
+                      "Incorrect parameter from HMI"
+                          << rpc::PrettyFormat(report));
 
-          output.erase(strings::msg_params);
-          output[strings::params][hmi_response::code] =
-              hmi_apis::Common_Result::INVALID_DATA;
-          output[strings::msg_params][strings::info] =
-              rpc::PrettyFormat(report);
-          return false;
-        }
+        output.erase(strings::msg_params);
+        output[strings::params][hmi_response::code] =
+            hmi_apis::Common_Result::INVALID_DATA;
+        output[strings::msg_params][strings::info] = rpc::PrettyFormat(report);
+        return false;
       }
       break;
     }
@@ -445,7 +442,7 @@ bool RPCHandlerImpl::ConvertMessageToSO(
   return true;
 }
 
-bool RPCHandlerImpl::ValidateRPCSO(smart_objects::SmartObject* message,
+bool RPCHandlerImpl::ValidateRpcSO(smart_objects::SmartObject* message,
                                    uint32_t connection_key,
                                    uint32_t correlation_id,
                                    int32_t function_id,
@@ -455,8 +452,7 @@ bool RPCHandlerImpl::ValidateRPCSO(smart_objects::SmartObject* message,
   if (!message ||
       !mobile_so_factory().attachSchema(
           *message, remove_unknown_params, msg_version) ||
-      ((message->validate(&report, msg_version) !=
-        smart_objects::errors::OK))) {
+      (message->validate(&report, msg_version) != smart_objects::errors::OK)) {
     LOG4CXX_WARN(logger_,
                  "Failed to parse string to smart object with API version "
                      << msg_version.toString() << " : " << message->asString());

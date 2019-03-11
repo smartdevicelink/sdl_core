@@ -154,7 +154,7 @@ class RPCHandlerImpl : public RPCHandler,
       ns_smart_device_link::ns_smart_objects::SmartObject& output,
       utils::SemanticVersion& message_version);
 
-  bool ValidateRPCSO(smart_objects::SmartObject* message,
+  bool ValidateRpcSO(smart_objects::SmartObject* message,
                      uint32_t connection_key,
                      uint32_t correlation_id,
                      int32_t function_id,
