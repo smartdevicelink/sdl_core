@@ -304,7 +304,6 @@ bool RPCHandlerImpl::ConvertMessageToSO(
               message.type(),
               message.correlation_id());
 
-      smart_objects::SmartObject* so_ptr = (conversion_result) ? &output : NULL;
       rpc::ValidationReport report("RPC");
 
       // Attach RPC version to SmartObject if it does not exist yet.
@@ -318,9 +317,10 @@ bool RPCHandlerImpl::ConvertMessageToSO(
         GetMessageVersion(output, msg_version);
       }
 
-      if (validate_params &&
-          !ValidateRpcSO(
-              so_ptr, msg_version, report, allow_unknown_parameters))) {
+      if (!conversion_result ||
+          (validate_params &&
+           !ValidateRpcSO(
+               output, msg_version, report, allow_unknown_parameters))) {
         LOG4CXX_WARN(logger_,
                      "Failed to parse string to smart object with API version "
                          << msg_version.toString() << " : "
@@ -453,14 +453,13 @@ bool RPCHandlerImpl::ConvertMessageToSO(
   return true;
 }
 
-bool RPCHandlerImpl::ValidateRpcSO(smart_objects::SmartObject* message,
+bool RPCHandlerImpl::ValidateRpcSO(smart_objects::SmartObject& message,
                                    utils::SemanticVersion& msg_version,
                                    rpc::ValidationReport& report_out,
                                    bool allow_unknown_parameters) {
-  if (!message ||
-      !mobile_so_factory().attachSchema(
-          *message, !allow_unknown_parameters, msg_version) ||
-      message->validate(&report_out, msg_version, allow_unknown_parameters) !=
+  if (!mobile_so_factory().attachSchema(
+          message, !allow_unknown_parameters, msg_version) ||
+      message.validate(&report_out, msg_version, allow_unknown_parameters) !=
           smart_objects::errors::OK) {
     LOG4CXX_WARN(logger_, "Failed to parse string to smart object");
     return false;

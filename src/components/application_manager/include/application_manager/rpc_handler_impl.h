@@ -154,7 +154,7 @@ class RPCHandlerImpl : public RPCHandler,
       ns_smart_device_link::ns_smart_objects::SmartObject& output,
       utils::SemanticVersion& message_version);
 
-  bool ValidateRpcSO(smart_objects::SmartObject* message,
+  bool ValidateRpcSO(smart_objects::SmartObject& message,
                      utils::SemanticVersion& msg_version,
                      rpc::ValidationReport& report_out,
                      bool allow_unknown_parameters) OVERRIDE;

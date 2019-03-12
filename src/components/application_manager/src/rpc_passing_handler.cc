@@ -246,7 +246,7 @@ void RPCPassingHandler::ForwardRequestToCore(uint32_t correlation_id) {
   }
 
   if (!app_manager_.GetRPCHandler().ValidateRpcSO(
-          &message, msg_version, report, false)) {
+          message, msg_version, report, false)) {
     std::shared_ptr<smart_objects::SmartObject> response(
         MessageHelper::CreateNegativeResponse(
             connection_key,
