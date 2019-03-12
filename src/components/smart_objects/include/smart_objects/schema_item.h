@@ -58,7 +58,11 @@ class ISchemaItem {
    * @param Object Object to validate.
    * @param report__ object for reporting errors during validation
    * message if an error occurs
-   * @param MessageVersion to check mobile RPC version against RPC Spec Histor
+   * @param MessageVersion to check mobile RPC version against RPC Spec History
+   * @param allow_unknown_enums
+   *   false - unknown enum values (left as string values after applySchema)
+   *   will be considered invalid.
+   *   true - such values will be considered valid.
    * @return ns_smart_objects::errors::eType
    **/
   virtual errors::eType validate(
