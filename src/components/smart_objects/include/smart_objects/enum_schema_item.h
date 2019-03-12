@@ -114,7 +114,7 @@ class TEnumSchemaItem : public CDefaultSchemaItem<EnumType> {
       const SmartObject& Object,
       rpc::ValidationReport* report__,
       const utils::SemanticVersion& MessageVersion = utils::SemanticVersion(),
-      const bool allow_unknown_parameters = false) OVERRIDE;
+      const bool allow_unknown_enums = false) OVERRIDE;
   /**
    * @brief Return the correct history signature based on message version.
    * @param signatures Vector reference of enums history items.
@@ -312,11 +312,11 @@ errors::eType TEnumSchemaItem<EnumType>::validate(
     const SmartObject& Object,
     rpc::ValidationReport* report__,
     const utils::SemanticVersion& MessageVersion,
-    const bool allow_unknown_parameters) {
+    const bool allow_unknown_enums) {
   if (SmartType_Integer != Object.getType()) {
     std::string validation_info;
     if (SmartType_String == Object.getType()) {
-      if (allow_unknown_parameters) {
+      if (allow_unknown_enums) {
         return errors::OK;
       }
       validation_info = "Invalid enum value: " + Object.asString();

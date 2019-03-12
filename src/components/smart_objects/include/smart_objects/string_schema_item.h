@@ -71,7 +71,7 @@ class CStringSchemaItem : public CDefaultSchemaItem<std::string> {
       const SmartObject& Object,
       rpc::ValidationReport* report__,
       const utils::SemanticVersion& MessageVersion = utils::SemanticVersion(),
-      const bool allow_unknown_parameters = false) OVERRIDE;
+      const bool allow_unknown_enums = false) OVERRIDE;
 
  private:
   /**

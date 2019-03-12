@@ -45,7 +45,7 @@ errors::eType CAlwaysFalseSchemaItem::validate(
     const SmartObject& Object,
     rpc::ValidationReport* report__,
     const utils::SemanticVersion& MessageVersion,
-    const bool allow_unknown_parameters) {
+    const bool allow_unknown_enums) {
   report__->set_validation_info("Generic error");
   return errors::ERROR;
 }

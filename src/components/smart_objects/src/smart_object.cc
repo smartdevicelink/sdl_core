@@ -879,9 +879,9 @@ bool SmartObject::isValid() const {
 errors::eType SmartObject::validate(
     rpc::ValidationReport* report__,
     const utils::SemanticVersion& MessageVersion,
-    const bool allow_unknown_parameters) {
+    const bool allow_unknown_enums) {
   return m_schema.validate(
-      *this, report__, MessageVersion, allow_unknown_parameters);
+      *this, report__, MessageVersion, allow_unknown_enums);
 }
 
 void SmartObject::setSchema(const CSmartSchema& schema) {

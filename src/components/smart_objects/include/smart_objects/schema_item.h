@@ -65,7 +65,7 @@ class ISchemaItem {
       const SmartObject& Object,
       rpc::ValidationReport* report__,
       const utils::SemanticVersion& MessageVersion = utils::SemanticVersion(),
-      const bool allow_unknown_parameters = false);
+      const bool allow_unknown_enums = false);
 
   /**
    * @brief Set default value to an object.

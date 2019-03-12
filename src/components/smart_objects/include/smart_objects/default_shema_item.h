@@ -59,7 +59,7 @@ class CDefaultSchemaItem : public ISchemaItem {
       const SmartObject& Object,
       rpc::ValidationReport* report__,
       const utils::SemanticVersion& MessageVersion = utils::SemanticVersion(),
-      const bool allow_unknown_parameters = false) OVERRIDE;
+      const bool allow_unknown_enums = false) OVERRIDE;
 
   /**
    * @brief Set default value to an object.
@@ -107,7 +107,7 @@ errors::eType CDefaultSchemaItem<Type>::validate(
     const SmartObject& Object,
     rpc::ValidationReport* report__,
     const utils::SemanticVersion& MessageVersion,
-    const bool allow_unknown_parameters) {
+    const bool allow_unknown_enums) {
   if (getSmartType() != Object.getType()) {
     std::string validation_info = "Incorrect type, expected: " +
                                   SmartObject::typeToString(getSmartType()) +

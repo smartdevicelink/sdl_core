@@ -46,7 +46,7 @@ errors::eType CArraySchemaItem::validate(
     const SmartObject& Object,
     rpc::ValidationReport* report__,
     const utils::SemanticVersion& MessageVersion,
-    const bool allow_unknown_parameters) {
+    const bool allow_unknown_enums) {
   if (SmartType_Array != Object.getType()) {
     std::string validation_info = "Incorrect type, expected: " +
                                   SmartObject::typeToString(SmartType_Array) +
@@ -82,7 +82,7 @@ errors::eType CArraySchemaItem::validate(
         mElementSchemaItem->validate(Object.getElement(i),
                                      &report__->ReportSubobject(strVal.str()),
                                      MessageVersion,
-                                     allow_unknown_parameters);
+                                     allow_unknown_enums);
     if (errors::OK != result) {
       return result;
     }

@@ -39,7 +39,7 @@ errors::eType ISchemaItem::validate(
     const SmartObject& object,
     rpc::ValidationReport* report__,
     const utils::SemanticVersion& MessageVersion,
-    const bool allow_unknown_parameters) {
+    const bool allow_unknown_enums) {
   return errors::ERROR;
 }
 

@@ -72,7 +72,7 @@ class CSmartSchema FINAL {
       const SmartObject& Object,
       rpc::ValidationReport* report__,
       const utils::SemanticVersion& messageVersion = utils::SemanticVersion(),
-      const bool allow_unknown_parameters = false) const;
+      const bool allow_unknown_enums = false) const;
 
   /**
    * @brief Set new root schema item.

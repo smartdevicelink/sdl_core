@@ -115,7 +115,7 @@ class CObjectSchemaItem : public ISchemaItem {
       const SmartObject& Object,
       rpc::ValidationReport* report__,
       const utils::SemanticVersion& MessageVersion = utils::SemanticVersion(),
-      const bool allow_unknown_parameters = false) OVERRIDE;
+      const bool allow_unknown_enums = false) OVERRIDE;
   /**
    * @brief Apply schema.
    * @param Object Object to apply schema.

@@ -76,7 +76,7 @@ class TNumberSchemaItem : public CDefaultSchemaItem<NumberType> {
       const SmartObject& Object,
       rpc::ValidationReport* report__,
       const utils::SemanticVersion& MessageVersion = utils::SemanticVersion(),
-      const bool allow_unknown_parameters = false) OVERRIDE;
+      const bool allow_unknown_enums = false) OVERRIDE;
 
  private:
   /**
@@ -139,7 +139,7 @@ errors::eType TNumberSchemaItem<NumberType>::validate(
     const SmartObject& Object,
     rpc::ValidationReport* report__,
     const utils::SemanticVersion& MessageVersion,
-    const bool allow_unknown_parameters) {
+    const bool allow_unknown_enums) {
   if (!isValidNumberType(Object.getType())) {
     SmartType expectedType = (typeid(double) == typeid(Object.getType()))
                                  ? SmartType_Double

@@ -44,9 +44,9 @@ errors::eType CSmartSchema::validate(
     const SmartObject& object,
     rpc::ValidationReport* report__,
     const utils::SemanticVersion& MessageVersion,
-    const bool allow_unknown_parameters) const {
+    const bool allow_unknown_enums) const {
   return mSchemaItem->validate(
-      object, report__, MessageVersion, allow_unknown_parameters);
+      object, report__, MessageVersion, allow_unknown_enums);
 }
 
 void CSmartSchema::setSchemaItem(const ISchemaItemPtr schemaItem) {
