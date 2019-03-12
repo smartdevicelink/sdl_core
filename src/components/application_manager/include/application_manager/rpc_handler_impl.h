@@ -157,14 +157,14 @@ class RPCHandlerImpl : public RPCHandler,
   bool ValidateRpcSO(smart_objects::SmartObject* message,
                      utils::SemanticVersion& msg_version,
                      rpc::ValidationReport& report_out,
-                     bool remove_unknown_params) OVERRIDE;
+                     bool allow_unknown_parameters) OVERRIDE;
 
  private:
   void ProcessMessageFromMobile(const std::shared_ptr<Message> message);
   void ProcessMessageFromHMI(const std::shared_ptr<Message> message);
   bool ConvertMessageToSO(const Message& message,
                           smart_objects::SmartObject& output,
-                          const bool remove_unknown_parameters = true,
+                          const bool allow_unknown_parameters = false,
                           const bool validate_params = true);
   std::shared_ptr<Message> ConvertRawMsgToMessage(
       const ::protocol_handler::RawMessagePtr message);

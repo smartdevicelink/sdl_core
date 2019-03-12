@@ -2268,7 +2268,7 @@ bool ApplicationManagerImpl::Stop() {
 bool ApplicationManagerImpl::ConvertSOtoMessage(
     const smart_objects::SmartObject& message,
     Message& output,
-    const bool remove_unknown_parameters) {
+    const bool allow_unknown_parameters) {
   LOG4CXX_AUTO_TRACE(logger_);
 
   if (smart_objects::SmartType_Null == message.getType() ||
