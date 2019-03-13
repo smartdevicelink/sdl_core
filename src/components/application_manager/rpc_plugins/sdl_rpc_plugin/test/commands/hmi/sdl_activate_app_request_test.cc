@@ -140,6 +140,8 @@ TEST_F(SDLActivateAppRequestTest, Run_ActivateApp_SUCCESS) {
   std::shared_ptr<SDLActivateAppRequest> command(
       CreateCommand<SDLActivateAppRequest>(msg));
 
+  EXPECT_CALL(app_mngr_, WaitingApplicationByID(kAppID))
+      .WillOnce(Return(ApplicationSharedPtr()));
   EXPECT_CALL(app_mngr_, state_controller())
       .WillOnce(ReturnRef(mock_state_controller_));
   EXPECT_CALL(mock_state_controller_,
@@ -446,8 +448,10 @@ TEST_F(SDLActivateAppRequestTest, WaitingCloudApplication_ConnectDevice) {
   EXPECT_CALL(*mock_app, IsRegistered()).WillOnce(Return(false));
   EXPECT_CALL(*mock_app, is_cloud_app()).WillOnce(Return(true));
 
+#ifndef EXTERNAL_PROPRIETARY_MODE
   EXPECT_CALL(app_mngr_, application(kAppID))
       .WillOnce(Return(ApplicationSharedPtr()));
+#endif
   EXPECT_CALL(app_mngr_, WaitingApplicationByID(kAppID))
       .WillOnce(Return(mock_app));
 
