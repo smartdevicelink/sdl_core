@@ -1580,6 +1580,15 @@ class ApplicationManagerImpl
     rpc_service_.reset(rpc_service);
   }
 
+  /**
+   * @brief set a mock rpc service directly. Only for unit
+   * testing.
+   * @param mock_app the mock rpc service to be assigned
+   */
+  void SetMockPolicyHandler(policy::PolicyHandlerInterface* policy_handler) {
+    policy_handler_.reset(policy_handler);
+  }
+
   virtual void SetPluginManager(
       std::unique_ptr<plugin_manager::RPCPluginManager>& plugin_manager)
       OVERRIDE {

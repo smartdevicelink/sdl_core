@@ -190,6 +190,24 @@ class TransportManagerImplTest : public ::testing::Test {
     tm_.TestHandle(test_event);
   }
 
+  void HandlePending() {
+    TransportAdapterEvent test_event(EventTypeEnum::ON_CONNECT_PENDING,
+                                     mock_adapter_,
+                                     dev_info_.mac_address(),
+                                     application_id_,
+                                     test_message_,
+                                     error_);
+
+    EXPECT_CALL(*mock_adapter_, DeviceName(dev_info_.mac_address()))
+        .WillOnce(Return(dev_info_.name()));
+    EXPECT_CALL(*mock_adapter_, GetConnectionType())
+        .WillRepeatedly(Return(dev_info_.connection_type()));
+
+    EXPECT_CALL(*tm_listener_, OnConnectionPending(dev_info_, connection_key_));
+
+    tm_.TestHandle(test_event);
+  }
+
   void HandleConnectionFailed() {
     TransportAdapterEvent test_event(EventTypeEnum::ON_CONNECT_FAIL,
                                      mock_adapter_,
@@ -403,6 +421,32 @@ TEST_F(TransportManagerImplTest, DisconnectDevice_ConnectionFailed) {
 TEST_F(TransportManagerImplTest, DisconnectDevice_DeviceNotConnected) {
   EXPECT_CALL(*mock_adapter_, DisconnectDevice(mac_address_)).Times(0);
   EXPECT_EQ(E_INVALID_HANDLE, tm_.DisconnectDevice(device_handle_));
+}
+
+TEST_F(TransportManagerImplTest, Pending) {
+  // Calling HandlePending twice verifies the connection_id stays the same if
+  // the connection exists.
+  HandlePending();
+  HandlePending();
+
+  // Now create pending event for new app id and verify connection_id is
+  // incremented
+  TransportAdapterEvent test_event(EventTypeEnum::ON_CONNECT_PENDING,
+                                   mock_adapter_,
+                                   dev_info_.mac_address(),
+                                   application_id_ + 1,
+                                   test_message_,
+                                   error_);
+
+  EXPECT_CALL(*mock_adapter_, DeviceName(dev_info_.mac_address()))
+      .WillOnce(Return(dev_info_.name()));
+  EXPECT_CALL(*mock_adapter_, GetConnectionType())
+      .WillRepeatedly(Return(dev_info_.connection_type()));
+
+  EXPECT_CALL(*tm_listener_,
+              OnConnectionPending(dev_info_, connection_key_ + 1));
+
+  tm_.TestHandle(test_event);
 }
 
 TEST_F(TransportManagerImplTest, Disconnect) {
