@@ -61,7 +61,7 @@ void OnAppServiceDataNotificationFromMobile::Run() {
   MessageHelper::PrintSmartObject(*message_);
 
   std::string service_type =
-      (*message_)[strings::msg_params][strings::app_service_manifest]
+      (*message_)[strings::msg_params][strings::service_data]
                  [strings::service_type].asString();
 
   ApplicationSharedPtr app = application_manager_.application(connection_key());

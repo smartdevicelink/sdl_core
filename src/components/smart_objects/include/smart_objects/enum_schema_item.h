@@ -108,12 +108,17 @@ class TEnumSchemaItem : public CDefaultSchemaItem<EnumType> {
    * @param Object Object to validate.
    * @param report__ object for reporting errors during validation
    * @param MessageVersion to check mobile RPC version against RPC Spec History
+   * @param allow_unknown_enums
+   *   false - unknown enum values (left as string values after applySchema)
+   *   will be considered invalid.
+   *   true - such values will be considered valid.
    * @return ns_smart_objects::errors::eType
    **/
-  errors::eType validate(const SmartObject& Object,
-                         rpc::ValidationReport* report__,
-                         const utils::SemanticVersion& MessageVersion =
-                             utils::SemanticVersion()) OVERRIDE;
+  errors::eType validate(
+      const SmartObject& Object,
+      rpc::ValidationReport* report__,
+      const utils::SemanticVersion& MessageVersion = utils::SemanticVersion(),
+      const bool allow_unknown_enums = false) OVERRIDE;
   /**
    * @brief Return the correct history signature based on message version.
    * @param signatures Vector reference of enums history items.
@@ -310,10 +315,14 @@ template <typename EnumType>
 errors::eType TEnumSchemaItem<EnumType>::validate(
     const SmartObject& Object,
     rpc::ValidationReport* report__,
-    const utils::SemanticVersion& MessageVersion) {
+    const utils::SemanticVersion& MessageVersion,
+    const bool allow_unknown_enums) {
   if (SmartType_Integer != Object.getType()) {
     std::string validation_info;
     if (SmartType_String == Object.getType()) {
+      if (allow_unknown_enums) {
+        return errors::OK;
+      }
       validation_info = "Invalid enum value: " + Object.asString();
     } else {
       validation_info = "Incorrect type, expected: " +

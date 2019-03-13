@@ -110,7 +110,8 @@ std::shared_ptr<CObjectSchemaItem> CObjectSchemaItem::create(
 errors::eType CObjectSchemaItem::validate(
     const SmartObject& object,
     rpc::ValidationReport* report__,
-    const utils::SemanticVersion& MessageVersion) {
+    const utils::SemanticVersion& MessageVersion,
+    const bool allow_unknown_enums) {
   if (SmartType_Map != object.getType()) {
     std::string validation_info = "Incorrect type, expected: " +
                                   SmartObject::typeToString(SmartType_Map) +
@@ -142,8 +143,11 @@ errors::eType CObjectSchemaItem::validate(
 
     errors::eType result = errors::OK;
     // Check if MessageVersion matches schema version
-    result = correct_member.mSchemaItem->validate(
-        field, &report__->ReportSubobject(key), MessageVersion);
+    result =
+        correct_member.mSchemaItem->validate(field,
+                                             &report__->ReportSubobject(key),
+                                             MessageVersion,
+                                             allow_unknown_enums);
     if (errors::OK != result) {
       return result;
     }
