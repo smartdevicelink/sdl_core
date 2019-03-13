@@ -148,8 +148,8 @@ MessageLoopThread<Q>::MessageLoopThread(const std::string& name,
 template <class Q>
 MessageLoopThread<Q>::~MessageLoopThread() {
   Shutdown();
-  delete thread_delegate_;
   threads::DeleteThread(thread_);
+  delete thread_delegate_;
 }
 
 template <class Q>
