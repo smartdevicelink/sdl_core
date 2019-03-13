@@ -676,11 +676,16 @@ class SmartObject FINAL {
    *
    * @param report__ object for reporting errors during validation
    * @param messageVersion of the mobile app to check against RPC Spec Schema
+   * @param allow_unknown_enums
+   *   false - unknown enum values (left as string values after applySchema)
+   *   will be considered invalid.
+   *   true - such values will be considered valid.
    * @return Result of validation.
    */
   errors::eType validate(
       rpc::ValidationReport* report__,
-      const utils::SemanticVersion& MessageVersion = utils::SemanticVersion());
+      const utils::SemanticVersion& MessageVersion = utils::SemanticVersion(),
+      const bool allow_unknown_enums = false);
 
   /**
    * @brief Sets new schema

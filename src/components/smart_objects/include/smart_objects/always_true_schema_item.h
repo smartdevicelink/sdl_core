@@ -53,12 +53,17 @@ class CAlwaysTrueSchemaItem : public ISchemaItem {
    * @param Object Object to validate.
    * @param report__ object for reporting errors during validation
    * @param MessageVersion to check mobile RPC version against RPC Spec History
+   * @param allow_unknown_enums
+   *   false - unknown enum values (left as string values after applySchema)
+   *   will be considered invalid.
+   *   true - such values will be considered valid.
    * @return ns_smart_objects::errors::eType
    **/
-  errors::eType validate(const SmartObject& Object,
-                         rpc::ValidationReport* report__,
-                         const utils::SemanticVersion& MessageVersion =
-                             utils::SemanticVersion()) OVERRIDE;
+  errors::eType validate(
+      const SmartObject& Object,
+      rpc::ValidationReport* report__,
+      const utils::SemanticVersion& MessageVersion = utils::SemanticVersion(),
+      const bool allow_unknown_enums = false) OVERRIDE;
 
  private:
   CAlwaysTrueSchemaItem();
