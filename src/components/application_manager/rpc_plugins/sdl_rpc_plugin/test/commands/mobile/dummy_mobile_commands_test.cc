@@ -62,6 +62,8 @@
 #include "mobile/end_audio_pass_thru_request.h"
 #include "mobile/end_audio_pass_thru_response.h"
 #include "mobile/generic_response.h"
+#include "mobile/get_file_request.h"
+#include "mobile/get_file_response.h"
 #include "mobile/get_way_points_request.h"
 #include "mobile/get_way_points_response.h"
 #include "mobile/list_files_request.h"
@@ -78,6 +80,7 @@
 #include "mobile/on_keyboard_input_notification.h"
 #include "mobile/on_language_change_notification.h"
 #include "mobile/on_permissions_change_notification.h"
+#include "mobile/on_system_capability_updated_notification.h"
 #include "mobile/on_system_request_notification.h"
 #include "mobile/on_tbt_client_state_notification.h"
 #include "mobile/on_touch_event_notification.h"
@@ -220,6 +223,8 @@ typedef Types<commands::AddCommandRequest,
               commands::EndAudioPassThruRequest,
               commands::EndAudioPassThruResponse,
               commands::GenericResponse,
+              commands::GetFileRequest,
+              commands::GetFileResponse,
               commands::GetWayPointsRequest,
               commands::GetWayPointsResponse,
               commands::ListFilesRequest,
@@ -236,12 +241,13 @@ typedef Types<commands::AddCommandRequest,
               commands::mobile::OnKeyBoardInputNotification,
               commands::OnLanguageChangeNotification,
               commands::OnPermissionsChangeNotification,
-              commands::mobile::OnSystemRequestNotification,
-              commands::OnTBTClientStateNotification,
-              commands::mobile::OnTouchEventNotification>
+              commands::mobile::OnSystemCapabilityUpdatedNotification>
     MobileCommandsListFirst;
 
-typedef Types<commands::OnWayPointChangeNotification,
+typedef Types<commands::mobile::OnSystemRequestNotification,
+              commands::OnTBTClientStateNotification,
+              commands::mobile::OnTouchEventNotification,
+              commands::OnWayPointChangeNotification,
               commands::PerformAudioPassThruRequest,
               commands::PerformAudioPassThruResponse,
               commands::PerformInteractionRequest,
@@ -277,12 +283,12 @@ typedef Types<commands::OnWayPointChangeNotification,
               commands::SubscribeWayPointsRequest,
               commands::SubscribeWayPointsResponse,
               commands::SystemResponse,
-              commands::UnregisterAppInterfaceRequest,
-              commands::UnregisterAppInterfaceResponse,
-              commands::UnsubscribeButtonRequest,
-              commands::UnsubscribeButtonResponse> MobileCommandsListSecond;
+              commands::UnregisterAppInterfaceRequest> MobileCommandsListSecond;
 
-typedef Types<commands::UnsubscribeWayPointsRequest,
+typedef Types<commands::UnregisterAppInterfaceResponse,
+              commands::UnsubscribeButtonRequest,
+              commands::UnsubscribeButtonResponse,
+              commands::UnsubscribeWayPointsRequest,
               commands::UnsubscribeWayPointsResponse,
               commands::UpdateTurnListRequest,
               commands::UpdateTurnListResponse> MobileCommandsListThird;

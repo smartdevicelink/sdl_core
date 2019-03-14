@@ -223,6 +223,8 @@
 #include "hmi/on_tts_reset_timeout_notification.h"
 #include "hmi/dial_number_request.h"
 #include "hmi/dial_number_response.h"
+#include "hmi/bc_get_file_path_request.h"
+#include "hmi/bc_get_file_path_response.h"
 
 #include "application_manager/commands/commands_test.h"
 #include "application_manager/mock_application.h"
@@ -496,7 +498,9 @@ typedef Types<commands::hmi::OnButtonEventNotification,
 typedef Types<commands::AllowAllAppsRequest,
               commands::AllowAllAppsResponse,
               commands::AllowAppRequest,
-              commands::AllowAppResponse> HMICommandsListFifth;
+              commands::AllowAppResponse,
+              commands::BCGetFilePathRequest,
+              commands::BCGetFilePathResponse> HMICommandsListFifth;
 
 TYPED_TEST_CASE(HMICommandsTestFirst, HMICommandsListFirst);
 TYPED_TEST_CASE(HMICommandsTestSecond, HMICommandsListSecond);
