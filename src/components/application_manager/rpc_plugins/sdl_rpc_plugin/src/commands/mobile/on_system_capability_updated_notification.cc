@@ -86,7 +86,7 @@ void OnSystemCapabilityUpdatedNotification::Run() {
       break;
     case mobile_apis::SystemCapabilityType::APP_SERVICES: {
       auto all_services =
-          application_manager_.GetAppServiceManager().GetAllServices();
+          application_manager_.GetAppServiceManager().GetAllServiceRecords();
       auto app_service_caps =
           MessageHelper::CreateAppServiceCapabilities(all_services);
 

@@ -42,6 +42,7 @@
 #include "application_manager/mock_application.h"
 #include "application_manager/mock_application_manager_settings.h"
 #include "application_manager/mock_resumption_data.h"
+#include "application_manager/mock_app_service_manager.h"
 #include "application_manager/mock_rpc_plugin_manager.h"
 #include "application_manager/mock_rpc_service.h"
 #include "application_manager/resumption/resume_ctrl_impl.h"
@@ -115,6 +116,8 @@ class ApplicationManagerImplTest : public ::testing::Test {
             std::make_shared<NiceMock<resumption_test::MockResumptionData> >(
                 mock_app_mngr_))
       , mock_rpc_service_(new MockRPCService)
+      , mock_app_service_manager_(
+            new MockAppServiceManager(mock_app_mngr_, mock_last_state_))
       , mock_message_helper_(
             application_manager::MockMessageHelper::message_helper_mock())
 
@@ -139,11 +142,13 @@ class ApplicationManagerImplTest : public ::testing::Test {
     app_manager_impl_->resume_controller().set_resumption_storage(
         mock_storage_);
     app_manager_impl_->set_connection_handler(&mock_connection_handler_);
+    ON_CALL(*mock_app_service_manager_, UnpublishServices(_))
+        .WillByDefault(Return());
+    ON_CALL(*mock_app_service_manager_, OnAppActivated(_))
+        .WillByDefault(Return());
+    app_manager_impl_->SetAppServiceManager(mock_app_service_manager_);
     Json::Value empty;
     ON_CALL(mock_last_state_, get_dictionary()).WillByDefault(ReturnRef(empty));
-    std::unique_ptr<AppServiceManager> app_service_manager_ptr(
-        new AppServiceManager(*app_manager_impl_, mock_last_state_));
-    app_manager_impl_->SetAppServiceManager(app_service_manager_ptr);
   }
 
   void CreateAppManager() {
@@ -221,6 +226,7 @@ class ApplicationManagerImplTest : public ::testing::Test {
   NiceMock<MockApplicationManagerSettings> mock_application_manager_settings_;
   application_manager_test::MockApplicationManager mock_app_mngr_;
   std::unique_ptr<am::ApplicationManagerImpl> app_manager_impl_;
+  MockAppServiceManager* mock_app_service_manager_;
   application_manager::MockMessageHelper* mock_message_helper_;
 
   std::shared_ptr<MockApplication> mock_app_ptr_;

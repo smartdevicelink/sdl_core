@@ -143,7 +143,7 @@ void GetSystemCapabilityRequest::Run() {
       break;
     case mobile_apis::SystemCapabilityType::APP_SERVICES: {
       auto all_services =
-          application_manager_.GetAppServiceManager().GetAllServices();
+          application_manager_.GetAppServiceManager().GetAllServiceRecords();
       response_params
           [strings::system_capability][strings::app_services_capabilities] =
               MessageHelper::CreateAppServiceCapabilities(all_services);

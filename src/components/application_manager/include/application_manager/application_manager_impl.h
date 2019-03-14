@@ -1587,8 +1587,8 @@ class ApplicationManagerImpl
   }
 
   virtual void SetAppServiceManager(
-      std::unique_ptr<AppServiceManager>& app_service_manager) {
-    app_service_manager_.reset(app_service_manager.release());
+      AppServiceManager* app_service_manager) {
+    app_service_manager_.reset(app_service_manager);
   }
 
  private:

@@ -123,28 +123,28 @@ class AppServiceManager {
    * @brief TODO
    * @param manifest
    */
-  std::vector<smart_objects::SmartObject> GetAllServices();
+  std::vector<smart_objects::SmartObject> GetAllServiceRecords();
   std::vector<std::pair<std::string, AppService> > GetActiveServices();
 
   void GetProviderByType(const std::string& service_type,
-                         bool mobile_consumer,
+                         const bool mobile_consumer,
                          ApplicationSharedPtr& app,
                          bool& hmi_service);
 
   void GetProviderByID(const std::string& service_id,
-                       bool mobile_consumer,
+                       const bool mobile_consumer,
                        ApplicationSharedPtr& app,
                        bool& hmi_service);
 
-  AppService* ActiveServiceByType(std::string service_type);
+  AppService* ActiveServiceForType(const std::string service_type);
 
-  AppService* EmbeddedServiceForType(std::string service_type);
+  AppService* EmbeddedServiceForType(const std::string service_type);
 
-  AppService* FindServiceByName(std::string name);
+  AppService* FindServiceByName(const std::string name);
 
-  AppService* FindServiceByID(std::string service_id);
+  AppService* FindServiceByID(const std::string service_id);
 
-  std::string DefaultServiceByType(std::string service_type);
+  std::string DefaultServiceByType(const std::string service_type);
 
   /**
    * @brief TODO
@@ -175,11 +175,11 @@ class AppServiceManager {
       const mobile_apis::ServiceUpdateReason::eType update_reason,
       smart_objects::SmartObject& msg_params);
   void GetProviderFromService(const AppService& service,
-                              bool mobile_consumer,
+                              const bool mobile_consumer,
                               ApplicationSharedPtr& app,
                               bool& hmi_service);
-  AppService* FindServiceByPolicyAppID(std::string policy_app_id,
-                                       std::string type);
+  AppService* FindServiceByPolicyAppID(const std::string policy_app_id,
+                                       const std::string type);
   std::string GetPolicyAppID(AppService service);
 };
 
