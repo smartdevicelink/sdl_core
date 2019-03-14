@@ -189,7 +189,8 @@ void AppServiceManager::OnAppActivated(ApplicationConstSharedPtr app) {
   }
 }
 
-std::vector<smart_objects::SmartObject> AppServiceManager::GetAllServiceRecords() {
+std::vector<smart_objects::SmartObject>
+AppServiceManager::GetAllServiceRecords() {
   LOG4CXX_AUTO_TRACE(logger_);
   std::vector<smart_objects::SmartObject> services;
   sync_primitives::AutoLock lock(published_services_lock_);

@@ -1586,8 +1586,7 @@ class ApplicationManagerImpl
     plugin_manager_.reset(plugin_manager.release());
   }
 
-  virtual void SetAppServiceManager(
-      AppServiceManager* app_service_manager) {
+  virtual void SetAppServiceManager(AppServiceManager* app_service_manager) {
     app_service_manager_.reset(app_service_manager);
   }
 

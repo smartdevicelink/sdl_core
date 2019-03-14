@@ -39,6 +39,7 @@
 #include "application_manager/app_service_manager.h"
 #include <deque>
 #include "utils/timer.h"
+#include "application_manager/commands/command.h"
 
 namespace application_manager {
 

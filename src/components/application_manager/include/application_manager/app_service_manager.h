@@ -142,7 +142,7 @@ class AppServiceManager {
 
   AppService* FindServiceByName(const std::string name);
 
-  AppService* FindServiceByID(const std::string service_id);
+  virtual AppService* FindServiceByID(const std::string service_id);
 
   std::string DefaultServiceByType(const std::string service_type);
 

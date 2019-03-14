@@ -35,6 +35,8 @@
 
 #include <gmock/gmock.h>
 #include "application_manager/app_service_manager.h"
+#include "application_manager/commands/command.h"
+#include "application_manager/commands/command_impl.h"
 
 namespace test {
 namespace components {
@@ -45,10 +47,11 @@ class MockAppServiceManager : public application_manager::AppServiceManager {
   MockAppServiceManager(application_manager::ApplicationManager& app_manager,
                         resumption::LastState& last_state)
       : application_manager::AppServiceManager(app_manager, last_state) {}
-  MOCK_METHOD3(PublishAppService, smart_objects::SmartObject(
-      const smart_objects::SmartObject& manifest,
-      const bool mobile_service,
-      const uint32_t connection_key));
+  MOCK_METHOD3(
+      PublishAppService,
+      smart_objects::SmartObject(const smart_objects::SmartObject& manifest,
+                                 const bool mobile_service,
+                                 const uint32_t connection_key));
   MOCK_METHOD1(UnpublishAppService, bool(const std::string service_id));
   MOCK_METHOD1(UnpublishServices, void(const uint32_t connection_key));
   MOCK_METHOD1(OnAppActivated,
