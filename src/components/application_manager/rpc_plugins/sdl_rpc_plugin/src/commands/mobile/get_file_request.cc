@@ -31,6 +31,8 @@
  */
 
 #include "sdl_rpc_plugin/commands/mobile/get_file_request.h"
+
+#include "application_manager/app_service_manager.h"
 #include "application_manager/application_impl.h"
 #include "application_manager/rpc_service.h"
 #include "interfaces/MOBILE_API.h"

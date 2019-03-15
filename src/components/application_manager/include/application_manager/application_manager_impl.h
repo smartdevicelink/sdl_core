@@ -42,6 +42,7 @@
 #include <memory>
 
 #include "application_manager/application_manager.h"
+#include "application_manager/app_service_manager.h"
 #include "application_manager/hmi_capabilities.h"
 #include "application_manager/message.h"
 #include "application_manager/message_helper.h"

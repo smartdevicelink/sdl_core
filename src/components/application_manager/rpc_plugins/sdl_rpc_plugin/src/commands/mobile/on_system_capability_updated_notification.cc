@@ -1,4 +1,6 @@
 #include "sdl_rpc_plugin/commands/mobile/on_system_capability_updated_notification.h"
+
+#include "application_manager/app_service_manager.h"
 #include "application_manager/application_manager.h"
 #include "application_manager/helpers/application_helper.h"
 #include "application_manager/message_helper.h"

@@ -33,11 +33,11 @@
 #ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_RPC_PASSING_HANDLER_H_
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_RPC_PASSING_HANDLER_H_
 
+#include <deque>
 #include "application_manager/application.h"
+#include "application_manager/commands/command.h"
 #include "interfaces/MOBILE_API.h"
 #include "smart_objects/smart_object.h"
-#include "application_manager/app_service_manager.h"
-#include <deque>
 #include "utils/timer.h"
 #include "application_manager/commands/command.h"
 

@@ -31,6 +31,8 @@
  */
 
 #include "application_manager/rpc_handler_impl.h"
+
+#include "application_manager/app_service_manager.h"
 #include "application_manager/plugin_manager/plugin_keys.h"
 
 namespace application_manager {

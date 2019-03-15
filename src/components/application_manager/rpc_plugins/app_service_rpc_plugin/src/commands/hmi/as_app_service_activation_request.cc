@@ -32,6 +32,8 @@
 
 #include "app_service_rpc_plugin/commands/hmi/as_app_service_activation_request.h"
 
+#include "application_manager/app_service_manager.h"
+
 namespace app_service_rpc_plugin {
 using namespace application_manager;
 namespace commands {

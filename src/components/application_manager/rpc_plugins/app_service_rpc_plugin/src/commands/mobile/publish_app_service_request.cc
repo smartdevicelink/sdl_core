@@ -31,6 +31,8 @@
  */
 
 #include "app_service_rpc_plugin/commands/mobile/publish_app_service_request.h"
+
+#include "application_manager/app_service_manager.h"
 #include "application_manager/application_impl.h"
 #include "application_manager/message_helper.h"
 #include "application_manager/rpc_service.h"
