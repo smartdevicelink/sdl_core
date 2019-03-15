@@ -31,6 +31,8 @@
  */
 
 #include "app_service_rpc_plugin/commands/hmi/as_publish_app_service_request.h"
+
+#include "application_manager/app_service_manager.h"
 #include "application_manager/message_helper.h"
 
 namespace app_service_rpc_plugin {

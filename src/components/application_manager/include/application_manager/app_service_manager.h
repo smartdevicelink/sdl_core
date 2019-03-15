@@ -34,10 +34,9 @@
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_APP_SERVICE_MANAGER_H_
 
 #include "application_manager/application.h"
+#include "application_manager/rpc_passing_handler.h"
 #include "interfaces/MOBILE_API.h"
 #include "smart_objects/smart_object.h"
-#include "application_manager/application.h"
-#include "application_manager/rpc_passing_handler.h"
 
 namespace resumption {
 class LastState;
@@ -52,6 +51,7 @@ struct AppService {
   smart_objects::SmartObject record;
 };
 
+class RPCPassingHandler;
 class ApplicationManager;
 /**
  * @brief The AppServiceManager is TODO.
@@ -70,13 +70,13 @@ class AppServiceManager {
   /**
    * @brief Class destructor
    */
-  ~AppServiceManager();
+  virtual ~AppServiceManager();
 
   /**
    * @brief TODO
    * @param manifest
    */
-  smart_objects::SmartObject PublishAppService(
+  virtual smart_objects::SmartObject PublishAppService(
       const smart_objects::SmartObject& manifest,
       const bool mobile_service,
       const uint32_t connection_key);
@@ -85,82 +85,83 @@ class AppServiceManager {
    * @brief TODO
    * @param service_id
    */
-  bool UnpublishAppService(const std::string service_id);
+  virtual bool UnpublishAppService(const std::string service_id);
 
-  void OnAppActivated(ApplicationConstSharedPtr app);
+  virtual void OnAppActivated(ApplicationConstSharedPtr app);
 
   /**
    * @brief TODO
    * @param connection_key
    */
-  void UnpublishServices(const uint32_t connection_key);
+  virtual void UnpublishServices(const uint32_t connection_key);
 
   /**
    * @brief TODO
    * @param service_id
    */
-  bool SetDefaultService(const std::string service_id);
+  virtual bool SetDefaultService(const std::string service_id);
 
   /**
    * @brief TODO
    * @param service_id
    */
-  bool RemoveDefaultService(const std::string service_id);
+  virtual bool RemoveDefaultService(const std::string service_id);
 
   /**
    * @brief TODO
    * @param service_id
    */
-  bool ActivateAppService(const std::string service_id);
+  virtual bool ActivateAppService(const std::string service_id);
 
   /**
    * @brief TODO
    * @param service_id
    */
-  bool DeactivateAppService(const std::string service_id);
+  virtual bool DeactivateAppService(const std::string service_id);
 
   /**
    * @brief TODO
    * @param manifest
    */
-  std::vector<smart_objects::SmartObject> GetAllServiceRecords();
-  std::vector<std::pair<std::string, AppService> > GetActiveServices();
+  virtual std::vector<smart_objects::SmartObject> GetAllServiceRecords();
+  virtual std::vector<std::pair<std::string, AppService> > GetActiveServices();
 
-  void GetProviderByType(const std::string& service_type,
-                         const bool mobile_consumer,
-                         ApplicationSharedPtr& app,
-                         bool& hmi_service);
+  virtual void GetProviderByType(const std::string& service_type,
+                                 const bool mobile_consumer,
+                                 ApplicationSharedPtr& app,
+                                 bool& hmi_service);
 
-  void GetProviderByID(const std::string& service_id,
-                       const bool mobile_consumer,
-                       ApplicationSharedPtr& app,
-                       bool& hmi_service);
+  virtual void GetProviderByID(const std::string& service_id,
+                               const bool mobile_consumer,
+                               ApplicationSharedPtr& app,
+                               bool& hmi_service);
 
-  AppService* ActiveServiceForType(const std::string service_type);
+  virtual AppService* ActiveServiceForType(const std::string service_type);
 
-  AppService* EmbeddedServiceForType(const std::string service_type);
+  virtual AppService* EmbeddedServiceForType(const std::string service_type);
 
   AppService* FindServiceByName(const std::string name);
 
-  AppService* FindServiceByID(const std::string service_id);
+  virtual AppService* FindServiceByID(const std::string service_id);
 
-  std::string DefaultServiceByType(const std::string service_type);
+  virtual std::string DefaultServiceByType(const std::string service_type);
 
   /**
    * @brief TODO
    * @param service_id
    * @param service_published
    */
-  void SetServicePublished(const std::string service_id,
-                           bool service_published);
+  virtual void SetServicePublished(const std::string service_id,
+                                   bool service_published);
 
   /**
    * @brief TODO
    * @param out_params
    */
-  bool UpdateNavigationCapabilities(smart_objects::SmartObject& out_params);
+  virtual bool UpdateNavigationCapabilities(
+      smart_objects::SmartObject& out_params);
 
-  RPCPassingHandler& GetRPCPassingHandler();
+  virtual RPCPassingHandler& GetRPCPassingHandler();
 
  private:
   ApplicationManager& app_manager_;
