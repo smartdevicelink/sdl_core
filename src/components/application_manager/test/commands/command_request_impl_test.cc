@@ -51,6 +51,9 @@
 #include "application_manager/mock_hmi_interface.h"
 #include "interfaces/MOBILE_API.h"
 
+#include "application_manager/mock_app_service_manager.h"
+#include "resumption/last_state_impl.h"
+
 namespace test {
 namespace components {
 namespace commands_test {
@@ -64,6 +67,7 @@ using ::testing::_;
 using ::testing::Return;
 using ::testing::SaveArg;
 using ::testing::DoAll;
+using ::testing::SetArgReferee;
 
 using am::commands::MessageSharedPtr;
 using am::CommandParametersPermissions;
@@ -74,6 +78,7 @@ using am::ApplicationManager;
 using am::ApplicationSet;
 using am::RPCParams;
 using am::MockHmiInterfaces;
+using test::components::application_manager_test::MockAppServiceManager;
 
 typedef am::commands::CommandRequestImpl::RequestState RequestState;
 
@@ -583,6 +588,87 @@ TEST_F(CommandRequestImplTest, AppNotFound_HashUpdateNotExpected) {
   EXPECT_CALL(*mock_app, UpdateHash()).Times(0);
 
   command.reset();
+}
+
+TEST_F(CommandRequestImplTest, SendProviderRequest_ByServiceType) {
+  resumption::LastStateImpl last_state("app_storage_folder",
+                                       "app_info_storage");
+  MockAppServiceManager app_service_manager(app_mngr_, last_state);
+  MockAppPtr mock_app = CreateMockApp();
+  EXPECT_CALL(app_mngr_, GetAppServiceManager())
+      .WillRepeatedly(ReturnRef(app_service_manager));
+  EXPECT_CALL(app_service_manager, GetProviderByType("MEDIA", _, _, _))
+      .WillOnce(DoAll(SetArgReferee<2>(mock_app), SetArgReferee<3>(false)));
+
+  MessageSharedPtr result;
+  EXPECT_CALL(mock_rpc_service_, ManageMobileCommand(_, _))
+      .WillOnce(DoAll(SaveArg<0>(&result), Return(true)));
+
+  MessageSharedPtr msg = CreateMessage();
+  (*msg)[strings::params][strings::function_id] =
+      mobile_apis::FunctionID::GetAppServiceDataID;
+  (*msg)[strings::msg_params][strings::service_type] = "MEDIA";
+
+  CommandPtr command = CreateCommand<UCommandRequestImpl>(msg);
+  command->SendProviderRequest(
+      mobile_apis::FunctionID::GetAppServiceDataID,
+      hmi_apis::FunctionID::AppService_GetAppServiceData,
+      &(*msg),
+      true);
+}
+
+TEST_F(CommandRequestImplTest, SendProviderRequest_ByProviderID) {
+  resumption::LastStateImpl last_state("app_storage_folder",
+                                       "app_info_storage");
+  MockAppServiceManager app_service_manager(app_mngr_, last_state);
+  MockAppPtr mock_app = CreateMockApp();
+  EXPECT_CALL(app_mngr_, GetAppServiceManager())
+      .WillRepeatedly(ReturnRef(app_service_manager));
+  EXPECT_CALL(app_service_manager, GetProviderByID("serviceid12345", _, _, _))
+      .WillOnce(DoAll(SetArgReferee<2>(mock_app), SetArgReferee<3>(false)));
+
+  MessageSharedPtr result;
+  EXPECT_CALL(mock_rpc_service_, ManageMobileCommand(_, _))
+      .WillOnce(DoAll(SaveArg<0>(&result), Return(true)));
+
+  MessageSharedPtr msg = CreateMessage();
+  (*msg)[strings::params][strings::function_id] =
+      mobile_apis::FunctionID::GetAppServiceDataID;
+  (*msg)[strings::msg_params][strings::service_id] = "serviceid12345";
+
+  CommandPtr command = CreateCommand<UCommandRequestImpl>(msg);
+  command->SendProviderRequest(
+      mobile_apis::FunctionID::GetAppServiceDataID,
+      hmi_apis::FunctionID::AppService_GetAppServiceData,
+      &(*msg),
+      true);
+}
+
+TEST_F(CommandRequestImplTest, SendProviderRequestToHMI_ByProviderID) {
+  resumption::LastStateImpl last_state("app_storage_folder",
+                                       "app_info_storage");
+  MockAppServiceManager app_service_manager(app_mngr_, last_state);
+  MockAppPtr mock_app = CreateMockApp();
+  EXPECT_CALL(app_mngr_, GetAppServiceManager())
+      .WillRepeatedly(ReturnRef(app_service_manager));
+  EXPECT_CALL(app_service_manager, GetProviderByID("serviceid12345", _, _, _))
+      .WillOnce(DoAll(SetArgReferee<2>(mock_app), SetArgReferee<3>(true)));
+
+  MessageSharedPtr result;
+  EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_, _))
+      .WillOnce(DoAll(SaveArg<0>(&result), Return(true)));
+
+  MessageSharedPtr msg = CreateMessage();
+  (*msg)[strings::params][strings::function_id] =
+      mobile_apis::FunctionID::GetAppServiceDataID;
+  (*msg)[strings::msg_params][strings::service_id] = "serviceid12345";
+
+  CommandPtr command = CreateCommand<UCommandRequestImpl>(msg);
+  command->SendProviderRequest(
+      mobile_apis::FunctionID::GetAppServiceDataID,
+      hmi_apis::FunctionID::AppService_GetAppServiceData,
+      &(*msg),
+      true);
 }
 
 }  // namespace command_request_impl

@@ -126,15 +126,15 @@ class AppServiceManager {
   std::vector<smart_objects::SmartObject> GetAllServiceRecords();
   std::vector<std::pair<std::string, AppService> > GetActiveServices();
 
-  void GetProviderByType(const std::string& service_type,
-                         const bool mobile_consumer,
-                         ApplicationSharedPtr& app,
-                         bool& hmi_service);
+  virtual void GetProviderByType(const std::string& service_type,
+                                 const bool mobile_consumer,
+                                 ApplicationSharedPtr& app,
+                                 bool& hmi_service);
 
-  void GetProviderByID(const std::string& service_id,
-                       const bool mobile_consumer,
-                       ApplicationSharedPtr& app,
-                       bool& hmi_service);
+  virtual void GetProviderByID(const std::string& service_id,
+                               const bool mobile_consumer,
+                               ApplicationSharedPtr& app,
+                               bool& hmi_service);
 
   AppService* ActiveServiceForType(const std::string service_type);
 
