@@ -3555,7 +3555,7 @@
             <description> In km </description>
         </param>
 
-        <param name="weatherIconImageName" type="String" mandatory="false"/>
+        <param name="weatherIcon" type="Common.Image" mandatory="false"/>
     </struct>
 
     <struct name="WeatherServiceData">
