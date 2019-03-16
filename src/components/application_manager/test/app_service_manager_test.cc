@@ -61,6 +61,7 @@ const std::string kServiceName = "service_name";
 const std::string kServiceId = "service_id";
 const std::string kPolicyAppId = "p_app_id";
 const uint32_t kConnectionKey = 43629;
+const uint32_t kHMIConnectionKey = 0;
 
 MATCHER_P(CapabilityUpdateMatcher, reason, "") {
   smart_objects::SmartObject& services_updated =
@@ -100,8 +101,7 @@ class AppServiceManagerTest : public testing::Test {
         .WillByDefault(ReturnRef(mock_settings_));
     ON_CALL(*mock_app_ptr_, policy_app_id())
         .WillByDefault(Return(kPolicyAppId));
-    ON_CALL(mock_last_state_, get_dictionary())
-        .WillByDefault(ReturnRef(dict_));
+    ON_CALL(mock_last_state_, get_dictionary()).WillByDefault(ReturnRef(dict_));
     auto app_ptr = std::static_pointer_cast<am::Application>(mock_app_ptr_);
     ON_CALL(mock_app_manager_, application(kConnectionKey))
         .WillByDefault(Return(app_ptr));
@@ -119,7 +119,7 @@ class AppServiceManagerTest : public testing::Test {
     return manifest;
   }
 
-  smart_objects::SmartObject PublishMobileService(
+  smart_objects::SmartObject PublishService(
       uint32_t connection_key = kConnectionKey, bool first_run = true) {
     smart_objects::SmartObject manifest = GenerateMediaManifest(true);
 
@@ -131,18 +131,17 @@ class AppServiceManagerTest : public testing::Test {
                 BroadcastCapabilityUpdate(
                     CapabilityUpdateMatcher(
                         mobile_apis::ServiceUpdateReason::PUBLISHED),
-                    _))
-        .WillOnce(Return());
+                    _)).WillOnce(Return());
     if (first_run) {
       EXPECT_CALL(*mock_message_helper_,
                   BroadcastCapabilityUpdate(
                       CapabilityUpdateMatcher(
                           mobile_apis::ServiceUpdateReason::ACTIVATED),
-                      _))
-          .WillOnce(Return());
+                      _)).WillOnce(Return());
     }
-
-    return app_service_manager_.PublishAppService(manifest, true, connection_key);
+    bool mobile_service = connection_key != kHMIConnectionKey;
+    return app_service_manager_.PublishAppService(
+        manifest, mobile_service, connection_key);
   }
 
   void CheckCapabilityUpdate(smart_objects::SmartObject& msg_params,
@@ -151,17 +150,16 @@ class AppServiceManagerTest : public testing::Test {
                              mobile_apis::ServiceUpdateReason::eType reason,
                              bool published,
                              bool active) {
-    smart_objects::SmartObject& services_updated =
-        msg_params[am::strings::system_capability]
-                  [am::strings::app_services_capabilities]
-                  [am::strings::app_services];
+    smart_objects::SmartObject& services_updated = msg_params
+        [am::strings::system_capability][am::strings::app_services_capabilities]
+        [am::strings::app_services];
     ASSERT_EQ(smart_objects::SmartType_Array, services_updated.getType());
     EXPECT_EQ(length, services_updated.length());
     for (size_t i = 0; i < services_updated.length(); i++) {
       smart_objects::SmartObject& service_cap = services_updated[i];
-      if (service_id == service_cap[am::strings::updated_app_service_record]
-                                   [am::strings::service_id]
-                                       .asString()) {
+      if (service_id ==
+          service_cap[am::strings::updated_app_service_record]
+                     [am::strings::service_id].asString()) {
         CheckCapability(service_cap, service_id, reason, published, active);
         return;
       }
@@ -180,7 +178,8 @@ class AppServiceManagerTest : public testing::Test {
     smart_objects::SmartObject& updated_record =
         app_service_capability[am::strings::updated_app_service_record];
     EXPECT_EQ(service_id, updated_record[am::strings::service_id].asString());
-    EXPECT_EQ(published, updated_record[am::strings::service_published].asBool());
+    EXPECT_EQ(published,
+              updated_record[am::strings::service_published].asBool());
     EXPECT_EQ(active, updated_record[am::strings::service_active].asBool());
   }
 
@@ -207,16 +206,14 @@ TEST_F(AppServiceManagerTest, PublishAppService_Mobile_SUCCESS) {
       *mock_message_helper_,
       BroadcastCapabilityUpdate(
           CapabilityUpdateMatcher(mobile_apis::ServiceUpdateReason::PUBLISHED),
-          _))
-      .WillOnce(DoAll(SaveArg<0>(&syscap_update_published), Return()));
-  
+          _)).WillOnce(DoAll(SaveArg<0>(&syscap_update_published), Return()));
+
   smart_objects::SmartObject syscap_update_activated;
   EXPECT_CALL(
       *mock_message_helper_,
       BroadcastCapabilityUpdate(
           CapabilityUpdateMatcher(mobile_apis::ServiceUpdateReason::ACTIVATED),
-          _))
-      .WillOnce(DoAll(SaveArg<0>(&syscap_update_activated), Return()));
+          _)).WillOnce(DoAll(SaveArg<0>(&syscap_update_activated), Return()));
 
   auto record =
       app_service_manager_.PublishAppService(manifest, true, kConnectionKey);
@@ -256,19 +253,16 @@ TEST_F(AppServiceManagerTest, PublishAppService_HMI_SUCCESS) {
       *mock_message_helper_,
       BroadcastCapabilityUpdate(
           CapabilityUpdateMatcher(mobile_apis::ServiceUpdateReason::PUBLISHED),
-          _))
-      .WillOnce(DoAll(SaveArg<0>(&syscap_update_published), Return()));
+          _)).WillOnce(DoAll(SaveArg<0>(&syscap_update_published), Return()));
 
   smart_objects::SmartObject syscap_update_activated;
   EXPECT_CALL(
       *mock_message_helper_,
       BroadcastCapabilityUpdate(
           CapabilityUpdateMatcher(mobile_apis::ServiceUpdateReason::ACTIVATED),
-          _))
-      .WillOnce(DoAll(SaveArg<0>(&syscap_update_activated), Return()));
+          _)).WillOnce(DoAll(SaveArg<0>(&syscap_update_activated), Return()));
 
-  auto record =
-      app_service_manager_.PublishAppService(manifest, false);
+  auto record = app_service_manager_.PublishAppService(manifest, false);
 
   // Check final record
   std::string service_id = record[am::strings::service_id].asString();
@@ -293,35 +287,55 @@ TEST_F(AppServiceManagerTest, PublishAppService_HMI_SUCCESS) {
                         true);
 }
 
+TEST_F(AppServiceManagerTest, UnpublishAppService_SUCCESS) {
+  auto record = PublishService();
+
+  smart_objects::SmartObject syscap_update_unpublished;
+  EXPECT_CALL(
+      *mock_message_helper_,
+      BroadcastCapabilityUpdate(
+          CapabilityUpdateMatcher(mobile_apis::ServiceUpdateReason::REMOVED),
+          _)).WillOnce(DoAll(SaveArg<0>(&syscap_update_unpublished), Return()));
+  std::string service_id = record[am::strings::service_id].asString();
+
+  EXPECT_TRUE(app_service_manager_.UnpublishAppService(service_id));
+
+  // Check removed capability update
+  CheckCapabilityUpdate(syscap_update_unpublished,
+                        1,
+                        service_id,
+                        mobile_apis::ServiceUpdateReason::REMOVED,
+                        false,
+                        false);
+}
+
 TEST_F(AppServiceManagerTest, ActivateAppService_AlreadyActivated) {
-  auto record = PublishMobileService();
+  auto record = PublishService();
 
   // No capability update
   EXPECT_CALL(
       *mock_message_helper_,
       BroadcastCapabilityUpdate(
           CapabilityUpdateMatcher(mobile_apis::ServiceUpdateReason::ACTIVATED),
-          _))
-      .Times(0);
+          _)).Times(0);
   std::string service_id = record[am::strings::service_id].asString();
-  
+
   EXPECT_TRUE(app_service_manager_.ActivateAppService(service_id));
 }
 
 TEST_F(AppServiceManagerTest, ActivateAppService_TwoApps_SUCCESS) {
   // Register two services with the same service type, the first is activated
   // automatically
-  auto record = PublishMobileService();
-  auto record2 = PublishMobileService(kConnectionKey + 1, false);
+  auto record = PublishService();
+  auto record2 = PublishService(kConnectionKey + 1, false);
 
   // No capability update
   smart_objects::SmartObject syscap_update_activated;
-  EXPECT_CALL(*mock_message_helper_,
-              BroadcastCapabilityUpdate(
-                  CapabilityUpdateMatcher(
-                      mobile_apis::ServiceUpdateReason::ACTIVATED),
-                  _))
-      .WillOnce(DoAll(SaveArg<0>(&syscap_update_activated), Return()));
+  EXPECT_CALL(
+      *mock_message_helper_,
+      BroadcastCapabilityUpdate(
+          CapabilityUpdateMatcher(mobile_apis::ServiceUpdateReason::ACTIVATED),
+          _)).WillOnce(DoAll(SaveArg<0>(&syscap_update_activated), Return()));
   std::string service_id = record[am::strings::service_id].asString();
   std::string service_id2 = record2[am::strings::service_id].asString();
 
@@ -346,7 +360,7 @@ TEST_F(AppServiceManagerTest, ActivateAppService_TwoApps_SUCCESS) {
 }
 
 TEST_F(AppServiceManagerTest, DeactivateAppService_SUCCESS) {
-  auto record = PublishMobileService();
+  auto record = PublishService();
 
   smart_objects::SmartObject syscap_update_deactivated;
   EXPECT_CALL(*mock_message_helper_,
@@ -359,7 +373,7 @@ TEST_F(AppServiceManagerTest, DeactivateAppService_SUCCESS) {
 
   EXPECT_TRUE(app_service_manager_.DeactivateAppService(service_id));
 
-  // Check deactivated capability updated
+  // Check deactivated capability update
   CheckCapabilityUpdate(syscap_update_deactivated,
                         1,
                         service_id,
@@ -369,12 +383,56 @@ TEST_F(AppServiceManagerTest, DeactivateAppService_SUCCESS) {
 }
 
 TEST_F(AppServiceManagerTest, ActiveServiceForType_SUCCESS) {
-  auto record = PublishMobileService();
+  auto record = PublishService();
 
   auto service = app_service_manager_.ActiveServiceForType(kServiceType);
 
   ASSERT_FALSE(service == NULL);
-  EXPECT_EQ(service->record, record);
+  EXPECT_EQ(record, service->record);
+  EXPECT_EQ(kConnectionKey, service->connection_key);
+  EXPECT_EQ(true, service->mobile_service);
+}
+
+TEST_F(AppServiceManagerTest, EmbeddedServiceForType_SUCCESS) {
+  auto record = PublishService(kHMIConnectionKey);
+
+  auto service = app_service_manager_.EmbeddedServiceForType(kServiceType);
+
+  ASSERT_FALSE(service == NULL);
+  EXPECT_EQ(record, service->record);
+  EXPECT_EQ(false, service->mobile_service);
+}
+
+TEST_F(AppServiceManagerTest, FindServiceByID_SUCCESS) {
+  auto record = PublishService();
+
+  std::string service_id = record[am::strings::service_id].asString();
+  auto service = app_service_manager_.FindServiceByID(service_id);
+
+  ASSERT_FALSE(service == NULL);
+  EXPECT_EQ(record, service->record);
+  EXPECT_EQ(kConnectionKey, service->connection_key);
+  EXPECT_EQ(true, service->mobile_service);
+}
+
+TEST_F(AppServiceManagerTest, GetAllServiceRecords_OneService_SUCCESS) {
+  auto record = PublishService();
+
+  auto records = app_service_manager_.GetAllServiceRecords();
+
+  ASSERT_EQ(1u, records.size());
+  EXPECT_EQ(record, records[0]);
+}
+
+TEST_F(AppServiceManagerTest, GetActiveServices_OneService_SUCCESS) {
+  auto record = PublishService();
+
+  auto services = app_service_manager_.GetActiveServices();
+
+  ASSERT_EQ(1u, services.size());
+  EXPECT_EQ(record, services[0].record);
+  EXPECT_EQ(kConnectionKey, services[0].connection_key);
+  EXPECT_EQ(true, services[0].mobile_service);
 }
 
 }  // namespace application_manager_test

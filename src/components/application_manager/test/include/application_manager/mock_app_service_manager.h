@@ -45,10 +45,11 @@ class MockAppServiceManager : public application_manager::AppServiceManager {
   MockAppServiceManager(application_manager::ApplicationManager& app_manager,
                         resumption::LastState& last_state)
       : application_manager::AppServiceManager(app_manager, last_state) {}
-  MOCK_METHOD3(PublishAppService, smart_objects::SmartObject(
-      const smart_objects::SmartObject& manifest,
-      const bool mobile_service,
-      const uint32_t connection_key));
+  MOCK_METHOD3(
+      PublishAppService,
+      smart_objects::SmartObject(const smart_objects::SmartObject& manifest,
+                                 const bool mobile_service,
+                                 const uint32_t connection_key));
   MOCK_METHOD1(UnpublishAppService, bool(const std::string service_id));
   MOCK_METHOD1(UnpublishServices, void(const uint32_t connection_key));
   MOCK_METHOD1(OnAppActivated,
@@ -58,9 +59,8 @@ class MockAppServiceManager : public application_manager::AppServiceManager {
   MOCK_METHOD1(ActivateAppService, bool(const std::string service_id));
   MOCK_METHOD1(DeactivateAppService, bool(const std::string service_id));
   MOCK_METHOD0(GetAllServiceRecords, std::vector<smart_objects::SmartObject>());
-  MOCK_METHOD0(
-      GetActiveServices,
-      std::vector<application_manager::AppService>());
+  MOCK_METHOD0(GetActiveServices,
+               std::vector<application_manager::AppService>());
   MOCK_METHOD4(GetProviderByType,
                void(const std::string& service_type,
                     const bool mobile_consumer,

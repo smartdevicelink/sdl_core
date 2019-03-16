@@ -142,7 +142,7 @@ class AppServiceManager {
    * @return A list of all all published service records.
    */
   virtual std::vector<smart_objects::SmartObject> GetAllServiceRecords();
-  
+
   /**
    * @brief Get a list of all active app services.
    * @return A list of all all active app services.
