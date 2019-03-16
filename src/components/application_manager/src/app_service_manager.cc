@@ -104,7 +104,8 @@ smart_objects::SmartObject AppServiceManager::PublishAppService(
       }
     }
   }
-  app_service.default_service = GetPolicyAppID(app_service) == default_app_id;
+  app_service.default_service =
+      !default_app_id.empty() && GetPolicyAppID(app_service) == default_app_id;
 
   auto ret = published_services_.insert(
       std::pair<std::string, AppService>(service_id, app_service));
@@ -375,7 +376,9 @@ bool AppServiceManager::DeactivateAppService(const std::string service_id) {
     const std::string service_type =
         service[strings::service_manifest][strings::service_type].asString();
     auto embedded_service = EmbeddedServiceForType(service_type);
-    if (embedded_service) {
+    if (embedded_service &&
+        embedded_service->record[strings::service_id].asString() !=
+            service[strings::service_id].asString()) {
       embedded_service->record[strings::service_active] = true;
       AppServiceUpdated(embedded_service->record,
                         mobile_apis::ServiceUpdateReason::ACTIVATED,
