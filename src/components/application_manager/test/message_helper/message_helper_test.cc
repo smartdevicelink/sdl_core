@@ -42,7 +42,7 @@
 #include "utils/custom_string.h"
 #include "utils/lock.h"
 #include "policy/mock_policy_settings.h"
-#include "application_manager/policies/policy_handler.h"
+#include "application_manager/commands/command_impl.h"
 #include "application_manager/mock_application_manager.h"
 #include "application_manager/mock_rpc_service.h"
 #include "application_manager/event_engine/event_dispatcher.h"

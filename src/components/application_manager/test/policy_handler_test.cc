@@ -81,15 +81,13 @@ using namespace application_manager;
 using namespace policy;
 using namespace utils::custom_string;
 using testing::_;
+using ::testing::DoAll;
 using ::testing::Mock;
+using ::testing::NiceMock;
 using ::testing::Return;
 using ::testing::ReturnRef;
-using ::testing::NiceMock;
-using ::testing::SetArgReferee;
 using ::testing::SetArgPointee;
-using ::testing::DoAll;
 using ::testing::SetArgReferee;
-using ::testing::Mock;
 
 typedef NiceMock<application_manager_test::MockRPCService> MockRPCService;
 
@@ -2534,6 +2532,104 @@ TEST_F(PolicyHandlerTest, RemoteAppsUrl_SUCCESS) {
       .WillOnce(SetEndpoint(endpoints));
 
   EXPECT_EQ(url, policy_handler_.RemoteAppsUrl());
+}
+
+TEST_F(PolicyHandlerTest, OnSetCloudAppProperties_AllProperties_SUCCESS) {
+  EnablePolicyAndPolicyManagerMock();
+
+  bool enabled = true;
+  std::string app_name = "anAppName";
+  std::string auth_token = "anAuthToken";
+  std::string cloud_transport_type = "aTransportType";
+  mobile_apis::HybridAppPreference::eType hybrid_app_preference =
+      mobile_apis::HybridAppPreference::CLOUD;
+  std::string hybrid_app_preference_str = "CLOUD";
+  std::string endpoint = "anEndpoint";
+
+  StringArray nicknames_vec;
+  nicknames_vec.push_back(app_name);
+
+  smart_objects::SmartObject message(smart_objects::SmartType_Map);
+  smart_objects::SmartObject properties(smart_objects::SmartType_Map);
+  smart_objects::SmartObject nicknames(smart_objects::SmartType_Array);
+
+  properties[strings::app_id] = kPolicyAppId_;
+  nicknames[0] = app_name;
+  properties[strings::nicknames] = nicknames;
+  properties[strings::enabled] = enabled;
+  properties[strings::auth_token] = auth_token;
+  properties[strings::cloud_transport_type] = cloud_transport_type;
+  properties[strings::hybrid_app_preference] = hybrid_app_preference;
+  properties[strings::endpoint] = endpoint;
+  message[strings::msg_params][strings::properties] = properties;
+
+  application_manager_test::MockPolicyHandlerObserver policy_handler_observer;
+  policy_handler_.add_listener(&policy_handler_observer);
+
+  EXPECT_CALL(*mock_policy_manager_, InitCloudApp(kPolicyAppId_));
+  EXPECT_CALL(*mock_policy_manager_,
+              SetCloudAppEnabled(kPolicyAppId_, enabled));
+  EXPECT_CALL(*mock_policy_manager_,
+              SetAppNicknames(kPolicyAppId_, nicknames_vec));
+  EXPECT_CALL(*mock_policy_manager_,
+              SetAppAuthToken(kPolicyAppId_, auth_token));
+  EXPECT_CALL(*mock_policy_manager_,
+              SetAppCloudTransportType(kPolicyAppId_, cloud_transport_type));
+  EXPECT_CALL(*mock_policy_manager_,
+              SetHybridAppPreference(kPolicyAppId_, hybrid_app_preference_str));
+  EXPECT_CALL(*mock_policy_manager_, SetAppEndpoint(kPolicyAppId_, endpoint));
+  EXPECT_CALL(*mock_policy_manager_,
+              GetCloudAppParameters(kPolicyAppId_, _, _, _, _, _, _))
+      .WillOnce(DoAll(SetArgReferee<4>(auth_token), Return(true)));
+  EXPECT_CALL(app_manager_, RefreshCloudAppInformation());
+  EXPECT_CALL(policy_handler_observer,
+              OnAuthTokenUpdated(kPolicyAppId_, auth_token));
+
+  policy_handler_.OnSetCloudAppProperties(message);
+}
+
+TEST_F(PolicyHandlerTest, GetCloudAppParameters_AllProperties_SUCCESS) {
+  EnablePolicyAndPolicyManagerMock();
+
+  bool enabled = true;
+  std::string certificate = "aCertificate";
+  std::string auth_token = "anAuthToken";
+  std::string cloud_transport_type = "aTransportType";
+  std::string hybrid_app_preference_str = "CLOUD";
+  std::string endpoint = "anEndpoint";
+
+  application_manager_test::MockPolicyHandlerObserver policy_handler_observer;
+  policy_handler_.add_listener(&policy_handler_observer);
+
+  EXPECT_CALL(*mock_policy_manager_,
+              GetCloudAppParameters(kPolicyAppId_, _, _, _, _, _, _))
+      .WillOnce(DoAll(SetArgReferee<1>(enabled),
+                      SetArgReferee<2>(endpoint),
+                      SetArgReferee<3>(certificate),
+                      SetArgReferee<4>(auth_token),
+                      SetArgReferee<5>(cloud_transport_type),
+                      SetArgReferee<6>(hybrid_app_preference_str),
+                      Return(true)));
+
+  bool enabled_out;
+  std::string endpoint_out;
+  std::string cert_out;
+  std::string auth_token_out;
+  std::string ctt_out;
+  std::string hap_out;
+  EXPECT_TRUE(policy_handler_.GetCloudAppParameters(kPolicyAppId_,
+                                                    enabled_out,
+                                                    endpoint_out,
+                                                    cert_out,
+                                                    auth_token_out,
+                                                    ctt_out,
+                                                    hap_out));
+  EXPECT_EQ(enabled, enabled_out);
+  EXPECT_EQ(endpoint, endpoint_out);
+  EXPECT_EQ(certificate, cert_out);
+  EXPECT_EQ(auth_token, auth_token_out);
+  EXPECT_EQ(cloud_transport_type, ctt_out);
+  EXPECT_EQ(hybrid_app_preference_str, hap_out);
 }
 
 }  // namespace policy_handler_test

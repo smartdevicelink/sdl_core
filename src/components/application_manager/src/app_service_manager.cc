@@ -39,7 +39,6 @@
 #include "application_manager/application_manager.h"
 #include "application_manager/commands/command_impl.h"
 #include "application_manager/message_helper.h"
-#include "application_manager/rpc_passing_handler.h"
 #include "application_manager/smart_object_keys.h"
 #include "encryption/hashing.h"
 #include "resumption/last_state.h"
@@ -104,7 +103,8 @@ smart_objects::SmartObject AppServiceManager::PublishAppService(
       }
     }
   }
-  app_service.default_service = GetPolicyAppID(app_service) == default_app_id;
+  app_service.default_service =
+      !default_app_id.empty() && GetPolicyAppID(app_service) == default_app_id;
 
   auto ret = published_services_.insert(
       std::pair<std::string, AppService>(service_id, app_service));
@@ -376,7 +376,9 @@ bool AppServiceManager::DeactivateAppService(const std::string service_id) {
     const std::string service_type =
         service[strings::service_manifest][strings::service_type].asString();
     auto embedded_service = EmbeddedServiceForType(service_type);
-    if (embedded_service) {
+    if (embedded_service &&
+        embedded_service->record[strings::service_id].asString() !=
+            service[strings::service_id].asString()) {
       embedded_service->record[strings::service_active] = true;
       AppServiceUpdated(embedded_service->record,
                         mobile_apis::ServiceUpdateReason::ACTIVATED,
@@ -418,19 +420,6 @@ AppService* AppServiceManager::EmbeddedServiceForType(
     if (it->second.record[strings::service_manifest][strings::service_type]
                 .asString() == service_type &&
         !it->second.mobile_service) {
-      return &(it->second);
-    }
-  }
-  return NULL;
-}
-
-AppService* AppServiceManager::FindServiceByName(const std::string name) {
-  LOG4CXX_AUTO_TRACE(logger_);
-  sync_primitives::AutoLock lock(published_services_lock_);
-  for (auto it = published_services_.begin(); it != published_services_.end();
-       ++it) {
-    if (it->second.record[strings::service_manifest][strings::service_name]
-            .asString() == name) {
       return &(it->second);
     }
   }
@@ -548,13 +537,12 @@ void AppServiceManager::AppServiceUpdated(
   services[-1] = service;
 }
 
-std::vector<std::pair<std::string, AppService> >
-AppServiceManager::GetActiveServices() {
-  std::vector<std::pair<std::string, AppService> > active_services;
+std::vector<AppService> AppServiceManager::GetActiveServices() {
+  std::vector<AppService> active_services;
   for (auto it = published_services_.begin(); it != published_services_.end();
        ++it) {
     if (it->second.record[strings::service_active].asBool()) {
-      active_services.push_back(*it);
+      active_services.push_back(it->second);
     }
   }
   return active_services;

@@ -61,9 +61,8 @@ class MockAppServiceManager : public application_manager::AppServiceManager {
   MOCK_METHOD1(ActivateAppService, bool(const std::string service_id));
   MOCK_METHOD1(DeactivateAppService, bool(const std::string service_id));
   MOCK_METHOD0(GetAllServiceRecords, std::vector<smart_objects::SmartObject>());
-  MOCK_METHOD0(
-      GetActiveServices,
-      std::vector<std::pair<std::string, application_manager::AppService> >());
+  MOCK_METHOD0(GetActiveServices,
+               std::vector<application_manager::AppService>());
   MOCK_METHOD4(GetProviderByType,
                void(const std::string& service_type,
                     const bool mobile_consumer,
@@ -82,8 +81,6 @@ class MockAppServiceManager : public application_manager::AppServiceManager {
       application_manager::AppService*(const std::string service_type));
   MOCK_METHOD1(FindServiceByID,
                application_manager::AppService*(const std::string service_id));
-  MOCK_METHOD1(DefaultServiceByType,
-               std::string(const std::string service_type));
   MOCK_METHOD2(SetServicePublished,
                void(const std::string service_id,
                     const bool service_published));

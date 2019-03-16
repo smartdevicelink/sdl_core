@@ -34,7 +34,7 @@
 
 #include "utils/logger.h"
 #include "application_manager/hmi_capabilities_impl.h"
-#include "application_manager/application_manager_impl.h"
+#include "application_manager/application_manager.h"
 #include "smart_objects/smart_object.h"
 #include "application_manager/message_helper.h"
 #include "application_manager/smart_object_keys.h"
@@ -45,6 +45,8 @@
 
 namespace application_manager {
 namespace formatters = ns_smart_device_link::ns_json_handler::formatters;
+
+CREATE_LOGGERPTR_GLOBAL(logger_, "HMICapabilities")
 
 namespace {
 std::map<std::string, hmi_apis::Common_VrCapabilities::eType>

@@ -32,7 +32,6 @@
 
 #include "app_service_rpc_plugin/commands/mobile/perform_app_service_interaction_request_to_mobile.h"
 #include "application_manager/application_impl.h"
-#include "interfaces/MOBILE_API.h"
 
 namespace app_service_rpc_plugin {
 using namespace application_manager;
