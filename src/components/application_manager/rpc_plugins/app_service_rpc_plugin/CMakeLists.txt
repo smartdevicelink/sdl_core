@@ -80,5 +80,5 @@ install(TARGETS app_service_rpc_plugin
 )
 
 if(BUILD_TESTS)
-  # add_subdirectory(test)
+  add_subdirectory(test)
 endif()
