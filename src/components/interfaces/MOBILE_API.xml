@@ -3899,7 +3899,7 @@
             <description> In km </description>
         </param>
 
-        <param name="weatherIconImageName" type="String" mandatory="false"/>
+        <param name="weatherIcon" type="Image" mandatory="false"/>
     </struct>
 
     <struct name="WeatherServiceData" since="5.1">
