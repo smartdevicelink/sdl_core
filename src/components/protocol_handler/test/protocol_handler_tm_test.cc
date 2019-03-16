@@ -29,19 +29,19 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-#include "gtest/gtest.h"
 #include <string>
-#include "protocol_handler/protocol_handler.h"
-#include "protocol_handler/protocol_handler_impl.h"
+#include "connection_handler/connection_handler_impl.h"
+#include "connection_handler/mock_connection_handler.h"
+#include "gtest/gtest.h"
 #include "protocol/bson_object_keys.h"
 #include "protocol/common.h"
 #include "protocol_handler/control_message_matcher.h"
 #include "protocol_handler/mock_protocol_handler.h"
-#include "protocol_handler/mock_protocol_observer.h"
 #include "protocol_handler/mock_protocol_handler_settings.h"
+#include "protocol_handler/mock_protocol_observer.h"
 #include "protocol_handler/mock_session_observer.h"
-#include "connection_handler/mock_connection_handler.h"
-#include "connection_handler/connection_handler_impl.h"
+#include "protocol_handler/protocol_handler.h"
+#include "protocol_handler/protocol_handler_impl.h"
 #ifdef ENABLE_SECURITY
 #include "security_manager/mock_security_manager.h"
 #include "security_manager/mock_ssl_context.h"
@@ -50,8 +50,8 @@
 #include "utils/mock_system_time_handler.h"
 #include "utils/semantic_version.h"
 
-#include "utils/test_async_waiter.h"
 #include <bson_object.h>
+#include "utils/test_async_waiter.h"
 
 namespace transport_manager {
 namespace transport_adapter {
@@ -59,8 +59,8 @@ namespace transport_adapter {
 const char* tc_enabled = "enabled";
 const char* tc_tcp_port = "tcp_port";
 const char* tc_tcp_ip_address = "tcp_ip_address";
-}
-}
+}  // namespace transport_adapter
+}  // namespace transport_manager
 
 namespace test {
 namespace components {
@@ -70,50 +70,50 @@ namespace protocol_handler_test {
 #define NEW_SESSION_ID 0u
 #define SESSION_START_REJECT 0u
 // Protocol Handler Entities
-using protocol_handler::ProtocolHandlerImpl;
-using protocol_handler::ServiceType;
-using protocol_handler::RawMessage;
-using protocol_handler::RawMessagePtr;
-using protocol_handler::PROTECTION_ON;
+using protocol_handler::FRAME_DATA_END_SERVICE;
+using protocol_handler::FRAME_DATA_END_SERVICE_ACK;
+using protocol_handler::FRAME_DATA_END_SERVICE_NACK;
+using protocol_handler::FRAME_DATA_FIRST;
+using protocol_handler::FRAME_DATA_HEART_BEAT;
+using protocol_handler::FRAME_DATA_HEART_BEAT_ACK;
+using protocol_handler::FRAME_DATA_LAST_CONSECUTIVE;
+using protocol_handler::FRAME_DATA_REGISTER_SECONDARY_TRANSPORT;
+using protocol_handler::FRAME_DATA_REGISTER_SECONDARY_TRANSPORT_ACK;
+using protocol_handler::FRAME_DATA_REGISTER_SECONDARY_TRANSPORT_NACK;
+using protocol_handler::FRAME_DATA_SERVICE_DATA_ACK;
+using protocol_handler::FRAME_DATA_SINGLE;
+using protocol_handler::FRAME_DATA_START_SERVICE;
+using protocol_handler::FRAME_DATA_START_SERVICE_ACK;
+using protocol_handler::FRAME_DATA_TRANSPORT_EVENT_UPDATE;
+using protocol_handler::FRAME_TYPE_CONSECUTIVE;
+using protocol_handler::FRAME_TYPE_CONTROL;
+using protocol_handler::FRAME_TYPE_FIRST;
+using protocol_handler::FRAME_TYPE_MAX_VALUE;
+using protocol_handler::FRAME_TYPE_SINGLE;
+using protocol_handler::kAudio;
+using protocol_handler::kBulk;
+using protocol_handler::kControl;
+using protocol_handler::kInvalidServiceType;
+using protocol_handler::kMobileNav;
+using protocol_handler::kRpc;
+using protocol_handler::MAXIMUM_FRAME_DATA_V2_SIZE;
 using protocol_handler::PROTECTION_OFF;
+using protocol_handler::PROTECTION_ON;
 using protocol_handler::PROTOCOL_VERSION_1;
 using protocol_handler::PROTOCOL_VERSION_2;
 using protocol_handler::PROTOCOL_VERSION_3;
 using protocol_handler::PROTOCOL_VERSION_4;
 using protocol_handler::PROTOCOL_VERSION_5;
 using protocol_handler::PROTOCOL_VERSION_MAX;
-using protocol_handler::FRAME_TYPE_CONTROL;
-using protocol_handler::FRAME_TYPE_SINGLE;
-using protocol_handler::FRAME_TYPE_FIRST;
-using protocol_handler::FRAME_TYPE_CONSECUTIVE;
-using protocol_handler::FRAME_TYPE_MAX_VALUE;
-using protocol_handler::MAXIMUM_FRAME_DATA_V2_SIZE;
-using protocol_handler::FRAME_DATA_START_SERVICE;
-using protocol_handler::FRAME_DATA_START_SERVICE_ACK;
-using protocol_handler::FRAME_DATA_END_SERVICE_NACK;
-using protocol_handler::FRAME_DATA_END_SERVICE_ACK;
-using protocol_handler::FRAME_DATA_END_SERVICE;
-using protocol_handler::FRAME_DATA_HEART_BEAT;
-using protocol_handler::FRAME_DATA_HEART_BEAT_ACK;
-using protocol_handler::FRAME_DATA_SERVICE_DATA_ACK;
-using protocol_handler::FRAME_DATA_SINGLE;
-using protocol_handler::FRAME_DATA_FIRST;
-using protocol_handler::FRAME_DATA_LAST_CONSECUTIVE;
-using protocol_handler::FRAME_DATA_REGISTER_SECONDARY_TRANSPORT;
-using protocol_handler::FRAME_DATA_REGISTER_SECONDARY_TRANSPORT_ACK;
-using protocol_handler::FRAME_DATA_REGISTER_SECONDARY_TRANSPORT_NACK;
-using protocol_handler::FRAME_DATA_TRANSPORT_EVENT_UPDATE;
-using protocol_handler::kRpc;
-using protocol_handler::kControl;
-using protocol_handler::kAudio;
-using protocol_handler::kMobileNav;
-using protocol_handler::kBulk;
-using protocol_handler::kInvalidServiceType;
+using protocol_handler::ProtocolHandlerImpl;
+using protocol_handler::RawMessage;
+using protocol_handler::RawMessagePtr;
+using protocol_handler::ServiceType;
 // For TM states
-using transport_manager::TransportManagerListener;
 using test::components::security_manager_test::MockSystemTimeHandler;
-using transport_manager::E_SUCCESS;
 using transport_manager::DeviceInfo;
+using transport_manager::E_SUCCESS;
+using transport_manager::TransportManagerListener;
 #ifdef ENABLE_SECURITY
 // For security
 using ContextCreationStrategy =
@@ -122,21 +122,21 @@ using ContextCreationStrategy =
 // For CH entities
 using connection_handler::DeviceHandle;
 // Google Testing Framework Entities
-using ::testing::Return;
-using ::testing::ReturnRef;
-using ::testing::ReturnRefOfCopy;
-using ::testing::ReturnNull;
+using ::testing::_;
 using ::testing::An;
 using ::testing::AnyOf;
 using ::testing::AtLeast;
 using ::testing::ByRef;
 using ::testing::DoAll;
-using ::testing::SaveArg;
 using ::testing::Eq;
-using ::testing::_;
 using ::testing::Invoke;
-using ::testing::SetArgReferee;
+using ::testing::Return;
+using ::testing::ReturnNull;
+using ::testing::ReturnRef;
+using ::testing::ReturnRefOfCopy;
+using ::testing::SaveArg;
 using ::testing::SetArgPointee;
+using ::testing::SetArgReferee;
 
 typedef std::vector<uint8_t> UCharDataVector;
 
@@ -149,7 +149,7 @@ namespace {
 const uint32_t kAsyncExpectationsTimeout = 10000u;
 const uint32_t kMicrosecondsInMillisecond = 1000u;
 const uint32_t kAddSessionWaitTimeMs = 100u;
-}
+}  // namespace
 
 class ProtocolHandlerImplTest : public ::testing::Test {
  protected:
@@ -382,6 +382,9 @@ class ProtocolHandlerImplTest : public ::testing::Test {
       const std::vector<std::string>& expected_transport_strings,
       const std::vector<int32_t>& expected_audio_service_transports,
       const std::vector<int32_t>& expected_video_service_transports);
+
+  void VerifyCloudAppParamsInStartSessionAck(const std::string& policy_app_id,
+                                             char* auth_token);
 
   testing::NiceMock<MockProtocolHandlerSettings> protocol_handler_settings_mock;
   std::shared_ptr<ProtocolHandlerImpl> protocol_handler_impl;
@@ -1920,6 +1923,117 @@ void ProtocolHandlerImplTest::VerifySecondaryTransportParamsInStartSessionAck(
 
   bson_object_deinitialize(&expected_obj);
 
+  EXPECT_CALL(
+      transport_manager_mock,
+      SendMessageToDevice(ControlMessage(
+          FRAME_DATA_START_SERVICE_ACK, PROTECTION_OFF, connection_id, _)))
+      .WillOnce(DoAll(NotifyTestAsyncWaiter(&waiter), Return(E_SUCCESS)));
+  times++;
+
+#ifdef ENABLE_SECURITY
+  AddSecurityManager();
+
+  EXPECT_CALL(session_observer_mock, KeyFromPair(connection_id, session_id))
+      .WillOnce(Return(connection_key));
+
+  EXPECT_CALL(session_observer_mock, GetSSLContext(connection_key, kRpc))
+      .WillOnce(ReturnNull());
+#endif  // ENABLE_SECURITY
+
+  protocol_handler_impl->SendStartSessionAck(connection_id,
+                                             session_id,
+                                             input_protocol_version,
+                                             hash_id,
+                                             protocol_handler::SERVICE_TYPE_RPC,
+                                             false /* protection */,
+                                             full_version);
+
+  EXPECT_TRUE(waiter.WaitFor(times, kAsyncExpectationsTimeout));
+}
+
+void ProtocolHandlerImplTest::VerifyCloudAppParamsInStartSessionAck(
+    const std::string& policy_app_id, char* auth_token) {
+  const size_t maximum_rpc_payload_size = 1500;
+  EXPECT_CALL(protocol_handler_settings_mock, maximum_rpc_payload_size())
+      .WillRepeatedly(Return(maximum_rpc_payload_size));
+  InitProtocolHandlerImpl(0u, 0u);
+
+  TestAsyncWaiter waiter;
+  uint32_t times = 0;
+
+  const uint8_t input_protocol_version = 5;
+  const uint32_t hash_id = 123456;
+  utils::SemanticVersion full_version(5, 2, 0);
+  char full_version_string[] = "5.2.0";
+
+  // configuration setup
+  EXPECT_CALL(protocol_handler_settings_mock, max_supported_protocol_version())
+      .WillRepeatedly(Return(PROTOCOL_VERSION_5));
+  EXPECT_CALL(connection_handler_mock, GetCloudAppID(connection_id))
+      .WillOnce(Return(policy_app_id));
+  connection_handler::SessionTransports dummy_st = {0, 0};
+  EXPECT_CALL(connection_handler_mock,
+              SetSecondaryTransportID(_, kDisabledSecondary))
+      .WillOnce(Return(dummy_st));
+  EXPECT_CALL(protocol_handler_settings_mock, multiple_transports_enabled())
+      .WillRepeatedly(Return(false));
+  std::vector<std::string> empty_vec;
+  EXPECT_CALL(protocol_handler_settings_mock, audio_service_transports())
+      .WillRepeatedly(ReturnRef(empty_vec));
+  EXPECT_CALL(protocol_handler_settings_mock, video_service_transports())
+      .WillRepeatedly(ReturnRef(empty_vec));
+  EXPECT_CALL(session_observer_mock,
+              TransportTypeProfileStringFromConnHandle(connection_id))
+      .WillRepeatedly(Return("WEBSOCKET"));
+
+  // Prepare expected BSON parameters. When we add another param in Start
+  // Service ACK frame in future, it should be also added here.
+  BsonObject expected_obj;
+  bson_object_initialize_default(&expected_obj);
+
+  // mtu
+  bson_object_put_int64(&expected_obj,
+                        protocol_handler::strings::mtu,
+                        static_cast<int64_t>(maximum_rpc_payload_size));
+  // hashId
+  bson_object_put_int32(&expected_obj,
+                        protocol_handler::strings::hash_id,
+                        static_cast<int32_t>(hash_id));
+  // protocolVersion
+  bson_object_put_string(&expected_obj,
+                         protocol_handler::strings::protocol_version,
+                         full_version_string);
+
+  // secondaryTransports
+  BsonArray secondary_transports;
+  bson_array_initialize(&secondary_transports, 0);
+  bson_object_put_array(&expected_obj,
+                        protocol_handler::strings::secondary_transports,
+                        &secondary_transports);
+
+  BsonArray audio_service_transports;
+  bson_array_initialize(&audio_service_transports, 1);
+  bson_array_add_int32(&audio_service_transports, 1);
+  bson_object_put_array(&expected_obj,
+                        protocol_handler::strings::audio_service_transports,
+                        &audio_service_transports);
+
+  BsonArray video_service_transports;
+  bson_array_initialize(&video_service_transports, 1);
+  bson_array_add_int32(&video_service_transports, 1);
+  bson_object_put_array(&expected_obj,
+                        protocol_handler::strings::video_service_transports,
+                        &video_service_transports);
+
+  // authToken
+  bson_object_put_string(
+      &expected_obj, protocol_handler::strings::auth_token, auth_token);
+
+  std::vector<uint8_t> expected_param =
+      CreateVectorFromBsonObject(&expected_obj);
+
+  bson_object_deinitialize(&expected_obj);
+
   EXPECT_CALL(transport_manager_mock,
               SendMessageToDevice(ControlMessage(FRAME_DATA_START_SERVICE_ACK,
                                                  PROTECTION_OFF,
@@ -1938,6 +2052,8 @@ void ProtocolHandlerImplTest::VerifySecondaryTransportParamsInStartSessionAck(
       .WillOnce(ReturnNull());
 #endif  // ENABLE_SECURITY
 
+  protocol_handler_impl->OnAuthTokenUpdated(policy_app_id,
+                                            std::string(auth_token));
   protocol_handler_impl->SendStartSessionAck(connection_id,
                                              session_id,
                                              input_protocol_version,
@@ -2466,6 +2582,18 @@ TEST_F(ProtocolHandlerImplTest, StartSessionAck_PrimaryTransportUSBHostMode) {
       expected_transport_strings,
       expected_audio_service_transports,
       expected_video_service_transports);
+}
+
+TEST_F(ProtocolHandlerImplTest, StartSessionAck_CloudAppAuthTokenAvailable) {
+  std::string policy_id = "policy_id";
+  char auth_token[] = "Sample auth token";
+
+  // A TransportUpdateEvent is also issued after Start Service ACK. We don't
+  // check it in this test case.
+  EXPECT_CALL(session_observer_mock, ProtocolVersionUsed(_, _, _))
+      .WillRepeatedly(Return(false));
+
+  VerifyCloudAppParamsInStartSessionAck(policy_id, auth_token);
 }
 
 TEST_F(ProtocolHandlerImplTest,
