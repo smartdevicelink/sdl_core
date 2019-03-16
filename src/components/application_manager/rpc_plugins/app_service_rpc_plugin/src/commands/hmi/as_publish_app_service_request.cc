@@ -62,7 +62,7 @@ void ASPublishAppServiceRequest::Run() {
       (*message_)[strings::msg_params][strings::app_service_manifest];
   smart_objects::SmartObject service_record =
       application_manager_.GetAppServiceManager().PublishAppService(
-          manifest, false, UINT32_MAX);
+          manifest, false);
 
   response_params[strings::app_service_record] = service_record;
   SendResponse(true,

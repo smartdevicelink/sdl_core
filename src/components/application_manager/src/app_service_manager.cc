@@ -547,13 +547,12 @@ void AppServiceManager::AppServiceUpdated(
   services[-1] = service;
 }
 
-std::vector<std::pair<std::string, AppService> >
-AppServiceManager::GetActiveServices() {
-  std::vector<std::pair<std::string, AppService> > active_services;
+std::vector<AppService> AppServiceManager::GetActiveServices() {
+  std::vector<AppService> active_services;
   for (auto it = published_services_.begin(); it != published_services_.end();
        ++it) {
     if (it->second.record[strings::service_active].asBool()) {
-      active_services.push_back(*it);
+      active_services.push_back(it->second);
     }
   }
   return active_services;

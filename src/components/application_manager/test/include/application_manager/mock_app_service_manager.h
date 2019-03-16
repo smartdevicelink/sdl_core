@@ -60,7 +60,7 @@ class MockAppServiceManager : public application_manager::AppServiceManager {
   MOCK_METHOD0(GetAllServiceRecords, std::vector<smart_objects::SmartObject>());
   MOCK_METHOD0(
       GetActiveServices,
-      std::vector<std::pair<std::string, application_manager::AppService> >());
+      std::vector<application_manager::AppService>());
   MOCK_METHOD4(GetProviderByType,
                void(const std::string& service_type,
                     const bool mobile_consumer,
