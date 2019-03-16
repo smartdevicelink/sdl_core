@@ -197,7 +197,6 @@ TEST_F(AppServiceManagerTest, PublishAppService_Mobile_SUCCESS) {
   smart_objects::SmartObject manifest = GenerateMediaManifest(true);
 
   Json::Value empty_json;
-  // dict[kAppServiceSection][kDefaults][kServiceType] = kPolicyAppId;
   EXPECT_CALL(mock_last_state_, get_dictionary())
       .WillOnce(ReturnRef(empty_json));
 
@@ -221,8 +220,8 @@ TEST_F(AppServiceManagerTest, PublishAppService_Mobile_SUCCESS) {
   // Check final record
   std::string service_id = record[am::strings::service_id].asString();
   EXPECT_EQ(manifest, record[am::strings::service_manifest]);
-  EXPECT_EQ(true, record[am::strings::service_published].asBool());
-  EXPECT_EQ(true, record[am::strings::service_active].asBool());
+  EXPECT_TRUE(record[am::strings::service_published].asBool());
+  EXPECT_TRUE(record[am::strings::service_active].asBool());
 
   // Check first capability update
   CheckCapabilityUpdate(syscap_update_published,
@@ -267,8 +266,8 @@ TEST_F(AppServiceManagerTest, PublishAppService_HMI_SUCCESS) {
   // Check final record
   std::string service_id = record[am::strings::service_id].asString();
   EXPECT_EQ(manifest, record[am::strings::service_manifest]);
-  EXPECT_EQ(true, record[am::strings::service_published].asBool());
-  EXPECT_EQ(true, record[am::strings::service_active].asBool());
+  EXPECT_TRUE(record[am::strings::service_published].asBool());
+  EXPECT_TRUE(record[am::strings::service_active].asBool());
 
   // Check first capability update
   CheckCapabilityUpdate(syscap_update_published,
@@ -390,7 +389,7 @@ TEST_F(AppServiceManagerTest, ActiveServiceForType_SUCCESS) {
   ASSERT_FALSE(service == NULL);
   EXPECT_EQ(record, service->record);
   EXPECT_EQ(kConnectionKey, service->connection_key);
-  EXPECT_EQ(true, service->mobile_service);
+  EXPECT_TRUE(service->mobile_service);
 }
 
 TEST_F(AppServiceManagerTest, EmbeddedServiceForType_SUCCESS) {
@@ -400,7 +399,7 @@ TEST_F(AppServiceManagerTest, EmbeddedServiceForType_SUCCESS) {
 
   ASSERT_FALSE(service == NULL);
   EXPECT_EQ(record, service->record);
-  EXPECT_EQ(false, service->mobile_service);
+  EXPECT_FALSE(service->mobile_service);
 }
 
 TEST_F(AppServiceManagerTest, FindServiceByID_SUCCESS) {
@@ -412,7 +411,7 @@ TEST_F(AppServiceManagerTest, FindServiceByID_SUCCESS) {
   ASSERT_FALSE(service == NULL);
   EXPECT_EQ(record, service->record);
   EXPECT_EQ(kConnectionKey, service->connection_key);
-  EXPECT_EQ(true, service->mobile_service);
+  EXPECT_TRUE(service->mobile_service);
 }
 
 TEST_F(AppServiceManagerTest, GetAllServiceRecords_OneService_SUCCESS) {
@@ -432,7 +431,7 @@ TEST_F(AppServiceManagerTest, GetActiveServices_OneService_SUCCESS) {
   ASSERT_EQ(1u, services.size());
   EXPECT_EQ(record, services[0].record);
   EXPECT_EQ(kConnectionKey, services[0].connection_key);
-  EXPECT_EQ(true, services[0].mobile_service);
+  EXPECT_TRUE(services[0].mobile_service);
 }
 
 }  // namespace application_manager_test
