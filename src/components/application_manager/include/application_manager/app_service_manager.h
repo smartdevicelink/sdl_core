@@ -195,8 +195,6 @@ class AppServiceManager {
    */
   virtual AppService* EmbeddedServiceForType(const std::string service_type);
 
-  AppService* FindServiceByName(const std::string name);
-
   /**
    * @brief Get the service with a given service ID.
    * @param service_type - The service ID
