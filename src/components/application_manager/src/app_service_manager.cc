@@ -39,7 +39,6 @@
 #include "application_manager/application_manager.h"
 #include "application_manager/commands/command_impl.h"
 #include "application_manager/message_helper.h"
-#include "application_manager/rpc_passing_handler.h"
 #include "application_manager/smart_object_keys.h"
 #include "encryption/hashing.h"
 #include "resumption/last_state.h"

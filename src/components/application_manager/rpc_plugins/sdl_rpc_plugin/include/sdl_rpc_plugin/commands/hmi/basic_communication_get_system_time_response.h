@@ -36,7 +36,7 @@
 #include "application_manager/commands/response_from_hmi.h"
 
 #include "utils/macro.h"
-#include "application_manager/application_manager_impl.h"
+#include "application_manager/application_manager.h"
 
 namespace sdl_rpc_plugin {
 namespace app_mngr = application_manager;

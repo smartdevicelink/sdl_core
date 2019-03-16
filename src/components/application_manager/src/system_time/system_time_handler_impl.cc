@@ -41,6 +41,8 @@
 
 namespace application_manager {
 
+CREATE_LOGGERPTR_GLOBAL(logger_, "SystemTimeHandler")
+
 SystemTimeHandlerImpl::SystemTimeHandlerImpl(
     ApplicationManager& application_manager)
     : event_engine::EventObserver(application_manager.event_dispatcher())

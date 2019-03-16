@@ -203,14 +203,6 @@ class AppServiceManager {
   virtual AppService* FindServiceByID(const std::string service_id);
 
   /**
-   * @brief Get the service ID of the default service for a given service type.
-   * @param service_type - The service type
-   * @return The service ID of the default service for the given service type on
-   * success, "" on failure
-   */
-  virtual std::string DefaultServiceByType(const std::string service_type);
-
-  /**
    * @brief Update a navigation system capability struct with the capabilities
    * of the active navigation service.
    * @param out_params - The struct to be modified
@@ -244,6 +236,15 @@ class AppServiceManager {
                               const bool mobile_consumer,
                               ApplicationSharedPtr& app,
                               bool& hmi_service);
+
+  /**
+   * @brief Get the policy app ID of the default service provider for a given
+   * service type.
+   * @param service_type - The service type
+   * @return The policy app ID of the default service provider for the given
+   * service type on success, "" on failure
+   */
+  std::string DefaultServiceByType(const std::string service_type);
   AppService* FindServiceByPolicyAppID(const std::string policy_app_id,
                                        const std::string type);
   std::string GetPolicyAppID(AppService service);

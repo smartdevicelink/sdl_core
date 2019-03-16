@@ -79,8 +79,6 @@ class MockAppServiceManager : public application_manager::AppServiceManager {
       application_manager::AppService*(const std::string service_type));
   MOCK_METHOD1(FindServiceByID,
                application_manager::AppService*(const std::string service_id));
-  MOCK_METHOD1(DefaultServiceByType,
-               std::string(const std::string service_type));
   MOCK_METHOD2(SetServicePublished,
                void(const std::string service_id,
                     const bool service_published));
