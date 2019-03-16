@@ -511,30 +511,30 @@ TYPED_TEST_CASE(HMICommandsTestFifth, HMICommandsListFifth);
 TYPED_TEST(HMICommandsTestFirst, CtorAndDtorCall) {
   std::shared_ptr<typename TestFixture::CommandType> command =
       this->template CreateCommand<typename TestFixture::CommandType>();
-  UNUSED(command);
+  EXPECT_NE(command.use_count(), 0);
 }
 
 TYPED_TEST(HMICommandsTestSecond, CtorAndDtorCall) {
   std::shared_ptr<typename TestFixture::CommandType> command =
       this->template CreateCommand<typename TestFixture::CommandType>();
-  UNUSED(command);
+  EXPECT_NE(command.use_count(), 0);
 }
 TYPED_TEST(HMICommandsTestThird, CtorAndDtorCall) {
   std::shared_ptr<typename TestFixture::CommandType> command =
       this->template CreateCommand<typename TestFixture::CommandType>();
-  UNUSED(command);
+  EXPECT_NE(command.use_count(), 0);
 }
 
 TYPED_TEST(HMICommandsTestFourth, CtorAndDtorCall) {
   std::shared_ptr<typename TestFixture::CommandType> command =
       this->template CreateCommand<typename TestFixture::CommandType>();
-  UNUSED(command);
+  EXPECT_NE(command.use_count(), 0);
 }
 
 TYPED_TEST(HMICommandsTestFifth, CtorAndDtorCall) {
   std::shared_ptr<typename TestFixture::CommandType> command =
       this->template CreateCommand<typename TestFixture::CommandType>();
-  UNUSED(command);
+  EXPECT_NE(command.use_count(), 0);
 }
 
 }  // namespace dummy_hmi_commands_test

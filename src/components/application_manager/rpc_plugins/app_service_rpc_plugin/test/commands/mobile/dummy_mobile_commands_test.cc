@@ -125,7 +125,7 @@ TYPED_TEST_CASE(MobileCommandsTestFirst, MobileCommandsListFirst);
 TYPED_TEST(MobileCommandsTestFirst, CtorAndDtorCall) {
   std::shared_ptr<typename TestFixture::CommandType> command =
       this->template CreateCommand<typename TestFixture::CommandType>();
-  UNUSED(command);
+  EXPECT_NE(command.use_count(), 0);
 }
 
 }  // namespace dummy_mobile_commands_test

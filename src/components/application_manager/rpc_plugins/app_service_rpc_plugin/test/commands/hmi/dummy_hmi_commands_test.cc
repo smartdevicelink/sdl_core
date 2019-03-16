@@ -141,7 +141,7 @@ TYPED_TEST_CASE(HMICommandsTestFirst, HMICommandsListFirst);
 TYPED_TEST(HMICommandsTestFirst, CtorAndDtorCall) {
   std::shared_ptr<typename TestFixture::CommandType> command =
       this->template CreateCommand<typename TestFixture::CommandType>();
-  UNUSED(command);
+  EXPECT_NE(command.use_count(), 0);
 }
 
 }  // namespace dummy_hmi_commands_test
