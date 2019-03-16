@@ -75,6 +75,15 @@ void PerformAppServiceInteractionRequest::Run() {
     return;
   }
 
+  if (!service->record[strings::service_manifest][strings::allow_app_consumers]
+           .asBool()) {
+    SendResponse(
+        false,
+        mobile_apis::Result::REJECTED,
+        "The requested service ID does not allow mobile app consumers");
+    return;
+  }
+
   bool request_service_active = false;
   if (msg_params.keyExists(strings::request_service_active)) {
     request_service_active =
