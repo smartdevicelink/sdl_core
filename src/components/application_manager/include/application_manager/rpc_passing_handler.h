@@ -39,7 +39,6 @@
 #include "interfaces/MOBILE_API.h"
 #include "smart_objects/smart_object.h"
 #include "utils/timer.h"
-#include "application_manager/commands/command.h"
 
 namespace application_manager {
 

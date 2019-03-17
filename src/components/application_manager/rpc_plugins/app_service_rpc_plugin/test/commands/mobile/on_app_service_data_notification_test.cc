@@ -70,10 +70,10 @@ namespace app_service_plugin_test {
 using namespace app_service_rpc_plugin;
 using application_manager::ApplicationSet;
 
-class OnAppServiceDatanotificationTest
+class OnAppServiceDataNotificationTest
     : public CommandsTest<CommandsTestMocks::kIsNice> {
  public:
-  OnAppServiceDatanotificationTest()
+  OnAppServiceDataNotificationTest()
       : mock_app_(std::make_shared<NiceMock<MockApplication> >())
       , app_service_app_extension_(
             std::make_shared<app_service_rpc_plugin::AppServiceAppExtension>(
@@ -113,7 +113,7 @@ class OnAppServiceDatanotificationTest
   MockAppServiceManager app_service_manager_;
 };
 
-TEST_F(OnAppServiceDatanotificationTest, Run_SendMessageToMobile_Notification) {
+TEST_F(OnAppServiceDataNotificationTest, Run_SendMessageToMobile_Notification) {
   MessageSharedPtr mobile_message = CreateBasicMessage();
 
   (*mobile_message)[am::strings::msg_params][am::strings::service_data]
@@ -152,7 +152,7 @@ TEST_F(OnAppServiceDatanotificationTest, Run_SendMessageToMobile_Notification) {
   Mock::VerifyAndClearExpectations(&app_mngr_);
 }
 
-TEST_F(OnAppServiceDatanotificationTest, Run_NoService) {
+TEST_F(OnAppServiceDataNotificationTest, Run_NoService) {
   MessageSharedPtr mobile_message = CreateBasicMessage();
 
   (*mobile_message)[am::strings::msg_params][am::strings::service_data]
@@ -180,7 +180,7 @@ TEST_F(OnAppServiceDatanotificationTest, Run_NoService) {
   Mock::VerifyAndClearExpectations(&app_mngr_);
 }
 
-TEST_F(OnAppServiceDatanotificationTest, Run_NoSubscribedApps) {
+TEST_F(OnAppServiceDataNotificationTest, Run_NoSubscribedApps) {
   MessageSharedPtr mobile_message = CreateBasicMessage();
 
   (*mobile_message)[am::strings::msg_params][am::strings::service_data]
