@@ -478,6 +478,137 @@ TEST_F(TransportAdapterTest, Disconnect_ConnectDoneSuccess) {
   EXPECT_CALL(*serverMock, Terminate());
 }
 
+TEST_F(TransportAdapterTest, FindPending) {
+  MockServerConnectionFactory* serverMock = new MockServerConnectionFactory();
+  MockTransportAdapterImpl transport_adapter(
+      NULL, serverMock, NULL, last_state_, transport_manager_settings);
+  SetDefaultExpectations(transport_adapter);
+
+  EXPECT_CALL(*serverMock, Init()).WillOnce(Return(TransportAdapter::OK));
+  EXPECT_CALL(transport_adapter, Restore()).WillOnce(Return(true));
+  transport_adapter.Init();
+
+  MockTransportAdapterListener mock_listener;
+  transport_adapter.AddListener(&mock_listener);
+
+  std::shared_ptr<MockDevice> mockdev =
+      std::make_shared<MockDevice>(dev_id, uniq_id);
+  DeviceVector devices{mockdev};
+  transport_adapter.SearchDeviceDone(devices);
+
+  // Create cloud app device with connection in pending state
+  std::shared_ptr<MockConnection> connection =
+      std::make_shared<MockConnection>();
+  EXPECT_CALL(transport_adapter, FindDevice(uniq_id)).WillOnce(Return(mockdev));
+  transport_adapter.ConnectionCreated(connection, uniq_id, 0);
+  transport_adapter.ConnectPending(uniq_id, 0);
+
+  std::vector<std::string> dev_list = transport_adapter.GetDeviceList();
+  ASSERT_EQ(1u, dev_list.size());
+  EXPECT_EQ(uniq_id, dev_list[0]);
+  EXPECT_EQ(ConnectionStatus::PENDING, mockdev->connection_status());
+
+  ConnectionSPtr mock_connection =
+      transport_adapter.FindPendingConnection(uniq_id, 0);
+  ASSERT_TRUE(mock_connection.use_count() != 0);
+
+  ConnectionSPtr mock_connection_fake =
+      transport_adapter.FindPendingConnection(uniq_id, 1);
+  ASSERT_TRUE(mock_connection_fake.use_count() == 0);
+}
+
+TEST_F(TransportAdapterTest,
+       Pending_Connect_Disconnect_ConnectDoneSuccess_PendingDeviceAdded) {
+  MockServerConnectionFactory* serverMock = new MockServerConnectionFactory();
+  MockTransportAdapterImpl transport_adapter(
+      NULL, serverMock, NULL, last_state_, transport_manager_settings);
+  SetDefaultExpectations(transport_adapter);
+
+  EXPECT_CALL(*serverMock, Init()).WillOnce(Return(TransportAdapter::OK));
+  EXPECT_CALL(transport_adapter, Restore()).WillOnce(Return(true));
+  transport_adapter.Init();
+
+  MockTransportAdapterListener mock_listener;
+  transport_adapter.AddListener(&mock_listener);
+
+  std::shared_ptr<MockDevice> mockdev =
+      std::make_shared<MockDevice>(dev_id, uniq_id);
+  DeviceVector devices{mockdev};
+  transport_adapter.SearchDeviceDone(devices);
+
+  // Create cloud app device with connection in pending state
+  std::shared_ptr<MockConnection> connection =
+      std::make_shared<MockConnection>();
+  EXPECT_CALL(transport_adapter, FindDevice(uniq_id)).WillOnce(Return(mockdev));
+  transport_adapter.ConnectionCreated(connection, uniq_id, 0);
+  transport_adapter.ConnectPending(uniq_id, 0);
+
+  std::vector<std::string> dev_list = transport_adapter.GetDeviceList();
+  ASSERT_EQ(1u, dev_list.size());
+  EXPECT_EQ(uniq_id, dev_list[0]);
+  EXPECT_EQ(ConnectionStatus::PENDING, mockdev->connection_status());
+
+  // Connect cloud app
+  int app_handle = 0;
+  std::vector<int> int_list = {app_handle};
+  EXPECT_CALL(*mockdev, GetApplicationList()).WillOnce(Return(int_list));
+
+  EXPECT_CALL(*serverMock, IsInitialised()).WillOnce(Return(true));
+  EXPECT_CALL(*serverMock, CreateConnection(uniq_id, app_handle))
+      .WillOnce(Return(TransportAdapter::OK));
+  EXPECT_CALL(transport_adapter, FindDevice(uniq_id)).WillOnce(Return(mockdev));
+
+  TransportAdapter::Error res = transport_adapter.ConnectDevice(uniq_id);
+
+  EXPECT_EQ(TransportAdapter::OK, res);
+  EXPECT_EQ(ConnectionStatus::CONNECTED, mockdev->connection_status());
+
+  auto mock_connection = std::make_shared<MockConnection>();
+  transport_adapter.ConnectionCreated(mock_connection, dev_id, app_handle);
+
+  EXPECT_CALL(transport_adapter, Store());
+  transport_adapter.ConnectDone(dev_id, app_handle);
+
+  // Disconnect cloud app
+  EXPECT_CALL(*mock_connection, Disconnect())
+      .WillOnce(Return(TransportAdapter::OK));
+  TransportAdapter::Error new_res =
+      transport_adapter.Disconnect(dev_id, app_handle);
+  EXPECT_EQ(TransportAdapter::OK, new_res);
+
+  EXPECT_CALL(transport_adapter, FindDevice(uniq_id)).WillOnce(Return(mockdev));
+  EXPECT_CALL(transport_adapter, GetDeviceType())
+      .WillOnce(Return(DeviceType::CLOUD_WEBSOCKET));
+  EXPECT_CALL(mock_listener,
+              OnDisconnectDeviceDone(&transport_adapter, uniq_id));
+  EXPECT_CALL(mock_listener, OnDeviceListUpdated(&transport_adapter)).Times(2);
+  EXPECT_CALL(transport_adapter, Store());
+  transport_adapter.DisconnectDone(uniq_id, 0);
+
+  dev_list = transport_adapter.GetDeviceList();
+  ASSERT_EQ(0u, dev_list.size());
+
+  // Recreate device and put cloud app back into pending state
+  std::shared_ptr<MockDevice> mockdev2 =
+      std::make_shared<MockDevice>(dev_id, uniq_id);
+  DeviceVector devices2{mockdev2};
+  transport_adapter.SearchDeviceDone(devices2);
+
+  std::shared_ptr<MockConnection> connection2 =
+      std::make_shared<MockConnection>();
+  EXPECT_CALL(transport_adapter, FindDevice(uniq_id))
+      .WillOnce(Return(mockdev2));
+  transport_adapter.ConnectionCreated(connection2, uniq_id, 0);
+  transport_adapter.ConnectPending(uniq_id, 0);
+
+  dev_list = transport_adapter.GetDeviceList();
+  ASSERT_EQ(1u, dev_list.size());
+  EXPECT_EQ(uniq_id, dev_list[0]);
+  EXPECT_EQ(ConnectionStatus::PENDING, mockdev2->connection_status());
+
+  EXPECT_CALL(*serverMock, Terminate());
+}
+
 TEST_F(TransportAdapterTest, DisconnectDevice_DeviceAddedConnectionCreated) {
   MockServerConnectionFactory* serverMock = new MockServerConnectionFactory();
   MockTransportAdapterImpl transport_adapter(

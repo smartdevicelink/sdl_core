@@ -1198,14 +1198,15 @@ void ApplicationManagerImpl::SetPendingApplicationState(
   }
   LOG4CXX_DEBUG(logger_,
                 "Unregister application and move into apps_to_register");
-  {
-    sync_primitives::AutoLock lock(apps_to_register_list_lock_ptr_);
-    apps_to_register_.insert(app);
-  }
 
   UnregisterApplication(
       app->app_id(), mobile_apis::Result::INVALID_ENUM, true, true);
   app->MarkUnregistered();
+
+  {
+    sync_primitives::AutoLock lock(apps_to_register_list_lock_ptr_);
+    apps_to_register_.insert(app);
+  }
 }
 
 void ApplicationManagerImpl::OnConnectionStatusUpdated() {
@@ -2941,6 +2942,7 @@ void ApplicationManagerImpl::UnregisterApplication(
     auto it_app = applications_.begin();
     while (applications_.end() != it_app) {
       if (app_id == (*it_app)->app_id()) {
+        connection_handler().GetDeviceID((*it_app)->mac_address(), &handle);
         app_to_remove = *it_app;
         applications_.erase(it_app++);
       } else {
