@@ -68,11 +68,10 @@ void GetAppServiceDataRequest::Run() {
 void GetAppServiceDataRequest::HandleSubscribe() {
   std::string service_type =
       (*message_)[strings::msg_params][strings::service_type].asString();
-  if ((*message_)[strings::msg_params].keyExists(strings::subscribe)) {
+  ApplicationSharedPtr app = application_manager_.application(connection_key());
+  if (app && (*message_)[strings::msg_params].keyExists(strings::subscribe)) {
     bool subscribe =
         (*message_)[strings::msg_params][strings::subscribe].asBool();
-    ApplicationSharedPtr app =
-        application_manager_.application(connection_key());
     auto& ext = AppServiceAppExtension::ExtractASExtension(*app);
     if (subscribe) {
       ext.SubscribeToAppService(service_type);
