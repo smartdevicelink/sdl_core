@@ -35,6 +35,8 @@
 
 #include <gmock/gmock.h>
 #include "application_manager/app_service_manager.h"
+#include "application_manager/commands/command.h"
+#include "application_manager/commands/command_impl.h"
 
 namespace test {
 namespace components {

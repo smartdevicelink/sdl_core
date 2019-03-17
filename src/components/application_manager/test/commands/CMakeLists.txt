@@ -59,6 +59,7 @@ set(LIBRARIES
   ApplicationManager
   jsoncpp
   Policy
+  Resumption
 )
 
 create_test("commands_test" "${SOURCES}" "${LIBRARIES}")

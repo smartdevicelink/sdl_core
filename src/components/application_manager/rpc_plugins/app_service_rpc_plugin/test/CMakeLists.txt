@@ -7,6 +7,7 @@ include_directories(
   ${COMPONENTS_DIR}/application_manager/test/include/
   ${POLICY_MOCK_INCLUDE_PATH}/
   ${CMAKE_SOURCE_DIR}/src
+  ${COMPONENTS_DIR}/resumption/include
 )  
 
 
@@ -33,6 +34,7 @@ set(LIBRARIES
   sdl_rpc_plugin
   jsoncpp
   Policy
+  Resumption
 )
 
 create_cotired_test("app_services_commands_test" "${SOURCES}" "${LIBRARIES}" )
