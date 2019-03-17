@@ -835,7 +835,7 @@ TEST_F(
 }
 
 TEST_F(PolicyManagerImplTest2, UpdateApplication_AppServices) {
-  std::string media_str = "MEDIA";
+  std::string kServiceType = "MEDIA";
   // Arrange
   CreateLocalPT("sdl_preloaded_pt.json");
   EXPECT_EQ("UP_TO_DATE", manager->GetPolicyTableStatus());
@@ -846,17 +846,17 @@ TEST_F(PolicyManagerImplTest2, UpdateApplication_AppServices) {
       policy_table::AppServiceParameters();
   manager->GetAppServiceParameters(app_id2, &app_service_parameters);
 
-  ASSERT_FALSE(app_service_parameters.find(media_str) ==
+  ASSERT_FALSE(app_service_parameters.find(kServiceType) ==
                app_service_parameters.end());
 
-  auto service_names = *(app_service_parameters[media_str].service_names);
+  auto service_names = *(app_service_parameters[kServiceType].service_names);
 
   ASSERT_TRUE(service_names.is_initialized());
   ASSERT_EQ(service_names.size(), 2u);
   EXPECT_EQ(static_cast<std::string>(service_names[0]), "SDL App");
   EXPECT_EQ(static_cast<std::string>(service_names[1]), "SDL Music");
 
-  auto handled_rpcs = app_service_parameters[media_str].handled_rpcs;
+  auto handled_rpcs = app_service_parameters[kServiceType].handled_rpcs;
 
   ASSERT_TRUE(handled_rpcs.is_initialized());
   EXPECT_EQ(handled_rpcs[0].function_id, 41);
