@@ -378,6 +378,70 @@ TEST_F(PolicyHandlerTest, ClearUserConsent) {
   policy_handler_.ClearUserConsent();
 }
 
+TEST_F(PolicyHandlerTest, AppServiceUpdate_CheckAppService) {
+  // Arrange
+  EnablePolicy();
+  EXPECT_TRUE(policy_handler_.LoadPolicyLibrary());
+  // Check
+  EXPECT_TRUE(policy_handler_.InitPolicyTable());
+  ChangePolicyManagerToMock();
+  std::string file_name("sdl_pt_update.json");
+  std::ifstream ifile(file_name);
+  Json::Reader reader;
+  std::string json;
+  Json::Value root(Json::objectValue);
+  if (ifile.is_open() && reader.parse(ifile, root, true)) {
+    json = root.toStyledString();
+  }
+  ifile.close();
+  BinaryMessage msg(json.begin(), json.end());
+  // Checks
+  EXPECT_CALL(*mock_policy_manager_, LoadPT("", msg)).WillOnce(Return(true));
+  policy_handler_.ReceiveMessageFromSDK("", msg);
+
+  policy_table::AppServiceParameters app_service_params =
+      policy_table::AppServiceParameters();
+  std::string kServiceType = "MEDIA";
+  std::string as_app_id = "1010101010";
+  std::string service_name1 = "SDL Music";
+  std::string service_name2 = "SDL App";
+  (app_service_params)[kServiceType] = policy_table::AppServiceInfo();
+  (app_service_params)[kServiceType].service_names->push_back(service_name2);
+  (app_service_params)[kServiceType].service_names->push_back(service_name1);
+  (app_service_params)[kServiceType].service_names->mark_initialized();
+  policy_table::AppServiceHandledRpc handled_rpc;
+  handled_rpc.function_id = 41;
+  (app_service_params)[kServiceType].handled_rpcs.push_back(handled_rpc);
+  EXPECT_CALL(*mock_policy_manager_, GetAppServiceParameters(_, _))
+      .WillRepeatedly(SetArgPointee<1>(app_service_params));
+
+  ns_smart_device_link::ns_smart_objects::SmartArray requested_handled_rpcs;
+  ns_smart_device_link::ns_smart_objects::SmartObject rpc_id(41);
+  requested_handled_rpcs.push_back(rpc_id);
+
+  ns_smart_device_link::ns_smart_objects::SmartArray fake_handled_rpcs;
+  ns_smart_device_link::ns_smart_objects::SmartObject fake_rpc_id(40);
+  fake_handled_rpcs.push_back(fake_rpc_id);
+
+  EXPECT_TRUE(policy_handler_.CheckAppServiceParameters(
+      as_app_id, service_name1, kServiceType, &requested_handled_rpcs));
+  EXPECT_TRUE(policy_handler_.CheckAppServiceParameters(
+      as_app_id, service_name2, kServiceType, &requested_handled_rpcs));
+  EXPECT_TRUE(policy_handler_.CheckAppServiceParameters(
+      as_app_id, service_name2, kServiceType, NULL));
+  EXPECT_TRUE(policy_handler_.CheckAppServiceParameters(
+      as_app_id, "", kServiceType, NULL));
+
+  EXPECT_FALSE(
+      policy_handler_.CheckAppServiceParameters(as_app_id, "", "", NULL));
+  EXPECT_FALSE(policy_handler_.CheckAppServiceParameters(
+      as_app_id, service_name2, "NAVIGATION", &requested_handled_rpcs));
+  EXPECT_FALSE(policy_handler_.CheckAppServiceParameters(
+      as_app_id, "MUSIC", kServiceType, &requested_handled_rpcs));
+  EXPECT_FALSE(policy_handler_.CheckAppServiceParameters(
+      as_app_id, service_name2, kServiceType, &fake_handled_rpcs));
+}
+
 TEST_F(PolicyHandlerTest, ReceiveMessageFromSDK) {
   // Arrange
   EnablePolicy();
