@@ -403,13 +403,17 @@ TEST_F(PolicyHandlerTest, AppServiceUpdate_CheckAppService) {
 
   policy_table::AppServiceParameters app_service_params =
       policy_table::AppServiceParameters();
-  (app_service_params)["MEDIA"] = policy_table::AppServiceInfo();
-  (app_service_params)["MEDIA"].service_names->push_back("SDL App");
-  (app_service_params)["MEDIA"].service_names->push_back("SDL Music");
-  (app_service_params)["MEDIA"].service_names->mark_initialized();
+  std::string media_str = "MEDIA";
+  std::string as_app_id = "1010101010";
+  std::string service_name1 = "SDL Music";
+  std::string service_name2 = "SDL App";
+  (app_service_params)[media_str] = policy_table::AppServiceInfo();
+  (app_service_params)[media_str].service_names->push_back(service_name2);
+  (app_service_params)[media_str].service_names->push_back(service_name1);
+  (app_service_params)[media_str].service_names->mark_initialized();
   policy_table::AppServiceHandledRpc handled_rpc;
   handled_rpc.function_id = 41;
-  (app_service_params)["MEDIA"].handled_rpcs.push_back(handled_rpc);
+  (app_service_params)[media_str].handled_rpcs.push_back(handled_rpc);
   EXPECT_CALL(*mock_policy_manager_, GetAppServiceParameters(_, _))
       .WillRepeatedly(SetArgPointee<1>(app_service_params));
 
@@ -421,23 +425,23 @@ TEST_F(PolicyHandlerTest, AppServiceUpdate_CheckAppService) {
   ns_smart_device_link::ns_smart_objects::SmartObject fake_rpc_id(40);
   fake_handled_rpcs.push_back(fake_rpc_id);
 
-  ASSERT_TRUE(policy_handler_.CheckAppServiceParameters(
-      "1010101010", "SDL Music", "MEDIA", &requested_handled_rpcs));
-  ASSERT_TRUE(policy_handler_.CheckAppServiceParameters(
-      "1010101010", "SDL App", "MEDIA", &requested_handled_rpcs));
-  ASSERT_TRUE(policy_handler_.CheckAppServiceParameters(
-      "1010101010", "SDL App", "MEDIA", NULL));
-  ASSERT_TRUE(policy_handler_.CheckAppServiceParameters(
-      "1010101010", "", "MEDIA", NULL));
+  EXPECT_TRUE(policy_handler_.CheckAppServiceParameters(
+      as_app_id, service_name1, media_str, &requested_handled_rpcs));
+  EXPECT_TRUE(policy_handler_.CheckAppServiceParameters(
+      as_app_id, service_name2, media_str, &requested_handled_rpcs));
+  EXPECT_TRUE(policy_handler_.CheckAppServiceParameters(
+      as_app_id, service_name2, media_str, NULL));
+  EXPECT_TRUE(policy_handler_.CheckAppServiceParameters(
+      as_app_id, "", media_str, NULL));
 
-  ASSERT_FALSE(
-      policy_handler_.CheckAppServiceParameters("1010101010", "", "", NULL));
-  ASSERT_FALSE(policy_handler_.CheckAppServiceParameters(
-      "1010101010", "SDL App", "NAVIGATION", &requested_handled_rpcs));
-  ASSERT_FALSE(policy_handler_.CheckAppServiceParameters(
-      "1010101010", "MUSIC", "MEDIA", &requested_handled_rpcs));
-  ASSERT_FALSE(policy_handler_.CheckAppServiceParameters(
-      "1010101010", "SDL App", "MEDIA", &fake_handled_rpcs));
+  EXPECT_FALSE(
+      policy_handler_.CheckAppServiceParameters(as_app_id, "", "", NULL));
+  EXPECT_FALSE(policy_handler_.CheckAppServiceParameters(
+      as_app_id, service_name2, "NAVIGATION", &requested_handled_rpcs));
+  EXPECT_FALSE(policy_handler_.CheckAppServiceParameters(
+      as_app_id, "MUSIC", media_str, &requested_handled_rpcs));
+  EXPECT_FALSE(policy_handler_.CheckAppServiceParameters(
+      as_app_id, service_name2, media_str, &fake_handled_rpcs));
 }
 
 TEST_F(PolicyHandlerTest, ReceiveMessageFromSDK) {
