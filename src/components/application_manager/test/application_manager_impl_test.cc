@@ -102,11 +102,14 @@ const std::string kAppName = "appName";
 
 // Cloud application params
 const std::string kEndpoint = "endpoint";
+const std::string kEndpoint2 = "https://fakesdlcloudapptesting.com:8080";
 const std::string kAuthToken = "auth_token";
 const std::string kCertificate = "cert";
 const std::string kTransportType = "WS";
 const mobile_api::HybridAppPreference::eType kHybridAppPreference =
     mobile_api::HybridAppPreference::CLOUD;
+const std::string kHybridAppPreferenceStr = "CLOUD";
+const bool kEnabled = true;
 }  // namespace
 
 class ApplicationManagerImplTest : public ::testing::Test {
@@ -145,7 +148,6 @@ class ApplicationManagerImplTest : public ::testing::Test {
     app_manager_impl_->set_connection_handler(&mock_connection_handler_);
     Json::Value empty;
     ON_CALL(mock_last_state_, get_dictionary()).WillByDefault(ReturnRef(empty));
-    // app_manager_impl_->SetMockPolicyHandler(mock_policy_handler_);
     std::unique_ptr<AppServiceManager> app_service_manager_ptr(
         new AppServiceManager(*app_manager_impl_, mock_last_state_));
     app_manager_impl_->SetAppServiceManager(app_service_manager_ptr);
@@ -1440,21 +1442,15 @@ TEST_F(ApplicationManagerImplTest,
 void ApplicationManagerImplTest::AddCloudAppToPendingDeviceMap() {
   app_manager_impl_->SetMockPolicyHandler(mock_policy_handler_);
   std::vector<std::string> enabled_apps{"1234"};
-  std::string endpoint = "https://fakesdlcloudapptesting.com:8080";
-  std::string certificate = "cert";
-  std::string auth_token = "auth_token";
-  std::string cloud_transport_type = "WS";
-  std::string hybrid_app_preference_str = "CLOUD";
-  bool enabled = true;
   EXPECT_CALL(*mock_policy_handler_, GetEnabledCloudApps(_))
       .WillOnce(SetArgReferee<0>(enabled_apps));
   EXPECT_CALL(*mock_policy_handler_, GetCloudAppParameters(_, _, _, _, _, _, _))
-      .WillOnce(DoAll(SetArgReferee<1>(enabled),
-                      SetArgReferee<2>(endpoint),
-                      SetArgReferee<3>(certificate),
-                      SetArgReferee<4>(auth_token),
-                      SetArgReferee<5>(cloud_transport_type),
-                      SetArgReferee<6>(hybrid_app_preference_str),
+      .WillOnce(DoAll(SetArgReferee<1>(kEnabled),
+                      SetArgReferee<2>(kEndpoint2),
+                      SetArgReferee<3>(kCertificate),
+                      SetArgReferee<4>(kAuthToken),
+                      SetArgReferee<5>(kTransportType),
+                      SetArgReferee<6>(kHybridAppPreferenceStr),
                       Return(true)));
 
   std::vector<std::string> nicknames{"CloudApp"};
@@ -1472,28 +1468,22 @@ TEST_F(ApplicationManagerImplTest, CreatePendingApplication) {
 
   // CreatePendingApplication
   transport_manager::DeviceInfo device_info(
-      1, "mac", "https://fakesdlcloudapptesting.com:8080", "CLOUD_WEBSOCKET");
+      1, "mac", kEndpoint2, "CLOUD_WEBSOCKET");
   std::vector<std::string> nicknames{"CloudApp"};
   EXPECT_CALL(*mock_policy_handler_, GetInitialAppData(_, _, _))
       .WillOnce(DoAll(SetArgPointee<1>(nicknames), Return(true)));
   std::vector<std::string> enabled_apps{"1234"};
-  std::string endpoint = "https://fakesdlcloudapptesting.com:8080";
-  std::string certificate = "cert";
-  std::string auth_token = "auth_token";
-  std::string cloud_transport_type = "WS";
-  std::string hybrid_app_preference_str = "CLOUD";
-  bool enabled = true;
 
   EXPECT_CALL(*mock_policy_handler_, GetStatisticManager())
       .WillOnce(Return(std::shared_ptr<usage_statistics::StatisticsManager>(
           new usage_statistics_test::MockStatisticsManager())));
   EXPECT_CALL(*mock_policy_handler_, GetCloudAppParameters(_, _, _, _, _, _, _))
-      .WillOnce(DoAll(SetArgReferee<1>(enabled),
-                      SetArgReferee<2>(endpoint),
-                      SetArgReferee<3>(certificate),
-                      SetArgReferee<4>(auth_token),
-                      SetArgReferee<5>(cloud_transport_type),
-                      SetArgReferee<6>(hybrid_app_preference_str),
+      .WillOnce(DoAll(SetArgReferee<1>(kEnabled),
+                      SetArgReferee<2>(kEndpoint2),
+                      SetArgReferee<3>(kCertificate),
+                      SetArgReferee<4>(kAuthToken),
+                      SetArgReferee<5>(kTransportType),
+                      SetArgReferee<6>(kHybridAppPreferenceStr),
                       Return(true)));
   // Expect Update app list
   EXPECT_CALL(*mock_rpc_service_, ManageHMICommand(_, _)).Times(1);
@@ -1514,25 +1504,19 @@ TEST_F(ApplicationManagerImplTest, SetPendingState) {
   std::string mac = "MAC_ADDRESS";
   EXPECT_CALL(*mock_app_ptr_, mac_address()).WillRepeatedly(ReturnRef(mac));
   transport_manager::DeviceInfo device_info(
-      1, "mac", "https://fakesdlcloudapptesting.com:8080", "CLOUD_WEBSOCKET");
+      1, "mac", kEndpoint2, "CLOUD_WEBSOCKET");
 
   std::vector<std::string> enabled_apps{"1234"};
-  std::string endpoint = "https://fakesdlcloudapptesting.com:8080";
-  std::string certificate = "cert";
-  std::string auth_token = "auth_token";
-  std::string cloud_transport_type = "WS";
-  std::string hybrid_app_preference_str = "CLOUD";
-  bool enabled = true;
 
   EXPECT_CALL(*mock_policy_handler_, GetEnabledCloudApps(_))
       .WillOnce(SetArgReferee<0>(enabled_apps));
   EXPECT_CALL(*mock_policy_handler_, GetCloudAppParameters(_, _, _, _, _, _, _))
-      .WillOnce(DoAll(SetArgReferee<1>(enabled),
-                      SetArgReferee<2>(endpoint),
-                      SetArgReferee<3>(certificate),
-                      SetArgReferee<4>(auth_token),
-                      SetArgReferee<5>(cloud_transport_type),
-                      SetArgReferee<6>(hybrid_app_preference_str),
+      .WillOnce(DoAll(SetArgReferee<1>(kEnabled),
+                      SetArgReferee<2>(kEndpoint2),
+                      SetArgReferee<3>(kCertificate),
+                      SetArgReferee<4>(kAuthToken),
+                      SetArgReferee<5>(kTransportType),
+                      SetArgReferee<6>(kHybridAppPreferenceStr),
                       Return(true)));
 
   std::vector<std::string> nicknames{"CloudApp"};
