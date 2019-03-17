@@ -32,6 +32,8 @@
 
 #include "app_service_rpc_plugin/commands/hmi/as_get_app_service_records_request.h"
 
+#include "application_manager/app_service_manager.h"
+
 namespace app_service_rpc_plugin {
 using namespace application_manager;
 namespace commands {
@@ -61,7 +63,7 @@ void ASGetAppServiceRecordsRequest::Run() {
   smart_objects::SmartObject records =
       smart_objects::SmartObject(smart_objects::SmartType_Array);
   std::vector<smart_objects::SmartObject> service_records =
-      application_manager_.GetAppServiceManager().GetAllServices();
+      application_manager_.GetAppServiceManager().GetAllServiceRecords();
 
   int index = 0;
   for (auto& record : service_records) {

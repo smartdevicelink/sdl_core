@@ -31,6 +31,8 @@
  */
 
 #include "sdl_rpc_plugin/commands/hmi/on_bc_system_capability_updated_notification.h"
+
+#include "application_manager/app_service_manager.h"
 #include "application_manager/application_impl.h"
 #include "application_manager/message_helper.h"
 #include "application_manager/rpc_service.h"
@@ -120,7 +122,7 @@ void OnBCSystemCapabilityUpdatedNotification::Run() {
       break;
     case hmi_apis::Common_SystemCapabilityType::APP_SERVICES: {
       auto all_services =
-          application_manager_.GetAppServiceManager().GetAllServices();
+          application_manager_.GetAppServiceManager().GetAllServiceRecords();
       auto app_service_caps =
           MessageHelper::CreateAppServiceCapabilities(all_services);
 

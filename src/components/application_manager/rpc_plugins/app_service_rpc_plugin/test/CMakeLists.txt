@@ -30,6 +30,7 @@ set(LIBRARIES
   MOBILE_API
   connectionHandler
   app_service_rpc_plugin
+  sdl_rpc_plugin
   jsoncpp
   Policy
 )

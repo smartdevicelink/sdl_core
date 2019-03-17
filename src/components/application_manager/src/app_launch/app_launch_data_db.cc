@@ -33,7 +33,7 @@
 #include <unistd.h>
 
 #include "application_manager/app_launch/app_launch_data_db.h"
-#include "application_manager/application_manager_impl.h"
+#include "application_manager/application_manager.h"
 #include "application_manager/app_launch/app_launch_sql_queries.h"
 #include "application_manager/smart_object_keys.h"
 #include "application_manager/message_helper.h"

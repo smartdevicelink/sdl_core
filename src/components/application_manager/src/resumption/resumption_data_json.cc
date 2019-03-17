@@ -30,7 +30,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "application_manager/application_manager_impl.h"
+#include "application_manager/application_manager.h"
 #include "application_manager/resumption/resumption_data_json.h"
 #include "smart_objects/smart_object.h"
 #include "json/json.h"

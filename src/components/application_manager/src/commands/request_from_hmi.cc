@@ -31,6 +31,8 @@
  */
 
 #include "application_manager/commands/request_from_hmi.h"
+
+#include "application_manager/app_service_manager.h"
 #include "application_manager/application_manager.h"
 #include "application_manager/request_info.h"
 #include "application_manager/rpc_service.h"

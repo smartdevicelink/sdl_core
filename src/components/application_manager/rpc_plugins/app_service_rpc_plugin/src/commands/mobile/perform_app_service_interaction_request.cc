@@ -31,6 +31,8 @@
  */
 
 #include "app_service_rpc_plugin/commands/mobile/perform_app_service_interaction_request.h"
+
+#include "application_manager/app_service_manager.h"
 #include "application_manager/application_impl.h"
 #include "application_manager/message_helper.h"
 #include "interfaces/MOBILE_API.h"
@@ -70,6 +72,15 @@ void PerformAppServiceInteractionRequest::Run() {
     SendResponse(false,
                  mobile_apis::Result::INVALID_ID,
                  "The requested service ID does not exist");
+    return;
+  }
+
+  if (!service->record[strings::service_manifest][strings::allow_app_consumers]
+           .asBool()) {
+    SendResponse(
+        false,
+        mobile_apis::Result::REJECTED,
+        "The requested service ID does not allow mobile app consumers");
     return;
   }
 

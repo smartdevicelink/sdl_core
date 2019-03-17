@@ -31,7 +31,9 @@
  */
 
 #include "app_service_rpc_plugin/commands/mobile/on_app_service_data_notification.h"
+
 #include "app_service_rpc_plugin/app_service_app_extension.h"
+#include "application_manager/app_service_manager.h"
 #include "application_manager/application_impl.h"
 #include "application_manager/helpers/application_helper.h"
 #include "application_manager/message_helper.h"

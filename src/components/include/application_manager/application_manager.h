@@ -51,7 +51,7 @@
 #include "application_manager/hmi_interfaces.h"
 #include "policy/policy_types.h"
 #include "application_manager/plugin_manager/rpc_plugin_manager.h"
-#include "application_manager/app_service_manager.h"
+
 namespace resumption {
 class LastState;
 }
@@ -90,6 +90,7 @@ class RPCHandler;
 }
 
 class Application;
+class AppServiceManager;
 class StateControllerImpl;
 struct CommandParametersPermissions;
 using policy::RPCParams;

@@ -59,11 +59,17 @@ GetAppServiceDataRequest::~GetAppServiceDataRequest() {}
 void GetAppServiceDataRequest::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
 
+  SendProviderRequest(mobile_apis::FunctionID::GetAppServiceDataID,
+                      hmi_apis::FunctionID::AppService_GetAppServiceData,
+                      &(*message_),
+                      true);
+}
+
+void GetAppServiceDataRequest::HandleSubscribe() {
   std::string service_type =
       (*message_)[strings::msg_params][strings::service_type].asString();
-
   ApplicationSharedPtr app = application_manager_.application(connection_key());
-  if ((*message_)[strings::msg_params].keyExists(strings::subscribe)) {
+  if (app && (*message_)[strings::msg_params].keyExists(strings::subscribe)) {
     bool subscribe =
         (*message_)[strings::msg_params][strings::subscribe].asBool();
     auto& ext = AppServiceAppExtension::ExtractASExtension(*app);
@@ -73,11 +79,6 @@ void GetAppServiceDataRequest::Run() {
       ext.UnsubscribeFromAppService(service_type);
     }
   }
-
-  SendProviderRequest(mobile_apis::FunctionID::GetAppServiceDataID,
-                      hmi_apis::FunctionID::AppService_GetAppServiceData,
-                      &(*message_),
-                      true);
 }
 
 void GetAppServiceDataRequest::on_event(
@@ -89,6 +90,9 @@ void GetAppServiceDataRequest::on_event(
   mobile_apis::Result::eType result = static_cast<mobile_apis::Result::eType>(
       msg_params[strings::result_code].asInt());
   bool success = IsMobileResultSuccess(result);
+  if (success) {
+    HandleSubscribe();
+  }
 
   const char* info = msg_params.keyExists(strings::info)
                          ? msg_params[strings::info].asCharArray()
@@ -110,6 +114,9 @@ void GetAppServiceDataRequest::on_event(const event_engine::Event& event) {
       MessageHelper::HMIToMobileResult(hmi_result);
   bool success = PrepareResultForMobileResponse(
       hmi_result, HmiInterfaces::HMI_INTERFACE_AppService);
+  if (success) {
+    HandleSubscribe();
+  }
 
   const char* info = msg_params.keyExists(strings::info)
                          ? msg_params[strings::info].asCharArray()
