@@ -267,6 +267,9 @@ void WebsocketClientConnection::Shutdown() {
     thread_delegate_->SetShutdown();
     write_thread_->join();
     delete thread_delegate_;
+    thread_delegate_ = NULL;
+    threads::DeleteThread(write_thread_);
+    write_thread_ = NULL;
   }
   if (buffer_.size()) {
     buffer_.consume(buffer_.size());
