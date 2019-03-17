@@ -933,6 +933,9 @@ void ApplicationManagerImpl::DisconnectCloudApp(ApplicationSharedPtr app) {
 
 void ApplicationManagerImpl::RefreshCloudAppInformation() {
   LOG4CXX_AUTO_TRACE(logger_);
+  if (is_stopping()) {
+    return;
+  }
   std::vector<std::string> enabled_apps;
   GetPolicyHandler().GetEnabledCloudApps(enabled_apps);
   std::vector<std::string>::iterator enabled_it = enabled_apps.begin();
@@ -2825,6 +2828,21 @@ void ApplicationManagerImpl::UnregisterAllApplications() {
       it = accessor.GetData().begin();
     }
   }
+
+  bool send_pending_update_app_list = false;
+  {
+    sync_primitives::AutoLock auto_lock(apps_to_register_list_lock_ptr_);
+    if (!apps_to_register_.empty()) {
+      send_pending_update_app_list = true;
+      apps_to_register_.clear();
+    }
+  }
+
+  // Only send update app list if pending apps were removed.
+  if (send_pending_update_app_list) {
+    SendUpdateAppList();
+  }
+
   if (is_ignition_off) {
     resume_controller().OnIgnitionOff();
   }

@@ -31,6 +31,8 @@
  */
 
 #include "app_service_rpc_plugin/commands/hmi/as_publish_app_service_request.h"
+
+#include "application_manager/app_service_manager.h"
 #include "application_manager/message_helper.h"
 
 namespace app_service_rpc_plugin {
@@ -59,8 +61,8 @@ void ASPublishAppServiceRequest::Run() {
   smart_objects::SmartObject manifest =
       (*message_)[strings::msg_params][strings::app_service_manifest];
   smart_objects::SmartObject service_record =
-      application_manager_.GetAppServiceManager().PublishAppService(
-          manifest, false, UINT32_MAX);
+      application_manager_.GetAppServiceManager().PublishAppService(manifest,
+                                                                    false);
 
   response_params[strings::app_service_record] = service_record;
   SendResponse(true,

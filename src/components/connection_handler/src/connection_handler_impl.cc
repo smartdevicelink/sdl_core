@@ -888,6 +888,8 @@ ConnectionHandlerImpl::TransportTypeProfileStringFromDeviceHandle(
     return std::string("IAP_USB_DEVICE_MODE");
   } else if (connection_type == "CARPLAY_WIRELESS_IOS") {
     return std::string("IAP_CARPLAY");
+  } else if (connection_type == "CLOUD_WEBSOCKET") {
+    return std::string("WEBSOCKET");
 #ifdef BUILD_TESTS
   } else if (connection_type == "BTMAC") {
     return std::string("BTMAC");

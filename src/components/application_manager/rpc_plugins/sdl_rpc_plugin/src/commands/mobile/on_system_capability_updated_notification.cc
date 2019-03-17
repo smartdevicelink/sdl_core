@@ -1,4 +1,6 @@
 #include "sdl_rpc_plugin/commands/mobile/on_system_capability_updated_notification.h"
+
+#include "application_manager/app_service_manager.h"
 #include "application_manager/application_manager.h"
 #include "application_manager/helpers/application_helper.h"
 #include "application_manager/message_helper.h"
@@ -86,7 +88,7 @@ void OnSystemCapabilityUpdatedNotification::Run() {
       break;
     case mobile_apis::SystemCapabilityType::APP_SERVICES: {
       auto all_services =
-          application_manager_.GetAppServiceManager().GetAllServices();
+          application_manager_.GetAppServiceManager().GetAllServiceRecords();
       auto app_service_caps =
           MessageHelper::CreateAppServiceCapabilities(all_services);
 

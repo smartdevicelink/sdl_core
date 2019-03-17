@@ -34,7 +34,6 @@
 #include "application_manager/application_impl.h"
 #include "application_manager/message_helper.h"
 #include "application_manager/rpc_service.h"
-#include "interfaces/MOBILE_API.h"
 
 namespace app_service_rpc_plugin {
 using namespace application_manager;
