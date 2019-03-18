@@ -34,7 +34,7 @@
 
 <interfaces name="SmartDeviceLink HMI API">
 
-<interface name="Common" version="2.0.0" date="2018-09-05">
+<interface name="Common" version="2.1.0" date="2019-03-18">
 
 <enum name="Result">
     <element name="SUCCESS" value="0"/>
@@ -3634,7 +3634,7 @@
         <param name="junctionType" type="Common.NavigationJunction" mandatory="false"/>
 
         <param name="drivingSide" type="Common.Direction" mandatory="false">
-            <description> Used to infer which side of the road this instruction takes place. For a U-Turn (Action=Turn, direction=180) this will determine which direction the turn should take place. </description>
+            <description> Used to infer which side of the road this instruction takes place. For a U-Turn (action=TURN, bearing=180) this will determine which direction the turn should take place. </description>
         </param>
 
         <param name="details" type="String" mandatory="false">
@@ -3685,8 +3685,8 @@
             <description> The type of service that is to be offered by this app </description>
         </param>
 
-        <param name="serviceIcon" type="String" mandatory="false">
-            <description> The file name of the icon to be associated with this service. Most likely the same as the appIcon. </description>
+        <param name="serviceIcon" type="Common.Image" mandatory="false">
+            <description> The icon to be associated with this service. Most likely the same as the appIcon.</description>
         </param>
 
         <param name="allowAppConsumers" type="Boolean" mandatory="false" defvalue="false">
@@ -3727,9 +3727,11 @@
     </struct>
 
     <struct name="AppServiceData">
-        <description> Contains all the current data of the app service. The serviceType will link to which of the service data objects are included in this object. (eg if service type equals MEDIA, the mediaServiceData param should be included.</description>
+        <description> Contains all the current data of the app service. The serviceType will link to which of the service data objects are included in this object (e.g. if the service type is MEDIA, the mediaServiceData param should be included).</description>
 
-        <param name="serviceType" type="String" mandatory="true"/>
+        <param name="serviceType" type="String" mandatory="true">
+            <description>The type of service that is to be offered by this app. See AppServiceType for known enum equivalent types. Parameter is a string to allow for new service types to be used by apps on older versions of SDL Core.</description>
+        </param>
         <param name="serviceID" type="String" mandatory="true"/>
 
         <param name="mediaServiceData" type="Common.MediaServiceData" mandatory="false"/>
@@ -3785,7 +3787,7 @@
     <struct name="SystemCapability">
         <description>The systemCapabilityType identifies which data object exists in this struct. For example, if the SystemCapability Type is NAVIGATION then a "navigationCapability" should exist</description>
         <param name="systemCapabilityType" type="Common.SystemCapabilityType" mandatory="true">
-            <description>Used as a descriptor of what data to expect in this struct. The corresponding param to this enum should be included and the only other para included.</description>
+            <description>Used as a descriptor of what data to expect in this struct. The corresponding param to this enum should be included and the only other param included.</description>
         </param>
         <param name="navigationCapability" type="Common.NavigationCapability" mandatory="false">
             <description>Describes extended capabilities for onboard navigation system </description>
@@ -3890,7 +3892,7 @@
     </function>
 </interface>
 
-<interface name="BasicCommunication" version="2.0.0" date="2018-09-05">
+<interface name="BasicCommunication" version="2.1.0" date="2019-03-18">
     <function name="GetSystemTime" messagetype="request">
       <description>Request from SDL to HMI to obtain current UTC time.</description>
     </function>
@@ -5285,7 +5287,7 @@
 
 </interface>
 
-<interface name="VehicleInfo" version="2.0.0" date="2018-09-05">
+<interface name="VehicleInfo" version="2.1.0" date="2019-03-18">
   <function name="IsReady" messagetype="request">
     <description>Method is invoked at system startup. Response should provide information about presence of any of vehicle information modules (ECU, GPS, etc) and their readiness to cooperate with SDL.</description>
   </function>
@@ -6251,7 +6253,7 @@
     <description>The module data to retrieve from the vehicle for that type</description>
   </param>
   <param name="subscribe" type="Boolean" mandatory="false">
-    <description>If subscribe is true, the head unit will send onInteriorVehicleData notifications for the module type</description>
+    <description>If subscribe is true, the head unit will send OnInteriorVehicleData notifications for the module type</description>
   </param>
 </function>
 
@@ -6260,7 +6262,7 @@
   </param>
   <param name="isSubscribed" type="Boolean" mandatory="false" >
     <description>Is a conditional-mandatory parameter: must be returned in case "subscribe" parameter was present in the related request.
-    if "true" - the "moduleType" from request is successfully subscribed and  the head unit will send onInteriorVehicleData notifications for the moduleDescription.
+    if "true" - the "moduleType" from request is successfully subscribed and  the head unit will send OnInteriorVehicleData notifications for the moduleDescription.
     if "false" - the "moduleType" from request is either unsubscribed or failed to subscribe.</description>
   </param>
 </function>
@@ -6313,7 +6315,7 @@
 
 </interface>
 
-<interface name="AppService" version="1.0.0" date="2019-01-20">
+<interface name="AppService" version="1.0.0" date="2019-03-18">
     <description>Interface used for interacting with app services as a producer or consumer</description>
     <function name="PublishAppService" messagetype="request">
         <description>Registers a service offered by this app on the module</description>
@@ -6340,7 +6342,9 @@
     <function name="GetAppServiceData" messagetype="request">
         <description> This request asks the module for current data related to the specific service. It also includes an option to subscribe to that service for future updates</description>
         
-        <param name="serviceType" type="String" mandatory="true"/>
+        <param name="serviceType" type="String" mandatory="true">
+            <description>The type of service that is to be offered by this app. See AppServiceType for known enum equivalent types. Parameter is a string to allow for new service types to be used by apps on older versions of SDL Core.</description>
+        </param>
         
         <param name="subscribe" type="Boolean" mandatory="false">
             <description> If true, the consumer is requesting to subscribe to all future updates from the service publisher. If false, the consumer doesn't wish to subscribe and should be unsubscribed if it was previously subscribed.</description>
@@ -6348,8 +6352,32 @@
     </function>
 
     <function name="GetAppServiceData" messagetype="response">
-        <description> This response includes the data that is requested from the specific service</description>    
+        <description> This response includes the data that was requested from the specific service</description>    
         <param name="serviceData" type="Common.AppServiceData" mandatory="false"/>
+    </function>
+
+    <function name="PerformAppServiceInteraction" messagetype="request">
+        <param name="serviceUri" type="String"  mandatory="true">
+            <description>Fully qualified URI based on a predetermined scheme provided by the app service. SDL makes no guarantee that this URI is correct.</description>
+        </param>
+        
+        <param name="serviceID" type="String" mandatory="true">
+            <description>The service ID that the app consumer wishes to send this URI.</description>
+        </param>
+        
+        <param name="originApp" type="String" mandatory="false">
+            <description>This string is the appID of the app requesting the app service provider take the specific action. This will automatically be set by SDL Core in requests originating from the HMI</description>
+        </param>
+        
+        <param name="requestServiceActive" type="Boolean" mandatory="false">
+            <description>This flag signals the requesting consumer would like this service to become the active primary service of the destination's type.</description>
+        </param>
+    </function>
+
+    <function name="PerformAppServiceInteraction" messagetype="response">
+        <param name="serviceSpecificResult" type="String" mandatory="false">
+            <description>The service can provide specific result strings to the consumer through this param.</description>
+        </param>
     </function>
 
     <function name="GetAppServiceRecords" messagetype="request">
@@ -6386,30 +6414,6 @@
         <param name="setAsDefault" type="Boolean" mandatory="false">
             <description>True if the service was set to the default service of this type. False if the app was not to be the default</description>
         </param> 
-    </function>
-
-    <function name="PerformAppServiceInteraction" messagetype="request">
-        <param name="serviceUri" type="String"  mandatory="true">
-            <description>Fully qualified URI based on the URI prefix and URI scheme the app service provided. SDL makes no gurantee that this URI is correct.</description>
-        </param>
-        
-        <param name="serviceID" type="String" mandatory="true">
-            <description>The service ID that the app consumer wishes to send this URI.</description>
-        </param>
-        
-        <param name="originApp" type="String" mandatory="false">
-            <description>This string is the appID of the app requesting the app service provider take the specific action. This will automatically be set by SDL Core in requests originating from the HMI</description>
-        </param>
-        
-        <param name="requestServiceActive" type="Boolean" mandatory="false">
-            <description>This flag signals the requesting consumer would like this service to become the active primary service of the destination's type.</description>
-        </param>
-    </function>
-
-    <function name="PerformAppServiceInteraction" messagetype="response">
-        <param name="serviceSpecificResult" type="String" mandatory="false">
-            <description>The service can provide specific result strings to the consumer through this param. These results should be described in the URI schema set in the Service Manifest</description>
-        </param>
     </function>
 
     <function name="GetActiveServiceConsent" messagetype="request">
