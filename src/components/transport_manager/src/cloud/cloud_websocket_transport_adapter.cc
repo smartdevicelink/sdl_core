@@ -80,17 +80,6 @@ void CloudWebsocketTransportAdapter::CreateDevice(const std::string& uid) {
     return;
   }
 
-  boost::regex pattern(
-      "(wss?):\\/\\/([A-Z\\d\\.-]{2,})\\.?([A-Z]{2,})?(:\\d{2,4})\\/",
-      boost::regex::icase);
-  std::string str = uid;
-  if (!boost::regex_match(str, pattern)) {
-    LOG4CXX_DEBUG(logger_, "Invalid Endpoint: " << uid);
-    return;
-  }
-
-  LOG4CXX_DEBUG(logger_, "Valid Endpoint: " << uid);
-
   // Port after second colon in valid endpoint string
   std::size_t pos_port = uid.find(":");
   pos_port = uid.find(":", pos_port + 1);
@@ -100,22 +89,20 @@ void CloudWebsocketTransportAdapter::CreateDevice(const std::string& uid) {
       "(wss?:\\/\\/)([A-Z\\d\\.-]{2,}\\.?([A-Z]{2,})?)(:)(\\d{2,5})(\\/"
       "[A-Z\\d\\.-]+)*\\/?");
   boost::smatch results;
+  std::string str = uid;
 
-  std::string host = "";
-  std::string port = "";
-  if (boost::regex_search(str, results, group_pattern)) {
-    host = results[2];
-    port = results[5];
-
-    LOG4CXX_DEBUG(logger_,
-                  "Results: " << results[0] << " " << results[1] << " "
-                              << results[2] << " " << results[3] << " "
-                              << results[4] << " " << results[5] << " ");
-  } else {
+  if (!boost::regex_search(str, results, group_pattern)) {
     LOG4CXX_DEBUG(logger_, "Invalid Pattern: " << uid);
     return;
   }
 
+  std::string host = results[2];
+  std::string port = results[5];
+
+  LOG4CXX_DEBUG(logger_,
+                "Results: " << results[0] << " " << results[1] << " "
+                            << results[2] << " " << results[3] << " "
+                            << results[4] << " " << results[5] << " ");
   std::string device_id = uid;
 
   LOG4CXX_DEBUG(logger_,
