@@ -1,7 +1,7 @@
 <?xml version="1.0" standalone="no"?>
 <?xml-stylesheet type="text/xml" href="protocol2html.xsl"?>
 
-<interface name="SmartDeviceLink RAPI" version="5.1.0" minVersion="1.0" date="2018-10-03">
+<interface name="SmartDeviceLink RAPI" version="5.1.0" minVersion="1.0" date="2019-03-18">
     <enum name="Result" internal_scope="base" since="1.0">
         <element name="SUCCESS">
             <description>The request succeeded</description>
@@ -544,7 +544,7 @@
         <element name="VEHICLEDATA_ELECTRONICPARKBRAKESTATUS" since="5.0" />
         <element name="VEHICLEDATA_CLOUDAPPVEHICLEID" since="5.1"/>
     </enum>
-    
+
     <enum name="HybridAppPreference" since="5.1">
         <description>Enumeration for the user's preference of which app type to use when both are available</description>
         <element name="MOBILE" />
@@ -556,7 +556,7 @@
         <param name="nicknames" type="String" minlength="0" maxlength="100" array="true" minsize="0" maxsize="100" mandatory="false">
             <description>An array of app names a cloud app is allowed to register with. If included in a SetCloudAppProperties request, this value will overwrite the existing "nicknames" field in the app policies section of the policy table.</description>
         </param>
-        <param name="appID" type="String" maxlength="100" mandatory="true"></param>
+        <param name="appID" type="String" maxlength="100" mandatory="true"/>
         <param name="enabled" type="Boolean" mandatory="false">
             <description>If true, cloud app will be included in HMI RPC UpdateAppList</description>
         </param>
@@ -569,9 +569,11 @@
         <param name="hybridAppPreference" type="HybridAppPreference" mandatory="false">
             <description>Specifies the user preference to use the cloud app version or mobile app version when both are available</description>
         </param>
-        <param name="endpoint" type="String" maxlength="65535" mandatory="false"></param>
+        <param name="endpoint" type="String" maxlength="65535" mandatory="false">
+            <description>Specifies the endpoint which Core will attempt to connect to when this app is selected</description>
+        </param>
     </struct>
-
+    
     <enum name="ButtonName" since="1.0">
         <description>Defines the hard (physical) and soft (touchscreen) buttons available from the module</description>
         <element name="OK" />
@@ -965,7 +967,7 @@
             <description>Similar to VP8, but VP9 is customized for video resolutions beyond high-definition video (UHD) and also enables lossless compression.</description>
         </element>
     </enum>
-
+	
     <enum name="AudioStreamingIndicator" since="5.0">
         <element name="PLAY_PAUSE">
             <description>
@@ -2826,7 +2828,7 @@
         <element name="PHONE_CALL"/>
         <element name="VIDEO_STREAMING"/>
         <element name="REMOTE_CONTROL"/>
-        <element name="APP_SERVICES" />
+        <element name="APP_SERVICES" since="5.1"/>
     </enum>
     
     <struct name="NavigationCapability" since="4.5">
@@ -3722,7 +3724,7 @@
 
     <!-- App Services -->
 
-    <enum name="AppServiceType" since="5.1">
+    <enum name="AppServiceType" platform="documentation" since="5.1">
         <element name="MEDIA"/>
         <element name="WEATHER"/>
         <element name="NAVIGATION"/>
@@ -3978,7 +3980,7 @@
         <param name="junctionType" type="NavigationJunction" mandatory="false"/>
 
         <param name="drivingSide" type="Direction" mandatory="false">
-            <description> Used to infer which side of the road this instruction takes place. For a U-Turn (Action=Turn, direction=180) this will determine which direction the turn should take place. </description>
+            <description> Used to infer which side of the road this instruction takes place. For a U-Turn (action=TURN, bearing=180) this will determine which direction the turn should take place. </description>
         </param>
 
         <param name="details" type="String" mandatory="false">
@@ -4030,7 +4032,7 @@
         </param>
 
         <param name="serviceIcon" type="Image" mandatory="false">
-            <description> The file name of the icon to be associated with this service. Most likely the same as the appIcon. </description>
+            <description> The icon to be associated with this service. Most likely the same as the appIcon.</description>
         </param>
 
         <param name="allowAppConsumers" type="Boolean" mandatory="false" defvalue="false">
@@ -4071,9 +4073,11 @@
     </struct>
 
     <struct name="AppServiceData" since="5.1">
-        <description> Contains all the current data of the app service. The serviceType will link to which of the service data objects are included in this object. (eg if service type equals MEDIA, the mediaServiceData param should be included.</description>
+        <description> Contains all the current data of the app service. The serviceType will link to which of the service data objects are included in this object (e.g. if the service type is MEDIA, the mediaServiceData param should be included).</description>
 
-        <param name="serviceType" type="String" mandatory="true"/>
+        <param name="serviceType" type="String" mandatory="true">
+            <description>The type of service that is to be offered by this app. See AppServiceType for known enum equivalent types. Parameter is a string to allow for new service types to be used by apps on older versions of SDL Core.</description>
+        </param>
         <param name="serviceID" type="String" mandatory="true"/>
 
         <param name="mediaServiceData" type="MediaServiceData" mandatory="false"/>
@@ -4120,7 +4124,7 @@
     <struct name="SystemCapability" since="4.5">
         <description>The systemCapabilityType identifies which data object exists in this struct. For example, if the SystemCapability Type is NAVIGATION then a "navigationCapability" should exist</description>
         <param name="systemCapabilityType" type="SystemCapabilityType" mandatory="true">
-            <description>Used as a descriptor of what data to expect in this struct. The corresponding param to this enum should be included and the only other para included.</description>
+            <description>Used as a descriptor of what data to expect in this struct. The corresponding param to this enum should be included and the only other param included.</description>
         </param>
         <param name="navigationCapability" type="NavigationCapability" mandatory="false">
             <description>Describes extended capabilities for onboard navigation system </description>
@@ -5381,7 +5385,7 @@
         <param name="cloudAppVehicleID" type="Boolean" mandatory="false" since="5.1">
             <description>Parameter used by cloud apps to identify a head unit</description>
         </param>
-
+        
         <!-- Ford Specific Data Items -->
         <param name="eCallInfo" type="Boolean" mandatory="false">
             <description>Emergency Call notification and confirmation data</description>
@@ -5499,7 +5503,7 @@
         <param name="cloudAppVehicleID" type="VehicleDataResult" mandatory="false" since="5.1">
             <description>Parameter used by cloud apps to identify a head unit</description>
         </param>
-
+        
         <!-- Ford Specific Data Items -->
         <param name="eCallInfo" type="VehicleDataResult" mandatory="false">
             <description>Emergency Call notification and confirmation data</description>
@@ -6470,7 +6474,7 @@
             <description>Provides additional human readable info regarding the result.</description>
         </param>
     </function>
-    
+
     <function name ="GetFile" functionID="GetFileID" messagetype="request">
         <description>This request is sent to the module to retrieve a file</description>
         <param name="fileName" type="String" maxlength="255" mandatory="true">
@@ -6486,7 +6490,10 @@
             <description>Optional offset in bytes for resuming partial data chunks</description>
         </param>
         <param name="length" type="Integer" minvalue="0" maxvalue="2000000000" mandatory="false">
-            <description>Optional length in bytes for resuming partial data chunks if offset is set to 0, then length is the total length of the file to be downloaded</description>
+            <description>
+                Optional length in bytes for resuming partial data chunks
+                If offset is set to 0, then length is the total length of the file to be retrieved
+            </description>
         </param>
     </function>
 
@@ -6506,7 +6513,7 @@
             <element name="APPLICATION_NOT_REGISTERED"/>
             <element name="GENERIC_ERROR"/>
             <element name="FILE_NOT_FOUND"/>
-    	</param>
+        </param>
         <param name="info" type="String" maxlength="1000" mandatory="false" platform="documentation">
             <description>Provides additional human readable info regarding the result.</description>
         </param>
@@ -6515,20 +6522,20 @@
         <param name="offset" type="Integer" minvalue="0" maxvalue="2000000000" mandatory="false">
             <description>Optional offset in bytes for resuming partial data chunks</description>
         </param>
-        
+
         <param name="length" type="Integer" minvalue="0" maxvalue="2000000000" mandatory="false">
             <description>Optional length in bytes for resuming partial data chunks if offset is set to 0, then length is the total length of the file to be downloaded</description>
         </param>
-        
+
         <param name="fileType" type="FileType" mandatory="false">
             <description>File type that is being sent in response.</description>
         </param>
-        
+
         <param name="crc" type="Integer" minvalue="0" maxvalue="4294967295" mandatory="false">
             <description>Additional CRC32 checksum to protect data integrity up to 512 Mbits</description>
         </param>
     </function>
-    
+
     <function name="DeleteFile" functionID="DeleteFileID" messagetype="request" since="3.0">
         <description>
             Used to delete a file resident on the module in the app's local cache.
@@ -6910,8 +6917,8 @@
         </param>
         <param name="subscribe" type="Boolean" mandatory="false" since="4.5.1">
             <description>
-                If subscribe is true, the head unit will register onInteriorVehicleData notifications for the requested moduleType.
-                If subscribe is false, the head unit will unregister onInteriorVehicleData notifications for the requested moduleType.
+                If subscribe is true, the head unit will register OnInteriorVehicleData notifications for the requested moduleType.
+                If subscribe is false, the head unit will unregister OnInteriorVehicleData notifications for the requested moduleType.
                 If subscribe is not included, the subscription status of the app for the requested moduleType will remain unchanged.
             </description>
             <history>
@@ -7070,7 +7077,7 @@
             <description>The type of system capability to get more information on</description>
         </param>
         <param name="subscribe" type="Boolean" mandatory="false" since="5.1">
-            <description>Flag to subscribe to updates of the supplied service capability type. If true, then requester will be subscribed</description>
+            <description>Flag to subscribe to updates of the supplied service capability type. If true, the requester will be subscribed. If false, the requester will not be subscribed and be removed as a subscriber if it was previously subscribed.</description>
         </param>
     </function>
     
@@ -7124,20 +7131,18 @@
             <element name="GENERIC_ERROR"/>
         </param>
     </function>
-    
+
     <function name="SetCloudAppProperties" functionID="SetCloudAppPropertiesID" messagetype="request" since="5.1">
         <description>
-            RPC used to enable/disable a cloud application and set authentication data
+            RPC used to enable/disable a cloud application and set its cloud-related policy properties
         </description>
         <param name="properties" type="CloudAppProperties" mandatory="true">
-            <description> The requested cloud application properties </description>
+            <description> The new cloud application properties </description>
         </param>
     </function>
 
     <function name="SetCloudAppProperties" functionID="SetCloudAppPropertiesID" messagetype="response" since="5.1">
-        <description>
-            The response to registerAppInterface
-        </description>
+        <description>The response to SetCloudAppProperties</description>
         <param name="success" type="Boolean" platform="documentation" mandatory="true">
             <description> true if successful; false if failed </description>
         </param>
@@ -7220,8 +7225,8 @@
         <description> This request asks the module for current data related to the specific service. It also includes an option to subscribe to that service for future updates</description>
         
         <param name="serviceType" type="String" mandatory="true">
-            <description>See AppServiceType</description>
-        </param>
+		    <description>The type of service that is to be offered by this app. See AppServiceType for known enum equivalent types. Parameter is a string to allow for new service types to be used by apps on older versions of SDL Core.</description>
+	    </param>
         
         <param name="subscribe" type="Boolean" mandatory="false">
             <description> If true, the consumer is requesting to subscribe to all future updates from the service publisher. If false, the consumer doesn't wish to subscribe and should be unsubscribed if it was previously subscribed.</description>
@@ -7229,7 +7234,7 @@
     </function>
 
     <function name="GetAppServiceData" functionID="GetAppServiceDataID" messagetype="response" since="5.1">
-        <description> This response includes the data that is requested from the specific service</description>
+        <description> This response includes the data that was requested from the specific service</description>
 
         <param name="success" type="Boolean" platform="documentation" mandatory="true">
             <description> true, if successful; false, if failed </description>
@@ -7255,9 +7260,9 @@
         <param name="serviceData" type="AppServiceData" mandatory="false"/>            
     </function>
 
-    <function name="PerformAppServiceInteraction" functionID="PerformAppServiceInteractionID" messagetype="request">
+    <function name="PerformAppServiceInteraction" functionID="PerformAppServiceInteractionID" messagetype="request" since="5.1">
         <param name="serviceUri" type="String"  mandatory="true">
-            <description>Fully qualified URI based on the URI prefix and URI scheme the app service provided. SDL makes no gurantee that this URI is correct.</description>
+            <description>Fully qualified URI based on a predetermined scheme provided by the app service. SDL makes no guarantee that this URI is correct.</description>
         </param>
         
         <param name="serviceID" type="String" mandatory="true">
@@ -7273,7 +7278,7 @@
         </param>
     </function>
 
-    <function name="PerformAppServiceInteraction" functionID="PerformAppServiceInteractionID" messagetype="response">
+    <function name="PerformAppServiceInteraction" functionID="PerformAppServiceInteractionID" messagetype="response" since="5.1">
         <param name="success" type="Boolean" platform="documentation" mandatory="true">
             <description> true, if successful; false, if failed </description>
         </param>       
@@ -7287,7 +7292,7 @@
         </param>
 
         <param name="serviceSpecificResult" type="String" mandatory="false">
-            <description>The service can provide specific result strings to the consumer through this param. These results should be described in the URI schema set in the Service Manifest</description>
+            <description>The service can provide specific result strings to the consumer through this param.</description>
         </param>
     </function>
 
@@ -7419,7 +7424,7 @@
         <param name="cloudAppVehicleID" type="String" mandatory="false" since="5.1">
             <description>Parameter used by cloud apps to identify a head unit</description>
         </param>
-        
+
         <!-- Ford Specific Vehicle Data -->
         <param name="eCallInfo" type="ECallInfo" mandatory="false">
             <description>Emergency Call notification and confirmation data</description>
