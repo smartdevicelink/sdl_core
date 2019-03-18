@@ -118,8 +118,20 @@ bool RPCPassingHandler::RPCPassThrough(smart_objects::SmartObject rpc_message) {
         PopulateRPCRequestQueue(rpc_message);
       } else {
         rpc_request_queue_lock_.Release();
-        LOG4CXX_DEBUG(logger_, "Correlation id DOES exist in map. Continuing");
-        return false;
+        LOG4CXX_DEBUG(logger_, "Correlation id DOES exist in map. Returning");
+        std::shared_ptr<smart_objects::SmartObject> response(
+            MessageHelper::CreateNegativeResponse(
+                rpc_message[strings::params][strings::connection_key].asInt(),
+                rpc_message[strings::params][strings::function_id].asInt(),
+                correlation_id,
+                mobile_apis::Result::INVALID_ID));
+
+        (*response)[strings::msg_params][strings::info] =
+            "Duplicate correlation_id";
+        app_manager_.GetRPCService().ManageMobileCommand(
+            response, commands::Command::SOURCE_SDL);
+
+        return true;
       }
 
       rpc_request_queue_lock_.Acquire();
