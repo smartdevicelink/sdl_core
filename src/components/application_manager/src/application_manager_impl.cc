@@ -2942,9 +2942,11 @@ void ApplicationManagerImpl::UnregisterApplication(
     auto it_app = applications_.begin();
     while (applications_.end() != it_app) {
       if (app_id == (*it_app)->app_id()) {
-        connection_handler().GetDeviceID((*it_app)->mac_address(), &handle);
-        app_to_remove = *it_app;
-        applications_.erase(it_app++);
+        if (connection_handler().GetDeviceID((*it_app)->mac_address(),
+                                             &handle)) {
+          app_to_remove = *it_app;
+          applications_.erase(it_app++);
+        }
       } else {
         ++it_app;
       }

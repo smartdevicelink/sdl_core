@@ -1800,8 +1800,14 @@ bool SQLPTRepresentation::GatherAppServiceParameters(
           handled_rpc);
     }
 
-    service_name_query.Reset();
-    handled_rpcs_query.Reset();
+    if (!service_name_query.Reset()) {
+      LOG4CXX_ERROR(logger_, "Could not reset service_name query");
+      return false;
+    }
+    if (handled_rpcs_query.Reset()) {
+      LOG4CXX_ERROR(logger_, "Could not reset handled_rpcs query");
+      return false;
+    }
   }
 
   return true;
