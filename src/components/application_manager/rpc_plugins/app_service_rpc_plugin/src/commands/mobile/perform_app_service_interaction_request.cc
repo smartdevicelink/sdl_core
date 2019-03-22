@@ -95,7 +95,7 @@ void PerformAppServiceInteractionRequest::Run() {
   bool activate_service = request_service_active &&
                           !service->record[strings::service_active].asBool();
   if (activate_service) {
-    if (app->is_foreground()) {
+    if (app->IsFullscreen()) {
       // App is in foreground, we can just activate the service
       application_manager_.GetAppServiceManager().ActivateAppService(
           service_id);
