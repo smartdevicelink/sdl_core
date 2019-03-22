@@ -50,6 +50,10 @@ bool CloudDevice::IsSameAs(const Device* other) const {
   const CloudDevice* other_cloud_device =
       dynamic_cast<const CloudDevice*>(other);
 
+  if (!other_cloud_device) {
+    return false;
+  }
+
   if (host_ != other_cloud_device->GetHost()) {
     return false;
   }
