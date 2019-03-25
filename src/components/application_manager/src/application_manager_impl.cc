@@ -2981,6 +2981,9 @@ void ApplicationManagerImpl::UnregisterApplication(
         RemoveAppsWaitingForRegistration(handle);
         RefreshCloudAppInformation();
         SendUpdateAppList();
+      } else if (app_to_remove->is_cloud_app()) {
+        RefreshCloudAppInformation();
+        SendUpdateAppList();
       }
     }
   }
