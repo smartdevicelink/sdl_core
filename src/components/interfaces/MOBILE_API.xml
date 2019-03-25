@@ -898,7 +898,7 @@
     </enum>
     
     <enum name="TBTState" since="2.0">
-        <description>Enumeration that describes possible states of turn-by-turn client or AppLink app.</description>
+        <description>Enumeration that describes possible states of turn-by-turn client or SmartDeviceLink app.</description>
         <element name="ROUTE_UPDATE_REQUEST" />
         <element name="ROUTE_ACCEPTED" />
         <element name="ROUTE_REFUSED" />
@@ -2585,7 +2585,7 @@
     </enum>         
    
     <enum name="FunctionID" internal_scope="base" since="1.0">
-        <description>Enumeration linking function names with function IDs in AppLink protocol. Assumes enumeration starts at value 0.</description>
+        <description>Enumeration linking function names with function IDs in SmartDeviceLink protocol. Assumes enumeration starts at value 0.</description>
         <element name="RESERVED" value="0" since="1.0" />
          <!--
          Base Request / Response RPCs
@@ -3916,13 +3916,13 @@
         </param>
     </struct>
 
-    <struct name="NavigationServiceManifest">
+    <struct name="NavigationServiceManifest" since="5.1">
         <param name="acceptsWayPoints" type="Boolean" mandatory="false">
             <description> Informs the subscriber if this service can actually accept way points. </description>
         </param>
     </struct>
 
-    <enum name="NavigationAction">
+    <enum name="NavigationAction" since="5.1">
         <element name="TURN">
             <description> Using this action plus a supplied direction can give the type of turn. </description>
         </element>
@@ -3934,7 +3934,7 @@
         <element name="WAYPOINT"/>
     </enum>
 
-    <enum name="NavigationJunction">
+    <enum name="NavigationJunction" since="5.1">
         <element name="REGULAR">
             <description> A junction that represents a standard intersection with a single road crossing another. </description>
         </element>
@@ -3961,12 +3961,12 @@
         </element>
     </enum>
 
-    <enum name="Direction">
+    <enum name="Direction" since="5.1">
         <element name="LEFT"/>
         <element name="RIGHT"/>
     </enum>
 
-    <struct name="NavigationInstruction">
+    <struct name="NavigationInstruction" since="5.1">
         <param name="locationDetails" type="LocationDetails" mandatory="true"/>
 
         <param name="action" type="NavigationAction" mandatory="true"/>
@@ -3992,7 +3992,7 @@
         </param>
     </struct>
 
-    <struct name="NavigationServiceData">
+    <struct name="NavigationServiceData" since="5.1">
         <description> This data is related to what a navigation service would provide.</description>
 
         <param name="timeStamp" type="DateTime" mandatory="true">
@@ -4138,7 +4138,7 @@
         <param name="remoteControlCapability" type="RemoteControlCapabilities" mandatory="false">
             <description>Describes extended capabilities of the module's phone feature</description>
         </param>
-        <param name="appServicesCapabilities" type="AppServicesCapabilities" mandatory="false">
+        <param name="appServicesCapabilities" type="AppServicesCapabilities" mandatory="false" since="5.1">
             <description>An array of currently available services. If this is an update to the capability the affected services will include an update reason in that item</description>
         </param>
     </struct>
@@ -4419,7 +4419,7 @@
         <param name="vrHelp" type="VrHelpItem" minsize="1" maxsize="100" array="true" mandatory="false" since="2.0">
             <description>
                 VR Help Items.
-                If omitted on supported displays, the default AppLink VR help / What Can I Say? screen shall be used.
+                If omitted on supported displays, the default SmartDeviceLink VR help / What Can I Say? screen shall be used.
                 If the list of VR Help Items contains nonsequential positions (e.g. [1,2,4]), the RPC shall be rejected.
                 If omitted and a vrHelpTitle is provided, the request will be rejected.
             </description>
@@ -6475,7 +6475,7 @@
         </param>
     </function>
 
-    <function name ="GetFile" functionID="GetFileID" messagetype="request">
+    <function name="GetFile" functionID="GetFileID" messagetype="request" since="5.1">
         <description>This request is sent to the module to retrieve a file</description>
         <param name="fileName" type="String" maxlength="255" mandatory="true">
             <description>File name that should be retrieved</description>
@@ -6497,7 +6497,7 @@
         </param>
     </function>
 
-    <function name="GetFile" functionID="GetFileID" messagetype="response">
+    <function name="GetFile" functionID="GetFileID" messagetype="response" since="5.1">
         <description>This response includes the data that is requested from the specific service</description>
         <param name="success" type="Boolean" platform="documentation" mandatory="true">
             <description> true, if successful; false, if failed </description>
