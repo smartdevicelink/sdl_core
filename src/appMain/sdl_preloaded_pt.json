@@ -539,8 +539,8 @@
                     }
                 }
             },
-            "CloudApp":{
-                "rpcs":{
+            "CloudAppStore": {
+                "rpcs": {
                     "SetCloudAppProperties":{
                         "hmi_levels":["BACKGROUND",
                         "FULL",
@@ -550,7 +550,11 @@
                         "hmi_levels":["BACKGROUND",
                         "FULL",
                         "LIMITED"]
-                    },
+                    }
+                }
+            },
+            "CloudApp": {
+                "rpcs": {
                     "GetVehicleData": {
                         "hmi_levels": ["BACKGROUND",
                         "FULL",
@@ -585,9 +589,9 @@
                     }
                 }
             },
-            "AppServiceProducer":{
-                "rpcs":{
-                    "PublishAppService":{
+            "AppServiceProvider": {
+                "rpcs": {
+                    "PublishAppService": {
                         "hmi_levels": [
                             "FULL",
                             "LIMITED",
