@@ -1804,7 +1804,7 @@ bool SQLPTRepresentation::GatherAppServiceParameters(
       LOG4CXX_ERROR(logger_, "Could not reset service_name query");
       return false;
     }
-    if (handled_rpcs_query.Reset()) {
+    if (!handled_rpcs_query.Reset()) {
       LOG4CXX_ERROR(logger_, "Could not reset handled_rpcs query");
       return false;
     }
