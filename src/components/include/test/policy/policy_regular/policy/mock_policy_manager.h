@@ -55,6 +55,22 @@ using namespace policy;
 
 class MockPolicyManager : public PolicyManager {
  public:
+  MOCK_CONST_METHOD1(AppNeedEncryption, bool(const std::string& policy_app_id));
+  MOCK_CONST_METHOD1(
+      GetFunctionGroupsForApp,
+      const std::vector<std::string>(const std::string& policy_app_id));
+  MOCK_CONST_METHOD2(FunctionNeedEncryption,
+                     bool(const std::string& policy_group,
+                          const std::string& policy_function_id));
+  MOCK_CONST_METHOD1(FunctionGroupNeedEncryption,
+                     bool(const std::string& policy_group));
+  MOCK_CONST_METHOD1(
+      GetAppEncryptionRequired,
+      const rpc::Optional<rpc::Boolean>(const std::string& policy_app_id));
+  MOCK_CONST_METHOD1(GetRPCsForFunctionGroup,
+                     const std::vector<std::string>(const std::string& group));
+  MOCK_CONST_METHOD1(GetPolicyFunctionName,
+                     const std::string(const uint32_t function_id));
   MOCK_METHOD1(set_listener, void(PolicyListener* listener));
   MOCK_METHOD2(InitPT,
                bool(const std::string& file_name,

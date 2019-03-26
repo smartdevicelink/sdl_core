@@ -37,6 +37,7 @@
 #include <list>
 #include <string>
 
+#include "application_manager/policies/policy_encryption_flag_getter.h"
 #include "policy/access_remote.h"
 #include "policy/access_remote_impl.h"
 #include "policy/cache_manager_interface.h"
@@ -57,6 +58,42 @@ struct CheckAppPolicy;
 class PolicyManagerImpl : public PolicyManager {
  public:
   PolicyManagerImpl();
+  /*
+   * \param policy_app_id policy app id
+   * \return true if the app need encryption
+   */
+  bool AppNeedEncryption(const std::string& policy_app_id) const OVERRIDE;
+
+  /*
+   * \param policy_app_id policy app id
+   * \return Optional app need encryption
+   */
+  const rpc::Optional<rpc::Boolean> GetAppEncryptionRequired(
+      const std::string& policy_app_id) const OVERRIDE;
+  /*
+   * \param policy_app_id policy app id
+   * \return groups that exist for app
+   */
+  const std::vector<std::string> GetFunctionGroupsForApp(
+      const std::string& policy_app_id) const OVERRIDE;
+  /*
+   * \param policy_group group
+   * \return true if the group need encryption
+   */
+  bool FunctionGroupNeedEncryption(
+      const std::string& policy_group) const OVERRIDE;
+  /*
+   * \param policy_group group
+   * \return RPCs that exists in group
+   */
+  const std::vector<std::string> GetRPCsForFunctionGroup(
+      const std::string& group) const OVERRIDE;
+  /*
+   * \param function_id function id
+   * \return policy function name
+   */
+  const std::string GetPolicyFunctionName(
+      const uint32_t function_id) const OVERRIDE;
 
   /**
    * @brief set_listener set new policy listener instance

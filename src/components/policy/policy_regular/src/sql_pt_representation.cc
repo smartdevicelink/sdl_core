@@ -616,6 +616,10 @@ bool SQLPTRepresentation::GatherFunctionalGroupings(
       *rpcs_structure.user_consent_prompt = functional_group.GetString(2);
     }
 
+    if (!functional_group.IsNull(3)) {
+      *rpcs_structure.encryption_required = functional_group.GetBoolean(3);
+    }
+
     const int group_id = functional_group.GetInteger(0);
 
     // Collecting RPCs with their HMI levels and parameters (if any)
@@ -718,11 +722,13 @@ bool SQLPTRepresentation::GatherApplicationPoliciesSection(
     params.priority = priority;
 
     *params.memory_kb = query.GetInteger(2);
+
     *params.heart_beat_timeout_ms = query.GetUInteger(3);
     if (!query.IsNull(4)) {
       *params.certificate = query.GetString(4);
     }
 
+    
     // Read cloud app properties
     policy_table::HybridAppPreference hap;
     bool valid = policy_table::EnumFromJsonString(query.GetString(5), &hap);
@@ -737,6 +743,10 @@ bool SQLPTRepresentation::GatherApplicationPoliciesSection(
     *params.cloud_transport_type = query.GetString(9);
     *params.icon_url = query.GetString(10);
     *params.allow_unknown_rpc_passthrough = query.GetBoolean(11);
+
+    if (!query.IsNull(12)) {
+      *params.encryption_required = query.GetBoolean(12);
+    }
 
     const auto& gather_app_id = ((*policies).apps[app_id].is_string())
                                     ? (*policies).apps[app_id].get_string()
@@ -853,7 +863,9 @@ bool SQLPTRepresentation::SaveFunctionalGroupings(
     it->second.user_consent_prompt.is_initialized()
         ? query.Bind(2, *(it->second.user_consent_prompt))
         : query.Bind(2);
-
+    it->second.encryption_required.is_initialized()
+        ? query.Bind(3, *(it->second.encryption_required))
+        : query.Bind(3);
     if (!query.Exec() || !query.Reset()) {
       LOG4CXX_WARN(logger_, "Incorrect insert into functional groups");
       return false;
@@ -1042,6 +1054,10 @@ bool SQLPTRepresentation::SaveSpecificAppPolicy(
       ? app_query.Bind(12, *app.second.allow_unknown_rpc_passthrough)
       : app_query.Bind(12);
 
+  app.second.encryption_required.is_initialized()
+      ? app_query.Bind(13, *app.second.encryption_required)
+      : app_query.Bind(13);
+
   if (!app_query.Exec() || !app_query.Reset()) {
     LOG4CXX_WARN(logger_, "Incorrect insert into application.");
     return false;
@@ -1103,7 +1119,6 @@ bool policy::SQLPTRepresentation::SaveDevicePolicy(
   app_query.Bind(3, 0);
   app_query.Bind(4, 0);
   app_query.Bind(5);
-
   if (!app_query.Exec() || !app_query.Reset()) {
     LOG4CXX_WARN(logger_, "Incorrect insert into application.");
     return false;

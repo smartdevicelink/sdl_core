@@ -38,18 +38,24 @@
 #include "utils/callable.h"
 #include "utils/optional.h"
 
+#include "application_manager/policies/policy_encryption_flag_getter.h"
 #include "policy/access_remote.h"
 #include "policy/cache_manager_interface.h"
 #include "policy/policy_listener.h"
 #include "policy/policy_table/types.h"
 #include "policy/policy_types.h"
+#include "policy/policy_table/types.h"
+#include "policy/policy_listener.h"
 #include "policy/usage_statistics/statistics_manager.h"
+#include "policy/cache_manager_interface.h"
+#include "policy/access_remote.h"
 
 namespace policy {
 class PolicySettings;
 typedef std::shared_ptr<utils::Callable> StatusNotifier;
 
-class PolicyManager : public usage_statistics::StatisticsManager {
+class PolicyManager : public usage_statistics::StatisticsManager,
+                      public PolicyEncryptionFlagGetterInterface {
  public:
   /**
    * @brief The NotificationMode enum defines whether application will be

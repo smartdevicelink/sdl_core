@@ -303,6 +303,11 @@ PolicyHandler::PolicyHandler(const PolicySettings& settings,
 
 PolicyHandler::~PolicyHandler() {}
 
+PolicyEncryptionFlagGetterInterfaceSPtr
+PolicyHandler::PolicyEncryptionFlagGetter() const {
+  return policy_manager_;
+}
+
 bool PolicyHandler::PolicyEnabled() const {
   return get_settings().enable_policy();
 }

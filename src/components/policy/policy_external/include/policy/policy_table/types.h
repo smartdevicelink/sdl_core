@@ -237,6 +237,7 @@ struct ApplicationParams : PolicyBase {
   // App Service Params
   Optional<AppServiceParameters> app_service_parameters;
   Optional<Boolean> allow_unknown_rpc_passthrough;
+  Optional<Boolean> encryption_required;
 
  public:
   ApplicationParams();
@@ -285,6 +286,7 @@ struct RpcParameters : CompositeType {
  public:
   HmiLevels hmi_levels;
   Optional<Parameters> parameters;
+  Optional<Boolean> encryption_required;
 
  public:
   RpcParameters();
@@ -331,6 +333,7 @@ struct Rpcs : CompositeType {
       disallowed_by_external_consent_entities_on;
   Optional<DisallowedByExternalConsentEntities>
       disallowed_by_external_consent_entities_off;
+  Optional<Boolean> encryption_required;
 
  public:
   Rpcs();

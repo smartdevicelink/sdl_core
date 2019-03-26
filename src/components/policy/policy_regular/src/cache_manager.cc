@@ -2052,4 +2052,39 @@ void CacheManager::BackgroundBackuper::DoBackup() {
   backup_notifier_.NotifyOne();
 }
 
+EncryptionRequired CacheManager::GetAppEncryptionRequiredFlag(
+    const std::string& application) const {
+  LOG4CXX_AUTO_TRACE(logger_);
+  sync_primitives::AutoLock auto_lock(cache_lock_);
+
+  return pt_->policy_table.app_policies_section.apps[application]
+      .encryption_required;
+}
+
+EncryptionRequired CacheManager::GetFunctionalGroupingEncryptionRequiredFlag(
+    const std::string& functional_group) const {
+  LOG4CXX_AUTO_TRACE(logger_);
+  sync_primitives::AutoLock auto_lock(cache_lock_);
+
+  const auto& functional_groupings = pt_->policy_table.functional_groupings;
+
+  const auto& grouping_itr = functional_groupings.find(functional_group);
+  if (grouping_itr == functional_groupings.end()) {
+    LOG4CXX_WARN(logger_, "Group " << functional_group << " not found");
+    return EncryptionRequired(rpc::Boolean(false));
+  }
+
+  return (*grouping_itr).second.encryption_required;
+}
+
+void CacheManager::GetApplicationParams(
+    const std::string& application_name,
+    policy_table::ApplicationParams& application_params) const {
+  LOG4CXX_AUTO_TRACE(logger_);
+  sync_primitives::AutoLock auto_lock(cache_lock_);
+
+  application_params =
+      pt_->policy_table.app_policies_section.apps[application_name];
+}
+
 }  // namespace policy

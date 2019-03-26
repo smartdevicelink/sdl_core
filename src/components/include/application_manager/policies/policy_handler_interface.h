@@ -51,17 +51,21 @@
 #include "smart_objects/smart_object.h"
 #include "utils/callable.h"
 #include "utils/custom_string.h"
-#include "utils/optional.h"
+#include "application_manager/policies/policy_encryption_flag_getter.h"
 
 using namespace ::rpc::policy_table_interface_base;
 namespace policy {
 typedef std::shared_ptr<utils::Callable> StatusNotifier;
+typedef std::shared_ptr<PolicyEncryptionFlagGetterInterface>
+    PolicyEncryptionFlagGetterInterfaceSPtr;
 
 class PolicyHandlerInterface {
  public:
   virtual ~PolicyHandlerInterface() {}
 
   virtual bool LoadPolicyLibrary() = 0;
+  virtual PolicyEncryptionFlagGetterInterfaceSPtr PolicyEncryptionFlagGetter()
+      const = 0;
   virtual bool PolicyEnabled() const = 0;
   virtual bool InitPolicyTable() = 0;
   virtual bool ResetPolicyTable() = 0;
