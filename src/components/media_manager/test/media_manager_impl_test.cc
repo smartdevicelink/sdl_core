@@ -194,6 +194,7 @@ class MediaManagerImplTest : public ::testing::Test {
                                            kProtocolVersion,
                                            data_sending,
                                            data_sending_size,
+                                           false,
                                            serviceType));
     media_manager_impl_->OnMessageReceived(raw_message_ptr);
     media_manager_impl_->OnMobileMessageSent(raw_message_ptr);

@@ -1436,8 +1436,11 @@ void PolicyHandler::OnPermissionsUpdated(const std::string& device_id,
     return;
   }
 
+  const auto require_encryption =
+      policy_manager_->GetAppEncryptionRequired(policy_app_id);
+
   MessageHelper::SendOnPermissionsChangeNotification(
-      app->app_id(), permissions, application_manager_);
+      app->app_id(), permissions, require_encryption, application_manager_);
 
   LOG4CXX_DEBUG(logger_,
                 "Notification sent for application_id: "

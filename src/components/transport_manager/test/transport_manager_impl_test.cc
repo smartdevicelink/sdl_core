@@ -101,7 +101,7 @@ class TransportManagerImplTest : public ::testing::Test {
     unsigned char data[kSize] = {
         0x20, 0x07, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
     test_message_ = std::make_shared<RawMessage>(
-        connection_key_, version_protocol_, data, kSize);
+        connection_key_, version_protocol_, data, kSize, false);
   }
 
   DeviceInfo ConstructDeviceInfo(const std::string& mac_address,
