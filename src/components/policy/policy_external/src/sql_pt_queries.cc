@@ -81,7 +81,8 @@ const std::string kCreateSchema =
     "CREATE TABLE IF NOT EXISTS `functional_group`( "
     "  `id` INTEGER PRIMARY KEY NOT NULL, "
     "  `user_consent_prompt` TEXT, "
-    "  `name` VARCHAR(100) NOT NULL "
+    "  `name` VARCHAR(100) NOT NULL, "
+    "  `encryption_required` BOOLEAN "
     "); "
     "CREATE TABLE IF NOT EXISTS `external_consent_entities`( "
     "  `group_id` INTEGER NOT NULL, "
@@ -159,6 +160,7 @@ const std::string kCreateSchema =
     "  `icon_url` VARCHAR(65535), "
     "  `allow_unknown_rpc_passthrough` BOOLEAN, "
     "  `remote_control_denied` BOOLEAN NOT NULL DEFAULT 0, "
+    "  `encryption_required` BOOLEAN, "
     "  CONSTRAINT `fk_application_hmi_level1` "
     "    FOREIGN KEY(`default_hmi`) "
     "    REFERENCES `hmi_level`(`value`), "
@@ -657,8 +659,9 @@ const std::string kSelectLockScreenIcon =
     "SELECT `url` FROM `endpoint` WHERE `service` = ? AND `application_id` = ?";
 
 const std::string kInsertFunctionalGroup =
-    "INSERT INTO `functional_group` (`id`, `name`, `user_consent_prompt`) "
-    "  VALUES (?, ?, ?)";
+    "INSERT INTO `functional_group` (`id`, `name`, `user_consent_prompt`, "
+    "`encryption_required`) "
+    "  VALUES (?, ?, ?, ?)";
 
 const std::string kInsertRpc =
     "INSERT INTO `rpc` (`name`, `hmi_level_value`, `functional_group_id`) "
@@ -678,9 +681,9 @@ const std::string kInsertApplication =
     "INSERT OR IGNORE INTO `application` (`id`, `priority_value`, "
     "`is_revoked`, `memory_kb`, `heart_beat_timeout_ms`, `certificate`, "
     "`hybrid_app_preference_value`, `endpoint`, `enabled`, `auth_token`, "
-    "`cloud_transport_type`, `icon_url`, `allow_unknown_rpc_passthrough`) "
+    "`cloud_transport_type`, `icon_url`, `allow_unknown_rpc_passthrough`, `encryption_required`) "
     "VALUES "
-    "(?,?,?,?,?,?,?,?,?,?,?,?,?)";
+    "(?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
 
 const std::string kInsertAppGroup =
     "INSERT INTO `app_group` (`application_id`, `functional_group_id`)"
@@ -802,7 +805,7 @@ const std::string kSelectAppLevels = "SELECT `application_id` FROM `app_level`";
 const std::string kSelectDeviceData = "SELECT * FROM `device`";
 
 const std::string kSelectFunctionalGroups =
-    "SELECT `id`,`name`, `user_consent_prompt` "
+    "SELECT `id`,`name`, `user_consent_prompt`, `encryption_required` "
     "FROM `functional_group`";
 
 const std::string kSelectAllRpcs =
@@ -820,7 +823,7 @@ const std::string kSelectAppPolicies =
     "SELECT `id`, `priority_value`, `memory_kb`, "
     " `heart_beat_timeout_ms`, `certificate`, `hybrid_app_preference_value`, "
     " `endpoint`, `enabled`, `auth_token`, `cloud_transport_type`, `icon_url`, "
-    " `allow_unknown_rpc_passthrough` "
+    " `allow_unknown_rpc_passthrough`, `encryption_required` "
     "FROM "
     " `application`";
 

@@ -1529,4 +1529,80 @@ void PolicyManagerImpl::set_access_remote(
   access_remote_ = access_remote;
 }
 
+bool PolicyManagerImpl::AppNeedEncryption(
+    const std::string& policy_app_id) const {
+  LOG4CXX_AUTO_TRACE(logger_);
+  const auto encryption_required =
+      cache_->GetAppEncryptionRequiredFlag(policy_app_id);
+
+  return encryption_required.is_initialized() ? *encryption_required : true;
+}
+
+const rpc::Optional<rpc::Boolean> PolicyManagerImpl::GetAppEncryptionRequired(
+    const std::string& policy_app_id) const {
+  LOG4CXX_AUTO_TRACE(logger_);
+  return cache_->GetAppEncryptionRequiredFlag(policy_app_id);
+}
+
+const std::vector<std::string> PolicyManagerImpl::GetFunctionGroupsForApp(
+    const std::string& policy_app_id) const {
+  LOG4CXX_AUTO_TRACE(logger_);
+  using namespace rpc::policy_table_interface_base;
+  DCHECK(kDeviceId != policy_app_id);
+
+  std::vector<std::string> function_groups;
+
+  ApplicationParams app_policies;
+  cache_->GetApplicationParams(policy_app_id, app_policies);
+
+  const auto& policy_function_group = app_policies.groups;
+
+  for (const auto& group : policy_function_group) {
+    function_groups.push_back(group);
+  }
+
+  return function_groups;
+}
+
+bool PolicyManagerImpl::FunctionGroupNeedEncryption(
+    const std::string& policy_group) const {
+  LOG4CXX_AUTO_TRACE(logger_);
+  FunctionalGroupings functional_groupings;
+  cache_->GetFunctionalGroupings(functional_groupings);
+
+  const auto& grouping_itr = functional_groupings.find(policy_group);
+  if (grouping_itr == functional_groupings.end()) {
+    LOG4CXX_WARN(logger_, "Group " << policy_group << " not found");
+    return false;
+  }
+
+  const auto& grouping = (*grouping_itr).second;
+
+  return grouping.encryption_required.is_initialized()
+             ? *grouping.encryption_required
+             : false;
+}
+
+const std::string PolicyManagerImpl::GetPolicyFunctionName(
+    const uint32_t function_id) const {
+  return policy_table::EnumToJsonString(
+      static_cast<policy_table::FunctionID>(function_id));
+}
+
+const std::vector<std::string> PolicyManagerImpl::GetRPCsForFunctionGroup(
+    const std::string& group) const {
+  std::vector<std::string> rpcs_for_group;
+
+  FunctionalGroupings functional_groupings;
+  cache_->GetFunctionalGroupings(functional_groupings);
+
+  const auto& rpcs = functional_groupings[group].rpcs;
+
+  for (const auto& rpc : rpcs) {
+    rpcs_for_group.push_back(rpc.first);
+  }
+
+  return rpcs_for_group;
+}
+
 }  //  namespace policy

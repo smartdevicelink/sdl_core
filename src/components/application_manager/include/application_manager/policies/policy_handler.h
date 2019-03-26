@@ -77,6 +77,8 @@ class PolicyHandler : public PolicyHandlerInterface,
   PolicyHandler(const policy::PolicySettings& get_settings,
                 application_manager::ApplicationManager& application_manager);
   virtual ~PolicyHandler();
+  PolicyEncryptionFlagGetterInterfaceSPtr PolicyEncryptionFlagGetter()
+      const OVERRIDE;
   bool LoadPolicyLibrary() OVERRIDE;
   bool PolicyEnabled() const OVERRIDE;
   bool InitPolicyTable() OVERRIDE;

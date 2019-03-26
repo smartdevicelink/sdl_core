@@ -334,6 +334,11 @@ PolicyHandler::PolicyHandler(const PolicySettings& settings,
 
 PolicyHandler::~PolicyHandler() {}
 
+PolicyEncryptionFlagGetterInterfaceSPtr
+PolicyHandler::PolicyEncryptionFlagGetter() const {
+  return policy_manager_;
+}
+
 bool PolicyHandler::PolicyEnabled() const {
   return get_settings().enable_policy();
 }
@@ -1414,6 +1419,7 @@ void PolicyHandler::OnPermissionsUpdated(const std::string& policy_app_id,
   LOG4CXX_AUTO_TRACE(logger_);
   ApplicationSharedPtr app =
       application_manager_.application_by_policy_id(policy_app_id);
+
   if (app.use_count() == 0) {
     LOG4CXX_WARN(
         logger_,
@@ -1421,8 +1427,11 @@ void PolicyHandler::OnPermissionsUpdated(const std::string& policy_app_id,
     return;
   }
 
+  const auto require_encryption =
+      policy_manager_->GetAppEncryptionRequired(policy_app_id);
+
   MessageHelper::SendOnPermissionsChangeNotification(
-      app->app_id(), permissions, application_manager_);
+      app->app_id(), permissions, require_encryption, application_manager_);
 
   LOG4CXX_DEBUG(logger_,
                 "Notification sent for application_id:"
