@@ -2942,9 +2942,9 @@ void ApplicationManagerImpl::UnregisterApplication(
     auto it_app = applications_.begin();
     while (applications_.end() != it_app) {
       if (app_id == (*it_app)->app_id()) {
-        connection_handler().GetDeviceID((*it_app)->mac_address(), &handle);
         app_to_remove = *it_app;
         applications_.erase(it_app++);
+        break;
       } else {
         ++it_app;
       }
@@ -2968,15 +2968,23 @@ void ApplicationManagerImpl::UnregisterApplication(
 
     (hmi_capabilities_->get_hmi_language_handler())
         .OnUnregisterApplication(app_id);
-    AppV4DevicePredicate finder(handle);
-    ApplicationSharedPtr app = FindApp(applications(), finder);
-    if (!app) {
-      LOG4CXX_DEBUG(
-          logger_, "There is no more SDL4 apps with device handle: " << handle);
 
-      RemoveAppsWaitingForRegistration(handle);
-      RefreshCloudAppInformation();
-      SendUpdateAppList();
+    if (connection_handler().GetDeviceID(app_to_remove->mac_address(),
+                                         &handle)) {
+      AppV4DevicePredicate finder(handle);
+      ApplicationSharedPtr app = FindApp(applications(), finder);
+      if (!app) {
+        LOG4CXX_DEBUG(
+            logger_,
+            "There is no more SDL4 apps with device handle: " << handle);
+
+        RemoveAppsWaitingForRegistration(handle);
+        RefreshCloudAppInformation();
+        SendUpdateAppList();
+      } else if (app_to_remove->is_cloud_app()) {
+        RefreshCloudAppInformation();
+        SendUpdateAppList();
+      }
     }
   }
 

@@ -76,7 +76,7 @@ class TransportManager {
   virtual int SearchDevices() = 0;
 
   virtual void AddCloudDevice(
-      const transport_manager::transport_adapter::CloudAppProperties
+      const transport_manager::transport_adapter::CloudAppProperties&
           cloud_properties) = 0;
 
   virtual void RemoveCloudDevice(const DeviceHandle device_id) = 0;

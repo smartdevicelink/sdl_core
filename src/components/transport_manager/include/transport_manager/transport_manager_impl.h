@@ -140,7 +140,7 @@ class TransportManagerImpl
   int SearchDevices() OVERRIDE;
 
   void AddCloudDevice(
-      const transport_manager::transport_adapter::CloudAppProperties
+      const transport_manager::transport_adapter::CloudAppProperties&
           cloud_properties) OVERRIDE;
 
   void RemoveCloudDevice(const DeviceHandle device_id) OVERRIDE;

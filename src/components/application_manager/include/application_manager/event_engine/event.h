@@ -131,9 +131,9 @@ int32_t Event::smart_object_function_id() const {
 }
 
 int32_t Event::smart_object_correlation_id() const {
-  return response_so_.getElement(strings::params)
-      .getElement(strings::correlation_id)
-      .asInt();
+  return static_cast<int32_t>(response_so_.getElement(strings::params)
+                                  .getElement(strings::correlation_id)
+                                  .asInt());
 }
 
 int32_t Event::smart_object_type() const {
@@ -223,21 +223,21 @@ const smart_objects::SmartObject& MobileEvent::smart_object() const {
 }
 
 int32_t MobileEvent::smart_object_function_id() const {
-  return response_so_.getElement(strings::params)
-      .getElement(strings::function_id)
-      .asInt();
+  return static_cast<int32_t>(response_so_.getElement(strings::params)
+                                  .getElement(strings::function_id)
+                                  .asInt());
 }
 
 int32_t MobileEvent::smart_object_correlation_id() const {
-  return response_so_.getElement(strings::params)
-      .getElement(strings::correlation_id)
-      .asInt();
+  return static_cast<int32_t>(response_so_.getElement(strings::params)
+                                  .getElement(strings::correlation_id)
+                                  .asInt());
 }
 
 int32_t MobileEvent::smart_object_type() const {
-  return response_so_.getElement(strings::params)
-      .getElement(strings::message_type)
-      .asInt();
+  return static_cast<int32_t>(response_so_.getElement(strings::params)
+                                  .getElement(strings::message_type)
+                                  .asInt());
 }
 
 }  // namespace event_engine
