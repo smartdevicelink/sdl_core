@@ -230,7 +230,10 @@ class ProtocolHandlerImpl
    * \param message Message with params to be sent to Mobile App
    */
   void SendMessageToMobileApp(const RawMessagePtr message,
+                              bool needs_encryption,
                               bool final_message) OVERRIDE;
+
+  bool IsRPCServiceSecure(const uint32_t connection_key) const OVERRIDE;
 
   /**
    * \brief Sends number of processed frames in case of binary nav streaming
@@ -569,6 +572,7 @@ class ProtocolHandlerImpl
                                      const uint8_t service_type,
                                      const size_t data_size,
                                      const uint8_t* data,
+                                     const bool needs_encryption,
                                      const bool is_final_message);
 
   /**
@@ -591,6 +595,7 @@ class ProtocolHandlerImpl
                                     const size_t data_size,
                                     const uint8_t* data,
                                     const size_t max_frame_size,
+                                    const bool needs_encryption,
                                     const bool is_final_message);
 
   /**

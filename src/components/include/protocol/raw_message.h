@@ -58,6 +58,7 @@ class RawMessage {
              uint32_t protocol_version,
              const uint8_t* const data_param,
              uint32_t data_size,
+             bool protection,
              uint8_t type = ServiceType::kRpc,
              uint32_t payload_size = 0);
   /**
@@ -96,6 +97,8 @@ class RawMessage {
   ServiceType service_type() const {
     return service_type_;
   }
+
+  bool protection_flag() const;
   /**
    * \brief Specifies current state of message in queue.
    * if false message is "ready to be processed"
@@ -109,6 +112,7 @@ class RawMessage {
   uint8_t* data_;
   size_t data_size_;
   uint32_t protocol_version_;
+  bool protection_;
   ServiceType service_type_;
   size_t payload_size_;
   bool waiting_;

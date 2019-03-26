@@ -137,7 +137,7 @@ void UsbConnection::OnInTransfer(libusb_transfer* transfer) {
                       << transfer->actual_length << ", data:"
                       << hex_data(transfer->buffer, transfer->actual_length));
     ::protocol_handler::RawMessagePtr data(new protocol_handler::RawMessage(
-        0, 0, in_buffer_, transfer->actual_length));
+        0, 0, in_buffer_, transfer->actual_length, false));
     controller_->DataReceiveDone(device_uid_, app_handle_, data);
   } else {
     LOG4CXX_ERROR(logger_,
