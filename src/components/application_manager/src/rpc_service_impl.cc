@@ -31,6 +31,7 @@
  */
 
 #include "application_manager/rpc_service_impl.h"
+#include "application_manager/rpc_protection_manager_impl.h"
 
 #include "application_manager/app_service_manager.h"
 #include "application_manager/plugin_manager/plugin_keys.h"
@@ -48,11 +49,13 @@ RPCServiceImpl::RPCServiceImpl(
     request_controller::RequestController& request_ctrl,
     protocol_handler::ProtocolHandler* protocol_handler,
     hmi_message_handler::HMIMessageHandler* hmi_handler,
-    CommandHolder& commands_holder)
+    CommandHolder& commands_holder,
+    RPCProtectionManagerSPtr rpc_protection_manager)
     : app_manager_(app_manager)
     , request_ctrl_(request_ctrl)
     , protocol_handler_(protocol_handler)
     , hmi_handler_(hmi_handler)
+    , rpc_protection_manager_(rpc_protection_manager)
     , commands_holder_(commands_holder)
     , messages_to_mobile_("AM ToMobile", this)
     , messages_to_hmi_("AM ToHMI", this)
@@ -60,6 +63,44 @@ RPCServiceImpl::RPCServiceImpl(
     , mobile_so_factory_(mobile_apis::MOBILE_API()) {}
 
 RPCServiceImpl::~RPCServiceImpl() {}
+
+EncryptionFlagCheckResult RPCServiceImpl::IsEncryptionRequired(
+    const smart_objects::SmartObject& message,
+    std::shared_ptr<Application> app,
+    const bool is_rpc_service_secure) const {
+  LOG4CXX_AUTO_TRACE(logger_);
+  const auto function_id =
+      message[strings::params][strings::function_id].asUInt();
+  const auto correlation_id =
+      message[strings::params][strings::correlation_id].asUInt();
+
+  const auto message_type =
+      message[strings::params][strings::message_type].asUInt();
+  const bool policy_encryption_flag =
+      rpc_protection_manager_->CheckPolicyEncryptionFlag(
+          function_id, app, correlation_id, is_rpc_service_secure);
+  if (MessageType::kRequest == message_type) {
+    const bool message_protected =
+        message[strings::params][strings::protection].asBool();
+
+    if (!message_protected) {
+      return policy_encryption_flag
+                 ? EncryptionFlagCheckResult::kError_EncryptionNeeded
+                 : EncryptionFlagCheckResult::kSuccess_NotProtected;
+    }
+
+    //    request is encrypted, so we need to encrypt response regardless of
+    //    policy flag
+    const auto connection_key =
+        message[strings::params][strings::connection_key].asUInt();
+    rpc_protection_manager_->AddToEncryptionNeededCache(connection_key,
+                                                        correlation_id);
+    return EncryptionFlagCheckResult::kSuccess_Protected;
+  }
+  return policy_encryption_flag
+             ? EncryptionFlagCheckResult::kSuccess_Protected
+             : EncryptionFlagCheckResult::kSuccess_NotProtected;
+}
 
 bool RPCServiceImpl::ManageMobileCommand(
     const commands::MessageSharedPtr message,
@@ -115,6 +156,17 @@ bool RPCServiceImpl::ManageMobileCommand(
               static_cast<int32_t>(
                   mobile_apis::Result::APPLICATION_NOT_REGISTERED));
 
+      SendMessageToMobile(response);
+      return false;
+    }
+    if (EncryptionFlagCheckResult::kError_EncryptionNeeded ==
+        IsEncryptionRequired(
+            *message,
+            app,
+            protocol_handler_->IsRPCServiceSecure(connection_key))) {
+      const auto response =
+          rpc_protection_manager_->CreateEncryptionNeededResponse(
+              connection_key, function_id, correlation_id);
       SendMessageToMobile(response);
       return false;
     }
@@ -337,6 +389,7 @@ void RPCServiceImpl::Handle(const impl::MessageToHmi message) {
 }
 
 void RPCServiceImpl::Handle(const impl::MessageToMobile message) {
+  LOG4CXX_AUTO_TRACE(logger_);
   if (!protocol_handler_) {
     LOG4CXX_WARN(logger_,
                  "Protocol Handler is not set; cannot send message to mobile.");
@@ -361,7 +414,33 @@ void RPCServiceImpl::Handle(const impl::MessageToMobile message) {
     }
   }
 
-  protocol_handler_->SendMessageToMobileApp(rawMessage, is_final);
+  const auto correlation_id = message->correlation_id();
+  const auto app_id = message->connection_key();
+
+  const bool is_service_secure =
+      protocol_handler_->IsRPCServiceSecure(message->connection_key());
+
+  const bool needs_encryption =
+      MessageType::kNotification == message->type()
+          ? rpc_protection_manager_->CheckPolicyEncryptionFlag(
+                message->function_id(),
+                app_manager_.application(app_id),
+                correlation_id,
+                is_service_secure)
+          : rpc_protection_manager_->IsInEncryptionNeededCache(app_id,
+                                                               correlation_id);
+
+  if (needs_encryption && !is_service_secure) {
+    LOG4CXX_WARN(logger_,
+                 "Unable to send rpc that requires encryption without secure "
+                 "rpc service");
+    return;
+  };
+
+  protocol_handler_->SendMessageToMobileApp(
+      rawMessage, needs_encryption, is_final);
+  rpc_protection_manager_->RemoveFromEncryptionNeededCache(app_id,
+                                                           correlation_id);
   LOG4CXX_INFO(logger_, "Message for mobile given away");
 
   if (close_session) {
@@ -451,6 +530,8 @@ void RPCServiceImpl::SendMessageToMobile(
     LOG4CXX_WARN(logger_, "Can't send msg to Mobile: failed to create string");
     return;
   }
+  const auto api_function_id = static_cast<mobile_apis::FunctionID::eType>(
+      (*message)[strings::params][strings::function_id].asInt());
 
   smart_objects::SmartObject& msg_to_mobile = *message;
   // If correlation_id is not present, it is from-HMI message which should be
@@ -461,9 +542,6 @@ void RPCServiceImpl::SendMessageToMobile(
         msg_to_mobile[strings::params][strings::connection_key].asUInt(),
         msg_to_mobile[strings::params][strings::function_id].asInt());
   } else if (app) {
-    mobile_apis::FunctionID::eType function_id =
-        static_cast<mobile_apis::FunctionID::eType>(
-            (*message)[strings::params][strings::function_id].asUInt());
     RPCParams params;
 
     const smart_objects::SmartObject& s_map = (*message)[strings::msg_params];
@@ -479,18 +557,19 @@ void RPCServiceImpl::SendMessageToMobile(
       }
     }
     const std::string string_functionID =
-        MessageHelper::StringifiedFunctionID(function_id);
+        MessageHelper::StringifiedFunctionID(api_function_id);
     const mobile_apis::Result::eType check_result =
         app_manager_.CheckPolicyPermissions(app, string_functionID, params);
     if (mobile_apis::Result::SUCCESS != check_result) {
       LOG4CXX_WARN(logger_,
-                   "Function \"" << string_functionID << "\" (#" << function_id
+                   "Function \"" << string_functionID << "\" (#"
+                                 << api_function_id
                                  << ") not allowed by policy");
       return;
     }
 
 #ifdef EXTERNAL_PROPRIETARY_MODE
-    if (function_id == mobile_apis::FunctionID::OnSystemRequestID) {
+    if (api_function_id == mobile_apis::FunctionID::OnSystemRequestID) {
       mobile_apis::RequestType::eType request_type =
           static_cast<mobile_apis::RequestType::eType>(
               (*message)[strings::msg_params][strings::request_type].asUInt());

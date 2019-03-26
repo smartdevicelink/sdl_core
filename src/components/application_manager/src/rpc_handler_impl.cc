@@ -472,6 +472,7 @@ bool RPCHandlerImpl::ConvertMessageToSO(
                        << message.protocol_version() << ".");
       return false;
   }
+  output[strings::params][strings::protection] = message.is_message_encrypted();
 
   LOG4CXX_DEBUG(logger_, "Successfully parsed message into smart object");
   return true;
@@ -513,6 +514,7 @@ std::shared_ptr<Message> RPCHandlerImpl::ConvertRawMsgToMessage(
   } else {
     LOG4CXX_ERROR(logger_, "Received invalid message");
   }
+
   return outgoing_message;
 }
 

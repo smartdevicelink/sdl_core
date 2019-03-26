@@ -850,6 +850,7 @@ void ProtocolHandlerImpl::SendHeartBeat(int32_t connection_id,
 }
 
 void ProtocolHandlerImpl::SendMessageToMobileApp(const RawMessagePtr message,
+                                                 bool needs_encryption,
                                                  bool final_message) {
 #ifdef TELEMETRY_MONITOR
   const date_time::TimeDuration start_time = date_time::getCurrentTime();
@@ -917,6 +918,7 @@ void ProtocolHandlerImpl::SendMessageToMobileApp(const RawMessagePtr message,
                                                 message->service_type(),
                                                 message->data_size(),
                                                 message->data(),
+                                                needs_encryption,
                                                 final_message);
     if (result != RESULT_OK) {
       LOG4CXX_ERROR(logger_,
@@ -934,6 +936,7 @@ void ProtocolHandlerImpl::SendMessageToMobileApp(const RawMessagePtr message,
                                                message->data_size(),
                                                message->data(),
                                                frame_size,
+                                               needs_encryption,
                                                final_message);
     if (result != RESULT_OK) {
       LOG4CXX_ERROR(logger_,
@@ -1210,6 +1213,15 @@ void ProtocolHandlerImpl::OnAuthTokenUpdated(const std::string& policy_app_id,
   }
 }
 
+bool ProtocolHandlerImpl::IsRPCServiceSecure(
+    const uint32_t connection_key) const {
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  security_manager::SSLContext* context =
+      session_observer_.GetSSLContext(connection_key, ServiceType::kRpc);
+  return (context && context->IsInitCompleted());
+}
+
 RESULT_CODE ProtocolHandlerImpl::SendFrame(const ProtocolFramePtr packet) {
   LOG4CXX_AUTO_TRACE(logger_);
   if (!packet) {
@@ -1254,13 +1266,18 @@ RESULT_CODE ProtocolHandlerImpl::SendSingleFrameMessage(
     const uint8_t service_type,
     const size_t data_size,
     const uint8_t* data,
+    const bool needs_encryption,
     const bool is_final_message) {
   LOG4CXX_AUTO_TRACE(logger_);
+
+  LOG4CXX_DEBUG(logger_,
+                "Packet needs encryption: " << std::boolalpha
+                                            << needs_encryption);
 
   ProtocolFramePtr ptr(
       new protocol_handler::ProtocolPacket(connection_id,
                                            protocol_version,
-                                           PROTECTION_OFF,
+                                           needs_encryption,
                                            FRAME_TYPE_SINGLE,
                                            service_type,
                                            FRAME_DATA_SINGLE,
@@ -1282,6 +1299,7 @@ RESULT_CODE ProtocolHandlerImpl::SendMultiFrameMessage(
     const size_t data_size,
     const uint8_t* data,
     const size_t max_frame_size,
+    const bool needs_encryption,
     const bool is_final_message) {
   LOG4CXX_AUTO_TRACE(logger_);
 
@@ -1322,7 +1340,7 @@ RESULT_CODE ProtocolHandlerImpl::SendMultiFrameMessage(
   const ProtocolFramePtr firstPacket(
       new protocol_handler::ProtocolPacket(connection_id,
                                            protocol_version,
-                                           PROTECTION_OFF,
+                                           needs_encryption,
                                            FRAME_TYPE_FIRST,
                                            service_type,
                                            FRAME_DATA_FIRST,
@@ -1346,7 +1364,7 @@ RESULT_CODE ProtocolHandlerImpl::SendMultiFrameMessage(
     const ProtocolFramePtr ptr(
         new protocol_handler::ProtocolPacket(connection_id,
                                              protocol_version,
-                                             PROTECTION_OFF,
+                                             needs_encryption,
                                              FRAME_TYPE_CONSECUTIVE,
                                              service_type,
                                              data_type,
@@ -1408,6 +1426,7 @@ RESULT_CODE ProtocolHandlerImpl::HandleSingleFrameMessage(
                                                 packet->protocol_version(),
                                                 packet->data(),
                                                 packet->total_data_bytes(),
+                                                packet->protection_flag(),
                                                 packet->service_type(),
                                                 packet->payload_size()));
   if (!rawMessage) {
@@ -1723,12 +1742,13 @@ void ProtocolHandlerImpl::NotifySessionStarted(
     start_session_frame_map_.erase(it);
   }
 
+  const ServiceType service_type = ServiceTypeFromByte(packet->service_type());
   const uint8_t protocol_version = packet->protocol_version();
 
   if (0 == context.new_session_id_) {
     LOG4CXX_WARN(logger_,
                  "Refused by session_observer to create service "
-                     << packet->service_type() << " type.");
+                     << static_cast<int32_t>(service_type) << " type.");
     SendStartSessionNAck(context.connection_id_,
                          packet->session_id(),
                          protocol_version,
@@ -1810,7 +1830,6 @@ void ProtocolHandlerImpl::NotifySessionStarted(
   }
 
 #ifdef ENABLE_SECURITY
-  const ServiceType service_type = ServiceTypeFromByte(packet->service_type());
   // for packet is encrypted and security plugin is enable
   if (context.is_protected_ && security_manager_) {
     const uint32_t connection_key = session_observer_.KeyFromPair(
@@ -1955,6 +1974,7 @@ void ProtocolHandlerImpl::PopValideAndExpirateMultiframes() {
                                                   frame->protocol_version(),
                                                   frame->data(),
                                                   frame->total_data_bytes(),
+                                                  frame->protection_flag(),
                                                   frame->service_type(),
                                                   frame->payload_size()));
     DCHECK(rawMessage);
@@ -2106,7 +2126,12 @@ RESULT_CODE ProtocolHandlerImpl::EncryptFrame(ProtocolFramePtr packet) {
       packet->connection_id(), packet->session_id());
   security_manager::SSLContext* context = session_observer_.GetSSLContext(
       connection_key, ServiceTypeFromByte(packet->service_type()));
-  if (!context || !context->IsInitCompleted()) {
+
+  LOG4CXX_DEBUG(logger_,
+                "Protection flag is: " << packet->protection_flag()
+                                       << std::boolalpha);
+  if ((!context || !context->IsInitCompleted()) || !packet->protection_flag()) {
+    LOG4CXX_DEBUG(logger_, "Ecryption is skipped!");
     return RESULT_OK;
   }
   const uint8_t* out_data;
