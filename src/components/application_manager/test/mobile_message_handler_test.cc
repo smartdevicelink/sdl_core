@@ -109,6 +109,7 @@ class MobileMessageHandlerTest : public testing::Test {
                                                 protocol_version,
                                                 &full_data[0],
                                                 full_size,
+                                                false,
                                                 ServiceType::kRpc,
                                                 payload_size);
 

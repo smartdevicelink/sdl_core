@@ -212,9 +212,10 @@ void MessageHelper::SendGetListOfPermissionsResponse(
 void MessageHelper::SendOnPermissionsChangeNotification(
     uint32_t connection_key,
     const policy::Permissions& permissions,
+    const policy::EncryptionRequired require_encryption,
     ApplicationManager& app_mngr) {
   MockMessageHelper::message_helper_mock()->SendOnPermissionsChangeNotification(
-      connection_key, permissions, app_mngr);
+      connection_key, permissions, require_encryption, app_mngr);
 }
 
 void MessageHelper::SendPolicySnapshotNotification(

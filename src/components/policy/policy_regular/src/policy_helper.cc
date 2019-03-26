@@ -1,4 +1,4 @@
-﻿/*
+/*
  Copyright (c) 2013, Ford Motor Company
  All rights reserved.
 
@@ -713,8 +713,28 @@ bool ProcessFunctionalGroup::operator()(const StringsValueType& group_name) {
     FillNotificationData filler(
         data_, GetGroupState(group_name_str), undefined_group_consent_);
     std::for_each(rpcs.begin(), rpcs.end(), filler);
+    FillEncryptionFlagForRpcs((*it).second.encryption_required);
   }
   return true;
+}
+
+void ProcessFunctionalGroup::FillEncryptionFlagForRpcs(
+    const EncryptionRequired encryption_required) {
+  auto update_encryption_required =
+      [](EncryptionRequired& current, const EncryptionRequired& incoming) {
+        if (!incoming.is_initialized()) {
+          return;
+        }
+        if (current.is_initialized() && *current) {
+          return;
+        }
+        current = incoming;
+      };
+
+  for (auto& item : data_) {
+    update_encryption_required(item.second.require_encryption,
+                               encryption_required);
+  }
 }
 
 GroupConsent ProcessFunctionalGroup::GetGroupState(

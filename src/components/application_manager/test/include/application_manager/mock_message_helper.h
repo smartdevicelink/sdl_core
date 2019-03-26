@@ -153,9 +153,10 @@ class MockMessageHelper {
            uint32_t correlation_id,
            ApplicationManager& app_mngr));
 #endif  // #ifdef EXTERNAL_PROPRIETARY_MODE
-  MOCK_METHOD3(SendOnPermissionsChangeNotification,
+  MOCK_METHOD4(SendOnPermissionsChangeNotification,
                void(uint32_t connection_key,
                     const policy::Permissions& permissions,
+                    const bool require_encryption,
                     ApplicationManager& app_mngr));
   MOCK_METHOD4(SendPolicySnapshotNotification,
                void(uint32_t connection_key,

@@ -87,6 +87,8 @@ typedef std::string Parameter;
 typedef std::string RpcName;
 typedef std::set<std::string> RPCParams;
 
+typedef rpc::Optional<rpc::Boolean> EncryptionRequired;
+
 typedef std::map<std::string, std::set<policy::HMILevel> > HMIPermissions;
 struct ParameterPermissions
     : std::map<std::string, std::set<policy::Parameter> > {
@@ -102,6 +104,7 @@ struct ParameterPermissions
 struct RpcPermissions {
   HMIPermissions hmi_permissions;
   ParameterPermissions parameter_permissions;
+  EncryptionRequired require_encryption;
 };
 
 typedef std::map<RpcName, RpcPermissions> Permissions;

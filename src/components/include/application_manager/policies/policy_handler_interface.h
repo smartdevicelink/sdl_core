@@ -73,12 +73,6 @@ class PolicyHandlerInterface {
   virtual bool ReceiveMessageFromSDK(const std::string& file,
                                      const BinaryMessage& pt_string) = 0;
   virtual bool UnloadPolicyLibrary() = 0;
-  virtual void OnPermissionsUpdated(const std::string& policy_app_id,
-                                    const Permissions& permissions,
-                                    const HMILevel& default_hmi) = 0;
-
-  virtual void OnPermissionsUpdated(const std::string& policy_app_id,
-                                    const Permissions& permissions) = 0;
 
 #ifdef EXTERNAL_PROPRIETARY_MODE
   virtual void OnSnapshotCreated(const BinaryMessage& pt_string,

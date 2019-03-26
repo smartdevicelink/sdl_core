@@ -122,7 +122,7 @@ class SecurityManagerTest : public ::testing::Test {
                               uint32_t dataSize,
                               const ServiceType serviceType) {
     const RawMessagePtr rawMessagePtr(std::make_shared<RawMessage>(
-        kKey, kProtocolVersion, data, dataSize, serviceType));
+        kKey, kProtocolVersion, data, dataSize, false, serviceType));
     security_manager_->OnMessageReceived(rawMessagePtr);
   }
   /*
@@ -307,8 +307,8 @@ TEST_F(SecurityManagerTest, SecurityManager_NULLCryptoManager) {
  */
 TEST_F(SecurityManagerTest, OnMobileMessageSent) {
   const uint8_t* data_param = NULL;
-  const RawMessagePtr rawMessagePtr(
-      std::make_shared<RawMessage>(kKey, kProtocolVersion, data_param, 0));
+  const RawMessagePtr rawMessagePtr(std::make_shared<RawMessage>(
+      kKey, kProtocolVersion, data_param, 0, false));
   security_manager_->OnMobileMessageSent(rawMessagePtr);
 }
 /*

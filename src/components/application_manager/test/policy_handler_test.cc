@@ -520,7 +520,7 @@ TEST_F(PolicyHandlerTest, OnPermissionsUpdated_TwoParams_InvalidApp_UNSUCCESS) {
   ChangePolicyManagerToMock();
   const policy::EncryptionRequired require_encryption;
   EXPECT_CALL(*mock_policy_manager_, GetAppEncryptionRequired(kPolicyAppId_))
-      .WillOnce(ReturnRef(require_encryption));
+      .Times(0);
   EXPECT_CALL(mock_message_helper_,
               SendOnPermissionsChangeNotification(_, _, _, _)).Times(0);
 

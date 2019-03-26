@@ -1,4 +1,4 @@
-﻿/*
+/*
  Copyright (c) 2013, Ford Motor Company
  All rights reserved.
 
@@ -174,6 +174,8 @@ struct ProcessFunctionalGroup {
 
  private:
   GroupConsent GetGroupState(const std::string& group_name);
+  void FillEncryptionFlagForRpcs(
+      const policy::EncryptionRequired encryption_required);
   const policy_table::FunctionalGroupings& fg_;
   const std::vector<FunctionalGroupPermission>& group_permissions_;
   Permissions& data_;
