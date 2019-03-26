@@ -111,7 +111,7 @@ void PublishAppServiceRequest::Run() {
   smart_objects::SmartObject service_record =
       application_manager_.GetAppServiceManager().PublishAppService(
           manifest, true, connection_key());
-  if (app->is_foreground()) {
+  if (app->IsFullscreen()) {
     // Service should be activated if app is in the foreground
     application_manager_.GetAppServiceManager().ActivateAppService(
         service_record[strings::service_id].asString());
