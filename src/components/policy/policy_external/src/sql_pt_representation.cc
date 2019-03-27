@@ -908,8 +908,8 @@ bool SQLPTRepresentation::SaveFunctionalGroupings(
     groups_it->second.user_consent_prompt.is_initialized()
         ? query.Bind(2, *(groups_it->second.user_consent_prompt))
         : query.Bind(2);
-    it->second.encryption_required.is_initialized()
-        ? query.Bind(3, *(it->second.encryption_required))
+    groups_it->second.encryption_required.is_initialized()
+        ? query.Bind(3, *(groups_it->second.encryption_required))
         : query.Bind(3);
     if (!query.Exec() || !query.Reset()) {
       LOG4CXX_WARN(logger_, "Incorrect insert into functional groups");

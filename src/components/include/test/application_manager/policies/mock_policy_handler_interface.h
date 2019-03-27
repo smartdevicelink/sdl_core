@@ -38,7 +38,7 @@
 #include "gmock/gmock.h"
 #include "policy/policy_types.h"
 #include "smart_objects/smart_object.h"
-#include "application_manager/policies/rpc_encryption_data_accessor_interface.h"
+#include "application_manager/policies/policy_encryption_flag_getter.h"
 
 namespace test {
 namespace components {
@@ -47,8 +47,8 @@ namespace policy_test {
 class MockPolicyHandlerInterface : public policy::PolicyHandlerInterface {
  public:
   MOCK_METHOD0(LoadPolicyLibrary, bool());
-  MOCK_CONST_METHOD0(RPCEncryptionDataAccessor,
-                     policy::RPCEncryptionDataAccessorInterface&());
+  MOCK_CONST_METHOD0(PolicyEncryptionFlagGetter,
+                     policy::PolicyEncryptionFlagGetterInterfaceSPtr());
   MOCK_CONST_METHOD0(PolicyEnabled, bool());
   MOCK_METHOD0(InitPolicyTable, bool());
   MOCK_METHOD0(ResetPolicyTable, bool());

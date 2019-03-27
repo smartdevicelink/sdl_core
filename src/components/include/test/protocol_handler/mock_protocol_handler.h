@@ -44,8 +44,9 @@ namespace protocol_handler_test {
 
 class MockProtocolHandler : public ::protocol_handler::ProtocolHandler {
  public:
-  MOCK_METHOD2(SendMessageToMobileApp,
+  MOCK_METHOD3(SendMessageToMobileApp,
                void(const ::protocol_handler::RawMessagePtr message,
+                    bool needs_encryption,
                     bool final_message));
   MOCK_METHOD1(AddProtocolObserver,
                void(::protocol_handler::ProtocolObserver* observer));
@@ -67,6 +68,7 @@ class MockProtocolHandler : public ::protocol_handler::ProtocolHandler {
                void(const ::protocol_handler::SessionContext& context,
                     std::vector<std::string>& rejected_params));
   MOCK_METHOD0(NotifyOnFailedHandshake, void());
+  MOCK_CONST_METHOD1(IsRPCServiceSecure, bool(const uint32_t connection_key));
 };
 }  // namespace protocol_handler_test
 }  // namespace components

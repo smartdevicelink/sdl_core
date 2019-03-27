@@ -292,8 +292,8 @@ TEST_F(SecurityManagerTest, SecurityManager_NULLCryptoManager) {
   EXPECT_CALL(mock_protocol_handler,
               SendMessageToMobileApp(
                   InternalErrorWithErrId(SecurityManager::ERROR_NOT_SUPPORTED),
-                  kIsFinal))
-      .WillOnce(NotifyTestAsyncWaiter(&waiter));
+                  false,
+                  kIsFinal)).WillOnce(NotifyTestAsyncWaiter(&waiter));
   const SecurityQuery::QueryHeader header(SecurityQuery::REQUEST,
                                           // It could be any query id
                                           SecurityQuery::INVALID_QUERY_ID);
@@ -338,6 +338,7 @@ TEST_F(SecurityManagerTest, GetEmptyQuery) {
       mock_protocol_handler,
       SendMessageToMobileApp(
           InternalErrorWithErrId(SecurityManager::ERROR_INVALID_QUERY_SIZE),
+          false,
           kIsFinal));
   // Call with NULL data
   call_OnMessageReceived(NULL, 0, kSecureServiceType);
@@ -359,6 +360,7 @@ TEST_F(SecurityManagerTest, GetWrongJSONSize) {
       mock_protocol_handler,
       SendMessageToMobileApp(
           InternalErrorWithErrId(SecurityManager::ERROR_INVALID_QUERY_SIZE),
+          false,
           kIsFinal));
   SecurityQuery::QueryHeader header(SecurityQuery::REQUEST,
                                     SecurityQuery::INVALID_QUERY_ID);
@@ -388,8 +390,8 @@ TEST_F(SecurityManagerTest, GetInvalidQueryId) {
       mock_protocol_handler,
       SendMessageToMobileApp(
           InternalErrorWithErrId(SecurityManager::ERROR_INVALID_QUERY_ID),
-          kIsFinal))
-      .WillOnce(NotifyTestAsyncWaiter(&waiter));
+          false,
+          kIsFinal)).WillOnce(NotifyTestAsyncWaiter(&waiter));
   times++;
   const SecurityQuery::QueryHeader header(SecurityQuery::REQUEST,
                                           SecurityQuery::INVALID_QUERY_ID);
@@ -427,10 +429,11 @@ TEST_F(SecurityManagerTest, CreateSSLContext_ErrorCreateSSL) {
   EXPECT_CALL(mock_session_observer,
               ProtocolVersionUsed(connection_id, session_id, _))
       .WillOnce(Return(true));
-  EXPECT_CALL(
-      mock_protocol_handler,
-      SendMessageToMobileApp(
-          InternalErrorWithErrId(SecurityManager::ERROR_INTERNAL), kIsFinal));
+  EXPECT_CALL(mock_protocol_handler,
+              SendMessageToMobileApp(
+                  InternalErrorWithErrId(SecurityManager::ERROR_INTERNAL),
+                  false,
+                  kIsFinal));
 
   // Emulate SessionObserver and CryptoManager result
   EXPECT_CALL(mock_session_observer, GetSSLContext(kKey, kControl))
@@ -461,6 +464,7 @@ TEST_F(SecurityManagerTest, CreateSSLContext_SetSSLContextError) {
       mock_protocol_handler,
       SendMessageToMobileApp(
           InternalErrorWithErrId(SecurityManager::ERROR_UNKNOWN_INTERNAL_ERROR),
+          false,
           kIsFinal));
 
   // Emulate SessionObserver and CryptoManager result
@@ -512,10 +516,11 @@ TEST_F(SecurityManagerTest, StartHandshake_ServiceStillUnprotected) {
               ProtocolVersionUsed(connection_id, session_id, _))
       .WillOnce(Return(true));
   // Expect InternalError with ERROR_INTERNAL
-  EXPECT_CALL(
-      mock_protocol_handler,
-      SendMessageToMobileApp(
-          InternalErrorWithErrId(SecurityManager::ERROR_INTERNAL), kIsFinal));
+  EXPECT_CALL(mock_protocol_handler,
+              SendMessageToMobileApp(
+                  InternalErrorWithErrId(SecurityManager::ERROR_INTERNAL),
+                  false,
+                  kIsFinal));
   // Expect notifying listeners (unsuccess)
   EXPECT_CALL(*mock_sm_listener,
               OnHandshakeDone(kKey, SSLContext::Handshake_Result_Fail))
@@ -550,10 +555,11 @@ TEST_F(SecurityManagerTest, StartHandshake_SSLInternalError) {
   EXPECT_CALL(mock_session_observer, GetSSLContext(kKey, kControl))
       .WillOnce(ReturnNull());
   // Expect InternalError with ERROR_ID
-  EXPECT_CALL(
-      mock_protocol_handler,
-      SendMessageToMobileApp(
-          InternalErrorWithErrId(SecurityManager::ERROR_INTERNAL), kIsFinal));
+  EXPECT_CALL(mock_protocol_handler,
+              SendMessageToMobileApp(
+                  InternalErrorWithErrId(SecurityManager::ERROR_INTERNAL),
+                  false,
+                  kIsFinal));
 
   security_manager_->StartHandshake(kKey);
   mock_sm_listener.release();
@@ -579,8 +585,8 @@ TEST_F(SecurityManagerTest, ProccessHandshakeData_WrongDataSize) {
       mock_protocol_handler,
       SendMessageToMobileApp(
           InternalErrorWithErrId(SecurityManager::ERROR_INVALID_QUERY_SIZE),
-          kIsFinal))
-      .WillOnce(NotifyTestAsyncWaiter(&waiter));
+          false,
+          kIsFinal)).WillOnce(NotifyTestAsyncWaiter(&waiter));
 
   EmulateMobileMessageHandshake(NULL, 0);
 
@@ -611,8 +617,8 @@ TEST_F(SecurityManagerTest,
       mock_protocol_handler,
       SendMessageToMobileApp(
           InternalErrorWithErrId(SecurityManager::ERROR_SERVICE_NOT_PROTECTED),
-          kIsFinal))
-      .WillOnce(NotifyTestAsyncWaiter(&waiter));
+          false,
+          kIsFinal)).WillOnce(NotifyTestAsyncWaiter(&waiter));
   times++;
 
   // Expect notifying listeners (unsuccess)
@@ -665,6 +671,7 @@ TEST_F(SecurityManagerTest, ProccessHandshakeData_InvalidData) {
       mock_protocol_handler,
       SendMessageToMobileApp(
           InternalErrorWithErrId(SecurityManager::ERROR_SSL_INVALID_DATA),
+          false,
           kIsFinal))
       .Times(handshake_emulates)
       .WillRepeatedly(NotifyTestAsyncWaiter(&waiter));
@@ -743,9 +750,9 @@ TEST_F(SecurityManagerTest, ProccessHandshakeData_Answer) {
 
   // Get size of raw message after
   const size_t raw_message_size = 15;
-  EXPECT_CALL(
-      mock_protocol_handler,
-      SendMessageToMobileApp(RawMessageEqSize(raw_message_size), kIsFinal))
+  EXPECT_CALL(mock_protocol_handler,
+              SendMessageToMobileApp(
+                  RawMessageEqSize(raw_message_size), false, kIsFinal))
       .Times(handshake_emulates)
       .WillRepeatedly(NotifyTestAsyncWaiter(&waiter));
   times += handshake_emulates;
@@ -872,7 +879,7 @@ TEST_F(SecurityManagerTest, ProccessHandshakeData_HandshakeFinished) {
       .WillRepeatedly(DoAll(NotifyTestAsyncWaiter(&waiter), Return(true)));
   times += 2;  // matches to the number above
 
-  EXPECT_CALL(mock_protocol_handler, SendMessageToMobileApp(_, kIsFinal))
+  EXPECT_CALL(mock_protocol_handler, SendMessageToMobileApp(_, false, kIsFinal))
       .Times(2)
       .WillRepeatedly(NotifyTestAsyncWaiter(&waiter));
   times += 2;  // matches to the number above

@@ -57,6 +57,7 @@ class MockCacheManagerInterface : public ::policy::CacheManagerInterface {
                     const PTString& hmi_level,
                     const PTString& rpc,
                     CheckPermissionResult& result));
+  MOCK_CONST_METHOD0(pt, std::shared_ptr<policy_table::Table>());
   MOCK_METHOD0(IsPTPreloaded, bool());
   MOCK_METHOD0(IgnitionCyclesBeforeExchange, int());
   MOCK_METHOD1(KilometersBeforeExchange, int(int current));
@@ -292,6 +293,18 @@ class MockCacheManagerInterface : public ::policy::CacheManagerInterface {
                      RequestType::State(const std::string& policy_app_id));
   MOCK_CONST_METHOD1(GetAppRequestSubTypesState,
                      RequestSubType::State(const std::string& policy_app_id));
+
+  MOCK_CONST_METHOD1(
+      GetAppEncryptionRequiredFlag,
+      rpc::Optional<rpc::Boolean>(const std::string& application_policy_name));
+
+  MOCK_CONST_METHOD1(
+      GetFunctionalGroupingEncryptionRequiredFlag,
+      rpc::Optional<rpc::Boolean>(const std::string& functional_group));
+
+  MOCK_CONST_METHOD2(GetApplicationParams,
+                     void(const std::string& application_name,
+                          policy_table::ApplicationParams& application_params));
 };
 
 }  // namespace policy_test
