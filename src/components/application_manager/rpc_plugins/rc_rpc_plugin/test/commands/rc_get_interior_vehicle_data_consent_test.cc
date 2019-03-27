@@ -248,6 +248,7 @@ TEST_F(RCGetInteriorVehicleDataConsentTest,
   EXPECT_CALL(mock_command_factory, CreateCommand(_, _))
       .WillOnce(Return(rc_consent_response));
   auto command = CreateRCCommand<commands::ButtonPressRequest>(mobile_message);
+
   // Act
   ASSERT_TRUE(command->Init());
   command->Run();
