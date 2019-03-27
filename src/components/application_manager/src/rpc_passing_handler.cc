@@ -331,10 +331,10 @@ void RPCPassingHandler::ClearCompletedTimers() {
   LOG4CXX_DEBUG(logger_, "Clearing Completed Timers");
   for (auto it = timeout_queue_.begin(); it != timeout_queue_.end();) {
     TimerSPtr timer = it->first;
-    uint32_t cid = it->second;
     if (timer->is_completed()) {
       LOG4CXX_DEBUG(logger_,
-                    "Removing completed timer for correlation id " << cid);
+                    "Removing completed timer for correlation id "
+                        << it->second);
       it = timeout_queue_.erase(it);
     } else {
       ++it;

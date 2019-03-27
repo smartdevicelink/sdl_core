@@ -47,22 +47,26 @@ WebsocketClientConnection::WebsocketClientConnection(
     const ApplicationHandle& app_handle,
     TransportAdapterController* controller)
     : controller_(controller)
-    , ctx_(ssl::context::sslv23_client)
     , resolver_(ioc_)
     , ws_(ioc_)
+#ifdef ENABLE_SECURITY
+    , ctx_(ssl::context::sslv23_client)
     , wss_(ioc_, ctx_)
+#endif  // ENABLE_SECURITY
     , shutdown_(false)
     , thread_delegate_(new LoopThreadDelegate(&message_queue_, this))
     , write_thread_(threads::CreateThread("WS Async Send", thread_delegate_))
     , device_uid_(device_uid)
     , app_handle_(app_handle)
-    , io_pool_(1) {}
+    , io_pool_(1) {
+}
 
 WebsocketClientConnection::~WebsocketClientConnection() {
   ioc_.stop();
   io_pool_.join();
 }
 
+#ifdef ENABLE_SECURITY
 void WebsocketClientConnection::AddCertificateAuthority(
     const std::string cert, boost::system::error_code& ec) {
   ctx_.add_certificate_authority(boost::asio::buffer(cert.data(), cert.size()),
@@ -73,6 +77,7 @@ void WebsocketClientConnection::AddCertificateAuthority(
 
   wss_.next_layer().set_verify_mode(ssl::verify_peer);
 }
+#endif  // ENABLE_SECURITY
 
 TransportAdapter::Error WebsocketClientConnection::Start() {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -106,12 +111,16 @@ TransportAdapter::Error WebsocketClientConnection::Start() {
   }
 
   // Make Connection to host IP Address over TCP
-  if (cloud_properties.cloud_transport_type == "WSS") {
-    boost::asio::connect(
-        wss_.next_layer().next_layer(), results.begin(), results.end(), ec);
-  } else {
+  if (cloud_properties.cloud_transport_type == "WS") {
     boost::asio::connect(ws_.next_layer(), results.begin(), results.end(), ec);
   }
+#ifdef ENABLE_SECURITY
+  else if (cloud_properties.cloud_transport_type == "WSS") {
+    boost::asio::connect(
+        wss_.next_layer().next_layer(), results.begin(), results.end(), ec);
+  }
+#endif  // ENABLE_SECURITY
+
   if (ec) {
     std::string str_err = "ErrorMessage: " + ec.message();
     LOG4CXX_ERROR(logger_,
@@ -120,6 +129,7 @@ TransportAdapter::Error WebsocketClientConnection::Start() {
     return TransportAdapter::FAIL;
   }
 
+#ifdef ENABLE_SECURITY
   if (cloud_properties.cloud_transport_type == "WSS") {
     AddCertificateAuthority(cloud_properties.certificate, ec);
 
@@ -146,13 +156,17 @@ TransportAdapter::Error WebsocketClientConnection::Start() {
       return TransportAdapter::FAIL;
     }
   }
+#endif  // ENABLE_SECURITY
 
   // Perform websocket handshake
-  if (cloud_properties.cloud_transport_type == "WSS") {
-    wss_.handshake(host, "/", ec);
-  } else {
+  if (cloud_properties.cloud_transport_type == "WS") {
     ws_.handshake(host, "/", ec);
   }
+#ifdef ENABLE_SECURITY
+  else if (cloud_properties.cloud_transport_type == "WSS") {
+    wss_.handshake(host, "/", ec);
+  }
+#endif  // ENABLE_SECURITY
   if (ec) {
     std::string str_err = "ErrorMessage: " + ec.message();
     LOG4CXX_ERROR(logger_,
@@ -163,28 +177,34 @@ TransportAdapter::Error WebsocketClientConnection::Start() {
   }
 
   // Set the binary message write option
-  if (cloud_properties.cloud_transport_type == "WSS") {
-    wss_.binary(true);
-  } else {
+  if (cloud_properties.cloud_transport_type == "WS") {
     ws_.binary(true);
   }
+#ifdef ENABLE_SECURITY
+  else if (cloud_properties.cloud_transport_type == "WSS") {
+    wss_.binary(true);
+  }
+#endif  // ENABLE_SECURITY
   write_thread_->start(threads::ThreadOptions());
   controller_->ConnectDone(device_uid_, app_handle_);
 
   // Start async read
-  if (cloud_properties.cloud_transport_type == "WSS") {
-    wss_.async_read(buffer_,
-                    std::bind(&WebsocketClientConnection::OnRead,
-                              this,
-                              std::placeholders::_1,
-                              std::placeholders::_2));
-  } else {
+  if (cloud_properties.cloud_transport_type == "WS") {
     ws_.async_read(buffer_,
                    std::bind(&WebsocketClientConnection::OnRead,
                              this,
                              std::placeholders::_1,
                              std::placeholders::_2));
   }
+#ifdef ENABLE_SECURITY
+  else if (cloud_properties.cloud_transport_type == "WSS") {
+    wss_.async_read(buffer_,
+                    std::bind(&WebsocketClientConnection::OnRead,
+                              this,
+                              std::placeholders::_1,
+                              std::placeholders::_2));
+  }
+#endif  // ENABLE_SECURITY
 
   boost::asio::post(io_pool_, [&]() { ioc_.run(); });
 
@@ -205,19 +225,22 @@ void WebsocketClientConnection::Recv(boost::system::error_code ec) {
     Shutdown();
     return;
   }
-  if (cloud_properties.cloud_transport_type == "WSS") {
-    wss_.async_read(buffer_,
-                    std::bind(&WebsocketClientConnection::OnRead,
-                              this,
-                              std::placeholders::_1,
-                              std::placeholders::_2));
-  } else {
+  if (cloud_properties.cloud_transport_type == "WS") {
     ws_.async_read(buffer_,
                    std::bind(&WebsocketClientConnection::OnRead,
                              this,
                              std::placeholders::_1,
                              std::placeholders::_2));
   }
+#ifdef ENABLE_SECURITY
+  else if (cloud_properties.cloud_transport_type == "WSS") {
+    wss_.async_read(buffer_,
+                    std::bind(&WebsocketClientConnection::OnRead,
+                              this,
+                              std::placeholders::_1,
+                              std::placeholders::_2));
+  }
+#endif  // ENABLE_SECURITY
 }
 
 void WebsocketClientConnection::OnRead(boost::system::error_code ec,
@@ -303,13 +326,16 @@ void WebsocketClientConnection::LoopThreadDelegate::DrainQueue() {
     message_queue_.pop(message_ptr);
     if (!shutdown_) {
       boost::system::error_code ec;
-      if (handler_.cloud_properties.cloud_transport_type == "WSS") {
-        handler_.wss_.write(
-            boost::asio::buffer(message_ptr->data(), message_ptr->data_size()));
-      } else {
+      if (handler_.cloud_properties.cloud_transport_type == "WS") {
         handler_.ws_.write(
             boost::asio::buffer(message_ptr->data(), message_ptr->data_size()));
       }
+#ifdef ENABLE_SECURITY
+      else if (handler_.cloud_properties.cloud_transport_type == "WSS") {
+        handler_.wss_.write(
+            boost::asio::buffer(message_ptr->data(), message_ptr->data_size()));
+      }
+#endif  // ENABLE_SECURITY
       if (ec) {
         LOG4CXX_ERROR(logger_, "Error writing to websocket");
         handler_.controller_->DataSendFailed(handler_.device_uid_,

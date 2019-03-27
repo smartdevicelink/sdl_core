@@ -1710,13 +1710,12 @@ void ProtocolHandlerImpl::NotifySessionStarted(
     start_session_frame_map_.erase(it);
   }
 
-  const ServiceType service_type = ServiceTypeFromByte(packet->service_type());
   const uint8_t protocol_version = packet->protocol_version();
 
   if (0 == context.new_session_id_) {
     LOG4CXX_WARN(logger_,
                  "Refused by session_observer to create service "
-                     << static_cast<int32_t>(service_type) << " type.");
+                     << packet->service_type() << " type.");
     SendStartSessionNAck(context.connection_id_,
                          packet->session_id(),
                          protocol_version,
@@ -1781,6 +1780,7 @@ void ProtocolHandlerImpl::NotifySessionStarted(
   }
 
 #ifdef ENABLE_SECURITY
+  const ServiceType service_type = ServiceTypeFromByte(packet->service_type());
   // for packet is encrypted and security plugin is enable
   if (context.is_protected_ && security_manager_) {
     const uint32_t connection_key = session_observer_.KeyFromPair(

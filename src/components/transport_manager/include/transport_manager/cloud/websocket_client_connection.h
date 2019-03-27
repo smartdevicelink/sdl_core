@@ -38,11 +38,13 @@
 
 #include <boost/beast/core.hpp>
 #include <boost/beast/websocket.hpp>
-#include <boost/beast/websocket/ssl.hpp>
 #include <boost/asio/connect.hpp>
 #include <boost/asio/ip/tcp.hpp>
-#include <boost/asio/ssl/stream.hpp>
 #include <boost/asio/thread_pool.hpp>
+#ifdef ENABLE_SECURITY
+#include <boost/asio/ssl/stream.hpp>
+#include <boost/beast/websocket/ssl.hpp>
+#endif  // ENABLE_SECURITY
 #include <cstdlib>
 #include <functional>
 #include <iostream>
@@ -55,16 +57,21 @@
 #include "utils/threads/message_loop_thread.h"
 #include "utils/message_queue.h"
 
-using tcp = boost::asio::ip::tcp;  // from <boost/asio/ip/tcp.hpp>
-namespace ssl = boost::asio::ssl;  // from <boost/asio/ssl.hpp>
 namespace websocket =
     boost::beast::websocket;  // from <boost/beast/websocket.hpp>
+
+using tcp = boost::asio::ip::tcp;  // from <boost/asio/ip/tcp.hpp>
+typedef websocket::stream<tcp::socket> WS;
+
+#ifdef ENABLE_SECURITY
+namespace ssl = boost::asio::ssl;  // from <boost/asio/ssl.hpp>
+typedef websocket::stream<ssl::stream<tcp::socket> > WSS;
+#endif  // ENABLE_SECURITY
+
 using ::utils::MessageQueue;
 
 typedef std::queue<protocol_handler::RawMessagePtr> AsyncQueue;
 typedef protocol_handler::RawMessagePtr Message;
-typedef websocket::stream<tcp::socket> WS;
-typedef websocket::stream<ssl::stream<tcp::socket> > WSS;
 
 namespace transport_manager {
 namespace transport_adapter {
@@ -106,12 +113,12 @@ class WebsocketClientConnection
   TransportAdapter::Error Start();
 
   /**
- * @brief Send data frame.
- *
- * @param message Smart pointer to the raw message.
- *
- * @return Error Information about possible reason of sending data failure.
- */
+   * @brief Send data frame.
+   *
+   * @param message Smart pointer to the raw message.
+   *
+   * @return Error Information about possible reason of sending data failure.
+   */
   TransportAdapter::Error SendData(::protocol_handler::RawMessagePtr message);
 
   /**
@@ -121,12 +128,14 @@ class WebsocketClientConnection
    */
   TransportAdapter::Error Disconnect();
 
+#ifdef ENABLE_SECURITY
   /**
    * @brief Attempt to add provided certificate to the ssl::context
    *
    * @param cert Certificate string from policy table
    */
   void AddCertificateAuthority(std::string cert, boost::system::error_code& ec);
+#endif  // ENABLE_SECURITY
 
   void Shutdown();
 
@@ -137,13 +146,15 @@ class WebsocketClientConnection
  private:
   TransportAdapterController* controller_;
   boost::asio::io_context ioc_;
-  ssl::context ctx_;
   tcp::resolver resolver_;
   boost::beast::flat_buffer buffer_;
   std::string host_;
   std::string text_;
   WS ws_;
+#ifdef ENABLE_SECURITY
+  ssl::context ctx_;
   WSS wss_;
+#endif  // ENABLE_SECURITY
 
   std::atomic_bool shutdown_;
 

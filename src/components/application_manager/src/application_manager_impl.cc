@@ -1027,10 +1027,10 @@ void ApplicationManagerImpl::RefreshCloudAppInformation() {
     const std::string app_icon_dir(settings_.app_icons_folder());
     const std::string full_icon_path(app_icon_dir + "/" + policy_id);
     if (!file_system::FileExists(full_icon_path)) {
-      int icon_map_size = app_icon_map_.size();
       AppIconInfo icon_info(endpoint, false);
-      LOG4CXX_DEBUG(logger_,
-                    "Inserting cloud app into icon map: " << icon_map_size);
+      LOG4CXX_DEBUG(
+          logger_,
+          "Inserting cloud app into icon map: " << app_icon_map_.size());
       app_icon_map_.insert(
           std::pair<std::string, AppIconInfo>(policy_id, icon_info));
     }
