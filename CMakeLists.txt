@@ -236,7 +236,8 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
 set(CMAKE_INSTALL_PREFIX ${CMAKE_CURRENT_BINARY_DIR})
 set(ARCHIVE_OUTPUT_DIRECTORY ./bin)
 
-set(CMAKE_CXX_FLAGS "-fPIC -std=gnu++0x -Wall -Werror -Wuninitialized -Wvla")
+set(EXCLUDE_ERROR_FLAGS "-Wno-error=unused-variable -Wno-error=unused-const-variable -Wno-error=unused-but-set-variable -Wno-error=deprecated-declarations")
+set(CMAKE_CXX_FLAGS "-fPIC -std=gnu++0x -Wall -Werror ${EXCLUDE_ERROR_FLAGS} -Wuninitialized -Wvla")
 
 if (USE_GOLD_LD)
   execute_process(COMMAND ld -v OUTPUT_VARIABLE result)
