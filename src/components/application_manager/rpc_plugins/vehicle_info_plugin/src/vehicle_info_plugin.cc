@@ -166,3 +166,7 @@ void VehicleInfoPlugin::DeleteSubscriptions(
 extern "C" application_manager::plugin_manager::RPCPlugin* Create() {
   return new vehicle_info_plugin::VehicleInfoPlugin();
 }
+
+void Delete(application_manager::plugin_manager::RPCPlugin* data) {
+  delete data;
+}
