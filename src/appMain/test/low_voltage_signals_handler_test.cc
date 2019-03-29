@@ -36,7 +36,6 @@
 #include "gtest/gtest.h"
 #include "appMain/test/mock_life_cycle.h"
 #include "utils/mock_signals_posix.h"
-#include "config_profile/profile.h"
 #include "utils/macro.h"
 
 namespace test {
@@ -45,6 +44,10 @@ using ::testing::_;
 using ::testing::Return;
 using ::testing::InSequence;
 
+const int kLowVoltageSignalOffset = 1;
+const int kWakeUpSignalOffset = 2;
+const int kIgnitionOffSignalOffset = 3;
+
 class LowVoltageSignalsHandlerTest : public ::testing::Test {
  protected:
   LowVoltageSignalsHandlerTest()
@@ -52,10 +55,8 @@ class LowVoltageSignalsHandlerTest : public ::testing::Test {
       , mock_signals_posix_(*utils::MockSignalsPosix::signals_posix_mock()) {}
 
   void SetUp() OVERRIDE {
-    profile_.set_config_file_name("smartDeviceLink.ini");
-    signals_offset_ = {profile_.low_voltage_signal_offset(),
-                       profile_.wake_up_signal_offset(),
-                       profile_.ignition_off_signal_offset()};
+    signals_offset_ = {
+        kLowVoltageSignalOffset, kWakeUpSignalOffset, kIgnitionOffSignalOffset};
 
     low_voltage_signals_handler_ =
         std::unique_ptr<main_namespace::LowVoltageSignalsHandler>(
@@ -63,7 +64,6 @@ class LowVoltageSignalsHandlerTest : public ::testing::Test {
                 *mock_life_cycle_.get(), signals_offset_));
   }
 
-  profile::Profile profile_;
   main_namespace::LowVoltageSignalsOffset signals_offset_;
   std::unique_ptr<main_namespace::LowVoltageSignalsHandler>
       low_voltage_signals_handler_;
