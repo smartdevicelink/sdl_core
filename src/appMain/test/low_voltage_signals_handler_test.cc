@@ -45,8 +45,8 @@ using ::testing::Return;
 using ::testing::InSequence;
 
 const int kLowVoltageSignalOffset = 1;
-const int kWakeUpSignalOffset = 1;
-const int kIgnitionOffSignalOffset = 1;
+const int kWakeUpSignalOffset = 2;
+const int kIgnitionOffSignalOffset = 3;
 
 class LowVoltageSignalsHandlerTest : public ::testing::Test {
  protected:
