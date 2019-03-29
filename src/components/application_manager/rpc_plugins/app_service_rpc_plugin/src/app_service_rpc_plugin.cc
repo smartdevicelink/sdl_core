@@ -96,3 +96,7 @@ void AppServiceRpcPlugin::DeleteSubscriptions(
 extern "C" application_manager::plugin_manager::RPCPlugin* Create() {
   return new app_service_rpc_plugin::AppServiceRpcPlugin();
 }
+
+void Delete(application_manager::plugin_manager::RPCPlugin* data) {
+  delete data;
+}

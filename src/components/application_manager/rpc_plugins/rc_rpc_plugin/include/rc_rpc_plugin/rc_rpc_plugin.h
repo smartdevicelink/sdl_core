@@ -109,5 +109,6 @@ class RCRPCPlugin : public plugins::RPCPlugin {
 }  // namespace rc_rpc_plugin
 
 extern "C" application_manager::plugin_manager::RPCPlugin* Create();
+extern "C" void Delete(application_manager::plugin_manager::RPCPlugin* data);
 
 #endif  // SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_RC_RPC_PLUGIN_INCLUDE_RC_RPC_PLUGIN_RC_RPC_PLUGIN_H_

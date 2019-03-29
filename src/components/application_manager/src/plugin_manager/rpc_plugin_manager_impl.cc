@@ -29,10 +29,27 @@ bool IsLibraryFile(const std::string& file_path) {
   return true;
 }
 
-RPCPluginPtr LoadPlugin(const std::string& full_plugin_path) {
+template <typename T>
+T GetFuncFromLib(void* dl_handle, const std::string& function_name) {
+  T exported_func =
+      reinterpret_cast<T>(dlsym(dl_handle, function_name.c_str()));
+  char* error_string = dlerror();
+  if (nullptr != error_string) {
+    LOG4CXX_ERROR(logger_, "Failed to export symbols : " << error_string);
+    dlclose(dl_handle);
+    return nullptr;
+  }
+  DCHECK(exported_func);
+  return exported_func;
+}
+
+RPCPluginManagerImpl::RPCPluginPtr RPCPluginManagerImpl::LoadPlugin(
+    const std::string& full_plugin_path) const {
+  RPCPluginPtr empty_plugin(nullptr, [](RPCPlugin*) {});
+
   if (!IsLibraryFile(full_plugin_path)) {
     LOG4CXX_DEBUG(logger_, "Skip loading " << full_plugin_path);
-    return RPCPluginPtr();
+    return std::move(empty_plugin);
   }
 
   void* plugin_dll = dlopen(full_plugin_path.c_str(), RTLD_LAZY);
@@ -44,17 +61,27 @@ RPCPluginPtr LoadPlugin(const std::string& full_plugin_path) {
   }
 
   typedef RPCPlugin* (*Create)();
-  Create create_plugin = reinterpret_cast<Create>(dlsym(plugin_dll, "Create"));
-  char* error_string = dlerror();
-  if (nullptr != error_string) {
-    LOG4CXX_ERROR(logger_,
-                  "Failed to export dll's " << full_plugin_path
-                                            << " symbols : " << error_string);
+  Create create_plugin = GetFuncFromLib<Create>(plugin_dll, "Create");
+  if (!create_plugin) {
+    LOG4CXX_ERROR(logger_, "No Create function in " << full_plugin_path);
+    return std::move(empty_plugin);
+  }
+
+  typedef void (*Delete)(RPCPlugin*);
+  Delete delete_plugin = GetFuncFromLib<Delete>(plugin_dll, "Delete");
+  if (!delete_plugin) {
+    LOG4CXX_ERROR(logger_, "No Delete function in " << full_plugin_path);
+    return std::move(empty_plugin);
+  }
+
+  auto plugin_destroyer = [delete_plugin, plugin_dll](RPCPlugin* plugin) {
+    LOG4CXX_DEBUG(logger_, "Delete plugin " << plugin->PluginName());
+    delete_plugin(plugin);
     dlclose(plugin_dll);
     return RPCPluginPtr();
-  }
+  };
   RPCPlugin* plugin = create_plugin();
-  return RPCPluginPtr(plugin);
+  return RPCPluginPtr(plugin, plugin_destroyer);
 }
 
 uint32_t RPCPluginManagerImpl::LoadPlugins(const std::string& plugins_path) {
@@ -82,7 +109,8 @@ uint32_t RPCPluginManagerImpl::LoadPlugins(const std::string& plugins_path) {
   return loaded_plugins_.size();
 }
 
-std::vector<RPCPluginPtr>& RPCPluginManagerImpl::GetPlugins() {
+std::vector<RPCPluginManagerImpl::RPCPluginPtr>&
+RPCPluginManagerImpl::GetPlugins() {
   return loaded_plugins_;
 }
 

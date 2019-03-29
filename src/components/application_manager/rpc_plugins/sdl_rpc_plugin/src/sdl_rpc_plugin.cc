@@ -87,3 +87,7 @@ void SDLRPCPlugin::ClearSubscriptions(app_mngr::ApplicationSharedPtr app) {
 extern "C" application_manager::plugin_manager::RPCPlugin* Create() {
   return new sdl_rpc_plugin::SDLRPCPlugin();
 }
+
+void Delete(application_manager::plugin_manager::RPCPlugin* data) {
+  delete data;
+}

@@ -117,7 +117,6 @@ class RPCPlugin {
       ApplicationEvent event,
       application_manager::ApplicationSharedPtr application) = 0;
 };
-typedef std::unique_ptr<RPCPlugin> RPCPluginPtr;
 
 }  // namespace plugin_manager
 }  // namespace application_manager
