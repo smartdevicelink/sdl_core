@@ -153,5 +153,18 @@ void ASPerformAppServiceInteractionRequestFromHMI::on_event(
                application_manager::commands::Command::SOURCE_SDL_TO_HMI);
 }
 
+void ASPerformAppServiceInteractionRequestFromHMI::onTimeOut() {
+  LOG4CXX_AUTO_TRACE(logger_);
+  smart_objects::SmartObject response_params;
+  response_params[strings::info] =
+      "The provider did not respond to the request";
+  SendErrorResponse(
+      correlation_id(),
+      hmi_apis::FunctionID::AppService_PerformAppServiceInteraction,
+      hmi_apis::Common_Result::GENERIC_ERROR,
+      "The provider did not respond to the request",
+      application_manager::commands::Command::SOURCE_SDL_TO_HMI);
+}
+
 }  // namespace commands
 }  // namespace app_service_rpc_plugin
