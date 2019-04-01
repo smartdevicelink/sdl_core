@@ -43,7 +43,9 @@
 
 // ----------------------------------------------------------------------------
 
+#ifdef ENABLE_LOG
 #include "utils/log_message_loop_thread.h"
+#endif  // ENABLE_LOG
 #include "utils/logger.h"
 
 #include "appMain/life_cycle_impl.h"
