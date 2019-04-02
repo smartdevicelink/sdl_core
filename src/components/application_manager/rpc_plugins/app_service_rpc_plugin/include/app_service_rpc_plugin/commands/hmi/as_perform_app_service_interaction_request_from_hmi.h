@@ -83,6 +83,11 @@ class ASPerformAppServiceInteractionRequestFromHMI
    */
   void on_event(const app_mngr::event_engine::MobileEvent& event) OVERRIDE;
 
+  /**
+   * @brief onTimeOut from request controller
+   */
+  virtual void onTimeOut();
+
  private:
   DISALLOW_COPY_AND_ASSIGN(ASPerformAppServiceInteractionRequestFromHMI);
 };

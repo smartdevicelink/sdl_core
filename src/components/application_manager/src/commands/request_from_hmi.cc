@@ -89,7 +89,7 @@ void RequestFromHMI::SendResponse(
           smart_objects::SmartType_Map);
   FillCommonParametersOfSO(*message, correlation_id, function_id);
   (*message)[strings::params][strings::message_type] = MessageType::kResponse;
-  (*message)[strings::params][hmi_response::code] = 0;
+  (*message)[strings::params][hmi_response::code] = result_code;
   (*message)[strings::msg_params][strings::success] = success;
   (*message)[strings::msg_params][strings::result_code] = result_code;
 
@@ -104,7 +104,8 @@ void RequestFromHMI::SendErrorResponse(
     const uint32_t correlation_id,
     const hmi_apis::FunctionID::eType function_id,
     const hmi_apis::Common_Result::eType result_code,
-    const std::string error_message) {
+    const std::string error_message,
+    commands::Command::CommandSource source) {
   smart_objects::SmartObjectSPtr message =
       std::make_shared<smart_objects::SmartObject>(
           smart_objects::SmartType_Map);
@@ -114,7 +115,7 @@ void RequestFromHMI::SendErrorResponse(
   (*message)[strings::params][hmi_response::code] = result_code;
   (*message)[strings::params][strings::error_msg] = error_message;
 
-  rpc_service_.ManageHMICommand(message);
+  rpc_service_.ManageHMICommand(message, source);
 }
 
 void RequestFromHMI::FillCommonParametersOfSO(
