@@ -39,6 +39,7 @@ include_directories(
   ${COMPONENTS_DIR}/utils/include/
   ${COMPONENTS_DIR}/application_manager/include/
   ${JSONCPP_INCLUDE_DIRECTORY}
+  ${BOOST_INCLUDE_DIR}
   ${APR_INCLUDE_DIRECTORY}
 )
 

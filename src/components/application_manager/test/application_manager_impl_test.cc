@@ -63,7 +63,9 @@
 #include "utils/lock.h"
 
 #include "encryption/hashing.h"
+#ifdef ENABLE_LOG
 #include "utils/push_log.h"
+#endif
 
 namespace test {
 namespace components {

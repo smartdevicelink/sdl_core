@@ -39,6 +39,7 @@ include_directories (
   ${COMPONENTS_DIR}/utils/include/
   ${COMPONENTS_DIR}/config_profile/include
   ${LOG4CXX_INCLUDE_DIRECTORY}
+  ${BOOST_INCLUDE_DIR}
 )
 
 set(POLICY_TABLE_PATHS
