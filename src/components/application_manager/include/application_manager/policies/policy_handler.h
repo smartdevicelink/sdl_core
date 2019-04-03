@@ -810,11 +810,25 @@ class PolicyHandler : public PolicyHandlerInterface,
   void GetRegisteredLinks(std::map<std::string, std::string>& out_links) const;
 
  private:
-  mutable sync_primitives::RWLock policy_manager_lock_;
+  mutable sync_primitives::RecursiveLock policy_manager_lock_;
   std::shared_ptr<PolicyManager> policy_manager_;
   void* dl_handle_;
   std::shared_ptr<PolicyEventObserver> event_observer_;
   uint32_t last_activated_app_id_;
+
+  /**
+   * @brief Call PolicyManager function with sync_primitives::AutoLock
+   * @param func function PolicyManager to call
+   * @param args arguments for call function
+   * @return result PolicyManager function
+   */
+  template <typename Func, typename... Args>
+  auto CallPolicyManagerFunction(Func func, Args&&... args) const
+      -> decltype((std::declval<PolicyManager>().*
+                   std::declval<Func>())(std::declval<Args>()...)) {
+    sync_primitives::AutoLock lock(policy_manager_lock_);
+    return ((*policy_manager_).*func)(args...);
+  }
 
   /**
    * @brief Contains device handles, which were sent for user consent to HMI
