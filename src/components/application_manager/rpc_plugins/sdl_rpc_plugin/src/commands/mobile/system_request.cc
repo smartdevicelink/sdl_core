@@ -543,6 +543,7 @@ void SystemRequest::Run() {
       if (file_name.empty()) {
         const std::string err_msg = "Invalid file name";
         SendResponse(false, mobile_apis::Result::INVALID_DATA, err_msg.c_str());
+        return;
       }
       LOG4CXX_DEBUG(logger_, "Got ICON_URL Request. File name: " << file_name);
     } else {
