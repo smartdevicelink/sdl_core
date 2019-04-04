@@ -74,6 +74,27 @@ void RPCHandlerImpl::ProcessMessageFromMobile(
     return;
   }
 
+  if (message->type() == application_manager::MessageType::kRequest &&
+      message->correlation_id() < 0) {
+    LOG4CXX_ERROR(logger_, "Request correlation id < 0. Returning INVALID_ID");
+    std::shared_ptr<smart_objects::SmartObject> response(
+        MessageHelper::CreateNegativeResponse(message->connection_key(),
+                                              message->function_id(),
+                                              0,
+                                              mobile_apis::Result::INVALID_ID));
+    // CreateNegativeResponse() takes a uint32_t for correlation_id, therefore a
+    // negative number cannot be passed to that function or else it will be
+    // improperly cast. correlation_id is reassigned below to its original
+    // value.
+    (*response)[strings::params][strings::correlation_id] =
+        message->correlation_id();
+    (*response)[strings::msg_params][strings::info] =
+        "Invalid Correlation ID for RPC Request";
+    app_manager_.GetRPCService().ManageMobileCommand(
+        response, commands::Command::SOURCE_SDL);
+    return;
+  }
+
   bool rpc_passing = app_manager_.GetAppServiceManager()
                          .GetRPCPassingHandler()
                          .CanHandleFunctionID(message->function_id());
