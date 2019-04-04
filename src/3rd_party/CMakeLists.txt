@@ -209,11 +209,12 @@ else()
       )
 endif()
 
+set(BOOST_ROOT ${3RD_PARTY_INSTALL_PREFIX})
 find_package(Boost 1.66.0 COMPONENTS system thread date_time filesystem regex) 
 set(BOOST_LIB_SOURCE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/boost_src)
 set(BOOST_LIBS_DIRECTORY ${3RD_PARTY_INSTALL_PREFIX}/lib)
+set(BOOST_INCLUDE_DIR ${3RD_PARTY_INSTALL_PREFIX}/include PARENT_SCOPE)
 SET_PROPERTY(GLOBAL PROPERTY GLOBAL_BOOST_LIBS ${BOOST_LIBS_DIRECTORY})
-set(BOOST_INCLUDE_DIRECTORY ${3RD_PARTY_INSTALL_PREFIX}/include )
 if (NOT ${Boost_FOUND})
   message(STATUS "Did not find boost. Downloading and installing boost 1.66")
   set(BOOST_INSTALL_COMMAND ./b2 install)
@@ -232,9 +233,6 @@ if (NOT ${Boost_FOUND})
     INSTALL_DIR ${3RD_PARTY_INSTALL_PREFIX}
     BUILD_IN_SOURCE true
   )
-
-  set(BOOST_INCLUDE_DIR ${BOOST_ROOT_DIR}/Boost-prefix/src/Boost)
-  set(BOOST_LIB_DIR ${BOOST_ROOT_DIR}/Boost-prefix/src/Boost/stage/lib/)
 else()
 add_custom_target(Boost) # empty target, Boost is already installed
 endif()

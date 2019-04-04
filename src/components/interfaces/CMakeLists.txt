@@ -35,6 +35,7 @@ include_directories (
   ${COMPONENTS_DIR}/utils/include
   ${COMPONENTS_DIR}/formatters/include
   ${COMPONENTS_DIR}/smart_objects/include
+  ${BOOST_INCLUDE_DIR}
   ${CMAKE_BINARY_DIR}
 )
 
