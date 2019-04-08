@@ -173,16 +173,22 @@ void RequestFromHMI::SendProviderRequest(
   LOG4CXX_AUTO_TRACE(logger_);
   bool hmi_destination = false;
   ApplicationSharedPtr app;
+  std::string error_msg = "No app service provider available";
+
   if ((*msg)[strings::msg_params].keyExists(strings::service_type)) {
     std::string service_type =
         (*msg)[strings::msg_params][strings::service_type].asString();
     application_manager_.GetAppServiceManager().GetProviderByType(
         service_type, false, app, hmi_destination);
+    error_msg = "No app service provider with serviceType: " + service_type +
+                " is available";
   } else if ((*msg)[strings::msg_params].keyExists(strings::service_id)) {
     std::string service_id =
         (*msg)[strings::msg_params][strings::service_id].asString();
     application_manager_.GetAppServiceManager().GetProviderByID(
         service_id, false, app, hmi_destination);
+    error_msg = "No app service provider with serviceId: " + service_id +
+                " is available";
   }
 
   if (hmi_destination) {
@@ -196,6 +202,11 @@ void RequestFromHMI::SendProviderRequest(
 
   if (!app) {
     LOG4CXX_DEBUG(logger_, "Invalid App Provider pointer");
+    SendErrorResponse(correlation_id(),
+                      static_cast<hmi_apis::FunctionID::eType>(function_id()),
+                      hmi_apis::Common_Result::DATA_NOT_AVAILABLE,
+                      error_msg,
+                      commands::Command::CommandSource::SOURCE_SDL_TO_HMI);
     return;
   }
 
