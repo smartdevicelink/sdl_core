@@ -3753,7 +3753,7 @@
             <description> The service has been deactivated as the primary service of its type</description>
         </element>
         <element name="MANIFEST_UPDATE">
-            <description> The service has updated its manifest. This could imply updated capabilities</description>
+          <description> The service has updated its manifest. This could imply updated capabilities. Note: Currently unimplemented </description>
         </element>
     </enum>
 
@@ -4259,7 +4259,7 @@
      </param>
    </function>
   <function name="OnSystemCapabilityUpdated" messagetype="notification">
-    <description>A notification to inform the connected device that a specific system capability has changed.</description>
+    <description>A notification to inform the HMI that a specific system capability has changed.</description>
     <param name="systemCapability" type="Common.SystemCapability" mandatory="true">
       <description>The system capability that has been updated</description>
     </param>
