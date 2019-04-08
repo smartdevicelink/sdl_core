@@ -77,6 +77,13 @@ class RPCPassingHandler {
   bool IsPassThroughMessage(uint32_t correlation_id,
                             commands::Command::CommandSource source,
                             int32_t message_type);
+  /**
+   * @brief Check if passthrough is allowed by policies for a given message
+   * @param rpc_message RPC message SmartObject
+   * @return true if the request is allowed to be passed through, false
+   * otherwise
+   */
+  bool IsPassThroughAllowed(smart_objects::SmartObject rpc_message);
 
   /**
    * @brief Function to handle sending and receiving RPC Passing
