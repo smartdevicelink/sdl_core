@@ -126,7 +126,23 @@ bool RPCServiceImpl::ManageMobileCommand(
   auto plugin =
       app_manager_.GetPluginManager().FindPluginToProcess(function_id, source);
   if (!plugin) {
-    LOG4CXX_WARN(logger_, "Filed to find plugin : " << plugin.error());
+    int32_t message_type =
+        (*(message.get()))[strings::params][strings::message_type].asInt();
+    if ((source == commands::Command::CommandSource::SOURCE_MOBILE &&
+         kRequest == message_type) ||
+        (source == commands::Command::CommandSource::SOURCE_SDL &&
+         kResponse == message_type)) {
+      LOG4CXX_WARN(logger_, "Failed to find plugin : " << plugin.error());
+      smart_objects::SmartObjectSPtr response =
+          MessageHelper::CreateNegativeResponse(
+              connection_key,
+              static_cast<int32_t>(function_id),
+              correlation_id,
+              static_cast<int32_t>(mobile_apis::Result::UNSUPPORTED_REQUEST));
+      (*response)[strings::msg_params][strings::info] =
+          "Module does not recognize this function id";
+      SendMessageToMobile(response);
+    }
     return false;
   }
   application_manager::CommandFactory& factory = (*plugin).GetCommandFactory();
