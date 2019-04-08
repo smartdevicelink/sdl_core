@@ -207,8 +207,9 @@ const std::string kInsertApplication =
     " `default_hmi`, `priority_value`, `is_revoked`, `memory_kb`, "
     " `heart_beat_timeout_ms`, `certificate`, `hybrid_app_preference_value`, "
     " `endpoint`, `enabled`, `auth_token`, "
-    " `cloud_transport_type`, `icon_url`) VALUES "
-    "(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
+    " `cloud_transport_type`, `icon_url`, `allow_unknown_rpc_pass_through`) "
+    "VALUES "
+    "(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
 
 const std::string kCollectFriendlyMsg = "SELECT * FROM `message`";
 
@@ -237,7 +238,8 @@ const std::string kSelectAppPolicies =
     "SELECT `id`, `priority_value`, `default_hmi`, `keep_context`, "
     " `steal_focus`, `memory_kb`, `heart_beat_timeout_ms`, `certificate`, "
     " `hybrid_app_preference_value`, `endpoint`, `enabled`, `auth_token` "
-    " `cloud_transport_type`, `icon_url` FROM `application`";
+    " `cloud_transport_type`, `icon_url`, `allow_unknown_rpc_pass_through` "
+    "FROM `application`";
 
 const std::string kSelectFunctionalGroupNames =
     "SELECT `id`, `user_consent_prompt`, `name`"

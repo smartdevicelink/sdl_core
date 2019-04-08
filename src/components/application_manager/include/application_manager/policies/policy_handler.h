@@ -474,6 +474,14 @@ class PolicyHandler : public PolicyHandlerInterface,
       const std::string& requested_service_type,
       smart_objects::SmartArray* requested_handled_rpcs) const OVERRIDE;
 
+  /**
+   * @brief Check if an app can send unknown rpc requests to an app service
+   * provider
+   * @param policy_app_id Unique application id
+  */
+  bool UnknownRPCPassThroughAllowed(
+      const std::string& policy_app_id) const OVERRIDE;
+
   virtual void OnUpdateHMIAppType(
       std::map<std::string, StringArray> app_hmi_types) OVERRIDE;
 

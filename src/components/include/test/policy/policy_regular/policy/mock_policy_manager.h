@@ -213,6 +213,8 @@ class MockPolicyManager : public PolicyManager {
       GetAppServiceParameters,
       void(const std::string& policy_app_id,
            policy_table::AppServiceParameters* app_service_parameters));
+  MOCK_CONST_METHOD1(UnknownRPCPassThroughAllowed,
+                     bool(const std::string& policy_app_id));
   MOCK_CONST_METHOD0(GetMetaInfo, const policy::MetaInfo());
   MOCK_CONST_METHOD0(RetrieveCertificate, std::string());
   MOCK_CONST_METHOD0(HasCertificate, bool());

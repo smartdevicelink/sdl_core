@@ -734,6 +734,7 @@ bool SQLPTRepresentation::GatherApplicationPoliciesSection(
     *params.auth_token = query.GetString(8);
     *params.cloud_transport_type = query.GetString(9);
     *params.icon_url = query.GetString(10);
+    *params.allow_unknown_rpc_pass_through = query.GetBoolean(11);
 
     const auto& gather_app_id = ((*policies).apps[app_id].is_string())
                                     ? (*policies).apps[app_id].get_string()
@@ -1035,6 +1036,9 @@ bool SQLPTRepresentation::SaveSpecificAppPolicy(
   app.second.icon_url.is_initialized()
       ? app_query.Bind(11, *app.second.icon_url)
       : app_query.Bind(11);
+  app.second.allow_unknown_rpc_pass_through.is_initialized()
+      ? app_query.Bind(12, *app.second.allow_unknown_rpc_pass_through)
+      : app_query.Bind(12);
 
   if (!app_query.Exec() || !app_query.Reset()) {
     LOG4CXX_WARN(logger_, "Incorrect insert into application.");
@@ -2296,6 +2300,8 @@ bool SQLPTRepresentation::CopyApplication(const std::string& source,
                         : query.Bind(15, source_app.GetString(14));
   source_app.IsNull(15) ? query.Bind(16)
                         : query.Bind(16, source_app.GetString(15));
+  source_app.IsNull(16) ? query.Bind(17)
+                        : query.Bind(17, source_app.GetBoolean(16));
 
   if (!query.Exec()) {
     LOG4CXX_WARN(logger_, "Failed inserting into application.");
