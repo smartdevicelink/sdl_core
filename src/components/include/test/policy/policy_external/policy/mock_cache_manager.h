@@ -108,7 +108,7 @@ class MockCacheManagerInterface : public ::policy::CacheManagerInterface {
       GetAppServiceParameters,
       void(const std::string& policy_app_id,
            policy_table::AppServiceParameters* app_service_parameters));
-  MOCK_CONST_METHOD1(UnknownRPCPassThroughAllowed,
+  MOCK_CONST_METHOD1(UnknownRPCPassthroughAllowed,
                      bool(const std::string& policy_app_id));
   MOCK_CONST_METHOD1(GetDeviceConsent,
                      DeviceConsent(const std::string& device_id));

@@ -143,7 +143,7 @@ const std::string kCreateSchema =
     "  `auth_token` VARCHAR(65535), "
     "  `cloud_transport_type` VARCHAR(255), "
     "  `icon_url` VARCHAR(65535), "
-    "  `allow_unknown_rpc_pass_through` BOOLEAN, "
+    "  `allow_unknown_rpc_passthrough` BOOLEAN, "
     "  `remote_control_denied` BOOLEAN NOT NULL DEFAULT 0, "
     "  CONSTRAINT `fk_application_hmi_level1` "
     "    FOREIGN KEY(`default_hmi`) "
@@ -627,7 +627,7 @@ const std::string kInsertApplication =
     "INSERT OR IGNORE INTO `application` (`id`, `priority_value`, "
     "`is_revoked`, `memory_kb`, `heart_beat_timeout_ms`, `certificate`, "
     "`hybrid_app_preference_value`, `endpoint`, `enabled`, `auth_token`, "
-    "`cloud_transport_type`, `icon_url`, `allow_unknown_rpc_pass_through`) "
+    "`cloud_transport_type`, `icon_url`, `allow_unknown_rpc_passthrough`) "
     "VALUES "
     "(?,?,?,?,?,?,?,?,?,?,?,?,?)";
 
@@ -755,7 +755,7 @@ const std::string kSelectAppPolicies =
     "SELECT `id`, `priority_value`, `memory_kb`, "
     " `heart_beat_timeout_ms`, `certificate`, `hybrid_app_preference_value`, "
     " `endpoint`, `enabled`, `auth_token`, `cloud_transport_type`, `icon_url`, "
-    " `allow_unknown_rpc_pass_through` "
+    " `allow_unknown_rpc_passthrough` "
     "FROM "
     " `application`";
 
@@ -880,7 +880,7 @@ const std::string kInsertApplicationFull =
     " `is_predata`, `memory_kb`, `heart_beat_timeout_ms`, "
     " `certificate`, `hybrid_app_preference_value`, `endpoint`, `enabled`, "
     " `auth_token`, `cloud_transport_type`, `icon_url`, "
-    "`allow_unknown_rpc_pass_through`) "
+    "`allow_unknown_rpc_passthrough`) "
     "  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
 const std::string kSelectApplicationFull =
@@ -889,7 +889,7 @@ const std::string kSelectApplicationFull =
     "  `heart_beat_timeout_ms`, `certificate`, `hybrid_app_preference_value`, "
     "  `endpoint`, `enabled`, `auth_token`, `cloud_transport_type`, "
     "`icon_url`, "
-    "  `allow_unknown_rpc_pass_through` "
+    "  `allow_unknown_rpc_passthrough` "
     "FROM `application` "
     "WHERE `id` = "
     "?";

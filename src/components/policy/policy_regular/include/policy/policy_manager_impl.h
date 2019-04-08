@@ -673,7 +673,7 @@ class PolicyManagerImpl : public PolicyManager {
    * @param policy_app_id Unique application id
    * @return bool true if allowed
   */
-  bool UnknownRPCPassThroughAllowed(
+  bool UnknownRPCPassthroughAllowed(
       const std::string& policy_app_id) const OVERRIDE;
 
   /**

@@ -836,7 +836,7 @@ void CacheManager::GetAppServiceParameters(
   }
 }
 
-bool CacheManager::UnknownRPCPassThroughAllowed(
+bool CacheManager::UnknownRPCPassthroughAllowed(
     const std::string& policy_app_id) const {
   const policy_table::ApplicationPolicies& policies =
       pt_->policy_table.app_policies_section.apps;
@@ -844,8 +844,8 @@ bool CacheManager::UnknownRPCPassThroughAllowed(
       policies.find(policy_app_id);
   if (policies.end() != policy_iter) {
     auto app_policy = (*policy_iter).second;
-    if (app_policy.allow_unknown_rpc_pass_through.is_initialized()) {
-      return *(app_policy.allow_unknown_rpc_pass_through);
+    if (app_policy.allow_unknown_rpc_passthrough.is_initialized()) {
+      return *(app_policy.allow_unknown_rpc_passthrough);
     }
   }
   return false;

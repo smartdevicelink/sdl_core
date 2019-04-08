@@ -793,8 +793,8 @@ bool SQLPTExtRepresentation::SaveSpecificAppPolicy(
   app.second.icon_url.is_initialized()
       ? app_query.Bind(14, *app.second.icon_url)
       : app_query.Bind(14);
-  app.second.allow_unknown_rpc_pass_through.is_initialized()
-      ? app_query.Bind(15, *app.second.allow_unknown_rpc_pass_through)
+  app.second.allow_unknown_rpc_passthrough.is_initialized()
+      ? app_query.Bind(15, *app.second.allow_unknown_rpc_passthrough)
       : app_query.Bind(15);
 
   if (!app_query.Exec() || !app_query.Reset()) {
@@ -939,7 +939,7 @@ bool SQLPTExtRepresentation::GatherApplicationPoliciesSection(
     *params.auth_token = query.GetString(11);
     *params.cloud_transport_type = query.GetString(12);
     *params.icon_url = query.GetString(13);
-    *params.allow_unknown_rpc_pass_through = query.GetBoolean(14);
+    *params.allow_unknown_rpc_passthrough = query.GetBoolean(14);
     const auto& gather_app_id = ((*policies).apps[app_id].is_string())
                                     ? (*policies).apps[app_id].get_string()
                                     : app_id;

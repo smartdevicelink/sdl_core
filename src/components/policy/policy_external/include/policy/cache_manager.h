@@ -257,7 +257,7 @@ class CacheManager : public CacheManagerInterface {
    * provider
    * @param policy_app_id Unique application id
   */
-  virtual bool UnknownRPCPassThroughAllowed(
+  virtual bool UnknownRPCPassthroughAllowed(
       const std::string& policy_app_id) const;
 
   /**

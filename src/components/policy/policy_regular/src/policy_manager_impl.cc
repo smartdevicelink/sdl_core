@@ -618,10 +618,10 @@ void PolicyManagerImpl::GetAppServiceParameters(
   cache_->GetAppServiceParameters(policy_app_id, app_service_parameters);
 }
 
-bool PolicyManagerImpl::UnknownRPCPassThroughAllowed(
+bool PolicyManagerImpl::UnknownRPCPassthroughAllowed(
     const std::string& policy_app_id) const {
   LOG4CXX_AUTO_TRACE(logger_);
-  return cache_->UnknownRPCPassThroughAllowed(policy_app_id);
+  return cache_->UnknownRPCPassthroughAllowed(policy_app_id);
 }
 
 void PolicyManagerImpl::CheckPermissions(const PTString& device_id,

@@ -479,7 +479,7 @@ class PolicyHandler : public PolicyHandlerInterface,
    * provider
    * @param policy_app_id Unique application id
   */
-  bool UnknownRPCPassThroughAllowed(
+  bool UnknownRPCPassthroughAllowed(
       const std::string& policy_app_id) const OVERRIDE;
 
   virtual void OnUpdateHMIAppType(

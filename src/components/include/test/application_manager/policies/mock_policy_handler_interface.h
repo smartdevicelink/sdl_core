@@ -237,7 +237,7 @@ class MockPolicyHandlerInterface : public policy::PolicyHandlerInterface {
                           const std::string& requested_service_name,
                           const std::string& requested_service_type,
                           smart_objects::SmartArray* requested_handled_rpcs));
-  MOCK_CONST_METHOD1(UnknownRPCPassThroughAllowed,
+  MOCK_CONST_METHOD1(UnknownRPCPassthroughAllowed,
                      bool(const std::string& policy_app_id));
 
 #ifdef EXTERNAL_PROPRIETARY_MODE
