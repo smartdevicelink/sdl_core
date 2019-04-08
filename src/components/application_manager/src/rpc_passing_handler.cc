@@ -93,7 +93,7 @@ bool RPCPassingHandler::CanHandleFunctionID(int32_t function_id) {
   return false;
 }
 
-bool RPCPassingHandler::IsPassThroughAllowed(
+bool RPCPassingHandler::IsPassthroughAllowed(
     smart_objects::SmartObject rpc_message) {
   LOG4CXX_AUTO_TRACE(logger_);
   mobile_api::FunctionID::eType function_id =
@@ -136,7 +136,7 @@ bool RPCPassingHandler::IsPassThroughAllowed(
   mobile_apis::Result::eType check_result = app_manager_.CheckPolicyPermissions(
       app, function_id_str, params, &parameters_permissions);
 
-  // Check, if RPC is allowed by policy (since we are allowing unknown params,
+  // Check if RPC is allowed by policy (since we are allowing unknown params,
   // check should pass if only undefined parameters exist)
   if (mobile_apis::Result::DISALLOWED == check_result &&
       !parameters_permissions.undefined_params.empty() &&

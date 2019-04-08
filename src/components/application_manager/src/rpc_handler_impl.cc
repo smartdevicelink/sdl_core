@@ -122,7 +122,7 @@ void RPCHandlerImpl::ProcessMessageFromMobile(
         app_manager_.GetAppServiceManager().GetRPCPassingHandler();
     // Check permissions for requests, otherwise attempt passthrough
     if ((application_manager::MessageType::kRequest != message_type ||
-         handler.IsPassThroughAllowed(*so_from_mobile)) &&
+         handler.IsPassthroughAllowed(*so_from_mobile)) &&
         handler.RPCPassThrough(*so_from_mobile)) {
       // RPC was forwarded. Skip handling by Core
       return;

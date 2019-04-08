@@ -83,7 +83,7 @@ class RPCPassingHandler {
    * @return true if the request is allowed to be passed through, false
    * otherwise
    */
-  bool IsPassThroughAllowed(smart_objects::SmartObject rpc_message);
+  bool IsPassthroughAllowed(smart_objects::SmartObject rpc_message);
 
   /**
    * @brief Function to handle sending and receiving RPC Passing
