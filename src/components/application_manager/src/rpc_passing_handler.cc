@@ -93,34 +93,13 @@ bool RPCPassingHandler::CanHandleFunctionID(int32_t function_id) {
   return false;
 }
 
-bool RPCPassingHandler::IsPassthroughAllowed(
-    smart_objects::SmartObject rpc_message) {
+bool RPCPassingHandler::ExtractRPCParams(
+    const smart_objects::SmartObject& s_map,
+    const ApplicationSharedPtr app,
+    const std::string& function_id_str) {
   LOG4CXX_AUTO_TRACE(logger_);
-  mobile_api::FunctionID::eType function_id =
-      static_cast<mobile_api::FunctionID::eType>(
-          rpc_message[strings::params][strings::function_id].asInt());
-  uint32_t connection_key =
-      rpc_message[strings::params][strings::connection_key].asUInt();
-  std::string function_id_str =
-      MessageHelper::StringifiedFunctionID(function_id);
-  ApplicationSharedPtr app = app_manager_.application(connection_key);
-  PolicyHandlerInterface& policy_handler = app_manager_.GetPolicyHandler();
-  if (!app) {
-    return false;
-  } else if (function_id_str.empty()) {
-    // Unknown RPC, just do basic revoked and user consent checks
-    std::string device_mac;
-    app_manager_.connection_handler().get_session_observer().GetDataOnDeviceID(
-        app->device(), NULL, NULL, &device_mac, NULL);
-    return policy_handler.UnknownRPCPassthroughAllowed(app->policy_app_id()) &&
-           !policy_handler.IsApplicationRevoked(app->policy_app_id()) &&
-           policy::kDeviceAllowed ==
-               app_manager_.GetUserConsentForDevice(device_mac);
-  }
-
   RPCParams params;
 
-  const smart_objects::SmartObject& s_map = rpc_message[strings::msg_params];
   if (smart_objects::SmartType_Map == s_map.getType()) {
     smart_objects::SmartMap::const_iterator iter = s_map.map_begin();
     smart_objects::SmartMap::const_iterator iter_end = s_map.map_end();
@@ -148,6 +127,38 @@ bool RPCPassingHandler::IsPassthroughAllowed(
   }
 
   return true;
+}
+
+bool RPCPassingHandler::IsPassthroughAllowed(
+    smart_objects::SmartObject rpc_message) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  uint32_t connection_key =
+      rpc_message[strings::params][strings::connection_key].asUInt();
+  ApplicationSharedPtr app = app_manager_.application(connection_key);
+  if (!app) {
+    return false;
+  }
+
+  mobile_api::FunctionID::eType function_id =
+      static_cast<mobile_api::FunctionID::eType>(
+          rpc_message[strings::params][strings::function_id].asInt());
+  std::string function_id_str =
+      MessageHelper::StringifiedFunctionID(function_id);
+  PolicyHandlerInterface& policy_handler = app_manager_.GetPolicyHandler();
+
+  if (function_id_str.empty()) {
+    // Unknown RPC, just do basic revoked and user consent checks
+    std::string device_mac;
+    app_manager_.connection_handler().get_session_observer().GetDataOnDeviceID(
+        app->device(), NULL, NULL, &device_mac, NULL);
+    return policy_handler.UnknownRPCPassthroughAllowed(app->policy_app_id()) &&
+           !policy_handler.IsApplicationRevoked(app->policy_app_id()) &&
+           policy::kDeviceAllowed ==
+               app_manager_.GetUserConsentForDevice(device_mac);
+  }
+
+  return ExtractRPCParams(
+      rpc_message[strings::msg_params], app, function_id_str);
 }
 
 bool RPCPassingHandler::RPCPassThrough(smart_objects::SmartObject rpc_message) {

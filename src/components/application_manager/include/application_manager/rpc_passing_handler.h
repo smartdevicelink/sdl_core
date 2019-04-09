@@ -104,6 +104,9 @@ class RPCPassingHandler {
   void ForwardResponseToMobile(uint32_t correlation_id,
                                smart_objects::SmartObject response_message);
   void PopulateRPCRequestQueue(smart_objects::SmartObject request_message);
+  bool ExtractRPCParams(const smart_objects::SmartObject& s_map,
+                        const ApplicationSharedPtr app,
+                        const std::string& function_id_str);
 
   AppServiceManager& app_service_manager_;
   ApplicationManager& app_manager_;

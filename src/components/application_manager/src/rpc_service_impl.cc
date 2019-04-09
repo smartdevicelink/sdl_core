@@ -127,30 +127,7 @@ bool RPCServiceImpl::ManageMobileCommand(
       app_manager_.GetPluginManager().FindPluginToProcess(function_id, source);
   if (!plugin) {
     LOG4CXX_WARN(logger_, "Failed to find plugin : " << plugin.error());
-    int32_t message_type =
-        (*(message.get()))[strings::params][strings::message_type].asInt();
-    if ((source == commands::Command::CommandSource::SOURCE_MOBILE &&
-         kRequest == message_type) ||
-        (source == commands::Command::CommandSource::SOURCE_SDL &&
-         kResponse == message_type)) {
-      smart_objects::SmartObjectSPtr response =
-          MessageHelper::CreateNegativeResponse(
-              connection_key,
-              static_cast<int32_t>(function_id),
-              correlation_id,
-              0);
-
-      // Since we are dealing with an unknown RPC, there is no schema attached
-      // to the message, so we have to convert the result to string directly
-      std::string result_code;
-      smart_objects::EnumConversionHelper<mobile_apis::Result::eType>::
-          EnumToString(mobile_apis::Result::UNSUPPORTED_REQUEST, &result_code);
-      (*response)[strings::msg_params][strings::result_code] = result_code;
-      (*response)[strings::msg_params][strings::info] =
-          "Module does not recognize this function id";
-
-      SendMessageToMobile(response);
-    }
+    CheckSourceForUnsupportedRequest(message, source);
     return false;
   }
   application_manager::CommandFactory& factory = (*plugin).GetCommandFactory();
@@ -736,6 +713,43 @@ hmi_apis::HMI_API& RPCServiceImpl::hmi_so_factory() {
 
 mobile_apis::MOBILE_API& RPCServiceImpl::mobile_so_factory() {
   return mobile_so_factory_;
+}
+
+void RPCServiceImpl::CheckSourceForUnsupportedRequest(
+    const commands::MessageSharedPtr message,
+    commands::Command::CommandSource source) {
+  int32_t message_type =
+      (*(message.get()))[strings::params][strings::message_type].asInt();
+  uint32_t correlation_id =
+      (*message)[strings::params].keyExists(strings::correlation_id)
+          ? (*message)[strings::params][strings::correlation_id].asUInt()
+          : 0;
+  const uint32_t connection_key = static_cast<uint32_t>(
+      (*message)[strings::params][strings::connection_key].asUInt());
+  mobile_apis::FunctionID::eType function_id =
+      static_cast<mobile_apis::FunctionID::eType>(
+          (*message)[strings::params][strings::function_id].asInt());
+  if ((source == commands::Command::CommandSource::SOURCE_MOBILE &&
+       kRequest == message_type) ||
+      (source == commands::Command::CommandSource::SOURCE_SDL &&
+       kResponse == message_type)) {
+    smart_objects::SmartObjectSPtr response =
+        MessageHelper::CreateNegativeResponse(connection_key,
+                                              static_cast<int32_t>(function_id),
+                                              correlation_id,
+                                              0);
+
+    // Since we are dealing with an unknown RPC, there is no schema attached
+    // to the message, so we have to convert the result to string directly
+    std::string result_code;
+    smart_objects::EnumConversionHelper<mobile_apis::Result::eType>::
+        EnumToString(mobile_apis::Result::UNSUPPORTED_REQUEST, &result_code);
+    (*response)[strings::msg_params][strings::result_code] = result_code;
+    (*response)[strings::msg_params][strings::info] =
+        "Module does not recognize this function id";
+
+    SendMessageToMobile(response);
+  }
 }
 
 }  // namespace rpc_service

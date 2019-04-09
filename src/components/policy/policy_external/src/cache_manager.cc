@@ -1548,7 +1548,7 @@ bool CacheManager::UnknownRPCPassthroughAllowed(
   policy_table::ApplicationPolicies::const_iterator policy_iter =
       policies.find(policy_app_id);
   if (policies.end() != policy_iter) {
-    auto app_policy = (*policy_iter).second;
+    const auto app_policy = (*policy_iter).second;
     if (app_policy.allow_unknown_rpc_passthrough.is_initialized()) {
       return *(app_policy.allow_unknown_rpc_passthrough);
     }
