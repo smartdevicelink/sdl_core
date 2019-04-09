@@ -101,10 +101,7 @@ bool RPCPassingHandler::ExtractRPCParams(
   RPCParams params;
 
   if (smart_objects::SmartType_Map == s_map.getType()) {
-    smart_objects::SmartMap::const_iterator iter = s_map.map_begin();
-    smart_objects::SmartMap::const_iterator iter_end = s_map.map_end();
-
-    for (; iter != iter_end; ++iter) {
+    for (auto iter = s_map.map_begin(); iter != s_map.map_end(); ++iter) {
       LOG4CXX_DEBUG(logger_, "Request's param: " << iter->first);
       params.insert(iter->first);
     }
