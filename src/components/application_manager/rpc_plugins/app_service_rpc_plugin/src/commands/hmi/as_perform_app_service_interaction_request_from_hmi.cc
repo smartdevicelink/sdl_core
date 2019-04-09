@@ -63,15 +63,11 @@ void ASPerformAppServiceInteractionRequestFromHMI::Run() {
       application_manager_.get_settings().hmi_origin_id();
   if (!msg_params.keyExists(strings::origin_app)) {
     if (hmi_origin_id.empty()) {
-      smart_objects::SmartObject response_params;
-      response_params[strings::info] =
-          "No HMI origin ID to use for interaction passthrough";
-      SendResponse(
-          false,
+      SendErrorResponse(
           correlation_id(),
           hmi_apis::FunctionID::AppService_PerformAppServiceInteraction,
           hmi_apis::Common_Result::INVALID_DATA,
-          &response_params,
+          "No HMI origin ID to use for interaction passthrough",
           application_manager::commands::Command::SOURCE_SDL_TO_HMI);
       return;
     }
@@ -82,14 +78,12 @@ void ASPerformAppServiceInteractionRequestFromHMI::Run() {
   auto service =
       application_manager_.GetAppServiceManager().FindServiceByID(service_id);
   if (!service) {
-    smart_objects::SmartObject response_params;
-    response_params[strings::info] = "The requested service ID does not exist";
-    SendResponse(false,
-                 correlation_id(),
-                 hmi_apis::FunctionID::AppService_PerformAppServiceInteraction,
-                 hmi_apis::Common_Result::INVALID_ID,
-                 &response_params,
-                 application_manager::commands::Command::SOURCE_SDL_TO_HMI);
+    SendErrorResponse(
+        correlation_id(),
+        hmi_apis::FunctionID::AppService_PerformAppServiceInteraction,
+        hmi_apis::Common_Result::INVALID_ID,
+        "The requested service ID does not exist",
+        application_manager::commands::Command::SOURCE_SDL_TO_HMI);
     return;
   }
 

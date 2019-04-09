@@ -432,16 +432,27 @@ void CommandRequestImpl::SendProviderRequest(
   LOG4CXX_AUTO_TRACE(logger_);
   bool hmi_destination = false;
   ApplicationSharedPtr app;
+  // Default error code and error message
+  std::string error_msg = "No app service provider available";
+  mobile_apis::Result::eType error_code =
+      mobile_apis::Result::DATA_NOT_AVAILABLE;
+
   if ((*msg)[strings::msg_params].keyExists(strings::service_type)) {
     std::string service_type =
         (*msg)[strings::msg_params][strings::service_type].asString();
     application_manager_.GetAppServiceManager().GetProviderByType(
         service_type, true, app, hmi_destination);
+    error_msg = "No app service provider with serviceType: " + service_type +
+                " is available";
+    error_code = mobile_apis::Result::DATA_NOT_AVAILABLE;
   } else if ((*msg)[strings::msg_params].keyExists(strings::service_id)) {
     std::string service_id =
         (*msg)[strings::msg_params][strings::service_id].asString();
     application_manager_.GetAppServiceManager().GetProviderByID(
         service_id, true, app, hmi_destination);
+    error_msg = "No app service provider with serviceId: " + service_id +
+                " is available";
+    error_code = mobile_apis::Result::INVALID_ID;
   }
 
   if (hmi_destination) {
@@ -454,9 +465,7 @@ void CommandRequestImpl::SendProviderRequest(
 
   if (!app) {
     LOG4CXX_DEBUG(logger_, "Invalid App Provider pointer");
-    SendResponse(false,
-                 mobile_apis::Result::DATA_NOT_AVAILABLE,
-                 "No app service provider available");
+    SendResponse(false, error_code, error_msg.c_str());
     return;
   }
 
