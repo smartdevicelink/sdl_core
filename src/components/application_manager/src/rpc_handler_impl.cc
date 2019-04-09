@@ -118,16 +118,17 @@ void RPCHandlerImpl::ProcessMessageFromMobile(
         (*so_from_mobile)[strings::params][strings::correlation_id].asUInt();
     int32_t message_type =
         (*so_from_mobile)[strings::params][strings::message_type].asInt();
-    if (app_manager_.GetAppServiceManager()
-            .GetRPCPassingHandler()
-            .RPCPassThrough(*so_from_mobile)) {
+    RPCPassingHandler& handler =
+        app_manager_.GetAppServiceManager().GetRPCPassingHandler();
+    // Check permissions for requests, otherwise attempt passthrough
+    if ((application_manager::MessageType::kRequest != message_type ||
+         handler.IsPassthroughAllowed(*so_from_mobile)) &&
+        handler.RPCPassThrough(*so_from_mobile)) {
       // RPC was forwarded. Skip handling by Core
       return;
-    } else if (!app_manager_.GetAppServiceManager()
-                    .GetRPCPassingHandler()
-                    .IsPassThroughMessage(correlation_id,
-                                          commands::Command::SOURCE_MOBILE,
-                                          message_type)) {
+    } else if (!handler.IsPassThroughMessage(correlation_id,
+                                             commands::Command::SOURCE_MOBILE,
+                                             message_type)) {
       // Since PassThrough failed, refiltering the message
       if (!ConvertMessageToSO(*message, *so_from_mobile)) {
         LOG4CXX_ERROR(logger_, "Cannot create smart object from message");

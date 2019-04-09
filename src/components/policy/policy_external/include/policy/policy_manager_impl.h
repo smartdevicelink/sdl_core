@@ -673,6 +673,15 @@ class PolicyManagerImpl : public PolicyManager {
                                    app_service_parameters) const OVERRIDE;
 
   /**
+   * @brief Check if an app can send unknown rpc requests to an app service
+   * provider
+   * @param policy_app_id Unique application id
+   * @return bool true if allowed
+  */
+  bool UnknownRPCPassthroughAllowed(
+      const std::string& policy_app_id) const OVERRIDE;
+
+  /**
    * @brief OnAppRegisteredOnMobile allows to handle event when application were
    * succesfully registered on mobile device.
    * It will send OnAppPermissionSend notification and will try to start PTU. *

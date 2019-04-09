@@ -515,6 +515,14 @@ class PolicyHandlerInterface {
       const std::string& requested_service_type,
       smart_objects::SmartArray* requested_handled_rpcs) const = 0;
 
+  /**
+   * @brief Check if an app can send unknown rpc requests to an app service
+   * provider
+   * @param policy_app_id Unique application id
+  */
+  virtual bool UnknownRPCPassthroughAllowed(
+      const std::string& policy_app_id) const = 0;
+
 #ifdef EXTERNAL_PROPRIETARY_MODE
   /**
    * @brief Gets meta information

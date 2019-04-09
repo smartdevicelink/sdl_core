@@ -241,6 +241,14 @@ class CacheManager : public CacheManagerInterface {
       policy_table::AppServiceParameters* app_service_parameters) const;
 
   /**
+   * @brief Check if an app can send unknown rpc requests to an app service
+   * provider
+   * @param policy_app_id Unique application id
+  */
+  virtual bool UnknownRPCPassthroughAllowed(
+      const std::string& policy_app_id) const;
+
+  /**
    * @brief Allows to update 'vin' field in module_meta table.
    *
    * @param new 'vin' value.

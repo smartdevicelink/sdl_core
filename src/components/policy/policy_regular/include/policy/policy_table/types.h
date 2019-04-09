@@ -202,6 +202,7 @@ struct ApplicationParams : PolicyBase {
 
   // App Service Params
   Optional<AppServiceParameters> app_service_parameters;
+  Optional<Boolean> allow_unknown_rpc_passthrough;
 
  public:
   ApplicationParams();

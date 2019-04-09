@@ -93,6 +93,71 @@ bool RPCPassingHandler::CanHandleFunctionID(int32_t function_id) {
   return false;
 }
 
+bool RPCPassingHandler::ExtractRPCParams(
+    const smart_objects::SmartObject& s_map,
+    const ApplicationSharedPtr app,
+    const std::string& function_id_str) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  RPCParams params;
+
+  if (smart_objects::SmartType_Map == s_map.getType()) {
+    for (auto iter = s_map.map_begin(); iter != s_map.map_end(); ++iter) {
+      LOG4CXX_DEBUG(logger_, "Request's param: " << iter->first);
+      params.insert(iter->first);
+    }
+  }
+
+  CommandParametersPermissions parameters_permissions;
+
+  mobile_apis::Result::eType check_result = app_manager_.CheckPolicyPermissions(
+      app, function_id_str, params, &parameters_permissions);
+
+  // Check if RPC is allowed by policy (since we are allowing unknown params,
+  // check should pass if only undefined parameters exist)
+  if (mobile_apis::Result::DISALLOWED == check_result &&
+      !parameters_permissions.undefined_params.empty() &&
+      parameters_permissions.disallowed_params.empty() &&
+      parameters_permissions.allowed_params.empty()) {
+    return true;
+  } else if (mobile_apis::Result::SUCCESS != check_result) {
+    return false;
+  }
+
+  return true;
+}
+
+bool RPCPassingHandler::IsPassthroughAllowed(
+    smart_objects::SmartObject rpc_message) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  uint32_t connection_key =
+      rpc_message[strings::params][strings::connection_key].asUInt();
+  ApplicationSharedPtr app = app_manager_.application(connection_key);
+  if (!app) {
+    return false;
+  }
+
+  mobile_api::FunctionID::eType function_id =
+      static_cast<mobile_api::FunctionID::eType>(
+          rpc_message[strings::params][strings::function_id].asInt());
+  std::string function_id_str =
+      MessageHelper::StringifiedFunctionID(function_id);
+  PolicyHandlerInterface& policy_handler = app_manager_.GetPolicyHandler();
+
+  if (function_id_str.empty()) {
+    // Unknown RPC, just do basic revoked and user consent checks
+    std::string device_mac;
+    app_manager_.connection_handler().get_session_observer().GetDataOnDeviceID(
+        app->device(), NULL, NULL, &device_mac, NULL);
+    return policy_handler.UnknownRPCPassthroughAllowed(app->policy_app_id()) &&
+           !policy_handler.IsApplicationRevoked(app->policy_app_id()) &&
+           policy::kDeviceAllowed ==
+               app_manager_.GetUserConsentForDevice(device_mac);
+  }
+
+  return ExtractRPCParams(
+      rpc_message[strings::msg_params], app, function_id_str);
+}
+
 bool RPCPassingHandler::RPCPassThrough(smart_objects::SmartObject rpc_message) {
   LOG4CXX_AUTO_TRACE(logger_);
 
@@ -121,7 +186,7 @@ bool RPCPassingHandler::RPCPassThrough(smart_objects::SmartObject rpc_message) {
         LOG4CXX_DEBUG(logger_, "Correlation id DOES exist in map. Returning");
         std::shared_ptr<smart_objects::SmartObject> response(
             MessageHelper::CreateNegativeResponse(
-                rpc_message[strings::params][strings::connection_key].asInt(),
+                rpc_message[strings::params][strings::connection_key].asUInt(),
                 rpc_message[strings::params][strings::function_id].asInt(),
                 correlation_id,
                 mobile_apis::Result::INVALID_ID));

@@ -626,6 +626,14 @@ class PolicyManager : public usage_statistics::StatisticsManager {
       policy_table::AppServiceParameters* app_service_parameters) const = 0;
 
   /**
+   * @brief Check if an app can send unknown rpc requests to an app service
+   * provider
+   * @param policy_app_id Unique application id
+  */
+  virtual bool UnknownRPCPassthroughAllowed(
+      const std::string& policy_app_id) const = 0;
+
+  /**
    * @brief Gets meta information
    * @return meta information
    */

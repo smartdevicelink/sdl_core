@@ -113,6 +113,7 @@
         <param name="service_name" type="String" mandatory="false" />
         <param name="service_type" type="String" mandatory="false" />
         <param name="handled_rpcs" array="true"  mandatory="false" />
+        <param name="allow_unknown_rpc_passthrough" type="Boolean" mandatory="false" />
     </struct>
 
     <typedef name="HmiLevels" type="HmiLevel" array="true"

@@ -135,6 +135,9 @@ class RPCServiceImpl : public RPCService,
                           const bool allow_unknown_parameters = false);
   hmi_apis::HMI_API& hmi_so_factory();
   mobile_apis::MOBILE_API& mobile_so_factory();
+  void CheckSourceForUnsupportedRequest(
+      const commands::MessageSharedPtr message,
+      commands::Command::CommandSource source);
 
   ApplicationManager& app_manager_;
   request_controller::RequestController& request_ctrl_;

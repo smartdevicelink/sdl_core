@@ -2055,6 +2055,13 @@ bool PolicyHandler::CheckAppServiceParameters(
   return true;
 }
 
+bool PolicyHandler::UnknownRPCPassthroughAllowed(
+    const std::string& policy_app_id) const {
+  LOG4CXX_AUTO_TRACE(logger_);
+  POLICY_LIB_CHECK(false);
+  return policy_manager_->UnknownRPCPassthroughAllowed(policy_app_id);
+}
+
 uint32_t PolicyHandler::HeartBeatTimeout(const std::string& app_id) const {
   POLICY_LIB_CHECK(0);
   return policy_manager_->HeartBeatTimeout(app_id);

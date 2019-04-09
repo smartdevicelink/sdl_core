@@ -278,7 +278,9 @@ ApplicationParams::ApplicationParams(const Json::Value* value__)
     , auth_token(impl::ValueMember(value__, "auth_token"))
     , cloud_transport_type(impl::ValueMember(value__, "cloud_transport_type"))
     , icon_url(impl::ValueMember(value__, "icon_url"))
-    , app_service_parameters(impl::ValueMember(value__, "app_services")) {}
+    , app_service_parameters(impl::ValueMember(value__, "app_services"))
+    , allow_unknown_rpc_passthrough(
+          impl::ValueMember(value__, "allow_unknown_rpc_passthrough")) {}
 
 Json::Value ApplicationParams::ToJsonValue() const {
   Json::Value result__(PolicyBase::ToJsonValue());
@@ -300,6 +302,9 @@ Json::Value ApplicationParams::ToJsonValue() const {
   impl::WriteJsonField("cloud_transport_type", cloud_transport_type, &result__);
   impl::WriteJsonField("icon_url", auth_token, &result__);
   impl::WriteJsonField("app_services", app_service_parameters, &result__);
+  impl::WriteJsonField("allow_unknown_rpc_passthrough",
+                       allow_unknown_rpc_passthrough,
+                       &result__);
   return result__;
 }
 
@@ -350,6 +355,9 @@ bool ApplicationParams::is_valid() const {
     return false;
   }
   if (!app_service_parameters.is_valid()) {
+    return false;
+  }
+  if (!allow_unknown_rpc_passthrough.is_valid()) {
     return false;
   }
   return Validate();
@@ -409,6 +417,9 @@ bool ApplicationParams::struct_empty() const {
     return false;
   }
   if (app_service_parameters.is_initialized()) {
+    return false;
+  }
+  if (allow_unknown_rpc_passthrough.is_initialized()) {
     return false;
   }
   return true;
@@ -472,6 +483,10 @@ void ApplicationParams::ReportErrors(rpc::ValidationReport* report__) const {
     app_service_parameters.ReportErrors(
         &report__->ReportSubobject("app_services"));
   }
+  if (!allow_unknown_rpc_passthrough.is_valid()) {
+    allow_unknown_rpc_passthrough.ReportErrors(
+        &report__->ReportSubobject("allow_unknown_rpc_passthrough"));
+  }
 }
 
 void ApplicationParams::SetPolicyTableType(PolicyTableType pt_type) {
@@ -490,6 +505,7 @@ void ApplicationParams::SetPolicyTableType(PolicyTableType pt_type) {
   hybrid_app_preference.SetPolicyTableType(pt_type);
   icon_url.SetPolicyTableType(pt_type);
   app_service_parameters.SetPolicyTableType(pt_type);
+  allow_unknown_rpc_passthrough.SetPolicyTableType(pt_type);
 }
 
 // RpcParameters methods
