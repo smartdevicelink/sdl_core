@@ -4099,7 +4099,7 @@
             <description> The service has been deactivated as the primary service of its type</description>
         </element>
         <element name="MANIFEST_UPDATE">
-            <description> The service has updated its manifest. This could imply updated capabilities</description>
+            <description> The service has updated its manifest. This could imply updated capabilities. Note: Currently unimplemented </description>
         </element>
     </enum>
 
