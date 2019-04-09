@@ -138,9 +138,17 @@ bool RPCServiceImpl::ManageMobileCommand(
               connection_key,
               static_cast<int32_t>(function_id),
               correlation_id,
-              static_cast<int32_t>(mobile_apis::Result::UNSUPPORTED_REQUEST));
+              0);
+
+      // Since we are dealing with an unknown RPC, there is no schema attached
+      // to the message, so we have to convert the result to string directly
+      std::string result_code;
+      smart_objects::EnumConversionHelper<mobile_apis::Result::eType>::
+          EnumToString(mobile_apis::Result::UNSUPPORTED_REQUEST, &result_code);
+      (*response)[strings::msg_params][strings::result_code] = result_code;
       (*response)[strings::msg_params][strings::info] =
           "Module does not recognize this function id";
+
       SendMessageToMobile(response);
     }
     return false;
