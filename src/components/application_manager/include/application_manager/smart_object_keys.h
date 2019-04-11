@@ -344,10 +344,6 @@ extern const char* activate;
 extern const char* set_as_default;
 extern const char* origin_app;
 
-// gps data
-extern const char* shifted;
-extern const char* altitude;
-
 // sis data
 extern const char* station_short_name;
 extern const char* station_location;
@@ -375,8 +371,11 @@ extern const char* global_ign_on_counter;
 extern const char* connection_info;
 extern const char* is_download_complete;
 
+extern const char* shifted;
+extern const char* altitude;
 extern const char* longitude_degrees;
 extern const char* latitude_degrees;
+
 extern const char* address;
 extern const char* country_name;
 extern const char* country_code;

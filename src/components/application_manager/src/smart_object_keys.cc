@@ -311,10 +311,6 @@ const char* activate = "activate";
 const char* set_as_default = "setAsDefault";
 const char* origin_app = "originApp";
 
-// gps data
-const char* shifted = "shifted";
-const char* altitude = "altitude";
-
 // sis data
 const char* station_short_name = "stationShortName";
 const char* station_location = "stationLocation";
@@ -347,8 +343,12 @@ const char* time_stamp = "timeStamp";
 const char* manual_text_entry = "manualTextEntry";
 const char* image_type_supported = "imageTypeSupported";
 const char* unexpected_disconnect = "unexpectedDisconnect";
+
+const char* shifted = "shifted";
+const char* altitude = "altitude";
 const char* longitude_degrees = "longitudeDegrees";
 const char* latitude_degrees = "latitudeDegrees";
+
 const char* address = "address";
 const char* country_name = "countryName";
 const char* country_code = "countryCode";
