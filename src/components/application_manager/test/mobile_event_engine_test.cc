@@ -38,8 +38,9 @@
 #include "application_manager/mock_event_observer.h"
 #include "application_manager/mock_event_dispatcher.h"
 #include "smart_objects/smart_object.h"
+#include "application_manager/message.h"
 
-#include "interfaces/HMI_API.h"
+#include "interfaces/MOBILE_API.h"
 
 namespace test {
 namespace components {
@@ -47,25 +48,22 @@ namespace event_engine_test {
 
 using application_manager::event_engine::EventDispatcherImpl;
 using application_manager::event_engine::Event;
+using application_manager::event_engine::MobileEvent;
 using application_manager::event_engine::EventObserver;
 using testing::_;
 using ::testing::An;
 using ::testing::Matcher;
 
-class EventEngineTest : public testing::Test {
+class MobileEventEngineTest : public testing::Test {
  public:
-  EventEngineTest()
-      : event_id(Event::EventID::BasicCommunication_ActivateApp)
-      , event_id2(Event::EventID::BasicCommunication_OnAppActivated)
-      , event_id3(Event::EventID::VR_IsReady)
+  MobileEventEngineTest()
+      : event_id(MobileEvent::MobileEventID::GetAppServiceDataID)
       , event_observer_mock_(mock_event_dispatcher_) {}
 
  protected:
   EventDispatcherImpl* event_dispatcher_instance_;
-  Event* event_;
-  const application_manager::event_engine::Event::EventID event_id;
-  const application_manager::event_engine::Event::EventID event_id2;
-  const application_manager::event_engine::Event::EventID event_id3;
+  MobileEvent* event_;
+  const MobileEvent::MobileEventID event_id;
   MockEventDispatcher mock_event_dispatcher_;
   MockEventObserver event_observer_mock_;
   const int32_t correlation_id = 1121;
@@ -77,39 +75,33 @@ class EventEngineTest : public testing::Test {
 
   virtual void SetUp() OVERRIDE {
     event_dispatcher_instance_ = new EventDispatcherImpl();
-    event_ = new Event(hmi_apis::FunctionID::eType::VR_IsReady);
+    event_ =
+        new MobileEvent(mobile_apis::FunctionID::eType::GetAppServiceDataID);
     smart_object_with_type_notification["params"]["message_type"] =
-        hmi_apis::messageType::notification;
+        application_manager::MessageType::kNotification;
     smart_object_with_type_notification["params"]["correlation_id"] =
         correlation_id;
     smart_object_with_type_notification["params"]["function_id"] =
-        hmi_apis::FunctionID::eType::VR_IsReady;
+        mobile_apis::FunctionID::eType::GetAppServiceDataID;
 
     smart_object_with_type_response["params"]["message_type"] =
-        hmi_apis::messageType::response;
+        application_manager::MessageType::kResponse;
     smart_object_with_type_response["params"]["correlation_id"] =
         correlation_id;
     smart_object_with_type_response["params"]["function_id"] =
-        hmi_apis::FunctionID::eType::VR_IsReady;
-
-    smart_object_with_type_error_response["params"]["message_type"] =
-        hmi_apis::messageType::error_response;
-    smart_object_with_type_error_response["params"]["correlation_id"] =
-        correlation_id;
-    smart_object_with_type_error_response["params"]["function_id"] =
-        hmi_apis::FunctionID::eType::VR_IsReady;
+        mobile_apis::FunctionID::eType::GetAppServiceDataID;
 
     smart_object_with_type_request["params"]["message_type"] =
-        hmi_apis::messageType::request;
+        application_manager::MessageType::kRequest;
     smart_object_with_type_request["params"]["correlation_id"] = correlation_id;
     smart_object_with_type_request["params"]["function_id"] =
-        hmi_apis::FunctionID::eType::VR_IsReady;
+        mobile_apis::FunctionID::eType::GetAppServiceDataID;
 
     smart_object_with_invalid_type["params"]["message_type"] =
-        hmi_apis::messageType::INVALID_ENUM;
+        application_manager::MessageType::kUnknownType;
     smart_object_with_invalid_type["params"]["correlation_id"] = correlation_id;
     smart_object_with_invalid_type["params"]["function_id"] =
-        hmi_apis::FunctionID::eType::VR_IsReady;
+        mobile_apis::FunctionID::eType::GetAppServiceDataID;
   }
 
   void TearDown() OVERRIDE {
@@ -117,21 +109,21 @@ class EventEngineTest : public testing::Test {
     delete event_;
   }
 
-  void CheckRaiseEvent(const Event::EventID& event_id,
-                       const uint32_t calls_number,
-                       const smart_objects::SmartObject& so) {
+  void CheckRaiseMobileEvent(
+      const MobileEvent::MobileEventID& event_id,
+      const uint32_t calls_number,
+      const smart_objects::SmartObject& so) {
     // Arrange
-    event_dispatcher_instance_->add_observer(
+    event_dispatcher_instance_->add_mobile_observer(
         event_id, correlation_id, event_observer_mock_);
     event_->set_smart_object(so);
-
-    EXPECT_CALL(event_observer_mock_, on_event(An<const Event&>()))
+    EXPECT_CALL(event_observer_mock_, on_event(An<const MobileEvent&>()))
         .Times(calls_number);
-    event_dispatcher_instance_->raise_event(*event_);
+    event_dispatcher_instance_->raise_mobile_event(*event_);
   }
 };
 
-TEST_F(EventEngineTest, EventObserverTest_ExpectObserversEmpty) {
+TEST_F(MobileEventEngineTest, EventObserverTest_ExpectObserversEmpty) {
   // Arrange
   EventObserver* event_observer_ptr =
       static_cast<EventObserver*>(&event_observer_mock_);
@@ -140,45 +132,39 @@ TEST_F(EventEngineTest, EventObserverTest_ExpectObserversEmpty) {
             event_observer_mock_.id());
 }
 
-TEST_F(EventEngineTest,
+TEST_F(MobileEventEngineTest,
        EventDispatcherImpl_RaiseEvent_EventSOTypeResponse_ExpectEventRaised) {
-  CheckRaiseEvent(event_id3, 1u, smart_object_with_type_response);
+  CheckRaiseMobileEvent(event_id, 1u, smart_object_with_type_response);
 }
 
-TEST_F(
-    EventEngineTest,
-    EventDispatcherImpl_RaiseEvent_EventSOTypeErrorResponse_ExpectEventRaised) {
-  CheckRaiseEvent(event_id3, 1u, smart_object_with_type_error_response);
-}
-
-TEST_F(EventEngineTest,
+TEST_F(MobileEventEngineTest,
        EventDispatcherImpl_RaiseEvent_EventSOTypeInvalid_ExpectEventNotRaised) {
-  CheckRaiseEvent(event_id3, 0u, smart_object_with_invalid_type);
+  CheckRaiseMobileEvent(event_id, 0u, smart_object_with_invalid_type);
 }
 
-TEST_F(EventEngineTest,
+TEST_F(MobileEventEngineTest,
        EventDispatcherImpl_RaiseEvent_EventSOTypeRequest_ExpectEventNotRaised) {
-  CheckRaiseEvent(event_id3, 0u, smart_object_with_type_request);
+  CheckRaiseMobileEvent(event_id, 0u, smart_object_with_type_request);
 }
 
 TEST_F(
-    EventEngineTest,
+    MobileEventEngineTest,
     EventDispatcherImpl_RaiseEvent_EventSOTypeNotification_ExpectEventNotRaised) {
-  CheckRaiseEvent(event_id3, 0u, smart_object_with_type_notification);
+  CheckRaiseMobileEvent(event_id, 0u, smart_object_with_type_notification);
 }
 
-TEST_F(EventEngineTest, Event_set_smart_object_ExpectObjectSet) {
+TEST_F(MobileEventEngineTest, Event_set_smart_object_ExpectObjectSet) {
   // Act
-  event_->set_smart_object(smart_object_with_type_notification);
+  event_->set_smart_object(smart_object_with_type_response);
   const int32_t obj_type =
-      static_cast<int32_t>(hmi_apis::messageType::notification);
+      static_cast<int32_t>(application_manager::MessageType::kResponse);
   const int32_t function_id =
-      static_cast<int32_t>(hmi_apis::FunctionID::eType::VR_IsReady);
+      static_cast<int32_t>(mobile_apis::FunctionID::eType::GetAppServiceDataID);
   // Checks
   EXPECT_EQ(obj_type, event_->smart_object_type());
   EXPECT_EQ(function_id, event_->smart_object_function_id());
   EXPECT_EQ(correlation_id, event_->smart_object_correlation_id());
-  EXPECT_EQ(smart_object_with_type_notification, event_->smart_object());
+  EXPECT_EQ(smart_object_with_type_response, event_->smart_object());
 }
 
 }  // namespace event_engine_test
