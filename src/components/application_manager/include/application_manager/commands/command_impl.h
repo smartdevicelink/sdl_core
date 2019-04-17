@@ -37,6 +37,7 @@
 #include "application_manager/event_engine/event_observer.h"
 #include "application_manager/application_manager.h"
 #include "application_manager/smart_object_keys.h"
+#include "policy/policy_types.h"
 #include "utils/logger.h"
 
 namespace application_manager {

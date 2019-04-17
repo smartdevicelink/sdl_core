@@ -39,7 +39,7 @@
 #include "utils/lock.h"
 #include "utils/macro.h"
 #include "utils/system_time_handler.h"
-#include "application_manager/application_manager_impl.h"
+#include "application_manager/application_manager.h"
 #include "application_manager/event_engine/event_observer.h"
 
 namespace application_manager {

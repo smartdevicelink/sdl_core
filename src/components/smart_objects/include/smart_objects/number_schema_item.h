@@ -70,12 +70,17 @@ class TNumberSchemaItem : public CDefaultSchemaItem<NumberType> {
    * @param Object Object to validate.
    * @param report__ object for reporting errors during validation
    * @param MessageVersion to check mobile RPC version against RPC Spec History
+   * @param allow_unknown_enums
+   *   false - unknown enum values (left as string values after applySchema)
+   *   will be considered invalid.
+   *   true - such values will be considered valid.
    * @return ns_smart_objects::errors::eType
    **/
-  errors::eType validate(const SmartObject& Object,
-                         rpc::ValidationReport* report__,
-                         const utils::SemanticVersion& MessageVersion =
-                             utils::SemanticVersion()) OVERRIDE;
+  errors::eType validate(
+      const SmartObject& Object,
+      rpc::ValidationReport* report__,
+      const utils::SemanticVersion& MessageVersion = utils::SemanticVersion(),
+      const bool allow_unknown_enums = false) OVERRIDE;
 
  private:
   /**
@@ -137,7 +142,8 @@ template <typename NumberType>
 errors::eType TNumberSchemaItem<NumberType>::validate(
     const SmartObject& Object,
     rpc::ValidationReport* report__,
-    const utils::SemanticVersion& MessageVersion) {
+    const utils::SemanticVersion& MessageVersion,
+    const bool allow_unknown_enums) {
   if (!isValidNumberType(Object.getType())) {
     SmartType expectedType = (typeid(double) == typeid(Object.getType()))
                                  ? SmartType_Double

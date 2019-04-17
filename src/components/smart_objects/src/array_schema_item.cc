@@ -45,7 +45,8 @@ std::shared_ptr<CArraySchemaItem> CArraySchemaItem::create(
 errors::eType CArraySchemaItem::validate(
     const SmartObject& Object,
     rpc::ValidationReport* report__,
-    const utils::SemanticVersion& MessageVersion) {
+    const utils::SemanticVersion& MessageVersion,
+    const bool allow_unknown_enums) {
   if (SmartType_Array != Object.getType()) {
     std::string validation_info = "Incorrect type, expected: " +
                                   SmartObject::typeToString(SmartType_Array) +
@@ -80,7 +81,8 @@ errors::eType CArraySchemaItem::validate(
     const errors::eType result =
         mElementSchemaItem->validate(Object.getElement(i),
                                      &report__->ReportSubobject(strVal.str()),
-                                     MessageVersion);
+                                     MessageVersion,
+                                     allow_unknown_enums);
     if (errors::OK != result) {
       return result;
     }
@@ -90,20 +92,21 @@ errors::eType CArraySchemaItem::validate(
 
 void CArraySchemaItem::applySchema(
     SmartObject& Object,
-    const bool RemoveFakeParameters,
+    const bool remove_unknown_parameters,
     const utils::SemanticVersion& MessageVersion) {
   if (SmartType_Array == Object.getType()) {
     for (size_t i = 0U; i < Object.length(); ++i) {
       mElementSchemaItem->applySchema(
-          Object[i], RemoveFakeParameters, MessageVersion);
+          Object[i], remove_unknown_parameters, MessageVersion);
     }
   }
 }
 
-void CArraySchemaItem::unapplySchema(SmartObject& Object) {
+void CArraySchemaItem::unapplySchema(SmartObject& Object,
+                                     const bool remove_unknown_parameters) {
   if (SmartType_Array == Object.getType()) {
     for (size_t i = 0U; i < Object.length(); ++i) {
-      mElementSchemaItem->unapplySchema(Object[i]);
+      mElementSchemaItem->unapplySchema(Object[i], remove_unknown_parameters);
     }
   }
 }

@@ -177,6 +177,14 @@ bool ApplicationParams::ValidateModuleTypes() const {
   return true;
 }
 
+bool AppServiceHandledRpc::Validate() const {
+  return true;
+}
+
+bool AppServiceInfo::Validate() const {
+  return true;
+}
+
 bool ApplicationParams::Validate() const {
   return ValidateModuleTypes();
 }

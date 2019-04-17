@@ -106,6 +106,10 @@ void OnExitApplicationNotification::Run() {
       application_manager_.UnregisterApplication(app_id, Result::SUCCESS);
       return;
     }
+    case Common_ApplicationExitReason::CLOSE_CLOUD_CONNECTION: {
+      application_manager_.DisconnectCloudApp(app_impl);
+      break;
+    }
     default: {
       LOG4CXX_WARN(logger_, "Unhandled reason");
       return;

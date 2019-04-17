@@ -413,6 +413,16 @@ class Profile : public protocol_handler::ProtocolHandlerSettings,
   const std::string& transport_manager_tcp_adapter_network_interface()
       const OVERRIDE;
 
+  /**
+   * @brief Returns retry timeout for cloud app connections
+   */
+  uint32_t cloud_app_retry_timeout() const OVERRIDE;
+
+  /**
+   * @brief Returns maximum retry attempts for cloud app connections
+   */
+  uint16_t cloud_app_max_retry_attempts() const OVERRIDE;
+
   // TransportManageMMESettings interface
 
   const std::string& event_mq_name() const OVERRIDE;
@@ -516,6 +526,9 @@ class Profile : public protocol_handler::ProtocolHandlerSettings,
   const std::vector<std::string>& audio_service_transports() const OVERRIDE;
   const std::vector<std::string>& video_service_transports() const OVERRIDE;
 
+  uint32_t rpc_pass_through_timeout() const OVERRIDE;
+  const std::vector<std::string>& embedded_services() const OVERRIDE;
+  const std::string hmi_origin_id() const OVERRIDE;
   /**
    * @brief Reads a string value from the profile
    *
@@ -960,6 +973,8 @@ class Profile : public protocol_handler::ProtocolHandlerSettings,
   std::string system_files_path_;
   uint16_t transport_manager_tcp_adapter_port_;
   std::string transport_manager_tcp_adapter_network_interface_;
+  uint32_t cloud_app_retry_timeout_;
+  uint16_t cloud_app_max_retry_attempts_;
   std::string tts_delimiter_;
   uint32_t audio_data_stopped_timeout_;
   uint32_t video_data_stopped_timeout_;
@@ -1051,6 +1066,11 @@ class Profile : public protocol_handler::ProtocolHandlerSettings,
   int low_voltage_signal_offset_;
   int wake_up_signal_offset_;
   int ignition_off_signal_offset_;
+  uint32_t rpc_pass_through_timeout_;
+
+  std::vector<std::string> embedded_services_;
+
+  std::string hmi_origin_id_;
 
   DISALLOW_COPY_AND_ASSIGN(Profile);
 };

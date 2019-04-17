@@ -141,7 +141,8 @@ typedef enum {
   TT_NONE = -1,
   TT_USB = 0,
   TT_BLUETOOTH = 1,
-  TT_WIFI = 2
+  TT_WIFI = 2,
+  TT_WEBSOCKET = 3
 } TransportType;
 
 struct TransportDescription {
@@ -428,6 +429,9 @@ class ProtocolHandlerImpl
   void NotifySessionStarted(const SessionContext& context,
                             std::vector<std::string>& rejected_params) OVERRIDE;
 
+  void OnAuthTokenUpdated(const std::string& policy_app_id,
+                          const std::string& auth_token) OVERRIDE;
+
 #ifdef BUILD_TESTS
   const impl::FromMobileQueue& get_from_mobile_queue() const {
     return raw_ford_messages_from_mobile_;
@@ -511,6 +515,10 @@ class ProtocolHandlerImpl
    **/
   void OnTMMessageSendFailed(const transport_manager::DataSendError& error,
                              const RawMessagePtr message) OVERRIDE;
+
+  void OnConnectionPending(
+      const transport_manager::DeviceInfo& device_info,
+      const transport_manager::ConnectionUID connection_id) OVERRIDE;
 
   void OnConnectionEstablished(
       const transport_manager::DeviceInfo& device_info,
@@ -772,6 +780,10 @@ class ProtocolHandlerImpl
 
   sync_primitives::Lock start_session_frame_map_lock_;
   StartSessionFrameMap start_session_frame_map_;
+
+  // Map policy app id -> auth token
+  sync_primitives::Lock auth_token_map_lock_;
+  std::map<std::string, std::string> auth_token_map_;
 
   bool tcp_enabled_;
   std::string tcp_port_;

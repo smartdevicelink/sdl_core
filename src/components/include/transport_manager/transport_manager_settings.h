@@ -69,6 +69,16 @@ class TransportManagerSettings : public TransportManagerMMESettings {
    */
   virtual const std::string& transport_manager_tcp_adapter_network_interface()
       const = 0;
+
+  /**
+   * @brief Returns retry timeout for cloud app connections
+   */
+  virtual uint32_t cloud_app_retry_timeout() const = 0;
+
+  /**
+   * @brief Returns maximum retry attempts for cloud app connections
+   */
+  virtual uint16_t cloud_app_max_retry_attempts() const = 0;
 };
 }  // namespace transport_manager
 #endif  // SRC_COMPONENTS_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_MANAGER_SETTINGS_H_

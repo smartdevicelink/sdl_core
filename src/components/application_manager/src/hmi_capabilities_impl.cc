@@ -34,7 +34,7 @@
 
 #include "utils/logger.h"
 #include "application_manager/hmi_capabilities_impl.h"
-#include "application_manager/application_manager_impl.h"
+#include "application_manager/application_manager.h"
 #include "smart_objects/smart_object.h"
 #include "application_manager/message_helper.h"
 #include "application_manager/smart_object_keys.h"
@@ -45,6 +45,8 @@
 
 namespace application_manager {
 namespace formatters = ns_smart_device_link::ns_json_handler::formatters;
+
+CREATE_LOGGERPTR_GLOBAL(logger_, "HMICapabilities")
 
 namespace {
 std::map<std::string, hmi_apis::Common_VrCapabilities::eType>
@@ -1170,6 +1172,20 @@ bool HMICapabilitiesImpl::load_capabilities_from_file() {
           smart_objects::SmartObject rc_capability_so;
           formatters::CFormatterJsonBase::jsonValueToObj(rc_capability,
                                                          rc_capability_so);
+          if (rc_capability_so.keyExists("lightControlCapabilities")) {
+            if (rc_capability_so["lightControlCapabilities"].keyExists(
+                    "supportedLights")) {
+              auto& lights = rc_capability_so["lightControlCapabilities"]
+                                             ["supportedLights"];
+              auto it = lights.asArray()->begin();
+              for (; it != lights.asArray()->end(); ++it) {
+                smart_objects::SmartObject& light_name_so = (*it)["name"];
+                auto light_name = MessageHelper::CommonLightNameFromString(
+                    light_name_so.asString());
+                light_name_so = light_name;
+              }
+            }
+          }
           set_rc_capability(rc_capability_so);
           if (!rc_capability_so.empty()) {
             set_rc_supported(true);

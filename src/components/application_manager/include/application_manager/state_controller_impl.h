@@ -144,6 +144,7 @@ class StateControllerImpl : public event_engine::EventObserver,
 
   // EventObserver interface
   void on_event(const event_engine::Event& event);
+  void on_event(const event_engine::MobileEvent& event);
 
   /**
    * @brief Sets default application state and apply currently active HMI states

@@ -69,9 +69,15 @@ class MockTransportAdapterController : public TransportAdapterController {
   MOCK_METHOD1(SearchDeviceDone, void(const DeviceVector& devices));
   MOCK_METHOD1(SearchDeviceFailed, void(const SearchDeviceError& error));
   MOCK_CONST_METHOD1(FindDevice, DeviceSptr(const DeviceUID& device_handle));
+  MOCK_CONST_METHOD2(FindPendingConnection,
+                     ConnectionSPtr(const DeviceUID& device_handle,
+                                    const ApplicationHandle& app_handle));
   MOCK_METHOD3(ConnectionCreated,
                void(ConnectionSPtr connection,
                     const DeviceUID& device_handle,
+                    const ApplicationHandle& app_handle));
+  MOCK_METHOD2(ConnectPending,
+               void(const DeviceUID& device_handle,
                     const ApplicationHandle& app_handle));
   MOCK_METHOD2(ConnectDone,
                void(const DeviceUID& device_handle,

@@ -92,6 +92,25 @@ class TransportAdapterListener {
       const TransportAdapter* adapter) = 0;
 
   /**
+   * @brief Reaction to connection status update
+   * @param adapter Current transport adapter
+   */
+  virtual void OnConnectionStatusUpdated(const TransportAdapter* adapter) = 0;
+
+  /**
+   * @brief Search specified device adapter in the container of shared pointers
+   * to device adapters to be sure it is available,
+   * launch event ON_CONNECT_PENDING in transport manager.
+   *
+   * @param device_adater Pointer to the device adapter.
+   * @param device_handle Device unique identifier.
+   * @param app_id Handle of application.
+   */
+  virtual void OnConnectPending(const TransportAdapter* adapter,
+                                const DeviceUID& device_handle,
+                                const ApplicationHandle& app_id) = 0;
+
+  /**
    * @brief Search specified device adapter in the container of shared pointers
    *to device adapters to be sure it is available,
    * launch event ON_CONNECT_DONE in transport manager.

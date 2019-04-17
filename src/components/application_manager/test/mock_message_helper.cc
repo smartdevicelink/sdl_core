@@ -277,6 +277,12 @@ hmi_apis::Common_Language::eType MessageHelper::CommonLanguageFromString(
       language);
 }
 
+hmi_apis::Common_LightName::eType MessageHelper::CommonLightNameFromString(
+    const std::string& lightName) {
+  return MockMessageHelper::message_helper_mock()->CommonLightNameFromString(
+      lightName);
+}
+
 smart_objects::SmartObjectSPtr MessageHelper::CreateModuleInfoSO(
     uint32_t function_id, ApplicationManager& app_mngr) {
   return MockMessageHelper::message_helper_mock()->CreateModuleInfoSO(
@@ -572,4 +578,15 @@ void MessageHelper::SendUnsubscribeButtonNotification(
       ->SendUnsubscribeButtonNotification(button, application, app_mngr);
 }
 
+smart_objects::SmartObject MessageHelper::CreateAppServiceCapabilities(
+    std::vector<smart_objects::SmartObject>& all_services) {
+  return MockMessageHelper::message_helper_mock()->CreateAppServiceCapabilities(
+      all_services);
+}
+
+void MessageHelper::BroadcastCapabilityUpdate(
+    smart_objects::SmartObject& msg_params, ApplicationManager& app_mngr) {
+  MockMessageHelper::message_helper_mock()->BroadcastCapabilityUpdate(
+      msg_params, app_mngr);
+}
 }  // namespace application_manager

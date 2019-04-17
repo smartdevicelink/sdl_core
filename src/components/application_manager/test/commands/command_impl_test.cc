@@ -85,11 +85,12 @@ class CommandImplTest : public CommandsTest<CommandsTestMocks::kIsNice> {
     using CommandImpl::ReplaceMobileWithHMIAppId;
     using CommandImpl::ReplaceHMIWithMobileAppId;
 
-    UnwrappedCommandImpl(const MessageSharedPtr& message,
-                         ApplicationManager& application_manager,
-                         app_mngr::rpc_service::RPCService& rpc_service,
-                         app_mngr::HMICapabilities& hmi_capabilities,
-                         policy::PolicyHandlerInterface& policy_handler)
+    UnwrappedCommandImpl(
+        const MessageSharedPtr& message,
+        ApplicationManager& application_manager,
+        application_manager::rpc_service::RPCService& rpc_service,
+        application_manager::HMICapabilities& hmi_capabilities,
+        policy::PolicyHandlerInterface& policy_handler)
         : CommandImpl(message,
                       application_manager,
                       rpc_service,

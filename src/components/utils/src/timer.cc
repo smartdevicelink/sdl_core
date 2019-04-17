@@ -49,7 +49,8 @@ timer::Timer::Timer(const std::string& name, TimerTask* task)
     , state_lock_()
     , delegate_(new TimerDelegate(this, state_lock_))
     , thread_(threads::CreateThread(name_.c_str(), delegate_.get()))
-    , single_shot_(true) {
+    , single_shot_(true)
+    , completed_flag_(false) {
   LOG4CXX_AUTO_TRACE(logger_);
   DCHECK(!name_.empty());
   DCHECK(task_);
@@ -76,6 +77,7 @@ void timer::Timer::Start(const Milliseconds timeout,
   LOG4CXX_AUTO_TRACE(logger_);
   sync_primitives::AutoLock auto_lock(state_lock_);
   StopThread();
+  completed_flag_ = false;
   switch (timer_type) {
     case kSingleShot: {
       single_shot_ = true;
@@ -106,17 +108,21 @@ bool timer::Timer::is_running() const {
   return !delegate_->stop_flag();
 }
 
+bool timer::Timer::is_completed() const {
+  return completed_flag_;
+}
+
 timer::Milliseconds timer::Timer::timeout() const {
   sync_primitives::AutoLock auto_lock(state_lock_);
   return delegate_->timeout();
 }
 
-void timer::Timer::StartDelegate(const Milliseconds timeout) const {
+void timer::Timer::StartDelegate(const Milliseconds timeout) {
   delegate_->set_stop_flag(false);
   delegate_->set_timeout(timeout);
 }
 
-void timer::Timer::StopDelegate() const {
+void timer::Timer::StopDelegate() {
   delegate_->set_stop_flag(true);
   delegate_->set_timeout(0);
 }
@@ -148,7 +154,7 @@ void timer::Timer::StopThread() {
   }
 }
 
-void timer::Timer::OnTimeout() const {
+void timer::Timer::OnTimeout() {
   {
     sync_primitives::AutoLock auto_lock(state_lock_);
     if (single_shot_) {
@@ -158,10 +164,11 @@ void timer::Timer::OnTimeout() const {
 
   DCHECK_OR_RETURN_VOID(task_);
   task_->run();
+  completed_flag_ = true;
 }
 
 timer::Timer::TimerDelegate::TimerDelegate(
-    const Timer* timer, sync_primitives::Lock& state_lock_ref)
+    Timer* timer, sync_primitives::Lock& state_lock_ref)
     : timer_(timer)
     , timeout_(0)
     , stop_flag_(true)

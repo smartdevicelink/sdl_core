@@ -153,6 +153,7 @@ class ResumeCtrlTest : public ::testing::Test {
     ON_CALL(*mock_app_, mac_address()).WillByDefault(ReturnRef(kMacAddress_));
     ON_CALL(*mock_app_, device()).WillByDefault(Return(kTestDevId_));
     ON_CALL(*mock_app_, app_id()).WillByDefault(Return(kTestAppId_));
+    ON_CALL(*mock_app_, is_cloud_app()).WillByDefault(Return(false));
   }
 
   NiceMock<event_engine_test::MockEventDispatcher> mock_event_dispatcher_;

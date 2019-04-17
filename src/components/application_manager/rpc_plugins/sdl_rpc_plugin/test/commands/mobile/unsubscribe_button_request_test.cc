@@ -139,9 +139,11 @@ TEST_F(UnsubscribeButtonRequestTest, Run_SUCCESS) {
 
   EXPECT_CALL(*mock_app, UnsubscribeFromButton(kButtonId))
       .WillOnce(Return(true));
-  EXPECT_CALL(mock_rpc_service_,
-              ManageHMICommand(HMIResultCodeIs(
-                  hmi_apis::FunctionID::Buttons_OnButtonSubscription)));
+  EXPECT_CALL(
+      mock_rpc_service_,
+      ManageHMICommand(
+          HMIResultCodeIs(hmi_apis::FunctionID::Buttons_OnButtonSubscription),
+          _));
   EXPECT_CALL(
       mock_rpc_service_,
       ManageMobileCommand(MobileResultCodeIs(mobile_result::SUCCESS), _));
@@ -182,9 +184,11 @@ TEST_F(UnsubscribeButtonRequestTest, Run_SUCCESS_Base_RPC_Version) {
   EXPECT_CALL(*mock_app,
               UnsubscribeFromButton(mobile_apis::ButtonName::PLAY_PAUSE))
       .WillOnce(Return(true));
-  EXPECT_CALL(mock_rpc_service_,
-              ManageHMICommand(HMIResultCodeIs(
-                  hmi_apis::FunctionID::Buttons_OnButtonSubscription)));
+  EXPECT_CALL(
+      mock_rpc_service_,
+      ManageHMICommand(
+          HMIResultCodeIs(hmi_apis::FunctionID::Buttons_OnButtonSubscription),
+          _));
   EXPECT_CALL(
       mock_rpc_service_,
       ManageMobileCommand(MobileResultCodeIs(mobile_result::SUCCESS), _));

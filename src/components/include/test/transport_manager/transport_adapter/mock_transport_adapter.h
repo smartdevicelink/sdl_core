@@ -35,6 +35,7 @@
 
 #include "gmock/gmock.h"
 #include "transport_manager/transport_adapter/transport_adapter.h"
+#include "transport_manager/transport_adapter/device.h"
 
 namespace test {
 namespace components {
@@ -66,6 +67,9 @@ class MockTransportAdapter
   MOCK_METHOD1(ConnectDevice,
                ::transport_manager::transport_adapter::TransportAdapter::Error(
                    const ::transport_manager::DeviceUID& device_handle));
+  MOCK_CONST_METHOD1(GetConnectionStatus,
+                     ::transport_manager::ConnectionStatus(
+                         const ::transport_manager::DeviceUID& device_handle));
   MOCK_METHOD2(RunAppOnDevice, void(const std::string&, const std::string&));
   MOCK_CONST_METHOD0(IsClientOriginatedConnectSupported, bool());
   MOCK_METHOD0(
@@ -105,6 +109,8 @@ class MockTransportAdapter
                      transport_manager::SwitchableDevices());
   MOCK_CONST_METHOD0(GetTransportConfiguration,
                      transport_manager::transport_adapter::TransportConfig());
+  MOCK_METHOD1(CreateDevice, void(const std::string& uid));
+
 #ifdef TELEMETRY_MONITOR
   MOCK_METHOD0(GetTelemetryObserver,
                ::transport_manager::TMTelemetryObserver*());

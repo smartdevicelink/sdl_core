@@ -41,6 +41,8 @@
 
 namespace application_manager {
 
+CREATE_LOGGERPTR_GLOBAL(logger_, "SystemTimeHandler")
+
 SystemTimeHandlerImpl::SystemTimeHandlerImpl(
     ApplicationManager& application_manager)
     : event_engine::EventObserver(application_manager.event_dispatcher())
@@ -56,7 +58,7 @@ SystemTimeHandlerImpl::SystemTimeHandlerImpl(
 
 SystemTimeHandlerImpl::~SystemTimeHandlerImpl() {
   LOG4CXX_AUTO_TRACE(logger_);
-  unsubscribe_from_all_events();
+  unsubscribe_from_all_hmi_events();
 }
 
 void SystemTimeHandlerImpl::DoSystemTimeQuery() {

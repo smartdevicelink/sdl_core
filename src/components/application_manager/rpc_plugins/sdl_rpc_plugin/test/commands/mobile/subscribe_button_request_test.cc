@@ -182,7 +182,7 @@ TEST_F(SubscribeButtonRequestTest, Run_SUCCESS) {
 
   MessageSharedPtr hmi_result_msg;
 
-  EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_))
+  EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_, _))
       .WillOnce(DoAll(SaveArg<0>(&hmi_result_msg), Return(true)));
 
   MessageSharedPtr mobile_result_msg;
@@ -230,7 +230,7 @@ TEST_F(SubscribeButtonRequestTest, Run_SUCCESS_App_Base_RPC_Version) {
 
   MessageSharedPtr hmi_result_msg;
 
-  EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_))
+  EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_, _))
       .WillOnce(DoAll(SaveArg<0>(&hmi_result_msg), Return(true)));
 
   MessageSharedPtr mobile_result_msg;

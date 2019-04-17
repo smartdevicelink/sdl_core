@@ -36,29 +36,32 @@
 #include "application_manager/command_factory.h"
 
 namespace sdl_rpc_plugin {
+namespace app_mngr = application_manager;
 namespace plugins = application_manager::plugin_manager;
+
+class SystemCapabilityAppExtension;
+
 class SDLRPCPlugin : public plugins::RPCPlugin {
   // RPCPlugin interface
  public:
-  bool Init(application_manager::ApplicationManager& app_manager,
-            application_manager::rpc_service::RPCService& rpc_service,
-            application_manager::HMICapabilities& hmi_capabilities,
+  bool Init(app_mngr::ApplicationManager& app_manager,
+            app_mngr::rpc_service::RPCService& rpc_service,
+            app_mngr::HMICapabilities& hmi_capabilities,
             policy::PolicyHandlerInterface& policy_handler) OVERRIDE;
 
   bool IsAbleToProcess(
       const int32_t function_id,
-      const application_manager::commands::Command::CommandSource
-          message_source) OVERRIDE;
+      const app_mngr::commands::Command::CommandSource message_source) OVERRIDE;
   std::string PluginName() OVERRIDE;
 
-  application_manager::CommandFactory& GetCommandFactory() OVERRIDE;
-  void OnPolicyEvent(
-      application_manager::plugin_manager::PolicyEvent event) OVERRIDE;
-  void OnApplicationEvent(
-      application_manager::plugin_manager::ApplicationEvent event,
-      application_manager::ApplicationSharedPtr application) OVERRIDE;
+  app_mngr::CommandFactory& GetCommandFactory() OVERRIDE;
+  void OnPolicyEvent(plugins::PolicyEvent event) OVERRIDE;
+  void OnApplicationEvent(plugins::ApplicationEvent event,
+                          app_mngr::ApplicationSharedPtr application) OVERRIDE;
 
  private:
+  void ClearSubscriptions(app_mngr::ApplicationSharedPtr app);
+
   std::unique_ptr<application_manager::CommandFactory> command_factory_;
 };
 }

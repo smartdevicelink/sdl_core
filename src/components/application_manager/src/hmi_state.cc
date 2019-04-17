@@ -45,7 +45,7 @@ CREATE_LOGGERPTR_GLOBAL(logger_, "HmiState")
 HmiState::HmiState(std::shared_ptr<Application> app,
                    const ApplicationManager& app_mngr,
                    StateID state_id)
-    : app_(app)
+    : hmi_app_id_(app->hmi_app_id())
     , state_id_(state_id)
     , app_mngr_(app_mngr)
     , hmi_level_(mobile_apis::HMILevel::INVALID_ENUM)
@@ -57,7 +57,7 @@ HmiState::HmiState(std::shared_ptr<Application> app,
 
 HmiState::HmiState(std::shared_ptr<Application> app,
                    const ApplicationManager& app_mngr)
-    : app_(app)
+    : hmi_app_id_(app->hmi_app_id())
     , state_id_(STATE_ID_REGULAR)
     , app_mngr_(app_mngr)
     , hmi_level_(mobile_apis::HMILevel::INVALID_ENUM)
@@ -73,19 +73,27 @@ void HmiState::set_parent(HmiStatePtr parent) {
 }
 
 bool HmiState::is_navi_app() const {
-  return app_->is_navi();
+  const ApplicationSharedPtr app =
+      app_mngr_.application_by_hmi_app(hmi_app_id_);
+  return app ? app->is_navi() : false;
 }
 
 bool HmiState::is_media_app() const {
-  return app_->is_media_application();
+  const ApplicationSharedPtr app =
+      app_mngr_.application_by_hmi_app(hmi_app_id_);
+  return app ? app->is_media_application() : false;
 }
 
 bool HmiState::is_voice_communication_app() const {
-  return app_->is_voice_communication_supported();
+  const ApplicationSharedPtr app =
+      app_mngr_.application_by_hmi_app(hmi_app_id_);
+  return app ? app->is_voice_communication_supported() : false;
 }
 
 bool HmiState::is_mobile_projection_app() const {
-  return app_->mobile_projection_enabled();
+  const ApplicationSharedPtr app =
+      app_mngr_.application_by_hmi_app(hmi_app_id_);
+  return app ? app->mobile_projection_enabled() : false;
 }
 
 mobile_apis::AudioStreamingState::eType VRHmiState::audio_streaming_state()
@@ -123,7 +131,9 @@ VideoStreamingHmiState::VideoStreamingHmiState(
 
 mobile_apis::VideoStreamingState::eType
 VideoStreamingHmiState::video_streaming_state() const {
-  if (app_->IsVideoApplication()) {
+  const ApplicationSharedPtr app =
+      app_mngr_.application_by_hmi_app(hmi_app_id_);
+  if (app && app->IsVideoApplication()) {
     return parent()->video_streaming_state();
   }
 
@@ -201,7 +211,7 @@ AudioSource::AudioSource(std::shared_ptr<Application> app,
                          const ApplicationManager& app_mngr)
     : HmiState(app, app_mngr, STATE_ID_AUDIO_SOURCE)
     , keep_context_(app->keep_context()) {
-  app_->set_keep_context(false);
+  app->set_keep_context(false);
 }
 
 mobile_apis::HMILevel::eType AudioSource::hmi_level() const {
@@ -260,7 +270,15 @@ std::ostream& operator<<(std::ostream& os, const HmiState::StateID src) {
 }
 
 std::ostream& operator<<(std::ostream& os, const HmiState& src) {
-  os << "HMIState(app id:" << src.app_->app_id() << ", state:" << src.state_id()
+  const ApplicationSharedPtr app =
+      src.app_mngr_.application_by_hmi_app(src.hmi_app_id_);
+  os << "HMIState(app id:";
+  if (app) {
+    os << app->app_id();
+  } else {
+    os << "(none)";
+  }
+  os << ", hmi app id:" << src.hmi_app_id_ << ", state:" << src.state_id()
      << ", hmi_level:" << src.hmi_level()
      << ", audio:" << src.audio_streaming_state()
      << ", video:" << src.video_streaming_state()

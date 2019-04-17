@@ -42,12 +42,15 @@
 #include "utils/custom_string.h"
 #include "utils/lock.h"
 #include "policy/mock_policy_settings.h"
-#include "application_manager/policies/policy_handler.h"
+#include "application_manager/commands/command_impl.h"
 #include "application_manager/mock_application_manager.h"
 #include "application_manager/mock_rpc_service.h"
 #include "application_manager/event_engine/event_dispatcher.h"
 #include "application_manager/state_controller.h"
 #include "application_manager/resumption/resume_ctrl.h"
+
+#include "policy/policy_table/types.h"
+#include "rpc_base/rpc_base_json_inl.h"
 
 #ifdef EXTERNAL_PROPRIETARY_MODE
 #include "policy/policy_external/include/policy/policy_types.h"
@@ -964,7 +967,7 @@ TEST_F(MessageHelperTest, SendGetListOfPermissionsResponse_SUCCESS) {
 
   ON_CALL(mock_application_manager, GetRPCService())
       .WillByDefault(ReturnRef(mock_rpc_service_));
-  EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_))
+  EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_, _))
       .WillOnce(DoAll(SaveArg<0>(&result), Return(true)));
 
   const uint32_t correlation_id = 0u;
@@ -1004,7 +1007,7 @@ TEST_F(MessageHelperTest,
 
   ON_CALL(mock_application_manager, GetRPCService())
       .WillByDefault(ReturnRef(mock_rpc_service_));
-  EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_))
+  EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_, _))
       .WillOnce(DoAll(SaveArg<0>(&result), Return(true)));
 
   const uint32_t correlation_id = 0u;
@@ -1050,7 +1053,7 @@ TEST_F(MessageHelperTest, SendNaviSetVideoConfigRequest) {
   smart_objects::SmartObjectSPtr result;
   ON_CALL(mock_application_manager, GetRPCService())
       .WillByDefault(ReturnRef(mock_rpc_service_));
-  EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_))
+  EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_, _))
       .WillOnce(DoAll(SaveArg<0>(&result), Return(true)));
 
   int32_t app_id = 123;

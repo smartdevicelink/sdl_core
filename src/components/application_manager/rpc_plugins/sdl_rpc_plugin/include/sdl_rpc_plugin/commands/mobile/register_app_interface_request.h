@@ -124,11 +124,14 @@ class RegisterAppInterfaceRequest
   /**
    * @brief Sends OnAppRegistered notification to HMI
    *
-   *@param application_impl application with changed HMI status
-   *
+   * @param app application with changed HMI status
+   * @param resumption If true, resumption-related parameters will be sent to
+   *the HMI
+   * @param need_restore_vr If resumption is true, whether or not VR commands
+   *should be resumed
    **/
   void SendOnAppRegisteredNotificationToHMI(
-      const app_mngr::Application& application_impl,
+      app_mngr::ApplicationConstSharedPtr app,
       bool resumption = false,
       bool need_restore_vr = false);
   /*
@@ -141,11 +144,14 @@ class RegisterAppInterfaceRequest
   /*
    * @brief Check new application parameters (name, tts, vr) for
    * coincidence with already known parameters of registered applications
+   * @param out_duplicate_apps In the case other apps was found with duplicate
+   * names, this field will be filled with a list of said apps
    *
    * return SUCCESS if there is no coincidence of app.name/TTS/VR synonyms,
    * otherwise appropriate error code returns
-  */
-  mobile_apis::Result::eType CheckCoincidence();
+   */
+  mobile_apis::Result::eType CheckCoincidence(
+      std::vector<app_mngr::ApplicationSharedPtr>& out_duplicate_apps);
 
   /*
   * @brief Predicate for using with CheckCoincidence method to compare with VR

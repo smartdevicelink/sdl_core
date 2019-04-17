@@ -101,7 +101,7 @@ class VIIsReadyRequestTest
         mock_message_helper_,
         CreateModuleInfoSO(hmi_apis::FunctionID::VehicleInfo_GetVehicleType, _))
         .WillOnce(Return(ivi_type));
-    EXPECT_CALL(mock_rpc_service_, ManageHMICommand(ivi_type));
+    EXPECT_CALL(mock_rpc_service_, ManageHMICommand(ivi_type, _));
   }
 
   void PrepareEvent(bool is_message_contain_param,

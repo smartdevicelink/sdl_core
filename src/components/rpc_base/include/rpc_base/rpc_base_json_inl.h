@@ -206,6 +206,7 @@ String<minlen, maxlen>::String(const Json::Value* value,
   if (!is_initialized()) {
     value_state_ = kValid;
   } else if (is_valid()) {
+    value_ = value->asString();
     value_state_ = length_range_.Includes(value_.length()) ? kValid : kInvalid;
   }
 }

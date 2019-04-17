@@ -85,7 +85,8 @@ const std::string CFormatterJsonSDLRPCv1::getMessageType(
 // ----------------------------------------------------------------------------
 
 bool CFormatterJsonSDLRPCv1::toString(const smart_objects_ns::SmartObject& obj,
-                                      std::string& outStr) {
+                                      std::string& outStr,
+                                      const bool remove_unknown_parameters) {
   bool result = false;
   try {
     Json::Value root(Json::objectValue);
@@ -93,7 +94,8 @@ bool CFormatterJsonSDLRPCv1::toString(const smart_objects_ns::SmartObject& obj,
 
     smart_objects_ns::SmartObject formattedObj(obj);
     formattedObj.getSchema().unapplySchema(
-        formattedObj);  // converts enums(as int32_t) to strings
+        formattedObj,
+        remove_unknown_parameters);  // converts enums(as int32_t) to strings
 
     objToJsonValue(formattedObj.getElement(strings::S_MSG_PARAMS), params);
 
@@ -125,7 +127,8 @@ CFormatterJsonSDLRPCv1::tMetaFormatterErrorCode
 CFormatterJsonSDLRPCv1::MetaFormatToString(
     const smart_objects_ns::SmartObject& object,
     const smart_objects_ns::CSmartSchema& schema,
-    std::string& outStr) {
+    std::string& outStr,
+    const bool remove_unknown_parameters) {
   meta_formatter_error_code::tMetaFormatterErrorCode result_code =
       meta_formatter_error_code::kErrorOk;
 
@@ -156,7 +159,8 @@ CFormatterJsonSDLRPCv1::MetaFormatToString(
     result_code |= meta_formatter_error_code::kErrorSchemaIsNotFunction;
   }
 
-  CFormatterJsonSDLRPCv1::toString(tmp_object, outStr);
+  CFormatterJsonSDLRPCv1::toString(
+      tmp_object, outStr, remove_unknown_parameters);
 
   return result_code;
 }

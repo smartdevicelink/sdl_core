@@ -6,7 +6,7 @@
             "JA-JP", "AR-SA", "KO-KR", "PT-BR", "CS-CZ", "DA-DK", "NO-NO"
         ],
         "displayCapabilities": {
-            "displayType": "GEN2_8_DMA",
+            "displayType": "SDL_GENERIC",
             "displayName": "GENERIC_DISPLAY",
             "textFields": [{
                     "name": "mainField1",
@@ -921,9 +921,9 @@
         }
     },
     "VehicleInfo": {
-        "make": "Ford",
-        "model": "Fiesta",
-        "modelYear": "2013",
+        "make": "SDL",
+        "model": "Generic",
+        "modelYear": "2019",
         "trim": "SE"
     },
     "SyncMessageVersion": {

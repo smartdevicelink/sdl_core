@@ -786,6 +786,14 @@ class MessageHelper {
   static hmi_apis::Common_Language::eType CommonLanguageFromString(
       const std::string& language);
 
+  /**
+   * @brief CommonLightNameFromString convert string to LightName enum value
+   * @param lightName string to convert
+   * @return value LightName enum value
+   */
+  static hmi_apis::Common_LightName::eType CommonLightNameFromString(
+      const std::string& lightName);
+
   static smart_objects::SmartObjectSPtr
   GetOnAppInterfaceUnregisteredNotificationToMobile(
       int32_t connection_key,
@@ -877,6 +885,12 @@ class MessageHelper {
    */
   static smart_objects::SmartObjectSPtr CreateMessageForHMI(
       hmi_apis::messageType::eType message_type, const uint32_t correlation_id);
+
+  static smart_objects::SmartObject CreateAppServiceCapabilities(
+      std::vector<smart_objects::SmartObject>& all_services);
+
+  static void BroadcastCapabilityUpdate(smart_objects::SmartObject& msg_params,
+                                        ApplicationManager& app_mngr);
 
  private:
   /**

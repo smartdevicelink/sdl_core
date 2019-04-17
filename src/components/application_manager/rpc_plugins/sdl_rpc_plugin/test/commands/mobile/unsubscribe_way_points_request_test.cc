@@ -122,9 +122,16 @@ TEST_F(UnsubscribeWayPointsRequestTest, Run_AppSubscribedForWayPoints_SUCCESS) {
                   ::testing::Matcher<am::ApplicationSharedPtr>(mock_app)))
       .WillOnce(Return(true));
 
+  const std::set<uint32_t> subscribed_apps{kConnectionKey};
+
+  EXPECT_CALL(app_mngr_, GetAppsSubscribedForWayPoints())
+      .WillOnce(Return(subscribed_apps));
+
   EXPECT_CALL(mock_rpc_service_,
-              ManageHMICommand(HMIResultCodeIs(
-                  hmi_apis::FunctionID::Navigation_UnsubscribeWayPoints)));
+              ManageHMICommand(
+                  HMIResultCodeIs(
+                      hmi_apis::FunctionID::Navigation_UnsubscribeWayPoints),
+                  _));
 
   command_->Run();
 }

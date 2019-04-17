@@ -51,6 +51,7 @@
 #include "application_manager/hmi_interfaces.h"
 #include "policy/policy_types.h"
 #include "application_manager/plugin_manager/rpc_plugin_manager.h"
+
 namespace resumption {
 class LastState;
 }
@@ -89,6 +90,7 @@ class RPCHandler;
 }
 
 class Application;
+class AppServiceManager;
 class StateControllerImpl;
 struct CommandParametersPermissions;
 using policy::RPCParams;
@@ -152,6 +154,8 @@ class ApplicationManager {
       connection_handler::ConnectionHandler* handler) = 0;
 
   virtual DataAccessor<ApplicationSet> applications() const = 0;
+  virtual DataAccessor<AppsWaitRegistrationSet> pending_applications()
+      const = 0;
 
   virtual ApplicationSharedPtr application(uint32_t app_id) const = 0;
   virtual ApplicationSharedPtr active_application() const = 0;
@@ -165,6 +169,12 @@ class ApplicationManager {
       uint32_t hmi_app_id) const = 0;
 
   virtual ApplicationSharedPtr application_by_policy_id(
+      const std::string& policy_app_id) const = 0;
+
+  virtual ApplicationSharedPtr application_by_name(
+      const std::string& app_name) const = 0;
+
+  virtual ApplicationSharedPtr pending_application_by_policy_id(
       const std::string& policy_app_id) const = 0;
 
   virtual AppSharedPtrs applications_by_button(uint32_t button) = 0;
@@ -187,6 +197,8 @@ class ApplicationManager {
       const std::string& policy_app_id) const = 0;
 
   virtual plugin_manager::RPCPluginManager& GetPluginManager() = 0;
+
+  virtual AppServiceManager& GetAppServiceManager() = 0;
 
 #ifdef BUILD_TESTS
   virtual void SetPluginManager(
@@ -282,6 +294,9 @@ class ApplicationManager {
    * @param application contains registered application.
    */
   virtual void SendDriverDistractionState(ApplicationSharedPtr application) = 0;
+
+  virtual void SendGetIconUrlNotifications(
+      const uint32_t connection_key, ApplicationSharedPtr application) = 0;
 
   /**
    * @brief Checks if Application is subscribed for way points
@@ -394,6 +409,7 @@ class ApplicationManager {
   virtual bool is_stopping() const = 0;
   virtual bool is_audio_pass_thru_active() const = 0;
 
+  virtual uint32_t GetNextMobileCorrelationID() = 0;
   virtual uint32_t GetNextHMICorrelationID() = 0;
   virtual uint32_t GenerateNewHMIAppID() = 0;
 
@@ -426,6 +442,22 @@ class ApplicationManager {
   virtual void ConnectToDevice(const std::string& device_mac) = 0;
 
   virtual void OnHMIStartedCooperation() = 0;
+
+  virtual void DisconnectCloudApp(ApplicationSharedPtr app) = 0;
+
+  virtual void RefreshCloudAppInformation() = 0;
+
+  virtual std::string PolicyIDByIconUrl(const std::string url) = 0;
+
+  virtual void SetIconFileFromSystemRequest(const std::string policy_id) = 0;
+
+  /**
+   * @brief Retrieve the current connection status of a cloud app
+   * @param app A cloud application
+   * @return The current CloudConnectionStatus of app
+   */
+  virtual hmi_apis::Common_CloudConnectionStatus::eType
+  GetCloudAppConnectionStatus(ApplicationConstSharedPtr app) const = 0;
 
   virtual bool IsHMICooperating() const = 0;
   /**
@@ -545,6 +577,9 @@ class ApplicationManager {
   virtual void updateRequestTimeout(uint32_t connection_key,
                                     uint32_t mobile_correlation_id,
                                     uint32_t new_timeout_value) = 0;
+
+  virtual void IncreaseForwardedRequestTimeout(
+      uint32_t connection_key, uint32_t mobile_correlation_id) = 0;
 
   virtual StateController& state_controller() = 0;
 

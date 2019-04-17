@@ -40,7 +40,7 @@
 #include "utils/threads/thread_delegate.h"
 #include "telemetry_monitor/metric_wrapper.h"
 #include "telemetry_monitor/application_manager_observer.h"
-#include "application_manager/application_manager_impl.h"
+#include "application_manager/application_manager.h"
 #include "telemetry_monitor/transport_manager_observer.h"
 #include "transport_manager/transport_manager_impl.h"
 #include "protocol_handler_observer.h"

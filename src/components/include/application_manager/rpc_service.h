@@ -58,7 +58,9 @@ class RPCService {
    * @param message pointer to received message
    * @return true if command is executed, otherwise return false
    */
-  virtual bool ManageHMICommand(const commands::MessageSharedPtr message) = 0;
+  virtual bool ManageHMICommand(const commands::MessageSharedPtr message,
+                                commands::Command::CommandSource
+                                    source = commands::Command::SOURCE_HMI) = 0;
 
   /**
    * @brief SendMessageToMobile Put message to the queue to be sent to mobile.
@@ -73,6 +75,17 @@ class RPCService {
    * @param message pointer to message to send
    */
   virtual void SendMessageToHMI(const commands::MessageSharedPtr message) = 0;
+
+  /**
+   * @brief Check if RPC with function_id can be handled by app services(related
+   * to app services or handled by app services plugin)
+   * @param function_id RPC function id
+   * @param source RPC command source
+   * @param rpc_passing Reference to bool. Set to true to enable rpc pasing
+   * @return true if App Services can handle RPC
+   */
+  virtual bool IsAppServiceRPC(int32_t function_id,
+                               commands::Command::CommandSource source) = 0;
 
   /**
    * @brief set_protocol_handler

@@ -88,6 +88,10 @@ class TransportAdapterController {
    */
   virtual DeviceSptr FindDevice(const DeviceUID& device_handle) const = 0;
 
+  virtual ConnectionSPtr FindPendingConnection(
+      const DeviceUID& device_handle,
+      const ApplicationHandle& app_handle) const = 0;
+
   /**
    * @brief Create connection and fill its parameters.
    *
@@ -98,6 +102,16 @@ class TransportAdapterController {
   virtual void ConnectionCreated(ConnectionSPtr connection,
                                  const DeviceUID& device_handle,
                                  const ApplicationHandle& app_handle) = 0;
+
+  /**
+   * @brief Set state of specified connection - PENDING and launch
+   *OnConnectPending event in device adapter listener.
+   *
+   * @param devcie_handle Device unique identifier.
+   * @param app_handle Handle of application.
+   */
+  virtual void ConnectPending(const DeviceUID& device_handle,
+                              const ApplicationHandle& app_handle) = 0;
 
   /**
    * @brief Make state of specified connection - ESTABLISHED and launch

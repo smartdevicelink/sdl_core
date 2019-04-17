@@ -399,7 +399,13 @@ bool ResumeCtrlImpl::StartResumption(ApplicationSharedPtr application,
                           << " hmi_app_id = " << application->hmi_app_id()
                           << " policy_id = " << application->policy_app_id()
                           << " received hash = " << hash);
-  SetupDefaultHMILevel(application);
+  if (!application->is_cloud_app()) {
+    // Default HMI Level is already set before resumption in
+    // ApplicationManager::OnApplicationRegistered, and handling low bandwidth
+    // transports doesn't apply to cloud apps, so this step can be skipped for
+    // such apps
+    SetupDefaultHMILevel(application);
+  }
   smart_objects::SmartObject saved_app;
   const std::string& device_mac = application->mac_address();
   bool result = resumption_storage_->GetSavedApplication(
@@ -426,7 +432,13 @@ bool ResumeCtrlImpl::StartResumptionOnlyHMILevel(
                     << application->app_id() << "with hmi_app_id "
                     << application->hmi_app_id() << ", policy_app_id "
                     << application->policy_app_id());
-  SetupDefaultHMILevel(application);
+  if (!application->is_cloud_app()) {
+    // Default HMI Level is already set before resumption in
+    // ApplicationManager::OnApplicationRegistered, and handling low bandwidth
+    // transports doesn't apply to cloud apps, so this step can be skipped for
+    // such apps
+    SetupDefaultHMILevel(application);
+  }
   const std::string& device_mac = application->mac_address();
   smart_objects::SmartObject saved_app;
   bool result = resumption_storage_->GetSavedApplication(

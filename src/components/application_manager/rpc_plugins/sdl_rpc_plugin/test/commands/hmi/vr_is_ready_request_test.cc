@@ -98,7 +98,7 @@ class VRIsReadyRequestTest
                 CreateModuleInfoSO(hmi_apis::FunctionID::VR_GetLanguage, _))
         .WillOnce(Return(language));
     EXPECT_CALL(mock_hmi_capabilities_, set_handle_response_for(*language));
-    EXPECT_CALL(mock_rpc_service_, ManageHMICommand(language));
+    EXPECT_CALL(mock_rpc_service_, ManageHMICommand(language, _));
 
     smart_objects::SmartObjectSPtr support_language(
         new smart_objects::SmartObject(smart_objects::SmartType_Map));
@@ -106,14 +106,14 @@ class VRIsReadyRequestTest
         mock_message_helper_,
         CreateModuleInfoSO(hmi_apis::FunctionID::VR_GetSupportedLanguages, _))
         .WillOnce(Return(support_language));
-    EXPECT_CALL(mock_rpc_service_, ManageHMICommand(support_language));
+    EXPECT_CALL(mock_rpc_service_, ManageHMICommand(support_language, _));
 
     smart_objects::SmartObjectSPtr capabilities(
         new smart_objects::SmartObject(smart_objects::SmartType_Map));
     EXPECT_CALL(mock_message_helper_,
                 CreateModuleInfoSO(hmi_apis::FunctionID::VR_GetCapabilities, _))
         .WillOnce(Return(capabilities));
-    EXPECT_CALL(mock_rpc_service_, ManageHMICommand(capabilities));
+    EXPECT_CALL(mock_rpc_service_, ManageHMICommand(capabilities, _));
   }
 
   void PrepareEvent(bool is_message_contain_param,

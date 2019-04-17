@@ -80,6 +80,16 @@ class ConnectionHandler {
       connection_handler::DeviceHandle device_handle) = 0;
 
   /**
+   * @brief Retrieves the connection status of a given device
+   *
+   * @param device_handle Handle of device to query
+   *
+   * @return The connection status of the given device
+   */
+  virtual transport_manager::ConnectionStatus GetConnectionStatus(
+      const DeviceHandle& device_handle) const = 0;
+
+  /**
    * @brief RunAppOnDevice allows to run specific application on the certain
    *device.
    *
@@ -92,6 +102,13 @@ class ConnectionHandler {
                               const std::string& bundle_id) const = 0;
 
   virtual void ConnectToAllDevices() = 0;
+
+  virtual void AddCloudAppDevice(
+      const std::string& policy_app_id,
+      const transport_manager::transport_adapter::CloudAppProperties&
+          cloud_properties) = 0;
+
+  virtual void RemoveCloudAppDevice(const DeviceHandle device_id) = 0;
 
   /**
    * @brief  Close the connection revoked by Policy
@@ -110,6 +127,15 @@ class ConnectionHandler {
    * \param connection_key pair of connection handle and session id
    */
   virtual uint32_t GetConnectionSessionsCount(uint32_t connection_key) = 0;
+
+  /**
+   * @brief Get cloud app id by connection id
+   * @param connection_id unique connection id
+   * @return the policy app id of the cloud app if the connection is tied to a
+   * cloud app, an empty string otherwise.
+   */
+  virtual std::string GetCloudAppID(
+      const transport_manager::ConnectionUID connection_id) const = 0;
 
   /**
    * Gets device id by mac address

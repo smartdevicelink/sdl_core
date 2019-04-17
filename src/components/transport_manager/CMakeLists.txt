@@ -41,6 +41,7 @@ include_directories (
   ${POLICY_GLOBAL_INCLUDE_PATH}/
   ${JSONCPP_INCLUDE_DIRECTORY}
   ${LOG4CXX_INCLUDE_DIRECTORY}
+  ${BOOST_INCLUDE_DIR}
 )
 
 if (CMAKE_SYSTEM_NAME STREQUAL "QNX")
@@ -70,6 +71,11 @@ else()
     ${COMPONENTS_DIR}/transport_manager/include/transport_manager/bluetooth
     ${COMPONENTS_DIR}/transport_manager/src/bluetooth
   )
+endif()
+
+if(BUILD_CLOUD_APP_SUPPORT)
+  GET_PROPERTY(BOOST_LIBS_DIRECTORY GLOBAL PROPERTY GLOBAL_BOOST_LIBS)
+  list(APPEND LIBRARIES boost_system boost_regex -L${BOOST_LIBS_DIRECTORY})
 endif()
 
 if(BUILD_USB_SUPPORT)
@@ -129,3 +135,4 @@ endif()
 if(BUILD_TESTS)
   add_subdirectory(test)
 endif()
+

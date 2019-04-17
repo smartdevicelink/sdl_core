@@ -164,6 +164,8 @@ class MockMessageHelper {
                     ApplicationManager& app_mngr));
   MOCK_METHOD1(CommonLanguageFromString,
                hmi_apis::Common_Language::eType(const std::string& language));
+  MOCK_METHOD1(CommonLightNameFromString,
+               hmi_apis::Common_LightName::eType(const std::string& lightName));
   MOCK_METHOD1(CommonLanguageToString,
                std::string(hmi_apis::Common_Language::eType));
   MOCK_METHOD2(CreateModuleInfoSO,
@@ -307,6 +309,12 @@ class MockMessageHelper {
   MOCK_METHOD3(SendUnsubscribeButtonNotification,
                void(mobile_apis::ButtonName::eType button,
                     ApplicationSharedPtr application,
+                    ApplicationManager& app_mngr));
+  MOCK_METHOD1(CreateAppServiceCapabilities,
+               smart_objects::SmartObject(
+                   std::vector<smart_objects::SmartObject>& all_services));
+  MOCK_METHOD2(BroadcastCapabilityUpdate,
+               void(smart_objects::SmartObject& msg_params,
                     ApplicationManager& app_mngr));
 
   static MockMessageHelper* message_helper_mock();

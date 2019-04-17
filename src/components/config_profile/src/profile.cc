@@ -81,6 +81,7 @@ const char* kMediaManagerSection = "MEDIA MANAGER";
 const char* kGlobalPropertiesSection = "GLOBAL PROPERTIES";
 const char* kVrCommandsSection = "VR COMMANDS";
 const char* kTransportManagerSection = "TransportManager";
+const char* kCloudAppTransportSection = "CloudAppConnections";
 const char* kApplicationManagerSection = "ApplicationManager";
 const char* kFilesystemRestrictionsSection = "FILESYSTEM RESTRICTIONS";
 const char* kIAPSection = "IAP";
@@ -95,6 +96,7 @@ const char* kTransportRequiredForResumptionSection =
     "TransportRequiredForResumption";
 const char* kLowBandwidthTransportResumptionLevelSection =
     "LowBandwidthTransportResumptionLevel";
+const char* kAppServicesSection = "AppServices";
 
 const char* kSDLVersionKey = "SDLVersion";
 const char* kHmiCapabilitiesKey = "HMICapabilities";
@@ -154,6 +156,8 @@ const char* kMaxSupportedProtocolVersionKey = "MaxSupportedProtocolVersion";
 const char* kUseLastStateKey = "UseLastState";
 const char* kTCPAdapterPortKey = "TCPAdapterPort";
 const char* kTCPAdapterNetworkInterfaceKey = "TCPAdapterNetworkInterface";
+const char* kCloudAppRetryTimeoutKey = "CloudAppRetryTimeout";
+const char* kCloudAppMaxRetryAttemptsKey = "CloudAppMaxRetryAttempts";
 const char* kServerPortKey = "ServerPort";
 const char* kVideoStreamingPortKey = "VideoStreamingPort";
 const char* kAudioStreamingPortKey = "AudioStreamingPort";
@@ -235,6 +239,7 @@ const char* kSecondaryTransportForUSBKey = "SecondaryTransportForUSB";
 const char* kSecondaryTransportForWiFiKey = "SecondaryTransportForWiFi";
 const char* kAudioServiceTransportsKey = "AudioServiceTransports";
 const char* kVideoServiceTransportsKey = "VideoServiceTransports";
+const char* kRpcPassThroughTimeoutKey = "RpcPassThroughTimeout";
 
 const char* kDefaultTransportRequiredForResumptionKey =
     "DefaultTransportRequiredForResumption";
@@ -281,6 +286,8 @@ const char* kProjectionLowBandwidthResumptionLevelKey =
     "ProjectionLowBandwidthResumptionLevel";
 const char* kMediaLowBandwidthResumptionLevelKey =
     "MediaLowBandwidthResumptionLevel";
+const char* kHMIOriginIDKey = "HMIOriginID";
+const char* kEmbeddedServicesKey = "EmbeddedServices";
 
 #ifdef WEB_HMI
 const char* kDefaultLinkToWebHMI = "HMI/index.html";
@@ -318,6 +325,8 @@ const uint32_t kDefaultHubProtocolIndex = 0;
 const uint32_t kDefaultHeartBeatTimeout = 0;
 const uint16_t kDefaultMaxSupportedProtocolVersion = 5;
 const uint16_t kDefautTransportManagerTCPPort = 12345;
+const uint16_t kDefaultCloudAppRetryTimeout = 1000;
+const uint16_t kDefaultCloudAppMaxRetryAttempts = 5;
 const uint16_t kDefaultServerPort = 8087;
 const uint16_t kDefaultVideoStreamingPort = 5050;
 const uint16_t kDefaultAudioStreamingPort = 5080;
@@ -386,6 +395,8 @@ const std::string kAllowedSymbols =
     "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ01234567890_.-";
 const bool kDefaultMultipleTransportsEnabled = false;
 const char* kDefaultLowBandwidthResumptionLevel = "NONE";
+const uint32_t kDefaultRpcPassThroughTimeout = 10000;
+const char* kDefaultHMIOriginId = "HMI_ID";
 }  // namespace
 
 namespace profile {
@@ -452,6 +463,8 @@ Profile::Profile()
     , supported_diag_modes_()
     , system_files_path_(kDefaultSystemFilesPath)
     , transport_manager_tcp_adapter_port_(kDefautTransportManagerTCPPort)
+    , cloud_app_retry_timeout_(kDefaultCloudAppRetryTimeout)
+    , cloud_app_max_retry_attempts_(kDefaultCloudAppMaxRetryAttempts)
     , tts_delimiter_(kDefaultTtsDelimiter)
     , audio_data_stopped_timeout_(kDefaultAudioDataStoppedTimeout)
     , video_data_stopped_timeout_(kDefaultVideoDataStoppedTimeout)
@@ -499,7 +512,8 @@ Profile::Profile()
     , error_description_()
     , low_voltage_signal_offset_(kDefaultLowVoltageSignalOffset)
     , wake_up_signal_offset_(kDefaultWakeUpSignalOffset)
-    , ignition_off_signal_offset_(kDefaultIgnitionOffSignalOffset) {
+    , ignition_off_signal_offset_(kDefaultIgnitionOffSignalOffset)
+    , rpc_pass_through_timeout_(kDefaultRpcPassThroughTimeout) {
   // SDL version
   ReadStringValue(
       &sdl_version_, kDefaultSDLVersion, kMainSection, kSDLVersionKey);
@@ -784,6 +798,14 @@ const std::string& Profile::transport_manager_tcp_adapter_network_interface()
   return transport_manager_tcp_adapter_network_interface_;
 }
 
+uint32_t Profile::cloud_app_retry_timeout() const {
+  return cloud_app_retry_timeout_;
+}
+
+uint16_t Profile::cloud_app_max_retry_attempts() const {
+  return cloud_app_max_retry_attempts_;
+}
+
 const std::string& Profile::tts_delimiter() const {
   return tts_delimiter_;
 }
@@ -1063,6 +1085,10 @@ const bool Profile::multiple_transports_enabled() const {
   return multiple_transports_enabled_;
 }
 
+uint32_t Profile::rpc_pass_through_timeout() const {
+  return rpc_pass_through_timeout_;
+}
+
 const std::vector<std::string>& Profile::secondary_transports_for_bluetooth()
     const {
   return secondary_transports_for_bluetooth_;
@@ -1097,6 +1123,14 @@ bool Profile::IsFileNamePortable(const std::string& file_name) const {
     return false;
   }
   return true;
+}
+
+const std::vector<std::string>& Profile::embedded_services() const {
+  return embedded_services_;
+}
+
+const std::string Profile::hmi_origin_id() const {
+  return hmi_origin_id_;
 }
 
 void Profile::UpdateValues() {
@@ -1769,6 +1803,24 @@ void Profile::UpdateValues() {
                     kTCPAdapterNetworkInterfaceKey,
                     kTransportManagerSection);
 
+  ReadUIntValue(&cloud_app_retry_timeout_,
+                kDefaultCloudAppRetryTimeout,
+                kCloudAppTransportSection,
+                kCloudAppRetryTimeoutKey);
+
+  LOG_UPDATED_VALUE(cloud_app_retry_timeout_,
+                    kCloudAppRetryTimeoutKey,
+                    kCloudAppTransportSection);
+
+  ReadUIntValue(&cloud_app_max_retry_attempts_,
+                kDefaultCloudAppMaxRetryAttempts,
+                kCloudAppTransportSection,
+                kCloudAppMaxRetryAttemptsKey);
+
+  LOG_UPDATED_VALUE(cloud_app_max_retry_attempts_,
+                    kCloudAppMaxRetryAttemptsKey,
+                    kCloudAppTransportSection);
+
   // Event MQ
   ReadStringValue(
       &event_mq_name_, kDefaultEventMQ, kTransportManagerSection, kEventMQKey);
@@ -2202,6 +2254,15 @@ void Profile::UpdateValues() {
                          kMultipleTransportsEnabledKey,
                          kMultipleTransportsSection);
 
+  ReadUIntValue(&rpc_pass_through_timeout_,
+                kDefaultRpcPassThroughTimeout,
+                kAppServicesSection,
+                kRpcPassThroughTimeoutKey);
+
+  LOG_UPDATED_VALUE(rpc_pass_through_timeout_,
+                    kRpcPassThroughTimeoutKey,
+                    kAppServicesSection);
+
   {  // Secondary Transports and ServicesMap
     struct KeyPair {
       std::vector<std::string>* ini_vector;
@@ -2223,6 +2284,44 @@ void Profile::UpdateValues() {
                  kServicesMapSection,
                  kVideoServiceTransportsKey},
                 {NULL, NULL, NULL}};
+    struct KeyPair* entry = keys;
+
+    while (entry->ini_vector != NULL) {
+      bool exist = false;
+      std::vector<std::string> profile_entry = ReadStringContainer(
+          entry->ini_section_name, entry->ini_key_name, &exist, true);
+      if (exist) {
+        *entry->ini_vector = profile_entry;
+
+        const std::string list_with_comma = std::accumulate(
+            profile_entry.begin(),
+            profile_entry.end(),
+            std::string(""),
+            [](std::string& first, std::string& second) {
+              return first.empty() ? second : first + ", " + second;
+            });
+        LOG_UPDATED_VALUE(
+            list_with_comma, entry->ini_key_name, entry->ini_section_name);
+      }
+      entry++;
+    }
+  }
+
+  ReadStringValue(&hmi_origin_id_,
+                  kDefaultHMIOriginId,
+                  kAppServicesSection,
+                  kHMIOriginIDKey);
+
+  LOG_UPDATED_VALUE(hmi_origin_id_, kHMIOriginIDKey, kAppServicesSection);
+
+  {  // App Services map
+    struct KeyPair {
+      std::vector<std::string>* ini_vector;
+      const char* ini_section_name;
+      const char* ini_key_name;
+    } keys[] = {
+        {&embedded_services_, kAppServicesSection, kEmbeddedServicesKey},
+        {NULL, NULL, NULL}};
     struct KeyPair* entry = keys;
 
     while (entry->ini_vector != NULL) {

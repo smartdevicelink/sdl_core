@@ -149,9 +149,10 @@ TEST_F(UnsubscribeVehicleRequestTest,
       .WillOnce(Return(mock_app_));
 
   EXPECT_CALL(mock_rpc_service_,
-              ManageHMICommand(HMIResultCodeIs(
-                  hmi_apis::FunctionID::VehicleInfo_UnsubscribeVehicleData)))
-      .WillOnce(Return(true));
+              ManageHMICommand(
+                  HMIResultCodeIs(
+                      hmi_apis::FunctionID::VehicleInfo_UnsubscribeVehicleData),
+                  _)).WillOnce(Return(true));
   vehicle_info_plugin::VehicleInfoAppExtension* vi_app_extension =
       dynamic_cast<vehicle_info_plugin::VehicleInfoAppExtension*>(
           vi_app_extension_ptr_.get());

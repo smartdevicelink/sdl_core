@@ -10,9 +10,10 @@ namespace application_manager_test {
 
 class MockRPCService : public application_manager::rpc_service::RPCService {
  public:
-  MOCK_METHOD1(
+  MOCK_METHOD2(
       ManageHMICommand,
-      bool(const application_manager::commands::MessageSharedPtr message));
+      bool(const application_manager::commands::MessageSharedPtr message,
+           application_manager::commands::Command::CommandSource source));
   MOCK_METHOD2(
       ManageMobileCommand,
       bool(const application_manager::commands::MessageSharedPtr message,
@@ -26,6 +27,10 @@ class MockRPCService : public application_manager::rpc_service::RPCService {
                void(protocol_handler::ProtocolHandler* handler));
   MOCK_METHOD1(set_hmi_message_handler,
                void(hmi_message_handler::HMIMessageHandler* handler));
+  MOCK_METHOD2(
+      IsAppServiceRPC,
+      bool(int32_t function_id,
+           application_manager::commands::Command::CommandSource source));
 };
 }
 }

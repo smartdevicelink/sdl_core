@@ -141,9 +141,11 @@ TEST_F(DiagnosticMessageRequestTest, Run_SUCCESS) {
   EXPECT_CALL(app_mngr_settings_, supported_diag_modes())
       .WillOnce(ReturnRef(supported_diag_modes));
 
-  EXPECT_CALL(mock_rpc_service_,
-              ManageHMICommand(HMIResultCodeIs(
-                  hmi_apis::FunctionID::VehicleInfo_DiagnosticMessage)));
+  EXPECT_CALL(
+      mock_rpc_service_,
+      ManageHMICommand(
+          HMIResultCodeIs(hmi_apis::FunctionID::VehicleInfo_DiagnosticMessage),
+          _));
 
   command->Run();
 }
