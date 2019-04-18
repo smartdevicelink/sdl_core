@@ -103,6 +103,7 @@ class MockPolicyListener : public ::policy::PolicyListener {
                void(const std::string& device_id,
                     const std::string& policy_app_id,
                     const std::string& hmi_level));
+  MOCK_METHOD0(OnLockScreenDismissalStateChanged, void());
 };
 
 }  // namespace policy_test
