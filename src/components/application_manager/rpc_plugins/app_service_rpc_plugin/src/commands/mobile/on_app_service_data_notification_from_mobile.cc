@@ -31,6 +31,7 @@
  */
 
 #include "app_service_rpc_plugin/commands/mobile/on_app_service_data_notification_from_mobile.h"
+#include "application_manager/app_service_manager.h"
 #include "application_manager/application_impl.h"
 #include "application_manager/message_helper.h"
 #include "application_manager/rpc_service.h"
@@ -60,11 +61,13 @@ void OnAppServiceDataNotificationFromMobile::Run() {
   LOG4CXX_DEBUG(logger_, "Received an OnAppServiceData");
   MessageHelper::PrintSmartObject(*message_);
 
+  uint32_t app_connection_key = connection_key();
   std::string service_type =
       (*message_)[strings::msg_params][strings::service_data]
                  [strings::service_type].asString();
 
-  ApplicationSharedPtr app = application_manager_.application(connection_key());
+  ApplicationSharedPtr app =
+      application_manager_.application(app_connection_key);
 
   bool result = policy_handler_.CheckAppServiceParameters(
       app->policy_app_id(), std::string(), service_type, NULL);
@@ -73,6 +76,36 @@ void OnAppServiceDataNotificationFromMobile::Run() {
     LOG4CXX_DEBUG(logger_,
                   "Incorrect service type received in "
                   "OnAppServiceDataNotificationFromMobile");
+    return;
+  }
+
+  std::string service_id =
+      (*message_)[strings::msg_params][strings::service_data]
+                 [strings::service_id].asString();
+  AppService* service =
+      application_manager_.GetAppServiceManager().FindServiceByID(service_id);
+  if (!service) {
+    LOG4CXX_DEBUG(
+        logger_, "No published services exist with service ID: " << service_id);
+    return;
+  } else if (!service->mobile_service ||
+             service->connection_key != app_connection_key) {
+    LOG4CXX_DEBUG(logger_, "Service was not published by this application");
+    return;
+  } else if (!service->record[strings::service_active].asBool()) {
+    LOG4CXX_DEBUG(logger_, "Service is not active");
+    return;
+  }
+
+  std::string published_service_type =
+      service->record[strings::service_manifest][strings::service_type]
+          .asString();
+  if (published_service_type != service_type) {
+    LOG4CXX_DEBUG(logger_,
+                  "Service type mismatch, expected "
+                      << service_type
+                      << ", but service was published with type "
+                      << published_service_type);
     return;
   }
 
