@@ -70,6 +70,15 @@ smart_objects::SmartObject AppServiceManager::PublishAppService(
   std::string str_to_hash = "";
   std::string service_id = "";
 
+  std::string service_type = manifest[strings::service_type].asString();
+
+  AppService* existing_service =
+      FindServiceByProvider(connection_key, service_type);
+  if (existing_service) {
+    LOG4CXX_DEBUG(logger_, "Service already exists, rejecting");
+    return smart_objects::SmartObject();
+  }
+
   published_services_lock_.Acquire();
   do {
     str_to_hash = manifest[strings::service_type].asString() +
@@ -87,8 +96,6 @@ smart_objects::SmartObject AppServiceManager::PublishAppService(
   service_record[strings::service_published] = true;
   service_record[strings::service_active] = false;
   app_service.record = service_record;
-
-  std::string service_type = manifest[strings::service_type].asString();
 
   std::string default_app_id = DefaultServiceByType(service_type);
   if (default_app_id.empty() && !mobile_service) {
@@ -378,7 +385,7 @@ bool AppServiceManager::DeactivateAppService(const std::string service_id) {
     auto embedded_service = EmbeddedServiceForType(service_type);
     if (embedded_service &&
         embedded_service->record[strings::service_id].asString() !=
-            service[strings::service_id].asString()) {
+            service_id) {
       embedded_service->record[strings::service_active] = true;
       AppServiceUpdated(embedded_service->record,
                         mobile_apis::ServiceUpdateReason::ACTIVATED,
@@ -454,6 +461,22 @@ AppService* AppServiceManager::FindServiceByID(const std::string service_id) {
     return NULL;
   }
   return &(it->second);
+}
+
+AppService* AppServiceManager::FindServiceByProvider(
+    const uint32_t connection_key, const std::string service_type) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  sync_primitives::AutoLock lock(published_services_lock_);
+
+  for (auto it = published_services_.begin(); it != published_services_.end();
+       ++it) {
+    if (it->second.connection_key == connection_key &&
+        it->second.record[strings::service_manifest][strings::service_type]
+                .asString() == service_type) {
+      return &(it->second);
+    }
+  }
+  return NULL;
 }
 
 std::string AppServiceManager::DefaultServiceByType(

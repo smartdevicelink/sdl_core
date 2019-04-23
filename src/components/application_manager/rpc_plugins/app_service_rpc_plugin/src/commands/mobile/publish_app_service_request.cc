@@ -99,8 +99,7 @@ void PublishAppServiceRequest::Run() {
   if (!result) {
     SendResponse(false,
                  mobile_apis::Result::DISALLOWED,
-                 "Service disallowed by policies",
-                 NULL);
+                 "Service disallowed by policies");
     return;
   }
 
@@ -111,6 +110,13 @@ void PublishAppServiceRequest::Run() {
   smart_objects::SmartObject service_record =
       application_manager_.GetAppServiceManager().PublishAppService(
           manifest, true, connection_key());
+
+  if (smart_objects::SmartType_Map != service_record.getType()) {
+    SendResponse(
+        false, mobile_apis::Result::REJECTED, "Failed to publish service");
+    return;
+  }
+
   if (app->IsFullscreen()) {
     // Service should be activated if app is in the foreground
     application_manager_.GetAppServiceManager().ActivateAppService(

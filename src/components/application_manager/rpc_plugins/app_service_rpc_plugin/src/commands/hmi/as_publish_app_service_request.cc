@@ -63,13 +63,23 @@ void ASPublishAppServiceRequest::Run() {
   smart_objects::SmartObject service_record =
       application_manager_.GetAppServiceManager().PublishAppService(manifest,
                                                                     false);
+  if (smart_objects::SmartType_Map != service_record.getType()) {
+    SendErrorResponse(
+        (*message_)[strings::params][strings::correlation_id].asUInt(),
+        hmi_apis::FunctionID::AppService_PublishAppService,
+        hmi_apis::Common_Result::REJECTED,
+        "Failed to publish service",
+        application_manager::commands::Command::SOURCE_SDL_TO_HMI);
+    return;
+  }
 
   response_params[strings::app_service_record] = service_record;
   SendResponse(true,
                (*message_)[strings::params][strings::correlation_id].asUInt(),
                hmi_apis::FunctionID::AppService_PublishAppService,
                hmi_apis::Common_Result::SUCCESS,
-               &response_params);
+               &response_params,
+               application_manager::commands::Command::SOURCE_SDL_TO_HMI);
 }
 
 }  // namespace commands
