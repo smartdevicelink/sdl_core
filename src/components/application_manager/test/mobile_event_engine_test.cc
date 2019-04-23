@@ -109,10 +109,9 @@ class MobileEventEngineTest : public testing::Test {
     delete event_;
   }
 
-  void CheckRaiseMobileEvent(
-      const MobileEvent::MobileEventID& event_id,
-      const uint32_t calls_number,
-      const smart_objects::SmartObject& so) {
+  void CheckRaiseMobileEvent(const MobileEvent::MobileEventID& event_id,
+                             const uint32_t calls_number,
+                             const smart_objects::SmartObject& so) {
     // Arrange
     event_dispatcher_instance_->add_mobile_observer(
         event_id, correlation_id, event_observer_mock_);
