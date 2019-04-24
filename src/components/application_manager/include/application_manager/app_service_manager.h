@@ -257,6 +257,7 @@ class AppServiceManager {
    */
   AppService* FindServiceByProvider(const uint32_t connection_key,
                                     const std::string service_type);
+  AppService* FindServiceByName(std::string name);
   std::string GetPolicyAppID(AppService service);
 };
 

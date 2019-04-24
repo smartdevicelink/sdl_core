@@ -80,6 +80,16 @@ smart_objects::SmartObject AppServiceManager::PublishAppService(
     return smart_objects::SmartObject();
   }
 
+  if (manifest.keyExists(strings::service_name)) {
+    existing_service =
+        FindServiceByName(manifest[strings::service_name].asString());
+    if (existing_service) {
+      LOG4CXX_DEBUG(logger_,
+                    "A service already exists with this name, rejecting");
+      return smart_objects::SmartObject();
+    }
+  }
+
   published_services_lock_.Acquire();
   do {
     str_to_hash = manifest[strings::service_type].asString() +
@@ -474,6 +484,19 @@ AppService* AppServiceManager::FindServiceByProvider(
     if (it->second.connection_key == connection_key &&
         it->second.record[strings::service_manifest][strings::service_type]
                 .asString() == service_type) {
+      return &(it->second);
+    }
+  }
+  return NULL;
+}
+
+AppService* AppServiceManager::FindServiceByName(std::string name) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  sync_primitives::AutoLock lock(published_services_lock_);
+  for (auto it = published_services_.begin(); it != published_services_.end();
+       ++it) {
+    if (it->second.record[strings::service_manifest][strings::service_name]
+            .asString() == name) {
       return &(it->second);
     }
   }
