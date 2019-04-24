@@ -75,7 +75,8 @@ smart_objects::SmartObject AppServiceManager::PublishAppService(
   AppService* existing_service =
       FindServiceByProvider(connection_key, service_type);
   if (existing_service) {
-    LOG4CXX_DEBUG(logger_, "Service already exists, rejecting");
+    LOG4CXX_DEBUG(logger_,
+                  "Service already exists for this provider, rejecting");
     return smart_objects::SmartObject();
   }
 

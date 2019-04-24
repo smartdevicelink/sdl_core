@@ -255,8 +255,8 @@ class AppServiceManager {
    * @param service_type - The service ID
    * @return A pointer to requested service on success, NULL on failure
    */
-  virtual AppService* FindServiceByProvider(const uint32_t connection_key,
-                                            const std::string service_type);
+  AppService* FindServiceByProvider(const uint32_t connection_key,
+                                    const std::string service_type);
   std::string GetPolicyAppID(AppService service);
 };
 
