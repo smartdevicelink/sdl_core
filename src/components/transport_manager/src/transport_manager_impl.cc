@@ -136,7 +136,7 @@ void TransportManagerImpl::AddCloudDevice(
     const transport_manager::transport_adapter::CloudAppProperties&
         cloud_properties) {
 #if !defined(CLOUD_APP_WEBSOCKET_TRANSPORT_SUPPORT)
-  LOG4CXX_TRACE(logger_,"Cloud app support is disabled. Exiting function");
+  LOG4CXX_TRACE(logger_, "Cloud app support is disabled. Exiting function");
 #else
   transport_adapter::DeviceType type = transport_adapter::DeviceType::UNKNOWN;
   if (cloud_properties.cloud_transport_type == "WS") {
@@ -167,7 +167,7 @@ void TransportManagerImpl::AddCloudDevice(
 
 void TransportManagerImpl::RemoveCloudDevice(const DeviceHandle device_handle) {
 #if !defined(CLOUD_APP_WEBSOCKET_TRANSPORT_SUPPORT)
-  LOG4CXX_TRACE(logger_,"Cloud app support is disabled. Exiting function");
+  LOG4CXX_TRACE(logger_, "Cloud app support is disabled. Exiting function");
   return;
 #endif
   DisconnectDevice(device_handle);
