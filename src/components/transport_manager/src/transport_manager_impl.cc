@@ -133,6 +133,9 @@ void TransportManagerImpl::ReconnectionTimeout() {
 void TransportManagerImpl::AddCloudDevice(
     const transport_manager::transport_adapter::CloudAppProperties&
         cloud_properties) {
+#if !defined(CLOUD_APP_WEBSOCKET_TRANSPORT_SUPPORT)
+  return;
+#endif
   transport_adapter::DeviceType type = transport_adapter::DeviceType::UNKNOWN;
   if (cloud_properties.cloud_transport_type == "WS") {
     type = transport_adapter::DeviceType::CLOUD_WEBSOCKET;
