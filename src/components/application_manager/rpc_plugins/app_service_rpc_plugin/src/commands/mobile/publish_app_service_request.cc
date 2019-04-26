@@ -111,7 +111,7 @@ void PublishAppServiceRequest::Run() {
       application_manager_.GetAppServiceManager().PublishAppService(
           manifest, true, connection_key());
 
-  if (smart_objects::SmartType_Map != service_record.getType()) {
+  if (service_record.empty()) {
     SendResponse(
         false, mobile_apis::Result::REJECTED, "Failed to publish service");
     return;

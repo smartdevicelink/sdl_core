@@ -252,7 +252,7 @@ class AppServiceManager {
   /**
    * @brief Get the service of a given type published by a given provider.
    * @param connection_key - The connection key of the service provider
-   * @param service_type - The service ID
+   * @param service_type - The service type
    * @return A pointer to requested service on success, NULL on failure
    */
   AppService* FindServiceByProvider(const uint32_t connection_key,

@@ -63,7 +63,7 @@ void ASPublishAppServiceRequest::Run() {
   smart_objects::SmartObject service_record =
       application_manager_.GetAppServiceManager().PublishAppService(manifest,
                                                                     false);
-  if (smart_objects::SmartType_Map != service_record.getType()) {
+  if (service_record.empty()) {
     SendErrorResponse(
         (*message_)[strings::params][strings::correlation_id].asUInt(),
         hmi_apis::FunctionID::AppService_PublishAppService,
