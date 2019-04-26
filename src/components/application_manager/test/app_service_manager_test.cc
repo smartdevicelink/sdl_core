@@ -120,8 +120,11 @@ class AppServiceManagerTest : public testing::Test {
   }
 
   smart_objects::SmartObject PublishService(
-      uint32_t connection_key = kConnectionKey, bool first_run = true) {
-    smart_objects::SmartObject manifest = GenerateMediaManifest(true);
+      uint32_t connection_key = kConnectionKey,
+      std::string service_name = kServiceName,
+      bool first_run = true) {
+    smart_objects::SmartObject manifest =
+        GenerateMediaManifest(true, service_name);
 
     Json::Value empty_json;
     EXPECT_CALL(mock_last_state_, get_dictionary())
@@ -326,7 +329,7 @@ TEST_F(AppServiceManagerTest, ActivateAppService_TwoApps_SUCCESS) {
   // Register two services with the same service type, the first is activated
   // automatically
   auto record = PublishService();
-  auto record2 = PublishService(kConnectionKey + 1, false);
+  auto record2 = PublishService(kConnectionKey + 1, kServiceName + "2", false);
 
   // No capability update
   smart_objects::SmartObject syscap_update_activated;
