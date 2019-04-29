@@ -687,7 +687,7 @@ void CacheManager::GetEnabledCloudApps(
 #if !defined(CLOUD_APP_WEBSOCKET_TRANSPORT_SUPPORT)
   enabled_apps.clear();
   return;
-#endif
+#else
   const policy_table::ApplicationPolicies& policies =
       pt_->policy_table.app_policies_section.apps;
   for (policy_table::ApplicationPolicies::const_iterator it = policies.begin();
@@ -698,6 +698,7 @@ void CacheManager::GetEnabledCloudApps(
       enabled_apps.push_back((*it).first);
     }
   }
+#endif  // CLOUD_APP_WEBSOCKET_TRANSPORT_SUPPORT
 }
 
 bool CacheManager::GetCloudAppParameters(

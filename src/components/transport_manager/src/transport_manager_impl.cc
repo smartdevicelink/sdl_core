@@ -161,7 +161,7 @@ void TransportManagerImpl::AddCloudDevice(
                                       cloud_properties);
     }
   }
-#endif
+#endif  // CLOUD_APP_WEBSOCKET_TRANSPORT_SUPPORT
   return;
 }
 
@@ -169,8 +169,9 @@ void TransportManagerImpl::RemoveCloudDevice(const DeviceHandle device_handle) {
 #if !defined(CLOUD_APP_WEBSOCKET_TRANSPORT_SUPPORT)
   LOG4CXX_TRACE(logger_, "Cloud app support is disabled. Exiting function");
   return;
-#endif
+#else
   DisconnectDevice(device_handle);
+#endif  // CLOUD_APP_WEBSOCKET_TRANSPORT_SUPPORT
 }
 
 int TransportManagerImpl::ConnectDevice(const DeviceHandle device_handle) {

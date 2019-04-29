@@ -1187,8 +1187,9 @@ const std::string& ApplicationImpl::cloud_app_certificate() const {
 bool ApplicationImpl::is_cloud_app() const {
 #if !defined(CLOUD_APP_WEBSOCKET_TRANSPORT_SUPPORT)
   return false;
-#endif  // CLOUD_APP_WEBSOCKET_TRANSPORT_SUPPORT
+#else
   return !endpoint_.empty();
+#endif  // CLOUD_APP_WEBSOCKET_TRANSPORT_SUPPORT
 }
 
 void ApplicationImpl::set_cloud_app_endpoint(const std::string& endpoint) {
