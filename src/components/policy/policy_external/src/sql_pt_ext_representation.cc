@@ -29,15 +29,15 @@
  ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  POSSIBILITY OF SUCH DAMAGE.
  */
+#include "policy/sql_pt_ext_representation.h"
 #include <algorithm>
 #include <utility>
-#include "utils/logger.h"
-#include "policy/sql_pt_ext_representation.h"
-#include "policy/sql_wrapper.h"
-#include "policy/sql_pt_queries.h"
-#include "policy/sql_pt_ext_queries.h"
-#include "policy/policy_helper.h"
 #include "policy/cache_manager.h"
+#include "policy/policy_helper.h"
+#include "policy/sql_pt_ext_queries.h"
+#include "policy/sql_pt_queries.h"
+#include "policy/sql_wrapper.h"
+#include "utils/logger.h"
 
 namespace policy {
 

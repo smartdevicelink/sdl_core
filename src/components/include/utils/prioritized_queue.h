@@ -33,9 +33,9 @@
 #ifndef SRC_COMPONENTS_INCLUDE_UTILS_PRIORITIZED_QUEUE_H_
 #define SRC_COMPONENTS_INCLUDE_UTILS_PRIORITIZED_QUEUE_H_
 
-#include <queue>
-#include <map>
 #include <algorithm>
+#include <map>
+#include <queue>
 
 #include "utils/macro.h"
 

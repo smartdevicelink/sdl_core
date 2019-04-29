@@ -28,15 +28,15 @@
  * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
-*/
+ */
 
 #ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_HMI_LANGUAGE_HANDLER_H_
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_HMI_LANGUAGE_HANDLER_H_
 
 #include "application_manager/event_engine/event_observer.h"
-#include "utils/lock.h"
 #include "interfaces/HMI_API.h"
 #include "smart_objects/smart_object.h"
+#include "utils/lock.h"
 
 namespace resumption {
 class LastState;
@@ -56,8 +56,8 @@ class HMILanguageHandler : public event_engine::EventObserver {
   typedef std::map<uint32_t, bool> Apps;
 
   /**
-  * @brief System interfaces
-  */
+   * @brief System interfaces
+   */
   enum Interface { INTERFACE_UI, INTERFACE_VR, INTERFACE_TTS };
 
   /**

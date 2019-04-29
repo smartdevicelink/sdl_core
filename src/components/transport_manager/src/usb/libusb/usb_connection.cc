@@ -38,8 +38,8 @@
 
 #include <sstream>
 
-#include "transport_manager/usb/libusb/usb_connection.h"
 #include "transport_manager/transport_adapter/transport_adapter_impl.h"
+#include "transport_manager/usb/libusb/usb_connection.h"
 
 #include "utils/logger.h"
 

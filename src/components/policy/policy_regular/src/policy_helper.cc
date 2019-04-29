@@ -30,13 +30,13 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "policy/policy_helper.h"
+#include <string.h>
 #include <algorithm>
 #include <sstream>
-#include <string.h>
-#include "utils/logger.h"
-#include "utils/custom_string.h"
-#include "policy/policy_helper.h"
 #include "policy/policy_manager_impl.h"
+#include "utils/custom_string.h"
+#include "utils/logger.h"
 
 namespace policy {
 
@@ -355,15 +355,15 @@ bool CheckAppPolicy::operator()(const AppPoliciesValueType& app_policy) {
     }
   }
   if (RESULT_NO_CHANGES == result) {
-    LOG4CXX_INFO(logger_,
-                 "Permissions for application:" << app_id
-                                                << " wasn't changed.");
+    LOG4CXX_INFO(
+        logger_,
+        "Permissions for application:" << app_id << " wasn't changed.");
     return true;
   }
 
-  LOG4CXX_INFO(logger_,
-               "Permissions for application:" << app_id
-                                              << " have been changed.");
+  LOG4CXX_INFO(
+      logger_,
+      "Permissions for application:" << app_id << " have been changed.");
 
   if (IsPredefinedApp(app_policy)) {
     for (const policy_table::ApplicationPolicies::value_type& app :
@@ -853,4 +853,4 @@ bool UnwrapAppPolicies(policy_table::ApplicationPolicies& app_policies) {
 
   return true;
 }
-}
+}  // namespace policy

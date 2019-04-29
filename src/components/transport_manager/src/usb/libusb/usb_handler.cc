@@ -33,14 +33,14 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <cstring>
 #include <cstdlib>
+#include <cstring>
 
-#include "transport_manager/usb/common.h"
 #include "transport_manager/transport_adapter/transport_adapter_impl.h"
+#include "transport_manager/usb/common.h"
 
-#include "utils/macro.h"
 #include "utils/logger.h"
+#include "utils/macro.h"
 #include "utils/threads/thread.h"
 
 namespace transport_manager {

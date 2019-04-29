@@ -33,22 +33,22 @@
 #include "security_manager/crypto_manager_impl.h"
 
 #include <openssl/bio.h>
-#include <openssl/ssl.h>
 #include <openssl/err.h>
 #include <openssl/pkcs12.h>
+#include <openssl/ssl.h>
 
+#include <stdio.h>
+#include <algorithm>
+#include <ctime>
 #include <fstream>
 #include <iostream>
-#include <stdio.h>
-#include <ctime>
-#include <algorithm>
 #include "security_manager/security_manager.h"
 
-#include "utils/logger.h"
 #include "utils/atomic.h"
+#include "utils/date_time.h"
+#include "utils/logger.h"
 #include "utils/macro.h"
 #include "utils/scope_guard.h"
-#include "utils/date_time.h"
 
 #define TLS1_1_MINIMAL_VERSION 0x1000103fL
 #define CONST_SSL_METHOD_MINIMAL_VERSION 0x00909000L
@@ -84,7 +84,7 @@ void free_ctx(SSL_CTX** ctx) {
     *ctx = NULL;
   }
 }
-}
+}  // namespace
 
 CryptoManagerImpl::CryptoManagerImpl(
     const std::shared_ptr<const CryptoManagerSettings> set)
@@ -156,9 +156,9 @@ bool CryptoManagerImpl::Init() {
   LOG4CXX_DEBUG(logger_,
                 "Peer verification "
                     << (get_settings().verify_peer() ? "enabled" : "disabled"));
-  LOG4CXX_DEBUG(logger_,
-                "CA certificate file is \"" << get_settings().ca_cert_path()
-                                            << '"');
+  LOG4CXX_DEBUG(
+      logger_,
+      "CA certificate file is \"" << get_settings().ca_cert_path() << '"');
 
 #if OPENSSL_VERSION_NUMBER < CONST_SSL_METHOD_MINIMAL_VERSION
   SSL_METHOD* method;
@@ -387,9 +387,9 @@ bool CryptoManagerImpl::SaveCertificateData(
   UNUSED(cert_guard);
 
   if (1 != BIO_reset(bio_cert)) {
-    LOG4CXX_WARN(logger_,
-                 "Unabled to reset BIO in order to read private key, "
-                     << LastError());
+    LOG4CXX_WARN(
+        logger_,
+        "Unabled to reset BIO in order to read private key, " << LastError());
   }
 
   EVP_PKEY* pkey = NULL;

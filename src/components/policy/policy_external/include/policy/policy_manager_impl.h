@@ -35,15 +35,15 @@
 
 #include <list>
 
-#include "utils/lock.h"
-#include "policy/policy_manager.h"
-#include "policy/policy_table.h"
-#include "policy/cache_manager_interface.h"
-#include "policy/update_status_manager.h"
-#include "policy/policy_table/functions.h"
-#include "policy/usage_statistics/statistics_manager.h"
 #include "policy/access_remote.h"
 #include "policy/access_remote_impl.h"
+#include "policy/cache_manager_interface.h"
+#include "policy/policy_manager.h"
+#include "policy/policy_table.h"
+#include "policy/policy_table/functions.h"
+#include "policy/update_status_manager.h"
+#include "policy/usage_statistics/statistics_manager.h"
+#include "utils/lock.h"
 
 namespace policy_table = rpc::policy_table_interface_base;
 
@@ -542,10 +542,10 @@ class PolicyManagerImpl : public PolicyManager {
   void OnAppsSearchCompleted(const bool trigger_ptu) OVERRIDE;
 
   /**
-    * @brief Get state of request types for given application
-    * @param policy_app_id Unique application id
-    * @return request type state
-    */
+   * @brief Get state of request types for given application
+   * @param policy_app_id Unique application id
+   * @return request type state
+   */
   RequestType::State GetAppRequestTypesState(
       const std::string& policy_app_id) const OVERRIDE;
 
@@ -566,10 +566,10 @@ class PolicyManagerImpl : public PolicyManager {
       const std::string policy_app_id) const OVERRIDE;
 
   /**
-    * @brief Gets request subtypes for application
-    * @param policy_app_id Unique application id
-    * @return request subtypes of application
-    */
+   * @brief Gets request subtypes for application
+   * @param policy_app_id Unique application id
+   * @return request subtypes of application
+   */
   const std::vector<std::string> GetAppRequestSubTypes(
       const std::string& policy_app_id) const OVERRIDE;
 
@@ -677,7 +677,7 @@ class PolicyManagerImpl : public PolicyManager {
    * provider
    * @param policy_app_id Unique application id
    * @return bool true if allowed
-  */
+   */
   bool UnknownRPCPassthroughAllowed(
       const std::string& policy_app_id) const OVERRIDE;
 
@@ -1009,11 +1009,11 @@ class PolicyManagerImpl : public PolicyManager {
   void SendAuthTokenUpdated(const std::string policy_app_id);
 
   /**
-    * @brief Gets all allowed module types
-    * @param policy_app_id unique identifier of application
-    * @param modules list of allowed module types
-    * @return true if application has allowed modules
-    */
+   * @brief Gets all allowed module types
+   * @param policy_app_id unique identifier of application
+   * @param modules list of allowed module types
+   * @return true if application has allowed modules
+   */
   bool GetModuleTypes(const std::string& policy_app_id,
                       std::vector<std::string>* modules) const OVERRIDE;
 

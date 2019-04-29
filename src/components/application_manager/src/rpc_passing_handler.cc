@@ -397,9 +397,9 @@ void RPCPassingHandler::ClearCompletedTimers() {
   for (auto it = timeout_queue_.begin(); it != timeout_queue_.end();) {
     TimerSPtr timer = it->first;
     if (timer->is_completed()) {
-      LOG4CXX_DEBUG(logger_,
-                    "Removing completed timer for correlation id "
-                        << it->second);
+      LOG4CXX_DEBUG(
+          logger_,
+          "Removing completed timer for correlation id " << it->second);
       it = timeout_queue_.erase(it);
     } else {
       ++it;
@@ -415,9 +415,9 @@ void RPCPassingHandler::AddRequestTimer(uint32_t correlation_id) {
   const uint32_t timeout_ms =
       app_manager_.get_settings().rpc_pass_through_timeout();
   rpc_passing_timer->Start(timeout_ms, timer::kSingleShot);
-  LOG4CXX_DEBUG(logger_,
-                "Adding and starting timer for correlation id "
-                    << correlation_id);
+  LOG4CXX_DEBUG(
+      logger_,
+      "Adding and starting timer for correlation id " << correlation_id);
   sync_primitives::AutoLock lock(timeout_queue_lock_);
   timeout_queue_.push_back(std::make_pair(rpc_passing_timer, correlation_id));
 }

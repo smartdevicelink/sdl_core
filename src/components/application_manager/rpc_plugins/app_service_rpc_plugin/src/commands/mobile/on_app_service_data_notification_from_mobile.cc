@@ -64,7 +64,8 @@ void OnAppServiceDataNotificationFromMobile::Run() {
   uint32_t app_connection_key = connection_key();
   std::string service_type =
       (*message_)[strings::msg_params][strings::service_data]
-                 [strings::service_type].asString();
+                 [strings::service_type]
+                     .asString();
 
   ApplicationSharedPtr app =
       application_manager_.application(app_connection_key);
@@ -81,7 +82,8 @@ void OnAppServiceDataNotificationFromMobile::Run() {
 
   std::string service_id =
       (*message_)[strings::msg_params][strings::service_data]
-                 [strings::service_id].asString();
+                 [strings::service_id]
+                     .asString();
   AppService* service =
       application_manager_.GetAppServiceManager().FindServiceByID(service_id);
   if (!service) {

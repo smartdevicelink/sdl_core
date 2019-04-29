@@ -32,9 +32,9 @@
 
 #include "application_manager/application_impl.h"
 
-#include "sdl_rpc_plugin/commands/hmi/on_system_request_notification.h"
 #include "application_manager/policies/policy_handler_interface.h"
 #include "interfaces/MOBILE_API.h"
+#include "sdl_rpc_plugin/commands/hmi/on_system_request_notification.h"
 #include "utils/macro.h"
 
 using policy::PolicyHandlerInterface;
@@ -121,4 +121,4 @@ void OnSystemRequestNotification::Run() {
 
 }  // namespace commands
 
-}  // namespace application_manager
+}  // namespace sdl_rpc_plugin

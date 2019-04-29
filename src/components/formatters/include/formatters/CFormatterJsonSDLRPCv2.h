@@ -188,8 +188,8 @@ inline bool CFormatterJsonSDLRPCv2::fromString(
 
   return result;
 }
-}
-}
-}  // namespace ns_smart_device_link::ns_json_handler::formatters
+}  // namespace formatters
+}  // namespace ns_json_handler
+}  // namespace ns_smart_device_link
 
 #endif  // SRC_COMPONENTS_FORMATTERS_INCLUDE_FORMATTERS_CFORMATTERJSONSDLRPCV2_H_

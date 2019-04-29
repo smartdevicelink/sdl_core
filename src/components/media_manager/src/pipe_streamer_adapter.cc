@@ -30,13 +30,13 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "media_manager/pipe_streamer_adapter.h"
 #include <errno.h>
 #include <fcntl.h>
 #include <sys/stat.h>
 #include <unistd.h>
-#include "utils/logger.h"
 #include "utils/file_system.h"
-#include "media_manager/pipe_streamer_adapter.h"
+#include "utils/logger.h"
 
 namespace media_manager {
 
@@ -88,9 +88,9 @@ bool PipeStreamerAdapter::PipeStreamer::Connect() {
     return false;
   }
 
-  LOG4CXX_INFO(logger_,
-               "Pipe " << named_pipe_path_
-                       << " was successfuly opened for writing");
+  LOG4CXX_INFO(
+      logger_,
+      "Pipe " << named_pipe_path_ << " was successfuly opened for writing");
   return true;
 }
 

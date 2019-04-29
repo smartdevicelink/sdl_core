@@ -37,8 +37,8 @@
 #include <string>
 #include <vector>
 
-#include "gmock/gmock.h"
 #include "application_manager/policies/policy_handler_observer.h"
+#include "gmock/gmock.h"
 
 namespace test {
 namespace components {

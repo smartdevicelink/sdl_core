@@ -30,10 +30,10 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "policy/update_status_manager.h"
 #include "gtest/gtest.h"
 #include "policy/mock_policy_listener.h"
 #include "policy/policy_manager_impl.h"
-#include "policy/update_status_manager.h"
 
 #include "utils/conditional_variable.h"
 
@@ -43,8 +43,8 @@ namespace policy_test {
 
 using namespace ::policy;
 using ::testing::_;
-using ::testing::Return;
 using testing::NiceMock;
+using ::testing::Return;
 
 class UpdateStatusManagerTest : public ::testing::Test {
  protected:
@@ -105,7 +105,7 @@ class WaitAsync {
   const uint32_t timeout_;
   sync_primitives::ConditionalVariable cond_var_;
 };
-}
+}  // namespace
 
 ACTION_P(NotifyAsync, waiter) {
   waiter->Notify();
@@ -298,6 +298,6 @@ TEST_F(UpdateStatusManagerTest,
   EXPECT_FALSE(manager_->IsAppsSearchInProgress());
 }
 
-}  // namespace policy
+}  // namespace policy_test
 }  // namespace components
 }  // namespace test

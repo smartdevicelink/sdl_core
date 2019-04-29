@@ -33,8 +33,8 @@
 #ifndef SRC_COMPONENTS_RPC_BASE_INCLUDE_RPC_BASE_RPC_BASE_JSON_INL_H_
 #define SRC_COMPONENTS_RPC_BASE_INCLUDE_RPC_BASE_RPC_BASE_JSON_INL_H_
 
-#include "rpc_base/rpc_base.h"
 #include "json/value.h"
+#include "rpc_base/rpc_base.h"
 
 namespace rpc {
 

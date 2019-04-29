@@ -30,17 +30,17 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "hmi/navi_stop_stream_request.h"
 #include "hmi/navi_audio_stop_stream_request.h"
+#include "hmi/navi_stop_stream_request.h"
 
 #include "gtest/gtest.h"
 
-#include "smart_objects/smart_object.h"
-#include "application_manager/smart_object_keys.h"
 #include "application_manager/commands/command_request_test.h"
-#include "application_manager/mock_application_manager.h"
 #include "application_manager/hmi_interfaces.h"
+#include "application_manager/mock_application_manager.h"
 #include "application_manager/mock_hmi_interface.h"
+#include "application_manager/smart_object_keys.h"
+#include "smart_objects/smart_object.h"
 
 namespace test {
 namespace components {
@@ -76,7 +76,8 @@ class NaviStopStreamRequestsTest
 };
 
 typedef testing::Types<commands::AudioStopStreamRequest,
-                       commands::NaviStopStreamRequest> RequestCommandsList;
+                       commands::NaviStopStreamRequest>
+    RequestCommandsList;
 TYPED_TEST_CASE(NaviStopStreamRequestsTest, RequestCommandsList);
 
 TYPED_TEST(NaviStopStreamRequestsTest, Run_HmiInterfaceNotAvailable_NoRequest) {

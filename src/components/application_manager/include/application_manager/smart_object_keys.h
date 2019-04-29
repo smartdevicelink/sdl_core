@@ -452,7 +452,7 @@ extern const char* instance_follow_redirect;
 extern const char* charset;
 extern const char* content_lenght;
 extern const char* GET;
-}  // http_request
+}  // namespace http_request
 
 namespace mobile_notification {
 extern const char* state;

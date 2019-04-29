@@ -34,15 +34,15 @@
 #include <string>
 #include <vector>
 
-#include "gtest/gtest.h"
-#include "hmi/sdl_get_user_friendly_message_request.h"
+#include "application_manager/commands/command_request_test.h"
 #include "application_manager/mock_application.h"
+#include "application_manager/mock_hmi_capabilities.h"
+#include "application_manager/mock_message_helper.h"
 #include "application_manager/mock_state_controller.h"
 #include "application_manager/policies/mock_policy_handler_interface.h"
-#include "application_manager/mock_message_helper.h"
-#include "application_manager/mock_hmi_capabilities.h"
+#include "gtest/gtest.h"
+#include "hmi/sdl_get_user_friendly_message_request.h"
 #include "smart_objects/smart_object.h"
-#include "application_manager/commands/command_request_test.h"
 
 namespace test {
 namespace components {
@@ -50,11 +50,11 @@ namespace commands_test {
 namespace hmi_commands_test {
 namespace sdl_get_user_friendly_message_request {
 
+using application_manager::MockMessageHelper;
 using application_manager::commands::MessageSharedPtr;
 using sdl_rpc_plugin::commands::SDLGetUserFriendlyMessageRequest;
-using application_manager::MockMessageHelper;
-using test::components::policy_test::MockPolicyHandlerInterface;
 using test::components::application_manager_test::MockHMICapabilities;
+using test::components::policy_test::MockPolicyHandlerInterface;
 using testing::_;
 using testing::Return;
 using testing::ReturnRef;

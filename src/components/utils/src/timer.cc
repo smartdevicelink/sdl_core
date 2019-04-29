@@ -33,13 +33,13 @@
 
 #include <string>
 
-#include "utils/macro.h"
-#include "utils/logger.h"
-#include "utils/lock.h"
-#include "utils/timer_task.h"
 #include "utils/conditional_variable.h"
+#include "utils/lock.h"
+#include "utils/logger.h"
+#include "utils/macro.h"
 #include "utils/threads/thread.h"
 #include "utils/threads/thread_delegate.h"
+#include "utils/timer_task.h"
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "Utils")
 

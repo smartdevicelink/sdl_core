@@ -31,14 +31,14 @@
  */
 
 #include "rc_rpc_plugin/commands/mobile/set_interior_vehicle_data_request.h"
+#include "interfaces/MOBILE_API.h"
+#include "json/json.h"
+#include "rc_rpc_plugin/rc_helpers.h"
 #include "rc_rpc_plugin/rc_module_constants.h"
 #include "rc_rpc_plugin/rc_rpc_plugin.h"
-#include "rc_rpc_plugin/rc_helpers.h"
 #include "smart_objects/enum_schema_item.h"
-#include "utils/macro.h"
-#include "json/json.h"
 #include "utils/helpers.h"
-#include "interfaces/MOBILE_API.h"
+#include "utils/macro.h"
 
 namespace rc_rpc_plugin {
 namespace commands {
@@ -175,9 +175,9 @@ capabilitiesStatus GetItemCapability(
   const auto it = mapping.find(request_parameter);
 
   if (it == mapping.end()) {
-    LOG4CXX_DEBUG(logger_,
-                  "Parameter " << request_parameter
-                               << " doesn't exist in capabilities.");
+    LOG4CXX_DEBUG(
+        logger_,
+        "Parameter " << request_parameter << " doesn't exist in capabilities.");
     return capabilitiesStatus::missedParam;
   }
 
@@ -525,9 +525,9 @@ void SetInteriorVehicleDataRequest::Execute() {
         return;
       } else if (module_data[message_params::kAudioControlData].keyExists(
                      message_params::kKeepContext)) {
-        app->set_keep_context(
-            module_data[message_params::kAudioControlData]
-                       [message_params::kKeepContext].asBool());
+        app->set_keep_context(module_data[message_params::kAudioControlData]
+                                         [message_params::kKeepContext]
+                                             .asBool());
       }
     }
 

@@ -29,8 +29,8 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-#include "smart_objects/smart_object.h"
 #include "smart_objects/string_schema_item.h"
+#include "smart_objects/smart_object.h"
 #include "utils/custom_string.h"
 
 namespace ns_smart_device_link {
@@ -52,10 +52,10 @@ errors::eType CStringSchemaItem::validate(
     const utils::SemanticVersion& MessageVersion,
     const bool allow_unknown_enums) {
   if (SmartType_String != Object.getType()) {
-    std::string validation_info = "Incorrect type, expected: " +
-                                  SmartObject::typeToString(SmartType_String) +
-                                  ", got: " +
-                                  SmartObject::typeToString(Object.getType());
+    std::string validation_info =
+        "Incorrect type, expected: " +
+        SmartObject::typeToString(SmartType_String) +
+        ", got: " + SmartObject::typeToString(Object.getType());
     report__->set_validation_info(validation_info);
     return errors::INVALID_VALUE;
   }

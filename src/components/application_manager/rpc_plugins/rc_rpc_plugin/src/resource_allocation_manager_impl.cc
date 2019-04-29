@@ -33,14 +33,14 @@
 #include "rc_rpc_plugin/resource_allocation_manager_impl.h"
 #include "application_manager/application.h"
 #include "application_manager/application_manager.h"
+#include "application_manager/message_helper.h"
 #include "interfaces/HMI_API.h"
 #include "interfaces/MOBILE_API.h"
-#include "smart_objects/enum_schema_item.h"
-#include "application_manager/message_helper.h"
-#include "rc_rpc_plugin/rc_rpc_plugin.h"
-#include "rc_rpc_plugin/rc_module_constants.h"
-#include "rc_rpc_plugin/rc_helpers.h"
 #include "json/json.h"
+#include "rc_rpc_plugin/rc_helpers.h"
+#include "rc_rpc_plugin/rc_module_constants.h"
+#include "rc_rpc_plugin/rc_rpc_plugin.h"
+#include "smart_objects/enum_schema_item.h"
 #include "utils/helpers.h"
 
 namespace rc_rpc_plugin {
@@ -80,16 +80,16 @@ AcquireResult::eType ResourceAllocationManagerImpl::AcquireResource(
   }
 
   if (app_id == allocated_resources_[module_type]) {
-    LOG4CXX_DEBUG(logger_,
-                  "App: " << app_id << " is already acquired resource "
-                          << module_type);
+    LOG4CXX_DEBUG(
+        logger_,
+        "App: " << app_id << " is already acquired resource " << module_type);
     return AcquireResult::ALLOWED;
   }
 
   if (IsModuleTypeRejected(module_type, app_id)) {
-    LOG4CXX_DEBUG(logger_,
-                  "Driver disallowed app: " << app_id << " to acquire "
-                                            << module_type);
+    LOG4CXX_DEBUG(
+        logger_,
+        "Driver disallowed app: " << app_id << " to acquire " << module_type);
     return AcquireResult::REJECTED;
   }
 
@@ -196,8 +196,8 @@ void ConstructOnRCStatusNotificationParams(
   namespace strings = application_manager::strings;
   namespace message_params = rc_rpc_plugin::message_params;
   using smart_objects::SmartObject;
-  using smart_objects::SmartType_Map;
   using smart_objects::SmartType_Array;
+  using smart_objects::SmartType_Map;
   LOG4CXX_AUTO_TRACE(logger_);
 
   auto modules_inserter = [](SmartObject& result_modules) {

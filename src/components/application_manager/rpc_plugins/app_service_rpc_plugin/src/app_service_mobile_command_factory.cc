@@ -97,9 +97,9 @@ bool AppServiceMobileCommandFactory::IsAbleToProcess(
     const int32_t function_id,
     const app_mngr::commands::Command::CommandSource source) const {
   UNUSED(source);
-  return buildCommandCreator(function_id,
-                             mobile_apis::messageType::INVALID_ENUM,
-                             source).CanBeCreated();
+  return buildCommandCreator(
+             function_id, mobile_apis::messageType::INVALID_ENUM, source)
+      .CanBeCreated();
 }
 
 app_mngr::CommandCreator& AppServiceMobileCommandFactory::buildCommandCreator(
@@ -156,4 +156,4 @@ app_mngr::CommandCreator& AppServiceMobileCommandFactory::buildCommandCreator(
   }
   return factory.GetCreator<app_mngr::InvalidCommand>();
 }
-}  // namespace vehicle_info_plugin
+}  // namespace app_service_rpc_plugin

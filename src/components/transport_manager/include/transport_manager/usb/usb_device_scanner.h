@@ -38,9 +38,9 @@
 
 #include <list>
 
-#include "utils/lock.h"
 #include "transport_manager/transport_adapter/device_scanner.h"
 #include "transport_manager/usb/common.h"
+#include "utils/lock.h"
 
 namespace transport_manager {
 
@@ -71,7 +71,7 @@ class UsbDeviceScanner : public DeviceScanner, public UsbDeviceListener {
   sync_primitives::Lock devices_mutex_;
 };
 
-}  // namespace
-}  // namespace
+}  // namespace transport_adapter
+}  // namespace transport_manager
 
 #endif  // SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_USB_USB_DEVICE_SCANNER_H_

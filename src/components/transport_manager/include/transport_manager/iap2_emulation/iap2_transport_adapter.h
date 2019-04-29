@@ -33,9 +33,9 @@
 #ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_IAP2_EMULATION_IAP2_TRANSPORT_ADAPTER_H_
 #define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_IAP2_EMULATION_IAP2_TRANSPORT_ADAPTER_H_
 
+#include "resumption/last_state.h"
 #include "transport_manager/tcp/tcp_transport_adapter.h"
 #include "transport_manager/transport_manager_settings.h"
-#include "resumption/last_state.h"
 #include "utils/macro.h"
 #include "utils/threads/thread_delegate.h"
 
@@ -108,8 +108,8 @@ class IAP2USBEmulationTransportAdapter : public TcpTransportAdapter {
                                    const TransportManagerSettings& settings);
 
   /**
-    * Destructor
-    */
+   * Destructor
+   */
   ~IAP2USBEmulationTransportAdapter();
 
   /**

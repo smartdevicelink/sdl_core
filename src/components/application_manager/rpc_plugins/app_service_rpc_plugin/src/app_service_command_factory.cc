@@ -74,4 +74,4 @@ bool AppServiceCommandFactory::IsAbleToProcess(
              ? hmi_command_factory_->IsAbleToProcess(function_id, source)
              : mobile_command_factory_->IsAbleToProcess(function_id, source);
 }
-}  // namespace service_plugin
+}  // namespace app_service_rpc_plugin

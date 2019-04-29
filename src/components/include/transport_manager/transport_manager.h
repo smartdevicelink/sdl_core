@@ -33,10 +33,10 @@
 #ifndef SRC_COMPONENTS_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_MANAGER_H_
 #define SRC_COMPONENTS_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_MANAGER_H_
 
-#include "transport_manager/common.h"
-#include "transport_manager/transport_manager_listener.h"
-#include "transport_manager/transport_adapter/transport_adapter_event.h"
 #include "protocol/common.h"
+#include "transport_manager/common.h"
+#include "transport_manager/transport_adapter/transport_adapter_event.h"
+#include "transport_manager/transport_manager_listener.h"
 
 namespace resumption {
 class LastState;
@@ -69,10 +69,10 @@ class TransportManager {
   virtual int Reinit() = 0;
 
   /**
-    * @brief Start scanning for new devices.
-    *
-    * @return Code error.
-    **/
+   * @brief Start scanning for new devices.
+   *
+   * @return Code error.
+   **/
   virtual int SearchDevices() = 0;
 
   virtual void AddCloudDevice(

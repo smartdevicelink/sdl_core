@@ -35,15 +35,15 @@
 
 #include <list>
 #include <map>
-#include "application_manager/hmi_state.h"
 #include "application_manager/application.h"
 #include "application_manager/application_manager.h"
-#include "event_engine/event_observer.h"
-#include "application_manager/state_controller.h"
+#include "application_manager/hmi_state.h"
 #include "application_manager/message_helper.h"
+#include "application_manager/state_controller.h"
+#include "event_engine/event_observer.h"
 #include "interfaces/MOBILE_API.h"
-#include "utils/lock.h"
 #include "utils/helpers.h"
+#include "utils/lock.h"
 
 namespace application_manager {
 
@@ -452,6 +452,6 @@ class StateControllerImpl : public event_engine::EventObserver,
   std::map<uint32_t, HmiStatePtr> waiting_for_activate_;
   ApplicationManager& app_mngr_;
 };
-}
+}  // namespace application_manager
 
 #endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_STATE_CONTROLLER_IMPL_H_

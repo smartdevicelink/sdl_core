@@ -45,7 +45,7 @@ struct StateIDComparator {
     return cur->state_id() == state_id_;
   }
 };
-}
+}  // namespace
 
 namespace application_manager {
 

@@ -31,12 +31,12 @@
  */
 
 #include "rc_rpc_plugin/commands/mobile/button_press_request.h"
+#include "interfaces/MOBILE_API.h"
+#include "json/json.h"
 #include "rc_rpc_plugin/rc_module_constants.h"
 #include "smart_objects/enum_schema_item.h"
-#include "utils/macro.h"
-#include "json/json.h"
 #include "utils/helpers.h"
-#include "interfaces/MOBILE_API.h"
+#include "utils/macro.h"
 
 namespace rc_rpc_plugin {
 namespace commands {
@@ -130,9 +130,9 @@ bool CheckIfButtonExistInRCCaps(
       const mobile_apis::ButtonName::eType current_button =
           static_cast<mobile_apis::ButtonName::eType>(current_id);
       if (current_button == button) {
-        LOG4CXX_TRACE(logger_,
-                      "Button id " << current_button
-                                   << " exist in capabilities");
+        LOG4CXX_TRACE(
+            logger_,
+            "Button id " << current_button << " exist in capabilities");
         return true;
       }
     }
@@ -177,7 +177,8 @@ void ButtonPressRequest::Execute() {
       EnumConversionHelper<mobile_apis::ButtonName::eType>::EnumToCString(
           static_cast<mobile_apis::ButtonName::eType>(
               (*message_)[app_mngr::strings::msg_params]
-                         [message_params::kButtonName].asUInt()),
+                         [message_params::kButtonName]
+                             .asUInt()),
           &button_name);
 
   const std::string module_type = ModuleType();
@@ -276,10 +277,11 @@ void ButtonPressRequest::on_event(const app_mngr::event_engine::Event& event) {
 }
 
 std::string ButtonPressRequest::ModuleType() {
-  mobile_apis::ModuleType::eType module_type = static_cast<
-      mobile_apis::ModuleType::eType>(
-      (*message_)[app_mngr::strings::msg_params][message_params::kModuleType]
-          .asUInt());
+  mobile_apis::ModuleType::eType module_type =
+      static_cast<mobile_apis::ModuleType::eType>(
+          (*message_)[app_mngr::strings::msg_params]
+                     [message_params::kModuleType]
+                         .asUInt());
   const char* str;
   const bool ok = ns_smart_device_link::ns_smart_objects::EnumConversionHelper<
       mobile_apis::ModuleType::eType>::EnumToCString(module_type, &str);

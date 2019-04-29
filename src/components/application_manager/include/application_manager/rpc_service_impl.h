@@ -34,24 +34,24 @@
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_RPC_SERVICE_IMPL_H
 
 #include "application_manager/application_manager.h"
-#include "application_manager/rpc_service.h"
-#include "application_manager/request_controller.h"
-#include "application_manager/message_helper.h"
-#include "application_manager/usage_statistics.h"
-#include "application_manager/mobile_message_handler.h"
 #include "application_manager/command_holder_impl.h"
+#include "application_manager/message_helper.h"
+#include "application_manager/mobile_message_handler.h"
+#include "application_manager/request_controller.h"
+#include "application_manager/rpc_service.h"
+#include "application_manager/usage_statistics.h"
 
-#include "formatters/formatter_json_rpc.h"
-#include "formatters/CFormatterJsonSDLRPCv2.h"
 #include "formatters/CFormatterJsonSDLRPCv1.h"
+#include "formatters/CFormatterJsonSDLRPCv2.h"
+#include "formatters/formatter_json_rpc.h"
 #include "interfaces/HMI_API_schema.h"
 #include "interfaces/MOBILE_API_schema.h"
 
 #include "interfaces/v4_protocol_v1_2_no_extra.h"
 #include "interfaces/v4_protocol_v1_2_no_extra_schema.h"
 
-#include "utils/threads/message_loop_thread.h"
 #include "utils/logger.h"
+#include "utils/threads/message_loop_thread.h"
 
 namespace application_manager {
 namespace rpc_service {
@@ -85,7 +85,7 @@ typedef threads::MessageLoopThread<utils::PrioritizedQueue<MessageToMobile> >
     ToMobileQueue;
 typedef threads::MessageLoopThread<utils::PrioritizedQueue<MessageToHmi> >
     ToHmiQueue;
-}
+}  // namespace impl
 
 class RPCServiceImpl : public RPCService,
                        public impl::ToMobileQueue::Handler,

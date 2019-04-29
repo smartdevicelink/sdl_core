@@ -36,21 +36,21 @@
 
 #include "gmock/gmock.h"
 
-#include "smart_objects/smart_object.h"
-#include "smart_objects/smart_schema.h"
-#include "smart_objects/schema_item.h"
-#include "formatters/CFormatterJsonSDLRPCv2.h"
 #include "formatters/CFormatterJsonSDLRPCv1.h"
+#include "formatters/CFormatterJsonSDLRPCv2.h"
 #include "smart_objects/array_schema_item.h"
 #include "smart_objects/bool_schema_item.h"
-#include "smart_objects/object_schema_item.h"
-#include "smart_objects/string_schema_item.h"
 #include "smart_objects/enum_schema_item.h"
 #include "smart_objects/number_schema_item.h"
+#include "smart_objects/object_schema_item.h"
+#include "smart_objects/schema_item.h"
 #include "smart_objects/schema_item_parameter.h"
+#include "smart_objects/smart_object.h"
+#include "smart_objects/smart_schema.h"
+#include "smart_objects/string_schema_item.h"
 
-#include <string>
 #include <time.h>
+#include <string>
 
 namespace test {
 namespace components {
@@ -783,5 +783,5 @@ const test::components::SmartObjects::SmartObjectConvertionTimeTest::
             MessageTypeTest::response,
         test::components::SmartObjects::SmartObjectConvertionTimeTest::
             MessageTypeTest::notification};
-}
-}
+}  // namespace ns_smart_objects
+}  // namespace ns_smart_device_link

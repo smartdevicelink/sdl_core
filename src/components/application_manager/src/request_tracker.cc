@@ -30,10 +30,10 @@
 * POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include "utils/logger.h"
-#include "utils/macro.h"
 #include "application_manager/request_tracker.h"
 #include "application_manager/message_helper.h"
+#include "utils/logger.h"
+#include "utils/macro.h"
 
 namespace application_manager {
 

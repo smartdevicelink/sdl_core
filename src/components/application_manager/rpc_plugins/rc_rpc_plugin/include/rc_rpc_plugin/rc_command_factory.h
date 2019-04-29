@@ -34,15 +34,14 @@
 #define SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_RC_RPC_PLUGIN_INCLUDE_RC_RPC_PLUGIN_RC_COMMAND_FACTORY_H_
 
 #include <memory>
-#include "application_manager/command_factory.h"
 #include "application_manager/application_manager.h"
 #include "application_manager/command_factory.h"
-#include "application_manager/rpc_service.h"
 #include "application_manager/hmi_capabilities.h"
 #include "application_manager/policies/policy_handler_interface.h"
-#include "rc_rpc_plugin/resource_allocation_manager.h"
-#include "rc_rpc_plugin/interior_data_cache.h"
+#include "application_manager/rpc_service.h"
 #include "rc_rpc_plugin/commands/rc_command_params.h"
+#include "rc_rpc_plugin/interior_data_cache.h"
+#include "rc_rpc_plugin/resource_allocation_manager.h"
 #include "utils/macro.h"
 
 namespace rc_rpc_plugin {
@@ -64,10 +63,10 @@ class RCCommandFactory : public application_manager::CommandFactory {
       app_mngr::commands::Command::CommandSource source) OVERRIDE;
 
   /**
-  * @param int32_t command id
-  * @param CommandSource source
-  * @return return true if command can be create, else return false
-  **/
+   * @param int32_t command id
+   * @param CommandSource source
+   * @return return true if command can be create, else return false
+   **/
   virtual bool IsAbleToProcess(
       const int32_t,
       const application_manager::commands::Command::CommandSource)

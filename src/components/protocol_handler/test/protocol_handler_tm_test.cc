@@ -214,9 +214,11 @@ class ProtocolHandlerImplTest : public ::testing::Test {
 
   void TearDown() OVERRIDE {
     const_cast<protocol_handler::impl::FromMobileQueue&>(
-        protocol_handler_impl->get_from_mobile_queue()).WaitDumpQueue();
+        protocol_handler_impl->get_from_mobile_queue())
+        .WaitDumpQueue();
     const_cast<protocol_handler::impl::ToMobileQueue&>(
-        protocol_handler_impl->get_to_mobile_queue()).WaitDumpQueue();
+        protocol_handler_impl->get_to_mobile_queue())
+        .WaitDumpQueue();
   }
 
   // Emulate connection establish
@@ -3638,7 +3640,8 @@ TEST_F(ProtocolHandlerImplTest,
               SendMessageToDevice(ExpectedMessage(FRAME_TYPE_CONTROL,
                                                   FRAME_DATA_HEART_BEAT_ACK,
                                                   PROTECTION_OFF,
-                                                  kControl))).Times(0);
+                                                  kControl)))
+      .Times(0);
   // Act
   SendControlMessage(
       PROTECTION_OFF, kControl, session_id, FRAME_DATA_HEART_BEAT);
@@ -3828,7 +3831,8 @@ TEST_F(ProtocolHandlerImplTest, SendServiceDataAck_AfterVersion5) {
               SendMessageToDevice(ExpectedMessage(FRAME_TYPE_CONTROL,
                                                   FRAME_DATA_SERVICE_DATA_ACK,
                                                   PROTECTION_OFF,
-                                                  kMobileNav))).Times(0);
+                                                  kMobileNav)))
+      .Times(0);
 
   protocol_handler_impl->SendFramesNumber(connection_key, 0);
 

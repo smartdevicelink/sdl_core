@@ -30,14 +30,14 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "application_manager/application_manager.h"
 #include "application_manager/resumption/resumption_data_json.h"
-#include "smart_objects/smart_object.h"
-#include "json/json.h"
-#include "formatters/CFormatterJsonBase.h"
+#include "application_manager/application_manager.h"
+#include "application_manager/application_manager_settings.h"
 #include "application_manager/message_helper.h"
 #include "application_manager/smart_object_keys.h"
-#include "application_manager/application_manager_settings.h"
+#include "formatters/CFormatterJsonBase.h"
+#include "json/json.h"
+#include "smart_objects/smart_object.h"
 
 namespace resumption {
 
@@ -531,4 +531,4 @@ void ResumptionDataJson::Persist() {
   last_state().SaveStateToFileSystem();
 }
 
-}  // resumption
+}  // namespace resumption

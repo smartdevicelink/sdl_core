@@ -31,19 +31,19 @@
  */
 
 #include <stdint.h>
-#include <string>
 #include <set>
+#include <string>
 
 #include "mobile/slider_request.h"
 
-#include "gtest/gtest.h"
 #include "application_manager/commands/command_request_test.h"
+#include "application_manager/event_engine/event.h"
 #include "application_manager/mock_application.h"
 #include "application_manager/mock_application_manager.h"
-#include "application_manager/mock_message_helper.h"
-#include "application_manager/event_engine/event.h"
 #include "application_manager/mock_hmi_interface.h"
+#include "application_manager/mock_message_helper.h"
 #include "application_manager/policies/mock_policy_handler_interface.h"
+#include "gtest/gtest.h"
 
 namespace test {
 namespace components {
@@ -52,11 +52,11 @@ namespace mobile_commands_test {
 namespace slider_request {
 
 namespace am = application_manager;
-using sdl_rpc_plugin::commands::SliderRequest;
+using am::MockMessageHelper;
 using am::commands::CommandImpl;
 using am::commands::MessageSharedPtr;
-using am::MockMessageHelper;
 using policy_test::MockPolicyHandlerInterface;
+using sdl_rpc_plugin::commands::SliderRequest;
 using ::testing::_;
 using ::testing::Return;
 using ::testing::ReturnRef;
@@ -337,4 +337,4 @@ TEST_F(SliderRequestTest, OnEvent_UISliderAborted_SUCCESS) {
 }  // namespace mobile_commands_test
 }  // namespace commands_test
 }  // namespace components
-}  // namespace tests
+}  // namespace test

@@ -33,12 +33,12 @@
 #ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_APP_LAUNCH_APP_LAUNCH_DATA_JSON_H_
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_APP_LAUNCH_APP_LAUNCH_DATA_JSON_H_
 
+#include <memory>
 #include "application_manager/app_launch/app_launch_data_impl.h"
-#include "smart_objects/smart_object.h"
 #include "resumption/last_state.h"
+#include "smart_objects/smart_object.h"
 #include "utils/lock.h"
 #include "utils/macro.h"
-#include <memory>
 
 namespace app_launch {
 

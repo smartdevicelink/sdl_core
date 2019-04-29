@@ -34,12 +34,12 @@
 
 #include "gtest/gtest.h"
 
-#include "protocol/common.h"
 #include "connection_handler/connection.h"
-#include "connection_handler/mock_connection_handler.h"
 #include "connection_handler/connection_handler_impl.h"
-#include "protocol/service_type.h"
+#include "connection_handler/mock_connection_handler.h"
 #include "connection_handler/mock_connection_handler_settings.h"
+#include "protocol/common.h"
+#include "protocol/service_type.h"
 #include "transport_manager/mock_transport_manager.h"
 #ifdef ENABLE_SECURITY
 #include "security_manager/mock_security_manager.h"

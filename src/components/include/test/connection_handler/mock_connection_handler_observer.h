@@ -33,8 +33,8 @@
 #ifndef SRC_COMPONENTS_INCLUDE_TEST_CONNECTION_HANDLER_MOCK_CONNECTION_HANDLER_OBSERVER_H_
 #define SRC_COMPONENTS_INCLUDE_TEST_CONNECTION_HANDLER_MOCK_CONNECTION_HANDLER_OBSERVER_H_
 
-#include "gmock/gmock.h"
 #include "connection_handler/connection_handler_observer.h"
+#include "gmock/gmock.h"
 
 namespace test {
 namespace components {

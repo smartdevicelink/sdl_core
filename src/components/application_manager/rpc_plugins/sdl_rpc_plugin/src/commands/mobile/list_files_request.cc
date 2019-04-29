@@ -31,8 +31,8 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <string>
 #include "sdl_rpc_plugin/commands/mobile/list_files_request.h"
+#include <string>
 
 #include "application_manager/application_impl.h"
 
@@ -112,4 +112,4 @@ void ListFilesRequest::Run() {
 
 }  // namespace commands
 
-}  // namespace application_manager
+}  // namespace sdl_rpc_plugin

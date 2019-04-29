@@ -33,23 +33,23 @@
 #ifndef SRC_COMPONENTS_INCLUDE_TEST_CONNECTION_HANDLER_MOCK_CONNECTION_HANDLER_H_
 #define SRC_COMPONENTS_INCLUDE_TEST_CONNECTION_HANDLER_MOCK_CONNECTION_HANDLER_H_
 
-#include <string>
 #include <list>
+#include <string>
 #include <vector>
 
-#include "gmock/gmock.h"
 #include "connection_handler/connection_handler.h"
 #include "connection_handler/connection_handler_observer.h"
-#include "connection_handler/devices_discovery_starter.h"
 #include "connection_handler/connection_handler_settings.h"
+#include "connection_handler/devices_discovery_starter.h"
+#include "gmock/gmock.h"
 
 namespace test {
 namespace components {
 namespace connection_handler_test {
 
+using connection_handler::CloseSessionReason;
 using connection_handler::ConnectionHandle;
 using connection_handler::DeviceHandle;
-using connection_handler::CloseSessionReason;
 using connection_handler::DevicesDiscoveryStarter;
 using connection_handler::SessionTransports;
 

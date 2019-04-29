@@ -36,15 +36,15 @@
 #ifndef SRC_COMPONENTS_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_ADAPTER_TRANSPORT_ADAPTER_H_
 #define SRC_COMPONENTS_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_ADAPTER_TRANSPORT_ADAPTER_H_
 
-#include <string>
-#include <vector>
 #include <list>
 #include <map>
+#include <string>
+#include <vector>
 
-#include "transport_manager/transport_adapter/device.h"
+#include "protocol/common.h"
 #include "transport_manager/common.h"
 #include "transport_manager/error.h"
-#include "protocol/common.h"
+#include "transport_manager/transport_adapter/device.h"
 
 namespace transport_manager {
 

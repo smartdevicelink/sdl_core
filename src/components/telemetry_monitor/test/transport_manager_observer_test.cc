@@ -30,11 +30,11 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "gtest/gtest.h"
-#include "telemetry_monitor/mock_telemetry_monitor.h"
-#include "protocol_handler/telemetry_observer.h"
-#include "telemetry_monitor/transport_manager_metric_wrapper.h"
 #include "telemetry_monitor/transport_manager_observer.h"
+#include "gtest/gtest.h"
+#include "protocol_handler/telemetry_observer.h"
+#include "telemetry_monitor/mock_telemetry_monitor.h"
+#include "telemetry_monitor/transport_manager_metric_wrapper.h"
 
 namespace test {
 namespace components {

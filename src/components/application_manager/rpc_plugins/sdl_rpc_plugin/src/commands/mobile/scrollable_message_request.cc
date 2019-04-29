@@ -31,14 +31,14 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <string.h>
 #include "sdl_rpc_plugin/commands/mobile/scrollable_message_request.h"
+#include <string.h>
 
 #include "application_manager/application_impl.h"
-#include "application_manager/policies/policy_handler.h"
 #include "application_manager/message_helper.h"
-#include "interfaces/MOBILE_API.h"
+#include "application_manager/policies/policy_handler.h"
 #include "interfaces/HMI_API.h"
+#include "interfaces/MOBILE_API.h"
 #include "utils/helpers.h"
 
 namespace sdl_rpc_plugin {
@@ -160,4 +160,4 @@ void ScrollableMessageRequest::on_event(const event_engine::Event& event) {
 }
 
 }  // namespace commands
-}  // namespace application_manager
+}  // namespace sdl_rpc_plugin

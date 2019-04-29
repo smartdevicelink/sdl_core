@@ -37,9 +37,9 @@ RPCPluginPtr LoadPlugin(const std::string& full_plugin_path) {
 
   void* plugin_dll = dlopen(full_plugin_path.c_str(), RTLD_LAZY);
   if (nullptr == plugin_dll) {
-    LOG4CXX_ERROR(logger_,
-                  "Failed to open dll " << full_plugin_path << " : "
-                                        << dlerror());
+    LOG4CXX_ERROR(
+        logger_,
+        "Failed to open dll " << full_plugin_path << " : " << dlerror());
     return RPCPluginPtr();
   }
 
@@ -66,9 +66,9 @@ uint32_t RPCPluginManagerImpl::LoadPlugins(const std::string& plugins_path) {
     if (!plugin) {
       continue;
     }
-    LOG4CXX_DEBUG(logger_,
-                  "Loaded " << plugin->PluginName() << " plugin from "
-                            << full_name);
+    LOG4CXX_DEBUG(
+        logger_,
+        "Loaded " << plugin->PluginName() << " plugin from " << full_name);
     if (plugin->Init(
             app_manager_, rpc_service_, hmi_capabilities_, policy_handler_)) {
       loaded_plugins_.push_back(std::move(plugin));

@@ -29,8 +29,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 #include "hmi_message_handler/websocket_session.h"
-#include "hmi_message_handler/mb_controller.h"
 #include <unistd.h>
+#include "hmi_message_handler/mb_controller.h"
 using namespace boost::beast::websocket;
 namespace hmi_message_handler {
 
@@ -319,4 +319,4 @@ void WebsocketSession::LoopThreadDelegate::SetShutdown() {
     message_queue_.Shutdown();
   }
 }
-}
+}  // namespace hmi_message_handler

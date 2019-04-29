@@ -30,13 +30,13 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <string>
+#include "formatters/CFormatterJsonBase.h"
 #include <algorithm>
-#include "json/value.h"
+#include <string>
+#include "formatters/generic_json_formatter.h"
 #include "gtest/gtest.h"
 #include "json/reader.h"
-#include "formatters/CFormatterJsonBase.h"
-#include "formatters/generic_json_formatter.h"
+#include "json/value.h"
 
 namespace test {
 namespace components {

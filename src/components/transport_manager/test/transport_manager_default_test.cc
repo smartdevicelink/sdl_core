@@ -30,20 +30,20 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "gtest/gtest.h"
-#include "transport_manager/transport_manager.h"
 #include "transport_manager/transport_manager_default.h"
-#include "transport_manager/mock_transport_manager_settings.h"
+#include "gtest/gtest.h"
 #include "resumption/mock_last_state.h"
+#include "transport_manager/mock_transport_manager_settings.h"
+#include "transport_manager/transport_manager.h"
 
 namespace test {
 namespace components {
 namespace transport_manager_test {
 
 using resumption_test::MockLastState;
+using ::testing::NiceMock;
 using ::testing::Return;
 using ::testing::ReturnRef;
-using ::testing::NiceMock;
 
 namespace {
 const std::string kDeviceName = "name";

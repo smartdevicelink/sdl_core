@@ -30,11 +30,11 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "gtest/gtest.h"
 #include "mobile/on_hmi_status_notification.h"
-#include "application_manager/test/include/application_manager/commands/commands_test.h"
-#include "application_manager/mock_message_helper.h"
 #include "application_manager/commands/command_impl.h"
+#include "application_manager/mock_message_helper.h"
+#include "application_manager/test/include/application_manager/commands/commands_test.h"
+#include "gtest/gtest.h"
 
 namespace test {
 namespace components {
@@ -47,13 +47,13 @@ const uint32_t kConnectionKey = 1u;
 }  // namespace
 
 namespace strings = application_manager::strings;
-using sdl_rpc_plugin::commands::OnHMIStatusNotification;
-using protocol_handler::MajorProtocolVersion;
 using application_manager::MockMessageHelper;
 using application_manager::commands::CommandImpl;
+using protocol_handler::MajorProtocolVersion;
+using sdl_rpc_plugin::commands::OnHMIStatusNotification;
+using testing::_;
 using testing::Mock;
 using testing::Return;
-using testing::_;
 
 class OnHMIStatusNotificationTest
     : public CommandsTest<CommandsTestMocks::kIsNice> {

@@ -34,9 +34,9 @@
 #define SRC_COMPONENTS_INCLUDE_CONNECTION_HANDLER_CONNECTION_HANDLER_OBSERVER_H_
 
 #include <string>
-#include "connection_handler/device.h"
 #include "connection_handler/connection.h"
 #include "connection_handler/connection_handler.h"
+#include "connection_handler/device.h"
 #include "protocol/service_type.h"
 
 #ifdef ENABLE_SECURITY

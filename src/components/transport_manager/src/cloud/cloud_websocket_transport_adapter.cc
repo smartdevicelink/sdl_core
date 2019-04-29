@@ -105,9 +105,9 @@ void CloudWebsocketTransportAdapter::CreateDevice(const std::string& uid) {
                             << results[4] << " " << results[5] << " ");
   std::string device_id = uid;
 
-  LOG4CXX_DEBUG(logger_,
-                "Creating Cloud Device For Host: " << host
-                                                   << " and Port: " << port);
+  LOG4CXX_DEBUG(
+      logger_,
+      "Creating Cloud Device For Host: " << host << " and Port: " << port);
 
   auto cloud_device = std::make_shared<CloudDevice>(host, port, device_id);
 
@@ -124,5 +124,5 @@ void CloudWebsocketTransportAdapter::CreateDevice(const std::string& uid) {
 
   return;
 }
-}
-}
+}  // namespace transport_adapter
+}  // namespace transport_manager

@@ -34,25 +34,25 @@
 #include <string>
 #include <vector>
 
-#include "gtest/gtest.h"
-#include "mobile/register_app_interface_request.h"
-#include "smart_objects/smart_object.h"
-#include "application_manager/commands/commands_test.h"
-#include "application_manager/commands/command_request_test.h"
 #include "application_manager/application.h"
-#include "application_manager/mock_application_manager.h"
+#include "application_manager/commands/command_request_test.h"
+#include "application_manager/commands/commands_test.h"
 #include "application_manager/mock_application.h"
 #include "application_manager/mock_application_helper.h"
-#include "interfaces/MOBILE_API.h"
-#include "application_manager/smart_object_keys.h"
-#include "application_manager/policies/mock_policy_handler_interface.h"
-#include "protocol_handler/mock_session_observer.h"
-#include "connection_handler/mock_connection_handler.h"
+#include "application_manager/mock_application_manager.h"
 #include "application_manager/mock_hmi_capabilities.h"
-#include "application_manager/mock_resume_ctrl.h"
 #include "application_manager/mock_hmi_interface.h"
-#include "utils/data_accessor.h"
+#include "application_manager/mock_resume_ctrl.h"
+#include "application_manager/policies/mock_policy_handler_interface.h"
+#include "application_manager/smart_object_keys.h"
+#include "connection_handler/mock_connection_handler.h"
+#include "gtest/gtest.h"
+#include "interfaces/MOBILE_API.h"
+#include "mobile/register_app_interface_request.h"
+#include "protocol_handler/mock_session_observer.h"
+#include "smart_objects/smart_object.h"
 #include "utils/custom_string.h"
+#include "utils/data_accessor.h"
 #include "utils/lock.h"
 #include "utils/macro.h"
 #include "utils/semantic_version.h"
@@ -64,9 +64,9 @@ namespace mobile_commands_test {
 namespace register_app_interface_request {
 
 using ::testing::_;
+using ::testing::DoAll;
 using ::testing::Return;
 using ::testing::ReturnRef;
-using ::testing::DoAll;
 
 namespace am = ::application_manager;
 
@@ -212,13 +212,15 @@ class RegisterAppInterfaceRequestTest
         ManageHMICommand(
             HMIResultCodeIs(
                 hmi_apis::FunctionID::BasicCommunication_OnAppRegistered),
-            _)).Times(0);
+            _))
+        .Times(0);
 
     EXPECT_CALL(
         mock_rpc_service_,
         ManageHMICommand(
             HMIResultCodeIs(hmi_apis::FunctionID::Buttons_OnButtonSubscription),
-            _)).Times(0);
+            _))
+        .Times(0);
 
     EXPECT_CALL(
         mock_rpc_service_,
@@ -309,12 +311,14 @@ TEST_F(RegisterAppInterfaceRequestTest, Run_MinimalData_SUCCESS) {
               ManageHMICommand(
                   HMIResultCodeIs(
                       hmi_apis::FunctionID::BasicCommunication_OnAppRegistered),
-                  _)).WillOnce(Return(true));
+                  _))
+      .WillOnce(Return(true));
   EXPECT_CALL(
       mock_rpc_service_,
       ManageHMICommand(
           HMIResultCodeIs(hmi_apis::FunctionID::Buttons_OnButtonSubscription),
-          _)).WillOnce(Return(true));
+          _))
+      .WillOnce(Return(true));
   EXPECT_CALL(mock_rpc_service_,
               ManageMobileCommand(_, am::commands::Command::SOURCE_SDL))
       .Times(2);
@@ -413,24 +417,29 @@ TEST_F(RegisterAppInterfaceRequestTest,
               ManageHMICommand(
                   HMIResultCodeIs(
                       hmi_apis::FunctionID::BasicCommunication_OnAppRegistered),
-                  _)).WillOnce(Return(true));
+                  _))
+      .WillOnce(Return(true));
   EXPECT_CALL(
       mock_rpc_service_,
       ManageHMICommand(
           HMIResultCodeIs(hmi_apis::FunctionID::Buttons_OnButtonSubscription),
-          _)).WillOnce(Return(true));
-  EXPECT_CALL(mock_rpc_service_,
-              ManageHMICommand(
-                  HMIResultCodeIs(hmi_apis::FunctionID::VR_ChangeRegistration),
-                  _)).WillOnce(Return(true));
-  EXPECT_CALL(mock_rpc_service_,
-              ManageHMICommand(
-                  HMIResultCodeIs(hmi_apis::FunctionID::TTS_ChangeRegistration),
-                  _)).WillOnce(Return(true));
-  EXPECT_CALL(mock_rpc_service_,
-              ManageHMICommand(
-                  HMIResultCodeIs(hmi_apis::FunctionID::UI_ChangeRegistration),
-                  _)).WillOnce(Return(true));
+          _))
+      .WillOnce(Return(true));
+  EXPECT_CALL(
+      mock_rpc_service_,
+      ManageHMICommand(
+          HMIResultCodeIs(hmi_apis::FunctionID::VR_ChangeRegistration), _))
+      .WillOnce(Return(true));
+  EXPECT_CALL(
+      mock_rpc_service_,
+      ManageHMICommand(
+          HMIResultCodeIs(hmi_apis::FunctionID::TTS_ChangeRegistration), _))
+      .WillOnce(Return(true));
+  EXPECT_CALL(
+      mock_rpc_service_,
+      ManageHMICommand(
+          HMIResultCodeIs(hmi_apis::FunctionID::UI_ChangeRegistration), _))
+      .WillOnce(Return(true));
   EXPECT_CALL(mock_rpc_service_,
               ManageMobileCommand(_, am::commands::Command::SOURCE_SDL))
       .Times(2);
@@ -460,7 +469,8 @@ TEST_F(RegisterAppInterfaceRequestTest,
       mock_resume_crt_,
       CheckApplicationHash(
           std::static_pointer_cast<application_manager::Application>(mock_app),
-          request_hash_id)).WillOnce(Return(true));
+          request_hash_id))
+      .WillOnce(Return(true));
 
   EXPECT_CALL(mock_resume_crt_, RemoveApplicationFromSaved(_)).Times(0);
 
@@ -494,7 +504,8 @@ TEST_F(RegisterAppInterfaceRequestTest,
       mock_resume_crt_,
       CheckApplicationHash(
           std::static_pointer_cast<application_manager::Application>(mock_app),
-          request_hash_id)).WillOnce(Return(false));
+          request_hash_id))
+      .WillOnce(Return(false));
 
   EXPECT_CALL(
       mock_application_helper_,

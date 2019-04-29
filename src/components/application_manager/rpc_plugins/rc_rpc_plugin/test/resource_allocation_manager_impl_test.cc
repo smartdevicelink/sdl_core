@@ -32,34 +32,34 @@
 #include <algorithm>
 #include "gtest/gtest.h"
 
-#include "rc_rpc_plugin/resource_allocation_manager_impl.h"
-#include "rc_rpc_plugin/rc_rpc_plugin.h"
-#include "rc_rpc_plugin/rc_module_constants.h"
 #include "application_manager/mock_application.h"
 #include "application_manager/mock_application_manager.h"
 #include "application_manager/mock_rpc_service.h"
 #include "application_manager/policies/mock_policy_handler_interface.h"
 #include "interfaces/HMI_API.h"
 #include "interfaces/MOBILE_API.h"
+#include "rc_rpc_plugin/rc_module_constants.h"
+#include "rc_rpc_plugin/rc_rpc_plugin.h"
+#include "rc_rpc_plugin/resource_allocation_manager_impl.h"
 
 using test::components::application_manager_test::MockApplication;
 using test::components::application_manager_test::MockApplicationManager;
 using test::components::application_manager_test::MockRPCService;
 
+using ::application_manager::ApplicationSharedPtr;
+using ::application_manager::Message;
+using ::application_manager::MessageType;
+using ::protocol_handler::MessagePriority;
 using ::testing::_;
+using ::testing::DoAll;
+using ::testing::Eq;
 using ::testing::Mock;
 using ::testing::NiceMock;
-using ::testing::StrictMock;
 using ::testing::Return;
 using ::testing::ReturnRef;
 using ::testing::SaveArg;
-using ::testing::Eq;
-using ::testing::DoAll;
 using ::testing::SetArgPointee;
-using ::application_manager::Message;
-using ::application_manager::MessageType;
-using ::application_manager::ApplicationSharedPtr;
-using ::protocol_handler::MessagePriority;
+using ::testing::StrictMock;
 
 namespace {
 const bool kDeviceHandle = 1u;
@@ -72,7 +72,7 @@ const uint32_t kHMIAppId1 = 1u;
 const uint32_t kAppId2 = 22u;
 const std::string policy_app_id_1_ = "policy_id_1";
 const uint32_t kSizeOfModules = 6u;
-}
+}  // namespace
 
 namespace rc_rpc_plugin_test {
 
@@ -665,4 +665,4 @@ TEST_F(RAManagerTest, OnRCStatus_ModuleAllocation) {
             kHMIAppId1);
 }
 
-}  // namespace rc_rpc_plugin
+}  // namespace rc_rpc_plugin_test

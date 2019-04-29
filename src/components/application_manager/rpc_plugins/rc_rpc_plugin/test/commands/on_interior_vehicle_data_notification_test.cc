@@ -30,36 +30,36 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "application_manager/application.h"
-#include "application_manager/mock_application.h"
-#include "application_manager/commands/commands_test.h"
 #include "rc_rpc_plugin/commands/mobile/on_interior_vehicle_data_notification.h"
-#include "rc_rpc_plugin/rc_rpc_plugin.h"
-#include "rc_rpc_plugin/rc_module_constants.h"
-#include "rc_rpc_plugin/mock/mock_resource_allocation_manager.h"
-#include "rc_rpc_plugin/mock/mock_interior_data_cache.h"
-#include "rc_rpc_plugin/mock/mock_interior_data_manager.h"
+#include "application_manager/application.h"
+#include "application_manager/commands/commands_test.h"
+#include "application_manager/mock_application.h"
 #include "gtest/gtest.h"
 #include "interfaces/MOBILE_API.h"
+#include "rc_rpc_plugin/mock/mock_interior_data_cache.h"
+#include "rc_rpc_plugin/mock/mock_interior_data_manager.h"
+#include "rc_rpc_plugin/mock/mock_resource_allocation_manager.h"
+#include "rc_rpc_plugin/rc_module_constants.h"
+#include "rc_rpc_plugin/rc_rpc_plugin.h"
 
-using ::testing::_;
-using ::testing::Return;
-using ::testing::NiceMock;
-using ::testing::SaveArg;
-using ::testing::Mock;
 using application_manager::ApplicationSet;
 using application_manager::commands::MessageSharedPtr;
 using test::components::application_manager_test::MockApplication;
 using test::components::application_manager_test::MockApplicationManager;
 using test::components::commands_test::CommandsTest;
 using test::components::commands_test::CommandsTestMocks;
+using ::testing::_;
+using ::testing::Mock;
+using ::testing::NiceMock;
+using ::testing::Return;
+using ::testing::SaveArg;
 
 namespace {
 const uint32_t kAppId = 0u;
 const uint32_t kConnectionKey = 1u;
 const std::string kPolicyAppId = "Test";
 const int kModuleId = 153u;
-}
+}  // namespace
 
 namespace rc_rpc_plugin_test {
 using namespace rc_rpc_plugin;

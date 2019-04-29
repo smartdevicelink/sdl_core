@@ -33,12 +33,12 @@
 #define SRC_COMPONENTS_SMART_OBJECTS_INCLUDE_SMART_OBJECTS_OBJECT_SCHEMA_ITEM_H_
 
 #include <map>
-#include <string>
 #include <set>
+#include <string>
 
+#include <boost/optional.hpp>
 #include "utils/macro.h"
 #include "utils/semantic_version.h"
-#include <boost/optional.hpp>
 
 #include "smart_objects/schema_item.h"
 #include "smart_objects/schema_item_parameter.h"

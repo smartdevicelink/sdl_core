@@ -36,12 +36,12 @@
 
 #include "gtest/gtest.h"
 
-#include "smart_objects/smart_object.h"
-#include "application_manager/smart_object_keys.h"
 #include "application_manager/commands/command_request_test.h"
-#include "application_manager/mock_application_manager.h"
 #include "application_manager/hmi_interfaces.h"
+#include "application_manager/mock_application_manager.h"
 #include "application_manager/mock_hmi_interface.h"
+#include "application_manager/smart_object_keys.h"
+#include "smart_objects/smart_object.h"
 
 namespace test {
 namespace components {
@@ -53,9 +53,9 @@ using ::testing::_;
 using ::testing::ReturnRef;
 namespace am = ::application_manager;
 namespace commands = am::commands;
+using am::event_engine::Event;
 using commands::MessageSharedPtr;
 using sdl_rpc_plugin::commands::NaviStartStreamRequest;
-using am::event_engine::Event;
 
 namespace {
 const uint32_t kHmiAppId = 13u;

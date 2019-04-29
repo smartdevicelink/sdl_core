@@ -36,8 +36,8 @@
 
 #include "protocol_handler/protocol_handler_impl.h"
 #include "protocol_handler/protocol_packet.h"
-#include "security_manager/security_manager.h"
 #include "protocol_handler/session_observer.h"
+#include "security_manager/security_manager.h"
 
 namespace protocol_handler {
 

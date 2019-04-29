@@ -431,9 +431,9 @@ void RPCServiceImpl::SendMessageToMobile(
   if (IsAppServiceRPC(function_id,
                       commands::Command::CommandSource::SOURCE_SDL) ||
       rpc_passing) {
-    LOG4CXX_DEBUG(logger_,
-                  "Allowing unknown parameters for response function "
-                      << function_id);
+    LOG4CXX_DEBUG(
+        logger_,
+        "Allowing unknown parameters for response function " << function_id);
     allow_unknown_parameters = true;
   }
 

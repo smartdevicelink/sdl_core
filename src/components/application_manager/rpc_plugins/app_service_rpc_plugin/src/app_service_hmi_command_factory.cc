@@ -106,9 +106,9 @@ bool AppServiceHmiCommandFactory::IsAbleToProcess(
   LOG4CXX_DEBUG(logger_,
                 "HMI App Service Plugin IsAbleToProcess: " << function_id);
   UNUSED(source);
-  return buildCommandCreator(function_id,
-                             hmi_apis::messageType::INVALID_ENUM,
-                             source).CanBeCreated();
+  return buildCommandCreator(
+             function_id, hmi_apis::messageType::INVALID_ENUM, source)
+      .CanBeCreated();
 }
 
 app_mngr::CommandCreator& AppServiceHmiCommandFactory::buildCommandCreator(
@@ -188,4 +188,4 @@ app_mngr::CommandCreator& AppServiceHmiCommandFactory::buildCommandCreator(
   }
   return factory.GetCreator<app_mngr::InvalidCommand>();
 }
-}
+}  // namespace app_service_rpc_plugin

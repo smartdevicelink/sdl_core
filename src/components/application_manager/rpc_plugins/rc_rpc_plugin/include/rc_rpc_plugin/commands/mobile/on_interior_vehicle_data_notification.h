@@ -35,9 +35,9 @@
 
 #include <string>
 #include "application_manager/commands/command_notification_impl.h"
-#include "rc_rpc_plugin/resource_allocation_manager.h"
-#include "rc_rpc_plugin/interior_data_cache.h"
 #include "rc_rpc_plugin/commands/rc_command_request.h"
+#include "rc_rpc_plugin/interior_data_cache.h"
+#include "rc_rpc_plugin/resource_allocation_manager.h"
 #include "utils/macro.h"
 
 namespace rc_rpc_plugin {

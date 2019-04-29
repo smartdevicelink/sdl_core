@@ -43,7 +43,7 @@ struct AppExtensionPredicate {
     return app ? (app->QueryInterface(uid).use_count() != 0) : false;
   }
 };
-}
+}  // namespace
 
 namespace commands {
 

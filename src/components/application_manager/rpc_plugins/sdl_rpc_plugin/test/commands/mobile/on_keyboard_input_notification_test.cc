@@ -30,13 +30,13 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "gtest/gtest.h"
 #include "mobile/on_keyboard_input_notification.h"
-#include "application_manager/commands/commands_test.h"
 #include <application_manager/smart_object_keys.h>
+#include "application_manager/commands/command_impl.h"
+#include "application_manager/commands/commands_test.h"
 #include "application_manager/message.h"
 #include "application_manager/mock_message_helper.h"
-#include "application_manager/commands/command_impl.h"
+#include "gtest/gtest.h"
 
 namespace test {
 namespace components {
@@ -50,13 +50,13 @@ namespace {
 const uint32_t kConnectionKey = 1u;
 }  // namespace
 
-using sdl_rpc_plugin::commands::mobile::OnKeyBoardInputNotification;
+using application_manager::ApplicationSet;
 using application_manager::MockMessageHelper;
 using application_manager::commands::CommandImpl;
-using application_manager::ApplicationSet;
+using sdl_rpc_plugin::commands::mobile::OnKeyBoardInputNotification;
+using testing::_;
 using testing::Mock;
 using testing::Return;
-using testing::_;
 
 class OnKeyBoardInputNotificationTest
     : public CommandsTest<CommandsTestMocks::kIsNice> {

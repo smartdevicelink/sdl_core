@@ -33,21 +33,21 @@
 #ifndef SRC_COMPONENTS_POLICY_POLICY_REGULAR_INCLUDE_POLICY_POLICY_MANAGER_IMPL_H_
 #define SRC_COMPONENTS_POLICY_POLICY_REGULAR_INCLUDE_POLICY_POLICY_MANAGER_IMPL_H_
 
-#include <string>
-#include <list>
 #include <cstdint>
+#include <list>
+#include <string>
 
-#include "utils/lock.h"
-#include "policy/policy_manager.h"
-#include "policy/policy_table.h"
-#include "policy/cache_manager_interface.h"
-#include "policy/update_status_manager.h"
-#include "policy/policy_table/functions.h"
-#include "policy/usage_statistics/statistics_manager.h"
-#include "policy/policy_helper.h"
-#include "utils/timer.h"
 #include "policy/access_remote.h"
 #include "policy/access_remote_impl.h"
+#include "policy/cache_manager_interface.h"
+#include "policy/policy_helper.h"
+#include "policy/policy_manager.h"
+#include "policy/policy_table.h"
+#include "policy/policy_table/functions.h"
+#include "policy/update_status_manager.h"
+#include "policy/usage_statistics/statistics_manager.h"
+#include "utils/lock.h"
+#include "utils/timer.h"
 
 namespace policy_table = rpc::policy_table_interface_base;
 
@@ -672,7 +672,7 @@ class PolicyManagerImpl : public PolicyManager {
    * provider
    * @param policy_app_id Unique application id
    * @return bool true if allowed
-  */
+   */
   bool UnknownRPCPassthroughAllowed(
       const std::string& policy_app_id) const OVERRIDE;
 
@@ -958,11 +958,11 @@ class PolicyManagerImpl : public PolicyManager {
   void SendAuthTokenUpdated(const std::string policy_app_id);
 
   /**
-    * @brief Gets all allowed module types
-    * @param policy_app_id unique identifier of application
-    * @param modules list of allowed module types
-    * @return true if application has allowed modules
-    */
+   * @brief Gets all allowed module types
+   * @param policy_app_id unique identifier of application
+   * @param modules list of allowed module types
+   * @return true if application has allowed modules
+   */
   bool GetModuleTypes(const std::string& policy_app_id,
                       std::vector<std::string>* modules) const OVERRIDE;
 

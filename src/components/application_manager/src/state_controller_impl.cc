@@ -32,8 +32,8 @@
 
 #include "application_manager/state_controller_impl.h"
 #include <tuple>
-#include "application_manager/usage_statistics.h"
 #include "application_manager/rpc_service.h"
+#include "application_manager/usage_statistics.h"
 #include "utils/helpers.h"
 
 #include "connection_handler/connection_handler.h"
@@ -627,8 +627,8 @@ void StateControllerImpl::ApplyRegularState(ApplicationSharedPtr app,
 void StateControllerImpl::on_event(const event_engine::MobileEvent& event) {}
 
 void StateControllerImpl::on_event(const event_engine::Event& event) {
-  using smart_objects::SmartObject;
   using event_engine::Event;
+  using smart_objects::SmartObject;
   using namespace hmi_apis;
   namespace FunctionID = hmi_apis::FunctionID;
 

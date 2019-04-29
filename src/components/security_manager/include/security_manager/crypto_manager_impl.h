@@ -33,19 +33,19 @@
 #ifndef SRC_COMPONENTS_SECURITY_MANAGER_INCLUDE_SECURITY_MANAGER_CRYPTO_MANAGER_IMPL_H_
 #define SRC_COMPONENTS_SECURITY_MANAGER_INCLUDE_SECURITY_MANAGER_CRYPTO_MANAGER_IMPL_H_
 
-#include <stdint.h>
 #include <openssl/bio.h>
-#include <openssl/ssl.h>
 #include <openssl/err.h>
-#include <string>
+#include <openssl/ssl.h>
+#include <stdint.h>
 #include <map>
+#include <string>
 
 #include "security_manager/crypto_manager.h"
-#include "security_manager/ssl_context.h"
 #include "security_manager/security_manager_settings.h"
+#include "security_manager/ssl_context.h"
 
-#include "utils/macro.h"
 #include "utils/lock.h"
+#include "utils/macro.h"
 
 namespace security_manager {
 class CryptoManagerImpl : public CryptoManager {

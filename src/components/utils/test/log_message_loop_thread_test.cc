@@ -30,9 +30,9 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "gtest/gtest.h"
-#include "gmock/gmock.h"
 #include "utils/log_message_loop_thread.h"
+#include "gmock/gmock.h"
+#include "gtest/gtest.h"
 #include "utils/logger_status.h"
 
 namespace test {

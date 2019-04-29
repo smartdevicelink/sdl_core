@@ -36,9 +36,9 @@
 #include <string>
 #include <vector>
 
+#include "protocol/common.h"
 #include "protocol/message_priority.h"
 #include "protocol/rpc_type.h"
-#include "protocol/common.h"
 #include "smart_objects/smart_object.h"
 
 namespace application_manager {

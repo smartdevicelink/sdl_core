@@ -670,6 +670,6 @@ TEST_F(
   policy_manager_->SendNotificationOnPermissionsUpdated(app_id_2_);
 }
 
-}  // namespace policy
+}  // namespace policy_test
 }  // namespace components
 }  // namespace test

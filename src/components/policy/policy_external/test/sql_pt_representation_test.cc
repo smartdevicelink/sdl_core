@@ -29,38 +29,38 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <vector>
-#include <string>
-#include <algorithm>
-#include <fstream>
 #include <stdio.h>
 #include <sys/stat.h>
+#include <algorithm>
+#include <fstream>
 #include <memory>
+#include <string>
+#include <vector>
 
 #include "gtest/gtest.h"
+#include "json/reader.h"
+#include "json/writer.h"
+#include "policy/mock_policy_settings.h"
+#include "policy/policy_table/enums.h"
+#include "policy/policy_table/types.h"
+#include "policy/policy_types.h"
 #include "policy/sql_pt_representation.h"
+#include "policy/sql_wrapper.h"
+#include "rpc_base/rpc_base.h"
 #include "utils/file_system.h"
 #include "utils/system.h"
-#include "policy/sql_wrapper.h"
-#include "policy/policy_types.h"
-#include "json/writer.h"
-#include "json/reader.h"
-#include "policy/policy_table/types.h"
-#include "policy/policy_table/enums.h"
-#include "rpc_base/rpc_base.h"
-#include "policy/mock_policy_settings.h"
 
 namespace policy_table = rpc::policy_table_interface_base;
-using policy::SQLPTRepresentation;
 using policy::CheckPermissionResult;
-using policy::UserFriendlyMessage;
 using policy::EndpointUrls;
+using policy::SQLPTRepresentation;
+using policy::UserFriendlyMessage;
 using policy::VehicleInfo;
 
-using testing::ReturnRef;
-using testing::Return;
-using testing::NiceMock;
 using testing::Mock;
+using testing::NiceMock;
+using testing::Return;
+using testing::ReturnRef;
 
 namespace test {
 namespace components {

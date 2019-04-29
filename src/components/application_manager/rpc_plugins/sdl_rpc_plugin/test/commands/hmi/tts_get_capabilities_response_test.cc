@@ -32,11 +32,11 @@
 
 #include <string>
 
+#include "application_manager/commands/commands_test.h"
+#include "application_manager/mock_hmi_capabilities.h"
 #include "gtest/gtest.h"
 #include "hmi/tts_get_capabilities_response.h"
-#include "application_manager/mock_hmi_capabilities.h"
 #include "smart_objects/smart_object.h"
-#include "application_manager/commands/commands_test.h"
 
 namespace test {
 namespace components {

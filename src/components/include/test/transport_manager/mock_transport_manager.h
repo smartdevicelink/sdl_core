@@ -33,22 +33,22 @@
 #ifndef SRC_COMPONENTS_INCLUDE_TEST_TRANSPORT_MANAGER_MOCK_TRANSPORT_MANAGER_H_
 #define SRC_COMPONENTS_INCLUDE_TEST_TRANSPORT_MANAGER_MOCK_TRANSPORT_MANAGER_H_
 
-#include "gmock/gmock.h"
 #include <string>
-#include "transport_manager/transport_manager.h"
-#include "transport_manager/transport_adapter/transport_adapter_event.h"
-#include "telemetry_monitor/telemetry_observable.h"
+#include "gmock/gmock.h"
 #include "resumption/last_state.h"
+#include "telemetry_monitor/telemetry_observable.h"
+#include "transport_manager/transport_adapter/transport_adapter_event.h"
+#include "transport_manager/transport_manager.h"
 
 namespace test {
 namespace components {
 namespace transport_manager_test {
 
-using ::transport_manager::DeviceHandle;
 using ::transport_manager::ConnectionUID;
-using ::transport_manager::transport_adapter::TransportAdapter;
+using ::transport_manager::DeviceHandle;
 using ::transport_manager::TransportAdapterEvent;
 using ::transport_manager::TransportManagerListener;
+using ::transport_manager::transport_adapter::TransportAdapter;
 /*
  * MOCK implementation of ::transport_manager::TransportManager interface
  */

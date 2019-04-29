@@ -33,9 +33,9 @@
 #ifndef SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_MOBILE_ON_SYSTEM_CAPABILITY_UPDATED_NOTIFICATION_H_
 #define SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_MOBILE_ON_SYSTEM_CAPABILITY_UPDATED_NOTIFICATION_H_
 
+#include <vector>
 #include "application_manager/commands/command_notification_impl.h"
 #include "policy/policy_table/enums.h"
-#include <vector>
 
 namespace sdl_rpc_plugin {
 namespace app_mngr = application_manager;
@@ -79,6 +79,6 @@ class OnSystemCapabilityUpdatedNotification
 
 }  // namespace mobile
 }  // namespace commands
-}  // namespace application_manager
+}  // namespace sdl_rpc_plugin
 
 #endif  // SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_MOBILE_ON_SYSTEM_CAPABILITY_UPDATED_NOTIFICATION_H_

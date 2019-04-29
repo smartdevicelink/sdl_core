@@ -30,48 +30,47 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <fstream>
 #include <string>
 #include <vector>
-#include <fstream>
 #include "gmock/gmock.h"
 
-#include "application_manager/policies/policy_handler.h"
-#include "application_manager/policies/delegates/app_permission_delegate.h"
-#include "connection_handler/connection_handler_impl.h"
-#include "application_manager/application_manager_impl.h"
 #include "application_manager/application_impl.h"
+#include "application_manager/application_manager_impl.h"
+#include "application_manager/policies/delegates/app_permission_delegate.h"
+#include "application_manager/policies/policy_handler.h"
+#include "connection_handler/connection_handler_impl.h"
 #ifdef ENABLE_SECURITY
-#include "security_manager/mock_security_manager.h"
 #include "security_manager/mock_crypto_manager.h"
+#include "security_manager/mock_security_manager.h"
 #endif  // ENABLE_SECURITY
 #include "application_manager/mock_message_helper.h"
 #include "connection_handler/mock_connection_handler_settings.h"
-#include "transport_manager/mock_transport_manager.h"
-#include "policy/policy_types.h"
 #include "json/reader.h"
-#include "json/writer.h"
 #include "json/value.h"
+#include "json/writer.h"
+#include "policy/policy_types.h"
 #include "smart_objects/smart_object.h"
+#include "transport_manager/mock_transport_manager.h"
 #include "utils/file_system.h"
 
-#include "utils/custom_string.h"
-#include "policy/usage_statistics/counter.h"
-#include "policy/usage_statistics/statistics_manager.h"
 #include "interfaces/MOBILE_API.h"
 #include "policy/mock_policy_settings.h"
+#include "policy/usage_statistics/counter.h"
+#include "policy/usage_statistics/statistics_manager.h"
+#include "utils/custom_string.h"
 
 #include "application_manager/mock_application.h"
-#include "policy/usage_statistics/mock_statistics_manager.h"
-#include "protocol_handler/mock_session_observer.h"
-#include "connection_handler/mock_connection_handler.h"
 #include "application_manager/mock_application_manager.h"
-#include "application_manager/policies/mock_policy_handler_observer.h"
 #include "application_manager/mock_event_dispatcher.h"
-#include "application_manager/mock_state_controller.h"
 #include "application_manager/mock_hmi_capabilities.h"
 #include "application_manager/mock_rpc_service.h"
+#include "application_manager/mock_state_controller.h"
+#include "application_manager/policies/mock_policy_handler_observer.h"
+#include "connection_handler/mock_connection_handler.h"
 #include "policy/mock_policy_manager.h"
 #include "policy/usage_statistics/mock_statistics_manager.h"
+#include "protocol_handler/mock_session_observer.h"
 
 namespace test {
 namespace components {
@@ -510,7 +509,8 @@ TEST_F(PolicyHandlerTest, OnPermissionsUpdated_TwoParams_InvalidApp_UNSUCCESS) {
   EXPECT_CALL(app_manager_, application_by_policy_id(kPolicyAppId_))
       .WillOnce(Return(invalid_app));
   EXPECT_CALL(mock_message_helper_,
-              SendOnPermissionsChangeNotification(_, _, _)).Times(0);
+              SendOnPermissionsChangeNotification(_, _, _))
+      .Times(0);
 
   Permissions permissions;
   policy_handler_.OnPermissionsUpdated(kPolicyAppId_, permissions);
@@ -978,7 +978,8 @@ TEST_F(PolicyHandlerTest,
   AppPermissions permissions(kPolicyAppId_);
   permissions.appPermissionsConsentNeeded = false;
   EXPECT_CALL(mock_message_helper_,
-              SendOnAppPermissionsChangedNotification(kAppId1_, _, _)).Times(0);
+              SendOnAppPermissionsChangedNotification(kAppId1_, _, _))
+      .Times(0);
 
   EXPECT_CALL(*mock_policy_manager_, GetAppPermissionsChanges(_))
       .WillOnce(Return(permissions));
@@ -1117,7 +1118,8 @@ TEST_F(PolicyHandlerTest,
   // Check expectations
   // Notification won't be sent
   EXPECT_CALL(mock_message_helper_,
-              SendOnAppPermissionsChangedNotification(kAppId1_, _, _)).Times(0);
+              SendOnAppPermissionsChangedNotification(kAppId1_, _, _))
+      .Times(0);
 
   EXPECT_CALL(*mock_policy_manager_, GetAppPermissionsChanges(_))
       .WillOnce(Return(permissions));
@@ -2242,7 +2244,8 @@ TEST_F(PolicyHandlerTest,
                   _,
                   NULL,
                   _,
-                  _)).WillOnce(Return(1u));
+                  _))
+      .WillOnce(Return(1u));
 
   EXPECT_CALL(app_manager_, application(kConnectionKey_))
       .WillOnce(Return(mock_app_));

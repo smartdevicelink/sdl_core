@@ -40,8 +40,8 @@
 #include "protocol_handler/protocol_observer.h"
 #include "protocol_handler/session_observer.h"
 
-#include "security_manager/security_manager_listener.h"
 #include "application_manager/policies/policy_handler_observer.h"
+#include "security_manager/security_manager_listener.h"
 
 namespace security_manager {
 

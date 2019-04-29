@@ -33,15 +33,15 @@
 #ifndef SRC_COMPONENTS_SMART_OBJECTS_INCLUDE_SMART_OBJECTS_SMART_OBJECT_H_
 #define SRC_COMPONENTS_SMART_OBJECTS_INCLUDE_SMART_OBJECTS_SMART_OBJECT_H_
 
-#include <set>
-#include <string>
-#include <sstream>
-#include <vector>
 #include <map>
+#include <set>
+#include <sstream>
+#include <string>
+#include <vector>
 
+#include "rpc_base/validation_report.h"
 #include "smart_objects/smart_schema.h"
 #include "utils/custom_string.h"
-#include "rpc_base/validation_report.h"
 
 namespace ns_smart_device_link {
 namespace ns_smart_objects {
@@ -299,8 +299,8 @@ class SmartObject FINAL {
   bool operator==(const int64_t Value) const;
 
   /**
-    * @name Support of type: uint64_t
-    * @{
+   * @name Support of type: uint64_t
+   * @{
    **/
 
   /**

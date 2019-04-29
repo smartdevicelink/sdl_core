@@ -30,8 +30,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <string>
 #include <set>
+#include <string>
 
 #include "gmock/gmock.h"
 
@@ -58,7 +58,7 @@ void MakeMapObject(SmartObject& obj, const int size) {
     obj[i_key] = array;
   }
 }
-}
+}  // namespace
 
 TEST(SmartObjectPerformanceTest, SmartObjectPerformance) {
   SmartObject object;

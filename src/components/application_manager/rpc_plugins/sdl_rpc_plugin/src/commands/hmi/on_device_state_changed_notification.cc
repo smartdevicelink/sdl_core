@@ -30,12 +30,12 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <algorithm>
 #include "sdl_rpc_plugin/commands/hmi/on_device_state_changed_notification.h"
+#include <algorithm>
 #include "application_manager/application_manager.h"
 #include "application_manager/message_helper.h"
-#include "interfaces/HMI_API.h"
 #include "encryption/hashing.h"
+#include "interfaces/HMI_API.h"
 
 namespace {
 // TODO(AOleynik) : replace this !!!
@@ -72,7 +72,7 @@ std::string convert_to_bt_mac(std::string& deviceInternalId) {
 
   return bt_mac;
 }
-}
+}  // namespace
 
 namespace sdl_rpc_plugin {
 using namespace application_manager;
@@ -121,4 +121,4 @@ void OnDeviceStateChangedNotification::Run() {
 
 }  // namespace commands
 
-}  // namespace application_manager
+}  // namespace sdl_rpc_plugin

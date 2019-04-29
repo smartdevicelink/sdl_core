@@ -33,33 +33,33 @@
 #ifndef SRC_COMPONENTS_PROTOCOL_HANDLER_INCLUDE_PROTOCOL_HANDLER_PROTOCOL_HANDLER_IMPL_H_
 #define SRC_COMPONENTS_PROTOCOL_HANDLER_INCLUDE_PROTOCOL_HANDLER_PROTOCOL_HANDLER_IMPL_H_
 
+#include <stdint.h>
 #include <map>
 #include <memory>
 #include <set>
-#include <stdint.h>
 #include <utility>  // std::make_pair
 #include <vector>
-#include "utils/prioritized_queue.h"
 #include "utils/message_queue.h"
+#include "utils/prioritized_queue.h"
 #include "utils/threads/message_loop_thread.h"
 
-#include "utils/messagemeter.h"
 #include "utils/custom_string.h"
+#include "utils/messagemeter.h"
 #include "utils/semantic_version.h"
 
-#include "protocol_handler/protocol_handler.h"
-#include "protocol_handler/protocol_packet.h"
-#include "protocol_handler/protocol_handler_settings.h"
-#include "protocol_handler/session_observer.h"
-#include "protocol_handler/protocol_observer.h"
+#include "application_manager/policies/policy_handler_observer.h"
+#include "connection_handler/connection_handler.h"
 #include "protocol_handler/incoming_data_handler.h"
 #include "protocol_handler/multiframe_builder.h"
+#include "protocol_handler/protocol_handler.h"
+#include "protocol_handler/protocol_handler_settings.h"
+#include "protocol_handler/protocol_observer.h"
+#include "protocol_handler/protocol_packet.h"
+#include "protocol_handler/session_observer.h"
 #include "transport_manager/common.h"
+#include "transport_manager/transport_adapter/transport_adapter.h"
 #include "transport_manager/transport_manager.h"
 #include "transport_manager/transport_manager_listener_empty.h"
-#include "transport_manager/transport_adapter/transport_adapter.h"
-#include "connection_handler/connection_handler.h"
-#include "application_manager/policies/policy_handler_observer.h"
 
 #ifdef TELEMETRY_MONITOR
 #include "protocol_handler/telemetry_observer.h"
@@ -67,8 +67,8 @@
 #endif  // TELEMETRY_MONITOR
 
 #ifdef ENABLE_SECURITY
-#include "security_manager/security_manager.h"
 #include "protocol_handler/handshake_handler.h"
+#include "security_manager/security_manager.h"
 #endif  // ENABLE_SECURITY
 
 namespace connection_handler {
@@ -110,7 +110,8 @@ struct RawFordMessageFromMobile : public ProtocolFramePtr {
   // PrioritizedQueue requires this method to decide which priority to assign
   size_t PriorityOrder() const {
     return MessagePriority::FromServiceType(
-               ServiceTypeFromByte(get()->service_type())).OrderingValue();
+               ServiceTypeFromByte(get()->service_type()))
+        .OrderingValue();
   }
 };
 
@@ -122,7 +123,8 @@ struct RawFordMessageToMobile : public ProtocolFramePtr {
   // PrioritizedQueue requires this method to decide which priority to assign
   size_t PriorityOrder() const {
     return MessagePriority::FromServiceType(
-               ServiceTypeFromByte(get()->service_type())).OrderingValue();
+               ServiceTypeFromByte(get()->service_type()))
+        .OrderingValue();
   }
   // Signals whether connection to mobile must be closed after processing this
   // message
@@ -131,9 +133,11 @@ struct RawFordMessageToMobile : public ProtocolFramePtr {
 
 // Short type names for prioritized message queues
 typedef threads::MessageLoopThread<
-    utils::PrioritizedQueue<RawFordMessageFromMobile> > FromMobileQueue;
+    utils::PrioritizedQueue<RawFordMessageFromMobile> >
+    FromMobileQueue;
 typedef threads::MessageLoopThread<
-    utils::PrioritizedQueue<RawFordMessageToMobile> > ToMobileQueue;
+    utils::PrioritizedQueue<RawFordMessageToMobile> >
+    ToMobileQueue;
 
 // Type to allow easy mapping between a device type and transport
 // characteristics
@@ -176,10 +180,10 @@ class ProtocolHandlerImpl
       public impl::FromMobileQueue::Handler,
       public impl::ToMobileQueue::Handler
 #ifdef TELEMETRY_MONITOR
-      ,
+    ,
       public telemetry_monitor::TelemetryObservable<PHTelemetryObserver>
 #endif  // TELEMETRY_MONITOR
-      {
+{
  public:
   /**
    * @brief Constructor
@@ -252,20 +256,20 @@ class ProtocolHandlerImpl
   void SendHeartBeat(int32_t connection_id, uint8_t session_id);
 
   /**
-    * \brief Sends ending session to mobile application
-    * \param connection_id Identifier of connection within which
-    * session exists
-    * \param session_id ID of session to be ended
-    */
+   * \brief Sends ending session to mobile application
+   * \param connection_id Identifier of connection within which
+   * session exists
+   * \param session_id ID of session to be ended
+   */
   void SendEndSession(int32_t connection_id, uint8_t session_id);
 
   /**
-    * \brief Sends ending session to mobile application
-    * \param primary_connection_id Identifier of connection within which
-    * service exists
-    * \param connection_id Identifier of the actual transport for the service
-    * \param session_id ID of session to be ended
-    */
+   * \brief Sends ending session to mobile application
+   * \param primary_connection_id Identifier of connection within which
+   * service exists
+   * \param connection_id Identifier of the actual transport for the service
+   * \param session_id ID of session to be ended
+   */
   void SendEndService(int32_t primary_connection_id,
                       int32_t connection_id,
                       uint8_t session_id,

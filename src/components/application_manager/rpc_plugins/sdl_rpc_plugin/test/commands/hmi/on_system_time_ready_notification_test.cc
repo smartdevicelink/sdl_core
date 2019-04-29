@@ -30,12 +30,12 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "gtest/gtest.h"
-#include "application_manager/commands/commands_test.h"
 #include "hmi/on_system_time_ready_notification.h"
+#include "application_manager/commands/commands_test.h"
 #include "application_manager/mock_application_manager.h"
 #include "application_manager/mock_event_dispatcher.h"
 #include "application_manager/smart_object_keys.h"
+#include "gtest/gtest.h"
 #include "interfaces/HMI_API.h"
 
 namespace test {

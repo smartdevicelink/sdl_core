@@ -33,11 +33,11 @@
 #ifndef SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_RC_RPC_PLUGIN_INCLUDE_RC_RPC_PLUGIN_RC_APP_EXTENSION_H_
 #define SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_RC_RPC_PLUGIN_INCLUDE_RC_RPC_PLUGIN_RC_APP_EXTENSION_H_
 
-#include <string>
-#include <set>
 #include <memory>
-#include "utils/macro.h"
+#include <set>
+#include <string>
 #include "application_manager/app_extension.h"
+#include "utils/macro.h"
 
 namespace rc_rpc_plugin {
 class RCAppExtension : public application_manager::AppExtension {

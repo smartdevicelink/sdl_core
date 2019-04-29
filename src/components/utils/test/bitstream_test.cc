@@ -30,10 +30,10 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "utils/bitstream.h"
 #include <unistd.h>
 #include "gtest/gtest.h"
 #include "utils/macro.h"
-#include "utils/bitstream.h"
 
 namespace test {
 namespace components {

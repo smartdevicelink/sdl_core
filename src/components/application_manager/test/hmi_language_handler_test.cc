@@ -32,18 +32,18 @@
 
 #include <stdint.h>
 
-#include "gtest/gtest.h"
 #include "application_manager/application_manager.h"
 #include "application_manager/hmi_language_handler.h"
-#include "application_manager/state_controller.h"
+#include "application_manager/mock_application.h"
 #include "application_manager/mock_application_manager.h"
 #include "application_manager/mock_event_dispatcher.h"
-#include "application_manager/mock_message_helper.h"
-#include "application_manager/resumption/resume_ctrl_impl.h"
 #include "application_manager/mock_hmi_capabilities.h"
-#include "application_manager/mock_application.h"
+#include "application_manager/mock_message_helper.h"
 #include "application_manager/mock_rpc_service.h"
+#include "application_manager/resumption/resume_ctrl_impl.h"
 #include "application_manager/smart_object_keys.h"
+#include "application_manager/state_controller.h"
+#include "gtest/gtest.h"
 #include "test/resumption/mock_last_state.h"
 
 #include "utils/lock.h"
@@ -54,13 +54,13 @@ namespace hmi_language_handler {
 
 namespace am = ::application_manager;
 
-using am::event_engine::Event;
 using am::ApplicationSet;
+using am::event_engine::Event;
 
+using ::testing::_;
+using ::testing::NiceMock;
 using ::testing::Return;
 using ::testing::ReturnRef;
-using ::testing::NiceMock;
-using ::testing::_;
 
 typedef NiceMock<
     ::test::components::application_manager_test::MockApplicationManager>

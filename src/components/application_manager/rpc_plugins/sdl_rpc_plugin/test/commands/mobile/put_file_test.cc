@@ -36,18 +36,18 @@
 
 #include "gtest/gtest.h"
 
-#include "application_manager/commands/commands_test.h"
 #include "application_manager/commands/command_request_test.h"
+#include "application_manager/commands/commands_test.h"
 
-#include "mobile/put_file_response.h"
 #include "mobile/put_file_request.h"
+#include "mobile/put_file_response.h"
 
-#include "utils/file_system.h"
-#include "smart_objects/smart_object.h"
-#include "interfaces/MOBILE_API.h"
 #include "application_manager/application.h"
 #include "application_manager/mock_application.h"
 #include "application_manager/policies/mock_policy_handler_interface.h"
+#include "interfaces/MOBILE_API.h"
+#include "smart_objects/smart_object.h"
+#include "utils/file_system.h"
 
 namespace test {
 namespace components {
@@ -56,16 +56,16 @@ namespace mobile_commands_test {
 namespace put_file {
 
 using ::testing::_;
+using ::testing::AtLeast;
 using ::testing::Return;
 using ::testing::ReturnRef;
-using ::testing::AtLeast;
 
 namespace am = ::application_manager;
 
-using sdl_rpc_plugin::commands::PutFileRequest;
-using sdl_rpc_plugin::commands::PutFileResponse;
 using am::commands::MessageSharedPtr;
 using policy_test::MockPolicyHandlerInterface;
+using sdl_rpc_plugin::commands::PutFileRequest;
+using sdl_rpc_plugin::commands::PutFileResponse;
 
 typedef std::shared_ptr<PutFileRequest> PutFileRequestPtr;
 typedef std::shared_ptr<PutFileResponse> PutFileResponsePtr;
@@ -78,7 +78,7 @@ const int64_t kZeroOffset = 0u;
 const std::string kStorageFolder = "./storage";
 const std::string kFolder = "folder";
 const std::string kAppFolder = "app_folder";
-}
+}  // namespace
 
 class PutFileRequestTest
     : public CommandRequestTest<CommandsTestMocks::kIsNice> {
@@ -319,7 +319,8 @@ TEST_F(PutFileRequestTest, Run_SendOnPutFileNotification_SUCCESS) {
       mock_rpc_service_,
       ManageHMICommand(
           HMIResultCodeIs(hmi_apis::FunctionID::BasicCommunication_OnPutFile),
-          _)).WillOnce(Return(true));
+          _))
+      .WillOnce(Return(true));
   ExpectManageMobileCommandWithResultCode(mobile_apis::Result::SUCCESS);
 
   PutFileRequestPtr command(CreateCommand<PutFileRequest>(msg_));

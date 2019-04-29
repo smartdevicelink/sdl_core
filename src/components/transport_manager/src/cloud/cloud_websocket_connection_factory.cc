@@ -33,9 +33,9 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "transport_manager/transport_adapter/transport_adapter_controller.h"
 #include "transport_manager/cloud/cloud_websocket_connection_factory.h"
 #include "transport_manager/cloud/websocket_client_connection.h"
+#include "transport_manager/transport_adapter/transport_adapter_controller.h"
 #include "utils/logger.h"
 
 #include "transport_manager/cloud/cloud_device.h"

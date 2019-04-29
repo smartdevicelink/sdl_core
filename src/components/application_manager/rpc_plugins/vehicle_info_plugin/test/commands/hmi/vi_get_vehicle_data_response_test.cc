@@ -36,17 +36,17 @@
 
 #include "gtest/gtest.h"
 
-#include "smart_objects/smart_object.h"
-#include "application_manager/smart_object_keys.h"
-#include "application_manager/commands/commands_test.h"
 #include "application_manager/application.h"
-#include "application_manager/message_helper.h"
-#include "application_manager/mock_message_helper.h"
-#include "application_manager/mock_application_manager.h"
+#include "application_manager/commands/commands_test.h"
 #include "application_manager/event_engine/event.h"
+#include "application_manager/message_helper.h"
+#include "application_manager/mock_application_manager.h"
 #include "application_manager/mock_event_dispatcher.h"
+#include "application_manager/mock_message_helper.h"
 #include "application_manager/policies/mock_policy_handler_interface.h"
+#include "application_manager/smart_object_keys.h"
 #include "hmi/vi_get_vehicle_data_response.h"
+#include "smart_objects/smart_object.h"
 
 namespace test {
 namespace components {
@@ -61,9 +61,9 @@ namespace am = ::application_manager;
 namespace strings = ::application_manager::strings;
 namespace hmi_response = am::hmi_response;
 using am::commands::MessageSharedPtr;
-using vehicle_info_plugin::commands::VIGetVehicleDataResponse;
 using am::event_engine::Event;
 using test::components::event_engine_test::MockEventDispatcher;
+using vehicle_info_plugin::commands::VIGetVehicleDataResponse;
 
 typedef std::shared_ptr<VIGetVehicleDataResponse> VIGetVehicleDataResponsePtr;
 

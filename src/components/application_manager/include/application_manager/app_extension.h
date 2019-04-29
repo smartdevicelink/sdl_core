@@ -37,7 +37,7 @@ namespace ns_smart_device_link {
 namespace ns_smart_objects {
 class SmartObject;
 }
-}
+}  // namespace ns_smart_device_link
 
 namespace application_manager {
 

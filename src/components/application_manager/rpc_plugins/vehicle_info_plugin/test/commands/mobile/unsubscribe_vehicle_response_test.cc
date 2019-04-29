@@ -30,10 +30,10 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "mobile/unsubscribe_vehicle_data_response.h"
 #include <stdint.h>
 #include <string>
 #include "gtest/gtest.h"
+#include "mobile/unsubscribe_vehicle_data_response.h"
 
 #include "application_manager/commands/commands_test.h"
 #include "application_manager/mock_application_manager.h"
@@ -50,8 +50,8 @@ using ::testing::_;
 using ::testing::NotNull;
 using ::testing::Types;
 
-using vehicle_info_plugin::commands::UnsubscribeVehicleDataResponse;
 using commands::MessageSharedPtr;
+using vehicle_info_plugin::commands::UnsubscribeVehicleDataResponse;
 namespace am = ::application_manager;
 
 class UnsubscribeVehicleResponseTest

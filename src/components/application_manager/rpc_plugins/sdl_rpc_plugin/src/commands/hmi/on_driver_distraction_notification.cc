@@ -30,13 +30,13 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <set>
 #include "sdl_rpc_plugin/commands/hmi/on_driver_distraction_notification.h"
+#include <set>
 
 #include "application_manager/application_impl.h"
 #include "application_manager/message_helper.h"
-#include "interfaces/MOBILE_API.h"
 #include "interfaces/HMI_API.h"
+#include "interfaces/MOBILE_API.h"
 
 namespace sdl_rpc_plugin {
 using namespace application_manager;
@@ -90,7 +90,7 @@ struct OnDriverDistractionProcessor {
   ApplicationManager& application_manager_;
   std::string stringified_function_id_;
 };
-}
+}  // namespace
 
 OnDriverDistractionNotification::OnDriverDistractionNotification(
     const application_manager::commands::MessageSharedPtr& message,
@@ -139,4 +139,4 @@ void OnDriverDistractionNotification::Run() {
 
 }  // namespace commands
 
-}  // namespace application_manager
+}  // namespace sdl_rpc_plugin

@@ -139,4 +139,4 @@ void CommandHolderImpl::ResumeMobileCommand(ApplicationSharedPtr application) {
 
   app_mobile_commands_.erase(app_commands);
 }
-}  // application_manager
+}  // namespace application_manager

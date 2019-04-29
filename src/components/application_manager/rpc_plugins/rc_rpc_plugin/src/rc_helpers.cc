@@ -1,9 +1,9 @@
 #include "rc_rpc_plugin/rc_helpers.h"
-#include "rc_rpc_plugin/rc_module_constants.h"
-#include "rc_rpc_plugin/rc_rpc_plugin.h"
-#include "application_manager/smart_object_keys.h"
 #include "application_manager/commands/command_impl.h"
 #include "application_manager/message.h"
+#include "application_manager/smart_object_keys.h"
+#include "rc_rpc_plugin/rc_module_constants.h"
+#include "rc_rpc_plugin/rc_rpc_plugin.h"
 
 namespace rc_rpc_plugin {
 CREATE_LOGGERPTR_GLOBAL(logger_, "RemoteControlModule");
@@ -115,4 +115,4 @@ RCHelpers::AppsModules RCHelpers::GetApplicationsAllowedModules(
   }
   return result;
 }
-}
+}  // namespace rc_rpc_plugin

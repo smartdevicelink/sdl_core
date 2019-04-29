@@ -32,19 +32,19 @@
 
 #include <stdint.h>
 #include <memory>
-#include <string>
 #include <set>
+#include <string>
 
 #include "mobile/set_global_properties_request.h"
 
-#include "gtest/gtest.h"
 #include "application_manager/commands/command_request_test.h"
-#include "application_manager/mock_application.h"
-#include "application_manager/mock_help_prompt_manager.h"
-#include "application_manager/mock_application_manager.h"
-#include "application_manager/mock_message_helper.h"
 #include "application_manager/event_engine/event.h"
+#include "application_manager/mock_application.h"
+#include "application_manager/mock_application_manager.h"
+#include "application_manager/mock_help_prompt_manager.h"
 #include "application_manager/mock_hmi_interface.h"
+#include "application_manager/mock_message_helper.h"
+#include "gtest/gtest.h"
 
 namespace test {
 namespace components {
@@ -53,15 +53,15 @@ namespace mobile_commands_test {
 namespace set_global_properties_request {
 
 namespace am = application_manager;
-using sdl_rpc_plugin::commands::SetGlobalPropertiesRequest;
+using am::CommandsMap;
+using am::MockMessageHelper;
 using am::commands::CommandImpl;
 using am::commands::MessageSharedPtr;
-using am::MockMessageHelper;
-using am::CommandsMap;
-using utils::custom_string::CustomString;
+using sdl_rpc_plugin::commands::SetGlobalPropertiesRequest;
 using ::testing::_;
 using ::testing::Return;
 using ::testing::ReturnRef;
+using utils::custom_string::CustomString;
 
 namespace {
 const int32_t kCommandId = 1;
@@ -314,17 +314,19 @@ TEST_F(SetGlobalPropertiesRequestTest,
   EXPECT_CALL(*mock_app_, help_prompt_manager())
       .WillRepeatedly(ReturnRef(*mock_help_prompt_manager_.get()));
   EXPECT_CALL(*mock_help_prompt_manager_,
-              OnSetGlobalPropertiesReceived(_, false)).Times(2);
+              OnSetGlobalPropertiesReceived(_, false))
+      .Times(2);
 
   EXPECT_CALL(
       mock_message_helper_,
       VerifyTtsFiles(
           (*msg_vr)[am::strings::msg_params][am::strings::help_prompt], _, _))
       .WillOnce(Return(mobile_apis::Result::SUCCESS));
-  EXPECT_CALL(mock_rpc_service_,
-              ManageHMICommand(
-                  HMIResultCodeIs(hmi_apis::FunctionID::UI_SetGlobalProperties),
-                  _)).WillOnce(Return(true));
+  EXPECT_CALL(
+      mock_rpc_service_,
+      ManageHMICommand(
+          HMIResultCodeIs(hmi_apis::FunctionID::UI_SetGlobalProperties), _))
+      .WillOnce(Return(true));
   EXPECT_CALL(
       mock_rpc_service_,
       ManageHMICommand(
@@ -414,7 +416,8 @@ TEST_F(SetGlobalPropertiesRequestTest,
   command->Run();
 
   EXPECT_CALL(*mock_help_prompt_manager_,
-              OnSetGlobalPropertiesReceived(_, true)).Times(2);
+              OnSetGlobalPropertiesReceived(_, true))
+      .Times(2);
   command->on_event(event_ui);
   command->on_event(event_tts);
 

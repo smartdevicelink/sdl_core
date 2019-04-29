@@ -33,9 +33,9 @@
 #include <sstream>
 
 #include "transport_manager/transport_adapter/transport_adapter_impl.h"
-#include "transport_manager/usb/usb_device_scanner.h"
-#include "transport_manager/usb/usb_device.h"
 #include "transport_manager/usb/common.h"
+#include "transport_manager/usb/usb_device.h"
+#include "transport_manager/usb/usb_device_scanner.h"
 
 #include "utils/logger.h"
 
@@ -247,5 +247,5 @@ bool UsbDeviceScanner::IsInitialised() const {
   return true;
 }
 
-}  // namespace
-}  // namespace
+}  // namespace transport_adapter
+}  // namespace transport_manager

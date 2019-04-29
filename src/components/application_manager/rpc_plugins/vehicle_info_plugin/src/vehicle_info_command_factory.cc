@@ -69,4 +69,4 @@ bool VehicleInfoCommandFactory::IsAbleToProcess(
              ? hmi_command_factory_->IsAbleToProcess(function_id, source)
              : mob_command_factory_->IsAbleToProcess(function_id, source);
 }
-}
+}  // namespace vehicle_info_plugin

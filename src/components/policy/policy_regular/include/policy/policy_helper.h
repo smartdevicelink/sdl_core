@@ -246,6 +246,6 @@ FunctionalGroupIDs FindSame(const FunctionalGroupIDs& first,
  * @return true, if succeded, otherwise - false
  */
 bool UnwrapAppPolicies(policy_table::ApplicationPolicies& app_policies);
-}
+}  // namespace policy
 
 #endif  // SRC_COMPONENTS_POLICY_POLICY_REGULAR_INCLUDE_POLICY_POLICY_HELPER_H_

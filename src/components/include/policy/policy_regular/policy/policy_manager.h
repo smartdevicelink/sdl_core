@@ -33,16 +33,16 @@
 #ifndef SRC_COMPONENTS_INCLUDE_POLICY_POLICY_REGULAR_POLICY_POLICY_MANAGER_H_
 #define SRC_COMPONENTS_INCLUDE_POLICY_POLICY_REGULAR_POLICY_POLICY_MANAGER_H_
 
-#include <vector>
 #include <cstdint>
+#include <vector>
 
-#include "utils/callable.h"
-#include "policy/policy_types.h"
-#include "policy/policy_table/types.h"
-#include "policy/policy_listener.h"
-#include "policy/usage_statistics/statistics_manager.h"
-#include "policy/cache_manager_interface.h"
 #include "policy/access_remote.h"
+#include "policy/cache_manager_interface.h"
+#include "policy/policy_listener.h"
+#include "policy/policy_table/types.h"
+#include "policy/policy_types.h"
+#include "policy/usage_statistics/statistics_manager.h"
+#include "utils/callable.h"
 
 namespace policy {
 class PolicySettings;
@@ -610,7 +610,7 @@ class PolicyManager : public usage_statistics::StatisticsManager {
    * @brief Check if an app can send unknown rpc requests to an app service
    * provider
    * @param policy_app_id Unique application id
-  */
+   */
   virtual bool UnknownRPCPassthroughAllowed(
       const std::string& policy_app_id) const = 0;
 
@@ -688,11 +688,11 @@ class PolicyManager : public usage_statistics::StatisticsManager {
                                          const std::string& application_id) = 0;
 
   /**
-    * @brief Gets all allowed module types
-    * @param policy_app_id unique identifier of application
-    * @param modules list of allowed module types
-    * @return true if application has allowed modules
-    */
+   * @brief Gets all allowed module types
+   * @param policy_app_id unique identifier of application
+   * @param modules list of allowed module types
+   * @return true if application has allowed modules
+   */
   virtual bool GetModuleTypes(const std::string& policy_app_id,
                               std::vector<std::string>* modules) const = 0;
 

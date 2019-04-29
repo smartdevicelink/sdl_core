@@ -33,81 +33,81 @@
 #include <stdint.h>
 #include <string>
 #include <vector>
-#include "gtest/gtest.h"
 #include "application_manager/commands/commands_test.h"
+#include "gtest/gtest.h"
+#include "sdl_rpc_plugin/commands/hmi/on_allow_sdl_functionality_notification.h"
+#include "sdl_rpc_plugin/commands/hmi/on_app_activated_notification.h"
+#include "sdl_rpc_plugin/commands/hmi/on_app_deactivated_notification.h"
+#include "sdl_rpc_plugin/commands/hmi/on_app_permission_changed_notification.h"
+#include "sdl_rpc_plugin/commands/hmi/on_app_permission_consent_notification.h"
+#include "sdl_rpc_plugin/commands/hmi/on_app_registered_notification.h"
+#include "sdl_rpc_plugin/commands/hmi/on_app_unregistered_notification.h"
+#include "sdl_rpc_plugin/commands/hmi/on_audio_data_streaming_notification.h"
 #include "sdl_rpc_plugin/commands/hmi/on_button_event_notification.h"
+#include "sdl_rpc_plugin/commands/hmi/on_button_press_notification.h"
+#include "sdl_rpc_plugin/commands/hmi/on_button_subscription_notification.h"
+#include "sdl_rpc_plugin/commands/hmi/on_device_chosen_notification.h"
+#include "sdl_rpc_plugin/commands/hmi/on_device_state_changed_notification.h"
+#include "sdl_rpc_plugin/commands/hmi/on_driver_distraction_notification.h"
+#include "sdl_rpc_plugin/commands/hmi/on_event_changed_notification.h"
+#include "sdl_rpc_plugin/commands/hmi/on_exit_all_applications_notification.h"
+#include "sdl_rpc_plugin/commands/hmi/on_exit_application_notification.h"
+#include "sdl_rpc_plugin/commands/hmi/on_file_removed_notification.h"
+#include "sdl_rpc_plugin/commands/hmi/on_ignition_cycle_over_notification.h"
 #include "sdl_rpc_plugin/commands/hmi/on_navi_tbt_client_state_notification.h"
 #include "sdl_rpc_plugin/commands/hmi/on_navi_way_point_change_notification.h"
-#include "sdl_rpc_plugin/commands/hmi/on_ui_command_notification.h"
-#include "sdl_rpc_plugin/commands/hmi/on_ui_keyboard_input_notification.h"
-#include "sdl_rpc_plugin/commands/hmi/on_ui_touch_event_notification.h"
-#include "sdl_rpc_plugin/commands/hmi/on_app_permission_changed_notification.h"
-#include "sdl_rpc_plugin/commands/hmi/on_app_registered_notification.h"
-#include "sdl_rpc_plugin/commands/hmi/on_audio_data_streaming_notification.h"
-#include "sdl_rpc_plugin/commands/hmi/on_button_subscription_notification.h"
-#include "sdl_rpc_plugin/commands/hmi/on_file_removed_notification.h"
+#include "sdl_rpc_plugin/commands/hmi/on_policy_update.h"
 #include "sdl_rpc_plugin/commands/hmi/on_put_file_notification.h"
+#include "sdl_rpc_plugin/commands/hmi/on_ready_notification.h"
+#include "sdl_rpc_plugin/commands/hmi/on_received_policy_update.h"
+#include "sdl_rpc_plugin/commands/hmi/on_record_start_notification.h"
 #include "sdl_rpc_plugin/commands/hmi/on_resume_audio_source_notification.h"
 #include "sdl_rpc_plugin/commands/hmi/on_sdl_close_notification.h"
 #include "sdl_rpc_plugin/commands/hmi/on_sdl_consent_needed_notification.h"
 #include "sdl_rpc_plugin/commands/hmi/on_sdl_persistence_complete_notification.h"
+#include "sdl_rpc_plugin/commands/hmi/on_start_device_discovery.h"
 #include "sdl_rpc_plugin/commands/hmi/on_status_update_notification.h"
-#include "sdl_rpc_plugin/commands/hmi/on_video_data_streaming_notification.h"
-#include "sdl_rpc_plugin/commands/hmi/on_record_start_notification.h"
-#include "sdl_rpc_plugin/commands/hmi/on_app_activated_notification.h"
-#include "sdl_rpc_plugin/commands/hmi/on_app_deactivated_notification.h"
-#include "sdl_rpc_plugin/commands/hmi/on_app_unregistered_notification.h"
-#include "sdl_rpc_plugin/commands/hmi/on_button_press_notification.h"
-#include "sdl_rpc_plugin/commands/hmi/on_event_changed_notification.h"
-#include "sdl_rpc_plugin/commands/hmi/on_ready_notification.h"
+#include "sdl_rpc_plugin/commands/hmi/on_system_context_notification.h"
+#include "sdl_rpc_plugin/commands/hmi/on_system_error_notification.h"
+#include "sdl_rpc_plugin/commands/hmi/on_system_info_changed_notification.h"
+#include "sdl_rpc_plugin/commands/hmi/on_system_request_notification.h"
+#include "sdl_rpc_plugin/commands/hmi/on_tts_language_change_notification.h"
 #include "sdl_rpc_plugin/commands/hmi/on_tts_reset_timeout_notification.h"
 #include "sdl_rpc_plugin/commands/hmi/on_tts_started_notification.h"
 #include "sdl_rpc_plugin/commands/hmi/on_tts_stopped_notification.h"
+#include "sdl_rpc_plugin/commands/hmi/on_ui_command_notification.h"
+#include "sdl_rpc_plugin/commands/hmi/on_ui_keyboard_input_notification.h"
+#include "sdl_rpc_plugin/commands/hmi/on_ui_language_change_notification.h"
 #include "sdl_rpc_plugin/commands/hmi/on_ui_reset_timeout_notification.h"
-#include "sdl_rpc_plugin/commands/hmi/on_vr_started_notification.h"
-#include "sdl_rpc_plugin/commands/hmi/on_vr_stopped_notification.h"
-#include "sdl_rpc_plugin/commands/hmi/on_app_permission_consent_notification.h"
-#include "sdl_rpc_plugin/commands/hmi/on_ignition_cycle_over_notification.h"
-#include "sdl_rpc_plugin/commands/hmi/on_policy_update.h"
-#include "sdl_rpc_plugin/commands/hmi/on_received_policy_update.h"
-#include "sdl_rpc_plugin/commands/hmi/on_system_error_notification.h"
-#include "sdl_rpc_plugin/commands/hmi/on_system_info_changed_notification.h"
-#include "sdl_rpc_plugin/commands/hmi/on_allow_sdl_functionality_notification.h"
-#include "sdl_rpc_plugin/commands/hmi/on_device_state_changed_notification.h"
-#include "sdl_rpc_plugin/commands/hmi/on_exit_all_applications_notification.h"
-#include "sdl_rpc_plugin/commands/hmi/on_exit_application_notification.h"
+#include "sdl_rpc_plugin/commands/hmi/on_ui_touch_event_notification.h"
+#include "sdl_rpc_plugin/commands/hmi/on_video_data_streaming_notification.h"
 #include "sdl_rpc_plugin/commands/hmi/on_vr_command_notification.h"
 #include "sdl_rpc_plugin/commands/hmi/on_vr_language_change_notification.h"
-#include "sdl_rpc_plugin/commands/hmi/on_start_device_discovery.h"
-#include "sdl_rpc_plugin/commands/hmi/on_device_chosen_notification.h"
-#include "sdl_rpc_plugin/commands/hmi/on_system_context_notification.h"
-#include "sdl_rpc_plugin/commands/hmi/on_system_request_notification.h"
-#include "sdl_rpc_plugin/commands/hmi/on_tts_language_change_notification.h"
-#include "sdl_rpc_plugin/commands/hmi/on_ui_language_change_notification.h"
-#include "sdl_rpc_plugin/commands/hmi/on_driver_distraction_notification.h"
+#include "sdl_rpc_plugin/commands/hmi/on_vr_started_notification.h"
+#include "sdl_rpc_plugin/commands/hmi/on_vr_stopped_notification.h"
 
-#include "utils/lock.h"
 #include "utils/data_accessor.h"
+#include "utils/lock.h"
 #include "utils/signals.h"
 
-#include "utils/file_system.h"
-#include "smart_objects/smart_object.h"
-#include "application_manager/smart_object_keys.h"
+#include "application_manager/hmi_capabilities_impl.h"
+#include "application_manager/mock_application.h"
 #include "application_manager/mock_application_manager.h"
+#include "application_manager/mock_event_dispatcher.h"
+#include "application_manager/mock_hmi_capabilities.h"
+#include "application_manager/mock_message_helper.h"
+#include "application_manager/mock_resume_ctrl.h"
 #include "application_manager/mock_rpc_plugin_manager.h"
 #include "application_manager/mock_state_controller.h"
-#include "application_manager/mock_application.h"
-#include "application_manager/mock_event_dispatcher.h"
-#include "application_manager/hmi_capabilities_impl.h"
-#include "application_manager/mock_hmi_capabilities.h"
-#include "transport_manager/mock_transport_manager.h"
+#include "application_manager/policies/mock_policy_handler_interface.h"
+#include "application_manager/smart_object_keys.h"
 #include "connection_handler/mock_connection_handler.h"
 #include "connection_handler/mock_connection_handler_settings.h"
-#include "test/application_manager/mock_application_manager_settings.h"
-#include "application_manager/policies/mock_policy_handler_interface.h"
-#include "application_manager/mock_message_helper.h"
 #include "protocol_handler/mock_session_observer.h"
-#include "application_manager/mock_resume_ctrl.h"
+#include "smart_objects/smart_object.h"
+#include "test/application_manager/mock_application_manager_settings.h"
+#include "transport_manager/mock_transport_manager.h"
+#include "utils/file_system.h"
 
 namespace am = application_manager;
 
@@ -117,22 +117,22 @@ namespace commands_test {
 namespace hmi_commands_test {
 namespace hmi_notifications_test {
 
-using ::testing::_;
-using ::testing::Test;
-using ::testing::Types;
-using ::testing::Return;
-using ::testing::ReturnRef;
-using ::testing::NiceMock;
-using ::testing::InSequence;
-using ::smart_objects::SmartObject;
+using ::application_manager::ApplicationSharedPtr;
+using ::application_manager::MockMessageHelper;
 using ::application_manager::commands::MessageSharedPtr;
+using ::smart_objects::SmartObject;
+using ::test::components::application_manager_test::MockApplication;
 using ::test::components::application_manager_test::MockApplicationManager;
 using ::test::components::application_manager_test::
     MockApplicationManagerSettings;
-using ::application_manager::ApplicationSharedPtr;
-using ::test::components::application_manager_test::MockApplication;
 using ::test::components::event_engine_test::MockEventDispatcher;
-using ::application_manager::MockMessageHelper;
+using ::testing::_;
+using ::testing::InSequence;
+using ::testing::NiceMock;
+using ::testing::Return;
+using ::testing::ReturnRef;
+using ::testing::Test;
+using ::testing::Types;
 using namespace sdl_rpc_plugin::commands;
 using namespace am::commands;
 
@@ -319,7 +319,8 @@ typedef Types<OnAppPermissionChangedNotification,
               OnSDLPersistenceCompleteNotification,
               OnStatusUpdateNotification,
               OnVideoDataStreamingNotification,
-              OnRecordStartdNotification> HMIOnNotificationsListToHMITypes;
+              OnRecordStartdNotification>
+    HMIOnNotificationsListToHMITypes;
 
 typedef Types<
     CommandPair<OnAppActivatedNotification,
@@ -1023,7 +1024,8 @@ TEST_F(HMICommandsNotificationsTest,
     EXPECT_CALL(app_mngr_, application(kAppId_)).WillRepeatedly(Return(app_));
     EXPECT_CALL(mock_message_helper_,
                 GetOnAppInterfaceUnregisteredNotificationToMobile(
-                    kAppId_, *it_mobile_reason)).WillOnce(Return(notification));
+                    kAppId_, *it_mobile_reason))
+        .WillOnce(Return(notification));
     EXPECT_CALL(mock_rpc_service_,
                 ManageMobileCommand(notification, Command::SOURCE_SDL));
     EXPECT_CALL(app_mngr_,
@@ -1377,10 +1379,11 @@ TEST_F(HMICommandsNotificationsTest,
             [am::strings::id] = "2014";
   std::shared_ptr<Command> command =
       CreateCommand<OnDeviceChosenNotification>(message);
-  EXPECT_CALL(app_mngr_,
-              ConnectToDevice(
-                  (*message)[am::strings::msg_params][am::strings::device_info]
-                            [am::strings::id].asString()));
+  EXPECT_CALL(
+      app_mngr_,
+      ConnectToDevice((*message)[am::strings::msg_params]
+                                [am::strings::device_info][am::strings::id]
+                                    .asString()));
   command->Run();
 }
 
