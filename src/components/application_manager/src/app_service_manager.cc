@@ -72,11 +72,15 @@ smart_objects::SmartObject AppServiceManager::PublishAppService(
 
   std::string service_type = manifest[strings::service_type].asString();
 
-  AppService* existing_service =
-      FindServiceByProvider(connection_key, service_type);
-  if (existing_service) {
-    LOG4CXX_DEBUG(logger_,
-                  "Service already exists for this provider, rejecting");
+  if (FindServiceByProvider(connection_key, service_type)) {
+    LOG4CXX_WARN(logger_,
+                 "Service already exists for this provider, rejecting");
+    return smart_objects::SmartObject();
+  }
+
+  if (manifest.keyExists(strings::service_name) &&
+      FindServiceByName(manifest[strings::service_name].asString())) {
+    LOG4CXX_WARN(logger_, "A service already exists with this name, rejecting");
     return smart_objects::SmartObject();
   }
 
@@ -468,13 +472,23 @@ AppService* AppServiceManager::FindServiceByProvider(
     const uint32_t connection_key, const std::string service_type) {
   LOG4CXX_AUTO_TRACE(logger_);
   sync_primitives::AutoLock lock(published_services_lock_);
-
-  for (auto it = published_services_.begin(); it != published_services_.end();
-       ++it) {
-    if (it->second.connection_key == connection_key &&
-        it->second.record[strings::service_manifest][strings::service_type]
+  for (auto& service : published_services_) {
+    if (service.second.connection_key == connection_key &&
+        service.second.record[strings::service_manifest][strings::service_type]
                 .asString() == service_type) {
-      return &(it->second);
+      return &(service.second);
+    }
+  }
+  return NULL;
+}
+
+AppService* AppServiceManager::FindServiceByName(std::string name) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  sync_primitives::AutoLock lock(published_services_lock_);
+  for (auto& service : published_services_) {
+    if (service.second.record[strings::service_manifest][strings::service_name]
+            .asString() == name) {
+      return &(service.second);
     }
   }
   return NULL;
