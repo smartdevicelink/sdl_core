@@ -85,15 +85,15 @@ void OnAppServiceDataNotificationFromMobile::Run() {
   AppService* service =
       application_manager_.GetAppServiceManager().FindServiceByID(service_id);
   if (!service) {
-    LOG4CXX_DEBUG(
+    LOG4CXX_ERROR(
         logger_, "No published services exist with service ID: " << service_id);
     return;
   } else if (!service->mobile_service ||
              service->connection_key != app_connection_key) {
-    LOG4CXX_DEBUG(logger_, "Service was not published by this application");
+    LOG4CXX_ERROR(logger_, "Service was not published by this application");
     return;
   } else if (!service->record[strings::service_active].asBool()) {
-    LOG4CXX_DEBUG(logger_, "Service is not active");
+    LOG4CXX_ERROR(logger_, "Service is not active");
     return;
   }
 
@@ -101,7 +101,7 @@ void OnAppServiceDataNotificationFromMobile::Run() {
       service->record[strings::service_manifest][strings::service_type]
           .asString();
   if (published_service_type != service_type) {
-    LOG4CXX_DEBUG(logger_,
+    LOG4CXX_ERROR(logger_,
                   "Service type mismatch, expected "
                       << service_type
                       << ", but service was published with type "
