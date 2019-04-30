@@ -894,6 +894,10 @@ void ApplicationManagerImpl::SetIconFileFromSystemRequest(
 }
 
 void ApplicationManagerImpl::DisconnectCloudApp(ApplicationSharedPtr app) {
+#if !defined(CLOUD_APP_WEBSOCKET_TRANSPORT_SUPPORT)
+  LOG4CXX_TRACE(logger_, "Cloud app support is disabled. Exiting function");
+  return;
+#else
   std::string endpoint;
   std::string certificate;
   std::string auth_token;
@@ -931,9 +935,14 @@ void ApplicationManagerImpl::DisconnectCloudApp(ApplicationSharedPtr app) {
   // Create device in pending state
   LOG4CXX_DEBUG(logger_, "Re-adding the cloud app device");
   connection_handler().AddCloudAppDevice(policy_app_id, properties);
+#endif  // CLOUD_APP_WEBSOCKET_TRANSPORT_SUPPORT
 }
 
 void ApplicationManagerImpl::RefreshCloudAppInformation() {
+#if !defined(CLOUD_APP_WEBSOCKET_TRANSPORT_SUPPORT)
+  LOG4CXX_TRACE(logger_, "Cloud app support is disabled. Exiting function");
+  return;
+#else
   LOG4CXX_AUTO_TRACE(logger_);
   if (is_stopping()) {
     return;
@@ -1084,6 +1093,7 @@ void ApplicationManagerImpl::RefreshCloudAppInformation() {
     LOG4CXX_DEBUG(logger_, "Removed " << removed_app_count << " disabled apps");
     SendUpdateAppList();
   }
+#endif  // CLOUD_APP_WEBSOCKET_TRANSPORT_SUPPORT
 }
 
 void ApplicationManagerImpl::CreatePendingApplication(
@@ -1218,6 +1228,9 @@ void ApplicationManagerImpl::OnConnectionStatusUpdated() {
 hmi_apis::Common_CloudConnectionStatus::eType
 ApplicationManagerImpl::GetCloudAppConnectionStatus(
     ApplicationConstSharedPtr app) const {
+#if !defined(CLOUD_APP_WEBSOCKET_TRANSPORT_SUPPORT)
+  return hmi_apis::Common_CloudConnectionStatus::INVALID_ENUM;
+#else
   transport_manager::ConnectionStatus status =
       connection_handler().GetConnectionStatus(app->device());
   switch (status) {
@@ -1231,6 +1244,7 @@ ApplicationManagerImpl::GetCloudAppConnectionStatus(
     default:
       return hmi_apis::Common_CloudConnectionStatus::INVALID_ENUM;
   }
+#endif  // CLOUD_APP_WEBSOCKET_TRANSPORT_SUPPORT
 }
 
 uint32_t ApplicationManagerImpl::GetNextMobileCorrelationID() {

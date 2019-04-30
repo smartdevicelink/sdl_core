@@ -478,6 +478,7 @@ TEST_F(TransportAdapterTest, Disconnect_ConnectDoneSuccess) {
   EXPECT_CALL(*serverMock, Terminate());
 }
 
+#if defined(CLOUD_APP_WEBSOCKET_TRANSPORT_SUPPORT)
 TEST_F(TransportAdapterTest, FindPending) {
   MockServerConnectionFactory* serverMock = new MockServerConnectionFactory();
   MockTransportAdapterImpl transport_adapter(
@@ -608,6 +609,7 @@ TEST_F(TransportAdapterTest,
 
   EXPECT_CALL(*serverMock, Terminate());
 }
+#endif  // CLOUD_APP_WEBSOCKET_TRANSPORT_SUPPORT
 
 TEST_F(TransportAdapterTest, DisconnectDevice_DeviceAddedConnectionCreated) {
   MockServerConnectionFactory* serverMock = new MockServerConnectionFactory();

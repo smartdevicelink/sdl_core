@@ -57,7 +57,8 @@ class MockTCPTransportAdapter : public TcpTransportAdapter {
                      const transport_manager::ApplicationHandle& app_handle));
 
   MOCK_CONST_METHOD1(
-      FindDevice, DeviceSptr(const transport_manager::DeviceUID& device_handle));
+      FindDevice,
+      DeviceSptr(const transport_manager::DeviceUID& device_handle));
   MOCK_METHOD2(Connect,
                TransportAdapter::Error(
                    const transport_manager::DeviceUID& device_handle,
