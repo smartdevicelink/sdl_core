@@ -40,7 +40,6 @@
 #include "application_manager/application.h"
 #include "application_manager/command_factory.h"
 #include "application_manager/commands/command.h"
-#include "application_manager/hmi_capabilities.h"
 #include "connection_handler/connection_handler.h"
 #include "utils/data_accessor.h"
 

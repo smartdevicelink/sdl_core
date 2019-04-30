@@ -35,6 +35,7 @@
 
 #include "application_manager/application_manager.h"
 #include "application_manager/commands/command.h"
+#include "application_manager/hmi_capabilities.h"
 #include "application_manager/policies/policy_handler_interface.h"
 #include "application_manager/rpc_service.h"
 #include "utils/macro.h"

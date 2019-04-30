@@ -37,6 +37,7 @@
 #include "application_manager/event_engine/event.h"
 #include "application_manager/event_engine/event_dispatcher.h"
 #include "application_manager/event_engine/event_observer.h"
+#include "gmock/gmock.h"
 
 namespace test {
 namespace components {
