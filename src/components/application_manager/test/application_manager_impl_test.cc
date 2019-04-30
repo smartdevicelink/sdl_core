@@ -103,6 +103,7 @@ const std::string kAppId = "someID";
 const uint32_t kConnectionKey = 1232u;
 const std::string kAppName = "appName";
 
+#if defined(CLOUD_APP_WEBSOCKET_TRANSPORT_SUPPORT)
 // Cloud application params
 const std::string kEndpoint = "endpoint";
 const std::string kEndpoint2 = "https://fakesdlcloudapptesting.com:8080";
@@ -113,6 +114,7 @@ const mobile_api::HybridAppPreference::eType kHybridAppPreference =
     mobile_api::HybridAppPreference::CLOUD;
 const std::string kHybridAppPreferenceStr = "CLOUD";
 const bool kEnabled = true;
+#endif  // CLOUD_APP_WEBSOCKET_TRANSPORT_SUPPORT
 }  // namespace
 
 class ApplicationManagerImplTest : public ::testing::Test {
@@ -224,8 +226,9 @@ class ApplicationManagerImplTest : public ::testing::Test {
       connection_handler::DeviceHandle secondary_device_handle,
       std::string secondary_transport_device_string);
 
+#if defined(CLOUD_APP_WEBSOCKET_TRANSPORT_SUPPORT)
   void AddCloudAppToPendingDeviceMap();
-
+#endif
   uint32_t app_id_;
   NiceMock<policy_test::MockPolicySettings> mock_policy_settings_;
   std::shared_ptr<NiceMock<resumption_test::MockResumptionData> > mock_storage_;
@@ -1447,6 +1450,7 @@ TEST_F(ApplicationManagerImplTest,
   EXPECT_TRUE(file_system::RemoveDirectory(kDirectoryName, true));
 }
 
+#if defined(CLOUD_APP_WEBSOCKET_TRANSPORT_SUPPORT)
 void ApplicationManagerImplTest::AddCloudAppToPendingDeviceMap() {
   app_manager_impl_->SetMockPolicyHandler(mock_policy_handler_);
   std::vector<std::string> enabled_apps{"1234"};
@@ -1659,7 +1663,7 @@ TEST_F(ApplicationManagerImplTest,
       app_manager_impl_->RegisterApplication(request_for_registration_ptr);
   EXPECT_EQ(0, application.use_count());
 }
-
+#endif  // CLOUD_APP_WEBSOCKET_TRANSPORT_SUPPORT
 }  // namespace application_manager_test
 }  // namespace components
 }  // namespace test

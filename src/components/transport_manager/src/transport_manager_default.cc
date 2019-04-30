@@ -46,7 +46,7 @@
 
 #if defined(CLOUD_APP_WEBSOCKET_TRANSPORT_SUPPORT)
 #include "transport_manager/cloud/cloud_websocket_transport_adapter.h"
-#endif
+#endif  // CLOUD_APP_WEBSOCKET_TRANSPORT_SUPPORT
 
 #if defined(BUILD_TESTS)
 #include "transport_manager/iap2_emulation/iap2_transport_adapter.h"
@@ -105,7 +105,7 @@ int TransportManagerDefault::Init(resumption::LastState& last_state) {
   ta_usb = NULL;
 #endif  // USB_SUPPORT
 
-#if defined CLOUD_APP_WEBSOCKET_TRANSPORT_SUPPORT
+#if defined(CLOUD_APP_WEBSOCKET_TRANSPORT_SUPPORT)
   transport_adapter::TransportAdapterImpl* ta_cloud =
       new transport_adapter::CloudWebsocketTransportAdapter(last_state,
                                                             get_settings());
@@ -116,7 +116,7 @@ int TransportManagerDefault::Init(resumption::LastState& last_state) {
 #endif  // TELEMETRY_MONITOR
   AddTransportAdapter(ta_cloud);
   ta_cloud = NULL;
-#endif
+#endif  // CLOUD_APP_WEBSOCKET_TRANSPORT_SUPPORT
 
 #if defined BUILD_TESTS
   const uint16_t iap2_bt_emu_port = 23456;
