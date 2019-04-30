@@ -76,17 +76,22 @@ endif()
 if(BUILD_CLOUD_APP_SUPPORT)
   GET_PROPERTY(BOOST_LIBS_DIRECTORY GLOBAL PROPERTY GLOBAL_BOOST_LIBS)
   list(APPEND LIBRARIES boost_system boost_regex -L${BOOST_LIBS_DIRECTORY})
+else()
+  list(APPEND EXCLUDE_PATHS
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/transport_manager/cloud
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/cloud
+  )
 endif()
 
 if(BUILD_USB_SUPPORT)
   if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
-    set(EXCLUDE_PATHS
+    list(APPEND EXCLUDE_PATHS
       ${COMPONENTS_DIR}/transport_manager/include/transport_manager/usb/qnx
       ${COMPONENTS_DIR}/transport_manager/src/usb/qnx
     )
 
   elseif(CMAKE_SYSTEM_NAME STREQUAL "QNX")
-    set(EXCLUDE_PATHS
+    list(APPEND EXCLUDE_PATHS
       ${COMPONENTS_DIR}/transport_manager/include/transport_manager/usb/libusb
       ${COMPONENTS_DIR}/transport_manager/src/usb/libusb
     )

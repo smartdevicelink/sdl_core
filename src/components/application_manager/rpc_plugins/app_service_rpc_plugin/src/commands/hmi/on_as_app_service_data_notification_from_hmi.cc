@@ -32,6 +32,8 @@
 
 #include "app_service_rpc_plugin/commands/hmi/on_as_app_service_data_notification_from_hmi.h"
 
+#include "application_manager/app_service_manager.h"
+
 namespace app_service_rpc_plugin {
 using namespace application_manager;
 namespace commands {
@@ -54,6 +56,39 @@ OnASAppServiceDataNotificationFromHMI::
 void OnASAppServiceDataNotificationFromHMI::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
   LOG4CXX_DEBUG(logger_, "Received an OnAppServiceData from HMI");
+
+  std::string service_id =
+      (*message_)[strings::msg_params][strings::service_data]
+                 [strings::service_id].asString();
+  AppService* service =
+      application_manager_.GetAppServiceManager().FindServiceByID(service_id);
+  if (!service) {
+    LOG4CXX_ERROR(
+        logger_, "No published services exist with service ID: " << service_id);
+    return;
+  } else if (service->mobile_service) {
+    LOG4CXX_ERROR(logger_, "Service was not published by the HMI");
+    return;
+  } else if (!service->record[strings::service_active].asBool()) {
+    LOG4CXX_ERROR(logger_, "Service is not active");
+    return;
+  }
+
+  std::string service_type =
+      (*message_)[strings::msg_params][strings::service_data]
+                 [strings::service_type].asString();
+  std::string published_service_type =
+      service->record[strings::service_manifest][strings::service_type]
+          .asString();
+  if (published_service_type != service_type) {
+    LOG4CXX_ERROR(logger_,
+                  "Service type mismatch, expected "
+                      << service_type
+                      << ", but service was published with type "
+                      << published_service_type);
+    return;
+  }
+
   SendNotificationToConsumers(
       mobile_apis::FunctionID::eType::OnAppServiceDataID);
 }
