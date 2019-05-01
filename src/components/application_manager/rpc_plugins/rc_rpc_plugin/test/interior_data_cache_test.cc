@@ -157,4 +157,4 @@ TEST_F(InteriorDataCacheTest, Exist2ModuleTypesRemoveOneAnotherOneLeft) {
   EXPECT_EQ(data2, retrieved_data2);
 }
 
-}  // rc_rpc_plugin_test
+}  // namespace rc_rpc_plugin_test

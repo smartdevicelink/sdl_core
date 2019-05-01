@@ -36,18 +36,18 @@
 #include "application_manager/resumption/resume_ctrl.h"
 
 #include <stdint.h>
-#include <vector>
+#include <list>
 #include <map>
 #include <set>
-#include <list>
+#include <vector>
 
+#include "application_manager/application.h"
+#include "application_manager/event_engine/event_observer.h"
+#include "application_manager/resumption/resumption_data.h"
 #include "interfaces/HMI_API.h"
 #include "interfaces/HMI_API_schema.h"
 #include "interfaces/MOBILE_API_schema.h"
-#include "application_manager/event_engine/event_observer.h"
 #include "smart_objects/smart_object.h"
-#include "application_manager/application.h"
-#include "application_manager/resumption/resumption_data.h"
 #include "utils/timer.h"
 
 namespace resumption {
@@ -322,10 +322,10 @@ class ResumeCtrlImpl : public ResumeCtrl,
 #endif  // BUILD_TESTS
  private:
   /**
-  * @brief Returns Low Voltage signal timestamp
-  * @return Low Voltage event timestamp if event LOW VOLTAGE event occures
-  * otherwise 0
-  */
+   * @brief Returns Low Voltage signal timestamp
+   * @return Low Voltage event timestamp if event LOW VOLTAGE event occures
+   * otherwise 0
+   */
   time_t LowVoltageTime() const;
 
   /**

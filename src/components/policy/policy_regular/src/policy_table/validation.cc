@@ -7,7 +7,7 @@ bool IsTypeInvalid(
     rpc::Enum<rpc::policy_table_interface_base::RequestType> request) {
   return !request.is_valid();
 }
-}
+}  // namespace
 
 namespace rpc {
 namespace policy_table_interface_base {

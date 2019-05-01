@@ -72,16 +72,16 @@ namespace dummy_hmi_commands_test {
 
 namespace commands = app_service_rpc_plugin::commands;
 
-using ::testing::_;
-using ::testing::NotNull;
-using ::testing::Types;
+using ::application_manager::ApplicationSharedPtr;
 using application_manager::commands::MessageSharedPtr;
-using ::test::components::event_engine_test::MockEventDispatcher;
+using ::test::components::application_manager_test::MockApplication;
 using ::test::components::application_manager_test::MockApplicationManager;
 using ::test::components::application_manager_test::
     MockApplicationManagerSettings;
-using ::application_manager::ApplicationSharedPtr;
-using ::test::components::application_manager_test::MockApplication;
+using ::test::components::event_engine_test::MockEventDispatcher;
+using ::testing::_;
+using ::testing::NotNull;
+using ::testing::Types;
 
 template <class Command>
 class HMICommandsTest : public components::commands_test::CommandRequestTest<

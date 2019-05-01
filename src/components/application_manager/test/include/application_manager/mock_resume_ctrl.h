@@ -31,9 +31,9 @@
  */
 #ifndef SRC_COMPONENTS_APPLICATION_MANAGER_TEST_INCLUDE_APPLICATION_MANAGER_MOCK_RESUME_CTRL_H_
 #define SRC_COMPONENTS_APPLICATION_MANAGER_TEST_INCLUDE_APPLICATION_MANAGER_MOCK_RESUME_CTRL_H_
-#include "gmock/gmock.h"
-#include "application_manager/resumption/resume_ctrl.h"
 #include "application_manager/application.h"
+#include "application_manager/resumption/resume_ctrl.h"
+#include "gmock/gmock.h"
 #include "resumption/last_state.h"
 
 namespace test {

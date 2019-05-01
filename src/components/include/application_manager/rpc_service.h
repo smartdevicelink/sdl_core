@@ -35,8 +35,8 @@
 
 #include "application_manager/commands/command.h"
 #include "application_manager/message.h"
-#include "protocol_handler/protocol_handler.h"
 #include "hmi_message_handler/hmi_message_handler.h"
+#include "protocol_handler/protocol_handler.h"
 
 namespace application_manager {
 namespace rpc_service {
@@ -59,8 +59,8 @@ class RPCService {
    * @return true if command is executed, otherwise return false
    */
   virtual bool ManageHMICommand(const commands::MessageSharedPtr message,
-                                commands::Command::CommandSource
-                                    source = commands::Command::SOURCE_HMI) = 0;
+                                commands::Command::CommandSource source =
+                                    commands::Command::SOURCE_HMI) = 0;
 
   /**
    * @brief SendMessageToMobile Put message to the queue to be sent to mobile.

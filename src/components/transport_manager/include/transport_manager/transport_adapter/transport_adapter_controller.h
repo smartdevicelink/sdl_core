@@ -33,9 +33,9 @@
 #ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_ADAPTER_TRANSPORT_ADAPTER_CONTROLLER_H_
 #define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_ADAPTER_TRANSPORT_ADAPTER_CONTROLLER_H_
 
-#include "transport_manager/transport_adapter/device.h"
-#include "transport_manager/transport_adapter/connection.h"
 #include "protocol/common.h"
+#include "transport_manager/transport_adapter/connection.h"
+#include "transport_manager/transport_adapter/device.h"
 
 namespace transport_manager {
 namespace transport_adapter {
@@ -174,12 +174,12 @@ class TransportAdapterController {
                               const ApplicationHandle& app_handle) = 0;
 
   /**
-  * @brief Launch OnDataReceiveDone event in the device adapter listener.
-  *
-  * @param device_handle Device unique identifier.
-  * @param app_handle Handle of application.
-  * @param message Smart pointer to the raw message.
-  */
+   * @brief Launch OnDataReceiveDone event in the device adapter listener.
+   *
+   * @param device_handle Device unique identifier.
+   * @param app_handle Handle of application.
+   * @param message Smart pointer to the raw message.
+   */
   virtual void DataReceiveDone(const DeviceUID& device_handle,
                                const ApplicationHandle& app_handle,
                                ::protocol_handler::RawMessagePtr message) = 0;

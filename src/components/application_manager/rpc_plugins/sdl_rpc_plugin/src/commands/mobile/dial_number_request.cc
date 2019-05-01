@@ -30,9 +30,9 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "sdl_rpc_plugin/commands/mobile/dial_number_request.h"
 #include <algorithm>
 #include <string>
-#include "sdl_rpc_plugin/commands/mobile/dial_number_request.h"
 
 #include "application_manager/application_impl.h"
 
@@ -153,4 +153,4 @@ void DialNumberRequest::StripNumberParam(std::string& number) {
 
 }  // namespace commands
 
-}  // namespace application_manager
+}  // namespace sdl_rpc_plugin

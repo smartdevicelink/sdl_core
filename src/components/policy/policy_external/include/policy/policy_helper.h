@@ -243,13 +243,13 @@ struct FillActionsForAppPolicies {
  */
 struct FillNotificationData {
   /**
- * @brief Constructor
- * @param data Output structure with filled data
- * @param group_state Consent of the group processed by instance
- * @param undefined_group_consent Defines how to treat 'undefined' consent
- * @param does_require_user_consent Specifies whether processed group requires
- * user consent
- */
+   * @brief Constructor
+   * @param data Output structure with filled data
+   * @param group_state Consent of the group processed by instance
+   * @param undefined_group_consent Defines how to treat 'undefined' consent
+   * @param does_require_user_consent Specifies whether processed group requires
+   * user consent
+   */
   FillNotificationData(Permissions& data,
                        GroupConsent group_state,
                        GroupConsent undefined_group_consent,

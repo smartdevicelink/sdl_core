@@ -32,8 +32,8 @@
 
 #include "json/json.h"
 
-#include "smart_objects/smart_object.h"
 #include "smart_objects/enum_schema_item.h"
+#include "smart_objects/smart_object.h"
 
 #include "CFormatterJsonBase.h"
 
@@ -238,8 +238,8 @@ int32_t formatters::CFormatterJsonSDLRPCv1::fromString(
 
   return result;
 }
-}
-}
-}  // namespace ns_smart_device_link::ns_json_handler::formatters
+}  // namespace formatters
+}  // namespace ns_json_handler
+}  // namespace ns_smart_device_link
 
 #endif  // SRC_COMPONENTS_FORMATTERS_INCLUDE_FORMATTERS_CFORMATTERJSONSDLRPCV1_H_

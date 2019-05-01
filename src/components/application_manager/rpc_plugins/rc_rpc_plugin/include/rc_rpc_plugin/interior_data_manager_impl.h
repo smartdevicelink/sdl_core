@@ -40,7 +40,7 @@ class ApplicationManager;
 namespace rpc_service {
 class RPCService;
 }
-}
+}  // namespace application_manager
 namespace rc_rpc_plugin {
 
 class InteriorDataCache;
@@ -94,7 +94,8 @@ class InteriorDataManagerImpl : public InteriorDataManager {
    * @brief AppsModules mapping from applications to list of modules
    */
   typedef std::map<application_manager::ApplicationSharedPtr,
-                   std::vector<std::string> > AppsModules;
+                   std::vector<std::string> >
+      AppsModules;
 
   /**
    * @brief AppsSubscribedModules get mapping of application to list of

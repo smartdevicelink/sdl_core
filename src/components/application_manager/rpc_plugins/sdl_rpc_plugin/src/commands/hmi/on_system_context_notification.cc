@@ -33,8 +33,8 @@
 #include "sdl_rpc_plugin/commands/hmi/on_system_context_notification.h"
 
 #include "application_manager/application_impl.h"
-#include "application_manager/state_controller.h"
 #include "application_manager/message_helper.h"
+#include "application_manager/state_controller.h"
 
 namespace sdl_rpc_plugin {
 using namespace application_manager;
@@ -85,4 +85,4 @@ void OnSystemContextNotification::Run() {
 
 }  // namespace commands
 
-}  // namespace application_manager
+}  // namespace sdl_rpc_plugin

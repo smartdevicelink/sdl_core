@@ -32,19 +32,19 @@
 
 #include <stdint.h>
 
-#include "gtest/gtest.h"
-#include "utils/lock.h"
-#include "utils/helpers.h"
-#include "hmi/sdl_activate_app_request.h"
-#include "application_manager/mock_application.h"
 #include "application_manager/application_manager.h"
-#include "application_manager/policies/mock_policy_handler_interface.h"
 #include "application_manager/commands/command_request_test.h"
-#include "application_manager/mock_message_helper.h"
 #include "application_manager/event_engine/event.h"
+#include "application_manager/mock_application.h"
 #include "application_manager/mock_event_dispatcher.h"
+#include "application_manager/mock_message_helper.h"
 #include "application_manager/mock_state_controller.h"
+#include "application_manager/policies/mock_policy_handler_interface.h"
 #include "connection_handler/mock_connection_handler.h"
+#include "gtest/gtest.h"
+#include "hmi/sdl_activate_app_request.h"
+#include "utils/helpers.h"
+#include "utils/lock.h"
 
 namespace test {
 namespace components {
@@ -55,18 +55,17 @@ namespace sdl_activate_app_request {
 namespace am = ::application_manager;
 namespace strings = am::strings;
 namespace hmi_response = am::hmi_response;
-using am::commands::MessageSharedPtr;
-using sdl_rpc_plugin::commands::SDLActivateAppRequest;
 using am::ApplicationSet;
+using am::commands::MessageSharedPtr;
+using am::event_engine::Event;
+using connection_handler_test::MockConnectionHandler;
+using policy_test::MockPolicyHandlerInterface;
+using sdl_rpc_plugin::commands::SDLActivateAppRequest;
+using testing::Gt;
 using testing::Mock;
+using ::testing::NiceMock;
 using testing::Return;
 using testing::ReturnRef;
-using testing::Mock;
-using testing::Gt;
-using ::testing::NiceMock;
-using policy_test::MockPolicyHandlerInterface;
-using connection_handler_test::MockConnectionHandler;
-using am::event_engine::Event;
 
 namespace {
 const uint32_t kCorrelationID = 1u;

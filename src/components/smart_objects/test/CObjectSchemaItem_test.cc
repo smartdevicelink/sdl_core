@@ -32,18 +32,18 @@
 
 #include <string>
 
+#include "formatters/CSmartFactory.h"
+#include "formatters/generic_json_formatter.h"
 #include "gmock/gmock.h"
-#include "smart_objects/smart_object.h"
-#include "smart_objects/smart_schema.h"
 #include "smart_objects/array_schema_item.h"
 #include "smart_objects/bool_schema_item.h"
-#include "smart_objects/string_schema_item.h"
 #include "smart_objects/enum_schema_item.h"
 #include "smart_objects/number_schema_item.h"
-#include "smart_objects/schema_item_parameter.h"
 #include "smart_objects/object_schema_item.h"
-#include "formatters/generic_json_formatter.h"
-#include "formatters/CSmartFactory.h"
+#include "smart_objects/schema_item_parameter.h"
+#include "smart_objects/smart_object.h"
+#include "smart_objects/smart_schema.h"
+#include "smart_objects/string_schema_item.h"
 #include "utils/semantic_version.h"
 
 namespace formatters = ns_smart_device_link::ns_json_handler::formatters;
@@ -89,7 +89,7 @@ namespace Keys {
 const char RESULT_CODE[] = "resultCode";
 const char INFO[] = "info";
 const char SUCCESS[] = "success";
-}
+}  // namespace Keys
 
 class ObjectSchemaItemTest : public ::testing::Test {
  protected:

@@ -33,12 +33,12 @@
 #ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_PLUGIN_MANAGER_RPC_PLUGIN_H
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_PLUGIN_MANAGER_RPC_PLUGIN_H
 #include <memory>
-#include "utils/macro.h"
-#include "application_manager/commands/command.h"
 #include "application_manager/application.h"
-#include "application_manager/rpc_service.h"
+#include "application_manager/commands/command.h"
 #include "application_manager/hmi_capabilities.h"
 #include "application_manager/policies/policy_handler_interface.h"
+#include "application_manager/rpc_service.h"
+#include "utils/macro.h"
 
 namespace application_manager {
 class CommandFactory;
@@ -68,13 +68,13 @@ class RPCPlugin {
   virtual ~RPCPlugin() {}
 
   /**
-    * @brief Command initialization function
-    * @param app_manager ApplicationManager
-    * @param rpc_service RPCService
-    * @param hmi_capabilities HMICapabilities
-    * @param policy_handler PolicyHandlerInterface
-    * @return true in case initialization was succesful, false otherwise.
-    **/
+   * @brief Command initialization function
+   * @param app_manager ApplicationManager
+   * @param rpc_service RPCService
+   * @param hmi_capabilities HMICapabilities
+   * @param policy_handler PolicyHandlerInterface
+   * @return true in case initialization was succesful, false otherwise.
+   **/
   virtual bool Init(ApplicationManager& app_manager,
                     rpc_service::RPCService& rpc_service,
                     HMICapabilities& hmi_capabilities,

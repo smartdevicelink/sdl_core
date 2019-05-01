@@ -32,9 +32,9 @@
  */
 
 #include "application_manager/hmi_state.h"
-#include <ostream>
 #include <boost/assign.hpp>
 #include <boost/bimap.hpp>
+#include <ostream>
 #include "application_manager/application_manager.h"
 #include "utils/helpers.h"
 

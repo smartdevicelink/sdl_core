@@ -77,4 +77,4 @@ bool SDLCommandFactory::IsAbleToProcess(
              : is_mobile_command_factory_able_to_process;
 }
 
-}  // namespace application_manager
+}  // namespace sdl_rpc_plugin

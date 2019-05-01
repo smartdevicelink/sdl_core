@@ -30,10 +30,10 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "rc_rpc_plugin/interior_data_cache_impl.h"
+#include <chrono>
 #include <iostream>
 #include <thread>
-#include <chrono>
-#include "rc_rpc_plugin/interior_data_cache_impl.h"
 #include "application_manager/smart_object_keys.h"
 #include "utils/date_time.h"
 #include "utils/logger.h"
@@ -110,17 +110,16 @@ smart_objects::SmartObject MergeArray(const smart_objects::SmartObject& data1,
   smart_objects::SmartArray* result_array = result.asArray();
   smart_objects::SmartArray* data_array = data2.asArray();
   auto data_it = data_array->begin();
-  auto find_by_id =
-      [](smart_objects::SmartArray* array, const smart_objects::SmartObject& id)
-          -> smart_objects::SmartArray::iterator {
-            auto it = std::find_if(
-                array->begin(),
-                array->end(),
-                [&id](smart_objects::SmartObject& obj) -> bool {
-                  return obj[application_manager::strings::id] == id;
-                });
-            return it;
-          };
+  auto find_by_id = [](smart_objects::SmartArray* array,
+                       const smart_objects::SmartObject& id)
+      -> smart_objects::SmartArray::iterator {
+    auto it = std::find_if(array->begin(),
+                           array->end(),
+                           [&id](smart_objects::SmartObject& obj) -> bool {
+                             return obj[application_manager::strings::id] == id;
+                           });
+    return it;
+  };
 
   for (; data_it != data_array->end(); ++data_it) {
     const smart_objects::SmartObject element_id =
@@ -167,9 +166,9 @@ bool InteriorDataCacheImpl::Contains(const std::string& module_type) const {
   sync_primitives::AutoLock autolock(cached_data_lock_);
   auto it = cached_data_.find(module_type);
   const bool contains = it != cached_data_.end();
-  LOG4CXX_TRACE(logger_,
-                "module_type : " << module_type << " "
-                                 << (contains ? "true" : "false"));
+  LOG4CXX_TRACE(
+      logger_,
+      "module_type : " << module_type << " " << (contains ? "true" : "false"));
   return contains;
 }
 
@@ -189,4 +188,4 @@ void InteriorDataCacheImpl::Clear() {
   sync_primitives::AutoLock autolock(cached_data_lock_);
   cached_data_.clear();
 }
-}
+}  // namespace rc_rpc_plugin

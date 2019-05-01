@@ -31,14 +31,14 @@
  */
 #include <strings.h>
 
-#include <string>
-#include <list>
 #include <algorithm>
+#include <list>
 #include <memory>
+#include <string>
 
 #include "connection_handler/connection_handler_impl.h"
-#include "transport_manager/info.h"
 #include "encryption/hashing.h"
+#include "transport_manager/info.h"
 
 #ifdef ENABLE_SECURITY
 #include "security_manager/security_manager.h"
@@ -95,9 +95,9 @@ void ConnectionHandlerImpl::Stop() {
 
 void ConnectionHandlerImpl::set_connection_handler_observer(
     ConnectionHandlerObserver* observer) {
-  LOG4CXX_DEBUG(logger_,
-                "ConnectionHandlerImpl::set_connection_handler_observer() "
-                    << observer);
+  LOG4CXX_DEBUG(
+      logger_,
+      "ConnectionHandlerImpl::set_connection_handler_observer() " << observer);
   sync_primitives::AutoWriteLock write_lock(connection_handler_observer_lock_);
   if (!observer) {
     LOG4CXX_WARN(logger_, "Set Null pointer to observer.");
@@ -107,9 +107,9 @@ void ConnectionHandlerImpl::set_connection_handler_observer(
 
 void ConnectionHandlerImpl::set_protocol_handler(
     protocol_handler::ProtocolHandler* protocol_handler) {
-  LOG4CXX_DEBUG(logger_,
-                "ConnectionHandlerImpl::set_protocol_handler()"
-                    << protocol_handler);
+  LOG4CXX_DEBUG(
+      logger_,
+      "ConnectionHandlerImpl::set_protocol_handler()" << protocol_handler);
   if (!protocol_handler) {
     LOG4CXX_WARN(logger_, "Set Null pointer to protocol handler.");
   }
@@ -392,9 +392,9 @@ bool AllowProtection(const ConnectionHandlerSettings& settings,
   if (std::find(force_unprotected_list.begin(),
                 force_unprotected_list.end(),
                 service_type) != force_unprotected_list.end()) {
-    LOG4CXX_ERROR(logger_,
-                  "Service " << static_cast<int>(service_type)
-                             << " shall be protected");
+    LOG4CXX_ERROR(
+        logger_,
+        "Service " << static_cast<int>(service_type) << " shall be protected");
     return false;
   }
   LOG4CXX_DEBUG(logger_,
@@ -686,34 +686,34 @@ uint32_t ConnectionHandlerImpl::OnSessionEndedCallback(
       KeyFromPair(primary_connection_handle, session_id);
 
   if (protocol_handler::kRpc == service_type) {
-    LOG4CXX_INFO(logger_,
-                 "Session " << static_cast<uint32_t>(session_id)
-                            << " to be removed");
+    LOG4CXX_INFO(
+        logger_,
+        "Session " << static_cast<uint32_t>(session_id) << " to be removed");
     // old version of protocol doesn't support hash
     if (protocol_handler::HASH_ID_NOT_SUPPORTED != *hashCode) {
       if (protocol_handler::HASH_ID_WRONG == *hashCode ||
           session_key != *hashCode) {
-        LOG4CXX_WARN(logger_,
-                     "Wrong hash_id for session "
-                         << static_cast<uint32_t>(session_id));
+        LOG4CXX_WARN(
+            logger_,
+            "Wrong hash_id for session " << static_cast<uint32_t>(session_id));
         *hashCode = protocol_handler::HASH_ID_WRONG;
         return 0;
       }
     }
     if (!connection->RemoveSession(session_id)) {
-      LOG4CXX_WARN(logger_,
-                   "Couldn't remove session "
-                       << static_cast<uint32_t>(session_id));
+      LOG4CXX_WARN(
+          logger_,
+          "Couldn't remove session " << static_cast<uint32_t>(session_id));
       return 0;
     }
   } else {
-    LOG4CXX_INFO(logger_,
-                 "Service " << static_cast<uint32_t>(service_type)
-                            << " to be removed");
+    LOG4CXX_INFO(
+        logger_,
+        "Service " << static_cast<uint32_t>(service_type) << " to be removed");
     if (!connection->RemoveService(session_id, service_type)) {
-      LOG4CXX_WARN(logger_,
-                   "Couldn't remove service "
-                       << static_cast<uint32_t>(service_type));
+      LOG4CXX_WARN(
+          logger_,
+          "Couldn't remove service " << static_cast<uint32_t>(service_type));
       return 0;
     }
   }
@@ -1480,9 +1480,9 @@ void ConnectionHandlerImpl::CloseSession(ConnectionHandle connection_handle,
     return;
   }
 
-  LOG4CXX_DEBUG(logger_,
-                "Session with id: " << session_id
-                                    << " has been closed successfully");
+  LOG4CXX_DEBUG(
+      logger_,
+      "Session with id: " << session_id << " has been closed successfully");
 }
 
 void ConnectionHandlerImpl::CloseConnectionSessions(

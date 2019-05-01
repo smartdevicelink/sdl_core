@@ -39,9 +39,9 @@
 #include "policy/policy_table/types.h"
 #include "policy/pt_representation.h"
 
-#include "policy/usage_statistics/counter.h"
-#include "policy/policy_types.h"
 #include "policy/policy_settings.h"
+#include "policy/policy_types.h"
+#include "policy/usage_statistics/counter.h"
 
 namespace policy_table = rpc::policy_table_interface_base;
 
@@ -199,11 +199,11 @@ class CacheManagerInterface {
       std::string& hybrid_app_preference) const = 0;
 
   /**
-  * Initializes a new cloud application with default policies
-  * Then adds cloud specific policies
-  * @param app_id application id
-  * @return true if success
-  */
+   * Initializes a new cloud application with default policies
+   * Then adds cloud specific policies
+   * @param app_id application id
+   * @return true if success
+   */
   virtual void InitCloudApp(const std::string& policy_app_id) = 0;
 
   /**
@@ -265,7 +265,7 @@ class CacheManagerInterface {
    * @brief Check if an app can send unknown rpc requests to an app service
    * provider
    * @param policy_app_id Unique application id
-  */
+   */
   virtual bool UnknownRPCPassthroughAllowed(
       const std::string& policy_app_id) const = 0;
 
@@ -867,9 +867,9 @@ class CacheManagerInterface {
   virtual std::string GetCertificate() const = 0;
 
   /**
-    * @brief Sets decrypted certificate in policy table
-    * @param certificate content of certificate
-    */
+   * @brief Sets decrypted certificate in policy table
+   * @param certificate content of certificate
+   */
   virtual void SetDecryptedCertificate(const std::string& certificate) = 0;
 
   /**
@@ -894,34 +894,35 @@ class CacheManagerInterface {
   virtual ExternalConsentStatus GetExternalConsentEntities() = 0;
 
   /**
- * @brief Creates collection of ExternalConsent items known by current
- * functional
- * groupings and appropiate section
- * (disallowed_by_external_consent_entities_on/off) where
- * is item is being holded
- * @param status Current status containing collection of ExternalConsent items
- * @return Collection of ExternalConsent items mapped to list of groups with
- * section
- * marker where the item is found
- */
+   * @brief Creates collection of ExternalConsent items known by current
+   * functional
+   * groupings and appropiate section
+   * (disallowed_by_external_consent_entities_on/off) where
+   * is item is being holded
+   * @param status Current status containing collection of ExternalConsent items
+   * @return Collection of ExternalConsent items mapped to list of groups with
+   * section
+   * marker where the item is found
+   */
   virtual GroupsByExternalConsentStatus GetGroupsWithSameEntities(
       const ExternalConsentStatus& status) = 0;
 
   /**
- * @brief Gets collection of links device-to-application from device_data
- * section of policy table if there any application records present, i.e. if
- * any specific user consent is present
- * @return Collection of device-to-application links
- */
+   * @brief Gets collection of links device-to-application from device_data
+   * section of policy table if there any application records present, i.e. if
+   * any specific user consent is present
+   * @return Collection of device-to-application links
+   */
   virtual std::map<std::string, std::string> GetKnownLinksFromPT() = 0;
 
   /**
- * @brief Sets groups permissions affected by customer connectivity settings
- * entities status, i.e. groups assigned to particular application on
- * particular device which have same entities as current ExternalConsent status
- * @param permissions Groups permissions which result current ExternalConsent
- * status
- */
+   * @brief Sets groups permissions affected by customer connectivity settings
+   * entities status, i.e. groups assigned to particular application on
+   * particular device which have same entities as current ExternalConsent
+   * status
+   * @param permissions Groups permissions which result current ExternalConsent
+   * status
+   */
   virtual void SetExternalConsentForApp(
       const PermissionConsent& permissions) = 0;
 

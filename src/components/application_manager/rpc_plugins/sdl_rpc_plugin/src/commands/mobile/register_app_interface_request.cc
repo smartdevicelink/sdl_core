@@ -33,19 +33,19 @@
 
 #include "sdl_rpc_plugin/commands/mobile/register_app_interface_request.h"
 
+#include <string.h>
 #include <unistd.h>
 #include <algorithm>
 #include <map>
-#include <string.h>
 
-#include "application_manager/application_manager.h"
-#include "application_manager/policies/policy_handler_interface.h"
-#include "application_manager/application_impl.h"
 #include "application_manager/app_launch/app_launch_ctrl.h"
-#include "application_manager/message_helper.h"
-#include "application_manager/resumption/resume_ctrl.h"
-#include "application_manager/policies/policy_handler.h"
+#include "application_manager/application_impl.h"
+#include "application_manager/application_manager.h"
 #include "application_manager/helpers/application_helper.h"
+#include "application_manager/message_helper.h"
+#include "application_manager/policies/policy_handler.h"
+#include "application_manager/policies/policy_handler_interface.h"
+#include "application_manager/resumption/resume_ctrl.h"
 #include "application_manager/rpc_service.h"
 #include "config_profile/profile.h"
 #include "interfaces/MOBILE_API.h"
@@ -166,7 +166,7 @@ struct IsSameNickname {
  private:
   const custom_str::CustomString& app_id_;
 };
-}
+}  // namespace
 
 namespace sdl_rpc_plugin {
 using namespace application_manager;
@@ -400,9 +400,9 @@ void RegisterAppInterfaceRequest::Run() {
             tts_name, application, application_manager_);
 
     if (mobile_apis::Result::FILE_NOT_FOUND == verification_result) {
-      LOG4CXX_WARN(logger_,
-                   "MessageHelper::VerifyTtsFiles return "
-                       << verification_result);
+      LOG4CXX_WARN(
+          logger_,
+          "MessageHelper::VerifyTtsFiles return " << verification_result);
       response_info_ = "One or more files needed for tts_name are not present";
       result_code_ = mobile_apis::Result::WARNINGS;
     }
@@ -454,17 +454,16 @@ void RegisterAppInterfaceRequest::Run() {
 
   // Add device to policy table and set device info, if any
   policy::DeviceParams dev_params;
-  if (-1 ==
-      application_manager_.connection_handler()
-          .get_session_observer()
-          .GetDataOnDeviceID(application->device(),
-                             &dev_params.device_name,
-                             NULL,
-                             &dev_params.device_mac_address,
-                             &dev_params.device_connection_type)) {
-    LOG4CXX_ERROR(logger_,
-                  "Failed to extract information for device "
-                      << application->device());
+  if (-1 == application_manager_.connection_handler()
+                .get_session_observer()
+                .GetDataOnDeviceID(application->device(),
+                                   &dev_params.device_name,
+                                   NULL,
+                                   &dev_params.device_mac_address,
+                                   &dev_params.device_connection_type)) {
+    LOG4CXX_ERROR(
+        logger_,
+        "Failed to extract information for device " << application->device());
   }
   policy::DeviceInfo device_info;
   device_info.AdoptDeviceType(dev_params.device_connection_type);
@@ -1212,7 +1211,8 @@ bool RegisterAppInterfaceRequest::IsWhiteSpaceExist() {
     if ((*message_)[strings::msg_params][strings::device_info].keyExists(
             strings::hardware)) {
       str = (*message_)[strings::msg_params][strings::device_info]
-                       [strings::hardware].asCharArray();
+                       [strings::hardware]
+                           .asCharArray();
       if (strlen(str) && !CheckSyntax(str)) {
         LOG4CXX_ERROR(logger_,
                       "Invalid device_info hardware syntax check failed");
@@ -1223,7 +1223,8 @@ bool RegisterAppInterfaceRequest::IsWhiteSpaceExist() {
     if ((*message_)[strings::msg_params][strings::device_info].keyExists(
             strings::firmware_rev)) {
       str = (*message_)[strings::msg_params][strings::device_info]
-                       [strings::firmware_rev].asCharArray();
+                       [strings::firmware_rev]
+                           .asCharArray();
       if (strlen(str) && !CheckSyntax(str)) {
         LOG4CXX_ERROR(logger_,
                       "Invalid device_info firmware_rev syntax check failed");
@@ -1244,7 +1245,8 @@ bool RegisterAppInterfaceRequest::IsWhiteSpaceExist() {
     if ((*message_)[strings::msg_params][strings::device_info].keyExists(
             strings::os_version)) {
       str = (*message_)[strings::msg_params][strings::device_info]
-                       [strings::os_version].asCharArray();
+                       [strings::os_version]
+                           .asCharArray();
       if (strlen(str) && !CheckSyntax(str)) {
         LOG4CXX_ERROR(logger_,
                       "Invalid device_info os_version syntax check failed");
@@ -1255,7 +1257,8 @@ bool RegisterAppInterfaceRequest::IsWhiteSpaceExist() {
     if ((*message_)[strings::msg_params][strings::device_info].keyExists(
             strings::carrier)) {
       str = (*message_)[strings::msg_params][strings::device_info]
-                       [strings::carrier].asCharArray();
+                       [strings::carrier]
+                           .asCharArray();
       if (strlen(str) && !CheckSyntax(str)) {
         LOG4CXX_ERROR(logger_,
                       "Invalid device_info carrier syntax check failed");
@@ -1323,18 +1326,18 @@ bool RegisterAppInterfaceRequest::IsApplicationSwitched() {
   auto app = application_manager_.application_by_policy_id(policy_app_id);
 
   if (!app) {
-    LOG4CXX_DEBUG(logger_,
-                  "Application with policy id " << policy_app_id
-                                                << " is not found.");
+    LOG4CXX_DEBUG(
+        logger_,
+        "Application with policy id " << policy_app_id << " is not found.");
     return false;
   }
 
   LOG4CXX_DEBUG(logger_,
                 "Application with policy id " << policy_app_id << " is found.");
   if (!application_manager_.IsAppInReconnectMode(policy_app_id)) {
-    LOG4CXX_DEBUG(logger_,
-                  "Policy id " << policy_app_id
-                               << " is not found in reconnection list.");
+    LOG4CXX_DEBUG(
+        logger_,
+        "Policy id " << policy_app_id << " is not found in reconnection list.");
     SendResponse(false, mobile_apis::Result::APPLICATION_REGISTERED_ALREADY);
     return false;
   }
@@ -1369,4 +1372,4 @@ RegisterAppInterfaceRequest::GetPolicyHandler() {
 
 }  // namespace commands
 
-}  // namespace application_manager
+}  // namespace sdl_rpc_plugin

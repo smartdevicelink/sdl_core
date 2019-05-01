@@ -35,15 +35,15 @@
 
 #include <map>
 
+#include "policy/cache_manager_interface.h"
 #include "policy/pt_representation.h"
 #include "policy/usage_statistics/statistics_manager.h"
-#include "policy/cache_manager_interface.h"
 #include "utils/threads/thread.h"
 #include "utils/threads/thread_delegate.h"
 
-#include "utils/lock.h"
-#include "utils/conditional_variable.h"
 #include "policy/policy_types.h"
+#include "utils/conditional_variable.h"
+#include "utils/lock.h"
 
 namespace policy {
 class PolicySettings;
@@ -244,7 +244,7 @@ class CacheManager : public CacheManagerInterface {
    * @brief Check if an app can send unknown rpc requests to an app service
    * provider
    * @param policy_app_id Unique application id
-  */
+   */
   virtual bool UnknownRPCPassthroughAllowed(
       const std::string& policy_app_id) const;
 

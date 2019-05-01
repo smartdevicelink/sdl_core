@@ -33,28 +33,28 @@
 #ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_APPLICATION_IMPL_H_
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_APPLICATION_IMPL_H_
 
+#include <stdint.h>
+#include <forward_list>
+#include <list>
 #include <map>
 #include <set>
-#include <vector>
 #include <utility>
-#include <list>
-#include <forward_list>
-#include <stdint.h>
+#include <vector>
 
 #include "application_manager/application.h"
 #include "application_manager/application_data_impl.h"
-#include "application_manager/usage_statistics.h"
 #include "application_manager/help_prompt_manager_impl.h"
 #include "application_manager/hmi_state.h"
+#include "application_manager/usage_statistics.h"
 #include "protocol_handler/protocol_handler.h"
 
-#include "connection_handler/device.h"
-#include "utils/lock.h"
 #include <atomic>
+#include "connection_handler/device.h"
 #include "utils/custom_string.h"
-#include "utils/timer.h"
-#include "utils/macro.h"
 #include "utils/date_time.h"
+#include "utils/lock.h"
+#include "utils/macro.h"
+#include "utils/timer.h"
 
 namespace usage_statistics {
 
@@ -304,18 +304,18 @@ class ApplicationImpl : public virtual Application,
   void SetInitialState(HmiStatePtr state) FINAL;
 
   /**
-  * @brief SetRegularState set permanent state of application
-  *
-  * @param state state to setup
-  */
+   * @brief SetRegularState set permanent state of application
+   *
+   * @param state state to setup
+   */
   virtual void SetRegularState(HmiStatePtr state);
 
   /**
-  * @brief SetPostponedState sets postponed state to application.
-  * This state could be set as regular later
-  *
-  * @param state state to setup
-  */
+   * @brief SetPostponedState sets postponed state to application.
+   * This state could be set as regular later
+   *
+   * @param state state to setup
+   */
   virtual void SetPostponedState(HmiStatePtr state);
 
   virtual void RemovePostponedState();

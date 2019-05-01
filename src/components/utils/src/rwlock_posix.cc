@@ -30,8 +30,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "utils/rwlock.h"
 #include "utils/logger.h"
+#include "utils/rwlock.h"
 
 namespace sync_primitives {
 

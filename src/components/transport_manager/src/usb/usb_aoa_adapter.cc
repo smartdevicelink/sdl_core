@@ -34,9 +34,9 @@
  */
 
 #include "transport_manager/usb/usb_aoa_adapter.h"
-#include "transport_manager/usb/usb_device_scanner.h"
-#include "transport_manager/usb/usb_connection_factory.h"
 #include "transport_manager/usb/common.h"
+#include "transport_manager/usb/usb_connection_factory.h"
+#include "transport_manager/usb/usb_device_scanner.h"
 #include "utils/logger.h"
 
 namespace transport_manager {

@@ -31,11 +31,11 @@
  */
 
 #include <gtest/gtest.h>
-#include <vector>
 #include <list>
+#include <vector>
 
-#include "utils/macro.h"
 #include "protocol_handler/protocol_packet.h"
+#include "utils/macro.h"
 
 namespace {
 const size_t MAXIMUM_FRAME_DATA_V3_SIZE = 131072;

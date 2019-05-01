@@ -39,10 +39,10 @@
 #include "application_manager/application.h"
 #include "application_manager/application_impl.h"
 #include "application_manager/application_manager_impl.h"
+#include "application_manager/mock_app_service_manager.h"
 #include "application_manager/mock_application.h"
 #include "application_manager/mock_application_manager_settings.h"
 #include "application_manager/mock_resumption_data.h"
-#include "application_manager/mock_app_service_manager.h"
 #include "application_manager/mock_rpc_plugin_manager.h"
 #include "application_manager/mock_rpc_service.h"
 #include "application_manager/policies/mock_policy_handler_interface.h"
@@ -179,7 +179,8 @@ class ApplicationManagerImplTest : public ::testing::Test {
     ON_CALL(mock_application_manager_settings_, default_timeout())
         .WillByDefault(ReturnRef(kTimeout));
     ON_CALL(mock_application_manager_settings_,
-            application_list_update_timeout()).WillByDefault(Return(kTimeout));
+            application_list_update_timeout())
+        .WillByDefault(Return(kTimeout));
 
     app_manager_impl_.reset(new am::ApplicationManagerImpl(
         mock_application_manager_settings_, mock_policy_settings_));
@@ -1157,9 +1158,10 @@ bool ApplicationManagerImplTest::CheckResumptionRequiredTransportAvailableTest(
         TransportTypeProfileStringFromDeviceHandle(secondary_device_handle))
         .WillOnce(Return(secondary_transport_device_string));
   } else {
-    EXPECT_CALL(mock_session_observer_,
-                TransportTypeProfileStringFromDeviceHandle(
-                    secondary_device_handle)).WillOnce(Return(std::string("")));
+    EXPECT_CALL(
+        mock_session_observer_,
+        TransportTypeProfileStringFromDeviceHandle(secondary_device_handle))
+        .WillOnce(Return(std::string("")));
   }
 
   return app_manager_impl_->CheckResumptionRequiredTransportAvailable(
@@ -1576,7 +1578,8 @@ TEST_F(ApplicationManagerImplTest,
                           testing::An<connection_handler::DeviceHandle*>()))
       .WillOnce(DoAll(SetArgPointee<3u>(kDeviceId), Return(0)));
   EXPECT_CALL(*mock_rpc_service_,
-              ManageMobileCommand(_, commands::Command::SOURCE_SDL)).Times(0);
+              ManageMobileCommand(_, commands::Command::SOURCE_SDL))
+      .Times(0);
   smart_objects::SmartObject request_for_registration(
       smart_objects::SmartType_Map);
 

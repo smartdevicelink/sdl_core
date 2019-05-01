@@ -33,9 +33,9 @@
 #ifndef SRC_COMPONENTS_INCLUDE_TEST_APPLICATION_MANAGER_MOCK_APPLICATION_MANAGER_H_
 #define SRC_COMPONENTS_INCLUDE_TEST_APPLICATION_MANAGER_MOCK_APPLICATION_MANAGER_H_
 
+#include <memory>
 #include <string>
 #include <vector>
-#include <memory>
 
 #include "gmock/gmock.h"
 
@@ -197,8 +197,9 @@ class MockApplicationManager : public application_manager::ApplicationManager {
                void(mobile_apis::VehicleDataType::eType vehicle_info,
                     int value));
   MOCK_METHOD1(RegisterApplication,
-               application_manager::ApplicationSharedPtr(const std::shared_ptr<
-                   smart_objects::SmartObject>& request_for_registration));
+               application_manager::ApplicationSharedPtr(
+                   const std::shared_ptr<smart_objects::SmartObject>&
+                       request_for_registration));
   MOCK_METHOD0(SendUpdateAppList, void());
   MOCK_METHOD2(MarkAppsGreyOut,
                void(const connection_handler::DeviceHandle handle,

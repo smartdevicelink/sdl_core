@@ -32,16 +32,16 @@
 
 #include <fstream>
 
-#include "json/reader.h"
-#include "gtest/gtest.h"
 #include <utility>
+#include "gtest/gtest.h"
+#include "json/reader.h"
 
 #include "policy/policy_manager_impl_test_base.h"
 
 using ::testing::_;
+using ::testing::AtLeast;
 using ::testing::Return;
 using ::testing::SetArgReferee;
-using ::testing::AtLeast;
 
 namespace test {
 namespace components {
@@ -1151,6 +1151,6 @@ TEST_F(
   EXPECT_EQ(Boolean(false), updated_group_2->second);
 }
 
-}  // namespace policy
+}  // namespace policy_test
 }  // namespace components
 }  // namespace test

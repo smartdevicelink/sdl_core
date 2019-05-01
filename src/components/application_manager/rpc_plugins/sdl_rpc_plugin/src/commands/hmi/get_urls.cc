@@ -31,10 +31,10 @@
  */
 
 #include "sdl_rpc_plugin/commands/hmi/get_urls.h"
-#include "application_manager/message.h"
 #include "application_manager/application_manager.h"
-#include "application_manager/rpc_service.h"
+#include "application_manager/message.h"
 #include "application_manager/policies/policy_handler.h"
+#include "application_manager/rpc_service.h"
 #include "utils/helpers.h"
 
 namespace sdl_rpc_plugin {
@@ -227,4 +227,4 @@ void GetUrls::ProcessPolicyServiceURLs(const policy::EndpointUrls& endpoints) {
 #endif  // PROPRIETARY_MODE
 
 }  // namespace commands
-}  // namespace application_manager
+}  // namespace sdl_rpc_plugin

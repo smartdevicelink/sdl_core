@@ -30,9 +30,9 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "transport_manager/transport_adapter/transport_adapter_controller.h"
 #include "transport_manager/tcp/tcp_connection_factory.h"
 #include "transport_manager/tcp/tcp_server_originated_socket_connection.h"
+#include "transport_manager/transport_adapter/transport_adapter_controller.h"
 
 #include "utils/logger.h"
 
@@ -52,9 +52,9 @@ TransportAdapter::Error TcpConnectionFactory::Init() {
 TransportAdapter::Error TcpConnectionFactory::CreateConnection(
     const DeviceUID& device_uid, const ApplicationHandle& app_handle) {
   LOG4CXX_AUTO_TRACE(logger_);
-  LOG4CXX_DEBUG(logger_,
-                "DeviceUID: " << &device_uid
-                              << ", ApplicationHandle: " << &app_handle);
+  LOG4CXX_DEBUG(
+      logger_,
+      "DeviceUID: " << &device_uid << ", ApplicationHandle: " << &app_handle);
   std::shared_ptr<TcpServerOriginatedSocketConnection> connection =
       std::make_shared<TcpServerOriginatedSocketConnection>(
           device_uid, app_handle, controller_);

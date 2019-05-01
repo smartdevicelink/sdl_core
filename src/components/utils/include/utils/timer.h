@@ -32,15 +32,15 @@
 #ifndef SRC_COMPONENTS_UTILS_INCLUDE_UTILS_TIMER_H_
 #define SRC_COMPONENTS_UTILS_INCLUDE_UTILS_TIMER_H_
 
-#include <string>
 #include <stdint.h>
 #include <memory>
+#include <string>
 
-#include "utils/macro.h"
 #include "utils/lock.h"
-#include "utils/timer_task.h"
+#include "utils/macro.h"
 #include "utils/threads/thread.h"
 #include "utils/threads/thread_delegate.h"
+#include "utils/timer_task.h"
 
 namespace timer {
 

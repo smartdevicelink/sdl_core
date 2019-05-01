@@ -35,6 +35,7 @@
 
 #include <string>
 #include "media_manager/media_adapter_listener.h"
+#include "utils/macro.h"
 
 namespace application_manager {
 class ApplicationManager;

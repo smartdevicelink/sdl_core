@@ -32,8 +32,8 @@
 
 #ifndef SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_SDL_RPC_PLUGIN_H
 #define SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_SDL_RPC_PLUGIN_H
-#include "application_manager/plugin_manager/rpc_plugin.h"
 #include "application_manager/command_factory.h"
+#include "application_manager/plugin_manager/rpc_plugin.h"
 
 namespace sdl_rpc_plugin {
 namespace app_mngr = application_manager;
@@ -64,7 +64,7 @@ class SDLRPCPlugin : public plugins::RPCPlugin {
 
   std::unique_ptr<application_manager::CommandFactory> command_factory_;
 };
-}
+}  // namespace sdl_rpc_plugin
 
 extern "C" application_manager::plugin_manager::RPCPlugin* Create();
 

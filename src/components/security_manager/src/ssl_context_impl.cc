@@ -33,14 +33,14 @@
 
 #include <assert.h>
 #include <memory.h>
-#include <map>
-#include <algorithm>
-#include <vector>
 #include <time.h>
+#include <algorithm>
+#include <map>
+#include <vector>
 
 #include <openssl/bio.h>
-#include <openssl/ssl.h>
 #include <openssl/err.h>
+#include <openssl/ssl.h>
 
 #include "utils/macro.h"
 
@@ -249,9 +249,9 @@ CryptoManagerImpl::SSLContextImpl::CheckCertContext() {
                       << start_seconds << " seconds");
     return Handshake_Result_NotYetValid;
   } else {
-    LOG4CXX_DEBUG(logger_,
-                  "Time since certificate validity " << start_seconds
-                                                     << "seconds");
+    LOG4CXX_DEBUG(
+        logger_,
+        "Time since certificate validity " << start_seconds << "seconds");
   }
 
   if (end_seconds < 0) {

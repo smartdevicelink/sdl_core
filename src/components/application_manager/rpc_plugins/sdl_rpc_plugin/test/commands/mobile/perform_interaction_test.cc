@@ -31,22 +31,22 @@
  */
 
 #include <stdint.h>
-#include <string>
 #include <set>
+#include <string>
 
 #include "mobile/perform_interaction_request.h"
 
-#include "gtest/gtest.h"
-#include "utils/helpers.h"
-#include "smart_objects/smart_object.h"
-#include "utils/custom_string.h"
 #include "application_manager/commands/command_request_test.h"
-#include "application_manager/smart_object_keys.h"
+#include "application_manager/event_engine/event.h"
 #include "application_manager/mock_application.h"
 #include "application_manager/mock_application_manager.h"
-#include "application_manager/mock_message_helper.h"
-#include "application_manager/event_engine/event.h"
 #include "application_manager/mock_hmi_interface.h"
+#include "application_manager/mock_message_helper.h"
+#include "application_manager/smart_object_keys.h"
+#include "gtest/gtest.h"
+#include "smart_objects/smart_object.h"
+#include "utils/custom_string.h"
+#include "utils/helpers.h"
 
 namespace test {
 namespace components {
@@ -55,16 +55,16 @@ namespace mobile_commands_test {
 namespace perform_interaction_request {
 
 namespace am = application_manager;
-using am::commands::CommandImpl;
 using am::ApplicationManager;
-using am::commands::MessageSharedPtr;
 using am::ApplicationSharedPtr;
 using am::MockMessageHelper;
+using am::commands::CommandImpl;
+using am::commands::MessageSharedPtr;
+using sdl_rpc_plugin::commands::PerformInteractionRequest;
+using ::test::components::application_manager_test::MockApplication;
 using ::testing::_;
 using ::testing::Return;
 using ::testing::ReturnRef;
-using sdl_rpc_plugin::commands::PerformInteractionRequest;
-using ::test::components::application_manager_test::MockApplication;
 
 namespace strings = ::application_manager::strings;
 namespace hmi_response = ::application_manager::hmi_response;
@@ -258,4 +258,4 @@ TEST_F(PerformInteractionRequestTest,
 }  // namespace mobile_commands_test
 }  // namespace commands_test
 }  // namespace components
-}  // namespace tests
+}  // namespace test

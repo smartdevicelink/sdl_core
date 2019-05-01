@@ -30,8 +30,8 @@
  ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  POSSIBILITY OF SUCH DAMAGE.
  */
-#include <algorithm>
 #include "sdl_rpc_plugin/commands/mobile/send_location_request.h"
+#include <algorithm>
 #include "application_manager/message_helper.h"
 #include "utils/custom_string.h"
 
@@ -281,4 +281,4 @@ bool SendLocationRequest::CheckHMICapabilities(
 
 }  // namespace commands
 
-}  // namespace application_manager
+}  // namespace sdl_rpc_plugin

@@ -33,12 +33,12 @@
 #ifndef SRC_COMPONENTS_POLICY_POLICY_REGULAR_INCLUDE_POLICY_PT_REPRESENTATION_H_
 #define SRC_COMPONENTS_POLICY_POLICY_REGULAR_INCLUDE_POLICY_PT_REPRESENTATION_H_
 
-#include <vector>
-#include <string>
 #include <memory>
-#include "policy/policy_types.h"
-#include "policy/policy_table/types.h"
+#include <string>
+#include <vector>
 #include "policy/policy_settings.h"
+#include "policy/policy_table/types.h"
+#include "policy/policy_types.h"
 #include "utils/macro.h"
 
 namespace policy {
@@ -265,10 +265,10 @@ class PTRepresentation {
   virtual bool IsDefaultPolicy(const std::string& app_id) const = 0;
 
   /**
-       * Checks if the application has pre_data policy
-       * @param app_id application id
-       * @return true if application has pre_data policy
-       */
+   * Checks if the application has pre_data policy
+   * @param app_id application id
+   * @return true if application has pre_data policy
+   */
   virtual bool IsPredataPolicy(const std::string& app_id) const = 0;
 
   /**

@@ -113,10 +113,10 @@ errors::eType CDefaultSchemaItem<Type>::validate(
     const utils::SemanticVersion& MessageVersion,
     const bool allow_unknown_enums) {
   if (getSmartType() != Object.getType()) {
-    std::string validation_info = "Incorrect type, expected: " +
-                                  SmartObject::typeToString(getSmartType()) +
-                                  ", got: " +
-                                  SmartObject::typeToString(Object.getType());
+    std::string validation_info =
+        "Incorrect type, expected: " +
+        SmartObject::typeToString(getSmartType()) +
+        ", got: " + SmartObject::typeToString(Object.getType());
     report__->set_validation_info(validation_info);
     return errors::INVALID_VALUE;
   } else {

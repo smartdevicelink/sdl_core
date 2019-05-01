@@ -29,10 +29,10 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
+#include <stdint.h>
 #include <sys/wait.h>
 #include <csignal>
 #include <cstdlib>
-#include <stdint.h>
 #include <iostream>
 
 #include "utils/signals.h"

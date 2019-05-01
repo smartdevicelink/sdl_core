@@ -35,23 +35,23 @@
 #include <stdint.h>
 #include <iostream>
 
-#include "gtest/gtest.h"
 #include "application_manager/hmi_state.h"
+#include "gtest/gtest.h"
 #include "utils/file_system.h"
 
-#include "application_manager/mock_message_helper.h"
-#include "utils/custom_string.h"
+#include "application_manager/event_engine/event_dispatcher.h"
 #include "application_manager/mock_application_manager.h"
 #include "application_manager/mock_application_manager_settings.h"
+#include "application_manager/mock_message_helper.h"
 #include "application_manager/mock_request_controller_settings.h"
-#include "application_manager/event_engine/event_dispatcher.h"
-#include "application_manager/state_controller.h"
-#include "resumption/last_state.h"
-#include "application_manager/resumption/resume_ctrl.h"
-#include "application_manager/policies/mock_policy_handler_interface.h"
 #include "application_manager/mock_resume_ctrl.h"
+#include "application_manager/policies/mock_policy_handler_interface.h"
+#include "application_manager/resumption/resume_ctrl.h"
+#include "application_manager/state_controller.h"
 #include "policy/usage_statistics/mock_statistics_manager.h"
+#include "resumption/last_state.h"
 #include "smart_objects/smart_object.h"
+#include "utils/custom_string.h"
 
 namespace test {
 namespace components {
@@ -63,10 +63,10 @@ using namespace mobile_apis;
 namespace custom_str = utils::custom_string;
 
 using ::testing::_;
+using ::testing::AtLeast;
 using ::testing::Mock;
 using ::testing::Return;
 using ::testing::ReturnRef;
-using ::testing::AtLeast;
 using usage_statistics_test::MockStatisticsManager;
 
 typedef void (ApplicationImpl::*AddSet)(HmiStatePtr args);
@@ -91,9 +91,11 @@ class ApplicationImplTest : public ::testing::Test {
     EXPECT_CALL(mock_application_manager_settings_, app_storage_folder())
         .WillRepeatedly(ReturnRef(directory_name));
     EXPECT_CALL(mock_application_manager_settings_,
-                audio_data_stopped_timeout()).WillOnce(Return(0));
+                audio_data_stopped_timeout())
+        .WillOnce(Return(0));
     EXPECT_CALL(mock_application_manager_settings_,
-                video_data_stopped_timeout()).WillOnce(Return(0));
+                video_data_stopped_timeout())
+        .WillOnce(Return(0));
     app_impl.reset(
         new ApplicationImpl(app_id,
                             policy_app_id,
@@ -666,7 +668,8 @@ TEST_F(ApplicationImplTest,
 
 TEST_F(ApplicationImplTest, UpdateHash_AppMngrNotSuspended) {
   EXPECT_CALL(*MockMessageHelper::message_helper_mock(),
-              SendHashUpdateNotification(app_id, _)).Times(1);
+              SendHashUpdateNotification(app_id, _))
+      .Times(1);
   resumprion_test::MockResumeCtrl mock_resume_ctrl;
   EXPECT_CALL(mock_application_manager_, resume_controller())
       .WillOnce(ReturnRef(mock_resume_ctrl));
@@ -678,7 +681,8 @@ TEST_F(ApplicationImplTest, UpdateHash_AppMngrNotSuspended) {
 
 TEST_F(ApplicationImplTest, UpdateHash_AppMngrSuspended) {
   EXPECT_CALL(*MockMessageHelper::message_helper_mock(),
-              SendHashUpdateNotification(app_id, _)).Times(0);
+              SendHashUpdateNotification(app_id, _))
+      .Times(0);
   resumprion_test::MockResumeCtrl mock_resume_ctrl;
   EXPECT_CALL(mock_application_manager_, resume_controller())
       .WillOnce(ReturnRef(mock_resume_ctrl));
@@ -699,7 +703,8 @@ TEST_F(ApplicationImplTest, SetVideoConfig_MobileNavi_StreamingNotApproved) {
 TEST_F(ApplicationImplTest, SetVideoConfig_MobileNavi_StreamingApproved) {
   app_impl->set_video_streaming_approved(true);
   EXPECT_CALL(*MockMessageHelper::message_helper_mock(),
-              SendNaviSetVideoConfig(app_id, _, _)).Times(0);
+              SendNaviSetVideoConfig(app_id, _, _))
+      .Times(0);
 
   smart_objects::SmartObject params;
   app_impl->SetVideoConfig(protocol_handler::ServiceType::kMobileNav, params);
@@ -707,7 +712,8 @@ TEST_F(ApplicationImplTest, SetVideoConfig_MobileNavi_StreamingApproved) {
 
 TEST_F(ApplicationImplTest, SetVideoConfig_NotMobileNavi) {
   EXPECT_CALL(*MockMessageHelper::message_helper_mock(),
-              SendNaviSetVideoConfig(app_id, _, _)).Times(0);
+              SendNaviSetVideoConfig(app_id, _, _))
+      .Times(0);
 
   smart_objects::SmartObject params;
   app_impl->SetVideoConfig(protocol_handler::ServiceType::kAudio, params);
@@ -732,13 +738,15 @@ TEST_F(ApplicationImplTest, StartStreaming_Audio_StreamingNotApproved) {
 TEST_F(ApplicationImplTest, StartStreaming_StreamingApproved) {
   app_impl->set_video_streaming_approved(true);
   EXPECT_CALL(*MockMessageHelper::message_helper_mock(),
-              SendNaviStartStream(app_id, _)).Times(0);
+              SendNaviStartStream(app_id, _))
+      .Times(0);
   app_impl->StartStreaming(protocol_handler::ServiceType::kMobileNav);
 
   app_impl->set_audio_streaming_approved(true);
 
   EXPECT_CALL(*MockMessageHelper::message_helper_mock(),
-              SendAudioStartStream(app_id, _)).Times(0);
+              SendAudioStartStream(app_id, _))
+      .Times(0);
   app_impl->StartStreaming(protocol_handler::ServiceType::kAudio);
 }
 

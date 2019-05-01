@@ -100,16 +100,16 @@ class Command {
   virtual void onTimeOut() = 0;
 
   /**
- * @brief AllowedToTerminate tells if request controller is allowed
- * to terminate this command
- * @return
- */
+   * @brief AllowedToTerminate tells if request controller is allowed
+   * to terminate this command
+   * @return
+   */
   virtual bool AllowedToTerminate() = 0;
 
   /**
- * @brief SetAllowedToTerminate set up allowed to terminate flag.
- * If true, request controller will terminate request on response
- */
+   * @brief SetAllowedToTerminate set up allowed to terminate flag.
+   * If true, request controller will terminate request on response
+   */
   virtual void SetAllowedToTerminate(const bool allowed) = 0;
 
   enum CommandSource {

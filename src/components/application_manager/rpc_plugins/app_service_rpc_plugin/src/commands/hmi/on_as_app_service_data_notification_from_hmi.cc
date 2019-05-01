@@ -59,7 +59,8 @@ void OnASAppServiceDataNotificationFromHMI::Run() {
 
   std::string service_id =
       (*message_)[strings::msg_params][strings::service_data]
-                 [strings::service_id].asString();
+                 [strings::service_id]
+                     .asString();
   AppService* service =
       application_manager_.GetAppServiceManager().FindServiceByID(service_id);
   if (!service) {
@@ -76,7 +77,8 @@ void OnASAppServiceDataNotificationFromHMI::Run() {
 
   std::string service_type =
       (*message_)[strings::msg_params][strings::service_data]
-                 [strings::service_type].asString();
+                 [strings::service_type]
+                     .asString();
   std::string published_service_type =
       service->record[strings::service_manifest][strings::service_type]
           .asString();

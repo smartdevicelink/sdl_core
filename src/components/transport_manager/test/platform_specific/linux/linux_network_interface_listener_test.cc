@@ -15,7 +15,7 @@ namespace transport_manager_test {
 namespace {
 const long kThreadStartWaitMsec = 10;
 const uint32_t kStartNotificationTimeoutMsec = 500;
-}
+}  // namespace
 
 using ::testing::_;
 using ::testing::AtLeast;
@@ -207,7 +207,8 @@ TEST_F(NetworkInterfaceListenerTest, DesignatedInterface_IPAddressChanged) {
   SetDummyInterfaceTable(entries1);
 
   EXPECT_CALL(mock_tcp_client_listener_,
-              OnIPAddressUpdated(entries1[0].ipv4_address, "")).Times(1);
+              OnIPAddressUpdated(entries1[0].ipv4_address, ""))
+      .Times(1);
 
   // this test case doesn't call Start() - we only check the behavior of
   // NotifyIPAddresses()
@@ -216,7 +217,8 @@ TEST_F(NetworkInterfaceListenerTest, DesignatedInterface_IPAddressChanged) {
   SetDummyInterfaceTable(entries2);
 
   EXPECT_CALL(mock_tcp_client_listener_,
-              OnIPAddressUpdated(entries2[0].ipv4_address, "")).Times(1);
+              OnIPAddressUpdated(entries2[0].ipv4_address, ""))
+      .Times(1);
 
   interface_listener_impl_->testCallNotifyIPAddresses();
 
@@ -239,7 +241,8 @@ TEST_F(NetworkInterfaceListenerTest, DesignatedInterface_IPAddressNotChanged) {
   SetDummyInterfaceTable(entries1);
 
   EXPECT_CALL(mock_tcp_client_listener_,
-              OnIPAddressUpdated(entries1[0].ipv4_address, "")).Times(1);
+              OnIPAddressUpdated(entries1[0].ipv4_address, ""))
+      .Times(1);
 
   interface_listener_impl_->testCallNotifyIPAddresses();
 
@@ -268,9 +271,10 @@ TEST_F(NetworkInterfaceListenerTest, DesignatedInterface_GoesUnavailable) {
 
   SetDummyInterfaceTable(entries1);
 
-  EXPECT_CALL(mock_tcp_client_listener_,
-              OnIPAddressUpdated(entries1[0].ipv4_address,
-                                 entries1[0].ipv6_address)).Times(1);
+  EXPECT_CALL(
+      mock_tcp_client_listener_,
+      OnIPAddressUpdated(entries1[0].ipv4_address, entries1[0].ipv6_address))
+      .Times(1);
 
   interface_listener_impl_->testCallNotifyIPAddresses();
 
@@ -297,9 +301,10 @@ TEST_F(NetworkInterfaceListenerTest, DesignatedInterface_Removed) {
 
   SetDummyInterfaceTable(entries1);
 
-  EXPECT_CALL(mock_tcp_client_listener_,
-              OnIPAddressUpdated(entries1[0].ipv4_address,
-                                 entries1[0].ipv6_address)).Times(1);
+  EXPECT_CALL(
+      mock_tcp_client_listener_,
+      OnIPAddressUpdated(entries1[0].ipv4_address, entries1[0].ipv6_address))
+      .Times(1);
 
   interface_listener_impl_->testCallNotifyIPAddresses();
 
@@ -331,7 +336,8 @@ TEST_F(NetworkInterfaceListenerTest, DesignatedInterface_Added) {
   SetDummyInterfaceTable(entries2);
 
   EXPECT_CALL(mock_tcp_client_listener_,
-              OnIPAddressUpdated(entries2[1].ipv4_address, "")).Times(1);
+              OnIPAddressUpdated(entries2[1].ipv4_address, ""))
+      .Times(1);
 
   interface_listener_impl_->testCallNotifyIPAddresses();
 
@@ -386,9 +392,10 @@ TEST_F(NetworkInterfaceListenerTest,
 
   // dummy_int1 should not be selected
   struct InterfaceEntry* expected = &entries[1];
-  EXPECT_CALL(mock_tcp_client_listener_,
-              OnIPAddressUpdated(expected->ipv4_address,
-                                 expected->ipv6_address)).Times(1);
+  EXPECT_CALL(
+      mock_tcp_client_listener_,
+      OnIPAddressUpdated(expected->ipv4_address, expected->ipv6_address))
+      .Times(1);
 
   interface_listener_impl_->testCallNotifyIPAddresses();
 
@@ -412,7 +419,8 @@ TEST_F(NetworkInterfaceListenerTest, AutoSelectInterface_SkipEmptyInterface) {
   // net_dummy2 should not be selected
   struct InterfaceEntry* expected = &entries[0];
   EXPECT_CALL(mock_tcp_client_listener_,
-              OnIPAddressUpdated(expected->ipv4_address, "")).Times(1);
+              OnIPAddressUpdated(expected->ipv4_address, ""))
+      .Times(1);
 
   interface_listener_impl_->testCallNotifyIPAddresses();
 
@@ -434,9 +442,10 @@ TEST_F(NetworkInterfaceListenerTest,
 
   // dummy_int1 should not be selected
   struct InterfaceEntry* expected = &entries[1];
-  EXPECT_CALL(mock_tcp_client_listener_,
-              OnIPAddressUpdated(expected->ipv4_address,
-                                 expected->ipv6_address)).Times(1);
+  EXPECT_CALL(
+      mock_tcp_client_listener_,
+      OnIPAddressUpdated(expected->ipv4_address, expected->ipv6_address))
+      .Times(1);
 
   SetDummyInterfaceTable(entries);
 
@@ -499,9 +508,10 @@ TEST_F(NetworkInterfaceListenerTest, AutoSelectInterface_EnableInterface) {
   entries[0].flags |= IFF_RUNNING;
   SetDummyInterfaceTable(entries);
 
-  EXPECT_CALL(mock_tcp_client_listener_,
-              OnIPAddressUpdated(entries[0].ipv4_address,
-                                 entries[0].ipv6_address)).Times(1);
+  EXPECT_CALL(
+      mock_tcp_client_listener_,
+      OnIPAddressUpdated(entries[0].ipv4_address, entries[0].ipv6_address))
+      .Times(1);
 
   interface_listener_impl_->testCallNotifyIPAddresses();
 
@@ -550,9 +560,10 @@ TEST_F(NetworkInterfaceListenerTest, AutoSelectInterface_SwitchInterface) {
     switched = &entries[0];
   }
 
-  EXPECT_CALL(mock_tcp_client_listener_,
-              OnIPAddressUpdated(switched->ipv4_address,
-                                 switched->ipv6_address)).Times(1);
+  EXPECT_CALL(
+      mock_tcp_client_listener_,
+      OnIPAddressUpdated(switched->ipv4_address, switched->ipv6_address))
+      .Times(1);
 
   interface_listener_impl_->testCallNotifyIPAddresses();
 

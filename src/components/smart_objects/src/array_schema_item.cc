@@ -48,10 +48,10 @@ errors::eType CArraySchemaItem::validate(
     const utils::SemanticVersion& MessageVersion,
     const bool allow_unknown_enums) {
   if (SmartType_Array != Object.getType()) {
-    std::string validation_info = "Incorrect type, expected: " +
-                                  SmartObject::typeToString(SmartType_Array) +
-                                  ", got: " +
-                                  SmartObject::typeToString(Object.getType());
+    std::string validation_info =
+        "Incorrect type, expected: " +
+        SmartObject::typeToString(SmartType_Array) +
+        ", got: " + SmartObject::typeToString(Object.getType());
     report__->set_validation_info(validation_info);
     return errors::INVALID_VALUE;
   }

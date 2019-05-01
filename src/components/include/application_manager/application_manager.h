@@ -34,23 +34,22 @@
 #define SRC_COMPONENTS_INCLUDE_APPLICATION_MANAGER_APPLICATION_MANAGER_H_
 
 #include <ctime>
+#include <set>
 #include <string>
 #include <vector>
-#include <set>
 #include "application_manager/application.h"
-#include "application_manager/hmi_capabilities.h"
-#include "application_manager/commands/command.h"
 #include "application_manager/command_factory.h"
+#include "application_manager/commands/command.h"
 #include "connection_handler/connection_handler.h"
 #include "utils/data_accessor.h"
 
-#include "telemetry_monitor/telemetry_observable.h"
-#include "application_manager/policies/policy_handler_interface.h"
 #include "application_manager/application_manager_settings.h"
-#include "application_manager/state_controller.h"
 #include "application_manager/hmi_interfaces.h"
-#include "policy/policy_types.h"
 #include "application_manager/plugin_manager/rpc_plugin_manager.h"
+#include "application_manager/policies/policy_handler_interface.h"
+#include "application_manager/state_controller.h"
+#include "policy/policy_types.h"
+#include "telemetry_monitor/telemetry_observable.h"
 
 namespace resumption {
 class LastState;
@@ -181,12 +180,12 @@ class ApplicationManager {
   virtual AppSharedPtrs applications_with_navi() = 0;
 
   /**
- * @brief application find application by device and policy identifier
- * @param device_id device id
- * @param policy_app_id poilcy identifier
- * @return pointer to application in case if application exist, in other case
- * return empty shared pointer
- */
+   * @brief application find application by device and policy identifier
+   * @param device_id device id
+   * @param policy_app_id poilcy identifier
+   * @return pointer to application in case if application exist, in other case
+   * return empty shared pointer
+   */
   virtual ApplicationSharedPtr application(
       const std::string& device_id, const std::string& policy_app_id) const = 0;
 
@@ -470,8 +469,9 @@ class ApplicationManager {
   virtual void IviInfoUpdated(mobile_apis::VehicleDataType::eType vehicle_info,
                               int value) = 0;
 
-  virtual ApplicationSharedPtr RegisterApplication(const std::shared_ptr<
-      smart_objects::SmartObject>& request_for_registration) = 0;
+  virtual ApplicationSharedPtr RegisterApplication(
+      const std::shared_ptr<smart_objects::SmartObject>&
+          request_for_registration) = 0;
 
   virtual void SendUpdateAppList() = 0;
 
@@ -644,10 +644,10 @@ class ApplicationManager {
   virtual resumption::ResumeCtrl& resume_controller() = 0;
 
   /**
-  * @brief hmi_interfaces getter for hmi_interfaces component, that handle
-  * hmi_instrfaces state
-  * @return reference to hmi_interfaces component
-  */
+   * @brief hmi_interfaces getter for hmi_interfaces component, that handle
+   * hmi_instrfaces state
+   * @return reference to hmi_interfaces component
+   */
   virtual HmiInterfaces& hmi_interfaces() = 0;
 
   virtual app_launch::AppLaunchCtrl& app_launch_ctrl() = 0;
@@ -675,19 +675,19 @@ class ApplicationManager {
   virtual void AddAppToTTSGlobalPropertiesList(const uint32_t app_id) = 0;
 
   /**
-  * Generate grammar ID
-  *
-  * @return New grammar ID
-  */
+   * Generate grammar ID
+   *
+   * @return New grammar ID
+   */
   virtual uint32_t GenerateGrammarID() = 0;
 
   virtual policy::DeviceConsent GetUserConsentForDevice(
       const std::string& device_id) const = 0;
 
   /**
-  * @brief Handle sequence for unauthorized application
-  * @param app_id Application id
-  */
+   * @brief Handle sequence for unauthorized application
+   * @param app_id Application id
+   */
   virtual void OnAppUnauthorized(const uint32_t& app_id) = 0;
 
   virtual bool ActivateApplication(ApplicationSharedPtr app) = 0;

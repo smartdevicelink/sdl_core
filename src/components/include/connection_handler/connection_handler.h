@@ -33,14 +33,14 @@
 #ifndef SRC_COMPONENTS_INCLUDE_CONNECTION_HANDLER_CONNECTION_HANDLER_H_
 #define SRC_COMPONENTS_INCLUDE_CONNECTION_HANDLER_CONNECTION_HANDLER_H_
 
-#include "connection_handler/connection_handler_settings.h"
-#include "transport_manager/transport_manager_listener.h"
-#include "protocol_handler/session_observer.h"
-#include "connection_handler/device.h"
 #include "connection_handler/connection.h"
+#include "connection_handler/connection_handler_settings.h"
+#include "connection_handler/device.h"
 #include "connection_handler/devices_discovery_starter.h"
-#include "utils/macro.h"
+#include "protocol_handler/session_observer.h"
+#include "transport_manager/transport_manager_listener.h"
 #include "utils/data_accessor.h"
+#include "utils/macro.h"
 
 /**
  * \namespace connection_handler
@@ -158,12 +158,12 @@ class ConnectionHandler {
                             CloseSessionReason close_reason) = 0;
 
   /**
- * @brief SendEndService allows to end up specific service.
- *
- * @param key application identifier whose service should be closed.
- *
- * @param service_type the service that should be closed.
- */
+   * @brief SendEndService allows to end up specific service.
+   *
+   * @param key application identifier whose service should be closed.
+   *
+   * @param service_type the service that should be closed.
+   */
   virtual void SendEndService(uint32_t key, uint8_t service_type) = 0;
 
   /**
@@ -188,9 +188,9 @@ class ConnectionHandler {
                                    uint32_t timeout) = 0;
 
   /**
-  * \brief Keep connection associated with the key from being closed by
-  * heartbeat monitor
-  */
+   * \brief Keep connection associated with the key from being closed by
+   * heartbeat monitor
+   */
   virtual void KeepConnectionAlive(uint32_t connection_key,
                                    uint8_t session_id) = 0;
 

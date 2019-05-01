@@ -39,13 +39,13 @@
 #include <inttypes.h>
 #undef __STDC_FORMAT_MACROS
 
-#include <set>
-#include <string>
 #include <strings.h>
 #include <algorithm>
-#include <utility>
-#include <map>
 #include <functional>
+#include <map>
+#include <set>
+#include <string>
+#include <utility>
 
 #include "application_manager/application.h"
 #include "application_manager/application_manager.h"
@@ -55,18 +55,18 @@
 #include "application_manager/resumption/resume_ctrl.h"
 #include "application_manager/rpc_service.h"
 #include "connection_handler/connection_handler_impl.h"
-#include "transport_manager/common.h"
 #include "interfaces/MOBILE_API.h"
 #include "smart_objects/enum_schema_item.h"
+#include "transport_manager/common.h"
 #include "utils/file_system.h"
-#include "utils/macro.h"
 #include "utils/logger.h"
+#include "utils/macro.h"
 
-#include "formatters/formatter_json_rpc.h"
-#include "formatters/CFormatterJsonSDLRPCv2.h"
-#include "formatters/CFormatterJsonSDLRPCv1.h"
-#include "json/json.h"
 #include "formatters/CFormatterJsonBase.h"
+#include "formatters/CFormatterJsonSDLRPCv1.h"
+#include "formatters/CFormatterJsonSDLRPCv2.h"
+#include "formatters/formatter_json_rpc.h"
+#include "json/json.h"
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "ApplicationManager")
 
@@ -162,71 +162,81 @@ struct ExternalConsentStatusAppender
 
 }  // namespace
 
-std::pair<std::string,
-          mobile_apis::VehicleDataType::eType> kVehicleDataInitializer[] = {
-    std::make_pair(strings::gps, mobile_apis::VehicleDataType::VEHICLEDATA_GPS),
-    std::make_pair(strings::speed,
-                   mobile_apis::VehicleDataType::VEHICLEDATA_SPEED),
-    std::make_pair(strings::rpm, mobile_apis::VehicleDataType::VEHICLEDATA_RPM),
-    std::make_pair(strings::fuel_level,
-                   mobile_apis::VehicleDataType::VEHICLEDATA_FUELLEVEL),
-    std::make_pair(strings::fuel_level_state,
-                   mobile_apis::VehicleDataType::VEHICLEDATA_FUELLEVEL_STATE),
-    std::make_pair(strings::instant_fuel_consumption,
-                   mobile_apis::VehicleDataType::VEHICLEDATA_FUELCONSUMPTION),
-    std::make_pair(strings::fuel_range,
-                   mobile_apis::VehicleDataType::VEHICLEDATA_FUELRANGE),
-    std::make_pair(strings::cloud_app_vehicle_id,
-                   mobile_apis::VehicleDataType::VEHICLEDATA_CLOUDAPPVEHICLEID),
-    std::make_pair(strings::external_temp,
-                   mobile_apis::VehicleDataType::VEHICLEDATA_EXTERNTEMP),
-    std::make_pair(strings::turn_signal,
-                   mobile_apis::VehicleDataType::VEHICLEDATA_TURNSIGNAL),
-    std::make_pair(strings::vin, mobile_apis::VehicleDataType::VEHICLEDATA_VIN),
-    std::make_pair(strings::prndl,
-                   mobile_apis::VehicleDataType::VEHICLEDATA_PRNDL),
-    std::make_pair(strings::tire_pressure,
-                   mobile_apis::VehicleDataType::VEHICLEDATA_TIREPRESSURE),
-    std::make_pair(strings::odometer,
-                   mobile_apis::VehicleDataType::VEHICLEDATA_ODOMETER),
-    std::make_pair(strings::belt_status,
-                   mobile_apis::VehicleDataType::VEHICLEDATA_BELTSTATUS),
-    std::make_pair(
-        strings::electronic_park_brake_status,
-        mobile_apis::VehicleDataType::VEHICLEDATA_ELECTRONICPARKBRAKESTATUS),
-    std::make_pair(strings::body_information,
-                   mobile_apis::VehicleDataType::VEHICLEDATA_BODYINFO),
-    std::make_pair(strings::device_status,
-                   mobile_apis::VehicleDataType::VEHICLEDATA_DEVICESTATUS),
-    std::make_pair(strings::driver_braking,
-                   mobile_apis::VehicleDataType::VEHICLEDATA_BRAKING),
-    std::make_pair(strings::wiper_status,
-                   mobile_apis::VehicleDataType::VEHICLEDATA_WIPERSTATUS),
-    std::make_pair(strings::head_lamp_status,
-                   mobile_apis::VehicleDataType::VEHICLEDATA_HEADLAMPSTATUS),
-    std::make_pair(strings::e_call_info,
-                   mobile_apis::VehicleDataType::VEHICLEDATA_ECALLINFO),
-    std::make_pair(strings::airbag_status,
-                   mobile_apis::VehicleDataType::VEHICLEDATA_AIRBAGSTATUS),
-    std::make_pair(strings::emergency_event,
-                   mobile_apis::VehicleDataType::VEHICLEDATA_EMERGENCYEVENT),
-    std::make_pair(strings::cluster_mode_status,
-                   mobile_apis::VehicleDataType::VEHICLEDATA_CLUSTERMODESTATUS),
-    std::make_pair(strings::my_key,
-                   mobile_apis::VehicleDataType::VEHICLEDATA_MYKEY),
-    /*
-     NOT DEFINED in mobile API
-     std::make_pair(strings::gps,
-     BATTVOLTAGE),
-     */
-    std::make_pair(strings::engine_torque,
-                   mobile_apis::VehicleDataType::VEHICLEDATA_ENGINETORQUE),
-    std::make_pair(strings::acc_pedal_pos,
-                   mobile_apis::VehicleDataType::VEHICLEDATA_ACCPEDAL),
-    std::make_pair(strings::steering_wheel_angle,
-                   mobile_apis::VehicleDataType::VEHICLEDATA_STEERINGWHEEL),
-    std::make_pair(strings::engine_oil_life,
-                   mobile_apis::VehicleDataType::VEHICLEDATA_ENGINEOILLIFE)};
+std::pair<std::string, mobile_apis::VehicleDataType::eType>
+    kVehicleDataInitializer[] = {
+        std::make_pair(strings::gps,
+                       mobile_apis::VehicleDataType::VEHICLEDATA_GPS),
+        std::make_pair(strings::speed,
+                       mobile_apis::VehicleDataType::VEHICLEDATA_SPEED),
+        std::make_pair(strings::rpm,
+                       mobile_apis::VehicleDataType::VEHICLEDATA_RPM),
+        std::make_pair(strings::fuel_level,
+                       mobile_apis::VehicleDataType::VEHICLEDATA_FUELLEVEL),
+        std::make_pair(
+            strings::fuel_level_state,
+            mobile_apis::VehicleDataType::VEHICLEDATA_FUELLEVEL_STATE),
+        std::make_pair(
+            strings::instant_fuel_consumption,
+            mobile_apis::VehicleDataType::VEHICLEDATA_FUELCONSUMPTION),
+        std::make_pair(strings::fuel_range,
+                       mobile_apis::VehicleDataType::VEHICLEDATA_FUELRANGE),
+        std::make_pair(
+            strings::cloud_app_vehicle_id,
+            mobile_apis::VehicleDataType::VEHICLEDATA_CLOUDAPPVEHICLEID),
+        std::make_pair(strings::external_temp,
+                       mobile_apis::VehicleDataType::VEHICLEDATA_EXTERNTEMP),
+        std::make_pair(strings::turn_signal,
+                       mobile_apis::VehicleDataType::VEHICLEDATA_TURNSIGNAL),
+        std::make_pair(strings::vin,
+                       mobile_apis::VehicleDataType::VEHICLEDATA_VIN),
+        std::make_pair(strings::prndl,
+                       mobile_apis::VehicleDataType::VEHICLEDATA_PRNDL),
+        std::make_pair(strings::tire_pressure,
+                       mobile_apis::VehicleDataType::VEHICLEDATA_TIREPRESSURE),
+        std::make_pair(strings::odometer,
+                       mobile_apis::VehicleDataType::VEHICLEDATA_ODOMETER),
+        std::make_pair(strings::belt_status,
+                       mobile_apis::VehicleDataType::VEHICLEDATA_BELTSTATUS),
+        std::make_pair(strings::electronic_park_brake_status,
+                       mobile_apis::VehicleDataType::
+                           VEHICLEDATA_ELECTRONICPARKBRAKESTATUS),
+        std::make_pair(strings::body_information,
+                       mobile_apis::VehicleDataType::VEHICLEDATA_BODYINFO),
+        std::make_pair(strings::device_status,
+                       mobile_apis::VehicleDataType::VEHICLEDATA_DEVICESTATUS),
+        std::make_pair(strings::driver_braking,
+                       mobile_apis::VehicleDataType::VEHICLEDATA_BRAKING),
+        std::make_pair(strings::wiper_status,
+                       mobile_apis::VehicleDataType::VEHICLEDATA_WIPERSTATUS),
+        std::make_pair(
+            strings::head_lamp_status,
+            mobile_apis::VehicleDataType::VEHICLEDATA_HEADLAMPSTATUS),
+        std::make_pair(strings::e_call_info,
+                       mobile_apis::VehicleDataType::VEHICLEDATA_ECALLINFO),
+        std::make_pair(strings::airbag_status,
+                       mobile_apis::VehicleDataType::VEHICLEDATA_AIRBAGSTATUS),
+        std::make_pair(
+            strings::emergency_event,
+            mobile_apis::VehicleDataType::VEHICLEDATA_EMERGENCYEVENT),
+        std::make_pair(
+            strings::cluster_mode_status,
+            mobile_apis::VehicleDataType::VEHICLEDATA_CLUSTERMODESTATUS),
+        std::make_pair(strings::my_key,
+                       mobile_apis::VehicleDataType::VEHICLEDATA_MYKEY),
+        /*
+         NOT DEFINED in mobile API
+         std::make_pair(strings::gps,
+         BATTVOLTAGE),
+         */
+        std::make_pair(strings::engine_torque,
+                       mobile_apis::VehicleDataType::VEHICLEDATA_ENGINETORQUE),
+        std::make_pair(strings::acc_pedal_pos,
+                       mobile_apis::VehicleDataType::VEHICLEDATA_ACCPEDAL),
+        std::make_pair(strings::steering_wheel_angle,
+                       mobile_apis::VehicleDataType::VEHICLEDATA_STEERINGWHEEL),
+        std::make_pair(
+            strings::engine_oil_life,
+            mobile_apis::VehicleDataType::VEHICLEDATA_ENGINEOILLIFE)};
 
 const VehicleData MessageHelper::vehicle_data_(
     kVehicleDataInitializer,
@@ -1130,12 +1140,11 @@ MessageHelper::CreateGlobalPropertiesRequestsToHMI(
   auto& help_prompt_manager =
       const_cast<Application*>(app.get())->help_prompt_manager();
 
-  const bool can_send_ui = helpers::Compare<HelpPromptManager::SendingType,
-                                            helpers::EQ,
-                                            helpers::ONE>(
-      help_prompt_manager.GetSendingType(),
-      HelpPromptManager::SendingType::kSendVRHelp,
-      HelpPromptManager::SendingType::kSendBoth);
+  const bool can_send_ui = helpers::
+      Compare<HelpPromptManager::SendingType, helpers::EQ, helpers::ONE>(
+          help_prompt_manager.GetSendingType(),
+          HelpPromptManager::SendingType::kSendVRHelp,
+          HelpPromptManager::SendingType::kSendBoth);
 
   // UI global properties
 
@@ -1173,12 +1182,11 @@ MessageHelper::CreateGlobalPropertiesRequestsToHMI(
     requests.push_back(ui_global_properties);
   }
 
-  const bool can_send_vr = helpers::Compare<HelpPromptManager::SendingType,
-                                            helpers::EQ,
-                                            helpers::ONE>(
-      help_prompt_manager.GetSendingType(),
-      HelpPromptManager::SendingType::kSendHelpPrompt,
-      HelpPromptManager::SendingType::kSendBoth);
+  const bool can_send_vr = helpers::
+      Compare<HelpPromptManager::SendingType, helpers::EQ, helpers::ONE>(
+          help_prompt_manager.GetSendingType(),
+          HelpPromptManager::SendingType::kSendHelpPrompt,
+          HelpPromptManager::SendingType::kSendBoth);
 
   // TTS global properties
   if (can_send_vr && (app->help_prompt() || app->timeout_prompt())) {
@@ -2930,7 +2938,7 @@ mobile_apis::Result::eType MessageHelper::ProcessSoftButtons(
         }
         if ((!request_soft_buttons[i].keyExists(strings::text)) ||
             (!VerifyString(
-                 request_soft_buttons[i][strings::text].asString()))) {
+                request_soft_buttons[i][strings::text].asString()))) {
           return Result::INVALID_DATA;
         }
         break;
@@ -2939,7 +2947,7 @@ mobile_apis::Result::eType MessageHelper::ProcessSoftButtons(
         if ((!request_soft_buttons[i].keyExists(strings::text)) ||
             ((request_soft_buttons[i][strings::text].length()) &&
              (!VerifyString(
-                  request_soft_buttons[i][strings::text].asString())))) {
+                 request_soft_buttons[i][strings::text].asString())))) {
           return Result::INVALID_DATA;
         }
 

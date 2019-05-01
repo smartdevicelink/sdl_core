@@ -30,16 +30,16 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <string>
 #include <algorithm>
+#include <string>
 #include "gtest/gtest.h"
 
-#include "application_manager/usage_statistics.h"
-#include "application_manager/mock_resumption_data.h"
-#include "utils/custom_string.h"
 #include "application_manager/application.h"
-#include "utils/data_accessor.h"
 #include "application_manager/message_helper.h"
+#include "application_manager/mock_resumption_data.h"
+#include "application_manager/usage_statistics.h"
+#include "utils/custom_string.h"
+#include "utils/data_accessor.h"
 
 #include "application_manager/resumption_data_test.h"
 
@@ -47,10 +47,10 @@ namespace test {
 namespace components {
 namespace resumption_test {
 namespace custom_str = utils::custom_string;
-using ::testing::Return;
-using ::testing::ReturnRef;
-using ::testing::ReturnPointee;
 using ::testing::_;
+using ::testing::Return;
+using ::testing::ReturnPointee;
+using ::testing::ReturnRef;
 
 void ResumptionDataTest::CheckSavedApp(sm::SmartObject& resume_app_list) {
   EXPECT_EQ(policy_app_id_, resume_app_list[am::strings::app_id].asString());
@@ -79,9 +79,9 @@ void ResumptionDataTest::CheckSavedApp(sm::SmartObject& resume_app_list) {
 void ResumptionDataTest::CheckCommands(sm::SmartObject& res_list) {
   for (uint32_t i = 0; i < kCountOfCommands_; ++i) {
     EXPECT_EQ(i, res_list[i][am::strings::cmd_id].asUInt());
-    std::string name =
-        (*test_commands_map[i])[am::strings::menu_params]
-                               [am::strings::menu_name].asString();
+    std::string name = (*test_commands_map[i])[am::strings::menu_params]
+                                              [am::strings::menu_name]
+                                                  .asString();
     EXPECT_EQ(name,
               res_list[i][am::strings::menu_params][am::strings::menu_name]
                   .asString());
@@ -93,7 +93,8 @@ void ResumptionDataTest::CheckCommands(sm::SmartObject& res_list) {
         res_list[i][am::strings::menu_params][am::strings::position].asInt());
 
     int parent_id = (*test_commands_map[i])[am::strings::menu_params]
-                                           [am::hmi_request::parent_id].asInt();
+                                           [am::hmi_request::parent_id]
+                                               .asInt();
     EXPECT_EQ(parent_id,
               res_list[i][am::strings::menu_params][am::hmi_request::parent_id]
                   .asInt());
@@ -150,20 +151,24 @@ void ResumptionDataTest::CheckChoiceSet(sm::SmartObject& res_list) {
       std::snprintf(numb, 12, "%d", i + j);
       std::string test_choice =
           (*test_choiceset_map[i])[am::strings::choice_set][j]
-                                  [am::strings::vr_commands][0].asString();
+                                  [am::strings::vr_commands][0]
+                                      .asString();
       EXPECT_EQ(test_choice, command[am::strings::vr_commands][0].asString());
       std::string menu_name =
           (*test_choiceset_map[i])[am::strings::choice_set][j]
-                                  [am::strings::menu_name].asString();
+                                  [am::strings::menu_name]
+                                      .asString();
       EXPECT_EQ(menu_name, command[am::strings::menu_name].asString());
       std::string secondary_text =
           (*test_choiceset_map[i])[am::strings::choice_set][j]
-                                  [am::strings::secondary_text].asString();
+                                  [am::strings::secondary_text]
+                                      .asString();
       EXPECT_EQ(secondary_text,
                 command[am::strings::secondary_text].asString());
       std::string tertiary_text =
           (*test_choiceset_map[i])[am::strings::choice_set][j]
-                                  [am::strings::tertiary_text].asString();
+                                  [am::strings::tertiary_text]
+                                      .asString();
       EXPECT_EQ(tertiary_text, command[am::strings::tertiary_text].asString());
 
       std::string image_value =
@@ -181,13 +186,15 @@ void ResumptionDataTest::CheckChoiceSet(sm::SmartObject& res_list) {
 
       image_value = (*test_choiceset_map[i])[am::strings::choice_set][j]
                                             [am::strings::secondary_image]
-                                            [am::strings::value].asString();
+                                            [am::strings::value]
+                                                .asString();
       EXPECT_EQ(
           image_value,
           command[am::strings::secondary_image][am::strings::value].asString());
       image_type = (*test_choiceset_map[i])[am::strings::choice_set][j]
                                            [am::strings::secondary_image]
-                                           [am::strings::image_type].asInt();
+                                           [am::strings::image_type]
+                                               .asInt();
       EXPECT_EQ(image_type,
                 command[am::strings::secondary_image][am::strings::image_type]
                     .asInt());

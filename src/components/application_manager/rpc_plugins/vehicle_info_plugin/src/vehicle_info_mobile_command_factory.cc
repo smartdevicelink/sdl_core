@@ -141,4 +141,4 @@ app_mngr::CommandCreator& VehicleInfoMobileCommandFactory::buildCommandCreator(
       return factory.GetCreator<app_mngr::InvalidCommand>();
   }
 }
-}
+}  // namespace vehicle_info_plugin

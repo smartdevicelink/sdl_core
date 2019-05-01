@@ -61,4 +61,4 @@ void DiagnosticMessageResponse::Run() {
 
 }  // namespace commands
 
-}  // namespace application_manager
+}  // namespace vehicle_info_plugin

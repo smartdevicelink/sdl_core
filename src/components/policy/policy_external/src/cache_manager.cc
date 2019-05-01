@@ -33,27 +33,27 @@
 #include "policy/cache_manager.h"
 
 #include <algorithm>
-#include <functional>
-#include <ctime>
 #include <cmath>
-#include <utility>
+#include <ctime>
+#include <functional>
 #include <string>
+#include <utility>
 #include <vector>
 
-#include "utils/file_system.h"
-#include "utils/helpers.h"
-#include "json/reader.h"
 #include "json/features.h"
+#include "json/reader.h"
 #include "json/writer.h"
-#include "utils/logger.h"
+#include "policy/policy_helper.h"
+#include "policy/policy_table/enums.h"
+#include "policy/sql_pt_ext_representation.h"
+#include "rpc_base/rpc_base.h"
 #include "utils/date_time.h"
+#include "utils/file_system.h"
 #include "utils/gen_hash.h"
+#include "utils/helpers.h"
+#include "utils/logger.h"
 #include "utils/threads/thread.h"
 #include "utils/threads/thread_delegate.h"
-#include "rpc_base/rpc_base.h"
-#include "policy/policy_table/enums.h"
-#include "policy/policy_helper.h"
-#include "policy/sql_pt_ext_representation.h"
 
 namespace policy_table = rpc::policy_table_interface_base;
 
@@ -904,9 +904,9 @@ bool CacheManager::HasDeviceSpecifiedConsent(const std::string& device_id,
     return false;
   }
   const std::string consent = is_allowed ? "allowed" : "disallowed";
-  LOG4CXX_INFO(logger_,
-               "DeviceGetDeviceGroupsFromPolicies is already " << consent
-                                                               << ".");
+  LOG4CXX_INFO(
+      logger_,
+      "DeviceGetDeviceGroupsFromPolicies is already " << consent << ".");
   return true;
 }
 
@@ -2189,9 +2189,9 @@ bool CacheManager::CleanupUnpairedDevices() {
 
     LOG4CXX_DEBUG(logger_, "Device_data size is: " << device_data.size());
     device_data.erase(it_device);
-    LOG4CXX_INFO(logger_,
-                 "Device id " << *iter
-                              << " had been deleted from device_data section.");
+    LOG4CXX_INFO(
+        logger_,
+        "Device id " << *iter << " had been deleted from device_data section.");
     LOG4CXX_DEBUG(logger_, "Device_data size is: " << device_data.size());
   }
   is_unpaired_.clear();
@@ -2768,7 +2768,7 @@ ExternalConsentStatus CacheManager::GetExternalConsentEntities() {
     policy_table::DisallowedByExternalConsentEntities::const_iterator it_2 =
         (*it->second.disallowed_by_external_consent_entities_off).begin();
     for (; it_2 !=
-               (*it->second.disallowed_by_external_consent_entities_off).end();
+           (*it->second.disallowed_by_external_consent_entities_off).end();
          ++it_2) {
       items.insert(ExternalConsentStatusItem(
           it_2->entity_type, it_2->entity_id, EntityStatus::kStatusOff));
@@ -2917,8 +2917,9 @@ void CacheManager::MergeFG(const policy_table::PolicyTable& new_pt,
 void CacheManager::MergeAP(const policy_table::PolicyTable& new_pt,
                            policy_table::PolicyTable& pt) {
   LOG4CXX_AUTO_TRACE(logger_);
-  pt.app_policies_section.device = const_cast<policy_table::PolicyTable&>(
-                                       new_pt).app_policies_section.device;
+  pt.app_policies_section.device =
+      const_cast<policy_table::PolicyTable&>(new_pt)
+          .app_policies_section.device;
 
   pt.app_policies_section.apps[kDefaultId] =
       const_cast<policy_table::PolicyTable&>(new_pt)

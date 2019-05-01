@@ -33,8 +33,8 @@
 #ifndef SRC_COMPONENTS_POLICY_INCLUDE_POLICY_STATISTICS_MANAGER_H_
 #define SRC_COMPONENTS_POLICY_INCLUDE_POLICY_STATISTICS_MANAGER_H_
 
-#include <cassert>
 #include "policy/usage_statistics/counter.h"
+#include <cassert>
 #include "utils/date_time.h"
 
 #include "utils/timer_task_impl.h"

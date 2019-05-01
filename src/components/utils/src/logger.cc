@@ -31,9 +31,9 @@
  */
 
 #include "utils/logger.h"
+#include <apr_time.h>
 #include "utils/log_message_loop_thread.h"
 #include "utils/logger_status.h"
-#include <apr_time.h>
 
 void deinit_logger() {
   CREATE_LOGGERPTR_LOCAL(logger_, "Utils")

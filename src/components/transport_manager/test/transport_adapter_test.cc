@@ -41,23 +41,23 @@
 #include "transport_manager/transport_adapter/mock_transport_adapter_listener.h"
 #include "utils/test_async_waiter.h"
 
+#include "protocol/raw_message.h"
+#include "transport_manager/transport_adapter/connection.h"
+#include "transport_manager/transport_adapter/transport_adapter_controller.h"
 #include "transport_manager/transport_adapter/transport_adapter_impl.h"
 #include "transport_manager/transport_adapter/transport_adapter_listener.h"
-#include "transport_manager/transport_adapter/transport_adapter_controller.h"
-#include "transport_manager/transport_adapter/connection.h"
-#include "protocol/raw_message.h"
 
-#include "resumption/last_state_impl.h"
 #include "config_profile/profile.h"
+#include "resumption/last_state_impl.h"
 
 namespace test {
 namespace components {
 namespace transport_manager_test {
 
-using ::testing::Return;
-using ::testing::ReturnRef;
 using ::testing::_;
 using ::testing::NiceMock;
+using ::testing::Return;
+using ::testing::ReturnRef;
 using namespace ::transport_manager;
 using namespace ::protocol_handler;
 

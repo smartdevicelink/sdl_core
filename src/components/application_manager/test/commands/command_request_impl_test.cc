@@ -31,25 +31,25 @@
  */
 
 #include <stdint.h>
-#include <string>
 #include <algorithm>
+#include <string>
 
-#include "gtest/gtest.h"
 #include "application_manager/commands/command_impl.h"
 #include "application_manager/commands/command_request_impl.h"
-#include "application_manager/commands/commands_test.h"
 #include "application_manager/commands/command_request_test.h"
+#include "application_manager/commands/commands_test.h"
+#include "gtest/gtest.h"
 #include "utils/lock.h"
 
-#include "utils/data_accessor.h"
-#include "smart_objects/smart_object.h"
-#include "application_manager/smart_object_keys.h"
 #include "application_manager/application_manager.h"
-#include "application_manager/mock_application.h"
 #include "application_manager/event_engine/event.h"
-#include "application_manager/mock_message_helper.h"
+#include "application_manager/mock_application.h"
 #include "application_manager/mock_hmi_interface.h"
+#include "application_manager/mock_message_helper.h"
+#include "application_manager/smart_object_keys.h"
 #include "interfaces/MOBILE_API.h"
+#include "smart_objects/smart_object.h"
+#include "utils/data_accessor.h"
 
 #include "application_manager/mock_app_service_manager.h"
 #include "resumption/last_state_impl.h"
@@ -64,20 +64,20 @@ namespace strings = am::strings;
 namespace hmi_response = am::hmi_response;
 
 using ::testing::_;
+using ::testing::DoAll;
 using ::testing::Return;
 using ::testing::SaveArg;
-using ::testing::DoAll;
 using ::testing::SetArgReferee;
 
-using am::commands::MessageSharedPtr;
-using am::CommandParametersPermissions;
-using am::event_engine::EventObserver;
-using am::commands::CommandImpl;
-using am::commands::CommandRequestImpl;
 using am::ApplicationManager;
 using am::ApplicationSet;
-using am::RPCParams;
+using am::CommandParametersPermissions;
 using am::MockHmiInterfaces;
+using am::RPCParams;
+using am::commands::CommandImpl;
+using am::commands::CommandRequestImpl;
+using am::commands::MessageSharedPtr;
+using am::event_engine::EventObserver;
 using test::components::application_manager_test::MockAppServiceManager;
 
 typedef am::commands::CommandRequestImpl::RequestState RequestState;
@@ -105,10 +105,10 @@ class CommandRequestImplTest
 
   class UnwrappedCommandRequestImpl : public CommandRequestImpl {
    public:
-    using CommandRequestImpl::CheckAllowedParameters;
-    using CommandRequestImpl::RemoveDisallowedParameters;
     using CommandRequestImpl::AddDisallowedParameters;
+    using CommandRequestImpl::CheckAllowedParameters;
     using CommandRequestImpl::HasDisallowedParams;
+    using CommandRequestImpl::RemoveDisallowedParameters;
 
     UnwrappedCommandRequestImpl(const MessageSharedPtr& message,
                                 ApplicationManager& am,

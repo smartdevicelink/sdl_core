@@ -31,18 +31,18 @@
  */
 
 #include <stdint.h>
-#include <string>
 #include <set>
+#include <string>
 
 #include "gtest/gtest.h"
 
-#include "mobile/system_request.h"
 #include "application_manager/commands/command_request_test.h"
+#include "application_manager/event_engine/event.h"
 #include "application_manager/mock_application.h"
 #include "application_manager/mock_application_manager.h"
-#include "application_manager/event_engine/event.h"
 #include "application_manager/mock_hmi_interface.h"
 #include "application_manager/policies/mock_policy_handler_interface.h"
+#include "mobile/system_request.h"
 
 namespace test {
 namespace components {
@@ -51,13 +51,13 @@ namespace mobile_commands_test {
 namespace system_request {
 
 namespace am = application_manager;
-using sdl_rpc_plugin::commands::SystemRequest;
+using am::MessageType;
+using am::MockHmiInterfaces;
 using am::commands::CommandImpl;
 using am::commands::MessageSharedPtr;
-using am::MockHmiInterfaces;
 using am::event_engine::Event;
-using am::MessageType;
 using policy_test::MockPolicyHandlerInterface;
+using sdl_rpc_plugin::commands::SystemRequest;
 
 using ::testing::_;
 using ::testing::DoAll;

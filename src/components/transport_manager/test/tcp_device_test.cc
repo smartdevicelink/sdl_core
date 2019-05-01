@@ -30,8 +30,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "gtest/gtest.h"
 #include "transport_manager/tcp/tcp_device.h"
+#include "gtest/gtest.h"
 #include "transport_manager/transport_adapter/device.h"
 
 namespace test {

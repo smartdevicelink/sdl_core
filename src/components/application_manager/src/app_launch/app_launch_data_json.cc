@@ -29,13 +29,13 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-#include <algorithm>
 #include "application_manager/app_launch/app_launch_data_json.h"
+#include <algorithm>
 #include "application_manager/smart_object_keys.h"
 #include "smart_objects/smart_object.h"
 
-#include "utils/date_time.h"
 #include "json/json.h"
+#include "utils/date_time.h"
 
 namespace app_launch {
 
@@ -277,4 +277,4 @@ bool AppLaunchDataJson::Persist() {
   return true;
 }
 
-}  // app_launch
+}  // namespace app_launch

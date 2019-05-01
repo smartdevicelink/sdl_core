@@ -32,19 +32,19 @@
 
 #include "application_manager/mobile_message_handler.h"
 
-#include <string>
-#include <vector>
 #include <algorithm>
 #include <iterator>
+#include <string>
+#include <vector>
 
-#include "gmock/gmock.h"
 #include "application_manager/message.h"
+#include "gmock/gmock.h"
 #include "protocol/raw_message.h"
 
+using application_manager::MobileMessageHandler;
+using protocol_handler::PROTOCOL_HEADER_V1_SIZE;
 using protocol_handler::RawMessage;
 using protocol_handler::RawMessagePtr;
-using protocol_handler::PROTOCOL_HEADER_V1_SIZE;
-using application_manager::MobileMessageHandler;
 
 namespace test {
 namespace components {

@@ -33,8 +33,8 @@
 #ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_COMMAND_RESPONSE_TO_MOBILE_H_
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_COMMAND_RESPONSE_TO_MOBILE_H_
 
-#include "application_manager/commands/command_impl.h"
 #include "application_manager/application_manager.h"
+#include "application_manager/commands/command_impl.h"
 #include "interfaces/MOBILE_API.h"
 #include "smart_objects/smart_object.h"
 

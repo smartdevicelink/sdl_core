@@ -1,6 +1,6 @@
+#include "sdl_rpc_plugin/commands/mobile/get_cloud_app_properties_response.h"
 #include "application_manager/application_manager.h"
 #include "application_manager/rpc_service.h"
-#include "sdl_rpc_plugin/commands/mobile/get_cloud_app_properties_response.h"
 
 namespace sdl_rpc_plugin {
 using namespace application_manager;
@@ -28,4 +28,4 @@ void GetCloudAppPropertiesResponse::Run() {
 }
 
 }  // namespace commands
-}  // namespace sdl_rpc_plugins
+}  // namespace sdl_rpc_plugin

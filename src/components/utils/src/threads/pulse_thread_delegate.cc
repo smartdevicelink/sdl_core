@@ -32,8 +32,8 @@
 
 #include <sys/netmgr.h>
 
-#include "utils/threads/pulse_thread_delegate.h"
 #include "utils/logger.h"
+#include "utils/threads/pulse_thread_delegate.h"
 
 namespace threads {
 

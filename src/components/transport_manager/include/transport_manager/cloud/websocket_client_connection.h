@@ -36,11 +36,11 @@
 #ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_CLOUD_WEBSOCKET_CLIENT_CONNECTION_H_
 #define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_CLOUD_WEBSOCKET_CLIENT_CONNECTION_H_
 
-#include <boost/beast/core.hpp>
-#include <boost/beast/websocket.hpp>
 #include <boost/asio/connect.hpp>
 #include <boost/asio/ip/tcp.hpp>
 #include <boost/asio/thread_pool.hpp>
+#include <boost/beast/core.hpp>
+#include <boost/beast/websocket.hpp>
 #ifdef ENABLE_SECURITY
 #include <boost/asio/ssl/stream.hpp>
 #include <boost/beast/websocket/ssl.hpp>
@@ -51,11 +51,11 @@
 #include <memory>
 #include <string>
 #include <thread>
-#include "transport_manager/transport_adapter/connection.h"
 #include "transport_manager/cloud/cloud_websocket_transport_adapter.h"
-#include "utils/threads/thread.h"
-#include "utils/threads/message_loop_thread.h"
+#include "transport_manager/transport_adapter/connection.h"
 #include "utils/message_queue.h"
+#include "utils/threads/message_loop_thread.h"
+#include "utils/threads/thread.h"
 
 namespace websocket =
     boost::beast::websocket;  // from <boost/beast/websocket.hpp>

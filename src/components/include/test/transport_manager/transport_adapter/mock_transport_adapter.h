@@ -34,8 +34,8 @@
 #define SRC_COMPONENTS_INCLUDE_TEST_TRANSPORT_MANAGER_TRANSPORT_ADAPTER_MOCK_TRANSPORT_ADAPTER_H_
 
 #include "gmock/gmock.h"
-#include "transport_manager/transport_adapter/transport_adapter.h"
 #include "transport_manager/transport_adapter/device.h"
+#include "transport_manager/transport_adapter/transport_adapter.h"
 
 namespace test {
 namespace components {

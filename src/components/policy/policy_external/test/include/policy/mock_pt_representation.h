@@ -37,9 +37,9 @@
 
 #include "gmock/gmock.h"
 
+#include "policy/policy_table/types.h"
 #include "policy/pt_representation.h"
 #include "rpc_base/rpc_base.h"
-#include "policy/policy_table/types.h"
 
 namespace policy_table = ::rpc::policy_table_interface_base;
 

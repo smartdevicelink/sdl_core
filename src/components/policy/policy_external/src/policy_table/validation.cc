@@ -1,15 +1,15 @@
-#include <iostream>
 #include <algorithm>
+#include <iostream>
 #include "policy/policy_table/types.h"
-#include "utils/logger.h"
 #include "utils/helpers.h"
+#include "utils/logger.h"
 
 namespace {
 bool IsPredefinedApplication(const std::string& app_id) {
   using namespace rpc::policy_table_interface_base;
   return kPreDataConsentApp == app_id || kDefaultApp == app_id;
 }
-}
+}  // namespace
 
 namespace rpc {
 namespace policy_table_interface_base {
@@ -102,9 +102,9 @@ bool ApplicationPoliciesSection::Validate() const {
     }
 
     if (!app_request_types.is_valid()) {
-      LOG4CXX_WARN(logger_,
-                   "Invalid RequestTypes for " << app_id
-                                               << " Will be cleaned up.");
+      LOG4CXX_WARN(
+          logger_,
+          "Invalid RequestTypes for " << app_id << " Will be cleaned up.");
       app_request_types.CleanUp();
       if (app_request_types.is_cleaned_up()) {
         if (PT_PRELOADED == pt_type) {

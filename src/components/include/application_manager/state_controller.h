@@ -33,10 +33,10 @@
 #ifndef SRC_COMPONENTS_INCLUDE_APPLICATION_MANAGER_STATE_CONTROLLER_H_
 #define SRC_COMPONENTS_INCLUDE_APPLICATION_MANAGER_STATE_CONTROLLER_H_
 
-#include "stdint.h"
-#include "application_manager/request_controller_settings.h"
-#include "application_manager/application_manager.h"
 #include "application_manager/application.h"
+#include "application_manager/application_manager.h"
+#include "application_manager/request_controller_settings.h"
+#include "stdint.h"
 
 namespace application_manager {
 class StateController {

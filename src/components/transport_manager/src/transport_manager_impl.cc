@@ -33,28 +33,28 @@
 #include "transport_manager/transport_manager_impl.h"
 
 #include <stdint.h>
+#include <algorithm>
 #include <cstring>
+#include <functional>
+#include <iostream>
+#include <limits>
 #include <queue>
 #include <set>
-#include <algorithm>
-#include <limits>
-#include <functional>
 #include <sstream>
-#include <iostream>
 
-#include "utils/macro.h"
 #include "utils/logger.h"
+#include "utils/macro.h"
 
-#include "utils/timer_task_impl.h"
-#include "transport_manager/common.h"
-#include "transport_manager/transport_manager_listener.h"
-#include "transport_manager/transport_manager_listener_empty.h"
-#include "transport_manager/transport_adapter/transport_adapter.h"
+#include "config_profile/profile.h"
 #if defined(CLOUD_APP_WEBSOCKET_TRANSPORT_SUPPORT)
 #include "transport_manager/cloud/cloud_websocket_transport_adapter.h"
 #endif
+#include "transport_manager/common.h"
+#include "transport_manager/transport_adapter/transport_adapter.h"
 #include "transport_manager/transport_adapter/transport_adapter_event.h"
-#include "config_profile/profile.h"
+#include "transport_manager/transport_manager_listener.h"
+#include "transport_manager/transport_manager_listener_empty.h"
+#include "utils/timer_task_impl.h"
 
 using ::transport_manager::transport_adapter::TransportAdapter;
 
@@ -379,9 +379,9 @@ int TransportManagerImpl::Stop() {
 int TransportManagerImpl::SendMessageToDevice(
     const ::protocol_handler::RawMessagePtr message) {
   LOG4CXX_TRACE(logger_, "enter. RawMessageSptr: " << message);
-  LOG4CXX_INFO(logger_,
-               "Send message to device called with arguments "
-                   << message.get());
+  LOG4CXX_INFO(
+      logger_,
+      "Send message to device called with arguments " << message.get());
   if (false == this->is_initialized_) {
     LOG4CXX_ERROR(logger_, "TM is not initialized.");
     LOG4CXX_TRACE(logger_,
@@ -781,9 +781,9 @@ TransportManagerImpl::ConnectionInternal*
 TransportManagerImpl::GetActiveConnection(
     const DeviceUID& device, const ApplicationHandle& application) {
   LOG4CXX_AUTO_TRACE(logger_);
-  LOG4CXX_DEBUG(logger_,
-                "DeviceUID: " << device
-                              << " ApplicationHandle: " << application);
+  LOG4CXX_DEBUG(
+      logger_,
+      "DeviceUID: " << device << " ApplicationHandle: " << application);
   for (std::vector<ConnectionInternal>::iterator it = connections_.begin();
        it != connections_.end();
        ++it) {
@@ -932,9 +932,9 @@ bool TransportManagerImpl::UpdateDeviceMapping(
     item = device_to_adapter_map_.begin();
   }
 
-  LOG4CXX_DEBUG(logger_,
-                "After cleanup. Device map size is "
-                    << device_to_adapter_map_.size());
+  LOG4CXX_DEBUG(
+      logger_,
+      "After cleanup. Device map size is " << device_to_adapter_map_.size());
 
   for (DeviceList::const_iterator it = adapter_device_list.begin();
        it != adapter_device_list.end();
@@ -944,10 +944,10 @@ bool TransportManagerImpl::UpdateDeviceMapping(
         device_to_adapter_map_.insert(std::make_pair(device_uid, ta));
     if (!result.second) {
       LOG4CXX_WARN(logger_,
-                   "Device UID "
-                       << device_uid
-                       << " is known already. Processing skipped."
-                          "Connection type is: " << ta->GetConnectionType());
+                   "Device UID " << device_uid
+                                 << " is known already. Processing skipped."
+                                    "Connection type is: "
+                                 << ta->GetConnectionType());
       continue;
     }
     DeviceHandle device_handle =
@@ -959,9 +959,9 @@ bool TransportManagerImpl::UpdateDeviceMapping(
     RaiseEvent(&TransportManagerListener::OnDeviceFound, info);
   }
 
-  LOG4CXX_DEBUG(logger_,
-                "After update. Device map size is "
-                    << device_to_adapter_map_.size());
+  LOG4CXX_DEBUG(
+      logger_,
+      "After update. Device map size is " << device_to_adapter_map_.size());
 
   return true;
 }

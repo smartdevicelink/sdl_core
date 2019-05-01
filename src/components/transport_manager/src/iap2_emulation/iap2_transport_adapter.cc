@@ -32,14 +32,14 @@
 
 #include "transport_manager/iap2_emulation/iap2_transport_adapter.h"
 
-#include <sys/types.h>
-#include <sys/stat.h>
 #include <fcntl.h>
-#include <unistd.h>
 #include <stdio.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <unistd.h>
 
-#include "utils/threads/thread.h"
 #include "utils/file_system.h"
+#include "utils/threads/thread.h"
 
 namespace {
 static const mode_t mode = 0666;
@@ -182,5 +182,5 @@ void IAP2USBEmulationTransportAdapter::IAPSignalHandlerDelegate::
   run_flag_ = false;
   ThreadDelegate::exitThreadMain();
 }
-}
-}  // namespace transport_manager::transport_adapter
+}  // namespace transport_adapter
+}  // namespace transport_manager

@@ -33,12 +33,12 @@
 #ifndef SRC_COMPONENTS_INCLUDE_APPLICATION_MANAGER_APPLICATION_MANAGER_SETTINGS_H_
 #define SRC_COMPONENTS_INCLUDE_APPLICATION_MANAGER_APPLICATION_MANAGER_SETTINGS_H_
 
-#include "application_manager/request_controller_settings.h"
 #include "application_manager/app_launch_settings.h"
+#include "application_manager/request_controller_settings.h"
 
 #include <stdint.h>
-#include <string>
 #include <map>
+#include <string>
 #include <vector>
 
 namespace application_manager {

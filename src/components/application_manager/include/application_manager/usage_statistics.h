@@ -33,10 +33,10 @@
 #ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_USAGE_STATISTICS_H_
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_USAGE_STATISTICS_H_
 
-#include <string>
 #include <memory>
-#include "policy/usage_statistics/counter.h"
+#include <string>
 #include "policy/usage_statistics/app_stopwatch.h"
+#include "policy/usage_statistics/counter.h"
 #include "utils/macro.h"
 
 #include "interfaces/MOBILE_API.h"

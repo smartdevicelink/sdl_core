@@ -30,10 +30,10 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "utils/threads/thread.h"
-#include "utils/logger.h"
 #include "media_manager/audio/from_mic_recorder_listener.h"
 #include "media_manager/audio/audio_stream_sender_thread.h"
+#include "utils/logger.h"
+#include "utils/threads/thread.h"
 
 namespace media_manager {
 
@@ -63,9 +63,9 @@ void FromMicRecorderListener::OnErrorReceived(int32_t application_key,
                                               const DataForListener& data) {}
 
 void FromMicRecorderListener::OnActivityStarted(int32_t application_key) {
-  LOG4CXX_INFO(logger_,
-               "FromMicRecorderListener::OnActivityStarted "
-                   << application_key);
+  LOG4CXX_INFO(
+      logger_,
+      "FromMicRecorderListener::OnActivityStarted " << application_key);
   if (application_key == current_application_) {
     return;
   }

@@ -32,48 +32,48 @@
 
 #include <stdlib.h>  // for rand()
 
-#include <climits>
-#include <string>
-#include <fstream>
-#include <utility>
 #include <bson_object.h>
+#include <climits>
+#include <fstream>
+#include <string>
+#include <utility>
 
-#include "application_manager/application_manager_impl.h"
-#include "application_manager/commands/command_impl.h"
-#include "application_manager/commands/command_notification_impl.h"
-#include "application_manager/message_helper.h"
-#include "application_manager/rpc_service_impl.h"
-#include "application_manager/rpc_handler_impl.h"
-#include "application_manager/mobile_message_handler.h"
-#include "application_manager/policies/policy_handler.h"
-#include "application_manager/hmi_capabilities_impl.h"
-#include "application_manager/resumption/resume_ctrl_impl.h"
 #include "application_manager/app_launch/app_launch_ctrl_impl.h"
 #include "application_manager/app_launch/app_launch_data_db.h"
 #include "application_manager/app_launch/app_launch_data_json.h"
-#include "application_manager/helpers/application_helper.h"
-#include "application_manager/plugin_manager/rpc_plugin_manager_impl.h"
-#include "protocol_handler/protocol_handler.h"
-#include "hmi_message_handler/hmi_message_handler.h"
+#include "application_manager/application_manager_impl.h"
 #include "application_manager/command_holder_impl.h"
+#include "application_manager/commands/command_impl.h"
+#include "application_manager/commands/command_notification_impl.h"
+#include "application_manager/helpers/application_helper.h"
+#include "application_manager/hmi_capabilities_impl.h"
+#include "application_manager/message_helper.h"
+#include "application_manager/mobile_message_handler.h"
+#include "application_manager/plugin_manager/rpc_plugin_manager_impl.h"
+#include "application_manager/policies/policy_handler.h"
+#include "application_manager/resumption/resume_ctrl_impl.h"
+#include "application_manager/rpc_handler_impl.h"
+#include "application_manager/rpc_service_impl.h"
 #include "connection_handler/connection_handler_impl.h"
-#include "formatters/formatter_json_rpc.h"
-#include "formatters/CFormatterJsonSDLRPCv2.h"
 #include "formatters/CFormatterJsonSDLRPCv1.h"
+#include "formatters/CFormatterJsonSDLRPCv2.h"
+#include "formatters/formatter_json_rpc.h"
+#include "hmi_message_handler/hmi_message_handler.h"
 #include "protocol/bson_object_keys.h"
+#include "protocol_handler/protocol_handler.h"
 
-#include "utils/threads/thread.h"
-#include "utils/file_system.h"
-#include "utils/helpers.h"
-#include "utils/timer_task_impl.h"
-#include "smart_objects/enum_schema_item.h"
-#include "interfaces/HMI_API_schema.h"
-#include "application_manager/application_impl.h"
-#include "media_manager/media_manager.h"
-#include "policy/usage_statistics/counter.h"
-#include "utils/custom_string.h"
 #include <time.h>
 #include <boost/filesystem.hpp>
+#include "application_manager/application_impl.h"
+#include "interfaces/HMI_API_schema.h"
+#include "media_manager/media_manager.h"
+#include "policy/usage_statistics/counter.h"
+#include "smart_objects/enum_schema_item.h"
+#include "utils/custom_string.h"
+#include "utils/file_system.h"
+#include "utils/helpers.h"
+#include "utils/threads/thread.h"
+#include "utils/timer_task_impl.h"
 
 namespace {
 int get_rand_from_range(uint32_t from = 0, int to = RAND_MAX) {
@@ -595,11 +595,13 @@ ApplicationSharedPtr ApplicationManagerImpl::RegisterApplication(
 
   Version version;
   int32_t min_version = message[strings::msg_params][strings::sync_msg_version]
-                               [strings::minor_version].asInt();
+                               [strings::minor_version]
+                                   .asInt();
   version.min_supported_api_version = static_cast<APIVersion>(min_version);
 
   int32_t max_version = message[strings::msg_params][strings::sync_msg_version]
-                               [strings::major_version].asInt();
+                               [strings::major_version]
+                                   .asInt();
   version.max_supported_api_version = static_cast<APIVersion>(max_version);
   application->set_version(version);
 
@@ -1061,9 +1063,9 @@ void ApplicationManagerImpl::RefreshCloudAppInformation() {
       ApplicationSet::iterator it = std::find_if(
           apps_to_register_.begin(), apps_to_register_.end(), finder);
       if (it == apps_to_register_.end()) {
-        LOG4CXX_DEBUG(logger_,
-                      "Unable to find app to remove (" << policy_app_id
-                                                       << "), skipping");
+        LOG4CXX_DEBUG(
+            logger_,
+            "Unable to find app to remove (" << policy_app_id << "), skipping");
         continue;
       }
       app = *it;
@@ -1887,9 +1889,9 @@ void ApplicationManagerImpl::OnServiceStartedCallback(
   using namespace helpers;
   using namespace protocol_handler;
   LOG4CXX_AUTO_TRACE(logger_);
-  LOG4CXX_DEBUG(logger_,
-                "ServiceType = " << type << ". Session = " << std::hex
-                                 << session_key);
+  LOG4CXX_DEBUG(
+      logger_,
+      "ServiceType = " << type << ". Session = " << std::hex << session_key);
   std::vector<std::string> empty;
 
   if (type == kRpc) {
@@ -1899,9 +1901,9 @@ void ApplicationManagerImpl::OnServiceStartedCallback(
   }
   ApplicationSharedPtr app = application(session_key);
   if (!app) {
-    LOG4CXX_WARN(logger_,
-                 "The application with id:" << session_key
-                                            << " doesn't exists.");
+    LOG4CXX_WARN(
+        logger_,
+        "The application with id:" << session_key << " doesn't exists.");
     connection_handler().NotifyServiceStartedResult(session_key, false, empty);
     return;
   }
@@ -2061,9 +2063,9 @@ void ApplicationManagerImpl::OnSecondaryTransportEndedCallback(
 
     connection_handler::DeviceHandle device_handle = app->secondary_device();
     if (device_handle == 0) {
-      LOG4CXX_WARN(logger_,
-                   "Secondary transport of app " << session_key
-                                                 << " is not found");
+      LOG4CXX_WARN(
+          logger_,
+          "Secondary transport of app " << session_key << " is not found");
       return;
     }
 
@@ -2530,9 +2532,8 @@ void ApplicationManagerImpl::CreateApplications(SmartArray& obj_array,
 
     connection_handler::DeviceHandle device_id = 0;
 
-    if (-1 ==
-        connection_handler().get_session_observer().GetDataOnSessionKey(
-            connection_key, NULL, NULL, &device_id)) {
+    if (-1 == connection_handler().get_session_observer().GetDataOnSessionKey(
+                  connection_key, NULL, NULL, &device_id)) {
       LOG4CXX_ERROR(logger_,
                     "Failed to create application: no connection info.");
       continue;
@@ -2871,9 +2872,9 @@ void ApplicationManagerImpl::RemoveAppsWaitingForRegistration(
       apps_to_register_.begin(), apps_to_register_.end(), device_finder);
 
   while (apps_to_register_.end() != it_app) {
-    LOG4CXX_DEBUG(logger_,
-                  "Waiting app: " << (*it_app)->name().c_str()
-                                  << " is removed.");
+    LOG4CXX_DEBUG(
+        logger_,
+        "Waiting app: " << (*it_app)->name().c_str() << " is removed.");
     apps_to_register_.erase(it_app);
     it_app = std::find_if(
         apps_to_register_.begin(), apps_to_register_.end(), device_finder);
@@ -3297,8 +3298,8 @@ void ApplicationManagerImpl::ProcessPostponedMessages(const uint32_t app_id) {
   }
   MobileMessageQueue messages;
   app->SwapMobileMessageQueue(messages);
-  auto push_allowed_messages = [this, &app](
-      smart_objects::SmartObjectSPtr message) {
+  auto push_allowed_messages = [this,
+                                &app](smart_objects::SmartObjectSPtr message) {
     const std::string function_id = MessageHelper::StringifiedFunctionID(
         static_cast<mobile_apis::FunctionID::eType>(
             (*message)[strings::params][strings::function_id].asUInt()));
@@ -4016,9 +4017,9 @@ bool ApplicationManagerImpl::InitDirectory(
     LOG4CXX_WARN(logger_, directory_type << " directory doesn't exist.");
     // if storage directory doesn't exist try to create it
     if (!file_system::CreateDirectoryRecursively(path)) {
-      LOG4CXX_ERROR(logger_,
-                    "Unable to create " << directory_type << " directory "
-                                        << path);
+      LOG4CXX_ERROR(
+          logger_,
+          "Unable to create " << directory_type << " directory " << path);
       return false;
     }
     LOG4CXX_DEBUG(logger_,
@@ -4033,9 +4034,9 @@ bool ApplicationManagerImpl::IsReadWriteAllowed(const std::string& path,
   const std::string directory_type = DirectoryTypeToString(type);
   if (!(file_system::IsWritingAllowed(path) &&
         file_system::IsReadingAllowed(path))) {
-    LOG4CXX_ERROR(logger_,
-                  directory_type
-                      << " directory doesn't have read/write permissions.");
+    LOG4CXX_ERROR(
+        logger_,
+        directory_type << " directory doesn't have read/write permissions.");
     return false;
   }
 

@@ -34,15 +34,15 @@
 #define SRC_COMPONENTS_POLICY_POLICY_EXTERNAL_INCLUDE_POLICY_POLICY_TYPES_H_
 
 #include <algorithm>
-#include <string>
-#include <vector>
 #include <map>
-#include <set>
-#include <utility>
 #include <memory>
+#include <set>
+#include <string>
+#include <utility>
+#include <vector>
 
-#include "utils/helpers.h"
 #include "transport_manager/common.h"
+#include "utils/helpers.h"
 
 namespace policy {
 
@@ -119,10 +119,10 @@ typedef std::vector<std::string> StringArray;
 enum PermitResult { kRpcAllowed = 0, kRpcDisallowed, kRpcUserDisallowed };
 
 /**
-  * @struct Stores result of check:
-  * if HMI Level was allowed for RPC to work in
-  * and list of parameters allowed for RPC if specified in PT.
-  */
+ * @struct Stores result of check:
+ * if HMI Level was allowed for RPC to work in
+ * and list of parameters allowed for RPC if specified in PT.
+ */
 struct CheckPermissionResult {
   CheckPermissionResult() : hmi_level_permitted(kRpcDisallowed) {}
 

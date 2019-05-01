@@ -30,21 +30,21 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "gtest/gtest.h"
+#include <openssl/ssl.h>
 #include <fstream>
 #include <sstream>
 #include <string>
-#include <openssl/ssl.h>
+#include "gtest/gtest.h"
 
 #include "security_manager/crypto_manager.h"
 #include "security_manager/crypto_manager_impl.h"
+#include "security_manager/mock_security_manager_settings.h"
 #include "security_manager/ssl_context.h"
 #include "utils/custom_string.h"
-#include "security_manager/mock_security_manager_settings.h"
 
+using ::testing::NiceMock;
 using ::testing::Return;
 using ::testing::ReturnRef;
-using ::testing::NiceMock;
 
 namespace {
 const std::string kCaPath = "";
@@ -98,14 +98,14 @@ class SSLTest : public testing::Test {
   static void SetCertificate(const std::string& file_name,
                              std::string& out_certificate_data) {
     std::ifstream certificate_file(file_name.c_str());
-    ASSERT_TRUE(certificate_file.is_open()) << "Could not open " << file_name
-                                            << "certificate data file";
+    ASSERT_TRUE(certificate_file.is_open())
+        << "Could not open " << file_name << "certificate data file";
     std::stringstream certificate;
     certificate << certificate_file.rdbuf();
     certificate_file.close();
     out_certificate_data = certificate.str();
-    ASSERT_FALSE(out_certificate_data.empty()) << file_name
-                                               << " data file is empty";
+    ASSERT_FALSE(out_certificate_data.empty())
+        << file_name << " data file is empty";
   }
 
   virtual void SetUp() OVERRIDE {

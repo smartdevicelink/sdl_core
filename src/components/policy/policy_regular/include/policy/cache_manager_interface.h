@@ -36,10 +36,10 @@
 #include <string>
 #include <vector>
 
-#include "policy/usage_statistics/counter.h"
-#include "policy/policy_types.h"
 #include "policy/policy_settings.h"
 #include "policy/policy_table/types.h"
+#include "policy/policy_types.h"
+#include "policy/usage_statistics/counter.h"
 
 namespace policy_table = rpc::policy_table_interface_base;
 
@@ -250,7 +250,7 @@ class CacheManagerInterface {
    * @brief Check if an app can send unknown rpc requests to an app service
    * provider
    * @param policy_app_id Unique application id
-  */
+   */
   virtual bool UnknownRPCPassthroughAllowed(
       const std::string& policy_app_id) const = 0;
 
@@ -460,10 +460,10 @@ class CacheManagerInterface {
                              std::string& default_hmi) const = 0;
 
   /**
-    * Gets HMI types from specific policy
-    * @param app_id ID application
-    * @return list of HMI types
-    */
+   * Gets HMI types from specific policy
+   * @param app_id ID application
+   * @return list of HMI types
+   */
   virtual const policy_table::AppHMITypes* GetHMITypes(
       const std::string& app_id) = 0;
 

@@ -32,22 +32,22 @@
 #include "policy/policy_manager_impl.h"
 
 #include <algorithm>
-#include <set>
-#include <queue>
 #include <iterator>
 #include <limits>
+#include <queue>
+#include <set>
 #include "json/reader.h"
 #include "json/writer.h"
+#include "policy/policy_helper.h"
 #include "policy/policy_table.h"
 #include "policy/pt_representation.h"
-#include "policy/policy_helper.h"
+#include "utils/date_time.h"
 #include "utils/file_system.h"
 #include "utils/logger.h"
-#include "utils/date_time.h"
 
+#include "config_profile/profile.h"
 #include "policy/cache_manager.h"
 #include "policy/update_status_manager.h"
-#include "config_profile/profile.h"
 #include "utils/timer_task_impl.h"
 
 #include "policy/access_remote.h"
@@ -675,7 +675,8 @@ void PolicyManagerImpl::SendNotificationOnPermissionsUpdated(
   if (device_id.empty()) {
     LOG4CXX_WARN(logger_,
                  "Couldn't find device info for application id "
-                 "'" << application_id << "'");
+                 "'" << application_id
+                     << "'");
     return;
   }
 
@@ -1457,9 +1458,9 @@ void PolicyManagerImpl::SendHMILevelChanged(const ApplicationOnDevice& who) {
   if (GetDefaultHmi(who.app_id, &default_hmi)) {
     listener()->OnUpdateHMIStatus(who.dev_id, who.app_id, default_hmi);
   } else {
-    LOG4CXX_WARN(logger_,
-                 "Couldn't get default HMI level for application "
-                     << who.app_id);
+    LOG4CXX_WARN(
+        logger_,
+        "Couldn't get default HMI level for application " << who.app_id);
   }
 }
 

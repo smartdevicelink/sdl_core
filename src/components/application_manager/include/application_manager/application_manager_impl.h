@@ -34,41 +34,41 @@
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_APPLICATION_MANAGER_IMPL_H_
 
 #include <stdint.h>
-#include <vector>
-#include <map>
-#include <set>
-#include <deque>
 #include <algorithm>
+#include <deque>
+#include <map>
 #include <memory>
+#include <set>
+#include <vector>
 
-#include "application_manager/application_manager.h"
+#include "application_manager/app_launch/app_launch_data.h"
 #include "application_manager/app_service_manager.h"
+#include "application_manager/application_manager.h"
+#include "application_manager/application_manager_settings.h"
+#include "application_manager/command_factory.h"
+#include "application_manager/command_holder.h"
+#include "application_manager/event_engine/event_dispatcher_impl.h"
 #include "application_manager/hmi_capabilities.h"
+#include "application_manager/hmi_interfaces_impl.h"
 #include "application_manager/message.h"
 #include "application_manager/message_helper.h"
 #include "application_manager/request_controller.h"
 #include "application_manager/resumption/resume_ctrl.h"
-#include "application_manager/state_controller_impl.h"
-#include "application_manager/app_launch/app_launch_data.h"
-#include "application_manager/application_manager_settings.h"
-#include "application_manager/event_engine/event_dispatcher_impl.h"
-#include "application_manager/hmi_interfaces_impl.h"
-#include "application_manager/command_holder.h"
-#include "application_manager/command_factory.h"
-#include "application_manager/rpc_service.h"
 #include "application_manager/rpc_handler.h"
+#include "application_manager/rpc_service.h"
+#include "application_manager/state_controller_impl.h"
 
-#include "protocol_handler/protocol_observer.h"
-#include "protocol_handler/protocol_handler.h"
-#include "hmi_message_handler/hmi_message_observer.h"
-#include "hmi_message_handler/hmi_message_sender.h"
 #include "application_manager/policies/policy_handler_interface.h"
 #include "application_manager/policies/policy_handler_observer.h"
 #include "connection_handler/connection_handler.h"
 #include "connection_handler/connection_handler_observer.h"
 #include "connection_handler/device.h"
 #include "formatters/CSmartFactory.h"
+#include "hmi_message_handler/hmi_message_observer.h"
+#include "hmi_message_handler/hmi_message_sender.h"
 #include "policies/policy_handler.h"
+#include "protocol_handler/protocol_handler.h"
+#include "protocol_handler/protocol_observer.h"
 
 #include "interfaces/HMI_API.h"
 #include "interfaces/HMI_API_schema.h"
@@ -88,14 +88,14 @@
 
 #include "utils/macro.h"
 
+#include "smart_objects/smart_object.h"
+#include "utils/data_accessor.h"
+#include "utils/lock.h"
 #include "utils/message_queue.h"
 #include "utils/prioritized_queue.h"
-#include "utils/threads/thread.h"
 #include "utils/threads/message_loop_thread.h"
-#include "utils/lock.h"
-#include "utils/data_accessor.h"
+#include "utils/threads/thread.h"
 #include "utils/timer.h"
-#include "smart_objects/smart_object.h"
 
 struct BsonObject;
 
@@ -134,14 +134,14 @@ class ApplicationManagerImpl
       public connection_handler::ConnectionHandlerObserver,
       public policy::PolicyHandlerObserver
 #ifdef ENABLE_SECURITY
-      ,
+    ,
       public security_manager::SecurityManagerListener
 #endif  // ENABLE_SECURITY
 #ifdef TELEMETRY_MONITOR
-      ,
+    ,
       public telemetry_monitor::TelemetryObservable<AMTelemetryObserver>
 #endif  // TELEMETRY_MONITOR
-      {
+{
 
   friend class ResumeCtrl;
   friend class CommandImpl;
@@ -324,8 +324,9 @@ class ApplicationManagerImpl
   void SetTelemetryObserver(AMTelemetryObserver* observer) OVERRIDE;
 #endif  // TELEMETRY_MONITOR
 
-  ApplicationSharedPtr RegisterApplication(const std::shared_ptr<
-      smart_objects::SmartObject>& request_for_registration) OVERRIDE;
+  ApplicationSharedPtr RegisterApplication(
+      const std::shared_ptr<smart_objects::SmartObject>&
+          request_for_registration) OVERRIDE;
   /*
    * @brief Closes application by id
    *
@@ -342,9 +343,9 @@ class ApplicationManagerImpl
                              bool is_unexpected_disconnect = false) OVERRIDE;
 
   /**
-  * @brief Handle sequence for unauthorized application
-  * @param app_id Application id
-  */
+   * @brief Handle sequence for unauthorized application
+   * @param app_id Application id
+   */
   void OnAppUnauthorized(const uint32_t& app_id) OVERRIDE;
 
   /*
@@ -827,9 +828,9 @@ class ApplicationManagerImpl
       ApplicationConstSharedPtr application) const;
 
   /**
-  * Getter for resume_controller
-  * @return Resume Controller
-  */
+   * Getter for resume_controller
+   * @return Resume Controller
+   */
   resumption::ResumeCtrl& resume_controller() OVERRIDE {
     return *resume_ctrl_.get();
   }
@@ -998,8 +999,7 @@ class ApplicationManagerImpl
     AppV4DevicePredicate(const connection_handler::DeviceHandle handle)
         : handle_(handle) {}
     bool operator()(const ApplicationSharedPtr app) const {
-      return app
-                 ? handle_ == app->device() &&
+      return app ? handle_ == app->device() &&
                        Message::is_sufficient_version(
                            protocol_handler::MajorProtocolVersion::
                                PROTOCOL_VERSION_4,
@@ -1075,14 +1075,14 @@ class ApplicationManagerImpl
   }
 
   /**
-     * @brief ProcessReconnection handles reconnection flow for application on
-     * transport switch
-     * @param application Pointer to switched application, must be validated
-     * before passing
-     * @param connection_key Connection key from registration request of
-     * switched
-     * application
-     */
+   * @brief ProcessReconnection handles reconnection flow for application on
+   * transport switch
+   * @param application Pointer to switched application, must be validated
+   * before passing
+   * @param connection_key Connection key from registration request of
+   * switched
+   * application
+   */
   void ProcessReconnection(ApplicationSharedPtr application,
                            const uint32_t connection_key) FINAL;
 

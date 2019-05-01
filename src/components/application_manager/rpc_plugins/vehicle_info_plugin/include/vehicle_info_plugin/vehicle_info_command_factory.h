@@ -65,6 +65,6 @@ class VehicleInfoCommandFactory : public app_mngr::CommandFactory {
   std::unique_ptr<app_mngr::CommandFactory> hmi_command_factory_;
   std::unique_ptr<app_mngr::CommandFactory> mob_command_factory_;
 };
-}
+}  // namespace vehicle_info_plugin
 
 #endif  // SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_VEHICLE_INFO_PLUGIN_INCLUDE_VEHICLE_INFO_PLUGIN_VEHICLE_INFO_COMMAND_FACTORY_H

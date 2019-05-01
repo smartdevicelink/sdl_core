@@ -30,26 +30,25 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "transport_manager/transport_manager_impl.h"
 #include <string>
 #include "gtest/gtest.h"
 #include "protocol/raw_message.h"
-#include "transport_manager/common.h"
-#include "transport_manager/transport_manager_impl.h"
-#include "transport_manager/mock_telemetry_observer.h"
-#include "transport_manager/mock_transport_manager_listener.h"
-#include "transport_manager/mock_telemetry_observer.h"
-#include "transport_manager/transport_adapter/mock_transport_adapter.h"
-#include "transport_manager/mock_transport_manager_impl.h"
-#include "transport_manager/mock_transport_manager_settings.h"
 #include "resumption/last_state_impl.h"
+#include "transport_manager/common.h"
+#include "transport_manager/mock_telemetry_observer.h"
+#include "transport_manager/mock_transport_manager_impl.h"
+#include "transport_manager/mock_transport_manager_listener.h"
+#include "transport_manager/mock_transport_manager_settings.h"
+#include "transport_manager/transport_adapter/mock_transport_adapter.h"
 
 #include "utils/test_async_waiter.h"
 
 using ::testing::_;
 using ::testing::AtLeast;
+using ::testing::DoAll;
 using ::testing::Return;
 using ::testing::ReturnRef;
-using ::testing::DoAll;
 
 using ::protocol_handler::RawMessage;
 using ::protocol_handler::RawMessagePtr;
@@ -64,7 +63,7 @@ namespace {
 const std::string kAppStorageFolder = "app_storage_folder";
 const std::string kAppInfoFolder = "app_info_folder";
 const uint32_t kAsyncExpectationsTimeout = 10000u;
-}
+}  // namespace
 
 class TransportManagerImplTest : public ::testing::Test {
  protected:
@@ -951,7 +950,8 @@ TEST_F(TransportManagerImplTest, Visibility_TMIsNotInitialized) {
 
 TEST_F(TransportManagerImplTest, HandleMessage_ConnectionNotExist) {
   EXPECT_CALL(*mock_adapter_,
-              SendData(mac_address_, application_id_, test_message_)).Times(0);
+              SendData(mac_address_, application_id_, test_message_))
+      .Times(0);
 
   TestAsyncWaiter waiter;
   EXPECT_CALL(*tm_listener_, OnTMMessageSendFailed(_, test_message_))
@@ -1232,7 +1232,8 @@ TEST_F(TransportManagerImplTest,
   EXPECT_CALL(mock_transport_manager_settings_, app_transport_change_timer())
       .WillOnce(Return(timeout));
   EXPECT_CALL(mock_transport_manager_settings_,
-              app_transport_change_timer_addition()).WillOnce(Return(0));
+              app_transport_change_timer_addition())
+      .WillOnce(Return(0));
 
   EXPECT_CALL(*tm_listener_, OnDeviceSwitchingStart(mac_address_, usb_serial));
 

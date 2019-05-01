@@ -30,16 +30,16 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <cstring>
-#include <cstdio>
-#include <string>
 #include "sdl_rpc_plugin/commands/mobile/on_system_request_notification.h"
-#include "interfaces/MOBILE_API.h"
-#include "utils/file_system.h"
-#include "utils/helpers.h"
-#include "policy/policy_table/enums.h"
+#include <cstdio>
+#include <cstring>
+#include <string>
 #include "application_manager/application_manager.h"
 #include "application_manager/policies/policy_handler_interface.h"
+#include "interfaces/MOBILE_API.h"
+#include "policy/policy_table/enums.h"
+#include "utils/file_system.h"
+#include "utils/helpers.h"
 
 namespace sdl_rpc_plugin {
 using namespace application_manager;
@@ -129,11 +129,11 @@ void OnSystemRequestNotification::Run() {
   }
 
   if (mobile_apis::RequestType::PROPRIETARY == request_type) {
-/* According to requirements:
-   "If the requestType = PROPRIETARY, add to mobile API fileType = JSON
-    If the requestType = HTTP, add to mobile API fileType = BINARY"
-   Also in Genivi SDL we don't save the PT to file - we put it directly in
-   binary_data */
+    /* According to requirements:
+       "If the requestType = PROPRIETARY, add to mobile API fileType = JSON
+        If the requestType = HTTP, add to mobile API fileType = BINARY"
+       Also in Genivi SDL we don't save the PT to file - we put it directly in
+       binary_data */
 
 #if defined(PROPRIETARY_MODE)
     AddHeader(binary_data);
@@ -246,4 +246,4 @@ size_t OnSystemRequestNotification::ParsePTString(
 
 }  // namespace commands
 
-}  // namespace application_manager
+}  // namespace sdl_rpc_plugin

@@ -28,17 +28,17 @@
  * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
-*/
+ */
 
 #ifndef SRC_COMPONENTS_INCLUDE_APPLICATION_MANAGER_HMI_CAPABILITIES_H_
 #define SRC_COMPONENTS_INCLUDE_APPLICATION_MANAGER_HMI_CAPABILITIES_H_
 
+#include "application_manager/hmi_language_handler.h"
 #include "interfaces/HMI_API.h"
 #include "interfaces/MOBILE_API.h"
 #include "json/json.h"
-#include "utils/macro.h"
-#include "application_manager/hmi_language_handler.h"
 #include "smart_objects/smart_object.h"
+#include "utils/macro.h"
 
 namespace resumption {
 class LastState;
@@ -56,10 +56,10 @@ class HMICapabilities {
   virtual ~HMICapabilities() {}
 
   /**
-     * @brief return component which follows for correctness of
-     * languages
-     * @return HMI language handler
-     */
+   * @brief return component which follows for correctness of
+   * languages
+   * @return HMI language handler
+   */
   virtual HMILanguageHandler& get_hmi_language_handler() = 0;
 
   /*

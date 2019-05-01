@@ -30,26 +30,26 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <string>
 #include <algorithm>
+#include <string>
 
-#include "gtest/gtest.h"
-#include "application_manager/resumption/resume_ctrl_impl.h"
-#include "application_manager/usage_statistics.h"
-#include "application_manager/mock_application.h"
+#include "application_manager/application.h"
+#include "application_manager/application_manager_impl.h"
 #include "application_manager/mock_app_extension.h"
+#include "application_manager/mock_application.h"
 #include "application_manager/mock_help_prompt_manager.h"
 #include "application_manager/mock_resumption_data.h"
-#include "interfaces/MOBILE_API.h"
-#include "application_manager/application_manager_impl.h"
-#include "application_manager/application.h"
-#include "utils/data_accessor.h"
+#include "application_manager/resumption/resume_ctrl_impl.h"
+#include "application_manager/usage_statistics.h"
 #include "config_profile/profile.h"
+#include "gtest/gtest.h"
+#include "interfaces/MOBILE_API.h"
+#include "utils/data_accessor.h"
 
-#include "application_manager/mock_message_helper.h"
 #include "application_manager/mock_application_manager.h"
 #include "application_manager/mock_application_manager_settings.h"
 #include "application_manager/mock_event_dispatcher.h"
+#include "application_manager/mock_message_helper.h"
 #include "application_manager/mock_state_controller.h"
 
 namespace test {
@@ -64,10 +64,10 @@ using ::testing::Eq;
 using ::testing::Mock;
 using ::testing::NiceMock;
 using ::testing::Return;
-using ::testing::ReturnRef;
-using ::testing::SetArgReferee;
 using ::testing::ReturnPointee;
+using ::testing::ReturnRef;
 using ::testing::SaveArg;
+using ::testing::SetArgReferee;
 using namespace application_manager_test;
 
 using namespace resumption;
@@ -501,7 +501,8 @@ TEST_F(ResumeCtrlTest, StartResumption_AppWithSubscribeOnButtons) {
   EXPECT_CALL(*mock_app_extension_, ProcessResumption(test_subscriptions));
 
   EXPECT_CALL(*application_manager::MockMessageHelper::message_helper_mock(),
-              SendAllOnButtonSubscriptionNotificationsForApp(_, _)).Times(2);
+              SendAllOnButtonSubscriptionNotificationsForApp(_, _))
+      .Times(2);
 
   const bool res = res_ctrl_->StartResumption(mock_app_, kHash_);
   EXPECT_TRUE(res);

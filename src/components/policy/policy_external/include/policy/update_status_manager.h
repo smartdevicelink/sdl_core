@@ -34,14 +34,13 @@
 #define SRC_COMPONENTS_POLICY_POLICY_EXTERNAL_INCLUDE_POLICY_UPDATE_STATUS_MANAGER_H_
 
 #include "policy/policy_types.h"
-#include "utils/lock.h"
-#include "utils/threads/thread.h"
-#include "utils/threads/thread_delegate.h"
+#include "policy/status.h"
 #include "utils/conditional_variable.h"
 #include "utils/lock.h"
 #include "utils/logger.h"
 #include "utils/macro.h"
-#include "policy/status.h"
+#include "utils/threads/thread.h"
+#include "utils/threads/thread_delegate.h"
 
 namespace policy {
 
@@ -235,6 +234,6 @@ class UpdateStatusManager {
   UpdateThreadDelegate* update_status_thread_delegate_;
   threads::Thread* thread_;
 };
-}
+}  // namespace policy
 
 #endif  // SRC_COMPONENTS_POLICY_POLICY_EXTERNAL_INCLUDE_POLICY_UPDATE_STATUS_MANAGER_H_

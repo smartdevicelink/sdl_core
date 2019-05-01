@@ -79,9 +79,9 @@ void NaviStartStreamRequest::Run() {
   ApplicationSharedPtr app =
       application_manager_.application_by_hmi_app(application_id());
   if (!app) {
-    LOG4CXX_ERROR(logger_,
-                  "Applcation with hmi_app_id " << application_id()
-                                                << "does not exist");
+    LOG4CXX_ERROR(
+        logger_,
+        "Application with hmi_app_id " << application_id() << "does not exist");
     return;
   }
   SetAllowedToTerminate(false);
@@ -190,4 +190,4 @@ void NaviStartStreamRequest::RetryStartSession() {
 
 }  // namespace commands
 
-}  // namespace application_manager
+}  // namespace sdl_rpc_plugin

@@ -53,5 +53,5 @@ class PHTelemetryObserver {
   virtual void EndMessageProcess(std::shared_ptr<MessageMetric> m) = 0;
   virtual ~PHTelemetryObserver() {}
 };
-}  // protocol_handler
+}  // namespace protocol_handler
 #endif  // SRC_COMPONENTS_INCLUDE_PROTOCOL_HANDLER_TELEMETRY_OBSERVER_H_

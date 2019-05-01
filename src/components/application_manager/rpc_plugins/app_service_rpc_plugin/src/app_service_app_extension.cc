@@ -119,4 +119,4 @@ AppServiceAppExtension& AppServiceAppExtension::ExtractASExtension(
   DCHECK(vi_app_extension);
   return *vi_app_extension;
 }
-}
+}  // namespace app_service_rpc_plugin

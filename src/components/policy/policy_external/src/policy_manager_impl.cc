@@ -32,23 +32,23 @@
 #include "policy/policy_manager_impl.h"
 
 #include <algorithm>
-#include <set>
-#include <queue>
+#include <functional>
 #include <iterator>
 #include <limits>
+#include <queue>
+#include <set>
 #include <vector>
-#include <functional>
+#include "config_profile/profile.h"
 #include "json/reader.h"
 #include "json/writer.h"
+#include "policy/cache_manager.h"
+#include "policy/policy_helper.h"
 #include "policy/policy_table.h"
 #include "policy/pt_representation.h"
-#include "policy/policy_helper.h"
+#include "policy/update_status_manager.h"
+#include "utils/date_time.h"
 #include "utils/file_system.h"
 #include "utils/logger.h"
-#include "utils/date_time.h"
-#include "policy/cache_manager.h"
-#include "policy/update_status_manager.h"
-#include "config_profile/profile.h"
 
 #include "policy/access_remote.h"
 #include "policy/access_remote_impl.h"
@@ -954,8 +954,9 @@ void PolicyManagerImpl::CheckPermissions(const PTString& app_id,
   for (; end != parameter; ++parameter) {
     if (!result.HasParameter(*parameter)) {
       LOG4CXX_DEBUG(logger_,
-                    "Parameter " << *parameter << " is unknown."
-                                                  " Adding to undefined list.");
+                    "Parameter " << *parameter
+                                 << " is unknown."
+                                    " Adding to undefined list.");
       result.list_of_undefined_params.insert(*parameter);
     }
   }
@@ -990,7 +991,8 @@ void PolicyManagerImpl::SendNotificationOnPermissionsUpdated(
   if (device_id.empty()) {
     LOG4CXX_WARN(logger_,
                  "Couldn't find device info for application id "
-                 "'" << application_id << "'");
+                 "'" << application_id
+                     << "'");
     return;
   }
 
@@ -2189,9 +2191,9 @@ void PolicyManagerImpl::SendHMILevelChanged(const ApplicationOnDevice& who) {
   if (GetDefaultHmi(who.app_id, &default_hmi)) {
     listener()->OnUpdateHMIStatus(who.dev_id, who.app_id, default_hmi);
   } else {
-    LOG4CXX_WARN(logger_,
-                 "Couldn't get default HMI level for application "
-                     << who.app_id);
+    LOG4CXX_WARN(
+        logger_,
+        "Couldn't get default HMI level for application " << who.app_id);
   }
 }
 

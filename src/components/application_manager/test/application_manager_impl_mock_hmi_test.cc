@@ -33,25 +33,25 @@
 #include <memory>
 #include <string>
 
-#include "gtest/gtest.h"
 #include "application_manager/application.h"
 #include "application_manager/application_impl.h"
 #include "application_manager/application_manager_impl.h"
+#include "gtest/gtest.h"
 #include "utils/custom_string.h"
 
 #include "encryption/hashing.h"
 
 #include "application_manager/mock_application_manager_settings.h"
-#include "application_manager/mock_resumption_data.h"
 #include "application_manager/mock_command_factory.h"
 #include "application_manager/mock_request.h"
+#include "application_manager/mock_resumption_data.h"
+#include "application_manager/mock_rpc_plugin.h"
+#include "application_manager/mock_rpc_plugin_manager.h"
 #include "connection_handler/mock_connection_handler.h"
 #include "policy/mock_policy_settings.h"
 #include "policy/usage_statistics/mock_statistics_manager.h"
-#include "protocol_handler/mock_session_observer.h"
 #include "protocol_handler/mock_protocol_handler.h"
-#include "application_manager/mock_rpc_plugin_manager.h"
-#include "application_manager/mock_rpc_plugin.h"
+#include "protocol_handler/mock_session_observer.h"
 #include "utils/optional.h"
 
 namespace test {
@@ -63,9 +63,9 @@ namespace am = application_manager;
 using testing::_;
 using ::testing::DoAll;
 using ::testing::Mock;
+using ::testing::NiceMock;
 using ::testing::Return;
 using ::testing::ReturnRef;
-using ::testing::NiceMock;
 using ::testing::SetArgPointee;
 
 using namespace application_manager;
@@ -269,6 +269,6 @@ TEST_F(ApplicationManagerImplMockHmiTest,
   Mock::VerifyAndClearExpectations(&mock_command_factory);
 }
 
-}  // application_manager_test
+}  // namespace application_manager_test
 }  // namespace components
 }  // namespace test

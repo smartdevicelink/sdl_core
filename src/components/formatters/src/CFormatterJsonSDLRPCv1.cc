@@ -164,6 +164,6 @@ CFormatterJsonSDLRPCv1::MetaFormatToString(
 
   return result_code;
 }
-}
-}
-}
+}  // namespace formatters
+}  // namespace ns_json_handler
+}  // namespace ns_smart_device_link

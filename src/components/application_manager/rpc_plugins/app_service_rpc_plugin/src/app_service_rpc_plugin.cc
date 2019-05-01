@@ -30,12 +30,12 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "application_manager/message_helper.h"
-#include "application_manager/smart_object_keys.h"
+#include "app_service_rpc_plugin/app_service_rpc_plugin.h"
 #include "app_service_rpc_plugin/app_service_app_extension.h"
 #include "app_service_rpc_plugin/app_service_command_factory.h"
-#include "app_service_rpc_plugin/app_service_rpc_plugin.h"
+#include "application_manager/message_helper.h"
 #include "application_manager/plugin_manager/plugin_keys.h"
+#include "application_manager/smart_object_keys.h"
 
 namespace app_service_rpc_plugin {
 CREATE_LOGGERPTR_GLOBAL(logger_, "AppServiceRpcPlugin")

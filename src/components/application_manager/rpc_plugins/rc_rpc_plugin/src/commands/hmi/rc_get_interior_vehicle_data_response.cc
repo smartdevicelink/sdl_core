@@ -31,8 +31,8 @@
  */
 
 #include "rc_rpc_plugin/commands/hmi/rc_get_interior_vehicle_data_response.h"
-#include "rc_rpc_plugin/rc_module_constants.h"
 #include "application_manager/event_engine/event.h"
+#include "rc_rpc_plugin/rc_module_constants.h"
 
 namespace rc_rpc_plugin {
 namespace commands {
@@ -53,8 +53,9 @@ void RCGetInteriorVehicleDataResponse::Run() {
   app_mngr::event_engine::Event event(
       hmi_apis::FunctionID::RC_GetInteriorVehicleData);
 
-  smart_objects::SmartObject& module_data = (*message_)
-      [application_manager::strings::msg_params][message_params::kModuleData];
+  smart_objects::SmartObject& module_data =
+      (*message_)[application_manager::strings::msg_params]
+                 [message_params::kModuleData];
   if (module_data.keyExists(message_params::kAudioControlData)) {
     smart_objects::SmartObject& audio_control_data =
         module_data[message_params::kAudioControlData];

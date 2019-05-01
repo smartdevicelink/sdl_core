@@ -35,11 +35,11 @@
 
 #include <memory>
 
-#include "application_manager/plugin_manager/rpc_plugin.h"
 #include "application_manager/command_factory.h"
-#include "rc_rpc_plugin/resource_allocation_manager.h"
+#include "application_manager/plugin_manager/rpc_plugin.h"
 #include "rc_rpc_plugin/interior_data_cache.h"
 #include "rc_rpc_plugin/interior_data_manager.h"
+#include "rc_rpc_plugin/resource_allocation_manager.h"
 
 namespace rc_rpc_plugin {
 namespace plugins = application_manager::plugin_manager;
@@ -48,22 +48,22 @@ namespace app_mngr = application_manager;
 class RCRPCPlugin : public plugins::RPCPlugin {
  public:
   /**
-    * @brief Command initialization function
-    * @param app_manager ApplicationManager
-    * @param rpc_service RPCService
-    * @param hmi_capabilities HMICapabilities
-    * @param policy_handler PolicyHandlerInterface
-    * @return true in case initialization was succesful, false otherwise.
-    **/
+   * @brief Command initialization function
+   * @param app_manager ApplicationManager
+   * @param rpc_service RPCService
+   * @param hmi_capabilities HMICapabilities
+   * @param policy_handler PolicyHandlerInterface
+   * @return true in case initialization was succesful, false otherwise.
+   **/
   bool Init(app_mngr::ApplicationManager& app_manager,
             app_mngr::rpc_service::RPCService& rpc_service,
             app_mngr::HMICapabilities& hmi_capabilities,
             policy::PolicyHandlerInterface& policy_handler) OVERRIDE;
   /**
-  * @param int32_t command id
-  * @param CommandSource source
-  * @return return true if command can be create, else return false
-  **/
+   * @param int32_t command id
+   * @param CommandSource source
+   * @return return true if command can be create, else return false
+   **/
   bool IsAbleToProcess(
       const int32_t function_id,
       const app_mngr::commands::Command::CommandSource message_source) OVERRIDE;
@@ -85,10 +85,10 @@ class RCRPCPlugin : public plugins::RPCPlugin {
    */
   void OnPolicyEvent(app_mngr::plugin_manager::PolicyEvent event) OVERRIDE;
   /**
-    * @brief OnApplicationEvent Notifies modules on certain application events
-    * @param event Event
-    * @param application Pointer to application struct
-    */
+   * @brief OnApplicationEvent Notifies modules on certain application events
+   * @param event Event
+   * @param application Pointer to application struct
+   */
   void OnApplicationEvent(plugins::ApplicationEvent event,
                           app_mngr::ApplicationSharedPtr application) OVERRIDE;
 

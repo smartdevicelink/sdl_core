@@ -30,41 +30,41 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "application_manager/application.h"
-#include "application_manager/mock_application.h"
-#include "application_manager/mock_app_service_manager.h"
-#include "application_manager/commands/commands_test.h"
 #include "app_service_rpc_plugin/commands/mobile/on_app_service_data_notification.h"
-#include "app_service_rpc_plugin/app_service_rpc_plugin.h"
 #include "app_service_rpc_plugin/app_service_app_extension.h"
+#include "app_service_rpc_plugin/app_service_rpc_plugin.h"
+#include "application_manager/application.h"
+#include "application_manager/commands/command_impl.h"
+#include "application_manager/commands/commands_test.h"
+#include "application_manager/mock_app_service_manager.h"
+#include "application_manager/mock_application.h"
 #include "gtest/gtest.h"
 #include "interfaces/MOBILE_API.h"
-#include "application_manager/commands/command_impl.h"
 #include "resumption/last_state_impl.h"
 
 namespace am = application_manager;
-using ::testing::_;
-using ::testing::Return;
-using ::testing::ReturnRef;
-using ::testing::ReturnNull;
-using ::testing::NiceMock;
-using ::testing::SaveArg;
-using ::testing::Mock;
 using am::ApplicationSet;
 using am::commands::MessageSharedPtr;
+using app_service_rpc_plugin::commands::OnAppServiceDataNotification;
 using test::components::application_manager_test::MockApplication;
 using test::components::application_manager_test::MockApplicationManager;
 using test::components::application_manager_test::MockAppServiceManager;
 using test::components::commands_test::CommandsTest;
 using test::components::commands_test::CommandsTestMocks;
-using app_service_rpc_plugin::commands::OnAppServiceDataNotification;
+using ::testing::_;
+using ::testing::Mock;
+using ::testing::NiceMock;
+using ::testing::Return;
+using ::testing::ReturnNull;
+using ::testing::ReturnRef;
+using ::testing::SaveArg;
 
 namespace {
 const uint32_t kAppId = 0u;
 const uint32_t kConnectionKey = 1u;
 const std::string kPolicyAppId = "Test";
 const int kModuleId = 153u;
-}
+}  // namespace
 
 namespace app_service_plugin_test {
 using namespace app_service_rpc_plugin;
@@ -214,4 +214,4 @@ TEST_F(OnAppServiceDataNotificationTest, Run_NoSubscribedApps) {
   Mock::VerifyAndClearExpectations(&app_mngr_);
 }
 
-}  // namespace rc_rpc_plugin_test
+}  // namespace app_service_plugin_test

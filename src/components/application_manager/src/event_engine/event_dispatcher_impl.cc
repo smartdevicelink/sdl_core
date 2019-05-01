@@ -31,9 +31,9 @@
  */
 
 #include "application_manager/event_engine/event_dispatcher_impl.h"
-#include "interfaces/HMI_API.h"
-#include "application_manager/event_engine/event_observer.h"
 #include <algorithm>
+#include "application_manager/event_engine/event_observer.h"
+#include "interfaces/HMI_API.h"
 
 namespace application_manager {
 namespace event_engine {
@@ -137,8 +137,9 @@ void EventDispatcherImpl::raise_mobile_event(const MobileEvent& event) {
     }
 
     if (mobile_apis::messageType::response == event.smart_object_type()) {
-      mobile_observers_ = mobile_observers_event_
-          [event.id()][event.smart_object_correlation_id()];
+      mobile_observers_ =
+          mobile_observers_event_[event.id()]
+                                 [event.smart_object_correlation_id()];
     }
   }
 

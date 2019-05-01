@@ -31,11 +31,11 @@
  */
 
 #include "rc_rpc_plugin/commands/rc_command_request.h"
-#include "rc_rpc_plugin/rc_module_constants.h"
-#include "application_manager/message_helper.h"
 #include "application_manager/hmi_interfaces.h"
-#include "smart_objects/enum_schema_item.h"
+#include "application_manager/message_helper.h"
 #include "rc_rpc_plugin/interior_data_cache.h"
+#include "rc_rpc_plugin/rc_module_constants.h"
+#include "smart_objects/enum_schema_item.h"
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "RemoteControlModule")
 
@@ -264,5 +264,5 @@ void RCCommandRequest::SendGetUserConsent(const std::string& module_type) {
                  &msg_params,
                  true);
 }
-}
-}
+}  // namespace commands
+}  // namespace rc_rpc_plugin

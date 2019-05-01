@@ -35,8 +35,8 @@
 
 #include "application_manager/application_impl.h"
 #include "application_manager/message_helper.h"
-#include "utils/helpers.h"
 #include "config_profile/profile.h"
+#include "utils/helpers.h"
 
 namespace sdl_rpc_plugin {
 using namespace application_manager;
@@ -204,4 +204,4 @@ bool SliderRequest::IsWhiteSpaceExist() {
 }
 
 }  // namespace commands
-}  // namespace application_manager
+}  // namespace sdl_rpc_plugin

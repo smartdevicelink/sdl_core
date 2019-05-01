@@ -32,16 +32,16 @@
 #ifdef __QNX__
 #include <process.h>
 #else  // __QNX__
+#include <fcntl.h>
+#include <sys/stat.h>
 #include <sys/types.h>
 #include <sys/wait.h>
-#include <sys/stat.h>
-#include <fcntl.h>
 #include <unistd.h>
 #endif  // __QNX__
 
 #include <algorithm>
-#include <functional>
 #include <cstring>
+#include <functional>
 #include <iostream>
 
 #include "utils/logger.h"
@@ -87,7 +87,7 @@ bool System::Execute() {
 
 bool System::Execute(bool wait) {
   size_t size = argv_.size();
-  char** argv = new char* [size + 1];
+  char** argv = new char*[size + 1];
   std::transform(argv_.begin(), argv_.end(), argv, GetCString());
   argv[size] = NULL;
 
@@ -137,7 +137,7 @@ bool System::Execute(bool wait) {
       dup2(fd_dev0, STDERR_FILENO);
 
       size_t size = argv_.size();
-      char** argv = new char* [size + 1];
+      char** argv = new char*[size + 1];
       std::transform(argv_.begin(), argv_.end(), argv, GetCString());
       argv[size] = NULL;
 
@@ -173,4 +173,4 @@ bool System::Execute(bool wait) {
 
 #endif  // __QNX__
 
-}  // utils
+}  // namespace utils
