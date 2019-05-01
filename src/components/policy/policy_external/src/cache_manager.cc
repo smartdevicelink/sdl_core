@@ -1391,6 +1391,10 @@ const policy::VehicleInfo CacheManager::GetVehicleInfo() const {
 
 void CacheManager::GetEnabledCloudApps(
     std::vector<std::string>& enabled_apps) const {
+#if !defined(CLOUD_APP_WEBSOCKET_TRANSPORT_SUPPORT)
+  enabled_apps.clear();
+  return;
+#else
   const policy_table::ApplicationPolicies& policies =
       pt_->policy_table.app_policies_section.apps;
   for (policy_table::ApplicationPolicies::const_iterator it = policies.begin();
@@ -1401,6 +1405,7 @@ void CacheManager::GetEnabledCloudApps(
       enabled_apps.push_back((*it).first);
     }
   }
+#endif  // CLOUD_APP_WEBSOCKET_TRANSPORT_SUPPORT
 }
 
 bool CacheManager::GetCloudAppParameters(

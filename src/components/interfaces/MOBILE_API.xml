@@ -1,7 +1,7 @@
 <?xml version="1.0" standalone="no"?>
 <?xml-stylesheet type="text/xml" href="protocol2html.xsl"?>
 
-<interface name="SmartDeviceLink RAPI" version="5.1.0" minVersion="1.0" date="2019-03-18">
+<interface name="SmartDeviceLink RAPI" version="5.1.0" minVersion="1.0" date="2019-03-19">
     <enum name="Result" internal_scope="base" since="1.0">
         <element name="SUCCESS">
             <description>The request succeeded</description>
@@ -967,7 +967,7 @@
             <description>Similar to VP8, but VP9 is customized for video resolutions beyond high-definition video (UHD) and also enables lossless compression.</description>
         </element>
     </enum>
-	
+    
     <enum name="AudioStreamingIndicator" since="5.0">
         <element name="PLAY_PAUSE">
             <description>
@@ -4028,7 +4028,7 @@
         </param>
 
         <param name="serviceType" type="String" mandatory="true">
-            <description> The type of service that is to be offered by this app </description>
+            <description> The type of service that is to be offered by this app. See AppServiceType for known enum equivalent types. Parameter is a string to allow for new service types to be used by apps on older versions of SDL Core. </description>
         </param>
 
         <param name="serviceIcon" type="Image" mandatory="false">
@@ -4099,7 +4099,7 @@
             <description> The service has been deactivated as the primary service of its type</description>
         </element>
         <element name="MANIFEST_UPDATE">
-            <description> The service has updated its manifest. This could imply updated capabilities. Note: Currently unimplemented </description>
+            <description> The service has updated its manifest. This could imply updated capabilities</description>
         </element>
     </enum>
 
@@ -7156,6 +7156,10 @@
             <element name="DISALLOWED"/>
             <element name="WARNINGS"/>
         </param>
+
+        <param name="info" type="String" maxlength="1000" mandatory="false" platform="documentation">
+            <description>Provides additional human readable info regarding the result.</description>
+        </param>
     </function>
 
     <function name="GetCloudAppProperties" functionID="GetCloudAppPropertiesID" messagetype="request" since="5.1">
@@ -7182,6 +7186,10 @@
             <element name="GENERIC_ERROR"/>
             <element name="DISALLOWED"/>
             <element name="WARNINGS"/>
+        </param>
+
+        <param name="info" type="String" maxlength="1000" mandatory="false" platform="documentation">
+            <description>Provides additional human readable info regarding the result.</description>
         </param>
     </function>
 
@@ -7225,8 +7233,8 @@
         <description> This request asks the module for current data related to the specific service. It also includes an option to subscribe to that service for future updates</description>
         
         <param name="serviceType" type="String" mandatory="true">
-		    <description>The type of service that is to be offered by this app. See AppServiceType for known enum equivalent types. Parameter is a string to allow for new service types to be used by apps on older versions of SDL Core.</description>
-	    </param>
+            <description>The type of service that is to be offered by this app. See AppServiceType for known enum equivalent types. Parameter is a string to allow for new service types to be used by apps on older versions of SDL Core.</description>
+        </param>
         
         <param name="subscribe" type="Boolean" mandatory="false">
             <description> If true, the consumer is requesting to subscribe to all future updates from the service publisher. If false, the consumer doesn't wish to subscribe and should be unsubscribed if it was previously subscribed.</description>

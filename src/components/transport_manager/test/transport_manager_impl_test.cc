@@ -190,6 +190,7 @@ class TransportManagerImplTest : public ::testing::Test {
     tm_.TestHandle(test_event);
   }
 
+#if defined(CLOUD_APP_WEBSOCKET_TRANSPORT_SUPPORT)
   void HandlePending() {
     TransportAdapterEvent test_event(EventTypeEnum::ON_CONNECT_PENDING,
                                      mock_adapter_,
@@ -207,6 +208,7 @@ class TransportManagerImplTest : public ::testing::Test {
 
     tm_.TestHandle(test_event);
   }
+#endif  // CLOUD_APP_WEBSOCKET_TRANSPORT_SUPPORT
 
   void HandleConnectionFailed() {
     TransportAdapterEvent test_event(EventTypeEnum::ON_CONNECT_FAIL,
@@ -423,6 +425,7 @@ TEST_F(TransportManagerImplTest, DisconnectDevice_DeviceNotConnected) {
   EXPECT_EQ(E_INVALID_HANDLE, tm_.DisconnectDevice(device_handle_));
 }
 
+#if defined(CLOUD_APP_WEBSOCKET_TRANSPORT_SUPPORT)
 TEST_F(TransportManagerImplTest, Pending) {
   // Calling HandlePending twice verifies the connection_id stays the same if
   // the connection exists.
@@ -448,6 +451,7 @@ TEST_F(TransportManagerImplTest, Pending) {
 
   tm_.TestHandle(test_event);
 }
+#endif  // CLOUD_APP_WEBSOCKET_TRANSPORT_SUPPORT
 
 TEST_F(TransportManagerImplTest, Disconnect) {
   // Arrange

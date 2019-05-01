@@ -81,7 +81,8 @@ class AppServiceManager {
    * app. False, if published by the embedded system.
    * @param connection_key - If mobile_service is true, the connection key of
    * the app publishing this service.
-   * @return The app service record of the published app service
+   * @return The app service record of the published app service on success, a
+   * Null SmartObject value on failure
    */
   virtual smart_objects::SmartObject PublishAppService(
       const smart_objects::SmartObject& manifest,
@@ -197,7 +198,7 @@ class AppServiceManager {
 
   /**
    * @brief Get the service with a given service ID.
-   * @param service_type - The service ID
+   * @param service_id - The service ID
    * @return A pointer to requested service on success, NULL on failure
    */
   virtual AppService* FindServiceByID(const std::string service_id);
@@ -247,6 +248,16 @@ class AppServiceManager {
   std::string DefaultServiceByType(const std::string service_type);
   AppService* FindServiceByPolicyAppID(const std::string policy_app_id,
                                        const std::string type);
+
+  /**
+   * @brief Get the service of a given type published by a given provider.
+   * @param connection_key - The connection key of the service provider
+   * @param service_type - The service type
+   * @return A pointer to requested service on success, NULL on failure
+   */
+  AppService* FindServiceByProvider(const uint32_t connection_key,
+                                    const std::string service_type);
+  AppService* FindServiceByName(std::string name);
   std::string GetPolicyAppID(AppService service);
 };
 
