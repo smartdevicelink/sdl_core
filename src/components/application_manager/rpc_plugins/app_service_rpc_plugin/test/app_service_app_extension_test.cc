@@ -49,10 +49,8 @@ TEST_F(AppServiceAppExtensionTest, DoubleSubscribe_FAILURE) {
 TEST_F(AppServiceAppExtensionTest, IsSubscribed_SUCCESS) {
   bool ret = as_ext.SubscribeToAppService(media);
   EXPECT_TRUE(ret);
-
   ret = as_ext.IsSubscribedToAppService(media);
   EXPECT_TRUE(ret);
-
   ret = as_ext.IsSubscribedToAppService(nav);
   EXPECT_FALSE(ret);
 }
@@ -62,9 +60,7 @@ TEST_F(AppServiceAppExtensionTest, UnsubscribeFromAllAppService_SUCCESS) {
   EXPECT_TRUE(ret);
   ret = as_ext.SubscribeToAppService(nav);
   EXPECT_TRUE(ret);
-
   as_ext.UnsubscribeFromAppService();
-
   ret = as_ext.IsSubscribedToAppService(media);
   EXPECT_FALSE(ret);
   ret = as_ext.IsSubscribedToAppService(nav);
@@ -76,9 +72,7 @@ TEST_F(AppServiceAppExtensionTest, UnsubscribeFromMediaAppService_SUCCESS) {
   EXPECT_TRUE(ret);
   ret = as_ext.SubscribeToAppService(nav);
   EXPECT_TRUE(ret);
-
   as_ext.UnsubscribeFromAppService(media);
-
   ret = as_ext.IsSubscribedToAppService(media);
   EXPECT_FALSE(ret);
   ret = as_ext.IsSubscribedToAppService(nav);

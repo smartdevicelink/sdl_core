@@ -48,6 +48,7 @@ file(GLOB SOURCES
   ${COMMANDS_TEST_DIR}/mobile/*
   ${COMPONENTS_DIR}/application_manager/src/message.cc
   ${COMPONENTS_DIR}/application_manager/src/event_engine/*
+  ${CMAKE_CURRENT_SOURCE_DIR}/vehicle_info_app_extension_test.cc
 )
 
 set(LIBRARIES
