@@ -46,6 +46,12 @@ set(EXCLUDE_PATHS
   raw_message_matcher.cc
 )
 
+if (NOT BUILD_CLOUD_APP_SUPPORT)
+  list(APPEND EXCLUDE_PATHS
+    ${CMAKE_CURRENT_SOURCE_DIR}/websocket_connection_test.cc
+  )
+endif()
+
 collect_sources(SOURCES "${CMAKE_CURRENT_SOURCE_DIR}" "${EXCLUDE_PATHS}")
 
 set(PLATFORM_DEPENDENT_SOURCES)
