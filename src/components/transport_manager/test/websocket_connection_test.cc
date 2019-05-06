@@ -55,13 +55,13 @@ class WebsocketConnectionTest : public ::testing::Test {
  public:
   void StartWSServer() {
     ws_session = std::make_shared<WSSession>(kHost, kPort);
-    ws_session->run();
+    ws_session->Run();
   }
 
   void StartWSSServer() {
     wss_session =
         std::make_shared<WSSSession>(kHost, kPort, kCertificate, kPrivateKey);
-    wss_session->run();
+    wss_session->Run();
   }
 
  protected:
@@ -87,65 +87,124 @@ class WebsocketConnectionTest : public ::testing::Test {
   // Sample certificate for localhost
   std::string kCertificate =
       "-----BEGIN "
-      "CERTIFICATE-----\nMIIC/"
-      "jCCAeagAwIBAgIJAIZjLucUID1mMA0GCSqGSIb3DQEBCwUAMBQxEjAQBgNV\nBAMMCTEyNy4"
-      "wLjAuMTAeFw0xOTA1MDYxNDA1MzdaFw0yMjA1MDUxNDA1MzdaMBQx\nEjAQBgNVBAMMCTEyN"
-      "y4wLjAuMTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoC\nggEBALfE5Qhc2mHTIux30l7"
-      "eHFjFLdzYeXE8vcaXKodalCG8EkRxojDOfUv+y2DV\nJzHAMiGxMFAEcSz71k+"
-      "jFZwhNG8PLY0b36ChnUsrGkOSJWq3OKUFrg8KxO9At9dL\nJsa+"
-      "R0N0D1bMoPYdpCi3m0b0q2ITHe56qKuTLTrIPia+"
-      "qXGEVD7EoEhU9tnwlcwE\npsUURMXCn2+FhHyqN9wjFkldmu4k8U3OJOK4385L+"
-      "4RJoIV8dsYawAMAf+"
-      "WuxyWq\niPQTPxr8q33ZZm6z0XrgsgxHYCCsryx8L9Ub9Zwu0mie7eL63rYdr86gULvnF1bY"
-      "\ncOunKFc71rBYFalbD6YYsre733kCAwEAAaNTMFEwHQYDVR0OBBYEFKW9ByUNG84Z\nYiSc"
-      "hUrB7KV9FinZMB8GA1UdIwQYMBaAFKW9ByUNG84ZYiSchUrB7KV9FinZMA8G\nA1UdEwEB/"
-      "wQFMAMBAf8wDQYJKoZIhvcNAQELBQADggEBAHYROS1EL2qnrwmAsR6c\nqo8yrk8qzLKt4os"
-      "41nv7QMUQFIO+QLPE8SbH4fK1YOMMUJ4ppARQBDaIIR3UEhp1\nZHT/"
-      "wGjK9qxcuQ1EXLyHOY0rxS5q57dYGxOyQo4v6IoLVMZ1ij+RJGPYI/"
-      "2fDXs0\nbDldeJyC1voHmG6lqTN5nLG7Y3j9j6rtSqJyRz5muaecQNiFPQOM2OTp0rC4VeAF"
-      "\ndejmTmLhUFVuHMzLF+"
-      "bpzsN76GnnQquJy2jexzFoWgbEfFVLKuyhTHQAalRb4ccq\nXCIx1hecNDYRY3Sc2Gzv5qxk"
-      "kWF8zqltT/0d5tx0JwN3k5nP4SlaEldFvD6BELxy\nVkU=\n-----END "
+      "CERTIFICATE-----\nMIIDqTCCApECCQC/"
+      "5LlQ+"
+      "GLgqTANBgkqhkiG9w0BAQsFADAXMRUwEwYDVQQDDAwx\nMjcuMC4wLjEgQ0EwIBcNMTkwNTA"
+      "2MTkzMjM2WhgPMjExOTA0MTIxOTMyMzZaMBQx\nEjAQBgNVBAMMCTEyNy4wLjAuMTCCAiIwD"
+      "QYJKoZIhvcNAQEBBQADggIPADCCAgoC\nggIBALbeIoAHFaFeNqbMnhtAO5QTgRd0X9qxpB0"
+      "d4M0dEeog2l/+inNA/eu+CCvm\nJj2I8+6MWH2TUrl/"
+      "2xfhHjzsMrtISCdpNcjaNzCnvi8ZcspFi3evknvs3+uo2/"
+      "wn\nyNZ04jp0oQ0k1cZ6WBpLTYV7WgmueemiWEiAfw+YE+wtRg+"
+      "0H7rksrbpeNPnxQHX\nBDDkWqwvfkD15Sd0XFQkW27K72/"
+      "et2uKuAcJHCIUbsA4iZyJw4Uu4eusy7W5kddX\nThE7Y1WqTXyA4j/"
+      "ZCYigXmsHbWrikPLVXbORhiMF4/60u8RDs0jI8xtgRQhLR9Vp\n3xys7/"
+      "5tHZX00s6x6OVy8aMSZIIVS0eWoVN8bGd9B4+fDMOcNT0YODeQA10w/"
+      "85P\nEiZDQ8AxneQkh8H3qjD2+"
+      "G9oHZaTk0zHTyaKRg3xGP3N9C96onaJX4Rm6nNvApO8\nU7lQ+xHkLwjKCQke39W+"
+      "r3FHwwQvUDeoJBXf6iVkIMFoUPAHNZqKf9Db6KKIEp8i\nDgIhbBxiB4MSn36Zly4SOMojyM"
+      "ZFri+"
+      "HzMbuHFlm8e8QRWGmM4UM2rHIpl4OJolg\nejesDqO8YZR5mZXV0FJRiPgLo2Q4OTtb3tEHJ"
+      "ZLmlT+"
+      "f42bge4ZCZmGPrkNfr68Y\nDEnJ6z4ksOVkMefOp2SNYLYYGPYyiKwa9qVkH9Obkect1omNA"
+      "gMBAAEwDQYJKoZI\nhvcNAQELBQADggEBABFJQtOTftrzbLBA5Vm6aPkbUyxhcaOpz+d+"
+      "Ljd6pIs4H+"
+      "Eb\nXkoHhmay4stZkDc2HVSKESZloI3Ylup8z3aRJjfOexJqHlYzk2vraYryWm8odgID\n5V"
+      "B0Zle8ofpHTJw1LCOXHkzKt1G6vdQpuq/"
+      "4OKpmggaIqqEC1bfOYZt5t6vIx3OF\nxjPz91NTR9gZ4lKrho1+sfS+"
+      "jbSjKkqVAhE4yTpKLPHRshQnBFEhvATXNvdZGftF\n+tXxqKsBZ9aX0/"
+      "YmPFIXFcjdjSSiuq1F1DjiqIZo88qfa9jlTg6VJdayyQ/"
+      "cu41C\nBucY8YTF0Ui8ccIS55h2UTzPy5/4PbrwI4P+Zgo=\n-----END "
       "CERTIFICATE-----\n";
   // Sample private key
   std::string kPrivateKey =
-      "-----BEGIN PRIVATE "
-      "KEY-----"
-      "\nMIIEvwIBADANBgkqhkiG9w0BAQEFAASCBKkwggSlAgEAAoIBAQC3xOUIXNph0yLs\nd9Je"
-      "3hxYxS3c2HlxPL3GlyqHWpQhvBJEcaIwzn1L/"
-      "stg1ScxwDIhsTBQBHEs+9ZP\noxWcITRvDy2NG9+"
-      "goZ1LKxpDkiVqtzilBa4PCsTvQLfXSybGvkdDdA9WzKD2HaQo\nt5tG9KtiEx3ueqirky06y"
-      "D4mvqlxhFQ+xKBIVPbZ8JXMBKbFFETFwp9vhYR8qjfc\nIxZJXZruJPFNziTiuN/OS/"
-      "uESaCFfHbGGsADAH/lrsclqoj0Ez8a/Kt92WZus9F6\n4LIMR2AgrK8sfC/VG/"
-      "WcLtJonu3i+t62Ha/"
-      "OoFC75xdW2HDrpyhXO9awWBWpWw+m\nGLK3u995AgMBAAECggEBALR7lukgsIY1I+"
-      "6UO7NadwKkHUfx/"
-      "0u8eTIKkwU+a4+"
-      "6\nM0KvS7idhCdYBYyDq6vL9DBs4mMkCbdBWxj5taaSYfnVMUqOHpKXR3Fk0rWcWk01\nx1c"
-      "jffBeBk5oBGZY86trg3f3C32XGVq+"
-      "f9RRhxooAA4hclsecnuX32sE8S2CQc4u\nm5HkpmUYXcFtmxaK6WT9mQDcsv/"
-      "29IY+2AxX4U+"
-      "yNywPrDZKDJPzom3v0FNb7GWr\nW41ALJrreCq7MBEJibEHjeXBjkhUgXjC9VLs+"
-      "tFbdqYwDaPfuEIHSeUV6GNpkhvm\nKuBcRCjrmGMwHcqzGOIr4uokWXcXOR2oLRMT7qlrduU"
-      "CgYEA3qP+lx0jiuhMaUrL\nhEAgHQP533jFnxSyMFiTn9Eg4uF6DguswJ7mUS11/"
-      "8EhROthn8advoJe1dXpz3SP\nn6TSR/"
-      "vxN6q46WsDspxtCrVBbF3R5m+FEgiZ+vnTsT3e52ecdskCkJ6/XjE8IU0B\nDR89DKtCZ/"
-      "vN2uDWvhcuDQyz6l8CgYEA003gEPMJy9Z8mfnRxMMv1LuNi0gbFQWS\nkyUTVwzxZ63B50N9"
-      "WQZoa8HBUftfPupK4YcLV7nxwE9WYxMSbceiXboTI/Pjj4QM\n2O+uKDQjGA441Bb2bH/"
-      "AVOz+vhhAc2glMncI5UvjUA2gfiy+JcBUDbQNHR/ux4Nd\ntz/R1W0itScCgYEAmM/"
-      "K0IGJgbALskFKCs3QvNmbycylJ5kW7KP/"
-      "PzRU9CR6l+Vf\nfx4RSyp+"
-      "0ToH0bwVV4sFflsRKIgYYPHKGnMQeaPtXp3pKRzwfslq9myOKQkEJrvo\nhAYvWdnbeM3Ujt"
-      "PIyqcRAZ5UDxyP/"
-      "vNRg2YriuSJQcHM+"
-      "yxTeEmErCRJ4NUCgYEA\nlKh2GhaSbsjgcodyUAauMPEeXL4G55w7CbCM0bJ2Z+"
-      "WzxFsT5bz/W8g9lMrPsHiu\n48nZbgeQkCaA9UTmszs+/Me7TZD5KO/"
-      "TBhBhq0E662KeEoBxL9YU3uq5Mc3oEglU\nGhPquz7PlnNv1TTvNaoAuH9StonPuKewGAsbO"
-      "hcE0wMCgYAjokPhXZi0z3YgwAEY\nCkSLMiHvAn+gd/pr7GIhvfR4MkxEFBoj1GxBJM/By4/"
-      "tHYMJQCuxFVZqPYH/"
-      "AWQ2\noVeuFoEjZXaGNV4SfkhNW7W+Btqt+aXT5+8F176+"
-      "cvG4uex59XGWG52wKOgLFkmk\nJ00j679GO7h2Fpt4I9bml2VfWw==\n-----END "
-      "PRIVATE KEY-----\n";
+      "-----BEGIN RSA PRIVATE "
+      "KEY-----\nMIIJKAIBAAKCAgEAtt4igAcVoV42psyeG0A7lBOBF3Rf2rGkHR3gzR0R6iDaX/"
+      "6K\nc0D9674IK+YmPYjz7oxYfZNSuX/"
+      "bF+EePOwyu0hIJ2k1yNo3MKe+LxlyykWLd6+S\ne+zf66jb/"
+      "CfI1nTiOnShDSTVxnpYGktNhXtaCa556aJYSIB/"
+      "D5gT7C1GD7QfuuSy\ntul40+fFAdcEMORarC9+"
+      "QPXlJ3RcVCRbbsrvb963a4q4BwkcIhRuwDiJnInDhS7h\n66zLtbmR11dOETtjVapNfIDiP9"
+      "kJiKBeawdtauKQ8tVds5GGIwXj/rS7xEOzSMjz\nG2BFCEtH1WnfHKzv/"
+      "m0dlfTSzrHo5XLxoxJkghVLR5ahU3xsZ30Hj58Mw5w1PRg4\nN5ADXTD/"
+      "zk8SJkNDwDGd5CSHwfeqMPb4b2gdlpOTTMdPJopGDfEY/"
+      "c30L3qidolf\nhGbqc28Ck7xTuVD7EeQvCMoJCR7f1b6vcUfDBC9QN6gkFd/"
+      "qJWQgwWhQ8Ac1mop/"
+      "\n0NvooogSnyIOAiFsHGIHgxKffpmXLhI4yiPIxkWuL4fMxu4cWWbx7xBFYaYzhQza\nscim"
+      "Xg4miWB6N6wOo7xhlHmZldXQUlGI+AujZDg5O1ve0QclkuaVP5/"
+      "jZuB7hkJm\nYY+uQ1+"
+      "vrxgMScnrPiSw5WQx586nZI1gthgY9jKIrBr2pWQf05uR5y3WiY0CAwEA\nAQKCAgBGSDGyS"
+      "wbBMliG2vWZO6KqUqS2wv9kKgoNNsKDkryj42SKqGXFziDJTgwN\n8zKXS9+Uu1P3T3vn13/"
+      "5OYhJme4VlL5Gh2UogNXdWVr69yjrHLdxlIUUJAIbrJZ/"
+      "\n3zqNUfbwyIptZs7SrYrW8EInHzWHqwsoBEEx/"
+      "FDZSXW+u9fFiVD4n5UgP7M0nktV\nXbI6qElBDC/V/"
+      "6vG8i3aGO8bMdu8fzi3mGUKLzIk1v2J2zDofPosYcxqq8rPWTb4\nMJHMhaqz7fRB+"
+      "bb7GwtS+2/Oathe0B0td1u//Bo1s7ng1s2jrPFm8/"
+      "SbfPCLM4O0\nPjCF8OF8Q6uvSp0K283LAdZk+liuDztc/"
+      "Ed8mcnCZQhBp86mJQi0Jj3Mje7prOAY\nXojMroYj7r2igCJvcwGb1y6zZWSj3jXuHze3bLy"
+      "fv7pCD+hkiZR7mZhQpOhQRZaU\ntdFGc+"
+      "DuykxKPqVjAPy7iVQXYnMjpo36SGIWoZLuepQto3GvU6czyOwhK0/"
+      "Mwbwd\nZpYpLH3L9IetY8GcPefmUR5wQUlUTrpxgGElIzkkWW8zmUWBXwrGbAtN1HJWpJdN"
+      "\neVshKod2fo03IQMPywSdENCJVeSrgRMuwPyFaOM+"
+      "CVrBJwD66K9YWn4cVRUIZsTq\nAXhQ8DzF+WCOZshhMUbCJX+KpcOFI8nxOrPp+"
+      "J1s1YpLLvdmcQKCAQEA7bwvOiCD\nHvaqpYg1jJak6l/"
+      "iY3QIOOpFyjfYrQXS0BNRmmxK8Lzevi/"
+      "NPTqu146QKDaIGvzu\n+"
+      "bXnuV1LmZqnOm5J6Kdx0Mk4Fb88akRtS9gOdzU7WWMYIGkeF1oih0ZrhHuIey6e\nCeLSmJh"
+      "UDaTIWcCirALRHcLWUS6BTGGuE+up5QG7djIW/"
+      "LD17lhGE6fXPlbYXb7l\nPbYwL1Yr0urIp9Un+zrExw+77TTGK7T37T1ZJv46qnro0/"
+      "HK8XxZ+"
+      "JNc18F763O4\nPmwu8KWrx4qnyPYAuB1rbVntK6UxYks9jvk93XecCUP6HHp0I0tV/"
+      "kBNd2+"
+      "18zux\n033xFEVKrUksmwKCAQEAxOrPGyBVFp29V4gQsMQdmafkDAgCLREgjQTOamFsYL5+"
+      "\nZWq+6VhT/"
+      "B650sIoRdX0N8timnSLBfjeqaBG5VVhhyKZhP5hulfRjALhdbGBOYvf\n0gLSffImwWdYQfx"
+      "jtCSO+"
+      "XCLVdAJGOOWeBVVKzH18ZvCFQwUr3Yrp7KmKWKAqgf7\n6rYovWh8T5LLYS0NzXCEwf9nJ0N"
+      "JMOy7I9B7EtF8Cs6tK3aaHVqDz7zufwosS7gI\n3aI51Qh4a5D1p95+"
+      "YU09beWjWGYnPiCKk4D47zaeOe7OQINaWugExlelHtJh9unO\nnhOFXhziav2Kxq1CICAuXl"
+      "Vx3A+gn/cU3niNHz2A9wKCAQEAws+aw78ws4bef5cG\nipZHveek1GqY8krHtdXdsKs8/"
+      "VVXYXusTWn3/VGelbYo4GrqpolJLxRloCr4IGXb\nNZwNvUvzNLtCAR1i4C89irdX+Paro/"
+      "PzFmSluKlrByfNc5y5Lm8sgATLbL56ZKEu\n/58wrpu0sc/"
+      "9HK40gYHiYn0I8ToElqy8uTaCr78zSIT9p826DFOOKgPsRo2tHp02\nfDf5Bc8eXDjkV1sFX"
+      "HQKkHZTVA0ZqWJbIKhncoaJDyofcBsR0ZuzuFWzfTOZo4mf\nInz00TEFldpF1e4C8+"
+      "kCdtHBOA/2Ki2Bp/YUVpHh6aoqZZa75Euehhs8tVpW242M\njEOSUQKCAQAM64sjMH/kt/"
+      "zQXXEa6AM5LbbcwznBUzpbhlE00aeWwWjxpotYLB92\nj12J4otZ6avYbVPO5o6omaeiYY3F"
+      "RlDb2P1RqI8o9tIc6aN5YWglKnRJBz5gXR8F\n2Y4E5lZ0X2GyJBxASSIPq/"
+      "8Xae7ooqKMc7fMQbqpuIssuaAFXx0qCtQQllsd8lkV\nr4AApEAflp5fTC6seNG4kA/"
+      "HTcqFdZE59E2QaHu8KVA0tSTA2R4G6dBLGnXI8IFW\nLXCwzvxjzfmV2FdbWXiBrwjonLG4o"
+      "FDJZE3MFdI73LVTfjSrTQp4dObFoGpDvols\nk64jUwLfsLzaG6kY0z2qwT9xSV+"
+      "ZCSQJAoIBADsSBeyELc5KnmOhT0Xue2o0bkAS\n8KcGWdAoQlaLCIs3vtdlC7DXDXO1l8FkT"
+      "Qrd+GwP3eWDq6ymtO4vkJ3m4cZ1PEsv\n6Qet7qtkVhUfa+"
+      "FYKtDzSMRuSaFPW3Ro1PesFa1H3y+sw5HL36vhRaSK+T4Wy5k2\nf7EwNZIf/"
+      "ZZeA+"
+      "sEtqj33obOBIiuU9htAjN81Kz4a0Xlh6jc4q6iwYKL8nZ76JYV\n8hXWIz6OXxLXE158+"
+      "QtJSZaRCvdr6L5UtWfMPKSMqgfhXfTYViPDleQCkJ132mIS\nH28UoET0Y5wI8M6pMkWpSqW"
+      "WcKPFGwyLInvHdxgnTAsutowkldA7qFwoRz4=\n-----END RSA PRIVATE KEY-----\n";
+  // Sample CA certificate(used to sign the server certificate)
+  std::string kCACertificate =
+      "-----BEGIN "
+      "CERTIFICATE-----"
+      "\nMIIDBjCCAe6gAwIBAgIJAPyCrKRDl3SWMA0GCSqGSIb3DQEBCwUAMBcxFTATBgNV\nBAMM"
+      "DDEyNy4wLjAuMSBDQTAgFw0xOTA1MDYxOTMyMzZaGA8yMTE5MDQxMjE5MzIz\nNlowFzEVMB"
+      "MGA1UEAwwMMTI3LjAuMC4xIENBMIIBIjANBgkqhkiG9w0BAQEFAAOC\nAQ8AMIIBCgKCAQEA"
+      "xrNHoY5+"
+      "JCgnyvEdG2dvvOaZ3sg6uhuF5Ssb5snyo9ixrxO5\nZkDGWwUqFO9PiYuO5ovNeq9LZtPG6s"
+      "K8zsCS062ChZX/7tZHndf4MKCUDzv/"
+      "LPHe\nnROoPi9n2FAiOPctY5hpgpIJDPI5Ofx0el2KPeFGeUO/"
+      "W3yqnfol1ZqzZ2h3uErR\noHkgT2Ja4K+5gnPkr/"
+      "RluJIu3AmWYw4eKi8i3+"
+      "PoThGmCFvoGfcWvRoctgnOHYHE\n4bDRirXL9nGkZ5FMzOVDeoIAEAShOqJwL08VcY+Pg/"
+      "qFQjzRrTmiKgm6QsHNnm0q\nzg70XaD88VJimiGYZOuJHNZpX8o0W+1Ls/"
+      "NbawIDAQABo1MwUTAdBgNVHQ4EFgQU\nkW3hgFWYMpVUkq9AlzGlI3awTGEwHwYDVR0jBBgw"
+      "FoAUkW3hgFWYMpVUkq9AlzGl\nI3awTGEwDwYDVR0TAQH/BAUwAwEB/"
+      "zANBgkqhkiG9w0BAQsFAAOCAQEAZeMkILiG\neEcELWb8cktP3LzvS47O8hys9+"
+      "6TFmftuO7kjDBd9YH2v8iQ7qCcUvMJ7bqL5RP1\nQssKfNOHZtw/"
+      "MMcKE6E3nl4yQSKc8ymivvYSVu5SYtQCedcgfRLb5zvVxXw8JmCp\nGNS3/"
+      "OlIYZAamh76GxkKSaV3tv0XZB6n3rUVQZShncFbMpyJRW0XWxReGWrhXv4s\nNxMeC1r07EE"
+      "WIDecv8KKf1F8uT4UF48HnC0VBpXiOyDGvn35NiKp+"
+      "Q5k7QV6jdCS\ngPRcnZhs6jiU0jnV8C9A1A+"
+      "3pXSSPrAed7tvECOgHCfS10CLsLWsLuSjc93BE5Vt\nav7kmxSwrdvQ2A==\n-----END "
+      "CERTIFICATE-----\n";
   std::string kIncorrectCertificate =
       "-----BEGIN "
       "CERTIFICATE-----\nMIIC/"
@@ -211,7 +270,7 @@ TEST_F(WebsocketConnectionTest, WSConnection_SUCCESS) {
   EXPECT_EQ(TransportAdapter::OK, ret_code);
 
   // Stop server thread
-  ws_session->stop();
+  ws_session->Stop();
   t1.join();
 }
 
@@ -220,7 +279,7 @@ TEST_F(WebsocketConnectionTest, WSSConnection_SUCCESS) {
   uniq_id = dev_id;
   transport_manager::transport_adapter::CloudAppProperties properties{
       .endpoint = dev_id,
-      .certificate = kCertificate,
+      .certificate = kCACertificate,
       .enabled = true,
       .auth_token = "auth_token",
       .cloud_transport_type = "WSS",
@@ -255,7 +314,7 @@ TEST_F(WebsocketConnectionTest, WSSConnection_SUCCESS) {
   EXPECT_EQ(TransportAdapter::OK, ret_code);
 
   // Stop server thread
-  wss_session->stop();
+  wss_session->Stop();
   t1.join();
 }
 
@@ -299,7 +358,7 @@ TEST_F(WebsocketConnectionTest, WSSConnection_FAILURE_IncorrectCert) {
   EXPECT_EQ(TransportAdapter::OK, ret_code);
 
   // Stop server thread
-  wss_session->stop();
+  wss_session->Stop();
   t1.join();
 }
 }  // namespace transport_manager_test
