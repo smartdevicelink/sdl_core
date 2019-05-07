@@ -1655,6 +1655,56 @@
 <!-- End of Policies -->
 
 <!-- Remote Control -->
+
+<struct name="Grid">
+    <description>Describes a location (origin coordinates and span) of a vehicle component.</description>
+    <param name="col" type="Integer" mandatory="true" minvalue="-1" maxvalue="100">
+    </param>
+    <param name="row" type="Integer"  mandatory="true" minvalue="-1" maxvalue="100">
+    </param>
+    <param name="level" type="Integer" mandatory="false"  defvalue="0" minvalue="-1" maxvalue="100" >
+    </param>
+    <param name="colspan" type="Integer" mandatory="false" defvalue="1" minvalue="1" maxvalue="100">
+    </param>
+    <param name="rowspan" type="Integer" mandatory="false" defvalue="1" minvalue="1" maxvalue="100">
+    </param>
+    <param name="levelspan" type="Integer" mandatory="false" defvalue="1" minvalue="1" maxvalue="100">
+    </param>
+</struct>
+
+<struct name="ModuleInfo">
+    <description>Information about a RC module</description>
+    <param name="moduleId" type="String" maxlength="100" mandatory="true">
+        <description> uuid of a module. "moduleId + moduleType" uniquely identify a module.</description>
+    </param>
+    <param name="location" type="Grid" mandatory="false">
+       <description>Location of a module.</description>
+    </param>
+    <param name="serviceArea" type="Grid" mandatory="false">
+       <description>Service area of a module. </description>
+    </param>
+    <param name="allowMultipleAccess" type="Boolean" mandatory="false" defvalue="true">
+        <description>allow multiple users/apps to access the module or not </description>
+    </param>
+</struct>
+
+<struct name="SeatLocation">
+    <description>Describes the location of a seat.</description>
+    <param name="grid" type="Grid"  mandatory="false">
+    </param>
+</struct>
+
+<struct name="SeatLocationCapability">
+    <description>Contains information about the locations of each seat</description>
+    <param name="rows" type="Integer" minvalue="1" maxvalue="100" mandatory="false"></param>
+    <param name="columns" type="Integer" minvalue="1" maxvalue="100" mandatory="false"></param>
+    <param name="levels" type="Integer" minvalue="1" maxvalue="100" defvalue="1" mandatory="false">   
+    </param>
+    <param name="seats" type="SeatLocation" array="true" mandatory="false">
+        <description>Contains a list of SeatLocation in the vehicle</description>
+    </param>
+</struct>
+
 <enum name="ModuleType">
    <element name="CLIMATE"/>
    <element name="RADIO"/>
@@ -1728,8 +1778,7 @@
 
     <struct name="SeatControlData">
       <description>Seat control data corresponds to "SEAT" ModuleType. </description>
-      <param name="id" type="SupportedSeat" mandatory="true"></param>
-
+      <param name="id" type="SupportedSeat" mandatory="false"></param>
       <param name="heatingEnabled" type="Boolean" mandatory="false"></param>
       <param name="coolingEnabled" type="Boolean" mandatory="false"></param>
       <param name="heatingLevel" type="Integer" minvalue="0" maxvalue="100" mandatory="false"></param>
@@ -1756,6 +1805,9 @@
         The short friendly name of the light control module.
         It should not be used to identify a module by mobile application.
         </description>
+      </param>
+      <param name="moduleInfo" type="ModuleInfo" mandatory="false">
+          <description>Information about a RC module, including its id. </description>
       </param>
       <param name="heatingEnabledAvailable" type="Boolean" mandatory="false">
       </param>
@@ -1968,6 +2020,9 @@
    <param name="moduleName" type="String" maxlength="100" mandatory="true" >
      <description>The short name or a short description of the radio control module.</description>
    </param>
+   <param name="moduleInfo" type="ModuleInfo" mandatory="false">
+       <description>Information about a RC module, including its id. </description>
+   </param>
    <param name="radioEnableAvailable" type="Boolean" mandatory="false">
      <description>
        Availability of the control of enable/disable radio.
@@ -2120,6 +2175,9 @@
    <param name="moduleName" type="String" maxlength="100" mandatory="true" >
      <description>The short name or a short description of the climate control module.</description>
    </param>
+   <param name="moduleInfo" type="ModuleInfo" mandatory="false">
+       <description>Information about a RC module, including its id. </description>
+   </param>
    <param name="currentTemperatureAvailable" type="Boolean" mandatory="false">
      <description>
        Availability of the reading of current temperature.
@@ -2262,6 +2320,9 @@
            The short friendly name of the light control module.
            It should not be used to identify a module by mobile application.
          </description>
+     </param>
+     <param name="moduleInfo" type="ModuleInfo" mandatory="false">
+         <description>Information about a RC module, including its id. </description>
      </param>
      <param name="sourceAvailable" type="Boolean" mandatory="false">
          <description>Availability of the control of audio source. </description>
@@ -2422,6 +2483,9 @@
            It should not be used to identify a module by mobile application.
          </description>
      </param>
+     <param name="moduleInfo" type="ModuleInfo" mandatory="false">
+         <description>Information about a RC module, including its id. </description>
+     </param>
      <param name="supportedLights" type="LightCapabilities" minsize="1" maxsize="100" array="true" mandatory="true">
      <description> An array of available light names that are controllable. </description>
      </param>
@@ -2466,6 +2530,9 @@
            It should not be used to identify a module by mobile application.
          </description>
      </param>
+     <param name="moduleInfo" type="ModuleInfo" mandatory="false">
+         <description>Information about a RC module, including its id. </description>
+     </param>
      <param name="distanceUnitAvailable" type="Boolean" mandatory="false">
          <description>Availability of the control of distance unit. </description>
      </param>
@@ -2480,6 +2547,9 @@
  <struct name="ModuleData">
    <description>The moduleType indicates which type of data should be changed and identifies which data object exists in this struct. For example, if the moduleType is CLIMATE then a "climateControlData" should exist</description>
    <param name="moduleType" type="Common.ModuleType" mandatory="true" >
+   </param>
+   <param name="moduleId" type="String" maxlength="100" mandatory="false">
+       <description>Id of a module, published by System Capability. </description>
    </param>
    <param name="radioControlData" type="Common.RadioControlData" mandatory="false">
    </param>
@@ -2522,6 +2592,9 @@
     <description>Contains the information about capabilities of a button.</description>
     <param name="name" type="Common.ButtonName" mandatory="true">
         <description>The name of the Button from the ButtonName enum</description>
+    </param>
+    <param name="moduleInfo" type="ModuleInfo" mandatory="false">
+        <description>Information about a RC module, including its id. </description>
     </param>
     <param name="shortPressAvailable" type="Boolean" mandatory="true">
         <description>The button supports a short press. Whenever the button is pressed short, onButtonPressed(SHORT) should be invoked.</description>
@@ -4009,6 +4082,7 @@
         <element name="REMOTE_CONTROL"/>
         <element name="APP_SERVICES" />
         <element name="DISPLAYS"/>
+	<element name="SEAT_LOCATION"/>
     </enum>
 
     <struct name="SystemCapability">
@@ -4039,6 +4113,9 @@
             </description>
         </param>
         <param name="displayCapabilities" type="Common.DisplayCapability" array="true" minsize="1" maxsize="1000" mandatory="false"/>
+	<param name="seatLocationCapability" type="SeatLocationCapability" mandatory="false">
+            <description>Contains information about the locations of each seat</description>
+        </param>
     </struct>
 
 </interface>
@@ -4060,6 +4137,9 @@
       <description>Method is invoked when the application tries to press a button</description>
       <param name="moduleType" type="Common.ModuleType" mandatory="true" >
         <description>The module where the button should be pressed</description>
+      </param>
+      <param name="moduleId" type="String" maxlength="100" mandatory="false">
+        <description>Id of a module, published by System Capability. </description>
       </param>
       <param name="buttonName" type="Common.ButtonName" mandatory="true" />
       <param name="buttonPressMode" type="Common.ButtonPressMode" mandatory="true" >
@@ -6714,7 +6794,23 @@
     <param name="remoteControlCapability" type="Common.RemoteControlCapabilities" mandatory="false">
       <description>See RemoteControlCapabilities, all available RC modules and buttons shall be returned.</description>
     </param>
+    <param name="seatLocationCapability" type="Common.SeatLocationCapability" mandatory="false">
+      <description>See SeatLocationCapability, all available seat locations shall be returned.</description>
+    </param>
   </function>
+  
+<function name="SetGlobalProperties" messagetype="request">
+    <description>Sets some properties for the application initiated request.</description>
+    <param name="userLocation" type="Common.SeatLocation" mandatory="false">
+      <description>Location of the user's seat. Default is driver's seat location if it is not set yet.</description>
+    </param>
+    <param name="appID" type="Integer" mandatory="true">
+      <description>ID of application related to this RPC.</description>
+    </param>
+</function>
+
+<function name="SetGlobalProperties" messagetype="response">
+</function>
 
  <function name="SetInteriorVehicleData" functionID="SetInteriorVehicleDataID" messagetype="request">
     <param name="moduleData" type="Common.ModuleData" mandatory="true" >
@@ -6735,8 +6831,11 @@
   <param name="moduleType" type="Common.ModuleType" mandatory="true" >
     <description>The module data to retrieve from the vehicle for that type</description>
   </param>
+  <param name="moduleId" type="String" maxlength="100" mandatory="false">
+      <description>Id of a module, published by System Capability. </description>
+  </param>
   <param name="subscribe" type="Boolean" mandatory="false">
-    <description>If subscribe is true, the head unit will send OnInteriorVehicleData notifications for the module type</description>
+    <description>If subscribe is true, the head unit will send OnInteriorVehicleData notifications for the requested module (moduleId and moduleType)</description>
   </param>
 </function>
 
@@ -6751,20 +6850,23 @@
 </function>
 
 <function name="GetInteriorVehicleDataConsent" messagetype="request">
-    <description>Sender: SDL->HMI. </description>
     <description>HMI is expected to display a permission prompt to the driver showing the RC module and app details (for example, app's name).
     The driver is expected to have an ability to grant or deny the permission.</description>
     <param name="moduleType" type="Common.ModuleType" mandatory="true">
       <description>The module type that the app requests to control.</description>
+    </param>
+    <param name="moduleIds" type="String" maxlength="100" array="true" mandatory="false">
+        <description>Ids of a module, published by System Capability. </description>
     </param>
     <param name="appID" type="Integer" mandatory="true">
       <description>ID of the application that triggers the permission prompt.</description>
     </param>
   </function>
   <function name="GetInteriorVehicleDataConsent" messagetype="response">
-    <param name="allowed" type="Boolean" mandatory="true">
-      <description>"true" - if the driver grants the permission for controlling to the named app;
-      "false" - in case the driver denies the permission for controlling to the named app.</description>
+    <param name="allowed" type="Boolean" array="true" mandatory="true">
+      <description>This array has the same size as "moduleIds" in the request; each element corresponding to one moduleId 
+      "true" - if the driver grants the permission for controlling the named app;
+      "false" - in case the driver denies the permission for controlling the named app.</description>
     </param>
 </function>
 
