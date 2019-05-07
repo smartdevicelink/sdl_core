@@ -46,13 +46,43 @@ namespace transport_manager_test {
 
 using ::testing::_;
 using ::testing::NiceMock;
-using ::testing::NotNull;
 using ::testing::Return;
 using namespace ::transport_manager;
 using namespace ::transport_manager::transport_adapter;
 
 class WebsocketConnectionTest : public ::testing::Test {
  public:
+  struct WebsocketClient {
+    std::shared_ptr<CloudWebsocketTransportAdapter> adapter;
+    std::shared_ptr<WebsocketClientConnection> connection;
+  };
+
+  WebsocketClient CreateWebsocketClient(
+      const transport_manager::transport_adapter::CloudAppProperties&
+          properties) {
+    uniq_id = dev_id = properties.endpoint;
+
+    WebsocketClient client{std::make_shared<CloudWebsocketTransportAdapter>(
+                               last_state_, transport_manager_settings),
+                           nullptr};
+    client.adapter->SetAppCloudTransportConfig(uniq_id, properties);
+
+    TransportAdapterImpl* ta_cloud =
+        dynamic_cast<TransportAdapterImpl*>(client.adapter.get());
+    ta_cloud->CreateDevice(uniq_id);
+
+    auto connection = client.adapter->FindPendingConnection(dev_id, app_handle);
+
+    EXPECT_NE(connection, nullptr);
+
+    client.connection =
+        std::dynamic_pointer_cast<WebsocketClientConnection>(connection);
+
+    EXPECT_NE(client.connection.use_count(), 0);
+
+    return client;
+  }
+
   void StartWSServer() {
     ws_session = std::make_shared<WSSession>(kHost, kPort);
     ws_session->Run();
@@ -69,6 +99,7 @@ class WebsocketConnectionTest : public ::testing::Test {
       : last_state_("app_storage_folder", "app_info_storage") {}
 
   ~WebsocketConnectionTest() {}
+
   void SetUp() OVERRIDE {
     app_handle = 0;
     ON_CALL(transport_manager_settings, use_last_state())
@@ -80,10 +111,10 @@ class WebsocketConnectionTest : public ::testing::Test {
   std::string dev_id;
   std::string uniq_id;
   int app_handle;
-  std::string kHost = "127.0.0.1";
-  uint16_t kPort = 8080;
   std::shared_ptr<WSSession> ws_session;
   std::shared_ptr<WSSSession> wss_session;
+  std::string kHost = "127.0.0.1";
+  uint16_t kPort = 8080;
   // Sample certificate for localhost
   std::string kCertificate =
       "-----BEGIN "
@@ -230,11 +261,8 @@ class WebsocketConnectionTest : public ::testing::Test {
 };
 
 TEST_F(WebsocketConnectionTest, WSConnection_SUCCESS) {
-  dev_id = "ws://" + kHost + ":" + std::to_string(kPort) + "/";
-  uniq_id = dev_id;
-
   transport_manager::transport_adapter::CloudAppProperties properties{
-      .endpoint = dev_id,
+      .endpoint = "ws://" + kHost + ":" + std::to_string(kPort) + "/",
       .certificate = "no cert",
       .enabled = true,
       .auth_token = "auth_token",
@@ -246,20 +274,9 @@ TEST_F(WebsocketConnectionTest, WSConnection_SUCCESS) {
   sleep(1);
 
   // Start client
-  CloudWebsocketTransportAdapter cta(last_state_, transport_manager_settings);
-  cta.SetAppCloudTransportConfig(uniq_id, properties);
-
-  TransportAdapterImpl* ta_cloud = &cta;
-  ta_cloud->CreateDevice(uniq_id);
-
-  auto connection = cta.FindPendingConnection(dev_id, app_handle);
-
-  EXPECT_NE(connection, nullptr);
-
+  auto client_connection = CreateWebsocketClient(properties);
   std::shared_ptr<WebsocketClientConnection> ws_connection =
-      std::dynamic_pointer_cast<WebsocketClientConnection>(connection);
-
-  EXPECT_NE(ws_connection.use_count(), 0);
+      client_connection.connection;
 
   // Check websocket connection
   TransportAdapter::Error ret_code = ws_connection->Start();
@@ -275,10 +292,8 @@ TEST_F(WebsocketConnectionTest, WSConnection_SUCCESS) {
 }
 
 TEST_F(WebsocketConnectionTest, WSSConnection_SUCCESS) {
-  dev_id = "wss://" + kHost + ":" + std::to_string(kPort) + "/";
-  uniq_id = dev_id;
   transport_manager::transport_adapter::CloudAppProperties properties{
-      .endpoint = dev_id,
+      .endpoint = "wss://" + kHost + ":" + std::to_string(kPort) + "/",
       .certificate = kCACertificate,
       .enabled = true,
       .auth_token = "auth_token",
@@ -290,20 +305,9 @@ TEST_F(WebsocketConnectionTest, WSSConnection_SUCCESS) {
   sleep(1);
 
   // Start client
-  CloudWebsocketTransportAdapter cta(last_state_, transport_manager_settings);
-  cta.SetAppCloudTransportConfig(uniq_id, properties);
-
-  TransportAdapterImpl* ta_cloud = &cta;
-  ta_cloud->CreateDevice(uniq_id);
-
-  auto connection = cta.FindPendingConnection(dev_id, app_handle);
-
-  EXPECT_NE(connection, nullptr);
-
+  auto client_connection = CreateWebsocketClient(properties);
   std::shared_ptr<WebsocketClientConnection> wss_connection =
-      std::dynamic_pointer_cast<WebsocketClientConnection>(connection);
-
-  EXPECT_NE(wss_connection.use_count(), 0);
+      client_connection.connection;
 
   // Check websocket connection
   TransportAdapter::Error ret_code = wss_connection->Start();
@@ -319,10 +323,8 @@ TEST_F(WebsocketConnectionTest, WSSConnection_SUCCESS) {
 }
 
 TEST_F(WebsocketConnectionTest, WSSConnection_FAILURE_IncorrectCert) {
-  dev_id = "wss://" + kHost + ":" + std::to_string(kPort) + "/";
-  uniq_id = dev_id;
   transport_manager::transport_adapter::CloudAppProperties properties{
-      .endpoint = dev_id,
+      .endpoint = "wss://" + kHost + ":" + std::to_string(kPort) + "/",
       .certificate = kIncorrectCertificate,
       .enabled = true,
       .auth_token = "auth_token",
@@ -334,20 +336,9 @@ TEST_F(WebsocketConnectionTest, WSSConnection_FAILURE_IncorrectCert) {
   sleep(1);
 
   // Start client
-  CloudWebsocketTransportAdapter cta(last_state_, transport_manager_settings);
-  cta.SetAppCloudTransportConfig(uniq_id, properties);
-
-  TransportAdapterImpl* ta_cloud = &cta;
-  ta_cloud->CreateDevice(uniq_id);
-
-  auto connection = cta.FindPendingConnection(dev_id, app_handle);
-
-  EXPECT_NE(connection, nullptr);
-
+  auto client_connection = CreateWebsocketClient(properties);
   std::shared_ptr<WebsocketClientConnection> wss_connection =
-      std::dynamic_pointer_cast<WebsocketClientConnection>(connection);
-
-  EXPECT_NE(wss_connection.use_count(), 0);
+      client_connection.connection;
 
   // Check websocket connection
   TransportAdapter::Error ret_code = wss_connection->Start();
