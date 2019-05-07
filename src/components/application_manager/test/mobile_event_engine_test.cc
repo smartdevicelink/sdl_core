@@ -32,13 +32,13 @@
 
 #include "gtest/gtest.h"
 
-#include "application_manager/event_engine/event_observer.h"
 #include "application_manager/event_engine/event.h"
 #include "application_manager/event_engine/event_dispatcher_impl.h"
-#include "application_manager/mock_event_observer.h"
-#include "application_manager/mock_event_dispatcher.h"
-#include "smart_objects/smart_object.h"
+#include "application_manager/event_engine/event_observer.h"
 #include "application_manager/message.h"
+#include "application_manager/mock_event_dispatcher.h"
+#include "application_manager/mock_event_observer.h"
+#include "smart_objects/smart_object.h"
 
 #include "interfaces/MOBILE_API.h"
 
@@ -46,10 +46,10 @@ namespace test {
 namespace components {
 namespace event_engine_test {
 
-using application_manager::event_engine::EventDispatcherImpl;
 using application_manager::event_engine::Event;
-using application_manager::event_engine::MobileEvent;
+using application_manager::event_engine::EventDispatcherImpl;
 using application_manager::event_engine::EventObserver;
+using application_manager::event_engine::MobileEvent;
 using testing::_;
 using ::testing::An;
 using ::testing::Matcher;
