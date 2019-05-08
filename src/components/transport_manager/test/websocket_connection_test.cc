@@ -49,6 +49,7 @@ using ::testing::NiceMock;
 using ::testing::Return;
 using namespace ::transport_manager;
 using namespace ::transport_manager::transport_adapter;
+namespace websocket = sample::websocket;
 
 class WebsocketConnectionTest : public ::testing::Test {
  public:
@@ -84,13 +85,13 @@ class WebsocketConnectionTest : public ::testing::Test {
   }
 
   void StartWSServer() {
-    ws_session = std::make_shared<WSSession>(kHost, kPort);
+    ws_session = std::make_shared<websocket::WSSession>(kHost, kPort);
     ws_session->Run();
   }
 
   void StartWSSServer() {
-    wss_session =
-        std::make_shared<WSSSession>(kHost, kPort, kCertificate, kPrivateKey);
+    wss_session = std::make_shared<websocket::WSSSession>(
+        kHost, kPort, kCertificate, kPrivateKey);
     wss_session->Run();
   }
 
@@ -111,8 +112,8 @@ class WebsocketConnectionTest : public ::testing::Test {
   std::string dev_id;
   std::string uniq_id;
   int app_handle;
-  std::shared_ptr<WSSession> ws_session;
-  std::shared_ptr<WSSSession> wss_session;
+  std::shared_ptr<websocket::WSSession> ws_session;
+  std::shared_ptr<websocket::WSSSession> wss_session;
   std::string kHost = "127.0.0.1";
   uint16_t kPort = 8080;
   // Sample certificate for localhost
