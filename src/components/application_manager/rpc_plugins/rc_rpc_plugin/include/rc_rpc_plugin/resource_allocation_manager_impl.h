@@ -166,12 +166,30 @@ class ResourceAllocationManagerImpl : public ResourceAllocationManager {
                        const uint32_t application_id);
 
   /**
+   * @brief ReleaseModuleType Releases all resources related to
+   * the corresponding module type acquired by application
+   * @param module_type Module name
+   * @param application_id Application id
+   */
+  void ReleaseModuleType(const std::string& module_type,
+                         const uint32_t application_id);
+
+  /**
    * @brief GetAcquiredResources Provides resources acquired by particular
    * application currently
    * @param application_id Application id
    * @return List of acquired resources by specific application
    */
   Resources GetAcquiredResources(const uint32_t application_id) const;
+
+  /**
+   * @brief GetAcquiredModuleTypes Provides module types acquired by particular
+   * application currently
+   * @param application_id Application id
+   * @return List of acquired module types by specific application
+   */
+  std::set<std::string> GetAcquiredModuleTypes(
+      const uint32_t application_id) const;
 
   /**
    * @brief ProcessApplicationPolicyUpdate Checks if allowed modules list is

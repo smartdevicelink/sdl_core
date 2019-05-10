@@ -148,6 +148,20 @@ void ResourceAllocationManagerImpl::ReleaseResource(
   SetResourceFree(module_type, module_id, application_id);
 }
 
+void ResourceAllocationManagerImpl::ReleaseModuleType(
+    const std::string& module_type, const uint32_t application_id) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  LOG4CXX_DEBUG(logger_,
+                "Release " << module_type << " "
+                           << " by " << application_id);
+  Resources allocated_resources = GetAcquiredResources(application_id);
+  for (const auto& resource : allocated_resources) {
+    if (module_type == resource.first) {
+      SetResourceFree(module_type, resource.second, application_id);
+    }
+  }
+}
+
 void ResourceAllocationManagerImpl::ProcessApplicationPolicyUpdate() {
   LOG4CXX_AUTO_TRACE(logger_);
   Apps app_list = RCRPCPlugin::GetRCApplications(app_mngr_);
@@ -156,10 +170,10 @@ void ResourceAllocationManagerImpl::ProcessApplicationPolicyUpdate() {
   for (; app_list.end() != app; ++app) {
     application_manager::ApplicationSharedPtr app_ptr = *app;
     const uint32_t application_id = app_ptr->app_id();
-    Resources acquired_modules = GetAcquiredResources(application_id);
-    std::sort(acquired_modules.begin(), acquired_modules.end());
+    std::set<std::string> acquired_modules =
+        GetAcquiredModuleTypes(application_id);
 
-    Resources allowed_modules;
+    std::vector<std::string> allowed_modules;
     app_mngr_.GetPolicyHandler().GetModuleTypes((*app)->policy_app_id(),
                                                 &allowed_modules);
     std::sort(allowed_modules.begin(), allowed_modules.end());
@@ -169,7 +183,7 @@ void ResourceAllocationManagerImpl::ProcessApplicationPolicyUpdate() {
                                        << " , allowed modules: "
                                        << allowed_modules.size());
 
-    Resources disallowed_modules;
+    std::vector<std::string> disallowed_modules;
     std::set_difference(acquired_modules.begin(),
                         acquired_modules.end(),
                         allowed_modules.begin(),
@@ -177,9 +191,9 @@ void ResourceAllocationManagerImpl::ProcessApplicationPolicyUpdate() {
                         std::back_inserter(disallowed_modules));
 
     auto rc_extention = RCHelpers::GetRCExtension(**app);
-    Resources::const_iterator module = disallowed_modules.begin();
+    auto module = disallowed_modules.begin();
     for (; disallowed_modules.end() != module; ++module) {
-      ReleaseResource(*module, application_id);
+      ReleaseModuleType(*module, application_id);
     }
     if (!disallowed_modules.empty()) {
       SendOnRCStatusNotifications(
@@ -365,6 +379,23 @@ std::vector<ModuleUid> ResourceAllocationManagerImpl::GetAcquiredResources(
   return allocated_resources;
 }
 
+std::set<std::string> ResourceAllocationManagerImpl::GetAcquiredModuleTypes(
+    const uint32_t application_id) const {
+  LOG4CXX_AUTO_TRACE(logger_);
+  Resources allocated_resources = GetAcquiredResources(application_id);
+  std::set<std::string> acquired_module_types;
+  for (const auto& resource : allocated_resources) {
+    acquired_module_types.insert(resource.first);
+  }
+
+  LOG4CXX_DEBUG(logger_,
+                "Application " << application_id << " acquired "
+                               << acquired_module_types.size()
+                               << " module type(s).");
+
+  return acquired_module_types;
+}
+
 void ResourceAllocationManagerImpl::SetResourceState(
     const std::string& module_type,
     const std::string& module_id,
@@ -486,10 +517,10 @@ void ResourceAllocationManagerImpl::OnApplicationEvent(
 
   if (ApplicationEvent::kApplicationExit == event ||
       ApplicationEvent::kApplicationUnregistered == event) {
-    Resources acquired_modules = GetAcquiredResources(application->app_id());
-    Resources::const_iterator module = acquired_modules.begin();
+    auto acquired_modules = GetAcquiredModuleTypes(application->app_id());
+    auto module = acquired_modules.begin();
     for (; acquired_modules.end() != module; ++module) {
-      ReleaseResource(*module, application->app_id());
+      ReleaseModuleType(*module, application->app_id());
     }
     if (!acquired_modules.empty()) {
       SendOnRCStatusNotifications(
