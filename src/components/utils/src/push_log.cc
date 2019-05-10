@@ -31,8 +31,18 @@
  */
 
 #include "utils/push_log.h"
+
+#include <log4cxx/propertyconfigurator.h>
+#include <stddef.h>
+
 #include "utils/log_message_loop_thread.h"
 #include "utils/logger_status.h"
+
+namespace log4cxx {
+namespace spi {
+class LocationInfo;
+}  // namespace spi
+}  // namespace log4cxx
 
 namespace logger {
 

@@ -1,18 +1,29 @@
-#include "transport_manager/tcp/platform_specific/linux/platform_specific_network_interface_listener_impl.h"
-
 #include <arpa/inet.h>
-#include <asm/types.h>
+#include <bits/stdint-uintn.h>
 #include <errno.h>
 #include <fcntl.h>
 #include <ifaddrs.h>
+#include <linux/if_addr.h>
+#include <log4cxx/helpers/objectptr.h>
+#include <log4cxx/logger.h>
 #include <net/if.h>
+#include <netinet/in.h>
+#include <string.h>
 #include <sys/select.h>
 #include <sys/socket.h>
-#include <sys/types.h>
 #include <unistd.h>
+
+#include "transport_manager/tcp/platform_specific/linux/platform_specific_network_interface_listener_impl.h"
+#include "utils/macro.h"
+#include "utils/threads/thread_delegate.h"
 
 #include <linux/netlink.h>
 #include <linux/rtnetlink.h>
+#include <map>
+#include <ostream>
+#include <string>
+#include <utility>
+#include <vector>
 
 #include "transport_manager/tcp/tcp_client_listener.h"
 #include "utils/logger.h"

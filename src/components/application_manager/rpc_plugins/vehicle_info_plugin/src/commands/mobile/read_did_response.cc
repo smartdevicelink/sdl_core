@@ -32,7 +32,19 @@
  */
 
 #include "vehicle_info_plugin/commands/mobile/read_did_response.h"
+
+#include "application_manager/commands/command_impl.h"
 #include "application_manager/rpc_service.h"
+#include "utils/logger.h"
+
+namespace application_manager {
+class ApplicationManager;
+class HMICapabilities;
+}  // namespace application_manager
+
+namespace policy {
+class PolicyHandlerInterface;
+}  // namespace policy
 
 namespace vehicle_info_plugin {
 using namespace application_manager;

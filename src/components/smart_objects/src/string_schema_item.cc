@@ -30,6 +30,10 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 #include "smart_objects/string_schema_item.h"
+
+#include <ostream>
+
+#include "rpc_base/validation_report.h"
 #include "smart_objects/smart_object.h"
 #include "utils/custom_string.h"
 

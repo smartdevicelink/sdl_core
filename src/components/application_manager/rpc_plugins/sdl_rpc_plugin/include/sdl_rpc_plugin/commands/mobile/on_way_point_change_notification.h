@@ -33,8 +33,22 @@
 #ifndef SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_MOBILE_ON_WAY_POINT_CHANGE_NOTIFICATION_H_
 #define SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_MOBILE_ON_WAY_POINT_CHANGE_NOTIFICATION_H_
 
+#include "application_manager/app_extension.h"
+#include "application_manager/commands/command.h"
 #include "application_manager/commands/command_notification_impl.h"
 #include "utils/macro.h"
+
+namespace application_manager {
+class ApplicationManager;
+class HMICapabilities;
+namespace rpc_service {
+class RPCService;
+}  // namespace rpc_service
+}  // namespace application_manager
+
+namespace policy {
+class PolicyHandlerInterface;
+}  // namespace policy
 
 namespace sdl_rpc_plugin {
 namespace app_mngr = application_manager;

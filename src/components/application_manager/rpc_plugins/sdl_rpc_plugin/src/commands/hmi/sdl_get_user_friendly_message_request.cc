@@ -31,7 +31,40 @@
  */
 
 #include "sdl_rpc_plugin/commands/hmi/sdl_get_user_friendly_message_request.h"
+
+#include <bits/stdint-uintn.h>
+#include <log4cxx/helpers/objectptr.h>
+#include <log4cxx/logger.h>
+#include <iosfwd>
+#include <memory>
+#include <string>
+#include <vector>
+
+#include "application_manager/commands/command_impl.h"
+#include "application_manager/hmi_capabilities.h"
 #include "application_manager/message_helper.h"
+#include "application_manager/policies/policy_handler_interface.h"
+#include "application_manager/smart_object_keys.h"
+#include "interfaces/HMI_API.h"
+#include "smart_objects/smart_object.h"
+#include "utils/logger.h"
+
+namespace application_manager {
+class ApplicationManager;
+namespace rpc_service {
+class RPCService;
+}  // namespace rpc_service
+
+class ApplicationManager;
+namespace rpc_service {
+class RPCService;
+}  // namespace rpc_service
+
+class ApplicationManager;
+namespace rpc_service {
+class RPCService;
+}  // namespace rpc_service
+}  // namespace application_manager
 
 namespace sdl_rpc_plugin {
 using namespace application_manager;

@@ -34,10 +34,20 @@
 #define SRC_COMPONENTS_SMART_OBJECTS_INCLUDE_SMART_OBJECTS_STRING_SCHEMA_ITEM_H_
 
 #include <stddef.h>
+#include <iosfwd>
+#include <memory>
 #include <string>
 
 #include "smart_objects/default_shema_item.h"
+#include "smart_objects/errors.h"
 #include "smart_objects/schema_item_parameter.h"
+#include "smart_objects/smart_object.h"
+#include "utils/macro.h"
+#include "utils/semantic_version.h"
+
+namespace rpc {
+class ValidationReport;
+}  // namespace rpc
 
 namespace ns_smart_device_link {
 namespace ns_smart_objects {

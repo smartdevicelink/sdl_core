@@ -32,14 +32,12 @@
 
 #include "utils/back_trace.h"
 
-#include <algorithm>
-#include <sstream>
-#include <vector>
-
 #include <cxxabi.h>
 #include <execinfo.h>
-
-#include "utils/macro.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <algorithm>
+#include <vector>
 
 using std::ostream;
 using std::string;

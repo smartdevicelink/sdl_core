@@ -33,15 +33,26 @@
 #ifndef SRC_COMPONENTS_SMART_OBJECTS_INCLUDE_SMART_OBJECTS_ENUM_SCHEMA_ITEM_H_
 #define SRC_COMPONENTS_SMART_OBJECTS_INCLUDE_SMART_OBJECTS_ENUM_SCHEMA_ITEM_H_
 
+#include <log4cxx/logger.h>
 #include <string.h>
-
+#include <sys/types.h>
+#include <boost/none.hpp>
+#include <boost/optional.hpp>
+#include <boost/optional/detail/optional_relops.hpp>
+#include <boost/optional/optional.hpp>
 #include <map>
+#include <memory>
+#include <ostream>
 #include <set>
 #include <string>
+#include <vector>
 
+#include "rpc_base/validation_report.h"
 #include "smart_objects/default_shema_item.h"
-
-#include <boost/optional.hpp>
+#include "smart_objects/errors.h"
+#include "smart_objects/schema_item_parameter.h"
+#include "smart_objects/smart_object.h"
+#include "utils/macro.h"
 #include "utils/semantic_version.h"
 
 namespace ns_smart_device_link {
@@ -72,6 +83,7 @@ struct ElementSignature {
 
 template <typename EnumType>
 class EnumConversionHelper;
+
 /**
  * @brief Enumeration schema item.
  * @tparam EnumType Enumeration type.

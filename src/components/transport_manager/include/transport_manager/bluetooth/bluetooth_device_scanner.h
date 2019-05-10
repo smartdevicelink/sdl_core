@@ -36,19 +36,29 @@
 #ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_BLUETOOTH_BLUETOOTH_DEVICE_SCANNER_H_
 #define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_BLUETOOTH_BLUETOOTH_DEVICE_SCANNER_H_
 
+#include <bits/stdint-uintn.h>
 #include <bluetooth/bluetooth.h>
 #include <bluetooth/hci.h>
 #include <bluetooth/hci_lib.h>
 #include <bluetooth/rfcomm.h>
 #include <bluetooth/sdp.h>
 #include <bluetooth/sdp_lib.h>
+#include <cstdint>
+#include <vector>
 
+#include "transport_manager/transport_adapter/device.h"
 #include "transport_manager/transport_adapter/device_scanner.h"
+#include "transport_manager/transport_adapter/transport_adapter.h"
 #include "utils/conditional_variable.h"
 #include "utils/lock.h"
+#include "utils/macro.h"
 #include "utils/threads/thread_delegate.h"
 
 class Thread;
+
+namespace threads {
+class Thread;
+}  // namespace threads
 
 namespace transport_manager {
 namespace transport_adapter {

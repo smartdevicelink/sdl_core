@@ -32,15 +32,36 @@
  */
 
 #include "sdl_rpc_plugin/commands/mobile/create_interaction_choice_set_request.h"
-#include <algorithm>
-#include <cstring>
-#include <string>
+
+#include <log4cxx/helpers/objectptr.h>
+#include <log4cxx/logger.h>
+#include <strings.h>
+
+#include <cstdint>
+#include <memory>
+#include <ostream>
+#include <set>
+#include <utility>
 #include <vector>
 
-#include "application_manager/application_impl.h"
+#include "application_manager/application_manager.h"
+#include "application_manager/commands/command_impl.h"
+#include "application_manager/event_engine/event.h"
+#include "application_manager/hmi_interfaces.h"
 #include "application_manager/message_helper.h"
-#include "utils/gen_hash.h"
 #include "utils/helpers.h"
+#include "utils/logger.h"
+
+namespace application_manager {
+class HMICapabilities;
+namespace rpc_service {
+class RPCService;
+}  // namespace rpc_service
+}  // namespace application_manager
+
+namespace policy {
+class PolicyHandlerInterface;
+}  // namespace policy
 
 const char* kInvalidImageWarningInfo = "Requested image(s) not found.";
 

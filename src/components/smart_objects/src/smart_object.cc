@@ -33,13 +33,16 @@
 #include "smart_objects/smart_object.h"
 
 #include <errno.h>
-#include <inttypes.h>
 #include <stdlib.h>
+
 #include <algorithm>
 #include <iomanip>
 #include <iterator>
 #include <limits>
 #include <sstream>
+#include <utility>
+
+#include "rpc_base/validation_report.h"
 
 namespace ns_smart_device_link {
 namespace ns_smart_objects {

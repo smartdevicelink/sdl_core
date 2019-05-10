@@ -31,7 +31,26 @@
  */
 
 #include "sdl_rpc_plugin/commands/hmi/on_ui_keyboard_input_notification.h"
+
+#include <memory>
+
+#include "application_manager/commands/command_impl.h"
+#include "application_manager/smart_object_keys.h"
 #include "interfaces/MOBILE_API.h"
+#include "smart_objects/smart_object.h"
+#include "utils/logger.h"
+
+namespace application_manager {
+class ApplicationManager;
+class HMICapabilities;
+namespace rpc_service {
+class RPCService;
+}  // namespace rpc_service
+}  // namespace application_manager
+
+namespace policy {
+class PolicyHandlerInterface;
+}  // namespace policy
 
 namespace sdl_rpc_plugin {
 using namespace application_manager;

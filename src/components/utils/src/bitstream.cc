@@ -31,6 +31,8 @@
  */
 #include "utils/bitstream.h"
 
+#include <cstdint>
+
 namespace utils {
 
 BitStream::BitStream(uint8_t* bytes, size_t bytes_count)

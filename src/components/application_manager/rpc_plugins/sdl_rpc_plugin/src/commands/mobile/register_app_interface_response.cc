@@ -32,10 +32,23 @@
  */
 
 #include "sdl_rpc_plugin/commands/mobile/register_app_interface_response.h"
+
+#include <bits/stdint-intn.h>
+#include <log4cxx/helpers/objectptr.h>
+#include <log4cxx/logger.h>
+#include <memory>
+#include <ostream>
+
+#include "application_manager/application.h"
 #include "application_manager/application_manager.h"
+#include "application_manager/commands/command_impl.h"
 #include "application_manager/policies/policy_handler_interface.h"
+#include "application_manager/smart_object_keys.h"
 #include "connection_handler/connection_handler.h"
 #include "interfaces/MOBILE_API.h"
+#include "smart_objects/smart_object.h"
+#include "utils/logger.h"
+#include "utils/semantic_version.h"
 
 namespace sdl_rpc_plugin {
 using namespace application_manager;

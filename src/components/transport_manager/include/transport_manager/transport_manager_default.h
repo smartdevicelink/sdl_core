@@ -37,6 +37,11 @@
 #define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_MANAGER_DEFAULT_H_
 
 #include "transport_manager/transport_manager_impl.h"
+#include "utils/macro.h"
+
+namespace transport_manager {
+class TransportManagerSettings;
+}  // namespace transport_manager
 
 namespace resumption {
 class LastState;

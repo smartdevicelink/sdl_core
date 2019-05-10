@@ -32,11 +32,26 @@
 
 #ifndef SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_RC_RPC_PLUGIN_INCLUDE_RC_RPC_PLUGIN_INTERIOR_DATA_MANAGER_IMPL_H_
 #define SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_RC_RPC_PLUGIN_INCLUDE_RC_RPC_PLUGIN_INTERIOR_DATA_MANAGER_IMPL_H_
+#include <deque>
+#include <iosfwd>
+#include <map>
+#include <string>
+#include <vector>
+
+#include "application_manager/application.h"
+#include "application_manager/plugin_manager/rpc_plugin.h"
 #include "rc_rpc_plugin/interior_data_manager.h"
 #include "utils/date_time.h"
+#include "utils/lock.h"
+#include "utils/macro.h"
+
+#include <map>
+#include <string>
+#include "application_manager/plugin_manager/rpc_plugin.h"
 
 namespace application_manager {
 class ApplicationManager;
+
 namespace rpc_service {
 class RPCService;
 }

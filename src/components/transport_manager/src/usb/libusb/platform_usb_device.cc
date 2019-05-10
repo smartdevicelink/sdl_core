@@ -32,7 +32,11 @@
  */
 
 #include "transport_manager/usb/libusb/platform_usb_device.h"
-#include "transport_manager/transport_adapter/transport_adapter_impl.h"
+
+#include <log4cxx/helpers/objectptr.h>
+#include <log4cxx/logger.h>
+#include <ostream>
+#include <string>
 
 #include "utils/logger.h"
 

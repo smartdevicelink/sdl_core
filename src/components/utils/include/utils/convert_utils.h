@@ -33,6 +33,8 @@
 #ifndef SRC_COMPONENTS_UTILS_INCLUDE_UTILS_CONVERT_UTILS_H_
 #define SRC_COMPONENTS_UTILS_INCLUDE_UTILS_CONVERT_UTILS_H_
 
+#include <bits/stdint-intn.h>
+#include <bits/stdint-uintn.h>
 #include <stdint.h>
 #include <limits>
 

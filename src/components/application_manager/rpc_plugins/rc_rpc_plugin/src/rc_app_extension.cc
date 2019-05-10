@@ -32,6 +32,18 @@
 
 #include "rc_rpc_plugin/rc_app_extension.h"
 
+#include <string>
+
+namespace ns_smart_device_link {
+namespace ns_smart_objects {
+class SmartObject;
+
+class SmartObject;
+
+class SmartObject;
+}  // namespace ns_smart_objects
+}  // namespace ns_smart_device_link
+
 namespace rc_rpc_plugin {
 RCAppExtension::RCAppExtension(application_manager::AppExtensionUID uid)
     : AppExtension(uid) {}

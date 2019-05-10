@@ -33,7 +33,16 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 #include "transport_manager/transport_manager_default.h"
+
+#include <bits/stdint-uintn.h>
+#include <log4cxx/helpers/objectptr.h>
+#include <log4cxx/logger.h>
+#include <stddef.h>
+
+#include "transport_manager/common.h"
 #include "transport_manager/tcp/tcp_transport_adapter.h"
+#include "transport_manager/transport_adapter/transport_adapter_impl.h"
+#include "transport_manager/transport_manager_settings.h"
 #include "utils/logger.h"
 
 #ifdef BLUETOOTH_SUPPORT

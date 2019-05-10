@@ -32,8 +32,8 @@
 #ifndef SRC_COMPONENTS_INCLUDE_PROTOCOL_RPC_TYPE_H_
 #define SRC_COMPONENTS_INCLUDE_PROTOCOL_RPC_TYPE_H_
 
+#include <bits/stdint-uintn.h>
 #include <stdint.h>
-
 #include <ostream>
 
 namespace protocol_handler {

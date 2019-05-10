@@ -33,13 +33,24 @@
 #ifndef SRC_COMPONENTS_SMART_OBJECTS_INCLUDE_SMART_OBJECTS_NUMBER_SCHEMA_ITEM_H_
 #define SRC_COMPONENTS_SMART_OBJECTS_INCLUDE_SMART_OBJECTS_NUMBER_SCHEMA_ITEM_H_
 
+#include <bits/stdint-intn.h>
+#include <bits/stdint-uintn.h>
+#include <log4cxx/logger.h>
 #include <limits>
+#include <memory>
+#include <ostream>
+#include <string>
 #include <typeinfo>
 
+#include "rpc_base/validation_report.h"
 #include "smart_objects/default_shema_item.h"
+#include "smart_objects/errors.h"
 #include "smart_objects/schema_item_parameter.h"
+#include "smart_objects/smart_object.h"
 #include "utils/convert_utils.h"
 #include "utils/helpers.h"
+#include "utils/macro.h"
+#include "utils/semantic_version.h"
 
 namespace ns_smart_device_link {
 namespace ns_smart_objects {

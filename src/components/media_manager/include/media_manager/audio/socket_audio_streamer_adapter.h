@@ -33,6 +33,9 @@
 #ifndef SRC_COMPONENTS_MEDIA_MANAGER_INCLUDE_MEDIA_MANAGER_AUDIO_SOCKET_AUDIO_STREAMER_ADAPTER_H_
 #define SRC_COMPONENTS_MEDIA_MANAGER_INCLUDE_MEDIA_MANAGER_AUDIO_SOCKET_AUDIO_STREAMER_ADAPTER_H_
 
+#include <bits/stdint-uintn.h>
+#include <iosfwd>
+
 #include "media_manager/socket_streamer_adapter.h"
 
 namespace media_manager {

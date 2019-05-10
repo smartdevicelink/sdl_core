@@ -30,18 +30,20 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <memory.h>
-#include <stdint.h>
+#include <bits/stdint-uintn.h>
+#include <log4cxx/helpers/objectptr.h>
+#include <log4cxx/logger.h>
 #include <cstring>
 #include <limits>
-#include <memory>
 #include <new>
+#include <ostream>
 
 #include "protocol/common.h"
+#include "protocol/raw_message.h"
+#include "protocol/service_type.h"
 #include "protocol_handler/protocol_packet.h"
-#include "utils/byte_order.h"
+#include "utils/logger.h"
 #include "utils/macro.h"
-#include "utils/semantic_version.h"
 
 namespace protocol_handler {
 

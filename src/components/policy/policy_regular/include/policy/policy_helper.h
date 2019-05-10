@@ -1,4 +1,13 @@
-﻿/*
+#include <stddef.h>
+#include <iosfwd>
+#include <memory>
+#include <set>
+#include <vector>
+
+#include "policy/policy_table/enums.h"
+#include "policy/policy_table/types.h"
+
+/*
  Copyright (c) 2013, Ford Motor Company
  All rights reserved.
 
@@ -29,12 +38,10 @@
  ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  POSSIBILITY OF SUCH DAMAGE.
  */
-
 #ifndef SRC_COMPONENTS_POLICY_POLICY_REGULAR_INCLUDE_POLICY_POLICY_HELPER_H_
 #define SRC_COMPONENTS_POLICY_POLICY_REGULAR_INCLUDE_POLICY_POLICY_HELPER_H_
 
 #include "policy/policy_table/functions.h"
-
 #include "policy/policy_types.h"
 
 namespace policy {
@@ -239,9 +246,9 @@ FunctionalGroupIDs FindSame(const FunctionalGroupIDs& first,
                             const FunctionalGroupIDs& second);
 
 /**
- * @brief Unwrap application policies from predefined values to specific policy
- * values, i.e. if application has "default", it will be assigned default
- * policies
+ * @brief Unwrap application policies from predefined values to specific
+ * policy values, i.e. if application has "default", it will be assigned
+ * default policies
  * @param app_policies Application policies to unwrap
  * @return true, if succeded, otherwise - false
  */

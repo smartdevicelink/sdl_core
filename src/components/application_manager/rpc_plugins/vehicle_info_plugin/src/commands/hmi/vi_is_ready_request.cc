@@ -31,8 +31,31 @@
  */
 
 #include "vehicle_info_plugin/commands/hmi/vi_is_ready_request.h"
+
+#include <log4cxx/helpers/objectptr.h>
+#include <log4cxx/logger.h>
+#include <memory>
+
+#include "application_manager/application_manager.h"
+#include "application_manager/commands/command_impl.h"
+#include "application_manager/event_engine/event.h"
+#include "application_manager/hmi_capabilities.h"
+#include "application_manager/hmi_interfaces.h"
 #include "application_manager/message_helper.h"
+#include "application_manager/policies/policy_handler_interface.h"
 #include "application_manager/rpc_service.h"
+#include "interfaces/HMI_API.h"
+#include "utils/logger.h"
+
+namespace ns_smart_device_link {
+namespace ns_smart_objects {
+class SmartObject;
+
+class SmartObject;
+
+class SmartObject;
+}  // namespace ns_smart_objects
+}  // namespace ns_smart_device_link
 
 namespace vehicle_info_plugin {
 using namespace application_manager;

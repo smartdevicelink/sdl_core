@@ -30,18 +30,37 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <bits/stdint-intn.h>
+#include <bits/stdint-uintn.h>
 #include <errno.h>
-#include <stdint.h>
+#include <log4cxx/helpers/objectptr.h>
+#include <log4cxx/logger.h>
 #include <stdlib.h>
+#include <string.h>
 #include <unistd.h>
-#include <sstream>
 
-#include "config_profile/profile.h"
+#include <map>
+#include <memory>
+#include <sstream>
+#include <string>
+#include <utility>
+#include <vector>
+
 #include "policy/cache_manager.h"
 #include "policy/policy_helper.h"
+#include "policy/policy_settings.h"
+#include "policy/policy_table/enums.h"
+#include "policy/policy_table/types.h"
+#include "policy/policy_types.h"
+#include "policy/pt_representation.h"
 #include "policy/sql_pt_queries.h"
 #include "policy/sql_pt_representation.h"
-#include "policy/sql_wrapper.h"
+#include "rpc_base/rpc_base.h"
+#include "rpc_base/rpc_base_inl.h"
+#include "rpc_base/rpc_base_json_inl.h"
+#include "sqlite_wrapper/sql_database.h"
+#include "sqlite_wrapper/sql_error.h"
+#include "sqlite_wrapper/sql_query.h"
 #include "utils/date_time.h"
 #include "utils/file_system.h"
 #include "utils/gen_hash.h"

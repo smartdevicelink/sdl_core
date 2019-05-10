@@ -31,7 +31,15 @@
  */
 
 #include "hmi_message_handler/hmi_message_handler_impl.h"
+
+#include <log4cxx/helpers/objectptr.h>
+#include <log4cxx/logger.h>
+
+#include "hmi_message_handler/hmi_message_adapter.h"
+#include "hmi_message_handler/hmi_message_handler_settings.h"
+#include "hmi_message_handler/hmi_message_observer.h"
 #include "utils/logger.h"
+#include "utils/threads/thread_options.h"
 
 namespace hmi_message_handler {
 

@@ -35,7 +35,20 @@
 #include <application_manager/application_manager.h>
 #include <set>
 #include <string>
+
+#include "application_manager/app_extension.h"
+#include "interfaces/MOBILE_API.h"
 #include "sdl_rpc_plugin/sdl_rpc_plugin.h"
+#include "utils/macro.h"
+
+namespace application_manager {
+class Application;
+}  // namespace application_manager
+namespace ns_smart_device_link {
+namespace ns_smart_objects {
+class SmartObject;
+}  // namespace ns_smart_objects
+}  // namespace ns_smart_device_link
 
 namespace sdl_rpc_plugin {
 class SDLRPCPlugin;

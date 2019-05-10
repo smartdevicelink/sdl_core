@@ -32,6 +32,7 @@
 #ifndef SRC_COMPONENTS_INCLUDE_PROTOCOL_MESSAGE_PRIORITY_H_
 #define SRC_COMPONENTS_INCLUDE_PROTOCOL_MESSAGE_PRIORITY_H_
 
+#include <bits/stdint-intn.h>
 #include <cstddef>
 
 #include "protocol/service_type.h"

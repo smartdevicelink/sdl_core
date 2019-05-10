@@ -32,7 +32,7 @@
 
 #include "protocol/raw_message.h"
 
-#include <memory.h>
+#include <string.h>
 
 namespace protocol_handler {
 

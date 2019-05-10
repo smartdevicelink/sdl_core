@@ -33,12 +33,20 @@
 #ifndef SRC_COMPONENTS_MEDIA_MANAGER_INCLUDE_MEDIA_MANAGER_STREAMER_ADAPTER_H_
 #define SRC_COMPONENTS_MEDIA_MANAGER_INCLUDE_MEDIA_MANAGER_STREAMER_ADAPTER_H_
 
+#include <bits/stdint-intn.h>
 #include <atomic>
+#include <memory>
+
 #include "media_manager/media_adapter_impl.h"
 #include "protocol/raw_message.h"
+#include "utils/macro.h"
 #include "utils/message_queue.h"
 #include "utils/threads/thread.h"
 #include "utils/threads/thread_delegate.h"
+
+namespace threads {
+class Thread;
+}  // namespace threads
 
 namespace media_manager {
 

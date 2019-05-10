@@ -33,9 +33,16 @@
 #ifndef SRC_PLUGINS_APPENDERS_SAFE_ROLLING_FILE_APPENDER_H_
 #define SRC_PLUGINS_APPENDERS_SAFE_ROLLING_FILE_APPENDER_H_
 
+#include <log4cxx/helpers/object.h>
+#include <log4cxx/logstring.h>
 #include <log4cxx/rollingfileappender.h>
+#include <log4cxx/spi/loggingevent.h>
 
 namespace log4cxx {
+
+namespace helpers {
+class Pool;
+}  // namespace helpers
 
 class SafeRollingFileAppender : public RollingFileAppender {
  public:

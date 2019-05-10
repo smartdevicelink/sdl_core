@@ -32,17 +32,26 @@
 #ifndef SRC_COMPONENTS_UTILS_INCLUDE_UTILS_TIMER_H_
 #define SRC_COMPONENTS_UTILS_INCLUDE_UTILS_TIMER_H_
 
+#include <bits/stdint-uintn.h>
 #include <stdint.h>
+#include <iosfwd>
 #include <memory>
 #include <string>
 
+#include "utils/conditional_variable.h"
 #include "utils/lock.h"
 #include "utils/macro.h"
 #include "utils/threads/thread.h"
 #include "utils/threads/thread_delegate.h"
 #include "utils/timer_task.h"
 
+namespace threads {
+class Thread;
+}  // namespace threads
+
 namespace timer {
+
+class TimerTask;
 
 typedef uint32_t Milliseconds;
 

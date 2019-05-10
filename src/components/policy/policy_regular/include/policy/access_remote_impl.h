@@ -32,16 +32,23 @@
 #ifndef SRC_COMPONENTS_POLICY_POLICY_REGULAR_INCLUDE_POLICY_ACCESS_REMOTE_IMPL_H_
 #define SRC_COMPONENTS_POLICY_POLICY_REGULAR_INCLUDE_POLICY_ACCESS_REMOTE_IMPL_H_
 
+#include <iosfwd>
 #include <map>
-#include "policy/policy_table/types.h"
-#include "utils/macro.h"
+#include <memory>
+#include <vector>
 
 #include "policy/access_remote.h"
 #include "policy/cache_manager.h"
+#include "policy/policy_table/enums.h"
+#include "policy/policy_table/types.h"
+#include "policy/policy_types.h"
+#include "rpc_base/rpc_base_inl.h"
+#include "utils/macro.h"
 
 using policy_table::FunctionalGroupings;
 
 namespace policy {
+class CacheManager;
 
 class AccessRemoteImpl : public AccessRemote {
  public:

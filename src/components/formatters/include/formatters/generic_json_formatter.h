@@ -35,7 +35,15 @@
 #ifndef SRC_COMPONENTS_FORMATTERS_INCLUDE_FORMATTERS_GENERIC_JSON_FORMATTER_H_
 #define SRC_COMPONENTS_FORMATTERS_INCLUDE_FORMATTERS_GENERIC_JSON_FORMATTER_H_
 
+#include <iosfwd>
+
 #include "CFormatterJsonBase.h"
+
+namespace ns_smart_device_link {
+namespace ns_smart_objects {
+class SmartObject;
+}  // namespace ns_smart_objects
+}  // namespace ns_smart_device_link
 
 namespace ns_smart_device_link {
 namespace ns_json_handler {

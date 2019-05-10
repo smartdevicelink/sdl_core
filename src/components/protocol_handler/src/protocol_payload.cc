@@ -31,7 +31,9 @@
  */
 #include "protocol_handler/protocol_payload.h"
 
+#include <log4cxx/logger.h>
 #include <climits>
+#include <string>
 
 #include "utils/bitstream.h"
 #include "utils/macro.h"

@@ -31,7 +31,11 @@
  */
 
 #include "media_manager/streamer_listener.h"
-#include "media_manager/media_manager_impl.h"
+
+#include <log4cxx/helpers/objectptr.h>
+#include <log4cxx/logger.h>
+
+#include "media_manager/media_manager.h"
 #include "utils/logger.h"
 
 namespace media_manager {

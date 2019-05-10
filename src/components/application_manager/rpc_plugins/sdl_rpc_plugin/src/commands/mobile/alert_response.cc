@@ -32,10 +32,18 @@
  */
 
 #include "sdl_rpc_plugin/commands/mobile/alert_response.h"
-#include "application_manager/application_impl.h"
+
+#include "application_manager/commands/command_impl.h"
 #include "application_manager/rpc_service.h"
-#include "interfaces/HMI_API.h"
-#include "interfaces/MOBILE_API.h"
+#include "utils/logger.h"
+
+namespace application_manager {
+class ApplicationManager;
+class HMICapabilities;
+}  // namespace application_manager
+namespace policy {
+class PolicyHandlerInterface;
+}  // namespace policy
 
 namespace sdl_rpc_plugin {
 using namespace application_manager;

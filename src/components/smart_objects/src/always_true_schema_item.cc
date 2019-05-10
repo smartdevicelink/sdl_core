@@ -30,8 +30,14 @@
 
 #include "smart_objects/always_true_schema_item.h"
 
+namespace rpc {
+class ValidationReport;
+}  // namespace rpc
+
 namespace ns_smart_device_link {
 namespace ns_smart_objects {
+
+class SmartObject;
 
 CAlwaysTrueSchemaItem::CAlwaysTrueSchemaItem() {}
 

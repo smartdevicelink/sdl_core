@@ -31,15 +31,43 @@
  */
 
 #include "sdl_rpc_plugin/commands/mobile/on_system_request_notification.h"
+
+#include <log4cxx/helpers/objectptr.h>
+#include <log4cxx/logger.h>
 #include <cstdio>
 #include <cstring>
+#include <memory>
+#include <ostream>
 #include <string>
+
+#include "application_manager/application.h"
 #include "application_manager/application_manager.h"
+#include "application_manager/commands/command_impl.h"
 #include "application_manager/policies/policy_handler_interface.h"
+#include "application_manager/smart_object_keys.h"
 #include "interfaces/MOBILE_API.h"
 #include "policy/policy_table/enums.h"
+#include "smart_objects/smart_object.h"
 #include "utils/file_system.h"
 #include "utils/helpers.h"
+#include "utils/logger.h"
+
+namespace application_manager {
+class HMICapabilities;
+namespace rpc_service {
+class RPCService;
+}  // namespace rpc_service
+
+class HMICapabilities;
+namespace rpc_service {
+class RPCService;
+}  // namespace rpc_service
+
+class HMICapabilities;
+namespace rpc_service {
+class RPCService;
+}  // namespace rpc_service
+}  // namespace application_manager
 
 namespace sdl_rpc_plugin {
 using namespace application_manager;

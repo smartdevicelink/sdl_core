@@ -31,8 +31,16 @@
  */
 
 #include "rc_rpc_plugin/commands/hmi/rc_on_interior_vehicle_data_notification.h"
+
+#include <memory>
+
+#include "application_manager/commands/command_impl.h"
+#include "application_manager/smart_object_keys.h"
+#include "interfaces/MOBILE_API.h"
+#include "rc_rpc_plugin/commands/rc_command_params.h"
 #include "rc_rpc_plugin/rc_module_constants.h"
-#include "utils/macro.h"
+#include "smart_objects/smart_object.h"
+#include "utils/logger.h"
 
 namespace rc_rpc_plugin {
 namespace commands {

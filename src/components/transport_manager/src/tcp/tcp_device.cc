@@ -31,6 +31,11 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 #include "transport_manager/tcp/tcp_device.h"
+
+#include <log4cxx/helpers/objectptr.h>
+#include <log4cxx/logger.h>
+#include <utility>
+
 #include "utils/logger.h"
 
 namespace transport_manager {

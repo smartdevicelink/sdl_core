@@ -32,9 +32,11 @@
 #ifndef SRC_COMPONENTS_UTILS_INCLUDE_UTILS_BACK_TRACE_H_
 #define SRC_COMPONENTS_UTILS_INCLUDE_UTILS_BACK_TRACE_H_
 
+#include <bits/stdint-intn.h>
 #include <ostream>
 #include <string>
 #include <vector>
+
 #include "utils/threads/thread.h"
 
 namespace utils {

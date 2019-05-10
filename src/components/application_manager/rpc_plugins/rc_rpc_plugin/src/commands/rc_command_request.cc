@@ -31,11 +31,24 @@
  */
 
 #include "rc_rpc_plugin/commands/rc_command_request.h"
+
+#include <log4cxx/helpers/objectptr.h>
+#include <log4cxx/logger.h>
+#include <memory>
+
+#include "application_manager/application_manager.h"
+#include "application_manager/commands/command_impl.h"
+#include "application_manager/event_engine/event.h"
 #include "application_manager/hmi_interfaces.h"
-#include "application_manager/message_helper.h"
-#include "rc_rpc_plugin/interior_data_cache.h"
+#include "application_manager/policies/policy_handler_interface.h"
+#include "application_manager/smart_object_keys.h"
+#include "interfaces/HMI_API.h"
+#include "interfaces/MOBILE_API.h"
+#include "rc_rpc_plugin/commands/rc_command_params.h"
 #include "rc_rpc_plugin/rc_module_constants.h"
-#include "smart_objects/enum_schema_item.h"
+#include "smart_objects/smart_object.h"
+#include "utils/helpers.h"
+#include "utils/logger.h"
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "RemoteControlModule")
 

@@ -33,24 +33,48 @@
 
 #include "sdl_rpc_plugin/commands/mobile/register_app_interface_request.h"
 
+#include <ctype.h>
+#include <log4cxx/helpers/objectptr.h>
+#include <log4cxx/logger.h>
+#include <pthread.h>
 #include <string.h>
-#include <unistd.h>
-#include <algorithm>
-#include <map>
 
-#include "application_manager/app_launch/app_launch_ctrl.h"
-#include "application_manager/application_impl.h"
+#include <iterator>
+#include <map>
+#include <memory>
+#include <ostream>
+#include <set>
+#include <string>
+#include <utility>
+
 #include "application_manager/application_manager.h"
+#include "application_manager/application_manager_settings.h"
+#include "application_manager/commands/command_impl.h"
 #include "application_manager/helpers/application_helper.h"
+#include "application_manager/hmi_capabilities.h"
+#include "application_manager/hmi_interfaces.h"
+#include "application_manager/message.h"
 #include "application_manager/message_helper.h"
-#include "application_manager/policies/policy_handler.h"
 #include "application_manager/policies/policy_handler_interface.h"
 #include "application_manager/resumption/resume_ctrl.h"
 #include "application_manager/rpc_service.h"
-#include "config_profile/profile.h"
+#include "application_manager/smart_object_keys.h"
+#include "connection_handler/connection_handler.h"
 #include "interfaces/MOBILE_API.h"
 #include "interfaces/generated_msg_version.h"
+#include "policy/policy_manager.h"
+#include "policy/policy_table/types.h"
+#include "policy/policy_types.h"
+#include "policy/usage_statistics/counter.h"
+#include "policy/usage_statistics/statistics_manager.h"
+#include "protocol_handler/session_observer.h"
+#include "utils/callable.h"
+#include "utils/custom_string.h"
+#include "utils/data_accessor.h"
 #include "utils/file_system.h"
+#include "utils/helpers.h"
+#include "utils/logger.h"
+#include "utils/semantic_version.h"
 
 namespace {
 namespace custom_str = utils::custom_string;
@@ -1128,7 +1152,7 @@ void RegisterAppInterfaceRequest::FillDeviceInfo(
 bool RegisterAppInterfaceRequest::IsApplicationWithSameAppIdRegistered() {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  const custom_string::CustomString mobile_app_id(
+  const custom_str::CustomString mobile_app_id(
       application_manager_.GetCorrectMobileIDFromMessage(message_));
 
   const ApplicationSet& applications =
@@ -1308,13 +1332,13 @@ void RegisterAppInterfaceRequest::CheckResponseVehicleTypeParam(
 
 void RegisterAppInterfaceRequest::SendSubscribeCustomButtonNotification() {
   using namespace smart_objects;
-  using namespace hmi_apis;
 
   SmartObject msg_params = SmartObject(SmartType_Map);
   msg_params[strings::app_id] = connection_key();
-  msg_params[strings::name] = Common_ButtonName::CUSTOM_BUTTON;
+  msg_params[strings::name] = hmi_apis::Common_ButtonName::CUSTOM_BUTTON;
   msg_params[strings::is_suscribed] = true;
-  CreateHMINotification(FunctionID::Buttons_OnButtonSubscription, msg_params);
+  CreateHMINotification(hmi_apis::FunctionID::Buttons_OnButtonSubscription,
+                        msg_params);
 }
 
 bool RegisterAppInterfaceRequest::IsApplicationSwitched() {

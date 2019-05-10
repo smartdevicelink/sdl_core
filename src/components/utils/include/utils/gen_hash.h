@@ -33,6 +33,10 @@
 #ifndef SRC_COMPONENTS_UTILS_INCLUDE_UTILS_GEN_HASH_H_
 #define SRC_COMPONENTS_UTILS_INCLUDE_UTILS_GEN_HASH_H_
 
+#include <bits/stdint-intn.h>
+#include <bits/stdint-uintn.h>
+#include <stddef.h>
+#include <iosfwd>
 #include <string>
 
 namespace utils {

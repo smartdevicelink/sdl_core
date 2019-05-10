@@ -32,9 +32,12 @@
 #ifndef SRC_COMPONENTS_CONNECTION_HANDLER_INCLUDE_CONNECTION_HANDLER_HEARTBEAT_MONITOR_H_
 #define SRC_COMPONENTS_CONNECTION_HANDLER_INCLUDE_CONNECTION_HANDLER_HEARTBEAT_MONITOR_H_
 
+#include <bits/stdint-intn.h>
+#include <bits/stdint-uintn.h>
 #include <stdint.h>
 #include <map>
 
+#include "utils/conditional_variable.h"
 #include "utils/date_time.h"
 #include "utils/lock.h"
 #include "utils/macro.h"

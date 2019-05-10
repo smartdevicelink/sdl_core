@@ -33,6 +33,9 @@
 #ifndef SRC_COMPONENTS_RESUMPTION_INCLUDE_RESUMPTION_LAST_STATE_IMPL_H_
 #define SRC_COMPONENTS_RESUMPTION_INCLUDE_RESUMPTION_LAST_STATE_IMPL_H_
 
+#include <iosfwd>
+
+#include "json/value.h"
 #include "resumption/last_state.h"
 #include "utils/macro.h"
 

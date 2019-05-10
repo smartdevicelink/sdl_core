@@ -31,7 +31,19 @@
  */
 
 #include "sdl_rpc_plugin/commands/mobile/dial_number_response.h"
+
+#include "application_manager/commands/command_impl.h"
 #include "application_manager/rpc_service.h"
+#include "utils/logger.h"
+
+namespace application_manager {
+class ApplicationManager;
+class HMICapabilities;
+}  // namespace application_manager
+
+namespace policy {
+class PolicyHandlerInterface;
+}  // namespace policy
 
 namespace sdl_rpc_plugin {
 using namespace application_manager;

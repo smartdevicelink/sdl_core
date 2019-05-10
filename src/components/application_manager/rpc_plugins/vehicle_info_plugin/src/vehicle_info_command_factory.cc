@@ -32,6 +32,22 @@
 
 #include "vehicle_info_plugin/vehicle_info_command_factory.h"
 
+#include "utils/logger.h"
+#include "vehicle_info_plugin/vehicle_info_hmi_command_factory.h"
+#include "vehicle_info_plugin/vehicle_info_mobile_command_factory.h"
+
+namespace application_manager {
+class ApplicationManager;
+class HMICapabilities;
+namespace rpc_service {
+class RPCService;
+}  // namespace rpc_service
+}  // namespace application_manager
+
+namespace policy {
+class PolicyHandlerInterface;
+}  // namespace policy
+
 CREATE_LOGGERPTR_GLOBAL(logger_, "VehicleInfoPlugin")
 
 namespace vehicle_info_plugin {

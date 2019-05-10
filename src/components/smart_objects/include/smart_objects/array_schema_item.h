@@ -33,18 +33,26 @@
 #define SRC_COMPONENTS_SMART_OBJECTS_INCLUDE_SMART_OBJECTS_ARRAY_SCHEMA_ITEM_H_
 
 #include <stddef.h>
+#include <memory>
 
 #include "smart_objects/always_true_schema_item.h"
+#include "smart_objects/errors.h"
 #include "smart_objects/schema_item.h"
 #include "smart_objects/schema_item_parameter.h"
-
+#include "utils/macro.h"
 #include "utils/semantic_version.h"
+
+namespace rpc {
+class ValidationReport;
+}  // namespace rpc
 
 namespace ns_smart_device_link {
 namespace ns_smart_objects {
 /**
  * @brief Array schema item.
  **/
+class SmartObject;
+
 class CArraySchemaItem : public ISchemaItem {
  public:
   /**

@@ -30,15 +30,29 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 #include "rc_rpc_plugin/rc_rpc_plugin.h"
+
 #include <memory>
+
+#include "application_manager/application_manager.h"
 #include "application_manager/plugin_manager/plugin_keys.h"
+#include "rc_rpc_plugin/commands/rc_command_params.h"
 #include "rc_rpc_plugin/interior_data_cache_impl.h"
 #include "rc_rpc_plugin/interior_data_manager_impl.h"
-#include "rc_rpc_plugin/rc_app_extension.h"
 #include "rc_rpc_plugin/rc_command_factory.h"
-#include "rc_rpc_plugin/rc_helpers.h"
 #include "rc_rpc_plugin/resource_allocation_manager_impl.h"
-#include "utils/helpers.h"
+#include "utils/data_accessor.h"
+#include "utils/logger.h"
+
+namespace application_manager {
+class HMICapabilities;
+namespace rpc_service {
+class RPCService;
+}  // namespace rpc_service
+}  // namespace application_manager
+
+namespace policy {
+class PolicyHandlerInterface;
+}  // namespace policy
 
 namespace rc_rpc_plugin {
 CREATE_LOGGERPTR_GLOBAL(logger_, "RemoteControlModule");

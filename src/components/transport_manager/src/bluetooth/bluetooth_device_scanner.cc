@@ -38,19 +38,22 @@
 #include <bluetooth/bluetooth.h>
 #include <bluetooth/hci.h>
 #include <bluetooth/hci_lib.h>
-#include <bluetooth/rfcomm.h>
 #include <bluetooth/sdp.h>
 #include <bluetooth/sdp_lib.h>
 #include <errno.h>
-#include <sys/socket.h>
-#include <sys/time.h>
-#include <sys/types.h>
+#include <log4cxx/helpers/objectptr.h>
+#include <log4cxx/logger.h>
+#include <stdio.h>
+#include <string.h>
 #include <unistd.h>
+#include <memory>
 #include <sstream>
+#include <string>
 #include <vector>
-#include "transport_manager/bluetooth/bluetooth_device.h"
-#include "transport_manager/bluetooth/bluetooth_transport_adapter.h"
 
+#include "transport_manager/bluetooth/bluetooth_device.h"
+#include "transport_manager/error.h"
+#include "transport_manager/transport_adapter/transport_adapter_controller.h"
 #include "utils/logger.h"
 #include "utils/threads/thread.h"
 

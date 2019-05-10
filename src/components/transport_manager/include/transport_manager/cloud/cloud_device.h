@@ -38,6 +38,9 @@
 #ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_CLOUD_CLOUD_DEVICE_H_
 #define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_CLOUD_CLOUD_DEVICE_H_
 
+#include <iosfwd>
+
+#include "transport_manager/common.h"
 #include "transport_manager/transport_adapter/device.h"
 
 namespace transport_manager {

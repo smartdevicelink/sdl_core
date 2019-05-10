@@ -33,7 +33,25 @@
 #ifndef SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_VEHICLE_INFO_PLUGIN_INCLUDE_VEHICLE_INFO_PLUGIN_VEHICLE_INFO_MOBILE_COMMAND_FACTORY_H
 #define SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_VEHICLE_INFO_PLUGIN_INCLUDE_VEHICLE_INFO_PLUGIN_VEHICLE_INFO_MOBILE_COMMAND_FACTORY_H
 
+#include <bits/stdint-intn.h>
+
+#include "application_manager/app_extension.h"
 #include "application_manager/application_manager.h"
+#include "application_manager/command_factory.h"
+#include "application_manager/commands/command.h"
+#include "utils/macro.h"
+
+namespace application_manager {
+class ApplicationManager;
+class HMICapabilities;
+namespace rpc_service {
+class RPCService;
+}  // namespace rpc_service
+}  // namespace application_manager
+
+namespace policy {
+class PolicyHandlerInterface;
+}  // namespace policy
 
 namespace vehicle_info_plugin {
 namespace app_mngr = application_manager;

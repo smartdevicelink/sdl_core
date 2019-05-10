@@ -36,12 +36,16 @@
 #ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_USB_USB_CONNECTION_FACTORY_H_
 #define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_USB_USB_CONNECTION_FACTORY_H_
 
+#include "transport_manager/common.h"
 #include "transport_manager/transport_adapter/server_connection_factory.h"
+#include "transport_manager/transport_adapter/transport_adapter.h"
 #include "transport_manager/transport_adapter/transport_adapter_controller.h"
 #include "transport_manager/usb/common.h"
 
 namespace transport_manager {
 namespace transport_adapter {
+
+class TransportAdapterController;
 
 class UsbConnectionFactory : public ServerConnectionFactory {
  public:

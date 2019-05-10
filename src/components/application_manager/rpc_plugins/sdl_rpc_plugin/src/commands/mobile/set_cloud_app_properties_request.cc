@@ -1,5 +1,42 @@
 #include "sdl_rpc_plugin/commands/mobile/set_cloud_app_properties_request.h"
 
+#include <log4cxx/helpers/objectptr.h>
+#include <log4cxx/logger.h>
+#include <memory>
+
+#include "application_manager/application.h"
+#include "application_manager/application_manager.h"
+#include "application_manager/commands/command_impl.h"
+#include "application_manager/policies/policy_handler_interface.h"
+#include "interfaces/MOBILE_API.h"
+#include "utils/logger.h"
+
+namespace application_manager {
+class HMICapabilities;
+namespace event_engine {
+class Event;
+}  // namespace event_engine
+namespace rpc_service {
+class RPCService;
+}  // namespace rpc_service
+
+class HMICapabilities;
+namespace event_engine {
+class Event;
+}  // namespace event_engine
+namespace rpc_service {
+class RPCService;
+}  // namespace rpc_service
+
+class HMICapabilities;
+namespace event_engine {
+class Event;
+}  // namespace event_engine
+namespace rpc_service {
+class RPCService;
+}  // namespace rpc_service
+}  // namespace application_manager
+
 namespace sdl_rpc_plugin {
 using namespace application_manager;
 

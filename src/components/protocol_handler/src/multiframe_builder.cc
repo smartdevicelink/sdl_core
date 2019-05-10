@@ -32,12 +32,14 @@
 
 #include "protocol_handler/multiframe_builder.h"
 
+#include <log4cxx/helpers/objectptr.h>
+#include <log4cxx/logger.h>
+
 #include <limits>
 
-#include "utils/logger.h"
-
 #include "utils/date_time.h"
-#include "utils/lock.h"
+#include "utils/logger.h"
+#include "utils/macro.h"
 
 namespace protocol_handler {
 

@@ -32,19 +32,21 @@
 
 #include "security_manager/crypto_manager_impl.h"
 
+#include <log4cxx/helpers/objectptr.h>
+#include <log4cxx/logger.h>
 #include <openssl/bio.h>
 #include <openssl/err.h>
-#include <openssl/pkcs12.h>
-#include <openssl/ssl.h>
-
-#include <stdio.h>
+#include <openssl/evp.h>
+#include <openssl/opensslv.h>
+#include <openssl/pem.h>
+#include <openssl/ssl3.h>
+#include <openssl/x509.h>
 #include <algorithm>
 #include <ctime>
 #include <fstream>
-#include <iostream>
-#include "security_manager/security_manager.h"
+#include <string>
+#include <vector>
 
-#include "utils/atomic.h"
 #include "utils/date_time.h"
 #include "utils/logger.h"
 #include "utils/macro.h"

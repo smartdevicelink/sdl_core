@@ -32,7 +32,29 @@
  */
 
 #include "sdl_rpc_plugin/commands/mobile/on_way_point_change_notification.h"
+
+#include <bits/stdint-uintn.h>
+
+#include <cstdint>
+#include <memory>
+#include <set>
+
 #include "application_manager/application_manager.h"
+#include "application_manager/commands/command_impl.h"
+#include "application_manager/smart_object_keys.h"
+#include "smart_objects/smart_object.h"
+#include "utils/logger.h"
+
+namespace application_manager {
+class HMICapabilities;
+namespace rpc_service {
+class RPCService;
+}  // namespace rpc_service
+}  // namespace application_manager
+
+namespace policy {
+class PolicyHandlerInterface;
+}  // namespace policy
 
 namespace sdl_rpc_plugin {
 using namespace application_manager;

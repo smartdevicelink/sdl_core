@@ -1,4 +1,8 @@
-﻿/*
+#include <bits/stdint-uintn.h>
+#include <iosfwd>
+#include <memory>
+
+/*
  Copyright (c) 2013, Ford Motor Company
  All rights reserved.
 
@@ -29,14 +33,14 @@
  ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  POSSIBILITY OF SUCH DAMAGE.
  */
-
 #ifndef SRC_COMPONENTS_POLICY_POLICY_REGULAR_INCLUDE_POLICY_USAGE_STATISTICS_COUNTER_H_
 #define SRC_COMPONENTS_POLICY_POLICY_REGULAR_INCLUDE_POLICY_USAGE_STATISTICS_COUNTER_H_
 
 #include <ctime>
+#include <memory>
+
 #include "policy/usage_statistics/app_stopwatch.h"
 #include "policy/usage_statistics/statistics_manager.h"
-
 #include "utils/macro.h"
 #include "utils/timer.h"
 

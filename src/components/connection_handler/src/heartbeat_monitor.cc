@@ -31,7 +31,9 @@
  */
 #include "connection_handler/heartbeat_monitor.h"
 
-#include <unistd.h>
+#include <log4cxx/helpers/objectptr.h>
+#include <log4cxx/logger.h>
+#include <ostream>
 #include <utility>
 
 #include "connection_handler/connection.h"

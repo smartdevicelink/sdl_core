@@ -31,8 +31,49 @@
  */
 
 #include "sdl_rpc_plugin/commands/hmi/sdl_activate_app_request.h"
+
+#include <log4cxx/helpers/objectptr.h>
+#include <log4cxx/logger.h>
+
+#include <algorithm>
+#include <iterator>
+#include <memory>
+#include <ostream>
+#include <utility>
+
+#include "application_manager/application_manager.h"
+#include "application_manager/application_manager_settings.h"
+#include "application_manager/commands/command_impl.h"
+#include "application_manager/event_engine/event.h"
+#include "application_manager/hmi_state.h"
+#include "application_manager/message.h"
 #include "application_manager/message_helper.h"
+#include "application_manager/policies/policy_handler_interface.h"
+#include "application_manager/smart_object_keys.h"
 #include "application_manager/state_controller.h"
+#include "connection_handler/connection_handler.h"
+#include "interfaces/HMI_API.h"
+#include "protocol/common.h"
+#include "smart_objects/smart_object.h"
+#include "utils/data_accessor.h"
+#include "utils/logger.h"
+
+namespace application_manager {
+class HMICapabilities;
+namespace rpc_service {
+class RPCService;
+}  // namespace rpc_service
+
+class HMICapabilities;
+namespace rpc_service {
+class RPCService;
+}  // namespace rpc_service
+
+class HMICapabilities;
+namespace rpc_service {
+class RPCService;
+}  // namespace rpc_service
+}  // namespace application_manager
 
 namespace sdl_rpc_plugin {
 using namespace application_manager;

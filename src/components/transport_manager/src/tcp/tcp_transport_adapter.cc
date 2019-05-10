@@ -32,19 +32,27 @@
 
 #include "transport_manager/tcp/tcp_transport_adapter.h"
 
-#include <errno.h>
-#include <memory.h>
-#include <signal.h>
+#include <arpa/inet.h>
+#include <log4cxx/helpers/objectptr.h>
+#include <log4cxx/logger.h>
+#include <netinet/in.h>
 #include <stdio.h>
-
 #include <cstdlib>
+#include <memory>
 #include <sstream>
+#include <string>
+#include <vector>
 
+#include "json/value.h"
+#include "resumption/last_state.h"
+#include "transport_manager/common.h"
 #include "transport_manager/tcp/tcp_client_listener.h"
 #include "transport_manager/tcp/tcp_connection_factory.h"
 #include "transport_manager/tcp/tcp_device.h"
+#include "transport_manager/transport_adapter/connection.h"
+#include "transport_manager/transport_adapter/device.h"
+#include "transport_manager/transport_manager_settings.h"
 #include "utils/logger.h"
-#include "utils/threads/thread_delegate.h"
 
 namespace transport_manager {
 namespace transport_adapter {

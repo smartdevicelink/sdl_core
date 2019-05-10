@@ -37,36 +37,47 @@
 
 #define __STDC_FORMAT_MACROS
 #include <inttypes.h>
+#include <log4cxx/helpers/objectptr.h>
+#include <log4cxx/logger.h>
+#include <stdio.h>
+
 #undef __STDC_FORMAT_MACROS
 
-#include <strings.h>
 #include <algorithm>
-#include <functional>
+#include <cstdint>
 #include <map>
+#include <memory>
+#include <ostream>
 #include <set>
 #include <string>
+#include <type_traits>
 #include <utility>
 
 #include "application_manager/application.h"
 #include "application_manager/application_manager.h"
+#include "application_manager/application_manager_settings.h"
+#include "application_manager/commands/command.h"
 #include "application_manager/commands/command_impl.h"
-#include "application_manager/message_helper.h"
+#include "application_manager/help_prompt_manager.h"
+#include "application_manager/message.h"
 #include "application_manager/policies/policy_handler_interface.h"
 #include "application_manager/resumption/resume_ctrl.h"
 #include "application_manager/rpc_service.h"
-#include "connection_handler/connection_handler_impl.h"
+#include "application_manager/smart_object_keys.h"
+#include "connection_handler/connection_handler.h"
+#include "formatters/CFormatterJsonBase.h"
 #include "interfaces/MOBILE_API.h"
+#include "json/value.h"
+#include "policy/cache_manager_interface.h"
+#include "protocol/common.h"
+#include "protocol_handler/session_observer.h"
 #include "smart_objects/enum_schema_item.h"
 #include "transport_manager/common.h"
+#include "utils/data_accessor.h"
 #include "utils/file_system.h"
+#include "utils/helpers.h"
 #include "utils/logger.h"
 #include "utils/macro.h"
-
-#include "formatters/CFormatterJsonBase.h"
-#include "formatters/CFormatterJsonSDLRPCv1.h"
-#include "formatters/CFormatterJsonSDLRPCv2.h"
-#include "formatters/formatter_json_rpc.h"
-#include "json/json.h"
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "ApplicationManager")
 
@@ -140,7 +151,6 @@ struct ExternalConsentStatusAppender
 
   void operator()(const policy::ExternalConsentStatus::value_type& item) {
     using namespace smart_objects;
-    using namespace policy;
     using namespace hmi_apis;
     status_[index_] = SmartObject(SmartType_Map);
 
@@ -2026,10 +2036,11 @@ void MessageHelper::SendGetListOfPermissionsResponse(
 
   SmartObject& params = (*message)[strings::params];
 
-  params[strings::function_id] = FunctionID::SDL_GetListOfPermissions;
+  params[strings::function_id] = hmi_apis::FunctionID::SDL_GetListOfPermissions;
   params[strings::message_type] = MessageType::kResponse;
   params[strings::correlation_id] = correlation_id;
-  params[hmi_response::code] = static_cast<int32_t>(Common_Result::SUCCESS);
+  params[hmi_response::code] =
+      static_cast<int32_t>(hmi_apis::Common_Result::SUCCESS);
 
   SmartObject& msg_params = (*message)[strings::msg_params];
 
@@ -2061,17 +2072,17 @@ void MessageHelper::SendGetListOfPermissionsResponse(
     uint32_t correlation_id,
     ApplicationManager& app_mngr) {
   using namespace smart_objects;
-  using namespace hmi_apis;
 
   SmartObjectSPtr message = std::make_shared<SmartObject>(SmartType_Map);
   DCHECK_OR_RETURN_VOID(message);
 
   SmartObject& params = (*message)[strings::params];
 
-  params[strings::function_id] = FunctionID::SDL_GetListOfPermissions;
+  params[strings::function_id] = hmi_apis::FunctionID::SDL_GetListOfPermissions;
   params[strings::message_type] = MessageType::kResponse;
   params[strings::correlation_id] = correlation_id;
-  params[hmi_response::code] = static_cast<int32_t>(Common_Result::SUCCESS);
+  params[hmi_response::code] =
+      static_cast<int32_t>(hmi_apis::Common_Result::SUCCESS);
 
   SmartObject& msg_params = (*message)[strings::msg_params];
 
@@ -2348,11 +2359,11 @@ void MessageHelper::SendLaunchApp(const uint32_t connection_key,
                                   const std::string& urlSchema,
                                   const std::string& packageName,
                                   ApplicationManager& app_mngr) {
-  using namespace mobile_apis;
   using namespace smart_objects;
 
   SmartObject content(SmartType_Map);
-  content[strings::msg_params][strings::request_type] = RequestType::LAUNCH_APP;
+  content[strings::msg_params][strings::request_type] =
+      mobile_apis::RequestType::LAUNCH_APP;
   content[strings::msg_params][strings::app_id] = connection_key;
   if (!urlSchema.empty()) {
     content[strings::msg_params][strings::url] = urlSchema;
@@ -2365,13 +2376,12 @@ void MessageHelper::SendLaunchApp(const uint32_t connection_key,
 
 void MessageHelper::SendQueryApps(const uint32_t connection_key,
                                   ApplicationManager& app_mngr) {
-  using namespace mobile_apis;
-
   policy::PolicyHandlerInterface& policy_handler = app_mngr.GetPolicyHandler();
 
   const uint32_t timeout = policy_handler.TimeoutExchangeSec();
   smart_objects::SmartObject content(smart_objects::SmartType_Map);
-  content[strings::msg_params][strings::request_type] = RequestType::QUERY_APPS;
+  content[strings::msg_params][strings::request_type] =
+      mobile_apis::RequestType::QUERY_APPS;
   content[strings::msg_params][strings::url] = policy_handler.RemoteAppsUrl();
   content[strings::msg_params][strings::timeout] = timeout;
 
@@ -2393,7 +2403,8 @@ void MessageHelper::SendQueryApps(const uint32_t connection_key,
 
   content[strings::params][strings::binary_data] =
       smart_objects::SmartObject(binary_data);
-  content[strings::msg_params][strings::file_type] = FileType::BINARY;
+  content[strings::msg_params][strings::file_type] =
+      mobile_apis::FileType::BINARY;
 
   SendSystemRequestNotification(connection_key, content, app_mngr);
 }
@@ -2876,7 +2887,6 @@ bool MessageHelper::VerifyString(const std::string& str) {
 bool CheckWithPolicy(mobile_api::SystemAction::eType system_action,
                      const std::string& app_mobile_id,
                      const policy::PolicyHandlerInterface& policy_handler) {
-  using namespace mobile_apis;
   bool result = true;
   if (policy_handler.PolicyEnabled()) {
     result = policy_handler.CheckSystemAction(system_action, app_mobile_id);
@@ -2889,7 +2899,6 @@ mobile_apis::Result::eType MessageHelper::ProcessSoftButtons(
     ApplicationConstSharedPtr app,
     const policy::PolicyHandlerInterface& policy_handler,
     ApplicationManager& app_mngr) {
-  using namespace mobile_apis;
   using namespace smart_objects;
 
   if (!message_params.keyExists(strings::soft_buttons)) {
@@ -2900,7 +2909,7 @@ mobile_apis::Result::eType MessageHelper::ProcessSoftButtons(
 
   // Check whether soft buttons request is well-formed
   if (!ValidateSoftButtons(request_soft_buttons)) {
-    return Result::INVALID_DATA;
+    return mobile_apis::Result::INVALID_DATA;
   }
 
   SmartObject soft_buttons(SmartType_Array);
@@ -2911,51 +2920,52 @@ mobile_apis::Result::eType MessageHelper::ProcessSoftButtons(
     const int system_action =
         request_soft_buttons[i][strings::system_action].asInt();
 
-    if (!CheckWithPolicy(static_cast<SystemAction::eType>(system_action),
-                         app->policy_app_id(),
-                         policy_handler)) {
-      return Result::DISALLOWED;
+    if (!CheckWithPolicy(
+            static_cast<mobile_apis::SystemAction::eType>(system_action),
+            app->policy_app_id(),
+            policy_handler)) {
+      return mobile_apis::Result::DISALLOWED;
     }
 
     switch (request_soft_buttons[i][strings::type].asInt()) {
-      case SoftButtonType::SBT_IMAGE: {
+      case mobile_apis::SoftButtonType::SBT_IMAGE: {
         // Any text value for type "IMAGE" should be ignored.
         if (request_soft_buttons[i].keyExists(strings::text)) {
           request_soft_buttons[i].erase(strings::text);
         }
 
         if ((!request_soft_buttons[i].keyExists(strings::image) ||
-             (Result::INVALID_DATA ==
+             (mobile_apis::Result::INVALID_DATA ==
               VerifyImage(
                   request_soft_buttons[i][strings::image], app, app_mngr)))) {
-          return Result::INVALID_DATA;
+          return mobile_apis::Result::INVALID_DATA;
         }
         break;
       }
-      case SoftButtonType::SBT_TEXT: {
+      case mobile_apis::SoftButtonType::SBT_TEXT: {
         if (request_soft_buttons[i].keyExists(strings::image)) {
           request_soft_buttons[i].erase(strings::image);
         }
         if ((!request_soft_buttons[i].keyExists(strings::text)) ||
             (!VerifyString(
                 request_soft_buttons[i][strings::text].asString()))) {
-          return Result::INVALID_DATA;
+          return mobile_apis::Result::INVALID_DATA;
         }
         break;
       }
-      case SoftButtonType::SBT_BOTH: {
+      case mobile_apis::SoftButtonType::SBT_BOTH: {
         if ((!request_soft_buttons[i].keyExists(strings::text)) ||
             ((request_soft_buttons[i][strings::text].length()) &&
              (!VerifyString(
                  request_soft_buttons[i][strings::text].asString())))) {
-          return Result::INVALID_DATA;
+          return mobile_apis::Result::INVALID_DATA;
         }
 
         if ((!request_soft_buttons[i].keyExists(strings::image) ||
-             (Result::INVALID_DATA ==
+             (mobile_apis::Result::INVALID_DATA ==
               VerifyImage(
                   request_soft_buttons[i][strings::image], app, app_mngr)))) {
-          return Result::INVALID_DATA;
+          return mobile_apis::Result::INVALID_DATA;
         }
         break;
       }
@@ -2973,7 +2983,7 @@ mobile_apis::Result::eType MessageHelper::ProcessSoftButtons(
   if (0 == request_soft_buttons.length()) {
     message_params.erase(strings::soft_buttons);
   }
-  return Result::SUCCESS;
+  return mobile_apis::Result::SUCCESS;
 }
 
 void MessageHelper::SubscribeApplicationToSoftButton(

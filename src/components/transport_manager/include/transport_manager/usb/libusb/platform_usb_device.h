@@ -36,7 +36,9 @@
 #ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_USB_LIBUSB_PLATFORM_USB_DEVICE_H_
 #define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_USB_LIBUSB_PLATFORM_USB_DEVICE_H_
 
+#include <bits/stdint-uintn.h>
 #include <libusb-1.0/libusb.h>
+#include <iosfwd>
 #include <string>
 
 namespace transport_manager {

@@ -33,13 +33,23 @@
 #include "transport_manager/iap2_emulation/iap2_transport_adapter.h"
 
 #include <fcntl.h>
+#include <log4cxx/helpers/objectptr.h>
+#include <log4cxx/logger.h>
 #include <stdio.h>
 #include <sys/stat.h>
-#include <sys/types.h>
 #include <unistd.h>
+#include <ostream>
+#include <string>
 
-#include "utils/file_system.h"
+#include "utils/logger.h"
 #include "utils/threads/thread.h"
+
+namespace resumption {
+class LastState;
+}  // namespace resumption
+namespace transport_manager {
+class TransportManagerSettings;
+}  // namespace transport_manager
 
 namespace {
 static const mode_t mode = 0666;

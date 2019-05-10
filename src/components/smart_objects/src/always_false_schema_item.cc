@@ -32,8 +32,12 @@
 
 #include "smart_objects/always_false_schema_item.h"
 
+#include "rpc_base/validation_report.h"
+
 namespace ns_smart_device_link {
 namespace ns_smart_objects {
+
+class SmartObject;
 
 CAlwaysFalseSchemaItem::CAlwaysFalseSchemaItem() {}
 

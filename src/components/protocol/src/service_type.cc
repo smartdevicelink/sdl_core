@@ -31,6 +31,10 @@
  */
 #include "protocol/service_type.h"
 
+#include <bits/stdint-intn.h>
+#include <log4cxx/helpers/objectptr.h>
+#include <log4cxx/logger.h>
+
 #include "utils/logger.h"
 #include "utils/macro.h"
 

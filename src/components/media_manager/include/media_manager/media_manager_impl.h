@@ -33,13 +33,27 @@
 #ifndef SRC_COMPONENTS_MEDIA_MANAGER_INCLUDE_MEDIA_MANAGER_MEDIA_MANAGER_IMPL_H_
 #define SRC_COMPONENTS_MEDIA_MANAGER_INCLUDE_MEDIA_MANAGER_MEDIA_MANAGER_IMPL_H_
 
+#include <bits/stdint-intn.h>
+#include <iosfwd>
 #include <map>
 #include <string>
+
 #include "media_manager/media_adapter_impl.h"
 #include "media_manager/media_adapter_listener.h"
 #include "media_manager/media_manager.h"
+#include "protocol/raw_message.h"
+#include "protocol/service_type.h"
 #include "protocol_handler/protocol_handler.h"
 #include "protocol_handler/protocol_observer.h"
+#include "utils/macro.h"
+
+namespace media_manager {
+class MediaAdapter;
+class MediaManagerSettings;
+}  // namespace media_manager
+namespace protocol_handler {
+class ProtocolHandler;
+}  // namespace protocol_handler
 
 namespace application_manager {
 class ApplicationManager;

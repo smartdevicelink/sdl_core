@@ -32,8 +32,17 @@
  */
 
 #include "sdl_rpc_plugin/commands/mobile/unregister_app_interface_request.h"
+
+#include <log4cxx/helpers/objectptr.h>
+#include <log4cxx/logger.h>
+
+#include "application_manager/application.h"
+#include "application_manager/application_manager.h"
+#include "application_manager/commands/command_impl.h"
 #include "application_manager/message_helper.h"
 #include "application_manager/rpc_service.h"
+#include "interfaces/MOBILE_API.h"
+#include "utils/logger.h"
 
 namespace sdl_rpc_plugin {
 using namespace application_manager;

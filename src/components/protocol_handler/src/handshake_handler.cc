@@ -33,11 +33,18 @@
 #include "protocol_handler/handshake_handler.h"
 
 #include <bson_object.h>
+#include <log4cxx/helpers/objectptr.h>
+#include <log4cxx/logger.h>
+#include <stddef.h>
+#include <algorithm>
+#include <ostream>
+#include <vector>
 
+#include "protocol/common.h"
 #include "protocol_handler/protocol_handler_impl.h"
-#include "protocol_handler/protocol_packet.h"
+#include "protocol_handler/protocol_handler_settings.h"
 #include "protocol_handler/session_observer.h"
-#include "security_manager/security_manager.h"
+#include "utils/logger.h"
 
 namespace protocol_handler {
 

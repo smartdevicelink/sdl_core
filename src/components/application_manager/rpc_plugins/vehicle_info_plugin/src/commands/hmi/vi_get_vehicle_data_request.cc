@@ -32,6 +32,21 @@
 
 #include "vehicle_info_plugin/commands/hmi/vi_get_vehicle_data_request.h"
 
+#include "application_manager/commands/command_impl.h"
+#include "utils/logger.h"
+
+namespace application_manager {
+class ApplicationManager;
+class HMICapabilities;
+namespace rpc_service {
+class RPCService;
+}  // namespace rpc_service
+}  // namespace application_manager
+
+namespace policy {
+class PolicyHandlerInterface;
+}  // namespace policy
+
 namespace vehicle_info_plugin {
 using namespace application_manager;
 

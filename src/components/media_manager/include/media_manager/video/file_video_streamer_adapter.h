@@ -33,6 +33,8 @@
 #ifndef SRC_COMPONENTS_MEDIA_MANAGER_INCLUDE_MEDIA_MANAGER_VIDEO_FILE_VIDEO_STREAMER_ADAPTER_H_
 #define SRC_COMPONENTS_MEDIA_MANAGER_INCLUDE_MEDIA_MANAGER_VIDEO_FILE_VIDEO_STREAMER_ADAPTER_H_
 
+#include <iosfwd>
+
 #include "media_manager/file_streamer_adapter.h"
 
 namespace media_manager {

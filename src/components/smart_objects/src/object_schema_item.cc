@@ -31,8 +31,14 @@
  */
 #include "smart_objects/object_schema_item.h"
 
-#include <algorithm>
+#include <sys/types.h>
 
+#include <boost/none.hpp>
+#include <boost/optional/detail/optional_relops.hpp>
+#include <set>
+#include <utility>
+
+#include "rpc_base/validation_report.h"
 #include "smart_objects/always_false_schema_item.h"
 #include "smart_objects/smart_object.h"
 

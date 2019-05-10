@@ -32,20 +32,20 @@
 
 #include "transport_manager/transport_manager_impl.h"
 
-#include <stdint.h>
+#include <log4cxx/helpers/objectptr.h>
+#include <log4cxx/logger.h>
+
 #include <algorithm>
 #include <cstring>
-#include <functional>
-#include <iostream>
-#include <limits>
-#include <queue>
+#include <iterator>
 #include <set>
-#include <sstream>
 
+#include "transport_manager/error.h"
+#include "transport_manager/telemetry_observer.h"
+#include "transport_manager/transport_adapter/transport_adapter_listener_impl.h"
+#include "transport_manager/transport_manager_settings.h"
 #include "utils/logger.h"
 #include "utils/macro.h"
-
-#include "config_profile/profile.h"
 #if defined(CLOUD_APP_WEBSOCKET_TRANSPORT_SUPPORT)
 #include "transport_manager/cloud/cloud_websocket_transport_adapter.h"
 #endif
@@ -53,8 +53,11 @@
 #include "transport_manager/transport_adapter/transport_adapter.h"
 #include "transport_manager/transport_adapter/transport_adapter_event.h"
 #include "transport_manager/transport_manager_listener.h"
-#include "transport_manager/transport_manager_listener_empty.h"
 #include "utils/timer_task_impl.h"
+
+namespace resumption {
+class LastState;
+}  // namespace resumption
 
 using ::transport_manager::transport_adapter::TransportAdapter;
 

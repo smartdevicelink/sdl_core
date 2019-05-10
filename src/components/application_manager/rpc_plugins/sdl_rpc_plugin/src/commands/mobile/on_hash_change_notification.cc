@@ -34,9 +34,30 @@
 
 #include "sdl_rpc_plugin/commands/mobile/on_hash_change_notification.h"
 
-#include <string>
-#include "application_manager/application_impl.h"
-#include "interfaces/MOBILE_API.h"
+#include <bits/stdint-intn.h>
+#include <log4cxx/helpers/objectptr.h>
+#include <log4cxx/logger.h>
+#include <memory>
+#include <ostream>
+
+#include "application_manager/application.h"
+#include "application_manager/application_manager.h"
+#include "application_manager/commands/command_impl.h"
+#include "application_manager/message.h"
+#include "application_manager/smart_object_keys.h"
+#include "smart_objects/smart_object.h"
+#include "utils/logger.h"
+
+namespace application_manager {
+class HMICapabilities;
+namespace rpc_service {
+class RPCService;
+}  // namespace rpc_service
+}  // namespace application_manager
+
+namespace policy {
+class PolicyHandlerInterface;
+}  // namespace policy
 
 namespace sdl_rpc_plugin {
 using namespace application_manager;

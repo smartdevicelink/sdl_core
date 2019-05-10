@@ -21,6 +21,9 @@ link_directories (
 set(LIBRARIES
   policy_struct
   rpc_base
+	log4cxx -L${LOG4CXX_LIBS_DIRECTORY}
+    apr-1 -L${APR_LIBS_DIRECTORY}
+    aprutil-1 -L${APR_UTIL_LIBS_DIRECTORY}
 )
 
 set (SOURCES

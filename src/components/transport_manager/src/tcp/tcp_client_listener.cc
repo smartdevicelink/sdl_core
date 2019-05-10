@@ -37,12 +37,12 @@
 #include <errno.h>
 #include <fcntl.h>
 #include <ifaddrs.h>
-#include <memory.h>
-#include <signal.h>
+#include <log4cxx/helpers/objectptr.h>
+#include <log4cxx/logger.h>
+#include <netinet/in.h>
+#include <string.h>
 #include <sys/select.h>
 #include <sys/socket.h>
-#include <sys/sysctl.h>
-#include <sys/types.h>
 #include <unistd.h>
 #ifdef __linux__
 #include <linux/tcp.h>
@@ -53,14 +53,19 @@
 #include <sys/time.h>
 #endif  // __linux__
 
+#include <memory>
 #include <sstream>
+#include <string>
+#include <utility>
 
-#include "utils/logger.h"
-
+#include "transport_manager/common.h"
+#include "transport_manager/tcp/network_interface_listener.h"
 #include "transport_manager/tcp/network_interface_listener_impl.h"
 #include "transport_manager/tcp/tcp_device.h"
 #include "transport_manager/tcp/tcp_socket_connection.h"
+#include "transport_manager/transport_adapter/device.h"
 #include "transport_manager/transport_adapter/transport_adapter_controller.h"
+#include "utils/logger.h"
 #include "utils/threads/thread.h"
 
 namespace transport_manager {

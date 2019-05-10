@@ -29,6 +29,11 @@
 // POSSIBILITY OF SUCH DAMAGE.
 
 #include "smart_objects/array_schema_item.h"
+
+#include <ostream>
+#include <string>
+
+#include "rpc_base/validation_report.h"
 #include "smart_objects/smart_object.h"
 
 namespace ns_smart_device_link {

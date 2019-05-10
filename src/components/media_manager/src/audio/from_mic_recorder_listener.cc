@@ -31,9 +31,16 @@
  */
 
 #include "media_manager/audio/from_mic_recorder_listener.h"
+
+#include <log4cxx/helpers/objectptr.h>
+#include <log4cxx/logger.h>
+#include <stddef.h>
+#include <ostream>
+
 #include "media_manager/audio/audio_stream_sender_thread.h"
 #include "utils/logger.h"
 #include "utils/threads/thread.h"
+#include "utils/threads/thread_delegate.h"
 
 namespace media_manager {
 

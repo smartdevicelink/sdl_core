@@ -34,11 +34,14 @@
  */
 
 #include "transport_manager/cloud/cloud_websocket_connection_factory.h"
+
+#include <log4cxx/helpers/objectptr.h>
+#include <log4cxx/logger.h>
+#include <memory>
+
 #include "transport_manager/cloud/websocket_client_connection.h"
 #include "transport_manager/transport_adapter/transport_adapter_controller.h"
 #include "utils/logger.h"
-
-#include "transport_manager/cloud/cloud_device.h"
 
 namespace transport_manager {
 namespace transport_adapter {

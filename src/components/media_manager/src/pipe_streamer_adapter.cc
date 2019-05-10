@@ -31,10 +31,18 @@
  */
 
 #include "media_manager/pipe_streamer_adapter.h"
+
+#include <bits/stdint-uintn.h>
 #include <errno.h>
 #include <fcntl.h>
+#include <log4cxx/helpers/objectptr.h>
+#include <log4cxx/logger.h>
 #include <sys/stat.h>
 #include <unistd.h>
+#include <memory>
+#include <ostream>
+#include <string>
+
 #include "utils/file_system.h"
 #include "utils/logger.h"
 

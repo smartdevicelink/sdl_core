@@ -33,9 +33,16 @@
 #ifndef SRC_COMPONENTS_POLICY_POLICY_REGULAR_INCLUDE_POLICY_POLICY_MANAGER_IMPL_H_
 #define SRC_COMPONENTS_POLICY_POLICY_REGULAR_INCLUDE_POLICY_POLICY_MANAGER_IMPL_H_
 
+#include <bits/stdint-intn.h>
+#include <bits/stdint-uintn.h>
+#include <stddef.h>
 #include <cstdint>
+#include <iosfwd>
 #include <list>
+#include <map>
+#include <memory>
 #include <string>
+#include <vector>
 
 #include "policy/access_remote.h"
 #include "policy/access_remote_impl.h"
@@ -43,15 +50,24 @@
 #include "policy/policy_helper.h"
 #include "policy/policy_manager.h"
 #include "policy/policy_table.h"
+#include "policy/policy_table/enums.h"
 #include "policy/policy_table/functions.h"
+#include "policy/policy_table/types.h"
+#include "policy/policy_types.h"
 #include "policy/update_status_manager.h"
 #include "policy/usage_statistics/statistics_manager.h"
+#include "rpc_base/rpc_base.h"
 #include "utils/lock.h"
+#include "utils/macro.h"
 #include "utils/timer.h"
 
 namespace policy_table = rpc::policy_table_interface_base;
 
 namespace policy {
+class AccessRemote;
+class PolicyListener;
+class PolicySettings;
+struct ApplicationOnDevice;
 struct CheckAppPolicy;
 
 class PolicyManagerImpl : public PolicyManager {

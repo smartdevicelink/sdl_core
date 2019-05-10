@@ -34,9 +34,21 @@
 #define SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_VEHICLE_INFO_PLUGIN_INCLUDE_VEHICLE_INFO_PLUGIN_VEHICLE_INFO_APP_EXTENSION_H
 
 #include <application_manager/application_manager.h>
-
 #include <set>
 #include <string>
+
+#include "application_manager/app_extension.h"
+#include "interfaces/MOBILE_API.h"
+#include "utils/macro.h"
+
+namespace application_manager {
+class Application;
+}  // namespace application_manager
+namespace ns_smart_device_link {
+namespace ns_smart_objects {
+class SmartObject;
+}  // namespace ns_smart_objects
+}  // namespace ns_smart_device_link
 
 namespace vehicle_info_plugin {
 class VehicleInfoPlugin;

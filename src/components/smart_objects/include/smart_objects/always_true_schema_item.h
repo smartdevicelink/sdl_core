@@ -33,13 +33,24 @@
 #ifndef SRC_COMPONENTS_SMART_OBJECTS_INCLUDE_SMART_OBJECTS_ALWAYS_TRUE_SCHEMA_ITEM_H_
 #define SRC_COMPONENTS_SMART_OBJECTS_INCLUDE_SMART_OBJECTS_ALWAYS_TRUE_SCHEMA_ITEM_H_
 
+#include <memory>
+
+#include "smart_objects/errors.h"
 #include "smart_objects/schema_item.h"
+#include "utils/macro.h"
+#include "utils/semantic_version.h"
+
+namespace rpc {
+class ValidationReport;
+}  // namespace rpc
 
 namespace ns_smart_device_link {
 namespace ns_smart_objects {
 /**
  * @brief Always true schema item.
  **/
+class SmartObject;
+
 class CAlwaysTrueSchemaItem : public ISchemaItem {
  public:
   /**

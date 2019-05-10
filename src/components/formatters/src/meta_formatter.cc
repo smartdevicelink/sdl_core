@@ -33,10 +33,10 @@
 // ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.auto
 
-#include <set>
-#include <string>
-
 #include "formatters/meta_formatter.h"
+#include "smart_objects/errors.h"
+#include "smart_objects/smart_object.h"
+#include "smart_objects/smart_schema.h"
 
 namespace formatter_ns = ns_smart_device_link::ns_json_handler::formatters;
 namespace smart_objects_ns = ns_smart_device_link::ns_smart_objects;

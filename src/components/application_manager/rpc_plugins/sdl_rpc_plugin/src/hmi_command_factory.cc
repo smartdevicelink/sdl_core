@@ -32,19 +32,12 @@
 
 #include "sdl_rpc_plugin/hmi_command_factory.h"
 
-#include "application_manager/message.h"
-#include "interfaces/HMI_API.h"
+#include <log4cxx/helpers/objectptr.h>
+#include <log4cxx/logger.h>
 
+#include "application_manager/smart_object_keys.h"
 #include "sdl_rpc_plugin/commands/hmi/activate_app_request.h"
 #include "sdl_rpc_plugin/commands/hmi/activate_app_response.h"
-#include "sdl_rpc_plugin/commands/hmi/allow_all_apps_request.h"
-#include "sdl_rpc_plugin/commands/hmi/allow_all_apps_response.h"
-#include "sdl_rpc_plugin/commands/hmi/allow_app_request.h"
-#include "sdl_rpc_plugin/commands/hmi/allow_app_response.h"
-#include "sdl_rpc_plugin/commands/hmi/button_get_capabilities_request.h"
-#include "sdl_rpc_plugin/commands/hmi/button_get_capabilities_response.h"
-#include "sdl_rpc_plugin/commands/hmi/close_popup_request.h"
-#include "sdl_rpc_plugin/commands/hmi/close_popup_response.h"
 #include "sdl_rpc_plugin/commands/hmi/get_system_info_request.h"
 #include "sdl_rpc_plugin/commands/hmi/get_system_info_response.h"
 #include "sdl_rpc_plugin/commands/hmi/mixing_audio_supported_request.h"
@@ -151,6 +144,8 @@
 #include "sdl_rpc_plugin/commands/hmi/vr_is_ready_response.h"
 #include "sdl_rpc_plugin/commands/hmi/vr_perform_interaction_request.h"
 #include "sdl_rpc_plugin/commands/hmi/vr_perform_interaction_response.h"
+#include "smart_objects/smart_object.h"
+#include "utils/logger.h"
 
 #ifdef EXTERNAL_PROPRIETARY_MODE
 #include "sdl_rpc_plugin/commands/hmi/decrypt_certificate_request.h"
@@ -163,6 +158,12 @@
 #include "sdl_rpc_plugin/commands/hmi/basic_communication_on_awake_sdl.h"
 #include "sdl_rpc_plugin/commands/hmi/basic_communication_system_request.h"
 #include "sdl_rpc_plugin/commands/hmi/basic_communication_system_response.h"
+#include "sdl_rpc_plugin/commands/hmi/bc_get_file_path_request.h"
+#include "sdl_rpc_plugin/commands/hmi/bc_get_file_path_response.h"
+#include "sdl_rpc_plugin/commands/hmi/button_get_capabilities_request.h"
+#include "sdl_rpc_plugin/commands/hmi/button_get_capabilities_response.h"
+#include "sdl_rpc_plugin/commands/hmi/close_popup_request.h"
+#include "sdl_rpc_plugin/commands/hmi/close_popup_response.h"
 #include "sdl_rpc_plugin/commands/hmi/dial_number_request.h"
 #include "sdl_rpc_plugin/commands/hmi/dial_number_response.h"
 #include "sdl_rpc_plugin/commands/hmi/get_urls.h"
@@ -196,6 +197,7 @@
 #include "sdl_rpc_plugin/commands/hmi/on_app_deactivated_notification.h"
 #include "sdl_rpc_plugin/commands/hmi/on_app_registered_notification.h"
 #include "sdl_rpc_plugin/commands/hmi/on_app_unregistered_notification.h"
+#include "sdl_rpc_plugin/commands/hmi/on_bc_system_capability_updated_notification.h"
 #include "sdl_rpc_plugin/commands/hmi/on_button_event_notification.h"
 #include "sdl_rpc_plugin/commands/hmi/on_button_press_notification.h"
 #include "sdl_rpc_plugin/commands/hmi/on_button_subscription_notification.h"
@@ -228,6 +230,10 @@
 #include "sdl_rpc_plugin/commands/hmi/on_vr_language_change_notification.h"
 #include "sdl_rpc_plugin/commands/hmi/on_vr_started_notification.h"
 #include "sdl_rpc_plugin/commands/hmi/on_vr_stopped_notification.h"
+#include "sdl_rpc_plugin/commands/hmi/rc_get_capabilities_request.h"
+#include "sdl_rpc_plugin/commands/hmi/rc_get_capabilities_response.h"
+#include "sdl_rpc_plugin/commands/hmi/rc_is_ready_request.h"
+#include "sdl_rpc_plugin/commands/hmi/rc_is_ready_response.h"
 #include "sdl_rpc_plugin/commands/hmi/sdl_policy_update.h"
 #include "sdl_rpc_plugin/commands/hmi/sdl_policy_update_response.h"
 #include "sdl_rpc_plugin/commands/hmi/ui_send_haptic_data_request.h"
@@ -235,14 +241,38 @@
 #include "sdl_rpc_plugin/commands/hmi/ui_set_display_layout_request.h"
 #include "sdl_rpc_plugin/commands/hmi/ui_set_display_layout_response.h"
 
-#include "sdl_rpc_plugin/commands/hmi/bc_get_file_path_request.h"
-#include "sdl_rpc_plugin/commands/hmi/bc_get_file_path_response.h"
-#include "sdl_rpc_plugin/commands/hmi/rc_get_capabilities_request.h"
-#include "sdl_rpc_plugin/commands/hmi/rc_get_capabilities_response.h"
-#include "sdl_rpc_plugin/commands/hmi/rc_is_ready_request.h"
-#include "sdl_rpc_plugin/commands/hmi/rc_is_ready_response.h"
+namespace application_manager {
+class ApplicationManager;
+class HMICapabilities;
+namespace rpc_service {
+class RPCService;
+}  // namespace rpc_service
+}  // namespace application_manager
+namespace policy {
+class PolicyHandlerInterface;
+}  // namespace policy
 
-#include "sdl_rpc_plugin/commands/hmi/on_bc_system_capability_updated_notification.h"
+namespace application_manager {
+class ApplicationManager;
+class HMICapabilities;
+namespace rpc_service {
+class RPCService;
+}  // namespace rpc_service
+}  // namespace application_manager
+namespace policy {
+class PolicyHandlerInterface;
+}  // namespace policy
+
+namespace application_manager {
+class ApplicationManager;
+class HMICapabilities;
+namespace rpc_service {
+class RPCService;
+}  // namespace rpc_service
+}  // namespace application_manager
+namespace policy {
+class PolicyHandlerInterface;
+}  // namespace policy
 
 namespace sdl_rpc_plugin {
 using namespace application_manager;

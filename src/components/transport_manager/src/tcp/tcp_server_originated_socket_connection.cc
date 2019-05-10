@@ -32,9 +32,21 @@
  */
 
 #include "transport_manager/tcp/tcp_server_originated_socket_connection.h"
+
+#include <arpa/inet.h>
+#include <errno.h>
+#include <log4cxx/helpers/objectptr.h>
+#include <log4cxx/logger.h>
+#include <netinet/in.h>
+#include <sys/socket.h>
+#include <ostream>
+
+#include "transport_manager/error.h"
 #include "transport_manager/tcp/tcp_device.h"
+#include "transport_manager/transport_adapter/device.h"
 #include "transport_manager/transport_adapter/transport_adapter_controller.h"
 #include "utils/logger.h"
+#include "utils/macro.h"
 
 namespace transport_manager {
 namespace transport_adapter {

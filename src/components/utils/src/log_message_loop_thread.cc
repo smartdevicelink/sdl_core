@@ -31,6 +31,9 @@
  */
 
 #include "utils/log_message_loop_thread.h"
+
+#include <log4cxx/logger.h>
+
 #include "utils/logger_status.h"
 
 namespace logger {

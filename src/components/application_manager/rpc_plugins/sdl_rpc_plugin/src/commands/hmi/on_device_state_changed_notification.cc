@@ -31,11 +31,41 @@
  */
 
 #include "sdl_rpc_plugin/commands/hmi/on_device_state_changed_notification.h"
+
+#include <ctype.h>
+#include <log4cxx/helpers/objectptr.h>
+#include <log4cxx/logger.h>
 #include <algorithm>
-#include "application_manager/application_manager.h"
-#include "application_manager/message_helper.h"
+#include <memory>
+#include <ostream>
+
+#include "application_manager/commands/command_impl.h"
+#include "application_manager/policies/policy_handler_interface.h"
+#include "application_manager/smart_object_keys.h"
 #include "encryption/hashing.h"
 #include "interfaces/HMI_API.h"
+#include "smart_objects/smart_object.h"
+#include "utils/logger.h"
+
+namespace application_manager {
+class ApplicationManager;
+class HMICapabilities;
+namespace rpc_service {
+class RPCService;
+}  // namespace rpc_service
+
+class ApplicationManager;
+class HMICapabilities;
+namespace rpc_service {
+class RPCService;
+}  // namespace rpc_service
+
+class ApplicationManager;
+class HMICapabilities;
+namespace rpc_service {
+class RPCService;
+}  // namespace rpc_service
+}  // namespace application_manager
 
 namespace {
 // TODO(AOleynik) : replace this !!!

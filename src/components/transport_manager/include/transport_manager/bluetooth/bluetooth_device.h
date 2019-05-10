@@ -36,8 +36,10 @@
 #ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_BLUETOOTH_BLUETOOTH_DEVICE_H_
 #define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_BLUETOOTH_BLUETOOTH_DEVICE_H_
 
+#include <bits/stdint-uintn.h>
 #include <bluetooth/bluetooth.h>
-
+#include <cstdint>
+#include <iosfwd>
 #include <vector>
 
 #include "transport_manager/common.h"

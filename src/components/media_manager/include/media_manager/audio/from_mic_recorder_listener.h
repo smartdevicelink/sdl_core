@@ -33,7 +33,10 @@
 #ifndef SRC_COMPONENTS_MEDIA_MANAGER_INCLUDE_MEDIA_MANAGER_AUDIO_FROM_MIC_RECORDER_LISTENER_H_
 #define SRC_COMPONENTS_MEDIA_MANAGER_INCLUDE_MEDIA_MANAGER_AUDIO_FROM_MIC_RECORDER_LISTENER_H_
 
+#include <bits/stdint-intn.h>
+#include <iosfwd>
 #include <string>
+
 #include "media_manager/media_adapter_listener.h"
 #include "utils/macro.h"
 

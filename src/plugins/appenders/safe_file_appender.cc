@@ -32,6 +32,14 @@
 
 #include "safe_file_appender.h"
 
+#include <log4cxx/writerappender.h>
+
+namespace log4cxx {
+namespace helpers {
+class Pool;
+}  // namespace helpers
+}  // namespace log4cxx
+
 using namespace log4cxx;
 using namespace log4cxx::helpers;
 

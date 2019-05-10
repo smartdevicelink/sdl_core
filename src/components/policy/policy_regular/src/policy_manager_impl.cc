@@ -31,27 +31,33 @@
  */
 #include "policy/policy_manager_impl.h"
 
+#include <log4cxx/helpers/objectptr.h>
+#include <log4cxx/logger.h>
+
 #include <algorithm>
 #include <iterator>
-#include <limits>
-#include <queue>
-#include <set>
+#include <ostream>
+#include <type_traits>
+#include <utility>
+
 #include "json/reader.h"
+#include "json/value.h"
 #include "json/writer.h"
+#include "policy/access_remote.h"
+#include "policy/access_remote_impl.h"
+#include "policy/cache_manager.h"
 #include "policy/policy_helper.h"
-#include "policy/policy_table.h"
-#include "policy/pt_representation.h"
+#include "policy/policy_listener.h"
+#include "policy/policy_settings.h"
+#include "policy/update_status_manager.h"
+#include "rpc_base/rpc_base_inl.h"
+#include "rpc_base/validation_report.h"
+#include "timer.h"
+#include "utils/callable.h"
 #include "utils/date_time.h"
 #include "utils/file_system.h"
 #include "utils/logger.h"
-
-#include "config_profile/profile.h"
-#include "policy/cache_manager.h"
-#include "policy/update_status_manager.h"
 #include "utils/timer_task_impl.h"
-
-#include "policy/access_remote.h"
-#include "policy/access_remote_impl.h"
 
 policy::PolicyManager* CreateManager() {
   return new policy::PolicyManagerImpl();

@@ -29,16 +29,50 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
+#include <bits/stdint-intn.h>
+#include <bits/stdint-uintn.h>
+#include <limits.h>
+#include <log4cxx/helpers/objectptr.h>
+#include <log4cxx/logger.h>
+#include <stddef.h>
 #include <strings.h>
 
 #include <algorithm>
+#include <cstdint>
 #include <list>
+#include <map>
 #include <memory>
+#include <ostream>
 #include <string>
+#include <utility>
+#include <vector>
 
+#include "connection_handler/connection.h"
+#include "connection_handler/connection_handler.h"
 #include "connection_handler/connection_handler_impl.h"
+#include "connection_handler/connection_handler_observer.h"
+#include "connection_handler/connection_handler_settings.h"
+#include "connection_handler/device.h"
 #include "encryption/hashing.h"
+#include "protocol/service_type.h"
+#include "protocol_handler/protocol_handler.h"
+#include "protocol_handler/session_observer.h"
+#include "security_manager/ssl_context.h"
+#include "transport_manager/common.h"
+#include "transport_manager/error.h"
 #include "transport_manager/info.h"
+#include "transport_manager/transport_adapter/transport_adapter.h"
+#include "transport_manager/transport_manager.h"
+#include "utils/data_accessor.h"
+#include "utils/lock.h"
+#include "utils/logger.h"
+#include "utils/macro.h"
+#include "utils/rwlock.h"
+
+namespace connection_handler {
+class DevicesDiscoveryStarter;
+}  // namespace connection_handler
+struct BsonObject;
 
 #ifdef ENABLE_SECURITY
 #include "security_manager/security_manager.h"

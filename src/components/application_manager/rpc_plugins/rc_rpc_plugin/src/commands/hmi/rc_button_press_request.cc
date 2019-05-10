@@ -31,9 +31,10 @@
  */
 
 #include "rc_rpc_plugin/commands/hmi/rc_button_press_request.h"
-#include "rc_rpc_plugin/resource_allocation_manager_impl.h"
 
-#include "utils/macro.h"
+#include "application_manager/commands/command_impl.h"
+#include "rc_rpc_plugin/commands/rc_command_params.h"
+#include "utils/logger.h"
 
 namespace rc_rpc_plugin {
 namespace commands {

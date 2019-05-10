@@ -32,6 +32,8 @@
 
 #include "protocol/message_priority.h"
 
+#include <log4cxx/logger.h>
+
 #include "protocol/service_type.h"
 #include "utils/macro.h"
 

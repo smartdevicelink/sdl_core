@@ -32,9 +32,13 @@
 
 #include "utils/date_time.h"
 
-#include <stdint.h>
-#include <sys/time.h>
-#include "boost/date_time/posix_time/posix_time.hpp"
+#include <stdlib.h>
+#include <boost/date_time/posix_time/conversion.hpp>
+#include <boost/date_time/posix_time/posix_time_duration.hpp>
+#include <boost/date_time/posix_time/posix_time_types.hpp>
+#include <boost/date_time/time.hpp>
+#include <boost/date_time/time_duration.hpp>
+#include <boost/operators.hpp>
 
 namespace bpt = boost::posix_time;
 using namespace boost::date_time;

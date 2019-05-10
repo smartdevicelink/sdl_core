@@ -31,9 +31,11 @@
  */
 
 #include "utils/gen_hash.h"
+
 #include <cstdlib>
 #include <locale>
 #include <string>
+
 #include "utils/custom_string.h"
 
 namespace utils {

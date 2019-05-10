@@ -29,8 +29,16 @@
  ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  POSSIBILITY OF SUCH DAMAGE.
  */
+#include <bits/stdint-intn.h>
+#include <log4cxx/helpers/objectptr.h>
+#include <log4cxx/logger.h>
 #include <iostream>
 
+#include "application_manager/command_factory.h"
+#include "application_manager/commands/command.h"
+#include "application_manager/smart_object_keys.h"
+#include "interfaces/HMI_API.h"
+#include "interfaces/MOBILE_API.h"
 #include "rc_rpc_plugin/commands/hmi/rc_button_press_request.h"
 #include "rc_rpc_plugin/commands/hmi/rc_button_press_response.h"
 #include "rc_rpc_plugin/commands/hmi/rc_get_interior_vehicle_data_consent_request.h"
@@ -48,13 +56,16 @@
 #include "rc_rpc_plugin/commands/mobile/on_interior_vehicle_data_notification.h"
 #include "rc_rpc_plugin/commands/mobile/set_interior_vehicle_data_request.h"
 #include "rc_rpc_plugin/commands/mobile/set_interior_vehicle_data_response.h"
+#include "rc_rpc_plugin/commands/rc_command_params.h"
 #include "rc_rpc_plugin/rc_command_factory.h"
+#include "smart_objects/smart_object.h"
+#include "utils/logger.h"
+#include "utils/macro.h"
 
-#include "interfaces/HMI_API.h"
-#include "interfaces/MOBILE_API.h"
-
-#include "rc_rpc_plugin/interior_data_cache.h"
-#include "rc_rpc_plugin/resource_allocation_manager.h"
+namespace rc_rpc_plugin {
+class InteriorDataCache;
+class ResourceAllocationManager;
+}  // namespace rc_rpc_plugin
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "RemoteControlModule")
 namespace application_manager {

@@ -33,8 +33,12 @@
 #ifndef SRC_COMPONENTS_MEDIA_MANAGER_INCLUDE_MEDIA_MANAGER_PIPE_STREAMER_ADAPTER_H_
 #define SRC_COMPONENTS_MEDIA_MANAGER_INCLUDE_MEDIA_MANAGER_PIPE_STREAMER_ADAPTER_H_
 
+#include <bits/stdint-intn.h>
+#include <iosfwd>
 #include <string>
+
 #include "media_manager/streamer_adapter.h"
+#include "protocol/raw_message.h"
 #include "utils/threads/thread_delegate.h"
 
 namespace media_manager {

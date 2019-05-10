@@ -33,6 +33,7 @@
 #ifndef SRC_COMPONENTS_UTILS_INCLUDE_UTILS_SQLITE_WRAPPER_SQL_ERROR_H_
 #define SRC_COMPONENTS_UTILS_INCLUDE_UTILS_SQLITE_WRAPPER_SQL_ERROR_H_
 
+#include <iosfwd>
 #include <string>
 
 namespace utils {

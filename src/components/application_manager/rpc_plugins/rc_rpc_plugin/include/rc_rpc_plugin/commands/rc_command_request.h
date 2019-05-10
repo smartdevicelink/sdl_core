@@ -33,13 +33,30 @@
 #ifndef SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_RC_RPC_PLUGIN_INCLUDE_RC_RPC_PLUGIN_COMMANDS_RC_COMMAND_REQUEST_H_
 #define SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_RC_RPC_PLUGIN_INCLUDE_RC_RPC_PLUGIN_COMMANDS_RC_COMMAND_REQUEST_H_
 
+#include <iosfwd>
+
+#include "application_manager/app_extension.h"
+#include "application_manager/application.h"
+#include "application_manager/commands/command.h"
 #include "application_manager/commands/command_request_impl.h"
+#include "application_manager/hmi_interfaces.h"
 #include "rc_rpc_plugin/commands/rc_command_params.h"
 #include "rc_rpc_plugin/interior_data_cache.h"
 #include "rc_rpc_plugin/rc_app_extension.h"
 #include "rc_rpc_plugin/resource_allocation_manager.h"
+#include "utils/macro.h"
+
+namespace application_manager {
+namespace event_engine {
+class Event;
+}  // namespace event_engine
+}  // namespace application_manager
 
 namespace rc_rpc_plugin {
+class InteriorDataCache;
+class InteriorDataManager;
+struct RCCommandParams;
+
 namespace app_mngr = application_manager;
 
 enum TypeAccess { kDisallowed, kAllowed };

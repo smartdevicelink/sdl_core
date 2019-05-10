@@ -33,6 +33,10 @@
 
 #include "transport_manager/cloud/cloud_device.h"
 
+#include <log4cxx/helpers/objectptr.h>
+#include <log4cxx/logger.h>
+#include <string>
+
 #include "utils/logger.h"
 
 namespace transport_manager {

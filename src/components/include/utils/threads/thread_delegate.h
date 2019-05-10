@@ -34,6 +34,7 @@
 #define SRC_COMPONENTS_INCLUDE_UTILS_THREADS_THREAD_DELEGATE_H_
 
 #include <pthread.h>
+#include <stddef.h>
 
 #include "utils/lock.h"
 

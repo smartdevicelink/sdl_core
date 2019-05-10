@@ -35,7 +35,9 @@
 
 #include <fstream>
 #include <string>
+
 #include "media_manager/streamer_adapter.h"
+#include "protocol/raw_message.h"
 #include "utils/threads/thread_delegate.h"
 
 namespace media_manager {

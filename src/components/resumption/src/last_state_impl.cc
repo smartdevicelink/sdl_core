@@ -31,6 +31,16 @@
  */
 
 #include "resumption/last_state_impl.h"
+
+#include <bits/stdint-uintn.h>
+#include <log4cxx/helpers/objectptr.h>
+#include <log4cxx/logger.h>
+#include <cstdint>
+#include <ostream>
+#include <type_traits>
+#include <vector>
+
+#include "json/reader.h"
 #include "utils/file_system.h"
 #include "utils/logger.h"
 

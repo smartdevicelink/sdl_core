@@ -33,15 +33,29 @@
 #ifndef SRC_COMPONENTS_HMI_MESSAGE_HANDLER_INCLUDE_HMI_MESSAGE_HANDLER_HMI_MESSAGE_HANDLER_IMPL_H_
 #define SRC_COMPONENTS_HMI_MESSAGE_HANDLER_INCLUDE_HMI_MESSAGE_HANDLER_HMI_MESSAGE_HANDLER_IMPL_H_
 
+#include <stddef.h>
+#include <memory>
 #include <set>
+#include <sstream>
+
+#include "application_manager/message.h"
 #include "hmi_message_handler/hmi_message_adapter.h"
 #include "hmi_message_handler/hmi_message_handler.h"
 #include "hmi_message_handler/hmi_message_handler_settings.h"
+#include "hmi_message_handler/hmi_message_sender.h"
+#include "protocol/message_priority.h"
+#include "utils/lock.h"
 #include "utils/macro.h"
 #include "utils/message_queue.h"
 #include "utils/prioritized_queue.h"
 #include "utils/threads/message_loop_thread.h"
 #include "utils/threads/thread.h"
+
+namespace hmi_message_handler {
+class HMIMessageAdapter;
+class HMIMessageHandlerSettings;
+class HMIMessageObserver;
+}  // namespace hmi_message_handler
 
 namespace hmi_message_handler {
 
@@ -79,8 +93,8 @@ typedef threads::MessageLoopThread<utils::PrioritizedQueue<MessageToHmi> >
     ToHmiQueue;
 }  // namespace impl
 
-class ToHMIThreadImpl;
 class FromHMIThreadImpl;
+class ToHMIThreadImpl;
 
 class HMIMessageHandlerImpl : public HMIMessageHandler,
                               public impl::FromHmiQueue::Handler,

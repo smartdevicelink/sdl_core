@@ -33,6 +33,8 @@
 #ifndef SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_RC_RPC_PLUGIN_INCLUDE_RC_RPC_PLUGIN_COMMANDS_HMI_RC_GET_INTERIOR_VEHICLE_DATA_REQUEST_H_
 #define SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_RC_RPC_PLUGIN_INCLUDE_RC_RPC_PLUGIN_COMMANDS_HMI_RC_GET_INTERIOR_VEHICLE_DATA_REQUEST_H_
 
+#include "application_manager/app_extension.h"
+#include "application_manager/commands/command.h"
 #include "application_manager/commands/request_to_hmi.h"
 #include "rc_rpc_plugin/commands/rc_command_request.h"
 #include "rc_rpc_plugin/interior_data_cache.h"
@@ -40,6 +42,12 @@
 #include "utils/macro.h"
 
 namespace rc_rpc_plugin {
+struct RCCommandParams;
+
+struct RCCommandParams;
+
+struct RCCommandParams;
+
 namespace app_mngr = application_manager;
 
 namespace commands {

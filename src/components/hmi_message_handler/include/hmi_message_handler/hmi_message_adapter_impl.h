@@ -38,6 +38,8 @@
 
 namespace hmi_message_handler {
 
+class HMIMessageHandler;
+
 class HMIMessageAdapterImpl : public HMIMessageAdapter {
  public:
   /**

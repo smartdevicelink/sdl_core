@@ -30,6 +30,23 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "hmi_message_handler/mb_controller.h"
 
+#include <log4cxx/helpers/objectptr.h>
+#include <log4cxx/logger.h>
+#include <boost/asio/detail/impl/reactive_socket_service_base.ipp>
+#include <boost/asio/impl/io_context.ipp>
+#include <boost/asio/ip/impl/address.ipp>
+#include <boost/asio/socket_base.hpp>
+#include <boost/beast/core/impl/multi_buffer.ipp>
+#include <boost/system/error_code.hpp>
+#include <functional>
+#include <new>
+#include <string>
+#include <type_traits>
+#include <utility>
+
+#include "hmi_message_handler/websocket_session.h"
+#include "json/value.h"
+
 using namespace boost::beast::websocket;
 namespace hmi_message_handler {
 

@@ -34,6 +34,12 @@
  */
 
 #include "connection_handler/device.h"
+
+#include <log4cxx/helpers/objectptr.h>
+#include <log4cxx/logger.h>
+#include <ostream>
+#include <string>
+
 #include "encryption/hashing.h"
 #include "utils/logger.h"
 

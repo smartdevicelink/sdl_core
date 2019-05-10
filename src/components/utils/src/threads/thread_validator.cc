@@ -31,6 +31,10 @@
  */
 #include "utils/threads/thread_validator.h"
 
+#include <log4cxx/helpers/objectptr.h>
+#include <log4cxx/logger.h>
+#include <ostream>
+
 #include "utils/back_trace.h"
 #include "utils/logger.h"
 

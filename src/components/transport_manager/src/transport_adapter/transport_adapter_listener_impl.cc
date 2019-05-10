@@ -30,15 +30,25 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <algorithm>
+#include <log4cxx/helpers/objectptr.h>
+#include <log4cxx/logger.h>
+#include <stddef.h>
+#include <memory>
+#include <ostream>
 
-#include "utils/logger.h"
-
+#include "protocol/raw_message.h"
+#include "transport_manager/common.h"
+#include "transport_manager/error.h"
 #include "transport_manager/transport_adapter/transport_adapter_event.h"
 #include "transport_manager/transport_adapter/transport_adapter_listener_impl.h"
-#include "transport_manager/transport_manager_impl.h"
+#include "transport_manager/transport_manager.h"
+#include "utils/logger.h"
 
 namespace transport_manager {
+namespace transport_adapter {
+class TransportAdapter;
+}  // namespace transport_adapter
+
 CREATE_LOGGERPTR_GLOBAL(logger_, "TransportManager")
 
 TransportAdapterListenerImpl::TransportAdapterListenerImpl(

@@ -33,14 +33,31 @@
 
 #include "sdl_rpc_plugin/commands/mobile/alert_request.h"
 
+#include <log4cxx/helpers/objectptr.h>
+#include <log4cxx/logger.h>
 #include <string.h>
+#include <memory>
+#include <ostream>
 
-#include "application_manager/application_impl.h"
+#include "application_manager/application.h"
+#include "application_manager/application_manager.h"
+#include "application_manager/commands/command_impl.h"
+#include "application_manager/event_engine/event.h"
+#include "application_manager/hmi_interfaces.h"
 #include "application_manager/message_helper.h"
-
-#include "application_manager/policies/policy_handler.h"
+#include "application_manager/smart_object_keys.h"
 #include "smart_objects/smart_object.h"
-#include "utils/helpers.h"
+#include "utils/logger.h"
+
+namespace application_manager {
+class HMICapabilities;
+namespace rpc_service {
+class RPCService;
+}  // namespace rpc_service
+}  // namespace application_manager
+namespace policy {
+class PolicyHandlerInterface;
+}  // namespace policy
 
 namespace sdl_rpc_plugin {
 using namespace application_manager;
@@ -380,7 +397,6 @@ void AlertRequest::SendSpeakRequest(int32_t app_id,
                                     bool tts_chunks_exists,
                                     size_t length_tts_chunks) {
   LOG4CXX_AUTO_TRACE(logger_);
-  using namespace hmi_apis;
   using namespace smart_objects;
   // crate HMI speak request
   SmartObject msg_params = smart_objects::SmartObject(SmartType_Map);
@@ -395,9 +411,9 @@ void AlertRequest::SendSpeakRequest(int32_t app_id,
     msg_params[strings::play_tone] = true;
   }
   msg_params[strings::app_id] = app_id;
-  msg_params[hmi_request::speak_type] = Common_MethodName::ALERT;
+  msg_params[hmi_request::speak_type] = hmi_apis::Common_MethodName::ALERT;
   StartAwaitForInterface(HmiInterfaces::HMI_INTERFACE_TTS);
-  SendHMIRequest(FunctionID::TTS_Speak, &msg_params, true);
+  SendHMIRequest(hmi_apis::FunctionID::TTS_Speak, &msg_params, true);
 }
 
 bool AlertRequest::CheckStringsOfAlertRequest() {

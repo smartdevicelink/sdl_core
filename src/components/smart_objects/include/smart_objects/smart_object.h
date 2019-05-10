@@ -33,15 +33,28 @@
 #ifndef SRC_COMPONENTS_SMART_OBJECTS_INCLUDE_SMART_OBJECTS_SMART_OBJECT_H_
 #define SRC_COMPONENTS_SMART_OBJECTS_INCLUDE_SMART_OBJECTS_SMART_OBJECT_H_
 
+#include <bits/stdint-intn.h>
+#include <bits/stdint-uintn.h>
+#include <log4cxx/logger.h>
+#include <stddef.h>
+#include <cstdint>
 #include <map>
+#include <memory>
 #include <set>
 #include <sstream>
 #include <string>
 #include <vector>
 
 #include "rpc_base/validation_report.h"
+#include "smart_objects/errors.h"
 #include "smart_objects/smart_schema.h"
 #include "utils/custom_string.h"
+#include "utils/macro.h"
+#include "utils/semantic_version.h"
+
+namespace rpc {
+class ValidationReport;
+}  // namespace rpc
 
 namespace ns_smart_device_link {
 namespace ns_smart_objects {

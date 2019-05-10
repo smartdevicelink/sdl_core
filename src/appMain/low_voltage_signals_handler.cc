@@ -32,17 +32,19 @@
 
 #include "appMain/low_voltage_signals_handler.h"
 
-#include <fcntl.h>
+#include <errno.h>
+#include <log4cxx/helpers/objectptr.h>
+#include <log4cxx/logger.h>
 #include <signal.h>
-#include <sys/types.h>
-#include <sys/wait.h>
+#include <stdlib.h>
+#include <string.h>
 #include <unistd.h>
 #include <iostream>
+
 #include "appMain/life_cycle.h"
-#include "config_profile/profile.h"
 #include "utils/logger.h"
 #include "utils/signals.h"
-#include "utils/typed_enum_print.h"
+#include "utils/threads/thread.h"
 
 namespace main_namespace {
 

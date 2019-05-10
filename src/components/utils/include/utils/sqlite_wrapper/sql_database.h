@@ -33,7 +33,9 @@
 #ifndef SRC_COMPONENTS_UTILS_INCLUDE_UTILS_SQLITE_WRAPPER_SQL_DATABASE_H_
 #define SRC_COMPONENTS_UTILS_INCLUDE_UTILS_SQLITE_WRAPPER_SQL_DATABASE_H_
 
+#include <iosfwd>
 #include <string>
+
 #include "utils/lock.h"
 #include "utils/sqlite_wrapper/sql_error.h"
 

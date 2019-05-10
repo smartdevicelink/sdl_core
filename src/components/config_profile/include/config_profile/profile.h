@@ -33,11 +33,18 @@
 #ifndef SRC_COMPONENTS_CONFIG_PROFILE_INCLUDE_CONFIG_PROFILE_PROFILE_H_
 #define SRC_COMPONENTS_CONFIG_PROFILE_INCLUDE_CONFIG_PROFILE_PROFILE_H_
 
+#include <bits/stdint-intn.h>
+#include <bits/stdint-uintn.h>
+#include <stddef.h>
 #include <stdint.h>
+#include <cstdint>
+#include <iosfwd>
 #include <list>
 #include <map>
 #include <string>
+#include <utility>
 #include <vector>
+
 #include "application_manager/application_manager_settings.h"
 #include "connection_handler/connection_handler_settings.h"
 #include "hmi_message_handler/hmi_message_handler_settings.h"

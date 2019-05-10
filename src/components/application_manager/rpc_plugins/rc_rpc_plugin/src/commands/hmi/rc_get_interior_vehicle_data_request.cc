@@ -31,7 +31,10 @@
  */
 
 #include "rc_rpc_plugin/commands/hmi/rc_get_interior_vehicle_data_request.h"
-#include "utils/macro.h"
+
+#include "application_manager/commands/command_impl.h"
+#include "rc_rpc_plugin/commands/rc_command_params.h"
+#include "utils/logger.h"
 
 namespace rc_rpc_plugin {
 namespace commands {

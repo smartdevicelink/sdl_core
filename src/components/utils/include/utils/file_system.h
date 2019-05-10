@@ -33,6 +33,9 @@
 #ifndef SRC_COMPONENTS_UTILS_INCLUDE_UTILS_FILE_SYSTEM_H_
 #define SRC_COMPONENTS_UTILS_INCLUDE_UTILS_FILE_SYSTEM_H_
 
+#include <bits/stdint-intn.h>
+#include <bits/stdint-uintn.h>
+#include <bits/types/time_t.h>
 #include <stdint.h>
 #include <string.h>
 #include <time.h>

@@ -34,15 +34,19 @@
 #else  // __QNX__
 #include <fcntl.h>
 #include <sys/stat.h>
-#include <sys/types.h>
 #include <sys/wait.h>
 #include <unistd.h>
 #endif  // __QNX__
 
+#include <bits/stdint-intn.h>
+#include <log4cxx/helpers/objectptr.h>
+#include <log4cxx/logger.h>
+#include <stdlib.h>
 #include <algorithm>
 #include <cstring>
-#include <functional>
 #include <iostream>
+#include <string>
+#include <vector>
 
 #include "utils/logger.h"
 #include "utils/system.h"

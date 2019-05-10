@@ -33,9 +33,11 @@
 #ifndef SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_RC_RPC_PLUGIN_INCLUDE_RC_RPC_PLUGIN_INTERIOR_DATA_CACHE_IMPL_H_
 #define SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_RC_RPC_PLUGIN_INCLUDE_RC_RPC_PLUGIN_INTERIOR_DATA_CACHE_IMPL_H_
 
+#include <iosfwd>
 #include <map>
 
 #include "rc_rpc_plugin/interior_data_cache.h"
+#include "smart_objects/smart_object.h"
 #include "utils/lock.h"
 #include "utils/macro.h"
 

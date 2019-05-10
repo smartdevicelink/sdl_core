@@ -31,8 +31,21 @@
  */
 
 #include "sdl_rpc_plugin/sdl_command_factory.h"
+
 #include "sdl_rpc_plugin/hmi_command_factory.h"
 #include "sdl_rpc_plugin/mobile_command_factory.h"
+
+namespace application_manager {
+class ApplicationManager;
+class HMICapabilities;
+namespace rpc_service {
+class RPCService;
+}  // namespace rpc_service
+}  // namespace application_manager
+
+namespace policy {
+class PolicyHandlerInterface;
+}  // namespace policy
 
 namespace sdl_rpc_plugin {
 namespace app_mngr = application_manager;

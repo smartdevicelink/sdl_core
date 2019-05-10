@@ -32,6 +32,10 @@
 
 #include "smart_objects/schema_item.h"
 
+namespace rpc {
+class ValidationReport;
+}  // namespace rpc
+
 namespace ns_smart_device_link {
 namespace ns_smart_objects {
 

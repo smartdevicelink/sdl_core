@@ -33,10 +33,24 @@
 #ifndef SRC_COMPONENTS_POLICY_POLICY_REGULAR_INCLUDE_POLICY_POLICY_TABLE_TYPES_H_
 #define SRC_COMPONENTS_POLICY_POLICY_REGULAR_INCLUDE_POLICY_POLICY_TABLE_TYPES_H_
 
+#include <bits/stdint-intn.h>
+#include <bits/stdint-uintn.h>
+#include <stdint.h>
 #include <climits>
+#include <iosfwd>
+#include <map>
+#include <string>
+#include <vector>
 
 #include "policy/policy_table/enums.h"
+#include "rpc_base/rpc_base.h"
+#include "rpc_base/rpc_base_inl.h"
+#include "rpc_base/rpc_base_json_inl.h"
 #include "rpc_base/rpc_message.h"
+
+namespace rpc {
+class ValidationReport;
+}  // namespace rpc
 
 namespace Json {
 class Value;
@@ -44,14 +58,14 @@ class Value;
 namespace rpc {
 namespace policy_table_interface_base {
 struct AppLevel;
+struct AppServiceHandledRpc;
+struct AppServiceInfo;
 struct ApplicationParams;
 struct DeviceParams;
 struct MessageLanguages;
 struct MessageString;
 struct RpcParameters;
 struct Rpcs;
-struct AppServiceHandledRpc;
-struct AppServiceInfo;
 }  // namespace policy_table_interface_base
 }  // namespace rpc
 

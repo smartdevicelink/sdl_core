@@ -30,8 +30,25 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 #include "vehicle_info_plugin/commands/hmi/vi_get_dtcs_response.h"
+
+#include <memory>
+
+#include "application_manager/application_manager.h"
+#include "application_manager/commands/command_impl.h"
 #include "application_manager/event_engine/event.h"
 #include "interfaces/HMI_API.h"
+#include "utils/logger.h"
+
+namespace application_manager {
+class HMICapabilities;
+namespace rpc_service {
+class RPCService;
+}  // namespace rpc_service
+}  // namespace application_manager
+
+namespace policy {
+class PolicyHandlerInterface;
+}  // namespace policy
 
 namespace vehicle_info_plugin {
 using namespace application_manager;

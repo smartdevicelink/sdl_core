@@ -33,11 +33,23 @@
 #ifndef SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_RC_RPC_PLUGIN_INCLUDE_RC_RPC_PLUGIN_RC_APP_EXTENSION_H_
 #define SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_RC_RPC_PLUGIN_INCLUDE_RC_RPC_PLUGIN_RC_APP_EXTENSION_H_
 
+#include <iosfwd>
 #include <memory>
 #include <set>
 #include <string>
+
 #include "application_manager/app_extension.h"
 #include "utils/macro.h"
+
+namespace ns_smart_device_link {
+namespace ns_smart_objects {
+class SmartObject;
+
+class SmartObject;
+
+class SmartObject;
+}  // namespace ns_smart_objects
+}  // namespace ns_smart_device_link
 
 namespace rc_rpc_plugin {
 class RCAppExtension : public application_manager::AppExtension {

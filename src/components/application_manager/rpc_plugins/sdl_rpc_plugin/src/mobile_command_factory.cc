@@ -31,6 +31,11 @@
  */
 
 #include "sdl_rpc_plugin/mobile_command_factory.h"
+
+#include <log4cxx/helpers/objectptr.h>
+#include <log4cxx/logger.h>
+
+#include "application_manager/smart_object_keys.h"
 #include "interfaces/MOBILE_API.h"
 #include "sdl_rpc_plugin/commands/mobile/add_command_request.h"
 #include "sdl_rpc_plugin/commands/mobile/add_command_response.h"
@@ -132,6 +137,20 @@
 #include "sdl_rpc_plugin/commands/mobile/unsubscribe_way_points_response.h"
 #include "sdl_rpc_plugin/commands/mobile/update_turn_list_request.h"
 #include "sdl_rpc_plugin/commands/mobile/update_turn_list_response.h"
+#include "smart_objects/smart_object.h"
+#include "utils/logger.h"
+
+namespace application_manager {
+class ApplicationManager;
+class HMICapabilities;
+namespace rpc_service {
+class RPCService;
+}  // namespace rpc_service
+}  // namespace application_manager
+
+namespace policy {
+class PolicyHandlerInterface;
+}  // namespace policy
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "ApplicationManager")
 namespace sdl_rpc_plugin {

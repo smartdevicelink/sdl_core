@@ -34,8 +34,15 @@
 #define SRC_PLUGINS_APPENDERS_SAFE_FILE_APPENDER_H_
 
 #include <log4cxx/fileappender.h>
+#include <log4cxx/helpers/object.h>
+#include <log4cxx/logstring.h>
+#include <log4cxx/spi/loggingevent.h>
 
 namespace log4cxx {
+
+namespace helpers {
+class Pool;
+}  // namespace helpers
 
 class SafeFileAppender : public FileAppender {
  public:

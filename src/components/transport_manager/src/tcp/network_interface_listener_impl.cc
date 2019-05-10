@@ -1,5 +1,7 @@
 #include "transport_manager/tcp/network_interface_listener_impl.h"
+
 #include "platform_specific_network_interface_listener_impl.h"
+#include "utils/logger.h"
 
 namespace transport_manager {
 namespace transport_adapter {

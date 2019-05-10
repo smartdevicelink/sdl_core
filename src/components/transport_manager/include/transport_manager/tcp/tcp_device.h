@@ -37,16 +37,18 @@
 #define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TCP_TCP_DEVICE_H_
 
 #include <arpa/inet.h>
+#include <bits/stdint-uintn.h>
 #include <errno.h>
 #include <memory.h>
 #include <netinet/in.h>
 #include <signal.h>
 #include <sys/socket.h>
 #include <sys/types.h>
-
+#include <iosfwd>
 #include <map>
 #include <string>
 
+#include "transport_manager/common.h"
 #include "transport_manager/transport_adapter/device.h"
 #include "utils/lock.h"
 

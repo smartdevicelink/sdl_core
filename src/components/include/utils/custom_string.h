@@ -33,6 +33,8 @@
 #ifndef SRC_COMPONENTS_INCLUDE_UTILS_CUSTOM_STRING_H_
 #define SRC_COMPONENTS_INCLUDE_UTILS_CUSTOM_STRING_H_
 
+#include <stddef.h>
+#include <iosfwd>
 #include <string>
 
 namespace utils {

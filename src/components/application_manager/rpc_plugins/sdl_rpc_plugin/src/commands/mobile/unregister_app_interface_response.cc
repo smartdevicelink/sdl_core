@@ -33,6 +33,13 @@
 
 #include "sdl_rpc_plugin/commands/mobile/unregister_app_interface_response.h"
 
+#include <memory>
+
+#include "application_manager/commands/command_impl.h"
+#include "application_manager/smart_object_keys.h"
+#include "smart_objects/smart_object.h"
+#include "utils/logger.h"
+
 namespace sdl_rpc_plugin {
 using namespace application_manager;
 

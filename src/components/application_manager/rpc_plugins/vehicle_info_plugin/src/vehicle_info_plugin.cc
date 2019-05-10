@@ -31,11 +31,43 @@
  */
 
 #include "vehicle_info_plugin/vehicle_info_plugin.h"
+
+#include <log4cxx/logger.h>
+
+#include <set>
+#include <utility>
+
+#include "application_manager/application_manager.h"
 #include "application_manager/message_helper.h"
 #include "application_manager/plugin_manager/plugin_keys.h"
+#include "application_manager/rpc_service.h"
 #include "application_manager/smart_object_keys.h"
+#include "interfaces/HMI_API.h"
+#include "interfaces/MOBILE_API.h"
+#include "smart_objects/smart_object.h"
+#include "utils/data_accessor.h"
+#include "utils/logger.h"
 #include "vehicle_info_plugin/vehicle_info_app_extension.h"
 #include "vehicle_info_plugin/vehicle_info_command_factory.h"
+
+namespace application_manager {
+class HMICapabilities;
+}  // namespace application_manager
+
+namespace policy {
+class PolicyHandlerInterface;
+
+class PolicyHandlerInterface;
+}  // namespace policy
+
+namespace application_manager {
+class HMICapabilities;
+
+class HMICapabilities;
+}  // namespace application_manager
+namespace policy {
+class PolicyHandlerInterface;
+}  // namespace policy
 
 namespace vehicle_info_plugin {
 CREATE_LOGGERPTR_GLOBAL(logger_, "VehicleInfoPlugin")

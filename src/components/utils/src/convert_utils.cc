@@ -31,9 +31,11 @@
  */
 
 #include "utils/convert_utils.h"
-#include <stdint.h>
+
+#include <log4cxx/logger.h>
 #include <algorithm>
 #include <limits>
+
 #include "utils/macro.h"
 
 long long int utils::ConvertInt64ToLongLongInt(const int64_t value) {

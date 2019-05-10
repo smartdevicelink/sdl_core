@@ -33,19 +33,35 @@
 #ifndef SRC_COMPONENTS_POLICY_POLICY_REGULAR_INCLUDE_POLICY_CACHE_MANAGER_H_
 #define SRC_COMPONENTS_POLICY_POLICY_REGULAR_INCLUDE_POLICY_CACHE_MANAGER_H_
 
+#include <bits/stdint-intn.h>
+#include <bits/stdint-uintn.h>
+#include <iosfwd>
 #include <map>
+#include <memory>
+#include <set>
+#include <string>
+#include <vector>
 
 #include "policy/cache_manager_interface.h"
+#include "policy/policy_table/enums.h"
+#include "policy/policy_table/types.h"
+#include "policy/policy_types.h"
 #include "policy/pt_representation.h"
 #include "policy/usage_statistics/statistics_manager.h"
+#include "rpc_base/rpc_base.h"
+#include "rpc_base/rpc_base_inl.h"
+#include "utils/conditional_variable.h"
+#include "utils/lock.h"
+#include "utils/macro.h"
 #include "utils/threads/thread.h"
 #include "utils/threads/thread_delegate.h"
 
-#include "policy/policy_types.h"
-#include "utils/conditional_variable.h"
-#include "utils/lock.h"
+namespace threads {
+class Thread;
+}  // namespace threads
 
 namespace policy {
+class PTRepresentation;
 class PolicySettings;
 
 class CacheManager : public CacheManagerInterface {

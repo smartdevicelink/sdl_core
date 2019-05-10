@@ -33,10 +33,37 @@
 
 #include "sdl_rpc_plugin/commands/mobile/slider_request.h"
 
-#include "application_manager/application_impl.h"
+#include <log4cxx/helpers/objectptr.h>
+#include <log4cxx/logger.h>
+#include <stddef.h>
+#include <memory>
+#include <ostream>
+#include <vector>
+
+#include "application_manager/application.h"
+#include "application_manager/application_manager.h"
+#include "application_manager/application_manager_settings.h"
+#include "application_manager/commands/command_impl.h"
+#include "application_manager/event_engine/event.h"
+#include "application_manager/hmi_interfaces.h"
 #include "application_manager/message_helper.h"
-#include "config_profile/profile.h"
+#include "application_manager/smart_object_keys.h"
+#include "interfaces/HMI_API.h"
+#include "interfaces/MOBILE_API.h"
+#include "smart_objects/smart_object.h"
 #include "utils/helpers.h"
+#include "utils/logger.h"
+
+namespace application_manager {
+class HMICapabilities;
+namespace rpc_service {
+class RPCService;
+}  // namespace rpc_service
+}  // namespace application_manager
+
+namespace policy {
+class PolicyHandlerInterface;
+}  // namespace policy
 
 namespace sdl_rpc_plugin {
 using namespace application_manager;
@@ -124,32 +151,35 @@ void SliderRequest::on_event(const event_engine::Event& event) {
   LOG4CXX_AUTO_TRACE(logger_);
   using namespace helpers;
   using namespace smart_objects;
-  using namespace hmi_apis;
 
   const SmartObject& message = event.smart_object();
 
   const event_engine::Event::EventID event_id = event.id();
-  if (event_id == FunctionID::UI_OnResetTimeout) {
+  if (event_id == hmi_apis::FunctionID::UI_OnResetTimeout) {
     LOG4CXX_INFO(logger_, "Received UI_OnResetTimeout event");
     application_manager_.updateRequestTimeout(
         connection_key(), correlation_id(), default_timeout());
     return;
   }
 
-  if (event_id != FunctionID::UI_Slider) {
+  if (event_id != hmi_apis::FunctionID::UI_Slider) {
     LOG4CXX_ERROR(logger_, "Received unknown event" << event.id());
     return;
   }
 
   LOG4CXX_DEBUG(logger_, "Received UI_Slider event");
   EndAwaitForInterface(HmiInterfaces::HMI_INTERFACE_UI);
-  const Common_Result::eType response_code = static_cast<Common_Result::eType>(
-      message[strings::params][hmi_response::code].asInt());
+  const hmi_apis::Common_Result::eType response_code =
+      static_cast<hmi_apis::Common_Result::eType>(
+          message[strings::params][hmi_response::code].asInt());
 
   SmartObject response_msg_params = message[strings::msg_params];
 
-  const bool is_timeout_aborted = Compare<Common_Result::eType, EQ, ONE>(
-      response_code, Common_Result::TIMED_OUT, Common_Result::ABORTED);
+  const bool is_timeout_aborted =
+      Compare<hmi_apis::Common_Result::eType, EQ, ONE>(
+          response_code,
+          hmi_apis::Common_Result::TIMED_OUT,
+          hmi_apis::Common_Result::ABORTED);
 
   if (is_timeout_aborted) {
     if (message[strings::params][strings::data].keyExists(

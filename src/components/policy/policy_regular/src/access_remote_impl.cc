@@ -31,9 +31,17 @@
  */
 #include "policy/access_remote_impl.h"
 
+#include <log4cxx/helpers/objectptr.h>
+#include <log4cxx/logger.h>
 #include <algorithm>
 #include <iterator>
+#include <ostream>
+#include <string>
+#include <utility>
+
 #include "policy/cache_manager.h"
+#include "rpc_base/rpc_base.h"
+#include "rpc_base/rpc_base_json_inl.h"
 #include "utils/logger.h"
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "PolicyManagerImpl")

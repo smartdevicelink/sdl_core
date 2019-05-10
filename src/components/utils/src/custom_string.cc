@@ -31,15 +31,16 @@
  */
 
 #include "utils/custom_string.h"
-#include <string.h>
+
+#include <log4cxx/logger.h>
+#include <strings.h>
 #include <algorithm>
 #include <clocale>
 #include <cstdlib>
-#include <cwchar>
 #include <cwctype>
-#include <new>
+#include <string>
 #include <vector>
-#include "utils/logger.h"
+
 #include "utils/macro.h"
 
 namespace {

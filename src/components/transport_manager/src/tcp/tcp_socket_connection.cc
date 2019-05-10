@@ -32,9 +32,12 @@
  */
 
 #include "transport_manager/tcp/tcp_socket_connection.h"
-#include "transport_manager/tcp/tcp_device.h"
-#include "transport_manager/transport_adapter/transport_adapter_controller.h"
+
 #include "utils/logger.h"
+
+namespace transport_manager {
+class ConnectError;
+}  // namespace transport_manager
 
 namespace transport_manager {
 namespace transport_adapter {

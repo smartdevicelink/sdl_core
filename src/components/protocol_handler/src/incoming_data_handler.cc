@@ -30,7 +30,16 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 #include "protocol_handler/incoming_data_handler.h"
+
+#include <log4cxx/helpers/objectptr.h>
+#include <log4cxx/logger.h>
+#include <algorithm>
+#include <memory>
+#include <ostream>
+#include <utility>
+
 #include "protocol/common.h"
+#include "protocol/raw_message.h"
 #include "utils/logger.h"
 
 namespace protocol_handler {

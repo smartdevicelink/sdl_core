@@ -31,7 +31,14 @@
  */
 
 #include "transport_manager/usb/usb_connection_factory.h"
-#include "transport_manager/transport_adapter/transport_adapter_impl.h"
+
+#include <log4cxx/helpers/objectptr.h>
+#include <log4cxx/logger.h>
+#include <memory>
+#include <ostream>
+
+#include "transport_manager/transport_adapter/device.h"
+#include "transport_manager/transport_adapter/transport_adapter_controller.h"
 #include "transport_manager/usb/usb_device.h"
 #include "utils/logger.h"
 

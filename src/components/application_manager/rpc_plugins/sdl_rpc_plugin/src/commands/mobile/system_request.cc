@@ -33,19 +33,54 @@ Copyright (c) 2018, Ford Motor Company
 
 #include "sdl_rpc_plugin/commands/mobile/system_request.h"
 
+#include <log4cxx/helpers/objectptr.h>
+#include <log4cxx/logger.h>
 #include <stdio.h>
-#include <algorithm>
-#include <sstream>
+
+#include <cstdint>
+#include <map>
+#include <memory>
+#include <set>
 #include <string>
+#include <utility>
 #include <vector>
+
+#include "application_manager/application.h"
+#include "application_manager/application_manager.h"
+#include "application_manager/application_manager_settings.h"
+#include "application_manager/commands/command_impl.h"
+#include "application_manager/event_engine/event.h"
+#include "application_manager/hmi_interfaces.h"
 #include "application_manager/policies/policy_handler_interface.h"
+#include "application_manager/smart_object_keys.h"
 #include "formatters/CFormatterJsonBase.h"
+#include "interfaces/HMI_API.h"
 #include "interfaces/MOBILE_API.h"
-#include "json/json.h"
+#include "json/reader.h"
+#include "json/value.h"
 #include "policy/policy_table/enums.h"
+#include "smart_objects/smart_object.h"
 #include "utils/custom_string.h"
 #include "utils/file_system.h"
 #include "utils/helpers.h"
+#include "utils/logger.h"
+
+namespace application_manager {
+class HMICapabilities;
+namespace rpc_service {
+class RPCService;
+}  // namespace rpc_service
+
+class HMICapabilities;
+namespace rpc_service {
+class RPCService;
+}  // namespace rpc_service
+
+class HMICapabilities;
+namespace rpc_service {
+class RPCService;
+}  // namespace rpc_service
+}  // namespace application_manager
 
 namespace sdl_rpc_plugin {
 using namespace application_manager;

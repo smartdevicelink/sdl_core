@@ -40,6 +40,13 @@
 #include "smart_objects/smart_schema.h"
 
 namespace ns_smart_device_link {
+namespace ns_smart_objects {
+class CSmartSchema;
+class SmartObject;
+}  // namespace ns_smart_objects
+}  // namespace ns_smart_device_link
+
+namespace ns_smart_device_link {
 namespace ns_json_handler {
 namespace formatters {
 

@@ -31,11 +31,22 @@
  */
 
 #include "media_manager/media_manager_impl.h"
+
+#include <bits/stdint-uintn.h>
+#include <log4cxx/helpers/objectptr.h>
+#include <log4cxx/logger.h>
+#include <stddef.h>
+#include <cstdint>
+#include <memory>
+#include <ostream>
+#include <string>
+#include <vector>
+
 #include "application_manager/application.h"
-#include "application_manager/application_impl.h"
 #include "application_manager/application_manager.h"
-#include "application_manager/message_helper.h"
 #include "media_manager/audio/from_mic_recorder_listener.h"
+#include "media_manager/media_adapter.h"
+#include "media_manager/media_adapter_listener.h"
 #include "media_manager/streamer_listener.h"
 #include "protocol_handler/protocol_handler.h"
 #include "utils/file_system.h"

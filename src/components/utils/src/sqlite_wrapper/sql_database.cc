@@ -31,7 +31,12 @@
  */
 
 #include "utils/sqlite_wrapper/sql_database.h"
+
 #include <sqlite3.h>
+#include <stddef.h>
+#include <string>
+
+#include "sqlite_wrapper/sql_error.h"
 
 namespace utils {
 namespace dbms {

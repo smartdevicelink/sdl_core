@@ -36,7 +36,14 @@
 #define SRC_COMPONENTS_FORMATTERS_INCLUDE_FORMATTERS_CFORMATTERJSONBASE_H_
 
 #include "json/json.h"
+#include "json/value.h"
 #include "smart_objects/smart_object.h"
+
+namespace ns_smart_device_link {
+namespace ns_smart_objects {
+class SmartObject;
+}  // namespace ns_smart_objects
+}  // namespace ns_smart_device_link
 
 namespace ns_smart_device_link {
 namespace ns_json_handler {

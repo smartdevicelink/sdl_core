@@ -33,7 +33,12 @@
 #ifndef SRC_COMPONENTS_INCLUDE_UTILS_SEMANTIC_VERSION_H_
 #define SRC_COMPONENTS_INCLUDE_UTILS_SEMANTIC_VERSION_H_
 
+#include <bits/stdint-intn.h>
+#include <bits/stdint-uintn.h>
+#include <stdio.h>
+#include <iosfwd>
 #include <string>
+
 namespace utils {
 
 struct SemanticVersion {

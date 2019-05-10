@@ -33,12 +33,17 @@
 #ifndef SRC_COMPONENTS_INCLUDE_UTILS_LOGGER_H_
 #define SRC_COMPONENTS_INCLUDE_UTILS_LOGGER_H_
 
+#include <log4cxx/level.h>
+#include <log4cxx/log4cxx.h>
+#include <log4cxx/logger.h>
+#include <log4cxx/spi/location/locationinfo.h>
 #ifdef ENABLE_LOG
 #include <errno.h>
 #include <log4cxx/propertyconfigurator.h>
 #include <log4cxx/spi/loggingevent.h>
 #include <string.h>
 #include <sstream>
+
 #include "utils/auto_trace.h"
 #include "utils/logger_status.h"
 #include "utils/push_log.h"

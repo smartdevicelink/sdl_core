@@ -33,7 +33,11 @@
 #ifndef SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_RC_RPC_PLUGIN_INCLUDE_RC_RPC_PLUGIN_COMMANDS_MOBILE_ON_INTERIOR_VEHICLE_DATA_NOTIFICATION_H_
 #define SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_RC_RPC_PLUGIN_INCLUDE_RC_RPC_PLUGIN_COMMANDS_MOBILE_ON_INTERIOR_VEHICLE_DATA_NOTIFICATION_H_
 
+#include <iosfwd>
 #include <string>
+
+#include "application_manager/app_extension.h"
+#include "application_manager/commands/command.h"
 #include "application_manager/commands/command_notification_impl.h"
 #include "rc_rpc_plugin/commands/rc_command_request.h"
 #include "rc_rpc_plugin/interior_data_cache.h"
@@ -41,6 +45,9 @@
 #include "utils/macro.h"
 
 namespace rc_rpc_plugin {
+class InteriorDataCache;
+struct RCCommandParams;
+
 namespace app_mngr = application_manager;
 
 namespace commands {

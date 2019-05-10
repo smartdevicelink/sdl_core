@@ -36,7 +36,12 @@
 #ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_BLUETOOTH_BLUETOOTH_SOCKET_CONNECTION_H_
 #define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_BLUETOOTH_BLUETOOTH_SOCKET_CONNECTION_H_
 
+#include "transport_manager/common.h"
 #include "transport_manager/transport_adapter/threaded_socket_connection.h"
+
+namespace transport_manager {
+class ConnectError;
+}  // namespace transport_manager
 
 namespace transport_manager {
 namespace transport_adapter {

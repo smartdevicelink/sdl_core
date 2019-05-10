@@ -33,12 +33,15 @@
 #include "config_profile/profile.h"
 
 #include <errno.h>
+#include <log4cxx/helpers/objectptr.h>
+#include <log4cxx/logger.h>
+#include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
 #include <algorithm>
+#include <limits>
 #include <numeric>
 #include <sstream>
-
 #include <string>
 
 #include "config_profile/ini_file.h"
@@ -49,7 +52,6 @@
 #ifdef ENABLE_SECURITY
 #include <openssl/ssl.h>
 #endif  // ENABLE_SECURITY
-
 namespace {
 #define LOG_UPDATED_VALUE(value, key, section)                              \
   {                                                                         \

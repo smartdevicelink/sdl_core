@@ -29,15 +29,16 @@
 // ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
 //
+#include <bits/stdint-intn.h>
+#include <bits/stdint-uintn.h>
+#include <log4cxx/helpers/objectptr.h>
+#include <log4cxx/logger.h>
+#include <cstdint>
+#include <iterator>
+#include <memory>
+#include <ostream>
+#include <vector>
 
-#if defined(OS_POSIX) && defined(OS_LINUX)
-#include <pthread.h>  // TODO(DK): Need to remove
-#include <unistd.h>
-#endif
-
-#include <string.h>
-#include <string>
-#include "application_manager/application_impl.h"
 #include "application_manager/application_manager.h"
 #include "application_manager/commands/command.h"
 #include "application_manager/message.h"
@@ -45,9 +46,10 @@
 #include "application_manager/smart_object_keys.h"
 #include "interfaces/MOBILE_API.h"
 #include "media_manager/audio/audio_stream_sender_thread.h"
-#include "media_manager/media_manager_settings.h"
 #include "smart_objects/smart_object.h"
+#include "utils/conditional_variable.h"
 #include "utils/file_system.h"
+#include "utils/lock.h"
 #include "utils/logger.h"
 
 namespace media_manager {

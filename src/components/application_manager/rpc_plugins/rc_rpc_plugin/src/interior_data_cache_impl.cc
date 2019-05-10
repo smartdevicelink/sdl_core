@@ -31,11 +31,15 @@
  */
 
 #include "rc_rpc_plugin/interior_data_cache_impl.h"
-#include <chrono>
+
+#include <log4cxx/helpers/objectptr.h>
+#include <log4cxx/logger.h>
+#include <algorithm>
 #include <iostream>
-#include <thread>
+#include <string>
+#include <utility>
+
 #include "application_manager/smart_object_keys.h"
-#include "utils/date_time.h"
 #include "utils/logger.h"
 
 namespace rc_rpc_plugin {

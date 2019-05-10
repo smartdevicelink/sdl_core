@@ -31,17 +31,45 @@
  */
 
 #include "protocol_handler/protocol_handler_impl.h"
-#include <arpa/inet.h>  // for INET6_ADDRSTRLEN
-#include <bson_object.h>
-#include <memory.h>
-#include <protocol/bson_object_keys.h>
-#include <algorithm>  // std::find
 
+#include <bson_array.h>
+#include <bson_object.h>
+#include <bson_util.h>
+#include <log4cxx/helpers/objectptr.h>
+#include <log4cxx/logger.h>
+#include <netinet/in.h>
+#include <protocol/bson_object_keys.h>
+#include <stdlib.h>
+#include <string.h>
+#include <algorithm>  // std::find
+#include <list>
+#include <locale>
+
+#include "connection_handler/connection_handler.h"
 #include "connection_handler/connection_handler_impl.h"
 #include "protocol/common.h"
+#include "protocol_handler/handshake_handler.h"
+#include "protocol_handler/protocol_handler_settings.h"
+#include "protocol_handler/protocol_observer.h"
 #include "protocol_handler/session_observer.h"
+#include "protocol_handler/telemetry_observer.h"
+#include "transport_manager/error.h"
+#include "transport_manager/transport_manager.h"
 #include "utils/byte_order.h"
+#include "utils/custom_string.h"
+#include "utils/data_accessor.h"
+#include "utils/date_time.h"
 #include "utils/helpers.h"
+#include "utils/logger.h"
+#include "utils/semantic_version.h"
+#include "utils/threads/thread_options.h"
+
+namespace security_manager {
+class SecurityManagerListener;
+}  // namespace security_manager
+namespace transport_manager {
+class DeviceInfo;
+}  // namespace transport_manager
 
 #ifdef ENABLE_SECURITY
 #include "security_manager/security_manager.h"

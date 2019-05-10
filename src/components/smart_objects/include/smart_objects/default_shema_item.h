@@ -32,11 +32,15 @@
 #ifndef SRC_COMPONENTS_SMART_OBJECTS_INCLUDE_SMART_OBJECTS_DEFAULT_SHEMA_ITEM_H_
 #define SRC_COMPONENTS_SMART_OBJECTS_INCLUDE_SMART_OBJECTS_DEFAULT_SHEMA_ITEM_H_
 
-#include "utils/macro.h"
+#include <iosfwd>
 
+#include "rpc_base/validation_report.h"
+#include "smart_objects/errors.h"
 #include "smart_objects/schema_item.h"
 #include "smart_objects/schema_item_parameter.h"
 #include "smart_objects/smart_object.h"
+#include "utils/macro.h"
+#include "utils/semantic_version.h"
 
 namespace ns_smart_device_link {
 namespace ns_smart_objects {

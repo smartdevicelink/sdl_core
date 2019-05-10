@@ -29,12 +29,15 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-#include <stdint.h>
+#include <errno.h>
+#include <string.h>
 #include <sys/wait.h>
+#include <unistd.h>
 #include <csignal>
 #include <cstdlib>
 #include <iostream>
 
+#include "appMain/low_voltage_signals_handler.h"
 #include "utils/signals.h"
 
 namespace utils {

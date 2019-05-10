@@ -31,12 +31,28 @@
  */
 
 #include "transport_manager/cloud/cloud_websocket_transport_adapter.h"
-#include "transport_manager/cloud/cloud_websocket_connection_factory.h"
+
+#include <log4cxx/helpers/objectptr.h>
+#include <log4cxx/logger.h>
+#include <stddef.h>
+#include <algorithm>
+#include <boost/regex.hpp>
+#include <map>
+#include <memory>
+#include <ostream>
 
 #include "transport_manager/cloud/cloud_device.h"
+#include "transport_manager/cloud/cloud_websocket_connection_factory.h"
 #include "transport_manager/cloud/websocket_client_connection.h"
+#include "transport_manager/transport_adapter/device.h"
+#include "utils/logger.h"
 
-#include <boost/regex.hpp>
+namespace resumption {
+class LastState;
+}  // namespace resumption
+namespace transport_manager {
+class TransportManagerSettings;
+}  // namespace transport_manager
 
 namespace transport_manager {
 namespace transport_adapter {

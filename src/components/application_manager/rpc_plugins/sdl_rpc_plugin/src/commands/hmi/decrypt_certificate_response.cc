@@ -30,8 +30,6 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 #include "sdl_rpc_plugin/commands/hmi/decrypt_certificate_response.h"
-
-#include "application_manager/policies/policy_handler.h"
 #ifdef EXTERNAL_PROPRIETARY_MODE
 namespace sdl_rpc_plugin {
 using namespace application_manager;

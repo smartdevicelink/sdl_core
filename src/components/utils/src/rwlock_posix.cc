@@ -30,6 +30,10 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <log4cxx/helpers/objectptr.h>
+#include <log4cxx/logger.h>
+#include <pthread.h>
+
 #include "utils/logger.h"
 #include "utils/rwlock.h"
 

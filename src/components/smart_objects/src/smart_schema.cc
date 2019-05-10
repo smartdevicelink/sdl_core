@@ -30,7 +30,14 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 #include "smart_objects/smart_schema.h"
+
+#include <memory>
+
 #include "smart_objects/always_true_schema_item.h"
+
+namespace rpc {
+class ValidationReport;
+}  // namespace rpc
 
 namespace ns_smart_device_link {
 namespace ns_smart_objects {

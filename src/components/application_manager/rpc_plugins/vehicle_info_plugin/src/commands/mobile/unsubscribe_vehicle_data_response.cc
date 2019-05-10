@@ -32,7 +32,27 @@
  */
 
 #include "vehicle_info_plugin/commands/mobile/unsubscribe_vehicle_data_response.h"
+
+#include <log4cxx/helpers/objectptr.h>
+#include <log4cxx/logger.h>
+#include <memory>
+
+#include "application_manager/commands/command_impl.h"
+#include "application_manager/smart_object_keys.h"
 #include "smart_objects/smart_object.h"
+#include "utils/logger.h"
+
+namespace application_manager {
+class ApplicationManager;
+class HMICapabilities;
+namespace rpc_service {
+class RPCService;
+}  // namespace rpc_service
+}  // namespace application_manager
+
+namespace policy {
+class PolicyHandlerInterface;
+}  // namespace policy
 
 namespace vehicle_info_plugin {
 using namespace application_manager;

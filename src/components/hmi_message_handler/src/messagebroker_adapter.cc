@@ -30,10 +30,25 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <string>
+#include <bits/stdint-uintn.h>
+#include <log4cxx/helpers/objectptr.h>
+#include <log4cxx/logger.h>
+#include <iosfwd>
+#include <memory>
 
+#include "application_manager/message.h"
+#include "hmi_message_handler/hmi_message_adapter_impl.h"
+#include "hmi_message_handler/hmi_message_handler.h"
+#include "hmi_message_handler/hmi_message_sender.h"
+#include "hmi_message_handler/mb_controller.h"
 #include "hmi_message_handler/messagebroker_adapter.h"
+#include "json/reader.h"
+#include "json/value.h"
+#include "json/writer.h"
+#include "protocol/common.h"
+#include "protocol/message_priority.h"
 #include "utils/logger.h"
+#include "utils/threads/thread.h"
 
 namespace hmi_message_handler {
 

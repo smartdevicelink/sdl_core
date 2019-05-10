@@ -34,10 +34,24 @@
  */
 
 #include "transport_manager/usb/usb_aoa_adapter.h"
-#include "transport_manager/usb/common.h"
+
+#include <log4cxx/helpers/objectptr.h>
+#include <log4cxx/logger.h>
+#include <stddef.h>
+#include <memory>
+#include <ostream>
+
+#include "transport_manager/usb/libusb/usb_handler.h"
 #include "transport_manager/usb/usb_connection_factory.h"
 #include "transport_manager/usb/usb_device_scanner.h"
 #include "utils/logger.h"
+
+namespace resumption {
+class LastState;
+}  // namespace resumption
+namespace transport_manager {
+class TransportManagerSettings;
+}  // namespace transport_manager
 
 namespace transport_manager {
 namespace transport_adapter {

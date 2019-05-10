@@ -33,6 +33,8 @@
 #include "hmi_message_handler/hmi_message_adapter_impl.h"
 
 namespace hmi_message_handler {
+class HMIMessageHandler;
+
 HMIMessageAdapterImpl::HMIMessageAdapterImpl(HMIMessageHandler* handler)
     : handler_(handler) {}
 

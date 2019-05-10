@@ -32,14 +32,33 @@
  */
 
 #include "sdl_rpc_plugin/commands/mobile/put_file_request.h"
-#include <algorithm>
 
-#include "application_manager/application_impl.h"
-#include "application_manager/policies/policy_handler.h"
-#include "application_manager/rpc_service.h"
-
+#include <log4cxx/helpers/objectptr.h>
+#include <log4cxx/logger.h>
+#include <stddef.h>
 #include <boost/crc.hpp>
+#include <cstdint>
+#include <memory>
+#include <ostream>
+#include <string>
+#include <vector>
+
+#include "application_manager/application.h"
+#include "application_manager/application_manager.h"
+#include "application_manager/application_manager_settings.h"
+#include "application_manager/commands/command_impl.h"
+#include "application_manager/message.h"
+#include "application_manager/policies/policy_handler_interface.h"
+#include "application_manager/rpc_service.h"
+#include "application_manager/smart_object_keys.h"
+#include "interfaces/HMI_API.h"
+#include "smart_objects/smart_object.h"
 #include "utils/file_system.h"
+#include "utils/logger.h"
+
+namespace application_manager {
+class HMICapabilities;
+}  // namespace application_manager
 
 namespace {
 /**

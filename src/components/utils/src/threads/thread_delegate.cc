@@ -32,9 +32,10 @@
 
 #include "utils/threads/thread_delegate.h"
 
+#include <log4cxx/logger.h>
 #include <pthread.h>
 
-#include "utils/lock.h"
+#include "utils/macro.h"
 #include "utils/threads/thread.h"
 
 namespace threads {

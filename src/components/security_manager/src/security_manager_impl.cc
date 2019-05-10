@@ -31,11 +31,25 @@
  */
 
 #include "security_manager/security_manager_impl.h"
+
+#include <log4cxx/helpers/objectptr.h>
+#include <log4cxx/logger.h>
+#include <string.h>
+
+#include <algorithm>
+#include <cstdint>
 #include <functional>
-#include "json/json.h"
-#include "protocol_handler/protocol_packet.h"
-#include "security_manager/crypto_manager_impl.h"
-#include "utils/byte_order.h"
+#include <string>
+#include <type_traits>
+#include <vector>
+
+#include "json/reader.h"
+#include "json/value.h"
+#include "protocol/service_type.h"
+#include "protocol_handler/protocol_handler.h"
+#include "protocol_handler/session_observer.h"
+#include "security_manager/crypto_manager.h"
+#include "security_manager/security_manager_listener.h"
 #include "utils/helpers.h"
 #include "utils/logger.h"
 

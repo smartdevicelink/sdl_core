@@ -31,6 +31,13 @@
  */
 
 #include "media_manager/file_streamer_adapter.h"
+
+#include <log4cxx/helpers/objectptr.h>
+#include <log4cxx/logger.h>
+#include <stddef.h>
+#include <memory>
+#include <string>
+
 #include "utils/file_system.h"
 #include "utils/logger.h"
 

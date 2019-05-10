@@ -30,17 +30,26 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <pthread.h>
-#include <unistd.h>
-#include <iomanip>
-
+#include <bits/stdint-uintn.h>
 #include <libusb-1.0/libusb.h>
-
+#include <log4cxx/helpers/objectptr.h>
+#include <log4cxx/logger.h>
+#include <pthread.h>
+#include <stddef.h>
+#include <iomanip>
+#include <list>
+#include <memory>
 #include <sstream>
 
-#include "transport_manager/transport_adapter/transport_adapter_impl.h"
+#include "protocol/raw_message.h"
+#include "transport_manager/common.h"
+#include "transport_manager/error.h"
+#include "transport_manager/transport_adapter/transport_adapter.h"
+#include "transport_manager/transport_adapter/transport_adapter_controller.h"
+#include "transport_manager/usb/common.h"
+#include "transport_manager/usb/libusb/platform_usb_device.h"
 #include "transport_manager/usb/libusb/usb_connection.h"
-
+#include "utils/lock.h"
 #include "utils/logger.h"
 
 // Define the buffer size, because the Android accessory protocol packet support

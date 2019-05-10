@@ -32,6 +32,21 @@
 
 #include "sdl_rpc_plugin/commands/hmi/on_start_device_discovery.h"
 
+#include "application_manager/application_manager.h"
+#include "application_manager/commands/command_impl.h"
+#include "utils/logger.h"
+
+namespace application_manager {
+class HMICapabilities;
+namespace rpc_service {
+class RPCService;
+}  // namespace rpc_service
+}  // namespace application_manager
+
+namespace policy {
+class PolicyHandlerInterface;
+}  // namespace policy
+
 namespace sdl_rpc_plugin {
 using namespace application_manager;
 

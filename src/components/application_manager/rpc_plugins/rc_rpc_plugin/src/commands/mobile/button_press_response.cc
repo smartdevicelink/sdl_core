@@ -31,7 +31,12 @@
  */
 
 #include "rc_rpc_plugin/commands/mobile/button_press_response.h"
+
+#include "application_manager/application_manager.h"
+#include "application_manager/commands/command_impl.h"
 #include "application_manager/rpc_service.h"
+#include "rc_rpc_plugin/commands/rc_command_params.h"
+#include "utils/logger.h"
 
 namespace rc_rpc_plugin {
 namespace commands {

@@ -1,4 +1,9 @@
-﻿/*
+#include <bits/stdint-intn.h>
+#include <stddef.h>
+#include <iosfwd>
+#include <utility>
+
+/*
  * Copyright (c) 2014, Ford Motor Company
  * All rights reserved.
  *
@@ -59,13 +64,9 @@ const std::string required_validation_info = "is required in ";
 std::string PolicyTableTypeToString(const PolicyTableType pt_type);
 }  // namespace policy_table_interface_base
 
-template <typename T>
-class Range;
-class PrimitiveType;
-class CompositeType;
 class Boolean;
-template <typename T, T minval, T maxval>
-class Integer;
+class CompositeType;
+class PrimitiveType;
 template <int64_t minnum,
           int64_t maxnum,
           int64_t minden = 1,
@@ -73,16 +74,20 @@ template <int64_t minnum,
 class Float;
 template <size_t minlen, size_t maxlen>
 class String;
-template <typename T>
-class Enum;
+template <typename T, T minval, T maxval>
+class Integer;
 template <typename T, size_t minsize, size_t maxsize>
 class Array;
 template <typename T, size_t minsize, size_t maxsize>
 class Map;
 template <typename T>
+class Enum;
+template <typename T>
 class Nullable;
 template <typename T>
 class Optional;
+template <typename T>
+class Range;
 template <typename T>
 class Stringifyable;
 

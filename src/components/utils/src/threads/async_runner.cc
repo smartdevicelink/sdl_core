@@ -32,9 +32,11 @@
 
 #include "utils/threads/async_runner.h"
 
-#include <string>
+#include <stddef.h>
 
 #include "utils/logger.h"
+#include "utils/threads/thread.h"
+#include "utils/threads/thread_delegate.h"
 
 namespace threads {
 

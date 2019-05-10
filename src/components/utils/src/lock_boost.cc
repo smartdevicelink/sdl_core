@@ -30,12 +30,14 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <errno.h>
-#include <stdint.h>
-#include <string.h>
-#include <cstring>
+#include <log4cxx/helpers/objectptr.h>
+#include <log4cxx/logger.h>
+#include <boost/thread/pthread/mutex.hpp>
+#include <boost/thread/pthread/recursive_mutex.hpp>
+
 #include "utils/lock.h"
 #include "utils/logger.h"
+#include "utils/macro.h"
 
 namespace sync_primitives {
 

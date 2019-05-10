@@ -32,25 +32,38 @@
 
 #include "policy/cache_manager.h"
 
+#include <bits/types/struct_tm.h>
+#include <bits/types/time_t.h>
+#include <ctype.h>
+#include <log4cxx/helpers/objectptr.h>
+#include <log4cxx/logger.h>
+#include <strings.h>
+
 #include <algorithm>
 #include <cmath>
+#include <cstdint>
 #include <ctime>
-#include <functional>
+#include <iterator>
 #include <sstream>
+#include <type_traits>
+#include <utility>
 
 #include "json/features.h"
 #include "json/reader.h"
+#include "json/value.h"
 #include "json/writer.h"
+#include "policy/policy_settings.h"
+#include "policy/pt_representation.h"
+#include "policy/sql_pt_representation.h"
+#include "rpc_base/rpc_base_json_inl.h"
+#include "rpc_base/validation_report.h"
 #include "utils/date_time.h"
 #include "utils/file_system.h"
-#include "utils/gen_hash.h"
 #include "utils/helpers.h"
 #include "utils/logger.h"
 #include "utils/macro.h"
 #include "utils/threads/thread.h"
 #include "utils/threads/thread_delegate.h"
-
-#include "policy/sql_pt_representation.h"
 
 namespace policy_table = rpc::policy_table_interface_base;
 

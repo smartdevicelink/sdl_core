@@ -33,21 +33,33 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <errno.h>
-#include <sys/socket.h>
-#include <sys/types.h>
-#include <unistd.h>
-
+#include <bits/stdint-uintn.h>
 #include <bluetooth/bluetooth.h>
-#include <iomanip>
-#include <set>
+#include <log4cxx/helpers/objectptr.h>
+#include <log4cxx/logger.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <iosfwd>
+#include <memory>
+#include <string>
+#include <vector>
 
+#include "json/value.h"
+#include "resumption/last_state.h"
 #include "transport_manager/bluetooth/bluetooth_connection_factory.h"
 #include "transport_manager/bluetooth/bluetooth_device.h"
 #include "transport_manager/bluetooth/bluetooth_device_scanner.h"
 #include "transport_manager/bluetooth/bluetooth_transport_adapter.h"
-
+#include "transport_manager/common.h"
+#include "transport_manager/transport_adapter/connection.h"
+#include "transport_manager/transport_adapter/device.h"
+#include "transport_manager/transport_adapter/transport_adapter.h"
+#include "transport_manager/transport_adapter/transport_adapter_impl.h"
 #include "utils/logger.h"
+
+namespace transport_manager {
+class TransportManagerSettings;
+}  // namespace transport_manager
 
 namespace transport_manager {
 namespace transport_adapter {

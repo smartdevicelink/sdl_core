@@ -33,9 +33,12 @@
 #ifndef SRC_COMPONENTS_CONNECTION_HANDLER_INCLUDE_CONNECTION_HANDLER_DEVICE_H_
 #define SRC_COMPONENTS_CONNECTION_HANDLER_INCLUDE_CONNECTION_HANDLER_DEVICE_H_
 
+#include <bits/stdint-intn.h>
+#include <iosfwd>
 #include <map>
 #include <string>
 #include <vector>
+
 #include "transport_manager/common.h"
 
 /**

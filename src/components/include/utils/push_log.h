@@ -33,8 +33,18 @@
 #ifndef SRC_COMPONENTS_INCLUDE_UTILS_PUSH_LOG_H_
 #define SRC_COMPONENTS_INCLUDE_UTILS_PUSH_LOG_H_
 
+#include <log4cxx/level.h>
+#include <log4cxx/log4cxx.h>
 #include <log4cxx/logger.h>
+#include <log4cxx/logstring.h>
+#include <iosfwd>
 #include <string>
+
+namespace log4cxx {
+namespace spi {
+class LocationInfo;
+}  // namespace spi
+}  // namespace log4cxx
 
 namespace logger {
 

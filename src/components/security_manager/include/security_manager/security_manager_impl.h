@@ -33,20 +33,32 @@
 #ifndef SRC_COMPONENTS_SECURITY_MANAGER_INCLUDE_SECURITY_MANAGER_SECURITY_MANAGER_IMPL_H_
 #define SRC_COMPONENTS_SECURITY_MANAGER_INCLUDE_SECURITY_MANAGER_SECURITY_MANAGER_IMPL_H_
 
+#include <bits/stdint-uintn.h>
+#include <bits/types/time_t.h>
+#include <stddef.h>
 #include <list>
 #include <memory>
 #include <set>
+#include <sstream>
 #include <string>
 
-#include "utils/macro.h"
-#include "utils/message_queue.h"
-#include "utils/threads/message_loop_thread.h"
-
 #include "protocol/common.h"
+#include "protocol/raw_message.h"
 #include "protocol_handler/protocol_handler.h"
 #include "security_manager/security_manager.h"
 #include "security_manager/security_query.h"
+#include "security_manager/ssl_context.h"
+#include "utils/lock.h"
+#include "utils/macro.h"
+#include "utils/message_queue.h"
+#include "utils/prioritized_queue.h"
 #include "utils/system_time_handler.h"
+#include "utils/threads/message_loop_thread.h"
+
+namespace protocol_handler {
+class ProtocolHandler;
+class SessionObserver;
+}  // namespace protocol_handler
 
 namespace security_manager {
 /**
@@ -54,6 +66,9 @@ namespace security_manager {
  * \brief SecurityMessageQueue and SecurityMessageLoop are support typedefs
  * for thread working
  */
+class CryptoManager;
+class SecurityManagerListener;
+
 struct SecurityMessage : public SecurityQueryPtr {
   SecurityMessage() {}
   explicit SecurityMessage(const SecurityQueryPtr& message)

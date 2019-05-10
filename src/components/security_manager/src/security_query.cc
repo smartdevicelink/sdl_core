@@ -31,7 +31,11 @@
  */
 
 #include "security_manager/security_query.h"
+
+#include <log4cxx/logger.h>
+#include <algorithm>
 #include <cstring>
+
 #include "utils/byte_order.h"
 #include "utils/macro.h"
 

@@ -29,14 +29,21 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-#include "utils/conditional_variable.h"
-
-#include <errno.h>
-#include <time.h>
-
+#include <bits/stdint-uintn.h>
+#include <log4cxx/helpers/objectptr.h>
+#include <log4cxx/logger.h>
+#include <boost/date_time/posix_time/posix_time_duration.hpp>
 #include <boost/exception/diagnostic_information.hpp>
+#include <boost/exception/exception.hpp>
+#include <boost/thread/pthread/condition_variable.hpp>
+#include <boost/thread/pthread/mutex.hpp>
+#include <boost/thread/pthread/recursive_mutex.hpp>
+#include <iosfwd>
+
+#include "utils/conditional_variable.h"
 #include "utils/lock.h"
 #include "utils/logger.h"
+#include "utils/macro.h"
 
 namespace {
 const long kNanosecondsPerSecond = 1000000000;

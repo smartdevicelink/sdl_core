@@ -33,17 +33,22 @@
 #ifndef SRC_COMPONENTS_SECURITY_MANAGER_INCLUDE_SECURITY_MANAGER_CRYPTO_MANAGER_IMPL_H_
 #define SRC_COMPONENTS_SECURITY_MANAGER_INCLUDE_SECURITY_MANAGER_CRYPTO_MANAGER_IMPL_H_
 
+#include <bits/stdint-uintn.h>
+#include <bits/types/time_t.h>
 #include <openssl/bio.h>
 #include <openssl/err.h>
+#include <openssl/ossl_typ.h>
 #include <openssl/ssl.h>
+#include <stddef.h>
 #include <stdint.h>
+#include <iosfwd>
 #include <map>
+#include <memory>
 #include <string>
 
 #include "security_manager/crypto_manager.h"
 #include "security_manager/security_manager_settings.h"
 #include "security_manager/ssl_context.h"
-
 #include "utils/lock.h"
 #include "utils/macro.h"
 

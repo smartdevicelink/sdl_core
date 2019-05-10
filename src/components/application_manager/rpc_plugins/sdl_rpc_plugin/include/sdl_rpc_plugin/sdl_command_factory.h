@@ -33,14 +33,40 @@
 #ifndef SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_SDL_COMMAND_FACTORY_H
 #define SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_SDL_COMMAND_FACTORY_H
 
+#include <bits/stdint-intn.h>
 #include <memory>
+
+#include "application_manager/app_extension.h"
 #include "application_manager/application_manager.h"
 #include "application_manager/command_factory.h"
+#include "application_manager/commands/command.h"
 #include "application_manager/hmi_capabilities.h"
 #include "application_manager/policies/policy_handler_interface.h"
 #include "application_manager/rpc_service.h"
 #include "sdl_rpc_plugin/hmi_command_factory.h"
 #include "sdl_rpc_plugin/mobile_command_factory.h"
+#include "utils/macro.h"
+
+namespace policy {
+class PolicyHandlerInterface;
+}  // namespace policy
+
+namespace application_manager {
+class ApplicationManager;
+class HMICapabilities;
+namespace rpc_service {
+class RPCService;
+}  // namespace rpc_service
+
+class ApplicationManager;
+class HMICapabilities;
+namespace rpc_service {
+class RPCService;
+}  // namespace rpc_service
+}  // namespace application_manager
+namespace policy {
+class PolicyHandlerInterface;
+}  // namespace policy
 
 namespace sdl_rpc_plugin {
 namespace app_mngr = application_manager;

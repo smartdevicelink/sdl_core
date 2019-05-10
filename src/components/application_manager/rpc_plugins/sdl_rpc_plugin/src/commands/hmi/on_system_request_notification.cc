@@ -30,12 +30,45 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "application_manager/application_impl.h"
+#include <bits/stdint-intn.h>
+#include <bits/stdint-uintn.h>
+#include <log4cxx/helpers/objectptr.h>
+#include <log4cxx/logger.h>
+#include <stddef.h>
+#include <memory>
+#include <ostream>
 
+#include "application_manager/application.h"
+#include "application_manager/application_manager.h"
+#include "application_manager/commands/command.h"
+#include "application_manager/commands/command_impl.h"
+#include "application_manager/commands/notification_from_hmi.h"
 #include "application_manager/policies/policy_handler_interface.h"
+#include "application_manager/smart_object_keys.h"
+#include "connection_handler/connection_handler.h"
 #include "interfaces/MOBILE_API.h"
+#include "policy/policy_types.h"
+#include "protocol_handler/session_observer.h"
 #include "sdl_rpc_plugin/commands/hmi/on_system_request_notification.h"
-#include "utils/macro.h"
+#include "smart_objects/smart_object.h"
+#include "utils/logger.h"
+
+namespace application_manager {
+class HMICapabilities;
+namespace rpc_service {
+class RPCService;
+}  // namespace rpc_service
+
+class HMICapabilities;
+namespace rpc_service {
+class RPCService;
+}  // namespace rpc_service
+
+class HMICapabilities;
+namespace rpc_service {
+class RPCService;
+}  // namespace rpc_service
+}  // namespace application_manager
 
 using policy::PolicyHandlerInterface;
 

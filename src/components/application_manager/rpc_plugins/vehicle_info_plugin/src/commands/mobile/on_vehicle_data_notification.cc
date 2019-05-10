@@ -33,12 +33,38 @@
 
 #include "vehicle_info_plugin/commands/mobile/on_vehicle_data_notification.h"
 
-#include "application_manager/application_impl.h"
+#include <log4cxx/helpers/objectptr.h>
+#include <log4cxx/logger.h>
+#include <stddef.h>
+#include <algorithm>
+#include <iterator>
+#include <map>
+#include <memory>
+#include <ostream>
+#include <utility>
+#include <vector>
+
+#include "application_manager/application_manager.h"
+#include "application_manager/commands/command_impl.h"
 #include "application_manager/helpers/application_helper.h"
 #include "application_manager/message_helper.h"
-#include "interfaces/MOBILE_API.h"
+#include "application_manager/smart_object_keys.h"
+#include "smart_objects/smart_object.h"
+#include "utils/custom_string.h"
+#include "utils/logger.h"
 #include "utils/macro.h"
 #include "vehicle_info_plugin/vehicle_info_app_extension.h"
+
+namespace application_manager {
+class HMICapabilities;
+namespace rpc_service {
+class RPCService;
+}  // namespace rpc_service
+}  // namespace application_manager
+
+namespace policy {
+class PolicyHandlerInterface;
+}  // namespace policy
 
 namespace vehicle_info_plugin {
 using namespace application_manager;

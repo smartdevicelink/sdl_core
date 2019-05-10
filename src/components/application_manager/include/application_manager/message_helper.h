@@ -36,27 +36,36 @@
 #ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_MESSAGE_HELPER_H_
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_MESSAGE_HELPER_H_
 
+#include <application_manager/smart_object_keys.h>
+#include <bits/stdint-intn.h>
+#include <bits/stdint-uintn.h>
+#include <iosfwd>
 #include <map>
 #include <string>
 #include <vector>
 
-#include <application_manager/smart_object_keys.h>
 #include "application_manager/application.h"
 #include "application_manager/policies/policy_handler_interface.h"
 #include "connection_handler/device.h"
 #include "interfaces/HMI_API.h"
 #include "interfaces/MOBILE_API.h"
 #include "policy/policy_types.h"
+#include "protocol/service_type.h"
 #include "protocol_handler/session_observer.h"
 #include "smart_objects/smart_object.h"
 #include "transport_manager/common.h"
 #include "utils/macro.h"
+
+namespace protocol_handler {
+class SessionObserver;
+}  // namespace protocol_handler
 
 namespace policy {
 class PolicyHandlerInterface;
 }
 
 namespace application_manager {
+class ApplicationManager;
 namespace mobile_api = mobile_apis;
 
 /*
@@ -234,7 +243,7 @@ class MessageHelper {
    */
   static smart_objects::SmartObjectSPtr CreateDeviceListSO(
       const connection_handler::DeviceMap& devices,
-      const policy::PolicyHandlerInterface& policy_handler,
+      const ::policy::PolicyHandlerInterface& policy_handler,
       ApplicationManager& app_mngr);
 
   static smart_objects::SmartObjectSPtr CreateModuleInfoSO(
@@ -316,7 +325,7 @@ class MessageHelper {
   static bool CreateDeviceInfo(
       connection_handler::DeviceHandle device_handle,
       const protocol_handler::SessionObserver& session_observer,
-      const policy::PolicyHandlerInterface& policy_handler,
+      const ::policy::PolicyHandlerInterface& policy_handler,
       ApplicationManager& app_mngr,
       smart_objects::SmartObject* output);
 
@@ -329,7 +338,7 @@ class MessageHelper {
   static bool CreateHMIApplicationStruct(
       ApplicationConstSharedPtr app,
       const protocol_handler::SessionObserver& session_observer,
-      const policy::PolicyHandlerInterface& policy_handler,
+      const ::policy::PolicyHandlerInterface& policy_handler,
       smart_objects::SmartObject* output,
       ApplicationManager& app_mngr);
 
@@ -352,7 +361,7 @@ class MessageHelper {
   GetBCActivateAppRequestToHMI(
       ApplicationConstSharedPtr app,
       const protocol_handler::SessionObserver& session_observer,
-      const policy::PolicyHandlerInterface& policy_handler,
+      const ::policy::PolicyHandlerInterface& policy_handler,
       hmi_apis::Common_HMILevel::eType level,
       bool send_policy_priority,
       ApplicationManager& app_mngr);
@@ -364,7 +373,7 @@ class MessageHelper {
    * @brief Send SDL_ActivateApp response to HMI
    * @param permissions response parameters
    */
-  static void SendSDLActivateAppResponse(policy::AppPermissions& permissions,
+  static void SendSDLActivateAppResponse(::policy::AppPermissions& permissions,
                                          uint32_t correlation_id,
                                          ApplicationManager& app_mngr);
 
@@ -372,7 +381,7 @@ class MessageHelper {
    * @brief Send OnSDLConsentNeeded to HMI for device data consent by user
    * @param device_info Device info, e.g. mac, handle, name
    */
-  static void SendOnSDLConsentNeeded(const policy::DeviceParams& device_info,
+  static void SendOnSDLConsentNeeded(const ::policy::DeviceParams& device_info,
                                      ApplicationManager& app_man);
 
   /**
@@ -393,7 +402,7 @@ class MessageHelper {
    * @param correlation_id Correlation id of request
    */
   static void SendGetUserFriendlyMessageResponse(
-      const std::vector<policy::UserFriendlyMessage>& msg,
+      const std::vector< ::policy::UserFriendlyMessage>& msg,
       uint32_t correlation_id,
       ApplicationManager& app_mngr);
 
@@ -405,13 +414,13 @@ class MessageHelper {
  */
 #ifdef EXTERNAL_PROPRIETARY_MODE
   static void SendGetListOfPermissionsResponse(
-      const std::vector<policy::FunctionalGroupPermission>& permissions,
-      const policy::ExternalConsentStatus& external_consent_status,
+      const std::vector< ::policy::FunctionalGroupPermission>& permissions,
+      const ::policy::ExternalConsentStatus& external_consent_status,
       const uint32_t correlation_id,
       ApplicationManager& app_mngr);
 #else
   static void SendGetListOfPermissionsResponse(
-      const std::vector<policy::FunctionalGroupPermission>& permissions,
+      const std::vector< ::policy::FunctionalGroupPermission>& permissions,
       const uint32_t correlation_id,
       ApplicationManager& app_mngr);
 #endif  // EXTERNAL_PROPRIETARY_MODE
@@ -491,7 +500,7 @@ class MessageHelper {
    */
   static void SendOnPermissionsChangeNotification(
       uint32_t connection_key,
-      const policy::Permissions& permissions,
+      const ::policy::Permissions& permissions,
       ApplicationManager& app_mngr);
 
   /*
@@ -501,7 +510,7 @@ class MessageHelper {
    */
   static void SendOnAppPermissionsChangedNotification(
       uint32_t connection_key,
-      const policy::AppPermissions& permissions,
+      const ::policy::AppPermissions& permissions,
       ApplicationManager& app_mngr);
 
   /**
@@ -683,7 +692,7 @@ class MessageHelper {
   static mobile_apis::Result::eType ProcessSoftButtons(
       smart_objects::SmartObject& message_params,
       ApplicationConstSharedPtr app,
-      const policy::PolicyHandlerInterface& policy_handler,
+      const ::policy::PolicyHandlerInterface& policy_handler,
       ApplicationManager& app_mngr);
 
   /*
@@ -899,7 +908,7 @@ class MessageHelper {
    * @param message which should be filled.
    */
   static void FillAppRevokedPermissions(
-      const policy::AppPermissions& permissions,
+      const ::policy::AppPermissions& permissions,
       smart_objects::SmartObject& message);
 
   static smart_objects::SmartObjectSPtr CreateChangeRegistration(

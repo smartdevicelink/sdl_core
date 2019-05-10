@@ -33,7 +33,10 @@
 #ifndef SRC_COMPONENTS_PROTOCOL_HANDLER_INCLUDE_PROTOCOL_HANDLER_PROTOCOL_PAYLOAD_H_
 #define SRC_COMPONENTS_PROTOCOL_HANDLER_INCLUDE_PROTOCOL_HANDLER_PROTOCOL_PAYLOAD_H_
 
+#include <bits/stdint-uintn.h>
+#include <stddef.h>
 #include <stdint.h>
+#include <cstdint>
 #include <ostream>
 #include <string>
 #include <vector>

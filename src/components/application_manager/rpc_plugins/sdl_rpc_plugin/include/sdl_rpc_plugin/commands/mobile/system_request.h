@@ -34,11 +34,36 @@
 #ifndef SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_MOBILE_SYSTEM_REQUEST_H_
 #define SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_MOBILE_SYSTEM_REQUEST_H_
 
+#include <bits/stdint-uintn.h>
+#include <iosfwd>
 #include <string>
+
+#include "application_manager/app_extension.h"
 #include "application_manager/application_manager.h"
+#include "application_manager/commands/command.h"
 #include "application_manager/commands/command_request_impl.h"
 #include "application_manager/event_engine/event.h"
 #include "smart_objects/smart_object.h"
+#include "utils/macro.h"
+
+namespace application_manager {
+class ApplicationManager;
+class HMICapabilities;
+namespace event_engine {
+class Event;
+}  // namespace event_engine
+namespace rpc_service {
+class RPCService;
+}  // namespace rpc_service
+}  // namespace application_manager
+namespace ns_smart_device_link {
+namespace ns_smart_objects {
+class SmartObject;
+}  // namespace ns_smart_objects
+}  // namespace ns_smart_device_link
+namespace policy {
+class PolicyHandlerInterface;
+}  // namespace policy
 
 namespace sdl_rpc_plugin {
 namespace app_mngr = application_manager;

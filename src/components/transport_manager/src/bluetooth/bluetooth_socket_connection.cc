@@ -33,17 +33,21 @@
 
 #include "transport_manager/bluetooth/bluetooth_socket_connection.h"
 
+#include <bits/stdint-uintn.h>
 #include <bluetooth/bluetooth.h>
-#include <bluetooth/hci.h>
-#include <bluetooth/hci_lib.h>
 #include <bluetooth/rfcomm.h>
-#include <bluetooth/sdp.h>
-#include <bluetooth/sdp_lib.h>
+#include <errno.h>
+#include <log4cxx/helpers/objectptr.h>
+#include <log4cxx/logger.h>
+#include <string.h>
+#include <sys/socket.h>
 #include <unistd.h>
+#include <ostream>
 
 #include "transport_manager/bluetooth/bluetooth_device.h"
+#include "transport_manager/error.h"
+#include "transport_manager/transport_adapter/device.h"
 #include "transport_manager/transport_adapter/transport_adapter_controller.h"
-
 #include "utils/logger.h"
 
 namespace transport_manager {

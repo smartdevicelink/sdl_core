@@ -30,8 +30,35 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 #include "vehicle_info_plugin/commands/hmi/vi_get_vehicle_data_response.h"
+
+#include <bits/stdint-intn.h>
+#include <memory>
+
+#include "application_manager/application_manager.h"
+#include "application_manager/commands/command_impl.h"
 #include "application_manager/event_engine/event.h"
+#include "application_manager/policies/policy_handler_interface.h"
+#include "application_manager/smart_object_keys.h"
 #include "interfaces/HMI_API.h"
+#include "smart_objects/smart_object.h"
+#include "utils/logger.h"
+
+namespace application_manager {
+class HMICapabilities;
+namespace rpc_service {
+class RPCService;
+}  // namespace rpc_service
+
+class HMICapabilities;
+namespace rpc_service {
+class RPCService;
+}  // namespace rpc_service
+
+class HMICapabilities;
+namespace rpc_service {
+class RPCService;
+}  // namespace rpc_service
+}  // namespace application_manager
 
 namespace vehicle_info_plugin {
 using namespace application_manager;

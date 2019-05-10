@@ -31,8 +31,12 @@
  */
 
 #include "utils/logger.h"
+
 #include <apr_time.h>
-#include "utils/log_message_loop_thread.h"
+#include <log4cxx/helpers/objectptr.h>
+#include <log4cxx/spi/loggerrepository.h>
+#include <vector>
+
 #include "utils/logger_status.h"
 
 void deinit_logger() {

@@ -31,13 +31,16 @@
  */
 
 #include "media_manager/socket_streamer_adapter.h"
+
 #include <arpa/inet.h>
-#include <netdb.h>
+#include <log4cxx/helpers/objectptr.h>
+#include <log4cxx/logger.h>
 #include <netinet/in.h>
-#include <sys/select.h>
+#include <stddef.h>
 #include <sys/socket.h>
-#include <sys/types.h>
 #include <unistd.h>
+#include <memory>
+
 #include "utils/logger.h"
 
 namespace media_manager {

@@ -33,8 +33,11 @@
 #ifndef SRC_COMPONENTS_INCLUDE_SECURITY_MANAGER_SECURITY_QUERY_H_
 #define SRC_COMPONENTS_INCLUDE_SECURITY_MANAGER_SECURITY_QUERY_H_
 
+#include <bits/stdint-uintn.h>
 #include <stdint.h>
 #include <cstddef>
+#include <cstdint>
+#include <iosfwd>
 #include <memory>
 #include <string>
 #include <vector>

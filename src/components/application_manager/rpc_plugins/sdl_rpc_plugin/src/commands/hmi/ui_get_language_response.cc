@@ -31,8 +31,29 @@
  */
 #include "sdl_rpc_plugin/commands/hmi/ui_get_language_response.h"
 
+#include <log4cxx/helpers/objectptr.h>
+#include <log4cxx/logger.h>
+#include <memory>
+#include <ostream>
+
+#include "application_manager/commands/command_impl.h"
 #include "application_manager/event_engine/event.h"
+#include "application_manager/hmi_capabilities.h"
+#include "application_manager/smart_object_keys.h"
 #include "interfaces/HMI_API.h"
+#include "smart_objects/smart_object.h"
+#include "utils/logger.h"
+
+namespace application_manager {
+class ApplicationManager;
+namespace rpc_service {
+class RPCService;
+}  // namespace rpc_service
+}  // namespace application_manager
+
+namespace policy {
+class PolicyHandlerInterface;
+}  // namespace policy
 
 namespace sdl_rpc_plugin {
 using namespace application_manager;
@@ -55,13 +76,13 @@ UIGetLanguageResponse::~UIGetLanguageResponse() {}
 
 void UIGetLanguageResponse::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
-  using namespace hmi_apis;
 
-  Common_Language::eType language = Common_Language::INVALID_ENUM;
+  hmi_apis::Common_Language::eType language =
+      hmi_apis::Common_Language::INVALID_ENUM;
 
   if ((*message_).keyExists(strings::msg_params) &&
       (*message_)[strings::msg_params].keyExists(hmi_response::language)) {
-    language = static_cast<Common_Language::eType>(
+    language = static_cast<hmi_apis::Common_Language::eType>(
         (*message_)[strings::msg_params][hmi_response::language].asInt());
   }
 
@@ -71,7 +92,7 @@ void UIGetLanguageResponse::Run() {
                 "Raising event for function_id " << function_id()
                                                  << " and correlation_id "
                                                  << correlation_id());
-  event_engine::Event event(FunctionID::UI_GetLanguage);
+  event_engine::Event event(hmi_apis::FunctionID::UI_GetLanguage);
   event.set_smart_object(*message_);
   event.raise(application_manager_.event_dispatcher());
 }

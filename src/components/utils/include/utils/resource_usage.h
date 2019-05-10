@@ -33,6 +33,7 @@
 #ifndef SRC_COMPONENTS_UTILS_INCLUDE_UTILS_RESOURCE_USAGE_H_
 #define SRC_COMPONENTS_UTILS_INCLUDE_UTILS_RESOURCE_USAGE_H_
 
+#include <bits/stdint-uintn.h>
 #include <sys/resource.h>
 #if defined(__QNXNTO__)
 #include <sys/procfs.h>
@@ -40,9 +41,9 @@
 
 #include <iostream>
 #include <string>
-#include "utils/macro.h"
 
 #include "utils/logger.h"
+#include "utils/macro.h"
 
 #define MAX_COMM_LEN 128
 #define MAX_CMDLINE_LEN 128

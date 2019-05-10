@@ -33,22 +33,30 @@
 #ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_MANAGER_IMPL_H_
 #define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_MANAGER_IMPL_H_
 
+#include <bits/stdint-uintn.h>
 #include <algorithm>
 #include <functional>
 #include <list>
 #include <map>
+#include <memory>
 #include <queue>
+#include <sstream>
+#include <string>
 #include <tuple>
 #include <utility>
 #include <vector>
 
-#include "utils/rwlock.h"
-#include "utils/timer.h"
-
 #include "protocol/common.h"
+#include "protocol/raw_message.h"
+#include "transport_manager/common.h"
+#include "transport_manager/info.h"
 #include "transport_manager/transport_adapter/transport_adapter_listener_impl.h"
 #include "transport_manager/transport_manager.h"
 #include "transport_manager/transport_manager_listener.h"
+#include "utils/lock.h"
+#include "utils/macro.h"
+#include "utils/rwlock.h"
+#include "utils/timer.h"
 #ifdef TELEMETRY_MONITOR
 #include "telemetry_monitor/telemetry_observable.h"
 #include "transport_manager/telemetry_observer.h"
@@ -56,6 +64,21 @@
 #include "transport_manager/transport_adapter/transport_adapter_event.h"
 #include "transport_manager/transport_manager_settings.h"
 #include "utils/threads/message_loop_thread.h"
+
+namespace resumption {
+class LastState;
+}  // namespace resumption
+namespace transport_manager {
+class TMTelemetryObserver;
+class TransportAdapterListenerImpl;
+class TransportManagerListener;
+class TransportManagerSettings;
+
+namespace transport_adapter {
+class TransportAdapter;
+struct CloudAppProperties;
+}  // namespace transport_adapter
+}  // namespace transport_manager
 
 namespace transport_manager {
 

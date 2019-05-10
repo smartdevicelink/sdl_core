@@ -31,13 +31,16 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef MB_CONTROLLER_H
 #define MB_CONTROLLER_H
 
+#include <bits/stdint-uintn.h>
 #include <algorithm>
 #include <atomic>
 #include <boost/asio/bind_executor.hpp>
+#include <boost/asio/io_context.hpp>
 #include <boost/asio/ip/tcp.hpp>
 #include <boost/asio/placeholders.hpp>
 #include <boost/asio/strand.hpp>
 #include <boost/beast/core.hpp>
+#include <boost/beast/core/multi_buffer.hpp>
 #include <boost/beast/websocket.hpp>
 #include <boost/make_shared.hpp>
 #include <boost/thread/thread.hpp>
@@ -49,10 +52,31 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <string>
 #include <thread>
 #include <vector>
+
 #include "json/json.h"
 #include "utils/lock.h"
+#include "utils/logger.h"
 #include "utils/macro.h"
 #include "websocket_session.h"
+
+namespace Json {
+class Value;
+}  // namespace Json
+namespace boost {
+namespace asio {
+template <typename Executor>
+class strand;
+}  // namespace asio
+namespace beast {
+namespace websocket {
+template <class NextLayer>
+class stream;
+}  // namespace websocket
+}  // namespace beast
+namespace system {
+class error_code;
+}  // namespace system
+}  // namespace boost
 
 using namespace boost::beast::websocket;
 

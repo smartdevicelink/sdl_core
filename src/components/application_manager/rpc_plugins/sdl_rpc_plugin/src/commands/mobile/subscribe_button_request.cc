@@ -32,7 +32,30 @@
  */
 
 #include "sdl_rpc_plugin/commands/mobile/subscribe_button_request.h"
+
+#include <log4cxx/helpers/objectptr.h>
+#include <log4cxx/logger.h>
+#include <memory>
+#include <ostream>
+
+#include "application_manager/application_manager.h"
+#include "application_manager/commands/command_impl.h"
+#include "application_manager/smart_object_keys.h"
+#include "interfaces/HMI_API.h"
+#include "smart_objects/smart_object.h"
+#include "utils/logger.h"
 #include "utils/semantic_version.h"
+
+namespace application_manager {
+class HMICapabilities;
+namespace rpc_service {
+class RPCService;
+}  // namespace rpc_service
+}  // namespace application_manager
+
+namespace policy {
+class PolicyHandlerInterface;
+}  // namespace policy
 
 namespace sdl_rpc_plugin {
 using namespace application_manager;
@@ -131,15 +154,15 @@ bool SubscribeButtonRequest::IsSubscriptionAllowed(
 
 void SubscribeButtonRequest::SendSubscribeButtonNotification() {
   using namespace smart_objects;
-  using namespace hmi_apis;
 
   // send OnButtonSubscription notification
   SmartObject msg_params = SmartObject(SmartType_Map);
   msg_params[strings::app_id] = connection_key();
-  msg_params[strings::name] = static_cast<Common_ButtonName::eType>(
+  msg_params[strings::name] = static_cast<hmi_apis::Common_ButtonName::eType>(
       (*message_)[strings::msg_params][strings::button_name].asUInt());
   msg_params[strings::is_suscribed] = true;
-  CreateHMINotification(FunctionID::Buttons_OnButtonSubscription, msg_params);
+  CreateHMINotification(hmi_apis::FunctionID::Buttons_OnButtonSubscription,
+                        msg_params);
 }
 
 }  // namespace commands

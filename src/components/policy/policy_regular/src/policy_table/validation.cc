@@ -1,5 +1,16 @@
+#include <log4cxx/helpers/objectptr.h>
+#include <log4cxx/logger.h>
+
 #include <algorithm>
+#include <map>
+#include <ostream>
+#include <utility>
+
+#include "policy/policy_table/enums.h"
 #include "policy/policy_table/types.h"
+#include "rpc_base/rpc_base.h"
+#include "rpc_base/rpc_base_inl.h"
+#include "rpc_base/rpc_base_json_inl.h"
 #include "utils/logger.h"
 
 namespace {

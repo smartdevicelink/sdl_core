@@ -33,7 +33,11 @@
 #ifndef SRC_COMPONENTS_POLICY_POLICY_REGULAR_INCLUDE_POLICY_UPDATE_STATUS_MANAGER_H_
 #define SRC_COMPONENTS_POLICY_POLICY_REGULAR_INCLUDE_POLICY_UPDATE_STATUS_MANAGER_H_
 
+#include <iosfwd>
+#include <memory>
+
 #include "policy/policy_types.h"
+#include "policy/status.h"
 #include "policy/update_status_manager_interface.h"
 #include "utils/conditional_variable.h"
 #include "utils/lock.h"

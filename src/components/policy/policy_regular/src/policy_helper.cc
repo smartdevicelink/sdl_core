@@ -31,11 +31,26 @@
  */
 
 #include "policy/policy_helper.h"
-#include <string.h>
+
+#include <log4cxx/helpers/objectptr.h>
+#include <log4cxx/logger.h>
+#include <strings.h>
+
 #include <algorithm>
+#include <iterator>
+#include <map>
 #include <sstream>
+#include <string>
+#include <utility>
+
+#include "policy/access_remote_impl.h"
+#include "policy/cache_manager_interface.h"
+#include "policy/policy_listener.h"
 #include "policy/policy_manager_impl.h"
+#include "rpc_base/rpc_base.h"
+#include "rpc_base/rpc_base_inl.h"
 #include "utils/custom_string.h"
+#include "utils/lock.h"
 #include "utils/logger.h"
 
 namespace policy {

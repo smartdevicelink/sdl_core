@@ -33,10 +33,34 @@
 
 #include "sdl_rpc_plugin/commands/mobile/delete_interaction_choice_set_request.h"
 
-#include "application_manager/application_impl.h"
-#include "application_manager/message_helper.h"
+#include <bits/stdint-intn.h>
+#include <bits/stdint-uintn.h>
+#include <log4cxx/helpers/objectptr.h>
+#include <log4cxx/logger.h>
+#include <map>
+#include <memory>
+#include <ostream>
+#include <utility>
+
+#include "application_manager/application_manager.h"
+#include "application_manager/commands/command_impl.h"
+#include "application_manager/smart_object_keys.h"
 #include "interfaces/HMI_API.h"
 #include "interfaces/MOBILE_API.h"
+#include "smart_objects/smart_object.h"
+#include "utils/data_accessor.h"
+#include "utils/logger.h"
+
+namespace application_manager {
+class HMICapabilities;
+namespace rpc_service {
+class RPCService;
+}  // namespace rpc_service
+}  // namespace application_manager
+
+namespace policy {
+class PolicyHandlerInterface;
+}  // namespace policy
 
 namespace sdl_rpc_plugin {
 using namespace application_manager;

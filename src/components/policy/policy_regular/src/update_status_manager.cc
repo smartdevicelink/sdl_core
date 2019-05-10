@@ -31,8 +31,14 @@
  */
 
 #include "policy/update_status_manager.h"
+
+#include <log4cxx/helpers/objectptr.h>
+#include <log4cxx/logger.h>
+#include <stddef.h>
+
 #include "policy/policy_listener.h"
 #include "utils/logger.h"
+#include "utils/macro.h"
 
 namespace policy {
 

@@ -33,22 +33,25 @@
 #ifndef SRC_COMPONENTS_PROTOCOL_HANDLER_INCLUDE_PROTOCOL_HANDLER_PROTOCOL_HANDLER_IMPL_H_
 #define SRC_COMPONENTS_PROTOCOL_HANDLER_INCLUDE_PROTOCOL_HANDLER_PROTOCOL_HANDLER_IMPL_H_
 
+#include <bits/stdint-intn.h>
+#include <bits/stdint-uintn.h>
+#include <stddef.h>
 #include <stdint.h>
+#include <cstdint>
 #include <map>
 #include <memory>
 #include <set>
+#include <sstream>
+#include <string>
 #include <utility>  // std::make_pair
 #include <vector>
-#include "utils/message_queue.h"
-#include "utils/prioritized_queue.h"
-#include "utils/threads/message_loop_thread.h"
-
-#include "utils/custom_string.h"
-#include "utils/messagemeter.h"
-#include "utils/semantic_version.h"
 
 #include "application_manager/policies/policy_handler_observer.h"
 #include "connection_handler/connection_handler.h"
+#include "protocol/common.h"
+#include "protocol/message_priority.h"
+#include "protocol/raw_message.h"
+#include "protocol/service_type.h"
 #include "protocol_handler/incoming_data_handler.h"
 #include "protocol_handler/multiframe_builder.h"
 #include "protocol_handler/protocol_handler.h"
@@ -60,6 +63,40 @@
 #include "transport_manager/transport_adapter/transport_adapter.h"
 #include "transport_manager/transport_manager.h"
 #include "transport_manager/transport_manager_listener_empty.h"
+#include "utils/custom_string.h"
+#include "utils/lock.h"
+#include "utils/macro.h"
+#include "utils/message_queue.h"
+#include "utils/messagemeter.h"
+#include "utils/prioritized_queue.h"
+#include "utils/semantic_version.h"
+#include "utils/threads/message_loop_thread.h"
+
+namespace connection_handler {
+class ConnectionHandler;
+}  // namespace connection_handler
+namespace protocol_handler {
+class PHTelemetryObserver;
+class ProtocolHandlerSettings;
+struct SessionContext;
+}  // namespace protocol_handler
+namespace security_manager {
+class SecurityManager;
+}  // namespace security_manager
+namespace transport_manager {
+class CommunicationError;
+class DataReceiveError;
+class DataSendError;
+class DeviceInfo;
+class TransportManager;
+}  // namespace transport_manager
+namespace utils {
+namespace custom_string {
+class CustomString;
+}  // namespace custom_string
+struct SemanticVersion;
+}  // namespace utils
+struct BsonObject;
 
 #ifdef TELEMETRY_MONITOR
 #include "protocol_handler/telemetry_observer.h"
@@ -80,12 +117,11 @@ class ConnectionHandlerImpl;
  *\brief Namespace for SmartDeviceLink ProtocolHandler related functionality.
  */
 namespace protocol_handler {
-class ProtocolObserver;
-class SessionObserver;
 class HandshakeHandler;
-
 class MessagesFromMobileAppHandler;
 class MessagesToMobileAppHandler;
+class ProtocolObserver;
+class SessionObserver;
 
 using transport_manager::TransportManagerListenerEmpty;
 

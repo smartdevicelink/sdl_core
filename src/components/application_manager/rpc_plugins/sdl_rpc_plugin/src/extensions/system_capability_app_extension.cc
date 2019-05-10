@@ -1,5 +1,16 @@
 #include "sdl_rpc_plugin/extensions/system_capability_app_extension.h"
 
+#include <log4cxx/helpers/objectptr.h>
+#include <log4cxx/logger.h>
+#include <stddef.h>
+
+#include <memory>
+#include <utility>
+
+#include "application_manager/application.h"
+#include "smart_objects/smart_object.h"
+#include "utils/logger.h"
+
 namespace sdl_rpc_plugin {
 CREATE_LOGGERPTR_GLOBAL(logger_, "GetSystemCapabilitiesAppExtension")
 

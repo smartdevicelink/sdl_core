@@ -33,10 +33,17 @@
 #ifndef SRC_APPMAIN_LOW_VOLTAGE_SIGNALS_HANDLER_H_
 #define SRC_APPMAIN_LOW_VOLTAGE_SIGNALS_HANDLER_H_
 
+#include <signal.h>
 #include <unistd.h>
 #include <memory>
+
+#include "utils/macro.h"
 #include "utils/threads/thread.h"
 #include "utils/threads/thread_delegate.h"
+
+namespace threads {
+class Thread;
+}  // namespace threads
 
 namespace main_namespace {
 

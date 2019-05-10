@@ -33,7 +33,13 @@
 #ifndef SRC_COMPONENTS_SMART_OBJECTS_INCLUDE_SMART_OBJECTS_BOOL_SCHEMA_ITEM_H_
 #define SRC_COMPONENTS_SMART_OBJECTS_INCLUDE_SMART_OBJECTS_BOOL_SCHEMA_ITEM_H_
 
+#include <memory>
+#include <string>
+
 #include "smart_objects/default_shema_item.h"
+#include "smart_objects/schema_item_parameter.h"
+#include "smart_objects/smart_object.h"
+#include "utils/macro.h"
 
 namespace ns_smart_device_link {
 namespace ns_smart_objects {

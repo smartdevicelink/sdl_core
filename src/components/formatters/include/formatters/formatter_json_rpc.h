@@ -35,15 +35,18 @@
 #ifndef SRC_COMPONENTS_FORMATTERS_INCLUDE_FORMATTERS_FORMATTER_JSON_RPC_H_
 #define SRC_COMPONENTS_FORMATTERS_INCLUDE_FORMATTERS_FORMATTER_JSON_RPC_H_
 
+#include <bits/stdint-intn.h>
 #include <sys/stat.h>
+#include <iosfwd>
 #include <string>
-
-#include "json/json.h"
-#include "smart_objects/enum_schema_item.h"
-#include "smart_objects/smart_object.h"
 
 #include "CFormatterJsonBase.h"
 #include "formatters/CSmartFactory.h"
+#include "json/json.h"
+#include "json/reader.h"
+#include "json/value.h"
+#include "smart_objects/enum_schema_item.h"
+#include "smart_objects/smart_object.h"
 
 namespace ns_smart_device_link {
 namespace ns_json_handler {

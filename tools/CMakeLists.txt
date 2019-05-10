@@ -25,4 +25,4 @@ ExternalProject_Add_Step(intergen forcebuild
 if(BUILD_TESTS)
   add_subdirectory(intergen/test)
 endif()  
-add_subdirectory(policy_table_validator)
+#add_subdirectory(policy_table_validator)

@@ -29,7 +29,11 @@
 // POSSIBILITY OF SUCH DAMAGE.
 
 #include "formatters/CFormatterJsonSDLRPCv2.h"
+
+#include "formatters/CFormatterJsonBase.h"
 #include "formatters/meta_formatter.h"
+#include "smart_objects/errors.h"
+#include "smart_objects/smart_schema.h"
 
 namespace smart_objects_ns = ns_smart_device_link::ns_smart_objects;
 namespace strings = ns_smart_device_link::ns_json_handler::strings;

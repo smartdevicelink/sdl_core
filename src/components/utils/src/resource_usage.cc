@@ -10,13 +10,14 @@
 #include <sys/types.h>
 #include <unistd.h>
 #endif
-#include <errno.h>
+#include <log4cxx/helpers/objectptr.h>
+#include <log4cxx/logger.h>
 #include <stdio.h>
-#include <sys/resource.h>
-#include <sys/types.h>
 #include <unistd.h>
-#include <sstream>
+#include <string>
+
 #include "utils/file_system.h"
+#include "utils/logger.h"
 
 namespace utils {
 

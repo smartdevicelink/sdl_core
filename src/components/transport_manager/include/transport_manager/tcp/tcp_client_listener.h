@@ -36,18 +36,26 @@
 #ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TCP_TCP_CLIENT_LISTENER_H_
 #define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TCP_TCP_CLIENT_LISTENER_H_
 
+#include <bits/stdint-uintn.h>
+#include <iosfwd>
+
 #include "transport_manager/transport_adapter/client_connection_listener.h"
+#include "transport_manager/transport_adapter/transport_adapter.h"
 #include "utils/lock.h"
 #include "utils/threads/thread_delegate.h"
 
 class Thread;
+
+namespace threads {
+class Thread;
+}  // namespace threads
 struct in_addr;
 
 namespace transport_manager {
 namespace transport_adapter {
 
-class TransportAdapterController;
 class NetworkInterfaceListener;
+class TransportAdapterController;
 
 /**
  * @brief Listener of device adapter that use TCP transport.

@@ -33,8 +33,12 @@
 #ifndef SRC_COMPONENTS_UTILS_INCLUDE_UTILS_SQLITE_WRAPPER_SQL_QUERY_H_
 #define SRC_COMPONENTS_UTILS_INCLUDE_UTILS_SQLITE_WRAPPER_SQL_QUERY_H_
 
+#include <bits/stdint-intn.h>
+#include <bits/stdint-uintn.h>
 #include <stdint.h>
+#include <iosfwd>
 #include <string>
+
 #include "utils/lock.h"
 #include "utils/sqlite_wrapper/sql_error.h"
 

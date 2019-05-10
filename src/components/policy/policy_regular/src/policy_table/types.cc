@@ -1,6 +1,9 @@
 // This file is generated, do not edit
 #include "policy/policy_table/types.h"
+
+#include "json/value.h"
 #include "rpc_base/rpc_base_json_inl.h"
+#include "rpc_base/validation_report.h"
 
 namespace rpc {
 namespace policy_table_interface_base {

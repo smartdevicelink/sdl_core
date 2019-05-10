@@ -33,14 +33,19 @@
 #ifndef SRC_COMPONENTS_PROTOCOL_HANDLER_INCLUDE_PROTOCOL_HANDLER_START_SESSION_HANDLER_H_
 #define SRC_COMPONENTS_PROTOCOL_HANDLER_INCLUDE_PROTOCOL_HANDLER_START_SESSION_HANDLER_H_
 
+#include <bits/stdint-uintn.h>
+#include <iosfwd>
 #include <memory>
 
 #include "protocol_handler/protocol_handler_impl.h"
 #include "protocol_handler/protocol_packet.h"
 #include "protocol_handler/session_observer.h"
 #include "security_manager/security_manager_listener.h"
-
+#include "security_manager/ssl_context.h"
+#include "utils/macro.h"
 #include "utils/semantic_version.h"
+
+struct BsonObject;
 
 namespace protocol_handler {
 

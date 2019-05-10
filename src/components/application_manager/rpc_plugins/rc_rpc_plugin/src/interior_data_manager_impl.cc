@@ -1,8 +1,24 @@
 #include "rc_rpc_plugin/interior_data_manager_impl.h"
+
+#include <bits/stdint-uintn.h>
+#include <log4cxx/helpers/objectptr.h>
+#include <log4cxx/logger.h>
+
+#include <algorithm>
+#include <iterator>
+#include <memory>
+#include <ostream>
+#include <set>
+#include <utility>
+
 #include "application_manager/application_manager.h"
+#include "application_manager/application_manager_settings.h"
 #include "application_manager/rpc_service.h"
+#include "rc_rpc_plugin/interior_data_cache.h"
+#include "rc_rpc_plugin/rc_app_extension.h"
 #include "rc_rpc_plugin/rc_helpers.h"
 #include "rc_rpc_plugin/rc_rpc_plugin.h"
+#include "utils/logger.h"
 
 namespace rc_rpc_plugin {
 CREATE_LOGGERPTR_GLOBAL(logger_, "RemoteControlModule");

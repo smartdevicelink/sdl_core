@@ -30,20 +30,36 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <limits.h>
-
+#include <bits/stdint-uintn.h>
+#include <log4cxx/helpers/objectptr.h>
+#include <log4cxx/logger.h>
+#include <stddef.h>
 #include <algorithm>
+#include <list>
+#include <map>
+#include <ostream>
+#include <utility>
+#include <vector>
 
 #include "connection_handler/connection.h"
 #include "connection_handler/connection_handler.h"
-#include "protocol_handler/protocol_packet.h"
+#include "connection_handler/device.h"
+#include "connection_handler/heartbeat_monitor.h"
+#include "protocol/common.h"
+#include "protocol/service_type.h"
+#include "transport_manager/common.h"
 #include "utils/helpers.h"
+#include "utils/lock.h"
 #include "utils/logger.h"
 #include "utils/macro.h"
+#include "utils/threads/thread.h"
+
+namespace security_manager {
+class SSLContext;
+}  // namespace security_manager
 
 #ifdef ENABLE_SECURITY
 #include "security_manager/security_manager.h"
-#include "security_manager/ssl_context.h"
 #endif  // ENABLE_SECURITY
 
 /**

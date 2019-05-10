@@ -31,6 +31,9 @@
  */
 
 #include "policy/status.h"
+
+#include <memory>
+
 #include "policy/update_status_manager_interface.h"
 
 policy::UpToDateStatus::UpToDateStatus()

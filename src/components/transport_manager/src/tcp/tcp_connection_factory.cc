@@ -31,9 +31,14 @@
  */
 
 #include "transport_manager/tcp/tcp_connection_factory.h"
+
+#include <log4cxx/helpers/objectptr.h>
+#include <log4cxx/logger.h>
+#include <memory>
+#include <ostream>
+
 #include "transport_manager/tcp/tcp_server_originated_socket_connection.h"
 #include "transport_manager/transport_adapter/transport_adapter_controller.h"
-
 #include "utils/logger.h"
 
 namespace transport_manager {

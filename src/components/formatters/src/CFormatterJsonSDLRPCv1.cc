@@ -31,7 +31,11 @@
  */
 
 #include "formatters/CFormatterJsonSDLRPCv1.h"
+
+#include "formatters/CFormatterJsonBase.h"
 #include "formatters/meta_formatter.h"
+#include "smart_objects/errors.h"
+#include "smart_objects/smart_schema.h"
 #include "utils/convert_utils.h"
 
 namespace strings = ns_smart_device_link::ns_json_handler::strings;

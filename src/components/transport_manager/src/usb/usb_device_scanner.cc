@@ -30,13 +30,25 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <bits/stdint-uintn.h>
+#include <log4cxx/helpers/objectptr.h>
+#include <log4cxx/logger.h>
+#include <list>
+#include <memory>
 #include <sstream>
+#include <string>
 
-#include "transport_manager/transport_adapter/transport_adapter_impl.h"
+#include "transport_manager/common.h"
+#include "transport_manager/transport_adapter/device.h"
+#include "transport_manager/transport_adapter/transport_adapter.h"
+#include "transport_manager/transport_adapter/transport_adapter_controller.h"
 #include "transport_manager/usb/common.h"
+#include "transport_manager/usb/libusb/platform_usb_device.h"
+#include "transport_manager/usb/libusb/usb_handler.h"
+#include "transport_manager/usb/usb_control_transfer.h"
 #include "transport_manager/usb/usb_device.h"
 #include "transport_manager/usb/usb_device_scanner.h"
-
+#include "utils/lock.h"
 #include "utils/logger.h"
 
 namespace transport_manager {

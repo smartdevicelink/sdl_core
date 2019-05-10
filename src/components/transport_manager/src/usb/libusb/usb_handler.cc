@@ -33,15 +33,26 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <assert.h>
+#include <bits/stdint-uintn.h>
+#include <libusb-1.0/libusb.h>
+#include <log4cxx/helpers/objectptr.h>
+#include <log4cxx/logger.h>
 #include <cstdlib>
 #include <cstring>
+#include <list>
+#include <ostream>
+#include <vector>
 
-#include "transport_manager/transport_adapter/transport_adapter_impl.h"
+#include "transport_manager/transport_adapter/transport_adapter.h"
 #include "transport_manager/usb/common.h"
-
+#include "transport_manager/usb/libusb/platform_usb_device.h"
+#include "transport_manager/usb/libusb/usb_handler.h"
+#include "transport_manager/usb/usb_control_transfer.h"
 #include "utils/logger.h"
 #include "utils/macro.h"
 #include "utils/threads/thread.h"
+#include "utils/threads/thread_delegate.h"
 
 namespace transport_manager {
 namespace transport_adapter {

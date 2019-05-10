@@ -30,50 +30,124 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <stdlib.h>  // for rand()
-
+#include <bits/stdint-intn.h>
+#include <bits/stdint-uintn.h>
 #include <bson_object.h>
-#include <climits>
+#include <bson_util.h>
+#include <ctype.h>
+#include <log4cxx/helpers/objectptr.h>
+#include <log4cxx/logger.h>
+#include <string.h>
+#include <sys/types.h>
+#include <boost/date_time/posix_time/posix_time_duration.hpp>
+#include <boost/date_time/time_duration.hpp>
+#include <boost/filesystem/convenience.hpp>
+
+#include <algorithm>
+#include <cstdint>
+#include <cstdlib>
+#include <ctime>
+#include <deque>
 #include <fstream>
+#include <functional>
+#include <iterator>
+#include <list>
+#include <map>
+#include <memory>
+#include <set>
 #include <string>
 #include <utility>
+#include <vector>
 
+#include "application_manager/app_launch/app_launch_ctrl.h"
 #include "application_manager/app_launch/app_launch_ctrl_impl.h"
+#include "application_manager/app_launch/app_launch_data.h"
 #include "application_manager/app_launch/app_launch_data_db.h"
 #include "application_manager/app_launch/app_launch_data_json.h"
+#include "application_manager/app_service_manager.h"
+#include "application_manager/application.h"
+#include "application_manager/application_impl.h"
+#include "application_manager/application_manager.h"
 #include "application_manager/application_manager_impl.h"
+#include "application_manager/application_manager_settings.h"
+#include "application_manager/command_factory.h"
+#include "application_manager/command_holder.h"
 #include "application_manager/command_holder_impl.h"
+#include "application_manager/commands/command.h"
 #include "application_manager/commands/command_impl.h"
-#include "application_manager/commands/command_notification_impl.h"
+#include "application_manager/event_engine/event_dispatcher.h"
+#include "application_manager/event_engine/event_dispatcher_impl.h"
 #include "application_manager/helpers/application_helper.h"
+#include "application_manager/hmi_capabilities.h"
 #include "application_manager/hmi_capabilities_impl.h"
+#include "application_manager/hmi_language_handler.h"
+#include "application_manager/hmi_state.h"
+#include "application_manager/message.h"
 #include "application_manager/message_helper.h"
-#include "application_manager/mobile_message_handler.h"
+#include "application_manager/plugin_manager/rpc_plugin.h"
+#include "application_manager/plugin_manager/rpc_plugin_manager.h"
 #include "application_manager/plugin_manager/rpc_plugin_manager_impl.h"
 #include "application_manager/policies/policy_handler.h"
+#include "application_manager/policies/policy_handler_interface.h"
+#include "application_manager/request_controller.h"
+#include "application_manager/resumption/resume_ctrl.h"
 #include "application_manager/resumption/resume_ctrl_impl.h"
+#include "application_manager/rpc_handler.h"
 #include "application_manager/rpc_handler_impl.h"
+#include "application_manager/rpc_service.h"
 #include "application_manager/rpc_service_impl.h"
-#include "connection_handler/connection_handler_impl.h"
+#include "application_manager/smart_object_keys.h"
+#include "application_manager/state_controller.h"
+#include "application_manager/state_controller_impl.h"
+#include "application_manager/usage_statistics.h"
+#include "connection_handler/connection_handler.h"
+#include "connection_handler/device.h"
+#include "connection_handler/devices_discovery_starter.h"
+#include "formatters/CFormatterJsonBase.h"
 #include "formatters/CFormatterJsonSDLRPCv1.h"
 #include "formatters/CFormatterJsonSDLRPCv2.h"
+#include "formatters/CSmartFactory.h"
 #include "formatters/formatter_json_rpc.h"
 #include "hmi_message_handler/hmi_message_handler.h"
-#include "protocol/bson_object_keys.h"
-#include "protocol_handler/protocol_handler.h"
-
-#include <time.h>
-#include <boost/filesystem.hpp>
-#include "application_manager/application_impl.h"
+#include "interfaces/HMI_API.h"
 #include "interfaces/HMI_API_schema.h"
+#include "interfaces/MOBILE_API.h"
+#include "interfaces/MOBILE_API_schema.h"
 #include "media_manager/media_manager.h"
-#include "policy/usage_statistics/counter.h"
+#include "policy/policy_types.h"
+#include "protocol/bson_object_keys.h"
+#include "protocol/common.h"
+#include "protocol/message_priority.h"
+#include "protocol/service_type.h"
+#include "protocol_handler/protocol_handler.h"
+#include "protocol_handler/session_observer.h"
+#include "security_manager/ssl_context.h"
 #include "smart_objects/enum_schema_item.h"
+#include "smart_objects/smart_object.h"
+#include "transport_manager/common.h"
+#include "transport_manager/info.h"
 #include "utils/custom_string.h"
+#include "utils/data_accessor.h"
+#include "utils/date_time.h"
 #include "utils/file_system.h"
 #include "utils/helpers.h"
-#include "utils/threads/thread.h"
+#include "utils/lock.h"
+#include "utils/logger.h"
+#include "utils/macro.h"
+#include "utils/timer.h"
 #include "utils/timer_task_impl.h"
+
+namespace policy {
+class PolicyHandlerObserver;
+class PolicySettings;
+}  // namespace policy
+namespace resumption {
+class LastState;
+}  // namespace resumption
+
+namespace application_manager {
+class AMTelemetryObserver;
+}  // namespace application_manager
 
 namespace {
 int get_rand_from_range(uint32_t from = 0, int to = RAND_MAX) {
@@ -1494,10 +1568,9 @@ void ApplicationManagerImpl::SendUpdateAppList() {
   LOG4CXX_AUTO_TRACE(logger_);
 
   using namespace smart_objects;
-  using namespace hmi_apis;
 
   SmartObjectSPtr request = MessageHelper::CreateModuleInfoSO(
-      FunctionID::BasicCommunication_UpdateAppList, *this);
+      hmi_apis::FunctionID::BasicCommunication_UpdateAppList, *this);
 
   (*request)[strings::msg_params][strings::applications] =
       SmartObject(SmartType_Array);

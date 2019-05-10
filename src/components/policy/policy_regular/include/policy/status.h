@@ -33,7 +33,9 @@
 #ifndef SRC_COMPONENTS_POLICY_POLICY_EXTERNAL_INCLUDE_POLICY_STATUS_H_
 #define SRC_COMPONENTS_POLICY_POLICY_EXTERNAL_INCLUDE_POLICY_STATUS_H_
 
+#include <iosfwd>
 #include <string>
+
 #include "policy/policy_types.h"
 #include "utils/macro.h"
 

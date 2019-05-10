@@ -33,6 +33,8 @@
 // POSSIBILITY OF SUCH DAMAGE.
 
 #include "formatters/formatter_json_rpc.h"
+
+#include "smart_objects/smart_schema.h"
 #include "utils/convert_utils.h"
 
 namespace ns_smart_device_link {

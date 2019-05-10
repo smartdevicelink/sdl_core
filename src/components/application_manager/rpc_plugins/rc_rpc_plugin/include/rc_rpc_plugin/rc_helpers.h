@@ -33,10 +33,25 @@
 #ifndef SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_RC_RPC_PLUGIN_INCLUDE_RC_RPC_PLUGIN_RC_HELPERS_H_
 #define SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_RC_RPC_PLUGIN_INCLUDE_RC_RPC_PLUGIN_RC_HELPERS_H_
 
-#include <map>
+#include <bits/stdint-uintn.h>
+#include <functional>
+#include <iosfwd>
 #include <string>
+#include <vector>
+
 #include "application_manager/application.h"
 #include "rc_rpc_plugin/rc_app_extension.h"
+#include "smart_objects/smart_object.h"
+
+#include <map>
+
+namespace application_manager {
+class ApplicationManager;
+
+class ApplicationManager;
+
+class ApplicationManager;
+}  // namespace application_manager
 
 namespace rc_rpc_plugin {
 class RCRPCPlugin;

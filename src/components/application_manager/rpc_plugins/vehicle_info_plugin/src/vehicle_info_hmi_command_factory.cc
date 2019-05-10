@@ -31,9 +31,15 @@
  */
 
 #include "vehicle_info_plugin/vehicle_info_hmi_command_factory.h"
-#include "application_manager/message.h"
-#include "interfaces/HMI_API.h"
 
+#include <log4cxx/helpers/objectptr.h>
+#include <log4cxx/logger.h>
+#include <ostream>
+
+#include "application_manager/smart_object_keys.h"
+#include "interfaces/HMI_API.h"
+#include "smart_objects/smart_object.h"
+#include "utils/logger.h"
 #include "vehicle_info_plugin/commands/hmi/on_vi_vehicle_data_notification.h"
 #include "vehicle_info_plugin/commands/hmi/vi_diagnostic_message_request.h"
 #include "vehicle_info_plugin/commands/hmi/vi_diagnostic_message_response.h"
@@ -51,6 +57,17 @@
 #include "vehicle_info_plugin/commands/hmi/vi_subscribe_vehicle_data_response.h"
 #include "vehicle_info_plugin/commands/hmi/vi_unsubscribe_vehicle_data_request.h"
 #include "vehicle_info_plugin/commands/hmi/vi_unsubscribe_vehicle_data_response.h"
+
+namespace application_manager {
+class ApplicationManager;
+class HMICapabilities;
+namespace rpc_service {
+class RPCService;
+}  // namespace rpc_service
+}  // namespace application_manager
+namespace policy {
+class PolicyHandlerInterface;
+}  // namespace policy
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "VehicleInfoPlugin")
 

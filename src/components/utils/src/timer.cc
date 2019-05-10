@@ -31,6 +31,9 @@
  */
 #include "utils/timer.h"
 
+#include <log4cxx/helpers/objectptr.h>
+#include <log4cxx/logger.h>
+#include <ostream>
 #include <string>
 
 #include "utils/conditional_variable.h"
@@ -38,7 +41,6 @@
 #include "utils/logger.h"
 #include "utils/macro.h"
 #include "utils/threads/thread.h"
-#include "utils/threads/thread_delegate.h"
 #include "utils/timer_task.h"
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "Utils")

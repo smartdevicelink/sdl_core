@@ -31,12 +31,43 @@
  */
 
 #include "rc_rpc_plugin/commands/mobile/get_interior_vehicle_data_request.h"
+
+#include <log4cxx/helpers/objectptr.h>
+#include <log4cxx/logger.h>
+#include <functional>
+#include <map>
+#include <memory>
+#include <ostream>
+#include <string>
+#include <utility>
+
+#include "application_manager/application_manager.h"
+#include "application_manager/commands/command_impl.h"
+#include "application_manager/commands/command_request_impl.h"
+#include "application_manager/event_engine/event.h"
+#include "application_manager/hmi_capabilities.h"
+#include "application_manager/smart_object_keys.h"
+#include "interfaces/HMI_API.h"
 #include "interfaces/MOBILE_API.h"
+#include "rc_rpc_plugin/interior_data_cache.h"
+#include "rc_rpc_plugin/interior_data_manager.h"
+#include "rc_rpc_plugin/rc_app_extension.h"
 #include "rc_rpc_plugin/rc_helpers.h"
 #include "rc_rpc_plugin/rc_module_constants.h"
-#include "rc_rpc_plugin/rc_rpc_plugin.h"
+#include "rc_rpc_plugin/resource_allocation_manager.h"
 #include "smart_objects/enum_schema_item.h"
+#include "smart_objects/smart_object.h"
+#include "utils/helpers.h"
+#include "utils/logger.h"
 #include "utils/macro.h"
+
+namespace rc_rpc_plugin {
+struct RCCommandParams;
+
+struct RCCommandParams;
+
+struct RCCommandParams;
+}  // namespace rc_rpc_plugin
 
 namespace rc_rpc_plugin {
 namespace commands {

@@ -31,10 +31,19 @@
  */
 
 #include <apr_time.h>
+#include <log4cxx/helpers/objectptr.h>
+#include <log4cxx/level.h>
+#include <log4cxx/logger.h>
 #include <log4cxx/spi/loggingevent.h>
 
 #include "utils/auto_trace.h"
 #include "utils/push_log.h"
+
+namespace log4cxx {
+namespace spi {
+class LocationInfo;
+}  // namespace spi
+}  // namespace log4cxx
 
 namespace logger {
 

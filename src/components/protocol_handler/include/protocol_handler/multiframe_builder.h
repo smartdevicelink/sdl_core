@@ -33,11 +33,17 @@
 #ifndef SRC_COMPONENTS_PROTOCOL_HANDLER_INCLUDE_PROTOCOL_HANDLER_MULTIFRAME_BUILDER_H_
 #define SRC_COMPONENTS_PROTOCOL_HANDLER_INCLUDE_PROTOCOL_HANDLER_MULTIFRAME_BUILDER_H_
 
+#include <bits/stdint-intn.h>
+#include <bits/stdint-uintn.h>
 #include <algorithm>  // std::copy
-#include <iterator>   // std::ostream_iterator
+#include <boost/date_time/posix_time/posix_time_config.hpp>
+#include <iterator>  // std::ostream_iterator
 #include <map>
+#include <memory>
 #include <ostream>  // std::basic_ostream
+#include <utility>
 
+#include "protocol/common.h"
 #include "protocol_handler/protocol_packet.h"
 #include "utils/date_time.h"
 

@@ -33,10 +33,52 @@
 #ifndef SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_RC_RPC_PLUGIN_INCLUDE_RC_RPC_PLUGIN_COMMANDS_MOBILE_GET_INTERIOR_VEHICLE_DATA_REQUEST_H_
 #define SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_RC_RPC_PLUGIN_INCLUDE_RC_RPC_PLUGIN_COMMANDS_MOBILE_GET_INTERIOR_VEHICLE_DATA_REQUEST_H_
 
+#include <iosfwd>
 #include <string>
+#include <vector>
+
+#include "application_manager/app_extension.h"
+#include "application_manager/application.h"
+#include "application_manager/commands/command.h"
 #include "rc_rpc_plugin/commands/rc_command_request.h"
+#include "utils/macro.h"
+
+namespace application_manager {
+namespace event_engine {
+class Event;
+}  // namespace event_engine
+}  // namespace application_manager
+namespace rc_rpc_plugin {
+struct RCCommandParams;
+}  // namespace rc_rpc_plugin
+
+namespace ns_smart_device_link {
+namespace ns_smart_objects {
+class SmartObject;
+
+class SmartObject;
+}  // namespace ns_smart_objects
+}  // namespace ns_smart_device_link
+namespace rc_rpc_plugin {
+struct RCCommandParams;
+}  // namespace rc_rpc_plugin
+
+namespace application_manager {
+namespace event_engine {
+class Event;
+
+class Event;
+}  // namespace event_engine
+}  // namespace application_manager
+namespace ns_smart_device_link {
+namespace ns_smart_objects {
+class SmartObject;
+}  // namespace ns_smart_objects
+}  // namespace ns_smart_device_link
 
 namespace rc_rpc_plugin {
+struct RCCommandParams;
+
 namespace app_mngr = application_manager;
 
 namespace commands {

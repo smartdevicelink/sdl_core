@@ -35,10 +35,19 @@
 #ifndef SRC_COMPONENTS_FORMATTERS_INCLUDE_FORMATTERS_CSMARTFACTORY_H_
 #define SRC_COMPONENTS_FORMATTERS_INCLUDE_FORMATTERS_CSMARTFACTORY_H_
 
+#include <iosfwd>
 #include <map>
 #include <string>
+
 #include "smart_objects/smart_object.h"
 #include "smart_objects/smart_schema.h"
+#include "utils/semantic_version.h"
+
+namespace ns_smart_device_link {
+namespace ns_smart_objects {
+class CSmartSchema;
+}  // namespace ns_smart_objects
+}  // namespace ns_smart_device_link
 
 namespace ns_smart_device_link {
 namespace ns_json_handler {

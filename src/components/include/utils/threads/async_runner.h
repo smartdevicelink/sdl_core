@@ -1,4 +1,10 @@
-﻿/*
+#include <iosfwd>
+
+namespace threads {
+class Thread;
+}  // namespace threads
+
+/*
  Copyright (c) 2014, Ford Motor Company
  All rights reserved.
 
@@ -38,7 +44,6 @@
 
 #include "thread.h"
 #include "thread_delegate.h"
-
 #include "utils/conditional_variable.h"
 #include "utils/lock.h"
 

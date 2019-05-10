@@ -30,16 +30,45 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config_profile/profile.h"
-#include "utils/helpers.h"
-#include "utils/logger.h"
-#include "utils/timer_task_impl.h"
+#include <log4cxx/helpers/objectptr.h>
+#include <log4cxx/logger.h>
+#include <stddef.h>
 
+#include <algorithm>
+#include <functional>
+#include <list>
+#include <map>
+#include <memory>
+#include <ostream>
+#include <queue>
+#include <set>
+#include <string>
+#include <utility>
+#include <vector>
+
+#include "protocol/raw_message.h"
+#include "transport_manager/common.h"
+#include "transport_manager/error.h"
+#include "transport_manager/telemetry_observer.h"
 #include "transport_manager/transport_adapter/client_connection_listener.h"
+#include "transport_manager/transport_adapter/connection.h"
+#include "transport_manager/transport_adapter/device.h"
 #include "transport_manager/transport_adapter/device_scanner.h"
 #include "transport_manager/transport_adapter/server_connection_factory.h"
+#include "transport_manager/transport_adapter/transport_adapter.h"
 #include "transport_manager/transport_adapter/transport_adapter_impl.h"
 #include "transport_manager/transport_adapter/transport_adapter_listener.h"
+#include "transport_manager/transport_manager_settings.h"
+#include "utils/lock.h"
+#include "utils/logger.h"
+#include "utils/macro.h"
+#include "utils/rwlock.h"
+#include "utils/timer.h"
+#include "utils/timer_task_impl.h"
+
+namespace resumption {
+class LastState;
+}  // namespace resumption
 
 namespace transport_manager {
 namespace transport_adapter {

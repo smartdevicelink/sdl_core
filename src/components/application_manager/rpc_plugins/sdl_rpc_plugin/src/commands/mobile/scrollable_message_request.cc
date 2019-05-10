@@ -32,14 +32,35 @@
  */
 
 #include "sdl_rpc_plugin/commands/mobile/scrollable_message_request.h"
-#include <string.h>
 
-#include "application_manager/application_impl.h"
+#include <bits/stdint-intn.h>
+#include <log4cxx/helpers/objectptr.h>
+#include <log4cxx/logger.h>
+#include <string.h>
+#include <iosfwd>
+#include <memory>
+
+#include "application_manager/application.h"
+#include "application_manager/application_manager.h"
+#include "application_manager/commands/command_impl.h"
+#include "application_manager/event_engine/event.h"
+#include "application_manager/hmi_interfaces.h"
 #include "application_manager/message_helper.h"
-#include "application_manager/policies/policy_handler.h"
+#include "application_manager/smart_object_keys.h"
 #include "interfaces/HMI_API.h"
 #include "interfaces/MOBILE_API.h"
-#include "utils/helpers.h"
+#include "smart_objects/smart_object.h"
+#include "utils/logger.h"
+
+namespace application_manager {
+class HMICapabilities;
+namespace rpc_service {
+class RPCService;
+}  // namespace rpc_service
+}  // namespace application_manager
+namespace policy {
+class PolicyHandlerInterface;
+}  // namespace policy
 
 namespace sdl_rpc_plugin {
 using namespace application_manager;

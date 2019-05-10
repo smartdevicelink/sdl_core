@@ -36,7 +36,18 @@
 #ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_CLOUD_CLOUD_WEBSOCKET_TRANSPORT_ADAPTER_H_
 #define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_CLOUD_CLOUD_WEBSOCKET_TRANSPORT_ADAPTER_H_
 
+#include <iosfwd>
+
+#include "transport_manager/transport_adapter/transport_adapter.h"
 #include "transport_manager/transport_adapter/transport_adapter_impl.h"
+#include "utils/macro.h"
+
+namespace resumption {
+class LastState;
+}  // namespace resumption
+namespace transport_manager {
+class TransportManagerSettings;
+}  // namespace transport_manager
 
 namespace transport_manager {
 namespace transport_adapter {

@@ -32,11 +32,38 @@
 
 #ifndef SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_RC_RPC_PLUGIN_INCLUDE_RC_RPC_PLUGIN_RESOURCE_ALLOCATION_MANAGER_IMPL_H_
 #define SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_RC_RPC_PLUGIN_INCLUDE_RC_RPC_PLUGIN_RESOURCE_ALLOCATION_MANAGER_IMPL_H_
+#include <bits/stdint-uintn.h>
+#include <iosfwd>
+#include <map>
+#include <string>
+#include <vector>
+
+#include "application_manager/application.h"
 #include "application_manager/application_impl.h"
+#include "application_manager/plugin_manager/rpc_plugin.h"
+#include "interfaces/HMI_API.h"
 #include "rc_rpc_plugin/rc_app_extension.h"
 #include "rc_rpc_plugin/resource_allocation_manager.h"
+#include "smart_objects/smart_object.h"
 #include "utils/lock.h"
 #include "utils/macro.h"
+
+namespace application_manager {
+class ApplicationManager;
+namespace rpc_service {
+class RPCService;
+}  // namespace rpc_service
+
+class ApplicationManager;
+namespace rpc_service {
+class RPCService;
+}  // namespace rpc_service
+
+class ApplicationManager;
+namespace rpc_service {
+class RPCService;
+}  // namespace rpc_service
+}  // namespace application_manager
 
 namespace rc_rpc_plugin {
 

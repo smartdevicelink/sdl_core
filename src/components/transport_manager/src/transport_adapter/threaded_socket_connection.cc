@@ -30,19 +30,32 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <bits/stdint-uintn.h>
 #include <errno.h>
 #include <fcntl.h>
-#include <memory.h>
+#include <log4cxx/helpers/objectptr.h>
+#include <log4cxx/logger.h>
+#include <poll.h>
+#include <stddef.h>
 #include <sys/socket.h>
-#include <sys/types.h>
 #include <unistd.h>
-#include <algorithm>
+#include <atomic>
+#include <memory>
+#include <ostream>
+#include <queue>
+#include <string>
 
-#include "utils/logger.h"
-#include "utils/threads/thread.h"
-
+#include "protocol/raw_message.h"
+#include "transport_manager/common.h"
+#include "transport_manager/error.h"
 #include "transport_manager/transport_adapter/threaded_socket_connection.h"
+#include "transport_manager/transport_adapter/transport_adapter.h"
 #include "transport_manager/transport_adapter/transport_adapter_controller.h"
+#include "utils/lock.h"
+#include "utils/logger.h"
+#include "utils/macro.h"
+#include "utils/threads/thread.h"
+#include "utils/threads/thread_delegate.h"
 
 namespace transport_manager {
 namespace transport_adapter {

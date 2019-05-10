@@ -33,6 +33,7 @@
 #ifndef SRC_COMPONENTS_UTILS_INCLUDE_UTILS_SYSTEM_TIME_HANDLER_H_
 #define SRC_COMPONENTS_UTILS_INCLUDE_UTILS_SYSTEM_TIME_HANDLER_H_
 
+#include <bits/types/time_t.h>
 #include <time.h>
 
 namespace utils {
