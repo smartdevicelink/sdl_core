@@ -35,12 +35,12 @@
 
 #include "application_manager/rpc_passing_handler.h"
 
-// #include "application_manager/commands/command.h"
 #include "application_manager/mock_app_service_manager.h"
 #include "application_manager/mock_application.h"
 #include "application_manager/mock_application_manager.h"
 #include "application_manager/mock_application_manager_settings.h"
 #include "application_manager/mock_message_helper.h"
+#include "application_manager/mock_rpc_handler.h"
 #include "application_manager/mock_rpc_service.h"
 #include "application_manager/policies/mock_policy_handler_interface.h"
 
@@ -91,12 +91,14 @@ class RPCPassingHandlerTest : public ::testing::Test {
         .WillByDefault(Return());
 
     ON_CALL(mock_app_manager_, GetAppServiceManager())
-        .WillByDefault(ReturnRef(mock_app_service_manager_))
-            ON_CALL(mock_app_service_manager_, GetActiveServices())
+        .WillByDefault(ReturnRef(mock_app_service_manager_));
+    ON_CALL(mock_app_service_manager_, GetActiveServices())
         .WillByDefault(Return(app_services_));
 
-    // app_manager_.GetRPCHandler()
-    // rpc_handler.ValidateRpcSO(message, msg_version, report, false))
+    ON_CALL(mock_app_manager_, GetRPCHandler())
+        .WillByDefault(ReturnRef(mock_rpc_handler_));
+    ON_CALL(mock_rpc_handler_, ValidateRpcSO(_, _, _, _))
+        .WillByDefault(Return(true));
   }
 
   void TearDown() OVERRIDE {
@@ -208,6 +210,7 @@ class RPCPassingHandlerTest : public ::testing::Test {
   MockApplicationManager mock_app_manager_;
   MockApplicationManagerSettings mock_app_manager_settings_;
   MockRPCService mock_rpc_service_;
+  MockRPCHandler mock_rpc_handler_;
   resumption_test::MockLastState mock_last_state_;
   MockAppServiceManager mock_app_service_manager_;
   am::RPCPassingHandler* rpc_passing_handler_;
