@@ -177,24 +177,27 @@ class ButtonPressRequestTest
 TEST_F(ButtonPressRequestTest,
        Execute_ButtonNameMatchesModuleType_ExpectCorrectMessageSentToHMI) {
   // Arrange
+  const std::string resource = "CLIMATE";
+  const std::string resource_id = "id1";
   MessageSharedPtr mobile_message = CreateBasicMessage();
   ns_smart_device_link::ns_smart_objects::SmartObject& msg_params =
       (*mobile_message)[application_manager::strings::msg_params];
   msg_params[message_params::kModuleType] = mobile_apis::ModuleType::CLIMATE;
+  msg_params[message_params::kModuleId] = resource_id;
   msg_params[message_params::kButtonName] = mobile_apis::ButtonName::AC;
   msg_params[message_params::kButtonPressMode] =
       mobile_apis::ButtonPressMode::SHORT;
 
   // Expectations
-  const std::string resource = "CLIMATE";
   ON_CALL(mock_policy_handler_, CheckModule(_, _)).WillByDefault(Return(true));
-  EXPECT_CALL(mock_allocation_manager_, IsResourceFree(resource))
+  EXPECT_CALL(mock_allocation_manager_, IsResourceFree(resource, resource_id))
       .WillOnce(Return(true));
-  EXPECT_CALL(mock_allocation_manager_, AcquireResource(resource, _))
+  EXPECT_CALL(mock_allocation_manager_, AcquireResource(resource, _, _))
       .WillOnce(Return(rc_rpc_plugin::AcquireResult::ALLOWED));
   EXPECT_CALL(
       mock_allocation_manager_,
-      SetResourceState(resource, kAppId, rc_rpc_plugin::ResourceState::BUSY));
+      SetResourceState(
+          resource, resource_id, kAppId, rc_rpc_plugin::ResourceState::BUSY));
   EXPECT_CALL(
       mock_rpc_service_,
       ManageHMICommand(
@@ -213,22 +216,25 @@ TEST_F(
     ButtonPressRequestTest,
     Execute_ButtonNameDoesNotMatchModuleType_ExpectMessageNotSentToHMI_AndFalseSentToMobile) {
   // Arrange
+  const std::string resource = "RADIO";
+  const std::string resource_id = "id1";
   MessageSharedPtr mobile_message = CreateBasicMessage();
   ns_smart_device_link::ns_smart_objects::SmartObject& msg_params =
       (*mobile_message)[application_manager::strings::msg_params];
   msg_params[message_params::kModuleType] = mobile_apis::ModuleType::RADIO;
+  msg_params[message_params::kModuleId] = resource_id;
   msg_params[message_params::kButtonName] = mobile_apis::ButtonName::AC;
   msg_params[message_params::kButtonPressMode] =
       mobile_apis::ButtonPressMode::SHORT;
   // Expectations
 
-  const std::string resource = "RADIO";
   ON_CALL(mock_policy_handler_, CheckModule(_, _)).WillByDefault(Return(true));
-  EXPECT_CALL(mock_allocation_manager_, IsResourceFree(resource))
+  EXPECT_CALL(mock_allocation_manager_, IsResourceFree(resource, resource_id))
       .WillOnce(Return(true));
-  EXPECT_CALL(mock_allocation_manager_, AcquireResource(resource, _))
+  EXPECT_CALL(mock_allocation_manager_, AcquireResource(resource, _, _))
       .WillOnce(Return(rc_rpc_plugin::AcquireResult::ALLOWED));
-  EXPECT_CALL(mock_allocation_manager_, SetResourceState(resource, kAppId, _))
+  EXPECT_CALL(mock_allocation_manager_,
+              SetResourceState(resource, resource_id, kAppId, _))
       .Times(2);
 
   EXPECT_CALL(
@@ -269,8 +275,9 @@ TEST_F(ButtonPressRequestTest, OnEvent_ExpectSuccessfullResponseSentToMobile) {
   hmi_msg_params[application_manager::strings::connection_key] = kConnectionKey;
 
   // Expectations
-  EXPECT_CALL(mock_allocation_manager_,
-              SetResourceState(_, kAppId, rc_rpc_plugin::ResourceState::FREE))
+  EXPECT_CALL(
+      mock_allocation_manager_,
+      SetResourceState(_, _, kAppId, rc_rpc_plugin::ResourceState::FREE))
       .Times(2);
 
   EXPECT_CALL(
@@ -308,8 +315,9 @@ TEST_F(ButtonPressRequestTest,
   hmi_msg_params[application_manager::strings::connection_key] = kConnectionKey;
 
   // Expectations
-  EXPECT_CALL(mock_allocation_manager_,
-              SetResourceState(_, kAppId, rc_rpc_plugin::ResourceState::FREE))
+  EXPECT_CALL(
+      mock_allocation_manager_,
+      SetResourceState(_, _, kAppId, rc_rpc_plugin::ResourceState::FREE))
       .Times(2);
 
   EXPECT_CALL(mock_rpc_service_,

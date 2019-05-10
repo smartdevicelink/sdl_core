@@ -86,9 +86,9 @@ class SetInteriorVehicleDataRequestTest
         .WillByDefault(Return(rc_app_extention_));
 
     ON_CALL(*mock_app_, policy_app_id()).WillByDefault(Return(kPolicyAppId));
-    ON_CALL(mock_allocation_manager_, IsResourceFree(_))
+    ON_CALL(mock_allocation_manager_, IsResourceFree(_, _))
         .WillByDefault(Return(true));
-    ON_CALL(mock_allocation_manager_, AcquireResource(_, _))
+    ON_CALL(mock_allocation_manager_, AcquireResource(_, _, _))
         .WillByDefault(Return(AcquireResult::ALLOWED));
     ON_CALL(*mock_app_, app_id()).WillByDefault(Return(kAppId));
     ON_CALL(mock_policy_handler_,

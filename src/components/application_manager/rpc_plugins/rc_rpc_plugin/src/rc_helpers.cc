@@ -55,6 +55,17 @@ const std::vector<std::string> RCHelpers::GetModulesList() {
   return {kClimate, kRadio, kSeat, kAudio, kLight, kHmiSettings};
 }
 
+const std::vector<ModuleUid> RCHelpers::GetResources() {
+  using namespace enums_value;
+  // TODO: get these values from capabilities
+  return {{kClimate, "id1"},
+          {kRadio, "id1"},
+          {kSeat, "id1"},
+          {kAudio, "id1"},
+          {kLight, "id1"},
+          {kHmiSettings, "id1"}};
+}
+
 RCAppExtensionPtr RCHelpers::GetRCExtension(
     application_manager::Application& app) {
   auto extension_interface = app.QueryInterface(RCRPCPlugin::kRCPluginID);

@@ -69,55 +69,71 @@ enum eType { APP_REGISTRATION = 0, MODULE_ALLOCATION, RC_STATE_CHANGING };
 }  // namespace NotificationTrigger
 
 /**
+ * @brief ModuleUid uniquely identify a module
+ * moduleType + moduleID
+ */
+typedef std::pair<std::string, std::string> ModuleUid;
+
+/**
  * @brief Resources defines list of resources
  */
-typedef std::vector<std::string> Resources;
+typedef std::vector<ModuleUid> Resources;
 
 class ResourceAllocationManager {
  public:
   /**
    * @brief AcquireResource acquires resource by application
    * @param module_type resource to acquire
+   * @param module_id uuid of a resource
    * @param app_id application that acquire resource
    * @return ALLOWED if resource acquired \
    *         IN_USE  if resource already acquired
    *         ASK_DRIVER if driver confirmation is required
    */
   virtual AcquireResult::eType AcquireResource(const std::string& module_type,
+                                               const std::string& module_id,
                                                const uint32_t app_id) = 0;
 
   /**
    * @brief SetResourceState changes resource state. Resource must be acquired
    * beforehand.
    * @param module_type Resource to change its state
+   * @param module_id uuid of a resource
    * @param app_id Application aquired resource before
    * @param state State to set for resource
    */
   virtual void SetResourceState(const std::string& module_type,
+                                const std::string& module_id,
                                 const uint32_t app_id,
                                 const ResourceState::eType state) = 0;
 
   /**
    * @brief IsResourceFree check resource state
    * @param module_type Resource name
+   * @param module_id uuid of a resource
    * @return True if free, otherwise - false
    */
-  virtual bool IsResourceFree(const std::string& module_type) const = 0;
+  virtual bool IsResourceFree(const std::string& module_type,
+                              const std::string& module_id) const = 0;
 
   /**
    * @brief AcquireResource forces acquiring resource by application
    * @param module_type resource to acquire
+   * @param module_id uuid of a resource
    * @param app_id application that acquire resource
    */
   virtual void ForceAcquireResource(const std::string& module_type,
+                                    const std::string& module_id,
                                     const uint32_t app_id) = 0;
 
   /**
    * @brief OnDriverDisallowed callback for rejecting acquiring resource
    * @param module_type resource type
+   * @param module_id uuid of a resource
    * @param app_id application id
    */
   virtual void OnDriverDisallowed(const std::string& module_type,
+                                  const std::string& module_id,
                                   const uint32_t app_id) = 0;
 
   /**
