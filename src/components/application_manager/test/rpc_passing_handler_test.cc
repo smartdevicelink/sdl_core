@@ -48,6 +48,7 @@
 #include "application_manager/smart_object_keys.h"
 #include "resumption/mock_last_state.h"
 #include "smart_objects/smart_object.h"
+#include "utils/semantic_version.h"
 
 namespace test {
 namespace components {
@@ -66,7 +67,9 @@ using ::testing::ReturnRef;
 class RPCPassingHandlerTest : public ::testing::Test {
  public:
   RPCPassingHandlerTest()
-      : mock_app_service_manager_(mock_app_manager_, mock_last_state_) {}
+      : mock_app_service_manager_(mock_app_manager_, mock_last_state_)
+      , mock_app_ptr_(std::make_shared<MockApplication>())
+      , mock_semantic_version_(utils::SemanticVersion(5, 1, 0)) {}
 
   ~RPCPassingHandlerTest() {}
 
@@ -99,6 +102,11 @@ class RPCPassingHandlerTest : public ::testing::Test {
         .WillByDefault(ReturnRef(mock_rpc_handler_));
     ON_CALL(mock_rpc_handler_, ValidateRpcSO(_, _, _, _))
         .WillByDefault(Return(true));
+
+    ON_CALL(mock_app_manager_, application(_))
+        .WillByDefault(Return(mock_app_ptr_));
+    ON_CALL(*mock_app_ptr_, msg_version())
+        .WillByDefault(ReturnRef(mock_semantic_version_));
   }
 
   void TearDown() OVERRIDE {
@@ -155,7 +163,7 @@ class RPCPassingHandlerTest : public ::testing::Test {
   smart_objects::SmartObject CreatePassThroughResponse(
       uint32_t connection_key,
       int32_t correlation_id,
-      mobile_apis::Result::eType result_code,
+      const std::string& result_code,
       bool success,
       std::string info = std::string()) {
     smart_objects::SmartObject record(smart_objects::SmartType::SmartType_Map);
@@ -213,6 +221,8 @@ class RPCPassingHandlerTest : public ::testing::Test {
   MockRPCHandler mock_rpc_handler_;
   resumption_test::MockLastState mock_last_state_;
   MockAppServiceManager mock_app_service_manager_;
+  std::shared_ptr<MockApplication> mock_app_ptr_;
+  const utils::SemanticVersion mock_semantic_version_;
   am::RPCPassingHandler* rpc_passing_handler_;
   std::vector<am::AppService> app_services_;
 
@@ -285,7 +295,7 @@ TEST_F(RPCPassingHandlerTest, RPCPassingTest_RESPONSE_UnknownCorrelationID) {
   int32_t correlation_id = 1;
   uint32_t connection_key = 1;
   smart_objects::SmartObject response = CreatePassThroughResponse(
-      connection_key, correlation_id, mobile_apis::Result::SUCCESS, true);
+      connection_key, correlation_id, "SUCCESS", true);
 
   app_services_.push_back(
       CreateAppService(connection_key + 1, "service 1", "NAVIGATION"));
@@ -305,9 +315,9 @@ TEST_F(RPCPassingHandlerTest, RPCPassingTest_SUCCESS) {
   int32_t correlation_id = 1;
   uint32_t connection_key = 1;
   smart_objects::SmartObject response = CreatePassThroughResponse(
-      connection_key + 1, correlation_id, mobile_apis::Result::SUCCESS, true);
+      connection_key + 1, correlation_id, "SUCCESS", true);
   smart_objects::SmartObject forwarded_response = CreatePassThroughResponse(
-      connection_key, correlation_id, mobile_apis::Result::SUCCESS, true);
+      connection_key, correlation_id, "SUCCESS", true);
 
   app_services_.push_back(
       CreateAppService(connection_key + 1, "service 1", "NAVIGATION"));
@@ -326,25 +336,38 @@ TEST_F(RPCPassingHandlerTest, RPCPassingTest_SUCCESS) {
   EXPECT_EQ(result, true);
 }
 
-// TEST_F(RPCPassingHandlerTest,
-// RPCPassingTest_UNSUPPORTED_REQUEST_ForwardToMobile) {
-//   int32_t correlation_id = 1;
-//   uint32_t connection_key = 1;
-//   smart_objects::SmartObject forwarded_response =
-//   CreatePassThroughResponse(connection_key, correlation_id,
-//   mobile_apis::Result::SUCCESS, true);
+TEST_F(RPCPassingHandlerTest,
+       RPCPassingTest_UNSUPPORTED_REQUEST_ForwardToCore) {
+  int32_t correlation_id = 1;
+  uint32_t connection_key = 1;
+  smart_objects::SmartObject unsupported_response = CreatePassThroughResponse(
+      connection_key + 1, correlation_id, "UNSUPPORTED_REQUEST", false);
+  smart_objects::SmartObject forwarded_request =
+      CreatePassThroughRequest(connection_key, correlation_id);
 
-//   app_services_.push_back(CreateAppService(connection_key + 1, "service 1",
-//   "NAVIGATION"));
+  app_services_.push_back(
+      CreateAppService(connection_key + 1, "service 1", "NAVIGATION"));
 
-//   SendPassthroughRequestToMobile(connection_key, correlation_id);
+  SendPassthroughRequestToMobile(connection_key, correlation_id);
 
-//   Call RPCPassThrough with response smart object
-//   Will cycle to core (no other app services in list)
-
-//   Call RPCPassThrough with request smart object
-//   Will return false
-// }
+  {
+    InSequence dummy;
+    // Call RPCPassThrough with response smart object
+    // Will cycle to core (no other app services in list)
+    EXPECT_CALL(mock_app_manager_, application(connection_key));
+    EXPECT_CALL(*mock_app_ptr_, msg_version());
+    EXPECT_CALL(mock_app_manager_, GetRPCHandler());
+    EXPECT_CALL(mock_rpc_handler_,
+                ValidateRpcSO(forwarded_request, _, _, false))
+        .WillOnce(Return(true));
+    EXPECT_CALL(mock_app_manager_, GetRPCService());
+    EXPECT_CALL(mock_rpc_service_,
+                ManageMobileCommand(Pointee(forwarded_request),
+                                    am::commands::Command::SOURCE_MOBILE));
+  }
+  bool result = rpc_passing_handler_->RPCPassThrough(unsupported_response);
+  EXPECT_EQ(result, true);
+}
 
 }  // namespace application_manager_test
 }  // namespace components
