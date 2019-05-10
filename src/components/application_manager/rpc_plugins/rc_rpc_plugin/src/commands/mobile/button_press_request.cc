@@ -272,7 +272,6 @@ void ButtonPressRequest::on_event(const app_mngr::event_engine::Event& event) {
   }
   std::string response_info;
   GetInfo(message, response_info);
-  SetResourceState(ModuleType(), ResourceState::FREE);
   SendResponse(result, result_code, response_info.c_str());
 }
 

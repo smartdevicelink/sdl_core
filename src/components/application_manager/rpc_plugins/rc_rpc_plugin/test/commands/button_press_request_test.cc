@@ -278,7 +278,7 @@ TEST_F(ButtonPressRequestTest, OnEvent_ExpectSuccessfullResponseSentToMobile) {
   EXPECT_CALL(
       mock_allocation_manager_,
       SetResourceState(_, _, kAppId, rc_rpc_plugin::ResourceState::FREE))
-      .Times(2);
+      .Times(1);
 
   EXPECT_CALL(
       mock_rpc_service_,
@@ -318,7 +318,7 @@ TEST_F(ButtonPressRequestTest,
   EXPECT_CALL(
       mock_allocation_manager_,
       SetResourceState(_, _, kAppId, rc_rpc_plugin::ResourceState::FREE))
-      .Times(2);
+      .Times(1);
 
   EXPECT_CALL(mock_rpc_service_,
               ManageMobileCommand(
