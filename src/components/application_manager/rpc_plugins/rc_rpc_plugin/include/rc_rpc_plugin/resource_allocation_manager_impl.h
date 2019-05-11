@@ -127,6 +127,11 @@ class ResourceAllocationManagerImpl : public ResourceAllocationManager {
 
   void set_rc_enabled(const bool value) FINAL;
 
+  ResourceReleasedState::eType ReleaseResource(
+      const std::string& module_type,
+      const std::string& module_id,
+      const uint32_t application_id) FINAL;
+
  private:
   typedef std::vector<application_manager::ApplicationSharedPtr> Apps;
 
@@ -154,16 +159,6 @@ class ResourceAllocationManagerImpl : public ResourceAllocationManager {
   bool IsModuleTypeRejected(const std::string& module_type,
                             const std::string& module_id,
                             const uint32_t app_id);
-
-  /**
-   * @brief ReleaseResource Releases resource acquired by application
-   * @param module_type Module name
-   * @param module_id uuid of a module
-   * @param application_id Application id
-   */
-  void ReleaseResource(const std::string& module_type,
-                       const std::string& module_id,
-                       const uint32_t application_id);
 
   /**
    * @brief ReleaseModuleType Releases all resources related to
@@ -222,9 +217,9 @@ class ResourceAllocationManagerImpl : public ResourceAllocationManager {
    * @param module_id uuid of a resource
    * @param app applicastion that aquire resource
    */
-  void SetResourceFree(const std::string& module_type,
-                       const std::string& module_id,
-                       const uint32_t app_id);
+  ResourceReleasedState::eType SetResourceFree(const std::string& module_type,
+                                               const std::string& module_id,
+                                               const uint32_t app_id);
 
   /**
    * @brief AllocatedResources contains link between resource and application

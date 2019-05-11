@@ -137,17 +137,6 @@ AcquireResult::eType ResourceAllocationManagerImpl::AcquireResource(
   }
 }
 
-void ResourceAllocationManagerImpl::ReleaseResource(
-    const std::string& module_type,
-    const std::string& module_id,
-    const uint32_t application_id) {
-  LOG4CXX_AUTO_TRACE(logger_);
-  LOG4CXX_DEBUG(logger_,
-                "Release " << module_type << " " << module_id << " by "
-                           << application_id);
-  SetResourceFree(module_type, module_id, application_id);
-}
-
 void ResourceAllocationManagerImpl::ReleaseModuleType(
     const std::string& module_type, const uint32_t application_id) {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -337,7 +326,18 @@ void ResourceAllocationManagerImpl::set_rc_enabled(const bool value) {
       std::shared_ptr<application_manager::Application>());
 }
 
-void ResourceAllocationManagerImpl::SetResourceFree(
+ResourceReleasedState::eType ResourceAllocationManagerImpl::ReleaseResource(
+    const std::string& module_type,
+    const std::string& module_id,
+    const uint32_t application_id) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  LOG4CXX_DEBUG(logger_,
+                "Release " << module_type << " " << module_id << " by "
+                           << application_id);
+  return SetResourceFree(module_type, module_id, application_id);
+}
+
+ResourceReleasedState::eType ResourceAllocationManagerImpl::SetResourceFree(
     const std::string& module_type,
     const std::string& module_id,
     const uint32_t app_id) {
@@ -346,18 +346,20 @@ void ResourceAllocationManagerImpl::SetResourceFree(
       allocated_resources_.find(module);
   if (allocated_resources_.end() == allocation) {
     LOG4CXX_DEBUG(logger_, "Resource " << module_type << " is not allocated.");
-    return;
+    return ResourceReleasedState::NOT_ALLOCATED;
   }
   if (app_id != allocation->second) {
     LOG4CXX_ERROR(logger_,
                   "Resource " << module_type
                               << " is allocated by different application "
                               << allocation->second);
+    return ResourceReleasedState::IS_ALLOCATED;
   }
   allocated_resources_.erase(allocation);
   LOG4CXX_DEBUG(
       logger_,
       "Resource " << module_type << ":" << module_id << " is released.");
+  return ResourceReleasedState::IS_RELEASED;
 }
 
 std::vector<ModuleUid> ResourceAllocationManagerImpl::GetAcquiredResources(

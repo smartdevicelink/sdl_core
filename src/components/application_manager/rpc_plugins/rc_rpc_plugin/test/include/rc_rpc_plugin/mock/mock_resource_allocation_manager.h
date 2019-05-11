@@ -76,6 +76,11 @@ class MockResourceAllocationManager
                     application_manager::ApplicationSharedPtr application));
   MOCK_CONST_METHOD0(is_rc_enabled, bool());
   MOCK_METHOD1(set_rc_enabled, void(const bool value));
+  MOCK_METHOD3(ReleaseResource,
+               rc_rpc_plugin::ResourceReleasedState::eType(
+                   const std::string& module_type,
+                   const std::string& module_id,
+                   const uint32_t application_id));
 };
 
 }  // namespace rc_rpc_plugin_test

@@ -69,6 +69,19 @@ enum eType { APP_REGISTRATION = 0, MODULE_ALLOCATION, RC_STATE_CHANGING };
 }  // namespace NotificationTrigger
 
 /**
+ * Defines result of releasing specified module type resource.
+ */
+namespace ResourceReleasedState {
+/**
+ * NOT_ALLOCATED Module's resource is not allocated
+ * IS_ALLOCATED Module's resource is already allocated by
+ * different application
+ * IS_RELEASED Module's resource is released.
+ */
+enum eType { NOT_ALLOCATED = 0, IS_ALLOCATED, IS_RELEASED };
+}  // namespace ResourceReleasedState
+
+/**
  * @brief ModuleUid uniquely identify a module
  * moduleType + moduleID
  */
@@ -186,6 +199,17 @@ class ResourceAllocationManager {
   virtual bool is_rc_enabled() const = 0;
 
   virtual void set_rc_enabled(const bool value) = 0;
+
+  /**
+   * @brief ReleaseResource Releases resource acquired by application
+   * @param module_type Module name
+   * @param module_id uuid of a module
+   * @param application_id Application id
+   */
+  virtual ResourceReleasedState::eType ReleaseResource(
+      const std::string& module_type,
+      const std::string& module_id,
+      const uint32_t application_id) = 0;
 
   virtual ~ResourceAllocationManager() {}
 };
