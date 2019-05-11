@@ -228,13 +228,14 @@ AcquireResult::eType ButtonPressRequest::AcquireResource(
   const std::string module_type = ModuleType();
   app_mngr::ApplicationSharedPtr app =
       application_manager_.application(CommandRequestImpl::connection_key());
-  return resource_allocation_manager_.AcquireResource(module_type,
-                                                      app->app_id());
+
+  return resource_allocation_manager_.AcquireResource(
+      module_type, ModuleId(), app->app_id());
 }
 
 bool ButtonPressRequest::IsResourceFree(const std::string& module_type) const {
   LOG4CXX_AUTO_TRACE(logger_);
-  return resource_allocation_manager_.IsResourceFree(module_type);
+  return resource_allocation_manager_.IsResourceFree(module_type, ModuleId());
 }
 
 void ButtonPressRequest::SetResourceState(const std::string& module_type,
@@ -242,8 +243,9 @@ void ButtonPressRequest::SetResourceState(const std::string& module_type,
   LOG4CXX_AUTO_TRACE(logger_);
   app_mngr::ApplicationSharedPtr app =
       application_manager_.application(CommandRequestImpl::connection_key());
+
   resource_allocation_manager_.SetResourceState(
-      module_type, app->app_id(), state);
+      module_type, ModuleId(), app->app_id(), state);
 }
 
 void ButtonPressRequest::on_event(const app_mngr::event_engine::Event& event) {
@@ -285,6 +287,13 @@ std::string ButtonPressRequest::ModuleType() {
   const bool ok = ns_smart_device_link::ns_smart_objects::EnumConversionHelper<
       mobile_apis::ModuleType::eType>::EnumToCString(module_type, &str);
   return ok ? str : "unknown";
+}
+
+std::string ButtonPressRequest::ModuleId() const {
+  // TODO: check if moduleId param is present in the message, if not-
+  // extract it from the capabilities
+  return (*message_)[app_mngr::strings::msg_params][message_params::kModuleId]
+      .asString();
 }
 
 }  // namespace commands

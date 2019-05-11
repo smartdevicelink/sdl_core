@@ -232,13 +232,13 @@ void RCCommandRequest::ProcessAccessResponse(
               .asBool();
     }
     if (is_allowed) {
-      resource_allocation_manager_.ForceAcquireResource(module_type,
-                                                        app->app_id());
+      resource_allocation_manager_.ForceAcquireResource(
+          module_type, ModuleId(), app->app_id());
       SetResourceState(module_type, ResourceState::BUSY);
       Execute();  // run child's logic
     } else {
-      resource_allocation_manager_.OnDriverDisallowed(module_type,
-                                                      app->app_id());
+      resource_allocation_manager_.OnDriverDisallowed(
+          module_type, ModuleId(), app->app_id());
       SendResponse(
           false,
           mobile_apis::Result::REJECTED,

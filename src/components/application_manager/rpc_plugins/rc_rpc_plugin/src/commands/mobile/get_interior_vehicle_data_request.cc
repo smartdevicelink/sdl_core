@@ -403,5 +403,12 @@ std::string GetInteriorVehicleDataRequest::ModuleType() {
   return ok ? str : "unknown";
 }
 
+std::string GetInteriorVehicleDataRequest::ModuleId() const {
+  // TODO: check if moduleId param is present in the message, if not-
+  // extract it from the capabilities
+  return (*message_)[app_mngr::strings::msg_params][message_params::kModuleId]
+      .asString();
+}
+
 }  // namespace commands
 }  // namespace rc_rpc_plugin

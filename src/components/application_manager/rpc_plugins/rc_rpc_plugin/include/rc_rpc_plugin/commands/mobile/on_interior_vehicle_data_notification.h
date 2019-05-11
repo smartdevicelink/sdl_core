@@ -55,6 +55,8 @@ class OnInteriorVehicleDataNotification
 
   std::string ModuleType();
 
+  std::string ModuleId() const;
+
   ~OnInteriorVehicleDataNotification();
 
  private:

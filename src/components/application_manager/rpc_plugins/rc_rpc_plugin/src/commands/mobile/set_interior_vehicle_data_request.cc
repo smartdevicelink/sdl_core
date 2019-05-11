@@ -757,19 +757,26 @@ std::string SetInteriorVehicleDataRequest::ModuleType() {
   return ok ? str : "unknown";
 }
 
+std::string SetInteriorVehicleDataRequest::ModuleId() const {
+  return (*message_)[app_mngr::strings::msg_params][message_params::kModuleData]
+                    [message_params::kModuleId]
+                        .asString();
+}
+
 AcquireResult::eType SetInteriorVehicleDataRequest::AcquireResource(
     const app_mngr::commands::MessageSharedPtr& message) {
   LOG4CXX_AUTO_TRACE(logger_);
   const std::string module_type = ModuleType();
   app_mngr::ApplicationSharedPtr app =
       application_manager_.application(CommandRequestImpl::connection_key());
-  return resource_allocation_manager_.AcquireResource(module_type,
-                                                      app->app_id());
+
+  return resource_allocation_manager_.AcquireResource(
+      module_type, ModuleId(), app->app_id());
 }
 
 bool SetInteriorVehicleDataRequest::IsResourceFree(
     const std::string& module_type) const {
-  return resource_allocation_manager_.IsResourceFree(module_type);
+  return resource_allocation_manager_.IsResourceFree(module_type, ModuleId());
 }
 
 void SetInteriorVehicleDataRequest::SetResourceState(
@@ -778,7 +785,7 @@ void SetInteriorVehicleDataRequest::SetResourceState(
   app_mngr::ApplicationSharedPtr app =
       application_manager_.application(CommandRequestImpl::connection_key());
   resource_allocation_manager_.SetResourceState(
-      module_type, app->app_id(), state);
+      module_type, ModuleId(), app->app_id(), state);
 }
 
 }  // namespace commands

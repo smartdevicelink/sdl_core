@@ -138,6 +138,14 @@ class RCCommandRequest : public app_mngr::commands::CommandRequestImpl {
 
   virtual std::string ModuleType() = 0;
 
+  /**
+   * @brief Extracts ModuleId from command message. Each inherited class should
+   * implement its own functionality
+   *
+   * @return ModuleId as string.
+   */
+  virtual std::string ModuleId() const = 0;
+
  private:
   /**
    * @brief CheckDriverConsent checks driver consent defined in policy table

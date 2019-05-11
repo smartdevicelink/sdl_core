@@ -94,6 +94,14 @@ void OnInteriorVehicleDataNotification::Run() {
   }
 }
 
+std::string OnInteriorVehicleDataNotification::ModuleId() const {
+  // TODO: check if moduleId param is present in the message, if not-
+  // extract it from the capabilities
+  return (*message_)[app_mngr::strings::msg_params][message_params::kModuleData]
+                    [message_params::kModuleId]
+                        .asString();
+}
+
 std::string OnInteriorVehicleDataNotification::ModuleType() {
   mobile_apis::ModuleType::eType module_type =
       static_cast<mobile_apis::ModuleType::eType>(

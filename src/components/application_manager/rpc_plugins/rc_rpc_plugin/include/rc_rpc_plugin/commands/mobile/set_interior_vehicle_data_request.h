@@ -108,6 +108,8 @@ class SetInteriorVehicleDataRequest : public RCCommandRequest {
 
   std::string ModuleType() FINAL;
 
+  std::string ModuleId() const FINAL;
+
   /**
    * @brief SetInteriorVehicleDataRequest class destructor
    */

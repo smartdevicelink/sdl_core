@@ -84,6 +84,8 @@ class ButtonPressRequest : public RCCommandRequest {
 
   std::string ModuleType() FINAL;
 
+  std::string ModuleId() const FINAL;
+
   /**
    * @brief ButtonPressRequest class destructor
    */
