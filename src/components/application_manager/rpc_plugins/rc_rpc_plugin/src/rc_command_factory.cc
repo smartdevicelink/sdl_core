@@ -43,6 +43,8 @@
 #include "rc_rpc_plugin/commands/hmi/rc_set_interior_vehicle_data_response.h"
 #include "rc_rpc_plugin/commands/mobile/button_press_request.h"
 #include "rc_rpc_plugin/commands/mobile/button_press_response.h"
+#include "rc_rpc_plugin/commands/mobile/get_interior_vehicle_data_consent_request.h"
+#include "rc_rpc_plugin/commands/mobile/get_interior_vehicle_data_consent_response.h"
 #include "rc_rpc_plugin/commands/mobile/get_interior_vehicle_data_request.h"
 #include "rc_rpc_plugin/commands/mobile/get_interior_vehicle_data_response.h"
 #include "rc_rpc_plugin/commands/mobile/on_interior_vehicle_data_notification.h"
@@ -204,6 +206,13 @@ CommandCreator& RCCommandFactory::get_mobile_command_creator(
                        commands::ReleaseInteriorVehicleDataModuleRequest>()
                  : rc_factory.GetCreator<
                        commands::ReleaseInteriorVehicleDataModuleResponse>();
+    }
+    case mobile_apis::FunctionID::GetInteriorVehicleDataConsentID: {
+      return mobile_apis::messageType::request == message_type
+                 ? rc_factory.GetCreator<
+                       commands::GetInteriorVehicleDataConsentRequest>()
+                 : rc_factory.GetCreator<
+                       commands::GetInteriorVehicleDataConsentResponse>();
     }
     default: {}
   }
