@@ -76,12 +76,12 @@ class WebsocketConnectionTest : public ::testing::Test {
 
     auto connection = client_out.adapter->FindPendingConnection(dev_id, 0);
 
-    EXPECT_NE(connection, nullptr);
+    ASSERT_NE(connection, nullptr);
 
     client_out.connection =
         std::dynamic_pointer_cast<WebsocketClientConnection>(connection);
 
-    EXPECT_NE(client_out.connection.use_count(), 0);
+    ASSERT_NE(client_out.connection.use_count(), 0);
   }
 
   void StartWSServer() {
