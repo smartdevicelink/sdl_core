@@ -64,6 +64,13 @@ using ::testing::Pointee;
 using ::testing::Return;
 using ::testing::ReturnRef;
 
+struct PassthroughParams {
+  const uint32_t connection_key;
+  const int32_t correlation_id;
+  smart_objects::SmartObject message;
+  smart_objects::SmartObject forwarded_message;
+};
+
 class RPCPassingHandlerTest : public ::testing::Test {
  public:
   RPCPassingHandlerTest()
@@ -180,12 +187,11 @@ class RPCPassingHandlerTest : public ::testing::Test {
     return record;
   }
 
-  void SendPassthroughRequestToMobile(uint32_t connection_key,
-                                      int32_t correlation_id) {
-    smart_objects::SmartObject request =
-        CreatePassThroughRequest(connection_key, correlation_id);
-    smart_objects::SmartObject forwarded_request =
-        CreatePassThroughRequest(connection_key + 1, correlation_id);
+  void SendRequestToASP(const PassthroughParams& params, uint32_t timeout = 0) {
+    if (timeout == 0) {
+      // If timeout argument is not sepcified
+      timeout = kRPCPassthroughTimeout;
+    }
 
     {
       InSequence dummy;
@@ -194,27 +200,24 @@ class RPCPassingHandlerTest : public ::testing::Test {
       // Will call PopulateRPCRequestQueue
       EXPECT_CALL(mock_app_service_manager_, GetActiveServices())
           .WillOnce(Return(app_services_));
-      EXPECT_CALL(
-          mock_app_manager_,
-          IncreaseForwardedRequestTimeout(connection_key, correlation_id))
+      EXPECT_CALL(mock_app_manager_,
+                  IncreaseForwardedRequestTimeout(params.connection_key,
+                                                  params.correlation_id))
           .Times(app_services_.size());
 
       // Will call ForwardRequesttoMobile
       EXPECT_CALL(mock_app_manager_, get_settings());
-      EXPECT_CALL(mock_app_manager_settings_, rpc_pass_through_timeout());
+      EXPECT_CALL(mock_app_manager_settings_, rpc_pass_through_timeout())
+          .WillOnce(Return(timeout));
       EXPECT_CALL(mock_app_manager_, GetRPCService());
-      EXPECT_CALL(mock_rpc_service_,
-                  SendMessageToMobile(Pointee(forwarded_request), false));
+      EXPECT_CALL(
+          mock_rpc_service_,
+          SendMessageToMobile(Pointee(params.forwarded_message), false));
     }
 
-    bool result = rpc_passing_handler_->RPCPassThrough(request);
-    EXPECT_EQ(result, true);
+    bool mobile_result = rpc_passing_handler_->RPCPassThrough(params.message);
+    EXPECT_EQ(mobile_result, true);
   }
-
-  void SendPassthroughResponseFromMobile(uint32_t connection_key,
-                                         int32_t correlation_id) {}
-
-  // void (uint32_t connection_key, int32_t correlation_id){}
 
   MockApplicationManager mock_app_manager_;
   MockApplicationManagerSettings mock_app_manager_settings_;
@@ -228,23 +231,30 @@ class RPCPassingHandlerTest : public ::testing::Test {
   std::vector<am::AppService> app_services_;
 
   uint32_t kRPCPassthroughTimeout = 10000;
+  uint32_t kConnectionKey_ASC = 1;
+  uint32_t kConnectionKey_NAV_ASP = 2;
+  uint32_t kConnectionKey_MEDIA_ASP = 3;
+  int32_t kCorrelationId = 1;
 };
 
 TEST_F(RPCPassingHandlerTest, RPCPassingTest_REQUEST_ForwardToMobile) {
-  int32_t correlation_id = 1;
-  uint32_t connection_key = 1;
-  app_services_.push_back(
-      CreateAppService(connection_key + 1, "service 1", "NAVIGATION"));
+  app_services_.push_back(CreateAppService(
+      kConnectionKey_NAV_ASP, "Navigation service", "NAVIGATION"));
 
-  SendPassthroughRequestToMobile(connection_key, correlation_id);
+  PassthroughParams request_params{
+      .connection_key = kConnectionKey_ASC,
+      .correlation_id = kCorrelationId,
+      .message = CreatePassThroughRequest(kConnectionKey_ASC, kCorrelationId),
+      .forwarded_message =
+          CreatePassThroughRequest(kConnectionKey_NAV_ASP, kCorrelationId),
+  };
+
+  SendRequestToASP(request_params);
 }
 
 TEST_F(RPCPassingHandlerTest, RPCPassingTest_REQUEST_NoPassthrough) {
-  int32_t correlation_id = 1;
-  uint32_t connection_key = 1;
-
   smart_objects::SmartObject request =
-      CreatePassThroughRequest(connection_key, correlation_id);
+      CreatePassThroughRequest(kConnectionKey_ASC, kCorrelationId);
 
   {
     InSequence dummy;
@@ -253,8 +263,9 @@ TEST_F(RPCPassingHandlerTest, RPCPassingTest_REQUEST_NoPassthrough) {
     // Will call PopulateRPCRequestQueue
     EXPECT_CALL(mock_app_service_manager_, GetActiveServices())
         .WillOnce(Return(app_services_));
-    EXPECT_CALL(mock_app_manager_,
-                IncreaseForwardedRequestTimeout(connection_key, correlation_id))
+    EXPECT_CALL(
+        mock_app_manager_,
+        IncreaseForwardedRequestTimeout(kConnectionKey_ASC, kCorrelationId))
         .Times(0);
     // Will return false since there are no active services to handle the rpc
     EXPECT_CALL(mock_rpc_service_, ManageMobileCommand(_, _)).Times(0);
@@ -266,13 +277,21 @@ TEST_F(RPCPassingHandlerTest, RPCPassingTest_REQUEST_NoPassthrough) {
 }
 
 TEST_F(RPCPassingHandlerTest, RPCPassingTest_RESPONSE_UnknownCorrelationID) {
-  int32_t correlation_id = 1;
-  uint32_t connection_key = 1;
-  smart_objects::SmartObject response = CreatePassThroughResponse(
-      connection_key, correlation_id, "SUCCESS", true);
+  smart_objects::SmartObject invalid_response = CreatePassThroughResponse(
+      kConnectionKey_NAV_ASP, kCorrelationId + 1, "SUCCESS", true);
 
-  app_services_.push_back(
-      CreateAppService(connection_key + 1, "service 1", "NAVIGATION"));
+  app_services_.push_back(CreateAppService(
+      kConnectionKey_NAV_ASP, "Navigation service", "NAVIGATION"));
+
+  PassthroughParams request_params{
+      .connection_key = kConnectionKey_ASC,
+      .correlation_id = kCorrelationId,
+      .message = CreatePassThroughRequest(kConnectionKey_ASC, kCorrelationId),
+      .forwarded_message =
+          CreatePassThroughRequest(kConnectionKey_NAV_ASP, kCorrelationId),
+  };
+
+  SendRequestToASP(request_params);
 
   {
     InSequence dummy;
@@ -281,22 +300,28 @@ TEST_F(RPCPassingHandlerTest, RPCPassingTest_RESPONSE_UnknownCorrelationID) {
     EXPECT_CALL(mock_rpc_service_, ManageMobileCommand(_, _)).Times(0);
     EXPECT_CALL(mock_rpc_service_, SendMessageToMobile(_, _)).Times(0);
   }
-  bool result = rpc_passing_handler_->RPCPassThrough(response);
+  bool result = rpc_passing_handler_->RPCPassThrough(invalid_response);
   EXPECT_EQ(result, false);
 }
 
 TEST_F(RPCPassingHandlerTest, RPCPassingTest_SUCCESS) {
-  int32_t correlation_id = 1;
-  uint32_t connection_key = 1;
   smart_objects::SmartObject response = CreatePassThroughResponse(
-      connection_key + 1, correlation_id, "SUCCESS", true);
+      kConnectionKey_NAV_ASP, kCorrelationId, "SUCCESS", true);
   smart_objects::SmartObject forwarded_response = CreatePassThroughResponse(
-      connection_key, correlation_id, "SUCCESS", true);
+      kConnectionKey_ASC, kCorrelationId, "SUCCESS", true);
 
-  app_services_.push_back(
-      CreateAppService(connection_key + 1, "service 1", "NAVIGATION"));
+  app_services_.push_back(CreateAppService(
+      kConnectionKey_NAV_ASP, "Navigation service", "NAVIGATION"));
 
-  SendPassthroughRequestToMobile(connection_key, correlation_id);
+  PassthroughParams request_params{
+      .connection_key = kConnectionKey_ASC,
+      .correlation_id = kCorrelationId,
+      .message = CreatePassThroughRequest(kConnectionKey_ASC, kCorrelationId),
+      .forwarded_message =
+          CreatePassThroughRequest(kConnectionKey_NAV_ASP, kCorrelationId),
+  };
+
+  SendRequestToASP(request_params);
 
   {
     InSequence dummy;
@@ -312,23 +337,29 @@ TEST_F(RPCPassingHandlerTest, RPCPassingTest_SUCCESS) {
 
 TEST_F(RPCPassingHandlerTest,
        RPCPassingTest_UNSUPPORTED_REQUEST_ForwardToCore) {
-  int32_t correlation_id = 1;
-  uint32_t connection_key = 1;
   smart_objects::SmartObject unsupported_response = CreatePassThroughResponse(
-      connection_key + 1, correlation_id, "UNSUPPORTED_REQUEST", false);
+      kConnectionKey_NAV_ASP, kCorrelationId, "UNSUPPORTED_REQUEST", false);
   smart_objects::SmartObject forwarded_request =
-      CreatePassThroughRequest(connection_key, correlation_id);
+      CreatePassThroughRequest(kConnectionKey_ASC, kCorrelationId);
 
-  app_services_.push_back(
-      CreateAppService(connection_key + 1, "service 1", "NAVIGATION"));
+  app_services_.push_back(CreateAppService(
+      kConnectionKey_NAV_ASP, "Navigation service", "NAVIGATION"));
 
-  SendPassthroughRequestToMobile(connection_key, correlation_id);
+  PassthroughParams request_params{
+      .connection_key = kConnectionKey_ASC,
+      .correlation_id = kCorrelationId,
+      .message = CreatePassThroughRequest(kConnectionKey_ASC, kCorrelationId),
+      .forwarded_message =
+          CreatePassThroughRequest(kConnectionKey_NAV_ASP, kCorrelationId),
+  };
+
+  SendRequestToASP(request_params);
 
   {
     InSequence dummy;
     // Call RPCPassThrough with response smart object
     // Will cycle to core (no other app services in list)
-    EXPECT_CALL(mock_app_manager_, application(connection_key));
+    EXPECT_CALL(mock_app_manager_, application(kConnectionKey_ASC));
     EXPECT_CALL(*mock_app_ptr_, msg_version());
     EXPECT_CALL(mock_app_manager_, GetRPCHandler());
     EXPECT_CALL(mock_rpc_handler_,
@@ -345,19 +376,25 @@ TEST_F(RPCPassingHandlerTest,
 
 TEST_F(RPCPassingHandlerTest,
        RPCPassingTest_UNSUPPORTED_REQUEST_ForwardToMobile) {
-  int32_t correlation_id = 1;
-  uint32_t connection_key = 1;
   smart_objects::SmartObject unsupported_response = CreatePassThroughResponse(
-      connection_key + 1, correlation_id, "UNSUPPORTED_REQUEST", false);
+      kConnectionKey_NAV_ASP, kCorrelationId, "UNSUPPORTED_REQUEST", false);
   smart_objects::SmartObject forwarded_request =
-      CreatePassThroughRequest(connection_key + 2, correlation_id);
+      CreatePassThroughRequest(kConnectionKey_MEDIA_ASP, kCorrelationId);
 
+  app_services_.push_back(CreateAppService(
+      kConnectionKey_NAV_ASP, "Navigation service", "NAVIGATION"));
   app_services_.push_back(
-      CreateAppService(connection_key + 1, "service 1", "NAVIGATION"));
-  app_services_.push_back(
-      CreateAppService(connection_key + 2, "service 2", "MEDIA"));
+      CreateAppService(kConnectionKey_MEDIA_ASP, "Media service", "MEDIA"));
 
-  SendPassthroughRequestToMobile(connection_key, correlation_id);
+  PassthroughParams request_params{
+      .connection_key = kConnectionKey_ASC,
+      .correlation_id = kCorrelationId,
+      .message = CreatePassThroughRequest(kConnectionKey_ASC, kCorrelationId),
+      .forwarded_message =
+          CreatePassThroughRequest(kConnectionKey_NAV_ASP, kCorrelationId),
+  };
+
+  SendRequestToASP(request_params);
 
   {
     InSequence dummy;
@@ -374,51 +411,32 @@ TEST_F(RPCPassingHandlerTest,
 }
 
 TEST_F(RPCPassingHandlerTest, RPCPassingTest_REQUEST_Timeout) {
-  int32_t correlation_id = 1;
-  uint32_t connection_key = 1;
-  app_services_.push_back(
-      CreateAppService(connection_key + 1, "service 1", "NAVIGATION"));
+  app_services_.push_back(CreateAppService(
+      kConnectionKey_NAV_ASP, "Navigation service", "NAVIGATION"));
 
-  smart_objects::SmartObject request =
-      CreatePassThroughRequest(connection_key, correlation_id);
-  smart_objects::SmartObject forwarded_request =
-      CreatePassThroughRequest(connection_key + 1, correlation_id);
+  PassthroughParams request_params{
+      .connection_key = kConnectionKey_ASC,
+      .correlation_id = kCorrelationId,
+      .message = CreatePassThroughRequest(kConnectionKey_ASC, kCorrelationId),
+      .forwarded_message =
+          CreatePassThroughRequest(kConnectionKey_NAV_ASP, kCorrelationId),
+  };
 
-  {
-    InSequence dummy;
-    // Call RPCPassThrough with request smart object
-
-    // Will call PopulateRPCRequestQueue
-    EXPECT_CALL(mock_app_service_manager_, GetActiveServices())
-        .WillOnce(Return(app_services_));
-    EXPECT_CALL(mock_app_manager_,
-                IncreaseForwardedRequestTimeout(connection_key, correlation_id))
-        .Times(app_services_.size());
-
-    // Will call ForwardRequesttoMobile
-    EXPECT_CALL(mock_app_manager_, get_settings());
-    EXPECT_CALL(mock_app_manager_settings_, rpc_pass_through_timeout())
-        .WillOnce(Return(1));
-    EXPECT_CALL(mock_app_manager_, GetRPCService());
-    EXPECT_CALL(mock_rpc_service_,
-                SendMessageToMobile(Pointee(forwarded_request), false));
-  }
-
-  bool result = rpc_passing_handler_->RPCPassThrough(request);
-  EXPECT_EQ(result, true);
+  SendRequestToASP(request_params, 1);
 
   {
     InSequence dummy;
     // Request timeout will trigger perform next request
     // Will cycle to core (no other app services in list)
-    EXPECT_CALL(mock_app_manager_, application(connection_key));
+    EXPECT_CALL(mock_app_manager_, application(kConnectionKey_ASC));
     EXPECT_CALL(*mock_app_ptr_, msg_version());
     EXPECT_CALL(mock_app_manager_, GetRPCHandler());
-    EXPECT_CALL(mock_rpc_handler_, ValidateRpcSO(request, _, _, false))
+    EXPECT_CALL(mock_rpc_handler_,
+                ValidateRpcSO(request_params.message, _, _, false))
         .WillOnce(Return(true));
     EXPECT_CALL(mock_app_manager_, GetRPCService());
     EXPECT_CALL(mock_rpc_service_,
-                ManageMobileCommand(Pointee(request),
+                ManageMobileCommand(Pointee(request_params.message),
                                     am::commands::Command::SOURCE_MOBILE));
   }
   sleep(1);
