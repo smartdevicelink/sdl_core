@@ -58,30 +58,30 @@ class WebsocketConnectionTest : public ::testing::Test {
     std::shared_ptr<WebsocketClientConnection> connection;
   };
 
-  WebsocketClient CreateWebsocketClient(
+  void InitWebsocketClient(
       const transport_manager::transport_adapter::CloudAppProperties&
-          properties) {
+          properties,
+      WebsocketClient& client_out) {
     uniq_id = dev_id = properties.endpoint;
 
-    WebsocketClient client{std::make_shared<CloudWebsocketTransportAdapter>(
-                               last_state_, transport_manager_settings),
-                           nullptr};
-    client.adapter->SetAppCloudTransportConfig(uniq_id, properties);
+    client_out =
+        WebsocketClient{std::make_shared<CloudWebsocketTransportAdapter>(
+                            last_state_, transport_manager_settings),
+                        nullptr};
+    client_out.adapter->SetAppCloudTransportConfig(uniq_id, properties);
 
     TransportAdapterImpl* ta_cloud =
-        dynamic_cast<TransportAdapterImpl*>(client.adapter.get());
+        dynamic_cast<TransportAdapterImpl*>(client_out.adapter.get());
     ta_cloud->CreateDevice(uniq_id);
 
-    auto connection = client.adapter->FindPendingConnection(dev_id, app_handle);
+    auto connection = client_out.adapter->FindPendingConnection(dev_id, 0);
 
     EXPECT_NE(connection, nullptr);
 
-    client.connection =
+    client_out.connection =
         std::dynamic_pointer_cast<WebsocketClientConnection>(connection);
 
-    EXPECT_NE(client.connection.use_count(), 0);
-
-    return client;
+    EXPECT_NE(client_out.connection.use_count(), 0);
   }
 
   void StartWSServer() {
@@ -102,7 +102,6 @@ class WebsocketConnectionTest : public ::testing::Test {
   ~WebsocketConnectionTest() {}
 
   void SetUp() OVERRIDE {
-    app_handle = 0;
     ON_CALL(transport_manager_settings, use_last_state())
         .WillByDefault(Return(true));
   }
@@ -111,9 +110,9 @@ class WebsocketConnectionTest : public ::testing::Test {
   resumption::LastStateImpl last_state_;
   std::string dev_id;
   std::string uniq_id;
-  int app_handle;
   std::shared_ptr<websocket::WSSession> ws_session;
   std::shared_ptr<websocket::WSSSession> wss_session;
+  WebsocketClient ws_client;
   std::string kHost = "127.0.0.1";
   uint16_t kPort = 8080;
   // Sample certificate for localhost
@@ -275,9 +274,9 @@ TEST_F(WebsocketConnectionTest, WSConnection_SUCCESS) {
   sleep(1);
 
   // Start client
-  auto client_connection = CreateWebsocketClient(properties);
+  InitWebsocketClient(properties, ws_client);
   std::shared_ptr<WebsocketClientConnection> ws_connection =
-      client_connection.connection;
+      ws_client.connection;
 
   // Check websocket connection
   TransportAdapter::Error ret_code = ws_connection->Start();
@@ -306,9 +305,9 @@ TEST_F(WebsocketConnectionTest, WSSConnection_SUCCESS) {
   sleep(1);
 
   // Start client
-  auto client_connection = CreateWebsocketClient(properties);
+  InitWebsocketClient(properties, ws_client);
   std::shared_ptr<WebsocketClientConnection> wss_connection =
-      client_connection.connection;
+      ws_client.connection;
 
   // Check websocket connection
   TransportAdapter::Error ret_code = wss_connection->Start();
@@ -337,9 +336,9 @@ TEST_F(WebsocketConnectionTest, WSSConnection_FAILURE_IncorrectCert) {
   sleep(1);
 
   // Start client
-  auto client_connection = CreateWebsocketClient(properties);
+  InitWebsocketClient(properties, ws_client);
   std::shared_ptr<WebsocketClientConnection> wss_connection =
-      client_connection.connection;
+      ws_client.connection;
 
   // Check websocket connection
   TransportAdapter::Error ret_code = wss_connection->Start();

@@ -65,9 +65,9 @@ namespace ssl = boost::asio::ssl;        // from <boost/asio/ssl.hpp>
 using tcp = boost::asio::ip::tcp;        // from <boost/asio/ip/tcp.hpp>
 
 // Accepts incoming connections and launches the WSServer
-class WSSession : public std::enable_shared_from_this<WSSession> {
+class WSSession {
  private:
-  class WSServer : public std::enable_shared_from_this<WSServer> {
+  class WSServer {
    public:
     explicit WSServer(tcp::socket&& socket);
     void Run();
@@ -97,9 +97,9 @@ class WSSession : public std::enable_shared_from_this<WSSession> {
 };
 
 // Accepts incoming connections and launches the sessions
-class WSSSession : public std::enable_shared_from_this<WSSSession> {
+class WSSSession {
  private:
-  class WSSServer : public std::enable_shared_from_this<WSSServer> {
+  class WSSServer {
    public:
     // Take ownership of the socket
     WSSServer(tcp::socket&& socket, ssl::context& ctx);

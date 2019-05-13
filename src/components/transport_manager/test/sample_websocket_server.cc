@@ -16,9 +16,7 @@ WSSession::WSServer::WSServer(tcp::socket&& socket)
 void WSSession::WSServer::Run() {
   // Accept the websocket handshake
   ws_.async_accept(boost::asio::bind_executor(
-      strand_,
-      std::bind(
-          &WSServer::OnAccept, shared_from_this(), std::placeholders::_1)));
+      strand_, std::bind(&WSServer::OnAccept, this, std::placeholders::_1)));
 }
 
 void WSSession::WSServer::OnAccept(beast::error_code ec) {
@@ -95,10 +93,9 @@ WSSSession::WSSServer::WSSServer(tcp::socket&& socket, ssl::context& ctx)
 
 void WSSSession::WSSServer::Run() {
   // Perform the SSL handshake
-  wss_.next_layer().async_handshake(ssl::stream_base::server,
-                                    std::bind(&WSSServer::OnSSLHandshake,
-                                              shared_from_this(),
-                                              std::placeholders::_1));
+  wss_.next_layer().async_handshake(
+      ssl::stream_base::server,
+      std::bind(&WSSServer::OnSSLHandshake, this, std::placeholders::_1));
 }
 
 void WSSSession::WSSServer::OnSSLHandshake(beast::error_code ec) {
@@ -107,8 +104,8 @@ void WSSSession::WSSServer::OnSSLHandshake(beast::error_code ec) {
   }
 
   // Accept the websocket handshake
-  wss_.async_accept(std::bind(
-      &WSSServer::OnAccept, shared_from_this(), std::placeholders::_1));
+  wss_.async_accept(
+      std::bind(&WSSServer::OnAccept, this, std::placeholders::_1));
 }
 
 void WSSSession::WSSServer::OnAccept(beast::error_code ec) {
@@ -192,8 +189,7 @@ void WSSSession::do_accept() {
   if (acceptor_.is_open()) {
     acceptor_.async_accept(
         socket_,
-        std::bind(
-            &WSSSession::on_accept, shared_from_this(), std::placeholders::_1));
+        std::bind(&WSSSession::on_accept, this, std::placeholders::_1));
     ioc_.run();
   }
 }
