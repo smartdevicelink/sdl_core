@@ -362,7 +362,7 @@ TEST_F(RPCPassingHandlerTest,
   {
     InSequence dummy;
     // Call RPCPassThrough with response smart object
-    // Will cycle to core (no other app services in list)
+    // Will cycle to next compatible active app service
     EXPECT_CALL(mock_app_manager_, get_settings());
     EXPECT_CALL(mock_app_manager_settings_, rpc_pass_through_timeout());
     EXPECT_CALL(mock_app_manager_, GetRPCService());
@@ -371,6 +371,57 @@ TEST_F(RPCPassingHandlerTest,
   }
   bool result = rpc_passing_handler_->RPCPassThrough(unsupported_response);
   EXPECT_EQ(result, true);
+}
+
+TEST_F(RPCPassingHandlerTest, RPCPassingTest_REQUEST_Timeout) {
+  int32_t correlation_id = 1;
+  uint32_t connection_key = 1;
+  app_services_.push_back(
+      CreateAppService(connection_key + 1, "service 1", "NAVIGATION"));
+
+  smart_objects::SmartObject request =
+      CreatePassThroughRequest(connection_key, correlation_id);
+  smart_objects::SmartObject forwarded_request =
+      CreatePassThroughRequest(connection_key + 1, correlation_id);
+
+  {
+    InSequence dummy;
+    // Call RPCPassThrough with request smart object
+
+    // Will call PopulateRPCRequestQueue
+    EXPECT_CALL(mock_app_service_manager_, GetActiveServices())
+        .WillOnce(Return(app_services_));
+    EXPECT_CALL(mock_app_manager_,
+                IncreaseForwardedRequestTimeout(connection_key, correlation_id))
+        .Times(app_services_.size());
+
+    // Will call ForwardRequesttoMobile
+    EXPECT_CALL(mock_app_manager_, get_settings());
+    EXPECT_CALL(mock_app_manager_settings_, rpc_pass_through_timeout())
+        .WillOnce(Return(1));
+    EXPECT_CALL(mock_app_manager_, GetRPCService());
+    EXPECT_CALL(mock_rpc_service_,
+                SendMessageToMobile(Pointee(forwarded_request), false));
+  }
+
+  bool result = rpc_passing_handler_->RPCPassThrough(request);
+  EXPECT_EQ(result, true);
+
+  {
+    InSequence dummy;
+    // Request timeout will trigger perform next request
+    // Will cycle to core (no other app services in list)
+    EXPECT_CALL(mock_app_manager_, application(connection_key));
+    EXPECT_CALL(*mock_app_ptr_, msg_version());
+    EXPECT_CALL(mock_app_manager_, GetRPCHandler());
+    EXPECT_CALL(mock_rpc_handler_, ValidateRpcSO(request, _, _, false))
+        .WillOnce(Return(true));
+    EXPECT_CALL(mock_app_manager_, GetRPCService());
+    EXPECT_CALL(mock_rpc_service_,
+                ManageMobileCommand(Pointee(request),
+                                    am::commands::Command::SOURCE_MOBILE));
+  }
+  sleep(1);
 }
 
 }  // namespace application_manager_test
