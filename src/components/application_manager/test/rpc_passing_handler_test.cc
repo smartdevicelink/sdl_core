@@ -194,10 +194,6 @@ class RPCPassingHandlerTest : public ::testing::Test {
     // Will call PopulateRPCRequestQueue
     EXPECT_CALL(mock_app_service_manager_, GetActiveServices())
         .WillOnce(Return(app_services_));
-    EXPECT_CALL(mock_app_manager_,
-                IncreaseForwardedRequestTimeout(params.connection_key,
-                                                params.correlation_id))
-        .Times(app_services_.size());
 
     // Will call ForwardRequesttoMobile
     EXPECT_CALL(mock_app_manager_settings_, rpc_pass_through_timeout())
@@ -402,7 +398,18 @@ TEST_F(RPCPassingHandlerTest, RPCPassingTest_REQUEST_Timeout) {
           CreatePassThroughRequest(kConnectionKey_NAV_ASP, kCorrelationId),
   };
 
-  SendRequestToASP(request_params, timeout_in_ms);
+  // Call RPCPassThrough with request smart object
+
+  // Will call PopulateRPCRequestQueue
+  EXPECT_CALL(mock_app_service_manager_, GetActiveServices())
+      .WillOnce(Return(app_services_));
+
+  // Will call ForwardRequesttoMobile
+  EXPECT_CALL(mock_app_manager_settings_, rpc_pass_through_timeout())
+      .WillOnce(Return(timeout_in_ms));
+  EXPECT_CALL(
+      mock_rpc_service_,
+      SendMessageToMobile(Pointee(request_params.forwarded_message), false));
 
   // Request timeout will trigger perform next request
   // Will cycle to core (no other app services in list)
@@ -410,11 +417,15 @@ TEST_F(RPCPassingHandlerTest, RPCPassingTest_REQUEST_Timeout) {
   EXPECT_CALL(mock_rpc_handler_,
               ValidateRpcSO(request_params.message, _, _, false))
       .WillOnce(Return(true));
-  EXPECT_CALL(mock_app_manager_, GetRPCService());
+  EXPECT_CALL(mock_app_manager_, GetRPCService()).Times(2);
   EXPECT_CALL(mock_rpc_service_,
               ManageMobileCommand(Pointee(request_params.message),
                                   am::commands::Command::SOURCE_MOBILE))
       .WillOnce(DoAll(NotifyTestAsyncWaiter(waiter), Return(true)));
+
+  bool mobile_result =
+      rpc_passing_handler_->RPCPassThrough(request_params.message);
+  EXPECT_EQ(mobile_result, true);
 
   const uint32_t wait_time = MAX_TEST_DURATION + timeout_in_ms;
   EXPECT_TRUE(waiter->WaitFor(1, wait_time));
