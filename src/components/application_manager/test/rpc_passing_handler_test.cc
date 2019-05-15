@@ -74,12 +74,10 @@ class RPCPassingHandlerTest : public ::testing::Test {
  public:
   RPCPassingHandlerTest()
       : mock_app_service_manager_(mock_app_manager_, mock_last_state_)
-      , mock_app_ptr_(std::make_shared<MockApplication>())
-      , mock_semantic_version_(utils::SemanticVersion(5, 1, 0)) {}
+      , mock_app_ptr_(std::make_shared<NiceMock<MockApplication> >())
+      , version_(utils::SemanticVersion(5, 1, 0)) {}
 
-  ~RPCPassingHandlerTest() {
-    std::cout << "Finished with ALL RPCPassingHandler tests" << std::endl;
-  }
+  ~RPCPassingHandlerTest() {}
 
   void SetUp() OVERRIDE {
     rpc_passing_handler_ =
@@ -113,13 +111,10 @@ class RPCPassingHandlerTest : public ::testing::Test {
 
     ON_CALL(mock_app_manager_, application(_))
         .WillByDefault(Return(mock_app_ptr_));
-    ON_CALL(*mock_app_ptr_, msg_version())
-        .WillByDefault(ReturnRef(mock_semantic_version_));
+    ON_CALL(*mock_app_ptr_, msg_version()).WillByDefault(ReturnRef(version_));
   }
 
   void TearDown() OVERRIDE {
-    std::cout << "Finishing test... deleting rpc_passing_handler pointer"
-              << std::endl;
     delete rpc_passing_handler_;
     rpc_passing_handler_ = NULL;
   }
@@ -136,8 +131,6 @@ class RPCPassingHandlerTest : public ::testing::Test {
 
     smart_objects::SmartObject record(smart_objects::SmartType::SmartType_Map);
     record[am::strings::service_id] = service_id;
-    // record[am::strings::service_manifest][am::strings::service_name] =
-    // service_name;
     record[am::strings::service_manifest][am::strings::service_type] =
         service_type;
     record[am::strings::service_manifest][am::strings::allow_app_consumers] =
@@ -207,7 +200,6 @@ class RPCPassingHandlerTest : public ::testing::Test {
         .Times(app_services_.size());
 
     // Will call ForwardRequesttoMobile
-    EXPECT_CALL(mock_app_manager_, get_settings());
     EXPECT_CALL(mock_app_manager_settings_, rpc_pass_through_timeout())
         .WillOnce(Return(timeout));
     EXPECT_CALL(mock_app_manager_, GetRPCService());
@@ -218,14 +210,14 @@ class RPCPassingHandlerTest : public ::testing::Test {
     EXPECT_EQ(mobile_result, true);
   }
 
-  MockApplicationManager mock_app_manager_;
-  MockApplicationManagerSettings mock_app_manager_settings_;
+  NiceMock<MockApplicationManager> mock_app_manager_;
+  NiceMock<MockApplicationManagerSettings> mock_app_manager_settings_;
   MockRPCService mock_rpc_service_;
   MockRPCHandler mock_rpc_handler_;
   resumption_test::MockLastState mock_last_state_;
   MockAppServiceManager mock_app_service_manager_;
-  std::shared_ptr<MockApplication> mock_app_ptr_;
-  const utils::SemanticVersion mock_semantic_version_;
+  std::shared_ptr<NiceMock<MockApplication> > mock_app_ptr_;
+  const utils::SemanticVersion version_;
   am::RPCPassingHandler* rpc_passing_handler_;
   std::vector<am::AppService> app_services_;
 
@@ -350,8 +342,6 @@ TEST_F(RPCPassingHandlerTest,
 
   // Call RPCPassThrough with response smart object
   // Will cycle to core (no other app services in list)
-  EXPECT_CALL(mock_app_manager_, application(kConnectionKey_ASC));
-  EXPECT_CALL(*mock_app_ptr_, msg_version());
   EXPECT_CALL(mock_app_manager_, GetRPCHandler());
   EXPECT_CALL(mock_rpc_handler_, ValidateRpcSO(forwarded_request, _, _, false))
       .WillOnce(Return(true));
@@ -388,7 +378,6 @@ TEST_F(RPCPassingHandlerTest,
 
   // Call RPCPassThrough with response smart object
   // Will cycle to next compatible active app service
-  EXPECT_CALL(mock_app_manager_, get_settings());
   EXPECT_CALL(mock_app_manager_settings_, rpc_pass_through_timeout());
   EXPECT_CALL(mock_app_manager_, GetRPCService());
   EXPECT_CALL(mock_rpc_service_,
@@ -417,8 +406,6 @@ TEST_F(RPCPassingHandlerTest, RPCPassingTest_REQUEST_Timeout) {
 
   // Request timeout will trigger perform next request
   // Will cycle to core (no other app services in list)
-  EXPECT_CALL(mock_app_manager_, application(kConnectionKey_ASC));
-  EXPECT_CALL(*mock_app_ptr_, msg_version());
   EXPECT_CALL(mock_app_manager_, GetRPCHandler());
   EXPECT_CALL(mock_rpc_handler_,
               ValidateRpcSO(request_params.message, _, _, false))
