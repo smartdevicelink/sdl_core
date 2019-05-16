@@ -84,7 +84,7 @@ void CloudWebsocketTransportAdapter::CreateDevice(const std::string& uid) {
   std::string host_pattern = "([a-zA-Z\\d\\.-]{2,}\\@?([a-zA-Z]{2,})?)";
   std::string port_pattern = "(\\d{2,5})";
   // Optional parameters
-  std::string path_pattern = "(\\/[^\\n\\t#? ]*)?";
+  std::string path_pattern = "((\\/[^\\n\\t\\/#? ]+)*)?";
   std::string query_pattern = "(\\?[^=&#\\n\\t ]*=?[^&#\\n\\t ]*&?)?";
   std::string position_pattern = "(#[^\\n\\t ]*)?";
 
@@ -101,9 +101,6 @@ void CloudWebsocketTransportAdapter::CreateDevice(const std::string& uid) {
     return;
   }
 
-  std::string host = results[2];
-  std::string port = results[4];
-
   LOG4CXX_DEBUG(logger_, "#Results: " << results.size());
   std::string results_str;
   for (size_t i = 0; i < results.size(); i++) {
@@ -115,11 +112,19 @@ void CloudWebsocketTransportAdapter::CreateDevice(const std::string& uid) {
 
   std::string device_id = uid;
 
-  LOG4CXX_DEBUG(
-      logger_,
-      "Creating Cloud Device For Host: " << host << " and Port: " << port);
+  CloudAppEndpoint endpoint{.host = results[2],
+                            .port = results[4],
+                            .path = results[5] + "/",
+                            .query = results[7],
+                            .position = results[8]};
 
-  auto cloud_device = std::make_shared<CloudDevice>(host, port, device_id);
+  LOG4CXX_DEBUG(logger_,
+                "Creating Cloud Device For Host: "
+                    << endpoint.host << " at Port: " << endpoint.port
+                    << " with Target: "
+                    << (endpoint.path + endpoint.query + endpoint.position));
+
+  auto cloud_device = std::make_shared<CloudDevice>(endpoint, device_id);
 
   DeviceVector devices{cloud_device};
 
