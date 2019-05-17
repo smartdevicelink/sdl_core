@@ -159,8 +159,9 @@ class PolicyListener {
                                  const std::string& hmi_level) = 0;
 
   /**
- * @brief Notify Connected mobile apps about changing state LockScreenDismissal
- */
+   * @brief Notify Connected mobile apps about changing state
+   * LockScreenDismissal
+   */
   virtual void OnLockScreenDismissalStateChanged() = 0;
 };
 }  //  namespace policy

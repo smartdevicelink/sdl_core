@@ -3912,7 +3912,7 @@ void ApplicationManagerImpl::SendDriverDistractionState(
     auto notification = std::make_shared<smart_objects::SmartObject>();
     auto& msg_params = (*notification)[strings::msg_params];
     auto& params = (*notification)[strings::params];
-    using application_manager::MessageType::kNotification;
+    using application_manager::MessageType;
     using mobile_api::FunctionID::OnDriverDistractionID;
 
     params[strings::message_type] =
