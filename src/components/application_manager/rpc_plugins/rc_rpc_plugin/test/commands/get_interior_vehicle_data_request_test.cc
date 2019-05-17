@@ -207,7 +207,7 @@ TEST_F(GetInteriorVehicleDataRequestTest,
       .WillOnce(Return(true));
   // Act
 
-  command->Init();
+  ASSERT_TRUE(command->Init());
   command->Run();
 }
 
@@ -235,7 +235,7 @@ TEST_F(GetInteriorVehicleDataRequestTest,
           HMIResultCodeIs(hmi_apis::FunctionID::RC_GetInteriorVehicleData), _))
       .WillOnce(Return(true));
   // Act
-  command->Init();
+  ASSERT_TRUE(command->Init());
   command->Run();
 }
 
@@ -267,7 +267,7 @@ TEST_F(
       .WillOnce(DoAll(SaveArg<0>(&command_result), Return(true)));
 
   // Act
-  command->Init();
+  ASSERT_TRUE(command->Init());
   command->Run();
 
   // Assert
@@ -319,7 +319,7 @@ TEST_F(
       command = CreateRCCommand<
           rc_rpc_plugin::commands::GetInteriorVehicleDataRequest>(
           mobile_message);
-  command->Init();
+  ASSERT_TRUE(command->Init());
   command->Run();
   application_manager::event_engine::Event event(
       hmi_apis::FunctionID::RC_GetInteriorVehicleData);
@@ -364,7 +364,7 @@ TEST_F(GetInteriorVehicleDataRequestTest,
       .WillOnce(DoAll(SaveArg<0>(&command_result), Return(true)));
 
   // Act
-  command->Init();
+  ASSERT_TRUE(command->Init());
   command->Run();
 
   // Assert
@@ -400,7 +400,7 @@ TEST_F(
           MobileResultCodeIs(mobile_apis::Result::UNSUPPORTED_RESOURCE), _))
       .WillOnce((Return(true)));
   // Act
-  command->Init();
+  ASSERT_TRUE(command->Init());
   command->Run();
 }
 
@@ -426,7 +426,7 @@ TEST_F(
       .WillOnce((Return(true)));
 
   // Act
-  command->Init();
+  ASSERT_TRUE(command->Init());
   command->Run();
 }
 
@@ -467,7 +467,7 @@ TEST_F(GetInteriorVehicleDataRequestTest,
   application_manager::event_engine::Event event(
       hmi_apis::FunctionID::RC_GetInteriorVehicleData);
   event.set_smart_object(*hmi_response_message);
-  command->Init();
+  ASSERT_TRUE(command->Init());
   command->Run();
   command->on_event(event);
 }
@@ -508,7 +508,7 @@ TEST_F(GetInteriorVehicleDataRequestTest,
       hmi_apis::FunctionID::RC_GetInteriorVehicleData);
   event.set_smart_object(*hmi_message);
   auto command = CreateRCCommand<GetInteriorVehicleDataRequest>(mobile_message);
-  command->Init();
+  ASSERT_TRUE(command->Init());
   command->Run();
   command->on_event(event);
 }
@@ -553,7 +553,7 @@ TEST_F(GetInteriorVehicleDataRequestTest,
       command = CreateRCCommand<
           rc_rpc_plugin::commands::GetInteriorVehicleDataRequest>(
           mobile_message);
-  command->Init();
+  ASSERT_TRUE(command->Init());
   command->Run();
   application_manager::event_engine::Event event(
       hmi_apis::FunctionID::RC_GetInteriorVehicleData);
@@ -595,7 +595,7 @@ TEST_F(GetInteriorVehicleDataRequestTest,
             _))
         .WillRepeatedly(Return(true));
     // Act
-    command->Init();
+    ASSERT_TRUE(command->Init());
     command->Run();
   }
 
@@ -610,7 +610,7 @@ TEST_F(GetInteriorVehicleDataRequestTest,
   EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_, _)).Times(0);
 
   // Act
-  command->Init();
+  ASSERT_TRUE(command->Init());
   command->Run();
 }
 
@@ -663,7 +663,7 @@ TEST_F(GetInteriorVehicleDataRequestTest,
   application_manager::event_engine::Event event(
       hmi_apis::FunctionID::RC_GetInteriorVehicleData);
 
-  command->Init();
+  ASSERT_TRUE(command->Init());
   command->Run();
 
   event.set_smart_object(*hmi_response_message);
@@ -721,7 +721,7 @@ TEST_F(GetInteriorVehicleDataRequestTest,
   application_manager::event_engine::Event event(
       hmi_apis::FunctionID::RC_GetInteriorVehicleData);
 
-  command->Init();
+  ASSERT_TRUE(command->Init());
   command->Run();
 
   event.set_smart_object(*hmi_response_message);

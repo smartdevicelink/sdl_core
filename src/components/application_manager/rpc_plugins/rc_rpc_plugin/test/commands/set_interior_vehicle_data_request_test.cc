@@ -50,6 +50,7 @@ using test::components::application_manager_test::MockApplication;
 using test::components::application_manager_test::MockApplicationManager;
 using test::components::commands_test::CommandRequestTest;
 using test::components::commands_test::CommandsTestMocks;
+using test::components::commands_test::HMIResultCodeIs;
 using ::testing::_;
 using ::testing::NiceMock;
 using ::testing::Return;
@@ -143,8 +144,11 @@ TEST_F(SetInteriorVehicleDataRequestTest,
       (*mobile_message)[application_manager::strings::msg_params];
   msg_params[message_params::kModuleData][message_params::kModuleType] =
       mobile_apis::ModuleType::CLIMATE;
+  smart_objects::SmartObject climate_control_data(smart_objects::SmartType_Map);
+  climate_control_data[message_params::kFanSpeed] = 10;
+
   msg_params[message_params::kModuleData][message_params::kClimateControlData] =
-      smart_objects::SmartObject(smart_objects::SmartType_Map);
+      climate_control_data;
   // Expectations
   EXPECT_CALL(mock_policy_handler_, CheckModule(kPolicyAppId, _))
       .WillOnce(Return(rc_rpc_plugin::TypeAccess::kAllowed));
@@ -154,15 +158,15 @@ TEST_F(SetInteriorVehicleDataRequestTest,
 
   EXPECT_CALL(
       mock_rpc_service_,
-      ManageMobileCommand(test::components::commands_test::MobileResultCodeIs(
-                              mobile_apis::Result::READ_ONLY),
-                          application_manager::commands::Command::SOURCE_SDL));
+      ManageHMICommand(
+          HMIResultCodeIs(hmi_apis::FunctionID::RC_SetInteriorVehicleData), _))
+      .WillOnce(Return(true));
   // Act
   std::shared_ptr<rc_rpc_plugin::commands::SetInteriorVehicleDataRequest>
       command = CreateRCCommand<
           rc_rpc_plugin::commands::SetInteriorVehicleDataRequest>(
           mobile_message);
-  command->Init();
+  ASSERT_TRUE(command->Init());
   command->Run();
 }
 
@@ -193,16 +197,16 @@ TEST_F(
 
   EXPECT_CALL(
       mock_rpc_service_,
-      ManageMobileCommand(test::components::commands_test::MobileResultCodeIs(
-                              mobile_apis::Result::OUT_OF_MEMORY),
-                          application_manager::commands::Command::SOURCE_SDL));
+      ManageHMICommand(
+          HMIResultCodeIs(hmi_apis::FunctionID::RC_SetInteriorVehicleData), _))
+      .WillOnce(Return(true));
 
   // Act
   std::shared_ptr<rc_rpc_plugin::commands::SetInteriorVehicleDataRequest>
       command = CreateRCCommand<
           rc_rpc_plugin::commands::SetInteriorVehicleDataRequest>(
           mobile_message);
-  command->Init();
+  ASSERT_TRUE(command->Init());
   command->Run();
 }
 
@@ -234,7 +238,7 @@ TEST_F(
       command = CreateRCCommand<
           rc_rpc_plugin::commands::SetInteriorVehicleDataRequest>(
           mobile_message);
-  command->Init();
+  ASSERT_TRUE(command->Init());
   command->Run();
 }
 
@@ -269,7 +273,7 @@ TEST_F(SetInteriorVehicleDataRequestTest,
           rc_rpc_plugin::commands::SetInteriorVehicleDataRequest>(
           mobile_message);
 
-  command->Init();
+  ASSERT_TRUE(command->Init());
   command->Run();
 
   auto& msg_params_from_mobile =
