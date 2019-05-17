@@ -39,6 +39,16 @@ namespace transport_manager {
 namespace transport_adapter {
 CREATE_LOGGERPTR_GLOBAL(logger_, "TransportManager")
 
+CloudDevice::CloudDevice(std::string& host,
+                         std::string& port,
+                         std::string& name)
+    : Device(name, std::string(name))
+    , endpoint_(CloudAppEndpoint{.host = host,
+                                 .port = port,
+                                 .path = "/",
+                                 .query = "",
+                                 .position = ""}) {}
+
 CloudDevice::CloudDevice(CloudAppEndpoint endpoint, std::string& name)
     : Device(name, std::string(name)), endpoint_(endpoint) {}
 
