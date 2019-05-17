@@ -654,7 +654,7 @@ TEST_F(GetInteriorVehicleDataRequestTest,
   MessageSharedPtr message_to_mob = CreateBasicMessage();
 
   // Expectations
-  EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_)).WillOnce(Return(true));
+  EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_, _)).WillOnce(Return(true));
   EXPECT_CALL(mock_rpc_service_, ManageMobileCommand(_, _))
       .WillOnce(DoAll(SaveArg<0>(&message_to_mob), Return(true)));
 
@@ -712,7 +712,7 @@ TEST_F(GetInteriorVehicleDataRequestTest,
   auto message_to_mob = CreateBasicMessage();
 
   // Expectations
-  EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_)).WillOnce(Return(true));
+  EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_, _)).WillOnce(Return(true));
   EXPECT_CALL(mock_rpc_service_, ManageMobileCommand(_, _))
       .WillOnce(DoAll(SaveArg<0>(&message_to_mob), Return(true)));
 

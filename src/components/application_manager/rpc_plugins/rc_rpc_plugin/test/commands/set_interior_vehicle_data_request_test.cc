@@ -265,7 +265,7 @@ TEST_F(SetInteriorVehicleDataRequestTest,
 
   MessageSharedPtr message_from_mobile = CreateBasicMessage();
 
-  EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_))
+  EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_, _))
       .WillOnce(DoAll(SaveArg<0>(&message_from_mobile), Return(true)));
 
   std::shared_ptr<rc_rpc_plugin::commands::SetInteriorVehicleDataRequest>
@@ -311,7 +311,7 @@ TEST_F(SetInteriorVehicleDataRequestTest,
 
   auto message_from_mobile = CreateBasicMessage();
 
-  EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_))
+  EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_, _))
       .WillOnce(DoAll(SaveArg<0>(&message_from_mobile), Return(true)));
 
   std::shared_ptr<rc_rpc_plugin::commands::SetInteriorVehicleDataRequest>
