@@ -65,15 +65,14 @@ bool RCCapabilitiesManagerImpl::CheckIfButtonExistInRCCaps(
   if (rc_capabilities.keyExists(strings::kbuttonCapabilities)) {
     const smart_objects::SmartObject& button_caps =
         rc_capabilities[strings::kbuttonCapabilities];
-    auto it = button_caps.asArray()->begin();
-    for (; it != button_caps.asArray()->end(); ++it) {
-      smart_objects::SmartObject& so = *it;
-      int64_t current_id = so[message_params::kName].asInt();
+    for (auto& button_cap : *(button_caps.asArray())) {
+      int64_t current_id = button_cap[message_params::kName].asInt();
       if (-1 == current_id) {
         // capabilities received from HMI contains enum values
         // capabilities loaded from file contains string values
         // TODO : unificate capabilities storing
-        const std::string& bt_name = so[message_params::kName].asString();
+        const std::string& bt_name =
+            button_cap[message_params::kName].asString();
         static RCHelpers::ButtonsMap btn_map = RCHelpers::buttons_map();
         current_id = btn_map[bt_name];
       }
@@ -96,7 +95,7 @@ bool RCCapabilitiesManagerImpl::CheckButtonName(
     const std::string& module_type, const std::string& button_name) {
   LOG4CXX_AUTO_TRACE(logger_);
   auto rc_capabilities = hmi_capabilities_.rc_capability();
-  if (rc_capabilities == NULL) {
+  if (!rc_capabilities) {
     LOG4CXX_ERROR(logger_, "No remote controll capabilities available");
     return false;
   }
@@ -219,8 +218,7 @@ ModuleCapability RCCapabilitiesManagerImpl::GetModuleDataCapabilities(
         LOG4CXX_DEBUG(logger_, module_data_key << " capabilities not present");
         return module_data_capabilities;
       }
-      const smart_objects::SmartObject& caps =
-          rc_capabilities[capabilities_key];
+      const auto& caps = rc_capabilities[capabilities_key];
 
       if (message_params::kHmiSettingsControlData == module_data_key ||
           message_params::kLightControlData == module_data_key) {
@@ -249,14 +247,12 @@ ModuleCapability RCCapabilitiesManagerImpl::GetControlDataCapabilities(
       continue;
     }
     if (message_params::kLightState == request_parameter) {
-      auto light_data = control_data[request_parameter].asArray()->begin();
       ModuleCapability light_capability =
           std::make_pair("", capabilitiesStatus::success);
 
-      for (; light_data != control_data[request_parameter].asArray()->end();
-           ++light_data) {
+      for (auto& light_data : *(control_data[request_parameter].asArray())) {
         light_capability = GetLightNameCapabilities(
-            capabilities[strings::kSupportedLights], *light_data);
+            capabilities[strings::kSupportedLights], light_data);
 
         if (capabilitiesStatus::success != light_capability.second) {
           return light_capability;
@@ -362,9 +358,7 @@ ModuleCapability RCCapabilitiesManagerImpl::GetLightNameCapabilities(
     const smart_objects::SmartObject& capabilities_status,
     const smart_objects::SmartObject& light_data) {
   LOG4CXX_AUTO_TRACE(logger_);
-  auto it = capabilities_status.asArray()->begin();
-  for (; it != capabilities_status.asArray()->end(); ++it) {
-    const smart_objects::SmartObject& so = *it;
+  for (auto& so : *(capabilities_status.asArray())) {
     const int64_t current_id = so[message_params::kName].asInt();
     if (current_id == light_data[message_params::kId].asInt()) {
       return GetLightDataCapabilities(so, light_data);
@@ -420,13 +414,12 @@ bool RCCapabilitiesManagerImpl::CheckReadOnlyParamsForAudio(
   if (module_type_params.keyExists(message_params::kEqualizerSettings)) {
     const auto& equalizer_settings =
         module_type_params[message_params::kEqualizerSettings];
-    auto it = equalizer_settings.asArray()->begin();
 
-    for (; it != equalizer_settings.asArray()->end(); ++it) {
-      if (it->keyExists(message_params::kChannelName)) {
+    for (auto& so : *(equalizer_settings.asArray())) {
+      if (so.keyExists(message_params::kChannelName)) {
         LOG4CXX_DEBUG(logger_,
                       "READ ONLY parameter. ChannelName = "
-                          << (*it)[message_params::kChannelName].asString());
+                          << so[message_params::kChannelName].asString());
         return true;
       }
     }
@@ -439,13 +432,12 @@ bool RCCapabilitiesManagerImpl::CheckReadOnlyParamsForLight(
     const smart_objects::SmartObject& module_type_params) {
   if (module_type_params.keyExists(message_params::kLightState)) {
     const auto& light_state = module_type_params[message_params::kLightState];
-    auto it = light_state.asArray()->begin();
 
-    for (; it != light_state.asArray()->end(); ++it) {
-      if (it->keyExists(message_params::kLightStatus)) {
+    for (auto& light_data : *(light_state.asArray())) {
+      if (light_data.keyExists(message_params::kLightStatus)) {
         const mobile_apis::LightStatus::eType light_status =
             static_cast<mobile_apis::LightStatus::eType>(
-                (*it)[message_params::kLightStatus].asUInt());
+                light_data[message_params::kLightStatus].asUInt());
 
         if (helpers::Compare<mobile_apis::LightStatus::eType,
                              helpers::EQ,
@@ -454,9 +446,10 @@ bool RCCapabilitiesManagerImpl::CheckReadOnlyParamsForLight(
                                            mobile_apis::LightStatus::RAMP_DOWN,
                                            mobile_apis::LightStatus::UNKNOWN,
                                            mobile_apis::LightStatus::INVALID)) {
-          LOG4CXX_DEBUG(logger_,
-                        "READ ONLY parameter. Status = "
-                            << (*it)[message_params::kLightStatus].asInt());
+          LOG4CXX_DEBUG(
+              logger_,
+              "READ ONLY parameter. Status = "
+                  << light_data[message_params::kLightStatus].asInt());
           return true;
         }
       }
