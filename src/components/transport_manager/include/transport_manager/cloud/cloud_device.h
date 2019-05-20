@@ -48,7 +48,7 @@ struct CloudAppEndpoint {
   std::string port;
   std::string path;
   std::string query;
-  std::string position;
+  std::string fragment;
 };
 
 class CloudDevice : public Device {

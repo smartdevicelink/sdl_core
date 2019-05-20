@@ -47,7 +47,7 @@ CloudDevice::CloudDevice(std::string& host,
                                  .port = port,
                                  .path = "/",
                                  .query = "",
-                                 .position = ""}) {}
+                                 .fragment = ""}) {}
 
 CloudDevice::CloudDevice(CloudAppEndpoint endpoint, std::string& name)
     : Device(name, std::string(name)), endpoint_(endpoint) {}
@@ -90,7 +90,7 @@ const std::string& CloudDevice::GetPort() const {
 }
 
 const std::string CloudDevice::GetTarget() const {
-  return endpoint_.path + endpoint_.query + endpoint_.position;
+  return endpoint_.path + endpoint_.query + endpoint_.fragment;
 }
 
 }  // namespace transport_adapter

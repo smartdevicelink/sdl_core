@@ -81,17 +81,18 @@ void CloudWebsocketTransportAdapter::CreateDevice(const std::string& uid) {
   }
 
   std::string protocol_pattern = "(wss?)";
-  std::string host_pattern = "([a-zA-Z\\d\\.-]{2,}\\@?([a-zA-Z]{2,})?)";
+  std::string host_pattern =
+      "(([^?#%\\\\/@:\\s]*)\\:?([^?#%\\\\/@\\s]*)\\@?([^?#%\\\\/\\s]*))";
   std::string port_pattern = "(\\d{2,5})";
   // Optional parameters
-  std::string path_pattern = "((\\/[^\\n\\t\\/#? ]+)*)?\\/?";
-  std::string query_pattern = "(\\?[^=&#\\n\\t ]*=?[^#\\n\\t ]*&?)?";
-  std::string position_pattern = "(#[^\\n\\t ]*)?";
+  std::string path_pattern = "((\\/[^\\/#?\\s]+)*)?\\/?";
+  std::string query_pattern = "(\\?[^=&#\\s]*=?[^#\\s]*&?)?";
+  std::string fragment_pattern = "(#[^\\s]*)?";
 
   // Extract host and port from endpoint string
   boost::regex group_pattern(protocol_pattern + ":\\/\\/" + host_pattern + ":" +
                                  port_pattern + path_pattern + query_pattern +
-                                 position_pattern,
+                                 fragment_pattern,
                              boost::regex::icase);
   boost::smatch results;
   std::string str = uid;
@@ -113,16 +114,16 @@ void CloudWebsocketTransportAdapter::CreateDevice(const std::string& uid) {
   std::string device_id = uid;
 
   CloudAppEndpoint endpoint{.host = results[2],
-                            .port = results[4],
-                            .path = results[5] + "/",
-                            .query = results[7],
-                            .position = results[8]};
+                            .port = results[6],
+                            .path = results[7] + "/",
+                            .query = results[9],
+                            .fragment = results[10]};
 
   LOG4CXX_DEBUG(logger_,
                 "Creating Cloud Device For Host: "
                     << endpoint.host << " at Port: " << endpoint.port
                     << " with Target: "
-                    << (endpoint.path + endpoint.query + endpoint.position));
+                    << (endpoint.path + endpoint.query + endpoint.fragment));
 
   auto cloud_device = std::make_shared<CloudDevice>(endpoint, device_id);
 

@@ -42,6 +42,8 @@
 #include "utils/test_async_waiter.h"
 
 #include "protocol/raw_message.h"
+#include "transport_manager/cloud/cloud_device.h"
+#include "transport_manager/cloud/cloud_websocket_transport_adapter.h"
 #include "transport_manager/transport_adapter/connection.h"
 #include "transport_manager/transport_adapter/transport_adapter_controller.h"
 #include "transport_manager/transport_adapter/transport_adapter_impl.h"
@@ -84,6 +86,14 @@ class TransportAdapterTest : public ::testing::Test {
   std::string dev_id;
   std::string uniq_id;
   int app_handle;
+
+#if defined(CLOUD_APP_WEBSOCKET_TRANSPORT_SUPPORT)
+  struct EndpointInfo {
+    std::string host;
+    std::string port;
+    std::string target;
+  };
+#endif  // CLOUD_APP_WEBSOCKET_TRANSPORT_SUPPORT
 };
 
 TEST_F(TransportAdapterTest, Init) {
@@ -608,6 +618,93 @@ TEST_F(TransportAdapterTest,
   EXPECT_EQ(ConnectionStatus::PENDING, mockdev2->connection_status());
 
   EXPECT_CALL(*serverMock, Terminate());
+}
+
+TEST_F(TransportAdapterTest, WebsocketEndpointParsing_SUCCESS) {
+  CloudAppProperties properties{.endpoint = "",
+                                .certificate = "no cert",
+                                .enabled = true,
+                                .auth_token = "no auth token",
+                                .cloud_transport_type = "WS",
+                                .hybrid_app_preference = "CLOUD"};
+  std::vector<EndpointInfo> test_endpoints;
+  // Host and port
+  test_endpoints.push_back(
+      EndpointInfo{"localhost", "40", "/"});  // ws://localhost:40
+  test_endpoints.push_back(EndpointInfo{"[::1]", "40", "/"});  // ws://[::1]:40
+  test_endpoints.push_back(
+      EndpointInfo{"username:password@localhost.com",
+                   "23",
+                   "/"});  // ws://username:password@localhost.com:23
+  // With path
+  test_endpoints.push_back(EndpointInfo{
+      "localhost", "440", "/file.html/"});  // ws://localhost:440/file.html
+  test_endpoints.push_back(EndpointInfo{
+      "101.123.213",
+      "23234",
+      "/folder/img_index(1)/file.html/"});  // ws://101.123.213:23234/folder/img_index(1)/file.html
+  test_endpoints.push_back(EndpointInfo{
+      "[2600:3c00::f03c:91ff:fe73:2b08]",
+      "31333",
+      "/folder/img_index(1)/file.html/"});  // ws://[2600:3c00::f03c:91ff:fe73:2b08]:31333/folder/img_index(1)/file.html
+  // With query and/or fragment
+  test_endpoints.push_back(EndpointInfo{
+      "username@localhost",
+      "22",
+      "/folder/img_index(1)/file.html/"
+      "?eventId=2345&eventName='some%20event'&eventSuccess="
+      "true"});  // ws://username@localhost:22/folder/img_index(1)/file.html?eventId=2345&eventName='some%20event'&eventSuccess=true
+  test_endpoints.push_back(EndpointInfo{
+      "username@localhost.com",
+      "23",
+      "/folder/img_index(1)/file.html/"
+      "?eventId=2345&eventName='some%20event'&eventSuccess=true#"
+      "section1"});  // ws://username@localhost.com:23/folder/img_index(1)/file.html?eventId=2345&eventName='some%20event'&eventSuccess=true#section1
+  test_endpoints.push_back(EndpointInfo{
+      "localhost",
+      "23",
+      "/?eventId=2345&eventName='some%20event'&eventSuccess=true#"
+      "section1"});  // ws://localhost:23/?eventId=2345&eventName='some%20event'&eventSuccess=true#section1
+  test_endpoints.push_back(EndpointInfo{
+      "a1-b2.com",
+      "23",
+      "/folder/img_index(1)/file.html/#section1"});  // ws://a1-b2.com:23/folder/img_index(1)/file.html#section1
+  test_endpoints.push_back(EndpointInfo{
+      "a1-b2.com", "23", "/#section1"});  // ws://a1-b2.com:23#section1
+
+  std::vector<std::string> protocols{"ws://", "wss://"};
+
+  std::shared_ptr<CloudWebsocketTransportAdapter> cta =
+      std::make_shared<CloudWebsocketTransportAdapter>(
+          last_state_, transport_manager_settings);
+
+  for (auto protocol : protocols) {
+    for (auto endpoint : test_endpoints) {
+      properties.endpoint =
+          protocol + endpoint.host + ":" + endpoint.port + endpoint.target;
+      std::cout << "Testing endpoint: " << properties.endpoint << std::endl;
+      cta->SetAppCloudTransportConfig("cloud app", properties);
+
+      auto ta = std::dynamic_pointer_cast<TransportAdapter>(cta);
+
+      ASSERT_NE(ta.use_count(), 0);
+
+      ta->CreateDevice(properties.endpoint);
+
+      auto device = cta->FindDevice(properties.endpoint);
+
+      ASSERT_NE(device.use_count(), 0);
+
+      std::shared_ptr<CloudDevice> cloud_device =
+          std::dynamic_pointer_cast<CloudDevice>(device);
+
+      ASSERT_NE(cloud_device.use_count(), 0);
+
+      EXPECT_EQ(cloud_device->GetHost(), endpoint.host);
+      EXPECT_EQ(cloud_device->GetPort(), endpoint.port);
+      EXPECT_EQ(cloud_device->GetTarget(), endpoint.target);
+    }
+  }
 }
 #endif  // CLOUD_APP_WEBSOCKET_TRANSPORT_SUPPORT
 
