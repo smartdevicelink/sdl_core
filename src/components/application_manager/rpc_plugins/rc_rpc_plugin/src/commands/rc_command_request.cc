@@ -56,7 +56,8 @@ RCCommandRequest::RCCommandRequest(
     , auto_allowed_(false)
     , resource_allocation_manager_(params.resource_allocation_manager_)
     , interior_data_cache_(params.interior_data_cache_)
-    , interior_data_manager_(params.interior_data_manager_) {}
+    , interior_data_manager_(params.interior_data_manager_)
+    , rc_capabilities_manager_(params.rc_capabilities_manager_) {}
 
 RCCommandRequest::~RCCommandRequest() {}
 

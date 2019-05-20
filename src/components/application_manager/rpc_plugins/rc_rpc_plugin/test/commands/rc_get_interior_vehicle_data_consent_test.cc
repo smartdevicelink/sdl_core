@@ -52,6 +52,7 @@
 #include "rc_rpc_plugin/commands/mobile/button_press_request.h"
 #include "rc_rpc_plugin/mock/mock_interior_data_cache.h"
 #include "rc_rpc_plugin/mock/mock_interior_data_manager.h"
+#include "rc_rpc_plugin/mock/mock_rc_capabilities_manager.h"
 #include "rc_rpc_plugin/mock/mock_resource_allocation_manager.h"
 #include "rc_rpc_plugin/rc_module_constants.h"
 #include "rc_rpc_plugin/rc_rpc_plugin.h"
@@ -166,7 +167,8 @@ class RCGetInteriorVehicleDataConsentTest
                            mock_policy_handler_,
                            mock_allocation_manager_,
                            mock_interior_data_cache_,
-                           mock_interior_data_manager_};
+                           mock_interior_data_manager_,
+                           mock_rc_capabilities_manager_};
     return std::make_shared<Command>(msg ? msg : msg = CreateMessage(), params);
   }
 
@@ -212,6 +214,8 @@ class RCGetInteriorVehicleDataConsentTest
   utils::Optional<MockRPCPlugin> optional_mock_rpc_plugin;
   hmi_apis::HMI_API hmi_so_factory_;
   mobile_apis::MOBILE_API mobile_so_factoy_;
+  testing::NiceMock<rc_rpc_plugin_test::MockRCCapabilitiesManager>
+      mock_rc_capabilities_manager_;
 };
 
 TEST_F(RCGetInteriorVehicleDataConsentTest,

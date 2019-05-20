@@ -8,6 +8,81 @@
 namespace rc_rpc_plugin {
 CREATE_LOGGERPTR_GLOBAL(logger_, "RemoteControlModule");
 
+const std::vector<std::string> RCHelpers::buttons_climate() {
+  std::vector<std::string> data;
+  data.push_back(enums_value::kACMax);
+  data.push_back(enums_value::kAC);
+  data.push_back(enums_value::kRecirculate);
+  data.push_back(enums_value::kFanUp);
+  data.push_back(enums_value::kFanDown);
+  data.push_back(enums_value::kTempUp);
+  data.push_back(enums_value::kTempDown);
+  data.push_back(enums_value::kDefrostMax);
+  data.push_back(enums_value::kDefrost);
+  data.push_back(enums_value::kDefrostRear);
+  data.push_back(enums_value::kUpperVent);
+  data.push_back(enums_value::kLowerVent);
+  return data;
+}
+
+const std::vector<std::string> RCHelpers::buttons_radio() {
+  std::vector<std::string> data;
+  data.push_back(enums_value::kVolumeUp);
+  data.push_back(enums_value::kVolumeDown);
+  data.push_back(enums_value::kEject);
+  data.push_back(enums_value::kSource);
+  data.push_back(enums_value::kShuffle);
+  data.push_back(enums_value::kRepeat);
+  return data;
+}
+
+const RCHelpers::ButtonsMap RCHelpers::buttons_map() {
+  using namespace mobile_apis;
+
+  ButtonsMap buttons_map;
+  buttons_map[enums_value::kACMax] = ButtonName::AC_MAX;
+  buttons_map[enums_value::kAC] = ButtonName::AC;
+  buttons_map[enums_value::kRecirculate] = ButtonName::RECIRCULATE;
+  buttons_map[enums_value::kFanUp] = ButtonName::FAN_UP;
+  buttons_map[enums_value::kFanDown] = ButtonName::FAN_DOWN;
+  buttons_map[enums_value::kTempUp] = ButtonName::TEMP_UP;
+  buttons_map[enums_value::kTempDown] = ButtonName::TEMP_DOWN;
+  buttons_map[enums_value::kDefrostMax] = ButtonName::DEFROST_MAX;
+  buttons_map[enums_value::kDefrost] = ButtonName::DEFROST;
+  buttons_map[enums_value::kDefrostRear] = ButtonName::DEFROST_REAR;
+  buttons_map[enums_value::kUpperVent] = ButtonName::UPPER_VENT;
+  buttons_map[enums_value::kLowerVent] = ButtonName::LOWER_VENT;
+  buttons_map[enums_value::kVolumeUp] = ButtonName::VOLUME_UP;
+  buttons_map[enums_value::kVolumeDown] = ButtonName::VOLUME_DOWN;
+  buttons_map[enums_value::kEject] = ButtonName::EJECT;
+  buttons_map[enums_value::kSource] = ButtonName::SOURCE;
+  buttons_map[enums_value::kShuffle] = ButtonName::SHUFFLE;
+  buttons_map[enums_value::kRepeat] = ButtonName::REPEAT;
+
+  return buttons_map;
+}
+
+std::vector<std::string> RCHelpers::GetModuleReadOnlyParams(
+    const std::string& module_type) {
+  using namespace message_params;
+  std::vector<std::string> module_ro_params;
+  if (enums_value::kClimate == module_type) {
+    module_ro_params.push_back(kCurrentTemperature);
+  } else if (enums_value::kRadio == module_type) {
+    module_ro_params.push_back(kRdsData);
+    module_ro_params.push_back(kAvailableHDs);
+    module_ro_params.push_back(kAvailableHdChannels);
+    module_ro_params.push_back(kSignalStrength);
+    module_ro_params.push_back(kSignalChangeThreshold);
+    module_ro_params.push_back(kState);
+    module_ro_params.push_back(kSisData);
+  } else if (enums_value::kLight == module_type) {
+    module_ro_params.push_back(kLightStatus);
+  }
+
+  return module_ro_params;
+}
+
 const std::function<std::string(const std::string& module_type)>
 RCHelpers::GetModuleTypeToDataMapping() {
   auto mapping_lambda = [](const std::string& module_type) -> std::string {

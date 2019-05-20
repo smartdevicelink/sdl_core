@@ -39,6 +39,7 @@
 #include "application_manager/plugin_manager/rpc_plugin.h"
 #include "rc_rpc_plugin/interior_data_cache.h"
 #include "rc_rpc_plugin/interior_data_manager.h"
+#include "rc_rpc_plugin/rc_capabilities_manager.h"
 #include "rc_rpc_plugin/resource_allocation_manager.h"
 
 namespace rc_rpc_plugin {
@@ -105,6 +106,7 @@ class RCRPCPlugin : public plugins::RPCPlugin {
   std::unique_ptr<ResourceAllocationManager> resource_allocation_manager_;
   std::unique_ptr<InteriorDataCache> interior_data_cache_;
   std::unique_ptr<InteriorDataManager> interior_data_manager_;
+  std::unique_ptr<RCCapabilitiesManager> rc_capabilities_manager_;
 };
 }  // namespace rc_rpc_plugin
 

@@ -50,26 +50,7 @@ GetInteriorVehicleDataRequest::GetInteriorVehicleDataRequest(
     const app_mngr::commands::MessageSharedPtr& message,
     const RCCommandParams& params)
     : RCCommandRequest(message, params)
-
     , excessive_subscription_occured_(false) {}
-
-bool CheckIfModuleTypeExistInCapabilities(
-    const smart_objects::SmartObject& rc_capabilities,
-    const std::string& module_type) {
-  LOG4CXX_AUTO_TRACE(logger_);
-  const auto& mapping = RCHelpers::GetModuleTypeToCapabilitiesMapping();
-  const auto& module_list = RCHelpers::GetModulesList();
-  bool is_module_type_valid = false;
-  for (const auto& module : module_list) {
-    if (module == module_type) {
-      if (rc_capabilities.keyExists(mapping(module))) {
-        is_module_type_valid = true;
-        break;
-      }
-    }
-  }
-  return is_module_type_valid;
-}
 
 bool GetInteriorVehicleDataRequest::ProcessCapabilities() {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -78,7 +59,8 @@ bool GetInteriorVehicleDataRequest::ProcessCapabilities() {
 
   const std::string module_type = ModuleType();
   if (rc_capabilities &&
-      !CheckIfModuleTypeExistInCapabilities(*rc_capabilities, module_type)) {
+      !rc_capabilities_manager_.CheckIfModuleTypeExistInCapabilities(
+          module_type)) {
     LOG4CXX_WARN(logger_, "Accessing not supported module data");
     SetResourceState(ModuleType(), ResourceState::FREE);
     SendResponse(false,

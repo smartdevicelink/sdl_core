@@ -37,6 +37,7 @@
 #include "rc_rpc_plugin/commands/rc_command_params.h"
 #include "rc_rpc_plugin/interior_data_cache.h"
 #include "rc_rpc_plugin/rc_app_extension.h"
+#include "rc_rpc_plugin/rc_capabilities_manager.h"
 #include "rc_rpc_plugin/resource_allocation_manager.h"
 
 namespace rc_rpc_plugin {
@@ -76,6 +77,7 @@ class RCCommandRequest : public app_mngr::commands::CommandRequestImpl {
   ResourceAllocationManager& resource_allocation_manager_;
   InteriorDataCache& interior_data_cache_;
   InteriorDataManager& interior_data_manager_;
+  RCCapabilitiesManager& rc_capabilities_manager_;
   /**
    * @brief AcquireResource try to allocate resource for application
    * In case if allocation of resource is not required, return ALLOWED by

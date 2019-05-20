@@ -100,6 +100,17 @@ class RCHelpers {
   static AppsModules GetApplicationsAllowedModules(
       application_manager::ApplicationManager& app_mngr);
 
+  typedef std::map<std::string, mobile_apis::ButtonName::eType> ButtonsMap;
+
+  static const std::vector<std::string> buttons_climate();
+
+  static const std::vector<std::string> buttons_radio();
+
+  static const ButtonsMap buttons_map();
+
+  static std::vector<std::string> GetModuleReadOnlyParams(
+      const std::string& module_type);
+
   /**
    * @brief RemoveRedundantGPSDataFromVIDataMsg removes redundant GPS data
    * params from interior vehicle data response message if one contains radio
