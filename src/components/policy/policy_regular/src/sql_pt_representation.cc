@@ -726,7 +726,6 @@ bool SQLPTRepresentation::GatherApplicationPoliciesSection(
       *params.certificate = query.GetString(4);
     }
 
-    
     // Read cloud app properties
     policy_table::HybridAppPreference hap;
     bool valid = policy_table::EnumFromJsonString(query.GetString(5), &hap);

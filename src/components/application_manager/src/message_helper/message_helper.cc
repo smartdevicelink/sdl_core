@@ -2401,8 +2401,8 @@ void MessageHelper::SendQueryApps(const uint32_t connection_key,
 void MessageHelper::SendOnPermissionsChangeNotification(
     uint32_t connection_key,
     const policy::Permissions& permissions,
-    const policy::EncryptionRequired encryprion_required,
-    ApplicationManager& app_mngr) {
+    ApplicationManager& app_mngr,
+    const policy::EncryptionRequired encryprion_required) {
   LOG4CXX_AUTO_TRACE(logger_);
   smart_objects::SmartObject content(smart_objects::SmartType_Map);
 

@@ -141,7 +141,7 @@ class RPCServiceImpl : public RPCService,
  private:
   bool ConvertSOtoMessage(const smart_objects::SmartObject& message,
                           Message& output,
-			  const bool allow_unknown_parameters = false);
+                          const bool allow_unknown_parameters = false);
 
   EncryptionFlagCheckResult IsEncryptionRequired(
       const smart_objects::SmartObject& message,
