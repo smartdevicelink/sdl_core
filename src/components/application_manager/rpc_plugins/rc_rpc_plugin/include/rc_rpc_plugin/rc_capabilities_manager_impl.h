@@ -45,7 +45,7 @@ class RCCapabilitiesManagerImpl : public RCCapabilitiesManager {
       const mobile_apis::ButtonName::eType button) const FINAL;
 
   bool CheckButtonName(const std::string& module_type,
-                       const std::string& button_name) FINAL;
+                       const std::string& button_name) const FINAL;
 
   bool CheckIfModuleExistInCapabilities(const ModuleUid& module) const FINAL;
 
@@ -55,23 +55,24 @@ class RCCapabilitiesManagerImpl : public RCCapabilitiesManager {
 
   const smart_objects::SmartObject& ControlData(
       const smart_objects::SmartObject& module_data,
-      const std::string& module_type) FINAL;
+      const std::string& module_type) const FINAL;
 
   bool AreReadOnlyParamsPresent(
       const smart_objects::SmartObject& module_data,
       const std::string& module_type,
-      ModuleCapability& module_data_capabilities) FINAL;
+      ModuleCapability& module_data_capabilities) const FINAL;
 
   bool AreAllParamsReadOnly(const smart_objects::SmartObject& module_data,
-                            const std::string& module_type) FINAL;
+                            const std::string& module_type) const FINAL;
 
   const std::string GetDefaultModuleIdFromCapabilities(
       const std::string& module_type) const FINAL;
 
  private:
-  const std::map<std::string, std::string> GetLightCapabilitiesMapping();
+  const std::map<std::string, std::string> GetLightCapabilitiesMapping() const;
 
-  const std::map<std::string, std::string> GetModuleDataToCapabilitiesMapping();
+  const std::map<std::string, std::string> GetModuleDataToCapabilitiesMapping()
+      const;
 
   /**
    * @brief Check whether the exists light data related to correspondent
@@ -82,7 +83,7 @@ class RCCapabilitiesManagerImpl : public RCCapabilitiesManager {
    */
   ModuleCapability GetControlDataCapabilities(
       const smart_objects::SmartObject& capabilities,
-      const smart_objects::SmartObject& control_data);
+      const smart_objects::SmartObject& control_data) const;
 
   /**
    * @brief Check whether the parameter exist in capabilities
@@ -96,7 +97,7 @@ class RCCapabilitiesManagerImpl : public RCCapabilitiesManager {
       const smart_objects::SmartObject& capabilities,
       const std::map<std::string, std::string>& mapping,
       const std::string& request_parameter,
-      const mobile_apis::Result::eType& switched_off_result);
+      const mobile_apis::Result::eType& switched_off_result) const;
 
   /**
    * @brief Check whether the cpabilities for light allowed
@@ -106,7 +107,7 @@ class RCCapabilitiesManagerImpl : public RCCapabilitiesManager {
    */
   ModuleCapability GetLightDataCapabilities(
       const smart_objects::SmartObject& capabilities,
-      const smart_objects::SmartObject& control_data);
+      const smart_objects::SmartObject& control_data) const;
 
   /**
    * @brief Check whether the light name exists in capabilities
@@ -116,17 +117,17 @@ class RCCapabilitiesManagerImpl : public RCCapabilitiesManager {
    */
   ModuleCapability GetLightNameCapabilities(
       const smart_objects::SmartObject& capabilities_status,
-      const smart_objects::SmartObject& light_data);
+      const smart_objects::SmartObject& light_data) const;
 
   ModuleCapability GetRadioBandByCapabilities(
       const smart_objects::SmartObject& capabilities_status,
-      const smart_objects::SmartObject& request_parameter);
+      const smart_objects::SmartObject& request_parameter) const;
 
   bool CheckReadOnlyParamsForAudio(
-      const smart_objects::SmartObject& module_type_params);
+      const smart_objects::SmartObject& module_type_params) const;
 
   bool CheckReadOnlyParamsForLight(
-      const smart_objects::SmartObject& module_type_params);
+      const smart_objects::SmartObject& module_type_params) const;
 
   smart_objects::SmartObject GetCapabilitiesByModuleIdFromArray(
       const smart_objects::SmartObject& module_data_capabilities,

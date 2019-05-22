@@ -59,7 +59,7 @@ class RCCapabilitiesManager {
    * @return true if they match, otherwise - false
    */
   virtual bool CheckButtonName(const std::string& module_type,
-                               const std::string& button_name) = 0;
+                               const std::string& button_name) const = 0;
 
   /**
    * @brief CheckIfModuleExistInCapabilities checks
@@ -90,7 +90,7 @@ class RCCapabilitiesManager {
    */
   virtual const smart_objects::SmartObject& ControlData(
       const smart_objects::SmartObject& module_data,
-      const std::string& module_type) = 0;
+      const std::string& module_type) const = 0;
 
   /**
    * @brief AreReadOnlyParamsPresent checks if there are
@@ -103,7 +103,7 @@ class RCCapabilitiesManager {
   virtual bool AreReadOnlyParamsPresent(
       const smart_objects::SmartObject& module_data,
       const std::string& module_type,
-      ModuleCapability& module_data_capabilities) = 0;
+      ModuleCapability& module_data_capabilities) const = 0;
 
   /**
    * @brief AreAllParamsReadOnly checks that all params from module
@@ -114,7 +114,7 @@ class RCCapabilitiesManager {
    */
   virtual bool AreAllParamsReadOnly(
       const smart_objects::SmartObject& module_data,
-      const std::string& module_type) = 0;
+      const std::string& module_type) const = 0;
 
   /**
    * @brief GetDefaultModuleIdFromCapabilities returns the moduleId
