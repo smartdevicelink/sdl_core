@@ -153,6 +153,15 @@ void RCCommandRequest::Run() {
                  "Remote control is disabled by user");
     return;
   }
+  auto rc_capabilities = hmi_capabilities_.rc_capability();
+  if (!rc_capabilities || rc_capabilities->empty()) {
+    LOG4CXX_WARN(logger_, "Accessing not supported module: " << ModuleType());
+    SetResourceState(ModuleType(), ResourceState::FREE);
+    SendResponse(false,
+                 mobile_apis::Result::UNSUPPORTED_RESOURCE,
+                 "Accessing not supported module");
+    return;
+  }
 
   if (CheckDriverConsent()) {
     if (AcquireResources()) {

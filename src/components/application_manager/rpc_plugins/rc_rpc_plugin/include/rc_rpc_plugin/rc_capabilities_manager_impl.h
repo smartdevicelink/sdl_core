@@ -47,11 +47,11 @@ class RCCapabilitiesManagerImpl : public RCCapabilitiesManager {
   bool CheckButtonName(const std::string& module_type,
                        const std::string& button_name) FINAL;
 
-  bool CheckIfModuleTypeExistInCapabilities(
-      const std::string& module_type) FINAL;
+  bool CheckIfModuleExistInCapabilities(const ModuleUid& module) const FINAL;
 
   ModuleCapability GetModuleDataCapabilities(
-      const smart_objects::SmartObject& module_data) FINAL;
+      const smart_objects::SmartObject& module_data,
+      const std::string& module_id) const FINAL;
 
   const smart_objects::SmartObject& ControlData(
       const smart_objects::SmartObject& module_data,
@@ -127,6 +127,22 @@ class RCCapabilitiesManagerImpl : public RCCapabilitiesManager {
 
   bool CheckReadOnlyParamsForLight(
       const smart_objects::SmartObject& module_type_params);
+
+  smart_objects::SmartObject GetCapabilitiesByModuleIdFromArray(
+      const smart_objects::SmartObject& module_data_capabilities,
+      const std::string& module_id) const;
+
+  const bool CheckModuleIdWithCapabilities(
+      const smart_objects::SmartObject& rc_capabilities,
+      const ModuleUid& module) const;
+
+  const bool CheckModuleIdWithCapabilitiesArrays(
+      const smart_objects::SmartObject& control_capabilities,
+      const std::string& module_id) const;
+
+  const bool CheckModuleIdWithCapabilitiesStructure(
+      const smart_objects::SmartObject& control_capabilities,
+      const std::string& module_id) const;
 
   const std::string GetDefaultModuleIdFromCapabilitiesStructure(
       const smart_objects::SmartObject& control_capabilities,

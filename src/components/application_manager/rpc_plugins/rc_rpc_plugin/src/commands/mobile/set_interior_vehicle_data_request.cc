@@ -115,22 +115,32 @@ void SetInteriorVehicleDataRequest::Execute() {
   const std::string module_type = ModuleType();
 
   if (ClearUnrelatedModuleData(module_type, module_data)) {
-    const smart_objects::SmartObject* rc_capabilities =
-        hmi_capabilities_.rc_capability();
     ModuleCapability module_data_capabilities;
 
-    if (rc_capabilities) {
-      module_data_capabilities =
-          rc_capabilities_manager_.GetModuleDataCapabilities(module_data);
+    const std::string module_id = ModuleId();
+    const ModuleUid module(module_type, module_id);
+    if (!rc_capabilities_manager_.CheckIfModuleExistInCapabilities(module)) {
+      LOG4CXX_WARN(logger_,
+                   "Accessing not supported module: " << module_type << " "
+                                                      << module_id);
+      SetResourceState(ModuleType(), ResourceState::FREE);
+      SendResponse(false,
+                   mobile_apis::Result::UNSUPPORTED_RESOURCE,
+                   "Accessing not supported module data");
+      return;
+    }
 
-      if (capabilitiesStatus::success != module_data_capabilities.second) {
-        SetResourceState(ModuleType(), ResourceState::FREE);
-        std::string info;
-        mobile_apis::Result::eType result =
-            PrepareResultCodeAndInfo(module_data_capabilities, info);
-        SendResponse(false, result, info.c_str());
-        return;
-      }
+    module_data_capabilities =
+        rc_capabilities_manager_.GetModuleDataCapabilities(module_data,
+                                                           module_id);
+
+    if (capabilitiesStatus::success != module_data_capabilities.second) {
+      SetResourceState(ModuleType(), ResourceState::FREE);
+      std::string info;
+      mobile_apis::Result::eType result =
+          PrepareResultCodeAndInfo(module_data_capabilities, info);
+      SendResponse(false, result, info.c_str());
+      return;
     }
 
     if (rc_capabilities_manager_.AreAllParamsReadOnly(module_data,

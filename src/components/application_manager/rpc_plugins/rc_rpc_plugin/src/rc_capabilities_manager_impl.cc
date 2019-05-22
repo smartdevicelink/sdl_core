@@ -109,16 +109,70 @@ const std::string RCCapabilitiesManagerImpl::GetDefaultModuleIdFromCapabilities(
       rc_capabilities[mapping(module_type)], module_type);
 }
 
-bool RCCapabilitiesManagerImpl::CheckIfModuleTypeExistInCapabilities(
-    const std::string& module_type) {
+const bool RCCapabilitiesManagerImpl::CheckModuleIdWithCapabilitiesStructure(
+    const smart_objects::SmartObject& control_capabilities,
+    const std::string& module_id) const {
+  LOG4CXX_AUTO_TRACE(logger_);
+  if (control_capabilities.keyExists(message_params::kModuleInfo) &&
+      (module_id == control_capabilities[message_params::kModuleInfo]
+                                        [message_params::kModuleId]
+                                            .asString())) {
+    return true;
+  }
+  LOG4CXX_WARN(logger_,
+               "There are no moduleInfo in hmi capabilities for requested "
+               "moduleId "
+                   << module_id);
+  return false;
+}
+
+const bool RCCapabilitiesManagerImpl::CheckModuleIdWithCapabilitiesArrays(
+    const smart_objects::SmartObject& control_capabilities,
+    const std::string& module_id) const {
+  LOG4CXX_AUTO_TRACE(logger_);
+  for (auto& cap_item : *(control_capabilities.asArray())) {
+    if (cap_item.keyExists(message_params::kModuleInfo) &&
+        (module_id ==
+         cap_item[message_params::kModuleInfo][message_params::kModuleId]
+             .asString())) {
+      return true;
+    }
+  }
+  LOG4CXX_WARN(logger_,
+               "There are no moduleInfo in hmi capabilities for requested "
+               "moduleId "
+                   << module_id);
+  return false;
+}
+
+const bool RCCapabilitiesManagerImpl::CheckModuleIdWithCapabilities(
+    const smart_objects::SmartObject& rc_capabilities,
+    const ModuleUid& module) const {
+  LOG4CXX_AUTO_TRACE(logger_);
+  if (module.second.empty()) {
+    return true;
+  }
+  const auto& mapping = RCHelpers::GetModuleTypeToCapabilitiesMapping();
+  if (enums_value::kHmiSettings == module.first ||
+      enums_value::kLight == module.first) {
+    return CheckModuleIdWithCapabilitiesStructure(
+        rc_capabilities[mapping(module.first)], module.second);
+  }
+  return CheckModuleIdWithCapabilitiesArrays(
+      rc_capabilities[mapping(module.first)], module.second);
+}
+
+bool RCCapabilitiesManagerImpl::CheckIfModuleExistInCapabilities(
+    const ModuleUid& module) const {
   LOG4CXX_AUTO_TRACE(logger_);
   auto rc_capabilities = *(hmi_capabilities_.rc_capability());
   const auto& mapping = RCHelpers::GetModuleTypeToCapabilitiesMapping();
-  const auto& module_list = RCHelpers::GetModulesList();
+  const auto& resource_list = RCHelpers::GetResources(rc_capabilities);
   bool is_module_type_valid = false;
-  for (const auto& module : module_list) {
-    if (module == module_type) {
-      if (rc_capabilities.keyExists(mapping(module))) {
+  for (const auto& resource : resource_list) {
+    if (resource.first == module.first) {
+      if (rc_capabilities.keyExists(mapping(module.first)) &&
+          CheckModuleIdWithCapabilities(rc_capabilities, module)) {
         is_module_type_valid = true;
         break;
       }
@@ -157,6 +211,24 @@ bool RCCapabilitiesManagerImpl::CheckIfButtonExistInRCCaps(
   LOG4CXX_TRACE(logger_,
                 "Button id " << button << " do not exist in capabilities");
   return false;
+}
+
+smart_objects::SmartObject
+RCCapabilitiesManagerImpl::GetCapabilitiesByModuleIdFromArray(
+    const smart_objects::SmartObject& module_data_capabilities,
+    const std::string& module_id) const {
+  for (auto& cap_item : *(module_data_capabilities.asArray())) {
+    std::string current_id =
+        cap_item[message_params::kModuleInfo][message_params::kModuleId]
+            .asString();
+    if (module_id == current_id) {
+      return cap_item;
+    }
+  }
+  LOG4CXX_WARN(logger_,
+               "Capabilities for moduleId " << module_id
+                                            << " do not exist in capabilities");
+  return smart_objects::SmartObject(smart_objects::SmartType_Null);
 }
 
 bool RCCapabilitiesManagerImpl::CheckButtonName(
@@ -267,7 +339,8 @@ RCCapabilitiesManagerImpl::GetModuleDataToCapabilitiesMapping() {
 }
 
 ModuleCapability RCCapabilitiesManagerImpl::GetModuleDataCapabilities(
-    const smart_objects::SmartObject& module_data) {
+    const smart_objects::SmartObject& module_data,
+    const std::string& module_id) const {
   LOG4CXX_AUTO_TRACE(logger_);
   auto rc_capabilities = *(hmi_capabilities_.rc_capability());
 
@@ -293,8 +366,9 @@ ModuleCapability RCCapabilitiesManagerImpl::GetModuleDataCapabilities(
         module_data_capabilities =
             GetControlDataCapabilities(caps, module_data[module_data_key]);
       } else {
-        module_data_capabilities =
-            GetControlDataCapabilities(caps[0], module_data[module_data_key]);
+        module_data_capabilities = GetControlDataCapabilities(
+            GetCapabilitiesByModuleIdFromArray(caps, module_id),
+            module_data[module_data_key]);
       }
     }
   }

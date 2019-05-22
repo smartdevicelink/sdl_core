@@ -58,10 +58,13 @@ bool GetInteriorVehicleDataRequest::ProcessCapabilities() {
       hmi_capabilities_.rc_capability();
 
   const std::string module_type = ModuleType();
+  const std::string module_id = ModuleId();
+  const ModuleUid module(module_type, module_id);
   if (rc_capabilities &&
-      !rc_capabilities_manager_.CheckIfModuleTypeExistInCapabilities(
-          module_type)) {
-    LOG4CXX_WARN(logger_, "Accessing not supported module data");
+      !rc_capabilities_manager_.CheckIfModuleExistInCapabilities(module)) {
+    LOG4CXX_WARN(
+        logger_,
+        "Accessing not supported module: " << module_type << " " << module_id);
     SetResourceState(ModuleType(), ResourceState::FREE);
     SendResponse(false,
                  mobile_apis::Result::UNSUPPORTED_RESOURCE,

@@ -33,6 +33,7 @@
 #ifndef SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_RC_RPC_PLUGIN_INCLUDE_RC_RPC_PLUGIN_RC_CAPABILITIES_MANAGER_H_
 #define SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_RC_RPC_PLUGIN_INCLUDE_RC_RPC_PLUGIN_RC_CAPABILITIES_MANAGER_H_
 #include "application_manager/application_manager.h"
+#include "rc_rpc_plugin/resource_allocation_manager.h"
 
 namespace rc_rpc_plugin {
 
@@ -61,13 +62,13 @@ class RCCapabilitiesManager {
                                const std::string& button_name) = 0;
 
   /**
-   * @brief CheckIfModuleTypeExistInCapabilities checks
-   * if the specified module type exists in rc_capabilities
-   * @param module_typere source name
+   * @brief CheckIfModuleExistInCapabilities checks
+   * if the specified module exists in rc_capabilities
+   * @param module moduleType + moduleId
    * @return true if exists, otherwise - false
    */
-  virtual bool CheckIfModuleTypeExistInCapabilities(
-      const std::string& module_type) = 0;
+  virtual bool CheckIfModuleExistInCapabilities(
+      const ModuleUid& module) const = 0;
 
   /**
    * @brief GetModuleDataCapabilities checks whether rc module data
@@ -77,7 +78,8 @@ class RCCapabilitiesManager {
    * @return pair of state and capability status - ModuleCapability
    */
   virtual ModuleCapability GetModuleDataCapabilities(
-      const smart_objects::SmartObject& module_data) = 0;
+      const smart_objects::SmartObject& module_data,
+      const std::string& module_id) const = 0;
 
   /**
    * @brief ControlData retrieves control data
