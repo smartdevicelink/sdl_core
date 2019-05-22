@@ -84,14 +84,16 @@ class WebsocketConnectionTest : public ::testing::Test {
     ASSERT_NE(client_out.connection.use_count(), 0);
   }
 
-  void StartWSServer() {
+  void StartWSServer(std::string path) {
     ws_session = std::make_shared<websocket::WSSession>(kHost, kPort);
+    ws_session->AddRoute(path);
     ws_session->Run();
   }
 
-  void StartWSSServer() {
+  void StartWSSServer(std::string path) {
     wss_session = std::make_shared<websocket::WSSSession>(
         kHost, kPort, kCertificate, kPrivateKey);
+    wss_session->AddRoute(path);
     wss_session->Run();
   }
 
@@ -115,6 +117,10 @@ class WebsocketConnectionTest : public ::testing::Test {
   WebsocketClient ws_client;
   std::string kHost = "127.0.0.1";
   uint16_t kPort = 8080;
+  std::string kPath = "/folder/file.html/";
+  std::string kQuery = "?eventId=2345&eventName='Test'&expectedResult=true";
+  std::string kFragment = "#section_1";
+
   // Sample certificate for localhost
   std::string kCertificate =
       "-----BEGIN "
@@ -262,7 +268,7 @@ class WebsocketConnectionTest : public ::testing::Test {
 
 TEST_F(WebsocketConnectionTest, WSConnection_SUCCESS) {
   transport_manager::transport_adapter::CloudAppProperties properties{
-      .endpoint = "ws://" + kHost + ":" + std::to_string(kPort) + "/",
+      .endpoint = "ws://" + kHost + ":" + std::to_string(kPort),
       .certificate = "no cert",
       .enabled = true,
       .auth_token = "auth_token",
@@ -270,8 +276,8 @@ TEST_F(WebsocketConnectionTest, WSConnection_SUCCESS) {
       .hybrid_app_preference = "CLOUD"};
 
   // Start server
-  std::thread t1(&WebsocketConnectionTest::StartWSServer, this);
-  sleep(1);
+  std::thread t1(&WebsocketConnectionTest::StartWSServer, this, "/");
+  usleep(5000);
 
   // Start client
   InitWebsocketClient(properties, ws_client);
@@ -291,9 +297,73 @@ TEST_F(WebsocketConnectionTest, WSConnection_SUCCESS) {
   t1.join();
 }
 
+TEST_F(WebsocketConnectionTest, WSConnection_SUCCESS_ValidTarget) {
+  transport_manager::transport_adapter::CloudAppProperties properties{
+      .endpoint = "ws://" + kHost + ":" + std::to_string(kPort) + kPath +
+                  kQuery + kFragment,
+      .certificate = "no cert",
+      .enabled = true,
+      .auth_token = "auth_token",
+      .cloud_transport_type = "WS",
+      .hybrid_app_preference = "CLOUD"};
+
+  // Start server
+  std::thread t1(&WebsocketConnectionTest::StartWSServer, this, kPath);
+  usleep(5000);
+
+  // Start client
+  InitWebsocketClient(properties, ws_client);
+  std::shared_ptr<WebsocketClientConnection> ws_connection =
+      ws_client.connection;
+
+  // Check websocket connection
+  TransportAdapter::Error ret_code = ws_connection->Start();
+  EXPECT_EQ(TransportAdapter::OK, ret_code);
+
+  // Stop client
+  ret_code = ws_connection->Disconnect();
+  EXPECT_EQ(TransportAdapter::OK, ret_code);
+
+  // Stop server thread
+  ws_session->Stop();
+  t1.join();
+}
+
+TEST_F(WebsocketConnectionTest, WSConnection_FAILURE_InvalidTarget) {
+  transport_manager::transport_adapter::CloudAppProperties properties{
+      .endpoint = "ws://" + kHost + ":" + std::to_string(kPort) + kPath +
+                  kQuery + kFragment,
+      .certificate = "no cert",
+      .enabled = true,
+      .auth_token = "auth_token",
+      .cloud_transport_type = "WS",
+      .hybrid_app_preference = "CLOUD"};
+
+  // Start server
+  std::thread t1(&WebsocketConnectionTest::StartWSServer, this, "/");
+  usleep(5000);
+
+  // Start client
+  InitWebsocketClient(properties, ws_client);
+  std::shared_ptr<WebsocketClientConnection> ws_connection =
+      ws_client.connection;
+
+  // Check websocket connection
+  TransportAdapter::Error ret_code = ws_connection->Start();
+  EXPECT_EQ(TransportAdapter::FAIL, ret_code);
+
+  // Stop client
+  ret_code = ws_connection->Disconnect();
+  EXPECT_EQ(TransportAdapter::OK, ret_code);
+
+  // Stop server thread
+  ws_session->Stop();
+  t1.join();
+}
+
 TEST_F(WebsocketConnectionTest, WSSConnection_SUCCESS) {
   transport_manager::transport_adapter::CloudAppProperties properties{
-      .endpoint = "wss://" + kHost + ":" + std::to_string(kPort) + "/",
+      .endpoint = "wss://" + kHost + ":" + std::to_string(kPort),
       .certificate = kCACertificate,
       .enabled = true,
       .auth_token = "auth_token",
@@ -301,8 +371,8 @@ TEST_F(WebsocketConnectionTest, WSSConnection_SUCCESS) {
       .hybrid_app_preference = "CLOUD"};
 
   // Start server
-  std::thread t1(&WebsocketConnectionTest::StartWSSServer, this);
-  sleep(1);
+  std::thread t1(&WebsocketConnectionTest::StartWSSServer, this, "/");
+  usleep(5000);
 
   // Start client
   InitWebsocketClient(properties, ws_client);
@@ -322,9 +392,73 @@ TEST_F(WebsocketConnectionTest, WSSConnection_SUCCESS) {
   t1.join();
 }
 
+TEST_F(WebsocketConnectionTest, WSSConnection_SUCCESS_ValidTarget) {
+  transport_manager::transport_adapter::CloudAppProperties properties{
+      .endpoint = "wss://" + kHost + ":" + std::to_string(kPort) + kPath,
+      .certificate = kCACertificate,
+      .enabled = true,
+      .auth_token = "auth_token",
+      .cloud_transport_type = "WSS",
+      .hybrid_app_preference = "CLOUD"};
+
+  // Start server
+  std::thread t1(&WebsocketConnectionTest::StartWSSServer,
+                 this,
+                 (kPath + kQuery + kFragment));
+  usleep(5000);
+
+  // Start client
+  InitWebsocketClient(properties, ws_client);
+  std::shared_ptr<WebsocketClientConnection> wss_connection =
+      ws_client.connection;
+
+  // Check websocket connection
+  TransportAdapter::Error ret_code = wss_connection->Start();
+  EXPECT_EQ(TransportAdapter::OK, ret_code);
+
+  // Stop client
+  ret_code = wss_connection->Disconnect();
+  EXPECT_EQ(TransportAdapter::OK, ret_code);
+
+  // Stop server thread
+  wss_session->Stop();
+  t1.join();
+}
+
+TEST_F(WebsocketConnectionTest, WSSConnection_FAILURE_InvalidTarget) {
+  transport_manager::transport_adapter::CloudAppProperties properties{
+      .endpoint = "wss://" + kHost + ":" + std::to_string(kPort),
+      .certificate = kCACertificate,
+      .enabled = true,
+      .auth_token = "auth_token",
+      .cloud_transport_type = "WSS",
+      .hybrid_app_preference = "CLOUD"};
+
+  // Start server
+  std::thread t1(&WebsocketConnectionTest::StartWSSServer, this, kPath);
+  usleep(5000);
+
+  // Start client
+  InitWebsocketClient(properties, ws_client);
+  std::shared_ptr<WebsocketClientConnection> wss_connection =
+      ws_client.connection;
+
+  // Check websocket connection
+  TransportAdapter::Error ret_code = wss_connection->Start();
+  EXPECT_EQ(TransportAdapter::FAIL, ret_code);
+
+  // Stop client
+  ret_code = wss_connection->Disconnect();
+  EXPECT_EQ(TransportAdapter::OK, ret_code);
+
+  // Stop server thread
+  wss_session->Stop();
+  t1.join();
+}
+
 TEST_F(WebsocketConnectionTest, WSSConnection_FAILURE_IncorrectCert) {
   transport_manager::transport_adapter::CloudAppProperties properties{
-      .endpoint = "wss://" + kHost + ":" + std::to_string(kPort) + "/",
+      .endpoint = "wss://" + kHost + ":" + std::to_string(kPort),
       .certificate = kIncorrectCertificate,
       .enabled = true,
       .auth_token = "auth_token",
@@ -332,8 +466,8 @@ TEST_F(WebsocketConnectionTest, WSSConnection_FAILURE_IncorrectCert) {
       .hybrid_app_preference = "CLOUD"};
 
   // Start server
-  std::thread t1(&WebsocketConnectionTest::StartWSSServer, this);
-  sleep(1);
+  std::thread t1(&WebsocketConnectionTest::StartWSSServer, this, "/");
+  usleep(5000);
 
   // Start client
   InitWebsocketClient(properties, ws_client);

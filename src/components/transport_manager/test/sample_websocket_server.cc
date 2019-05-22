@@ -13,20 +13,78 @@ namespace websocket {
 WSSession::WSServer::WSServer(tcp::socket&& socket)
     : ws_(std::move(socket)), strand_(ws_.get_executor()) {}
 
+void WSSession::WSServer::AddURLRoute(const std::string& target) {
+  url_routes_.insert(ParseRouteFromTarget(target));
+}
+
 void WSSession::WSServer::Run() {
-  // Accept the websocket handshake
-  ws_.async_accept(boost::asio::bind_executor(
-      strand_, std::bind(&WSServer::OnAccept, this, std::placeholders::_1)));
+  req_ = {};
+  http::async_read(
+      ws_.next_layer(),
+      buffer_,
+      req_,
+      std::bind(&WSServer::OnWebsocketHandshake, this, std::placeholders::_1));
+}
+
+void WSSession::WSServer::OnWebsocketHandshake(
+    const boost::system::error_code& ec) {
+  if (ec) {
+    return Fail("ERROR_HTTP_REQUEST_READ", ec);
+  }
+  if (websocket::is_upgrade(req_)) {
+    // Check target
+    std::string route = ParseRouteFromTarget(req_.target().to_string());
+    if (!CanHandleRoute(route)) {
+      auto error = boost::system::errc::make_error_code(
+          boost::system::errc::address_not_available);
+      ws_.next_layer().close();
+      return Fail("ERROR_INVALID_TARGET", error);
+    }
+    // Accept the websocket handshake
+    ws_.async_accept(
+        req_,
+        boost::asio::bind_executor(
+            strand_,
+            std::bind(&WSServer::OnAccept, this, std::placeholders::_1)));
+  }
 }
 
 void WSSession::WSServer::OnAccept(beast::error_code ec) {
   if (ec) {
-    return Fail("ERROR_CONNECTION_ACCEPT", ec);
+    return Fail("ERROR_WEBSOCKET_HANDSHAKE", ec);
   }
 }
 
+bool WSSession::WSServer::CanHandleRoute(const std::string& route) {
+  if (url_routes_.find(route) == url_routes_.end()) {
+    return false;
+  }
+  return true;
+}
+
+std::string WSSession::WSServer::ParseRouteFromTarget(
+    const std::string& target) {
+  std::string route = target;
+  // Remove fragment
+  auto fragment_pos = route.find('#');
+  if (fragment_pos != std::string::npos) {
+    route = route.substr(0, fragment_pos);
+  }
+  // Remove query
+  auto query_pos = route.find('?');
+  if (query_pos != std::string::npos) {
+    route = route.substr(0, query_pos);
+  }
+
+  return route;
+}
+
 WSSession::WSSession(const std::string& address, uint16_t port)
-    : address_(address), port_(port), acceptor_(ioc_), socket_(ioc_) {
+    : address_(address)
+    , port_(port)
+    , acceptor_(ioc_)
+    , socket_(ioc_)
+    , ws_(nullptr) {
   endpoint_ = {boost::asio::ip::make_address(address), port};
   boost::system::error_code error;
 
@@ -76,6 +134,14 @@ void WSSession::Stop() {
   }
 }
 
+void WSSession::AddRoute(const std::string& route) {
+  if (ws_ == nullptr) {
+    buffered_routes_.push(route);
+    return;
+  }
+  ws_->AddURLRoute(route);
+}
+
 void WSSession::on_accept(boost::system::error_code ec) {
   if (ec) {
     Fail("ERROR_ON_ACCEPT", ec);
@@ -85,12 +151,20 @@ void WSSession::on_accept(boost::system::error_code ec) {
 
   // Make websocket object and start
   ws_ = std::make_shared<WSServer>(std::move(socket_));
+  // Load routes stored in buffer
+  while (!buffered_routes_.empty()) {
+    ws_->AddURLRoute(buffered_routes_.front());
+    buffered_routes_.pop();
+  }
   ws_->Run();
 }
 
 WSSSession::WSSServer::WSSServer(tcp::socket&& socket, ssl::context& ctx)
     : wss_(std::move(socket), ctx) {}
 
+void WSSSession::WSSServer::AddURLRoute(const std::string& target) {
+  url_routes_.insert(ParseRouteFromTarget(target));
+}
 void WSSSession::WSSServer::Run() {
   // Perform the SSL handshake
   wss_.next_layer().async_handshake(
@@ -103,9 +177,32 @@ void WSSSession::WSSServer::OnSSLHandshake(beast::error_code ec) {
     return Fail("ERROR_SSL_HANDSHAKE", ec);
   }
 
-  // Accept the websocket handshake
-  wss_.async_accept(
-      std::bind(&WSSServer::OnAccept, this, std::placeholders::_1));
+  req_ = {};
+  http::async_read(
+      wss_.next_layer(),
+      buffer_,
+      req_,
+      std::bind(&WSSServer::OnWebsocketHandshake, this, std::placeholders::_1));
+}
+
+void WSSSession::WSSServer::OnWebsocketHandshake(
+    const boost::system::error_code& ec) {
+  if (ec) {
+    return Fail("ERROR_HTTP_REQUEST_READ", ec);
+  }
+  if (websocket::is_upgrade(req_)) {
+    // Check target
+    std::string route = ParseRouteFromTarget(req_.target().to_string());
+    if (!CanHandleRoute(route)) {
+      auto error = boost::system::errc::make_error_code(
+          boost::system::errc::address_not_available);
+      wss_.next_layer().next_layer().close();
+      return Fail("ERROR_INVALID_TARGET", error);
+    }
+    // Accept the websocket handshake
+    wss_.async_accept(
+        req_, std::bind(&WSSServer::OnAccept, this, std::placeholders::_1));
+  }
 }
 
 void WSSSession::WSSServer::OnAccept(beast::error_code ec) {
@@ -114,11 +211,38 @@ void WSSSession::WSSServer::OnAccept(beast::error_code ec) {
   }
 }
 
+bool WSSSession::WSSServer::CanHandleRoute(const std::string& route) {
+  if (url_routes_.find(route) == url_routes_.end()) {
+    return false;
+  }
+  return true;
+}
+
+std::string WSSSession::WSSServer::ParseRouteFromTarget(
+    const std::string& target) {
+  std::string route = target;
+  // Remove fragment
+  auto fragment_pos = route.find('#');
+  if (fragment_pos != std::string::npos) {
+    route = route.substr(0, fragment_pos);
+  }
+  // Remove query
+  auto query_pos = route.find('?');
+  if (query_pos != std::string::npos) {
+    route = route.substr(0, query_pos);
+  }
+
+  return route;
+}
+
 WSSSession::WSSSession(const std::string& address,
                        uint16_t port,
                        const std::string& certificate,
                        const std::string& private_key)
-    : acceptor_(ioc_), socket_(ioc_), ctx_(ssl::context::sslv23_server) {
+    : acceptor_(ioc_)
+    , socket_(ioc_)
+    , ctx_(ssl::context::sslv23_server)
+    , wss_(nullptr) {
   beast::error_code ec;
   endpoint_ = {boost::asio::ip::make_address(address), port};
 
@@ -185,6 +309,14 @@ void WSSSession::Stop() {
   }
 }
 
+void WSSSession::AddRoute(const std::string& route) {
+  if (wss_ == nullptr) {
+    buffered_routes_.push(route);
+    return;
+  }
+  wss_->AddURLRoute(route);
+}
+
 void WSSSession::do_accept() {
   if (acceptor_.is_open()) {
     acceptor_.async_accept(
@@ -202,6 +334,11 @@ void WSSSession::on_accept(boost::system::error_code ec) {
   }
   // Create the session and run it
   wss_ = std::make_shared<WSSServer>(std::move(socket_), ctx_);
+  // Load routes stored in buffer
+  while (!buffered_routes_.empty()) {
+    wss_->AddURLRoute(buffered_routes_.front());
+    buffered_routes_.pop();
+  }
   wss_->Run();
 }
 

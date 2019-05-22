@@ -752,8 +752,6 @@ TEST_F(TransportAdapterTest, WebsocketEndpointParsing_SUCCESS) {
   for (auto protocol : kWebsocketProtocols) {
     for (auto endpoint : kValidTestEndpoints) {
       test_cloud_properties_.endpoint = protocol + endpoint.test_string;
-      std::cout << "Testing endpoint: " << test_cloud_properties_.endpoint
-                << std::endl;
       cta->SetAppCloudTransportConfig("cloud app", test_cloud_properties_);
 
       auto ta = std::dynamic_pointer_cast<TransportAdapter>(cta);
@@ -782,8 +780,6 @@ TEST_F(TransportAdapterTest, WebsocketEndpointParsing_INVALID) {
   for (auto protocol : kWebsocketProtocols) {
     for (auto endpoint : kInvalidTestEndpoints) {
       test_cloud_properties_.endpoint = protocol + endpoint.test_string;
-      std::cout << "Testing endpoint: " << test_cloud_properties_.endpoint
-                << std::endl;
       cta->SetAppCloudTransportConfig("cloud app", test_cloud_properties_);
 
       auto ta = std::dynamic_pointer_cast<TransportAdapter>(cta);
@@ -804,8 +800,6 @@ TEST_F(TransportAdapterTest, WebsocketEndpointParsing_INCORRECT) {
   for (auto protocol : kWebsocketProtocols) {
     for (auto endpoint : kIncorrectTestEndpoints) {
       test_cloud_properties_.endpoint = protocol + endpoint.test_string;
-      std::cout << "Testing endpoint: " << test_cloud_properties_.endpoint
-                << std::endl;
       cta->SetAppCloudTransportConfig("cloud app", test_cloud_properties_);
 
       auto ta = std::dynamic_pointer_cast<TransportAdapter>(cta);
@@ -819,14 +813,6 @@ TEST_F(TransportAdapterTest, WebsocketEndpointParsing_INCORRECT) {
       std::shared_ptr<CloudDevice> cloud_device =
           std::dynamic_pointer_cast<CloudDevice>(device);
       ASSERT_NE(cloud_device.use_count(), 0);
-
-      std::cout << "\tExpected Host: " << endpoint.host
-                << ", Actual Host: " << cloud_device->GetHost() << std::endl;
-      std::cout << "\tExpected Port: " << endpoint.port
-                << ", Actual Port: " << cloud_device->GetPort() << std::endl;
-      std::cout << "\tExpected Target: " << endpoint.target
-                << ", Actual Target: " << cloud_device->GetTarget()
-                << std::endl;
 
       EXPECT_FALSE(cloud_device->GetHost() == endpoint.host &&
                    cloud_device->GetPort() == endpoint.port &&

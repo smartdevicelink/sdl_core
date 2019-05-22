@@ -50,9 +50,10 @@
 #include <functional>
 #include <iostream>
 #include <memory>
+#include <queue>
+#include <set>
 #include <string>
 #include <thread>
-#include <vector>
 
 namespace sample {
 namespace websocket {
@@ -70,19 +71,31 @@ class WSSession {
   class WSServer {
    public:
     explicit WSServer(tcp::socket&& socket);
+    void AddURLRoute(const std::string& route);
+    // Start the asynchronous operation
     void Run();
-    void OnAccept(beast::error_code ec);
 
    private:
+    void OnWebsocketHandshake(const boost::system::error_code& ec);
+    void OnAccept(beast::error_code ec);
+    // Check if route can be handled by the server
+    bool CanHandleRoute(const std::string& route);
+    std::string ParseRouteFromTarget(const std::string& target);
+
     websocket::stream<tcp::socket> ws_;
     beast::flat_buffer buffer_;
     boost::asio::strand<boost::asio::io_context::executor_type> strand_;
+    http::request<http::string_body> req_;
+    std::set<std::string> url_routes_;
   };
 
  public:
   WSSession(const std::string& address, uint16_t port);
+  // Start Accepting incoming connections
   void Run();
   void Stop();
+  // Add route endpoint which can be handled the server
+  void AddRoute(const std::string& route);
 
  private:
   void on_accept(boost::system::error_code ec);
@@ -94,6 +107,7 @@ class WSSession {
   beast::flat_buffer buffer_;
   boost::asio::ip::tcp::endpoint endpoint_;
   std::shared_ptr<WSServer> ws_;
+  std::queue<std::string> buffered_routes_;
 };
 
 // Accepts incoming connections and launches the sessions
@@ -103,14 +117,23 @@ class WSSSession {
    public:
     // Take ownership of the socket
     WSSServer(tcp::socket&& socket, ssl::context& ctx);
+    void AddURLRoute(const std::string& route);
     // Start the asynchronous operation
     void Run();
-    void OnSSLHandshake(beast::error_code ec);
-    void OnAccept(beast::error_code ec);
 
    private:
+    void OnSSLHandshake(beast::error_code ec);
+    void OnWebsocketHandshake(const boost::system::error_code& ec);
+    void OnAccept(beast::error_code ec);
+
+    // Check if route can be handled by the server
+    bool CanHandleRoute(const std::string& route);
+    std::string ParseRouteFromTarget(const std::string& target);
+
     websocket::stream<ssl::stream<tcp::socket> > wss_;
     beast::flat_buffer buffer_;
+    http::request<http::string_body> req_;
+    std::set<std::string> url_routes_;
   };
 
  public:
@@ -121,6 +144,8 @@ class WSSSession {
   // Start accepting incoming connections
   void Run();
   void Stop();
+  // Add route endpoint which can be handled the server
+  void AddRoute(const std::string& route);
 
  private:
   void do_accept();
@@ -133,6 +158,7 @@ class WSSSession {
   ssl::context ctx_;
   tcp::endpoint endpoint_;
   std::shared_ptr<WSSServer> wss_;
+  std::queue<std::string> buffered_routes_;
 };
 
 }  // namespace websocket
