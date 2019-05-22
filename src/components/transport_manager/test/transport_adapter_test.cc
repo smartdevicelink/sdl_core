@@ -163,6 +163,7 @@ class TransportAdapterTest : public ::testing::Test {
       TestEndpoint{"local/host:80", "local/host", "80", "/"},
       TestEndpoint{"local host:80", "local host", "80", "/"},
       TestEndpoint{"local\thost:80", "local\thost", "80", "/"},
+      TestEndpoint{":80#section1", "", "80", "/#section1"},
       // Invalid port
       TestEndpoint{"username:password@localhost.com",
                    "username:password@localhost.com",

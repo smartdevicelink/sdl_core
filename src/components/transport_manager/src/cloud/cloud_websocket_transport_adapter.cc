@@ -82,7 +82,7 @@ void CloudWebsocketTransportAdapter::CreateDevice(const std::string& uid) {
 
   std::string protocol_pattern = "(wss?)";
   std::string host_pattern =
-      "(([^?#%\\\\/@:\\s]*)\\:?([^?#%\\\\/@\\s]*)\\@?([^?#%\\\\/\\s]*))";
+      "(([^?#%\\\\/@:\\s]{1,})\\:?([^?#%\\\\/@\\s]*)\\@?([^?#%\\\\/\\s]*))";
   std::string port_pattern = "(\\d{2,5})";
   // Optional parameters
   std::string path_pattern = "((\\/[^\\/#?\\s]+)*)?\\/?";
