@@ -114,6 +114,16 @@ class RCCapabilitiesManager {
       const smart_objects::SmartObject& module_data,
       const std::string& module_type) = 0;
 
+  /**
+   * @brief GetDefaultModuleIdFromCapabilities returns the moduleId
+   * from the first item published by xyz-ControlCapabilities
+   * @param module_type resource name
+   * @return default module id from HMI capabilities
+   */
+  virtual const std::string GetDefaultModuleIdFromCapabilities(
+      const std::string& module_type) const = 0;
+
+
   virtual ~RCCapabilitiesManager() {}
 };
 

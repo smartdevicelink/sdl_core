@@ -87,7 +87,7 @@ class GetInteriorVehicleDataRequest : public RCCommandRequest {
    */
   void RemoveExcessiveSubscription();
 
-  std::string ModuleType() FINAL;
+  std::string ModuleType() const FINAL;
   std::string ModuleId() const FINAL;
   bool excessive_subscription_occured_;
   bool ProcessCapabilities();

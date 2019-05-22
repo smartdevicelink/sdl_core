@@ -41,6 +41,74 @@ RCCapabilitiesManagerImpl::RCCapabilitiesManagerImpl(
     application_manager::HMICapabilities& hmi_capabilities)
     : hmi_capabilities_(hmi_capabilities) {}
 
+const std::string
+RCCapabilitiesManagerImpl::GetDefaultModuleIdFromCapabilitiesStructure(
+    const smart_objects::SmartObject& control_capabilities,
+    const std::string& module_type) const {
+  LOG4CXX_AUTO_TRACE(logger_);
+  if (control_capabilities.keyExists(message_params::kModuleInfo)) {
+    // moduleId - mandatory param for ModuleInfo structure
+    const auto module_id = control_capabilities[message_params::kModuleInfo]
+                                               [message_params::kModuleId]
+                                                   .asString();
+    LOG4CXX_WARN(logger_,
+                 "Use default moduleId from hmi capabilities: "
+                     << module_id
+                     << " for requested moduleType: " << module_type);
+    return module_id;
+  }
+  LOG4CXX_WARN(logger_,
+               "There are no moduleInfo in hmi capabilities for requested "
+               "moduleType "
+                   << module_type);
+  return "";
+}
+
+const std::string
+RCCapabilitiesManagerImpl::GetDefaultModuleIdFromCapabilitiesArray(
+    const smart_objects::SmartObject& control_capabilities,
+    const std::string& module_type) const {
+  LOG4CXX_AUTO_TRACE(logger_);
+  for (auto& cap_item : *(control_capabilities.asArray())) {
+    if (cap_item.keyExists(message_params::kModuleInfo)) {
+      // moduleId - mandatory param for ModuleInfo structure
+      const auto module_id =
+          cap_item[message_params::kModuleInfo][message_params::kModuleId]
+              .asString();
+      LOG4CXX_WARN(logger_,
+                   "Use default moduleId from hmi capabilities: "
+                       << module_id
+                       << " for requested moduleType: " << module_type);
+      return module_id;
+    }
+  }
+  LOG4CXX_WARN(logger_,
+               "There are no moduleInfo in hmi capabilities for requested "
+               "moduleType "
+                   << module_type);
+  return "";
+}
+
+const std::string RCCapabilitiesManagerImpl::GetDefaultModuleIdFromCapabilities(
+    const std::string& module_type) const {
+  LOG4CXX_AUTO_TRACE(logger_);
+  auto rc_capabilities = *(hmi_capabilities_.rc_capability());
+  const auto& mapping = RCHelpers::GetModuleTypeToCapabilitiesMapping();
+  if (!rc_capabilities.keyExists(mapping(module_type))) {
+    LOG4CXX_WARN(
+        logger_,
+        "There is no RC capability for requested module_type " << module_type);
+    return "";
+  }
+  if (enums_value::kHmiSettings == module_type ||
+      enums_value::kLight == module_type) {
+    return GetDefaultModuleIdFromCapabilitiesStructure(
+        rc_capabilities[mapping(module_type)], module_type);
+  }
+  return GetDefaultModuleIdFromCapabilitiesArray(
+      rc_capabilities[mapping(module_type)], module_type);
+}
+
 bool RCCapabilitiesManagerImpl::CheckIfModuleTypeExistInCapabilities(
     const std::string& module_type) {
   LOG4CXX_AUTO_TRACE(logger_);

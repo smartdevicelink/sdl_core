@@ -61,7 +61,7 @@ class GetInteriorVehicleDataConsentRequest
    */
   void Execute() FINAL;
 
-  std::string ModuleType() FINAL;
+  std::string ModuleType() const FINAL;
 
   std::string ModuleId() const FINAL;
 

@@ -96,10 +96,13 @@ class RCCommandRequest : public app_mngr::commands::CommandRequestImpl {
    * This is default implementation which has to be redefined for RPCs which
    * need to manage the resources
    * @param module_type Resource name
+   * @param module_id Resource id
    * @return True if free, otherwise - false
    */
-  virtual bool IsResourceFree(const std::string& module_type) const {
+  virtual bool IsResourceFree(const std::string& module_type,
+                              const std::string& module_id) const {
     UNUSED(module_type);
+    UNUSED(module_id);
     return true;
   }
   /**
@@ -138,7 +141,7 @@ class RCCommandRequest : public app_mngr::commands::CommandRequestImpl {
     disallowed_info_ = info;
   }
 
-  virtual std::string ModuleType() = 0;
+  virtual std::string ModuleType() const = 0;
 
   /**
    * @brief Extracts ModuleId from command message. Each inherited class should
@@ -147,6 +150,15 @@ class RCCommandRequest : public app_mngr::commands::CommandRequestImpl {
    * @return ModuleId as string.
    */
   virtual std::string ModuleId() const = 0;
+
+  /**
+   * @brief IsModuleIdProvided checks if moduleId parameter
+   * is provided in the hmi response
+   * @param hmi_response response from hmi
+   * @return true if provided, otherwise - false
+   */
+
+  bool IsModuleIdProvided(const smart_objects::SmartObject& hmi_response) const;
 
  private:
   /**

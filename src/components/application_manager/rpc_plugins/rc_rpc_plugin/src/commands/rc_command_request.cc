@@ -102,6 +102,14 @@ rc_rpc_plugin::TypeAccess RCCommandRequest::CheckModule(
              : rc_rpc_plugin::TypeAccess::kDisallowed;
 }
 
+bool RCCommandRequest::IsModuleIdProvided(
+    const smart_objects::SmartObject& hmi_response) const {
+  LOG4CXX_AUTO_TRACE(logger_);
+  return hmi_response[app_mngr::strings::msg_params]
+                     [message_params::kModuleData]
+                         .keyExists(message_params::kModuleId);
+}
+
 void RCCommandRequest::SendDisallowed(rc_rpc_plugin::TypeAccess access) {
   LOG4CXX_AUTO_TRACE(logger_);
   std::string info;
@@ -159,8 +167,9 @@ void RCCommandRequest::Run() {
 bool RCCommandRequest::AcquireResources() {
   LOG4CXX_AUTO_TRACE(logger_);
   const std::string module_type = ModuleType();
+  const std::string module_id = ModuleId();
 
-  if (!IsResourceFree(module_type)) {
+  if (!IsResourceFree(module_type, module_id)) {
     LOG4CXX_WARN(logger_, "Resource is busy.");
     SendResponse(false, mobile_apis::Result::IN_USE, "");
     return false;
@@ -205,6 +214,7 @@ void RCCommandRequest::ProcessAccessResponse(
   app_mngr::ApplicationSharedPtr app =
       application_manager_.application(CommandRequestImpl::connection_key());
   const std::string module_type = ModuleType();
+  const std::string module_id = ModuleId();
   if (!app) {
     LOG4CXX_ERROR(logger_, "NULL pointer.");
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED, "");
@@ -234,12 +244,12 @@ void RCCommandRequest::ProcessAccessResponse(
     }
     if (is_allowed) {
       resource_allocation_manager_.ForceAcquireResource(
-          module_type, ModuleId(), app->app_id());
+          module_type, module_id, app->app_id());
       SetResourceState(module_type, ResourceState::BUSY);
       Execute();  // run child's logic
     } else {
       resource_allocation_manager_.OnDriverDisallowed(
-          module_type, ModuleId(), app->app_id());
+          module_type, module_id, app->app_id());
       SendResponse(
           false,
           mobile_apis::Result::REJECTED,

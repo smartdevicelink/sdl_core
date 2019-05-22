@@ -62,9 +62,11 @@ class SetInteriorVehicleDataRequest : public RCCommandRequest {
   /**
    * @brief IsResourceFree check resource state
    * @param module_type Resource name
+   * @param module_id Resource id
    * @return True if free, otherwise - false
    */
-  bool IsResourceFree(const std::string& module_type) const FINAL;
+  bool IsResourceFree(const std::string& module_type,
+                      const std::string& module_id) const FINAL;
 
   /**
    * @brief SetResourceState changes state of resource
@@ -86,7 +88,7 @@ class SetInteriorVehicleDataRequest : public RCCommandRequest {
    */
   void CutOffReadOnlyParams(smart_objects::SmartObject& module_data);
 
-  std::string ModuleType() FINAL;
+  std::string ModuleType() const FINAL;
 
   std::string ModuleId() const FINAL;
 

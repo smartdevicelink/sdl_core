@@ -187,6 +187,8 @@ void GetInteriorVehicleDataRequest::Execute() {
       return;
     }
     interior_data_manager_.StoreRequestToHMITime(ModuleType());
+    (*message_)[app_mngr::strings::msg_params][message_params::kModuleId] =
+        ModuleId();
     SendHMIRequest(hmi_apis::FunctionID::RC_GetInteriorVehicleData,
                    &(*message_)[app_mngr::strings::msg_params],
                    true);
@@ -224,6 +226,14 @@ void GetInteriorVehicleDataRequest::on_event(
   }
 
   if (result) {
+    if (!IsModuleIdProvided(hmi_response)) {
+      LOG4CXX_WARN(logger_,
+                   "conditional mandatory parameter "
+                       << message_params::kModuleId
+                       << " missed in hmi response");
+      result = false;
+      result_code = mobile_apis::Result::GENERIC_ERROR;
+    }
     app_mngr::ApplicationSharedPtr app =
         application_manager_.application(connection_key());
 
@@ -373,7 +383,8 @@ void GetInteriorVehicleDataRequest::RemoveExcessiveSubscription() {
   (*message_)[app_mngr::strings::msg_params].erase(message_params::kSubscribe);
 }
 
-std::string GetInteriorVehicleDataRequest::ModuleType() {
+std::string GetInteriorVehicleDataRequest::ModuleType() const {
+  LOG4CXX_AUTO_TRACE(logger_);
   mobile_apis::ModuleType::eType module_type =
       static_cast<mobile_apis::ModuleType::eType>(
           (*message_)[app_mngr::strings::msg_params]
@@ -386,10 +397,14 @@ std::string GetInteriorVehicleDataRequest::ModuleType() {
 }
 
 std::string GetInteriorVehicleDataRequest::ModuleId() const {
-  // TODO: check if moduleId param is present in the message, if not-
-  // extract it from the capabilities
-  return (*message_)[app_mngr::strings::msg_params][message_params::kModuleId]
-      .asString();
+  LOG4CXX_AUTO_TRACE(logger_);
+  auto msg_params = (*message_)[app_mngr::strings::msg_params];
+  if (msg_params.keyExists(message_params::kModuleId)) {
+    return msg_params[message_params::kModuleId].asString();
+  }
+  const std::string module_id =
+      rc_capabilities_manager_.GetDefaultModuleIdFromCapabilities(ModuleType());
+  return module_id;
 }
 
 }  // namespace commands

@@ -118,9 +118,10 @@ AcquireResult::eType ButtonPressRequest::AcquireResource(
       module_type, ModuleId(), app->app_id());
 }
 
-bool ButtonPressRequest::IsResourceFree(const std::string& module_type) const {
+bool ButtonPressRequest::IsResourceFree(const std::string& module_type,
+                                        const std::string& module_id) const {
   LOG4CXX_AUTO_TRACE(logger_);
-  return resource_allocation_manager_.IsResourceFree(module_type, ModuleId());
+  return resource_allocation_manager_.IsResourceFree(module_type, module_id);
 }
 
 void ButtonPressRequest::SetResourceState(const std::string& module_type,
@@ -162,7 +163,7 @@ void ButtonPressRequest::on_event(const app_mngr::event_engine::Event& event) {
   SendResponse(result, result_code, response_info.c_str());
 }
 
-std::string ButtonPressRequest::ModuleType() {
+std::string ButtonPressRequest::ModuleType() const {
   mobile_apis::ModuleType::eType module_type =
       static_cast<mobile_apis::ModuleType::eType>(
           (*message_)[app_mngr::strings::msg_params]
@@ -175,10 +176,15 @@ std::string ButtonPressRequest::ModuleType() {
 }
 
 std::string ButtonPressRequest::ModuleId() const {
-  // TODO: check if moduleId param is present in the message, if not-
-  // extract it from the capabilities
-  return (*message_)[app_mngr::strings::msg_params][message_params::kModuleId]
-      .asString();
+  LOG4CXX_AUTO_TRACE(logger_);
+  auto msg_params = (*message_)[app_mngr::strings::msg_params];
+  if (msg_params.keyExists(message_params::kModuleId)) {
+    return msg_params[message_params::kModuleId].asString();
+  }
+  const std::string module_id =
+      rc_capabilities_manager_.GetDefaultModuleIdForSpecifiedButtonName(
+          GetButtonId());
+  return module_id;
 }
 
 }  // namespace commands

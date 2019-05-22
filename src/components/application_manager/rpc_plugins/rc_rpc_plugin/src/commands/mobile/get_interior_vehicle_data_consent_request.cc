@@ -46,7 +46,7 @@ void GetInteriorVehicleDataConsentRequest::Execute() {
   LOG4CXX_AUTO_TRACE(logger_);
 }
 
-std::string GetInteriorVehicleDataConsentRequest::ModuleType() {
+std::string GetInteriorVehicleDataConsentRequest::ModuleType() const {
   mobile_apis::ModuleType::eType module_type =
       static_cast<mobile_apis::ModuleType::eType>(
           (*message_)[app_mngr::strings::msg_params]

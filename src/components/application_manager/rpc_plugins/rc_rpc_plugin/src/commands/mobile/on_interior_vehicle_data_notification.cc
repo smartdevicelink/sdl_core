@@ -102,7 +102,7 @@ std::string OnInteriorVehicleDataNotification::ModuleId() const {
                         .asString();
 }
 
-std::string OnInteriorVehicleDataNotification::ModuleType() {
+std::string OnInteriorVehicleDataNotification::ModuleType() const {
   mobile_apis::ModuleType::eType module_type =
       static_cast<mobile_apis::ModuleType::eType>(
           (*message_)[app_mngr::strings::msg_params]

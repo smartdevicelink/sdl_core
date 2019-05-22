@@ -65,6 +65,10 @@ class RCCapabilitiesManagerImpl : public RCCapabilitiesManager {
   bool AreAllParamsReadOnly(const smart_objects::SmartObject& module_data,
                             const std::string& module_type) FINAL;
 
+  const std::string GetDefaultModuleIdFromCapabilities(
+      const std::string& module_type) const FINAL;
+
+
  private:
   const std::map<std::string, std::string> GetLightCapabilitiesMapping();
 
@@ -124,6 +128,14 @@ class RCCapabilitiesManagerImpl : public RCCapabilitiesManager {
 
   bool CheckReadOnlyParamsForLight(
       const smart_objects::SmartObject& module_type_params);
+
+  const std::string GetDefaultModuleIdFromCapabilitiesStructure(
+      const smart_objects::SmartObject& control_capabilities,
+      const std::string& module_type) const;
+
+  const std::string GetDefaultModuleIdFromCapabilitiesArray(
+      const smart_objects::SmartObject& control_capabilities,
+      const std::string& module_type) const;
 
   application_manager::HMICapabilities& hmi_capabilities_;
 };

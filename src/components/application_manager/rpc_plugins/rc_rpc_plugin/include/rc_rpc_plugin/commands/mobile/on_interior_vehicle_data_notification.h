@@ -53,7 +53,7 @@ class OnInteriorVehicleDataNotification
 
   void Run() OVERRIDE;
 
-  std::string ModuleType();
+  std::string ModuleType() const;
 
   std::string ModuleId() const;
 

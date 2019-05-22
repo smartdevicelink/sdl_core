@@ -310,6 +310,8 @@ TEST_F(
       hmi_apis::Common_Result::SUCCESS;
   hmi_msg_params[application_manager::hmi_response::code] = response_code;
   hmi_msg_params[application_manager::strings::connection_key] = kConnectionKey;
+  hmi_msg_params[message_params::kModuleData][message_params::kModuleId] =
+      module_id;
 
   apps_.insert(mock_app_);
   rc_app_extention_->SubscribeToInteriorVehicleData(enums_value::kRadio);
@@ -461,6 +463,8 @@ TEST_F(GetInteriorVehicleDataRequestTest,
   auto& hmi_response_params = (*hmi_response_message)[strings::msg_params];
   hmi_response_params[hmi_response::code] = hmi_apis::Common_Result::SUCCESS;
   hmi_response_params[strings::connection_key] = kConnectionKey;
+  hmi_response_params[message_params::kModuleData][message_params::kModuleId] =
+      module_id;
 
   ON_CALL(mock_interior_data_cache_, Contains(_)).WillByDefault(Return(false));
   ON_CALL(mock_interior_data_manager_, CheckRequestsToHMIFrequency(_))
