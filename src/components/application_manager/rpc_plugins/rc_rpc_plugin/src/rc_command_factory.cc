@@ -144,7 +144,7 @@ CommandSharedPtr RCCommandFactory::CreateCommand(
         static_cast<mobile_apis::FunctionID::eType>(
             (*message)[strings::params][strings::function_id].asInt());
 
-    return get_mobile_creator_factory(function_id, message_type)
+    return get_mobile_creator_factory(function_id, message_type, source)
         .create(message);
   }
 }
@@ -160,51 +160,90 @@ bool RCCommandFactory::IsAbleToProcess(
                static_cast<hmi_apis::FunctionID::eType>(function_id),
                hmi_apis::messageType::INVALID_ENUM).CanBeCreated();
   } else {
-    return get_mobile_creator_factory(
-               static_cast<mobile_api::FunctionID::eType>(function_id),
-               mobile_api::messageType::INVALID_ENUM).CanBeCreated();
+    auto id = static_cast<mobile_apis::FunctionID::eType>(function_id);
+    return get_mobile_command_creator(
+               id, mobile_apis::messageType::INVALID_ENUM).CanBeCreated() ||
+           get_mobile_notification_creator(id).CanBeCreated();
   }
 }
 
-CommandCreator& RCCommandFactory::get_mobile_creator_factory(
-    mobile_api::FunctionID::eType id,
-    mobile_api::messageType::eType message_type) const {
-  LOG4CXX_DEBUG(logger_,
-                "CreateMobileCommand function_id: " << id << " message_type: "
-                                                    << message_type);
+CommandCreator& RCCommandFactory::get_mobile_command_creator(
+    const mobile_apis::FunctionID::eType id,
+    const mobile_apis::messageType::eType message_type) const {
   RCCommandCreatorFactory rc_factory(params_);
-
   switch (id) {
     case mobile_apis::FunctionID::ButtonPressID: {
-      return mobile_api::messageType::request == message_type
+      return mobile_apis::messageType::request == message_type
                  ? rc_factory.GetCreator<commands::ButtonPressRequest>()
                  : rc_factory.GetCreator<commands::ButtonPressResponse>();
     }
     case mobile_apis::FunctionID::GetInteriorVehicleDataID: {
-      return mobile_api::messageType::request == message_type
+      return mobile_apis::messageType::request == message_type
                  ? rc_factory
                        .GetCreator<commands::GetInteriorVehicleDataRequest>()
                  : rc_factory
                        .GetCreator<commands::GetInteriorVehicleDataResponse>();
     }
     case mobile_apis::FunctionID::SetInteriorVehicleDataID: {
-      return mobile_api::messageType::request == message_type
+      return mobile_apis::messageType::request == message_type
                  ? rc_factory
                        .GetCreator<commands::SetInteriorVehicleDataRequest>()
                  : rc_factory
                        .GetCreator<commands::SetInteriorVehicleDataResponse>();
     }
+    default: {}
+  }
+  return rc_factory.GetCreator<RCInvalidCommand>();
+}
+
+CommandCreator& RCCommandFactory::get_mobile_notification_creator(
+    const mobile_apis::FunctionID::eType id) const {
+  RCCommandCreatorFactory rc_factory(params_);
+  switch (id) {
     case mobile_apis::FunctionID::OnInteriorVehicleDataID: {
       return rc_factory
           .GetCreator<commands::OnInteriorVehicleDataNotification>();
     }
-    default: { return rc_factory.GetCreator<RCInvalidCommand>(); }
+    default: {}
   }
+  return rc_factory.GetCreator<RCInvalidCommand>();
+}
+
+CommandCreator& RCCommandFactory::get_mobile_creator_factory(
+    const mobile_apis::FunctionID::eType id,
+    const mobile_apis::messageType::eType message_type,
+    const app_mngr::commands::Command::CommandSource source) const {
+  LOG4CXX_DEBUG(logger_,
+                "CreateMobileCommand function_id: " << id << " message_type: "
+                                                    << message_type);
+  RCCommandCreatorFactory rc_factory(params_);
+  switch (message_type) {
+    case mobile_apis::messageType::request: {
+      if (app_mngr::commands::Command::CommandSource::SOURCE_MOBILE == source) {
+        return get_mobile_command_creator(id, message_type);
+      }
+      break;
+    }
+    case mobile_apis::messageType::response: {
+      if (app_mngr::commands::Command::CommandSource::SOURCE_SDL == source) {
+        return get_mobile_command_creator(id, message_type);
+      }
+      break;
+    }
+    case mobile_apis::messageType::notification: {
+      if (app_mngr::commands::Command::CommandSource::SOURCE_SDL == source) {
+        return get_mobile_notification_creator(id);
+      }
+      break;
+    }
+    default: {}
+  }
+  return rc_factory.GetCreator<RCInvalidCommand>();
 }
 
 CommandCreator& RCCommandFactory::get_hmi_creator_factory(
-    hmi_apis::FunctionID::eType id,
-    hmi_apis::messageType::eType message_type) const {
+    const hmi_apis::FunctionID::eType id,
+    const hmi_apis::messageType::eType message_type) const {
   LOG4CXX_DEBUG(logger_,
                 "CreateHMICommand function_id: " << id << " message_type: "
                                                  << message_type);
