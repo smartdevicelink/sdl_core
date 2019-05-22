@@ -167,7 +167,7 @@ bool RCCapabilitiesManagerImpl::CheckIfModuleExistInCapabilities(
   LOG4CXX_AUTO_TRACE(logger_);
   auto rc_capabilities = *(hmi_capabilities_.rc_capability());
   const auto& mapping = RCHelpers::GetModuleTypeToCapabilitiesMapping();
-  const auto& resource_list = RCHelpers::GetResources(rc_capabilities);
+  const auto& resource_list = GetResources();
   bool is_module_type_valid = false;
   for (const auto& resource : resource_list) {
     if (resource.first == module.first) {
@@ -179,6 +179,94 @@ bool RCCapabilitiesManagerImpl::CheckIfModuleExistInCapabilities(
     }
   }
   return is_module_type_valid;
+}
+
+const std::vector<std::string> RCCapabilitiesManagerImpl::GetCapabilitiesList()
+    const {
+  using namespace enums_value;
+  return {strings::kclimateControlCapabilities,
+          strings::kradioControlCapabilities,
+          strings::kseatControlCapabilities,
+          strings::kaudioControlCapabilities,
+          strings::klightControlCapabilities,
+          strings::khmiSettingsControlCapabilities};
+}
+
+const std::function<std::string(const std::string& control_cap)>
+RCCapabilitiesManagerImpl::GetCapabilitiesToModuleTypeMapping() const {
+  auto mapping_lambda = [](const std::string& control_cap) -> std::string {
+    static std::map<std::string, std::string> mapping = {
+        {strings::kclimateControlCapabilities, enums_value::kClimate},
+        {strings::kradioControlCapabilities, enums_value::kRadio},
+        {strings::kseatControlCapabilities, enums_value::kSeat},
+        {strings::kaudioControlCapabilities, enums_value::kAudio},
+        {strings::klightControlCapabilities, enums_value::kLight},
+        {strings::khmiSettingsControlCapabilities, enums_value::kHmiSettings}};
+    auto it = mapping.find(control_cap);
+    if (mapping.end() == it) {
+      LOG4CXX_ERROR(logger_, "Unknown control capability " << control_cap);
+      return std::string();
+    }
+    return it->second;
+  };
+
+  return mapping_lambda;
+}
+
+void RCCapabilitiesManagerImpl::GetResourcesFromCapabilitiesStructure(
+    const smart_objects::SmartObject& control_capabilities,
+    const std::string& capability_key,
+    std::vector<ModuleUid>& out_resources) const {
+  const auto& mapping = GetCapabilitiesToModuleTypeMapping();
+  if (control_capabilities.keyExists(message_params::kModuleInfo)) {
+    std::string module_id = control_capabilities[message_params::kModuleInfo]
+                                                [message_params::kModuleId]
+                                                    .asString();
+    out_resources.push_back(std::make_pair(mapping(capability_key), module_id));
+  } else {
+    LOG4CXX_WARN(logger_, "There are no moduleId in " << capability_key);
+    out_resources.push_back(std::make_pair(mapping(capability_key), ""));
+  }
+}
+
+void RCCapabilitiesManagerImpl::GetResourcesFromCapabilitiesArray(
+    const smart_objects::SmartObject& control_capabilities,
+    const std::string& capability_key,
+    std::vector<ModuleUid>& out_resources) const {
+  const auto& mapping = GetCapabilitiesToModuleTypeMapping();
+  for (auto cap_item : *(control_capabilities.asArray())) {
+    if (cap_item.keyExists(message_params::kModuleInfo)) {
+      std::string module_id =
+          cap_item[message_params::kModuleInfo][message_params::kModuleId]
+              .asString();
+      out_resources.push_back(
+          std::make_pair(mapping(capability_key), module_id));
+    } else {
+      LOG4CXX_WARN(logger_,
+                   "There are no moduleId for item from " << capability_key);
+      out_resources.push_back(std::make_pair(mapping(capability_key), ""));
+    }
+  }
+}
+
+const std::vector<ModuleUid> RCCapabilitiesManagerImpl::GetResources() const {
+  LOG4CXX_AUTO_TRACE(logger_);
+  std::vector<ModuleUid> resources;
+  auto rc_capabilities = *(hmi_capabilities_.rc_capability());
+  const auto& control_caps_list = GetCapabilitiesList();
+  for (const auto& capability_key : control_caps_list) {
+    if (rc_capabilities.keyExists(capability_key)) {
+      if (strings::khmiSettingsControlCapabilities == capability_key ||
+          strings::klightControlCapabilities == capability_key) {
+        GetResourcesFromCapabilitiesStructure(
+            rc_capabilities[capability_key], capability_key, resources);
+      } else {
+        GetResourcesFromCapabilitiesArray(
+            rc_capabilities[capability_key], capability_key, resources);
+      }
+    }
+  }
+  return resources;
 }
 
 bool RCCapabilitiesManagerImpl::CheckIfButtonExistInRCCaps(

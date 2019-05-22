@@ -125,6 +125,13 @@ class RCCapabilitiesManager {
   virtual const std::string GetDefaultModuleIdFromCapabilities(
       const std::string& module_type) const = 0;
 
+  /**
+   * @brief GetResources get list of ModuleUids(moduleType + moduleId)
+   * of all known resources
+   * @return vector contains all known moduleUids
+   */
+  virtual const std::vector<ModuleUid> GetResources() const = 0;
+
   virtual ~RCCapabilitiesManager() {}
 };
 

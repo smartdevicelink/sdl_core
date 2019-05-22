@@ -34,6 +34,7 @@
 #define SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_RC_RPC_PLUGIN_INCLUDE_RC_RPC_PLUGIN_RESOURCE_ALLOCATION_MANAGER_IMPL_H_
 #include "application_manager/application_impl.h"
 #include "rc_rpc_plugin/rc_app_extension.h"
+#include "rc_rpc_plugin/rc_capabilities_manager.h"
 #include "rc_rpc_plugin/resource_allocation_manager.h"
 #include "utils/lock.h"
 #include "utils/macro.h"
@@ -46,7 +47,8 @@ class ResourceAllocationManagerImpl : public ResourceAllocationManager {
  public:
   ResourceAllocationManagerImpl(
       application_manager::ApplicationManager& app_mngr,
-      application_manager::rpc_service::RPCService& rpc_service);
+      application_manager::rpc_service::RPCService& rpc_service,
+      rc_rpc_plugin::RCCapabilitiesManager& rc_capabilities_manager);
 
   ~ResourceAllocationManagerImpl();
 
@@ -249,6 +251,7 @@ class ResourceAllocationManagerImpl : public ResourceAllocationManager {
   hmi_apis::Common_RCAccessMode::eType current_access_mode_;
   application_manager::ApplicationManager& app_mngr_;
   application_manager::rpc_service::RPCService& rpc_service_;
+  rc_rpc_plugin::RCCapabilitiesManager& rc_capabilities_manager_;
   bool is_rc_enabled_;
 };
 }  // namespace rc_rpc_plugin

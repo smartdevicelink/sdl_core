@@ -68,6 +68,8 @@ class RCCapabilitiesManagerImpl : public RCCapabilitiesManager {
   const std::string GetDefaultModuleIdFromCapabilities(
       const std::string& module_type) const FINAL;
 
+  const std::vector<ModuleUid> GetResources() const FINAL;
+
  private:
   const std::map<std::string, std::string> GetLightCapabilitiesMapping() const;
 
@@ -152,6 +154,21 @@ class RCCapabilitiesManagerImpl : public RCCapabilitiesManager {
   const std::string GetDefaultModuleIdFromCapabilitiesArray(
       const smart_objects::SmartObject& control_capabilities,
       const std::string& module_type) const;
+
+  const std::vector<std::string> GetCapabilitiesList() const;
+
+  const std::function<std::string(const std::string& control_cap)>
+  GetCapabilitiesToModuleTypeMapping() const;
+
+  void GetResourcesFromCapabilitiesStructure(
+      const smart_objects::SmartObject& control_capabilities,
+      const std::string& capabitity_key,
+      std::vector<ModuleUid>& out_resources) const;
+
+  void GetResourcesFromCapabilitiesArray(
+      const smart_objects::SmartObject& control_capabilities,
+      const std::string& capability_key,
+      std::vector<ModuleUid>& out_resources) const;
 
   application_manager::HMICapabilities& hmi_capabilities_;
 };

@@ -49,10 +49,12 @@ CREATE_LOGGERPTR_GLOBAL(logger_, "RemoteControlModule")
 
 ResourceAllocationManagerImpl::ResourceAllocationManagerImpl(
     application_manager::ApplicationManager& app_mngr,
-    application_manager::rpc_service::RPCService& rpc_service)
+    application_manager::rpc_service::RPCService& rpc_service,
+    RCCapabilitiesManager& rc_capabilities_manager)
     : current_access_mode_(hmi_apis::Common_RCAccessMode::AUTO_ALLOW)
     , app_mngr_(app_mngr)
     , rpc_service_(rpc_service)
+    , rc_capabilities_manager_(rc_capabilities_manager)
     , is_rc_enabled_(true) {}
 
 ResourceAllocationManagerImpl::~ResourceAllocationManagerImpl() {}
@@ -249,10 +251,11 @@ ResourceAllocationManagerImpl::CreateOnRCStatusNotificationToMobile(
       mobile_apis::FunctionID::OnRCStatusID, app->app_id());
   auto& msg_params = (*msg_to_mobile)[application_manager::strings::msg_params];
   if (is_rc_enabled()) {
-    ConstructOnRCStatusNotificationParams(msg_params,
-                                          allocated_resources_,
-                                          RCHelpers::GetResources(),
-                                          app->app_id());
+    ConstructOnRCStatusNotificationParams(
+        msg_params,
+        allocated_resources_,
+        rc_capabilities_manager_.GetResources(),
+        app->app_id());
   } else {
     msg_params[message_params::kAllocatedModules] =
         smart_objects::SmartObject(smart_objects::SmartType_Array);
@@ -272,7 +275,7 @@ ResourceAllocationManagerImpl::CreateOnRCStatusNotificationToHmi(
   auto& msg_params = (*msg_to_hmi)[application_manager::strings::msg_params];
   ConstructOnRCStatusNotificationParams(msg_params,
                                         allocated_resources_,
-                                        RCHelpers::GetResources(),
+                                        rc_capabilities_manager_.GetResources(),
                                         app->app_id());
   msg_params[application_manager::strings::app_id] = app->hmi_app_id();
   return msg_to_hmi;

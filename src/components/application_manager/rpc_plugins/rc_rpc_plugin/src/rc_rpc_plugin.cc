@@ -55,10 +55,10 @@ bool RCRPCPlugin::Init(
   interior_data_manager_.reset(new InteriorDataManagerImpl(
       *this, *interior_data_cache_, app_manager, rpc_service));
 
-  resource_allocation_manager_.reset(
-      new ResourceAllocationManagerImpl(app_manager, rpc_service));
   rc_capabilities_manager_.reset(
       new RCCapabilitiesManagerImpl(hmi_capabilities));
+  resource_allocation_manager_.reset(new ResourceAllocationManagerImpl(
+      app_manager, rpc_service, *(rc_capabilities_manager_.get())));
   RCCommandParams params{app_manager,
                          rpc_service,
                          hmi_capabilities,
