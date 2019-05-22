@@ -84,6 +84,8 @@ class ButtonPressRequestTest
             std::make_shared<rc_rpc_plugin::RCAppExtension>(kModuleId)) {}
 
   void SetUp() OVERRIDE {
+    smart_objects::SmartObject control_caps((smart_objects::SmartType_Array));
+    rc_capabilities_[strings::kradioControlCapabilities] = control_caps;
     ON_CALL(app_mngr_, application(_)).WillByDefault(Return(mock_app_));
     ON_CALL(*mock_app_, QueryInterface(RCRPCPlugin::kRCPluginID))
         .WillByDefault(Return(rc_app_extention_));
@@ -100,6 +102,12 @@ class ButtonPressRequestTest
                          nullptr))
         .WillByDefault(Return(true));
     ON_CALL(mock_allocation_manager_, is_rc_enabled())
+        .WillByDefault(Return(true));
+    ON_CALL(mock_rc_capabilities_manager_, CheckButtonName(_, _))
+        .WillByDefault(Return(true));
+    ON_CALL(mock_rc_capabilities_manager_, CheckIfModuleExistInCapabilities(_))
+        .WillByDefault(Return(true));
+    ON_CALL(mock_rc_capabilities_manager_, CheckIfButtonExistInRCCaps(_))
         .WillByDefault(Return(true));
   }
 
@@ -161,10 +169,7 @@ TEST_F(ButtonPressRequestTest,
 
   // Expectations
   ON_CALL(mock_policy_handler_, CheckModule(_, _)).WillByDefault(Return(true));
-  ON_CALL(mock_rc_capabilities_manager_, CheckButtonName(_, _))
-      .WillByDefault(Return(true));
-  ON_CALL(mock_rc_capabilities_manager_, CheckIfButtonExistInRCCaps(_))
-      .WillByDefault(Return(true));
+
   EXPECT_CALL(mock_allocation_manager_, IsResourceFree(resource, resource_id))
       .WillOnce(Return(true));
   EXPECT_CALL(mock_allocation_manager_, AcquireResource(resource, _, _))
@@ -203,6 +208,8 @@ TEST_F(
       mobile_apis::ButtonPressMode::SHORT;
   // Expectations
 
+  EXPECT_CALL(mock_rc_capabilities_manager_, CheckButtonName(_, _))
+      .WillOnce(Return(false));
   ON_CALL(mock_policy_handler_, CheckModule(_, _)).WillByDefault(Return(true));
   EXPECT_CALL(mock_allocation_manager_, IsResourceFree(resource, resource_id))
       .WillOnce(Return(true));

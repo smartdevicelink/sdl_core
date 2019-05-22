@@ -92,7 +92,8 @@ class GetInteriorVehicleDataRequestTest
       , rc_app_extention_(std::make_shared<RCAppExtension>(kModuleId))
       , rc_app_extention2_(std::make_shared<RCAppExtension>(kModuleId))
       , apps_lock_(std::make_shared<sync_primitives::Lock>())
-      , apps_da_(apps_, apps_lock_) {
+      , apps_da_(apps_, apps_lock_)
+      , rc_capabilities_(smart_objects::SmartType::SmartType_Array) {
     ON_CALL(*mock_app_, app_id()).WillByDefault(Return(kAppId));
     ON_CALL(*mock_app2_, app_id()).WillByDefault(Return(kAppId2));
     ON_CALL(*mock_app_, is_remote_control_supported())
@@ -126,6 +127,8 @@ class GetInteriorVehicleDataRequestTest
     std::pair<uint32_t, int32_t> frequency;
     frequency.first = max_request_in_time_frame;
     frequency.second = time_frame_of_allowed_requests;
+    smart_objects::SmartObject control_caps((smart_objects::SmartType_Array));
+    rc_capabilities_[strings::kradioControlCapabilities] = control_caps;
     ON_CALL(app_mngr_, get_settings())
         .WillByDefault(ReturnRef(app_mngr_settings_));
     ON_CALL(app_mngr_settings_, get_interior_vehicle_data_frequency())
@@ -145,7 +148,7 @@ class GetInteriorVehicleDataRequestTest
     ON_CALL(app_mngr_, hmi_capabilities())
         .WillByDefault(ReturnRef(mock_hmi_capabilities_));
     ON_CALL(mock_hmi_capabilities_, rc_capability())
-        .WillByDefault(Return(nullptr));
+        .WillByDefault(Return(&rc_capabilities_));
     ON_CALL(mock_policy_handler_,
             CheckHMIType(
                 _, mobile_apis::AppHMIType::eType::REMOTE_CONTROL, nullptr))
@@ -153,6 +156,8 @@ class GetInteriorVehicleDataRequestTest
     ON_CALL(mock_policy_handler_, CheckModule(_, _))
         .WillByDefault(Return(true));
     ON_CALL(mock_allocation_manager_, is_rc_enabled())
+        .WillByDefault(Return(true));
+    ON_CALL(mock_rc_capabilities_manager_, CheckIfModuleExistInCapabilities(_))
         .WillByDefault(Return(true));
   }
 
@@ -186,6 +191,7 @@ class GetInteriorVehicleDataRequestTest
   DataAccessor<application_manager::ApplicationSet> apps_da_;
   testing::NiceMock<rc_rpc_plugin_test::MockRCCapabilitiesManager>
       mock_rc_capabilities_manager_;
+  smart_objects::SmartObject rc_capabilities_;
 };
 
 TEST_F(GetInteriorVehicleDataRequestTest,
@@ -198,9 +204,8 @@ TEST_F(GetInteriorVehicleDataRequestTest,
       .WillByDefault(Return(false));
   ON_CALL(mock_interior_data_manager_, CheckRequestsToHMIFrequency(_))
       .WillByDefault(Return(true));
-  std::shared_ptr<rc_rpc_plugin::commands::GetInteriorVehicleDataRequest>
-      command = CreateRCCommand<
-          rc_rpc_plugin::commands::GetInteriorVehicleDataRequest>(
+  auto command =
+      CreateRCCommand<rc_rpc_plugin::commands::GetInteriorVehicleDataRequest>(
           mobile_message);
 
   // Expectations
@@ -227,9 +232,8 @@ TEST_F(GetInteriorVehicleDataRequestTest,
       .WillByDefault(Return(false));
   ON_CALL(mock_interior_data_manager_, CheckRequestsToHMIFrequency(_))
       .WillByDefault(Return(true));
-  std::shared_ptr<rc_rpc_plugin::commands::GetInteriorVehicleDataRequest>
-      command = CreateRCCommand<
-          rc_rpc_plugin::commands::GetInteriorVehicleDataRequest>(
+  auto command =
+      CreateRCCommand<rc_rpc_plugin::commands::GetInteriorVehicleDataRequest>(
           mobile_message);
 
   // Expectations
@@ -265,9 +269,8 @@ TEST_F(
   radio_data[message_params::kBand] = enums_value::kAM;
   radio_data[message_params::kSisData] = sis_data;
 
-  std::shared_ptr<rc_rpc_plugin::commands::GetInteriorVehicleDataRequest>
-      command = CreateRCCommand<
-          rc_rpc_plugin::commands::GetInteriorVehicleDataRequest>(
+  auto command =
+      CreateRCCommand<rc_rpc_plugin::commands::GetInteriorVehicleDataRequest>(
           mobile_message);
 
   // Expectations
@@ -333,9 +336,8 @@ TEST_F(
   EXPECT_CALL(mock_interior_data_cache_, Remove(enums_value::kRadio));
 
   // Act
-  std::shared_ptr<rc_rpc_plugin::commands::GetInteriorVehicleDataRequest>
-      command = CreateRCCommand<
-          rc_rpc_plugin::commands::GetInteriorVehicleDataRequest>(
+  auto command =
+      CreateRCCommand<rc_rpc_plugin::commands::GetInteriorVehicleDataRequest>(
           mobile_message);
   ASSERT_TRUE(command->Init());
   command->Run();
@@ -363,9 +365,8 @@ TEST_F(GetInteriorVehicleDataRequestTest,
   radio_data[message_params::kBand] = enums_value::kAM;
   ON_CALL(app_mngr_, applications()).WillByDefault(Return(apps_da_));
 
-  std::shared_ptr<rc_rpc_plugin::commands::GetInteriorVehicleDataRequest>
-      command = CreateRCCommand<
-          rc_rpc_plugin::commands::GetInteriorVehicleDataRequest>(
+  auto command =
+      CreateRCCommand<rc_rpc_plugin::commands::GetInteriorVehicleDataRequest>(
           mobile_message);
 
   // Expectations
@@ -402,13 +403,11 @@ TEST_F(
   ns_smart_device_link::ns_smart_objects::SmartObject& msg_params =
       (*mobile_message)[application_manager::strings::msg_params];
   msg_params[message_params::kModuleType] = mobile_apis::ModuleType::RADIO;
-  std::shared_ptr<rc_rpc_plugin::commands::GetInteriorVehicleDataRequest>
-      command = CreateRCCommand<
-          rc_rpc_plugin::commands::GetInteriorVehicleDataRequest>(
+  auto command =
+      CreateRCCommand<rc_rpc_plugin::commands::GetInteriorVehicleDataRequest>(
           mobile_message);
-  smart_objects::SmartObject rc_capabilities;
   ON_CALL(mock_hmi_capabilities_, rc_capability())
-      .WillByDefault(Return(&rc_capabilities));
+      .WillByDefault(Return(nullptr));
 
   // Expectations
   EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_, _)).Times(0);
@@ -430,9 +429,8 @@ TEST_F(
   ns_smart_device_link::ns_smart_objects::SmartObject& msg_params =
       (*mobile_message)[application_manager::strings::msg_params];
   msg_params[message_params::kModuleType] = mobile_apis::ModuleType::RADIO;
-  std::shared_ptr<rc_rpc_plugin::commands::GetInteriorVehicleDataRequest>
-      command = CreateRCCommand<
-          rc_rpc_plugin::commands::GetInteriorVehicleDataRequest>(
+  auto command =
+      CreateRCCommand<rc_rpc_plugin::commands::GetInteriorVehicleDataRequest>(
           mobile_message);
   ON_CALL(mock_policy_handler_, CheckModule(_, _)).WillByDefault(Return(false));
 
@@ -569,9 +567,8 @@ TEST_F(GetInteriorVehicleDataRequestTest,
   EXPECT_CALL(mock_interior_data_cache_, Clear()).Times(0);
 
   // Act
-  std::shared_ptr<rc_rpc_plugin::commands::GetInteriorVehicleDataRequest>
-      command = CreateRCCommand<
-          rc_rpc_plugin::commands::GetInteriorVehicleDataRequest>(
+  auto command =
+      CreateRCCommand<rc_rpc_plugin::commands::GetInteriorVehicleDataRequest>(
           mobile_message);
   ASSERT_TRUE(command->Init());
   command->Run();
@@ -594,9 +591,8 @@ TEST_F(GetInteriorVehicleDataRequestTest,
                    [message_params::kModuleType] = module_type;
   smart_objects::SmartObject radio_data;
   radio_data[message_params::kBand] = enums_value::kAM;
-  std::shared_ptr<rc_rpc_plugin::commands::GetInteriorVehicleDataRequest>
-      command = CreateRCCommand<
-          rc_rpc_plugin::commands::GetInteriorVehicleDataRequest>(
+  auto command =
+      CreateRCCommand<rc_rpc_plugin::commands::GetInteriorVehicleDataRequest>(
           mobile_message);
   size_t i = 0;
   for (; i <= max_request_in_time_frame; ++i) {

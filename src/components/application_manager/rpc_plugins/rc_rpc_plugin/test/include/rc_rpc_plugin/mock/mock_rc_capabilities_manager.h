@@ -38,33 +38,41 @@
 namespace rc_rpc_plugin_test {
 class MockRCCapabilitiesManager : public rc_rpc_plugin::RCCapabilitiesManager {
  public:
-  MOCK_METHOD1(CheckIfButtonExistInRCCaps,
-               bool(const mobile_apis::ButtonName::eType button));
+  MOCK_CONST_METHOD2(CheckButtonName,
+                     bool(const std::string& module_type,
+                          const std::string& button_name));
 
-  MOCK_METHOD2(CheckButtonName,
-               bool(const std::string& module_type,
-                    const std::string& button_name));
+  MOCK_CONST_METHOD1(CheckIfModuleExistInCapabilities,
+                     bool(const rc_rpc_plugin::ModuleUid& module_type));
 
-  MOCK_METHOD1(CheckIfModuleTypeExistInCapabilities,
-               bool(const std::string& module_type));
+  MOCK_CONST_METHOD2(GetModuleDataCapabilities,
+                     rc_rpc_plugin::ModuleCapability(
+                         const smart_objects::SmartObject& module_data,
+                         const std::string& module_id));
 
-  MOCK_METHOD1(GetModuleDataCapabilities,
-               rc_rpc_plugin::ModuleCapability(
-                   const smart_objects::SmartObject& module_data));
+  MOCK_CONST_METHOD2(ControlData,
+                     const smart_objects::SmartObject&(
+                         const smart_objects::SmartObject& module_data,
+                         const std::string& module_type));
 
-  MOCK_METHOD2(ControlData,
-               const smart_objects::SmartObject&(
-                   const smart_objects::SmartObject& module_data,
-                   const std::string& module_type));
+  MOCK_CONST_METHOD3(
+      AreReadOnlyParamsPresent,
+      bool(const smart_objects::SmartObject& module_data,
+           const std::string& module_type,
+           rc_rpc_plugin::ModuleCapability& module_data_capabilities));
 
-  MOCK_METHOD3(AreReadOnlyParamsPresent,
-               bool(const smart_objects::SmartObject& module_data,
-                    const std::string& module_type,
-                    rc_rpc_plugin::ModuleCapability& module_data_capabilities));
+  MOCK_CONST_METHOD2(AreAllParamsReadOnly,
+                     bool(const smart_objects::SmartObject& module_data,
+                          const std::string& module_type));
 
-  MOCK_METHOD2(AreAllParamsReadOnly,
-               bool(const smart_objects::SmartObject& module_data,
-                    const std::string& module_type));
+  MOCK_CONST_METHOD1(GetDefaultModuleIdFromCapabilities,
+                     const std::string(const std::string& module_type));
+
+  MOCK_CONST_METHOD1(CheckIfButtonExistInRCCaps,
+                     bool(const mobile_apis::ButtonName::eType button));
+
+  MOCK_CONST_METHOD0(GetResources,
+                     const std::vector<rc_rpc_plugin::ModuleUid>());
 };
 }  // namespace rc_rpc_plugin_test
 #endif  // SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_RC_RPC_PLUGIN_TEST_INCLUDE_RC_RPC_PLUGIN_MOCK_MOCK_RC_СAPABILITIES_MANAGER_H_

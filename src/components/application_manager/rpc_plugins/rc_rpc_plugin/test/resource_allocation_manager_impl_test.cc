@@ -34,10 +34,13 @@
 
 #include "application_manager/mock_application.h"
 #include "application_manager/mock_application_manager.h"
+#include "application_manager/mock_hmi_capabilities.h"
 #include "application_manager/mock_rpc_service.h"
 #include "application_manager/policies/mock_policy_handler_interface.h"
 #include "interfaces/HMI_API.h"
 #include "interfaces/MOBILE_API.h"
+#include "rc_rpc_plugin/mock/mock_rc_capabilities_manager.h"
+#include "rc_rpc_plugin/rc_helpers.h"
 #include "rc_rpc_plugin/rc_module_constants.h"
 #include "rc_rpc_plugin/rc_rpc_plugin.h"
 #include "rc_rpc_plugin/resource_allocation_manager_impl.h"
@@ -96,6 +99,10 @@ class RAManagerTest : public ::testing::Test {
     app_ext_ptr_ = std::make_shared<rc_rpc_plugin::RCAppExtension>(plugin_id);
     ON_CALL(*mock_app_1_, app_id()).WillByDefault(Return(kAppId1));
 
+    PrepareResources();
+    ON_CALL(mock_rc_capabilities_manager_, GetResources())
+        .WillByDefault(Return(resources_));
+
     OnRCStatusNotificationExpectations();
   }
 
@@ -105,6 +112,7 @@ class RAManagerTest : public ::testing::Test {
       const rc_rpc_plugin::AcquireResult::eType expected_result,
       const hmi_apis::Common_RCAccessMode::eType access_mode);
 
+  void PrepareResources();
   void OnRCStatusNotificationExpectations();
 
  protected:
@@ -120,6 +128,9 @@ class RAManagerTest : public ::testing::Test {
   application_manager::ApplicationSet apps_;
   std::shared_ptr<sync_primitives::Lock> apps_lock_ptr_;
   DataAccessor<application_manager::ApplicationSet> apps_da_;
+  testing::NiceMock<rc_rpc_plugin_test::MockRCCapabilitiesManager>
+      mock_rc_capabilities_manager_;
+  std::vector<ModuleUid> resources_;
 };
 
 void RAManagerTest::CheckResultWithHMILevelAndAccessMode(
@@ -144,6 +155,14 @@ void RAManagerTest::CheckResultWithHMILevelAndAccessMode(
             ra_manager.AcquireResource(kModuleType1, kModuleId, kAppId2));
 }
 
+void RAManagerTest::PrepareResources() {
+  const auto& all_module_types = RCHelpers::GetModulesList();
+  for (auto& module_type : all_module_types) {
+    ModuleUid module(module_type, kModuleId);
+    resources_.push_back(module);
+  }
+}
+
 void RAManagerTest::OnRCStatusNotificationExpectations() {
   ON_CALL(mock_app_mngr_, application(kAppId1))
       .WillByDefault(Return(mock_app_1_));
@@ -157,7 +176,8 @@ TEST_F(RAManagerTest, AcquireResource_NoAppRegistered_Expect_InUse) {
   // Arrange
   EXPECT_CALL(mock_app_mngr_, application(kAppId1))
       .WillOnce(Return(ApplicationSharedPtr()));
-  ResourceAllocationManagerImpl ra_manager(mock_app_mngr_, mock_rpc_service_);
+  ResourceAllocationManagerImpl ra_manager(
+      mock_app_mngr_, mock_rpc_service_, mock_rc_capabilities_manager_);
   // Act & Assert
   EXPECT_EQ(rc_rpc_plugin::AcquireResult::IN_USE,
             ra_manager.AcquireResource(kModuleType1, kModuleId, kAppId1));
@@ -166,7 +186,8 @@ TEST_F(RAManagerTest, AcquireResource_NoAppRegistered_Expect_InUse) {
 TEST_F(RAManagerTest,
        AcquireResource_AppRegisteredAnyHmiLevelResourceFree_Expect_Allowed) {
   // Arrange
-  ResourceAllocationManagerImpl ra_manager(mock_app_mngr_, mock_rpc_service_);
+  ResourceAllocationManagerImpl ra_manager(
+      mock_app_mngr_, mock_rpc_service_, mock_rc_capabilities_manager_);
   // Act & Assert
   EXPECT_EQ(rc_rpc_plugin::AcquireResult::ALLOWED,
             ra_manager.AcquireResource(kModuleType1, kModuleId, kAppId1));
@@ -178,7 +199,8 @@ TEST_F(
   // Arrange
   EXPECT_CALL(mock_app_mngr_, application(kAppId1))
       .WillOnce(Return(mock_app_1_));
-  ResourceAllocationManagerImpl ra_manager(mock_app_mngr_, mock_rpc_service_);
+  ResourceAllocationManagerImpl ra_manager(
+      mock_app_mngr_, mock_rpc_service_, mock_rc_capabilities_manager_);
   EXPECT_EQ(rc_rpc_plugin::AcquireResult::ALLOWED,
             ra_manager.AcquireResource(kModuleType1, kModuleId, kAppId1));
   EXPECT_CALL(mock_app_mngr_, application(kAppId1))
@@ -198,7 +220,8 @@ TEST_F(
   const AcquireResult::eType expected_result = AcquireResult::REJECTED;
   const Common_RCAccessMode::eType access_mode =
       Common_RCAccessMode::eType::AUTO_ALLOW;
-  ResourceAllocationManagerImpl ra_manager(mock_app_mngr_, mock_rpc_service_);
+  ResourceAllocationManagerImpl ra_manager(
+      mock_app_mngr_, mock_rpc_service_, mock_rc_capabilities_manager_);
   CheckResultWithHMILevelAndAccessMode(
       ra_manager, app_level, expected_result, access_mode);
 }
@@ -213,7 +236,8 @@ TEST_F(
   const AcquireResult::eType expected_result = AcquireResult::IN_USE;
   const Common_RCAccessMode::eType access_mode =
       Common_RCAccessMode::eType::AUTO_DENY;
-  ResourceAllocationManagerImpl ra_manager(mock_app_mngr_, mock_rpc_service_);
+  ResourceAllocationManagerImpl ra_manager(
+      mock_app_mngr_, mock_rpc_service_, mock_rc_capabilities_manager_);
   CheckResultWithHMILevelAndAccessMode(
       ra_manager, app_level, expected_result, access_mode);
 }
@@ -228,7 +252,8 @@ TEST_F(
   const AcquireResult::eType expected_result = AcquireResult::ALLOWED;
   const Common_RCAccessMode::eType access_mode =
       Common_RCAccessMode::eType::AUTO_ALLOW;
-  ResourceAllocationManagerImpl ra_manager(mock_app_mngr_, mock_rpc_service_);
+  ResourceAllocationManagerImpl ra_manager(
+      mock_app_mngr_, mock_rpc_service_, mock_rc_capabilities_manager_);
   CheckResultWithHMILevelAndAccessMode(
       ra_manager, app_level, expected_result, access_mode);
 }
@@ -243,7 +268,8 @@ TEST_F(
   const AcquireResult::eType expected_result = AcquireResult::ASK_DRIVER;
   const Common_RCAccessMode::eType access_mode =
       Common_RCAccessMode::eType::ASK_DRIVER;
-  ResourceAllocationManagerImpl ra_manager(mock_app_mngr_, mock_rpc_service_);
+  ResourceAllocationManagerImpl ra_manager(
+      mock_app_mngr_, mock_rpc_service_, mock_rc_capabilities_manager_);
   CheckResultWithHMILevelAndAccessMode(
       ra_manager, app_level, expected_result, access_mode);
 }
@@ -251,7 +277,8 @@ TEST_F(
 TEST_F(RAManagerTest,
        AcquireResource_AcquiredModuleIsRejectedForApp2_ExpectApp2Rejected) {
   // Arrange
-  ResourceAllocationManagerImpl ra_manager(mock_app_mngr_, mock_rpc_service_);
+  ResourceAllocationManagerImpl ra_manager(
+      mock_app_mngr_, mock_rpc_service_, mock_rc_capabilities_manager_);
   EXPECT_CALL(mock_app_mngr_, application(kAppId1))
       .WillRepeatedly(Return(mock_app_1_));
   EXPECT_EQ(AcquireResult::ALLOWED,
@@ -269,7 +296,8 @@ TEST_F(RAManagerTest,
 
 TEST_F(RAManagerTest, AppExit_ReleaseResource) {
   // Arrange
-  ResourceAllocationManagerImpl ra_manager(mock_app_mngr_, mock_rpc_service_);
+  ResourceAllocationManagerImpl ra_manager(
+      mock_app_mngr_, mock_rpc_service_, mock_rc_capabilities_manager_);
   ra_manager.SetAccessMode(hmi_apis::Common_RCAccessMode::eType::AUTO_DENY);
 
   EXPECT_CALL(mock_app_mngr_, application(kAppId1))
@@ -291,7 +319,8 @@ TEST_F(RAManagerTest, AppExit_ReleaseResource) {
 
 TEST_F(RAManagerTest, AnotherAppExit_NoReleaseResource) {
   // Arrange
-  ResourceAllocationManagerImpl ra_manager(mock_app_mngr_, mock_rpc_service_);
+  ResourceAllocationManagerImpl ra_manager(
+      mock_app_mngr_, mock_rpc_service_, mock_rc_capabilities_manager_);
   ra_manager.SetAccessMode(hmi_apis::Common_RCAccessMode::eType::AUTO_DENY);
 
   EXPECT_CALL(mock_app_mngr_, application(kAppId1))
@@ -319,7 +348,8 @@ TEST_F(RAManagerTest, AnotherAppExit_NoReleaseResource) {
 
 TEST_F(RAManagerTest, AppUnregistered_ReleaseResource) {
   // Arrange
-  ResourceAllocationManagerImpl ra_manager(mock_app_mngr_, mock_rpc_service_);
+  ResourceAllocationManagerImpl ra_manager(
+      mock_app_mngr_, mock_rpc_service_, mock_rc_capabilities_manager_);
   ra_manager.SetAccessMode(hmi_apis::Common_RCAccessMode::eType::AUTO_DENY);
 
   RCAppExtensionPtr rc_extention_ptr =
@@ -345,7 +375,8 @@ TEST_F(RAManagerTest, AppUnregistered_ReleaseResource) {
 
 TEST_F(RAManagerTest, AnotherAppUnregistered_NoReleaseResource) {
   // Arrange
-  ResourceAllocationManagerImpl ra_manager(mock_app_mngr_, mock_rpc_service_);
+  ResourceAllocationManagerImpl ra_manager(
+      mock_app_mngr_, mock_rpc_service_, mock_rc_capabilities_manager_);
   ra_manager.SetAccessMode(hmi_apis::Common_RCAccessMode::eType::AUTO_DENY);
 
   EXPECT_CALL(mock_app_mngr_, application(kAppId1))
@@ -373,7 +404,8 @@ TEST_F(RAManagerTest, AnotherAppUnregistered_NoReleaseResource) {
 
 TEST_F(RAManagerTest, AppsDisallowed_ReleaseAllResources) {
   // Arrange
-  ResourceAllocationManagerImpl ra_manager(mock_app_mngr_, mock_rpc_service_);
+  ResourceAllocationManagerImpl ra_manager(
+      mock_app_mngr_, mock_rpc_service_, mock_rc_capabilities_manager_);
   ra_manager.SetAccessMode(hmi_apis::Common_RCAccessMode::eType::AUTO_DENY);
 
   EXPECT_CALL(mock_app_mngr_, application(kAppId1))
@@ -416,7 +448,8 @@ TEST_F(RAManagerTest, AppsDisallowed_ReleaseAllResources) {
 
 TEST_F(RAManagerTest, AppGotRevokedModulesWithPTU_ReleaseRevokedResource) {
   // Arrange
-  ResourceAllocationManagerImpl ra_manager(mock_app_mngr_, mock_rpc_service_);
+  ResourceAllocationManagerImpl ra_manager(
+      mock_app_mngr_, mock_rpc_service_, mock_rc_capabilities_manager_);
   ra_manager.SetAccessMode(hmi_apis::Common_RCAccessMode::eType::AUTO_DENY);
 
   EXPECT_CALL(mock_app_mngr_, application(kAppId1))
@@ -477,7 +510,8 @@ TEST_F(RAManagerTest, AppGotRevokedModulesWithPTU_ReleaseRevokedResource) {
 }
 
 TEST_F(RAManagerTest, GetAccessMode_ExpectedSameAsHadSet) {
-  ResourceAllocationManagerImpl ra_manager(mock_app_mngr_, mock_rpc_service_);
+  ResourceAllocationManagerImpl ra_manager(
+      mock_app_mngr_, mock_rpc_service_, mock_rc_capabilities_manager_);
 
   ra_manager.SetAccessMode(hmi_apis::Common_RCAccessMode::AUTO_DENY);
   EXPECT_EQ(hmi_apis::Common_RCAccessMode::AUTO_DENY,
@@ -498,7 +532,8 @@ TEST_F(RAManagerTest, GetAccessMode_ExpectedSameAsHadSet) {
 
 TEST_F(RAManagerTest, OnRCStatus_AppRegistation_RC_allowed) {
   // Arrange
-  ResourceAllocationManagerImpl ra_manager(mock_app_mngr_, mock_rpc_service_);
+  ResourceAllocationManagerImpl ra_manager(
+      mock_app_mngr_, mock_rpc_service_, mock_rc_capabilities_manager_);
   ON_CALL((*mock_app_1_), is_remote_control_supported())
       .WillByDefault(Return(true));
   ON_CALL((*mock_app_1_), hmi_app_id()).WillByDefault(Return(kHMIAppId1));
@@ -527,7 +562,8 @@ TEST_F(RAManagerTest, OnRCStatus_AppRegistation_RC_allowed) {
 
 TEST_F(RAManagerTest, OnRCStatus_AppRegistation_RC_disallowed) {
   // Arrange
-  ResourceAllocationManagerImpl ra_manager(mock_app_mngr_, mock_rpc_service_);
+  ResourceAllocationManagerImpl ra_manager(
+      mock_app_mngr_, mock_rpc_service_, mock_rc_capabilities_manager_);
   ra_manager.set_rc_enabled(false);
 
   ON_CALL((*mock_app_1_), is_remote_control_supported())
@@ -555,7 +591,8 @@ TEST_F(RAManagerTest, OnRCStatus_AppRegistation_RC_disallowed) {
 
 TEST_F(RAManagerTest, OnRCStatus_RCStateChanging_RC_disabling) {
   // Arrange
-  ResourceAllocationManagerImpl ra_manager(mock_app_mngr_, mock_rpc_service_);
+  ResourceAllocationManagerImpl ra_manager(
+      mock_app_mngr_, mock_rpc_service_, mock_rc_capabilities_manager_);
   ON_CALL((*mock_app_1_), is_remote_control_supported())
       .WillByDefault(Return(true));
   ON_CALL((*mock_app_1_), hmi_app_id()).WillByDefault(Return(kHMIAppId1));
@@ -592,7 +629,8 @@ TEST_F(RAManagerTest, OnRCStatus_RCStateChanging_RC_disabling) {
 
 TEST_F(RAManagerTest, OnRCStatus_RCStateChanging_RC_enabling) {
   // Arrange
-  ResourceAllocationManagerImpl ra_manager(mock_app_mngr_, mock_rpc_service_);
+  ResourceAllocationManagerImpl ra_manager(
+      mock_app_mngr_, mock_rpc_service_, mock_rc_capabilities_manager_);
   ON_CALL((*mock_app_1_), is_remote_control_supported())
       .WillByDefault(Return(true));
   ON_CALL((*mock_app_1_), hmi_app_id()).WillByDefault(Return(kHMIAppId1));
@@ -629,7 +667,8 @@ TEST_F(RAManagerTest, OnRCStatus_RCStateChanging_RC_enabling) {
 
 TEST_F(RAManagerTest, OnRCStatus_ModuleAllocation) {
   // Arrange
-  ResourceAllocationManagerImpl ra_manager(mock_app_mngr_, mock_rpc_service_);
+  ResourceAllocationManagerImpl ra_manager(
+      mock_app_mngr_, mock_rpc_service_, mock_rc_capabilities_manager_);
 
   ON_CALL((*mock_app_1_), is_remote_control_supported())
       .WillByDefault(Return(true));
