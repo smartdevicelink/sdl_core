@@ -54,33 +54,44 @@ ButtonPressRequest::ButtonPressRequest(
 
 ButtonPressRequest::~ButtonPressRequest() {}
 
-void ButtonPressRequest::Execute() {
-  LOG4CXX_AUTO_TRACE(logger_);
+std::string ButtonPressRequest::GetButtonName() const {
+  mobile_apis::ButtonName::eType button_name =
+      static_cast<mobile_apis::ButtonName::eType>(
+          (*message_)[app_mngr::strings::msg_params]
+                     [message_params::kButtonName]
+                         .asUInt());
+  const char* str;
+  const bool ok = ns_smart_device_link::ns_smart_objects::EnumConversionHelper<
+      mobile_apis::ButtonName::eType>::EnumToCString(button_name, &str);
+  return ok ? str : "unknown";
+}
 
-  const char* button_name;
-  ns_smart_device_link::ns_smart_objects::
-      EnumConversionHelper<mobile_apis::ButtonName::eType>::EnumToCString(
-          static_cast<mobile_apis::ButtonName::eType>(
-              (*message_)[app_mngr::strings::msg_params]
-                         [message_params::kButtonName]
-                             .asUInt()),
-          &button_name);
-
-  const std::string module_type = ModuleType();
+const mobile_apis::ButtonName::eType ButtonPressRequest::GetButtonId() const {
+  const auto button_name = GetButtonName();
   static RCHelpers::ButtonsMap btn_map = RCHelpers::buttons_map();
   mobile_apis::ButtonName::eType button_id =
       mobile_apis::ButtonName::INVALID_ENUM;
   if (btn_map.end() != btn_map.find(button_name)) {
     button_id = btn_map[button_name];
   }
+  return button_id;
+}
 
-  const smart_objects::SmartObject* rc_capabilities =
-      hmi_capabilities_.rc_capability();
+void ButtonPressRequest::Execute() {
+  LOG4CXX_AUTO_TRACE(logger_);
+  const std::string module_type = ModuleType();
+
   const bool button_name_matches_module_type =
-      rc_capabilities_manager_.CheckButtonName(module_type, button_name);
-  const bool button_id_exist_in_caps =
-      rc_capabilities &&
-      rc_capabilities_manager_.CheckIfButtonExistInRCCaps(button_id);
+      rc_capabilities_manager_.CheckButtonName(module_type, GetButtonName());
+
+  const std::string module_id = ModuleId();
+  const ModuleUid module(module_type, module_id);
+  const bool is_module_exists =
+      rc_capabilities_manager_.CheckIfModuleExistInCapabilities(module);
+
+  const bool button_valid_by_caps =
+      is_module_exists &&
+      rc_capabilities_manager_.CheckIfButtonExistInRCCaps(GetButtonId());
 
   app_mngr::ApplicationSharedPtr app =
       application_manager_.application(connection_key());
@@ -88,7 +99,9 @@ void ButtonPressRequest::Execute() {
   (*message_)[app_mngr::strings::msg_params][app_mngr::strings::app_id] =
       app->app_id();
 
-  if (button_name_matches_module_type && button_id_exist_in_caps) {
+  if (button_name_matches_module_type && button_valid_by_caps) {
+    (*message_)[app_mngr::strings::msg_params][message_params::kModuleId] =
+        module_id;
     SendHMIRequest(hmi_apis::FunctionID::Buttons_ButtonPress,
                    &(*message_)[app_mngr::strings::msg_params],
                    true);
@@ -99,11 +112,12 @@ void ButtonPressRequest::Execute() {
                  mobile_apis::Result::INVALID_DATA,
                  "Request module type and button name mismatch!");
   } else {
-    LOG4CXX_WARN(logger_, "Requested button is not exists in capabilities!");
+    LOG4CXX_WARN(logger_,
+                 "Requested button or module does not exist in capabilities!");
     SetResourceState(module_type, ResourceState::FREE);
     SendResponse(false,
                  mobile_apis::Result::UNSUPPORTED_RESOURCE,
-                 "Requested button is not exists in capabilities!");
+                 "Requested button or module does not exist in capabilities!");
   }
 }
 
@@ -182,8 +196,7 @@ std::string ButtonPressRequest::ModuleId() const {
     return msg_params[message_params::kModuleId].asString();
   }
   const std::string module_id =
-      rc_capabilities_manager_.GetDefaultModuleIdForSpecifiedButtonName(
-          GetButtonId());
+      rc_capabilities_manager_.GetDefaultModuleIdFromCapabilities(ModuleType());
   return module_id;
 }
 

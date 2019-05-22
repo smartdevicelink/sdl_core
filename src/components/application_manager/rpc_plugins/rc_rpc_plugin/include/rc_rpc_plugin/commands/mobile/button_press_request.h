@@ -92,6 +92,10 @@ class ButtonPressRequest : public RCCommandRequest {
    * @brief ButtonPressRequest class destructor
    */
   ~ButtonPressRequest();
+
+ private:
+  const mobile_apis::ButtonName::eType GetButtonId() const;
+  std::string GetButtonName() const;
 };
 
 }  // namespace commands

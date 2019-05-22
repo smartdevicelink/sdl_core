@@ -128,7 +128,7 @@ bool RCCapabilitiesManagerImpl::CheckIfModuleTypeExistInCapabilities(
 }
 
 bool RCCapabilitiesManagerImpl::CheckIfButtonExistInRCCaps(
-    const mobile_apis::ButtonName::eType button) {
+    const mobile_apis::ButtonName::eType button) const {
   auto rc_capabilities = *(hmi_capabilities_.rc_capability());
   if (rc_capabilities.keyExists(strings::kbuttonCapabilities)) {
     const smart_objects::SmartObject& button_caps =

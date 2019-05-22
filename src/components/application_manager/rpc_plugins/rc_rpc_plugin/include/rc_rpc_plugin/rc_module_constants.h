@@ -163,6 +163,7 @@ namespace message_params {
 const char kName[] = "name";
 const char kId[] = "id";
 const char kModuleId[] = "moduleId";
+const char kModuleInfo[] = "moduleInfo";
 
 // SetInteriorVehicleData request
 const char kModuleData[] = "moduleData";

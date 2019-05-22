@@ -45,10 +45,10 @@ class RCCapabilitiesManager {
    * @brief CheckIfButtonExistInRCCaps checks if the
    * specified button exists in rc_capabilities
    * @param button button name
-   * @return true if button exists, otherwise - false
+   * @return true if present, otherwise - false
    */
   virtual bool CheckIfButtonExistInRCCaps(
-      const mobile_apis::ButtonName::eType button) = 0;
+      const mobile_apis::ButtonName::eType button) const = 0;
 
   /**
    * @brief CheckButtonName checks if the button
@@ -122,7 +122,6 @@ class RCCapabilitiesManager {
    */
   virtual const std::string GetDefaultModuleIdFromCapabilities(
       const std::string& module_type) const = 0;
-
 
   virtual ~RCCapabilitiesManager() {}
 };

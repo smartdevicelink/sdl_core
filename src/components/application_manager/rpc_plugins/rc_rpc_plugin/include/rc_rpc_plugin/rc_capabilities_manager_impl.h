@@ -42,7 +42,7 @@ class RCCapabilitiesManagerImpl : public RCCapabilitiesManager {
       application_manager::HMICapabilities& hmi_capabilities);
 
   bool CheckIfButtonExistInRCCaps(
-      const mobile_apis::ButtonName::eType button) FINAL;
+      const mobile_apis::ButtonName::eType button) const FINAL;
 
   bool CheckButtonName(const std::string& module_type,
                        const std::string& button_name) FINAL;
@@ -67,7 +67,6 @@ class RCCapabilitiesManagerImpl : public RCCapabilitiesManager {
 
   const std::string GetDefaultModuleIdFromCapabilities(
       const std::string& module_type) const FINAL;
-
 
  private:
   const std::map<std::string, std::string> GetLightCapabilitiesMapping();
