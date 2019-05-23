@@ -95,6 +95,11 @@ class PolicyEncryptionFlagGetterInterface {
    */
   virtual const std::string GetPolicyFunctionName(
       const uint32_t function_id) const = 0;
+  /*
+   * @brief retrieves application names from policy table
+   * @return container with policy application names
+   */
+  virtual const std::vector<std::string> GetApplicationPolicyIDs() const = 0;
 };
 
 }  // policy

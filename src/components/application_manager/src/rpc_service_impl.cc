@@ -78,7 +78,7 @@ EncryptionFlagCheckResult RPCServiceImpl::IsEncryptionRequired(
       message[strings::params][strings::message_type].asUInt();
   const bool policy_encryption_flag =
       rpc_protection_manager_->CheckPolicyEncryptionFlag(
-          function_id, app, correlation_id, is_rpc_service_secure);
+          function_id, app, is_rpc_service_secure);
   if (MessageType::kRequest == message_type) {
     const bool message_protected =
         message[strings::params][strings::protection].asBool();
@@ -164,9 +164,12 @@ bool RPCServiceImpl::ManageMobileCommand(
             *message,
             app,
             protocol_handler_->IsRPCServiceSecure(connection_key))) {
-      const auto response =
-          rpc_protection_manager_->CreateEncryptionNeededResponse(
-              connection_key, function_id, correlation_id);
+      const auto response = MessageHelper::CreateNegativeResponse(
+          connection_key,
+          function_id,
+          correlation_id,
+          static_cast<int32_t>(mobile_apis::Result::ENCRYPTION_NEEDED));
+      ;
       SendMessageToMobile(response);
       return false;
     }
@@ -425,7 +428,6 @@ void RPCServiceImpl::Handle(const impl::MessageToMobile message) {
           ? rpc_protection_manager_->CheckPolicyEncryptionFlag(
                 message->function_id(),
                 app_manager_.application(app_id),
-                correlation_id,
                 is_service_secure)
           : rpc_protection_manager_->IsInEncryptionNeededCache(app_id,
                                                                correlation_id);

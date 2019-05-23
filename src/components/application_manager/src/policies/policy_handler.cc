@@ -400,10 +400,23 @@ bool PolicyHandler::InitPolicyTable() {
       hmi_apis::FunctionID::BasicCommunication_OnReady);
   std::string preloaded_file = get_settings().preloaded_pt_file();
   if (file_system::FileExists(preloaded_file)) {
-    return policy_manager_->InitPT(preloaded_file, &get_settings());
+    const bool pt_inited =
+        policy_manager_->InitPT(preloaded_file, &get_settings());
+    OnPTInited();
+    return pt_inited;
   }
   LOG4CXX_FATAL(logger_, "The file which contains preloaded PT is not exist");
   return false;
+}
+
+void PolicyHandler::OnPTInited() {
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  sync_primitives::AutoLock lock(listeners_lock_);
+
+  std::for_each(listeners_.begin(),
+                listeners_.end(),
+                std::mem_fun(&PolicyHandlerObserver::OnPTInited));
 }
 
 bool PolicyHandler::ResetPolicyTable() {

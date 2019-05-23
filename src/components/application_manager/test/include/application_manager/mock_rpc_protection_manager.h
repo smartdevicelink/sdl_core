@@ -39,10 +39,9 @@
 namespace application_manager {
 class MockRPCProtectionManager : public RPCProtectionManager {
  public:
-  MOCK_CONST_METHOD4(CheckPolicyEncryptionFlag,
+  MOCK_CONST_METHOD3(CheckPolicyEncryptionFlag,
                      bool(const uint32_t function_id,
                           const ApplicationSharedPtr app,
-                          const uint32_t conrrelation_id,
                           const bool is_rpc_service_secure));
 
   MOCK_METHOD3(CreateEncryptionNeededResponse,

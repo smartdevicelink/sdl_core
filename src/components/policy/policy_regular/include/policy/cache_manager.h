@@ -391,6 +391,12 @@ class CacheManager : public CacheManagerInterface {
   bool GetFunctionalGroupings(policy_table::FunctionalGroupings& groups);
 
   /**
+   * @brief Get policy app names from PT
+   * @return container of strings representing policy application names
+   */
+  const policy_table::Strings GetPolicyAppNames() const OVERRIDE;
+
+  /**
    * Checks if the application is represented in policy table
    * @param app_id application id
    * @return true if application is represented in policy table

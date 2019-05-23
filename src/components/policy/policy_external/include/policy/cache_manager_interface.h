@@ -417,6 +417,12 @@ class CacheManagerInterface {
       policy_table::FunctionalGroupings& groups) = 0;
 
   /**
+   * @brief Get policy app names from PT
+   * @return container of strings representing policy application names
+   */
+  virtual const policy_table::Strings GetPolicyAppNames() const = 0;
+
+  /**
    * Checks if the application is represented in policy table
    * @param app_id application id
    * @return true if application is represented in policy table

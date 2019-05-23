@@ -654,6 +654,8 @@ class PolicyHandler : public PolicyHandlerInterface,
 
   virtual void OnPTUFinished(const bool ptu_result) OVERRIDE;
 
+  virtual void OnPTInited() OVERRIDE;
+
   /**
    * @brief OnDeviceSwitching Notifies policy manager on device switch event so
    * policy permissions should be processed accordingly

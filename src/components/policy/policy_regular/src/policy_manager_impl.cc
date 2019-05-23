@@ -1564,6 +1564,20 @@ const std::vector<std::string> PolicyManagerImpl::GetFunctionGroupsForApp(
   return function_groups;
 }
 
+const std::vector<std::string> PolicyManagerImpl::GetApplicationPolicyIDs()
+    const {
+  LOG4CXX_AUTO_TRACE(logger_);
+  std::vector<std::string> policy_app_ids;
+
+  const auto apps = cache_->GetPolicyAppNames();
+
+  for (const auto& app : apps) {
+    policy_app_ids.push_back(app);
+  }
+
+  return policy_app_ids;
+}
+
 bool PolicyManagerImpl::FunctionGroupNeedEncryption(
     const std::string& policy_group) const {
   LOG4CXX_AUTO_TRACE(logger_);

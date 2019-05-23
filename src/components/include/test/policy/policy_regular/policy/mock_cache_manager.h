@@ -266,6 +266,7 @@ class MockCacheManagerInterface : public CacheManagerInterface {
   MOCK_CONST_METHOD2(GetApplicationParams,
                      void(const std::string& application_name,
                           policy_table::ApplicationParams& application_params));
+  MOCK_CONST_METHOD0(GetPolicyAppNames, const policy_table::Strings());
 };
 
 }  // namespace policy_test
