@@ -116,7 +116,6 @@ typedef Integer<int32_t, 0, INT32_MAX> FunctionIDInt;
 typedef Map<Strings, 0, 255> RemoteRpcs;
 typedef Map<RemoteRpcs, 0, 255> AccessModules;
 typedef Array<Enum<ModuleType>, 0, 255> ModuleTypes;
-
 typedef AppHMIType AppHmiType;
 typedef std::vector<AppHMIType> AppHmiTypes;
 

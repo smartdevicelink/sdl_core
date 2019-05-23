@@ -37,6 +37,7 @@
 #include <memory>
 
 #include "application_manager/application.h"
+#include "application_manager/policies/policy_handler_observer.h"
 #include "smart_objects/smart_object.h"
 
 namespace ns_smart_device_link {
@@ -60,7 +61,7 @@ namespace application_manager {
   * PolicyEncryptionFlagGetterInterface which is implemented by PolicyManager,
   * providing adequate level of abstraction.
   */
-class RPCProtectionManager {
+class RPCProtectionManager : public policy::PolicyHandlerObserver {
  public:
   /*
    * @brief virtual destructor RPCProtectionManager
@@ -77,7 +78,6 @@ class RPCProtectionManager {
   virtual bool CheckPolicyEncryptionFlag(
       const uint32_t function_id,
       const ApplicationSharedPtr app,
-      const uint32_t conrrelation_id,
       const bool is_rpc_service_secure) const = 0;
   /*
    * @brief check whether given rpc is saved to internal cache and needs to be
@@ -89,18 +89,6 @@ class RPCProtectionManager {
    */
   virtual bool IsInEncryptionNeededCache(
       const uint32_t app_id, const uint32_t conrrelation_id) const = 0;
-  /*
-   * @brief create encryption needed response in case when received unencrypted
-   * rpc that requires encryption
-   * @param connection_key connection key
-   * @param function_id function id
-   * @param conrrelation_id conrrelation id
-   * @return response with error code ENCRYPTION_NEEDED
-   */
-  virtual smart_objects::SmartObjectSPtr CreateEncryptionNeededResponse(
-      const uint32_t connection_key,
-      const uint32_t function_id,
-      const uint32_t conrrelation_id) = 0;
 
   /*
    * @brief Adds app id and correlation id of a message to internal cache

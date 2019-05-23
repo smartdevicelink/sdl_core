@@ -54,40 +54,16 @@ RPCProtectionManagerImpl::RPCProtectionManagerImpl(
   LOG4CXX_AUTO_TRACE(logger_);
 }
 
-bool RPCProtectionManagerImpl::IsFunctionInGroup(
-    const std::string& function_name, const std::string& group) const {
-  const auto policy_encryption_flag_getter =
-      policy_handler_.PolicyEncryptionFlagGetter();
-
-  const auto group_rpcs =
-      policy_encryption_flag_getter->GetRPCsForFunctionGroup(group);
-
-  const auto it =
-      std::find(group_rpcs.begin(), group_rpcs.end(), function_name);
-
-  const bool is_function_in_group = it != group_rpcs.end();
-
-  LOG4CXX_DEBUG(logger_,
-                "Function is in group " << std::boolalpha
-                                        << is_function_in_group);
-
-  return is_function_in_group;
-}
-
 bool RPCProtectionManagerImpl::CheckPolicyEncryptionFlag(
     const uint32_t function_id,
     const ApplicationSharedPtr app,
-    const uint32_t correlation_id,
     const bool is_rpc_service_secure) const {
   LOG4CXX_AUTO_TRACE(logger_);
   const auto& policy_encryption_flag_getter =
       policy_handler_.PolicyEncryptionFlagGetter();
   const std::string function_name =
       policy_encryption_flag_getter->GetPolicyFunctionName(function_id);
-  LOG4CXX_DEBUG(logger_,
-                "Function for check is " << function_name
-                                         << " conrrelation_id is "
-                                         << correlation_id);
+  LOG4CXX_DEBUG(logger_, "Function for check is " << function_name);
 
   if (!is_rpc_service_secure && IsExceptionRPC(function_id)) {
     LOG4CXX_WARN(logger_,
@@ -102,27 +78,27 @@ bool RPCProtectionManagerImpl::CheckPolicyEncryptionFlag(
   }
 
   const auto policy_app_id = app->policy_app_id();
-  if (!policy_encryption_flag_getter->AppNeedEncryption(policy_app_id)) {
-    LOG4CXX_TRACE(logger_, "Application does not require encryption");
-    return false;
+
+  return IsEncryptionRequiredByPolicy(policy_app_id, function_name);
+}
+
+bool RPCProtectionManagerImpl::IsEncryptionRequiredByPolicy(
+    const std::string& policy_app_id, const std::string& function_name) const {
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  auto it = encrypted_rpcs_.find(policy_app_id);
+
+  if (encrypted_rpcs_.end() == it) {
+    LOG4CXX_WARN(logger_,
+                 "App specific policies for app: " << policy_app_id
+                                                   << " not found");
+    it = encrypted_rpcs_.find(policy_table::kDefaultApp);
+    return encrypted_rpcs_.end() != it
+               ? (*it).second.find(function_name) != (*it).second.end()
+               : false;
   }
 
-  const auto app_rpc_groups =
-      policy_encryption_flag_getter->GetFunctionGroupsForApp(policy_app_id);
-
-  for (const auto& group : app_rpc_groups) {
-    const bool is_function_in_group = IsFunctionInGroup(function_name, group);
-
-    if (is_function_in_group &&
-        policy_encryption_flag_getter->FunctionGroupNeedEncryption(group)) {
-      LOG4CXX_DEBUG(logger_,
-                    "Message needs encryption. Function name is "
-                        << function_name);
-      return true;
-    }
-  }
-
-  return false;
+  return (*it).second.find(function_name) != (*it).second.end();
 }
 
 bool RPCProtectionManagerImpl::IsInEncryptionNeededCache(
@@ -163,25 +139,80 @@ void RPCProtectionManagerImpl::RemoveFromEncryptionNeededCache(
   encryption_needed_cache_.erase(std::make_pair(app_id, correlation_id));
 }
 
-smart_objects::SmartObjectSPtr
-RPCProtectionManagerImpl::CreateEncryptionNeededResponse(
-    const uint32_t connection_key,
-    const uint32_t function_id,
-    const uint32_t correlation_id) {
+void RPCProtectionManagerImpl::OnPTUFinished(const bool ptu_result) {
   LOG4CXX_AUTO_TRACE(logger_);
-  auto it = encryption_needed_cache_.find(
-      std::make_pair(connection_key, correlation_id));
-  if (it != encryption_needed_cache_.end()) {
-    encryption_needed_cache_.erase(it);
+  sync_primitives::AutoLock lock(encrypted_rpcs_lock_);
+
+  if (ptu_result) {
+    LOG4CXX_TRACE(logger_,
+                  "PTU finished successfully, commencing internal encrypted "
+                  "RPC cache update");
+    encrypted_rpcs_.clear();
+    SaveEncryptedRPC();
   } else {
     LOG4CXX_WARN(logger_,
-                 "RPC for correlation id: " << correlation_id << " and app id: "
-                                            << connection_key << " not found");
+                 "PTU was unsuccessful. Keeping internal RPC cache from "
+                 "current snapshot");
   }
-  return MessageHelper::CreateNegativeResponse(
-      connection_key,
-      function_id,
-      correlation_id,
-      static_cast<int32_t>(mobile_apis::Result::ENCRYPTION_NEEDED));
 }
+
+void RPCProtectionManagerImpl::SaveEncryptedRPC() {
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  const auto policy_encryption_flag_getter =
+      policy_handler_.PolicyEncryptionFlagGetter();
+
+  const auto policy_policy_app_ids =
+      policy_encryption_flag_getter->GetApplicationPolicyIDs();
+
+  for (const auto& app : policy_policy_app_ids) {
+    LOG4CXX_DEBUG(logger_, "Processing app name: " << app);
+
+    encrypted_rpcs_[app] = GetEncryptedRPCsForApp(app);
+  }
+}
+
+void RPCProtectionManagerImpl::OnPTInited() {
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  encrypted_rpcs_.clear();
+
+  SaveEncryptedRPC();
+}
+
+RPCProtectionManagerImpl::FunctionNames
+RPCProtectionManagerImpl::GetEncryptedRPCsForApp(
+    const std::string& policy_app_id) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  FunctionNames encrypted_rpcs;
+
+  const auto policy_encryption_flag_getter =
+      policy_handler_.PolicyEncryptionFlagGetter();
+
+  if (!policy_encryption_flag_getter->AppNeedEncryption(policy_app_id)) {
+    return encrypted_rpcs;
+  }
+
+  const auto function_groups =
+      policy_encryption_flag_getter->GetFunctionGroupsForApp(policy_app_id);
+
+  auto fill_encrypted_rpcs = [&encrypted_rpcs](
+      const std::string& function_name) {
+    LOG4CXX_DEBUG(logger_, "Adding required encryprion rpc: " << function_name);
+    encrypted_rpcs.insert(function_name);
+  };
+
+  for (const auto& function_group : function_groups) {
+    if (policy_encryption_flag_getter->FunctionGroupNeedEncryption(
+            function_group)) {
+      auto rpcs = policy_encryption_flag_getter->GetRPCsForFunctionGroup(
+          function_group);
+
+      std::for_each(rpcs.begin(), rpcs.end(), fill_encrypted_rpcs);
+    }
+  }
+
+  return encrypted_rpcs;
+}
+
 }  // namespace protocol_handler

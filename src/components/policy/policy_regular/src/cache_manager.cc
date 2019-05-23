@@ -124,6 +124,20 @@ const policy_table::Strings& CacheManager::GetGroups(const PTString& app_id) {
   return pt_->policy_table.app_policies_section.apps[app_id].groups;
 }
 
+const policy_table::Strings CacheManager::GetPolicyAppNames() const {
+  LOG4CXX_AUTO_TRACE(logger_);
+  sync_primitives::AutoLock auto_lock(cache_lock_);
+
+  const auto apps = pt_->policy_table.app_policies_section.apps;
+
+  policy_table::Strings policy_app_ids;
+  for (const auto& app : apps) {
+    policy_app_ids.push_back(app.first);
+  }
+
+  return policy_app_ids;
+}
+
 bool CacheManager::CanAppKeepContext(const std::string& app_id) const {
   CACHE_MANAGER_CHECK(false);
   bool result = true;

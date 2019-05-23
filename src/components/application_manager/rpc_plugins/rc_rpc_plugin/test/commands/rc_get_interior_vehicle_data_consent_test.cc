@@ -150,7 +150,7 @@ class RCGetInteriorVehicleDataConsentTest
         .WillByDefault(Return(true));
     ON_CALL(mock_protocol_handler, IsRPCServiceSecure(_))
         .WillByDefault(Return(false));
-    ON_CALL(*rpc_protection_manager_, CheckPolicyEncryptionFlag(_, _, _, _))
+    ON_CALL(*rpc_protection_manager_, CheckPolicyEncryptionFlag(_, _, _))
         .WillByDefault(Return(false));
   }
 

@@ -34,6 +34,7 @@
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_PROTOCOL_HANDLER_RPC_PROTECTION_MANAGER_IMPL_H_
 
 #include <set>
+#include <map>
 #include "application_manager/rpc_protection_manager.h"
 #include "application_manager/policies/policy_handler.h"
 
@@ -43,6 +44,10 @@ namespace application_manager {
 */
 class RPCProtectionManagerImpl : public RPCProtectionManager {
  public:
+  typedef std::pair<uint32_t, uint32_t> AppIdCorrIdPair;
+  typedef std::set<std::string> FunctionNames;
+  typedef std::map<std::string, FunctionNames> AppEncryptedRpcMap;
+
   RPCProtectionManagerImpl(policy::PolicyHandlerInterface& policy_handler);
 
   ~RPCProtectionManagerImpl() OVERRIDE {}
@@ -50,22 +55,21 @@ class RPCProtectionManagerImpl : public RPCProtectionManager {
   bool CheckPolicyEncryptionFlag(
       const uint32_t function_id,
       const ApplicationSharedPtr app,
-      const uint32_t conrrelation_id,
       const bool is_rpc_service_secure) const OVERRIDE;
 
   bool IsInEncryptionNeededCache(const uint32_t app_id,
                                  const uint32_t conrrelation_id) const OVERRIDE;
-
-  smart_objects::SmartObjectSPtr CreateEncryptionNeededResponse(
-      const uint32_t connection_key,
-      const uint32_t function_id,
-      const uint32_t conrrelation_id) OVERRIDE;
 
   void AddToEncryptionNeededCache(const uint32_t app_id,
                                   const uint32_t correlation_id) OVERRIDE;
 
   void RemoveFromEncryptionNeededCache(const uint32_t app_id,
                                        const uint32_t correlation_id) OVERRIDE;
+
+  // PolicyHandlerObserver interface
+  void OnPTUFinished(const bool ptu_result) OVERRIDE;
+
+  void OnPTInited() OVERRIDE;
 
  private:
   /*
@@ -77,17 +81,32 @@ class RPCProtectionManagerImpl : public RPCProtectionManager {
   bool IsExceptionRPC(const uint32_t function_id) const;
 
   /*
-   * @brief checks whether given function is in functional group
-   * @param function_name function name
-   * @param group group name
-   * @return true if the function exists in group else return false
+   * @brief retreives list of rpcs that require encryption by policy
+   * @param policy_app_id policy application name
+   * @return container with function names that require encryption by policy
    */
-  bool IsFunctionInGroup(const std::string& function_name,
-                         const std::string& group) const;
+  FunctionNames GetEncryptedRPCsForApp(const std::string& policy_app_id);
+
+  /*
+   * @brief checks whether given function name is in saved encrypted rpc list
+   * @param policy_app_id policy application name
+   * @param function_name policy function name
+   * @return true if function_name for this policy_app_id is saved, otherwise -
+   * false
+   */
+  bool IsEncryptionRequiredByPolicy(const std::string& policy_app_id,
+                                    const std::string& function_name) const;
+
+  /*
+   * @brief saves rpcs that have encryption_required flag in policy table to
+   * internal container
+   */
+  void SaveEncryptedRPC();
 
   policy::PolicyHandlerInterface& policy_handler_;
 
-  typedef std::pair<uint32_t, uint32_t> AppIdCorrIdPair;
+  AppEncryptedRpcMap encrypted_rpcs_;
+  sync_primitives::Lock encrypted_rpcs_lock_;
 
   std::set<AppIdCorrIdPair> encryption_needed_cache_;
   sync_primitives::Lock message_needed_encryption_lock_;

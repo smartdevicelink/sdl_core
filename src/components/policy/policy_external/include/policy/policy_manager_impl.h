@@ -74,6 +74,8 @@ class PolicyManagerImpl : public PolicyManager {
   const std::vector<std::string> GetFunctionGroupsForApp(
       const std::string& policy_app_id) const OVERRIDE;
 
+  const std::vector<std::string> GetApplicationPolicyIDs() const OVERRIDE;
+
   /*
    * \param policy_group group
    * \return true if the group need encryption

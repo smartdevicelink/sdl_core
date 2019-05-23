@@ -70,6 +70,7 @@ class ProtocolHandler {
   /**
    * \brief Method for sending message to Mobile Application.
    * \param message RawMessage with params to be sent to Mobile App.
+   * \param needs_encryption whether message needs to be encrypted by policy
    * \param final_message tells whether message's
    * connection must be closed when message is processed
    */
