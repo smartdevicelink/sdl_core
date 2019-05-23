@@ -188,15 +188,16 @@ if (${BSON_LIB} MATCHES "BSON_LIB-NOTFOUND")
   endif()
   include(ExternalProject)
   ExternalProject_Add(libbson
-      GIT_REPOSITORY "http://github.com/smartdevicelink/bson_c_lib.git"
+      GIT_REPOSITORY "https://github.com/smartdevicelink/bson_c_lib.git"
       GIT_TAG "master"
       BINARY_DIR ${BSON_LIB_SOURCE_DIRECTORY}
       INSTALL_DIR ${3RD_PARTY_INSTALL_PREFIX}
       DOWNLOAD_DIR ${BSON_LIB_SOURCE_DIRECTORY}
       SOURCE_DIR ${BSON_LIB_SOURCE_DIRECTORY}
-      CONFIGURE_COMMAND touch aclocal.m4 configure.ac Makefile.am Makefile.in configure config.h.in && ./configure --prefix=${3RD_PARTY_INSTALL_PREFIX}
+      CONFIGURE_COMMAND touch aclocal.m4 configure.ac Makefile.am Makefile.in configure config.h.in libbson.pc.in && ./configure --prefix=${3RD_PARTY_INSTALL_PREFIX}
       BUILD_COMMAND make
-      INSTALL_COMMAND ${BSON_INSTALL_COMMAND})
+      INSTALL_COMMAND ${BSON_INSTALL_COMMAND}
+      UPDATE_COMMAND git pull)
 else()
   get_filename_component(BSON_LIBS_DIRECTORY ${BSON_LIB} DIRECTORY)
   get_filename_component(EMHASHMAP_LIBS_DIRECTORY ${EMHASHMAP_LIB} DIRECTORY)
