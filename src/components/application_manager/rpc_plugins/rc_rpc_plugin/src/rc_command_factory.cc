@@ -170,6 +170,9 @@ bool RCCommandFactory::IsAbleToProcess(
 CommandCreator& RCCommandFactory::get_mobile_command_creator(
     const mobile_apis::FunctionID::eType id,
     const mobile_apis::messageType::eType message_type) const {
+  LOG4CXX_DEBUG(logger_,
+                "get_mobile_command_creator function_id: "
+                    << id << " message_type: " << message_type);
   RCCommandCreatorFactory rc_factory(params_);
   switch (id) {
     case mobile_apis::FunctionID::ButtonPressID: {
@@ -213,9 +216,6 @@ CommandCreator& RCCommandFactory::get_mobile_creator_factory(
     const mobile_apis::FunctionID::eType id,
     const mobile_apis::messageType::eType message_type,
     const app_mngr::commands::Command::CommandSource source) const {
-  LOG4CXX_DEBUG(logger_,
-                "CreateMobileCommand function_id: " << id << " message_type: "
-                                                    << message_type);
   RCCommandCreatorFactory rc_factory(params_);
   switch (message_type) {
     case mobile_apis::messageType::request: {

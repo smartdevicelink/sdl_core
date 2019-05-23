@@ -138,8 +138,8 @@ namespace sdl_rpc_plugin {
 using namespace application_manager;
 
 CommandCreator& MobileCommandFactory::get_command_creator(
-    mobile_apis::FunctionID::eType id,
-    mobile_apis::messageType::eType message_type) const {
+    const mobile_apis::FunctionID::eType id,
+    const mobile_apis::messageType::eType message_type) const {
   CommandCreatorFactory factory(
       application_manager_, rpc_service_, hmi_capabilities_, policy_handler_);
   switch (id) {
@@ -366,7 +366,7 @@ CommandCreator& MobileCommandFactory::get_command_creator(
 }
 
 CommandCreator& MobileCommandFactory::get_notification_creator(
-    mobile_apis::FunctionID::eType id) const {
+    const mobile_apis::FunctionID::eType id) const {
   CommandCreatorFactory factory(
       application_manager_, rpc_service_, hmi_capabilities_, policy_handler_);
   switch (id) {
@@ -429,7 +429,7 @@ CommandCreator& MobileCommandFactory::get_notification_creator(
 }
 
 CommandCreator& MobileCommandFactory::get_notification_from_mobile_creator(
-    mobile_apis::FunctionID::eType id) const {
+    const mobile_apis::FunctionID::eType id) const {
   CommandCreatorFactory factory(
       application_manager_, rpc_service_, hmi_capabilities_, policy_handler_);
   switch (id) {
@@ -442,9 +442,9 @@ CommandCreator& MobileCommandFactory::get_notification_from_mobile_creator(
 }
 
 CommandCreator& MobileCommandFactory::get_creator_factory(
-    mobile_apis::FunctionID::eType id,
-    mobile_apis::messageType::eType message_type,
-    app_mngr::commands::Command::CommandSource source) const {
+    const mobile_apis::FunctionID::eType id,
+    const mobile_apis::messageType::eType message_type,
+    const app_mngr::commands::Command::CommandSource source) const {
   switch (message_type) {
     case mobile_api::messageType::request: {
       if (app_mngr::commands::Command::CommandSource::SOURCE_MOBILE == source) {
