@@ -536,6 +536,11 @@ class Profile : public protocol_handler::ProtocolHandlerSettings,
   const std::vector<std::string>& video_service_transports() const OVERRIDE;
 
   uint32_t rpc_pass_through_timeout() const OVERRIDE;
+
+  // RcConsentManager
+  uint16_t period_for_consent_expiration() const OVERRIDE;
+  // RcConsentManager end
+
   const std::vector<std::string>& embedded_services() const OVERRIDE;
   const std::string hmi_origin_id() const OVERRIDE;
   /**
@@ -1087,6 +1092,7 @@ class Profile : public protocol_handler::ProtocolHandlerSettings,
   int wake_up_signal_offset_;
   int ignition_off_signal_offset_;
   uint32_t rpc_pass_through_timeout_;
+  uint16_t period_for_consent_expiration_;
 
   std::vector<std::string> embedded_services_;
 

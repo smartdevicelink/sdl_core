@@ -89,6 +89,7 @@ class MockApplicationManagerSettings
   MOCK_CONST_METHOD0(named_audio_pipe_path, const std::string&());
   MOCK_CONST_METHOD0(video_stream_file, const std::string&());
   MOCK_CONST_METHOD0(audio_stream_file, const std::string&());
+  MOCK_CONST_METHOD0(period_for_consent_expiration, uint16_t());
   MOCK_CONST_METHOD0(use_full_app_id, bool());
   MOCK_CONST_METHOD0(cloud_app_retry_timeout, uint32_t());
   MOCK_CONST_METHOD0(cloud_app_max_retry_attempts, uint16_t());

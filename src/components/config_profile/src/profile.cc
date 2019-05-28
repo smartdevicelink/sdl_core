@@ -97,6 +97,7 @@ const char* kTransportRequiredForResumptionSection =
 const char* kLowBandwidthTransportResumptionLevelSection =
     "LowBandwidthTransportResumptionLevel";
 const char* kAppServicesSection = "AppServices";
+const char* kRCModuleConsentSection = "RCModuleConsent";
 
 const char* kSDLVersionKey = "SDLVersion";
 const char* kHmiCapabilitiesKey = "HMICapabilities";
@@ -247,6 +248,7 @@ const char* kSecondaryTransportForWiFiKey = "SecondaryTransportForWiFi";
 const char* kAudioServiceTransportsKey = "AudioServiceTransports";
 const char* kVideoServiceTransportsKey = "VideoServiceTransports";
 const char* kRpcPassThroughTimeoutKey = "RpcPassThroughTimeout";
+const char* kPeriodForConsentExpirationKey = "PeriodForConsentExpiration";
 
 const char* kDefaultTransportRequiredForResumptionKey =
     "DefaultTransportRequiredForResumption";
@@ -403,6 +405,7 @@ const std::string kAllowedSymbols =
 const bool kDefaultMultipleTransportsEnabled = false;
 const char* kDefaultLowBandwidthResumptionLevel = "NONE";
 const uint32_t kDefaultRpcPassThroughTimeout = 10000;
+const uint16_t kDefaultPeriodForConsentExpiration = 30;
 const char* kDefaultHMIOriginId = "HMI_ID";
 const std::vector<uint8_t> kDefaultBluetoothUUID = {0x93,
                                                     0x6D,
@@ -542,7 +545,8 @@ Profile::Profile()
     , low_voltage_signal_offset_(kDefaultLowVoltageSignalOffset)
     , wake_up_signal_offset_(kDefaultWakeUpSignalOffset)
     , ignition_off_signal_offset_(kDefaultIgnitionOffSignalOffset)
-    , rpc_pass_through_timeout_(kDefaultRpcPassThroughTimeout) {
+    , rpc_pass_through_timeout_(kDefaultRpcPassThroughTimeout)
+    , period_for_consent_expiration_(kDefaultPeriodForConsentExpiration) {
   // SDL version
   ReadStringValue(
       &sdl_version_, kDefaultSDLVersion, kMainSection, kSDLVersionKey);
@@ -1144,6 +1148,10 @@ const bool Profile::multiple_transports_enabled() const {
 
 uint32_t Profile::rpc_pass_through_timeout() const {
   return rpc_pass_through_timeout_;
+}
+
+uint16_t Profile::period_for_consent_expiration() const {
+  return period_for_consent_expiration_;
 }
 
 const std::vector<std::string>& Profile::secondary_transports_for_bluetooth()
@@ -2377,6 +2385,15 @@ void Profile::UpdateValues() {
   LOG_UPDATED_VALUE(rpc_pass_through_timeout_,
                     kRpcPassThroughTimeoutKey,
                     kAppServicesSection);
+
+  ReadUIntValue(&period_for_consent_expiration_,
+                kDefaultPeriodForConsentExpiration,
+                kRCModuleConsentSection,
+                kPeriodForConsentExpirationKey);
+
+  LOG_UPDATED_VALUE(period_for_consent_expiration_,
+                    kPeriodForConsentExpirationKey,
+                    kRCModuleConsentSection);
 
   {  // Secondary Transports and ServicesMap
     struct KeyPair {
