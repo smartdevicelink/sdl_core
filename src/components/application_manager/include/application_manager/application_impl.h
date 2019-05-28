@@ -500,6 +500,11 @@ class ApplicationImpl : public virtual Application,
    */
   void set_cloud_app_certificate(const std::string& certificate) OVERRIDE;
 
+  void set_user_location(
+      const smart_objects::SmartObject& user_location) OVERRIDE;
+
+  const smart_objects::SmartObject& get_user_location() const OVERRIDE;
+
  protected:
   /**
    * @brief Clean up application folder. Persistent files will stay
@@ -611,6 +616,7 @@ class ApplicationImpl : public virtual Application,
   std::string cloud_transport_type_;
   mobile_apis::HybridAppPreference::eType hybrid_app_preference_;
   std::string certificate_;
+  smart_objects::SmartObject user_location_;
 
   /**
    * @brief Defines number per time in seconds limits

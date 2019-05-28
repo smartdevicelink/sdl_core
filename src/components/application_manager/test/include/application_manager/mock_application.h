@@ -425,6 +425,9 @@ class MockApplication : public ::application_manager::Application {
                application_manager::WindowID(const uint32_t button_id));
   MOCK_METHOD1(remove_window_capability,
                void(const application_manager::WindowID window_id));
+  MOCK_METHOD1(set_user_location,
+               void(const smart_objects::SmartObject& user_location));
+  MOCK_CONST_METHOD0(get_user_location, const smart_objects::SmartObject&());
 };
 
 }  // namespace application_manager_test

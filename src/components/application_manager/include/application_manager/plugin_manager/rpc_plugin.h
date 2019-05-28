@@ -60,7 +60,8 @@ enum ApplicationEvent {
   kApplicationExit = 0,
   kApplicationRegistered,
   kApplicationUnregistered,
-  kDeleteApplicationData
+  kDeleteApplicationData,
+  kGlobalPropertiesUpdated
 };
 
 class RPCPlugin {

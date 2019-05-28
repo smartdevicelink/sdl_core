@@ -118,6 +118,12 @@ void RCRPCPlugin::OnApplicationEvent(
       interior_data_manager_->OnApplicationEvent(event, application);
       break;
     }
+    case plugins::kGlobalPropertiesUpdated: {
+      const auto user_location = application->get_user_location();
+      auto extension = RCHelpers::GetRCExtension(*application);
+      // TODO:: save user location to extension
+      break;
+    }
     default:
       break;
   }

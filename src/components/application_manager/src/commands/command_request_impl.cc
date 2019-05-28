@@ -112,7 +112,8 @@ const std::string CreateInfoForUnsupportedResult(
   }
 }
 
-bool CheckResultCode(const ResponseInfo& first, const ResponseInfo& second) {
+bool CommandRequestImpl::CheckResult(const ResponseInfo& first,
+                                     const ResponseInfo& second) const {
   if (first.is_ok && second.is_unsupported_resource) {
     return true;
   }
@@ -935,8 +936,8 @@ bool CommandRequestImpl::PrepareResultForMobileResponse(
 bool CommandRequestImpl::PrepareResultForMobileResponse(
     ResponseInfo& out_first, ResponseInfo& out_second) const {
   LOG4CXX_AUTO_TRACE(logger_);
-  bool result = CheckResultCode(out_first, out_second) ||
-                CheckResultCode(out_second, out_first);
+  bool result =
+      CheckResult(out_first, out_second) || CheckResult(out_second, out_first);
   return result;
 }
 

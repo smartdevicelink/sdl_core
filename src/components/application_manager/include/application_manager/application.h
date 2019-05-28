@@ -1202,6 +1202,19 @@ class Application : public virtual InitialApplicationData,
    */
   virtual void set_cloud_app_certificate(const std::string& certificate) = 0;
 
+  /**
+   * @brief Set user location
+   * @param smart object of user location
+   */
+  virtual void set_user_location(
+      const smart_objects::SmartObject& user_location) = 0;
+
+  /**
+   * @brief Get user location
+   * @return smart object of user location
+   */
+  virtual const smart_objects::SmartObject& get_user_location() const = 0;
+
  protected:
   mutable sync_primitives::Lock hmi_states_lock_;
 

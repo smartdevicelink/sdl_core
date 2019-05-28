@@ -1313,6 +1313,15 @@ void ApplicationImpl::set_cloud_app_certificate(
   certificate_ = certificate;
 }
 
+void ApplicationImpl::set_user_location(
+    const smart_objects::SmartObject& user_location) {
+  user_location_ = user_location;
+}
+
+const smart_objects::SmartObject& ApplicationImpl::get_user_location() const {
+  return user_location_;
+}
+
 void ApplicationImpl::PushMobileMessage(
     smart_objects::SmartObjectSPtr mobile_message) {
   sync_primitives::AutoLock lock(mobile_message_lock_);

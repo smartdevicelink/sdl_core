@@ -81,6 +81,7 @@ const char* menu_icon = "menuIcon";
 const char* keyboard_properties = "keyboardProperties";
 const char* vr_commands = "vrCommands";
 const char* position = "position";
+const char* user_location = "userLocation";
 const char* num_ticks = "numTicks";
 const char* slider_footer = "sliderFooter";
 const char* menu_id = "menuID";

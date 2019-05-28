@@ -39,6 +39,8 @@
 #include "rc_rpc_plugin/commands/hmi/rc_get_interior_vehicle_data_response.h"
 #include "rc_rpc_plugin/commands/hmi/rc_on_interior_vehicle_data_notification.h"
 #include "rc_rpc_plugin/commands/hmi/rc_on_remote_control_settings_notification.h"
+#include "rc_rpc_plugin/commands/hmi/rc_set_global_properties_request.h"
+#include "rc_rpc_plugin/commands/hmi/rc_set_global_properties_response.h"
 #include "rc_rpc_plugin/commands/hmi/rc_set_interior_vehicle_data_request.h"
 #include "rc_rpc_plugin/commands/hmi/rc_set_interior_vehicle_data_response.h"
 #include "rc_rpc_plugin/commands/mobile/button_press_request.h"
@@ -304,6 +306,13 @@ CommandCreator& RCCommandFactory::get_hmi_creator_factory(
     case hmi_apis::FunctionID::RC_OnRemoteControlSettings: {
       return rc_factory
           .GetCreator<commands::RCOnRemoteControlSettingsNotification>();
+    }
+    case hmi_apis::FunctionID::RC_SetGlobalProperties: {
+      return hmi_apis::messageType::request == message_type
+                 ? rc_factory
+                       .GetCreator<commands::RCSetGlobalPropertiesRequest>()
+                 : rc_factory
+                       .GetCreator<commands::RCSetGlobalPropertiesResponse>();
     }
     default: { return rc_factory.GetCreator<RCInvalidCommand>(); }
   }

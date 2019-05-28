@@ -114,6 +114,7 @@ extern const char* menu_icon;
 extern const char* keyboard_properties;
 extern const char* vr_commands;
 extern const char* position;
+extern const char* user_location;
 extern const char* num_ticks;
 extern const char* slider_footer;
 extern const char* menu_id;
