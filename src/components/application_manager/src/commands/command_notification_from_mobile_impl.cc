@@ -90,7 +90,7 @@ void CommandNotificationFromMobileImpl::SendNotificationToHMI(
     const hmi_apis::FunctionID::eType& hmi_function_id) {
   (*message_)[strings::params][strings::protocol_type] = hmi_protocol_type_;
   (*message_)[strings::params][strings::function_id] = hmi_function_id;
-  rpc_service_.SendMessageToHMI(message_);
+  rpc_service_.ManageHMICommand(message_, SOURCE_SDL_TO_HMI);
 }
 
 void CommandNotificationFromMobileImpl::SendNotificationToConsumers(
