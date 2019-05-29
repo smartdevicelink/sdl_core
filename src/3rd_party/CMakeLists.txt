@@ -169,12 +169,13 @@ if(ENABLE_LOG)
 endif()
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}")
-set(CMAKE_SOURCE_PREFIX ${CMAKE_SOURCE_PREFIX} "${3RD_PARTY_INSTALL_PREFIX}")
-find_package (BSON)
-message (STATUS "bson installed in " ${BSON_LIBS_DIRECTORY} " , " ${BSON_INCLUDE_DIRECTORY})
-message (STATUS "emhashmap installed in " ${EMHASHMAP_LIBS_DIRECTORY} " , " ${EMHASHMAP_INCLUDE_DIRECTORY})
+set(CMAKE_PREFIX_PATH ${CMAKE_PREFIX_PATH} "${3RD_PARTY_INSTALL_PREFIX}/etc")
+set(ENV{PKG_CONFIG_PATH} $ENV{CMAKE_PREFIX_PATH} "${3RD_PARTY_INSTALL_PREFIX}/etc")
+find_package(PkgConfig)
+pkg_check_modules(BSON libbson)
+message (STATUS "bson installed in " ${BSON_LIBDIR} ", " ${BSON_INCLUDEDIR})
 
-if (${BSON_LIB} MATCHES "BSON_LIB-NOTFOUND")
+if ((NOT "${BSON_FOUND}") OR ("${BSON_VERSION}" VERSION_LESS "1.2.0"))
   message (STATUS "Building bson required")
   set(BSON_LIB_SOURCE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/bson_c_lib CACHE INTERNAL "Sources of bson library" FORCE)
   set(BSON_LIBS_DIRECTORY ${3RD_PARTY_INSTALL_PREFIX}/lib CACHE INTERNAL "Installation path of bson libraries" FORCE)
@@ -199,10 +200,8 @@ if (${BSON_LIB} MATCHES "BSON_LIB-NOTFOUND")
       INSTALL_COMMAND ${BSON_INSTALL_COMMAND}
       UPDATE_COMMAND git pull)
 else()
-  get_filename_component(BSON_LIBS_DIRECTORY ${BSON_LIB} DIRECTORY)
-  get_filename_component(EMHASHMAP_LIBS_DIRECTORY ${EMHASHMAP_LIB} DIRECTORY)
-  set(BSON_LIBS_DIRECTORY ${BSON_LIBS_DIRECTORY} CACHE INTERNAL "Installation path of bson libraries" FORCE)
-  set(EMHASHMAP_LIBS_DIRECTORY ${BSON_LIBS_DIRECTORY} CACHE INTERNAL "Installation path of emashmap libraries" FORCE)
+  set(BSON_LIBS_DIRECTORY ${BSON_LIBDIR} CACHE INTERNAL "Installation path of bson libraries" FORCE)
+  set(EMHASHMAP_LIBS_DIRECTORY ${BSON_LIBDIR} CACHE INTERNAL "Installation path of emashmap libraries" FORCE)
   add_custom_target(
       libbson
       DEPENDS ${BSON_LIBS_DIRECTORY}
