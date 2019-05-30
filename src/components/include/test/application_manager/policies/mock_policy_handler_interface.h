@@ -76,7 +76,9 @@ class MockPolicyHandlerInterface : public policy::PolicyHandlerInterface {
                     const std::vector<int>& retry_delay_seconds,
                     uint32_t timeout_exchange));
 #else   // EXTERNAL_PROPRIETARY_MODE
-  MOCK_METHOD1(OnSnapshotCreated, void(const policy::BinaryMessage& pt_string));
+  MOCK_METHOD2(OnSnapshotCreated,
+               void(const policy::BinaryMessage& pt_string,
+                    const policy::PTUIterationType iteration_type));
 #endif  // EXTERNAL_PROPRIETARY_MODE
 
   MOCK_CONST_METHOD2(GetPriority,
@@ -262,6 +264,7 @@ class MockPolicyHandlerInterface : public policy::PolicyHandlerInterface {
 #ifdef EXTERNAL_PROPRIETARY_MODE
   MOCK_CONST_METHOD0(GetMetaInfo, const policy::MetaInfo());
   MOCK_METHOD0(IncrementRetryIndex, void());
+  MOCK_CONST_METHOD0(ptu_retry_handler, policy::PTURetryHandler&());
 #endif  // EXTERNAL_PROPRIETARY_MODE
 
   MOCK_METHOD1(Increment, void(usage_statistics::GlobalCounterId type));

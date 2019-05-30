@@ -1430,7 +1430,7 @@ TEST_F(ProtocolHandlerImplTest,
   services.push_back(0x0A);
   services.push_back(0x0B);
   EXPECT_CALL(protocol_handler_settings_mock, force_protected_service())
-      .WillOnce(ReturnRefOfCopy(services));
+      .WillRepeatedly(ReturnRefOfCopy(services));
 
   // call new SSLContext creation
   EXPECT_CALL(security_manager_mock, CreateSSLContext(connection_key, _))

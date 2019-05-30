@@ -29,38 +29,20 @@
  ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  POSSIBILITY OF SUCH DAMAGE.
  */
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_POLICIES_PTU_RETRY_HANDLER_H_
-#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_POLICIES_PTU_RETRY_HANDLER_H_
+
+#ifndef SRC_COMPONENTS_POLICY_POLICY_EXTERNAL_INCLUDE_POLICY_MOCK_PTU_RETRY_HANDLER_H_
+#define SRC_COMPONENTS_POLICY_POLICY_EXTERNAL_INCLUDE_POLICY_MOCK_PTU_RETRY_HANDLER_H_
+
+#include "policy/ptu_retry_handler.h"
 
 namespace policy {
 
-class PTURetryHandler {
+class MockPTURetryHandler : public PTURetryHandler {
  public:
-  /**
-   * @brief Check whether allowed retry sequence count is exceeded
-   * @return bool value - true is allowed count is exceeded, otherwise - false
-   */
-  virtual bool IsAllowedRetryCountExceeded() const = 0;
-
-  /**
-   * @brief Begins new retry sequence
-   */
-  virtual void BeginRetrySequence() = 0;
-  /**
-   * @brief Start timer waiting for OnSystemRequest from HMI.
-   */
-  virtual void StartWaitingPTURetry() = 0;
-
-  /**
-   * @brief Stop timer waiting for git OnSystemRequest from HMI.
-   */
-  virtual void StopWaitingPTURetry() = 0;
-
-  /**
-   * @brief Handle retry sequence failure
-   */
-  virtual void RetrySequenceFailed() = 0;
+  MOCK_CONST_METHOD0(IsAllowedRetryCountExceeded, bool());
+  MOCK_METHOD0(OnSystemRequestReceived, void());
+  MOCK_METHOD0(RetrySequenceFailed, void());
 };
 }  // namespace policy
 
-#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_POLICIES_PTU_RETRY_HANDLER_H_
+#endif  // SRC_COMPONENTS_POLICY_POLICY_EXTERNAL_INCLUDE_POLICY_MOCK_PTU_RETRY_HANDLER_H_

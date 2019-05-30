@@ -85,7 +85,8 @@ class MockPolicyManager : public PolicyManager {
   MOCK_METHOD2(GetUpdateUrls,
                void(const std::string& service_type,
                     EndpointUrls& out_end_points));
-  MOCK_METHOD0(RequestPTUpdate, bool());
+  MOCK_METHOD1(RequestPTUpdate,
+               bool(const policy::PTUIterationType iteration_type));
   MOCK_METHOD5(CheckPermissions,
                void(const PTString& app_id,
                     const PTString& hmi_level,
@@ -102,7 +103,8 @@ class MockPolicyManager : public PolicyManager {
   MOCK_METHOD0(IncrementIgnitionCycles, void());
   MOCK_METHOD0(ForcePTExchange, std::string());
   MOCK_METHOD0(ForcePTExchangeAtUserRequest, std::string());
-  MOCK_METHOD0(ResetRetrySequence, void());
+  MOCK_METHOD1(ResetRetrySequence,
+               void(const policy::ResetRetryCountType send_event));
   MOCK_METHOD0(NextRetryTimeout, uint32_t());
   MOCK_METHOD0(TimeoutExchangeMSec, uint32_t());
   MOCK_METHOD0(RetrySequenceDelaysSeconds, const std::vector<int>());

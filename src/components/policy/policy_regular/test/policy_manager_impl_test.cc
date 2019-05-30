@@ -1083,7 +1083,7 @@ TEST_F(PolicyManagerImplTest2, OnSystemReady) {
 TEST_F(PolicyManagerImplTest2, ResetRetrySequence) {
   // Arrange
   CreateLocalPT("sdl_preloaded_pt.json");
-  manager->ResetRetrySequence();
+  manager->ResetRetrySequence(ResetRetryCountType::kResetWithStatusUpdate);
   EXPECT_EQ("UPDATE_NEEDED", manager->GetPolicyTableStatus());
   manager->SetSendOnUpdateSentOut(false);
   manager->OnUpdateStarted();

@@ -218,6 +218,8 @@ void PolicyManagerImplTest::SetUp() {
   ON_CALL(*cache_manager_, GetKnownLinksFromPT())
       .WillByDefault(Return(std::map<std::string, std::string>()));
   ON_CALL(listener_, GetRegisteredLinks(_)).WillByDefault(Return());
+  ON_CALL(listener_, ptu_retry_handler())
+      .WillByDefault(ReturnRef(ptu_retry_handler_));
 }
 
 void PolicyManagerImplTest::TearDown() {
@@ -253,6 +255,8 @@ PolicyManagerImplTest2::PolicyManagerImplTest2()
 
 void PolicyManagerImplTest2::SetUp() {
   ON_CALL(listener_, GetRegisteredLinks(_)).WillByDefault(Return());
+  ON_CALL(listener_, ptu_retry_handler())
+      .WillByDefault(ReturnRef(ptu_retry_handler_));
 
   file_system::CreateDirectory(app_storage_folder_);
 

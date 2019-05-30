@@ -635,6 +635,13 @@ MessageHelper::ServiceStatusUpdateNotificationBuilder::notification() const {
   return MockMessageHelper::on_service_update_builder_mock()->notification();
 }
 
+smart_objects::SmartObjectSPtr
+MessageHelper::CreateOnSystemRequestNotificationToMobile(
+    const std::vector<uint8_t>& policy_data, const uint32_t connection_key) {
+  return MockMessageHelper::message_helper_mock()
+      ->CreateOnSystemRequestNotificationToMobile(policy_data, connection_key);
+}
+
 smart_objects::SmartObject MessageHelper::CreateAppServiceCapabilities(
     std::vector<smart_objects::SmartObject>& all_services) {
   return MockMessageHelper::message_helper_mock()->CreateAppServiceCapabilities(

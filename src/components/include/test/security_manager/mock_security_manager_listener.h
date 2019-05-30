@@ -50,7 +50,7 @@ class MockSecurityManagerListener
   MOCK_METHOD0(OnCertificateUpdateRequired, void());
   MOCK_CONST_METHOD1(GetPolicyCertificateData, bool(std::string& data));
   MOCK_METHOD0(OnGetSystemTimeFailed, bool());
-  MOCK_METHOD0(OnPTUFailed, void());
+  MOCK_METHOD0(OnPTUFailed, bool());
 #ifdef EXTERNAL_PROPRIETARY_MODE
   MOCK_METHOD0(OnCertDecryptFailed, bool());
 #endif
