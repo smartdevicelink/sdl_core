@@ -63,8 +63,8 @@ class GetInteriorVehicleDataRequest : public RCCommandRequest {
   ~GetInteriorVehicleDataRequest();
 
  private:
-  std::vector<application_manager::ApplicationSharedPtr>
-  AppsSubscribedToModuleType(const std::string& module_type);
+  std::vector<application_manager::ApplicationSharedPtr> AppsSubscribedToModule(
+      const ModuleUid& module);
 
   /**
    * @brief Check if app wants to proceed with already setup subscription

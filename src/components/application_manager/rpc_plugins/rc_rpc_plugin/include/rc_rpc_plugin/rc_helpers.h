@@ -80,7 +80,11 @@ class RCHelpers {
       application_manager::Application& app);
 
   static smart_objects::SmartObjectSPtr CreateUnsubscribeRequestToHMI(
-      const std::string& module_type, const uint32_t correlation_id);
+      const ModuleUid& module, const uint32_t correlation_id);
+
+  static std::vector<application_manager::ApplicationSharedPtr>
+  AppsSubscribedToModule(application_manager::ApplicationManager& app_mngr,
+                         const ModuleUid& module);
 
   static std::vector<application_manager::ApplicationSharedPtr>
   AppsSubscribedToModuleType(application_manager::ApplicationManager& app_mngr,
@@ -88,8 +92,9 @@ class RCHelpers {
 
   typedef std::map<application_manager::ApplicationSharedPtr,
                    std::vector<std::string> >
-      AppsModules;
-  static AppsModules GetApplicationsAllowedModules(
+      AppsModuleTypes;
+
+  static AppsModuleTypes GetApplicationsAllowedModuleTypes(
       application_manager::ApplicationManager& app_mngr);
 
   typedef std::map<std::string, mobile_apis::ButtonName::eType> ButtonsMap;

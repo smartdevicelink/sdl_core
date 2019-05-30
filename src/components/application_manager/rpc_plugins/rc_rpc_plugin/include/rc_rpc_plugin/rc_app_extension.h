@@ -40,6 +40,9 @@
 #include "utils/macro.h"
 
 namespace rc_rpc_plugin {
+
+typedef std::pair<std::string, std::string> ModuleUid;
+
 class RCAppExtension : public application_manager::AppExtension {
  public:
   explicit RCAppExtension(application_manager::AppExtensionUID uid);
@@ -49,13 +52,15 @@ class RCAppExtension : public application_manager::AppExtension {
    * @brief Subscribe to OnInteriorVehicleDataNotification
    * @param module interior data specification(zone, data type)
    */
-  void SubscribeToInteriorVehicleData(const std::string& module_type);
+  void SubscribeToInteriorVehicleData(const ModuleUid& module);
 
   /**
    * @brief Unsubscribe from OnInteriorVehicleDataNotification
    * @param module interior data specification(zone, data type)
    */
-  void UnsubscribeFromInteriorVehicleData(const std::string& module_type);
+  void UnsubscribeFromInteriorVehicleData(const ModuleUid& module);
+
+  void UnsubscribeFromInteriorVehicleDataOfType(const std::string& module_type);
 
   /**
    * @brief UnsubscribeFromInteriorVehicleData removes all subscriptions for
@@ -67,16 +72,18 @@ class RCAppExtension : public application_manager::AppExtension {
    * @brief Check if application subscribed to OnInteriorVehicleDataNotification
    * @param module interior data specification(zone, data type)
    */
-  bool IsSubscibedToInteriorVehicleData(const std::string& module_type);
+  bool IsSubscribedToInteriorVehicleData(const ModuleUid& module);
+
+  bool IsSubscribedToInteriorVehicleDataOfType(const std::string& module_type);
 
   /**
    * @brief get list of subscriptions of application
    * @return list of subscriptions of application
    */
-  std::set<std::string> InteriorVehicleDataSubscriptions() const;
+  std::set<ModuleUid> InteriorVehicleDataSubscriptions() const;
 
  private:
-  std::set<std::string> subscribed_interior_vehicle_data_;
+  std::set<ModuleUid> subscribed_interior_vehicle_data_;
 
   // AppExtension interface
  public:

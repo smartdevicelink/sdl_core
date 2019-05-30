@@ -139,7 +139,7 @@ RCAppExtensionPtr RCHelpers::GetRCExtension(
 }
 
 smart_objects::SmartObjectSPtr RCHelpers::CreateUnsubscribeRequestToHMI(
-    const std::string& module_type, const uint32_t correlation_id) {
+    const ModuleUid& module, const uint32_t correlation_id) {
   using namespace smart_objects;
   namespace commands = application_manager::commands;
   namespace am_strings = application_manager::strings;
@@ -157,8 +157,25 @@ smart_objects::SmartObjectSPtr RCHelpers::CreateUnsubscribeRequestToHMI(
   params[am_strings::function_id] =
       hmi_apis::FunctionID::RC_GetInteriorVehicleData;
   msg_params[message_params::kSubscribe] = false;
-  msg_params[message_params::kModuleType] = module_type;
+  msg_params[message_params::kModuleType] = module.first;
+  msg_params[message_params::kModuleId] = module.second;
   return message;
+}
+
+std::vector<application_manager::ApplicationSharedPtr>
+RCHelpers::AppsSubscribedToModule(
+    application_manager::ApplicationManager& app_mngr,
+    const ModuleUid& module) {
+  std::vector<application_manager::ApplicationSharedPtr> result;
+  auto rc_apps = RCRPCPlugin::GetRCApplications(app_mngr);
+  for (auto& app : rc_apps) {
+    auto rc_ext = RCHelpers::GetRCExtension(*app);
+    DCHECK_OR_RETURN(rc_ext, result);
+    if (rc_ext->IsSubscribedToInteriorVehicleData(module)) {
+      result.push_back(app);
+    }
+  }
+  return result;
 }
 
 std::vector<application_manager::ApplicationSharedPtr>
@@ -170,17 +187,17 @@ RCHelpers::AppsSubscribedToModuleType(
   for (auto& app : rc_apps) {
     auto rc_ext = RCHelpers::GetRCExtension(*app);
     DCHECK_OR_RETURN(rc_ext, result);
-    if (rc_ext->IsSubscibedToInteriorVehicleData(module_type)) {
+    if (rc_ext->IsSubscribedToInteriorVehicleDataOfType(module_type)) {
       result.push_back(app);
     }
   }
   return result;
 }
 
-RCHelpers::AppsModules RCHelpers::GetApplicationsAllowedModules(
+RCHelpers::AppsModuleTypes RCHelpers::GetApplicationsAllowedModuleTypes(
     app_mngr::ApplicationManager& app_mngr) {
   auto apps_list = RCRPCPlugin::GetRCApplications(app_mngr);
-  RCHelpers::AppsModules result;
+  RCHelpers::AppsModuleTypes result;
   for (auto& app_ptr : apps_list) {
     std::vector<std::string> allowed_modules;
     app_mngr.GetPolicyHandler().GetModuleTypes(app_ptr->policy_app_id(),

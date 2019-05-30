@@ -44,35 +44,41 @@ TEST_F(InteriorDataCacheTest,
        InteriorDataCacheDoesNotContainRandomDataInitialy) {
   rc_rpc_plugin::InteriorDataCacheImpl cache;
   std::string module_type_key = "random_module_type";
-  EXPECT_FALSE(cache.Contains(module_type_key));
-  auto retrieved_data = cache.Retrieve(module_type_key);
+  std::string module_id = "34045662-a9dc-4823-8435-91056d4c26cb";
+  rc_rpc_plugin::ModuleUid module(module_type_key, module_id);
+  EXPECT_FALSE(cache.Contains(module));
+  auto retrieved_data = cache.Retrieve(module);
   EXPECT_EQ(smart_objects::SmartType_Null, retrieved_data.getType());
 }
 
 TEST_F(InteriorDataCacheTest, CheckThatCacheContansDataAfterAdding) {
   rc_rpc_plugin::InteriorDataCacheImpl cache;
   const std::string module_type_key = "random_module_type";
+  std::string module_id = "34045662-a9dc-4823-8435-91056d4c26cb";
+  rc_rpc_plugin::ModuleUid module(module_type_key, module_id);
   smart_objects::SmartObject data;
   data["key"] = "value";
 
-  cache.Add(module_type_key, data);
-  EXPECT_TRUE(cache.Contains(module_type_key));
-  auto retrieved_data = cache.Retrieve(module_type_key);
+  cache.Add(module, data);
+  EXPECT_TRUE(cache.Contains(module));
+  auto retrieved_data = cache.Retrieve(module);
   EXPECT_EQ(data, retrieved_data);
 }
 
 TEST_F(InteriorDataCacheTest, DataDoesNotExistAfterClear) {
   rc_rpc_plugin::InteriorDataCacheImpl cache;
   const std::string module_type_key = "random_module_type";
+  std::string module_id = "34045662-a9dc-4823-8435-91056d4c26cb";
+  rc_rpc_plugin::ModuleUid module(module_type_key, module_id);
   smart_objects::SmartObject data;
   data["key"] = "value";
 
-  cache.Add(module_type_key, data);
-  EXPECT_TRUE(cache.Contains(module_type_key));
-  auto Retrieved_data = cache.Retrieve(module_type_key);
+  cache.Add(module, data);
+  EXPECT_TRUE(cache.Contains(module));
+  auto Retrieved_data = cache.Retrieve(module);
   EXPECT_EQ(Retrieved_data, data);
   cache.Clear();
-  auto Retrieved_data_after_clear = cache.Retrieve(module_type_key);
+  auto Retrieved_data_after_clear = cache.Retrieve(module);
   EXPECT_EQ(smart_objects::SmartType_Null,
             Retrieved_data_after_clear.getType());
 }
@@ -81,19 +87,23 @@ TEST_F(InteriorDataCacheTest, MultipleDataCached) {
   rc_rpc_plugin::InteriorDataCacheImpl cache;
 
   const std::string module_type_key1 = "random_module_type";
+  std::string module_id1 = "34045662-a9dc-4823-8435-91056d4c26cb";
+  rc_rpc_plugin::ModuleUid module1(module_type_key1, module_id1);
   smart_objects::SmartObject data1;
   data1["key"] = "value1";
-  cache.Add(module_type_key1, data1);
-  EXPECT_TRUE(cache.Contains(module_type_key1));
-  auto retrieved_data1 = cache.Retrieve(module_type_key1);
+  cache.Add(module1, data1);
+  EXPECT_TRUE(cache.Contains(module1));
+  auto retrieved_data1 = cache.Retrieve(module1);
   EXPECT_EQ(data1, retrieved_data1);
 
   std::string module_type_key2 = "random_module_type2";
+  std::string module_id2 = "eb7739ea-b263-4fe1-af9c-9311d1acac2d";
+  rc_rpc_plugin::ModuleUid module2(module_type_key2, module_id2);
   smart_objects::SmartObject data2;
   data2["key"] = "value2";
-  cache.Add(module_type_key2, data2);
-  EXPECT_TRUE(cache.Contains(module_type_key2));
-  auto retrieved_data2 = cache.Retrieve(module_type_key2);
+  cache.Add(module2, data2);
+  EXPECT_TRUE(cache.Contains(module2));
+  auto retrieved_data2 = cache.Retrieve(module2);
   EXPECT_EQ(retrieved_data2, data2);
 
   ASSERT_TRUE(data1 != data2);
@@ -105,30 +115,36 @@ TEST_F(InteriorDataCacheTest, RemoveFromChacheSuccessful) {
   rc_rpc_plugin::InteriorDataCacheImpl cache;
 
   const std::string module_type = "random_module_type";
+  std::string module_id = "34045662-a9dc-4823-8435-91056d4c26cb";
+  rc_rpc_plugin::ModuleUid module(module_type, module_id);
   smart_objects::SmartObject data;
   data["key"] = "value1";
-  cache.Add(module_type, data);
-  EXPECT_TRUE(cache.Contains(module_type));
-  auto retrieved_data1 = cache.Retrieve(module_type);
+  cache.Add(module, data);
+  EXPECT_TRUE(cache.Contains(module));
+  auto retrieved_data1 = cache.Retrieve(module);
   EXPECT_EQ(data, retrieved_data1);
 
-  cache.Remove(module_type);
-  EXPECT_FALSE(cache.Contains(module_type));
-  auto retreived = cache.Retrieve(module_type);
+  cache.Remove(module);
+  EXPECT_FALSE(cache.Contains(module));
+  auto retreived = cache.Retrieve(module);
   EXPECT_EQ(smart_objects::SmartType_Null, retreived.getType());
 }
 
 TEST_F(InteriorDataCacheTest, RemoveNotExistingNoSideEffects) {
   rc_rpc_plugin::InteriorDataCacheImpl cache;
   const std::string module_type_key = "random_module_type";
+  std::string module_id = "34045662-a9dc-4823-8435-91056d4c26cb";
+  rc_rpc_plugin::ModuleUid module(module_type_key, module_id);
   smart_objects::SmartObject data;
   data["key"] = "value";
 
-  cache.Add(module_type_key, data);
-  cache.Remove("some other module_type");
+  cache.Add(module, data);
+  rc_rpc_plugin::ModuleUid other_module("some other module_type",
+                                        "some other module id");
+  cache.Remove(other_module);
 
-  EXPECT_TRUE(cache.Contains(module_type_key));
-  auto retrieved_data = cache.Retrieve(module_type_key);
+  EXPECT_TRUE(cache.Contains(module));
+  auto retrieved_data = cache.Retrieve(module);
   EXPECT_EQ(data, retrieved_data);
 }
 
@@ -136,24 +152,28 @@ TEST_F(InteriorDataCacheTest, Exist2ModuleTypesRemoveOneAnotherOneLeft) {
   rc_rpc_plugin::InteriorDataCacheImpl cache;
 
   const std::string module_type_key1 = "random_module_type";
+  std::string module_id1 = "34045662-a9dc-4823-8435-91056d4c26cb";
+  rc_rpc_plugin::ModuleUid module1(module_type_key1, module_id1);
   smart_objects::SmartObject data1;
   data1["key"] = "value1";
-  cache.Add(module_type_key1, data1);
+  cache.Add(module1, data1);
 
   std::string module_type_key2 = "random_module_type2";
+  std::string module_id2 = "eb7739ea-b263-4fe1-af9c-9311d1acac2d";
+  rc_rpc_plugin::ModuleUid module2(module_type_key2, module_id2);
   smart_objects::SmartObject data2;
   data2["key"] = "value2";
-  cache.Add(module_type_key2, data2);
+  cache.Add(module2, data2);
 
   ASSERT_TRUE(data1 != data2);
 
-  cache.Remove(module_type_key1);
-  EXPECT_FALSE(cache.Contains(module_type_key1));
-  EXPECT_TRUE(cache.Contains(module_type_key2));
+  cache.Remove(module1);
+  EXPECT_FALSE(cache.Contains(module1));
+  EXPECT_TRUE(cache.Contains(module2));
 
-  auto retrieved_data1 = cache.Retrieve(module_type_key1);
+  auto retrieved_data1 = cache.Retrieve(module1);
   EXPECT_EQ(smart_objects::SmartType_Null, retrieved_data1.getType());
-  auto retrieved_data2 = cache.Retrieve(module_type_key2);
+  auto retrieved_data2 = cache.Retrieve(module2);
   EXPECT_EQ(data2, retrieved_data2);
 }
 

@@ -46,16 +46,19 @@ class InteriorDataCacheImpl : public InteriorDataCache {
 
   ~InteriorDataCacheImpl();
 
-  void Add(const std::string& module_type,
+  void Add(const ModuleUid& module,
            const smart_objects::SmartObject& module_data) OVERRIDE;
-  smart_objects::SmartObject Retrieve(
+  smart_objects::SmartObject Retrieve(const ModuleUid& module) const OVERRIDE;
+
+  std::vector<ModuleUid> GetCachedModulesByType(
       const std::string& module_type) const OVERRIDE;
-  bool Contains(const std::string& module_type) const OVERRIDE;
-  void Remove(const std::string& module_type) OVERRIDE;
+
+  bool Contains(const ModuleUid& module) const OVERRIDE;
+  void Remove(const ModuleUid& module) OVERRIDE;
   void Clear() OVERRIDE;
 
  private:
-  std::map<std::string, smart_objects::SmartObject> cached_data_;
+  std::map<ModuleUid, smart_objects::SmartObject> cached_data_;
   mutable sync_primitives::Lock cached_data_lock_;
 };
 
