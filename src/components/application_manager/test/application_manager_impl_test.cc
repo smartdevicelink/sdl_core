@@ -1710,7 +1710,16 @@ TEST_F(ApplicationManagerImplTest, SetIconFileFromSystemRequest_Success) {
   const std::string url = "https://www.fakeiconurl.com/icon.png";
   EXPECT_CALL(*mock_policy_handler_, GetIconUrl("1234"))
       .WillRepeatedly(Return(url));
-  EXPECT_CALL(*mock_rpc_service_, ManageHMICommand(_, _)).Times(1);
+
+  smart_objects::SmartObject dummy_object(smart_objects::SmartType_Map);
+  smart_objects::SmartObjectSPtr sptr =
+      std::make_shared<smart_objects::SmartObject>(dummy_object);
+
+  EXPECT_CALL(*mock_message_helper_,
+              CreateModuleInfoSO(
+                  hmi_apis::FunctionID::BasicCommunication_UpdateAppList, _))
+      .WillOnce(Return(sptr));
+  EXPECT_CALL(*mock_rpc_service_, ManageHMICommand(sptr, _)).Times(1);
   EXPECT_CALL(mock_application_manager_settings_, app_icons_folder())
       .WillOnce(ReturnRef(kDirectoryName));
   app_manager_impl_->SetIconFileFromSystemRequest("1234");
