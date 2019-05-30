@@ -46,8 +46,7 @@ namespace rpc {
  * Range helper class
  */
 template <typename T>
-Range<T>::Range(T min, T max)
-    : min_(min), max_(max) {}
+Range<T>::Range(T min, T max) : min_(min), max_(max) {}
 
 template <typename T>
 T Range<T>::min() const {
@@ -236,8 +235,7 @@ template <size_t minlen, size_t maxlen>
 const Range<size_t> String<minlen, maxlen>::length_range_(minlen, maxlen);
 
 template <size_t minlen, size_t maxlen>
-String<minlen, maxlen>::String()
-    : PrimitiveType(kUninitialized) {}
+String<minlen, maxlen>::String() : PrimitiveType(kUninitialized) {}
 
 template <size_t minlen, size_t maxlen>
 String<minlen, maxlen>::String(const std::string& value)
@@ -288,8 +286,7 @@ String<minlen, maxlen>::operator const std::string&() const {
  * Enum class
  */
 template <typename T>
-Enum<T>::Enum()
-    : PrimitiveType(kUninitialized), value_(EnumType()) {}
+Enum<T>::Enum() : PrimitiveType(kUninitialized), value_(EnumType()) {}
 
 template <typename T>
 Enum<T>::Enum(EnumType value)
@@ -311,8 +308,7 @@ Enum<T>::operator EnumType() const {
  * Array class
  */
 template <typename T, size_t minsize, size_t maxsize>
-Array<T, minsize, maxsize>::Array()
-    : CompositeType(kUninitialized) {}
+Array<T, minsize, maxsize>::Array() : CompositeType(kUninitialized) {}
 
 template <typename T, size_t minsize, size_t maxsize>
 template <typename U>
@@ -401,13 +397,11 @@ void Array<T, minsize, maxsize>::SetPolicyTableType(
  * Map class
  */
 template <typename T, size_t minsize, size_t maxsize>
-Map<T, minsize, maxsize>::Map()
-    : CompositeType(kUninitialized) {}
+Map<T, minsize, maxsize>::Map() : CompositeType(kUninitialized) {}
 
 template <typename T, size_t minsize, size_t maxsize>
 template <typename U>
-Map<T, minsize, maxsize>::Map(const U& value)
-    : CompositeType(kUninitialized) {
+Map<T, minsize, maxsize>::Map(const U& value) : CompositeType(kUninitialized) {
   for (typename U::const_iterator i = value.begin(), e = value.end(); i != e;
        ++i) {
     // Explicitly convert that value to T because all rpc_types have explicit
@@ -499,13 +493,11 @@ void Map<T, minsize, maxsize>::SetPolicyTableType(
  * Nullable class
  */
 template <typename T>
-Nullable<T>::Nullable()
-    : marked_null_(false) {}
+Nullable<T>::Nullable() : marked_null_(false) {}
 
 template <typename T>
 template <typename U>
-Nullable<T>::Nullable(const U& value)
-    : T(value), marked_null_(false) {}
+Nullable<T>::Nullable(const U& value) : T(value), marked_null_(false) {}
 
 template <typename T>
 template <typename U>
@@ -623,8 +615,7 @@ void rpc::Optional<T>::SetPolicyTableType(
  * Stringifyable class
  */
 template <typename T>
-Stringifyable<T>::Stringifyable()
-    : predefined_string_("") {}
+Stringifyable<T>::Stringifyable() : predefined_string_("") {}
 
 template <typename T>
 template <typename U>

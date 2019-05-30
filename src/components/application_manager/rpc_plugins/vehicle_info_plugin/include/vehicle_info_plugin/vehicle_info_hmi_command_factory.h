@@ -68,6 +68,6 @@ class VehicleInfoHmiCommandFactory : public app_mngr::CommandFactory {
 
   DISALLOW_COPY_AND_ASSIGN(VehicleInfoHmiCommandFactory);
 };
-}
+}  // namespace vehicle_info_plugin
 
 #endif  // SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_VEHICLE_INFO_PLUGIN_INCLUDE_VEHICLE_INFO_PLUGIN_VEHICLE_INFO_HMI_COMMAND_FACTORY_H

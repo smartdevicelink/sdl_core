@@ -30,12 +30,12 @@
  ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  POSSIBILITY OF SUCH DAMAGE.
  */
-#include <string.h>
 #include "sdl_rpc_plugin/commands/mobile/show_request.h"
+#include <string.h>
 
-#include "application_manager/policies/policy_handler.h"
 #include "application_manager/application.h"
 #include "application_manager/message_helper.h"
+#include "application_manager/policies/policy_handler.h"
 #include "utils/file_system.h"
 #include "utils/helpers.h"
 
@@ -138,7 +138,8 @@ void ShowRequest::Run() {
   mobile_apis::Result::eType verification_result = mobile_apis::Result::SUCCESS;
   if (((*message_)[strings::msg_params].keyExists(strings::graphic)) &&
       ((*message_)[strings::msg_params][strings::graphic][strings::value]
-           .asString()).length()) {
+           .asString())
+          .length()) {
     verification_result = MessageHelper::VerifyImage(
         (*message_)[strings::msg_params][strings::graphic],
         app,
@@ -398,7 +399,8 @@ bool ShowRequest::CheckStringsOfShowRequest() {
 
   if ((*message_)[strings::msg_params].keyExists(strings::secondary_graphic)) {
     str = (*message_)[strings::msg_params][strings::secondary_graphic]
-                     [strings::value].asCharArray();
+                     [strings::value]
+                         .asCharArray();
     if (!CheckSyntax(str)) {
       LOG4CXX_ERROR(logger_,
                     "Invalid secondary_graphic value syntax check failed");
@@ -410,4 +412,4 @@ bool ShowRequest::CheckStringsOfShowRequest() {
 
 }  // namespace commands
 
-}  // namespace application_manager
+}  // namespace sdl_rpc_plugin

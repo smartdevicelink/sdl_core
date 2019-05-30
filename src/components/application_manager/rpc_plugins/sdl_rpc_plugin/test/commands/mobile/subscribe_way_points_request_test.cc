@@ -32,17 +32,17 @@
 
 #include "gtest/gtest.h"
 
-#include "smart_objects/smart_object.h"
-#include "application_manager/commands/commands_test.h"
-#include "application_manager/commands/command_request_test.h"
 #include "application_manager/application.h"
-#include "application_manager/mock_application_manager.h"
+#include "application_manager/commands/command_request_test.h"
+#include "application_manager/commands/commands_test.h"
 #include "application_manager/mock_application.h"
+#include "application_manager/mock_application_manager.h"
 #include "application_manager/mock_hmi_capabilities.h"
 #include "application_manager/mock_message_helper.h"
-#include "mobile/subscribe_way_points_request.h"
-#include "interfaces/MOBILE_API.h"
 #include "application_manager/smart_object_keys.h"
+#include "interfaces/MOBILE_API.h"
+#include "mobile/subscribe_way_points_request.h"
+#include "smart_objects/smart_object.h"
 
 namespace test {
 namespace components {
@@ -52,14 +52,14 @@ namespace subscribe_way_points_request {
 
 using ::testing::_;
 using ::testing::A;
+using ::testing::DoAll;
+using ::testing::InSequence;
 using ::testing::Return;
 using ::testing::ReturnRef;
-using ::testing::DoAll;
 using ::testing::SaveArg;
-using ::testing::InSequence;
 namespace am = ::application_manager;
-using sdl_rpc_plugin::commands::SubscribeWayPointsRequest;
 using am::commands::MessageSharedPtr;
+using sdl_rpc_plugin::commands::SubscribeWayPointsRequest;
 
 typedef std::shared_ptr<SubscribeWayPointsRequest> CommandPtr;
 
@@ -90,7 +90,8 @@ TEST_F(SubscribeWayPointsRequestTest, Run_SUCCESS) {
   EXPECT_EQ(mobile_apis::Result::SUCCESS,
             static_cast<mobile_apis::Result::eType>(
                 (*mobile_result_msg)[am::strings::msg_params]
-                                    [am::strings::result_code].asInt()));
+                                    [am::strings::result_code]
+                                        .asInt()));
 }
 
 TEST_F(SubscribeWayPointsRequestTest, OnEvent_SUCCESS) {

@@ -32,9 +32,9 @@
 
 #include "sdl_rpc_plugin/commands/hmi/bc_get_file_path_response.h"
 #include "application_manager/application_impl.h"
+#include "application_manager/event_engine/event.h"
 #include "application_manager/rpc_service.h"
 #include "interfaces/MOBILE_API.h"
-#include "application_manager/event_engine/event.h"
 
 namespace sdl_rpc_plugin {
 using namespace application_manager;

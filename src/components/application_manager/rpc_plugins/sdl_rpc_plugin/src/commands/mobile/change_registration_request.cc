@@ -31,14 +31,14 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "sdl_rpc_plugin/commands/mobile/change_registration_request.h"
 #include <string.h>
 #include <algorithm>
-#include "sdl_rpc_plugin/commands/mobile/change_registration_request.h"
-#include "application_manager/application_manager.h"
 #include "application_manager/application_impl.h"
-#include "interfaces/MOBILE_API.h"
-#include "interfaces/HMI_API.h"
+#include "application_manager/application_manager.h"
 #include "application_manager/message_helper.h"
+#include "interfaces/HMI_API.h"
+#include "interfaces/MOBILE_API.h"
 
 namespace {
 namespace custom_str = utils::custom_string;
@@ -51,7 +51,7 @@ struct IsSameNickname {
  private:
   const custom_str::CustomString& app_id_;
 };
-}
+}  // namespace
 
 namespace sdl_rpc_plugin {
 using namespace application_manager;
@@ -194,9 +194,9 @@ void ChangeRegistrationRequest::Run() {
         MessageHelper::VerifyTtsFiles(tts_name, app, application_manager_);
 
     if (mobile_apis::Result::FILE_NOT_FOUND == verification_result) {
-      LOG4CXX_ERROR(logger_,
-                    "MessageHelper::VerifyTtsFiles return "
-                        << verification_result);
+      LOG4CXX_ERROR(
+          logger_,
+          "MessageHelper::VerifyTtsFiles return " << verification_result);
       SendResponse(false,
                    mobile_apis::Result::FILE_NOT_FOUND,
                    "One or more files needed for tts_name are not present");
@@ -216,9 +216,9 @@ void ChangeRegistrationRequest::Run() {
       hmi_interfaces.GetInterfaceState(
           HmiInterfaces::InterfaceID::HMI_INTERFACE_TTS);
 
+  using helpers::ALL;
   using helpers::Compare;
   using helpers::EQ;
-  using helpers::ALL;
 
   if (Compare<HmiInterfaces::InterfaceState, EQ, ALL>(
           HmiInterfaces::InterfaceState::STATE_NOT_AVAILABLE,
@@ -638,9 +638,9 @@ bool ChangeRegistrationRequest::IsNicknameAllowed(
   ApplicationSharedPtr app = application_manager_.application(connection_key());
 
   if (!app) {
-    LOG4CXX_ERROR(logger_,
-                  "Can't find appication with connection key "
-                      << connection_key());
+    LOG4CXX_ERROR(
+        logger_,
+        "Can't find appication with connection key " << connection_key());
     return false;
   }
 
@@ -681,4 +681,4 @@ bool ChangeRegistrationRequest::IsNicknameAllowed(
 
 }  // namespace commands
 
-}  // namespace application_manager
+}  // namespace sdl_rpc_plugin

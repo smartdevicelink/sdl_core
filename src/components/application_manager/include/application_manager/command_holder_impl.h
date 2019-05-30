@@ -35,9 +35,9 @@
 
 #include "application_manager/command_holder.h"
 
+#include <map>
 #include <string>
 #include <vector>
-#include <map>
 #include "application_manager/application.h"
 #include "application_manager/rpc_service.h"
 #include "smart_objects/smart_object.h"

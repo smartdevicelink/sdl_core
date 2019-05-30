@@ -33,9 +33,9 @@
 #ifndef SRC_COMPONENTS_INCLUDE_TRANSPORT_MANAGER_COMMON_H_
 #define SRC_COMPONENTS_INCLUDE_TRANSPORT_MANAGER_COMMON_H_
 
-#include <vector>
-#include <string>
 #include <map>
+#include <string>
+#include <vector>
 
 /**
  * @brief - transport_manager namespace

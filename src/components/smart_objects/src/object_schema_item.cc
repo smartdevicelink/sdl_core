@@ -40,7 +40,7 @@ namespace {
 const char connection_key[] = "connection_key";
 const char binary_data[] = "binary_data";
 const char app_id[] = "appID";
-}
+}  // namespace
 namespace ns_smart_device_link {
 namespace ns_smart_objects {
 
@@ -113,10 +113,10 @@ errors::eType CObjectSchemaItem::validate(
     const utils::SemanticVersion& MessageVersion,
     const bool allow_unknown_enums) {
   if (SmartType_Map != object.getType()) {
-    std::string validation_info = "Incorrect type, expected: " +
-                                  SmartObject::typeToString(SmartType_Map) +
-                                  ", got: " +
-                                  SmartObject::typeToString(object.getType());
+    std::string validation_info =
+        "Incorrect type, expected: " +
+        SmartObject::typeToString(SmartType_Map) +
+        ", got: " + SmartObject::typeToString(object.getType());
     report__->set_validation_info(validation_info);
     return errors::INVALID_VALUE;
   }
@@ -244,8 +244,7 @@ void CObjectSchemaItem::RemoveFakeParams(
         mMembers.find(key);
     if (mMembers.end() == members_it
         // FIXME(EZamakhov): Remove illegal usage of filed in AM
-        &&
-        key.compare(connection_key) != 0 && key.compare(binary_data) != 0 &&
+        && key.compare(connection_key) != 0 && key.compare(binary_data) != 0 &&
         key.compare(app_id) != 0) {
       ++it;
       Object.erase(key);

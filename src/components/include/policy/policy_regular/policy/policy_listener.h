@@ -61,12 +61,12 @@ class PolicyListener {
       std::map<std::string, StringArray> app_hmi_types) = 0;
 
   /**
- * @brief CanUpdate allows to find active application
- * and check whether related device consented.
- *
- * @return true if there are at least one application has been registered
- * with consented device.
- */
+   * @brief CanUpdate allows to find active application
+   * and check whether related device consented.
+   *
+   * @return true if there are at least one application has been registered
+   * with consented device.
+   */
   virtual bool CanUpdate() = 0;
 
   /**

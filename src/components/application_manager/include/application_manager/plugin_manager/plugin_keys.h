@@ -41,7 +41,7 @@ extern const char* vehicle_info_rpc_plugin;
 extern const char* app_service_rpc_plugin;
 extern const char* rc_rpc_plugin;
 extern const char* sdl_rpc_plugin;
-}
+}  // namespace plugin_names
 
 }  // namespace plugin_manager
 }  // namespace application_manager

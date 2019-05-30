@@ -75,7 +75,7 @@ class VehicleInfoPlugin : public plugins::RPCPlugin {
   std::unique_ptr<app_mngr::CommandFactory> command_factory_;
   app_mngr::ApplicationManager* application_manager_;
 };
-}
+}  // namespace vehicle_info_plugin
 
 extern "C" application_manager::plugin_manager::RPCPlugin* Create();
 

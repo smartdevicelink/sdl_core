@@ -31,19 +31,19 @@
  */
 
 #include <stdint.h>
-#include <string>
 #include <set>
+#include <string>
 
 #include "mobile/alert_request.h"
 
-#include "gtest/gtest.h"
 #include "application_manager/commands/command_request_test.h"
+#include "application_manager/event_engine/event.h"
 #include "application_manager/mock_application.h"
 #include "application_manager/mock_application_manager.h"
-#include "application_manager/mock_message_helper.h"
-#include "application_manager/event_engine/event.h"
 #include "application_manager/mock_hmi_interface.h"
+#include "application_manager/mock_message_helper.h"
 #include "application_manager/policies/mock_policy_handler_interface.h"
+#include "gtest/gtest.h"
 
 namespace test {
 namespace components {
@@ -52,12 +52,12 @@ namespace mobile_commands_test {
 namespace alert_request {
 
 namespace am = application_manager;
-using sdl_rpc_plugin::commands::AlertRequest;
+using am::MockMessageHelper;
 using am::commands::CommandImpl;
 using am::commands::MessageSharedPtr;
-using am::MockMessageHelper;
 using am::event_engine::Event;
 using policy_test::MockPolicyHandlerInterface;
+using sdl_rpc_plugin::commands::AlertRequest;
 using ::testing::_;
 using ::testing::Return;
 using ::testing::ReturnRef;
@@ -477,9 +477,10 @@ TEST_F(AlertRequestTest, DISABLED_OnEvent_TTSWarnings_SUCCESS) {
           (*msg_)[am::strings::msg_params][am::strings::tts_chunks], _, _))
       .WillOnce(Return(mobile_apis::Result::SUCCESS));
 
-  EXPECT_CALL(mock_rpc_service_,
-              ManageHMICommand(HMIResultCodeIs(hmi_apis::FunctionID::TTS_Speak),
-                               _)).WillOnce(Return(true));
+  EXPECT_CALL(
+      mock_rpc_service_,
+      ManageHMICommand(HMIResultCodeIs(hmi_apis::FunctionID::TTS_Speak), _))
+      .WillOnce(Return(true));
 
   CommandPtr command(CreateCommand<AlertRequest>(msg_));
   command->Run();
@@ -508,9 +509,10 @@ TEST_F(AlertRequestTest, DISABLED_OnEvent_TTSUnsupportedResource_SUCCESS) {
       VerifyTtsFiles(
           (*msg_)[am::strings::msg_params][am::strings::tts_chunks], _, _))
       .WillOnce(Return(mobile_apis::Result::SUCCESS));
-  EXPECT_CALL(mock_rpc_service_,
-              ManageHMICommand(HMIResultCodeIs(hmi_apis::FunctionID::TTS_Speak),
-                               _)).WillOnce(Return(true));
+  EXPECT_CALL(
+      mock_rpc_service_,
+      ManageHMICommand(HMIResultCodeIs(hmi_apis::FunctionID::TTS_Speak), _))
+      .WillOnce(Return(true));
 
   CommandPtr command(CreateCommand<AlertRequest>(msg_));
   command->Run();
@@ -641,9 +643,10 @@ TEST_F(AlertRequestTest, OnEvent_TTSSuccesUiAlertInvalidEnum_SUCCESS) {
       VerifyTtsFiles(
           (*msg_)[am::strings::msg_params][am::strings::tts_chunks], _, _))
       .WillOnce(Return(mobile_apis::Result::SUCCESS));
-  EXPECT_CALL(mock_rpc_service_,
-              ManageHMICommand(HMIResultCodeIs(hmi_apis::FunctionID::TTS_Speak),
-                               _)).WillOnce(Return(true));
+  EXPECT_CALL(
+      mock_rpc_service_,
+      ManageHMICommand(HMIResultCodeIs(hmi_apis::FunctionID::TTS_Speak), _))
+      .WillOnce(Return(true));
 
   CommandPtr command(CreateCommand<AlertRequest>(msg_));
   command->Run();
@@ -690,9 +693,10 @@ TEST_F(AlertRequestTest, DISABLED_OnEvent_TTSAbortedUiAlertNotSent_SUCCESS) {
       VerifyTtsFiles(
           (*msg_)[am::strings::msg_params][am::strings::tts_chunks], _, _))
       .WillOnce(Return(mobile_apis::Result::SUCCESS));
-  EXPECT_CALL(mock_rpc_service_,
-              ManageHMICommand(HMIResultCodeIs(hmi_apis::FunctionID::TTS_Speak),
-                               _)).WillOnce(Return(true));
+  EXPECT_CALL(
+      mock_rpc_service_,
+      ManageHMICommand(HMIResultCodeIs(hmi_apis::FunctionID::TTS_Speak), _))
+      .WillOnce(Return(true));
 
   CommandPtr command(CreateCommand<AlertRequest>(msg_));
   command->Run();

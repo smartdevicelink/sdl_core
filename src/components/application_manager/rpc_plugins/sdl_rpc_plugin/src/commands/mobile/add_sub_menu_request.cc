@@ -33,8 +33,8 @@
 
 #include "sdl_rpc_plugin/commands/mobile/add_sub_menu_request.h"
 
-#include "application_manager/message_helper.h"
 #include "application_manager/application.h"
+#include "application_manager/message_helper.h"
 #include "utils/helpers.h"
 
 namespace sdl_rpc_plugin {
@@ -114,10 +114,12 @@ void AddSubMenuRequest::Run() {
     msg_params[strings::menu_params][strings::position] =
         received_msg_params[strings::position];
   }
+  if (received_msg_params.keyExists(strings::menu_icon)) {
+    msg_params[strings::menu_icon] = received_msg_params[strings::menu_icon];
+  }
   msg_params[strings::menu_params][strings::menu_name] =
       received_msg_params[strings::menu_name];
   msg_params[strings::app_id] = app->app_id();
-  msg_params[strings::menu_icon] = received_msg_params[strings::menu_icon];
 
   StartAwaitForInterface(HmiInterfaces::HMI_INTERFACE_UI);
   SendHMIRequest(hmi_apis::FunctionID::UI_AddSubMenu, &msg_params, true);
@@ -183,4 +185,4 @@ bool AddSubMenuRequest::CheckSubMenuName() {
 
 }  // namespace commands
 
-}  // namespace application_manager
+}  // namespace sdl_rpc_plugin

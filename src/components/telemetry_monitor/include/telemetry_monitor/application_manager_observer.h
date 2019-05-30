@@ -33,9 +33,9 @@
 #ifndef SRC_COMPONENTS_TELEMETRY_MONITOR_INCLUDE_TELEMETRY_MONITOR_APPLICATION_MANAGER_OBSERVER_H_
 #define SRC_COMPONENTS_TELEMETRY_MONITOR_INCLUDE_TELEMETRY_MONITOR_APPLICATION_MANAGER_OBSERVER_H_
 
-#include "utils/message_queue.h"
 #include "application_manager/telemetry_observer.h"
 #include "telemetry_monitor/application_manager_metric_wrapper.h"
+#include "utils/message_queue.h"
 
 namespace telemetry_monitor {
 
@@ -50,5 +50,5 @@ class ApplicationManagerObserver
  private:
   TelemetryMonitor* telemetry_monitor_;
 };
-}
+}  // namespace telemetry_monitor
 #endif  // SRC_COMPONENTS_TELEMETRY_MONITOR_INCLUDE_TELEMETRY_MONITOR_APPLICATION_MANAGER_OBSERVER_H_

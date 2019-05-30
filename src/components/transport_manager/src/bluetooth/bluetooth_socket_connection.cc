@@ -33,13 +33,13 @@
 
 #include "transport_manager/bluetooth/bluetooth_socket_connection.h"
 
-#include <unistd.h>
 #include <bluetooth/bluetooth.h>
 #include <bluetooth/hci.h>
 #include <bluetooth/hci_lib.h>
+#include <bluetooth/rfcomm.h>
 #include <bluetooth/sdp.h>
 #include <bluetooth/sdp_lib.h>
-#include <bluetooth/rfcomm.h>
+#include <unistd.h>
 
 #include "transport_manager/bluetooth/bluetooth_device.h"
 #include "transport_manager/transport_adapter/transport_adapter_controller.h"
@@ -93,9 +93,9 @@ bool BluetoothSocketConnection::Establish(ConnectError** error) {
   do {
     rfcomm_socket = socket(AF_BLUETOOTH, SOCK_STREAM, BTPROTO_RFCOMM);
     if (-1 == rfcomm_socket) {
-      LOG4CXX_ERROR_WITH_ERRNO(logger_,
-                               "Failed to create RFCOMM socket for device "
-                                   << device_handle());
+      LOG4CXX_ERROR_WITH_ERRNO(
+          logger_,
+          "Failed to create RFCOMM socket for device " << device_handle());
       *error = new ConnectError();
       LOG4CXX_TRACE(logger_, "exit with FALSE");
       return false;

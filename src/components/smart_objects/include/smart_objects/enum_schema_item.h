@@ -41,8 +41,8 @@
 
 #include "smart_objects/default_shema_item.h"
 
-#include "utils/semantic_version.h"
 #include <boost/optional.hpp>
+#include "utils/semantic_version.h"
 
 namespace ns_smart_device_link {
 namespace ns_smart_objects {
@@ -325,10 +325,10 @@ errors::eType TEnumSchemaItem<EnumType>::validate(
       }
       validation_info = "Invalid enum value: " + Object.asString();
     } else {
-      validation_info = "Incorrect type, expected: " +
-                        SmartObject::typeToString(SmartType_Integer) +
-                        " (enum), got: " +
-                        SmartObject::typeToString(Object.getType());
+      validation_info =
+          "Incorrect type, expected: " +
+          SmartObject::typeToString(SmartType_Integer) +
+          " (enum), got: " + SmartObject::typeToString(Object.getType());
     }
     report__->set_validation_info(validation_info);
     return errors::INVALID_VALUE;

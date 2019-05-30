@@ -35,15 +35,15 @@
 
 #include <map>
 
-#include "policy/pt_representation.h"
-#include "policy/pt_ext_representation.h"
-#include "policy/usage_statistics/statistics_manager.h"
 #include "policy/cache_manager_interface.h"
+#include "policy/pt_ext_representation.h"
+#include "policy/pt_representation.h"
+#include "policy/usage_statistics/statistics_manager.h"
 #include "utils/threads/thread.h"
 #include "utils/threads/thread_delegate.h"
 
-#include "utils/lock.h"
 #include "utils/conditional_variable.h"
+#include "utils/lock.h"
 
 namespace policy {
 class PolicySettings;
@@ -256,7 +256,7 @@ class CacheManager : public CacheManagerInterface {
    * @brief Check if an app can send unknown rpc requests to an app service
    * provider
    * @param policy_app_id Unique application id
-  */
+   */
   virtual bool UnknownRPCPassthroughAllowed(
       const std::string& policy_app_id) const;
 
@@ -798,35 +798,36 @@ class CacheManager : public CacheManagerInterface {
   ExternalConsentStatus GetExternalConsentEntities() OVERRIDE;
 
   /**
- * @brief Creates collection of ExternalConsent items known by current
- * functional
- * groupings and appropiate section
- * (disallowed_by_external_consent_entities_on/off) where
- * is item is being holded. If item is not found it's not included into
- * collection
- * @param status Current status containing collection of ExternalConsent items
- * @return Collection of ExternalConsent items mapped to list of groups with
- * section
- * marker where the item is found
- */
+   * @brief Creates collection of ExternalConsent items known by current
+   * functional
+   * groupings and appropiate section
+   * (disallowed_by_external_consent_entities_on/off) where
+   * is item is being holded. If item is not found it's not included into
+   * collection
+   * @param status Current status containing collection of ExternalConsent items
+   * @return Collection of ExternalConsent items mapped to list of groups with
+   * section
+   * marker where the item is found
+   */
   GroupsByExternalConsentStatus GetGroupsWithSameEntities(
       const ExternalConsentStatus& status) OVERRIDE;
 
   /**
-  * @brief Gets collection of links device-to-application from device_data
-  * section of policy table if there any application records present, i.e. if
-  * any specific user consent is present
-  * @return Collection of device-to-application links
-  */
+   * @brief Gets collection of links device-to-application from device_data
+   * section of policy table if there any application records present, i.e. if
+   * any specific user consent is present
+   * @return Collection of device-to-application links
+   */
   std::map<std::string, std::string> GetKnownLinksFromPT() OVERRIDE;
 
   /**
- * @brief Sets groups permissions affected by customer connectivity settings
- * entities status, i.e. groups assigned to particular application on
- * particular device which have same entities as current ExternalConsent status
- * @param permissions Groups permissions which result current ExternalConsent
- * status
- */
+   * @brief Sets groups permissions affected by customer connectivity settings
+   * entities status, i.e. groups assigned to particular application on
+   * particular device which have same entities as current ExternalConsent
+   * status
+   * @param permissions Groups permissions which result current ExternalConsent
+   * status
+   */
   void SetExternalConsentForApp(const PermissionConsent& permissions) OVERRIDE;
 
 #ifdef BUILD_TESTS

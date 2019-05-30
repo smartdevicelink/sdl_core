@@ -31,11 +31,11 @@
  */
 
 #include "gtest/gtest.h"
-#include "telemetry_monitor/json_keys.h"
 #include "json/json.h"
-#include "utils/resource_usage.h"
-#include "telemetry_monitor/protocol_handler_metric_wrapper.h"
 #include "protocol_handler/telemetry_observer.h"
+#include "telemetry_monitor/json_keys.h"
+#include "telemetry_monitor/protocol_handler_metric_wrapper.h"
+#include "utils/resource_usage.h"
 
 namespace test {
 namespace components {

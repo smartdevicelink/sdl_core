@@ -33,9 +33,9 @@
 #define SRC_COMPONENTS_INCLUDE_TEST_PROTOCOL_HANDLER_MOCK_PROTOCOL_HANDLER_H_
 
 #include "gmock/gmock.h"
-#include "protocol_handler/protocol_packet.h"
 #include "protocol_handler/protocol_handler.h"
 #include "protocol_handler/protocol_handler_settings.h"
+#include "protocol_handler/protocol_packet.h"
 #include "protocol_handler/session_observer.h"
 
 namespace test {

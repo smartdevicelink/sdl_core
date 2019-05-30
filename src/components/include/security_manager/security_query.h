@@ -35,9 +35,9 @@
 
 #include <stdint.h>
 #include <cstddef>
-#include <vector>
-#include <string>
 #include <memory>
+#include <string>
+#include <vector>
 
 namespace security_manager {
 /**
@@ -187,8 +187,8 @@ class SecurityQuery {
   std::string json_message_;
 };
 /**
-*\brief SmartPointer wrapper
-*/
+ *\brief SmartPointer wrapper
+ */
 typedef std::shared_ptr<SecurityQuery> SecurityQueryPtr;
 }  // namespace security_manager
 #endif  // SRC_COMPONENTS_INCLUDE_SECURITY_MANAGER_SECURITY_QUERY_H_

@@ -417,9 +417,9 @@ bool RPCHandlerImpl::ConvertMessageToSO(
       if (validate_params &&
           output.validate(&report, empty_version, allow_unknown_parameters) !=
               smart_objects::errors::OK) {
-        LOG4CXX_ERROR(logger_,
-                      "Incorrect parameter from HMI - "
-                          << rpc::PrettyFormat(report));
+        LOG4CXX_ERROR(
+            logger_,
+            "Incorrect parameter from HMI - " << rpc::PrettyFormat(report));
 
         output.erase(strings::msg_params);
         output[strings::params][hmi_response::code] =
@@ -523,5 +523,5 @@ hmi_apis::HMI_API& RPCHandlerImpl::hmi_so_factory() {
 mobile_apis::MOBILE_API& RPCHandlerImpl::mobile_so_factory() {
   return mobile_so_factory_;
 }
-}
-}
+}  // namespace rpc_handler
+}  // namespace application_manager

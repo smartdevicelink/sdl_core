@@ -33,16 +33,16 @@
 #include <stdint.h>
 #include <string>
 
+#include "application_manager/smart_object_keys.h"
 #include "gtest/gtest.h"
 #include "smart_objects/smart_object.h"
-#include "application_manager/smart_object_keys.h"
 
-#include "application_manager/mock_application_manager.h"
 #include "application_manager/mock_application.h"
+#include "application_manager/mock_application_manager.h"
 
 #include "application_manager/commands/command_impl.h"
-#include "application_manager/commands/commands_test.h"
 #include "application_manager/commands/command_request_test.h"
+#include "application_manager/commands/commands_test.h"
 #include "mobile/on_button_event_notification.h"
 #include "mobile/on_button_press_notification.h"
 
@@ -54,12 +54,12 @@ namespace on_button_notification {
 
 namespace am = ::application_manager;
 namespace commands = am::commands;
+using am::commands::MessageSharedPtr;
 using sdl_rpc_plugin::commands::mobile::OnButtonEventNotification;
 using sdl_rpc_plugin::commands::mobile::OnButtonPressNotification;
 using ::testing::_;
-using ::testing::Types;
 using ::testing::Return;
-using am::commands::MessageSharedPtr;
+using ::testing::Types;
 
 namespace {
 const uint32_t kAppId = 5u;

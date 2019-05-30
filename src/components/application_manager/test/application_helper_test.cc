@@ -36,42 +36,42 @@
 
 #include "application_manager/mock_application_manager_settings.h"
 #include "application_manager/mock_message_helper.h"
-#include "policy/usage_statistics/mock_statistics_manager.h"
 #include "policy/mock_policy_settings.h"
+#include "policy/usage_statistics/mock_statistics_manager.h"
 
 #include "application_manager/application.h"
 #include "application_manager/application_impl.h"
 #include "application_manager/application_manager_impl.h"
-#include "application_manager/usage_statistics.h"
 #include "application_manager/helpers/application_helper.h"
 #include "application_manager/smart_object_keys.h"
-#include "interfaces/MOBILE_API.h"
+#include "application_manager/usage_statistics.h"
 #include "connection_handler/device.h"
+#include "interfaces/MOBILE_API.h"
 #include "smart_objects/smart_object.h"
 #include "utils/custom_string.h"
 #include "utils/macro.h"
 
-#include "test/resumption/mock_last_state.h"
 #include "media_manager/mock_media_manager.h"
+#include "test/resumption/mock_last_state.h"
 
 namespace {
 const uint8_t expected_tread_pool_size = 2u;
 const uint8_t stop_streaming_timeout = 1u;
 const std::string kDirectoryName = "./test_storage";
 const std::vector<std::string> kTimeoutPrompt{"timeoutPrompt"};
-}
+}  // namespace
 
 namespace test {
 namespace components {
 namespace application_manager_test {
 
+using resumption_test::MockLastState;
+using test::components::media_manager_test::MockMediaManager;
 using testing::_;
 using ::testing::Mock;
 using ::testing::NiceMock;
 using ::testing::Return;
 using ::testing::ReturnRef;
-using resumption_test::MockLastState;
-using test::components::media_manager_test::MockMediaManager;
 
 using namespace application_manager;
 using namespace policy_handler_test;
@@ -255,6 +255,6 @@ TEST_F(ApplicationHelperTest, RecallApplicationData_ExpectHMICleanupRequests) {
   application_manager::DeleteApplicationData(app_impl_, app_manager_impl_);
 }
 
-}  // application_manager_test
-}  // components
-}  // test
+}  // namespace application_manager_test
+}  // namespace components
+}  // namespace test

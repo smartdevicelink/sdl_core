@@ -52,8 +52,8 @@
 
 #include "application_manager/mock_application.h"
 #include "application_manager/mock_application_manager.h"
-#include "test/application_manager/mock_application_manager_settings.h"
 #include "application_manager/mock_event_dispatcher.h"
+#include "test/application_manager/mock_application_manager_settings.h"
 
 namespace am = application_manager;
 
@@ -64,16 +64,16 @@ namespace mobile_commands_test {
 namespace dummy_mobile_commands_test {
 
 namespace commands = app_service_rpc_plugin::commands;
-using ::testing::_;
-using ::testing::NotNull;
-using ::testing::Types;
 using am::commands::MessageSharedPtr;
-using ::test::components::event_engine_test::MockEventDispatcher;
+using ::application_manager::ApplicationSharedPtr;
+using ::test::components::application_manager_test::MockApplication;
 using ::test::components::application_manager_test::MockApplicationManager;
 using ::test::components::application_manager_test::
     MockApplicationManagerSettings;
-using ::application_manager::ApplicationSharedPtr;
-using ::test::components::application_manager_test::MockApplication;
+using ::test::components::event_engine_test::MockEventDispatcher;
+using ::testing::_;
+using ::testing::NotNull;
+using ::testing::Types;
 
 namespace {
 const std::string kEmptyString_ = "";
@@ -118,7 +118,8 @@ typedef Types<commands::GetAppServiceDataRequest,
               commands::PerformAppServiceInteractionResponse,
               commands::PerformAppServiceInteractionResponseFromMobile,
               commands::PublishAppServiceRequest,
-              commands::PublishAppServiceResponse> MobileCommandsListFirst;
+              commands::PublishAppServiceResponse>
+    MobileCommandsListFirst;
 
 TYPED_TEST_CASE(MobileCommandsTestFirst, MobileCommandsListFirst);
 

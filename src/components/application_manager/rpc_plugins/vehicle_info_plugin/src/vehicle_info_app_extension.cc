@@ -122,4 +122,4 @@ VehicleInfoAppExtension& VehicleInfoAppExtension::ExtractVIExtension(
   DCHECK(vi_app_extension);
   return *vi_app_extension;
 }
-}
+}  // namespace vehicle_info_plugin

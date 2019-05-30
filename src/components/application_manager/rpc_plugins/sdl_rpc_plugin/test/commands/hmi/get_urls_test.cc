@@ -33,21 +33,21 @@
 #include <stdint.h>
 #include <string>
 
-#include "gtest/gtest.h"
-#include "application_manager/message.h"
+#include "application_manager/commands/command.h"
+#include "application_manager/commands/command_request_test.h"
 #include "application_manager/commands/commands_test.h"
+#include "application_manager/commands/request_from_hmi.h"
+#include "application_manager/event_engine/event_dispatcher.h"
+#include "application_manager/message.h"
 #include "application_manager/mock_application.h"
 #include "application_manager/mock_application_manager.h"
-#include "smart_objects/smart_object.h"
-#include "application_manager/smart_object_keys.h"
-#include "application_manager/commands/command.h"
-#include "hmi/get_urls.h"
-#include "application_manager/policies/policy_handler.h"
 #include "application_manager/policies/mock_policy_handler_interface.h"
-#include "application_manager/commands/command_request_test.h"
-#include "application_manager/commands/request_from_hmi.h"
+#include "application_manager/policies/policy_handler.h"
+#include "application_manager/smart_object_keys.h"
+#include "gtest/gtest.h"
+#include "hmi/get_urls.h"
 #include "policy/mock_policy_manager.h"
-#include "application_manager/event_engine/event_dispatcher.h"
+#include "smart_objects/smart_object.h"
 
 namespace test {
 namespace components {
@@ -57,17 +57,17 @@ namespace get_urls {
 
 using namespace hmi_apis;
 using namespace policy;
-using ::testing::NiceMock;
-using ::testing::_;
-using ::testing::SetArgReferee;
 using ::test::components::application_manager_test::MockApplication;
+using ::testing::_;
+using ::testing::NiceMock;
+using ::testing::SetArgReferee;
 namespace am = ::application_manager;
 namespace strings = ::application_manager::strings;
-using am::commands::RequestFromHMI;
-using sdl_rpc_plugin::commands::GetUrls;
 using am::commands::CommandImpl;
+using am::commands::RequestFromHMI;
 using policy::PolicyHandler;
 using policy_test::MockPolicyHandlerInterface;
+using sdl_rpc_plugin::commands::GetUrls;
 
 typedef std::shared_ptr<RequestFromHMI> RequestFromHMIPtr;
 
@@ -175,10 +175,12 @@ TEST_F(GetUrlsTest, ProcessPolicyServiceURLs_SUCCESS) {
 
   EXPECT_EQ(kAppIdForSending,
             (*command_msg_)[am::strings::msg_params][am::hmi_response::urls][0]
-                           [strings::app_id].asInt());
+                           [strings::app_id]
+                               .asInt());
   EXPECT_EQ(kDefaultUrl,
             (*command_msg_)[am::strings::msg_params][am::hmi_response::urls][0]
-                           [strings::url].asString());
+                           [strings::url]
+                               .asString());
 }
 
 TEST_F(GetUrlsTest, ProcessPolicyServiceURLs_IncorrectIdForSending_UNSUCCESS) {
@@ -297,10 +299,12 @@ TEST_F(GetUrlsTest, DISABLED_ProcessServiceURLs_SUCCESS) {
       am::hmi_request::service));
   EXPECT_EQ(kDefaultUrl,
             (*command_msg_)[am::strings::msg_params][am::hmi_response::urls][0]
-                           [am::strings::url].asString());
+                           [am::strings::url]
+                               .asString());
   EXPECT_EQ(endpoints_[0].app_id,
             (*command_msg_)[am::strings::msg_params][am::hmi_response::urls][0]
-                           [am::hmi_response::policy_app_id].asString());
+                           [am::hmi_response::policy_app_id]
+                               .asString());
 }
 
 TEST_F(GetUrlsTest, ProcessServiceURLs_PolicyDefaultId_SUCCESS) {

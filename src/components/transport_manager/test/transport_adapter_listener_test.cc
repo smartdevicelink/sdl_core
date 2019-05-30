@@ -76,7 +76,8 @@ TEST_F(TransportAdapterListenerTest, OnCommunicationError) {
       ReceiveEventFromDevice(IsEvent(EventTypeEnum::ON_COMMUNICATION_ERROR,
                                      &adapter_mock,
                                      dev_id,
-                                     app_handle))).WillOnce(Return(E_SUCCESS));
+                                     app_handle)))
+      .WillOnce(Return(E_SUCCESS));
   transport_listener.OnCommunicationError(&adapter_mock, dev_id, app_handle);
 }
 
@@ -195,7 +196,8 @@ TEST_F(TransportAdapterListenerTest, OnFindNewApplicationsRequest) {
                   IsEvent(EventTypeEnum::ON_FIND_NEW_APPLICATIONS_REQUEST,
                           &adapter_mock,
                           "",
-                          0))).WillOnce(Return(E_SUCCESS));
+                          0)))
+      .WillOnce(Return(E_SUCCESS));
   transport_listener.OnFindNewApplicationsRequest(&adapter_mock);
 }
 
@@ -225,7 +227,8 @@ TEST_F(TransportAdapterListenerTest, OnUnexpectedDisconnect) {
       ReceiveEventFromDevice(IsEvent(EventTypeEnum::ON_UNEXPECTED_DISCONNECT,
                                      &adapter_mock,
                                      dev_id,
-                                     app_handle))).WillOnce(Return(E_SUCCESS));
+                                     app_handle)))
+      .WillOnce(Return(E_SUCCESS));
   transport_listener.OnUnexpectedDisconnect(
       &adapter_mock, dev_id, app_handle, err);
 }

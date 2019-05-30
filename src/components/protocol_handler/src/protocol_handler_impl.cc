@@ -32,20 +32,20 @@
 
 #include "protocol_handler/protocol_handler_impl.h"
 #include <arpa/inet.h>  // for INET6_ADDRSTRLEN
-#include <memory.h>
-#include <algorithm>  // std::find
 #include <bson_object.h>
+#include <memory.h>
 #include <protocol/bson_object_keys.h>
+#include <algorithm>  // std::find
 
 #include "connection_handler/connection_handler_impl.h"
+#include "protocol/common.h"
 #include "protocol_handler/session_observer.h"
 #include "utils/byte_order.h"
 #include "utils/helpers.h"
-#include "protocol/common.h"
 
 #ifdef ENABLE_SECURITY
-#include "security_manager/ssl_context.h"
 #include "security_manager/security_manager.h"
+#include "security_manager/ssl_context.h"
 #endif  // ENABLE_SECURITY
 
 namespace protocol_handler {
@@ -975,9 +975,9 @@ void ProtocolHandlerImpl::OnTMMessageReceived(const RawMessagePtr tm_message) {
   LOG4CXX_DEBUG(logger_, "Proccessed " << protocol_frames.size() << " frames");
   if (result != RESULT_OK) {
     if (result == RESULT_MALFORMED_OCCURS) {
-      LOG4CXX_WARN(logger_,
-                   "Malformed message occurs, connection id "
-                       << connection_key);
+      LOG4CXX_WARN(
+          logger_,
+          "Malformed message occurs, connection id " << connection_key);
       if (!get_settings().malformed_message_filtering()) {
         LOG4CXX_DEBUG(logger_, "Malformed message filterign disabled");
         session_observer_.OnMalformedMessageCallback(connection_key);
@@ -1285,9 +1285,9 @@ RESULT_CODE ProtocolHandlerImpl::SendMultiFrameMessage(
     const bool is_final_message) {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  LOG4CXX_DEBUG(logger_,
-                " data size " << data_size << " max_frame_size "
-                              << max_frame_size);
+  LOG4CXX_DEBUG(
+      logger_,
+      " data size " << data_size << " max_frame_size " << max_frame_size);
 
   // remainder of last frame
   const size_t lastframe_remainder = data_size % max_frame_size;
@@ -1880,9 +1880,9 @@ void ProtocolHandlerImpl::NotifySessionStarted(
 RESULT_CODE ProtocolHandlerImpl::HandleControlMessageHeartBeat(
     const ProtocolPacket& packet) {
   const ConnectionID connection_id = packet.connection_id();
-  LOG4CXX_DEBUG(logger_,
-                "Sending heart beat acknowledgment for connection "
-                    << connection_id);
+  LOG4CXX_DEBUG(
+      logger_,
+      "Sending heart beat acknowledgment for connection " << connection_id);
   uint8_t protocol_version;
   if (session_observer_.ProtocolVersionUsed(
           connection_id, packet.session_id(), protocol_version)) {
@@ -1918,9 +1918,9 @@ void ProtocolHandlerImpl::PopValideAndExpirateMultiframes() {
 
     const uint32_t connection_key = session_observer_.KeyFromPair(
         frame->connection_id(), frame->session_id());
-    LOG4CXX_DEBUG(logger_,
-                  "Result frame" << frame << "for connection "
-                                 << connection_key);
+    LOG4CXX_DEBUG(
+        logger_,
+        "Result frame" << frame << "for connection " << connection_key);
     const RawMessagePtr rawMessage(new RawMessage(connection_key,
                                                   frame->protocol_version(),
                                                   frame->data(),
@@ -1947,9 +1947,9 @@ bool ProtocolHandlerImpl::TrackMessage(const uint32_t& connection_key) {
   if (frequency_time > 0u && frequency_count > 0u) {
     const size_t message_frequency =
         message_meter_.TrackMessage(connection_key);
-    LOG4CXX_DEBUG(logger_,
-                  "Frequency of " << connection_key << " is "
-                                  << message_frequency);
+    LOG4CXX_DEBUG(
+        logger_,
+        "Frequency of " << connection_key << " is " << message_frequency);
     if (message_frequency > frequency_count) {
       LOG4CXX_WARN(logger_,
                    "Frequency of " << connection_key << " is marked as high.");
@@ -1975,9 +1975,9 @@ bool ProtocolHandlerImpl::TrackMalformedMessage(const uint32_t& connection_key,
                                             << malformed_message_frequency);
     if (!get_settings().malformed_message_filtering() ||
         malformed_message_frequency > malformed_frequency_count) {
-      LOG4CXX_WARN(logger_,
-                   "Malformed frequency of " << connection_key
-                                             << " is marked as high.");
+      LOG4CXX_WARN(
+          logger_,
+          "Malformed frequency of " << connection_key << " is marked as high.");
       session_observer_.OnMalformedMessageCallback(connection_key);
       malformed_message_meter_.RemoveIdentifier(connection_key);
       return true;
@@ -2027,7 +2027,8 @@ void ProtocolHandlerImpl::Handle(const impl::RawFordMessageToMobile message) {
                 "Message to mobile app: connection id "
                     << static_cast<int>(message->connection_id())
                     << ";"
-                       " dataSize: " << message->data_size()
+                       " dataSize: "
+                    << message->data_size()
                     << " ;"
                        " protocolVersion "
                     << static_cast<int>(message->protocol_version()));
@@ -2432,9 +2433,9 @@ void ProtocolHandlerImpl::GenerateServiceTransportsForStartSessionAck(
     std::vector<std::string>::const_iterator it = service_transports.begin();
     for (; it != service_transports.end(); it++) {
       const utils::custom_string::CustomString transport(*it);
-      LOG4CXX_TRACE(logger_,
-                    "Service Allowed to run on " << transport.c_str()
-                                                 << " transport");
+      LOG4CXX_TRACE(
+          logger_,
+          "Service Allowed to run on " << transport.c_str() << " transport");
 
       if (!fPrimaryAdded &&
           (transport.CompareIgnoreCase(primary_connection_type.c_str()) ||

@@ -65,6 +65,7 @@ set(testSources
   ${AM_TEST_DIR}/usage_statistics_test.cc
   ${AM_TEST_DIR}/policy_handler_test.cc
   ${AM_TEST_DIR}/app_service_manager_test.cc
+  ${AM_TEST_DIR}/rpc_passing_handler_test.cc
   ${AM_TEST_DIR}/application_manager_impl_test.cc
   ${AM_TEST_DIR}/application_helper_test.cc
   ${AM_TEST_DIR}/command_holder_test.cc

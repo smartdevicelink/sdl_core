@@ -32,8 +32,8 @@
 
 #include "application_manager/commands/command_notification_from_mobile_impl.h"
 #include "application_manager/application_manager.h"
-#include "application_manager/rpc_service.h"
 #include "application_manager/message_helper.h"
+#include "application_manager/rpc_service.h"
 
 namespace application_manager {
 

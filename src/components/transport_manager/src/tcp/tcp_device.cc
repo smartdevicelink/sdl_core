@@ -30,8 +30,8 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-#include "utils/logger.h"
 #include "transport_manager/tcp/tcp_device.h"
+#include "utils/logger.h"
 
 namespace transport_manager {
 namespace transport_adapter {
@@ -57,9 +57,9 @@ TcpDevice::TcpDevice(const in_addr_t& in_addr,
   LOG4CXX_AUTO_TRACE(logger_);
   LOG4CXX_DEBUG(logger_,
                 "Device created with transport switch emulation support.");
-  LOG4CXX_DEBUG(logger_,
-                "Device parameters: " << device_uid << " / "
-                                      << transport_switch_id);
+  LOG4CXX_DEBUG(
+      logger_,
+      "Device parameters: " << device_uid << " / " << transport_switch_id);
 }
 #endif  // BUILD_TESTS
 

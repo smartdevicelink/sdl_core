@@ -34,8 +34,8 @@
 #include "vehicle_info_plugin/commands/mobile/get_dtcs_request.h"
 
 #include "application_manager/application_impl.h"
-#include "interfaces/HMI_API.h"
 #include "application_manager/message_helper.h"
+#include "interfaces/HMI_API.h"
 
 namespace vehicle_info_plugin {
 using namespace application_manager;
@@ -116,4 +116,4 @@ void GetDTCsRequest::on_event(const event_engine::Event& event) {
 
 }  // namespace commands
 
-}  // namespace application_manager
+}  // namespace vehicle_info_plugin

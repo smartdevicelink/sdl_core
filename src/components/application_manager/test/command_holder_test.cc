@@ -36,8 +36,8 @@
 #include "application_manager/commands/command.h"
 #include "smart_objects/smart_object.h"
 
-#include "application_manager/mock_application_manager.h"
 #include "application_manager/mock_application.h"
+#include "application_manager/mock_application_manager.h"
 #include "application_manager/mock_rpc_service.h"
 
 namespace test {
@@ -173,6 +173,6 @@ TEST_F(CommandHolderImplTest, Hold_Mobile_and_HMI_commands_ExpectReleased) {
                     am::CommandHolder::CommandType::kMobileCommand);
 }
 
-}  // application_manager_test
-}  // components
-}  // test
+}  // namespace application_manager_test
+}  // namespace components
+}  // namespace test

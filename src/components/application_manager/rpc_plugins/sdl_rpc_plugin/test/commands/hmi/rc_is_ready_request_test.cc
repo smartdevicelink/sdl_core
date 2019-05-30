@@ -34,15 +34,15 @@
 
 #include "gtest/gtest.h"
 
-#include "smart_objects/smart_object.h"
-#include "application_manager/smart_object_keys.h"
 #include "application_manager/commands/command_request_test.h"
-#include "application_manager/mock_application_manager.h"
-#include "application_manager/hmi_interfaces.h"
-#include "application_manager/mock_hmi_interface.h"
-#include "application_manager/mock_hmi_capabilities.h"
-#include "application_manager/mock_message_helper.h"
 #include "application_manager/event_engine/event.h"
+#include "application_manager/hmi_interfaces.h"
+#include "application_manager/mock_application_manager.h"
+#include "application_manager/mock_hmi_capabilities.h"
+#include "application_manager/mock_hmi_interface.h"
+#include "application_manager/mock_message_helper.h"
+#include "application_manager/smart_object_keys.h"
+#include "smart_objects/smart_object.h"
 
 namespace test {
 namespace components {
@@ -54,8 +54,8 @@ using ::testing::_;
 using ::testing::ReturnRef;
 namespace am = ::application_manager;
 using am::commands::MessageSharedPtr;
-using sdl_rpc_plugin::commands::RCIsReadyRequest;
 using am::event_engine::Event;
+using sdl_rpc_plugin::commands::RCIsReadyRequest;
 
 typedef std::shared_ptr<RCIsReadyRequest> RCIsReadyRequestPtr;
 

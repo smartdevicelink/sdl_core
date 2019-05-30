@@ -31,21 +31,21 @@
  */
 
 #include "application_manager/application_impl.h"
-#include <string>
 #include <strings.h>
-#include "application_manager/message_helper.h"
-#include "protocol_handler/protocol_handler.h"
+#include <string>
 #include "application_manager/application_manager.h"
+#include "application_manager/message_helper.h"
 #include "config_profile/profile.h"
 #include "interfaces/MOBILE_API.h"
+#include "protocol_handler/protocol_handler.h"
 #include "utils/file_system.h"
-#include "utils/logger.h"
 #include "utils/gen_hash.h"
+#include "utils/logger.h"
 
-#include "utils/timer_task_impl.h"
 #include "application_manager/policies/policy_handler_interface.h"
 #include "application_manager/resumption/resume_ctrl.h"
 #include "transport_manager/common.h"
+#include "utils/timer_task_impl.h"
 
 namespace {
 
@@ -849,8 +849,9 @@ bool ApplicationImpl::AreCommandLimitsExceeded(
                    "Time Info: "
                        << "\n Current: " << date_time::getSecs(current)
                        << "\n Limit: (" << date_time::getSecs(limit.first)
-                       << "," << limit.second << ")"
-                                                 "\n frequency_restrictions: ("
+                       << "," << limit.second
+                       << ")"
+                          "\n frequency_restrictions: ("
                        << frequency_restrictions.first << ","
                        << frequency_restrictions.second << ")");
       if (date_time::getSecs(current) <
@@ -1152,9 +1153,9 @@ bool ApplicationImpl::AddExtension(AppExtensionPtr extension) {
 
 bool ApplicationImpl::RemoveExtension(AppExtensionUID uid) {
   auto it = std::find_if(
-      extensions_.begin(),
-      extensions_.end(),
-      [uid](AppExtensionPtr extension) { return extension->uid() == uid; });
+      extensions_.begin(), extensions_.end(), [uid](AppExtensionPtr extension) {
+        return extension->uid() == uid;
+      });
 
   return it != extensions_.end();
 }

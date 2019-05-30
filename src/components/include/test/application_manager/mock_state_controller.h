@@ -33,12 +33,11 @@
 #ifndef SRC_COMPONENTS_INCLUDE_TEST_APPLICATION_MANAGER_MOCK_STATE_CONTROLLER_H_
 #define SRC_COMPONENTS_INCLUDE_TEST_APPLICATION_MANAGER_MOCK_STATE_CONTROLLER_H_
 
-#include "gmock/gmock.h"
 #include "application_manager/application.h"
 #include "application_manager/hmi_state.h"
 #include "application_manager/state_controller.h"
+#include "gmock/gmock.h"
 #include "interfaces/MOBILE_API.h"
-#include "application_manager/application.h"
 
 namespace test {
 namespace components {

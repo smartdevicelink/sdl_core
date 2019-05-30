@@ -34,10 +34,10 @@
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_COMMAND_REQUEST_IMPL_H_
 
 #include "application_manager/commands/command_impl.h"
-#include "interfaces/MOBILE_API.h"
 #include "interfaces/HMI_API.h"
-#include "utils/lock.h"
+#include "interfaces/MOBILE_API.h"
 #include "smart_objects/smart_object.h"
+#include "utils/lock.h"
 
 namespace application_manager {
 namespace commands {
@@ -335,7 +335,7 @@ class CommandRequestImpl : public CommandImpl,
    * @param interface_id interface which SDL awaits for response in given time
    * @return true if SDL awaits for response from given interface in
    * interface_id
-  */
+   */
   bool IsInterfaceAwaited(const HmiInterfaces::InterfaceID& interface_id) const;
 
   /**
@@ -346,7 +346,7 @@ class CommandRequestImpl : public CommandImpl,
   void EndAwaitForInterface(const HmiInterfaces::InterfaceID& interface_id);
 
   /**
-  * @brief This set stores all the interfaces which are awaited by SDL to
+   * @brief This set stores all the interfaces which are awaited by SDL to
    * return a response on some request
    */
   std::set<HmiInterfaces::InterfaceID> awaiting_response_interfaces_;
@@ -387,10 +387,10 @@ class CommandRequestImpl : public CommandImpl,
       const hmi_apis::FunctionID::eType& function_id);
 
   /**
-    * @brief UpdateHash updates hash field for application and sends
-    * OnHashChanged notification to mobile side in case of approriate hash mode
-    * is set
-    */
+   * @brief UpdateHash updates hash field for application and sends
+   * OnHashChanged notification to mobile side in case of approriate hash mode
+   * is set
+   */
   void UpdateHash();
 
   /**

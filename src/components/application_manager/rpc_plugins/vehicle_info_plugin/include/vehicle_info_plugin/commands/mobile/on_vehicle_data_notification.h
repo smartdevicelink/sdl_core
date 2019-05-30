@@ -34,8 +34,8 @@
 #ifndef SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_MOBILE_ON_VEHICLE_DATA_NOTIFICATION_H_
 #define SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_MOBILE_ON_VEHICLE_DATA_NOTIFICATION_H_
 
-#include "application_manager/commands/command_notification_impl.h"
 #include "application_manager/application.h"
+#include "application_manager/commands/command_notification_impl.h"
 #include "utils/macro.h"
 
 namespace vehicle_info_plugin {
@@ -83,6 +83,6 @@ class OnVehicleDataNotification
 };
 
 }  // namespace commands
-}  // namespace application_manager
+}  // namespace vehicle_info_plugin
 
 #endif  // SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_MOBILE_ON_VEHICLE_DATA_NOTIFICATION_H_

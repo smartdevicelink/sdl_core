@@ -42,7 +42,7 @@ class ApplicationManager;
 class Application;
 typedef std::shared_ptr<Application> ApplicationSharedPtr;
 typedef std::shared_ptr<const Application> ApplicationConstSharedPtr;
-}
+}  // namespace application_manager
 namespace app_mngr = application_manager;
 
 namespace resumption {

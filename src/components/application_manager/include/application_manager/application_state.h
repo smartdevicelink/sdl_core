@@ -33,9 +33,9 @@
 #ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_APPLICATION_STATE_H_
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_APPLICATION_STATE_H_
 #include <vector>
+#include "application_manager/hmi_state.h"
 #include "utils/lock.h"
 #include "utils/macro.h"
-#include "application_manager/hmi_state.h"
 
 namespace application_manager {
 
@@ -119,11 +119,11 @@ class ApplicationState {
   void SetRegularState(HmiStatePtr state);
 
   /**
-  * @brief Sets postponed state of application.
-  * This state could be set as regular later on
-  *
-  * @param state state to setup
-  */
+   * @brief Sets postponed state of application.
+   * This state could be set as regular later on
+   *
+   * @param state state to setup
+   */
   void SetPostponedState(HmiStatePtr state);
 
   /**
@@ -154,6 +154,6 @@ class ApplicationState {
 
   DISALLOW_COPY_AND_ASSIGN(ApplicationState);
 };
-}
+}  // namespace application_manager
 
 #endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_APPLICATION_STATE_H_

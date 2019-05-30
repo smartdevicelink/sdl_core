@@ -31,18 +31,18 @@
  */
 
 #include <stdint.h>
-#include <string>
 #include <set>
+#include <string>
 
 #include "mobile/perform_audio_pass_thru_request.h"
 
-#include "gtest/gtest.h"
 #include "application_manager/commands/command_request_test.h"
+#include "application_manager/event_engine/event.h"
 #include "application_manager/mock_application.h"
 #include "application_manager/mock_application_manager.h"
-#include "application_manager/mock_message_helper.h"
-#include "application_manager/event_engine/event.h"
 #include "application_manager/mock_hmi_interface.h"
+#include "application_manager/mock_message_helper.h"
+#include "gtest/gtest.h"
 
 namespace test {
 namespace components {
@@ -51,14 +51,14 @@ namespace mobile_commands_test {
 namespace perform_audio_pass_thru_request {
 
 namespace am = application_manager;
-using sdl_rpc_plugin::commands::PerformAudioPassThruRequest;
+using am::MockMessageHelper;
 using am::commands::CommandImpl;
 using am::commands::MessageSharedPtr;
-using am::MockMessageHelper;
+using sdl_rpc_plugin::commands::PerformAudioPassThruRequest;
 using ::testing::_;
+using ::testing::InSequence;
 using ::testing::Return;
 using ::testing::ReturnRef;
-using ::testing::InSequence;
 
 namespace {
 const int32_t kCommandId = 1;
@@ -250,7 +250,8 @@ TEST_F(PerformAudioPassThruRequestTest,
               VerifyTtsFiles((*mobile_request)[am::strings::msg_params]
                                               [am::strings::initial_prompt],
                              _,
-                             _)).WillOnce(Return(mobile_apis::Result::SUCCESS));
+                             _))
+      .WillOnce(Return(mobile_apis::Result::SUCCESS));
 
   command->Run();
   command->on_event(event_tts);
@@ -463,10 +464,12 @@ TEST_F(PerformAudioPassThruRequestTest,
           .asString();
   const std::string result_display_text_1 =
       perform_msg_params[am::hmi_request::audio_pass_display_texts][0]
-                        [am::hmi_request::field_text].asString();
+                        [am::hmi_request::field_text]
+                            .asString();
   const std::string result_display_text_2 =
       perform_msg_params[am::hmi_request::audio_pass_display_texts][1]
-                        [am::hmi_request::field_text].asString();
+                        [am::hmi_request::field_text]
+                            .asString();
 
   EXPECT_EQ(kCorrectPrompt, result_initial_prompt);
   EXPECT_EQ(kCorrectType, result_prompt_type);
@@ -579,7 +582,8 @@ TEST_F(
   const hmi_apis::FunctionID::eType start_record_result_function_id =
       static_cast<hmi_apis::FunctionID::eType>(
           (*start_record_result_msg)[am::strings::params]
-                                    [am::strings::function_id].asInt());
+                                    [am::strings::function_id]
+                                        .asInt());
   EXPECT_EQ(hmi_apis::FunctionID::UI_OnRecordStart,
             start_record_result_function_id);
 }
@@ -831,4 +835,4 @@ TEST_F(PerformAudioPassThruRequestTest,
 }  // namespace mobile_commands_test
 }  // namespace commands_test
 }  // namespace components
-}  // namespace tests
+}  // namespace test

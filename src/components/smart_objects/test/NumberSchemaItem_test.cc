@@ -33,8 +33,8 @@
 #include <string>
 
 #include "gmock/gmock.h"
-#include "smart_objects/smart_object.h"
 #include "smart_objects/number_schema_item.h"
+#include "smart_objects/smart_object.h"
 
 namespace test {
 namespace components {

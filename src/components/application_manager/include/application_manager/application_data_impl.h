@@ -34,11 +34,11 @@
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_APPLICATION_DATA_IMPL_H_
 
 #include <string>
-#include "utils/lock.h"
-#include "utils/semantic_version.h"
-#include "smart_objects/smart_object.h"
 #include "application_manager/application.h"
 #include "interfaces/MOBILE_API.h"
+#include "smart_objects/smart_object.h"
+#include "utils/lock.h"
+#include "utils/semantic_version.h"
 
 namespace application_manager {
 

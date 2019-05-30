@@ -31,10 +31,10 @@
  */
 
 #include "application_manager/policies/policy_event_observer.h"
-#include "application_manager/smart_object_keys.h"
 #include "application_manager/policies/policy_handler.h"
-#include "utils/date_time.h"
+#include "application_manager/smart_object_keys.h"
 #include "smart_objects/smart_object.h"
+#include "utils/date_time.h"
 
 namespace policy {
 using namespace application_manager;

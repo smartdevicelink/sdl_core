@@ -35,10 +35,10 @@
 #ifndef SRC_COMPONENTS_FORMATTERS_INCLUDE_FORMATTERS_CSMARTFACTORY_H_
 #define SRC_COMPONENTS_FORMATTERS_INCLUDE_FORMATTERS_CSMARTFACTORY_H_
 
-#include "smart_objects/smart_object.h"
-#include "smart_objects/smart_schema.h"
 #include <map>
 #include <string>
+#include "smart_objects/smart_object.h"
+#include "smart_objects/smart_schema.h"
 
 namespace ns_smart_device_link {
 namespace ns_json_handler {
@@ -94,7 +94,7 @@ extern const std::string kCode;
  * @brief String constant for "message" param name.
  */
 extern const std::string kMessage;
-}
+}  // namespace strings
 
 /**
  * @brief Smart Schema key.
@@ -286,11 +286,11 @@ bool CSmartFactory<FunctionIdEnum, MessageTypeEnum, StructIdEnum>::attachSchema(
     return false;
 
   MessageTypeEnum msgtype(
-      (MessageTypeEnum)
-          object[strings::S_PARAMS][strings::S_MESSAGE_TYPE].asInt());
+      (MessageTypeEnum)object[strings::S_PARAMS][strings::S_MESSAGE_TYPE]
+          .asInt());
   FunctionIdEnum fid(
-      (FunctionIdEnum)
-          object[strings::S_PARAMS][strings::S_FUNCTION_ID].asInt());
+      (FunctionIdEnum)object[strings::S_PARAMS][strings::S_FUNCTION_ID]
+          .asInt());
 
   SmartSchemaKey<FunctionIdEnum, MessageTypeEnum> key(fid, msgtype);
 
@@ -415,6 +415,6 @@ bool operator<(const SmartSchemaKey<FunctionIdEnum, MessageTypeEnum>& l,
 
   return false;
 }
-}
-}
+}  // namespace ns_json_handler
+}  // namespace ns_smart_device_link
 #endif  // SRC_COMPONENTS_FORMATTERS_INCLUDE_FORMATTERS_CSMARTFACTORY_H_

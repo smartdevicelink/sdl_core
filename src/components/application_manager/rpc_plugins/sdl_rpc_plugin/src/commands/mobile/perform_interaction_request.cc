@@ -31,20 +31,20 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <numeric>
-#include <string.h>
-#include <string>
 #include "sdl_rpc_plugin/commands/mobile/perform_interaction_request.h"
+#include <string.h>
+#include <numeric>
+#include <string>
 
 #include "application_manager/application_impl.h"
 #include "application_manager/message_helper.h"
 
-#include "interfaces/MOBILE_API.h"
 #include "interfaces/HMI_API.h"
-#include "utils/file_system.h"
-#include "utils/helpers.h"
+#include "interfaces/MOBILE_API.h"
 #include "utils/custom_string.h"
+#include "utils/file_system.h"
 #include "utils/gen_hash.h"
+#include "utils/helpers.h"
 
 namespace sdl_rpc_plugin {
 using namespace application_manager;
@@ -560,9 +560,9 @@ void PerformInteractionRequest::SendVRPerformInteractionRequest(
         MessageHelper::VerifyTtsFiles(help_prompt, app, application_manager_);
 
     if (mobile_apis::Result::FILE_NOT_FOUND == verification_result) {
-      LOG4CXX_WARN(logger_,
-                   "MessageHelper::VerifyTtsFiles return "
-                       << verification_result);
+      LOG4CXX_WARN(
+          logger_,
+          "MessageHelper::VerifyTtsFiles return " << verification_result);
       invalid_params.push_back("help_prompt");
     } else {
       msg_params[strings::help_prompt] = help_prompt;
@@ -608,9 +608,9 @@ void PerformInteractionRequest::SendVRPerformInteractionRequest(
             timeout_prompt, app, application_manager_);
 
     if (mobile_apis::Result::FILE_NOT_FOUND == verification_result) {
-      LOG4CXX_WARN(logger_,
-                   "MessageHelper::VerifyTtsFiles return "
-                       << verification_result);
+      LOG4CXX_WARN(
+          logger_,
+          "MessageHelper::VerifyTtsFiles return " << verification_result);
       invalid_params.push_back("timeout_prompt");
     } else {
       msg_params[strings::timeout_prompt] = timeout_prompt;
@@ -629,9 +629,9 @@ void PerformInteractionRequest::SendVRPerformInteractionRequest(
             initial_prompt, app, application_manager_);
 
     if (mobile_apis::Result::FILE_NOT_FOUND == verification_result) {
-      LOG4CXX_WARN(logger_,
-                   "MessageHelper::VerifyTtsFiles return "
-                       << verification_result);
+      LOG4CXX_WARN(
+          logger_,
+          "MessageHelper::VerifyTtsFiles return " << verification_result);
       invalid_params.push_back("initial_prompt");
     } else {
       msg_params[strings::initial_prompt] = initial_prompt;
@@ -1065,4 +1065,4 @@ void PerformInteractionRequest::SendBothModeResponse(
 
 }  // namespace commands
 
-}  // namespace application_manager
+}  // namespace sdl_rpc_plugin

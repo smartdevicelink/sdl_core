@@ -32,14 +32,14 @@
 
 #include <stdint.h>
 
-#include "gtest/gtest.h"
-#include "smart_objects/smart_object.h"
-#include "interfaces/MOBILE_API.h"
+#include "application_manager/commands/command_impl.h"
+#include "application_manager/commands/commands_test.h"
 #include "application_manager/mock_hmi_capabilities.h"
 #include "application_manager/smart_object_keys.h"
-#include "application_manager/commands/commands_test.h"
-#include "application_manager/commands/command_impl.h"
+#include "gtest/gtest.h"
 #include "hmi/ui_get_capabilities_response.h"
+#include "interfaces/MOBILE_API.h"
+#include "smart_objects/smart_object.h"
 
 namespace test {
 namespace components {
@@ -51,9 +51,9 @@ using ::testing::NiceMock;
 namespace am = ::application_manager;
 namespace strings = am::strings;
 namespace hmi_response = am::hmi_response;
+using am::commands::CommandImpl;
 using application_manager::commands::ResponseFromHMI;
 using sdl_rpc_plugin::commands::UIGetCapabilitiesResponse;
-using am::commands::CommandImpl;
 
 typedef std::shared_ptr<ResponseFromHMI> ResponseFromHMIPtr;
 typedef NiceMock<
@@ -113,8 +113,9 @@ TEST_F(UIGetCapabilitiesResponseTest, SetSoftButton_SUCCESS) {
   ResponseFromHMIPtr command(
       CreateCommand<UIGetCapabilitiesResponse>(command_msg));
 
-  smart_objects::SmartObject soft_button_capabilities_so = (*command_msg)
-      [strings::msg_params][hmi_response::soft_button_capabilities];
+  smart_objects::SmartObject soft_button_capabilities_so =
+      (*command_msg)[strings::msg_params]
+                    [hmi_response::soft_button_capabilities];
 
   EXPECT_CALL(mock_hmi_capabilities_,
               set_soft_button_capabilities(soft_button_capabilities_so));
@@ -149,8 +150,9 @@ TEST_F(UIGetCapabilitiesResponseTest, SetAudioPassThru_SUCCESS) {
   ResponseFromHMIPtr command(
       CreateCommand<UIGetCapabilitiesResponse>(command_msg));
 
-  smart_objects::SmartObject audio_pass_thru_capabilities_so = (*command_msg)
-      [strings::msg_params][strings::audio_pass_thru_capabilities];
+  smart_objects::SmartObject audio_pass_thru_capabilities_so =
+      (*command_msg)[strings::msg_params]
+                    [strings::audio_pass_thru_capabilities];
   EXPECT_CALL(
       mock_hmi_capabilities_,
       set_audio_pass_thru_capabilities(audio_pass_thru_capabilities_so));

@@ -31,23 +31,23 @@
  */
 #include "application_manager/resumption/resume_ctrl_impl.h"
 
-#include <fstream>
 #include <algorithm>
+#include <fstream>
 
 #include "application_manager/application_manager.h"
 #include "application_manager/rpc_service.h"
 
-#include "utils/file_system.h"
-#include "connection_handler/connection_handler_impl.h"
-#include "application_manager/message_helper.h"
-#include "connection_handler/connection.h"
 #include "application_manager/commands/command_impl.h"
-#include "policy/policy_manager_impl.h"
+#include "application_manager/message_helper.h"
 #include "application_manager/policies/policy_handler.h"
-#include "application_manager/state_controller.h"
-#include "utils/helpers.h"
 #include "application_manager/resumption/resumption_data_db.h"
 #include "application_manager/resumption/resumption_data_json.h"
+#include "application_manager/state_controller.h"
+#include "connection_handler/connection.h"
+#include "connection_handler/connection_handler_impl.h"
+#include "policy/policy_manager_impl.h"
+#include "utils/file_system.h"
+#include "utils/helpers.h"
 
 #include "utils/timer_task_impl.h"
 
@@ -152,9 +152,9 @@ void ResumeCtrlImpl::SaveApplication(ApplicationSharedPtr application) {
     LOG4CXX_DEBUG(logger_, "Low Voltage state is active");
     return;
   }
-  LOG4CXX_DEBUG(logger_,
-                "application with appID " << application->app_id()
-                                          << " will be saved");
+  LOG4CXX_DEBUG(
+      logger_,
+      "application with appID " << application->app_id() << " will be saved");
   resumption_storage_->SaveApplication(application);
 }
 
@@ -515,9 +515,9 @@ void ResumeCtrlImpl::StartAppHmiStateResumption(
     }
     RemoveApplicationFromSaved(application);
   } else {
-    LOG4CXX_INFO(logger_,
-                 "Do not need to resume application "
-                     << application->policy_app_id());
+    LOG4CXX_INFO(
+        logger_,
+        "Do not need to resume application " << application->policy_app_id());
   }
 }
 
@@ -1035,8 +1035,9 @@ void ResumeCtrlImpl::AddToResumptionTimerQueue(const uint32_t app_id) {
   }
   queue_lock_.Release();
   LOG4CXX_DEBUG(logger_,
-                "Application ID " << app_id << " have been added"
-                                               " to resumption queue.");
+                "Application ID " << app_id
+                                  << " have been added"
+                                     " to resumption queue.");
   if (run_resumption) {
     LOG4CXX_DEBUG(logger_,
                   "Application ID " << app_id << " will be restored by timer");
@@ -1197,4 +1198,4 @@ static mobile_api::HMILevel::eType ConvertHmiLevelString(
   }
 }
 
-}  // namespce resumption
+}  // namespace resumption

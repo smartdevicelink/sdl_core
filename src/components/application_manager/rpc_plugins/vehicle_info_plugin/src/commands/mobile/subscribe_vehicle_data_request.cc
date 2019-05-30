@@ -325,9 +325,8 @@ void SubscribeVehicleDataRequest::CheckVISubscriptions(
   }
 
   const bool is_everything_already_subscribed =
-      items_to_subscribe ==
-      vi_already_subscribed_by_another_apps_.size() +
-          vi_already_subscribed_by_this_app_.size();
+      items_to_subscribe == vi_already_subscribed_by_another_apps_.size() +
+                                vi_already_subscribed_by_this_app_.size();
 
   if (0 == items_to_subscribe) {
     if (HasDisallowedParams()) {
@@ -357,4 +356,4 @@ void SubscribeVehicleDataRequest::CheckVISubscriptions(
 }
 
 }  // namespace commands
-}  // namespace application_manager
+}  // namespace vehicle_info_plugin

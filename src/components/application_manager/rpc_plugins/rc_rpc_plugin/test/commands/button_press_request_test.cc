@@ -30,22 +30,26 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "gtest/gtest.h"
 #include "rc_rpc_plugin/commands/mobile/button_press_request.h"
-#include "rc_rpc_plugin/rc_command_factory.h"
-#include "rc_rpc_plugin/rc_app_extension.h"
-#include "rc_rpc_plugin/rc_rpc_plugin.h"
-#include "rc_rpc_plugin/rc_module_constants.h"
-#include "rc_rpc_plugin/mock/mock_resource_allocation_manager.h"
-#include "rc_rpc_plugin/mock/mock_interior_data_cache.h"
-#include "rc_rpc_plugin/mock/mock_interior_data_manager.h"
+#include "application_manager/commands/command_request_test.h"
 #include "application_manager/mock_application.h"
 #include "application_manager/mock_application_manager.h"
-#include "application_manager/commands/command_request_test.h"
 #include "application_manager/policies/mock_policy_handler_interface.h"
+#include "gtest/gtest.h"
 #include "interfaces/HMI_API.h"
 #include "interfaces/MOBILE_API.h"
+#include "rc_rpc_plugin/mock/mock_interior_data_cache.h"
+#include "rc_rpc_plugin/mock/mock_interior_data_manager.h"
+#include "rc_rpc_plugin/mock/mock_resource_allocation_manager.h"
+#include "rc_rpc_plugin/rc_app_extension.h"
+#include "rc_rpc_plugin/rc_command_factory.h"
+#include "rc_rpc_plugin/rc_module_constants.h"
+#include "rc_rpc_plugin/rc_rpc_plugin.h"
 
+using ::application_manager::Message;
+using ::application_manager::MessageType;
+using application_manager::commands::MessageSharedPtr;
+using ::protocol_handler::MessagePriority;
 using test::components::application_manager_test::MockApplication;
 using test::components::commands_test::CommandRequestTest;
 using test::components::commands_test::CommandsTestMocks;
@@ -57,17 +61,13 @@ using ::testing::NiceMock;
 using ::testing::Return;
 using ::testing::ReturnRef;
 using ::testing::SaveArg;
-using ::application_manager::Message;
-using ::application_manager::MessageType;
-using application_manager::commands::MessageSharedPtr;
-using ::protocol_handler::MessagePriority;
 
 namespace {
 const int kModuleId = 153u;
 const uint32_t kConnectionKey = 1u;
 const uint32_t kAppId = 0u;
 const std::string kPolicyAppId = "Test";
-}
+}  // namespace
 
 namespace rc_rpc_plugin_test {
 
@@ -129,7 +129,8 @@ class ButtonPressRequestTest
     ON_CALL(mock_policy_handler_,
             CheckHMIType(kPolicyAppId,
                          mobile_apis::AppHMIType::eType::REMOTE_CONTROL,
-                         nullptr)).WillByDefault(Return(true));
+                         nullptr))
+        .WillByDefault(Return(true));
     ON_CALL(mock_allocation_manager_, is_rc_enabled())
         .WillByDefault(Return(true));
   }
@@ -194,10 +195,11 @@ TEST_F(ButtonPressRequestTest,
   EXPECT_CALL(
       mock_allocation_manager_,
       SetResourceState(resource, kAppId, rc_rpc_plugin::ResourceState::BUSY));
-  EXPECT_CALL(mock_rpc_service_,
-              ManageHMICommand(
-                  HMIResultCodeIs(hmi_apis::FunctionID::Buttons_ButtonPress),
-                  _)).WillOnce(Return(true));
+  EXPECT_CALL(
+      mock_rpc_service_,
+      ManageHMICommand(
+          HMIResultCodeIs(hmi_apis::FunctionID::Buttons_ButtonPress), _))
+      .WillOnce(Return(true));
 
   // Act
   std::shared_ptr<rc_rpc_plugin::commands::ButtonPressRequest> command =
@@ -229,10 +231,11 @@ TEST_F(
   EXPECT_CALL(mock_allocation_manager_, SetResourceState(resource, kAppId, _))
       .Times(2);
 
-  EXPECT_CALL(mock_rpc_service_,
-              ManageHMICommand(
-                  HMIResultCodeIs(hmi_apis::FunctionID::Buttons_ButtonPress),
-                  _)).Times(0);
+  EXPECT_CALL(
+      mock_rpc_service_,
+      ManageHMICommand(
+          HMIResultCodeIs(hmi_apis::FunctionID::Buttons_ButtonPress), _))
+      .Times(0);
   MessageSharedPtr command_result;
   EXPECT_CALL(mock_rpc_service_,
               ManageMobileCommand(

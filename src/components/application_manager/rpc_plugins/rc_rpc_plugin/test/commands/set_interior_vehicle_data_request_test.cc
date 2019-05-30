@@ -30,34 +30,34 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "rc_rpc_plugin/commands/mobile/set_interior_vehicle_data_request.h"
 #include "application_manager/application.h"
 #include "application_manager/commands/command_request_test.h"
 #include "application_manager/mock_application.h"
-#include "rc_rpc_plugin/commands/mobile/set_interior_vehicle_data_request.h"
-#include "rc_rpc_plugin/rc_rpc_plugin.h"
-#include "rc_rpc_plugin/rc_module_constants.h"
-#include "rc_rpc_plugin/mock/mock_resource_allocation_manager.h"
-#include "rc_rpc_plugin/mock/mock_interior_data_cache.h"
-#include "rc_rpc_plugin/mock/mock_interior_data_manager.h"
 #include "gtest/gtest.h"
 #include "interfaces/MOBILE_API.h"
+#include "rc_rpc_plugin/mock/mock_interior_data_cache.h"
+#include "rc_rpc_plugin/mock/mock_interior_data_manager.h"
+#include "rc_rpc_plugin/mock/mock_resource_allocation_manager.h"
+#include "rc_rpc_plugin/rc_module_constants.h"
+#include "rc_rpc_plugin/rc_rpc_plugin.h"
 
-using ::testing::_;
-using ::testing::Return;
-using ::testing::NiceMock;
 using application_manager::ApplicationSet;
 using application_manager::commands::MessageSharedPtr;
 using test::components::application_manager_test::MockApplication;
 using test::components::application_manager_test::MockApplicationManager;
 using test::components::commands_test::CommandRequestTest;
 using test::components::commands_test::CommandsTestMocks;
+using ::testing::_;
+using ::testing::NiceMock;
+using ::testing::Return;
 
 namespace {
 const uint32_t kAppId = 0u;
 const int kModuleId = 153u;
 const uint32_t kConnectionKey = 1u;
 const std::string kPolicyAppId = "Test";
-}
+}  // namespace
 
 namespace rc_rpc_plugin_test {
 using namespace rc_rpc_plugin;
@@ -90,7 +90,8 @@ class SetInteriorVehicleDataRequestTest
     ON_CALL(mock_policy_handler_,
             CheckHMIType(kPolicyAppId,
                          mobile_apis::AppHMIType::eType::REMOTE_CONTROL,
-                         nullptr)).WillByDefault(Return(true));
+                         nullptr))
+        .WillByDefault(Return(true));
     ON_CALL(mock_allocation_manager_, is_rc_enabled())
         .WillByDefault(Return(true));
   }
@@ -154,9 +155,9 @@ TEST_F(SetInteriorVehicleDataRequestTest,
                               mobile_apis::Result::READ_ONLY),
                           application_manager::commands::Command::SOURCE_SDL));
   // Act
-  std::shared_ptr<
-      rc_rpc_plugin::commands::SetInteriorVehicleDataRequest> command =
-      CreateRCCommand<rc_rpc_plugin::commands::SetInteriorVehicleDataRequest>(
+  std::shared_ptr<rc_rpc_plugin::commands::SetInteriorVehicleDataRequest>
+      command = CreateRCCommand<
+          rc_rpc_plugin::commands::SetInteriorVehicleDataRequest>(
           mobile_message);
   command->Run();
 }
@@ -193,9 +194,9 @@ TEST_F(
                           application_manager::commands::Command::SOURCE_SDL));
 
   // Act
-  std::shared_ptr<
-      rc_rpc_plugin::commands::SetInteriorVehicleDataRequest> command =
-      CreateRCCommand<rc_rpc_plugin::commands::SetInteriorVehicleDataRequest>(
+  std::shared_ptr<rc_rpc_plugin::commands::SetInteriorVehicleDataRequest>
+      command = CreateRCCommand<
+          rc_rpc_plugin::commands::SetInteriorVehicleDataRequest>(
           mobile_message);
   command->Run();
 }
@@ -224,9 +225,9 @@ TEST_F(
                           application_manager::commands::Command::SOURCE_SDL));
 
   // Act
-  std::shared_ptr<
-      rc_rpc_plugin::commands::SetInteriorVehicleDataRequest> command =
-      CreateRCCommand<rc_rpc_plugin::commands::SetInteriorVehicleDataRequest>(
+  std::shared_ptr<rc_rpc_plugin::commands::SetInteriorVehicleDataRequest>
+      command = CreateRCCommand<
+          rc_rpc_plugin::commands::SetInteriorVehicleDataRequest>(
           mobile_message);
   command->Run();
 }

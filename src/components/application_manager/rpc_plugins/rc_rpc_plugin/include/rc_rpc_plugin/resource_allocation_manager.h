@@ -35,8 +35,8 @@
 #include <string>
 #include "utils/macro.h"
 
-#include "interfaces/HMI_API.h"
 #include "application_manager/plugin_manager/rpc_plugin.h"
+#include "interfaces/HMI_API.h"
 #include "rc_rpc_plugin/rc_app_extension.h"
 
 namespace rc_rpc_plugin {
@@ -66,7 +66,7 @@ namespace NotificationTrigger {
  * MODULE_ALLOCATION module allocation/deallocation event
  */
 enum eType { APP_REGISTRATION = 0, MODULE_ALLOCATION, RC_STATE_CHANGING };
-}
+}  // namespace NotificationTrigger
 
 /**
  * @brief Resources defines list of resources

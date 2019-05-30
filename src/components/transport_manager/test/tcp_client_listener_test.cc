@@ -33,16 +33,16 @@
 #include <netinet/in.h>
 #include <sys/socket.h>
 #include <sys/types.h>
-#include <unistd.h>
 #include <time.h>
+#include <unistd.h>
 
 #include "gtest/gtest.h"
-#include "transport_manager/transport_adapter/mock_transport_adapter.h"
-#include "transport_manager/tcp/tcp_client_listener.h"
-#include "transport_manager/tcp/network_interface_listener.h"
 #include "transport_manager/mock_transport_manager.h"
-#include "transport_manager/transport_adapter/transport_adapter_controller.h"
+#include "transport_manager/tcp/network_interface_listener.h"
+#include "transport_manager/tcp/tcp_client_listener.h"
 #include "transport_manager/transport_adapter/mock_device.h"
+#include "transport_manager/transport_adapter/mock_transport_adapter.h"
+#include "transport_manager/transport_adapter/transport_adapter_controller.h"
 
 #include "utils/test_async_waiter.h"
 #include "utils/threads/thread.h"
@@ -60,7 +60,7 @@ using namespace ::transport_manager::transport_adapter;
 namespace {
 const long kThreadStartWaitMsec = 10;
 const uint32_t kConnectionCreatedTimeoutMsec = 200;
-}
+}  // namespace
 
 class MockTransportAdapterController : public TransportAdapterController {
  public:
@@ -395,7 +395,8 @@ TEST_P(TcpClientListenerTest, OnIPAddressUpdated_IPv4Address_changed) {
   expected_config_1.insert(std::make_pair(tc_tcp_port, test_port));
 
   EXPECT_CALL(adapter_controller_mock_,
-              TransportConfigUpdated(expected_config_1)).Times(1);
+              TransportConfigUpdated(expected_config_1))
+      .Times(1);
 
   tcp_client_listener_->OnIPAddressUpdated(test_ipv4_addr_1, test_ipv6_addr);
 
@@ -406,7 +407,8 @@ TEST_P(TcpClientListenerTest, OnIPAddressUpdated_IPv4Address_changed) {
   expected_config_2.insert(std::make_pair(tc_tcp_port, test_port));
 
   EXPECT_CALL(adapter_controller_mock_,
-              TransportConfigUpdated(expected_config_2)).Times(1);
+              TransportConfigUpdated(expected_config_2))
+      .Times(1);
 
   tcp_client_listener_->OnIPAddressUpdated(test_ipv4_addr_2, test_ipv6_addr);
 
@@ -440,7 +442,8 @@ TEST_P(TcpClientListenerTest, OnIPAddressUpdated_IPv4Address_same) {
   expected_config_1.insert(std::make_pair(tc_tcp_port, test_port));
 
   EXPECT_CALL(adapter_controller_mock_,
-              TransportConfigUpdated(expected_config_1)).Times(1);
+              TransportConfigUpdated(expected_config_1))
+      .Times(1);
 
   tcp_client_listener_->OnIPAddressUpdated(test_ipv4_addr_1, test_ipv6_addr);
 
@@ -485,7 +488,8 @@ TEST_P(TcpClientListenerTest, OnIPAddressUpdated_IPv4Address_disabled) {
   expected_config_1.insert(std::make_pair(tc_tcp_port, test_port));
 
   EXPECT_CALL(adapter_controller_mock_,
-              TransportConfigUpdated(expected_config_1)).Times(1);
+              TransportConfigUpdated(expected_config_1))
+      .Times(1);
 
   tcp_client_listener_->OnIPAddressUpdated(test_ipv4_addr_1, test_ipv6_addr);
 
@@ -496,7 +500,8 @@ TEST_P(TcpClientListenerTest, OnIPAddressUpdated_IPv4Address_disabled) {
   expected_config_2.insert(std::make_pair(tc_tcp_port, test_port));
 
   EXPECT_CALL(adapter_controller_mock_,
-              TransportConfigUpdated(expected_config_2)).Times(1);
+              TransportConfigUpdated(expected_config_2))
+      .Times(1);
 
   tcp_client_listener_->OnIPAddressUpdated(test_ipv4_addr_2, test_ipv6_addr);
 
@@ -530,7 +535,8 @@ TEST_P(TcpClientListenerTest, OnIPAddressUpdated_IPv4Address_reenabled) {
   expected_config_1.insert(std::make_pair(tc_tcp_port, test_port));
 
   EXPECT_CALL(adapter_controller_mock_,
-              TransportConfigUpdated(expected_config_1)).Times(1);
+              TransportConfigUpdated(expected_config_1))
+      .Times(1);
 
   tcp_client_listener_->OnIPAddressUpdated(test_ipv4_addr_1, test_ipv6_addr);
 
@@ -541,7 +547,8 @@ TEST_P(TcpClientListenerTest, OnIPAddressUpdated_IPv4Address_reenabled) {
   expected_config_2.insert(std::make_pair(tc_tcp_port, test_port));
 
   EXPECT_CALL(adapter_controller_mock_,
-              TransportConfigUpdated(expected_config_2)).Times(1);
+              TransportConfigUpdated(expected_config_2))
+      .Times(1);
 
   tcp_client_listener_->OnIPAddressUpdated(test_ipv4_addr_2, test_ipv6_addr);
 
@@ -552,7 +559,8 @@ TEST_P(TcpClientListenerTest, OnIPAddressUpdated_IPv4Address_reenabled) {
   expected_config_3.insert(std::make_pair(tc_tcp_port, test_port));
 
   EXPECT_CALL(adapter_controller_mock_,
-              TransportConfigUpdated(expected_config_3)).Times(1);
+              TransportConfigUpdated(expected_config_3))
+      .Times(1);
 
   tcp_client_listener_->OnIPAddressUpdated(test_ipv4_addr_3, test_ipv6_addr);
 

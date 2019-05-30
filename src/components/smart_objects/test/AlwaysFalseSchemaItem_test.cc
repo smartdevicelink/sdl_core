@@ -34,8 +34,8 @@
 
 #include "gmock/gmock.h"
 
-#include "smart_objects/smart_object.h"
 #include "smart_objects/always_false_schema_item.h"
+#include "smart_objects/smart_object.h"
 
 namespace test {
 namespace components {

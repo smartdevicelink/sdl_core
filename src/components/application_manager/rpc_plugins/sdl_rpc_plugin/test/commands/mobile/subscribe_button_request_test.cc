@@ -35,16 +35,16 @@
 
 #include "gtest/gtest.h"
 
-#include "smart_objects/smart_object.h"
-#include "application_manager/commands/commands_test.h"
-#include "application_manager/commands/command_request_test.h"
 #include "application_manager/application.h"
-#include "application_manager/mock_application_manager.h"
+#include "application_manager/commands/command_request_test.h"
+#include "application_manager/commands/commands_test.h"
 #include "application_manager/mock_application.h"
+#include "application_manager/mock_application_manager.h"
 #include "application_manager/mock_hmi_capabilities.h"
-#include "mobile/subscribe_button_request.h"
-#include "interfaces/MOBILE_API.h"
 #include "application_manager/smart_object_keys.h"
+#include "interfaces/MOBILE_API.h"
+#include "mobile/subscribe_button_request.h"
+#include "smart_objects/smart_object.h"
 
 namespace test {
 namespace components {
@@ -53,13 +53,13 @@ namespace mobile_commands_test {
 namespace subscribe_button_request {
 
 using ::testing::_;
+using ::testing::DoAll;
 using ::testing::Return;
 using ::testing::ReturnRef;
-using ::testing::DoAll;
 using ::testing::SaveArg;
 namespace am = ::application_manager;
-using sdl_rpc_plugin::commands::SubscribeButtonRequest;
 using am::commands::MessageSharedPtr;
+using sdl_rpc_plugin::commands::SubscribeButtonRequest;
 
 typedef std::shared_ptr<SubscribeButtonRequest> CommandPtr;
 
@@ -199,7 +199,8 @@ TEST_F(SubscribeButtonRequestTest, Run_SUCCESS) {
   EXPECT_EQ(mobile_apis::Result::SUCCESS,
             static_cast<mobile_apis::Result::eType>(
                 (*mobile_result_msg)[am::strings::msg_params]
-                                    [am::strings::result_code].asInt()));
+                                    [am::strings::result_code]
+                                        .asInt()));
 }
 
 TEST_F(SubscribeButtonRequestTest, Run_SUCCESS_App_Base_RPC_Version) {
@@ -252,7 +253,8 @@ TEST_F(SubscribeButtonRequestTest, Run_SUCCESS_App_Base_RPC_Version) {
   EXPECT_EQ(mobile_apis::Result::SUCCESS,
             static_cast<mobile_apis::Result::eType>(
                 (*mobile_result_msg)[am::strings::msg_params]
-                                    [am::strings::result_code].asInt()));
+                                    [am::strings::result_code]
+                                        .asInt()));
 }
 
 }  // namespace subscribe_button_request

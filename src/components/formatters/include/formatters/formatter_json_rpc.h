@@ -35,12 +35,12 @@
 #ifndef SRC_COMPONENTS_FORMATTERS_INCLUDE_FORMATTERS_FORMATTER_JSON_RPC_H_
 #define SRC_COMPONENTS_FORMATTERS_INCLUDE_FORMATTERS_FORMATTER_JSON_RPC_H_
 
-#include <string>
 #include <sys/stat.h>
+#include <string>
 
-#include "smart_objects/smart_object.h"
-#include "smart_objects/enum_schema_item.h"
 #include "json/json.h"
+#include "smart_objects/enum_schema_item.h"
+#include "smart_objects/smart_object.h"
 
 #include "CFormatterJsonBase.h"
 #include "formatters/CSmartFactory.h"

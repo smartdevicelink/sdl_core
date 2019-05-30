@@ -25,9 +25,9 @@ bool SystemCapabilityAppExtension::SubscribeTo(
 
 bool SystemCapabilityAppExtension::UnsubscribeFrom(
     const SystemCapabilityType system_capability_type) {
-  LOG4CXX_INFO(logger_,
-               "Unsubscribing from System Capability "
-                   << system_capability_type);
+  LOG4CXX_INFO(
+      logger_,
+      "Unsubscribing from System Capability " << system_capability_type);
   auto it = subscribed_data_.find(system_capability_type);
   if (it != subscribed_data_.end()) {
     subscribed_data_.erase(it);
@@ -95,4 +95,4 @@ SystemCapabilityAppExtension& SystemCapabilityAppExtension::ExtractExtension(
   DCHECK(app_extension);
   return *app_extension;
 }
-}
+}  // namespace sdl_rpc_plugin

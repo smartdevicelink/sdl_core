@@ -1,8 +1,8 @@
 #ifndef MOCK_RPC_SERVICE_H
 #define MOCK_RPC_SERVICE_H
 
-#include "gmock/gmock.h"
 #include "application_manager/rpc_service.h"
+#include "gmock/gmock.h"
 
 namespace test {
 namespace components {
@@ -32,8 +32,8 @@ class MockRPCService : public application_manager::rpc_service::RPCService {
       bool(int32_t function_id,
            application_manager::commands::Command::CommandSource source));
 };
-}
-}
-}
+}  // namespace application_manager_test
+}  // namespace components
+}  // namespace test
 
 #endif  // MOCK_RPC_SERVICE_H

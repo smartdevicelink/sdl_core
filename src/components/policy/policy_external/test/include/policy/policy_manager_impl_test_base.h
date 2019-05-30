@@ -40,16 +40,16 @@
 #include "policy/policy_manager_impl.h"
 
 #include "policy/mock_cache_manager.h"
-#include "policy/mock_update_status_manager.h"
 #include "policy/mock_policy_listener.h"
 #include "policy/mock_policy_settings.h"
+#include "policy/mock_update_status_manager.h"
 
 namespace test {
 namespace components {
 namespace policy_test {
 
-using ::testing::NiceMock;
 using ::policy::PolicyManagerImpl;
+using ::testing::NiceMock;
 
 typedef std::multimap<std::string, policy_table::Rpcs&>
     UserConsentPromptToRpcsConnections;

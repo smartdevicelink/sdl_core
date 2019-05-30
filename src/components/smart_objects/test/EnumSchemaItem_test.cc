@@ -32,8 +32,8 @@
 
 #include "gmock/gmock.h"
 
-#include "smart_objects/smart_object.h"
 #include "smart_objects/enum_schema_item.h"
+#include "smart_objects/smart_object.h"
 #include "smart_objects/string_schema_item.h"
 
 #include <string>
@@ -278,5 +278,5 @@ const test::components::SmartObjects::SchemaItem::TestType::eType
         test::components::SmartObjects::SchemaItem::TestType::MASTER_RESET,
         test::components::SmartObjects::SchemaItem::TestType::FACTORY_DEFAULTS,
         test::components::SmartObjects::SchemaItem::TestType::APP_UNAUTHORIZED};
-}
-}
+}  // namespace ns_smart_objects
+}  // namespace ns_smart_device_link

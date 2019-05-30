@@ -30,10 +30,10 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "application_manager/plugin_manager/plugin_keys.h"
 #include "sdl_rpc_plugin/sdl_rpc_plugin.h"
-#include "sdl_rpc_plugin/sdl_command_factory.h"
+#include "application_manager/plugin_manager/plugin_keys.h"
 #include "sdl_rpc_plugin/extensions/system_capability_app_extension.h"
+#include "sdl_rpc_plugin/sdl_command_factory.h"
 
 namespace sdl_rpc_plugin {
 namespace app_mngr = application_manager;

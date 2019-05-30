@@ -33,23 +33,23 @@
 #ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_APPLICATION_H_
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_APPLICATION_H_
 
-#include <string>
-#include <map>
-#include <set>
 #include <list>
-#include <vector>
+#include <map>
 #include <memory>
+#include <set>
+#include <string>
+#include <vector>
 
-#include "utils/data_accessor.h"
-#include "interfaces/MOBILE_API.h"
-#include "connection_handler/device.h"
 #include "application_manager/app_extension.h"
-#include "application_manager/message.h"
-#include "application_manager/hmi_state.h"
 #include "application_manager/application_state.h"
 #include "application_manager/help_prompt_manager.h"
+#include "application_manager/hmi_state.h"
+#include "application_manager/message.h"
+#include "connection_handler/device.h"
+#include "interfaces/MOBILE_API.h"
 #include "protocol_handler/protocol_handler.h"
 #include "smart_objects/smart_object.h"
+#include "utils/data_accessor.h"
 #include "utils/macro.h"
 #include "utils/semantic_version.h"
 
@@ -236,8 +236,8 @@ class DynamicApplicationData {
   virtual bool is_audio() const = 0;
 
   /*
- * @brief Adds a command to the in application menu
- */
+   * @brief Adds a command to the in application menu
+   */
   virtual void AddCommand(uint32_t cmd_id,
                           const smart_objects::SmartObject& command) = 0;
 
@@ -353,10 +353,10 @@ class DynamicApplicationData {
   virtual uint32_t is_perform_interaction_active() const = 0;
 
   /*
-  * @brief Set perform interaction layout
-  *
-  * @param Current Interaction layout of the perform interaction
-  */
+   * @brief Set perform interaction layout
+   *
+   * @param Current Interaction layout of the perform interaction
+   */
   virtual void set_perform_interaction_layout(
       mobile_api::LayoutMode::eType layout) = 0;
 
@@ -366,10 +366,10 @@ class DynamicApplicationData {
   virtual mobile_api::LayoutMode::eType perform_interaction_layout() const = 0;
 
   /*
-     * @brief Sets the mode for perform interaction: UI/VR/BOTH
-     *
-     * @param mode Mode that was selected (MENU; VR; BOTH)
-     */
+   * @brief Sets the mode for perform interaction: UI/VR/BOTH
+   *
+   * @param mode Mode that was selected (MENU; VR; BOTH)
+   */
   virtual void set_perform_interaction_mode(int32_t mode) = 0;
 
   /*
@@ -706,11 +706,11 @@ class Application : public virtual InitialApplicationData,
   virtual void SetRegularState(HmiStatePtr state) = 0;
 
   /**
-  * @brief SetPostponedState sets postponed state to application.
-  * This state could be set as regular later
-  *
-  * @param state state to setup
-  */
+   * @brief SetPostponedState sets postponed state to application.
+   * This state could be set as regular later
+   *
+   * @param state state to setup
+   */
   virtual void SetPostponedState(HmiStatePtr state) = 0;
 
   virtual void RemovePostponedState() = 0;

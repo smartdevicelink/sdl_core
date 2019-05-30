@@ -75,19 +75,22 @@ void PublishAppServiceRequest::Run() {
           strings::service_name)) {
     requested_service_name =
         (*message_)[strings::msg_params][strings::app_service_manifest]
-                   [strings::service_name].asString();
+                   [strings::service_name]
+                       .asString();
   }
 
   std::string requested_service_type =
       (*message_)[strings::msg_params][strings::app_service_manifest]
-                 [strings::service_type].asString();
+                 [strings::service_type]
+                     .asString();
 
   smart_objects::SmartArray* requested_handled_rpcs = NULL;
   if ((*message_)[strings::msg_params][strings::app_service_manifest].keyExists(
           strings::handled_rpcs)) {
     requested_handled_rpcs =
         (*message_)[strings::msg_params][strings::app_service_manifest]
-                   [strings::handled_rpcs].asArray();
+                   [strings::handled_rpcs]
+                       .asArray();
   }
 
   bool result =

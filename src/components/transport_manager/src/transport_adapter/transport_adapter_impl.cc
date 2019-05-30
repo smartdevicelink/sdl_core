@@ -35,11 +35,11 @@
 #include "utils/logger.h"
 #include "utils/timer_task_impl.h"
 
-#include "transport_manager/transport_adapter/transport_adapter_impl.h"
-#include "transport_manager/transport_adapter/transport_adapter_listener.h"
+#include "transport_manager/transport_adapter/client_connection_listener.h"
 #include "transport_manager/transport_adapter/device_scanner.h"
 #include "transport_manager/transport_adapter/server_connection_factory.h"
-#include "transport_manager/transport_adapter/client_connection_listener.h"
+#include "transport_manager/transport_adapter/transport_adapter_impl.h"
+#include "transport_manager/transport_adapter/transport_adapter_listener.h"
 
 namespace transport_manager {
 namespace transport_adapter {
@@ -100,16 +100,16 @@ TransportAdapterImpl::~TransportAdapterImpl() {
     LOG4CXX_DEBUG(logger_, "device_scanner_ deleted.");
   }
   if (server_connection_factory_) {
-    LOG4CXX_DEBUG(logger_,
-                  "Deleting server_connection_factory "
-                      << server_connection_factory_);
+    LOG4CXX_DEBUG(
+        logger_,
+        "Deleting server_connection_factory " << server_connection_factory_);
     delete server_connection_factory_;
     LOG4CXX_DEBUG(logger_, "server_connection_factory deleted.");
   }
   if (client_connection_listener_) {
-    LOG4CXX_DEBUG(logger_,
-                  "Deleting client_connection_listener_ "
-                      << client_connection_listener_);
+    LOG4CXX_DEBUG(
+        logger_,
+        "Deleting client_connection_listener_ " << client_connection_listener_);
     delete client_connection_listener_;
     LOG4CXX_DEBUG(logger_, "client_connection_listener_ deleted.");
   }
@@ -193,9 +193,9 @@ TransportAdapter::Error TransportAdapterImpl::SearchDevices() {
 
 TransportAdapter::Error TransportAdapterImpl::Connect(
     const DeviceUID& device_id, const ApplicationHandle& app_handle) {
-  LOG4CXX_TRACE(logger_,
-                "enter. DeviceUID " << device_id << " ApplicationHandle "
-                                    << app_handle);
+  LOG4CXX_TRACE(
+      logger_,
+      "enter. DeviceUID " << device_id << " ApplicationHandle " << app_handle);
   if (server_connection_factory_ == 0) {
     LOG4CXX_TRACE(logger_, "exit with NOT_SUPPORTED");
     return NOT_SUPPORTED;
@@ -339,9 +339,9 @@ void TransportAdapterImpl::ConnectionStatusUpdated(DeviceSptr device,
 
 TransportAdapter::Error TransportAdapterImpl::Disconnect(
     const DeviceUID& device_id, const ApplicationHandle& app_handle) {
-  LOG4CXX_TRACE(logger_,
-                "enter. device_id: " << &device_id
-                                     << ", device_id: " << &device_id);
+  LOG4CXX_TRACE(
+      logger_,
+      "enter. device_id: " << &device_id << ", device_id: " << &device_id);
   if (!initialised_) {
     LOG4CXX_TRACE(logger_, "exit with BAD_STATE");
     return BAD_STATE;
@@ -638,9 +638,9 @@ void TransportAdapterImpl::ConnectionCreated(
 void TransportAdapterImpl::DeviceDisconnected(
     const DeviceUID& device_handle, const DisconnectDeviceError& error) {
   const DeviceUID device_uid = device_handle;
-  LOG4CXX_TRACE(logger_,
-                "enter. device_handle: " << &device_uid
-                                         << ", error: " << &error);
+  LOG4CXX_TRACE(
+      logger_,
+      "enter. device_handle: " << &device_uid << ", error: " << &error);
   ApplicationList app_list = GetApplicationList(device_uid);
   for (ApplicationList::const_iterator i = app_list.begin();
        i != app_list.end();
@@ -698,9 +698,9 @@ void TransportAdapterImpl::DisconnectDone(const DeviceUID& device_handle,
                                           const ApplicationHandle& app_handle) {
   const DeviceUID device_uid = device_handle;
   const ApplicationHandle app_uid = app_handle;
-  LOG4CXX_TRACE(logger_,
-                "enter. device_id: " << &device_uid
-                                     << ", app_handle: " << &app_uid);
+  LOG4CXX_TRACE(
+      logger_,
+      "enter. device_id: " << &device_uid << ", app_handle: " << &app_uid);
   DeviceSptr device = FindDevice(device_handle);
   if (!device) {
     LOG4CXX_WARN(logger_, "Device: uid " << &device_uid << " not found");
@@ -823,9 +823,9 @@ void TransportAdapterImpl::DeviceSwitched(const DeviceUID& device_handle) {
 
 ConnectionSPtr TransportAdapterImpl::FindPendingConnection(
     const DeviceUID& device_id, const ApplicationHandle& app_handle) const {
-  LOG4CXX_TRACE(logger_,
-                "enter. device_id: " << &device_id
-                                     << ", app_handle: " << &app_handle);
+  LOG4CXX_TRACE(
+      logger_,
+      "enter. device_id: " << &device_id << ", app_handle: " << &app_handle);
   ConnectionSPtr connection;
   connections_lock_.AcquireForReading();
   ConnectionMap::const_iterator it =
@@ -886,9 +886,9 @@ void TransportAdapterImpl::ConnectPending(const DeviceUID& device_id,
 
 void TransportAdapterImpl::ConnectDone(const DeviceUID& device_id,
                                        const ApplicationHandle& app_handle) {
-  LOG4CXX_TRACE(logger_,
-                "enter. device_id: " << &device_id
-                                     << ", app_handle: " << &app_handle);
+  LOG4CXX_TRACE(
+      logger_,
+      "enter. device_id: " << &device_id << ", app_handle: " << &app_handle);
   connections_lock_.AcquireForReading();
   ConnectionMap::iterator it_conn =
       connections_.find(std::make_pair(device_id, app_handle));
@@ -975,9 +975,9 @@ ApplicationList TransportAdapterImpl::GetApplicationList(
 
 void TransportAdapterImpl::ConnectionFinished(
     const DeviceUID& device_id, const ApplicationHandle& app_handle) {
-  LOG4CXX_TRACE(logger_,
-                "enter. device_id: " << &device_id
-                                     << ", app_handle: " << &app_handle);
+  LOG4CXX_TRACE(
+      logger_,
+      "enter. device_id: " << &device_id << ", app_handle: " << &app_handle);
   connections_lock_.AcquireForReading();
   ConnectionMap::iterator it =
       connections_.find(std::make_pair(device_id, app_handle));
@@ -1101,9 +1101,9 @@ bool TransportAdapterImpl::ToBeAutoDisconnected(DeviceSptr device) const {
 
 ConnectionSPtr TransportAdapterImpl::FindEstablishedConnection(
     const DeviceUID& device_id, const ApplicationHandle& app_handle) const {
-  LOG4CXX_TRACE(logger_,
-                "enter. device_id: " << &device_id
-                                     << ", app_handle: " << &app_handle);
+  LOG4CXX_TRACE(
+      logger_,
+      "enter. device_id: " << &device_id << ", app_handle: " << &app_handle);
   ConnectionSPtr connection;
   connections_lock_.AcquireForReading();
   ConnectionMap::const_iterator it =

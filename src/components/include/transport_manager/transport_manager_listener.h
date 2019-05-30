@@ -35,10 +35,10 @@
 
 #include <map>
 #include <vector>
-#include "transport_manager/common.h"
-#include "transport_manager/info.h"
-#include "transport_manager/error.h"
 #include "protocol/common.h"
+#include "transport_manager/common.h"
+#include "transport_manager/error.h"
+#include "transport_manager/info.h"
 
 namespace transport_manager {
 
@@ -57,8 +57,8 @@ class TransportManagerListener {
   virtual void OnDeviceListUpdated(const std::vector<DeviceInfo>&) = 0;
 
   /**
-  * @brief Reaction to "Find new applications" request
-  */
+   * @brief Reaction to "Find new applications" request
+   */
   virtual void OnFindNewApplicationsRequest() = 0;
 
   /**

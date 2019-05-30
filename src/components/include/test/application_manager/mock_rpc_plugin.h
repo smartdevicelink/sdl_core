@@ -1,8 +1,8 @@
 #ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_PLUGIN_MANAGER_MOCK_RPC_PLUGIN_H
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_PLUGIN_MANAGER_MOCK_RPC_PLUGIN_H
 
-#include "gmock/gmock.h"
 #include "application_manager/plugin_manager/rpc_plugin.h"
+#include "gmock/gmock.h"
 
 namespace application_manager {
 class CommandFactory;

@@ -1,5 +1,5 @@
-#include <algorithm>
 #include "policy/policy_table/types.h"
+#include <algorithm>
 #include "rpc_base/rpc_base_json_inl.h"
 
 namespace rpc {

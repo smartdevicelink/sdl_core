@@ -33,9 +33,9 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "transport_manager/transport_adapter/transport_adapter_controller.h"
 #include "transport_manager/bluetooth/bluetooth_connection_factory.h"
 #include "transport_manager/bluetooth/bluetooth_socket_connection.h"
+#include "transport_manager/transport_adapter/transport_adapter_controller.h"
 #include "utils/logger.h"
 
 namespace transport_manager {

@@ -32,15 +32,15 @@
 
 #include "gtest/gtest.h"
 
-#include "application_manager/commands/commands_test.h"
 #include "application_manager/commands/command_request_test.h"
+#include "application_manager/commands/commands_test.h"
 
 #include "mobile/send_haptic_data_request.h"
 #include "mobile/send_haptic_data_response.h"
 
-#include "interfaces/MOBILE_API.h"
 #include "application_manager/application.h"
 #include "application_manager/mock_application.h"
+#include "interfaces/MOBILE_API.h"
 
 namespace test {
 namespace components {
@@ -53,9 +53,9 @@ using ::testing::Return;
 
 namespace am = ::application_manager;
 
+using am::commands::MessageSharedPtr;
 using sdl_rpc_plugin::commands::SendHapticDataRequest;
 using sdl_rpc_plugin::commands::SendHapticDataResponse;
-using am::commands::MessageSharedPtr;
 
 typedef std::shared_ptr<SendHapticDataRequest> SendHapticDataRequestPtr;
 typedef std::shared_ptr<SendHapticDataResponse> SendHapticDataResponsePtr;

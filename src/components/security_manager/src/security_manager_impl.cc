@@ -32,12 +32,12 @@
 
 #include "security_manager/security_manager_impl.h"
 #include <functional>
-#include "security_manager/crypto_manager_impl.h"
-#include "protocol_handler/protocol_packet.h"
-#include "utils/logger.h"
-#include "utils/byte_order.h"
 #include "json/json.h"
+#include "protocol_handler/protocol_packet.h"
+#include "security_manager/crypto_manager_impl.h"
+#include "utils/byte_order.h"
 #include "utils/helpers.h"
+#include "utils/logger.h"
 
 namespace security_manager {
 
@@ -448,9 +448,9 @@ bool SecurityManagerImpl::ProccessHandshakeData(
   const uint32_t seqNumber = inMessage->get_header().seq_number;
   const uint32_t connection_key = inMessage->get_connection_key();
 
-  LOG4CXX_DEBUG(logger_,
-                "Received " << inMessage->get_data_size()
-                            << " bytes handshake data ");
+  LOG4CXX_DEBUG(
+      logger_,
+      "Received " << inMessage->get_data_size() << " bytes handshake data ");
 
   if (!inMessage->get_data_size()) {
     const std::string error_text("SendHandshakeData: null arguments size.");

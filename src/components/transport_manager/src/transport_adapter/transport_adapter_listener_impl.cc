@@ -34,9 +34,9 @@
 
 #include "utils/logger.h"
 
+#include "transport_manager/transport_adapter/transport_adapter_event.h"
 #include "transport_manager/transport_adapter/transport_adapter_listener_impl.h"
 #include "transport_manager/transport_manager_impl.h"
-#include "transport_manager/transport_adapter/transport_adapter_event.h"
 
 namespace transport_manager {
 CREATE_LOGGERPTR_GLOBAL(logger_, "TransportManager")

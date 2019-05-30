@@ -31,8 +31,8 @@
  */
 
 #include "vehicle_info_plugin/commands/hmi/vi_is_ready_request.h"
-#include "application_manager/rpc_service.h"
 #include "application_manager/message_helper.h"
+#include "application_manager/rpc_service.h"
 
 namespace vehicle_info_plugin {
 using namespace application_manager;
@@ -109,4 +109,4 @@ void VIIsReadyRequest::SendMessageToHMI() {
 
 }  // namespace commands
 
-}  // namespace application_manager
+}  // namespace vehicle_info_plugin

@@ -69,7 +69,8 @@ void OnBCSystemCapabilityUpdatedNotification::Run() {
   hmi_apis::Common_SystemCapabilityType::eType system_capability_type =
       static_cast<hmi_apis::Common_SystemCapabilityType::eType>(
           msg_params[strings::system_capability]
-                    [strings::system_capability_type].asInt());
+                    [strings::system_capability_type]
+                        .asInt());
   switch (system_capability_type) {
     case hmi_apis::Common_SystemCapabilityType::NAVIGATION: {
       smart_objects::SmartObject nav_capability(smart_objects::SmartType_Map);
@@ -134,21 +135,24 @@ void OnBCSystemCapabilityUpdatedNotification::Run() {
       for (size_t i = 0; i < updated_capabilities.length(); i++) {
         std::string service_id =
             updated_capabilities[i][strings::updated_app_service_record]
-                                [strings::service_id].asString();
-        auto matching_service_predicate = [&service_id](
-            const smart_objects::SmartObject& app_service_capability) {
-          return service_id ==
-                 app_service_capability[strings::updated_app_service_record]
-                                       [strings::service_id].asString();
-        };
+                                [strings::service_id]
+                                    .asString();
+        auto matching_service_predicate =
+            [&service_id](
+                const smart_objects::SmartObject& app_service_capability) {
+              return service_id ==
+                     app_service_capability[strings::updated_app_service_record]
+                                           [strings::service_id]
+                                               .asString();
+            };
 
         auto it = std::find_if(app_services->begin(),
                                app_services->end(),
                                matching_service_predicate);
         if (it != app_services->end()) {
-          LOG4CXX_DEBUG(logger_,
-                        "Replacing updated record with service_id "
-                            << service_id);
+          LOG4CXX_DEBUG(
+              logger_,
+              "Replacing updated record with service_id " << service_id);
           app_services->erase(it);
         }
         app_services->push_back(updated_capabilities[i]);
@@ -164,4 +168,4 @@ void OnBCSystemCapabilityUpdatedNotification::Run() {
 }
 
 }  // namespace commands
-}  // namespace app_service_rpc_plugin
+}  // namespace sdl_rpc_plugin

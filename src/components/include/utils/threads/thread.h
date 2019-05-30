@@ -40,11 +40,11 @@
 #include <ostream>
 #include <string>
 
+#include "utils/conditional_variable.h"
+#include "utils/lock.h"
 #include "utils/macro.h"
 #include "utils/threads/thread_delegate.h"
 #include "utils/threads/thread_options.h"
-#include "utils/conditional_variable.h"
-#include "utils/lock.h"
 
 namespace threads {
 

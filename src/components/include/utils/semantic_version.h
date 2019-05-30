@@ -120,6 +120,6 @@ struct SemanticVersion {
 
 extern const SemanticVersion base_rpc_version;
 extern const SemanticVersion rpc_version_5;
-}
+}  // namespace utils
 
 #endif  // SRC_COMPONENTS_INCLUDE_UTILS_CALLABLE_H

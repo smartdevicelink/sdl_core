@@ -39,8 +39,8 @@
 #include "application_manager/mock_application_manager.h"
 #include "application_manager/mock_message_helper.h"
 #include "mobile/unsubscribe_vehicle_data_request.h"
-#include "vehicle_info_plugin/vehicle_info_plugin.h"
 #include "vehicle_info_plugin/vehicle_info_app_extension.h"
+#include "vehicle_info_plugin/vehicle_info_plugin.h"
 
 namespace test {
 namespace components {
@@ -53,8 +53,8 @@ namespace mobile_result = mobile_apis::Result;
 
 using ::testing::_;
 
-using vehicle_info_plugin::commands::UnsubscribeVehicleDataRequest;
 using am::commands::MessageSharedPtr;
+using vehicle_info_plugin::commands::UnsubscribeVehicleDataRequest;
 
 typedef std::shared_ptr<UnsubscribeVehicleDataRequest> CommandPtr;
 
@@ -152,7 +152,8 @@ TEST_F(UnsubscribeVehicleRequestTest,
               ManageHMICommand(
                   HMIResultCodeIs(
                       hmi_apis::FunctionID::VehicleInfo_UnsubscribeVehicleData),
-                  _)).WillOnce(Return(true));
+                  _))
+      .WillOnce(Return(true));
   vehicle_info_plugin::VehicleInfoAppExtension* vi_app_extension =
       dynamic_cast<vehicle_info_plugin::VehicleInfoAppExtension*>(
           vi_app_extension_ptr_.get());

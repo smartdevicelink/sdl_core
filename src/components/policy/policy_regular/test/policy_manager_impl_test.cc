@@ -30,39 +30,38 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <vector>
+#include <ctime>
 #include <fstream>
 #include <string>
-#include <ctime>
+#include <vector>
 
+#include "gtest/gtest.h"
 #include "json/reader.h"
 #include "json/writer.h"
-#include "gtest/gtest.h"
 
 #include "config_profile/profile.h"
+#include "policy/mock_cache_manager.h"
+#include "policy/mock_policy_listener.h"
+#include "policy/mock_policy_settings.h"
+#include "policy/mock_update_status_manager.h"
 #include "policy/policy_manager_impl.h"
 #include "policy/policy_table/enums.h"
 #include "policy/policy_table/types.h"
-#include "policy/mock_policy_settings.h"
-#include "policy/mock_policy_listener.h"
-#include "policy/mock_cache_manager.h"
-#include "policy/mock_update_status_manager.h"
 
-#include "utils/macro.h"
-#include "utils/file_system.h"
 #include "utils/date_time.h"
+#include "utils/file_system.h"
+#include "utils/macro.h"
 
-#include "utils/gen_hash.h"
 #include "policy/mock_access_remote.h"
+#include "utils/gen_hash.h"
 
-using ::testing::ReturnRef;
-using ::testing::DoAll;
-using ::testing::SetArgReferee;
-using ::testing::NiceMock;
 using ::testing::_;
-using ::testing::SetArgReferee;
 using ::testing::AtLeast;
+using ::testing::DoAll;
+using ::testing::NiceMock;
 using ::testing::Return;
+using ::testing::ReturnRef;
+using ::testing::SetArgReferee;
 
 using ::policy::PolicyManagerImpl;
 using ::policy::PolicyTable;
@@ -932,9 +931,8 @@ TEST_F(PolicyManagerImplTest2, NextRetryTimeout_ExpectTimeoutsFromPT) {
         date_time::MILLISECONDS_IN_SECOND;
     const uint32_t first_retry = timeout_after_x_seconds;
     EXPECT_EQ(first_retry, manager->NextRetryTimeout());
-    uint32_t next_retry =
-        first_retry +
-        seconds_between_retries[0].asInt() * date_time::MILLISECONDS_IN_SECOND;
+    uint32_t next_retry = first_retry + seconds_between_retries[0].asInt() *
+                                            date_time::MILLISECONDS_IN_SECOND;
     EXPECT_EQ(next_retry, manager->NextRetryTimeout());
     next_retry =
         first_retry + next_retry +
@@ -977,9 +975,8 @@ TEST_F(PolicyManagerImplTest2, UpdatedPreloadedPT_ExpectLPT_IsUpdated) {
     Json::Value val2(Json::arrayValue);
     val2[0] = hmi_level[index];
     val[new_data.new_field_value_]["hmi_levels"] = val2;
-    root["policy_table"]["functional_groupings"][new_data
-                                                     .new_field_name_]["rpcs"] =
-        val;
+    root["policy_table"]["functional_groupings"][new_data.new_field_name_]
+        ["rpcs"] = val;
     root["policy_table"]["functional_groupings"][new_data.new_field_name_]
         ["user_consent_prompt"] = new_data.new_field_name_;
   }

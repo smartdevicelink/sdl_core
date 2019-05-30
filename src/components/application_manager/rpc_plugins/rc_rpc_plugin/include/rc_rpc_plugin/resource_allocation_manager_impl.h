@@ -32,11 +32,11 @@
 
 #ifndef SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_RC_RPC_PLUGIN_INCLUDE_RC_RPC_PLUGIN_RESOURCE_ALLOCATION_MANAGER_IMPL_H_
 #define SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_RC_RPC_PLUGIN_INCLUDE_RC_RPC_PLUGIN_RESOURCE_ALLOCATION_MANAGER_IMPL_H_
-#include "rc_rpc_plugin/resource_allocation_manager.h"
 #include "application_manager/application_impl.h"
 #include "rc_rpc_plugin/rc_app_extension.h"
-#include "utils/macro.h"
+#include "rc_rpc_plugin/resource_allocation_manager.h"
 #include "utils/lock.h"
+#include "utils/macro.h"
 
 namespace rc_rpc_plugin {
 
@@ -67,12 +67,12 @@ class ResourceAllocationManagerImpl : public ResourceAllocationManager {
                             const uint32_t app_id) FINAL;
 
   /**
-    * @brief SetResourceState changes resource state. Resource must be acquired
-    * beforehand.
-    * @param module_type Resource to change its state
-    * @param app_id Application aquired resource before
-    * @param state State to set for resource
-    */
+   * @brief SetResourceState changes resource state. Resource must be acquired
+   * beforehand.
+   * @param module_type Resource to change its state
+   * @param app_id Application aquired resource before
+   * @param state State to set for resource
+   */
   void SetResourceState(const std::string& module_type,
                         const uint32_t app_id,
                         const ResourceState::eType state) FINAL;
@@ -219,6 +219,6 @@ class ResourceAllocationManagerImpl : public ResourceAllocationManager {
   application_manager::rpc_service::RPCService& rpc_service_;
   bool is_rc_enabled_;
 };
-}  // rc_rpc_plugin
+}  // namespace rc_rpc_plugin
 
 #endif  // SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_RC_RPC_PLUGIN_INCLUDE_RC_RPC_PLUGIN_RESOURCE_ALLOCATION_MANAGER_IMPL_H_

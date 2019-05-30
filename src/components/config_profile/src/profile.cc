@@ -33,18 +33,18 @@
 #include "config_profile/profile.h"
 
 #include <errno.h>
-#include <numeric>
-#include <string.h>
 #include <stdlib.h>
-#include <sstream>
+#include <string.h>
 #include <algorithm>
+#include <numeric>
+#include <sstream>
 
 #include <string>
 
 #include "config_profile/ini_file.h"
+#include "utils/file_system.h"
 #include "utils/logger.h"
 #include "utils/threads/thread.h"
-#include "utils/file_system.h"
 
 #ifdef ENABLE_SECURITY
 #include <openssl/ssl.h>
@@ -2460,7 +2460,7 @@ std::string trim_string(const std::string& str) {
 
   return str.substr(start, end - start + 1);
 }
-}
+}  // namespace
 
 std::vector<int> Profile::ReadIntContainer(const char* const pSection,
                                            const char* const pKey,

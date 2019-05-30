@@ -34,8 +34,8 @@
 #define SRC_COMPONENTS_INCLUDE_MEDIA_MANAGER_MEDIA_MANAGER_H_
 
 #include <string>
-#include "protocol/service_type.h"
 #include "media_manager/media_manager_settings.h"
+#include "protocol/service_type.h"
 namespace media_manager {
 
 class MediaManager {

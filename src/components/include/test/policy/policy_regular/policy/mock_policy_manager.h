@@ -40,8 +40,8 @@
 #include "policy/policy_types.h"
 #include "policy/usage_statistics/statistics_manager.h"
 
-#include "rpc_base/rpc_base.h"
 #include "policy/policy_manager.h"
+#include "rpc_base/rpc_base.h"
 
 namespace policy_table = ::rpc::policy_table_interface_base;
 

@@ -33,8 +33,8 @@
 #ifndef SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_RC_RPC_PLUGIN_TEST_INCLUDE_RC_RPC_PLUGIN_MOCK_MOCK_RESOURCE_ALLOCATION_MANAGER_H_
 #define SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_RC_RPC_PLUGIN_TEST_INCLUDE_RC_RPC_PLUGIN_MOCK_MOCK_RESOURCE_ALLOCATION_MANAGER_H_
 
-#include "gmock/gmock.h"
 #include "application_manager/rpc_plugins/rc_rpc_plugin/include/rc_rpc_plugin/resource_allocation_manager.h"
+#include "gmock/gmock.h"
 
 namespace rc_rpc_plugin_test {
 

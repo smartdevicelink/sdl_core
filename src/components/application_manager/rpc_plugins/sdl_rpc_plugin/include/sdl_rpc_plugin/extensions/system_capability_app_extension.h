@@ -78,6 +78,6 @@ class SystemCapabilityAppExtension : public app_mngr_::AppExtension {
   SDLRPCPlugin& plugin_;
   app_mngr_::Application& app_;
 };
-}
+}  // namespace sdl_rpc_plugin
 
 #endif  // SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_EXTENSIONS_SYSTEM_CAPABILITY_APP_EXTENSION_H

@@ -33,17 +33,17 @@
 #include <stdint.h>
 #include <string>
 
-#include "gtest/gtest.h"
-#include "smart_objects/smart_object.h"
-#include "application_manager/smart_object_keys.h"
-#include "utils/lock.h"
-#include "utils/data_accessor.h"
 #include "application_manager/commands/commands_test.h"
 #include "application_manager/mock_application.h"
 #include "application_manager/mock_application_manager.h"
 #include "application_manager/policies/mock_policy_handler_interface.h"
+#include "application_manager/smart_object_keys.h"
+#include "gtest/gtest.h"
 #include "hmi/on_driver_distraction_notification.h"
 #include "interfaces/MOBILE_API.h"
+#include "smart_objects/smart_object.h"
+#include "utils/data_accessor.h"
+#include "utils/lock.h"
 
 namespace test {
 namespace components {
@@ -52,8 +52,8 @@ namespace hmi_commands_test {
 namespace on_driver_distraction_notification {
 
 using ::testing::_;
-using ::testing::Return;
 using ::testing::Eq;
+using ::testing::Return;
 namespace am = ::application_manager;
 using am::commands::MessageSharedPtr;
 using sdl_rpc_plugin::commands::hmi::OnDriverDistractionNotification;
@@ -152,7 +152,7 @@ TEST_F(HMIOnDriverDistractionNotificationTest,
   command->Run();
 }
 
-}  // on_driver_distraction_notification
+}  // namespace on_driver_distraction_notification
 }  // namespace hmi_commands_test
 }  // namespace commands_test
 }  // namespace components

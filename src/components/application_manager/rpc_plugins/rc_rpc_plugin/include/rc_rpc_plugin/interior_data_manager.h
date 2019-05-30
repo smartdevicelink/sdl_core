@@ -50,10 +50,10 @@ class InteriorDataManager {
   virtual void OnPolicyEvent(app_mngr::plugin_manager::PolicyEvent event) = 0;
 
   /**
-    * @brief OnApplicationEvent Notifies modules on certain application events
-    * @param event Event
-    * @param application Pointer to application struct
-    */
+   * @brief OnApplicationEvent Notifies modules on certain application events
+   * @param event Event
+   * @param application Pointer to application struct
+   */
   virtual void OnApplicationEvent(
       plugins::ApplicationEvent event,
       app_mngr::ApplicationSharedPtr application) = 0;
@@ -71,13 +71,13 @@ class InteriorDataManager {
   virtual void StoreRequestToHMITime(const std::string& module_type) = 0;
 
   /**
- * @brief CheckRequestsToHMIFrequency check that rate limits are not allowed of
- * bounce during current time frame.
- * calculate amount of requests per module type in time frame and checks if it
- * bigger then allowed by ini file
- * @param module_type moduletype to calculate frequency on
- * @return true if amount of requests was not exceeded, otherwise return false.
- */
+   * @brief CheckRequestsToHMIFrequency check that rate limits are not allowed
+   * of bounce during current time frame. calculate amount of requests per
+   * module type in time frame and checks if it bigger then allowed by ini file
+   * @param module_type moduletype to calculate frequency on
+   * @return true if amount of requests was not exceeded, otherwise return
+   * false.
+   */
   virtual bool CheckRequestsToHMIFrequency(const std::string& module_type) = 0;
 };
 

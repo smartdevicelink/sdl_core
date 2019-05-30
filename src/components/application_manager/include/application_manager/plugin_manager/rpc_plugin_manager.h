@@ -33,10 +33,10 @@
 #ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_PLUGIN_MANAGER_RPC_PLUGIN_MANAGER_H
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_PLUGIN_MANAGER_RPC_PLUGIN_MANAGER_H
 #include <cstdint>
-#include <string>
-#include <memory>
-#include <vector>
 #include <functional>
+#include <memory>
+#include <string>
+#include <vector>
 
 #include "application_manager/plugin_manager/rpc_plugin.h"
 #include "utils/optional.h"

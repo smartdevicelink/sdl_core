@@ -31,22 +31,22 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <algorithm>
 #include "sdl_rpc_plugin/commands/mobile/put_file_request.h"
+#include <algorithm>
 
-#include "application_manager/policies/policy_handler.h"
 #include "application_manager/application_impl.h"
+#include "application_manager/policies/policy_handler.h"
 #include "application_manager/rpc_service.h"
 
-#include "utils/file_system.h"
 #include <boost/crc.hpp>
+#include "utils/file_system.h"
 
 namespace {
 /**
-* Calculates CRC32 checksum
-* @param binary_data - input data for which CRC32 should be calculated
-* @return calculated CRC32 checksum
-*/
+ * Calculates CRC32 checksum
+ * @param binary_data - input data for which CRC32 should be calculated
+ * @return calculated CRC32 checksum
+ */
 uint32_t GetCrc32CheckSum(const std::vector<uint8_t>& binary_data) {
   const std::size_t file_size = binary_data.size();
   boost::crc_32_type result;
@@ -321,4 +321,4 @@ void PutFileRequest::SendOnPutFileNotification() {
 
 }  // namespace commands
 
-}  // namespace application_manager
+}  // namespace sdl_rpc_plugin

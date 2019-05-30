@@ -33,28 +33,28 @@
 #ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_POLICIES_POLICY_HANDLER_H_
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_POLICIES_POLICY_HANDLER_H_
 
-#include <string>
+#include <stdint.h>
+#include <list>
 #include <map>
 #include <set>
+#include <string>
 #include <vector>
-#include <list>
-#include <stdint.h>
 
-#include "policy/policy_manager.h"
 #include "application_manager/application.h"
-#include "application_manager/policies/policy_handler_interface.h"
-#include "application_manager/policies/policy_event_observer.h"
 #include "application_manager/policies/delegates/statistics_delegate.h"
+#include "application_manager/policies/policy_event_observer.h"
+#include "application_manager/policies/policy_handler_interface.h"
 #include "application_manager/policies/policy_handler_observer.h"
+#include "policy/policy_manager.h"
+#include "policy/policy_settings.h"
+#include "policy/usage_statistics/statistics_manager.h"
+#include "utils/conditional_variable.h"
+#include "utils/custom_string.h"
 #include "utils/logger.h"
+#include "utils/rwlock.h"
+#include "utils/threads/async_runner.h"
 #include "utils/threads/thread.h"
 #include "utils/threads/thread_delegate.h"
-#include "utils/conditional_variable.h"
-#include "utils/rwlock.h"
-#include "utils/custom_string.h"
-#include "policy/usage_statistics/statistics_manager.h"
-#include "utils/threads/async_runner.h"
-#include "policy/policy_settings.h"
 
 namespace Json {
 class Value;
@@ -478,7 +478,7 @@ class PolicyHandler : public PolicyHandlerInterface,
    * @brief Check if an app can send unknown rpc requests to an app service
    * provider
    * @param policy_app_id Unique application id
-  */
+   */
   bool UnknownRPCPassthroughAllowed(
       const std::string& policy_app_id) const OVERRIDE;
 
@@ -811,10 +811,10 @@ class PolicyHandler : public PolicyHandlerInterface,
   static const std::string kLibrary;
 
   /**
- * @brief Collects currently registered applications ids linked to their
- * device id
- * @param out_links Collection of device_id-to-app_id links
- */
+   * @brief Collects currently registered applications ids linked to their
+   * device id
+   * @param out_links Collection of device_id-to-app_id links
+   */
   void GetRegisteredLinks(std::map<std::string, std::string>& out_links) const;
 
  private:

@@ -33,19 +33,19 @@
 #include "policy/cache_manager.h"
 
 #include <algorithm>
-#include <functional>
-#include <ctime>
 #include <cmath>
+#include <ctime>
+#include <functional>
 #include <sstream>
 
-#include "utils/file_system.h"
-#include "utils/helpers.h"
-#include "json/reader.h"
 #include "json/features.h"
+#include "json/reader.h"
 #include "json/writer.h"
-#include "utils/logger.h"
 #include "utils/date_time.h"
+#include "utils/file_system.h"
 #include "utils/gen_hash.h"
+#include "utils/helpers.h"
+#include "utils/logger.h"
 #include "utils/macro.h"
 #include "utils/threads/thread.h"
 #include "utils/threads/thread_delegate.h"
@@ -1906,8 +1906,9 @@ void CacheManager::MergeFG(const policy_table::PolicyTable& new_pt,
 void CacheManager::MergeAP(const policy_table::PolicyTable& new_pt,
                            policy_table::PolicyTable& pt) {
   LOG4CXX_AUTO_TRACE(logger_);
-  pt.app_policies_section.device = const_cast<policy_table::PolicyTable&>(
-                                       new_pt).app_policies_section.device;
+  pt.app_policies_section.device =
+      const_cast<policy_table::PolicyTable&>(new_pt)
+          .app_policies_section.device;
 
   pt.app_policies_section.apps[kDefaultId] =
       const_cast<policy_table::PolicyTable&>(new_pt)

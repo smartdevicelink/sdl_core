@@ -65,6 +65,6 @@ class TransportManagerDefault : public TransportManagerImpl {
 
   DISALLOW_COPY_AND_ASSIGN(TransportManagerDefault);
 };
-}
+}  // namespace transport_manager
 
 #endif  // SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_MANAGER_DEFAULT_H_

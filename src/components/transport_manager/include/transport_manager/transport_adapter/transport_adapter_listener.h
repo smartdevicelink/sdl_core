@@ -33,9 +33,9 @@
 #ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_ADAPTER_TRANSPORT_ADAPTER_LISTENER_H_
 #define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_ADAPTER_TRANSPORT_ADAPTER_LISTENER_H_
 
+#include "protocol/common.h"
 #include "transport_manager/common.h"
 #include "transport_manager/error.h"
-#include "protocol/common.h"
 
 namespace transport_manager {
 namespace transport_adapter {
@@ -307,6 +307,6 @@ class TransportAdapterListener {
       const TransportAdapter* transport_adapter) = 0;
 };
 
-}  // transport_adapter namespace
-}  // transport_manager namespace
+}  // namespace transport_adapter
+}  // namespace transport_manager
 #endif  // SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_ADAPTER_TRANSPORT_ADAPTER_LISTENER_H_

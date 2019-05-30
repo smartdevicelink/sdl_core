@@ -31,35 +31,35 @@
  */
 
 #include <stdint.h>
-#include <string>
 #include <algorithm>
 #include <functional>
 #include <set>
+#include <string>
 
 #include "gtest/gtest.h"
 
-#include "smart_objects/smart_object.h"
-#include "application_manager/smart_object_keys.h"
-#include "application_manager/commands/commands_test.h"
+#include "application_manager/application_manager.h"
 #include "application_manager/commands/command.h"
 #include "application_manager/commands/command_impl.h"
-#include "application_manager/application_manager.h"
+#include "application_manager/commands/commands_test.h"
 #include "application_manager/mock_application.h"
+#include "application_manager/smart_object_keys.h"
+#include "smart_objects/smart_object.h"
 
 namespace test {
 namespace components {
 namespace commands_test {
 namespace command_impl {
 
-using ::testing::Return;
-using ::testing::AtLeast;
 using ::testing::_;
+using ::testing::AtLeast;
+using ::testing::Return;
 
 namespace strings = ::application_manager::strings;
-using ::application_manager::commands::CommandImpl;
 using ::application_manager::ApplicationManager;
-using ::application_manager::commands::MessageSharedPtr;
 using ::application_manager::ApplicationSharedPtr;
+using ::application_manager::commands::CommandImpl;
+using ::application_manager::commands::MessageSharedPtr;
 using ::test::components::application_manager_test::MockApplication;
 
 typedef std::shared_ptr<MockApplication> MockAppPtr;
@@ -82,8 +82,8 @@ class CommandImplTest : public CommandsTest<CommandsTestMocks::kIsNice> {
  public:
   class UnwrappedCommandImpl : CommandImpl {
    public:
-    using CommandImpl::ReplaceMobileWithHMIAppId;
     using CommandImpl::ReplaceHMIWithMobileAppId;
+    using CommandImpl::ReplaceMobileWithHMIAppId;
 
     UnwrappedCommandImpl(
         const MessageSharedPtr& message,

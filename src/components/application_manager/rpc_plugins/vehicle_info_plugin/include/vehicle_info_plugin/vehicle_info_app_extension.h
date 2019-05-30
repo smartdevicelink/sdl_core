@@ -61,11 +61,11 @@ class VehicleInfoAppExtension : public app_mngr::AppExtension {
   virtual ~VehicleInfoAppExtension();
 
   /**
- * @brief subscribeToVehicleInfo add vehicle_data to list of subscriptions of
- * application extension
- * @param vehicle_data data to subscribe
- * @return true in case if subscription is successful
- */
+   * @brief subscribeToVehicleInfo add vehicle_data to list of subscriptions of
+   * application extension
+   * @param vehicle_data data to subscribe
+   * @return true in case if subscription is successful
+   */
   bool subscribeToVehicleInfo(const VehicleDataType vehicle_data);
 
   /**
@@ -130,6 +130,6 @@ class VehicleInfoAppExtension : public app_mngr::AppExtension {
   VehicleInfoPlugin& plugin_;
   app_mngr::Application& app_;
 };
-}
+}  // namespace vehicle_info_plugin
 
 #endif  // SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_VEHICLE_INFO_PLUGIN_INCLUDE_VEHICLE_INFO_PLUGIN_VEHICLE_INFO_APP_EXTENSION_H

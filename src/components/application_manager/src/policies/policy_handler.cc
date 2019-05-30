@@ -30,34 +30,34 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 #include "application_manager/policies/policy_handler.h"
-#include <unistd.h>
 #include <dlfcn.h>
+#include <unistd.h>
 #include <algorithm>
-#include <vector>
 #include <functional>
 #include <utility>
-#include "application_manager/smart_object_keys.h"
-#include "application_manager/policies/delegates/app_permission_delegate.h"
-#include "policy/status.h"
+#include <vector>
 #include "application_manager/application_manager.h"
-#include "application_manager/state_controller.h"
 #include "application_manager/message_helper.h"
+#include "application_manager/policies/delegates/app_permission_delegate.h"
 #include "application_manager/rpc_service.h"
-#include "policy/policy_manager_impl.h"
+#include "application_manager/smart_object_keys.h"
+#include "application_manager/state_controller.h"
+#include "application_manager/usage_statistics.h"
 #include "connection_handler/connection_handler.h"
-#include "utils/macro.h"
-#include "utils/date_time.h"
+#include "interfaces/MOBILE_API.h"
 #include "json/value.h"
 #include "json/writer.h"
-#include "application_manager/usage_statistics.h"
+#include "policy/policy_manager_impl.h"
 #include "policy/policy_types.h"
-#include "interfaces/MOBILE_API.h"
-#include "utils/file_system.h"
-#include "utils/scope_guard.h"
+#include "policy/status.h"
 #include "smart_objects/enum_schema_item.h"
+#include "utils/date_time.h"
+#include "utils/file_system.h"
+#include "utils/macro.h"
+#include "utils/scope_guard.h"
 
-#include "utils/helpers.h"
 #include "policy/policy_manager.h"
+#include "utils/helpers.h"
 
 namespace policy {
 
@@ -107,13 +107,12 @@ const policy::DeviceParams GetDeviceParams(
     const protocol_handler::SessionObserver& session_observer) {
   CREATE_LOGGERPTR_LOCAL(logger_, "PolicyHandler");
   policy::DeviceParams device_params;
-  if (-1 ==
-      session_observer.GetDataOnDeviceID(
-          device_handle,
-          &device_params.device_name,
-          NULL,
-          &device_params.device_mac_address,
-          &device_params.device_connection_type)) {
+  if (-1 == session_observer.GetDataOnDeviceID(
+                device_handle,
+                &device_params.device_name,
+                NULL,
+                &device_params.device_mac_address,
+                &device_params.device_connection_type)) {
     LOG4CXX_ERROR(logger_,
                   "Failed to extract information for device " << device_handle);
   }
@@ -516,9 +515,9 @@ void PolicyHandler::OnDeviceConsentChanged(const std::string& device_id,
 void PolicyHandler::SendOnAppPermissionsChanged(
     const AppPermissions& permissions, const std::string& policy_app_id) const {
   LOG4CXX_AUTO_TRACE(logger_);
-  LOG4CXX_DEBUG(logger_,
-                "PolicyHandler::SendOnAppPermissionsChanged for "
-                    << policy_app_id);
+  LOG4CXX_DEBUG(
+      logger_,
+      "PolicyHandler::SendOnAppPermissionsChanged for " << policy_app_id);
   ApplicationSharedPtr app =
       application_manager_.application_by_policy_id(policy_app_id);
   if (app.use_count() == 0) {
@@ -812,9 +811,9 @@ bool PolicyHandler::IsAppSuitableForPolicyUpdate(
   LOG4CXX_AUTO_TRACE(logger_);
 
   if (!value->IsRegistered()) {
-    LOG4CXX_DEBUG(logger_,
-                  "Application " << value->app_id()
-                                 << " is not marked as registered.");
+    LOG4CXX_DEBUG(
+        logger_,
+        "Application " << value->app_id() << " is not marked as registered.");
     return false;
   }
 
@@ -827,9 +826,9 @@ bool PolicyHandler::IsAppSuitableForPolicyUpdate(
       value->device(),
       application_manager_.connection_handler().get_session_observer());
 
-  const bool is_device_allowed = (kDeviceAllowed ==
-                                  policy_manager_->GetUserConsentForDevice(
-                                      device_params.device_mac_address));
+  const bool is_device_allowed =
+      (kDeviceAllowed == policy_manager_->GetUserConsentForDevice(
+                             device_params.device_mac_address));
 
   LOG4CXX_DEBUG(logger_,
                 "Is device " << device_params.device_mac_address << " allowed "
@@ -936,9 +935,9 @@ void PolicyHandler::OnVehicleDataUpdated(
   POLICY_LIB_CHECK_VOID();
 #ifdef EXTERNAL_PROPRIETARY_MODE
   if (!message.keyExists(strings::msg_params)) {
-    LOG4CXX_ERROR(logger_,
-                  "Message does not contains mandatory section "
-                      << strings::msg_params);
+    LOG4CXX_ERROR(
+        logger_,
+        "Message does not contains mandatory section " << strings::msg_params);
     return;
   }
   if (message[strings::msg_params].keyExists(strings::vin)) {
@@ -954,9 +953,9 @@ void PolicyHandler::OnVehicleDataUpdated(
 void PolicyHandler::OnPendingPermissionChange(
     const std::string& policy_app_id) {
   LOG4CXX_AUTO_TRACE(logger_);
-  LOG4CXX_DEBUG(logger_,
-                "PolicyHandler::OnPendingPermissionChange for "
-                    << policy_app_id);
+  LOG4CXX_DEBUG(
+      logger_,
+      "PolicyHandler::OnPendingPermissionChange for " << policy_app_id);
   POLICY_LIB_CHECK_VOID();
   ApplicationSharedPtr app =
       application_manager_.application_by_policy_id(policy_app_id);
@@ -1051,14 +1050,17 @@ bool PolicyHandler::SendMessageToSDK(const BinaryMessage& pt_string,
   if (mobile_app_id.empty()) {
     LOG4CXX_WARN(logger_,
                  "Application with connection key '"
-                     << app_id << "'"
-                                  " has no application id.");
+                     << app_id
+                     << "'"
+                        " has no application id.");
     return false;
   }
 
   LOG4CXX_DEBUG(logger_,
-                "Update url is " << url << " for application "
-                                           "with connection key " << app_id);
+                "Update url is " << url
+                                 << " for application "
+                                    "with connection key "
+                                 << app_id);
 
   MessageHelper::SendPolicySnapshotNotification(
       app_id, pt_string, url, application_manager_);
@@ -1173,9 +1175,9 @@ void PolicyHandler::OnAllowSDLFunctionalityNotification(
       policy_manager_->SetUserConsentForDevice(device_id, is_allowed);
       connection_handler::DeviceHandle device_handle = 0;
       if (!connection_handler.GetDeviceID(device_id, &device_handle)) {
-        LOG4CXX_WARN(logger_,
-                     "Device handle with mac " << device_id
-                                               << " wasn't found.");
+        LOG4CXX_WARN(
+            logger_,
+            "Device handle with mac " << device_id << " wasn't found.");
       }
 
 #ifdef EXTERNAL_PROPRIETARY_MODE
@@ -1373,9 +1375,9 @@ void PolicyHandler::OnPermissionsUpdated(const std::string& policy_app_id,
       MessageHelper::StringToHMILevel(default_hmi);
 
   if (mobile_apis::HMILevel::INVALID_ENUM == hmi_level) {
-    LOG4CXX_WARN(logger_,
-                 "Couldn't convert default hmi level " << default_hmi
-                                                       << " to enum.");
+    LOG4CXX_WARN(
+        logger_,
+        "Couldn't convert default hmi level " << default_hmi << " to enum.");
     return;
   }
   if (current_hmi_level == hmi_level) {
@@ -1703,9 +1705,9 @@ void PolicyHandler::OnCertificateUpdated(const std::string& certificate_data) {
   const bool is_written = file_system::Write(
       file_name,
       std::vector<uint8_t>(certificate_data.begin(), certificate_data.end()));
-  LOG4CXX_DEBUG(logger_,
-                "Saving encrypted certificate data: \"" << certificate_data
-                                                        << '"');
+  LOG4CXX_DEBUG(
+      logger_,
+      "Saving encrypted certificate data: \"" << certificate_data << '"');
   if (!is_written) {
     LOG4CXX_ERROR(logger_,
                   "Unable to save encrypted certificate to file " << file_name);
@@ -1752,9 +1754,9 @@ void PolicyHandler::OnCertificateDecrypted(bool is_succeeded) {
                   "Unable to read certificate from file " << file_name);
     return;
   }
-  LOG4CXX_DEBUG(logger_,
-                "Loaded decrypted certificate data: \"" << certificate_data
-                                                        << '"');
+  LOG4CXX_DEBUG(
+      logger_,
+      "Loaded decrypted certificate data: \"" << certificate_data << '"');
 
   policy_manager_->SetDecryptedCertificate(certificate_data);
 
@@ -1910,24 +1912,24 @@ void PolicyHandler::OnSetCloudAppProperties(
     const smart_objects::SmartObject& message) {
   POLICY_LIB_CHECK_VOID();
   if (!message.keyExists(strings::msg_params)) {
-    LOG4CXX_ERROR(logger_,
-                  "Message does not contain mandatory section "
-                      << strings::msg_params);
+    LOG4CXX_ERROR(
+        logger_,
+        "Message does not contain mandatory section " << strings::msg_params);
     return;
   }
   if (!message[strings::msg_params].keyExists(strings::properties)) {
-    LOG4CXX_ERROR(logger_,
-                  "Message does not contain app properties "
-                      << strings::msg_params);
+    LOG4CXX_ERROR(
+        logger_,
+        "Message does not contain app properties " << strings::msg_params);
     return;
   }
 
   const smart_objects::SmartObject& properties =
       message[strings::msg_params][strings::properties];
   if (!properties.keyExists(strings::app_id)) {
-    LOG4CXX_ERROR(logger_,
-                  "Message does not contain mandatory parameter "
-                      << strings::app_id);
+    LOG4CXX_ERROR(
+        logger_,
+        "Message does not contain mandatory parameter " << strings::app_id);
     return;
   }
   std::string policy_app_id(properties[strings::app_id].asString());
@@ -2288,17 +2290,17 @@ void PolicyHandler::OnUpdateHMIStatus(const std::string& device_id,
   ApplicationSharedPtr app =
       application_manager_.application(device_id, policy_app_id);
   if (!app) {
-    LOG4CXX_WARN(logger_,
-                 "Could not find application: " << device_id << " - "
-                                                << policy_app_id);
+    LOG4CXX_WARN(
+        logger_,
+        "Could not find application: " << device_id << " - " << policy_app_id);
     return;
   }
   mobile_apis::HMILevel::eType level =
       MessageHelper::StringToHMILevel(hmi_level);
   if (mobile_apis::HMILevel::INVALID_ENUM == level) {
-    LOG4CXX_WARN(logger_,
-                 "Couldn't convert default hmi level " << hmi_level
-                                                       << " to enum.");
+    LOG4CXX_WARN(
+        logger_,
+        "Couldn't convert default hmi level " << hmi_level << " to enum.");
     return;
   }
 
@@ -2361,17 +2363,17 @@ void PolicyHandler::OnUpdateHMILevel(const std::string& device_id,
   ApplicationSharedPtr app =
       application_manager_.application(device_id, policy_app_id);
   if (!app) {
-    LOG4CXX_WARN(logger_,
-                 "Could not find application: " << device_id << " - "
-                                                << policy_app_id);
+    LOG4CXX_WARN(
+        logger_,
+        "Could not find application: " << device_id << " - " << policy_app_id);
     return;
   }
   mobile_apis::HMILevel::eType level =
       MessageHelper::StringToHMILevel(hmi_level);
   if (mobile_apis::HMILevel::INVALID_ENUM == level) {
-    LOG4CXX_WARN(logger_,
-                 "Couldn't convert default hmi level " << hmi_level
-                                                       << " to enum.");
+    LOG4CXX_WARN(
+        logger_,
+        "Couldn't convert default hmi level " << hmi_level << " to enum.");
     return;
   }
   UpdateHMILevel(app, level);

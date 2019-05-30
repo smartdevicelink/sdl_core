@@ -33,8 +33,8 @@
 #ifndef SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_RC_RPC_PLUGIN_INCLUDE_RC_RPC_PLUGIN_COMMANDS_MOBILE_GET_INTERIOR_VEHICLE_DATA_REQUEST_H_
 #define SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_RC_RPC_PLUGIN_INCLUDE_RC_RPC_PLUGIN_COMMANDS_MOBILE_GET_INTERIOR_VEHICLE_DATA_REQUEST_H_
 
-#include "rc_rpc_plugin/commands/rc_command_request.h"
 #include <string>
+#include "rc_rpc_plugin/commands/rc_command_request.h"
 
 namespace rc_rpc_plugin {
 namespace app_mngr = application_manager;
@@ -76,9 +76,9 @@ class GetInteriorVehicleDataRequest : public RCCommandRequest {
   bool HasRequestExcessiveSubscription();
 
   /**
-    * @brief Handle subscription to vehicle data
-    * @param hmi_response json message with response from HMI
-    */
+   * @brief Handle subscription to vehicle data
+   * @param hmi_response json message with response from HMI
+   */
   void ProccessSubscription(const smart_objects::SmartObject& hmi_response);
 
   /**

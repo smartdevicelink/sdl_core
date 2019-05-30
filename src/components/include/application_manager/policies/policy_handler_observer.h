@@ -34,8 +34,8 @@
 #define SRC_COMPONENTS_INCLUDE_APPLICATION_MANAGER_POLICIES_POLICY_HANDLER_OBSERVER_H_
 
 #include <map>
-#include <vector>
 #include <string>
+#include <vector>
 
 namespace policy {
 

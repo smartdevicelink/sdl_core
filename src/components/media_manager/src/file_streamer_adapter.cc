@@ -30,9 +30,9 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "utils/logger.h"
-#include "utils/file_system.h"
 #include "media_manager/file_streamer_adapter.h"
+#include "utils/file_system.h"
+#include "utils/logger.h"
 
 namespace media_manager {
 

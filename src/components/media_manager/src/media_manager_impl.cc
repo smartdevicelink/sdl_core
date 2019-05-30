@@ -31,27 +31,27 @@
  */
 
 #include "media_manager/media_manager_impl.h"
+#include "application_manager/application.h"
+#include "application_manager/application_impl.h"
+#include "application_manager/application_manager.h"
+#include "application_manager/message_helper.h"
 #include "media_manager/audio/from_mic_recorder_listener.h"
 #include "media_manager/streamer_listener.h"
-#include "application_manager/message_helper.h"
-#include "application_manager/application.h"
-#include "application_manager/application_manager.h"
-#include "application_manager/application_impl.h"
 #include "protocol_handler/protocol_handler.h"
 #include "utils/file_system.h"
-#include "utils/logger.h"
 #include "utils/helpers.h"
+#include "utils/logger.h"
 #if defined(EXTENDED_MEDIA_MODE)
 #include "media_manager/audio/a2dp_source_player_adapter.h"
 #include "media_manager/audio/from_mic_recorder_adapter.h"
 #endif
-#include "media_manager/video/socket_video_streamer_adapter.h"
-#include "media_manager/audio/socket_audio_streamer_adapter.h"
-#include "media_manager/video/pipe_video_streamer_adapter.h"
-#include "media_manager/audio/pipe_audio_streamer_adapter.h"
-#include "media_manager/video/file_video_streamer_adapter.h"
 #include "media_manager/audio/file_audio_streamer_adapter.h"
+#include "media_manager/audio/pipe_audio_streamer_adapter.h"
+#include "media_manager/audio/socket_audio_streamer_adapter.h"
 #include "media_manager/media_manager_settings.h"
+#include "media_manager/video/file_video_streamer_adapter.h"
+#include "media_manager/video/pipe_video_streamer_adapter.h"
+#include "media_manager/video/socket_video_streamer_adapter.h"
 
 namespace media_manager {
 
@@ -220,9 +220,9 @@ void MediaManagerImpl::StartMicrophoneRecording(int32_t application_key,
   std::vector<uint8_t> buf;
   if (file_system::ReadBinaryFile(record_file_source, buf)) {
     if (file_system::Write(file_path, buf)) {
-      LOG4CXX_INFO(logger_,
-                   "File " << record_file_source << " copied to "
-                           << output_file);
+      LOG4CXX_INFO(
+          logger_,
+          "File " << record_file_source << " copied to " << output_file);
     } else {
       LOG4CXX_WARN(logger_, "Could not write to file " << output_file);
     }

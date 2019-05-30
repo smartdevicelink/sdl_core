@@ -30,24 +30,24 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <sstream>
-#include <stdlib.h>
-#include <stdint.h>
 #include <errno.h>
+#include <stdint.h>
+#include <stdlib.h>
 #include <unistd.h>
+#include <sstream>
 
-#include "utils/logger.h"
-#include "utils/date_time.h"
-#include "utils/sqlite_wrapper/sql_database.h"
-#include "utils/file_system.h"
-#include "utils/gen_hash.h"
-#include "policy/sql_pt_representation.h"
-#include "policy/sql_wrapper.h"
+#include "config_profile/profile.h"
+#include "policy/cache_manager.h"
+#include "policy/policy_helper.h"
 #include "policy/sql_pt_ext_queries.h"
 #include "policy/sql_pt_queries.h"
-#include "policy/policy_helper.h"
-#include "policy/cache_manager.h"
-#include "config_profile/profile.h"
+#include "policy/sql_pt_representation.h"
+#include "policy/sql_wrapper.h"
+#include "utils/date_time.h"
+#include "utils/file_system.h"
+#include "utils/gen_hash.h"
+#include "utils/logger.h"
+#include "utils/sqlite_wrapper/sql_database.h"
 
 namespace policy {
 
@@ -130,9 +130,9 @@ void SQLPTRepresentation::CheckPermissions(const PTString& app_id,
   utils::dbms::SQLQuery query(db());
 
   if (!query.Prepare(sql_pt::kSelectRpc)) {
-    LOG4CXX_WARN(logger_,
-                 "Incorrect select statement from rpcs"
-                     << query.LastError().text());
+    LOG4CXX_WARN(
+        logger_,
+        "Incorrect select statement from rpcs" << query.LastError().text());
     return;
   }
   query.Bind(0, app_id);
@@ -408,9 +408,9 @@ InitResult SQLPTRepresentation::Init(const PolicySettings* settings) {
             utils::dbms::SQLQuery check_first_run(db());
             if (check_first_run.Prepare(sql_pt::kIsFirstRun) &&
                 check_first_run.Next()) {
-              LOG4CXX_INFO(logger_,
-                           "Selecting is first run "
-                               << check_first_run.GetBoolean(0));
+              LOG4CXX_INFO(
+                  logger_,
+                  "Selecting is first run " << check_first_run.GetBoolean(0));
               if (check_first_run.GetBoolean(0)) {
                 utils::dbms::SQLQuery set_not_first_run(db());
                 set_not_first_run.Exec(sql_pt::kSetNotFirstRun);
@@ -1183,9 +1183,9 @@ bool SQLPTRepresentation::SaveAppGroup(
     query.Bind(0, app_id);
     query.Bind(1, *it);
     if (!query.Exec() || !query.Reset()) {
-      LOG4CXX_WARN(logger_,
-                   "Incorrect insert into app group."
-                       << query.LastError().text());
+      LOG4CXX_WARN(
+          logger_,
+          "Incorrect insert into app group." << query.LastError().text());
       return false;
     }
   }

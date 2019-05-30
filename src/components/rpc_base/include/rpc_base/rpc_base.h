@@ -57,7 +57,7 @@ const std::string omitted_validation_info = "should be omitted in ";
 const std::string required_validation_info = "is required in ";
 
 std::string PolicyTableTypeToString(const PolicyTableType pt_type);
-}
+}  // namespace policy_table_interface_base
 
 template <typename T>
 class Range;

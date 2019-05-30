@@ -33,9 +33,9 @@
 #ifndef SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_MOBILE_SET_GLOBAL_PROPERTIES_REQUEST_H_
 #define SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_MOBILE_SET_GLOBAL_PROPERTIES_REQUEST_H_
 #include <string>
+#include "application_manager/application.h"
 #include "application_manager/commands/command_request_impl.h"
 #include "utils/macro.h"
-#include "application_manager/application.h"
 
 namespace sdl_rpc_plugin {
 namespace app_mngr = application_manager;
@@ -153,6 +153,6 @@ class SetGlobalPropertiesRequest
 };
 
 }  // namespace commands
-}  // namespace application_manager
+}  // namespace sdl_rpc_plugin
 
 #endif  // SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_MOBILE_SET_GLOBAL_PROPERTIES_REQUEST_H_

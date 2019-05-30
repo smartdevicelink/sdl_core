@@ -33,12 +33,12 @@
 #include <stdint.h>
 #include <string>
 
-#include "gtest/gtest.h"
-#include "application_manager/commands/commands_test.h"
 #include "application_manager/commands/command_request_test.h"
-#include "application_manager/mock_hmi_capabilities.h"
+#include "application_manager/commands/commands_test.h"
 #include "application_manager/mock_application_manager.h"
 #include "application_manager/mock_event_dispatcher.h"
+#include "application_manager/mock_hmi_capabilities.h"
+#include "gtest/gtest.h"
 #include "hmi/navi_is_ready_response.h"
 
 namespace test {

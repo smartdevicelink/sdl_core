@@ -30,12 +30,12 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "application_manager/message_helper.h"
 #include "application_manager/mock_message_helper.h"
+#include "application_manager/message_helper.h"
 #include "application_manager/policies/policy_handler_interface.h"
-#include "transport_manager/common.h"
-#include "gtest/gtest.h"
 #include "gmock/gmock.h"
+#include "gtest/gtest.h"
+#include "transport_manager/common.h"
 
 namespace application_manager {
 

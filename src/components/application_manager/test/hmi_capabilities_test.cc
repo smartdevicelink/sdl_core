@@ -36,32 +36,32 @@
 #include <string>
 
 #include "application_manager/hmi_capabilities.h"
-#include "gtest/gtest.h"
-#include "smart_objects/smart_object.h"
 #include "application_manager/mock_message_helper.h"
-#include "smart_objects/enum_schema_item.h"
+#include "gtest/gtest.h"
 #include "interfaces/HMI_API.h"
+#include "smart_objects/enum_schema_item.h"
+#include "smart_objects/smart_object.h"
 
 #include "application_manager/hmi_capabilities_for_testing.h"
-#include "utils/file_system.h"
 #include "application_manager/mock_application_manager.h"
 #include "application_manager/mock_application_manager_settings.h"
 #include "application_manager/mock_event_dispatcher.h"
 #include "application_manager/mock_rpc_service.h"
+#include "application_manager/resumption/resume_ctrl.h"
 #include "application_manager/state_controller.h"
 #include "resumption/last_state_impl.h"
-#include "application_manager/resumption/resume_ctrl.h"
+#include "utils/file_system.h"
 
 namespace test {
 namespace components {
 namespace application_manager_test {
 
 using ::testing::_;
+using ::testing::AtLeast;
+using ::testing::InSequence;
+using ::testing::Invoke;
 using ::testing::Return;
 using ::testing::ReturnRef;
-using ::testing::AtLeast;
-using ::testing::Invoke;
-using ::testing::InSequence;
 
 using namespace application_manager;
 
@@ -76,7 +76,8 @@ class HMICapabilitiesTest : public ::testing::Test {
     EXPECT_CALL(app_mngr_, get_settings())
         .WillRepeatedly(ReturnRef(mock_application_manager_settings_));
     EXPECT_CALL(mock_application_manager_settings_,
-                hmi_capabilities_file_name()).WillOnce(ReturnRef(file_name_));
+                hmi_capabilities_file_name())
+        .WillOnce(ReturnRef(file_name_));
     EXPECT_CALL(mock_event_dispatcher, add_observer(_, _, _)).Times(1);
     EXPECT_CALL(mock_event_dispatcher, remove_observer(_)).Times(1);
     EXPECT_CALL(mock_application_manager_settings_, launch_hmi())
@@ -140,9 +141,9 @@ struct CStringComparator {
   }
 };
 
-typedef std::map<const char*,
-                 hmi_apis::Common_Language::eType,
-                 CStringComparator> CStringToEnumMap;
+typedef std::
+    map<const char*, hmi_apis::Common_Language::eType, CStringComparator>
+        CStringToEnumMap;
 
 CStringToEnumMap InitCStringToEnumMap() {
   size_t value = sizeof(cstring_values_) / sizeof(cstring_values_[0]);
@@ -407,7 +408,8 @@ TEST_F(HMICapabilitiesTest, LoadCapabilitiesFromFile) {
           .asInt());
   EXPECT_EQ(350,
             vs_capability_so[strings::preferred_resolution]
-                            [strings::resolution_height].asInt());
+                            [strings::resolution_height]
+                                .asInt());
   EXPECT_TRUE(vs_capability_so.keyExists(strings::max_bitrate));
   EXPECT_EQ(10000, vs_capability_so[strings::max_bitrate].asInt());
   EXPECT_TRUE(vs_capability_so.keyExists(strings::supported_formats));
@@ -454,7 +456,8 @@ TEST_F(HMICapabilitiesTest, LoadCapabilitiesFromFile) {
       rc_capability_so["climateControlCapabilities"][0]["fanSpeedAvailable"]
           .asBool());
   EXPECT_TRUE(rc_capability_so["climateControlCapabilities"][0]
-                              ["desiredTemperatureAvailable"].asBool());
+                              ["desiredTemperatureAvailable"]
+                                  .asBool());
   EXPECT_TRUE(
       rc_capability_so["climateControlCapabilities"][0]["acEnableAvailable"]
           .asBool());
@@ -582,7 +585,8 @@ TEST_F(HMICapabilitiesTest, VerifyImageType) {
 void HMICapabilitiesTest::SetCooperating() {
   smart_objects::SmartObjectSPtr test_so;
   EXPECT_CALL(*(MockMessageHelper::message_helper_mock()),
-              CreateModuleInfoSO(_, _)).WillRepeatedly(Return(test_so));
+              CreateModuleInfoSO(_, _))
+      .WillRepeatedly(Return(test_so));
   EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_, _))
       .WillRepeatedly(Return(true));
 }

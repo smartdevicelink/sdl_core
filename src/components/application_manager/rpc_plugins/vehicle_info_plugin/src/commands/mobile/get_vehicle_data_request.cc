@@ -31,13 +31,13 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <string>
 #include "vehicle_info_plugin/commands/mobile/get_vehicle_data_request.h"
+#include <string>
 
 #include "application_manager/application_impl.h"
 #include "application_manager/message_helper.h"
-#include "interfaces/MOBILE_API.h"
 #include "interfaces/HMI_API.h"
+#include "interfaces/MOBILE_API.h"
 
 namespace vehicle_info_plugin {
 using namespace application_manager;
@@ -144,4 +144,4 @@ void GetVehicleDataRequest::on_event(const event_engine::Event& event) {
 
 }  // namespace commands
 
-}  // namespace application_manager
+}  // namespace vehicle_info_plugin
