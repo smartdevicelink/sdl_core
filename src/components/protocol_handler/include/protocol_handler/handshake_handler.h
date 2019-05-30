@@ -90,7 +90,7 @@ class HandshakeHandler : public security_manager::SecurityManagerListener {
    */
   void OnCertificateUpdateRequired() OVERRIDE;
 
-  void OnPTUFailed() OVERRIDE;
+  bool OnPTUFailed() OVERRIDE;
 
 #ifdef EXTERNAL_PROPRIETARY_MODE
   /**

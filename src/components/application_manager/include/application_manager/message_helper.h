@@ -90,6 +90,17 @@ class MessageHelper {
       hmi_apis::FunctionID::eType function_id);
 
   /**
+   * @brief CreateOnSystemRequestNotificationToMobile creates mobile
+   * OnSystemRequestNotification
+   * @param policy_data pt snapshot data
+   * @param connection_key connection key of application
+   * @return OnSystemRequest notification smart object
+   */
+  static smart_objects::SmartObjectSPtr
+  CreateOnSystemRequestNotificationToMobile(
+      const std::vector<uint8_t>& policy_data, const uint32_t connection_key);
+
+  /**
    * @brief ServiceStatusUpdateNotificationBuilder small utility class used for
    * more flexible construction of OnServiceUpdateNotification
    */

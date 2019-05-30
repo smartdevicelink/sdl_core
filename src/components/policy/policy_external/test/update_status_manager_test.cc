@@ -121,9 +121,41 @@ TEST_F(UpdateStatusManagerTest,
   WaitAsync waiter(count, timeout);
   EXPECT_CALL(listener_, OnUpdateStatusChanged(_))
       .WillRepeatedly(NotifyAsync(&waiter));
+  EXPECT_CALL(listener_, IsAllowedPTURetriesExceeded())
+      .WillRepeatedly(Return(false));
   manager_->ScheduleUpdate();
   manager_->OnUpdateSentOut(k_timeout_);
   status_ = manager_->GetLastUpdateStatus();
+  EXPECT_EQ(StatusUpdatePending, status_);
+  EXPECT_TRUE(waiter.Wait(auto_lock));
+  status_ = manager_->GetLastUpdateStatus();
+  // Check
+  EXPECT_EQ(StatusUpdateRequired, status_);
+}
+
+TEST_F(
+    UpdateStatusManagerTest,
+    OnUpdateSentOut_WaitForTimeoutExpired_ExpectStatusUpdateNeeded_RetryExceeded) {
+  sync_primitives::Lock lock;
+  sync_primitives::AutoLock auto_lock(lock);
+  const uint32_t count = 3u;
+  const uint32_t timeout = 2u * k_timeout_;
+  WaitAsync waiter(count, timeout);
+  EXPECT_CALL(listener_, OnUpdateStatusChanged(_))
+      .WillRepeatedly(NotifyAsync(&waiter));
+  manager_->ScheduleUpdate();
+  manager_->OnUpdateSentOut(k_timeout_);
+  status_ = manager_->GetLastUpdateStatus();
+  {
+    ::testing::InSequence s;
+    EXPECT_CALL(listener_, IsAllowedPTURetriesExceeded())
+        .WillRepeatedly(Return(false));
+    EXPECT_CALL(listener_, IsAllowedPTURetriesExceeded())
+        .WillRepeatedly(Return(false));
+    EXPECT_CALL(listener_, IsAllowedPTURetriesExceeded())
+        .WillRepeatedly(Return(true));
+    EXPECT_CALL(listener_, OnPTUFinished(false));
+  }
   EXPECT_EQ(StatusUpdatePending, status_);
   EXPECT_TRUE(waiter.Wait(auto_lock));
   status_ = manager_->GetLastUpdateStatus();

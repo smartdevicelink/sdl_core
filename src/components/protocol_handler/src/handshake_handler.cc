@@ -103,11 +103,13 @@ bool HandshakeHandler::OnGetSystemTimeFailed() {
   return true;
 }
 
-void HandshakeHandler::OnPTUFailed() {
+bool HandshakeHandler::OnPTUFailed() {
   LOG4CXX_AUTO_TRACE(logger_);
   if (payload_) {
     ProcessFailedHandshake(*payload_, ServiceStatus::PTU_FAILED);
   }
+
+  return true;
 }
 
 bool HandshakeHandler::OnHandshakeDone(

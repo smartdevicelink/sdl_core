@@ -122,6 +122,8 @@ typedef std::vector<std::string> StringArray;
 
 enum PermitResult { kRpcAllowed = 0, kRpcDisallowed, kRpcUserDisallowed };
 
+enum class ResetRetryCountType { kResetWithStatusUpdate = 0, kResetInternally };
+
 /**
  * @struct Stores result of check:
  * if HMI Level was allowed for RPC to work in

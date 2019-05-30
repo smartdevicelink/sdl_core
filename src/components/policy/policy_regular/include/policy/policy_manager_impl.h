@@ -183,7 +183,7 @@ class PolicyManagerImpl : public PolicyManager {
   /**
    * @brief PTU is needed, for this PTS has to be formed and sent.
    */
-  bool RequestPTUpdate() OVERRIDE;
+  bool RequestPTUpdate(const PTUIterationType iteration_type) OVERRIDE;
 
   /**
    * @brief Check if specified RPC for specified application
@@ -247,8 +247,10 @@ class PolicyManagerImpl : public PolicyManager {
 
   /**
    * @brief Resets retry sequence
+   * @param send_event - if true corresponding event is sent to
+   * UpdateStatusManager
    */
-  void ResetRetrySequence();
+  void ResetRetrySequence(const ResetRetryCountType reset_type) OVERRIDE;
 
   /**
    * @brief Gets timeout to wait before next retry updating PT

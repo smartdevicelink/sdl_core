@@ -585,8 +585,7 @@ class ApplicationManagerImpl
       utils::Optional<hmi_apis::Common_ServiceUpdateReason::eType>
           service_update_reason) FINAL;
 
-  void OnPTUFailed() FINAL {}
-
+  bool OnPTUFailed() FINAL;
   /*
    * @brief Starts audio pass thru thread
    *

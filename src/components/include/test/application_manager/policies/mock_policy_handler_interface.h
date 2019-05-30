@@ -261,6 +261,7 @@ class MockPolicyHandlerInterface : public policy::PolicyHandlerInterface {
 
 #ifdef EXTERNAL_PROPRIETARY_MODE
   MOCK_CONST_METHOD0(GetMetaInfo, const policy::MetaInfo());
+  MOCK_METHOD0(IncrementRetryIndex, void());
 #endif  // EXTERNAL_PROPRIETARY_MODE
 
   MOCK_METHOD1(Increment, void(usage_statistics::GlobalCounterId type));

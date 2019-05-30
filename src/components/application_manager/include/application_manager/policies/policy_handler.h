@@ -103,8 +103,11 @@ class PolicyHandler : public PolicyHandlerInterface,
   void OnSnapshotCreated(const BinaryMessage& pt_string,
                          const std::vector<int>& retry_delay_seconds,
                          uint32_t timeout_exchange) OVERRIDE;
+
+  PTURetryHandler& ptu_retry_handler() const OVERRIDE;
 #else   // EXTERNAL_PROPRIETARY_MODE
-  void OnSnapshotCreated(const BinaryMessage& pt_string) OVERRIDE;
+  void OnSnapshotCreated(const BinaryMessage& pt_string,
+                         const PTUIterationType iteration_type) OVERRIDE;
 #endif  // EXTERNAL_PROPRIETARY_MODE
   virtual bool GetPriority(const std::string& policy_app_id,
                            std::string* priority) const OVERRIDE;

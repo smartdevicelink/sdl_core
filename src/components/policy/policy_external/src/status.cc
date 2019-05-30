@@ -99,8 +99,10 @@ void policy::UpdatingStatus::ProcessEvent(policy::UpdateStatusManager* manager,
       break;
     case kScheduleUpdate:
     case kScheduleManualUpdate:
-    case kOnResetRetrySequence:
       manager->SetPostponedStatus(std::make_shared<UpdateNeededStatus>());
+      break;
+    case kOnResetRetrySequence:
+      manager->SetNextStatus(std::make_shared<UpdateNeededStatus>());
       break;
     default:
       break;

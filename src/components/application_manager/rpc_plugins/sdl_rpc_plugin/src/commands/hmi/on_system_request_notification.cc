@@ -37,6 +37,10 @@
 #include "sdl_rpc_plugin/commands/hmi/on_system_request_notification.h"
 #include "utils/macro.h"
 
+#ifdef EXTERNAL_PROPRIETARY_MODE
+#include "policy/ptu_retry_handler.h"
+#endif  // EXTERNAL_PROPRIETARY_MODE
+
 using policy::PolicyHandlerInterface;
 
 namespace sdl_rpc_plugin {
@@ -116,6 +120,17 @@ void OnSystemRequestNotification::Run() {
                 "Sending request with application id " << app->policy_app_id());
 
   params[strings::connection_key] = app->app_id();
+
+#ifdef EXTERNAL_PROPRIETARY_MODE
+  using namespace rpc::policy_table_interface_base;
+  const auto request_type =
+      static_cast<rpc::policy_table_interface_base::RequestType>(
+          (*message_)[strings::msg_params][strings::request_type].asUInt());
+
+  if (RequestType::RT_PROPRIETARY == request_type) {
+    policy_handler_.ptu_retry_handler().OnSystemRequestReceived();
+  }
+#endif
   SendNotificationToMobile(message_);
 }
 

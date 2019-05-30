@@ -117,7 +117,7 @@ class PolicyManager : public usage_statistics::StatisticsManager,
   /**
    * @brief PTU is needed, for this PTS has to be formed and sent.
    */
-  virtual bool RequestPTUpdate() = 0;
+  virtual bool RequestPTUpdate(const PTUIterationType iteration_type) = 0;
 
   /**
    * @brief Check if specified RPC for specified application
@@ -200,6 +200,13 @@ class PolicyManager : public usage_statistics::StatisticsManager,
    * @return Current status of policy table
    */
   virtual std::string ForcePTExchangeAtUserRequest() = 0;
+
+  /**
+   * @brief Resets retry sequence
+   * @param send_event - if true corresponding event is sent to
+   * UpdateStatusManager
+   */
+  virtual void ResetRetrySequence(const ResetRetryCountType reset_type) = 0;
 
   /**
    * @brief Gets timeout to wait before next retry updating PT

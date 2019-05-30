@@ -415,9 +415,21 @@ void SecurityManagerImpl::ProcessFailedPTU() {
     LOG4CXX_DEBUG(logger_, "listeners arrays IS EMPTY!");
     return;
   }
-  std::for_each(listeners_.begin(),
-                listeners_.end(),
-                std::mem_fun(&SecurityManagerListener::OnPTUFailed));
+
+  std::list<SecurityManagerListener*> listeners_to_remove;
+  for (auto listener : listeners_) {
+    if (listener->OnPTUFailed()) {
+      listeners_to_remove.push_back(listener);
+    }
+  }
+
+  for (auto& listener : listeners_to_remove) {
+    auto it = std::find(listeners_.begin(), listeners_.end(), listener);
+    DCHECK(it != listeners_.end());
+    LOG4CXX_DEBUG(logger_, "Destroying listener: " << *it);
+    delete (*it);
+    listeners_.erase(it);
+  }
 }
 
 #ifdef EXTERNAL_PROPRIETARY_MODE

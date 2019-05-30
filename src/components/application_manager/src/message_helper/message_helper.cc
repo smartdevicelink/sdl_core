@@ -2465,31 +2465,54 @@ bool MessageHelper::SendUnsubscribedWayPoints(ApplicationManager& app_mngr) {
   return app_mngr.GetRPCService().ManageHMICommand(result);
 }
 
+smart_objects::SmartObjectSPtr
+MessageHelper::CreateOnSystemRequestNotificationToMobile(
+    const std::vector<uint8_t>& policy_data, const uint32_t app_id) {
+  auto notification =
+      CreateNotification(mobile_apis::FunctionID::OnSystemRequestID, app_id);
+
+  (*notification)[strings::params][strings::binary_data] =
+      smart_objects::SmartObject(policy_data);
+
+#if defined(PROPRIETARY_MODE) || defined(EXTERNAL_PROPRIETARY_MODE)
+  (*notification)[strings::msg_params][strings::request_type] =
+      mobile_apis::RequestType::PROPRIETARY;
+#else
+  (*notification)[strings::msg_params][strings::request_type] =
+      mobile_apis::RequestType::HTTP;
+#endif  // PROPRIETARY || EXTERNAL_PROPRIETARY_MODE
+
+  return notification;
+}
+
 void MessageHelper::SendPolicySnapshotNotification(
     uint32_t connection_key,
     const std::vector<uint8_t>& policy_data,
     const std::string& url,
     ApplicationManager& app_mngr) {
-  smart_objects::SmartObject content(smart_objects::SmartType_Map);
+  auto notification =
+      CreateOnSystemRequestNotificationToMobile(policy_data, connection_key);
 
   if (!url.empty()) {
-    content[strings::msg_params][strings::url] =
+    (*notification)[strings::msg_params][strings::url] =
         url;  // Doesn't work with mobile_notification::syncp_url ("URL")
   } else {
     LOG4CXX_WARN(logger_, "No service URLs");
   }
 
-  content[strings::params][strings::binary_data] =
+  (*notification)[strings::params][strings::binary_data] =
       smart_objects::SmartObject(policy_data);
 #if defined(PROPRIETARY_MODE) || defined(EXTERNAL_PROPRIETARY_MODE)
-  content[strings::msg_params][strings::request_type] =
+  (*notification)[strings::msg_params][strings::request_type] =
       mobile_apis::RequestType::PROPRIETARY;
 #else
-  content[strings::msg_params][strings::request_type] =
+  (*notification)[strings::msg_params][strings::request_type] =
       mobile_apis::RequestType::HTTP;
 #endif  // PROPRIETARY || EXTERNAL_PROPRIETARY_MODE
 
-  SendSystemRequestNotification(connection_key, content, app_mngr);
+  PrintSmartObject(*notification);
+  app_mngr.GetRPCService().ManageMobileCommand(notification,
+                                               commands::Command::SOURCE_SDL);
 }
 
 void MessageHelper::SendSystemRequestNotification(
