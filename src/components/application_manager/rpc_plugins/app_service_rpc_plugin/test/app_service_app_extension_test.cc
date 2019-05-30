@@ -22,6 +22,7 @@ using ::testing::ReturnRef;
 
 const std::string media = "MEDIA";
 const std::string nav = "NAVIGATION";
+const std::string future = "FUTURESERVICE";
 
 class AppServiceAppExtensionTest : public ::testing::Test {
  public:
@@ -36,6 +37,8 @@ class AppServiceAppExtensionTest : public ::testing::Test {
 
 TEST_F(AppServiceAppExtensionTest, Subscribe_SUCCESS) {
   bool ret = as_ext.SubscribeToAppService(media);
+  EXPECT_TRUE(ret);
+  ret = as_ext.SubscribeToAppService(future);
   EXPECT_TRUE(ret);
 }
 
@@ -60,10 +63,14 @@ TEST_F(AppServiceAppExtensionTest, UnsubscribeFromAllAppService_SUCCESS) {
   EXPECT_TRUE(ret);
   ret = as_ext.SubscribeToAppService(nav);
   EXPECT_TRUE(ret);
+  ret = as_ext.SubscribeToAppService(future);
+  EXPECT_TRUE(ret);
   as_ext.UnsubscribeFromAppService();
   ret = as_ext.IsSubscribedToAppService(media);
   EXPECT_FALSE(ret);
   ret = as_ext.IsSubscribedToAppService(nav);
+  EXPECT_FALSE(ret);
+  ret = as_ext.IsSubscribedToAppService(future);
   EXPECT_FALSE(ret);
 }
 
@@ -72,10 +79,14 @@ TEST_F(AppServiceAppExtensionTest, UnsubscribeFromMediaAppService_SUCCESS) {
   EXPECT_TRUE(ret);
   ret = as_ext.SubscribeToAppService(nav);
   EXPECT_TRUE(ret);
+  ret = as_ext.SubscribeToAppService(future);
+  EXPECT_TRUE(ret);
   as_ext.UnsubscribeFromAppService(media);
   ret = as_ext.IsSubscribedToAppService(media);
   EXPECT_FALSE(ret);
   ret = as_ext.IsSubscribedToAppService(nav);
+  EXPECT_TRUE(ret);
+  ret = as_ext.IsSubscribedToAppService(future);
   EXPECT_TRUE(ret);
 }
 }  // namespace app_service_rpc_plugin
