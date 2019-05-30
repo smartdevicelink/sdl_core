@@ -43,13 +43,25 @@
 namespace transport_manager {
 namespace transport_adapter {
 
+struct CloudAppEndpoint {
+  std::string host;
+  std::string port;
+  std::string path;
+  std::string query;
+  std::string fragment;
+};
+
 class CloudDevice : public Device {
  public:
   CloudDevice(std::string& host, std::string& port, std::string& name);
 
+  CloudDevice(CloudAppEndpoint endpoint, std::string& name);
+
   virtual const std::string& GetHost() const;
 
   virtual const std::string& GetPort() const;
+
+  virtual const std::string GetTarget() const;
 
  protected:
   virtual bool IsSameAs(const Device* other_device) const;
@@ -57,8 +69,7 @@ class CloudDevice : public Device {
   virtual ApplicationList GetApplicationList() const;
 
  private:
-  const std::string host_;
-  const std::string port_;
+  const CloudAppEndpoint endpoint_;
 };
 
 }  // namespace transport_adapter

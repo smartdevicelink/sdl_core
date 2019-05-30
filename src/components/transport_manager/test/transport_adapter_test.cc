@@ -42,6 +42,8 @@
 #include "utils/test_async_waiter.h"
 
 #include "protocol/raw_message.h"
+#include "transport_manager/cloud/cloud_device.h"
+#include "transport_manager/cloud/cloud_websocket_transport_adapter.h"
 #include "transport_manager/transport_adapter/connection.h"
 #include "transport_manager/transport_adapter/transport_adapter_controller.h"
 #include "transport_manager/transport_adapter/transport_adapter_impl.h"
@@ -84,6 +86,139 @@ class TransportAdapterTest : public ::testing::Test {
   std::string dev_id;
   std::string uniq_id;
   int app_handle;
+
+#if defined(CLOUD_APP_WEBSOCKET_TRANSPORT_SUPPORT)
+  struct TestEndpoint {
+    std::string test_string;
+    std::string host;
+    std::string port;
+    std::string target;
+  };
+
+  CloudAppProperties test_cloud_properties_{.endpoint = "",
+                                            .certificate = "no cert",
+                                            .enabled = true,
+                                            .auth_token = "no auth token",
+                                            .cloud_transport_type = "WS",
+                                            .hybrid_app_preference = "CLOUD"};
+  std::vector<std::string> kWebsocketProtocols{"ws://", "wss://"};
+
+  std::vector<TestEndpoint> kValidTestEndpoints{
+      // Host and port
+      TestEndpoint{"localhost:40/", "localhost", "40", "/"},
+      TestEndpoint{"[::1]:40", "[::1]", "40", "/"},
+      TestEndpoint{"username:password@localhost.com:80",
+                   "username:password@localhost.com",
+                   "80",
+                   "/"},
+      // With path
+      TestEndpoint{
+          "localhost:440/file.html", "localhost", "440", "/file.html/"},
+      TestEndpoint{"101.180.1.213:23234/folder/img_index(1)/file.html",
+                   "101.180.1.213",
+                   "23234",
+                   "/folder/img_index(1)/file.html/"},
+      TestEndpoint{"[2600:3c00::f03c:91ff:fe73:2b08]:31333/folder/img_index(1)/"
+                   "file.html",
+                   "[2600:3c00::f03c:91ff:fe73:2b08]",
+                   "31333",
+                   "/folder/img_index(1)/file.html/"},
+      // With query and/or fragment
+      TestEndpoint{
+          "username@localhost:22/folder/img_index(1)/"
+          "file.html?eventId=2345&eventName='some%20event'&eventSuccess=true",
+          "username@localhost",
+          "22",
+          "/folder/img_index(1)/file.html/"
+          "?eventId=2345&eventName='some%20event'&eventSuccess="
+          "true"},
+      TestEndpoint{"username@localhost.com:80/folder/img_index(1)/"
+                   "file.html?eventId=2345&eventName='some%20event'&"
+                   "eventSuccess=true#section1",
+                   "username@localhost.com",
+                   "80",
+                   "/folder/img_index(1)/file.html/"
+                   "?eventId=2345&eventName='some%20event'&eventSuccess=true#"
+                   "section1"},
+      TestEndpoint{
+          "localhost:443/"
+          "?eventId=2345&eventName='some%20event'&eventSuccess=true#section1",
+          "localhost",
+          "443",
+          "/?eventId=2345&eventName='some%20event'&eventSuccess=true#"
+          "section1"},
+      TestEndpoint{"a1-b2.com:443/folder/img_index(1)/file.html#section1",
+                   "a1-b2.com",
+                   "443",
+                   "/folder/img_index(1)/file.html/#section1"},
+      TestEndpoint{"a1-b2.com:23#section1", "a1-b2.com", "23", "/#section1"}};
+
+  std::vector<TestEndpoint> kInvalidTestEndpoints{
+      // Invalid hostname
+      TestEndpoint{"/localhost:80", "localhost", "80", "/"},
+      TestEndpoint{"local?host:80", "local?host", "80", "/"},
+      TestEndpoint{"local#host:80", "local#host", "80", "/"},
+      TestEndpoint{"local\%host:80", "local\%host", "80", "/"},
+      TestEndpoint{"local\\host:80", "local\\host", "80", "/"},
+      TestEndpoint{"local/host:80", "local/host", "80", "/"},
+      TestEndpoint{"local host:80", "local host", "80", "/"},
+      TestEndpoint{"local\thost:80", "local\thost", "80", "/"},
+      TestEndpoint{":80#section1", "", "80", "/#section1"},
+      // Invalid port
+      TestEndpoint{"username:password@localhost.com",
+                   "username:password@localhost.com",
+                   "",
+                   "/"},
+      TestEndpoint{"username:password@localhost.com:5",
+                   "username:password@localhost.com",
+                   "5",
+                   "/"},
+      TestEndpoint{"201.123.213:2h32/", "201.123.213", "2h32", "/"}};
+  std::vector<TestEndpoint> kIncorrectTestEndpoints{
+      // Incorrect port number
+      TestEndpoint{"201.123.1.213:232454/folder/img_index(1)/file.html",
+                   "201.123.1.213",
+                   "232454",
+                   "/folder/img_index(1)/file.html/"},
+      // Incorrect path
+      TestEndpoint{"201.123.1.213:232//folder/img_index(1)/file.html",
+                   "201.123.1.213",
+                   "232",
+                   "//folder/img_index(1)/file.html/"},
+      TestEndpoint{"201.123.1.213:232/folder/img_index(1)//file.html",
+                   "201.123.1.213",
+                   "232",
+                   "/folder/img_index(1)//file.html/"},
+      TestEndpoint{"201.123.1.213:232/folder/img index(1)//file.html",
+                   "201.123.1.213",
+                   "232",
+                   "/folder/img index(1)//file.html/"},
+      TestEndpoint{"201.123.1.213:232/folder/img\tindex(1)//file.html",
+                   "201.123.1.213",
+                   "232",
+                   "/folder/img\tindex(1)//file.html/"},
+      // Incorrect query
+      TestEndpoint{"username@localhost:443/?eventId=2345&eventName='some "
+                   "event'&eventSuccess=true",
+                   "username@localhost",
+                   "443",
+                   "?eventId=2345&eventName='some event'&eventSuccess=true"},
+      TestEndpoint{"username@localhost:443/"
+                   "?eventId=2345&eventName='some\tevent'&eventSuccess=true",
+                   "username@localhost",
+                   "443",
+                   "?eventId=2345&eventName='some\tevent'&eventSuccess=true"},
+      // Incorrect fragment
+      TestEndpoint{"a1(b2).com:80/folder/img_index(1)/file.html#section 1",
+                   "a1(b2).com",
+                   "80",
+                   "/folder/img_index(1)/file.html#section 1"},
+      TestEndpoint{"a1(b2).com:80/folder/img_index(1)/file.html#section\t1",
+                   "a1(b2).com",
+                   "80",
+                   "/folder/img_index(1)/file.html#section\t1"}};
+
+#endif  // CLOUD_APP_WEBSOCKET_TRANSPORT_SUPPORT
 };
 
 TEST_F(TransportAdapterTest, Init) {
@@ -608,6 +743,83 @@ TEST_F(TransportAdapterTest,
   EXPECT_EQ(ConnectionStatus::PENDING, mockdev2->connection_status());
 
   EXPECT_CALL(*serverMock, Terminate());
+}
+
+TEST_F(TransportAdapterTest, WebsocketEndpointParsing_SUCCESS) {
+  std::shared_ptr<CloudWebsocketTransportAdapter> cta =
+      std::make_shared<CloudWebsocketTransportAdapter>(
+          last_state_, transport_manager_settings);
+
+  for (auto protocol : kWebsocketProtocols) {
+    for (auto endpoint : kValidTestEndpoints) {
+      test_cloud_properties_.endpoint = protocol + endpoint.test_string;
+      cta->SetAppCloudTransportConfig("cloud app", test_cloud_properties_);
+
+      auto ta = std::dynamic_pointer_cast<TransportAdapter>(cta);
+      ASSERT_NE(ta.use_count(), 0);
+
+      ta->CreateDevice(test_cloud_properties_.endpoint);
+
+      auto device = cta->FindDevice(test_cloud_properties_.endpoint);
+      ASSERT_NE(device.use_count(), 0);
+
+      std::shared_ptr<CloudDevice> cloud_device =
+          std::dynamic_pointer_cast<CloudDevice>(device);
+      ASSERT_NE(cloud_device.use_count(), 0);
+
+      EXPECT_EQ(cloud_device->GetHost(), endpoint.host);
+      EXPECT_EQ(cloud_device->GetPort(), endpoint.port);
+      EXPECT_EQ(cloud_device->GetTarget(), endpoint.target);
+    }
+  }
+}
+TEST_F(TransportAdapterTest, WebsocketEndpointParsing_INVALID) {
+  std::shared_ptr<CloudWebsocketTransportAdapter> cta =
+      std::make_shared<CloudWebsocketTransportAdapter>(
+          last_state_, transport_manager_settings);
+
+  for (auto protocol : kWebsocketProtocols) {
+    for (auto endpoint : kInvalidTestEndpoints) {
+      test_cloud_properties_.endpoint = protocol + endpoint.test_string;
+      cta->SetAppCloudTransportConfig("cloud app", test_cloud_properties_);
+
+      auto ta = std::dynamic_pointer_cast<TransportAdapter>(cta);
+      ASSERT_NE(ta.use_count(), 0);
+
+      ta->CreateDevice(test_cloud_properties_.endpoint);
+
+      auto device = cta->FindDevice(test_cloud_properties_.endpoint);
+      EXPECT_EQ(device.use_count(), 0);
+    }
+  }
+}
+TEST_F(TransportAdapterTest, WebsocketEndpointParsing_INCORRECT) {
+  std::shared_ptr<CloudWebsocketTransportAdapter> cta =
+      std::make_shared<CloudWebsocketTransportAdapter>(
+          last_state_, transport_manager_settings);
+
+  for (auto protocol : kWebsocketProtocols) {
+    for (auto endpoint : kIncorrectTestEndpoints) {
+      test_cloud_properties_.endpoint = protocol + endpoint.test_string;
+      cta->SetAppCloudTransportConfig("cloud app", test_cloud_properties_);
+
+      auto ta = std::dynamic_pointer_cast<TransportAdapter>(cta);
+      ASSERT_NE(ta.use_count(), 0);
+
+      ta->CreateDevice(test_cloud_properties_.endpoint);
+
+      auto device = cta->FindDevice(test_cloud_properties_.endpoint);
+      ASSERT_NE(device.use_count(), 0);
+
+      std::shared_ptr<CloudDevice> cloud_device =
+          std::dynamic_pointer_cast<CloudDevice>(device);
+      ASSERT_NE(cloud_device.use_count(), 0);
+
+      EXPECT_FALSE(cloud_device->GetHost() == endpoint.host &&
+                   cloud_device->GetPort() == endpoint.port &&
+                   cloud_device->GetTarget() == endpoint.target);
+    }
+  }
 }
 #endif  // CLOUD_APP_WEBSOCKET_TRANSPORT_SUPPORT
 

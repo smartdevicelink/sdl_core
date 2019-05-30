@@ -111,9 +111,15 @@ app_mngr::CommandCreator& AppServiceMobileCommandFactory::buildCommandCreator(
 
   switch (function_id) {
     case mobile_apis::FunctionID::PublishAppServiceID:
-      return mobile_apis::messageType::request == message_type
-                 ? factory.GetCreator<commands::PublishAppServiceRequest>()
-                 : factory.GetCreator<commands::PublishAppServiceResponse>();
+      if (app_mngr::commands::Command::CommandSource::SOURCE_MOBILE == source &&
+          mobile_apis::messageType::response != message_type) {
+        return factory.GetCreator<commands::PublishAppServiceRequest>();
+      } else if (app_mngr::commands::Command::CommandSource::SOURCE_SDL ==
+                     source &&
+                 mobile_apis::messageType::request != message_type) {
+        return factory.GetCreator<commands::PublishAppServiceResponse>();
+      }
+      break;
     case mobile_apis::FunctionID::OnAppServiceDataID:
       return app_mngr::commands::Command::CommandSource::SOURCE_MOBILE == source
                  ? factory.GetCreator<

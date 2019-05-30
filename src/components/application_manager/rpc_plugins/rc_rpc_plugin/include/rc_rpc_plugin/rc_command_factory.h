@@ -74,12 +74,18 @@ class RCCommandFactory : public application_manager::CommandFactory {
 
  private:
   app_mngr::CommandCreator& get_mobile_creator_factory(
-      mobile_apis::FunctionID::eType id,
-      mobile_apis::messageType::eType message_type) const;
+      const mobile_apis::FunctionID::eType id,
+      const mobile_apis::messageType::eType message_type,
+      const app_mngr::commands::Command::CommandSource source) const;
+  app_mngr::CommandCreator& get_mobile_command_creator(
+      const mobile_apis::FunctionID::eType id,
+      const mobile_apis::messageType::eType message_type) const;
+  app_mngr::CommandCreator& get_mobile_notification_creator(
+      const mobile_apis::FunctionID::eType id) const;
 
   app_mngr::CommandCreator& get_hmi_creator_factory(
-      hmi_apis::FunctionID::eType id,
-      hmi_apis::messageType::eType message_type) const;
+      const hmi_apis::FunctionID::eType id,
+      const hmi_apis::messageType::eType message_type) const;
 
   RCCommandParams params_;
 };

@@ -42,7 +42,15 @@ CREATE_LOGGERPTR_GLOBAL(logger_, "TransportManager")
 CloudDevice::CloudDevice(std::string& host,
                          std::string& port,
                          std::string& name)
-    : Device(name, std::string(name)), host_(host), port_(port) {}
+    : Device(name, std::string(name))
+    , endpoint_(CloudAppEndpoint{.host = host,
+                                 .port = port,
+                                 .path = "/",
+                                 .query = "",
+                                 .fragment = ""}) {}
+
+CloudDevice::CloudDevice(CloudAppEndpoint endpoint, std::string& name)
+    : Device(name, std::string(name)), endpoint_(endpoint) {}
 
 bool CloudDevice::IsSameAs(const Device* other) const {
   LOG4CXX_TRACE(logger_, "enter. device: " << other);
@@ -54,12 +62,18 @@ bool CloudDevice::IsSameAs(const Device* other) const {
     return false;
   }
 
-  if (host_ != other_cloud_device->GetHost()) {
+  if (GetHost() != other_cloud_device->GetHost()) {
     return false;
   }
-  if (port_ != other_cloud_device->GetPort()) {
+
+  if (GetPort() != other_cloud_device->GetPort()) {
     return false;
   }
+
+  if (GetTarget() != other_cloud_device->GetTarget()) {
+    return false;
+  }
+
   return true;
 }
 
@@ -68,11 +82,15 @@ ApplicationList CloudDevice::GetApplicationList() const {
 }
 
 const std::string& CloudDevice::GetHost() const {
-  return host_;
+  return endpoint_.host;
 }
 
 const std::string& CloudDevice::GetPort() const {
-  return port_;
+  return endpoint_.port;
+}
+
+const std::string CloudDevice::GetTarget() const {
+  return endpoint_.path + endpoint_.query + endpoint_.fragment;
 }
 
 }  // namespace transport_adapter
