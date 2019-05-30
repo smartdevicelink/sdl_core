@@ -137,13 +137,11 @@ CREATE_LOGGERPTR_GLOBAL(logger_, "ApplicationManager")
 namespace sdl_rpc_plugin {
 using namespace application_manager;
 
-CommandCreator& MobileCommandFactory::get_creator_factory(
-    mobile_apis::FunctionID::eType id,
-    mobile_apis::messageType::eType message_type,
-    app_mngr::commands::Command::CommandSource source) const {
+CommandCreator& MobileCommandFactory::get_command_creator(
+    const mobile_apis::FunctionID::eType id,
+    const mobile_apis::messageType::eType message_type) const {
   CommandCreatorFactory factory(
       application_manager_, rpc_service_, hmi_capabilities_, policy_handler_);
-
   switch (id) {
     case mobile_apis::FunctionID::RegisterAppInterfaceID: {
       return mobile_api::messageType::request == message_type
@@ -182,7 +180,6 @@ CommandCreator& MobileCommandFactory::get_creator_factory(
                  ? factory.GetCreator<commands::AddSubMenuRequest>()
                  : factory.GetCreator<commands::AddSubMenuResponse>();
     }
-
     case mobile_apis::FunctionID::DeleteSubMenuID: {
       return mobile_api::messageType::request == message_type
                  ? factory.GetCreator<commands::DeleteSubMenuRequest>()
@@ -215,7 +212,6 @@ CommandCreator& MobileCommandFactory::get_creator_factory(
                  ? factory.GetCreator<commands::PerformAudioPassThruRequest>()
                  : factory.GetCreator<commands::PerformAudioPassThruResponse>();
     }
-
     case mobile_apis::FunctionID::CreateInteractionChoiceSetID: {
       return mobile_api::messageType::request == message_type
                  ? factory.GetCreator<
@@ -298,7 +294,6 @@ CommandCreator& MobileCommandFactory::get_creator_factory(
                  ? factory.GetCreator<commands::ScrollableMessageRequest>()
                  : factory.GetCreator<commands::ScrollableMessageResponse>();
     }
-
     case mobile_apis::FunctionID::AlertManeuverID: {
       return mobile_api::messageType::request == message_type
                  ? factory.GetCreator<commands::AlertManeuverRequest>()
@@ -361,6 +356,20 @@ CommandCreator& MobileCommandFactory::get_creator_factory(
                  : factory
                        .GetCreator<commands::GetCloudAppPropertiesResponse>();
     }
+    case mobile_apis::FunctionID::GenericResponseID: {
+      using app_mngr::commands::Command;
+      return factory.GetCreator<commands::GenericResponse>();
+    }
+    default: {}
+  }
+  return factory.GetCreator<InvalidCommand>();
+}
+
+CommandCreator& MobileCommandFactory::get_notification_creator(
+    const mobile_apis::FunctionID::eType id) const {
+  CommandCreatorFactory factory(
+      application_manager_, rpc_service_, hmi_capabilities_, policy_handler_);
+  switch (id) {
     case mobile_apis::FunctionID::OnButtonEventID: {
       return factory.GetCreator<commands::mobile::OnButtonEventNotification>();
     }
@@ -391,11 +400,7 @@ CommandCreator& MobileCommandFactory::get_creator_factory(
       return factory.GetCreator<commands::OnPermissionsChangeNotification>();
     }
     case mobile_apis::FunctionID::OnHMIStatusID: {
-      using app_mngr::commands::Command;
-      return Command::CommandSource::SOURCE_MOBILE == source
-                 ? factory.GetCreator<
-                       commands::OnHMIStatusNotificationFromMobile>()
-                 : factory.GetCreator<commands::OnHMIStatusNotification>();
+      return factory.GetCreator<commands::OnHMIStatusNotification>();
     }
     case mobile_apis::FunctionID::OnKeyboardInputID: {
       return factory
@@ -413,19 +418,60 @@ CommandCreator& MobileCommandFactory::get_creator_factory(
           .GetCreator<commands::mobile::OnSystemRequestNotification>();
     }
     case mobile_apis::FunctionID::OnHashChangeID: {
-      using app_mngr::commands::Command;
       return factory.GetCreator<commands::mobile::OnHashChangeNotification>();
     }
     case mobile_apis::FunctionID::OnWayPointChangeID: {
-      using app_mngr::commands::Command;
       return factory.GetCreator<commands::OnWayPointChangeNotification>();
     }
-    case mobile_apis::FunctionID::GenericResponseID: {
-      using app_mngr::commands::Command;
-      return factory.GetCreator<commands::GenericResponse>();
-    }
-    default: { return factory.GetCreator<InvalidCommand>(); }
+    default: {}
   }
+  return factory.GetCreator<InvalidCommand>();
+}
+
+CommandCreator& MobileCommandFactory::get_notification_from_mobile_creator(
+    const mobile_apis::FunctionID::eType id) const {
+  CommandCreatorFactory factory(
+      application_manager_, rpc_service_, hmi_capabilities_, policy_handler_);
+  switch (id) {
+    case mobile_apis::FunctionID::OnHMIStatusID: {
+      return factory.GetCreator<commands::OnHMIStatusNotificationFromMobile>();
+    }
+    default: {}
+  }
+  return factory.GetCreator<InvalidCommand>();
+}
+
+CommandCreator& MobileCommandFactory::get_creator_factory(
+    const mobile_apis::FunctionID::eType id,
+    const mobile_apis::messageType::eType message_type,
+    const app_mngr::commands::Command::CommandSource source) const {
+  switch (message_type) {
+    case mobile_api::messageType::request: {
+      if (app_mngr::commands::Command::CommandSource::SOURCE_MOBILE == source) {
+        return get_command_creator(id, message_type);
+      }
+      break;
+    }
+    case mobile_api::messageType::response: {
+      if (app_mngr::commands::Command::CommandSource::SOURCE_SDL == source) {
+        return get_command_creator(id, message_type);
+      }
+      break;
+    }
+    case mobile_api::messageType::notification: {
+      if (app_mngr::commands::Command::CommandSource::SOURCE_SDL == source) {
+        return get_notification_creator(id);
+      } else if (app_mngr::commands::Command::CommandSource::SOURCE_MOBILE ==
+                 source) {
+        return get_notification_from_mobile_creator(id);
+      }
+      break;
+    }
+    default: {}
+  }
+  CommandCreatorFactory factory(
+      application_manager_, rpc_service_, hmi_capabilities_, policy_handler_);
+  return factory.GetCreator<InvalidCommand>();
 }
 
 MobileCommandFactory::MobileCommandFactory(
@@ -442,11 +488,10 @@ bool MobileCommandFactory::IsAbleToProcess(
     const int32_t function_id,
     const application_manager::commands::Command::CommandSource message_source)
     const {
-  using app_mngr::commands::Command;
-  return get_creator_factory(
-             static_cast<mobile_apis::FunctionID::eType>(function_id),
-             mobile_apis::messageType::INVALID_ENUM,
-             message_source).CanBeCreated();
+  auto id = static_cast<mobile_apis::FunctionID::eType>(function_id);
+  return get_command_creator(id, mobile_apis::messageType::INVALID_ENUM)
+             .CanBeCreated() ||
+         get_notification_creator(id).CanBeCreated();
 }
 
 CommandSharedPtr MobileCommandFactory::CreateCommand(

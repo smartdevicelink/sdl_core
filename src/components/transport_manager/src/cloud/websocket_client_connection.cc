@@ -160,11 +160,11 @@ TransportAdapter::Error WebsocketClientConnection::Start() {
 
   // Perform websocket handshake
   if (cloud_properties.cloud_transport_type == "WS") {
-    ws_.handshake(host, "/", ec);
+    ws_.handshake(host, cloud_device->GetTarget(), ec);
   }
 #ifdef ENABLE_SECURITY
   else if (cloud_properties.cloud_transport_type == "WSS") {
-    wss_.handshake(host, "/", ec);
+    wss_.handshake(host, cloud_device->GetTarget(), ec);
   }
 #endif  // ENABLE_SECURITY
   if (ec) {

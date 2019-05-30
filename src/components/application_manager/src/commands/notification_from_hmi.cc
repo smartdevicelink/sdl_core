@@ -84,7 +84,7 @@ void NotificationFromHMI::SendNotificationToMobile(
 
 void NotificationFromHMI::SendNotificationToHMI(MessageSharedPtr& message) {
   (*message)[strings::params][strings::protocol_type] = hmi_protocol_type_;
-  rpc_service_.SendMessageToHMI(message);
+  rpc_service_.ManageHMICommand(message, SOURCE_SDL_TO_HMI);
 }
 
 void NotificationFromHMI::CreateHMIRequest(
