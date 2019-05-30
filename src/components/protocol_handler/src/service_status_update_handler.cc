@@ -3,6 +3,8 @@
 
 namespace protocol_handler {
 
+CREATE_LOGGERPTR_GLOBAL(logger_, "ServiceStatusUpdateHandler")
+
 hmi_apis::Common_ServiceType::eType GetHMIServiceType(
     protocol_handler::ServiceType service_type) {
   using namespace hmi_apis;
@@ -76,7 +78,12 @@ void ServiceStatusUpdateHandler::OnServiceUpdate(
           Common_ServiceEvent::REQUEST_REJECTED,
           update_reason);
     }
-    default: { return; }
+    default: {
+      LOG4CXX_WARN(logger_,
+                   "Received unknown ServiceStatus: "
+                       << static_cast<int32_t>(service_status));
+      return;
+    }
   }
 }
 }  // namespace protocol_handler
