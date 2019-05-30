@@ -55,9 +55,9 @@ OnServiceStatusUpdateNotification::~OnServiceStatusUpdateNotification() {}
 
 void OnServiceStatusUpdateNotification::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
-
   SendNotification();
 }
+
 }  // namespace hmi
 }  // namespace commands
 }  // namespace sdl_rpc_plugin

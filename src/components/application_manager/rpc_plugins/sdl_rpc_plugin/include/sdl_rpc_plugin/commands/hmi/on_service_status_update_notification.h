@@ -39,7 +39,6 @@ namespace sdl_rpc_plugin {
 namespace app_mngr = application_manager;
 
 namespace commands {
-
 namespace hmi {
 
 /**
@@ -77,9 +76,7 @@ class OnServiceStatusUpdateNotification
 };
 
 }  // namespace hmi
-
 }  // namespace commands
-
 }  // namespace sdl_rpc_plugin
 
 #endif  // SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_HMI_ON_SERVICE_STATUS_UPDATE_NOTIFICATION_H_

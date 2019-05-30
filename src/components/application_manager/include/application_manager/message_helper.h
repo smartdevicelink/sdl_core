@@ -90,32 +90,61 @@ class MessageHelper {
       hmi_apis::FunctionID::eType function_id);
 
   /**
-   * @brief CreateOnServiceStatusUpdateNotification creates on status update hmi
-   * notification smart object
-   * @param app_id - application id
-   * @param service_type - enum value representing service_type
-   * @param service_event - enum value representing service update event
-   * @return smart object containing on status update notification
+   * @brief ServiceStatusUpdateNotificationBuilder small utility class used for
+   * more flexible construction of OnServiceUpdateNotification
    */
-  static smart_objects::SmartObjectSPtr CreateOnServiceStatusUpdateNotification(
-      const uint32_t app_id,
-      const hmi_apis::Common_ServiceType::eType service_type,
-      const hmi_apis::Common_ServiceEvent::eType service_event);
+  class ServiceStatusUpdateNotificationBuilder {
+   public:
+    typedef hmi_apis::Common_ServiceType::eType ServiceType;
+    typedef hmi_apis::Common_ServiceEvent::eType ServiceEvent;
+    typedef hmi_apis::Common_ServiceUpdateReason::eType ServiceUpdateReason;
 
-  /**
-   * @brief CreateOnServiceStatusUpdateNotification creates on status update hmi
-   * notification smart object
-   * @param app_id - application id
-   * @param service_type - enum value representing service_type
-   * @param service_event - enum value representing service update event
-   * @param service_event_reason - enum value representing service update reason
-   * @return smart object containing on status update notification
-   */
-  static smart_objects::SmartObjectSPtr CreateOnServiceStatusUpdateNotification(
-      const uint32_t app_id,
-      const hmi_apis::Common_ServiceType::eType service_type,
-      const hmi_apis::Common_ServiceEvent::eType service_event,
-      const hmi_apis::Common_ServiceUpdateReason::eType service_update_reason);
+    /**
+     * @brief CreateBuilder creates builder instance
+     * @param service_type - enum value containing service type
+     * @param service_event - enum value containing service event
+     * @returns builder instance
+     */
+    static ServiceStatusUpdateNotificationBuilder CreateBuilder(
+        const ServiceType service_type, const ServiceEvent service_event);
+
+    /**
+     * @brief AddAppID adds app id to notification
+     * @param app_id application id to add
+     * @returns ref to builder instance
+     */
+    ServiceStatusUpdateNotificationBuilder& AddAppID(const uint32_t app_id);
+
+    /**
+     * @brief AddServiceUpdateReason adds service update reason to notification
+     * @param service_update_reason enum value containing update reason
+     * @returns ref to builder instance
+     */
+    ServiceStatusUpdateNotificationBuilder& AddServiceUpdateReason(
+        const ServiceUpdateReason service_update_reason);
+
+    /**
+     * @brief notification gets notification SO
+     * @returns shared ptr to notification SO
+     */
+    smart_objects::SmartObjectSPtr notification() const;
+
+   protected:
+    smart_objects::SmartObjectSPtr notification_;
+
+    /**
+     * @brief class constructor
+     * @param service_type - enum value containing service type
+     * @param service_event - enum value containing service event
+     */
+    ServiceStatusUpdateNotificationBuilder(const ServiceType service_type,
+                                           const ServiceEvent service_event);
+
+    /**
+     * @brief class constructor
+     */
+    ServiceStatusUpdateNotificationBuilder(){};
+  };
 
   /**
    * @brief Creates request for different interfaces(JSON)

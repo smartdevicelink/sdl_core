@@ -58,6 +58,8 @@
 #include "application_manager/rpc_service.h"
 #include "application_manager/state_controller_impl.h"
 
+#include "application_manager/rpc_handler.h"
+
 #include "application_manager/policies/policy_handler_interface.h"
 #include "application_manager/policies/policy_handler_observer.h"
 #include "connection_handler/connection_handler.h"
@@ -69,6 +71,7 @@
 #include "policies/policy_handler.h"
 #include "protocol_handler/protocol_handler.h"
 #include "protocol_handler/protocol_observer.h"
+#include "protocol_handler/service_status_update_handler_listener.h"
 
 #include "interfaces/HMI_API.h"
 #include "interfaces/HMI_API_schema.h"
@@ -132,7 +135,8 @@ typedef std::shared_ptr<timer::Timer> TimerSPtr;
 class ApplicationManagerImpl
     : public ApplicationManager,
       public connection_handler::ConnectionHandlerObserver,
-      public policy::PolicyHandlerObserver
+      public policy::PolicyHandlerObserver,
+      public protocol_handler::ServiceStatusUpdateHandlerListener
 #ifdef ENABLE_SECURITY
     ,
       public security_manager::SecurityManagerListener
@@ -538,6 +542,51 @@ class ApplicationManagerImpl
    */
   void OnPTUFinished(const bool ptu_result) FINAL;
 
+#if defined(EXTERNAL_PROPRIETARY_MODE) && defined(ENABLE_SECURITY)
+  /**
+   * @brief OnCertDecryptFailed is called when certificate decryption fails in
+   * external flow
+   * @return since this callback is a part of SecurityManagerListener, bool
+   * return value is used to indicate whether listener instance can be deleted
+   * by calling entity. if true - listener can be deleted and removed from
+   * listeners by SecurityManager, false - listener retains its place within
+   * SecurityManager.
+   */
+  bool OnCertDecryptFailed() FINAL;
+
+  /**
+   * @brief OnCertDecryptFinished is called when certificate decryption is
+   * finished in the external flow
+   * @param decrypt_result bool value indicating whether decryption was
+   * successful
+   */
+  void OnCertDecryptFinished(const bool decrypt_result) FINAL;
+#endif
+
+  /**
+   * @brief OnPTUTimeoutExceeded is called on policy table update timed out
+   */
+  void OnPTUTimeoutExceeded() FINAL;
+
+  /**
+   *@brief ProcessServiceStatusUpdate callback that is invoked in case of
+   *service status update
+   *@param connection_key - connection key
+   *@param service_type enum value containing type of service.
+   *@param service_event enum value containing event that occured during service
+   *start.
+   *@param service_update_reason enum value containing reason why service_event
+   *occured.
+   **/
+  void ProcessServiceStatusUpdate(
+      const uint32_t connection_key,
+      hmi_apis::Common_ServiceType::eType service_type,
+      hmi_apis::Common_ServiceEvent::eType service_event,
+      utils::Optional<hmi_apis::Common_ServiceUpdateReason::eType>
+          service_update_reason) FINAL;
+
+  void OnPTUFailed() FINAL {}
+
   /*
    * @brief Starts audio pass thru thread
    *
@@ -657,7 +706,7 @@ class ApplicationManagerImpl
    * @brief Notification about handshake failure
    * @return true on success notification handling or false otherwise
    */
-  bool OnHandshakeFailed() OVERRIDE;
+  bool OnGetSystemTimeFailed() OVERRIDE;
 
   /**
    * @brief Notification that certificate update is required.

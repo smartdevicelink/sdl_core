@@ -213,6 +213,13 @@ void SecurityManagerImpl::ResumeHandshake(uint32_t connection_key) {
     return;
   }
 
+  LOG4CXX_DEBUG(logger_,
+                "Connection key : "
+                    << connection_key
+                    << " is waiting for certificate: " << std::boolalpha
+                    << waiting_for_certificate_ << " and has certificate: "
+                    << ssl_context->HasCertificate());
+
   ssl_context->ResetConnection();
   if (!waiting_for_certificate_ && !ssl_context->HasCertificate()) {
     NotifyListenersOnHandshakeDone(connection_key,
@@ -228,6 +235,7 @@ void SecurityManagerImpl::StartHandshake(uint32_t connection_key) {
   LOG4CXX_INFO(logger_, "StartHandshake: connection_key " << connection_key);
   security_manager::SSLContext* ssl_context = session_observer_->GetSSLContext(
       connection_key, protocol_handler::kControl);
+
   if (!ssl_context) {
     const std::string error_text(
         "StartHandshake failed, "
@@ -277,6 +285,7 @@ void SecurityManagerImpl::ProceedHandshake(
   time_t cert_due_date;
   if (!ssl_context->GetCertificateDueDate(cert_due_date)) {
     LOG4CXX_ERROR(logger_, "Failed to get certificate due date!");
+    PostponeHandshake(connection_key);
     return;
   }
 
@@ -388,6 +397,56 @@ void SecurityManagerImpl::OnSystemTimeArrived(const time_t utc_time) {
   awaiting_time_connections_.clear();
 }
 
+void SecurityManagerImpl::OnSystemTimeFailed() {
+  LOG4CXX_AUTO_TRACE(logger_);
+  {
+    sync_primitives::AutoLock lock(waiters_lock_);
+    waiting_for_time_ = false;
+  }
+
+  NotifyListenersOnGetSystemTimeFailed();
+
+  awaiting_time_connections_.clear();
+}
+
+void SecurityManagerImpl::ProcessFailedPTU() {
+  LOG4CXX_AUTO_TRACE(logger_);
+  if (listeners_.empty()) {
+    LOG4CXX_DEBUG(logger_, "listeners arrays IS EMPTY!");
+    return;
+  }
+  std::for_each(listeners_.begin(),
+                listeners_.end(),
+                std::mem_fun(&SecurityManagerListener::OnPTUFailed));
+}
+
+#ifdef EXTERNAL_PROPRIETARY_MODE
+void SecurityManagerImpl::ProcessFailedCertDecrypt() {
+  LOG4CXX_AUTO_TRACE(logger_);
+  {
+    sync_primitives::AutoLock lock(waiters_lock_);
+    waiting_for_certificate_ = false;
+  }
+
+  std::list<SecurityManagerListener*> listeners_to_remove;
+  for (auto listener : listeners_) {
+    if (listener->OnCertDecryptFailed()) {
+      listeners_to_remove.push_back(listener);
+    }
+  }
+
+  for (auto& listener : listeners_to_remove) {
+    auto it = std::find(listeners_.begin(), listeners_.end(), listener);
+    DCHECK(it != listeners_.end());
+    LOG4CXX_DEBUG(logger_, "Destroying listener: " << *it);
+    delete (*it);
+    listeners_.erase(it);
+  }
+
+  awaiting_certificate_connections_.clear();
+}
+#endif
+
 void SecurityManagerImpl::NotifyListenersOnHandshakeDone(
     const uint32_t& connection_key, SSLContext::HandshakeResult error) {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -412,11 +471,15 @@ void SecurityManagerImpl::NotifyOnCertificateUpdateRequired() {
   }
 }
 
-void SecurityManagerImpl::NotifyListenersOnHandshakeFailed() {
+void SecurityManagerImpl::ResetPendingSystemTimeRequests() {
+  system_time_handler_->ResetPendingSystemTimeRequests();
+}
+
+void SecurityManagerImpl::NotifyListenersOnGetSystemTimeFailed() {
   LOG4CXX_AUTO_TRACE(logger_);
   std::list<SecurityManagerListener*>::iterator it = listeners_.begin();
   while (it != listeners_.end()) {
-    if ((*it)->OnHandshakeFailed()) {
+    if ((*it)->OnGetSystemTimeFailed()) {
       LOG4CXX_DEBUG(logger_, "Destroying listener: " << *it);
       delete (*it);
       it = listeners_.erase(it);

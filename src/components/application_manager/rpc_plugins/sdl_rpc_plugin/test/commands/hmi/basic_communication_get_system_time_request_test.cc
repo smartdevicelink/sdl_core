@@ -60,7 +60,7 @@ TEST_F(BasicCommunicationGetSystemTimeRequestTest, OnTimeout) {
 
   ON_CALL(app_mngr_, protocol_handler())
       .WillByDefault(ReturnRef(mock_protocol_handler));
-  EXPECT_CALL(mock_protocol_handler, NotifyOnFailedHandshake());
+  EXPECT_CALL(mock_protocol_handler, NotifyOnGetSystemTimeFailed());
 
   command->onTimeOut();
 }

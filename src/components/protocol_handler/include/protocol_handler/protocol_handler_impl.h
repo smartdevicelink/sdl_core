@@ -55,6 +55,7 @@
 #include "protocol_handler/protocol_handler_settings.h"
 #include "protocol_handler/protocol_observer.h"
 #include "protocol_handler/protocol_packet.h"
+#include "protocol_handler/service_status_update_handler.h"
 #include "protocol_handler/session_observer.h"
 #include "transport_manager/common.h"
 #include "transport_manager/transport_adapter/transport_adapter.h"
@@ -210,6 +211,16 @@ class ProtocolHandlerImpl
 
   void RemoveProtocolObserver(ProtocolObserver* observer) OVERRIDE;
 
+  void ProcessFailedPTU() OVERRIDE;
+
+#ifdef EXTERNAL_PROPRIETARY_MODE
+  /**
+   * @brief ProcessFailedCertDecrypt is called to notify security manager that
+   * certificate decryption failed in the external flow
+   */
+  void ProcessFailedCertDecrypt() OVERRIDE;
+#endif
+
 #ifdef ENABLE_SECURITY
   /**
    * \brief Sets pointer for SecurityManager layer for managing protection
@@ -219,6 +230,9 @@ class ProtocolHandlerImpl
   void set_security_manager(
       security_manager::SecurityManager* security_manager);
 #endif  // ENABLE_SECURITY
+
+  void set_service_status_update_handler(
+      std::unique_ptr<ServiceStatusUpdateHandler> handler);
 
   /**
    * \brief Stop all handling activity
@@ -278,7 +292,7 @@ class ProtocolHandlerImpl
                       uint8_t session_id,
                       uint8_t service_type);
 
-  void NotifyOnFailedHandshake() OVERRIDE;
+  void NotifyOnGetSystemTimeFailed() OVERRIDE;
 
   // TODO(Ezamakhov): move Ack/Nack as interface for StartSessionHandler
   /**
@@ -436,9 +450,6 @@ class ProtocolHandlerImpl
   void NotifySessionStarted(const SessionContext& context,
                             std::vector<std::string>& rejected_params) OVERRIDE;
 
-  void OnAuthTokenUpdated(const std::string& policy_app_id,
-                          const std::string& auth_token) OVERRIDE;
-
 #ifdef BUILD_TESTS
   const impl::FromMobileQueue& get_from_mobile_queue() const {
     return raw_ford_messages_from_mobile_;
@@ -522,10 +533,6 @@ class ProtocolHandlerImpl
    **/
   void OnTMMessageSendFailed(const transport_manager::DataSendError& error,
                              const RawMessagePtr message) OVERRIDE;
-
-  void OnConnectionPending(
-      const transport_manager::DeviceInfo& device_info,
-      const transport_manager::ConnectionUID connection_id) OVERRIDE;
 
   void OnConnectionEstablished(
       const transport_manager::DeviceInfo& device_info,
@@ -789,6 +796,8 @@ class ProtocolHandlerImpl
 
   sync_primitives::Lock start_session_frame_map_lock_;
   StartSessionFrameMap start_session_frame_map_;
+
+  std::unique_ptr<ServiceStatusUpdateHandler> service_status_update_handler_;
 
   // Map policy app id -> auth token
   sync_primitives::Lock auth_token_map_lock_;

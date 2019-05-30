@@ -601,24 +601,38 @@ void MessageHelper::SendUnsubscribeButtonNotification(
       ->SendUnsubscribeButtonNotification(button, application, app_mngr);
 }
 
-smart_objects::SmartObject
-MessageHelper::CreateOnServiceStatusUpdateNotification(
-    const uint32_t app_id,
-    const hmi_apis::Common_ServiceType::eType service_type,
-    const hmi_apis::Common_ServiceEvent::eType service_event) {
-  return MockMessageHelper::message_helper_mock()
-      ->CreateOnStatusUpdateNotification(app_id, service_type, service_event);
+MockMessageHelper::MockServiceStatusUpdateNotificationBuilder*
+MockMessageHelper::on_service_update_builder_mock() {
+  static ::testing::NiceMock<
+      MockMessageHelper::MockServiceStatusUpdateNotificationBuilder>
+      on_service_update_builder_mock;
+  return &on_service_update_builder_mock;
 }
 
-smart_objects::SmartObject
-MessageHelper::CreateOnServiceStatusUpdateNotification(
-    const uint32_t app_id,
-    const hmi_apis::Common_ServiceType::eType service_type,
-    const hmi_apis::Common_ServiceEvent::eType service_event,
-    const hmi_apis::Common_ServiceUpdateReason service_update_reason) {
-  return MockMessageHelper::message_helper_mock()
-      ->CreateOnStatusUpdateNotification(
-          app_id, service_type, service_event, service_update_reason);
+MessageHelper::ServiceStatusUpdateNotificationBuilder
+MessageHelper::ServiceStatusUpdateNotificationBuilder::CreateBuilder(
+    hmi_apis::Common_ServiceType::eType service_type,
+    hmi_apis::Common_ServiceEvent::eType service_event) {
+  return MockMessageHelper::on_service_update_builder_mock()->CreateBuilder(
+      service_type, service_event);
+}
+
+MessageHelper::ServiceStatusUpdateNotificationBuilder&
+MessageHelper::ServiceStatusUpdateNotificationBuilder::AddAppID(
+    const uint32_t app_id) {
+  return MockMessageHelper::on_service_update_builder_mock()->AddAppID(app_id);
+}
+
+MessageHelper::ServiceStatusUpdateNotificationBuilder&
+MessageHelper::ServiceStatusUpdateNotificationBuilder::AddServiceUpdateReason(
+    const hmi_apis::Common_ServiceUpdateReason::eType service_update_reason) {
+  return MockMessageHelper::on_service_update_builder_mock()
+      ->AddServiceUpdateReason(service_update_reason);
+}
+
+smart_objects::SmartObjectSPtr
+MessageHelper::ServiceStatusUpdateNotificationBuilder::notification() const {
+  return MockMessageHelper::on_service_update_builder_mock()->notification();
 }
 
 smart_objects::SmartObject MessageHelper::CreateAppServiceCapabilities(

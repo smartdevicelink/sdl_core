@@ -35,6 +35,7 @@ include_directories(
   ${COMPONENTS_DIR}/protocol_handler/include/
   ${COMPONENTS_DIR}/connection_handler/include/
   ${COMPONENTS_DIR}/application_manager/include
+  ${CMAKE_BINARY_DIR}/src/components/
   ${LOG4CXX_INCLUDE_DIRECTORY}
   ${BSON_INCLUDE_DIRECTORY}
 )

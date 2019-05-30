@@ -354,7 +354,27 @@ class MockMessageHelper {
                    const hmi_apis::Common_ServiceUpdateReason::eType
                        service_update_reason));
 
+  class MockServiceStatusUpdateNotificationBuilder {
+   public:
+    MOCK_METHOD2(CreateBuilder,
+                 MessageHelper::ServiceStatusUpdateNotificationBuilder(
+                     hmi_apis::Common_ServiceType::eType,
+                     hmi_apis::Common_ServiceEvent::eType));
+
+    MOCK_METHOD1(AddAppID,
+                 MessageHelper::ServiceStatusUpdateNotificationBuilder&(
+                     const uint32_t app_id));
+
+    MOCK_METHOD1(AddServiceUpdateReason,
+                 MessageHelper::ServiceStatusUpdateNotificationBuilder&(
+                     const hmi_apis::Common_ServiceUpdateReason::eType));
+
+    MOCK_CONST_METHOD0(notification, smart_objects::SmartObjectSPtr());
+  };
+
   static MockMessageHelper* message_helper_mock();
+  static MockServiceStatusUpdateNotificationBuilder*
+  on_service_update_builder_mock();
 };
 
 }  // namespace application_manager

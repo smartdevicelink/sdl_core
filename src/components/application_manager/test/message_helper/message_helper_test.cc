@@ -69,6 +69,14 @@ using namespace application_manager;
 typedef std::shared_ptr<MockApplication> MockApplicationSharedPtr;
 typedef std::vector<std::string> StringArray;
 typedef std::shared_ptr<application_manager::Application> ApplicationSharedPtr;
+typedef MessageHelper::ServiceStatusUpdateNotificationBuilder::ServiceType
+    ServiceType;
+typedef MessageHelper::ServiceStatusUpdateNotificationBuilder::ServiceEvent
+    ServiceEvent;
+typedef MessageHelper::ServiceStatusUpdateNotificationBuilder::
+    ServiceUpdateReason UpdateReason;
+typedef MessageHelper::ServiceStatusUpdateNotificationBuilder
+    ServiceStatusUpdateBuilder;
 
 using testing::_;
 using testing::AtLeast;

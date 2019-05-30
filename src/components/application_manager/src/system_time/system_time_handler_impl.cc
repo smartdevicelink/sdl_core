@@ -82,6 +82,13 @@ void SystemTimeHandlerImpl::DoSubscribe(utils::SystemTimeListener* listener) {
   system_time_listener_ = listener;
 }
 
+void SystemTimeHandlerImpl::ResetPendingSystemTimeRequests() {
+  LOG4CXX_AUTO_TRACE(logger_);
+  unsubscribe_from_event(
+      hmi_apis::FunctionID::BasicCommunication_GetSystemTime);
+  awaiting_get_system_time_ = false;
+}
+
 void SystemTimeHandlerImpl::DoUnsubscribe(utils::SystemTimeListener* listener) {
   LOG4CXX_AUTO_TRACE(logger_);
   sync_primitives::AutoLock lock(system_time_listener_lock_);
@@ -145,6 +152,14 @@ void SystemTimeHandlerImpl::ProcessSystemTimeResponse(
     const application_manager::event_engine::Event& event) {
   LOG4CXX_AUTO_TRACE(logger_);
   const smart_objects::SmartObject& message = event.smart_object();
+
+  const auto result = static_cast<hmi_apis::Common_Result::eType>(
+      message[strings::params][hmi_response::code].asInt());
+
+  if (hmi_apis::Common_Result::SUCCESS != result) {
+    system_time_listener_->OnSystemTimeFailed();
+  }
+
   const smart_objects::SmartObject& system_time_so =
       message[strings::msg_params][hmi_response::system_time];
 

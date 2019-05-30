@@ -119,6 +119,11 @@ class PolicyListener {
   virtual void OnCertificateUpdated(const std::string& certificate_data) = 0;
 
   /**
+   * @brief OnPTUTimeOut the callback which signals if PTU timeout occured
+   */
+  virtual void OnPTUTimeOut() = 0;
+
+  /**
    * @brief OnAuthTokenUpdated the callback which signals if an app's auth token
    * field has been updated during a PTU
    *

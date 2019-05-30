@@ -81,7 +81,7 @@ PolicyManagerImpl::PolicyManagerImpl()
     , retry_sequence_index_(0)
     , timer_retry_sequence_("Retry sequence timer",
                             new timer::TimerTaskImpl<PolicyManagerImpl>(
-                                this, &PolicyManagerImpl::RetrySequence))
+                                this, &PolicyManagerImpl::StartRetrySequence))
     , ignition_check(true)
     , retry_sequence_url_(0, 0, "")
     , wrong_ptu_update_received_(false)
@@ -1217,6 +1217,7 @@ uint32_t PolicyManagerImpl::NextRetryTimeout() {
 }
 
 void PolicyManagerImpl::RefreshRetrySequence() {
+  LOG4CXX_AUTO_TRACE(logger_);
   sync_primitives::AutoLock auto_lock(retry_sequence_lock_);
   retry_sequence_timeout_ = cache_->TimeoutResponse();
   retry_sequence_seconds_.clear();
@@ -1438,6 +1439,7 @@ bool PolicyManagerImpl::IsNewApplication(
 }
 
 bool PolicyManagerImpl::ResetPT(const std::string& file_name) {
+  LOG4CXX_AUTO_TRACE(logger_);
   cache_->ResetCalculatedPermissions();
   const bool result = cache_->ResetPT(file_name);
   if (result) {
@@ -1502,8 +1504,17 @@ void PolicyManagerImpl::set_cache_manager(
   cache_ = std::shared_ptr<CacheManagerInterface>(cache_manager);
 }
 
-void PolicyManagerImpl::RetrySequence() {
-  LOG4CXX_INFO(logger_, "Start new retry sequence");
+void PolicyManagerImpl::StartRetrySequence() {
+  LOG4CXX_DEBUG(logger_, "Start new retry sequence");
+
+  const bool is_exceeded_retries_count =
+      (retry_sequence_seconds_.size() < retry_sequence_index_);
+
+  if (is_exceeded_retries_count) {
+    LOG4CXX_WARN(logger_, "Exceeded allowed PTU retry count");
+    listener_->OnPTUTimeOut();
+  }
+
   update_status_manager_.OnUpdateTimeoutOccurs();
 
   const uint32_t timeout_msec = NextRetryTimeout();
