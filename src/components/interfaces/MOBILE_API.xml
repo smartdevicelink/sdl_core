@@ -3100,21 +3100,21 @@
         <param name="hdRadioEnable" type="Boolean" mandatory="false"  since="5.0">
             <description> True if the hd radio is on, false if the radio is off</description>
         </param>
-        <param name="availableHDs" type="Integer" minvalue="0" maxvalue="7" mandatory="false" deprecated="true" since="5.1">
+        <param name="availableHDs" type="Integer" minvalue="0" maxvalue="7" mandatory="false" deprecated="true" since="5.2">
             <description>Number of HD sub-channels if available</description>
             <history>
                 <param name="availableHDs" type="Integer" minvalue="1" maxvalue="3" mandatory="false" since="4.5" until="5.0"/>
-                <param name="availableHDs" type="Integer" minvalue="0" maxvalue="7" mandatory="false" since="5.0" until="5.1"/>
+                <param name="availableHDs" type="Integer" minvalue="0" maxvalue="7" mandatory="false" since="5.0" until="5.2"/>
             </history>
         </param>
-        <param name="availableHdChannels" type="Integer" minvalue="0" maxvalue="7" array="true" minsize="0" maxsize="8" mandatory="false" since="5.0">
+        <param name="availableHdChannels" type="Integer" minvalue="0" maxvalue="7" array="true" minsize="0" maxsize="8" mandatory="false" since="5.2">
             <description>The list of available HD sub-channel indexes. Empty list means no Hd channel is available. Read-only. </description>
         </param>
-        <param name="hdChannel" type="Integer" minvalue="0" maxvalue="7" mandatory="false" since="5.0">
+        <param name="hdChannel" type="Integer" minvalue="0" maxvalue="7" mandatory="false" since="5.2">
             <description>Current HD sub-channel if available</description>
             <history>
                 <param name="hdChannel" type="Integer" minvalue="1" maxvalue="3" mandatory="false" since="4.5" until="5.0"/>
-                <param name="hdChannel" type="Integer" minvalue="1" maxvalue="7" mandatory="false" since="5.0" until="5.1"/>
+                <param name="hdChannel" type="Integer" minvalue="1" maxvalue="7" mandatory="false" since="5.0" until="5.2"/>
             </history>
         </param>
         <param name="signalStrength" type="Integer" minvalue="0" maxvalue="100" mandatory="false">
@@ -3165,7 +3165,7 @@
         <param name="heatedMirrorsEnable" type="Boolean" mandatory="false" since="5.0">
             <description>value false means disabled, value true means enabled.</description>
         </param>
-        <param name="climateEnable" type="Boolean" mandatory="false" since="5.1">
+        <param name="climateEnable" type="Boolean" mandatory="false" since="5.2">
         </param>
     </struct>
 
@@ -3208,16 +3208,16 @@
                 True: Available, False: Not Available, Not present: Not Available.
             </description>
         </param>
-        <param name="availableHDsAvailable" type="Boolean" mandatory="false" deprecated="true" since="5.0">
+        <param name="availableHDsAvailable" type="Boolean" mandatory="false" deprecated="true" since="5.2">
             <description>
                 Availability of the getting the number of available HD channels.
                 True: Available, False: Not Available, Not present: Not Available.
             </description>
             <history>
-                <param name="availableHDsAvailable" type="Boolean" mandatory="false" since="1.0" until="5.1"/>
+                <param name="availableHDsAvailable" type="Boolean" mandatory="false" since="1.0" until="5.2"/>
             </history>
         </param>
-        <param name="availableHdChannelsAvailable" type="Boolean" mandatory="false" since="5.0">
+        <param name="availableHdChannelsAvailable" type="Boolean" mandatory="false" since="5.2">
             <description>
                 Availability of the list of available HD sub-channel indexes.
                 True: Available, False: Not Available, Not present: Not Available.
@@ -3362,7 +3362,7 @@
                 True: Available, False: Not Available, Not present: Not Available.
             </description>
         </param>
-        <param name="climateEnableAvailable" type="Boolean" mandatory="false" since="5.1">
+        <param name="climateEnableAvailable" type="Boolean" mandatory="false" since="5.2">
             <description>
                 Availability of the control of enable/disable climate control.
                 True: Available, False: Not Available, Not present: Not Available.

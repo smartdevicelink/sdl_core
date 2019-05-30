@@ -2040,7 +2040,7 @@
    <param name="heatedMirrorsEnable" type="Boolean" mandatory="false">
        <description>value false means disabled, value true means enabled.</description>
    </param>
-   <param name="climateEnable" type="Boolean" mandatory="false" since="5.1">
+   <param name="climateEnable" type="Boolean" mandatory="false">
    </param>
  </struct>
 
