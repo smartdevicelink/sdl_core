@@ -28,7 +28,7 @@ void ServiceStatusUpdateHandler::OnServiceUpdate(
     const protocol_handler::ServiceType service_type,
     ServiceStatus service_status) {
   using namespace hmi_apis;
-  typedef utils::Optional<Common_ServiceUpdateReason::eType>
+  typedef utils::Optional<Common_ServiceStatusUpdateReason::eType>
       UpdateReasonOptional;
   auto hmi_service_type = GetHMIServiceType(service_type);
 
@@ -55,7 +55,7 @@ void ServiceStatusUpdateHandler::OnServiceUpdate(
           UpdateReasonOptional(UpdateReasonOptional::EMPTY));
     }
     case ServiceStatus::PTU_FAILED: {
-      auto update_reason = Common_ServiceUpdateReason::PTU_FAILED;
+      auto update_reason = Common_ServiceStatusUpdateReason::PTU_FAILED;
       return listener_->ProcessServiceStatusUpdate(
           connection_key,
           hmi_service_type,
@@ -63,7 +63,7 @@ void ServiceStatusUpdateHandler::OnServiceUpdate(
           update_reason);
     }
     case ServiceStatus::CERT_INVALID: {
-      auto update_reason = Common_ServiceUpdateReason::INVALID_CERT;
+      auto update_reason = Common_ServiceStatusUpdateReason::INVALID_CERT;
       return listener_->ProcessServiceStatusUpdate(
           connection_key,
           hmi_service_type,
@@ -71,7 +71,7 @@ void ServiceStatusUpdateHandler::OnServiceUpdate(
           update_reason);
     }
     case ServiceStatus::INVALID_TIME: {
-      auto update_reason = Common_ServiceUpdateReason::INVALID_TIME;
+      auto update_reason = Common_ServiceStatusUpdateReason::INVALID_TIME;
       return listener_->ProcessServiceStatusUpdate(
           connection_key,
           hmi_service_type,

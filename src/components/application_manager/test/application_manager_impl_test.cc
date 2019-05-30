@@ -107,10 +107,11 @@ const WindowID kDefaultWindowId =
 
 typedef MockMessageHelper::MockServiceStatusUpdateNotificationBuilder*
     MockServiceStatusUpdatePtr;
-typedef hmi_apis::Common_ServiceUpdateReason::eType ServiceUpdateReason;
+typedef hmi_apis::Common_ServiceStatusUpdateReason::eType
+    ServiceStatusUpdateReason;
 typedef hmi_apis::Common_ServiceType::eType ServiceType;
 typedef hmi_apis::Common_ServiceEvent::eType ServiceEvent;
-typedef utils::Optional<ServiceUpdateReason> UpdateReasonOptional;
+typedef utils::Optional<ServiceStatusUpdateReason> UpdateReasonOptional;
 
 #if defined(CLOUD_APP_WEBSOCKET_TRANSPORT_SUPPORT)
 // Cloud application params
@@ -177,11 +178,7 @@ class ApplicationManagerImplTest
         .WillByDefault(DoAll(SetArgPointee<3u>(app_id_), Return(0)));
     ON_CALL(mock_connection_handler_, get_session_observer())
         .WillByDefault(ReturnRef(mock_session_observer_));
-    std::unique_ptr<rpc_service::RPCService> unique_rpc_service(
-        new MockRPCService);
-    app_manager_impl_->SetRPCService(unique_rpc_service);
-    mock_rpc_service_ =
-        static_cast<MockRPCService*>(&(app_manager_impl_->GetRPCService()));
+
     app_manager_impl_->SetMockRPCService(mock_rpc_service_);
     app_manager_impl_->resume_controller().set_resumption_storage(
         mock_storage_);
@@ -326,8 +323,9 @@ INSTANTIATE_TEST_CASE_P(
 
 TEST_P(ApplicationManagerImplTest,
        ProcessServiceStatusUpdate_SendMessageToHMI) {
-  smart_objects::SmartObjectSPtr notification_(
-      new smart_objects::SmartObject(smart_objects::SmartType_Map));
+  smart_objects::SmartObjectSPtr notification_ =
+      std::make_shared<smart_objects::SmartObject>(
+          smart_objects::SmartType_Map);
   (*notification_)[strings::msg_params][hmi_notification::service_type] =
       GetParam().service_type_;
   (*notification_)[strings::msg_params][hmi_notification::service_event] =
@@ -347,7 +345,7 @@ TEST_P(ApplicationManagerImplTest,
   ON_CALL(*mock_service_status_update_, notification())
       .WillByDefault(Return(notification_));
 
-  EXPECT_CALL(*mock_rpc_service_, ManageHMICommand(notification_))
+  EXPECT_CALL(*mock_rpc_service_, ManageHMICommand(notification_, _))
       .WillOnce(Return(true));
 
   app_manager_impl_->ProcessServiceStatusUpdate(kConnectionKey,

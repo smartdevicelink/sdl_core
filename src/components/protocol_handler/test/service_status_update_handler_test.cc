@@ -46,7 +46,8 @@ using namespace protocol_handler;
 using ::testing::_;
 using ::testing::Return;
 using namespace hmi_apis;
-typedef utils::Optional<Common_ServiceUpdateReason::eType> UpdateReasonOptional;
+typedef utils::Optional<Common_ServiceStatusUpdateReason::eType>
+    UpdateReasonOptional;
 typedef std::shared_ptr<ServiceStatusUpdateHandler>
     ServiceStatusUpdateHandlerPtr;
 typedef std::shared_ptr<MockServiceStatusUpdateHandlerListener>
@@ -96,19 +97,19 @@ class ServiceStatusUpdateHandlerTest
         return UpdateReasonOptional::EMPTY;
       }
       case ServiceStatus::PTU_FAILED: {
-        auto reason = Common_ServiceUpdateReason::PTU_FAILED;
+        auto reason = Common_ServiceStatusUpdateReason::PTU_FAILED;
         return reason;
       }
       case ServiceStatus::CERT_INVALID: {
-        auto reason = Common_ServiceUpdateReason::INVALID_CERT;
+        auto reason = Common_ServiceStatusUpdateReason::INVALID_CERT;
         return reason;
       }
       case ServiceStatus::INVALID_TIME: {
-        auto reason = Common_ServiceUpdateReason::INVALID_TIME;
+        auto reason = Common_ServiceStatusUpdateReason::INVALID_TIME;
         return reason;
       }
       default: {
-        auto reason = Common_ServiceUpdateReason::INVALID_ENUM;
+        auto reason = Common_ServiceStatusUpdateReason::INVALID_ENUM;
         return reason;
       }
     }

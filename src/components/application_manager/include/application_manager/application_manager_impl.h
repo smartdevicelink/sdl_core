@@ -582,7 +582,7 @@ class ApplicationManagerImpl
       const uint32_t connection_key,
       hmi_apis::Common_ServiceType::eType service_type,
       hmi_apis::Common_ServiceEvent::eType service_event,
-      utils::Optional<hmi_apis::Common_ServiceUpdateReason::eType>
+      utils::Optional<hmi_apis::Common_ServiceStatusUpdateReason::eType>
           service_update_reason) FINAL;
 
   bool OnPTUFailed() FINAL;

@@ -38,10 +38,6 @@
 #include "policy/policy_types.h"
 #include "smart_objects/smart_object.h"
 
-#ifdef EXTERNAL_PROPRIETARY_MODE
-#include "policy/ptu_retry_handler.h"
-#endif
-
 namespace test {
 namespace components {
 namespace policy_test {

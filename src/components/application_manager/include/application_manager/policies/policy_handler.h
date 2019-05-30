@@ -462,8 +462,12 @@ class PolicyHandler : public PolicyHandlerInterface,
                              std::string& cloud_transport_type,
                              std::string& hybrid_app_preference) const OVERRIDE;
 
+  void OnAuthTokenUpdated(const std::string& policy_app_id,
+                          const std::string& auth_token) OVERRIDE;
+
   /**
-   * @brief Callback for when a SetCloudAppProperties message is received from a
+   * @brief Callback for when a SetCloudAppProperties message is received
+   * from a
    * mobile app
    * @param message The SetCloudAppProperties message
    */

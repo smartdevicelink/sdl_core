@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Copyright (c) 2018, Ford Motor Company
  * All rights reserved.
  *

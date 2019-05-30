@@ -111,7 +111,8 @@ class MessageHelper {
    public:
     typedef hmi_apis::Common_ServiceType::eType ServiceType;
     typedef hmi_apis::Common_ServiceEvent::eType ServiceEvent;
-    typedef hmi_apis::Common_ServiceUpdateReason::eType ServiceUpdateReason;
+    typedef hmi_apis::Common_ServiceStatusUpdateReason::eType
+        ServiceStatusUpdateReason;
 
     /**
      * @brief CreateBuilder creates builder instance
@@ -135,7 +136,7 @@ class MessageHelper {
      * @returns ref to builder instance
      */
     ServiceStatusUpdateNotificationBuilder& AddServiceUpdateReason(
-        const ServiceUpdateReason service_update_reason);
+        const ServiceStatusUpdateReason service_update_reason);
 
     /**
      * @brief notification gets notification SO

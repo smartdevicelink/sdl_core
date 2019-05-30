@@ -74,7 +74,7 @@ typedef MessageHelper::ServiceStatusUpdateNotificationBuilder::ServiceType
 typedef MessageHelper::ServiceStatusUpdateNotificationBuilder::ServiceEvent
     ServiceEvent;
 typedef MessageHelper::ServiceStatusUpdateNotificationBuilder::
-    ServiceUpdateReason UpdateReason;
+    ServiceStatusUpdateReason UpdateReason;
 typedef MessageHelper::ServiceStatusUpdateNotificationBuilder
     ServiceStatusUpdateBuilder;
 

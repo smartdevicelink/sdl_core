@@ -48,7 +48,7 @@ class MockServiceStatusUpdateHandlerListener
       void(const uint32_t,
            hmi_apis::Common_ServiceType::eType,
            hmi_apis::Common_ServiceEvent::eType,
-           utils::Optional<hmi_apis::Common_ServiceUpdateReason::eType>));
+           utils::Optional<hmi_apis::Common_ServiceStatusUpdateReason::eType>));
 };
 }  // namespace protocol_handler_test
 }  // namespace components

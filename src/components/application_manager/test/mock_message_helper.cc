@@ -625,7 +625,8 @@ MessageHelper::ServiceStatusUpdateNotificationBuilder::AddAppID(
 
 MessageHelper::ServiceStatusUpdateNotificationBuilder&
 MessageHelper::ServiceStatusUpdateNotificationBuilder::AddServiceUpdateReason(
-    const hmi_apis::Common_ServiceUpdateReason::eType service_update_reason) {
+    const hmi_apis::Common_ServiceStatusUpdateReason::eType
+        service_update_reason) {
   return MockMessageHelper::on_service_update_builder_mock()
       ->AddServiceUpdateReason(service_update_reason);
 }

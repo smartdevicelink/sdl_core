@@ -468,6 +468,8 @@ class ProtocolHandlerImpl
   }
 #endif
 
+  void OnAuthTokenUpdated(const std::string&, const std::string&) OVERRIDE;
+
  private:
   void SendEndServicePrivate(int32_t primary_connection_id,
                              int32_t connection_id,
@@ -544,6 +546,10 @@ class ProtocolHandlerImpl
   void OnUnexpectedDisconnect(
       const transport_manager::ConnectionUID connection_id,
       const transport_manager::CommunicationError& error) OVERRIDE;
+
+  void OnConnectionPending(
+      const transport_manager::DeviceInfo& device_info,
+      const transport_manager::ConnectionUID connection_id) OVERRIDE;
 
   /**
    * @brief Notifies that configuration of a transport has been updated.

@@ -2264,7 +2264,7 @@ MessageHelper::ServiceStatusUpdateNotificationBuilder::AddAppID(
 
 MessageHelper::ServiceStatusUpdateNotificationBuilder&
 MessageHelper::ServiceStatusUpdateNotificationBuilder::AddServiceUpdateReason(
-    const ServiceUpdateReason service_update_reason) {
+    const ServiceStatusUpdateReason service_update_reason) {
   (*notification_)[strings::msg_params][hmi_notification::reason] =
       service_update_reason;
 
