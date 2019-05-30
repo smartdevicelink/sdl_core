@@ -2467,20 +2467,16 @@ bool MessageHelper::SendUnsubscribedWayPoints(ApplicationManager& app_mngr) {
 
 smart_objects::SmartObjectSPtr
 MessageHelper::CreateOnSystemRequestNotificationToMobile(
-    const std::vector<uint8_t>& policy_data, const uint32_t app_id) {
+    const std::vector<uint8_t>& policy_data,
+    const uint32_t app_id,
+    const mobile_apis::RequestType::eType request_type) {
   auto notification =
       CreateNotification(mobile_apis::FunctionID::OnSystemRequestID, app_id);
 
   (*notification)[strings::params][strings::binary_data] =
       smart_objects::SmartObject(policy_data);
 
-#if defined(PROPRIETARY_MODE) || defined(EXTERNAL_PROPRIETARY_MODE)
-  (*notification)[strings::msg_params][strings::request_type] =
-      mobile_apis::RequestType::PROPRIETARY;
-#else
-  (*notification)[strings::msg_params][strings::request_type] =
-      mobile_apis::RequestType::HTTP;
-#endif  // PROPRIETARY || EXTERNAL_PROPRIETARY_MODE
+  (*notification)[strings::msg_params][strings::request_type] = request_type;
 
   return notification;
 }
@@ -2490,8 +2486,14 @@ void MessageHelper::SendPolicySnapshotNotification(
     const std::vector<uint8_t>& policy_data,
     const std::string& url,
     ApplicationManager& app_mngr) {
-  auto notification =
-      CreateOnSystemRequestNotificationToMobile(policy_data, connection_key);
+  const auto request_type =
+#if defined(PROPRIETARY_MODE) || defined(EXTERNAL_PROPRIETARY_MODE)
+      mobile_apis::RequestType::PROPRIETARY;
+#else
+      mobile_apis::RequestType::HTTP;
+#endif  // PROPRIETARY || EXTERNAL_PROPRIETARY_MODE
+  auto notification = CreateOnSystemRequestNotificationToMobile(
+      policy_data, connection_key, request_type);
 
   if (!url.empty()) {
     (*notification)[strings::msg_params][strings::url] =
@@ -2502,13 +2504,6 @@ void MessageHelper::SendPolicySnapshotNotification(
 
   (*notification)[strings::params][strings::binary_data] =
       smart_objects::SmartObject(policy_data);
-#if defined(PROPRIETARY_MODE) || defined(EXTERNAL_PROPRIETARY_MODE)
-  (*notification)[strings::msg_params][strings::request_type] =
-      mobile_apis::RequestType::PROPRIETARY;
-#else
-  (*notification)[strings::msg_params][strings::request_type] =
-      mobile_apis::RequestType::HTTP;
-#endif  // PROPRIETARY || EXTERNAL_PROPRIETARY_MODE
 
   PrintSmartObject(*notification);
   app_mngr.GetRPCService().ManageMobileCommand(notification,

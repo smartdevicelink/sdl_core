@@ -637,9 +637,12 @@ MessageHelper::ServiceStatusUpdateNotificationBuilder::notification() const {
 
 smart_objects::SmartObjectSPtr
 MessageHelper::CreateOnSystemRequestNotificationToMobile(
-    const std::vector<uint8_t>& policy_data, const uint32_t connection_key) {
+    const std::vector<uint8_t>& policy_data,
+    const uint32_t connection_key,
+    const mobile_apis::RequestType::eType request_type) {
   return MockMessageHelper::message_helper_mock()
-      ->CreateOnSystemRequestNotificationToMobile(policy_data, connection_key);
+      ->CreateOnSystemRequestNotificationToMobile(
+          policy_data, connection_key, request_type);
 }
 
 smart_objects::SmartObject MessageHelper::CreateAppServiceCapabilities(

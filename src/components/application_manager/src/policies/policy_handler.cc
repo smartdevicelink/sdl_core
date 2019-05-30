@@ -1524,7 +1524,9 @@ void PolicyHandler::OnSnapshotCreated(const BinaryMessage& pt_string,
   if (PTUIterationType::RetryIteration == iteration_type) {
     auto on_system_request_notification =
         MessageHelper::CreateOnSystemRequestNotificationToMobile(
-            pt_string, GetAppIdForSending());
+            pt_string,
+            GetAppIdForSending(),
+            mobile_apis::RequestType::PROPRIETARY);
     application_manager_.GetRPCService().ManageMobileCommand(
         on_system_request_notification, commands::Command::SOURCE_SDL);
   } else {

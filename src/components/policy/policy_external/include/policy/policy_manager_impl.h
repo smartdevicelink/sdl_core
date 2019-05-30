@@ -903,7 +903,10 @@ class PolicyManagerImpl : public PolicyManager {
   void RetrySequenceFailed() OVERRIDE;
 
   /**
-   * @brief Begins new retry sequence
+   * @brief In EXTERNAL_PROPRIETARY_MODE PTU sequence is driven by HMI and
+   * begins with OnSystemRequest from HMI. Following function is called when
+   * this notification is received to track number of PTU retries and react
+   * accordingly once allowed retry count is exceeded
    */
   void OnSystemRequestReceived() OVERRIDE;
 
@@ -1288,7 +1291,7 @@ class PolicyManagerImpl : public PolicyManager {
   /**
    * @brief Lock for guarding retry sequence
    */
-  sync_primitives::Lock retry_sequence_lock_;
+  mutable sync_primitives::Lock retry_sequence_lock_;
 
   /**
    * @brief Device id, which is used during PTU handling for specific

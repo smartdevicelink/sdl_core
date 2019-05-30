@@ -79,9 +79,10 @@ PolicyManagerImpl::PolicyManagerImpl()
           new AccessRemoteImpl(std::static_pointer_cast<CacheManager>(cache_)))
     , retry_sequence_timeout_(kDefaultRetryTimeoutInMSec)
     , retry_sequence_index_(0)
-    , timer_retry_sequence_("Retry sequence timer",
-                            new timer::TimerTaskImpl<PolicyManagerImpl>(
-                                this, &PolicyManagerImpl::StartRetrySequence))
+    , timer_retry_sequence_(
+          "Retry sequence timer",
+          new timer::TimerTaskImpl<PolicyManagerImpl>(
+              this, &PolicyManagerImpl::OnPTUIterationTimeout))
     , ignition_check(true)
     , retry_sequence_url_(0, 0, "")
     , wrong_ptu_update_received_(false)
@@ -1516,7 +1517,7 @@ void PolicyManagerImpl::set_cache_manager(
   cache_ = std::shared_ptr<CacheManagerInterface>(cache_manager);
 }
 
-void PolicyManagerImpl::StartRetrySequence() {
+void PolicyManagerImpl::OnPTUIterationTimeout() {
   LOG4CXX_DEBUG(logger_, "Start new retry sequence");
 
   const bool is_exceeded_retries_count =

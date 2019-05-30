@@ -94,11 +94,14 @@ class MessageHelper {
    * OnSystemRequestNotification
    * @param policy_data pt snapshot data
    * @param connection_key connection key of application
+   * @param request_type OnSystemRequest request type
    * @return OnSystemRequest notification smart object
    */
   static smart_objects::SmartObjectSPtr
   CreateOnSystemRequestNotificationToMobile(
-      const std::vector<uint8_t>& policy_data, const uint32_t connection_key);
+      const std::vector<uint8_t>& policy_data,
+      const uint32_t connection_key,
+      const mobile_apis::RequestType::eType request_type);
 
   /**
    * @brief ServiceStatusUpdateNotificationBuilder small utility class used for

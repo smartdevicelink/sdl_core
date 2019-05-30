@@ -1297,11 +1297,21 @@ void PolicyManagerImpl::SetUserConsentForApp(
 
 bool PolicyManagerImpl::IsAllowedRetryCountExceeded() const {
   LOG4CXX_AUTO_TRACE(logger_);
+  sync_primitives::AutoLock auto_lock(retry_sequence_lock_);
+
   return retry_sequence_index_ > retry_sequence_seconds_.size();
 }
 
 void PolicyManagerImpl::IncrementRetryIndex() {
   LOG4CXX_AUTO_TRACE(logger_);
+  sync_primitives::AutoLock auto_lock(retry_sequence_lock_);
+
+  if (!is_ptu_in_progress_) {
+    LOG4CXX_TRACE(logger_,
+                  "First PTU iteration, skipping incrementing retry index");
+    is_ptu_in_progress_ = true;
+    return;
+  }
 
   ++retry_sequence_index_;
   LOG4CXX_DEBUG(logger_,
@@ -1318,11 +1328,7 @@ void PolicyManagerImpl::RetrySequenceFailed() {
 void PolicyManagerImpl::OnSystemRequestReceived() {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  if (is_ptu_in_progress_) {
-    IncrementRetryIndex();
-  } else {
-    is_ptu_in_progress_ = true;
-  }
+  IncrementRetryIndex();
 }
 
 bool PolicyManagerImpl::GetDefaultHmi(const std::string& device_id,
