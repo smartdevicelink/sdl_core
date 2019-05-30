@@ -1654,15 +1654,25 @@ RESULT_CODE ProtocolHandlerImpl::HandleControlMessageStartSession(
   const uint32_t connection_key = session_observer_.KeyFromPair(
       packet->connection_id(), packet->session_id());
 
+  const auto& force_protected = get_settings().force_protected_service();
+
+  const bool is_force_protected =
+      (helpers::in_range(force_protected, service_type));
+
+  const bool can_start_unprotected = is_force_protected && protection;
+
   service_status_update_handler_->OnServiceUpdate(
       connection_key, service_type, ServiceStatus::SERVICE_RECEIVED);
 
   if ((ServiceType::kMobileNav == service_type && !is_video_allowed) ||
-      (ServiceType::kAudio == service_type && !is_audio_allowed)) {
+      (ServiceType::kAudio == service_type && !is_audio_allowed) ||
+      (is_force_protected && !can_start_unprotected)) {
     LOG4CXX_DEBUG(logger_,
                   "Rejecting StartService for service:"
                       << service_type << ", over transport: " << transport
                       << ", disallowed by settings.");
+    service_status_update_handler_->OnServiceUpdate(
+        connection_key, service_type, ServiceStatus::SERVICE_START_FAILED);
     SendStartSessionNAck(
         connection_id, session_id, protocol_version, service_type);
     return RESULT_OK;
