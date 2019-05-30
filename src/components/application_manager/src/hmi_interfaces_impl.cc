@@ -103,6 +103,8 @@ generate_function_to_interface_convert_map() {
       HmiInterfaces::HMI_INTERFACE_BasicCommunication;
   convert_map[BasicCommunication_OnEventChanged] =
       HmiInterfaces::HMI_INTERFACE_BasicCommunication;
+  convert_map[BasicCommunication_OnServiceUpdate] =
+      HmiInterfaces::HMI_INTERFACE_BasicCommunication;
   convert_map[BasicCommunication_GetFilePath] =
       HmiInterfaces::HMI_INTERFACE_BasicCommunication;
   convert_map[BasicCommunication_CloseApplication] =

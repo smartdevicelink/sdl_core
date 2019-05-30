@@ -573,6 +573,9 @@ const char* policyfile = "policyfile";
 const char* is_active = "isActive";
 const char* is_deactivated = "isDeactivated";
 const char* event_name = "eventName";
+const char* service_type = "serviceType";
+const char* service_event = "serviceEvent";
+const char* reason = "reason";
 }  // namespace hmi_notification
 
 }  // namespace application_manager

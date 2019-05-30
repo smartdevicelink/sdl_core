@@ -616,6 +616,9 @@ extern const char* policyfile;
 extern const char* is_active;
 extern const char* is_deactivated;
 extern const char* event_name;
+extern const char* service_type;
+extern const char* service_event;
+extern const char* reason;
 
 }  // namespace hmi_notification
 

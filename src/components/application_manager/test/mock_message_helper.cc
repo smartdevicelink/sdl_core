@@ -601,6 +601,26 @@ void MessageHelper::SendUnsubscribeButtonNotification(
       ->SendUnsubscribeButtonNotification(button, application, app_mngr);
 }
 
+smart_objects::SmartObject
+MessageHelper::CreateOnServiceStatusUpdateNotification(
+    const uint32_t app_id,
+    const hmi_apis::Common_ServiceType::eType service_type,
+    const hmi_apis::Common_ServiceEvent::eType service_event) {
+  return MockMessageHelper::message_helper_mock()
+      ->CreateOnStatusUpdateNotification(app_id, service_type, service_event);
+}
+
+smart_objects::SmartObject
+MessageHelper::CreateOnServiceStatusUpdateNotification(
+    const uint32_t app_id,
+    const hmi_apis::Common_ServiceType::eType service_type,
+    const hmi_apis::Common_ServiceEvent::eType service_event,
+    const hmi_apis::Common_ServiceUpdateReason service_update_reason) {
+  return MockMessageHelper::message_helper_mock()
+      ->CreateOnStatusUpdateNotification(
+          app_id, service_type, service_event, service_update_reason);
+}
+
 smart_objects::SmartObject MessageHelper::CreateAppServiceCapabilities(
     std::vector<smart_objects::SmartObject>& all_services) {
   return MockMessageHelper::message_helper_mock()->CreateAppServiceCapabilities(
