@@ -1,19 +1,19 @@
-#include "gtest/gtest.h"
-#include "application_manager/mock_application.h"
 #include "rc_rpc_plugin/rc_app_extension.h"
 #include "application_manager/application_manager.h"
+#include "application_manager/mock_application.h"
+#include "gtest/gtest.h"
 
 namespace test {
 namespace components {
 namespace rc_rpc_plugin {
 
+using ::rc_rpc_plugin::RCAppExtension;
 using ::testing::_;
+using ::testing::AtLeast;
 using ::testing::Mock;
+using ::testing::NiceMock;
 using ::testing::Return;
 using ::testing::ReturnRef;
-using ::testing::AtLeast;
-using ::testing::NiceMock;
-using ::rc_rpc_plugin::RCAppExtension;
 
 const std::string climate = "CLIMATE";
 const std::string radio = "RADIO";
@@ -54,6 +54,6 @@ TEST_F(RCAppExtensionTest, UnsubscribeFromClimate_SUCCESS) {
   ret = rc_ext.IsSubscibedToInteriorVehicleData(radio);
   EXPECT_TRUE(ret);
 }
-}
-}
-}
+}  // namespace rc_rpc_plugin
+}  // namespace components
+}  // namespace test

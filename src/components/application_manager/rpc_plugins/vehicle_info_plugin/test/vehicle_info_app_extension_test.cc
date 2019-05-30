@@ -1,24 +1,24 @@
-#include "gtest/gtest.h"
-#include "application_manager/mock_application.h"
 #include "vehicle_info_plugin/vehicle_info_app_extension.h"
-#include "vehicle_info_plugin/vehicle_info_plugin.h"
 #include "application_manager/application_manager.h"
+#include "application_manager/mock_application.h"
 #include "application_manager/mock_rpc_plugin.h"
+#include "gtest/gtest.h"
+#include "vehicle_info_plugin/vehicle_info_plugin.h"
 
 namespace test {
 namespace components {
 namespace vehicle_info_plugin {
 
+using ::application_manager::plugin_manager::MockRPCPlugin;
+using test::components::application_manager_test::MockApplication;
 using ::testing::_;
+using ::testing::AtLeast;
 using ::testing::Mock;
+using ::testing::NiceMock;
 using ::testing::Return;
 using ::testing::ReturnRef;
-using ::testing::AtLeast;
-using ::testing::NiceMock;
-using test::components::application_manager_test::MockApplication;
-using ::vehicle_info_plugin::VehicleInfoPlugin;
 using ::vehicle_info_plugin::VehicleInfoAppExtension;
-using ::application_manager::plugin_manager::MockRPCPlugin;
+using ::vehicle_info_plugin::VehicleInfoPlugin;
 
 typedef mobile_apis::VehicleDataType::eType VehicleDataType;
 
@@ -80,6 +80,6 @@ TEST_F(VehicleInfoAppExtensionTest, UnsubscribeFromSpeed_SUCCESS) {
   ret = vi_ext.isSubscribedToVehicleInfo(rpm);
   EXPECT_TRUE(ret);
 }
-}
-}
-}
+}  // namespace vehicle_info_plugin
+}  // namespace components
+}  // namespace test

@@ -1,24 +1,24 @@
-#include "gtest/gtest.h"
-#include "application_manager/mock_application.h"
 #include "app_service_rpc_plugin/app_service_app_extension.h"
 #include "app_service_rpc_plugin/app_service_rpc_plugin.h"
 #include "application_manager/application_manager.h"
+#include "application_manager/mock_application.h"
 #include "application_manager/mock_rpc_plugin.h"
+#include "gtest/gtest.h"
 
 namespace test {
 namespace components {
 namespace app_service_rpc_plugin {
 
-using ::testing::_;
-using ::testing::Mock;
-using ::testing::Return;
-using ::testing::ReturnRef;
-using ::testing::AtLeast;
-using ::testing::NiceMock;
-using test::components::application_manager_test::MockApplication;
 using ::app_service_rpc_plugin::AppServiceAppExtension;
 using ::app_service_rpc_plugin::AppServiceRpcPlugin;
 using ::application_manager::plugin_manager::MockRPCPlugin;
+using test::components::application_manager_test::MockApplication;
+using ::testing::_;
+using ::testing::AtLeast;
+using ::testing::Mock;
+using ::testing::NiceMock;
+using ::testing::Return;
+using ::testing::ReturnRef;
 
 const std::string media = "MEDIA";
 const std::string nav = "NAVIGATION";
@@ -78,6 +78,6 @@ TEST_F(AppServiceAppExtensionTest, UnsubscribeFromMediaAppService_SUCCESS) {
   ret = as_ext.IsSubscribedToAppService(nav);
   EXPECT_TRUE(ret);
 }
-}
-}
-}
+}  // namespace app_service_rpc_plugin
+}  // namespace components
+}  // namespace test

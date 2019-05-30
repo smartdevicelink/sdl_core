@@ -1,24 +1,24 @@
-#include "gtest/gtest.h"
-#include "application_manager/mock_application.h"
 #include "sdl_rpc_plugin/extensions/system_capability_app_extension.h"
-#include "sdl_rpc_plugin/sdl_rpc_plugin.h"
 #include "application_manager/application_manager.h"
+#include "application_manager/mock_application.h"
 #include "application_manager/mock_rpc_plugin.h"
+#include "gtest/gtest.h"
+#include "sdl_rpc_plugin/sdl_rpc_plugin.h"
 
 namespace test {
 namespace components {
 namespace sdl_rpc_plugin {
 
-using ::testing::_;
-using ::testing::Mock;
-using ::testing::Return;
-using ::testing::ReturnRef;
-using ::testing::AtLeast;
-using ::testing::NiceMock;
-using test::components::application_manager_test::MockApplication;
+using ::application_manager::plugin_manager::MockRPCPlugin;
 using ::sdl_rpc_plugin::SDLRPCPlugin;
 using ::sdl_rpc_plugin::SystemCapabilityAppExtension;
-using ::application_manager::plugin_manager::MockRPCPlugin;
+using test::components::application_manager_test::MockApplication;
+using ::testing::_;
+using ::testing::AtLeast;
+using ::testing::Mock;
+using ::testing::NiceMock;
+using ::testing::Return;
+using ::testing::ReturnRef;
 
 typedef mobile_apis::SystemCapabilityType::eType SystemCapabilityType;
 
@@ -80,6 +80,6 @@ TEST_F(SystemCapabilityAppExtensionTest, UnsubscribeFromAppService_SUCCESS) {
   ret = sys_cap_ext.IsSubscribedTo(nav);
   EXPECT_TRUE(ret);
 }
-}
-}
-}
+}  // namespace sdl_rpc_plugin
+}  // namespace components
+}  // namespace test
