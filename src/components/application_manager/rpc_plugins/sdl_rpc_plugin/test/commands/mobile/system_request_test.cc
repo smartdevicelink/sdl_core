@@ -229,6 +229,37 @@ TEST_F(SystemRequestTest, Run_RequestTypeDisallowed_SendDisallowedResponse) {
   command->Run();
 }
 
+TEST_F(SystemRequestTest, Run_RequestType_IconURL_Success) {
+  PreConditions();
+  MessageSharedPtr msg = CreateIVSUMessage();
+  (*msg)[am::strings::msg_params][am::strings::request_type] =
+      mobile_apis::RequestType::ICON_URL;
+
+  const std::string url = "https://www.appsfakeiconurlendpoint.com/icon.png";
+
+  (*msg)[am::strings::msg_params][am::strings::file_name] = url;
+  const std::vector<uint8_t> binary_data = {1u, 2u};
+  (*msg)[am::strings::params][am::strings::binary_data] = binary_data;
+
+  EXPECT_CALL(
+      mock_policy_handler_,
+      IsRequestTypeAllowed(kAppPolicyId, mobile_apis::RequestType::ICON_URL))
+      .WillOnce(Return(true));
+  EXPECT_CALL(app_mngr_settings_, app_icons_folder())
+      .WillOnce(ReturnRef(kAppStorageFolder));
+  EXPECT_CALL(app_mngr_, PolicyIDByIconUrl(url)).WillOnce(Return(kAppPolicyId));
+
+  EXPECT_CALL(app_mngr_,
+              SaveBinary(binary_data, kAppStorageFolder, kAppPolicyId, 0u))
+      .WillOnce(Return(mobile_apis::Result::SUCCESS));
+
+  EXPECT_CALL(app_mngr_, SetIconFileFromSystemRequest(kAppPolicyId)).Times(1);
+
+  std::shared_ptr<SystemRequest> command(CreateCommand<SystemRequest>(msg));
+  ASSERT_TRUE(command->Init());
+  command->Run();
+}
+
 }  // namespace system_request
 }  // namespace mobile_commands_test
 }  // namespace commands_test
