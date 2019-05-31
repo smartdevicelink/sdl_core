@@ -35,9 +35,11 @@
 
 #include "gtest/gtest.h"
 
+#include "application_manager/commands/command_request_test.h"
 #include "application_manager/mock_application_manager.h"
 #include "application_manager/mock_message_helper.h"
 #include "mobile/unsubscribe_vehicle_data_request.h"
+#include "resumption/mock_last_state.h"
 #include "vehicle_info_plugin/commands/vi_command_request_test.h"
 #include "vehicle_info_plugin/vehicle_info_app_extension.h"
 #include "vehicle_info_plugin/vehicle_info_plugin.h"
@@ -87,7 +89,8 @@ class UnsubscribeVehicleRequestTest
     vi_plugin_.Init(app_mngr_,
                     mock_rpc_service_,
                     mock_hmi_capabilities_,
-                    mock_policy_handler_);
+                    mock_policy_handler_,
+                    mock_last_state_);
     ON_CALL(*mock_app_, AddExtension(vi_app_extension_ptr_));
     vi_plugin_.OnApplicationEvent(application_manager::plugin_manager::
                                       ApplicationEvent::kApplicationRegistered,
@@ -104,6 +107,7 @@ class UnsubscribeVehicleRequestTest
   std::shared_ptr<sync_primitives::Lock> app_set_lock_ptr_;
   vehicle_info_plugin::VehicleInfoPlugin vi_plugin_;
   application_manager_test::MockRPCHandler mock_rpc_handler_;
+  resumption_test::MockLastState mock_last_state_;
 };
 
 TEST_F(UnsubscribeVehicleRequestTest, Run_AppNotRegistered_UNSUCCESS) {

@@ -59,7 +59,8 @@ RCOnRemoteControlSettingsNotification::RCOnRemoteControlSettingsNotification(
           params.hmi_capabilities_,
           params.policy_handler_)
     , resource_allocation_manager_(params.resource_allocation_manager_)
-    , interior_data_manager_(params.interior_data_manager_) {}
+    , interior_data_manager_(params.interior_data_manager_)
+    , rc_consent_manager_(params.rc_consent_manager_) {}
 
 RCOnRemoteControlSettingsNotification::
     ~RCOnRemoteControlSettingsNotification() {}
@@ -132,6 +133,7 @@ void RCOnRemoteControlSettingsNotification::Run() {
     DisallowRCFunctionality();
     resource_allocation_manager_.ResetAllAllocations();
     resource_allocation_manager_.set_rc_enabled(false);
+    rc_consent_manager_.RemoveAllConsents();
   }
 }
 

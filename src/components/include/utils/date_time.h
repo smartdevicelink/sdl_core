@@ -84,6 +84,9 @@ int64_t calculateTimeSpan(const TimeDuration& sinceTime);
 // return MILLISECONDS count between time1 and time2
 int64_t calculateTimeDiff(const TimeDuration& time1, const TimeDuration& time2);
 
+// returns difference between specific date and current date
+int64_t calculateAmountDaysFromDate(const std::time_t& start_date);
+
 /**
  * @brief Adds milliseconds to time struct
  * @param time contains time struct

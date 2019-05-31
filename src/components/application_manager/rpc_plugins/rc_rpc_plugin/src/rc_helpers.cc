@@ -83,6 +83,49 @@ std::vector<std::string> RCHelpers::GetModuleReadOnlyParams(
   return module_ro_params;
 }
 
+rc_rpc_types::ModuleIdConsentVector RCHelpers::FillModuleConsents(
+    const std::string& module_type,
+    const std::vector<std::string>& module_ids,
+    const std::vector<bool> allowed) {
+  using namespace rc_rpc_types;
+  if (module_ids.size() != allowed.size()) {
+    return rc_rpc_types::ModuleIdConsentVector();
+  }
+
+  rc_rpc_types::ModuleIdConsentVector module_consents;
+  std::time_t current_date = std::time(0);
+  size_t array_size = module_ids.size();
+
+  for (size_t i = 0; i < array_size; ++i) {
+    rc_rpc_types::ModuleIdConsent module_consent;
+    module_consent.module_id = {module_type, module_ids[i]};
+    module_consent.consent =
+        allowed[i] ? ModuleConsent::CONSENTED : ModuleConsent::NOT_CONSENTED;
+    module_consent.date_of_consent = current_date;
+
+    module_consents.push_back(module_consent);
+  }
+  return module_consents;
+}
+
+std::vector<std::string> RCHelpers::RetrieveModuleIds(
+    const ns_smart_device_link::ns_smart_objects::SmartObject& moduleIds) {
+  std::vector<std::string> module_ids;
+  for (const auto& module_id : (*moduleIds.asArray())) {
+    module_ids.push_back(module_id.asString());
+  }
+  return module_ids;
+}
+
+std::vector<bool> RCHelpers::RetrieveModuleConsents(
+    const ns_smart_device_link::ns_smart_objects::SmartObject& consents) {
+  std::vector<bool> module_consents;
+  for (const auto& allowed_item : (*consents.asArray())) {
+    module_consents.push_back(allowed_item.asBool());
+  }
+  return module_consents;
+}
+
 const std::function<std::string(const std::string& module_type)>
 RCHelpers::GetModuleTypeToDataMapping() {
   auto mapping_lambda = [](const std::string& module_type) -> std::string {

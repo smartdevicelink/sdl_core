@@ -37,6 +37,7 @@
 #include <string>
 #include "application_manager/application.h"
 #include "rc_rpc_plugin/rc_app_extension.h"
+#include "rc_rpc_plugin/rc_rpc_types.h"
 
 namespace rc_rpc_plugin {
 class RCRPCPlugin;
@@ -107,6 +108,35 @@ class RCHelpers {
 
   static std::vector<std::string> GetModuleReadOnlyParams(
       const std::string& module_type);
+
+  /**
+   * @brief Combines module ids and alloweds for these ids and fills vector with
+   * ModuleConsents
+   * @param module_type Module type as string
+   * @param module_ids Modules ids which needed consents from driver
+   * @param allowed Consents for modules
+   */
+  static rc_rpc_types::ModuleIdConsentVector FillModuleConsents(
+      const std::string& module_type,
+      const std::vector<std::string>& module_ids,
+      const std::vector<bool> allowed);
+
+  /**
+   * @brief Retrieves module ids from SmartObject.
+   * @param moduleIds Smartobject which contains collection of module ids
+   * @return Collection of module ids
+   */
+  static std::vector<std::string> RetrieveModuleIds(
+      const smart_objects::SmartObject& moduleIds);
+
+  /**
+   * @brief Retrieves module ids consents from SmartObject.
+   * @param moduleIds Smartobject which contains collection of module ids
+   * consents
+   * @return Collection of module ids consents.
+   */
+  static std::vector<bool> RetrieveModuleConsents(
+      const smart_objects::SmartObject& consents);
 
   /**
    * @brief RemoveRedundantGPSDataFromVIDataMsg removes redundant GPS data

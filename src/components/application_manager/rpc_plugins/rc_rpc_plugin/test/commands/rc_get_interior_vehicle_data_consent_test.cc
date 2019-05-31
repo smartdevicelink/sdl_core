@@ -53,6 +53,7 @@
 #include "rc_rpc_plugin/mock/mock_interior_data_cache.h"
 #include "rc_rpc_plugin/mock/mock_interior_data_manager.h"
 #include "rc_rpc_plugin/mock/mock_rc_capabilities_manager.h"
+#include "rc_rpc_plugin/mock/mock_rc_consent_manager.h"
 #include "rc_rpc_plugin/mock/mock_resource_allocation_manager.h"
 #include "rc_rpc_plugin/rc_module_constants.h"
 #include "rc_rpc_plugin/rc_rpc_plugin.h"
@@ -93,7 +94,9 @@ namespace {
 const uint32_t kConnectionKey = 2u;
 const uint32_t kAppId = 5u;
 const std::string kResource = "CLIMATE";
-const std::string kResourceId = "id1";
+const std::string kResourceId = "34045662-a9dc-4823-8435-91056d4c26cb";
+const std::string kPolicyAppId = "policy_app_id";
+const std::string kMacAddress = "device1";
 const uint32_t kPluginID = RCRPCPlugin::kRCPluginID;
 }  // namespace
 
@@ -173,7 +176,8 @@ class RCGetInteriorVehicleDataConsentTest
                            mock_allocation_manager_,
                            mock_interior_data_cache_,
                            mock_interior_data_manager_,
-                           mock_rc_capabilities_manager_};
+                           mock_rc_capabilities_manager_,
+                           mock_rc_consent_manger_};
     return std::make_shared<Command>(msg ? msg : msg = CreateMessage(), params);
   }
 
@@ -221,6 +225,7 @@ class RCGetInteriorVehicleDataConsentTest
   mobile_apis::MOBILE_API mobile_so_factoy_;
   testing::NiceMock<rc_rpc_plugin_test::MockRCCapabilitiesManager>
       mock_rc_capabilities_manager_;
+  testing::NiceMock<MockRCConsentManager> mock_rc_consent_manger_;
 };
 
 TEST_F(RCGetInteriorVehicleDataConsentTest,
@@ -231,6 +236,15 @@ TEST_F(RCGetInteriorVehicleDataConsentTest,
   // Expectations
   EXPECT_CALL(mock_allocation_manager_, AcquireResource(_, _, _))
       .WillOnce(Return(rc_rpc_plugin::AcquireResult::ASK_DRIVER));
+  ON_CALL(*mock_app_, app_id()).WillByDefault(Return(kAppId));
+  ON_CALL(*mock_app_, policy_app_id()).WillByDefault(Return(kPolicyAppId));
+  ON_CALL(*mock_app_, mac_address()).WillByDefault(ReturnRef(kMacAddress));
+
+  rc_rpc_types::ModuleUid moduleUid{kResource, kResourceId};
+  EXPECT_CALL(mock_rc_consent_manger_,
+              GetModuleConsent(kPolicyAppId, _, moduleUid))
+      .WillOnce(Return(rc_rpc_types::ModuleConsent::NOT_EXISTS));
+
   EXPECT_CALL(*optional_mock_rpc_plugin, GetCommandFactory())
       .WillOnce(ReturnRef(mock_command_factory));
   auto rc_consent_request =

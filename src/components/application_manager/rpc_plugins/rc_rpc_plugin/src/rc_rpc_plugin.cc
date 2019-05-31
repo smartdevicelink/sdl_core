@@ -37,6 +37,7 @@
 #include "rc_rpc_plugin/rc_app_extension.h"
 #include "rc_rpc_plugin/rc_capabilities_manager_impl.h"
 #include "rc_rpc_plugin/rc_command_factory.h"
+#include "rc_rpc_plugin/rc_consent_manager_impl.h"
 #include "rc_rpc_plugin/rc_helpers.h"
 #include "rc_rpc_plugin/resource_allocation_manager_impl.h"
 #include "utils/helpers.h"
@@ -50,11 +51,15 @@ bool RCRPCPlugin::Init(
     application_manager::ApplicationManager& app_manager,
     application_manager::rpc_service::RPCService& rpc_service,
     application_manager::HMICapabilities& hmi_capabilities,
-    policy::PolicyHandlerInterface& policy_handler) {
+    policy::PolicyHandlerInterface& policy_handler,
+    resumption::LastState& last_state) {
+  rc_consent_manager_.reset(new rc_rpc_plugin::RCConsentManagerImpl(
+      last_state,
+      app_manager,
+      app_manager.get_settings().period_for_consent_expiration()));
   interior_data_cache_.reset(new InteriorDataCacheImpl());
   interior_data_manager_.reset(new InteriorDataManagerImpl(
       *this, *interior_data_cache_, app_manager, rpc_service));
-
   rc_capabilities_manager_.reset(
       new RCCapabilitiesManagerImpl(hmi_capabilities));
   resource_allocation_manager_.reset(new ResourceAllocationManagerImpl(
@@ -66,10 +71,15 @@ bool RCRPCPlugin::Init(
                          *(resource_allocation_manager_.get()),
                          *(interior_data_cache_.get()),
                          *(interior_data_manager_.get()),
-                         *(rc_capabilities_manager_.get())};
+                         *(rc_capabilities_manager_.get()),
+                         *(rc_consent_manager_.get())};
   command_factory_.reset(new rc_rpc_plugin::RCCommandFactory(params));
   rpc_service_ = &rpc_service;
   app_mngr_ = &app_manager;
+
+  // Check all saved consents and remove expired
+  rc_consent_manager_->RemoveExpiredConsents();
+
   return true;
 }
 

@@ -40,7 +40,12 @@
 #include "rc_rpc_plugin/interior_data_cache.h"
 #include "rc_rpc_plugin/interior_data_manager.h"
 #include "rc_rpc_plugin/rc_capabilities_manager.h"
+#include "rc_rpc_plugin/rc_consent_manager.h"
 #include "rc_rpc_plugin/resource_allocation_manager.h"
+
+namespace resumption {
+class LastState;
+}
 
 namespace rc_rpc_plugin {
 namespace plugins = application_manager::plugin_manager;
@@ -59,7 +64,8 @@ class RCRPCPlugin : public plugins::RPCPlugin {
   bool Init(app_mngr::ApplicationManager& app_manager,
             app_mngr::rpc_service::RPCService& rpc_service,
             app_mngr::HMICapabilities& hmi_capabilities,
-            policy::PolicyHandlerInterface& policy_handler) OVERRIDE;
+            policy::PolicyHandlerInterface& policy_handler,
+            resumption::LastState& last_state) OVERRIDE;
   /**
    * @param int32_t command id
    * @param CommandSource source
@@ -102,6 +108,7 @@ class RCRPCPlugin : public plugins::RPCPlugin {
  private:
   application_manager::rpc_service::RPCService* rpc_service_;
   application_manager::ApplicationManager* app_mngr_;
+  std::unique_ptr<rc_rpc_plugin::RCConsentManager> rc_consent_manager_;
   std::unique_ptr<application_manager::CommandFactory> command_factory_;
   std::unique_ptr<ResourceAllocationManager> resource_allocation_manager_;
   std::unique_ptr<InteriorDataCache> interior_data_cache_;

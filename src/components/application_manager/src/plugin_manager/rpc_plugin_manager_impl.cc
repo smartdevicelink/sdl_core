@@ -1,6 +1,6 @@
-#include "application_manager/plugin_manager/rpc_plugin_manager_impl.h"
 #include <dlfcn.h>
 
+#include "application_manager/plugin_manager/rpc_plugin_manager_impl.h"
 #include "utils/file_system.h"
 
 namespace application_manager {
@@ -12,11 +12,13 @@ RPCPluginManagerImpl::RPCPluginManagerImpl(
     ApplicationManager& app_manager,
     rpc_service::RPCService& rpc_service,
     HMICapabilities& hmi_capabilities,
-    policy::PolicyHandlerInterface& policy_handler)
+    policy::PolicyHandlerInterface& policy_handler,
+    resumption::LastState& last_state)
     : app_manager_(app_manager)
     , rpc_service_(rpc_service)
     , hmi_capabilities_(hmi_capabilities)
-    , policy_handler_(policy_handler) {}
+    , policy_handler_(policy_handler)
+    , last_state_(last_state) {}
 
 bool IsLibraryFile(const std::string& file_path) {
   size_t pos = file_path.find_last_of(".");
@@ -94,8 +96,11 @@ uint32_t RPCPluginManagerImpl::LoadPlugins(const std::string& plugins_path) {
     LOG4CXX_DEBUG(
         logger_,
         "Loaded " << plugin->PluginName() << " plugin from " << full_name);
-    if (plugin->Init(
-            app_manager_, rpc_service_, hmi_capabilities_, policy_handler_)) {
+    if (plugin->Init(app_manager_,
+                     rpc_service_,
+                     hmi_capabilities_,
+                     policy_handler_,
+                     last_state_)) {
       loaded_plugins_.push_back(std::move(plugin));
     } else {
       LOG4CXX_ERROR(logger_,

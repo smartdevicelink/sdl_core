@@ -30,11 +30,18 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <algorithm>
+#include <ctime>
+#include <vector>
+
 #include "rc_rpc_plugin/commands/mobile/get_interior_vehicle_data_consent_request.h"
+#include "rc_rpc_plugin/rc_helpers.h"
 #include "rc_rpc_plugin/rc_module_constants.h"
+#include "rc_rpc_plugin/rc_rpc_types.h"
 #include "smart_objects/enum_schema_item.h"
 
 namespace rc_rpc_plugin {
+namespace app_mngr = application_manager;
 namespace commands {
 
 GetInteriorVehicleDataConsentRequest::GetInteriorVehicleDataConsentRequest(
@@ -44,6 +51,96 @@ GetInteriorVehicleDataConsentRequest::GetInteriorVehicleDataConsentRequest(
 
 void GetInteriorVehicleDataConsentRequest::Execute() {
   LOG4CXX_AUTO_TRACE(logger_);
+
+  auto& msg_params = (*message_)[app_mngr::strings::msg_params];
+
+  const bool module_ids_exists =
+      msg_params.keyExists(message_params::kModuleIds);
+  if (!module_ids_exists) {
+    SendResponse(false,
+                 mobile_apis::Result::INVALID_DATA,
+                 "ModuleIds collection is absent in request message");
+    return;
+  }
+
+  if (msg_params[message_params::kModuleIds].empty()) {
+    LOG4CXX_DEBUG(logger_,
+                  "ModuleIds collection is empty. Will be add default "
+                  "module_id from capabilities");
+
+    const auto module_id =
+        rc_capabilities_manager_.GetDefaultModuleIdFromCapabilities(
+            ModuleType());
+
+    msg_params[message_params::kModuleIds][0] = module_id;
+  }
+
+  const std::string module_type = ModuleType();
+  for (const auto module_id :
+       *(msg_params[message_params::kModuleIds].asArray())) {
+    const ModuleUid module(module_type, module_id.asString());
+    if (!rc_capabilities_manager_.CheckIfModuleExistInCapabilities(module)) {
+      LOG4CXX_WARN(logger_,
+                   "Accessing not supported module: " << module_type << " "
+                                                      << module_id.asString());
+      SetResourceState(module_type, ResourceState::FREE);
+      SendResponse(false,
+                   mobile_apis::Result::UNSUPPORTED_RESOURCE,
+                   "Accessing not supported module data");
+      return;
+    }
+  }
+
+  (*message_)[application_manager::strings::msg_params]
+             [application_manager::strings::app_id] = connection_key();
+
+  SendHMIRequest(hmi_apis::FunctionID::RC_GetInteriorVehicleDataConsent,
+                 (&msg_params),
+                 true);
+}
+
+void GetInteriorVehicleDataConsentRequest::on_event(
+    const app_mngr::event_engine::Event& event) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  namespace app_mnrg = application_manager;
+
+  if (event.id() != hmi_apis::FunctionID::RC_GetInteriorVehicleDataConsent) {
+    LOG4CXX_ERROR(logger_, "Received wrong event. FunctionID: " << event.id());
+    return;
+  }
+
+  const auto& hmi_response = event.smart_object();
+
+  std::string response_info;
+  const bool result_of_saving = SaveModuleIdConsents(
+      response_info, hmi_response[app_mngr::strings::msg_params]);
+
+  if (!result_of_saving) {
+    LOG4CXX_DEBUG(logger_, "Consent saving failed");
+    SendResponse(
+        false, mobile_apis::Result::GENERIC_ERROR, response_info.c_str());
+    return;
+  }
+
+  auto result_code =
+      GetMobileResultCode(static_cast<hmi_apis::Common_Result::eType>(
+          hmi_response[app_mngr::strings::params][app_mngr::hmi_response::code]
+              .asUInt()));
+
+  const bool success_result =
+      helpers::Compare<mobile_apis::Result::eType, helpers::EQ, helpers::ONE>(
+          result_code,
+          mobile_apis::Result::SUCCESS,
+          mobile_apis::Result::WARNINGS);
+
+  smart_objects::SmartObject response_params;
+  response_params = hmi_response[app_mngr::strings::msg_params];
+  std::string info;
+  GetInfo(hmi_response, info);
+  SendResponse(success_result,
+               result_code,
+               info.c_str(),
+               success_result ? &response_params : nullptr);
 }
 
 std::string GetInteriorVehicleDataConsentRequest::ModuleType() const {
@@ -54,20 +151,59 @@ std::string GetInteriorVehicleDataConsentRequest::ModuleType() const {
                          .asUInt());
 
   const char* str;
-  const bool ok = ns_smart_device_link::ns_smart_objects::EnumConversionHelper<
+  const bool ok = smart_objects::EnumConversionHelper<
       mobile_apis::ModuleType::eType>::EnumToCString(module_type, &str);
   return ok ? str : "unknown";
 }
 
 std::string GetInteriorVehicleDataConsentRequest::ModuleId() const {
-  // TODO: rewrite this function, because for this request we have this param as
-  // array: <param name="moduleIds" type="String" maxlength="100" array="true"
-  // mandatory="true">
-  return (*message_)[app_mngr::strings::msg_params][message_params::kModuleId]
-      .asString();
+  return std::string();
 }
 
 GetInteriorVehicleDataConsentRequest::~GetInteriorVehicleDataConsentRequest() {}
+
+bool GetInteriorVehicleDataConsentRequest::SaveModuleIdConsents(
+    std::string& info_out, const smart_objects::SmartObject& msg_params) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  const bool is_allowed_exists = msg_params.keyExists(message_params::kAllowed);
+
+  if (!is_allowed_exists || msg_params[message_params::kAllowed].empty()) {
+    info_out = "Collection of consents is absent in HMI response or empty";
+    LOG4CXX_ERROR(logger_, info_out);
+    return false;
+  }
+
+  const auto& allowed = msg_params[message_params::kAllowed];
+  const auto& moduleIds =
+      (*message_)[app_mngr::strings::msg_params][message_params::kModuleIds];
+
+  if (allowed.length() != moduleIds.length()) {
+    info_out =
+        "The received module_id collection from mobile and received consent "
+        "collection from HMI are not equal by size.";
+    LOG4CXX_ERROR(logger_, info_out);
+    return false;
+  }
+  std::string module_type = ModuleType();
+  auto module_ids = RCHelpers::RetrieveModuleIds(moduleIds);
+  auto module_allowed = RCHelpers::RetrieveModuleConsents(allowed);
+
+  auto module_consents =
+      RCHelpers::FillModuleConsents(module_type, module_ids, module_allowed);
+
+  auto application = application_manager_.application(connection_key());
+  if (!application) {
+    LOG4CXX_ERROR(logger_,
+                  "Application with connection key:" << connection_key()
+                                                     << " isn't registered");
+    return false;
+  }
+  std::string policy_app_id = application->policy_app_id();
+  const auto mac_address = application->mac_address();
+  rc_consent_manager_.SaveModuleConsents(
+      policy_app_id, mac_address, module_consents);
+  return true;
+}
 
 }  // namespace commands
 }  // namespace rc_rpc_plugin

@@ -33,6 +33,8 @@
 #ifndef SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_RC_RPC_PLUGIN_INCLUDE_RC_RPC_PLUGIN_COMMANDS_MOBILE_RC_GET_INTERIOR_VEHICLE_DATA_CONSENT_REQUEST_H
 #define SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_RC_RPC_PLUGIN_INCLUDE_RC_RPC_PLUGIN_COMMANDS_MOBILE_RC_GET_INTERIOR_VEHICLE_DATA_CONSENT_REQUEST_H
 
+#include <string>
+
 #include "rc_rpc_plugin/commands/rc_command_params.h"
 #include "rc_rpc_plugin/commands/rc_command_request.h"
 #include "utils/macro.h"
@@ -45,12 +47,9 @@ class GetInteriorVehicleDataConsentRequest
  public:
   /**
    * @brief GetInteriorVehicleDataConsentRequest constructor
-   *
    * @param message smart pointer with SmartObject
-   * @param params structure which contains references for next
-   * parameters: ApplicationManager, RPCService, HMICapabilities,
-   * PolicyHandlerInterface, ResourceAllocationManager, InteriorDataCache,
-   * InteriorDataManager.
+   * @param params structure that contains references to
+   * parameters used in remote сontrol commands
    */
   GetInteriorVehicleDataConsentRequest(
       const application_manager::commands::MessageSharedPtr& message,
@@ -61,11 +60,28 @@ class GetInteriorVehicleDataConsentRequest
    */
   void Execute() FINAL;
 
+  void on_event(const app_mngr::event_engine::Event& event) FINAL;
+
   std::string ModuleType() const FINAL;
 
+  /**
+   * @brief For this RPC this method isn't correct, because SDL receives array
+   * of module_ids instead of only one module_id. This method returns empty
+   * string.
+   */
   std::string ModuleId() const FINAL;
 
   ~GetInteriorVehicleDataConsentRequest();
+
+ private:
+  /**
+   * @brief Saves ModuleId consents (saved before moduleids + received moduleId
+   * consents + date_of_consent) to file.
+   *
+   * @param msg_params Message params from response message as SmartObject.
+   */
+  bool SaveModuleIdConsents(std::string& info_out,
+                            const smart_objects::SmartObject& msg_params);
 };
 
 }  // namespace commands

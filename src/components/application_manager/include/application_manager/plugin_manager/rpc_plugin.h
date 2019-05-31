@@ -43,6 +43,10 @@ namespace policy {
 class PolicyHandlerInterface;
 }
 
+namespace resumption {
+class LastState;
+}
+
 namespace application_manager {
 class CommandFactory;
 
@@ -82,7 +86,8 @@ class RPCPlugin {
   virtual bool Init(ApplicationManager& app_manager,
                     rpc_service::RPCService& rpc_service,
                     HMICapabilities& hmi_capabilities,
-                    policy::PolicyHandlerInterface& policy_handler) = 0;
+                    policy::PolicyHandlerInterface& policy_handler,
+                    resumption::LastState& last_state) = 0;
   /**
    * @brief IsAbleToProcess check if plugin is able to process function
    * @param function_id RPC identifier

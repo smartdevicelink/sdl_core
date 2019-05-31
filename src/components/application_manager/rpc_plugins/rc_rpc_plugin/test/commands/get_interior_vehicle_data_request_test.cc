@@ -39,6 +39,7 @@
 #include "rc_rpc_plugin/mock/mock_interior_data_cache.h"
 #include "rc_rpc_plugin/mock/mock_interior_data_manager.h"
 #include "rc_rpc_plugin/mock/mock_rc_capabilities_manager.h"
+#include "rc_rpc_plugin/mock/mock_rc_consent_manager.h"
 #include "rc_rpc_plugin/mock/mock_resource_allocation_manager.h"
 #include "rc_rpc_plugin/rc_app_extension.h"
 #include "rc_rpc_plugin/rc_command_factory.h"
@@ -173,7 +174,8 @@ class GetInteriorVehicleDataRequestTest
                            mock_allocation_manager_,
                            mock_interior_data_cache_,
                            mock_interior_data_manager_,
-                           mock_rc_capabilities_manager_};
+                           mock_rc_capabilities_manager_,
+                           mock_rc_consent_manger_};
     return std::make_shared<Command>(msg ? msg : msg = CreateMessage(), params);
   }
 
@@ -194,6 +196,7 @@ class GetInteriorVehicleDataRequestTest
   testing::NiceMock<rc_rpc_plugin_test::MockRCCapabilitiesManager>
       mock_rc_capabilities_manager_;
   smart_objects::SmartObject rc_capabilities_;
+  testing::NiceMock<MockRCConsentManager> mock_rc_consent_manger_;
 };
 
 TEST_F(GetInteriorVehicleDataRequestTest,

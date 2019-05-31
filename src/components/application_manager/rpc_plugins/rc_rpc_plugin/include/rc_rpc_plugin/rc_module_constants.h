@@ -162,8 +162,20 @@ const char kCode[] = "code";
 namespace message_params {
 const char kName[] = "name";
 const char kId[] = "id";
+
+// RCConsentManager, ResumptionCtrl, GetInteriorVehicleDataConsent request
 const char kModuleId[] = "moduleId";
 const char kModuleInfo[] = "moduleInfo";
+const char kAppConsents[] = "appConsents";
+const char kAppConsentList[] = "appConsentsList";
+const char kConsent[] = "consent";
+const char kConsentDate[] = "consentDate";
+const char kModuleConsents[] = "moduleConsents";
+const char kAppId[] = "appId";
+const char kModuleIds[] = "moduleIds";
+const char kMacAddress[] = "macAddress";
+const char kApplications[] = "applications";
+// RCConsentManager, ResumptionCtrl, GetInteriorVehicleDataConsent request
 
 // SetInteriorVehicleData request
 const char kModuleData[] = "moduleData";
