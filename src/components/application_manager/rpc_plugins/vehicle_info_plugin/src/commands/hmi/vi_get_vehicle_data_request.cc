@@ -52,6 +52,24 @@ VIGetVehicleDataRequest::~VIGetVehicleDataRequest() {}
 
 void VIGetVehicleDataRequest::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
+  const auto& rpc_spec_vehicle_data = MessageHelper::vehicle_data();
+  auto& msg_params = (*message_)[strings::msg_params];
+
+  smart_objects::SmartObject custom_data;
+  for (const auto& name : msg_params.enumerate()) {
+    const auto& found_it = rpc_spec_vehicle_data.find(name);
+    if (rpc_spec_vehicle_data.end() == found_it) {
+      custom_data[name] = msg_params[name];
+      msg_params.erase(name);
+    }
+  }
+
+  auto hmi_custom_msg_params =
+      custom_vehicle_data_manager_.CreateHMIMessageParams(
+          custom_data.enumerate());
+  for (const auto& param : hmi_custom_msg_params.enumerate()) {
+    msg_params[param] = hmi_custom_msg_params[param];
+  }
 
   SendRequest();
 }
