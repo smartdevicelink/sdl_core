@@ -26,6 +26,7 @@ import generator.parsers.SDLRPCV2
 import generator.parsers.JSONRPC
 import generator.generators.SmartFactorySDLRPC
 import generator.generators.SmartFactoryJSONRPC
+import generator.generators.PolicyTypes
 import MsgVersionGenerate
 
 from generator.parsers.RPCBase import ParseError
@@ -37,7 +38,11 @@ SUPPORTED_FORMATS = {
     "sdlrpcv2": (generator.parsers.SDLRPCV2.Parser,
                  generator.generators.SmartFactorySDLRPC.CodeGenerator),
     "jsonrpc": (generator.parsers.JSONRPC.Parser,
-                generator.generators.SmartFactoryJSONRPC.CodeGenerator)
+                generator.generators.SmartFactoryJSONRPC.CodeGenerator),
+    "mobile-policy-types": (generator.parsers.SDLRPCV2.Parser,
+                generator.generators.PolicyTypes.CodeGenerator),
+    "hmi-policy-types": (generator.parsers.JSONRPC.Parser,
+                generator.generators.PolicyTypes.CodeGenerator)
 }
 
 
