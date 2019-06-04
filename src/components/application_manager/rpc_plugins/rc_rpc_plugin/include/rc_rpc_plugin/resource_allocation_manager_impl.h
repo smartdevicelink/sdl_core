@@ -222,6 +222,15 @@ class ResourceAllocationManagerImpl : public ResourceAllocationManager {
   ResourceReleasedState::eType SetResourceFree(const std::string& module_type,
                                                const std::string& module_id,
                                                const uint32_t app_id);
+  /**
+   * @brief CheckLocation checks if the user's grid is equal to or is within the
+   * service area of the module, or user location is driver's seat
+   * @param module module type + module id
+   * @return true if the user's grid equals to or is within module service
+   * area or user location is driver's seat, otherwise - false
+   */
+  bool IsUserLocationValid(ModuleUid& module,
+                           application_manager::ApplicationSharedPtr app);
 
   /**
    * @brief AllocatedResources contains link between resource and application

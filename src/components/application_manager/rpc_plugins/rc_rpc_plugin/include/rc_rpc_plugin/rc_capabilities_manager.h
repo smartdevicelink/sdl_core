@@ -132,6 +132,39 @@ class RCCapabilitiesManager {
    */
   virtual const std::vector<ModuleUid> GetResources() const = 0;
 
+  /**
+   * @brief GetModuleServiceArea retrieves service area of module,
+   * if module serviceArea is missed in capabilities, serviceArea is
+   * assumed to be the same as location, if location
+   * is missed in capabilities, it is assumed that serviceArea covers
+   * the whole area of vehicle
+   * @param module module type + module id
+   * @return Grid of module service area
+   */
+  virtual Grid GetModuleServiceArea(const ModuleUid& module) const = 0;
+
+  /**
+   * @brief IsMultipleAccessAllowed checks if multiple access allowed
+   * for requested module
+   * @param module module type + module id
+   * @return true if allowed, otherwise - false
+   */
+  virtual bool IsMultipleAccessAllowed(const ModuleUid& module) const = 0;
+
+  /**
+   * @brief GetDriverLocationFromSeatLocationCapability retrieves the driver's
+   * location from seat location capabilities
+   * @return Grid of driver's location
+   */
+  virtual const Grid GetDriverLocationFromSeatLocationCapability() const = 0;
+
+  /**
+   * @brief IsSeatLocationCapabilityProvided checks whether all necessary
+   * parameters are provided in seat location capabilities
+   * @return true if provided, otherwise - false
+   */
+  virtual bool IsSeatLocationCapabilityProvided() const = 0;
+
   virtual ~RCCapabilitiesManager() {}
 };
 

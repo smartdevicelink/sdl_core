@@ -70,6 +70,14 @@ class RCCapabilitiesManagerImpl : public RCCapabilitiesManager {
 
   const std::vector<ModuleUid> GetResources() const FINAL;
 
+  Grid GetModuleServiceArea(const ModuleUid& module) const FINAL;
+
+  bool IsMultipleAccessAllowed(const ModuleUid& module) const FINAL;
+
+  const Grid GetDriverLocationFromSeatLocationCapability() const FINAL;
+
+  bool IsSeatLocationCapabilityProvided() const FINAL;
+
  private:
   const std::map<std::string, std::string> GetLightCapabilitiesMapping() const;
 
@@ -169,6 +177,17 @@ class RCCapabilitiesManagerImpl : public RCCapabilitiesManager {
       const smart_objects::SmartObject& control_capabilities,
       const std::string& capability_key,
       std::vector<ModuleUid>& out_resources) const;
+
+  Grid GetModuleServiceAreaFromControlCapability(
+      const smart_objects::SmartObject& control_capabilities) const;
+
+  Grid GetModuleLocationFromControlCapability(
+      const smart_objects::SmartObject& control_capabilities) const;
+
+  bool IsMultipleAccessAllowedInControlCaps(
+      const smart_objects::SmartObject& control_capabilities) const;
+
+  Grid GetWholeVehicleArea() const;
 
   application_manager::HMICapabilities& hmi_capabilities_;
 };

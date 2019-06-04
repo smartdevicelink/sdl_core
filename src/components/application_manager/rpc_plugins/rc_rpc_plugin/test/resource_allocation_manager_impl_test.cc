@@ -92,7 +92,8 @@ class RAManagerTest : public ::testing::Test {
       , mock_app_1_(std::make_shared<NiceMock<MockApplication> >())
       , mock_app_2_(std::make_shared<NiceMock<MockApplication> >())
       , apps_lock_ptr_(std::make_shared<sync_primitives::Lock>())
-      , apps_da_(apps_, apps_lock_ptr_) {
+      , apps_da_(apps_, apps_lock_ptr_)
+      , module_service_area_(0, 0, 0, 3, 2, 1) {
     ON_CALL(mock_app_mngr_, GetPolicyHandler())
         .WillByDefault(ReturnRef(mock_policy_handler_));
     auto plugin_id = rc_rpc_plugin::RCRPCPlugin::kRCPluginID;
@@ -102,6 +103,24 @@ class RAManagerTest : public ::testing::Test {
     PrepareResources();
     ON_CALL(mock_rc_capabilities_manager_, GetResources())
         .WillByDefault(Return(resources_));
+    ON_CALL(mock_rc_capabilities_manager_, IsSeatLocationCapabilityProvided())
+        .WillByDefault(Return(false));
+    ON_CALL(mock_rc_capabilities_manager_, IsMultipleAccessAllowed(_))
+        .WillByDefault(Return(true));
+    ON_CALL(mock_rc_capabilities_manager_, GetModuleServiceArea(_))
+        .WillByDefault(Return(module_service_area_));
+
+    ON_CALL(mock_app_mngr_, application(kAppId1))
+        .WillByDefault(Return(mock_app_1_));
+    ON_CALL(*mock_app_1_,
+            QueryInterface(rc_rpc_plugin::RCRPCPlugin::kRCPluginID))
+        .WillByDefault(Return(app_ext_ptr_));
+
+    ON_CALL(mock_app_mngr_, application(kAppId2))
+        .WillByDefault(Return(mock_app_2_));
+    ON_CALL(*mock_app_2_,
+            QueryInterface(rc_rpc_plugin::RCRPCPlugin::kRCPluginID))
+        .WillByDefault(Return(app_ext_ptr_));
 
     OnRCStatusNotificationExpectations();
   }
@@ -131,6 +150,7 @@ class RAManagerTest : public ::testing::Test {
   testing::NiceMock<rc_rpc_plugin_test::MockRCCapabilitiesManager>
       mock_rc_capabilities_manager_;
   std::vector<ModuleUid> resources_;
+  Grid module_service_area_;
 };
 
 void RAManagerTest::CheckResultWithHMILevelAndAccessMode(
@@ -164,10 +184,6 @@ void RAManagerTest::PrepareResources() {
 }
 
 void RAManagerTest::OnRCStatusNotificationExpectations() {
-  ON_CALL(mock_app_mngr_, application(kAppId1))
-      .WillByDefault(Return(mock_app_1_));
-  ON_CALL(*mock_app_1_, QueryInterface(rc_rpc_plugin::RCRPCPlugin::kRCPluginID))
-      .WillByDefault(Return(app_ext_ptr_));
   apps_.insert(mock_app_1_);
   ON_CALL(mock_app_mngr_, applications()).WillByDefault(Return(apps_da_));
 }

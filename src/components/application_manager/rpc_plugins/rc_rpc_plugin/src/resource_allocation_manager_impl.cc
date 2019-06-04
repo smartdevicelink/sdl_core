@@ -71,8 +71,17 @@ AcquireResult::eType ResourceAllocationManagerImpl::AcquireResource(
     return AcquireResult::IN_USE;
   }
 
-  sync_primitives::AutoLock lock(allocated_resources_lock_);
   ModuleUid module(module_type, module_id);
+
+  if (rc_capabilities_manager_.IsSeatLocationCapabilityProvided() &&
+      !IsUserLocationValid(module, acquiring_app)) {
+    LOG4CXX_WARN(logger_,
+                 "Resource acquisition is not allowed "
+                 "according to location verification.");
+    return AcquireResult::REJECTED;
+  }
+
+  sync_primitives::AutoLock lock(allocated_resources_lock_);
   const AllocatedResources::const_iterator allocated_it =
       allocated_resources_.find(module);
   if (allocated_resources_.end() == allocated_it) {
@@ -110,6 +119,13 @@ AcquireResult::eType ResourceAllocationManagerImpl::AcquireResource(
     return AcquireResult::REJECTED;
   }
 
+  if (!rc_capabilities_manager_.IsMultipleAccessAllowed(module)) {
+    LOG4CXX_DEBUG(logger_,
+                  "Multiple access for the: " << module_type << " " << module_id
+                                              << " isn't allowed");
+    return AcquireResult::REJECTED;
+  }
+
   switch (current_access_mode_) {
     case hmi_apis::Common_RCAccessMode::AUTO_DENY: {
       LOG4CXX_DEBUG(logger_,
@@ -137,6 +153,23 @@ AcquireResult::eType ResourceAllocationManagerImpl::AcquireResource(
     }
     default: { DCHECK_OR_RETURN(false, AcquireResult::IN_USE); }
   }
+}
+
+bool ResourceAllocationManagerImpl::IsUserLocationValid(
+    ModuleUid& module, application_manager::ApplicationSharedPtr app) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  const auto extension = RCHelpers::GetRCExtension(*app);
+  const auto user_location = extension->GetUserLocation();
+  const auto module_service_area =
+      rc_capabilities_manager_.GetModuleServiceArea(module);
+  const auto driver =
+      rc_capabilities_manager_.GetDriverLocationFromSeatLocationCapability();
+  const bool is_driver = user_location == driver;
+  if (is_driver || user_location.IntersectionExists(module_service_area)) {
+    return true;
+  }
+  LOG4CXX_DEBUG(logger_, "User location is not valid");
+  return false;
 }
 
 void ResourceAllocationManagerImpl::ReleaseModuleType(

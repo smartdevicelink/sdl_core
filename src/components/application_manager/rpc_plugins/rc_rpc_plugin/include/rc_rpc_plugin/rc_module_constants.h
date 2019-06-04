@@ -46,6 +46,25 @@ const char khmiSettingsControlCapabilities[] = "hmiSettingsControlCapabilities";
 const char kseatControlCapabilities[] = "seatControlCapabilities";
 // RemoteControlCapabilities constants
 
+const char kServiceArea[] = "serviceArea";
+const char kLocation[] = "location";
+const char kCol[] = "col";
+const char kRow[] = "row";
+const char kLevel[] = "level";
+const char kColspan[] = "colspan";
+const char kRowspan[] = "rowspan";
+const char kLevelspan[] = "levelspan";
+
+// SeatLocationCapability constants
+const char kCols[] = "columns";
+const char kRows[] = "rows";
+const char kLevels[] = "levels";
+const char kSeats[] = "seats";
+const char kGrid[] = "grid";
+// SeatLocationCapability constants
+
+const char kAllowMultipleAccess[] = "allowMultipleAccess";
+
 const char kSupportedLights[] = "supportedLights";
 
 // ClimateControlCapabilities
@@ -300,6 +319,15 @@ const char kHMIAppID[] = "appID";
 const char kHmiLevel[] = "hmiLevel";
 const char kSysContext[] = "systemContext";
 const char kAudioState[] = "audioStreamingState";
+
+// Grid struct
+const char kCol[] = "col";
+const char kRow[] = "row";
+const char kLevel[] = "level";
+const char kColspan[] = "colspan";
+const char kRowspan[] = "rowspan";
+const char kLevelspan[] = "levelspan";
+
 }  //  namespace message_params
 
 namespace enums_value {

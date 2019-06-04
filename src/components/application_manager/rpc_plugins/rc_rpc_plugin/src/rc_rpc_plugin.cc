@@ -112,8 +112,13 @@ void RCRPCPlugin::OnApplicationEvent(
   }
   switch (event) {
     case plugins::kApplicationRegistered: {
-      application->AddExtension(
-          std::shared_ptr<RCAppExtension>(new RCAppExtension(kRCPluginID)));
+      auto extension =
+          std::shared_ptr<RCAppExtension>(new RCAppExtension(kRCPluginID));
+      application->AddExtension(extension);
+      const auto driver_location =
+          rc_capabilities_manager_
+              ->GetDriverLocationFromSeatLocationCapability();
+      extension->SetUserLocation(driver_location);
       resource_allocation_manager_->SendOnRCStatusNotifications(
           NotificationTrigger::APP_REGISTRATION, application);
       break;
@@ -131,7 +136,7 @@ void RCRPCPlugin::OnApplicationEvent(
     case plugins::kGlobalPropertiesUpdated: {
       const auto user_location = application->get_user_location();
       auto extension = RCHelpers::GetRCExtension(*application);
-      // TODO:: save user location to extension
+      extension->SetUserLocation(user_location);
       break;
     }
     default:

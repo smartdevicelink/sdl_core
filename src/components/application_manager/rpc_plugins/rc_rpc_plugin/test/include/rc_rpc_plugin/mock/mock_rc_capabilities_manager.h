@@ -73,6 +73,17 @@ class MockRCCapabilitiesManager : public rc_rpc_plugin::RCCapabilitiesManager {
 
   MOCK_CONST_METHOD0(GetResources,
                      const std::vector<rc_rpc_plugin::ModuleUid>());
+
+  MOCK_CONST_METHOD1(GetModuleServiceArea,
+                     rc_rpc_plugin::Grid(const rc_rpc_plugin::ModuleUid&));
+
+  MOCK_CONST_METHOD1(IsMultipleAccessAllowed,
+                     bool(const rc_rpc_plugin::ModuleUid&));
+
+  MOCK_CONST_METHOD0(GetDriverLocationFromSeatLocationCapability,
+                     const rc_rpc_plugin::Grid());
+
+  MOCK_CONST_METHOD0(IsSeatLocationCapabilityProvided, bool());
 };
 }  // namespace rc_rpc_plugin_test
 #endif  // SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_RC_RPC_PLUGIN_TEST_INCLUDE_RC_RPC_PLUGIN_MOCK_MOCK_RC_СAPABILITIES_MANAGER_H_

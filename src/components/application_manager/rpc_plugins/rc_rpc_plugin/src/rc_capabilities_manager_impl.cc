@@ -742,4 +742,161 @@ bool RCCapabilitiesManagerImpl::AreAllParamsReadOnly(
   return true;
 }
 
+bool RCCapabilitiesManagerImpl::IsSeatLocationCapabilityProvided() const {
+  LOG4CXX_AUTO_TRACE(logger_);
+  auto seat_location_capability = hmi_capabilities_.seat_location_capability();
+  if (!seat_location_capability || seat_location_capability->empty()) {
+    LOG4CXX_DEBUG(logger_, "Seat Location capability is not provided by HMI");
+    return false;
+  }
+
+  if (seat_location_capability->keyExists(strings::kRows) &&
+      seat_location_capability->keyExists(strings::kCols) &&
+      seat_location_capability->keyExists(strings::kLevels) &&
+      seat_location_capability->keyExists(strings::kSeats)) {
+    const auto* seats = (*seat_location_capability)[strings::kSeats].asArray();
+    if (!seats->empty()) {
+      return true;
+    }
+  }
+
+  LOG4CXX_DEBUG(
+      logger_,
+      "Seat Location capability doesn't contain all necessary parameters");
+  return false;
+}
+
+const Grid
+RCCapabilitiesManagerImpl::GetDriverLocationFromSeatLocationCapability() const {
+  LOG4CXX_AUTO_TRACE(logger_);
+  Grid grid;
+  if (IsSeatLocationCapabilityProvided()) {
+    auto seat_location_capability =
+        hmi_capabilities_.seat_location_capability();
+    const auto* seats = (*seat_location_capability)[strings::kSeats].asArray();
+    const auto& driver_seat = (*seats)[0];
+    if (driver_seat.keyExists(strings::kGrid)) {
+      const auto& driver_location = driver_seat[strings::kGrid];
+      grid = Grid(driver_location[strings::kCol].asInt(),
+                  driver_location[strings::kRow].asInt(),
+                  driver_location[strings::kLevel].asInt(),
+                  driver_location[strings::kColspan].asInt(),
+                  driver_location[strings::kRowspan].asInt(),
+                  driver_location[strings::kLevelspan].asInt());
+    } else {
+      LOG4CXX_DEBUG(logger_, "Driver's location doesn't provided");
+    }
+  }
+  return grid;
+}
+
+Grid RCCapabilitiesManagerImpl::GetWholeVehicleArea() const {
+  auto seat_location_capability =
+      *(hmi_capabilities_.seat_location_capability());
+  int32_t colspan = seat_location_capability.keyExists(strings::kCols)
+                        ? seat_location_capability[strings::kCols].asInt()
+                        : 0;
+
+  int32_t rowspan = seat_location_capability.keyExists(strings::kRows)
+                        ? seat_location_capability[strings::kRows].asInt()
+                        : 0;
+
+  int32_t levelspan = seat_location_capability.keyExists(strings::kLevels)
+                          ? seat_location_capability[strings::kLevels].asInt()
+                          : 0;
+  return Grid(0, 0, 0, colspan, rowspan, levelspan);
+}
+
+Grid RCCapabilitiesManagerImpl::GetModuleLocationFromControlCapability(
+    const smart_objects::SmartObject& control_capabilities) const {
+  if (control_capabilities[message_params::kModuleInfo].keyExists(
+          strings::kLocation)) {
+    const auto& location =
+        control_capabilities[message_params::kModuleInfo][strings::kLocation];
+
+    return Grid(location[strings::kCol].asInt(),
+                location[strings::kRow].asInt(),
+                location[strings::kLevel].asInt(),
+                location[strings::kColspan].asInt(),
+                location[strings::kRowspan].asInt(),
+                location[strings::kLevelspan].asInt());
+  }
+  return GetWholeVehicleArea();
+}
+
+Grid RCCapabilitiesManagerImpl::GetModuleServiceAreaFromControlCapability(
+    const smart_objects::SmartObject& control_capabilities) const {
+  if (control_capabilities.keyExists(message_params::kModuleInfo)) {
+    if (control_capabilities[message_params::kModuleInfo].keyExists(
+            strings::kServiceArea)) {
+      const auto& serviceArea =
+          control_capabilities[message_params::kModuleInfo]
+                              [strings::kServiceArea];
+
+      return Grid(serviceArea[strings::kCol].asInt(),
+                  serviceArea[strings::kRow].asInt(),
+                  serviceArea[strings::kLevel].asInt(),
+                  serviceArea[strings::kColspan].asInt(),
+                  serviceArea[strings::kRowspan].asInt(),
+                  serviceArea[strings::kLevelspan].asInt());
+    }
+  }
+  return GetModuleLocationFromControlCapability(control_capabilities);
+}
+
+Grid RCCapabilitiesManagerImpl::GetModuleServiceArea(
+    const ModuleUid& module) const {
+  auto rc_capabilities = *(hmi_capabilities_.rc_capability());
+  const auto& mapping = RCHelpers::GetModuleTypeToCapabilitiesMapping();
+  const auto& module_type = module.first;
+  const auto& capabilities_key = mapping(module_type);
+  if (!rc_capabilities.keyExists(capabilities_key)) {
+    LOG4CXX_DEBUG(logger_, module_type << "control capabilities not present");
+    return Grid();
+  }
+  const auto& caps = rc_capabilities[capabilities_key];
+
+  if (strings::khmiSettingsControlCapabilities == capabilities_key ||
+      strings::klightControlCapabilities == capabilities_key) {
+    return GetModuleServiceAreaFromControlCapability(caps);
+  } else {
+    const auto& capability_item =
+        GetCapabilitiesByModuleIdFromArray(caps, module.second);
+    return GetModuleServiceAreaFromControlCapability(capability_item);
+  }
+}
+
+bool RCCapabilitiesManagerImpl::IsMultipleAccessAllowedInControlCaps(
+    const smart_objects::SmartObject& control_capabilities) const {
+  if (control_capabilities.keyExists(message_params::kModuleInfo) &&
+      control_capabilities[message_params::kModuleInfo].keyExists(
+          strings::kAllowMultipleAccess)) {
+    return control_capabilities[message_params::kModuleInfo]
+                               [strings::kAllowMultipleAccess]
+                                   .asBool();
+  }
+  return true;
+}
+
+bool RCCapabilitiesManagerImpl::IsMultipleAccessAllowed(
+    const ModuleUid& module) const {
+  auto rc_capabilities = *(hmi_capabilities_.rc_capability());
+  const auto& mapping = RCHelpers::GetModuleTypeToCapabilitiesMapping();
+  const auto& module_type = module.first;
+  const auto& capabilities_key = mapping(module_type);
+  if (!rc_capabilities.keyExists(capabilities_key)) {
+    LOG4CXX_DEBUG(logger_, module_type << "control capabilities not present");
+    return false;
+  }
+  const auto& caps = rc_capabilities[capabilities_key];
+
+  if (strings::khmiSettingsControlCapabilities == capabilities_key ||
+      strings::klightControlCapabilities == capabilities_key) {
+    return IsMultipleAccessAllowedInControlCaps(caps);
+  } else {
+    return IsMultipleAccessAllowedInControlCaps(
+        GetCapabilitiesByModuleIdFromArray(caps, module.second));
+  }
+}
+
 }  // namespace rc_rpc_plugin

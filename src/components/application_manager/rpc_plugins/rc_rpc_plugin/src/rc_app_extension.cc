@@ -32,6 +32,8 @@
 
 #include "rc_rpc_plugin/rc_app_extension.h"
 #include <algorithm>
+#include "rc_rpc_plugin/rc_module_constants.h"
+#include "smart_objects/smart_object.h"
 
 namespace rc_rpc_plugin {
 RCAppExtension::RCAppExtension(application_manager::AppExtensionUID uid)
@@ -87,6 +89,26 @@ void RCAppExtension::ProcessResumption(
 
 std::set<ModuleUid> RCAppExtension::InteriorVehicleDataSubscriptions() const {
   return subscribed_interior_vehicle_data_;
+}
+
+Grid RCAppExtension::GetUserLocation() const {
+  return user_location_;
+}
+
+void RCAppExtension::SetUserLocation(
+    const ns_smart_device_link::ns_smart_objects::SmartObject& user_location) {
+  const auto grid = user_location[strings::kGrid];
+  const int32_t col = grid[strings::kCol].asInt();
+  const int32_t row = grid[strings::kRow].asInt();
+  const int32_t level = grid[strings::kLevel].asInt();
+  const int32_t colspan = grid[strings::kColspan].asInt();
+  const int32_t rowspan = grid[strings::kRowspan].asInt();
+  const int32_t levelspan = grid[strings::kLevelspan].asInt();
+  user_location_ = Grid(col, row, level, colspan, rowspan, levelspan);
+}
+
+void RCAppExtension::SetUserLocation(const Grid& grid) {
+  user_location_ = grid;
 }
 
 RCAppExtension::~RCAppExtension() {}

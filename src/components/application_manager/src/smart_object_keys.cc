@@ -164,6 +164,7 @@ const char* navigation_capability = "navigationCapability";
 const char* phone_capability = "phoneCapability";
 const char* video_streaming_capability = "videoStreamingCapability";
 const char* rc_capability = "remoteControlCapability";
+const char* seat_location_capability = "seatLocationCapability";
 const char* app_services_capabilities = "appServicesCapabilities";
 const char* day_color_scheme = "dayColorScheme";
 const char* night_color_scheme = "nightColorScheme";
