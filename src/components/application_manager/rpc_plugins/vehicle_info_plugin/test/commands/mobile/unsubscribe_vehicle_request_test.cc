@@ -35,10 +35,10 @@
 
 #include "gtest/gtest.h"
 
-#include "application_manager/commands/command_request_test.h"
 #include "application_manager/mock_application_manager.h"
 #include "application_manager/mock_message_helper.h"
 #include "mobile/unsubscribe_vehicle_data_request.h"
+#include "vehicle_info_plugin/commands/vi_command_request_test.h"
 #include "vehicle_info_plugin/vehicle_info_app_extension.h"
 #include "vehicle_info_plugin/vehicle_info_plugin.h"
 
@@ -66,7 +66,7 @@ const mobile_apis::VehicleDataType::eType kVehicleType =
 }  // namespace
 
 class UnsubscribeVehicleRequestTest
-    : public CommandRequestTest<CommandsTestMocks::kIsNice> {
+    : public VICommandRequestTest<CommandsTestMocks::kIsNice> {
  public:
   UnsubscribeVehicleRequestTest()
       : mock_app_(CreateMockApp())
@@ -99,7 +99,7 @@ class UnsubscribeVehicleRequestTest
 };
 
 TEST_F(UnsubscribeVehicleRequestTest, Run_AppNotRegistered_UNSUCCESS) {
-  CommandPtr command(CreateCommand<UnsubscribeVehicleDataRequest>());
+  CommandPtr command(CreateCommandVI<UnsubscribeVehicleDataRequest>());
   EXPECT_CALL(app_mngr_, application(_))
       .WillOnce(Return(ApplicationSharedPtr()));
 
@@ -121,7 +121,8 @@ TEST_F(UnsubscribeVehicleRequestTest,
 
   am::VehicleData data;
   EXPECT_CALL(mock_message_helper_, vehicle_data()).WillOnce(ReturnRef(data));
-  CommandPtr command(CreateCommand<UnsubscribeVehicleDataRequest>(command_msg));
+  CommandPtr command(
+      CreateCommandVI<UnsubscribeVehicleDataRequest>(command_msg));
 
   EXPECT_CALL(app_mngr_, application(kConnectionKey))
       .WillOnce(Return(mock_app_));
@@ -163,7 +164,8 @@ TEST_F(UnsubscribeVehicleRequestTest,
                                                              app_set_lock_ptr_);
   // Expectations
   EXPECT_CALL(app_mngr_, applications()).WillRepeatedly(Return(accessor));
-  CommandPtr command(CreateCommand<UnsubscribeVehicleDataRequest>(command_msg));
+  CommandPtr command(
+      CreateCommandVI<UnsubscribeVehicleDataRequest>(command_msg));
   command->Run();
 }
 
@@ -185,7 +187,8 @@ TEST_F(UnsubscribeVehicleRequestTest,
   (*command_msg)[am::strings::params][am::strings::connection_key] =
       kConnectionKey;
   (*command_msg)[am::strings::msg_params][kMsgParamKey] = false;
-  CommandPtr command(CreateCommand<UnsubscribeVehicleDataRequest>(command_msg));
+  CommandPtr command(
+      CreateCommandVI<UnsubscribeVehicleDataRequest>(command_msg));
   command->Run();
 }
 
@@ -207,7 +210,8 @@ TEST_F(UnsubscribeVehicleRequestTest,
   (*command_msg)[am::strings::params][am::strings::connection_key] =
       kConnectionKey;
   (*command_msg)[am::strings::msg_params][kMsgParamKey] = true;
-  CommandPtr command(CreateCommand<UnsubscribeVehicleDataRequest>(command_msg));
+  CommandPtr command(
+      CreateCommandVI<UnsubscribeVehicleDataRequest>(command_msg));
   command->Run();
 }
 
@@ -220,7 +224,8 @@ TEST_F(UnsubscribeVehicleRequestTest, Run_UnsubscribeDataDisabled_UNSUCCESS) {
   vehicle_data.insert(am::VehicleData::value_type(kMsgParamKey, kVehicleType));
   EXPECT_CALL(mock_message_helper_, vehicle_data())
       .WillOnce(ReturnRef(vehicle_data));
-  CommandPtr command(CreateCommand<UnsubscribeVehicleDataRequest>(command_msg));
+  CommandPtr command(
+      CreateCommandVI<UnsubscribeVehicleDataRequest>(command_msg));
 
   MockAppPtr mock_app(CreateMockApp());
   EXPECT_CALL(app_mngr_, application(kConnectionKey))
@@ -238,7 +243,8 @@ TEST_F(UnsubscribeVehicleRequestTest, OnEvent_DataNotSubscribed_IGNORED) {
   (*command_msg)[am::strings::params][am::strings::connection_key] =
       kConnectionKey;
   (*command_msg)[am::strings::msg_params][kMsgParamKey] = true;
-  CommandPtr command(CreateCommand<UnsubscribeVehicleDataRequest>(command_msg));
+  CommandPtr command(
+      CreateCommandVI<UnsubscribeVehicleDataRequest>(command_msg));
 
   am::VehicleData vehicle_data;
 
@@ -276,7 +282,8 @@ TEST_F(UnsubscribeVehicleRequestTest, OnEvent_DataUnsubscribed_SUCCESS) {
   (*command_msg)[am::strings::params][am::strings::connection_key] =
       kConnectionKey;
   (*command_msg)[am::strings::msg_params][kMsgParamKey] = true;
-  CommandPtr command(CreateCommand<UnsubscribeVehicleDataRequest>(command_msg));
+  CommandPtr command(
+      CreateCommandVI<UnsubscribeVehicleDataRequest>(command_msg));
 
   EXPECT_CALL(app_mngr_, application(kConnectionKey))
       .WillRepeatedly(Return(mock_app_));

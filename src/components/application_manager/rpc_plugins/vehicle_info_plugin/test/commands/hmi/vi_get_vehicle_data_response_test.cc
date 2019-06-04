@@ -37,7 +37,6 @@
 #include "gtest/gtest.h"
 
 #include "application_manager/application.h"
-#include "application_manager/commands/commands_test.h"
 #include "application_manager/event_engine/event.h"
 #include "application_manager/message_helper.h"
 #include "application_manager/mock_application_manager.h"
@@ -47,6 +46,7 @@
 #include "application_manager/smart_object_keys.h"
 #include "hmi/vi_get_vehicle_data_response.h"
 #include "smart_objects/smart_object.h"
+#include "vehicle_info_plugin/commands/vi_commands_test.h"
 
 namespace test {
 namespace components {
@@ -74,7 +74,7 @@ const std::string kStrNumber = "123";
 }  // namespace
 
 class VIGetVehicleDataResponseTest
-    : public CommandsTest<CommandsTestMocks::kIsNice> {};
+    : public VICommandsTest<CommandsTestMocks::kIsNice> {};
 
 TEST_F(VIGetVehicleDataResponseTest, RUN_SUCCESS) {
   MessageSharedPtr command_msg(CreateMessage(smart_objects::SmartType_Map));
@@ -84,7 +84,7 @@ TEST_F(VIGetVehicleDataResponseTest, RUN_SUCCESS) {
       hmi_apis::messageType::response;
 
   VIGetVehicleDataResponsePtr command(
-      CreateCommand<VIGetVehicleDataResponse>(command_msg));
+      CreateCommandVI<VIGetVehicleDataResponse>(command_msg));
 
   am::event_engine::Event event(
       hmi_apis::FunctionID::VehicleInfo_GetVehicleData);
@@ -132,7 +132,7 @@ TEST_F(VIGetVehicleDataResponseTest, ErrorResponse_SUCCESS) {
       (*command_msg)[strings::params][strings::protocol_version];
 
   VIGetVehicleDataResponsePtr command(
-      CreateCommand<VIGetVehicleDataResponse>(command_msg));
+      CreateCommandVI<VIGetVehicleDataResponse>(command_msg));
 
   am::event_engine::Event event(
       hmi_apis::FunctionID::VehicleInfo_GetVehicleData);

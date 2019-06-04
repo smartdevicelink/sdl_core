@@ -40,7 +40,9 @@
 #include "application_manager/application.h"
 #include "application_manager/commands/command_request_impl.h"
 #include "utils/macro.h"
+#include "vehicle_info_plugin/custom_vehicle_data_manager.h"
 #include "vehicle_info_plugin/vehicle_info_app_extension.h"
+#include "vehicle_info_plugin/vehicle_info_command_params.h"
 
 namespace vehicle_info_plugin {
 namespace app_mngr = application_manager;
@@ -60,10 +62,7 @@ class SubscribeVehicleDataRequest
    **/
   SubscribeVehicleDataRequest(
       const app_mngr::commands::MessageSharedPtr& message,
-      app_mngr::ApplicationManager& application_manager,
-      app_mngr::rpc_service::RPCService& rpc_service,
-      app_mngr::HMICapabilities& hmi_capabilities,
-      policy::PolicyHandlerInterface& policy_handler);
+      VehicleInfoCommandParams params);
 
   /**
    * @brief SubscribeButtonCommandRequest class destructor

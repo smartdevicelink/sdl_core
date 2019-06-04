@@ -31,6 +31,7 @@
  */
 
 #include "vehicle_info_plugin/commands/hmi/vi_get_vehicle_data_request.h"
+#include "application_manager/message_helper.h"
 
 namespace vehicle_info_plugin {
 using namespace application_manager;
@@ -39,15 +40,13 @@ namespace commands {
 
 VIGetVehicleDataRequest::VIGetVehicleDataRequest(
     const application_manager::commands::MessageSharedPtr& message,
-    ApplicationManager& application_manager,
-    rpc_service::RPCService& rpc_service,
-    HMICapabilities& hmi_capabilities,
-    policy::PolicyHandlerInterface& policy_handle)
+    const VehicleInfoCommandParams& params)
     : RequestToHMI(message,
-                   application_manager,
-                   rpc_service,
-                   hmi_capabilities,
-                   policy_handle) {}
+                   params.application_manager_,
+                   params.rpc_service_,
+                   params.hmi_capabilities_,
+                   params.policy_handler_)
+    , custom_vehicle_data_manager_(params.custom_vehicle_data_manager_) {}
 
 VIGetVehicleDataRequest::~VIGetVehicleDataRequest() {}
 
@@ -58,5 +57,4 @@ void VIGetVehicleDataRequest::Run() {
 }
 
 }  // namespace commands
-
 }  // namespace vehicle_info_plugin
