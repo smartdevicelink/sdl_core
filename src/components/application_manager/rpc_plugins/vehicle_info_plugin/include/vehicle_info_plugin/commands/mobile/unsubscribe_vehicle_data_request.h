@@ -109,6 +109,8 @@ class UnsubscribeVehicleDataRequest
    */
   VehicleInfoSubscriptions vi_already_unsubscribed_by_this_app_;
 
+  CustomVehicleDataManager& custom_vehicle_data_manager_;
+
   DISALLOW_COPY_AND_ASSIGN(UnsubscribeVehicleDataRequest);
 };
 
