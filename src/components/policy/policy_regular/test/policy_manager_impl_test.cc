@@ -208,7 +208,7 @@ class PolicyManagerImplTest2 : public ::testing::Test {
         .WillByDefault(ReturnRef(kAppStorageFolder));
     ON_CALL(policy_settings_, use_full_app_id()).WillByDefault(Return(true));
     manager->set_listener(&listener);
-    const char* levels[] = {"BACKGROUND", "FULL", "LIMITED", "NONE"};
+    const char* levels[] = {"FULL", "LIMITED", "BACKGROUND", "NONE"};
     hmi_level.assign(levels, levels + sizeof(levels) / sizeof(levels[0]));
     srand(time(NULL));
     index = rand() % 3;

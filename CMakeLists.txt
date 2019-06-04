@@ -343,7 +343,9 @@ endif()
 if (${EXTENDED_POLICY} STREQUAL "EXTERNAL_PROPRIETARY")
     add_definitions(-DEXTERNAL_PROPRIETARY_MODE)
     set(POLICY_PATH ${COMPONENTS_DIR}/policy/policy_external/)
-    set(POLICY_GLOBAL_INCLUDE_PATH ${COMPONENTS_DIR}/include/policy/policy_external/)
+    set(POLICY_GLOBAL_INCLUDE_PATH
+      ${COMPONENTS_DIR}/include/policy/policy_external/
+      ${CMAKE_BINARY_DIR}/src/components/policy/policy_external/)
     set(POLICY_MOCK_INCLUDE_PATH ${COMPONENTS_DIR}/include/test/policy/policy_external/)
     message(STATUS "EXTERNAL_PROPRIETARY policy enabled")
 else()
@@ -354,7 +356,9 @@ else()
      message(STATUS "HTTP policy enabled")
    endif()
    set(POLICY_PATH ${COMPONENTS_DIR}/policy/policy_regular/)
-   set(POLICY_GLOBAL_INCLUDE_PATH ${COMPONENTS_DIR}/include/policy/policy_regular/)
+   set(POLICY_GLOBAL_INCLUDE_PATH
+    ${COMPONENTS_DIR}/include/policy/policy_regular/
+    ${CMAKE_BINARY_DIR}/src/components/policy/policy_regular/)
    set(POLICY_MOCK_INCLUDE_PATH ${COMPONENTS_DIR}/include/test/policy/policy_regular/)
 endif()
 
