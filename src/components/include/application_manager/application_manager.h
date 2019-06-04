@@ -38,7 +38,6 @@
 #include <string>
 #include <vector>
 #include "application_manager/application.h"
-#include "application_manager/command_factory.h"
 #include "application_manager/commands/command.h"
 #include "connection_handler/connection_handler.h"
 #include "utils/data_accessor.h"
@@ -46,7 +45,6 @@
 #include "application_manager/application_manager_settings.h"
 #include "application_manager/hmi_interfaces.h"
 #include "application_manager/plugin_manager/rpc_plugin_manager.h"
-#include "application_manager/policies/policy_handler_interface.h"
 #include "application_manager/state_controller.h"
 #include "policy/policy_types.h"
 #include "telemetry_monitor/telemetry_observable.h"
@@ -74,6 +72,10 @@ class ConnectionHandler;
 }
 namespace resumption {
 class ResumeCtrl;
+}
+
+namespace policy {
+class PolicyHandlerInterface;
 }
 
 namespace application_manager {

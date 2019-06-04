@@ -36,9 +36,12 @@
 #include "application_manager/application.h"
 #include "application_manager/commands/command.h"
 #include "application_manager/hmi_capabilities.h"
-#include "application_manager/policies/policy_handler_interface.h"
 #include "application_manager/rpc_service.h"
 #include "utils/macro.h"
+
+namespace policy {
+class PolicyHandlerInterface;
+}
 
 namespace application_manager {
 class CommandFactory;

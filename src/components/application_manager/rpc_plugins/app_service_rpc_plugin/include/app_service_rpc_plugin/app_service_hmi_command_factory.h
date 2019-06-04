@@ -34,6 +34,7 @@
 #define SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_APP_SERVICE_RPC_PLUGIN_INCLUDE_APP_SERVICE_RPC_PLUGIN_APP_SERVICE_RPC_HMI_COMMAND_FACTORY_H
 
 #include "application_manager/application_manager.h"
+#include "application_manager/command_factory.h"
 
 namespace app_service_rpc_plugin {
 namespace app_mngr = application_manager;
