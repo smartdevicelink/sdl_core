@@ -42,16 +42,13 @@ namespace commands {
 
 VIIsReadyRequest::VIIsReadyRequest(
     const application_manager::commands::MessageSharedPtr& message,
-    ApplicationManager& application_manager,
-    rpc_service::RPCService& rpc_service,
-    HMICapabilities& hmi_capabilities,
-    policy::PolicyHandlerInterface& policy_handle)
+    const VehicleInfoCommandParams& params)
     : RequestToHMI(message,
-                   application_manager,
-                   rpc_service,
-                   hmi_capabilities,
-                   policy_handle)
-    , EventObserver(application_manager.event_dispatcher()) {}
+                   params.application_manager_,
+                   params.rpc_service_,
+                   params.hmi_capabilities_,
+                   params.policy_handler_)
+    , EventObserver(application_manager_.event_dispatcher()) {}
 
 VIIsReadyRequest::~VIIsReadyRequest() {}
 

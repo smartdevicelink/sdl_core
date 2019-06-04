@@ -36,15 +36,27 @@ CREATE_LOGGERPTR_GLOBAL(logger_, "VehicleInfoPlugin")
 
 namespace vehicle_info_plugin {
 
+namespace app_mngr = application_manager;
+namespace commands = application_manager::commands;
+
 VehicleInfoCommandFactory::VehicleInfoCommandFactory(
     app_mngr::ApplicationManager& application_manager,
     app_mngr::rpc_service::RPCService& rpc_service,
     app_mngr::HMICapabilities& hmi_capabilities,
-    policy::PolicyHandlerInterface& policy_handler)
-    : hmi_command_factory_(new VehicleInfoHmiCommandFactory(
-          application_manager, rpc_service, hmi_capabilities, policy_handler))
-    , mob_command_factory_(new VehicleInfoMobileCommandFactory(
-          application_manager, rpc_service, hmi_capabilities, policy_handler)) {
+    policy::PolicyHandlerInterface& policy_handler,
+    CustomVehicleDataManager& custom_vehicle_data_manager)
+    : hmi_command_factory_(
+          new VehicleInfoHmiCommandFactory(application_manager,
+                                           rpc_service,
+                                           hmi_capabilities,
+                                           policy_handler,
+                                           custom_vehicle_data_manager))
+    , mob_command_factory_(
+          new VehicleInfoMobileCommandFactory(application_manager,
+                                              rpc_service,
+                                              hmi_capabilities,
+                                              policy_handler,
+                                              custom_vehicle_data_manager)) {
   LOG4CXX_AUTO_TRACE(logger_);
 }
 
