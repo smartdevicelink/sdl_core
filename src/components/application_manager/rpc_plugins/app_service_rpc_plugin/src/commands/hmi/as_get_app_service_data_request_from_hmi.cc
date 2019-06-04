@@ -161,6 +161,14 @@ void ASGetAppServiceDataRequestFromHMI::GetNavigationImagePaths(
   }
 }
 
+void ASGetAppServiceDataRequestFromHMI::GetMediaImagePaths(
+    smart_objects::SmartObject& data, ApplicationSharedPtr app) {
+  if (data.keyExists(strings::media_image)) {
+    MessageHelper::VerifyImage(
+        data[strings::media_image], app, application_manager_);
+  }
+}
+
 bool ASGetAppServiceDataRequestFromHMI::ValidateResponse(
     smart_objects::SmartObject& message_params) {
   if (!message_params.keyExists(strings::service_data)) {
@@ -214,6 +222,11 @@ bool ASGetAppServiceDataRequestFromHMI::ValidateResponse(
         service_data.keyExists(strings::navigation_service_data)) {
       GetNavigationImagePaths(service_data[strings::navigation_service_data],
                               app);
+    }
+
+    if (service_type_value == mobile_apis::AppServiceType::MEDIA &&
+        service_data.keyExists(strings::media_service_data)) {
+      GetMediaImagePaths(service_data[strings::media_service_data], app);
     }
   }
   return true;

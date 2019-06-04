@@ -70,6 +70,8 @@ class OnASAppServiceDataNotification
   virtual void Run();
 
  private:
+  void GetMediaImagePaths(smart_objects::SmartObject& data,
+                          application_manager::ApplicationSharedPtr app);
   void GetWeatherImagePaths(smart_objects::SmartObject& data,
                             application_manager::ApplicationSharedPtr app);
   void GetNavigationImagePaths(smart_objects::SmartObject& data,
