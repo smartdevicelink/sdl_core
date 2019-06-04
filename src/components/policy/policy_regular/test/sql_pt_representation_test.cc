@@ -322,6 +322,8 @@ class SQLPTRepresentationTest : public SQLPTRepresentation,
     app_policies["1234"]["steal_focus"] = Json::Value(false);
     app_policies["1234"]["RequestType"] = Json::Value(Json::arrayValue);
     app_policies["1234"]["app_services"] = Json::Value(Json::objectValue);
+    app_policies["1234"]["icon_url"] =
+        Json::Value("http:://www.sdl.com/image.png");
     app_policies["1234"]["app_services"]["MEDIA"] =
         Json::Value(Json::objectValue);
     app_policies["1234"]["app_services"]["MEDIA"]["service_names"] =
@@ -1745,6 +1747,11 @@ TEST_F(SQLPTRepresentationTest, Save_SetPolicyTableThenSave_ExpectSavedToPT) {
 
   EXPECT_TRUE(handled_rpcs.is_initialized());
   EXPECT_EQ(handled_rpcs[0].function_id, 41);
+
+  policy_table::ApplicationPolicies& apps = policies.apps;
+  auto icon_url = *(apps[kAppId].icon_url);
+
+  EXPECT_EQ(std::string(icon_url), "http:://www.sdl.com/image.png");
 }
 
 }  // namespace policy_test

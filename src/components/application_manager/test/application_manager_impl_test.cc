@@ -229,6 +229,7 @@ class ApplicationManagerImplTest : public ::testing::Test {
 
 #if defined(CLOUD_APP_WEBSOCKET_TRANSPORT_SUPPORT)
   void AddCloudAppToPendingDeviceMap();
+  void CreatePendingApplication();
 #endif
   uint32_t app_id_;
   NiceMock<policy_test::MockPolicySettings> mock_policy_settings_;
@@ -1476,8 +1477,7 @@ void ApplicationManagerImplTest::AddCloudAppToPendingDeviceMap() {
   app_manager_impl_->RefreshCloudAppInformation();
 }
 
-TEST_F(ApplicationManagerImplTest, CreatePendingApplication) {
-  // Add to pending device map. Calls refresh cloud app
+void ApplicationManagerImplTest::CreatePendingApplication() {
   AddCloudAppToPendingDeviceMap();
 
   // CreatePendingApplication
@@ -1505,6 +1505,10 @@ TEST_F(ApplicationManagerImplTest, CreatePendingApplication) {
   AppsWaitRegistrationSet app_list =
       app_manager_impl_->AppsWaitingForRegistration().GetData();
   EXPECT_EQ(1u, app_list.size());
+}
+
+TEST_F(ApplicationManagerImplTest, CreatePendingApplication) {
+  CreatePendingApplication();
 }
 
 TEST_F(ApplicationManagerImplTest, SetPendingState) {
@@ -1666,6 +1670,62 @@ TEST_F(ApplicationManagerImplTest,
       app_manager_impl_->RegisterApplication(request_for_registration_ptr);
   EXPECT_EQ(0, application.use_count());
 }
+
+TEST_F(ApplicationManagerImplTest, PolicyIDByIconUrl_Success) {
+  app_manager_impl_->SetMockPolicyHandler(mock_policy_handler_);
+  std::vector<std::string> enabled_apps{"1234"};
+  EXPECT_CALL(*mock_policy_handler_, GetEnabledCloudApps(_))
+      .WillOnce(SetArgReferee<0>(enabled_apps));
+  EXPECT_CALL(*mock_policy_handler_, GetCloudAppParameters(_, _, _, _, _, _, _))
+      .WillOnce(DoAll(SetArgReferee<1>(kEnabled),
+                      SetArgReferee<2>(kEndpoint2),
+                      SetArgReferee<3>(kCertificate),
+                      SetArgReferee<4>(kAuthToken),
+                      SetArgReferee<5>(kTransportType),
+                      SetArgReferee<6>(kHybridAppPreferenceStr),
+                      Return(true)));
+
+  std::vector<std::string> nicknames{"CloudApp"};
+  EXPECT_CALL(*mock_policy_handler_, GetInitialAppData(_, _, _))
+      .WillOnce(DoAll(SetArgPointee<1>(nicknames), Return(true)));
+
+  const std::string url = "https://www.fakeiconurl.com/icon.png";
+  EXPECT_CALL(*mock_policy_handler_, GetIconUrl("1234"))
+      .WillRepeatedly(Return(url));
+
+  app_manager_impl_->RefreshCloudAppInformation();
+
+  std::string result = app_manager_impl_->PolicyIDByIconUrl(url);
+  EXPECT_EQ(result, "1234");
+}
+
+TEST_F(ApplicationManagerImplTest, SetIconFileFromSystemRequest_Success) {
+  CreatePendingApplication();
+  Mock::VerifyAndClearExpectations(mock_message_helper_);
+
+  file_system::CreateDirectory(kDirectoryName);
+  const std::string full_icon_path = kDirectoryName + "/1234";
+  ASSERT_TRUE(file_system::CreateFile(full_icon_path));
+
+  const std::string url = "https://www.fakeiconurl.com/icon.png";
+  EXPECT_CALL(*mock_policy_handler_, GetIconUrl("1234"))
+      .WillRepeatedly(Return(url));
+
+  smart_objects::SmartObject dummy_object(smart_objects::SmartType_Map);
+  smart_objects::SmartObjectSPtr sptr =
+      std::make_shared<smart_objects::SmartObject>(dummy_object);
+
+  EXPECT_CALL(*mock_message_helper_,
+              CreateModuleInfoSO(
+                  hmi_apis::FunctionID::BasicCommunication_UpdateAppList, _))
+      .WillOnce(Return(sptr));
+  EXPECT_CALL(*mock_rpc_service_, ManageHMICommand(sptr, _)).Times(1);
+  EXPECT_CALL(mock_application_manager_settings_, app_icons_folder())
+      .WillOnce(ReturnRef(kDirectoryName));
+  app_manager_impl_->SetIconFileFromSystemRequest("1234");
+  EXPECT_TRUE(file_system::RemoveDirectory(kDirectoryName, true));
+}
+
 #endif  // CLOUD_APP_WEBSOCKET_TRANSPORT_SUPPORT
 }  // namespace application_manager_test
 }  // namespace components

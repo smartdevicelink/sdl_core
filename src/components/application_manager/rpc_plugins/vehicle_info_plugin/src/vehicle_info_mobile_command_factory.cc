@@ -69,8 +69,6 @@ VehicleInfoMobileCommandFactory::VehicleInfoMobileCommandFactory(
 app_mngr::CommandSharedPtr VehicleInfoMobileCommandFactory::CreateCommand(
     const app_mngr::commands::MessageSharedPtr& message,
     app_mngr::commands::Command::CommandSource source) {
-  UNUSED(source);
-
   const mobile_apis::FunctionID::eType function_id =
       static_cast<mobile_apis::FunctionID::eType>(
           (*message)[strings::params][strings::function_id].asInt());
@@ -91,54 +89,102 @@ app_mngr::CommandSharedPtr VehicleInfoMobileCommandFactory::CreateCommand(
                 "HMICommandFactory::CreateCommand function_id: "
                     << function_id << ", message type: " << message_type_str);
 
-  return buildCommandCreator(function_id, message_type).create(message);
+  return get_creator_factory(function_id, message_type, source).create(message);
 }
 
 bool VehicleInfoMobileCommandFactory::IsAbleToProcess(
     const int32_t function_id,
     const app_mngr::commands::Command::CommandSource source) const {
   UNUSED(source);
-  return buildCommandCreator(function_id,
-                             mobile_apis::messageType::INVALID_ENUM)
-      .CanBeCreated();
+  auto id = static_cast<mobile_apis::FunctionID::eType>(function_id);
+  return get_command_creator(id, mobile_apis::messageType::INVALID_ENUM)
+             .CanBeCreated() ||
+         get_notification_creator(id).CanBeCreated();
 }
 
-app_mngr::CommandCreator& VehicleInfoMobileCommandFactory::buildCommandCreator(
-    const int32_t function_id, const int32_t message_type) const {
+app_mngr::CommandCreator& VehicleInfoMobileCommandFactory::get_command_creator(
+    const mobile_apis::FunctionID::eType id,
+    const mobile_apis::messageType::eType message_type) const {
   auto factory = app_mngr::CommandCreatorFactory(
       application_manager_, rpc_service_, hmi_capabilities_, policy_handler_);
-
-  switch (function_id) {
-    case mobile_apis::FunctionID::GetVehicleDataID:
+  switch (id) {
+    case mobile_apis::FunctionID::GetVehicleDataID: {
       return mobile_apis::messageType::request == message_type
                  ? factory.GetCreator<commands::GetVehicleDataRequest>()
                  : factory.GetCreator<commands::GetVehicleDataResponse>();
-    case mobile_apis::FunctionID::SubscribeVehicleDataID:
+    }
+    case mobile_apis::FunctionID::SubscribeVehicleDataID: {
       return mobile_apis::messageType::request == message_type
                  ? factory.GetCreator<commands::SubscribeVehicleDataRequest>()
                  : factory.GetCreator<commands::SubscribeVehicleDataResponse>();
-    case mobile_apis::FunctionID::UnsubscribeVehicleDataID:
+    }
+    case mobile_apis::FunctionID::UnsubscribeVehicleDataID: {
       return mobile_apis::messageType::request == message_type
                  ? factory.GetCreator<commands::UnsubscribeVehicleDataRequest>()
                  : factory
                        .GetCreator<commands::UnsubscribeVehicleDataResponse>();
-    case mobile_apis::FunctionID::OnVehicleDataID:
-      return factory.GetCreator<commands::OnVehicleDataNotification>();
-    case mobile_apis::FunctionID::ReadDIDID:
+    }
+    case mobile_apis::FunctionID::ReadDIDID: {
       return mobile_apis::messageType::request == message_type
                  ? factory.GetCreator<commands::ReadDIDRequest>()
                  : factory.GetCreator<commands::ReadDIDResponse>();
-    case mobile_apis::FunctionID::GetDTCsID:
+    }
+    case mobile_apis::FunctionID::GetDTCsID: {
       return mobile_apis::messageType::request == message_type
                  ? factory.GetCreator<commands::GetDTCsRequest>()
                  : factory.GetCreator<commands::GetDTCsResponse>();
-    case mobile_apis::FunctionID::DiagnosticMessageID:
+    }
+    case mobile_apis::FunctionID::DiagnosticMessageID: {
       return mobile_apis::messageType::request == message_type
                  ? factory.GetCreator<commands::DiagnosticMessageRequest>()
                  : factory.GetCreator<commands::DiagnosticMessageResponse>();
-    default:
-      LOG4CXX_WARN(logger_, "Unsupported function_id: " << function_id);
-      return factory.GetCreator<app_mngr::InvalidCommand>();
+    }
+    default: {}
   }
+  return factory.GetCreator<app_mngr::InvalidCommand>();
+}
+
+app_mngr::CommandCreator&
+VehicleInfoMobileCommandFactory::get_notification_creator(
+    const mobile_apis::FunctionID::eType id) const {
+  auto factory = app_mngr::CommandCreatorFactory(
+      application_manager_, rpc_service_, hmi_capabilities_, policy_handler_);
+  switch (id) {
+    case mobile_apis::FunctionID::OnVehicleDataID: {
+      return factory.GetCreator<commands::OnVehicleDataNotification>();
+    }
+    default: {}
+  }
+  return factory.GetCreator<app_mngr::InvalidCommand>();
+}
+
+app_mngr::CommandCreator& VehicleInfoMobileCommandFactory::get_creator_factory(
+    const mobile_apis::FunctionID::eType id,
+    const mobile_apis::messageType::eType message_type,
+    const app_mngr::commands::Command::CommandSource source) const {
+  switch (message_type) {
+    case mobile_apis::messageType::request: {
+      if (app_mngr::commands::Command::CommandSource::SOURCE_MOBILE == source) {
+        return get_command_creator(id, message_type);
+      }
+      break;
+    }
+    case mobile_apis::messageType::response: {
+      if (app_mngr::commands::Command::CommandSource::SOURCE_SDL == source) {
+        return get_command_creator(id, message_type);
+      }
+      break;
+    }
+    case mobile_apis::messageType::notification: {
+      if (app_mngr::commands::Command::CommandSource::SOURCE_SDL == source) {
+        return get_notification_creator(id);
+      }
+      break;
+    }
+    default: {}
+  }
+  auto factory = app_mngr::CommandCreatorFactory(
+      application_manager_, rpc_service_, hmi_capabilities_, policy_handler_);
+  return factory.GetCreator<app_mngr::InvalidCommand>();
 }
 }  // namespace vehicle_info_plugin

@@ -80,15 +80,20 @@ void CloudWebsocketTransportAdapter::CreateDevice(const std::string& uid) {
     return;
   }
 
-  // Port after second colon in valid endpoint string
-  std::size_t pos_port = uid.find(":");
-  pos_port = uid.find(":", pos_port + 1);
+  std::string protocol_pattern = "(wss?)";
+  std::string host_pattern =
+      "(([^?#%\\\\/@:\\s]{1,})\\:?([^?#%\\\\/@\\s]*)\\@?([^?#%\\\\/\\s]*))";
+  std::string port_pattern = "(\\d{2,5})";
+  // Optional parameters
+  std::string path_pattern = "((\\/[^\\/#?\\s]+)*)?\\/?";
+  std::string query_pattern = "(\\?[^=&#\\s]*=?[^#\\s]*&?)?";
+  std::string fragment_pattern = "(#[^\\s]*)?";
 
   // Extract host and port from endpoint string
-  boost::regex group_pattern(
-      "(wss?:\\/\\/)([A-Z\\d\\.-]{2,}\\.?([A-Z]{2,})?)(:)(\\d{2,5})(\\/"
-      "[A-Z\\d\\.-]+)*\\/?",
-      boost::regex::icase);
+  boost::regex group_pattern(protocol_pattern + ":\\/\\/" + host_pattern + ":" +
+                                 port_pattern + path_pattern + query_pattern +
+                                 fragment_pattern,
+                             boost::regex::icase);
   boost::smatch results;
   std::string str = uid;
 
@@ -97,20 +102,30 @@ void CloudWebsocketTransportAdapter::CreateDevice(const std::string& uid) {
     return;
   }
 
-  std::string host = results[2];
-  std::string port = results[5];
+  LOG4CXX_DEBUG(logger_, "#Results: " << results.size());
+  std::string results_str;
+  for (size_t i = 0; i < results.size(); i++) {
+    results_str += " R[" + std::to_string(i) + "]:";
+    results_str +=
+        (results[i].length() != 0) ? results[i] : std::string("<EMPTY>");
+  }
+  LOG4CXX_DEBUG(logger_, "Results: " << results_str);
 
-  LOG4CXX_DEBUG(logger_,
-                "Results: " << results[0] << " " << results[1] << " "
-                            << results[2] << " " << results[3] << " "
-                            << results[4] << " " << results[5] << " ");
   std::string device_id = uid;
 
-  LOG4CXX_DEBUG(
-      logger_,
-      "Creating Cloud Device For Host: " << host << " and Port: " << port);
+  CloudAppEndpoint endpoint{.host = results[2],
+                            .port = results[6],
+                            .path = results[7] + "/",
+                            .query = results[9],
+                            .fragment = results[10]};
 
-  auto cloud_device = std::make_shared<CloudDevice>(host, port, device_id);
+  LOG4CXX_DEBUG(logger_,
+                "Creating Cloud Device For Host: "
+                    << endpoint.host << " at Port: " << endpoint.port
+                    << " with Target: "
+                    << (endpoint.path + endpoint.query + endpoint.fragment));
+
+  auto cloud_device = std::make_shared<CloudDevice>(endpoint, device_id);
 
   DeviceVector devices{cloud_device};
 
