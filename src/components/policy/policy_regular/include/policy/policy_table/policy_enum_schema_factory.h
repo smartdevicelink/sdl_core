@@ -1,4 +1,8 @@
-/*
+/**
+ * @file generated_MOBILE_API_policy_enum_schema_factory.h
+ * @brief Generated class generated_MOBILE_API_policy_enum_schema_factory header
+ * file.
+ *
  * Copyright (c) 2017, Ford Motor Company
  * All rights reserved.
  *
@@ -30,59 +34,31 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_POLICY_POLICY_REGULAR_INCLUDE_POLICY_POLICY_TABLE_ENUMS_H_
-#define SRC_COMPONENTS_POLICY_POLICY_REGULAR_INCLUDE_POLICY_POLICY_TABLE_ENUMS_H_
-
+#ifndef SRC_COMPONENTS_POLICY_POLICY_REGULAR_INCLUDE_POLICY_POLICY_TABLE_POLICY_ENUM_SCHEMA_FACTORY_H
+#define SRC_COMPONENTS_POLICY_POLICY_REGULAR_INCLUDE_POLICY_POLICY_TABLE_POLICY_ENUM_SCHEMA_FACTORY_H
+#include <memory>
 #include <string>
-#include "generated_HMI_API_policy_types.h"
-#include "generated_MOBILE_API_policy_types.h"
+
+#include "smart_objects/smart_schema.h"
 
 namespace rpc {
 namespace policy_table_interface_base {
 
-enum Parameter {
-  P_GPS,
-  P_SPEED,
-  P_ENGINETORQUE,
-  P_EXTERNALTEMPERATURE,
-  P_TURNSIGNAL,
-  P_FUELLEVEL,
-  P_FUELLEVEL_STATE,
-  P_HEADLAMPSTATUS,
-  P_INSTANTFUELCONSUMPTION,
-  P_FUELRANGE,
-  P_ODOMETER,
-  P_TIREPRESSURE,
-  P_WIPERSTATUS,
-  P_VIN,
-  P_ACCPEDALPOSITION,
-  P_BELTSTATUS,
-  P_ELECTRONICPARKBRAKESTATUS,
-  P_DRIVERBRAKING,
-  P_PRNDL,
-  P_RPM,
-  P_STEERINGWHEELANGLE,
-  P_ENGINEOILLIFE,
-  P_MYKEY,
-  P_CLOUD_APP_VEHICLE_ID,
-  P_AIRBAGSTATUS,
-  P_BODYINFORMATION,
-  P_CLUSTERMODESTATUS,
-  P_DEVICESTATUS,
-  P_EMERGENCYEVENT,
-  P_ECALLINFO,
-  P_EMPTY  // Added to allow empty parameters handling
+class EnumSchemaItemFactory {
+ public:
+  /**
+   * @brief Get enum schama from enum name
+   * Implementation of this function should be generated from MOBILE_API.xml
+   * @param enum_name enum name to get shema factory for
+   * @return shared pointer to shema factory or empty shared pointer if
+   * enum_name is wrong
+   */
+  static std::shared_ptr<ns_smart_device_link::ns_smart_objects::ISchemaItem>
+  Get(const std::string& enum_name);
+
+  static bool IsRPCSpecVehicleDataType(const std::string& vd_name);
 };
-
-bool IsValidEnum(Parameter val);
-const char* EnumToJsonString(Parameter val);
-bool EnumFromJsonString(const std::string& literal, Parameter* result);
-
-extern const std::string kDefaultApp;
-extern const std::string kPreDataConsentApp;
-extern const std::string kDeviceApp;
 
 }  // namespace policy_table_interface_base
 }  // namespace rpc
-
-#endif  // SRC_COMPONENTS_POLICY_POLICY_REGULAR_INCLUDE_POLICY_POLICY_TABLE_ENUMS_H_
+#endif  // SRC_COMPONENTS_POLICY_POLICY_REGULAR_INCLUDE_POLICY_POLICY_TABLE_POLICY_ENUM_SCHEMA_FACTORY_H

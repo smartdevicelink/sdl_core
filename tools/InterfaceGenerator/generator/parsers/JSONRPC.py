@@ -4,8 +4,9 @@ Contains parser for JSON RPC XML format.
 
 """
 
+from generator import Model
 from generator.parsers import RPCBase
-
+import xml.etree.ElementTree as ET
 
 class Parser(RPCBase.Parser):
 
@@ -41,6 +42,45 @@ class Parser(RPCBase.Parser):
 
             self._interface_name = element.attrib["name"]
             self._parse_interface(element, self._interface_name + "_")
+
+    def _check_enum_name(self, enum):
+        """Check enum name.
+
+        This method is called to check whether the newly parsed enum's name
+        conflicts with some predefined enum.
+        As SDLRPCV2 has no predefined enums this implementation does nothing.
+
+        """
+
+        if enum.name == "Common_VehicleDataType":
+            item = Model.EnumElement("OEM_SPECIFIC")
+            enum.elements["OEM_SPECIFIC"] = item
+
+    def _check_function(self, struct):
+        custom_vdi_subs = [
+            "SubscribeVehicleData",
+            "UnsubscribeVehicleData"]
+
+        custom_vdi_data = [
+            "GetVehicleData"]
+
+        oem_specific = ET.Element('param')
+
+        name = struct.attrib['name']
+        msg_type = struct.attrib['messagetype']
+        if (name in custom_vdi_subs or name in custom_vdi_data) and msg_type == 'request':
+            oem_specific.attrib['name'] = 'oemSpecific'
+            oem_specific.attrib['type'] = 'Boolean'
+            oem_specific.attrib['mandatory'] = 'false'
+
+            struct.append(oem_specific)
+
+        if name in custom_vdi_subs and msg_type == 'response':
+            oem_specific.attrib['name'] = 'oemSpecific'
+            oem_specific.attrib['type'] = 'Common.VehicleDataResult'
+            oem_specific.attrib['mandatory'] = 'false'
+
+            struct.append(oem_specific)
 
     def _provide_enum_element_for_function(self, enum_name, element_name):
         """Provide enum element for functions.
