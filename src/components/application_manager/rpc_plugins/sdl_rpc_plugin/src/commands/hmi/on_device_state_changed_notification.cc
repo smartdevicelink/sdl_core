@@ -34,6 +34,7 @@
 #include <algorithm>
 #include "application_manager/application_manager.h"
 #include "application_manager/message_helper.h"
+#include "application_manager/policies/policy_handler_interface.h"
 #include "encryption/hashing.h"
 #include "interfaces/HMI_API.h"
 

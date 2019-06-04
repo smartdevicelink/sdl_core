@@ -33,6 +33,7 @@
 #include "rc_rpc_plugin/commands/rc_command_request.h"
 #include "application_manager/hmi_interfaces.h"
 #include "application_manager/message_helper.h"
+#include "application_manager/policies/policy_handler_interface.h"
 #include "rc_rpc_plugin/interior_data_cache.h"
 #include "rc_rpc_plugin/rc_module_constants.h"
 #include "smart_objects/enum_schema_item.h"
