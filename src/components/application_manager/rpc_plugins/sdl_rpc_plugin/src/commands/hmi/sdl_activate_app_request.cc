@@ -32,6 +32,7 @@
 
 #include "sdl_rpc_plugin/commands/hmi/sdl_activate_app_request.h"
 #include "application_manager/message_helper.h"
+#include "application_manager/policies/policy_handler_interface.h"
 #include "application_manager/state_controller.h"
 
 namespace sdl_rpc_plugin {

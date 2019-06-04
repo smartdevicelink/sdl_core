@@ -31,6 +31,8 @@
  */
 #include "vehicle_info_plugin/commands/hmi/vi_get_vehicle_data_response.h"
 #include "application_manager/event_engine/event.h"
+#include "application_manager/policies/policy_handler_interface.h"
+
 #include "interfaces/HMI_API.h"
 
 namespace vehicle_info_plugin {

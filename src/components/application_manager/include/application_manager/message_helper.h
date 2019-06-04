@@ -42,7 +42,6 @@
 
 #include <application_manager/smart_object_keys.h>
 #include "application_manager/application.h"
-#include "application_manager/policies/policy_handler_interface.h"
 #include "connection_handler/device.h"
 #include "interfaces/HMI_API.h"
 #include "interfaces/MOBILE_API.h"
