@@ -32,12 +32,15 @@
  */
 
 #include "vehicle_info_plugin/commands/mobile/get_vehicle_data_request.h"
+#include "vehicle_info_plugin/custom_vehicle_data_manager.h"
+
 #include <string>
 
 #include "application_manager/application_impl.h"
 #include "application_manager/message_helper.h"
 #include "interfaces/HMI_API.h"
 #include "interfaces/MOBILE_API.h"
+#include "policy/policy_table/types.h"
 
 namespace vehicle_info_plugin {
 using namespace application_manager;
@@ -61,45 +64,61 @@ GetVehicleDataRequest::~GetVehicleDataRequest() {}
 void GetVehicleDataRequest::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  int32_t app_id =
-      (*message_)[strings::params][strings::connection_key].asUInt();
-  ApplicationSharedPtr app = application_manager_.application(app_id);
+  auto app = application_manager_.application(connection_key());
 
   if (!app) {
-    LOG4CXX_ERROR(logger_, "NULL pointer");
+    LOG4CXX_ERROR(logger_, "No such application : " << connection_key());
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     return;
   }
 
-  if (app->AreCommandLimitsExceeded(
-          static_cast<mobile_apis::FunctionID::eType>(function_id()),
-          application_manager::TLimitSource::CONFIG_FILE)) {
-    LOG4CXX_ERROR(logger_, "GetVehicleData frequency is too high.");
+  if (!CheckFrequency(*app)) {
     SendResponse(false, mobile_apis::Result::REJECTED);
     return;
   }
-  const VehicleData& vehicle_data = MessageHelper::vehicle_data();
-  VehicleData::const_iterator it = vehicle_data.begin();
-  smart_objects::SmartObject msg_params =
+
+  auto hmi_msg_params =
       smart_objects::SmartObject(smart_objects::SmartType_Map);
-  msg_params[strings::app_id] = app->app_id();
-  const uint32_t min_length_msg_params = 1;
-  for (; vehicle_data.end() != it; ++it) {
-    if (true == (*message_)[str::msg_params].keyExists(it->first) &&
-        true == (*message_)[str::msg_params][it->first].asBool()) {
-      msg_params[it->first] = (*message_)[strings::msg_params][it->first];
+  hmi_msg_params[strings::app_id] = app->app_id();
+
+  int params_count = 0;
+  auto& msg_params = (*message_)[strings::msg_params];
+  for (const auto& name : msg_params.enumerate()) {
+    auto enabled = msg_params[name].asBool();
+    if (!enabled) {
+      continue;
+    }
+    if (custom_vehicle_data_manager_.IsVehicleDataName(name)) {
+      hmi_msg_params[name] = msg_params[name];
+      params_count++;
     }
   }
-  if (msg_params.length() > min_length_msg_params) {
-    StartAwaitForInterface(HmiInterfaces::HMI_INTERFACE_VehicleInfo);
-    SendHMIRequest(
-        hmi_apis::FunctionID::VehicleInfo_GetVehicleData, &msg_params, true);
+
+  auto undefined_params_valid = [this]() {
+    for (const auto& item : removed_parameters_permissions_.undefined_params) {
+      if (!custom_vehicle_data_manager_.IsVehicleDataName(item)) {
+        return false;
+      }
+    }
+    return true;
+  };
+
+  const int minimal_params_count = 1;
+  if (params_count < minimal_params_count) {
+    const auto result_code = HasDisallowedParams() && undefined_params_valid()
+                                 ? mobile_apis::Result::DISALLOWED
+                                 : mobile_apis::Result::INVALID_DATA;
+    SendResponse(false, result_code);
     return;
-  } else if (HasDisallowedParams()) {
-    SendResponse(false, mobile_apis::Result::DISALLOWED);
-  } else {
-    SendResponse(false, mobile_apis::Result::INVALID_DATA);
   }
+
+  for (const auto& param : msg_params.enumerate()) {
+    pending_vehicle_data_.insert(param);
+  }
+
+  StartAwaitForInterface(HmiInterfaces::HMI_INTERFACE_VehicleInfo);
+  SendHMIRequest(
+      hmi_apis::FunctionID::VehicleInfo_GetVehicleData, &hmi_msg_params, true);
 }
 
 void GetVehicleDataRequest::on_event(const event_engine::Event& event) {
@@ -127,6 +146,35 @@ void GetVehicleDataRequest::on_event(const event_engine::Event& event) {
       if (true == message[strings::params].keyExists(strings::error_msg)) {
         response_info = message[strings::params][strings::error_msg].asString();
       }
+
+      custom_vehicle_data_manager_.CreateMobileMessageParams(
+          const_cast<smart_objects::SmartObject&>(
+              message[strings::msg_params]));
+
+      if (result) {
+        if (!ValidateResponseData(message[strings::msg_params])) {
+          LOG4CXX_ERROR(logger_, "Vehicle data items validation failed.");
+          response_info = "Vehicle data items validation failed";
+          SendResponse(
+              false, mobile_api::Result::GENERIC_ERROR, response_info.c_str());
+          return;
+        }
+
+        for (const auto& item : message[strings::msg_params].enumerate()) {
+          const auto& found_item = pending_vehicle_data_.find(item);
+          if (pending_vehicle_data_.end() == found_item) {
+            message[strings::msg_params].erase(item);
+          }
+        }
+
+        if (message[strings::msg_params].empty()) {
+          response_info = "Failed to retrieve data from vehicle";
+          SendResponse(
+              false, mobile_apis::Result::GENERIC_ERROR, response_info.c_str());
+          return;
+        }
+      }
+
       SendResponse(result,
                    MessageHelper::HMIToMobileResult(result_code),
                    response_info.empty() ? NULL : response_info.c_str(),
@@ -140,6 +188,30 @@ void GetVehicleDataRequest::on_event(const event_engine::Event& event) {
   }
 }
 
-}  // namespace commands
+bool GetVehicleDataRequest::CheckFrequency(Application& app) {
+  if (app.AreCommandLimitsExceeded(
+          static_cast<mobile_apis::FunctionID::eType>(function_id()),
+          application_manager::TLimitSource::CONFIG_FILE)) {
+    LOG4CXX_ERROR(logger_, "GetVehicleData frequency is too high.");
+    return false;
+  }
+  return true;
+}
 
+bool GetVehicleDataRequest::ValidateResponseData(
+    const smart_objects::SmartObject& msg_params) {
+  const auto& rpc_spec_vehicle_data = MessageHelper::vehicle_data();
+
+  smart_objects::SmartObject custom_data;
+  for (const auto& name : msg_params.enumerate()) {
+    const auto& found_it = rpc_spec_vehicle_data.find(name);
+    if (rpc_spec_vehicle_data.end() == found_it) {
+      custom_data[name] = msg_params[name];
+    }
+  }
+
+  return custom_vehicle_data_manager_.ValidateVehicleDataItems(custom_data);
+}
+
+}  // namespace commands
 }  // namespace vehicle_info_plugin

@@ -134,15 +134,15 @@ TEST_F(GetVehicleDataRequestTest, Run_EmptyMsgParams_UNSUCCESS) {
   GetVehicleDataRequestPtr command(
       CreateCommandVI<GetVehicleDataRequest>(command_msg));
 
-  EXPECT_CALL(mock_custom_vehicle_data_manager_, ValidateVehicleDataItems(_))
-      .WillOnce(Return(true));
-
   const am::VehicleData kEmptyVehicleData;
-  EXPECT_CALL(mock_message_helper_, vehicle_data())
-      .WillOnce(ReturnRef(kEmptyVehicleData));
+  ON_CALL(mock_message_helper_, vehicle_data())
+      .WillByDefault(ReturnRef(kEmptyVehicleData));
+  smart_objects::SmartObject empty_hmi_custom_params;
+  ON_CALL(mock_custom_vehicle_data_manager_, CreateHMIMessageParams(_))
+      .WillByDefault(Return(empty_hmi_custom_params));
 
   MockAppPtr app(CreateMockApp());
-  EXPECT_CALL(app_mngr_, application(kConnectionKey)).WillOnce(Return(app));
+  ON_CALL(app_mngr_, application(kConnectionKey)).WillByDefault(Return(app));
 
   EXPECT_CALL(
       mock_rpc_service_,
@@ -160,12 +160,13 @@ TEST_F(GetVehicleDataRequestTest,
   std::shared_ptr<UnwrappedGetVehicleDataRequest> command(
       CreateCommandVI<UnwrappedGetVehicleDataRequest>(command_msg));
 
-  EXPECT_CALL(mock_custom_vehicle_data_manager_, ValidateVehicleDataItems(_))
-      .WillOnce(Return(true));
+  smart_objects::SmartObject empty_hmi_custom_params;
+  ON_CALL(mock_custom_vehicle_data_manager_, CreateHMIMessageParams(_))
+      .WillByDefault(Return(empty_hmi_custom_params));
 
   const am::VehicleData kEmptyVehicleData;
-  EXPECT_CALL(mock_message_helper_, vehicle_data())
-      .WillRepeatedly(ReturnRef(kEmptyVehicleData));
+  ON_CALL(mock_message_helper_, vehicle_data())
+      .WillByDefault(ReturnRef(kEmptyVehicleData));
 
   policy::RPCParams& disallowed_params = command->get_disallowed_params();
   disallowed_params.insert("test_param");
@@ -191,14 +192,14 @@ TEST_F(GetVehicleDataRequestTest, Run_SUCCESS) {
   GetVehicleDataRequestPtr command(
       CreateCommandVI<GetVehicleDataRequest>(command_msg));
 
-  EXPECT_CALL(mock_custom_vehicle_data_manager_, ValidateVehicleDataItems(_))
-      .WillOnce(Return(true));
+  ON_CALL(mock_custom_vehicle_data_manager_, IsVehicleDataName(_))
+      .WillByDefault(Return(true));
 
   am::VehicleData vehicle_data;
   vehicle_data.insert(am::VehicleData::value_type(
       kMsgParamKey, mobile_apis::VehicleDataType::VEHICLEDATA_SPEED));
-  EXPECT_CALL(mock_message_helper_, vehicle_data())
-      .WillOnce(ReturnRef(vehicle_data));
+  ON_CALL(mock_message_helper_, vehicle_data())
+      .WillByDefault(ReturnRef(vehicle_data));
 
   MockAppPtr app(CreateMockApp());
   EXPECT_CALL(app_mngr_, application(kConnectionKey)).WillOnce(Return(app));

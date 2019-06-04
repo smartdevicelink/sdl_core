@@ -148,6 +148,8 @@ class SubscribeVehicleDataRequest
    */
   VehicleInfoSubscriptions vi_waiting_for_subscribe_;
 
+  CustomVehicleDataManager& custom_vehicle_data_manager_;
+
   DISALLOW_COPY_AND_ASSIGN(SubscribeVehicleDataRequest);
 };
 
