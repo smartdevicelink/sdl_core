@@ -34,6 +34,9 @@
 
 #include "application_manager/message.h"
 #include "interfaces/MOBILE_API.h"
+#include "vehicle_info_plugin/vehicle_info_command_params.h"
+
+#include "vehicle_info_plugin/custom_vehicle_data_manager.h"
 
 #include "vehicle_info_plugin/commands/mobile/diagnostic_message_request.h"
 #include "vehicle_info_plugin/commands/mobile/diagnostic_message_response.h"
@@ -54,21 +57,83 @@ CREATE_LOGGERPTR_GLOBAL(logger_, "VehicleInfoPlugin")
 namespace vehicle_info_plugin {
 namespace strings = app_mngr::strings;
 
+template <typename VehicleInfoCommandType>
+class VehicleInfoCommandCreator : public application_manager::CommandCreator {
+ public:
+  VehicleInfoCommandCreator(const VehicleInfoCommandParams& params)
+      : params_(params) {}
+
+ private:
+  bool CanBeCreated() const override {
+    return true;
+  }
+
+  application_manager::CommandSharedPtr create(
+      const application_manager::commands::MessageSharedPtr& message)
+      const override {
+    application_manager::CommandSharedPtr command(
+        new VehicleInfoCommandType(message, params_));
+    return command;
+  }
+
+  VehicleInfoCommandParams params_;
+};
+
+struct VehicleInfoInvalidCommand {};
+
+template <>
+class VehicleInfoCommandCreator<VehicleInfoInvalidCommand>
+    : public application_manager::CommandCreator {
+ public:
+  VehicleInfoCommandCreator(const VehicleInfoCommandParams& params) {
+    UNUSED(params);
+  }
+
+ private:
+  bool CanBeCreated() const override {
+    return false;
+  }
+
+  application_manager::CommandSharedPtr create(
+      const application_manager::commands::MessageSharedPtr& message)
+      const override {
+    UNUSED(message);
+    return application_manager::CommandSharedPtr();
+  }
+};
+
+struct VehicleInfoCommandCreatorFactory {
+  VehicleInfoCommandCreatorFactory(const VehicleInfoCommandParams& params)
+      : params_(params) {}
+
+  template <typename VehicleInfoCommandType>
+  application_manager::CommandCreator& GetCreator() {
+    LOG4CXX_AUTO_TRACE(logger_);
+    static VehicleInfoCommandCreator<VehicleInfoCommandType> res(params_);
+    return res;
+  }
+  const VehicleInfoCommandParams params_;
+};
+
 VehicleInfoMobileCommandFactory::VehicleInfoMobileCommandFactory(
     application_manager::ApplicationManager& application_manager,
     application_manager::rpc_service::RPCService& rpc_service,
     application_manager::HMICapabilities& hmi_capabilities,
-    policy::PolicyHandlerInterface& policy_handler)
+    policy::PolicyHandlerInterface& policy_handler,
+    CustomVehicleDataManager& custom_vehicle_data_manager)
     : application_manager_(application_manager)
     , rpc_service_(rpc_service)
     , hmi_capabilities_(hmi_capabilities)
-    , policy_handler_(policy_handler) {
+    , policy_handler_(policy_handler)
+    , custom_vehicle_data_manager_(custom_vehicle_data_manager) {
   LOG4CXX_AUTO_TRACE(logger_);
 }
 
 app_mngr::CommandSharedPtr VehicleInfoMobileCommandFactory::CreateCommand(
     const app_mngr::commands::MessageSharedPtr& message,
     app_mngr::commands::Command::CommandSource source) {
+  UNUSED(source);
+
   const mobile_apis::FunctionID::eType function_id =
       static_cast<mobile_apis::FunctionID::eType>(
           (*message)[strings::params][strings::function_id].asInt());
@@ -105,8 +170,12 @@ bool VehicleInfoMobileCommandFactory::IsAbleToProcess(
 app_mngr::CommandCreator& VehicleInfoMobileCommandFactory::get_command_creator(
     const mobile_apis::FunctionID::eType id,
     const mobile_apis::messageType::eType message_type) const {
-  auto factory = app_mngr::CommandCreatorFactory(
-      application_manager_, rpc_service_, hmi_capabilities_, policy_handler_);
+  VehicleInfoCommandParams params = {application_manager_,
+                                     rpc_service_,
+                                     hmi_capabilities_,
+                                     policy_handler_,
+                                     custom_vehicle_data_manager_};
+  auto factory = VehicleInfoCommandCreatorFactory(params);
   switch (id) {
     case mobile_apis::FunctionID::GetVehicleDataID: {
       return mobile_apis::messageType::request == message_type
@@ -141,21 +210,25 @@ app_mngr::CommandCreator& VehicleInfoMobileCommandFactory::get_command_creator(
     }
     default: {}
   }
-  return factory.GetCreator<app_mngr::InvalidCommand>();
+  return factory.GetCreator<VehicleInfoInvalidCommand>();
 }
 
 app_mngr::CommandCreator&
 VehicleInfoMobileCommandFactory::get_notification_creator(
     const mobile_apis::FunctionID::eType id) const {
-  auto factory = app_mngr::CommandCreatorFactory(
-      application_manager_, rpc_service_, hmi_capabilities_, policy_handler_);
+  VehicleInfoCommandParams params = {application_manager_,
+                                     rpc_service_,
+                                     hmi_capabilities_,
+                                     policy_handler_,
+                                     custom_vehicle_data_manager_};
+  auto factory = VehicleInfoCommandCreatorFactory(params);
   switch (id) {
     case mobile_apis::FunctionID::OnVehicleDataID: {
       return factory.GetCreator<commands::OnVehicleDataNotification>();
     }
     default: {}
   }
-  return factory.GetCreator<app_mngr::InvalidCommand>();
+  return factory.GetCreator<VehicleInfoInvalidCommand>();
 }
 
 app_mngr::CommandCreator& VehicleInfoMobileCommandFactory::get_creator_factory(
@@ -183,8 +256,12 @@ app_mngr::CommandCreator& VehicleInfoMobileCommandFactory::get_creator_factory(
     }
     default: {}
   }
-  auto factory = app_mngr::CommandCreatorFactory(
-      application_manager_, rpc_service_, hmi_capabilities_, policy_handler_);
-  return factory.GetCreator<app_mngr::InvalidCommand>();
+  VehicleInfoCommandParams params = {application_manager_,
+                                     rpc_service_,
+                                     hmi_capabilities_,
+                                     policy_handler_,
+                                     custom_vehicle_data_manager_};
+  auto factory = VehicleInfoCommandCreatorFactory(params);
+  return factory.GetCreator<VehicleInfoInvalidCommand>();
 }
 }  // namespace vehicle_info_plugin

@@ -48,15 +48,13 @@ namespace str = strings;
 
 GetVehicleDataRequest::GetVehicleDataRequest(
     const application_manager::commands::MessageSharedPtr& message,
-    ApplicationManager& application_manager,
-    rpc_service::RPCService& rpc_service,
-    HMICapabilities& hmi_capabilities,
-    policy::PolicyHandlerInterface& policy_handler)
+    const VehicleInfoCommandParams& params)
     : CommandRequestImpl(message,
-                         application_manager,
-                         rpc_service,
-                         hmi_capabilities,
-                         policy_handler) {}
+                         params.application_manager_,
+                         params.rpc_service_,
+                         params.hmi_capabilities_,
+                         params.policy_handler_)
+    , custom_vehicle_data_manager_(params.custom_vehicle_data_manager_) {}
 
 GetVehicleDataRequest::~GetVehicleDataRequest() {}
 

@@ -33,6 +33,8 @@
 #include "application_manager/rpc_service_impl.h"
 
 #include "application_manager/app_service_manager.h"
+#include "application_manager/command_factory.h"
+#include "application_manager/commands/command.h"
 #include "application_manager/plugin_manager/plugin_keys.h"
 
 namespace application_manager {
