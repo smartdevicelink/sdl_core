@@ -66,5 +66,6 @@ void OnWayPointChangeNotification::Run() {
     SendNotification();
   }
 }
+
 }  // namespace commands
 }  // namespace sdl_rpc_plugin

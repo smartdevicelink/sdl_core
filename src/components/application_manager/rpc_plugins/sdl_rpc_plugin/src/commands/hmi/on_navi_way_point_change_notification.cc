@@ -31,6 +31,7 @@
  */
 
 #include "sdl_rpc_plugin/commands/hmi/on_navi_way_point_change_notification.h"
+#include "application_manager/app_service_manager.h"
 
 namespace sdl_rpc_plugin {
 using namespace application_manager;
@@ -50,6 +51,14 @@ OnNaviWayPointChangeNotification::~OnNaviWayPointChangeNotification() {}
 
 void OnNaviWayPointChangeNotification::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
+  if (application_manager_.GetAppServiceManager()
+          .GetRPCPassingHandler()
+          .CanHandleFunctionID(mobile_apis::FunctionID::GetWayPointsID)) {
+    LOG4CXX_INFO(logger_,
+                 "Ignoring OnWayPointChange from HMI, there is already an "
+                 "active service handling waypoints");
+    return;
+  }
 
   // prepare SmartObject for mobile factory
   (*message_)[strings::params][strings::function_id] =
