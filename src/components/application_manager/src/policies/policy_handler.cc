@@ -493,6 +493,7 @@ void PolicyHandler::OnAppPermissionConsent(
 
 void PolicyHandler::OnDeviceConsentChanged(const std::string& device_id,
                                            const bool is_allowed) {
+  LOG4CXX_AUTO_TRACE(logger_);
   POLICY_LIB_CHECK_VOID();
   connection_handler::DeviceHandle device_handle;
   if (!application_manager_.connection_handler().GetDeviceID(device_id,
@@ -975,9 +976,8 @@ void PolicyHandler::OnPendingPermissionChange(
       logger_,
       "PolicyHandler::OnPendingPermissionChange for " << policy_app_id);
   POLICY_LIB_CHECK_VOID();
-  ApplicationSharedPtr app =
-      application_manager_.application_by_policy_id(policy_app_id);
-  if (app.use_count() == 0) {
+  auto app = application_manager_.application_by_policy_id(policy_app_id);
+  if (!app) {
     LOG4CXX_WARN(logger_,
                  "No app found for " << policy_app_id << " policy app id.");
     return;
