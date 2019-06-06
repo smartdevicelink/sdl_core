@@ -83,22 +83,11 @@ bool operator!=(const policy_table::ApplicationParams& first,
 struct CheckAppPolicy {
   CheckAppPolicy(PolicyManagerImpl* pm,
                  const std::shared_ptr<policy_table::Table> update,
-                 const std::shared_ptr<policy_table::Table> snapshot);
+                 const std::shared_ptr<policy_table::Table> snapshot,
+                 CheckAppPolicyResults& out_results);
   bool operator()(const AppPoliciesValueType& app_policy);
 
  private:
-  enum PermissionsCheckResult {
-    RESULT_NO_CHANGES,
-    RESULT_APP_REVOKED,
-    RESULT_NICKNAME_MISMATCH,
-    RESULT_PERMISSIONS_REVOKED,
-    RESULT_CONSENT_NEEDED,
-    RESULT_CONSENT_NOT_REQIURED,
-    RESULT_PERMISSIONS_REVOKED_AND_CONSENT_NEEDED,
-    RESULT_REQUEST_TYPE_CHANGED,
-    RESULT_REQUEST_SUBTYPE_CHANGED
-  };
-
   void SetPendingPermissions(const AppPoliciesValueType& app_policy,
                              PermissionsCheckResult result) const;
   PermissionsCheckResult CheckPermissionsChanges(
@@ -119,6 +108,16 @@ struct CheckAppPolicy {
                             const policy_table::Strings& groups) const;
   bool IsAppRevoked(const AppPoliciesValueType& app_policy) const;
   bool NicknamesMatch(const AppPoliciesValueType& app_policy) const;
+
+  /**
+   * @brief Check of current policy against incoming updated policy is
+   * performed.
+   * This function adds result code of this check to container.
+   * @param app_id Application id
+   * @param result Result value
+   */
+  void AddResult(const std::string& app_id, PermissionsCheckResult result);
+
   /**
    * @brief Allows to check if appropriate group requires any consent.
    * @param group_name the group for which consent will be checked.
@@ -129,10 +128,31 @@ struct CheckAppPolicy {
   bool IsRequestTypeChanged(const AppPoliciesValueType& app_policy) const;
   bool IsRequestSubTypeChanged(const AppPoliciesValueType& app_policy) const;
 
+  bool IsEncryptionRequiredFlagChanged(
+      const AppPoliciesValueType& app_policy) const;
+
  private:
   PolicyManagerImpl* pm_;
   const std::shared_ptr<policy_table::Table> update_;
   const std::shared_ptr<policy_table::Table> snapshot_;
+  CheckAppPolicyResults& out_results_;
+};
+
+/**
+ * @brief Helper struct for filling actions to be done for processed application
+ * using CheckAppPolicyResults data as a source
+ */
+struct FillActionsForAppPolicies {
+  FillActionsForAppPolicies(
+      ApplicationsPoliciesActions& actions,
+      const policy_table::ApplicationPolicies& app_policies)
+      : actions_(actions), app_policies_(app_policies) {}
+
+  void operator()(const policy::CheckAppPolicyResults::value_type& value);
+
+ private:
+  ApplicationsPoliciesActions& actions_;
+  const policy_table::ApplicationPolicies& app_policies_;
 };
 
 /*
