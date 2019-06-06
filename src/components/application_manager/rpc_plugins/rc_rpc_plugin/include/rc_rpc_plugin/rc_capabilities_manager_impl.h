@@ -78,6 +78,9 @@ class RCCapabilitiesManagerImpl : public RCCapabilitiesManager {
 
   bool IsSeatLocationCapabilityProvided() const FINAL;
 
+  const std::string GetModuleIdForSeatLocation(
+      mobile_apis::SupportedSeat::eType id) const FINAL;
+
  private:
   const std::map<std::string, std::string> GetLightCapabilitiesMapping() const;
 

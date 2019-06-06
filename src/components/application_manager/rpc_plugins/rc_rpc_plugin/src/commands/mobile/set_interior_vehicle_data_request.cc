@@ -115,8 +115,6 @@ void SetInteriorVehicleDataRequest::Execute() {
   const std::string module_type = ModuleType();
 
   if (ClearUnrelatedModuleData(module_type, module_data)) {
-    ModuleCapability module_data_capabilities;
-
     const std::string module_id = ModuleId();
     const ModuleUid module(module_type, module_id);
     if (!rc_capabilities_manager_.CheckIfModuleExistInCapabilities(module)) {
@@ -130,6 +128,7 @@ void SetInteriorVehicleDataRequest::Execute() {
       return;
     }
 
+    ModuleCapability module_data_capabilities;
     module_data_capabilities =
         rc_capabilities_manager_.GetModuleDataCapabilities(module_data,
                                                            module_id);
@@ -325,6 +324,13 @@ std::string SetInteriorVehicleDataRequest::ModuleId() const {
           message_params::kModuleId)) {
     return msg_params[message_params::kModuleData][message_params::kModuleId]
         .asString();
+  }
+  if (enums_value::kSeat == ModuleType()) {
+    const auto id = static_cast<mobile_apis::SupportedSeat::eType>(
+        msg_params[message_params::kModuleData]
+                  [message_params::kSeatControlData][message_params::kId]
+                      .asUInt());
+    return rc_capabilities_manager_.GetModuleIdForSeatLocation(id);
   }
   const std::string module_id =
       rc_capabilities_manager_.GetDefaultModuleIdFromCapabilities(ModuleType());

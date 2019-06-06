@@ -165,6 +165,18 @@ class RCCapabilitiesManager {
    */
   virtual bool IsSeatLocationCapabilityProvided() const = 0;
 
+  /**
+   * @brief GetModuleIdForSeatLocation returns the moduleId if request from
+   * mobile contains the id parameter and doesn't contain the moduleId
+   * parameter. If the vehicle support at least one seat control, seat control
+   * capability includes at least two items. SupportedSeat id shall be converted
+   * to the moduleId according to capabilities: 1st item from capabilities for
+   * driver’s seat. 2nd item for front passenger’s seat.
+   * @param id supported seat id
+   */
+  virtual const std::string GetModuleIdForSeatLocation(
+      mobile_apis::SupportedSeat::eType id) const = 0;
+
   virtual ~RCCapabilitiesManager() {}
 };
 

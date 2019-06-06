@@ -269,6 +269,29 @@ const std::vector<ModuleUid> RCCapabilitiesManagerImpl::GetResources() const {
   return resources;
 }
 
+const std::string RCCapabilitiesManagerImpl::GetModuleIdForSeatLocation(
+    const mobile_apis::SupportedSeat::eType id) const {
+  LOG4CXX_AUTO_TRACE(logger_);
+  auto rc_capabilities = *(hmi_capabilities_.rc_capability());
+  const auto seat_capabilities =
+      rc_capabilities[strings::kseatControlCapabilities];
+  if (seat_capabilities.length() > 0) {
+    if (mobile_apis::SupportedSeat::DRIVER == id) {
+      return seat_capabilities[0][message_params::kModuleInfo]
+                              [message_params::kModuleId]
+                                  .asString();
+    }
+    if ((seat_capabilities.length() > 1) &&
+        mobile_apis::SupportedSeat::FRONT_PASSENGER == id) {
+      return seat_capabilities[1][message_params::kModuleInfo]
+                              [message_params::kModuleId]
+                                  .asString();
+    }
+  }
+  LOG4CXX_DEBUG(logger_, "There are no capabitities for requested id: " << id);
+  return "";
+}
+
 bool RCCapabilitiesManagerImpl::CheckIfButtonExistInRCCaps(
     const mobile_apis::ButtonName::eType button) const {
   auto rc_capabilities = *(hmi_capabilities_.rc_capability());

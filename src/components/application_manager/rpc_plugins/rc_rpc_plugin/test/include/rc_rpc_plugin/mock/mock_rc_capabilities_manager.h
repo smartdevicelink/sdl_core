@@ -84,6 +84,10 @@ class MockRCCapabilitiesManager : public rc_rpc_plugin::RCCapabilitiesManager {
                      const rc_rpc_plugin::Grid());
 
   MOCK_CONST_METHOD0(IsSeatLocationCapabilityProvided, bool());
+
+  MOCK_CONST_METHOD1(
+      GetModuleIdForSeatLocation,
+      const std::string(const mobile_apis::SupportedSeat::eType id));
 };
 }  // namespace rc_rpc_plugin_test
 #endif  // SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_RC_RPC_PLUGIN_TEST_INCLUDE_RC_RPC_PLUGIN_MOCK_MOCK_RC_СAPABILITIES_MANAGER_H_
