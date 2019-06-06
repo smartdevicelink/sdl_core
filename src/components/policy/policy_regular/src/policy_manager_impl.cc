@@ -346,7 +346,8 @@ bool PolicyManagerImpl::LoadPT(const std::string& file,
     // groups, which had been present before are absent in PTU and will be
     // removed after update. So in case of revoked groups system has to know
     // names and ids of revoked groups before they will be removed.
-    CheckPermissionsChanges(pt_update, policy_table_snapshot);
+    const auto results =
+        CheckPermissionsChanges(pt_update, policy_table_snapshot);
 
     // Replace current data with updated
     if (!cache_->ApplyUpdate(*pt_update)) {
@@ -356,6 +357,9 @@ bool PolicyManagerImpl::LoadPT(const std::string& file,
       ForcePTExchange();
       return false;
     }
+
+    ProcessAppPolicyCheckResults(
+        results, pt_update->policy_table.app_policies_section.apps);
 
     listener_->OnCertificateUpdated(
         *(pt_update->policy_table.module_config.certificate));
@@ -387,18 +391,102 @@ bool PolicyManagerImpl::LoadPT(const std::string& file,
   return true;
 }
 
-void PolicyManagerImpl::CheckPermissionsChanges(
+void PolicyManagerImpl::ProcessAppPolicyCheckResults(
+    const CheckAppPolicyResults& results,
+    const rpc::policy_table_interface_base::ApplicationPolicies& app_policies) {
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  ApplicationsPoliciesActions actions_for_apps_policies;
+  FillActionsForAppPolicies filler(actions_for_apps_policies, app_policies);
+
+  std::for_each(results.begin(), results.end(), filler);
+
+  ProcessActionsForAppPolicies(actions_for_apps_policies, app_policies);
+}
+
+void PolicyManagerImpl::ProcessActionsForAppPolicies(
+    const ApplicationsPoliciesActions& actions,
+    const policy_table::ApplicationPolicies& app_policies) {
+  ApplicationsPoliciesActions::const_iterator it_actions = actions.begin();
+  for (; it_actions != actions.end(); ++it_actions) {
+    auto app_policy = app_policies.find(it_actions->first);
+    if (app_policies.end() == app_policy) {
+      continue;
+    }
+
+    if (it_actions->second.is_consent_needed) {
+      // Post-check after ExternalConsent consent changes
+      const std::string& policy_app_id = app_policy->first;
+      if (!IsConsentNeeded(policy_app_id)) {
+        sync_primitives::AutoLock lock(app_permissions_diff_lock_);
+
+        PendingPermissions::iterator app_id_diff =
+            app_permissions_diff_.find(policy_app_id);
+
+        if (app_permissions_diff_.end() != app_id_diff) {
+          app_id_diff->second.appPermissionsConsentNeeded = false;
+        }
+      }
+    }
+    if (it_actions->second.is_notify_system) {
+      NotifySystem(*app_policy);
+    }
+    if (it_actions->second.is_send_permissions_to_app) {
+      SendPermissionsToApp(*app_policy);
+    }
+  }
+}
+
+void PolicyManagerImpl::NotifySystem(
+    const PolicyManagerImpl::AppPoliciesValueType& app_policy) const {
+  listener()->OnPendingPermissionChange(app_policy.first);
+}
+
+void PolicyManagerImpl::SendPermissionsToApp(
+    const PolicyManagerImpl::AppPoliciesValueType& app_policy) {
+  const std::string app_id = app_policy.first;
+
+  const std::string device_id = GetCurrentDeviceId(app_id);
+  if (device_id.empty()) {
+    LOG4CXX_WARN(logger_,
+                 "Couldn't find device info for application id: " << app_id);
+    return;
+  }
+  std::vector<FunctionalGroupPermission> group_permissons;
+  GetPermissionsForApp(device_id, app_id, group_permissons);
+
+  Permissions notification_data;
+
+  // Need to get rid of this call
+  auto policy_table_snapshot = cache_->GenerateSnapshot();
+
+  PrepareNotificationData(
+      policy_table_snapshot->policy_table.functional_groupings,
+      app_policy.second.groups,
+      group_permissons,
+      notification_data);
+
+  std::string default_hmi;
+  default_hmi = "NONE";
+  listener()->OnPermissionsUpdated(app_id, notification_data, default_hmi);
+}
+
+CheckAppPolicyResults PolicyManagerImpl::CheckPermissionsChanges(
     const std::shared_ptr<policy_table::Table> pt_update,
     const std::shared_ptr<policy_table::Table> snapshot) {
-  LOG4CXX_INFO(logger_, "Checking incoming permissions.");
+  LOG4CXX_AUTO_TRACE(logger_);
 
   // Replace predefined policies with its actual setting, e.g. "123":"default"
   // to actual values of default section
   UnwrapAppPolicies(pt_update->policy_table.app_policies_section.apps);
 
+  CheckAppPolicyResults out_results;
+
   std::for_each(pt_update->policy_table.app_policies_section.apps.begin(),
                 pt_update->policy_table.app_policies_section.apps.end(),
-                CheckAppPolicy(this, pt_update, snapshot));
+                CheckAppPolicy(this, pt_update, snapshot, out_results));
+
+  return out_results;
 }
 
 void PolicyManagerImpl::PrepareNotificationData(
@@ -406,7 +494,7 @@ void PolicyManagerImpl::PrepareNotificationData(
     const policy_table::Strings& group_names,
     const std::vector<FunctionalGroupPermission>& group_permission,
     Permissions& notification_data) {
-  LOG4CXX_INFO(logger_, "Preparing data for notification.");
+  LOG4CXX_AUTO_TRACE(logger_);
   ProcessFunctionalGroup processor(groups, group_permission, notification_data);
   std::for_each(group_names.begin(), group_names.end(), processor);
 }

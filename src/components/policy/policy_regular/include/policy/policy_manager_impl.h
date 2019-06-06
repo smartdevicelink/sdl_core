@@ -132,6 +132,21 @@ class PolicyManagerImpl : public PolicyManager {
   bool LoadPT(const std::string& file,
               const BinaryMessage& pt_content) OVERRIDE;
 
+  typedef policy_table::ApplicationPolicies::value_type AppPoliciesValueType;
+
+  /**
+   * @brief Notifies system by sending OnAppPermissionChanged notification
+   * @param app_policy Reference to application policy
+   */
+  void NotifySystem(const AppPoliciesValueType& app_policy) const;
+
+  /**
+   * @brief Sends OnPermissionChange notification to application if its
+   * currently registered
+   * @param app_policy Reference to application policy
+   */
+  void SendPermissionsToApp(const AppPoliciesValueType& app_policy);
+
   /**
    * @brief Resets Policy Table
    * @param file_name Path to preloaded PT file
@@ -855,9 +870,18 @@ class PolicyManagerImpl : public PolicyManager {
    * @param snapshot Shared pointer to current copy of policy table
    * @return Collection per-application results
    */
-  void CheckPermissionsChanges(
+  CheckAppPolicyResults CheckPermissionsChanges(
       const std::shared_ptr<policy_table::Table> update,
       const std::shared_ptr<policy_table::Table> snapshot);
+
+  void ProcessAppPolicyCheckResults(
+      const CheckAppPolicyResults& results,
+      const rpc::policy_table_interface_base::ApplicationPolicies&
+          app_policies);
+
+  void ProcessActionsForAppPolicies(
+      const ApplicationsPoliciesActions& actions,
+      const policy_table::ApplicationPolicies& app_policies);
 
   /**
    * @brief Fill structure to be sent with OnPermissionsChanged notification
