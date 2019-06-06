@@ -94,9 +94,9 @@ class RCHelpers {
 
   /**
    * @brief RemoveRedundantGPSDataFromVIDataMsg removes redundant GPS data
-   * params from interrior vehicle data response message if one contains radio
+   * params from interior vehicle data response message if one contains radio
    * station location data
-   * @param msg_params Params of the interrion vehicle data response message
+   * @param msg_params Params of the interior vehicle data response message
    */
   static void RemoveRedundantGPSDataFromIVDataMsg(
       smart_objects::SmartObject& msg_params);

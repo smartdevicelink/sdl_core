@@ -2014,7 +2014,7 @@
                 <param name="speed" type="Float" minvalue="0" maxvalue="500" mandatory="true" since="2.0" until="5.0"/>
             </history>
         </param>
-        <param name="shifted" type="Boolean" mandatory="false" since="5.0">
+        <param name="shifted" type="Boolean" mandatory="false" since="5.2">
             <description>
                 True, if GPS lat/long, time, and altitude have been purposefully shifted (requires a proprietary algorithm to unshift).
                 False, if the GPS data is raw and un-shifted.
