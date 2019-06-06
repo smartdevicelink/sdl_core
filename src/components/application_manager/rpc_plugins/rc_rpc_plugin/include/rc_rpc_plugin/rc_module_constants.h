@@ -151,6 +151,7 @@ const char kFrequencyFraction[] = "frequencyFraction";
 const char kBand[] = "band";
 const char kRdsData[] = "rdsData";
 const char kHdRadioEnable[] = "hdRadioEnable";
+const char kAvailableHDs[] = "availableHDs";
 const char kAvailableHdChannels[] = "availableHdChannels";
 const char kHdChannel[] = "hdChannel";
 const char kSignalStrength[] = "signalStrength";

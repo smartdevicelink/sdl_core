@@ -1879,10 +1879,16 @@
    <param name="hdRadioEnable" type="Boolean" mandatory="false">
      <description> True if the hd radio is on, false is the radio is off</description>
    </param>
+   <param name="availableHDs" type="Integer" minvalue="1" maxvalue="7" mandatory="false">
+    <description>
+       Number of HD sub-channels if available.
+       Note that this parameter is deprecated in MOBILE API.
+    </description>
+   </param>
    <param name="availableHdChannels" type="Integer" minvalue="0" maxvalue="7" array="true" minsize="0" maxsize="8" mandatory="false">
      <description>The list of available hd sub-channel indexes. Empty list means no Hd channel is available. Read-only.</description>
    </param>
-   <param name="hdChannel" type="Integer" minvalue="0" maxvalue="7" mandatory="false">
+   <param name="hdChannel" type="Integer" minvalue="1" maxvalue="7" mandatory="false">
      <description>Current HD sub-channel if available</description>
    </param>
    <param name="signalStrength" type="Integer" minvalue="0" maxvalue="100" mandatory="false">
@@ -1935,6 +1941,14 @@
        True: Available, False: Not Available, Not present: Not Available.
      </description>
    </param>
+   <param name="availableHDsAvailable" type="Boolean" mandatory="false" >
+   <description>
+       Availability of the getting the number of available HD channels.
+       True: Available, False: Not Available, Not present: Not Available.
+       Note that this parameter is deprecated in MOBILE API
+     </description>
+   </param>
+
    <param name="availableHdChannelsAvailable" type="Boolean" mandatory="false">
      <description>
        Availability of the list of available HD sub-channel indexes.
