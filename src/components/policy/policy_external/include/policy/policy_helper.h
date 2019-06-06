@@ -202,6 +202,15 @@ struct CheckAppPolicy {
   bool IsRequestSubTypeChanged(const AppPoliciesValueType& app_policy) const;
 
   /**
+   * @brief IsEncryptionRequiredFlagChanged check if encryption_needed flag was
+   * changed for application or application groups
+   * @param app_policy applicaiton policies
+   * @return true if encryption_needed state was changed otherwise - false
+   */
+  bool IsEncryptionRequiredFlagChanged(
+      const AppPoliciesValueType& app_policy) const;
+
+  /**
    * @brief Helper function that inserts permissions into app_permissions_diff_
    * map.
    * udpated

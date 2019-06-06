@@ -452,6 +452,8 @@ PermissionsCheckResult CheckAppPolicy::CheckPermissionsChanges(
 
   bool has_new_groups = HasNewGroups(app_policy);
 
+  const bool encryption_required_flag_changed =
+      IsEncryptionRequiredFlagChanged(app_policy);
   if (has_revoked_groups && has_consent_needed_groups) {
     return RESULT_PERMISSIONS_REVOKED_AND_CONSENT_NEEDED;
   } else if (has_revoked_groups) {
@@ -460,6 +462,8 @@ PermissionsCheckResult CheckAppPolicy::CheckPermissionsChanges(
     return RESULT_CONSENT_NEEDED;
   } else if (has_new_groups) {
     return RESULT_CONSENT_NOT_REQIURED;
+  } else if (encryption_required_flag_changed) {
+    return RESULT_ENCRYPTION_REQUIRED_FLAG_CHANGED;
   }
 
   return RESULT_NO_CHANGES;
@@ -540,11 +544,101 @@ bool CheckAppPolicy::IsRequestSubTypeChanged(
   return diff.size();
 }
 
+bool CheckAppPolicy::IsEncryptionRequiredFlagChanged(
+    const AppPoliciesValueType& app_policy) const {
+  LOG4CXX_AUTO_TRACE(logger_);
+  auto get_app_encryption_needed =
+      [](const std::string& policy_app_id,
+         policy_table::ApplicationPolicies& policies)
+          -> rpc::Optional<rpc::Boolean> {
+            auto it = policies.find(policy_app_id);
+            if (policies.end() == it) {
+              LOG4CXX_WARN(logger_,
+                           "App is not present in policies" << policy_app_id);
+              return rpc::Optional<rpc::Boolean>(false);
+            }
+            return it->second.encryption_required;
+          };
+
+  auto get_app_groups =
+      [](const std::string& policy_app_id,
+         policy_table::ApplicationPolicies& policies) -> policy_table::Strings {
+        policy_table::Strings result;
+        auto it = policies.find(policy_app_id);
+        if (policies.end() == it) {
+          LOG4CXX_WARN(logger_,
+                       "App is not present in policies" << policy_app_id);
+          return result;
+        }
+        auto& groups = it->second.groups;
+        std::copy(groups.begin(), groups.end(), std::back_inserter(result));
+        return result;
+      };
+
+  auto get_app_rpcs =
+      [](const std::string group_name, const FunctionalGroupings& groups)
+          -> rpc::Optional<policy_table::Rpcs> {
+            auto it = groups.find(group_name);
+            if (it == groups.end()) {
+              return rpc::Optional<policy_table::Rpcs>();
+            }
+            return rpc::Optional<policy_table::Rpcs>(it->second);
+          };
+
+  const auto snapshot_groups = get_app_groups(
+      app_policy.first, snapshot_->policy_table.app_policies_section.apps);
+  const auto update_groups = get_app_groups(
+      app_policy.first, update_->policy_table.app_policies_section.apps);
+
+  auto get_resulting_encryption_required_flag_for_app_groups =
+      [this, &get_app_rpcs](
+          const rpc::policy_table_interface_base::Strings& app_groups,
+          const std::shared_ptr<rpc::policy_table_interface_base::Table> pt) {
+
+        for (const auto& group : app_groups) {
+          const auto rpcs =
+              get_app_rpcs(group, pt->policy_table.functional_groupings);
+          if (*rpcs->encryption_required) {
+            return true;
+          }
+        }
+
+        return false;
+      };
+
+  auto group_res_en_flag_changed =
+      [this, &get_resulting_encryption_required_flag_for_app_groups](
+          const rpc::policy_table_interface_base::Strings& snapshot_groups,
+          const rpc::policy_table_interface_base::Strings& update_groups) {
+        return get_resulting_encryption_required_flag_for_app_groups(
+                   snapshot_groups, snapshot_) !=
+               get_resulting_encryption_required_flag_for_app_groups(
+                   update_groups, update_);
+      };
+
+  const auto snapshot_app_encryption_needed = get_app_encryption_needed(
+      app_policy.first, snapshot_->policy_table.app_policies_section.apps);
+  const auto update_app_encryption_needed = get_app_encryption_needed(
+      app_policy.first, update_->policy_table.app_policies_section.apps);
+
+  const bool app_encryption_needed_changed =
+      (snapshot_app_encryption_needed.is_initialized() !=
+       update_app_encryption_needed.is_initialized()) ||
+      (*snapshot_app_encryption_needed != *update_app_encryption_needed);
+
+  if ((!update_app_encryption_needed.is_initialized() ||
+       *update_app_encryption_needed) &&
+      group_res_en_flag_changed(snapshot_groups, update_groups)) {
+    return true;
+  }
+
+  return app_encryption_needed_changed;
+}
+
 void FillActionsForAppPolicies::operator()(
     const policy::CheckAppPolicyResults::value_type& value) {
   const std::string app_id = value.first;
-  const policy_table::ApplicationPolicies::const_iterator app_policy =
-      app_policies_.find(app_id);
+  const auto app_policy = app_policies_.find(app_id);
 
   if (app_policies_.end() == app_policy) {
     return;
@@ -567,6 +661,7 @@ void FillActionsForAppPolicies::operator()(
     case RESULT_PERMISSIONS_REVOKED:
     case RESULT_REQUEST_TYPE_CHANGED:
     case RESULT_REQUEST_SUBTYPE_CHANGED:
+    case RESULT_ENCRYPTION_REQUIRED_FLAG_CHANGED:
       break;
     case RESULT_NO_CHANGES:
     default:
@@ -641,9 +736,11 @@ void FillNotificationData::UpdateParameters(
   // particular parameters (if applicable), the system shall find all of the
   // functional groups the RPC is included in. If user consent is needed as
   // listed within the functional group in the policy table, the system shall
-  // use a logical AND: backend permissions AND User permissions. If the RPC is
+  // use a logical AND: backend permissions AND User permissions. If the RPC
+  // is
   // listed under more than one group, the system shall perform a logical OR
-  // amongst all of the possible allowed permissions scenarios for the RPC (and
+  // among all of the possible allowed permissions scenarios for the RPC
+  // (and
   // parameter/or HMI level) defined by each of the functional groups.
 
   // Due to requirements SDL must consider cases when 'parameters' section is
@@ -734,7 +831,8 @@ void FillNotificationData::ExcludeSame(RpcPermissions& rpc) {
     }
   }
 
-  // Removing disallowed parameters from allowed and undefined (by user consent)
+  // Removing disallowed parameters from allowed and undefined (by user
+  // consent)
   if (rpc.parameter_permissions.end() != it_parameter_user_disallowed) {
     if (rpc.parameter_permissions.end() != it_parameter_allowed) {
       ExcludeSameParameters(rpc.parameter_permissions[kAllowedKey],
