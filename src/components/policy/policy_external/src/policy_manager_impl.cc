@@ -524,7 +524,7 @@ bool PolicyManagerImpl::LoadPT(const std::string& file,
 CheckAppPolicyResults PolicyManagerImpl::CheckPermissionsChanges(
     const std::shared_ptr<policy_table::Table> pt_update,
     const std::shared_ptr<policy_table::Table> snapshot) {
-  LOG4CXX_INFO(logger_, "Checking incoming permissions.");
+  LOG4CXX_AUTO_TRACE(logger_);
 
   // Replace predefined policies with its actual setting, e.g. "123":"default"
   // to actual values of default section
@@ -554,7 +554,7 @@ void PolicyManagerImpl::ProcessActionsForAppPolicies(
     const policy_table::ApplicationPolicies& app_policies) {
   ApplicationsPoliciesActions::const_iterator it_actions = actions.begin();
   for (; it_actions != actions.end(); ++it_actions) {
-    policy_table::ApplicationPolicies::const_iterator app_policy =
+    auto app_policy = app_policies.find(it_actions->first);
         app_policies.find(it_actions->first);
     if (app_policies.end() == app_policy) {
       continue;
