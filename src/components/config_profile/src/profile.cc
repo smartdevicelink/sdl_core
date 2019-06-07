@@ -184,6 +184,7 @@ const char* kAppHmiLevelNoneRequestsTimeScaleKey =
 const char* kPendingRequestsAmoundKey = "PendingRequestsAmount";
 const char* kSupportedDiagModesKey = "SupportedDiagModes";
 const char* kTransportManagerDisconnectTimeoutKey = "DisconnectTimeout";
+const char* kBluetoothUUIDKey = "BluetoothUUID";
 const char* kTTSDelimiterKey = "TTSDelimiter";
 const char* kRecordingFileNameKey = "RecordingFileName";
 const char* kRecordingFileSourceKey = "RecordingFileSource";
@@ -804,6 +805,10 @@ uint32_t Profile::cloud_app_retry_timeout() const {
 
 uint16_t Profile::cloud_app_max_retry_attempts() const {
   return cloud_app_max_retry_attempts_;
+}
+
+const uint8_t* Profile::bluetooth_uuid() const {
+  return bluetooth_uuid_.data();
 }
 
 const std::string& Profile::tts_delimiter() const {
@@ -1821,6 +1826,9 @@ void Profile::UpdateValues() {
                     kCloudAppMaxRetryAttemptsKey,
                     kCloudAppTransportSection);
 
+  bluetooth_uuid_ =
+      ReadUint8Container(kTransportManagerSection, kBluetoothUUIDKey, NULL);
+      
   // Event MQ
   ReadStringValue(
       &event_mq_name_, kDefaultEventMQ, kTransportManagerSection, kEventMQKey);
@@ -2449,6 +2457,10 @@ int32_t hex_to_int(const std::string& value) {
   return static_cast<int32_t>(strtol(value.c_str(), NULL, 16));
 }
 
+int32_t hex_to_uint8(const std::string& value) {
+  return static_cast<uint8_t>(strtol(value.c_str(), NULL, 16));
+}
+
 std::string trim_string(const std::string& str) {
   const char* delims = " \t";
 
@@ -2471,6 +2483,18 @@ std::vector<int> Profile::ReadIntContainer(const char* const pSection,
   value_list.resize(string_list.size());
   std::transform(
       string_list.begin(), string_list.end(), value_list.begin(), hex_to_int);
+  return value_list;
+}
+
+std::vector<uint8_t> Profile::ReadUint8Container(const char* const pSection,
+                                                 const char* const pKey,
+                                                 bool* out_result) const {
+  const std::vector<std::string> string_list =
+      ReadStringContainer(pSection, pKey, out_result);
+  std::vector<uint8_t> value_list;
+  value_list.resize(string_list.size());
+  std::transform(
+      string_list.begin(), string_list.end(), value_list.begin(), hex_to_uint8);
   return value_list;
 }
 
