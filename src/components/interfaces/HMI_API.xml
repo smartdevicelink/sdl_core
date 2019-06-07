@@ -3585,6 +3585,12 @@
     <element name="INVALID_TIME" >
       <description>When a Service is rejected because the system was unable to get a valid SystemTime from HMI, which is required for certificate authentication.</description>
     </element>
+    <element name="PROTECTION_ENFORCED" >
+      <description>When a Service is rejected because the system configuration ini file requires the service must be protected, but the app asks for an unprotected service.</description>
+    </element>
+    <element name="PROTECTION_DISABLED" >
+      <description>When a mobile app requests a protected service, but the system starts an unprotected service instead.</description>
+    </element>
   </enum>
 
     <!-- App Services -->

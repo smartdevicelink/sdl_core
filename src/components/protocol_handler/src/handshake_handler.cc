@@ -225,7 +225,7 @@ void HandshakeHandler::ProcessFailedHandshake(BsonObject& params,
     service_status_update_handler_.OnServiceUpdate(
         this->connection_key(),
         context_.service_type_,
-        ServiceStatus::SERVICE_ACCEPTED);
+        ServiceStatus::PROTECTION_DISABLED);
     protocol_handler_.SendStartSessionAck(context_.connection_id_,
                                           context_.new_session_id_,
                                           protocol_version_,

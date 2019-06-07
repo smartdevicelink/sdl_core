@@ -73,7 +73,8 @@ class ServiceStatusUpdateHandlerTest
 
   Common_ServiceEvent::eType GetServiceEvent(ServiceStatus status) {
     switch (status) {
-      case ServiceStatus::SERVICE_ACCEPTED: {
+      case ServiceStatus::SERVICE_ACCEPTED:
+      case ServiceStatus::PROTECTION_DISABLED: {
         return Common_ServiceEvent::REQUEST_ACCEPTED;
       }
       case ServiceStatus::SERVICE_RECEIVED: {
@@ -82,7 +83,8 @@ class ServiceStatusUpdateHandlerTest
       case ServiceStatus::SERVICE_START_FAILED:
       case ServiceStatus::PTU_FAILED:
       case ServiceStatus::CERT_INVALID:
-      case ServiceStatus::INVALID_TIME: {
+      case ServiceStatus::INVALID_TIME:
+      case ServiceStatus::PROTECTION_ENFORCED: {
         return Common_ServiceEvent::REQUEST_REJECTED;
       }
       default: { return Common_ServiceEvent::INVALID_ENUM; }
@@ -106,6 +108,14 @@ class ServiceStatusUpdateHandlerTest
       }
       case ServiceStatus::INVALID_TIME: {
         auto reason = Common_ServiceStatusUpdateReason::INVALID_TIME;
+        return reason;
+      }
+      case ServiceStatus::PROTECTION_ENFORCED: {
+        auto reason = Common_ServiceStatusUpdateReason::PROTECTION_ENFORCED;
+        return reason;
+      }
+      case ServiceStatus::PROTECTION_DISABLED: {
+        auto reason = Common_ServiceStatusUpdateReason::PROTECTION_DISABLED;
         return reason;
       }
       default: {
@@ -169,6 +179,24 @@ INSTANTIATE_TEST_CASE_P(
         ServiceUpdate(ServiceType::kAudio, ServiceStatus::PTU_FAILED),
         ServiceUpdate(ServiceType::kMobileNav, ServiceStatus::PTU_FAILED),
         ServiceUpdate(ServiceType::kRpc, ServiceStatus::PTU_FAILED)));
+
+INSTANTIATE_TEST_CASE_P(
+    OnServiceUpdate_PROTECTION_ENFRORCED,
+    ServiceStatusUpdateHandlerTest,
+    ::testing::Values(
+        ServiceUpdate(ServiceType::kAudio, ServiceStatus::PROTECTION_ENFORCED),
+        ServiceUpdate(ServiceType::kMobileNav,
+                      ServiceStatus::PROTECTION_ENFORCED),
+        ServiceUpdate(ServiceType::kRpc, ServiceStatus::PROTECTION_ENFORCED)));
+
+INSTANTIATE_TEST_CASE_P(
+    OnServiceUpdate_PROTECTION_DISABLED,
+    ServiceStatusUpdateHandlerTest,
+    ::testing::Values(
+        ServiceUpdate(ServiceType::kAudio, ServiceStatus::PROTECTION_DISABLED),
+        ServiceUpdate(ServiceType::kMobileNav,
+                      ServiceStatus::PROTECTION_DISABLED),
+        ServiceUpdate(ServiceType::kRpc, ServiceStatus::PROTECTION_DISABLED)));
 
 TEST_P(ServiceStatusUpdateHandlerTest, OnServiceUpdate) {
   auto service_event_ = GetServiceEvent(GetParam().service_status_);

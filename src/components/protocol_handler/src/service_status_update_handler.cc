@@ -30,6 +30,7 @@ void ServiceStatusUpdateHandler::OnServiceUpdate(
   using namespace hmi_apis;
   typedef utils::Optional<Common_ServiceStatusUpdateReason::eType>
       UpdateReasonOptional;
+  LOG4CXX_AUTO_TRACE(logger_);
   auto hmi_service_type = GetHMIServiceType(service_type);
 
   switch (service_status) {
@@ -76,6 +77,24 @@ void ServiceStatusUpdateHandler::OnServiceUpdate(
           connection_key,
           hmi_service_type,
           Common_ServiceEvent::REQUEST_REJECTED,
+          update_reason);
+    }
+    case ServiceStatus::PROTECTION_ENFORCED: {
+      auto update_reason =
+          Common_ServiceStatusUpdateReason::PROTECTION_ENFORCED;
+      return listener_->ProcessServiceStatusUpdate(
+          connection_key,
+          hmi_service_type,
+          Common_ServiceEvent::REQUEST_REJECTED,
+          update_reason);
+    }
+    case ServiceStatus::PROTECTION_DISABLED: {
+      auto update_reason =
+          Common_ServiceStatusUpdateReason::PROTECTION_DISABLED;
+      return listener_->ProcessServiceStatusUpdate(
+          connection_key,
+          hmi_service_type,
+          Common_ServiceEvent::REQUEST_ACCEPTED,
           update_reason);
     }
     default: {

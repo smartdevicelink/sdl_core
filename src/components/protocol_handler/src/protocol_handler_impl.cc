@@ -1672,7 +1672,7 @@ RESULT_CODE ProtocolHandlerImpl::HandleControlMessageStartSession(
                       << service_type << ", over transport: " << transport
                       << ", disallowed by settings.");
     service_status_update_handler_->OnServiceUpdate(
-        connection_key, service_type, ServiceStatus::SERVICE_START_FAILED);
+        connection_key, service_type, ServiceStatus::PROTECTION_ENFORCED);
     SendStartSessionNAck(
         connection_id, session_id, protocol_version, service_type);
     return RESULT_OK;
