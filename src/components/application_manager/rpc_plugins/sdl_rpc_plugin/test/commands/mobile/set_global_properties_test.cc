@@ -39,6 +39,7 @@
 
 #include "application_manager/commands/command_request_test.h"
 #include "application_manager/event_engine/event.h"
+#include "application_manager/message_helper.h"
 #include "application_manager/mock_application.h"
 #include "application_manager/mock_application_manager.h"
 #include "application_manager/mock_help_prompt_manager.h"
@@ -70,6 +71,13 @@ const uint32_t kCmdId = 1u;
 const uint32_t kConnectionKey = 1u;
 const std::string kText = "one";
 const uint32_t kPosition = 1u;
+
+const std::vector<hmi_apis::Common_Result::eType> success_result_codes{
+    hmi_apis::Common_Result::SUCCESS,
+    hmi_apis::Common_Result::WARNINGS,
+    hmi_apis::Common_Result::WRONG_LANGUAGE,
+    hmi_apis::Common_Result::RETRY,
+    hmi_apis::Common_Result::SAVED};
 }  // namespace
 
 class SetGlobalPropertiesRequestTest
@@ -233,9 +241,16 @@ class SetGlobalPropertiesRequestTest
     ON_CALL(app_mngr_, application(kConnectionKey))
         .WillByDefault(Return(mock_app_));
     ON_CALL(*mock_app_, app_id()).WillByDefault(Return(kConnectionKey));
-    ON_CALL(mock_hmi_interfaces_,
-            GetInterfaceState(am::HmiInterfaces::HMI_INTERFACE_UI))
+    ON_CALL(mock_hmi_interfaces_, GetInterfaceState(_))
         .WillByDefault(Return(am::HmiInterfaces::STATE_AVAILABLE));
+    ON_CALL(mock_app_manager_, hmi_interfaces())
+        .WillByDefault(ReturnRef(mock_hmi_interfaces_));
+    ON_CALL(mock_message_helper_,
+            MobileToHMIResult(mobile_apis::Result::UNSUPPORTED_RESOURCE))
+        .WillByDefault(Return(hmi_apis::Common_Result::UNSUPPORTED_RESOURCE));
+    ON_CALL(mock_message_helper_,
+            MobileToHMIResult(mobile_apis::Result::WARNINGS))
+        .WillByDefault(Return(hmi_apis::Common_Result::WARNINGS));
   }
 
   void ResultCommandExpectations(MessageSharedPtr msg,
@@ -243,8 +258,8 @@ class SetGlobalPropertiesRequestTest
     EXPECT_EQ((*msg)[am::strings::msg_params][am::strings::success].asBool(),
               true);
     EXPECT_EQ(
-        (*msg)[am::strings::msg_params][am::strings::result_code].asInt(),
-        static_cast<int32_t>(hmi_apis::Common_Result::UNSUPPORTED_RESOURCE));
+        static_cast<int32_t>(hmi_apis::Common_Result::UNSUPPORTED_RESOURCE),
+        (*msg)[am::strings::msg_params][am::strings::result_code].asInt());
     EXPECT_EQ((*msg)[am::strings::msg_params][am::strings::info].asString(),
               info);
   }
@@ -265,10 +280,128 @@ class SetGlobalPropertiesRequestTest
             GetInterfaceState(am::HmiInterfaces::HMI_INTERFACE_TTS))
         .WillByDefault(Return(am::HmiInterfaces::STATE_AVAILABLE));
   }
+
+  // Checks total result code for each properties
+  void PrepareResultCodeForResponse_CheckTotalCode(
+      const hmi_apis::Common_Result::eType& ui_result,
+      const hmi_apis::Common_Result::eType& tts_result,
+      const hmi_apis::Common_Result::eType& rc_result,
+      const mobile_apis::Result::eType expected_total_result_code) {
+    using namespace application_manager;
+    using namespace hmi_apis;
+
+    commands::ResponseInfo ui_properties_info(
+        ui_result, HmiInterfaces::HMI_INTERFACE_UI, mock_app_manager_);
+    commands::ResponseInfo tts_properties_info(
+        tts_result, HmiInterfaces::HMI_INTERFACE_TTS, mock_app_manager_);
+    commands::ResponseInfo rc_properties_info(
+        rc_result, HmiInterfaces::HMI_INTERFACE_RC, mock_app_manager_);
+
+    MessageSharedPtr msg = CreateMsgParams();
+    std::shared_ptr<SetGlobalPropertiesRequest> command(
+        CreateCommand<SetGlobalPropertiesRequest>(msg));
+
+    auto result = command->PrepareResultCodeForResponse(
+        ui_properties_info, tts_properties_info, rc_properties_info);
+
+    EXPECT_EQ(expected_total_result_code, result);
+  }
+
+  // Sets in rotation for each result UNSUPPROTED result code and checks total
+  // result code
+  void PrepareResultCodeForResponse_CheckAllResultsForSpecifiedTotalResult(
+      mobile_apis::Result::eType expected_total_result_code) {
+    using namespace application_manager;
+    using namespace hmi_apis;
+
+    Common_Result::eType ui_result =
+        MessageHelper::MobileToHMIResult(expected_total_result_code);
+    Common_Result::eType tts_result = Common_Result::SUCCESS;
+    Common_Result::eType rc_result = Common_Result::SUCCESS;
+
+    PrepareResultCodeForResponse_CheckTotalCode(
+        ui_result, tts_result, rc_result, expected_total_result_code);
+
+    ui_result = Common_Result::SUCCESS;
+    tts_result = MessageHelper::MobileToHMIResult(expected_total_result_code);
+
+    PrepareResultCodeForResponse_CheckTotalCode(
+        ui_result, tts_result, rc_result, expected_total_result_code);
+
+    tts_result = Common_Result::SUCCESS;
+    rc_result = MessageHelper::MobileToHMIResult(expected_total_result_code);
+
+    PrepareResultCodeForResponse_CheckTotalCode(
+        ui_result, tts_result, rc_result, expected_total_result_code);
+  }
+
+  void PrepareResultForMobileResponse_CheckTotalReault(
+      const hmi_apis::Common_Result::eType& ui_result,
+      const hmi_apis::Common_Result::eType& tts_result,
+      const hmi_apis::Common_Result::eType& rc_result,
+      const bool expected_total_result) {
+    using namespace application_manager;
+    using namespace hmi_apis;
+
+    commands::ResponseInfo ui_properties_info(
+        ui_result, HmiInterfaces::HMI_INTERFACE_UI, mock_app_manager_);
+    commands::ResponseInfo tts_properties_info(
+        tts_result, HmiInterfaces::HMI_INTERFACE_TTS, mock_app_manager_);
+    commands::ResponseInfo rc_properties_info(
+        rc_result, HmiInterfaces::HMI_INTERFACE_RC, mock_app_manager_);
+
+    MessageSharedPtr msg = CreateMsgParams();
+    std::shared_ptr<SetGlobalPropertiesRequest> command(
+        CreateCommand<SetGlobalPropertiesRequest>(msg));
+
+    bool result = command->PrepareResultForMobileResponse(
+        ui_properties_info, tts_properties_info, rc_properties_info);
+
+    EXPECT_EQ(expected_total_result, result);
+  }
+
+  void PrepareResultForMobileResponse_CheckResultsForAllCases() {
+    using namespace application_manager;
+    using namespace hmi_apis;
+
+    Common_Result::eType ui_result = Common_Result::SUCCESS;
+    Common_Result::eType tts_result = Common_Result::SUCCESS;
+    Common_Result::eType rc_result = Common_Result::SUCCESS;
+
+    PrepareResultForMobileResponse_CheckTotalReault(
+        ui_result, tts_result, rc_result, true);
+
+    // Result code isn't success
+    EXPECT_FALSE(helpers::in_range(success_result_codes,
+                                   Common_Result::UNSUPPORTED_REQUEST));
+
+    ui_result = Common_Result::UNSUPPORTED_REQUEST;
+    tts_result = Common_Result::SUCCESS;
+    rc_result = Common_Result::SUCCESS;
+
+    PrepareResultForMobileResponse_CheckTotalReault(
+        ui_result, tts_result, rc_result, false);
+
+    ui_result = Common_Result::SUCCESS;
+    tts_result = Common_Result::UNSUPPORTED_REQUEST;
+    rc_result = Common_Result::SUCCESS;
+
+    PrepareResultForMobileResponse_CheckTotalReault(
+        ui_result, tts_result, rc_result, false);
+
+    ui_result = Common_Result::SUCCESS;
+    tts_result = Common_Result::SUCCESS;
+    rc_result = Common_Result::UNSUPPORTED_REQUEST;
+
+    PrepareResultForMobileResponse_CheckTotalReault(
+        ui_result, tts_result, rc_result, false);
+  }
+
   std::shared_ptr<sync_primitives::Lock> lock_ptr_;
   MockAppPtr mock_app_;
   std::shared_ptr<application_manager_test::MockHelpPromptManager>
       mock_help_prompt_manager_;
+  NiceMock<MockApplicationManager> mock_app_manager_;
 };
 
 TEST_F(SetGlobalPropertiesRequestTest,
@@ -332,6 +465,7 @@ TEST_F(SetGlobalPropertiesRequestTest,
       ManageHMICommand(
           HMIResultCodeIs(hmi_apis::FunctionID::TTS_SetGlobalProperties), _))
       .WillOnce(Return(true));
+
   (*msg_vr)[am::strings::params][am::hmi_response::code] =
       hmi_apis::Common_Result::SUCCESS;
   Event event_vr(hmi_apis::FunctionID::TTS_SetGlobalProperties);
@@ -1370,6 +1504,51 @@ TEST_F(SetGlobalPropertiesRequestTest,
       (*ui_command_result)[am::strings::msg_params][am::strings::result_code]
           .asInt(),
       static_cast<int32_t>(hmi_apis::Common_Result::WARNINGS));
+}
+
+TEST_F(SetGlobalPropertiesRequestTest,
+       PrepareResultCodeForResponse_AllResultsAreSUCCESS_TotalResultSUCCESS) {
+  using namespace application_manager;
+  using namespace hmi_apis;
+  const auto expected_total_result = mobile_apis::Result::eType::SUCCESS;
+
+  Common_Result::eType ui_result = Common_Result::SUCCESS;
+  Common_Result::eType tts_result = Common_Result::SUCCESS;
+  Common_Result::eType rc_result = Common_Result::SUCCESS;
+
+  app_mngr::commands::ResponseInfo ui_properties_info(
+      ui_result, HmiInterfaces::HMI_INTERFACE_UI, mock_app_manager_);
+
+  app_mngr::commands::ResponseInfo tts_properties_info(
+      tts_result, HmiInterfaces::HMI_INTERFACE_TTS, mock_app_manager_);
+
+  app_mngr::commands::ResponseInfo rc_properties_info(
+      rc_result, HmiInterfaces::HMI_INTERFACE_RC, mock_app_manager_);
+
+  MessageSharedPtr msg = CreateMsgParams();
+  std::shared_ptr<SetGlobalPropertiesRequest> command(
+      CreateCommand<SetGlobalPropertiesRequest>(msg));
+
+  auto result = command->PrepareResultCodeForResponse(
+      ui_properties_info, tts_properties_info, rc_properties_info);
+
+  EXPECT_EQ(expected_total_result, result);
+}
+
+TEST_F(SetGlobalPropertiesRequestTest,
+       PrepareResultCodeForResponse_UNSUPPORTED) {
+  PrepareResultCodeForResponse_CheckAllResultsForSpecifiedTotalResult(
+      mobile_apis::Result::UNSUPPORTED_RESOURCE);
+}
+
+TEST_F(SetGlobalPropertiesRequestTest, PrepareResultCodeForResponse_WARNINGS) {
+  PrepareResultCodeForResponse_CheckAllResultsForSpecifiedTotalResult(
+      mobile_apis::Result::WARNINGS);
+}
+
+TEST_F(SetGlobalPropertiesRequestTest,
+       PrepareResultForMobileResponse_AllCases) {
+  PrepareResultForMobileResponse_CheckResultsForAllCases();
 }
 
 }  // namespace set_global_properties_request
