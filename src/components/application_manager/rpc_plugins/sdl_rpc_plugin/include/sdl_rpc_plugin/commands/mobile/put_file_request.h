@@ -76,7 +76,7 @@ class PutFileRequest : public app_mngr::commands::CommandRequestImpl {
   mobile_apis::FileType::eType file_type_;
   bool is_persistent_file_;
 
-  void SendOnPutFileNotification();
+  void SendOnPutFileNotification(bool is_system_file);
   DISALLOW_COPY_AND_ASSIGN(PutFileRequest);
 };
 
