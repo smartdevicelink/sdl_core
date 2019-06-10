@@ -58,19 +58,21 @@ UnpublishAppServiceRequest::~UnpublishAppServiceRequest() {}
 void UnpublishAppServiceRequest::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  std::string service_id = (*message_)[strings::msg_params][strings::service_id].asString();
+  std::string service_id =
+      (*message_)[strings::msg_params][strings::service_id].asString();
 
-  bool ret = application_manager_.GetAppServiceManager().UnpublishAppService(service_id);
+  bool ret = application_manager_.GetAppServiceManager().UnpublishAppService(
+      service_id);
 
   if (!ret) {
-    SendResponse(false,
-              mobile_apis::Result::INVALID_ID,
-              "The app service with that requested service ID does not exist");
+    SendResponse(
+        false,
+        mobile_apis::Result::INVALID_ID,
+        "The app service with that requested service ID does not exist");
     return;
   }
 
   SendResponse(true, mobile_apis::Result::SUCCESS, NULL, NULL);
-
 }
 
 }  // namespace commands

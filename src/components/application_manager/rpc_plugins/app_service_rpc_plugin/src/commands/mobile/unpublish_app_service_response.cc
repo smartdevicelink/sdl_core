@@ -46,10 +46,10 @@ UnpublishAppServiceResponse::UnpublishAppServiceResponse(
     app_mngr::HMICapabilities& hmi_capabilities,
     policy::PolicyHandlerInterface& policy_handler)
     : CommandResponseImpl(message,
-                         application_manager,
-                         rpc_service,
-                         hmi_capabilities,
-                         policy_handler) {}
+                          application_manager,
+                          rpc_service,
+                          hmi_capabilities,
+                          policy_handler) {}
 
 UnpublishAppServiceResponse::~UnpublishAppServiceResponse() {}
 

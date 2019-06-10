@@ -46,15 +46,16 @@ ASUnpublishAppServiceResponse::ASUnpublishAppServiceResponse(
     app_mngr::HMICapabilities& hmi_capabilities,
     policy::PolicyHandlerInterface& policy_handler)
     : ResponseToHMI(message,
-                         application_manager,
-                         rpc_service,
-                         hmi_capabilities,
-                         policy_handler) {}
+                    application_manager,
+                    rpc_service,
+                    hmi_capabilities,
+                    policy_handler) {}
 
 ASUnpublishAppServiceResponse::~ASUnpublishAppServiceResponse() {}
 
 void ASUnpublishAppServiceResponse::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
+  rpc_service_.SendMessageToHMI(message_);
 }
 
 }  // namespace commands

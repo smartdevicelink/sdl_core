@@ -31,10 +31,10 @@
  */
 
 #include "app_service_rpc_plugin/commands/hmi/as_unpublish_app_service_request.h"
+#include "application_manager/app_service_manager.h"
 #include "application_manager/application_impl.h"
 #include "application_manager/rpc_service.h"
 #include "interfaces/MOBILE_API.h"
-#include "application_manager/app_service_manager.h"
 
 namespace app_service_rpc_plugin {
 using namespace application_manager;
@@ -47,20 +47,22 @@ ASUnpublishAppServiceRequest::ASUnpublishAppServiceRequest(
     app_mngr::HMICapabilities& hmi_capabilities,
     policy::PolicyHandlerInterface& policy_handler)
     : RequestFromHMI(message,
-                         application_manager,
-                         rpc_service,
-                         hmi_capabilities,
-                         policy_handler) {}
+                     application_manager,
+                     rpc_service,
+                     hmi_capabilities,
+                     policy_handler) {}
 
 ASUnpublishAppServiceRequest::~ASUnpublishAppServiceRequest() {}
 
 void ASUnpublishAppServiceRequest::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  std::string service_id = (*message_)[strings::msg_params][strings::service_id].asString();
+  std::string service_id =
+      (*message_)[strings::msg_params][strings::service_id].asString();
 
-  bool ret = application_manager_.GetAppServiceManager().UnpublishAppService(service_id);
-  
+  bool ret = application_manager_.GetAppServiceManager().UnpublishAppService(
+      service_id);
+
   if (!ret) {
     SendErrorResponse(
         (*message_)[strings::params][strings::correlation_id].asUInt(),
@@ -72,11 +74,11 @@ void ASUnpublishAppServiceRequest::Run() {
   }
 
   SendResponse(true,
-              (*message_)[strings::params][strings::correlation_id].asUInt(),
-              hmi_apis::FunctionID::AppService_UnpublishAppService,
-              hmi_apis::Common_Result::SUCCESS,
-              NULL,
-              application_manager::commands::Command::SOURCE_SDL_TO_HMI);
+               (*message_)[strings::params][strings::correlation_id].asUInt(),
+               hmi_apis::FunctionID::AppService_UnpublishAppService,
+               hmi_apis::Common_Result::SUCCESS,
+               NULL,
+               application_manager::commands::Command::SOURCE_SDL_TO_HMI);
 }
 
 }  // namespace commands

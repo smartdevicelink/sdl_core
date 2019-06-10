@@ -131,7 +131,8 @@ app_mngr::CommandCreator& AppServiceHmiCommandFactory::buildCommandCreator(
     case hmi_apis::FunctionID::AppService_UnpublishAppService:
       return hmi_apis::messageType::request == message_type
                  ? factory.GetCreator<commands::ASUnpublishAppServiceRequest>()
-                 : factory.GetCreator<commands::ASUnpublishAppServiceResponse>();
+                 : factory
+                       .GetCreator<commands::ASUnpublishAppServiceResponse>();
     case hmi_apis::FunctionID::AppService_OnAppServiceData:
       return app_mngr::commands::Command::CommandSource::SOURCE_HMI == source
                  ? factory.GetCreator<

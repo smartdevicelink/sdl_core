@@ -72,10 +72,10 @@ smart_objects::SmartObject AppServiceManager::PublishAppService(
 
   std::string service_type = manifest[strings::service_type].asString();
 
-  AppService* found_service = FindServiceByProvider(connection_key, service_type);
+  AppService* found_service =
+      FindServiceByProvider(connection_key, service_type);
   if (found_service) {
-    LOG4CXX_WARN(logger_,
-                 "Service already exists for this provider, updating");
+    LOG4CXX_WARN(logger_, "Service already exists for this provider, updating");
 
     published_services_lock_.Acquire();
     found_service->record[strings::service_manifest] = manifest;
@@ -85,13 +85,14 @@ smart_objects::SmartObject AppServiceManager::PublishAppService(
 
     smart_objects::SmartObject msg_params;
     msg_params[strings::system_capability][strings::system_capability_type] =
-      mobile_apis::SystemCapabilityType::APP_SERVICES;
+        mobile_apis::SystemCapabilityType::APP_SERVICES;
 
-    AppServiceUpdated(
-      updated_service_record, mobile_apis::ServiceUpdateReason::MANIFEST_UPDATE, msg_params);
+    AppServiceUpdated(updated_service_record,
+                      mobile_apis::ServiceUpdateReason::MANIFEST_UPDATE,
+                      msg_params);
 
     MessageHelper::BroadcastCapabilityUpdate(msg_params, app_manager_);
-    
+
     return updated_service_record;
   }
 
@@ -151,12 +152,13 @@ smart_objects::SmartObject AppServiceManager::PublishAppService(
   // Activate the new service if it is the default for its service type, if
   // no service is active of its service type, or it is a mobile app in full.
   AppService* active_service = ActiveServiceForType(service_type);
-  ApplicationSharedPtr app = NULL; 
+  ApplicationSharedPtr app = NULL;
   if (mobile_service && connection_key) {
     app = app_manager_.application(connection_key);
   }
-  
-  if (!active_service || app_service.default_service || (mobile_service && app && app->IsFullscreen())) {
+
+  if (!active_service || app_service.default_service ||
+      (mobile_service && app && app->IsFullscreen())) {
     ActivateAppService(service_id);
   }
 
@@ -185,7 +187,9 @@ bool AppServiceManager::UnpublishAppService(const std::string service_id) {
     // Activate embedded service, if available
     auto embedded_service = EmbeddedServiceForType(
         record[strings::service_manifest][strings::service_type].asString());
-    if (embedded_service) {
+    if (embedded_service &&
+        (embedded_service->record[strings::service_id].asString().compare(
+             service_id) > 0)) {
       embedded_service->record[strings::service_active] = true;
       AppServiceUpdated(embedded_service->record,
                         mobile_apis::ServiceUpdateReason::ACTIVATED,

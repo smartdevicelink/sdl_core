@@ -43,7 +43,8 @@ namespace commands {
 /**
  * @brief UnpublishAppServiceResponse command class
  **/
-class UnpublishAppServiceResponse : public app_mngr::commands::CommandResponseImpl {
+class UnpublishAppServiceResponse
+    : public app_mngr::commands::CommandResponseImpl {
  public:
   /**
    * @brief UnpublishAppServiceResponse class constructor
