@@ -92,6 +92,8 @@ class ASGetAppServiceDataRequestFromHMI
                             application_manager::ApplicationSharedPtr app);
   void GetNavigationImagePaths(smart_objects::SmartObject& data,
                                application_manager::ApplicationSharedPtr app);
+  void GetMediaImagePaths(smart_objects::SmartObject& data,
+                          application_manager::ApplicationSharedPtr app);
   bool ValidateResponse(smart_objects::SmartObject& message_params);
 
   DISALLOW_COPY_AND_ASSIGN(ASGetAppServiceDataRequestFromHMI);
