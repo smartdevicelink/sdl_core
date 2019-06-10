@@ -599,6 +599,14 @@
                             "NONE"
                         ]
                     },
+                    "UnpublishAppService": {
+                      "hmi_levels": [
+                          "FULL",
+                          "LIMITED",
+                          "BACKGROUND",
+                          "NONE"
+                      ]
+                    },
                     "GetAppServiceData": {
                         "hmi_levels": [
                             "FULL",
