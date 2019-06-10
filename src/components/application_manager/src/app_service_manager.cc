@@ -72,10 +72,27 @@ smart_objects::SmartObject AppServiceManager::PublishAppService(
 
   std::string service_type = manifest[strings::service_type].asString();
 
-  if (FindServiceByProvider(connection_key, service_type)) {
+  AppService* found_service = FindServiceByProvider(connection_key, service_type);
+  if (found_service) {
     LOG4CXX_WARN(logger_,
-                 "Service already exists for this provider, rejecting");
-    return smart_objects::SmartObject();
+                 "Service already exists for this provider, updating");
+
+    published_services_lock_.Acquire();
+    found_service->record[strings::service_manifest] = manifest;
+    found_service->record[strings::service_published] = true;
+    smart_objects::SmartObject updated_service_record = found_service->record;
+    published_services_lock_.Release();
+
+    smart_objects::SmartObject msg_params;
+    msg_params[strings::system_capability][strings::system_capability_type] =
+      mobile_apis::SystemCapabilityType::APP_SERVICES;
+
+    AppServiceUpdated(
+      updated_service_record, mobile_apis::ServiceUpdateReason::MANIFEST_UPDATE, msg_params);
+
+    MessageHelper::BroadcastCapabilityUpdate(msg_params, app_manager_);
+    
+    return updated_service_record;
   }
 
   if (manifest.keyExists(strings::service_name) &&
@@ -131,10 +148,15 @@ smart_objects::SmartObject AppServiceManager::PublishAppService(
 
   MessageHelper::BroadcastCapabilityUpdate(msg_params, app_manager_);
 
-  // Activate the new service if it is the default for its service type, or if
-  // no service is active of its service type
+  // Activate the new service if it is the default for its service type, if
+  // no service is active of its service type, or it is a mobile app in full.
   AppService* active_service = ActiveServiceForType(service_type);
-  if (!active_service || app_service.default_service) {
+  ApplicationSharedPtr app = NULL; 
+  if (mobile_service && connection_key) {
+    app = app_manager_.application(connection_key);
+  }
+  
+  if (!active_service || app_service.default_service || (mobile_service && app && app->IsFullscreen())) {
     ActivateAppService(service_id);
   }
 

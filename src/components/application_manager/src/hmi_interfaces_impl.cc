@@ -231,6 +231,8 @@ generate_function_to_interface_convert_map() {
   convert_map[RC_OnRemoteControlSettings] = HmiInterfaces::HMI_INTERFACE_RC;
   convert_map[AppService_PublishAppService] =
       HmiInterfaces::HMI_INTERFACE_AppService;
+  convert_map[AppService_UnpublishAppService] =
+      HmiInterfaces::HMI_INTERFACE_AppService;
   convert_map[AppService_GetAppServiceData] =
       HmiInterfaces::HMI_INTERFACE_AppService;
   convert_map[AppService_PerformAppServiceInteraction] =

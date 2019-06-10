@@ -457,6 +457,11 @@ enum FunctionID {
   PerformAppServiceInteractionID = 55,
 
   /**
+   * @brief UnpublishAppServiceID.
+   */
+  UnpublishAppServiceID = 56,
+
+  /**
    * @brief OnHMIStatusID.
    */
   OnHMIStatusID = 32768,

@@ -1,7 +1,7 @@
 <?xml version="1.0" standalone="no"?>
 <?xml-stylesheet type="text/xml" href="protocol2html.xsl"?>
 
-<interface name="SmartDeviceLink RAPI" version="5.1.0" minVersion="1.0" date="2019-03-19">
+<interface name="SmartDeviceLink RAPI" version="5.2.0" minVersion="1.0" date="2019-03-19">
     <enum name="Result" internal_scope="base" since="1.0">
         <element name="SUCCESS">
             <description>The request succeeded</description>
@@ -2645,6 +2645,7 @@
         <element name="GetAppServiceDataID" value="53" hexvalue="35" since="5.1" />
         <element name="GetFileID" value="54" hexvalue="36" since="5.1" />
         <element name="PerformAppServiceInteractionID" value="55" hexvalue="37" since="5.1" />
+        <element name="UnpublishAppServiceID" value="56" hexvalue="38" since="5.2" />
         
         <!--
          Base Notifications
@@ -7194,10 +7195,16 @@
     </function>
 
     <function name="PublishAppService" functionID="PublishAppServiceID" messagetype="request" since="5.1">
-        <description>Registers a service offered by this app on the module</description>
+        <description>
+            Registers a service offered by this app on the module.
+            Subsequent calls with the same service type will update the manifest for that service.
+        </description>
 
         <param name="appServiceManifest" type="AppServiceManifest" mandatory="true">
-            <description> The manifest of the service that wishes to be published.</description>
+            <description>
+                The manifest of the service that wishes to be published. 
+                If already published, the updated manifest for this service.
+            </description>
         </param>
     </function>
 
@@ -7226,6 +7233,38 @@
 
         <param name="appServiceRecord" type="AppServiceRecord" mandatory="false">
             <description> If the request was successful, this object will be the current status of the service record for the published service. This will include the Core supplied service ID.</description>
+        </param>
+    </function>
+
+    <function name="UnpublishAppService" functionID="UnpublishAppServiceID" messagetype="request" since="5.2">
+        <description> Unpublish an existing service published by this application. </description>
+
+        <param name="serviceID" type="String" mandatory="true">
+            <description> The ID of the service to be unpublished. </description>
+        </param>
+    </function>
+    
+    <function name="UnpublishAppService" functionID="UnpublishAppServiceID" messagetype="response" since="5.2">
+        <description> The response to UnpublishAppService </description>
+        <param name="success" type="Boolean" platform="documentation" mandatory="true">
+            <description> true, if successful; false, if failed </description>
+        </param>
+       
+        <param name="resultCode" type="Result" platform="documentation" mandatory="true">
+            <description>See Result</description>
+            <element name="SUCCESS"/>
+            <element name="REJECTED"/>
+            <element name="DISALLOWED"/>
+            <element name="INVALID_DATA"/>
+            <element name="INVALID_ID"/>
+            <element name="OUT_OF_MEMORY"/>
+            <element name="TOO_MANY_PENDING_REQUESTS"/>
+            <element name="APPLICATION_NOT_REGISTERED"/>
+            <element name="GENERIC_ERROR"/>
+        </param>
+
+        <param name="info" type="String" maxlength="1000" mandatory="false" platform="documentation">
+            <description>Provides additional human readable info regarding the result.</description>
         </param>
     </function>
 

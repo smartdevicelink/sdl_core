@@ -6333,6 +6333,18 @@
         </param>
     </function>
 
+    <function name="UnpublishAppService" messagetype="request">
+        <description>Unpublish an existing service published by this application.</description>
+
+        <param name="serviceID" type="String" mandatory="true">
+            <description> The ID of the service to be unpublished. </description>
+        </param>
+    </function>
+
+    <function name="UnpublishAppService" messagetype="response">
+        <description>The response to UnpublishAppService</description>
+    </function>
+
     <function name="OnAppServiceData" messagetype="notification">
         <description>This notification includes the data that is updated from the specific service. HMI->SDL if the HMI is a producer, SDL->HMI if the HMI is a consumer</description>
 
