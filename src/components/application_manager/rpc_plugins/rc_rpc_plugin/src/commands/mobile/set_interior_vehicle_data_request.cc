@@ -209,6 +209,7 @@ void SetInteriorVehicleDataRequest::Execute() {
                    true);
   } else {
     LOG4CXX_WARN(logger_, "Request module type & data mismatch!");
+    SetResourceState(ModuleType(), ResourceState::FREE);
     SendResponse(false,
                  mobile_apis::Result::INVALID_DATA,
                  "Request module type & data mismatch!");
