@@ -53,7 +53,9 @@ collect_sources(COMMANDS_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/src/commands")
 set(LIBRARIES
   HMI_API
   MOBILE_API
+  MessageHelper
   ApplicationManager
+  Resumption
   v4_protocol_v1_2_no_extra
   SmartObjects
   Utils
