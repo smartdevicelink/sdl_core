@@ -52,17 +52,8 @@ file(GLOB SOURCES
 )
 
 set(LIBRARIES
-  RCRpcPluginStaticLib
-  ApplicationManager
-  connectionHandler
-  SmartObjects
-  ProtocolHandler
-  MessageHelper
-  connectionHandler
-  Utils
-  jsoncpp
+  rc_rpc_plugin_static
   gmock_main
-  dl
 )
 
 if(ENABLE_LOG)

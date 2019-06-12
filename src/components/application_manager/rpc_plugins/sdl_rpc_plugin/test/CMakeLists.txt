@@ -23,15 +23,8 @@ file(GLOB SOURCES
 )
 
 set(LIBRARIES
+  sdl_rpc_plugin_static
   gmock
-  Utils
-  SmartObjects
-  HMI_API
-  MOBILE_API
-  connectionHandler
-  sdl_rpc_plugin
-  jsoncpp
-  Policy
 )
 
 create_cotired_test("sdl_commands_test" "${SOURCES}" "${LIBRARIES}" )
