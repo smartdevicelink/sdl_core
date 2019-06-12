@@ -63,11 +63,12 @@ if(ENABLE_LOG)
   list(APPEND LIBRARIES log4cxx -L${LOG4CXX_LIBS_DIRECTORY})
 endif()
 
-add_library("rc_rpc_plugin" SHARED ${PLUGIN_SOURCES} ${MOBILE_COMMANDS} ${HMI_COMMANDS} ${COMMANDS_SOURCES})
-target_link_libraries("rc_rpc_plugin" ${LIBRARIES})
+add_library("rc_rpc_plugin_static" ${PLUGIN_SOURCES} ${MOBILE_COMMANDS} ${HMI_COMMANDS})
+target_link_libraries("rc_rpc_plugin_static" ${LIBRARIES})
 
-add_library("RCRpcPluginStaticLib" ${PLUGIN_SOURCES} ${MOBILE_COMMANDS} ${HMI_COMMANDS})
-target_link_libraries("RCRpcPluginStaticLib" ${LIBRARIES})
+add_library("rc_rpc_plugin" SHARED "src/rc_rpc_plugin.cc")
+target_link_libraries("rc_rpc_plugin" rc_rpc_plugin_static)
+
 
 set(INSTALL_DESTINATION bin)
 
