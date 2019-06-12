@@ -87,8 +87,13 @@ else ()
   list(APPEND LIBRARIES sqlite3)
 endif ()
 
-add_library(Policy SHARED ${SOURCES})
-target_link_libraries(Policy ${LIBRARIES})
+
+add_library(PolicyStatic ${SOURCES})
+target_link_libraries(PolicyStatic ${LIBRARIES})
+
+
+add_library(Policy SHARED "src/policy_manager_impl.cc")
+target_link_libraries(Policy PolicyStatic)
 
 if(ENABLE_LOG)
   target_link_libraries(Policy log4cxx -L${LOG4CXX_LIBS_DIRECTORY})

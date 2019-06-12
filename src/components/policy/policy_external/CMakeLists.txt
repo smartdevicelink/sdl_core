@@ -29,10 +29,9 @@
 # POSSIBILITY OF SUCH DAMAGE.
 
 # --- Policy
-set(target Policy)
 set(install_destination bin)
 set(copy_destination ${CMAKE_BINARY_DIR}/src/appMain)
-set(library_name ${CMAKE_SHARED_LIBRARY_PREFIX}${target}${CMAKE_SHARED_LIBRARY_SUFFIX})
+set(library_name ${CMAKE_SHARED_LIBRARY_PREFIX}Policy${CMAKE_SHARED_LIBRARY_SUFFIX})
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
 
@@ -75,21 +74,25 @@ else ()
   list(APPEND LIBRARIES sqlite3)
 endif ()
 
-add_library(${target} SHARED ${SOURCES})
-target_link_libraries(${target} ${LIBRARIES} )
+add_library(PolicyStatic ${SOURCES})
+target_link_libraries(PolicyStatic ${LIBRARIES})
+
+
+add_library(Policy SHARED "src/policy_manager_impl.cc")
+target_link_libraries(Policy PolicyStatic)
 
 if (ENABLE_LOG)
-  target_link_libraries(${target} log4cxx -L${LOG4CXX_LIBS_DIRECTORY})
+  target_link_libraries(Policy log4cxx -L${LOG4CXX_LIBS_DIRECTORY})
 endif()
 
-add_custom_target(copy_library_${target} ALL
+add_custom_target(copy_library_Policy ALL
   COMMAND ${CMAKE_COMMAND} -E copy_if_different
     ${CMAKE_CURRENT_BINARY_DIR}/${library_name}
     ${copy_destination}
-    DEPENDS ${target}
+    DEPENDS Policy
     COMMENT "Copying library ${library_name}")
 
-install(TARGETS ${target}
+install(TARGETS Policy
   DESTINATION ${install_destination}
   PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE
     GROUP_READ GROUP_EXECUTE
