@@ -45,10 +45,13 @@ collect_sources(VEHICLE_INFO_PLUGIN_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/src")
 set(LIBRARIES
   HMI_API
   MOBILE_API
+  MessageHelper
   ApplicationManager
   v4_protocol_v1_2_no_extra
   SmartObjects
   Utils
+  jsoncpp
+  connectionHandler
 )
 
 if(ENABLE_LOG)

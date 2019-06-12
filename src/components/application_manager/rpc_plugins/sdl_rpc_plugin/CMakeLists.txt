@@ -51,13 +51,16 @@ collect_sources(APP_EXTENSIONS "${EXTENSIONS_SOURCE_DIR}")
 collect_sources(RPC_PLUGIN_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/src")
 
 set(LIBRARIES
+  ApplicationManager
   HMI_API
   MOBILE_API
-  ApplicationManager
+  MessageHelper
+  connectionHandler
   v4_protocol_v1_2_no_extra
   SmartObjects
   Utils
-  Policy
+  PolicyStatic
+  jsoncpp
 )
 
 if(ENABLE_LOG)
