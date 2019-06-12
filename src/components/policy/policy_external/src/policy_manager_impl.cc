@@ -546,9 +546,7 @@ void PolicyManagerImpl::CheckPermissionsChangesAfterUpdate(
       update.policy_table.module_config.lock_screen_dismissal_enabled;
   const auto old_lock_screen_dismissal_enabled =
       snapshot.policy_table.module_config.lock_screen_dismissal_enabled;
-  const bool lock_screen_dismisal_updated =
-      (new_lock_screen_dismissal_enabled != old_lock_screen_dismissal_enabled);
-  if (lock_screen_dismisal_updated) {
+  if (new_lock_screen_dismissal_enabled != old_lock_screen_dismissal_enabled) {
     listener()->OnLockScreenDismissalStateChanged();
   }
 }
