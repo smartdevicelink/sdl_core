@@ -136,10 +136,13 @@ RCRPCPlugin::Apps RCRPCPlugin::GetRCApplications(
 
 }  // namespace rc_rpc_plugin
 
-extern "C" application_manager::plugin_manager::RPCPlugin* Create() {
+extern "C" __attribute__((visibility("default")))
+application_manager::plugin_manager::RPCPlugin*
+Create() {
   return new rc_rpc_plugin::RCRPCPlugin();
 }  // namespace rc_rpc_plugin
 
-void Delete(application_manager::plugin_manager::RPCPlugin* data) {
+extern "C" __attribute__((visibility("default"))) void Delete(
+    application_manager::plugin_manager::RPCPlugin* data) {
   delete data;
 }

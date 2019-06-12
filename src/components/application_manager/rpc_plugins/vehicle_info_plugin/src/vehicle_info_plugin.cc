@@ -163,10 +163,13 @@ void VehicleInfoPlugin::DeleteSubscriptions(
 }
 }  // namespace vehicle_info_plugin
 
-extern "C" application_manager::plugin_manager::RPCPlugin* Create() {
+extern "C" __attribute__((visibility("default")))
+application_manager::plugin_manager::RPCPlugin*
+Create() {
   return new vehicle_info_plugin::VehicleInfoPlugin();
 }
 
-void Delete(application_manager::plugin_manager::RPCPlugin* data) {
+extern "C" __attribute__((visibility("default"))) void Delete(
+    application_manager::plugin_manager::RPCPlugin* data) {
   delete data;
 }

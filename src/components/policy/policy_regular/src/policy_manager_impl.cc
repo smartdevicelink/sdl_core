@@ -53,10 +53,12 @@
 #include "policy/access_remote.h"
 #include "policy/access_remote_impl.h"
 
-policy::PolicyManager* CreateManager() {
+__attribute__((visibility("default"))) policy::PolicyManager* CreateManager() {
   return new policy::PolicyManagerImpl();
 }
-void DeleteManager(policy::PolicyManager* pm) {
+
+__attribute__((visibility("default"))) void DeleteManager(
+    policy::PolicyManager* pm) {
   delete pm;
 }
 
