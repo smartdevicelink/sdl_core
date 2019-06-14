@@ -271,6 +271,13 @@
                         "hmi_levels": ["BACKGROUND",
                         "FULL",
                         "LIMITED"]
+                    },
+                    "CloseApplication": {
+                        "hmi_levels": [
+                          "FULL",
+                          "LIMITED",
+                          "BACKGROUND"
+                        ]
                     }
                 }
             },
