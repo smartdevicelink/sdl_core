@@ -44,6 +44,7 @@ set (RC_TEST_SOURCES
 ${CMAKE_CURRENT_SOURCE_DIR}/resource_allocation_manager_impl_test.cc
 ${CMAKE_CURRENT_SOURCE_DIR}/interior_data_cache_test.cc
 ${CMAKE_CURRENT_SOURCE_DIR}/rc_consent_manager_impl_test.cc
+${CMAKE_CURRENT_SOURCE_DIR}/grid_test.cc
 )
 
 set(RC_COMMANDS_TEST_DIR ${CMAKE_CURRENT_SOURCE_DIR}/commands)
