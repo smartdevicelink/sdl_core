@@ -88,7 +88,6 @@ class ApplicationManagerSettings : public RequestControlerSettings,
   virtual uint32_t rpc_pass_through_timeout() const = 0;
   virtual uint32_t cloud_app_retry_timeout() const = 0;
   virtual uint16_t cloud_app_max_retry_attempts() const = 0;
-  virtual const uint8_t* bluetooth_uuid() const = 0;
   virtual bool use_db_for_resumption() const = 0;
   virtual const uint32_t& app_resumption_save_persistent_data_timeout()
       const = 0;

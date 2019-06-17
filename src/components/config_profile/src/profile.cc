@@ -398,6 +398,22 @@ const bool kDefaultMultipleTransportsEnabled = false;
 const char* kDefaultLowBandwidthResumptionLevel = "NONE";
 const uint32_t kDefaultRpcPassThroughTimeout = 10000;
 const char* kDefaultHMIOriginId = "HMI_ID";
+const std::vector<uint8_t> kDefaultBluetoothUUID = {0x93,
+                                                    0x6D,
+                                                    0xA0,
+                                                    0x1F,
+                                                    0x9A,
+                                                    0xBD,
+                                                    0x4D,
+                                                    0x9D,
+                                                    0x80,
+                                                    0xC7,
+                                                    0x02,
+                                                    0xAF,
+                                                    0x85,
+                                                    0xC8,
+                                                    0x22,
+                                                    0xA8};
 }  // namespace
 
 namespace profile {
@@ -1826,9 +1842,13 @@ void Profile::UpdateValues() {
                     kCloudAppMaxRetryAttemptsKey,
                     kCloudAppTransportSection);
 
-  bluetooth_uuid_ =
-      ReadUint8Container(kTransportManagerSection, kBluetoothUUIDKey, NULL);
-      
+  bool read_result = true;
+  bluetooth_uuid_ = ReadUint8Container(
+      kTransportManagerSection, kBluetoothUUIDKey, &read_result);
+  if (!read_result || bluetooth_uuid_.size() != 16) {
+    bluetooth_uuid_ = kDefaultBluetoothUUID;
+  }
+
   // Event MQ
   ReadStringValue(
       &event_mq_name_, kDefaultEventMQ, kTransportManagerSection, kEventMQKey);
@@ -2457,7 +2477,7 @@ int32_t hex_to_int(const std::string& value) {
   return static_cast<int32_t>(strtol(value.c_str(), NULL, 16));
 }
 
-int32_t hex_to_uint8(const std::string& value) {
+uint8_t hex_to_uint8(const std::string& value) {
   return static_cast<uint8_t>(strtol(value.c_str(), NULL, 16));
 }
 
