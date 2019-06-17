@@ -623,6 +623,7 @@
         <element name="SOURCE" since="4.5" />
         <element name="SHUFFLE" since="4.5" />
         <element name="REPEAT" since="4.5" />
+        <!-- Navigation Buttons -->
         <element name="NAV_CENTER_LOCATION" since="5.2" />
         <element name="NAV_ZOOM_IN" since="5.2" />
         <element name="NAV_ZOOM_OUT" since="5.2" />
