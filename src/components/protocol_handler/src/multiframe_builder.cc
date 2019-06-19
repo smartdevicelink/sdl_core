@@ -59,6 +59,7 @@ void MultiFrameBuilder::set_waiting_timeout(
 
 bool MultiFrameBuilder::AddConnection(const ConnectionID connection_id) {
   LOG4CXX_DEBUG(logger_, "Adding connection_id: " << connection_id);
+  sync_primitives::AutoLock lock(multiframes_map_lock_);
   LOG4CXX_DEBUG(logger_, "Current state is: " << multiframes_map_);
   const MultiFrameMap::const_iterator it = multiframes_map_.find(connection_id);
   if (it != multiframes_map_.end()) {
@@ -71,6 +72,7 @@ bool MultiFrameBuilder::AddConnection(const ConnectionID connection_id) {
 
 bool MultiFrameBuilder::RemoveConnection(const ConnectionID connection_id) {
   LOG4CXX_DEBUG(logger_, "Removing connection_id: " << connection_id);
+  sync_primitives::AutoLock lock(multiframes_map_lock_);
   LOG4CXX_DEBUG(logger_, "Current state is: " << multiframes_map_);
   const MultiFrameMap::iterator it = multiframes_map_.find(connection_id);
   if (it == multiframes_map_.end()) {
@@ -90,6 +92,7 @@ bool MultiFrameBuilder::RemoveConnection(const ConnectionID connection_id) {
 
 ProtocolFramePtrList MultiFrameBuilder::PopMultiframes() {
   LOG4CXX_AUTO_TRACE(logger_);
+  sync_primitives::AutoLock lock(multiframes_map_lock_);
   LOG4CXX_DEBUG(logger_, "Current state is: " << multiframes_map_);
   LOG4CXX_DEBUG(logger_,
                 "Current multiframe map size is: " << multiframes_map_.size());
@@ -144,7 +147,6 @@ ProtocolFramePtrList MultiFrameBuilder::PopMultiframes() {
 RESULT_CODE MultiFrameBuilder::AddFrame(const ProtocolFramePtr packet) {
   LOG4CXX_AUTO_TRACE(logger_);
   LOG4CXX_DEBUG(logger_, "Handling frame: " << packet);
-  LOG4CXX_DEBUG(logger_, "Current state is: " << multiframes_map_);
   if (!packet) {
     LOG4CXX_ERROR(logger_, "Skip empty frame");
     return RESULT_FAIL;
@@ -165,6 +167,7 @@ RESULT_CODE MultiFrameBuilder::AddFrame(const ProtocolFramePtr packet) {
 
 RESULT_CODE MultiFrameBuilder::HandleFirstFrame(const ProtocolFramePtr packet) {
   DCHECK_OR_RETURN(packet->frame_type() == FRAME_TYPE_FIRST, RESULT_FAIL);
+  sync_primitives::AutoLock lock(multiframes_map_lock_);
   LOG4CXX_DEBUG(logger_, "Waiting : " << multiframes_map_);
   LOG4CXX_DEBUG(logger_, "Handling FIRST frame: " << packet);
   if (packet->payload_size() != 0u) {
@@ -207,6 +210,7 @@ RESULT_CODE MultiFrameBuilder::HandleFirstFrame(const ProtocolFramePtr packet) {
 RESULT_CODE MultiFrameBuilder::HandleConsecutiveFrame(
     const ProtocolFramePtr packet) {
   DCHECK_OR_RETURN(packet->frame_type() == FRAME_TYPE_CONSECUTIVE, RESULT_FAIL);
+  sync_primitives::AutoLock lock(multiframes_map_lock_);
   LOG4CXX_DEBUG(logger_, "Handling CONSECUTIVE frame: " << packet);
 
   const ConnectionID connection_id = packet->connection_id();
