@@ -555,7 +555,7 @@ void PolicyManagerImpl::ProcessActionsForAppPolicies(
   ApplicationsPoliciesActions::const_iterator it_actions = actions.begin();
   for (; it_actions != actions.end(); ++it_actions) {
     auto app_policy = app_policies.find(it_actions->first);
-        app_policies.find(it_actions->first);
+    app_policies.find(it_actions->first);
     if (app_policies.end() == app_policy) {
       continue;
     }

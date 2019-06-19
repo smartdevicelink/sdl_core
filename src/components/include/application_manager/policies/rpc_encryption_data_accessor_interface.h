@@ -40,13 +40,13 @@ using rpc::policy_table_interface_base::Strings;
 
 namespace policy {
 /*
-* @brief RPCEncryptionDataAccessorInterface interface
-*/
+ * @brief RPCEncryptionDataAccessorInterface interface
+ */
 class RPCEncryptionDataAccessorInterface {
  public:
   /*!
-  * @brief virtual destructor RPCEncryptionDataAccessorInterface
-  */
+   * @brief virtual destructor RPCEncryptionDataAccessorInterface
+   */
   virtual ~RPCEncryptionDataAccessorInterface() {}
 
   /*
@@ -91,5 +91,5 @@ class RPCEncryptionDataAccessorInterface {
       const uint32_t function_id) const = 0;
 };
 
-}  // policy
+}  // namespace policy
 #endif  // SRC_COMPONENTS_INCLUDE_APPLICATION_MANAGER_POLICIES_RPC_ENCRYPTION_MANAGER

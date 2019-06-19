@@ -41,6 +41,7 @@
 #include <utility>
 #include <vector>
 
+#include "policy/policy_table/types.h"
 #include "transport_manager/common.h"
 #include "utils/helpers.h"
 

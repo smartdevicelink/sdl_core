@@ -485,12 +485,12 @@ class MessageHelper {
                             ApplicationManager& app_man);
 
   /*
-  * @brief Send notification to mobile on application permissions update
-  * @param connection_key Id of application to send message to
-  * @param permissions updated permissions for application
-  * @param app_mngr reference ro application manager
-  * @param require_encryption require encryption flag
-  */
+   * @brief Send notification to mobile on application permissions update
+   * @param connection_key Id of application to send message to
+   * @param permissions updated permissions for application
+   * @param app_mngr reference ro application manager
+   * @param require_encryption require encryption flag
+   */
   static void SendOnPermissionsChangeNotification(
       uint32_t connection_key,
       const policy::Permissions& permissions,

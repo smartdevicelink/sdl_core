@@ -40,13 +40,13 @@ using rpc::policy_table_interface_base::Strings;
 
 namespace policy {
 /*
-* @brief PolicyEncryptionFlagGetterInterface interface
-*/
+ * @brief PolicyEncryptionFlagGetterInterface interface
+ */
 class PolicyEncryptionFlagGetterInterface {
  public:
   /*!
-  * @brief virtual destructor PolicyEncryptionFlagGetterInterface
-  */
+   * @brief virtual destructor PolicyEncryptionFlagGetterInterface
+   */
   virtual ~PolicyEncryptionFlagGetterInterface() {}
 
   /*
@@ -102,5 +102,5 @@ class PolicyEncryptionFlagGetterInterface {
   virtual const std::vector<std::string> GetApplicationPolicyIDs() const = 0;
 };
 
-}  // policy
+}  // namespace policy
 #endif  // SRC_COMPONENTS_INCLUDE_APPLICATION_MANAGER_POLICIES_POLICY_ENCRYPTION_FLAG_GETTER

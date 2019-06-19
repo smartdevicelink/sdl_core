@@ -1,7 +1,7 @@
 #pragma once
 
-#include "gmock/gmock.h"
 #include "application_manager/rpc_protection_mediator.h"
+#include "gmock/gmock.h"
 
 namespace application_manager {
 class MockRPCProtectionMediator : public RPCProtectionMediator {
@@ -19,4 +19,4 @@ class MockRPCProtectionMediator : public RPCProtectionMediator {
                    const uint32_t function_id,
                    const uint32_t conrrelation_id));
 };
-}
+}  // namespace application_manager

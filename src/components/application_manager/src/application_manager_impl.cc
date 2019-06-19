@@ -48,8 +48,6 @@
 #include "application_manager/helpers/application_helper.h"
 #include "application_manager/hmi_capabilities_impl.h"
 #include "application_manager/message_helper.h"
-#include "application_manager/rpc_service_impl.h"
-#include "application_manager/rpc_handler_impl.h"
 #include "application_manager/mobile_message_handler.h"
 #include "application_manager/plugin_manager/rpc_plugin_manager_impl.h"
 #include "application_manager/policies/policy_handler.h"

@@ -31,8 +31,8 @@
  */
 
 #include "application_manager/rpc_protection_manager_impl.h"
-#include "application_manager/message_helper.h"
 #include "application_manager/application.h"
+#include "application_manager/message_helper.h"
 #include "utils/helpers.h"
 
 CREATE_LOGGERPTR_LOCAL(logger_, "RPCProtectionManagerImpl");
@@ -89,9 +89,9 @@ bool RPCProtectionManagerImpl::IsEncryptionRequiredByPolicy(
   auto it = encrypted_rpcs_.find(policy_app_id);
 
   if (encrypted_rpcs_.end() == it) {
-    LOG4CXX_WARN(logger_,
-                 "App specific policies for app: " << policy_app_id
-                                                   << " not found");
+    LOG4CXX_WARN(
+        logger_,
+        "App specific policies for app: " << policy_app_id << " not found");
     it = encrypted_rpcs_.find(policy_table::kDefaultApp);
     return encrypted_rpcs_.end() != it
                ? (*it).second.find(function_name) != (*it).second.end()
@@ -197,7 +197,7 @@ RPCProtectionManagerImpl::GetEncryptedRPCsForApp(
       policy_encryption_flag_getter->GetFunctionGroupsForApp(policy_app_id);
 
   auto fill_encrypted_rpcs = [&encrypted_rpcs](
-      const std::string& function_name) {
+                                 const std::string& function_name) {
     LOG4CXX_DEBUG(logger_, "Adding required encryprion rpc: " << function_name);
     encrypted_rpcs.insert(function_name);
   };
@@ -215,4 +215,4 @@ RPCProtectionManagerImpl::GetEncryptedRPCsForApp(
   return encrypted_rpcs;
 }
 
-}  // namespace protocol_handler
+}  // namespace application_manager

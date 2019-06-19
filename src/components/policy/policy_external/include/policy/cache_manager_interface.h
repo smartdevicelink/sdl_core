@@ -942,12 +942,12 @@ class CacheManagerInterface {
                                  const std::string& device_id_to) = 0;
 
   /**
-     * @brief GetAppEncryptionRequiredFlag retrieves encryption required flag
+   * @brief GetAppEncryptionRequiredFlag retrieves encryption required flag
    * for
-     * given application
-     * @param application policy application name
-     * @return optional object containing encryption required flag
-     */
+   * given application
+   * @param application policy application name
+   * @return optional object containing encryption required flag
+   */
   virtual rpc::Optional<rpc::Boolean> GetAppEncryptionRequiredFlag(
       const std::string& application_policy_name) const = 0;
 

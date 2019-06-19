@@ -39,6 +39,7 @@
 #include <string>
 #include <vector>
 #include "application_manager/application.h"
+#include "application_manager/policies/policy_encryption_flag_getter.h"
 #include "application_manager/policies/policy_handler_observer.h"
 #include "interfaces/MOBILE_API.h"
 #include "policy/cache_manager_interface.h"
@@ -49,7 +50,6 @@
 #include "smart_objects/smart_object.h"
 #include "utils/callable.h"
 #include "utils/custom_string.h"
-#include "application_manager/policies/policy_encryption_flag_getter.h"
 
 using namespace ::rpc::policy_table_interface_base;
 namespace policy {
@@ -193,13 +193,13 @@ class PolicyHandlerInterface {
                              const DeviceInfo& device_info) = 0;
 
 /**
-*@brief Processes data from OnAppPermissionConsent notification with
-*permissions changes and ExternalConsent status changes done by user
-*@param connection_key Connection key of application, 0 if no key has been
-*provided
-*@param permissions Groups permissions changes
-*@param external_consent_status Customer connectivity settings status changes
-*/
+ *@brief Processes data from OnAppPermissionConsent notification with
+ *permissions changes and ExternalConsent status changes done by user
+ *@param connection_key Connection key of application, 0 if no key has been
+ *provided
+ *@param permissions Groups permissions changes
+ *@param external_consent_status Customer connectivity settings status changes
+ */
 #ifdef EXTERNAL_PROPRIETARY_MODE
   virtual void OnAppPermissionConsent(
       const uint32_t connection_key,
@@ -520,7 +520,7 @@ class PolicyHandlerInterface {
    * @brief Check if an app can send unknown rpc requests to an app service
    * provider
    * @param policy_app_id Unique application id
-  */
+   */
   virtual bool UnknownRPCPassthroughAllowed(
       const std::string& policy_app_id) const = 0;
 
@@ -627,14 +627,14 @@ class PolicyHandlerInterface {
  * @brief Processes data received via OnAppPermissionChanged notification
  * from. Being started asyncronously from AppPermissionDelegate class.
  * Sets updated permissions and ExternalConsent for registered applications
-*and
+ *and
  * applications which already have appropriate group assigned which related to
  * devices already known by policy
  * @param connection_key Connection key of application, 0 if no key has been
  * provided within notification
  * @param external_consent_status Customer connectivity settings changes to
-*process
-*@param permissions Permissions changes to process
+ *process
+ *@param permissions Permissions changes to process
  */
 #ifdef EXTERNAL_PROPRIETARY_MODE
   virtual void OnAppPermissionConsentInternal(

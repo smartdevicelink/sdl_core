@@ -1270,9 +1270,9 @@ RESULT_CODE ProtocolHandlerImpl::SendSingleFrameMessage(
     const bool is_final_message) {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  LOG4CXX_DEBUG(logger_,
-                "Packet needs encryption: " << std::boolalpha
-                                            << needs_encryption);
+  LOG4CXX_DEBUG(
+      logger_,
+      "Packet needs encryption: " << std::boolalpha << needs_encryption);
 
   ProtocolFramePtr ptr(
       new protocol_handler::ProtocolPacket(connection_id,
@@ -2127,9 +2127,9 @@ RESULT_CODE ProtocolHandlerImpl::EncryptFrame(ProtocolFramePtr packet) {
   security_manager::SSLContext* context = session_observer_.GetSSLContext(
       connection_key, ServiceTypeFromByte(packet->service_type()));
 
-  LOG4CXX_DEBUG(logger_,
-                "Protection flag is: " << packet->protection_flag()
-                                       << std::boolalpha);
+  LOG4CXX_DEBUG(
+      logger_,
+      "Protection flag is: " << packet->protection_flag() << std::boolalpha);
   if ((!context || !context->IsInitCompleted()) || !packet->protection_flag()) {
     LOG4CXX_DEBUG(logger_, "Ecryption is skipped!");
     return RESULT_OK;
