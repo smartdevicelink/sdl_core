@@ -89,7 +89,7 @@ void GetSystemCapabilityRequest::Run() {
       bool has_nav_capability = false;
       if (hmi_capabilities.navigation_capability()) {
         has_nav_capability = true;
-        auto nav_capability = *hmi_capabilities.navigation_capability();
+        nav_capability = *hmi_capabilities.navigation_capability();
       }
 
       has_nav_capability = application_manager_.GetAppServiceManager()
