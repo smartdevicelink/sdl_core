@@ -1,7 +1,7 @@
 <?xml version="1.0" standalone="no"?>
 <?xml-stylesheet type="text/xml" href="protocol2html.xsl"?>
 
-<interface name="SmartDeviceLink RAPI" version="5.2.0" minVersion="1.0" date="2019-03-19">
+<interface name="SmartDeviceLink RAPI" version="6.0.0" minVersion="1.0" date="2019-03-19">
     <enum name="Result" internal_scope="base" since="1.0">
         <element name="SUCCESS">
             <description>The request succeeded</description>
@@ -3830,7 +3830,7 @@
                 Audiobook: The total number of sections in the playback queue (e.g. the number of chapters in the book)
             </description>
         </param>
-        <param name="mediaImage" type="Image" mandatory="false" since="5.2">
+        <param name="mediaImage" type="Image" mandatory="false" since="6.0">
           <description>
               Music: The album art of the current track
               Podcast: The podcast or chapter artwork of the current podcast episode
