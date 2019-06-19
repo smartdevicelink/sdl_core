@@ -53,14 +53,14 @@ class Application;
 
 namespace application_manager {
 /**
-  * @brief RPCProtectionManager interface
-  * This entity exists to get info from policy table regarding encryption on
-  * application and function group level, as well as make decisions whether
-  * certain RPC should be encrypted or not.
-  * It mediates communication between PRCService and
-  * PolicyEncryptionFlagGetterInterface which is implemented by PolicyManager,
-  * providing adequate level of abstraction.
-  */
+ * @brief RPCProtectionManager interface
+ * This entity exists to get info from policy table regarding encryption on
+ * application and function group level, as well as make decisions whether
+ * certain RPC should be encrypted or not.
+ * It mediates communication between PRCService and
+ * PolicyEncryptionFlagGetterInterface which is implemented by PolicyManager,
+ * providing adequate level of abstraction.
+ */
 class RPCProtectionManager : public policy::PolicyHandlerObserver {
  public:
   /*
@@ -106,6 +106,6 @@ class RPCProtectionManager : public policy::PolicyHandlerObserver {
   virtual void RemoveFromEncryptionNeededCache(
       const uint32_t app_id, const uint32_t correlation_id) = 0;
 };
-}  // namespace policy
+}  // namespace application_manager
 
 #endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_PROTOCOL_HANDLER_RPC_PROTECTION_MANAGER_H_

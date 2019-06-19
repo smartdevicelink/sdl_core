@@ -42,8 +42,6 @@
 #include "policy/policy_listener.h"
 #include "policy/policy_table/types.h"
 #include "policy/policy_types.h"
-#include "policy/policy_table/types.h"
-#include "policy/policy_listener.h"
 #include "policy/usage_statistics/statistics_manager.h"
 #include "utils/callable.h"
 #include "utils/optional.h"

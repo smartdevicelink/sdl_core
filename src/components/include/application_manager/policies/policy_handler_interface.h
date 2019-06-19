@@ -41,6 +41,7 @@
 #include "boost/optional.hpp"
 
 #include "application_manager/application.h"
+#include "application_manager/policies/policy_encryption_flag_getter.h"
 #include "application_manager/policies/policy_handler_observer.h"
 #include "interfaces/MOBILE_API.h"
 #include "policy/cache_manager_interface.h"
@@ -51,7 +52,6 @@
 #include "smart_objects/smart_object.h"
 #include "utils/callable.h"
 #include "utils/custom_string.h"
-#include "application_manager/policies/policy_encryption_flag_getter.h"
 
 using namespace ::rpc::policy_table_interface_base;
 namespace policy {

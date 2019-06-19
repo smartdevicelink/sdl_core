@@ -550,40 +550,38 @@ bool CheckAppPolicy::IsEncryptionRequiredFlagChanged(
   auto get_app_encryption_needed =
       [](const std::string& policy_app_id,
          policy_table::ApplicationPolicies& policies)
-          -> rpc::Optional<rpc::Boolean> {
-            auto it = policies.find(policy_app_id);
-            if (policies.end() == it) {
-              LOG4CXX_WARN(logger_,
-                           "App is not present in policies" << policy_app_id);
-              return rpc::Optional<rpc::Boolean>(false);
-            }
-            return it->second.encryption_required;
-          };
+      -> rpc::Optional<rpc::Boolean> {
+    auto it = policies.find(policy_app_id);
+    if (policies.end() == it) {
+      LOG4CXX_WARN(logger_, "App is not present in policies" << policy_app_id);
+      return rpc::Optional<rpc::Boolean>(false);
+    }
+    return it->second.encryption_required;
+  };
 
   auto get_app_groups =
       [](const std::string& policy_app_id,
          policy_table::ApplicationPolicies& policies) -> policy_table::Strings {
-        policy_table::Strings result;
-        auto it = policies.find(policy_app_id);
-        if (policies.end() == it) {
-          LOG4CXX_WARN(logger_,
-                       "App is not present in policies" << policy_app_id);
-          return result;
-        }
-        auto& groups = it->second.groups;
-        std::copy(groups.begin(), groups.end(), std::back_inserter(result));
-        return result;
-      };
+    policy_table::Strings result;
+    auto it = policies.find(policy_app_id);
+    if (policies.end() == it) {
+      LOG4CXX_WARN(logger_, "App is not present in policies" << policy_app_id);
+      return result;
+    }
+    auto& groups = it->second.groups;
+    std::copy(groups.begin(), groups.end(), std::back_inserter(result));
+    return result;
+  };
 
-  auto get_app_rpcs =
-      [](const std::string group_name, const FunctionalGroupings& groups)
-          -> rpc::Optional<policy_table::Rpcs> {
-            auto it = groups.find(group_name);
-            if (it == groups.end()) {
-              return rpc::Optional<policy_table::Rpcs>();
-            }
-            return rpc::Optional<policy_table::Rpcs>(it->second);
-          };
+  auto get_app_rpcs = [](const std::string group_name,
+                         const FunctionalGroupings& groups)
+      -> rpc::Optional<policy_table::Rpcs> {
+    auto it = groups.find(group_name);
+    if (it == groups.end()) {
+      return rpc::Optional<policy_table::Rpcs>();
+    }
+    return rpc::Optional<policy_table::Rpcs>(it->second);
+  };
 
   const auto snapshot_groups = get_app_groups(
       app_policy.first, snapshot_->policy_table.app_policies_section.apps);
@@ -594,7 +592,6 @@ bool CheckAppPolicy::IsEncryptionRequiredFlagChanged(
       [this, &get_app_rpcs](
           const rpc::policy_table_interface_base::Strings& app_groups,
           const std::shared_ptr<rpc::policy_table_interface_base::Table> pt) {
-
         for (const auto& group : app_groups) {
           const auto rpcs =
               get_app_rpcs(group, pt->policy_table.functional_groupings);
@@ -947,16 +944,16 @@ bool ProcessFunctionalGroup::operator()(const StringsValueType& group_name) {
 
 void ProcessFunctionalGroup::FillEncryptionFlagForRpcs(
     const EncryptionRequired encryption_required) {
-  auto update_encryption_required =
-      [](EncryptionRequired& current, const EncryptionRequired& incoming) {
-        if (!incoming.is_initialized()) {
-          return;
-        }
-        if (current.is_initialized() && *current) {
-          return;
-        }
-        current = incoming;
-      };
+  auto update_encryption_required = [](EncryptionRequired& current,
+                                       const EncryptionRequired& incoming) {
+    if (!incoming.is_initialized()) {
+      return;
+    }
+    if (current.is_initialized() && *current) {
+      return;
+    }
+    current = incoming;
+  };
   for (auto& item : data_) {
     update_encryption_required(item.second.require_encryption,
                                encryption_required);

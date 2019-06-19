@@ -41,6 +41,7 @@
 #include "application_manager/mock_request_controller_settings.h"
 #include "application_manager/mock_rpc_plugin.h"
 #include "application_manager/mock_rpc_plugin_manager.h"
+#include "application_manager/mock_rpc_protection_manager.h"
 #include "application_manager/request_controller.h"
 #include "application_manager/rpc_service_impl.h"
 #include "hmi_message_handler/mock_hmi_message_handler.h"
@@ -55,7 +56,6 @@
 #include "rc_rpc_plugin/rc_module_constants.h"
 #include "rc_rpc_plugin/rc_rpc_plugin.h"
 #include "test/application_manager/mock_application_manager_settings.h"
-#include "application_manager/mock_rpc_protection_manager.h"
 
 using ::testing::_;
 using ::testing::Mock;

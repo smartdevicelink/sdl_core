@@ -33,8 +33,8 @@
 #ifndef SRC_COMPONENTS_APPLICATION_MANAGER_TEST_INCLUDE_APPLICATION_MANAGER_MOCK_RPC_PROTECTION_MANAGER_H_
 #define SRC_COMPONENTS_APPLICATION_MANAGER_TEST_INCLUDE_APPLICATION_MANAGER_MOCK_RPC_PROTECTION_MANAGER_H_
 
-#include "gmock/gmock.h"
 #include "application_manager/rpc_protection_manager.h"
+#include "gmock/gmock.h"
 
 namespace application_manager {
 class MockRPCProtectionManager : public RPCProtectionManager {
@@ -60,6 +60,6 @@ class MockRPCProtectionManager : public RPCProtectionManager {
   MOCK_METHOD2(RemoveFromEncryptionNeededCache,
                void(const uint32_t app_id, const uint32_t correlation_id));
 };
-}
+}  // namespace application_manager
 
 #endif  // SRC_COMPONENTS_APPLICATION_MANAGER_TEST_INCLUDE_APPLICATION_MANAGER_MOCK_RPC_PROTECTION_MANAGER_H_

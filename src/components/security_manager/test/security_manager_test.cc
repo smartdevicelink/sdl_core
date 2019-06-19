@@ -293,7 +293,8 @@ TEST_F(SecurityManagerTest, SecurityManager_NULLCryptoManager) {
               SendMessageToMobileApp(
                   InternalErrorWithErrId(SecurityManager::ERROR_NOT_SUPPORTED),
                   false,
-                  kIsFinal)).WillOnce(NotifyTestAsyncWaiter(&waiter));
+                  kIsFinal))
+      .WillOnce(NotifyTestAsyncWaiter(&waiter));
   const SecurityQuery::QueryHeader header(SecurityQuery::REQUEST,
                                           // It could be any query id
                                           SecurityQuery::INVALID_QUERY_ID);
@@ -391,7 +392,8 @@ TEST_F(SecurityManagerTest, GetInvalidQueryId) {
       SendMessageToMobileApp(
           InternalErrorWithErrId(SecurityManager::ERROR_INVALID_QUERY_ID),
           false,
-          kIsFinal)).WillOnce(NotifyTestAsyncWaiter(&waiter));
+          kIsFinal))
+      .WillOnce(NotifyTestAsyncWaiter(&waiter));
   times++;
   const SecurityQuery::QueryHeader header(SecurityQuery::REQUEST,
                                           SecurityQuery::INVALID_QUERY_ID);
@@ -586,7 +588,8 @@ TEST_F(SecurityManagerTest, ProccessHandshakeData_WrongDataSize) {
       SendMessageToMobileApp(
           InternalErrorWithErrId(SecurityManager::ERROR_INVALID_QUERY_SIZE),
           false,
-          kIsFinal)).WillOnce(NotifyTestAsyncWaiter(&waiter));
+          kIsFinal))
+      .WillOnce(NotifyTestAsyncWaiter(&waiter));
 
   EmulateMobileMessageHandshake(NULL, 0);
 
@@ -618,7 +621,8 @@ TEST_F(SecurityManagerTest,
       SendMessageToMobileApp(
           InternalErrorWithErrId(SecurityManager::ERROR_SERVICE_NOT_PROTECTED),
           false,
-          kIsFinal)).WillOnce(NotifyTestAsyncWaiter(&waiter));
+          kIsFinal))
+      .WillOnce(NotifyTestAsyncWaiter(&waiter));
   times++;
 
   // Expect notifying listeners (unsuccess)

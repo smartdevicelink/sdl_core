@@ -33,15 +33,15 @@
 #ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_PROTOCOL_HANDLER_RPC_PROTECTION_MANAGER_IMPL_H_
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_PROTOCOL_HANDLER_RPC_PROTECTION_MANAGER_IMPL_H_
 
-#include <set>
 #include <map>
-#include "application_manager/rpc_protection_manager.h"
+#include <set>
 #include "application_manager/policies/policy_handler.h"
+#include "application_manager/rpc_protection_manager.h"
 
 namespace application_manager {
 /*
-* @brief RPCProtectionManager implementation
-*/
+ * @brief RPCProtectionManager implementation
+ */
 class RPCProtectionManagerImpl : public RPCProtectionManager {
  public:
   typedef std::pair<uint32_t, uint32_t> AppIdCorrIdPair;
@@ -111,6 +111,6 @@ class RPCProtectionManagerImpl : public RPCProtectionManager {
   std::set<AppIdCorrIdPair> encryption_needed_cache_;
   sync_primitives::Lock message_needed_encryption_lock_;
 };
-}  // namespace policy
+}  // namespace application_manager
 
 #endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_PROTOCOL_HANDLER_RPC_PROTECTION_MANAGER_IMPL_H_
