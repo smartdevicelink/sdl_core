@@ -73,7 +73,7 @@ class RPCProtectionManagerImpl : public RPCProtectionManager {
 
  private:
   /*
-   * @brief check whether given rpc is an exeption
+   * @brief check whether given rpc is an exception
    * @param function_id function id
    * @return true if function_id is an exception (rpc that can be sent before
    * app is registered, hence before secure rpc service is established)
