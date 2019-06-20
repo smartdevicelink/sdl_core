@@ -55,6 +55,14 @@ OnASAppServiceDataNotification::OnASAppServiceDataNotification(
 
 OnASAppServiceDataNotification::~OnASAppServiceDataNotification() {}
 
+void OnASAppServiceDataNotification::GetMediaImagePaths(
+    smart_objects::SmartObject& data, ApplicationSharedPtr app) {
+  if (data.keyExists(strings::media_image)) {
+    MessageHelper::VerifyImage(
+        data[strings::media_image], app, application_manager_);
+  }
+}
+
 void OnASAppServiceDataNotification::GetWeatherImagePaths(
     smart_objects::SmartObject& data, ApplicationSharedPtr app) {
   if (data[strings::location].keyExists(strings::location_image)) {
@@ -185,6 +193,11 @@ bool OnASAppServiceDataNotification::ValidateParams(
         service_data.keyExists(strings::navigation_service_data)) {
       GetNavigationImagePaths(service_data[strings::navigation_service_data],
                               app);
+    }
+
+    if (service_type_value == mobile_apis::AppServiceType::MEDIA &&
+        service_data.keyExists(strings::media_service_data)) {
+      GetMediaImagePaths(service_data[strings::media_service_data], app);
     }
   }
   return true;

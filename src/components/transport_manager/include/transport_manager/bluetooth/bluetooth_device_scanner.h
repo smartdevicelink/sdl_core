@@ -70,6 +70,11 @@ class BluetoothDeviceScanner : public DeviceScanner {
   BluetoothDeviceScanner(TransportAdapterController* controller,
                          bool auto_repeat_search,
                          int repeat_search_pause_sec);
+
+  BluetoothDeviceScanner(TransportAdapterController* controller,
+                         bool auto_repeat_search,
+                         int repeat_search_pause_sec,
+                         const uint8_t* smart_device_link_service_uuid_data);
   /**
    * @brief Destructor.
    */

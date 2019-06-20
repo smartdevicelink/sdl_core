@@ -289,6 +289,7 @@ const char* service_active = "serviceActive";
 const char* app_service_id = "appServiceId";
 const char* service_data = "serviceData";
 const char* media_service_data = "mediaServiceData";
+const char* media_image = "mediaImage";
 const char* weather_service_data = "weatherServiceData";
 const char* location = "location";
 const char* current_forecast = "currentForecast";

@@ -322,6 +322,7 @@ extern const char* service_active;
 extern const char* app_service_id;
 extern const char* service_data;
 extern const char* media_service_data;
+extern const char* media_image;
 extern const char* weather_service_data;
 extern const char* location;
 extern const char* current_forecast;

@@ -3852,6 +3852,13 @@
                 Audiobook: The total number of sections in the playback queue (e.g. the number of chapters in the book)
             </description>
         </param>
+        <param name="mediaImage" type="Image" mandatory="false" since="5.2">
+          <description>
+              Music: The album art of the current track
+              Podcast: The podcast or chapter artwork of the current podcast episode
+              Audiobook: The book or chapter artwork of the current audiobook
+          </description>
+        </param>
     </struct>
 
     <struct name="WeatherServiceManifest" since="5.1">
