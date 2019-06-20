@@ -488,7 +488,7 @@ class MessageHelper {
    * @brief Send notification to mobile on application permissions update
    * @param connection_key Id of application to send message to
    * @param permissions updated permissions for application
-   * @param app_mngr reference ro application manager
+   * @param app_mngr reference to application manager
    * @param require_encryption require encryption flag
    */
   static void SendOnPermissionsChangeNotification(

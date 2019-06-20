@@ -83,7 +83,7 @@ class RPCProtectionManager : public policy::PolicyHandlerObserver {
    * @brief check whether given rpc is saved to internal cache and needs to be
    * encrypted before sending to mobile
    * @param app_id application id
-   * @param correlation_id conrrelation id
+   * @param correlation_id correlation id
    * @return true if the message with correlation id correlation_id needed e
    * ncryption else false
    */

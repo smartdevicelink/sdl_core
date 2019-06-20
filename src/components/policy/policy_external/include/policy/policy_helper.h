@@ -1,4 +1,4 @@
-﻿/*
+/*
  Copyright (c) 2013, Ford Motor Company
  All rights reserved.
 
@@ -204,7 +204,7 @@ struct CheckAppPolicy {
   /**
    * @brief IsEncryptionRequiredFlagChanged check if encryption_needed flag was
    * changed for application or application groups
-   * @param app_policy applicaiton policies
+   * @param app_policy application policies
    * @return true if encryption_needed state was changed otherwise - false
    */
   bool IsEncryptionRequiredFlagChanged(
