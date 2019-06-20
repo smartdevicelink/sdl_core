@@ -7504,7 +7504,7 @@
         <param name="state" type="DriverDistractionState" mandatory="true">
             <description>Current State of Driver Distraction</description>
         </param>
-        <param name="lockScreenDismissalEnabled" type="Boolean" mandatory="false" since="5.2">
+        <param name="lockScreenDismissalEnabled" type="Boolean" mandatory="false" since="6.0">
             <description>
                 If enabled, the lock screen will be able to be dismissed while connected to SDL, allowing users 
                 the ability to interact with the app. Dismissals should include a warning to the user and ensure 
