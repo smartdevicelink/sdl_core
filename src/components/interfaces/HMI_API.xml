@@ -1888,7 +1888,7 @@
    <param name="availableHdChannels" type="Integer" minvalue="0" maxvalue="7" array="true" minsize="0" maxsize="8" mandatory="false">
      <description>The list of available hd sub-channel indexes. Empty list means no Hd channel is available. Read-only.</description>
    </param>
-   <param name="hdChannel" type="Integer" minvalue="1" maxvalue="7" mandatory="false">
+   <param name="hdChannel" type="Integer" minvalue="0" maxvalue="7" mandatory="false">
      <description>Current HD sub-channel if available</description>
    </param>
    <param name="signalStrength" type="Integer" minvalue="0" maxvalue="100" mandatory="false">
