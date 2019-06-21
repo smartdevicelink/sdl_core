@@ -91,7 +91,7 @@ void VehicleInfoAppExtension::SaveResumptionData(
       smart_objects::SmartObject(smart_objects::SmartType_Array);
   int i = 0;
   for (const auto& subscription : subscribed_data_) {
-    resumption_data[application_vehicle_info][i] = subscription;
+    resumption_data[application_vehicle_info][i++] = subscription;
   }
 }
 
@@ -99,10 +99,12 @@ void VehicleInfoAppExtension::ProcessResumption(
     const smart_objects::SmartObject& resumption_data) {
   const char* application_vehicle_info = "vehicleInfo";
   if (resumption_data.keyExists(application_vehicle_info)) {
-    const auto& subscriptions_ivi =
-        resumption_data[application_vehicle_info].enumerate();
-    for (const auto& ivi : subscriptions_ivi) {
-      subscribeToVehicleInfo(ivi);
+    const auto* subscriptions_ivi =
+        resumption_data[application_vehicle_info].asArray();
+    if (subscriptions_ivi) {
+      for (const auto& ivi : (*subscriptions_ivi)) {
+        subscribeToVehicleInfo(ivi.asString());
+      }
     }
     plugin_.ProcessResumptionSubscription(app_, *this);
   }
