@@ -97,11 +97,8 @@ void VehicleInfoPlugin::ProcessResumptionSubscription(
       smart_objects::SmartObject(smart_objects::SmartType_Map);
   msg_params[strings::app_id] = app.app_id();
   const auto& subscriptions = ext.Subscriptions();
-  for (auto& ivi_data : application_manager::MessageHelper::vehicle_data()) {
-    std::string key_name = ivi_data.first;
-    if (subscriptions.end() != subscriptions.find(key_name)) {
-      msg_params[key_name] = true;
-    }
+  for (const auto& item : subscriptions) {
+    msg_params[item] = true;
   }
   smart_objects::SmartObjectSPtr request =
       application_manager::MessageHelper::CreateModuleInfoSO(
