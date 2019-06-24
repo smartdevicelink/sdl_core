@@ -623,15 +623,16 @@ void MessageHelper::SendResetPropertiesRequest(ApplicationSharedPtr application,
     msg_params = *MessageHelper::CreateAppVrHelp(application);
     msg_params[hmi_request::menu_title] = "";
 
-    smart_objects::SmartObject key_board_properties =
+    smart_objects::SmartObject keyboard_properties =
         smart_objects::SmartObject(smart_objects::SmartType_Map);
-    key_board_properties[strings::language] =
+    keyboard_properties[strings::language] =
         static_cast<int32_t>(hmi_apis::Common_Language::EN_US);
-    key_board_properties[hmi_request::keyboard_layout] =
+    keyboard_properties[hmi_request::keyboard_layout] =
         static_cast<int32_t>(hmi_apis::Common_KeyboardLayout::QWERTY);
 
-    key_board_properties[hmi_request::auto_complete_text] = "";
-    msg_params[hmi_request::keyboard_properties] = key_board_properties;
+    keyboard_properties[hmi_request::auto_complete_list] =
+        smart_objects::SmartObject(smart_objects::SmartType_Array);
+    msg_params[hmi_request::keyboard_properties] = keyboard_properties;
 
     msg_params[strings::app_id] = application->app_id();
 

@@ -68,8 +68,7 @@ SetGlobalPropertiesRequest::~SetGlobalPropertiesRequest() {}
 void SetGlobalPropertiesRequest::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  const smart_objects::SmartObject& msg_params =
-      (*message_)[strings::msg_params];
+  smart_objects::SmartObject& msg_params = (*message_)[strings::msg_params];
 
   ApplicationSharedPtr app = application_manager_.application(connection_key());
 
@@ -90,11 +89,9 @@ void SetGlobalPropertiesRequest::Run() {
 
   mobile_apis::Result::eType verification_result = mobile_apis::Result::SUCCESS;
 
-  if ((*message_)[strings::msg_params].keyExists(strings::menu_icon)) {
+  if (msg_params.keyExists(strings::menu_icon)) {
     verification_result = MessageHelper::VerifyImage(
-        (*message_)[strings::msg_params][strings::menu_icon],
-        app,
-        application_manager_);
+        msg_params[strings::menu_icon], app, application_manager_);
     if (mobile_apis::Result::INVALID_DATA == verification_result) {
       LOG4CXX_ERROR(
           logger_, "MessageHelper::VerifyImage return " << verification_result);
@@ -103,16 +100,27 @@ void SetGlobalPropertiesRequest::Run() {
     }
   }
   // Check for image file(s) in vrHelpItem
-  if ((*message_)[strings::msg_params].keyExists(strings::vr_help)) {
+  if (msg_params.keyExists(strings::vr_help)) {
     if (mobile_apis::Result::INVALID_DATA ==
         MessageHelper::VerifyImageVrHelpItems(
-            (*message_)[strings::msg_params][strings::vr_help],
-            app,
-            application_manager_)) {
+            msg_params[strings::vr_help], app, application_manager_)) {
       LOG4CXX_ERROR(logger_, "MessageHelper::VerifyImage return INVALID_DATA!");
       SendResponse(false, mobile_apis::Result::INVALID_DATA);
       return;
     }
+  }
+
+  if (msg_params.keyExists(strings::keyboard_properties)) {
+    if (!msg_params[strings::keyboard_properties].keyExists(
+            strings::auto_complete_list) &&
+        msg_params[strings::keyboard_properties].keyExists(
+            strings::auto_complete_text)) {
+      LOG4CXX_ERROR(logger_, "Replacing deprecated autoCompleteText property");
+      msg_params[strings::keyboard_properties][strings::auto_complete_list][0] =
+          msg_params[strings::keyboard_properties][strings::auto_complete_text]
+              .asString();
+    }
+    msg_params[strings::keyboard_properties].erase(strings::auto_complete_text);
   }
 
   if (IsWhiteSpaceExist()) {
@@ -549,16 +557,21 @@ bool SetGlobalPropertiesRequest::IsWhiteSpaceExist() {
     }
 
     if (msg_params[strings::keyboard_properties].keyExists(
-            strings::auto_complete_text)) {
-      str =
-          msg_params[strings::keyboard_properties][strings::auto_complete_text]
-              .asCharArray();
+            strings::auto_complete_list)) {
+      const smart_objects::SmartArray* acl_array =
+          msg_params[strings::keyboard_properties][strings::auto_complete_list]
+              .asArray();
 
-      if (!CheckSyntax(str)) {
-        LOG4CXX_ERROR(logger_,
-                      "Invalid keyboard_properties "
-                      "auto_complete_text syntax check failed");
-        return true;
+      smart_objects::SmartArray::const_iterator it = acl_array->begin();
+
+      for (; it != acl_array->end(); ++it) {
+        str = it->asCharArray();
+        if (!CheckSyntax(str)) {
+          LOG4CXX_ERROR(logger_,
+                        "Invalid keyboard_properties "
+                        "auto_complete_list syntax check failed");
+          return true;
+        }
       }
     }
   }

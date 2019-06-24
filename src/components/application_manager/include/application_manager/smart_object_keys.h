@@ -254,6 +254,7 @@ extern const char* key_press_mode;
 // duplicate names from hmi_request
 extern const char* limited_character_list;
 extern const char* auto_complete_text;
+extern const char* auto_complete_list;
 extern const char* navigation_text;
 
 // vehicle info
@@ -409,7 +410,6 @@ extern const char* const language_supported;
 extern const char* const keyboard_layout_supported;
 extern const char* const keypress_mode_supported;
 extern const char* const limited_characters_list_supported;
-extern const char* const auto_complete_text_supported;
 extern const char* const send_location_enabled;
 extern const char* const get_way_points_enabled;
 extern const char* const entity_type;
@@ -518,7 +518,7 @@ extern const char* keyboard_properties;
 extern const char* method_name;
 extern const char* keyboard_layout;
 extern const char* limited_character_list;
-extern const char* auto_complete_text;
+extern const char* auto_complete_list;
 extern const char* file;
 extern const char* file_name;
 extern const char* retry;
