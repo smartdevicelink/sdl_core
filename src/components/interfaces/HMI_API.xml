@@ -3368,6 +3368,15 @@
     <param name="hapticSpatialDataSupported" type="Boolean" mandatory="false">
       <description>True if the system can utilize the haptic spatial data from the source being streamed. </description>
     </param>
+    <param name="diagonalScreenSize" type="Float" mandatory="false">
+      <description>The diagonal screen size in inches.</description>
+    </param>
+    <param name="pixelPerInch" type="Float" mandatory="false">
+      <description>PPI is the diagonal resolution in pixels divided by the diagonal screen size in inches.</description>
+    </param>
+    <param name="scale" type="Float" mandatory="false">
+      <description>The scaling factor the app should use to change the size of the projecting view.</description>
+    </param>
   </struct>
 
   <struct name="SystemCapabilities">
