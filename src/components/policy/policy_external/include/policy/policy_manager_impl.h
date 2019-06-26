@@ -423,10 +423,11 @@ class PolicyManagerImpl : public PolicyManager {
 
   /**
    * @brief Send OnPermissionsUpdated for choosen application
+   * @param device_id device identifier
    * @param application_id Unique application id
    */
   void SendNotificationOnPermissionsUpdated(
-      const std::string& application_id) OVERRIDE;
+      const std::string& device_id, const std::string& application_id) OVERRIDE;
 
   /**
    * @brief Removes unpaired device records and related records from DB
@@ -687,12 +688,26 @@ class PolicyManagerImpl : public PolicyManager {
       const std::string& policy_app_id) const OVERRIDE;
 
   /**
+   * DEPRECATED
    * @brief OnAppRegisteredOnMobile allows to handle event when application were
    * succesfully registered on mobile device.
-   * It will send OnAppPermissionSend notification and will try to start PTU. *
+   * It will send OnAppPermissionSend notification and will try to start PTU.
+   *
    * @param application_id registered application.
    */
-  void OnAppRegisteredOnMobile(const std::string& application_id) OVERRIDE;
+  DEPRECATED void OnAppRegisteredOnMobile(
+      const std::string& application_id) OVERRIDE;
+
+  /**
+   * @brief OnAppRegisteredOnMobile allows to handle event when application were
+   * succesfully registered on mobile device.
+   * It will send OnAppPermissionSend notification and will try to start PTU.
+   *
+   * @param device_id device identifier
+   * @param application_id registered application.
+   */
+  void OnAppRegisteredOnMobile(const std::string& device_id,
+                               const std::string& application_id) OVERRIDE;
 
   void OnDeviceSwitching(const std::string& device_id_from,
                          const std::string& device_id_to) OVERRIDE;
@@ -837,6 +852,14 @@ class PolicyManagerImpl : public PolicyManager {
       const BinaryMessage& pt_content);
 
  private:
+  /**
+   * DEPRECATED
+   * @brief Send OnPermissionsUpdated for choosen application
+   * @param application_id Unique application id
+   */
+  void SendNotificationOnPermissionsUpdated(
+      const std::string& application_id) OVERRIDE;
+
   /**
    * @brief Checks if PT update should be started and schedules it if needed
    */
@@ -1036,11 +1059,13 @@ class PolicyManagerImpl : public PolicyManager {
   /**
    * @brief Notify application about its permissions changes by preparing and
    * sending OnPermissionsChanged notification
+   * @param device_id device identifier
    * @param policy_app_id Application id to send notification to
    * @param app_group_permissons Current permissions for groups assigned to
    * application
    */
   void NotifyPermissionsChanges(
+      const std::string& device_id,
       const std::string& policy_app_id,
       const std::vector<FunctionalGroupPermission>& app_group_permissions);
 
