@@ -2547,7 +2547,7 @@ void MessageHelper::SendOnPermissionsChangeNotification(
       smart_objects::SmartObject(smart_objects::SmartType_Map);
 
   if (encryprion_required.is_initialized()) {
-    content[strings::msg_params][strings::requireEncryption] =
+    content[strings::msg_params][strings::require_encryption] =
         static_cast<bool>(*encryprion_required);
   }
   content[strings::msg_params]["permissionItem"] =
@@ -2608,7 +2608,7 @@ void MessageHelper::SendOnPermissionsChangeNotification(
         encryprion_required, rpc_permissions.require_encryption);
     if (item_require_encryption.is_initialized()) {
       const bool require_encryption = *item_require_encryption;
-      permission_item[strings::requireEncryption] = require_encryption;
+      permission_item[strings::require_encryption] = require_encryption;
     }
 
     // Creating SO for hmiPermissions
