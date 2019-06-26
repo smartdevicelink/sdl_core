@@ -164,7 +164,7 @@ struct IsSameNickname {
   }
 
  private:
-  const custom_str::CustomString& app_id_;
+  const custom_str::CustomString app_id_;
 };
 }  // namespace
 
@@ -184,13 +184,14 @@ RegisterAppInterfaceRequest::RegisterAppInterfaceRequest(
                          rpc_service,
                          hmi_capabilities,
                          policy_handler)
-    , result_code_(mobile_apis::Result::INVALID_ENUM) {}
+    , result_code_(mobile_apis::Result::INVALID_ENUM)
+    , device_handle_(0) {}
 
 RegisterAppInterfaceRequest::~RegisterAppInterfaceRequest() {}
 
 bool RegisterAppInterfaceRequest::Init() {
   LOG4CXX_AUTO_TRACE(logger_);
-  return true;
+  return GetDataOnSessionKey(connection_key(), &device_handle_, &device_id_);
 }
 
 void RegisterAppInterfaceRequest::Run() {
@@ -224,20 +225,25 @@ void RegisterAppInterfaceRequest::Run() {
     return;
   }
 
+  LOG4CXX_DEBUG(
+      logger_,
+      "device_handle: " << device_handle_ << " device_id: " << device_id_);
+
   if (IsApplicationSwitched()) {
     return;
   }
 
+  // Cache the original app ID (for legacy behavior)
+  const auto policy_app_id =
+      application_manager_.GetCorrectMobileIDFromMessage(message_);
+
   ApplicationSharedPtr application =
-      application_manager_.application(connection_key());
+      application_manager_.application(device_id_, policy_app_id);
 
   if (application) {
     SendResponse(false, mobile_apis::Result::APPLICATION_REGISTERED_ALREADY);
     return;
   }
-  // cache the original app ID (for legacy behavior)
-  const std::string policy_app_id =
-      application_manager_.GetCorrectMobileIDFromMessage(message_);
 
   const smart_objects::SmartObject& msg_params =
       (*message_)[strings::msg_params];
@@ -856,7 +862,8 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile(
   // Start PTU after successfull registration
   // Sends OnPermissionChange notification to mobile right after RAI response
   // and HMI level set-up
-  GetPolicyHandler().OnAppRegisteredOnMobile(application->policy_app_id());
+  GetPolicyHandler().OnAppRegisteredOnMobile(application->mac_address(),
+                                             application->policy_app_id());
 
   if (result_code != mobile_apis::Result::RESUME_FAILED) {
     resumer.StartResumption(application, hash_id);
@@ -961,48 +968,72 @@ mobile_apis::Result::eType RegisterAppInterfaceRequest::CheckCoincidence(
   const smart_objects::SmartObject& msg_params =
       (*message_)[strings::msg_params];
 
-  ApplicationSet accessor = application_manager_.applications().GetData();
+  auto compare_tts_name = [](const smart_objects::SmartObject& obj_1,
+                             const smart_objects::SmartObject& obj_2) {
+    return obj_1[application_manager::strings::text]
+        .asCustomString()
+        .CompareIgnoreCase(
+            obj_2[application_manager::strings::text].asCustomString());
+  };
 
-  ApplicationSetConstIt it = accessor.begin();
-  const custom_str::CustomString& app_name =
-      msg_params[strings::app_name].asCustomString();
+  const auto& accessor = application_manager_.applications().GetData();
+  const auto& app_name = msg_params[strings::app_name].asCustomString();
 
-  for (; accessor.end() != it; ++it) {
-    // name check
-    const custom_str::CustomString& cur_name = (*it)->name();
-    if (app_name.CompareIgnoreCase(cur_name)) {
-      LOG4CXX_ERROR(logger_, "Application name is known already.");
-      out_duplicate_apps.push_back(*it);
+  for (const auto& app : accessor) {
+    if (app->device() != device_handle_) {
       continue;
     }
-
-    const smart_objects::SmartObject* vr = (*it)->vr_synonyms();
-    const std::vector<smart_objects::SmartObject>* curr_vr = NULL;
-    if (NULL != vr) {
-      curr_vr = vr->asArray();
+    // Name check
+    const auto& cur_name = app->name();
+    if (app_name.CompareIgnoreCase(cur_name)) {
+      LOG4CXX_ERROR(logger_, "Application name is known already.");
+      out_duplicate_apps.push_back(app);
+      continue;
+    }
+    const auto vr = app->vr_synonyms();
+    if (vr) {
+      const auto curr_vr = vr->asArray();
       CoincidencePredicateVR v(app_name);
 
       if (0 != std::count_if(curr_vr->begin(), curr_vr->end(), v)) {
         LOG4CXX_ERROR(logger_, "Application name is known already.");
-        out_duplicate_apps.push_back(*it);
+        out_duplicate_apps.push_back(app);
         continue;
       }
     }
 
-    // vr check
+    // VR check
     if (msg_params.keyExists(strings::vr_synonyms)) {
-      const std::vector<smart_objects::SmartObject>* new_vr =
-          msg_params[strings::vr_synonyms].asArray();
+      const auto new_vr = msg_params[strings::vr_synonyms].asArray();
 
       CoincidencePredicateVR v(cur_name);
       if (0 != std::count_if(new_vr->begin(), new_vr->end(), v)) {
         LOG4CXX_ERROR(logger_, "vr_synonyms duplicated with app_name .");
-        out_duplicate_apps.push_back(*it);
+        out_duplicate_apps.push_back(app);
         continue;
       }
-    }  // end vr check
+    }  // End vr check
 
-  }  // application for end
+    // TTS check
+    if (msg_params.keyExists(strings::tts_name) && app->tts_name()) {
+      const auto tts_array = msg_params[strings::tts_name].asArray();
+      const auto tts_curr = app->tts_name()->asArray();
+      const auto& it_tts = std::find_first_of(tts_array->begin(),
+                                              tts_array->end(),
+                                              tts_curr->begin(),
+                                              tts_curr->end(),
+                                              compare_tts_name);
+      if (it_tts != tts_array->end()) {
+        LOG4CXX_ERROR(
+            logger_,
+            "TTS name: "
+                << (*it_tts)[strings::text].asCustomString().AsMBString()
+                << " is known already");
+        return mobile_apis::Result::DUPLICATE_NAME;
+      }
+    }  // End tts check
+
+  }  // Application for end
 
   if (!out_duplicate_apps.empty()) {
     return mobile_apis::Result::DUPLICATE_NAME;
@@ -1131,14 +1162,19 @@ bool RegisterAppInterfaceRequest::IsApplicationWithSameAppIdRegistered() {
   const custom_string::CustomString mobile_app_id(
       application_manager_.GetCorrectMobileIDFromMessage(message_));
 
-  const ApplicationSet& applications =
-      application_manager_.applications().GetData();
+  const auto& applications = application_manager_.applications().GetData();
 
-  ApplicationSetConstIt it = applications.begin();
-  ApplicationSetConstIt it_end = applications.end();
-
-  for (; it != it_end; ++it) {
-    if (mobile_app_id.CompareIgnoreCase((*it)->policy_app_id().c_str())) {
+  for (const auto& app : applications) {
+    if (mobile_app_id.CompareIgnoreCase(app->policy_app_id().c_str())) {
+      if (app->device() != device_handle_) {
+        LOG4CXX_DEBUG(logger_,
+                      "These policy_app_id equal, but applications have "
+                      "different device id"
+                          << " mobile_app_id: " << mobile_app_id.c_str()
+                          << " device_handle: " << device_handle_
+                          << " device_handle: " << app->device());
+        continue;
+      }
       return true;
     }
   }
@@ -1323,7 +1359,7 @@ bool RegisterAppInterfaceRequest::IsApplicationSwitched() {
 
   LOG4CXX_DEBUG(logger_, "Looking for application id " << policy_app_id);
 
-  auto app = application_manager_.application_by_policy_id(policy_app_id);
+  auto app = application_manager_.application(device_id_, policy_app_id);
 
   if (!app) {
     LOG4CXX_DEBUG(
@@ -1334,7 +1370,8 @@ bool RegisterAppInterfaceRequest::IsApplicationSwitched() {
 
   LOG4CXX_DEBUG(logger_,
                 "Application with policy id " << policy_app_id << " is found.");
-  if (!application_manager_.IsAppInReconnectMode(policy_app_id)) {
+  if (!application_manager_.IsAppInReconnectMode(device_handle_,
+                                                 policy_app_id)) {
     LOG4CXX_DEBUG(
         logger_,
         "Policy id " << policy_app_id << " is not found in reconnection list.");
@@ -1361,6 +1398,51 @@ bool RegisterAppInterfaceRequest::IsApplicationSwitched() {
   application_manager_.SendHMIStatusNotification(app);
 
   application_manager_.OnApplicationSwitched(app);
+
+  return true;
+}
+
+bool RegisterAppInterfaceRequest::GetDataOnSessionKey(
+    const uint32_t key,
+    connection_handler::DeviceHandle* device_id,
+    std::string* mac_address) const {
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  if ((nullptr == mac_address) && (nullptr == device_id)) {
+    LOG4CXX_ERROR(logger_,
+                  "Can't get data on session key because device id and mac "
+                  "address are empty.");
+    return false;
+  }
+
+  connection_handler::DeviceHandle device_handle = 0;
+  auto& connect_handler = application_manager_.connection_handler();
+
+  auto result = connect_handler.GetDataOnSessionKey(
+      connection_key(), nullptr, nullptr, &device_handle);
+
+  if (result) {
+    LOG4CXX_DEBUG(
+        logger_,
+        "Failed get device info for connection key: " << connection_key());
+    return false;
+  }
+
+  if (mac_address) {
+    result = connect_handler.get_session_observer().GetDataOnDeviceID(
+        device_handle, nullptr, nullptr, mac_address, nullptr);
+  }
+
+  if (result) {
+    LOG4CXX_DEBUG(logger_,
+                  "Failed get unique address info for connection key: "
+                      << connection_key());
+    return false;
+  }
+
+  if (device_id) {
+    *device_id = device_handle;
+  }
 
   return true;
 }
