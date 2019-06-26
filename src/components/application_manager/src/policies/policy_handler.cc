@@ -594,13 +594,9 @@ void PolicyHandler::OnAppPermissionConsentInternal(
 #endif
     }
   } else if (!app_to_device_link_.empty()) {
-    sync_primitives::AutoLock lock(app_to_device_link_lock_);
-    std::map<std::string, std::string>::const_iterator it =
-        app_to_device_link_.begin();
-    for (; app_to_device_link_.end() != it; ++it) {
-      ApplicationSharedPtr app =
-          application_manager_.application(it->first, it->second);
-
+    const ApplicationSet& accessor =
+        application_manager_.applications().GetData();
+    for (const auto& app : accessor) {
       // If list of apps sent to HMI for user consents is not the same as
       // current,
       // permissions should be set only for coincident to registered apps
@@ -611,19 +607,26 @@ void PolicyHandler::OnAppPermissionConsentInternal(
         continue;
       }
 
+      if (!app->IsRegistered()) {
+        LOG4CXX_DEBUG(logger_,
+                      "Application " << app->policy_app_id()
+                                     << " is not marked as registered.");
+        continue;
+      }
+
       DeviceParams device_params = GetDeviceParams(
           app->device(),
           application_manager_.connection_handler().get_session_observer());
 
-      if (device_params.device_mac_address != it->first) {
+      if (device_params.device_mac_address != app->mac_address()) {
         LOG4CXX_WARN(logger_,
                      "Device_id of application is changed."
                      "Permissions setting skipped.");
         continue;
       }
 
-      out_permissions.policy_app_id = it->second;
-      out_permissions.device_id = it->first;
+      out_permissions.policy_app_id = app->policy_app_id();
+      out_permissions.device_id = app->mac_address();
 #ifdef EXTERNAL_PROPRIETARY_MODE
       policy_manager_->SetUserConsentForApp(out_permissions, mode);
 #else
