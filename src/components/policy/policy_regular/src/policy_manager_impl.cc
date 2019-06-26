@@ -531,6 +531,12 @@ void PolicyManagerImpl::OnAppRegisteredOnMobile(
   SendNotificationOnPermissionsUpdated(application_id);
 }
 
+void PolicyManagerImpl::OnAppRegisteredOnMobile(
+    const std::string& device_id, const std::string& application_id) {
+  StartPTExchange();
+  SendNotificationOnPermissionsUpdated(device_id, application_id);
+}
+
 void PolicyManagerImpl::OnDeviceSwitching(const std::string& device_id_from,
                                           const std::string& device_id_to) {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -721,12 +727,50 @@ void PolicyManagerImpl::SendNotificationOnPermissionsUpdated(
 
   const ApplicationOnDevice who = {device_id, application_id};
   if (access_remote_->IsAppRemoteControl(who)) {
-    listener()->OnPermissionsUpdated(application_id, notification_data);
+    listener()->OnPermissionsUpdated(
+        device_id, application_id, notification_data);
     return;
   }
 
   listener()->OnPermissionsUpdated(
-      application_id, notification_data, default_hmi);
+      device_id, application_id, notification_data, default_hmi);
+}
+
+void PolicyManagerImpl::SendNotificationOnPermissionsUpdated(
+    const std::string& device_id, const std::string& application_id) {
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  std::vector<FunctionalGroupPermission> app_group_permissions;
+  GetPermissionsForApp(device_id, application_id, app_group_permissions);
+
+  policy_table::FunctionalGroupings functional_groupings;
+  cache_->GetFunctionalGroupings(functional_groupings);
+
+  policy_table::Strings app_groups;
+  for (const auto& group_permission : app_group_permissions) {
+    app_groups.push_back(group_permission.group_name);
+  }
+
+  Permissions notification_data;
+  PrepareNotificationData(functional_groupings,
+                          app_groups,
+                          app_group_permissions,
+                          notification_data);
+
+  LOG4CXX_INFO(logger_,
+               "Send notification for application_id: " << application_id);
+
+  std::string default_hmi = "NONE";
+
+  const ApplicationOnDevice who = {device_id, application_id};
+  if (access_remote_->IsAppRemoteControl(who)) {
+    listener()->OnPermissionsUpdated(
+        device_id, application_id, notification_data);
+    return;
+  }
+
+  listener()->OnPermissionsUpdated(
+      device_id, application_id, notification_data, default_hmi);
 }
 
 bool PolicyManagerImpl::CleanupUnpairedDevices() {
@@ -1515,7 +1559,8 @@ void PolicyManagerImpl::SendAppPermissionsChanged(
     const std::string& device_id, const std::string& application_id) {
   Permissions notification_data;
   GetPermissions(device_id, application_id, &notification_data);
-  listener()->OnPermissionsUpdated(application_id, notification_data);
+  listener()->OnPermissionsUpdated(
+      device_id, application_id, notification_data);
 }
 
 void PolicyManagerImpl::SendAuthTokenUpdated(const std::string policy_app_id) {

@@ -396,11 +396,20 @@ class PolicyManager : public usage_statistics::StatisticsManager {
                              const std::string& language) = 0;
 
   /**
+   * DEPRECATED
    * @brief Send OnPermissionsUpdated for choosen application
    * @param application_id Unique application id
    */
-  virtual void SendNotificationOnPermissionsUpdated(
+  DEPRECATED virtual void SendNotificationOnPermissionsUpdated(
       const std::string& application_id) = 0;
+
+  /**
+   * @brief Send OnPermissionsUpdated for choosen application
+   * @param device_id device identifier
+   * @param application_id Unique application id
+   */
+  virtual void SendNotificationOnPermissionsUpdated(
+      const std::string& device_id, const std::string& application_id) = 0;
 
   /**
    * @brief Marks device as upaired
@@ -634,12 +643,26 @@ class PolicyManager : public usage_statistics::StatisticsManager {
       const std::string& policy_app_id) const = 0;
 
   /**
+   * DEPRECATED
    * @brief OnAppRegisteredOnMobile allows to handle event when application were
    * succesfully registered on mobile device.
-   * It will send OnAppPermissionSend notification and will try to start PTU. *
+   * It will send OnAppPermissionSend notification and will try to start PTU.
+   *
    * @param application_id registered application.
    */
-  virtual void OnAppRegisteredOnMobile(const std::string& application_id) = 0;
+  DEPRECATED virtual void OnAppRegisteredOnMobile(
+      const std::string& application_id) = 0;
+
+  /**
+   * @brief OnAppRegisteredOnMobile allows to handle event when application were
+   * succesfully registered on mobile device.
+   * It will send OnAppPermissionSend notification and will try to start PTU.
+   *
+   * @param device_id device identifier
+   * @param application_id registered application.
+   */
+  virtual void OnAppRegisteredOnMobile(const std::string& device_id,
+                                       const std::string& application_id) = 0;
 
   virtual void OnDeviceSwitching(const std::string& device_id_from,
                                  const std::string& device_id_to) = 0;

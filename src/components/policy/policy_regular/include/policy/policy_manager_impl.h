@@ -417,10 +417,11 @@ class PolicyManagerImpl : public PolicyManager {
 
   /**
    * @brief Send OnPermissionsUpdated for choosen application
+   * @param device_id device identifier
    * @param application_id Unique application id
    */
   void SendNotificationOnPermissionsUpdated(
-      const std::string& application_id) OVERRIDE;
+      const std::string& device_id, const std::string& application_id) OVERRIDE;
 
   /**
    * @brief Removes unpaired device records and related records from DB
@@ -682,12 +683,26 @@ class PolicyManagerImpl : public PolicyManager {
       const std::string& policy_app_id) const OVERRIDE;
 
   /**
+   * DEPRECATED
    * @brief OnAppRegisteredOnMobile allows to handle event when application were
    * succesfully registered on mobile device.
-   * It will send OnAppPermissionSend notification and will try to start PTU. *
+   * It will send OnAppPermissionSend notification and will try to start PTU.
+   *
    * @param application_id registered application.
    */
-  void OnAppRegisteredOnMobile(const std::string& application_id) OVERRIDE;
+  DEPRECATED void OnAppRegisteredOnMobile(
+      const std::string& application_id) OVERRIDE;
+
+  /**
+   * @brief OnAppRegisteredOnMobile allows to handle event when application were
+   * succesfully registered on mobile device.
+   * It will send OnAppPermissionSend notification and will try to start PTU.
+   *
+   * @param device_id device identifier
+   * @param application_id registered application.
+   */
+  void OnAppRegisteredOnMobile(const std::string& device_id,
+                               const std::string& application_id) OVERRIDE;
 
   void OnDeviceSwitching(const std::string& device_id_from,
                          const std::string& device_id_to) OVERRIDE;
@@ -806,6 +821,14 @@ class PolicyManagerImpl : public PolicyManager {
   const PolicySettings& get_settings() const OVERRIDE;
 
  private:
+  /**
+   * DEPRECATED
+   * @brief Send OnPermissionsUpdated for choosen application
+   * @param application_id Unique application id
+   */
+  void SendNotificationOnPermissionsUpdated(
+      const std::string& application_id) OVERRIDE;
+
   /**
    * @brief Checks if PT update should be started and schedules it if needed
    */

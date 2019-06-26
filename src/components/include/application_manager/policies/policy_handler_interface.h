@@ -71,11 +71,17 @@ class PolicyHandlerInterface {
   virtual bool ReceiveMessageFromSDK(const std::string& file,
                                      const BinaryMessage& pt_string) = 0;
   virtual bool UnloadPolicyLibrary() = 0;
-  virtual void OnPermissionsUpdated(const std::string& policy_app_id,
+  DEPRECATED virtual void OnPermissionsUpdated(const std::string& policy_app_id,
+                                               const Permissions& permissions,
+                                               const HMILevel& default_hmi) = 0;
+  virtual void OnPermissionsUpdated(const std::string& device_id,
+                                    const std::string& policy_app_id,
                                     const Permissions& permissions,
                                     const HMILevel& default_hmi) = 0;
-
-  virtual void OnPermissionsUpdated(const std::string& policy_app_id,
+  DEPRECATED virtual void OnPermissionsUpdated(
+      const std::string& policy_app_id, const Permissions& permissions) = 0;
+  virtual void OnPermissionsUpdated(const std::string& device_id,
+                                    const std::string& policy_app_id,
                                     const Permissions& permissions) = 0;
 
 #ifdef EXTERNAL_PROPRIETARY_MODE
@@ -380,13 +386,26 @@ class PolicyHandlerInterface {
   virtual void OnAppsSearchCompleted(const bool trigger_ptu) = 0;
 
   /**
+   * DEPRECATED
    * @brief OnAppRegisteredOnMobile allows to handle event when application were
    * succesfully registered on mobile device.
    * It will send OnAppPermissionSend notification and will try to start PTU.
    *
    * @param application_id registered application.
    */
-  virtual void OnAppRegisteredOnMobile(const std::string& application_id) = 0;
+  DEPRECATED virtual void OnAppRegisteredOnMobile(
+      const std::string& application_id) = 0;
+
+  /**
+   * @brief OnAppRegisteredOnMobile allows to handle event when application were
+   * succesfully registered on mobile device.
+   * It will send OnAppPermissionSend notification and will try to start PTU.
+   *
+   * @param device_id device identifier
+   * @param application_id registered application.
+   */
+  virtual void OnAppRegisteredOnMobile(const std::string& device_id,
+                                       const std::string& application_id) = 0;
 
   /**
    * @brief Checks if certain request type is allowed for application

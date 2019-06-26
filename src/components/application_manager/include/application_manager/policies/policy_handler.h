@@ -87,11 +87,14 @@ class PolicyHandler : public PolicyHandlerInterface,
   bool ReceiveMessageFromSDK(const std::string& file,
                              const BinaryMessage& pt_string) OVERRIDE;
   bool UnloadPolicyLibrary() OVERRIDE;
-  virtual void OnPermissionsUpdated(const std::string& policy_app_id,
+
+  virtual void OnPermissionsUpdated(const std::string& device_id,
+                                    const std::string& policy_app_id,
                                     const Permissions& permissions,
                                     const HMILevel& default_hmi) OVERRIDE;
 
-  virtual void OnPermissionsUpdated(const std::string& policy_app_id,
+  virtual void OnPermissionsUpdated(const std::string& device_id,
+                                    const std::string& policy_app_id,
                                     const Permissions& permissions) OVERRIDE;
 
 #ifdef EXTERNAL_PROPRIETARY_MODE
@@ -556,13 +559,26 @@ class PolicyHandler : public PolicyHandlerInterface,
   void OnAppsSearchCompleted(const bool trigger_ptu) OVERRIDE;
 
   /**
+   * DEPRECATED
    * @brief OnAppRegisteredOnMobile allows to handle event when application were
    * succesfully registered on mobile device.
    * It will send OnAppPermissionSend notification and will try to start PTU.
    *
    * @param application_id registered application.
    */
-  void OnAppRegisteredOnMobile(const std::string& application_id) OVERRIDE;
+  DEPRECATED void OnAppRegisteredOnMobile(
+      const std::string& application_id) OVERRIDE;
+
+  /**
+   * @brief OnAppRegisteredOnMobile allows to handle event when application were
+   * succesfully registered on mobile device.
+   * It will send OnAppPermissionSend notification and will try to start PTU.
+   *
+   * @param device_id device identifier
+   * @param application_id registered application.
+   */
+  void OnAppRegisteredOnMobile(const std::string& device_id,
+                               const std::string& application_id) OVERRIDE;
 
   /**
    * @brief Checks if certain request type is allowed for application
@@ -673,6 +689,13 @@ class PolicyHandler : public PolicyHandlerInterface,
   void StartNextRetry();
 
  private:
+  void OnPermissionsUpdated(const std::string& policy_app_id,
+                            const Permissions& permissions,
+                            const HMILevel& default_hmi) OVERRIDE;
+
+  void OnPermissionsUpdated(const std::string& policy_app_id,
+                            const Permissions& permissions) OVERRIDE;
+
   /**
    * Checks system action of application for permission of keep context
    * @param system_action system action (see mobile api)
