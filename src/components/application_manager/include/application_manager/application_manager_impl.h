@@ -517,32 +517,6 @@ class ApplicationManagerImpl
   bool IsApplicationForbidden(uint32_t connection_key,
                               const std::string& mobile_app_id);
 
-  struct ApplicationsAppIdSorter {
-    bool operator()(const ApplicationSharedPtr lhs,
-                    const ApplicationSharedPtr rhs) {
-      return lhs->app_id() < rhs->app_id();
-    }
-  };
-
-  struct ApplicationsMobileAppIdSorter {
-    bool operator()(const ApplicationSharedPtr lhs,
-                    const ApplicationSharedPtr rhs) {
-      if (lhs->policy_app_id() == rhs->policy_app_id()) {
-        return lhs->device() < rhs->device();
-      }
-      return lhs->policy_app_id() < rhs->policy_app_id();
-    }
-  };
-
-  // typedef for Applications list
-  typedef std::set<ApplicationSharedPtr, ApplicationsAppIdSorter> ApplictionSet;
-
-  // typedef for Applications list iterator
-  typedef ApplictionSet::iterator ApplictionSetIt;
-
-  // typedef for Applications list const iterator
-  typedef ApplictionSet::const_iterator ApplictionSetConstIt;
-
   /**
    * @brief Notification from PolicyHandler about PTU.
    * Compares AppHMIType between saved in app and received from PTU. If they are
@@ -1062,13 +1036,26 @@ class ApplicationManagerImpl
       const connection_handler::DeviceHandle handle) const OVERRIDE;
 
   /**
+   * DEPRECATED
    * @brief IsAppInReconnectMode check if application belongs to session
    * affected by transport switching at the moment by checking internal
    * waiting list prepared on switching start
    * @param policy_app_id Application id
    * @return True if application is in the waiting list, otherwise - false
    */
-  bool IsAppInReconnectMode(const std::string& policy_app_id) const FINAL;
+  DEPRECATED bool IsAppInReconnectMode(
+      const std::string& policy_app_id) const FINAL;
+
+  /**
+   * @brief IsAppInReconnectMode check if application belongs to session
+   * affected by transport switching at the moment by checking internal
+   * waiting list prepared on switching start
+   * @param device_id device identifier
+   * @param policy_app_id Application id
+   * @return True if application is in the waiting list, otherwise - false
+   */
+  bool IsAppInReconnectMode(const connection_handler::DeviceHandle& device_id,
+                            const std::string& policy_app_id) const FINAL;
 
   bool IsStopping() const OVERRIDE {
     return is_stopping_;

@@ -121,6 +121,7 @@ bool device_id_comparator(const std::string& device_id,
 }
 
 /**
+ * DEPRECATED
  * @brief policy_app_id_comparator is predicate to compare policy application
  * ids
  * @param policy_app_id Policy id of application
@@ -132,6 +133,28 @@ bool policy_app_id_comparator(const std::string& policy_app_id,
   DCHECK_OR_RETURN(app, false);
   return app->policy_app_id() == policy_app_id;
 }
+
+/**
+ * @brief PolicyAppIdComparator is struct predicate to compare policy
+ * application ids & device
+ * @param device_handle of application
+ * @param id of application
+ * @return True if policy id & device_handle of application matches to policy id
+ * & device_handle passed
+ */
+struct PolicyAppIdComparator {
+  PolicyAppIdComparator(const connection_handler::DeviceHandle& device_handle,
+                        const std::string& policy_app_id)
+      : device_handle_(device_handle), policy_app_id_(policy_app_id) {}
+  bool operator()(const ApplicationSharedPtr app) const {
+    return app && app->device() == device_handle_ &&
+           app->policy_app_id() == policy_app_id_;
+  }
+
+ private:
+  const connection_handler::DeviceHandle& device_handle_;
+  const std::string& policy_app_id_;
+};
 
 uint32_t ApplicationManagerImpl::mobile_corelation_id_ = 0;
 uint32_t ApplicationManagerImpl::corelation_id_ = 0;
@@ -1943,7 +1966,7 @@ void ApplicationManagerImpl::OnServiceEndedCallback(
     return;
   }
 
-  if (IsAppInReconnectMode(app->policy_app_id())) {
+  if (IsAppInReconnectMode(app->device(), app->policy_app_id())) {
     LOG4CXX_DEBUG(logger_,
                   "Application is in reconnection list and won't be closed.");
     return;
@@ -2533,7 +2556,7 @@ void ApplicationManagerImpl::CreateApplications(SmartArray& obj_array,
     connection_handler::DeviceHandle device_id = 0;
 
     if (-1 == connection_handler().get_session_observer().GetDataOnSessionKey(
-                  connection_key, NULL, NULL, &device_id)) {
+                  connection_key, nullptr, nullptr, &device_id)) {
       LOG4CXX_ERROR(logger_,
                     "Failed to create application: no connection info.");
       continue;
@@ -2541,7 +2564,7 @@ void ApplicationManagerImpl::CreateApplications(SmartArray& obj_array,
 
     std::string device_mac;
     connection_handler().get_session_observer().GetDataOnDeviceID(
-        device_id, NULL, NULL, &device_mac, NULL);
+        device_id, nullptr, nullptr, &device_mac, nullptr);
 
     const uint32_t hmi_app_id =
         resume_controller().IsApplicationSaved(policy_app_id, device_mac)
@@ -3524,6 +3547,17 @@ bool ApplicationManagerImpl::IsAppInReconnectMode(
                                    policy_app_id));
 }
 
+bool ApplicationManagerImpl::IsAppInReconnectMode(
+    const connection_handler::DeviceHandle& device_id,
+    const std::string& policy_app_id) const {
+  LOG4CXX_AUTO_TRACE(logger_);
+  sync_primitives::AutoLock lock(reregister_wait_list_lock_);
+  return reregister_wait_list_.end() !=
+         std::find_if(reregister_wait_list_.begin(),
+                      reregister_wait_list_.end(),
+                      PolicyAppIdComparator(device_id, policy_app_id));
+}
+
 policy::DeviceConsent ApplicationManagerImpl::GetUserConsentForDevice(
     const std::string& device_id) const {
   return GetPolicyHandler().GetUserConsentForDevice(device_id);
@@ -3846,10 +3880,10 @@ void ApplicationManagerImpl::EraseAppFromReconnectionList(
 
   const auto policy_app_id = app->policy_app_id();
   sync_primitives::AutoLock lock(reregister_wait_list_lock_);
-  auto app_it = std::find_if(
-      reregister_wait_list_.begin(),
-      reregister_wait_list_.end(),
-      std::bind1st(std::ptr_fun(&policy_app_id_comparator), policy_app_id));
+  auto app_it =
+      std::find_if(reregister_wait_list_.begin(),
+                   reregister_wait_list_.end(),
+                   PolicyAppIdComparator(app->device(), policy_app_id));
   if (reregister_wait_list_.end() != app_it) {
     reregister_wait_list_.erase(app_it);
   }
