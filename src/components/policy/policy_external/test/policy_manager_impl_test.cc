@@ -341,8 +341,10 @@ TEST_F(PolicyManagerImplTest, MarkUnpairedDevice) {
 
 TEST_F(PolicyManagerImplTest2, GetCurrentDeviceId) {
   // Arrange
-  EXPECT_CALL(listener_, OnCurrentDeviceIdUpdateRequired(app_id_2_)).Times(1);
-  EXPECT_EQ("", policy_manager_->GetCurrentDeviceId(app_id_2_));
+  const transport_manager::DeviceHandle handle = 1;
+  EXPECT_CALL(listener_, OnCurrentDeviceIdUpdateRequired(handle, app_id_2_))
+      .Times(1);
+  EXPECT_EQ("", policy_manager_->GetCurrentDeviceId(handle, app_id_2_));
 }
 
 TEST_F(PolicyManagerImplTest2, UpdateApplication_AppServices) {
@@ -424,7 +426,7 @@ TEST_F(
   status.insert(ExternalConsentStatusItem(type_2_, id_2_, kStatusOn));
   status.insert(ExternalConsentStatusItem(type_3_, id_3_, kStatusOn));
 
-  EXPECT_CALL(listener_, OnPermissionsUpdated(app_id_1_, _));
+  EXPECT_CALL(listener_, OnPermissionsUpdated(device_id_1_, app_id_1_, _));
 
   EXPECT_TRUE(policy_manager_->SetExternalConsentStatus(status));
 
@@ -473,7 +475,7 @@ TEST_F(
   status.insert(ExternalConsentStatusItem(type_2_, id_2_, kStatusOn));
   status.insert(ExternalConsentStatusItem(type_3_, id_3_, kStatusOn));
 
-  EXPECT_CALL(listener_, OnPermissionsUpdated(app_id_1_, _));
+  EXPECT_CALL(listener_, OnPermissionsUpdated(device_id_1_, app_id_1_, _));
 
   EXPECT_TRUE(policy_manager_->SetExternalConsentStatus(status));
 
@@ -529,12 +531,12 @@ TEST_F(
 
   EXPECT_FALSE(pt->policy_table.device_data->end() != updated_device_data);
 
-  EXPECT_CALL(listener_, OnPermissionsUpdated(app_id_1_, _));
+  EXPECT_CALL(listener_, OnPermissionsUpdated(device_id_1_, app_id_1_, _));
   EXPECT_CALL(listener_, OnCurrentDeviceIdUpdateRequired(app_id_1_))
       .WillRepeatedly(Return(device_id_1_));
 
-  policy_manager_->AddApplication(app_id_1_,
-                                  HmiTypes(policy_table::AHT_DEFAULT));
+  policy_manager_->AddApplication(
+      device_id_1_, app_id_1_, HmiTypes(policy_table::AHT_DEFAULT));
 
   // Check ExternalConsent consents for application
   updated_device_data = pt->policy_table.device_data->find(device_id_1_);
@@ -597,12 +599,12 @@ TEST_F(
 
   EXPECT_FALSE(pt->policy_table.device_data->end() != updated_device_data);
 
-  EXPECT_CALL(listener_, OnPermissionsUpdated(app_id_1_, _));
+  EXPECT_CALL(listener_, OnPermissionsUpdated(device_id_1_, app_id_1_, _));
   EXPECT_CALL(listener_, OnCurrentDeviceIdUpdateRequired(app_id_1_))
       .WillRepeatedly(Return(device_id_1_));
 
-  policy_manager_->AddApplication(app_id_1_,
-                                  HmiTypes(policy_table::AHT_DEFAULT));
+  policy_manager_->AddApplication(
+      device_id_1_, app_id_1_, HmiTypes(policy_table::AHT_DEFAULT));
 
   // Checking ExternalConsent consents after setting new ExternalConsent status
   ApplicationPolicies::const_iterator app_parameters =
@@ -652,15 +654,12 @@ TEST_F(
 
   EXPECT_TRUE(policy_manager_->GetCache()->ApplyUpdate(t));
 
-  EXPECT_CALL(listener_, OnPermissionsUpdated(app_id_1_, _));
-  EXPECT_CALL(listener_, OnCurrentDeviceIdUpdateRequired(app_id_1_))
-      .WillOnce(Return(device_id_1_))         // registered
-      .WillOnce(Return(""))                   // not registered
-      .WillRepeatedly(Return(device_id_1_));  // again registered
-
+  EXPECT_CALL(listener_, OnPermissionsUpdated(device_id_1_, app_id_1_, _));
+  EXPECT_CALL(listener_, GetDevicesIds(app_id_1_))
+      .WillRepeatedly(Return(transport_manager::DeviceList()));
   // First register w/o app having groups to consent
-  policy_manager_->AddApplication(app_id_1_,
-                                  HmiTypes(policy_table::AHT_DEFAULT));
+  policy_manager_->AddApplication(
+      device_id_1_, app_id_1_, HmiTypes(policy_table::AHT_DEFAULT));
 
   // Act
   std::shared_ptr<policy_table::Table> pt =
@@ -691,8 +690,8 @@ TEST_F(
   EXPECT_TRUE(policy_manager_->GetCache()->ApplyUpdate(t));
 
   // Second time register w/ app having groups to consent
-  policy_manager_->AddApplication(app_id_1_,
-                                  HmiTypes(policy_table::AHT_DEFAULT));
+  policy_manager_->AddApplication(
+      device_id_1_, app_id_1_, HmiTypes(policy_table::AHT_DEFAULT));
 
   // Checking ExternalConsent consents after setting new ExternalConsent status
   ApplicationPolicies::const_iterator app_parameters =
@@ -742,15 +741,11 @@ TEST_F(
 
   EXPECT_TRUE(policy_manager_->GetCache()->ApplyUpdate(t));
 
-  EXPECT_CALL(listener_, OnPermissionsUpdated(app_id_1_, _));
-  EXPECT_CALL(listener_, OnCurrentDeviceIdUpdateRequired(app_id_1_))
-      .WillOnce(Return(device_id_1_))         // registered
-      .WillOnce(Return(""))                   // not registered
-      .WillRepeatedly(Return(device_id_1_));  // registered again
+  EXPECT_CALL(listener_, OnPermissionsUpdated(device_id_1_, app_id_1_, _));
 
   // First register w/o app having groups to consent
-  policy_manager_->AddApplication(app_id_1_,
-                                  HmiTypes(policy_table::AHT_DEFAULT));
+  policy_manager_->AddApplication(
+      device_id_1_, app_id_1_, HmiTypes(policy_table::AHT_DEFAULT));
 
   // Act
   std::shared_ptr<policy_table::Table> pt =
@@ -781,8 +776,8 @@ TEST_F(
   EXPECT_TRUE(policy_manager_->GetCache()->ApplyUpdate(t));
 
   // Second time register w/ app having groups to consent
-  policy_manager_->AddApplication(app_id_1_,
-                                  HmiTypes(policy_table::AHT_DEFAULT));
+  policy_manager_->AddApplication(
+      device_id_1_, app_id_1_, HmiTypes(policy_table::AHT_DEFAULT));
 
   // Check ExternalConsent consents for application
   updated_device_data = pt->policy_table.device_data->find(device_id_1_);
@@ -840,12 +835,11 @@ TEST_F(PolicyManagerImplTest_ExternalConsent,
 
   EXPECT_TRUE(policy_manager_->SetExternalConsentStatus(status));
 
-  EXPECT_CALL(listener_, OnPermissionsUpdated(app_id_1_, _));
-  EXPECT_CALL(listener_, OnCurrentDeviceIdUpdateRequired(app_id_1_))
-      .WillRepeatedly(Return(device_id_1_));
-
-  policy_manager_->AddApplication(app_id_1_,
-                                  HmiTypes(policy_table::AHT_DEFAULT));
+  EXPECT_CALL(listener_, OnPermissionsUpdated(device_id_1_, app_id_1_, _));
+  EXPECT_CALL(listener_, GetDevicesIds(app_id_1_))
+      .WillRepeatedly(Return(transport_manager::DeviceList()));
+  policy_manager_->AddApplication(
+      device_id_1_, app_id_1_, HmiTypes(policy_table::AHT_DEFAULT));
 
   std::shared_ptr<policy_table::Table> pt =
       policy_manager_->GetCache()->GetPT();
@@ -965,12 +959,11 @@ TEST_F(PolicyManagerImplTest_ExternalConsent,
 
   EXPECT_TRUE(policy_manager_->SetExternalConsentStatus(status));
 
-  EXPECT_CALL(listener_, OnPermissionsUpdated(app_id_1_, _));
-  EXPECT_CALL(listener_, OnCurrentDeviceIdUpdateRequired(app_id_1_))
-      .WillRepeatedly(Return(device_id_1_));
-
-  policy_manager_->AddApplication(app_id_1_,
-                                  HmiTypes(policy_table::AHT_DEFAULT));
+  EXPECT_CALL(listener_, OnPermissionsUpdated(device_id_1_, app_id_1_, _));
+  EXPECT_CALL(listener_, GetDevicesIds(app_id_1_))
+      .WillRepeatedly(Return(transport_manager::DeviceList()));
+  policy_manager_->AddApplication(
+      device_id_1_, app_id_1_, HmiTypes(policy_table::AHT_DEFAULT));
 
   std::shared_ptr<policy_table::Table> pt =
       policy_manager_->GetCache()->GetPT();
@@ -1099,7 +1092,7 @@ TEST_F(
   status_on.insert(ExternalConsentStatusItem(type_2_, id_2_, kStatusOn));
   status_on.insert(ExternalConsentStatusItem(type_3_, id_3_, kStatusOn));
 
-  EXPECT_CALL(listener_, OnPermissionsUpdated(app_id_1_, _));
+  EXPECT_CALL(listener_, OnPermissionsUpdated(device_id_1_, app_id_1_, _));
 
   EXPECT_TRUE(policy_manager_->SetExternalConsentStatus(status_on));
 
@@ -1135,7 +1128,8 @@ TEST_F(
   status_off.insert(ExternalConsentStatusItem(type_2_, id_2_, kStatusOff));
   status_off.insert(ExternalConsentStatusItem(type_3_, id_3_, kStatusOff));
 
-  EXPECT_CALL(listener_, OnPermissionsUpdated(app_id_1_, _)).Times(1);
+  EXPECT_CALL(listener_, OnPermissionsUpdated(device_id_1_, app_id_1_, _))
+      .Times(1);
 
   EXPECT_TRUE(policy_manager_->SetExternalConsentStatus(status_off));
 

@@ -38,6 +38,8 @@ include_directories (
   ${JSONCPP_INCLUDE_DIRECTORY}
   ${COMPONENTS_DIR}/utils/include/
   ${COMPONENTS_DIR}/config_profile/include
+  ${COMPONENTS_DIR}/connection_handler/include/
+  ${COMPONENTS_DIR}/protocol_handler/include/
   ${LOG4CXX_INCLUDE_DIRECTORY}
   ${BOOST_INCLUDE_DIR}
 )

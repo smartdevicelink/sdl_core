@@ -67,6 +67,8 @@ using ::testing::_;
 using ::testing::DoAll;
 using ::testing::Return;
 using ::testing::ReturnRef;
+using ::testing::SaveArg;
+using ::testing::SetArgPointee;
 
 namespace am = ::application_manager;
 
@@ -75,12 +77,15 @@ using sdl_rpc_plugin::commands::RegisterAppInterfaceRequest;
 
 namespace {
 const uint32_t kConnectionKey = 1u;
+const uint32_t kConnectionKey2 = 2u;
 const hmi_apis::Common_Language::eType kHmiLanguage =
     hmi_apis::Common_Language::EN_US;
 const mobile_apis::Language::eType kMobileLanguage =
     mobile_apis::Language::EN_US;
-const std::string kMacAddress = "test_mac_address";
-const std::string kAppId = "test_app_id";
+const std::string kMacAddress1 = "test_mac_address1";
+const std::string kMacAddress2 = "test_mac_address2";
+const std::string kAppId1 = "test_app1_id";
+const std::string kAppId2 = "test_app2_id";
 const std::string kFullAppId = "test_app_id_long";
 const std::string kDummyString = "test_string";
 const std::vector<uint32_t> kDummyDiagModes;
@@ -94,6 +99,7 @@ class RegisterAppInterfaceRequestTest
       : msg_(CreateMessage())
       , command_(CreateCommand<RegisterAppInterfaceRequest>(msg_))
       , app_name_("test_app_name_")
+      , app2_name_("test_app2_name_")
       , lock_ptr_(std::make_shared<sync_primitives::Lock>())
       , mock_application_helper_(
             application_manager_test::MockApplicationHelper::
@@ -112,7 +118,7 @@ class RegisterAppInterfaceRequestTest
 
   void InitBasicMessage() {
     (*msg_)[am::strings::params][am::strings::connection_key] = kConnectionKey;
-    (*msg_)[am::strings::msg_params][am::strings::app_id] = kAppId;
+    (*msg_)[am::strings::msg_params][am::strings::app_id] = kAppId1;
     (*msg_)[am::strings::msg_params][am::strings::full_app_id] = kFullAppId;
     (*msg_)[am::strings::msg_params][am::strings::app_name] = app_name_;
     (*msg_)[am::strings::msg_params][am::strings::language_desired] =
@@ -130,11 +136,11 @@ class RegisterAppInterfaceRequestTest
   MockAppPtr CreateBasicMockedApp() {
     MockAppPtr mock_app = CreateMockApp();
     ON_CALL(*mock_app, name()).WillByDefault(ReturnRef(app_name_));
-    ON_CALL(*mock_app, mac_address()).WillByDefault(ReturnRef(kMacAddress));
+    ON_CALL(*mock_app, mac_address()).WillByDefault(ReturnRef(kMacAddress1));
     ON_CALL(*mock_app, app_icon_path()).WillByDefault(ReturnRef(kDummyString));
     ON_CALL(*mock_app, language()).WillByDefault(ReturnRef(kMobileLanguage));
     ON_CALL(*mock_app, ui_language()).WillByDefault(ReturnRef(kMobileLanguage));
-    ON_CALL(*mock_app, policy_app_id()).WillByDefault(Return(kAppId));
+    ON_CALL(*mock_app, policy_app_id()).WillByDefault(Return(kAppId1));
     ON_CALL(*mock_app, msg_version())
         .WillByDefault(ReturnRef(mock_semantic_version));
     return mock_app;
@@ -154,7 +160,7 @@ class RegisterAppInterfaceRequestTest
 
   void InitGetters() {
     ON_CALL(app_mngr_, GetCorrectMobileIDFromMessage(msg_))
-        .WillByDefault(Return(kAppId));
+        .WillByDefault(Return(kAppId1));
     ON_CALL(app_mngr_, IsHMICooperating()).WillByDefault(Return(true));
     ON_CALL(app_mngr_, resume_controller())
         .WillByDefault(ReturnRef(mock_resume_crt_));
@@ -168,7 +174,7 @@ class RegisterAppInterfaceRequestTest
         .WillByDefault(ReturnRef(kDummyString));
     ON_CALL(app_mngr_settings_, supported_diag_modes())
         .WillByDefault(ReturnRef(kDummyDiagModes));
-    ON_CALL(mock_policy_handler_, GetAppRequestTypes(_))
+    ON_CALL(mock_policy_handler_, GetAppRequestTypes(_, _))
         .WillByDefault(Return(std::vector<std::string>()));
     ON_CALL(mock_policy_handler_, GetAppRequestTypeState(_))
         .WillByDefault(Return(policy::RequestType::State::EMPTY));
@@ -180,7 +186,7 @@ class RegisterAppInterfaceRequestTest
         .WillByDefault(Return(policy::DeviceConsent::kDeviceAllowed));
     ON_CALL(app_mngr_, GetDeviceTransportType(_))
         .WillByDefault(Return(hmi_apis::Common_TransportType::WIFI));
-    ON_CALL(app_mngr_, IsAppInReconnectMode(_)).WillByDefault(Return(false));
+    ON_CALL(app_mngr_, IsAppInReconnectMode(_, _)).WillByDefault(Return(false));
     ON_CALL(app_mngr_, application_by_policy_id(_))
         .WillByDefault(Return(ApplicationSharedPtr()));
     ON_CALL(mock_hmi_interfaces_, GetInterfaceState(_))
@@ -201,7 +207,7 @@ class RegisterAppInterfaceRequestTest
 
   void SetCommonExpectionsOnSwitchedApplication(
       MockAppPtr mock_app, mobile_apis::Result::eType response_result_code) {
-    EXPECT_CALL(mock_policy_handler_, AddApplication(_, _)).Times(0);
+    EXPECT_CALL(mock_policy_handler_, AddApplication(_, _, _)).Times(0);
 
     EXPECT_CALL(
         mock_rpc_service_,
@@ -250,6 +256,7 @@ class RegisterAppInterfaceRequestTest
   std::shared_ptr<RegisterAppInterfaceRequest> command_;
 
   const utils::custom_string::CustomString app_name_;
+  const utils::custom_string::CustomString app2_name_;
   std::shared_ptr<sync_primitives::Lock> lock_ptr_;
   am::ApplicationSet app_set_;
 
@@ -280,7 +287,7 @@ TEST_F(RegisterAppInterfaceRequestTest, Init_SUCCESS) {
 
 TEST_F(RegisterAppInterfaceRequestTest, Run_MinimalData_SUCCESS) {
   InitBasicMessage();
-  (*msg_)[am::strings::msg_params][am::strings::hash_id] = kAppId;
+  (*msg_)[am::strings::msg_params][am::strings::hash_id] = kAppId1;
   EXPECT_CALL(app_mngr_, IsStopping())
       .WillOnce(Return(false))
       .WillOnce(Return(true))
@@ -289,20 +296,30 @@ TEST_F(RegisterAppInterfaceRequestTest, Run_MinimalData_SUCCESS) {
   EXPECT_CALL(app_mngr_, updateRequestTimeout(_, _, _));
   EXPECT_CALL(app_mngr_, IsApplicationForbidden(_, _)).WillOnce(Return(false));
 
+  connection_handler::DeviceHandle handle = 1;
+  ON_CALL(mock_connection_handler_,
+          GetDataOnSessionKey(kConnectionKey, _, _, _))
+      .WillByDefault(DoAll(SetArgPointee<3>(handle), Return(0)));
+  ON_CALL(mock_session_observer_, GetDataOnDeviceID(handle, _, _, _, _))
+      .WillByDefault(DoAll(SetArgPointee<3>(kMacAddress1), Return(0)));
+
   MockAppPtr mock_app = CreateBasicMockedApp();
-  EXPECT_CALL(app_mngr_, application(kConnectionKey))
-      .WillOnce(Return(ApplicationSharedPtr()))
-      .WillRepeatedly(Return(mock_app));
+  EXPECT_CALL(app_mngr_, application(kMacAddress1, kAppId1))
+      .WillRepeatedly(Return(ApplicationSharedPtr()));
 
   ON_CALL(app_mngr_, applications())
       .WillByDefault(
           Return(DataAccessor<am::ApplicationSet>(app_set_, lock_ptr_)));
+
+  EXPECT_CALL(app_mngr_, application(kConnectionKey))
+      .WillOnce(Return(mock_app));
+
   ON_CALL(mock_policy_handler_, PolicyEnabled()).WillByDefault(Return(true));
-  ON_CALL(mock_policy_handler_, GetInitialAppData(kAppId, _, _))
+  ON_CALL(mock_policy_handler_, GetInitialAppData(kAppId1, _, _))
       .WillByDefault(Return(true));
   policy::StatusNotifier notify_upd_manager =
       std::make_shared<utils::CallNothing>();
-  ON_CALL(mock_policy_handler_, AddApplication(_, _))
+  ON_CALL(mock_policy_handler_, AddApplication(kMacAddress1, kAppId1, _))
       .WillByDefault(Return(notify_upd_manager));
 
   EXPECT_CALL(app_mngr_, RegisterApplication(msg_)).WillOnce(Return(mock_app));
@@ -323,6 +340,7 @@ TEST_F(RegisterAppInterfaceRequestTest, Run_MinimalData_SUCCESS) {
               ManageMobileCommand(_, am::commands::Command::SOURCE_SDL))
       .Times(2);
   EXPECT_CALL(app_mngr_, SendDriverDistractionState(_));
+  ASSERT_TRUE(command_->Init());
   command_->Run();
 }
 
@@ -360,10 +378,19 @@ TEST_F(RegisterAppInterfaceRequestTest,
   EXPECT_CALL(app_mngr_, updateRequestTimeout(_, _, _));
   EXPECT_CALL(app_mngr_, IsApplicationForbidden(_, _)).WillOnce(Return(false));
 
+  connection_handler::DeviceHandle handle = 1;
+  ON_CALL(mock_connection_handler_,
+          GetDataOnSessionKey(kConnectionKey, _, _, _))
+      .WillByDefault(DoAll(SetArgPointee<3>(handle), Return(0)));
+  ON_CALL(mock_session_observer_, GetDataOnDeviceID(_, _, _, _, _))
+      .WillByDefault(DoAll(SetArgPointee<3>(kMacAddress1), Return(0)));
+
   MockAppPtr mock_app = CreateBasicMockedApp();
+  EXPECT_CALL(app_mngr_, application(kMacAddress1, kAppId1))
+      .WillRepeatedly(Return(ApplicationSharedPtr()));
+
   EXPECT_CALL(app_mngr_, application(kConnectionKey))
-      .WillOnce(Return(ApplicationSharedPtr()))
-      .WillRepeatedly(Return(mock_app));
+      .WillOnce(Return(mock_app));
 
   MessageSharedPtr expected_message =
       CreateMessage(smart_objects::SmartType_Map);
@@ -401,11 +428,11 @@ TEST_F(RegisterAppInterfaceRequestTest,
       .WillByDefault(
           Return(DataAccessor<am::ApplicationSet>(app_set_, lock_ptr_)));
   ON_CALL(mock_policy_handler_, PolicyEnabled()).WillByDefault(Return(true));
-  ON_CALL(mock_policy_handler_, GetInitialAppData(kAppId, _, _))
+  ON_CALL(mock_policy_handler_, GetInitialAppData(kAppId1, _, _))
       .WillByDefault(Return(true));
   policy::StatusNotifier notify_upd_manager =
       std::make_shared<utils::CallNothing>();
-  ON_CALL(mock_policy_handler_, AddApplication(_, _))
+  ON_CALL(mock_policy_handler_, AddApplication(kMacAddress1, kAppId1, _))
       .WillByDefault(Return(notify_upd_manager));
 
   EXPECT_CALL(app_mngr_, RegisterApplication(msg_)).WillOnce(Return(mock_app));
@@ -444,7 +471,7 @@ TEST_F(RegisterAppInterfaceRequestTest,
               ManageMobileCommand(_, am::commands::Command::SOURCE_SDL))
       .Times(2);
   EXPECT_CALL(app_mngr_, SendDriverDistractionState(_));
-
+  ASSERT_TRUE(command_->Init());
   command_->Run();
 }
 
@@ -456,10 +483,23 @@ TEST_F(RegisterAppInterfaceRequestTest,
   (*msg_)[am::strings::msg_params][am::strings::hash_id] = request_hash_id;
 
   MockAppPtr mock_app = CreateBasicMockedApp();
-  EXPECT_CALL(app_mngr_, application_by_policy_id(kAppId))
+  app_set_.insert(mock_app);
+  EXPECT_CALL(app_mngr_, application_by_policy_id(kAppId1))
       .WillRepeatedly(Return(mock_app));
 
-  EXPECT_CALL(app_mngr_, IsAppInReconnectMode(kAppId)).WillOnce(Return(true));
+  connection_handler::DeviceHandle device_id = 1;
+  ON_CALL(mock_connection_handler_,
+          GetDataOnSessionKey(kConnectionKey, _, _, _))
+      .WillByDefault(DoAll(SetArgPointee<3>(device_id), Return(0)));
+
+  ON_CALL(mock_session_observer_, GetDataOnDeviceID(device_id, _, _, _, _))
+      .WillByDefault(DoAll(SetArgPointee<3>(kMacAddress1), Return(0)));
+
+  ON_CALL(app_mngr_, application(kMacAddress1, kAppId1))
+      .WillByDefault(Return(mock_app));
+
+  ON_CALL(app_mngr_, IsAppInReconnectMode(device_id, kAppId1))
+      .WillByDefault(Return(true));
 
   EXPECT_CALL(app_mngr_, ProcessReconnection(_, kConnectionKey));
 
@@ -482,6 +522,7 @@ TEST_F(RegisterAppInterfaceRequestTest,
   SetCommonExpectionsOnSwitchedApplication(mock_app,
                                            mobile_apis::Result::SUCCESS);
 
+  ASSERT_TRUE(command_->Init());
   command_->Run();
 }
 
@@ -492,11 +533,22 @@ TEST_F(RegisterAppInterfaceRequestTest,
   const std::string request_hash_id = "abc123";
   (*msg_)[am::strings::msg_params][am::strings::hash_id] = request_hash_id;
 
+  connection_handler::DeviceHandle device_id = 1;
+  ON_CALL(mock_connection_handler_,
+          GetDataOnSessionKey(kConnectionKey, _, _, _))
+      .WillByDefault(DoAll(SetArgPointee<3>(device_id), Return(0)));
+
+  ON_CALL(mock_session_observer_, GetDataOnDeviceID(device_id, _, _, _, _))
+      .WillByDefault(DoAll(SetArgPointee<3>(kMacAddress1), Return(0)));
+
   MockAppPtr mock_app = CreateBasicMockedApp();
-  EXPECT_CALL(app_mngr_, application_by_policy_id(kAppId))
+  EXPECT_CALL(app_mngr_, application_by_policy_id(kAppId1))
       .WillRepeatedly(Return(mock_app));
 
-  EXPECT_CALL(app_mngr_, IsAppInReconnectMode(kAppId)).WillOnce(Return(true));
+  EXPECT_CALL(app_mngr_, application(kMacAddress1, kAppId1))
+      .WillOnce(Return(mock_app));
+  ON_CALL(app_mngr_, IsAppInReconnectMode(device_id, kAppId1))
+      .WillByDefault(Return(true));
 
   EXPECT_CALL(app_mngr_, ProcessReconnection(_, kConnectionKey));
 
@@ -520,7 +572,7 @@ TEST_F(RegisterAppInterfaceRequestTest,
 
   SetCommonExpectionsOnSwitchedApplication(mock_app,
                                            mobile_apis::Result::RESUME_FAILED);
-
+  ASSERT_TRUE(command_->Init());
   command_->Run();
 }
 
@@ -528,11 +580,23 @@ TEST_F(RegisterAppInterfaceRequestTest,
        SwitchApplication_NoHash_ExpectCleanupResumeFailed) {
   InitBasicMessage();
 
+  connection_handler::DeviceHandle device_id = 1;
+  ON_CALL(mock_connection_handler_,
+          GetDataOnSessionKey(kConnectionKey, _, _, _))
+      .WillByDefault(DoAll(SetArgPointee<3>(device_id), Return(0)));
+
+  ON_CALL(mock_session_observer_, GetDataOnDeviceID(device_id, _, _, _, _))
+      .WillByDefault(DoAll(SetArgPointee<3>(kMacAddress1), Return(0)));
+
   MockAppPtr mock_app = CreateBasicMockedApp();
-  EXPECT_CALL(app_mngr_, application_by_policy_id(kAppId))
+  EXPECT_CALL(app_mngr_, application_by_policy_id(kAppId1))
       .WillRepeatedly(Return(mock_app));
 
-  EXPECT_CALL(app_mngr_, IsAppInReconnectMode(kAppId)).WillOnce(Return(true));
+  EXPECT_CALL(app_mngr_, application(kMacAddress1, kAppId1))
+      .WillOnce(Return(mock_app));
+
+  EXPECT_CALL(app_mngr_, IsAppInReconnectMode(device_id, kAppId1))
+      .WillOnce(Return(true));
 
   EXPECT_CALL(app_mngr_, ProcessReconnection(_, kConnectionKey));
 
@@ -550,6 +614,133 @@ TEST_F(RegisterAppInterfaceRequestTest,
   SetCommonExpectionsOnSwitchedApplication(mock_app,
                                            mobile_apis::Result::RESUME_FAILED);
 
+  ASSERT_TRUE(command_->Init());
+  command_->Run();
+}
+
+TEST_F(RegisterAppInterfaceRequestTest,
+       RegisterApp_SameAppId_SameDeviceFailed) {
+  using namespace am;
+
+  InitBasicMessage();
+
+  MockAppPtr mock_app1 = CreateBasicMockedApp();
+
+  app_set_.insert(mock_app1);
+  ON_CALL(app_mngr_, applications())
+      .WillByDefault(
+          Return(DataAccessor<am::ApplicationSet>(app_set_, lock_ptr_)));
+
+  MockAppPtr mock_app2 = CreateBasicMockedApp();
+
+  connection_handler::DeviceHandle device_id = 1;
+  ON_CALL(mock_connection_handler_,
+          GetDataOnSessionKey(kConnectionKey, _, _, _))
+      .WillByDefault(DoAll(SetArgPointee<3>(device_id), Return(0)));
+
+  ON_CALL(mock_session_observer_, GetDataOnDeviceID(device_id, _, _, _, _))
+      .WillByDefault(DoAll(SetArgPointee<3>(kMacAddress1), Return(0)));
+
+  EXPECT_CALL(app_mngr_, application(kMacAddress1, kAppId1))
+      .WillOnce(Return(mock_app1));
+
+  EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_, _)).Times(0);
+
+  EXPECT_CALL(mock_rpc_service_,
+              ManageMobileCommand(
+                  MobileResultCodeIs(
+                      mobile_apis::Result::APPLICATION_REGISTERED_ALREADY),
+                  am::commands::Command::SOURCE_SDL));
+
+  ASSERT_TRUE(command_->Init());
+  command_->Run();
+}
+
+TEST_F(RegisterAppInterfaceRequestTest,
+       RegisterApp_SameAppId_DifferentDevicesSuccess) {
+  MockAppPtr mock_app1 = CreateBasicMockedApp();
+  const connection_handler::DeviceHandle device_id1 = 1u;
+  ON_CALL(*mock_app1, device()).WillByDefault(Return(device_id1));
+  app_set_.insert(mock_app1);
+  ON_CALL(app_mngr_, applications())
+      .WillByDefault(
+          Return(DataAccessor<am::ApplicationSet>(app_set_, lock_ptr_)));
+
+  InitBasicMessage();
+  (*msg_)[am::strings::params][am::strings::connection_key] = kConnectionKey2;
+  EXPECT_CALL(app_mngr_, IsStopping())
+      .WillOnce(Return(false))
+      .WillOnce(Return(true))
+      .WillOnce(Return(false));
+  ON_CALL(app_mngr_, IsHMICooperating()).WillByDefault(Return(false));
+  EXPECT_CALL(app_mngr_, updateRequestTimeout(kConnectionKey2, _, _));
+  EXPECT_CALL(app_mngr_, IsApplicationForbidden(kConnectionKey2, kAppId1))
+      .WillOnce(Return(false));
+
+  connection_handler::DeviceHandle device_id2 = 2u;
+  ON_CALL(mock_connection_handler_,
+          GetDataOnSessionKey(kConnectionKey2, _, _, _))
+      .WillByDefault(DoAll(SetArgPointee<3>(device_id2), Return(0)));
+
+  ON_CALL(mock_session_observer_, GetDataOnDeviceID(device_id2, _, _, _, _))
+      .WillByDefault(DoAll(SetArgPointee<3>(kMacAddress2), Return(0)));
+
+  MockAppPtr mock_app2 = CreateBasicMockedApp();
+
+  ON_CALL(*mock_app2, device()).WillByDefault(Return(device_id2));
+  ON_CALL(*mock_app2, mac_address()).WillByDefault(ReturnRef(kMacAddress2));
+  EXPECT_CALL(app_mngr_, application(kMacAddress2, kAppId1))
+      .WillRepeatedly(Return(ApplicationSharedPtr()));
+
+  EXPECT_CALL(app_mngr_, application(kConnectionKey2))
+      .WillOnce(Return(mock_app2));
+
+  ON_CALL(mock_policy_handler_, PolicyEnabled()).WillByDefault(Return(true));
+  ON_CALL(mock_policy_handler_, GetInitialAppData(kAppId1, _, _))
+      .WillByDefault(Return(true));
+  policy::StatusNotifier notify_upd_manager =
+      std::make_shared<utils::CallNothing>();
+  ON_CALL(mock_policy_handler_, AddApplication(kMacAddress2, kAppId1, _))
+      .WillByDefault(Return(notify_upd_manager));
+
+  EXPECT_CALL(app_mngr_, RegisterApplication(msg_)).WillOnce(Return(mock_app2));
+
+  EXPECT_CALL(mock_hmi_interfaces_, GetInterfaceState(_))
+      .WillRepeatedly(Return(am::HmiInterfaces::STATE_AVAILABLE));
+
+  EXPECT_CALL(mock_rpc_service_,
+              ManageHMICommand(
+                  HMIResultCodeIs(
+                      hmi_apis::FunctionID::BasicCommunication_OnAppRegistered),
+                  _))
+      .WillOnce(Return(true));
+  EXPECT_CALL(
+      mock_rpc_service_,
+      ManageHMICommand(
+          HMIResultCodeIs(hmi_apis::FunctionID::Buttons_OnButtonSubscription),
+          _))
+      .WillOnce(Return(true));
+  EXPECT_CALL(
+      mock_rpc_service_,
+      ManageHMICommand(
+          HMIResultCodeIs(hmi_apis::FunctionID::VR_ChangeRegistration), _))
+      .WillOnce(Return(true));
+  EXPECT_CALL(
+      mock_rpc_service_,
+      ManageHMICommand(
+          HMIResultCodeIs(hmi_apis::FunctionID::TTS_ChangeRegistration), _))
+      .WillOnce(Return(true));
+  EXPECT_CALL(
+      mock_rpc_service_,
+      ManageHMICommand(
+          HMIResultCodeIs(hmi_apis::FunctionID::UI_ChangeRegistration), _))
+      .WillOnce(Return(true));
+  EXPECT_CALL(mock_rpc_service_,
+              ManageMobileCommand(_, am::commands::Command::SOURCE_SDL))
+      .Times(2);
+  EXPECT_CALL(app_mngr_, SendDriverDistractionState(_));
+
+  ASSERT_TRUE(command_->Init());
   command_->Run();
 }
 
