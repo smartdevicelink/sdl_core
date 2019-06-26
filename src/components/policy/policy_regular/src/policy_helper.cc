@@ -263,31 +263,45 @@ bool CheckAppPolicy::IsKnownAppication(
 
 void policy::CheckAppPolicy::NotifySystem(
     const policy::AppPoliciesValueType& app_policy) const {
-  pm_->listener()->OnPendingPermissionChange(app_policy.first);
+  auto& listener = *pm_->listener();
+  const auto devices_ids = listener.GetDevicesIds(app_policy.first);
+  if (devices_ids.empty()) {
+    LOG4CXX_WARN(
+        logger_,
+        "Couldn't find device info for application id: " << app_policy.first);
+    return;
+  }
+
+  for (const auto& device_id : devices_ids) {
+    listener.OnPendingPermissionChange(device_id, app_policy.first);
+  }
 }
 
 void CheckAppPolicy::SendPermissionsToApp(
     const std::string& app_id, const policy_table::Strings& groups) const {
-  const std::string device_id = pm_->GetCurrentDeviceId(app_id);
-  if (device_id.empty()) {
+  const auto devices_ids = pm_->listener()->GetDevicesIds(app_id);
+  if (devices_ids.empty()) {
     LOG4CXX_WARN(logger_,
                  "Couldn't find device info for application id: " << app_id);
     return;
   }
-  std::vector<FunctionalGroupPermission> group_permissons;
-  pm_->GetPermissionsForApp(device_id, app_id, group_permissons);
 
-  Permissions notification_data;
-  pm_->PrepareNotificationData(update_->policy_table.functional_groupings,
-                               groups,
-                               group_permissons,
-                               notification_data);
+  for (const auto& device_id : devices_ids) {
+    std::vector<FunctionalGroupPermission> group_permissons;
+    pm_->GetPermissionsForApp(device_id, app_id, group_permissons);
 
-  LOG4CXX_INFO(logger_, "Send notification for application_id: " << app_id);
-  // Default_hmi is Ford-specific and should not be used with basic policy
-  const std::string default_hmi;
-  pm_->listener()->OnPermissionsUpdated(
-      device_id, app_id, notification_data, default_hmi);
+    Permissions notification_data;
+    pm_->PrepareNotificationData(update_->policy_table.functional_groupings,
+                                 groups,
+                                 group_permissons,
+                                 notification_data);
+
+    LOG4CXX_INFO(logger_, "Send notification for application_id: " << app_id);
+    // Default_hmi is Ford-specific and should not be used with basic policy
+    const std::string default_hmi;
+    pm_->listener()->OnPermissionsUpdated(
+        device_id, app_id, notification_data, default_hmi);
+  }
 }
 
 bool CheckAppPolicy::IsAppRevoked(

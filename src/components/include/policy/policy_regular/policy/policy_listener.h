@@ -58,9 +58,15 @@ class PolicyListener {
   virtual void OnPermissionsUpdated(const std::string& device_id,
                                     const std::string& policy_app_id,
                                     const Permissions& permissions) = 0;
-  virtual void OnPendingPermissionChange(const std::string& policy_app_id) = 0;
+  DEPRECATED virtual void OnPendingPermissionChange(
+      const std::string& policy_app_id) = 0;
+  virtual void OnPendingPermissionChange(const std::string& device_id,
+                                         const std::string& policy_app_id) = 0;
   virtual void OnUpdateStatusChanged(const std::string&) = 0;
+  DEPRECATED virtual std::string OnCurrentDeviceIdUpdateRequired(
+      const std::string& policy_app_id) = 0;
   virtual std::string OnCurrentDeviceIdUpdateRequired(
+      const transport_manager::DeviceHandle& device_handle,
       const std::string& policy_app_id) = 0;
   virtual void OnSystemInfoUpdateRequired() = 0;
   virtual custom_str::CustomString GetAppName(
@@ -99,12 +105,24 @@ class PolicyListener {
                                       bool is_allowed) = 0;
 
   /**
+   * DEPRECATED
    * @brief Sends OnAppPermissionsChanged notification to HMI
    * @param permissions contains parameter for OnAppPermisionChanged
    * @param policy_app_id contains policy application id
    */
+  DEPRECATED virtual void SendOnAppPermissionsChanged(
+      const AppPermissions& permissions,
+      const std::string& policy_app_id) const = 0;
+
+  /**
+   * @brief Sends OnAppPermissionsChanged notification to HMI
+   * @param permissions contains parameter for OnAppPermisionChanged
+   * @param device_id device identifier
+   * @param policy_app_id contains policy application id
+   */
   virtual void SendOnAppPermissionsChanged(
       const AppPermissions& permissions,
+      const std::string& device_id,
       const std::string& policy_app_id) const = 0;
 
   /**
@@ -136,7 +154,7 @@ class PolicyListener {
    * @return list devices ids
    */
   virtual std::vector<std::string> GetDevicesIds(
-      const std::string& policy_app_id) = 0;
+      const std::string& policy_app_id) const = 0;
 
   /**
    * Notifies about changing HMI level

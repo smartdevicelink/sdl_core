@@ -802,6 +802,19 @@ void PolicyManagerImpl::SetUserConsentForDevice(const std::string& device_id,
 
 bool PolicyManagerImpl::ReactOnUserDevConsentForApp(const std::string app_id,
                                                     bool is_device_allowed) {
+  UNUSED(app_id);
+  UNUSED(is_device_allowed);
+
+  return true;
+}
+
+bool PolicyManagerImpl::ReactOnUserDevConsentForApp(
+    const transport_manager::DeviceHandle& device_handle,
+    const std::string app_id,
+    bool is_device_allowed) {
+  UNUSED(device_handle);
+  UNUSED(app_id);
+  UNUSED(is_device_allowed);
   return true;
 }
 
@@ -923,6 +936,17 @@ bool PolicyManagerImpl::GetDefaultHmi(const std::string& policy_app_id,
   return cache_->GetDefaultHMI(app_id, *default_hmi);
 }
 
+bool PolicyManagerImpl::GetDefaultHmi(const std::string& device_id,
+                                      const std::string& policy_app_id,
+                                      std::string* default_hmi) const {
+  LOG4CXX_AUTO_TRACE(logger_);
+  const DeviceConsent device_consent = GetUserConsentForDevice(device_id);
+  const std::string app_id = policy::kDeviceAllowed != device_consent
+                                 ? kPreDataConsentId
+                                 : policy_app_id;
+  return cache_->GetDefaultHMI(app_id, *default_hmi);
+}
+
 bool PolicyManagerImpl::GetPriority(const std::string& policy_app_id,
                                     std::string* priority) const {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -999,7 +1023,7 @@ void PolicyManagerImpl::GetPermissionsForApp(
     app_id_to_check = kDefaultId;
     allowed_by_default = true;
   } else if (cache_->IsPredataPolicy(policy_app_id) ||
-             policy::kDeviceDisallowed == GetUserConsentForDevice(device_id)) {
+             policy::kDeviceAllowed != GetUserConsentForDevice(device_id)) {
     app_id_to_check = kPreDataConsentId;
     allowed_by_default = true;
   }
@@ -1056,7 +1080,17 @@ void PolicyManagerImpl::GetPermissionsForApp(
 std::string& PolicyManagerImpl::GetCurrentDeviceId(
     const std::string& policy_app_id) const {
   LOG4CXX_AUTO_TRACE(logger_);
-  last_device_id_ = listener()->OnCurrentDeviceIdUpdateRequired(policy_app_id);
+  const auto devices_ids = listener()->GetDevicesIds(policy_app_id);
+  last_device_id_ = devices_ids.size() ? devices_ids.back() : last_device_id_;
+  return last_device_id_;
+}
+
+std::string& PolicyManagerImpl::GetCurrentDeviceId(
+    const transport_manager::DeviceHandle& device_handle,
+    const std::string& policy_app_id) const {
+  LOG4CXX_AUTO_TRACE(logger_);
+  last_device_id_ =
+      listener()->OnCurrentDeviceIdUpdateRequired(device_handle, policy_app_id);
   return last_device_id_;
 }
 
@@ -1251,6 +1285,12 @@ bool PolicyManagerImpl::IsConsentNeeded(const std::string& app_id) {
   return false;
 }
 
+bool PolicyManagerImpl::IsConsentNeeded(const std::string& device_id,
+                                        const std::string& app_id) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  return false;
+}
+
 void PolicyManagerImpl::SetVINValue(const std::string& value) {}
 
 AppPermissions PolicyManagerImpl::GetAppPermissionsChanges(
@@ -1262,6 +1302,22 @@ AppPermissions PolicyManagerImpl::GetAppPermissionsChanges(
     permissions = app_id_diff->second;
   } else {
     permissions.appPermissionsConsentNeeded = IsConsentNeeded(policy_app_id);
+    permissions.appRevoked = IsApplicationRevoked(policy_app_id);
+    GetPriority(permissions.application_id, &permissions.priority);
+  }
+  return permissions;
+}
+
+AppPermissions PolicyManagerImpl::GetAppPermissionsChanges(
+    const std::string& device_id, const std::string& policy_app_id) {
+  typedef std::map<std::string, AppPermissions>::iterator PermissionsIt;
+  PermissionsIt app_id_diff = app_permissions_diff_.find(policy_app_id);
+  AppPermissions permissions(policy_app_id);
+  if (app_permissions_diff_.end() != app_id_diff) {
+    permissions = app_id_diff->second;
+  } else {
+    permissions.appPermissionsConsentNeeded =
+        IsConsentNeeded(device_id, policy_app_id);
     permissions.appRevoked = IsApplicationRevoked(policy_app_id);
     GetPriority(permissions.application_id, &permissions.priority);
   }
@@ -1354,6 +1410,23 @@ StatusNotifier PolicyManagerImpl::AddApplication(
   LOG4CXX_AUTO_TRACE(logger_);
   const std::string device_id = GetCurrentDeviceId(application_id);
   DeviceConsent device_consent = GetUserConsentForDevice(device_id);
+  sync_primitives::AutoLock lock(apps_registration_lock_);
+  if (IsNewApplication(application_id)) {
+    AddNewApplication(application_id, device_consent);
+    return std::make_shared<CallStatusChange>(update_status_manager_,
+                                              device_consent);
+  }
+  PromoteExistedApplication(application_id, device_consent);
+  update_status_manager_.OnExistedApplicationAdded(cache_->UpdateRequired());
+  return std::make_shared<utils::CallNothing>();
+}
+
+StatusNotifier PolicyManagerImpl::AddApplication(
+    const std::string& device_id,
+    const std::string& application_id,
+    const rpc::policy_table_interface_base::AppHmiTypes& hmi_types) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  auto device_consent = GetUserConsentForDevice(device_id);
   sync_primitives::AutoLock lock(apps_registration_lock_);
   if (IsNewApplication(application_id)) {
     AddNewApplication(application_id, device_consent);
@@ -1489,6 +1562,17 @@ void PolicyManagerImpl::SetDefaultHmiTypes(const std::string& application_id,
   access_remote_->SetDefaultHmiTypes(who, hmi_types);
 }
 
+void PolicyManagerImpl::SetDefaultHmiTypes(
+    const transport_manager::DeviceHandle& device_handle,
+    const std::string& application_id,
+    const std::vector<int>& hmi_types) {
+  LOG4CXX_INFO(logger_, "SetDefaultHmiTypes");
+  const std::string device_id =
+      GetCurrentDeviceId(device_handle, application_id);
+  ApplicationOnDevice who = {device_id, application_id};
+  access_remote_->SetDefaultHmiTypes(who, hmi_types);
+}
+
 struct HMITypeToInt {
   int operator()(const policy_table::AppHMITypes::value_type item) {
     return policy_table::AppHMIType(item);
@@ -1522,7 +1606,7 @@ bool PolicyManagerImpl::CheckModule(const PTString& app_id,
 
 void PolicyManagerImpl::SendHMILevelChanged(const ApplicationOnDevice& who) {
   std::string default_hmi("NONE");
-  if (GetDefaultHmi(who.app_id, &default_hmi)) {
+  if (GetDefaultHmi(who.dev_id, who.app_id, &default_hmi)) {
     listener()->OnUpdateHMIStatus(who.dev_id, who.app_id, default_hmi);
   } else {
     LOG4CXX_WARN(

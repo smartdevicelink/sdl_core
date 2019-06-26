@@ -2214,7 +2214,11 @@ bool PolicyHandler::IsRequestTypeAllowed(
     case RequestType::State::AVAILABLE: {
       // If any of request types is available for current application - get them
       const auto request_types =
+#ifdef EXTERNAL_PROPRIETARY_MODE
+          policy_manager_->GetAppRequestTypes(device_id, policy_app_id);
+#else
           policy_manager_->GetAppRequestTypes(policy_app_id);
+#endif
       return helpers::in_range(request_types, stringified_type);
     }
     default:
@@ -2262,7 +2266,11 @@ bool PolicyHandler::IsRequestSubTypeAllowed(
 const std::vector<std::string> PolicyHandler::GetAppRequestTypes(
     const std::string& policy_app_id) const {
   POLICY_LIB_CHECK(std::vector<std::string>());
+#ifdef EXTERNAL_PROPRIETARY_MODE
+  return policy_manager_->GetAppRequestTypes(device_handle, policy_app_id);
+#else
   return policy_manager_->GetAppRequestTypes(policy_app_id);
+#endif
 }
 
 const std::vector<std::string> PolicyHandler::GetAppRequestSubTypes(

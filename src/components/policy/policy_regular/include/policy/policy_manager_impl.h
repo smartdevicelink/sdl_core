@@ -263,14 +263,28 @@ class PolicyManagerImpl : public PolicyManager {
                                const bool is_allowed) OVERRIDE;
 
   /**
+   * DEPRECATED
    * @brief Update Application Policies as reaction
    * on User allowing/disallowing device this app is running on.
    * @param app_id Unique application id
    * @param is_device_allowed true if user allowing device otherwise false
    * @return true if operation was successful
    */
-  bool ReactOnUserDevConsentForApp(const std::string app_id,
-                                   const bool is_device_allowed) OVERRIDE;
+  DEPRECATED bool ReactOnUserDevConsentForApp(
+      const std::string app_id, const bool is_device_allowed) OVERRIDE;
+
+  /**
+   * @brief Update Application Policies as reaction
+   * on User allowing/disallowing device this app is running on.
+   * @param device_handle device identifier
+   * @param app_id Unique application id
+   * @param is_device_allowed true if user allowing device otherwise false
+   * @return true if operation was successful
+   */
+  bool ReactOnUserDevConsentForApp(
+      const transport_manager::DeviceHandle& device_handle,
+      const std::string app_id,
+      const bool is_device_allowed) OVERRIDE;
 
   /**
    * @brief Retrieves data from app_policies about app on its registration:
@@ -310,13 +324,26 @@ class PolicyManagerImpl : public PolicyManager {
   void SetUserConsentForApp(const PermissionConsent& permissions) OVERRIDE;
 
   /**
+   * DEPRECATED
    * @brief Get default HMI level for application
    * @param policy_app_id Unique application id
    * @param default_hmi Default HMI level for application or empty, if value
    * was not set
    * @return true, if succedeed, otherwise - false
    */
-  bool GetDefaultHmi(const std::string& policy_app_id,
+  DEPRECATED bool GetDefaultHmi(const std::string& policy_app_id,
+                                std::string* default_hmi) const OVERRIDE;
+
+  /**
+   * @brief Get default HMI level for application
+   * @param device_id device identifier
+   * @param policy_app_id Unique application id
+   * @param default_hmi Default HMI level for application or empty, if value
+   * was not set
+   * @return true, if succedeed, otherwise - false
+   */
+  bool GetDefaultHmi(const std::string& device_id,
+                     const std::string& policy_app_id,
                      std::string* default_hmi) const OVERRIDE;
 
   /**
@@ -359,9 +386,11 @@ class PolicyManagerImpl : public PolicyManager {
 
   /**
    * @brief Return device id, which hosts specific application
+   * @param device_handle device identifier
    * @param policy_app_id Application id, which is required to update device id
    */
   std::string& GetCurrentDeviceId(
+      const transport_manager::DeviceHandle& device_handle,
       const std::string& policy_app_id) const OVERRIDE;
 
   /**
@@ -401,13 +430,24 @@ class PolicyManagerImpl : public PolicyManager {
   void SetVINValue(const std::string& value) OVERRIDE;
 
   /**
+   * DEPRECATED
    * @brief Gets specific application permissions changes since last policy
    * table update
    * @param policy_app_id Unique application id
    * @return Permissions changes
    */
+  DEPRECATED AppPermissions
+  GetAppPermissionsChanges(const std::string& policy_app_id) OVERRIDE;
+
+  /**
+   * @brief Gets specific application permissions changes since last policy
+   * table update
+   * @param device_id device identifier
+   * @param policy_app_id Unique application id
+   * @return Permissions changes
+   */
   AppPermissions GetAppPermissionsChanges(
-      const std::string& policy_app_id) OVERRIDE;
+      const std::string& device_id, const std::string& policy_app_id) OVERRIDE;
 
   /**
    * @brief Removes specific application permissions changes
@@ -450,22 +490,48 @@ class PolicyManagerImpl : public PolicyManager {
   void MarkUnpairedDevice(const std::string& device_id) OVERRIDE;
 
   /**
+   * DEPRECATED
    * @brief Adds, application to the db or update existed one
    * run PTU if policy update is necessary for application.
    * @param application_id Unique application id
    * @param hmi_types application HMI types
    * @return function that will notify update manager about new application
    */
-  StatusNotifier AddApplication(
+  DEPRECATED StatusNotifier AddApplication(
       const std::string& application_id,
       const rpc::policy_table_interface_base::AppHmiTypes& hmi_types) OVERRIDE;
 
   /**
+   * @brief Adds, application to the db or update existed one
+   * run PTU if policy update is necessary for application.
+   * @param device_id device identifier
+   * @param application_id Unique application id
+   * @param hmi_types application HMI types
+   * @return function that will notify update manager about new application
+   */
+  StatusNotifier AddApplication(
+      const std::string& device_id,
+      const std::string& application_id,
+      const rpc::policy_table_interface_base::AppHmiTypes& hmi_types) OVERRIDE;
+
+  /**
+   * DEPRECATED
    * @brief Assigns new HMI types for specified application
    * @param application_id Unique application id
    * @param hmi_types new HMI types list
    */
-  void SetDefaultHmiTypes(const std::string& application_id,
+  DEPRECATED void SetDefaultHmiTypes(
+      const std::string& application_id,
+      const std::vector<int>& hmi_types) OVERRIDE;
+
+  /**
+   * @brief Assigns new HMI types for specified application
+   * @param device_handle device identifier
+   * @param application_id Unique application id
+   * @param hmi_types new HMI types list
+   */
+  void SetDefaultHmiTypes(const transport_manager::DeviceHandle& device_handle,
+                          const std::string& application_id,
                           const std::vector<int>& hmi_types) OVERRIDE;
 
   /**
@@ -823,6 +889,14 @@ class PolicyManagerImpl : public PolicyManager {
  private:
   /**
    * DEPRECATED
+   * @brief Return device id, which hosts specific application
+   * @param policy_app_id Application id, which is required to update device id
+   */
+  std::string& GetCurrentDeviceId(
+      const std::string& policy_app_id) const OVERRIDE;
+
+  /**
+   * DEPRECATED
    * @brief Send OnPermissionsUpdated for choosen application
    * @param application_id Unique application id
    */
@@ -913,10 +987,21 @@ class PolicyManagerImpl : public PolicyManager {
   bool CheckAppStorageFolder() const;
 
   /**
+   * DEPRECATED
    * @brief Checks whether need ask the permission of users
+   * @param app_id policy application id
    * @return true if user consent is needed
    */
   virtual bool IsConsentNeeded(const std::string& app_id);
+
+  /**
+   * @brief Checks whether need ask the permission of users
+   * @param device_id device identifier
+   * @param app_id policy application id
+   * @return true if user consent is needed
+   */
+  virtual bool IsConsentNeeded(const std::string& device_id,
+                               const std::string& app_id);
 
   /**
    * @brief Changes isConsentNeeded for app pending permissions, in case
