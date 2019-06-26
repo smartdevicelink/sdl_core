@@ -7511,6 +7511,14 @@
                 that they are not the driver.
             </description>
         </param>
+        <param name="lockScreenDismissalWarning" type="String" mandatory="false">
+            <description>
+                Warning message to be displayed on the lock screen when dismissal is enabled.
+                This warning should be used to ensure that the user is not the driver of the vehicle, 
+                ex. `Swipe down to dismiss, acknowledging that you are not the driver.`.
+                This parameter must be present if "lockScreenDismissalEnabled" is set to true.
+            </description>
+        </param>
     </function>
     
     <function name="OnPermissionsChange" functionID="OnPermissionsChangeID" messagetype="notification" since="2.0">

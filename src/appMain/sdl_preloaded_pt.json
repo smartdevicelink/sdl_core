@@ -1913,6 +1913,13 @@
                         }
                     }
                 },
+                "LockScreenDismissalWarning":{
+                    "languages":{
+                        "en-us":{
+                            "textBody": "Swipe down to dismiss, acknowledging that you are not the driver"
+                        }
+                    }
+                },
                 "Notifications": {
                     "languages": {
                         "de-de": {
