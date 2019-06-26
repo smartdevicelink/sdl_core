@@ -62,12 +62,12 @@ class BasicCommunicationCloseApplicationResponse
   /**
    * @brief BasicCommunicationCloseApplicationResponse class destructor
    **/
-  virtual ~BasicCommunicationCloseApplicationResponse();
+  ~BasicCommunicationCloseApplicationResponse() OVERRIDE;
 
   /**
    * @brief Execute command
    **/
-  virtual void Run();
+  void Run() OVERRIDE;
 
  private:
   DISALLOW_COPY_AND_ASSIGN(BasicCommunicationCloseApplicationResponse);

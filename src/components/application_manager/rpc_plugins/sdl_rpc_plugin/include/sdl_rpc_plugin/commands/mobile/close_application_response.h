@@ -61,12 +61,12 @@ class CloseApplicationResponse
   /**
    * @brief CloseApplicationResponse class destructor
    **/
-  virtual ~CloseApplicationResponse();
+  ~CloseApplicationResponse() OVERRIDE;
 
   /**
    * @brief Execute command
    **/
-  virtual void Run();
+  void Run() OVERRIDE;
 
  private:
   DISALLOW_COPY_AND_ASSIGN(CloseApplicationResponse);

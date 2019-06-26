@@ -68,7 +68,7 @@ StateControllerImpl::StateControllerImpl(ApplicationManager& app_mngr)
 
 void StateControllerImpl::SetRegularState(ApplicationSharedPtr app,
                                           HmiStatePtr state,
-                                          const bool send_activate_app) {
+                                          const bool send_state_to_hmi) {
   LOG4CXX_AUTO_TRACE(logger_);
   DCHECK_OR_RETURN_VOID(app);
   DCHECK_OR_RETURN_VOID(state);
@@ -101,12 +101,17 @@ void StateControllerImpl::SetRegularState(ApplicationSharedPtr app,
       static_cast<hmi_apis::Common_HMILevel::eType>(
           resolved_state->hmi_level());
 
-  if (send_activate_app) {
-    const int64_t corr_id = SendBCActivateApp(app, hmi_level, true);
-    if (-1 != corr_id) {
-      subscribe_on_event(hmi_apis::FunctionID::BasicCommunication_ActivateApp,
-                         corr_id);
-      waiting_for_activate_[app->app_id()] = resolved_state;
+  if (send_state_to_hmi) {
+    const int64_t result = SendStateToHMI(app, hmi_level, true);
+    if (-1 != result) {
+      const uint32_t corr_id = static_cast<uint32_t>(result);
+      subscribe_on_event(
+          hmi_apis::Common_HMILevel::NONE == hmi_level
+              ? hmi_apis::FunctionID::BasicCommunication_CloseApplication
+              : hmi_apis::FunctionID::BasicCommunication_ActivateApp,
+          corr_id);
+      waiting_for_response_[app->app_id()] = resolved_state;
+      app_mngr_.set_application_id(corr_id, app->hmi_app_id());
       return;
     }
     LOG4CXX_ERROR(logger_, "Unable to send BC.ActivateApp");
@@ -120,7 +125,7 @@ void StateControllerImpl::SetRegularState(
     const mobile_apis::HMILevel::eType hmi_level,
     const mobile_apis::AudioStreamingState::eType audio_state,
     const mobile_apis::VideoStreamingState::eType video_state,
-    const bool send_activate_app) {
+    const bool send_state_to_hmi) {
   LOG4CXX_AUTO_TRACE(logger_);
   DCHECK_OR_RETURN_VOID(app);
   HmiStatePtr prev_regular = app->RegularHmiState();
@@ -132,13 +137,13 @@ void StateControllerImpl::SetRegularState(
   hmi_state->set_audio_streaming_state(audio_state);
   hmi_state->set_video_streaming_state(video_state);
   hmi_state->set_system_context(prev_regular->system_context());
-  SetRegularState(app, hmi_state, send_activate_app);
+  SetRegularState(app, hmi_state, send_state_to_hmi);
 }
 
 void StateControllerImpl::SetRegularState(
     ApplicationSharedPtr app,
     const mobile_apis::HMILevel::eType hmi_level,
-    const bool send_activate_app) {
+    const bool send_state_to_hmi) {
   using namespace mobile_apis;
   LOG4CXX_AUTO_TRACE(logger_);
   DCHECK_OR_RETURN_VOID(app);
@@ -150,7 +155,7 @@ void StateControllerImpl::SetRegularState(
   hmi_state->set_audio_streaming_state(CalcAudioState(app, hmi_level));
   hmi_state->set_video_streaming_state(CalcVideoState(app, hmi_level));
   hmi_state->set_system_context(SystemContext::SYSCTXT_MAIN);
-  SetRegularState(app, hmi_state, send_activate_app);
+  SetRegularState(app, hmi_state, send_state_to_hmi);
 }
 
 void StateControllerImpl::SetRegularState(
@@ -159,7 +164,7 @@ void StateControllerImpl::SetRegularState(
     const mobile_apis::AudioStreamingState::eType audio_state,
     const mobile_apis::VideoStreamingState::eType video_state,
     const mobile_apis::SystemContext::eType system_context,
-    const bool send_activate_app) {
+    const bool send_state_to_hmi) {
   LOG4CXX_AUTO_TRACE(logger_);
   DCHECK_OR_RETURN_VOID(app);
   HmiStatePtr hmi_state =
@@ -169,7 +174,7 @@ void StateControllerImpl::SetRegularState(
   hmi_state->set_audio_streaming_state(audio_state);
   hmi_state->set_video_streaming_state(video_state);
   hmi_state->set_system_context(system_context);
-  SetRegularState(app, hmi_state, send_activate_app);
+  SetRegularState(app, hmi_state, send_state_to_hmi);
 }
 
 void StateControllerImpl::SetRegularState(
@@ -636,8 +641,9 @@ void StateControllerImpl::on_event(const event_engine::Event& event) {
   const SmartObject& message = event.smart_object();
   const FunctionID::eType id = static_cast<FunctionID::eType>(event.id());
   switch (id) {
-    case FunctionID::BasicCommunication_ActivateApp: {
-      OnActivateAppResponse(message);
+    case FunctionID::BasicCommunication_ActivateApp:
+    case FunctionID::BasicCommunication_CloseApplication: {
+      OnHMIResponse(message);
       break;
     }
     case FunctionID::BasicCommunication_OnAppActivated: {
@@ -791,31 +797,33 @@ void StateControllerImpl::OnApplicationRegistered(
   OnStateChanged(app, initial_state, new_state);
 }
 
-int64_t StateControllerImpl::SendBCActivateApp(
+int64_t StateControllerImpl::SendStateToHMI(
     ApplicationConstSharedPtr app,
     hmi_apis::Common_HMILevel::eType level,
     bool send_policy_priority) {
   LOG4CXX_AUTO_TRACE(logger_);
-  smart_objects::SmartObjectSPtr bc_activate_app_request =
-      MessageHelper::GetBCActivateAppRequestToHMI(
-          app,
-          app_mngr_.connection_handler().get_session_observer(),
-          app_mngr_.GetPolicyHandler(),
-          level,
-          send_policy_priority,
-          app_mngr_);
-  if (!bc_activate_app_request) {
-    LOG4CXX_ERROR(logger_, "Unable to create BC.ActivateAppRequest");
+  smart_objects::SmartObjectSPtr request = NULL;
+  if (level == hmi_apis::Common_HMILevel::NONE) {
+    request = MessageHelper::GetBCCloseApplicationRequestToHMI(app, app_mngr_);
+  } else {
+    request = MessageHelper::GetBCActivateAppRequestToHMI(
+        app,
+        app_mngr_.GetPolicyHandler(),
+        level,
+        send_policy_priority,
+        app_mngr_);
+  }
+  if (!request) {
+    LOG4CXX_ERROR(logger_, "Unable to create request");
     return -1;
   }
-  if (!app_mngr_.GetRPCService().ManageHMICommand(bc_activate_app_request)) {
-    LOG4CXX_ERROR(logger_, "Unable to send BC.ActivateAppRequest");
+  if (!app_mngr_.GetRPCService().ManageHMICommand(request)) {
+    LOG4CXX_ERROR(logger_, "Unable to send request");
     return -1;
   }
-  const int64_t corr_id =
-      (*bc_activate_app_request)[strings::params][strings::correlation_id]
-          .asInt();
-  return corr_id;
+  const uint32_t corr_id =
+      (*request)[strings::params][strings::correlation_id].asUInt();
+  return static_cast<int64_t>(corr_id);
 }
 
 void StateControllerImpl::ApplyPostponedStateForApp(ApplicationSharedPtr app) {
@@ -890,18 +898,18 @@ void StateControllerImpl::DeactivateApp(ApplicationSharedPtr app) {
   SetRegularState(app, new_regular, false);
 }
 
-void StateControllerImpl::OnActivateAppResponse(
+void StateControllerImpl::OnHMIResponse(
     const smart_objects::SmartObject& message) {
   const hmi_apis::Common_Result::eType code =
       static_cast<hmi_apis::Common_Result::eType>(
           message[strings::params][hmi_response::code].asInt());
-  const int32_t correlation_id =
-      message[strings::params][strings::correlation_id].asInt();
+  const uint32_t correlation_id =
+      message[strings::params][strings::correlation_id].asUInt();
   const uint32_t hmi_app_id = app_mngr_.application_id(correlation_id);
   ApplicationSharedPtr application =
       app_mngr_.application_by_hmi_app(hmi_app_id);
   if (application && hmi_apis::Common_Result::SUCCESS == code) {
-    HmiStatePtr pending_state = waiting_for_activate_[application->app_id()];
+    HmiStatePtr pending_state = waiting_for_response_[application->app_id()];
     DCHECK_OR_RETURN_VOID(pending_state);
     ApplyRegularState(application, pending_state);
   }

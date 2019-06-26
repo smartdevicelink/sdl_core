@@ -60,12 +60,12 @@ class CloseApplicationRequest : public app_mngr::commands::CommandRequestImpl {
   /**
    * @brief CloseApplicationRequest class destructor
    **/
-  virtual ~CloseApplicationRequest();
+  ~CloseApplicationRequest() OVERRIDE;
 
   /**
    * @brief Execute command
    **/
-  virtual void Run();
+  void Run() OVERRIDE;
 
   /**
    * @brief Interface method that is called whenever new event received

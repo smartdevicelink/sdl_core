@@ -62,12 +62,12 @@ class BasicCommunicationCloseApplicationRequest
   /**
    * @brief BasicCommunicationCloseApplicationRequest class destructor
    **/
-  virtual ~BasicCommunicationCloseApplicationRequest();
+  ~BasicCommunicationCloseApplicationRequest() OVERRIDE;
 
   /**
    * @brief Execute command
    **/
-  virtual void Run();
+  void Run() OVERRIDE;
 
  private:
   DISALLOW_COPY_AND_ASSIGN(BasicCommunicationCloseApplicationRequest);
