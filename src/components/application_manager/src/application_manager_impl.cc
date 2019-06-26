@@ -1654,7 +1654,8 @@ mobile_apis::HMILevel::eType ApplicationManagerImpl::GetDefaultHmiLevel(
   if (GetPolicyHandler().PolicyEnabled()) {
     const std::string policy_app_id = application->policy_app_id();
     std::string default_hmi_string = "";
-    if (GetPolicyHandler().GetDefaultHmi(policy_app_id, &default_hmi_string)) {
+    if (GetPolicyHandler().GetDefaultHmi(
+            application->mac_address(), policy_app_id, &default_hmi_string)) {
       if ("BACKGROUND" == default_hmi_string) {
         default_hmi = HMILevel::HMI_BACKGROUND;
       } else if ("FULL" == default_hmi_string) {
@@ -2513,8 +2514,24 @@ void ApplicationManagerImpl::CreateApplications(SmartArray& obj_array,
     }
 
     const std::string policy_app_id(app_data[json::appId].asString());
-    ApplicationSharedPtr registered_app =
-        application_by_policy_id(policy_app_id);
+
+    connection_handler::DeviceHandle device_handle;
+    if (-1 == connection_handler().get_session_observer().GetDataOnSessionKey(
+                  connection_key, nullptr, nullptr, &device_handle)) {
+      LOG4CXX_ERROR(logger_,
+                    "Failed to create application: no connection info.");
+      continue;
+    }
+
+    std::string device_id;
+    if (-1 == connection_handler().get_session_observer().GetDataOnDeviceID(
+                  device_handle, nullptr, nullptr, &device_id)) {
+      LOG4CXX_ERROR(logger_,
+                    "Failed to create application: no connection info.");
+      continue;
+    }
+
+    ApplicationSharedPtr registered_app = application(device_id, policy_app_id);
     if (registered_app) {
       LOG4CXX_DEBUG(logger_,
                     "Application with the same id: "
@@ -2553,22 +2570,9 @@ void ApplicationManagerImpl::CreateApplications(SmartArray& obj_array,
     const std::string app_icon_dir(settings_.app_icons_folder());
     const std::string full_icon_path(app_icon_dir + "/" + policy_app_id);
 
-    connection_handler::DeviceHandle device_id = 0;
-
-    if (-1 == connection_handler().get_session_observer().GetDataOnSessionKey(
-                  connection_key, nullptr, nullptr, &device_id)) {
-      LOG4CXX_ERROR(logger_,
-                    "Failed to create application: no connection info.");
-      continue;
-    }
-
-    std::string device_mac;
-    connection_handler().get_session_observer().GetDataOnDeviceID(
-        device_id, nullptr, nullptr, &device_mac, nullptr);
-
     const uint32_t hmi_app_id =
-        resume_controller().IsApplicationSaved(policy_app_id, device_mac)
-            ? resume_controller().GetHMIApplicationID(policy_app_id, device_mac)
+        resume_controller().IsApplicationSaved(policy_app_id, device_id)
+            ? resume_controller().GetHMIApplicationID(policy_app_id, device_id)
             : GenerateNewHMIAppID();
 
     // AppId = 0 because this is query_app(provided by hmi for download, but not
@@ -2576,8 +2580,8 @@ void ApplicationManagerImpl::CreateApplications(SmartArray& obj_array,
     ApplicationSharedPtr app(
         new ApplicationImpl(0,
                             policy_app_id,
-                            device_mac,
                             device_id,
+                            device_handle,
                             appName,
                             GetPolicyHandler().GetStatisticManager(),
                             *this));

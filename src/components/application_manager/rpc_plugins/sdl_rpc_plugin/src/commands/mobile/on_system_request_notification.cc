@@ -86,8 +86,8 @@ void OnSystemRequestNotification::Run() {
           static_cast<rpc::policy_table_interface_base::RequestType>(
               request_type));
 
-  if (!policy_handler.IsRequestTypeAllowed(app->policy_app_id(),
-                                           request_type)) {
+  if (!policy_handler.IsRequestTypeAllowed(
+          app->device(), app->policy_app_id(), request_type)) {
     LOG4CXX_WARN(logger_,
                  "Request type " << stringified_request_type
                                  << " is not allowed by policies");

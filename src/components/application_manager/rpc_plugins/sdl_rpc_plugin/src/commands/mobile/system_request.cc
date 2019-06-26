@@ -470,8 +470,8 @@ void SystemRequest::Run() {
           static_cast<rpc::policy_table_interface_base::RequestType>(
               request_type));
 
-  if (!policy_handler.IsRequestTypeAllowed(application->policy_app_id(),
-                                           request_type)) {
+  if (!policy_handler.IsRequestTypeAllowed(
+          application->device(), application->policy_app_id(), request_type)) {
     LOG4CXX_ERROR(logger_,
                   "RequestType " << stringified_request_type
                                  << " is DISALLOWED by policies");

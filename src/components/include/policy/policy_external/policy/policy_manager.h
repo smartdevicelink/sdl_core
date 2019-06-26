@@ -130,6 +130,7 @@ class PolicyManager : public usage_statistics::StatisticsManager {
   virtual void RequestPTUpdate() = 0;
 
   /**
+   * DEPRECATED
    * @brief Check if specified RPC for specified application
    * has permission to be executed in specified HMI Level
    * and also its permitted params.
@@ -140,7 +141,26 @@ class PolicyManager : public usage_statistics::StatisticsManager {
    * @param CheckPermissionResult containing flag if HMI Level is allowed
    * and list of allowed params.
    */
-  virtual void CheckPermissions(const PTString& app_id,
+  DEPRECATED virtual void CheckPermissions(const PTString& app_id,
+                                           const PTString& hmi_level,
+                                           const PTString& rpc,
+                                           const RPCParams& rpc_params,
+                                           CheckPermissionResult& result) = 0;
+
+  /**
+   * @brief Check if specified RPC for specified application
+   * has permission to be executed in specified HMI Level
+   * and also its permitted params.
+   * @param device_id device identifier
+   * @param app_id Id of application provided during registration
+   * @param hmi_level Current HMI Level of application
+   * @param rpc Name of RPC
+   * @param rpc_params List of RPC params
+   * @param CheckPermissionResult containing flag if HMI Level is allowed
+   * and list of allowed params.
+   */
+  virtual void CheckPermissions(const PTString& device_id,
+                                const PTString& app_id,
                                 const PTString& hmi_level,
                                 const PTString& rpc,
                                 const RPCParams& rpc_params,
@@ -263,14 +283,28 @@ class PolicyManager : public usage_statistics::StatisticsManager {
                                        const bool is_allowed) = 0;
 
   /**
+   * DEPRECATED
    * @brief Update Application Policies as reaction
    * on User allowing/disallowing device this app is running on.
    * @param app_id Unique application id
    * @param is_device_allowed true if user allowing device otherwise false
    * @return true if operation was successful
    */
-  virtual bool ReactOnUserDevConsentForApp(const std::string& app_id,
-                                           const bool is_device_allowed) = 0;
+  DEPRECATED virtual bool ReactOnUserDevConsentForApp(
+      const std::string& app_id, const bool is_device_allowed) = 0;
+
+  /**
+   * @brief Update Application Policies as reaction
+   * on User allowing/disallowing device this app is running on.
+   * @param device_handle device identifier
+   * @param app_id Unique application id
+   * @param is_device_allowed true if user allowing device otherwise false
+   * @return true if operation was successful
+   */
+  virtual bool ReactOnUserDevConsentForApp(
+      const transport_manager::DeviceHandle& device_handle,
+      const std::string& app_id,
+      const bool is_device_allowed) = 0;
 
   /**
    * @brief Sets counter value that passed for receiving PT UPdate.
@@ -317,13 +351,26 @@ class PolicyManager : public usage_statistics::StatisticsManager {
                                     const NotificationMode mode) = 0;
 
   /**
+   * DEPRECATED
    * @brief Get default HMI level for application
    * @param policy_app_id Unique application id
    * @param default_hmi Default HMI level for application or empty, if value
    * was not set
    * @return true, if succedeed, otherwise - false
    */
-  virtual bool GetDefaultHmi(const std::string& policy_app_id,
+  DEPRECATED virtual bool GetDefaultHmi(const std::string& policy_app_id,
+                                        std::string* default_hmi) const = 0;
+
+  /**
+   * @brief Get default HMI level for application
+   * @param device_id device identifier
+   * @param policy_app_id Unique application id
+   * @param default_hmi Default HMI level for application or empty, if value
+   * was not set
+   * @return true, if succedeed, otherwise - false
+   */
+  virtual bool GetDefaultHmi(const std::string& device_id,
+                             const std::string& policy_app_id,
                              std::string* default_hmi) const = 0;
 
   /**
@@ -367,13 +414,24 @@ class PolicyManager : public usage_statistics::StatisticsManager {
       std::vector<FunctionalGroupPermission>& permissions) = 0;
 
   /**
+   * DEPRECATED
    * @brief Gets specific application permissions changes since last policy
    * table update
    * @param policy_app_id Unique application id
    * @return Permissions changes
    */
-  virtual AppPermissions GetAppPermissionsChanges(
+  DEPRECATED virtual AppPermissions GetAppPermissionsChanges(
       const std::string& policy_app_id) = 0;
+
+  /**
+   * @brief Gets specific application permissions changes since last policy
+   * table update
+   * @param device_id device identifier
+   * @param policy_app_id Unique application id
+   * @return Permissions changes
+   */
+  virtual AppPermissions GetAppPermissionsChanges(
+      const std::string& device_id, const std::string& policy_app_id) = 0;
 
   /**
    * @brief Removes specific application permissions changes
@@ -382,10 +440,20 @@ class PolicyManager : public usage_statistics::StatisticsManager {
   virtual void RemovePendingPermissionChanges(const std::string& app_id) = 0;
 
   /**
+   * DEPRECATED
    * @brief Return device id, which hosts specific application
    * @param policy_app_id Application id, which is required to update device id
    */
+  DEPRECATED virtual std::string& GetCurrentDeviceId(
+      const std::string& policy_app_id) const = 0;
+
+  /**
+   * @brief Return device id, which hosts specific application
+   * @param device_handle device identifier
+   * @param policy_app_id Application id, which is required to update device id
+   */
   virtual std::string& GetCurrentDeviceId(
+      const transport_manager::DeviceHandle& device_handle,
       const std::string& policy_app_id) const = 0;
 
   /**
@@ -427,13 +495,27 @@ class PolicyManager : public usage_statistics::StatisticsManager {
   virtual void MarkUnpairedDevice(const std::string& device_id) = 0;
 
   /**
+   * DEPRECATED
    * @brief Adds, application to the db or update existed one
    * run PTU if policy update is necessary for application.
    * @param application_id Unique application id
    * @param hmi_types application HMI types
    * @return function that will notify update manager about new application
    */
+  DEPRECATED virtual StatusNotifier AddApplication(
+      const std::string& application_id,
+      const rpc::policy_table_interface_base::AppHmiTypes& hmi_types) = 0;
+
+  /**
+   * @brief Adds, application to the db or update existed one
+   * run PTU if policy update is necessary for application.
+   * @param device_id device identifier
+   * @param application_id Unique application id
+   * @param hmi_types application HMI types
+   * @return function that will notify update manager about new application
+   */
   virtual StatusNotifier AddApplication(
+      const std::string& device_id,
       const std::string& application_id,
       const rpc::policy_table_interface_base::AppHmiTypes& hmi_types) = 0;
 
@@ -552,11 +634,22 @@ class PolicyManager : public usage_statistics::StatisticsManager {
       const std::string& policy_app_id) const = 0;
 
   /**
+   * DEPRECATED
    * @brief Gets request types for application
    * @param policy_app_id Unique application id
    * @return request types of application
    */
+  DEPRECATED virtual const std::vector<std::string> GetAppRequestTypes(
+      const std::string policy_app_id) const = 0;
+
+  /**
+   * @brief Gets request types for application
+   * @param device_handle device identifier
+   * @param policy_app_id Unique application id
+   * @return request types of application
+   */
   virtual const std::vector<std::string> GetAppRequestTypes(
+      const transport_manager::DeviceHandle& device_handle,
       const std::string policy_app_id) const = 0;
 
   /**
@@ -716,12 +809,24 @@ class PolicyManager : public usage_statistics::StatisticsManager {
   virtual AppIdURL GetNextUpdateUrl(const EndpointUrls& urls) = 0;
 
   /**
+   * DEPRECATED
    * @brief Assigns new HMI types for specified application
    * @param application_id Unique application id
    * @param hmi_types new HMI types list
    */
-  virtual void SetDefaultHmiTypes(const std::string& application_id,
-                                  const std::vector<int>& hmi_types) = 0;
+  DEPRECATED virtual void SetDefaultHmiTypes(
+      const std::string& application_id, const std::vector<int>& hmi_types) = 0;
+
+  /**
+   * @brief Assigns new HMI types for specified application
+   * @param device_handle device identifier
+   * @param application_id Unique application id
+   * @param hmi_types new HMI types list
+   */
+  virtual void SetDefaultHmiTypes(
+      const transport_manager::DeviceHandle& device_handle,
+      const std::string& application_id,
+      const std::vector<int>& hmi_types) = 0;
   /**
    * @brief Gets HMI types
    * @param application_id ID application

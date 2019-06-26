@@ -841,14 +841,15 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile(
     }
   }
   policy::StatusNotifier notify_upd_manager = GetPolicyHandler().AddApplication(
-      application->policy_app_id(), hmi_types);
+      application->mac_address(), application->policy_app_id(), hmi_types);
 
   response_params[strings::icon_resumed] =
       file_system::FileExists(application->app_icon_path());
 
   SendResponse(true, result_code, add_info.c_str(), &response_params);
   if (msg_params.keyExists(strings::app_hmi_type)) {
-    GetPolicyHandler().SetDefaultHmiTypes(application->policy_app_id(),
+    GetPolicyHandler().SetDefaultHmiTypes(application->device(),
+                                          application->policy_app_id(),
                                           &(msg_params[strings::app_hmi_type]));
   }
 
