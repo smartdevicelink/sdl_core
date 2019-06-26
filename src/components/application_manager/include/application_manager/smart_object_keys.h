@@ -38,7 +38,7 @@ namespace application_manager {
 namespace strings {
 
 extern const char* params;
-extern const char* requireEncryption;
+extern const char* require_encryption;
 extern const char* protection;
 extern const char* message_type;
 extern const char* correlation_id;

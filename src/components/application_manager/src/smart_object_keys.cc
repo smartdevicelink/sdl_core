@@ -5,7 +5,7 @@ namespace application_manager {
 namespace strings {
 
 const char* params = "params";
-const char* requireEncryption = "requireEncryption";
+const char* require_encryption = "requireEncryption";
 const char* protection = "protection";
 const char* message_type = "message_type";
 const char* correlation_id = "correlation_id";
