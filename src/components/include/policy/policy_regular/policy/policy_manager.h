@@ -176,6 +176,14 @@ class PolicyManager : public usage_statistics::StatisticsManager {
       const = 0;
 
   /**
+   * @brief Returns lock screen warning message
+   * @param language_code Specific language for which need message
+   * @return std::string Lock screen warning message
+   */
+  virtual const boost::optional<std::string> LockScreenDismissalWarningMessage(
+      const std::string& language) const = 0;
+
+  /**
    * @brief Increments counter of ignition cycles
    */
   virtual void IncrementIgnitionCycles() = 0;

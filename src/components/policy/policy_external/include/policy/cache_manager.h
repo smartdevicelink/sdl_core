@@ -161,6 +161,9 @@ class CacheManager : public CacheManagerInterface {
 
   const boost::optional<bool> LockScreenDismissalEnabledState() const OVERRIDE;
 
+  const boost::optional<std::string> LockScreenDismissalWarningMessage(
+      const std::string& language) const OVERRIDE;
+
   /**
    * @brief Get a list of enabled cloud applications
    * @param enabled_apps List filled with the policy app id of each enabled
@@ -286,7 +289,7 @@ class CacheManager : public CacheManagerInterface {
   std::vector<UserFriendlyMessage> GetUserFriendlyMsg(
       const std::vector<std::string>& msg_codes,
       const std::string& language,
-      const std::string& active_hmi_language);
+      const std::string& active_hmi_language) const;
 
   /**
    * @brief GetLockScreenIcon allows to obtain lock screen icon url;

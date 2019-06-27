@@ -1085,6 +1085,12 @@ const boost::optional<bool> PolicyManagerImpl::LockScreenDismissalEnabledState()
   return cache_->LockScreenDismissalEnabledState();
 }
 
+const boost::optional<std::string>
+PolicyManagerImpl::LockScreenDismissalWarningMessage(
+    const std::string& language) const {
+  return cache_->LockScreenDismissalWarningMessage(language);
+}
+
 void PolicyManagerImpl::IncrementIgnitionCycles() {
   cache_->IncrementIgnitionCycles();
 }

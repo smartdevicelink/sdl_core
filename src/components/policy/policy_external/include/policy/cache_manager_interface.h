@@ -280,6 +280,15 @@ class CacheManagerInterface {
       const = 0;
 
   /**
+   * @brief Returns lock screen warning message. In case when specified language
+   * is absent in policy table will be returned message on default language
+   * ("en-us"). Otherwise returns uninitialized boost::optional<std::string>
+   * @return std::string Lock screen warning message
+   */
+  virtual const boost::optional<std::string> LockScreenDismissalWarningMessage(
+      const std::string& language) const = 0;
+
+  /**
    * @brief Allows to update 'vin' field in module_meta table.
    *
    * @param new 'vin' value.
@@ -300,7 +309,7 @@ class CacheManagerInterface {
   virtual std::vector<UserFriendlyMessage> GetUserFriendlyMsg(
       const std::vector<std::string>& msg_codes,
       const std::string& language,
-      const std::string& active_hmi_language) = 0;
+      const std::string& active_hmi_language) const = 0;
 
   /**
    * @brief Get list of URL to send PTS to

@@ -1573,10 +1573,32 @@ const boost::optional<bool> CacheManager::LockScreenDismissalEnabledState()
   return empty;
 }
 
+const boost::optional<std::string>
+CacheManager::LockScreenDismissalWarningMessage(
+    const std::string& language) const {
+  LOG4CXX_AUTO_TRACE(logger_);
+  boost::optional<std::string> empty;
+  CACHE_MANAGER_CHECK(empty);
+
+  const std::string lock_screen_dismissal_warning_message =
+      "LockScreenDismissalWarning";
+  sync_primitives::AutoLock auto_lock(cache_lock_);
+
+  std::vector<std::string> msg_codes{lock_screen_dismissal_warning_message};
+
+  const auto messages = GetUserFriendlyMsg(msg_codes, language, "en-us");
+
+  if (messages.empty() || messages[0].text_body.empty()) {
+    return empty;
+  }
+
+  return boost::optional<std::string>(messages[0].text_body);
+}
+
 std::vector<UserFriendlyMessage> CacheManager::GetUserFriendlyMsg(
     const std::vector<std::string>& msg_codes,
     const std::string& language,
-    const std::string& active_hmi_language) {
+    const std::string& active_hmi_language) const {
   LOG4CXX_AUTO_TRACE(logger_);
   std::vector<UserFriendlyMessage> result;
   CACHE_MANAGER_CHECK(result);
