@@ -150,6 +150,9 @@ class PolicyManagerImpl : public PolicyManager {
 
   const boost::optional<bool> LockScreenDismissalEnabledState() const OVERRIDE;
 
+  const boost::optional<std::string> LockScreenDismissalWarningMessage(
+      const std::string& language) const OVERRIDE;
+
   /**
    * @brief Increments counter of ignition cycles
    */

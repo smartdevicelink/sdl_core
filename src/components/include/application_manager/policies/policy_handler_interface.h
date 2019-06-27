@@ -126,6 +126,8 @@ class PolicyHandlerInterface {
   virtual void OnSystemReady() = 0;
   virtual const boost::optional<bool> LockScreenDismissalEnabledState()
       const = 0;
+  virtual const boost::optional<std::string> LockScreenDismissalWarningMessage(
+      const std::string& language) const = 0;
   virtual void PTUpdatedAt(Counters counter, int value) = 0;
   virtual void add_listener(PolicyHandlerObserver* listener) = 0;
   virtual void remove_listener(PolicyHandlerObserver* listener) = 0;
