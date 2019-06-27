@@ -57,6 +57,22 @@ const std::string kTransportManager = "TransportManager";
 const std::string kTcpAdapter = "TcpAdapter";
 const std::string kBluetoothAdapter = "BluetoothAdapter";
 const std::string kDevices = "devices";
+std::vector<uint8_t> kBTUUID = {0x93,
+                                0x6D,
+                                0xA0,
+                                0x1F,
+                                0x9A,
+                                0xBD,
+                                0x4D,
+                                0x9D,
+                                0x80,
+                                0xC7,
+                                0x02,
+                                0xAF,
+                                0x85,
+                                0xC8,
+                                0x22,
+                                0xA8};
 }  // namespace
 
 TEST(TestTransportManagerDefault, Init_LastStateNotUsed) {
@@ -78,6 +94,8 @@ TEST(TestTransportManagerDefault, Init_LastStateNotUsed) {
   EXPECT_CALL(transport_manager_settings,
               transport_manager_tcp_adapter_network_interface())
       .WillRepeatedly(ReturnRef(network_interface));
+  EXPECT_CALL(transport_manager_settings, bluetooth_uuid())
+      .WillRepeatedly(Return(kBTUUID.data()));
 
   transport_manager.Init(mock_last_state);
   transport_manager.Stop();
@@ -114,6 +132,8 @@ TEST(TestTransportManagerDefault, Init_LastStateUsed) {
   EXPECT_CALL(transport_manager_settings,
               transport_manager_tcp_adapter_network_interface())
       .WillRepeatedly(ReturnRef(network_interface));
+  EXPECT_CALL(transport_manager_settings, bluetooth_uuid())
+      .WillRepeatedly(Return(kBTUUID.data()));
   transport_manager.Init(mock_last_state);
   transport_manager.Stop();
 }
@@ -149,6 +169,8 @@ TEST(TestTransportManagerDefault, Init_LastStateUsed_InvalidPort) {
   EXPECT_CALL(transport_manager_settings,
               transport_manager_tcp_adapter_network_interface())
       .WillRepeatedly(ReturnRef(network_interface));
+  EXPECT_CALL(transport_manager_settings, bluetooth_uuid())
+      .WillRepeatedly(Return(kBTUUID.data()));
   transport_manager.Init(mock_last_state);
   transport_manager.Stop();
 }

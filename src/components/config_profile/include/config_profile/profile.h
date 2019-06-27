@@ -423,6 +423,8 @@ class Profile : public protocol_handler::ProtocolHandlerSettings,
    */
   uint16_t cloud_app_max_retry_attempts() const OVERRIDE;
 
+  const uint8_t* bluetooth_uuid() const OVERRIDE;
+
   // TransportManageMMESettings interface
 
   const std::string& event_mq_name() const OVERRIDE;
@@ -609,6 +611,10 @@ class Profile : public protocol_handler::ProtocolHandlerSettings,
   std::vector<int> ReadIntContainer(const char* const pSection,
                                     const char* const pKey,
                                     bool* out_result) const;
+
+  std::vector<uint8_t> ReadUint8Container(const char* const pSection,
+                                          const char* const pKey,
+                                          bool* out_result) const;
 
   /**
    * @brief Returns delimiter for SDL-generated TTS chunks
@@ -975,6 +981,7 @@ class Profile : public protocol_handler::ProtocolHandlerSettings,
   std::string transport_manager_tcp_adapter_network_interface_;
   uint32_t cloud_app_retry_timeout_;
   uint16_t cloud_app_max_retry_attempts_;
+  std::vector<uint8_t> bluetooth_uuid_;
   std::string tts_delimiter_;
   uint32_t audio_data_stopped_timeout_;
   uint32_t video_data_stopped_timeout_;

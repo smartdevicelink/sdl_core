@@ -139,6 +139,7 @@ TEST_F(RCGetCapabilitiesResponseTest, RUN_SUCCESSS) {
   radio_control_capability["hdChannelAvailable"] = true;
   radio_control_capability["rdsDataAvailable"] = true;
   radio_control_capability["availableHDsAvailable"] = true;
+  radio_control_capability["availableHdChannelsAvailable"] = true;
   radio_control_capability["stateAvailable"] = true;
   radio_control_capability["signalStrengthAvailable"] = true;
   radio_control_capability["signalChangeThresholdAvailable"] = true;
