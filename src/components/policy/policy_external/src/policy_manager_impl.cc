@@ -717,18 +717,6 @@ void PolicyManagerImpl::OnAppsSearchCompleted(const bool trigger_ptu) {
 }
 
 const std::vector<std::string> PolicyManagerImpl::GetAppRequestTypes(
-    const std::string policy_app_id) const {
-  std::vector<std::string> request_types;
-  if (kDeviceDisallowed ==
-      cache_->GetDeviceConsent(GetCurrentDeviceId(policy_app_id))) {
-    cache_->GetAppRequestTypes(kPreDataConsentId, request_types);
-  } else {
-    cache_->GetAppRequestTypes(policy_app_id, request_types);
-  }
-  return request_types;
-}
-
-const std::vector<std::string> PolicyManagerImpl::GetAppRequestTypes(
     const transport_manager::DeviceHandle& device_handle,
     const std::string policy_app_id) const {
   std::vector<std::string> request_types;
@@ -831,171 +819,6 @@ bool PolicyManagerImpl::UnknownRPCPassthroughAllowed(
     const std::string& policy_app_id) const {
   LOG4CXX_AUTO_TRACE(logger_);
   return cache_->UnknownRPCPassthroughAllowed(policy_app_id);
-}
-
-void PolicyManagerImpl::CheckPermissions(const PTString& app_id,
-                                         const PTString& hmi_level,
-                                         const PTString& rpc,
-                                         const RPCParams& rpc_params,
-                                         CheckPermissionResult& result) {
-  LOG4CXX_INFO(logger_,
-               "CheckPermissions for " << app_id << " and rpc " << rpc
-                                       << " for " << hmi_level << " level.");
-
-  const std::string device_id = GetCurrentDeviceId(app_id);
-
-  Permissions rpc_permissions;
-
-  // Check, if there are calculated permission present in cache
-  if (!cache_->IsPermissionsCalculated(device_id, app_id, rpc_permissions)) {
-    LOG4CXX_DEBUG(logger_,
-                  "IsPermissionsCalculated for device: "
-                      << device_id << " and app: " << app_id
-                      << " returns false");
-    // Get actual application group permission according to user consents
-    std::vector<FunctionalGroupPermission> app_group_permissions;
-    GetPermissionsForApp(device_id, app_id, app_group_permissions);
-
-    // Fill struct with known groups RPCs
-    policy_table::FunctionalGroupings functional_groupings;
-    cache_->GetFunctionalGroupings(functional_groupings);
-
-    policy_table::Strings app_groups = GetGroupsNames(app_group_permissions);
-
-    // Undefined groups (without user consent) disallowed by default, since
-    // OnPermissionsChange notification has no "undefined" section
-    // For RPC permission checking undefinded group will be treated as separate
-    // type
-    ProcessFunctionalGroup processor(functional_groupings,
-                                     app_group_permissions,
-                                     rpc_permissions,
-                                     GroupConsent::kGroupUndefined);
-    std::for_each(app_groups.begin(), app_groups.end(), processor);
-
-    cache_->AddCalculatedPermissions(device_id, app_id, rpc_permissions);
-  } else {
-    LOG4CXX_DEBUG(logger_,
-                  "IsPermissionsCalculated for device: "
-                      << device_id << " and app: " << app_id
-                      << " returns true");
-  }
-
-  if (cache_->IsApplicationRevoked(app_id)) {
-    // SDL must be able to notify mobile side with its status after app has
-    // been revoked by backend
-    if ("OnHMIStatus" == rpc && "NONE" == hmi_level) {
-      result.hmi_level_permitted = kRpcAllowed;
-    } else {
-      result.hmi_level_permitted = kRpcDisallowed;
-    }
-    return;
-  }
-
-  const bool known_rpc = rpc_permissions.end() != rpc_permissions.find(rpc);
-  LOG4CXX_DEBUG(logger_, "Is known rpc " << (known_rpc ? "true" : "false"));
-  if (!known_rpc) {
-    // RPC not found in list == disallowed by backend
-    result.hmi_level_permitted = kRpcDisallowed;
-    return;
-  }
-
-  // Check HMI level
-  if (rpc_permissions[rpc].hmi_permissions[kAllowedKey].end() !=
-      rpc_permissions[rpc].hmi_permissions[kAllowedKey].find(hmi_level)) {
-    // RPC found in allowed == allowed by backend and user
-    result.hmi_level_permitted = kRpcAllowed;
-  } else if (rpc_permissions[rpc].hmi_permissions[kUndefinedKey].end() !=
-             rpc_permissions[rpc].hmi_permissions[kUndefinedKey].find(
-                 hmi_level)) {
-    // RPC found in undefined == allowed by backend, but not consented yet by
-    // user
-    result.hmi_level_permitted = kRpcDisallowed;
-  } else if (rpc_permissions[rpc].hmi_permissions[kUserDisallowedKey].end() !=
-             rpc_permissions[rpc].hmi_permissions[kUserDisallowedKey].find(
-                 hmi_level)) {
-    // RPC found in allowed == allowed by backend, but disallowed by user
-    LOG4CXX_DEBUG(
-        logger_,
-        "RPC found in allowed == allowed by backend, but disallowed by user");
-    result.hmi_level_permitted = kRpcUserDisallowed;
-  } else {
-    LOG4CXX_DEBUG(logger_,
-                  "HMI level " << hmi_level << " wasn't found "
-                               << " for rpc " << rpc << " and appID "
-                               << app_id);
-    return;
-  }
-
-  if (kRpcAllowed != result.hmi_level_permitted) {
-    LOG4CXX_DEBUG(logger_, "RPC is not allowed. Stop parameters processing.");
-    result.list_of_allowed_params =
-        rpc_permissions[rpc].parameter_permissions[kAllowedKey];
-
-    result.list_of_disallowed_params =
-        rpc_permissions[rpc].parameter_permissions[kUserDisallowedKey];
-
-    result.list_of_undefined_params =
-        rpc_permissions[rpc].parameter_permissions[kUndefinedKey];
-    return;
-  }
-
-  // Considered that items disallowed by user take priority over system (policy)
-  // permissions, so that flag is processed first
-  if (rpc_permissions[rpc]
-          .parameter_permissions.any_parameter_disallowed_by_user) {
-    LOG4CXX_DEBUG(logger_, "All parameters are disallowed by user.");
-    result.list_of_disallowed_params = rpc_params;
-    result.hmi_level_permitted = kRpcUserDisallowed;
-    return;
-  }
-
-  if (rpc_permissions[rpc]
-          .parameter_permissions.any_parameter_disallowed_by_policy) {
-    LOG4CXX_DEBUG(logger_, "All parameters are disallowed by policy.");
-    result.list_of_undefined_params = rpc_params;
-    result.hmi_level_permitted = kRpcDisallowed;
-    return;
-  }
-
-  if (rpc_permissions[rpc].parameter_permissions.any_parameter_allowed) {
-    LOG4CXX_DEBUG(logger_, "All parameters are allowed.");
-    result.list_of_allowed_params = rpc_params;
-    return;
-  }
-
-  result.list_of_allowed_params =
-      rpc_permissions[rpc].parameter_permissions[kAllowedKey];
-
-  result.list_of_disallowed_params =
-      rpc_permissions[rpc].parameter_permissions[kUserDisallowedKey];
-
-  result.list_of_undefined_params =
-      rpc_permissions[rpc].parameter_permissions[kUndefinedKey];
-
-  // In case of some parameters of RPC are missing in current policy table
-  // they will be considered as disallowed by policy itself, not by user.
-  // Undefined parameters contain parameters present in policy table, but which
-  // have not been allowed or disallowed explicitly by user, so missing params
-  // are being added to undefined.
-  RPCParams::const_iterator parameter = rpc_params.begin();
-  RPCParams::const_iterator end = rpc_params.end();
-  for (; end != parameter; ++parameter) {
-    if (!result.HasParameter(*parameter)) {
-      LOG4CXX_DEBUG(logger_,
-                    "Parameter " << *parameter
-                                 << " is unknown."
-                                    " Adding to undefined list.");
-      result.list_of_undefined_params.insert(*parameter);
-    }
-  }
-
-  if (result.DisallowedInclude(rpc_params)) {
-    LOG4CXX_DEBUG(logger_, "All parameters are disallowed.");
-    result.hmi_level_permitted = kRpcUserDisallowed;
-  } else if (!result.IsAnyAllowed(rpc_params)) {
-    LOG4CXX_DEBUG(logger_, "There are no parameters allowed.");
-    result.hmi_level_permitted = kRpcDisallowed;
-  }
 }
 
 void PolicyManagerImpl::CheckPermissions(const PTString& device_id,
@@ -1177,49 +1000,6 @@ policy_table::Strings PolicyManagerImpl::GetGroupsNames(
 }
 
 void PolicyManagerImpl::SendNotificationOnPermissionsUpdated(
-    const std::string& application_id) {
-  LOG4CXX_AUTO_TRACE(logger_);
-  const std::string device_id = GetCurrentDeviceId(application_id);
-  if (device_id.empty()) {
-    LOG4CXX_WARN(logger_,
-                 "Couldn't find device info for application id "
-                 "'" << application_id
-                     << "'");
-    return;
-  }
-
-  std::vector<FunctionalGroupPermission> app_group_permissions;
-  GetPermissionsForApp(device_id, application_id, app_group_permissions);
-
-  policy_table::FunctionalGroupings functional_groupings;
-  cache_->GetFunctionalGroupings(functional_groupings);
-
-  policy_table::Strings app_groups = GetGroupsNames(app_group_permissions);
-
-  Permissions notification_data;
-  PrepareNotificationData(functional_groupings,
-                          app_groups,
-                          app_group_permissions,
-                          notification_data);
-
-  LOG4CXX_INFO(logger_,
-               "Send notification for application_id: " << application_id);
-
-  const ApplicationOnDevice who = {device_id, application_id};
-  if (access_remote_->IsAppRemoteControl(who)) {
-    listener()->OnPermissionsUpdated(
-        device_id, application_id, notification_data);
-    return;
-  }
-
-  std::string default_hmi;
-  GetDefaultHmi(device_id, application_id, &default_hmi);
-
-  listener()->OnPermissionsUpdated(
-      device_id, application_id, notification_data, default_hmi);
-}
-
-void PolicyManagerImpl::SendNotificationOnPermissionsUpdated(
     const std::string& device_id, const std::string& application_id) {
   LOG4CXX_AUTO_TRACE(logger_);
   if (device_id.empty()) {
@@ -1288,51 +1068,6 @@ void PolicyManagerImpl::SetUserConsentForDevice(const std::string& device_id,
     update_status_manager_.OnDeviceConsented();
   }
   StartPTExchange();
-}
-
-bool PolicyManagerImpl::ReactOnUserDevConsentForApp(
-    const std::string& app_id, const bool is_device_allowed) {
-  std::vector<std::string> current_request_types = GetAppRequestTypes(app_id);
-  std::string current_priority, new_priority;
-  GetPriority(app_id, &current_priority);
-
-  bool result = cache_->ReactOnUserDevConsentForApp(app_id, is_device_allowed);
-
-  std::vector<std::string> new_request_types = GetAppRequestTypes(app_id);
-  GetPriority(app_id, &new_priority);
-  std::sort(current_request_types.begin(), current_request_types.end());
-  std::sort(new_request_types.begin(), new_request_types.end());
-
-  std::vector<std::string> diff;
-  std::set_symmetric_difference(current_request_types.begin(),
-                                current_request_types.end(),
-                                new_request_types.begin(),
-                                new_request_types.end(),
-                                std::back_inserter(diff));
-
-  AppPermissions permissions(app_id);
-
-  if (!diff.empty()) {
-    permissions.requestType = new_request_types;
-    permissions.requestTypeChanged = true;
-  }
-
-  if ((!current_priority.empty()) && (!new_priority.empty()) &&
-      (current_priority != new_priority)) {
-    permissions.priority = new_priority;
-  }
-
-  if (permissions.requestTypeChanged || (!permissions.priority.empty())) {
-    const auto devices_ids = listener()->GetDevicesIds(app_id);
-    if (devices_ids.size() == 0) {
-      LOG4CXX_WARN(logger_,
-                   "Could not find device info for app_id: " << app_id);
-      return false;
-    }
-    listener_->SendOnAppPermissionsChanged(
-        permissions, devices_ids.back(), app_id);
-  }
-  return result;
 }
 
 bool PolicyManagerImpl::ReactOnUserDevConsentForApp(
@@ -1549,17 +1284,6 @@ void PolicyManagerImpl::SetUserConsentForApp(
                            updated_app_group_permissons);
 }
 
-bool PolicyManagerImpl::GetDefaultHmi(const std::string& policy_app_id,
-                                      std::string* default_hmi) const {
-  LOG4CXX_AUTO_TRACE(logger_);
-  const std::string device_id = GetCurrentDeviceId(policy_app_id);
-  DeviceConsent device_consent = GetUserConsentForDevice(device_id);
-  const std::string app_id = policy::kDeviceAllowed != device_consent
-                                 ? kPreDataConsentId
-                                 : policy_app_id;
-  return cache_->GetDefaultHMI(app_id, *default_hmi);
-}
-
 bool PolicyManagerImpl::GetDefaultHmi(const std::string& device_id,
                                       const std::string& policy_app_id,
                                       std::string* default_hmi) const {
@@ -1755,19 +1479,6 @@ void PolicyManagerImpl::GetPermissionsForApp(
         all_disallowed, group_names, kGroupDisallowed, permissions);
   }
   return;
-}
-
-std::string& PolicyManagerImpl::GetCurrentDeviceId(
-    const std::string& policy_app_id) const {
-  LOG4CXX_INFO(logger_, "GetDeviceInfo");
-  const auto devices_ids = listener()->GetDevicesIds(policy_app_id);
-  if (devices_ids.size() == 0) {
-    LOG4CXX_WARN(logger_,
-                 "Could not find device info for app_id: " << policy_app_id);
-    return last_device_id_;
-  }
-  last_device_id_ = devices_ids.back();
-  return last_device_id_;
 }
 
 std::string& PolicyManagerImpl::GetCurrentDeviceId(
@@ -2185,27 +1896,6 @@ void PolicyManagerImpl::SetVINValue(const std::string& value) {
 }
 
 AppPermissions PolicyManagerImpl::GetAppPermissionsChanges(
-    const std::string& policy_app_id) {
-  PendingPermissions::iterator app_id_diff =
-      app_permissions_diff_.find(policy_app_id);
-
-  AppPermissions permissions(policy_app_id);
-
-  if (app_permissions_diff_.end() != app_id_diff) {
-    permissions = app_id_diff->second;
-  } else {
-    const auto devices_ids = listener()->GetDevicesIds(policy_app_id);
-    const auto device_id =
-        devices_ids.size() ? devices_ids.back() : last_device_id_;
-    permissions.appPermissionsConsentNeeded =
-        IsConsentNeeded(device_id, policy_app_id);
-    permissions.appRevoked = IsApplicationRevoked(policy_app_id);
-    GetPriority(permissions.application_id, &permissions.priority);
-  }
-  return permissions;
-}
-
-AppPermissions PolicyManagerImpl::GetAppPermissionsChanges(
     const std::string& device_id, const std::string& policy_app_id) {
   PendingPermissions::iterator app_id_diff =
       app_permissions_diff_.find(policy_app_id);
@@ -2242,12 +1932,6 @@ void PolicyManagerImpl::MarkUnpairedDevice(const std::string& device_id) {
     return;
   }
   SetUserConsentForDevice(device_id, false);
-}
-
-void PolicyManagerImpl::OnAppRegisteredOnMobile(
-    const std::string& application_id) {
-  StartPTExchange();
-  SendNotificationOnPermissionsUpdated(application_id);
 }
 
 void PolicyManagerImpl::OnAppRegisteredOnMobile(
@@ -2340,27 +2024,6 @@ class CallStatusChange : public utils::Callable {
   UpdateStatusManager& upd_manager_;
   const DeviceConsent device_consent_;
 };
-
-StatusNotifier PolicyManagerImpl::AddApplication(
-    const std::string& application_id,
-    const rpc::policy_table_interface_base::AppHmiTypes& hmi_types) {
-  LOG4CXX_AUTO_TRACE(logger_);
-  const auto devices_ids = listener()->GetDevicesIds(application_id);
-  const auto device_id =
-      devices_ids.size() ? devices_ids.back() : last_device_id_;
-  DeviceConsent device_consent = GetUserConsentForDevice(device_id);
-  sync_primitives::AutoLock lock(apps_registration_lock_);
-  if (IsNewApplication(application_id)) {
-    LOG4CXX_DEBUG(logger_, "Adding new application");
-    AddNewApplication(device_id, application_id, device_consent);
-    return std::make_shared<CallStatusChange>(update_status_manager_,
-                                              device_consent);
-  }
-  LOG4CXX_DEBUG(logger_, "Promote existed application");
-  PromoteExistedApplication(device_id, application_id, device_consent);
-  update_status_manager_.OnExistedApplicationAdded(cache_->UpdateRequired());
-  return std::make_shared<utils::CallNothing>();
-}
 
 StatusNotifier PolicyManagerImpl::AddApplication(
     const std::string& device_id,
@@ -2539,14 +2202,6 @@ std::ostream& operator<<(std::ostream& output,
     output << static_cast<std::string>(*i) << " ";
   }
   return output;
-}
-
-void PolicyManagerImpl::SetDefaultHmiTypes(const std::string& application_id,
-                                           const std::vector<int>& hmi_types) {
-  LOG4CXX_INFO(logger_, "SetDefaultHmiTypes");
-  const std::string device_id = GetCurrentDeviceId(application_id);
-  ApplicationOnDevice who = {device_id, application_id};
-  access_remote_->SetDefaultHmiTypes(who, hmi_types);
 }
 
 void PolicyManagerImpl::SetDefaultHmiTypes(

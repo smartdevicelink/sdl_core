@@ -342,7 +342,7 @@ void PolicyManagerImplTest2::AddRTtoAppSectionPT(
   // section
   pt_request_types_ = policy_manager_->GetAppRequestTypes(handle, section_name);
   EXPECT_EQ(rt_number, pt_request_types_.size());
-  EXPECT_CALL(listener_, OnPendingPermissionChange(section_name)).Times(1);
+  EXPECT_CALL(listener_, OnPendingPermissionChange(_, section_name)).Times(1);
   Json::Value root = GetPTU(update_file_name);
 
   // Get App Request Types from PTU

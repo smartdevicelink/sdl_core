@@ -335,8 +335,6 @@ class MockApplicationManager : public application_manager::ApplicationManager {
   MOCK_METHOD2(ProcessReconnection,
                void(application_manager::ApplicationSharedPtr application,
                     const uint32_t connection_key));
-  MOCK_CONST_METHOD1(IsAppInReconnectMode,
-                     bool(const std::string& policy_app_id));
   MOCK_CONST_METHOD2(IsAppInReconnectMode,
                      bool(const connection_handler::DeviceHandle& device_id,
                           const std::string& policy_app_id));

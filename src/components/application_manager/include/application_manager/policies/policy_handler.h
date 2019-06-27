@@ -117,16 +117,6 @@ class PolicyHandler : public PolicyHandlerInterface,
       const std::string& device_id) const OVERRIDE;
 
   /**
-   * DEPRECATED
-   * @brief Sets HMI default type for specified application
-   * @param application_id ID application
-   * @param app_types list of HMI types
-   */
-  DEPRECATED void SetDefaultHmiTypes(
-      const std::string& application_id,
-      const smart_objects::SmartObject* app_types) OVERRIDE;
-
-  /**
    * @brief Sets HMI default type for specified application
    * @param device_handle device identifier
    * @param application_id ID application
@@ -192,8 +182,6 @@ class PolicyHandler : public PolicyHandlerInterface,
   bool GetModuleTypes(const std::string& policy_app_id,
                       std::vector<std::string>* modules) const OVERRIDE;
 
-  DEPRECATED bool GetDefaultHmi(const std::string& policy_app_id,
-                                std::string* default_hmi) const OVERRIDE;
   bool GetDefaultHmi(const std::string& device_id,
                      const std::string& policy_app_id,
                      std::string* default_hmi) const OVERRIDE;
@@ -532,18 +520,6 @@ class PolicyHandler : public PolicyHandlerInterface,
   virtual void GetAvailableApps(std::queue<std::string>& apps) OVERRIDE;
 
   /**
-   * DEPRECATED
-   * @brief Allows to add new or update existed application during
-   * registration process
-   * @param application_id The policy aplication id.
-   * @param hmi_types list of hmi types
-   * @return function that will notify update manager about new application
-   */
-  DEPRECATED StatusNotifier AddApplication(
-      const std::string& application_id,
-      const rpc::policy_table_interface_base::AppHmiTypes& hmi_types) OVERRIDE;
-
-  /**
    * @brief Allows to add new or update existed application during
    * registration process
    * @param device_id device identifier
@@ -592,17 +568,6 @@ class PolicyHandler : public PolicyHandlerInterface,
   void OnAppsSearchCompleted(const bool trigger_ptu) OVERRIDE;
 
   /**
-   * DEPRECATED
-   * @brief OnAppRegisteredOnMobile allows to handle event when application were
-   * succesfully registered on mobile device.
-   * It will send OnAppPermissionSend notification and will try to start PTU.
-   *
-   * @param application_id registered application.
-   */
-  DEPRECATED void OnAppRegisteredOnMobile(
-      const std::string& application_id) OVERRIDE;
-
-  /**
    * @brief OnAppRegisteredOnMobile allows to handle event when application were
    * succesfully registered on mobile device.
    * It will send OnAppPermissionSend notification and will try to start PTU.
@@ -612,17 +577,6 @@ class PolicyHandler : public PolicyHandlerInterface,
    */
   void OnAppRegisteredOnMobile(const std::string& device_id,
                                const std::string& application_id) OVERRIDE;
-
-  /**
-   * DEPRECATED
-   * @brief Checks if certain request type is allowed for application
-   * @param policy_app_id Unique applicaion id
-   * @param type Request type
-   * @return true, if allowed, otherwise - false
-   */
-  DEPRECATED bool IsRequestTypeAllowed(
-      const std::string& policy_app_id,
-      mobile_apis::RequestType::eType type) const OVERRIDE;
 
   /**
    * @brief Checks if certain request type is allowed for application
@@ -660,15 +614,6 @@ class PolicyHandler : public PolicyHandlerInterface,
    * @return request subtypes state
    */
   RequestSubType::State GetAppRequestSubTypeState(
-      const std::string& policy_app_id) const OVERRIDE;
-
-  /**
-   * DEPRECATED
-   * @brief Gets application request types
-   * @param policy_app_id Unique application id
-   * @return request types
-   */
-  DEPRECATED const std::vector<std::string> GetAppRequestTypes(
       const std::string& policy_app_id) const OVERRIDE;
 
   /**
@@ -746,28 +691,6 @@ class PolicyHandler : public PolicyHandlerInterface,
   void StartNextRetry();
 
  private:
-  /**
-   * DEPRECATED
-   * @brief Update currently used device id in policies manager for given
-   * application
-   * @param policy_app_id Application id
-   */
-  std::string OnCurrentDeviceIdUpdateRequired(
-      const std::string& policy_app_id) OVERRIDE;
-
-  void OnPendingPermissionChange(const std::string& policy_app_id) OVERRIDE;
-
-  void SendOnAppPermissionsChanged(
-      const AppPermissions& permissions,
-      const std::string& policy_app_id) const OVERRIDE;
-
-  void OnPermissionsUpdated(const std::string& policy_app_id,
-                            const Permissions& permissions,
-                            const HMILevel& default_hmi) OVERRIDE;
-
-  void OnPermissionsUpdated(const std::string& policy_app_id,
-                            const Permissions& permissions) OVERRIDE;
-
   /**
    * Checks system action of application for permission of keep context
    * @param system_action system action (see mobile api)

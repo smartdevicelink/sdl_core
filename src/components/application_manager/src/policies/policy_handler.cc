@@ -480,22 +480,6 @@ void PolicyHandler::OnDeviceConsentChanged(const std::string& device_id,
 }
 
 void PolicyHandler::SendOnAppPermissionsChanged(
-    const AppPermissions& permissions, const std::string& policy_app_id) const {
-  LOG4CXX_AUTO_TRACE(logger_);
-  LOG4CXX_DEBUG(
-      logger_,
-      "PolicyHandler::SendOnAppPermissionsChanged for " << policy_app_id);
-  ApplicationSharedPtr app =
-      application_manager_.application_by_policy_id(policy_app_id);
-  if (app.use_count() == 0) {
-    LOG4CXX_WARN(logger_, "No app found for policy app id = " << policy_app_id);
-    return;
-  }
-  MessageHelper::SendOnAppPermissionsChangedNotification(
-      app->app_id(), permissions, application_manager_);
-}
-
-void PolicyHandler::SendOnAppPermissionsChanged(
     const AppPermissions& permissions,
     const std::string& device_id,
     const std::string& policy_app_id) const {
@@ -1355,62 +1339,6 @@ void PolicyHandler::PTExchangeAtUserRequest(uint32_t correlation_id) {
       update_status, correlation_id, application_manager_);
 }
 
-void PolicyHandler::OnPermissionsUpdated(const std::string& policy_app_id,
-                                         const Permissions& permissions,
-                                         const HMILevel& default_hmi) {
-  LOG4CXX_AUTO_TRACE(logger_);
-  OnPermissionsUpdated(policy_app_id, permissions);
-
-  ApplicationSharedPtr app =
-      application_manager_.application_by_policy_id(policy_app_id);
-  if (app.use_count() == 0) {
-    LOG4CXX_WARN(
-        logger_,
-        "Connection_key not found for application_id: " << policy_app_id);
-    return;
-  }
-
-  // The application currently not running (i.e. in NONE) should change HMI
-  // level to default
-  mobile_apis::HMILevel::eType current_hmi_level = app->hmi_level();
-  mobile_apis::HMILevel::eType hmi_level =
-      MessageHelper::StringToHMILevel(default_hmi);
-
-  if (mobile_apis::HMILevel::INVALID_ENUM == hmi_level) {
-    LOG4CXX_WARN(
-        logger_,
-        "Couldn't convert default hmi level " << default_hmi << " to enum.");
-    return;
-  }
-  if (current_hmi_level == hmi_level) {
-    LOG4CXX_DEBUG(logger_, "Application already in default hmi state.");
-    return;
-  }
-  switch (current_hmi_level) {
-    case mobile_apis::HMILevel::HMI_NONE: {
-      LOG4CXX_INFO(logger_,
-                   "Changing hmi level of application "
-                       << policy_app_id << " to default hmi level "
-                       << default_hmi);
-
-      if (hmi_level == mobile_apis::HMILevel::HMI_FULL) {
-        application_manager_.state_controller().SetRegularState(
-            app, hmi_level, true);
-      } else {
-        application_manager_.state_controller().SetRegularState(
-            app, hmi_level, false);
-      }
-      break;
-    }
-    default:
-      LOG4CXX_WARN(logger_,
-                   "Application " << policy_app_id
-                                  << " is running."
-                                     "HMI level won't be changed.");
-      break;
-  }
-}
-
 void PolicyHandler::OnPermissionsUpdated(const std::string& device_id,
                                          const std::string& policy_app_id,
                                          const Permissions& permissions,
@@ -1465,27 +1393,6 @@ void PolicyHandler::OnPermissionsUpdated(const std::string& device_id,
                                      "HMI level won't be changed.");
       break;
   }
-}
-
-void PolicyHandler::OnPermissionsUpdated(const std::string& policy_app_id,
-                                         const Permissions& permissions) {
-  LOG4CXX_AUTO_TRACE(logger_);
-  ApplicationSharedPtr app =
-      application_manager_.application_by_policy_id(policy_app_id);
-  if (app.use_count() == 0) {
-    LOG4CXX_WARN(
-        logger_,
-        "Connection_key not found for application_id: " << policy_app_id);
-    return;
-  }
-
-  MessageHelper::SendOnPermissionsChangeNotification(
-      app->app_id(), permissions, application_manager_);
-
-  LOG4CXX_DEBUG(logger_,
-                "Notification sent for application_id: "
-                    << policy_app_id << " and connection_key "
-                    << app->app_id());
 }
 
 void PolicyHandler::OnPermissionsUpdated(const std::string& device_id,
@@ -2179,16 +2086,6 @@ void PolicyHandler::OnAppsSearchStarted() {
 void PolicyHandler::OnAppsSearchCompleted(const bool trigger_ptu) {
   POLICY_LIB_CHECK();
   policy_manager_->OnAppsSearchCompleted(trigger_ptu);
-}
-
-void PolicyHandler::OnAppRegisteredOnMobile(const std::string& application_id) {
-  POLICY_LIB_CHECK_VOID();
-  const auto app =
-      application_manager_.application_by_policy_id(application_id);
-  if (app.use_count()) {
-    policy_manager_->OnAppRegisteredOnMobile(app->mac_address(),
-                                             application_id);
-  }
 }
 
 void PolicyHandler::OnAppRegisteredOnMobile(const std::string& device_id,

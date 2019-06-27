@@ -71,15 +71,10 @@ class PolicyHandlerInterface {
   virtual bool ReceiveMessageFromSDK(const std::string& file,
                                      const BinaryMessage& pt_string) = 0;
   virtual bool UnloadPolicyLibrary() = 0;
-  DEPRECATED virtual void OnPermissionsUpdated(const std::string& policy_app_id,
-                                               const Permissions& permissions,
-                                               const HMILevel& default_hmi) = 0;
   virtual void OnPermissionsUpdated(const std::string& device_id,
                                     const std::string& policy_app_id,
                                     const Permissions& permissions,
                                     const HMILevel& default_hmi) = 0;
-  DEPRECATED virtual void OnPermissionsUpdated(
-      const std::string& policy_app_id, const Permissions& permissions) = 0;
   virtual void OnPermissionsUpdated(const std::string& device_id,
                                     const std::string& policy_app_id,
                                     const Permissions& permissions) = 0;
@@ -104,8 +99,6 @@ class PolicyHandlerInterface {
       const std::string& priority) const = 0;
   virtual DeviceConsent GetUserConsentForDevice(
       const std::string& device_id) const = 0;
-  DEPRECATED virtual bool GetDefaultHmi(const std::string& policy_app_id,
-                                        std::string* default_hmi) const = 0;
   virtual bool GetDefaultHmi(const std::string& device_id,
                              const std::string& policy_app_id,
                              std::string* default_hmi) const = 0;
@@ -143,10 +136,6 @@ class PolicyHandlerInterface {
 
   virtual std::shared_ptr<usage_statistics::StatisticsManager>
   GetStatisticManager() const = 0;
-
-  DEPRECATED virtual void SendOnAppPermissionsChanged(
-      const AppPermissions& permissions,
-      const std::string& policy_app_id) const = 0;
 
   virtual void SendOnAppPermissionsChanged(
       const AppPermissions& permissions,
@@ -189,9 +178,6 @@ class PolicyHandlerInterface {
    * @brief Increment counter for ignition cycles
    */
   virtual void OnIgnitionCycleOver() = 0;
-
-  DEPRECATED virtual void OnPendingPermissionChange(
-      const std::string& policy_app_id) = 0;
 
   virtual void OnPendingPermissionChange(const std::string& device_id,
                                          const std::string& policy_app_id) = 0;
@@ -269,15 +255,6 @@ class PolicyHandlerInterface {
    * @param status Current policy update state
    */
   virtual void OnUpdateStatusChanged(const std::string& status) = 0;
-
-  /**
-   * DEPRECATED
-   * @brief Update currently used device id in policies manager for given
-   * application
-   * @param policy_app_id Application id
-   */
-  DEPRECATED virtual std::string OnCurrentDeviceIdUpdateRequired(
-      const std::string& policy_app_id) = 0;
 
   /**
    * @brief Update currently used device id in policies manager for given
@@ -369,17 +346,6 @@ class PolicyHandlerInterface {
   virtual void GetAvailableApps(std::queue<std::string>& apps) = 0;
 
   /**
-   * DEPRECATED
-   * @brief Allows to add new or update existed application during
-   * registration process
-   * @param application_id The policy aplication id.
-   * @return function that will notify update manager about new application
-   */
-  DEPRECATED virtual StatusNotifier AddApplication(
-      const std::string& application_id,
-      const rpc::policy_table_interface_base::AppHmiTypes& hmi_types) = 0;
-
-  /**
    * @brief Allows to add new or update existed application during
    * registration process
    * @param device_id device identifier
@@ -422,17 +388,6 @@ class PolicyHandlerInterface {
   virtual void OnAppsSearchCompleted(const bool trigger_ptu) = 0;
 
   /**
-   * DEPRECATED
-   * @brief OnAppRegisteredOnMobile allows to handle event when application were
-   * succesfully registered on mobile device.
-   * It will send OnAppPermissionSend notification and will try to start PTU.
-   *
-   * @param application_id registered application.
-   */
-  DEPRECATED virtual void OnAppRegisteredOnMobile(
-      const std::string& application_id) = 0;
-
-  /**
    * @brief OnAppRegisteredOnMobile allows to handle event when application were
    * succesfully registered on mobile device.
    * It will send OnAppPermissionSend notification and will try to start PTU.
@@ -442,17 +397,6 @@ class PolicyHandlerInterface {
    */
   virtual void OnAppRegisteredOnMobile(const std::string& device_id,
                                        const std::string& application_id) = 0;
-
-  /**
-   * DEPRECATED
-   * @brief Checks if certain request type is allowed for application
-   * @param policy_app_id Unique applicaion id
-   * @param type Request type
-   * @return true, if allowed, otherwise - false
-   */
-  DEPRECATED virtual bool IsRequestTypeAllowed(
-      const std::string& policy_app_id,
-      mobile_apis::RequestType::eType type) const = 0;
 
   /**
    * @brief Checks if certain request type is allowed for application
@@ -490,15 +434,6 @@ class PolicyHandlerInterface {
    * @return request subtypes state
    */
   virtual RequestSubType::State GetAppRequestSubTypeState(
-      const std::string& policy_app_id) const = 0;
-
-  /**
-   * DEPRECATED
-   * @brief Gets application request types
-   * @param policy_app_id Unique application id
-   * @return request types
-   */
-  DEPRECATED virtual const std::vector<std::string> GetAppRequestTypes(
       const std::string& policy_app_id) const = 0;
 
   /**
@@ -641,16 +576,6 @@ class PolicyHandlerInterface {
    */
   virtual void OnDeviceSwitching(const std::string& device_id_from,
                                  const std::string& device_id_to) = 0;
-
-  /**
-   * DEPERECATED
-   * @brief Sets HMI default type for specified application
-   * @param application_id ID application
-   * @param app_types list of HMI types
-   */
-  DEPRECATED virtual void SetDefaultHmiTypes(
-      const std::string& application_id,
-      const smart_objects::SmartObject* app_types) = 0;
 
   /**
    * @brief Sets HMI default type for specified application

@@ -532,7 +532,7 @@ TEST_F(
   EXPECT_FALSE(pt->policy_table.device_data->end() != updated_device_data);
 
   EXPECT_CALL(listener_, OnPermissionsUpdated(device_id_1_, app_id_1_, _));
-  EXPECT_CALL(listener_, OnCurrentDeviceIdUpdateRequired(app_id_1_))
+  EXPECT_CALL(listener_, OnCurrentDeviceIdUpdateRequired(_, app_id_1_))
       .WillRepeatedly(Return(device_id_1_));
 
   policy_manager_->AddApplication(
@@ -600,7 +600,7 @@ TEST_F(
   EXPECT_FALSE(pt->policy_table.device_data->end() != updated_device_data);
 
   EXPECT_CALL(listener_, OnPermissionsUpdated(device_id_1_, app_id_1_, _));
-  EXPECT_CALL(listener_, OnCurrentDeviceIdUpdateRequired(app_id_1_))
+  EXPECT_CALL(listener_, OnCurrentDeviceIdUpdateRequired(_, app_id_1_))
       .WillRepeatedly(Return(device_id_1_));
 
   policy_manager_->AddApplication(

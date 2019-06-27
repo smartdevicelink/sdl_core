@@ -121,20 +121,6 @@ bool device_id_comparator(const std::string& device_id,
 }
 
 /**
- * DEPRECATED
- * @brief policy_app_id_comparator is predicate to compare policy application
- * ids
- * @param policy_app_id Policy id of application
- * @param app Application pointer
- * @return True if policy id of application matches to policy id passed
- */
-bool policy_app_id_comparator(const std::string& policy_app_id,
-                              ApplicationSharedPtr app) {
-  DCHECK_OR_RETURN(app, false);
-  return app->policy_app_id() == policy_app_id;
-}
-
-/**
  * @brief PolicyAppIdComparator is struct predicate to compare policy
  * application ids & device
  * @param device_handle of application
@@ -3538,17 +3524,6 @@ bool ApplicationManagerImpl::IsApplicationForbidden(
     uint32_t connection_key, const std::string& mobile_app_id) const {
   const std::string name = GetHashedAppID(connection_key, mobile_app_id);
   return forbidden_applications.find(name) != forbidden_applications.end();
-}
-
-bool ApplicationManagerImpl::IsAppInReconnectMode(
-    const std::string& policy_app_id) const {
-  LOG4CXX_AUTO_TRACE(logger_);
-  sync_primitives::AutoLock lock(reregister_wait_list_lock_);
-  return reregister_wait_list_.end() !=
-         std::find_if(reregister_wait_list_.begin(),
-                      reregister_wait_list_.end(),
-                      std::bind1st(std::ptr_fun(&policy_app_id_comparator),
-                                   policy_app_id));
 }
 
 bool ApplicationManagerImpl::IsAppInReconnectMode(

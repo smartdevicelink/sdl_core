@@ -119,24 +119,6 @@ class PolicyManagerImpl : public PolicyManager {
   void RequestPTUpdate() OVERRIDE;
 
   /**
-   * DEPRECATED
-   * @brief Check if specified RPC for specified application
-   * has permission to be executed in specified HMI Level
-   * and also its permitted params.
-   * @param app_id Id of application provided during registration
-   * @param hmi_level Current HMI Level of application
-   * @param rpc Name of RPC
-   * @param rpc_params List of RPC params
-   * @param result containing flag if HMI Level is allowed
-   * and list of allowed params.
-   */
-  DEPRECATED void CheckPermissions(const PTString& app_id,
-                                   const PTString& hmi_level,
-                                   const PTString& rpc,
-                                   const RPCParams& rpc_params,
-                                   CheckPermissionResult& result) OVERRIDE;
-
-  /**
    * @brief Check if specified RPC for specified application
    * has permission to be executed in specified HMI Level
    * and also its permitted params.
@@ -285,17 +267,6 @@ class PolicyManagerImpl : public PolicyManager {
                                const bool is_allowed) OVERRIDE;
 
   /**
-   * DEPRECATED
-   * @brief Update Application Policies as reaction
-   * on User allowing/disallowing device this app is running on.
-   * @param app_id Unique application id
-   * @param is_device_allowed true if user allowing device otherwise false
-   * @return true if operation was successful
-   */
-  DEPRECATED bool ReactOnUserDevConsentForApp(
-      const std::string& app_id, const bool is_device_allowed) OVERRIDE;
-
-  /**
    * @brief Update Application Policies as reaction
    * on User allowing/disallowing device this app is running on.
    * @param device_handle device identifier
@@ -346,17 +317,6 @@ class PolicyManagerImpl : public PolicyManager {
    */
   void SetUserConsentForApp(const PermissionConsent& permissions,
                             const NotificationMode mode) OVERRIDE;
-
-  /**
-   * DEPRECATED
-   * @brief Get default HMI level for application
-   * @param policy_app_id Unique application id
-   * @param default_hmi Default HMI level for application or empty, if value
-   * was not set
-   * @return true, if succedeed, otherwise - false
-   */
-  DEPRECATED bool GetDefaultHmi(const std::string& policy_app_id,
-                                std::string* default_hmi) const OVERRIDE;
 
   /**
    * @brief Get default HMI level for application
@@ -456,16 +416,6 @@ class PolicyManagerImpl : public PolicyManager {
   void SetVINValue(const std::string& value) OVERRIDE;
 
   /**
-   * DEPRECATED
-   * @brief Gets specific application permissions changes since last policy
-   * table update
-   * @param policy_app_id Unique application id
-   * @return Permissions changes
-   */
-  DEPRECATED AppPermissions
-  GetAppPermissionsChanges(const std::string& policy_app_id) OVERRIDE;
-
-  /**
    * @brief Gets specific application permissions changes since last policy
    * table update
    * @param device_id device identifier
@@ -516,18 +466,6 @@ class PolicyManagerImpl : public PolicyManager {
   void MarkUnpairedDevice(const std::string& device_id) OVERRIDE;
 
   /**
-   * DEPRECATED
-   * @brief Adds, application to the db or update existed one
-   * run PTU if policy update is necessary for application.
-   * @param application_id Unique application id
-   * @param hmi_types application HMI types
-   * @return function that will notify update manager about new application
-   */
-  DEPRECATED StatusNotifier AddApplication(
-      const std::string& application_id,
-      const rpc::policy_table_interface_base::AppHmiTypes& hmi_types) OVERRIDE;
-
-  /**
    * @brief Adds, application to the db or update existed one
    * run PTU if policy update is necessary for application.
    * @param device_id device identifier
@@ -539,16 +477,6 @@ class PolicyManagerImpl : public PolicyManager {
       const std::string& device_id,
       const std::string& application_id,
       const rpc::policy_table_interface_base::AppHmiTypes& hmi_types) OVERRIDE;
-
-  /**
-   * DEPRECATED
-   * @brief Assigns new HMI types for specified application
-   * @param application_id Unique application id
-   * @param hmi_types new HMI types list
-   */
-  DEPRECATED void SetDefaultHmiTypes(
-      const std::string& application_id,
-      const std::vector<int>& hmi_types) OVERRIDE;
 
   /**
    * @brief Assigns new HMI types for specified application
@@ -776,17 +704,6 @@ class PolicyManagerImpl : public PolicyManager {
       const std::string& policy_app_id) const OVERRIDE;
 
   /**
-   * DEPRECATED
-   * @brief OnAppRegisteredOnMobile allows to handle event when application were
-   * succesfully registered on mobile device.
-   * It will send OnAppPermissionSend notification and will try to start PTU.
-   *
-   * @param application_id registered application.
-   */
-  DEPRECATED void OnAppRegisteredOnMobile(
-      const std::string& application_id) OVERRIDE;
-
-  /**
    * @brief OnAppRegisteredOnMobile allows to handle event when application were
    * succesfully registered on mobile device.
    * It will send OnAppPermissionSend notification and will try to start PTU.
@@ -940,31 +857,6 @@ class PolicyManagerImpl : public PolicyManager {
       const BinaryMessage& pt_content);
 
  private:
-  /**
-   * DEPRECATED
-   * @brief Gets request types for application
-   * @param policy_app_id Unique application id
-   * @return request types of application
-   */
-  const std::vector<std::string> GetAppRequestTypes(
-      const std::string policy_app_id) const OVERRIDE;
-
-  /**
-   * DEPRECATED
-   * @brief Return device id, which hosts specific application
-   * @param policy_app_id Application id, which is required to update device id
-   */
-  std::string& GetCurrentDeviceId(
-      const std::string& policy_app_id) const OVERRIDE;
-
-  /**
-   * DEPRECATED
-   * @brief Send OnPermissionsUpdated for choosen application
-   * @param application_id Unique application id
-   */
-  void SendNotificationOnPermissionsUpdated(
-      const std::string& application_id) OVERRIDE;
-
   /**
    * @brief Checks if PT update should be started and schedules it if needed
    */

@@ -263,17 +263,6 @@ class PolicyManagerImpl : public PolicyManager {
                                const bool is_allowed) OVERRIDE;
 
   /**
-   * DEPRECATED
-   * @brief Update Application Policies as reaction
-   * on User allowing/disallowing device this app is running on.
-   * @param app_id Unique application id
-   * @param is_device_allowed true if user allowing device otherwise false
-   * @return true if operation was successful
-   */
-  DEPRECATED bool ReactOnUserDevConsentForApp(
-      const std::string app_id, const bool is_device_allowed) OVERRIDE;
-
-  /**
    * @brief Update Application Policies as reaction
    * on User allowing/disallowing device this app is running on.
    * @param device_handle device identifier
@@ -322,17 +311,6 @@ class PolicyManagerImpl : public PolicyManager {
    * from this structure.
    */
   void SetUserConsentForApp(const PermissionConsent& permissions) OVERRIDE;
-
-  /**
-   * DEPRECATED
-   * @brief Get default HMI level for application
-   * @param policy_app_id Unique application id
-   * @param default_hmi Default HMI level for application or empty, if value
-   * was not set
-   * @return true, if succedeed, otherwise - false
-   */
-  DEPRECATED bool GetDefaultHmi(const std::string& policy_app_id,
-                                std::string* default_hmi) const OVERRIDE;
 
   /**
    * @brief Get default HMI level for application
@@ -430,16 +408,6 @@ class PolicyManagerImpl : public PolicyManager {
   void SetVINValue(const std::string& value) OVERRIDE;
 
   /**
-   * DEPRECATED
-   * @brief Gets specific application permissions changes since last policy
-   * table update
-   * @param policy_app_id Unique application id
-   * @return Permissions changes
-   */
-  DEPRECATED AppPermissions
-  GetAppPermissionsChanges(const std::string& policy_app_id) OVERRIDE;
-
-  /**
    * @brief Gets specific application permissions changes since last policy
    * table update
    * @param device_id device identifier
@@ -490,18 +458,6 @@ class PolicyManagerImpl : public PolicyManager {
   void MarkUnpairedDevice(const std::string& device_id) OVERRIDE;
 
   /**
-   * DEPRECATED
-   * @brief Adds, application to the db or update existed one
-   * run PTU if policy update is necessary for application.
-   * @param application_id Unique application id
-   * @param hmi_types application HMI types
-   * @return function that will notify update manager about new application
-   */
-  DEPRECATED StatusNotifier AddApplication(
-      const std::string& application_id,
-      const rpc::policy_table_interface_base::AppHmiTypes& hmi_types) OVERRIDE;
-
-  /**
    * @brief Adds, application to the db or update existed one
    * run PTU if policy update is necessary for application.
    * @param device_id device identifier
@@ -513,16 +469,6 @@ class PolicyManagerImpl : public PolicyManager {
       const std::string& device_id,
       const std::string& application_id,
       const rpc::policy_table_interface_base::AppHmiTypes& hmi_types) OVERRIDE;
-
-  /**
-   * DEPRECATED
-   * @brief Assigns new HMI types for specified application
-   * @param application_id Unique application id
-   * @param hmi_types new HMI types list
-   */
-  DEPRECATED void SetDefaultHmiTypes(
-      const std::string& application_id,
-      const std::vector<int>& hmi_types) OVERRIDE;
 
   /**
    * @brief Assigns new HMI types for specified application
@@ -749,17 +695,6 @@ class PolicyManagerImpl : public PolicyManager {
       const std::string& policy_app_id) const OVERRIDE;
 
   /**
-   * DEPRECATED
-   * @brief OnAppRegisteredOnMobile allows to handle event when application were
-   * succesfully registered on mobile device.
-   * It will send OnAppPermissionSend notification and will try to start PTU.
-   *
-   * @param application_id registered application.
-   */
-  DEPRECATED void OnAppRegisteredOnMobile(
-      const std::string& application_id) OVERRIDE;
-
-  /**
    * @brief OnAppRegisteredOnMobile allows to handle event when application were
    * succesfully registered on mobile device.
    * It will send OnAppPermissionSend notification and will try to start PTU.
@@ -888,22 +823,6 @@ class PolicyManagerImpl : public PolicyManager {
 
  private:
   /**
-   * DEPRECATED
-   * @brief Return device id, which hosts specific application
-   * @param policy_app_id Application id, which is required to update device id
-   */
-  std::string& GetCurrentDeviceId(
-      const std::string& policy_app_id) const OVERRIDE;
-
-  /**
-   * DEPRECATED
-   * @brief Send OnPermissionsUpdated for choosen application
-   * @param application_id Unique application id
-   */
-  void SendNotificationOnPermissionsUpdated(
-      const std::string& application_id) OVERRIDE;
-
-  /**
    * @brief Checks if PT update should be started and schedules it if needed
    */
   void CheckTriggers();
@@ -985,14 +904,6 @@ class PolicyManagerImpl : public PolicyManager {
    * @return true if AppStorageFolder exists and has permissions read/write
    */
   bool CheckAppStorageFolder() const;
-
-  /**
-   * DEPRECATED
-   * @brief Checks whether need ask the permission of users
-   * @param app_id policy application id
-   * @return true if user consent is needed
-   */
-  virtual bool IsConsentNeeded(const std::string& app_id);
 
   /**
    * @brief Checks whether need ask the permission of users

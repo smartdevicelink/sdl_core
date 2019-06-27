@@ -526,12 +526,6 @@ void PolicyManagerImpl::OnAppsSearchCompleted(const bool trigger_ptu) {
 }
 
 void PolicyManagerImpl::OnAppRegisteredOnMobile(
-    const std::string& application_id) {
-  StartPTExchange();
-  SendNotificationOnPermissionsUpdated(application_id);
-}
-
-void PolicyManagerImpl::OnAppRegisteredOnMobile(
     const std::string& device_id, const std::string& application_id) {
   StartPTExchange();
   SendNotificationOnPermissionsUpdated(device_id, application_id);
@@ -687,56 +681,6 @@ bool PolicyManagerImpl::ResetUserConsent() {
 }
 
 void PolicyManagerImpl::SendNotificationOnPermissionsUpdated(
-    const std::string& application_id) {
-  LOG4CXX_AUTO_TRACE(logger_);
-  const std::string device_id = GetCurrentDeviceId(application_id);
-  if (device_id.empty()) {
-    LOG4CXX_WARN(logger_,
-                 "Couldn't find device info for application id "
-                 "'" << application_id
-                     << "'");
-    return;
-  }
-
-  std::vector<FunctionalGroupPermission> app_group_permissions;
-  GetPermissionsForApp(device_id, application_id, app_group_permissions);
-
-  policy_table::FunctionalGroupings functional_groupings;
-  cache_->GetFunctionalGroupings(functional_groupings);
-
-  policy_table::Strings app_groups;
-  std::vector<FunctionalGroupPermission>::const_iterator it =
-      app_group_permissions.begin();
-  std::vector<FunctionalGroupPermission>::const_iterator it_end =
-      app_group_permissions.end();
-  for (; it != it_end; ++it) {
-    app_groups.push_back((*it).group_name);
-  }
-
-  Permissions notification_data;
-  PrepareNotificationData(functional_groupings,
-                          app_groups,
-                          app_group_permissions,
-                          notification_data);
-
-  LOG4CXX_INFO(logger_,
-               "Send notification for application_id:" << application_id);
-
-  std::string default_hmi;
-  default_hmi = "NONE";
-
-  const ApplicationOnDevice who = {device_id, application_id};
-  if (access_remote_->IsAppRemoteControl(who)) {
-    listener()->OnPermissionsUpdated(
-        device_id, application_id, notification_data);
-    return;
-  }
-
-  listener()->OnPermissionsUpdated(
-      device_id, application_id, notification_data, default_hmi);
-}
-
-void PolicyManagerImpl::SendNotificationOnPermissionsUpdated(
     const std::string& device_id, const std::string& application_id) {
   LOG4CXX_AUTO_TRACE(logger_);
 
@@ -798,14 +742,6 @@ void PolicyManagerImpl::SetUserConsentForDevice(const std::string& device_id,
     LOG4CXX_INFO(logger_, "Device is already " << consent << ".");
     return;
   }
-}
-
-bool PolicyManagerImpl::ReactOnUserDevConsentForApp(const std::string app_id,
-                                                    bool is_device_allowed) {
-  UNUSED(app_id);
-  UNUSED(is_device_allowed);
-
-  return true;
 }
 
 bool PolicyManagerImpl::ReactOnUserDevConsentForApp(
@@ -923,17 +859,6 @@ void PolicyManagerImpl::CheckPendingPermissionsChanges(
 void PolicyManagerImpl::SetUserConsentForApp(
     const PermissionConsent& permissions) {
   LOG4CXX_AUTO_TRACE(logger_);
-}
-
-bool PolicyManagerImpl::GetDefaultHmi(const std::string& policy_app_id,
-                                      std::string* default_hmi) const {
-  LOG4CXX_AUTO_TRACE(logger_);
-  const std::string device_id = GetCurrentDeviceId(policy_app_id);
-  DeviceConsent device_consent = GetUserConsentForDevice(device_id);
-  const std::string app_id = policy::kDeviceAllowed != device_consent
-                                 ? kPreDataConsentId
-                                 : policy_app_id;
-  return cache_->GetDefaultHMI(app_id, *default_hmi);
 }
 
 bool PolicyManagerImpl::GetDefaultHmi(const std::string& device_id,
@@ -1075,14 +1000,6 @@ void PolicyManagerImpl::GetPermissionsForApp(
         common_allowed, group_names, kGroupAllowed, permissions);
   }
   return;
-}
-
-std::string& PolicyManagerImpl::GetCurrentDeviceId(
-    const std::string& policy_app_id) const {
-  LOG4CXX_AUTO_TRACE(logger_);
-  const auto devices_ids = listener()->GetDevicesIds(policy_app_id);
-  last_device_id_ = devices_ids.size() ? devices_ids.back() : last_device_id_;
-  return last_device_id_;
 }
 
 std::string& PolicyManagerImpl::GetCurrentDeviceId(
@@ -1280,11 +1197,6 @@ bool PolicyManagerImpl::IsApplicationRevoked(const std::string& app_id) const {
   return cache_->IsApplicationRevoked(app_id);
 }
 
-bool PolicyManagerImpl::IsConsentNeeded(const std::string& app_id) {
-  LOG4CXX_AUTO_TRACE(logger_);
-  return false;
-}
-
 bool PolicyManagerImpl::IsConsentNeeded(const std::string& device_id,
                                         const std::string& app_id) {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -1292,21 +1204,6 @@ bool PolicyManagerImpl::IsConsentNeeded(const std::string& device_id,
 }
 
 void PolicyManagerImpl::SetVINValue(const std::string& value) {}
-
-AppPermissions PolicyManagerImpl::GetAppPermissionsChanges(
-    const std::string& policy_app_id) {
-  typedef std::map<std::string, AppPermissions>::iterator PermissionsIt;
-  PermissionsIt app_id_diff = app_permissions_diff_.find(policy_app_id);
-  AppPermissions permissions(policy_app_id);
-  if (app_permissions_diff_.end() != app_id_diff) {
-    permissions = app_id_diff->second;
-  } else {
-    permissions.appPermissionsConsentNeeded = IsConsentNeeded(policy_app_id);
-    permissions.appRevoked = IsApplicationRevoked(policy_app_id);
-    GetPriority(permissions.application_id, &permissions.priority);
-  }
-  return permissions;
-}
 
 AppPermissions PolicyManagerImpl::GetAppPermissionsChanges(
     const std::string& device_id, const std::string& policy_app_id) {
@@ -1403,23 +1300,6 @@ class CallStatusChange : public utils::Callable {
   UpdateStatusManager& upd_manager_;
   const DeviceConsent device_consent_;
 };
-
-StatusNotifier PolicyManagerImpl::AddApplication(
-    const std::string& application_id,
-    const rpc::policy_table_interface_base::AppHmiTypes& hmi_types) {
-  LOG4CXX_AUTO_TRACE(logger_);
-  const std::string device_id = GetCurrentDeviceId(application_id);
-  DeviceConsent device_consent = GetUserConsentForDevice(device_id);
-  sync_primitives::AutoLock lock(apps_registration_lock_);
-  if (IsNewApplication(application_id)) {
-    AddNewApplication(application_id, device_consent);
-    return std::make_shared<CallStatusChange>(update_status_manager_,
-                                              device_consent);
-  }
-  PromoteExistedApplication(application_id, device_consent);
-  update_status_manager_.OnExistedApplicationAdded(cache_->UpdateRequired());
-  return std::make_shared<utils::CallNothing>();
-}
 
 StatusNotifier PolicyManagerImpl::AddApplication(
     const std::string& device_id,
@@ -1552,14 +1432,6 @@ void PolicyManagerImpl::RetrySequence() {
 
   RequestPTUpdate();
   timer_retry_sequence_.Start(timeout_msec, timer::kPeriodic);
-}
-
-void PolicyManagerImpl::SetDefaultHmiTypes(const std::string& application_id,
-                                           const std::vector<int>& hmi_types) {
-  LOG4CXX_INFO(logger_, "SetDefaultHmiTypes");
-  const std::string device_id = GetCurrentDeviceId(application_id);
-  ApplicationOnDevice who = {device_id, application_id};
-  access_remote_->SetDefaultHmiTypes(who, hmi_types);
 }
 
 void PolicyManagerImpl::SetDefaultHmiTypes(

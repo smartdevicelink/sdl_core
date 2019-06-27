@@ -1036,17 +1036,6 @@ class ApplicationManagerImpl
       const connection_handler::DeviceHandle handle) const OVERRIDE;
 
   /**
-   * DEPRECATED
-   * @brief IsAppInReconnectMode check if application belongs to session
-   * affected by transport switching at the moment by checking internal
-   * waiting list prepared on switching start
-   * @param policy_app_id Application id
-   * @return True if application is in the waiting list, otherwise - false
-   */
-  DEPRECATED bool IsAppInReconnectMode(
-      const std::string& policy_app_id) const FINAL;
-
-  /**
    * @brief IsAppInReconnectMode check if application belongs to session
    * affected by transport switching at the moment by checking internal
    * waiting list prepared on switching start

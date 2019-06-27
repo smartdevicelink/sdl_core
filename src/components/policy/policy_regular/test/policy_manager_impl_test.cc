@@ -282,7 +282,7 @@ class PolicyManagerImplTest2 : public ::testing::Test {
     // section
     PT_request_types = manager->GetAppRequestTypes(section_name);
     EXPECT_EQ(rt_number, PT_request_types.size());
-    EXPECT_CALL(listener, OnPendingPermissionChange(section_name)).Times(1);
+    EXPECT_CALL(listener, OnPendingPermissionChange(_, section_name)).Times(1);
     Json::Value root = GetPTU(update_file_name);
 
     // Get App Request Types from PTU
@@ -543,7 +543,7 @@ TEST_F(PolicyManagerImplTest2,
                       "Life",
                       2,
                       "Bluetooth");
-  EXPECT_CALL(listener, OnCurrentDeviceIdUpdateRequired(app_id1))
+  EXPECT_CALL(listener, OnCurrentDeviceIdUpdateRequired(_, app_id1))
       .WillRepeatedly(Return(dev_id1));
   manager->SetUserConsentForDevice(dev_id1, true);
   // Add app from consented device. App will be assigned with default policies
@@ -603,7 +603,7 @@ TEST_F(PolicyManagerImplTest2,
                                   "Life",
                                   2,
                                   "Bluetooth"));
-  EXPECT_CALL(listener, OnCurrentDeviceIdUpdateRequired("1234"))
+  EXPECT_CALL(listener, OnCurrentDeviceIdUpdateRequired(_, "1234"))
       .WillRepeatedly(Return(dev_id1));
   manager->SetUserConsentForDevice(dev_id1, true);
   // Add app from consented device. App will be assigned with default policies
@@ -824,7 +824,7 @@ TEST_F(
   manager->AddApplication(
       dev_id1, app_id1, HmiTypes(policy_table::AHT_DEFAULT));
   EXPECT_FALSE(manager->IsPredataPolicy(app_id1));
-  EXPECT_CALL(listener, OnPendingPermissionChange(app_id1)).Times(0);
+  EXPECT_CALL(listener, OnPendingPermissionChange(_, app_id1)).Times(0);
   manager->ReactOnUserDevConsentForApp(dev_handle1, app_id1, true);
   EXPECT_FALSE(manager->IsPredataPolicy(app_id1));
   EXPECT_TRUE((manager->GetCache())->IsDefaultPolicy(app_id1));
@@ -1121,7 +1121,7 @@ TEST_F(PolicyManagerImplTest2,
   ::policy::DeviceConsent consent = manager->GetUserConsentForDevice(dev_id2);
   // Check
   EXPECT_EQ(::policy::DeviceConsent::kDeviceAllowed, consent);
-  EXPECT_CALL(listener, OnCurrentDeviceIdUpdateRequired(app_id2))
+  EXPECT_CALL(listener, OnCurrentDeviceIdUpdateRequired(_, app_id2))
       .WillRepeatedly(Return(dev_id2));
   manager->AddApplication(
       dev_id2, app_id2, HmiTypes(policy_table::AHT_DEFAULT));
@@ -1156,7 +1156,7 @@ TEST_F(PolicyManagerImplTest2,
   ::policy::DeviceConsent consent = manager->GetUserConsentForDevice(dev_id2);
   // Check
   EXPECT_EQ(::policy::DeviceConsent::kDeviceAllowed, consent);
-  EXPECT_CALL(listener, OnCurrentDeviceIdUpdateRequired(app_id2))
+  EXPECT_CALL(listener, OnCurrentDeviceIdUpdateRequired(_, app_id2))
       .WillRepeatedly(Return(dev_id2));
   manager->AddApplication(
       dev_id2, app_id2, HmiTypes(policy_table::AHT_DEFAULT));
@@ -1241,7 +1241,7 @@ TEST_F(PolicyManagerImplTest2,
   manager->SetUserConsentForDevice(dev_id2, true);
   ::policy::DeviceConsent consent = manager->GetUserConsentForDevice(dev_id2);
   EXPECT_EQ(::policy::DeviceConsent::kDeviceAllowed, consent);
-  EXPECT_CALL(listener, OnCurrentDeviceIdUpdateRequired(app_id2))
+  EXPECT_CALL(listener, OnCurrentDeviceIdUpdateRequired(_, app_id2))
       .WillRepeatedly(Return(dev_id2));
   manager->AddApplication(
       dev_id2, app_id2, HmiTypes(policy_table::AHT_DEFAULT));
@@ -1282,7 +1282,7 @@ TEST_F(PolicyManagerImplTest2,
   manager->SetUserConsentForDevice(dev_id2, true);
   ::policy::DeviceConsent consent = manager->GetUserConsentForDevice(dev_id2);
   EXPECT_EQ(::policy::DeviceConsent::kDeviceAllowed, consent);
-  EXPECT_CALL(listener, OnCurrentDeviceIdUpdateRequired(app_id2))
+  EXPECT_CALL(listener, OnCurrentDeviceIdUpdateRequired(_, app_id2))
       .WillRepeatedly(Return(dev_id2));
   manager->AddApplication(
       dev_id2, app_id2, HmiTypes(policy_table::AHT_DEFAULT));
@@ -1354,7 +1354,7 @@ TEST_F(
       ->SetUserPermissionsForDevice(
           dev_id2, consented_groups, disallowed_groups);
   manager->SetUserConsentForDevice(dev_id2, true);
-  EXPECT_CALL(listener, OnCurrentDeviceIdUpdateRequired(app_id2))
+  EXPECT_CALL(listener, OnCurrentDeviceIdUpdateRequired(_, app_id2))
       .WillRepeatedly(Return(dev_id2));
   manager->AddApplication(
       dev_id2, app_id2, HmiTypes(policy_table::AHT_DEFAULT));

@@ -94,12 +94,6 @@ class StateControllerImpl;
 struct CommandParametersPermissions;
 using policy::RPCParams;
 typedef std::vector<ApplicationSharedPtr> AppSharedPtrs;
-struct DEPRECATED ApplicationsAppIdSorter {
-  bool operator()(const ApplicationSharedPtr lhs,
-                  const ApplicationSharedPtr rhs) const {
-    return lhs->app_id() < rhs->app_id();
-  }
-};
 struct ApplicationsSorter {
   bool operator()(const ApplicationSharedPtr lhs,
                   const ApplicationSharedPtr rhs) const {
@@ -640,17 +634,6 @@ class ApplicationManager {
    */
   virtual bool IsApplicationForbidden(
       uint32_t connection_key, const std::string& policy_app_id) const = 0;
-
-  /**
-   * DEPRECATED
-   * @brief IsAppInReconnectMode check if application belongs to session
-   * affected by transport switching at the moment
-   * @param policy_app_id Application id
-   * @return True if application is registered within session being switched,
-   * otherwise - false
-   */
-  DEPRECATED virtual bool IsAppInReconnectMode(
-      const std::string& policy_app_id) const = 0;
 
   /**
    * @brief IsAppInReconnectMode check if application belongs to session

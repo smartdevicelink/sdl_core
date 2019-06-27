@@ -50,7 +50,7 @@ TEST_F(
   // Arrange
   CreateLocalPT(preloaded_pt_filename_);
 
-  EXPECT_CALL(listener_, OnCurrentDeviceIdUpdateRequired(app_id_1_))
+  EXPECT_CALL(listener_, OnCurrentDeviceIdUpdateRequired(_, app_id_1_))
       .WillRepeatedly(Return(device_id_1_));
 
   policy_manager_->SetUserConsentForDevice(device_id_1_, true);
@@ -220,7 +220,7 @@ TEST_F(
   policy_manager_->AddApplication(
       device_id_1_, app_id_1_, HmiTypes(policy_table::AHT_DEFAULT));
   ASSERT_TRUE(policy_manager_->IsPredataPolicy(app_id_1_));
-  EXPECT_CALL(listener_, OnPendingPermissionChange(app_id_1_)).Times(0);
+  EXPECT_CALL(listener_, OnPendingPermissionChange(_, app_id_1_)).Times(0);
   policy_manager_->ReactOnUserDevConsentForApp(handle, app_id_1_, true);
   EXPECT_FALSE(policy_manager_->IsPredataPolicy(app_id_1_));
   EXPECT_TRUE((policy_manager_->GetCache())->IsDefaultPolicy(app_id_1_));
@@ -308,7 +308,7 @@ TEST_F(PolicyManagerImplTest2,
       policy_manager_->GetUserConsentForDevice(device_id_2_);
   // Check
   EXPECT_EQ(::policy::DeviceConsent::kDeviceDisallowed, consent);
-  EXPECT_CALL(listener_, OnCurrentDeviceIdUpdateRequired(app_id_2_))
+  EXPECT_CALL(listener_, OnCurrentDeviceIdUpdateRequired(_, app_id_2_))
       .WillRepeatedly(Return(device_id_2_));
   policy_manager_->AddApplication(
       device_id_2_, app_id_2_, HmiTypes(policy_table::AHT_DEFAULT));
@@ -344,7 +344,7 @@ TEST_F(PolicyManagerImplTest2,
       policy_manager_->GetUserConsentForDevice(device_id_2_);
   // Check
   EXPECT_EQ(::policy::DeviceConsent::kDeviceAllowed, consent);
-  EXPECT_CALL(listener_, OnCurrentDeviceIdUpdateRequired(app_id_2_))
+  EXPECT_CALL(listener_, OnCurrentDeviceIdUpdateRequired(_, app_id_2_))
       .WillRepeatedly(Return(device_id_2_));
   policy_manager_->AddApplication(
       device_id_2_, app_id_2_, HmiTypes(policy_table::AHT_DEFAULT));
@@ -381,7 +381,7 @@ TEST_F(PolicyManagerImplTest2,
       policy_manager_->GetUserConsentForDevice(device_id_2_);
   // Check
   EXPECT_EQ(::policy::DeviceConsent::kDeviceAllowed, consent);
-  EXPECT_CALL(listener_, OnCurrentDeviceIdUpdateRequired(app_id_2_))
+  EXPECT_CALL(listener_, OnCurrentDeviceIdUpdateRequired(_, app_id_2_))
       .WillRepeatedly(Return(device_id_2_));
   policy_manager_->AddApplication(
       device_id_2_, app_id_2_, HmiTypes(policy_table::AHT_DEFAULT));
@@ -576,7 +576,7 @@ TEST_F(PolicyManagerImplTest2,
   ::policy::DeviceConsent consent =
       policy_manager_->GetUserConsentForDevice(device_id_2_);
   EXPECT_EQ(::policy::DeviceConsent::kDeviceAllowed, consent);
-  EXPECT_CALL(listener_, OnCurrentDeviceIdUpdateRequired(app_id_2_))
+  EXPECT_CALL(listener_, OnCurrentDeviceIdUpdateRequired(_, app_id_2_))
       .WillRepeatedly(Return(device_id_2_));
   policy_manager_->AddApplication(
       device_id_2_, app_id_2_, HmiTypes(policy_table::AHT_DEFAULT));
@@ -618,7 +618,7 @@ TEST_F(PolicyManagerImplTest2,
   ::policy::DeviceConsent consent =
       policy_manager_->GetUserConsentForDevice(device_id_2_);
   EXPECT_EQ(::policy::DeviceConsent::kDeviceAllowed, consent);
-  EXPECT_CALL(listener_, OnCurrentDeviceIdUpdateRequired(app_id_2_))
+  EXPECT_CALL(listener_, OnCurrentDeviceIdUpdateRequired(_, app_id_2_))
       .WillRepeatedly(Return(device_id_2_));
   policy_manager_->AddApplication(
       device_id_2_, app_id_2_, HmiTypes(policy_table::AHT_DEFAULT));

@@ -174,7 +174,7 @@ TEST_F(OnSystemRequestNotificationTest, Run_InvalidApp_NoNotification) {
   EXPECT_CALL(app_mngr_, application(kConnectionKey))
       .WillOnce(Return(MockAppPtr()));
   EXPECT_CALL(*mock_app_, policy_app_id()).Times(0);
-  EXPECT_CALL(mock_policy_handler_, IsRequestTypeAllowed(_, _)).Times(0);
+  EXPECT_CALL(mock_policy_handler_, IsRequestTypeAllowed(_, _, _)).Times(0);
 
   EXPECT_CALL(mock_message_helper_, PrintSmartObject(_)).Times(0);
 
