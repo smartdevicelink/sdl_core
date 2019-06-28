@@ -194,7 +194,7 @@ RPCProtectionManagerImpl::GetEncryptedRPCsForApp(
   }
 
   const auto function_groups =
-      policy_encryption_flag_getter->GetFunctionGroupsForApp(policy_app_id);
+      policy_encryption_flag_getter->GetFunctionalGroupsForApp(policy_app_id);
 
   auto fill_encrypted_rpcs = [&encrypted_rpcs](
                                  const std::string& function_name) {

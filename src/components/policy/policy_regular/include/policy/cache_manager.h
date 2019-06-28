@@ -399,7 +399,7 @@ class CacheManager : public CacheManagerInterface {
    * @brief Get policy app names from PT
    * @return container of strings representing policy application names
    */
-  const policy_table::Strings GetPolicyAppNames() const OVERRIDE;
+  const policy_table::Strings GetPolicyAppIDs() const OVERRIDE;
 
   /**
    * Checks if the application is represented in policy table

@@ -325,7 +325,7 @@ const policy_table::Strings& CacheManager::GetGroups(const PTString& app_id) {
   return pt_->policy_table.app_policies_section.apps[app_id].groups;
 }
 
-const policy_table::Strings CacheManager::GetPolicyAppNames() const {
+const policy_table::Strings CacheManager::GetPolicyAppIDs() const {
   LOG4CXX_AUTO_TRACE(logger_);
   sync_primitives::AutoLock auto_lock(cache_lock_);
 
@@ -3123,8 +3123,15 @@ void CacheManager::GetApplicationParams(
   LOG4CXX_AUTO_TRACE(logger_);
   sync_primitives::AutoLock auto_lock(cache_lock_);
 
-  application_params =
-      pt_->policy_table.app_policies_section.apps[application_name];
+  const auto apps = pt_->policy_table.app_policies_section.apps;
+  const auto it = apps.find(application_name);
+  if (apps.end() == it) {
+    LOG4CXX_WARN(logger_,
+                 "Application " << application_name << " was not found");
+    return;
+  }
+
+  application_params = (*it).second;
 }
 
 }  // namespace policy

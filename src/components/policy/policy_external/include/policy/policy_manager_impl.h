@@ -71,7 +71,7 @@ class PolicyManagerImpl : public PolicyManager {
    * \param policy_app_id policy app id
    * \return groups that exist for app
    */
-  const std::vector<std::string> GetFunctionGroupsForApp(
+  const std::vector<std::string> GetFunctionalGroupsForApp(
       const std::string& policy_app_id) const OVERRIDE;
 
   const std::vector<std::string> GetApplicationPolicyIDs() const OVERRIDE;

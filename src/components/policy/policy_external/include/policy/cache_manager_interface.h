@@ -439,7 +439,7 @@ class CacheManagerInterface {
    * @brief Get policy app names from PT
    * @return container of strings representing policy application names
    */
-  virtual const policy_table::Strings GetPolicyAppNames() const = 0;
+  virtual const policy_table::Strings GetPolicyAppIDs() const = 0;
 
   /**
    * Checks if the application is represented in policy table

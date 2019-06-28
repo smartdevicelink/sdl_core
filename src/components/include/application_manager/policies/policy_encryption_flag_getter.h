@@ -69,7 +69,7 @@ class PolicyEncryptionFlagGetterInterface {
    * @param policy_app_id policy app id
    * @return groups that exist for app
    */
-  virtual const std::vector<std::string> GetFunctionGroupsForApp(
+  virtual const std::vector<std::string> GetFunctionalGroupsForApp(
       const std::string& policy_app_id) const = 0;
 
   /*

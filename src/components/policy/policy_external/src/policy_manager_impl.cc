@@ -2292,7 +2292,7 @@ const rpc::Optional<rpc::Boolean> PolicyManagerImpl::GetAppEncryptionRequired(
   return cache_->GetAppEncryptionRequiredFlag(policy_app_id);
 }
 
-const std::vector<std::string> PolicyManagerImpl::GetFunctionGroupsForApp(
+const std::vector<std::string> PolicyManagerImpl::GetFunctionalGroupsForApp(
     const std::string& policy_app_id) const {
   LOG4CXX_AUTO_TRACE(logger_);
   using namespace rpc::policy_table_interface_base;
@@ -2317,7 +2317,7 @@ const std::vector<std::string> PolicyManagerImpl::GetApplicationPolicyIDs()
   LOG4CXX_AUTO_TRACE(logger_);
   std::vector<std::string> policy_app_ids;
 
-  const auto apps = cache_->GetPolicyAppNames();
+  const auto apps = cache_->GetPolicyAppIDs();
 
   for (const auto& app : apps) {
     policy_app_ids.push_back(app);

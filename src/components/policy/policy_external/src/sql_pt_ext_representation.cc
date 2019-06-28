@@ -796,6 +796,9 @@ bool SQLPTExtRepresentation::SaveSpecificAppPolicy(
   app.second.allow_unknown_rpc_passthrough.is_initialized()
       ? app_query.Bind(15, *app.second.allow_unknown_rpc_passthrough)
       : app_query.Bind(15);
+  app.second.encryption_required.is_initialized()
+      ? app_query.Bind(16, *app.second.encryption_required)
+      : app_query.Bind(16);
 
   if (!app_query.Exec() || !app_query.Reset()) {
     LOG4CXX_WARN(logger_, "Incorrect insert into application.");
@@ -940,6 +943,9 @@ bool SQLPTExtRepresentation::GatherApplicationPoliciesSection(
     *params.cloud_transport_type = query.GetString(12);
     *params.icon_url = query.GetString(13);
     *params.allow_unknown_rpc_passthrough = query.GetBoolean(14);
+    if (!query.IsNull(15)) {
+      *params.encryption_required = query.GetBoolean(15);
+    }
     const auto& gather_app_id = ((*policies).apps[app_id].is_string())
                                     ? (*policies).apps[app_id].get_string()
                                     : app_id;
