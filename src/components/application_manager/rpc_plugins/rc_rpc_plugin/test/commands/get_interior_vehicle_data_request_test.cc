@@ -44,6 +44,7 @@
 #include "rc_rpc_plugin/rc_module_constants.h"
 #include "rc_rpc_plugin/rc_rpc_plugin.h"
 
+#include <stdint.h>
 #include <chrono>
 #include <thread>
 
@@ -205,6 +206,8 @@ TEST_F(GetInteriorVehicleDataRequestTest,
           HMIResultCodeIs(hmi_apis::FunctionID::RC_GetInteriorVehicleData), _))
       .WillOnce(Return(true));
   // Act
+
+  ASSERT_TRUE(command->Init());
   command->Run();
 }
 
@@ -232,6 +235,7 @@ TEST_F(GetInteriorVehicleDataRequestTest,
           HMIResultCodeIs(hmi_apis::FunctionID::RC_GetInteriorVehicleData), _))
       .WillOnce(Return(true));
   // Act
+  ASSERT_TRUE(command->Init());
   command->Run();
 }
 
@@ -275,6 +279,7 @@ TEST_F(
       .WillOnce(DoAll(SaveArg<0>(&command_result), Return(true)));
 
   // Act
+  ASSERT_TRUE(command->Init());
   command->Run();
 
   // Assert
@@ -326,6 +331,7 @@ TEST_F(
       command = CreateRCCommand<
           rc_rpc_plugin::commands::GetInteriorVehicleDataRequest>(
           mobile_message);
+  ASSERT_TRUE(command->Init());
   command->Run();
   application_manager::event_engine::Event event(
       hmi_apis::FunctionID::RC_GetInteriorVehicleData);
@@ -370,6 +376,7 @@ TEST_F(GetInteriorVehicleDataRequestTest,
       .WillOnce(DoAll(SaveArg<0>(&command_result), Return(true)));
 
   // Act
+  ASSERT_TRUE(command->Init());
   command->Run();
 
   // Assert
@@ -405,6 +412,7 @@ TEST_F(
           MobileResultCodeIs(mobile_apis::Result::UNSUPPORTED_RESOURCE), _))
       .WillOnce((Return(true)));
   // Act
+  ASSERT_TRUE(command->Init());
   command->Run();
 }
 
@@ -430,6 +438,7 @@ TEST_F(
       .WillOnce((Return(true)));
 
   // Act
+  ASSERT_TRUE(command->Init());
   command->Run();
 }
 
@@ -470,6 +479,7 @@ TEST_F(GetInteriorVehicleDataRequestTest,
   application_manager::event_engine::Event event(
       hmi_apis::FunctionID::RC_GetInteriorVehicleData);
   event.set_smart_object(*hmi_response_message);
+  ASSERT_TRUE(command->Init());
   command->Run();
   command->on_event(event);
 }
@@ -510,6 +520,7 @@ TEST_F(GetInteriorVehicleDataRequestTest,
       hmi_apis::FunctionID::RC_GetInteriorVehicleData);
   event.set_smart_object(*hmi_message);
   auto command = CreateRCCommand<GetInteriorVehicleDataRequest>(mobile_message);
+  ASSERT_TRUE(command->Init());
   command->Run();
   command->on_event(event);
 }
@@ -554,6 +565,7 @@ TEST_F(GetInteriorVehicleDataRequestTest,
       command = CreateRCCommand<
           rc_rpc_plugin::commands::GetInteriorVehicleDataRequest>(
           mobile_message);
+  ASSERT_TRUE(command->Init());
   command->Run();
   application_manager::event_engine::Event event(
       hmi_apis::FunctionID::RC_GetInteriorVehicleData);
@@ -595,6 +607,7 @@ TEST_F(GetInteriorVehicleDataRequestTest,
             _))
         .WillRepeatedly(Return(true));
     // Act
+    ASSERT_TRUE(command->Init());
     command->Run();
   }
 
@@ -609,6 +622,130 @@ TEST_F(GetInteriorVehicleDataRequestTest,
   EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_, _)).Times(0);
 
   // Act
+  ASSERT_TRUE(command->Init());
   command->Run();
 }
+
+TEST_F(GetInteriorVehicleDataRequestTest,
+       OnEvent_ValidHmiResponse_AvailableHDChanelsIsArrayWithHDChanels) {
+  using rc_rpc_plugin::commands::GetInteriorVehicleDataRequest;
+  namespace hmi_response = application_manager::hmi_response;
+  namespace strings = application_manager::strings;
+
+  const uint32_t chanel1_index = 1u;
+  const uint32_t chanel2_index = 2u;
+  const uint32_t chanel3_index = 3u;
+
+  const uint32_t expected_array_length = 3u;
+
+  // Arrange
+  MessageSharedPtr mobile_message = CreateBasicMessage();
+
+  MessageSharedPtr hmi_response_message = CreateBasicMessage();
+  auto& hmi_response_params = (*hmi_response_message)[strings::msg_params];
+  hmi_response_params[hmi_response::code] = hmi_apis::Common_Result::SUCCESS;
+  hmi_response_params[strings::connection_key] = kAppId;
+
+  auto& msg_params = (*hmi_response_message)[strings::msg_params];
+  msg_params[message_params::kModuleType] = module_type;
+
+  auto available_hd_chanels =
+      smart_objects::SmartObject(smart_objects::SmartType_Array);
+
+  available_hd_chanels[0] = chanel1_index;
+  available_hd_chanels[1] = chanel2_index;
+  available_hd_chanels[2] = chanel3_index;
+
+  msg_params[message_params::kModuleData][message_params::kRadioControlData]
+            [message_params::kAvailableHdChannels] = available_hd_chanels;
+
+  ON_CALL(mock_interior_data_cache_, Contains(_)).WillByDefault(Return(false));
+  ON_CALL(mock_interior_data_manager_, CheckRequestsToHMIFrequency(_))
+      .WillByDefault(Return(true));
+
+  MessageSharedPtr message_to_mob = CreateBasicMessage();
+
+  // Expectations
+  EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_, _)).WillOnce(Return(true));
+  EXPECT_CALL(mock_rpc_service_, ManageMobileCommand(_, _))
+      .WillOnce(DoAll(SaveArg<0>(&message_to_mob), Return(true)));
+
+  // Act
+  auto command = CreateRCCommand<GetInteriorVehicleDataRequest>(mobile_message);
+  application_manager::event_engine::Event event(
+      hmi_apis::FunctionID::RC_GetInteriorVehicleData);
+
+  ASSERT_TRUE(command->Init());
+  command->Run();
+
+  event.set_smart_object(*hmi_response_message);
+  command->on_event(event);
+
+  auto& hd_chanels =
+      (*message_to_mob)[strings::msg_params][message_params::kModuleData]
+                       [message_params::kRadioControlData]
+                       [message_params::kAvailableHdChannels];
+  const size_t array_length = hd_chanels.length();
+
+  EXPECT_EQ(expected_array_length, array_length);
+
+  EXPECT_EQ(chanel1_index, hd_chanels[0].asUInt());
+  EXPECT_EQ(chanel2_index, hd_chanels[1].asUInt());
+  EXPECT_EQ(chanel3_index, hd_chanels[2].asUInt());
+}
+
+TEST_F(GetInteriorVehicleDataRequestTest,
+       OnEvent_ValidHmiResponse_ClimateEnableAvailable) {
+  using rc_rpc_plugin::commands::GetInteriorVehicleDataRequest;
+  namespace hmi_response = application_manager::hmi_response;
+  namespace strings = application_manager::strings;
+
+  // Arrange
+  MessageSharedPtr mobile_message = CreateBasicMessage();
+
+  MessageSharedPtr hmi_response_message = CreateBasicMessage();
+  auto& hmi_response_params = (*hmi_response_message)[strings::msg_params];
+  hmi_response_params[hmi_response::code] = hmi_apis::Common_Result::SUCCESS;
+  hmi_response_params[strings::connection_key] = kAppId;
+
+  auto& msg_params = (*hmi_response_message)[strings::msg_params];
+
+  auto climate_control_data =
+      smart_objects::SmartObject(smart_objects::SmartType_Boolean);
+  climate_control_data = true;
+
+  msg_params[message_params::kModuleData][message_params::kClimateControlData]
+            [message_params::kClimateEnableAvailable] = climate_control_data;
+
+  ON_CALL(mock_interior_data_cache_, Contains(_)).WillByDefault(Return(false));
+  ON_CALL(mock_interior_data_manager_, CheckRequestsToHMIFrequency(_))
+      .WillByDefault(Return(true));
+
+  auto message_to_mob = CreateBasicMessage();
+
+  // Expectations
+  EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_, _)).WillOnce(Return(true));
+  EXPECT_CALL(mock_rpc_service_, ManageMobileCommand(_, _))
+      .WillOnce(DoAll(SaveArg<0>(&message_to_mob), Return(true)));
+
+  // Act
+  auto command = CreateRCCommand<GetInteriorVehicleDataRequest>(mobile_message);
+  application_manager::event_engine::Event event(
+      hmi_apis::FunctionID::RC_GetInteriorVehicleData);
+
+  ASSERT_TRUE(command->Init());
+  command->Run();
+
+  event.set_smart_object(*hmi_response_message);
+  command->on_event(event);
+
+  const bool climate_enable_available =
+      (*message_to_mob)[strings::msg_params][message_params::kModuleData]
+                       [message_params::kClimateControlData]
+                       [message_params::kClimateEnableAvailable]
+                           .asBool();
+
+  EXPECT_TRUE(climate_enable_available);
+}
+
 }  // namespace rc_rpc_plugin_test
