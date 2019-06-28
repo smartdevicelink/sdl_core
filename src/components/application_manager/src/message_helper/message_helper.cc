@@ -332,6 +332,15 @@ std::string MessageHelper::CommonLanguageToString(
   return std::string();
 }
 
+std::string MessageHelper::MobileLanguageToString(
+    mobile_apis::Language::eType language) {
+  using namespace ns_smart_device_link::ns_smart_objects;
+  const char* str = 0;
+  EnumConversionHelper<mobile_apis::Language::eType>::EnumToCString(language,
+                                                                    &str);
+  return str ? str : std::string();
+}
+
 smart_objects::SmartObjectSPtr MessageHelper::CreateMessageForHMI(
     hmi_apis::messageType::eType message_type, const uint32_t correlation_id) {
   using namespace smart_objects;
@@ -370,6 +379,28 @@ void MessageHelper::BroadcastCapabilityUpdate(
   smart_objects::SmartObjectSPtr hmi_notification =
       std::make_shared<smart_objects::SmartObject>(message);
   app_mngr.GetRPCService().ManageHMICommand(hmi_notification);
+}
+
+bool MessageHelper::AddLockScreenDismissalWarningToMessage(
+    ns_smart_device_link::ns_smart_objects::SmartObject& notification_so,
+    const mobile_apis::Language::eType& mobile_ui_language,
+    const policy::PolicyHandlerInterface& policy_handler) {
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  const auto mobile_language = MobileLanguageToString(mobile_ui_language);
+
+  const auto lock_screen_dismissal_warning_message =
+      policy_handler.LockScreenDismissalWarningMessage(mobile_language);
+
+  if (!lock_screen_dismissal_warning_message ||
+      lock_screen_dismissal_warning_message->empty()) {
+    LOG4CXX_WARN(logger_, "LockScreenDismissalWarningMessage is invalid");
+    return false;
+  }
+  notification_so[strings::msg_params]
+                 [mobile_notification::lock_screen_dismissal_warning] =
+                     *lock_screen_dismissal_warning_message;
+  return true;
 }
 
 smart_objects::SmartObject MessageHelper::CreateAppServiceCapabilities(

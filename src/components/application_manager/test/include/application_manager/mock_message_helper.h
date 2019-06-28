@@ -168,6 +168,8 @@ class MockMessageHelper {
                hmi_apis::Common_LightName::eType(const std::string& lightName));
   MOCK_METHOD1(CommonLanguageToString,
                std::string(hmi_apis::Common_Language::eType));
+  MOCK_METHOD1(MobileLanguageToString,
+               std::string(mobile_apis::Language::eType));
   MOCK_METHOD2(CreateModuleInfoSO,
                smart_objects::SmartObjectSPtr(uint32_t function_id,
                                               ApplicationManager& app_mngr));
@@ -316,6 +318,10 @@ class MockMessageHelper {
   MOCK_METHOD2(BroadcastCapabilityUpdate,
                void(smart_objects::SmartObject& msg_params,
                     ApplicationManager& app_mngr));
+  MOCK_METHOD3(AddLockScreenDismissalWarningToMessage,
+               bool(smart_objects::SmartObject&,
+                    const mobile_apis::Language::eType&,
+                    const policy::PolicyHandlerInterface&));
 
   static MockMessageHelper* message_helper_mock();
 };

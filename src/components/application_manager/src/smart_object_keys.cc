@@ -433,6 +433,7 @@ const char* state = "state";
 const char* syncp_timeout = "Timeout";
 const char* syncp_url = "URL";
 const char* lock_screen_dismissal_enabled = "lockScreenDismissalEnabled";
+const char* lock_screen_dismissal_warning = "lockScreenDismissalWarning";
 }  // namespace mobile_notification
 
 namespace hmi_levels {

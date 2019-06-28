@@ -65,6 +65,19 @@ struct OnDriverDistractionProcessor {
       policy::CheckPermissionResult result;
       application_manager_.GetPolicyHandler().CheckPermissions(
           application, stringified_function_id_, params, result);
+      const auto& msg_params =
+          (*on_driver_distraction_so_)[strings::msg_params];
+      const bool is_lock_screen_dissmisal_exists = msg_params.keyExists(
+          mobile_notification::lock_screen_dismissal_enabled);
+
+      if (is_lock_screen_dissmisal_exists &&
+          msg_params[mobile_notification::lock_screen_dismissal_enabled]
+              .asBool()) {
+        MessageHelper::AddLockScreenDismissalWarningToMessage(
+            *on_driver_distraction_so_,
+            application->ui_language(),
+            application_manager_.GetPolicyHandler());
+      }
       if (result.hmi_level_permitted != policy::kRpcAllowed) {
         MobileMessageQueue messages;
         application->SwapMobileMessageQueue(messages);
@@ -72,11 +85,13 @@ struct OnDriverDistractionProcessor {
             std::remove_if(
                 messages.begin(),
                 messages.end(),
-                [this](smart_objects::SmartObjectSPtr message) {
+                [](smart_objects::SmartObjectSPtr message) {
                   return (*message)[strings::params][strings::function_id]
-                             .asString() == stringified_function_id_;
+                             .asUInt() ==
+                         mobile_api::FunctionID::OnDriverDistractionID;
                 }),
             messages.end());
+        application->SwapMobileMessageQueue(messages);
         application->PushMobileMessage(on_driver_distraction_so_);
         return;
       }

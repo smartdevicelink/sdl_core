@@ -3926,6 +3926,17 @@ void ApplicationManagerImpl::SendDriverDistractionState(
             driver_distraction_state()) {
       msg_params[mobile_notification::lock_screen_dismissal_enabled] =
           *lock_screen_dismissal;
+
+      if (*lock_screen_dismissal) {
+        const bool result =
+            MessageHelper::AddLockScreenDismissalWarningToMessage(
+                *notification, application->ui_language(), *policy_handler_);
+
+        if (!result) {
+          LOG4CXX_WARN(logger_,
+                       "Adding LockScreenDismissalWarning message was failed");
+        }
+      }
     }
 
     params[strings::connection_key] = application->app_id();

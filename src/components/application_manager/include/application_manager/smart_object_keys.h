@@ -473,6 +473,7 @@ extern const char* state;
 extern const char* syncp_timeout;
 extern const char* syncp_url;
 extern const char* lock_screen_dismissal_enabled;
+extern const char* lock_screen_dismissal_warning;
 }  // namespace mobile_notification
 
 namespace hmi_levels {

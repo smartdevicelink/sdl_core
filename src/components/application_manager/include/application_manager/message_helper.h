@@ -725,6 +725,14 @@ class MessageHelper {
       hmi_apis::Common_Language::eType language);
 
   /**
+   * @brief Converts mobile language to string representation
+   * @param language Mobile UI language
+   * @return Mobile language string representation
+   */
+  static std::string MobileLanguageToString(
+      mobile_apis::Language::eType language);
+
+  /**
    * @brief Converts string to mobile language enum value
    * @param language language as string
    * @return Mobile language enum value
@@ -891,6 +899,20 @@ class MessageHelper {
 
   static void BroadcastCapabilityUpdate(smart_objects::SmartObject& msg_params,
                                         ApplicationManager& app_mngr);
+
+  /**
+   * @brief Adds lock screen dismissal warning message to notification
+   * @param notification_so Notification as SmartObject smart pointer which will
+   * be contain lock screen warning message
+   * @param mobile_ui_language Code of language which uses for UI on Mobile
+   * @param policy_handler Reference to PolicyHandlerInterface instance
+   * @return bool Returns true if lock screen message has been set into
+   * notification successfully, otherwise returns false
+   */
+  static bool AddLockScreenDismissalWarningToMessage(
+      smart_objects::SmartObject& notification_so,
+      const mobile_apis::Language::eType& mobile_ui_language,
+      const policy::PolicyHandlerInterface& policy_handler);
 
  private:
   /**
