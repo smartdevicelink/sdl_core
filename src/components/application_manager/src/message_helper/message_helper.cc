@@ -332,6 +332,15 @@ std::string MessageHelper::CommonLanguageToString(
   return std::string();
 }
 
+std::string MessageHelper::MobileLanguageToString(
+    mobile_apis::Language::eType language) {
+  using namespace ns_smart_device_link::ns_smart_objects;
+  const char* str = 0;
+  EnumConversionHelper<mobile_apis::Language::eType>::EnumToCString(language,
+                                                                    &str);
+  return str ? str : std::string();
+}
+
 smart_objects::SmartObjectSPtr MessageHelper::CreateMessageForHMI(
     hmi_apis::messageType::eType message_type, const uint32_t correlation_id) {
   using namespace smart_objects;

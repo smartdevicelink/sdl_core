@@ -3924,8 +3924,23 @@ void ApplicationManagerImpl::SendDriverDistractionState(
     if (lock_screen_dismissal &&
         hmi_apis::Common_DriverDistractionState::DD_ON ==
             driver_distraction_state()) {
+      bool dismissal_enabled = *lock_screen_dismissal;
+      if (dismissal_enabled) {
+        const auto language =
+            MessageHelper::MobileLanguageToString(application->ui_language());
+
+        const auto warning_message =
+            policy_handler_->LockScreenDismissalWarningMessage(language);
+        // Only allow lock screen dismissal if a warning message is available
+        if (warning_message && !warning_message->empty()) {
+          msg_params[mobile_notification::lock_screen_dismissal_warning] =
+              *warning_message;
+        } else {
+          dismissal_enabled = false;
+        }
+      }
       msg_params[mobile_notification::lock_screen_dismissal_enabled] =
-          *lock_screen_dismissal;
+          dismissal_enabled;
     }
 
     params[strings::connection_key] = application->app_id();

@@ -168,6 +168,8 @@ class MockMessageHelper {
                hmi_apis::Common_LightName::eType(const std::string& lightName));
   MOCK_METHOD1(CommonLanguageToString,
                std::string(hmi_apis::Common_Language::eType));
+  MOCK_METHOD1(MobileLanguageToString,
+               std::string(mobile_apis::Language::eType));
   MOCK_METHOD2(CreateModuleInfoSO,
                smart_objects::SmartObjectSPtr(uint32_t function_id,
                                               ApplicationManager& app_mngr));

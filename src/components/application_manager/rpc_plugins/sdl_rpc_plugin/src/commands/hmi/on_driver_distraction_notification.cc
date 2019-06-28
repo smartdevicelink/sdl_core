@@ -59,12 +59,35 @@ struct OnDriverDistractionProcessor {
 
   void operator()(ApplicationSharedPtr application) {
     if (application) {
-      (*on_driver_distraction_so_)[strings::params][strings::connection_key] =
-          application->app_id();
+      // Create modifiable copy of base message
+      smart_objects::SmartObject message = *on_driver_distraction_so_;
+      message[strings::params][strings::connection_key] = application->app_id();
       const RPCParams params;
       policy::CheckPermissionResult result;
       application_manager_.GetPolicyHandler().CheckPermissions(
           application, stringified_function_id_, params, result);
+      auto& msg_params = message[strings::msg_params];
+      const bool is_lock_screen_dismissal_exists = msg_params.keyExists(
+          mobile_notification::lock_screen_dismissal_enabled);
+
+      if (is_lock_screen_dismissal_exists &&
+          msg_params[mobile_notification::lock_screen_dismissal_enabled]
+              .asBool()) {
+        const auto language =
+            MessageHelper::MobileLanguageToString(application->ui_language());
+
+        const auto warning_message =
+            application_manager_.GetPolicyHandler()
+                .LockScreenDismissalWarningMessage(language);
+        // Only allow lock screen dismissal if a warning message is available
+        if (warning_message && !warning_message->empty()) {
+          msg_params[mobile_notification::lock_screen_dismissal_warning] =
+              *warning_message;
+        } else {
+          msg_params[mobile_notification::lock_screen_dismissal_enabled] =
+              false;
+        }
+      }
       if (result.hmi_level_permitted != policy::kRpcAllowed) {
         MobileMessageQueue messages;
         application->SwapMobileMessageQueue(messages);
@@ -72,15 +95,19 @@ struct OnDriverDistractionProcessor {
             std::remove_if(
                 messages.begin(),
                 messages.end(),
-                [this](smart_objects::SmartObjectSPtr message) {
+                [](smart_objects::SmartObjectSPtr message) {
                   return (*message)[strings::params][strings::function_id]
-                             .asString() == stringified_function_id_;
+                             .asUInt() ==
+                         mobile_api::FunctionID::OnDriverDistractionID;
                 }),
             messages.end());
-        application->PushMobileMessage(on_driver_distraction_so_);
+        application->SwapMobileMessageQueue(messages);
+        application->PushMobileMessage(
+            std::make_shared<smart_objects::SmartObject>(message));
         return;
       }
-      command_.SendNotificationToMobile(on_driver_distraction_so_);
+      command_.SendNotificationToMobile(
+          std::make_shared<smart_objects::SmartObject>(message));
     }
   }
 
