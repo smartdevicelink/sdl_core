@@ -531,14 +531,12 @@ RpcParameters::~RpcParameters() {}
 RpcParameters::RpcParameters(const Json::Value* value__)
     : CompositeType(InitHelper(value__, &Json::Value::isObject))
     , hmi_levels(impl::ValueMember(value__, "hmi_levels"))
-    , parameters(impl::ValueMember(value__, "parameters"))
-    , encryption_required(impl::ValueMember(value__, "encryption_required")) {}
+    , parameters(impl::ValueMember(value__, "parameters")) {}
 
 Json::Value RpcParameters::ToJsonValue() const {
   Json::Value result__(Json::objectValue);
   impl::WriteJsonField("hmi_levels", hmi_levels, &result__);
   impl::WriteJsonField("parameters", parameters, &result__);
-  impl::WriteJsonField("encryption_required", encryption_required, &result__);
   return result__;
 }
 
@@ -549,9 +547,7 @@ bool RpcParameters::is_valid() const {
   if (!parameters.is_valid()) {
     return false;
   }
-  if (!encryption_required.is_valid()) {
-    return false;
-  }
+
   return Validate();
 }
 
@@ -566,9 +562,7 @@ bool RpcParameters::struct_empty() const {
   if (parameters.is_initialized()) {
     return false;
   }
-  if (encryption_required.is_initialized()) {
-    return false;
-  }
+
   return true;
 }
 
@@ -581,10 +575,6 @@ void RpcParameters::ReportErrors(rpc::ValidationReport* report__) const {
   }
   if (!parameters.is_valid()) {
     parameters.ReportErrors(&report__->ReportSubobject("parameters"));
-  }
-  if (!encryption_required.is_valid()) {
-    encryption_required.ReportErrors(
-        &report__->ReportSubobject("encryption_required"));
   }
 }
 

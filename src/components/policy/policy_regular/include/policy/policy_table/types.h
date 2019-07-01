@@ -248,7 +248,6 @@ struct RpcParameters : CompositeType {
  public:
   HmiLevels hmi_levels;
   Optional<Parameters> parameters;
-  Optional<Boolean> encryption_required;
 
  public:
   RpcParameters();

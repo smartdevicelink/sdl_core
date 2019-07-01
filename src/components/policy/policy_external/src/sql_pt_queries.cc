@@ -952,7 +952,7 @@ const std::string kInsertApplicationFull =
     " `certificate`, `hybrid_app_preference_value`, `endpoint`, `enabled`, "
     " `auth_token`, `cloud_transport_type`, `icon_url`, "
     "`allow_unknown_rpc_passthrough`, `encryption_required`) "
-    "  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+    "  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
 const std::string kSelectApplicationFull =
     "SELECT `keep_context`, `steal_focus`, `default_hmi`, `priority_value`, "
