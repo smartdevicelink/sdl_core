@@ -170,7 +170,6 @@ bool RPCServiceImpl::ManageMobileCommand(
           function_id,
           correlation_id,
           static_cast<int32_t>(mobile_apis::Result::ENCRYPTION_NEEDED));
-      ;
       SendMessageToMobile(response);
       return false;
     }
@@ -536,7 +535,7 @@ void RPCServiceImpl::SendMessageToMobile(
     return;
   }
   const auto api_function_id = static_cast<mobile_apis::FunctionID::eType>(
-      (*message)[strings::params][strings::function_id].asInt());
+      (*message)[strings::params][strings::function_id].asUInt());
 
   smart_objects::SmartObject& msg_to_mobile = *message;
   // If correlation_id is not present, it is from-HMI message which should be

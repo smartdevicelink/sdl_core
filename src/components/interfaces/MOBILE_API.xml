@@ -138,7 +138,7 @@
         <element name="CORRUPTED_DATA" since="5.0">
             <description>The data sent failed to pass CRC check in receiver end</description>
         </element>
-        <element name="ENCRYPTION_NEEDED" since="5.1">
+        <element name="ENCRYPTION_NEEDED" since="6.0">
         <description>SDL receives an un-encrypted PRC request that needs protection. </description>
         </element>
     </enum>
@@ -2238,7 +2238,7 @@
         </param>
         <param name="hmiPermissions" type="HMIPermissions"  mandatory="true"/>
         <param name="parameterPermissions" type="ParameterPermissions"  mandatory="true"/>
-        <param name="requireEncryption" type="Boolean" mandatory="false" since="5.1"/>
+        <param name="requireEncryption" type="Boolean" mandatory="false" since="6.0"/>
     </struct>
     
     <struct name="DisplayCapabilities" deprecated="true" since="6.0">
@@ -8014,7 +8014,7 @@
         <param name="permissionItem" type="PermissionItem" minsize="0" maxsize="500" array="true" mandatory="true">
             <description>Change in permissions for a given set of RPCs</description>
         </param>
-        <param name="requireEncryption" type="Boolean" mandatory="false" since="5.1"/>
+        <param name="requireEncryption" type="Boolean" mandatory="false" since="6.0"/>
     </function>
     
     <function name="OnAudioPassThru" functionID="OnAudioPassThruID" messagetype="notification" since="2.0">
