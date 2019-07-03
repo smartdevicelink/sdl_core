@@ -675,8 +675,9 @@ const std::string kInsertLanguage =
     "INSERT OR IGNORE INTO `language` (`code`) VALUES (?)";
 
 const std::string kInsertMessageString =
-    "INSERT INTO `message` (`language_code`, `message_type_name`) "
-    "VALUES (?, ?)";
+    "INSERT INTO `message` (`language_code`, `message_type_name`, `tts`, "
+    "`label`, `line1`, `line2`, `textBody`) "
+    "VALUES (?, ?, ?, ?, ?, ?, ?)";
 
 const std::string kUpdateModuleConfig =
     "UPDATE `module_config` SET `preloaded_pt` = ?, "

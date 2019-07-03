@@ -1524,6 +1524,25 @@ bool SQLPTRepresentation::SaveMessageString(
 
   query.Bind(0, lang);
   query.Bind(1, type);
+  if (strings.tts.is_valid() && strings.tts.is_initialized()) {
+    query.Bind(2, (*strings.tts));
+  }
+
+  if (strings.label.is_valid() && strings.label.is_initialized()) {
+    query.Bind(3, (*strings.label));
+  }
+
+  if (strings.line1.is_valid() && strings.line1.is_initialized()) {
+    query.Bind(4, *(strings.line1));
+  }
+
+  if (strings.line2.is_valid() && strings.line2.is_initialized()) {
+    query.Bind(5, (*strings.line2));
+  }
+
+  if (strings.textBody.is_valid() && strings.textBody.is_initialized()) {
+    query.Bind(6, (*strings.textBody));
+  }
 
   if (!query.Exec() || !query.Reset()) {
     LOG4CXX_WARN(logger_, "Incorrect insert into message.");
