@@ -36,7 +36,11 @@
 
 namespace logger {
 
-static bool logs_enabled_ = false;
+struct __attribute__((visibility("default"))) LogsEnabled {
+  static bool logs_enabled_;
+};
+
+bool LogsEnabled::logs_enabled_ = false;
 static LogMessageLoopThread* log_message_loop_thread = NULL;
 
 bool push_log(log4cxx::LoggerPtr logger,
@@ -73,11 +77,11 @@ bool push_log(log4cxx::LoggerPtr logger,
 }
 
 bool logs_enabled() {
-  return logs_enabled_;
+  return LogsEnabled::logs_enabled_;
 }
 
 void set_logs_enabled(bool state) {
-  logs_enabled_ = state;
+  LogsEnabled::logs_enabled_ = state;
 }
 
 void create_log_message_loop_thread() {
