@@ -153,6 +153,25 @@ errors::eType CObjectSchemaItem::validate(
     }
     object_keys.erase(key_it);
   }
+
+  if (!object_keys.empty()) {
+    const auto& oem_member_it = mMembers.find("oemSpecific");
+    if (oem_member_it != mMembers.end()) {
+      const SMember& oem_member = oem_member_it->second;
+      for (const auto& item : object_keys) {
+        errors::eType result = errors::OK;
+        result =
+            oem_member.mSchemaItem->validate(object.getElement(item),
+                                             &report__->ReportSubobject(item),
+                                             MessageVersion,
+                                             allow_unknown_enums);
+        if (errors::OK != result) {
+          return result;
+        }
+      }
+    }
+  }
+
   return errors::OK;
 }
 
@@ -169,10 +188,10 @@ void CObjectSchemaItem::applySchema(
   }
 
   SmartObject default_value;
-  for (Members::const_iterator it = mMembers.begin(); it != mMembers.end();
-       ++it) {
-    const std::string& key = it->first;
-    const SMember& member = it->second;
+
+  for (const auto& item : mMembers) {
+    const std::string& key = item.first;
+    const SMember& member = item.second;
     if (!Object.keyExists(key)) {
       if (member.mSchemaItem->setDefaultValue(default_value)) {
         Object[key] = default_value;
@@ -184,6 +203,18 @@ void CObjectSchemaItem::applySchema(
           Object[key], remove_unknown_parameters, MessageVersion);
     }
   }
+
+  const auto& oem_member_it = mMembers.find("oemSpecific");
+  if (oem_member_it != mMembers.end()) {
+    const SMember& oem_member = oem_member_it->second;
+    for (const auto& item : Object.enumerate()) {
+      if (mMembers.end() != mMembers.find(item)) {
+        continue;
+      }
+      oem_member.mSchemaItem->applySchema(
+          Object[item], remove_unknown_parameters, MessageVersion);
+    }
+  }
 }
 
 void CObjectSchemaItem::unapplySchema(SmartObject& Object,
@@ -191,22 +222,25 @@ void CObjectSchemaItem::unapplySchema(SmartObject& Object,
   if (SmartType_Map != Object.getType()) {
     return;
   }
-  for (SmartMap::const_iterator it = Object.map_begin();
-       it != Object.map_end();) {
-    const std::string& key = it->first;
-    // move next to avoid wrong iterator on erase
-    ++it;
-    if (mMembers.end() == mMembers.find(key) && remove_unknown_parameters) {
-      // remove fake params
-      Object.erase(key);
-    }
-  }
 
-  for (Members::const_iterator it = mMembers.begin(); it != mMembers.end();
+  for (SmartMap::const_iterator it = Object.map_begin(); it != Object.map_end();
        ++it) {
     const std::string& key = it->first;
-    const SMember& member = it->second;
-    if (Object.keyExists(key)) {
+    const auto& member_it = mMembers.find(key);
+    if (mMembers.end() == member_it) {
+      if (remove_unknown_parameters) {
+        // remove fake params
+        Object.erase(key);
+      } else {
+        const auto& oem_member_it = mMembers.find("oemSpecific");
+        if (oem_member_it != mMembers.end()) {
+          const SMember& oem_member = oem_member_it->second;
+          oem_member.mSchemaItem->unapplySchema(Object[key],
+                                                remove_unknown_parameters);
+        }
+      }
+    } else {
+      const SMember& member = member_it->second;
       member.mSchemaItem->unapplySchema(Object[key], remove_unknown_parameters);
     }
   }
