@@ -30,6 +30,7 @@
  * POSSIBILITY OF SUCH DAMAGE. */
 
 #include <algorithm>
+#include <memory>
 #include "gtest/gtest.h"
 
 #include "application_manager/mock_application.h"
@@ -40,7 +41,7 @@
 #include "interfaces/HMI_API.h"
 #include "interfaces/MOBILE_API.h"
 #include "rc_rpc_plugin/mock/mock_rc_capabilities_manager.h"
-#include "rc_rpc_plugin/rc_helpers.h"
+#include "rc_rpc_plugin/mock/mock_rc_helpers.h"
 #include "rc_rpc_plugin/rc_module_constants.h"
 #include "rc_rpc_plugin/rc_rpc_plugin.h"
 #include "rc_rpc_plugin/resource_allocation_manager_impl.h"
@@ -53,6 +54,7 @@ using ::application_manager::ApplicationSharedPtr;
 using ::application_manager::Message;
 using ::application_manager::MessageType;
 using ::protocol_handler::MessagePriority;
+using ::rc_rpc_plugin::MockRCHelpers;
 using ::testing::_;
 using ::testing::DoAll;
 using ::testing::Eq;
@@ -78,11 +80,24 @@ const std::string policy_app_id_1_ = "policy_id_1";
 const uint32_t kSizeOfModules = 6u;
 const application_manager::WindowID kDefaultWindowId =
     mobile_apis::PredefinedWindows::DEFAULT_WINDOW;
+const rc_rpc_plugin::Grid KDefaultUserLocation = {2, 0, 0, 1, 1, 1};
+const rc_rpc_plugin::Grid kDriverLocation = {0, 0, 0, 1, 1, 1};
+const rc_rpc_plugin::Grid kInvalidLocation = {0, 0, 0, 0, 0, 0};
+const std::vector<std::string> kModuleList = {
+    rc_rpc_plugin::enums_value::kClimate,
+    rc_rpc_plugin::enums_value::kRadio,
+    rc_rpc_plugin::enums_value::kSeat,
+    rc_rpc_plugin::enums_value::kAudio,
+    rc_rpc_plugin::enums_value::kLight,
+    rc_rpc_plugin::enums_value::kHmiSettings};
+
 }  // namespace
 
 namespace rc_rpc_plugin_test {
 
 using namespace rc_rpc_plugin;
+
+typedef std::shared_ptr<MockRCHelpers> MockRCHelpersPtr;
 
 class RAManagerTest : public ::testing::Test {
  public:
@@ -93,7 +108,8 @@ class RAManagerTest : public ::testing::Test {
       , mock_app_2_(std::make_shared<NiceMock<MockApplication> >())
       , apps_lock_ptr_(std::make_shared<sync_primitives::Lock>())
       , apps_da_(apps_, apps_lock_ptr_)
-      , module_service_area_(0, 0, 0, 3, 2, 1) {
+      , module_service_area_(0, 0, 0, 3, 2, 1)
+      , mock_rc_helpers_(MockRCHelpers::rc_helpers_mock()) {
     ON_CALL(mock_app_mngr_, GetPolicyHandler())
         .WillByDefault(ReturnRef(mock_policy_handler_));
     auto plugin_id = rc_rpc_plugin::RCRPCPlugin::kRCPluginID;
@@ -125,6 +141,17 @@ class RAManagerTest : public ::testing::Test {
     OnRCStatusNotificationExpectations();
   }
 
+  void SetUp() OVERRIDE {
+    rc_app_extension_ = std::make_shared<rc_rpc_plugin::RCAppExtension>(
+        static_cast<application_manager::AppExtensionUID>(
+            rc_rpc_plugin::RCRPCPlugin::kRCPluginID));
+    ON_CALL(mock_rc_capabilities_manager_,
+            GetDriverLocationFromSeatLocationCapability())
+        .WillByDefault(Return(kDriverLocation));
+    ON_CALL(*mock_rc_helpers_, GetRCExtension(_))
+        .WillByDefault(Return(rc_app_extension_));
+  }
+
   void CheckResultWithHMILevelAndAccessMode(
       ResourceAllocationManagerImpl& ra_manager,
       mobile_apis::HMILevel::eType app_level,
@@ -151,6 +178,8 @@ class RAManagerTest : public ::testing::Test {
       mock_rc_capabilities_manager_;
   std::vector<ModuleUid> resources_;
   Grid module_service_area_;
+  RCAppExtensionPtr rc_app_extension_;
+  MockRCHelpers* mock_rc_helpers_;
 };
 
 void RAManagerTest::CheckResultWithHMILevelAndAccessMode(
@@ -176,8 +205,7 @@ void RAManagerTest::CheckResultWithHMILevelAndAccessMode(
 }
 
 void RAManagerTest::PrepareResources() {
-  const auto& all_module_types = RCHelpers::GetModulesList();
-  for (auto& module_type : all_module_types) {
+  for (auto& module_type : kModuleList) {
     ModuleUid module(module_type, kModuleId);
     resources_.push_back(module);
   }
@@ -724,6 +752,115 @@ TEST_F(RAManagerTest, OnRCStatus_ModuleAllocation) {
             kSizeOfModules - 1u);
   EXPECT_EQ(msg_to_hmi_params[application_manager::strings::app_id].asInt(),
             kHMIAppId1);
+}
+
+// UL - User Location
+// If User Location is invalid, in any case AcquireResult will be REJECTED
+TEST_F(RAManagerTest, AcquireResource_UL_IsInvalid_REJECTED) {
+  ResourceAllocationManagerImpl ra_manager(
+      mock_app_mngr_, mock_rpc_service_, mock_rc_capabilities_manager_);
+
+  ON_CALL(mock_rc_capabilities_manager_, IsSeatLocationCapabilityProvided())
+      .WillByDefault(Return(true));
+  rc_app_extension_->SetUserLocation(kInvalidLocation);
+
+  EXPECT_EQ(AcquireResult::REJECTED,
+            ra_manager.AcquireResource(kModuleType1, kModuleId, kAppId1));
+}
+
+// UL - User Location, MA - Multiple Access
+TEST_F(RAManagerTest,
+       AcquireResource_UL_IsValid_ResourceIsFree_MA_False_ALLOWED) {
+  ResourceAllocationManagerImpl ra_manager(
+      mock_app_mngr_, mock_rpc_service_, mock_rc_capabilities_manager_);
+
+  ON_CALL(mock_rc_capabilities_manager_, IsSeatLocationCapabilityProvided())
+      .WillByDefault(Return(true));
+  rc_app_extension_->SetUserLocation(KDefaultUserLocation);
+
+  EXPECT_EQ(AcquireResult::ALLOWED,
+            ra_manager.AcquireResource(kModuleType1, kModuleId, kAppId1));
+}
+
+// UL - User Location,  MA - Multiple Access
+TEST_F(RAManagerTest,
+       AcquireResource_UL_IsValid_ResourceIsAcquired_MA_False_REJECTED) {
+  ResourceAllocationManagerImpl ra_manager(
+      mock_app_mngr_, mock_rpc_service_, mock_rc_capabilities_manager_);
+
+  ON_CALL(mock_rc_capabilities_manager_, IsSeatLocationCapabilityProvided())
+      .WillByDefault(Return(true));
+  rc_app_extension_->SetUserLocation(KDefaultUserLocation);
+
+  EXPECT_EQ(AcquireResult::ALLOWED,
+            ra_manager.AcquireResource(kModuleType1, kModuleId, kAppId1));
+
+  ON_CALL(*mock_app_2_, hmi_level(kDefaultWindowId))
+      .WillByDefault(Return(mobile_apis::HMILevel::HMI_FULL));
+  ON_CALL(mock_rc_capabilities_manager_, IsMultipleAccessAllowed(_))
+      .WillByDefault(Return(false));
+  EXPECT_EQ(AcquireResult::REJECTED,
+            ra_manager.AcquireResource(kModuleType1, kModuleId, kAppId2));
+}
+
+// UL - User Location,  MA - Multiple Access
+TEST_F(RAManagerTest,
+       AcquireResource_UL_IsValid_ResourceIsFree_MA_True_ALLOWED) {
+  ResourceAllocationManagerImpl ra_manager(
+      mock_app_mngr_, mock_rpc_service_, mock_rc_capabilities_manager_);
+
+  ON_CALL(mock_rc_capabilities_manager_, IsSeatLocationCapabilityProvided())
+      .WillByDefault(Return(true));
+  rc_app_extension_->SetUserLocation(KDefaultUserLocation);
+
+  EXPECT_EQ(AcquireResult::ALLOWED,
+            ra_manager.AcquireResource(kModuleType1, kModuleId, kAppId1));
+
+  ON_CALL(*mock_app_2_, hmi_level(kDefaultWindowId))
+      .WillByDefault(Return(mobile_apis::HMILevel::HMI_FULL));
+  EXPECT_EQ(AcquireResult::ALLOWED,
+            ra_manager.AcquireResource(kModuleType1, kModuleId, kAppId2));
+}
+
+// UL - User Location,  MA - Multiple Access, AM - Access Mode
+TEST_F(RAManagerTest,
+       AcquireResource_UL_IsValid_ResourceIsAcquired_MA_True_AM_AUTO_DENY) {
+  ResourceAllocationManagerImpl ra_manager(
+      mock_app_mngr_, mock_rpc_service_, mock_rc_capabilities_manager_);
+
+  ON_CALL(mock_rc_capabilities_manager_, IsSeatLocationCapabilityProvided())
+      .WillByDefault(Return(true));
+  rc_app_extension_->SetUserLocation(KDefaultUserLocation);
+
+  EXPECT_EQ(AcquireResult::ALLOWED,
+            ra_manager.AcquireResource(kModuleType1, kModuleId, kAppId1));
+
+  ra_manager.SetAccessMode(hmi_apis::Common_RCAccessMode::AUTO_DENY);
+
+  ON_CALL(*mock_app_2_, hmi_level(kDefaultWindowId))
+      .WillByDefault(Return(mobile_apis::HMILevel::HMI_FULL));
+  EXPECT_EQ(AcquireResult::IN_USE,
+            ra_manager.AcquireResource(kModuleType1, kModuleId, kAppId2));
+}
+
+TEST_F(RAManagerTest,
+       AcquireResource_UL_IsValid_ResourceIsAcquired_MA_True_AM_ASK_DRIVER) {
+  ResourceAllocationManagerImpl ra_manager(
+      mock_app_mngr_, mock_rpc_service_, mock_rc_capabilities_manager_);
+
+  ON_CALL(mock_rc_capabilities_manager_, IsSeatLocationCapabilityProvided())
+      .WillByDefault(Return(true));
+  rc_app_extension_->SetUserLocation(KDefaultUserLocation);
+
+  EXPECT_EQ(AcquireResult::ALLOWED,
+            ra_manager.AcquireResource(kModuleType1, kModuleId, kAppId1));
+
+  ra_manager.SetAccessMode(hmi_apis::Common_RCAccessMode::ASK_DRIVER);
+
+  ON_CALL(*mock_app_2_, hmi_level(kDefaultWindowId))
+      .WillByDefault(Return(mobile_apis::HMILevel::HMI_FULL));
+  EXPECT_EQ(AcquireResult::ASK_DRIVER,
+            ra_manager.AcquireResource(kModuleType1, kModuleId, kAppId2));
 }
 
 }  // namespace rc_rpc_plugin_test

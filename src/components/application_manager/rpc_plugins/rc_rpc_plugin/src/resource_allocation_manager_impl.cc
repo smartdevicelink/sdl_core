@@ -214,7 +214,6 @@ void ResourceAllocationManagerImpl::ProcessApplicationPolicyUpdate() {
                         allowed_modules.end(),
                         std::back_inserter(disallowed_modules));
 
-    auto rc_extention = RCHelpers::GetRCExtension(**app);
     auto module = disallowed_modules.begin();
     for (; disallowed_modules.end() != module; ++module) {
       ReleaseModuleType(*module, application_id);
