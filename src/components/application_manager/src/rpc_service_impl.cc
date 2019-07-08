@@ -656,9 +656,10 @@ bool RPCServiceImpl::RPCSupportsCustomVDI(
   if ((source == commands::Command::CommandSource::SOURCE_MOBILE) ||
       (source == commands::Command::CommandSource::SOURCE_SDL)) {
     switch (function_id) {
+      case mobile_apis::FunctionID::GetVehicleDataID:
+      case mobile_apis::FunctionID::OnVehicleDataID:
       case mobile_apis::FunctionID::SubscribeVehicleDataID:
       case mobile_apis::FunctionID::UnsubscribeVehicleDataID:
-      case mobile_apis::FunctionID::GetVehicleDataID:
         return true;
         break;
     }
@@ -666,6 +667,7 @@ bool RPCServiceImpl::RPCSupportsCustomVDI(
              (source == commands::Command::CommandSource::SOURCE_SDL_TO_HMI)) {
     switch (function_id) {
       case hmi_apis::FunctionID::VehicleInfo_GetVehicleData:
+      case hmi_apis::FunctionID::VehicleInfo_OnVehicleData:
       case hmi_apis::FunctionID::VehicleInfo_SubscribeVehicleData:
       case hmi_apis::FunctionID::VehicleInfo_UnsubscribeVehicleData:
         return true;

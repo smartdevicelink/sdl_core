@@ -167,13 +167,15 @@ void RPCHandlerImpl::ProcessMessageFromHMI(
                                            hmi_apis::messageType::eType>(
       message->json_message(), converted_result);
 
+  const auto function_id = static_cast<int32_t>(
+      converted_result[jhs::S_PARAMS][jhs::S_FUNCTION_ID].asInt());
   if (app_manager_.GetRPCService().IsAppServiceRPC(
-          converted_result[jhs::S_PARAMS][jhs::S_FUNCTION_ID].asInt(),
-          commands::Command::SOURCE_HMI)) {
+          function_id, commands::Command::SOURCE_HMI) ||
+      app_manager_.GetRPCService().RPCSupportsCustomVDI(
+          function_id, commands::Command::SOURCE_HMI)) {
     LOG4CXX_DEBUG(
         logger_,
-        "Allowing unknown parameters for request function "
-            << converted_result[jhs::S_PARAMS][jhs::S_FUNCTION_ID].asInt());
+        "Allowing unknown parameters for request function " << function_id);
     allow_unknown_parameters = true;
   }
 
@@ -405,7 +407,7 @@ bool RPCHandlerImpl::ConvertMessageToSO(
                     "Convertion result: "
                         << result << " function id "
                         << output[jhs::S_PARAMS][jhs::S_FUNCTION_ID].asInt());
-      if (!hmi_so_factory().attachSchema(output, false)) {
+      if (!hmi_so_factory().attachSchema(output, !allow_unknown_parameters)) {
         LOG4CXX_WARN(logger_, "Failed to attach schema to object.");
         return false;
       }
@@ -414,8 +416,9 @@ bool RPCHandlerImpl::ConvertMessageToSO(
 
       utils::SemanticVersion empty_version;
       if (validate_params &&
-          output.validate(&report, empty_version, allow_unknown_parameters) !=
-              smart_objects::errors::OK) {
+          smart_objects::errors::OK !=
+              output.validate(
+                  &report, empty_version, allow_unknown_parameters)) {
         LOG4CXX_ERROR(
             logger_,
             "Incorrect parameter from HMI - " << rpc::PrettyFormat(report));

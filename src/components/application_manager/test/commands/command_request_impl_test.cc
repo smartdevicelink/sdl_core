@@ -318,13 +318,6 @@ TEST_F(CommandRequestImplTest, SendHMIRequest_UseEvent_SUCCESS) {
 }
 
 TEST_F(CommandRequestImplTest, RemoveDisallowedParameters_SUCCESS) {
-  am::VehicleData vehicle_data;
-  vehicle_data.insert(am::VehicleData::value_type(
-      kMissedParam, mobile_apis::VehicleDataType::VEHICLEDATA_MYKEY));
-
-  EXPECT_CALL(mock_message_helper_, vehicle_data())
-      .WillOnce(ReturnRef(vehicle_data));
-
   MessageSharedPtr msg = CreateMessage();
   (*msg)[strings::msg_params][kDisallowedParam1] = 0u;
   (*msg)[strings::msg_params][kDisallowedParam2] = 0u;
@@ -333,7 +326,6 @@ TEST_F(CommandRequestImplTest, RemoveDisallowedParameters_SUCCESS) {
   (*msg)[strings::msg_params][kMissedParam] = 0u;
 
   CommandPtr command = CreateCommand<UCommandRequestImpl>(msg);
-
   CommandParametersPermissions& permission = command->parameters_permissions();
   permission.disallowed_params.insert(kDisallowedParam1);
   permission.disallowed_params.insert(kDisallowedParam2);
