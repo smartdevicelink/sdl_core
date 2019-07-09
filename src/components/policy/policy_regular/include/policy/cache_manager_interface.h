@@ -149,10 +149,10 @@ class CacheManagerInterface {
   virtual bool SecondsBetweenRetries(std::vector<int>& seconds) = 0;
 
   /**
-   * @brief Gets module config data from policy table
-   * @return ModuleConfig section of pilicy_table
+   * @brief Gets copy of current policy table data
+   * @return policy_table as json object
    */
-  virtual policy_table::ModuleConfig GetModuleConfigData() const = 0;
+  virtual Json::Value GetPolicyTableData() const = 0;
 
   /**
    * @brief Gets vehicle data items

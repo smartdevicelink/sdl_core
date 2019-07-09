@@ -1522,8 +1522,8 @@ DeviceConsent PolicyHandler::GetUserConsentForDevice(
   return policy_manager_->GetUserConsentForDevice(device_id);
 }
 
-policy_table::ModuleConfig PolicyHandler::GetModuleConfigData() const {
-  return policy_manager_->GetModuleConfigData();
+Json::Value PolicyHandler::GetPolicyTableData() const {
+  return policy_manager_->GetPolicyTableData();
 }
 
 bool PolicyHandler::GetDefaultHmi(const std::string& policy_app_id,

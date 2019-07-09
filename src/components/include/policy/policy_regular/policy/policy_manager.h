@@ -532,10 +532,10 @@ class PolicyManager : public usage_statistics::StatisticsManager {
       const = 0;
 
   /**
-   * @brief Gets module config data from policy table
-   * @return ModuleConfig section of pilicy_table
+   * @brief Gets copy of current policy table data
+   * @return policy_table as json object
    */
-  virtual policy_table::ModuleConfig GetModuleConfigData() const = 0;
+  virtual Json::Value GetPolicyTableData() const = 0;
   /**
    * @brief Get a list of enabled cloud applications
    * @param enabled_apps List filled with the policy app id of each enabled
