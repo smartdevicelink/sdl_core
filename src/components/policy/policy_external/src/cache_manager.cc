@@ -33,6 +33,7 @@
 #include "policy/cache_manager.h"
 
 #include <algorithm>
+#include <boost/algorithm/string.hpp>
 #include <cmath>
 #include <ctime>
 #include <functional>
@@ -752,6 +753,34 @@ bool CacheManager::ApplyUpdate(const policy_table::Table& update_pt) {
   pt_->policy_table.consumer_friendly_messages.assign_if_valid(
       update_pt.policy_table.consumer_friendly_messages);
 
+  pt_->policy_table.module_config.endpoint_properties =
+      update_pt.policy_table.module_config.endpoint_properties;
+
+  // Apply update for vehicle data
+  if (update_pt.policy_table.vehicle_data.is_initialized()) {
+    if (!update_pt.policy_table.vehicle_data->schema_items.is_initialized() ||
+        update_pt.policy_table.vehicle_data->schema_items->empty()) {
+      pt_->policy_table.vehicle_data->schema_items =
+          rpc::Optional<policy_table::VehicleDataItems>();
+    } else {
+      auto rpc_spec_items =
+          CollectRPCSpecVDItems(*pt_->policy_table.vehicle_data->schema_items);
+      auto custom_items = CollectCustomVDItems(
+          *update_pt.policy_table.vehicle_data->schema_items);
+      policy_table::VehicleDataItems vd_to_update(rpc_spec_items);
+      vd_to_update.insert(
+          vd_to_update.end(), custom_items.begin(), custom_items.end());
+
+      pt_->policy_table.vehicle_data->schema_version =
+          update_pt.policy_table.vehicle_data->schema_version;
+      pt_->policy_table.vehicle_data->schema_items =
+          rpc::Optional<policy_table::VehicleDataItems>(vd_to_update);
+    }
+    if (update_pt.policy_table.vehicle_data->schema_version.is_initialized() &&
+        update_pt.policy_table.vehicle_data->schema_items.is_initialized()) {
+    }
+  }
+
   ResetCalculatedPermissions();
   Backup();
 
@@ -760,6 +789,36 @@ bool CacheManager::ApplyUpdate(const policy_table::Table& update_pt) {
   }
 
   return true;
+}
+
+policy_table::VehicleDataItems CacheManager::CollectRPCSpecVDItems(
+    const policy_table::VehicleDataItems& vd_items) {
+  policy_table::VehicleDataItems result_items;
+  for (auto& item : vd_items) {
+    const std::string i_name = "VEHICLEDATA_" + std::string(item.name);
+    const std::string vd_name = boost::to_upper_copy<std::string>(i_name);
+    const bool is_standart =
+        policy_table::EnumSchemaItemFactory::IsRPCSpecVehicleDataType(vd_name);
+    if (is_standart) {
+      result_items.push_back(item);
+    }
+  }
+  return result_items;
+}
+
+policy_table::VehicleDataItems CacheManager::CollectCustomVDItems(
+    const policy_table::VehicleDataItems& vd_items) {
+  policy_table::VehicleDataItems result_items;
+  for (auto& item : vd_items) {
+    const std::string i_name = "VEHICLEDATA_" + std::string(item.name);
+    const std::string vd_name = boost::to_upper_copy<std::string>(i_name);
+    const bool is_standart =
+        policy_table::EnumSchemaItemFactory::IsRPCSpecVehicleDataType(vd_name);
+    if (!is_standart) {
+      result_items.push_back(item);
+    }
+  }
+  return result_items;
 }
 
 void CacheManager::GetHMIAppTypeAfterUpdate(
@@ -1231,14 +1290,8 @@ void CacheManager::CheckPermissions(const PTString& app_id,
         if (rpc_param.hmi_levels.end() != hmi_iter) {
           result.hmi_level_permitted = PermitResult::kRpcAllowed;
 
-          policy_table::Parameters::const_iterator params_iter =
-              rpc_param.parameters->begin();
-          policy_table::Parameters::const_iterator params_iter_end =
-              rpc_param.parameters->end();
-
-          for (; params_iter != params_iter_end; ++params_iter) {
-            result.list_of_allowed_params.insert(
-                policy_table::EnumToJsonString(*params_iter));
+          for (const auto& param : *rpc_param.parameters) {
+            result.list_of_allowed_params.insert(std::string(param));
           }
         }
       }
@@ -1385,6 +1438,10 @@ bool CacheManager::SecondsBetweenRetries(std::vector<int>& seconds) {
     seconds.push_back(*iter);
   }
   return true;
+}
+
+Json::Value CacheManager::GetPolicyTableData() const {
+  return pt_->policy_table.ToJsonValue();
 }
 
 void CacheManager::GetEnabledCloudApps(
@@ -1653,11 +1710,19 @@ std::vector<UserFriendlyMessage> CacheManager::GetUserFriendlyMsg(
 
 void CacheManager::GetUpdateUrls(const uint32_t service_type,
                                  EndpointUrls& out_end_points) {
-  std::stringstream service_type_stream;
-  service_type_stream << (service_type <= 9 ? "0x0" : "0x") << service_type;
-
-  const std::string service_type_str = service_type_stream.str();
-  GetUpdateUrls(service_type_str, out_end_points);
+  auto find_hexademical =
+      [service_type](policy_table::ServiceEndpoints::value_type end_point) {
+        uint32_t decimal;
+        std::istringstream(end_point.first) >> std::hex >> decimal;
+        return end_point.first.compare(0, 2, "0x") == 0 &&
+               decimal == service_type;
+      };
+  auto& end_points = pt_->policy_table.module_config.endpoints;
+  const auto end_point =
+      std::find_if(end_points.begin(), end_points.end(), find_hexademical);
+  if (end_point != end_points.end()) {
+    GetUpdateUrls(end_point->first, out_end_points);
+  }
 }
 
 void CacheManager::GetUpdateUrls(const std::string& service_type,
@@ -1997,6 +2062,14 @@ std::shared_ptr<policy_table::Table> CacheManager::GenerateSnapshot() {
   snapshot_ = std::make_shared<policy_table::Table>();
   sync_primitives::AutoLock auto_lock(cache_lock_);
   snapshot_->policy_table = pt_->policy_table;
+
+  if (pt_->policy_table.vehicle_data.is_initialized()) {
+    snapshot_->policy_table.vehicle_data =
+        rpc::Optional<policy_table::VehicleData>();
+    snapshot_->policy_table.vehicle_data->mark_initialized();
+    snapshot_->policy_table.vehicle_data->schema_version =
+        pt_->policy_table.vehicle_data->schema_version;
+  }
 
   snapshot_->SetPolicyTableType(policy_table::PT_SNAPSHOT);
 
@@ -2515,6 +2588,8 @@ bool CacheManager::Init(const std::string& file_name,
       } else {
         rpc::ValidationReport report("policy_table");
         snapshot->ReportErrors(&report);
+        LOG4CXX_DEBUG(logger_,
+                      "Validation report: " << rpc::PrettyFormat(report));
         ex_backup_->RemoveDB();
       }
     } break;
@@ -2579,7 +2654,6 @@ bool CacheManager::LoadFromFile(const std::string& file_name,
     LOG4CXX_FATAL(logger_, "Failed to read policy table source file.");
     return false;
   }
-
   Json::Value value;
   Json::Reader reader(Json::Features::strictMode());
   std::string json(json_string.begin(), json_string.end());
@@ -2918,6 +2992,7 @@ bool CacheManager::MergePreloadPT(const std::string& file_name) {
     MergeFG(new_table, current);
     MergeAP(new_table, current);
     MergeCFM(new_table, current);
+    MergeVD(new_table, current);
     Backup();
   }
   return true;
@@ -2983,6 +3058,12 @@ void CacheManager::MergeCFM(const policy_table::PolicyTable& new_pt,
       }
     }
   }
+}
+
+void CacheManager::MergeVD(const policy_table::PolicyTable& new_pt,
+                           policy_table::PolicyTable& pt) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  pt.vehicle_data.assign_if_valid(new_pt.vehicle_data);
 }
 
 void CacheManager::InitBackupThread() {

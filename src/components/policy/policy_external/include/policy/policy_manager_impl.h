@@ -639,6 +639,12 @@ class PolicyManagerImpl : public PolicyManager {
       const std::string& policy_app_id) const OVERRIDE;
 
   /**
+   * @brief Gets copy of current policy table data
+   * @return policy_table as json object
+   */
+  Json::Value GetPolicyTableData() const OVERRIDE;
+
+  /**
    * @brief Get a list of enabled cloud applications
    * @param enabled_apps List filled with the policy app id of each enabled
    * cloud application

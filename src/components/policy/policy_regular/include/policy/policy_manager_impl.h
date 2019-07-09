@@ -650,10 +650,10 @@ class PolicyManagerImpl : public PolicyManager {
       const OVERRIDE;
 
   /**
-   * @brief Gets module config data from policy table
-   * @return ModuleConfig section of pilicy_table
+   * @brief Gets copy of current policy table data
+   * @return policy_table as json object
    */
-  policy_table::ModuleConfig GetModuleConfigData() const OVERRIDE;
+  Json::Value GetPolicyTableData() const OVERRIDE;
   /**
    * @brief Get a list of enabled cloud applications
    * @param enabled_apps List filled with the policy app id of each enabled

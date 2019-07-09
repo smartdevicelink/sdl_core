@@ -69,7 +69,7 @@ class MockPolicyHandlerInterface : public policy::PolicyHandlerInterface {
                void(const std::string& device_id,
                     const std::string& policy_app_id,
                     const policy::Permissions& permissions));
-  MOCK_CONST_METHOD0(GetModuleConfigData, policy_table::ModuleConfig());
+  MOCK_CONST_METHOD0(GetPolicyTableData, Json::Value());
   MOCK_CONST_METHOD0(
       GetVehicleDataItems,
       const std::vector<rpc::policy_table_interface_base::VehicleDataItem>());

@@ -744,8 +744,9 @@ CacheManager::GetVehicleDataItems() const {
 
   return vehicle_data_items;
 }
-policy_table::ModuleConfig CacheManager::GetModuleConfigData() const {
-  return pt_->policy_table.module_config;
+
+Json::Value CacheManager::GetPolicyTableData() const {
+  return pt_->policy_table.ToJsonValue();
 }
 
 void CacheManager::GetEnabledCloudApps(

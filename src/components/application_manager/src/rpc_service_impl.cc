@@ -603,7 +603,6 @@ void RPCServiceImpl::SendMessageToMobile(
 void RPCServiceImpl::SendMessageToHMI(
     const commands::MessageSharedPtr message) {
   LOG4CXX_AUTO_TRACE(logger_);
-
   if (!message) {
     LOG4CXX_WARN(logger_, "Null-pointer message received.");
     NOTREACHED();
@@ -647,7 +646,6 @@ void RPCServiceImpl::SendMessageToHMI(
                  "Cannot send message to HMI: failed to create string");
     return;
   }
-
   messages_to_hmi_.PostMessage(impl::MessageToHmi(message_to_send));
 }
 

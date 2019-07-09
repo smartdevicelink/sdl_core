@@ -62,7 +62,7 @@ class MockCacheManagerInterface : public CacheManagerInterface {
   MOCK_METHOD0(ResetIgnitionCycles, void());
   MOCK_METHOD0(TimeoutResponse, int());
   MOCK_METHOD1(SecondsBetweenRetries, bool(std::vector<int>& seconds));
-  MOCK_CONST_METHOD0(GetModuleConfigData, policy_table::ModuleConfig());
+  MOCK_CONST_METHOD0(GetPolicyTableData, Json::Value());
   MOCK_CONST_METHOD0(GetVehicleDataItems,
                      const std::vector<policy_table::VehicleDataItem>());
   MOCK_CONST_METHOD1(GetEnabledCloudApps,

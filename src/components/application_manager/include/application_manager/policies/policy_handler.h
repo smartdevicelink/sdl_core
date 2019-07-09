@@ -124,7 +124,7 @@ class PolicyHandler : public PolicyHandlerInterface,
   virtual DeviceConsent GetUserConsentForDevice(
       const std::string& device_id) const OVERRIDE;
 
-  policy_table::ModuleConfig GetModuleConfigData() const OVERRIDE;
+  Json::Value GetPolicyTableData() const OVERRIDE;
 
   /**
    * @brief Sets HMI default type for specified application
