@@ -459,7 +459,7 @@ enum FunctionID {
   /**
    * @brief CloseApplicationID.
    */
-  CloseApplicationID = 56,
+  CloseApplicationID = 58,
 
   /**
    * @brief OnHMIStatusID.
