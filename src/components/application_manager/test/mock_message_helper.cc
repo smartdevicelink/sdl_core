@@ -258,10 +258,11 @@ smart_objects::SmartObjectSPtr MessageHelper::CreateMessageForHMI(
 }
 
 void MessageHelper::SendHMIStatusNotification(
-    const Application& application_impl,
+    ApplicationSharedPtr application,
+    const WindowID window_id,
     ApplicationManager& application_manager) {
   MockMessageHelper::message_helper_mock()->SendHMIStatusNotification(
-      application_impl, application_manager);
+      application, window_id, application_manager);
 }
 
 void MessageHelper::SendUpdateSDLResponse(const std::string& result,

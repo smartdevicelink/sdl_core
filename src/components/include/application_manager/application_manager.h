@@ -281,15 +281,6 @@ class ApplicationManager {
                                  mobile_apis::HMILevel::eType to) = 0;
 
   /**
-   * @brief Sends HMI status notification to mobile
-   *
-   * @param application_impl application with changed HMI status
-   *
-   **/
-  virtual void SendHMIStatusNotification(
-      const std::shared_ptr<Application> app) = 0;
-
-  /**
    * @brief Checks if driver distraction state is valid, creates message
    * which is sent to the application if allowed, otherwise it is added
    * to a list of postponed messages.

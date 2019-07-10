@@ -128,8 +128,9 @@ class MockMessageHelper {
   MOCK_METHOD2(CreateMessageForHMI,
                smart_objects::SmartObjectSPtr(hmi_apis::messageType::eType,
                                               const uint32_t));
-  MOCK_METHOD2(SendHMIStatusNotification,
-               void(const Application& application_impl,
+  MOCK_METHOD3(SendHMIStatusNotification,
+               void(ApplicationSharedPtr application,
+                    const WindowID window_id,
                     ApplicationManager& application_manager));
   MOCK_METHOD4(SendPolicyUpdate,
                void(const std::string& file_path,

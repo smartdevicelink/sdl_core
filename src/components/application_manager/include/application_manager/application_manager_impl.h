@@ -203,9 +203,6 @@ class ApplicationManagerImpl
                          mobile_apis::HMILevel::eType from,
                          mobile_apis::HMILevel::eType to) OVERRIDE;
 
-  void SendHMIStatusNotification(
-      const std::shared_ptr<Application> app) OVERRIDE;
-
   void SendDriverDistractionState(ApplicationSharedPtr application);
 
   void SendGetIconUrlNotifications(const uint32_t connection_key,

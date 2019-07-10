@@ -772,7 +772,8 @@ hmi_apis::Common_Result::eType MessageHelper::MobileToHMIResult(
 }
 
 void MessageHelper::SendHMIStatusNotification(
-    const Application& application_impl,
+    ApplicationSharedPtr application,
+    const WindowID window_id,
     ApplicationManager& application_manager) {
   LOG4CXX_AUTO_TRACE(logger_);
   smart_objects::SmartObjectSPtr notification =
@@ -790,16 +791,21 @@ void MessageHelper::SendHMIStatusNotification(
       static_cast<int32_t>(application_manager::MessageType::kNotification);
 
   message[strings::params][strings::connection_key] =
-      static_cast<int32_t>(application_impl.app_id());
+      static_cast<int32_t>(application->app_id());
+
+  message[strings::msg_params][strings::window_id] = window_id;
 
   message[strings::msg_params][strings::hmi_level] =
-      static_cast<int32_t>(application_impl.hmi_level());
+      static_cast<int32_t>(application->hmi_level(window_id));
 
   message[strings::msg_params][strings::audio_streaming_state] =
-      static_cast<int32_t>(application_impl.audio_streaming_state());
+      static_cast<int32_t>(application->audio_streaming_state());
+
+  message[strings::msg_params][strings::video_streaming_state] =
+      static_cast<int32_t>(application->video_streaming_state());
 
   message[strings::msg_params][strings::system_context] =
-      static_cast<int32_t>(application_impl.system_context());
+      static_cast<int32_t>(application->system_context(window_id));
 
   application_manager.GetRPCService().ManageMobileCommand(
       notification, commands::Command::SOURCE_SDL);

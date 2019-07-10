@@ -864,10 +864,13 @@ class MessageHelper {
 
   /**
    * @brief Sends HMI status notification to mobile
-   * @param application_impl application with changed HMI status
+   * @param application application with changed HMI status
+   * @param window_id id of affected window
+   * @param application_manager reference to application manager
    **/
   static void SendHMIStatusNotification(
-      const Application& application_impl,
+      ApplicationSharedPtr application,
+      const WindowID window_id,
       ApplicationManager& application_manager);
 
   /**

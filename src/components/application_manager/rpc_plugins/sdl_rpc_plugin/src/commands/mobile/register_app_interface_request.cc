@@ -1346,13 +1346,12 @@ void RegisterAppInterfaceRequest::CheckResponseVehicleTypeParam(
 
 void RegisterAppInterfaceRequest::SendSubscribeCustomButtonNotification() {
   using namespace smart_objects;
-  using namespace hmi_apis;
-
   SmartObject msg_params = SmartObject(SmartType_Map);
   msg_params[strings::app_id] = connection_key();
-  msg_params[strings::name] = Common_ButtonName::CUSTOM_BUTTON;
+  msg_params[strings::name] = hmi_apis::Common_ButtonName::CUSTOM_BUTTON;
   msg_params[strings::is_suscribed] = true;
-  CreateHMINotification(FunctionID::Buttons_OnButtonSubscription, msg_params);
+  CreateHMINotification(hmi_apis::FunctionID::Buttons_OnButtonSubscription,
+                        msg_params);
 }
 
 bool RegisterAppInterfaceRequest::IsApplicationSwitched() {
@@ -1397,7 +1396,10 @@ bool RegisterAppInterfaceRequest::IsApplicationSwitched() {
   application_manager_.ProcessReconnection(app, connection_key());
   SendRegisterAppInterfaceResponseToMobile(app_type);
 
-  application_manager_.SendHMIStatusNotification(app);
+  MessageHelper::SendHMIStatusNotification(
+      app,
+      mobile_apis::PredefinedWindows::DEFAULT_WINDOW,
+      application_manager_);
 
   application_manager_.OnApplicationSwitched(app);
 
