@@ -216,6 +216,7 @@ extern const char* is_template;
 extern const char* image;
 extern const char* type;
 extern const char* system_file;
+extern const char* is_system_file;
 extern const char* offset;
 extern const char* length;
 extern const char* secondary_image;

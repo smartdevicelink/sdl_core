@@ -183,6 +183,7 @@ const char* is_template = "isTemplate";
 const char* image = "image";
 const char* type = "type";
 const char* system_file = "systemFile";
+const char* is_system_file = "isSystemFile";
 const char* offset = "offset";
 const char* length = "length";
 const char* secondary_image = "secondaryImage";
