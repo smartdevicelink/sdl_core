@@ -46,7 +46,8 @@ namespace {
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "Policy")
 
-bool Compare(const StringsValueType& first, const StringsValueType& second) {
+bool IsDifferentStrings(const StringsValueType& first,
+                        const StringsValueType& second) {
   const std::string& first_str = first;
   const std::string& second_str = second;
   return (strcasecmp(first_str.c_str(), second_str.c_str()) < 0);
@@ -132,10 +133,10 @@ bool policy::CheckAppPolicy::HasRevokedGroups(
       snapshot_->policy_table.app_policies_section.apps.find(app_policy.first);
 
   policy_table::Strings groups_new = app_policy.second.groups;
-  std::sort(groups_new.begin(), groups_new.end(), Compare);
+  std::sort(groups_new.begin(), groups_new.end(), IsDifferentStrings);
 
   policy_table::Strings groups_curr = (*it).second.groups;
-  std::sort(groups_curr.begin(), groups_curr.end(), Compare);
+  std::sort(groups_curr.begin(), groups_curr.end(), IsDifferentStrings);
 
   StringsConstItr it_groups_new = groups_new.begin();
   StringsConstItr it_groups_new_end = groups_new.end();
@@ -149,7 +150,7 @@ bool policy::CheckAppPolicy::HasRevokedGroups(
                       it_groups_new,
                       it_groups_new_end,
                       std::back_inserter(revoked_group_list),
-                      Compare);
+                      IsDifferentStrings);
 
   if (revoked_groups) {
     *revoked_groups = revoked_group_list;
@@ -165,10 +166,10 @@ bool policy::CheckAppPolicy::HasNewGroups(
       snapshot_->policy_table.app_policies_section.apps.find(app_policy.first);
 
   policy_table::Strings groups_new = app_policy.second.groups;
-  std::sort(groups_new.begin(), groups_new.end(), Compare);
+  std::sort(groups_new.begin(), groups_new.end(), IsDifferentStrings);
 
   policy_table::Strings groups_curr = (*it).second.groups;
-  std::sort(groups_curr.begin(), groups_curr.end(), Compare);
+  std::sort(groups_curr.begin(), groups_curr.end(), IsDifferentStrings);
 
   StringsConstItr it_groups_new = groups_new.begin();
   StringsConstItr it_groups_new_end = groups_new.end();
@@ -176,13 +177,55 @@ bool policy::CheckAppPolicy::HasNewGroups(
   StringsConstItr it_groups_curr = groups_curr.begin();
   StringsConstItr it_groups_curr_end = groups_curr.end();
 
+  auto IsDifferentGroupContent =
+      [this](const StringsValueType& update_group_name,
+             const StringsValueType& snapshot_group_name) -> bool {
+    if (IsDifferentStrings(update_group_name, snapshot_group_name)) {
+      return true;
+    }
+
+    const auto& func_group_from_update =
+        update_->policy_table.functional_groupings.find(update_group_name);
+    const auto& func_group_from_snapshot =
+        snapshot_->policy_table.functional_groupings.find(snapshot_group_name);
+
+    const auto& update_fg_rpcs = func_group_from_update->second.rpcs;
+    const auto& snapshot_fg_rpcs = func_group_from_snapshot->second.rpcs;
+
+    if (update_fg_rpcs.is_null() || snapshot_fg_rpcs.is_null()) {
+      return !(update_fg_rpcs.is_null() && snapshot_fg_rpcs.is_null());
+    }
+
+    if (update_fg_rpcs.size() != snapshot_fg_rpcs.size()) {
+      return true;
+    }
+
+    for (const auto& rpc : update_fg_rpcs) {
+      const auto& old_rpc = snapshot_fg_rpcs.find(rpc.first);
+      if (snapshot_fg_rpcs.end() == old_rpc) {
+        return true;
+      }
+
+      const bool hmi_levels_same =
+          old_rpc->second.hmi_levels == rpc.second.hmi_levels;
+      const bool parameters_same =
+          *(old_rpc->second.parameters) == *(rpc.second.parameters);
+
+      if (!hmi_levels_same || !parameters_same) {
+        return true;
+      }
+    }
+
+    return false;
+  };
+
   policy_table::Strings new_group_list;
   std::set_difference(it_groups_new,
                       it_groups_new_end,
                       it_groups_curr,
                       it_groups_curr_end,
                       std::back_inserter(new_group_list),
-                      Compare);
+                      IsDifferentGroupContent);
 
   if (new_groups) {
     *new_groups = new_group_list;
@@ -355,28 +398,32 @@ bool CheckAppPolicy::operator()(const AppPoliciesValueType& app_policy) {
       "Permissions for application:" << app_id << " have been changed.");
 
   if (IsPredefinedApp(app_policy)) {
-    for (const policy_table::ApplicationPolicies::value_type& app :
-         snapshot_->policy_table.app_policies_section.apps) {
-      if (app_policy.first == app.second.get_string()) {
-        if (RESULT_CONSENT_NOT_REQIURED != result) {
-          SetPendingPermissions(app, result);
-          NotifySystem(app);
-        }
-        SendPermissionsToApp(app.first, app_policy.second.groups);
-      }
+    const auto& snapshot_app_policy_begin =
+        snapshot_->policy_table.app_policies_section.apps.begin();
+    const auto& snapshot_app_policy_end =
+        snapshot_->policy_table.app_policies_section.apps.end();
+
+    auto find_app = [&app_id](AppPoliciesValueType app) {
+      return app_id == app.second.get_string();
+    };
+
+    const auto& app = std::find_if(
+        snapshot_app_policy_begin, snapshot_app_policy_end, find_app);
+
+    if ((snapshot_app_policy_end != app) &&
+        (RESULT_CONSENT_NOT_REQIURED != result)) {
+      SetPendingPermissions(*app, result);
+      NotifySystem(*app);
     }
     return true;
   }
 
-  if (!IsPredefinedApp(app_policy) && RESULT_CONSENT_NOT_REQIURED != result) {
+  if (RESULT_CONSENT_NOT_REQIURED != result) {
     SetPendingPermissions(app_policy, result);
     NotifySystem(app_policy);
   }
 
-  // Don't sent notification for predefined apps (e.g. default, device etc.)
-  if (!IsPredefinedApp(app_policy)) {
-    SendPermissionsToApp(app_policy.first, app_policy.second.groups);
-  }
+  SendPermissionsToApp(app_policy.first, app_policy.second.groups);
   return true;
 }
 
