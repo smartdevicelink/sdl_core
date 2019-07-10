@@ -46,6 +46,7 @@ class ApplicationManager;
 class Application;
 
 typedef std::shared_ptr<HmiState> HmiStatePtr;
+typedef int32_t WindowID;
 
 /**
  * @brief The HmiState class
@@ -206,11 +207,24 @@ class HmiState {
     state_id_ = state_id;
   }
 
+  /**
+   * @brief window_type getter for a window type for this type
+   * @return current state window type
+   */
+  mobile_apis::WindowType::eType window_type() const;
+
+  /**
+   * @brief set_window_type sets current state window type
+   * @param window_type new window type
+   */
+  void set_window_type(const mobile_apis::WindowType::eType window_type);
+
  protected:
   uint32_t hmi_app_id_;
   StateID state_id_;
   const ApplicationManager& app_mngr_;
   HmiStatePtr parent_;
+  mobile_apis::WindowType::eType window_type_;
   mobile_apis::HMILevel::eType hmi_level_;
   mobile_apis::AudioStreamingState::eType audio_streaming_state_;
   mobile_apis::VideoStreamingState::eType video_streaming_state_;

@@ -78,6 +78,8 @@ const int64_t kZeroOffset = 0u;
 const std::string kStorageFolder = "./storage";
 const std::string kFolder = "folder";
 const std::string kAppFolder = "app_folder";
+const am::WindowID kDefaultWindowId =
+    mobile_apis::PredefinedWindows::DEFAULT_WINDOW;
 }  // namespace
 
 class PutFileRequestTest
@@ -99,7 +101,7 @@ class PutFileRequestTest
 
     ON_CALL(app_mngr_, application(kConnectionKey))
         .WillByDefault(Return(mock_app_));
-    ON_CALL(*mock_app_, hmi_level())
+    ON_CALL(*mock_app_, hmi_level(kDefaultWindowId))
         .WillByDefault(Return(mobile_apis::HMILevel::HMI_FULL));
   }
 
@@ -179,7 +181,7 @@ TEST_F(PutFileRequestTest, Run_ApplicationIsNotRegistered_UNSUCCESS) {
 }
 
 TEST_F(PutFileRequestTest, Run_HmiLevelNone_UNSUCCESS) {
-  EXPECT_CALL(*mock_app_, hmi_level())
+  EXPECT_CALL(*mock_app_, hmi_level(kDefaultWindowId))
       .WillOnce(Return(mobile_apis::HMILevel::HMI_NONE));
 
   const uint32_t settings_put_file_in_none = 1u;

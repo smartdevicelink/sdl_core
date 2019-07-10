@@ -65,6 +65,8 @@ namespace {
 const uint32_t kAppId = 5u;
 const uint32_t kCustomButtonId = 3u;
 const mobile_apis::ButtonName::eType kButtonName = mobile_apis::ButtonName::OK;
+const am::WindowID kDefaultWindowId =
+    mobile_apis::PredefinedWindows::DEFAULT_WINDOW;
 }  // namespace
 
 template <class NotificationT,
@@ -217,7 +219,7 @@ TYPED_TEST(OnButtonNotificationCommandsTest, Run_CustomButton_SUCCESS) {
       this->template CreateCommand<Notification>(notification_msg));
 
   typename TestFixture::MockAppPtr mock_app = this->CreateMockApp();
-  ON_CALL(*mock_app, hmi_level())
+  ON_CALL(*mock_app, hmi_level(kDefaultWindowId))
       .WillByDefault(Return(mobile_apis::HMILevel::HMI_FULL));
   EXPECT_CALL(this->app_mngr_, application(kAppId)).WillOnce(Return(mock_app));
   EXPECT_CALL(*mock_app, IsSubscribedToSoftButton(kCustomButtonId))
@@ -264,7 +266,7 @@ TYPED_TEST(OnButtonNotificationCommandsTest, Run_InvalidHmiLevel_UNSUCCESS) {
   std::vector<ApplicationSharedPtr> subscribed_apps_list;
   subscribed_apps_list.push_back(mock_app);
 
-  EXPECT_CALL(*mock_app, hmi_level())
+  EXPECT_CALL(*mock_app, hmi_level(kDefaultWindowId))
       .WillRepeatedly(Return(mobile_apis::HMILevel::HMI_NONE));
 
   EXPECT_CALL(this->app_mngr_, applications_by_button(kButtonName))
@@ -290,7 +292,7 @@ TYPED_TEST(OnButtonNotificationCommandsTest,
   std::vector<ApplicationSharedPtr> subscribed_apps_list;
   subscribed_apps_list.push_back(mock_app);
 
-  EXPECT_CALL(*mock_app, hmi_level())
+  EXPECT_CALL(*mock_app, hmi_level(kDefaultWindowId))
       .WillRepeatedly(Return(mobile_apis::HMILevel::HMI_LIMITED));
 
   EXPECT_CALL(this->app_mngr_, applications_by_button(kButtonName))
@@ -316,7 +318,7 @@ TYPED_TEST(OnButtonNotificationCommandsTest, Run_SUCCESS) {
   std::vector<ApplicationSharedPtr> subscribed_apps_list;
   subscribed_apps_list.push_back(mock_app);
 
-  EXPECT_CALL(*mock_app, hmi_level())
+  EXPECT_CALL(*mock_app, hmi_level(kDefaultWindowId))
       .WillRepeatedly(Return(mobile_apis::HMILevel::HMI_FULL));
 
   ON_CALL(*mock_app, IsFullscreen()).WillByDefault(Return(true));

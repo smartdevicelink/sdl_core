@@ -352,7 +352,8 @@ void ResumptionDataTest::PrepareData() {
   ON_CALL(*app_mock, curHash()).WillByDefault(ReturnRef(hash_));
   ON_CALL(*app_mock, get_grammar_id()).WillByDefault(Return(grammar_id_));
   ON_CALL(*app_mock, device()).WillByDefault(Return(device_handle_));
-  ON_CALL(*app_mock, hmi_level()).WillByDefault(Return(hmi_level_));
+  ON_CALL(*app_mock, hmi_level(mobile_apis::PredefinedWindows::DEFAULT_WINDOW))
+      .WillByDefault(Return(hmi_level_));
   ON_CALL(*app_mock, app_id()).WillByDefault(Return(app_id_));
   ON_CALL(*app_mock, hmi_app_id()).WillByDefault(Return(hmi_app_id_));
   ON_CALL(*app_mock, IsAudioApplication()).WillByDefault(Return(is_audio_));

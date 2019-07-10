@@ -88,6 +88,7 @@ class InitialApplicationDataImpl : public virtual Application {
 
 class DynamicApplicationDataImpl : public virtual Application {
  public:
+  typedef std::map<WindowID, smart_objects::SmartObject> AppWindowsTemplates;
   DynamicApplicationDataImpl();
   ~DynamicApplicationDataImpl();
   const smart_objects::SmartObject* help_prompt() const;
@@ -100,9 +101,29 @@ class DynamicApplicationDataImpl : public virtual Application {
   const smart_objects::SmartObject* keyboard_props() const;
   const smart_objects::SmartObject* menu_title() const;
   const smart_objects::SmartObject* menu_icon() const;
-  const smart_objects::SmartObject* day_color_scheme() const;
-  const smart_objects::SmartObject* night_color_scheme() const;
-  const std::string& display_layout() const;
+
+  smart_objects::SmartObject day_color_scheme() const OVERRIDE;
+  smart_objects::SmartObject night_color_scheme() const OVERRIDE;
+  std::string display_layout() const OVERRIDE;
+  smart_objects::SmartObjectSPtr display_capabilities() const OVERRIDE;
+
+  void set_window_layout(const WindowID window_id,
+                         const std::string& layout) OVERRIDE;
+
+  void set_day_color_scheme(
+      const WindowID window_id,
+      const smart_objects::SmartObject& color_scheme) OVERRIDE;
+  void set_night_color_scheme(
+      const WindowID window_id,
+      const smart_objects::SmartObject& color_scheme) OVERRIDE;
+
+  std::string window_layout(const WindowID window_id) const OVERRIDE;
+
+  smart_objects::SmartObject day_color_scheme(
+      const WindowID window_id) const OVERRIDE;
+
+  smart_objects::SmartObject night_color_scheme(
+      const WindowID window_id) const OVERRIDE;
 
   void load_global_properties(const smart_objects::SmartObject& properties_so);
   void set_help_prompt(const smart_objects::SmartObject& help_prompt);
@@ -120,6 +141,8 @@ class DynamicApplicationDataImpl : public virtual Application {
   void set_day_color_scheme(const smart_objects::SmartObject& color_scheme);
   void set_night_color_scheme(const smart_objects::SmartObject& color_scheme);
   void set_display_layout(const std::string& layout);
+  void set_display_capabilities(
+      const smart_objects::SmartObject& display_capabilities) OVERRIDE;
   /*
    * @brief Adds a command to the in application menu
    */
@@ -155,6 +178,11 @@ class DynamicApplicationDataImpl : public virtual Application {
    * @brief Returns true if sub menu with such name already exist
    */
   bool IsSubMenuNameAlreadyExist(const std::string& name);
+
+  void AddWindowInfo(const WindowID window_id,
+                     const smart_objects::SmartObject& window_info) OVERRIDE;
+
+  void RemoveWindowInfo(const WindowID window_id) OVERRIDE;
 
   /*
    * @brief Adds a interaction choice set to the application
@@ -221,6 +249,8 @@ class DynamicApplicationDataImpl : public virtual Application {
    */
   inline DataAccessor<ChoiceSetMap> choice_set_map() const;
 
+  DataAccessor<WindowParamsMap> window_optional_params_map() const;
+
   /*
    * @brief Sets perform interaction state
    *
@@ -274,9 +304,8 @@ class DynamicApplicationDataImpl : public virtual Application {
   smart_objects::SmartObject* menu_title_;
   smart_objects::SmartObject* menu_icon_;
   smart_objects::SmartObject* tbt_show_command_;
-  smart_objects::SmartObject* day_color_scheme_;
-  smart_objects::SmartObject* night_color_scheme_;
-  std::string display_layout_;
+  smart_objects::SmartObjectSPtr display_capabilities_;
+  AppWindowsTemplates window_templates_;
 
   CommandsMap commands_;
   mutable std::shared_ptr<sync_primitives::RecursiveLock> commands_lock_ptr_;
@@ -287,6 +316,8 @@ class DynamicApplicationDataImpl : public virtual Application {
   PerformChoiceSetMap performinteraction_choice_set_map_;
   mutable std::shared_ptr<sync_primitives::RecursiveLock>
       performinteraction_choice_set_lock_ptr_;
+  WindowParamsMap window_params_map_;
+  mutable std::shared_ptr<sync_primitives::Lock> window_params_map_lock_ptr_;
   uint32_t is_perform_interaction_active_;
   bool is_reset_global_properties_active_;
   int32_t perform_interaction_mode_;

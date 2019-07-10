@@ -72,6 +72,8 @@ const uint32_t kHMIAppId1 = 1u;
 const uint32_t kAppId2 = 22u;
 const std::string policy_app_id_1_ = "policy_id_1";
 const uint32_t kSizeOfModules = 6u;
+const application_manager::WindowID kDefaultWindowId =
+    mobile_apis::PredefinedWindows::DEFAULT_WINDOW;
 }  // namespace
 
 namespace rc_rpc_plugin_test {
@@ -134,7 +136,8 @@ void RAManagerTest::CheckResultWithHMILevelAndAccessMode(
             ra_manager.AcquireResource(kModuleType1, kAppId1));
   EXPECT_CALL(mock_app_mngr_, application(kAppId2))
       .WillOnce(Return(mock_app_2_));
-  EXPECT_CALL(*mock_app_2_, hmi_level()).WillOnce(Return(app_level));
+  EXPECT_CALL(*mock_app_2_, hmi_level(kDefaultWindowId))
+      .WillOnce(Return(app_level));
   // Second app tries to get already acquired resource by 1st app
   EXPECT_EQ(expected_result, ra_manager.AcquireResource(kModuleType1, kAppId2));
 }
@@ -306,7 +309,7 @@ TEST_F(RAManagerTest, AnotherAppExit_NoReleaseResource) {
 
   EXPECT_CALL(mock_app_mngr_, application(kAppId2))
       .WillOnce(Return(mock_app_2_));
-  EXPECT_CALL(*mock_app_2_, hmi_level())
+  EXPECT_CALL(*mock_app_2_, hmi_level(kDefaultWindowId))
       .WillOnce(Return(mobile_apis::HMILevel::HMI_FULL));
   EXPECT_EQ(rc_rpc_plugin::AcquireResult::IN_USE,
             ra_manager.AcquireResource(kModuleType1, kAppId2));
@@ -360,7 +363,7 @@ TEST_F(RAManagerTest, AnotherAppUnregistered_NoReleaseResource) {
 
   EXPECT_CALL(mock_app_mngr_, application(kAppId2))
       .WillOnce(Return(mock_app_2_));
-  EXPECT_CALL(*mock_app_2_, hmi_level())
+  EXPECT_CALL(*mock_app_2_, hmi_level(kDefaultWindowId))
       .WillOnce(Return(mobile_apis::HMILevel::HMI_FULL));
   EXPECT_EQ(rc_rpc_plugin::AcquireResult::IN_USE,
             ra_manager.AcquireResource(kModuleType1, kAppId2));
@@ -400,7 +403,7 @@ TEST_F(RAManagerTest, AppsDisallowed_ReleaseAllResources) {
 
   EXPECT_CALL(mock_app_mngr_, application(kAppId2))
       .WillRepeatedly(Return(mock_app_2_));
-  EXPECT_CALL(*mock_app_2_, hmi_level())
+  EXPECT_CALL(*mock_app_2_, hmi_level(kDefaultWindowId))
       .WillRepeatedly(Return(mobile_apis::HMILevel::HMI_FULL));
   EXPECT_EQ(rc_rpc_plugin::AcquireResult::ALLOWED,
             ra_manager.AcquireResource(kModuleType1, kAppId2));
@@ -461,7 +464,7 @@ TEST_F(RAManagerTest, AppGotRevokedModulesWithPTU_ReleaseRevokedResource) {
 
   EXPECT_CALL(mock_app_mngr_, application(kAppId2))
       .WillRepeatedly(Return(mock_app_2_));
-  EXPECT_CALL(*mock_app_2_, hmi_level())
+  EXPECT_CALL(*mock_app_2_, hmi_level(kDefaultWindowId))
       .WillRepeatedly(Return(mobile_apis::HMILevel::HMI_FULL));
   EXPECT_EQ(rc_rpc_plugin::AcquireResult::IN_USE,
             ra_manager.AcquireResource(kModuleType1, kAppId2));

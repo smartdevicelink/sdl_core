@@ -476,6 +476,7 @@ class ApplicationManagerImpl
   /**
    * @brief CreateRegularState create regular HMI state for application
    * @param app Application
+   * @param window_type type of window
    * @param hmi_level of returned state
    * @param audio_state of returned state
    * @param system_context of returned state
@@ -483,10 +484,11 @@ class ApplicationManagerImpl
    */
   HmiStatePtr CreateRegularState(
       std::shared_ptr<Application> app,
-      mobile_apis::HMILevel::eType hmi_level,
-      mobile_apis::AudioStreamingState::eType audio_state,
-      mobile_apis::VideoStreamingState::eType video_state,
-      mobile_apis::SystemContext::eType system_context) const OVERRIDE;
+      const mobile_apis::WindowType::eType window_type,
+      const mobile_apis::HMILevel::eType hmi_level,
+      const mobile_apis::AudioStreamingState::eType audio_state,
+      const mobile_apis::VideoStreamingState::eType video_state,
+      const mobile_apis::SystemContext::eType system_context) const OVERRIDE;
 
   /**
    * @brief Checks, if given RPC is allowed at current HMI level for specific

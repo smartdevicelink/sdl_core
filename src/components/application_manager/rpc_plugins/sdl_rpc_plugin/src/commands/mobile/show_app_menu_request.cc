@@ -68,11 +68,12 @@ void ShowAppMenuRequest::Run() {
     return;
   }
 
-  if (mobile_apis::HMILevel::HMI_FULL != app->hmi_level() ||
+  if (mobile_apis::HMILevel::HMI_FULL !=
+          app->hmi_level(mobile_apis::PredefinedWindows::DEFAULT_WINDOW) ||
       helpers::Compare<mobile_apis::SystemContext::eType,
                        helpers::NEQ,
                        helpers::ALL>(
-          app->system_context(),
+          app->system_context(mobile_apis::PredefinedWindows::DEFAULT_WINDOW),
           mobile_apis::SystemContext::SYSCTXT_MAIN,
           mobile_apis::SystemContext::SYSCTXT_MENU)) {
     LOG4CXX_ERROR(

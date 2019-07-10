@@ -102,8 +102,10 @@ void OnButtonEventNotification::Run() {
       return;
     }
 
-    if ((mobile_api::HMILevel::HMI_FULL != app->hmi_level()) &&
-        (mobile_api::HMILevel::HMI_LIMITED != app->hmi_level())) {
+    const mobile_apis::HMILevel::eType app_hmi_level =
+        app->hmi_level(mobile_apis::PredefinedWindows::DEFAULT_WINDOW);
+    if ((mobile_api::HMILevel::HMI_FULL != app_hmi_level) &&
+        (mobile_api::HMILevel::HMI_LIMITED != app_hmi_level)) {
       LOG4CXX_WARN(logger_,
                    "CUSTOM_BUTTON OnButtonEvent notification is allowed only "
                        << "in FULL or LIMITED hmi level");
@@ -127,8 +129,11 @@ void OnButtonEventNotification::Run() {
     }
 
     // Send ButtonEvent notification only in HMI_FULL or HMI_LIMITED mode
-    if ((mobile_api::HMILevel::HMI_FULL != subscribed_app->hmi_level()) &&
-        (mobile_api::HMILevel::HMI_LIMITED != subscribed_app->hmi_level())) {
+    const mobile_apis::HMILevel::eType app_hmi_level =
+        subscribed_app->hmi_level(
+            mobile_apis::PredefinedWindows::DEFAULT_WINDOW);
+    if ((mobile_api::HMILevel::HMI_FULL != app_hmi_level) &&
+        (mobile_api::HMILevel::HMI_LIMITED != app_hmi_level)) {
       LOG4CXX_WARN(logger_,
                    "OnButtonEvent notification is allowed only"
                        << "in FULL or LIMITED hmi level");

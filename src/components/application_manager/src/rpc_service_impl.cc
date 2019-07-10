@@ -177,7 +177,8 @@ bool RPCServiceImpl::ManageMobileCommand(
     mobile_apis::HMILevel::eType app_hmi_level =
         mobile_apis::HMILevel::INVALID_ENUM;
     if (app) {
-      app_hmi_level = app->hmi_level();
+      app_hmi_level =
+          app->hmi_level(mobile_apis::PredefinedWindows::DEFAULT_WINDOW);
     }
 
     // commands will be launched from request_ctrl

@@ -1885,8 +1885,8 @@ TEST_F(HMICommandsNotificationsTest, OnDriverDistractionNotificationValidApp) {
 
   policy::CheckPermissionResult result;
   result.hmi_level_permitted = policy::kRpcAllowed;
-  EXPECT_CALL(mock_policy_handler_, CheckPermissions(_, _, _, _))
-      .WillOnce(GetArg3(&result));
+  EXPECT_CALL(mock_policy_handler_, CheckPermissions(_, _, _, _, _))
+      .WillOnce(GetArg4(&result));
 
   EXPECT_CALL(mock_rpc_service_,
               ManageMobileCommand(_, Command::CommandSource::SOURCE_SDL))
