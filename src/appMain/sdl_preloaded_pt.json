@@ -271,6 +271,11 @@
                         "hmi_levels": ["BACKGROUND",
                         "FULL",
                         "LIMITED"]
+                    },
+                    "CancelInteraction": {
+                        "hmi_levels": ["BACKGROUND",
+                        "FULL",
+                        "LIMITED"]
                     }
                 }
             },

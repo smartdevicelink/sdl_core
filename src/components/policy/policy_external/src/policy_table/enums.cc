@@ -1159,6 +1159,11 @@ bool EnumFromJsonString(const std::string& literal, FunctionID* result) {
     return true;
   }
 
+  if ("CancelInteraction" == literal) {
+    *result = CancelInteractionID;
+    return true;
+  }
+
   if ("OnHMIStatus" == literal) {
     *result = OnHMIStatusID;
     return true;
