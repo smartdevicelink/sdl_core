@@ -51,10 +51,10 @@
 
 #include "utils/date_time.h"
 #include "utils/file_system.h"
+#include "utils/gen_hash.h"
 #include "utils/macro.h"
 
 #include "policy/mock_access_remote.h"
-#include "utils/gen_hash.h"
 
 using ::testing::_;
 using ::testing::AtLeast;
@@ -76,6 +76,12 @@ namespace custom_str = utils::custom_string;
 
 typedef std::multimap<std::string, policy_table::Rpcs&>
     UserConsentPromptToRpcsConnections;
+
+namespace {
+std::string kSpeed = "speed";
+std::string kRPM = "rpm";
+std::string kFuelLevel = "fuelLevel";
+}  // namespace
 
 template <typename T>
 std::string NumberToString(T Number) {
@@ -144,6 +150,7 @@ class PolicyManagerImplTest : public ::testing::Test {
   PolicyManagerImpl* manager;
   NiceMock<MockCacheManagerInterface>* cache_manager;
   NiceMock<MockPolicyListener> listener;
+  NiceMock<MockUpdateStatusManager> update_status_manager;
   const std::string device_id;
   std::shared_ptr<access_remote_test::MockAccessRemote> access_remote;
 
@@ -152,7 +159,7 @@ class PolicyManagerImplTest : public ::testing::Test {
     manager->set_listener(&listener);
     cache_manager = new NiceMock<MockCacheManagerInterface>();
     manager->set_cache_manager(cache_manager);
-    access_remote = std::shared_ptr<access_remote_test::MockAccessRemote>();
+    access_remote = std::make_shared<access_remote_test::MockAccessRemote>();
     manager->set_access_remote(access_remote);
   }
 
@@ -168,6 +175,71 @@ class PolicyManagerImplTest : public ::testing::Test {
       table.ReportErrors(&report);
       return ::testing::AssertionFailure() << ::rpc::PrettyFormat(report);
     }
+  }
+
+  void PrepareUpdateWithFunctionalGroupingContent(policy_table::Table& update) {
+    using namespace application_manager;
+
+    update.SetPolicyTableType(rpc::policy_table_interface_base::PT_UPDATE);
+
+    policy_table::Rpcs rpcs;
+    rpcs.mark_initialized();
+
+    policy_table::Rpc rpc;
+    rpc.mark_initialized();
+
+    policy_table::RpcParameters rpc_params;
+    rpc_params.mark_initialized();
+    rpc_params.hmi_levels.push_back(
+        rpc::policy_table_interface_base::HmiLevel::HL_FULL);
+    rpc_params.hmi_levels.push_back(
+        rpc::policy_table_interface_base::HmiLevel::HL_BACKGROUND);
+
+    (*rpc_params.parameters).push_back(kRPM);
+    (*rpc_params.parameters).push_back(kSpeed);
+
+    rpc["GetVehicleData"] = rpc_params;
+    rpcs.rpcs = rpc;
+
+    policy_table::FunctionalGroupings fg;
+    fg["TestGroup1"] = rpcs;
+
+    update.policy_table.functional_groupings = fg;
+
+    policy_table::ApplicationParams app_params;
+    app_params.mark_initialized();
+    app_params.priority =
+        rpc::policy_table_interface_base::Priority::P_COMMUNICATION;
+    app_params.groups.push_back("TestGroup1");
+    update.policy_table.app_policies_section.apps["1234"] = app_params;
+  }
+
+  void ExpectOnPermissionsUpdated() {
+    EXPECT_CALL(*cache_manager, IsDefaultPolicy("1234")).WillOnce(Return(true));
+    EXPECT_CALL(listener, OnCurrentDeviceIdUpdateRequired("1234"))
+        .WillOnce(Return("dev_id_1"));
+    EXPECT_CALL(*access_remote, IsAppRemoteControl(_)).WillOnce(Return(true));
+
+    FunctionalGroupNames fg_names;
+    fg_names[0] =
+        std::make_pair<std::string, std::string>("fg_name_1", "fg_name_2");
+    EXPECT_CALL(*cache_manager, GetFunctionalGroupNames(_))
+        .WillOnce(DoAll(SetArgReferee<0>(fg_names), Return(true)));
+
+    int32_t group_id = 0;
+    FunctionalGroupIDs ids;
+    ids.push_back(group_id);
+    FunctionalIdType group_types;
+    group_types[GroupType::kTypeGeneral] = ids;
+    EXPECT_CALL(*access_remote, GetPermissionsForApp("dev_id_1", "1234", _))
+        .WillRepeatedly(DoAll(SetArgReferee<2>(group_types), Return(true)));
+
+    EXPECT_CALL(listener, OnPermissionsUpdated("1234", _, _)).Times(1);
+
+    EXPECT_CALL(listener, GetAppName(_))
+        .WillOnce(Return(custom_str::CustomString("")));
+
+    EXPECT_CALL(listener, OnUpdateStatusChanged(_)).Times(1);
   }
 };
 
@@ -899,13 +971,214 @@ TEST_F(PolicyManagerImplTest, LoadPT_SetPT_PTIsLoaded) {
       std::make_shared<policy_table::Table>(update.policy_table);
   // Assert
   EXPECT_CALL(*cache_manager, GenerateSnapshot()).WillOnce(Return(snapshot));
+  EXPECT_CALL(*cache_manager, pt()).WillOnce(Return(snapshot));
+  snapshot->policy_table.vehicle_data->schema_items =
+      rpc::Optional<policy_table::VehicleDataItems>();
   EXPECT_CALL(*cache_manager, ApplyUpdate(_)).WillOnce(Return(true));
   EXPECT_CALL(listener, GetAppName("1234"))
       .WillOnce(Return(custom_str::CustomString("")));
-  EXPECT_CALL(listener, OnUpdateStatusChanged(_));
   EXPECT_CALL(*cache_manager, SaveUpdateRequired(false));
   EXPECT_CALL(*cache_manager, TimeoutResponse());
   EXPECT_CALL(*cache_manager, SecondsBetweenRetries(_));
+  EXPECT_TRUE(manager->LoadPT("file_pt_update.json", msg));
+}
+
+TEST_F(PolicyManagerImplTest, LoadPT_FunctionalGroup_removeRPC_SendUpdate) {
+  // Arrange
+  manager->ForcePTExchange();
+  manager->OnUpdateStarted();
+  Json::Value table = CreatePTforLoad();
+  policy_table::Table update(&table);
+
+  PrepareUpdateWithFunctionalGroupingContent(update);
+
+  std::shared_ptr<policy_table::Table> snapshot =
+      std::make_shared<policy_table::Table>(update.policy_table);
+
+  const auto& fg_found =
+      update.policy_table.functional_groupings.find("TestGroup1");
+  fg_found->second.rpcs.erase("GetVehicleData");
+
+  ASSERT_TRUE(IsValid(update));
+
+  const std::string json = update.ToJsonValue().toStyledString();
+  ::policy::BinaryMessage msg(json.begin(), json.end());
+
+  // Assert
+  EXPECT_CALL(*cache_manager, pt()).WillOnce(Return(snapshot));
+  snapshot->policy_table.vehicle_data->schema_items =
+      rpc::Optional<policy_table::VehicleDataItems>();
+  EXPECT_CALL(*cache_manager, GenerateSnapshot()).WillOnce(Return(snapshot));
+  EXPECT_CALL(*cache_manager, ApplyUpdate(_)).WillOnce(Return(true));
+  ExpectOnPermissionsUpdated();
+
+  EXPECT_TRUE(manager->LoadPT("file_pt_update.json", msg));
+}
+
+TEST_F(PolicyManagerImplTest,
+       LoadPT_FunctionalGroup_removeRPCParams_SendUpdate) {
+  // Arrange
+  manager->ForcePTExchange();
+  manager->OnUpdateStarted();
+  Json::Value table = CreatePTforLoad();
+  policy_table::Table update(&table);
+
+  PrepareUpdateWithFunctionalGroupingContent(update);
+
+  std::shared_ptr<policy_table::Table> snapshot =
+      std::make_shared<policy_table::Table>(update.policy_table);
+
+  const auto& fg_found =
+      update.policy_table.functional_groupings.find("TestGroup1");
+  policy_table::RpcParameters& new_rpc_params =
+      fg_found->second.rpcs["GetVehicleData"];
+  new_rpc_params.parameters->erase(new_rpc_params.parameters->begin());
+
+  ASSERT_TRUE(IsValid(update));
+
+  const std::string json = update.ToJsonValue().toStyledString();
+  ::policy::BinaryMessage msg(json.begin(), json.end());
+
+  // Assert
+  EXPECT_CALL(*cache_manager, GenerateSnapshot()).WillOnce(Return(snapshot));
+  EXPECT_CALL(*cache_manager, pt()).WillOnce(Return(snapshot));
+  snapshot->policy_table.vehicle_data->schema_items =
+      rpc::Optional<policy_table::VehicleDataItems>();
+  EXPECT_CALL(*cache_manager, ApplyUpdate(_)).WillOnce(Return(true));
+  ExpectOnPermissionsUpdated();
+
+  EXPECT_TRUE(manager->LoadPT("file_pt_update.json", msg));
+}
+
+TEST_F(PolicyManagerImplTest,
+       LoadPT_FunctionalGroup_removeRPC_HMILevels_SendUpdate) {
+  // Arrange
+  manager->ForcePTExchange();
+  manager->OnUpdateStarted();
+  Json::Value table = CreatePTforLoad();
+  policy_table::Table update(&table);
+
+  PrepareUpdateWithFunctionalGroupingContent(update);
+
+  std::shared_ptr<policy_table::Table> snapshot =
+      std::make_shared<policy_table::Table>(update.policy_table);
+
+  const auto& fg_found =
+      update.policy_table.functional_groupings.find("TestGroup1");
+  policy_table::RpcParameters& new_rpc_params =
+      fg_found->second.rpcs["GetVehicleData"];
+  new_rpc_params.hmi_levels.erase(new_rpc_params.hmi_levels.begin());
+
+  ASSERT_TRUE(IsValid(update));
+
+  const std::string json = update.ToJsonValue().toStyledString();
+  ::policy::BinaryMessage msg(json.begin(), json.end());
+
+  // Assert
+  EXPECT_CALL(*cache_manager, GenerateSnapshot()).WillOnce(Return(snapshot));
+  EXPECT_CALL(*cache_manager, pt()).WillOnce(Return(snapshot));
+  snapshot->policy_table.vehicle_data->schema_items =
+      rpc::Optional<policy_table::VehicleDataItems>();
+  EXPECT_CALL(*cache_manager, ApplyUpdate(_)).WillOnce(Return(true));
+  ExpectOnPermissionsUpdated();
+
+  EXPECT_TRUE(manager->LoadPT("file_pt_update.json", msg));
+}
+
+TEST_F(PolicyManagerImplTest,
+       LoadPT_FunctionalGroup_addRPC_HMILevels_SendUpdate) {
+  // Arrange
+  manager->ForcePTExchange();
+  manager->OnUpdateStarted();
+  Json::Value table = CreatePTforLoad();
+  policy_table::Table update(&table);
+
+  PrepareUpdateWithFunctionalGroupingContent(update);
+
+  std::shared_ptr<policy_table::Table> snapshot =
+      std::make_shared<policy_table::Table>(update.policy_table);
+
+  const auto& fg_found =
+      update.policy_table.functional_groupings.find("TestGroup1");
+  policy_table::RpcParameters& new_rpc_params =
+      fg_found->second.rpcs["GetVehicleData"];
+  new_rpc_params.hmi_levels.push_back(
+      rpc::policy_table_interface_base::HmiLevel::HL_LIMITED);
+
+  ASSERT_TRUE(IsValid(update));
+
+  const std::string json = update.ToJsonValue().toStyledString();
+  ::policy::BinaryMessage msg(json.begin(), json.end());
+
+  // Assert
+  EXPECT_CALL(*cache_manager, GenerateSnapshot()).WillOnce(Return(snapshot));
+  EXPECT_CALL(*cache_manager, pt()).WillOnce(Return(snapshot));
+  snapshot->policy_table.vehicle_data->schema_items =
+      rpc::Optional<policy_table::VehicleDataItems>();
+  EXPECT_CALL(*cache_manager, ApplyUpdate(_)).WillOnce(Return(true));
+  ExpectOnPermissionsUpdated();
+
+  EXPECT_TRUE(manager->LoadPT("file_pt_update.json", msg));
+}
+
+TEST_F(PolicyManagerImplTest, LoadPT_FunctionalGroup_addRPCParams_SendUpdate) {
+  using namespace application_manager;
+  // Arrange
+  manager->ForcePTExchange();
+  manager->OnUpdateStarted();
+  Json::Value table = CreatePTforLoad();
+  policy_table::Table update(&table);
+
+  PrepareUpdateWithFunctionalGroupingContent(update);
+
+  std::shared_ptr<policy_table::Table> snapshot =
+      std::make_shared<policy_table::Table>(update.policy_table);
+
+  const auto& fg_found =
+      update.policy_table.functional_groupings.find("TestGroup1");
+  policy_table::RpcParameters& new_rpc_params =
+      fg_found->second.rpcs["GetVehicleData"];
+  (*new_rpc_params.parameters).push_back(kFuelLevel);
+
+  ASSERT_TRUE(IsValid(update));
+
+  const std::string json = update.ToJsonValue().toStyledString();
+  ::policy::BinaryMessage msg(json.begin(), json.end());
+
+  // Assert
+  EXPECT_CALL(*cache_manager, GenerateSnapshot()).WillOnce(Return(snapshot));
+  EXPECT_CALL(*cache_manager, pt()).WillOnce(Return(snapshot));
+  snapshot->policy_table.vehicle_data->schema_items =
+      rpc::Optional<policy_table::VehicleDataItems>();
+  EXPECT_CALL(*cache_manager, ApplyUpdate(_)).WillOnce(Return(true));
+  ExpectOnPermissionsUpdated();
+
+  EXPECT_TRUE(manager->LoadPT("file_pt_update.json", msg));
+}
+
+TEST_F(PolicyManagerImplTest, LoadPT_FunctionalGroup_NoUpdate_DONT_SendUpdate) {
+  // Arrange
+  manager->ForcePTExchange();
+  manager->OnUpdateStarted();
+  Json::Value table = CreatePTforLoad();
+  policy_table::Table update(&table);
+
+  PrepareUpdateWithFunctionalGroupingContent(update);
+
+  std::shared_ptr<policy_table::Table> snapshot =
+      std::make_shared<policy_table::Table>(update.policy_table);
+
+  ASSERT_TRUE(IsValid(update));
+
+  const std::string json = update.ToJsonValue().toStyledString();
+  ::policy::BinaryMessage msg(json.begin(), json.end());
+
+  // Assert
+  EXPECT_CALL(*cache_manager, GenerateSnapshot()).WillOnce(Return(snapshot));
+  EXPECT_CALL(*cache_manager, pt()).WillOnce(Return(snapshot));
+  snapshot->policy_table.vehicle_data->schema_items =
+      rpc::Optional<policy_table::VehicleDataItems>();
+  EXPECT_CALL(*cache_manager, ApplyUpdate(_)).WillOnce(Return(true));
 
   EXPECT_TRUE(manager->LoadPT("file_pt_update.json", msg));
 }
@@ -929,6 +1202,9 @@ TEST_F(PolicyManagerImplTest, LoadPT_SetInvalidUpdatePT_PTIsNotLoaded) {
   std::shared_ptr<policy_table::Table> snapshot =
       std::make_shared<policy_table::Table>(update.policy_table);
   ON_CALL(*cache_manager, GenerateSnapshot()).WillByDefault(Return(snapshot));
+  ON_CALL(*cache_manager, pt()).WillByDefault(Return(snapshot));
+  snapshot->policy_table.vehicle_data->schema_items =
+      rpc::Optional<policy_table::VehicleDataItems>();
 
   // Assert
   EXPECT_CALL(*cache_manager, ApplyUpdate(_)).Times(0);
@@ -1477,23 +1753,6 @@ TEST_F(PolicyManagerImplTest2, GetCurrentDeviceId) {
   EXPECT_EQ(custom_str::CustomString(""),
             manager->GetCurrentDeviceId(dev_handle2, app_id2));
   EXPECT_EQ("", manager->GetCurrentDeviceId(dev_handle2, app_id2));
-}
-
-TEST_F(PolicyManagerImplTest2,
-       GetVehicleInfo_SetVehicleInfo_ExpectReceivedInfoCorrect) {
-  // Arrange
-  CreateLocalPT("sdl_preloaded_pt.json");
-  GetPTU("valid_sdl_pt_update.json");
-  std::shared_ptr<policy_table::Table> pt = (manager->GetCache())->pt();
-  policy_table::ModuleConfig& module_config = pt->policy_table.module_config;
-  ::policy::VehicleInfo vehicle_info = manager->GetVehicleInfo();
-
-  EXPECT_EQ(static_cast<std::string>(*module_config.vehicle_make),
-            vehicle_info.vehicle_make);
-  EXPECT_EQ(static_cast<std::string>(*module_config.vehicle_model),
-            vehicle_info.vehicle_model);
-  EXPECT_EQ(static_cast<std::string>(*module_config.vehicle_year),
-            vehicle_info.vehicle_year);
 }
 
 TEST_F(
