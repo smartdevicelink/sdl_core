@@ -378,7 +378,8 @@ void MessageHelper::BroadcastCapabilityUpdate(
       hmi_apis::FunctionID::BasicCommunication_OnSystemCapabilityUpdated;
   smart_objects::SmartObjectSPtr hmi_notification =
       std::make_shared<smart_objects::SmartObject>(message);
-  app_mngr.GetRPCService().ManageHMICommand(hmi_notification);
+  app_mngr.GetRPCService().ManageHMICommand(
+      hmi_notification, commands::Command::CommandSource::SOURCE_SDL_TO_HMI);
 }
 
 smart_objects::SmartObject MessageHelper::CreateAppServiceCapabilities(
