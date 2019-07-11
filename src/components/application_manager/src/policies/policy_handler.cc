@@ -168,6 +168,7 @@ struct DeactivateApplication {
     if (device_id_ == app->device()) {
       state_ctrl_.SetRegularState(
           app,
+          mobile_apis::PredefinedWindows::DEFAULT_WINDOW,
           mobile_apis::HMILevel::HMI_NONE,
           mobile_apis::AudioStreamingState::NOT_AUDIBLE,
           mobile_apis::VideoStreamingState::NOT_STREAMABLE,
@@ -881,6 +882,9 @@ std::string PolicyHandler::OnCurrentDeviceIdUpdateRequired(
                         "not found within registered applications.");
     return std::string();
   }
+  DeviceParams device_params = GetDeviceParams(
+      app->device(),
+      application_manager_.connection_handler().get_session_observer());
 
   return device_params.device_mac_address;
 }
@@ -962,6 +966,7 @@ void PolicyHandler::OnPendingPermissionChange(
         app_id, permissions, application_manager_);
     application_manager_.state_controller().SetRegularState(
         app,
+        mobile_apis::PredefinedWindows::DEFAULT_WINDOW,
         mobile_apis::HMILevel::HMI_NONE,
         mobile_apis::AudioStreamingState::NOT_AUDIBLE,
         mobile_apis::VideoStreamingState::NOT_STREAMABLE,
@@ -1126,7 +1131,11 @@ struct SDLAlowedNotification {
       } else {
         return;
       }
-      state_controller_.SetRegularState(app, default_mobile_hmi, true);
+      state_controller_.SetRegularState(
+          app,
+          mobile_apis::PredefinedWindows::DEFAULT_WINDOW,
+          default_mobile_hmi,
+          true);
     }
   }
 
@@ -1235,7 +1244,12 @@ void PolicyHandler::OnAllowSDLFunctionalityNotification(
                                     : VideoStreamingState::NOT_STREAMABLE;
 
       application_manager_.state_controller().SetRegularState(
-          app, mobile_apis::HMILevel::HMI_FULL, audio_state, video_state, true);
+          app,
+          mobile_apis::PredefinedWindows::DEFAULT_WINDOW,
+          mobile_apis::HMILevel::HMI_FULL,
+          audio_state,
+          video_state,
+          true);
       last_activated_app_id_ = 0;
     } else {
       DeactivateApplication deactivate_notification(
@@ -1383,12 +1397,19 @@ void PolicyHandler::OnPermissionsUpdated(const std::string& device_id,
                        << policy_app_id << " to default hmi level "
                        << default_hmi);
 
-      const bool is_full_hmi_level =
-          mobile_apis::HMILevel::HMI_FULL == hmi_level;
-
-      application_manager_.state_controller().SetRegularState(
-          app, hmi_level, is_full_hmi_level);
-
+      if (hmi_level == mobile_apis::HMILevel::HMI_FULL) {
+        application_manager_.state_controller().SetRegularState(
+            app,
+            mobile_apis::PredefinedWindows::DEFAULT_WINDOW,
+            hmi_level,
+            true);
+      } else {
+        application_manager_.state_controller().SetRegularState(
+            app,
+            mobile_apis::PredefinedWindows::DEFAULT_WINDOW,
+            hmi_level,
+            false);
+      }
       break;
     }
     default:
@@ -1520,9 +1541,13 @@ void PolicyHandler::CheckPermissions(
                "Checking permissions for  " << app->policy_app_id() << " in "
                                             << hmi_level << " on device "
                                             << device_id << " rpc " << rpc);
-
+#ifdef EXTERNAL_PROPRIETARY_MODE
+  policy_manager_->CheckPermissions(
+      app->policy_app_id(), hmi_level, rpc, rpc_params, result);
+#else   // EXTERNAL_PROPRIETARY_MODE
   policy_manager_->CheckPermissions(
       device_id, app->policy_app_id(), hmi_level, rpc, rpc_params, result);
+#endif  // EXTERNAL_PROPRIETARY_MODE
 }
 
 uint32_t PolicyHandler::GetNotificationsNumber(
@@ -2249,6 +2274,8 @@ bool PolicyHandler::IsUrlAppIdValid(const uint32_t app_idx,
                                     const EndpointUrls& urls) const {
   const EndpointData& app_data = urls[app_idx];
   const std::vector<std::string> app_urls = app_data.url;
+  const ApplicationSharedPtr app =
+      application_manager_.application_by_policy_id(app_data.app_id);
 
   if (policy::kDefaultId == app_data.app_id) {
     return true;

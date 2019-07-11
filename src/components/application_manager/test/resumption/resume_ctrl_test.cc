@@ -73,6 +73,11 @@ using namespace application_manager_test;
 using namespace resumption;
 using namespace mobile_apis::HMILevel;
 
+namespace {
+const WindowID kDefaultWindowId =
+    mobile_apis::PredefinedWindows::DEFAULT_WINDOW;
+}
+
 class ResumeCtrlTest : public ::testing::Test {
  protected:
   ResumeCtrlTest()
@@ -572,7 +577,8 @@ TEST_F(ResumeCtrlTest, StartResumption_AppWithSubscriptionToWayPoints) {
       mobile_apis::HMILevel::HMI_FULL;
   ON_CALL(mock_app_mngr_, GetDefaultHmiLevel(const_app_))
       .WillByDefault(Return(hmi_test_level));
-  EXPECT_CALL(mock_state_controller_, SetRegularState(_, hmi_test_level));
+  EXPECT_CALL(mock_state_controller_,
+              SetRegularState(_, kDefaultWindowId, hmi_test_level));
 
   const bool result = res_ctrl_->StartResumption(mock_app_, kHash_);
   EXPECT_TRUE(result);
@@ -632,7 +638,8 @@ TEST_F(ResumeCtrlTest, StartAppHmiStateResumption_AppInFull) {
   DataAccessor<application_manager::CommandsMap> data_accessor(
       command, app_set_lock_ptr_);
 
-  EXPECT_CALL(mock_state_controller_, SetRegularState(_, restored_test_type))
+  EXPECT_CALL(mock_state_controller_,
+              SetRegularState(_, kDefaultWindowId, restored_test_type))
       .Times(AtLeast(1));
   GetInfoFromApp();
   EXPECT_CALL(mock_app_mngr_, GetDefaultHmiLevel(const_app_))
@@ -681,7 +688,8 @@ TEST_F(ResumeCtrlTest, StartAppHmiStateResumption_AppHasDeferredResumption) {
   saved_app[application_manager::strings::time_stamp] = time_stamp;
 
   // resume into deferred level instead of restored level
-  EXPECT_CALL(mock_state_controller_, SetRegularState(_, deferred_level))
+  EXPECT_CALL(mock_state_controller_,
+              SetRegularState(_, kDefaultWindowId, deferred_level))
       .Times(AtLeast(1));
   GetInfoFromApp();
   ON_CALL(*mock_storage_,
@@ -716,7 +724,8 @@ TEST_F(ResumeCtrlTest,
   saved_app[application_manager::strings::hmi_level] = restored_test_type;
   saved_app[application_manager::strings::time_stamp] = time_stamp;
 
-  EXPECT_CALL(mock_state_controller_, SetRegularState(_, eType::HMI_LIMITED))
+  EXPECT_CALL(mock_state_controller_,
+              SetRegularState(_, kDefaultWindowId, eType::HMI_LIMITED))
       .Times(AtLeast(1));
   GetInfoFromApp();
   ON_CALL(*mock_storage_,
@@ -760,7 +769,8 @@ TEST_F(
 
   // in this test, it is expected that the app will resume into LIMITED, which
   // is the higher level among NONE and LIMITED
-  EXPECT_CALL(mock_state_controller_, SetRegularState(_, eType::HMI_LIMITED))
+  EXPECT_CALL(mock_state_controller_,
+              SetRegularState(_, kDefaultWindowId, eType::HMI_LIMITED))
       .Times(AtLeast(1));
   GetInfoFromApp();
   ON_CALL(*mock_storage_,
@@ -816,7 +826,8 @@ TEST_F(ResumeCtrlTest, RestoreAppHMIState_RestoreHMILevelFull) {
   saved_app[application_manager::strings::grammar_id] = kTestGrammarId_;
   saved_app[application_manager::strings::hmi_level] = restored_test_type;
 
-  EXPECT_CALL(mock_state_controller_, SetRegularState(_, restored_test_type))
+  EXPECT_CALL(mock_state_controller_,
+              SetRegularState(_, kDefaultWindowId, restored_test_type))
       .Times(AtLeast(1));
   GetInfoFromApp();
   EXPECT_CALL(mock_app_mngr_, GetDefaultHmiLevel(const_app_))
@@ -847,7 +858,8 @@ TEST_F(ResumeCtrlTest, SetupDefaultHMILevel) {
   ON_CALL(mock_app_mngr_, GetDefaultHmiLevel(const_app_))
       .WillByDefault(Return(kDefaultTestLevel_));
 
-  EXPECT_CALL(mock_state_controller_, SetRegularState(_, kDefaultTestLevel_))
+  EXPECT_CALL(mock_state_controller_,
+              SetRegularState(_, kDefaultWindowId, kDefaultTestLevel_))
       .Times(AtLeast(1));
 
   res_ctrl_->SetupDefaultHMILevel(mock_app_);
@@ -876,7 +888,8 @@ TEST_F(ResumeCtrlTest,
   EXPECT_CALL(*mock_app_, is_media_application()).WillRepeatedly(Return(false));
 
   // SetRegularState() should be called with kProjectionLowbandwidthLevel_
-  EXPECT_CALL(mock_state_controller_, SetRegularState(_, eType::HMI_NONE))
+  EXPECT_CALL(mock_state_controller_,
+              SetRegularState(_, kDefaultWindowId, eType::HMI_NONE))
       .Times(AtLeast(1));
 
   res_ctrl_->SetupDefaultHMILevel(mock_app_);
@@ -903,7 +916,8 @@ TEST_F(ResumeCtrlTest, ApplicationResumptiOnTimer_AppInFull) {
   MockStateController state_controller;
   EXPECT_CALL(mock_app_mngr_, state_controller())
       .WillOnce(ReturnRef(state_controller));
-  EXPECT_CALL(state_controller, SetRegularState(_, restored_test_type))
+  EXPECT_CALL(state_controller,
+              SetRegularState(_, kDefaultWindowId, restored_test_type))
       .Times(AtLeast(1));
   GetInfoFromApp();
   EXPECT_CALL(mock_app_mngr_, GetDefaultHmiLevel(const_app_))
@@ -932,7 +946,8 @@ TEST_F(ResumeCtrlTest, SetAppHMIState_HMINone_WithoutCheckPolicy) {
   EXPECT_CALL(mock_app_mngr_, GetUserConsentForDevice("12345")).Times(0);
 
   EXPECT_CALL(*mock_app_, set_is_resuming(true));
-  EXPECT_CALL(mock_state_controller_, SetRegularState(_, kDefaultTestLevel_))
+  EXPECT_CALL(mock_state_controller_,
+              SetRegularState(_, kDefaultWindowId, kDefaultTestLevel_))
       .Times(AtLeast(1));
   const bool res =
       res_ctrl_->SetAppHMIState(mock_app_, kDefaultTestLevel_, false);
@@ -945,7 +960,8 @@ TEST_F(ResumeCtrlTest, SetAppHMIState_HMILimited_WithoutCheckPolicy) {
   EXPECT_CALL(mock_app_mngr_, GetUserConsentForDevice("12345")).Times(0);
 
   EXPECT_CALL(*mock_app_, set_is_resuming(true));
-  EXPECT_CALL(mock_state_controller_, SetRegularState(_, test_type))
+  EXPECT_CALL(mock_state_controller_,
+              SetRegularState(_, kDefaultWindowId, test_type))
       .Times(AtLeast(1));
   const bool res = res_ctrl_->SetAppHMIState(mock_app_, test_type, false);
   EXPECT_TRUE(res);
@@ -959,7 +975,8 @@ TEST_F(ResumeCtrlTest, SetAppHMIState_HMIFull_WithoutCheckPolicy) {
   EXPECT_CALL(mock_app_mngr_, GetUserConsentForDevice("12345")).Times(0);
 
   EXPECT_CALL(*mock_app_, set_is_resuming(true));
-  EXPECT_CALL(mock_state_controller_, SetRegularState(_, test_type))
+  EXPECT_CALL(mock_state_controller_,
+              SetRegularState(_, kDefaultWindowId, test_type))
       .Times(AtLeast(1));
 
   const bool res = res_ctrl_->SetAppHMIState(mock_app_, test_type, false);
@@ -974,7 +991,8 @@ TEST_F(ResumeCtrlTest, SetAppHMIState_HMIFull_WithPolicy_DevAllowed) {
       .WillByDefault(Return(policy::kDeviceAllowed));
 
   EXPECT_CALL(*mock_app_, set_is_resuming(true));
-  EXPECT_CALL(mock_state_controller_, SetRegularState(_, test_type))
+  EXPECT_CALL(mock_state_controller_,
+              SetRegularState(_, kDefaultWindowId, test_type))
       .Times(AtLeast(1));
 
   const bool res = res_ctrl_->SetAppHMIState(mock_app_, test_type, true);
@@ -991,7 +1009,8 @@ TEST_F(ResumeCtrlTest, SetAppHMIState_HMIFull_WithPolicy_DevDisallowed) {
   EXPECT_CALL(*mock_app_, set_is_resuming(true));
   ON_CALL(mock_app_mngr_, GetDefaultHmiLevel(const_app_))
       .WillByDefault(Return(kDefaultTestLevel_));
-  EXPECT_CALL(mock_state_controller_, SetRegularState(_, kDefaultTestLevel_))
+  EXPECT_CALL(mock_state_controller_,
+              SetRegularState(_, kDefaultWindowId, kDefaultTestLevel_))
       .Times(AtLeast(1));
   const bool res = res_ctrl_->SetAppHMIState(mock_app_, test_type, true);
   EXPECT_FALSE(res);
@@ -1246,7 +1265,8 @@ TEST_F(
   DataAccessor<application_manager::CommandsMap> data_accessor(
       command, app_set_lock_ptr_);
 
-  EXPECT_CALL(mock_state_controller_, SetRegularState(_, restored_test_type))
+  EXPECT_CALL(mock_state_controller_,
+              SetRegularState(_, kDefaultWindowId, restored_test_type))
       .Times(AtLeast(1));
   GetInfoFromApp();
   EXPECT_CALL(mock_app_mngr_, GetDefaultHmiLevel(const_app_))
@@ -1353,7 +1373,8 @@ TEST_F(
   DataAccessor<application_manager::CommandsMap> data_accessor(
       command, app_set_lock_ptr_);
 
-  EXPECT_CALL(mock_state_controller_, SetRegularState(_, restored_test_type))
+  EXPECT_CALL(mock_state_controller_,
+              SetRegularState(_, kDefaultWindowId, restored_test_type))
       .Times(AtLeast(1));
   GetInfoFromApp();
   EXPECT_CALL(mock_app_mngr_, GetDefaultHmiLevel(const_app_))

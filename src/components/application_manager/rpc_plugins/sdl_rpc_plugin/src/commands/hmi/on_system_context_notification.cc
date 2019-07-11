@@ -76,8 +76,13 @@ void OnSystemContextNotification::Run() {
   }
 
   if (app && mobile_api::SystemContext::INVALID_ENUM != system_context) {
-    application_manager_.state_controller().SetRegularState(app,
-                                                            system_context);
+    WindowID window_id = mobile_apis::PredefinedWindows::DEFAULT_WINDOW;
+    if ((*message_)[strings::msg_params].keyExists(strings::window_id)) {
+      window_id = (*message_)[strings::msg_params][strings::window_id].asUInt();
+    }
+
+    application_manager_.state_controller().SetRegularState(
+        app, window_id, system_context);
   } else {
     LOG4CXX_ERROR(logger_, "Application does not exist");
   }

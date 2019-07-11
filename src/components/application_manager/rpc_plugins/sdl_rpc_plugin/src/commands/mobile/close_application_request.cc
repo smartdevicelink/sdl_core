@@ -101,6 +101,7 @@ void CloseApplicationRequest::on_event(const event_engine::Event& event) {
     application_manager_.GetPluginManager().ForEachPlugin(on_app_exit);
     application_manager_.state_controller().SetRegularState(
         app,
+        mobile_apis::PredefinedWindows::DEFAULT_WINDOW,
         mobile_apis::HMILevel::HMI_NONE,
         mobile_apis::AudioStreamingState::NOT_AUDIBLE,
         mobile_apis::VideoStreamingState::NOT_STREAMABLE,

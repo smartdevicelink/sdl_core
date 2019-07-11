@@ -184,17 +184,25 @@ PhoneCallHmiState::PhoneCallHmiState(std::shared_ptr<Application> app,
 mobile_apis::HMILevel::eType PhoneCallHmiState::hmi_level() const {
   using namespace helpers;
   using namespace mobile_apis;
+
+  if (WindowType::WIDGET == window_type()) {
+    return parent()->hmi_level();
+  }
+
   if (Compare<HMILevel::eType, EQ, ONE>(parent()->hmi_level(),
                                         HMILevel::HMI_BACKGROUND,
                                         HMILevel::HMI_NONE)) {
     return parent()->hmi_level();
   }
+
   if (is_navi_app() || is_mobile_projection_app()) {
     return HMILevel::HMI_LIMITED;
   }
+
   if (!is_media_app()) {
     return parent()->hmi_level();
   }
+
   return HMILevel::HMI_BACKGROUND;
 }
 
@@ -209,6 +217,11 @@ DeactivateHMI::DeactivateHMI(std::shared_ptr<Application> app,
 mobile_apis::HMILevel::eType DeactivateHMI::hmi_level() const {
   using namespace helpers;
   using namespace mobile_apis;
+
+  if (WindowType::WIDGET == window_type()) {
+    return parent()->hmi_level();
+  }
+
   if (Compare<HMILevel::eType, EQ, ONE>(parent()->hmi_level(),
                                         HMILevel::HMI_BACKGROUND,
                                         HMILevel::HMI_NONE)) {
@@ -226,14 +239,19 @@ AudioSource::AudioSource(std::shared_ptr<Application> app,
 }
 
 mobile_apis::HMILevel::eType AudioSource::hmi_level() const {
-  // Checking for NONE  is necessary to avoid issue during
-  // calculation of HMI level during setting default HMI level
-  if (keep_context_ ||
-      mobile_apis::HMILevel::HMI_NONE == parent()->hmi_level()) {
+  using namespace mobile_apis;
+
+  if (WindowType::WIDGET == window_type()) {
     return parent()->hmi_level();
   }
 
-  return mobile_apis::HMILevel::HMI_BACKGROUND;
+  // Checking for NONE  is necessary to avoid issue during
+  // calculation of HMI level during setting default HMI level
+  if (keep_context_ || HMILevel::HMI_NONE == parent()->hmi_level()) {
+    return parent()->hmi_level();
+  }
+
+  return HMILevel::HMI_BACKGROUND;
 }
 
 EmbeddedNavi::EmbeddedNavi(std::shared_ptr<Application> app,
@@ -243,11 +261,17 @@ EmbeddedNavi::EmbeddedNavi(std::shared_ptr<Application> app,
 mobile_apis::HMILevel::eType EmbeddedNavi::hmi_level() const {
   using namespace mobile_apis;
   using namespace helpers;
+
+  if (WindowType::WIDGET == window_type()) {
+    return parent()->hmi_level();
+  }
+
   if (Compare<HMILevel::eType, EQ, ONE>(parent()->hmi_level(),
                                         HMILevel::HMI_BACKGROUND,
                                         HMILevel::HMI_NONE)) {
     return parent()->hmi_level();
   }
+
   return HMILevel::HMI_BACKGROUND;
 }
 
@@ -289,7 +313,8 @@ std::ostream& operator<<(std::ostream& os, const HmiState& src) {
   } else {
     os << "(none)";
   }
-  os << ", hmi app id:" << src.hmi_app_id_ << ", state:" << src.state_id()
+  os << ", hmi app id:" << src.hmi_app_id_
+     << ", window_type:" << src.window_type_ << ", state:" << src.state_id()
      << ", hmi_level:" << src.hmi_level()
      << ", audio:" << src.audio_streaming_state()
      << ", video:" << src.video_streaming_state()

@@ -1024,6 +1024,7 @@ TEST_F(PolicyHandlerTest, OnPendingPermissionChange_AppLimitedAndRevoked) {
               SendOnAppPermissionsChangedNotification(kAppId1_, _, _));
   EXPECT_CALL(mock_state_controller,
               SetRegularState(_,
+                              kDefaultWindowId,
                               mobile_apis::HMILevel::HMI_NONE,
                               mobile_apis::AudioStreamingState::NOT_AUDIBLE,
                               mobile_apis::VideoStreamingState::NOT_STREAMABLE,

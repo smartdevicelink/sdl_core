@@ -744,18 +744,15 @@ bool ApplicationManagerImpl::ActivateApplication(ApplicationSharedPtr app) {
 
   LOG4CXX_DEBUG(logger_, "Activating application with id:" << app->app_id());
 
-  // remove from resumption if app was activated by user
+  // Remove from resumption if app was activated by user
   resume_controller().OnAppActivated(app);
+
   // Activate any app services published by the app
   GetAppServiceManager().OnAppActivated(app);
-  const HMILevel::eType hmi_level = HMILevel::HMI_FULL;
-  const AudioStreamingState::eType audio_state =
-      app->IsAudioApplication() ? AudioStreamingState::AUDIBLE
-                                : AudioStreamingState::NOT_AUDIBLE;
-  const VideoStreamingState::eType video_state =
-      app->IsVideoApplication() ? VideoStreamingState::STREAMABLE
-                                : VideoStreamingState::NOT_STREAMABLE;
-  state_ctrl_.SetRegularState(app, hmi_level, audio_state, video_state, false);
+
+  // Activate main window in state controller
+  state_ctrl_.ActivateDefaultWindow(app);
+
   return true;
 }
 
@@ -3828,7 +3825,10 @@ void ApplicationManagerImpl::OnUpdateHMIAppType(
                    (app_hmi_level == mobile_api::HMILevel::HMI_LIMITED)) {
           MessageHelper::SendUIChangeRegistrationRequestToHMI(*it, *this);
           state_controller().SetRegularState(
-              *it, mobile_apis::HMILevel::HMI_BACKGROUND, true);
+              *it,
+              mobile_apis::PredefinedWindows::DEFAULT_WINDOW,
+              mobile_apis::HMILevel::HMI_BACKGROUND,
+              true);
         }
       }
     }
