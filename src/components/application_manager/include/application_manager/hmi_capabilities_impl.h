@@ -230,6 +230,20 @@ class HMICapabilitiesImpl : public HMICapabilities {
       const smart_objects::SmartObject& display_capabilities) OVERRIDE;
 
   /*
+   * @brief Retrieves information about the display capability
+   * @return Currently supported display capability
+   */
+  const smart_objects::SmartObject* system_display_capabilities()
+      const OVERRIDE;
+
+  /*
+   * @brief Sets supported display capability
+   * @param display_capabilities supported display capability
+   */
+  void set_system_display_capabilities(
+      const smart_objects::SmartObject& display_capabilities);
+
+  /*
    * @brief Retrieves information about the HMI zone capabilities
    *
    * @return Currently supported HMI zone capabilities
@@ -578,7 +592,13 @@ class HMICapabilitiesImpl : public HMICapabilities {
   smart_objects::SmartObject* ui_supported_languages_;
   smart_objects::SmartObject* tts_supported_languages_;
   smart_objects::SmartObject* vr_supported_languages_;
+  /*
+   * display_capabilities_ is deprecated and replaced by
+   * system_display_capabilities_. For backward compatibility
+   * display_capabilities_ is not removed.
+   */
   smart_objects::SmartObject* display_capabilities_;
+  smart_objects::SmartObject* system_display_capabilities_;
   smart_objects::SmartObject* hmi_zone_capabilities_;
   smart_objects::SmartObject* soft_buttons_capabilities_;
   smart_objects::SmartObject* button_capabilities_;

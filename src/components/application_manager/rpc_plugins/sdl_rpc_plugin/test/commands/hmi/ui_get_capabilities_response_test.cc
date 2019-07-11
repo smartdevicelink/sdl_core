@@ -337,6 +337,25 @@ TEST_F(UIGetCapabilitiesResponseTest, SetVideoStreamingCapability_SUCCESS) {
   command->Run();
 }
 
+TEST_F(UIGetCapabilitiesResponseTest, SetSystemDisplayCapabilities_SUCCESS) {
+  MessageSharedPtr command_msg = CreateCommandMsg();
+  (*command_msg)[strings::msg_params][strings::system_capabilities] =
+      smart_objects::SmartObject(smart_objects::SmartType_Map);
+
+  ResponseFromHMIPtr command(
+      CreateCommand<UIGetCapabilitiesResponse>(command_msg));
+
+  const auto& display_capability_so =
+      (*command_msg)[strings::msg_params][strings::system_capabilities]
+                    [strings::display_capabilities];
+
+  EXPECT_CALL(mock_hmi_capabilities_,
+              set_system_display_capabilities(display_capability_so));
+
+  ASSERT_TRUE(command->Init());
+  command->Run();
+}
+
 }  // namespace ui_get_capabilities_response
 }  // namespace hmi_commands_test
 }  // namespace commands_test

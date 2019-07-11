@@ -436,6 +436,7 @@ HMICapabilitiesImpl::HMICapabilitiesImpl(ApplicationManager& app_mngr)
     , tts_supported_languages_(NULL)
     , vr_supported_languages_(NULL)
     , display_capabilities_(NULL)
+    , system_display_capabilities_(NULL)
     , hmi_zone_capabilities_(NULL)
     , soft_buttons_capabilities_(NULL)
     , button_capabilities_(NULL)
@@ -472,6 +473,7 @@ HMICapabilitiesImpl::~HMICapabilitiesImpl() {
   delete tts_supported_languages_;
   delete vr_supported_languages_;
   delete display_capabilities_;
+  delete system_display_capabilities_;
   delete hmi_zone_capabilities_;
   delete soft_buttons_capabilities_;
   delete button_capabilities_;
@@ -614,6 +616,15 @@ void HMICapabilitiesImpl::set_display_capabilities(
     display_capabilities_ =
         new smart_objects::SmartObject(display_capabilities);
   }
+}
+
+void HMICapabilitiesImpl::set_system_display_capabilities(
+    const smart_objects::SmartObject& display_capabilities) {
+  if (system_display_capabilities_) {
+    delete system_display_capabilities_;
+  }
+  system_display_capabilities_ =
+      new smart_objects::SmartObject(display_capabilities);
 }
 
 void HMICapabilitiesImpl::set_hmi_zone_capabilities(
@@ -804,6 +815,11 @@ const smart_objects::SmartObject* HMICapabilitiesImpl::tts_supported_languages()
 const smart_objects::SmartObject* HMICapabilitiesImpl::display_capabilities()
     const {
   return display_capabilities_;
+}
+
+const smart_objects::SmartObject*
+HMICapabilitiesImpl::system_display_capabilities() const {
+  return system_display_capabilities_;
 }
 
 const smart_objects::SmartObject* HMICapabilitiesImpl::hmi_zone_capabilities()

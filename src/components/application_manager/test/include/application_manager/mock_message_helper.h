@@ -34,6 +34,7 @@
 #define SRC_COMPONENTS_APPLICATION_MANAGER_TEST_INCLUDE_APPLICATION_MANAGER_MOCK_MESSAGE_HELPER_H_
 #include "application_manager/application.h"
 #include "application_manager/application_manager.h"
+#include "application_manager/hmi_capabilities.h"
 #include "application_manager/message_helper.h"
 #include "application_manager/policies/policy_handler_interface.h"
 #include "gmock/gmock.h"

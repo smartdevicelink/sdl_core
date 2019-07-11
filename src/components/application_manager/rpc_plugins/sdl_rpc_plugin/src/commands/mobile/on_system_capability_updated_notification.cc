@@ -31,7 +31,7 @@ void OnSystemCapabilityUpdatedNotification::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
 
   smart_objects::SmartObject& msg_params = (*message_)[strings::msg_params];
-  mobile_apis::SystemCapabilityType::eType system_capability_type =
+  const auto system_capability_type =
       static_cast<mobile_apis::SystemCapabilityType::eType>(
           msg_params[strings::system_capability]
                     [strings::system_capability_type]
@@ -127,8 +127,21 @@ void OnSystemCapabilityUpdatedNotification::Run() {
                 [strings::app_services_capabilities] = app_service_caps;
       break;
     }
-    default:
+
+    case mobile_apis::SystemCapabilityType::DISPLAY: {
+      // Display capabilities content will be populated in the code after the
+      // switch so just breaking here
+      break;
+    }
+
+    default: {
+      LOG4CXX_ERROR(logger_,
+                    "Unknown system capability type: "
+                        << msg_params[strings::system_capability]
+                                     [strings::system_capability_type]
+                                         .asInt());
       return;
+    }
   }
 
   const char* capability_type_string;
@@ -136,11 +149,34 @@ void OnSystemCapabilityUpdatedNotification::Run() {
       mobile_apis::SystemCapabilityType::eType>::
       EnumToCString(system_capability_type, &capability_type_string);
 
+  const auto initial_connection_key =
+      (*message_)[strings::params][strings::connection_key].asUInt();
+
   auto subscribed_to_capability_predicate =
-      [&system_capability_type](const ApplicationSharedPtr app) {
+      [&system_capability_type,
+       &initial_connection_key](const ApplicationSharedPtr app) {
         DCHECK_OR_RETURN(app, false);
         auto& ext = SystemCapabilityAppExtension::ExtractExtension(*app);
-        return ext.IsSubscribedTo(system_capability_type);
+        if (!ext.IsSubscribedTo(system_capability_type)) {
+          LOG4CXX_DEBUG(logger_,
+                        "App " << app->app_id()
+                               << " is not subscribed to this capability type");
+          return false;
+        }
+
+        if (mobile_apis::SystemCapabilityType::DISPLAY ==
+                system_capability_type &&
+            initial_connection_key > 0) {
+          LOG4CXX_DEBUG(logger_,
+                        "Display capabilities notification for app "
+                            << initial_connection_key << " only");
+          return app->app_id() == initial_connection_key;
+        }
+
+        LOG4CXX_DEBUG(logger_,
+                      "App " << app->app_id()
+                             << " is subscribed to specified capability type");
+        return true;
       };
 
   const std::vector<ApplicationSharedPtr>& applications = FindAllApps(
@@ -167,6 +203,28 @@ void OnSystemCapabilityUpdatedNotification::Run() {
       ext.UnsubscribeFrom(system_capability_type);
       continue;
     }
+
+    if (mobile_apis::SystemCapabilityType::DISPLAY == system_capability_type) {
+      LOG4CXX_DEBUG(logger_, "Using common display capabilities");
+      auto capabilities = hmi_capabilities_.system_display_capabilities();
+
+      if (app->display_capabilities()) {
+        LOG4CXX_DEBUG(logger_,
+                      "Application " << app->app_id()
+                                     << " has specific display capabilities");
+        capabilities = app->display_capabilities().get();
+      }
+
+      if (!capabilities) {
+        LOG4CXX_WARN(logger_,
+                     "No available display capabilities for sending. Skipping");
+        continue;
+      }
+
+      msg_params[strings::system_capability][strings::display_capabilities] =
+          *capabilities;
+    }
+
     LOG4CXX_INFO(logger_,
                  "Sending OnSystemCapabilityUpdated " << capability_type_string
                                                       << " application id "

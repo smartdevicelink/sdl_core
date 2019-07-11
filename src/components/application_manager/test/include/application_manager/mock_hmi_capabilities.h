@@ -103,6 +103,11 @@ class MockHMICapabilities : public ::application_manager::HMICapabilities {
   MOCK_METHOD1(set_display_capabilities,
                void(const smart_objects::SmartObject& display_capabilities));
 
+  MOCK_CONST_METHOD0(system_display_capabilities,
+                     const smart_objects::SmartObject*());
+  MOCK_METHOD1(set_system_display_capabilities,
+               void(const smart_objects::SmartObject& display_capabilities));
+
   MOCK_CONST_METHOD0(hmi_zone_capabilities,
                      const smart_objects::SmartObject*());
   MOCK_METHOD1(set_hmi_zone_capabilities,
