@@ -83,7 +83,7 @@ void CloseApplicationRequest::on_event(const event_engine::Event& event) {
   mobile_apis::Result::eType result =
       MessageHelper::HMIToMobileResult(hmi_result);
   bool success = PrepareResultForMobileResponse(
-      hmi_result, HmiInterfaces::HMI_INTERFACE_AppService);
+      hmi_result, HmiInterfaces::HMI_INTERFACE_BasicCommunication);
   if (success) {
     ApplicationSharedPtr app =
         application_manager_.application(connection_key());

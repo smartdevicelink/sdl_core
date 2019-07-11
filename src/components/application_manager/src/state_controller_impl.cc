@@ -68,7 +68,7 @@ StateControllerImpl::StateControllerImpl(ApplicationManager& app_mngr)
 
 void StateControllerImpl::SetRegularState(ApplicationSharedPtr app,
                                           HmiStatePtr state,
-                                          const bool send_state_to_hmi) {
+                                          const bool request_hmi_state_change) {
   LOG4CXX_AUTO_TRACE(logger_);
   DCHECK_OR_RETURN_VOID(app);
   DCHECK_OR_RETURN_VOID(state);
@@ -101,8 +101,8 @@ void StateControllerImpl::SetRegularState(ApplicationSharedPtr app,
       static_cast<hmi_apis::Common_HMILevel::eType>(
           resolved_state->hmi_level());
 
-  if (send_state_to_hmi) {
-    const int64_t result = SendStateToHMI(app, hmi_level, true);
+  if (request_hmi_state_change) {
+    const int64_t result = RequestHMIStateChange(app, hmi_level, true);
     if (-1 != result) {
       const uint32_t corr_id = static_cast<uint32_t>(result);
       subscribe_on_event(
@@ -125,7 +125,7 @@ void StateControllerImpl::SetRegularState(
     const mobile_apis::HMILevel::eType hmi_level,
     const mobile_apis::AudioStreamingState::eType audio_state,
     const mobile_apis::VideoStreamingState::eType video_state,
-    const bool send_state_to_hmi) {
+    const bool request_hmi_state_change) {
   LOG4CXX_AUTO_TRACE(logger_);
   DCHECK_OR_RETURN_VOID(app);
   HmiStatePtr prev_regular = app->RegularHmiState();
@@ -137,13 +137,13 @@ void StateControllerImpl::SetRegularState(
   hmi_state->set_audio_streaming_state(audio_state);
   hmi_state->set_video_streaming_state(video_state);
   hmi_state->set_system_context(prev_regular->system_context());
-  SetRegularState(app, hmi_state, send_state_to_hmi);
+  SetRegularState(app, hmi_state, request_hmi_state_change);
 }
 
 void StateControllerImpl::SetRegularState(
     ApplicationSharedPtr app,
     const mobile_apis::HMILevel::eType hmi_level,
-    const bool send_state_to_hmi) {
+    const bool request_hmi_state_change) {
   using namespace mobile_apis;
   LOG4CXX_AUTO_TRACE(logger_);
   DCHECK_OR_RETURN_VOID(app);
@@ -155,7 +155,7 @@ void StateControllerImpl::SetRegularState(
   hmi_state->set_audio_streaming_state(CalcAudioState(app, hmi_level));
   hmi_state->set_video_streaming_state(CalcVideoState(app, hmi_level));
   hmi_state->set_system_context(SystemContext::SYSCTXT_MAIN);
-  SetRegularState(app, hmi_state, send_state_to_hmi);
+  SetRegularState(app, hmi_state, request_hmi_state_change);
 }
 
 void StateControllerImpl::SetRegularState(
@@ -164,7 +164,7 @@ void StateControllerImpl::SetRegularState(
     const mobile_apis::AudioStreamingState::eType audio_state,
     const mobile_apis::VideoStreamingState::eType video_state,
     const mobile_apis::SystemContext::eType system_context,
-    const bool send_state_to_hmi) {
+    const bool request_hmi_state_change) {
   LOG4CXX_AUTO_TRACE(logger_);
   DCHECK_OR_RETURN_VOID(app);
   HmiStatePtr hmi_state =
@@ -174,7 +174,7 @@ void StateControllerImpl::SetRegularState(
   hmi_state->set_audio_streaming_state(audio_state);
   hmi_state->set_video_streaming_state(video_state);
   hmi_state->set_system_context(system_context);
-  SetRegularState(app, hmi_state, send_state_to_hmi);
+  SetRegularState(app, hmi_state, request_hmi_state_change);
 }
 
 void StateControllerImpl::SetRegularState(
@@ -797,13 +797,13 @@ void StateControllerImpl::OnApplicationRegistered(
   OnStateChanged(app, initial_state, new_state);
 }
 
-int64_t StateControllerImpl::SendStateToHMI(
+int64_t StateControllerImpl::RequestHMIStateChange(
     ApplicationConstSharedPtr app,
     hmi_apis::Common_HMILevel::eType level,
     bool send_policy_priority) {
   LOG4CXX_AUTO_TRACE(logger_);
   smart_objects::SmartObjectSPtr request = NULL;
-  if (level == hmi_apis::Common_HMILevel::NONE) {
+  if (hmi_apis::Common_HMILevel::NONE == level) {
     request = MessageHelper::GetBCCloseApplicationRequestToHMI(app, app_mngr_);
   } else {
     request = MessageHelper::GetBCActivateAppRequestToHMI(

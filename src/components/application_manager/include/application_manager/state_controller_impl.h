@@ -186,9 +186,9 @@ class StateControllerImpl : public event_engine::EventObserver,
   virtual bool IsStateActive(HmiState::StateID state_id) const;
 
  private:
-  int64_t SendStateToHMI(ApplicationConstSharedPtr app,
-                         hmi_apis::Common_HMILevel::eType level,
-                         bool send_policy_priority);
+  int64_t RequestHMIStateChange(ApplicationConstSharedPtr app,
+                                hmi_apis::Common_HMILevel::eType level,
+                                bool send_policy_priority);
   /**
    * @brief The HmiLevelConflictResolver struct
    * Move other application to HmiStates if applied moved to FULL or LIMITED

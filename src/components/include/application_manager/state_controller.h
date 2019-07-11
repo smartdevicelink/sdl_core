@@ -43,25 +43,25 @@ class StateController {
  public:
   virtual void SetRegularState(ApplicationSharedPtr app,
                                HmiStatePtr state,
-                               const bool send_state_to_hmi) = 0;
+                               const bool request_hmi_state_change) = 0;
 
   virtual void SetRegularState(
       ApplicationSharedPtr app,
       const mobile_apis::HMILevel::eType hmi_level,
       const mobile_apis::AudioStreamingState::eType audio_state,
       const mobile_apis::VideoStreamingState::eType video_state,
-      const bool send_state_to_hmi) = 0;
+      const bool request_hmi_state_change) = 0;
 
   virtual void SetRegularState(ApplicationSharedPtr app,
                                const mobile_apis::HMILevel::eType hmi_level,
-                               const bool send_state_to_hmi) = 0;
+                               const bool request_hmi_state_change) = 0;
   virtual void SetRegularState(
       ApplicationSharedPtr app,
       const mobile_apis::HMILevel::eType hmi_level,
       const mobile_apis::AudioStreamingState::eType audio_state,
       const mobile_apis::VideoStreamingState::eType video_state,
       const mobile_apis::SystemContext::eType system_context,
-      const bool send_state_to_hmi) = 0;
+      const bool request_hmi_state_change) = 0;
 
   virtual void SetRegularState(
       ApplicationSharedPtr app,
