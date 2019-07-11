@@ -110,7 +110,7 @@ bool RPCPassingHandler::ExtractRPCParams(
   CommandParametersPermissions parameters_permissions;
 
   mobile_apis::Result::eType check_result = app_manager_.CheckPolicyPermissions(
-      app, function_id_str, params, &parameters_permissions);
+      app, window_id, function_id_str, params, &parameters_permissions);
 
   // Check if RPC is allowed by policy (since we are allowing unknown params,
   // check should pass if only undefined parameters exist)

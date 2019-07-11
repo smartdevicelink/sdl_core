@@ -653,7 +653,8 @@ TEST_F(PolicyHandlerTest, CheckPermissions) {
   EXPECT_CALL(mock_message_helper_, GetDeviceMacAddressForHandle(device, _))
       .WillOnce(Return(kDeviceId));
   // Act
-  policy_handler_.CheckPermissions(mock_app_, kRpc_, kRpc_params, result);
+  policy_handler_.CheckPermissions(
+      mock_app_, kDefaultWindowId, kRpc_, kRpc_params, result);
 }
 
 TEST_F(PolicyHandlerTest, GetNotificationsNumber) {

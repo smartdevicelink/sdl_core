@@ -248,9 +248,10 @@ class MockApplicationManager : public application_manager::ApplicationManager {
   MOCK_CONST_METHOD2(HMILevelAllowsStreaming,
                      bool(uint32_t app_id,
                           protocol_handler::ServiceType service_type));
-  MOCK_METHOD4(CheckPolicyPermissions,
+  MOCK_METHOD5(CheckPolicyPermissions,
                mobile_apis::Result::eType(
                    const application_manager::ApplicationSharedPtr app,
+                   const application_manager::WindowID window_id,
                    const std::string& function_id,
                    const application_manager::RPCParams& rpc_params,
                    application_manager::CommandParametersPermissions*

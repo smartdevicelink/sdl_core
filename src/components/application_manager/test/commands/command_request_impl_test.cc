@@ -154,6 +154,13 @@ class CommandRequestImplTest
 typedef CommandRequestImplTest::UnwrappedCommandRequestImpl UCommandRequestImpl;
 typedef std::shared_ptr<UCommandRequestImpl> CommandPtr;
 
+TEST_F(CommandRequestImplTest, WindowID_ExpectDefaultWindowID) {
+  auto msg = CreateMessage();
+  const auto command = CreateCommand<UCommandRequestImpl>(msg);
+  EXPECT_EQ(mobile_apis::PredefinedWindows::DEFAULT_WINDOW,
+            command->window_id());
+}
+
 TEST_F(CommandRequestImplTest, OnTimeOut_StateCompleted_UNSUCCESS) {
   CommandPtr command = CreateCommand<UCommandRequestImpl>();
 
@@ -366,6 +373,12 @@ TEST_F(CommandRequestImplTest,
 TEST_F(CommandRequestImplTest, CheckAllowedParameters_NoMsgParamsMap_SUCCESS) {
   MockAppPtr mock_app = CreateMockApp();
   ON_CALL(app_mngr_, application(_)).WillByDefault(Return(mock_app));
+  ON_CALL(*mock_app, GetWindowIds())
+      .WillByDefault(Return(
+          am::WindowIds(1, mobile_apis::PredefinedWindows::DEFAULT_WINDOW)));
+  ON_CALL(*mock_app,
+          WindowIdExists(mobile_apis::PredefinedWindows::DEFAULT_WINDOW))
+      .WillByDefault(Return(true));
 
   MessageSharedPtr message = CreateMessage();
   (*message)[strings::msg_params] =
@@ -373,7 +386,7 @@ TEST_F(CommandRequestImplTest, CheckAllowedParameters_NoMsgParamsMap_SUCCESS) {
 
   CommandPtr command = CreateCommand<UCommandRequestImpl>(message);
 
-  EXPECT_CALL(app_mngr_, CheckPolicyPermissions(_, _, _, _))
+  EXPECT_CALL(app_mngr_, CheckPolicyPermissions(_, _, _, _, _))
       .WillOnce(Return(kMobResultSuccess));
 
   EXPECT_TRUE(command->CheckPermissions());
@@ -383,6 +396,12 @@ TEST_F(CommandRequestImplTest,
        CheckAllowedParameters_WrongPolicyPermissions_UNSUCCESS) {
   MockAppPtr mock_app = CreateMockApp();
   ON_CALL(app_mngr_, application(_)).WillByDefault(Return(mock_app));
+  ON_CALL(*mock_app, GetWindowIds())
+      .WillByDefault(Return(
+          am::WindowIds(1, mobile_apis::PredefinedWindows::DEFAULT_WINDOW)));
+  ON_CALL(*mock_app,
+          WindowIdExists(mobile_apis::PredefinedWindows::DEFAULT_WINDOW))
+      .WillByDefault(Return(true));
 
   MessageSharedPtr message = CreateMessage();
   (*message)[strings::msg_params] =
@@ -394,7 +413,7 @@ TEST_F(CommandRequestImplTest,
       .Times(1)
       .WillRepeatedly(Return(kConnectionKey));
 
-  EXPECT_CALL(app_mngr_, CheckPolicyPermissions(_, _, _, _))
+  EXPECT_CALL(app_mngr_, CheckPolicyPermissions(_, _, _, _, _))
       .WillOnce(Return(mobile_apis::Result::INVALID_ENUM));
 
   EXPECT_CALL(mock_message_helper_, CreateBlockedByPoliciesResponse(_, _, _, _))
@@ -405,7 +424,7 @@ TEST_F(CommandRequestImplTest,
 }
 
 ACTION_P(GetArg3, output) {
-  *output = arg2;
+  *output = arg3;
 }
 
 TEST_F(CommandRequestImplTest, CheckAllowedParameters_MsgParamsMap_SUCCESS) {
@@ -417,9 +436,14 @@ TEST_F(CommandRequestImplTest, CheckAllowedParameters_MsgParamsMap_SUCCESS) {
 
   MockAppPtr app = CreateMockApp();
   ON_CALL(app_mngr_, application(_)).WillByDefault(Return(app));
+  ON_CALL(*app, GetWindowIds())
+      .WillByDefault(Return(
+          am::WindowIds(1, mobile_apis::PredefinedWindows::DEFAULT_WINDOW)));
+  ON_CALL(*app, WindowIdExists(mobile_apis::PredefinedWindows::DEFAULT_WINDOW))
+      .WillByDefault(Return(true));
 
   RPCParams params;
-  EXPECT_CALL(app_mngr_, CheckPolicyPermissions(_, _, _, _))
+  EXPECT_CALL(app_mngr_, CheckPolicyPermissions(_, _, _, _, _))
       .WillOnce(DoAll(GetArg3(&params), Return(kMobResultSuccess)));
 
   EXPECT_TRUE(command->CheckPermissions());

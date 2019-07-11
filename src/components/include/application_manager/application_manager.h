@@ -600,8 +600,8 @@ class ApplicationManager {
   /**
    * @brief Checks, if given RPC is allowed at current HMI level for specific
    * application in policy table
-   * @param policy_app_id Application id
-   * @param hmi_level Current HMI level of application
+   * @param app Application
+   * @param window_id id of application's window
    * @param function_id FunctionID of RPC
    * @param params_permissions Permissions for RPC parameters (e.g.
    * SubscribeVehicleData) defined in policy table
@@ -609,6 +609,7 @@ class ApplicationManager {
    */
   virtual mobile_apis::Result::eType CheckPolicyPermissions(
       const ApplicationSharedPtr app,
+      const WindowID window_id,
       const std::string& function_id,
       const RPCParams& rpc_params,
       CommandParametersPermissions* params_permissions = NULL) = 0;

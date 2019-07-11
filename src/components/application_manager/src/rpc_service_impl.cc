@@ -484,7 +484,8 @@ void RPCServiceImpl::SendMessageToMobile(
     const std::string string_functionID =
         MessageHelper::StringifiedFunctionID(function_id);
     const mobile_apis::Result::eType check_result =
-        app_manager_.CheckPolicyPermissions(app, string_functionID, params);
+        app_manager_.CheckPolicyPermissions(
+            app, window_id, string_functionID, params);
     if (mobile_apis::Result::SUCCESS != check_result) {
       LOG4CXX_WARN(logger_,
                    "Function \"" << string_functionID << "\" (#" << function_id

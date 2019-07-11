@@ -108,6 +108,7 @@ class PolicyHandler : public PolicyHandlerInterface,
                            std::string* priority) const OVERRIDE;
   virtual void CheckPermissions(
       const application_manager::ApplicationSharedPtr app,
+      const application_manager::WindowID window_id,
       const PTString& rpc,
       const RPCParams& rpc_params,
       CheckPermissionResult& result) OVERRIDE;
