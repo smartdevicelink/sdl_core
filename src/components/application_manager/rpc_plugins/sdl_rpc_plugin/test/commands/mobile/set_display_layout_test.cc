@@ -188,7 +188,7 @@ TEST_F(SetDisplayLayoutRequestTest, Run_SUCCESS) {
   MockAppPtr mock_app(CreateMockApp());
   EXPECT_CALL(app_mngr_, application(kConnectionKey))
       .WillOnce(Return(mock_app));
-  EXPECT_CALL(*mock_app, display_layout()).WillOnce(ReturnRef(kLayout));
+  EXPECT_CALL(*mock_app, display_layout()).WillOnce(Return(kLayout));
   EXPECT_CALL(*mock_app, app_id()).WillOnce(Return(kAppId));
 
   EXPECT_CALL(app_mngr_, GetNextHMICorrelationID())
@@ -235,7 +235,7 @@ TEST_F(SetDisplayLayoutRequestTest, OnEvent_SUCCESS) {
       .WillOnce(Return(dispaly_capabilities_msg.get()));
   EXPECT_CALL(
       mock_rpc_service_,
-      ManageMobileCommand(MobileResultCodeIs(mobile_result::SUCCESS),
+      ManageMobileCommand(MobileResultCodeIs(mobile_result::WARNINGS),
                           am::commands::Command::CommandSource::SOURCE_SDL));
 
   CommandPtr command(CreateCommand<SetDisplayLayoutRequest>(msg));
