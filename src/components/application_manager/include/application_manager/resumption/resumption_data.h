@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2015, Ford Motor Company
+﻿/*
+ * Copyright (c) 2019, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -256,12 +256,35 @@ class ResumptionData {
       app_mngr::ApplicationConstSharedPtr application) const;
 
   /**
+   * @brief Retrieves of windows info from list of available window
+   * @param application contains list of available windows
+   * @return windows info from list of available window
+   */
+  smart_objects::SmartObject GetApplicationWidgetsInfo(
+      app_mngr::ApplicationConstSharedPtr application) const;
+
+  /**
    * @brief checks pointer that it is not equal NULL
    * @param ptr - contains pointer which need to check
    * @return smartObject from pointer
    */
   smart_objects::SmartObject PointerToSmartObj(
       const smart_objects::SmartObject* ptr) const;
+
+  /**
+   * @brief creates smart object containing window info
+   * @param window_id window id
+   * @param window_type window type
+   * @param window_name window name
+   * @param window_optional_params_map collection containing optional params for
+   * creating window
+   * @return smart object with window data
+   */
+  smart_objects::SmartObject CreateWindowInfoSO(
+      const application_manager::WindowID window_id,
+      const mobile_apis::WindowType::eType window_type,
+      const application_manager::WindowParamsMap& window_optional_params_map)
+      const;
 
   /**
    * @brief Creates smart array from received data

@@ -101,6 +101,13 @@ class MockResumeCtrl : public resumption::ResumeCtrl {
                     bool check_policy));
   MOCK_CONST_METHOD0(LaunchTime, time_t());
 
+  MOCK_METHOD2(RestoreAppWidgets,
+               void(app_mngr::ApplicationSharedPtr application,
+                    const smart_objects::SmartObject& saved_app));
+
+  MOCK_METHOD1(RestoreWidgetsHMIState,
+               void(const smart_objects::SmartObject& response_message));
+
 #ifdef BUILD_TESTS
   MOCK_METHOD1(set_resumption_storage,
                void(std::shared_ptr<resumption::ResumptionData> mock_storage));

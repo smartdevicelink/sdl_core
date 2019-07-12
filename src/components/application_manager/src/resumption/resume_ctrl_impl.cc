@@ -159,7 +159,13 @@ void ResumeCtrlImpl::SaveApplication(ApplicationSharedPtr application) {
 }
 
 void ResumeCtrlImpl::on_event(const event_engine::Event& event) {
-  LOG4CXX_DEBUG(logger_, "Event received" << event.id());
+  LOG4CXX_DEBUG(logger_, "Event received: " << event.id());
+
+  if (hmi_apis::FunctionID::UI_CreateWindow == event.id()) {
+    LOG4CXX_INFO(logger_, "Received UI_CreateWindow event");
+    const auto& response_message = event.smart_object();
+    RestoreWidgetsHMIState(response_message);
+  }
 }
 
 bool ResumeCtrlImpl::RestoreAppHMIState(ApplicationSharedPtr application) {
@@ -208,7 +214,11 @@ bool ResumeCtrlImpl::RestoreAppHMIState(ApplicationSharedPtr application) {
                 << saved_hmi_level);
       }
 
-      return SetAppHMIState(application, saved_hmi_level, true);
+      const bool app_hmi_state_is_set =
+          SetAppHMIState(application, saved_hmi_level, true);
+      if (app_hmi_state_is_set) {
+        RestoreAppWidgets(application, saved_app);
+      }
     } else {
       result = false;
       LOG4CXX_ERROR(logger_, "saved app data corrupted");
@@ -217,6 +227,74 @@ bool ResumeCtrlImpl::RestoreAppHMIState(ApplicationSharedPtr application) {
     LOG4CXX_ERROR(logger_, "Application not saved");
   }
   return result;
+}
+
+void ResumeCtrlImpl::RestoreWidgetsHMIState(
+    const smart_objects::SmartObject& response_message) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  const auto correlation_id =
+      response_message[strings::params][strings::correlation_id].asInt();
+  const auto& request = requests_msg_.find(correlation_id);
+  if (requests_msg_.end() == request) {
+    LOG4CXX_ERROR(logger_,
+                  "Request UI_CreateWindow for correlation id: "
+                      << correlation_id << " not found");
+    return;
+  }
+  const auto result_code = static_cast<hmi_apis::Common_Result::eType>(
+      response_message[strings::params][hmi_response::code].asInt());
+  if (hmi_apis::Common_Result::SUCCESS != result_code) {
+    LOG4CXX_ERROR(logger_,
+                  "UI_CreateWindow for correlation id: "
+                      << correlation_id
+                      << " failed with code: " << result_code);
+    requests_msg_.erase(request);
+    return;
+  }
+
+  const auto& msg_params = (*request->second)[strings::msg_params];
+  const auto hmi_app_id = msg_params[strings::app_id].asInt();
+  auto application = application_manager_.application_by_hmi_app(hmi_app_id);
+  if (!application) {
+    LOG4CXX_ERROR(logger_,
+                  "Application is not registered by hmi id: " << hmi_app_id);
+    requests_msg_.erase(request);
+    return;
+  }
+  smart_objects::SmartObject window_info(smart_objects::SmartType_Map);
+  auto fill_optional_param = [&window_info,
+                              &msg_params](const std::string& key) {
+    if (msg_params.keyExists(key)) {
+      window_info[key] = msg_params[key].asString();
+    }
+  };
+  fill_optional_param(strings::associated_service_type);
+  fill_optional_param(strings::duplicate_updates_from_window_id);
+
+  const auto window_name = msg_params[strings::window_name].asString();
+  window_info[strings::window_name] = window_name;
+
+  const WindowID window_id = msg_params[strings::window_id].asUInt();
+  application->AddWindowInfo(window_id, window_info);
+
+  const auto window_type = static_cast<mobile_apis::WindowType::eType>(
+      msg_params[strings::window_type].asInt());
+  // State should be initialized with INVALID_ENUM value to let state controller
+  // trigger OnHmiStatus notifiation sending
+  auto initial_state = application_manager_.CreateRegularState(
+      application,
+      window_type,
+      mobile_apis::HMILevel::INVALID_ENUM,
+      mobile_apis::AudioStreamingState::INVALID_ENUM,
+      mobile_apis::VideoStreamingState::INVALID_ENUM,
+      mobile_api::SystemContext::INVALID_ENUM);
+  application->SetInitialState(window_id, window_name, initial_state);
+
+  // Default HMI level for all windows except the main one is always NONE
+  application_manager_.state_controller().OnAppWindowAdded(
+      application, window_id, window_type, mobile_apis::HMILevel::HMI_NONE);
+
+  requests_msg_.erase(request);
 }
 
 bool ResumeCtrlImpl::SetupDefaultHMILevel(ApplicationSharedPtr application) {
@@ -298,6 +376,28 @@ bool ResumeCtrlImpl::SetAppHMIState(
                "Application with policy id " << application->policy_app_id()
                                              << " got HMI level " << hmi_level);
   return true;
+}
+
+void ResumeCtrlImpl::RestoreAppWidgets(
+    application_manager::ApplicationSharedPtr application,
+    const smart_objects::SmartObject& saved_app) {
+  using namespace mobile_apis;
+  LOG4CXX_AUTO_TRACE(logger_);
+  DCHECK(application);
+  if (!saved_app.keyExists(strings::windows_info)) {
+    LOG4CXX_ERROR(logger_, "windows_info section does not exist");
+    return;
+  }
+  const auto& windows_info = saved_app[strings::windows_info];
+  auto request_list = MessageHelper::CreateUICreateWindowRequestsToHMI(
+      application, application_manager_, windows_info);
+
+  requests_msg_.clear();
+  for (auto& request : request_list) {
+    requests_msg_.insert(std::make_pair(
+        (*request)[strings::params][strings::correlation_id].asInt(), request));
+  }
+  ProcessHMIRequests(request_list);
 }
 
 bool ResumeCtrlImpl::IsHMIApplicationIdExist(uint32_t hmi_app_id) {
@@ -1006,7 +1106,8 @@ bool ResumeCtrlImpl::ProcessHMIRequest(smart_objects::SmartObjectSPtr request,
         (*request)[strings::correlation_id].asInt();
     subscribe_on_event(function_id, hmi_correlation_id);
   }
-  if (!application_manager_.GetRPCService().ManageHMICommand(request)) {
+  if (!application_manager_.GetRPCService().ManageHMICommand(
+          request, commands::Command::SOURCE_SDL_TO_HMI)) {
     LOG4CXX_ERROR(logger_, "Unable to send request");
     return false;
   }

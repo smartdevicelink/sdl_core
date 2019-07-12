@@ -1084,6 +1084,27 @@ TEST_F(MessageHelperTest, SendNaviSetVideoConfigRequest) {
   EXPECT_EQ(480, msg_params[strings::config][strings::height].asInt());
 }
 
+TEST_F(MessageHelperTest, ExtractWindowIdFromSmartObject_SUCCESS) {
+  const WindowID window_id = 145;
+  smart_objects::SmartObject message(smart_objects::SmartType_Map);
+  message[strings::msg_params][strings::window_id] = window_id;
+  EXPECT_EQ(window_id,
+            MessageHelper::ExtractWindowIdFromSmartObject(
+                message[strings::msg_params]));
+}
+
+TEST_F(MessageHelperTest, ExtractWindowIdFromSmartObject_FromEmptyMessage) {
+  smart_objects::SmartObject message(smart_objects::SmartType_Map);
+  EXPECT_EQ(mobile_apis::PredefinedWindows::DEFAULT_WINDOW,
+            MessageHelper::ExtractWindowIdFromSmartObject(message));
+}
+
+TEST_F(MessageHelperTest, ExtractWindowIdFromSmartObject_FromWrongType) {
+  smart_objects::SmartObject message(smart_objects::SmartType_Array);
+  EXPECT_EQ(mobile_apis::PredefinedWindows::DEFAULT_WINDOW,
+            MessageHelper::ExtractWindowIdFromSmartObject(message));
+}
+
 }  // namespace application_manager_test
 }  // namespace components
 }  // namespace test

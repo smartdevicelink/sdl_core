@@ -95,6 +95,9 @@ class ResumeCtrlImpl : public ResumeCtrl,
    */
   bool RestoreAppHMIState(app_mngr::ApplicationSharedPtr application) OVERRIDE;
 
+  void RestoreWidgetsHMIState(
+      const smart_objects::SmartObject& response_message) OVERRIDE;
+
   /**
    * @brief Set application HMI Level as stored in policy
    * @param application is application witch HMI Level is need to setup
@@ -115,6 +118,14 @@ class ResumeCtrlImpl : public ResumeCtrl,
   bool SetAppHMIState(app_mngr::ApplicationSharedPtr application,
                       const mobile_apis::HMILevel::eType hmi_level,
                       bool check_policy = true) OVERRIDE;
+
+  /**
+   * @brief RestoreAppWidgets add widgets for the application
+   * @param application application which will be resumed
+   * @param saved_app application specific section from backup file
+   */
+  void RestoreAppWidgets(application_manager::ApplicationSharedPtr application,
+                         const smart_objects::SmartObject& saved_app) OVERRIDE;
 
   /**
    * @brief Remove application from list of saved applications
@@ -609,6 +620,13 @@ class ResumeCtrlImpl : public ResumeCtrl,
   time_t wake_up_time_;
   std::shared_ptr<ResumptionData> resumption_storage_;
   application_manager::ApplicationManager& application_manager_;
+  /**
+   *@brief Mapping correlation id to request
+   *wait for on event response from HMI to resume HMI Level
+   */
+  typedef std::map<int32_t, smart_objects::SmartObjectSPtr>
+      WaitingResponseToRequest;
+  WaitingResponseToRequest requests_msg_;
 };
 
 }  // namespace resumption

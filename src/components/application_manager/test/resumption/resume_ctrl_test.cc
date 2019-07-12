@@ -39,6 +39,7 @@
 #include "application_manager/mock_application.h"
 #include "application_manager/mock_help_prompt_manager.h"
 #include "application_manager/mock_resumption_data.h"
+#include "application_manager/mock_rpc_service.h"
 #include "application_manager/resumption/resume_ctrl_impl.h"
 #include "application_manager/usage_statistics.h"
 #include "config_profile/profile.h"
@@ -76,7 +77,8 @@ using namespace mobile_apis::HMILevel;
 namespace {
 const WindowID kDefaultWindowId =
     mobile_apis::PredefinedWindows::DEFAULT_WINDOW;
-}
+const int32_t kDefaultHmiAppId = 111;
+}  // namespace
 
 class ResumeCtrlTest : public ::testing::Test {
  protected:
@@ -161,6 +163,43 @@ class ResumeCtrlTest : public ::testing::Test {
     ON_CALL(*mock_app_, is_cloud_app()).WillByDefault(Return(false));
   }
 
+  smart_objects::SmartObjectSPtr CreateStubCreateWindowRequest(
+      const std::string window_name,
+      const WindowID window_id,
+      const mobile_apis::WindowType::eType window_type) const {
+    auto request = std::make_shared<smart_objects::SmartObject>(
+        smart_objects::SmartType_Map);
+    smart_objects::SmartObject msg_params(smart_objects::SmartType_Map);
+    smart_objects::SmartObject params(smart_objects::SmartType_Map);
+
+    params[strings::correlation_id] = window_id;
+
+    msg_params[strings::window_name] = window_name;
+    msg_params[strings::window_id] = window_id;
+    msg_params[strings::window_type] = window_type;
+    msg_params[strings::app_id] = kDefaultHmiAppId;
+
+    (*request)[strings::msg_params] = msg_params;
+    (*request)[strings::params] = params;
+
+    return request;
+  }
+
+  smart_objects::SmartObjectSPtr CreateStubCreateWindowResponse(
+      const int32_t correlation_id,
+      const hmi_apis::Common_Result::eType result_code) const {
+    auto response = std::make_shared<smart_objects::SmartObject>(
+        smart_objects::SmartType_Map);
+    smart_objects::SmartObject params(smart_objects::SmartType_Map);
+
+    params[strings::correlation_id] = correlation_id;
+    params[hmi_response::code] = result_code;
+
+    (*response)[strings::params] = params;
+
+    return response;
+  }
+
   NiceMock<event_engine_test::MockEventDispatcher> mock_event_dispatcher_;
   application_manager_test::MockApplicationManagerSettings
       mock_application_manager_settings_;
@@ -190,6 +229,7 @@ class ResumeCtrlTest : public ::testing::Test {
   const std::string kNaviLowbandwidthLevel_;
   const std::string kProjectionLowbandwidthLevel_;
   const std::string kMediaLowbandwidthLevel_;
+  NiceMock<application_manager_test::MockRPCService> mock_rpc_service_;
 };
 
 /**
@@ -582,6 +622,207 @@ TEST_F(ResumeCtrlTest, StartResumption_AppWithSubscriptionToWayPoints) {
 
   const bool result = res_ctrl_->StartResumption(mock_app_, kHash_);
   EXPECT_TRUE(result);
+}
+
+TEST_F(ResumeCtrlTest,
+       RestoreAppWidgets_AppWithWidgets_SendCreateWindowRequests) {
+  using namespace smart_objects;
+  using namespace application_manager;
+  GetInfoFromApp();
+  const uint32_t count_of_widgets = 10u;
+
+  auto create_window_info_so = []() -> SmartObject {
+    SmartObject widgets_info(SmartType_Array);
+    for (uint32_t i = 0; i < count_of_widgets; ++i) {
+      SmartObject widget_info(SmartType_Map);
+      widget_info[strings::associated_service_type] = "ServiceType";
+      widget_info[strings::duplicate_updates_from_window_id] = 0;
+      widget_info[strings::window_name] =
+          std::string("Widget ") + std::to_string(i + 1);
+      widget_info[strings::window_type] =
+          static_cast<int32_t>(mobile_apis::WindowType::WIDGET);
+      widget_info[strings::window_id] = i + 1;
+      widgets_info[widgets_info.length()] = widget_info;
+    }
+    return widgets_info;
+  };
+
+  auto create_saved_app_so = [&create_window_info_so, this]() -> SmartObject {
+    smart_objects::SmartObject saved_app;
+    const auto test_app_widgets = create_window_info_so();
+    saved_app[strings::hash_id] = kHash_;
+    saved_app[strings::windows_info] = test_app_widgets;
+    saved_app[application_manager::strings::grammar_id] = kTestGrammarId_;
+    saved_app[application_manager::strings::hmi_level] = eType::HMI_FULL;
+    return saved_app;
+  };
+
+  const auto saved_app = create_saved_app_so();
+
+  const auto hmi_request = std::make_shared<smart_objects::SmartObject>(
+      smart_objects::SmartType_Map);
+  const auto hmi_requests =
+      smart_objects::SmartObjectList(count_of_widgets, hmi_request);
+
+  EXPECT_CALL(
+      *application_manager::MockMessageHelper::message_helper_mock(),
+      CreateUICreateWindowRequestsToHMI(_, _, saved_app[strings::windows_info]))
+      .WillOnce(Return(hmi_requests));
+
+  ON_CALL(mock_app_mngr_, GetRPCService())
+      .WillByDefault(ReturnRef(mock_rpc_service_));
+
+  EXPECT_CALL(mock_rpc_service_,
+              ManageHMICommand(_, commands::Command::SOURCE_SDL_TO_HMI))
+      .Times(count_of_widgets)
+      .WillRepeatedly(Return(true));
+
+  res_ctrl_->RestoreAppWidgets(mock_app_, saved_app);
+}
+
+TEST_F(ResumeCtrlTest,
+       RestoreWidgetsHMIState_AppWithWidgets_AddWidgetsInternally) {
+  const uint32_t count_of_widgets = 10u;
+
+  smart_objects::SmartObject saved_app;
+  saved_app[strings::hash_id] = kHash_;
+  saved_app[strings::windows_info] = smart_objects::SmartObject();
+  saved_app[application_manager::strings::grammar_id] = kTestGrammarId_;
+  saved_app[application_manager::strings::hmi_level] = eType::HMI_FULL;
+
+  ON_CALL(mock_app_mngr_, application_by_hmi_app(kDefaultHmiAppId))
+      .WillByDefault(Return(mock_app_));
+
+  smart_objects::SmartObjectList requests;
+  smart_objects::SmartObjectList responses;
+  for (uint32_t i = 0; i < count_of_widgets; ++i) {
+    const auto window_type = mobile_apis::WindowType::WIDGET;
+    const WindowID window_id = i + 1;
+    const auto window_name = std::string("Widget ") + std::to_string(window_id);
+    requests.push_back(
+        CreateStubCreateWindowRequest(window_name, window_id, window_type));
+    responses.push_back(CreateStubCreateWindowResponse(
+        window_id, hmi_apis::Common_Result::SUCCESS));
+    EXPECT_CALL(mock_app_mngr_, CreateRegularState(_, window_type, _, _, _, _))
+        .WillRepeatedly(Return(nullptr));
+    EXPECT_CALL(*mock_app_, SetInitialState(window_id, window_name, _));
+    EXPECT_CALL(mock_state_controller_,
+                OnAppWindowAdded(_, window_id, window_type, _));
+  }
+
+  EXPECT_CALL(*application_manager::MockMessageHelper::message_helper_mock(),
+              CreateUICreateWindowRequestsToHMI(_, _, _))
+      .WillOnce(Return(requests));
+
+  ON_CALL(mock_app_mngr_, GetRPCService())
+      .WillByDefault(ReturnRef(mock_rpc_service_));
+  EXPECT_CALL(mock_rpc_service_,
+              ManageHMICommand(_, commands::Command::SOURCE_SDL_TO_HMI))
+      .Times(count_of_widgets)
+      .WillRepeatedly(Return(true));
+  res_ctrl_->RestoreAppWidgets(mock_app_, saved_app);
+  for (const auto& response : responses) {
+    res_ctrl_->RestoreWidgetsHMIState(*response);
+  }
+}
+
+TEST_F(ResumeCtrlTest,
+       RestoreAppWidgets_AppWithoutWidgets_NoCreateWindowRqSent) {
+  smart_objects::SmartObject saved_app;
+  saved_app[strings::hash_id] = kHash_;
+  saved_app[application_manager::strings::grammar_id] = kTestGrammarId_;
+  saved_app[application_manager::strings::hmi_level] = eType::HMI_FULL;
+
+  EXPECT_CALL(*application_manager::MockMessageHelper::message_helper_mock(),
+              CreateUICreateWindowRequestsToHMI(_, _, _))
+      .Times(0);
+
+  res_ctrl_->RestoreAppWidgets(mock_app_, saved_app);
+}
+
+TEST_F(ResumeCtrlTest, RestoreWidgetsHMIState_HMIResponseWith_InvalidCorrId) {
+  smart_objects::SmartObject saved_app;
+  saved_app[strings::hash_id] = kHash_;
+  saved_app[strings::windows_info] = smart_objects::SmartObject();
+  saved_app[application_manager::strings::grammar_id] = kTestGrammarId_;
+  saved_app[application_manager::strings::hmi_level] = eType::HMI_FULL;
+
+  const int32_t invalid_corr_id = -1;
+  auto response = CreateStubCreateWindowResponse(
+      invalid_corr_id, hmi_apis::Common_Result::SUCCESS);
+
+  ON_CALL(mock_app_mngr_, application_by_hmi_app(kDefaultHmiAppId))
+      .WillByDefault(Return(mock_app_));
+
+  smart_objects::SmartObjectList requests;
+
+  const auto window_type = mobile_apis::WindowType::WIDGET;
+  const WindowID window_id = 1;
+  const auto window_name = std::string("Widget ") + std::to_string(window_id);
+  requests.push_back(
+      CreateStubCreateWindowRequest(window_name, window_id, window_type));
+
+  EXPECT_CALL(mock_app_mngr_, CreateRegularState(_, window_type, _, _, _, _))
+      .Times(0);
+  EXPECT_CALL(*mock_app_, SetInitialState(window_id, window_name, _)).Times(0);
+  EXPECT_CALL(mock_state_controller_,
+              OnAppWindowAdded(_, window_id, window_type, _))
+      .Times(0);
+
+  EXPECT_CALL(*application_manager::MockMessageHelper::message_helper_mock(),
+              CreateUICreateWindowRequestsToHMI(_, _, _))
+      .WillOnce(Return(requests));
+
+  ON_CALL(mock_app_mngr_, GetRPCService())
+      .WillByDefault(ReturnRef(mock_rpc_service_));
+  EXPECT_CALL(mock_rpc_service_,
+              ManageHMICommand(_, commands::Command::SOURCE_SDL_TO_HMI))
+      .WillRepeatedly(Return(true));
+  res_ctrl_->RestoreAppWidgets(mock_app_, saved_app);
+  res_ctrl_->RestoreWidgetsHMIState(*response);
+}
+
+TEST_F(ResumeCtrlTest, RestoreWidgetsHMIState_HMIResponseWith_Unsuccess) {
+  smart_objects::SmartObject saved_app;
+  saved_app[strings::hash_id] = kHash_;
+  saved_app[strings::windows_info] = smart_objects::SmartObject();
+  saved_app[application_manager::strings::grammar_id] = kTestGrammarId_;
+  saved_app[application_manager::strings::hmi_level] = eType::HMI_FULL;
+
+  const int32_t correlation_id = 1;
+  auto response = CreateStubCreateWindowResponse(
+      correlation_id, hmi_apis::Common_Result::GENERIC_ERROR);
+
+  ON_CALL(mock_app_mngr_, application_by_hmi_app(kDefaultHmiAppId))
+      .WillByDefault(Return(mock_app_));
+
+  smart_objects::SmartObjectList requests;
+  smart_objects::SmartObjectList responses;
+
+  const auto window_type = mobile_apis::WindowType::WIDGET;
+  const WindowID window_id = 1;
+  const auto window_name = std::string("Widget ") + std::to_string(window_id);
+  requests.push_back(
+      CreateStubCreateWindowRequest(window_name, window_id, window_type));
+
+  EXPECT_CALL(mock_app_mngr_, CreateRegularState(_, window_type, _, _, _, _))
+      .Times(0);
+  EXPECT_CALL(*mock_app_, SetInitialState(window_id, window_name, _)).Times(0);
+  EXPECT_CALL(mock_state_controller_,
+              OnAppWindowAdded(_, window_id, window_type, _))
+      .Times(0);
+
+  EXPECT_CALL(*application_manager::MockMessageHelper::message_helper_mock(),
+              CreateUICreateWindowRequestsToHMI(_, _, _))
+      .WillOnce(Return(requests));
+
+  ON_CALL(mock_app_mngr_, GetRPCService())
+      .WillByDefault(ReturnRef(mock_rpc_service_));
+  EXPECT_CALL(mock_rpc_service_,
+              ManageHMICommand(_, commands::Command::SOURCE_SDL_TO_HMI))
+      .WillRepeatedly(Return(true));
+  res_ctrl_->RestoreAppWidgets(mock_app_, saved_app);
+  res_ctrl_->RestoreWidgetsHMIState(*response);
 }
 
 TEST_F(ResumeCtrlTest, StartResumptionOnlyHMILevel) {

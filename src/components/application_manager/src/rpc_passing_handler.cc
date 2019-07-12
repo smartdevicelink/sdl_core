@@ -108,6 +108,8 @@ bool RPCPassingHandler::ExtractRPCParams(
   }
 
   CommandParametersPermissions parameters_permissions;
+  const WindowID window_id =
+      MessageHelper::ExtractWindowIdFromSmartObject(s_map);
 
   mobile_apis::Result::eType check_result = app_manager_.CheckPolicyPermissions(
       app, window_id, function_id_str, params, &parameters_permissions);

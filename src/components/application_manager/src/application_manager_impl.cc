@@ -3332,6 +3332,8 @@ void ApplicationManagerImpl::ProcessPostponedMessages(const uint32_t app_id) {
     const std::string function_id = MessageHelper::StringifiedFunctionID(
         static_cast<mobile_apis::FunctionID::eType>(
             (*message)[strings::params][strings::function_id].asUInt()));
+    const WindowID window_id = MessageHelper::ExtractWindowIdFromSmartObject(
+        (*message)[strings::msg_params]);
     const RPCParams params;
     const mobile_apis::Result::eType check_result =
         CheckPolicyPermissions(app, window_id, function_id, params);

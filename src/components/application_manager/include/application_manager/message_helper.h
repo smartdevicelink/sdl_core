@@ -303,6 +303,30 @@ class MessageHelper {
       const uint32_t app_id,
       ApplicationManager& app_mngr);
 
+  /**
+   * @brief Creates UI.CreateWindow request
+   * @param application application instance
+   * @param app_mngr reference to application manager
+   * @param windows_info smart object containing saved windows info
+   * @return smart object with UI.CreateWindow request
+   */
+  static smart_objects::SmartObjectSPtr CreateUICreateWindowRequestToHMI(
+      ApplicationSharedPtr application,
+      ApplicationManager& app_mngr,
+      const smart_objects::SmartObject& window_info);
+
+  /**
+   * @brief Creates UI.CreateWindow requests
+   * @param application application instance
+   * @param app_mngr reference to application manager
+   * @param windows_info smart object containing saved windows info
+   * @return list of smart objects with UI.CreateWindow requests
+   */
+  static smart_objects::SmartObjectList CreateUICreateWindowRequestsToHMI(
+      application_manager::ApplicationSharedPtr application,
+      ApplicationManager& app_mngr,
+      const smart_objects::SmartObject& windows_info);
+
   /*
    * @brief Create Common.DeviceInfo struct from device handle
    * @param device_handle device handle of the app
@@ -711,6 +735,15 @@ class MessageHelper {
    * be any print in RELEASE build mode
    */
   static bool PrintSmartObject(const smart_objects::SmartObject& object);
+
+  /**
+   * @brief Extract window unique ID from message, this id is used for identify
+   * the window
+   * @param s_map contains application's window id
+   * @return window id from current message
+   */
+  static WindowID ExtractWindowIdFromSmartObject(
+      const smart_objects::SmartObject& s_map);
 
   template <typename From, typename To>
   static To ConvertEnumAPINoCheck(const From& input) {

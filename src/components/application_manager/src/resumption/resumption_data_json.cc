@@ -100,6 +100,9 @@ void ResumptionDataJson::SaveApplication(
   formatters::CFormatterJsonBase::objToJsonValue(
       GetApplicationFiles(application), tmp);
   json_app[strings::application_files] = tmp;
+  formatters::CFormatterJsonBase::objToJsonValue(
+      GetApplicationWidgetsInfo(application), tmp);
+  json_app[strings::windows_info] = tmp;
   json_app[strings::time_stamp] = time_stamp;
   json_app[strings::subscribed_for_way_points] = is_subscribed_for_way_points;
 

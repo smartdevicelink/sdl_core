@@ -467,9 +467,12 @@ void RPCServiceImpl::SendMessageToMobile(
     mobile_apis::FunctionID::eType function_id =
         static_cast<mobile_apis::FunctionID::eType>(
             (*message)[strings::params][strings::function_id].asUInt());
+
     RPCParams params;
 
     const smart_objects::SmartObject& s_map = (*message)[strings::msg_params];
+    const WindowID window_id =
+        MessageHelper::ExtractWindowIdFromSmartObject(s_map);
     if (smart_objects::SmartType_Map == s_map.getType()) {
       smart_objects::SmartMap::iterator iter = s_map.map_begin();
       smart_objects::SmartMap::iterator iter_end = s_map.map_end();

@@ -1564,6 +1564,67 @@ smart_objects::SmartObjectSPtr MessageHelper::CreateAddVRCommandToHMI(
   return vr_command;
 }
 
+smart_objects::SmartObjectSPtr MessageHelper::CreateUICreateWindowRequestToHMI(
+    ApplicationSharedPtr application,
+    ApplicationManager& app_mngr,
+    const smart_objects::SmartObject& window_info) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  auto ui_request = CreateMessageForHMI(hmi_apis::messageType::request,
+                                        app_mngr.GetNextHMICorrelationID());
+
+  (*ui_request)[strings::params][strings::function_id] =
+      static_cast<int>(hmi_apis::FunctionID::UI_CreateWindow);
+
+  (*ui_request)[strings::correlation_id] =
+      (*ui_request)[strings::params][strings::correlation_id];
+  (*ui_request)[strings::function_id] =
+      (*ui_request)[strings::params][strings::function_id];
+
+  smart_objects::SmartObject msg_params(
+      smart_objects::SmartObject(smart_objects::SmartType_Map));
+
+  msg_params[strings::window_id] = window_info[strings::window_id].asInt();
+  msg_params[strings::window_type] = window_info[strings::window_type].asInt();
+  msg_params[strings::window_name] =
+      window_info[strings::window_name].asString();
+
+  if (window_info.keyExists(strings::associated_service_type)) {
+    msg_params[strings::associated_service_type] =
+        window_info[strings::associated_service_type].asString();
+  }
+  if (window_info.keyExists(strings::duplicate_updates_from_window_id)) {
+    msg_params[strings::duplicate_updates_from_window_id] =
+        window_info[strings::duplicate_updates_from_window_id].asInt();
+  }
+
+  msg_params[strings::app_id] = application->hmi_app_id();
+
+  (*ui_request)[strings::msg_params] = msg_params;
+
+  return ui_request;
+}
+
+smart_objects::SmartObjectList MessageHelper::CreateUICreateWindowRequestsToHMI(
+    application_manager::ApplicationSharedPtr application,
+    ApplicationManager& app_mngr,
+    const smart_objects::SmartObject& windows_info) {
+  smart_objects::SmartObjectList requests;
+  DCHECK_OR_RETURN(application, requests);
+
+  for (size_t i = 0; i < windows_info.length(); ++i) {
+    const auto& info = windows_info[i];
+
+    const auto ui_request =
+        CreateUICreateWindowRequestToHMI(application, app_mngr, info);
+
+    DCHECK_OR_RETURN(ui_request, requests);
+
+    requests.push_back(ui_request);
+  }
+
+  return requests;
+}
+
 bool MessageHelper::CreateDeviceInfo(
     connection_handler::DeviceHandle device_handle,
     const protocol_handler::SessionObserver& session_observer,
@@ -3037,6 +3098,16 @@ bool MessageHelper::PrintSmartObject(const smart_objects::SmartObject& object) {
   LOG4CXX_DEBUG(logger_, "SMART OBJECT: " << tmp.toStyledString());
 #endif
   return true;
+}
+
+WindowID MessageHelper::ExtractWindowIdFromSmartObject(
+    const smart_objects::SmartObject& s_map) {
+  if (smart_objects::SmartType_Map == s_map.getType()) {
+    if (s_map.keyExists(strings::window_id)) {
+      return s_map[strings::window_id].asUInt();
+    }
+  }
+  return mobile_apis::PredefinedWindows::DEFAULT_WINDOW;
 }
 
 }  //  namespace application_manager
