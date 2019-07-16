@@ -4618,8 +4618,8 @@
     </param>
   </function>
   <function name="Show" messagetype="request">
-    <param name="showStrings" type="Common.TextFieldStruct" mandatory="true" array="true" minsize="0" maxsize="7">
-      <description>Array of lines of show text fields. See TextFieldStruct. Uses mainField1, mainField2, mainField3, mainField4. If some field is not set, the corresponding text should stay unchanged. If field's text is empty "", the field must be cleared.
+    <param name="showStrings" type="Common.TextFieldStruct" mandatory="true" array="true" minsize="0" maxsize="8">
+      <description>Array of lines of show text fields. See TextFieldStruct. If some field is not set, the corresponding text should stay unchanged. If field's text is empty "", the field must be cleared.
           mainField1: The text that should be displayed in a single or upper display line.
           mainField2: The text that should be displayed on the second display line.
           mainField3: The text that should be displayed on the second "page" first display line.
