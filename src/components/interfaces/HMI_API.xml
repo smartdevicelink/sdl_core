@@ -4010,6 +4010,14 @@
     </function>
     <function name="ActivateApp" messagetype="response">
     </function>
+    <function name="CloseApplication" messagetype="request">
+      <description>Request from the application to exit the foreground.</description>
+      <param name="appID" type="Integer" mandatory="true">
+        <description>ID of selected application.</description>
+      </param>
+    </function>
+    <function name="CloseApplication" messagetype="response">
+    </function>
     <function name="OnAppActivated" messagetype="notification">
       <description>Must be sent by HU system when the user clicks on app in the list of registered apps or on soft button with 'STEAL_FOCUS' action.</description>
       <param name="appID" type="Integer" mandatory="true">
