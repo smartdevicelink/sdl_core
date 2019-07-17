@@ -70,6 +70,12 @@ smart_objects::SmartObject AppServiceManager::PublishAppService(
   std::string str_to_hash = "";
   std::string service_id = "";
 
+  if (manifest.keyExists(strings::service_name) &&
+      FindServiceByName(manifest[strings::service_name].asString())) {
+    LOG4CXX_WARN(logger_, "A service already exists with this name, rejecting");
+    return smart_objects::SmartObject();
+  }
+
   std::string service_type = manifest[strings::service_type].asString();
 
   AppService* found_service =
@@ -94,12 +100,6 @@ smart_objects::SmartObject AppServiceManager::PublishAppService(
     MessageHelper::BroadcastCapabilityUpdate(msg_params, app_manager_);
 
     return updated_service_record;
-  }
-
-  if (manifest.keyExists(strings::service_name) &&
-      FindServiceByName(manifest[strings::service_name].asString())) {
-    LOG4CXX_WARN(logger_, "A service already exists with this name, rejecting");
-    return smart_objects::SmartObject();
   }
 
   published_services_lock_.Acquire();
@@ -158,7 +158,7 @@ smart_objects::SmartObject AppServiceManager::PublishAppService(
   }
 
   if (!active_service || app_service.default_service ||
-      (mobile_service && app && app->IsFullscreen())) {
+      (app && app->IsFullscreen())) {
     ActivateAppService(service_id);
   }
 
@@ -188,8 +188,8 @@ bool AppServiceManager::UnpublishAppService(const std::string service_id) {
     auto embedded_service = EmbeddedServiceForType(
         record[strings::service_manifest][strings::service_type].asString());
     if (embedded_service &&
-        (embedded_service->record[strings::service_id].asString().compare(
-             service_id) > 0)) {
+        (embedded_service->record[strings::service_id].asString() !=
+         service_id)) {
       embedded_service->record[strings::service_active] = true;
       AppServiceUpdated(embedded_service->record,
                         mobile_apis::ServiceUpdateReason::ACTIVATED,

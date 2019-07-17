@@ -60,6 +60,18 @@ void ASUnpublishAppServiceRequest::Run() {
   std::string service_id =
       (*message_)[strings::msg_params][strings::service_id].asString();
 
+  auto service =
+      application_manager_.GetAppServiceManager().FindServiceByID(service_id);
+  if (service->mobile_service) {
+    SendErrorResponse(
+        (*message_)[strings::params][strings::correlation_id].asUInt(),
+        hmi_apis::FunctionID::AppService_UnpublishAppService,
+        hmi_apis::Common_Result::REJECTED,
+        "Invalid Service ID",
+        application_manager::commands::Command::SOURCE_SDL_TO_HMI);
+    return;
+  }
+
   bool ret = application_manager_.GetAppServiceManager().UnpublishAppService(
       service_id);
 

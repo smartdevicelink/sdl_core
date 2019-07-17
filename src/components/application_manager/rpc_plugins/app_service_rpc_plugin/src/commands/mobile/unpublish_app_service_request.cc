@@ -61,6 +61,17 @@ void UnpublishAppServiceRequest::Run() {
   std::string service_id =
       (*message_)[strings::msg_params][strings::service_id].asString();
 
+  auto service =
+      application_manager_.GetAppServiceManager().FindServiceByID(service_id);
+
+  if (service->connection_key != connection_key()) {
+    SendResponse(
+        false,
+        mobile_apis::Result::INVALID_ID,
+        "The app service with that requested service ID does not exist");
+    return;
+  }
+
   bool ret = application_manager_.GetAppServiceManager().UnpublishAppService(
       service_id);
 
