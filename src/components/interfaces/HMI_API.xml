@@ -6342,7 +6342,7 @@
     </function>
 
     <function name="UnpublishAppService" messagetype="request">
-        <description>Unpublish an existing service published by this application.</description>
+        <description>Unpublish an existing service published by the HMI.</description>
 
         <param name="serviceID" type="String" mandatory="true">
             <description> The ID of the service to be unpublished. </description>

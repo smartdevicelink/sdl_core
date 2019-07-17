@@ -2645,7 +2645,7 @@
         <element name="GetAppServiceDataID" value="53" hexvalue="35" since="5.1" />
         <element name="GetFileID" value="54" hexvalue="36" since="5.1" />
         <element name="PerformAppServiceInteractionID" value="55" hexvalue="37" since="5.1" />
-        <element name="UnpublishAppServiceID" value="56" hexvalue="38" since="5.2" />
+        <element name="UnpublishAppServiceID" value="56" hexvalue="38" since="6.0" />
         
         <!--
          Base Notifications
@@ -7243,7 +7243,7 @@
         </param>
     </function>
 
-    <function name="UnpublishAppService" functionID="UnpublishAppServiceID" messagetype="request" since="5.2">
+    <function name="UnpublishAppService" functionID="UnpublishAppServiceID" messagetype="request" since="6.0">
         <description> Unpublish an existing service published by this application. </description>
 
         <param name="serviceID" type="String" mandatory="true">
@@ -7251,7 +7251,7 @@
         </param>
     </function>
     
-    <function name="UnpublishAppService" functionID="UnpublishAppServiceID" messagetype="response" since="5.2">
+    <function name="UnpublishAppService" functionID="UnpublishAppServiceID" messagetype="response" since="6.0">
         <description> The response to UnpublishAppService </description>
         <param name="success" type="Boolean" platform="documentation" mandatory="true">
             <description> true, if successful; false, if failed </description>
