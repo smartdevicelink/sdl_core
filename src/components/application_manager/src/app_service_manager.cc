@@ -70,19 +70,27 @@ smart_objects::SmartObject AppServiceManager::PublishAppService(
   std::string str_to_hash = "";
   std::string service_id = "";
 
-  if (manifest.keyExists(strings::service_name) &&
-      FindServiceByName(manifest[strings::service_name].asString())) {
-    LOG4CXX_WARN(logger_, "A service already exists with this name, rejecting");
-    return smart_objects::SmartObject();
-  }
-
   std::string service_type = manifest[strings::service_type].asString();
 
   AppService* found_service =
       FindServiceByProvider(connection_key, service_type);
   if (found_service) {
+    // Check if there is a different existing service with the same updated
+    // name.
+    if (manifest.keyExists(strings::service_name)) {
+      auto service_by_name =
+          FindServiceByName(manifest[strings::service_name].asString());
+      auto service_by_name_id =
+          service_by_name->record[strings::service_id].asString();
+      auto found_service_id =
+          service_by_name->record[strings::service_id].asString();
+      if (service_by_name_id != found_service_id) {
+        LOG4CXX_WARN(logger_,
+                     "A service already exists with this name, rejecting");
+        return smart_objects::SmartObject();
+      }
+    }
     LOG4CXX_WARN(logger_, "Service already exists for this provider, updating");
-
     published_services_lock_.Acquire();
     found_service->record[strings::service_manifest] = manifest;
     found_service->record[strings::service_published] = true;
@@ -100,6 +108,12 @@ smart_objects::SmartObject AppServiceManager::PublishAppService(
     MessageHelper::BroadcastCapabilityUpdate(msg_params, app_manager_);
 
     return updated_service_record;
+  }
+
+  if (manifest.keyExists(strings::service_name) &&
+      FindServiceByName(manifest[strings::service_name].asString())) {
+    LOG4CXX_WARN(logger_, "A service already exists with this name, rejecting");
+    return smart_objects::SmartObject();
   }
 
   published_services_lock_.Acquire();
