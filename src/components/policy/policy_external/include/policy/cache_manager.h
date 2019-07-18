@@ -160,6 +160,13 @@ class CacheManager : public CacheManagerInterface {
       const std::string& language) const OVERRIDE;
 
   /**
+   * @brief Gets vehicle data items
+   * @return Structure with vehicle data items
+   */
+  virtual const std::vector<policy_table::VehicleDataItem> GetVehicleDataItems()
+      const OVERRIDE;
+
+  /**
    * @brief Gets copy of current policy table data
    * @return policy_table as json object
    */

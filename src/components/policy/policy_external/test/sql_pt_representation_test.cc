@@ -176,7 +176,7 @@ class SQLPTRepresentationTest : public SQLPTRepresentation,
       policy_table::Strings& temp_groups = apps_iter->second.groups;
       StringsCompare(groups, temp_groups);
       EXPECT_EQ(0u, (*(apps_iter->second.nicknames)).size());
-      EXPECT_EQ(prio, apps_iter->second.priority);
+      EXPECT_EQ(prio, (apps_iter->second).priority);
       EXPECT_EQ(0u, (*(apps_iter->second.AppHMIType)).size());
       EXPECT_EQ(memory_kb, (*(apps_iter->second.memory_kb)));
       EXPECT_EQ(heart_beat_timeout_ms,
@@ -378,18 +378,23 @@ class SQLPTRepresentationTest2 : public ::testing::Test {
 
 TEST_F(SQLPTRepresentationTest, VehicleDataItem_Store_Item) {
   policy_table::VehicleDataItem rpm;
+  rpm.mark_initialized();
   rpm.name = "rpm";
   rpm.type = "Integer";
   rpm.key = "OEM_REF_RPM";
   rpm.mandatory = false;
   *rpm.array = false;
-  rpm.params = rpc::Array<policy_table::VehicleDataItem, 0, 255>();
-  ASSERT_FALSE(reps->VehicleDataItemExists(rpm.name, rpm.key));
+  rpm.params->mark_initialized();
+  ASSERT_FALSE(reps->VehicleDataItemExists(rpm));
   ASSERT_TRUE(reps->InsertVehicleDataItem(rpm));
-  ASSERT_TRUE(reps->VehicleDataItemExists(rpm.name, rpm.key));
+  ASSERT_TRUE(reps->VehicleDataItemExists(rpm));
 
   auto rpm_retrieved = reps->GetVehicleDataItem(rpm.name, rpm.key);
-  ASSERT_EQ(rpm.ToJsonValue(), rpm_retrieved.ToJsonValue());
+
+  std::cout << rpm.ToJsonValue().toStyledString() << std::endl;
+  std::cout << rpm_retrieved.ToJsonValue().toStyledString() << std::endl;
+
+  ASSERT_EQ(rpm.ToJsonValue(), rpm_retrieved.begin()->ToJsonValue());
 }
 
 TEST_F(SQLPTRepresentationTest, VehicleDataItem_Store_Complete_Item) {
@@ -399,7 +404,6 @@ TEST_F(SQLPTRepresentationTest, VehicleDataItem_Store_Complete_Item) {
   message.key = "OEM_REF_MSG";
   message.mandatory = false;
   *message.array = false;
-  message.params = rpc::Array<policy_table::VehicleDataItem, 0, 255>();
   *message.since = "1.0";
   *message.until = "5.0";
   *message.removed = false;
@@ -410,53 +414,59 @@ TEST_F(SQLPTRepresentationTest, VehicleDataItem_Store_Complete_Item) {
   *message.maxsize = 255;
   *message.minlength = 0;
   *message.maxlength = 255;
+  message.params->mark_initialized();
   ASSERT_TRUE(reps->InsertVehicleDataItem(message));
 
   auto message_retrieved = reps->GetVehicleDataItem(message.name, message.key);
-  ASSERT_EQ(message.ToJsonValue(), message_retrieved.ToJsonValue());
+  ASSERT_EQ(message.ToJsonValue(), message_retrieved.begin()->ToJsonValue());
 }
 
 TEST_F(SQLPTRepresentationTest, VehicleDataItem_Store_Struct) {
   policy_table::VehicleDataItem alss;
+  alss.mark_initialized();
   alss.name = "ambientLightSensorStatus";
   alss.type = "AmbientLightStatus";
   alss.key = "OEM_REF_AMB_LIGHT";
   alss.mandatory = false;
-  alss.params = rpc::Array<policy_table::VehicleDataItem, 0, 255>();
+  alss.params->mark_initialized();
   policy_table::VehicleDataItem lss;
+  lss.mark_initialized();
   lss.name = "LightSensorStatus";
   lss.type = "Struct";
   lss.key = "OEM_REF_SEN_LIGHT";
   lss.mandatory = false;
-  lss.params = rpc::Array<policy_table::VehicleDataItem, 0, 255>();
-  lss.params.push_back(alss);
+  lss.params->mark_initialized();
+  (*lss.params).push_back(alss);
 
   policy_table::VehicleDataItem hbo;
+  hbo.mark_initialized();
   hbo.name = "highBeamsOn";
   hbo.type = "Boolean";
   hbo.key = "OEM_REF_HIGH_BEAM";
   hbo.mandatory = true;
-  hbo.params = rpc::Array<policy_table::VehicleDataItem, 0, 255>();
+  hbo.params->mark_initialized();
   policy_table::VehicleDataItem lbo;
+  lbo.mark_initialized();
   lbo.name = "lowBeamsOn";
   lbo.type = "Boolean";
   lbo.key = "OEM_REF_LOW_BEAM";
   lbo.mandatory = false;
-  lbo.params = rpc::Array<policy_table::VehicleDataItem, 0, 255>();
+  lbo.params->mark_initialized();
   policy_table::VehicleDataItem hls;
+  hls.mark_initialized();
   hls.name = "headLampStatus";
   hls.type = "Struct";
   hls.key = "OEM_REF_HLSTATUS";
   hls.mandatory = false;
-  hls.params = rpc::Array<policy_table::VehicleDataItem, 0, 255>();
-  hls.params.push_back(lss);
-  hls.params.push_back(lbo);
-  hls.params.push_back(hbo);
+  hls.params->mark_initialized();
+  (*hls.params).push_back(lss);
+  (*hls.params).push_back(lbo);
+  (*hls.params).push_back(hbo);
   ASSERT_TRUE(reps->InsertVehicleDataItem(alss));
   ASSERT_TRUE(reps->InsertVehicleDataItem(hls));
 
   auto hls_retrieved = reps->GetVehicleDataItem(hls.name, hls.key);
-  ASSERT_EQ(hls.ToJsonValue(), hls_retrieved.ToJsonValue());
+  ASSERT_EQ(hls.ToJsonValue(), hls_retrieved.begin()->ToJsonValue());
 }
 
 TEST_F(SQLPTRepresentationTest2,
@@ -489,8 +499,8 @@ TEST_F(SQLPTRepresentationTest,
   query.Prepare(query_select);
   query.Next();
 
-  // 37 - is current total tables number created by schema
-  const int policy_tables_number = 37;
+  // 41 - is current total tables number created by schema
+  const int policy_tables_number = 41;
   ASSERT_EQ(policy_tables_number, query.GetInteger(0));
 
   const std::string query_select_count_of_iap_buffer_full =
@@ -1759,9 +1769,8 @@ TEST_F(SQLPTRepresentationTest,
 
   const ::policy_table::Parameters& parameters = *(rpc_iter->second.parameters);
   EXPECT_EQ(1u, parameters.size());
-  EXPECT_TRUE(parameters.end() != std::find(parameters.begin(),
-                                            parameters.end(),
-                                            policy_table::Parameter::P_SPEED));
+  EXPECT_TRUE(parameters.end() !=
+              std::find(parameters.begin(), parameters.end(), "P_SPEED"));
   // Check Application Policies Section
   GatherApplicationPoliciesSection(&policies);
   const uint32_t apps_size = 3u;

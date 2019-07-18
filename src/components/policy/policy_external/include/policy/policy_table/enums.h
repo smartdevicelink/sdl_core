@@ -41,30 +41,6 @@
 namespace rpc {
 namespace policy_table_interface_base {
 
-enum Priority {
-  P_EMERGENCY,
-  P_NAVIGATION,
-  P_VOICECOM,
-  P_COMMUNICATION,
-  P_NORMAL,
-  P_PROJECTION,
-  P_NONE,
-};
-
-bool IsValidEnum(Priority val);
-const char* EnumToJsonString(Priority val);
-bool EnumFromJsonString(const std::string& literal, Priority* result);
-
-enum HmiLevel {
-  HL_BACKGROUND,
-  HL_FULL,
-  HL_LIMITED,
-  HL_NONE,
-};
-bool IsValidEnum(HmiLevel val);
-const char* EnumToJsonString(HmiLevel val);
-bool EnumFromJsonString(const std::string& literal, HmiLevel* result);
-
 enum Parameter {
   P_GPS,
   P_SPEED,
@@ -117,54 +93,6 @@ bool IsValidEnum(Parameter val);
 const char* EnumToJsonString(Parameter val);
 bool EnumFromJsonString(const std::string& literal, Parameter* result);
 
-enum AppHMIType {
-  AHT_DEFAULT,
-  AHT_COMMUNICATION,
-  AHT_MEDIA,
-  AHT_MESSAGING,
-  AHT_NAVIGATION,
-  AHT_INFORMATION,
-  AHT_SOCIAL,
-  AHT_BACKGROUND_PROCESS,
-  AHT_TESTING,
-  AHT_SYSTEM,
-  AHT_PROJECTION,
-  AHT_REMOTE_CONTROL,
-};
-bool IsValidEnum(AppHMIType val);
-const char* EnumToJsonString(AppHMIType val);
-bool EnumFromJsonString(const std::string& literal, AppHMIType* result);
-
-enum RequestType {
-  RT_HTTP,
-  RT_FILE_RESUME,
-  RT_AUTH_REQUEST,
-  RT_AUTH_CHALLENGE,
-  RT_AUTH_ACK,
-  RT_PROPRIETARY,
-  RT_QUERY_APPS,
-  RT_LAUNCH_APP,
-  RT_LOCK_SCREEN_ICON_URL,
-  RT_TRAFFIC_MESSAGE_CHANNEL,
-  RT_DRIVER_PROFILE,
-  RT_VOICE_SEARCH,
-  RT_NAVIGATION,
-  RT_PHONE,
-  RT_CLIMATE,
-  RT_SETTINGS,
-  RT_VEHICLE_DIAGNOSTICS,
-  RT_EMERGENCY,
-  RT_MEDIA,
-  RT_FOTA,
-  RT_OEM_SPECIFIC,
-  RT_ICON_URL,
-  RT_EMPTY  // Added to allow empty Request Types handling
-};
-
-bool IsValidEnum(RequestType val);
-const char* EnumToJsonString(RequestType val);
-bool EnumFromJsonString(const std::string& literal, RequestType* result);
-
 enum Input {
   I_GUI,
   I_VUI,
@@ -172,19 +100,6 @@ enum Input {
 bool IsValidEnum(Input val);
 const char* EnumToJsonString(Input val);
 bool EnumFromJsonString(const std::string& literal, Input* result);
-
-enum ModuleType {
-  MT_CLIMATE,
-  MT_RADIO,
-  MT_SEAT,
-  MT_AUDIO,
-  MT_LIGHT,
-  MT_HMI_SETTINGS,
-  MT_EMPTY
-};
-bool IsValidEnum(ModuleType val);
-const char* EnumToJsonString(ModuleType val);
-bool EnumFromJsonString(const std::string& literal, ModuleType* result);
 
 extern const std::string kDefaultApp;
 extern const std::string kPreDataConsentApp;

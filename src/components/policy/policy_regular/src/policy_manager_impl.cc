@@ -166,7 +166,7 @@ void FilterInvalidFunctions(policy_table::Rpc& rpcs) {
  */
 void FilterInvalidRPCParameters(
     policy_table::RpcParameters& rpc_parameters,
-    policy_table::VehicleDataItems& vehicle_data_items) {
+    const std::vector<policy_table::VehicleDataItem>& vehicle_data_items) {
   policy_table::HmiLevels valid_hmi_levels;
   for (const auto& hmi_level : rpc_parameters.hmi_levels) {
     if (hmi_level.is_valid()) {
@@ -182,7 +182,9 @@ void FilterInvalidRPCParameters(
           return true;
         }
 
-        if (!vehicle_data_items.is_initialized()) {
+        // In case when this collection is empty that means collection is not
+        // initialized
+        if (vehicle_data_items.empty()) {
           return false;
         }
 
@@ -282,8 +284,9 @@ void FilterInvalidApplicationParameters(
  * @brief FilterPolicyTable filter values that not present in schema
  * @param pt policy table to filter
  */
-void FilterPolicyTable(policy_table::PolicyTable& pt,
-                       policy_table::VehicleDataItems& current_vd_items) {
+void FilterPolicyTable(
+    policy_table::PolicyTable& pt,
+    const std::vector<policy_table::VehicleDataItem>& current_vd_items) {
   policy_table::ModuleConfig& module_config = pt.module_config;
   if (module_config.is_initialized() &&
       module_config.notifications_per_minute_by_priority.is_initialized()) {
@@ -357,11 +360,7 @@ bool PolicyManagerImpl::LoadPT(const std::string& file,
       return false;
     }
 
-    const auto& current_vd = cache_->pt()->policy_table.vehicle_data;
-    auto current_vd_items =
-        current_vd.is_initialized() && current_vd->schema_items.is_initialized()
-            ? *(current_vd->schema_items)
-            : policy_table::VehicleDataItems();
+    auto current_vd_items = GetVehicleDataItems();
 
     FilterPolicyTable(pt_update->policy_table, current_vd_items);
     if (!IsPTValid(pt_update, policy_table::PT_UPDATE)) {
