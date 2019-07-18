@@ -1541,8 +1541,8 @@ TEST_F(SQLPTExtRepresentationTest, SaveFunctionalGroupings_ExpectedSaved) {
 
   const HmiLevel test_level_1 = HL_FULL;
   const HmiLevel test_level_2 = HL_LIMITED;
-  const policy_table::Parameter test_parameter_1 = P_GPS;
-  const policy_table::Parameter test_parameter_2 = P_SPEED;
+  const std::string test_parameter_1 = "P_GPS";
+  const std::string test_parameter_2 = "P_SPEED";
 
   Rpcs rpcs;
 
@@ -1578,7 +1578,7 @@ TEST_F(SQLPTExtRepresentationTest, SaveFunctionalGroupings_ExpectedSaved) {
   *another_rpcs.user_consent_prompt = another_user_consent_prompt;
 
   const HmiLevel test_level_3 = HL_BACKGROUND;
-  const policy_table::Parameter test_parameter_3 = P_BELTSTATUS;
+  const std::string test_parameter_3 = "P_BELTSTATUS";
 
   RpcParameters another_parameters;
   another_parameters.hmi_levels.push_back(test_level_3);
@@ -1615,10 +1615,10 @@ TEST_F(SQLPTExtRepresentationTest, SaveFunctionalGroupings_ExpectedSaved) {
   EXPECT_TRUE(
       (IsKeyExist<HmiLevels>(loaded_parameters.hmi_levels, test_level_2)));
 
-  EXPECT_TRUE((
-      IsKeyExist<Parameters>(*loaded_parameters.parameters, test_parameter_1)));
-  EXPECT_TRUE((
-      IsKeyExist<Parameters>(*loaded_parameters.parameters, test_parameter_2)));
+  EXPECT_TRUE((IsKeyExist<Parameters, std::string>(
+      *loaded_parameters.parameters, test_parameter_1)));
+  EXPECT_TRUE((IsKeyExist<Parameters, std::string>(
+      *loaded_parameters.parameters, test_parameter_2)));
 
   Rpcs another_loaded_rpcs = GetKeyData<FunctionalGroupings, Rpcs>(
       loaded_groupings, another_group_name);
@@ -1637,8 +1637,8 @@ TEST_F(SQLPTExtRepresentationTest, SaveFunctionalGroupings_ExpectedSaved) {
   EXPECT_TRUE((IsKeyExist<HmiLevels>(another_loaded_parameters.hmi_levels,
                                      test_level_3)));
 
-  EXPECT_TRUE((IsKeyExist<Parameters>(*another_loaded_parameters.parameters,
-                                      test_parameter_3)));
+  EXPECT_TRUE((IsKeyExist<Parameters, std::string>(
+      *another_loaded_parameters.parameters, test_parameter_3)));
 }
 
 TEST_F(SQLPTExtRepresentationTest, JsonContentsExternalConsent_ExpectParsed) {

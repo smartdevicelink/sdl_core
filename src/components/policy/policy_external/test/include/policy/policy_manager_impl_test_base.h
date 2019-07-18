@@ -112,7 +112,7 @@ class PolicyManagerImplTest : public ::testing::Test {
   const std::string unpaired_device_id_;
 
   PolicyManagerImpl* policy_manager_;
-  MockCacheManagerInterface* cache_manager_;
+  NiceMock<MockCacheManagerInterface>* cache_manager_;
   MockUpdateStatusManager update_manager_;
   NiceMock<MockPolicyListener> listener_;
 

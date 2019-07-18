@@ -44,9 +44,9 @@ file(GLOB SOURCES
   ${COMPONENTS_DIR}/application_manager/test/mock_message_helper.cc
   ${COMPONENTS_DIR}/application_manager/test/mock_application_helper.cc
   ${COMPONENTS_DIR}/application_manager/src/smart_object_keys.cc
-  ${COMPONENTS_DIR}/policy/policy_regular/src/policy_table/types.cc
-  ${COMPONENTS_DIR}/policy/policy_regular/src/policy_table/validation.cc
-  ${COMPONENTS_DIR}/policy/policy_regular/src/policy_table/enums.cc
+  ${COMPONENTS_DIR}/${POLICY_PATH}/src/policy_table/types.cc
+  ${COMPONENTS_DIR}/${POLICY_PATH}/src/policy_table/validation.cc
+  ${COMPONENTS_DIR}/${POLICY_PATH}/src/policy_table/enums.cc
   ${COMMANDS_TEST_DIR}/hmi/*
   ${COMMANDS_TEST_DIR}/mobile/*
   ${CMAKE_CURRENT_SOURCE_DIR}/custom_vehicle_data_manager_test.cc

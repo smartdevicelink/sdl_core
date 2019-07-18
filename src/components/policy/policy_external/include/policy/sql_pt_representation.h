@@ -123,6 +123,9 @@ class SQLPTRepresentation : public virtual PTRepresentation {
       policy_table::ConsumerFriendlyMessages* messages) const;
   virtual bool GatherApplicationPoliciesSection(
       policy_table::ApplicationPoliciesSection* policies) const;
+  virtual bool GatherVehicleDataItems(
+      policy_table::VehicleDataItems* vehicle_data_items) const;
+  virtual bool GatherVehicleData(policy_table::VehicleData* vehicle_data) const;
 
   bool GatherAppGroup(const std::string& app_id,
                       policy_table::Strings* app_groups) const;
@@ -158,6 +161,9 @@ class SQLPTRepresentation : public virtual PTRepresentation {
   virtual bool SaveSpecificAppPolicy(
       const policy_table::ApplicationPolicies::value_type& app);
   virtual bool SaveDevicePolicy(const policy_table::DevicePolicy& device);
+  virtual bool SaveVehicleDataItems(
+      const policy_table::VehicleDataItems& vehicle_data_items);
+  virtual bool SaveVehicleData(const policy_table::VehicleData& vehicle_data);
 
   virtual bool SaveMessageString(const std::string& type,
                                  const std::string& lang,
@@ -202,6 +208,26 @@ class SQLPTRepresentation : public virtual PTRepresentation {
   virtual bool IsDBVersionActual() const OVERRIDE;
   virtual bool UpdateDBVersion() const OVERRIDE;
 
+  policy_table::VehicleDataItems GetVehicleDataItem(
+      const std::string& name, const std::string& key) const;
+  bool InsertVehicleDataItem(
+      const policy_table::VehicleDataItem& vehicle_data_item);
+  bool VehicleDataItemExists(
+      const policy_table::VehicleDataItem& vehicle_data_item) const;
+
+  /**
+   * @brief Retrieves vehicle data items of type Struct (which contains params)
+   * from the database includeing these parameters.
+   * @return Array of parametrised VehicleDataItems (including params)
+   */
+  policy_table::VehicleDataItems SelectParameterizedVehicleDataItems() const;
+
+  /**
+   * @brief Retrieves vehicle data items of non Struct type from the database.
+   * @return Array of parameterised VehicleDataItems (including params)
+   */
+  policy_table::VehicleDataItems SelectNonParameterizedVehicleDataItems() const;
+
  private:
   utils::dbms::SQLDatabase* db_;
 
@@ -219,12 +245,17 @@ class SQLPTRepresentation : public virtual PTRepresentation {
   const int32_t GetDBVersion() const;
   bool SaveRpcs(int64_t group_id, const policy_table::Rpc& rpcs);
   bool SaveServiceEndpoints(const policy_table::ServiceEndpoints& endpoints);
+  bool SaveServiceEndpointProperties(
+      const policy_table::ServiceEndpointProperties& endpoint_properties);
   bool SaveSecondsBetweenRetries(
       const policy_table::SecondsBetweenRetries& seconds);
   bool SaveNumberOfNotificationsPerMinute(
       const policy_table::NumberOfNotificationsPerMinute& notifications);
   bool SaveMessageType(const std::string& type);
   bool SaveLanguage(const std::string& code);
+  policy_table::VehicleDataItem PopulateVDIFromQuery(
+      const utils::dbms::SQLQuery& query) const;
+  bool DeleteVehicleDataItems() const;
 
   bool is_in_memory;
   bool SaveExternalConsentEntities(

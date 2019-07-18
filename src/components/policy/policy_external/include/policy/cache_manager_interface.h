@@ -168,6 +168,13 @@ class CacheManagerInterface {
   virtual Json::Value GetPolicyTableData() const = 0;
 
   /**
+   * @brief Gets vehicle data items
+   * @return Structure with vehicle data items
+   */
+  virtual const std::vector<policy_table::VehicleDataItem> GetVehicleDataItems()
+      const = 0;
+
+  /**
    * @brief Get a list of enabled cloud applications
    * @param enabled_apps List filled with the policy app id of each enabled
    * cloud application

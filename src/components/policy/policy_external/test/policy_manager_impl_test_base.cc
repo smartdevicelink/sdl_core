@@ -207,7 +207,7 @@ PolicyManagerImplTest::PolicyManagerImplTest()
 
 void PolicyManagerImplTest::SetUp() {
   policy_manager_ = new PolicyManagerImpl();
-  cache_manager_ = new MockCacheManagerInterface();
+  cache_manager_ = new NiceMock<MockCacheManagerInterface>();
   policy_manager_->set_cache_manager(cache_manager_);
   policy_manager_->set_listener(&listener_);
 
@@ -260,7 +260,7 @@ void PolicyManagerImplTest2::SetUp() {
   ON_CALL(policy_settings_, app_storage_folder())
       .WillByDefault(ReturnRef(app_storage_folder_));
   policy_manager_->set_listener(&listener_);
-  const char* levels[] = {"BACKGROUND", "FULL", "LIMITED", "NONE"};
+  const char* levels[] = {"FULL", "LIMITED", "BACKGROUND", "NONE"};
   hmi_level_.assign(levels, levels + sizeof(levels) / sizeof(levels[0]));
   srand(time(NULL));
   index_ = rand() % 3;

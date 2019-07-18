@@ -148,8 +148,9 @@ TEST_F(PolicyManagerImplTest, LoadPT_SetPT_PTIsLoaded) {
 
   std::shared_ptr<policy_table::Table> snapshot =
       std::make_shared<policy_table::Table>(update.policy_table);
+  ON_CALL(*cache_manager_, GenerateSnapshot()).WillByDefault(Return(snapshot));
+
   // Assert
-  EXPECT_CALL(*cache_manager_, GenerateSnapshot()).WillOnce(Return(snapshot));
   EXPECT_CALL(*cache_manager_, ApplyUpdate(_)).WillOnce(Return(true));
   EXPECT_CALL(listener_, GetAppName("1234"))
       .WillOnce(Return(custom_str::CustomString("")));
@@ -158,6 +159,8 @@ TEST_F(PolicyManagerImplTest, LoadPT_SetPT_PTIsLoaded) {
   EXPECT_CALL(*cache_manager_, TimeoutResponse());
   EXPECT_CALL(*cache_manager_, SecondsBetweenRetries(_));
 
+  EXPECT_CALL(*cache_manager_, GetVehicleDataItems())
+      .WillOnce(Return(std::vector<policy_table::VehicleDataItem>()));
   EXPECT_TRUE(policy_manager_->LoadPT(kFilePtUpdateJson, msg));
   EXPECT_CALL(*cache_manager_, IsPTPreloaded());
   EXPECT_FALSE(policy_manager_->GetCache()->IsPTPreloaded());
