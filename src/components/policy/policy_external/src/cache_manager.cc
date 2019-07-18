@@ -1440,6 +1440,19 @@ bool CacheManager::SecondsBetweenRetries(std::vector<int>& seconds) {
   return true;
 }
 
+const std::vector<policy_table::VehicleDataItem>
+CacheManager::GetVehicleDataItems() const {
+  CACHE_MANAGER_CHECK(std::vector<policy_table::VehicleDataItem>());
+  sync_primitives::AutoLock auto_lock(cache_lock_);
+
+  if (pt_->policy_table.vehicle_data.is_initialized() &&
+      pt_->policy_table.vehicle_data->schema_items.is_initialized()) {
+    return *(pt_->policy_table.vehicle_data->schema_items);
+  }
+
+  return std::vector<policy_table::VehicleDataItem>();
+}
+
 Json::Value CacheManager::GetPolicyTableData() const {
   return pt_->policy_table.ToJsonValue();
 }

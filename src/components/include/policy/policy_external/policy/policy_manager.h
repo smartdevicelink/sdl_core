@@ -568,6 +568,13 @@ class PolicyManager : public usage_statistics::StatisticsManager,
       const std::string& policy_app_id) const = 0;
 
   /**
+   * @brief Gets vehicle data items
+   * @return Structure with vehicle data items
+   */
+  virtual const std::vector<policy_table::VehicleDataItem> GetVehicleDataItems()
+      const = 0;
+
+  /**
    * @brief Gets copy of current policy table data
    * @return policy_table as json object
    */

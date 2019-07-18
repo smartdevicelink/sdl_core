@@ -215,9 +215,10 @@ class PolicyManagerImplTest : public ::testing::Test {
   }
 
   void ExpectOnPermissionsUpdated() {
-    EXPECT_CALL(*cache_manager, IsDefaultPolicy("1234")).WillOnce(Return(true));
-    EXPECT_CALL(listener, OnCurrentDeviceIdUpdateRequired("1234"))
-        .WillOnce(Return("dev_id_1"));
+    std::string dev_id_1 = "dev_id_1";
+    std::string app_id = "1234";
+
+    EXPECT_CALL(*cache_manager, IsDefaultPolicy(app_id)).WillOnce(Return(true));
     EXPECT_CALL(*access_remote, IsAppRemoteControl(_)).WillOnce(Return(true));
 
     FunctionalGroupNames fg_names;
@@ -226,15 +227,21 @@ class PolicyManagerImplTest : public ::testing::Test {
     EXPECT_CALL(*cache_manager, GetFunctionalGroupNames(_))
         .WillOnce(DoAll(SetArgReferee<0>(fg_names), Return(true)));
 
+    std::vector<std::string> device_ids;
+    device_ids.push_back(dev_id_1);
+    EXPECT_CALL(listener, GetDevicesIds(app_id))
+        .WillRepeatedly(Return(device_ids));
+
     int32_t group_id = 0;
-    FunctionalGroupIDs ids;
-    ids.push_back(group_id);
+    FunctionalGroupIDs group_ids;
+    group_ids.push_back(group_id);
     FunctionalIdType group_types;
-    group_types[GroupType::kTypeGeneral] = ids;
-    EXPECT_CALL(*access_remote, GetPermissionsForApp("dev_id_1", "1234", _))
+    group_types[GroupType::kTypeGeneral] = group_ids;
+    EXPECT_CALL(*access_remote, GetPermissionsForApp(dev_id_1, app_id, _))
         .WillRepeatedly(DoAll(SetArgReferee<2>(group_types), Return(true)));
 
-    EXPECT_CALL(listener, OnPermissionsUpdated("1234", _, _)).Times(1);
+    EXPECT_CALL(listener, OnPermissionsUpdated(dev_id_1, app_id, _, _))
+        .Times(1);
 
     EXPECT_CALL(listener, GetAppName(_))
         .WillOnce(Return(custom_str::CustomString("")));
@@ -971,12 +978,11 @@ TEST_F(PolicyManagerImplTest, LoadPT_SetPT_PTIsLoaded) {
       std::make_shared<policy_table::Table>(update.policy_table);
   // Assert
   EXPECT_CALL(*cache_manager, GenerateSnapshot()).WillOnce(Return(snapshot));
-  EXPECT_CALL(*cache_manager, pt()).WillOnce(Return(snapshot));
-  snapshot->policy_table.vehicle_data->schema_items =
-      rpc::Optional<policy_table::VehicleDataItems>();
+  EXPECT_CALL(*cache_manager, GetVehicleDataItems())
+      .WillOnce(Return(std::vector<policy_table::VehicleDataItem>()));
   EXPECT_CALL(*cache_manager, ApplyUpdate(_)).WillOnce(Return(true));
-  EXPECT_CALL(listener, GetAppName("1234"))
-      .WillOnce(Return(custom_str::CustomString("")));
+  EXPECT_CALL(listener, GetDevicesIds("1234"))
+      .WillRepeatedly(Return(transport_manager::DeviceList()));
   EXPECT_CALL(*cache_manager, SaveUpdateRequired(false));
   EXPECT_CALL(*cache_manager, TimeoutResponse());
   EXPECT_CALL(*cache_manager, SecondsBetweenRetries(_));
@@ -1005,9 +1011,8 @@ TEST_F(PolicyManagerImplTest, LoadPT_FunctionalGroup_removeRPC_SendUpdate) {
   ::policy::BinaryMessage msg(json.begin(), json.end());
 
   // Assert
-  EXPECT_CALL(*cache_manager, pt()).WillOnce(Return(snapshot));
-  snapshot->policy_table.vehicle_data->schema_items =
-      rpc::Optional<policy_table::VehicleDataItems>();
+  EXPECT_CALL(*cache_manager, GetVehicleDataItems())
+      .WillOnce(Return(std::vector<policy_table::VehicleDataItem>()));
   EXPECT_CALL(*cache_manager, GenerateSnapshot()).WillOnce(Return(snapshot));
   EXPECT_CALL(*cache_manager, ApplyUpdate(_)).WillOnce(Return(true));
   ExpectOnPermissionsUpdated();
@@ -1041,9 +1046,8 @@ TEST_F(PolicyManagerImplTest,
 
   // Assert
   EXPECT_CALL(*cache_manager, GenerateSnapshot()).WillOnce(Return(snapshot));
-  EXPECT_CALL(*cache_manager, pt()).WillOnce(Return(snapshot));
-  snapshot->policy_table.vehicle_data->schema_items =
-      rpc::Optional<policy_table::VehicleDataItems>();
+  EXPECT_CALL(*cache_manager, GetVehicleDataItems())
+      .WillOnce(Return(std::vector<policy_table::VehicleDataItem>()));
   EXPECT_CALL(*cache_manager, ApplyUpdate(_)).WillOnce(Return(true));
   ExpectOnPermissionsUpdated();
 
@@ -1076,9 +1080,8 @@ TEST_F(PolicyManagerImplTest,
 
   // Assert
   EXPECT_CALL(*cache_manager, GenerateSnapshot()).WillOnce(Return(snapshot));
-  EXPECT_CALL(*cache_manager, pt()).WillOnce(Return(snapshot));
-  snapshot->policy_table.vehicle_data->schema_items =
-      rpc::Optional<policy_table::VehicleDataItems>();
+  EXPECT_CALL(*cache_manager, GetVehicleDataItems())
+      .WillOnce(Return(std::vector<policy_table::VehicleDataItem>()));
   EXPECT_CALL(*cache_manager, ApplyUpdate(_)).WillOnce(Return(true));
   ExpectOnPermissionsUpdated();
 
@@ -1112,9 +1115,8 @@ TEST_F(PolicyManagerImplTest,
 
   // Assert
   EXPECT_CALL(*cache_manager, GenerateSnapshot()).WillOnce(Return(snapshot));
-  EXPECT_CALL(*cache_manager, pt()).WillOnce(Return(snapshot));
-  snapshot->policy_table.vehicle_data->schema_items =
-      rpc::Optional<policy_table::VehicleDataItems>();
+  EXPECT_CALL(*cache_manager, GetVehicleDataItems())
+      .WillOnce(Return(std::vector<policy_table::VehicleDataItem>()));
   EXPECT_CALL(*cache_manager, ApplyUpdate(_)).WillOnce(Return(true));
   ExpectOnPermissionsUpdated();
 
@@ -1147,9 +1149,8 @@ TEST_F(PolicyManagerImplTest, LoadPT_FunctionalGroup_addRPCParams_SendUpdate) {
 
   // Assert
   EXPECT_CALL(*cache_manager, GenerateSnapshot()).WillOnce(Return(snapshot));
-  EXPECT_CALL(*cache_manager, pt()).WillOnce(Return(snapshot));
-  snapshot->policy_table.vehicle_data->schema_items =
-      rpc::Optional<policy_table::VehicleDataItems>();
+  EXPECT_CALL(*cache_manager, GetVehicleDataItems())
+      .WillOnce(Return(std::vector<policy_table::VehicleDataItem>()));
   EXPECT_CALL(*cache_manager, ApplyUpdate(_)).WillOnce(Return(true));
   ExpectOnPermissionsUpdated();
 
@@ -1175,9 +1176,8 @@ TEST_F(PolicyManagerImplTest, LoadPT_FunctionalGroup_NoUpdate_DONT_SendUpdate) {
 
   // Assert
   EXPECT_CALL(*cache_manager, GenerateSnapshot()).WillOnce(Return(snapshot));
-  EXPECT_CALL(*cache_manager, pt()).WillOnce(Return(snapshot));
-  snapshot->policy_table.vehicle_data->schema_items =
-      rpc::Optional<policy_table::VehicleDataItems>();
+  EXPECT_CALL(*cache_manager, GetVehicleDataItems())
+      .WillOnce(Return(std::vector<policy_table::VehicleDataItem>()));
   EXPECT_CALL(*cache_manager, ApplyUpdate(_)).WillOnce(Return(true));
 
   EXPECT_TRUE(manager->LoadPT("file_pt_update.json", msg));
@@ -1202,9 +1202,8 @@ TEST_F(PolicyManagerImplTest, LoadPT_SetInvalidUpdatePT_PTIsNotLoaded) {
   std::shared_ptr<policy_table::Table> snapshot =
       std::make_shared<policy_table::Table>(update.policy_table);
   ON_CALL(*cache_manager, GenerateSnapshot()).WillByDefault(Return(snapshot));
-  ON_CALL(*cache_manager, pt()).WillByDefault(Return(snapshot));
-  snapshot->policy_table.vehicle_data->schema_items =
-      rpc::Optional<policy_table::VehicleDataItems>();
+  ON_CALL(*cache_manager, GetVehicleDataItems())
+      .WillByDefault(Return(std::vector<policy_table::VehicleDataItem>()));
 
   // Assert
   EXPECT_CALL(*cache_manager, ApplyUpdate(_)).Times(0);

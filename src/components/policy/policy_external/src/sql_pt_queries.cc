@@ -474,8 +474,7 @@ const std::string kCreateSchema =
     "  `minsize` INTEGER, "
     "  `maxsize` INTEGER, "
     "  `minlength` INTEGER, "
-    "  `maxlength` INTEGER, "
-    "   PRIMARY KEY(`name`,`key`) "
+    "  `maxlength` INTEGER "
     "); "
     "CREATE TABLE IF NOT EXISTS `vehicle_data_item_parameters`( "
     "  `parent_name` VARCHAR(255) NOT NULL, "
@@ -694,13 +693,24 @@ const std::string kSelectVehicleDataItem =
     "SELECT * FROM `vehicle_data_item_definition` "
     "WHERE `key` = ? AND `name` = ?";
 
+const std::string kSelectVehicleDataItemWithVersion =
+    "SELECT * FROM `vehicle_data_item_definition` "
+    "WHERE `name` IS ? AND `key` IS ? AND `since` IS ? AND `until` IS ?";
+
 const std::string kSelectVehicleDataItemParams =
     "SELECT * FROM `vehicle_data_item_parameters` "
     "WHERE `parent_name` = ? AND `parent_key` = ?";
 
 const std::string kSelectParametrizedVehicleDataItemsKey =
     "SELECT DISTINCT `parent_name`, `parent_key` FROM "
-    "`vehicle_data_item_parameters`";
+    "`vehicle_data_item_parameters` "
+    "LEFT JOIN "
+    "(SELECT DISTINCT `param_name`, `param_key` FROM "
+    "`vehicle_data_item_parameters`) `vdi_params` ON "
+    "`vehicle_data_item_parameters`.`parent_name` = `vdi_params`.`param_name` "
+    "AND "
+    "`vehicle_data_item_parameters`.`parent_key` = `vdi_params`.`param_key` "
+    "WHERE `vdi_params`.`param_key` IS NULL";
 
 const std::string kSelectNonParametrizedVehicleDataItems =
     "SELECT * FROM `vehicle_data_item_definition` "
@@ -709,7 +719,8 @@ const std::string kSelectNonParametrizedVehicleDataItems =
     "UNION "
     "SELECT `param_name`, `param_key` FROM `vehicle_data_item_parameters`) "
     "`vdi_params` ON "
-    "`vehicle_data_item_definition`.`name` = `vdi_params`.`parent_name` AND "
+    "`vehicle_data_item_definition`.`name` = `vdi_params`.`parent_name` "
+    "AND "
     "`vehicle_data_item_definition`.`key` = `vdi_params`.`parent_key` "
     "WHERE `vdi_params`.`parent_key` IS NULL";
 

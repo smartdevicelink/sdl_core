@@ -645,6 +645,13 @@ class PolicyManagerImpl : public PolicyManager {
   Json::Value GetPolicyTableData() const OVERRIDE;
 
   /**
+   * @brief Gets vehicle data items
+   * @return Structure with vehicle data items
+   */
+  const std::vector<policy_table::VehicleDataItem> GetVehicleDataItems()
+      const OVERRIDE;
+
+  /**
    * @brief Get a list of enabled cloud applications
    * @param enabled_apps List filled with the policy app id of each enabled
    * cloud application

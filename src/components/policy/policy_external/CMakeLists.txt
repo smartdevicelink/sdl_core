@@ -28,6 +28,8 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
+include(${CMAKE_SOURCE_DIR}/tools/cmake/helpers/generators.cmake)
+
 # --- Policy
 set(install_destination bin)
 set(copy_destination ${CMAKE_BINARY_DIR}/src/appMain)
@@ -36,13 +38,16 @@ set(library_name ${CMAKE_SHARED_LIBRARY_PREFIX}Policy${CMAKE_SHARED_LIBRARY_SUFF
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
 
 include_directories (
-  include
-  ${COMPONENTS_DIR}/rpc_base/include
+  ${POLICY_PATH}/include/
+  ${COMPONENTS_DIR}/
   ${COMPONENTS_DIR}/utils/include/
   ${COMPONENTS_DIR}/config_profile/include
+  ${COMPONENTS_DIR}/smart_objects/include/
+  ${COMPONENTS_DIR}/rpc_base/include
+  ${CMAKE_BINARY_DIR}/src/components/
   ${POLICY_GLOBAL_INCLUDE_PATH}/
-  ${LOG4CXX_INCLUDE_DIRECTORY}
   ${BOOST_INCLUDE_DIR}
+  ${LOG4CXX_INCLUDE_DIRECTORY}
   ${JSONCPP_INCLUDE_DIRECTORY}
 )
 
@@ -57,32 +62,39 @@ set(SOURCES
   ${POLICY_PATH}/src/cache_manager.cc
   ${POLICY_PATH}/src/access_remote_impl.cc
   ${COMPONENTS_DIR}/rpc_base/src/rpc_base/rpc_base.cc
-  ${CMAKE_CURRENT_BINARY_DIR}/
 )
 
-set (GENERATED_MOBILE_POLICY_TYPES "generated_MOBILE_API_policy_types")
-set(GENERATED_MOBILE_POLICY_TYPES_HPP "${CMAKE_CURRENT_BINARY_DIR}/${GENERATED_MOBILE_POLICY_TYPES}.h")
-set(GENERATED_MOBILE_POLICY_TYPES_CPP "${CMAKE_CURRENT_BINARY_DIR}/${GENERATED_MOBILE_POLICY_TYPES}.cc")
-generate_policy_types("${COMPONENTS_DIR}/interfaces/MOBILE_API.xml"
-                      "rpc::policy_table_interface_base"
-                      "mobile-policy-types" ${GENERATED_MOBILE_POLICY_TYPES})
-add_custom_target(
-    ${GENERATED_MOBILE_POLICY_TYPES}
-    DEPENDS ${GENERATED_MOBILE_POLICY_TYPES_HPP}
-    DEPENDS ${GENERATED_MOBILE_POLICY_TYPES_CPP}
-    )
+set(GENERATED_MOBILE_POLICY_TYPES_CPP
+  "${CMAKE_CURRENT_BINARY_DIR}/generated_MOBILE_API_policy_types.cc"
+  "${CMAKE_CURRENT_BINARY_DIR}/generated_MOBILE_API_enum_schema_factory.cc")
 
-set (GENERATED_HMI_POLICY_TYPES "generated_HMI_API_policy_types")
-set(GENERATED_HMI_POLICY_TYPES_HPP "${CMAKE_CURRENT_BINARY_DIR}/${GENERATED_HMI_POLICY_TYPES}.h")
-set(GENERATED_HMI_POLICY_TYPES_CPP "${CMAKE_CURRENT_BINARY_DIR}/${GENERATED_HMI_POLICY_TYPES}.cc")
-generate_policy_types("${COMPONENTS_DIR}/interfaces/HMI_API.xml"
+set(GENERATED_MOBILE_POLICY_TYPES_HPP
+  "${CMAKE_CURRENT_BINARY_DIR}/generated_MOBILE_API_policy_types.h")
+
+set(GENERATED_MOBILE_POLICY_TYPES
+  ${GENERATED_MOBILE_POLICY_TYPES_HPP}
+  ${GENERATED_MOBILE_POLICY_TYPES_CPP})
+
+generate_policy_types("${GENERATED_MOBILE_POLICY_TYPES}"
+                      "${COMPONENTS_DIR}/interfaces/MOBILE_API.xml"
                       "rpc::policy_table_interface_base"
-                      "hmi-policy-types" ${GENERATED_HMI_POLICY_TYPES})
-add_custom_target(
-    ${GENERATED_HMI_POLICY_TYPES}
-    DEPENDS ${GENERATED_HMI_POLICY_TYPES_HPP}
-    DEPENDS ${GENERATED_HMI_POLICY_TYPES_CPP}
-    )
+                      "mobile-policy-types")
+
+set(GENERATED_HMI_POLICY_TYPES_CPP
+  "${CMAKE_CURRENT_BINARY_DIR}/generated_HMI_API_policy_types.cc")
+
+set(GENERATED_HMI_POLICY_TYPES_HPP
+  "${CMAKE_CURRENT_BINARY_DIR}/generated_HMI_API_policy_types.h")
+
+set(GENERATED_HMI_POLICY_TYPES
+  ${GENERATED_HMI_POLICY_TYPES_HPP}
+  ${GENERATED_HMI_POLICY_TYPES_CPP})
+
+
+generate_policy_types("${GENERATED_HMI_POLICY_TYPES}"
+                    "${COMPONENTS_DIR}/interfaces/HMI_API.xml"
+                    "rpc::policy_table_interface_base"
+                    "hmi-policy-types")
 
 if (REMOTE_CONTROL)
   list(APPEND SOURCES ${POLICY_PATH}/src/access_remote_impl.cc)
@@ -93,7 +105,13 @@ list(APPEND SOURCES
   ${POLICY_PATH}/src/sql_pt_ext_representation.cc
 )
 
-set(LIBRARIES ConfigProfile policy_struct dbms jsoncpp Utils)
+set(LIBRARIES 
+  ConfigProfile 
+  policy_struct 
+  dbms jsoncpp 
+  Utils
+)
+
 if (CMAKE_SYSTEM_NAME STREQUAL "QNX")
   # --- QDB Wrapper
   include_directories (${COMPONENTS_DIR}/utils/include/utils)
@@ -132,16 +150,22 @@ install(TARGETS Policy
 set(struct_target policy_struct)
 
 set(TABLE_STRUCT_SOURCES
+  ${GENERATED_MOBILE_POLICY_TYPES_CPP}  
+  ${GENERATED_HMI_POLICY_TYPES_CPP}
   ${POLICY_PATH}/src/policy_table/enums.cc
   ${POLICY_PATH}/src/policy_table/types.cc
   ${POLICY_PATH}/src/policy_table/validation.cc
-  ${GENERATED_HMI_POLICY_TYPES_CPP}
-  ${GENERATED_MOBILE_POLICY_TYPES_CPP}
 )
 
 add_library(${struct_target} ${TABLE_STRUCT_SOURCES})
-target_link_libraries(${struct_target} Utils)
-add_dependencies(${struct_target} ${GENERATED_MOBILE_POLICY_TYPES})
+target_link_libraries(${struct_target}
+MOBILE_API
+HMI_API
+Utils
+SmartObjects
+formatters
+jsoncpp
+)
 
 # --- Usage statistics
 set(USAGE_STATISTICS_SOURCES

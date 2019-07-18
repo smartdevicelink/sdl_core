@@ -739,10 +739,12 @@ const std::vector<policy_table::VehicleDataItem>
 CacheManager::GetVehicleDataItems() const {
   CACHE_MANAGER_CHECK(std::vector<policy_table::VehicleDataItem>());
   sync_primitives::AutoLock auto_lock(cache_lock_);
-  const auto vehicle_data_items =
-      *(pt_->policy_table.vehicle_data->schema_items);
+  if (pt_->policy_table.vehicle_data.is_initialized() &&
+      pt_->policy_table.vehicle_data->schema_items.is_initialized()) {
+    return *(pt_->policy_table.vehicle_data->schema_items);
+  }
 
-  return vehicle_data_items;
+  return std::vector<policy_table::VehicleDataItem>();
 }
 
 Json::Value CacheManager::GetPolicyTableData() const {

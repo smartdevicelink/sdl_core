@@ -972,14 +972,18 @@ TEST_F(PolicyManagerImplTest, LoadPT_SetInvalidUpdatePT_PTIsNotLoaded) {
   std::string json = table.toStyledString();
   ::policy::BinaryMessage msg(json.begin(), json.end());
 
+  auto pt = std::make_shared<policy_table::Table>();
+  *pt = update;
+
   // Assert
-  EXPECT_CALL(*cache_manager_, GenerateSnapshot()).Times(0);
   EXPECT_CALL(*cache_manager_, ApplyUpdate(_)).Times(0);
   EXPECT_CALL(listener_, GetAppName(_)).Times(0);
   EXPECT_CALL(listener_, OnUpdateStatusChanged(_)).Times(1);
   EXPECT_CALL(*cache_manager_, SaveUpdateRequired(false)).Times(0);
   EXPECT_CALL(*cache_manager_, TimeoutResponse()).Times(0);
   EXPECT_CALL(*cache_manager_, SecondsBetweenRetries(_)).Times(0);
+  EXPECT_CALL(*cache_manager_, GetVehicleDataItems())
+      .WillOnce(Return(std::vector<policy_table::VehicleDataItem>()));
   EXPECT_FALSE(policy_manager_->LoadPT(kFilePtUpdateJson, msg));
   EXPECT_CALL(*cache_manager_, IsPTPreloaded());
   EXPECT_FALSE(policy_manager_->GetCache()->IsPTPreloaded());
