@@ -1,5 +1,5 @@
 /*
- Copyright (c) 2018, Ford Motor Company
+ Copyright (c) 2019, Ford Motor Company, Livio
  All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -13,9 +13,9 @@
  disclaimer in the documentation and/or other materials provided with the
  distribution.
 
- Neither the name of the Ford Motor Company nor the names of its contributors
- may be used to endorse or promote products derived from this software
- without specific prior written permission.
+ Neither the name of the the copyright holders nor the names of their
+ contributors may be used to endorse or promote products derived from this
+ software without specific prior written permission.
 
  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
@@ -30,31 +30,32 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "rc_rpc_plugin/commands/mobile/get_interior_vehicle_data_response.h"
-#include "rc_rpc_plugin/rc_helpers.h"
-#include "utils/macro.h"
+#include "sdl_rpc_plugin/commands/mobile/close_application_response.h"
+#include "application_manager/application_impl.h"
+#include "interfaces/MOBILE_API.h"
 
-namespace rc_rpc_plugin {
+namespace sdl_rpc_plugin {
+using namespace application_manager;
 namespace commands {
 
-GetInteriorVehicleDataResponse::GetInteriorVehicleDataResponse(
-    const app_mngr::commands::MessageSharedPtr& message,
-    const RCCommandParams& params)
-    : application_manager::commands::CommandResponseImpl(
-          message,
-          params.application_manager_,
-          params.rpc_service_,
-          params.hmi_capabilities_,
-          params.policy_handler_) {}
-GetInteriorVehicleDataResponse::~GetInteriorVehicleDataResponse() {}
+CloseApplicationResponse::CloseApplicationResponse(
+    const application_manager::commands::MessageSharedPtr& message,
+    ApplicationManager& application_manager,
+    app_mngr::rpc_service::RPCService& rpc_service,
+    app_mngr::HMICapabilities& hmi_capabilities,
+    policy::PolicyHandlerInterface& policy_handler)
+    : CommandResponseImpl(message,
+                          application_manager,
+                          rpc_service,
+                          hmi_capabilities,
+                          policy_handler) {}
 
-void GetInteriorVehicleDataResponse::Run() {
+CloseApplicationResponse::~CloseApplicationResponse() {}
+
+void CloseApplicationResponse::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
-
-  RCHelpers::RemoveRedundantGPSDataFromIVDataMsg(
-      (*message_)[app_mngr::strings::msg_params]);
-  application_manager_.GetRPCService().SendMessageToMobile(message_);
+  rpc_service_.SendMessageToMobile(message_);
 }
 
 }  // namespace commands
-}  // namespace rc_rpc_plugin
+}  // namespace sdl_rpc_plugin

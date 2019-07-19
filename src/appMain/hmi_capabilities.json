@@ -428,6 +428,7 @@
                         "acMaxEnableAvailable": true,
                         "autoModeEnableAvailable": true,
                         "circulateAirEnableAvailable": true,
+                        "climateEnableAvailable": true,
                         "currentTemperatureAvailable": true,
                         "defrostZone": [
                             "FRONT",
@@ -455,7 +456,7 @@
                 ],
                 "radioControlCapabilities": [
                     {
-                        "availableHDsAvailable": true,
+                        "availableHdChannelsAvailable": true,
                         "hdChannelAvailable": true,
                         "moduleName": "radio",
                         "radioBandAvailable": true,

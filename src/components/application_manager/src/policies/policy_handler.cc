@@ -177,41 +177,6 @@ struct DeactivateApplication {
   StateController& state_ctrl_;
 };
 
-struct SDLAllowedNotification {
-  SDLAllowedNotification(const connection_handler::DeviceHandle& device_id,
-                         PolicyManager* policy_manager,
-                         StateController& state_controller)
-      : device_id_(device_id)
-      , policy_manager_(policy_manager)
-      , state_controller_(state_controller) {}
-
-  void operator()(const ApplicationSharedPtr& app) {
-    DCHECK_OR_RETURN_VOID(policy_manager_);
-    if (device_id_ == app->device()) {
-      std::string hmi_level = "NONE";
-      mobile_apis::HMILevel::eType default_mobile_hmi;
-      policy_manager_->GetDefaultHmi(app->policy_app_id(), &hmi_level);
-      if ("BACKGROUND" == hmi_level) {
-        default_mobile_hmi = mobile_apis::HMILevel::HMI_BACKGROUND;
-      } else if ("FULL" == hmi_level) {
-        default_mobile_hmi = mobile_apis::HMILevel::HMI_FULL;
-      } else if ("LIMITED" == hmi_level) {
-        default_mobile_hmi = mobile_apis::HMILevel::HMI_LIMITED;
-      } else if ("NONE" == hmi_level) {
-        default_mobile_hmi = mobile_apis::HMILevel::HMI_NONE;
-      } else {
-        return;
-      }
-      state_controller_.SetRegularState(app, default_mobile_hmi, true);
-    }
-  }
-
- private:
-  connection_handler::DeviceHandle device_id_;
-  PolicyManager* policy_manager_;
-  StateController& state_controller_;
-};
-
 /**
  * @brief Gets from system list of currently registered applications and
  * create collection of links device-to-application

@@ -49,24 +49,24 @@ class MockStateController : public am::StateController {
   MOCK_METHOD3(SetRegularState,
                void(am::ApplicationSharedPtr app,
                     am::HmiStatePtr state,
-                    const bool SendActivateApp));
+                    const bool request_hmi_state_change));
   MOCK_METHOD5(SetRegularState,
                void(am::ApplicationSharedPtr app,
                     const mobile_apis::HMILevel::eType hmi_level,
                     const mobile_apis::AudioStreamingState::eType audio_state,
                     const mobile_apis::VideoStreamingState::eType video_state,
-                    const bool SendActivateApp));
+                    const bool request_hmi_state_change));
   MOCK_METHOD3(SetRegularState,
                void(am::ApplicationSharedPtr app,
                     const mobile_apis::HMILevel::eType hmi_level,
-                    const bool SendActivateApp));
+                    const bool request_hmi_state_change));
   MOCK_METHOD6(SetRegularState,
                void(am::ApplicationSharedPtr app,
                     const mobile_apis::HMILevel::eType hmi_level,
                     const mobile_apis::AudioStreamingState::eType audio_state,
                     const mobile_apis::VideoStreamingState::eType video_state,
                     const mobile_apis::SystemContext::eType system_context,
-                    const bool SendActivateApp));
+                    const bool request_hmi_state_change));
   MOCK_METHOD2(SetRegularState,
                void(am::ApplicationSharedPtr app,
                     const mobile_apis::HMILevel::eType hmi_level));
@@ -82,7 +82,7 @@ class MockStateController : public am::StateController {
   MOCK_METHOD2(OnApplicationRegistered,
                void(am::ApplicationSharedPtr app,
                     const mobile_apis::HMILevel::eType default_level));
-  MOCK_METHOD3(SendBCActivateApp,
+  MOCK_METHOD3(RequestHMIStateChange,
                int64_t(am::ApplicationConstSharedPtr app,
                        hmi_apis::Common_HMILevel::eType level,
                        bool send_policy_priority));

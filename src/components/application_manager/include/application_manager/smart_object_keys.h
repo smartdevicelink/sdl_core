@@ -1,5 +1,5 @@
 /*
- Copyright (c) 2013, Ford Motor Company
+ Copyright (c) 2019, Ford Motor Company
  All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -216,6 +216,7 @@ extern const char* is_template;
 extern const char* image;
 extern const char* type;
 extern const char* system_file;
+extern const char* is_system_file;
 extern const char* offset;
 extern const char* length;
 extern const char* secondary_image;
@@ -344,6 +345,10 @@ extern const char* activate;
 extern const char* set_as_default;
 extern const char* origin_app;
 
+// sis data
+extern const char* station_short_name;
+extern const char* station_location;
+
 // resuming
 extern const char* application_commands;
 extern const char* application_submenus;
@@ -367,8 +372,11 @@ extern const char* global_ign_on_counter;
 extern const char* connection_info;
 extern const char* is_download_complete;
 
+extern const char* shifted;
+extern const char* altitude;
 extern const char* longitude_degrees;
 extern const char* latitude_degrees;
+
 extern const char* address;
 extern const char* country_name;
 extern const char* country_code;

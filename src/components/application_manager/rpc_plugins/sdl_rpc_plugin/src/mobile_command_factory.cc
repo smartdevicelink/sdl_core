@@ -42,6 +42,8 @@
 #include "sdl_rpc_plugin/commands/mobile/alert_response.h"
 #include "sdl_rpc_plugin/commands/mobile/change_registration_request.h"
 #include "sdl_rpc_plugin/commands/mobile/change_registration_response.h"
+#include "sdl_rpc_plugin/commands/mobile/close_application_request.h"
+#include "sdl_rpc_plugin/commands/mobile/close_application_response.h"
 #include "sdl_rpc_plugin/commands/mobile/create_interaction_choice_set_request.h"
 #include "sdl_rpc_plugin/commands/mobile/create_interaction_choice_set_response.h"
 #include "sdl_rpc_plugin/commands/mobile/delete_command_request.h"
@@ -355,6 +357,11 @@ CommandCreator& MobileCommandFactory::get_command_creator(
                  ? factory.GetCreator<commands::GetCloudAppPropertiesRequest>()
                  : factory
                        .GetCreator<commands::GetCloudAppPropertiesResponse>();
+    }
+    case mobile_apis::FunctionID::CloseApplicationID: {
+      return mobile_api::messageType::request == message_type
+                 ? factory.GetCreator<commands::CloseApplicationRequest>()
+                 : factory.GetCreator<commands::CloseApplicationResponse>();
     }
     case mobile_apis::FunctionID::GenericResponseID: {
       using app_mngr::commands::Command;
