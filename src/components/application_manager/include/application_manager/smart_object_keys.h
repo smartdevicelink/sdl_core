@@ -218,6 +218,9 @@ extern const char* is_cloud_application;
 extern const char* cloud_connection_status;
 extern const char* endpoint;
 extern const char* display_capabilities;
+extern const char* module_config;
+extern const char* policy_type;
+extern const char* property;
 
 // PutFile
 extern const char* sync_file_name;
