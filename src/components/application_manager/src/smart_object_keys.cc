@@ -167,6 +167,9 @@ const char* hybrid_app_preference = "hybridAppPreference";
 const char* is_cloud_application = "isCloudApplication";
 const char* cloud_connection_status = "cloudConnectionStatus";
 const char* endpoint = "endpoint";
+const char* module_config = "module_config";
+const char* policy_type = "policyType";
+const char* property = "property";
 
 // PutFile
 const char* sync_file_name = "syncFileName";

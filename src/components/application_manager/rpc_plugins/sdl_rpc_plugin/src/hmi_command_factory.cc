@@ -71,6 +71,8 @@
 #include "sdl_rpc_plugin/commands/hmi/sdl_activate_app_response.h"
 #include "sdl_rpc_plugin/commands/hmi/sdl_get_list_of_permissions_request.h"
 #include "sdl_rpc_plugin/commands/hmi/sdl_get_list_of_permissions_response.h"
+#include "sdl_rpc_plugin/commands/hmi/sdl_get_policy_configuration_data_request.h"
+#include "sdl_rpc_plugin/commands/hmi/sdl_get_policy_configuration_data_response.h"
 #include "sdl_rpc_plugin/commands/hmi/sdl_get_status_update_request.h"
 #include "sdl_rpc_plugin/commands/hmi/sdl_get_status_update_response.h"
 #include "sdl_rpc_plugin/commands/hmi/sdl_get_user_friendly_message_request.h"
@@ -376,6 +378,13 @@ CommandCreator& HMICommandFactory::get_creator_factory(
       return hmi_apis::messageType::request == message_type
                  ? factory.GetCreator<commands::SDLGetStatusUpdateRequest>()
                  : factory.GetCreator<commands::SDLGetStatusUpdateResponse>();
+    }
+    case hmi_apis::FunctionID::SDL_GetPolicyConfigurationData: {
+      return hmi_apis::messageType::request == message_type
+                 ? factory.GetCreator<
+                       commands::SDLGetPolicyConfigurationDataRequest>()
+                 : factory.GetCreator<
+                       commands::SDLGetPolicyConfigurationDataResponse>();
     }
     case hmi_apis::FunctionID::SDL_OnStatusUpdate: {
       return factory.GetCreator<commands::OnStatusUpdateNotification>();
