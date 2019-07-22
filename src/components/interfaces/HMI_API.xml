@@ -2717,6 +2717,12 @@
   </param>
 </struct>
 
+<enum name="MenuLayout">
+    <description>How the main menu or submenu is laid out on screen</description>
+    <element name="LIST" />
+    <element name="TILES" />
+</enum>
+
 <struct name="Choice">
   <description>A choice is an option given to the user which can be selected either by menu, or through voice recognition system.</description>
   <param name="choiceID" type="Integer" minvalue="0" maxvalue="65535" mandatory="true">
@@ -2856,6 +2862,9 @@
   </param>
   <param name="numCustomPresetsAvailable" type="Integer" minvalue="1" maxvalue="100" mandatory="false">
     <description>The number of on-screen custom presets available (if any); otherwise omitted.</description>
+  </param>
+  <param name="menuLayoutsAvailable" type="Common.MenuLayout" array="true" minsize="1" maxsize="1000" mandatory="false">
+    <description>An array of available menu layouts. If this parameter is not provided, only the `LIST` layout is assumed to be available</description>
   </param>
 </struct>
 
@@ -4725,6 +4734,9 @@
     <param name="appID" type="Integer" mandatory="true">
       <description>ID of application that requested this RPC.</description>
     </param>
+    <param name="menuLayout" type="Common.MenuLayout" defvalue="LIST" mandatory="false">
+      <description>Sets the layout of the submenu screen.</description>
+    </param>
   </function>
   <function name="AddSubMenu" messagetype="response">
   </function>
@@ -4821,6 +4833,9 @@
     </param>
     <param name="appID" type="Integer" mandatory="true">
       <description>ID of application that concerns this RPC.</description>
+    </param>
+    <param name="menuLayout" type="Common.MenuLayout" defvalue="LIST" mandatory="false">
+      <description>Sets the layout of the main menu screen. If this is sent while a menu is already on-screen, the head unit will change the display to the new layout type.</description>
     </param>
   </function>
   <function name="SetGlobalProperties" messagetype="response">

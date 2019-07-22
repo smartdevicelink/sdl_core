@@ -377,6 +377,8 @@ void InitCapabilities() {
       std::make_pair(std::string("MFD5"), hmi_apis::Common_DisplayType::MFD5));
   display_type_enum.insert(std::make_pair(
       std::string("GEN3_8_INCH"), hmi_apis::Common_DisplayType::GEN3_8_INCH));
+  display_type_enum.insert(std::make_pair(
+      std::string("SDL_GENERIC"), hmi_apis::Common_DisplayType::SDL_GENERIC));
 
   character_set_enum.insert(std::make_pair(
       std::string("TYPE2SET"), hmi_apis::Common_CharacterSet::TYPE2SET));
@@ -864,6 +866,25 @@ bool HMICapabilitiesImpl::video_streaming_supported() const {
 
 bool HMICapabilitiesImpl::rc_supported() const {
   return is_rc_supported_;
+}
+
+bool HMICapabilitiesImpl::menu_layout_supported(mobile_apis::MenuLayout::eType layout) const {
+  if (!display_capabilities_ || !display_capabilities_->keyExists(strings::menu_layouts_available))
+    return false;
+
+  auto menu_layouts = display_capabilities_->getElement(strings::menu_layouts_available);
+  if (menu_layouts.getType() == smart_objects::SmartType_Array)
+  {
+    for (uint32_t i = 0; i < menu_layouts.length(); ++i)
+    {
+      if (layout == static_cast<mobile_apis::MenuLayout::eType>(menu_layouts.getElement(i).asUInt()))
+      {
+        return true;
+      }
+    }
+  }
+
+  return false;
 }
 
 const smart_objects::SmartObject* HMICapabilitiesImpl::navigation_capability()

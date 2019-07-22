@@ -114,6 +114,8 @@ extern const char* num_ticks;
 extern const char* slider_footer;
 extern const char* menu_id;
 extern const char* menu_name;
+extern const char* menu_layout;
+extern const char* menu_layouts_available;
 extern const char* interaction_choice_set_id;
 extern const char* interaction_choice_set_id_list;
 extern const char* choice_set;

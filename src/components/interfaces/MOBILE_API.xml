@@ -1929,6 +1929,12 @@
         </element>
     </enum>
 
+    <enum name="MenuLayout" since="6.0">
+        <description>How the main menu or submenu is laid out on screen</description>
+        <element name="LIST" />
+        <element name="TILES" />
+    </enum>
+
     <struct name="GPSData" since="2.0">
         <description>Struct with the GPS data.</description>
         <param name="longitudeDegrees" type="Float" minvalue="-180" maxvalue="180" mandatory="true">
@@ -2233,7 +2239,9 @@
         <param name="numCustomPresetsAvailable" type="Integer" minvalue="1" maxvalue="100" mandatory="false" since="3.0">
             <description>The number of on-screen custom presets available (if any); otherwise omitted.</description>
         </param>
-        
+        <param name="menuLayoutsAvailable" type="MenuLayout" array="true" minsize="1" maxsize="1000" mandatory="false" since="6.0">
+            <description>An array of available menu layouts. If this parameter is not provided, only the `LIST` layout is assumed to be available</description>
+        </param>
         <!-- TODO:  Add pixel density? -->
     </struct>
 
@@ -2369,7 +2377,7 @@
             <description>Trim of the vehicle, e.g. SE</description>
         </param>
     </struct>   
-    
+
     <enum name="KeyboardLayout" since="3.0">
         <description>Enumeration listing possible keyboard layouts.</description>
         <element name="QWERTY" />
@@ -4492,6 +4500,10 @@
         <param name="keyboardProperties" type="KeyboardProperties" mandatory="false" since="3.0">
             <description>On-screen keyboard configuration (if available).</description>
         </param>
+
+        <param name="menuLayout" type="MenuLayout" defvalue="LIST" mandatory="false" since="6.0">
+            <description>Sets the layout of the main menu screen. If this is sent while a menu is already on-screen, the head unit will change the display to the new layout type.</description>
+        </param>
     </function>
     
     <function name="SetGlobalProperties" functionID="SetGlobalPropertiesID" messagetype="response" since="1.0">
@@ -4666,6 +4678,10 @@
 
         <param name="menuIcon" type="Image" mandatory="false" since="5.0">
             <description>The image field for AddSubMenu</description>
+        </param>
+
+        <param name="menuLayout" type="MenuLayout" defvalue="LIST" mandatory="false" since="6.0">
+            <description>Sets the layout of the submenu screen.</description>
         </param>
     </function>
     

@@ -138,6 +138,22 @@ void SetGlobalPropertiesRequest::Run() {
     return;
   }
 
+  smart_objects::SmartObject params =
+      smart_objects::SmartObject(smart_objects::SmartType_Map);
+
+  if (msg_params.keyExists(strings::menu_layout))
+  {
+    auto menu_layout = static_cast<mobile_apis::MenuLayout::eType>(msg_params[strings::menu_layout].asUInt());
+    if (application_manager_.hmi_capabilities().menu_layout_supported(menu_layout))
+    {
+      params[strings::menu_layout] = msg_params[strings::menu_layout];
+    }
+    else
+    {
+      verification_result = mobile_apis::Result::WARNINGS;
+    }
+  }
+
   /* Need to set flags before sending request to HMI
    * for correct processing this flags in method on_event */
   if (is_help_prompt_present || is_timeout_prompt_present) {
@@ -154,9 +170,6 @@ void SetGlobalPropertiesRequest::Run() {
       return;
     }
 
-    smart_objects::SmartObject params =
-        smart_objects::SmartObject(smart_objects::SmartType_Map);
-
     PrepareUIRequestVRHelpData(app, msg_params, params);
     PrepareUIRequestMenuAndKeyboardData(app, msg_params, params);
 
@@ -169,9 +182,6 @@ void SetGlobalPropertiesRequest::Run() {
     LOG4CXX_DEBUG(logger_, "VRHelp params does not present");
     DCHECK_OR_RETURN_VOID(!is_vr_help_title_present && !is_vr_help_present);
 
-    smart_objects::SmartObject params =
-        smart_objects::SmartObject(smart_objects::SmartType_Map);
-
     PrepareUIRequestMenuAndKeyboardData(app, msg_params, params);
 
     // Preparing data
@@ -183,18 +193,21 @@ void SetGlobalPropertiesRequest::Run() {
     }
   }
 
+  if (verification_result == mobile_apis::Result::WARNINGS)
+  {
+    SendResponse(true, verification_result, "The MenuLayout specified is unsupported, the default MenuLayout will be used");
+  }
+
   // check TTS params
   if (is_help_prompt_present || is_timeout_prompt_present) {
     LOG4CXX_DEBUG(logger_, "TTS params presents");
-    smart_objects::SmartObject params =
-        smart_objects::SmartObject(smart_objects::SmartType_Map);
+    auto tts_params = smart_objects::SmartObject(smart_objects::SmartType_Map);
 
     std::vector<std::string> invalid_params;
     if (is_help_prompt_present) {
       smart_objects::SmartObject& help_prompt =
           (*message_)[strings::msg_params][strings::help_prompt];
-      mobile_apis::Result::eType verification_result =
-          MessageHelper::VerifyTtsFiles(help_prompt, app, application_manager_);
+      verification_result = MessageHelper::VerifyTtsFiles(help_prompt, app, application_manager_);
 
       if (mobile_apis::Result::FILE_NOT_FOUND == verification_result) {
         LOG4CXX_ERROR(
@@ -203,16 +216,14 @@ void SetGlobalPropertiesRequest::Run() {
         invalid_params.push_back("help_prompt");
       } else {
         app->set_help_prompt(help_prompt);
-        params[strings::help_prompt] = (*app->help_prompt());
+        tts_params[strings::help_prompt] = (*app->help_prompt());
       }
     }
 
     if (is_timeout_prompt_present) {
       smart_objects::SmartObject& timeout_prompt =
           (*message_)[strings::msg_params][strings::timeout_prompt];
-      mobile_apis::Result::eType verification_result =
-          MessageHelper::VerifyTtsFiles(
-              timeout_prompt, app, application_manager_);
+      verification_result = MessageHelper::VerifyTtsFiles(timeout_prompt, app, application_manager_);
 
       if (mobile_apis::Result::FILE_NOT_FOUND == verification_result) {
         LOG4CXX_ERROR(
@@ -221,7 +232,7 @@ void SetGlobalPropertiesRequest::Run() {
         invalid_params.push_back("timeout_prompt");
       } else {
         app->set_timeout_prompt(timeout_prompt);
-        params[strings::timeout_prompt] = (*app->timeout_prompt());
+        tts_params[strings::timeout_prompt] = (*app->timeout_prompt());
       }
     }
 
@@ -239,11 +250,11 @@ void SetGlobalPropertiesRequest::Run() {
       return;
     }
 
-    params[strings::app_id] = app->app_id();
-    SendTTSRequest(params, true);
+    tts_params[strings::app_id] = app->app_id();
+    SendTTSRequest(tts_params, true);
 
     auto& help_prompt_manager = app->help_prompt_manager();
-    help_prompt_manager.OnSetGlobalPropertiesReceived(params, false);
+    help_prompt_manager.OnSetGlobalPropertiesReceived(tts_params, false);
   }
 }
 
@@ -435,7 +446,8 @@ bool SetGlobalPropertiesRequest::ValidateConditionalMandatoryParameters(
          params.keyExists(strings::vr_help) ||
          params.keyExists(strings::menu_title) ||
          params.keyExists(strings::menu_icon) ||
-         params.keyExists(strings::keyboard_properties);
+         params.keyExists(strings::keyboard_properties) ||
+         params.keyExists(strings::menu_layout);
 }
 
 bool SetGlobalPropertiesRequest::IsWhiteSpaceExist() {
