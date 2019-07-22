@@ -1,9 +1,9 @@
 #include "rc_rpc_plugin/rc_helpers.h"
-#include "rc_rpc_plugin/rc_module_constants.h"
-#include "rc_rpc_plugin/rc_rpc_plugin.h"
-#include "application_manager/smart_object_keys.h"
 #include "application_manager/commands/command_impl.h"
 #include "application_manager/message.h"
+#include "application_manager/smart_object_keys.h"
+#include "rc_rpc_plugin/rc_module_constants.h"
+#include "rc_rpc_plugin/rc_rpc_plugin.h"
 
 namespace rc_rpc_plugin {
 CREATE_LOGGERPTR_GLOBAL(logger_, "RemoteControlModule");
@@ -115,4 +115,30 @@ RCHelpers::AppsModules RCHelpers::GetApplicationsAllowedModules(
   }
   return result;
 }
+
+void RCHelpers::RemoveRedundantGPSDataFromIVDataMsg(
+    smart_objects::SmartObject& msg_params) {
+  using namespace message_params;
+  using namespace application_manager::strings;
+
+  LOG4CXX_AUTO_TRACE(logger_);
+  auto& module_data = msg_params[kModuleData];
+  if (!module_data.keyExists(kRadioControlData) ||
+      !module_data[kRadioControlData].keyExists(kSisData) ||
+      !module_data[kRadioControlData][kSisData].keyExists(station_location)) {
+    return;
+  }
+
+  auto& location_data =
+      module_data[kRadioControlData][kSisData][station_location];
+  auto new_location_data =
+      smart_objects::SmartObject(smart_objects::SmartType_Map);
+  new_location_data[latitude_degrees] = location_data[latitude_degrees];
+  new_location_data[longitude_degrees] = location_data[longitude_degrees];
+  if (location_data.keyExists(altitude)) {
+    new_location_data[altitude] = location_data[altitude];
+
+    location_data = new_location_data;
+  }
 }
+}  // namespace rc_rpc_plugin

@@ -30,11 +30,11 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 #include <gtest/gtest.h>
-#include <vector>
 #include <list>
+#include <vector>
 
-#include "utils/macro.h"
 #include "protocol_handler/incoming_data_handler.h"
+#include "utils/macro.h"
 
 namespace test {
 namespace components {
@@ -91,7 +91,7 @@ class IncomingDataHandlerTest : public ::testing::Test {
   FrameList actual_frames;
   RESULT_CODE result_code;
   size_t malformed_occurs;
-  uint8_t* some_data, *some_data2;
+  uint8_t *some_data, *some_data2;
   size_t some_data_size, some_data2_size;
   uint32_t protov1_message_id;
   uint32_t some_message_id;
@@ -251,8 +251,8 @@ TEST_F(IncomingDataHandlerTest, MixedPayloadData_TwoConnections) {
        it != actual_frames.end();
        ++it, ++it_exp) {
     // TODO(EZamakhov): investigate valgrind warning (unitialized value)
-    EXPECT_EQ(**it, **it_exp) << "Element number "
-                              << std::distance(mobile_packets.begin(), it_exp);
+    EXPECT_EQ(**it, **it_exp)
+        << "Element number " << std::distance(mobile_packets.begin(), it_exp);
   }
 }
 
@@ -654,8 +654,8 @@ TEST_F(IncomingDataHandlerTest, MalformedPacket_AdditionalByte) {
        it != actual_frames.end();
        ++it, ++it_exp) {
     // TODO(EZamakhov): investigate valgrind warning (unitialized value)
-    EXPECT_EQ(**it, **it_exp) << "Element number "
-                              << std::distance(mobile_packets.begin(), it_exp);
+    EXPECT_EQ(**it, **it_exp)
+        << "Element number " << std::distance(mobile_packets.begin(), it_exp);
   }
 }
 
@@ -754,8 +754,8 @@ TEST_F(IncomingDataHandlerTest, MalformedPacket_Mix) {
        it != actual_frames.end();
        ++it, ++it_exp) {
     // TODO(EZamakhov): investigate valgrind warning (unitialized value)
-    EXPECT_EQ(**it, **it_exp) << "Element number "
-                              << std::distance(mobile_packets.begin(), it_exp);
+    EXPECT_EQ(**it, **it_exp)
+        << "Element number " << std::distance(mobile_packets.begin(), it_exp);
   }
 }
 

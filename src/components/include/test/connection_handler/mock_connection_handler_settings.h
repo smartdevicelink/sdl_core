@@ -34,8 +34,8 @@
 #define SRC_COMPONENTS_INCLUDE_TEST_CONNECTION_HANDLER_MOCK_CONNECTION_HANDLER_SETTINGS_H_
 
 #include <vector>
-#include "gmock/gmock.h"
 #include "connection_handler/connection_handler_settings.h"
+#include "gmock/gmock.h"
 
 namespace test {
 namespace components {

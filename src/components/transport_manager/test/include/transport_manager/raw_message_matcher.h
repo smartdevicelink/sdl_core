@@ -38,8 +38,8 @@
 
 #include <gmock/gmock.h>
 
-#include "transport_manager/common.h"
 #include "protocol/common.h"
+#include "transport_manager/common.h"
 
 using ::testing::Matcher;
 using ::testing::MatcherInterface;

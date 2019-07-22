@@ -31,14 +31,14 @@
  */
 
 #include "rc_rpc_plugin/commands/mobile/set_interior_vehicle_data_request.h"
+#include "interfaces/MOBILE_API.h"
+#include "json/json.h"
+#include "rc_rpc_plugin/rc_helpers.h"
 #include "rc_rpc_plugin/rc_module_constants.h"
 #include "rc_rpc_plugin/rc_rpc_plugin.h"
-#include "rc_rpc_plugin/rc_helpers.h"
 #include "smart_objects/enum_schema_item.h"
-#include "utils/macro.h"
-#include "json/json.h"
 #include "utils/helpers.h"
-#include "interfaces/MOBILE_API.h"
+#include "utils/macro.h"
 
 namespace rc_rpc_plugin {
 namespace commands {
@@ -55,6 +55,7 @@ std::vector<std::string> GetModuleReadOnlyParams(
   } else if (enums_value::kRadio == module_type) {
     module_ro_params.push_back(kRdsData);
     module_ro_params.push_back(kAvailableHDs);
+    module_ro_params.push_back(kAvailableHdChannels);
     module_ro_params.push_back(kSignalStrength);
     module_ro_params.push_back(kSignalChangeThreshold);
     module_ro_params.push_back(kState);
@@ -92,6 +93,8 @@ const std::map<std::string, std::string> GetModuleDataToCapabilitiesMapping() {
   mapping["heatedWindshieldEnable"] = "heatedWindshieldAvailable";
   mapping["heatedMirrorsEnable"] = "heatedMirrorsAvailable";
   mapping["heatedRearWindowEnable"] = "heatedRearWindowAvailable";
+  mapping["climateEnable"] = "climateEnableAvailable";
+  mapping["climateEnableAvailable"] = "climateEnableAvailable";
 
   // radio
   mapping["band"] = "radioBandAvailable";
@@ -99,7 +102,8 @@ const std::map<std::string, std::string> GetModuleDataToCapabilitiesMapping() {
   mapping["frequencyFraction"] = "radioFrequencyAvailable";
   mapping["rdsData"] = "rdsDataAvailable";
   mapping["availableHDs"] = "availableHDsAvailable";
-  mapping["hdChannel"] = "availableHDsAvailable";
+  mapping["availableHdChannels"] = "availableHdChannelsAvailable";
+  mapping["hdChannel"] = "availableHdChannelsAvailable";
   mapping["hdRadioEnable"] = "hdRadioEnableAvailable";
   mapping["signalStrength"] = "signalStrengthAvailable";
   mapping["signalChangeThreshold"] = "signalChangeThresholdAvailable";
@@ -175,9 +179,9 @@ capabilitiesStatus GetItemCapability(
   const auto it = mapping.find(request_parameter);
 
   if (it == mapping.end()) {
-    LOG4CXX_DEBUG(logger_,
-                  "Parameter " << request_parameter
-                               << " doesn't exist in capabilities.");
+    LOG4CXX_DEBUG(
+        logger_,
+        "Parameter " << request_parameter << " doesn't exist in capabilities.");
     return capabilitiesStatus::missedParam;
   }
 
@@ -525,9 +529,9 @@ void SetInteriorVehicleDataRequest::Execute() {
         return;
       } else if (module_data[message_params::kAudioControlData].keyExists(
                      message_params::kKeepContext)) {
-        app->set_keep_context(
-            module_data[message_params::kAudioControlData]
-                       [message_params::kKeepContext].asBool());
+        app->set_keep_context(module_data[message_params::kAudioControlData]
+                                         [message_params::kKeepContext]
+                                             .asBool());
       }
     }
 
@@ -716,21 +720,6 @@ void SetInteriorVehicleDataRequest::CutOffReadOnlyParams(
   const smart_objects::SmartObject& module_type_params =
       ControlData(module_data);
   const std::string module_type = ModuleType();
-  std::vector<std::string> ro_params = GetModuleReadOnlyParams(module_type);
-
-  for (auto& it : ro_params) {
-    if (module_type_params.keyExists(it)) {
-      if (enums_value::kClimate == module_type) {
-        module_data[message_params::kClimateControlData].erase(it);
-      } else if (enums_value::kRadio == module_type) {
-        module_data[message_params::kRadioControlData].erase(it);
-      } else {
-        continue;
-      }
-
-      LOG4CXX_DEBUG(logger_, "Cutting-off READ ONLY parameter: " << it);
-    }
-  }
 
   if (enums_value::kAudio == module_type) {
     auto& equalizer_settings = module_data[message_params::kAudioControlData]
@@ -743,6 +732,15 @@ void SetInteriorVehicleDataRequest::CutOffReadOnlyParams(
                       "Cutting-off READ ONLY parameter: "
                           << message_params::kChannelName);
       }
+    }
+  }
+
+  std::vector<std::string> ro_params = GetModuleReadOnlyParams(module_type);
+  const auto& data_mapping = RCHelpers::GetModuleTypeToDataMapping();
+  for (const auto& param : ro_params) {
+    if (module_type_params.keyExists(param)) {
+      module_data[data_mapping(module_type)].erase(param);
+      LOG4CXX_DEBUG(logger_, "Cutting-off READ ONLY parameter: " << param);
     }
   }
 }

@@ -32,8 +32,8 @@
  */
 
 #include "sdl_rpc_plugin/commands/mobile/speak_response.h"
-#include "application_manager/rpc_service.h"
 #include "application_manager/application_impl.h"
+#include "application_manager/rpc_service.h"
 #include "interfaces/HMI_API.h"
 
 namespace sdl_rpc_plugin {
@@ -63,4 +63,4 @@ void SpeakResponse::Run() {
 
 }  // namespace commands
 
-}  // namespace application_manager
+}  // namespace sdl_rpc_plugin

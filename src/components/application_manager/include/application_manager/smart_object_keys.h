@@ -1,5 +1,5 @@
 /*
- Copyright (c) 2013, Ford Motor Company
+ Copyright (c) 2019, Ford Motor Company
  All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -60,6 +60,7 @@ extern const char* app_launch_last_session;
 extern const char* policy_app_id;
 extern const char* hmi_app_id;
 extern const char* device_id;
+extern const char* subscribe;
 extern const char* subscribed_for_way_points;
 extern const char* url;
 extern const char* urlScheme;
@@ -76,7 +77,7 @@ extern const char* ngn_media_screen_app_name;
 extern const char* vr_synonyms;
 extern const char* uses_vehicle_data;
 extern const char* is_media_application;
-extern const char* greyOut;
+extern const char* grey_out;
 extern const char* language_desired;
 extern const char* auto_activated_id;
 extern const char* app_type;
@@ -178,6 +179,7 @@ extern const char* navigation_capability;
 extern const char* phone_capability;
 extern const char* video_streaming_capability;
 extern const char* rc_capability;
+extern const char* app_services_capabilities;
 extern const char* day_color_scheme;
 extern const char* night_color_scheme;
 extern const char* primary_color;
@@ -188,10 +190,19 @@ extern const char* green;
 extern const char* blue;
 extern const char* display_layout;
 extern const char* icon_resumed;
+extern const char* nicknames;
+extern const char* enabled;
+extern const char* auth_token;
+extern const char* cloud_transport_type;
+extern const char* hybrid_app_preference;
+extern const char* is_cloud_application;
+extern const char* cloud_connection_status;
+extern const char* endpoint;
 
 // PutFile
 extern const char* sync_file_name;
 extern const char* file_name;
+extern const char* file_path;
 extern const char* file_type;
 extern const char* file_size;
 extern const char* crc32_check_sum;
@@ -205,6 +216,7 @@ extern const char* is_template;
 extern const char* image;
 extern const char* type;
 extern const char* system_file;
+extern const char* is_system_file;
 extern const char* offset;
 extern const char* length;
 extern const char* secondary_image;
@@ -253,6 +265,7 @@ extern const char* fuel_level;
 extern const char* fuel_level_state;
 extern const char* instant_fuel_consumption;
 extern const char* fuel_range;
+extern const char* cloud_app_vehicle_id;
 extern const char* external_temp;
 extern const char* turn_signal;
 extern const char* vin;
@@ -293,6 +306,49 @@ extern const char* system_software_version;
 extern const char* priority;
 extern const char* engine_oil_life;
 
+// app services
+extern const char* app_service_manifest;
+extern const char* service_name;
+extern const char* service_type;
+extern const char* service_icon;
+extern const char* allow_app_consumers;
+extern const char* rpc_spec_version;
+extern const char* handled_rpcs;
+extern const char* media_service_manifest;
+extern const char* app_service_record;
+extern const char* service_id;
+extern const char* service_manifest;
+extern const char* service_published;
+extern const char* service_active;
+extern const char* app_service_id;
+extern const char* service_data;
+extern const char* media_service_data;
+extern const char* media_image;
+extern const char* weather_service_data;
+extern const char* location;
+extern const char* current_forecast;
+extern const char* minute_forecast;
+extern const char* hourly_forecast;
+extern const char* multiday_forecast;
+extern const char* weather_icon;
+extern const char* navigation_service_data;
+extern const char* origin;
+extern const char* destination;
+extern const char* instructions;
+extern const char* location_details;
+extern const char* request_service_active;
+extern const char* app_services;
+extern const char* update_reason;
+extern const char* updated_app_service_record;
+extern const char* service_records;
+extern const char* activate;
+extern const char* set_as_default;
+extern const char* origin_app;
+
+// sis data
+extern const char* station_short_name;
+extern const char* station_location;
+
 // resuming
 extern const char* application_commands;
 extern const char* application_submenus;
@@ -316,8 +372,11 @@ extern const char* global_ign_on_counter;
 extern const char* connection_info;
 extern const char* is_download_complete;
 
+extern const char* shifted;
+extern const char* altitude;
 extern const char* longitude_degrees;
 extern const char* latitude_degrees;
+
 extern const char* address;
 extern const char* country_name;
 extern const char* country_code;
@@ -359,6 +418,8 @@ extern const char* const keyboard_layout_supported;
 extern const char* const keypress_mode_supported;
 extern const char* const limited_characters_list_supported;
 extern const char* const auto_complete_text_supported;
+extern const char* const send_location_enabled;
+extern const char* const get_way_points_enabled;
 extern const char* const entity_type;
 extern const char* const entity_id;
 extern const char* const status;
@@ -413,7 +474,7 @@ extern const char* instance_follow_redirect;
 extern const char* charset;
 extern const char* content_lenght;
 extern const char* GET;
-}  // http_request
+}  // namespace http_request
 
 namespace mobile_notification {
 extern const char* state;

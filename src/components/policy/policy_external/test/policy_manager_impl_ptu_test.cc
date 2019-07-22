@@ -30,19 +30,19 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <stdint.h>
 #include <fstream>
 #include <string>
 #include <vector>
-#include <stdint.h>
 
 #include "gtest/gtest.h"
 
 #include "policy/policy_manager_impl_test_base.h"
 #include "policy/policy_table/types.h"
 
+#include "json/reader.h"
 #include "utils/date_time.h"
 #include "utils/gen_hash.h"
-#include "json/reader.h"
 
 namespace test {
 namespace components {
@@ -1713,6 +1713,6 @@ TEST_F(
   CompareRequestTypesContainers(correct_types, received_types);
 }
 
-}  // namespace policy
+}  // namespace policy_test
 }  // namespace components
 }  // namespace test

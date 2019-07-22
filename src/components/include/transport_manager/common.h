@@ -33,9 +33,9 @@
 #ifndef SRC_COMPONENTS_INCLUDE_TRANSPORT_MANAGER_COMMON_H_
 #define SRC_COMPONENTS_INCLUDE_TRANSPORT_MANAGER_COMMON_H_
 
-#include <vector>
-#include <string>
 #include <map>
+#include <string>
+#include <vector>
 
 /**
  * @brief - transport_manager namespace
@@ -55,6 +55,8 @@ enum {
   E_ADAPTERS_FAIL,
   E_INTERNAL_ERROR
 };
+
+enum ConnectionStatus { INVALID = -1, PENDING, RETRY, CONNECTED, CLOSING };
 
 /**
  * @brief Type definition for variable that hold handle of device.

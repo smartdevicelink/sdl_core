@@ -36,9 +36,9 @@
 
 #include "application_manager/application_impl.h"
 #include "application_manager/message_helper.h"
-#include "interfaces/MOBILE_API.h"
-#include "interfaces/HMI_API.h"
 #include "application_manager/smart_object_keys.h"
+#include "interfaces/HMI_API.h"
+#include "interfaces/MOBILE_API.h"
 #include "utils/helpers.h"
 #include "vehicle_info_plugin/vehicle_info_app_extension.h"
 
@@ -284,4 +284,4 @@ void UnsubscribeVehicleDataRequest::AddAlreadyUnsubscribedVI(
 }
 
 }  // namespace commands
-}  // namespace application_manager
+}  // namespace vehicle_info_plugin

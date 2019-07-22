@@ -183,6 +183,12 @@
                         "LIMITED",
                         "NONE"]
                     },
+                    "OnSystemCapabilityUpdated": {
+                        "hmi_levels": ["BACKGROUND",
+                        "FULL",
+                        "LIMITED",
+                        "NONE"]
+                    },
                     "PerformAudioPassThru": {
                         "hmi_levels": ["FULL",
                         "LIMITED"]
@@ -196,7 +202,7 @@
                         "FULL",
                         "LIMITED",
                         "NONE"]
-                    },
+                    },                    
                     "RegisterAppInterface": {
                         "hmi_levels": ["BACKGROUND",
                         "FULL",
@@ -268,6 +274,13 @@
                         "hmi_levels": ["BACKGROUND",
                         "FULL",
                         "LIMITED"]
+                    },
+                    "CloseApplication": {
+                        "hmi_levels": [
+                          "FULL",
+                          "LIMITED",
+                          "BACKGROUND"
+                        ]
                     }
                 }
             },
@@ -415,6 +428,7 @@
                         "headLampStatus",
                         "instantFuelConsumption",
                         "fuelRange",
+                        "cloudAppVehicleID",
                         "odometer",
                         "tirePressure",
                         "vin",
@@ -435,6 +449,7 @@
                         "headLampStatus",
                         "instantFuelConsumption",
                         "fuelRange",
+                        "cloudAppVehicleID",
                         "odometer",
                         "tirePressure",
                         "vin",
@@ -455,6 +470,7 @@
                         "headLampStatus",
                         "instantFuelConsumption",
                         "fuelRange",
+                        "cloudAppVehicleID",
                         "odometer",
                         "tirePressure",
                         "wiperStatus"]
@@ -474,6 +490,7 @@
                         "headLampStatus",
                         "instantFuelConsumption",
                         "fuelRange",
+                        "cloudAppVehicleID",
                         "odometer",
                         "tirePressure",
                         "wiperStatus"]
@@ -529,6 +546,128 @@
                         "hmi_levels": ["BACKGROUND",
                         "FULL",
                         "LIMITED"]
+                    }
+                }
+            },
+            "CloudAppStore": {
+                "rpcs": {
+                    "SetCloudAppProperties":{
+                        "hmi_levels":["BACKGROUND",
+                        "FULL",
+                        "LIMITED"]
+                    },
+                    "GetCloudAppProperties":{
+                        "hmi_levels":["BACKGROUND",
+                        "FULL",
+                        "LIMITED"]
+                    }
+                }
+            },
+            "CloudApp": {
+                "rpcs": {
+                    "GetVehicleData": {
+                        "hmi_levels": ["BACKGROUND",
+                        "FULL",
+                        "LIMITED"],
+                        "parameters": [
+                        "cloudAppVehicleID"
+                        ]
+                    },
+                    "OnVehicleData": {
+                        "hmi_levels": ["BACKGROUND",
+                        "FULL",
+                        "LIMITED"],
+                        "parameters": [
+                        "cloudAppVehicleID"
+                        ]
+                    },
+                    "SubscribeVehicleData": {
+                        "hmi_levels": ["BACKGROUND",
+                        "FULL",
+                        "LIMITED"],
+                        "parameters": [
+                        "cloudAppVehicleID"
+                        ]
+                    },
+                    "UnsubscribeVehicleData": {
+                        "hmi_levels": ["BACKGROUND",
+                        "FULL",
+                        "LIMITED"],
+                        "parameters": [
+                        "cloudAppVehicleID"
+                        ]
+                    }
+                }
+            },
+            "AppServiceProvider": {
+                "rpcs": {
+                    "PublishAppService": {
+                        "hmi_levels": [
+                            "FULL",
+                            "LIMITED",
+                            "BACKGROUND",
+                            "NONE"
+                        ]
+                    },
+                    "GetAppServiceData": {
+                        "hmi_levels": [
+                            "FULL",
+                            "LIMITED",
+                            "BACKGROUND",
+                            "NONE"
+                        ]
+                    },
+                    "OnAppServiceData": {
+                        "hmi_levels": [
+                            "FULL",
+                            "LIMITED",
+                            "BACKGROUND",
+                            "NONE"
+                        ]
+                    },
+                    "PerformAppServiceInteraction": {
+                        "hmi_levels": [
+                            "FULL",
+                            "LIMITED",
+                            "BACKGROUND",
+                            "NONE"
+                        ]
+                    }
+                }
+            },
+            "AppServiceConsumer": {
+                "rpcs": {
+                    "GetFile": {
+                        "hmi_levels": [
+                            "FULL",
+                            "LIMITED",
+                            "BACKGROUND",
+                            "NONE"
+                        ]
+                    },
+                    "GetAppServiceData": {
+                        "hmi_levels": [
+                            "FULL",
+                            "LIMITED",
+                            "BACKGROUND",
+                            "NONE"
+                        ]
+                    },
+                    "OnAppServiceData": {
+                        "hmi_levels": [
+                            "FULL",
+                            "LIMITED",
+                            "BACKGROUND",
+                            "NONE"
+                        ]
+                    },
+                    "PerformAppServiceInteraction": {
+                        "hmi_levels": [
+                            "FULL",
+                            "LIMITED",
+                            "BACKGROUND",
+                            "NONE"
+                        ]
                     }
                 }
             },
@@ -1015,6 +1154,11 @@
                         "LIMITED"]
                     },
                     "UnsubscribeWayPoints": {
+                        "hmi_levels": ["BACKGROUND",
+                        "FULL",
+                        "LIMITED"]
+                    },
+                    "OnWayPointChange": {
                         "hmi_levels": ["BACKGROUND",
                         "FULL",
                         "LIMITED"]

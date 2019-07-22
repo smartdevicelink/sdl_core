@@ -36,8 +36,8 @@
 
 #include "utils/logger.h"
 
-#include "utils/lock.h"
 #include "utils/date_time.h"
+#include "utils/lock.h"
 
 namespace protocol_handler {
 

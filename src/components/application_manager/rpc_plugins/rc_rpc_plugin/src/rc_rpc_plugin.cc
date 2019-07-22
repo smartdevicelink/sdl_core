@@ -29,16 +29,16 @@
  ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  POSSIBILITY OF SUCH DAMAGE.
  */
-
 #include "rc_rpc_plugin/rc_rpc_plugin.h"
-#include "rc_rpc_plugin/rc_command_factory.h"
-#include "rc_rpc_plugin/rc_app_extension.h"
-#include "rc_rpc_plugin/resource_allocation_manager_impl.h"
+#include <memory>
+#include "application_manager/plugin_manager/plugin_keys.h"
 #include "rc_rpc_plugin/interior_data_cache_impl.h"
 #include "rc_rpc_plugin/interior_data_manager_impl.h"
+#include "rc_rpc_plugin/rc_app_extension.h"
+#include "rc_rpc_plugin/rc_command_factory.h"
 #include "rc_rpc_plugin/rc_helpers.h"
+#include "rc_rpc_plugin/resource_allocation_manager_impl.h"
 #include "utils/helpers.h"
-#include <memory>
 
 namespace rc_rpc_plugin {
 CREATE_LOGGERPTR_GLOBAL(logger_, "RemoteControlModule");
@@ -77,7 +77,7 @@ bool RCRPCPlugin::IsAbleToProcess(
 }
 
 std::string RCRPCPlugin::PluginName() {
-  return "RC RPC Plugin";
+  return plugins::plugin_names::rc_rpc_plugin;
 }
 
 application_manager::CommandFactory& RCRPCPlugin::GetCommandFactory() {
@@ -121,8 +121,8 @@ void RCRPCPlugin::OnApplicationEvent(
 
 RCRPCPlugin::Apps RCRPCPlugin::GetRCApplications(
     application_manager::ApplicationManager& app_mngr) {
-  using application_manager::ApplicationSharedPtr;
   using application_manager::ApplicationSet;
+  using application_manager::ApplicationSharedPtr;
   ApplicationSet accessor = app_mngr.applications().GetData();
 
   std::vector<ApplicationSharedPtr> result;

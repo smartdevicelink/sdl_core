@@ -33,12 +33,12 @@
 #ifndef SRC_COMPONENTS_INCLUDE_TEST_SECURITY_MANAGER_MOCK_SECURITY_MANAGER_H_
 #define SRC_COMPONENTS_INCLUDE_TEST_SECURITY_MANAGER_MOCK_SECURITY_MANAGER_H_
 
-#include <string>
 #include <list>
+#include <string>
 #include "gmock/gmock.h"
-#include "utils/byte_order.h"
 #include "security_manager/security_manager.h"
 #include "security_manager/security_query.h"
+#include "utils/byte_order.h"
 
 namespace test {
 namespace components {

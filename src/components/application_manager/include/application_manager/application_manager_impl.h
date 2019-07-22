@@ -34,40 +34,41 @@
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_APPLICATION_MANAGER_IMPL_H_
 
 #include <stdint.h>
-#include <vector>
-#include <map>
-#include <set>
-#include <deque>
 #include <algorithm>
+#include <deque>
+#include <map>
 #include <memory>
+#include <set>
+#include <vector>
 
+#include "application_manager/app_launch/app_launch_data.h"
+#include "application_manager/app_service_manager.h"
 #include "application_manager/application_manager.h"
+#include "application_manager/application_manager_settings.h"
+#include "application_manager/command_factory.h"
+#include "application_manager/command_holder.h"
+#include "application_manager/event_engine/event_dispatcher_impl.h"
 #include "application_manager/hmi_capabilities.h"
+#include "application_manager/hmi_interfaces_impl.h"
 #include "application_manager/message.h"
 #include "application_manager/message_helper.h"
 #include "application_manager/request_controller.h"
 #include "application_manager/resumption/resume_ctrl.h"
-#include "application_manager/state_controller_impl.h"
-#include "application_manager/app_launch/app_launch_data.h"
-#include "application_manager/application_manager_settings.h"
-#include "application_manager/event_engine/event_dispatcher_impl.h"
-#include "application_manager/hmi_interfaces_impl.h"
-#include "application_manager/command_holder.h"
-#include "application_manager/command_factory.h"
-#include "application_manager/rpc_service.h"
 #include "application_manager/rpc_handler.h"
+#include "application_manager/rpc_service.h"
+#include "application_manager/state_controller_impl.h"
 
-#include "protocol_handler/protocol_observer.h"
-#include "protocol_handler/protocol_handler.h"
-#include "hmi_message_handler/hmi_message_observer.h"
-#include "hmi_message_handler/hmi_message_sender.h"
 #include "application_manager/policies/policy_handler_interface.h"
 #include "application_manager/policies/policy_handler_observer.h"
 #include "connection_handler/connection_handler.h"
 #include "connection_handler/connection_handler_observer.h"
 #include "connection_handler/device.h"
 #include "formatters/CSmartFactory.h"
+#include "hmi_message_handler/hmi_message_observer.h"
+#include "hmi_message_handler/hmi_message_sender.h"
 #include "policies/policy_handler.h"
+#include "protocol_handler/protocol_handler.h"
+#include "protocol_handler/protocol_observer.h"
 
 #include "interfaces/HMI_API.h"
 #include "interfaces/HMI_API_schema.h"
@@ -87,14 +88,14 @@
 
 #include "utils/macro.h"
 
+#include "smart_objects/smart_object.h"
+#include "utils/data_accessor.h"
+#include "utils/lock.h"
 #include "utils/message_queue.h"
 #include "utils/prioritized_queue.h"
-#include "utils/threads/thread.h"
 #include "utils/threads/message_loop_thread.h"
-#include "utils/lock.h"
-#include "utils/data_accessor.h"
+#include "utils/threads/thread.h"
 #include "utils/timer.h"
-#include "smart_objects/smart_object.h"
 
 struct BsonObject;
 
@@ -117,6 +118,14 @@ struct CommandParametersPermissions;
 typedef std::map<std::string, hmi_apis::Common_TransportType::eType>
     DeviceTypes;
 
+struct AppIconInfo {
+  std::string endpoint;
+  bool pending_request;
+  AppIconInfo();
+  AppIconInfo(std::string ws_endpoint, bool pending)
+      : endpoint(ws_endpoint), pending_request(pending) {}
+};
+
 CREATE_LOGGERPTR_GLOBAL(logger_, "ApplicationManager")
 typedef std::shared_ptr<timer::Timer> TimerSPtr;
 
@@ -125,14 +134,14 @@ class ApplicationManagerImpl
       public connection_handler::ConnectionHandlerObserver,
       public policy::PolicyHandlerObserver
 #ifdef ENABLE_SECURITY
-      ,
+    ,
       public security_manager::SecurityManagerListener
 #endif  // ENABLE_SECURITY
 #ifdef TELEMETRY_MONITOR
-      ,
+    ,
       public telemetry_monitor::TelemetryObservable<AMTelemetryObserver>
 #endif  // TELEMETRY_MONITOR
-      {
+{
 
   friend class ResumeCtrl;
   friend class CommandImpl;
@@ -156,6 +165,7 @@ class ApplicationManagerImpl
   bool Stop() OVERRIDE;
 
   DataAccessor<ApplicationSet> applications() const OVERRIDE;
+  DataAccessor<AppsWaitRegistrationSet> pending_applications() const OVERRIDE;
   ApplicationSharedPtr application(uint32_t app_id) const OVERRIDE;
 
   ApplicationSharedPtr active_application() const OVERRIDE;
@@ -163,6 +173,10 @@ class ApplicationManagerImpl
   ApplicationSharedPtr application_by_hmi_app(
       uint32_t hmi_app_id) const OVERRIDE;
   ApplicationSharedPtr application_by_policy_id(
+      const std::string& policy_app_id) const OVERRIDE;
+  ApplicationSharedPtr application_by_name(
+      const std::string& app_name) const OVERRIDE;
+  ApplicationSharedPtr pending_application_by_policy_id(
       const std::string& policy_app_id) const OVERRIDE;
 
   std::vector<ApplicationSharedPtr> applications_by_button(
@@ -194,6 +208,9 @@ class ApplicationManagerImpl
 
   void SendDriverDistractionState(ApplicationSharedPtr application);
 
+  void SendGetIconUrlNotifications(const uint32_t connection_key,
+                                   ApplicationSharedPtr application);
+
   ApplicationSharedPtr application(
       const std::string& device_id,
       const std::string& policy_app_id) const OVERRIDE;
@@ -211,6 +228,11 @@ class ApplicationManagerImpl
   virtual plugin_manager::RPCPluginManager& GetPluginManager() OVERRIDE {
     DCHECK(plugin_manager_);
     return *plugin_manager_;
+  }
+
+  virtual AppServiceManager& GetAppServiceManager() OVERRIDE {
+    DCHECK(app_service_manager_);
+    return *app_service_manager_;
   }
 
   std::vector<std::string> devices(
@@ -302,8 +324,9 @@ class ApplicationManagerImpl
   void SetTelemetryObserver(AMTelemetryObserver* observer) OVERRIDE;
 #endif  // TELEMETRY_MONITOR
 
-  ApplicationSharedPtr RegisterApplication(const std::shared_ptr<
-      smart_objects::SmartObject>& request_for_registration) OVERRIDE;
+  ApplicationSharedPtr RegisterApplication(
+      const std::shared_ptr<smart_objects::SmartObject>&
+          request_for_registration) OVERRIDE;
   /*
    * @brief Closes application by id
    *
@@ -320,9 +343,9 @@ class ApplicationManagerImpl
                              bool is_unexpected_disconnect = false) OVERRIDE;
 
   /**
-  * @brief Handle sequence for unauthorized application
-  * @param app_id Application id
-  */
+   * @brief Handle sequence for unauthorized application
+   * @param app_id Application id
+   */
   void OnAppUnauthorized(const uint32_t& app_id) OVERRIDE;
 
   /*
@@ -359,6 +382,44 @@ class ApplicationManagerImpl
 
   void ConnectToDevice(const std::string& device_mac) OVERRIDE;
   void OnHMIStartedCooperation() OVERRIDE;
+
+  void DisconnectCloudApp(ApplicationSharedPtr app) OVERRIDE;
+
+  void RefreshCloudAppInformation() OVERRIDE;
+
+  void CreatePendingApplication(
+      const transport_manager::ConnectionUID connection_id,
+      const transport_manager::DeviceInfo& device_info,
+      connection_handler::DeviceHandle device_id);
+
+  void SetPendingApplicationState(
+      const transport_manager::ConnectionUID connection_id,
+      const transport_manager::DeviceInfo& device_info);
+
+  std::string PolicyIDByIconUrl(const std::string url) OVERRIDE;
+
+  void SetIconFileFromSystemRequest(const std::string policy_id) OVERRIDE;
+
+  /**
+   * @brief Notifies the applicaiton manager that a cloud connection status has
+   * updated and should trigger an UpdateAppList RPC to the HMI
+   */
+  void OnConnectionStatusUpdated();
+
+  /**
+   * @brief Retrieve the current connection status of a cloud app
+   * @param app A cloud application
+   * @return The current CloudConnectionStatus of app
+   */
+  hmi_apis::Common_CloudConnectionStatus::eType GetCloudAppConnectionStatus(
+      ApplicationConstSharedPtr app) const;
+
+  /*
+   * @brief Returns unique correlation ID for to mobile request
+   *
+   * @return Unique correlation ID
+   */
+  uint32_t GetNextMobileCorrelationID() OVERRIDE;
 
   /*
    * @brief Returns unique correlation ID for HMI request
@@ -476,17 +537,11 @@ class ApplicationManagerImpl
   // typedef for Applications list
   typedef std::set<ApplicationSharedPtr, ApplicationsAppIdSorter> ApplictionSet;
 
-  typedef std::set<ApplicationSharedPtr, ApplicationsPolicyAppIdSorter>
-      AppsWaitRegistrationSet;
-
   // typedef for Applications list iterator
   typedef ApplictionSet::iterator ApplictionSetIt;
 
   // typedef for Applications list const iterator
   typedef ApplictionSet::const_iterator ApplictionSetConstIt;
-
-  DataAccessor<AppsWaitRegistrationSet> apps_waiting_for_registration() const;
-  ApplicationConstSharedPtr waiting_app(const uint32_t hmi_id) const;
 
   /**
    * @brief Notification from PolicyHandler about PTU.
@@ -678,6 +733,15 @@ class ApplicationManagerImpl
                             uint32_t new_timeout_value) OVERRIDE;
 
   /**
+   * @brief TODO
+   *
+   * @param connection_key Connection key of application
+   * @param mobile_correlation_id Correlation ID of the mobile request
+   */
+  void IncreaseForwardedRequestTimeout(uint32_t connection_key,
+                                       uint32_t mobile_correlation_id) OVERRIDE;
+
+  /**
    * @brief AddPolicyObserver allows to subscribe needed component to events
    * from policy.
    *
@@ -764,9 +828,9 @@ class ApplicationManagerImpl
       ApplicationConstSharedPtr application) const;
 
   /**
-  * Getter for resume_controller
-  * @return Resume Controller
-  */
+   * Getter for resume_controller
+   * @return Resume Controller
+   */
   resumption::ResumeCtrl& resume_controller() OVERRIDE {
     return *resume_ctrl_.get();
   }
@@ -935,8 +999,7 @@ class ApplicationManagerImpl
     AppV4DevicePredicate(const connection_handler::DeviceHandle handle)
         : handle_(handle) {}
     bool operator()(const ApplicationSharedPtr app) const {
-      return app
-                 ? handle_ == app->device() &&
+      return app ? handle_ == app->device() &&
                        Message::is_sufficient_version(
                            protocol_handler::MajorProtocolVersion::
                                PROTOCOL_VERSION_4,
@@ -959,6 +1022,14 @@ class ApplicationManagerImpl
     GrammarIdPredicate(uint32_t grammar_id) : grammar_id_(grammar_id) {}
     bool operator()(const ApplicationSharedPtr app) const {
       return app ? grammar_id_ == app->get_grammar_id() : false;
+    }
+  };
+
+  struct AppNamePredicate {
+    std::string app_name_;
+    AppNamePredicate(const std::string& app_name) : app_name_(app_name) {}
+    bool operator()(const ApplicationSharedPtr app) const {
+      return app ? app->name() == app_name_ : false;
     }
   };
 
@@ -1004,14 +1075,14 @@ class ApplicationManagerImpl
   }
 
   /**
-     * @brief ProcessReconnection handles reconnection flow for application on
-     * transport switch
-     * @param application Pointer to switched application, must be validated
-     * before passing
-     * @param connection_key Connection key from registration request of
-     * switched
-     * application
-     */
+   * @brief ProcessReconnection handles reconnection flow for application on
+   * transport switch
+   * @param application Pointer to switched application, must be validated
+   * before passing
+   * @param connection_key Connection key from registration request of
+   * switched
+   * application
+   */
   void ProcessReconnection(ApplicationSharedPtr application,
                            const uint32_t connection_key) FINAL;
 
@@ -1078,7 +1149,8 @@ class ApplicationManagerImpl
   mobile_apis::MOBILE_API& mobile_so_factory();
 
   bool ConvertSOtoMessage(const smart_objects::SmartObject& message,
-                          Message& output);
+                          Message& output,
+                          const bool allow_unknown_parameters = false);
 
   template <typename ApplicationList>
   void PrepareApplicationListSO(ApplicationList app_list,
@@ -1382,6 +1454,7 @@ class ApplicationManagerImpl
   protocol_handler::ProtocolHandler* protocol_handler_;
   request_controller::RequestController request_ctrl_;
   std::unique_ptr<plugin_manager::RPCPluginManager> plugin_manager_;
+  std::unique_ptr<application_manager::AppServiceManager> app_service_manager_;
 
   /**
    * @brief Map contains apps with HMI state before incoming call
@@ -1404,6 +1477,7 @@ class ApplicationManagerImpl
   hmi_apis::HMI_API* hmi_so_factory_;
   mobile_apis::MOBILE_API* mobile_so_factory_;
 
+  static uint32_t mobile_corelation_id_;
   static uint32_t corelation_id_;
   static const uint32_t max_corelation_id_;
 
@@ -1449,6 +1523,13 @@ class ApplicationManagerImpl
 
   DeviceMap secondary_transport_devices_cache_;
 
+  mutable std::shared_ptr<sync_primitives::RecursiveLock>
+      pending_device_map_lock_ptr_;
+  std::map<std::string, std::string> pending_device_map_;
+
+  sync_primitives::Lock app_icon_map_lock_ptr_;
+  std::map<std::string, AppIconInfo> app_icon_map_;
+
 #ifdef TELEMETRY_MONITOR
   AMTelemetryObserver* metric_observer_;
 #endif  // TELEMETRY_MONITOR
@@ -1478,16 +1559,45 @@ class ApplicationManagerImpl
   void AddMockApplication(ApplicationSharedPtr mock_app);
 
   /**
+   * @brief Add a mock application to the pending application list without going
+   * through the formal registration process. Only for unit testing.
+   * @param mock_app the mock app to be added to the pending application list
+   */
+  void AddMockPendingApplication(ApplicationSharedPtr mock_app);
+
+  /**
    * @brief set a mock media manager without running Init(). Only for unit
    * testing.
-   * @param mock_app the mock app to be registered
+   * @param mock_media_manager the mock media manager to be assigned
    */
   void SetMockMediaManager(media_manager::MediaManager* mock_media_manager);
+
+  /**
+   * @brief set a mock rpc service directly. Only for unit
+   * testing.
+   * @param mock_app the mock rpc service to be assigned
+   */
+  void SetMockRPCService(rpc_service::RPCService* rpc_service) {
+    rpc_service_.reset(rpc_service);
+  }
+
+  /**
+   * @brief set a mock rpc service directly. Only for unit
+   * testing.
+   * @param mock_app the mock rpc service to be assigned
+   */
+  void SetMockPolicyHandler(policy::PolicyHandlerInterface* policy_handler) {
+    policy_handler_.reset(policy_handler);
+  }
 
   virtual void SetPluginManager(
       std::unique_ptr<plugin_manager::RPCPluginManager>& plugin_manager)
       OVERRIDE {
     plugin_manager_.reset(plugin_manager.release());
+  }
+
+  virtual void SetAppServiceManager(AppServiceManager* app_service_manager) {
+    app_service_manager_.reset(app_service_manager);
   }
 
  private:

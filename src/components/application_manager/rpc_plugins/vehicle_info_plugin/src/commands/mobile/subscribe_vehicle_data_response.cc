@@ -32,8 +32,8 @@
  */
 
 #include "vehicle_info_plugin/commands/mobile/subscribe_vehicle_data_response.h"
-#include "application_manager/rpc_service.h"
 #include "application_manager/application_impl.h"
+#include "application_manager/rpc_service.h"
 #include "interfaces/MOBILE_API.h"
 
 namespace vehicle_info_plugin {
@@ -60,4 +60,4 @@ void SubscribeVehicleDataResponse::Run() {
 }
 
 }  // namespace commands
-}  // namespace application_manager
+}  // namespace vehicle_info_plugin

@@ -31,15 +31,15 @@
  */
 
 #include "application_manager/application_state.h"
-#include "gtest/gtest.h"
-#include "application_manager/hmi_state.h"
-#include "application_manager/mock_application_manager.h"
-#include "application_manager/mock_application.h"
 #include "application_manager/event_engine/event_dispatcher.h"
-#include "resumption/last_state.h"
+#include "application_manager/hmi_state.h"
+#include "application_manager/mock_application.h"
+#include "application_manager/mock_application_manager.h"
 #include "application_manager/policies/policy_handler.h"
-#include "application_manager/state_controller.h"
 #include "application_manager/resumption/resume_ctrl.h"
+#include "application_manager/state_controller.h"
+#include "gtest/gtest.h"
+#include "resumption/last_state.h"
 
 namespace test {
 namespace components {
@@ -60,7 +60,7 @@ std::vector<StateID> GenerateCurrentStates() {
   states.push_back(StateID::STATE_ID_DEACTIVATE_HMI);
   return states;
 }
-}
+}  // namespace
 
 class ApplicationStateTest : public ::testing::Test {
  public:

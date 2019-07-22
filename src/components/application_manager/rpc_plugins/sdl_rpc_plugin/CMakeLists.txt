@@ -42,8 +42,12 @@ set (HMI_COMMANDS_SOURCE_DIR
   ${COMMANDS_SOURCE_DIR}/hmi
 )
 
+set (EXTENSIONS_SOURCE_DIR
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/extensions
+)
 collect_sources(MOBILE_COMMANDS "${MOBILE_COMMANDS_SOURCE_DIR}")
 collect_sources(HMI_COMMANDS "${HMI_COMMANDS_SOURCE_DIR}")
+collect_sources(APP_EXTENSIONS "${EXTENSIONS_SOURCE_DIR}")
 collect_sources(RPC_PLUGIN_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/src")
 
 set(LIBRARIES
@@ -60,7 +64,7 @@ if(ENABLE_LOG)
   list(APPEND LIBRARIES log4cxx -L${LOG4CXX_LIBS_DIRECTORY})
 endif()
 
-add_library("sdl_rpc_plugin" SHARED ${MOBILE_COMMANDS} ${HMI_COMMANDS} ${RPC_PLUGIN_SOURCES})
+add_library("sdl_rpc_plugin" SHARED ${MOBILE_COMMANDS} ${HMI_COMMANDS} ${RPC_PLUGIN_SOURCES} ${APP_EXTENSIONS})
 target_link_libraries("sdl_rpc_plugin" ${LIBRARIES})
 
 set(INSTALL_DESTINATION bin)

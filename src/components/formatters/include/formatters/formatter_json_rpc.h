@@ -35,12 +35,12 @@
 #ifndef SRC_COMPONENTS_FORMATTERS_INCLUDE_FORMATTERS_FORMATTER_JSON_RPC_H_
 #define SRC_COMPONENTS_FORMATTERS_INCLUDE_FORMATTERS_FORMATTER_JSON_RPC_H_
 
-#include <string>
 #include <sys/stat.h>
+#include <string>
 
-#include "smart_objects/smart_object.h"
-#include "smart_objects/enum_schema_item.h"
 #include "json/json.h"
+#include "smart_objects/enum_schema_item.h"
+#include "smart_objects/smart_object.h"
 
 #include "CFormatterJsonBase.h"
 #include "formatters/CSmartFactory.h"
@@ -105,11 +105,13 @@ class FormatterJsonRpc : public CFormatterJsonBase {
    *
    * @param obj Input SmartObject.
    * @param out_str Resulting JSON string.
-   *
+   * @param remove_unknown_parameters contains true if need to remove unknown
+   *parameters
    * @return true if success, false otherwise.
    */
   static bool ToString(const ns_smart_objects::SmartObject& obj,
-                       std::string& out_str);
+                       std::string& out_str,
+                       const bool remove_unknown_parameters = true);
 
   /**
    * @brief Creates a SmartObject from a JSON string.

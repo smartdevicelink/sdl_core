@@ -31,9 +31,9 @@
  */
 
 #include "application_manager/resumption/resumption_data.h"
-#include "utils/logger.h"
-#include "application_manager/smart_object_keys.h"
 #include "application_manager/application_manager_settings.h"
+#include "application_manager/smart_object_keys.h"
+#include "utils/logger.h"
 
 namespace resumption {
 

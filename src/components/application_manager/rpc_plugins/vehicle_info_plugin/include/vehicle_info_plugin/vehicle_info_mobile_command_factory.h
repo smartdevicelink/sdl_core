@@ -63,11 +63,18 @@ class VehicleInfoMobileCommandFactory : public app_mngr::CommandFactory {
   app_mngr::HMICapabilities& hmi_capabilities_;
   policy::PolicyHandlerInterface& policy_handler_;
 
-  app_mngr::CommandCreator& buildCommandCreator(
-      const int32_t function_id, const int32_t message_type) const;
+  app_mngr::CommandCreator& get_creator_factory(
+      const mobile_apis::FunctionID::eType function_id,
+      const mobile_apis::messageType::eType message_type,
+      const app_mngr::commands::Command::CommandSource source) const;
+  app_mngr::CommandCreator& get_command_creator(
+      const mobile_apis::FunctionID::eType id,
+      const mobile_apis::messageType::eType message_type) const;
+  app_mngr::CommandCreator& get_notification_creator(
+      const mobile_apis::FunctionID::eType id) const;
 
   DISALLOW_COPY_AND_ASSIGN(VehicleInfoMobileCommandFactory);
 };
-}
+}  // namespace vehicle_info_plugin
 
 #endif  // SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_VEHICLE_INFO_PLUGIN_INCLUDE_VEHICLE_INFO_PLUGIN_VEHICLE_INFO_MOBILE_COMMAND_FACTORY_H

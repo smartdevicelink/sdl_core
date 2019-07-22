@@ -34,23 +34,23 @@
 #define SRC_COMPONENTS_INCLUDE_APPLICATION_MANAGER_APPLICATION_MANAGER_H_
 
 #include <ctime>
+#include <set>
 #include <string>
 #include <vector>
-#include <set>
 #include "application_manager/application.h"
-#include "application_manager/hmi_capabilities.h"
-#include "application_manager/commands/command.h"
 #include "application_manager/command_factory.h"
+#include "application_manager/commands/command.h"
 #include "connection_handler/connection_handler.h"
 #include "utils/data_accessor.h"
 
-#include "telemetry_monitor/telemetry_observable.h"
-#include "application_manager/policies/policy_handler_interface.h"
 #include "application_manager/application_manager_settings.h"
-#include "application_manager/state_controller.h"
 #include "application_manager/hmi_interfaces.h"
-#include "policy/policy_types.h"
 #include "application_manager/plugin_manager/rpc_plugin_manager.h"
+#include "application_manager/policies/policy_handler_interface.h"
+#include "application_manager/state_controller.h"
+#include "policy/policy_types.h"
+#include "telemetry_monitor/telemetry_observable.h"
+
 namespace resumption {
 class LastState;
 }
@@ -89,6 +89,7 @@ class RPCHandler;
 }
 
 class Application;
+class AppServiceManager;
 class StateControllerImpl;
 struct CommandParametersPermissions;
 using policy::RPCParams;
@@ -152,6 +153,8 @@ class ApplicationManager {
       connection_handler::ConnectionHandler* handler) = 0;
 
   virtual DataAccessor<ApplicationSet> applications() const = 0;
+  virtual DataAccessor<AppsWaitRegistrationSet> pending_applications()
+      const = 0;
 
   virtual ApplicationSharedPtr application(uint32_t app_id) const = 0;
   virtual ApplicationSharedPtr active_application() const = 0;
@@ -167,16 +170,22 @@ class ApplicationManager {
   virtual ApplicationSharedPtr application_by_policy_id(
       const std::string& policy_app_id) const = 0;
 
+  virtual ApplicationSharedPtr application_by_name(
+      const std::string& app_name) const = 0;
+
+  virtual ApplicationSharedPtr pending_application_by_policy_id(
+      const std::string& policy_app_id) const = 0;
+
   virtual AppSharedPtrs applications_by_button(uint32_t button) = 0;
   virtual AppSharedPtrs applications_with_navi() = 0;
 
   /**
- * @brief application find application by device and policy identifier
- * @param device_id device id
- * @param policy_app_id poilcy identifier
- * @return pointer to application in case if application exist, in other case
- * return empty shared pointer
- */
+   * @brief application find application by device and policy identifier
+   * @param device_id device id
+   * @param policy_app_id poilcy identifier
+   * @return pointer to application in case if application exist, in other case
+   * return empty shared pointer
+   */
   virtual ApplicationSharedPtr application(
       const std::string& device_id, const std::string& policy_app_id) const = 0;
 
@@ -187,6 +196,8 @@ class ApplicationManager {
       const std::string& policy_app_id) const = 0;
 
   virtual plugin_manager::RPCPluginManager& GetPluginManager() = 0;
+
+  virtual AppServiceManager& GetAppServiceManager() = 0;
 
 #ifdef BUILD_TESTS
   virtual void SetPluginManager(
@@ -282,6 +293,9 @@ class ApplicationManager {
    * @param application contains registered application.
    */
   virtual void SendDriverDistractionState(ApplicationSharedPtr application) = 0;
+
+  virtual void SendGetIconUrlNotifications(
+      const uint32_t connection_key, ApplicationSharedPtr application) = 0;
 
   /**
    * @brief Checks if Application is subscribed for way points
@@ -394,6 +408,7 @@ class ApplicationManager {
   virtual bool is_stopping() const = 0;
   virtual bool is_audio_pass_thru_active() const = 0;
 
+  virtual uint32_t GetNextMobileCorrelationID() = 0;
   virtual uint32_t GetNextHMICorrelationID() = 0;
   virtual uint32_t GenerateNewHMIAppID() = 0;
 
@@ -427,6 +442,22 @@ class ApplicationManager {
 
   virtual void OnHMIStartedCooperation() = 0;
 
+  virtual void DisconnectCloudApp(ApplicationSharedPtr app) = 0;
+
+  virtual void RefreshCloudAppInformation() = 0;
+
+  virtual std::string PolicyIDByIconUrl(const std::string url) = 0;
+
+  virtual void SetIconFileFromSystemRequest(const std::string policy_id) = 0;
+
+  /**
+   * @brief Retrieve the current connection status of a cloud app
+   * @param app A cloud application
+   * @return The current CloudConnectionStatus of app
+   */
+  virtual hmi_apis::Common_CloudConnectionStatus::eType
+  GetCloudAppConnectionStatus(ApplicationConstSharedPtr app) const = 0;
+
   virtual bool IsHMICooperating() const = 0;
   /**
    * @brief Notifies all components interested in Vehicle Data update
@@ -438,8 +469,9 @@ class ApplicationManager {
   virtual void IviInfoUpdated(mobile_apis::VehicleDataType::eType vehicle_info,
                               int value) = 0;
 
-  virtual ApplicationSharedPtr RegisterApplication(const std::shared_ptr<
-      smart_objects::SmartObject>& request_for_registration) = 0;
+  virtual ApplicationSharedPtr RegisterApplication(
+      const std::shared_ptr<smart_objects::SmartObject>&
+          request_for_registration) = 0;
 
   virtual void SendUpdateAppList() = 0;
 
@@ -546,6 +578,9 @@ class ApplicationManager {
                                     uint32_t mobile_correlation_id,
                                     uint32_t new_timeout_value) = 0;
 
+  virtual void IncreaseForwardedRequestTimeout(
+      uint32_t connection_key, uint32_t mobile_correlation_id) = 0;
+
   virtual StateController& state_controller() = 0;
 
   virtual void SetUnregisterAllApplicationsReason(
@@ -609,10 +644,10 @@ class ApplicationManager {
   virtual resumption::ResumeCtrl& resume_controller() = 0;
 
   /**
-  * @brief hmi_interfaces getter for hmi_interfaces component, that handle
-  * hmi_instrfaces state
-  * @return reference to hmi_interfaces component
-  */
+   * @brief hmi_interfaces getter for hmi_interfaces component, that handle
+   * hmi_instrfaces state
+   * @return reference to hmi_interfaces component
+   */
   virtual HmiInterfaces& hmi_interfaces() = 0;
 
   virtual app_launch::AppLaunchCtrl& app_launch_ctrl() = 0;
@@ -640,19 +675,19 @@ class ApplicationManager {
   virtual void AddAppToTTSGlobalPropertiesList(const uint32_t app_id) = 0;
 
   /**
-  * Generate grammar ID
-  *
-  * @return New grammar ID
-  */
+   * Generate grammar ID
+   *
+   * @return New grammar ID
+   */
   virtual uint32_t GenerateGrammarID() = 0;
 
   virtual policy::DeviceConsent GetUserConsentForDevice(
       const std::string& device_id) const = 0;
 
   /**
-  * @brief Handle sequence for unauthorized application
-  * @param app_id Application id
-  */
+   * @brief Handle sequence for unauthorized application
+   * @param app_id Application id
+   */
   virtual void OnAppUnauthorized(const uint32_t& app_id) = 0;
 
   virtual bool ActivateApplication(ApplicationSharedPtr app) = 0;

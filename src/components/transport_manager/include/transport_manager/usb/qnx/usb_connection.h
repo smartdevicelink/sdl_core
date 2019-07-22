@@ -38,8 +38,8 @@
 
 #include "utils/lock.h"
 
-#include "transport_manager/transport_adapter/transport_adapter_controller.h"
 #include "transport_manager/transport_adapter/connection.h"
+#include "transport_manager/transport_adapter/transport_adapter_controller.h"
 #include "transport_manager/usb/common.h"
 
 namespace transport_manager {

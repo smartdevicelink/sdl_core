@@ -33,23 +33,23 @@
 #ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_APPLICATION_H_
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_APPLICATION_H_
 
-#include <string>
-#include <map>
-#include <set>
 #include <list>
-#include <vector>
+#include <map>
 #include <memory>
+#include <set>
+#include <string>
+#include <vector>
 
-#include "utils/data_accessor.h"
-#include "interfaces/MOBILE_API.h"
-#include "connection_handler/device.h"
 #include "application_manager/app_extension.h"
-#include "application_manager/message.h"
-#include "application_manager/hmi_state.h"
 #include "application_manager/application_state.h"
 #include "application_manager/help_prompt_manager.h"
+#include "application_manager/hmi_state.h"
+#include "application_manager/message.h"
+#include "connection_handler/device.h"
+#include "interfaces/MOBILE_API.h"
 #include "protocol_handler/protocol_handler.h"
 #include "smart_objects/smart_object.h"
+#include "utils/data_accessor.h"
 #include "utils/macro.h"
 #include "utils/semantic_version.h"
 
@@ -236,8 +236,8 @@ class DynamicApplicationData {
   virtual bool is_audio() const = 0;
 
   /*
- * @brief Adds a command to the in application menu
- */
+   * @brief Adds a command to the in application menu
+   */
   virtual void AddCommand(uint32_t cmd_id,
                           const smart_objects::SmartObject& command) = 0;
 
@@ -353,10 +353,10 @@ class DynamicApplicationData {
   virtual uint32_t is_perform_interaction_active() const = 0;
 
   /*
-  * @brief Set perform interaction layout
-  *
-  * @param Current Interaction layout of the perform interaction
-  */
+   * @brief Set perform interaction layout
+   *
+   * @param Current Interaction layout of the perform interaction
+   */
   virtual void set_perform_interaction_layout(
       mobile_api::LayoutMode::eType layout) = 0;
 
@@ -366,10 +366,10 @@ class DynamicApplicationData {
   virtual mobile_api::LayoutMode::eType perform_interaction_layout() const = 0;
 
   /*
-     * @brief Sets the mode for perform interaction: UI/VR/BOTH
-     *
-     * @param mode Mode that was selected (MENU; VR; BOTH)
-     */
+   * @brief Sets the mode for perform interaction: UI/VR/BOTH
+   *
+   * @param mode Mode that was selected (MENU; VR; BOTH)
+   */
   virtual void set_perform_interaction_mode(int32_t mode) = 0;
 
   /*
@@ -706,11 +706,11 @@ class Application : public virtual InitialApplicationData,
   virtual void SetRegularState(HmiStatePtr state) = 0;
 
   /**
-  * @brief SetPostponedState sets postponed state to application.
-  * This state could be set as regular later
-  *
-  * @param state state to setup
-  */
+   * @brief SetPostponedState sets postponed state to application.
+   * This state could be set as regular later
+   *
+   * @param state state to setup
+   */
   virtual void SetPostponedState(HmiStatePtr state) = 0;
 
   virtual void RemovePostponedState() = 0;
@@ -945,6 +945,73 @@ class Application : public virtual InitialApplicationData,
    * @return application extensions
    */
   virtual const std::list<AppExtensionPtr>& Extensions() const = 0;
+
+  /**
+   * @brief Get cloud app endpoint for websocket connection
+   * @return cloud app endpoint
+   */
+  virtual const std::string& cloud_app_endpoint() const = 0;
+
+  /**
+   * @brief Get cloud app auth token to be used in connection handshake after
+   * websocket open.
+   * @return cloud app auth token
+   */
+  virtual const std::string& auth_token() const = 0;
+
+  /**
+   * @brief Get cloud app transport type. Defines the type of websocket
+   * connection used.
+   * @return cloud app transport type
+   */
+  virtual const std::string& cloud_app_transport_type() const = 0;
+
+  /**
+   * @brief Get hybrid app preference. Defines behaviour for when a similar
+   * mobile and cloud app are connected simultaneously.
+   * @return hybrid app preference
+   */
+  virtual const mobile_apis::HybridAppPreference::eType& hybrid_app_preference()
+      const = 0;
+
+  /**
+   * @brief Get cloud app certificate. Used for secured websocket connections.
+   * @return cloud app certificate.
+   */
+  virtual const std::string& cloud_app_certificate() const = 0;
+
+  /**
+   * @brief Check whether the given application is a cloud app.
+   * @return true if the application is a cloud application, false otherwise.
+   */
+  virtual bool is_cloud_app() const = 0;
+
+  /**
+   * @brief Set cloud app endpoint
+   */
+  virtual void set_cloud_app_endpoint(const std::string& endpoint) = 0;
+
+  /**
+   * @brief Set cloud app auth token
+   */
+  virtual void set_auth_token(const std::string& auth_token) = 0;
+
+  /**
+   * @brief Set cloud app transport type
+   */
+  virtual void set_cloud_app_transport_type(
+      const std::string& transport_type) = 0;
+
+  /**
+   * @brief Set hybrid app preference
+   */
+  virtual void set_hybrid_app_preference(
+      const mobile_apis::HybridAppPreference::eType& hybrid_app_preference) = 0;
+
+  /**
+   * @brief Set cloud app certificate
+   */
+  virtual void set_cloud_app_certificate(const std::string& certificate) = 0;
 
  protected:
   mutable sync_primitives::Lock hmi_states_lock_;

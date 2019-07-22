@@ -33,22 +33,22 @@
 #ifndef SRC_COMPONENTS_INCLUDE_APPLICATION_MANAGER_POLICIES_POLICY_HANDLER_INTERFACE_H_
 #define SRC_COMPONENTS_INCLUDE_APPLICATION_MANAGER_POLICIES_POLICY_HANDLER_INTERFACE_H_
 
-#include <string>
 #include <map>
-#include <set>
-#include <vector>
 #include <queue>
-#include "interfaces/MOBILE_API.h"
-#include "application_manager/policies/policy_handler_observer.h"
+#include <set>
+#include <string>
+#include <vector>
 #include "application_manager/application.h"
-#include "policy/usage_statistics/statistics_manager.h"
-#include "utils/custom_string.h"
-#include "utils/callable.h"
-#include "policy/policy_settings.h"
-#include "smart_objects/smart_object.h"
-#include "policy/policy_types.h"
-#include "policy/policy_table/types.h"
+#include "application_manager/policies/policy_handler_observer.h"
+#include "interfaces/MOBILE_API.h"
 #include "policy/cache_manager_interface.h"
+#include "policy/policy_settings.h"
+#include "policy/policy_table/types.h"
+#include "policy/policy_types.h"
+#include "policy/usage_statistics/statistics_manager.h"
+#include "smart_objects/smart_object.h"
+#include "utils/callable.h"
+#include "utils/custom_string.h"
 
 using namespace ::rpc::policy_table_interface_base;
 namespace policy {
@@ -105,6 +105,7 @@ class PolicyHandlerInterface {
   virtual void GetUpdateUrls(const uint32_t service_type,
                              EndpointUrls& out_end_points) = 0;
   virtual std::string GetLockScreenIconUrl() const = 0;
+  virtual std::string GetIconUrl(const std::string& policy_app_id) const = 0;
   virtual uint32_t NextRetryTimeout() = 0;
 
   /**
@@ -193,13 +194,13 @@ class PolicyHandlerInterface {
                              const DeviceInfo& device_info) = 0;
 
 /**
-*@brief Processes data from OnAppPermissionConsent notification with
-*permissions changes and ExternalConsent status changes done by user
-*@param connection_key Connection key of application, 0 if no key has been
-*provided
-*@param permissions Groups permissions changes
-*@param external_consent_status Customer connectivity settings status changes
-*/
+ *@brief Processes data from OnAppPermissionConsent notification with
+ *permissions changes and ExternalConsent status changes done by user
+ *@param connection_key Connection key of application, 0 if no key has been
+ *provided
+ *@param permissions Groups permissions changes
+ *@param external_consent_status Customer connectivity settings status changes
+ */
 #ifdef EXTERNAL_PROPRIETARY_MODE
   virtual void OnAppPermissionConsent(
       const uint32_t connection_key,
@@ -437,6 +438,91 @@ class PolicyHandlerInterface {
    * @return Structure with vehicle information
    */
   virtual const VehicleInfo GetVehicleInfo() const = 0;
+
+  /**
+   * @brief Get a list of enabled cloud applications
+   * @param enabled_apps List filled with the policy app id of each enabled
+   * cloud application
+   */
+  virtual void GetEnabledCloudApps(
+      std::vector<std::string>& enabled_apps) const = 0;
+
+  /**
+   * @brief Checks if a given application is an enabled cloud application
+   * @param policy_app_id Unique application id
+   * @return true if the application is an enabled cloud application,
+   * false otherwise
+   */
+  virtual const bool CheckCloudAppEnabled(
+      const std::string& policy_app_id) const = 0;
+
+  /**
+   * @brief Get cloud app policy information, all fields that aren't set for a
+   * given app will be filled with empty strings
+   * @param policy_app_id Unique application id
+   * @param enabled Whether or not the app is enabled
+   * @param endpoint Filled with the endpoint used to connect to the cloud
+   * application
+   * @param certificate Filled with the certificate used to for creating a
+   * secure connection to the cloud application
+   * @param auth_token Filled with the token used for authentication when
+   * reconnecting to the cloud app
+   * @param cloud_transport_type Filled with the transport type used by the
+   * cloud application (ex. "WSS")
+   * @param hybrid_app_preference Filled with the hybrid app preference for the
+   * cloud application set by the user
+   */
+  virtual bool GetCloudAppParameters(
+      const std::string& policy_app_id,
+      bool& enabled,
+      std::string& endpoint,
+      std::string& certificate,
+      std::string& auth_token,
+      std::string& cloud_transport_type,
+      std::string& hybrid_app_preference) const = 0;
+
+  /**
+   * @brief Callback for when a SetCloudAppProperties message is received from a
+   * mobile app
+   * @param message The SetCloudAppProperties message
+   */
+  virtual void OnSetCloudAppProperties(
+      const smart_objects::SmartObject& message) = 0;
+
+  /**
+   * @brief Get app service parameters from the policy table
+   * @param policy_app_id Unique application id
+   * @param app_service_parameters Pointer to struct containing all app service
+   * information
+   */
+  virtual void GetAppServiceParameters(
+      const std::string& policy_app_id,
+      policy_table::AppServiceParameters* app_service_parameters) const = 0;
+
+  /**
+   * @brief Check app service parameters from an app against policies
+   * @param policy_app_id Unique application id
+   * @param requested_service_name Service name published by app service
+   * provider
+   * @param requested_service_type Service type published by app service
+   * provider
+   * @param requested_handled_rpcs Vector of requested function ids an app
+   * service wants to handle from consumers
+   */
+  virtual bool CheckAppServiceParameters(
+      const std::string& policy_app_id,
+      const std::string& requested_service_name,
+      const std::string& requested_service_type,
+      smart_objects::SmartArray* requested_handled_rpcs) const = 0;
+
+  /**
+   * @brief Check if an app can send unknown rpc requests to an app service
+   * provider
+   * @param policy_app_id Unique application id
+   */
+  virtual bool UnknownRPCPassthroughAllowed(
+      const std::string& policy_app_id) const = 0;
+
 #ifdef EXTERNAL_PROPRIETARY_MODE
   /**
    * @brief Gets meta information
@@ -540,14 +626,14 @@ class PolicyHandlerInterface {
  * @brief Processes data received via OnAppPermissionChanged notification
  * from. Being started asyncronously from AppPermissionDelegate class.
  * Sets updated permissions and ExternalConsent for registered applications
-*and
+ *and
  * applications which already have appropriate group assigned which related to
  * devices already known by policy
  * @param connection_key Connection key of application, 0 if no key has been
  * provided within notification
  * @param external_consent_status Customer connectivity settings changes to
-*process
-*@param permissions Permissions changes to process
+ *process
+ *@param permissions Permissions changes to process
  */
 #ifdef EXTERNAL_PROPRIETARY_MODE
   virtual void OnAppPermissionConsentInternal(

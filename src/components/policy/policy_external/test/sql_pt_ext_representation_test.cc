@@ -29,27 +29,27 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <vector>
-#include <map>
-#include <algorithm>
-#include <utility>
-#include <string>
-#include <iterator>
-#include <iostream>
-#include "gtest/gtest.h"
 #include "policy/sql_pt_ext_representation.h"
-#include "utils/gen_hash.h"
-#include "utils/file_system.h"
-#include "sqlite_wrapper/sql_query.h"
-#include "rpc_base/rpc_base.h"
-#include "policy/policy_table/types.h"
+#include <algorithm>
+#include <iostream>
+#include <iterator>
+#include <map>
+#include <string>
+#include <utility>
+#include <vector>
+#include "gtest/gtest.h"
 #include "policy/mock_policy_settings.h"
+#include "policy/policy_table/types.h"
+#include "rpc_base/rpc_base.h"
+#include "sqlite_wrapper/sql_query.h"
+#include "utils/file_system.h"
+#include "utils/gen_hash.h"
 
 using namespace ::policy;
 namespace policy_table = rpc::policy_table_interface_base;
-using std::string;
 using std::map;
 using std::pair;
+using std::string;
 using std::vector;
 using testing::ReturnRef;
 

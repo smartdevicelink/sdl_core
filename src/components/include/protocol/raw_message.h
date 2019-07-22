@@ -32,10 +32,10 @@
 #ifndef SRC_COMPONENTS_INCLUDE_PROTOCOL_RAW_MESSAGE_H_
 #define SRC_COMPONENTS_INCLUDE_PROTOCOL_RAW_MESSAGE_H_
 
-#include "utils/macro.h"
 #include <memory>
-#include "protocol/service_type.h"
 #include "protocol/message_priority.h"
+#include "protocol/service_type.h"
+#include "utils/macro.h"
 
 namespace protocol_handler {
 /**

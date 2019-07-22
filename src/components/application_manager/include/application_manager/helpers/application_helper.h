@@ -57,6 +57,18 @@ ApplicationSharedPtr FindApp(DataAccessor<ApplicationSet> accessor,
   return app;
 }
 
+template <class UnaryPredicate>
+ApplicationSharedPtr FindPendingApp(
+    DataAccessor<AppsWaitRegistrationSet> accessor, UnaryPredicate finder) {
+  AppsWaitRegistrationSet::iterator it = std::find_if(
+      accessor.GetData().begin(), accessor.GetData().end(), finder);
+  if (accessor.GetData().end() == it) {
+    return ApplicationSharedPtr();
+  }
+  ApplicationSharedPtr app = *it;
+  return app;
+}
+
 /**
  * Helper function for lookup through applications list and returning all
  * applications satisfying predicate logic

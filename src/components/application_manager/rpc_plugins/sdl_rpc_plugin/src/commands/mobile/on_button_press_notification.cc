@@ -80,9 +80,8 @@ void OnButtonPressNotification::Run() {
         (*message_)[strings::msg_params][strings::app_id].asUInt());
 
     // custom_button_id is mandatory for CUSTOM_BUTTON notification
-    if (false ==
-        (*message_)[strings::msg_params].keyExists(
-            hmi_response::custom_button_id)) {
+    if (false == (*message_)[strings::msg_params].keyExists(
+                     hmi_response::custom_button_id)) {
       LOG4CXX_ERROR(logger_,
                     "CUSTOM_BUTTON OnButtonPress without custom_button_id.");
       return;
@@ -196,4 +195,4 @@ void OnButtonPressNotification::SendButtonPress(ApplicationConstSharedPtr app) {
 
 }  // namespace commands
 
-}  // namespace application_manager
+}  // namespace sdl_rpc_plugin

@@ -96,6 +96,7 @@ def prepare_data_for_storage(major_version, minor_version, patch_version, minimu
     u'''*/\n'''
     u'''#ifndef GENERATED_MSG_VERSION_H\n'''
     u'''#define GENERATED_MSG_VERSION_H\n\n'''
+    u'''#include <cstdint>\n\n'''
     u'''namespace application_manager {\n\n'''
     u'''const uint16_t major_version = $m_version;\n'''
     u'''const uint16_t minor_version = $min_version;\n'''

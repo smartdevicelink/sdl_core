@@ -32,16 +32,16 @@
 
 #include <fstream>
 
-#include "json/reader.h"
-#include "gtest/gtest.h"
 #include <utility>
+#include "gtest/gtest.h"
+#include "json/reader.h"
 
 #include "policy/policy_manager_impl_test_base.h"
 
 using ::testing::_;
+using ::testing::AtLeast;
 using ::testing::Return;
 using ::testing::SetArgReferee;
-using ::testing::AtLeast;
 
 namespace test {
 namespace components {
@@ -343,6 +343,37 @@ TEST_F(PolicyManagerImplTest2, GetCurrentDeviceId) {
   // Arrange
   EXPECT_CALL(listener_, OnCurrentDeviceIdUpdateRequired(app_id_2_)).Times(1);
   EXPECT_EQ("", policy_manager_->GetCurrentDeviceId(app_id_2_));
+}
+
+TEST_F(PolicyManagerImplTest2, UpdateApplication_AppServices) {
+  // Arrange
+  std::string kServiceType = "MEDIA";
+  CreateLocalPT(preloaded_pt_filename_);
+  EXPECT_EQ("UP_TO_DATE", policy_manager_->GetPolicyTableStatus());
+  GetPTU("json/valid_sdl_pt_update.json");
+  EXPECT_EQ("UP_TO_DATE", policy_manager_->GetPolicyTableStatus());
+  // Try to add existing app
+  policy_table::AppServiceParameters app_service_parameters =
+      policy_table::AppServiceParameters();
+  policy_manager_->GetAppServiceParameters(app_id_2_, &app_service_parameters);
+
+  ASSERT_FALSE(app_service_parameters.find(kServiceType) ==
+               app_service_parameters.end());
+
+  auto service_names = *(app_service_parameters[kServiceType].service_names);
+
+  ASSERT_TRUE(service_names.is_initialized());
+  ASSERT_EQ(service_names.size(), 2u);
+  EXPECT_EQ(static_cast<std::string>(service_names[0]), "SDL App");
+  EXPECT_EQ(static_cast<std::string>(service_names[1]), "SDL Music");
+
+  auto handled_rpcs = app_service_parameters[kServiceType].handled_rpcs;
+
+  ASSERT_TRUE(handled_rpcs.is_initialized());
+  EXPECT_EQ(handled_rpcs[0].function_id, 41);
+
+  // Check no update required
+  EXPECT_EQ("UP_TO_DATE", policy_manager_->GetPolicyTableStatus());
 }
 
 TEST_F(
@@ -1120,6 +1151,6 @@ TEST_F(
   EXPECT_EQ(Boolean(false), updated_group_2->second);
 }
 
-}  // namespace policy
+}  // namespace policy_test
 }  // namespace components
 }  // namespace test

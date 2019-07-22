@@ -39,8 +39,8 @@
 #include <sys/usbdi.h>
 
 #include "transport_manager/transport_adapter/transport_adapter.h"
-#include "transport_manager/usb/usb_control_transfer.h"
 #include "transport_manager/usb/qnx/platform_usb_device.h"
+#include "transport_manager/usb/usb_control_transfer.h"
 
 namespace transport_manager {
 

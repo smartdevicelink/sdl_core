@@ -31,21 +31,21 @@
  */
 
 #include "application_manager/application_impl.h"
-#include <string>
 #include <strings.h>
-#include "application_manager/message_helper.h"
-#include "protocol_handler/protocol_handler.h"
+#include <string>
 #include "application_manager/application_manager.h"
+#include "application_manager/message_helper.h"
 #include "config_profile/profile.h"
 #include "interfaces/MOBILE_API.h"
+#include "protocol_handler/protocol_handler.h"
 #include "utils/file_system.h"
-#include "utils/logger.h"
 #include "utils/gen_hash.h"
+#include "utils/logger.h"
 
-#include "utils/timer_task_impl.h"
 #include "application_manager/policies/policy_handler_interface.h"
 #include "application_manager/resumption/resume_ctrl.h"
 #include "transport_manager/common.h"
+#include "utils/timer_task_impl.h"
 
 namespace {
 
@@ -849,8 +849,9 @@ bool ApplicationImpl::AreCommandLimitsExceeded(
                    "Time Info: "
                        << "\n Current: " << date_time::getSecs(current)
                        << "\n Limit: (" << date_time::getSecs(limit.first)
-                       << "," << limit.second << ")"
-                                                 "\n frequency_restrictions: ("
+                       << "," << limit.second
+                       << ")"
+                          "\n frequency_restrictions: ("
                        << frequency_restrictions.first << ","
                        << frequency_restrictions.second << ")");
       if (date_time::getSecs(current) <
@@ -964,7 +965,7 @@ void ApplicationImpl::CleanupFiles() {
       application_manager_.get_settings().app_storage_folder();
   directory_name += "/" + folder_name();
 
-  if (file_system::DirectoryExists(directory_name)) {
+  if (file_system::DirectoryExists(directory_name) && !folder_name().empty()) {
     std::vector<std::string> files = file_system::ListFiles(directory_name);
     AppFilesMap::const_iterator app_files_it;
 
@@ -1152,15 +1153,67 @@ bool ApplicationImpl::AddExtension(AppExtensionPtr extension) {
 
 bool ApplicationImpl::RemoveExtension(AppExtensionUID uid) {
   auto it = std::find_if(
-      extensions_.begin(),
-      extensions_.end(),
-      [uid](AppExtensionPtr extension) { return extension->uid() == uid; });
+      extensions_.begin(), extensions_.end(), [uid](AppExtensionPtr extension) {
+        return extension->uid() == uid;
+      });
 
   return it != extensions_.end();
 }
 
 const std::list<AppExtensionPtr>& ApplicationImpl::Extensions() const {
   return extensions_;
+}
+
+const std::string& ApplicationImpl::cloud_app_endpoint() const {
+  return endpoint_;
+}
+
+const std::string& ApplicationImpl::auth_token() const {
+  return auth_token_;
+}
+
+const std::string& ApplicationImpl::cloud_app_transport_type() const {
+  return cloud_transport_type_;
+}
+
+const mobile_apis::HybridAppPreference::eType&
+ApplicationImpl::hybrid_app_preference() const {
+  return hybrid_app_preference_;
+}
+
+const std::string& ApplicationImpl::cloud_app_certificate() const {
+  return certificate_;
+}
+
+bool ApplicationImpl::is_cloud_app() const {
+#if !defined(CLOUD_APP_WEBSOCKET_TRANSPORT_SUPPORT)
+  return false;
+#else
+  return !endpoint_.empty();
+#endif  // CLOUD_APP_WEBSOCKET_TRANSPORT_SUPPORT
+}
+
+void ApplicationImpl::set_cloud_app_endpoint(const std::string& endpoint) {
+  endpoint_ = endpoint;
+}
+
+void ApplicationImpl::set_auth_token(const std::string& auth_token) {
+  auth_token_ = auth_token;
+}
+
+void ApplicationImpl::set_cloud_app_transport_type(
+    const std::string& transport_type) {
+  cloud_transport_type_ = transport_type;
+}
+
+void ApplicationImpl::set_hybrid_app_preference(
+    const mobile_apis::HybridAppPreference::eType& hybrid_app_preference) {
+  hybrid_app_preference_ = hybrid_app_preference;
+}
+
+void ApplicationImpl::set_cloud_app_certificate(
+    const std::string& certificate) {
+  certificate_ = certificate;
 }
 
 void ApplicationImpl::PushMobileMessage(

@@ -104,8 +104,8 @@ class AppLaunchDataDB : public AppLaunchDataImpl {
   bool IsAppDataAlreadyExisted(const ApplicationData& app_data) const OVERRIDE;
 
   /**
-  * @brief returns pointer to data base
-  */
+   * @brief returns pointer to data base
+   */
   utils::dbms::SQLDatabase* db() const;
 
   enum ApplicationDataDBIndexes {
@@ -151,13 +151,13 @@ class AppLaunchDataDB : public AppLaunchDataImpl {
   bool WriteDb();
 
   /**
-  * @brief returns pointer to data base
-  */
+   * @brief returns pointer to data base
+   */
   std::unique_ptr<utils::dbms::SQLDatabase> db_;
 
   /**
-  * @brief indicate initializing status of DB
-  */
+   * @brief indicate initializing status of DB
+   */
   bool init_successeful_;
 
   DISALLOW_COPY_AND_ASSIGN(AppLaunchDataDB);

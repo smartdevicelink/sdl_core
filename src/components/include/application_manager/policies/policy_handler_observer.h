@@ -34,8 +34,8 @@
 #define SRC_COMPONENTS_INCLUDE_APPLICATION_MANAGER_POLICIES_POLICY_HANDLER_OBSERVER_H_
 
 #include <map>
-#include <vector>
 #include <string>
+#include <vector>
 
 namespace policy {
 
@@ -47,6 +47,9 @@ class PolicyHandlerObserver {
   virtual bool OnCertificateUpdated(const std::string& certificate_data) {
     return false;
   }
+
+  virtual void OnAuthTokenUpdated(const std::string& policy_app_id,
+                                  const std::string& auth_token) {}
 
   virtual void OnPTUFinished(const bool ptu_result) {}
 

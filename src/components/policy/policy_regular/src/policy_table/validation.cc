@@ -7,7 +7,7 @@ bool IsTypeInvalid(
     rpc::Enum<rpc::policy_table_interface_base::RequestType> request) {
   return !request.is_valid();
 }
-}
+}  // namespace
 
 namespace rpc {
 namespace policy_table_interface_base {
@@ -174,6 +174,14 @@ bool ApplicationParams::ValidateModuleTypes() const {
     ModuleTypes non_initialized;
     moduleType = Optional<ModuleTypes>(non_initialized);
   }
+  return true;
+}
+
+bool AppServiceHandledRpc::Validate() const {
+  return true;
+}
+
+bool AppServiceInfo::Validate() const {
   return true;
 }
 

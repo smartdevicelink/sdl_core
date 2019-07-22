@@ -33,9 +33,9 @@
 #ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_ADAPTER_TRANSPORT_ADAPTER_LISTENER_H_
 #define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_ADAPTER_TRANSPORT_ADAPTER_LISTENER_H_
 
+#include "protocol/common.h"
 #include "transport_manager/common.h"
 #include "transport_manager/error.h"
-#include "protocol/common.h"
 
 namespace transport_manager {
 namespace transport_adapter {
@@ -90,6 +90,25 @@ class TransportAdapterListener {
    */
   virtual void OnFindNewApplicationsRequest(
       const TransportAdapter* adapter) = 0;
+
+  /**
+   * @brief Reaction to connection status update
+   * @param adapter Current transport adapter
+   */
+  virtual void OnConnectionStatusUpdated(const TransportAdapter* adapter) = 0;
+
+  /**
+   * @brief Search specified device adapter in the container of shared pointers
+   * to device adapters to be sure it is available,
+   * launch event ON_CONNECT_PENDING in transport manager.
+   *
+   * @param device_adater Pointer to the device adapter.
+   * @param device_handle Device unique identifier.
+   * @param app_id Handle of application.
+   */
+  virtual void OnConnectPending(const TransportAdapter* adapter,
+                                const DeviceUID& device_handle,
+                                const ApplicationHandle& app_id) = 0;
 
   /**
    * @brief Search specified device adapter in the container of shared pointers
@@ -288,6 +307,6 @@ class TransportAdapterListener {
       const TransportAdapter* transport_adapter) = 0;
 };
 
-}  // transport_adapter namespace
-}  // transport_manager namespace
+}  // namespace transport_adapter
+}  // namespace transport_manager
 #endif  // SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_ADAPTER_TRANSPORT_ADAPTER_LISTENER_H_

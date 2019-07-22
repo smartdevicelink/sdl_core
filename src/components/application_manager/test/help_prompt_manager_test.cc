@@ -136,10 +136,12 @@ class HelpPromptManagerTest : public ::testing::Test {
   typedef CommandsTest<CommandsTestMocks::kIsNice>::MockAppManager
       MockAppManager;
   MockAppManager app_mngr_;
+  // put this before ApplicationImplTest instance, so that app_mngr_settings_
+  // will still exist during app_impl_'s destructor.
+  NiceMock<MockApplicationManagerSettings> app_mngr_settings_;
   std::shared_ptr<ApplicationImplTest> app_impl_;
   MockHmiInterfaces mock_hmi_interfaces_;
   NiceMock<event_engine_test::MockEventDispatcher> mock_event_dispatcher_;
-  NiceMock<MockApplicationManagerSettings> app_mngr_settings_;
   std::shared_ptr<application_manager_test::MockApplication> mock_app_;
   sync_primitives::Lock app_lock_;
   MockRPCService mock_rpc_service_;
@@ -174,11 +176,6 @@ void HelpPromptManagerTest::SetUp() {
 
   mock_help_prompt_manager_ =
       std::shared_ptr<MockHelpPromptManager>(new MockHelpPromptManager());
-
-  HmiStatePtr state = std::make_shared<HmiState>(
-      static_cast<std::shared_ptr<Application> >(mock_app_),
-      app_mngr_,
-      HmiState::STATE_ID_REGULAR);
 
   std::string path = file_system::CreateDirectory("storage");
   file_system::CreateFile(path + "/" + "certificate");

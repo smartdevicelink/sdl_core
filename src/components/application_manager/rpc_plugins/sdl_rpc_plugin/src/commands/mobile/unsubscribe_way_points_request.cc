@@ -30,8 +30,8 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "application_manager/application_manager.h"
 #include "sdl_rpc_plugin/commands/mobile/unsubscribe_way_points_request.h"
+#include "application_manager/application_manager.h"
 #include "application_manager/message_helper.h"
 
 namespace sdl_rpc_plugin {
@@ -71,9 +71,20 @@ void UnsubscribeWayPointsRequest::Run() {
     return;
   }
 
-  StartAwaitForInterface(HmiInterfaces::HMI_INTERFACE_Navigation);
-  SendHMIRequest(
-      hmi_apis::FunctionID::Navigation_UnsubscribeWayPoints, NULL, true);
+  std::set<uint32_t> subscribed_apps =
+      application_manager_.GetAppsSubscribedForWayPoints();
+
+  if (subscribed_apps.size() > 1) {
+    // More than 1 subscribed app, don't send HMI unsubscribe request
+    application_manager_.UnsubscribeAppFromWayPoints(app);
+    SendResponse(true, mobile_apis::Result::SUCCESS, NULL);
+    return;
+  } else {
+    // Only subscribed app, send HMI unsubscribe request
+    StartAwaitForInterface(HmiInterfaces::HMI_INTERFACE_Navigation);
+    SendHMIRequest(
+        hmi_apis::FunctionID::Navigation_UnsubscribeWayPoints, NULL, true);
+  }
 }
 
 void UnsubscribeWayPointsRequest::on_event(const event_engine::Event& event) {
@@ -114,4 +125,4 @@ bool UnsubscribeWayPointsRequest::Init() {
 
 }  // namespace commands
 
-}  // namespace application_manager
+}  // namespace sdl_rpc_plugin

@@ -30,19 +30,19 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "gtest/gtest.h"
 #include "telemetry_monitor/telemetry_monitor.h"
-#include "protocol_handler/telemetry_observer.h"
-#include "protocol_handler/protocol_handler.h"
-#include "protocol_handler//mock_protocol_handler.h"
-#include "protocol_handler/mock_session_observer.h"
-#include "protocol_handler/mock_protocol_handler_settings.h"
 #include "connection_handler/mock_connection_handler.h"
-#include "transport_manager/mock_transport_manager.h"
+#include "gtest/gtest.h"
+#include "protocol_handler//mock_protocol_handler.h"
+#include "protocol_handler/mock_protocol_handler_settings.h"
+#include "protocol_handler/mock_session_observer.h"
+#include "protocol_handler/protocol_handler.h"
+#include "protocol_handler/telemetry_observer.h"
 #include "telemetry_monitor/mock_telemetry_observable.h"
+#include "transport_manager/mock_transport_manager.h"
 
-using testing::Return;
 using testing::_;
+using testing::Return;
 
 namespace test {
 namespace components {

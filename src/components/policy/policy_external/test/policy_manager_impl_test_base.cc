@@ -30,17 +30,17 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <string>
-#include <fstream>
 #include <stdint.h>
+#include <fstream>
+#include <string>
 #include <vector>
 
 #include "policy/policy_manager_impl_test_base.h"
 
 #include "utils/file_system.h"
 
-#include "utils/gen_hash.h"
 #include "json/reader.h"
+#include "utils/gen_hash.h"
 
 #include "policy/mock_pt_ext_representation.h"
 
@@ -48,10 +48,10 @@ namespace test {
 namespace components {
 namespace policy_test {
 
+using ::testing::_;
+using ::testing::ContainerEq;
 using ::testing::Return;
 using ::testing::ReturnRef;
-using ::testing::ContainerEq;
-using ::testing::_;
 
 // Help functions
 char GenRandomChar(char range_from, char range_to) {

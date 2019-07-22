@@ -35,9 +35,9 @@
 
 #include <map>
 
-#include "utils/macro.h"
-#include "utils/lock.h"
 #include "rc_rpc_plugin/interior_data_cache.h"
+#include "utils/lock.h"
+#include "utils/macro.h"
 
 namespace rc_rpc_plugin {
 class InteriorDataCacheImpl : public InteriorDataCache {
@@ -59,6 +59,6 @@ class InteriorDataCacheImpl : public InteriorDataCache {
   mutable sync_primitives::Lock cached_data_lock_;
 };
 
-}  // rc_rpc_plugin
+}  // namespace rc_rpc_plugin
 
 #endif  // SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_RC_RPC_PLUGIN_INCLUDE_RC_RPC_PLUGIN_INTERIOR_DATA_CACHE_IMPL_H_

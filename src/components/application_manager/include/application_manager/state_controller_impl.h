@@ -35,15 +35,15 @@
 
 #include <list>
 #include <map>
-#include "application_manager/hmi_state.h"
 #include "application_manager/application.h"
 #include "application_manager/application_manager.h"
-#include "event_engine/event_observer.h"
-#include "application_manager/state_controller.h"
+#include "application_manager/hmi_state.h"
 #include "application_manager/message_helper.h"
+#include "application_manager/state_controller.h"
+#include "event_engine/event_observer.h"
 #include "interfaces/MOBILE_API.h"
-#include "utils/lock.h"
 #include "utils/helpers.h"
+#include "utils/lock.h"
 
 namespace application_manager {
 
@@ -144,6 +144,7 @@ class StateControllerImpl : public event_engine::EventObserver,
 
   // EventObserver interface
   void on_event(const event_engine::Event& event);
+  void on_event(const event_engine::MobileEvent& event);
 
   /**
    * @brief Sets default application state and apply currently active HMI states
@@ -185,9 +186,9 @@ class StateControllerImpl : public event_engine::EventObserver,
   virtual bool IsStateActive(HmiState::StateID state_id) const;
 
  private:
-  int64_t SendBCActivateApp(ApplicationConstSharedPtr app,
-                            hmi_apis::Common_HMILevel::eType level,
-                            bool send_policy_priority);
+  int64_t RequestHMIStateChange(ApplicationConstSharedPtr app,
+                                hmi_apis::Common_HMILevel::eType level,
+                                bool send_policy_priority);
   /**
    * @brief The HmiLevelConflictResolver struct
    * Move other application to HmiStates if applied moved to FULL or LIMITED
@@ -377,10 +378,11 @@ class StateControllerImpl : public event_engine::EventObserver,
       const mobile_apis::VideoStreamingState::eType video_state);
 
   /**
-   * @brief OnActivateAppResponse calback for activate app response
+   * @brief OnHMIResponse callback for activate app or close application
+   * response
    * @param message Smart Object
    */
-  void OnActivateAppResponse(const smart_objects::SmartObject& message);
+  void OnHMIResponse(const smart_objects::SmartObject& message);
 
   /**
    * @brief OnAppDeactivated callback for OnAppDeactivated notification
@@ -448,9 +450,9 @@ class StateControllerImpl : public event_engine::EventObserver,
   typedef std::list<HmiState::StateID> StateIDList;
   StateIDList active_states_;
   mutable sync_primitives::Lock active_states_lock_;
-  std::map<uint32_t, HmiStatePtr> waiting_for_activate_;
+  std::map<uint32_t, HmiStatePtr> waiting_for_response_;
   ApplicationManager& app_mngr_;
 };
-}
+}  // namespace application_manager
 
 #endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_STATE_CONTROLLER_IMPL_H_

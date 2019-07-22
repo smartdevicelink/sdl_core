@@ -30,8 +30,8 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "rc_rpc_plugin/rc_module_constants.h"
 #include "rc_rpc_plugin/commands/hmi/rc_on_interior_vehicle_data_notification.h"
+#include "rc_rpc_plugin/rc_module_constants.h"
 #include "utils/macro.h"
 
 namespace rc_rpc_plugin {
@@ -54,8 +54,9 @@ void RCOnInteriorVehicleDataNotification::Run() {
   (*message_)[app_mngr::strings::params][app_mngr::strings::function_id] =
       static_cast<int>(mobile_apis::FunctionID::eType::OnInteriorVehicleDataID);
 
-  smart_objects::SmartObject& module_data = (*message_)
-      [application_manager::strings::msg_params][message_params::kModuleData];
+  smart_objects::SmartObject& module_data =
+      (*message_)[application_manager::strings::msg_params]
+                 [message_params::kModuleData];
   if (module_data.keyExists(rc_rpc_plugin::message_params::kAudioControlData)) {
     smart_objects::SmartObject& audio_control_data =
         module_data[message_params::kAudioControlData];

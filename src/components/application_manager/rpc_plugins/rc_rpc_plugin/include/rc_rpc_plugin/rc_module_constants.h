@@ -58,7 +58,7 @@ const char kRGBColorSpaceAvailable[] = "rgbColorSpaceAvailable";
 
 // RadioControlCapabilities
 const char kSiriusxmRadioAvailable[] = "siriusxmRadioAvailable";
-}  //  strings
+}  // namespace strings
 
 namespace result_codes {
 const char kSuccess[] = "SUCCESS";
@@ -84,7 +84,7 @@ const char kWrongLanguage[] = "WRONG_LANGUAGE";
 const char kGenericError[] = "GENERIC_ERROR";
 const char kUserDisallowed[] = "USER_DISALLOWED";
 const char kReadOnly[] = "READ_ONLY";
-}  //  result_codes
+}  // namespace result_codes
 
 namespace json_keys {
 const char kParams[] = "params";
@@ -100,7 +100,7 @@ const char kMessage[] = "message";
 const char kData[] = "data";
 const char kAppId[] = "appID";
 const char kCode[] = "code";
-}  //  json_keys
+}  // namespace json_keys
 
 namespace message_params {
 const char kName[] = "name";
@@ -152,6 +152,7 @@ const char kBand[] = "band";
 const char kRdsData[] = "rdsData";
 const char kHdRadioEnable[] = "hdRadioEnable";
 const char kAvailableHDs[] = "availableHDs";
+const char kAvailableHdChannels[] = "availableHdChannels";
 const char kHdChannel[] = "hdChannel";
 const char kSignalStrength[] = "signalStrength";
 const char kSignalChangeThreshold[] = "signalChangeThreshold";
@@ -176,6 +177,8 @@ const char kHeatedSteeringWheelEnable[] = "heatedSteeringWheelEnable";
 const char kHeatedWindshieldEnable[] = "heatedWindshieldEnable";
 const char kHeatedRearWindowEnable[] = "heatedRearWindowEnable";
 const char kHeatedMirrorsEnable[] = "heatedMirrorsEnable";
+const char kClimateEnable[] = "climateEnable";
+const char kClimateEnableAvailable[] = "climateEnableAvailable";
 // ClimateControlData struct
 
 // LightControlData
@@ -274,6 +277,6 @@ const char kAskDriver[] = "ASK_DRIVER";
 
 }  //  namespace enums_value
 
-}  //  namespace remote_control
+}  // namespace rc_rpc_plugin
 
 #endif  // SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_RC_RPC_PLUGIN_INCLUDE_RC_RPC_PLUGIN_RC_MODULE_CONSTANTS_H_

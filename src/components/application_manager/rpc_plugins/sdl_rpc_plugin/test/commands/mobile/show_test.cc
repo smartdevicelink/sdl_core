@@ -32,19 +32,19 @@
 
 #include <stdint.h>
 #include <memory>
-#include <string>
 #include <set>
+#include <string>
 
 #include "mobile/show_request.h"
 
-#include "gtest/gtest.h"
 #include "application_manager/commands/command_request_test.h"
+#include "application_manager/event_engine/event.h"
 #include "application_manager/mock_application.h"
 #include "application_manager/mock_application_manager.h"
-#include "application_manager/mock_message_helper.h"
-#include "application_manager/event_engine/event.h"
 #include "application_manager/mock_hmi_interface.h"
+#include "application_manager/mock_message_helper.h"
 #include "application_manager/policies/mock_policy_handler_interface.h"
+#include "gtest/gtest.h"
 
 namespace test {
 namespace components {
@@ -53,10 +53,10 @@ namespace mobile_commands_test {
 namespace show_request {
 
 namespace am = application_manager;
-using sdl_rpc_plugin::commands::ShowRequest;
+using am::MockMessageHelper;
 using am::commands::CommandImpl;
 using am::commands::MessageSharedPtr;
-using am::MockMessageHelper;
+using sdl_rpc_plugin::commands::ShowRequest;
 using test::components::policy_test::MockPolicyHandlerInterface;
 using ::testing::_;
 using ::testing::Return;
@@ -125,7 +125,7 @@ class ShowRequestTest : public CommandRequestTest<CommandsTestMocks::kIsNice> {
         static_cast<int32_t>(field_name);
     msg_params[am::hmi_request::show_strings][0][am::hmi_request::field_text] =
         text_field_;
-    EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_));
+    EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_, _));
     EXPECT_CALL(*mock_app_, set_show_command(msg_params));
   }
 
@@ -143,7 +143,7 @@ class ShowRequestTest : public CommandRequestTest<CommandsTestMocks::kIsNice> {
     EXPECT_CALL(mock_rpc_service_, ManageMobileCommand(_, _));
     EXPECT_CALL(*mock_app_, app_id()).Times(0);
 
-    EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_)).Times(0);
+    EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_, _)).Times(0);
     EXPECT_CALL(*mock_app_, set_show_command(_)).Times(0);
   }
 
@@ -196,7 +196,7 @@ class ShowRequestTest : public CommandRequestTest<CommandsTestMocks::kIsNice> {
       }
     }
 
-    EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_));
+    EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_, _));
     EXPECT_CALL(*mock_app_, set_show_command(msg_params));
   }
 
@@ -272,7 +272,7 @@ TEST_F(ShowRequestTest, Run_SoftButtonExists_SUCCESS) {
   EXPECT_CALL(
       mock_message_helper_,
       SubscribeApplicationToSoftButton(creation_msg_params, _, kFunctionID));
-  EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_));
+  EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_, _));
   EXPECT_CALL(*mock_app_, set_show_command(msg_params));
 
   command->Run();
@@ -296,7 +296,7 @@ TEST_F(ShowRequestTest, Run_SoftButtonNotExists_SUCCESS) {
       smart_objects::SmartObject(smart_objects::SmartType_Array);
 
   EXPECT_CALL(*mock_app_, UnsubscribeFromSoftButtons(kFunctionID));
-  EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_));
+  EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_, _));
   EXPECT_CALL(*mock_app_, set_show_command(msg_params));
 
   command->Run();
@@ -321,7 +321,7 @@ TEST_F(ShowRequestTest, Run_SoftButtonExists_Canceled) {
 
   EXPECT_CALL(mock_message_helper_, SubscribeApplicationToSoftButton(_, _, _))
       .Times(0);
-  EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_)).Times(0);
+  EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_, _)).Times(0);
   EXPECT_CALL(*mock_app_, set_show_command(_)).Times(0);
 
   command->Run();
@@ -348,7 +348,7 @@ TEST_F(ShowRequestTest, Run_Graphic_SUCCESS) {
   msg_params[am::hmi_request::show_strings] =
       smart_objects::SmartObject(smart_objects::SmartType_Array);
 
-  EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_));
+  EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_, _));
   EXPECT_CALL(*mock_app_, set_show_command(msg_params));
 
   command->Run();
@@ -375,7 +375,7 @@ TEST_F(ShowRequestTest, Run_Graphic_WARNINGS) {
   msg_params[am::hmi_request::show_strings] =
       smart_objects::SmartObject(smart_objects::SmartType_Array);
 
-  EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_));
+  EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_, _));
   EXPECT_CALL(*mock_app_, set_show_command(msg_params));
 
   command->Run();
@@ -398,7 +398,7 @@ TEST_F(ShowRequestTest, Run_Graphic_Canceled) {
       .WillOnce(Return(mobile_apis::Result::INVALID_DATA));
   EXPECT_CALL(mock_rpc_service_, ManageMobileCommand(_, _));
   EXPECT_CALL(*mock_app_, app_id()).Times(0);
-  EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_)).Times(0);
+  EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_, _)).Times(0);
   EXPECT_CALL(*mock_app_, set_show_command(msg_params)).Times(0);
 
   command->Run();
@@ -421,7 +421,7 @@ TEST_F(ShowRequestTest, Run_Graphic_WrongSyntax) {
   EXPECT_CALL(mock_rpc_service_, ManageMobileCommand(_, _));
   EXPECT_CALL(*mock_app_, app_id()).Times(0);
 
-  EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_)).Times(0);
+  EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_, _)).Times(0);
   EXPECT_CALL(*mock_app_, set_show_command(msg_params)).Times(0);
 
   command->Run();
@@ -447,7 +447,7 @@ TEST_F(ShowRequestTest, Run_SecondaryGraphic_SUCCESS) {
   msg_params[am::strings::app_id] = kAppId;
   msg_params[am::hmi_request::show_strings] =
       smart_objects::SmartObject(smart_objects::SmartType_Array);
-  EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_));
+  EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_, _));
   EXPECT_CALL(*mock_app_, set_show_command(msg_params));
 
   command->Run();
@@ -473,7 +473,7 @@ TEST_F(ShowRequestTest, Run_SecondaryGraphic_WARNINGS) {
   msg_params[am::strings::app_id] = kAppId;
   msg_params[am::hmi_request::show_strings] =
       smart_objects::SmartObject(smart_objects::SmartType_Array);
-  EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_));
+  EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_, _));
   EXPECT_CALL(*mock_app_, set_show_command(msg_params));
 
   command->Run();
@@ -497,7 +497,7 @@ TEST_F(ShowRequestTest, Run_SecondaryGraphic_Canceled) {
   EXPECT_CALL(mock_rpc_service_, ManageMobileCommand(_, _));
   EXPECT_CALL(*mock_app_, app_id()).Times(0);
 
-  EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_)).Times(0);
+  EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_, _)).Times(0);
   EXPECT_CALL(*mock_app_, set_show_command(msg_params)).Times(0);
 
   command->Run();
@@ -520,7 +520,7 @@ TEST_F(ShowRequestTest, Run_SecondaryGraphic_WrongSyntax) {
   EXPECT_CALL(mock_rpc_service_, ManageMobileCommand(_, _));
   EXPECT_CALL(*mock_app_, app_id()).Times(0);
 
-  EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_)).Times(0);
+  EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_, _)).Times(0);
   EXPECT_CALL(*mock_app_, set_show_command(msg_params)).Times(0);
 
   command->Run();
@@ -836,7 +836,7 @@ TEST_F(ShowRequestTest, Run_Alignment_SUCCESS) {
   msg_params[am::hmi_request::show_strings] =
       smart_objects::SmartObject(smart_objects::SmartType_Array);
 
-  EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_));
+  EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_, _));
   EXPECT_CALL(*mock_app_, set_show_command(msg_params));
 
   command->Run();
@@ -859,7 +859,7 @@ TEST_F(ShowRequestTest, Run_CustomPresets_SUCCESS) {
   msg_params[am::strings::app_id] = kAppId;
   msg_params[am::hmi_request::show_strings] =
       smart_objects::SmartObject(smart_objects::SmartType_Array);
-  EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_));
+  EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_, _));
   EXPECT_CALL(*mock_app_, set_show_command(msg_params));
 
   command->Run();
@@ -880,7 +880,7 @@ TEST_F(ShowRequestTest, Run_CustomPresets_WrongSyntax) {
   EXPECT_CALL(mock_rpc_service_, ManageMobileCommand(_, _));
   EXPECT_CALL(*mock_app_, app_id()).Times(0);
 
-  EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_)).Times(0);
+  EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_, _)).Times(0);
   EXPECT_CALL(*mock_app_, set_show_command(_)).Times(0);
 
   command->Run();
@@ -895,7 +895,7 @@ TEST_F(ShowRequestTest, Run_InvalidApp_Canceled) {
       .WillOnce(Return(MockAppPtr()));
   EXPECT_CALL(mock_rpc_service_, ManageMobileCommand(_, _));
   EXPECT_CALL(*mock_app_, app_id()).Times(0);
-  EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_)).Times(0);
+  EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_, _)).Times(0);
   EXPECT_CALL(*mock_app_, set_show_command(_)).Times(0);
 
   command->Run();
@@ -910,7 +910,7 @@ TEST_F(ShowRequestTest, Run_EmptyParams_Canceled) {
       .WillOnce(Return(mock_app_));
   EXPECT_CALL(mock_rpc_service_, ManageMobileCommand(_, _));
   EXPECT_CALL(*mock_app_, app_id()).Times(0);
-  EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_)).Times(0);
+  EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_, _)).Times(0);
   EXPECT_CALL(*mock_app_, set_show_command(_)).Times(0);
 
   command->Run();
@@ -971,4 +971,4 @@ TEST_F(ShowRequestTest, OnEvent_WrongFunctionID_Canceled) {
 }  // namespace mobile_commands_test
 }  // namespace commands_test
 }  // namespace components
-}  // namespace tests
+}  // namespace test

@@ -30,9 +30,9 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "gtest/gtest.h"
 #include "formatters/meta_formatter.h"
 #include "formatters/meta_formatter_test_helper.h"
+#include "gtest/gtest.h"
 
 namespace test {
 namespace components {
@@ -44,7 +44,8 @@ TEST_F(CMetaFormatterTestHelper,
   Json::Reader reader;
   CSmartFactory<FunctionIDTest::eType,
                 MessageTypeTest::eType,
-                StructIdentifiers::eType> factory_;
+                StructIdentifiers::eType>
+      factory_;
 
   SmartObject object1 = factory_.CreateSmartObject(
       FunctionIDTest::RegisterAppInterface, MessageTypeTest::request);

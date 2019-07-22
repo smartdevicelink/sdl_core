@@ -44,7 +44,8 @@ EventObserver::EventObserver(EventDispatcher& event_dispatcher)
 }
 
 EventObserver::~EventObserver() {
-  unsubscribe_from_all_events();
+  unsubscribe_from_all_hmi_events();
+  unsubscribe_from_all_mobile_events();
 }
 
 void EventObserver::subscribe_on_event(const Event::EventID& event_id,
@@ -59,6 +60,26 @@ void EventObserver::unsubscribe_from_event(const Event::EventID& event_id) {
 void EventObserver::unsubscribe_from_all_events() {
   event_dispatcher_.remove_observer(*this);
 }
+
+void EventObserver::unsubscribe_from_all_hmi_events() {
+  event_dispatcher_.remove_observer(*this);
+}
+
+void EventObserver::subscribe_on_event(
+    const MobileEvent::MobileEventID& event_id, int32_t mobile_correlation_id) {
+  event_dispatcher_.add_mobile_observer(event_id, mobile_correlation_id, *this);
+}
+
+void EventObserver::unsubscribe_from_event(
+    const MobileEvent::MobileEventID& event_id) {
+  event_dispatcher_.remove_mobile_observer(event_id, *this);
+}
+
+void EventObserver::unsubscribe_from_all_mobile_events() {
+  event_dispatcher_.remove_mobile_observer(*this);
+}
+
+void EventObserver::on_event(const event_engine::MobileEvent& event) {}
 
 }  // namespace event_engine
 }  // namespace application_manager

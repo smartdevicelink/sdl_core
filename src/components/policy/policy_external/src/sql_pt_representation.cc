@@ -30,24 +30,24 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <sstream>
-#include <stdlib.h>
-#include <stdint.h>
 #include <errno.h>
+#include <stdint.h>
+#include <stdlib.h>
 #include <unistd.h>
+#include <sstream>
 
-#include "utils/logger.h"
-#include "utils/date_time.h"
-#include "utils/sqlite_wrapper/sql_database.h"
-#include "utils/file_system.h"
-#include "utils/gen_hash.h"
-#include "policy/sql_pt_representation.h"
-#include "policy/sql_wrapper.h"
+#include "config_profile/profile.h"
+#include "policy/cache_manager.h"
+#include "policy/policy_helper.h"
 #include "policy/sql_pt_ext_queries.h"
 #include "policy/sql_pt_queries.h"
-#include "policy/policy_helper.h"
-#include "policy/cache_manager.h"
-#include "config_profile/profile.h"
+#include "policy/sql_pt_representation.h"
+#include "policy/sql_wrapper.h"
+#include "utils/date_time.h"
+#include "utils/file_system.h"
+#include "utils/gen_hash.h"
+#include "utils/logger.h"
+#include "utils/sqlite_wrapper/sql_database.h"
 
 namespace policy {
 
@@ -130,9 +130,9 @@ void SQLPTRepresentation::CheckPermissions(const PTString& app_id,
   utils::dbms::SQLQuery query(db());
 
   if (!query.Prepare(sql_pt::kSelectRpc)) {
-    LOG4CXX_WARN(logger_,
-                 "Incorrect select statement from rpcs"
-                     << query.LastError().text());
+    LOG4CXX_WARN(
+        logger_,
+        "Incorrect select statement from rpcs" << query.LastError().text());
     return;
   }
   query.Bind(0, app_id);
@@ -408,9 +408,9 @@ InitResult SQLPTRepresentation::Init(const PolicySettings* settings) {
             utils::dbms::SQLQuery check_first_run(db());
             if (check_first_run.Prepare(sql_pt::kIsFirstRun) &&
                 check_first_run.Next()) {
-              LOG4CXX_INFO(logger_,
-                           "Selecting is first run "
-                               << check_first_run.GetBoolean(0));
+              LOG4CXX_INFO(
+                  logger_,
+                  "Selecting is first run " << check_first_run.GetBoolean(0));
               if (check_first_run.GetBoolean(0)) {
                 utils::dbms::SQLQuery set_not_first_run(db());
                 set_not_first_run.Exec(sql_pt::kSetNotFirstRun);
@@ -761,6 +761,24 @@ bool SQLPTRepresentation::GatherApplicationPoliciesSection(
     *params.memory_kb = query.GetInteger(2);
     *params.heart_beat_timeout_ms = query.GetUInteger(3);
 
+    if (!query.IsNull(4)) {
+      *params.certificate = query.GetString(4);
+    }
+
+    // Read cloud app properties
+    policy_table::HybridAppPreference hap;
+    bool valid = policy_table::EnumFromJsonString(query.GetString(5), &hap);
+    if (valid) {
+      *params.hybrid_app_preference = hap;
+    }
+    *params.endpoint = query.GetString(6);
+    if (!query.IsNull(7)) {
+      *params.enabled = query.GetBoolean(7);
+    }
+    *params.auth_token = query.GetString(8);
+    *params.cloud_transport_type = query.GetString(9);
+    *params.icon_url = query.GetString(10);
+    *params.allow_unknown_rpc_passthrough = query.GetBoolean(11);
     const auto& gather_app_id = ((*policies).apps[app_id].is_string())
                                     ? (*policies).apps[app_id].get_string()
                                     : app_id;
@@ -791,6 +809,10 @@ bool SQLPTRepresentation::GatherApplicationPoliciesSection(
       return false;
     }
     if (!GatherRequestSubType(gather_app_id, &*params.RequestSubType)) {
+      return false;
+    }
+    if (!GatherAppServiceParameters(gather_app_id,
+                                    &*params.app_service_parameters)) {
       return false;
     }
 
@@ -984,6 +1006,21 @@ bool SQLPTRepresentation::SaveApplicationPoliciesSection(
     return false;
   }
 
+  if (!query_delete.Exec(sql_pt::kDeleteAppServiceHandledRpcs)) {
+    LOG4CXX_WARN(logger_, "Incorrect delete from handled rpcs.");
+    return false;
+  }
+
+  if (!query_delete.Exec(sql_pt::kDeleteAppServiceNames)) {
+    LOG4CXX_WARN(logger_, "Incorrect delete from service names.");
+    return false;
+  }
+
+  if (!query_delete.Exec(sql_pt::kDeleteAppServiceTypes)) {
+    LOG4CXX_WARN(logger_, "Incorrect delete from handled service types.");
+    return false;
+  }
+
   // All predefined apps (e.g. default, pre_DataConsent) should be saved first,
   // otherwise another app with the predefined permissions can get incorrect
   // permissions
@@ -1035,6 +1072,30 @@ bool SQLPTRepresentation::SaveSpecificAppPolicy(
   app_query.Bind(2, app.second.is_null());
   app_query.Bind(3, *app.second.memory_kb);
   app_query.Bind(4, static_cast<int64_t>(*app.second.heart_beat_timeout_ms));
+  app.second.certificate.is_initialized()
+      ? app_query.Bind(5, *app.second.certificate)
+      : app_query.Bind(5);
+  app.second.hybrid_app_preference.is_initialized()
+      ? app_query.Bind(6,
+                       std::string(policy_table::EnumToJsonString(
+                           *app.second.hybrid_app_preference)))
+      : app_query.Bind(6);
+  app.second.endpoint.is_initialized() ? app_query.Bind(7, *app.second.endpoint)
+                                       : app_query.Bind(7);
+  app.second.enabled.is_initialized() ? app_query.Bind(8, *app.second.enabled)
+                                      : app_query.Bind(8);
+  app.second.auth_token.is_initialized()
+      ? app_query.Bind(9, *app.second.auth_token)
+      : app_query.Bind(9);
+  app.second.cloud_transport_type.is_initialized()
+      ? app_query.Bind(10, *app.second.cloud_transport_type)
+      : app_query.Bind(10);
+  app.second.icon_url.is_initialized()
+      ? app_query.Bind(11, *app.second.icon_url)
+      : app_query.Bind(11);
+  app.second.allow_unknown_rpc_passthrough.is_initialized()
+      ? app_query.Bind(12, *app.second.allow_unknown_rpc_passthrough)
+      : app_query.Bind(12);
 
   if (!app_query.Exec() || !app_query.Reset()) {
     LOG4CXX_WARN(logger_, "Incorrect insert into application.");
@@ -1069,6 +1130,10 @@ bool SQLPTRepresentation::SaveSpecificAppPolicy(
   }
 
   if (!SaveRequestType(app.first, *app.second.RequestType)) {
+    return false;
+  }
+  if (!SaveAppServiceParameters(app.first,
+                                *app.second.app_service_parameters)) {
     return false;
   }
 
@@ -1118,9 +1183,9 @@ bool SQLPTRepresentation::SaveAppGroup(
     query.Bind(0, app_id);
     query.Bind(1, *it);
     if (!query.Exec() || !query.Reset()) {
-      LOG4CXX_WARN(logger_,
-                   "Incorrect insert into app group."
-                       << query.LastError().text());
+      LOG4CXX_WARN(
+          logger_,
+          "Incorrect insert into app group." << query.LastError().text());
       return false;
     }
   }
@@ -1230,6 +1295,85 @@ bool SQLPTRepresentation::SaveRequestSubType(
     if (!query.Exec() || !query.Reset()) {
       LOG4CXX_WARN(logger_, "Incorrect insert into request subtypes.");
       return false;
+    }
+  }
+  return true;
+}
+
+bool SQLPTRepresentation::SaveAppServiceParameters(
+    const std::string& app_id,
+    const policy_table::AppServiceParameters& app_service_parameters) {
+  LOG4CXX_INFO(logger_, "Save app service parameters");
+  utils::dbms::SQLQuery query(db());
+
+  if (!query.Prepare(sql_pt::kInsertAppServiceTypes)) {
+    LOG4CXX_WARN(logger_, "Incorrect insert statement for app service types");
+    return false;
+  }
+  policy_table::AppServiceParameters::const_iterator it;
+  for (it = app_service_parameters.begin(); it != app_service_parameters.end();
+       ++it) {
+    // Create service type id from hashing app_id and service_type
+    std::string str_to_hash = std::string(app_id + it->first);
+    const long int id = abs(CacheManager::GenerateHash(str_to_hash));
+    query.Bind(0, static_cast<int64_t>(id));
+    query.Bind(1, it->first);
+    query.Bind(2, app_id);
+    if (!query.Exec() || !query.Reset()) {
+      LOG4CXX_WARN(logger_, "Insert execute failed for into app service types");
+      return false;
+    }
+
+    // Insert app names array into db
+    utils::dbms::SQLQuery service_name_query(db());
+    if (!service_name_query.Prepare(sql_pt::kInsertAppServiceNames)) {
+      LOG4CXX_WARN(logger_, "Incorrect insert statement for app service names");
+      return false;
+    }
+
+    auto app_service_names = it->second.service_names;
+
+    if (app_service_names.is_initialized() && app_service_names->empty()) {
+      // App service names is an empty array
+      LOG4CXX_DEBUG(logger_, "App Service Names is Empty Array");
+      service_name_query.Bind(0, static_cast<int64_t>(id));
+      service_name_query.Bind(1);
+      if (!service_name_query.Exec() || !service_name_query.Reset()) {
+        LOG4CXX_WARN(logger_, "Incorrect insert into empty app service names");
+        return false;
+      }
+    } else {
+      policy_table::AppServiceNames::const_iterator names_it;
+      for (names_it = app_service_names->begin();
+           names_it != app_service_names->end();
+           ++names_it) {
+        service_name_query.Bind(0, static_cast<int64_t>(id));
+        service_name_query.Bind(1, *names_it);
+        if (!service_name_query.Exec() || !service_name_query.Reset()) {
+          LOG4CXX_WARN(logger_, "Incorrect insert into app service names");
+          return false;
+        }
+      }
+    }
+
+    // Insert handled rpcs array into db
+    utils::dbms::SQLQuery handled_rpcs_query(db());
+    if (!handled_rpcs_query.Prepare(sql_pt::kInsertAppServiceHandledRpcs)) {
+      LOG4CXX_WARN(logger_,
+                   "Incorrect insert statement for app service handled rpcs");
+      return false;
+    }
+
+    auto handled_rpcs = it->second.handled_rpcs;
+    policy_table::AppServiceHandledRpcs::const_iterator rpc_it;
+    for (rpc_it = handled_rpcs.begin(); rpc_it != handled_rpcs.end();
+         ++rpc_it) {
+      handled_rpcs_query.Bind(0, static_cast<int64_t>(id));
+      handled_rpcs_query.Bind(1, static_cast<int32_t>(rpc_it->function_id));
+      if (!handled_rpcs_query.Exec() || !handled_rpcs_query.Reset()) {
+        LOG4CXX_WARN(logger_, "Incorrect insert into app service handled rpcs");
+        return false;
+      }
     }
   }
   return true;
@@ -1661,6 +1805,63 @@ bool SQLPTRepresentation::GatherRequestSubType(
   return true;
 }
 
+bool SQLPTRepresentation::GatherAppServiceParameters(
+    const std::string& app_id,
+    policy_table::AppServiceParameters* app_service_parameters) const {
+  LOG4CXX_INFO(logger_, "Gather app service info");
+  utils::dbms::SQLQuery service_type_query(db());
+  if (!service_type_query.Prepare(sql_pt::kSelectAppServiceTypes)) {
+    LOG4CXX_WARN(logger_, "Incorrect select from service_types");
+    return false;
+  }
+
+  utils::dbms::SQLQuery service_name_query(db());
+  if (!service_name_query.Prepare(sql_pt::kSelectAppServiceNames)) {
+    LOG4CXX_WARN(logger_, "Incorrect select all from app_service_names");
+    return false;
+  }
+
+  utils::dbms::SQLQuery handled_rpcs_query(db());
+  if (!handled_rpcs_query.Prepare(sql_pt::kSelectAppServiceHandledRpcs)) {
+    LOG4CXX_WARN(logger_, "Incorrect select all from app_service_handled_rpcs");
+    return false;
+  }
+
+  service_type_query.Bind(0, app_id);
+  while (service_type_query.Next()) {
+    const int service_type_id = service_type_query.GetInteger(0);
+    std::string service_type = service_type_query.GetString(1);
+    (*app_service_parameters)[service_type] = policy_table::AppServiceInfo();
+
+    service_name_query.Bind(0, service_type_id);
+    while (service_name_query.Next()) {
+      LOG4CXX_DEBUG(logger_, "Loading service name");
+      (*app_service_parameters)[service_type].service_names->push_back(
+          service_name_query.GetString(0));
+      (*app_service_parameters)[service_type].service_names->mark_initialized();
+    }
+
+    handled_rpcs_query.Bind(0, service_type_id);
+    while (handled_rpcs_query.Next()) {
+      policy_table::AppServiceHandledRpc handled_rpc;
+      handled_rpc.function_id = handled_rpcs_query.GetInteger(0);
+      (*app_service_parameters)[service_type].handled_rpcs.push_back(
+          handled_rpc);
+    }
+
+    if (!service_name_query.Reset()) {
+      LOG4CXX_ERROR(logger_, "Could not reset service_name query");
+      return false;
+    }
+    if (!handled_rpcs_query.Reset()) {
+      LOG4CXX_ERROR(logger_, "Could not reset handled_rpcs query");
+      return false;
+    }
+  }
+
+  return true;
+}
+
 bool SQLPTRepresentation::GatherNickName(
     const std::string& app_id, policy_table::Strings* nicknames) const {
   utils::dbms::SQLQuery query(db());
@@ -2006,6 +2207,12 @@ bool SQLPTRepresentation::SetDefaultPolicy(const std::string& app_id) {
     return false;
   }
 
+  policy_table::AppServiceParameters app_service_parameters;
+  if (!GatherAppServiceParameters(kDefaultId, &app_service_parameters) ||
+      !SaveAppServiceParameters(app_id, app_service_parameters)) {
+    return false;
+  }
+
   policy_table::Strings default_groups;
   bool ret = (GatherAppGroup(kDefaultId, &default_groups) &&
               SaveAppGroup(app_id, default_groups));
@@ -2107,7 +2314,7 @@ bool SQLPTRepresentation::CopyApplication(const std::string& source,
 
   utils::dbms::SQLQuery query(db());
   if (!query.Prepare(sql_pt::kInsertApplicationFull)) {
-    LOG4CXX_WARN(logger_, "Incorrect insert statement into application.");
+    LOG4CXX_WARN(logger_, "Incorrect insert statement into application full.");
     return false;
   }
   query.Bind(0, destination);
@@ -2125,6 +2332,22 @@ bool SQLPTRepresentation::CopyApplication(const std::string& source,
                        : query.Bind(7, source_app.GetBoolean(6));
   query.Bind(8, source_app.GetInteger(7));
   query.Bind(9, source_app.GetInteger(8));
+  source_app.IsNull(9) ? query.Bind(10)
+                       : query.Bind(10, source_app.GetString(9));
+  source_app.IsNull(10) ? query.Bind(11)
+                        : query.Bind(11, source_app.GetString(10));
+  source_app.IsNull(11) ? query.Bind(12)
+                        : query.Bind(12, source_app.GetString(11));
+  source_app.IsNull(12) ? query.Bind(13)
+                        : query.Bind(13, source_app.GetBoolean(12));
+  source_app.IsNull(13) ? query.Bind(14)
+                        : query.Bind(14, source_app.GetString(13));
+  source_app.IsNull(14) ? query.Bind(15)
+                        : query.Bind(15, source_app.GetString(14));
+  source_app.IsNull(15) ? query.Bind(16)
+                        : query.Bind(16, source_app.GetString(15));
+  source_app.IsNull(16) ? query.Bind(17)
+                        : query.Bind(17, source_app.GetBoolean(16));
 
   if (!query.Exec()) {
     LOG4CXX_WARN(logger_, "Failed inserting into application.");

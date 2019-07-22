@@ -37,8 +37,8 @@
 #include <sched.h>
 #include <cstring>
 
-#include "transport_manager/usb/qnx/usb_connection.h"
 #include "transport_manager/transport_adapter/transport_adapter_impl.h"
+#include "transport_manager/usb/qnx/usb_connection.h"
 
 #include "utils/logger.h"
 

@@ -33,8 +33,8 @@
 
 #include "sdl_rpc_plugin/commands/mobile/set_display_layout_request.h"
 
-#include "application_manager/message_helper.h"
 #include "application_manager/application_impl.h"
+#include "application_manager/message_helper.h"
 
 namespace sdl_rpc_plugin {
 using namespace application_manager;
@@ -145,9 +145,9 @@ void SetDisplayLayoutRequest::on_event(const event_engine::Event& event) {
 
         // in case templates_available is empty copy from hmi capabilities
         if (msg_params.keyExists(hmi_response::display_capabilities)) {
-          if (0 ==
-              msg_params[hmi_response::display_capabilities]
-                        [hmi_response::templates_available].length()) {
+          if (0 == msg_params[hmi_response::display_capabilities]
+                             [hmi_response::templates_available]
+                                 .length()) {
             msg_params[hmi_response::display_capabilities]
                       [hmi_response::templates_available] =
                           hmi_capabilities.display_capabilities()->getElement(
@@ -170,4 +170,4 @@ void SetDisplayLayoutRequest::on_event(const event_engine::Event& event) {
 
 }  // namespace commands
 
-}  // namespace application_manager
+}  // namespace sdl_rpc_plugin

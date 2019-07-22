@@ -49,18 +49,18 @@ class RCRPCPlugin;
 class RCHelpers {
  public:
   /**
-  * @brief GetModuleTypeToDataMapping get mapping of module type enum naming to
-  * actual module data filed name
-  * @return module mapping from enum naming to filed name
-  */
+   * @brief GetModuleTypeToDataMapping get mapping of module type enum naming to
+   * actual module data filed name
+   * @return module mapping from enum naming to filed name
+   */
   static const std::function<std::string(const std::string& module_type)>
   GetModuleTypeToDataMapping();
 
   /**
-  * @brief GetModuleTypeToDataMapping get mapping of module type enum naming to
-  * actual module capabilities key
-  * @return module mapping from enum naming to capabilities key
-  */
+   * @brief GetModuleTypeToDataMapping get mapping of module type enum naming to
+   * actual module capabilities key
+   * @return module mapping from enum naming to capabilities key
+   */
   static const std::function<std::string(const std::string& module_type)>
   GetModuleTypeToCapabilitiesMapping();
 
@@ -87,10 +87,20 @@ class RCHelpers {
                              const std::string& module_type);
 
   typedef std::map<application_manager::ApplicationSharedPtr,
-                   std::vector<std::string> > AppsModules;
+                   std::vector<std::string> >
+      AppsModules;
   static AppsModules GetApplicationsAllowedModules(
       application_manager::ApplicationManager& app_mngr);
+
+  /**
+   * @brief RemoveRedundantGPSDataFromVIDataMsg removes redundant GPS data
+   * params from interior vehicle data response message if one contains radio
+   * station location data
+   * @param msg_params Params of the interior vehicle data response message
+   */
+  static void RemoveRedundantGPSDataFromIVDataMsg(
+      smart_objects::SmartObject& msg_params);
 };
 
-}  // rc_rpc_plugin
+}  // namespace rc_rpc_plugin
 #endif  // SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_RC_RPC_PLUGIN_INCLUDE_RC_RPC_PLUGIN_RC_HELPERS_H_

@@ -33,8 +33,8 @@
 #ifndef SRC_COMPONENTS_RPC_BASE_INCLUDE_RPC_BASE_RPC_BASE_JSON_INL_H_
 #define SRC_COMPONENTS_RPC_BASE_INCLUDE_RPC_BASE_RPC_BASE_JSON_INL_H_
 
-#include "rpc_base/rpc_base.h"
 #include "json/value.h"
+#include "rpc_base/rpc_base.h"
 
 namespace rpc {
 
@@ -206,6 +206,7 @@ String<minlen, maxlen>::String(const Json::Value* value,
   if (!is_initialized()) {
     value_state_ = kValid;
   } else if (is_valid()) {
+    value_ = value->asString();
     value_state_ = length_range_.Includes(value_.length()) ? kValid : kInvalid;
   }
 }

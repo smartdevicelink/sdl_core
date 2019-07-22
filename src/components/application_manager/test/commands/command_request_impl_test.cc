@@ -31,25 +31,28 @@
  */
 
 #include <stdint.h>
-#include <string>
 #include <algorithm>
+#include <string>
 
-#include "gtest/gtest.h"
 #include "application_manager/commands/command_impl.h"
 #include "application_manager/commands/command_request_impl.h"
-#include "application_manager/commands/commands_test.h"
 #include "application_manager/commands/command_request_test.h"
+#include "application_manager/commands/commands_test.h"
+#include "gtest/gtest.h"
 #include "utils/lock.h"
 
-#include "utils/data_accessor.h"
-#include "smart_objects/smart_object.h"
-#include "application_manager/smart_object_keys.h"
 #include "application_manager/application_manager.h"
-#include "application_manager/mock_application.h"
 #include "application_manager/event_engine/event.h"
-#include "application_manager/mock_message_helper.h"
+#include "application_manager/mock_application.h"
 #include "application_manager/mock_hmi_interface.h"
+#include "application_manager/mock_message_helper.h"
+#include "application_manager/smart_object_keys.h"
 #include "interfaces/MOBILE_API.h"
+#include "smart_objects/smart_object.h"
+#include "utils/data_accessor.h"
+
+#include "application_manager/mock_app_service_manager.h"
+#include "resumption/last_state_impl.h"
 
 namespace test {
 namespace components {
@@ -61,19 +64,21 @@ namespace strings = am::strings;
 namespace hmi_response = am::hmi_response;
 
 using ::testing::_;
+using ::testing::DoAll;
 using ::testing::Return;
 using ::testing::SaveArg;
-using ::testing::DoAll;
+using ::testing::SetArgReferee;
 
-using am::commands::MessageSharedPtr;
-using am::CommandParametersPermissions;
-using am::event_engine::EventObserver;
-using am::commands::CommandImpl;
-using am::commands::CommandRequestImpl;
 using am::ApplicationManager;
 using am::ApplicationSet;
-using am::RPCParams;
+using am::CommandParametersPermissions;
 using am::MockHmiInterfaces;
+using am::RPCParams;
+using am::commands::CommandImpl;
+using am::commands::CommandRequestImpl;
+using am::commands::MessageSharedPtr;
+using am::event_engine::EventObserver;
+using test::components::application_manager_test::MockAppServiceManager;
 
 typedef am::commands::CommandRequestImpl::RequestState RequestState;
 
@@ -100,10 +105,10 @@ class CommandRequestImplTest
 
   class UnwrappedCommandRequestImpl : public CommandRequestImpl {
    public:
-    using CommandRequestImpl::CheckAllowedParameters;
-    using CommandRequestImpl::RemoveDisallowedParameters;
     using CommandRequestImpl::AddDisallowedParameters;
+    using CommandRequestImpl::CheckAllowedParameters;
     using CommandRequestImpl::HasDisallowedParams;
+    using CommandRequestImpl::RemoveDisallowedParameters;
 
     UnwrappedCommandRequestImpl(const MessageSharedPtr& message,
                                 ApplicationManager& am,
@@ -258,7 +263,7 @@ TEST_F(CommandRequestImplTest, CreateHMINotification_SUCCESS) {
 
   MessageSharedPtr result;
 
-  EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_))
+  EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_, _))
       .WillOnce(DoAll(SaveArg<0>(&result), Return(true)));
 
   command->CreateHMINotification(kInvalidFunctionId, *msg_params);
@@ -280,7 +285,7 @@ TEST_F(CommandRequestImplTest, SendHMIRequest_NoUseEvent_SUCCESS) {
       .WillRepeatedly(Return(am::HmiInterfaces::STATE_AVAILABLE));
   // Return `true` prevents call of `SendResponse` method;
 
-  EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_)).WillOnce(Return(true));
+  EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_, _)).WillOnce(Return(true));
 
   EXPECT_EQ(kCorrelationId,
             command->SendHMIRequest(kInvalidFunctionId, NULL, false));
@@ -298,7 +303,7 @@ TEST_F(CommandRequestImplTest, SendHMIRequest_UseEvent_SUCCESS) {
       .WillRepeatedly(Return(am::HmiInterfaces::STATE_AVAILABLE));
   // Return `true` prevents call of `SendResponse` method;
 
-  EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_)).WillOnce(Return(true));
+  EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_, _)).WillOnce(Return(true));
   EXPECT_CALL(event_dispatcher_, add_observer(_, _, _));
 
   EXPECT_EQ(kCorrelationId,
@@ -583,6 +588,87 @@ TEST_F(CommandRequestImplTest, AppNotFound_HashUpdateNotExpected) {
   EXPECT_CALL(*mock_app, UpdateHash()).Times(0);
 
   command.reset();
+}
+
+TEST_F(CommandRequestImplTest, SendProviderRequest_ByServiceType) {
+  resumption::LastStateImpl last_state("app_storage_folder",
+                                       "app_info_storage");
+  MockAppServiceManager app_service_manager(app_mngr_, last_state);
+  MockAppPtr mock_app = CreateMockApp();
+  EXPECT_CALL(app_mngr_, GetAppServiceManager())
+      .WillRepeatedly(ReturnRef(app_service_manager));
+  EXPECT_CALL(app_service_manager, GetProviderByType("MEDIA", _, _, _))
+      .WillOnce(DoAll(SetArgReferee<2>(mock_app), SetArgReferee<3>(false)));
+
+  MessageSharedPtr result;
+  EXPECT_CALL(mock_rpc_service_, ManageMobileCommand(_, _))
+      .WillOnce(DoAll(SaveArg<0>(&result), Return(true)));
+
+  MessageSharedPtr msg = CreateMessage();
+  (*msg)[strings::params][strings::function_id] =
+      mobile_apis::FunctionID::GetAppServiceDataID;
+  (*msg)[strings::msg_params][strings::service_type] = "MEDIA";
+
+  CommandPtr command = CreateCommand<UCommandRequestImpl>(msg);
+  command->SendProviderRequest(
+      mobile_apis::FunctionID::GetAppServiceDataID,
+      hmi_apis::FunctionID::AppService_GetAppServiceData,
+      &(*msg),
+      true);
+}
+
+TEST_F(CommandRequestImplTest, SendProviderRequest_ByProviderID) {
+  resumption::LastStateImpl last_state("app_storage_folder",
+                                       "app_info_storage");
+  MockAppServiceManager app_service_manager(app_mngr_, last_state);
+  MockAppPtr mock_app = CreateMockApp();
+  EXPECT_CALL(app_mngr_, GetAppServiceManager())
+      .WillRepeatedly(ReturnRef(app_service_manager));
+  EXPECT_CALL(app_service_manager, GetProviderByID("serviceid12345", _, _, _))
+      .WillOnce(DoAll(SetArgReferee<2>(mock_app), SetArgReferee<3>(false)));
+
+  MessageSharedPtr result;
+  EXPECT_CALL(mock_rpc_service_, ManageMobileCommand(_, _))
+      .WillOnce(DoAll(SaveArg<0>(&result), Return(true)));
+
+  MessageSharedPtr msg = CreateMessage();
+  (*msg)[strings::params][strings::function_id] =
+      mobile_apis::FunctionID::GetAppServiceDataID;
+  (*msg)[strings::msg_params][strings::service_id] = "serviceid12345";
+
+  CommandPtr command = CreateCommand<UCommandRequestImpl>(msg);
+  command->SendProviderRequest(
+      mobile_apis::FunctionID::GetAppServiceDataID,
+      hmi_apis::FunctionID::AppService_GetAppServiceData,
+      &(*msg),
+      true);
+}
+
+TEST_F(CommandRequestImplTest, SendProviderRequestToHMI_ByProviderID) {
+  resumption::LastStateImpl last_state("app_storage_folder",
+                                       "app_info_storage");
+  MockAppServiceManager app_service_manager(app_mngr_, last_state);
+  MockAppPtr mock_app = CreateMockApp();
+  EXPECT_CALL(app_mngr_, GetAppServiceManager())
+      .WillRepeatedly(ReturnRef(app_service_manager));
+  EXPECT_CALL(app_service_manager, GetProviderByID("serviceid12345", _, _, _))
+      .WillOnce(DoAll(SetArgReferee<2>(mock_app), SetArgReferee<3>(true)));
+
+  MessageSharedPtr result;
+  EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_, _))
+      .WillOnce(DoAll(SaveArg<0>(&result), Return(true)));
+
+  MessageSharedPtr msg = CreateMessage();
+  (*msg)[strings::params][strings::function_id] =
+      mobile_apis::FunctionID::GetAppServiceDataID;
+  (*msg)[strings::msg_params][strings::service_id] = "serviceid12345";
+
+  CommandPtr command = CreateCommand<UCommandRequestImpl>(msg);
+  command->SendProviderRequest(
+      mobile_apis::FunctionID::GetAppServiceDataID,
+      hmi_apis::FunctionID::AppService_GetAppServiceData,
+      &(*msg),
+      true);
 }
 
 }  // namespace command_request_impl

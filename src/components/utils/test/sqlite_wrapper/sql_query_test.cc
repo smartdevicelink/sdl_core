@@ -29,17 +29,17 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <string>
 #include <sqlite3.h>
+#include <string>
 
 #include "gtest/gtest.h"
 
-#include "utils/sqlite_wrapper/sql_error.h"
 #include "utils/sqlite_wrapper/sql_database.h"
+#include "utils/sqlite_wrapper/sql_error.h"
 #include "utils/sqlite_wrapper/sql_query.h"
 
-using ::utils::dbms::SQLError;
 using ::utils::dbms::SQLDatabase;
+using ::utils::dbms::SQLError;
 using ::utils::dbms::SQLQuery;
 
 namespace test {

@@ -32,14 +32,13 @@
 
 #include <string>
 
-#include "gtest/gtest.h"
-#include "mobile/on_system_request_notification.h"
+#include "application_manager/commands/command_impl.h"
+#include "application_manager/commands/commands_test.h"
 #include "application_manager/mock_message_helper.h"
 #include "application_manager/policies/mock_policy_handler_interface.h"
-#include "application_manager/mock_message_helper.h"
-#include "application_manager/commands/commands_test.h"
-#include "application_manager/commands/command_impl.h"
+#include "gtest/gtest.h"
 #include "interfaces/MOBILE_API.h"
+#include "mobile/on_system_request_notification.h"
 
 namespace test {
 namespace components {
@@ -49,16 +48,16 @@ namespace on_system_request_notification {
 
 namespace strings = application_manager::strings;
 
-using sdl_rpc_plugin::commands::mobile::OnSystemRequestNotification;
-using application_manager::commands::CommandImpl;
 using application_manager::MockMessageHelper;
+using application_manager::commands::CommandImpl;
+using sdl_rpc_plugin::commands::mobile::OnSystemRequestNotification;
 using test::components::policy_test::MockPolicyHandlerInterface;
 using namespace mobile_apis;
-using testing::SaveArg;
+using testing::_;
 using testing::Mock;
 using testing::Return;
 using testing::ReturnRef;
-using testing::_;
+using testing::SaveArg;
 
 namespace {
 const uint32_t kConnectionKey = 1u;

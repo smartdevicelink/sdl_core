@@ -78,4 +78,4 @@ void LastStateImpl::LoadStateFromFileSystem() {
   LOG4CXX_WARN(logger_, "No valid last state was found.");
 }
 
-}  // resumption
+}  // namespace resumption

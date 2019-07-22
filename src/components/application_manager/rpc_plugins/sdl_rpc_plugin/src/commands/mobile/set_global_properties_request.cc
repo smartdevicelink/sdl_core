@@ -30,14 +30,14 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <string.h>
-#include <numeric>
-#include <algorithm>
 #include "sdl_rpc_plugin/commands/mobile/set_global_properties_request.h"
+#include <string.h>
+#include <algorithm>
+#include <numeric>
 
 #include "application_manager/message_helper.h"
-#include "interfaces/MOBILE_API.h"
 #include "interfaces/HMI_API.h"
+#include "interfaces/MOBILE_API.h"
 #include "utils/helpers.h"
 
 namespace sdl_rpc_plugin {
@@ -74,9 +74,9 @@ void SetGlobalPropertiesRequest::Run() {
   ApplicationSharedPtr app = application_manager_.application(connection_key());
 
   if (!app) {
-    LOG4CXX_ERROR(logger_,
-                  "No application associated with connection key "
-                      << connection_key());
+    LOG4CXX_ERROR(
+        logger_,
+        "No application associated with connection key " << connection_key());
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     return;
   }
@@ -197,9 +197,9 @@ void SetGlobalPropertiesRequest::Run() {
           MessageHelper::VerifyTtsFiles(help_prompt, app, application_manager_);
 
       if (mobile_apis::Result::FILE_NOT_FOUND == verification_result) {
-        LOG4CXX_ERROR(logger_,
-                      "MessageHelper::VerifyTtsFiles return "
-                          << verification_result);
+        LOG4CXX_ERROR(
+            logger_,
+            "MessageHelper::VerifyTtsFiles return " << verification_result);
         invalid_params.push_back("help_prompt");
       } else {
         app->set_help_prompt(help_prompt);
@@ -215,9 +215,9 @@ void SetGlobalPropertiesRequest::Run() {
               timeout_prompt, app, application_manager_);
 
       if (mobile_apis::Result::FILE_NOT_FOUND == verification_result) {
-        LOG4CXX_ERROR(logger_,
-                      "MessageHelper::VerifyTtsFiles return "
-                          << verification_result);
+        LOG4CXX_ERROR(
+            logger_,
+            "MessageHelper::VerifyTtsFiles return " << verification_result);
         invalid_params.push_back("timeout_prompt");
       } else {
         app->set_timeout_prompt(timeout_prompt);
@@ -531,7 +531,8 @@ bool SetGlobalPropertiesRequest::IsWhiteSpaceExist() {
             strings::limited_character_list)) {
       const smart_objects::SmartArray* lcl_array =
           msg_params[strings::keyboard_properties]
-                    [strings::limited_character_list].asArray();
+                    [strings::limited_character_list]
+                        .asArray();
 
       smart_objects::SmartArray::const_iterator it_lcl = lcl_array->begin();
       smart_objects::SmartArray::const_iterator it_lcl_end = lcl_array->end();
@@ -565,4 +566,4 @@ bool SetGlobalPropertiesRequest::IsWhiteSpaceExist() {
 }
 
 }  // namespace commands
-}  // namespace application_manager
+}  // namespace sdl_rpc_plugin

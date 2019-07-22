@@ -30,20 +30,20 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <string>
 #include <memory>
+#include <string>
 
 #include "gtest/gtest.h"
-#include "utils/byte_order.h"
 #include "protocol/common.h"
 #include "security_manager/security_manager_impl.h"
+#include "utils/byte_order.h"
 
 #include "protocol_handler/mock_protocol_handler.h"
 #include "protocol_handler/mock_session_observer.h"
-#include "security_manager/mock_security_manager.h"
-#include "security_manager/mock_ssl_context.h"
 #include "security_manager/mock_crypto_manager.h"
+#include "security_manager/mock_security_manager.h"
 #include "security_manager/mock_security_manager_listener.h"
+#include "security_manager/mock_ssl_context.h"
 #include "utils/mock_system_time_handler.h"
 
 #include "utils/test_async_waiter.h"
@@ -52,28 +52,28 @@ namespace test {
 namespace components {
 namespace security_manager_test {
 
-using protocol_handler::PROTOCOL_VERSION_2;
-using protocol_handler::ServiceType;
-using protocol_handler::kControl;
-using protocol_handler::kRpc;
 using protocol_handler::kAudio;
-using protocol_handler::kMobileNav;
 using protocol_handler::kBulk;
+using protocol_handler::kControl;
 using protocol_handler::kInvalidServiceType;
-using protocol_handler::RawMessagePtr;
+using protocol_handler::kMobileNav;
+using protocol_handler::kRpc;
+using protocol_handler::PROTOCOL_VERSION_2;
 using protocol_handler::RawMessage;
+using protocol_handler::RawMessagePtr;
+using protocol_handler::ServiceType;
 
-using security_manager::SecurityQuery;
-using security_manager::SSLContext;
 using security_manager::SecurityManager;
 using security_manager::SecurityManagerImpl;
+using security_manager::SecurityQuery;
+using security_manager::SSLContext;
 
 using security_manager_test::InternalErrorWithErrId;
+using ::testing::_;
+using ::testing::DoAll;
 using ::testing::Return;
 using ::testing::ReturnNull;
-using ::testing::DoAll;
 using ::testing::SetArgPointee;
-using ::testing::_;
 
 namespace {
 // Sample data for handshake data emulation
@@ -92,7 +92,7 @@ uint8_t* handshake_data_out_pointer = handshake_data_out;
 const size_t handshake_data_out_size =
     sizeof(handshake_data_out) / sizeof(handshake_data_out[0]);
 const uint32_t kAsyncExpectationsTimeout = 10000u;
-}
+}  // namespace
 
 class SecurityManagerTest : public ::testing::Test {
  protected:
@@ -104,8 +104,9 @@ class SecurityManagerTest : public ::testing::Test {
   void SetUp() OVERRIDE {
     security_manager_->set_session_observer(&mock_session_observer);
     security_manager_->set_protocol_handler(&mock_protocol_handler);
-    mock_sm_listener.reset(new testing::StrictMock<
-        security_manager_test::MockSecurityManagerListener>());
+    mock_sm_listener.reset(
+        new testing::StrictMock<
+            security_manager_test::MockSecurityManagerListener>());
     security_manager_->AddListener(mock_sm_listener.get());
   }
 
@@ -170,8 +171,9 @@ class SecurityManagerTest : public ::testing::Test {
       mock_ssl_context_new;
   testing::StrictMock<security_manager_test::MockSSLContext>
       mock_ssl_context_exists;
-  std::unique_ptr<testing::StrictMock<
-      security_manager_test::MockSecurityManagerListener> > mock_sm_listener;
+  std::unique_ptr<
+      testing::StrictMock<security_manager_test::MockSecurityManagerListener> >
+      mock_sm_listener;
   std::unique_ptr<MockSystemTimeHandler> mock_system_time_handler;
   std::shared_ptr<SecurityManagerImpl> security_manager_;
 };
@@ -290,7 +292,8 @@ TEST_F(SecurityManagerTest, SecurityManager_NULLCryptoManager) {
   EXPECT_CALL(mock_protocol_handler,
               SendMessageToMobileApp(
                   InternalErrorWithErrId(SecurityManager::ERROR_NOT_SUPPORTED),
-                  kIsFinal)).WillOnce(NotifyTestAsyncWaiter(&waiter));
+                  kIsFinal))
+      .WillOnce(NotifyTestAsyncWaiter(&waiter));
   const SecurityQuery::QueryHeader header(SecurityQuery::REQUEST,
                                           // It could be any query id
                                           SecurityQuery::INVALID_QUERY_ID);
@@ -385,7 +388,8 @@ TEST_F(SecurityManagerTest, GetInvalidQueryId) {
       mock_protocol_handler,
       SendMessageToMobileApp(
           InternalErrorWithErrId(SecurityManager::ERROR_INVALID_QUERY_ID),
-          kIsFinal)).WillOnce(NotifyTestAsyncWaiter(&waiter));
+          kIsFinal))
+      .WillOnce(NotifyTestAsyncWaiter(&waiter));
   times++;
   const SecurityQuery::QueryHeader header(SecurityQuery::REQUEST,
                                           SecurityQuery::INVALID_QUERY_ID);
@@ -575,7 +579,8 @@ TEST_F(SecurityManagerTest, ProccessHandshakeData_WrongDataSize) {
       mock_protocol_handler,
       SendMessageToMobileApp(
           InternalErrorWithErrId(SecurityManager::ERROR_INVALID_QUERY_SIZE),
-          kIsFinal)).WillOnce(NotifyTestAsyncWaiter(&waiter));
+          kIsFinal))
+      .WillOnce(NotifyTestAsyncWaiter(&waiter));
 
   EmulateMobileMessageHandshake(NULL, 0);
 
@@ -606,7 +611,8 @@ TEST_F(SecurityManagerTest,
       mock_protocol_handler,
       SendMessageToMobileApp(
           InternalErrorWithErrId(SecurityManager::ERROR_SERVICE_NOT_PROTECTED),
-          kIsFinal)).WillOnce(NotifyTestAsyncWaiter(&waiter));
+          kIsFinal))
+      .WillOnce(NotifyTestAsyncWaiter(&waiter));
   times++;
 
   // Expect notifying listeners (unsuccess)

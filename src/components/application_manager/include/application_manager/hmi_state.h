@@ -48,11 +48,11 @@ class Application;
 typedef std::shared_ptr<HmiState> HmiStatePtr;
 
 /**
-* @brief The HmiState class
-*  Handle Hmi state of application (hmi level,
-*  audio streaming state, system context)
-*
-*/
+ * @brief The HmiState class
+ *  Handle Hmi state of application (hmi level,
+ *  audio streaming state, system context)
+ *
+ */
 class HmiState {
   friend std::ostream& operator<<(std::ostream& os, const HmiState& src);
 
@@ -207,7 +207,7 @@ class HmiState {
   }
 
  protected:
-  std::shared_ptr<Application> app_;
+  uint32_t hmi_app_id_;
   StateID state_id_;
   const ApplicationManager& app_mngr_;
   HmiStatePtr parent_;

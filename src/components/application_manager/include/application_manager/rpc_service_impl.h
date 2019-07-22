@@ -34,24 +34,24 @@
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_RPC_SERVICE_IMPL_H
 
 #include "application_manager/application_manager.h"
-#include "application_manager/rpc_service.h"
-#include "application_manager/request_controller.h"
-#include "application_manager/message_helper.h"
-#include "application_manager/usage_statistics.h"
-#include "application_manager/mobile_message_handler.h"
 #include "application_manager/command_holder_impl.h"
+#include "application_manager/message_helper.h"
+#include "application_manager/mobile_message_handler.h"
+#include "application_manager/request_controller.h"
+#include "application_manager/rpc_service.h"
+#include "application_manager/usage_statistics.h"
 
-#include "formatters/formatter_json_rpc.h"
-#include "formatters/CFormatterJsonSDLRPCv2.h"
 #include "formatters/CFormatterJsonSDLRPCv1.h"
+#include "formatters/CFormatterJsonSDLRPCv2.h"
+#include "formatters/formatter_json_rpc.h"
 #include "interfaces/HMI_API_schema.h"
 #include "interfaces/MOBILE_API_schema.h"
 
 #include "interfaces/v4_protocol_v1_2_no_extra.h"
 #include "interfaces/v4_protocol_v1_2_no_extra_schema.h"
 
-#include "utils/threads/message_loop_thread.h"
 #include "utils/logger.h"
+#include "utils/threads/message_loop_thread.h"
 
 namespace application_manager {
 namespace rpc_service {
@@ -85,7 +85,7 @@ typedef threads::MessageLoopThread<utils::PrioritizedQueue<MessageToMobile> >
     ToMobileQueue;
 typedef threads::MessageLoopThread<utils::PrioritizedQueue<MessageToHmi> >
     ToHmiQueue;
-}
+}  // namespace impl
 
 class RPCServiceImpl : public RPCService,
                        public impl::ToMobileQueue::Handler,
@@ -108,7 +108,9 @@ class RPCServiceImpl : public RPCService,
 
   bool ManageMobileCommand(const commands::MessageSharedPtr message,
                            commands::Command::CommandSource source) OVERRIDE;
-  bool ManageHMICommand(const commands::MessageSharedPtr message) OVERRIDE;
+  bool ManageHMICommand(const commands::MessageSharedPtr message,
+                        commands::Command::CommandSource source =
+                            commands::Command::SOURCE_HMI) OVERRIDE;
 
   // CALLED ON messages_to_hmi_ thread!
   void Handle(const impl::MessageToHmi message) OVERRIDE;
@@ -119,6 +121,9 @@ class RPCServiceImpl : public RPCService,
                            bool final_message = false) OVERRIDE;
   void SendMessageToHMI(const commands::MessageSharedPtr message) OVERRIDE;
 
+  bool IsAppServiceRPC(int32_t function_id,
+                       commands::Command::CommandSource source);
+
   void set_protocol_handler(
       protocol_handler::ProtocolHandler* handler) OVERRIDE;
   void set_hmi_message_handler(
@@ -126,9 +131,13 @@ class RPCServiceImpl : public RPCService,
 
  private:
   bool ConvertSOtoMessage(const smart_objects::SmartObject& message,
-                          Message& output);
+                          Message& output,
+                          const bool allow_unknown_parameters = false);
   hmi_apis::HMI_API& hmi_so_factory();
   mobile_apis::MOBILE_API& mobile_so_factory();
+  void CheckSourceForUnsupportedRequest(
+      const commands::MessageSharedPtr message,
+      commands::Command::CommandSource source);
 
   ApplicationManager& app_manager_;
   request_controller::RequestController& request_ctrl_;

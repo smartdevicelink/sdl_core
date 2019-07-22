@@ -35,17 +35,17 @@
 
 #include "gtest/gtest.h"
 
-#include "smart_objects/smart_object.h"
-#include "application_manager/commands/commands_test.h"
-#include "application_manager/commands/command_request_test.h"
 #include "application_manager/application.h"
-#include "application_manager/mock_application_manager.h"
-#include "application_manager/mock_application.h"
-#include "application_manager/mock_message_helper.h"
-#include "interfaces/MOBILE_API.h"
-#include "interfaces/HMI_API.h"
-#include "application_manager/smart_object_keys.h"
+#include "application_manager/commands/command_request_test.h"
+#include "application_manager/commands/commands_test.h"
 #include "application_manager/event_engine/event.h"
+#include "application_manager/mock_application.h"
+#include "application_manager/mock_application_manager.h"
+#include "application_manager/mock_message_helper.h"
+#include "application_manager/smart_object_keys.h"
+#include "interfaces/HMI_API.h"
+#include "interfaces/MOBILE_API.h"
+#include "smart_objects/smart_object.h"
 #include "vehicle_info_plugin/commands/mobile/read_did_request.h"
 
 namespace test {
@@ -59,9 +59,9 @@ using ::testing::DoAll;
 using ::testing::Return;
 using ::testing::SaveArg;
 namespace am = ::application_manager;
-using vehicle_info_plugin::commands::ReadDIDRequest;
 using am::commands::MessageSharedPtr;
 using am::event_engine::Event;
+using vehicle_info_plugin::commands::ReadDIDRequest;
 
 class ReadDIDRequestTest
     : public CommandRequestTest<CommandsTestMocks::kIsNice> {};

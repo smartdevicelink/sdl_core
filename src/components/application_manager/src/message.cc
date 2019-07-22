@@ -36,7 +36,7 @@ namespace {
 bool BinaryDataPredicate(uint8_t i, uint8_t j) {
   return (i == j);
 }
-}
+}  // namespace
 
 namespace application_manager {
 

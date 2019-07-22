@@ -43,6 +43,7 @@ include_directories (
   ${COMPONENTS_DIR}/config_profile/include
   ${POLICY_GLOBAL_INCLUDE_PATH}/
   ${LOG4CXX_INCLUDE_DIRECTORY}
+  ${BOOST_INCLUDE_DIR}
   ${JSONCPP_INCLUDE_DIRECTORY}
 )
 

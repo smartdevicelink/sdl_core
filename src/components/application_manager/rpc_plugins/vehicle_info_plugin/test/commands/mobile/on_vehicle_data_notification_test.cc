@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018, Ford Motor Company
+ * Copyright (c) 2019, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,21 +30,21 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <stdint.h>
-#include <vector>
-#include <map>
+#include <strings.h>
 
 #include "gtest/gtest.h"
 #include "mobile/on_vehicle_data_notification.h"
 
-#include "utils/custom_string.h"
-#include "smart_objects/smart_object.h"
-#include "application_manager/smart_object_keys.h"
-#include "application_manager/commands/commands_test.h"
 #include "application_manager/commands/command_impl.h"
+#include "application_manager/commands/commands_test.h"
 #include "application_manager/message_helper.h"
 #include "application_manager/mock_message_helper.h"
+#include "application_manager/smart_object_keys.h"
+#include "smart_objects/smart_object.h"
+#include "utils/custom_string.h"
 #include "utils/helpers.h"
+#include "vehicle_info_plugin/vehicle_info_app_extension.h"
+#include "vehicle_info_plugin/vehicle_info_plugin.h"
 
 namespace test {
 namespace components {
@@ -62,49 +62,75 @@ using am::commands::MessageSharedPtr;
 using vehicle_info_plugin::commands::OnVehicleDataNotification;
 
 typedef std::shared_ptr<OnVehicleDataNotification> NotificationPtr;
+typedef std::shared_ptr<vehicle_info_plugin::VehicleInfoAppExtension>
+    VehicleInfoAppExtensionPtr;
+typedef DataAccessor<application_manager::ApplicationSet> ApplicationSetDA;
 
 namespace {
 const uint32_t kAppId = 1u;
+const utils::custom_string::CustomString kAppName("test_app");
 }  // namespace
 
 class OnVehicleDataNotificationTest
     : public CommandsTest<CommandsTestMocks::kIsNice> {
  public:
-  OnVehicleDataNotificationTest()
-      : command_msg_(CreateMessage(smart_objects::SmartType_Map))
-      , command_(CreateCommand<OnVehicleDataNotification>(command_msg_)) {}
+  OnVehicleDataNotificationTest() : mock_app_(CreateMockApp()) {}
 
-  MessageSharedPtr command_msg_;
-  NotificationPtr command_;
+ protected:
+  void SetUp() OVERRIDE {
+    ON_CALL(*mock_app_, app_id()).WillByDefault(Return(kAppId));
+    ON_CALL(*mock_app_, name()).WillByDefault(ReturnRef(kAppName));
+
+    ON_CALL(mock_message_helper_, PrintSmartObject(_))
+        .WillByDefault(Return(false));
+  }
+  MockAppPtr mock_app_;
 };
 
-MATCHER_P2(CheckMessageData, key, value, "") {
-  const bool kIsMobileProtocolTypeCorrect =
-      (*arg)[am::strings::params][am::strings::protocol_type].asInt() ==
-      am::commands::CommandImpl::mobile_protocol_type_;
+TEST_F(OnVehicleDataNotificationTest, OnVehicleDataNotification_SUCCESS) {
+  MessageSharedPtr message(CreateMessage(smart_objects::SmartType_Map));
+  smart_objects::SmartObject gps_data;
+  gps_data[am::strings::longitude_degrees] = 1.0;
+  gps_data[am::strings::latitude_degrees] = 1.0;
+  gps_data[am::strings::shifted] = true;
 
-  const bool kIsProtocolVersionCorrect =
-      (*arg)[am::strings::params][am::strings::protocol_version].asInt() ==
-      am::commands::CommandImpl::protocol_version_;
+  (*message)[am::strings::msg_params][am::strings::gps] = gps_data;
+  (*message)[am::strings::msg_params][am::strings::speed] = 0;
 
-  const bool kIsNotificationCorrect =
-      (*arg)[am::strings::params][am::strings::message_type].asInt() ==
-      am::MessageType::kNotification;
+  NotificationPtr command(CreateCommand<OnVehicleDataNotification>(message));
 
-  const bool kIsConnectionKeyCorrect =
-      (*arg)[am::strings::params][am::strings::connection_key].asUInt() ==
-      kAppId;
+  vehicle_info_plugin::VehicleInfoPlugin vi_plugin;
+  VehicleInfoAppExtensionPtr vi_app_extention_ptr =
+      std::make_shared<vehicle_info_plugin::VehicleInfoAppExtension>(
+          vi_plugin, *mock_app_);
+  vi_app_extention_ptr->subscribeToVehicleInfo(
+      mobile_apis::VehicleDataType::VEHICLEDATA_GPS);
+  vi_app_extention_ptr->subscribeToVehicleInfo(
+      mobile_apis::VehicleDataType::VEHICLEDATA_SPEED);
 
-  const bool kAreMsgParamsCorrect =
-      (*arg)[am::strings::msg_params][key].asInt() == value;
+  EXPECT_CALL(*mock_app_,
+              QueryInterface(vehicle_info_plugin::VehicleInfoAppExtension::
+                                 VehicleInfoAppExtensionUID))
+      .WillOnce(Return(vi_app_extention_ptr));
 
-  using namespace helpers;
-  return Compare<bool, EQ, ALL>(true,
-                                kIsMobileProtocolTypeCorrect,
-                                kIsProtocolVersionCorrect,
-                                kIsNotificationCorrect,
-                                kIsConnectionKeyCorrect,
-                                kAreMsgParamsCorrect);
+  application_manager::ApplicationSet apps;
+  apps.insert(mock_app_);
+  std::shared_ptr<sync_primitives::Lock> apps_lock =
+      std::make_shared<sync_primitives::Lock>();
+  ApplicationSetDA apps_da(apps, apps_lock);
+  EXPECT_CALL(app_mngr_, applications()).WillOnce(Return(apps_da));
+
+  am::VehicleData vehicle_data;
+  vehicle_data.insert(am::VehicleData::value_type(
+      am::strings::gps, mobile_apis::VehicleDataType::VEHICLEDATA_GPS));
+  vehicle_data.insert(am::VehicleData::value_type(
+      am::strings::gps, mobile_apis::VehicleDataType::VEHICLEDATA_SPEED));
+  EXPECT_CALL(mock_message_helper_, vehicle_data())
+      .WillOnce(ReturnRef(vehicle_data));
+
+  EXPECT_CALL(mock_rpc_service_, SendMessageToMobile(message, _));
+
+  command->Run();
 }
 
 }  // namespace on_vehicle_data_notification

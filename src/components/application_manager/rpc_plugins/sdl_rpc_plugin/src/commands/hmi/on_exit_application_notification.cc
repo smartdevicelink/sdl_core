@@ -33,11 +33,11 @@
 #include "sdl_rpc_plugin/commands/hmi/on_exit_application_notification.h"
 
 #include "application_manager/application_impl.h"
-#include "application_manager/state_controller.h"
 #include "application_manager/message_helper.h"
 #include "application_manager/rpc_service.h"
-#include "interfaces/MOBILE_API.h"
+#include "application_manager/state_controller.h"
 #include "interfaces/HMI_API.h"
+#include "interfaces/MOBILE_API.h"
 
 namespace sdl_rpc_plugin {
 using namespace application_manager;
@@ -106,6 +106,13 @@ void OnExitApplicationNotification::Run() {
       application_manager_.UnregisterApplication(app_id, Result::SUCCESS);
       return;
     }
+#if defined(CLOUD_APP_WEBSOCKET_TRANSPORT_SUPPORT)
+    case Common_ApplicationExitReason::CLOSE_CLOUD_CONNECTION: {
+      application_manager_.DisconnectCloudApp(app_impl);
+      break;
+    }
+#endif  // CLOUD_APP_WEBSOCKET_TRANSPORT_SUPPORT
+
     default: {
       LOG4CXX_WARN(logger_, "Unhandled reason");
       return;
@@ -122,4 +129,4 @@ void OnExitApplicationNotification::Run() {
 
 }  // namespace commands
 
-}  // namespace application_manager
+}  // namespace sdl_rpc_plugin

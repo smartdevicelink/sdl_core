@@ -33,9 +33,9 @@
 #define SRC_COMPONENTS_INCLUDE_TEST_TRANSPORT_MANAGER_MOCK_TRANSPORT_MANAGER_SETTINGS_H_
 
 #include "gmock/gmock.h"
+#include "mock_transport_manager_mme_settings.h"
 #include "protocol_handler/protocol_handler.h"
 #include "transport_manager/transport_manager_settings.h"
-#include "mock_transport_manager_mme_settings.h"
 
 namespace test {
 namespace components {
@@ -63,6 +63,9 @@ class MockTransportManagerSettings
   MOCK_CONST_METHOD0(app_transport_change_timer_addition, uint32_t());
   MOCK_CONST_METHOD0(transport_manager_tcp_adapter_network_interface,
                      std::string&());
+  MOCK_CONST_METHOD0(cloud_app_retry_timeout, uint32_t());
+  MOCK_CONST_METHOD0(cloud_app_max_retry_attempts, uint16_t());
+  MOCK_CONST_METHOD0(bluetooth_uuid, const uint8_t*());
 };
 
 }  // namespace transport_manager_test

@@ -31,12 +31,12 @@
  */
 
 #include "rc_rpc_plugin/commands/mobile/get_interior_vehicle_data_request.h"
-#include "rc_rpc_plugin/rc_module_constants.h"
+#include "interfaces/MOBILE_API.h"
 #include "rc_rpc_plugin/rc_helpers.h"
+#include "rc_rpc_plugin/rc_module_constants.h"
 #include "rc_rpc_plugin/rc_rpc_plugin.h"
 #include "smart_objects/enum_schema_item.h"
 #include "utils/macro.h"
-#include "interfaces/MOBILE_API.h"
 
 namespace rc_rpc_plugin {
 namespace commands {
@@ -109,6 +109,7 @@ void GetInteriorVehicleDataRequest::FilterDisabledModuleData(
       module_data[message_params::kHdRadioEnable].asBool() == false) {
     module_data.erase(message_params::kHdChannel);
     module_data.erase(message_params::kAvailableHDs);
+    module_data.erase(message_params::kAvailableHdChannels);
     module_data.erase(message_params::kSisData);
   }
 }
@@ -297,7 +298,8 @@ void GetInteriorVehicleDataRequest::ProccessSubscription(
           static_cast<mobile_apis::ModuleType::eType>(
               hmi_response[app_mngr::strings::msg_params]
                           [message_params::kModuleData]
-                          [message_params::kModuleType].asUInt()),
+                          [message_params::kModuleType]
+                              .asUInt()),
           &module_type);
   if (excessive_subscription_occured_) {
     is_subscribed = extension->IsSubscibedToInteriorVehicleData(module_type);
@@ -390,10 +392,11 @@ void GetInteriorVehicleDataRequest::RemoveExcessiveSubscription() {
 }
 
 std::string GetInteriorVehicleDataRequest::ModuleType() {
-  mobile_apis::ModuleType::eType module_type = static_cast<
-      mobile_apis::ModuleType::eType>(
-      (*message_)[app_mngr::strings::msg_params][message_params::kModuleType]
-          .asUInt());
+  mobile_apis::ModuleType::eType module_type =
+      static_cast<mobile_apis::ModuleType::eType>(
+          (*message_)[app_mngr::strings::msg_params]
+                     [message_params::kModuleType]
+                         .asUInt());
   const char* str;
   const bool ok = ns_smart_device_link::ns_smart_objects::EnumConversionHelper<
       mobile_apis::ModuleType::eType>::EnumToCString(module_type, &str);

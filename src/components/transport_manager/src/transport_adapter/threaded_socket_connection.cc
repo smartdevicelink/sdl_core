@@ -30,13 +30,13 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <algorithm>
 #include <errno.h>
 #include <fcntl.h>
 #include <memory.h>
-#include <unistd.h>
-#include <sys/types.h>
 #include <sys/socket.h>
+#include <sys/types.h>
+#include <unistd.h>
+#include <algorithm>
 
 #include "utils/logger.h"
 #include "utils/threads/thread.h"
@@ -300,9 +300,9 @@ bool ThreadedSocketConnection::Receive() {
     bytes_read = recv(socket_, buffer, sizeof(buffer), MSG_DONTWAIT);
 
     if (bytes_read > 0) {
-      LOG4CXX_DEBUG(logger_,
-                    "Received " << bytes_read << " bytes for connection "
-                                << this);
+      LOG4CXX_DEBUG(
+          logger_,
+          "Received " << bytes_read << " bytes for connection " << this);
       ::protocol_handler::RawMessagePtr frame(
           new protocol_handler::RawMessage(0, 0, buffer, bytes_read));
       controller_->DataReceiveDone(

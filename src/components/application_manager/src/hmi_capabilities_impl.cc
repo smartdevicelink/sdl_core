@@ -32,19 +32,21 @@
 
 #include <map>
 
-#include "utils/logger.h"
+#include "application_manager/application_manager.h"
 #include "application_manager/hmi_capabilities_impl.h"
-#include "application_manager/application_manager_impl.h"
-#include "smart_objects/smart_object.h"
 #include "application_manager/message_helper.h"
 #include "application_manager/smart_object_keys.h"
 #include "config_profile/profile.h"
 #include "formatters/CFormatterJsonBase.h"
 #include "interfaces/HMI_API.h"
+#include "smart_objects/smart_object.h"
 #include "utils/file_system.h"
+#include "utils/logger.h"
 
 namespace application_manager {
 namespace formatters = ns_smart_device_link::ns_json_handler::formatters;
+
+CREATE_LOGGERPTR_GLOBAL(logger_, "HMICapabilities")
 
 namespace {
 std::map<std::string, hmi_apis::Common_VrCapabilities::eType>
@@ -912,7 +914,8 @@ bool HMICapabilitiesImpl::load_capabilities_from_file() {
                        hmi_apis::Common_TextFieldName::eType>::const_iterator
                   it_text_field_name = text_fields_enum_name.find(
                       display_capabilities_so[hmi_response::text_fields][i]
-                                             [strings::name].asString());
+                                             [strings::name]
+                                                 .asString());
               display_capabilities_so[hmi_response::text_fields][i].erase(
                   strings::name);
               if (text_fields_enum_name.end() != it_text_field_name) {
@@ -1029,19 +1032,21 @@ bool HMICapabilitiesImpl::load_capabilities_from_file() {
             smart_objects::SmartObject(smart_objects::SmartType_Map);
         if (check_existing_json_member(audio_capabilities, "samplingRate")) {
           audio_capabilities_so["samplingRate"] =
-              sampling_rate_enum.find(audio_capabilities.get("samplingRate", "")
-                                          .asString())->second;
+              sampling_rate_enum
+                  .find(audio_capabilities.get("samplingRate", "").asString())
+                  ->second;
         }
         if (check_existing_json_member(audio_capabilities, "bitsPerSample")) {
           audio_capabilities_so["bitsPerSample"] =
-              bit_per_sample_enum.find(audio_capabilities.get("bitsPerSample",
-                                                              "").asString())
+              bit_per_sample_enum
+                  .find(audio_capabilities.get("bitsPerSample", "").asString())
                   ->second;
         }
         if (check_existing_json_member(audio_capabilities, "audioType")) {
           audio_capabilities_so["audioType"] =
-              audio_type_enum.find(audio_capabilities.get("audioType", "")
-                                       .asString())->second;
+              audio_type_enum
+                  .find(audio_capabilities.get("audioType", "").asString())
+                  ->second;
         }
         set_audio_pass_thru_capabilities(audio_capabilities_so);
       }
@@ -1053,18 +1058,21 @@ bool HMICapabilitiesImpl::load_capabilities_from_file() {
 
         if (check_existing_json_member(pcm_capabilities, "samplingRate")) {
           pcm_capabilities_so["samplingRate"] =
-              sampling_rate_enum.find(pcm_capabilities.get("samplingRate", "")
-                                          .asString())->second;
+              sampling_rate_enum
+                  .find(pcm_capabilities.get("samplingRate", "").asString())
+                  ->second;
         }
         if (check_existing_json_member(pcm_capabilities, "bitsPerSample")) {
           pcm_capabilities_so["bitsPerSample"] =
-              bit_per_sample_enum.find(pcm_capabilities.get("bitsPerSample", "")
-                                           .asString())->second;
+              bit_per_sample_enum
+                  .find(pcm_capabilities.get("bitsPerSample", "").asString())
+                  ->second;
         }
         if (check_existing_json_member(pcm_capabilities, "audioType")) {
           pcm_capabilities_so["audioType"] =
-              audio_type_enum.find(pcm_capabilities.get("audioType", "")
-                                       .asString())->second;
+              audio_type_enum
+                  .find(pcm_capabilities.get("audioType", "").asString())
+                  ->second;
         }
 
         set_pcm_stream_capabilities(pcm_capabilities_so);
@@ -1170,6 +1178,20 @@ bool HMICapabilitiesImpl::load_capabilities_from_file() {
           smart_objects::SmartObject rc_capability_so;
           formatters::CFormatterJsonBase::jsonValueToObj(rc_capability,
                                                          rc_capability_so);
+          if (rc_capability_so.keyExists("lightControlCapabilities")) {
+            if (rc_capability_so["lightControlCapabilities"].keyExists(
+                    "supportedLights")) {
+              auto& lights = rc_capability_so["lightControlCapabilities"]
+                                             ["supportedLights"];
+              auto it = lights.asArray()->begin();
+              for (; it != lights.asArray()->end(); ++it) {
+                smart_objects::SmartObject& light_name_so = (*it)["name"];
+                auto light_name = MessageHelper::CommonLightNameFromString(
+                    light_name_so.asString());
+                light_name_so = light_name;
+              }
+            }
+          }
           set_rc_capability(rc_capability_so);
           if (!rc_capability_so.empty()) {
             set_rc_supported(true);

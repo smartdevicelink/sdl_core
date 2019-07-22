@@ -36,8 +36,8 @@
 #include "application_manager/application_impl.h"
 #include "application_manager/message_helper.h"
 
-#include "interfaces/MOBILE_API.h"
 #include "interfaces/HMI_API.h"
+#include "interfaces/MOBILE_API.h"
 
 namespace sdl_rpc_plugin {
 using namespace application_manager;
@@ -333,4 +333,4 @@ bool ResetGlobalPropertiesRequest::IsPendingResponseExist() {
 
 }  // namespace commands
 
-}  // namespace application_manager
+}  // namespace sdl_rpc_plugin

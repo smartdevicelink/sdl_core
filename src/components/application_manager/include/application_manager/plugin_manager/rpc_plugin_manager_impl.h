@@ -32,11 +32,11 @@
 
 #ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_PLUGIN_MANAGER_RPC_PLUGIN_MANAGER_IMPL_H
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_PLUGIN_MANAGER_RPC_PLUGIN_MANAGER_IMPL_H
-#include "application_manager/plugin_manager/rpc_plugin_manager.h"
 #include "application_manager/application_manager.h"
-#include "application_manager/rpc_service.h"
 #include "application_manager/hmi_capabilities.h"
+#include "application_manager/plugin_manager/rpc_plugin_manager.h"
 #include "application_manager/policies/policy_handler_interface.h"
+#include "application_manager/rpc_service.h"
 #include "utils/optional.h"
 
 namespace application_manager {

@@ -33,28 +33,28 @@
 #ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_APPLICATION_IMPL_H_
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_APPLICATION_IMPL_H_
 
+#include <stdint.h>
+#include <forward_list>
+#include <list>
 #include <map>
 #include <set>
-#include <vector>
 #include <utility>
-#include <list>
-#include <forward_list>
-#include <stdint.h>
+#include <vector>
 
 #include "application_manager/application.h"
 #include "application_manager/application_data_impl.h"
-#include "application_manager/usage_statistics.h"
 #include "application_manager/help_prompt_manager_impl.h"
 #include "application_manager/hmi_state.h"
+#include "application_manager/usage_statistics.h"
 #include "protocol_handler/protocol_handler.h"
 
-#include "connection_handler/device.h"
-#include "utils/lock.h"
 #include <atomic>
+#include "connection_handler/device.h"
 #include "utils/custom_string.h"
-#include "utils/timer.h"
-#include "utils/macro.h"
 #include "utils/date_time.h"
+#include "utils/lock.h"
+#include "utils/macro.h"
+#include "utils/timer.h"
 
 namespace usage_statistics {
 
@@ -304,18 +304,18 @@ class ApplicationImpl : public virtual Application,
   void SetInitialState(HmiStatePtr state) FINAL;
 
   /**
-  * @brief SetRegularState set permanent state of application
-  *
-  * @param state state to setup
-  */
+   * @brief SetRegularState set permanent state of application
+   *
+   * @param state state to setup
+   */
   virtual void SetRegularState(HmiStatePtr state);
 
   /**
-  * @brief SetPostponedState sets postponed state to application.
-  * This state could be set as regular later
-  *
-  * @param state state to setup
-  */
+   * @brief SetPostponedState sets postponed state to application.
+   * This state could be set as regular later
+   *
+   * @param state state to setup
+   */
   virtual void SetPostponedState(HmiStatePtr state);
 
   virtual void RemovePostponedState();
@@ -408,6 +408,72 @@ class ApplicationImpl : public virtual Application,
       smart_objects::SmartObjectSPtr mobile_message) OVERRIDE;
 
   void SwapMobileMessageQueue(MobileMessageQueue& mobile_messages) OVERRIDE;
+
+  /**
+   * @brief Get cloud app endpoint for websocket connection
+   * @return cloud app endpoint
+   */
+  const std::string& cloud_app_endpoint() const OVERRIDE;
+
+  /**
+   * @brief Get cloud app auth token to be used in connection handshake after
+   * websocket open.
+   * @return cloud app auth token
+   */
+  const std::string& auth_token() const OVERRIDE;
+
+  /**
+   * @brief Get cloud app transport type. Defines the type of websocket
+   * connection used.
+   * @return cloud app transport type
+   */
+  const std::string& cloud_app_transport_type() const OVERRIDE;
+
+  /**
+   * @brief Get hybrid app preference. Defines behaviour for when a similar
+   * mobile and cloud app are connected simultaneously.
+   * @return hybrid app preference
+   */
+  const mobile_apis::HybridAppPreference::eType& hybrid_app_preference()
+      const OVERRIDE;
+
+  /**
+   * @brief Get cloud app certificate. Used for secured websocket connections.
+   * @return cloud app certificate.
+   */
+  const std::string& cloud_app_certificate() const OVERRIDE;
+
+  /**
+   * @brief Check whether the given application is a cloud app.
+   * @return true if the application is a cloud application, false otherwise.
+   */
+  bool is_cloud_app() const OVERRIDE;
+
+  /**
+   * @brief Set cloud app endpoint
+   */
+  void set_cloud_app_endpoint(const std::string& endpoint) OVERRIDE;
+
+  /**
+   * @brief Set cloud app auth token
+   */
+  void set_auth_token(const std::string& auth_token) OVERRIDE;
+
+  /**
+   * @brief Set cloud app transport type
+   */
+  void set_cloud_app_transport_type(const std::string& transport_type) OVERRIDE;
+
+  /**
+   * @brief Set hybrid app preference
+   */
+  void set_hybrid_app_preference(const mobile_apis::HybridAppPreference::eType&
+                                     hybrid_app_preference) OVERRIDE;
+
+  /**
+   * @brief Set cloud app certificate
+   */
+  void set_cloud_app_certificate(const std::string& certificate) OVERRIDE;
 
  protected:
   /**
@@ -512,6 +578,13 @@ class ApplicationImpl : public virtual Application,
   Timer audio_stream_suspend_timer_;
 
   std::list<AppExtensionPtr> extensions_;
+
+  // Cloud app properties
+  std::string endpoint_;
+  std::string auth_token_;
+  std::string cloud_transport_type_;
+  mobile_apis::HybridAppPreference::eType hybrid_app_preference_;
+  std::string certificate_;
 
   /**
    * @brief Defines number per time in seconds limits

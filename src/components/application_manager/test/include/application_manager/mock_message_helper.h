@@ -32,13 +32,13 @@
 
 #ifndef SRC_COMPONENTS_APPLICATION_MANAGER_TEST_INCLUDE_APPLICATION_MANAGER_MOCK_MESSAGE_HELPER_H_
 #define SRC_COMPONENTS_APPLICATION_MANAGER_TEST_INCLUDE_APPLICATION_MANAGER_MOCK_MESSAGE_HELPER_H_
-#include "gmock/gmock.h"
 #include "application_manager/application.h"
+#include "application_manager/application_manager.h"
 #include "application_manager/message_helper.h"
+#include "application_manager/policies/policy_handler_interface.h"
+#include "gmock/gmock.h"
 #include "interfaces/HMI_API.h"
 #include "policy/policy_types.h"
-#include "application_manager/policies/policy_handler_interface.h"
-#include "application_manager/application_manager.h"
 #include "smart_objects/smart_object.h"
 #include "transport_manager/common.h"
 
@@ -164,6 +164,8 @@ class MockMessageHelper {
                     ApplicationManager& app_mngr));
   MOCK_METHOD1(CommonLanguageFromString,
                hmi_apis::Common_Language::eType(const std::string& language));
+  MOCK_METHOD1(CommonLightNameFromString,
+               hmi_apis::Common_LightName::eType(const std::string& lightName));
   MOCK_METHOD1(CommonLanguageToString,
                std::string(hmi_apis::Common_Language::eType));
   MOCK_METHOD2(CreateModuleInfoSO,
@@ -199,14 +201,16 @@ class MockMessageHelper {
                MessageHelper::ChoiceSetVRCommandsStatus(
                    const smart_objects::SmartObject&));
 
-  MOCK_METHOD6(GetBCActivateAppRequestToHMI,
+  MOCK_METHOD5(GetBCActivateAppRequestToHMI,
                smart_objects::SmartObjectSPtr(
                    ApplicationConstSharedPtr app,
-                   const protocol_handler::SessionObserver& session_observer,
                    const policy::PolicyHandlerInterface& policy_handler,
                    hmi_apis::Common_HMILevel::eType level,
                    bool send_policy_priority,
                    ApplicationManager& app_mngr));
+  MOCK_METHOD2(GetBCCloseApplicationRequestToHMI,
+               smart_objects::SmartObjectSPtr(ApplicationConstSharedPtr app,
+                                              ApplicationManager& app_mngr));
   MOCK_METHOD2(GetOnAppInterfaceUnregisteredNotificationToMobile,
                ns_smart_device_link::ns_smart_objects::SmartObjectSPtr(
                    int32_t connection_key,
@@ -307,6 +311,12 @@ class MockMessageHelper {
   MOCK_METHOD3(SendUnsubscribeButtonNotification,
                void(mobile_apis::ButtonName::eType button,
                     ApplicationSharedPtr application,
+                    ApplicationManager& app_mngr));
+  MOCK_METHOD1(CreateAppServiceCapabilities,
+               smart_objects::SmartObject(
+                   std::vector<smart_objects::SmartObject>& all_services));
+  MOCK_METHOD2(BroadcastCapabilityUpdate,
+               void(smart_objects::SmartObject& msg_params,
                     ApplicationManager& app_mngr));
 
   static MockMessageHelper* message_helper_mock();

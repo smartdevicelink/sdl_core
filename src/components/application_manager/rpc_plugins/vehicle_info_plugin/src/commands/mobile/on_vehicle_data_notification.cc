@@ -34,11 +34,11 @@
 #include "vehicle_info_plugin/commands/mobile/on_vehicle_data_notification.h"
 
 #include "application_manager/application_impl.h"
+#include "application_manager/helpers/application_helper.h"
 #include "application_manager/message_helper.h"
 #include "interfaces/MOBILE_API.h"
-#include "vehicle_info_plugin/vehicle_info_app_extension.h"
-#include "application_manager/helpers/application_helper.h"
 #include "utils/macro.h"
+#include "vehicle_info_plugin/vehicle_info_app_extension.h"
 
 namespace vehicle_info_plugin {
 using namespace application_manager;
@@ -72,7 +72,7 @@ void OnVehicleDataNotification::Run() {
 
   for (; vehicle_data.end() != it; ++it) {
     if (true == (*message_)[strings::msg_params].keyExists(it->first)) {
-      LOG4CXX_ERROR(logger_, "vehicle_data nanme" << it->first);
+      LOG4CXX_DEBUG(logger_, "vehicle_data name" << it->first);
       auto vehicle_data_value =
           (*message_)[strings::msg_params][it->first].asInt();
 
@@ -133,4 +133,4 @@ void OnVehicleDataNotification::Run() {
 
 }  // namespace commands
 
-}  // namespace application_manager
+}  // namespace vehicle_info_plugin

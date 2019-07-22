@@ -35,17 +35,17 @@
 #else
 #include <openssl/ssl.h>
 #endif  //__QNXNTO__
-#include <limits>
 #include <fstream>
+#include <limits>
 #include <sstream>
 
 #include "gtest/gtest.h"
 #include "security_manager/crypto_manager_impl.h"
 #include "security_manager/mock_security_manager_settings.h"
 
+using ::testing::NiceMock;
 using ::testing::Return;
 using ::testing::ReturnRef;
-using ::testing::NiceMock;
 
 namespace {
 const size_t kUpdatesBeforeHour = 24;
@@ -62,7 +62,7 @@ const std::string kFordCipher = SSL3_TXT_RSA_DES_192_CBC3_SHA;
 // Used cipher from ford protocol requirement
 const std::string kFordCipher = TLS1_TXT_RSA_WITH_AES_256_GCM_SHA384;
 #endif
-}
+}  // namespace
 
 namespace test {
 namespace components {

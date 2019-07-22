@@ -29,38 +29,43 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
+#include <bson_object.h>
 #include <stdint.h>
 #include <memory>
 #include <set>
 #include <string>
 #include <vector>
-#include <bson_object.h>
 
-#include "gtest/gtest.h"
 #include "application_manager/application.h"
 #include "application_manager/application_impl.h"
 #include "application_manager/application_manager_impl.h"
+#include "application_manager/mock_app_service_manager.h"
 #include "application_manager/mock_application.h"
 #include "application_manager/mock_application_manager_settings.h"
 #include "application_manager/mock_resumption_data.h"
-#include "application_manager/mock_rpc_service.h"
 #include "application_manager/mock_rpc_plugin_manager.h"
+#include "application_manager/mock_rpc_service.h"
+#include "application_manager/policies/mock_policy_handler_interface.h"
 #include "application_manager/resumption/resume_ctrl_impl.h"
 #include "application_manager/test/include/application_manager/mock_message_helper.h"
 #include "connection_handler/mock_connection_handler.h"
+#include "gtest/gtest.h"
 #include "hmi_message_handler/mock_hmi_message_handler.h"
 #include "media_manager/mock_media_manager.h"
 #include "policy/mock_policy_settings.h"
 #include "policy/usage_statistics/mock_statistics_manager.h"
 #include "protocol/bson_object_keys.h"
-#include "protocol_handler/mock_session_observer.h"
 #include "protocol_handler/mock_protocol_handler.h"
+#include "protocol_handler/mock_session_observer.h"
+#include "resumption/mock_last_state.h"
 #include "utils/custom_string.h"
 #include "utils/file_system.h"
 #include "utils/lock.h"
 
-#include "utils/push_log.h"
 #include "encryption/hashing.h"
+#ifdef ENABLE_LOG
+#include "utils/push_log.h"
+#endif
 
 namespace test {
 namespace components {
@@ -72,15 +77,16 @@ namespace con_test = connection_handler_test;
 
 using testing::_;
 using ::testing::An;
-using ::testing::Matcher;
 using ::testing::ByRef;
 using ::testing::DoAll;
+using ::testing::Matcher;
 using ::testing::Mock;
+using ::testing::NiceMock;
 using ::testing::Return;
 using ::testing::ReturnRef;
-using ::testing::NiceMock;
 using ::testing::SaveArg;
 using ::testing::SetArgPointee;
+using ::testing::SetArgReferee;
 
 using namespace application_manager;
 
@@ -96,6 +102,19 @@ connection_handler::DeviceHandle kDeviceId = 12345u;
 const std::string kAppId = "someID";
 const uint32_t kConnectionKey = 1232u;
 const std::string kAppName = "appName";
+
+#if defined(CLOUD_APP_WEBSOCKET_TRANSPORT_SUPPORT)
+// Cloud application params
+const std::string kEndpoint = "endpoint";
+const std::string kEndpoint2 = "https://fakesdlcloudapptesting.com:8080";
+const std::string kAuthToken = "auth_token";
+const std::string kCertificate = "cert";
+const std::string kTransportType = "WS";
+const mobile_api::HybridAppPreference::eType kHybridAppPreference =
+    mobile_api::HybridAppPreference::CLOUD;
+const std::string kHybridAppPreferenceStr = "CLOUD";
+const bool kEnabled = true;
+#endif  // CLOUD_APP_WEBSOCKET_TRANSPORT_SUPPORT
 }  // namespace
 
 class ApplicationManagerImplTest : public ::testing::Test {
@@ -106,6 +125,10 @@ class ApplicationManagerImplTest : public ::testing::Test {
             std::make_shared<NiceMock<resumption_test::MockResumptionData> >(
                 mock_app_mngr_))
       , mock_rpc_service_(new MockRPCService)
+      , mock_policy_handler_(
+            new test::components::policy_test::MockPolicyHandlerInterface)
+      , mock_app_service_manager_(
+            new MockAppServiceManager(mock_app_mngr_, mock_last_state_))
       , mock_message_helper_(
             application_manager::MockMessageHelper::message_helper_mock())
 
@@ -122,14 +145,21 @@ class ApplicationManagerImplTest : public ::testing::Test {
  protected:
   void SetUp() OVERRIDE {
     CreateAppManager();
-    ON_CALL(mock_connection_handler_, GetDataOnSessionKey(_, _, _, &kDeviceId))
-        .WillByDefault(DoAll(SetArgPointee<3u>(app_id_), Return(0)));
+    ON_CALL(mock_session_observer_, GetDataOnSessionKey(_, _, _, _))
+        .WillByDefault(DoAll(SetArgPointee<3u>(kDeviceId), Return(0)));
     ON_CALL(mock_connection_handler_, get_session_observer())
         .WillByDefault(ReturnRef(mock_session_observer_));
-    app_manager_impl_->SetRPCService(mock_rpc_service_);
+    app_manager_impl_->SetMockRPCService(mock_rpc_service_);
     app_manager_impl_->resume_controller().set_resumption_storage(
         mock_storage_);
     app_manager_impl_->set_connection_handler(&mock_connection_handler_);
+    ON_CALL(*mock_app_service_manager_, UnpublishServices(_))
+        .WillByDefault(Return());
+    ON_CALL(*mock_app_service_manager_, OnAppActivated(_))
+        .WillByDefault(Return());
+    app_manager_impl_->SetAppServiceManager(mock_app_service_manager_);
+    Json::Value empty;
+    ON_CALL(mock_last_state_, get_dictionary()).WillByDefault(ReturnRef(empty));
   }
 
   void CreateAppManager() {
@@ -149,7 +179,8 @@ class ApplicationManagerImplTest : public ::testing::Test {
     ON_CALL(mock_application_manager_settings_, default_timeout())
         .WillByDefault(ReturnRef(kTimeout));
     ON_CALL(mock_application_manager_settings_,
-            application_list_update_timeout()).WillByDefault(Return(kTimeout));
+            application_list_update_timeout())
+        .WillByDefault(Return(kTimeout));
 
     app_manager_impl_.reset(new am::ApplicationManagerImpl(
         mock_application_manager_settings_, mock_policy_settings_));
@@ -196,16 +227,24 @@ class ApplicationManagerImplTest : public ::testing::Test {
       connection_handler::DeviceHandle secondary_device_handle,
       std::string secondary_transport_device_string);
 
+#if defined(CLOUD_APP_WEBSOCKET_TRANSPORT_SUPPORT)
+  void AddCloudAppToPendingDeviceMap();
+  void CreatePendingApplication();
+#endif
   uint32_t app_id_;
   NiceMock<policy_test::MockPolicySettings> mock_policy_settings_;
   std::shared_ptr<NiceMock<resumption_test::MockResumptionData> > mock_storage_;
 
-  std::unique_ptr<rpc_service::RPCService> mock_rpc_service_;
+  MockRPCService* mock_rpc_service_;
+  resumption_test::MockLastState mock_last_state_;
   NiceMock<con_test::MockConnectionHandler> mock_connection_handler_;
   NiceMock<protocol_handler_test::MockSessionObserver> mock_session_observer_;
   NiceMock<MockApplicationManagerSettings> mock_application_manager_settings_;
+  test::components::policy_test::MockPolicyHandlerInterface*
+      mock_policy_handler_;
   application_manager_test::MockApplicationManager mock_app_mngr_;
   std::unique_ptr<am::ApplicationManagerImpl> app_manager_impl_;
+  MockAppServiceManager* mock_app_service_manager_;
   application_manager::MockMessageHelper* mock_message_helper_;
 
   std::shared_ptr<MockApplication> mock_app_ptr_;
@@ -1120,9 +1159,10 @@ bool ApplicationManagerImplTest::CheckResumptionRequiredTransportAvailableTest(
         TransportTypeProfileStringFromDeviceHandle(secondary_device_handle))
         .WillOnce(Return(secondary_transport_device_string));
   } else {
-    EXPECT_CALL(mock_session_observer_,
-                TransportTypeProfileStringFromDeviceHandle(
-                    secondary_device_handle)).WillOnce(Return(std::string("")));
+    EXPECT_CALL(
+        mock_session_observer_,
+        TransportTypeProfileStringFromDeviceHandle(secondary_device_handle))
+        .WillOnce(Return(std::string("")));
   }
 
   return app_manager_impl_->CheckResumptionRequiredTransportAvailable(
@@ -1413,6 +1453,280 @@ TEST_F(ApplicationManagerImplTest,
   EXPECT_TRUE(file_system::RemoveDirectory(kDirectoryName, true));
 }
 
-}  // application_manager_test
+#if defined(CLOUD_APP_WEBSOCKET_TRANSPORT_SUPPORT)
+void ApplicationManagerImplTest::AddCloudAppToPendingDeviceMap() {
+  app_manager_impl_->SetMockPolicyHandler(mock_policy_handler_);
+  std::vector<std::string> enabled_apps{"1234"};
+  EXPECT_CALL(*mock_policy_handler_, GetEnabledCloudApps(_))
+      .WillOnce(SetArgReferee<0>(enabled_apps));
+  EXPECT_CALL(*mock_policy_handler_, GetCloudAppParameters(_, _, _, _, _, _, _))
+      .WillOnce(DoAll(SetArgReferee<1>(kEnabled),
+                      SetArgReferee<2>(kEndpoint2),
+                      SetArgReferee<3>(kCertificate),
+                      SetArgReferee<4>(kAuthToken),
+                      SetArgReferee<5>(kTransportType),
+                      SetArgReferee<6>(kHybridAppPreferenceStr),
+                      Return(true)));
+
+  std::vector<std::string> nicknames{"CloudApp"};
+  EXPECT_CALL(*mock_policy_handler_, GetInitialAppData(_, _, _))
+      .WillOnce(DoAll(SetArgPointee<1>(nicknames), Return(true)));
+
+  EXPECT_CALL(*mock_policy_handler_, GetIconUrl(_)).WillOnce(Return(""));
+
+  app_manager_impl_->RefreshCloudAppInformation();
+}
+
+void ApplicationManagerImplTest::CreatePendingApplication() {
+  AddCloudAppToPendingDeviceMap();
+
+  // CreatePendingApplication
+  transport_manager::DeviceInfo device_info(
+      1, "mac", kEndpoint2, "CLOUD_WEBSOCKET");
+  std::vector<std::string> nicknames{"CloudApp"};
+  EXPECT_CALL(*mock_policy_handler_, GetInitialAppData(_, _, _))
+      .WillOnce(DoAll(SetArgPointee<1>(nicknames), Return(true)));
+  std::vector<std::string> enabled_apps{"1234"};
+
+  EXPECT_CALL(*mock_policy_handler_, GetStatisticManager())
+      .WillOnce(Return(std::shared_ptr<usage_statistics::StatisticsManager>(
+          new usage_statistics_test::MockStatisticsManager())));
+  EXPECT_CALL(*mock_policy_handler_, GetCloudAppParameters(_, _, _, _, _, _, _))
+      .WillOnce(DoAll(SetArgReferee<1>(kEnabled),
+                      SetArgReferee<2>(kEndpoint2),
+                      SetArgReferee<3>(kCertificate),
+                      SetArgReferee<4>(kAuthToken),
+                      SetArgReferee<5>(kTransportType),
+                      SetArgReferee<6>(kHybridAppPreferenceStr),
+                      Return(true)));
+  // Expect Update app list
+  EXPECT_CALL(*mock_rpc_service_, ManageHMICommand(_, _)).Times(1);
+  app_manager_impl_->CreatePendingApplication(1, device_info, 1);
+  AppsWaitRegistrationSet app_list =
+      app_manager_impl_->AppsWaitingForRegistration().GetData();
+  EXPECT_EQ(1u, app_list.size());
+}
+
+TEST_F(ApplicationManagerImplTest, CreatePendingApplication) {
+  CreatePendingApplication();
+}
+
+TEST_F(ApplicationManagerImplTest, SetPendingState) {
+  AddCloudAppToPendingDeviceMap();
+  AddMockApplication();
+  AppsWaitRegistrationSet app_list =
+      app_manager_impl_->AppsWaitingForRegistration().GetData();
+  EXPECT_EQ(0u, app_list.size());
+  EXPECT_CALL(*mock_app_ptr_, policy_app_id()).WillRepeatedly(Return("1234"));
+  EXPECT_CALL(*mock_app_ptr_, app_id()).WillRepeatedly(Return(123));
+  std::string mac = "MAC_ADDRESS";
+  EXPECT_CALL(*mock_app_ptr_, mac_address()).WillRepeatedly(ReturnRef(mac));
+  transport_manager::DeviceInfo device_info(
+      1, "mac", kEndpoint2, "CLOUD_WEBSOCKET");
+
+  std::vector<std::string> enabled_apps{"1234"};
+
+  EXPECT_CALL(*mock_policy_handler_, GetEnabledCloudApps(_))
+      .WillOnce(SetArgReferee<0>(enabled_apps));
+  EXPECT_CALL(*mock_policy_handler_, GetCloudAppParameters(_, _, _, _, _, _, _))
+      .WillOnce(DoAll(SetArgReferee<1>(kEnabled),
+                      SetArgReferee<2>(kEndpoint2),
+                      SetArgReferee<3>(kCertificate),
+                      SetArgReferee<4>(kAuthToken),
+                      SetArgReferee<5>(kTransportType),
+                      SetArgReferee<6>(kHybridAppPreferenceStr),
+                      Return(true)));
+
+  std::vector<std::string> nicknames{"CloudApp"};
+  EXPECT_CALL(*mock_policy_handler_, GetInitialAppData(_, _, _))
+      .WillOnce(DoAll(SetArgPointee<1>(nicknames), Return(true)));
+
+  EXPECT_CALL(*mock_policy_handler_, GetIconUrl(_)).WillOnce(Return(""));
+
+  plugin_manager::MockRPCPluginManager* mock_rpc_plugin_manager =
+      new plugin_manager::MockRPCPluginManager;
+  std::unique_ptr<plugin_manager::RPCPluginManager> mock_rpc_plugin_manager_ptr(
+      mock_rpc_plugin_manager);
+  app_manager_impl_->SetPluginManager(mock_rpc_plugin_manager_ptr);
+
+  EXPECT_CALL(mock_connection_handler_, GetDeviceID(_, _))
+      .WillOnce(DoAll(SetArgPointee<1>(0), Return(true)));
+  app_manager_impl_->SetPendingApplicationState(1, device_info);
+  app_list = app_manager_impl_->AppsWaitingForRegistration().GetData();
+  EXPECT_EQ(1u, app_list.size());
+}
+
+TEST_F(ApplicationManagerImplTest,
+       RegisterApplication_CloudAppRegisterSuccess) {
+  std::shared_ptr<MockApplication> waiting_app =
+      std::make_shared<MockApplication>();
+  ON_CALL(*waiting_app, device()).WillByDefault(Return(kDeviceId));
+  EXPECT_CALL(*waiting_app, cloud_app_endpoint())
+      .WillOnce(ReturnRef(kEndpoint));
+  EXPECT_CALL(*waiting_app, auth_token()).WillOnce(ReturnRef(kAuthToken));
+  EXPECT_CALL(*waiting_app, cloud_app_certificate())
+      .WillOnce(ReturnRef(kCertificate));
+  EXPECT_CALL(*waiting_app, cloud_app_transport_type())
+      .WillOnce(ReturnRef(kTransportType));
+  EXPECT_CALL(*waiting_app, hybrid_app_preference())
+      .WillOnce(ReturnRef(kHybridAppPreference));
+  ON_CALL(*waiting_app, is_cloud_app()).WillByDefault(Return(true));
+  EXPECT_CALL(*waiting_app, policy_app_id()).WillRepeatedly(Return(kAppId));
+  app_manager_impl_->AddMockPendingApplication(waiting_app);
+
+  EXPECT_CALL(
+      mock_session_observer_,
+      GetDataOnSessionKey(kConnectionKey,
+                          _,
+                          _,
+                          testing::An<connection_handler::DeviceHandle*>()))
+      .WillOnce(DoAll(SetArgPointee<3u>(kDeviceId), Return(0)));
+  EXPECT_CALL(*mock_rpc_service_,
+              ManageMobileCommand(_, commands::Command::SOURCE_SDL))
+      .Times(0);
+  smart_objects::SmartObject request_for_registration(
+      smart_objects::SmartType_Map);
+
+  smart_objects::SmartObject& params =
+      request_for_registration[strings::msg_params];
+  params[strings::app_id] = kAppId;
+  params[strings::language_desired] = mobile_api::Language::EN_US;
+  params[strings::hmi_display_language_desired] = mobile_api::Language::EN_US;
+
+  request_for_registration[strings::params][strings::connection_key] =
+      kConnectionKey;
+  request_for_registration[strings::msg_params][strings::app_name] = kAppName;
+  request_for_registration[strings::msg_params][strings::sync_msg_version]
+                          [strings::minor_version] = APIVersion::kAPIV2;
+  request_for_registration[strings::msg_params][strings::sync_msg_version]
+                          [strings::major_version] = APIVersion::kAPIV3;
+
+  request_for_registration[strings::params][strings::protocol_version] =
+      protocol_handler::MajorProtocolVersion::PROTOCOL_VERSION_2;
+
+  smart_objects::SmartObjectSPtr request_for_registration_ptr =
+      std::make_shared<smart_objects::SmartObject>(request_for_registration);
+
+  ApplicationSharedPtr application =
+      app_manager_impl_->RegisterApplication(request_for_registration_ptr);
+
+  EXPECT_EQ(protocol_handler::MajorProtocolVersion::PROTOCOL_VERSION_2,
+            application->protocol_version());
+  EXPECT_EQ(APIVersion::kAPIV2,
+            application->version().min_supported_api_version);
+  EXPECT_EQ(APIVersion::kAPIV3,
+            application->version().max_supported_api_version);
+  EXPECT_EQ(kEndpoint, application->cloud_app_endpoint());
+  EXPECT_EQ(kAuthToken, application->auth_token());
+  EXPECT_EQ(kCertificate, application->cloud_app_certificate());
+  EXPECT_EQ(kTransportType, application->cloud_app_transport_type());
+  EXPECT_EQ(kHybridAppPreference, application->hybrid_app_preference());
+}
+
+TEST_F(ApplicationManagerImplTest,
+       RegisterApplication_CloudAppRegisterFailed_DISALLOWED) {
+  std::shared_ptr<MockApplication> waiting_app =
+      std::make_shared<MockApplication>();
+  EXPECT_CALL(*waiting_app, device()).WillRepeatedly(Return(kDeviceId));
+  EXPECT_CALL(*waiting_app, is_cloud_app()).WillRepeatedly(Return(true));
+  EXPECT_CALL(*waiting_app, policy_app_id())
+      .WillRepeatedly(Return("Fake" + kAppId));
+  app_manager_impl_->AddMockPendingApplication(waiting_app);
+
+  EXPECT_CALL(
+      mock_session_observer_,
+      GetDataOnSessionKey(kConnectionKey,
+                          _,
+                          _,
+                          testing::An<connection_handler::DeviceHandle*>()))
+      .WillOnce(DoAll(SetArgPointee<3u>(kDeviceId), Return(0)));
+  EXPECT_CALL(*mock_rpc_service_,
+              ManageMobileCommand(_, commands::Command::SOURCE_SDL))
+      .WillOnce(Return(true));
+  smart_objects::SmartObject request_for_registration(
+      smart_objects::SmartType_Map);
+
+  smart_objects::SmartObject& params =
+      request_for_registration[strings::msg_params];
+  params[strings::app_id] = kAppId;
+  params[strings::language_desired] = mobile_api::Language::EN_US;
+  params[strings::hmi_display_language_desired] = mobile_api::Language::EN_US;
+
+  request_for_registration[strings::params][strings::connection_key] =
+      kConnectionKey;
+  request_for_registration[strings::msg_params][strings::app_name] = kAppName;
+  request_for_registration[strings::msg_params][strings::sync_msg_version]
+                          [strings::minor_version] = APIVersion::kAPIV2;
+  request_for_registration[strings::msg_params][strings::sync_msg_version]
+                          [strings::major_version] = APIVersion::kAPIV3;
+
+  request_for_registration[strings::params][strings::protocol_version] =
+      protocol_handler::MajorProtocolVersion::PROTOCOL_VERSION_2;
+
+  smart_objects::SmartObjectSPtr request_for_registration_ptr =
+      std::make_shared<smart_objects::SmartObject>(request_for_registration);
+
+  ApplicationSharedPtr application =
+      app_manager_impl_->RegisterApplication(request_for_registration_ptr);
+  EXPECT_EQ(0, application.use_count());
+}
+
+TEST_F(ApplicationManagerImplTest, PolicyIDByIconUrl_Success) {
+  app_manager_impl_->SetMockPolicyHandler(mock_policy_handler_);
+  std::vector<std::string> enabled_apps{"1234"};
+  EXPECT_CALL(*mock_policy_handler_, GetEnabledCloudApps(_))
+      .WillOnce(SetArgReferee<0>(enabled_apps));
+  EXPECT_CALL(*mock_policy_handler_, GetCloudAppParameters(_, _, _, _, _, _, _))
+      .WillOnce(DoAll(SetArgReferee<1>(kEnabled),
+                      SetArgReferee<2>(kEndpoint2),
+                      SetArgReferee<3>(kCertificate),
+                      SetArgReferee<4>(kAuthToken),
+                      SetArgReferee<5>(kTransportType),
+                      SetArgReferee<6>(kHybridAppPreferenceStr),
+                      Return(true)));
+
+  std::vector<std::string> nicknames{"CloudApp"};
+  EXPECT_CALL(*mock_policy_handler_, GetInitialAppData(_, _, _))
+      .WillOnce(DoAll(SetArgPointee<1>(nicknames), Return(true)));
+
+  const std::string url = "https://www.fakeiconurl.com/icon.png";
+  EXPECT_CALL(*mock_policy_handler_, GetIconUrl("1234"))
+      .WillRepeatedly(Return(url));
+
+  app_manager_impl_->RefreshCloudAppInformation();
+
+  std::string result = app_manager_impl_->PolicyIDByIconUrl(url);
+  EXPECT_EQ(result, "1234");
+}
+
+TEST_F(ApplicationManagerImplTest, SetIconFileFromSystemRequest_Success) {
+  CreatePendingApplication();
+  Mock::VerifyAndClearExpectations(mock_message_helper_);
+
+  file_system::CreateDirectory(kDirectoryName);
+  const std::string full_icon_path = kDirectoryName + "/1234";
+  ASSERT_TRUE(file_system::CreateFile(full_icon_path));
+
+  const std::string url = "https://www.fakeiconurl.com/icon.png";
+  EXPECT_CALL(*mock_policy_handler_, GetIconUrl("1234"))
+      .WillRepeatedly(Return(url));
+
+  smart_objects::SmartObject dummy_object(smart_objects::SmartType_Map);
+  smart_objects::SmartObjectSPtr sptr =
+      std::make_shared<smart_objects::SmartObject>(dummy_object);
+
+  EXPECT_CALL(*mock_message_helper_,
+              CreateModuleInfoSO(
+                  hmi_apis::FunctionID::BasicCommunication_UpdateAppList, _))
+      .WillOnce(Return(sptr));
+  EXPECT_CALL(*mock_rpc_service_, ManageHMICommand(sptr, _)).Times(1);
+  EXPECT_CALL(mock_application_manager_settings_, app_icons_folder())
+      .WillOnce(ReturnRef(kDirectoryName));
+  app_manager_impl_->SetIconFileFromSystemRequest("1234");
+  EXPECT_TRUE(file_system::RemoveDirectory(kDirectoryName, true));
+}
+
+#endif  // CLOUD_APP_WEBSOCKET_TRANSPORT_SUPPORT
+}  // namespace application_manager_test
 }  // namespace components
 }  // namespace test

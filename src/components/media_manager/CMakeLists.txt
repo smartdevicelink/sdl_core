@@ -50,6 +50,7 @@ include_directories(
     ${POLICY_PATH}/include/
     ${POLICY_GLOBAL_INCLUDE_PATH}/
     ${LOG4CXX_INCLUDE_DIRECTORY}
+    ${BOOST_INCLUDE_DIR}
 )
 
 set(PATHS

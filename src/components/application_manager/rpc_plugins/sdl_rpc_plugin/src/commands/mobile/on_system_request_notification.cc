@@ -30,15 +30,16 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <cstring>
-#include <cstdio>
-#include <string>
 #include "sdl_rpc_plugin/commands/mobile/on_system_request_notification.h"
-#include "interfaces/MOBILE_API.h"
-#include "utils/file_system.h"
-#include "policy/policy_table/enums.h"
+#include <cstdio>
+#include <cstring>
+#include <string>
 #include "application_manager/application_manager.h"
 #include "application_manager/policies/policy_handler_interface.h"
+#include "interfaces/MOBILE_API.h"
+#include "policy/policy_table/enums.h"
+#include "utils/file_system.h"
+#include "utils/helpers.h"
 
 namespace sdl_rpc_plugin {
 using namespace application_manager;
@@ -65,6 +66,7 @@ void OnSystemRequestNotification::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
   using namespace application_manager;
   using namespace mobile_apis;
+  using namespace helpers;
 
   ApplicationSharedPtr app = application_manager_.application(connection_key());
 
@@ -106,6 +108,26 @@ void OnSystemRequestNotification::Run() {
     }
   }
 
+  LOG4CXX_DEBUG(logger_,
+                "Processing Request type : " << stringified_request_type);
+
+  const bool binary_data_is_required =
+      Compare<mobile_apis::RequestType::eType, EQ, ONE>(
+          request_type,
+          mobile_apis::RequestType::PROPRIETARY,
+          mobile_apis::RequestType::OEM_SPECIFIC);
+
+  BinaryMessage binary_data;
+  if (binary_data_is_required) {
+    const std::string filename =
+        (*message_)[strings::msg_params][strings::file_name].asString();
+    file_system::ReadBinaryFile(filename, binary_data);
+  }
+
+  if (mobile_apis::RequestType::OEM_SPECIFIC == request_type) {
+    (*message_)[strings::params][strings::binary_data] = binary_data;
+  }
+
   if (mobile_apis::RequestType::PROPRIETARY == request_type) {
     /* According to requirements:
        "If the requestType = PROPRIETARY, add to mobile API fileType = JSON
@@ -113,10 +135,6 @@ void OnSystemRequestNotification::Run() {
        Also in Genivi SDL we don't save the PT to file - we put it directly in
        binary_data */
 
-    const std::string filename =
-        (*message_)[strings::msg_params][strings::file_name].asString();
-    BinaryMessage binary_data;
-    file_system::ReadBinaryFile(filename, binary_data);
 #if defined(PROPRIETARY_MODE)
     AddHeader(binary_data);
 #endif  // PROPRIETARY_MODE
@@ -126,7 +144,9 @@ void OnSystemRequestNotification::Run() {
 #endif  // PROPRIETARY_MODE
 
     (*message_)[strings::msg_params][strings::file_type] = FileType::JSON;
-  } else if (mobile_apis::RequestType::HTTP == request_type) {
+  }
+
+  if (mobile_apis::RequestType::HTTP == request_type) {
     (*message_)[strings::msg_params][strings::file_type] = FileType::BINARY;
     if ((*message_)[strings::msg_params].keyExists(strings::url)) {
       (*message_)[strings::msg_params][strings::timeout] =
@@ -226,4 +246,4 @@ size_t OnSystemRequestNotification::ParsePTString(
 
 }  // namespace commands
 
-}  // namespace application_manager
+}  // namespace sdl_rpc_plugin

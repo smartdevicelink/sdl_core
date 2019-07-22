@@ -32,12 +32,12 @@
 
 #include <string.h>
 
-#include "utils/macro.h"
 #include "application_manager/mobile_message_handler.h"
-#include "protocol_handler/protocol_payload.h"
 #include "protocol_handler/protocol_packet.h"
+#include "protocol_handler/protocol_payload.h"
 #include "utils/bitstream.h"
 #include "utils/logger.h"
+#include "utils/macro.h"
 
 #include <stdint.h>
 #include <memory>
@@ -48,7 +48,7 @@ const uint8_t kRequest = 0x0;
 const uint8_t kResponse = 0x1;
 const uint8_t kNotification = 0x2;
 const uint8_t kUnknown = 0xF;
-}
+}  // namespace
 
 namespace application_manager {
 using protocol_handler::Extract;
@@ -58,7 +58,7 @@ typedef std::map<MessageType, std::string> MessageTypeMap;
 MessageTypeMap message_types = {std::make_pair(kRequest, "Request"),
                                 std::make_pair(kResponse, "Response"),
                                 std::make_pair(kNotification, "Notification")};
-}
+}  // namespace
 CREATE_LOGGERPTR_GLOBAL(logger_, "ApplicationManager")
 
 application_manager::Message*

@@ -39,13 +39,13 @@
 #include <inttypes.h>
 #undef __STDC_FORMAT_MACROS
 
-#include <set>
-#include <string>
 #include <strings.h>
 #include <algorithm>
-#include <utility>
-#include <map>
 #include <functional>
+#include <map>
+#include <set>
+#include <string>
+#include <utility>
 
 #include "application_manager/application.h"
 #include "application_manager/application_manager.h"
@@ -55,18 +55,18 @@
 #include "application_manager/resumption/resume_ctrl.h"
 #include "application_manager/rpc_service.h"
 #include "connection_handler/connection_handler_impl.h"
-#include "transport_manager/common.h"
 #include "interfaces/MOBILE_API.h"
 #include "smart_objects/enum_schema_item.h"
+#include "transport_manager/common.h"
 #include "utils/file_system.h"
-#include "utils/macro.h"
 #include "utils/logger.h"
+#include "utils/macro.h"
 
-#include "formatters/formatter_json_rpc.h"
-#include "formatters/CFormatterJsonSDLRPCv2.h"
-#include "formatters/CFormatterJsonSDLRPCv1.h"
-#include "json/json.h"
 #include "formatters/CFormatterJsonBase.h"
+#include "formatters/CFormatterJsonSDLRPCv1.h"
+#include "formatters/CFormatterJsonSDLRPCv2.h"
+#include "formatters/formatter_json_rpc.h"
+#include "json/json.h"
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "ApplicationManager")
 
@@ -162,69 +162,81 @@ struct ExternalConsentStatusAppender
 
 }  // namespace
 
-std::pair<std::string,
-          mobile_apis::VehicleDataType::eType> kVehicleDataInitializer[] = {
-    std::make_pair(strings::gps, mobile_apis::VehicleDataType::VEHICLEDATA_GPS),
-    std::make_pair(strings::speed,
-                   mobile_apis::VehicleDataType::VEHICLEDATA_SPEED),
-    std::make_pair(strings::rpm, mobile_apis::VehicleDataType::VEHICLEDATA_RPM),
-    std::make_pair(strings::fuel_level,
-                   mobile_apis::VehicleDataType::VEHICLEDATA_FUELLEVEL),
-    std::make_pair(strings::fuel_level_state,
-                   mobile_apis::VehicleDataType::VEHICLEDATA_FUELLEVEL_STATE),
-    std::make_pair(strings::instant_fuel_consumption,
-                   mobile_apis::VehicleDataType::VEHICLEDATA_FUELCONSUMPTION),
-    std::make_pair(strings::fuel_range,
-                   mobile_apis::VehicleDataType::VEHICLEDATA_FUELRANGE),
-    std::make_pair(strings::external_temp,
-                   mobile_apis::VehicleDataType::VEHICLEDATA_EXTERNTEMP),
-    std::make_pair(strings::turn_signal,
-                   mobile_apis::VehicleDataType::VEHICLEDATA_TURNSIGNAL),
-    std::make_pair(strings::vin, mobile_apis::VehicleDataType::VEHICLEDATA_VIN),
-    std::make_pair(strings::prndl,
-                   mobile_apis::VehicleDataType::VEHICLEDATA_PRNDL),
-    std::make_pair(strings::tire_pressure,
-                   mobile_apis::VehicleDataType::VEHICLEDATA_TIREPRESSURE),
-    std::make_pair(strings::odometer,
-                   mobile_apis::VehicleDataType::VEHICLEDATA_ODOMETER),
-    std::make_pair(strings::belt_status,
-                   mobile_apis::VehicleDataType::VEHICLEDATA_BELTSTATUS),
-    std::make_pair(
-        strings::electronic_park_brake_status,
-        mobile_apis::VehicleDataType::VEHICLEDATA_ELECTRONICPARKBRAKESTATUS),
-    std::make_pair(strings::body_information,
-                   mobile_apis::VehicleDataType::VEHICLEDATA_BODYINFO),
-    std::make_pair(strings::device_status,
-                   mobile_apis::VehicleDataType::VEHICLEDATA_DEVICESTATUS),
-    std::make_pair(strings::driver_braking,
-                   mobile_apis::VehicleDataType::VEHICLEDATA_BRAKING),
-    std::make_pair(strings::wiper_status,
-                   mobile_apis::VehicleDataType::VEHICLEDATA_WIPERSTATUS),
-    std::make_pair(strings::head_lamp_status,
-                   mobile_apis::VehicleDataType::VEHICLEDATA_HEADLAMPSTATUS),
-    std::make_pair(strings::e_call_info,
-                   mobile_apis::VehicleDataType::VEHICLEDATA_ECALLINFO),
-    std::make_pair(strings::airbag_status,
-                   mobile_apis::VehicleDataType::VEHICLEDATA_AIRBAGSTATUS),
-    std::make_pair(strings::emergency_event,
-                   mobile_apis::VehicleDataType::VEHICLEDATA_EMERGENCYEVENT),
-    std::make_pair(strings::cluster_mode_status,
-                   mobile_apis::VehicleDataType::VEHICLEDATA_CLUSTERMODESTATUS),
-    std::make_pair(strings::my_key,
-                   mobile_apis::VehicleDataType::VEHICLEDATA_MYKEY),
-    /*
-     NOT DEFINED in mobile API
-     std::make_pair(strings::gps,
-     BATTVOLTAGE),
-     */
-    std::make_pair(strings::engine_torque,
-                   mobile_apis::VehicleDataType::VEHICLEDATA_ENGINETORQUE),
-    std::make_pair(strings::acc_pedal_pos,
-                   mobile_apis::VehicleDataType::VEHICLEDATA_ACCPEDAL),
-    std::make_pair(strings::steering_wheel_angle,
-                   mobile_apis::VehicleDataType::VEHICLEDATA_STEERINGWHEEL),
-    std::make_pair(strings::engine_oil_life,
-                   mobile_apis::VehicleDataType::VEHICLEDATA_ENGINEOILLIFE)};
+std::pair<std::string, mobile_apis::VehicleDataType::eType>
+    kVehicleDataInitializer[] = {
+        std::make_pair(strings::gps,
+                       mobile_apis::VehicleDataType::VEHICLEDATA_GPS),
+        std::make_pair(strings::speed,
+                       mobile_apis::VehicleDataType::VEHICLEDATA_SPEED),
+        std::make_pair(strings::rpm,
+                       mobile_apis::VehicleDataType::VEHICLEDATA_RPM),
+        std::make_pair(strings::fuel_level,
+                       mobile_apis::VehicleDataType::VEHICLEDATA_FUELLEVEL),
+        std::make_pair(
+            strings::fuel_level_state,
+            mobile_apis::VehicleDataType::VEHICLEDATA_FUELLEVEL_STATE),
+        std::make_pair(
+            strings::instant_fuel_consumption,
+            mobile_apis::VehicleDataType::VEHICLEDATA_FUELCONSUMPTION),
+        std::make_pair(strings::fuel_range,
+                       mobile_apis::VehicleDataType::VEHICLEDATA_FUELRANGE),
+        std::make_pair(
+            strings::cloud_app_vehicle_id,
+            mobile_apis::VehicleDataType::VEHICLEDATA_CLOUDAPPVEHICLEID),
+        std::make_pair(strings::external_temp,
+                       mobile_apis::VehicleDataType::VEHICLEDATA_EXTERNTEMP),
+        std::make_pair(strings::turn_signal,
+                       mobile_apis::VehicleDataType::VEHICLEDATA_TURNSIGNAL),
+        std::make_pair(strings::vin,
+                       mobile_apis::VehicleDataType::VEHICLEDATA_VIN),
+        std::make_pair(strings::prndl,
+                       mobile_apis::VehicleDataType::VEHICLEDATA_PRNDL),
+        std::make_pair(strings::tire_pressure,
+                       mobile_apis::VehicleDataType::VEHICLEDATA_TIREPRESSURE),
+        std::make_pair(strings::odometer,
+                       mobile_apis::VehicleDataType::VEHICLEDATA_ODOMETER),
+        std::make_pair(strings::belt_status,
+                       mobile_apis::VehicleDataType::VEHICLEDATA_BELTSTATUS),
+        std::make_pair(strings::electronic_park_brake_status,
+                       mobile_apis::VehicleDataType::
+                           VEHICLEDATA_ELECTRONICPARKBRAKESTATUS),
+        std::make_pair(strings::body_information,
+                       mobile_apis::VehicleDataType::VEHICLEDATA_BODYINFO),
+        std::make_pair(strings::device_status,
+                       mobile_apis::VehicleDataType::VEHICLEDATA_DEVICESTATUS),
+        std::make_pair(strings::driver_braking,
+                       mobile_apis::VehicleDataType::VEHICLEDATA_BRAKING),
+        std::make_pair(strings::wiper_status,
+                       mobile_apis::VehicleDataType::VEHICLEDATA_WIPERSTATUS),
+        std::make_pair(
+            strings::head_lamp_status,
+            mobile_apis::VehicleDataType::VEHICLEDATA_HEADLAMPSTATUS),
+        std::make_pair(strings::e_call_info,
+                       mobile_apis::VehicleDataType::VEHICLEDATA_ECALLINFO),
+        std::make_pair(strings::airbag_status,
+                       mobile_apis::VehicleDataType::VEHICLEDATA_AIRBAGSTATUS),
+        std::make_pair(
+            strings::emergency_event,
+            mobile_apis::VehicleDataType::VEHICLEDATA_EMERGENCYEVENT),
+        std::make_pair(
+            strings::cluster_mode_status,
+            mobile_apis::VehicleDataType::VEHICLEDATA_CLUSTERMODESTATUS),
+        std::make_pair(strings::my_key,
+                       mobile_apis::VehicleDataType::VEHICLEDATA_MYKEY),
+        /*
+         NOT DEFINED in mobile API
+         std::make_pair(strings::gps,
+         BATTVOLTAGE),
+         */
+        std::make_pair(strings::engine_torque,
+                       mobile_apis::VehicleDataType::VEHICLEDATA_ENGINETORQUE),
+        std::make_pair(strings::acc_pedal_pos,
+                       mobile_apis::VehicleDataType::VEHICLEDATA_ACCPEDAL),
+        std::make_pair(strings::steering_wheel_angle,
+                       mobile_apis::VehicleDataType::VEHICLEDATA_STEERINGWHEEL),
+        std::make_pair(
+            strings::engine_oil_life,
+            mobile_apis::VehicleDataType::VEHICLEDATA_ENGINEOILLIFE)};
 
 const VehicleData MessageHelper::vehicle_data_(
     kVehicleDataInitializer,
@@ -288,6 +300,17 @@ hmi_apis::Common_Language::eType MessageHelper::CommonLanguageFromString(
   return hmi_apis::Common_Language::INVALID_ENUM;
 }
 
+hmi_apis::Common_LightName::eType MessageHelper::CommonLightNameFromString(
+    const std::string& lightName) {
+  using namespace ns_smart_device_link::ns_smart_objects;
+  hmi_apis::Common_LightName::eType value;
+  if (EnumConversionHelper<hmi_apis::Common_LightName::eType>::StringToEnum(
+          lightName, &value)) {
+    return value;
+  }
+  return hmi_apis::Common_LightName::INVALID_ENUM;
+}
+
 std::string MessageHelper::GetDeviceMacAddressForHandle(
     const transport_manager::DeviceHandle device_handle,
     const ApplicationManager& app_mngr) {
@@ -323,6 +346,51 @@ smart_objects::SmartObjectSPtr MessageHelper::CreateMessageForHMI(
       commands::CommandImpl::hmi_protocol_type_;
   ref[strings::params][strings::correlation_id] = correlation_id;
   return message;
+}
+
+void MessageHelper::BroadcastCapabilityUpdate(
+    smart_objects::SmartObject& msg_params, ApplicationManager& app_mngr) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  smart_objects::SmartObject message(smart_objects::SmartType_Map);
+
+  message[strings::params][strings::message_type] = MessageType::kNotification;
+  message[strings::msg_params] = msg_params;
+
+  // Construct and send mobile notification
+  message[strings::params][strings::function_id] =
+      mobile_apis::FunctionID::OnSystemCapabilityUpdatedID;
+  smart_objects::SmartObjectSPtr notification =
+      std::make_shared<smart_objects::SmartObject>(message);
+  app_mngr.GetRPCService().ManageMobileCommand(
+      notification, commands::Command::CommandSource::SOURCE_SDL);
+
+  // Construct and send HMI notification
+  message[strings::params][strings::function_id] =
+      hmi_apis::FunctionID::BasicCommunication_OnSystemCapabilityUpdated;
+  smart_objects::SmartObjectSPtr hmi_notification =
+      std::make_shared<smart_objects::SmartObject>(message);
+  app_mngr.GetRPCService().ManageHMICommand(hmi_notification);
+}
+
+smart_objects::SmartObject MessageHelper::CreateAppServiceCapabilities(
+    std::vector<smart_objects::SmartObject>& all_services) {
+  smart_objects::SmartObject app_service_capabilities(
+      smart_objects::SmartType_Map);
+  smart_objects::SmartObject app_services(smart_objects::SmartType_Array);
+
+  std::vector<smart_objects::SmartObject> service_records = all_services;
+
+  int i = 0;
+  for (auto& record : service_records) {
+    smart_objects::SmartObject app_service_capability(
+        smart_objects::SmartType_Map);
+    app_service_capability[strings::updated_app_service_record] = record;
+    app_services[i] = app_service_capability;
+    i++;
+  }
+
+  app_service_capabilities[strings::app_services] = app_services;
+  return app_service_capabilities;
 }
 
 smart_objects::SmartObjectSPtr MessageHelper::CreateHashUpdateNotification(
@@ -1072,12 +1140,11 @@ MessageHelper::CreateGlobalPropertiesRequestsToHMI(
   auto& help_prompt_manager =
       const_cast<Application*>(app.get())->help_prompt_manager();
 
-  const bool can_send_ui = helpers::Compare<HelpPromptManager::SendingType,
-                                            helpers::EQ,
-                                            helpers::ONE>(
-      help_prompt_manager.GetSendingType(),
-      HelpPromptManager::SendingType::kSendVRHelp,
-      HelpPromptManager::SendingType::kSendBoth);
+  const bool can_send_ui = helpers::
+      Compare<HelpPromptManager::SendingType, helpers::EQ, helpers::ONE>(
+          help_prompt_manager.GetSendingType(),
+          HelpPromptManager::SendingType::kSendVRHelp,
+          HelpPromptManager::SendingType::kSendBoth);
 
   // UI global properties
 
@@ -1115,12 +1182,11 @@ MessageHelper::CreateGlobalPropertiesRequestsToHMI(
     requests.push_back(ui_global_properties);
   }
 
-  const bool can_send_vr = helpers::Compare<HelpPromptManager::SendingType,
-                                            helpers::EQ,
-                                            helpers::ONE>(
-      help_prompt_manager.GetSendingType(),
-      HelpPromptManager::SendingType::kSendHelpPrompt,
-      HelpPromptManager::SendingType::kSendBoth);
+  const bool can_send_vr = helpers::
+      Compare<HelpPromptManager::SendingType, helpers::EQ, helpers::ONE>(
+          help_prompt_manager.GetSendingType(),
+          HelpPromptManager::SendingType::kSendHelpPrompt,
+          HelpPromptManager::SendingType::kSendBoth);
 
   // TTS global properties
   if (can_send_vr && (app->help_prompt() || app->timeout_prompt())) {
@@ -1540,15 +1606,20 @@ bool MessageHelper::CreateHMIApplicationStruct(
   message = smart_objects::SmartObject(smart_objects::SmartType_Map);
   message[strings::app_name] = app->name();
   message[strings::app_id] = app->hmi_app_id();
+
+  const std::string policy_app_id = app->policy_app_id();
+  message[hmi_response::policy_app_id] = policy_app_id;
+
   const std::string icon_path = app->app_icon_path();
-  if (!icon_path.empty()) {
+
+  if (file_system::FileExists(app->app_icon_path())) {
     message[strings::icon] = icon_path;
   }
   if (app->IsRegistered()) {
     message[strings::hmi_display_language_desired] = app->ui_language();
     message[strings::is_media_application] = app->is_media_application();
   } else {
-    message[strings::greyOut] = app->is_greyed_out();
+    message[strings::grey_out] = app->is_greyed_out();
   }
   if (app->tts_name() && !app->tts_name()->empty()) {
     message[json::ttsName] = *(app->tts_name());
@@ -1562,6 +1633,46 @@ bool MessageHelper::CreateHMIApplicationStruct(
   }
   if (app_types) {
     message[strings::app_type] = *app_types;
+  }
+
+  const policy::RequestType::State app_request_types_state =
+      policy_handler.GetAppRequestTypeState(policy_app_id);
+  if (policy::RequestType::State::AVAILABLE == app_request_types_state) {
+    const auto request_types = policy_handler.GetAppRequestTypes(policy_app_id);
+    message[strings::request_type] =
+        SmartObject(smart_objects::SmartType_Array);
+    smart_objects::SmartObject& request_types_array =
+        message[strings::request_type];
+
+    size_t index = 0;
+    for (auto it : request_types) {
+      request_types_array[index] = it;
+      ++index;
+    }
+  } else if (policy::RequestType::State::EMPTY == app_request_types_state) {
+    message[strings::request_type] =
+        SmartObject(smart_objects::SmartType_Array);
+  }
+
+  const policy::RequestSubType::State app_request_subtypes_state =
+      policy_handler.GetAppRequestSubTypeState(policy_app_id);
+  if (policy::RequestSubType::State::AVAILABLE == app_request_subtypes_state) {
+    const auto request_subtypes =
+        policy_handler.GetAppRequestSubTypes(policy_app_id);
+    message[strings::request_subtype] =
+        SmartObject(smart_objects::SmartType_Array);
+    smart_objects::SmartObject& request_subtypes_array =
+        message[strings::request_subtype];
+
+    size_t index = 0;
+    for (auto it : request_subtypes) {
+      request_subtypes_array[index] = it;
+      ++index;
+    }
+  } else if (policy::RequestSubType::State::EMPTY ==
+             app_request_subtypes_state) {
+    message[strings::request_subtype] =
+        SmartObject(smart_objects::SmartType_Array);
   }
 
   if (day_color_scheme) {
@@ -1588,6 +1699,12 @@ bool MessageHelper::CreateHMIApplicationStruct(
                      policy_handler,
                      app_mngr,
                      &secondary_device_info);
+  }
+
+  message[strings::is_cloud_application] = app->is_cloud_app();
+  if (app->is_cloud_app()) {
+    message[strings::cloud_connection_status] =
+        app_mngr.GetCloudAppConnectionStatus(app);
   }
 
   return true;
@@ -1672,12 +1789,16 @@ void MessageHelper::SendOnAppUnregNotificationToHMI(
 
 smart_objects::SmartObjectSPtr MessageHelper::GetBCActivateAppRequestToHMI(
     ApplicationConstSharedPtr app,
-    const protocol_handler::SessionObserver& session_observer,
     const policy::PolicyHandlerInterface& policy_handler,
     hmi_apis::Common_HMILevel::eType level,
     bool send_policy_priority,
     ApplicationManager& app_mngr) {
   DCHECK_OR_RETURN(app, smart_objects::SmartObjectSPtr());
+  if (hmi_apis::Common_HMILevel::NONE == level) {
+    LOG4CXX_WARN(logger_,
+                 "BC.ActivateApp cannot be used to deactivate an application");
+    return NULL;
+  }
 
   const uint32_t correlation_id = app_mngr.GetNextHMICorrelationID();
   smart_objects::SmartObjectSPtr message =
@@ -1711,6 +1832,23 @@ smart_objects::SmartObjectSPtr MessageHelper::GetBCActivateAppRequestToHMI(
       hmi_apis::Common_HMILevel::FULL != level) {
     (*message)[strings::msg_params][strings::activate_app_hmi_level] = level;
   }
+  return message;
+}
+
+smart_objects::SmartObjectSPtr MessageHelper::GetBCCloseApplicationRequestToHMI(
+    ApplicationConstSharedPtr app, ApplicationManager& app_mngr) {
+  DCHECK_OR_RETURN(app, smart_objects::SmartObjectSPtr());
+
+  const uint32_t correlation_id = app_mngr.GetNextHMICorrelationID();
+  smart_objects::SmartObjectSPtr message =
+      std::make_shared<smart_objects::SmartObject>(
+          smart_objects::SmartType_Map);
+  (*message)[strings::params][strings::function_id] =
+      hmi_apis::FunctionID::BasicCommunication_CloseApplication;
+  (*message)[strings::params][strings::message_type] = MessageType::kRequest;
+  (*message)[strings::params][strings::correlation_id] = correlation_id;
+  (*message)[strings::msg_params][strings::app_id] = app->app_id();
+
   return message;
 }
 
@@ -2821,7 +2959,7 @@ mobile_apis::Result::eType MessageHelper::ProcessSoftButtons(
         }
         if ((!request_soft_buttons[i].keyExists(strings::text)) ||
             (!VerifyString(
-                 request_soft_buttons[i][strings::text].asString()))) {
+                request_soft_buttons[i][strings::text].asString()))) {
           return Result::INVALID_DATA;
         }
         break;
@@ -2830,7 +2968,7 @@ mobile_apis::Result::eType MessageHelper::ProcessSoftButtons(
         if ((!request_soft_buttons[i].keyExists(strings::text)) ||
             ((request_soft_buttons[i][strings::text].length()) &&
              (!VerifyString(
-                  request_soft_buttons[i][strings::text].asString())))) {
+                 request_soft_buttons[i][strings::text].asString())))) {
           return Result::INVALID_DATA;
         }
 

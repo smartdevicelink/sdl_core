@@ -34,6 +34,7 @@
 #define SRC_COMPONENTS_TRANSPORT_MANAGER_TEST_INCLUDE_TRANSPORT_MANAGER_TCP_MOCK_TCP_TRANSPORT_ADAPTER_H_
 
 #include "gmock/gmock.h"
+#include "transport_manager/common.h"
 #include "transport_manager/tcp/tcp_transport_adapter.h"
 #include "transport_manager/transport_manager_settings.h"
 
@@ -50,14 +51,18 @@ class MockTCPTransportAdapter : public TcpTransportAdapter {
       resumption::LastState& last_state,
       const transport_manager::TransportManagerSettings& settings)
       : TcpTransportAdapter(port, last_state, settings) {}
-  MOCK_CONST_METHOD2(FindEstablishedConnection,
-                     ConnectionSPtr(const DeviceUID& device_handle,
-                                    const ApplicationHandle& app_handle));
+  MOCK_CONST_METHOD2(
+      FindEstablishedConnection,
+      ConnectionSPtr(const transport_manager::DeviceUID& device_handle,
+                     const transport_manager::ApplicationHandle& app_handle));
 
-  MOCK_CONST_METHOD1(FindDevice, DeviceSptr(const DeviceUID& device_handle));
+  MOCK_CONST_METHOD1(
+      FindDevice,
+      DeviceSptr(const transport_manager::DeviceUID& device_handle));
   MOCK_METHOD2(Connect,
-               TransportAdapter::Error(const DeviceUID& device_handle,
-                                       const ApplicationHandle& app_handle));
+               TransportAdapter::Error(
+                   const transport_manager::DeviceUID& device_handle,
+                   const transport_manager::ApplicationHandle& app_handle));
   void CallStore() {
     Store();
   }

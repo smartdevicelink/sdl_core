@@ -1,7 +1,7 @@
 #ifndef SRC_COMPONENTS_INCLUDE_POLICY_POLICY_SETTINGS_H_
 #define SRC_COMPONENTS_INCLUDE_POLICY_POLICY_SETTINGS_H_
-#include <string>
 #include <stdint.h>
+#include <string>
 
 namespace policy {
 class PolicySettings {
@@ -17,8 +17,8 @@ class PolicySettings {
   virtual const std::string& preloaded_pt_file() const = 0;
 
   /**
-    * @brief Returns application storage path
-    */
+   * @brief Returns application storage path
+   */
   virtual const std::string& app_storage_folder() const = 0;
 
   virtual uint16_t attempts_to_open_policy_db() const = 0;
@@ -34,8 +34,8 @@ class PolicySettings {
   virtual bool use_full_app_id() const = 0;
 
   /**
-    * @brief Returns system files folder path
-    */
+   * @brief Returns system files folder path
+   */
   virtual const std::string& system_files_path() const = 0;
 
   virtual ~PolicySettings() {}

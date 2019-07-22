@@ -35,12 +35,12 @@
 
 #include <string.h>
 
-#include "application_manager/message_helper.h"
 #include "application_manager/application_impl.h"
+#include "application_manager/message_helper.h"
 
 #include "application_manager/policies/policy_handler.h"
-#include "utils/helpers.h"
 #include "smart_objects/smart_object.h"
+#include "utils/helpers.h"
 
 namespace sdl_rpc_plugin {
 using namespace application_manager;
@@ -298,9 +298,9 @@ bool AlertRequest::Validate(uint32_t app_id) {
         MessageHelper::VerifyTtsFiles(tts_chunks, app, application_manager_);
 
     if (mobile_apis::Result::FILE_NOT_FOUND == verification_result) {
-      LOG4CXX_ERROR(logger_,
-                    "MessageHelper::VerifyTtsFiles return "
-                        << verification_result);
+      LOG4CXX_ERROR(
+          logger_,
+          "MessageHelper::VerifyTtsFiles return " << verification_result);
       SendResponse(false,
                    mobile_apis::Result::FILE_NOT_FOUND,
                    "One or more files needed for tts_chunks are not present");
@@ -450,4 +450,4 @@ bool AlertRequest::HasHmiResponsesToWait() {
 
 }  // namespace commands
 
-}  // namespace application_manager
+}  // namespace sdl_rpc_plugin

@@ -1,5 +1,5 @@
-#include <algorithm>
 #include "policy/policy_table/types.h"
+#include <algorithm>
 #include "rpc_base/rpc_base_json_inl.h"
 
 namespace rpc {
@@ -221,6 +221,110 @@ void ApplicationPoliciesSection::SetPolicyTableType(PolicyTableType pt_type) {
   apps.SetPolicyTableType(pt_type);
 }
 
+// Handled RPC Methods
+AppServiceHandledRpc::AppServiceHandledRpc() : CompositeType(kUninitialized) {}
+
+AppServiceHandledRpc::~AppServiceHandledRpc() {}
+
+AppServiceHandledRpc::AppServiceHandledRpc(const Json::Value* value__)
+    : CompositeType(InitHelper(value__, &Json::Value::isObject))
+    , function_id(impl::ValueMember(value__, "function_id")) {}
+
+Json::Value AppServiceHandledRpc::ToJsonValue() const {
+  Json::Value result__(Json::objectValue);
+  impl::WriteJsonField("function_id", function_id, &result__);
+  return result__;
+}
+
+bool AppServiceHandledRpc::is_valid() const {
+  if (!function_id.is_valid()) {
+    return false;
+  }
+  return Validate();
+}
+
+bool AppServiceHandledRpc::is_initialized() const {
+  return (initialization_state__ != kUninitialized) || (!struct_empty());
+}
+
+bool AppServiceHandledRpc::struct_empty() const {
+  if (function_id.is_initialized()) {
+    return false;
+  }
+  return true;
+}
+
+void AppServiceHandledRpc::SetPolicyTableType(PolicyTableType pt_type) {
+  function_id.SetPolicyTableType(pt_type);
+}
+
+void AppServiceHandledRpc::ReportErrors(rpc::ValidationReport* report__) const {
+  if (struct_empty()) {
+    rpc::CompositeType::ReportErrors(report__);
+  }
+  if (!function_id.is_valid()) {
+    function_id.ReportErrors(&report__->ReportSubobject("function_id"));
+  }
+}
+
+// AppServiceInfo methods
+AppServiceInfo::AppServiceInfo() : CompositeType(kUninitialized) {}
+
+AppServiceInfo::~AppServiceInfo() {}
+
+AppServiceInfo::AppServiceInfo(const Json::Value* value__)
+    : CompositeType(InitHelper(value__, &Json::Value::isObject))
+    , service_names(impl::ValueMember(value__, "service_names"))
+    , handled_rpcs(impl::ValueMember(value__, "handled_rpcs")) {}
+
+Json::Value AppServiceInfo::ToJsonValue() const {
+  Json::Value result__(Json::objectValue);
+  impl::WriteJsonField("service_names", service_names, &result__);
+  impl::WriteJsonField("parameters", handled_rpcs, &result__);
+  return result__;
+}
+
+bool AppServiceInfo::is_valid() const {
+  if (!service_names.is_valid()) {
+    return false;
+  }
+  if (!handled_rpcs.is_valid()) {
+    return false;
+  }
+  return Validate();
+}
+
+bool AppServiceInfo::is_initialized() const {
+  return (initialization_state__ != kUninitialized) || (!struct_empty());
+}
+
+bool AppServiceInfo::struct_empty() const {
+  if (service_names.is_initialized()) {
+    return false;
+  }
+  if (handled_rpcs.is_initialized()) {
+    return false;
+  }
+  return true;
+}
+
+void AppServiceInfo::SetPolicyTableType(PolicyTableType pt_type) {
+  service_names.SetPolicyTableType(pt_type);
+  handled_rpcs.SetPolicyTableType(pt_type);
+}
+
+void AppServiceInfo::ReportErrors(rpc::ValidationReport* report__) const {
+  if (struct_empty()) {
+    rpc::CompositeType::ReportErrors(report__);
+  }
+  if (!service_names.is_valid()) {
+    service_names.ReportErrors(&report__->ReportSubobject("service_names"));
+  }
+  if (!handled_rpcs.is_valid()) {
+    handled_rpcs.ReportErrors(&report__->ReportSubobject("handled_rpcs"));
+  }
+}
+
 // ApplicationParams methods
 ApplicationParams::ApplicationParams() : PolicyBase() {}
 
@@ -241,7 +345,17 @@ ApplicationParams::ApplicationParams(const Json::Value* value__)
     , RequestSubType(impl::ValueMember(value__, "RequestSubType"))
     , memory_kb(impl::ValueMember(value__, "memory_kb"), 0)
     , heart_beat_timeout_ms(impl::ValueMember(value__, "heart_beat_timeout_ms"))
-    , moduleType(impl::ValueMember(value__, "moduleType")) {}
+    , moduleType(impl::ValueMember(value__, "moduleType"))
+    , certificate(impl::ValueMember(value__, "certificate"))
+    , hybrid_app_preference(impl::ValueMember(value__, "hybrid_app_preference"))
+    , endpoint(impl::ValueMember(value__, "endpoint"))
+    , enabled(impl::ValueMember(value__, "enabled"))
+    , auth_token(impl::ValueMember(value__, "auth_token"))
+    , cloud_transport_type(impl::ValueMember(value__, "cloud_transport_type"))
+    , icon_url(impl::ValueMember(value__, "icon_url"))
+    , app_service_parameters(impl::ValueMember(value__, "app_services"))
+    , allow_unknown_rpc_passthrough(
+          impl::ValueMember(value__, "allow_unknown_rpc_passthrough")) {}
 
 Json::Value ApplicationParams::ToJsonValue() const {
   Json::Value result__(PolicyBase::ToJsonValue());
@@ -253,6 +367,18 @@ Json::Value ApplicationParams::ToJsonValue() const {
   impl::WriteJsonField(
       "heart_beat_timeout_ms", heart_beat_timeout_ms, &result__);
   impl::WriteJsonField("moduleType", moduleType, &result__);
+  impl::WriteJsonField("certificate", certificate, &result__);
+  impl::WriteJsonField(
+      "hybrid_app_preference", hybrid_app_preference, &result__);
+  impl::WriteJsonField("endpoint", endpoint, &result__);
+  impl::WriteJsonField("enabled", enabled, &result__);
+  impl::WriteJsonField("auth_token", auth_token, &result__);
+  impl::WriteJsonField("cloud_transport_type", cloud_transport_type, &result__);
+  impl::WriteJsonField("icon_url", auth_token, &result__);
+  impl::WriteJsonField("app_services", app_service_parameters, &result__);
+  impl::WriteJsonField("allow_unknown_rpc_passthrough",
+                       allow_unknown_rpc_passthrough,
+                       &result__);
   return result__;
 }
 
@@ -275,6 +401,33 @@ bool ApplicationParams::is_valid() const {
     return false;
   }
   if (!moduleType.is_valid()) {
+    return false;
+  }
+  if (!certificate.is_valid()) {
+    return false;
+  }
+  if (!endpoint.is_valid()) {
+    return false;
+  }
+  if (!enabled.is_valid()) {
+    return false;
+  }
+  if (!auth_token.is_valid()) {
+    return false;
+  }
+  if (!cloud_transport_type.is_valid()) {
+    return false;
+  }
+  if (!hybrid_app_preference.is_valid()) {
+    return false;
+  }
+  if (!icon_url.is_valid()) {
+    return false;
+  }
+  if (!app_service_parameters.is_valid()) {
+    return false;
+  }
+  if (!allow_unknown_rpc_passthrough.is_valid()) {
     return false;
   }
   return Validate();
@@ -307,6 +460,33 @@ bool ApplicationParams::struct_empty() const {
     return false;
   }
   if (moduleType.is_initialized()) {
+    return false;
+  }
+  if (certificate.is_initialized()) {
+    return false;
+  }
+  if (endpoint.is_initialized()) {
+    return false;
+  }
+  if (enabled.is_initialized()) {
+    return false;
+  }
+  if (auth_token.is_initialized()) {
+    return false;
+  }
+  if (cloud_transport_type.is_initialized()) {
+    return false;
+  }
+  if (hybrid_app_preference.is_initialized()) {
+    return false;
+  }
+  if (icon_url.is_initialized()) {
+    return false;
+  }
+  if (app_service_parameters.is_initialized()) {
+    return false;
+  }
+  if (allow_unknown_rpc_passthrough.is_initialized()) {
     return false;
   }
   return true;
@@ -357,6 +537,36 @@ void ApplicationParams::ReportErrors(rpc::ValidationReport* report__) const {
   if (!moduleType.is_valid()) {
     moduleType.ReportErrors(&report__->ReportSubobject("moduleType"));
   }
+  if (!certificate.is_valid()) {
+    certificate.ReportErrors(&report__->ReportSubobject("certificate"));
+  }
+  if (!endpoint.is_valid()) {
+    moduleType.ReportErrors(&report__->ReportSubobject("endpoint"));
+  }
+  if (!enabled.is_valid()) {
+    moduleType.ReportErrors(&report__->ReportSubobject("enabled"));
+  }
+  if (!auth_token.is_valid()) {
+    moduleType.ReportErrors(&report__->ReportSubobject("auth_token"));
+  }
+  if (!cloud_transport_type.is_valid()) {
+    moduleType.ReportErrors(&report__->ReportSubobject("cloud_transport_type"));
+  }
+  if (!hybrid_app_preference.is_valid()) {
+    moduleType.ReportErrors(
+        &report__->ReportSubobject("hybrid_app_preference"));
+  }
+  if (!icon_url.is_valid()) {
+    moduleType.ReportErrors(&report__->ReportSubobject("icon_url"));
+  }
+  if (!app_service_parameters.is_valid()) {
+    app_service_parameters.ReportErrors(
+        &report__->ReportSubobject("app_services"));
+  }
+  if (!allow_unknown_rpc_passthrough.is_valid()) {
+    allow_unknown_rpc_passthrough.ReportErrors(
+        &report__->ReportSubobject("allow_unknown_rpc_passthrough"));
+  }
 }
 
 void ApplicationParams::SetPolicyTableType(PolicyTableType pt_type) {
@@ -367,6 +577,14 @@ void ApplicationParams::SetPolicyTableType(PolicyTableType pt_type) {
   memory_kb.SetPolicyTableType(pt_type);
   heart_beat_timeout_ms.SetPolicyTableType(pt_type);
   moduleType.SetPolicyTableType(pt_type);
+  certificate.SetPolicyTableType(pt_type);
+  endpoint.SetPolicyTableType(pt_type);
+  enabled.SetPolicyTableType(pt_type);
+  cloud_transport_type.SetPolicyTableType(pt_type);
+  hybrid_app_preference.SetPolicyTableType(pt_type);
+  icon_url.SetPolicyTableType(pt_type);
+  app_service_parameters.SetPolicyTableType(pt_type);
+  allow_unknown_rpc_passthrough.SetPolicyTableType(pt_type);
 }
 
 // RpcParameters methods

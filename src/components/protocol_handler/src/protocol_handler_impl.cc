@@ -32,20 +32,20 @@
 
 #include "protocol_handler/protocol_handler_impl.h"
 #include <arpa/inet.h>  // for INET6_ADDRSTRLEN
-#include <memory.h>
-#include <algorithm>  // std::find
 #include <bson_object.h>
+#include <memory.h>
 #include <protocol/bson_object_keys.h>
+#include <algorithm>  // std::find
 
 #include "connection_handler/connection_handler_impl.h"
+#include "protocol/common.h"
 #include "protocol_handler/session_observer.h"
 #include "utils/byte_order.h"
 #include "utils/helpers.h"
-#include "protocol/common.h"
 
 #ifdef ENABLE_SECURITY
-#include "security_manager/ssl_context.h"
 #include "security_manager/security_manager.h"
+#include "security_manager/ssl_context.h"
 #endif  // ENABLE_SECURITY
 
 namespace protocol_handler {
@@ -59,10 +59,11 @@ CREATE_LOGGERPTR_GLOBAL(logger_, "ProtocolHandler")
 std::string ConvertPacketDataToString(const uint8_t* data,
                                       const size_t data_size);
 
-const size_t kStackSize = 65536;
+const size_t kStackSize = 131072;
 
-utils::SemanticVersion defaultProtocolVersion(5, 1, 0);
-utils::SemanticVersion minMultipleTransportsVersion(5, 1, 0);
+utils::SemanticVersion default_protocol_version(5, 2, 0);
+utils::SemanticVersion min_multiple_transports_version(5, 1, 0);
+utils::SemanticVersion min_cloud_app_version(5, 2, 0);
 
 ProtocolHandlerImpl::ProtocolHandlerImpl(
     const ProtocolHandlerSettings& settings,
@@ -309,16 +310,16 @@ void ProtocolHandlerImpl::SendStartSessionAck(
                                &params, strings::hash_id)));
 
       // Minimum protocol version supported by both
-      utils::SemanticVersion* minVersion =
+      utils::SemanticVersion* min_version =
           (full_version.major_version_ < PROTOCOL_VERSION_5)
-              ? &defaultProtocolVersion
+              ? &default_protocol_version
               : utils::SemanticVersion::min(full_version,
-                                            defaultProtocolVersion);
-      char protocolVersionString[256];
-      strncpy(protocolVersionString, (*minVersion).toString().c_str(), 255);
+                                            default_protocol_version);
+      char protocol_version_string[256];
+      strncpy(protocol_version_string, (*min_version).toString().c_str(), 255);
 
       const bool protocol_ver_written = bson_object_put_string(
-          &params, strings::protocol_version, protocolVersionString);
+          &params, strings::protocol_version, protocol_version_string);
       UNUSED(protocol_ver_written);
       LOG4CXX_DEBUG(
           logger_,
@@ -327,12 +328,12 @@ void ProtocolHandlerImpl::SendStartSessionAck(
               << bson_object_get_string(&params, strings::protocol_version));
 
       LOG4CXX_INFO(logger_,
-                   "Protocol Version String " << protocolVersionString);
+                   "Protocol Version String " << protocol_version_string);
 
       std::vector<std::string> secondaryTransports;
       std::vector<int32_t> audioServiceTransports;
       std::vector<int32_t> videoServiceTransports;
-      if (*minVersion >= minMultipleTransportsVersion) {
+      if (*min_version >= min_multiple_transports_version) {
         if (ParseSecondaryTransportConfiguration(connection_id,
                                                  secondaryTransports,
                                                  audioServiceTransports,
@@ -410,10 +411,23 @@ void ProtocolHandlerImpl::SendStartSessionAck(
         connection_handler_.SetSecondaryTransportID(session_id,
                                                     kDisabledSecondary);
       }
+
+      std::string policy_app_id =
+          connection_handler_.GetCloudAppID(connection_id);
+      if (*min_version >= min_cloud_app_version && !policy_app_id.empty()) {
+        sync_primitives::AutoLock lock(auth_token_map_lock_);
+        auto it = auth_token_map_.find(policy_app_id);
+        if (it != auth_token_map_.end()) {
+          char auth_token[65536];
+          strncpy(auth_token, it->second.c_str(), 65535);
+          auth_token[sizeof(auth_token) - 1] = '\0';
+          bson_object_put_string(&params, strings::auth_token, auth_token);
+        }
+      }
     }
-    uint8_t* payloadBytes = bson_object_to_bytes(&params);
-    ptr->set_data(payloadBytes, bson_object_size(&params));
-    free(payloadBytes);
+    uint8_t* payload_bytes = bson_object_to_bytes(&params);
+    ptr->set_data(payload_bytes, bson_object_size(&params));
+    free(payload_bytes);
   } else {
     set_hash_id(hash_id, *ptr);
   }
@@ -961,9 +975,9 @@ void ProtocolHandlerImpl::OnTMMessageReceived(const RawMessagePtr tm_message) {
   LOG4CXX_DEBUG(logger_, "Proccessed " << protocol_frames.size() << " frames");
   if (result != RESULT_OK) {
     if (result == RESULT_MALFORMED_OCCURS) {
-      LOG4CXX_WARN(logger_,
-                   "Malformed message occurs, connection id "
-                       << connection_key);
+      LOG4CXX_WARN(
+          logger_,
+          "Malformed message occurs, connection id " << connection_key);
       if (!get_settings().malformed_message_filtering()) {
         LOG4CXX_DEBUG(logger_, "Malformed message filterign disabled");
         session_observer_.OnMalformedMessageCallback(connection_key);
@@ -1087,6 +1101,10 @@ void ProtocolHandlerImpl::OnTMMessageSendFailed(
                                    << "Error_text: " << error.text());
 }
 
+void ProtocolHandlerImpl::OnConnectionPending(
+    const transport_manager::DeviceInfo& device_info,
+    const transport_manager::ConnectionUID connection_id) {}
+
 void ProtocolHandlerImpl::OnConnectionEstablished(
     const transport_manager::DeviceInfo& device_info,
     const transport_manager::ConnectionUID connection_id) {
@@ -1181,6 +1199,17 @@ void ProtocolHandlerImpl::OnTransportConfigUpdated(
   }
 }
 
+void ProtocolHandlerImpl::OnAuthTokenUpdated(const std::string& policy_app_id,
+                                             const std::string& auth_token) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  sync_primitives::AutoLock lock(auth_token_map_lock_);
+  if (auth_token.empty()) {
+    auth_token_map_.erase(policy_app_id);
+  } else {
+    auth_token_map_[policy_app_id] = auth_token;
+  }
+}
+
 RESULT_CODE ProtocolHandlerImpl::SendFrame(const ProtocolFramePtr packet) {
   LOG4CXX_AUTO_TRACE(logger_);
   if (!packet) {
@@ -1256,9 +1285,9 @@ RESULT_CODE ProtocolHandlerImpl::SendMultiFrameMessage(
     const bool is_final_message) {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  LOG4CXX_DEBUG(logger_,
-                " data size " << data_size << " max_frame_size "
-                              << max_frame_size);
+  LOG4CXX_DEBUG(
+      logger_,
+      " data size " << data_size << " max_frame_size " << max_frame_size);
 
   // remainder of last frame
   const size_t lastframe_remainder = data_size % max_frame_size;
@@ -1472,11 +1501,18 @@ uint32_t get_hash_id(const ProtocolPacket& packet) {
     return HASH_ID_WRONG;
   }
   if (packet.protocol_version() >= PROTOCOL_VERSION_5) {
-    BsonObject obj = bson_object_from_bytes(packet.data());
-    const uint32_t hash_id =
-        (uint32_t)bson_object_get_int32(&obj, strings::hash_id);
-    bson_object_deinitialize(&obj);
-    return hash_id;
+    BsonObject obj;
+    size_t obj_size = bson_object_from_bytes_len(
+        &obj, packet.data(), packet.total_data_bytes());
+    if (obj_size > 0) {
+      const uint32_t hash_id =
+          (uint32_t)bson_object_get_int32(&obj, strings::hash_id);
+      bson_object_deinitialize(&obj);
+      return hash_id;
+    } else {
+      LOG4CXX_WARN(logger_, "Failed to parse BSON field for hash ID");
+      return HASH_ID_WRONG;
+    }
   } else {
     const uint32_t hash_be = *(reinterpret_cast<uint32_t*>(packet.data()));
     const uint32_t hash_le = BE_TO_LE32(hash_be);
@@ -1608,7 +1644,13 @@ RESULT_CODE ProtocolHandlerImpl::HandleControlMessageStartSession(
 
   BsonObject bson_obj;
   if (packet->data() != NULL) {
-    bson_obj = bson_object_from_bytes(packet->data());
+    size_t bson_obj_size = bson_object_from_bytes_len(
+        &bson_obj, packet->data(), packet->total_data_bytes());
+    if (bson_obj_size == 0) {
+      LOG4CXX_WARN(logger_,
+                   "Failed to parse BSON field of start service packet");
+      bson_object_initialize_default(&bson_obj);
+    }
   } else {
     bson_object_initialize_default(&bson_obj);
   }
@@ -1681,13 +1723,12 @@ void ProtocolHandlerImpl::NotifySessionStarted(
     start_session_frame_map_.erase(it);
   }
 
-  const ServiceType service_type = ServiceTypeFromByte(packet->service_type());
   const uint8_t protocol_version = packet->protocol_version();
 
   if (0 == context.new_session_id_) {
     LOG4CXX_WARN(logger_,
                  "Refused by session_observer to create service "
-                     << static_cast<int32_t>(service_type) << " type.");
+                     << packet->service_type() << " type.");
     SendStartSessionNAck(context.connection_id_,
                          packet->session_id(),
                          protocol_version,
@@ -1702,33 +1743,42 @@ void ProtocolHandlerImpl::NotifySessionStarted(
   // when video service is successfully started, copy input parameters
   // ("width", "height", "videoProtocol", "videoCodec") to the ACK packet
   if (packet->service_type() == kMobileNav && packet->data() != NULL) {
-    BsonObject req_param = bson_object_from_bytes(packet->data());
-    BsonElement* element = NULL;
+    BsonObject req_param;
+    size_t req_param_size = bson_object_from_bytes_len(
+        &req_param, packet->data(), packet->total_data_bytes());
+    if (req_param_size > 0) {
+      BsonElement* element = NULL;
 
-    if ((element = bson_object_get(&req_param, strings::height)) != NULL &&
-        element->type == TYPE_INT32) {
-      bson_object_put_int32(start_session_ack_params.get(),
-                            strings::height,
-                            bson_object_get_int32(&req_param, strings::height));
+      if ((element = bson_object_get(&req_param, strings::height)) != NULL &&
+          element->type == TYPE_INT32) {
+        bson_object_put_int32(
+            start_session_ack_params.get(),
+            strings::height,
+            bson_object_get_int32(&req_param, strings::height));
+      }
+      if ((element = bson_object_get(&req_param, strings::width)) != NULL &&
+          element->type == TYPE_INT32) {
+        bson_object_put_int32(
+            start_session_ack_params.get(),
+            strings::width,
+            bson_object_get_int32(&req_param, strings::width));
+      }
+      char* protocol =
+          bson_object_get_string(&req_param, strings::video_protocol);
+      if (protocol != NULL) {
+        bson_object_put_string(
+            start_session_ack_params.get(), strings::video_protocol, protocol);
+      }
+      char* codec = bson_object_get_string(&req_param, strings::video_codec);
+      if (codec != NULL) {
+        bson_object_put_string(
+            start_session_ack_params.get(), strings::video_codec, codec);
+      }
+      bson_object_deinitialize(&req_param);
+    } else {
+      LOG4CXX_WARN(logger_,
+                   "Failed to parse BSON field of start service (video)");
     }
-    if ((element = bson_object_get(&req_param, strings::width)) != NULL &&
-        element->type == TYPE_INT32) {
-      bson_object_put_int32(start_session_ack_params.get(),
-                            strings::width,
-                            bson_object_get_int32(&req_param, strings::width));
-    }
-    char* protocol =
-        bson_object_get_string(&req_param, strings::video_protocol);
-    if (protocol != NULL) {
-      bson_object_put_string(
-          start_session_ack_params.get(), strings::video_protocol, protocol);
-    }
-    char* codec = bson_object_get_string(&req_param, strings::video_codec);
-    if (codec != NULL) {
-      bson_object_put_string(
-          start_session_ack_params.get(), strings::video_codec, codec);
-    }
-    bson_object_deinitialize(&req_param);
   }
 
   std::shared_ptr<utils::SemanticVersion> fullVersion;
@@ -1737,21 +1787,30 @@ void ProtocolHandlerImpl::NotifySessionStarted(
   // could still be a payload, in which case we can get the real protocol
   // version
   if (packet->service_type() == kRpc && packet->data() != NULL) {
-    BsonObject request_params = bson_object_from_bytes(packet->data());
-    char* version_param =
-        bson_object_get_string(&request_params, strings::protocol_version);
-    std::string version_string(version_param == NULL ? "" : version_param);
-    fullVersion = std::make_shared<utils::SemanticVersion>(version_string);
-    // Constructed payloads added in Protocol v5
-    if (fullVersion->major_version_ < PROTOCOL_VERSION_5) {
-      rejected_params.push_back(std::string(strings::protocol_version));
+    BsonObject request_params;
+    size_t request_params_size = bson_object_from_bytes_len(
+        &request_params, packet->data(), packet->total_data_bytes());
+    if (request_params_size > 0) {
+      char* version_param =
+          bson_object_get_string(&request_params, strings::protocol_version);
+      std::string version_string(version_param == NULL ? "" : version_param);
+      fullVersion = std::make_shared<utils::SemanticVersion>(version_string);
+      // Constructed payloads added in Protocol v5
+      if (fullVersion->major_version_ < PROTOCOL_VERSION_5) {
+        rejected_params.push_back(std::string(strings::protocol_version));
+      }
+      bson_object_deinitialize(&request_params);
+    } else {
+      LOG4CXX_WARN(logger_,
+                   "Failed to parse start service packet for version string");
+      fullVersion = std::make_shared<utils::SemanticVersion>();
     }
-    bson_object_deinitialize(&request_params);
   } else {
     fullVersion = std::make_shared<utils::SemanticVersion>();
   }
 
 #ifdef ENABLE_SECURITY
+  const ServiceType service_type = ServiceTypeFromByte(packet->service_type());
   // for packet is encrypted and security plugin is enable
   if (context.is_protected_ && security_manager_) {
     const uint32_t connection_key = session_observer_.KeyFromPair(
@@ -1851,9 +1910,9 @@ void ProtocolHandlerImpl::NotifySessionStarted(
 RESULT_CODE ProtocolHandlerImpl::HandleControlMessageHeartBeat(
     const ProtocolPacket& packet) {
   const ConnectionID connection_id = packet.connection_id();
-  LOG4CXX_DEBUG(logger_,
-                "Sending heart beat acknowledgment for connection "
-                    << connection_id);
+  LOG4CXX_DEBUG(
+      logger_,
+      "Sending heart beat acknowledgment for connection " << connection_id);
   uint8_t protocol_version;
   if (session_observer_.ProtocolVersionUsed(
           connection_id, packet.session_id(), protocol_version)) {
@@ -1889,9 +1948,9 @@ void ProtocolHandlerImpl::PopValideAndExpirateMultiframes() {
 
     const uint32_t connection_key = session_observer_.KeyFromPair(
         frame->connection_id(), frame->session_id());
-    LOG4CXX_DEBUG(logger_,
-                  "Result frame" << frame << "for connection "
-                                 << connection_key);
+    LOG4CXX_DEBUG(
+        logger_,
+        "Result frame" << frame << "for connection " << connection_key);
     const RawMessagePtr rawMessage(new RawMessage(connection_key,
                                                   frame->protocol_version(),
                                                   frame->data(),
@@ -1918,9 +1977,9 @@ bool ProtocolHandlerImpl::TrackMessage(const uint32_t& connection_key) {
   if (frequency_time > 0u && frequency_count > 0u) {
     const size_t message_frequency =
         message_meter_.TrackMessage(connection_key);
-    LOG4CXX_DEBUG(logger_,
-                  "Frequency of " << connection_key << " is "
-                                  << message_frequency);
+    LOG4CXX_DEBUG(
+        logger_,
+        "Frequency of " << connection_key << " is " << message_frequency);
     if (message_frequency > frequency_count) {
       LOG4CXX_WARN(logger_,
                    "Frequency of " << connection_key << " is marked as high.");
@@ -1946,9 +2005,9 @@ bool ProtocolHandlerImpl::TrackMalformedMessage(const uint32_t& connection_key,
                                             << malformed_message_frequency);
     if (!get_settings().malformed_message_filtering() ||
         malformed_message_frequency > malformed_frequency_count) {
-      LOG4CXX_WARN(logger_,
-                   "Malformed frequency of " << connection_key
-                                             << " is marked as high.");
+      LOG4CXX_WARN(
+          logger_,
+          "Malformed frequency of " << connection_key << " is marked as high.");
       session_observer_.OnMalformedMessageCallback(connection_key);
       malformed_message_meter_.RemoveIdentifier(connection_key);
       return true;
@@ -1998,7 +2057,8 @@ void ProtocolHandlerImpl::Handle(const impl::RawFordMessageToMobile message) {
                 "Message to mobile app: connection id "
                     << static_cast<int>(message->connection_id())
                     << ";"
-                       " dataSize: " << message->data_size()
+                       " dataSize: "
+                    << message->data_size()
                     << " ;"
                        " protocolVersion "
                     << static_cast<int>(message->protocol_version()));
@@ -2245,7 +2305,10 @@ const impl::TransportTypes transportTypes = {
         impl::TransportDescription(impl::TransportType::TT_USB, true, false)),
     std::make_pair(
         std::string("IAP_CARPLAY"),
-        impl::TransportDescription(impl::TransportType::TT_WIFI, true, false))};
+        impl::TransportDescription(impl::TransportType::TT_WIFI, true, false)),
+    std::make_pair(std::string("WEBSOCKET"),
+                   impl::TransportDescription(
+                       impl::TransportType::TT_WEBSOCKET, false, false))};
 
 const impl::TransportDescription
 ProtocolHandlerImpl::GetTransportTypeFromConnectionType(
@@ -2400,9 +2463,9 @@ void ProtocolHandlerImpl::GenerateServiceTransportsForStartSessionAck(
     std::vector<std::string>::const_iterator it = service_transports.begin();
     for (; it != service_transports.end(); it++) {
       const utils::custom_string::CustomString transport(*it);
-      LOG4CXX_TRACE(logger_,
-                    "Service Allowed to run on " << transport.c_str()
-                                                 << " transport");
+      LOG4CXX_TRACE(
+          logger_,
+          "Service Allowed to run on " << transport.c_str() << " transport");
 
       if (!fPrimaryAdded &&
           (transport.CompareIgnoreCase(primary_connection_type.c_str()) ||

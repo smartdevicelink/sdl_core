@@ -30,10 +30,10 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "rpc_base/rpc_base.h"
 #include "gtest/gtest.h"
 #include "json/writer.h"
 #include "rpc_base/gtest_support.h"
-#include "rpc_base/rpc_base.h"
 
 namespace test {
 namespace components {

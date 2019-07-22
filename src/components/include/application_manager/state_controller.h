@@ -33,35 +33,35 @@
 #ifndef SRC_COMPONENTS_INCLUDE_APPLICATION_MANAGER_STATE_CONTROLLER_H_
 #define SRC_COMPONENTS_INCLUDE_APPLICATION_MANAGER_STATE_CONTROLLER_H_
 
-#include "stdint.h"
-#include "application_manager/request_controller_settings.h"
-#include "application_manager/application_manager.h"
 #include "application_manager/application.h"
+#include "application_manager/application_manager.h"
+#include "application_manager/request_controller_settings.h"
+#include "stdint.h"
 
 namespace application_manager {
 class StateController {
  public:
   virtual void SetRegularState(ApplicationSharedPtr app,
                                HmiStatePtr state,
-                               const bool SendActivateApp) = 0;
+                               const bool request_hmi_state_change) = 0;
 
   virtual void SetRegularState(
       ApplicationSharedPtr app,
       const mobile_apis::HMILevel::eType hmi_level,
       const mobile_apis::AudioStreamingState::eType audio_state,
       const mobile_apis::VideoStreamingState::eType video_state,
-      const bool SendActivateApp) = 0;
+      const bool request_hmi_state_change) = 0;
 
   virtual void SetRegularState(ApplicationSharedPtr app,
                                const mobile_apis::HMILevel::eType hmi_level,
-                               const bool SendActivateApp) = 0;
+                               const bool request_hmi_state_change) = 0;
   virtual void SetRegularState(
       ApplicationSharedPtr app,
       const mobile_apis::HMILevel::eType hmi_level,
       const mobile_apis::AudioStreamingState::eType audio_state,
       const mobile_apis::VideoStreamingState::eType video_state,
       const mobile_apis::SystemContext::eType system_context,
-      const bool SendActivateApp) = 0;
+      const bool request_hmi_state_change) = 0;
 
   virtual void SetRegularState(
       ApplicationSharedPtr app,
@@ -82,9 +82,6 @@ class StateController {
       ApplicationSharedPtr app,
       const mobile_apis::HMILevel::eType default_level) = 0;
 
-  virtual int64_t SendBCActivateApp(ApplicationConstSharedPtr app,
-                                    hmi_apis::Common_HMILevel::eType level,
-                                    bool send_policy_priority) = 0;
   /**
    * @brief OnVideoStreamingStarted process video streaming started
    * @param app projection or navigation application starting streaming

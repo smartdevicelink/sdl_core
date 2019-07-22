@@ -33,17 +33,17 @@
 #include <stdint.h>
 #include <string>
 
-#include "gtest/gtest.h"
-#include "smart_objects/smart_object.h"
-#include "application_manager/smart_object_keys.h"
-#include "application_manager/commands/commands_test.h"
 #include "application_manager/application.h"
+#include "application_manager/commands/commands_test.h"
+#include "application_manager/commands/response_from_hmi.h"
+#include "application_manager/mock_application_manager.h"
 #include "application_manager/mock_hmi_capabilities.h"
 #include "application_manager/mock_message_helper.h"
-#include "application_manager/mock_application_manager.h"
-#include "application_manager/commands/response_from_hmi.h"
-#include "hmi/tts_get_supported_languages_response.h"
 #include "application_manager/policies/mock_policy_handler_interface.h"
+#include "application_manager/smart_object_keys.h"
+#include "gtest/gtest.h"
+#include "hmi/tts_get_supported_languages_response.h"
+#include "smart_objects/smart_object.h"
 
 namespace test {
 namespace components {
@@ -52,14 +52,14 @@ namespace hmi_commands_test {
 namespace tts_get_supported_languages_response {
 
 using ::testing::_;
-using ::testing::Return;
 using ::testing::NiceMock;
+using ::testing::Return;
 namespace am = ::application_manager;
 namespace strings = ::application_manager::strings;
 namespace hmi_response = am::hmi_response;
+using am::commands::CommandImpl;
 using application_manager::commands::ResponseFromHMI;
 using sdl_rpc_plugin::commands::TTSGetSupportedLanguagesResponse;
-using am::commands::CommandImpl;
 
 typedef std::shared_ptr<ResponseFromHMI> ResponseFromHMIPtr;
 typedef NiceMock<
@@ -113,7 +113,8 @@ TEST_F(TTSGetSupportedLanguageResponseTest, RUN_UNSUCCESS) {
       CreateCommand<TTSGetSupportedLanguagesResponse>(command_msg));
 
   EXPECT_CALL(mock_hmi_capabilities_,
-              set_tts_supported_languages(supported_languages)).Times(0);
+              set_tts_supported_languages(supported_languages))
+      .Times(0);
 
   command->Run();
 

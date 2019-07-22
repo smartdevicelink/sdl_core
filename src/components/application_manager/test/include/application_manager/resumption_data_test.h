@@ -33,20 +33,20 @@
 #ifndef SRC_COMPONENTS_APPLICATION_MANAGER_TEST_INCLUDE_APPLICATION_MANAGER_RESUMPTION_DATA_TEST_H_
 #define SRC_COMPONENTS_APPLICATION_MANAGER_TEST_INCLUDE_APPLICATION_MANAGER_RESUMPTION_DATA_TEST_H_
 
-#include <string>
 #include <algorithm>
-#include "gtest/gtest.h"
-#include "application_manager/usage_statistics.h"
+#include <string>
+#include "application_manager/event_engine/event_dispatcher.h"
+#include "application_manager/mock_app_extension.h"
 #include "application_manager/mock_application.h"
 #include "application_manager/mock_application_manager.h"
-#include "application_manager/mock_app_extension.h"
-#include "utils/data_accessor.h"
-#include "config_profile/profile.h"
-#include "application_manager/policies/policy_handler.h"
-#include "application_manager/state_controller.h"
-#include "application_manager/resumption/resume_ctrl.h"
-#include "application_manager/event_engine/event_dispatcher.h"
 #include "application_manager/mock_application_manager_settings.h"
+#include "application_manager/policies/policy_handler.h"
+#include "application_manager/resumption/resume_ctrl.h"
+#include "application_manager/state_controller.h"
+#include "application_manager/usage_statistics.h"
+#include "config_profile/profile.h"
+#include "gtest/gtest.h"
+#include "utils/data_accessor.h"
 
 namespace test {
 namespace components {

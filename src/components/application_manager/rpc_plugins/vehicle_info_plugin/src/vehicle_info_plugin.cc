@@ -31,16 +31,17 @@
  */
 
 #include "vehicle_info_plugin/vehicle_info_plugin.h"
-#include "vehicle_info_plugin/vehicle_info_command_factory.h"
-#include "vehicle_info_plugin/vehicle_info_app_extension.h"
+#include "application_manager/message_helper.h"
+#include "application_manager/plugin_manager/plugin_keys.h"
 #include "application_manager/smart_object_keys.h"
-#include "application_manager/message_helper.h"
-#include "application_manager/message_helper.h"
+#include "vehicle_info_plugin/vehicle_info_app_extension.h"
+#include "vehicle_info_plugin/vehicle_info_command_factory.h"
 
 namespace vehicle_info_plugin {
 CREATE_LOGGERPTR_GLOBAL(logger_, "VehicleInfoPlugin")
 
 namespace strings = application_manager::strings;
+namespace plugins = application_manager::plugin_manager;
 
 VehicleInfoPlugin::VehicleInfoPlugin() : application_manager_(nullptr) {}
 
@@ -61,7 +62,7 @@ bool VehicleInfoPlugin::IsAbleToProcess(
 }
 
 std::string VehicleInfoPlugin::PluginName() {
-  return "Vehicle Info Plugin";
+  return plugins::plugin_names::vehicle_info_rpc_plugin;
 }
 
 app_mngr::CommandFactory& VehicleInfoPlugin::GetCommandFactory() {
@@ -160,7 +161,7 @@ void VehicleInfoPlugin::DeleteSubscriptions(
     }
   }
 }
-}
+}  // namespace vehicle_info_plugin
 
 extern "C" application_manager::plugin_manager::RPCPlugin* Create() {
   return new vehicle_info_plugin::VehicleInfoPlugin();

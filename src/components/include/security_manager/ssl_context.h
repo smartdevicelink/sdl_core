@@ -33,10 +33,10 @@
 #ifndef SRC_COMPONENTS_INCLUDE_SECURITY_MANAGER_SSL_CONTEXT_H_
 #define SRC_COMPONENTS_INCLUDE_SECURITY_MANAGER_SSL_CONTEXT_H_
 
-#include <cstddef>  // for size_t typedef
-#include <string>
 #include <ctype.h>
 #include <algorithm>
+#include <cstddef>  // for size_t typedef
+#include <string>
 #include "utils/custom_string.h"
 
 // TODO(EZamakhov): update brief info
@@ -106,11 +106,11 @@ class SSLContext {
   virtual bool IsInitCompleted() const = 0;
   virtual bool IsHandshakePending() const = 0;
   /**
-  * @brief GetCertificateDueDate gets certificate expiration date
-  * @param due_date - certificate expiration time to be received
-  * @return True if certificate expiration date received
-  * otherwise False
-  */
+   * @brief GetCertificateDueDate gets certificate expiration date
+   * @param due_date - certificate expiration time to be received
+   * @return True if certificate expiration date received
+   * otherwise False
+   */
   virtual bool GetCertificateDueDate(time_t& due_date) const = 0;
   virtual bool HasCertificate() const = 0;
   virtual size_t get_max_block_size(size_t mtu) const = 0;

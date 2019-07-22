@@ -35,15 +35,15 @@
 
 #include <list>
 
-#include "utils/lock.h"
-#include "policy/policy_manager.h"
-#include "policy/policy_table.h"
-#include "policy/cache_manager_interface.h"
-#include "policy/update_status_manager.h"
-#include "policy/policy_table/functions.h"
-#include "policy/usage_statistics/statistics_manager.h"
 #include "policy/access_remote.h"
 #include "policy/access_remote_impl.h"
+#include "policy/cache_manager_interface.h"
+#include "policy/policy_manager.h"
+#include "policy/policy_table.h"
+#include "policy/policy_table/functions.h"
+#include "policy/update_status_manager.h"
+#include "policy/usage_statistics/statistics_manager.h"
+#include "utils/lock.h"
 
 namespace policy_table = rpc::policy_table_interface_base;
 
@@ -207,6 +207,15 @@ class PolicyManagerImpl : public PolicyManager {
    *obtained.
    */
   std::string GetLockScreenIconUrl() const OVERRIDE;
+
+  /**
+   * @brief Get Icon Url used for showing a cloud apps icon before the intial
+   *registration
+   *
+   * @return url which point to the resourse where icon could be
+   *obtained.
+   */
+  std::string GetIconUrl(const std::string& policy_app_id) const OVERRIDE;
 
   /**
    * @brief Handler of PTS sending out
@@ -533,10 +542,10 @@ class PolicyManagerImpl : public PolicyManager {
   void OnAppsSearchCompleted(const bool trigger_ptu) OVERRIDE;
 
   /**
-    * @brief Get state of request types for given application
-    * @param policy_app_id Unique application id
-    * @return request type state
-    */
+   * @brief Get state of request types for given application
+   * @param policy_app_id Unique application id
+   * @return request type state
+   */
   RequestType::State GetAppRequestTypesState(
       const std::string& policy_app_id) const OVERRIDE;
 
@@ -557,10 +566,10 @@ class PolicyManagerImpl : public PolicyManager {
       const std::string policy_app_id) const OVERRIDE;
 
   /**
-    * @brief Gets request subtypes for application
-    * @param policy_app_id Unique application id
-    * @return request subtypes of application
-    */
+   * @brief Gets request subtypes for application
+   * @param policy_app_id Unique application id
+   * @return request subtypes of application
+   */
   const std::vector<std::string> GetAppRequestSubTypes(
       const std::string& policy_app_id) const OVERRIDE;
 
@@ -569,6 +578,108 @@ class PolicyManagerImpl : public PolicyManager {
    * @return vehicle information
    */
   const VehicleInfo GetVehicleInfo() const OVERRIDE;
+
+  /**
+   * @brief Get a list of enabled cloud applications
+   * @param enabled_apps List filled with the policy app id of each enabled
+   * cloud application
+   */
+  void GetEnabledCloudApps(
+      std::vector<std::string>& enabled_apps) const OVERRIDE;
+
+  /**
+   * @brief Get cloud app policy information, all fields that aren't set for a
+   * given app will be filled with empty strings
+   * @param policy_app_id Unique application id
+   * @param enabled Whether or not the app is enabled
+   * @param endpoint Filled with the endpoint used to connect to the cloud
+   * application
+   * @param certificate Filled with the certificate used to for creating a
+   * secure connection to the cloud application
+   * @param auth_token Filled with the token used for authentication when
+   * reconnecting to the cloud app
+   * @param cloud_transport_type Filled with the transport type used by the
+   * cloud application (ex. "WSS")
+   * @param hybrid_app_preference Filled with the hybrid app preference for the
+   * cloud application set by the user
+   */
+  bool GetCloudAppParameters(const std::string& policy_app_id,
+                             bool& enabled,
+                             std::string& endpoint,
+                             std::string& certificate,
+                             std::string& auth_token,
+                             std::string& cloud_transport_type,
+                             std::string& hybrid_app_preference) const OVERRIDE;
+
+  /**
+   * @ brief Initialize new cloud app in the policy table
+   * @ param policy_app_id Application ID
+   */
+  void InitCloudApp(const std::string& policy_app_id) OVERRIDE;
+
+  /**
+   * @brief Enable or disable a cloud application in the HMI
+   * @param enabled Cloud app enabled state
+   */
+  void SetCloudAppEnabled(const std::string& policy_app_id,
+                          const bool enabled) OVERRIDE;
+
+  /**
+   * @brief Set an app's auth token
+   * @param auth_token Cloud app authentication token
+   */
+  void SetAppAuthToken(const std::string& policy_app_id,
+                       const std::string& auth_token) OVERRIDE;
+
+  /**
+   * @brief Set a cloud app's transport type
+   * @param cloud_transport_type Cloud app transport type
+   */
+  void SetAppCloudTransportType(
+      const std::string& policy_app_id,
+      const std::string& cloud_transport_type) OVERRIDE;
+
+  /**
+   * @brief Set a cloud app's endpoint url
+   * @param endpoint URL for websocket connection
+   */
+  void SetAppEndpoint(const std::string& policy_app_id,
+                      const std::string& endpoint) OVERRIDE;
+
+  /**
+   * @brief Set a cloud app's nicknames
+   * @param nicknames Nicknames for cloud app
+   */
+  void SetAppNicknames(const std::string& policy_app_id,
+                       const StringArray& nicknames) OVERRIDE;
+
+  /**
+   * @brief Set the user preference for how a hybrid (cloud and mobile) app
+   * should be used
+   * @param hybrid_app_preference Hybrid app user preference
+   */
+  void SetHybridAppPreference(
+      const std::string& policy_app_id,
+      const std::string& hybrid_app_preference) OVERRIDE;
+
+  /**
+   * @brief Get app service parameters from the policy table
+   * @param policy_app_id Unique application id
+   * @param app_service_parameters Pointer to struct containing all app service
+   * information
+   */
+  void GetAppServiceParameters(const std::string& policy_app_id,
+                               policy_table::AppServiceParameters*
+                                   app_service_parameters) const OVERRIDE;
+
+  /**
+   * @brief Check if an app can send unknown rpc requests to an app service
+   * provider
+   * @param policy_app_id Unique application id
+   * @return bool true if allowed
+   */
+  bool UnknownRPCPassthroughAllowed(
+      const std::string& policy_app_id) const OVERRIDE;
 
   /**
    * @brief OnAppRegisteredOnMobile allows to handle event when application were
@@ -892,11 +1003,17 @@ class PolicyManagerImpl : public PolicyManager {
                                  const std::string& application_id) OVERRIDE;
 
   /**
-    * @brief Gets all allowed module types
-    * @param policy_app_id unique identifier of application
-    * @param modules list of allowed module types
-    * @return true if application has allowed modules
-    */
+   * @brief notify listener of updated auth token for a given policy id
+   * @param policy_app_id the app id that has an updated auth token
+   */
+  void SendAuthTokenUpdated(const std::string policy_app_id);
+
+  /**
+   * @brief Gets all allowed module types
+   * @param policy_app_id unique identifier of application
+   * @param modules list of allowed module types
+   * @return true if application has allowed modules
+   */
   bool GetModuleTypes(const std::string& policy_app_id,
                       std::vector<std::string>* modules) const OVERRIDE;
 

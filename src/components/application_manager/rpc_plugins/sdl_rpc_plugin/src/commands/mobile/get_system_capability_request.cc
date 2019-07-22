@@ -32,6 +32,11 @@
 
 #include "sdl_rpc_plugin/commands/mobile/get_system_capability_request.h"
 
+#include <set>
+#include "application_manager/app_service_manager.h"
+#include "application_manager/message_helper.h"
+#include "sdl_rpc_plugin/extensions/system_capability_app_extension.h"
+
 namespace sdl_rpc_plugin {
 using namespace application_manager;
 
@@ -80,10 +85,20 @@ void GetSystemCapabilityRequest::Run() {
 
   switch (response_type) {
     case mobile_apis::SystemCapabilityType::NAVIGATION: {
+      smart_objects::SmartObject nav_capability(smart_objects::SmartType_Map);
+      bool has_nav_capability = false;
       if (hmi_capabilities.navigation_capability()) {
+        has_nav_capability = true;
+        nav_capability = *hmi_capabilities.navigation_capability();
+      }
+
+      has_nav_capability = application_manager_.GetAppServiceManager()
+                               .UpdateNavigationCapabilities(nav_capability) ||
+                           has_nav_capability;
+
+      if (has_nav_capability) {
         response_params[strings::system_capability]
-                       [strings::navigation_capability] =
-                           *hmi_capabilities.navigation_capability();
+                       [strings::navigation_capability] = nav_capability;
       } else {
         SendResponse(false, mobile_apis::Result::DATA_NOT_AVAILABLE);
         return;
@@ -128,10 +143,35 @@ void GetSystemCapabilityRequest::Run() {
         return;
       }
       break;
+    case mobile_apis::SystemCapabilityType::APP_SERVICES: {
+      auto all_services =
+          application_manager_.GetAppServiceManager().GetAllServiceRecords();
+      response_params[strings::system_capability]
+                     [strings::app_services_capabilities] =
+                         MessageHelper::CreateAppServiceCapabilities(
+                             all_services);
+      break;
+    }
     default:  // Return unsupported resource
       SendResponse(false, mobile_apis::Result::UNSUPPORTED_RESOURCE);
       return;
   }
+
+  if ((*message_)[app_mngr::strings::msg_params].keyExists(
+          strings::subscribe)) {
+    auto& ext = SystemCapabilityAppExtension::ExtractExtension(*app);
+    if ((*message_)[app_mngr::strings::msg_params][strings::subscribe]
+            .asBool() == true) {
+      LOG4CXX_DEBUG(logger_,
+                    "Subscribe to system capability: " << response_type);
+      ext.SubscribeTo(response_type);
+    } else {
+      LOG4CXX_DEBUG(logger_,
+                    "Unsubscribe from system capability: " << response_type);
+      ext.UnsubscribeFrom(response_type);
+    }
+  }
+
   SendResponse(true, mobile_apis::Result::SUCCESS, NULL, &response_params);
 }
 
@@ -140,4 +180,4 @@ void GetSystemCapabilityRequest::on_event(const event_engine::Event& event) {
 }
 
 }  // namespace commands
-}  // namespace application_manager
+}  // namespace sdl_rpc_plugin

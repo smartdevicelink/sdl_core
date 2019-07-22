@@ -34,13 +34,12 @@
 
 #include <errno.h>
 #include <inttypes.h>
-#include <limits>
 #include <stdlib.h>
 #include <algorithm>
-#include <sstream>
 #include <iomanip>
 #include <iterator>
 #include <limits>
+#include <sstream>
 
 namespace ns_smart_device_link {
 namespace ns_smart_objects {
@@ -701,6 +700,9 @@ void SmartObject::duplicate(const SmartObject& OtherObject) {
     case SmartType_Integer:
       newData.int_value = OtherObject.m_data.int_value;
       break;
+    case SmartType_UInteger:
+      newData.int_value = OtherObject.m_data.int_value;
+      break;
     case SmartType_Double:
       newData.double_value = OtherObject.m_data.double_value;
       break;
@@ -875,8 +877,10 @@ bool SmartObject::isValid() const {
 
 errors::eType SmartObject::validate(
     rpc::ValidationReport* report__,
-    const utils::SemanticVersion& MessageVersion) {
-  return m_schema.validate(*this, report__, MessageVersion);
+    const utils::SemanticVersion& MessageVersion,
+    const bool allow_unknown_enums) {
+  return m_schema.validate(
+      *this, report__, MessageVersion, allow_unknown_enums);
 }
 
 void SmartObject::setSchema(const CSmartSchema& schema) {

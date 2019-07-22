@@ -33,10 +33,10 @@
 #ifndef SRC_COMPONENTS_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_MANAGER_H_
 #define SRC_COMPONENTS_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_MANAGER_H_
 
-#include "transport_manager/common.h"
-#include "transport_manager/transport_manager_listener.h"
-#include "transport_manager/transport_adapter/transport_adapter_event.h"
 #include "protocol/common.h"
+#include "transport_manager/common.h"
+#include "transport_manager/transport_adapter/transport_adapter_event.h"
+#include "transport_manager/transport_manager_listener.h"
 
 namespace resumption {
 class LastState;
@@ -69,11 +69,17 @@ class TransportManager {
   virtual int Reinit() = 0;
 
   /**
-    * @brief Start scanning for new devices.
-    *
-    * @return Code error.
-    **/
+   * @brief Start scanning for new devices.
+   *
+   * @return Code error.
+   **/
   virtual int SearchDevices() = 0;
+
+  virtual void AddCloudDevice(
+      const transport_manager::transport_adapter::CloudAppProperties&
+          cloud_properties) = 0;
+
+  virtual void RemoveCloudDevice(const DeviceHandle device_id) = 0;
 
   /**
    * @brief Connect to all applications discovered on device.
@@ -83,6 +89,16 @@ class TransportManager {
    * @return Code error.
    **/
   virtual int ConnectDevice(const DeviceHandle device_id) = 0;
+
+  /**
+   * @brief Retrieves the connection status of a given device
+   *
+   * @param device_handle Handle of device to query
+   *
+   * @return The connection status of the given device
+   */
+  virtual ConnectionStatus GetConnectionStatus(
+      const DeviceHandle& device_handle) const = 0;
 
   /**
    * @brief Disconnect from all applications connected on device.

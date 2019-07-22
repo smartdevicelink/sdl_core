@@ -32,16 +32,16 @@
 #ifndef SRC_COMPONENTS_INCLUDE_TEST_POLICY_POLICY_EXTERNAL_POLICY_MOCK_POLICY_LISTENER_H_
 #define SRC_COMPONENTS_INCLUDE_TEST_POLICY_POLICY_EXTERNAL_POLICY_MOCK_POLICY_LISTENER_H_
 
-#include <string>
 #include <map>
 #include <queue>
+#include <string>
 #include <vector>
 
 #include "gmock/gmock.h"
 
 #include "policy/policy_listener.h"
-#include "rpc_base/rpc_base.h"
 #include "policy/policy_table/types.h"
+#include "rpc_base/rpc_base.h"
 #include "utils/custom_string.h"
 
 namespace policy_table = ::rpc::policy_table_interface_base;
@@ -81,6 +81,9 @@ class MockPolicyListener : public ::policy::PolicyListener {
                     uint32_t timeout_exceed));
   MOCK_METHOD0(CanUpdate, bool());
   MOCK_METHOD1(OnCertificateUpdated, void(const std::string&));
+  MOCK_METHOD2(OnAuthTokenUpdated,
+               void(const std::string& policy_app_id,
+                    const std::string& auth_token));
   MOCK_METHOD1(OnPTUFinished, void(const bool ptu_result));
   MOCK_CONST_METHOD2(SendOnAppPermissionsChanged,
                      void(const policy::AppPermissions&, const std::string&));

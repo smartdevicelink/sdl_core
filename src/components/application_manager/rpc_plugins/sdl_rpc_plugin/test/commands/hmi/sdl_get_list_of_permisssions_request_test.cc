@@ -32,11 +32,11 @@
 
 #include <stdint.h>
 
-#include "gtest/gtest.h"
-#include "hmi/sdl_get_list_of_permissions_request.h"
+#include "application_manager/commands/command_request_test.h"
 #include "application_manager/mock_application.h"
 #include "application_manager/policies/mock_policy_handler_interface.h"
-#include "application_manager/commands/command_request_test.h"
+#include "gtest/gtest.h"
+#include "hmi/sdl_get_list_of_permissions_request.h"
 
 namespace test {
 namespace components {
@@ -46,8 +46,8 @@ namespace sdl_get_list_of_permissions_request {
 
 using application_manager::commands::MessageSharedPtr;
 using sdl_rpc_plugin::commands::SDLGetListOfPermissionsRequest;
-using test::components::policy_test::MockPolicyHandlerInterface;
 using smart_objects::SmartObject;
+using test::components::policy_test::MockPolicyHandlerInterface;
 using testing::Return;
 using testing::ReturnRef;
 
