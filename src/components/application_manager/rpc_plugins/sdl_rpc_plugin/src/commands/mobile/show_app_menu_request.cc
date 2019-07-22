@@ -61,9 +61,9 @@ void ShowAppMenuRequest::Run() {
   ApplicationSharedPtr app = application_manager_.application(connection_key());
 
   if (!app) {
-    LOG4CXX_ERROR(logger_,
-                  "Application with id " << connection_key()
-                                         << " is not registered.");
+    LOG4CXX_ERROR(
+        logger_,
+        "Application with id " << connection_key() << " is not registered.");
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     return;
   }
@@ -75,9 +75,9 @@ void ShowAppMenuRequest::Run() {
           app->system_context(),
           mobile_apis::SystemContext::SYSCTXT_MAIN,
           mobile_apis::SystemContext::SYSCTXT_MENU)) {
-    LOG4CXX_ERROR(logger_,
-                  "Application with id " << connection_key()
-                                         << " is not activated.");
+    LOG4CXX_ERROR(
+        logger_,
+        "Application with id " << connection_key() << " is not activated.");
     SendResponse(false, mobile_apis::Result::REJECTED);
     return;
   }

@@ -112,6 +112,8 @@
 #include "sdl_rpc_plugin/commands/mobile/set_global_properties_response.h"
 #include "sdl_rpc_plugin/commands/mobile/set_media_clock_timer_request.h"
 #include "sdl_rpc_plugin/commands/mobile/set_media_clock_timer_response.h"
+#include "sdl_rpc_plugin/commands/mobile/show_app_menu_request.h"
+#include "sdl_rpc_plugin/commands/mobile/show_app_menu_response.h"
 #include "sdl_rpc_plugin/commands/mobile/show_constant_tbt_request.h"
 #include "sdl_rpc_plugin/commands/mobile/show_constant_tbt_response.h"
 #include "sdl_rpc_plugin/commands/mobile/show_request.h"
@@ -134,8 +136,6 @@
 #include "sdl_rpc_plugin/commands/mobile/unsubscribe_way_points_response.h"
 #include "sdl_rpc_plugin/commands/mobile/update_turn_list_request.h"
 #include "sdl_rpc_plugin/commands/mobile/update_turn_list_response.h"
-#include "sdl_rpc_plugin/commands/mobile/show_app_menu_request.h"
-#include "sdl_rpc_plugin/commands/mobile/show_app_menu_response.h"
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "ApplicationManager")
 namespace sdl_rpc_plugin {

@@ -234,10 +234,10 @@
 #include "sdl_rpc_plugin/commands/hmi/sdl_policy_update_response.h"
 #include "sdl_rpc_plugin/commands/hmi/ui_send_haptic_data_request.h"
 #include "sdl_rpc_plugin/commands/hmi/ui_send_haptic_data_response.h"
-#include "sdl_rpc_plugin/commands/hmi/ui_show_app_menu_request.h"
-#include "sdl_rpc_plugin/commands/hmi/ui_show_app_menu_response.h"
 #include "sdl_rpc_plugin/commands/hmi/ui_set_display_layout_request.h"
 #include "sdl_rpc_plugin/commands/hmi/ui_set_display_layout_response.h"
+#include "sdl_rpc_plugin/commands/hmi/ui_show_app_menu_request.h"
+#include "sdl_rpc_plugin/commands/hmi/ui_show_app_menu_response.h"
 
 #include "sdl_rpc_plugin/commands/hmi/bc_get_file_path_request.h"
 #include "sdl_rpc_plugin/commands/hmi/bc_get_file_path_response.h"

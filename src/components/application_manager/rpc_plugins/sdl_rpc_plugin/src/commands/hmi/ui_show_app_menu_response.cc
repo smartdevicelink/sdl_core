@@ -60,4 +60,4 @@ void UIShowAppMenuResponse::Run() {
 }
 
 }  // namespace commands
-}  // sdl_rpc_plugin
+}  // namespace sdl_rpc_plugin
