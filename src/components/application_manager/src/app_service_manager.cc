@@ -83,7 +83,7 @@ smart_objects::SmartObject AppServiceManager::PublishAppService(
       auto service_by_name_id =
           service_by_name->record[strings::service_id].asString();
       auto found_service_id =
-          service_by_name->record[strings::service_id].asString();
+          found_service->record[strings::service_id].asString();
       if (service_by_name_id != found_service_id) {
         LOG4CXX_WARN(logger_,
                      "A service already exists with this name, rejecting");
