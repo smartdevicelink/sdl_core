@@ -272,6 +272,10 @@
             "imageCapabilities": [
                 "DYNAMIC",
                 "STATIC"
+            ],
+            "menuLayoutsAvailable": [
+                "LIST",
+                "TILES"
             ]
         },
         "audioPassThruCapabilities": {
