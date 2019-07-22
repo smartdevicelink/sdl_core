@@ -7378,7 +7378,7 @@
         </param>
     </function>
 
-    <function name="CancelInteraction" functionID="CancelInteractionID" messagetype="response">
+    <function name="CancelInteraction" functionID="CancelInteractionID" messagetype="response" since="6.0">
         <description>
             If no applicable request can be dismissed, the result will be IGNORED.
         </description>
