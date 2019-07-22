@@ -64,7 +64,7 @@ void UnpublishAppServiceRequest::Run() {
   auto service =
       application_manager_.GetAppServiceManager().FindServiceByID(service_id);
 
-  if (service->connection_key != connection_key()) {
+  if (!service || service->connection_key != connection_key()) {
     SendResponse(
         false,
         mobile_apis::Result::INVALID_ID,

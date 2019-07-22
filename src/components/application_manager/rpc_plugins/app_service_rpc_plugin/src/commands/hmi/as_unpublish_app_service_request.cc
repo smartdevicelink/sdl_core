@@ -62,11 +62,11 @@ void ASUnpublishAppServiceRequest::Run() {
 
   auto service =
       application_manager_.GetAppServiceManager().FindServiceByID(service_id);
-  if (service->mobile_service) {
+  if (!service || service->mobile_service) {
     SendErrorResponse(
         (*message_)[strings::params][strings::correlation_id].asUInt(),
         hmi_apis::FunctionID::AppService_UnpublishAppService,
-        hmi_apis::Common_Result::REJECTED,
+        hmi_apis::Common_Result::INVALID_ID,
         "Invalid Service ID",
         application_manager::commands::Command::SOURCE_SDL_TO_HMI);
     return;

@@ -80,14 +80,16 @@ smart_objects::SmartObject AppServiceManager::PublishAppService(
     if (manifest.keyExists(strings::service_name)) {
       auto service_by_name =
           FindServiceByName(manifest[strings::service_name].asString());
-      auto service_by_name_id =
-          service_by_name->record[strings::service_id].asString();
-      auto found_service_id =
-          found_service->record[strings::service_id].asString();
-      if (service_by_name_id != found_service_id) {
-        LOG4CXX_WARN(logger_,
-                     "A service already exists with this name, rejecting");
-        return smart_objects::SmartObject();
+      if (service_by_name) {
+        auto service_by_name_id =
+            service_by_name->record[strings::service_id].asString();
+        auto found_service_id =
+            found_service->record[strings::service_id].asString();
+        if (service_by_name_id != found_service_id) {
+          LOG4CXX_WARN(logger_,
+                       "A service already exists with this name, rejecting");
+          return smart_objects::SmartObject();
+        }
       }
     }
     LOG4CXX_WARN(logger_, "Service already exists for this provider, updating");
