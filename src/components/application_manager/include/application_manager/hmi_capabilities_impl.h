@@ -443,7 +443,8 @@ class HMICapabilitiesImpl : public HMICapabilities {
    *
    * @return TRUE if it supported, otherwise FALSE
    */
-  bool menu_layout_supported(mobile_apis::MenuLayout::eType layout) const OVERRIDE;
+  bool menu_layout_supported(
+      mobile_apis::MenuLayout::eType layout) const OVERRIDE;
 
   /*
    * @brief Interface used to store information regarding

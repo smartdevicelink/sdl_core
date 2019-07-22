@@ -141,16 +141,17 @@ void SetGlobalPropertiesRequest::Run() {
   smart_objects::SmartObject params =
       smart_objects::SmartObject(smart_objects::SmartType_Map);
 
-  if (msg_params.keyExists(strings::menu_layout))
-  {
-    auto menu_layout = static_cast<mobile_apis::MenuLayout::eType>(msg_params[strings::menu_layout].asUInt());
-    if (application_manager_.hmi_capabilities().menu_layout_supported(menu_layout))
-    {
+  if (msg_params.keyExists(strings::menu_layout)) {
+    auto menu_layout = static_cast<mobile_apis::MenuLayout::eType>(
+        msg_params[strings::menu_layout].asUInt());
+    if (application_manager_.hmi_capabilities().menu_layout_supported(
+            menu_layout)) {
       params[strings::menu_layout] = msg_params[strings::menu_layout];
-    }
-    else
-    {
-      verification_result = mobile_apis::Result::WARNINGS;
+    } else {
+      SendResponse(true,
+                   verification_result,
+                   "The MenuLayout specified is unsupported, the default "
+                   "MenuLayout will be used");
     }
   }
 
@@ -193,11 +194,6 @@ void SetGlobalPropertiesRequest::Run() {
     }
   }
 
-  if (verification_result == mobile_apis::Result::WARNINGS)
-  {
-    SendResponse(true, verification_result, "The MenuLayout specified is unsupported, the default MenuLayout will be used");
-  }
-
   // check TTS params
   if (is_help_prompt_present || is_timeout_prompt_present) {
     LOG4CXX_DEBUG(logger_, "TTS params presents");
@@ -207,7 +203,8 @@ void SetGlobalPropertiesRequest::Run() {
     if (is_help_prompt_present) {
       smart_objects::SmartObject& help_prompt =
           (*message_)[strings::msg_params][strings::help_prompt];
-      verification_result = MessageHelper::VerifyTtsFiles(help_prompt, app, application_manager_);
+      verification_result =
+          MessageHelper::VerifyTtsFiles(help_prompt, app, application_manager_);
 
       if (mobile_apis::Result::FILE_NOT_FOUND == verification_result) {
         LOG4CXX_ERROR(
@@ -223,7 +220,8 @@ void SetGlobalPropertiesRequest::Run() {
     if (is_timeout_prompt_present) {
       smart_objects::SmartObject& timeout_prompt =
           (*message_)[strings::msg_params][strings::timeout_prompt];
-      verification_result = MessageHelper::VerifyTtsFiles(timeout_prompt, app, application_manager_);
+      verification_result = MessageHelper::VerifyTtsFiles(
+          timeout_prompt, app, application_manager_);
 
       if (mobile_apis::Result::FILE_NOT_FOUND == verification_result) {
         LOG4CXX_ERROR(

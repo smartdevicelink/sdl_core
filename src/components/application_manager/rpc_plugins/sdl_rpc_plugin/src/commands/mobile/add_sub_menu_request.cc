@@ -109,16 +109,18 @@ void AddSubMenuRequest::Run() {
   smart_objects::SmartObject msg_params =
       smart_objects::SmartObject(smart_objects::SmartType_Map);
 
-  if (received_msg_params.keyExists(strings::menu_layout))
-  {
-    auto menu_layout = static_cast<mobile_apis::MenuLayout::eType>(received_msg_params[strings::menu_layout].asUInt());
-    if (application_manager_.hmi_capabilities().menu_layout_supported(menu_layout))
-    {
-      msg_params[strings::menu_layout] = received_msg_params[strings::menu_layout];
-    }
-    else
-    {
-      SendResponse(true, mobile_apis::Result::WARNINGS, "The MenuLayout specified is unsupported, the default MenuLayout will be used");
+  if (received_msg_params.keyExists(strings::menu_layout)) {
+    auto menu_layout = static_cast<mobile_apis::MenuLayout::eType>(
+        received_msg_params[strings::menu_layout].asUInt());
+    if (application_manager_.hmi_capabilities().menu_layout_supported(
+            menu_layout)) {
+      msg_params[strings::menu_layout] =
+          received_msg_params[strings::menu_layout];
+    } else {
+      SendResponse(true,
+                   mobile_apis::Result::WARNINGS,
+                   "The MenuLayout specified is unsupported, the default "
+                   "MenuLayout will be used");
     }
   }
 

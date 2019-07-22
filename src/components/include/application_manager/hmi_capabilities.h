@@ -445,7 +445,8 @@ class HMICapabilities {
    *
    * @return TRUE if it supported, otherwise FALSE
    */
-  virtual bool menu_layout_supported(mobile_apis::MenuLayout::eType layout) const = 0;
+  virtual bool menu_layout_supported(
+      mobile_apis::MenuLayout::eType layout) const = 0;
 
   /*
    * @brief Interface used to store information regarding

@@ -4205,7 +4205,7 @@ bool ApplicationManagerImpl::IsSOStructValid(
   if (hmi_so_factory().AttachSchema(struct_id, display_capabilities_so)) {
     return display_capabilities_so.isValid();
   }
-  
+
   LOG4CXX_ERROR(logger_, "Could not find struct id: " << struct_id);
   return false;
 }
