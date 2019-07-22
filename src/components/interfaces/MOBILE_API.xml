@@ -623,6 +623,26 @@
         <element name="SOURCE" since="4.5" />
         <element name="SHUFFLE" since="4.5" />
         <element name="REPEAT" since="4.5" />
+        <!-- Navigation Buttons -->
+        <element name="NAV_CENTER_LOCATION" since="6.0" />
+        <element name="NAV_ZOOM_IN" since="6.0" />
+        <element name="NAV_ZOOM_OUT" since="6.0" />
+        <element name="NAV_PAN_UP" since="6.0" />
+        <element name="NAV_PAN_UP_RIGHT" since="6.0" />
+        <element name="NAV_PAN_RIGHT" since="6.0" />
+        <element name="NAV_PAN_DOWN_RIGHT" since="6.0" />
+        <element name="NAV_PAN_DOWN" since="6.0" />
+        <element name="NAV_PAN_DOWN_LEFT" since="6.0" />
+        <element name="NAV_PAN_LEFT" since="6.0" />
+        <element name="NAV_PAN_UP_LEFT" since="6.0" />
+        <element name="NAV_TILT_TOGGLE" since="6.0" >
+            <description>If supported, this toggles between a top-down view and an angled/3D view. If your app supports different, but substantially similar options, then you may implement those. If you don't implement these or similar options, do not subscribe to this button.</description>
+        </element>
+        <element name="NAV_ROTATE_CLOCKWISE" since="6.0" />
+        <element name="NAV_ROTATE_COUNTERCLOCKWISE" since="6.0" />
+        <element name="NAV_HEADING_TOGGLE" since="6.0" >
+            <description>If supported, this toggles between locking the orientation to north or to the vehicle's heading. If your app supports different, but substantially similar options, then you may implement those. If you don't implement these or similar options, do not subscribe to this button.</description>
+        </element>
     </enum>
     
     <enum name="MediaClockFormat" since="1.0">

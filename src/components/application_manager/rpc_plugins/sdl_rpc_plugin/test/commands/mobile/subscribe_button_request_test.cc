@@ -106,6 +106,23 @@ TEST_F(SubscribeButtonRequestTest, Run_SubscriptionNotAllowed_UNSUCCESS) {
                     .asInt()));
 }
 
+TEST_F(SubscribeButtonRequestTest, Run_NavSubscriptionNotAllowed_UNSUCCESS) {
+  MessageSharedPtr msg(CreateMessage());
+  (*msg)[am::strings::msg_params][am::strings::button_name] =
+      mobile_apis::ButtonName::NAV_CENTER_LOCATION;
+  CommandPtr command(CreateCommand<SubscribeButtonRequest>(msg));
+
+  MockAppPtr app(CreateMockApp());
+  ON_CALL(app_mngr_, application(_)).WillByDefault(Return(app));
+  ON_CALL(*app, is_navi()).WillByDefault(Return(false));
+
+  MessageSharedPtr result_msg(CatchMobileCommandResult(CallRun(*command)));
+  EXPECT_EQ(mobile_apis::Result::REJECTED,
+            static_cast<mobile_apis::Result::eType>(
+                (*result_msg)[am::strings::msg_params][am::strings::result_code]
+                    .asInt()));
+}
+
 TEST_F(SubscribeButtonRequestTest, Run_UiIsNotSupported_UNSUCCESS) {
   CommandPtr command(CreateCommand<SubscribeButtonRequest>());
 
@@ -168,6 +185,53 @@ TEST_F(SubscribeButtonRequestTest, Run_SUCCESS) {
   ON_CALL(app_mngr_, application(_)).WillByDefault(Return(app));
   ON_CALL(*app, msg_version()).WillByDefault(ReturnRef(mock_semantic_version));
   ON_CALL(*app, is_media_application()).WillByDefault(Return(true));
+
+  ON_CALL(mock_hmi_capabilities_, is_ui_cooperating())
+      .WillByDefault(Return(true));
+
+  MessageSharedPtr button_caps_ptr(CreateMessage(smart_objects::SmartType_Map));
+  (*button_caps_ptr)[0][am::hmi_response::button_name] = kButtonName;
+
+  ON_CALL(mock_hmi_capabilities_, button_capabilities())
+      .WillByDefault(Return(button_caps_ptr.get()));
+
+  ON_CALL(*app, IsSubscribedToButton(_)).WillByDefault(Return(false));
+
+  MessageSharedPtr hmi_result_msg;
+
+  EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_, _))
+      .WillOnce(DoAll(SaveArg<0>(&hmi_result_msg), Return(true)));
+
+  MessageSharedPtr mobile_result_msg;
+  EXPECT_CALL(this->mock_rpc_service_, ManageMobileCommand(_, _))
+      .WillOnce(DoAll(SaveArg<0>(&mobile_result_msg), Return(true)));
+  ASSERT_TRUE(command->Init());
+  command->Run();
+
+  EXPECT_EQ(hmi_apis::FunctionID::Buttons_OnButtonSubscription,
+            static_cast<hmi_apis::FunctionID::eType>(
+                (*hmi_result_msg)[am::strings::params][am::strings::function_id]
+                    .asInt()));
+
+  EXPECT_EQ(mobile_apis::Result::SUCCESS,
+            static_cast<mobile_apis::Result::eType>(
+                (*mobile_result_msg)[am::strings::msg_params]
+                                    [am::strings::result_code]
+                                        .asInt()));
+}
+
+TEST_F(SubscribeButtonRequestTest, Run_NAV_SUCCESS) {
+  const mobile_apis::ButtonName::eType kButtonName =
+      mobile_apis::ButtonName::NAV_CENTER_LOCATION;
+
+  MessageSharedPtr msg(CreateMessage());
+  (*msg)[am::strings::msg_params][am::strings::button_name] = kButtonName;
+  CommandPtr command(CreateCommand<SubscribeButtonRequest>(msg));
+
+  MockAppPtr app(CreateMockApp());
+  ON_CALL(app_mngr_, application(_)).WillByDefault(Return(app));
+  ON_CALL(*app, msg_version()).WillByDefault(ReturnRef(mock_semantic_version));
+  ON_CALL(*app, is_navi()).WillByDefault(Return(true));
 
   ON_CALL(mock_hmi_capabilities_, is_ui_cooperating())
       .WillByDefault(Return(true));
