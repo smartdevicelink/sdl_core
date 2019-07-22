@@ -4800,7 +4800,7 @@
             <description>See LayoutMode.</description>
         </param>
 
-        <param name="cancelID" type="Integer" mandatory="false">
+        <param name="cancelID" type="Integer" mandatory="false" since="6.0">
             <description>
                 An ID for this specific alert to allow cancellation through the `CancelInteraction` RPC.
             </description>
