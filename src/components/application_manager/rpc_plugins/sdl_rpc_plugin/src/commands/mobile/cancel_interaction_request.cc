@@ -103,7 +103,7 @@ void CancelInteractionRequest::on_event(const event_engine::Event& event) {
   mobile_apis::Result::eType result =
       MessageHelper::HMIToMobileResult(hmi_result);
   bool success = PrepareResultForMobileResponse(
-      hmi_result, HmiInterfaces::HMI_INTERFACE_AppService);
+      hmi_result, HmiInterfaces::HMI_INTERFACE_UI);
 
   if (success) {
     ApplicationSharedPtr app =
