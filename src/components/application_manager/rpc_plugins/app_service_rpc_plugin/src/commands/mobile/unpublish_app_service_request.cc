@@ -68,7 +68,7 @@ void UnpublishAppServiceRequest::Run() {
     SendResponse(
         false,
         mobile_apis::Result::INVALID_ID,
-        "The app service with that requested service ID does not exist");
+        "No app service with the requested service ID was published by this application");
     return;
   }
 
