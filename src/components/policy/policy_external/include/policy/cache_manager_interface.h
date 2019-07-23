@@ -162,11 +162,6 @@ class CacheManagerInterface {
   virtual bool SecondsBetweenRetries(std::vector<int>& seconds) = 0;
 
   /**
-   * @brief Get information about vehicle
-   */
-  virtual const VehicleInfo GetVehicleInfo() const = 0;
-
-  /**
    * @brief Get a list of enabled cloud applications
    * @param enabled_apps List filled with the policy app id of each enabled
    * cloud application

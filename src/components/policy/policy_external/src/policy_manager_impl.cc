@@ -745,10 +745,6 @@ const std::vector<std::string> PolicyManagerImpl::GetAppRequestSubTypes(
   return request_subtypes;
 }
 
-const VehicleInfo PolicyManagerImpl::GetVehicleInfo() const {
-  return cache_->GetVehicleInfo();
-}
-
 void PolicyManagerImpl::GetEnabledCloudApps(
     std::vector<std::string>& enabled_apps) const {
   cache_->GetEnabledCloudApps(enabled_apps);
