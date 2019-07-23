@@ -6372,7 +6372,10 @@
 <interface name="AppService" version="1.0.0" date="2019-03-18">
     <description>Interface used for interacting with app services as a producer or consumer</description>
     <function name="PublishAppService" messagetype="request">
-        <description>Registers a service offered by this app on the module</description>
+        <description>
+          Registers a service offered by this app on the module.
+          Subsequent calls with the same service type will update the manifest for that service.
+        </description>
 
         <param name="appServiceManifest" type="Common.AppServiceManifest" mandatory="true">
             <description> The manifest of the service that wishes to be published.</description>
