@@ -242,6 +242,13 @@
                         "resolutionWidth": 35,
                         "resolutionHeight": 35
                     }
+                },
+                {
+                    "name": "alertIcon",
+                    "imageResolution": {
+                        "resolutionWidth": 225,
+                        "resolutionHeight": 225
+                    }
                 }
 
             ],
@@ -272,10 +279,6 @@
             "imageCapabilities": [
                 "DYNAMIC",
                 "STATIC"
-            ],
-            "menuLayoutsAvailable": [
-                "LIST",
-                "TILES"
             ]
         },
         "audioPassThruCapabilities": {
