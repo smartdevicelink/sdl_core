@@ -323,16 +323,13 @@ void SetGlobalPropertiesRequest::on_event(const event_engine::Event& event) {
   std::string response_info;
   const bool result = PrepareResponseParameters(result_code, response_info);
 
-  if (result && !is_menu_layout_available_)
-  {
+  if (result && !is_menu_layout_available_) {
     SendResponse(result,
                  mobile_apis::Result::WARNINGS,
                  "The MenuLayout specified is unsupported, the default "
                  "MenuLayout will be used",
                  &(message[strings::msg_params]));
-  }
-  else
-  {
+  } else {
     SendResponse(result,
                  result_code,
                  response_info.empty() ? NULL : response_info.c_str(),
