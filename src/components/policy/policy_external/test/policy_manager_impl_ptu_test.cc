@@ -1169,24 +1169,6 @@ TEST_F(PolicyManagerImplTest2,
   EXPECT_TRUE(policy_manager_->CanAppKeepContext(app_id_2_));
 }
 
-TEST_F(PolicyManagerImplTest2,
-       GetVehicleInfo_SetVehicleInfo_ExpectReceivedInfoCorrect) {
-  // Arrange
-  CreateLocalPT(preloaded_pt_filename_);
-  GetPTU(kValidSdlPtUpdateJson);
-  std::shared_ptr<policy_table::Table> pt =
-      (policy_manager_->GetCache())->GetPT();
-  policy_table::ModuleConfig& module_config = pt->policy_table.module_config;
-  ::policy::VehicleInfo vehicle_info = policy_manager_->GetVehicleInfo();
-
-  EXPECT_EQ(static_cast<std::string>(*module_config.vehicle_make),
-            vehicle_info.vehicle_make);
-  EXPECT_EQ(static_cast<std::string>(*module_config.vehicle_model),
-            vehicle_info.vehicle_model);
-  EXPECT_EQ(static_cast<std::string>(*module_config.vehicle_year),
-            vehicle_info.vehicle_year);
-}
-
 TEST_F(
     PolicyManagerImplTest2,
     GetPermissionsForApp_SetUserConsentForApp_ExpectReceivedPermissionsCorrect) {

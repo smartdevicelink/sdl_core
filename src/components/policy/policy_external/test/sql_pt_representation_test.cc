@@ -376,6 +376,89 @@ class SQLPTRepresentationTest2 : public ::testing::Test {
   const uint16_t kAttemptsToOpenPolicyDB = 2u;
 };
 
+TEST_F(SQLPTRepresentationTest, VehicleDataItem_Store_Item) {
+  policy_table::VehicleDataItem rpm;
+  rpm.name = "rpm";
+  rpm.type = "Integer";
+  rpm.key = "OEM_REF_RPM";
+  rpm.mandatory = false;
+  *rpm.array = false;
+  rpm.params = rpc::Array<policy_table::VehicleDataItem, 0, 255>();
+  ASSERT_FALSE(reps->VehicleDataItemExists(rpm.name, rpm.key));
+  ASSERT_TRUE(reps->InsertVehicleDataItem(rpm));
+  ASSERT_TRUE(reps->VehicleDataItemExists(rpm.name, rpm.key));
+
+  auto rpm_retrieved = reps->GetVehicleDataItem(rpm.name, rpm.key);
+  ASSERT_EQ(rpm.ToJsonValue(), rpm_retrieved.ToJsonValue());
+}
+
+TEST_F(SQLPTRepresentationTest, VehicleDataItem_Store_Complete_Item) {
+  policy_table::VehicleDataItem message;
+  message.name = "messsageName";
+  message.type = "String";
+  message.key = "OEM_REF_MSG";
+  message.mandatory = false;
+  *message.array = false;
+  message.params = rpc::Array<policy_table::VehicleDataItem, 0, 255>();
+  *message.since = "1.0";
+  *message.until = "5.0";
+  *message.removed = false;
+  *message.deprecated = false;
+  *message.minvalue = 0;
+  *message.maxvalue = 255;
+  *message.minsize = 0;
+  *message.maxsize = 255;
+  *message.minlength = 0;
+  *message.maxlength = 255;
+  ASSERT_TRUE(reps->InsertVehicleDataItem(message));
+
+  auto message_retrieved = reps->GetVehicleDataItem(message.name, message.key);
+  ASSERT_EQ(message.ToJsonValue(), message_retrieved.ToJsonValue());
+}
+
+TEST_F(SQLPTRepresentationTest, VehicleDataItem_Store_Struct) {
+  policy_table::VehicleDataItem alss;
+  alss.name = "ambientLightSensorStatus";
+  alss.type = "AmbientLightStatus";
+  alss.key = "OEM_REF_AMB_LIGHT";
+  alss.mandatory = false;
+  alss.params = rpc::Array<policy_table::VehicleDataItem, 0, 255>();
+  policy_table::VehicleDataItem lss;
+  lss.name = "LightSensorStatus";
+  lss.type = "Struct";
+  lss.key = "OEM_REF_SEN_LIGHT";
+  lss.mandatory = false;
+  lss.params = rpc::Array<policy_table::VehicleDataItem, 0, 255>();
+  lss.params.push_back(alss);
+
+  policy_table::VehicleDataItem hbo;
+  hbo.name = "highBeamsOn";
+  hbo.type = "Boolean";
+  hbo.key = "OEM_REF_HIGH_BEAM";
+  hbo.mandatory = true;
+  hbo.params = rpc::Array<policy_table::VehicleDataItem, 0, 255>();
+  policy_table::VehicleDataItem lbo;
+  lbo.name = "lowBeamsOn";
+  lbo.type = "Boolean";
+  lbo.key = "OEM_REF_LOW_BEAM";
+  lbo.mandatory = false;
+  lbo.params = rpc::Array<policy_table::VehicleDataItem, 0, 255>();
+  policy_table::VehicleDataItem hls;
+  hls.name = "headLampStatus";
+  hls.type = "Struct";
+  hls.key = "OEM_REF_HLSTATUS";
+  hls.mandatory = false;
+  hls.params = rpc::Array<policy_table::VehicleDataItem, 0, 255>();
+  hls.params.push_back(lss);
+  hls.params.push_back(lbo);
+  hls.params.push_back(hbo);
+  ASSERT_TRUE(reps->InsertVehicleDataItem(alss));
+  ASSERT_TRUE(reps->InsertVehicleDataItem(hls));
+
+  auto hls_retrieved = reps->GetVehicleDataItem(hls.name, hls.key);
+  ASSERT_EQ(hls.ToJsonValue(), hls_retrieved.ToJsonValue());
+}
+
 TEST_F(SQLPTRepresentationTest2,
        CheckActualAttemptsToOpenDB_ExpectCorrectNumber) {
   EXPECT_EQ(::policy::FAIL, reps->Init(&policy_settings_));
@@ -963,25 +1046,6 @@ TEST_F(
   query.Prepare(query_select);
   query.Next();
   ASSERT_EQ(0, query.GetInteger(0));
-}
-
-TEST_F(
-    SQLPTRepresentationTest,
-    GetVehicleInfo_ManuallySetVehcleInfoThenCallGetVehicleInfo_ExpectValuesReceived) {
-  // Check
-  const std::string query_insert_module_config =
-      "UPDATE `module_config` SET `preloaded_pt` = 1, "
-      " `exchange_after_x_ignition_cycles` = 50,"
-      "  `exchange_after_x_kilometers` = 2000, `exchange_after_x_days` = 30,"
-      " `timeout_after_x_seconds` = 5, `vehicle_make` = 'FORD', "
-      "  `vehicle_model` = 'MUSTANG', `vehicle_year` = '2003', "
-      "`preloaded_date` = '25.04.2015'";
-  ASSERT_TRUE(query_wrapper_->Exec(query_insert_module_config));
-  VehicleInfo info = reps->GetVehicleInfo();
-
-  ASSERT_EQ("FORD", info.vehicle_make);
-  ASSERT_EQ("MUSTANG", info.vehicle_model);
-  ASSERT_EQ("2003", info.vehicle_year);
 }
 
 TEST_F(SQLPTRepresentationTest,

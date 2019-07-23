@@ -386,6 +386,11 @@ const std::string kCreateSchema =
     "); "
     "CREATE INDEX IF NOT EXISTS `endpoint.fk_endpoint_application1_idx` "
     "  ON `endpoint`(`application_id` COLLATE NOCASE); "
+    /*endpoint properties*/
+    "CREATE TABLE IF NOT EXISTS `endpoint_properties`( "
+    "  `service` VARCHAR(100) NOT NULL, "
+    "  `version` VARCHAR(100) NOT NULL "
+    ");"
     "CREATE TABLE IF NOT EXISTS `message`( "
     "  `id` INTEGER PRIMARY KEY NOT NULL, "
     "  `tts` TEXT, "
@@ -449,6 +454,41 @@ const std::string kCreateSchema =
     "  `entity_id` INTEGER NOT NULL, "
     "  `on_off` TEXT NOT NULL "
     "  ); "
+    /*vehicle data*/
+    "CREATE TABLE IF NOT EXISTS `vehicle_data`( "
+    "  `schema_version` VARCHAR(100) NOT NULL "
+    ");"
+    /* vehicle data item definition*/
+    "CREATE TABLE IF NOT EXISTS `vehicle_data_item_definition`( "
+    "  `name` VARCHAR(255) NOT NULL, "
+    "  `type` VARCHAR(255) NOT NULL, "
+    "  `key` VARCHAR(255) NOT NULL, "
+    "  `mandatory` BOOL NOT NULL, "
+    "  `array` BOOL, "
+    "  `since` VARCHAR(45), "
+    "  `until` VARCHAR(45), "
+    "  `removed` BOOL, "
+    "  `deprecated` BOOL, "
+    "  `minvalue` INTEGER, "
+    "  `maxvalue` INTEGER, "
+    "  `minsize` INTEGER, "
+    "  `maxsize` INTEGER, "
+    "  `minlength` INTEGER, "
+    "  `maxlength` INTEGER, "
+    "   PRIMARY KEY(`name`,`key`) "
+    "); "
+    "CREATE TABLE IF NOT EXISTS `vehicle_data_item_parameters`( "
+    "  `parent_name` VARCHAR(255) NOT NULL, "
+    "  `parent_key` VARCHAR(255) NOT NULL, "
+    "  `param_name` VARCHAR(255) NOT NULL, "
+    "  `param_key` VARCHAR(255) NOT NULL, "
+    "  CONSTRAINT `fk_vdi_id` "
+    "    FOREIGN KEY(`parent_name`, `parent_key`) "
+    "    REFERENCES `vehicle_data_item_definition`(`name`, `key`), "
+    "  CONSTRAINT `fk_vdi_param_id` "
+    "    FOREIGN KEY(`param_name`, `param_key`) "
+    "    REFERENCES `vehicle_data_item_definition`(`name`, `key`) "
+    "); "
     "COMMIT;";
 
 const std::string kInsertInitData =
@@ -464,6 +504,8 @@ const std::string kInsertInitData =
     "  `exchange_after_x_ignition_cycles`, `exchange_after_x_kilometers`, "
     "  `exchange_after_x_days`, `timeout_after_x_seconds`)"
     "  VALUES(1, 0, 0, 0, 0, 0); "
+    "INSERT OR IGNORE INTO `vehicle_data` ("
+    "  `schema_version`) VALUES('0'); "
     "INSERT OR IGNORE INTO `priority`(`value`) VALUES ('EMERGENCY'); "
     "INSERT OR IGNORE INTO `priority`(`value`) VALUES ('NAVIGATION'); "
     "INSERT OR IGNORE INTO `priority`(`value`) VALUES ('VOICECOMMUNICATION'); "
@@ -528,6 +570,7 @@ const std::string kDropSchema =
     "DROP TABLE IF EXISTS `message`; "
     "DROP INDEX IF EXISTS `endpoint.fk_endpoint_application1_idx`; "
     "DROP TABLE IF EXISTS `endpoint`; "
+    "DROP TABLE IF EXISTS `endpoint_properties`; "
     "DROP INDEX IF EXISTS `consent_group.fk_consent_group_device1_idx`; "
     "DROP INDEX IF EXISTS "
     "`consent_group.fk_consent_group_functional_group1_idx`; "
@@ -593,6 +636,9 @@ const std::string kDropSchema =
     "DROP TABLE IF EXISTS `device`; "
     "DROP TABLE IF EXISTS `_internal_data`; "
     "DROP TABLE IF EXISTS `_internal_external_consent_status`; "
+    "DROP TABLE IF EXISTS `vehicle_data`; "
+    "DROP TABLE IF EXISTS `vehicle_data_item_definition`; "
+    "DROP TABLE IF EXISTS `vehicle_data_item_parameters`; "
     "COMMIT; "
     "VACUUM;";
 
@@ -601,6 +647,7 @@ const std::string kDeleteData =
     "DELETE FROM `message`; "
     "DELETE FROM `module_type`; "
     "DELETE FROM `endpoint`; "
+    "DELETE FROM `endpoint_properties`; "
     "DELETE FROM `consent_group`; "
     "DELETE FROM `external_consent_status_group`; "
     "DELETE FROM `external_consent_entities`; "
@@ -627,12 +674,79 @@ const std::string kDeleteData =
     "DELETE FROM `usage_and_error_count`; "
     "DELETE FROM `device`; "
     "DELETE FROM `request_type`; "
+    "DELETE FROM `vehicle_data`; "
+    "DELETE FROM `vehicle_data_item_definition`; "
+    "DELETE FROM `vehicle_data_item_parameters`; "
     "COMMIT; "
     "VACUUM;";
 
 const std::string kCheckDBIntegrity = "PRAGMA integrity_check";
 
 const std::string kCheckPgNumber = "PRAGMA page_count";
+
+const std::string kSelectEndpointProperties =
+    "SELECT `service`, `version` FROM `endpoint_properties`";
+
+const std::string kSelectVehicleDataSchemaVersion =
+    "SELECT `schema_version` FROM `vehicle_data` ";
+
+const std::string kSelectVehicleDataItem =
+    "SELECT * FROM `vehicle_data_item_definition` "
+    "WHERE `key` = ? AND `name` = ?";
+
+const std::string kSelectVehicleDataItemParams =
+    "SELECT * FROM `vehicle_data_item_parameters` "
+    "WHERE `parent_name` = ? AND `parent_key` = ?";
+
+const std::string kSelectParametrizedVehicleDataItemsKey =
+    "SELECT DISTINCT `parent_name`, `parent_key` FROM "
+    "`vehicle_data_item_parameters`";
+
+const std::string kSelectNonParametrizedVehicleDataItems =
+    "SELECT * FROM `vehicle_data_item_definition` "
+    "LEFT JOIN ( "
+    "SELECT `parent_name`, `parent_key` FROM `vehicle_data_item_parameters` "
+    "UNION "
+    "SELECT `param_name`, `param_key` FROM `vehicle_data_item_parameters`) "
+    "`vdi_params` ON "
+    "`vehicle_data_item_definition`.`name` = `vdi_params`.`parent_name` AND "
+    "`vehicle_data_item_definition`.`key` = `vdi_params`.`parent_key` "
+    "WHERE `vdi_params`.`parent_key` IS NULL";
+
+const std::string kInsertVehicleDataSchemaVersion =
+    "UPDATE `vehicle_data` SET `schema_version` = ?";
+
+const std::string kInsertEndpointVersion =
+    "INSERT OR REPLACE INTO `endpoint_properties`(`service`, "
+    "`version`) "
+    "VALUES(?, ?)";
+
+const std::string kInsertVehicleDataItem =
+    "INSERT INTO `vehicle_data_item_definition` ("
+    "  `name`, "
+    "  `type`, "
+    "  `key`, "
+    "  `mandatory`, "
+    "  `array`, "
+    "  `since`, "
+    "  `until`, "
+    "  `removed`, "
+    "  `deprecated`, "
+    "  `minvalue`, "
+    "  `maxvalue`, "
+    "  `minsize`, "
+    "  `maxsize`, "
+    "  `minlength`, "
+    "  `maxlength`) "
+    "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ";
+
+const std::string kInsertVehicleDataItemParams =
+    "INSERT INTO `vehicle_data_item_parameters` ("
+    "  `parent_name`, "
+    "  `parent_key`, "
+    "  `param_name`, "
+    "  `param_key`) "
+    "VALUES (?, ?, ?, ?) ";
 
 const std::string kSelectRpc =
     "SELECT DISTINCT `rpc`.`parameter` FROM `rpc` "
@@ -923,6 +1037,12 @@ const std::string kDeleteAppServiceNames = "DELETE FROM `app_service_names`";
 
 const std::string kDeleteAppServiceHandledRpcs =
     "DELETE FROM `app_service_handled_rpcs`";
+
+const std::string kDeleteVehicleDataItems =
+    "DELETE FROM `vehicle_data_item_definition`";
+
+const std::string kDeleteVehicleDataItemParams =
+    "DELETE FROM `vehicle_data_item_parameters`";
 
 const std::string kSelectApplicationRevoked =
     "SELECT `is_revoked` FROM `application` WHERE `id` = ?";

@@ -69,6 +69,10 @@ class MockPolicyHandlerInterface : public policy::PolicyHandlerInterface {
                void(const std::string& device_id,
                     const std::string& policy_app_id,
                     const policy::Permissions& permissions));
+  MOCK_CONST_METHOD0(GetModuleConfigData, policy_table::ModuleConfig());
+  MOCK_CONST_METHOD0(
+      GetVehicleDataItems,
+      const std::vector<rpc::policy_table_interface_base::VehicleDataItem>());
 
 #ifdef EXTERNAL_PROPRIETARY_MODE
   MOCK_METHOD3(OnSnapshotCreated,
@@ -234,7 +238,6 @@ class MockPolicyHandlerInterface : public policy::PolicyHandlerInterface {
                      const std::vector<std::string>(
                          const transport_manager::DeviceHandle& device_handle,
                          const std::string& policy_app_id));
-  MOCK_CONST_METHOD0(GetVehicleInfo, const policy::VehicleInfo());
   MOCK_CONST_METHOD1(GetEnabledCloudApps,
                      void(std::vector<std::string>& enabled_apps));
   MOCK_CONST_METHOD1(CheckCloudAppEnabled,

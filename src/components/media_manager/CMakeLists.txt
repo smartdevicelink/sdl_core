@@ -65,6 +65,7 @@ set(EXCLUDE_PATHS
 set(LIBRARIES
   MOBILE_API
   ProtocolLibrary
+  PolicyStatic
   Utils
 )
 

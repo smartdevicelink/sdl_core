@@ -1602,6 +1602,90 @@ TEST_F(
   EXPECT_EQ(heart_beat_timeout.asUInt(), result);
 }
 
+TEST_F(PolicyManagerImplTest2, CacheManager_RemoveRPCSpecVehicleDataItems) {
+  policy_table::VehicleDataItems init;
+  policy_table::VehicleDataItem test_item;
+  test_item.name = "headLampStatus";
+  init.push_back(test_item);
+
+  const auto ret = CacheManager::CollectCustomVDItems(init);
+
+  EXPECT_EQ(0u, ret.size());
+}
+
+TEST_F(PolicyManagerImplTest2,
+       CacheManager_RemoveRPCSpecVehicleDataItemsAndRemainCustom) {
+  policy_table::VehicleDataItems init;
+  policy_table::VehicleDataItem rpc_spec_item;
+  rpc_spec_item.name = "headLampStatus";
+  policy_table::VehicleDataItem custom_item;
+  custom_item.name = "Custom";
+  init.push_back(rpc_spec_item);
+  init.push_back(custom_item);
+
+  EXPECT_EQ(2u, init.size());
+
+  const auto ret = CacheManager::CollectCustomVDItems(init);
+
+  EXPECT_EQ(1u, ret.size());
+  EXPECT_EQ(ret.at(0).name, "Custom");
+}
+
+TEST_F(PolicyManagerImplTest2, CacheManager_RemainCustomVehicleDataItems) {
+  policy_table::VehicleDataItems init;
+  policy_table::VehicleDataItem custom_item;
+  custom_item.name = "Custom";
+  init.push_back(custom_item);
+
+  EXPECT_EQ(1u, init.size());
+
+  const auto ret = CacheManager::CollectCustomVDItems(init);
+
+  EXPECT_EQ(1u, ret.size());
+}
+
+TEST_F(PolicyManagerImplTest2, CacheManager_RemoveCustomVehicleDataItems) {
+  policy_table::VehicleDataItems init;
+  policy_table::VehicleDataItem test_item;
+  test_item.name = "Custom";
+  init.push_back(test_item);
+
+  const auto ret = CacheManager::CollectRPCSpecVDItems(init);
+
+  EXPECT_EQ(0u, ret.size());
+}
+
+TEST_F(PolicyManagerImplTest2,
+       CacheManager_RemoveCustomVehicleDataItemsAndRemainRPCSpec) {
+  policy_table::VehicleDataItems init;
+  policy_table::VehicleDataItem rpc_spec_item;
+  rpc_spec_item.name = "headLampStatus";
+  policy_table::VehicleDataItem custom_item;
+  custom_item.name = "Custom";
+  init.push_back(rpc_spec_item);
+  init.push_back(custom_item);
+
+  EXPECT_EQ(2u, init.size());
+
+  const auto ret = CacheManager::CollectRPCSpecVDItems(init);
+
+  EXPECT_EQ(1u, ret.size());
+  EXPECT_EQ(ret.at(0).name, "headLampStatus");
+}
+
+TEST_F(PolicyManagerImplTest2, CacheManager_RemainRPCSpecVehicleDataItems) {
+  policy_table::VehicleDataItems init;
+  policy_table::VehicleDataItem custom_item;
+  custom_item.name = "headLampStatus";
+  init.push_back(custom_item);
+
+  EXPECT_EQ(1u, init.size());
+
+  const auto ret = CacheManager::CollectRPCSpecVDItems(init);
+
+  EXPECT_EQ(1u, ret.size());
+}
+
 }  // namespace policy_test
 }  // namespace components
 }  // namespace test

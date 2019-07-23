@@ -218,7 +218,6 @@ class MockPolicyManager : public PolicyManager {
                      const std::vector<std::string>(
                          const transport_manager::DeviceHandle& device_handle,
                          const std::string policy_app_id));
-  MOCK_CONST_METHOD0(GetVehicleInfo, const policy::VehicleInfo());
   MOCK_CONST_METHOD1(GetEnabledCloudApps,
                      void(std::vector<std::string>& enabled_apps));
   MOCK_CONST_METHOD7(GetCloudAppParameters,

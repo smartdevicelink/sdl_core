@@ -142,9 +142,17 @@ class CacheManager : public CacheManagerInterface {
   virtual bool SecondsBetweenRetries(std::vector<int>& seconds);
 
   /**
-   * @brief Get information about vehicle
+   * @brief Gets module config data from policy table
+   * @return ModuleConfig section of pilicy_table
    */
-  virtual const VehicleInfo GetVehicleInfo() const;
+  virtual policy_table::ModuleConfig GetModuleConfigData() const OVERRIDE;
+
+  /**
+   * @brief Gets vehicle data items
+   * @return Structure with vehicle data items
+   */
+  virtual const std::vector<policy_table::VehicleDataItem> GetVehicleDataItems()
+      const;
 
   const boost::optional<bool> LockScreenDismissalEnabledState() const OVERRIDE;
 
@@ -841,6 +849,24 @@ class CacheManager : public CacheManagerInterface {
   void MergeCFM(const policy_table::PolicyTable& new_pt,
                 policy_table::PolicyTable& pt);
 
+  /**
+   * @brief MergeVD allows to merge VehicleDataItems section by
+   *definite rules.
+   *
+   * The rules are:
+   * 1. If vehicle_data_items key is not presented in the updated PolicyTable,
+   * update for VehicleDataItems should be ignored.
+   * 2. If vehicle_data_items presented in updated PolicyTable, the
+   * VehicleDataItems in the database (LocalPT) should be overwritten with
+   * updated data.
+   *
+   * @param new_pt the policy table loaded from updated preload JSON file.
+   *
+   * @param pt the exists database
+   */
+  void MergeVD(const policy_table::PolicyTable& new_pt,
+               policy_table::PolicyTable& pt);
+
   const PolicySettings& get_settings() const;
 
   std::shared_ptr<policy_table::Table> pt() const {
@@ -865,6 +891,22 @@ class CacheManager : public CacheManagerInterface {
   void GetApplicationParams(
       const std::string& application_name,
       policy_table::ApplicationParams& application_policies) const OVERRIDE;
+
+  /**
+   * @brief Method for separate RPCSpec vehicle data items from custom
+   * @param full vehicle data items during PTU
+   * @return array with only RPCSpec vehicle items
+   */
+  static policy_table::VehicleDataItems CollectRPCSpecVDItems(
+      const policy_table::VehicleDataItems& vd_items);
+
+  /**
+   * @brief Method for separate RPCSpec vehicle data items from custom
+   * @param full vehicle data items during PTU
+   * @return array with only custom vehicle items
+   */
+  static policy_table::VehicleDataItems CollectCustomVDItems(
+      const policy_table::VehicleDataItems& vd_items);
 
  private:
   std::string currentDateTime();

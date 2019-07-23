@@ -172,6 +172,7 @@ class Boolean : public PrimitiveType {
   Boolean& operator=(bool new_val);
   operator bool() const;
   Json::Value ToJsonValue() const;
+  bool operator==(const Boolean& that);
 
  private:
   // Fields
@@ -282,6 +283,7 @@ class Array : public std::vector<T>, public CompositeType {
   template <typename U>
   void push_back(const U& value);
   Json::Value ToJsonValue() const;
+  bool operator==(const Array& that);
 
   virtual bool is_valid() const;
   bool is_initialized() const;
@@ -394,6 +396,8 @@ class Optional {
   // Better than operator bool because bool can be implicitly
   // casted to integral types
   operator const void*() const;
+
+  bool operator==(const Optional<T>& that);
 
   bool is_valid() const;
   bool is_initialized() const;

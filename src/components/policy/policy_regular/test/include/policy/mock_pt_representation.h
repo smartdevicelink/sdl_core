@@ -64,7 +64,6 @@ class MockPTRepresentation : virtual public PTRepresentation {
   MOCK_METHOD1(SecondsBetweenRetries, bool(std::vector<int>* seconds));
   MOCK_METHOD2(GetPriority,
                bool(const std::string& app_id, std::string* priority));
-  MOCK_CONST_METHOD0(GetVehicleInfo, const VehicleInfo());
   MOCK_METHOD1(SetVINValue, bool(const std::string& value));
   MOCK_METHOD2(
       GetUserFriendlyMsg,

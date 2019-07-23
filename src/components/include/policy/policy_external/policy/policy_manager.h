@@ -568,12 +568,6 @@ class PolicyManager : public usage_statistics::StatisticsManager,
       const std::string& policy_app_id) const = 0;
 
   /**
-   * @brief Get information about vehicle
-   * @return vehicle information
-   */
-  virtual const VehicleInfo GetVehicleInfo() const = 0;
-
-  /**
    * @brief Get a list of enabled cloud applications
    * @param enabled_apps List filled with the policy app id of each enabled
    * cloud application
