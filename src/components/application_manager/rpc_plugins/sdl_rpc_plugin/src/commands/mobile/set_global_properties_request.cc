@@ -148,10 +148,7 @@ void SetGlobalPropertiesRequest::Run() {
             menu_layout)) {
       params[strings::menu_layout] = msg_params[strings::menu_layout];
     } else {
-      SendResponse(true,
-                   verification_result,
-                   "The MenuLayout specified is unsupported, the default "
-                   "MenuLayout will be used");
+      is_menu_layout_available_ = false;
     }
   }
 
@@ -326,10 +323,21 @@ void SetGlobalPropertiesRequest::on_event(const event_engine::Event& event) {
   std::string response_info;
   const bool result = PrepareResponseParameters(result_code, response_info);
 
-  SendResponse(result,
-               result_code,
-               response_info.empty() ? NULL : response_info.c_str(),
-               &(message[strings::msg_params]));
+  if (result && !is_menu_layout_available_)
+  {
+    SendResponse(result,
+                 mobile_apis::Result::WARNINGS,
+                 "The MenuLayout specified is unsupported, the default "
+                 "MenuLayout will be used",
+                 &(message[strings::msg_params]));
+  }
+  else
+  {
+    SendResponse(result,
+                 result_code,
+                 response_info.empty() ? NULL : response_info.c_str(),
+                 &(message[strings::msg_params]));
+  }
 }
 
 bool SetGlobalPropertiesRequest::Init() {

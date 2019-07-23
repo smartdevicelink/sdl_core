@@ -88,6 +88,8 @@ class AddSubMenuRequest : public app_mngr::commands::CommandRequestImpl {
    */
   bool CheckSubMenuName();
 
+  bool is_menu_layout_available_ = true;
+
   DISALLOW_COPY_AND_ASSIGN(AddSubMenuRequest);
 };
 
