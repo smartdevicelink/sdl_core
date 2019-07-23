@@ -154,11 +154,6 @@ class CacheManager : public CacheManagerInterface {
    */
   virtual bool SecondsBetweenRetries(std::vector<int>& seconds);
 
-  /**
-   * @brief Gets information about vehicle
-   */
-  virtual const VehicleInfo GetVehicleInfo() const;
-
   const boost::optional<bool> LockScreenDismissalEnabledState() const OVERRIDE;
 
   const boost::optional<std::string> LockScreenDismissalWarningMessage(

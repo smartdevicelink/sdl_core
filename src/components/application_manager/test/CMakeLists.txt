@@ -46,6 +46,7 @@ include_directories(
   ${COMPONENTS_DIR}/security_manager/include/
   ${COMPONENTS_DIR}/application_manager/test/include/
   ${COMPONENTS_DIR}/application_manager/rpc_plugins/sdl_rpc_plugin/include/
+  ${COMPONENTS_DIR}/application_manager/rpc_plugins/vehicle_info_plugin/include/
   ${BSON_INCLUDE_DIRECTORY}
 )
 

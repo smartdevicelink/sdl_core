@@ -44,6 +44,7 @@ namespace policy_table = rpc::policy_table_interface_base;
 namespace utils {
 namespace dbms {
 class SQLDatabase;
+class SQLQuery;
 }  // namespace dbms
 }  // namespace utils
 
@@ -70,8 +71,6 @@ class SQLPTRepresentation : public virtual PTRepresentation {
   virtual int TimeoutResponse();
   virtual bool SecondsBetweenRetries(std::vector<int>* seconds);
   virtual bool RefreshDB();
-  virtual const VehicleInfo GetVehicleInfo() const;
-
   virtual std::vector<UserFriendlyMessage> GetUserFriendlyMsg(
       const std::vector<std::string>& msg_codes, const std::string& language);
 

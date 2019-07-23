@@ -164,7 +164,9 @@ void FilterInvalidFunctions(policy_table::Rpc& rpcs) {
  * schema
  * @param rpc_parameters parameters to filter
  */
-void FilterInvalidRPCParameters(policy_table::RpcParameters& rpc_parameters) {
+void FilterInvalidRPCParameters(
+    policy_table::RpcParameters& rpc_parameters,
+    policy_table::VehicleDataItems& vehicle_data_items) {
   policy_table::HmiLevels valid_hmi_levels;
   for (const auto& hmi_level : rpc_parameters.hmi_levels) {
     if (hmi_level.is_valid()) {
@@ -173,10 +175,29 @@ void FilterInvalidRPCParameters(policy_table::RpcParameters& rpc_parameters) {
   }
   rpc_parameters.hmi_levels.swap(valid_hmi_levels);
 
+  auto ParamExists =
+      [&vehicle_data_items](const rpc::String<0, 255>& param_name) {
+        policy_table::Parameter parameter_enum;
+        if (policy_table::EnumFromJsonString(param_name, &parameter_enum)) {
+          return true;
+        }
+
+        if (!vehicle_data_items.is_initialized()) {
+          return false;
+        }
+
+        for (const auto& vdi : vehicle_data_items) {
+          if (param_name == vdi.name) {
+            return true;
+          }
+        }
+        return false;
+      };
+
   policy_table::Parameters valid_params;
   const policy_table::Parameters& params = *(rpc_parameters.parameters);
   for (const auto& param : params) {
-    if (param.is_valid()) {
+    if (param.is_valid() && ParamExists(param)) {
       valid_params.push_back(param);
     }
   }
@@ -261,7 +282,8 @@ void FilterInvalidApplicationParameters(
  * @brief FilterPolicyTable filter values that not present in schema
  * @param pt policy table to filter
  */
-void FilterPolicyTable(policy_table::PolicyTable& pt) {
+void FilterPolicyTable(policy_table::PolicyTable& pt,
+                       policy_table::VehicleDataItems& current_vd_items) {
   policy_table::ModuleConfig& module_config = pt.module_config;
   if (module_config.is_initialized() &&
       module_config.notifications_per_minute_by_priority.is_initialized()) {
@@ -280,8 +302,18 @@ void FilterPolicyTable(policy_table::PolicyTable& pt) {
     policy_table::Rpc& rpcs = group.second.rpcs;
     FilterInvalidFunctions(rpcs);
 
+    policy_table::VehicleDataItems vehicle_data_items;
+
+    if (!pt.vehicle_data->struct_empty()) {
+      vehicle_data_items =
+          pt.vehicle_data.is_initialized() &&
+                  pt.vehicle_data->schema_items.is_initialized()
+              ? *pt.vehicle_data->schema_items
+              : current_vd_items;
+    }
+
     for (auto& func : rpcs) {
-      FilterInvalidRPCParameters(func.second);
+      FilterInvalidRPCParameters(func.second, vehicle_data_items);
     }
   }
 }
@@ -311,22 +343,6 @@ bool PolicyManagerImpl::LoadPT(const std::string& file,
 
   file_system::DeleteFile(file);
 
-  FilterPolicyTable(pt_update->policy_table);
-  if (!IsPTValid(pt_update, policy_table::PT_UPDATE)) {
-    wrong_ptu_update_received_ = true;
-    update_status_manager_.OnWrongUpdateReceived();
-    return false;
-  }
-
-  update_status_manager_.OnValidUpdateReceived();
-  cache_->SaveUpdateRequired(false);
-
-  // Update finished, no need retry
-  if (timer_retry_sequence_.is_running()) {
-    LOG4CXX_INFO(logger_, "Stop retry sequence");
-    timer_retry_sequence_.Stop();
-  }
-
   {
     sync_primitives::AutoLock lock(apps_registration_lock_);
 
@@ -339,6 +355,28 @@ bool PolicyManagerImpl::LoadPT(const std::string& file,
           "Failed to create snapshot of policy table, trying another exchange");
       ForcePTExchange();
       return false;
+    }
+
+    const auto& current_vd = cache_->pt()->policy_table.vehicle_data;
+    auto current_vd_items =
+        current_vd.is_initialized() && current_vd->schema_items.is_initialized()
+            ? *(current_vd->schema_items)
+            : policy_table::VehicleDataItems();
+
+    FilterPolicyTable(pt_update->policy_table, current_vd_items);
+    if (!IsPTValid(pt_update, policy_table::PT_UPDATE)) {
+      wrong_ptu_update_received_ = true;
+      update_status_manager_.OnWrongUpdateReceived();
+      return false;
+    }
+
+    update_status_manager_.OnValidUpdateReceived();
+    cache_->SaveUpdateRequired(false);
+
+    // Update finished, no need retry
+    if (timer_retry_sequence_.is_running()) {
+      LOG4CXX_INFO(logger_, "Stop retry sequence");
+      timer_retry_sequence_.Stop();
     }
 
     // Checking of difference between PTU and current policy state
@@ -562,9 +600,13 @@ const std::vector<std::string> PolicyManagerImpl::GetAppRequestSubTypes(
   cache_->GetAppRequestSubTypes(policy_app_id, request_subtypes);
   return request_subtypes;
 }
+const std::vector<policy_table::VehicleDataItem>
+PolicyManagerImpl::GetVehicleDataItems() const {
+  return cache_->GetVehicleDataItems();
+}
 
-const VehicleInfo PolicyManagerImpl::GetVehicleInfo() const {
-  return cache_->GetVehicleInfo();
+policy_table::ModuleConfig PolicyManagerImpl::GetModuleConfigData() const {
+  return cache_->GetModuleConfigData();
 }
 
 void PolicyManagerImpl::GetEnabledCloudApps(

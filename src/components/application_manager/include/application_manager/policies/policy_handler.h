@@ -113,6 +113,8 @@ class PolicyHandler : public PolicyHandlerInterface,
   virtual DeviceConsent GetUserConsentForDevice(
       const std::string& device_id) const OVERRIDE;
 
+  policy_table::ModuleConfig GetModuleConfigData() const OVERRIDE;
+
   /**
    * @brief Sets HMI default type for specified application
    * @param application_id ID application
@@ -615,12 +617,6 @@ class PolicyHandler : public PolicyHandlerInterface,
    */
   const std::vector<std::string> GetAppRequestSubTypes(
       const std::string& policy_app_id) const OVERRIDE;
-
-  /**
-   * @brief Gets vehicle information
-   * @return Structure with vehicle information
-   */
-  const VehicleInfo GetVehicleInfo() const OVERRIDE;
 
 #ifdef EXTERNAL_PROPRIETARY_MODE
   /**

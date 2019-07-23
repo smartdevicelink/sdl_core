@@ -123,11 +123,6 @@ class PTRepresentation {
   virtual bool SecondsBetweenRetries(std::vector<int>* seconds) = 0;
 
   /**
-   * @brief Get information about vehicle
-   */
-  virtual const VehicleInfo GetVehicleInfo() const = 0;
-
-  /**
    * @brief Allows to update 'vin' field in module_meta table.
    *
    * @param new 'vin' value.
