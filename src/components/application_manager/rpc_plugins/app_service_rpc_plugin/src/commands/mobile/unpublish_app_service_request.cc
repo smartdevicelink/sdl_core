@@ -65,10 +65,10 @@ void UnpublishAppServiceRequest::Run() {
       application_manager_.GetAppServiceManager().FindServiceByID(service_id);
 
   if (!service || service->connection_key != connection_key()) {
-    SendResponse(
-        false,
-        mobile_apis::Result::INVALID_ID,
-        "No app service with the requested service ID was published by this application");
+    SendResponse(false,
+                 mobile_apis::Result::INVALID_ID,
+                 "No app service with the requested service ID was published "
+                 "by this application");
     return;
   }
 
