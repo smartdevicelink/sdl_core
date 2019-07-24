@@ -120,12 +120,6 @@ void PublishAppServiceRequest::Run() {
     return;
   }
 
-  if (app->IsFullscreen()) {
-    // Service should be activated if app is in the foreground
-    application_manager_.GetAppServiceManager().ActivateAppService(
-        service_record[strings::service_id].asString());
-  }
-
   response_params[strings::app_service_record] = service_record;
 
   SendResponse(true, mobile_apis::Result::SUCCESS, NULL, &response_params);

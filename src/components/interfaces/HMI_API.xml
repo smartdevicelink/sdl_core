@@ -6393,7 +6393,10 @@
 <interface name="AppService" version="1.0.0" date="2019-03-18">
     <description>Interface used for interacting with app services as a producer or consumer</description>
     <function name="PublishAppService" messagetype="request">
-        <description>Registers a service offered by this app on the module</description>
+        <description>
+          Registers a service offered by this app on the module.
+          Subsequent calls with the same service type will update the manifest for that service.
+        </description>
 
         <param name="appServiceManifest" type="Common.AppServiceManifest" mandatory="true">
             <description> The manifest of the service that wishes to be published.</description>
@@ -6406,6 +6409,18 @@
         <param name="appServiceRecord" type="Common.AppServiceRecord" mandatory="false">
             <description> If the request was successful, this object will be the current status of the service record for the published service. This will include the Core supplied service ID.</description>
         </param>
+    </function>
+
+    <function name="UnpublishAppService" messagetype="request">
+        <description>Unpublish an existing service published by the HMI.</description>
+
+        <param name="serviceID" type="String" mandatory="true">
+            <description> The ID of the service to be unpublished. </description>
+        </param>
+    </function>
+
+    <function name="UnpublishAppService" messagetype="response">
+        <description>The response to UnpublishAppService</description>
     </function>
 
     <function name="OnAppServiceData" messagetype="notification">
