@@ -2906,7 +2906,10 @@
     <description>If omitted, the entire keyboard will be enabled.</description>
   </param>
   <param name="autoCompleteList" type="String" maxlength="1000" minsize="0" maxsize="100" array="true" mandatory="false">
-    <description>Allows an app to prepopulate the text field with a list of suggested or completed entry as the user types</description>
+    <description>
+      Allows an app to prepopulate the text field with a list of suggested or completed entries as the user types. 
+      If empty, the auto-complete list will be removed from the screen.
+    </description>
   </param>
 </struct>
 

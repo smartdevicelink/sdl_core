@@ -2397,8 +2397,11 @@
                 <param name="autoCompleteText" type="String" maxlength="1000" mandatory="false" since="3.0" until="6.0" />
             </history>
         </param>
-        <param name="autoCompleteList" type="String" maxlength="1000" minsize="1" maxsize="100" array="true" mandatory="false" since="6.0">
-            <description>Allows an app to prepopulate the text field with a list of suggested or completed entry as the user types</description>
+        <param name="autoCompleteList" type="String" maxlength="1000" minsize="0" maxsize="100" array="true" mandatory="false" since="6.0">
+            <description>
+                Allows an app to prepopulate the text field with a list of suggested or completed entries as the user types. 
+                If empty, the auto-complete list will be removed from the screen.
+            </description>
         </param>
     </struct>
 
