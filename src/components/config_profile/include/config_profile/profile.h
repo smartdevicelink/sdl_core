@@ -425,6 +425,13 @@ class Profile : public protocol_handler::ProtocolHandlerSettings,
 
   const uint8_t* bluetooth_uuid() const OVERRIDE;
 
+  const std::string& aoa_filter_manufacturer() const OVERRIDE;
+  const std::string& aoa_filter_model_name() const OVERRIDE;
+  const std::string& aoa_filter_description() const OVERRIDE;
+  const std::string& aoa_filter_version() const OVERRIDE;
+  const std::string& aoa_filter_uri() const OVERRIDE;
+  const std::string& aoa_filter_serial_number() const OVERRIDE;
+
   // TransportManageMMESettings interface
 
   const std::string& event_mq_name() const OVERRIDE;
@@ -982,6 +989,12 @@ class Profile : public protocol_handler::ProtocolHandlerSettings,
   uint32_t cloud_app_retry_timeout_;
   uint16_t cloud_app_max_retry_attempts_;
   std::vector<uint8_t> bluetooth_uuid_;
+  std::string aoa_filter_manufacturer_;
+  std::string aoa_filter_model_name_;
+  std::string aoa_filter_description_;
+  std::string aoa_filter_version_;
+  std::string aoa_filter_uri_;
+  std::string aoa_filter_serial_number_;
   std::string tts_delimiter_;
   uint32_t audio_data_stopped_timeout_;
   uint32_t video_data_stopped_timeout_;
