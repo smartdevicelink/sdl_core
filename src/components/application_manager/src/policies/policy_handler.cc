@@ -826,6 +826,15 @@ void PolicyHandler::OnDeviceSwitching(const std::string& device_id_from,
   policy_manager_->OnDeviceSwitching(device_id_from, device_id_to);
 }
 
+void PolicyHandler::OnLockScreenDismissalStateChanged() {
+  LOG4CXX_AUTO_TRACE(logger_);
+  const auto accessor = application_manager_.applications();
+  const auto apps = accessor.GetData();
+  for (auto& app : apps) {
+    application_manager_.SendDriverDistractionState(app);
+  }
+}
+
 void PolicyHandler::OnGetStatusUpdate(const uint32_t correlation_id) {
   LOG4CXX_AUTO_TRACE(logger_);
   POLICY_LIB_CHECK_VOID();
@@ -1572,6 +1581,19 @@ void PolicyHandler::OnExceededTimeout() {
 void PolicyHandler::OnSystemReady() {
   POLICY_LIB_CHECK_VOID();
   policy_manager_->OnSystemReady();
+}
+
+const boost::optional<bool> PolicyHandler::LockScreenDismissalEnabledState()
+    const {
+  POLICY_LIB_CHECK(boost::optional<bool>());
+  return policy_manager_->LockScreenDismissalEnabledState();
+}
+
+const boost::optional<std::string>
+PolicyHandler::LockScreenDismissalWarningMessage(
+    const std::string& language) const {
+  POLICY_LIB_CHECK(boost::optional<std::string>());
+  return policy_manager_->LockScreenDismissalWarningMessage(language);
 }
 
 void PolicyHandler::PTUpdatedAt(Counters counter, int value) {

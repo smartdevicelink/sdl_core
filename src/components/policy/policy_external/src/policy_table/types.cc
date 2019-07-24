@@ -788,8 +788,9 @@ ModuleConfig::ModuleConfig(const Json::Value* value__)
     , preloaded_date(impl::ValueMember(value__, "preloaded_date"))
     , certificate(impl::ValueMember(value__, "certificate"))
     , preloaded_pt(impl::ValueMember(value__, "preloaded_pt"))
-    , full_app_id_supported(
-          impl::ValueMember(value__, "full_app_id_supported")) {}
+    , full_app_id_supported(impl::ValueMember(value__, "full_app_id_supported"))
+    , lock_screen_dismissal_enabled(
+          impl::ValueMember(value__, "lock_screen_dismissal_enabled")) {}
 
 void ModuleConfig::SafeCopyFrom(const ModuleConfig& from) {
   exchange_after_x_days = from.exchange_after_x_days;
@@ -801,6 +802,7 @@ void ModuleConfig::SafeCopyFrom(const ModuleConfig& from) {
   endpoints = from.endpoints;
   notifications_per_minute_by_priority =
       from.notifications_per_minute_by_priority;
+  lock_screen_dismissal_enabled = from.lock_screen_dismissal_enabled;
 
   certificate.assign_if_valid(from.certificate);
   vehicle_make.assign_if_valid(from.vehicle_make);
@@ -834,6 +836,9 @@ Json::Value ModuleConfig::ToJsonValue() const {
   impl::WriteJsonField("vehicle_year", vehicle_year, &result__);
   impl::WriteJsonField("certificate", certificate, &result__);
   impl::WriteJsonField("preloaded_date", preloaded_date, &result__);
+  impl::WriteJsonField("lock_screen_dismissal_enabled",
+                       lock_screen_dismissal_enabled,
+                       &result__);
   return result__;
 }
 
@@ -883,6 +888,9 @@ bool ModuleConfig::is_valid() const {
   if (!preloaded_date.is_valid()) {
     return false;
   }
+  if (!lock_screen_dismissal_enabled.is_valid()) {
+    return false;
+  }
   return Validate();
 }
 
@@ -923,6 +931,9 @@ bool ModuleConfig::struct_empty() const {
   }
 
   if (notifications_per_minute_by_priority.is_initialized()) {
+    return false;
+  }
+  if (lock_screen_dismissal_enabled.is_initialized()) {
     return false;
   }
   if (vehicle_make.is_initialized()) {
@@ -978,6 +989,10 @@ void ModuleConfig::ReportErrors(rpc::ValidationReport* report__) const {
   if (!notifications_per_minute_by_priority.is_valid()) {
     notifications_per_minute_by_priority.ReportErrors(
         &report__->ReportSubobject("notifications_per_minute_by_priority"));
+  }
+  if (!lock_screen_dismissal_enabled.is_valid()) {
+    lock_screen_dismissal_enabled.ReportErrors(
+        &report__->ReportSubobject("lock_screen_dismissal_enabled"));
   }
   if (!vehicle_make.is_valid()) {
     vehicle_make.ReportErrors(&report__->ReportSubobject("vehicle_make"));
@@ -1037,6 +1052,7 @@ void ModuleConfig::SetPolicyTableType(PolicyTableType pt_type) {
   seconds_between_retries.SetPolicyTableType(pt_type);
   endpoints.SetPolicyTableType(pt_type);
   notifications_per_minute_by_priority.SetPolicyTableType(pt_type);
+  lock_screen_dismissal_enabled.SetPolicyTableType(pt_type);
   vehicle_make.SetPolicyTableType(pt_type);
   vehicle_model.SetPolicyTableType(pt_type);
   vehicle_year.SetPolicyTableType(pt_type);

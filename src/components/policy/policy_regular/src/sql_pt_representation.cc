@@ -525,7 +525,9 @@ void SQLPTRepresentation::GatherModuleConfig(
     *config->vehicle_make = query.GetString(6);
     *config->vehicle_model = query.GetString(7);
     *config->vehicle_year = query.GetString(8);
-    *config->preloaded_date = query.GetString(9);
+    if (!query.IsNull(9)) {
+      *config->lock_screen_dismissal_enabled = query.GetBoolean(9);
+    }
   }
 
   utils::dbms::SQLQuery endpoints(db());
@@ -1365,6 +1367,9 @@ bool SQLPTRepresentation::SaveModuleConfig(
                                         : query.Bind(7);
   config.vehicle_year.is_initialized() ? query.Bind(8, *(config.vehicle_year))
                                        : query.Bind(8);
+  config.lock_screen_dismissal_enabled.is_initialized()
+      ? query.Bind(9, *(config.lock_screen_dismissal_enabled))
+      : query.Bind(9);
   if (!query.Exec()) {
     LOG4CXX_WARN(logger_, "Incorrect update module config");
     return false;
@@ -1519,6 +1524,25 @@ bool SQLPTRepresentation::SaveMessageString(
 
   query.Bind(0, lang);
   query.Bind(1, type);
+  if (strings.tts.is_valid() && strings.tts.is_initialized()) {
+    query.Bind(2, (*strings.tts));
+  }
+
+  if (strings.label.is_valid() && strings.label.is_initialized()) {
+    query.Bind(3, (*strings.label));
+  }
+
+  if (strings.line1.is_valid() && strings.line1.is_initialized()) {
+    query.Bind(4, *(strings.line1));
+  }
+
+  if (strings.line2.is_valid() && strings.line2.is_initialized()) {
+    query.Bind(5, (*strings.line2));
+  }
+
+  if (strings.textBody.is_valid() && strings.textBody.is_initialized()) {
+    query.Bind(6, (*strings.textBody));
+  }
 
   if (!query.Exec() || !query.Reset()) {
     LOG4CXX_WARN(logger_, "Incorrect insert into message.");

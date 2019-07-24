@@ -162,6 +162,11 @@ class PolicyManagerImpl : public PolicyManager {
    */
   void KmsChanged(int kilometers) OVERRIDE;
 
+  const boost::optional<bool> LockScreenDismissalEnabledState() const OVERRIDE;
+
+  const boost::optional<std::string> LockScreenDismissalWarningMessage(
+      const std::string& language) const OVERRIDE;
+
   /**
    * @brief Increments counter of ignition cycles
    */
@@ -818,6 +823,17 @@ class PolicyManagerImpl : public PolicyManager {
   void CheckPermissionsChanges(
       const std::shared_ptr<policy_table::Table> update,
       const std::shared_ptr<policy_table::Table> snapshot);
+
+  /**
+   * @brief Compares current policies to the updated one.
+   * Trigger actions in case if certain fields after update were changed.
+   * This function should be called after PT update.
+   * Actions require already updated policy table
+   * @param update Shared pointer to policy table update
+   * @param snapshot Shared pointer to old copy of policy table
+   */
+  void CheckPermissionsChangesAfterUpdate(const policy_table::Table& update,
+                                          const policy_table::Table& snapshot);
 
   /**
    * @brief Fill structure to be sent with OnPermissionsChanged notification

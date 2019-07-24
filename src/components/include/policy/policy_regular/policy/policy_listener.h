@@ -157,6 +157,12 @@ class PolicyListener {
   virtual void OnUpdateHMIStatus(const std::string& device_id,
                                  const std::string& policy_app_id,
                                  const std::string& hmi_level) = 0;
+
+  /**
+   * @brief Notify Connected mobile apps about changing state
+   * LockScreenDismissal
+   */
+  virtual void OnLockScreenDismissalStateChanged() = 0;
 };
 }  //  namespace policy
 #endif  // SRC_COMPONENTS_INCLUDE_POLICY_POLICY_REGULAR_POLICY_POLICY_LISTENER_H_

@@ -366,6 +366,11 @@ std::string MessageHelper::CommonLanguageToString(
   return MockMessageHelper::message_helper_mock()->CommonLanguageToString(lang);
 }
 
+std::string MessageHelper::MobileLanguageToString(
+    mobile_apis::Language::eType lang) {
+  return MockMessageHelper::message_helper_mock()->MobileLanguageToString(lang);
+}
+
 smart_objects::SmartObjectSPtr MessageHelper::GetBCActivateAppRequestToHMI(
     ApplicationConstSharedPtr app,
     const policy::PolicyHandlerInterface& policy_handler,
@@ -589,4 +594,5 @@ void MessageHelper::BroadcastCapabilityUpdate(
   MockMessageHelper::message_helper_mock()->BroadcastCapabilityUpdate(
       msg_params, app_mngr);
 }
+
 }  // namespace application_manager

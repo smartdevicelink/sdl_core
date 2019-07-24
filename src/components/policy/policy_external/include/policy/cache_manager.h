@@ -34,6 +34,7 @@
 #define SRC_COMPONENTS_POLICY_POLICY_EXTERNAL_INCLUDE_POLICY_CACHE_MANAGER_H_
 
 #include <map>
+#include "boost/optional.hpp"
 
 #include "policy/cache_manager_interface.h"
 #include "policy/pt_ext_representation.h"
@@ -157,6 +158,11 @@ class CacheManager : public CacheManagerInterface {
    * @brief Gets information about vehicle
    */
   virtual const VehicleInfo GetVehicleInfo() const;
+
+  const boost::optional<bool> LockScreenDismissalEnabledState() const OVERRIDE;
+
+  const boost::optional<std::string> LockScreenDismissalWarningMessage(
+      const std::string& language) const OVERRIDE;
 
   /**
    * @brief Get a list of enabled cloud applications
@@ -283,7 +289,7 @@ class CacheManager : public CacheManagerInterface {
   std::vector<UserFriendlyMessage> GetUserFriendlyMsg(
       const std::vector<std::string>& msg_codes,
       const std::string& language,
-      const std::string& active_hmi_language);
+      const std::string& active_hmi_language) const;
 
   /**
    * @brief GetLockScreenIcon allows to obtain lock screen icon url;

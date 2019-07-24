@@ -110,6 +110,10 @@ class MockCacheManagerInterface : public ::policy::CacheManagerInterface {
            policy_table::AppServiceParameters* app_service_parameters));
   MOCK_CONST_METHOD1(UnknownRPCPassthroughAllowed,
                      bool(const std::string& policy_app_id));
+  MOCK_CONST_METHOD0(LockScreenDismissalEnabledState,
+                     const boost::optional<bool>());
+  MOCK_CONST_METHOD1(LockScreenDismissalWarningMessage,
+                     const boost::optional<std::string>(const std::string&));
   MOCK_CONST_METHOD1(GetDeviceConsent,
                      DeviceConsent(const std::string& device_id));
   MOCK_METHOD2(SetDeviceConsent,
@@ -120,11 +124,11 @@ class MockCacheManagerInterface : public ::policy::CacheManagerInterface {
   MOCK_CONST_METHOD1(GetCachedDeviceConsent,
                      DeviceConsent(const std::string& device_id));
   MOCK_METHOD1(SetVINValue, bool(const std::string& value));
-  MOCK_METHOD3(GetUserFriendlyMsg,
-               std::vector<UserFriendlyMessage>(
-                   const std::vector<std::string>& msg_codes,
-                   const std::string& language,
-                   const std::string& active_hmi_language));
+  MOCK_CONST_METHOD3(GetUserFriendlyMsg,
+                     std::vector<UserFriendlyMessage>(
+                         const std::vector<std::string>& msg_codes,
+                         const std::string& language,
+                         const std::string& active_hmi_language));
   MOCK_METHOD2(GetUpdateUrls,
                void(const std::string& service_type,
                     EndpointUrls& out_end_points));

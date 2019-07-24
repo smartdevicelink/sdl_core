@@ -856,8 +856,47 @@ bool CacheManager::UnknownRPCPassthroughAllowed(
   return false;
 }
 
+const boost::optional<bool> CacheManager::LockScreenDismissalEnabledState()
+    const {
+  LOG4CXX_AUTO_TRACE(logger_);
+  boost::optional<bool> empty;
+  CACHE_MANAGER_CHECK(empty);
+  sync_primitives::AutoLock auto_lock(cache_lock_);
+  policy_table::ModuleConfig& module_config = pt_->policy_table.module_config;
+  if (module_config.lock_screen_dismissal_enabled.is_initialized()) {
+    LOG4CXX_TRACE(logger_,
+                  "state = " << *module_config.lock_screen_dismissal_enabled);
+    return boost::optional<bool>(*module_config.lock_screen_dismissal_enabled);
+  }
+  LOG4CXX_TRACE(logger_, "state = empty");
+  return empty;
+}
+
+const boost::optional<std::string>
+CacheManager::LockScreenDismissalWarningMessage(
+    const std::string& language) const {
+  LOG4CXX_AUTO_TRACE(logger_);
+  boost::optional<std::string> empty;
+  CACHE_MANAGER_CHECK(empty);
+
+  const std::string lock_screen_dismissal_warning_message =
+      "LockScreenDismissalWarning";
+  sync_primitives::AutoLock auto_lock(cache_lock_);
+
+  std::vector<std::string> msg_codes{lock_screen_dismissal_warning_message};
+
+  const auto messages = GetUserFriendlyMsg(msg_codes, language);
+
+  if (messages.empty() || messages[0].text_body.empty()) {
+    return empty;
+  }
+
+  return boost::optional<std::string>(messages[0].text_body);
+}
+
 std::vector<UserFriendlyMessage> CacheManager::GetUserFriendlyMsg(
-    const std::vector<std::string>& msg_codes, const std::string& language) {
+    const std::vector<std::string>& msg_codes,
+    const std::string& language) const {
   LOG4CXX_AUTO_TRACE(logger_);
   std::vector<UserFriendlyMessage> result;
   CACHE_MANAGER_CHECK(result);
@@ -903,6 +942,12 @@ std::vector<UserFriendlyMessage> CacheManager::GetUserFriendlyMsg(
 
     UserFriendlyMessage msg;
     msg.message_code = *it;
+    msg.tts = *message_string.tts;
+    msg.label = *message_string.label;
+    msg.line1 = *message_string.line1;
+    msg.line2 = *message_string.line2;
+    msg.text_body = *message_string.textBody;
+
     result.push_back(msg);
   }
   return result;
