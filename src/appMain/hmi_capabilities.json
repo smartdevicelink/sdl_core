@@ -245,6 +245,9 @@
                 },
                 {
                     "name": "alertIcon",
+                    "imageTypeSupported": [
+                        "GRAPHIC_PNG"
+                    ],
                     "imageResolution": {
                         "resolutionWidth": 225,
                         "resolutionHeight": 225
