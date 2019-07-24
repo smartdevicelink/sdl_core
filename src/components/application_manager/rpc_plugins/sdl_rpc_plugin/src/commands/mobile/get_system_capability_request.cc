@@ -152,7 +152,7 @@ void GetSystemCapabilityRequest::Run() {
                              all_services);
       break;
     }
-    case mobile_apis::SystemCapabilityType::DISPLAY: {
+    case mobile_apis::SystemCapabilityType::DISPLAYS: {
       auto capabilities = hmi_capabilities.system_display_capabilities();
       if (app->display_capabilities()) {
         capabilities = app->display_capabilities().get();
@@ -174,8 +174,8 @@ void GetSystemCapabilityRequest::Run() {
   }
 
   const char* info = nullptr;
-  // Ignore subscription/unsubscription for DISPLAY type
-  if (mobile_apis::SystemCapabilityType::DISPLAY != response_type) {
+  // Ignore subscription/unsubscription for DISPLAYS type
+  if (mobile_apis::SystemCapabilityType::DISPLAYS != response_type) {
     if ((*message_)[app_mngr::strings::msg_params].keyExists(
             strings::subscribe)) {
       auto& ext = SystemCapabilityAppExtension::ExtractExtension(*app);

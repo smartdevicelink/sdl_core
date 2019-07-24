@@ -376,7 +376,7 @@ MessageHelper::CreateDisplayCapabilityUpdateToMobile(
 
   smart_objects::SmartObject system_capability(smart_objects::SmartType_Map);
   system_capability[strings::system_capability_type] =
-      static_cast<int32_t>(mobile_apis::SystemCapabilityType::DISPLAY);
+      static_cast<int32_t>(mobile_apis::SystemCapabilityType::DISPLAYS);
   system_capability[strings::display_capabilities] = display_capabilities;
   (*message)[strings::msg_params][strings::system_capability] =
       system_capability;

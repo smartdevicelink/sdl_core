@@ -2969,7 +2969,7 @@
         <element name="VIDEO_STREAMING"/>
         <element name="REMOTE_CONTROL"/>
         <element name="APP_SERVICES" since="5.1"/>
-        <element name="DISPLAY" since="6.0"/>
+        <element name="DISPLAYS" since="6.0"/>
     </enum>
     
     <struct name="NavigationCapability" since="4.5">
@@ -4474,7 +4474,7 @@
 
         <param name="displayCapabilities" type="DisplayCapabilities" mandatory="false" deprecated="true" since="6.0">
             <description>
-                See DisplayCapabilities. This parameter is deprecated and replaced by SystemCapability using DISPLAY.
+                See DisplayCapabilities. This parameter is deprecated and replaced by SystemCapability using DISPLAYS.
             </description>
             <history>
                 <param name="displayCapabilities" type="DisplayCapabilities" mandatory="false" since="2.0" until="6.0"/>
@@ -4483,7 +4483,7 @@
 
         <param name="buttonCapabilities" type="ButtonCapabilities" minsize="1" maxsize="100" array="true" mandatory="false" deprecated="true" since="6.0">
             <description>
-                See ButtonCapabilities. This parameter is deprecated and replaced by  SystemCapability using DISPLAY.
+                See ButtonCapabilities. This parameter is deprecated and replaced by  SystemCapability using DISPLAYS.
             </description>
             <history>
                 <param name="buttonCapabilities" type="ButtonCapabilities" minsize="1" maxsize="100" array="true" mandatory="false" since="2.0" until="6.0"/>
@@ -4493,7 +4493,7 @@
         <param name="softButtonCapabilities" type="SoftButtonCapabilities" minsize="1" maxsize="100" array="true" mandatory="false" deprecated="true" since="6.0">
             <description>
                 If returned, the platform supports on-screen SoftButtons; see SoftButtonCapabilities.
-                This parameter is deprecated and replaced by  SystemCapability using DISPLAY.
+                This parameter is deprecated and replaced by  SystemCapability using DISPLAYS.
             </description>
             <history>
                 <param name="softButtonCapabilities" type="SoftButtonCapabilities" minsize="1" maxsize="100" array="true" mandatory="false" since="2.0" until="6.0"/>
@@ -4503,7 +4503,7 @@
         <param name="presetBankCapabilities" type="PresetBankCapabilities" mandatory="false" deprecated="true" since="6.0">
             <description>
                 If returned, the platform supports custom on-screen Presets; see PresetBankCapabilities.
-                This parameter is deprecated and replaced by  SystemCapability using DISPLAY.
+                This parameter is deprecated and replaced by  SystemCapability using DISPLAYS.
             </description>
             <history>
                 <param name="presetBankCapabilities" type="PresetBankCapabilities" mandatory="false" since="2.0" until="6.0"/>

@@ -77,7 +77,7 @@ TEST_F(
     GetSystemCapabilityRequestTest,
     Run_GetSystemDisplayCapabilities_SendMessageToMobileWithSUCCESSResultCode) {
   (*message_)[strings::msg_params][strings::system_capability_type] =
-      mobile_apis::SystemCapabilityType::DISPLAY;
+      mobile_apis::SystemCapabilityType::DISPLAYS;
 
   smart_objects::SmartObjectSPtr system_display_capabilities(
       std::make_shared<smart_objects::SmartObject>());
@@ -98,7 +98,7 @@ TEST_F(
     GetSystemCapabilityRequestTest,
     Run_GetSystemDisplayCapabilities_CapabilitiesNotExistSendMessageToMobileWithDATA_NOT_AVAILABLEResultCode) {
   (*message_)[strings::msg_params][strings::system_capability_type] =
-      mobile_apis::SystemCapabilityType::DISPLAY;
+      mobile_apis::SystemCapabilityType::DISPLAYS;
 
   EXPECT_CALL(*mock_app_, display_capabilities()).WillOnce(Return(nullptr));
 

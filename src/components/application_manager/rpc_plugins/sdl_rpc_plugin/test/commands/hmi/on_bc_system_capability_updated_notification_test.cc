@@ -79,7 +79,7 @@ TEST_F(OnBCSystemCapabilityUpdatedNotificationTest,
        SystemDisplayCapabilities_SUCCESS) {
   (*message_)[am::strings::msg_params][strings::system_capability]
              [am::strings::system_capability_type] =
-                 mobile_apis::SystemCapabilityType::DISPLAY;
+                 mobile_apis::SystemCapabilityType::DISPLAYS;
 
   smart_objects::SmartObject system_display_capabilities;
 
@@ -99,7 +99,7 @@ TEST_F(OnBCSystemCapabilityUpdatedNotificationTest,
        SystemDisplayCapabilities_DATA_NOT_AVAILABLE) {
   (*message_)[am::strings::msg_params][strings::system_capability]
              [am::strings::system_capability_type] =
-                 mobile_apis::SystemCapabilityType::DISPLAY;
+                 mobile_apis::SystemCapabilityType::DISPLAYS;
   EXPECT_CALL(mock_hmi_capabilities_, system_display_capabilities())
       .WillOnce(Return(nullptr));
 

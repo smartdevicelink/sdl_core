@@ -75,8 +75,8 @@ void SDLRPCPlugin::OnApplicationEvent(
     application->AddExtension(sys_cap_ext_ptr);
     // Processing automatic subscription to SystemCapabilities for DISPLAY type
     const auto capability_type =
-        mobile_apis::SystemCapabilityType::eType::DISPLAY;
-    LOG4CXX_DEBUG(logger_, "Subscription to DISPLAY capability is enabled");
+        mobile_apis::SystemCapabilityType::eType::DISPLAYS;
+    LOG4CXX_DEBUG(logger_, "Subscription to DISPLAYS capability is enabled");
     sys_cap_ext_ptr->SubscribeTo(capability_type);
   } else if (plugins::ApplicationEvent::kDeleteApplicationData == event) {
     ClearSubscriptions(application);

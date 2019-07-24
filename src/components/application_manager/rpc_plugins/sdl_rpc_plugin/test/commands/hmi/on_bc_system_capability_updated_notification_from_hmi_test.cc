@@ -97,7 +97,7 @@ TEST_F(
     Run_AppIdNotPresentedInMessage_SetSystemDisplayCapabilitiesToHMICapabilities_SendMessageToMobile) {
   (*message_)[am::strings::msg_params][strings::system_capability]
              [am::strings::system_capability_type] =
-                 mobile_apis::SystemCapabilityType::DISPLAY;
+                 mobile_apis::SystemCapabilityType::DISPLAYS;
 
   EXPECT_CALL(mock_hmi_capabilities_,
               set_system_display_capabilities(
@@ -117,7 +117,7 @@ TEST_F(OnBCSystemCapabilityUpdatedNotificationFromHMITest,
        Run_AppNotRegisteredWithPresentedAppIdInMessage_MessageNotSendToMobile) {
   (*message_)[am::strings::msg_params][strings::system_capability]
              [am::strings::system_capability_type] =
-                 mobile_apis::SystemCapabilityType::DISPLAY;
+                 mobile_apis::SystemCapabilityType::DISPLAYS;
   (*message_)[strings::msg_params][strings::app_id] = kAppId;
   ApplicationSharedPtr app;  // Empty application shared pointer
 
@@ -133,7 +133,7 @@ TEST_F(
     Run_AppRegisteredWithPresentedAppIdInMessage_SetDisplayCapabilitiesToApp_SendMessageToMobile) {
   (*message_)[am::strings::msg_params][strings::system_capability]
              [am::strings::system_capability_type] =
-                 mobile_apis::SystemCapabilityType::DISPLAY;
+                 mobile_apis::SystemCapabilityType::DISPLAYS;
   (*message_)[strings::msg_params][strings::app_id] = kAppId;
 
   ON_CALL(app_mngr_, application(kAppId)).WillByDefault(Return(mock_app_));

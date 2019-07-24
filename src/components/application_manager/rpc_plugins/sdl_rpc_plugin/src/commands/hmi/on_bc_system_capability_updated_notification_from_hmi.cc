@@ -106,7 +106,7 @@ void OnBCSystemCapabilityUpdatedNotificationFromHMI::Run() {
 
   const auto& system_capability =
       (*message_)[strings::msg_params][strings::system_capability];
-  if (mobile_apis::SystemCapabilityType::DISPLAY ==
+  if (mobile_apis::SystemCapabilityType::DISPLAYS ==
           system_capability[strings::system_capability_type].asInt() &&
       system_capability.keyExists(strings::display_capabilities)) {
     const auto result = ProcessSystemDisplayCapabilities(

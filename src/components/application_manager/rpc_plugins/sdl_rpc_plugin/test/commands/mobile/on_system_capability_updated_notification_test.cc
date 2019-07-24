@@ -84,7 +84,7 @@ TEST_F(
     Run_AppExistSubscribedToNotification_SystemDisplayCapabilitiesSendToMobile) {
   (*message_)[am::strings::msg_params][strings::system_capability]
              [am::strings::system_capability_type] =
-                 mobile_apis::SystemCapabilityType::DISPLAY;
+                 mobile_apis::SystemCapabilityType::DISPLAYS;
 
   smart_objects::SmartObject system_display_capabilities;
 
@@ -98,7 +98,7 @@ TEST_F(
           std::make_shared<sdl_rpc_plugin::SystemCapabilityAppExtension>(
               sdl_rpc_plugin, *mock_app_));
   system_capability_app_extension->SubscribeTo(
-      mobile_apis::SystemCapabilityType::DISPLAY);
+      mobile_apis::SystemCapabilityType::DISPLAYS);
   application_manager::ApplicationSet apps({mock_app_});
   std::shared_ptr<sync_primitives::Lock> apps_lock_(
       std::make_shared<sync_primitives::Lock>());
@@ -130,7 +130,7 @@ TEST_F(
     Run_AppExistConnectionKeyNotEqualWithAppId_SystemDisplayCapabilitiesNotSendToMobile) {
   (*message_)[am::strings::msg_params][strings::system_capability]
              [am::strings::system_capability_type] =
-                 mobile_apis::SystemCapabilityType::DISPLAY;
+                 mobile_apis::SystemCapabilityType::DISPLAYS;
 
   smart_objects::SmartObject system_display_capabilities;
 
@@ -144,7 +144,7 @@ TEST_F(
           std::make_shared<sdl_rpc_plugin::SystemCapabilityAppExtension>(
               sdl_rpc_plugin, *mock_app_));
   system_capability_app_extension->SubscribeTo(
-      mobile_apis::SystemCapabilityType::DISPLAY);
+      mobile_apis::SystemCapabilityType::DISPLAYS);
   application_manager::ApplicationSet apps({mock_app_});
   std::shared_ptr<sync_primitives::Lock> apps_lock_(
       std::make_shared<sync_primitives::Lock>());
@@ -170,7 +170,7 @@ TEST_F(
     Run_AppExistNotSubscribedToNotification_SystemDisplayCapabilitiesNotSendToMobile) {
   (*message_)[am::strings::msg_params][strings::system_capability]
              [am::strings::system_capability_type] =
-                 mobile_apis::SystemCapabilityType::DISPLAY;
+                 mobile_apis::SystemCapabilityType::DISPLAYS;
 
   smart_objects::SmartObject system_display_capabilities;
 
@@ -209,7 +209,7 @@ TEST_F(
     Run_AppDataEmpty_SystemDisplayCapabilitiesUpdatedNotificationNotSendToMobile) {
   (*message_)[am::strings::msg_params][strings::system_capability]
              [am::strings::system_capability_type] =
-                 mobile_apis::SystemCapabilityType::DISPLAY;
+                 mobile_apis::SystemCapabilityType::DISPLAYS;
   application_manager::ApplicationSet apps;
   std::shared_ptr<sync_primitives::Lock> apps_lock_(
       std::make_shared<sync_primitives::Lock>());

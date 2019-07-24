@@ -129,7 +129,7 @@ void OnSystemCapabilityUpdatedNotification::Run() {
       break;
     }
 
-    case mobile_apis::SystemCapabilityType::DISPLAY: {
+    case mobile_apis::SystemCapabilityType::DISPLAYS: {
       // Display capabilities content will be populated in the code after the
       // switch so just breaking here
       break;
@@ -165,7 +165,7 @@ void OnSystemCapabilityUpdatedNotification::Run() {
           return false;
         }
 
-        if (mobile_apis::SystemCapabilityType::DISPLAY ==
+        if (mobile_apis::SystemCapabilityType::DISPLAYS ==
                 system_capability_type &&
             initial_connection_key > 0) {
           LOG4CXX_DEBUG(logger_,
@@ -205,7 +205,7 @@ void OnSystemCapabilityUpdatedNotification::Run() {
       continue;
     }
 
-    if (mobile_apis::SystemCapabilityType::DISPLAY == system_capability_type) {
+    if (mobile_apis::SystemCapabilityType::DISPLAYS == system_capability_type) {
       LOG4CXX_DEBUG(logger_, "Using common display capabilities");
       auto capabilities = hmi_capabilities_.system_display_capabilities();
       if (app->is_resuming()) {
