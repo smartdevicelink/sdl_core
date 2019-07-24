@@ -1051,7 +1051,6 @@ const char* EnumToJsonString(FunctionID val) {
   }
 };
 
-
 bool EnumFromJsonString(const std::string& literal, FunctionID* result) {
   if ("RegisterAppInterface" == literal) {
     *result = RegisterAppInterfaceID;

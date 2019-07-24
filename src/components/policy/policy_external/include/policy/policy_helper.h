@@ -322,6 +322,7 @@ struct ProcessFunctionalGroup {
    * flag
    */
   void FillEncryptionFlagForRpcs(
+      const policy_table::Rpc& rpcs,
       const policy::EncryptionRequired encryption_required);
   const policy_table::FunctionalGroupings& fg_;
   const std::vector<FunctionalGroupPermission>& group_permissions_;
