@@ -58,21 +58,15 @@ CancelInteractionRequest::~CancelInteractionRequest() {}
 void CancelInteractionRequest::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  auto app = application_manager_.application(connection_key());
+  auto function_id = static_cast<rpc::policy_table_interface_base::FunctionID>(
+      (*message_)[strings::msg_params][strings::func_id].asInt());
 
-  if (!app || app.use_count() == 0) {
-    LOG4CXX_ERROR(logger_, "Application does not exist");
-    SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
-    return;
-  }
-
-  auto function_id = (*message_)[strings::msg_params][strings::func_id].asInt();
-  auto cancel_id = (*message_)[strings::msg_params][strings::cancel_id].asInt();
-
-  if (function_id != FunctionID::PerformInteractionID &&
-      function_id != FunctionID::AlertID &&
-      function_id != FunctionID::ScrollableMessageID &&
-      function_id != FunctionID::SliderID) {
+  if (helpers::Compare<FunctionID, helpers::NEQ, helpers::ALL>(
+          function_id,
+          FunctionID::PerformInteractionID,
+          FunctionID::AlertID,
+          FunctionID::ScrollableMessageID,
+          FunctionID::SliderID)) {
     LOG4CXX_ERROR(logger_, "Bad function ID" << function_id);
     SendResponse(false, mobile_apis::Result::INVALID_ID);
     return;
@@ -81,7 +75,11 @@ void CancelInteractionRequest::Run() {
   smart_objects::SmartObject msg_params;
   msg_params[strings::app_id] = connection_key();
   msg_params[strings::func_id] = function_id;
-  msg_params[strings::cancel_id] = cancel_id;
+
+  if ((*message_)[strings::msg_params].keyExists(strings::cancel_id)) {
+    msg_params[strings::cancel_id] =
+        (*message_)[strings::msg_params][strings::cancel_id].asInt();
+  }
 
   SendHMIRequest(hmi_apis::FunctionID::UI_CancelInteraction, &msg_params, true);
 }

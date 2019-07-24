@@ -449,10 +449,10 @@ void PerformInteractionRequest::SendUIPerformInteractionRequest(
   smart_objects::SmartObject msg_params =
       smart_objects::SmartObject(smart_objects::SmartType_Map);
 
-  msg_params[strings::cancel_id] =
-      (*message_)[strings::msg_params].keyExists(strings::cancel_id)
-          ? (*message_)[strings::msg_params][strings::cancel_id].asInt()
-          : -1;
+  if ((*message_)[strings::msg_params].keyExists(strings::cancel_id)) {
+    msg_params[strings::cancel_id] =
+        (*message_)[strings::msg_params][strings::cancel_id].asInt();
+  }
 
   mobile_apis::InteractionMode::eType mode =
       static_cast<mobile_apis::InteractionMode::eType>(

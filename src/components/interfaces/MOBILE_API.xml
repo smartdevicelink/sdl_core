@@ -7366,11 +7366,16 @@
     </function>
 
     <function name="CancelInteraction" functionID="CancelInteractionID" messagetype="request" since="6.0">
+        <description>
+            Close an active interaction on the HMI.
+        </description>
+
         <param name="cancelID" type="Integer" mandatory="false">
             <description>
                 The ID of the specific interaction you want to dismiss. If not set, the most recent of the RPC type set in functionID will be dismissed.
             </description>
         </param>
+
         <param name="functionID" type="Integer" mandatory="true">
             <description>
                 The ID of the type of interaction the developer wants to dismiss. Only values 10, (PerformInteractionID), 12 (AlertID), 25 (ScrollableMessageID), and 26 (SliderID) are permitted.

@@ -116,10 +116,10 @@ void SliderRequest::Run() {
     msg_params[strings::timeout] = default_timeout_;
   }
 
-  msg_params[strings::cancel_id] =
-      (*message_)[strings::msg_params].keyExists(strings::cancel_id)
-          ? (*message_)[strings::msg_params][strings::cancel_id].asInt()
-          : -1;
+  if ((*message_)[strings::msg_params].keyExists(strings::cancel_id)) {
+    msg_params[strings::cancel_id] =
+        (*message_)[strings::msg_params][strings::cancel_id].asInt();
+  }
 
   StartAwaitForInterface(HmiInterfaces::HMI_INTERFACE_UI);
   SendHMIRequest(hmi_apis::FunctionID::UI_Slider, &msg_params, true);
