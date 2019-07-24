@@ -58,15 +58,15 @@ CancelInteractionRequest::~CancelInteractionRequest() {}
 void CancelInteractionRequest::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  auto function_id = static_cast<rpc::policy_table_interface_base::FunctionID>(
+  auto function_id = static_cast<mobile_apis::FunctionID::eType>(
       (*message_)[strings::msg_params][strings::func_id].asInt());
 
-  if (helpers::Compare<FunctionID, helpers::NEQ, helpers::ALL>(
+  if (helpers::Compare<mobile_apis::FunctionID::eType, helpers::NEQ, helpers::ALL>(
           function_id,
-          FunctionID::PerformInteractionID,
-          FunctionID::AlertID,
-          FunctionID::ScrollableMessageID,
-          FunctionID::SliderID)) {
+          mobile_apis::FunctionID::PerformInteractionID,
+          mobile_apis::FunctionID::AlertID,
+          mobile_apis::FunctionID::ScrollableMessageID,
+          mobile_apis::FunctionID::SliderID)) {
     LOG4CXX_ERROR(logger_, "Bad function ID" << function_id);
     SendResponse(false, mobile_apis::Result::INVALID_ID);
     return;
