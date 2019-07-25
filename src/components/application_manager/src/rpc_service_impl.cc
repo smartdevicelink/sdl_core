@@ -515,7 +515,8 @@ void RPCServiceImpl::SendMessageToMobile(
                          .CanHandleFunctionID(function_id);
   if (IsAppServiceRPC(function_id,
                       commands::Command::CommandSource::SOURCE_SDL) ||
-      rpc_passing) {
+      rpc_passing ||
+      RPCSupportsCustomVDI(function_id, commands::Command::SOURCE_SDL)) {
     LOG4CXX_DEBUG(
         logger_,
         "Allowing unknown parameters for response function " << function_id);
@@ -548,10 +549,6 @@ void RPCServiceImpl::SendMessageToMobile(
         msg_to_mobile[strings::params][strings::connection_key].asUInt(),
         msg_to_mobile[strings::params][strings::function_id].asInt());
   } else if (app) {
-    mobile_apis::FunctionID::eType function_id =
-        static_cast<mobile_apis::FunctionID::eType>(
-            (*message)[strings::params][strings::function_id].asUInt());
-
     RPCParams params;
 
     const smart_objects::SmartObject& s_map = (*message)[strings::msg_params];
@@ -633,7 +630,10 @@ void RPCServiceImpl::SendMessageToHMI(
       "Attached schema to message, result if valid: " << message->isValid());
 
   if (IsAppServiceRPC((*message)[jhs::S_PARAMS][jhs::S_FUNCTION_ID].asInt(),
-                      commands::Command::CommandSource::SOURCE_SDL_TO_HMI)) {
+                      commands::Command::CommandSource::SOURCE_SDL_TO_HMI) ||
+      RPCSupportsCustomVDI(
+          (*message)[jhs::S_PARAMS][jhs::S_FUNCTION_ID].asInt(),
+          commands::Command::CommandSource::SOURCE_SDL_TO_HMI)) {
     LOG4CXX_DEBUG(logger_,
                   "Allowing unknown parameters for response function "
                       << (*message)[jhs::S_PARAMS][jhs::S_FUNCTION_ID].asInt());
@@ -649,6 +649,31 @@ void RPCServiceImpl::SendMessageToHMI(
   }
 
   messages_to_hmi_.PostMessage(impl::MessageToHmi(message_to_send));
+}
+
+bool RPCServiceImpl::RPCSupportsCustomVDI(
+    int32_t function_id, commands::Command::CommandSource source) {
+  if ((source == commands::Command::CommandSource::SOURCE_MOBILE) ||
+      (source == commands::Command::CommandSource::SOURCE_SDL)) {
+    switch (function_id) {
+      case mobile_apis::FunctionID::SubscribeVehicleDataID:
+      case mobile_apis::FunctionID::UnsubscribeVehicleDataID:
+      case mobile_apis::FunctionID::GetVehicleDataID:
+        return true;
+        break;
+    }
+  } else if ((source == commands::Command::CommandSource::SOURCE_HMI) ||
+             (source == commands::Command::CommandSource::SOURCE_SDL_TO_HMI)) {
+    switch (function_id) {
+      case hmi_apis::FunctionID::VehicleInfo_GetVehicleData:
+      case hmi_apis::FunctionID::VehicleInfo_SubscribeVehicleData:
+      case hmi_apis::FunctionID::VehicleInfo_UnsubscribeVehicleData:
+        return true;
+        break;
+    }
+  }
+
+  return false;
 }
 
 bool RPCServiceImpl::IsAppServiceRPC(int32_t function_id,

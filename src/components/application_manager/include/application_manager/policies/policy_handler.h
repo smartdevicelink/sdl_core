@@ -694,6 +694,14 @@ class PolicyHandler : public PolicyHandlerInterface,
   void OnDeviceSwitching(const std::string& device_id_from,
                          const std::string& device_id_to) FINAL;
 
+  // VehicleDataItemProvider interface :
+  /**
+   * @brief Gets vehicle data items
+   * @return Structure with vehicle data items
+   */
+  const std::vector<rpc::policy_table_interface_base::VehicleDataItem>
+  GetVehicleDataItems() const OVERRIDE;
+
   void OnLockScreenDismissalStateChanged() FINAL;
 
  protected:
@@ -842,6 +850,7 @@ class PolicyHandler : public PolicyHandlerInterface,
   std::vector<FunctionalGroupPermission> CollectAppPermissions(
       const uint32_t connection_key);
 
+ private:
   static const std::string kLibrary;
 
   /**

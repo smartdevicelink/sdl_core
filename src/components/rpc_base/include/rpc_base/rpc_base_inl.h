@@ -284,6 +284,21 @@ bool String<minlen, maxlen>::operator==(const String& rhs) const {
 }
 
 template <size_t minlen, size_t maxlen>
+bool String<minlen, maxlen>::operator==(const std::string& rhs) const {
+  return value_ == rhs;
+}
+
+template <size_t minlen, size_t maxlen>
+bool String<minlen, maxlen>::operator!=(const String& rhs) const {
+  return value_ != rhs.value_;
+}
+
+template <size_t minlen, size_t maxlen>
+bool String<minlen, maxlen>::operator!=(const std::string& rhs) const {
+  return value_ != rhs;
+}
+
+template <size_t minlen, size_t maxlen>
 String<minlen, maxlen>::operator const std::string&() const {
   return value_;
 }

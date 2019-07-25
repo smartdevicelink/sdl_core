@@ -142,7 +142,7 @@ class PolicyManagerImplTest : public ::testing::Test {
 
  protected:
   PolicyManagerImpl* manager;
-  MockCacheManagerInterface* cache_manager;
+  NiceMock<MockCacheManagerInterface>* cache_manager;
   NiceMock<MockPolicyListener> listener;
   const std::string device_id;
   std::shared_ptr<access_remote_test::MockAccessRemote> access_remote;
@@ -150,7 +150,7 @@ class PolicyManagerImplTest : public ::testing::Test {
   void SetUp() OVERRIDE {
     manager = new PolicyManagerImpl();
     manager->set_listener(&listener);
-    cache_manager = new MockCacheManagerInterface();
+    cache_manager = new NiceMock<MockCacheManagerInterface>();
     manager->set_cache_manager(cache_manager);
     access_remote = std::shared_ptr<access_remote_test::MockAccessRemote>();
     manager->set_access_remote(access_remote);
@@ -926,8 +926,11 @@ TEST_F(PolicyManagerImplTest, LoadPT_SetInvalidUpdatePT_PTIsNotLoaded) {
   std::string json = table.toStyledString();
   ::policy::BinaryMessage msg(json.begin(), json.end());
 
+  std::shared_ptr<policy_table::Table> snapshot =
+      std::make_shared<policy_table::Table>(update.policy_table);
+  ON_CALL(*cache_manager, GenerateSnapshot()).WillByDefault(Return(snapshot));
+
   // Assert
-  EXPECT_CALL(*cache_manager, GenerateSnapshot()).Times(0);
   EXPECT_CALL(*cache_manager, ApplyUpdate(_)).Times(0);
   EXPECT_CALL(listener, GetAppName(_)).Times(0);
   EXPECT_CALL(listener, OnUpdateStatusChanged(_)).Times(1);

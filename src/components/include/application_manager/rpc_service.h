@@ -81,11 +81,20 @@ class RPCService {
    * to app services or handled by app services plugin)
    * @param function_id RPC function id
    * @param source RPC command source
-   * @param rpc_passing Reference to bool. Set to true to enable rpc pasing
    * @return true if App Services can handle RPC
    */
   virtual bool IsAppServiceRPC(int32_t function_id,
                                commands::Command::CommandSource source) = 0;
+
+  /**
+   * @brief Check if RPC with function_id may handle custom vehicle data items
+   * (in this case unknown parameters should be allowed)
+   * @param function_id RPC function id
+   * @param source RPC command source
+   * @return true if RPC can handle custom vehicle data items
+   */
+  virtual bool RPCSupportsCustomVDI(
+      int32_t function_id, commands::Command::CommandSource source) = 0;
 
   /**
    * @brief set_protocol_handler

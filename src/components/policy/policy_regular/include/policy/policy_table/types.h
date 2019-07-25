@@ -70,7 +70,7 @@ typedef Array<Enum<AppHMIType>, 0, 255> AppHMITypes;
 
 typedef Array<Enum<HmiLevel>, 0, 4> HmiLevels;
 
-typedef Array<Enum<Parameter>, 0, 255> Parameters;
+typedef Array<String<0, 255>, 0, 255> Parameters;
 
 typedef Map<RpcParameters, 0, UINT_MAX> Rpc;
 

@@ -132,7 +132,10 @@ class RPCServiceImpl : public RPCService,
   void SendMessageToHMI(const commands::MessageSharedPtr message) OVERRIDE;
 
   bool IsAppServiceRPC(int32_t function_id,
-                       commands::Command::CommandSource source);
+                       commands::Command::CommandSource source) OVERRIDE;
+
+  bool RPCSupportsCustomVDI(int32_t function_id,
+                            commands::Command::CommandSource source) OVERRIDE;
 
   void set_protocol_handler(
       protocol_handler::ProtocolHandler* handler) OVERRIDE;

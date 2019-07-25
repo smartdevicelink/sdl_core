@@ -400,16 +400,12 @@ struct IsApplication {
   connection_handler::DeviceHandle device_handle_;
   const std::string& policy_app_id_;
 };
-void ApplicationManagerImpl::IviInfoUpdated(
-    mobile_apis::VehicleDataType::eType vehicle_info, int value) {
+void ApplicationManagerImpl::IviInfoUpdated(const std::string& vehicle_info,
+                                            int value) {
   // Notify Policy Manager if available about info it's interested in,
   // i.e. odometer etc
-  switch (vehicle_info) {
-    case mobile_apis::VehicleDataType::VEHICLEDATA_ODOMETER:
-      GetPolicyHandler().KmsChanged(value);
-      break;
-    default:
-      break;
+  if (strings::odometer == vehicle_info) {
+    GetPolicyHandler().KmsChanged(value);
   }
 }
 

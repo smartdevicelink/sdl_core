@@ -752,7 +752,7 @@ void FillNotificationData::UpdateParameters(
   ParametersConstItr it_parameters_end = in_parameters.end();
 
   for (; it_parameters != it_parameters_end; ++it_parameters) {
-    out_parameter.insert(policy_table::EnumToJsonString(*it_parameters));
+    out_parameter.insert(*it_parameters);
   }
 }
 

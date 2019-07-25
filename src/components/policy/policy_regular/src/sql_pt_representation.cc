@@ -640,18 +640,17 @@ bool SQLPTRepresentation::GatherFunctionalGroupings(
         }
       }
       if (!rpcs.IsNull(2)) {
-        policy_table::Parameter param;
-        if (EnumFromJsonString(rpcs.GetString(2), &param)) {
-          // EMPTY is a special mark to specify that 'parameters' section is
-          // present, but has no parameters. It is not valid parameter value.
-          if (policy_table::P_EMPTY == param) {
-            (*rpcs_structure.rpcs[rpcs.GetString(0)].parameters)
-                .mark_initialized();
-            continue;
-          }
-          InsertUnique(param,
-                       &(*rpcs_structure.rpcs[rpcs.GetString(0)].parameters));
+        std::string param = rpcs.GetString(2);
+        // EMPTY is a special mark to specify that 'parameters' section is
+        // present, but has no parameters. It is not valid parameter value.
+        if ("EMPTY" == param) {
+          (*rpcs_structure.rpcs[rpcs.GetString(0)].parameters)
+              .mark_initialized();
+          continue;
         }
+
+        InsertUnique(rpcs.GetString(2),
+                     &(*rpcs_structure.rpcs[rpcs.GetString(0)].parameters));
       }
     }
 
@@ -950,8 +949,7 @@ bool SQLPTRepresentation::SaveRpcs(int64_t group_id,
           query_parameter.Bind(0, it->first);
           query_parameter.Bind(
               1, std::string(policy_table::EnumToJsonString(*hmi_it)));
-          query_parameter.Bind(
-              2, std::string(policy_table::EnumToJsonString(*ps_it)));
+          query_parameter.Bind(2, std::string(*ps_it));
           query_parameter.Bind(3, group_id);
           if (!query_parameter.Exec() || !query_parameter.Reset()) {
             LOG4CXX_WARN(logger_, "Incorrect insert into rpc with parameter");

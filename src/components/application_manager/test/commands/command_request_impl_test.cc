@@ -456,9 +456,6 @@ TEST_F(CommandRequestImplTest, AddDisallowedParameters_SUCCESS) {
   vehicle_data.insert(am::VehicleData::value_type(
       kDisallowedParam1, mobile_apis::VehicleDataType::VEHICLEDATA_MYKEY));
 
-  EXPECT_CALL(mock_message_helper_, vehicle_data())
-      .WillOnce(ReturnRef(vehicle_data));
-
   MessageSharedPtr msg;
 
   CommandPtr command = CreateCommand<UCommandRequestImpl>(msg);
@@ -508,9 +505,6 @@ TEST_F(CommandRequestImplTest,
   am::VehicleData vehicle_data;
   vehicle_data.insert(am::VehicleData::value_type(
       kDisallowedParam1, mobile_apis::VehicleDataType::VEHICLEDATA_MYKEY));
-
-  EXPECT_CALL(mock_message_helper_, vehicle_data())
-      .WillOnce(ReturnRef(vehicle_data));
 
   MessageSharedPtr msg = CreateMessage();
   (*msg)[strings::params][strings::function_id] =

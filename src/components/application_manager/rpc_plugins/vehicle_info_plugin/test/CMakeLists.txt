@@ -36,8 +36,8 @@ include_directories(
   ${COMPONENTS_DIR}/application_manager/rpc_plugins/vehicle_info_plugin/include
   ${COMPONENTS_DIR}/application_manager/rpc_plugins/vehicle_info_plugin/include/vehicle_info_plugin/commands/
   ${COMPONENTS_DIR}/application_manager/test/include/
-)
-
+  ${COMPONENTS_DIR}/include/test/application_manager/
+  )
 set(COMMANDS_TEST_DIR ${CMAKE_CURRENT_SOURCE_DIR}/commands)
 
 file(GLOB SOURCES
