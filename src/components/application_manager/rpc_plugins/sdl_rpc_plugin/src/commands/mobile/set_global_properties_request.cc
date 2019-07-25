@@ -324,12 +324,10 @@ void SetGlobalPropertiesRequest::on_event(const event_engine::Event& event) {
   const bool result = PrepareResponseParameters(result_code, response_info);
 
   if (result && !is_menu_layout_available_) {
-    response_info = response_info.empty()
-                        ? "The MenuLayout specified is unsupported, the "
-                          "default MenuLayout will be used"
-                        : response_info +
-                              " Also, the MenuLayout specified is unsupported, "
-                              "the default MenuLayout will be used";
+    response_info =
+        "The MenuLayout specified is unsupported, the "
+        "default MenuLayout will be used." +
+        response_info;
     SendResponse(result,
                  mobile_apis::Result::WARNINGS,
                  response_info.c_str(),

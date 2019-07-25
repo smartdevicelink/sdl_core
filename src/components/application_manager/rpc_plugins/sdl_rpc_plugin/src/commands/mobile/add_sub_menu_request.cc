@@ -164,14 +164,15 @@ void AddSubMenuRequest::on_event(const event_engine::Event& event) {
         application->AddSubMenu(
             (*message_)[strings::msg_params][strings::menu_id].asInt(),
             (*message_)[strings::msg_params]);
+        response_info =
+            "The MenuLayout specified is unsupported, the "
+            "default MenuLayout will be used." +
+            response_info;
         SendResponse(result,
                      is_menu_layout_available_
                          ? MessageHelper::HMIToMobileResult(result_code)
                          : mobile_apis::Result::WARNINGS,
-                     is_menu_layout_available_
-                         ? NULL
-                         : "The MenuLayout specified is unsupported, the "
-                           "default MenuLayout will be used",
+                     is_menu_layout_available_ ? NULL : response_info.c_str(),
                      &(message[strings::msg_params]));
       } else {
         SendResponse(result,
