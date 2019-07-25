@@ -58,6 +58,7 @@ std::map<std::string, hmi_apis::Common_TextFieldName::eType>
     text_fields_enum_name;
 std::map<std::string, hmi_apis::Common_MediaClockFormat::eType>
     media_clock_enum_name;
+std::map<std::string, hmi_apis::Common_MenuLayout::eType> menu_layout_enum;
 std::map<std::string, hmi_apis::Common_ImageType::eType> image_type_enum;
 std::map<std::string, hmi_apis::Common_SamplingRate::eType> sampling_rate_enum;
 std::map<std::string, hmi_apis::Common_BitsPerSample::eType>
@@ -278,6 +279,11 @@ void InitCapabilities() {
   media_clock_enum_name.insert(
       std::make_pair(std::string("CLOCKTEXT4"),
                      hmi_apis::Common_MediaClockFormat::CLOCKTEXT4));
+
+  menu_layout_enum.insert(
+      std::make_pair(std::string("LIST"), hmi_apis::Common_MenuLayout::LIST));
+  menu_layout_enum.insert(
+      std::make_pair(std::string("TILES"), hmi_apis::Common_MenuLayout::TILES));
 
   image_type_enum.insert(std::make_pair(std::string("STATIC"),
                                         hmi_apis::Common_ImageType::STATIC));
@@ -1061,6 +1067,25 @@ bool HMICapabilitiesImpl::load_capabilities_from_file() {
           display_capabilities_so.erase(hmi_response::media_clock_formats);
           display_capabilities_so[hmi_response::media_clock_formats] =
               media_clock_formats_enum;
+        }
+
+        if (display_capabilities_so.keyExists(
+                strings::menu_layouts_available)) {
+          smart_objects::SmartObject menu_layouts_available_enum(
+              smart_objects::SmartType_Array);
+          auto menu_layouts_available_array =
+              display_capabilities_so[strings::menu_layouts_available];
+          for (uint32_t i = 0, j = 0; i < menu_layouts_available_array.length();
+               ++i) {
+            auto it = menu_layout_enum.find(
+                menu_layouts_available_array[i].asString());
+            if (it != menu_layout_enum.end()) {
+              menu_layouts_available_enum[j++] = it->second;
+            }
+          }
+          display_capabilities_so.erase(strings::menu_layouts_available);
+          display_capabilities_so[strings::menu_layouts_available] =
+              menu_layouts_available_enum;
         }
 
         if (display_capabilities_so.keyExists(
