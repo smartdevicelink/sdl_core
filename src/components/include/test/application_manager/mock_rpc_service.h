@@ -31,6 +31,10 @@ class MockRPCService : public application_manager::rpc_service::RPCService {
       IsAppServiceRPC,
       bool(int32_t function_id,
            application_manager::commands::Command::CommandSource source));
+  MOCK_METHOD2(
+      RPCSupportsCustomVDI,
+      bool(int32_t function_id,
+           application_manager::commands::Command::CommandSource source));
 };
 }  // namespace application_manager_test
 }  // namespace components

@@ -234,6 +234,9 @@ class String : public PrimitiveType {
   String& operator=(const std::string& new_val);
   String& operator=(const String& new_val);
   bool operator==(const String& rhs) const;
+  bool operator==(const std::string& rhs) const;
+  bool operator!=(const String& rhs) const;
+  bool operator!=(const std::string& rhs) const;
   operator const std::string&() const;
   Json::Value ToJsonValue() const;
 

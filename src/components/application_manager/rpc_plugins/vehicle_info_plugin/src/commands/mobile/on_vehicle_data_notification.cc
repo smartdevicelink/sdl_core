@@ -52,82 +52,92 @@ OnVehicleDataNotification::OnVehicleDataNotification(
                               params.application_manager_,
                               params.rpc_service_,
                               params.hmi_capabilities_,
-                              params.policy_handler_) {}
+                              params.policy_handler_)
+    , custom_vehicle_data_manager_(params.custom_vehicle_data_manager_) {}
 
 OnVehicleDataNotification::~OnVehicleDataNotification() {}
 
 void OnVehicleDataNotification::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  std::vector<ApplicationSharedPtr> appNotification;
-  std::vector<ApplicationSharedPtr>::iterator appNotification_it =
-      appNotification.begin();
+  std::vector<ApplicationSharedPtr> notify_apps;
+  std::vector<ApplicationSharedPtr>::iterator notified_app_it =
+      notify_apps.begin();
   std::vector<smart_objects::SmartObject> appSO;
 
-  const VehicleData& vehicle_data = MessageHelper::vehicle_data();
-  VehicleData::const_iterator it = vehicle_data.begin();
+  custom_vehicle_data_manager_.CreateMobileMessageParams(
+      (*message_)[strings::msg_params]);
 
-  for (; vehicle_data.end() != it; ++it) {
-    if (true == (*message_)[strings::msg_params].keyExists(it->first)) {
-      LOG4CXX_DEBUG(logger_, "vehicle_data name" << it->first);
-      auto vehicle_data_value =
-          (*message_)[strings::msg_params][it->first].asInt();
+  const auto& param_names = (*message_)[strings::msg_params].enumerate();
+  for (const auto& name : param_names) {
+    LOG4CXX_DEBUG(logger_, "vehicle_data name: " << name);
 
-      application_manager_.IviInfoUpdated(it->second, vehicle_data_value);
+    smart_objects::SmartObject current_param;
+    current_param[name] = (*message_)[strings::msg_params][name];
+    if (!ValidateHMIMessageData(current_param)) {
+      LOG4CXX_WARN(logger_, "Unknown vehicle data: " << name);
+      continue;
+    }
 
-      auto subscribed_to_ivi_predicate = [&it](const ApplicationSharedPtr app) {
-        DCHECK_OR_RETURN(app, false);
-        auto& ext = VehicleInfoAppExtension::ExtractVIExtension(*app);
-        return ext.isSubscribedToVehicleInfo(it->second);
-      };
+    auto vehicle_data_value = (*message_)[strings::msg_params][name].asInt();
+    application_manager_.IviInfoUpdated(name, vehicle_data_value);
 
-      const std::vector<ApplicationSharedPtr>& applications =
-          application_manager::FindAllApps(application_manager_.applications(),
-                                           subscribed_to_ivi_predicate);
+    auto subscribed_to_ivi_predicate = [&name](const ApplicationSharedPtr app) {
+      DCHECK_OR_RETURN(app, false);
+      auto& ext = VehicleInfoAppExtension::ExtractVIExtension(*app);
+      return ext.isSubscribedToVehicleInfo(name);
+    };
 
-      std::vector<ApplicationSharedPtr>::const_iterator app_it =
-          applications.begin();
-
-      for (; applications.end() != app_it; ++app_it) {
-        const ApplicationSharedPtr app = *app_it;
-        if (!app) {
-          LOG4CXX_ERROR(logger_, "NULL pointer");
-          continue;
-        }
-
-        appNotification_it =
-            find(appNotification.begin(), appNotification.end(), app);
-        if (appNotification_it == appNotification.end()) {
-          appNotification.push_back(app);
-          smart_objects::SmartObject msg_param =
-              smart_objects::SmartObject(smart_objects::SmartType_Map);
-          msg_param[it->first] = (*message_)[strings::msg_params][it->first];
-          appSO.push_back(msg_param);
-        } else {
-          size_t idx =
-              std::distance(appNotification.begin(), appNotification_it);
-          appSO[idx][it->first] = (*message_)[strings::msg_params][it->first];
-        }
+    const auto& applications = application_manager::FindAllApps(
+        application_manager_.applications(), subscribed_to_ivi_predicate);
+    for (const auto& app : applications) {
+      if (!app) {
+        LOG4CXX_ERROR(logger_, "NULL pointer");
+        continue;
+      }
+      notified_app_it = find(notify_apps.begin(), notify_apps.end(), app);
+      if (notified_app_it == notify_apps.end()) {
+        notify_apps.push_back(app);
+        smart_objects::SmartObject msg_param =
+            smart_objects::SmartObject(smart_objects::SmartType_Map);
+        msg_param[name] = (*message_)[strings::msg_params][name];
+        appSO.push_back(msg_param);
+      } else {
+        size_t idx = std::distance(notify_apps.begin(), notified_app_it);
+        appSO[idx][name] = (*message_)[strings::msg_params][name];
       }
     }
   }
 
-  LOG4CXX_DEBUG(
-      logger_,
-      "Number of Notifications to be send: " << appNotification.size());
+  LOG4CXX_DEBUG(logger_,
+                "Number of Notifications to be send: " << notify_apps.size());
 
-  for (size_t idx = 0; idx < appNotification.size(); idx++) {
+  for (size_t idx = 0; idx < notify_apps.size(); idx++) {
     LOG4CXX_INFO(logger_,
                  "Send OnVehicleData PRNDL notification to "
-                     << appNotification[idx]->name().c_str()
-                     << " application id " << appNotification[idx]->app_id());
+                     << notify_apps[idx]->name().c_str() << " application id "
+                     << notify_apps[idx]->app_id());
     (*message_)[strings::params][strings::connection_key] =
-        appNotification[idx]->app_id();
+        notify_apps[idx]->app_id();
     (*message_)[strings::msg_params] = appSO[idx];
     SendNotification();
   }
 }
 
-}  // namespace commands
+bool OnVehicleDataNotification::ValidateHMIMessageData(
+    const smart_objects::SmartObject& msg_params) {
+  const auto& rpc_spec_vehicle_data = MessageHelper::vehicle_data();
 
+  smart_objects::SmartObject custom_data;
+  for (const auto& name : msg_params.enumerate()) {
+    const auto& found_it = rpc_spec_vehicle_data.find(name);
+    if (rpc_spec_vehicle_data.end() == found_it) {
+      custom_data[name] = msg_params[name];
+    }
+  }
+
+  return custom_vehicle_data_manager_.ValidateVehicleDataItems(custom_data);
+}
+
+}  // namespace commands
 }  // namespace vehicle_info_plugin

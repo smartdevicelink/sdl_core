@@ -1786,9 +1786,11 @@ TEST_F(SQLPTRepresentationTest, Save_SetPolicyTableThenSave_ExpectSavedToPT) {
 
   const ::policy_table::Parameters& parameters = *(rpc_iter->second.parameters);
   EXPECT_EQ(1u, parameters.size());
-  EXPECT_TRUE(parameters.end() != std::find(parameters.begin(),
-                                            parameters.end(),
-                                            policy_table::Parameter::P_SPEED));
+  EXPECT_TRUE(parameters.end() !=
+              std::find(parameters.begin(),
+                        parameters.end(),
+                        policy_table::EnumToJsonString(
+                            policy_table::Parameter::P_SPEED)));
   // Check Application Policies Section
   GatherApplicationPoliciesSection(&policies);
   const uint32_t apps_size = 3u;
