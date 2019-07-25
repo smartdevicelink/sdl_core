@@ -146,6 +146,10 @@ class CacheManager : public CacheManagerInterface {
    */
   virtual const VehicleInfo GetVehicleInfo() const;
 
+  const boost::optional<bool> LockScreenDismissalEnabledState() const OVERRIDE;
+
+  const boost::optional<std::string> LockScreenDismissalWarningMessage(
+      const std::string& language) const OVERRIDE;
   /**
    * @brief Get a list of enabled cloud applications
    * @param enabled_apps List filled with the policy app id of each enabled
@@ -267,7 +271,8 @@ class CacheManager : public CacheManagerInterface {
    * @return Array of appropriate messages parameters
    */
   std::vector<UserFriendlyMessage> GetUserFriendlyMsg(
-      const std::vector<std::string>& msg_codes, const std::string& language);
+      const std::vector<std::string>& msg_codes,
+      const std::string& language) const;
 
   /**
    * @brief Get list of URLs related to particular service

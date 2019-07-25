@@ -491,6 +491,8 @@ bool PolicyManagerImpl::LoadPT(const std::string& file,
     ProcessAppPolicyCheckResults(
         results, pt_update->policy_table.app_policies_section.apps);
 
+    CheckPermissionsChangesAfterUpdate(*pt_update, *policy_table_snapshot);
+
     listener_->OnCertificateUpdated(
         *(pt_update->policy_table.module_config.certificate));
 
@@ -536,6 +538,17 @@ CheckAppPolicyResults PolicyManagerImpl::CheckPermissionsChanges(
                 CheckAppPolicy(this, pt_update, snapshot, out_results));
 
   return out_results;
+}
+
+void PolicyManagerImpl::CheckPermissionsChangesAfterUpdate(
+    const policy_table::Table& update, const policy_table::Table& snapshot) {
+  const auto new_lock_screen_dismissal_enabled =
+      update.policy_table.module_config.lock_screen_dismissal_enabled;
+  const auto old_lock_screen_dismissal_enabled =
+      snapshot.policy_table.module_config.lock_screen_dismissal_enabled;
+  if (new_lock_screen_dismissal_enabled != old_lock_screen_dismissal_enabled) {
+    listener()->OnLockScreenDismissalStateChanged();
+  }
 }
 
 void PolicyManagerImpl::ProcessAppPolicyCheckResults(
@@ -1736,6 +1749,19 @@ void PolicyManagerImpl::KmsChanged(int kilometers) {
     StartPTExchange();
     PTUpdatedAt(KILOMETERS, kilometers);
   }
+}
+
+const boost::optional<bool> PolicyManagerImpl::LockScreenDismissalEnabledState()
+    const {
+  LOG4CXX_AUTO_TRACE(logger_);
+  return cache_->LockScreenDismissalEnabledState();
+}
+
+const boost::optional<std::string>
+PolicyManagerImpl::LockScreenDismissalWarningMessage(
+    const std::string& language) const {
+  LOG4CXX_AUTO_TRACE(logger_);
+  return cache_->LockScreenDismissalWarningMessage(language);
 }
 
 void PolicyManagerImpl::IncrementIgnitionCycles() {

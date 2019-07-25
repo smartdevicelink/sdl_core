@@ -116,6 +116,27 @@
     <element name="SOURCE" />
     <element name="SHUFFLE" />
     <element name="REPEAT" />
+
+    <!-- Navigation Subscription Buttons -->
+    <element name="NAV_CENTER_LOCATION" />
+    <element name="NAV_ZOOM_IN" />
+    <element name="NAV_ZOOM_OUT" />
+    <element name="NAV_PAN_UP" />
+    <element name="NAV_PAN_UP_RIGHT" />
+    <element name="NAV_PAN_RIGHT" />
+    <element name="NAV_PAN_DOWN_RIGHT" />
+    <element name="NAV_PAN_DOWN" />
+    <element name="NAV_PAN_DOWN_LEFT" />
+    <element name="NAV_PAN_LEFT" />
+    <element name="NAV_PAN_UP_LEFT" />
+    <element name="NAV_TILT_TOGGLE">
+        <description>If supported, this toggles between a top-down view and an angled/3D view. If your app supports different, but substantially similar options, then you may implement those. If you don't implement these or similar options, do not subscribe to this button.</description>
+    </element>
+    <element name="NAV_ROTATE_CLOCKWISE" />
+    <element name="NAV_ROTATE_COUNTERCLOCKWISE" />
+    <element name="NAV_HEADING_TOGGLE">
+        <description>If supported, this toggles between locking the orientation to north or to the vehicle's heading. If your app supports different, but substantially similar options, then you may implement those. If you don't implement these or similar options, do not subscribe to this button.</description>
+    </element>
 </enum>
 
 <enum name="ButtonEventMode">
@@ -2912,8 +2933,11 @@
     <description>All omitted characters will be greyed out (disabled) on the keyboard.</description>
     <description>If omitted, the entire keyboard will be enabled.</description>
   </param>
-  <param name="autoCompleteText" type="String" maxlength="1000" mandatory="false">
-    <description>Allows an app to prepopulate the text field with a suggested or completed entry as the user types</description>
+  <param name="autoCompleteList" type="String" maxlength="1000" minsize="0" maxsize="100" array="true" mandatory="false">
+    <description>
+      Allows an app to prepopulate the text field with a list of suggested or completed entries as the user types. 
+      If empty, the auto-complete list will be removed from the screen.
+    </description>
   </param>
 </struct>
 
@@ -4009,6 +4033,14 @@
       </param>
     </function>
     <function name="ActivateApp" messagetype="response">
+    </function>
+    <function name="CloseApplication" messagetype="request">
+      <description>Request from the application to exit the foreground.</description>
+      <param name="appID" type="Integer" mandatory="true">
+        <description>ID of selected application.</description>
+      </param>
+    </function>
+    <function name="CloseApplication" messagetype="response">
     </function>
     <function name="OnAppActivated" messagetype="notification">
       <description>Must be sent by HU system when the user clicks on app in the list of registered apps or on soft button with 'STEAL_FOCUS' action.</description>
@@ -6401,7 +6433,10 @@
 <interface name="AppService" version="1.0.0" date="2019-03-18">
     <description>Interface used for interacting with app services as a producer or consumer</description>
     <function name="PublishAppService" messagetype="request">
-        <description>Registers a service offered by this app on the module</description>
+        <description>
+          Registers a service offered by this app on the module.
+          Subsequent calls with the same service type will update the manifest for that service.
+        </description>
 
         <param name="appServiceManifest" type="Common.AppServiceManifest" mandatory="true">
             <description> The manifest of the service that wishes to be published.</description>
@@ -6414,6 +6449,18 @@
         <param name="appServiceRecord" type="Common.AppServiceRecord" mandatory="false">
             <description> If the request was successful, this object will be the current status of the service record for the published service. This will include the Core supplied service ID.</description>
         </param>
+    </function>
+
+    <function name="UnpublishAppService" messagetype="request">
+        <description>Unpublish an existing service published by the HMI.</description>
+
+        <param name="serviceID" type="String" mandatory="true">
+            <description> The ID of the service to be unpublished. </description>
+        </param>
+    </function>
+
+    <function name="UnpublishAppService" messagetype="response">
+        <description>The response to UnpublishAppService</description>
     </function>
 
     <function name="OnAppServiceData" messagetype="notification">

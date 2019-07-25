@@ -36,6 +36,7 @@
 #include <vector>
 
 #include "utils/callable.h"
+#include "utils/optional.h"
 
 #include "policy/access_remote.h"
 #include "policy/cache_manager_interface.h"
@@ -163,6 +164,24 @@ class PolicyManager : public usage_statistics::StatisticsManager {
    * @return true if exceeded
    */
   virtual void KmsChanged(int kilometers) = 0;
+
+  /**
+   * @brief Returns state of the lock screen that could be able to be dismissed
+   * while connected to SDL, allowing users the ability to interact with the
+   * app.
+   * @return bool True if lock screen can be dismissed.
+   */
+  virtual const boost::optional<bool> LockScreenDismissalEnabledState()
+      const = 0;
+
+  /**
+   * @brief Returns lock screen warning message. In case when specified language
+   * is absent in policy table will be returned message on default language
+   * ("en-us"). Otherwise returns uninitialized boost::optional<std::string>
+   * @return std::string Lock screen warning message
+   */
+  virtual const boost::optional<std::string> LockScreenDismissalWarningMessage(
+      const std::string& language) const = 0;
 
   /**
    * @brief Increments counter of ignition cycles

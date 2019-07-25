@@ -3907,30 +3907,69 @@ void ApplicationManagerImpl::SendDriverDistractionState(
     LOG4CXX_WARN(logger_, "DriverDistractionState is INVALID_ENUM");
     return;
   }
-  smart_objects::SmartObjectSPtr on_driver_distraction =
-      std::make_shared<smart_objects::SmartObject>();
 
-  (*on_driver_distraction)[strings::params][strings::message_type] =
-      static_cast<int32_t>(application_manager::MessageType::kNotification);
-  (*on_driver_distraction)[strings::params][strings::function_id] =
-      mobile_api::FunctionID::OnDriverDistractionID;
-  (*on_driver_distraction)[strings::msg_params][mobile_notification::state] =
-      driver_distraction_state();
-  (*on_driver_distraction)[strings::params][strings::connection_key] =
-      application->app_id();
+  auto create_notification = [application, this]() {
+    auto notification = std::make_shared<smart_objects::SmartObject>();
+    auto& msg_params = (*notification)[strings::msg_params];
+    auto& params = (*notification)[strings::params];
 
-  const std::string function_id = MessageHelper::StringifiedFunctionID(
-      static_cast<mobile_apis::FunctionID::eType>(
-          (*on_driver_distraction)[strings::params][strings::function_id]
-              .asUInt()));
+    params[strings::message_type] =
+        static_cast<int32_t>(application_manager::MessageType::kNotification);
+    params[strings::function_id] =
+        static_cast<int32_t>(mobile_apis::FunctionID::OnDriverDistractionID);
+    msg_params[mobile_notification::state] = driver_distraction_state();
+    const auto lock_screen_dismissal =
+        policy_handler_->LockScreenDismissalEnabledState();
+
+    if (lock_screen_dismissal &&
+        hmi_apis::Common_DriverDistractionState::DD_ON ==
+            driver_distraction_state()) {
+      bool dismissal_enabled = *lock_screen_dismissal;
+      if (dismissal_enabled) {
+        const auto language =
+            MessageHelper::MobileLanguageToString(application->ui_language());
+
+        const auto warning_message =
+            policy_handler_->LockScreenDismissalWarningMessage(language);
+        // Only allow lock screen dismissal if a warning message is available
+        if (warning_message && !warning_message->empty()) {
+          msg_params[mobile_notification::lock_screen_dismissal_warning] =
+              *warning_message;
+        } else {
+          dismissal_enabled = false;
+        }
+      }
+      msg_params[mobile_notification::lock_screen_dismissal_enabled] =
+          dismissal_enabled;
+    }
+
+    params[strings::connection_key] = application->app_id();
+    return notification;
+  };
+
   const RPCParams params;
+  const std::string function_id = MessageHelper::StringifiedFunctionID(
+      mobile_api::FunctionID::OnDriverDistractionID);
   const mobile_apis::Result::eType check_result =
       CheckPolicyPermissions(application, function_id, params);
   if (mobile_api::Result::SUCCESS == check_result) {
-    rpc_service_->ManageMobileCommand(on_driver_distraction,
+    rpc_service_->ManageMobileCommand(create_notification(),
                                       commands::Command::SOURCE_SDL);
   } else {
-    application->PushMobileMessage(on_driver_distraction);
+    MobileMessageQueue messages;
+    application->SwapMobileMessageQueue(messages);
+    messages.erase(
+        std::remove_if(
+            messages.begin(),
+            messages.end(),
+            [](smart_objects::SmartObjectSPtr message) {
+              return (*message)[strings::params][strings::function_id]
+                         .asUInt() ==
+                     mobile_apis::FunctionID::OnDriverDistractionID;
+            }),
+        messages.end());
+    application->SwapMobileMessageQueue(messages);
+    application->PushMobileMessage(create_notification());
   }
 }
 

@@ -168,6 +168,8 @@ class MockMessageHelper {
                hmi_apis::Common_LightName::eType(const std::string& lightName));
   MOCK_METHOD1(CommonLanguageToString,
                std::string(hmi_apis::Common_Language::eType));
+  MOCK_METHOD1(MobileLanguageToString,
+               std::string(mobile_apis::Language::eType));
   MOCK_METHOD2(CreateModuleInfoSO,
                smart_objects::SmartObjectSPtr(uint32_t function_id,
                                               ApplicationManager& app_mngr));
@@ -201,14 +203,16 @@ class MockMessageHelper {
                MessageHelper::ChoiceSetVRCommandsStatus(
                    const smart_objects::SmartObject&));
 
-  MOCK_METHOD6(GetBCActivateAppRequestToHMI,
+  MOCK_METHOD5(GetBCActivateAppRequestToHMI,
                smart_objects::SmartObjectSPtr(
                    ApplicationConstSharedPtr app,
-                   const protocol_handler::SessionObserver& session_observer,
                    const policy::PolicyHandlerInterface& policy_handler,
                    hmi_apis::Common_HMILevel::eType level,
                    bool send_policy_priority,
                    ApplicationManager& app_mngr));
+  MOCK_METHOD2(GetBCCloseApplicationRequestToHMI,
+               smart_objects::SmartObjectSPtr(ApplicationConstSharedPtr app,
+                                              ApplicationManager& app_mngr));
   MOCK_METHOD2(GetOnAppInterfaceUnregisteredNotificationToMobile,
                ns_smart_device_link::ns_smart_objects::SmartObjectSPtr(
                    int32_t connection_key,

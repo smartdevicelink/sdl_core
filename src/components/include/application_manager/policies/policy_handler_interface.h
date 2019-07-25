@@ -38,6 +38,8 @@
 #include <set>
 #include <string>
 #include <vector>
+#include "boost/optional.hpp"
+
 #include "application_manager/application.h"
 #include "application_manager/policies/policy_handler_observer.h"
 #include "interfaces/MOBILE_API.h"
@@ -49,6 +51,7 @@
 #include "smart_objects/smart_object.h"
 #include "utils/callable.h"
 #include "utils/custom_string.h"
+#include "utils/optional.h"
 
 using namespace ::rpc::policy_table_interface_base;
 namespace policy {
@@ -121,6 +124,10 @@ class PolicyHandlerInterface {
   virtual uint32_t TimeoutExchangeMSec() const = 0;
   virtual void OnExceededTimeout() = 0;
   virtual void OnSystemReady() = 0;
+  virtual const boost::optional<bool> LockScreenDismissalEnabledState()
+      const = 0;
+  virtual const boost::optional<std::string> LockScreenDismissalWarningMessage(
+      const std::string& language) const = 0;
   virtual void PTUpdatedAt(Counters counter, int value) = 0;
   virtual void add_listener(PolicyHandlerObserver* listener) = 0;
   virtual void remove_listener(PolicyHandlerObserver* listener) = 0;

@@ -332,6 +332,15 @@ std::string MessageHelper::CommonLanguageToString(
   return std::string();
 }
 
+std::string MessageHelper::MobileLanguageToString(
+    mobile_apis::Language::eType language) {
+  using namespace ns_smart_device_link::ns_smart_objects;
+  const char* str = 0;
+  EnumConversionHelper<mobile_apis::Language::eType>::EnumToCString(language,
+                                                                    &str);
+  return str ? str : std::string();
+}
+
 smart_objects::SmartObjectSPtr MessageHelper::CreateMessageForHMI(
     hmi_apis::messageType::eType message_type, const uint32_t correlation_id) {
   using namespace smart_objects;
@@ -623,15 +632,16 @@ void MessageHelper::SendResetPropertiesRequest(ApplicationSharedPtr application,
     msg_params = *MessageHelper::CreateAppVrHelp(application);
     msg_params[hmi_request::menu_title] = "";
 
-    smart_objects::SmartObject key_board_properties =
+    smart_objects::SmartObject keyboard_properties =
         smart_objects::SmartObject(smart_objects::SmartType_Map);
-    key_board_properties[strings::language] =
+    keyboard_properties[strings::language] =
         static_cast<int32_t>(hmi_apis::Common_Language::EN_US);
-    key_board_properties[hmi_request::keyboard_layout] =
+    keyboard_properties[hmi_request::keyboard_layout] =
         static_cast<int32_t>(hmi_apis::Common_KeyboardLayout::QWERTY);
 
-    key_board_properties[hmi_request::auto_complete_text] = "";
-    msg_params[hmi_request::keyboard_properties] = key_board_properties;
+    keyboard_properties[hmi_request::auto_complete_list] =
+        smart_objects::SmartObject(smart_objects::SmartType_Array);
+    msg_params[hmi_request::keyboard_properties] = keyboard_properties;
 
     msg_params[strings::app_id] = application->app_id();
 
@@ -1789,12 +1799,16 @@ void MessageHelper::SendOnAppUnregNotificationToHMI(
 
 smart_objects::SmartObjectSPtr MessageHelper::GetBCActivateAppRequestToHMI(
     ApplicationConstSharedPtr app,
-    const protocol_handler::SessionObserver& session_observer,
     const policy::PolicyHandlerInterface& policy_handler,
     hmi_apis::Common_HMILevel::eType level,
     bool send_policy_priority,
     ApplicationManager& app_mngr) {
   DCHECK_OR_RETURN(app, smart_objects::SmartObjectSPtr());
+  if (hmi_apis::Common_HMILevel::NONE == level) {
+    LOG4CXX_WARN(logger_,
+                 "BC.ActivateApp cannot be used to deactivate an application");
+    return NULL;
+  }
 
   const uint32_t correlation_id = app_mngr.GetNextHMICorrelationID();
   smart_objects::SmartObjectSPtr message =
@@ -1828,6 +1842,23 @@ smart_objects::SmartObjectSPtr MessageHelper::GetBCActivateAppRequestToHMI(
       hmi_apis::Common_HMILevel::FULL != level) {
     (*message)[strings::msg_params][strings::activate_app_hmi_level] = level;
   }
+  return message;
+}
+
+smart_objects::SmartObjectSPtr MessageHelper::GetBCCloseApplicationRequestToHMI(
+    ApplicationConstSharedPtr app, ApplicationManager& app_mngr) {
+  DCHECK_OR_RETURN(app, smart_objects::SmartObjectSPtr());
+
+  const uint32_t correlation_id = app_mngr.GetNextHMICorrelationID();
+  smart_objects::SmartObjectSPtr message =
+      std::make_shared<smart_objects::SmartObject>(
+          smart_objects::SmartType_Map);
+  (*message)[strings::params][strings::function_id] =
+      hmi_apis::FunctionID::BasicCommunication_CloseApplication;
+  (*message)[strings::params][strings::message_type] = MessageType::kRequest;
+  (*message)[strings::params][strings::correlation_id] = correlation_id;
+  (*message)[strings::msg_params][strings::app_id] = app->app_id();
+
   return message;
 }
 

@@ -623,6 +623,26 @@
         <element name="SOURCE" since="4.5" />
         <element name="SHUFFLE" since="4.5" />
         <element name="REPEAT" since="4.5" />
+        <!-- Navigation Buttons -->
+        <element name="NAV_CENTER_LOCATION" since="6.0" />
+        <element name="NAV_ZOOM_IN" since="6.0" />
+        <element name="NAV_ZOOM_OUT" since="6.0" />
+        <element name="NAV_PAN_UP" since="6.0" />
+        <element name="NAV_PAN_UP_RIGHT" since="6.0" />
+        <element name="NAV_PAN_RIGHT" since="6.0" />
+        <element name="NAV_PAN_DOWN_RIGHT" since="6.0" />
+        <element name="NAV_PAN_DOWN" since="6.0" />
+        <element name="NAV_PAN_DOWN_LEFT" since="6.0" />
+        <element name="NAV_PAN_LEFT" since="6.0" />
+        <element name="NAV_PAN_UP_LEFT" since="6.0" />
+        <element name="NAV_TILT_TOGGLE" since="6.0" >
+            <description>If supported, this toggles between a top-down view and an angled/3D view. If your app supports different, but substantially similar options, then you may implement those. If you don't implement these or similar options, do not subscribe to this button.</description>
+        </element>
+        <element name="NAV_ROTATE_CLOCKWISE" since="6.0" />
+        <element name="NAV_ROTATE_COUNTERCLOCKWISE" since="6.0" />
+        <element name="NAV_HEADING_TOGGLE" since="6.0" >
+            <description>If supported, this toggles between locking the orientation to north or to the vehicle's heading. If your app supports different, but substantially similar options, then you may implement those. If you don't implement these or similar options, do not subscribe to this button.</description>
+        </element>
     </enum>
     
     <enum name="MediaClockFormat" since="1.0">
@@ -2383,25 +2403,34 @@
         <description>Configuration of on-screen keyboard (if available).</description>         
         <param name="language" type="Language" mandatory="false">
             <description>The keyboard language.</description>
-        </param>         
+        </param>
         <param name="keyboardLayout" type="KeyboardLayout" mandatory="false" >
             <description>Desired keyboard layout.</description>
-        </param>         
+        </param>
         <param name="keypressMode" type="KeypressMode" mandatory="false" >
             <description>
                 Desired keypress mode.
                 If omitted, this value will be set to RESEND_CURRENT_ENTRY.
             </description>
-        </param>         
+        </param>
         <param name="limitedCharacterList" type="String" maxlength="1" minsize="1" maxsize="100" array="true" mandatory="false">
             <description>Array of keyboard characters to enable.</description>
             <description>All omitted characters will be greyed out (disabled) on the keyboard.</description>
             <description>If omitted, the entire keyboard will be enabled.</description>
-        </param>         
-        <param name="autoCompleteText" type="String" maxlength="1000" mandatory="false">
-            <description>Allows an app to prepopulate the text field with a suggested or completed entry as the user types</description>
-        </param>         
-    </struct>         
+        </param>
+        <param name="autoCompleteText" type="String" maxlength="1000" mandatory="false" deprecated="true" since="6.0">
+            <description>Deprecated, use autoCompleteList instead.</description>
+            <history>
+                <param name="autoCompleteText" type="String" maxlength="1000" mandatory="false" since="3.0" until="6.0" />
+            </history>
+        </param>
+        <param name="autoCompleteList" type="String" maxlength="1000" minsize="0" maxsize="100" array="true" mandatory="false" since="6.0">
+            <description>
+                Allows an app to prepopulate the text field with a list of suggested or completed entries as the user types. 
+                If empty, the auto-complete list will be removed from the screen.
+            </description>
+        </param>
+    </struct>
 
     <struct name="DeviceInfo" since="3.0">
         <description>Various information about connecting device.</description>         
@@ -2652,7 +2681,9 @@
         <element name="GetAppServiceDataID" value="53" hexvalue="35" since="5.1" />
         <element name="GetFileID" value="54" hexvalue="36" since="5.1" />
         <element name="PerformAppServiceInteractionID" value="55" hexvalue="37" since="5.1" />
+        <element name="UnpublishAppServiceID" value="56" hexvalue="38" since="6.0" />
         <element name="CancelInteractionID" value="57" hexvalue="39" since="6.0" />
+        <element name="CloseApplicationID" value="58" hexvalue="3A" since="6.0" />
         
         <!--
          Base Notifications
@@ -7255,10 +7286,16 @@
     </function>
 
     <function name="PublishAppService" functionID="PublishAppServiceID" messagetype="request" since="5.1">
-        <description>Registers a service offered by this app on the module</description>
+        <description>
+            Registers a service offered by this app on the module.
+            Subsequent calls with the same service type will update the manifest for that service.
+        </description>
 
         <param name="appServiceManifest" type="AppServiceManifest" mandatory="true">
-            <description> The manifest of the service that wishes to be published.</description>
+            <description>
+                The manifest of the service that wishes to be published. 
+                If already published, the updated manifest for this service.
+            </description>
         </param>
     </function>
 
@@ -7287,6 +7324,38 @@
 
         <param name="appServiceRecord" type="AppServiceRecord" mandatory="false">
             <description> If the request was successful, this object will be the current status of the service record for the published service. This will include the Core supplied service ID.</description>
+        </param>
+    </function>
+
+    <function name="UnpublishAppService" functionID="UnpublishAppServiceID" messagetype="request" since="6.0">
+        <description> Unpublish an existing service published by this application. </description>
+
+        <param name="serviceID" type="String" mandatory="true">
+            <description> The ID of the service to be unpublished. </description>
+        </param>
+    </function>
+    
+    <function name="UnpublishAppService" functionID="UnpublishAppServiceID" messagetype="response" since="6.0">
+        <description> The response to UnpublishAppService </description>
+        <param name="success" type="Boolean" platform="documentation" mandatory="true">
+            <description> true, if successful; false, if failed </description>
+        </param>
+       
+        <param name="resultCode" type="Result" platform="documentation" mandatory="true">
+            <description>See Result</description>
+            <element name="SUCCESS"/>
+            <element name="REJECTED"/>
+            <element name="DISALLOWED"/>
+            <element name="INVALID_DATA"/>
+            <element name="INVALID_ID"/>
+            <element name="OUT_OF_MEMORY"/>
+            <element name="TOO_MANY_PENDING_REQUESTS"/>
+            <element name="APPLICATION_NOT_REGISTERED"/>
+            <element name="GENERIC_ERROR"/>
+        </param>
+
+        <param name="info" type="String" maxlength="1000" mandatory="false" platform="documentation">
+            <description>Provides additional human readable info regarding the result.</description>
         </param>
     </function>
 
@@ -7395,17 +7464,33 @@
         <param name="resultCode" type="Result" platform="documentation" mandatory="true">
             <description>See Result</description>
             <element name="SUCCESS"/>
-            <element name="IGNORED"/>
-            <element name="INVALID_DATA"/>
-            <element name="OUT_OF_MEMORY"/>
-            <element name="TOO_MANY_PENDING_REQUESTS"/>
+            <element name="DISALLOWED"/>
             <element name="APPLICATION_NOT_REGISTERED"/>
             <element name="GENERIC_ERROR"/>
-            <element name="REJECTED"/>
+            <element name="IGNORED"/>
+        </param>
+        
+        <param name="info" type="String" maxlength="1000" mandatory="false" platform="documentation">
+            <description>Provides additional human readable info regarding the result.</description>
+        </param>
+    </function>
+
+    <function name="CloseApplication" functionID="CloseApplicationID" messagetype="request" since="6.0">
+        <description>Request from the application to exit the foreground and enter HMI_NONE.</description>
+    </function>
+
+    <function name="CloseApplication" functionID="CloseApplicationID" messagetype="response" since="6.0">
+        <param name="success" type="Boolean" platform="documentation" mandatory="true">
+            <description> true if successful; false, if failed </description>
+        </param>
+        
+        <param name="resultCode" type="Result" platform="documentation" mandatory="true">
+            <description>See Result</description>
+            <element name="SUCCESS"/>
             <element name="DISALLOWED"/>
-            <element name="UNSUPPORTED_RESOURCE"/>
-            <element name="WARNINGS"/>
-            <element name="ABORTED"/>
+            <element name="APPLICATION_NOT_REGISTERED"/>
+            <element name="GENERIC_ERROR"/>
+            <element name="IGNORED"/>
         </param>
         
         <param name="info" type="String" maxlength="1000" mandatory="false" platform="documentation">
@@ -7583,6 +7668,21 @@
         <description>Provides driver distraction state to mobile applications</description>
         <param name="state" type="DriverDistractionState" mandatory="true">
             <description>Current State of Driver Distraction</description>
+        </param>
+        <param name="lockScreenDismissalEnabled" type="Boolean" mandatory="false" since="6.0">
+            <description>
+                If enabled, the lock screen will be able to be dismissed while connected to SDL, allowing users 
+                the ability to interact with the app. Dismissals should include a warning to the user and ensure 
+                that they are not the driver.
+            </description>
+        </param>
+        <param name="lockScreenDismissalWarning" type="String" mandatory="false" since="6.0">
+            <description>
+                Warning message to be displayed on the lock screen when dismissal is enabled.
+                This warning should be used to ensure that the user is not the driver of the vehicle, 
+                ex. `Swipe down to dismiss, acknowledging that you are not the driver.`.
+                This parameter must be present if "lockScreenDismissalEnabled" is set to true.
+            </description>
         </param>
     </function>
     

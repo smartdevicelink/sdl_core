@@ -158,6 +158,8 @@
 #endif  // EXTERNAL_PROPRIETARY_MODE
 
 #include "sdl_rpc_plugin/commands/hmi/add_statistics_info_notification.h"
+#include "sdl_rpc_plugin/commands/hmi/basic_communication_close_application_request.h"
+#include "sdl_rpc_plugin/commands/hmi/basic_communication_close_application_response.h"
 #include "sdl_rpc_plugin/commands/hmi/basic_communication_get_system_time_request.h"
 #include "sdl_rpc_plugin/commands/hmi/basic_communication_get_system_time_response.h"
 #include "sdl_rpc_plugin/commands/hmi/basic_communication_on_awake_sdl.h"
@@ -318,6 +320,13 @@ CommandCreator& HMICommandFactory::get_creator_factory(
       return hmi_apis::messageType::request == message_type
                  ? factory.GetCreator<commands::ActivateAppRequest>()
                  : factory.GetCreator<commands::ActivateAppResponse>();
+    }
+    case hmi_apis::FunctionID::BasicCommunication_CloseApplication: {
+      return hmi_apis::messageType::request == message_type
+                 ? factory.GetCreator<
+                       commands::BasicCommunicationCloseApplicationRequest>()
+                 : factory.GetCreator<
+                       commands::BasicCommunicationCloseApplicationResponse>();
     }
 #ifdef EXTERNAL_PROPRIETARY_MODE
     case hmi_apis::FunctionID::BasicCommunication_DecryptCertificate: {

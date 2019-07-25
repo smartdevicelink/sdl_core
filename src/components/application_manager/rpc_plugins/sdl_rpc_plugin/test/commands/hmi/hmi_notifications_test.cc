@@ -192,6 +192,14 @@ const int32_t kMobileProtocolType_ = 0;
 const int32_t kProtocolVersion_ = 3;
 const uint32_t kCorrelationId_ = 1939u;
 const uint32_t kAppId_ = 2014u;
+const std::string kDefaultLanguage = "en-us";
+const mobile_apis::Language::eType kMobileLanguage =
+    mobile_apis::Language::EN_US;
+
+// LSDW - lock screen dismissal warning
+const std::string kLockScreenDismissalWarningMessage_en =
+    "Swipe down to dismiss, acknowledging that you are not the driver";
+const uint32_t kConnectionKey = 2u;
 }  // namespace
 
 class HMICommandsNotificationsTest
@@ -240,6 +248,9 @@ class HMICommandsNotificationsTest
         .WillByDefault(ReturnRef(mock_event_dispatcher_));
     ON_CALL(app_mngr_, application_by_hmi_app(_)).WillByDefault(Return(app_));
     ON_CALL(*app_ptr_, app_id()).WillByDefault(Return(kAppId_));
+    ON_CALL(app_mngr_, application(kConnectionKey)).WillByDefault(Return(app_));
+    ON_CALL(mock_message_helper_, MobileLanguageToString(kMobileLanguage))
+        .WillByDefault(Return(kDefaultLanguage));
   }
 
   am::ApplicationSharedPtr ConfigureApp(NiceMock<MockApplication>** app_mock,
@@ -259,6 +270,8 @@ class HMICommandsNotificationsTest
         .WillByDefault(Return(vc));
     ON_CALL(**app_mock, IsAudioApplication())
         .WillByDefault(Return(media || navi || vc));
+    ON_CALL(**app_mock, ui_language())
+        .WillByDefault(ReturnRef(kMobileLanguage));
     return app;
   }
 #if defined(OS_POSIX)
@@ -1793,11 +1806,26 @@ TEST_F(HMICommandsNotificationsTest, OnDriverDistractionNotificationEmptyData) {
       hmi_apis::Common_DriverDistractionState::DD_ON;
   MessageSharedPtr message = CreateMessage();
   (*message)[am::strings::msg_params][am::hmi_notification::state] = state;
+  (*message)[am::strings::params][am::strings::connection_key] = kConnectionKey;
   std::shared_ptr<Command> command =
       CreateCommand<hmi::OnDriverDistractionNotification>(message);
 
   EXPECT_CALL(app_mngr_, set_driver_distraction_state(state));
-  EXPECT_CALL(app_mngr_, applications()).WillOnce(Return(applications_));
+
+  ON_CALL(app_mngr_, GetPolicyHandler())
+      .WillByDefault(ReturnRef(mock_policy_handler_));
+  typedef boost::optional<bool> OptionalBool;
+
+  ON_CALL(mock_policy_handler_, LockScreenDismissalEnabledState())
+      .WillByDefault(Return(OptionalBool(true)));
+  std::string required_language = "en-us";
+  ON_CALL(mock_policy_handler_,
+          LockScreenDismissalWarningMessage(required_language))
+      .WillByDefault(Return(
+          boost::optional<std::string>(kLockScreenDismissalWarningMessage_en)));
+
+  ON_CALL(app_mngr_, applications()).WillByDefault(Return(applications_));
+
   EXPECT_CALL(mock_rpc_service_, ManageMobileCommand(_, _)).Times(0);
   EXPECT_CALL(*app_ptr_, app_id()).Times(0);
   command->Run();
@@ -1805,16 +1833,28 @@ TEST_F(HMICommandsNotificationsTest, OnDriverDistractionNotificationEmptyData) {
 
 TEST_F(HMICommandsNotificationsTest,
        OnDriverDistractionNotificationInvalidApp) {
-  const hmi_apis::Common_DriverDistractionState::eType state =
-      hmi_apis::Common_DriverDistractionState::DD_ON;
+  const auto state = hmi_apis::Common_DriverDistractionState::DD_ON;
   MessageSharedPtr message = CreateMessage();
   (*message)[am::strings::msg_params][am::hmi_notification::state] = state;
+  (*message)[am::strings::params][am::strings::connection_key] = kConnectionKey;
   std::shared_ptr<Command> command =
       CreateCommand<hmi::OnDriverDistractionNotification>(message);
 
   ApplicationSharedPtr invalid_app;
   application_set_.insert(invalid_app);
-  EXPECT_CALL(app_mngr_, applications()).WillOnce(Return(applications_));
+
+  ON_CALL(app_mngr_, GetPolicyHandler())
+      .WillByDefault(ReturnRef(mock_policy_handler_));
+  typedef boost::optional<bool> OptionalBool;
+  ON_CALL(mock_policy_handler_, LockScreenDismissalEnabledState())
+      .WillByDefault(Return(OptionalBool(true)));
+  std::string required_language = "en-us";
+  ON_CALL(mock_policy_handler_,
+          LockScreenDismissalWarningMessage(required_language))
+      .WillByDefault(Return(
+          boost::optional<std::string>(kLockScreenDismissalWarningMessage_en)));
+  ON_CALL(app_mngr_, applications()).WillByDefault(Return(applications_));
+
   EXPECT_CALL(mock_rpc_service_, ManageMobileCommand(_, _)).Times(0);
   EXPECT_CALL(*app_ptr_, app_id()).Times(0);
   command->Run();
@@ -1825,21 +1865,33 @@ TEST_F(HMICommandsNotificationsTest, OnDriverDistractionNotificationValidApp) {
       hmi_apis::Common_DriverDistractionState::DD_ON;
   MessageSharedPtr message = CreateMessage();
   (*message)[am::strings::msg_params][am::mobile_notification::state] = state;
+  (*message)[am::strings::params][am::strings::connection_key] = kConnectionKey;
   std::shared_ptr<Command> command =
       CreateCommand<hmi::OnDriverDistractionNotification>(message);
 
   application_set_.insert(app_);
-  EXPECT_CALL(app_mngr_, applications()).WillOnce(Return(applications_));
+
+  ON_CALL(app_mngr_, GetPolicyHandler())
+      .WillByDefault(ReturnRef(mock_policy_handler_));
+  typedef boost::optional<bool> OptionalBool;
+  ON_CALL(mock_policy_handler_, LockScreenDismissalEnabledState())
+      .WillByDefault(Return(OptionalBool(true)));
+  std::string required_language = "en-us";
+  ON_CALL(mock_policy_handler_,
+          LockScreenDismissalWarningMessage(required_language))
+      .WillByDefault(Return(
+          boost::optional<std::string>(kLockScreenDismissalWarningMessage_en)));
+  ON_CALL(app_mngr_, applications()).WillByDefault(Return(applications_));
+
   policy::CheckPermissionResult result;
   result.hmi_level_permitted = policy::kRpcAllowed;
-  EXPECT_CALL(app_mngr_, GetPolicyHandler())
-      .WillOnce(ReturnRef(mock_policy_handler_));
   EXPECT_CALL(mock_policy_handler_, CheckPermissions(_, _, _, _))
       .WillOnce(GetArg3(&result));
+
   EXPECT_CALL(mock_rpc_service_,
               ManageMobileCommand(_, Command::CommandSource::SOURCE_SDL))
       .WillOnce(GetMessage(message));
-  EXPECT_CALL(*app_ptr_, app_id()).WillRepeatedly(Return(kAppId_));
+  ON_CALL(*app_ptr_, app_id()).WillByDefault(Return(kAppId_));
 
   command->Run();
   EXPECT_EQ(

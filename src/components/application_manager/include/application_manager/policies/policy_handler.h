@@ -204,6 +204,9 @@ class PolicyHandler : public PolicyHandlerInterface,
   uint32_t TimeoutExchangeMSec() const OVERRIDE;
   void OnExceededTimeout() OVERRIDE;
   void OnSystemReady() OVERRIDE;
+  const boost::optional<bool> LockScreenDismissalEnabledState() const OVERRIDE;
+  const boost::optional<std::string> LockScreenDismissalWarningMessage(
+      const std::string& language) const OVERRIDE;
   void PTUpdatedAt(Counters counter, int value) OVERRIDE;
   void add_listener(PolicyHandlerObserver* listener) OVERRIDE;
   void remove_listener(PolicyHandlerObserver* listener) OVERRIDE;
@@ -661,6 +664,8 @@ class PolicyHandler : public PolicyHandlerInterface,
   void OnDeviceSwitching(const std::string& device_id_from,
                          const std::string& device_id_to) FINAL;
 
+  void OnLockScreenDismissalStateChanged() FINAL;
+
  protected:
   /**
    * Starts next retry exchange policy table
@@ -807,7 +812,6 @@ class PolicyHandler : public PolicyHandlerInterface,
   std::vector<FunctionalGroupPermission> CollectAppPermissions(
       const uint32_t connection_key);
 
- private:
   static const std::string kLibrary;
 
   /**
@@ -817,7 +821,6 @@ class PolicyHandler : public PolicyHandlerInterface,
    */
   void GetRegisteredLinks(std::map<std::string, std::string>& out_links) const;
 
- private:
   mutable sync_primitives::RWLock policy_manager_lock_;
   std::shared_ptr<PolicyManager> policy_manager_;
   void* dl_handle_;

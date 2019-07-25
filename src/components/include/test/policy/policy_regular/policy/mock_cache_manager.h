@@ -91,11 +91,15 @@ class MockCacheManagerInterface : public CacheManagerInterface {
   MOCK_METHOD2(SetHybridAppPreference,
                void(const std::string& policy_app_id,
                     const std::string& hybrid_app_preference));
+  MOCK_CONST_METHOD0(LockScreenDismissalEnabledState,
+                     const boost::optional<bool>());
+  MOCK_CONST_METHOD1(LockScreenDismissalWarningMessage,
+                     const boost::optional<std::string>(const std::string&));
   MOCK_METHOD1(SetVINValue, bool(const std::string& value));
-  MOCK_METHOD2(GetUserFriendlyMsg,
-               std::vector<UserFriendlyMessage>(
-                   const std::vector<std::string>& msg_codes,
-                   const std::string& language));
+  MOCK_CONST_METHOD2(GetUserFriendlyMsg,
+                     std::vector<UserFriendlyMessage>(
+                         const std::vector<std::string>& msg_codes,
+                         const std::string& language));
   MOCK_CONST_METHOD2(
       GetAppServiceParameters,
       void(const std::string& policy_app_id,

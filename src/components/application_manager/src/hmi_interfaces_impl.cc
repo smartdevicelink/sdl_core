@@ -105,6 +105,8 @@ generate_function_to_interface_convert_map() {
       HmiInterfaces::HMI_INTERFACE_BasicCommunication;
   convert_map[BasicCommunication_GetFilePath] =
       HmiInterfaces::HMI_INTERFACE_BasicCommunication;
+  convert_map[BasicCommunication_CloseApplication] =
+      HmiInterfaces::HMI_INTERFACE_BasicCommunication;
   convert_map[VR_IsReady] = HmiInterfaces::HMI_INTERFACE_VR;
   convert_map[VR_Started] = HmiInterfaces::HMI_INTERFACE_VR;
   convert_map[VR_Stopped] = HmiInterfaces::HMI_INTERFACE_VR;
@@ -231,6 +233,8 @@ generate_function_to_interface_convert_map() {
   convert_map[RC_OnInteriorVehicleData] = HmiInterfaces::HMI_INTERFACE_RC;
   convert_map[RC_OnRemoteControlSettings] = HmiInterfaces::HMI_INTERFACE_RC;
   convert_map[AppService_PublishAppService] =
+      HmiInterfaces::HMI_INTERFACE_AppService;
+  convert_map[AppService_UnpublishAppService] =
       HmiInterfaces::HMI_INTERFACE_AppService;
   convert_map[AppService_GetAppServiceData] =
       HmiInterfaces::HMI_INTERFACE_AppService;

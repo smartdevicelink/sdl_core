@@ -356,6 +356,7 @@ bool PolicyManagerImpl::LoadPT(const std::string& file,
       ForcePTExchange();
       return false;
     }
+    CheckPermissionsChangesAfterUpdate(*pt_update, *policy_table_snapshot);
 
     listener_->OnCertificateUpdated(
         *(pt_update->policy_table.module_config.certificate));
@@ -390,7 +391,7 @@ bool PolicyManagerImpl::LoadPT(const std::string& file,
 void PolicyManagerImpl::CheckPermissionsChanges(
     const std::shared_ptr<policy_table::Table> pt_update,
     const std::shared_ptr<policy_table::Table> snapshot) {
-  LOG4CXX_INFO(logger_, "Checking incoming permissions.");
+  LOG4CXX_AUTO_TRACE(logger_);
 
   // Replace predefined policies with its actual setting, e.g. "123":"default"
   // to actual values of default section
@@ -399,6 +400,17 @@ void PolicyManagerImpl::CheckPermissionsChanges(
   std::for_each(pt_update->policy_table.app_policies_section.apps.begin(),
                 pt_update->policy_table.app_policies_section.apps.end(),
                 CheckAppPolicy(this, pt_update, snapshot));
+}
+
+void PolicyManagerImpl::CheckPermissionsChangesAfterUpdate(
+    const policy_table::Table& update, const policy_table::Table& snapshot) {
+  const auto new_lock_screen_dismissal_enabled =
+      update.policy_table.module_config.lock_screen_dismissal_enabled;
+  const auto old_lock_screen_dismissal_enabled =
+      snapshot.policy_table.module_config.lock_screen_dismissal_enabled;
+  if (new_lock_screen_dismissal_enabled != old_lock_screen_dismissal_enabled) {
+    listener()->OnLockScreenDismissalStateChanged();
+  }
 }
 
 void PolicyManagerImpl::PrepareNotificationData(
@@ -1066,6 +1078,17 @@ void PolicyManagerImpl::KmsChanged(int kilometers) {
     update_status_manager_.ScheduleUpdate();
     StartPTExchange();
   }
+}
+
+const boost::optional<bool> PolicyManagerImpl::LockScreenDismissalEnabledState()
+    const {
+  return cache_->LockScreenDismissalEnabledState();
+}
+
+const boost::optional<std::string>
+PolicyManagerImpl::LockScreenDismissalWarningMessage(
+    const std::string& language) const {
+  return cache_->LockScreenDismissalWarningMessage(language);
 }
 
 void PolicyManagerImpl::IncrementIgnitionCycles() {

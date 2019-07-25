@@ -177,41 +177,6 @@ struct DeactivateApplication {
   StateController& state_ctrl_;
 };
 
-struct SDLAllowedNotification {
-  SDLAllowedNotification(const connection_handler::DeviceHandle& device_id,
-                         PolicyManager* policy_manager,
-                         StateController& state_controller)
-      : device_id_(device_id)
-      , policy_manager_(policy_manager)
-      , state_controller_(state_controller) {}
-
-  void operator()(const ApplicationSharedPtr& app) {
-    DCHECK_OR_RETURN_VOID(policy_manager_);
-    if (device_id_ == app->device()) {
-      std::string hmi_level = "NONE";
-      mobile_apis::HMILevel::eType default_mobile_hmi;
-      policy_manager_->GetDefaultHmi(app->policy_app_id(), &hmi_level);
-      if ("BACKGROUND" == hmi_level) {
-        default_mobile_hmi = mobile_apis::HMILevel::HMI_BACKGROUND;
-      } else if ("FULL" == hmi_level) {
-        default_mobile_hmi = mobile_apis::HMILevel::HMI_FULL;
-      } else if ("LIMITED" == hmi_level) {
-        default_mobile_hmi = mobile_apis::HMILevel::HMI_LIMITED;
-      } else if ("NONE" == hmi_level) {
-        default_mobile_hmi = mobile_apis::HMILevel::HMI_NONE;
-      } else {
-        return;
-      }
-      state_controller_.SetRegularState(app, default_mobile_hmi, true);
-    }
-  }
-
- private:
-  connection_handler::DeviceHandle device_id_;
-  PolicyManager* policy_manager_;
-  StateController& state_controller_;
-};
-
 /**
  * @brief Gets from system list of currently registered applications and
  * create collection of links device-to-application
@@ -859,6 +824,15 @@ void PolicyHandler::OnDeviceSwitching(const std::string& device_id_from,
   LOG4CXX_AUTO_TRACE(logger_);
   POLICY_LIB_CHECK_VOID();
   policy_manager_->OnDeviceSwitching(device_id_from, device_id_to);
+}
+
+void PolicyHandler::OnLockScreenDismissalStateChanged() {
+  LOG4CXX_AUTO_TRACE(logger_);
+  const auto accessor = application_manager_.applications();
+  const auto apps = accessor.GetData();
+  for (auto& app : apps) {
+    application_manager_.SendDriverDistractionState(app);
+  }
 }
 
 void PolicyHandler::OnGetStatusUpdate(const uint32_t correlation_id) {
@@ -1607,6 +1581,19 @@ void PolicyHandler::OnExceededTimeout() {
 void PolicyHandler::OnSystemReady() {
   POLICY_LIB_CHECK_VOID();
   policy_manager_->OnSystemReady();
+}
+
+const boost::optional<bool> PolicyHandler::LockScreenDismissalEnabledState()
+    const {
+  POLICY_LIB_CHECK(boost::optional<bool>());
+  return policy_manager_->LockScreenDismissalEnabledState();
+}
+
+const boost::optional<std::string>
+PolicyHandler::LockScreenDismissalWarningMessage(
+    const std::string& language) const {
+  POLICY_LIB_CHECK(boost::optional<std::string>());
+  return policy_manager_->LockScreenDismissalWarningMessage(language);
 }
 
 void PolicyHandler::PTUpdatedAt(Counters counter, int value) {

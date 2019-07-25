@@ -135,6 +135,46 @@ void InitCapabilities() {
                      hmi_apis::Common_ButtonName::CUSTOM_BUTTON));
   button_enum_name.insert(std::make_pair(std::string("SEARCH"),
                                          hmi_apis::Common_ButtonName::SEARCH));
+  button_enum_name.insert(
+      std::make_pair(std::string("NAV_CENTER_LOCATION"),
+                     hmi_apis::Common_ButtonName::NAV_CENTER_LOCATION));
+  button_enum_name.insert(std::make_pair(
+      std::string("NAV_ZOOM_IN"), hmi_apis::Common_ButtonName::NAV_ZOOM_IN));
+  button_enum_name.insert(std::make_pair(
+      std::string("NAV_ZOOM_OUT"), hmi_apis::Common_ButtonName::NAV_ZOOM_OUT));
+  button_enum_name.insert(std::make_pair(
+      std::string("NAV_PAN_UP"), hmi_apis::Common_ButtonName::NAV_PAN_UP));
+  button_enum_name.insert(
+      std::make_pair(std::string("NAV_PAN_UP_RIGHT"),
+                     hmi_apis::Common_ButtonName::NAV_PAN_UP_RIGHT));
+  button_enum_name.insert(
+      std::make_pair(std::string("NAV_PAN_RIGHT"),
+                     hmi_apis::Common_ButtonName::NAV_PAN_RIGHT));
+  button_enum_name.insert(
+      std::make_pair(std::string("NAV_PAN_DOWN_RIGHT"),
+                     hmi_apis::Common_ButtonName::NAV_PAN_DOWN_RIGHT));
+  button_enum_name.insert(std::make_pair(
+      std::string("NAV_PAN_DOWN"), hmi_apis::Common_ButtonName::NAV_PAN_DOWN));
+  button_enum_name.insert(
+      std::make_pair(std::string("NAV_PAN_DOWN_LEFT"),
+                     hmi_apis::Common_ButtonName::NAV_PAN_DOWN_LEFT));
+  button_enum_name.insert(std::make_pair(
+      std::string("NAV_PAN_LEFT"), hmi_apis::Common_ButtonName::NAV_PAN_LEFT));
+  button_enum_name.insert(
+      std::make_pair(std::string("NAV_PAN_UP_LEFT"),
+                     hmi_apis::Common_ButtonName::NAV_PAN_UP_LEFT));
+  button_enum_name.insert(
+      std::make_pair(std::string("NAV_TILT_TOGGLE"),
+                     hmi_apis::Common_ButtonName::NAV_TILT_TOGGLE));
+  button_enum_name.insert(
+      std::make_pair(std::string("NAV_ROTATE_CLOCKWISE"),
+                     hmi_apis::Common_ButtonName::NAV_ROTATE_CLOCKWISE));
+  button_enum_name.insert(
+      std::make_pair(std::string("NAV_ROTATE_COUNTERCLOCKWISE"),
+                     hmi_apis::Common_ButtonName::NAV_ROTATE_COUNTERCLOCKWISE));
+  button_enum_name.insert(
+      std::make_pair(std::string("NAV_HEADING_TOGGLE"),
+                     hmi_apis::Common_ButtonName::NAV_HEADING_TOGGLE));
 
   text_fields_enum_name.insert(std::make_pair(
       std::string("mainField1"), hmi_apis::Common_TextFieldName::mainField1));

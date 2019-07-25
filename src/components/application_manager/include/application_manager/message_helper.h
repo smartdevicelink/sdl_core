@@ -348,14 +348,15 @@ class MessageHelper {
                                               bool is_unexpected_disconnect,
                                               ApplicationManager& app_mngr);
 
-  static ns_smart_device_link::ns_smart_objects::SmartObjectSPtr
-  GetBCActivateAppRequestToHMI(
+  static smart_objects::SmartObjectSPtr GetBCActivateAppRequestToHMI(
       ApplicationConstSharedPtr app,
-      const protocol_handler::SessionObserver& session_observer,
       const policy::PolicyHandlerInterface& policy_handler,
       hmi_apis::Common_HMILevel::eType level,
       bool send_policy_priority,
       ApplicationManager& app_mngr);
+
+  static smart_objects::SmartObjectSPtr GetBCCloseApplicationRequestToHMI(
+      ApplicationConstSharedPtr app, ApplicationManager& app_mngr);
 
   static void SendOnResumeAudioSourceToHMI(const uint32_t app_id,
                                            ApplicationManager& app_mngr);
@@ -723,6 +724,14 @@ class MessageHelper {
    */
   static std::string CommonLanguageToString(
       hmi_apis::Common_Language::eType language);
+
+  /**
+   * @brief Converts mobile language to string representation
+   * @param language Mobile UI language
+   * @return Mobile language string representation
+   */
+  static std::string MobileLanguageToString(
+      mobile_apis::Language::eType language);
 
   /**
    * @brief Converts string to mobile language enum value

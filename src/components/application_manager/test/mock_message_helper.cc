@@ -366,20 +366,25 @@ std::string MessageHelper::CommonLanguageToString(
   return MockMessageHelper::message_helper_mock()->CommonLanguageToString(lang);
 }
 
+std::string MessageHelper::MobileLanguageToString(
+    mobile_apis::Language::eType lang) {
+  return MockMessageHelper::message_helper_mock()->MobileLanguageToString(lang);
+}
+
 smart_objects::SmartObjectSPtr MessageHelper::GetBCActivateAppRequestToHMI(
     ApplicationConstSharedPtr app,
-    const protocol_handler::SessionObserver& session_observer,
     const policy::PolicyHandlerInterface& policy_handler,
     hmi_apis::Common_HMILevel::eType level,
     bool send_policy_priority,
     ApplicationManager& app_mngr) {
   return MockMessageHelper::message_helper_mock()->GetBCActivateAppRequestToHMI(
-      app,
-      session_observer,
-      policy_handler,
-      level,
-      send_policy_priority,
-      app_mngr);
+      app, policy_handler, level, send_policy_priority, app_mngr);
+}
+
+smart_objects::SmartObjectSPtr MessageHelper::GetBCCloseApplicationRequestToHMI(
+    ApplicationConstSharedPtr app, ApplicationManager& app_mngr) {
+  return MockMessageHelper::message_helper_mock()
+      ->GetBCCloseApplicationRequestToHMI(app, app_mngr);
 }
 
 ns_smart_device_link::ns_smart_objects::SmartObjectSPtr
@@ -589,4 +594,5 @@ void MessageHelper::BroadcastCapabilityUpdate(
   MockMessageHelper::message_helper_mock()->BroadcastCapabilityUpdate(
       msg_params, app_mngr);
 }
+
 }  // namespace application_manager

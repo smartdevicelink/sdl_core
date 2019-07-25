@@ -49,6 +49,8 @@
 #include "mobile/perform_app_service_interaction_response_from_mobile.h"
 #include "mobile/publish_app_service_request.h"
 #include "mobile/publish_app_service_response.h"
+#include "mobile/unpublish_app_service_request.h"
+#include "mobile/unpublish_app_service_response.h"
 
 #include "application_manager/mock_application.h"
 #include "application_manager/mock_application_manager.h"
@@ -118,7 +120,9 @@ typedef Types<commands::GetAppServiceDataRequest,
               commands::PerformAppServiceInteractionResponse,
               commands::PerformAppServiceInteractionResponseFromMobile,
               commands::PublishAppServiceRequest,
-              commands::PublishAppServiceResponse>
+              commands::PublishAppServiceResponse,
+              commands::UnpublishAppServiceRequest,
+              commands::UnpublishAppServiceResponse>
     MobileCommandsListFirst;
 
 TYPED_TEST_CASE(MobileCommandsTestFirst, MobileCommandsListFirst);

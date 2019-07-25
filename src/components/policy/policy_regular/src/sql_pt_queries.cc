@@ -71,7 +71,8 @@ const std::string kCreateSchema =
     "  `certificate` TEXT, "
     "  `vehicle_make` VARCHAR(45), "
     "  `vehicle_model` VARCHAR(45), "
-    "  `vehicle_year` VARCHAR(4) "
+    "  `vehicle_year` VARCHAR(4), "
+    "  `lock_screen_dismissal_enabled` BOOL"
     "); "
     "CREATE TABLE IF NOT EXISTS `functional_group`( "
     "  `id` INTEGER PRIMARY KEY NOT NULL, "
@@ -419,7 +420,7 @@ const std::string kInsertInitData =
     "  VALUES (0, 0, 0, 0); "
     "INSERT OR IGNORE INTO `module_config` (`preloaded_pt`, `is_first_run`,"
     "  `exchange_after_x_ignition_cycles`, `exchange_after_x_kilometers`, "
-    "  `exchange_after_x_days`, `timeout_after_x_seconds`) "
+    "  `exchange_after_x_days`, `timeout_after_x_seconds`)"
     "  VALUES(1, 0, 0, 0, 0, 0); "
     "INSERT OR IGNORE INTO `priority`(`value`) VALUES ('EMERGENCY'); "
     "INSERT OR IGNORE INTO `priority`(`value`) VALUES ('NAVIGATION'); "
@@ -674,15 +675,17 @@ const std::string kInsertLanguage =
     "INSERT OR IGNORE INTO `language` (`code`) VALUES (?)";
 
 const std::string kInsertMessageString =
-    "INSERT INTO `message` (`language_code`, `message_type_name`) "
-    "VALUES (?, ?)";
+    "INSERT INTO `message` (`language_code`, `message_type_name`, `tts`, "
+    "`label`, `line1`, `line2`, `textBody`) "
+    "VALUES (?, ?, ?, ?, ?, ?, ?)";
 
 const std::string kUpdateModuleConfig =
     "UPDATE `module_config` SET `preloaded_pt` = ?, "
     "  `exchange_after_x_ignition_cycles` = ?,"
     "  `exchange_after_x_kilometers` = ?, `exchange_after_x_days` = ?, "
     "  `timeout_after_x_seconds` = ?, `certificate` = ?, `vehicle_make` = ?, "
-    "  `vehicle_model` = ?, `vehicle_year` = ? ";
+    "  `vehicle_model` = ?, `vehicle_year` = ?,  lock_screen_dismissal_enabled "
+    "= ?";
 
 const std::string kInsertEndpoint =
     "INSERT INTO `endpoint` (`service`, `url`, `application_id`) "
@@ -722,7 +725,7 @@ const std::string kSelectModuleConfig =
     "SELECT `preloaded_pt`, `exchange_after_x_ignition_cycles`, "
     " `exchange_after_x_kilometers`, `exchange_after_x_days`, "
     " `timeout_after_x_seconds`, `certificate`, `vehicle_make`,"
-    " `vehicle_model`, `vehicle_year` "
+    " `vehicle_model`, `vehicle_year` ,`lock_screen_dismissal_enabled`"
     " FROM `module_config`";
 
 const std::string kSelectEndpoints =
@@ -907,6 +910,5 @@ const std::string kSaveModuleMeta =
     "`ignition_cycles_since_last_exchange` = ? ";
 
 const std::string kSelectModuleMeta = "SELECT* FROM `module_meta`";
-
 }  // namespace sql_pt
 }  // namespace policy

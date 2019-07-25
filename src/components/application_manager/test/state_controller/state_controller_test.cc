@@ -1036,7 +1036,7 @@ class StateControllerImplTest : public ::testing::Test {
     (*bc_activate_app_request)[am::strings::params]
                               [am::strings::correlation_id] = corr_id;
     ON_CALL(message_helper_mock_,
-            GetBCActivateAppRequestToHMI(_, _, _, hmi_lvl, _, _))
+            GetBCActivateAppRequestToHMI(_, _, hmi_lvl, _, _))
         .WillByDefault(Return(bc_activate_app_request));
     ON_CALL(app_manager_mock_, GetRPCService())
         .WillByDefault(ReturnRef(mock_rpc_service_));
@@ -1969,12 +1969,6 @@ TEST_F(StateControllerImplTest, DISABLED_ActivateAppSuccessReceivedFromHMI) {
       StateLevelPair(LimitedState(), Common_HMILevel::LIMITED));
   hmi_states.push_back(
       StateLevelPair(BackgroundState(), Common_HMILevel::BACKGROUND));
-  hmi_states.push_back(
-      StateLevelPair(createHmiState(HMILevel::HMI_NONE,
-                                    AudioStreamingState::NOT_AUDIBLE,
-                                    VideoStreamingState::NOT_STREAMABLE,
-                                    SystemContext::SYSCTXT_MAIN),
-                     Common_HMILevel::NONE));
   std::vector<StateLevelPair> initial_hmi_states = hmi_states;
   std::vector<StateLevelPair>::iterator it = hmi_states.begin();
   std::vector<StateLevelPair>::iterator it2 = initial_hmi_states.begin();
