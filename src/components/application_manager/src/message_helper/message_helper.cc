@@ -221,6 +221,9 @@ std::pair<std::string, mobile_apis::VehicleDataType::eType>
         std::make_pair(
             strings::cluster_mode_status,
             mobile_apis::VehicleDataType::VEHICLEDATA_CLUSTERMODESTATUS),
+        std::make_pair(
+            strings::cluster_modes,
+            mobile_apis::VehicleDataType::VEHICLEDATA_CLUSTERMODESTATUS),
         std::make_pair(strings::my_key,
                        mobile_apis::VehicleDataType::VEHICLEDATA_MYKEY),
         /*

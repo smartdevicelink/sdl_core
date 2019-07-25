@@ -100,6 +100,7 @@ target_link_libraries(policy_struct
   Utils
   SmartObjects
   formatters
+  jsoncpp
 )
 
 set(USAGE_STATISTICS_PATHS
@@ -126,7 +127,6 @@ set(LIBRARIES
   ConfigProfile
   policy_struct
   dbms
-  jsoncpp
   Utils
 )
 

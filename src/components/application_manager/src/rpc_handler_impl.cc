@@ -100,6 +100,8 @@ void RPCHandlerImpl::ProcessMessageFromMobile(
                          .CanHandleFunctionID(message->function_id());
   if (app_manager_.GetRPCService().IsAppServiceRPC(
           message->function_id(), commands::Command::SOURCE_MOBILE) ||
+      app_manager_.GetRPCService().RPCSupportsCustomVDI(
+          message->function_id(), commands::Command::SOURCE_MOBILE) ||
       rpc_passing) {
     LOG4CXX_DEBUG(logger_,
                   "Allowing unknown parameters for request function "

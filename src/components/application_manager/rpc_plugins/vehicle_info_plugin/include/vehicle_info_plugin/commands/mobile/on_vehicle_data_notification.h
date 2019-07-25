@@ -37,6 +37,7 @@
 #include "application_manager/application.h"
 #include "application_manager/commands/command_notification_impl.h"
 #include "utils/macro.h"
+#include "vehicle_info_plugin/custom_vehicle_data_manager.h"
 #include "vehicle_info_plugin/vehicle_info_command_params.h"
 
 namespace vehicle_info_plugin {
@@ -76,6 +77,15 @@ class OnVehicleDataNotification
    * @param app Application to receive notification
    */
   void SendVehicleData(app_mngr::ApplicationConstSharedPtr app);
+
+  /**
+   * @brief Checks whether vehicle data in message params valid
+   * @param msg_params message parameters of HMI response
+   * @return true if vehicle data is valid, otherwise false
+   */
+  bool ValidateHMIMessageData(const smart_objects::SmartObject& msg_params);
+
+  CustomVehicleDataManager& custom_vehicle_data_manager_;
 
   DISALLOW_COPY_AND_ASSIGN(OnVehicleDataNotification);
 };

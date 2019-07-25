@@ -98,9 +98,8 @@ void VehicleInfoPlugin::ProcessResumptionSubscription(
   msg_params[strings::app_id] = app.app_id();
   const auto& subscriptions = ext.Subscriptions();
   for (auto& ivi_data : application_manager::MessageHelper::vehicle_data()) {
-    mobile_apis::VehicleDataType::eType type_id = ivi_data.second;
-    if (subscriptions.end() != subscriptions.find(type_id)) {
-      std::string key_name = ivi_data.first;
+    std::string key_name = ivi_data.first;
+    if (subscriptions.end() != subscriptions.find(key_name)) {
       msg_params[key_name] = true;
     }
   }
@@ -113,13 +112,13 @@ void VehicleInfoPlugin::ProcessResumptionSubscription(
 }
 
 application_manager::ApplicationSharedPtr FindAppSubscribedToIVI(
-    mobile_apis::VehicleDataType::eType ivi_data,
+    const std::string& ivi_name,
     application_manager::ApplicationManager& app_mngr) {
   auto applications = app_mngr.applications();
 
   for (auto& app : applications.GetData()) {
     auto& ext = VehicleInfoAppExtension::ExtractVIExtension(*app);
-    if (ext.isSubscribedToVehicleInfo(ivi_data)) {
+    if (ext.isSubscribedToVehicleInfo(ivi_name)) {
       return app;
     }
   }
@@ -127,12 +126,13 @@ application_manager::ApplicationSharedPtr FindAppSubscribedToIVI(
 }
 
 smart_objects::SmartObjectSPtr GetUnsubscribeIVIRequest(
-    int32_t ivi_id, application_manager::ApplicationManager& app_mngr) {
+    const std::string& ivi_name,
+    application_manager::ApplicationManager& app_mngr) {
   using namespace smart_objects;
 
-  auto find_ivi_name = [ivi_id]() {
+  auto find_ivi_name = [ivi_name]() {
     for (auto item : application_manager::MessageHelper::vehicle_data()) {
-      if (ivi_id == item.second) {
+      if (ivi_name == item.first) {
         return item.first;
       }
     }
