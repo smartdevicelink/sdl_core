@@ -598,8 +598,8 @@ TEST_F(HMICapabilitiesTest,
     EXPECT_TRUE(::file_system::DeleteFile("./app_info_data"));
   }
 
-  utils::SharedPtr<HMICapabilitiesForTesting> hmi_capabilities =
-      utils::MakeShared<HMICapabilitiesForTesting>(mock_app_mngr);
+  std::shared_ptr<HMICapabilitiesForTesting> hmi_capabilities =
+      std::make_shared<HMICapabilitiesForTesting>(mock_app_mngr);
   hmi_capabilities->Init(&last_state_);
 
   // with old audio pass thru format, the object is a map
