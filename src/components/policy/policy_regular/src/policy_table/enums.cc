@@ -861,6 +861,8 @@ bool IsValidEnum(FunctionID val) {
       return true;
     case CloseApplicationID:
       return true;
+    case ShowAppMenuID:
+      return true;
     case OnHMIStatusID:
       return true;
     case OnAppInterfaceUnregisteredID:
@@ -1026,6 +1028,8 @@ const char* EnumToJsonString(FunctionID val) {
       return "PerformAppServiceInteraction";
     case CloseApplicationID:
       return "CloseApplication";
+    case ShowAppMenuID:
+      return "ShowAppMenu";
     case OnHMIStatusID:
       return "OnHMIStatus";
     case OnAppInterfaceUnregisteredID:
@@ -1352,6 +1356,11 @@ bool EnumFromJsonString(const std::string& literal, FunctionID* result) {
 
   if ("CloseApplication" == literal) {
     *result = CloseApplicationID;
+    return true;
+  }
+
+  if ("ShowAppMenu" == literal) {
+    *result = ShowAppMenuID;
     return true;
   }
 
