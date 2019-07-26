@@ -103,17 +103,6 @@ void CancelInteractionRequest::on_event(const event_engine::Event& event) {
   bool success = PrepareResultForMobileResponse(
       hmi_result, HmiInterfaces::HMI_INTERFACE_UI);
 
-  if (success) {
-    ApplicationSharedPtr app =
-        application_manager_.application(connection_key());
-
-    if (!app || app.use_count() == 0) {
-      LOG4CXX_ERROR(logger_, "Application does not exist");
-      SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
-      return;
-    }
-  }
-
   auto msg_params = message[strings::msg_params];
 
   const char* info = msg_params.keyExists(strings::info)
