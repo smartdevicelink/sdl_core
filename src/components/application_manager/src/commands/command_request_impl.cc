@@ -147,7 +147,14 @@ struct DisallowedParamsInserter {
     smart_objects::SmartObjectSPtr disallowed_param =
         std::make_shared<smart_objects::SmartObject>(
             smart_objects::SmartType_Map);
-    (*disallowed_param)[strings::data_type] = param;
+
+    auto rpc_spec_vehicle_data = MessageHelper::vehicle_data();
+    auto vehicle_data = rpc_spec_vehicle_data.find(param);
+    auto vehicle_data_type = vehicle_data == rpc_spec_vehicle_data.end()
+                                 ? mobile_apis::VehicleDataType::OEM_SPECIFIC
+                                 : vehicle_data->second;
+
+    (*disallowed_param)[strings::data_type] = vehicle_data_type;
     (*disallowed_param)[strings::result_code] = code_;
     response_[strings::msg_params][param.c_str()] = *disallowed_param;
     return true;
