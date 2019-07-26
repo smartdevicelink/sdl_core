@@ -323,6 +323,14 @@ bool DeviceParams::Validate() const {
 }
 
 bool VehicleDataItem::Validate() const {
+  if (!ValidateNaming(std::string(name))) {
+    return false;
+  };
+
+  if (!ValidateNaming(std::string(key))) {
+    return false;
+  };
+
   if (!ValidateTypes()) {
     LOG4CXX_ERROR(
         logger_,
