@@ -72,6 +72,11 @@ class OnBCSystemCapabilityUpdatedNotificationFromHMI
   void Run() FINAL;
 
  private:
+  enum ProcessSystemDisplayCapabilitiesResult {
+    SUCCESS,
+    FAIL,
+    CAPABILITIES_CACHED
+  };
   /**
    * @brief ProcessSystemDisplayCapabilities processes provided display
    * capabilities according to its structure
@@ -79,7 +84,7 @@ class OnBCSystemCapabilityUpdatedNotificationFromHMI
    * @return true if display capabilities have been processed properly,
    * otherwise returns false
    */
-  bool ProcessSystemDisplayCapabilities(
+  ProcessSystemDisplayCapabilitiesResult ProcessSystemDisplayCapabilities(
       const smart_objects::SmartObject& display_capabilities);
 
   DISALLOW_COPY_AND_ASSIGN(OnBCSystemCapabilityUpdatedNotificationFromHMI);

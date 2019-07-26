@@ -196,7 +196,8 @@ DynamicApplicationDataImpl::DynamicApplicationDataImpl()
     , window_params_map_lock_ptr_(std::make_shared<sync_primitives::Lock>())
     , is_perform_interaction_active_(false)
     , is_reset_global_properties_active_(false)
-    , perform_interaction_mode_(-1) {}
+    , perform_interaction_mode_(-1)
+    , display_capabilities_builder_(*this) {}
 
 DynamicApplicationDataImpl::~DynamicApplicationDataImpl() {
   if (help_prompt_) {
@@ -677,6 +678,12 @@ void DynamicApplicationDataImpl::AddWindowInfo(
     window_params_map_[window_id] =
         std::make_shared<smart_objects::SmartObject>(window_info);
   }
+}
+
+DisplayCapabilitiesBuilder&
+DynamicApplicationDataImpl::display_capabilities_builder() {
+  LOG4CXX_AUTO_TRACE(logger_);
+  return display_capabilities_builder_;
 }
 
 void DynamicApplicationDataImpl::RemoveWindowInfo(const WindowID window_id) {

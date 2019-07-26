@@ -357,6 +357,33 @@ smart_objects::SmartObjectSPtr MessageHelper::CreateMessageForHMI(
   return message;
 }
 
+smart_objects::SmartObjectSPtr
+MessageHelper::CreateDisplayCapabilityUpdateToMobile(
+    const smart_objects::SmartObject& display_capabilities, Application& app) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  auto message = std::make_shared<smart_objects::SmartObject>(
+      smart_objects::SmartType_Map);
+
+  (*message)[strings::params][strings::message_type] =
+      MessageType::kNotification;
+  (*message)[strings::params][strings::function_id] =
+      mobile_apis::FunctionID::OnSystemCapabilityUpdatedID;
+  (*message)[strings::params][strings::connection_key] = app.app_id();
+  (*message)[strings::params][strings::protocol_type] =
+      commands::CommandImpl::mobile_protocol_type_;
+  (*message)[strings::params][strings::protocol_version] =
+      commands::CommandImpl::protocol_version_;
+
+  smart_objects::SmartObject system_capability(smart_objects::SmartType_Map);
+  system_capability[strings::system_capability_type] =
+      static_cast<int32_t>(mobile_apis::SystemCapabilityType::DISPLAY);
+  system_capability[strings::display_capabilities] = display_capabilities;
+  (*message)[strings::msg_params][strings::system_capability] =
+      system_capability;
+
+  return message;
+}
+
 void MessageHelper::BroadcastCapabilityUpdate(
     smart_objects::SmartObject& msg_params, ApplicationManager& app_mngr) {
   LOG4CXX_AUTO_TRACE(logger_);

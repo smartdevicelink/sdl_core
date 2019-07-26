@@ -62,6 +62,8 @@ typedef int32_t ErrorCode;
 
 class UsageStatistics;
 
+class DisplayCapabilitiesBuilder;
+
 enum APIVersion {
   kUnknownAPI = -1,
   kAPIV0 = 0,
@@ -413,6 +415,11 @@ class DynamicApplicationData {
    * @brief Retrieves window info map
    */
   virtual DataAccessor<WindowParamsMap> window_optional_params_map() const = 0;
+
+  /*
+   * @brief Retrieves display capabilities builder
+   */
+  virtual DisplayCapabilitiesBuilder& display_capabilities_builder() = 0;
 
   /*
    * @brief Retrieve application commands

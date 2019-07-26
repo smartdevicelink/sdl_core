@@ -626,7 +626,6 @@ void StateControllerImpl::SetupRegularHmiState(ApplicationSharedPtr app,
                       << "Send OnResumeAudioSource notification");
     MessageHelper::SendOnResumeAudioSourceToHMI(app->app_id(), app_mngr_);
   }
-  app->set_is_resuming(false);
 
   HmiStatePtr new_state = app->CurrentHmiState(window_id);
   OnStateChanged(app, window_id, old_state, new_state);

@@ -32,6 +32,7 @@
 
 #include "sdl_rpc_plugin/commands/hmi/on_bc_system_capability_updated_notification_from_hmi.h"
 
+#include "application_manager/display_capabilities_builder.h"
 #include "application_manager/message_helper.h"
 #include "interfaces/HMI_API.h"
 #include "interfaces/MOBILE_API.h"
@@ -57,15 +58,17 @@ OnBCSystemCapabilityUpdatedNotificationFromHMI::
 OnBCSystemCapabilityUpdatedNotificationFromHMI::
     ~OnBCSystemCapabilityUpdatedNotificationFromHMI() {}
 
-bool OnBCSystemCapabilityUpdatedNotificationFromHMI::
-    ProcessSystemDisplayCapabilities(
-        const smart_objects::SmartObject& display_capabilities) {
+OnBCSystemCapabilityUpdatedNotificationFromHMI::
+    ProcessSystemDisplayCapabilitiesResult
+    OnBCSystemCapabilityUpdatedNotificationFromHMI::
+        ProcessSystemDisplayCapabilities(
+            const smart_objects::SmartObject& display_capabilities) {
   LOG4CXX_AUTO_TRACE(logger_);
 
   if (!(*message_)[strings::msg_params].keyExists(strings::app_id)) {
     LOG4CXX_DEBUG(logger_, "Updating general display capabilities");
     hmi_capabilities_.set_system_display_capabilities(display_capabilities);
-    return true;
+    return ProcessSystemDisplayCapabilitiesResult::SUCCESS;
   }
 
   const auto app_id =
@@ -74,7 +77,7 @@ bool OnBCSystemCapabilityUpdatedNotificationFromHMI::
   if (!app) {
     LOG4CXX_ERROR(logger_,
                   "Application with app_id " << app_id << " is not registered");
-    return false;
+    return ProcessSystemDisplayCapabilitiesResult::FAIL;
   }
 
   LOG4CXX_DEBUG(logger_, "Updating display capabilities for app " << app_id);
@@ -84,8 +87,14 @@ bool OnBCSystemCapabilityUpdatedNotificationFromHMI::
   (*message_)[strings::params][strings::connection_key] =
       (*message_)[strings::msg_params][strings::app_id];
   (*message_)[strings::msg_params].erase(strings::app_id);
+  if (app->is_resuming()) {
+    LOG4CXX_DEBUG(logger_, "Application is resuming");
+    app->display_capabilities_builder().UpdateDisplayCapabilities(
+        display_capabilities);
+    return ProcessSystemDisplayCapabilitiesResult::CAPABILITIES_CACHED;
+  }
 
-  return true;
+  return ProcessSystemDisplayCapabilitiesResult::SUCCESS;
 }
 
 void OnBCSystemCapabilityUpdatedNotificationFromHMI::Run() {
@@ -100,11 +109,16 @@ void OnBCSystemCapabilityUpdatedNotificationFromHMI::Run() {
   if (mobile_apis::SystemCapabilityType::DISPLAY ==
           system_capability[strings::system_capability_type].asInt() &&
       system_capability.keyExists(strings::display_capabilities)) {
-    if (!ProcessSystemDisplayCapabilities(
-            system_capability[strings::display_capabilities])) {
+    const auto result = ProcessSystemDisplayCapabilities(
+        system_capability[strings::display_capabilities]);
+    if (ProcessSystemDisplayCapabilitiesResult::FAIL == result) {
       LOG4CXX_ERROR(logger_,
                     "Failed to process display capabilities. Notification will "
                     "be ignored");
+      return;
+    } else if (ProcessSystemDisplayCapabilitiesResult::CAPABILITIES_CACHED ==
+               result) {
+      LOG4CXX_TRACE(logger_, "Capabilities are being cached for resuming app");
       return;
     }
   }

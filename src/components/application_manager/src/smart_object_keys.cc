@@ -142,6 +142,7 @@ const char* video_streaming_state = "videoStreamingState";
 const char* system_context = "systemContext";
 const char* window_name = "windowName";
 const char* window_type = "type";
+const char* window_capabilities = "windowCapabilities";
 const char* associated_service_type = "associatedServiceType";
 const char* duplicate_updates_from_window_id = "duplicateUpdatesFromWindowID";
 const char* speech_capabilities = "speechCapabilities";

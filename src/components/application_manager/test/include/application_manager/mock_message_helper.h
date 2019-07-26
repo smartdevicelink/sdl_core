@@ -331,6 +331,10 @@ class MockMessageHelper {
                    ApplicationSharedPtr application,
                    ApplicationManager& app_manager,
                    const smart_objects::SmartObject& windows_info));
+  MOCK_METHOD2(
+      CreateDisplayCapabilityUpdateToMobile,
+      smart_objects::SmartObjectSPtr(const smart_objects::SmartObject&,
+                                     application_manager::Application&));
 
   static MockMessageHelper* message_helper_mock();
 };

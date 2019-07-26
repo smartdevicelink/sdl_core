@@ -164,7 +164,7 @@ struct IsSameNickname {
   }
 
  private:
-  const custom_str::CustomString app_id_;
+  const custom_str::CustomString& app_id_;
 };
 }  // namespace
 
@@ -244,6 +244,9 @@ void RegisterAppInterfaceRequest::Run() {
     SendResponse(false, mobile_apis::Result::APPLICATION_REGISTERED_ALREADY);
     return;
   }
+  // cache the original app ID (for legacy behavior)
+  const std::string policy_app_id =
+      application_manager_.GetCorrectMobileIDFromMessage(message_);
 
   const smart_objects::SmartObject& msg_params =
       (*message_)[strings::msg_params];
@@ -828,6 +831,10 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile(
                                             application->mac_address());
   }
 
+  if (resumption) {
+    resumer.StartWaitingForDisplayCapabilitiesUpdate(application);
+  }
+
   AppHmiTypes hmi_types;
   if ((*message_)[strings::msg_params].keyExists(strings::app_hmi_type)) {
     smart_objects::SmartArray* hmi_types_ptr =
@@ -864,13 +871,13 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile(
   // Start PTU after successfull registration
   // Sends OnPermissionChange notification to mobile right after RAI response
   // and HMI level set-up
-  GetPolicyHandler().OnAppRegisteredOnMobile(application->mac_address(),
-                                             application->policy_app_id());
-
-  if (result_code != mobile_apis::Result::RESUME_FAILED) {
-    resumer.StartResumption(application, hash_id);
-  } else {
-    resumer.StartResumptionOnlyHMILevel(application);
+  GetPolicyHandler().OnAppRegisteredOnMobile(application->policy_app_id());
+  if (resumption) {
+    if (result_code != mobile_apis::Result::RESUME_FAILED) {
+      resumer.StartResumption(application, hash_id);
+    } else {
+      resumer.StartResumptionOnlyHMILevel(application);
+    }
   }
 
   // By default app subscribed to CUSTOM_BUTTON

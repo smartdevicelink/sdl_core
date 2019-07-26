@@ -30,6 +30,7 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 #include "application_manager/resumption/resume_ctrl_impl.h"
+#include "application_manager/display_capabilities_builder.h"
 
 #include <algorithm>
 #include <fstream>
@@ -241,16 +242,6 @@ void ResumeCtrlImpl::RestoreWidgetsHMIState(
                       << correlation_id << " not found");
     return;
   }
-  const auto result_code = static_cast<hmi_apis::Common_Result::eType>(
-      response_message[strings::params][hmi_response::code].asInt());
-  if (hmi_apis::Common_Result::SUCCESS != result_code) {
-    LOG4CXX_ERROR(logger_,
-                  "UI_CreateWindow for correlation id: "
-                      << correlation_id
-                      << " failed with code: " << result_code);
-    requests_msg_.erase(request);
-    return;
-  }
 
   const auto& msg_params = (*request->second)[strings::msg_params];
   const auto hmi_app_id = msg_params[strings::app_id].asInt();
@@ -261,6 +252,21 @@ void ResumeCtrlImpl::RestoreWidgetsHMIState(
     requests_msg_.erase(request);
     return;
   }
+  const WindowID window_id = msg_params[strings::window_id].asInt();
+
+  const auto result_code = static_cast<hmi_apis::Common_Result::eType>(
+      response_message[strings::params][hmi_response::code].asInt());
+  if (hmi_apis::Common_Result::SUCCESS != result_code) {
+    LOG4CXX_ERROR(logger_,
+                  "UI_CreateWindow for correlation id: "
+                      << correlation_id
+                      << " failed with code: " << result_code);
+    requests_msg_.erase(request);
+    auto& builder = application->display_capabilities_builder();
+    builder.StopWaitingForWindow(window_id);
+    return;
+  }
+
   smart_objects::SmartObject window_info(smart_objects::SmartType_Map);
   auto fill_optional_param = [&window_info,
                               &msg_params](const std::string& key) {
@@ -273,8 +279,6 @@ void ResumeCtrlImpl::RestoreWidgetsHMIState(
 
   const auto window_name = msg_params[strings::window_name].asString();
   window_info[strings::window_name] = window_name;
-
-  const WindowID window_id = msg_params[strings::window_id].asUInt();
   application->AddWindowInfo(window_id, window_info);
 
   const auto window_type = static_cast<mobile_apis::WindowType::eType>(
@@ -295,6 +299,18 @@ void ResumeCtrlImpl::RestoreWidgetsHMIState(
       application, window_id, window_type, mobile_apis::HMILevel::HMI_NONE);
 
   requests_msg_.erase(request);
+}
+
+void ResumeCtrlImpl::ProcessSystemCapabilityUpdated(
+    Application& app, const smart_objects::SmartObject& display_capabilities) {
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  auto notification = MessageHelper::CreateDisplayCapabilityUpdateToMobile(
+      display_capabilities, app);
+
+  application_manager_.GetRPCService().ManageMobileCommand(
+      notification, commands::Command::SOURCE_SDL);
+  app.set_is_resuming(false);
 }
 
 bool ResumeCtrlImpl::SetupDefaultHMILevel(ApplicationSharedPtr application) {
@@ -330,7 +346,9 @@ void ResumeCtrlImpl::ApplicationResumptiOnTimer() {
       LOG4CXX_ERROR(logger_, "Invalid app_id = " << *it);
       continue;
     }
-    StartAppHmiStateResumption(app);
+    if (!StartAppHmiStateResumption(app)) {
+      app->set_is_resuming(false);
+    }
   }
   is_resumption_active_ = false;
   waiting_for_timer_.clear();
@@ -573,18 +591,18 @@ void ResumeCtrlImpl::RetryResumption(const uint32_t app_id) {
   AddToResumptionTimerQueue(app_id);
 }
 
-void ResumeCtrlImpl::StartAppHmiStateResumption(
+bool ResumeCtrlImpl::StartAppHmiStateResumption(
     ApplicationSharedPtr application) {
   using namespace date_time;
   LOG4CXX_AUTO_TRACE(logger_);
-  DCHECK_OR_RETURN_VOID(application);
+  DCHECK_OR_RETURN(application, false);
   smart_objects::SmartObject saved_app;
   const std::string& device_mac = application->mac_address();
   const bool result = resumption_storage_->GetSavedApplication(
       application->policy_app_id(), device_mac, saved_app);
   if (!result) {
     LOG4CXX_ERROR(logger_, "Application was not saved");
-    return;
+    return false;
   }
 
   const bool is_hmi_level_applicable_to_resume =
@@ -592,7 +610,7 @@ void ResumeCtrlImpl::StartAppHmiStateResumption(
 
   if (!is_hmi_level_applicable_to_resume) {
     LOG4CXX_DEBUG(logger_, "No applicable HMI level found for resuming");
-    return;
+    return false;
   }
 
   const bool is_resume_allowed_by_low_voltage =
@@ -607,18 +625,20 @@ void ResumeCtrlImpl::StartAppHmiStateResumption(
   if (restore_hmi_level_allowed) {
     LOG4CXX_INFO(logger_,
                  "Resume application " << application->policy_app_id());
-    RestoreAppHMIState(application);
+    bool result = RestoreAppHMIState(application);
     if (mobile_apis::HMILevel::eType::INVALID_ENUM !=
         application->deferred_resumption_hmi_level()) {
       // the application has not been fully resumed
-      return;
+      return false;
     }
     RemoveApplicationFromSaved(application);
+    return result;
   } else {
     LOG4CXX_INFO(
         logger_,
         "Do not need to resume application " << application->policy_app_id());
   }
+  return true;
 }
 
 void ResumeCtrlImpl::ResetLaunchTime() {
@@ -726,6 +746,28 @@ bool ResumeCtrlImpl::RestoreApplicationData(ApplicationSharedPtr application) {
     LOG4CXX_WARN(logger_, "Application not saved");
   }
   return result;
+}
+
+void ResumeCtrlImpl::StartWaitingForDisplayCapabilitiesUpdate(
+    app_mngr::ApplicationSharedPtr application) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  smart_objects::SmartObject saved_app(smart_objects::SmartType_Map);
+  resumption_storage_->GetSavedApplication(
+      application->policy_app_id(), application->mac_address(), saved_app);
+  auto resume_callback =
+      [this](Application& app,
+             const smart_objects::SmartObject& display_capabilities) -> void {
+    LOG4CXX_AUTO_TRACE(logger_);
+    ProcessSystemCapabilityUpdated(app, display_capabilities);
+  };
+  auto& builder = application->display_capabilities_builder();
+
+  smart_objects::SmartObject windows_info(smart_objects::SmartType_Null);
+  if (saved_app.keyExists(strings::windows_info)) {
+    windows_info = saved_app[strings::windows_info];
+  }
+  builder.InitBuilder(resume_callback, windows_info);
+  application->set_is_resuming(true);
 }
 
 void ResumeCtrlImpl::AddFiles(ApplicationSharedPtr application,

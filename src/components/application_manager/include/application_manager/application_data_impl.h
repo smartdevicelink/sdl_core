@@ -35,6 +35,7 @@
 
 #include <string>
 #include "application_manager/application.h"
+#include "application_manager/display_capabilities_builder.h"
 #include "interfaces/MOBILE_API.h"
 #include "smart_objects/smart_object.h"
 #include "utils/lock.h"
@@ -251,6 +252,8 @@ class DynamicApplicationDataImpl : public virtual Application {
 
   DataAccessor<WindowParamsMap> window_optional_params_map() const;
 
+  DisplayCapabilitiesBuilder& display_capabilities_builder();
+
   /*
    * @brief Sets perform interaction state
    *
@@ -321,6 +324,7 @@ class DynamicApplicationDataImpl : public virtual Application {
   uint32_t is_perform_interaction_active_;
   bool is_reset_global_properties_active_;
   int32_t perform_interaction_mode_;
+  DisplayCapabilitiesBuilder display_capabilities_builder_;
 
  private:
   void SetGlobalProperties(

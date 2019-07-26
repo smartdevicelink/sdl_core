@@ -33,6 +33,7 @@
 #include "mobile/on_system_capability_updated_notification.h"
 
 #include "application_manager/commands/commands_test.h"
+#include "application_manager/display_capabilities_builder.h"
 #include "gtest/gtest.h"
 #include "sdl_rpc_plugin/extensions/system_capability_app_extension.h"
 #include "sdl_rpc_plugin/sdl_rpc_plugin.h"
@@ -111,6 +112,9 @@ TEST_F(
           QueryInterface(sdl_rpc_plugin::SystemCapabilityAppExtension::
                              SystemCapabilityAppExtensionUID))
       .WillByDefault(Return(system_capability_app_extension));
+  application_manager::DisplayCapabilitiesBuilder builder(*mock_app_);
+  ON_CALL(*mock_app_, display_capabilities_builder())
+      .WillByDefault(ReturnRef(builder));
 
   EXPECT_CALL(
       mock_rpc_service_,

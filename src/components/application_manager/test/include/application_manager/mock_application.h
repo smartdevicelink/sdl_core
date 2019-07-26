@@ -34,6 +34,7 @@
 #include <string>
 #include "application_manager/app_extension.h"
 #include "application_manager/application.h"
+#include "application_manager/display_capabilities_builder.h"
 #include "application_manager/hmi_state.h"
 #include "application_manager/usage_statistics.h"
 #include "gmock/gmock.h"
@@ -413,6 +414,8 @@ class MockApplication : public ::application_manager::Application {
                void((const ::application_manager::WindowID window_id)));
   MOCK_CONST_METHOD0(window_optional_params_map,
                      DataAccessor< ::application_manager::WindowParamsMap>());
+  MOCK_METHOD0(display_capabilities_builder,
+               application_manager::DisplayCapabilitiesBuilder&());
 };
 
 }  // namespace application_manager_test

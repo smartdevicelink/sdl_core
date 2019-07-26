@@ -35,6 +35,7 @@
 
 #include "application_manager/application.h"
 #include "application_manager/application_manager_impl.h"
+#include "application_manager/display_capabilities_builder.h"
 #include "application_manager/mock_app_extension.h"
 #include "application_manager/mock_application.h"
 #include "application_manager/mock_help_prompt_manager.h"
@@ -664,6 +665,9 @@ TEST_F(ResumeCtrlTest,
   const auto hmi_requests =
       smart_objects::SmartObjectList(count_of_widgets, hmi_request);
 
+  DisplayCapabilitiesBuilder builder(*mock_app_);
+  ON_CALL(*mock_app_, display_capabilities_builder())
+      .WillByDefault(ReturnRef(builder));
   EXPECT_CALL(
       *application_manager::MockMessageHelper::message_helper_mock(),
       CreateUICreateWindowRequestsToHMI(_, _, saved_app[strings::windows_info]))
@@ -692,6 +696,9 @@ TEST_F(ResumeCtrlTest,
 
   ON_CALL(mock_app_mngr_, application_by_hmi_app(kDefaultHmiAppId))
       .WillByDefault(Return(mock_app_));
+  DisplayCapabilitiesBuilder builder(*mock_app_);
+  ON_CALL(*mock_app_, display_capabilities_builder())
+      .WillByDefault(ReturnRef(builder));
 
   smart_objects::SmartObjectList requests;
   smart_objects::SmartObjectList responses;
@@ -754,6 +761,10 @@ TEST_F(ResumeCtrlTest, RestoreWidgetsHMIState_HMIResponseWith_InvalidCorrId) {
   ON_CALL(mock_app_mngr_, application_by_hmi_app(kDefaultHmiAppId))
       .WillByDefault(Return(mock_app_));
 
+  DisplayCapabilitiesBuilder builder(*mock_app_);
+  ON_CALL(*mock_app_, display_capabilities_builder())
+      .WillByDefault(ReturnRef(builder));
+
   smart_objects::SmartObjectList requests;
 
   const auto window_type = mobile_apis::WindowType::WIDGET;
@@ -795,6 +806,13 @@ TEST_F(ResumeCtrlTest, RestoreWidgetsHMIState_HMIResponseWith_Unsuccess) {
 
   ON_CALL(mock_app_mngr_, application_by_hmi_app(kDefaultHmiAppId))
       .WillByDefault(Return(mock_app_));
+
+  DisplayCapabilitiesBuilder builder(*mock_app_);
+  smart_objects::SmartObject stub_window_info(smart_objects::SmartType_Null);
+  auto stub_resume_cb = [](Application&, const smart_objects::SmartObject&) {};
+  builder.InitBuilder(stub_resume_cb, stub_window_info);
+  ON_CALL(*mock_app_, display_capabilities_builder())
+      .WillByDefault(ReturnRef(builder));
 
   smart_objects::SmartObjectList requests;
   smart_objects::SmartObjectList responses;

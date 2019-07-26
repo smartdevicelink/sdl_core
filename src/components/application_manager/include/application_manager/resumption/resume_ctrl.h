@@ -250,7 +250,7 @@ class ResumeCtrl {
    * @param application - application to restore hmi level
    * and audio streaming state
    */
-  virtual void StartAppHmiStateResumption(
+  virtual bool StartAppHmiStateResumption(
       application_manager::ApplicationSharedPtr application) = 0;
 
   /**
@@ -298,6 +298,9 @@ class ResumeCtrl {
    */
   virtual int32_t GetSavedAppHmiLevel(const std::string& app_id,
                                       const std::string& device_id) const = 0;
+
+  virtual void StartWaitingForDisplayCapabilitiesUpdate(
+      app_mngr::ApplicationSharedPtr application) = 0;
 
   virtual time_t LaunchTime() const = 0;
 

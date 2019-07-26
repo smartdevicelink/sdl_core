@@ -609,4 +609,11 @@ smart_objects::SmartObjectList MessageHelper::CreateUICreateWindowRequestsToHMI(
   return MockMessageHelper::message_helper_mock()
       ->CreateUICreateWindowRequestsToHMI(application, app_mngr, windows_info);
 }
+
+smart_objects::SmartObjectSPtr
+MessageHelper::CreateDisplayCapabilityUpdateToMobile(
+    const smart_objects::SmartObject& system_capabilities, Application& app) {
+  return MockMessageHelper::message_helper_mock()
+      ->CreateDisplayCapabilityUpdateToMobile(system_capabilities, app);
+}
 }  // namespace application_manager

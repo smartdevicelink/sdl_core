@@ -261,8 +261,9 @@ class ResumeCtrlImpl : public ResumeCtrl,
    * @brief Resume HMI Level and audio streaming state if needed
    * @param application - application to restore hmi level
    * and audio streaming state
+   * @return true if success otherwise false
    */
-  void StartAppHmiStateResumption(
+  bool StartAppHmiStateResumption(
       app_mngr::ApplicationSharedPtr application) OVERRIDE;
 
   /**
@@ -306,6 +307,9 @@ class ResumeCtrlImpl : public ResumeCtrl,
 
   int32_t GetSavedAppHmiLevel(const std::string& app_id,
                               const std::string& device_id) const OVERRIDE;
+
+  void StartWaitingForDisplayCapabilitiesUpdate(
+      app_mngr::ApplicationSharedPtr application) OVERRIDE;
 
   /**
    * @brief geter for launch_time_
@@ -601,6 +605,16 @@ class ResumeCtrlImpl : public ResumeCtrl,
    */
   mobile_apis::HMILevel::eType GetHmiLevelOnLowBandwidthTransport(
       app_mngr::ApplicationConstSharedPtr application) const;
+
+  /**
+   * @brief Constructs and sends system capability mobile notification
+   *
+   * @param app to send display capabilities updated
+   * @param display_capabilities SO containing notification data
+   */
+  void ProcessSystemCapabilityUpdated(
+      app_mngr::Application& app,
+      const smart_objects::SmartObject& display_capabilities);
 
   /**
    *@brief Mapping applications to time_stamps
