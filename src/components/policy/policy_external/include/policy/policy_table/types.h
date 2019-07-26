@@ -640,9 +640,9 @@ struct VehicleDataItem : CompositeType {
   static const std::string kName;
   static const std::string kParams;
 
-  String<0, 255> name;
+  String<1, 255> name;
   String<0, 255> type;
-  String<0, 255> key;
+  String<1, 255> key;
   Boolean mandatory;
   Optional<Array<VehicleDataItem, 0, 255> > params;
 
@@ -680,6 +680,7 @@ struct VehicleDataItem : CompositeType {
    */
   bool ValidateTypes() const;
   bool IsPrimitiveType() const;
+  bool ValidateNaming(std::string str) const;
 
  private:
   bool Validate() const;

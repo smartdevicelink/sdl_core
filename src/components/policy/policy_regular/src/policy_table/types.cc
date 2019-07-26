@@ -1832,6 +1832,11 @@ void VehicleDataItem::ReportErrors(rpc::ValidationReport* report__) const {
   if (!name.is_valid()) {
     name.ReportErrors(&report__->ReportSubobject("name"));
   }
+  if (!ValidateNaming(std::string(name))) {
+    report__->set_validation_info(
+        "Invalid name valus [" + std::string(name) +
+        "]. It should not contain spaces or invalid chars.");
+  }
   if (!type.is_valid()) {
     type.ReportErrors(&report__->ReportSubobject("type"));
   }
@@ -1841,6 +1846,11 @@ void VehicleDataItem::ReportErrors(rpc::ValidationReport* report__) const {
   }
   if (!key.is_valid()) {
     key.ReportErrors(&report__->ReportSubobject("key"));
+  }
+  if (!ValidateNaming(std::string(key))) {
+    report__->set_validation_info(
+        "Invalid key valus [" + std::string(key) +
+        "]. It should not contain spaces or invalid chars.");
   }
   if (!array.is_valid()) {
     array.ReportErrors(&report__->ReportSubobject("array"));
@@ -1898,6 +1908,33 @@ void VehicleDataItem::SetPolicyTableType(PolicyTableType pt_type) {
   maxsize.SetPolicyTableType(pt_type);
   minlength.SetPolicyTableType(pt_type);
   maxlength.SetPolicyTableType(pt_type);
+}
+
+bool VehicleDataItem::ValidateNaming(std::string str) const {
+  auto contains_spec_chars = [](std::string str) {
+    const auto invlaid_chars = "!@#$%^&*";
+    return str.npos != str.find_first_of(invlaid_chars);
+  };
+
+  auto contains_spaces = [](std::string str) {
+    const auto found_space =
+        std::find_if(str.begin(), str.end(), [](unsigned char ch) {
+          return std::isspace(ch);
+        });
+
+    return found_space != str.end();
+  };
+
+  auto empty_string = [](std::string str) {
+    str.erase(std::remove_if(str.begin(),
+                             str.end(),
+                             [](unsigned char ch) { return std::isspace(ch); }),
+              str.end());
+    return str.length() < 1;
+  };
+
+  return !empty_string(str) && !contains_spaces(str) &&
+         !contains_spec_chars(str);
 }
 
 bool VehicleDataItem::ValidateTypes() const {
