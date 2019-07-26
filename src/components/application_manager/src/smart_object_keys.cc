@@ -97,6 +97,7 @@ const char* initial_text = "initialText";
 const char* duration = "duration";
 const char* progress_indicator = "progressIndicator";
 const char* alert_type = "alertType";
+const char* alert_icon = "alertIcon";
 const char* play_tone = "playTone";
 const char* soft_buttons = "softButtons";
 const char* soft_button_id = "softButtonID";

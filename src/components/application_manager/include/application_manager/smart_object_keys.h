@@ -130,6 +130,7 @@ extern const char* initial_text;
 extern const char* duration;
 extern const char* progress_indicator;
 extern const char* alert_type;
+extern const char* alert_icon;
 extern const char* play_tone;
 extern const char* soft_buttons;
 extern const char* soft_button_id;

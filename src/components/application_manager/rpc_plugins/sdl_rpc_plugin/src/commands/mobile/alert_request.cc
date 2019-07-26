@@ -350,6 +350,23 @@ void AlertRequest::SendAlertRequest(int32_t app_id) {
     MessageHelper::SubscribeApplicationToSoftButton(
         (*message_)[strings::msg_params], app, function_id());
   }
+
+  if ((*message_)[strings::msg_params].keyExists(strings::alert_icon)) {
+    auto verification_result = MessageHelper::VerifyImage(
+        (*message_)[strings::msg_params][strings::alert_icon],
+        app,
+        application_manager_);
+
+    if (mobile_apis::Result::INVALID_DATA == verification_result) {
+      LOG4CXX_ERROR(logger_, "Image verification failed.");
+      SendResponse(false, verification_result);
+      return;
+    }
+
+    msg_params[strings::alert_icon] =
+        (*message_)[strings::msg_params][strings::alert_icon];
+  }
+
   // app_id
   msg_params[strings::app_id] = app_id;
   msg_params[strings::duration] = default_timeout_;

@@ -688,6 +688,9 @@
   <element name="locationImage">
     <description>The optional image of a destination / location</description>
   </element>
+  <element name="alertIcon">
+    <description>The image field for Alert</description>
+  </element>
 </enum>
 
 <enum name="TextAlignment">
@@ -4639,6 +4642,12 @@
     </param>
     <param name="appID" type="Integer" mandatory="true">
       <description>ID of application requested this RPC.</description>
+    </param>
+    <param name="alertIcon" type="Common.Image" mandatory="false" >
+      <description>
+        Image to be displayed for the corresponding alert. See Image. 
+        If omitted, no (or the default if applicable) icon should be displayed.
+      </description>
     </param>
   </function>
   <function name="Alert" messagetype="response">
