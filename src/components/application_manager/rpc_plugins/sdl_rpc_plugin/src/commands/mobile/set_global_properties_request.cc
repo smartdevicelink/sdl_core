@@ -250,6 +250,10 @@ void SetGlobalPropertiesRequest::Run() {
 
     auto& help_prompt_manager = app->help_prompt_manager();
     help_prompt_manager.OnSetGlobalPropertiesReceived(tts_params, false);
+  } else if (!is_ui_send_) {
+    SendResponse(false,
+                 mobile_apis::Result::INVALID_DATA,
+                 "There are no parameters present in request.");
   }
 }
 
