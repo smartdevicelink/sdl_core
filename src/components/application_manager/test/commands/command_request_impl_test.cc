@@ -452,6 +452,9 @@ TEST_F(CommandRequestImplTest, AddDisallowedParameters_SUCCESS) {
 
   CommandPtr command = CreateCommand<UCommandRequestImpl>(msg);
 
+  ON_CALL(mock_message_helper_, vehicle_data())
+      .WillByDefault(ReturnRef(vehicle_data));
+
   command->removed_parameters_permissions().disallowed_params.insert(
       kDisallowedParam1);
 
@@ -508,6 +511,9 @@ TEST_F(CommandRequestImplTest,
       kDisallowedParam1);
 
   MessageSharedPtr result;
+
+  ON_CALL(mock_message_helper_, vehicle_data())
+      .WillByDefault(ReturnRef(vehicle_data));
 
   EXPECT_CALL(mock_rpc_service_, ManageMobileCommand(_, _))
       .WillOnce(DoAll(SaveArg<0>(&result), Return(true)));
