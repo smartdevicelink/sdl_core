@@ -1246,26 +1246,27 @@ bool SQLPTRepresentation::SaveVehicleDataItems(
 bool SQLPTRepresentation::SaveVehicleData(
     const policy_table::VehicleData& vehicle_data) {
   LOG4CXX_AUTO_TRACE(logger_);
-  if (!vehicle_data.is_initialized() ||
-      !vehicle_data.schema_items.is_initialized() ||
-      !vehicle_data.schema_version.is_initialized()) {
-    LOG4CXX_DEBUG(logger_, "Vehicle data is absent in policy table.");
-    return true;
+  if (vehicle_data.is_initialized() &&
+      vehicle_data.schema_version.is_initialized()) {
+    utils::dbms::SQLQuery query(db());
+    if (!query.Prepare(sql_pt::kInsertVehicleDataSchemaVersion)) {
+      LOG4CXX_WARN(logger_,
+                   "Incorrect insert of schema_version to vehicle_data.");
+      return false;
+    }
+    query.Bind(0, *vehicle_data.schema_version);
+    if (!query.Exec() || !query.Reset()) {
+      LOG4CXX_WARN(logger_, "Failed to insert schema_version to vehicle_data.");
+      return false;
+    }
   }
 
-  utils::dbms::SQLQuery query(db());
-  if (!query.Prepare(sql_pt::kInsertVehicleDataSchemaVersion)) {
-    LOG4CXX_WARN(logger_,
-                 "Incorrect insert of schema_version to vehicle_data.");
-    return false;
-  }
-  query.Bind(0, *vehicle_data.schema_version);
-  if (!query.Exec() || !query.Reset()) {
-    LOG4CXX_WARN(logger_, "Failed to insert schema_version to vehicle_data.");
-    return false;
-  }
+  auto vehicle_data_items = vehicle_data.is_initialized() &&
+                                    vehicle_data.schema_items.is_initialized()
+                                ? *(vehicle_data.schema_items)
+                                : policy_table::VehicleDataItems();
 
-  return SaveVehicleDataItems(*vehicle_data.schema_items);
+  return SaveVehicleDataItems(vehicle_data_items);
 }
 
 bool SQLPTRepresentation::SaveAppGroup(
