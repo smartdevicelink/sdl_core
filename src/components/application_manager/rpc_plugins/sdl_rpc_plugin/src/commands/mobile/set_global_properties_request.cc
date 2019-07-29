@@ -251,9 +251,12 @@ void SetGlobalPropertiesRequest::Run() {
     auto& help_prompt_manager = app->help_prompt_manager();
     help_prompt_manager.OnSetGlobalPropertiesReceived(tts_params, false);
   } else if (!is_ui_send_) {
-    SendResponse(false,
-                 mobile_apis::Result::INVALID_DATA,
-                 "There are no parameters present in request.");
+    std::string response_info = "There are no parameters present in request.";
+    if (!is_menu_layout_available_) {
+      response_info += " The MenuLayout specified is unsupported.";
+    }
+    SendResponse(
+        false, mobile_apis::Result::INVALID_DATA, response_info.c_str());
   }
 }
 
