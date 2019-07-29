@@ -5097,6 +5097,11 @@
     <param name="appID" type="Integer" mandatory="true">
       <description>ID of application related to this RPC.</description>
     </param>
+    <param name="cancelID" type="Integer" mandatory="false">
+      <description>
+        An ID for this specific alert to allow cancellation through the `CancelInteraction` RPC.
+      </description>
+    </param>
   </function>
   <function name="ScrollableMessage" messagetype="response">
   </function>
