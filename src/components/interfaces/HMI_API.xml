@@ -535,6 +535,9 @@
   <element name="mediaTrack">
     <description>The track field of NGN and GEN1.1 MFD displays. This field is only available for media applications; applies to "Show"</description>
   </element>
+  <element name="templateTitle">
+    <description>The title of the new template that will be displayed; applies to "Show"</description>
+  </element>
   <element name="alertText1">
     <description>The first line of the alert text field; applies to "Alert"</description>
   </element>
@@ -606,7 +609,7 @@
   </element>
   <element name="timeToDestination"/>
     <!-- TO DO to be removed -->
-    <element name="turnText"/>
+  <element name="turnText"/>
 </enum>
 
 <enum name="MetadataType">
@@ -4656,12 +4659,13 @@
     </param>
   </function>
   <function name="Show" messagetype="request">
-    <param name="showStrings" type="Common.TextFieldStruct" mandatory="true" array="true" minsize="0" maxsize="7">
-      <description>Array of lines of show text fields. See TextFieldStruct. Uses mainField1, mainField2, mainField3, mainField4. If some field is not set, the corresponding text should stay unchanged. If field's text is empty "", the field must be cleared.
+    <param name="showStrings" type="Common.TextFieldStruct" mandatory="true" array="true" minsize="0" maxsize="8">
+      <description>Array of lines of show text fields. See TextFieldStruct. If some field is not set, the corresponding text should stay unchanged. If field's text is empty "", the field must be cleared.
           mainField1: The text that should be displayed in a single or upper display line.
           mainField2: The text that should be displayed on the second display line.
           mainField3: The text that should be displayed on the second "page" first display line.
           mainField4: The text that should be displayed on the second "page" second display line.
+          templateTitle: The title of the new template that will be displayed.
           statusBar: statusBar.
           mediaClock: Text value for MediaClock field.
           mediaTrack: The text that should be displayed in the track field. This field is only valid for media applications on NGN type ACMs.

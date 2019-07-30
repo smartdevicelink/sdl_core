@@ -752,7 +752,11 @@
         <element name="mediaTrack">
             <description>The track field of NGN and GEN1.1 MFD displays. This field is only available for media applications; applies to "Show"</description>
         </element>
-        
+
+        <element name="templateTitle" since="6.0">
+            <description>The title of the new template that will be displayed; applies to "Show"</description>
+        </element>
+
         <element name="alertText1">
             <description>The first line of the alert text field; applies to "Alert"</description>
         </element>
@@ -5102,9 +5106,18 @@
         </param>
         
         <param name="metadataTags" type="MetadataTags" mandatory="false" since="4.5">
-            <description>App defined metadata information. See MetadataStruct. Uses mainField1, mainField2, mainField3, mainField4.
+            <description>
+                App defined metadata information. See MetadataStruct. Uses mainField1, mainField2, mainField3, mainField4.
                 If omitted on supported displays, the currently set metadata tags will not change.
-                If any text field contains no tags or the none tag, the metadata tag for that textfield should be removed.</description>
+                If any text field contains no tags or the none tag, the metadata tag for that textfield should be removed.
+            </description>
+        </param>
+
+        <param name="templateTitle" type="String" minlength="0" maxlength="100" mandatory="false" since="6.0">
+            <description>
+                The title of the new template that will be displayed. 
+                How this will be displayed is dependent on the OEM design and implementation of the template.
+            </description>
         </param>
     </function>
     
