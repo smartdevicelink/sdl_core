@@ -49,6 +49,9 @@
                         "FULL",
                         "LIMITED"]
                     },
+                    "ShowAppMenu": {
+                        "hmi_levels": ["FULL"]
+                    },
                     "Alert": {
                         "hmi_levels": ["FULL",
                         "LIMITED"]
@@ -783,6 +786,9 @@
                         "hmi_levels": ["BACKGROUND",
                         "FULL",
                         "LIMITED"]
+                    },
+                    "ShowAppMenu": {
+                        "hmi_levels": ["FULL"]
                     },
                     "Alert": {
                         "hmi_levels": ["FULL",

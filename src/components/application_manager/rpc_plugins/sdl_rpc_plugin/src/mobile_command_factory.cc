@@ -112,6 +112,8 @@
 #include "sdl_rpc_plugin/commands/mobile/set_global_properties_response.h"
 #include "sdl_rpc_plugin/commands/mobile/set_media_clock_timer_request.h"
 #include "sdl_rpc_plugin/commands/mobile/set_media_clock_timer_response.h"
+#include "sdl_rpc_plugin/commands/mobile/show_app_menu_request.h"
+#include "sdl_rpc_plugin/commands/mobile/show_app_menu_response.h"
 #include "sdl_rpc_plugin/commands/mobile/show_constant_tbt_request.h"
 #include "sdl_rpc_plugin/commands/mobile/show_constant_tbt_response.h"
 #include "sdl_rpc_plugin/commands/mobile/show_request.h"
@@ -186,6 +188,11 @@ CommandCreator& MobileCommandFactory::get_command_creator(
       return mobile_api::messageType::request == message_type
                  ? factory.GetCreator<commands::DeleteSubMenuRequest>()
                  : factory.GetCreator<commands::DeleteSubMenuResponse>();
+    }
+    case mobile_apis::FunctionID::ShowAppMenuID: {
+      return mobile_api::messageType::request == message_type
+                 ? factory.GetCreator<commands::ShowAppMenuRequest>()
+                 : factory.GetCreator<commands::ShowAppMenuResponse>();
     }
     case mobile_apis::FunctionID::DeleteInteractionChoiceSetID: {
       return mobile_api::messageType::request == message_type
