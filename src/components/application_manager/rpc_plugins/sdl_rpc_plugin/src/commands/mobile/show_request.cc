@@ -218,6 +218,14 @@ void ShowRequest::Run() {
     HandleMetadata(strings::main_field_4, main_field_4_index, msg_params);
   }
 
+  if ((*message_)[strings::msg_params].keyExists(strings::template_title)) {
+    msg_params[hmi_request::show_strings][index][hmi_request::field_name] =
+        static_cast<int32_t>(hmi_apis::Common_TextFieldName::templateTitle);
+    msg_params[hmi_request::show_strings][index][hmi_request::field_text] =
+        (*message_)[strings::msg_params][strings::template_title];
+    ++index;
+  }
+
   if ((*message_)[strings::msg_params].keyExists(strings::media_clock)) {
     msg_params[hmi_request::show_strings][index][hmi_request::field_name] =
         static_cast<int32_t>(hmi_apis::Common_TextFieldName::mediaClock);
@@ -352,6 +360,14 @@ bool ShowRequest::CheckStringsOfShowRequest() {
     str = (*message_)[strings::msg_params][strings::main_field_1].asCharArray();
     if (strlen(str) && !CheckSyntax(str)) {
       LOG4CXX_ERROR(logger_, "Invalid main_field_1 syntax check failed");
+      return false;
+    }
+  }
+  if ((*message_)[strings::msg_params].keyExists(strings::template_title)) {
+    str =
+        (*message_)[strings::msg_params][strings::template_title].asCharArray();
+    if (strlen(str) && !CheckSyntax(str)) {
+      LOG4CXX_ERROR(logger_, "Invalid templateTitle syntax check failed");
       return false;
     }
   }

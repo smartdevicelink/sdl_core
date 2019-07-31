@@ -535,6 +535,9 @@
   <element name="mediaTrack">
     <description>The track field of NGN and GEN1.1 MFD displays. This field is only available for media applications; applies to "Show"</description>
   </element>
+  <element name="templateTitle">
+    <description>The title of the new template that will be displayed; applies to "Show"</description>
+  </element>
   <element name="alertText1">
     <description>The first line of the alert text field; applies to "Alert"</description>
   </element>
@@ -606,7 +609,7 @@
   </element>
   <element name="timeToDestination"/>
     <!-- TO DO to be removed -->
-    <element name="turnText"/>
+  <element name="turnText"/>
 </enum>
 
 <enum name="MetadataType">
@@ -687,6 +690,9 @@
   </element>
   <element name="locationImage">
     <description>The optional image of a destination / location</description>
+  </element>
+  <element name="alertIcon">
+    <description>The image field for Alert</description>
   </element>
 </enum>
 
@@ -4650,6 +4656,12 @@
         An ID for this specific alert to allow cancellation through the `CancelInteraction` RPC.
       </description>
     </param>
+    <param name="alertIcon" type="Common.Image" mandatory="false" >
+      <description>
+        Image to be displayed for the corresponding alert. See Image. 
+        If omitted, no (or the default if applicable) icon should be displayed.
+      </description>
+    </param>
   </function>
   <function name="Alert" messagetype="response">
     <param name="tryAgainTime" type="Integer" mandatory="false" minvalue="0" maxvalue="2000000000">
@@ -4657,12 +4669,13 @@
     </param>
   </function>
   <function name="Show" messagetype="request">
-    <param name="showStrings" type="Common.TextFieldStruct" mandatory="true" array="true" minsize="0" maxsize="7">
-      <description>Array of lines of show text fields. See TextFieldStruct. Uses mainField1, mainField2, mainField3, mainField4. If some field is not set, the corresponding text should stay unchanged. If field's text is empty "", the field must be cleared.
+    <param name="showStrings" type="Common.TextFieldStruct" mandatory="true" array="true" minsize="0" maxsize="8">
+      <description>Array of lines of show text fields. See TextFieldStruct. If some field is not set, the corresponding text should stay unchanged. If field's text is empty "", the field must be cleared.
           mainField1: The text that should be displayed in a single or upper display line.
           mainField2: The text that should be displayed on the second display line.
           mainField3: The text that should be displayed on the second "page" first display line.
           mainField4: The text that should be displayed on the second "page" second display line.
+          templateTitle: The title of the new template that will be displayed.
           statusBar: statusBar.
           mediaClock: Text value for MediaClock field.
           mediaTrack: The text that should be displayed in the track field. This field is only valid for media applications on NGN type ACMs.
@@ -4751,6 +4764,20 @@
     </param>
   </function>
   <function name="DeleteSubMenu" messagetype="response">
+  </function>
+  <function name="ShowAppMenu" messagetype="request">
+    <description>Request from SDL to show an app's menu or a corresponding sub-menu.</description>
+    <param name="menuID" type="Integer" minvalue="1" maxvalue="2000000000" mandatory="false">
+      <description>
+        If ommited the HMI opens the app's menu.
+        If set to a sub-menu ID the HMI opens the corresponding sub-menu previously added using `AddSubMenu`.
+      </description>
+    </param>
+    <param name="appID" type="Integer" mandatory="true">
+      <description>ID of application that concerns this RPC.</description>
+    </param>
+  </function>
+  <function name="ShowAppMenu" messagetype="response">
   </function>
   <function name="PerformInteraction" messagetype="request">
     <description>Request from SDL for triggering an interaction (e.g. "Permit GPS?" - Yes, no, Always Allow).</description>

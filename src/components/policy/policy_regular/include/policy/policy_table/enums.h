@@ -472,6 +472,11 @@ enum FunctionID {
   CloseApplicationID = 58,
 
   /**
+   * @brief ShowAppMenuID.
+   */
+  ShowAppMenuID = 59,
+
+  /**
    * @brief OnHMIStatusID.
    */
   OnHMIStatusID = 32768,
