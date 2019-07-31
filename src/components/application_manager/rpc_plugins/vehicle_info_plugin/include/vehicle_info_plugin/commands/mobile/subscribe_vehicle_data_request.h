@@ -155,6 +155,13 @@ class SubscribeVehicleDataRequest
   const std::string& ConvertRequestToResponseName(const std::string& name);
 
   /**
+   * @brief Appends data types for vehicle data in response to mobile
+   * @param msg_params 'message_parameters' response section reference
+   */
+  void AppendDataTypesToMobileResponse(
+      smart_objects::SmartObject& msg_params) const;
+
+  /**
    * @brief VI parameters which had been already subscribed by another apps
    * befor particular app subscribed for these parameters
    */

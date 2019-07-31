@@ -52,9 +52,7 @@ class Parser(RPCBase.Parser):
 
         """
 
-        if enum.name == "Common_VehicleDataType":
-            item = Model.EnumElement("OEM_SPECIFIC")
-            enum.elements["OEM_SPECIFIC"] = item
+        pass
 
     def _check_function(self, struct):
         custom_vdi_subs = [

@@ -79,6 +79,15 @@ bool CustomVehicleDataManagerImpl::ValidateVehicleDataItems(
   return true;
 }
 
+std::string CustomVehicleDataManagerImpl::GetVehicleDataItemType(
+    const std::string& vehicle_data_item_name) const {
+  LOG4CXX_AUTO_TRACE(logger_);
+  const auto& schema = FindSchemaByNameNonRecursive(vehicle_data_item_name);
+
+  return schema.is_initialized() ? std::string(schema->type)
+                                 : vehicle_data_item_name;
+}
+
 void CustomVehicleDataManagerImpl::CreateMobileMessageParams(
     smart_objects::SmartObject& msg_params) {
   using namespace application_manager;
@@ -92,8 +101,7 @@ void CustomVehicleDataManagerImpl::CreateMobileMessageParams(
   MobileMsgConstructor fill_mobile_msg =
       [this, &fill_mobile_msg](
           const smart_objects::SmartObject& input_params,
-          SearchMethod search_method =
-              SearchMethod::NON_RECURSIVE) -> smart_objects::SmartObject {
+          SearchMethod search_method) -> smart_objects::SmartObject {
     smart_objects::SmartObject out_params;
 
     const auto& items = input_params.enumerate();

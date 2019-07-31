@@ -122,7 +122,8 @@ TEST_F(UnsubscribeVehicleRequestTest,
       kVehicleTypeStr;
 
   am::VehicleData data;
-  EXPECT_CALL(mock_message_helper_, vehicle_data()).WillOnce(ReturnRef(data));
+  EXPECT_CALL(mock_message_helper_, vehicle_data())
+      .WillRepeatedly(ReturnRef(data));
 
   smart_objects::SmartObject empty_hmi_custom_params;
   ON_CALL(mock_custom_vehicle_data_manager_, CreateHMIMessageParams(_))
@@ -185,7 +186,7 @@ TEST_F(UnsubscribeVehicleRequestTest,
        Run_EmptyVehicleData_INVALID_DATA_SentToMobile) {
   am::VehicleData vehicle_data;
   EXPECT_CALL(mock_message_helper_, vehicle_data())
-      .WillOnce(ReturnRef(vehicle_data));
+      .WillRepeatedly(ReturnRef(vehicle_data));
 
   smart_objects::SmartObject empty_hmi_custom_params;
   ON_CALL(mock_custom_vehicle_data_manager_, CreateHMIMessageParams(_))
@@ -218,7 +219,7 @@ TEST_F(UnsubscribeVehicleRequestTest,
   am::VehicleData vehicle_data;
   vehicle_data.insert(am::VehicleData::value_type(kMsgParamKey, kVehicleType));
   EXPECT_CALL(mock_message_helper_, vehicle_data())
-      .WillOnce(ReturnRef(vehicle_data));
+      .WillRepeatedly(ReturnRef(vehicle_data));
   EXPECT_CALL(app_mngr_, application(kConnectionKey))
       .WillOnce(Return(mock_app_));
 
@@ -252,7 +253,7 @@ TEST_F(UnsubscribeVehicleRequestTest, Run_UnsubscribeDataDisabled_UNSUCCESS) {
   am::VehicleData vehicle_data;
   vehicle_data.insert(am::VehicleData::value_type(kMsgParamKey, kVehicleType));
   EXPECT_CALL(mock_message_helper_, vehicle_data())
-      .WillOnce(ReturnRef(vehicle_data));
+      .WillRepeatedly(ReturnRef(vehicle_data));
   EXPECT_CALL(app_mngr_, application(kConnectionKey))
       .WillOnce(Return(mock_app_));
 
@@ -326,6 +327,11 @@ TEST_F(UnsubscribeVehicleRequestTest, OnEvent_DataUnsubscribed_SUCCESS) {
   message[am::strings::params][am::hmi_response::code] = hmi_result;
   message[am::strings::msg_params][kMsgParamKey] = true;
   test_event.set_smart_object(message);
+
+  am::VehicleData vehicle_data;
+  vehicle_data.insert(am::VehicleData::value_type(kMsgParamKey, kVehicleType));
+  EXPECT_CALL(mock_message_helper_, vehicle_data())
+      .WillRepeatedly(ReturnRef(vehicle_data));
 
   EXPECT_CALL(
       mock_rpc_service_,
