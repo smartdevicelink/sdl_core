@@ -537,6 +537,11 @@ void PerformInteractionRequest::SendVRPerformInteractionRequest(
   smart_objects::SmartObject msg_params =
       smart_objects::SmartObject(smart_objects::SmartType_Map);
 
+  if ((*message_)[strings::msg_params].keyExists(strings::cancel_id)) {
+    msg_params[strings::cancel_id] =
+        (*message_)[strings::msg_params][strings::cancel_id].asInt();
+  }
+
   smart_objects::SmartObject& choice_list =
       (*message_)[strings::msg_params][strings::interaction_choice_set_id_list];
 
