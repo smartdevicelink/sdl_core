@@ -329,7 +329,7 @@ extern const char* sdl_version;
 extern const char* system_software_version;
 extern const char* priority;
 extern const char* engine_oil_life;
-extern const char* oem_specific;
+extern const char* oem_custom_data_type;
 
 // app services
 extern const char* app_service_manifest;

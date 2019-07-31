@@ -32,6 +32,9 @@ class CustomVehicleDataManagerImpl : public CustomVehicleDataManager {
   virtual smart_objects::SmartObject CreateHMIMessageParams(
       const std::set<std::string>& item_names) OVERRIDE;
 
+  std::string GetVehicleDataItemType(
+      const std::string& vehicle_data_item_name) const OVERRIDE;
+
   virtual void CreateMobileMessageParams(
       smart_objects::SmartObject& msg_params) OVERRIDE;
 

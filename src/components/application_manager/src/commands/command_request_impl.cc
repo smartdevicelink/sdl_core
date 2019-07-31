@@ -150,9 +150,10 @@ struct DisallowedParamsInserter {
 
     auto rpc_spec_vehicle_data = MessageHelper::vehicle_data();
     auto vehicle_data = rpc_spec_vehicle_data.find(param);
-    auto vehicle_data_type = vehicle_data == rpc_spec_vehicle_data.end()
-                                 ? mobile_apis::VehicleDataType::OEM_SPECIFIC
-                                 : vehicle_data->second;
+    auto vehicle_data_type =
+        vehicle_data == rpc_spec_vehicle_data.end()
+            ? mobile_apis::VehicleDataType::VEHICLEDATA_OEM_CUSTOM_DATA
+            : vehicle_data->second;
 
     (*disallowed_param)[strings::data_type] = vehicle_data_type;
     (*disallowed_param)[strings::result_code] = code_;

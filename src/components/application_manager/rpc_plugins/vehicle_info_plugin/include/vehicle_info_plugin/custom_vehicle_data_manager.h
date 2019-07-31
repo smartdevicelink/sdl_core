@@ -27,6 +27,14 @@ class CustomVehicleDataManager {
       const std::set<std::string>& item_names) = 0;
 
   /**
+   * @brief Gets data type of vehicle data item
+   * @param vehicle_data_item_name name of vehicle data
+   * @return data type of vehicle_data if one found, item name otherwise
+   */
+  virtual std::string GetVehicleDataItemType(
+      const std::string& vehicle_data_item_name) const = 0;
+
+  /**
    * @brief Creates message params (nested if needed) to be sent to Mobile
    * according to vehicle data item schema
    * @param input_params message params received from hmi

@@ -15,6 +15,8 @@ class MockCustomVehicleDataManager : public CustomVehicleDataManager {
       smart_objects::SmartObject(const std::set<std::string>& msg_params));
   MOCK_METHOD1(CreateMobileMessageParams,
                void(smart_objects::SmartObject& msg_params));
+  MOCK_CONST_METHOD1(GetVehicleDataItemType,
+                     std::string(const std::string& vehicle_data_item_name));
   MOCK_METHOD1(IsVehicleDataName, bool(const std::string& name));
   MOCK_METHOD1(IsVehicleDataKey, bool(const std::string& key));
 };

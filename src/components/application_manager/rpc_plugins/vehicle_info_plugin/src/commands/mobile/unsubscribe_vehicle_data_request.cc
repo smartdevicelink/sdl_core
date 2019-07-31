@@ -39,6 +39,7 @@
 #include "application_manager/smart_object_keys.h"
 #include "interfaces/HMI_API.h"
 #include "interfaces/MOBILE_API.h"
+#include "smart_objects/enum_schema_item.h"
 #include "utils/helpers.h"
 #include "vehicle_info_plugin/vehicle_info_app_extension.h"
 
@@ -80,32 +81,25 @@ void UnsubscribeVehicleDataRequest::Run() {
   auto rpc_spec_vehicle_data = MessageHelper::vehicle_data();
   std::set<std::string> custom_vehicle_data;
 
-  auto app_not_subscribed_response =
-      [this](const std::string& key_name,
-             const mobile_apis::VehicleDataType::eType vd_type) {
-        LOG4CXX_DEBUG(
-            logger_,
-            "App with connection key "
-                << connection_key()
-                << " is not subscribed for VehicleData: " << key_name);
-        vi_already_unsubscribed_by_this_app_.insert(key_name);
-        response_params_[key_name][strings::data_type] = vd_type;
-        response_params_[key_name][strings::result_code] =
-            mobile_apis::VehicleDataResultCode::VDRC_DATA_NOT_SUBSCRIBED;
-      };
+  auto app_not_subscribed_response = [this](const std::string& key_name) {
+    LOG4CXX_DEBUG(logger_,
+                  "App with connection key "
+                      << connection_key()
+                      << " is not subscribed for VehicleData: " << key_name);
+    vi_already_unsubscribed_by_this_app_.insert(key_name);
+    response_params_[key_name][strings::result_code] =
+        mobile_apis::VehicleDataResultCode::VDRC_DATA_NOT_SUBSCRIBED;
+  };
 
-  auto other_app_subscribed_response =
-      [this](const std::string& key_name,
-             const mobile_apis::VehicleDataType::eType vd_type) {
-        LOG4CXX_DEBUG(logger_,
-                      "There are apps still subscribed for "
-                      "VehicleDataType: "
-                          << key_name);
-        vi_still_subscribed_by_another_apps_.insert(key_name);
-        response_params_[key_name][strings::data_type] = vd_type;
-        response_params_[key_name][strings::result_code] =
-            mobile_apis::VehicleDataResultCode::VDRC_SUCCESS;
-      };
+  auto other_app_subscribed_response = [this](const std::string& key_name) {
+    LOG4CXX_DEBUG(logger_,
+                  "There are apps still subscribed for "
+                  "VehicleDataType: "
+                      << key_name);
+    vi_still_subscribed_by_another_apps_.insert(key_name);
+    response_params_[key_name][strings::result_code] =
+        mobile_apis::VehicleDataResultCode::VDRC_SUCCESS;
+  };
 
   auto& ext = VehicleInfoAppExtension::ExtractVIExtension(*app);
 
@@ -123,13 +117,8 @@ void UnsubscribeVehicleDataRequest::Run() {
 
     ++items_to_unsubscribe;
 
-    auto vehicle_data = rpc_spec_vehicle_data.find(name);
-    auto vehicle_data_type = vehicle_data == rpc_spec_vehicle_data.end()
-                                 ? VehicleDataType::OEM_SPECIFIC
-                                 : vehicle_data->second;
-
     if (!(ext.isSubscribedToVehicleInfo(name))) {
-      app_not_subscribed_response(name, vehicle_data_type);
+      app_not_subscribed_response(name);
       continue;
     }
 
@@ -140,7 +129,7 @@ void UnsubscribeVehicleDataRequest::Run() {
     ++unsubscribed_items;
 
     if (IsSomeoneSubscribedFor(name)) {
-      other_app_subscribed_response(name, vehicle_data_type);
+      other_app_subscribed_response(name);
       ext.unsubscribeFromVehicleInfo(name);
       continue;
     }
@@ -162,6 +151,7 @@ void UnsubscribeVehicleDataRequest::Run() {
     }
     return true;
   };
+  AppendDataTypesToMobileResponse(response_params_);
 
   if (0 == items_to_unsubscribe) {
     if (HasDisallowedParams() && undefined_params_valid()) {
@@ -262,6 +252,7 @@ void UnsubscribeVehicleDataRequest::on_event(const event_engine::Event& event) {
     }
   }
 
+  AppendDataTypesToMobileResponse(hmi_response_msg_params);
   for (const auto& key : hmi_response_msg_params.enumerate()) {
     response_params_[key] = hmi_response_msg_params[key];
   }
@@ -305,24 +296,13 @@ void UnsubscribeVehicleDataRequest::AddAlreadyUnsubscribedVI(
   LOG4CXX_AUTO_TRACE(logger_);
   using namespace mobile_apis;
 
-  const auto& rpc_spec_vehicle_data = MessageHelper::vehicle_data();
   for (const auto& item : vi_already_unsubscribed_by_this_app_) {
-    const auto& data_type =
-        rpc_spec_vehicle_data.end() == rpc_spec_vehicle_data.find(item)
-            ? strings::oem_specific
-            : item;
     response[item][strings::result_code] =
         VehicleDataResultCode::VDRC_DATA_NOT_SUBSCRIBED;
-    response[item][strings::data_type] = data_type;
   }
 
   for (const auto& item : vi_still_subscribed_by_another_apps_) {
-    const auto& data_type =
-        rpc_spec_vehicle_data.end() == rpc_spec_vehicle_data.find(item)
-            ? strings::oem_specific
-            : item;
     response[item][strings::result_code] = VehicleDataResultCode::VDRC_SUCCESS;
-    response[item][strings::data_type] = data_type;
   }
 }
 
@@ -381,6 +361,27 @@ const std::string& UnsubscribeVehicleDataRequest::ConvertResponseToRequestName(
   return parameter_name_converion_map.end() == converted_it
              ? name
              : converted_it->second;
+}
+
+void UnsubscribeVehicleDataRequest::AppendDataTypesToMobileResponse(
+    smart_objects::SmartObject& msg_params) const {
+  using namespace smart_objects;
+
+  std::string oem_vehicle_data_type_str;
+  EnumConversionHelper<VehicleDataType>::EnumToString(
+      VehicleDataType::VEHICLEDATA_OEM_CUSTOM_DATA, &oem_vehicle_data_type_str);
+
+  const auto& rpc_spec_vehicle_data = MessageHelper::vehicle_data();
+  for (const auto& item : msg_params.enumerate()) {
+    const auto& rpc_spec_vehicle_data_item = rpc_spec_vehicle_data.find(item);
+    if (rpc_spec_vehicle_data.end() == rpc_spec_vehicle_data_item) {
+      msg_params[item][strings::data_type] = oem_vehicle_data_type_str;
+      msg_params[item][strings::oem_custom_data_type] =
+          custom_vehicle_data_manager_.GetVehicleDataItemType(item);
+    } else {
+      msg_params[item][strings::data_type] = rpc_spec_vehicle_data_item->second;
+    }
+  }
 }
 
 }  // namespace commands

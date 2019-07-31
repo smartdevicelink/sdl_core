@@ -73,6 +73,7 @@ void SubscribeVehicleDataRequest::Run() {
       app, info, result_code, response_params, msg_params, result);
 
   if (mobile_apis::Result::INVALID_ENUM != result_code) {
+    AppendDataTypesToMobileResponse(response_params);
     SendResponse(result,
                  result_code,
                  info.empty() ? NULL : info.c_str(),
@@ -148,10 +149,33 @@ void SubscribeVehicleDataRequest::on_event(const event_engine::Event& event) {
       !vi_already_subscribed_by_this_app_.empty()) {
     AddAlreadySubscribedVI(converted_msg_params);
   }
+  AppendDataTypesToMobileResponse(converted_msg_params);
+
   SendResponse(is_succeeded,
                result_code,
                response_info.empty() ? NULL : response_info.c_str(),
                &converted_msg_params);
+}
+
+void SubscribeVehicleDataRequest::AppendDataTypesToMobileResponse(
+    smart_objects::SmartObject& msg_params) const {
+  using namespace smart_objects;
+
+  std::string oem_vehicle_data_type_str;
+  EnumConversionHelper<VehicleDataType>::EnumToString(
+      VehicleDataType::VEHICLEDATA_OEM_CUSTOM_DATA, &oem_vehicle_data_type_str);
+
+  const auto& rpc_spec_vehicle_data = MessageHelper::vehicle_data();
+  for (const auto& item : msg_params.enumerate()) {
+    const auto& rpc_spec_vehicle_data_item = rpc_spec_vehicle_data.find(item);
+    if (rpc_spec_vehicle_data.end() == rpc_spec_vehicle_data_item) {
+      msg_params[item][strings::data_type] = oem_vehicle_data_type_str;
+      msg_params[item][strings::oem_custom_data_type] =
+          custom_vehicle_data_manager_.GetVehicleDataItemType(item);
+    } else {
+      msg_params[item][strings::data_type] = rpc_spec_vehicle_data_item->second;
+    }
+  }
 }
 
 bool SubscribeVehicleDataRequest::CheckSubscriptionStatus(
@@ -204,25 +228,14 @@ void SubscribeVehicleDataRequest::AddAlreadySubscribedVI(
   LOG4CXX_AUTO_TRACE(logger_);
   using namespace mobile_apis;
 
-  const auto& rpc_spec_vehicle_data = MessageHelper::vehicle_data();
   for (const auto& item : vi_already_subscribed_by_this_app_) {
-    const auto& data_type =
-        rpc_spec_vehicle_data.end() == rpc_spec_vehicle_data.find(item)
-            ? strings::oem_specific
-            : item;
     msg_params[item][strings::result_code] =
         VehicleDataResultCode::VDRC_DATA_ALREADY_SUBSCRIBED;
-    msg_params[item][strings::data_type] = data_type;
   }
 
   for (const auto& item : vi_already_subscribed_by_another_apps_) {
-    const auto& data_type =
-        rpc_spec_vehicle_data.end() == rpc_spec_vehicle_data.find(item)
-            ? strings::oem_specific
-            : item;
     msg_params[item][strings::result_code] =
         VehicleDataResultCode::VDRC_SUCCESS;
-    msg_params[item][strings::data_type] = data_type;
   }
 }
 
@@ -335,9 +348,10 @@ void SubscribeVehicleDataRequest::CheckVISubscriptions(
       }
 
       auto vehicle_data = rpc_spec_vehicle_data.find(name);
-      auto vehicle_data_type = (vehicle_data == rpc_spec_vehicle_data.end())
-                                   ? VehicleDataType::OEM_SPECIFIC
-                                   : vehicle_data->second;
+      auto vehicle_data_type =
+          (vehicle_data == rpc_spec_vehicle_data.end())
+              ? VehicleDataType::VEHICLEDATA_OEM_CUSTOM_DATA
+              : vehicle_data->second;
       if (ext.isSubscribedToVehicleInfo(name)) {
         app_already_subscribed(name, vehicle_data_type);
       } else if (IsSomeoneSubscribedFor(name)) {

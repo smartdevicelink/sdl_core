@@ -34,6 +34,7 @@
 
 #include "gtest/gtest.h"
 
+#include "smart_objects/enum_schema_item.h"
 #include "smart_objects/smart_object.h"
 #include "vehicle_info_plugin/commands/vi_command_request_test.h"
 
@@ -79,9 +80,14 @@ TEST_F(VIUnsubscribeVehicleDataRequestTest, Run_Success) {
   ON_CALL(mock_message_helper_, vehicle_data())
       .WillByDefault(ReturnRef(vehicle_data));
 
+  std::string oem_vehicle_data_type_str;
+  smart_objects::EnumConversionHelper<mobile_apis::VehicleDataType::eType>::
+      EnumToString(mobile_apis::VehicleDataType::VEHICLEDATA_OEM_CUSTOM_DATA,
+                   &oem_vehicle_data_type_str);
+
   smart_objects::SmartObject hmi_params;
   hmi_params[kHMIParam] = smart_objects::SmartType_Map;
-  hmi_params[kHMIParam][strings::data_type] = strings::oem_specific;
+  hmi_params[kHMIParam][strings::data_type] = oem_vehicle_data_type_str;
   ON_CALL(mock_custom_vehicle_data_manager_, CreateHMIMessageParams(_))
       .WillByDefault(Return(hmi_params));
 

@@ -146,6 +146,13 @@ class UnsubscribeVehicleDataRequest
    */
   const std::string& ConvertResponseToRequestName(const std::string& name);
 
+  /**
+   * @brief Appends data types for vehicle data in response to mobile
+   * @param msg_params 'message_parameters' response section reference
+   */
+  void AppendDataTypesToMobileResponse(
+      smart_objects::SmartObject& msg_params) const;
+
   bool CheckSubscriptionStatus(std::string key,
                                const smart_objects::SmartObject& msg_params);
 

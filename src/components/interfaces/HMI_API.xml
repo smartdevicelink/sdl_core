@@ -1160,6 +1160,7 @@
   <element name="VEHICLEDATA_ENGINEOILLIFE" />
   <element name="VEHICLEDATA_ELECTRONICPARKBRAKESTATUS" />
   <element name="VEHICLEDATA_CLOUDAPPVEHICLEID" />
+  <element name="VEHICLEDATA_OEM_CUSTOM_DATA" />
 </enum>
 
 <enum name="WiperStatus">
