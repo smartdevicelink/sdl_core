@@ -149,6 +149,7 @@ template <class Q>
 MessageLoopThread<Q>::~MessageLoopThread() {
   Shutdown();
   threads::DeleteThread(thread_);
+  thread_ = NULL;
   delete thread_delegate_;
 }
 
