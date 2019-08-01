@@ -441,10 +441,12 @@ HMICapabilitiesImpl::HMICapabilitiesImpl(ApplicationManager& app_mngr)
     , is_phone_call_supported_(false)
     , is_video_streaming_supported_(false)
     , is_rc_supported_(false)
+    , is_driver_distraction_supported_(false)
     , navigation_capability_(NULL)
     , phone_capability_(NULL)
     , video_streaming_capability_(NULL)
     , rc_capability_(NULL)
+    , driver_distraction_capability_(NULL)
     , app_mngr_(app_mngr)
     , hmi_language_handler_(app_mngr) {
   InitCapabilities();
@@ -709,6 +711,11 @@ void HMICapabilitiesImpl::set_rc_supported(const bool supported) {
   is_rc_supported_ = supported;
 }
 
+void HMICapabilitiesImpl::set_driver_distraction_supported(
+    const bool supported) {
+  is_driver_distraction_supported_ = supported;
+}
+
 void HMICapabilitiesImpl::set_navigation_capability(
     const smart_objects::SmartObject& navigation_capability) {
   if (navigation_capability_) {
@@ -741,6 +748,15 @@ void HMICapabilitiesImpl::set_rc_capability(
     delete rc_capability_;
   }
   rc_capability_ = new smart_objects::SmartObject(rc_capability);
+}
+
+void HMICapabilitiesImpl::set_driver_distraction_capability(
+    const smart_objects::SmartObject& driver_distraction_capability) {
+  if (driver_distraction_capability_) {
+    delete driver_distraction_capability_;
+  }
+  driver_distraction_capability_ =
+      new smart_objects::SmartObject(driver_distraction_capability);
 }
 
 void HMICapabilitiesImpl::Init(resumption::LastState* last_state) {
@@ -866,6 +882,10 @@ bool HMICapabilitiesImpl::rc_supported() const {
   return is_rc_supported_;
 }
 
+bool HMICapabilitiesImpl::driver_distraction_supported() const {
+  return is_driver_distraction_supported_;
+}
+
 const smart_objects::SmartObject* HMICapabilitiesImpl::navigation_capability()
     const {
   return navigation_capability_;
@@ -883,6 +903,11 @@ HMICapabilitiesImpl::video_streaming_capability() const {
 
 const smart_objects::SmartObject* HMICapabilitiesImpl::rc_capability() const {
   return rc_capability_;
+}
+
+const smart_objects::SmartObject*
+HMICapabilitiesImpl::driver_distraction_capability() const {
+  return driver_distraction_capability_;
 }
 
 bool HMICapabilitiesImpl::load_capabilities_from_file() {
@@ -1235,6 +1260,18 @@ bool HMICapabilitiesImpl::load_capabilities_from_file() {
           set_rc_capability(rc_capability_so);
           if (!rc_capability_so.empty()) {
             set_rc_supported(true);
+          }
+        }
+        if (check_existing_json_member(system_capabilities,
+                                       "driverDistractionCapability")) {
+          Json::Value driver_distraction_capability =
+              system_capabilities.get("driverDistractionCapability", "");
+          smart_objects::SmartObject driver_distraction_capability_so;
+          formatters::CFormatterJsonBase::jsonValueToObj(
+              driver_distraction_capability, driver_distraction_capability_so);
+          set_driver_distraction_capability(driver_distraction_capability_so);
+          if (!driver_distraction_capability_so.empty()) {
+            set_driver_distraction_supported(true);
           }
         }
       }

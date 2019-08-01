@@ -152,6 +152,17 @@ void GetSystemCapabilityRequest::Run() {
                              all_services);
       break;
     }
+    case mobile_apis::SystemCapabilityType::DRIVER_DISTRACTION:
+      if (hmi_capabilities.driver_distraction_capability() &&
+          hmi_capabilities.driver_distraction_supported()) {
+        response_params[strings::system_capability]
+                       [strings::driver_distraction_capability] =
+                           *hmi_capabilities.driver_distraction_capability();
+      } else {
+        SendResponse(false, mobile_apis::Result::DATA_NOT_AVAILABLE);
+        return;
+      }
+      break;
     default:  // Return unsupported resource
       SendResponse(false, mobile_apis::Result::UNSUPPORTED_RESOURCE);
       return;

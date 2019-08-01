@@ -113,6 +113,17 @@ void UIGetCapabilitiesResponse::Run() {
           msg_params[strings::system_capabilities]
                     [strings::video_streaming_capability]);
     }
+    if (msg_params[strings::system_capabilities].keyExists(
+            strings::driver_distraction_capability)) {
+      if (!msg_params[strings::system_capabilities]
+                     [strings::driver_distraction_capability]
+                         .empty()) {
+        hmi_capabilities.set_driver_distraction_capability(
+            msg_params[strings::system_capabilities]
+                      [strings::driver_distraction_capability]);
+        hmi_capabilities.set_driver_distraction_supported(true);
+      }
+    }
   }
 }
 

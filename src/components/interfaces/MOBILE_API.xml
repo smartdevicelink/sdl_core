@@ -2876,6 +2876,7 @@
         <element name="VIDEO_STREAMING"/>
         <element name="REMOTE_CONTROL"/>
         <element name="APP_SERVICES" since="5.1"/>
+        <element name="DRIVER_DISTRACTION" since="6.0"/>
     </enum>
     
     <struct name="NavigationCapability" since="4.5">
@@ -4196,6 +4197,15 @@
     </struct>
 
     <!-- End App Services -->
+
+    <struct name="DriverDistractionCapability" since="6.0">
+        <param name="menuLength" type="Integer" mandatory="false">
+            <description>The number of items allowed in a Choice Set or Command menu while the driver is distracted</description>
+        </param>
+        <param name="subMenuDepth" type="Integer" minvalue="1" mandatory="false">
+            <description>The depth of submenus allowed when the driver is distracted. e.g. 3 == top level menu -> submenu -> submenu; 1 == top level menu only</description>
+        </param>
+    </struct>
     
     <struct name="SystemCapability" since="4.5">
         <description>The systemCapabilityType identifies which data object exists in this struct. For example, if the SystemCapability Type is NAVIGATION then a "navigationCapability" should exist</description>
@@ -4216,6 +4226,9 @@
         </param>
         <param name="appServicesCapabilities" type="AppServicesCapabilities" mandatory="false" since="5.1">
             <description>An array of currently available services. If this is an update to the capability the affected services will include an update reason in that item</description>
+        </param>
+        <param name="driverDistractionCapability" type="DriverDistractionCapability" mandatory="false" since="6.0">
+            <description>Describes capabilities when the driver is distracted</description>
         </param>
     </struct>
 
@@ -4686,6 +4699,13 @@
         <param name="menuIcon" type="Image" mandatory="false" since="5.0">
             <description>The image field for AddSubMenu</description>
         </param>
+
+        <param name="parentID" type="Integer" minvalue="0" maxvalue="2000000000" defvalue="0" mandatory="false" since="6.0">
+            <description>
+                unique ID of the sub menu, the command will be added to.
+                If not provided, it will be provided to the top level of the in application menu.
+            </description>
+        </param>        
     </function>
     
     <function name="AddSubMenu" functionID="AddSubMenuID" messagetype="response" since="1.0">

@@ -154,7 +154,8 @@ class DynamicApplicationDataImpl : public virtual Application {
   /*
    * @brief Returns true if sub menu with such name already exist
    */
-  bool IsSubMenuNameAlreadyExist(const std::string& name);
+  bool IsSubMenuNameAlreadyExist(const std::string& name,
+                                 const int32_t parent_id);
 
   /*
    * @brief Adds a interaction choice set to the application

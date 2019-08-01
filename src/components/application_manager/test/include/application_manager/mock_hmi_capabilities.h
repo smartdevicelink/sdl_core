@@ -163,6 +163,9 @@ class MockHMICapabilities : public ::application_manager::HMICapabilities {
   MOCK_CONST_METHOD0(rc_supported, bool());
   MOCK_METHOD1(set_rc_supported, void(const bool supported));
 
+  MOCK_CONST_METHOD0(driver_distraction_supported, bool());
+  MOCK_METHOD1(set_driver_distraction_supported, void(const bool supported));
+
   MOCK_CONST_METHOD0(navigation_capability,
                      const smart_objects::SmartObject*());
   MOCK_METHOD1(set_navigation_capability,
@@ -180,6 +183,12 @@ class MockHMICapabilities : public ::application_manager::HMICapabilities {
   MOCK_CONST_METHOD0(rc_capability, const smart_objects::SmartObject*());
   MOCK_METHOD1(set_rc_capability,
                void(const smart_objects::SmartObject& rc_capability));
+
+  MOCK_CONST_METHOD0(driver_distraction_capability,
+                     const smart_objects::SmartObject*());
+  MOCK_METHOD1(
+      set_driver_distraction_capability,
+      void(const smart_objects::SmartObject& driver_distraction_capability));
 
   MOCK_METHOD1(Init, void(resumption::LastState* last_state));
 
