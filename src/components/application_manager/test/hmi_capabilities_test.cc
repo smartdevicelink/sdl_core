@@ -602,21 +602,25 @@ TEST_F(HMICapabilitiesTest,
       std::make_shared<HMICapabilitiesForTesting>(mock_app_mngr);
   hmi_capabilities->Init(&last_state_);
 
-  // with old audio pass thru format, the object is a map
+  // with old audio pass thru format, the object is an array containing a single
+  // object
   smart_objects::SmartObject audio_pass_thru_capabilities_so =
       *(hmi_capabilities->audio_pass_thru_capabilities());
-  EXPECT_TRUE(audio_pass_thru_capabilities_so.keyExists("samplingRate"));
+  EXPECT_EQ(smart_objects::SmartType_Array,
+            audio_pass_thru_capabilities_so.getType());
+  EXPECT_EQ(1u, audio_pass_thru_capabilities_so.length());
+  EXPECT_TRUE(audio_pass_thru_capabilities_so[0].keyExists("samplingRate"));
   EXPECT_EQ(hmi_apis::Common_SamplingRate::RATE_22KHZ,
             static_cast<hmi_apis::Common_SamplingRate::eType>(
-                audio_pass_thru_capabilities_so["samplingRate"].asInt()));
-  EXPECT_TRUE(audio_pass_thru_capabilities_so.keyExists("bitsPerSample"));
+                audio_pass_thru_capabilities_so[0]["samplingRate"].asInt()));
+  EXPECT_TRUE(audio_pass_thru_capabilities_so[0].keyExists("bitsPerSample"));
   EXPECT_EQ(hmi_apis::Common_BitsPerSample::RATE_16_BIT,
             static_cast<hmi_apis::Common_BitsPerSample::eType>(
-                audio_pass_thru_capabilities_so["bitsPerSample"].asInt()));
-  EXPECT_TRUE(audio_pass_thru_capabilities_so.keyExists("audioType"));
+                audio_pass_thru_capabilities_so[0]["bitsPerSample"].asInt()));
+  EXPECT_TRUE(audio_pass_thru_capabilities_so[0].keyExists("audioType"));
   EXPECT_EQ(hmi_apis::Common_AudioType::PCM,
             static_cast<hmi_apis::Common_AudioType::eType>(
-                audio_pass_thru_capabilities_so["audioType"].asInt()));
+                audio_pass_thru_capabilities_so[0]["audioType"].asInt()));
 }
 
 TEST_F(HMICapabilitiesTest, VerifyImageType) {

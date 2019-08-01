@@ -1066,20 +1066,16 @@ bool HMICapabilitiesImpl::load_capabilities_from_file() {
       if (check_existing_json_member(ui, "audioPassThruCapabilities")) {
         Json::Value audio_capabilities =
             ui.get("audioPassThruCapabilities", "");
-        smart_objects::SmartObject audio_capabilities_so;
+        smart_objects::SmartObject audio_capabilities_so(
+            smart_objects::SmartType_Array);
         if (audio_capabilities.type() == Json::arrayValue) {
-          audio_capabilities_so =
-              smart_objects::SmartObject(smart_objects::SmartType_Array);
           for (uint32_t i = 0; i < audio_capabilities.size(); i++) {
             convert_audio_capability_to_obj(audio_capabilities[i],
                                             audio_capabilities_so[i]);
           }
         } else if (audio_capabilities.type() == Json::objectValue) {
-          // old format which supports only one capability set
-          audio_capabilities_so =
-              smart_objects::SmartObject(smart_objects::SmartType_Map);
           convert_audio_capability_to_obj(audio_capabilities,
-                                          audio_capabilities_so);
+                                          audio_capabilities_so[0]);
         }
         set_audio_pass_thru_capabilities(audio_capabilities_so);
       }
