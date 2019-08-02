@@ -135,19 +135,27 @@ smart_objects::SmartObject SDLGetPolicyConfigurationDataRequest::GetValueParam(
     const Json::Value& policy_property) const {
   LOG4CXX_AUTO_TRACE(logger_);
   smart_objects::SmartObject value(smart_objects::SmartType_Array);
-  Json::FastWriter writer;
+
+  auto put_element_in_value_array = [&value](const Json::Value& element,
+                                             const int32_t index) {
+    Json::FastWriter writer;
+    std::string str;
+    if (element.type() == Json::objectValue) {
+      str = writer.write(element);
+      clear_new_line_symbol(str);
+    } else {
+      str = element.asString();
+    }
+    value[index] = str;
+  };
 
   if (policy_property.type() == Json::arrayValue) {
     for (Json::ArrayIndex i = 0; i < policy_property.size(); i++) {
-      std::string element = writer.write(policy_property[i]);
-      clear_new_line_symbol(element);
-      value[i] = element;
+      put_element_in_value_array(policy_property[i], i);
     }
     return value;
   }
-  std::string object_str = writer.write(policy_property);
-  clear_new_line_symbol(object_str);
-  value[0] = object_str;
+  put_element_in_value_array(policy_property, 0);
   return value;
 }
 
