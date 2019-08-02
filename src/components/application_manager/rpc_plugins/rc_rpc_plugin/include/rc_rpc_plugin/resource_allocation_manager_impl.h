@@ -134,6 +134,13 @@ class ResourceAllocationManagerImpl : public ResourceAllocationManager {
       const std::string& module_id,
       const uint32_t application_id) FINAL;
 
+  void SetResourceAcquired(const std::string& module_type,
+                           const std::string& module_id,
+                           const uint32_t app_id) FINAL;
+
+  bool IsResourceAlreadyAcquiredByApp(const rc_rpc_plugin::ModuleUid& moduleUid,
+                                      const uint32_t app_id) const FINAL;
+
  private:
   typedef std::vector<application_manager::ApplicationSharedPtr> Apps;
 
@@ -202,16 +209,6 @@ class ResourceAllocationManagerImpl : public ResourceAllocationManager {
    */
   void RemoveAppsSubscriptions(const Apps& apps);
 
-  /**
-   * @brief SetResourceAquired mark resourse as aquired and process logic of
-   * changing state of aquired resources
-   * @param module_type resource name
-   * @param module_id uuid of a resource
-   * @param app applicastion that aquire resource
-   */
-  void SetResourceAquired(const std::string& module_type,
-                          const std::string& module_id,
-                          const uint32_t app_id);
   /**
    * @brief SetResourceFree mark resourse as free and process logic of
    * changing state of aquired resources

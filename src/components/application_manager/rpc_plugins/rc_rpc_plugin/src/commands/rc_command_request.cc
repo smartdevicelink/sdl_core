@@ -277,8 +277,6 @@ void RCCommandRequest::ProcessConsentResult(const bool is_allowed,
                                             const uint32_t app_id) {
   LOG4CXX_AUTO_TRACE(logger_);
   if (is_allowed) {
-    resource_allocation_manager_.ForceAcquireResource(
-        module_type, module_id, app_id);
     SetResourceState(module_type, ResourceState::BUSY);
     Execute();  // run child's logic
   } else {

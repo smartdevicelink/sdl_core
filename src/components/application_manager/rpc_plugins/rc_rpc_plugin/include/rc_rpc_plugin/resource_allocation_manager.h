@@ -211,6 +211,31 @@ class ResourceAllocationManager {
       const std::string& module_id,
       const uint32_t application_id) = 0;
 
+  /**
+   * @brief SetResourceAquired mark resourse as aquired and process logic of
+   * changing state of aquired resources
+   * @param module_type resource name
+   * @param module_id uuid of a resource
+   * @param app applicastion that aquire resource
+   */
+  virtual void SetResourceAcquired(const std::string& module_type,
+                                   const std::string& module_id,
+                                   const uint32_t app_id) = 0;
+
+  /**
+   * @brief Checks if specific resource is already aquired by specific
+   * application
+   * @param moduleUid Module resurce (module type + module ID)
+   * @param app_id Application ID which try to aquire resource
+   * @return true In case when resource is already aquired by specific
+   * application
+   * @return false In case when isn't aquired by specific
+   * application
+   */
+  virtual bool IsResourceAlreadyAcquiredByApp(
+      const rc_rpc_plugin::ModuleUid& moduleUid,
+      const uint32_t app_id) const = 0;
+
   virtual ~ResourceAllocationManager() {}
 };
 

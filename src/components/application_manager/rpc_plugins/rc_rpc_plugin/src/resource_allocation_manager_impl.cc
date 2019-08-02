@@ -85,7 +85,6 @@ AcquireResult::eType ResourceAllocationManagerImpl::AcquireResource(
   const AllocatedResources::const_iterator allocated_it =
       allocated_resources_.find(module);
   if (allocated_resources_.end() == allocated_it) {
-    SetResourceAquired(module_type, module_id, app_id);
     LOG4CXX_DEBUG(logger_,
                   "Resource is not acquired yet. "
                       << "App: " << app_id << " is allowed to acquire "
@@ -147,8 +146,6 @@ AcquireResult::eType ResourceAllocationManagerImpl::AcquireResource(
                     "Current access_mode is AUTO_ALLOW. "
                         << "App: " << app_id << " is allowed to acquire "
                         << module_type << " " << module_id);
-
-      SetResourceAquired(module_type, module_id, app_id);
       return AcquireResult::ALLOWED;
     }
     default: { DCHECK_OR_RETURN(false, AcquireResult::IN_USE); }
@@ -313,18 +310,6 @@ ResourceAllocationManagerImpl::CreateOnRCStatusNotificationToHmi(
   return msg_to_hmi;
 }
 
-void ResourceAllocationManagerImpl::SetResourceAquired(
-    const std::string& module_type,
-    const std::string& module_id,
-    const uint32_t app_id) {
-  LOG4CXX_AUTO_TRACE(logger_);
-  ModuleUid module(module_type, module_id);
-  allocated_resources_[module] = app_id;
-  SendOnRCStatusNotifications(
-      NotificationTrigger::MODULE_ALLOCATION,
-      std::shared_ptr<application_manager::Application>());
-}
-
 void ResourceAllocationManagerImpl::SendOnRCStatusNotifications(
     NotificationTrigger::eType event,
     application_manager::ApplicationSharedPtr application) {
@@ -370,6 +355,44 @@ ResourceReleasedState::eType ResourceAllocationManagerImpl::ReleaseResource(
                 "Release " << module_type << " " << module_id << " by "
                            << application_id);
   return SetResourceFree(module_type, module_id, application_id);
+}
+
+void ResourceAllocationManagerImpl::SetResourceAcquired(
+    const std::string& module_type,
+    const std::string& module_id,
+    const uint32_t app_id) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  ModuleUid module(module_type, module_id);
+  allocated_resources_[module] = app_id;
+}
+
+bool ResourceAllocationManagerImpl::IsResourceAlreadyAcquiredByApp(
+    const ModuleUid& moduleUid, const uint32_t app_id) const {
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  auto allocation = allocated_resources_.find(moduleUid);
+
+  if (allocated_resources_.end() == allocation) {
+    LOG4CXX_DEBUG(logger_,
+                  "Resource " << moduleUid.first
+                              << " is not allocated for any application.");
+    return false;
+  }
+
+  if (allocation->second != app_id) {
+    LOG4CXX_DEBUG(logger_,
+                  "Resource "
+                      << moduleUid.first
+                      << " is already allocated by app:" << allocation->second
+                      << ". Asquire has been asked for app:" << app_id);
+    return false;
+  }
+
+  LOG4CXX_DEBUG(logger_,
+                "Resource " << moduleUid.first
+                            << " is allocated by app:" << allocation->second);
+
+  return true;
 }
 
 ResourceReleasedState::eType ResourceAllocationManagerImpl::SetResourceFree(
@@ -504,7 +527,7 @@ void ResourceAllocationManagerImpl::ForceAcquireResource(
     const uint32_t app_id) {
   LOG4CXX_DEBUG(logger_, "Force " << app_id << " acquiring " << module_type);
   sync_primitives::AutoLock lock(allocated_resources_lock_);
-  SetResourceAquired(module_type, module_id, app_id);
+  SetResourceAcquired(module_type, module_id, app_id);
 }
 
 bool ResourceAllocationManagerImpl::IsModuleTypeRejected(

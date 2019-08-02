@@ -81,6 +81,13 @@ class MockResourceAllocationManager
                    const std::string& module_type,
                    const std::string& module_id,
                    const uint32_t application_id));
+  MOCK_METHOD3(SetResourceAcquired,
+               void(const std::string& module_type,
+                    const std::string& module_id,
+                    const uint32_t app_id));
+  MOCK_CONST_METHOD2(IsResourceAlreadyAcquiredByApp,
+                     bool(const rc_rpc_plugin::ModuleUid& moduleUid,
+                          const uint32_t app_id));
 };
 
 }  // namespace rc_rpc_plugin_test
