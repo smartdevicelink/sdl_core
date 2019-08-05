@@ -118,8 +118,6 @@ TEST_F(SDLGetPolicyConfigurationDataRequestTest, Run_Success) {
   std::shared_ptr<SDLGetPolicyConfigurationDataRequest> command(
       CreateCommand<SDLGetPolicyConfigurationDataRequest>(msg));
 
-  PolicyTable pt;
-
   policy_table::ModuleConfig module_config_with_endpoints;
   policy_table::URLList endpoint_url_list;
   policy_table::URL urls;
@@ -128,10 +126,15 @@ TEST_F(SDLGetPolicyConfigurationDataRequestTest, Run_Success) {
   endpoint_url_list["default"] = urls;
   module_config_with_endpoints.endpoints["0x9"] = endpoint_url_list;
 
+  PolicyTable pt;
+  pt.mark_initialized();
+  pt.module_config.mark_initialized();
+  pt.module_config = module_config_with_endpoints;
+
   ON_CALL(mock_policy_handler_, GetPolicyTableData())
       .WillByDefault(Return(pt.ToJsonValue()));
 
-  auto json_val = endpoint_url_list.ToJsonValue();
+  auto json_val = module_config_with_endpoints.endpoints.ToJsonValue();
   Json::FastWriter writer;
   std::string expected_string = writer.write(json_val);
   clear_new_line_symbol(expected_string);
