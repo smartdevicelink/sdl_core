@@ -52,7 +52,9 @@ namespace hmi_response = ::app_mngr::hmi_response;
 class SDLGetPolicyConfigurationDataRequestTest
     : public CommandRequestTest<CommandsTestMocks::kIsNice> {};
 
-MATCHER_P(GetPolicyConfigurationDataMatchesJson, json_value, "") {
+MATCHER_P(GetPolicyConfigurationDataFirstElementMatches,
+          string_first_element_value,
+          "") {
   auto message = static_cast<smart_objects::SmartObject>(*arg);
   if (!message.keyExists(strings::msg_params) ||
       !message[strings::msg_params].keyExists(strings::value)) {
@@ -67,17 +69,9 @@ MATCHER_P(GetPolicyConfigurationDataMatchesJson, json_value, "") {
 
   Json::Reader reader;
   Json::Value msg_json_value(Json::ValueType::arrayValue);
-  auto msg_value_array = message[strings::msg_params][strings::value].asArray();
-  auto msg_value_array_it = msg_value_array->begin();
-  auto msg_value_array_end = msg_value_array->end();
-  for (; msg_value_array_it != msg_value_array_end; ++msg_value_array_it) {
-    Json::Value item(Json::objectValue);
-    auto msg_value_item = msg_value_array_it->asString();
-    reader.parse(msg_value_item, item);
-    msg_json_value.append(item);
-  }
 
-  return msg_json_value == json_value;
+  auto msg_value_first = message[strings::msg_params][strings::value][0];
+  return msg_value_first.asString() == string_first_element_value;
 }
 
 MATCHER_P(HMIResultCodeIs, result_code, "") {
@@ -108,6 +102,14 @@ TEST_F(SDLGetPolicyConfigurationDataRequestTest, Run_Fail_DataNotAvailable) {
   command->Run();
 }
 
+void clear_new_line_symbol(std::string& str_to_clear) {
+  str_to_clear.erase(
+      std::remove_if(str_to_clear.begin(),
+                     str_to_clear.end(),
+                     [](char character) { return '\n' == character; }),
+      str_to_clear.end());
+}
+
 TEST_F(SDLGetPolicyConfigurationDataRequestTest, Run_Success) {
   MessageSharedPtr msg = CreateMessage();
   (*msg)[strings::msg_params][strings::policy_type] = "module_config";
@@ -115,8 +117,6 @@ TEST_F(SDLGetPolicyConfigurationDataRequestTest, Run_Success) {
 
   std::shared_ptr<SDLGetPolicyConfigurationDataRequest> command(
       CreateCommand<SDLGetPolicyConfigurationDataRequest>(msg));
-
-  PolicyTable pt;
 
   policy_table::ModuleConfig module_config_with_endpoints;
   policy_table::URLList endpoint_url_list;
@@ -126,19 +126,49 @@ TEST_F(SDLGetPolicyConfigurationDataRequestTest, Run_Success) {
   endpoint_url_list["default"] = urls;
   module_config_with_endpoints.endpoints["0x9"] = endpoint_url_list;
 
+  PolicyTable pt;
+  pt.mark_initialized();
+  pt.module_config.mark_initialized();
   pt.module_config = module_config_with_endpoints;
-  Json::Value value_json(Json::ValueType::arrayValue);
-  Json::Value endpoints_json =
-      module_config_with_endpoints.endpoints.ToJsonValue();
-  value_json.append(endpoints_json);
 
   ON_CALL(mock_policy_handler_, GetPolicyTableData())
       .WillByDefault(Return(pt.ToJsonValue()));
 
-  EXPECT_CALL(
-      mock_rpc_service_,
-      ManageHMICommand(GetPolicyConfigurationDataMatchesJson(value_json),
-                       Command::SOURCE_SDL_TO_HMI));
+  auto json_val = module_config_with_endpoints.endpoints.ToJsonValue();
+  Json::FastWriter writer;
+  std::string expected_string = writer.write(json_val);
+  clear_new_line_symbol(expected_string);
+
+  EXPECT_CALL(mock_rpc_service_,
+              ManageHMICommand(GetPolicyConfigurationDataFirstElementMatches(
+                                   expected_string),
+                               Command::SOURCE_SDL_TO_HMI));
+  command->Run();
+}
+
+TEST_F(SDLGetPolicyConfigurationDataRequestTest,
+       Run_RetriveStringValueFromPolicy) {
+  MessageSharedPtr msg = CreateMessage();
+  (*msg)[strings::msg_params][strings::policy_type] =
+      "consumer_friendly_messages";
+  (*msg)[strings::msg_params][strings::property] = "version";
+
+  auto command = CreateCommand<SDLGetPolicyConfigurationDataRequest>(msg);
+
+  const std::string version_test_value("version string");
+  PolicyTable pt;
+  pt.mark_initialized();
+  pt.consumer_friendly_messages->mark_initialized();
+  pt.consumer_friendly_messages->version =
+      rpc::String<1, 100>(version_test_value);
+
+  ON_CALL(mock_policy_handler_, GetPolicyTableData())
+      .WillByDefault(Return(pt.ToJsonValue()));
+
+  EXPECT_CALL(mock_rpc_service_,
+              ManageHMICommand(GetPolicyConfigurationDataFirstElementMatches(
+                                   version_test_value),
+                               Command::SOURCE_SDL_TO_HMI));
 
   command->Run();
 }
