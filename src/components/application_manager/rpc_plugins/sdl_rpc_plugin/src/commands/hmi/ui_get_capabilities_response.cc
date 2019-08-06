@@ -78,8 +78,19 @@ void UIGetCapabilitiesResponse::Run() {
     hmi_capabilities.set_audio_pass_thru_capabilities(
         msg_params[strings::audio_pass_thru_capabilities_list]);
   } else if (msg_params.keyExists(strings::audio_pass_thru_capabilities)) {
-    hmi_capabilities.set_audio_pass_thru_capabilities(
-        msg_params[strings::audio_pass_thru_capabilities]);
+    const smart_objects::SmartObject& audio_pass_thru_capabilities =
+        msg_params[strings::audio_pass_thru_capabilities];
+    if (smart_objects::SmartType_Array ==
+        audio_pass_thru_capabilities.getType()) {
+      hmi_capabilities.set_audio_pass_thru_capabilities(
+          audio_pass_thru_capabilities);
+    } else {
+      smart_objects::SmartObject audio_pass_thru_capabilities_list(
+          smart_objects::SmartType_Array);
+      audio_pass_thru_capabilities_list[0] = audio_pass_thru_capabilities;
+      hmi_capabilities.set_audio_pass_thru_capabilities(
+          audio_pass_thru_capabilities_list);
+    }
   }
 
   if (msg_params.keyExists(strings::hmi_capabilities)) {
