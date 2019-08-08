@@ -1425,7 +1425,7 @@ bool RegisterAppInterfaceRequest::GetDataOnSessionKey(
   if (result) {
     LOG4CXX_DEBUG(
         logger_,
-        "Failed get device info for connection key: " << connection_key());
+        "Failed to get device info for connection key: " << connection_key());
     return false;
   }
 
