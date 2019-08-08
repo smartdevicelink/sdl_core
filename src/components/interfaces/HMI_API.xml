@@ -4734,7 +4734,7 @@
     <param name="appID" type="Integer" mandatory="true">
       <description>ID of application that requested this RPC.</description>
     </param>
-    <param name="menuLayout" type="Common.MenuLayout" defvalue="LIST" mandatory="false">
+    <param name="menuLayout" type="Common.MenuLayout" mandatory="false">
       <description>Sets the layout of the submenu screen.</description>
     </param>
   </function>
@@ -4834,7 +4834,7 @@
     <param name="appID" type="Integer" mandatory="true">
       <description>ID of application that concerns this RPC.</description>
     </param>
-    <param name="menuLayout" type="Common.MenuLayout" defvalue="LIST" mandatory="false">
+    <param name="menuLayout" type="Common.MenuLayout" mandatory="false">
       <description>Sets the layout of the main menu screen. If this is sent while a menu is already on-screen, the head unit will change the display to the new layout type.</description>
     </param>
   </function>

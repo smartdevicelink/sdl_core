@@ -4501,7 +4501,7 @@
             <description>On-screen keyboard configuration (if available).</description>
         </param>
 
-        <param name="menuLayout" type="MenuLayout" defvalue="LIST" mandatory="false" since="6.0">
+        <param name="menuLayout" type="MenuLayout" mandatory="false" since="6.0">
             <description>Sets the layout of the main menu screen. If this is sent while a menu is already on-screen, the head unit will change the display to the new layout type.</description>
         </param>
     </function>
@@ -4680,7 +4680,7 @@
             <description>The image field for AddSubMenu</description>
         </param>
 
-        <param name="menuLayout" type="MenuLayout" defvalue="LIST" mandatory="false" since="6.0">
+        <param name="menuLayout" type="MenuLayout" mandatory="false" since="6.0">
             <description>Sets the layout of the submenu screen.</description>
         </param>
     </function>
