@@ -202,6 +202,18 @@ void ShowRequest::ApplyTemplateConfigurationForApp(
           template_config_[strings::template_layout].asString();
       LOG4CXX_DEBUG(logger_, "New layout : " << new_layout << " is applied");
       app.set_window_layout(current_window_id_, new_layout);
+
+      if (template_config_.keyExists(strings::day_color_scheme)) {
+        app.set_day_color_scheme(current_window_id_,
+                                 template_config_[strings::day_color_scheme]);
+      }
+
+      if (template_config_.keyExists(strings::night_color_scheme)) {
+        app.set_night_color_scheme(
+            current_window_id_, template_config_[strings::night_color_scheme]);
+      }
+
+      return;
     }
 
     if (dcs_change_required_) {

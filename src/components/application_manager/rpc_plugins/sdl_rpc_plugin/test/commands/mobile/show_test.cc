@@ -1209,8 +1209,8 @@ TEST_F(ShowRequestTest, OnEvent_SuccessResultCode_ExpectSetWindowLayoutOnly) {
   // Expectation
   EXPECT_CALL(*mock_app_,
               set_window_layout(kCurrentWindowID, kNewTemplateLayout));
-  EXPECT_CALL(*mock_app_, set_day_color_scheme(_, _)).Times(0);
-  EXPECT_CALL(*mock_app_, set_night_color_scheme(_, _)).Times(0);
+  EXPECT_CALL(*mock_app_, set_day_color_scheme(_, _));
+  EXPECT_CALL(*mock_app_, set_night_color_scheme(_, _));
   EXPECT_CALL(mock_rpc_service_,
               ManageMobileCommand(
                   CheckMessageToMobile(mobile_apis::Result::SUCCESS, true),
@@ -1242,7 +1242,7 @@ TEST_F(ShowRequestTest,
   EXPECT_CALL(*mock_app_,
               set_day_color_scheme(kCurrentWindowID,
                                    CreateColorScheme(kCurrentDayColorRGB)));
-  EXPECT_CALL(*mock_app_, set_night_color_scheme(_, _)).Times(0);
+  EXPECT_CALL(*mock_app_, set_night_color_scheme(_, _));
   EXPECT_CALL(mock_rpc_service_,
               ManageMobileCommand(
                   CheckMessageToMobile(mobile_apis::Result::SUCCESS, true),
