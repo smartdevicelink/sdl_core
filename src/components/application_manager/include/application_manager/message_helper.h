@@ -720,6 +720,23 @@ class MessageHelper {
    * @param app current application
    *
    * @param function_id Unique command id from mobile API
+   *
+   * @param window_id window id containing soft buttons
+   */
+  static void SubscribeApplicationToSoftButton(
+      smart_objects::SmartObject& message_params,
+      ApplicationSharedPtr app,
+      int32_t function_id,
+      const WindowID window_id);
+
+  /*
+   * @brief subscribe application to softbutton
+   *
+   * @param message_params contains data of request
+   *
+   * @param app current application
+   *
+   * @param function_id Unique command id from mobile API
    */
   static void SubscribeApplicationToSoftButton(
       smart_objects::SmartObject& message_params,

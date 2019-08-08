@@ -409,6 +409,16 @@ mobile_apis::Result::eType MessageHelper::ProcessSoftButtons(
 void MessageHelper::SubscribeApplicationToSoftButton(
     smart_objects::SmartObject& message_params,
     ApplicationSharedPtr app,
+    int32_t function_id,
+    const WindowID window_id) {
+  return MockMessageHelper::message_helper_mock()
+      ->SubscribeApplicationToSoftButton(
+          message_params, app, function_id, window_id);
+}
+
+void MessageHelper::SubscribeApplicationToSoftButton(
+    smart_objects::SmartObject& message_params,
+    ApplicationSharedPtr app,
     int32_t function_id) {
   return MockMessageHelper::message_helper_mock()
       ->SubscribeApplicationToSoftButton(message_params, app, function_id);

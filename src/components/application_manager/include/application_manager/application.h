@@ -170,7 +170,7 @@ typedef std::map<uint32_t, PerformChoice> PerformChoiceSetMap;
 /**
  * @brief Defines id of SoftButton
  */
-typedef std::set<uint32_t> SoftButtonID;
+typedef std::set<std::pair<uint32_t, WindowID> > SoftButtonID;
 
 /**
  * @brief Defines set of buttons subscription
@@ -917,6 +917,13 @@ class Application : public virtual InitialApplicationData,
    */
   virtual void SubscribeToSoftButtons(int32_t cmd_id,
                                       const SoftButtonID& softbuttons_id) = 0;
+
+  /**
+   * @brief Retreives window id on which given button is created
+   * @param button_id identifier of a button
+   * @param window id of a widget containing button
+   */
+  virtual WindowID GetSoftButtonWindowID(const uint32_t button_id) = 0;
 
   /**
    * @brief Determine the existence of softbutton

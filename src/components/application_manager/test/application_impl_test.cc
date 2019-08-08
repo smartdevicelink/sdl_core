@@ -573,7 +573,9 @@ TEST_F(ApplicationImplTest, SubscribeToSoftButton_UnsubscribeFromSoftButton) {
 
   SoftButtonID test_button;
   for (uint i = 0; i < btn_count; i++) {
-    test_button.insert(i);
+    test_button.insert(std::make_pair(
+        i,
+        static_cast<WindowID>(mobile_apis::PredefinedWindows::DEFAULT_WINDOW)));
   }
   app_impl->SubscribeToSoftButtons(FunctionID::ScrollableMessageID,
                                    test_button);

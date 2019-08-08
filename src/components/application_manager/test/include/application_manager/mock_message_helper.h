@@ -225,6 +225,11 @@ class MockMessageHelper {
                    ApplicationConstSharedPtr app,
                    const policy::PolicyHandlerInterface& policy_handler,
                    ApplicationManager& app_mngr));
+  MOCK_METHOD4(SubscribeApplicationToSoftButton,
+               void(smart_objects::SmartObject& message_params,
+                    ApplicationSharedPtr app,
+                    int32_t function_id,
+                    const application_manager::WindowID window_id));
   MOCK_METHOD3(SubscribeApplicationToSoftButton,
                void(smart_objects::SmartObject& message_params,
                     ApplicationSharedPtr app,

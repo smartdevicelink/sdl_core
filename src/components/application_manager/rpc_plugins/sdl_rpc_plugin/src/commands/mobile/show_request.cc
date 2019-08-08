@@ -408,7 +408,7 @@ void ShowRequest::Run() {
       app->UnsubscribeFromSoftButtons(function_id());
     } else {
       MessageHelper::SubscribeApplicationToSoftButton(
-          (*message_)[strings::msg_params], app, function_id());
+          (*message_)[strings::msg_params], app, function_id(), window_id());
     }
   }
 

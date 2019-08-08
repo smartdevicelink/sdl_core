@@ -1116,19 +1116,56 @@ void ApplicationImpl::SubscribeToSoftButtons(
       cmd_softbuttonid_[cmd_id] = softbuttons_id;
     }
   } else {
-    cmd_softbuttonid_[cmd_id] = softbuttons_id;
+    auto& soft_button_ids = cmd_softbuttonid_[cmd_id];
+    for (auto& softbutton_item : softbuttons_id) {
+      soft_button_ids.insert(softbutton_item);
+    }
   }
 }
 
+struct FindSoftButtonId {
+  uint32_t soft_button_id_;
+
+  FindSoftButtonId(const uint32_t soft_button_id)
+      : soft_button_id_(soft_button_id) {}
+
+  bool operator()(const std::pair<uint32_t, WindowID>& element) {
+    return soft_button_id_ == element.first;
+  }
+};
+
 bool ApplicationImpl::IsSubscribedToSoftButton(const uint32_t softbutton_id) {
+  LOG4CXX_AUTO_TRACE(logger_);
   sync_primitives::AutoLock lock(cmd_softbuttonid_lock_);
   CommandSoftButtonID::iterator it = cmd_softbuttonid_.begin();
   for (; it != cmd_softbuttonid_.end(); ++it) {
-    if ((it->second).find(softbutton_id) != (it->second).end()) {
+    const auto& soft_button_ids = (*it).second;
+    FindSoftButtonId finder(softbutton_id);
+    const auto find_res =
+        std::find_if(soft_button_ids.begin(), soft_button_ids.end(), finder);
+    if ((soft_button_ids.end() != find_res)) {
       return true;
     }
   }
   return false;
+}
+
+WindowID ApplicationImpl::GetSoftButtonWindowID(const uint32_t softbutton_id) {
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  sync_primitives::AutoLock lock(cmd_softbuttonid_lock_);
+  CommandSoftButtonID::iterator it = cmd_softbuttonid_.begin();
+  for (; it != cmd_softbuttonid_.end(); ++it) {
+    const auto& soft_button_ids = (*it).second;
+    FindSoftButtonId finder(softbutton_id);
+    const auto find_res =
+        std::find_if(soft_button_ids.begin(), soft_button_ids.end(), finder);
+    if ((soft_button_ids.end() != find_res)) {
+      return find_res->second;
+    }
+  }
+
+  return mobile_apis::PredefinedWindows::DEFAULT_WINDOW;
 }
 
 void ApplicationImpl::UnsubscribeFromSoftButtons(int32_t cmd_id) {

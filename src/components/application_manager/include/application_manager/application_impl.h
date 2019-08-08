@@ -231,6 +231,8 @@ class ApplicationImpl : public virtual Application,
   bool IsSubscribedToButton(mobile_apis::ButtonName::eType btn_name);
   bool UnsubscribeFromButton(mobile_apis::ButtonName::eType btn_name);
 
+  WindowID GetSoftButtonWindowID(const uint32_t button_id) OVERRIDE;
+
   inline bool IsRegistered() const OVERRIDE;
 
   /**

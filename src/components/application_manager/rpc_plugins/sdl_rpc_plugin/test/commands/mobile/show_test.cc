@@ -77,6 +77,8 @@ const rgb_color_scheme kCurrentDayColorRGB = {75, 75, 75};
 const rgb_color_scheme kCurrentNightColorRGB = {200, 200, 200};
 const rgb_color_scheme kNewDayColorRGB = {80, 80, 80};
 const rgb_color_scheme kNewNightColorRGB = {222, 222, 222};
+const am::WindowID kDefaultWindowId =
+    mobile_apis::PredefinedWindows::DEFAULT_WINDOW;
 }  // namespace
 
 MATCHER_P2(CheckMessageToMobile, result_code, success, "") {
@@ -383,9 +385,9 @@ TEST_F(ShowRequestTest, Run_SoftButtonExists_SUCCESS) {
   msg_params[am::hmi_request::show_strings] =
       smart_objects::SmartObject(smart_objects::SmartType_Array);
 
-  EXPECT_CALL(
-      mock_message_helper_,
-      SubscribeApplicationToSoftButton(creation_msg_params, _, kFunctionID));
+  EXPECT_CALL(mock_message_helper_,
+              SubscribeApplicationToSoftButton(
+                  creation_msg_params, _, kFunctionID, kDefaultWindowId));
   EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_, _));
   EXPECT_CALL(*mock_app_, set_show_command(msg_params));
 
@@ -433,7 +435,8 @@ TEST_F(ShowRequestTest, Run_SoftButtonExists_Canceled) {
 
   EXPECT_CALL(*mock_app_, app_id()).Times(0);
 
-  EXPECT_CALL(mock_message_helper_, SubscribeApplicationToSoftButton(_, _, _))
+  EXPECT_CALL(mock_message_helper_,
+              SubscribeApplicationToSoftButton(_, _, _, kDefaultWindowId))
       .Times(0);
   EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_, _)).Times(0);
   EXPECT_CALL(*mock_app_, set_show_command(_)).Times(0);

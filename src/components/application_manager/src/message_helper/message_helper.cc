@@ -3106,15 +3106,30 @@ mobile_apis::Result::eType MessageHelper::ProcessSoftButtons(
 void MessageHelper::SubscribeApplicationToSoftButton(
     smart_objects::SmartObject& message_params,
     ApplicationSharedPtr app,
-    int32_t function_id) {
+    int32_t function_id,
+    const WindowID window_id) {
   SoftButtonID softbuttons_id;
   smart_objects::SmartObject& soft_buttons =
       message_params[strings::soft_buttons];
   unsigned int length = soft_buttons.length();
   for (unsigned int i = 0; i < length; ++i) {
-    softbuttons_id.insert(soft_buttons[i][strings::soft_button_id].asUInt());
+    const auto button_id = std::make_pair(
+        soft_buttons[i][strings::soft_button_id].asUInt(), window_id);
+    softbuttons_id.insert(button_id);
   }
   app->SubscribeToSoftButtons(function_id, softbuttons_id);
+}
+
+void MessageHelper::SubscribeApplicationToSoftButton(
+    smart_objects::SmartObject& message_params,
+    ApplicationSharedPtr app,
+    int32_t function_id) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  SubscribeApplicationToSoftButton(
+      message_params,
+      app,
+      function_id,
+      mobile_apis::PredefinedWindows::DEFAULT_WINDOW);
 }
 
 bool MessageHelper::PrintSmartObject(const smart_objects::SmartObject& object) {
