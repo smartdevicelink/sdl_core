@@ -4077,7 +4077,7 @@
       <param name="vrSynonyms" type="String" maxlength="40" minsize="1" maxsize="100" array="true" mandatory="false">
         <description>
           Defines an additional voice recognition command.
-          Must not interfere with any name of previously registered applications(SDL makes check).
+          Must not interfere with any name of previously registered applications from the same device.
         </description>
       </param>
       <param name="resumeVrGrammars" type="Boolean" mandatory="false">
@@ -4462,7 +4462,7 @@
       <description>
         Request new VR synonyms registration
         Defines an additional voice recognition command.
-        Must not interfere with any name of previously registered applications(SDL makes check).
+        Must not interfere with any name of previously registered applications from the same device.
       </description>
     </param>
     <param name="language" type="Common.Language" mandatory="true">
