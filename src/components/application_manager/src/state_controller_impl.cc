@@ -1087,7 +1087,7 @@ void StateControllerImpl::OnAppActivated(
 
   WindowID window_id = mobile_apis::PredefinedWindows::DEFAULT_WINDOW;
   if (message[strings::msg_params].keyExists(strings::window_id)) {
-    window_id = message[strings::msg_params][strings::window_id].asUInt();
+    window_id = message[strings::msg_params][strings::window_id].asInt();
   }
 
   const auto window_ids = app->GetWindowIds();
@@ -1128,7 +1128,7 @@ void StateControllerImpl::OnAppDeactivated(
 
   WindowID window_id = mobile_apis::PredefinedWindows::DEFAULT_WINDOW;
   if (message[strings::msg_params].keyExists(strings::window_id)) {
-    window_id = message[strings::msg_params][strings::window_id].asUInt();
+    window_id = message[strings::msg_params][strings::window_id].asInt();
   }
 
   const auto window_ids = app->GetWindowIds();

@@ -1,4 +1,4 @@
-﻿/*
+/*
  Copyright (c) 2014, Ford Motor Company
  All rights reserved.
 
@@ -99,7 +99,7 @@ int32_t CommandImpl::function_id() const {
 WindowID CommandImpl::window_id() const {
   if ((*message_).keyExists(strings::msg_params)) {
     if ((*message_)[strings::msg_params].keyExists(strings::window_id)) {
-      return (*message_)[strings::msg_params][strings::window_id].asUInt();
+      return (*message_)[strings::msg_params][strings::window_id].asInt();
     }
   }
   return mobile_apis::PredefinedWindows::DEFAULT_WINDOW;

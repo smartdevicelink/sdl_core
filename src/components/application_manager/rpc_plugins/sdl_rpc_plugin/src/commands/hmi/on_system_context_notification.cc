@@ -64,7 +64,7 @@ void OnSystemContextNotification::Run() {
 
   WindowID window_id = mobile_apis::PredefinedWindows::DEFAULT_WINDOW;
   if ((*message_)[strings::msg_params].keyExists(strings::window_id)) {
-    window_id = (*message_)[strings::msg_params][strings::window_id].asUInt();
+    window_id = (*message_)[strings::msg_params][strings::window_id].asInt();
   }
 
   ApplicationSharedPtr app;

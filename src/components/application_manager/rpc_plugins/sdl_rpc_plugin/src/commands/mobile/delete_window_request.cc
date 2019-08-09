@@ -56,7 +56,7 @@ DeleteWindowRequest::~DeleteWindowRequest() {}
 bool DeleteWindowRequest::CheckWindowId(
     app_mngr::ApplicationSharedPtr app) const {
   const WindowID window_id =
-      (*message_)[strings::msg_params][strings::window_id].asUInt();
+      (*message_)[strings::msg_params][strings::window_id].asInt();
   if (mobile_apis::PredefinedWindows::DEFAULT_WINDOW == window_id) {
     LOG4CXX_ERROR(logger_, "Main application window can't be deleted");
     return false;
@@ -78,7 +78,7 @@ app_mngr::WindowID DeleteWindowRequest::window_id() const {
 void DeleteWindowRequest::DeleteWindow(
     app_mngr::ApplicationSharedPtr app) const {
   const WindowID window_id =
-      (*message_)[strings::msg_params][strings::window_id].asUInt();
+      (*message_)[strings::msg_params][strings::window_id].asInt();
   app->RemoveWindowInfo(window_id);
   app->RemoveHMIState(window_id, HmiState::StateID::STATE_ID_REGULAR);
 }

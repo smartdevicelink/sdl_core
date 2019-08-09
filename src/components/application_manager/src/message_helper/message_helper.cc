@@ -3146,7 +3146,7 @@ WindowID MessageHelper::ExtractWindowIdFromSmartObject(
     const smart_objects::SmartObject& s_map) {
   if (smart_objects::SmartType_Map == s_map.getType()) {
     if (s_map.keyExists(strings::window_id)) {
-      return s_map[strings::window_id].asUInt();
+      return s_map[strings::window_id].asInt();
     }
   }
   return mobile_apis::PredefinedWindows::DEFAULT_WINDOW;

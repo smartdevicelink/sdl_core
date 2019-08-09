@@ -419,7 +419,7 @@ void ShowRequest::Run() {
 
   if ((*message_)[strings::msg_params].keyExists(strings::window_id)) {
     const auto window_id =
-        (*message_)[strings::msg_params][strings::window_id].asUInt();
+        (*message_)[strings::msg_params][strings::window_id].asInt();
     if (!app->WindowIdExists(window_id)) {
       LOG4CXX_ERROR(logger_,
                     "Window with id #" << window_id << " does not exist");
