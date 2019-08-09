@@ -670,7 +670,7 @@ DynamicApplicationDataImpl::window_optional_params_map() const {
                                        window_params_map_lock_ptr_);
 }
 
-void DynamicApplicationDataImpl::AddWindowInfo(
+void DynamicApplicationDataImpl::SetWindowInfo(
     const WindowID window_id, const smart_objects::SmartObject& window_info) {
   LOG4CXX_AUTO_TRACE(logger_);
   const auto it = window_params_map_.find(window_id);

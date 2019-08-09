@@ -1,4 +1,4 @@
-﻿/*
+/*
  Copyright (c) 2019, Ford Motor Company
  All rights reserved.
 
@@ -118,7 +118,7 @@ void CreateWindowRequest::ApplyWindowInitialState(
 
   window_info[strings::window_name] = window_name;
 
-  app->AddWindowInfo(window_id, window_info);
+  app->SetWindowInfo(window_id, window_info);
 
   app->SetInitialState(window_id, window_name, initial_state);
 

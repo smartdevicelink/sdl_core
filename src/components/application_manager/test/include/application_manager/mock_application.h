@@ -407,7 +407,7 @@ class MockApplication : public ::application_manager::Application {
                void(const mobile_apis::HybridAppPreference::eType&
                         hybrid_app_preference));
   MOCK_METHOD1(set_cloud_app_certificate, void(const std::string& certificate));
-  MOCK_METHOD2(AddWindowInfo,
+  MOCK_METHOD2(SetWindowInfo,
                void(const ::application_manager::WindowID windowID,
                     const smart_objects::SmartObject& window_info));
   MOCK_METHOD1(RemoveWindowInfo,

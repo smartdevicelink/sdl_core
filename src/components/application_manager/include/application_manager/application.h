@@ -368,7 +368,7 @@ class DynamicApplicationData {
    * @param window_id unique id of a window
    * @param window_info SmartObject that represent window info
    */
-  virtual void AddWindowInfo(const WindowID window_id,
+  virtual void SetWindowInfo(const WindowID window_id,
                              const smart_objects::SmartObject& window_info) = 0;
 
   /*

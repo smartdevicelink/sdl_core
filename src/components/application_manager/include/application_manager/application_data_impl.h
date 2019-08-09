@@ -180,7 +180,7 @@ class DynamicApplicationDataImpl : public virtual Application {
    */
   bool IsSubMenuNameAlreadyExist(const std::string& name);
 
-  void AddWindowInfo(const WindowID window_id,
+  void SetWindowInfo(const WindowID window_id,
                      const smart_objects::SmartObject& window_info) OVERRIDE;
 
   void RemoveWindowInfo(const WindowID window_id) OVERRIDE;

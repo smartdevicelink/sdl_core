@@ -279,7 +279,7 @@ void ResumeCtrlImpl::RestoreWidgetsHMIState(
 
   const auto window_name = msg_params[strings::window_name].asString();
   window_info[strings::window_name] = window_name;
-  application->AddWindowInfo(window_id, window_info);
+  application->SetWindowInfo(window_id, window_info);
 
   const auto window_type = static_cast<mobile_apis::WindowType::eType>(
       msg_params[strings::window_type].asInt());
