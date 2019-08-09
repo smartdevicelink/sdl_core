@@ -157,6 +157,17 @@ bool policy::CheckAppPolicy::HasRevokedGroups(
                       std::back_inserter(revoked_group_list),
                       CompareStrings);
 
+  // Remove groups which are not required user consent
+  policy_table::Strings::iterator it_revoked = revoked_group_list.begin();
+  for (; revoked_group_list.end() != it_revoked;) {
+    if (!IsConsentRequired(app_policy.first, std::string(*it_revoked))) {
+      revoked_group_list.erase(it_revoked);
+      it_revoked = revoked_group_list.begin();
+    } else {
+      ++it_revoked;
+    }
+  }
+
   if (revoked_groups) {
     *revoked_groups = revoked_group_list;
   }
@@ -493,7 +504,7 @@ PermissionsCheckResult CheckAppPolicy::CheckPermissionsChanges(
   } else if (has_consent_needed_groups) {
     return RESULT_CONSENT_NEEDED;
   } else if (has_new_groups) {
-    return RESULT_CONSENT_NOT_REQIURED;
+    return RESULT_CONSENT_NOT_REQUIRED;
   } else if (encryption_required_flag_changed) {
     return RESULT_ENCRYPTION_REQUIRED_FLAG_CHANGED;
   }
@@ -686,7 +697,7 @@ void FillActionsForAppPolicies::operator()(
     case RESULT_PERMISSIONS_REVOKED_AND_CONSENT_NEEDED:
       actions_[app_id].is_consent_needed = true;
       break;
-    case RESULT_CONSENT_NOT_REQIURED:
+    case RESULT_CONSENT_NOT_REQUIRED:
     case RESULT_PERMISSIONS_REVOKED:
     case RESULT_REQUEST_TYPE_CHANGED:
     case RESULT_REQUEST_SUBTYPE_CHANGED:

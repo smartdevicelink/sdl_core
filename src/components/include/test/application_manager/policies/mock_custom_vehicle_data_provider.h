@@ -1,7 +1,7 @@
 #ifndef MOCK_CUSTOM_VEHICLE_DATA_MANAGER_H
 #define MOCK_CUSTOM_VEHICLE_DATA_MANAGER_H
 
-#include "application_manager/policies/custom_vehicle_data_povider.h"
+#include "application_manager/policies/custom_vehicle_data_provider.h"
 #include "gmock/gmock.h"
 
 namespace test {

@@ -217,16 +217,16 @@ class SQLPTRepresentation : public virtual PTRepresentation {
 
   /**
    * @brief Retrieves vehicle data items of type Struct (which contains
-   * params) from the database includeing these parameters.
-   * @return Array of parametrised VehicleDataItems (including params)
+   * params) from the database including these parameters.
+   * @return Array of composite VehicleDataItems
    */
-  policy_table::VehicleDataItems SelectParameterizedVehicleDataItems() const;
+  policy_table::VehicleDataItems SelectCompositeVehicleDataItems() const;
 
   /**
    * @brief Retrieves vehicle data items of non Struct type from the database.
-   * @return Array of parameterised VehicleDataItems (including params)
+   * @return Array of primitive VehicleDataItems
    */
-  policy_table::VehicleDataItems SelectNonParameterizedVehicleDataItems() const;
+  policy_table::VehicleDataItems SelectPrimitiveVehicleDataItems() const;
 
  private:
   static const std::string kDatabaseName;

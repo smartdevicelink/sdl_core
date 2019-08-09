@@ -131,7 +131,7 @@ void SubscribeVehicleDataRequest::on_event(const event_engine::Event& event) {
       const auto& converted_name = ConvertResponseToRequestName(param);
       if (vi_waiting_for_subscribe_.end() ==
           vi_waiting_for_subscribe_.find(converted_name)) {
-        LOG4CXX_DEBUG(logger_, "eraze " << converted_name);
+        LOG4CXX_DEBUG(logger_, "erase " << converted_name);
         converted_msg_params.erase(param);
       }
     }
@@ -395,26 +395,26 @@ void SubscribeVehicleDataRequest::CheckVISubscriptions(
 
 const std::string& SubscribeVehicleDataRequest::ConvertResponseToRequestName(
     const std::string& name) {
-  static std::map<std::string, std::string> parameter_name_converion_map = {
+  static std::map<std::string, std::string> parameter_name_conversion_map = {
       {strings::cluster_modes, strings::cluster_mode_status}};
-  const auto converted_it = parameter_name_converion_map.find(name);
-  auto result = parameter_name_converion_map.end() == converted_it
+  const auto converted_it = parameter_name_conversion_map.find(name);
+  auto result = parameter_name_conversion_map.end() == converted_it
                     ? name
                     : converted_it->second;
-  return parameter_name_converion_map.end() == converted_it
+  return parameter_name_conversion_map.end() == converted_it
              ? name
              : converted_it->second;
 }
 
 const std::string& SubscribeVehicleDataRequest::ConvertRequestToResponseName(
     const std::string& name) {
-  static std::map<std::string, std::string> parameter_name_converion_map = {
+  static std::map<std::string, std::string> parameter_name_conversion_map = {
       {strings::cluster_mode_status, strings::cluster_modes}};
-  const auto converted_it = parameter_name_converion_map.find(name);
-  auto result = parameter_name_converion_map.end() == converted_it
+  const auto converted_it = parameter_name_conversion_map.find(name);
+  auto result = parameter_name_conversion_map.end() == converted_it
                     ? name
                     : converted_it->second;
-  return parameter_name_converion_map.end() == converted_it
+  return parameter_name_conversion_map.end() == converted_it
              ? name
              : converted_it->second;
 }

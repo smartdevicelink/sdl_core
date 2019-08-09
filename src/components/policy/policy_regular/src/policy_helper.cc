@@ -436,14 +436,14 @@ bool CheckAppPolicy::operator()(const AppPoliciesValueType& app_policy) {
         snapshot_app_policy_begin, snapshot_app_policy_end, find_app);
 
     if ((snapshot_app_policy_end != app) &&
-        (RESULT_CONSENT_NOT_REQIURED != result)) {
+        (RESULT_CONSENT_NOT_REQUIRED != result)) {
       SetPendingPermissions(*app, result);
       AddResult(app_id, RESULT_CONSENT_NEEDED);
     }
     return true;
   }
 
-  if (RESULT_CONSENT_NOT_REQIURED != result) {
+  if (RESULT_CONSENT_NOT_REQUIRED != result) {
     SetPendingPermissions(app_policy, result);
     AddResult(app_id, RESULT_CONSENT_NEEDED);
   }
@@ -524,7 +524,7 @@ policy::PermissionsCheckResult policy::CheckAppPolicy::CheckPermissionsChanges(
   } else if (has_consent_needed_groups) {
     return RESULT_CONSENT_NEEDED;
   } else if (has_new_groups) {
-    return RESULT_CONSENT_NOT_REQIURED;
+    return RESULT_CONSENT_NOT_REQUIRED;
   } else if (encryption_required_flag_changed) {
     return RESULT_ENCRYPTION_REQUIRED_FLAG_CHANGED;
   }
@@ -704,7 +704,7 @@ void FillActionsForAppPolicies::operator()(
     case RESULT_PERMISSIONS_REVOKED_AND_CONSENT_NEEDED:
       actions_[app_id].is_consent_needed = true;
       break;
-    case RESULT_CONSENT_NOT_REQIURED:
+    case RESULT_CONSENT_NOT_REQUIRED:
     case RESULT_PERMISSIONS_REVOKED:
     case RESULT_REQUEST_TYPE_CHANGED:
     case RESULT_REQUEST_SUBTYPE_CHANGED:

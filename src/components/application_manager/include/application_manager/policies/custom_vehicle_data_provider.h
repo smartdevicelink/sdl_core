@@ -1,5 +1,5 @@
-#ifndef CUSTOM_VEHICLE_DATA_POVIDER_H
-#define CUSTOM_VEHICLE_DATA_POVIDER_H
+#ifndef CUSTOM_VEHICLE_DATA_PROVIDER_H
+#define CUSTOM_VEHICLE_DATA_PROVIDER_H
 
 #include <vector>
 
@@ -22,4 +22,4 @@ class VehicleDataItemProvider {
 };
 }  // namespace policy
 
-#endif  // CUSTOM_VEHICLE_DATA_POVIDER_H
+#endif  // CUSTOM_VEHICLE_DATA_PROVIDER_H

@@ -46,7 +46,7 @@
 #include "application_manager/policies/policy_handler_interface.h"
 #include "application_manager/policies/policy_handler_observer.h"
 
-#include "application_manager/policies/custom_vehicle_data_povider.h"
+#include "application_manager/policies/custom_vehicle_data_provider.h"
 #include "policy/policy_manager.h"
 #include "policy/policy_settings.h"
 #include "policy/usage_statistics/statistics_manager.h"

@@ -6686,12 +6686,12 @@
 
     <function name="GetPolicyConfigurationData" messagetype="request" scope="internal">
       <description>Request from HMI to SDL core to get policy configuration data (i.e. OEM Network Mapping table file version etc.) from Policy Table.</description>
-      <param name="policyType" type="String" maxlength="1000" minlength="1" mandatory="true">
+      <param name="policyType" type="String" minlength="1" maxlength="1000" mandatory="true">
         <description>Name of the Struct where configuration data is located in Policy Table, i.e. module_config etc.</description>
-      </param>  
-      <param name="property" type="String" maxlength="1000" minlength="1" mandatory="true">
-        <description>Name of the property located within the policyType Struct, i.e. vehicle_year etc..</description>
-      </param>  
+      </param>
+      <param name="property" type="String" minlength="1" maxlength="1000" mandatory="true">
+        <description>Name of the property located within the policyType Struct, i.e. vehicle_year etc.</description>
+      </param>
     </function>
     <function name="GetPolicyConfigurationData" messagetype="response">
       <param name="value" type="String" array="true" maxlength="1000" minsize="1" maxsize="100" mandatory="false">

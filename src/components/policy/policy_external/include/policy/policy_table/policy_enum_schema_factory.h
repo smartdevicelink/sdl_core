@@ -1,8 +1,4 @@
 /**
- * @file generated_MOBILE_API_policy_enum_schema_factory.h
- * @brief Generated class generated_MOBILE_API_policy_enum_schema_factory header
- * file.
- *
  * Copyright (c) 2017, Ford Motor Company
  * All rights reserved.
  *
@@ -48,10 +44,10 @@ namespace policy_table_interface_base {
 class EnumSchemaItemFactory {
  public:
   /**
-   * @brief Get enum schama from enum name
+   * @brief Get enum schema from enum name
    * Implementation of this function should be generated from MOBILE_API.xml
-   * @param enum_name enum name to get shema factory for
-   * @return shared pointer to shema factory or empty shared pointer if
+   * @param enum_name enum name to get schema factory for
+   * @return shared pointer to schema factory or empty shared pointer if
    * enum_name is wrong
    */
   static std::shared_ptr<ns_smart_device_link::ns_smart_objects::ISchemaItem>

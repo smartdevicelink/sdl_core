@@ -187,7 +187,7 @@ class CodeGenerator(object):
             includes = '''#include <set>\n'''\
             '''#include "interfaces/MOBILE_API.h"\n'''\
             '''#include "smart_objects/enum_schema_item.h"\n'''
-            f_cc.write(self._cc_file_tempalte.substitute(
+            f_cc.write(self._cc_file_template.substitute(
                 class_name=class_name,
                 header_file=header_file_name,
                 includes = includes,
@@ -206,7 +206,7 @@ class CodeGenerator(object):
             guard = u"_{0}_{1}_H__".format( class_name.upper(),
                     unicode(uuid.uuid1().hex.capitalize()))
             namespace_open, namespace_close = self._namespaces_strings(namespace)
-            f_h.write(self._h_file_tempalte.substitute(
+            f_h.write(self._h_file_template.substitute(
                 class_name=class_name,
                 guard=guard,
                 includes="",
@@ -227,7 +227,7 @@ class CodeGenerator(object):
             guard = u"_{0}_{1}_CC__".format( class_name.upper(),
                     unicode(uuid.uuid1().hex.capitalize()))
             namespace_open, namespace_close = self._namespaces_strings(namespace)            
-            f_cc.write(self._cc_file_tempalte.substitute(
+            f_cc.write(self._cc_file_template.substitute(
                 class_name=class_name,
                 header_file=header_file_name,
                 includes="",
@@ -530,7 +530,7 @@ class CodeGenerator(object):
          u"Param": u"Struct member ",
          u"FunctionParam": u"Function parameter "})
 
-    _cc_file_tempalte = string.Template(
+    _cc_file_template = string.Template(
         u'''/**\n'''
         u''' * @file ${class_name}.h\n'''
         u''' * @brief Generated class ${class_name} source file.\n'''
@@ -547,7 +547,7 @@ class CodeGenerator(object):
         u'''\n\n''')
 
 
-    _h_file_tempalte = string.Template(
+    _h_file_template = string.Template(
         u'''/**\n'''
         u''' * @file ${class_name}.h\n'''
         u''' * @brief Generated class ${class_name} header file.\n'''
@@ -617,10 +617,7 @@ class CodeGenerator(object):
         )
     _valiation_enum_template = string.Template(
         u'''bool IsValidEnum($name val) {\n'''
-        u'''  switch(val) {\n'''
-        u'''$enum_items\n'''
-        u'''    default: return false;\n'''
-        u'''  }\n'''
+        u'''  return !(std::string(EnumToJsonString(val)).empty());\n'''
         u'''};\n''')
 
     _valiation_enum_item_template = string.Template(

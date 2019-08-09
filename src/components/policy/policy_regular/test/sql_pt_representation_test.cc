@@ -560,12 +560,12 @@ TEST_F(SQLPTRepresentationTest, VehicleDataItem_Select_NonParameterizedVDI) {
   ASSERT_TRUE(reps->InsertVehicleDataItem(lss));
   parameterized_vdis.push_back(lss);
 
-  auto non_param_vdi_retrieved = reps->SelectNonParameterizedVehicleDataItems();
+  auto non_param_vdi_retrieved = reps->SelectPrimitiveVehicleDataItems();
 
   ASSERT_EQ(non_parameterized_vdis.ToJsonValue(),
             non_param_vdi_retrieved.ToJsonValue());
 
-  auto param_vdi_retrieved = reps->SelectParameterizedVehicleDataItems();
+  auto param_vdi_retrieved = reps->SelectCompositeVehicleDataItems();
   ASSERT_EQ(parameterized_vdis.ToJsonValue(),
             param_vdi_retrieved.ToJsonValue());
 }

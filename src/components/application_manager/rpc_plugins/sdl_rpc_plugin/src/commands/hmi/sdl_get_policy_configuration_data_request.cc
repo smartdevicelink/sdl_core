@@ -91,11 +91,6 @@ SDLGetPolicyConfigurationDataRequest::PrepareResponseParams(
   const auto policy_type =
       (*message_)[strings::msg_params][strings::policy_type].asString();
 
-  if (policy_type.empty()) {
-    LOG4CXX_ERROR(logger_, "Failed to retrieve policy_type");
-    return hmi_apis::Common_Result::DATA_NOT_AVAILABLE;
-  }
-
   const auto property =
       (*message_)[strings::msg_params][strings::property].asString();
 
@@ -108,18 +103,16 @@ SDLGetPolicyConfigurationDataRequest::PrepareResponseParams(
   }
 
   auto& policy_section_table_data = policy_table_data[policy_type];
-  if (!property.empty() && !policy_section_table_data.isMember(property)) {
+  if (!policy_section_table_data.isMember(property)) {
     LOG4CXX_ERROR(
         logger_,
         "property " << property << " doesn't exist in " << policy_type);
     return hmi_apis::Common_Result::DATA_NOT_AVAILABLE;
   }
 
-  auto& property_table_data = property.empty()
-                                  ? policy_section_table_data
-                                  : policy_section_table_data[property];
-
+  auto& property_table_data = policy_section_table_data[property];
   response_out = GetValueParam(property_table_data);
+
   return hmi_apis::Common_Result::SUCCESS;
 }
 

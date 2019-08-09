@@ -240,7 +240,6 @@ void UnsubscribeVehicleDataRequest::on_event(const event_engine::Event& event) {
     AddAlreadyUnsubscribedVI(hmi_response_msg_params);
   }
 
-  SetAllowedToTerminate(false);
   if (result) {
     if (vi_already_unsubscribed_by_this_app_.size()) {
       result_code = mobile_apis::Result::IGNORED;
@@ -274,9 +273,6 @@ void UnsubscribeVehicleDataRequest::on_event(const event_engine::Event& event) {
       smart_objects::SmartType::SmartType_Null == response_params_.getType()
           ? NULL
           : &response_params_);
-
-  application_manager_.TerminateRequest(
-      connection_key(), correlation_id(), function_id());
 }
 
 bool UnsubscribeVehicleDataRequest::Init() {

@@ -93,7 +93,7 @@ class CodeGenerator(object):
         with codecs.open(os.path.join(destination_dir, header_file_name),
                          encoding="utf-8",
                          mode="w") as f_h:
-            f_h.write(self._h_file_tempalte.substitute(
+            f_h.write(self._h_file_template.substitute(
                 class_name=class_name,
                 guard=guard,
                 namespace_open=namespace_open,
@@ -131,7 +131,7 @@ class CodeGenerator(object):
         with codecs.open(os.path.join(destination_dir, header_file_name),
                          encoding="utf-8",
                          mode="w") as f_h:
-            f_h.write(self._hpp_schema_file_tempalte.substitute(
+            f_h.write(self._hpp_schema_file_template.substitute(
                 class_name=class_name,
                 guard=guard,
                 header_file_name=unicode("".join("{0}.h".format(class_name))),
@@ -1361,7 +1361,7 @@ class CodeGenerator(object):
          u"Param": u"Struct member ",
          u"FunctionParam": u"Function parameter "})
 
-    _h_file_tempalte = string.Template(
+    _h_file_template = string.Template(
         u'''/**\n'''
         u''' * @file ${class_name}.h\n'''
         u''' * @brief Generated class ${class_name} header file.\n'''
@@ -1426,7 +1426,7 @@ class CodeGenerator(object):
         u'''#endif //$guard\n'''
         u'''\n\n''')
 
-    _hpp_schema_file_tempalte = string.Template(
+    _hpp_schema_file_template = string.Template(
         u'''/**\n'''
         u''' * @file ${class_name}.h\n'''
         u''' * @brief Generated class ${class_name} header file.\n'''

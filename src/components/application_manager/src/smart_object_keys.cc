@@ -185,7 +185,6 @@ const char* is_cloud_application = "isCloudApplication";
 const char* cloud_connection_status = "cloudConnectionStatus";
 const char* endpoint = "endpoint";
 const char* display_capabilities = "displayCapabilities";
-const char* module_config = "module_config";
 const char* policy_type = "policyType";
 const char* property = "property";
 

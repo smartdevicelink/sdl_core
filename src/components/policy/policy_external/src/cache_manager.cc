@@ -776,9 +776,6 @@ bool CacheManager::ApplyUpdate(const policy_table::Table& update_pt) {
       pt_->policy_table.vehicle_data->schema_items =
           rpc::Optional<policy_table::VehicleDataItems>(vd_to_update);
     }
-    if (update_pt.policy_table.vehicle_data->schema_version.is_initialized() &&
-        update_pt.policy_table.vehicle_data->schema_items.is_initialized()) {
-    }
   }
 
   ResetCalculatedPermissions();
@@ -797,9 +794,9 @@ policy_table::VehicleDataItems CacheManager::CollectRPCSpecVDItems(
   for (auto& item : vd_items) {
     const std::string i_name = "VEHICLEDATA_" + std::string(item.name);
     const std::string vd_name = boost::to_upper_copy<std::string>(i_name);
-    const bool is_standart =
+    const bool is_standard =
         policy_table::EnumSchemaItemFactory::IsRPCSpecVehicleDataType(vd_name);
-    if (is_standart) {
+    if (is_standard) {
       result_items.push_back(item);
     }
   }
@@ -812,9 +809,9 @@ policy_table::VehicleDataItems CacheManager::CollectCustomVDItems(
   for (auto& item : vd_items) {
     const std::string i_name = "VEHICLEDATA_" + std::string(item.name);
     const std::string vd_name = boost::to_upper_copy<std::string>(i_name);
-    const bool is_standart =
+    const bool is_standard =
         policy_table::EnumSchemaItemFactory::IsRPCSpecVehicleDataType(vd_name);
-    if (!is_standart) {
+    if (!is_standard) {
       result_items.push_back(item);
     }
   }

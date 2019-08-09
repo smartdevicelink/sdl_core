@@ -37,7 +37,7 @@
 
 #include "application_manager/application_manager.h"
 #include "application_manager/message_helper.h"
-#include "application_manager/policies/custom_vehicle_data_povider.h"
+#include "application_manager/policies/custom_vehicle_data_provider.h"
 #include "interfaces/MOBILE_API_schema.h"
 #include "policy/policy_table/policy_enum_schema_factory.h"
 #include "smart_objects/enum_schema_item.h"
@@ -72,7 +72,7 @@ bool CustomVehicleDataManagerImpl::ValidateVehicleDataItems(
       return false;
     }
     if (!ValidateVehicleDataItem(param, *param_schema)) {
-      LOG4CXX_ERROR(logger_, "Item validaition failed: " << param_name);
+      LOG4CXX_ERROR(logger_, "Item validation failed: " << param_name);
       return false;
     }
   }
@@ -302,7 +302,7 @@ bool CustomVehicleDataManagerImpl::ValidateRPCSpecEnumVehicleDataItem(
   if (errors::OK != validation_result) {
     LOG4CXX_WARN(logger_,
                  "Enum <" << std::string(item_schema.name)
-                          << "> validaiton failed : " << item.asString());
+                          << "> validation failed : " << item.asString());
     return false;
   }
   return true;
@@ -338,9 +338,7 @@ bool CustomVehicleDataManagerImpl::ValidatePODTypeItem(
                                     << " does not fit into boundaries : ("
                                     << minlength << " , " << maxlength << ")");
     }
-    return result;
-  }
-  if (item_type == policy_table::VehicleDataItem::kInteger) {
+  } else if (item_type == policy_table::VehicleDataItem::kInteger) {
     auto numeric_types = {smart_objects::SmartType::SmartType_Integer,
                           smart_objects::SmartType::SmartType_UInteger};
     if (!helpers::in_range(numeric_types, item.getType())) {
@@ -362,9 +360,7 @@ bool CustomVehicleDataManagerImpl::ValidatePODTypeItem(
                                      << " does not fit into boundaries : ("
                                      << minval << " , " << maxval << ")");
     }
-    return result;
-  }
-  if (item_type == policy_table::VehicleDataItem::kFloat) {
+  } else if (item_type == policy_table::VehicleDataItem::kFloat) {
     auto numeric_types = {smart_objects::SmartType::SmartType_Double,
                           smart_objects::SmartType::SmartType_Integer,
                           smart_objects::SmartType::SmartType_UInteger};
@@ -387,9 +383,7 @@ bool CustomVehicleDataManagerImpl::ValidatePODTypeItem(
                                    << " does not fit into boundaries : ("
                                    << minval << " , " << maxval << ")");
     }
-    return result;
-  }
-  if (item_type == policy_table::VehicleDataItem::kBoolean) {
+  } else if (item_type == policy_table::VehicleDataItem::kBoolean) {
     if (smart_objects::SmartType::SmartType_Boolean != item.getType()) {
       LOG4CXX_WARN(logger_,
                    "Parameter type mismatch. Expected: "
@@ -405,14 +399,6 @@ bool CustomVehicleDataManagerImpl::ValidateStructTypeItem(
     const ns_smart_device_link::ns_smart_objects::SmartObject& item,
     const policy_table::VehicleDataItem& item_schema) {
   LOG4CXX_AUTO_TRACE(logger_);
-  auto find_param = [&item](const std::string& name) {
-    for (auto param : item.enumerate()) {
-      if (param == name) {
-        return item[param];
-      }
-    }
-    return smart_objects::SmartObject();
-  };
 
   // Check for redundant parameters
   for (const auto& param : item.enumerate()) {
@@ -424,15 +410,14 @@ bool CustomVehicleDataManagerImpl::ValidateStructTypeItem(
 
   auto params_schemas = *(item_schema.params);
   for (const auto& param_schema : params_schemas) {
-    smart_objects::SmartObject param =
-        find_param(std::string(param_schema.name));
-    if (smart_objects::SmartType::SmartType_Null == param.getType()) {
+    if (!item.keyExists(param_schema.name)) {
       if (param_schema.mandatory) {
         return false;
       }
       continue;
     }
-    if (!ValidateVehicleDataItem(param, param_schema)) {
+
+    if (!ValidateVehicleDataItem(item[param_schema.name], param_schema)) {
       return false;
     }
   }
