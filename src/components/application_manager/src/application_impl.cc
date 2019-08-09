@@ -1193,7 +1193,7 @@ void ApplicationImpl::set_audio_streaming_state(
     return;
   }
 
-  // According to proposal SDL-0216 audio and video streaming states should
+  // According to proposal SDL-0216 audio streaming state should
   // be applied for all windows to keep consistency
   HmiStates hmi_states = state_.GetStates(HmiState::STATE_ID_CURRENT);
   for (const auto& hmi_state : hmi_states) {
