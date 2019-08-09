@@ -37,7 +37,7 @@ namespace application_manager {
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "DisplayCapabilitiesBuilder")
 
-const WindowID kMainWindowID = 0;
+const WindowID kDefaultWindowID = 0;
 
 DisplayCapabilitiesBuilder::DisplayCapabilitiesBuilder(Application& application)
     : owner_(application) {
@@ -50,7 +50,7 @@ void DisplayCapabilitiesBuilder::InitBuilder(
   LOG4CXX_AUTO_TRACE(logger_);
   sync_primitives::AutoLock lock(display_capabilities_lock_);
   resume_callback_ = resume_callback;
-  window_ids_to_resume_.insert(kMainWindowID);
+  window_ids_to_resume_.insert(kDefaultWindowID);
   for (size_t i = 0; i < windows_info.length(); ++i) {
     auto window_id = windows_info[i][strings::window_id].asInt();
     LOG4CXX_DEBUG(logger_,
@@ -80,7 +80,7 @@ void DisplayCapabilitiesBuilder::UpdateDisplayCapabilities(
     const WindowID window_id =
         inc_window_caps[i].keyExists(strings::window_id)
             ? inc_window_caps[i][strings::window_id].asInt()
-            : kMainWindowID;
+            : kDefaultWindowID;
     if (window_ids_to_resume_.end() != window_ids_to_resume_.find(window_id)) {
       cur_window_caps[cur_window_caps.length()] = inc_window_caps[i];
       LOG4CXX_DEBUG(logger_, "Stop waiting for: " << window_id);
