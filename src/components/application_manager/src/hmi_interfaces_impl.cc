@@ -144,6 +144,7 @@ generate_function_to_interface_convert_map() {
   convert_map[UI_OnCommand] = HmiInterfaces::HMI_INTERFACE_UI;
   convert_map[UI_OnSystemContext] = HmiInterfaces::HMI_INTERFACE_UI;
   convert_map[UI_GetCapabilities] = HmiInterfaces::HMI_INTERFACE_UI;
+  convert_map[UI_CancelInteraction] = HmiInterfaces::HMI_INTERFACE_UI;
   convert_map[UI_ChangeRegistration] = HmiInterfaces::HMI_INTERFACE_UI;
   convert_map[UI_OnLanguageChange] = HmiInterfaces::HMI_INTERFACE_UI;
   convert_map[UI_GetSupportedLanguages] = HmiInterfaces::HMI_INTERFACE_UI;

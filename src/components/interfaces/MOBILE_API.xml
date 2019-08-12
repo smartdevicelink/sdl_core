@@ -2690,6 +2690,7 @@
         <element name="GetFileID" value="54" hexvalue="36" since="5.1" />
         <element name="PerformAppServiceInteractionID" value="55" hexvalue="37" since="5.1" />
         <element name="UnpublishAppServiceID" value="56" hexvalue="38" since="6.0" />
+        <element name="CancelInteractionID" value="57" hexvalue="39" since="6.0" />
         <element name="CloseApplicationID" value="58" hexvalue="3A" since="6.0" />
         <element name="ShowAppMenuID" value="59" hexvalue="3B" since="6.0" />
         
@@ -4869,6 +4870,12 @@
         <param name="interactionLayout" type="LayoutMode" mandatory="false" since="3.0">
             <description>See LayoutMode.</description>
         </param>
+
+        <param name="cancelID" type="Integer" mandatory="false" since="6.0">
+            <description>
+                An ID for this specific alert to allow cancellation through the `CancelInteraction` RPC.
+            </description>
+        </param>
         
     </function>
     
@@ -5007,6 +5014,12 @@
             <description>
                 Image struct determining whether static or dynamic icon.
                 If omitted on supported displays, no (or the default if applicable) icon should be displayed.
+            </description>
+        </param>
+        
+        <param name="cancelID" type="Integer" mandatory="false" since="6.0">
+            <description>
+                An ID for this specific alert to allow cancellation through the `CancelInteraction` RPC.
             </description>
         </param>
         
@@ -6233,6 +6246,13 @@
                 If omitted on supported displays, only the system defined "Close" SoftButton will be displayed.
             </description>
         </param>
+
+        <param name="cancelID" type="Integer" mandatory="false" since="6.0">
+            <description>
+                An ID for this specific alert to allow cancellation through the `CancelInteraction` RPC.
+            </description>
+        </param>
+
     </function>
     
     <function name="ScrollableMessage" functionID="ScrollableMessageID" messagetype="response" since="2.0">
@@ -6285,6 +6305,11 @@
             <description>
                 App defined timeout.  Indicates how long of a timeout from the last action (i.e. sliding control resets timeout).
                 If omitted, the value is set to 10000.
+            </description>
+        </param>
+        <param name="cancelID" type="Integer" mandatory="false" since="6.0">
+            <description>
+                An ID for this specific alert to allow cancellation through the `CancelInteraction` RPC.
             </description>
         </param>
     </function>
@@ -7465,6 +7490,47 @@
         </param>
     </function>
 
+    <function name="CancelInteraction" functionID="CancelInteractionID" messagetype="request" since="6.0">
+        <description>
+            Close an active interaction on the HMI.
+        </description>
+
+        <param name="cancelID" type="Integer" mandatory="false">
+            <description>
+                The ID of the specific interaction you want to dismiss. If not set, the most recent of the RPC type set in functionID will be dismissed.
+            </description>
+        </param>
+
+        <param name="functionID" type="Integer" mandatory="true">
+            <description>
+                The ID of the type of interaction the developer wants to dismiss. Only values 10, (PerformInteractionID), 12 (AlertID), 25 (ScrollableMessageID), and 26 (SliderID) are permitted.
+            </description>
+        </param>
+    </function>
+
+    <function name="CancelInteraction" functionID="CancelInteractionID" messagetype="response" since="6.0">
+        <description>
+            If no applicable request can be dismissed, the result will be IGNORED.
+        </description>
+
+        <param name="success" type="Boolean" platform="documentation" mandatory="true">
+            <description> true if successful; false, if failed </description>
+        </param>
+        
+        <param name="resultCode" type="Result" platform="documentation" mandatory="true">
+            <description>See Result</description>
+            <element name="SUCCESS"/>
+            <element name="DISALLOWED"/>
+            <element name="APPLICATION_NOT_REGISTERED"/>
+            <element name="GENERIC_ERROR"/>
+            <element name="IGNORED"/>
+        </param>
+        
+        <param name="info" type="String" maxlength="1000" mandatory="false" platform="documentation">
+            <description>Provides additional human readable info regarding the result.</description>
+        </param>
+    </function>
+
     <function name="CloseApplication" functionID="CloseApplicationID" messagetype="request" since="6.0">
         <description>Request from the application to exit the foreground and enter HMI_NONE.</description>
     </function>
@@ -7475,6 +7541,7 @@
         </param>
         
         <param name="resultCode" type="Result" platform="documentation" mandatory="true">
+            <description>See Result</description>
             <element name="SUCCESS"/>
             <element name="DISALLOWED"/>
             <element name="APPLICATION_NOT_REGISTERED"/>

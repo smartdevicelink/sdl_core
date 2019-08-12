@@ -232,6 +232,8 @@
 #include "sdl_rpc_plugin/commands/hmi/on_vr_stopped_notification.h"
 #include "sdl_rpc_plugin/commands/hmi/sdl_policy_update.h"
 #include "sdl_rpc_plugin/commands/hmi/sdl_policy_update_response.h"
+#include "sdl_rpc_plugin/commands/hmi/ui_cancel_interaction_request.h"
+#include "sdl_rpc_plugin/commands/hmi/ui_cancel_interaction_response.h"
 #include "sdl_rpc_plugin/commands/hmi/ui_send_haptic_data_request.h"
 #include "sdl_rpc_plugin/commands/hmi/ui_send_haptic_data_response.h"
 #include "sdl_rpc_plugin/commands/hmi/ui_set_display_layout_request.h"
@@ -395,6 +397,11 @@ CommandCreator& HMICommandFactory::get_creator_factory(
       return hmi_apis::messageType::request == message_type
                  ? factory.GetCreator<commands::UIAddCommandRequest>()
                  : factory.GetCreator<commands::UIAddCommandResponse>();
+    }
+    case hmi_apis::FunctionID::UI_CancelInteraction: {
+      return hmi_apis::messageType::request == message_type
+                 ? factory.GetCreator<commands::UICancelInteractionRequest>()
+                 : factory.GetCreator<commands::UICancelInteractionResponse>();
     }
     case hmi_apis::FunctionID::UI_DeleteCommand: {
       return hmi_apis::messageType::request == message_type

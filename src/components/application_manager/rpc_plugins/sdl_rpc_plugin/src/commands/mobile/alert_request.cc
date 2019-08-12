@@ -321,6 +321,11 @@ void AlertRequest::SendAlertRequest(int32_t app_id) {
   msg_params[hmi_request::alert_strings] =
       smart_objects::SmartObject(smart_objects::SmartType_Array);
 
+  if ((*message_)[strings::msg_params].keyExists(strings::cancel_id)) {
+    msg_params[strings::cancel_id] =
+        (*message_)[strings::msg_params][strings::cancel_id].asInt();
+  }
+
   int32_t index = 0;
   if ((*message_)[strings::msg_params].keyExists(strings::alert_text1)) {
     msg_params[hmi_request::alert_strings][index][hmi_request::field_name] =

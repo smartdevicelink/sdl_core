@@ -1164,6 +1164,11 @@ bool EnumFromJsonString(const std::string& literal, FunctionID* result) {
     return true;
   }
 
+  if ("CancelInteraction" == literal) {
+    *result = CancelInteractionID;
+    return true;
+  }
+
   if ("CloseApplication" == literal) {
     *result = CloseApplicationID;
     return true;

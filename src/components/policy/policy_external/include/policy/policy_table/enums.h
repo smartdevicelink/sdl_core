@@ -477,6 +477,11 @@ enum FunctionID {
   UnpublishAppServiceID = 56,
 
   /**
+   * @brief CancelInteractionID.
+   */
+  CancelInteractionID = 57,
+
+  /**
    * @brief CloseApplicationID.
    */
   CloseApplicationID = 58,

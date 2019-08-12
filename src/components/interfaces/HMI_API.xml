@@ -4434,6 +4434,11 @@
     <param name="appID" type="Integer" mandatory="true">
       <description>ID of application related to this RPC.</description>
     </param>
+    <param name="cancelID" type="Integer" mandatory="false">
+      <description>
+        An ID for this specific alert to allow cancellation through the `CancelInteraction` RPC.
+      </description>
+    </param>
   </function>
   <function name="PerformInteraction" messagetype="response">
     <param name="choiceID" type="Integer" minvalue="0" maxvalue="2000000000" mandatory="false">
@@ -4646,6 +4651,11 @@
     <param name="appID" type="Integer" mandatory="true">
       <description>ID of application requested this RPC.</description>
     </param>
+    <param name="cancelID" type="Integer" mandatory="false">
+      <description>
+        An ID for this specific alert to allow cancellation through the `CancelInteraction` RPC.
+      </description>
+    </param>
     <param name="alertIcon" type="Common.Image" mandatory="false" >
       <description>
         Image to be displayed for the corresponding alert. See Image. 
@@ -4793,6 +4803,11 @@
     <param name="appID" type="Integer" mandatory="true">
       <description>ID of application that concerns this RPC.</description>
     </param>
+    <param name="cancelID" type="Integer" mandatory="false">
+      <description>
+        An ID for this specific alert to allow cancellation through the `CancelInteraction` RPC.
+      </description>
+    </param>
   </function>
   <function name="PerformInteraction" messagetype="response">
     <param name="choiceID" type="Integer" minvalue="0" maxvalue="2000000000" mandatory="false">
@@ -4804,6 +4819,23 @@
             Can be returned in lieu of choiceID, depending on trigger source
       </description>
     </param>
+  </function>
+  <function name="CancelInteraction" messagetype="request">
+    <param name="cancelID" type="Integer" mandatory="false">
+      <description>
+        The ID of the specific interaction you want to dismiss. If not set, the most recent of the RPC type set in functionID will be dismissed.
+      </description>
+    </param>
+    <param name="functionID" type="Integer" mandatory="true">
+      <description>
+        The ID of the type of interaction the developer wants to dismiss. Only values 10, (PerformInteractionID), 12 (AlertID), 25 (ScrollableMessageID), and 26 (SliderID) are permitted.
+      </description>
+    </param>
+    <param name="appID" type="Integer" mandatory="true">
+      <description>ID of application requested this RPC.</description>
+    </param>
+  </function>
+  <function name="CancelInteraction" messagetype="response">
   </function>
   <function name="SetMediaClockTimer" messagetype="request">
     <description>Sets the initial media clock value and automatic update method.</description>
@@ -5066,6 +5098,11 @@
     <param name="appID" type="Integer" mandatory="true">
       <description>ID of application that concerns this RPC.</description>
     </param>
+    <param name="cancelID" type="Integer" mandatory="false">
+      <description>
+        An ID for this specific alert to allow cancellation through the `CancelInteraction` RPC.
+      </description>
+    </param>
   </function>
   <function name="Slider" messagetype="response">
     <param name="sliderPosition" type="Integer" minvalue="1" maxvalue="26" mandatory="false">
@@ -5086,6 +5123,11 @@
     </param>
     <param name="appID" type="Integer" mandatory="true">
       <description>ID of application related to this RPC.</description>
+    </param>
+    <param name="cancelID" type="Integer" mandatory="false">
+      <description>
+        An ID for this specific alert to allow cancellation through the `CancelInteraction` RPC.
+      </description>
     </param>
   </function>
   <function name="ScrollableMessage" messagetype="response">

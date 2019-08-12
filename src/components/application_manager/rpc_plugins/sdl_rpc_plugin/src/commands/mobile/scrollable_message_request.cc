@@ -112,6 +112,11 @@ void ScrollableMessageRequest::Run() {
   msg_params[strings::app_id] = app->app_id();
   msg_params[strings::timeout] = default_timeout_;
 
+  if ((*message_)[strings::msg_params].keyExists(strings::cancel_id)) {
+    msg_params[strings::cancel_id] =
+        (*message_)[strings::msg_params][strings::cancel_id].asInt();
+  }
+
   if ((*message_)[strings::msg_params].keyExists(strings::soft_buttons)) {
     msg_params[strings::soft_buttons] =
         (*message_)[strings::msg_params][strings::soft_buttons];

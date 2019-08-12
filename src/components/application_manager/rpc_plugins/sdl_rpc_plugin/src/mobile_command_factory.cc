@@ -40,6 +40,8 @@
 #include "sdl_rpc_plugin/commands/mobile/alert_maneuver_response.h"
 #include "sdl_rpc_plugin/commands/mobile/alert_request.h"
 #include "sdl_rpc_plugin/commands/mobile/alert_response.h"
+#include "sdl_rpc_plugin/commands/mobile/cancel_interaction_request.h"
+#include "sdl_rpc_plugin/commands/mobile/cancel_interaction_response.h"
 #include "sdl_rpc_plugin/commands/mobile/change_registration_request.h"
 #include "sdl_rpc_plugin/commands/mobile/change_registration_response.h"
 #include "sdl_rpc_plugin/commands/mobile/close_application_request.h"
@@ -220,6 +222,11 @@ CommandCreator& MobileCommandFactory::get_command_creator(
       return mobile_api::messageType::request == message_type
                  ? factory.GetCreator<commands::PerformAudioPassThruRequest>()
                  : factory.GetCreator<commands::PerformAudioPassThruResponse>();
+    }
+    case mobile_apis::FunctionID::CancelInteractionID: {
+      return mobile_api::messageType::request == message_type
+                 ? factory.GetCreator<commands::CancelInteractionRequest>()
+                 : factory.GetCreator<commands::CancelInteractionResponse>();
     }
     case mobile_apis::FunctionID::CreateInteractionChoiceSetID: {
       return mobile_api::messageType::request == message_type
