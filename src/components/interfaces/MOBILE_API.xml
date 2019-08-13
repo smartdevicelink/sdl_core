@@ -2237,7 +2237,10 @@
         <param name="parameterPermissions" type="ParameterPermissions"  mandatory="true"/>
     </struct>
     
-    <struct name="DisplayCapabilities" since="1.0">
+    <struct name="DisplayCapabilities" deprecated="true" since="6.0">
+        <history>
+            <struct name="DisplayCapabilities" since="1.0" until="6.0"/>
+        </history>
         <description>Contains information about the display capabilities.</description>
         <param name="displayType" type="DisplayType" mandatory="true" deprecated="true" since="5.0">
             <description>The type of the display. See DisplayType</description>
