@@ -186,6 +186,10 @@ void CreateWindowRequest::Run() {
     return;
   }
 
+  if (!ValidateWindowCreation(application, window_id)) {
+    return;
+  }
+
   smart_objects::SmartObject msg_params = (*message_)[strings::msg_params];
   msg_params[strings::app_id] = application->hmi_app_id();
 
@@ -238,6 +242,126 @@ void CreateWindowRequest::on_event(const event_engine::Event& event) {
 
 bool CreateWindowRequest::Init() {
   hash_update_mode_ = HashUpdateMode::kDoHashUpdate;
+  return true;
+}
+
+bool CreateWindowRequest::IsWindowForAssociatedServiceCreated(
+    app_mngr::ApplicationSharedPtr app) const {
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  const auto window_optional_params_map =
+      app->window_optional_params_map().GetData();
+
+  if (!(*message_)[strings::msg_params].keyExists(
+          strings::associated_service_type)) {
+    return false;
+  }
+
+  const auto associated_service_type =
+      (*message_)[strings::msg_params][strings::associated_service_type]
+          .asString();
+
+  const auto find_res = std::find_if(
+      window_optional_params_map.begin(),
+      window_optional_params_map.end(),
+      [&associated_service_type](
+          const std::pair<WindowID, smart_objects::SmartObjectSPtr>& element) {
+        LOG4CXX_DEBUG(logger_,
+                      "Searching for " << associated_service_type
+                                       << " in window info for id "
+                                       << element.first);
+        if (element.second->keyExists(strings::associated_service_type) &&
+            associated_service_type ==
+                (*element.second)[strings::associated_service_type]
+                    .asString()) {
+          return true;
+        }
+
+        return false;
+      });
+
+  return find_res != window_optional_params_map.end();
+}
+
+bool CreateWindowRequest::DoesExceedMaxAllowedWindows(
+    app_mngr::ApplicationSharedPtr app) const {
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  auto get_current_number_of_windows =
+      [&app](const mobile_apis::WindowType::eType window_type) -> size_t {
+    switch (window_type) {
+      case mobile_apis::WindowType::MAIN: {
+        return 1u;
+      }
+      case mobile_apis::WindowType::WIDGET: {
+        return app->window_optional_params_map().GetData().size();
+      }
+
+      default: {
+        LOG4CXX_WARN(logger_, "Unknown window type");
+        return 0u;
+      }
+    }
+  };
+
+  const auto window_type = static_cast<mobile_apis::WindowType::eType>(
+      (*message_)[strings::msg_params][strings::window_type].asInt());
+
+  const auto display_capabilities = app->display_capabilities();
+
+  if (!display_capabilities) {
+    LOG4CXX_WARN(logger_, "Application has no capabilities");
+    return false;
+  }
+
+  MessageHelper::PrintSmartObject(*display_capabilities);
+
+  const auto windowTypeSupported =
+      (*display_capabilities)[0][strings::window_type_supported].asArray();
+
+  DCHECK(windowTypeSupported);
+
+  const auto find_res = std::find_if(
+      windowTypeSupported->begin(),
+      windowTypeSupported->end(),
+      [&window_type](const smart_objects::SmartObject& element) {
+        if (window_type == static_cast<mobile_apis::WindowType::eType>(
+                               element[strings::window_type].asInt())) {
+          return true;
+        }
+
+        return false;
+      });
+
+  DCHECK(find_res != windowTypeSupported->end());
+
+  if (get_current_number_of_windows(window_type) + 1 >
+      (*find_res)[strings::maximum_number_of_windows].asUInt()) {
+    return true;
+  }
+
+  return false;
+}
+
+bool CreateWindowRequest::ValidateWindowCreation(
+    app_mngr::ApplicationSharedPtr app, const WindowID window_id) {
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  if (DoesExceedMaxAllowedWindows(app)) {
+    std::string info("Maximum allowed amount of windows is exceeded");
+    LOG4CXX_WARN(logger_, info);
+    SendResponse(false, mobile_apis::Result::REJECTED, info.c_str());
+    return false;
+  }
+
+  if (IsWindowForAssociatedServiceCreated(app)) {
+    std::string info(
+        "Window for this associated service type is already created");
+    LOG4CXX_WARN(logger_, info);
+    SendResponse(false, mobile_apis::Result::REJECTED, info.c_str());
+    return false;
+  }
+
   return true;
 }
 

@@ -79,6 +79,28 @@ class CreateWindowRequest : public app_mngr::commands::CommandRequestImpl {
                        const std::string& window_name) const;
 
   /**
+   * @brief ValidateWindowCreation checks whether window can be created
+   * @return true if window can be created, otherwise returns false
+   */
+  bool ValidateWindowCreation(app_mngr::ApplicationSharedPtr app,
+                              const app_mngr::WindowID window_id);
+
+  /**
+   * @brief IsWindowForAssociatedServiceCreated check whether a window with
+   * current associated type has already been created
+   * @return true if window has been created, otherwise returns false
+   */
+  bool IsWindowForAssociatedServiceCreated(
+      app_mngr::ApplicationSharedPtr app) const;
+
+  /**
+   * @brief DoesExceedMaxAllowedWindows check wheter max allowed amount of
+   * windows is exceeded
+   * @return true if amount us exceeded, otherwise returns false
+   */
+  bool DoesExceedMaxAllowedWindows(app_mngr::ApplicationSharedPtr app) const;
+
+  /**
    * @brief ApplyWindowInitialState apply changes related to window HMI state
    * initialization
    * @param app pointer to application owns affected window

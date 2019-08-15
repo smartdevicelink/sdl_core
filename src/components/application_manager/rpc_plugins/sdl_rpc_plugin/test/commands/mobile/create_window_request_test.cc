@@ -142,8 +142,41 @@ class CreateWindowRequestTest
         .WillByDefault(Return());
   }
 
+  void SetUp() OVERRIDE {
+    using namespace application_manager;
+    display_capabilities_ = std::make_shared<smart_objects::SmartObject>(
+        smart_objects::SmartType_Array);
+
+    smart_objects::SmartObject window_type_supported(
+        smart_objects::SmartType_Array);
+
+    const uint32_t maximum_widgets_amount = 4;
+    smart_objects::SmartObject maximum_widgets(smart_objects::SmartType_Map);
+    maximum_widgets[strings::window_type] = mobile_apis::WindowType::WIDGET;
+    maximum_widgets[strings::maximum_number_of_windows] =
+        maximum_widgets_amount;
+
+    window_type_supported[window_type_supported.length()] = maximum_widgets;
+
+    (*display_capabilities_)[0][strings::window_type_supported] =
+        window_type_supported;
+
+    ON_CALL(*mock_app_, display_capabilities())
+        .WillByDefault(Return(display_capabilities_));
+
+    window_params_map_lock_ptr_ = std::make_shared<sync_primitives::Lock>();
+
+    DataAccessor<am::WindowParamsMap> window_params_map(
+        test_window_params_map_, window_params_map_lock_ptr_);
+    ON_CALL(*mock_app_, window_optional_params_map())
+        .WillByDefault(Return(window_params_map));
+  }
+
   MockAppPtr mock_app_;
   NiceMock<MockStateController> mock_state_controller;
+  std::shared_ptr<sync_primitives::Lock> window_params_map_lock_ptr_;
+  application_manager::WindowParamsMap test_window_params_map_;
+  smart_objects::SmartObjectSPtr display_capabilities_;
 };
 
 TEST_F(CreateWindowRequestTest, WindowID_ExpectDefaultWindowID) {
@@ -249,6 +282,8 @@ TEST_F(
   (*msg)[am::strings::msg_params][am::strings::window_id] = kTestWindowId;
   (*msg)[am::strings::msg_params]
         [am::strings::duplicate_updates_from_window_id] = kDuplicateWindowID;
+  (*msg)[am::strings::msg_params][am::strings::window_type] =
+      mobile_apis::WindowType::WIDGET;
 
   auto command = CreateCommand<CreateWindowRequest>(msg);
   EXPECT_TRUE(command->Init());
@@ -299,6 +334,8 @@ TEST_F(CreateWindowRequestTest,
         [am::strings::duplicate_updates_from_window_id] = kDuplicateWindowID;
   (*msg)[am::strings::msg_params][am::strings::associated_service_type] =
       "MEDIA";
+  (*msg)[am::strings::msg_params][am::strings::window_type] =
+      mobile_apis::WindowType::WIDGET;
 
   auto command = CreateCommand<CreateWindowRequest>(msg);
   EXPECT_TRUE(command->Init());
@@ -327,6 +364,8 @@ TEST_F(
         [am::strings::duplicate_updates_from_window_id] = kDuplicateWindowID;
   (*msg)[am::strings::msg_params][am::strings::associated_service_type] =
       "MEDIA";
+  (*msg)[am::strings::msg_params][am::strings::window_type] =
+      mobile_apis::WindowType::WIDGET;
 
   auto command = CreateCommand<CreateWindowRequest>(msg);
   EXPECT_TRUE(command->Init());

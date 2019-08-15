@@ -175,6 +175,8 @@ extern const char* video_streaming_state;
 extern const char* system_context;
 extern const char* window_name;
 extern const char* window_type;
+extern const char* window_type_supported;
+extern const char* maximum_number_of_windows;
 extern const char* window_capabilities;
 extern const char* associated_service_type;
 extern const char* duplicate_updates_from_window_id;
