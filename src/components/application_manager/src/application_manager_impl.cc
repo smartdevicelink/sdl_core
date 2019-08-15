@@ -4242,16 +4242,11 @@ bool ApplicationManagerImpl::IsSOStructValid(
     const smart_objects::SmartObject& display_capabilities) {
   smart_objects::SmartObject display_capabilities_so = display_capabilities;
   if (hmi_so_factory().AttachSchema(struct_id, display_capabilities_so)) {
-    if (display_capabilities_so.isValid()) {
-      return true;
-    } else {
-      return false;
-    }
-  } else {
-    LOG4CXX_ERROR(logger_, "Could not find struct id: " << struct_id);
-    return false;
+    return display_capabilities_so.isValid();
   }
-  return true;
+
+  LOG4CXX_ERROR(logger_, "Could not find struct id: " << struct_id);
+  return false;
 }
 
 #ifdef BUILD_TESTS

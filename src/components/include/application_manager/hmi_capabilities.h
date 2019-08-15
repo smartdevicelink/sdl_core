@@ -441,6 +441,14 @@ class HMICapabilities {
   virtual bool rc_supported() const = 0;
 
   /*
+   * @brief Retrieves whether HMI supports passed Menu Layout
+   *
+   * @return TRUE if it supported, otherwise FALSE
+   */
+  virtual bool menu_layout_supported(
+      mobile_apis::MenuLayout::eType layout) const = 0;
+
+  /*
    * @brief Interface used to store information regarding
    * the navigation "System Capability"
    *

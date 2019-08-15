@@ -58,6 +58,7 @@ std::map<std::string, hmi_apis::Common_TextFieldName::eType>
     text_fields_enum_name;
 std::map<std::string, hmi_apis::Common_MediaClockFormat::eType>
     media_clock_enum_name;
+std::map<std::string, hmi_apis::Common_MenuLayout::eType> menu_layout_enum;
 std::map<std::string, hmi_apis::Common_ImageType::eType> image_type_enum;
 std::map<std::string, hmi_apis::Common_SamplingRate::eType> sampling_rate_enum;
 std::map<std::string, hmi_apis::Common_BitsPerSample::eType>
@@ -279,6 +280,11 @@ void InitCapabilities() {
       std::make_pair(std::string("CLOCKTEXT4"),
                      hmi_apis::Common_MediaClockFormat::CLOCKTEXT4));
 
+  menu_layout_enum.insert(
+      std::make_pair(std::string("LIST"), hmi_apis::Common_MenuLayout::LIST));
+  menu_layout_enum.insert(
+      std::make_pair(std::string("TILES"), hmi_apis::Common_MenuLayout::TILES));
+
   image_type_enum.insert(std::make_pair(std::string("STATIC"),
                                         hmi_apis::Common_ImageType::STATIC));
   image_type_enum.insert(std::make_pair(std::string("DYNAMIC"),
@@ -377,6 +383,8 @@ void InitCapabilities() {
       std::make_pair(std::string("MFD5"), hmi_apis::Common_DisplayType::MFD5));
   display_type_enum.insert(std::make_pair(
       std::string("GEN3_8_INCH"), hmi_apis::Common_DisplayType::GEN3_8_INCH));
+  display_type_enum.insert(std::make_pair(
+      std::string("SDL_GENERIC"), hmi_apis::Common_DisplayType::SDL_GENERIC));
 
   character_set_enum.insert(std::make_pair(
       std::string("TYPE2SET"), hmi_apis::Common_CharacterSet::TYPE2SET));
@@ -866,6 +874,26 @@ bool HMICapabilitiesImpl::rc_supported() const {
   return is_rc_supported_;
 }
 
+bool HMICapabilitiesImpl::menu_layout_supported(
+    mobile_apis::MenuLayout::eType layout) const {
+  if (!display_capabilities_ ||
+      !display_capabilities_->keyExists(strings::menu_layouts_available))
+    return false;
+
+  auto menu_layouts =
+      display_capabilities_->getElement(strings::menu_layouts_available);
+  if (menu_layouts.getType() == smart_objects::SmartType_Array) {
+    for (uint32_t i = 0; i < menu_layouts.length(); ++i) {
+      if (layout == static_cast<mobile_apis::MenuLayout::eType>(
+                        menu_layouts.getElement(i).asUInt())) {
+        return true;
+      }
+    }
+  }
+
+  return false;
+}
+
 const smart_objects::SmartObject* HMICapabilitiesImpl::navigation_capability()
     const {
   return navigation_capability_;
@@ -1039,6 +1067,25 @@ bool HMICapabilitiesImpl::load_capabilities_from_file() {
           display_capabilities_so.erase(hmi_response::media_clock_formats);
           display_capabilities_so[hmi_response::media_clock_formats] =
               media_clock_formats_enum;
+        }
+
+        if (display_capabilities_so.keyExists(
+                strings::menu_layouts_available)) {
+          smart_objects::SmartObject menu_layouts_available_enum(
+              smart_objects::SmartType_Array);
+          auto menu_layouts_available_array =
+              display_capabilities_so[strings::menu_layouts_available];
+          for (uint32_t i = 0, j = 0; i < menu_layouts_available_array.length();
+               ++i) {
+            auto it = menu_layout_enum.find(
+                menu_layouts_available_array[i].asString());
+            if (it != menu_layout_enum.end()) {
+              menu_layouts_available_enum[j++] = it->second;
+            }
+          }
+          display_capabilities_so.erase(strings::menu_layouts_available);
+          display_capabilities_so[strings::menu_layouts_available] =
+              menu_layouts_available_enum;
         }
 
         if (display_capabilities_so.keyExists(
