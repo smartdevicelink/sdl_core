@@ -345,26 +345,31 @@ void MediaManagerImpl::FramesProcessed(int32_t application_key,
 
   application_manager::ApplicationSharedPtr app =
       application_manager_.application(application_key);
+
   if (app) {
-    auto audio_queue_size =
-        std::dynamic_pointer_cast<StreamerAdapter>(
-            streamer_[protocol_handler::ServiceType::kAudio])
-            ->GetMsgQueueSize();
-    LOG4CXX_DEBUG(logger_,
-                  "MEDIASTREAM_MEDIA_MNGR: # Messages in audio queue = "
-                      << audio_queue_size);
-    if (audio_queue_size > 0) {
-      app->WakeUpStreaming(protocol_handler::ServiceType::kAudio);
+    auto audio_stream = std::dynamic_pointer_cast<StreamerAdapter>(
+        streamer_[protocol_handler::ServiceType::kAudio]);
+    auto video_stream = std::dynamic_pointer_cast<StreamerAdapter>(
+        streamer_[protocol_handler::ServiceType::kMobileNav]);
+
+    if (audio_stream.use_count() != 0) {
+      size_t audio_queue_size = audio_stream->GetMsgQueueSize();
+      LOG4CXX_DEBUG(logger_,
+                    "MEDIASTREAM_MEDIA_MNGR: # Messages in audio queue = "
+                        << audio_queue_size);
+      if (audio_queue_size > 0) {
+        app->WakeUpStreaming(protocol_handler::ServiceType::kAudio);
+      }
     }
-    auto video_queue_size =
-        std::dynamic_pointer_cast<StreamerAdapter>(
-            streamer_[protocol_handler::ServiceType::kMobileNav])
-            ->GetMsgQueueSize();
-    LOG4CXX_DEBUG(logger_,
-                  "MEDIASTREAM_MEDIA_MNGR: # Messages in video queue = "
-                      << video_queue_size);
-    if (video_queue_size > 0) {
-      app->WakeUpStreaming(protocol_handler::ServiceType::kMobileNav);
+
+    if (video_stream.use_count() != 0) {
+      size_t video_queue_size = video_stream->GetMsgQueueSize();
+      LOG4CXX_DEBUG(logger_,
+                    "MEDIASTREAM_MEDIA_MNGR: # Messages in video queue = "
+                        << video_queue_size);
+      if (video_queue_size > 0) {
+        app->WakeUpStreaming(protocol_handler::ServiceType::kMobileNav);
+      }
     }
   }
 }

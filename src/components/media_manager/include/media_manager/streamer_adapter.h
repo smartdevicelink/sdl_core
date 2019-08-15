@@ -60,7 +60,7 @@ class StreamerAdapter : public MediaAdapterImpl {
   virtual void SendData(int32_t application_key,
                         const ::protocol_handler::RawMessagePtr msg);
   virtual bool is_app_performing_activity(int32_t application_key) const;
-  size_t GetMsgQueueSize();
+  virtual size_t GetMsgQueueSize();
 
  protected:
   // TODO(AN): APPLINK-15203 Use MessageLoopThread
