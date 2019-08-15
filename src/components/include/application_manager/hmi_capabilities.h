@@ -233,7 +233,7 @@ class HMICapabilities {
    * @brief Retrieves information about the display capability
    * @return Currently supported display capability
    */
-  virtual const smart_objects::SmartObject* system_display_capabilities()
+  virtual const smart_objects::SmartObjectSPtr system_display_capabilities()
       const = 0;
 
   /*

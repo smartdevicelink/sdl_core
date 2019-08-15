@@ -233,7 +233,7 @@ class HMICapabilitiesImpl : public HMICapabilities {
    * @brief Retrieves information about the display capability
    * @return Currently supported display capability
    */
-  const smart_objects::SmartObject* system_display_capabilities()
+  const smart_objects::SmartObjectSPtr system_display_capabilities()
       const OVERRIDE;
 
   /*
@@ -598,7 +598,7 @@ class HMICapabilitiesImpl : public HMICapabilities {
    * display_capabilities_ is not removed.
    */
   smart_objects::SmartObject* display_capabilities_;
-  smart_objects::SmartObject* system_display_capabilities_;
+  smart_objects::SmartObjectSPtr system_display_capabilities_;
   smart_objects::SmartObject* hmi_zone_capabilities_;
   smart_objects::SmartObject* soft_buttons_capabilities_;
   smart_objects::SmartObject* button_capabilities_;

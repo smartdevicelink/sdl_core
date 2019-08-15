@@ -215,12 +215,17 @@ void OnSystemCapabilityUpdatedNotification::Run() {
                           << " is resuming. Providing cached capabilities");
         auto display_caps =
             app->display_capabilities_builder().display_capabilities();
-        capabilities = display_caps.get();
+        capabilities = display_caps;
       } else if (app->display_capabilities()) {
         LOG4CXX_DEBUG(logger_,
                       "Application " << app->app_id()
                                      << " has specific display capabilities");
-        capabilities = app->display_capabilities().get();
+        const WindowID window_id =
+            msg_params[strings::system_capability]
+                      [strings::display_capabilities][0]
+                      [strings::window_capabilities][0][strings::window_id]
+                          .asInt();
+        capabilities = app->display_capabilities(window_id);
       }
 
       if (!capabilities) {

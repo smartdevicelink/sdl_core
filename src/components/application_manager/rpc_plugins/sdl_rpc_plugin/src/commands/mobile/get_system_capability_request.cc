@@ -155,7 +155,7 @@ void GetSystemCapabilityRequest::Run() {
     case mobile_apis::SystemCapabilityType::DISPLAYS: {
       auto capabilities = hmi_capabilities.system_display_capabilities();
       if (app->display_capabilities()) {
-        capabilities = app->display_capabilities().get();
+        capabilities = app->display_capabilities();
       }
 
       if (!capabilities) {

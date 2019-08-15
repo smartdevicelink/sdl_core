@@ -359,6 +359,44 @@ DynamicApplicationDataImpl::display_capabilities() const {
   return display_capabilities_;
 }
 
+smart_objects::SmartObjectSPtr DynamicApplicationDataImpl::display_capabilities(
+    const WindowID window_id) const {
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  auto result_display_caps = std::make_shared<smart_objects::SmartObject>(
+      smart_objects::SmartType_Array);
+  const auto window_caps =
+      (*display_capabilities_)[0][strings::window_capabilities].asArray();
+  if (!window_caps) {
+    LOG4CXX_WARN(logger_, "Current window capabilities are empty");
+    // SDL still needs to retreive display capabilities
+    return display_capabilities_;
+  }
+  auto find_res =
+      std::find_if(window_caps->begin(),
+                   window_caps->end(),
+                   [&window_id](const smart_objects::SmartObject& element) {
+                     if (window_id == element[strings::window_id].asInt()) {
+                       return true;
+                     }
+
+                     return false;
+                   });
+
+  DCHECK(find_res != window_caps->end());
+  const auto disp_caps_keys = (*display_capabilities_)[0].enumerate();
+  for (const auto& key : disp_caps_keys) {
+    if (strings::window_capabilities == key) {
+      continue;
+    }
+    (*result_display_caps)[0][key] = (*display_capabilities_)[0][key];
+  }
+
+  (*result_display_caps)[0][strings::window_capabilities][0] = *find_res;
+
+  return result_display_caps;
+}
+
 void DynamicApplicationDataImpl::load_global_properties(
     const smart_objects::SmartObject& properties_so) {
   SetGlobalProperties(properties_so.getElement(strings::vr_help_title),
@@ -498,8 +536,80 @@ void DynamicApplicationDataImpl::set_display_layout(const std::string& layout) {
 
 void DynamicApplicationDataImpl::set_display_capabilities(
     const smart_objects::SmartObject& display_capabilities) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  const auto& incoming_window_capabilities =
+      display_capabilities[0][strings::window_capabilities];
+
+  smart_objects::SmartObject tmp_window_capabilities;
+  if (display_capabilities_) {
+    tmp_window_capabilities =
+        (*display_capabilities_)[0][strings::window_capabilities];
+  }
+
   display_capabilities_.reset(
       new smart_objects::SmartObject(display_capabilities));
+
+  auto has_window_id = [&tmp_window_capabilities](const WindowID window_id) {
+    const auto tmp_window_capabilities_arr = tmp_window_capabilities.asArray();
+    if (!tmp_window_capabilities_arr) {
+      return false;
+    }
+
+    const auto find_res = std::find_if(
+        tmp_window_capabilities_arr->begin(),
+        tmp_window_capabilities_arr->end(),
+        [&window_id](const smart_objects::SmartObject& element) {
+          LOG4CXX_DEBUG(logger_,
+                        "Searching for "
+                            << window_id << " with element window id "
+                            << element[strings::window_id].asInt());
+          if ((!element.keyExists(strings::window_id)) && 0 == window_id) {
+            return true;
+          }
+          const auto current_window_id = element[strings::window_id].asInt();
+          if (window_id == current_window_id) {
+            return true;
+          }
+          return false;
+        });
+
+    return find_res != tmp_window_capabilities_arr->end();
+  };
+  for (uint32_t i = 0; i < incoming_window_capabilities.length(); ++i) {
+    const auto window_id =
+        incoming_window_capabilities[i][strings::window_id].asInt();
+    if (!has_window_id(window_id)) {
+      tmp_window_capabilities[tmp_window_capabilities.length()] =
+          incoming_window_capabilities[i];
+    }
+  }
+
+  (*display_capabilities_)[0][strings::window_capabilities] =
+      tmp_window_capabilities;
+}
+
+void DynamicApplicationDataImpl::remove_window_capability(
+    const WindowID window_id) {
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  auto window_capabilities =
+      (*display_capabilities_)[0][strings::window_capabilities].asArray();
+  DCHECK_OR_RETURN_VOID(window_capabilities);
+
+  for (auto it = window_capabilities->begin(); it != window_capabilities->end();
+       ++it) {
+    const auto cur_window_id = (*it).keyExists(strings::window_id)
+                                   ? (*it)[strings::window_id].asInt()
+                                   : 0;
+    if (window_id == cur_window_id) {
+      window_capabilities->erase(it);
+      return;
+    }
+  }
+
+  LOG4CXX_WARN(
+      logger_,
+      "No window id " << window_id << " found in display capabilities");
 }
 
 void DynamicApplicationDataImpl::set_window_layout(const WindowID window_id,

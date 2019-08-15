@@ -107,6 +107,8 @@ class DynamicApplicationDataImpl : public virtual Application {
   smart_objects::SmartObject night_color_scheme() const OVERRIDE;
   std::string display_layout() const OVERRIDE;
   smart_objects::SmartObjectSPtr display_capabilities() const OVERRIDE;
+  smart_objects::SmartObjectSPtr display_capabilities(
+      const WindowID window_id) const OVERRIDE;
 
   void set_window_layout(const WindowID window_id,
                          const std::string& layout) OVERRIDE;
@@ -144,6 +146,7 @@ class DynamicApplicationDataImpl : public virtual Application {
   void set_display_layout(const std::string& layout);
   void set_display_capabilities(
       const smart_objects::SmartObject& display_capabilities) OVERRIDE;
+  void remove_window_capability(const WindowID window_id) OVERRIDE;
   /*
    * @brief Adds a command to the in application menu
    */

@@ -207,6 +207,15 @@ class DynamicApplicationData {
    */
   virtual smart_objects::SmartObjectSPtr display_capabilities() const = 0;
 
+  /**
+   * @brief Specific display capabilities of application
+   * @param window id - id of an affected widget
+   * @return display capabilities of application or NULL-initialized pointer if
+   * not specified
+   */
+  virtual smart_objects::SmartObjectSPtr display_capabilities(
+      const WindowID window_id) const = 0;
+
   virtual void load_global_properties(const smart_objects::SmartObject& so) = 0;
   virtual void set_help_prompt(
       const smart_objects::SmartObject& help_prompt) = 0;
@@ -249,6 +258,12 @@ class DynamicApplicationData {
    */
   virtual void set_display_capabilities(
       const smart_objects::SmartObject& display_capabilities) = 0;
+
+  /**
+   * @brief deletes stored window capability for given window id
+   * @param window id of capability to remove
+   */
+  virtual void remove_window_capability(const WindowID window_id) = 0;
 
   /**
    * @brief Sets layout for application's specific window

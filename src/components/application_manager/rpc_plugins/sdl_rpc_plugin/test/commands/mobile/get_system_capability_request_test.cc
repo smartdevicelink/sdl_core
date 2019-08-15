@@ -85,6 +85,9 @@ TEST_F(
   ON_CALL(*mock_app_, display_capabilities())
       .WillByDefault(Return(system_display_capabilities));
 
+  ON_CALL(mock_hmi_capabilities_, system_display_capabilities())
+      .WillByDefault(Return(system_display_capabilities));
+
   EXPECT_CALL(
       mock_rpc_service_,
       ManageMobileCommand(MobileResultCodeIs(mobile_apis::Result::SUCCESS),
@@ -101,6 +104,9 @@ TEST_F(
       mobile_apis::SystemCapabilityType::DISPLAYS;
 
   EXPECT_CALL(*mock_app_, display_capabilities()).WillOnce(Return(nullptr));
+
+  ON_CALL(mock_hmi_capabilities_, system_display_capabilities())
+      .WillByDefault(Return(nullptr));
 
   EXPECT_CALL(mock_rpc_service_,
               ManageMobileCommand(

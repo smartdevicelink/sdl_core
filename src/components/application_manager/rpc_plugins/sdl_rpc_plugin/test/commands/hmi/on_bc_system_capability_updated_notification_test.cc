@@ -81,15 +81,17 @@ TEST_F(OnBCSystemCapabilityUpdatedNotificationTest,
              [am::strings::system_capability_type] =
                  mobile_apis::SystemCapabilityType::DISPLAYS;
 
-  smart_objects::SmartObject system_display_capabilities;
+  smart_objects::SmartObjectSPtr system_display_capabilities =
+      std::make_shared<smart_objects::SmartObject>(
+          smart_objects::SmartType_Null);
 
   EXPECT_CALL(mock_hmi_capabilities_, system_display_capabilities())
       .Times(2)
-      .WillRepeatedly(Return(&system_display_capabilities));
+      .WillRepeatedly(Return(system_display_capabilities));
 
   EXPECT_CALL(
       mock_rpc_service_,
-      SendMessageToHMI(CheckDisplayCapabilities(system_display_capabilities)));
+      SendMessageToHMI(CheckDisplayCapabilities(*system_display_capabilities)));
 
   ASSERT_TRUE(command_->Init());
   command_->Run();

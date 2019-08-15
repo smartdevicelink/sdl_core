@@ -81,6 +81,7 @@ void DeleteWindowRequest::DeleteWindow(
       (*message_)[strings::msg_params][strings::window_id].asInt();
   app->RemoveWindowInfo(window_id);
   app->RemoveHMIState(window_id, HmiState::StateID::STATE_ID_REGULAR);
+  app->remove_window_capability(window_id);
 }
 
 void DeleteWindowRequest::Run() {

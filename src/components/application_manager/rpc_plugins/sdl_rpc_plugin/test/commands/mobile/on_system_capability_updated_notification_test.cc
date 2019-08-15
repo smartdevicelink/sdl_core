@@ -58,7 +58,7 @@ const uint32_t kAppId = 2u;
 }  // namespace
 
 MATCHER_P(CheckDisplayCapabilities, display_capabilities, "") {
-  return display_capabilities ==
+  return *display_capabilities ==
          (*arg)[strings::msg_params][strings::system_capability]
                [strings::display_capabilities];
 }
@@ -86,10 +86,12 @@ TEST_F(
              [am::strings::system_capability_type] =
                  mobile_apis::SystemCapabilityType::DISPLAYS;
 
-  smart_objects::SmartObject system_display_capabilities;
+  smart_objects::SmartObjectSPtr system_display_capabilities =
+      std::make_shared<smart_objects::SmartObject>(
+          smart_objects::SmartType_Null);
 
   ON_CALL(mock_hmi_capabilities_, system_display_capabilities())
-      .WillByDefault(Return(&system_display_capabilities));
+      .WillByDefault(Return(system_display_capabilities));
 
   sdl_rpc_plugin::SDLRPCPlugin sdl_rpc_plugin;
 
@@ -132,10 +134,12 @@ TEST_F(
              [am::strings::system_capability_type] =
                  mobile_apis::SystemCapabilityType::DISPLAYS;
 
-  smart_objects::SmartObject system_display_capabilities;
+  smart_objects::SmartObjectSPtr system_display_capabilities =
+      std::make_shared<smart_objects::SmartObject>(
+          smart_objects::SmartType_Null);
 
   ON_CALL(mock_hmi_capabilities_, system_display_capabilities())
-      .WillByDefault(Return(&system_display_capabilities));
+      .WillByDefault(Return(system_display_capabilities));
 
   sdl_rpc_plugin::SDLRPCPlugin sdl_rpc_plugin;
 
@@ -172,10 +176,12 @@ TEST_F(
              [am::strings::system_capability_type] =
                  mobile_apis::SystemCapabilityType::DISPLAYS;
 
-  smart_objects::SmartObject system_display_capabilities;
+  smart_objects::SmartObjectSPtr system_display_capabilities =
+      std::make_shared<smart_objects::SmartObject>(
+          smart_objects::SmartType_Null);
 
   ON_CALL(mock_hmi_capabilities_, system_display_capabilities())
-      .WillByDefault(Return(&system_display_capabilities));
+      .WillByDefault(Return(system_display_capabilities));
 
   sdl_rpc_plugin::SDLRPCPlugin sdl_rpc_plugin;
 
