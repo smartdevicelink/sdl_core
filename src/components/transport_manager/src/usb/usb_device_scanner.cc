@@ -47,6 +47,7 @@ CREATE_LOGGERPTR_GLOBAL(logger_, "TransportManager")
 class AoaInitSequence : public UsbControlTransferSequence {
  public:
   AoaInitSequence();
+  AoaInitSequence(const TransportManagerSettings& settings);
   virtual ~AoaInitSequence() {}
 
  private:
@@ -86,8 +87,9 @@ void UsbDeviceScanner::OnDeviceLeft(PlatformUsbDevice* device) {
   }
 }
 
-UsbDeviceScanner::UsbDeviceScanner(TransportAdapterController* controller)
-    : controller_(controller) {}
+UsbDeviceScanner::UsbDeviceScanner(TransportAdapterController* controller,
+                                   const TransportManagerSettings& settings)
+    : controller_(controller), settings_(settings) {}
 
 UsbDeviceScanner::~UsbDeviceScanner() {}
 
@@ -171,14 +173,14 @@ class AoaInitSequence::AoaTurnIntoAccessoryMode : public UsbControlOutTransfer {
   }
 };
 
-static char manufacturer[] = "SDL";
-static char model_name[] = "Core";
-static char description[] = "SmartDeviceLink Core Component USB";
-static char version[] = "1.0";
-static char uri[] = "http://www.smartdevicelink.org";
-static char serial_num[] = "N000000";
-
-AoaInitSequence::AoaInitSequence() : UsbControlTransferSequence() {
+AoaInitSequence::AoaInitSequence(const TransportManagerSettings& settings)
+    : UsbControlTransferSequence() {
+  auto manufacturer = settings.aoa_filter_manufacturer().c_str();
+  auto model_name = settings.aoa_filter_model_name().c_str();
+  auto description = settings.aoa_filter_description().c_str();
+  auto version = settings.aoa_filter_version().c_str();
+  auto uri = settings.aoa_filter_uri().c_str();
+  auto serial_num = settings.aoa_filter_serial_number().c_str();
   AddTransfer(new AoaGetProtocolRequest);
   AddTransfer(new AoaSendIdString(0, manufacturer, sizeof(manufacturer)));
   AddTransfer(new AoaSendIdString(1, model_name, sizeof(model_name)));
@@ -192,7 +194,8 @@ AoaInitSequence::AoaInitSequence() : UsbControlTransferSequence() {
 void UsbDeviceScanner::TurnIntoAccessoryMode(PlatformUsbDevice* device) {
   LOG4CXX_AUTO_TRACE(logger_);
   LOG4CXX_DEBUG(logger_, "PlatformUsbDevice: " << device);
-  GetUsbHandler()->StartControlTransferSequence(new AoaInitSequence, device);
+  GetUsbHandler()->StartControlTransferSequence(new AoaInitSequence(settings_),
+                                                device);
 }
 
 void UsbDeviceScanner::SupportedDeviceFound(PlatformUsbDevice* device) {
