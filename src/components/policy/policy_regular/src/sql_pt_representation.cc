@@ -643,13 +643,13 @@ bool SQLPTRepresentation::GatherFunctionalGroupings(
         std::string param = rpcs.GetString(2);
         // EMPTY is a special mark to specify that 'parameters' section is
         // present, but has no parameters. It is not valid parameter value.
-        if ("EMPTY" == param) {
+        if (policy_table::EnumToJsonString(policy_table::P_EMPTY) == param) {
           (*rpcs_structure.rpcs[rpcs.GetString(0)].parameters)
               .mark_initialized();
           continue;
         }
 
-        InsertUnique(rpcs.GetString(2),
+        InsertUnique(param,
                      &(*rpcs_structure.rpcs[rpcs.GetString(0)].parameters));
       }
     }
@@ -1296,7 +1296,9 @@ bool SQLPTRepresentation::SaveRequestSubType(
   } else if (request_subtypes.is_initialized()) {
     LOG4CXX_WARN(logger_, "Request subtypes empty.");
     query.Bind(0, app_id);
-    query.Bind(1, std::string("EMPTY"));
+    query.Bind(1,
+               std::string(policy_table::EnumToJsonString(
+                   policy_table::RequestType::RT_EMPTY)));
     if (!query.Exec() || !query.Reset()) {
       LOG4CXX_WARN(logger_, "Incorrect insert into request subtypes.");
       return false;
@@ -1902,7 +1904,8 @@ bool SQLPTRepresentation::GatherRequestSubType(
   query.Bind(0, app_id);
   while (query.Next()) {
     const std::string request_subtype = query.GetString(0);
-    if ("EMPTY" == request_subtype) {
+    if (policy_table::EnumToJsonString(policy_table::RT_EMPTY) ==
+        request_subtype) {
       request_subtypes->mark_initialized();
       continue;
     }

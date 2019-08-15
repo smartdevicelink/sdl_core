@@ -40,44 +40,6 @@
 namespace rpc {
 namespace policy_table_interface_base {
 
-enum Parameter {
-  P_GPS,
-  P_SPEED,
-  P_ENGINETORQUE,
-  P_EXTERNALTEMPERATURE,
-  P_TURNSIGNAL,
-  P_FUELLEVEL,
-  P_FUELLEVEL_STATE,
-  P_HEADLAMPSTATUS,
-  P_INSTANTFUELCONSUMPTION,
-  P_FUELRANGE,
-  P_ODOMETER,
-  P_TIREPRESSURE,
-  P_WIPERSTATUS,
-  P_VIN,
-  P_ACCPEDALPOSITION,
-  P_BELTSTATUS,
-  P_ELECTRONICPARKBRAKESTATUS,
-  P_DRIVERBRAKING,
-  P_PRNDL,
-  P_RPM,
-  P_STEERINGWHEELANGLE,
-  P_ENGINEOILLIFE,
-  P_MYKEY,
-  P_CLOUD_APP_VEHICLE_ID,
-  P_AIRBAGSTATUS,
-  P_BODYINFORMATION,
-  P_CLUSTERMODESTATUS,
-  P_DEVICESTATUS,
-  P_EMERGENCYEVENT,
-  P_ECALLINFO,
-  P_EMPTY  // Added to allow empty parameters handling
-};
-
-bool IsValidEnum(Parameter val);
-const char* EnumToJsonString(Parameter val);
-bool EnumFromJsonString(const std::string& literal, Parameter* result);
-
 extern const std::string kDefaultApp;
 extern const std::string kPreDataConsentApp;
 extern const std::string kDeviceApp;

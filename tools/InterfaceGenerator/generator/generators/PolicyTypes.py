@@ -11,6 +11,7 @@ import collections
 import os
 import string
 import uuid
+import re
 
 from generator import Model
 
@@ -29,6 +30,10 @@ class GenerateError(Exception):
 def to_camel_case(snake_str):
     components = snake_str.split('_')
     return components[0].lower() + "".join(x.title() for x in components[1:])
+
+def to_snake_case(camel_str):
+    s1 = re.sub('(.)([A-Z][a-z]+)', r'\1_\2', camel_str)
+    return re.sub('([a-z0-9])([A-Z])', r'\1_\2', s1)
 
 class CodeGenerator(object):
 
@@ -97,21 +102,14 @@ class CodeGenerator(object):
         if interface is None:
             raise GenerateError("Given interface is None.")
 
-        vi_data_names = []
+        params_set = set()
         for func in interface.functions.values():
-            if (func.name == "SubscribeVehicleData"):
-                for param in func.params:
-                    vi_data_names.append(param)
-        def string_vi_name(vi_enum):
+            for param in func.params:
+                params_set.add(param)
 
-            def the_same(x, y):
-                return x in y or x[:3] == y[:3]
-
-            for vi_name in vi_data_names:
-                if the_same(vi_enum, vi_name.upper()):
-                    return vi_name
-
-            return vi_enum.lower()
+        parameter_enum = Model.Enum('Parameter')
+        for item in params_set:
+            parameter_enum.elements[item] = Model.EnumElement(item)
 
         required_enums_for_policy = [
             "HMILevel",
@@ -120,12 +118,14 @@ class CodeGenerator(object):
             "AppHMIType",
             "RequestType",
             "ModuleType",
-            "Common_AppPriority"
+            "Common_AppPriority",
+            "Parameter"
         ]
 
         self.required_empty_value = [
             "RequestType",
-            "ModuleType"
+            "ModuleType",
+            "Parameter"
         ]
 
         self.enum_items_naming_conversion_ = {
@@ -135,7 +135,8 @@ class CodeGenerator(object):
             "HybridAppPreference" : lambda item_name : item_name,
             "RequestType" : lambda item_name : "RT_" + item_name,
             "ModuleType" : lambda item_name : "MT_" + item_name,
-            "Common_AppPriority" :  lambda item_name : "P_" + item_name if not item_name == "VOICE_COMMUNICATION" else "P_VOICECOM"
+            "Common_AppPriority" :  lambda item_name : "P_" + item_name if not item_name == "VOICE_COMMUNICATION" else "P_VOICECOM",
+            "Parameter" :  lambda item_name : "P_" + to_snake_case(item_name)
         }
 
         self.enum_items_string_naming_conversion_ = {
@@ -146,6 +147,7 @@ class CodeGenerator(object):
             "RequestType" : lambda item_name : item_name,
             "ModuleType" : lambda item_name : item_name,
             "Common_AppPriority" :  lambda item_name : item_name if not item_name == "VOICE_COMMUNICATION" else "VOICECOM",
+            "Parameter" :  lambda item_name : item_name
         }
 
         self.enum_naming_conversion_ = {
@@ -155,7 +157,8 @@ class CodeGenerator(object):
             "HybridAppPreference" : "HybridAppPreference",
             "RequestType" : "RequestType",
             "ModuleType" : "ModuleType",
-            "Common_AppPriority" : "Priority"
+            "Common_AppPriority" : "Priority",
+            "Parameter" : "Parameter"
         }
 
         get_first_enum_value_name = lambda enum : enum.elements.values()[0].name
@@ -166,10 +169,14 @@ class CodeGenerator(object):
         required_enum_values = [val for val in interface.enums.values()
                                if enum_required_for_policy(val)]
 
-        self._write_header_with_enums(filename, namespace, destination_dir, required_enum_values)
-        self._write_cc_with_enums(filename, namespace, destination_dir, required_enum_values)
         if filename == "MOBILE_API":
             self._write_cc_with_enum_schema_factory(filename, namespace, destination_dir, interface.enums.values())
+
+            # Params should be generated as enum for MOBILE_API to validate RPCSpec parameters
+            required_enum_values.append(parameter_enum)
+
+        self._write_header_with_enums(filename, namespace, destination_dir, required_enum_values)
+        self._write_cc_with_enums(filename, namespace, destination_dir, required_enum_values)
 
     def _write_cc_with_enum_schema_factory(self,filename, namespace, destination_dir, required_enum_values):
         class_name = u"generated_{0}_enum_schema_factory".format(filename)
@@ -226,7 +233,7 @@ class CodeGenerator(object):
                          mode="w") as f_cc:
             guard = u"_{0}_{1}_CC__".format( class_name.upper(),
                     unicode(uuid.uuid1().hex.capitalize()))
-            namespace_open, namespace_close = self._namespaces_strings(namespace)            
+            namespace_open, namespace_close = self._namespaces_strings(namespace)
             f_cc.write(self._cc_file_template.substitute(
                 class_name=class_name,
                 header_file=header_file_name,
