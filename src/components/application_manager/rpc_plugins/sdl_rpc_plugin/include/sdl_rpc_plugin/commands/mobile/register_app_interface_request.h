@@ -215,9 +215,23 @@ class RegisterAppInterfaceRequest
    */
   bool IsApplicationSwitched();
 
+  /**
+   * @brief Information about given Connection Key.
+   * @param key Unique key used by other components as session identifier
+   * @param device_id device identifier.
+   * @param mac_address uniq address
+   * @return false in case of error or true in case of success
+   */
+  bool GetDataOnSessionKey(
+      const uint32_t key,
+      connection_handler::DeviceHandle* device_id = nullptr,
+      std::string* mac_address = nullptr) const;
+
  private:
   std::string response_info_;
   mobile_apis::Result::eType result_code_;
+  connection_handler::DeviceHandle device_handle_;
+  std::string device_id_;
 
   policy::PolicyHandlerInterface& GetPolicyHandler();
   DISALLOW_COPY_AND_ASSIGN(RegisterAppInterfaceRequest);

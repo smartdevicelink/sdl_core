@@ -45,14 +45,18 @@ namespace custom_str = utils::custom_string;
 class PolicyListener {
  public:
   virtual ~PolicyListener() {}
-  virtual void OnPermissionsUpdated(const std::string& policy_app_id,
+  virtual void OnPermissionsUpdated(const std::string& device_id,
+                                    const std::string& policy_app_id,
                                     const Permissions& permissions,
                                     const policy::HMILevel& default_hmi) = 0;
-  virtual void OnPermissionsUpdated(const std::string& policy_app_id,
+  virtual void OnPermissionsUpdated(const std::string& device_id,
+                                    const std::string& policy_app_id,
                                     const Permissions& permissions) = 0;
-  virtual void OnPendingPermissionChange(const std::string& policy_app_id) = 0;
+  virtual void OnPendingPermissionChange(const std::string& device_id,
+                                         const std::string& policy_app_id) = 0;
   virtual void OnUpdateStatusChanged(const std::string&) = 0;
   virtual std::string OnCurrentDeviceIdUpdateRequired(
+      const transport_manager::DeviceHandle& device_handle,
       const std::string& policy_app_id) = 0;
   virtual void OnSystemInfoUpdateRequired() = 0;
   virtual custom_str::CustomString GetAppName(
@@ -95,10 +99,12 @@ class PolicyListener {
   /**
    * @brief Sends OnAppPermissionsChanged notification to HMI
    * @param permissions contains parameter for OnAppPermisionChanged
+   * @param device_id device identifier
    * @param policy_app_id contains policy application id
    */
   virtual void SendOnAppPermissionsChanged(
       const AppPermissions& permissions,
+      const std::string& device_id,
       const std::string& policy_app_id) const = 0;
 
   /**
@@ -146,7 +152,7 @@ class PolicyListener {
    * @return list devices ids
    */
   virtual std::vector<std::string> GetDevicesIds(
-      const std::string& policy_app_id) = 0;
+      const std::string& policy_app_id) const = 0;
 
   /**
    * Notifies about changing HMI level

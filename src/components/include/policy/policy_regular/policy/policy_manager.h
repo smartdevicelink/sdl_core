@@ -260,12 +260,15 @@ class PolicyManager : public usage_statistics::StatisticsManager {
   /**
    * @brief Update Application Policies as reaction
    * on User allowing/disallowing device this app is running on.
+   * @param device_handle device identifier
    * @param app_id Unique application id
    * @param is_device_allowed true if user allowing device otherwise false
    * @return true if operation was successful
    */
-  virtual bool ReactOnUserDevConsentForApp(const std::string app_id,
-                                           bool is_device_allowed) = 0;
+  virtual bool ReactOnUserDevConsentForApp(
+      const transport_manager::DeviceHandle& device_handle,
+      const std::string app_id,
+      bool is_device_allowed) = 0;
 
   /**
    * @brief Sets counter value that passed for receiving PT UPdate.
@@ -311,12 +314,14 @@ class PolicyManager : public usage_statistics::StatisticsManager {
 
   /**
    * @brief Get default HMI level for application
+   * @param device_id device identifier
    * @param policy_app_id Unique application id
    * @param default_hmi Default HMI level for application or empty, if value
    * was not set
    * @return true, if succedeed, otherwise - false
    */
-  virtual bool GetDefaultHmi(const std::string& policy_app_id,
+  virtual bool GetDefaultHmi(const std::string& device_id,
+                             const std::string& policy_app_id,
                              std::string* default_hmi) const = 0;
 
   /**
@@ -360,11 +365,12 @@ class PolicyManager : public usage_statistics::StatisticsManager {
   /**
    * @brief Gets specific application permissions changes since last policy
    * table update
+   * @param device_id device identifier
    * @param policy_app_id Unique application id
    * @return Permissions changes
    */
   virtual AppPermissions GetAppPermissionsChanges(
-      const std::string& policy_app_id) = 0;
+      const std::string& device_id, const std::string& policy_app_id) = 0;
 
   /**
    * @brief Removes specific application permissions changes
@@ -374,9 +380,11 @@ class PolicyManager : public usage_statistics::StatisticsManager {
 
   /**
    * @brief Return device id, which hosts specific application
+   * @param device_handle device identifier
    * @param policy_app_id Application id, which is required to update device id
    */
   virtual std::string& GetCurrentDeviceId(
+      const transport_manager::DeviceHandle& device_handle,
       const std::string& policy_app_id) const = 0;
 
   /**
@@ -397,10 +405,11 @@ class PolicyManager : public usage_statistics::StatisticsManager {
 
   /**
    * @brief Send OnPermissionsUpdated for choosen application
+   * @param device_id device identifier
    * @param application_id Unique application id
    */
   virtual void SendNotificationOnPermissionsUpdated(
-      const std::string& application_id) = 0;
+      const std::string& device_id, const std::string& application_id) = 0;
 
   /**
    * @brief Marks device as upaired
@@ -411,11 +420,13 @@ class PolicyManager : public usage_statistics::StatisticsManager {
   /**
    * @brief Adds, application to the db or update existed one
    * run PTU if policy update is necessary for application.
+   * @param device_id device identifier
    * @param application_id Unique application id
    * @param hmi_types application HMI types
    * @return function that will notify update manager about new application
    */
   virtual StatusNotifier AddApplication(
+      const std::string& device_id,
       const std::string& application_id,
       const rpc::policy_table_interface_base::AppHmiTypes& hmi_types) = 0;
 
@@ -636,10 +647,13 @@ class PolicyManager : public usage_statistics::StatisticsManager {
   /**
    * @brief OnAppRegisteredOnMobile allows to handle event when application were
    * succesfully registered on mobile device.
-   * It will send OnAppPermissionSend notification and will try to start PTU. *
+   * It will send OnAppPermissionSend notification and will try to start PTU.
+   *
+   * @param device_id device identifier
    * @param application_id registered application.
    */
-  virtual void OnAppRegisteredOnMobile(const std::string& application_id) = 0;
+  virtual void OnAppRegisteredOnMobile(const std::string& device_id,
+                                       const std::string& application_id) = 0;
 
   virtual void OnDeviceSwitching(const std::string& device_id_from,
                                  const std::string& device_id_to) = 0;
@@ -674,11 +688,14 @@ class PolicyManager : public usage_statistics::StatisticsManager {
 
   /**
    * @brief Assigns new HMI types for specified application
+   * @param device_handle device identifier
    * @param application_id Unique application id
    * @param hmi_types new HMI types list
    */
-  virtual void SetDefaultHmiTypes(const std::string& application_id,
-                                  const std::vector<int>& hmi_types) = 0;
+  virtual void SetDefaultHmiTypes(
+      const transport_manager::DeviceHandle& device_handle,
+      const std::string& application_id,
+      const std::vector<int>& hmi_types) = 0;
 
   /**
    * @brief Gets HMI types

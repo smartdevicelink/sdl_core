@@ -265,12 +265,15 @@ class PolicyManagerImpl : public PolicyManager {
   /**
    * @brief Update Application Policies as reaction
    * on User allowing/disallowing device this app is running on.
+   * @param device_handle device identifier
    * @param app_id Unique application id
    * @param is_device_allowed true if user allowing device otherwise false
    * @return true if operation was successful
    */
-  bool ReactOnUserDevConsentForApp(const std::string app_id,
-                                   const bool is_device_allowed) OVERRIDE;
+  bool ReactOnUserDevConsentForApp(
+      const transport_manager::DeviceHandle& device_handle,
+      const std::string app_id,
+      const bool is_device_allowed) OVERRIDE;
 
   /**
    * @brief Retrieves data from app_policies about app on its registration:
@@ -311,12 +314,14 @@ class PolicyManagerImpl : public PolicyManager {
 
   /**
    * @brief Get default HMI level for application
+   * @param device_id device identifier
    * @param policy_app_id Unique application id
    * @param default_hmi Default HMI level for application or empty, if value
    * was not set
    * @return true, if succedeed, otherwise - false
    */
-  bool GetDefaultHmi(const std::string& policy_app_id,
+  bool GetDefaultHmi(const std::string& device_id,
+                     const std::string& policy_app_id,
                      std::string* default_hmi) const OVERRIDE;
 
   /**
@@ -359,9 +364,11 @@ class PolicyManagerImpl : public PolicyManager {
 
   /**
    * @brief Return device id, which hosts specific application
+   * @param device_handle device identifier
    * @param policy_app_id Application id, which is required to update device id
    */
   std::string& GetCurrentDeviceId(
+      const transport_manager::DeviceHandle& device_handle,
       const std::string& policy_app_id) const OVERRIDE;
 
   /**
@@ -403,11 +410,12 @@ class PolicyManagerImpl : public PolicyManager {
   /**
    * @brief Gets specific application permissions changes since last policy
    * table update
+   * @param device_id device identifier
    * @param policy_app_id Unique application id
    * @return Permissions changes
    */
   AppPermissions GetAppPermissionsChanges(
-      const std::string& policy_app_id) OVERRIDE;
+      const std::string& device_id, const std::string& policy_app_id) OVERRIDE;
 
   /**
    * @brief Removes specific application permissions changes
@@ -417,10 +425,11 @@ class PolicyManagerImpl : public PolicyManager {
 
   /**
    * @brief Send OnPermissionsUpdated for choosen application
+   * @param device_id device identifier
    * @param application_id Unique application id
    */
   void SendNotificationOnPermissionsUpdated(
-      const std::string& application_id) OVERRIDE;
+      const std::string& device_id, const std::string& application_id) OVERRIDE;
 
   /**
    * @brief Removes unpaired device records and related records from DB
@@ -451,20 +460,24 @@ class PolicyManagerImpl : public PolicyManager {
   /**
    * @brief Adds, application to the db or update existed one
    * run PTU if policy update is necessary for application.
+   * @param device_id device identifier
    * @param application_id Unique application id
    * @param hmi_types application HMI types
    * @return function that will notify update manager about new application
    */
   StatusNotifier AddApplication(
+      const std::string& device_id,
       const std::string& application_id,
       const rpc::policy_table_interface_base::AppHmiTypes& hmi_types) OVERRIDE;
 
   /**
    * @brief Assigns new HMI types for specified application
+   * @param device_handle device identifier
    * @param application_id Unique application id
    * @param hmi_types new HMI types list
    */
-  void SetDefaultHmiTypes(const std::string& application_id,
+  void SetDefaultHmiTypes(const transport_manager::DeviceHandle& device_handle,
+                          const std::string& application_id,
                           const std::vector<int>& hmi_types) OVERRIDE;
 
   /**
@@ -684,10 +697,13 @@ class PolicyManagerImpl : public PolicyManager {
   /**
    * @brief OnAppRegisteredOnMobile allows to handle event when application were
    * succesfully registered on mobile device.
-   * It will send OnAppPermissionSend notification and will try to start PTU. *
+   * It will send OnAppPermissionSend notification and will try to start PTU.
+   *
+   * @param device_id device identifier
    * @param application_id registered application.
    */
-  void OnAppRegisteredOnMobile(const std::string& application_id) OVERRIDE;
+  void OnAppRegisteredOnMobile(const std::string& device_id,
+                               const std::string& application_id) OVERRIDE;
 
   void OnDeviceSwitching(const std::string& device_id_from,
                          const std::string& device_id_to) OVERRIDE;
@@ -891,9 +907,12 @@ class PolicyManagerImpl : public PolicyManager {
 
   /**
    * @brief Checks whether need ask the permission of users
+   * @param device_id device identifier
+   * @param app_id policy application id
    * @return true if user consent is needed
    */
-  virtual bool IsConsentNeeded(const std::string& app_id);
+  virtual bool IsConsentNeeded(const std::string& device_id,
+                               const std::string& app_id);
 
   /**
    * @brief Changes isConsentNeeded for app pending permissions, in case

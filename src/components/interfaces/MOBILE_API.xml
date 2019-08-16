@@ -4243,11 +4243,11 @@
         <param name="appName" type="String" maxlength="100" mandatory="true" since="1.0">
             <description>
                 The mobile application name, e.g. "Ford Drive Green".
-                Needs to be unique over all applications.
+                Needs to be unique over all applications from the same device.
                 May not be empty.
                 May not start with a new line character.
-                May not interfere with any name or synonym of previously registered applications and any predefined blacklist of words (global commands)
-                Needs to be unique over all applications. Applications with the same name will be rejected.
+                May not interfere with any name or synonym of previously registered applications from the same device and any predefined blacklist of words (global commands)
+                Additional applications with the same name from the same device will be rejected.
                 Only characters from char set [@TODO: Create char set (character/hex value) for each ACM and refer to] are supported.
             </description>
         </param>
@@ -4256,7 +4256,7 @@
             <description>
                 TTS string for VR recognition of the mobile application name, e.g. "Ford Drive Green".
                 Meant to overcome any failing on speech engine in properly pronouncing / understanding app name.
-                Needs to be unique over all applications.
+                Needs to be unique over all applications from the same device.
                 May not be empty.
                 May not start with a new line character.
                 Only characters from char set [@TODO: Create char set (character/hex value) for each ACM and refer to] are supported.
@@ -4274,7 +4274,7 @@
         <param name="vrSynonyms" type="String" maxlength="40" minsize="1" maxsize="100" array="true" mandatory="false" since="1.0">
             <description>
                 Defines an additional voice recognition command.
-                May not interfere with any app name of previously registered applications and any predefined blacklist of words (global commands)
+                May not interfere with any app name of previously registered applications from the same device and any predefined blacklist of words (global commands)
                 Only characters from char set [@TODO: Create char set (character/hex value) for each ACM and refer to] are supported.
             </description>
         </param>

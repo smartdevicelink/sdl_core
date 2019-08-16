@@ -71,11 +71,12 @@ class PolicyHandlerInterface {
   virtual bool ReceiveMessageFromSDK(const std::string& file,
                                      const BinaryMessage& pt_string) = 0;
   virtual bool UnloadPolicyLibrary() = 0;
-  virtual void OnPermissionsUpdated(const std::string& policy_app_id,
+  virtual void OnPermissionsUpdated(const std::string& device_id,
+                                    const std::string& policy_app_id,
                                     const Permissions& permissions,
                                     const HMILevel& default_hmi) = 0;
-
-  virtual void OnPermissionsUpdated(const std::string& policy_app_id,
+  virtual void OnPermissionsUpdated(const std::string& device_id,
+                                    const std::string& policy_app_id,
                                     const Permissions& permissions) = 0;
 
 #ifdef EXTERNAL_PROPRIETARY_MODE
@@ -98,7 +99,8 @@ class PolicyHandlerInterface {
       const std::string& priority) const = 0;
   virtual DeviceConsent GetUserConsentForDevice(
       const std::string& device_id) const = 0;
-  virtual bool GetDefaultHmi(const std::string& policy_app_id,
+  virtual bool GetDefaultHmi(const std::string& device_id,
+                             const std::string& policy_app_id,
                              std::string* default_hmi) const = 0;
   virtual bool GetInitialAppData(const std::string& application_id,
                                  StringArray* nicknames = NULL,
@@ -137,6 +139,7 @@ class PolicyHandlerInterface {
 
   virtual void SendOnAppPermissionsChanged(
       const AppPermissions& permissions,
+      const std::string& device_id,
       const std::string& policy_app_id) const = 0;
 
   /**
@@ -176,7 +179,8 @@ class PolicyHandlerInterface {
    */
   virtual void OnIgnitionCycleOver() = 0;
 
-  virtual void OnPendingPermissionChange(const std::string& policy_app_id) = 0;
+  virtual void OnPendingPermissionChange(const std::string& device_id,
+                                         const std::string& policy_app_id) = 0;
 
   /**
    * Initializes PT exchange at user request
@@ -255,9 +259,11 @@ class PolicyHandlerInterface {
   /**
    * @brief Update currently used device id in policies manager for given
    * application
+   * @param device_handle device identifier
    * @param policy_app_id Application id
    */
   virtual std::string OnCurrentDeviceIdUpdateRequired(
+      const transport_manager::DeviceHandle& device_handle,
       const std::string& policy_app_id) = 0;
 
   /**
@@ -342,10 +348,12 @@ class PolicyHandlerInterface {
   /**
    * @brief Allows to add new or update existed application during
    * registration process
+   * @param device_id device identifier
    * @param application_id The policy aplication id.
    * @return function that will notify update manager about new application
    */
   virtual StatusNotifier AddApplication(
+      const std::string& device_id,
       const std::string& application_id,
       const rpc::policy_table_interface_base::AppHmiTypes& hmi_types) = 0;
 
@@ -384,17 +392,21 @@ class PolicyHandlerInterface {
    * succesfully registered on mobile device.
    * It will send OnAppPermissionSend notification and will try to start PTU.
    *
+   * @param device_id device identifier
    * @param application_id registered application.
    */
-  virtual void OnAppRegisteredOnMobile(const std::string& application_id) = 0;
+  virtual void OnAppRegisteredOnMobile(const std::string& device_id,
+                                       const std::string& application_id) = 0;
 
   /**
    * @brief Checks if certain request type is allowed for application
+   * @param device_handle device identifier
    * @param policy_app_id Unique applicaion id
    * @param type Request type
    * @return true, if allowed, otherwise - false
    */
   virtual bool IsRequestTypeAllowed(
+      const transport_manager::DeviceHandle& device_handle,
       const std::string& policy_app_id,
       mobile_apis::RequestType::eType type) const = 0;
 
@@ -426,10 +438,12 @@ class PolicyHandlerInterface {
 
   /**
    * @brief Gets application request types
+   * @param device_handle device identifier
    * @param policy_app_id Unique application id
    * @return request types
    */
   virtual const std::vector<std::string> GetAppRequestTypes(
+      const transport_manager::DeviceHandle& device_handle,
       const std::string& policy_app_id) const = 0;
 
   /**
@@ -565,10 +579,12 @@ class PolicyHandlerInterface {
 
   /**
    * @brief Sets HMI default type for specified application
+   * @param device_handle device identifier
    * @param application_id ID application
    * @param app_types list of HMI types
    */
   virtual void SetDefaultHmiTypes(
+      const transport_manager::DeviceHandle& device_handle,
       const std::string& application_id,
       const smart_objects::SmartObject* app_types) = 0;
 

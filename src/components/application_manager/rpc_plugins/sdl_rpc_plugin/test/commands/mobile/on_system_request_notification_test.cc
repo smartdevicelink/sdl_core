@@ -62,6 +62,7 @@ using testing::SaveArg;
 namespace {
 const uint32_t kConnectionKey = 1u;
 const std::string kPolicyAppId = "fake-app-id";
+const connection_handler::DeviceHandle kDeviceId = 1u;
 }  // namespace
 
 class OnSystemRequestNotificationTest
@@ -73,6 +74,7 @@ class OnSystemRequestNotificationTest
     ON_CALL(app_mngr_, application(kConnectionKey))
         .WillByDefault(Return(mock_app_));
     ON_CALL(*mock_app_, policy_app_id()).WillByDefault(Return(kPolicyAppId));
+    ON_CALL(*mock_app_, device()).WillByDefault(Return(kDeviceId));
   }
 
  protected:
@@ -90,12 +92,14 @@ TEST_F(OnSystemRequestNotificationTest, Run_ProprietaryType_SUCCESS) {
   std::shared_ptr<OnSystemRequestNotification> command =
       CreateCommand<OnSystemRequestNotification>(msg);
 
+  PreConditions();
+
   EXPECT_CALL(app_mngr_, application(kConnectionKey))
       .WillRepeatedly(Return(mock_app_));
 
   EXPECT_CALL(*mock_app_, policy_app_id()).WillOnce(Return(kPolicyAppId));
   EXPECT_CALL(mock_policy_handler_,
-              IsRequestTypeAllowed(kPolicyAppId, request_type))
+              IsRequestTypeAllowed(kDeviceId, kPolicyAppId, request_type))
       .WillRepeatedly(Return(true));
 
 #ifdef PROPRIETARY_MODE
@@ -130,10 +134,13 @@ TEST_F(OnSystemRequestNotificationTest, Run_HTTPType_SUCCESS) {
   std::shared_ptr<OnSystemRequestNotification> command =
       CreateCommand<OnSystemRequestNotification>(msg);
 
+  PreConditions();
+
   EXPECT_CALL(app_mngr_, application(kConnectionKey))
       .WillOnce(Return(mock_app_));
   EXPECT_CALL(*mock_app_, policy_app_id()).WillOnce(Return(kPolicyAppId));
-  EXPECT_CALL(mock_policy_handler_, IsRequestTypeAllowed(_, _))
+  EXPECT_CALL(mock_policy_handler_,
+              IsRequestTypeAllowed(kDeviceId, kPolicyAppId, request_type))
       .WillOnce(Return(true));
 
   EXPECT_CALL(mock_message_helper_, PrintSmartObject(_))
@@ -167,7 +174,7 @@ TEST_F(OnSystemRequestNotificationTest, Run_InvalidApp_NoNotification) {
   EXPECT_CALL(app_mngr_, application(kConnectionKey))
       .WillOnce(Return(MockAppPtr()));
   EXPECT_CALL(*mock_app_, policy_app_id()).Times(0);
-  EXPECT_CALL(mock_policy_handler_, IsRequestTypeAllowed(_, _)).Times(0);
+  EXPECT_CALL(mock_policy_handler_, IsRequestTypeAllowed(_, _, _)).Times(0);
 
   EXPECT_CALL(mock_message_helper_, PrintSmartObject(_)).Times(0);
 
@@ -187,10 +194,13 @@ TEST_F(OnSystemRequestNotificationTest, Run_RequestNotAllowed_NoNotification) {
   std::shared_ptr<OnSystemRequestNotification> command =
       CreateCommand<OnSystemRequestNotification>(msg);
 
+  PreConditions();
+
   EXPECT_CALL(app_mngr_, application(kConnectionKey))
       .WillOnce(Return(mock_app_));
   EXPECT_CALL(*mock_app_, policy_app_id()).WillOnce(Return(kPolicyAppId));
-  EXPECT_CALL(mock_policy_handler_, IsRequestTypeAllowed(_, _))
+  EXPECT_CALL(mock_policy_handler_,
+              IsRequestTypeAllowed(kDeviceId, kPolicyAppId, request_type))
       .WillOnce(Return(false));
 
   EXPECT_CALL(mock_message_helper_, PrintSmartObject(_)).Times(0);
@@ -214,7 +224,7 @@ TEST_F(
   PreConditions();
 
   EXPECT_CALL(mock_policy_handler_,
-              IsRequestTypeAllowed(kPolicyAppId, request_type))
+              IsRequestTypeAllowed(kDeviceId, kPolicyAppId, request_type))
       .WillOnce(Return(true));
   EXPECT_CALL(mock_policy_handler_,
               IsRequestSubTypeAllowed(kPolicyAppId, request_subtype))
@@ -241,7 +251,7 @@ TEST_F(OnSystemRequestNotificationTest,
   PreConditions();
 
   EXPECT_CALL(mock_policy_handler_,
-              IsRequestTypeAllowed(kPolicyAppId, request_type))
+              IsRequestTypeAllowed(kDeviceId, kPolicyAppId, request_type))
       .WillOnce(Return(true));
   EXPECT_CALL(mock_policy_handler_,
               IsRequestSubTypeAllowed(kPolicyAppId, request_subtype))

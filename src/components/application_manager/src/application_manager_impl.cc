@@ -121,17 +121,26 @@ bool device_id_comparator(const std::string& device_id,
 }
 
 /**
- * @brief policy_app_id_comparator is predicate to compare policy application
- * ids
- * @param policy_app_id Policy id of application
- * @param app Application pointer
- * @return True if policy id of application matches to policy id passed
+ * @brief PolicyAppIdComparator is struct predicate to compare policy
+ * application ids & device
+ * @param device_handle of application
+ * @param id of application
+ * @return True if policy id & device_handle of application matches to policy id
+ * & device_handle passed
  */
-bool policy_app_id_comparator(const std::string& policy_app_id,
-                              ApplicationSharedPtr app) {
-  DCHECK_OR_RETURN(app, false);
-  return app->policy_app_id() == policy_app_id;
-}
+struct PolicyAppIdComparator {
+  PolicyAppIdComparator(const connection_handler::DeviceHandle& device_handle,
+                        const std::string& policy_app_id)
+      : device_handle_(device_handle), policy_app_id_(policy_app_id) {}
+  bool operator()(const ApplicationSharedPtr app) const {
+    return app && app->device() == device_handle_ &&
+           app->policy_app_id() == policy_app_id_;
+  }
+
+ private:
+  const connection_handler::DeviceHandle& device_handle_;
+  const std::string& policy_app_id_;
+};
 
 uint32_t ApplicationManagerImpl::mobile_corelation_id_ = 0;
 uint32_t ApplicationManagerImpl::corelation_id_ = 0;
@@ -1631,7 +1640,8 @@ mobile_apis::HMILevel::eType ApplicationManagerImpl::GetDefaultHmiLevel(
   if (GetPolicyHandler().PolicyEnabled()) {
     const std::string policy_app_id = application->policy_app_id();
     std::string default_hmi_string = "";
-    if (GetPolicyHandler().GetDefaultHmi(policy_app_id, &default_hmi_string)) {
+    if (GetPolicyHandler().GetDefaultHmi(
+            application->mac_address(), policy_app_id, &default_hmi_string)) {
       if ("BACKGROUND" == default_hmi_string) {
         default_hmi = HMILevel::HMI_BACKGROUND;
       } else if ("FULL" == default_hmi_string) {
@@ -1943,7 +1953,7 @@ void ApplicationManagerImpl::OnServiceEndedCallback(
     return;
   }
 
-  if (IsAppInReconnectMode(app->policy_app_id())) {
+  if (IsAppInReconnectMode(app->device(), app->policy_app_id())) {
     LOG4CXX_DEBUG(logger_,
                   "Application is in reconnection list and won't be closed.");
     return;
@@ -2490,8 +2500,24 @@ void ApplicationManagerImpl::CreateApplications(SmartArray& obj_array,
     }
 
     const std::string policy_app_id(app_data[json::appId].asString());
-    ApplicationSharedPtr registered_app =
-        application_by_policy_id(policy_app_id);
+
+    connection_handler::DeviceHandle device_handle;
+    if (-1 == connection_handler().get_session_observer().GetDataOnSessionKey(
+                  connection_key, nullptr, nullptr, &device_handle)) {
+      LOG4CXX_ERROR(logger_,
+                    "Failed to create application: no connection info.");
+      continue;
+    }
+
+    std::string device_id;
+    if (-1 == connection_handler().get_session_observer().GetDataOnDeviceID(
+                  device_handle, nullptr, nullptr, &device_id)) {
+      LOG4CXX_ERROR(logger_,
+                    "Failed to create application: no connection info.");
+      continue;
+    }
+
+    ApplicationSharedPtr registered_app = application(device_id, policy_app_id);
     if (registered_app) {
       LOG4CXX_DEBUG(logger_,
                     "Application with the same id: "
@@ -2530,22 +2556,9 @@ void ApplicationManagerImpl::CreateApplications(SmartArray& obj_array,
     const std::string app_icon_dir(settings_.app_icons_folder());
     const std::string full_icon_path(app_icon_dir + "/" + policy_app_id);
 
-    connection_handler::DeviceHandle device_id = 0;
-
-    if (-1 == connection_handler().get_session_observer().GetDataOnSessionKey(
-                  connection_key, NULL, NULL, &device_id)) {
-      LOG4CXX_ERROR(logger_,
-                    "Failed to create application: no connection info.");
-      continue;
-    }
-
-    std::string device_mac;
-    connection_handler().get_session_observer().GetDataOnDeviceID(
-        device_id, NULL, NULL, &device_mac, NULL);
-
     const uint32_t hmi_app_id =
-        resume_controller().IsApplicationSaved(policy_app_id, device_mac)
-            ? resume_controller().GetHMIApplicationID(policy_app_id, device_mac)
+        resume_controller().IsApplicationSaved(policy_app_id, device_id)
+            ? resume_controller().GetHMIApplicationID(policy_app_id, device_id)
             : GenerateNewHMIAppID();
 
     // AppId = 0 because this is query_app(provided by hmi for download, but not
@@ -2553,8 +2566,8 @@ void ApplicationManagerImpl::CreateApplications(SmartArray& obj_array,
     ApplicationSharedPtr app(
         new ApplicationImpl(0,
                             policy_app_id,
-                            device_mac,
                             device_id,
+                            device_handle,
                             appName,
                             GetPolicyHandler().GetStatisticManager(),
                             *this));
@@ -3514,14 +3527,14 @@ bool ApplicationManagerImpl::IsApplicationForbidden(
 }
 
 bool ApplicationManagerImpl::IsAppInReconnectMode(
+    const connection_handler::DeviceHandle& device_id,
     const std::string& policy_app_id) const {
   LOG4CXX_AUTO_TRACE(logger_);
   sync_primitives::AutoLock lock(reregister_wait_list_lock_);
   return reregister_wait_list_.end() !=
          std::find_if(reregister_wait_list_.begin(),
                       reregister_wait_list_.end(),
-                      std::bind1st(std::ptr_fun(&policy_app_id_comparator),
-                                   policy_app_id));
+                      PolicyAppIdComparator(device_id, policy_app_id));
 }
 
 policy::DeviceConsent ApplicationManagerImpl::GetUserConsentForDevice(
@@ -3846,10 +3859,10 @@ void ApplicationManagerImpl::EraseAppFromReconnectionList(
 
   const auto policy_app_id = app->policy_app_id();
   sync_primitives::AutoLock lock(reregister_wait_list_lock_);
-  auto app_it = std::find_if(
-      reregister_wait_list_.begin(),
-      reregister_wait_list_.end(),
-      std::bind1st(std::ptr_fun(&policy_app_id_comparator), policy_app_id));
+  auto app_it =
+      std::find_if(reregister_wait_list_.begin(),
+                   reregister_wait_list_.end(),
+                   PolicyAppIdComparator(app->device(), policy_app_id));
   if (reregister_wait_list_.end() != app_it) {
     reregister_wait_list_.erase(app_it);
   }

@@ -2665,7 +2665,7 @@
     <param name="vrSynonyms" type="String" maxlength="40" minsize="1" maxsize="100" array="true" mandatory="false">
       <description>
         Defines an additional voice recognition command.
-        Must not interfere with any name of previously registered applications(SDL makes check).
+        Must not interfere with any name of previously registered applications from the same device.
       </description>
     </param>
     <param name="appID" type="Integer" mandatory="true">
@@ -4086,7 +4086,7 @@
       <param name="vrSynonyms" type="String" maxlength="40" minsize="1" maxsize="100" array="true" mandatory="false">
         <description>
           Defines an additional voice recognition command.
-          Must not interfere with any name of previously registered applications(SDL makes check).
+          Must not interfere with any name of previously registered applications from the same device.
         </description>
       </param>
       <param name="resumeVrGrammars" type="Boolean" mandatory="false">
@@ -4471,7 +4471,7 @@
       <description>
         Request new VR synonyms registration
         Defines an additional voice recognition command.
-        Must not interfere with any name of previously registered applications(SDL makes check).
+        Must not interfere with any name of previously registered applications from the same device.
       </description>
     </param>
     <param name="language" type="Common.Language" mandatory="true">
@@ -4947,10 +4947,10 @@
     <param name="appName" type="String" maxlength="100" mandatory="false">
       <description>
         Request new app name registration
-        Needs to be unique over all applications.
+        Needs to be unique over all applications from the same device.
         May not be empty. May not start with a new line character.
-        May not interfere with any name or synonym of any registered applications.
-        Applications with the same name will be rejected. (SDL makes all the checks)
+        May not interfere with any name or synonym of any registered applications from the same device.
+        Additional applications with the same name from the same device will be rejected.
       </description>
     </param>
     <param name="ngnMediaScreenAppName" type="String" maxlength="100" mandatory="false">

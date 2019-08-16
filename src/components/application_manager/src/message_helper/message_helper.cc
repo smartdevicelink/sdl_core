@@ -1648,7 +1648,8 @@ bool MessageHelper::CreateHMIApplicationStruct(
   const policy::RequestType::State app_request_types_state =
       policy_handler.GetAppRequestTypeState(policy_app_id);
   if (policy::RequestType::State::AVAILABLE == app_request_types_state) {
-    const auto request_types = policy_handler.GetAppRequestTypes(policy_app_id);
+    const auto request_types =
+        policy_handler.GetAppRequestTypes(app->device(), policy_app_id);
     message[strings::request_type] =
         SmartObject(smart_objects::SmartType_Array);
     smart_objects::SmartObject& request_types_array =

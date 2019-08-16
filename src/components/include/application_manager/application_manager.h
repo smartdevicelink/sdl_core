@@ -94,9 +94,12 @@ class StateControllerImpl;
 struct CommandParametersPermissions;
 using policy::RPCParams;
 typedef std::vector<ApplicationSharedPtr> AppSharedPtrs;
-struct ApplicationsAppIdSorter {
+struct ApplicationsSorter {
   bool operator()(const ApplicationSharedPtr lhs,
                   const ApplicationSharedPtr rhs) const {
+    if (lhs->app_id() == rhs->app_id()) {
+      return lhs->device() < rhs->device();
+    }
     return lhs->app_id() < rhs->app_id();
   }
 };
@@ -110,7 +113,7 @@ struct ApplicationsPolicyAppIdSorter {
   }
 };
 
-typedef std::set<ApplicationSharedPtr, ApplicationsAppIdSorter> ApplicationSet;
+typedef std::set<ApplicationSharedPtr, ApplicationsSorter> ApplicationSet;
 
 typedef std::set<ApplicationSharedPtr, ApplicationsPolicyAppIdSorter>
     AppsWaitRegistrationSet;
@@ -635,11 +638,14 @@ class ApplicationManager {
   /**
    * @brief IsAppInReconnectMode check if application belongs to session
    * affected by transport switching at the moment
+   * @param device_id device indentifier
    * @param policy_app_id Application id
    * @return True if application is registered within session being switched,
    * otherwise - false
    */
-  virtual bool IsAppInReconnectMode(const std::string& policy_app_id) const = 0;
+  virtual bool IsAppInReconnectMode(
+      const connection_handler::DeviceHandle& device_id,
+      const std::string& policy_app_id) const = 0;
 
   virtual resumption::ResumeCtrl& resume_controller() = 0;
 
