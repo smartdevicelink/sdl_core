@@ -145,7 +145,7 @@ TEST_F(UIGetCapabilitiesResponseTest, SetHmiZone_SUCCESS) {
 TEST_F(UIGetCapabilitiesResponseTest, SetAudioPassThru_SUCCESS) {
   MessageSharedPtr command_msg = CreateCommandMsg();
   (*command_msg)[strings::msg_params][strings::audio_pass_thru_capabilities] =
-      smart_objects::SmartObject(smart_objects::SmartType_Array);
+      smart_objects::SmartObject(smart_objects::SmartType_Map);
 
   ResponseFromHMIPtr command(
       CreateCommand<UIGetCapabilitiesResponse>(command_msg));
@@ -153,9 +153,15 @@ TEST_F(UIGetCapabilitiesResponseTest, SetAudioPassThru_SUCCESS) {
   smart_objects::SmartObject audio_pass_thru_capabilities_so =
       (*command_msg)[strings::msg_params]
                     [strings::audio_pass_thru_capabilities];
+
+  // hmi_capabilities will receive a list of capabilities, the first element
+  // being audio_pass_thru_capabilities_so
+  smart_objects::SmartObject audio_pass_thru_capabilities_list_so =
+      smart_objects::SmartObject(smart_objects::SmartType_Array);
+  audio_pass_thru_capabilities_list_so[0] = audio_pass_thru_capabilities_so;
   EXPECT_CALL(
       mock_hmi_capabilities_,
-      set_audio_pass_thru_capabilities(audio_pass_thru_capabilities_so));
+      set_audio_pass_thru_capabilities(audio_pass_thru_capabilities_list_so));
 
   command->Run();
 }
