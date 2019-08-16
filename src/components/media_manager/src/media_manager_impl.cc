@@ -31,7 +31,6 @@
  */
 
 #include "media_manager/media_manager_impl.h"
-#include <chrono>
 #include "application_manager/application.h"
 #include "application_manager/application_impl.h"
 #include "application_manager/application_manager.h"
@@ -53,11 +52,6 @@
 #include "media_manager/video/file_video_streamer_adapter.h"
 #include "media_manager/video/pipe_video_streamer_adapter.h"
 #include "media_manager/video/socket_video_streamer_adapter.h"
-
-namespace {
-// For debugging cut off point
-std::chrono::time_point<std::chrono::system_clock> start_time, end_time;
-}  // namespace
 
 namespace media_manager {
 
@@ -260,10 +254,6 @@ void MediaManagerImpl::StartStreaming(
     int32_t application_key, protocol_handler::ServiceType service_type) {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  LOG4CXX_DEBUG(logger_,
-                "MEDIASTREAM_MEDIA_MNGR: Starting "
-                    << service_type << " stream for app " << application_key);
-  start_time = std::chrono::system_clock::now();
   if (streamer_[service_type]) {
     streamer_[service_type]->StartActivity(application_key);
   }
@@ -272,13 +262,6 @@ void MediaManagerImpl::StartStreaming(
 void MediaManagerImpl::StopStreaming(
     int32_t application_key, protocol_handler::ServiceType service_type) {
   LOG4CXX_AUTO_TRACE(logger_);
-
-  end_time = std::chrono::system_clock::now();
-  std::chrono::duration<double> elapsed_seconds = end_time - start_time;
-  LOG4CXX_DEBUG(logger_,
-                "MEDIASTREAM_MEDIA_MNGR: Stopping "
-                    << service_type << " stream for app " << application_key
-                    << " after " << elapsed_seconds.count() << " seconds");
 
   if (streamer_[service_type]) {
     streamer_[service_type]->StopActivity(application_key);
@@ -299,13 +282,6 @@ void MediaManagerImpl::OnMessageReceived(
 
   const uint32_t streaming_app_id = message->connection_key();
   const ServiceType service_type = message->service_type();
-
-  end_time = std::chrono::system_clock::now();
-  std::chrono::duration<double> elapsed_seconds = end_time - start_time;
-  LOG4CXX_DEBUG(logger_,
-                "MEDIASTREAM_MEDIA_MNGR: Receiving message from app "
-                    << streaming_app_id << " for service type " << service_type
-                    << "(" << elapsed_seconds.count() << "seconds)");
 
   if (Compare<ServiceType, NEQ, ALL>(
           service_type, ServiceType::kMobileNav, ServiceType::kAudio)) {
@@ -332,13 +308,6 @@ void MediaManagerImpl::OnMobileMessageSent(
 
 void MediaManagerImpl::FramesProcessed(int32_t application_key,
                                        int32_t frame_number) {
-  end_time = std::chrono::system_clock::now();
-  std::chrono::duration<double> elapsed_seconds = end_time - start_time;
-  LOG4CXX_DEBUG(logger_,
-                "MEDIASTREAM_MEDIA_MNGR: Sending frame number "
-                    << frame_number << " from app " << application_key << " ("
-                    << elapsed_seconds.count() << " seconds)");
-
   if (protocol_handler_) {
     protocol_handler_->SendFramesNumber(application_key, frame_number);
   }
@@ -355,8 +324,7 @@ void MediaManagerImpl::FramesProcessed(int32_t application_key,
     if (audio_stream.use_count() != 0) {
       size_t audio_queue_size = audio_stream->GetMsgQueueSize();
       LOG4CXX_DEBUG(logger_,
-                    "MEDIASTREAM_MEDIA_MNGR: # Messages in audio queue = "
-                        << audio_queue_size);
+                    "# Messages in audio queue = " << audio_queue_size);
       if (audio_queue_size > 0) {
         app->WakeUpStreaming(protocol_handler::ServiceType::kAudio);
       }
@@ -365,8 +333,7 @@ void MediaManagerImpl::FramesProcessed(int32_t application_key,
     if (video_stream.use_count() != 0) {
       size_t video_queue_size = video_stream->GetMsgQueueSize();
       LOG4CXX_DEBUG(logger_,
-                    "MEDIASTREAM_MEDIA_MNGR: # Messages in video queue = "
-                        << video_queue_size);
+                    "# Messages in video queue = " << video_queue_size);
       if (video_queue_size > 0) {
         app->WakeUpStreaming(protocol_handler::ServiceType::kMobileNav);
       }
