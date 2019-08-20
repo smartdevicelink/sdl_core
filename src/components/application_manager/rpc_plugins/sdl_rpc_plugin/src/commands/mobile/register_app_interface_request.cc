@@ -244,9 +244,6 @@ void RegisterAppInterfaceRequest::Run() {
     SendResponse(false, mobile_apis::Result::APPLICATION_REGISTERED_ALREADY);
     return;
   }
-  // cache the original app ID (for legacy behavior)
-  const std::string policy_app_id =
-      application_manager_.GetCorrectMobileIDFromMessage(message_);
 
   const smart_objects::SmartObject& msg_params =
       (*message_)[strings::msg_params];
@@ -871,7 +868,7 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile(
   // Start PTU after successfull registration
   // Sends OnPermissionChange notification to mobile right after RAI response
   // and HMI level set-up
-  GetPolicyHandler().OnAppRegisteredOnMobile(application->policy_app_id());
+  GetPolicyHandler().OnAppRegisteredOnMobile(application->mac_address(), application->policy_app_id());
   if (resumption) {
     if (result_code != mobile_apis::Result::RESUME_FAILED) {
       resumer.StartResumption(application, hash_id);

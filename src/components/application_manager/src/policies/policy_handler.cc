@@ -882,9 +882,6 @@ std::string PolicyHandler::OnCurrentDeviceIdUpdateRequired(
                         "not found within registered applications.");
     return std::string();
   }
-  DeviceParams device_params = GetDeviceParams(
-      app->device(),
-      application_manager_.connection_handler().get_session_observer());
 
   return device_params.device_mac_address;
 }

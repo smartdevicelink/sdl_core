@@ -650,11 +650,11 @@ TEST_F(
                       "Life",
                       2,
                       "Bluetooth");
-  EXPECT_CALL(listener, OnCurrentDeviceIdUpdateRequired(app_id1))
+  EXPECT_CALL(listener, OnCurrentDeviceIdUpdateRequired(_, app_id1))
       .WillRepeatedly(Return(dev_id1));
   manager->SetUserConsentForDevice(dev_id1, true);
   // Add app from consented device. App will be assigned with default policies
-  manager->AddApplication(app_id1, HmiTypes(policy_table::AHT_DEFAULT));
+  manager->AddApplication(app_id1, app_id1, HmiTypes(policy_table::AHT_DEFAULT));
   // Act
   const char* const rpc_name = "CreateWindow";
   const char* const hmi_level = "NONE";
@@ -703,11 +703,11 @@ TEST_F(
                       "Life",
                       2,
                       "Bluetooth");
-  EXPECT_CALL(listener, OnCurrentDeviceIdUpdateRequired(app_id1))
+  EXPECT_CALL(listener, OnCurrentDeviceIdUpdateRequired(_, app_id1))
       .WillRepeatedly(Return(dev_id1));
   manager->SetUserConsentForDevice(dev_id1, true);
   // Add app from consented device. App will be assigned with default policies
-  manager->AddApplication(app_id1, HmiTypes(policy_table::AHT_DEFAULT));
+  manager->AddApplication(dev_id1, app_id1, HmiTypes(policy_table::AHT_DEFAULT));
   // Act
   const char* const rpc_name = "DeleteWindow";
   const char* const hmi_level = "NONE";
