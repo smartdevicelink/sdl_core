@@ -70,7 +70,9 @@ enum APIVersion {
   kAPIV1 = 1,
   kAPIV2 = 2,
   kAPIV3 = 3,
-  kAPIV4 = 4
+  kAPIV4 = 4,
+  kAPIV5 = 5,
+  kAPIV6 = 6
 };
 
 enum TLimitSource { POLICY_TABLE = 0, CONFIG_FILE };

@@ -125,6 +125,14 @@ void SetDisplayLayoutRequest::Run() {
 void SetDisplayLayoutRequest::on_event(const event_engine::Event& event) {
   LOG4CXX_AUTO_TRACE(logger_);
 
+  ApplicationSharedPtr app = application_manager_.application(connection_key());
+
+  if (!app) {
+    LOG4CXX_ERROR(logger_, "Application is not registered");
+    SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
+    return;
+  }
+
   const smart_objects::SmartObject& message = event.smart_object();
   switch (event.id()) {
     case hmi_apis::FunctionID::UI_SetDisplayLayout: {
@@ -152,18 +160,21 @@ void SetDisplayLayoutRequest::on_event(const event_engine::Event& event) {
                               hmi_response::templates_available);
           }
         }
-
-        // In case of successful response warn user that this RPC is deprecated
-        result_code = hmi_apis::Common_Result::WARNINGS;
-        info =
-            "The RPC is deprecated and will be removed in a future version. "
-            "The requested display layout is set to the main window. Please "
-            "use `Show.templateConfiguration` instead.";
+        const Version& app_version = app->version();
+        if (app_version.max_supported_api_version >= APIVersion::kAPIV6) {
+          // In case of successful response warn user that this RPC is
+          // deprecated from 6.0 and higher API versions
+          result_code = hmi_apis::Common_Result::WARNINGS;
+          info =
+              "The RPC is deprecated and will be removed in a future version. "
+              "The requested display layout is set to the main window. Please "
+              "use `Show.templateConfiguration` instead.";
+        }
       }
 
       SendResponse(response_success,
                    MessageHelper::HMIToMobileResult(result_code),
-                   info.empty() ? NULL : info.c_str(),
+                   info.empty() ? nullptr : info.c_str(),
                    &msg_params);
       break;
     }
