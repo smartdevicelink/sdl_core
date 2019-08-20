@@ -836,8 +836,6 @@ void PolicyManagerImpl::CheckPermissions(const PTString& device_id,
                "CheckPermissions for " << app_id << " and rpc " << rpc
                                        << " for " << hmi_level << " level.");
 
-  const std::string device_id = GetCurrentDeviceId(app_id);
-
   Permissions rpc_permissions;
 
   // Check, if there are calculated permission present in cache
@@ -1009,7 +1007,6 @@ policy_table::Strings PolicyManagerImpl::GetGroupsNames(
 void PolicyManagerImpl::SendNotificationOnPermissionsUpdated(
     const std::string& device_id, const std::string& application_id) {
   LOG4CXX_AUTO_TRACE(logger_);
-  const std::string device_id = GetCurrentDeviceId(application_id);
   if (device_id.empty()) {
     LOG4CXX_WARN(logger_,
                  "Couldn't find device info for application id "
