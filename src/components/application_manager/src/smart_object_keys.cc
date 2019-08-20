@@ -142,6 +142,7 @@ const char* system_context = "systemContext";
 const char* speech_capabilities = "speechCapabilities";
 const char* vr_capabilities = "vrCapabilities";
 const char* audio_pass_thru_capabilities = "audioPassThruCapabilities";
+const char* audio_pass_thru_capabilities_list = "audioPassThruCapabilitiesList";
 const char* pcm_stream_capabilities = "pcmStreamCapabilities";
 const char* audio_pass_thru_icon = "audioPassThruIcon";
 const char* way_points = "wayPoints";

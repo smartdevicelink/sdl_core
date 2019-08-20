@@ -626,15 +626,9 @@ void FillUIRelatedFields(smart_objects::SmartObject& response_params,
   }
 
   if (hmi_capabilities.audio_pass_thru_capabilities()) {
-    if (smart_objects::SmartType_Array ==
-        hmi_capabilities.audio_pass_thru_capabilities()->getType()) {
-      // hmi_capabilities json contains array and HMI response object
-      response_params[strings::audio_pass_thru_capabilities] =
-          *hmi_capabilities.audio_pass_thru_capabilities();
-    } else {
-      response_params[strings::audio_pass_thru_capabilities][0] =
-          *hmi_capabilities.audio_pass_thru_capabilities();
-    }
+    // hmi_capabilities json contains array and HMI response object
+    response_params[strings::audio_pass_thru_capabilities] =
+        *hmi_capabilities.audio_pass_thru_capabilities();
   }
   response_params[strings::hmi_capabilities] =
       smart_objects::SmartObject(smart_objects::SmartType_Map);

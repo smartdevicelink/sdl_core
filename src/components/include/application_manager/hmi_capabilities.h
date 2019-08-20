@@ -533,6 +533,18 @@ class HMICapabilities {
   virtual void convert_json_languages_to_obj(
       const Json::Value& json_languages,
       smart_objects::SmartObject& languages) const = 0;
+
+  /*
+   * @brief function that converts a single entry of audio pass thru capability
+   *        to smart object
+   *
+   * @param capability json object that represents a single entry of audio pass
+   *        thru capability
+   * @param output_so the converted object
+   */
+  virtual void convert_audio_capability_to_obj(
+      const Json::Value& capability,
+      smart_objects::SmartObject& output_so) const = 0;
 };
 
 }  //  namespace application_manager

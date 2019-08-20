@@ -1113,27 +1113,16 @@ bool HMICapabilitiesImpl::load_capabilities_from_file() {
       if (check_existing_json_member(ui, "audioPassThruCapabilities")) {
         Json::Value audio_capabilities =
             ui.get("audioPassThruCapabilities", "");
-        smart_objects::SmartObject audio_capabilities_so =
-            smart_objects::SmartObject(smart_objects::SmartType_Array);
-        audio_capabilities_so =
-            smart_objects::SmartObject(smart_objects::SmartType_Map);
-        if (check_existing_json_member(audio_capabilities, "samplingRate")) {
-          audio_capabilities_so["samplingRate"] =
-              sampling_rate_enum
-                  .find(audio_capabilities.get("samplingRate", "").asString())
-                  ->second;
-        }
-        if (check_existing_json_member(audio_capabilities, "bitsPerSample")) {
-          audio_capabilities_so["bitsPerSample"] =
-              bit_per_sample_enum
-                  .find(audio_capabilities.get("bitsPerSample", "").asString())
-                  ->second;
-        }
-        if (check_existing_json_member(audio_capabilities, "audioType")) {
-          audio_capabilities_so["audioType"] =
-              audio_type_enum
-                  .find(audio_capabilities.get("audioType", "").asString())
-                  ->second;
+        smart_objects::SmartObject audio_capabilities_so(
+            smart_objects::SmartType_Array);
+        if (audio_capabilities.type() == Json::arrayValue) {
+          for (uint32_t i = 0; i < audio_capabilities.size(); i++) {
+            convert_audio_capability_to_obj(audio_capabilities[i],
+                                            audio_capabilities_so[i]);
+          }
+        } else if (audio_capabilities.type() == Json::objectValue) {
+          convert_audio_capability_to_obj(audio_capabilities,
+                                          audio_capabilities_so[0]);
         }
         set_audio_pass_thru_capabilities(audio_capabilities_so);
       }
@@ -1142,26 +1131,7 @@ bool HMICapabilitiesImpl::load_capabilities_from_file() {
         Json::Value pcm_capabilities = ui.get("pcmStreamCapabilities", "");
         smart_objects::SmartObject pcm_capabilities_so =
             smart_objects::SmartObject(smart_objects::SmartType_Map);
-
-        if (check_existing_json_member(pcm_capabilities, "samplingRate")) {
-          pcm_capabilities_so["samplingRate"] =
-              sampling_rate_enum
-                  .find(pcm_capabilities.get("samplingRate", "").asString())
-                  ->second;
-        }
-        if (check_existing_json_member(pcm_capabilities, "bitsPerSample")) {
-          pcm_capabilities_so["bitsPerSample"] =
-              bit_per_sample_enum
-                  .find(pcm_capabilities.get("bitsPerSample", "").asString())
-                  ->second;
-        }
-        if (check_existing_json_member(pcm_capabilities, "audioType")) {
-          pcm_capabilities_so["audioType"] =
-              audio_type_enum
-                  .find(pcm_capabilities.get("audioType", "").asString())
-                  ->second;
-        }
-
+        convert_audio_capability_to_obj(pcm_capabilities, pcm_capabilities_so);
         set_pcm_stream_capabilities(pcm_capabilities_so);
       }
 
@@ -1415,6 +1385,27 @@ void HMICapabilitiesImpl::convert_json_languages_to_obj(
   for (uint32_t i = 0, j = 0; i < json_languages.size(); ++i) {
     languages[j++] =
         MessageHelper::CommonLanguageFromString(json_languages[i].asString());
+  }
+}
+
+void HMICapabilitiesImpl::convert_audio_capability_to_obj(
+    const Json::Value& capability,
+    smart_objects::SmartObject& output_so) const {
+  if (check_existing_json_member(capability, "samplingRate")) {
+    output_so[strings::sampling_rate] =
+        sampling_rate_enum.find(capability.get("samplingRate", "").asString())
+            ->second;
+  }
+  if (check_existing_json_member(capability, "bitsPerSample")) {
+    output_so[strings::bits_per_sample] =
+        bit_per_sample_enum
+            .find(capability.get("bitsPerSample", "").asString())
+            ->second;
+  }
+  if (check_existing_json_member(capability, "audioType")) {
+    output_so[strings::audio_type] =
+        audio_type_enum.find(capability.get("audioType", "").asString())
+            ->second;
   }
 }
 
