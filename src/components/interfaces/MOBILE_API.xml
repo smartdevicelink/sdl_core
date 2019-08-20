@@ -5396,17 +5396,25 @@
                 If omitted on supported displays, the currently set metadata tags will not change.
                 If any text field contains no tags or the none tag, the metadata tag for that textfield should be removed.</description>
         </param>
+
+        <param name="templateTitle" type="String" maxlength="100" mandatory="false" since="6.0">
+            <description>
+                The title of the new template that will be displayed.
+                How this will be displayed is dependent on the OEM design and implementation of the template.
+            </description>
+        </param>
+
         <param name="windowID" type="Integer" mandatory="false" since="6.0" >
             <description>
-              This is the unique ID assigned to the window that this RPC is intended. If this param is not included,
-              it will be assumed that this request is specifically for the main window on the main display.
-              See PredefinedWindows enum.
+                This is the unique ID assigned to the window that this RPC is intended. If this param is not included,
+                it will be assumed that this request is specifically for the main window on the main display.
+                See PredefinedWindows enum.
             </description>
         </param>
 
         <param name="templateConfiguration" type="TemplateConfiguration" mandatory="false" since="6.0">
             <description>
-              Used to set an alternate template layout to a window.
+                Used to set an alternate template layout to a window.
             </description>
         </param>
     </function>
