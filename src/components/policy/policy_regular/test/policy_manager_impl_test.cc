@@ -655,6 +655,8 @@ TEST_F(
   manager->SetUserConsentForDevice(dev_id1, true);
   // Add app from consented device. App will be assigned with default policies
   manager->AddApplication(app_id1, app_id1, HmiTypes(policy_table::AHT_DEFAULT));
+  EXPECT_CALL(listener, GetDevicesIds(app_id1))
+      .WillRepeatedly(Return(transport_manager::DeviceList()));
   // Act
   const char* const rpc_name = "CreateWindow";
   const char* const hmi_level = "NONE";
@@ -708,6 +710,8 @@ TEST_F(
   manager->SetUserConsentForDevice(dev_id1, true);
   // Add app from consented device. App will be assigned with default policies
   manager->AddApplication(dev_id1, app_id1, HmiTypes(policy_table::AHT_DEFAULT));
+  EXPECT_CALL(listener, GetDevicesIds(app_id1))
+      .WillRepeatedly(Return(transport_manager::DeviceList()));
   // Act
   const char* const rpc_name = "DeleteWindow";
   const char* const hmi_level = "NONE";
