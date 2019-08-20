@@ -828,7 +828,7 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile(
                                             application->mac_address());
   }
 
-  if (resumption) {
+  if (resumption && mobile_apis::Result::RESUME_FAILED != result_code) {
     resumer.StartWaitingForDisplayCapabilitiesUpdate(application);
   }
 
