@@ -236,8 +236,9 @@ void RegisterAppInterfaceRequest::Run() {
   }
 
   if (!GetDataOnSessionKey(connection_key(), &device_handle_, &device_id_)) {
-    SendResponse(false, mobile_apis::Result::GENERIC_ERROR, 
-              "Could not find a session for your connection key!");
+    SendResponse(false,
+                 mobile_apis::Result::GENERIC_ERROR,
+                 "Could not find a session for your connection key!");
     return;
   }
 
