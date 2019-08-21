@@ -523,7 +523,8 @@ TEST_F(PolicyHandlerTest, OnPermissionsUpdated_TwoParams_InvalidApp_UNSUCCESS) {
   EXPECT_CALL(*mock_policy_manager_, GetAppEncryptionRequired(kPolicyAppId_))
       .Times(0);
   EXPECT_CALL(mock_message_helper_,
-              SendOnPermissionsChangeNotification(_, _, _, _)).Times(0);
+              SendOnPermissionsChangeNotification(_, _, _, _))
+      .Times(0);
 
   Permissions permissions;
   policy_handler_.OnPermissionsUpdated(kDeviceId, kPolicyAppId_, permissions);
@@ -673,9 +674,9 @@ TEST_F(PolicyHandlerTest, CheckPermissions) {
   EXPECT_CALL(*mock_app_, device()).WillOnce(Return(device));
   EXPECT_CALL(*mock_app_, policy_app_id()).WillOnce(Return(kPolicyAppId_));
 #ifdef EXTERNAL_PROPRIETARY_MODE
-  EXPECT_CALL(
-      *mock_policy_manager_,
-      CheckPermissions(kPolicyAppId_, kHmiLevel_, kRpc_, kRpc_params, _));
+  EXPECT_CALL(*mock_policy_manager_,
+              CheckPermissions(
+                  kDeviceId, kPolicyAppId_, kHmiLevel_, kRpc_, kRpc_params, _));
 
 #else   // EXTERNAL_PROPRIETARY_MODE
   EXPECT_CALL(*mock_policy_manager_,

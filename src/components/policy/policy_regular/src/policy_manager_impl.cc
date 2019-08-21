@@ -420,7 +420,7 @@ void PolicyManagerImpl::ProcessActionsForAppPolicies(
     if (it_actions->second.is_consent_needed) {
       // Post-check after ExternalConsent consent changes
       const std::string& policy_app_id = app_policy->first;
-      if (!IsConsentNeeded(policy_app_id)) {
+      if (!IsConsentNeeded(last_device_id_, policy_app_id)) {
         sync_primitives::AutoLock lock(app_permissions_diff_lock_);
 
         PendingPermissions::iterator app_id_diff =
@@ -442,21 +442,15 @@ void PolicyManagerImpl::ProcessActionsForAppPolicies(
 
 void PolicyManagerImpl::NotifySystem(
     const PolicyManagerImpl::AppPoliciesValueType& app_policy) const {
-  listener()->OnPendingPermissionChange(app_policy.first);
+  listener()->OnPendingPermissionChange(last_device_id_, app_policy.first);
 }
 
 void PolicyManagerImpl::SendPermissionsToApp(
     const PolicyManagerImpl::AppPoliciesValueType& app_policy) {
   const std::string app_id = app_policy.first;
 
-  const std::string device_id = GetCurrentDeviceId(app_id);
-  if (device_id.empty()) {
-    LOG4CXX_WARN(logger_,
-                 "Couldn't find device info for application id: " << app_id);
-    return;
-  }
   std::vector<FunctionalGroupPermission> group_permissons;
-  GetPermissionsForApp(device_id, app_id, group_permissons);
+  GetPermissionsForApp(last_device_id_, app_id, group_permissons);
 
   Permissions notification_data;
 
@@ -471,7 +465,8 @@ void PolicyManagerImpl::SendPermissionsToApp(
 
   std::string default_hmi;
   default_hmi = "NONE";
-  listener()->OnPermissionsUpdated(app_id, notification_data, default_hmi);
+  listener()->OnPermissionsUpdated(
+      last_device_id_, app_id, notification_data, default_hmi);
 }
 
 CheckAppPolicyResults PolicyManagerImpl::CheckPermissionsChanges(
