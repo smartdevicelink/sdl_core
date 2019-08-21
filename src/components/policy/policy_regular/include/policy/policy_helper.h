@@ -195,6 +195,7 @@ struct ProcessFunctionalGroup {
  private:
   GroupConsent GetGroupState(const std::string& group_name);
   void FillEncryptionFlagForRpcs(
+      const policy_table::Rpc& rpcs,
       const policy::EncryptionRequired encryption_required);
   const policy_table::FunctionalGroupings& fg_;
   const std::vector<FunctionalGroupPermission>& group_permissions_;
