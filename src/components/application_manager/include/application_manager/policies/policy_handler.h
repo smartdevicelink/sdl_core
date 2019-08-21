@@ -467,8 +467,7 @@ class PolicyHandler : public PolicyHandlerInterface,
 
   /**
    * @brief Callback for when a SetCloudAppProperties message is received
-   * from a
-   * mobile app
+   * from a mobile app
    * @param message The SetCloudAppProperties message
    */
   void OnSetCloudAppProperties(

@@ -39,7 +39,7 @@ namespace components {
 namespace protocol_handler_test {
 
 namespace {
-const uint32_t kConnectioKey = 123u;
+const uint32_t kConnectionKey = 123u;
 }
 
 using namespace protocol_handler;
@@ -204,11 +204,11 @@ TEST_P(ServiceStatusUpdateHandlerTest, OnServiceUpdate) {
 
   EXPECT_CALL(
       *mock_service_status_update_handler_listener_,
-      ProcessServiceStatusUpdate(kConnectioKey, _, service_event_, reason_))
+      ProcessServiceStatusUpdate(kConnectionKey, _, service_event_, reason_))
       .Times(1);
 
   service_status_update_handler_->OnServiceUpdate(
-      kConnectioKey, GetParam().service_type_, GetParam().service_status_);
+      kConnectionKey, GetParam().service_type_, GetParam().service_status_);
 }
 
 TEST_F(ServiceStatusUpdateHandlerTest, GetHMIServiceType) {

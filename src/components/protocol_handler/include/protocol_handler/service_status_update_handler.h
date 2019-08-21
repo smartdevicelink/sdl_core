@@ -38,7 +38,7 @@
 namespace protocol_handler {
 
 /**
- * @brief  ServiceUpdateFailureReason helper enum containing reasons for
+ * @brief  ServiceStatus helper enum containing reasons for
  * service
  * status to be updated
  */
