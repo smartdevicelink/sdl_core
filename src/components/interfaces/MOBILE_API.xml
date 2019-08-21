@@ -2928,10 +2928,10 @@
         <param name="hapticSpatialDataSupported" type="Boolean" mandatory="false">
             <description>True if the system can utilize the haptic spatial data from the source being streamed. If not included, it can be assumed the module doesn't support haptic spatial data'. </description>
         </param>
-        <param name="diagonalScreenSize" type="Float" mandatory="false" since="6.0">
+        <param name="diagonalScreenSize" type="Float" minvalue="0" mandatory="false" since="6.0">
           <description>The diagonal screen size in inches.</description>
         </param>
-        <param name="pixelPerInch" type="Float" mandatory="false" since="6.0">
+        <param name="pixelPerInch" type="Float" minvalue="0" mandatory="false" since="6.0">
           <description>PPI is the diagonal resolution in pixels divided by the diagonal screen size in inches.</description>
         </param>
         <param name="scale" type="Float" minvalue="1" maxvalue="10" mandatory="false" since="6.0">
