@@ -2465,49 +2465,32 @@ bool MessageHelper::SendUnsubscribedWayPoints(ApplicationManager& app_mngr) {
   return app_mngr.GetRPCService().ManageHMICommand(result);
 }
 
-smart_objects::SmartObjectSPtr
-MessageHelper::CreateOnSystemRequestNotificationToMobile(
-    const std::vector<uint8_t>& policy_data,
-    const uint32_t app_id,
-    const mobile_apis::RequestType::eType request_type) {
-  auto notification =
-      CreateNotification(mobile_apis::FunctionID::OnSystemRequestID, app_id);
-
-  (*notification)[strings::params][strings::binary_data] =
-      smart_objects::SmartObject(policy_data);
-
-  (*notification)[strings::msg_params][strings::request_type] = request_type;
-
-  return notification;
-}
-
 void MessageHelper::SendPolicySnapshotNotification(
     uint32_t connection_key,
     const std::vector<uint8_t>& policy_data,
     const std::string& url,
     ApplicationManager& app_mngr) {
+  smart_objects::SmartObject content(smart_objects::SmartType_Map);
   const auto request_type =
 #if defined(PROPRIETARY_MODE) || defined(EXTERNAL_PROPRIETARY_MODE)
       mobile_apis::RequestType::PROPRIETARY;
 #else
       mobile_apis::RequestType::HTTP;
 #endif  // PROPRIETARY || EXTERNAL_PROPRIETARY_MODE
-  auto notification = CreateOnSystemRequestNotificationToMobile(
-      policy_data, connection_key, request_type);
+
+  content[strings::msg_params][strings::request_type] = request_type;
 
   if (!url.empty()) {
-    (*notification)[strings::msg_params][strings::url] =
+    content[strings::msg_params][strings::url] =
         url;  // Doesn't work with mobile_notification::syncp_url ("URL")
   } else {
     LOG4CXX_WARN(logger_, "No service URLs");
   }
 
-  (*notification)[strings::params][strings::binary_data] =
+  content[strings::params][strings::binary_data] =
       smart_objects::SmartObject(policy_data);
 
-  PrintSmartObject(*notification);
-  app_mngr.GetRPCService().ManageMobileCommand(notification,
-                                               commands::Command::SOURCE_SDL);
+  SendSystemRequestNotification(connection_key, content, app_mngr);
 }
 
 void MessageHelper::SendSystemRequestNotification(
