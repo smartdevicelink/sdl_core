@@ -247,7 +247,7 @@
 
 #include "sdl_rpc_plugin/commands/hmi/bc_get_file_path_request.h"
 #include "sdl_rpc_plugin/commands/hmi/bc_get_file_path_response.h"
-#include "sdl_rpc_plugin/commands/hmi/on_service_status_update_notification.h"
+#include "sdl_rpc_plugin/commands/hmi/on_service_update_notification.h"
 #include "sdl_rpc_plugin/commands/hmi/rc_get_capabilities_request.h"
 #include "sdl_rpc_plugin/commands/hmi/rc_get_capabilities_response.h"
 #include "sdl_rpc_plugin/commands/hmi/rc_is_ready_request.h"
@@ -868,8 +868,7 @@ CommandCreator& HMICommandFactory::get_creator_factory(
                  : factory.GetCreator<commands::hmi::DialNumberResponse>();
     }
     case hmi_apis::FunctionID::BasicCommunication_OnServiceUpdate: {
-      return factory
-          .GetCreator<commands::hmi::OnServiceStatusUpdateNotification>();
+      return factory.GetCreator<commands::hmi::OnServiceUpdateNotification>();
     }
     case hmi_apis::FunctionID::Navigation_OnWayPointChange: {
       return factory.GetCreator<commands::OnNaviWayPointChangeNotification>();

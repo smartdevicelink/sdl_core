@@ -36,19 +36,19 @@
 #include "application_manager/mock_application_manager.h"
 #include "application_manager/smart_object_keys.h"
 #include "gtest/gtest.h"
-#include "hmi/on_service_status_update_notification.h"
+#include "hmi/on_service_update_notification.h"
 #include "smart_objects/smart_object.h"
 
 namespace test {
 namespace components {
 namespace commands_test {
 namespace hmi_commands_test {
-namespace on_service_status_update_notification {
+namespace on_service_update_notification {
 
 using namespace application_manager;
-using sdl_rpc_plugin::commands::hmi::OnServiceStatusUpdateNotification;
+using sdl_rpc_plugin::commands::hmi::OnServiceUpdateNotification;
 
-typedef std::shared_ptr<OnServiceStatusUpdateNotification> NotificationPtr;
+typedef std::shared_ptr<OnServiceUpdateNotification> NotificationPtr;
 typedef hmi_apis::Common_ServiceType::eType ServiceType;
 typedef hmi_apis::Common_ServiceEvent::eType ServiceEvent;
 
@@ -57,10 +57,10 @@ const uint32_t kConnectionKey = 1232u;
 const uint32_t kHmi_app_id = 321u;
 }  // namespace
 
-class OnServiceStatusUpdateNotificationTest
+class OnServiceUpdateNotificationTest
     : public CommandsTest<CommandsTestMocks::kIsNice> {
  public:
-  OnServiceStatusUpdateNotificationTest()
+  OnServiceUpdateNotificationTest()
       : message_(CreateMessage(smart_objects::SmartType_Map)) {}
 
  public:
@@ -68,13 +68,13 @@ class OnServiceStatusUpdateNotificationTest
   NotificationPtr command_;
 };
 
-TEST_F(OnServiceStatusUpdateNotificationTest, SendNotificationToHMI) {
+TEST_F(OnServiceUpdateNotificationTest, SendNotificationToHMI) {
   (*message_)[strings::msg_params][hmi_notification::service_type] =
       ServiceType::AUDIO;
   (*message_)[strings::msg_params][hmi_notification::service_event] =
       ServiceEvent::REQUEST_ACCEPTED;
   (*message_)[strings::msg_params][strings::app_id] = kConnectionKey;
-  command_ = CreateCommand<OnServiceStatusUpdateNotification>(message_);
+  command_ = CreateCommand<OnServiceUpdateNotification>(message_);
 
   EXPECT_CALL(mock_rpc_service_, SendMessageToHMI(message_)).Times(1);
 

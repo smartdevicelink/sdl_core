@@ -30,53 +30,34 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_HMI_ON_SERVICE_STATUS_UPDATE_NOTIFICATION_H_
-#define SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_HMI_ON_SERVICE_STATUS_UPDATE_NOTIFICATION_H_
-
-#include "application_manager/commands/notification_to_hmi.h"
+#include "sdl_rpc_plugin/commands/hmi/on_service_update_notification.h"
 
 namespace sdl_rpc_plugin {
-namespace app_mngr = application_manager;
+using namespace application_manager;
 
 namespace commands {
+
 namespace hmi {
 
-/**
- * @brief OnServiceStatusUpdateNotification command class
- **/
-class OnServiceStatusUpdateNotification
-    : public app_mngr::commands::NotificationToHMI {
- public:
-  /**
-   * @brief OnServiceStatusUpdateNotification class constructor
-   * @param application_manager ref to application manager
-   * @param rpc_service ref to rpc service
-   * @param hmi_capabilities ref to HMI capabilities
-   * @param policy_handle ref to policy handler
-   **/
-  OnServiceStatusUpdateNotification(
-      const app_mngr::commands::MessageSharedPtr& message,
-      app_mngr::ApplicationManager& application_manager,
-      app_mngr::rpc_service::RPCService& rpc_service,
-      app_mngr::HMICapabilities& hmi_capabilities,
-      policy::PolicyHandlerInterface& policy_handle);
+OnServiceUpdateNotification::OnServiceUpdateNotification(
+    const application_manager::commands::MessageSharedPtr& message,
+    ApplicationManager& application_manager,
+    rpc_service::RPCService& rpc_service,
+    HMICapabilities& hmi_capabilities,
+    policy::PolicyHandlerInterface& policy_handler)
+    : NotificationToHMI(message,
+                        application_manager,
+                        rpc_service,
+                        hmi_capabilities,
+                        policy_handler) {}
 
-  /**
-   * @brief OnServiceStatusUpdateNotification class destructor
-   **/
-  virtual ~OnServiceStatusUpdateNotification() OVERRIDE;
+OnServiceUpdateNotification::~OnServiceUpdateNotification() {}
 
-  /**
-   * @brief Execute command
-   **/
-  void Run() OVERRIDE;
-
- private:
-  DISALLOW_COPY_AND_ASSIGN(OnServiceStatusUpdateNotification);
-};
+void OnServiceUpdateNotification::Run() {
+  LOG4CXX_AUTO_TRACE(logger_);
+  SendNotification();
+}
 
 }  // namespace hmi
 }  // namespace commands
 }  // namespace sdl_rpc_plugin
-
-#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_HMI_ON_SERVICE_STATUS_UPDATE_NOTIFICATION_H_
