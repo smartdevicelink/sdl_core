@@ -191,7 +191,7 @@ RegisterAppInterfaceRequest::~RegisterAppInterfaceRequest() {}
 
 bool RegisterAppInterfaceRequest::Init() {
   LOG4CXX_AUTO_TRACE(logger_);
-  return GetDataOnSessionKey(connection_key(), &device_handle_, &device_id_);
+  return true;
 }
 
 void RegisterAppInterfaceRequest::Run() {
@@ -225,6 +225,22 @@ void RegisterAppInterfaceRequest::Run() {
     return;
   }
 
+  // Cache the original app ID (for legacy behavior)
+  const auto policy_app_id =
+      application_manager_.GetCorrectMobileIDFromMessage(message_);
+
+  if (application_manager_.IsApplicationForbidden(connection_key(),
+                                                  policy_app_id)) {
+    SendResponse(false, mobile_apis::Result::TOO_MANY_PENDING_REQUESTS);
+    return;
+  }
+
+  if (!GetDataOnSessionKey(connection_key(), &device_handle_, &device_id_)) {
+    SendResponse(false, mobile_apis::Result::GENERIC_ERROR, 
+              "Could not find a session for your connection key!");
+    return;
+  }
+
   LOG4CXX_DEBUG(
       logger_,
       "device_handle: " << device_handle_ << " device_id: " << device_id_);
@@ -232,10 +248,6 @@ void RegisterAppInterfaceRequest::Run() {
   if (IsApplicationSwitched()) {
     return;
   }
-
-  // Cache the original app ID (for legacy behavior)
-  const auto policy_app_id =
-      application_manager_.GetCorrectMobileIDFromMessage(message_);
 
   ApplicationSharedPtr application =
       application_manager_.application(device_id_, policy_app_id);
@@ -265,11 +277,6 @@ void RegisterAppInterfaceRequest::Run() {
                    new_app_id_full.begin(),
                    ::tolower);
     (*message_)[strings::msg_params][strings::full_app_id] = new_app_id_full;
-  }
-  if (application_manager_.IsApplicationForbidden(connection_key(),
-                                                  policy_app_id)) {
-    SendResponse(false, mobile_apis::Result::TOO_MANY_PENDING_REQUESTS);
-    return;
   }
 
   if (IsApplicationWithSameAppIdRegistered()) {
