@@ -36,20 +36,16 @@ T GetFuncFromLib(void* dl_handle, const std::string& function_name) {
   char* error_string = dlerror();
   if (nullptr != error_string) {
     LOG4CXX_ERROR(logger_, "Failed to export symbols : " << error_string);
-    dlclose(dl_handle);
     return nullptr;
   }
-  DCHECK(exported_func);
   return exported_func;
 }
 
 RPCPluginManagerImpl::RPCPluginPtr RPCPluginManagerImpl::LoadPlugin(
     const std::string& full_plugin_path) const {
-  RPCPluginPtr empty_plugin(nullptr, [](RPCPlugin*) {});
-
   if (!IsLibraryFile(full_plugin_path)) {
     LOG4CXX_DEBUG(logger_, "Skip loading " << full_plugin_path);
-    return std::move(empty_plugin);
+    return RPCPluginPtr(nullptr, [](RPCPlugin*) {});
   }
 
   void* plugin_dll = dlopen(full_plugin_path.c_str(), RTLD_LAZY);
@@ -57,28 +53,30 @@ RPCPluginManagerImpl::RPCPluginPtr RPCPluginManagerImpl::LoadPlugin(
     LOG4CXX_ERROR(
         logger_,
         "Failed to open dll " << full_plugin_path << " : " << dlerror());
-    return RPCPluginPtr();
+    return RPCPluginPtr(nullptr, [](RPCPlugin*) {});
   }
 
   typedef RPCPlugin* (*Create)();
   Create create_plugin = GetFuncFromLib<Create>(plugin_dll, "Create");
   if (!create_plugin) {
     LOG4CXX_ERROR(logger_, "No Create function in " << full_plugin_path);
-    return std::move(empty_plugin);
+    dlclose(plugin_dll);
+    return RPCPluginPtr(nullptr, [](RPCPlugin*) {});
   }
 
   typedef void (*Delete)(RPCPlugin*);
   Delete delete_plugin = GetFuncFromLib<Delete>(plugin_dll, "Delete");
   if (!delete_plugin) {
     LOG4CXX_ERROR(logger_, "No Delete function in " << full_plugin_path);
-    return std::move(empty_plugin);
+    dlclose(plugin_dll);
+    return RPCPluginPtr(nullptr, [](RPCPlugin*) {});
   }
 
   auto plugin_destroyer = [delete_plugin, plugin_dll](RPCPlugin* plugin) {
     LOG4CXX_DEBUG(logger_, "Delete plugin " << plugin->PluginName());
     delete_plugin(plugin);
     dlclose(plugin_dll);
-    return RPCPluginPtr();
+    return RPCPluginPtr(nullptr, [](RPCPlugin*) {});
   };
   RPCPlugin* plugin = create_plugin();
   return RPCPluginPtr(plugin, plugin_destroyer);
