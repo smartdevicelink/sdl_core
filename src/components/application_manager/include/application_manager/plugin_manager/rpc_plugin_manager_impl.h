@@ -58,12 +58,17 @@ class RPCPluginManagerImpl : public RPCPluginManager {
                        policy::PolicyHandlerInterface& policy_handler);
 
   uint32_t LoadPlugins(const std::string& plugins_path) OVERRIDE;
+
+  DEPRECATED
   std::vector<RPCPluginPtr>& GetPlugins() OVERRIDE;
+
   utils::Optional<RPCPlugin> FindPluginToProcess(
       const int32_t function_id,
       const commands::Command::CommandSource message_source) OVERRIDE;
 
  private:
+  RPCPluginPtr LoadPlugin(const std::string& full_plugin_path) const;
+
   std::vector<RPCPluginPtr> loaded_plugins_;
   ApplicationManager& app_manager_;
   rpc_service::RPCService& rpc_service_;

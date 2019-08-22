@@ -93,6 +93,13 @@ void AppServiceRpcPlugin::DeleteSubscriptions(
 
 }  // namespace app_service_rpc_plugin
 
-extern "C" application_manager::plugin_manager::RPCPlugin* Create() {
+extern "C" __attribute__((visibility("default")))
+application_manager::plugin_manager::RPCPlugin*
+Create() {
   return new app_service_rpc_plugin::AppServiceRpcPlugin();
+}
+
+extern "C" __attribute__((visibility("default"))) void Delete(
+    application_manager::plugin_manager::RPCPlugin* data) {
+  delete data;
 }
