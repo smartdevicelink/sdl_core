@@ -829,7 +829,13 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile(
                                             application->mac_address());
   }
 
-  if (resumption && mobile_apis::Result::RESUME_FAILED != result_code) {
+  // If app is in resuming state
+  // DisplayCapabilitiesBuilder has to collect all the information
+  // from incoming HMI notifications and send only one notification
+  // to mobile app, even if hash does not match, which means that app data
+  // will not be resumed, notification should be sent for default window as
+  // it will be resumed in any case
+  if (resumption) {
     resumer.StartWaitingForDisplayCapabilitiesUpdate(application);
   }
 
