@@ -2042,19 +2042,17 @@ void ApplicationManagerImpl::ProcessServiceStatusUpdate(
                     << " service_update_reason " << service_update_reason);
 
   const auto app = application(connection_key);
-  auto notification_builder =
-      MessageHelper::ServiceStatusUpdateNotificationBuilder::CreateBuilder(
-          service_type, service_event);
 
-  if (app) {
-    notification_builder.AddAppID(app->app_id());
-  }
+  const uint32_t app_id = app ? app->app_id() : 0u;
 
-  if (service_update_reason) {
-    notification_builder.AddServiceUpdateReason(*service_update_reason);
-  }
+  auto reason = service_update_reason
+                    ? *service_update_reason
+                    : hmi_apis::Common_ServiceStatusUpdateReason::INVALID_ENUM;
 
-  rpc_service_->ManageHMICommand(notification_builder.notification());
+  auto notification = MessageHelper::CreateOnServiceUpdateNotification(
+      service_type, service_event, reason, app_id);
+
+  rpc_service_->ManageHMICommand(notification);
 }
 
 void ApplicationManagerImpl::OnSecondaryTransportStartedCallback(

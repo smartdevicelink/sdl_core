@@ -2234,45 +2234,32 @@ smart_objects::SmartObjectSPtr MessageHelper::CreateNegativeResponse(
   return std::make_shared<smart_objects::SmartObject>(response_data);
 }
 
-MessageHelper::ServiceStatusUpdateNotificationBuilder::
-    ServiceStatusUpdateNotificationBuilder(const ServiceType service_type,
-                                           const ServiceEvent service_event) {
-  notification_ = MessageHelper::CreateHMINotification(
+smart_objects::SmartObjectSPtr MessageHelper::CreateOnServiceUpdateNotification(
+    const hmi_apis::Common_ServiceType::eType service_type,
+    const hmi_apis::Common_ServiceEvent::eType service_event,
+    const hmi_apis::Common_ServiceStatusUpdateReason::eType
+        service_update_reason,
+    const uint32_t app_id) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  auto notification = MessageHelper::CreateHMINotification(
       hmi_apis::FunctionID::BasicCommunication_OnServiceUpdate);
 
-  (*notification_)[strings::msg_params][hmi_notification::service_type] =
+  (*notification)[strings::msg_params][hmi_notification::service_type] =
       service_type;
-  (*notification_)[strings::msg_params][hmi_notification::service_event] =
+  (*notification)[strings::msg_params][hmi_notification::service_event] =
       service_event;
-}
 
-MessageHelper::ServiceStatusUpdateNotificationBuilder
-MessageHelper::ServiceStatusUpdateNotificationBuilder::CreateBuilder(
-    const ServiceType service_type, const ServiceEvent service_event) {
-  MessageHelper::ServiceStatusUpdateNotificationBuilder builder{service_type,
-                                                                service_event};
-  return builder;
-}
+  if (0 != app_id) {
+    (*notification)[strings::msg_params][strings::app_id] = app_id;
+  }
 
-MessageHelper::ServiceStatusUpdateNotificationBuilder&
-MessageHelper::ServiceStatusUpdateNotificationBuilder::AddAppID(
-    const uint32_t app_id) {
-  (*notification_)[strings::msg_params][strings::app_id] = app_id;
+  if (hmi_apis::Common_ServiceStatusUpdateReason::INVALID_ENUM !=
+      service_update_reason) {
+    (*notification)[strings::msg_params][hmi_notification::reason] =
+        service_update_reason;
+  }
 
-  return *this;
-}
-
-MessageHelper::ServiceStatusUpdateNotificationBuilder&
-MessageHelper::ServiceStatusUpdateNotificationBuilder::AddServiceUpdateReason(
-    const ServiceStatusUpdateReason service_update_reason) {
-  (*notification_)[strings::msg_params][hmi_notification::reason] =
-      service_update_reason;
-
-  return *this;
-}
-smart_objects::SmartObjectSPtr
-MessageHelper::ServiceStatusUpdateNotificationBuilder::notification() const {
-  return notification_;
+  return notification;
 }
 
 void MessageHelper::SendNaviSetVideoConfig(

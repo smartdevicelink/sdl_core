@@ -601,41 +601,6 @@ void MessageHelper::SendUnsubscribeButtonNotification(
       ->SendUnsubscribeButtonNotification(button, application, app_mngr);
 }
 
-MockMessageHelper::MockServiceStatusUpdateNotificationBuilder*
-MockMessageHelper::on_service_update_builder_mock() {
-  static ::testing::NiceMock<
-      MockMessageHelper::MockServiceStatusUpdateNotificationBuilder>
-      on_service_update_builder_mock;
-  return &on_service_update_builder_mock;
-}
-
-MessageHelper::ServiceStatusUpdateNotificationBuilder
-MessageHelper::ServiceStatusUpdateNotificationBuilder::CreateBuilder(
-    hmi_apis::Common_ServiceType::eType service_type,
-    hmi_apis::Common_ServiceEvent::eType service_event) {
-  return MockMessageHelper::on_service_update_builder_mock()->CreateBuilder(
-      service_type, service_event);
-}
-
-MessageHelper::ServiceStatusUpdateNotificationBuilder&
-MessageHelper::ServiceStatusUpdateNotificationBuilder::AddAppID(
-    const uint32_t app_id) {
-  return MockMessageHelper::on_service_update_builder_mock()->AddAppID(app_id);
-}
-
-MessageHelper::ServiceStatusUpdateNotificationBuilder&
-MessageHelper::ServiceStatusUpdateNotificationBuilder::AddServiceUpdateReason(
-    const hmi_apis::Common_ServiceStatusUpdateReason::eType
-        service_update_reason) {
-  return MockMessageHelper::on_service_update_builder_mock()
-      ->AddServiceUpdateReason(service_update_reason);
-}
-
-smart_objects::SmartObjectSPtr
-MessageHelper::ServiceStatusUpdateNotificationBuilder::notification() const {
-  return MockMessageHelper::on_service_update_builder_mock()->notification();
-}
-
 smart_objects::SmartObject MessageHelper::CreateAppServiceCapabilities(
     std::vector<smart_objects::SmartObject>& all_services) {
   return MockMessageHelper::message_helper_mock()->CreateAppServiceCapabilities(
@@ -661,5 +626,16 @@ MessageHelper::CreateDisplayCapabilityUpdateToMobile(
     const smart_objects::SmartObject& system_capabilities, Application& app) {
   return MockMessageHelper::message_helper_mock()
       ->CreateDisplayCapabilityUpdateToMobile(system_capabilities, app);
+}
+
+smart_objects::SmartObjectSPtr MessageHelper::CreateOnServiceUpdateNotification(
+    const hmi_apis::Common_ServiceType::eType service_type,
+    const hmi_apis::Common_ServiceEvent::eType service_event,
+    const hmi_apis::Common_ServiceStatusUpdateReason::eType
+        service_update_reason,
+    const uint32_t app_id) {
+  return MockMessageHelper::message_helper_mock()
+      ->CreateOnServiceUpdateNotification(
+          service_type, service_event, service_update_reason, app_id);
 }
 }  // namespace application_manager

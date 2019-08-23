@@ -105,8 +105,6 @@ const std::string kAppName = "appName";
 const WindowID kDefaultWindowId =
     mobile_apis::PredefinedWindows::DEFAULT_WINDOW;
 
-typedef MockMessageHelper::MockServiceStatusUpdateNotificationBuilder*
-    MockServiceStatusUpdatePtr;
 typedef hmi_apis::Common_ServiceStatusUpdateReason::eType
     ServiceStatusUpdateReason;
 typedef hmi_apis::Common_ServiceType::eType ServiceType;
@@ -154,8 +152,6 @@ class ApplicationManagerImplTest
             new MockAppServiceManager(mock_app_mngr_, mock_last_state_))
       , mock_message_helper_(
             application_manager::MockMessageHelper::message_helper_mock())
-      , mock_service_status_update_(application_manager::MockMessageHelper::
-                                        on_service_update_builder_mock())
 
   {
 #ifdef ENABLE_LOG
@@ -276,7 +272,6 @@ class ApplicationManagerImplTest
   std::unique_ptr<am::ApplicationManagerImpl> app_manager_impl_;
   MockAppServiceManager* mock_app_service_manager_;
   application_manager::MockMessageHelper* mock_message_helper_;
-  MockServiceStatusUpdatePtr mock_service_status_update_;
 
   std::shared_ptr<MockApplication> mock_app_ptr_;
   NiceMock<protocol_handler_test::MockProtocolHandler> mock_protocol_handler_;
@@ -335,14 +330,8 @@ TEST_P(ApplicationManagerImplTest,
   AddMockApplication();
 
   ON_CALL(*mock_app_ptr_, app_id()).WillByDefault(Return(kConnectionKey));
-  ON_CALL(*mock_service_status_update_,
-          CreateBuilder(GetParam().service_type_, GetParam().service_event_))
-      .WillByDefault(Return(*mock_service_status_update_));
-  ON_CALL(*mock_service_status_update_, AddAppID(kConnectionKey))
-      .WillByDefault(ReturnRef(*mock_service_status_update_));
-  ON_CALL(*mock_service_status_update_, AddServiceUpdateReason(_))
-      .WillByDefault(ReturnRef(*mock_service_status_update_));
-  ON_CALL(*mock_service_status_update_, notification())
+
+  ON_CALL(*mock_message_helper_, CreateOnServiceUpdateNotification(_, _, _, _))
       .WillByDefault(Return(notification_));
 
   EXPECT_CALL(*mock_rpc_service_, ManageHMICommand(notification_, _))

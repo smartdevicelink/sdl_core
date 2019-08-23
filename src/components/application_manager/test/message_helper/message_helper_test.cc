@@ -69,14 +69,6 @@ using namespace application_manager;
 typedef std::shared_ptr<MockApplication> MockApplicationSharedPtr;
 typedef std::vector<std::string> StringArray;
 typedef std::shared_ptr<application_manager::Application> ApplicationSharedPtr;
-typedef MessageHelper::ServiceStatusUpdateNotificationBuilder::ServiceType
-    ServiceType;
-typedef MessageHelper::ServiceStatusUpdateNotificationBuilder::ServiceEvent
-    ServiceEvent;
-typedef MessageHelper::ServiceStatusUpdateNotificationBuilder::
-    ServiceStatusUpdateReason UpdateReason;
-typedef MessageHelper::ServiceStatusUpdateNotificationBuilder
-    ServiceStatusUpdateBuilder;
 
 using testing::_;
 using testing::AtLeast;
@@ -1111,92 +1103,6 @@ TEST_F(MessageHelperTest, ExtractWindowIdFromSmartObject_FromWrongType) {
   smart_objects::SmartObject message(smart_objects::SmartType_Array);
   EXPECT_EQ(mobile_apis::PredefinedWindows::DEFAULT_WINDOW,
             MessageHelper::ExtractWindowIdFromSmartObject(message));
-}
-
-TEST(ServiceStatusUpdateNotificationBuilderTest, CreateBuilderIsCorrect) {
-  auto service_status_update_builder_ =
-      ServiceStatusUpdateBuilder::CreateBuilder(ServiceType::AUDIO,
-                                                ServiceEvent::REQUEST_ACCEPTED);
-  auto notification_ = service_status_update_builder_.notification();
-
-  auto message_type_exist_ =
-      (*notification_)[strings::params].keyExists(strings::message_type);
-  auto message_type_ =
-      (*notification_)[strings::params][strings::message_type].asInt();
-  auto function_id_exist_ =
-      (*notification_)[strings::params].keyExists(strings::function_id);
-  auto function_id_ =
-      (*notification_)[strings::params][strings::function_id].asInt();
-  auto protocol_version_exist_ =
-      (*notification_)[strings::params].keyExists(strings::protocol_version);
-  auto protocol_version_ =
-      (*notification_)[strings::params][strings::protocol_version].asInt();
-  auto protocol_type_exist_ =
-      (*notification_)[strings::params].keyExists(strings::protocol_type);
-  auto protocol_type_ =
-      (*notification_)[strings::params][strings::protocol_type].asInt();
-  auto service_type_exist_ = (*notification_)[strings::msg_params].keyExists(
-      hmi_notification::service_type);
-  auto service_type_ =
-      (*notification_)[strings::msg_params][hmi_notification::service_type]
-          .asInt();
-  auto service_event_exist_ = (*notification_)[strings::msg_params].keyExists(
-      hmi_notification::service_event);
-  auto service_event_ =
-      (*notification_)[strings::msg_params][hmi_notification::service_event]
-          .asInt();
-
-  EXPECT_TRUE(message_type_exist_);
-  EXPECT_EQ(static_cast<int64_t>(kNotification), message_type_);
-  EXPECT_TRUE(function_id_exist_);
-  EXPECT_EQ(static_cast<int64_t>(
-                hmi_apis::FunctionID::BasicCommunication_OnServiceUpdate),
-            function_id_);
-  EXPECT_TRUE(protocol_version_exist_);
-  EXPECT_EQ(static_cast<int64_t>(commands::CommandImpl::protocol_version_),
-            protocol_version_);
-  EXPECT_TRUE(protocol_type_exist_);
-  EXPECT_EQ(static_cast<int64_t>(commands::CommandImpl::hmi_protocol_type_),
-            protocol_type_);
-  EXPECT_TRUE(service_type_exist_);
-  EXPECT_EQ(static_cast<int64_t>(ServiceType::AUDIO), service_type_);
-  EXPECT_TRUE(service_event_exist_);
-  EXPECT_EQ(static_cast<int64_t>(ServiceEvent::REQUEST_ACCEPTED),
-            service_event_);
-}
-
-TEST(ServiceStatusUpdateNotificationBuilderTest, AddAppID) {
-  auto service_status_update_builder_ =
-      ServiceStatusUpdateBuilder::CreateBuilder(ServiceType::RPC,
-                                                ServiceEvent::REQUEST_RECEIVED);
-  const uint32_t kAppId = 1234u;
-
-  service_status_update_builder_.AddAppID(kAppId);
-  auto notification_ = service_status_update_builder_.notification();
-
-  auto app_id_exist_ =
-      (*notification_)[strings::msg_params].keyExists(strings::app_id);
-  auto app_id_ = (*notification_)[strings::msg_params][strings::app_id].asInt();
-
-  EXPECT_TRUE(app_id_exist_);
-  EXPECT_EQ(kAppId, app_id_);
-}
-
-TEST(ServiceStatusUpdateNotificationBuilderTest, AddServiceUpdateReason) {
-  auto service_status_update_builder_ =
-      ServiceStatusUpdateBuilder::CreateBuilder(ServiceType::VIDEO,
-                                                ServiceEvent::REQUEST_REJECTED);
-
-  service_status_update_builder_.AddServiceUpdateReason(
-      UpdateReason::INVALID_CERT);
-  auto notification_ = service_status_update_builder_.notification();
-  auto reason_exist_ =
-      (*notification_)[strings::msg_params].keyExists(hmi_notification::reason);
-  auto reason_ =
-      (*notification_)[strings::msg_params][hmi_notification::reason].asInt();
-
-  EXPECT_TRUE(reason_exist_);
-  EXPECT_EQ(static_cast<int64_t>(UpdateReason::INVALID_CERT), reason_);
 }
 
 }  // namespace application_manager_test
