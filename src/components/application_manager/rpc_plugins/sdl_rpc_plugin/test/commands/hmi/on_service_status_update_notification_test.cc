@@ -89,7 +89,7 @@ TEST_F(OnServiceUpdateNotificationTest, SendNotificationToHMI) {
   command_->Run();
 }
 
-}  // namespace on_service_status_update_notification
+}  // namespace on_service_update_notification
 }  // namespace hmi_commands_test
 }  // namespace commands_test
 }  // namespace components
