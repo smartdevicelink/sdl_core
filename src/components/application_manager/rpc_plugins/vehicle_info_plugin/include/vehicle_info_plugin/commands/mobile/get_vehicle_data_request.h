@@ -77,13 +77,6 @@ class GetVehicleDataRequest : public app_mngr::commands::CommandRequestImpl {
    */
   bool CheckFrequency(application_manager::Application& app);
 
-  /**
-   * @brief Checks whether vehicle data in message params valid
-   * @param msg_params message parameters of HMI response
-   * @return true if vehicle data is valid, otherwise false
-   */
-  bool ValidateResponseData(const smart_objects::SmartObject& msg_params);
-
   std::set<std::string> pending_vehicle_data_;
 
   CustomVehicleDataManager& custom_vehicle_data_manager_;

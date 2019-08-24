@@ -52,7 +52,9 @@ RPCServiceImpl::RPCServiceImpl(
     protocol_handler::ProtocolHandler* protocol_handler,
     hmi_message_handler::HMIMessageHandler* hmi_handler,
     CommandHolder& commands_holder,
-    RPCProtectionManagerSPtr rpc_protection_manager)
+    RPCProtectionManagerSPtr rpc_protection_manager,
+    hmi_apis::HMI_API& hmi_so_factory,
+    mobile_apis::MOBILE_API& mobile_so_factory)
     : app_manager_(app_manager)
     , request_ctrl_(request_ctrl)
     , protocol_handler_(protocol_handler)
@@ -61,8 +63,8 @@ RPCServiceImpl::RPCServiceImpl(
     , commands_holder_(commands_holder)
     , messages_to_mobile_("AM ToMobile", this)
     , messages_to_hmi_("AM ToHMI", this)
-    , hmi_so_factory_(hmi_apis::HMI_API())
-    , mobile_so_factory_(mobile_apis::MOBILE_API()) {}
+    , hmi_so_factory_(hmi_so_factory)
+    , mobile_so_factory_(mobile_so_factory) {}
 
 RPCServiceImpl::~RPCServiceImpl() {}
 
@@ -515,8 +517,7 @@ void RPCServiceImpl::SendMessageToMobile(
                          .CanHandleFunctionID(function_id);
   if (IsAppServiceRPC(function_id,
                       commands::Command::CommandSource::SOURCE_SDL) ||
-      rpc_passing ||
-      RPCSupportsCustomVDI(function_id, commands::Command::SOURCE_SDL)) {
+      rpc_passing) {
     LOG4CXX_DEBUG(
         logger_,
         "Allowing unknown parameters for response function " << function_id);
@@ -629,10 +630,7 @@ void RPCServiceImpl::SendMessageToHMI(
       "Attached schema to message, result if valid: " << message->isValid());
 
   if (IsAppServiceRPC((*message)[jhs::S_PARAMS][jhs::S_FUNCTION_ID].asInt(),
-                      commands::Command::CommandSource::SOURCE_SDL_TO_HMI) ||
-      RPCSupportsCustomVDI(
-          (*message)[jhs::S_PARAMS][jhs::S_FUNCTION_ID].asInt(),
-          commands::Command::CommandSource::SOURCE_SDL_TO_HMI)) {
+                      commands::Command::CommandSource::SOURCE_SDL_TO_HMI)) {
     LOG4CXX_DEBUG(logger_,
                   "Allowing unknown parameters for response function "
                       << (*message)[jhs::S_PARAMS][jhs::S_FUNCTION_ID].asInt());
@@ -647,33 +645,6 @@ void RPCServiceImpl::SendMessageToHMI(
     return;
   }
   messages_to_hmi_.PostMessage(impl::MessageToHmi(message_to_send));
-}
-
-bool RPCServiceImpl::RPCSupportsCustomVDI(
-    int32_t function_id, commands::Command::CommandSource source) {
-  if ((source == commands::Command::CommandSource::SOURCE_MOBILE) ||
-      (source == commands::Command::CommandSource::SOURCE_SDL)) {
-    switch (function_id) {
-      case mobile_apis::FunctionID::GetVehicleDataID:
-      case mobile_apis::FunctionID::OnVehicleDataID:
-      case mobile_apis::FunctionID::SubscribeVehicleDataID:
-      case mobile_apis::FunctionID::UnsubscribeVehicleDataID:
-        return true;
-        break;
-    }
-  } else if ((source == commands::Command::CommandSource::SOURCE_HMI) ||
-             (source == commands::Command::CommandSource::SOURCE_SDL_TO_HMI)) {
-    switch (function_id) {
-      case hmi_apis::FunctionID::VehicleInfo_GetVehicleData:
-      case hmi_apis::FunctionID::VehicleInfo_OnVehicleData:
-      case hmi_apis::FunctionID::VehicleInfo_SubscribeVehicleData:
-      case hmi_apis::FunctionID::VehicleInfo_UnsubscribeVehicleData:
-        return true;
-        break;
-    }
-  }
-
-  return false;
 }
 
 bool RPCServiceImpl::IsAppServiceRPC(int32_t function_id,
@@ -822,6 +793,28 @@ bool RPCServiceImpl::ConvertSOtoMessage(
 
   LOG4CXX_DEBUG(logger_, "Successfully parsed smart object into message");
   return true;
+}
+
+void RPCServiceImpl::UpdateMobileRPCParams(
+    const mobile_apis::FunctionID::eType& function_id,
+    const mobile_apis::messageType::eType& message_type,
+    const std::map<std::string, SMember>& members) {
+  mobile_so_factory().ResetFunctionSchema(function_id, message_type);
+  for (const auto& item : members) {
+    mobile_so_factory().AddCustomMember(
+        function_id, message_type, item.first, item.second);
+  }
+}
+
+void RPCServiceImpl::UpdateHMIRPCParams(
+    const hmi_apis::FunctionID::eType& function_id,
+    const hmi_apis::messageType::eType& message_type,
+    const std::map<std::string, SMember>& members) {
+  hmi_so_factory().ResetFunctionSchema(function_id, message_type);
+  for (const auto& item : members) {
+    hmi_so_factory().AddCustomMember(
+        function_id, message_type, item.first, item.second);
+  }
 }
 
 hmi_apis::HMI_API& RPCServiceImpl::hmi_so_factory() {

@@ -125,14 +125,6 @@ TEST_F(OnVehicleDataNotificationTest, OnVehicleDataNotification_SUCCESS) {
   gps_data[am::strings::latitude_degrees] = 1.0;
   gps_data[am::strings::shifted] = true;
 
-  smart_objects::SmartObject empty;
-  ON_CALL(mock_custom_vehicle_data_manager_,
-          ValidateVehicleDataItems(SmartObjectCheck(
-              [](const smart_objects::SmartObject& custom_data) {
-                return custom_data.empty();
-              })))
-      .WillByDefault(Return(true));
-
   (*message)[am::strings::msg_params][am::strings::gps] = gps_data;
   (*message)[am::strings::msg_params][am::strings::speed] = 0;
 

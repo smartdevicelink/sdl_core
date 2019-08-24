@@ -192,9 +192,6 @@ TEST_F(GetVehicleDataRequestTest, Run_SUCCESS) {
   GetVehicleDataRequestPtr command(
       CreateCommandVI<GetVehicleDataRequest>(command_msg));
 
-  ON_CALL(mock_custom_vehicle_data_manager_, IsVehicleDataName(_))
-      .WillByDefault(Return(true));
-
   am::VehicleData vehicle_data;
   vehicle_data.insert(am::VehicleData::value_type(
       kMsgParamKey, mobile_apis::VehicleDataType::VEHICLEDATA_SPEED));

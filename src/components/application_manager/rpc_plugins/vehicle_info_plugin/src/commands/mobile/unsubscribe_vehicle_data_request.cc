@@ -110,11 +110,6 @@ void UnsubscribeVehicleDataRequest::Run() {
       continue;
     }
 
-    if (!custom_vehicle_data_manager_.IsVehicleDataName(name)) {
-      LOG4CXX_WARN(logger_, name << " does not stand for any of vehicle data.");
-      continue;
-    }
-
     ++items_to_unsubscribe;
 
     if (!(ext.isSubscribedToVehicleInfo(name))) {
@@ -143,18 +138,10 @@ void UnsubscribeVehicleDataRequest::Run() {
       vi_still_subscribed_by_another_apps_.size() +
           vi_already_unsubscribed_by_this_app_.size();
 
-  auto undefined_params_valid = [this]() {
-    for (const auto& item : removed_parameters_permissions_.undefined_params) {
-      if (!custom_vehicle_data_manager_.IsVehicleDataName(item)) {
-        return false;
-      }
-    }
-    return true;
-  };
   AppendDataTypesToMobileResponse(response_params_);
 
   if (0 == items_to_unsubscribe) {
-    if (HasDisallowedParams() && undefined_params_valid()) {
+    if (HasDisallowedParams()) {
       SendResponse(false, mobile_apis::Result::DISALLOWED);
     } else {
       SendResponse(

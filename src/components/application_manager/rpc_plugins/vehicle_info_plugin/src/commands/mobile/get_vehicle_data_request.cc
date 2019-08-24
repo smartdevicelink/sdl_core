@@ -88,37 +88,25 @@ void GetVehicleDataRequest::Run() {
     if (!enabled) {
       continue;
     }
-    if (custom_vehicle_data_manager_.IsVehicleDataName(name)) {
-      hmi_msg_params[name] = msg_params[name];
-      params_count++;
-    }
+    hmi_msg_params[name] = msg_params[name];
+    params_count++;
   }
-
-  auto undefined_params_valid = [this]() {
-    for (const auto& item : removed_parameters_permissions_.undefined_params) {
-      if (!custom_vehicle_data_manager_.IsVehicleDataName(item)) {
-        return false;
-      }
-    }
-    return true;
-  };
 
   const int minimal_params_count = 1;
-  if (params_count < minimal_params_count) {
-    const auto result_code = HasDisallowedParams() && undefined_params_valid()
-                                 ? mobile_apis::Result::DISALLOWED
-                                 : mobile_apis::Result::INVALID_DATA;
-    SendResponse(false, result_code);
-    return;
-  }
 
-  for (const auto& param : msg_params.enumerate()) {
-    pending_vehicle_data_.insert(param);
+  if (params_count >= minimal_params_count) {
+    for (const auto& param : msg_params.enumerate()) {
+      pending_vehicle_data_.insert(param);
+    }
+    StartAwaitForInterface(HmiInterfaces::HMI_INTERFACE_VehicleInfo);
+    SendHMIRequest(hmi_apis::FunctionID::VehicleInfo_GetVehicleData,
+                   &hmi_msg_params,
+                   true);
+  } else if (HasDisallowedParams()) {
+    SendResponse(false, mobile_apis::Result::DISALLOWED);
+  } else {
+    SendResponse(false, mobile_apis::Result::INVALID_DATA);
   }
-
-  StartAwaitForInterface(HmiInterfaces::HMI_INTERFACE_VehicleInfo);
-  SendHMIRequest(
-      hmi_apis::FunctionID::VehicleInfo_GetVehicleData, &hmi_msg_params, true);
 }
 
 void GetVehicleDataRequest::on_event(const event_engine::Event& event) {
@@ -152,14 +140,6 @@ void GetVehicleDataRequest::on_event(const event_engine::Event& event) {
               message[strings::msg_params]));
 
       if (result) {
-        if (!ValidateResponseData(message[strings::msg_params])) {
-          LOG4CXX_ERROR(logger_, "Vehicle data items validation failed.");
-          response_info = "Vehicle data items validation failed";
-          SendResponse(
-              false, mobile_api::Result::GENERIC_ERROR, response_info.c_str());
-          return;
-        }
-
         for (const auto& item : message[strings::msg_params].enumerate()) {
           const auto& found_item = pending_vehicle_data_.find(item);
           if (pending_vehicle_data_.end() == found_item) {
@@ -196,21 +176,6 @@ bool GetVehicleDataRequest::CheckFrequency(Application& app) {
     return false;
   }
   return true;
-}
-
-bool GetVehicleDataRequest::ValidateResponseData(
-    const smart_objects::SmartObject& msg_params) {
-  const auto& rpc_spec_vehicle_data = MessageHelper::vehicle_data();
-
-  smart_objects::SmartObject custom_data;
-  for (const auto& name : msg_params.enumerate()) {
-    const auto& found_it = rpc_spec_vehicle_data.find(name);
-    if (rpc_spec_vehicle_data.end() == found_it) {
-      custom_data[name] = msg_params[name];
-    }
-  }
-
-  return custom_vehicle_data_manager_.ValidateVehicleDataItems(custom_data);
 }
 
 }  // namespace commands

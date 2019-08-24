@@ -117,28 +117,27 @@ class ObjectSchemaItemTest : public ::testing::Test {
     resultCode_values.insert(ResultType::GENERIC_ERROR);
     resultCode_values.insert(ResultType::DISALLOWED);
 
-    CObjectSchemaItem::Members paramsMembersMap;
-    paramsMembersMap[S_FUNCTION_ID] = CObjectSchemaItem::SMember(
+    Members paramsMembersMap;
+    paramsMembersMap[S_FUNCTION_ID] = SMember(
         TEnumSchemaItem<FunctionID::eType>::create(function_values), true);
     paramsMembersMap[S_CORRELATION_ID] =
-        CObjectSchemaItem::SMember(TNumberSchemaItem<int>::create(), true);
-    paramsMembersMap[S_PROTOCOL_VERSION] = CObjectSchemaItem::SMember(
-        TNumberSchemaItem<int>::create(TSchemaItemParameter<int>(1),
-                                       TSchemaItemParameter<int>(2)),
-        true);
+        SMember(TNumberSchemaItem<int>::create(), true);
+    paramsMembersMap[S_PROTOCOL_VERSION] =
+        SMember(TNumberSchemaItem<int>::create(TSchemaItemParameter<int>(1),
+                                               TSchemaItemParameter<int>(2)),
+                true);
 
-    CObjectSchemaItem::Members schemaMembersMap;
-    schemaMembersMap[Keys::RESULT_CODE] = CObjectSchemaItem::SMember(
+    Members schemaMembersMap;
+    schemaMembersMap[Keys::RESULT_CODE] = SMember(
         TEnumSchemaItem<ResultType::eType>::create(resultCode_values), false);
-    schemaMembersMap[Keys::INFO] = CObjectSchemaItem::SMember(
-        CStringSchemaItem::create(TSchemaItemParameter<size_t>(0),
-                                  TSchemaItemParameter<size_t>(10)),
-        false);
-    schemaMembersMap[Keys::SUCCESS] =
-        CObjectSchemaItem::SMember(CBoolSchemaItem::create(), false);
+    schemaMembersMap[Keys::INFO] =
+        SMember(CStringSchemaItem::create(TSchemaItemParameter<size_t>(0),
+                                          TSchemaItemParameter<size_t>(10)),
+                false);
+    schemaMembersMap[Keys::SUCCESS] = SMember(CBoolSchemaItem::create(), false);
 
     // Create fake param that has breaking history changes
-    std::vector<CObjectSchemaItem::SMember> fake_param_history_vector;
+    std::vector<SMember> fake_param_history_vector;
 
     std::shared_ptr<ISchemaItem> fake_param_SchemaItem =
         CArraySchemaItem::create(
@@ -156,22 +155,21 @@ class ObjectSchemaItemTest : public ::testing::Test {
             TSchemaItemParameter<size_t>(1),
             TSchemaItemParameter<size_t>(100));
 
-    fake_param_history_vector.push_back(CObjectSchemaItem::SMember(
+    fake_param_history_vector.push_back(SMember(
         fake_param_history_v1_SchemaItem, true, "", "4.5.0", false, false));
-    schemaMembersMap["fakeParam"] =
-        CObjectSchemaItem::SMember(fake_param_SchemaItem,
-                                   false,
-                                   "4.5.0",
-                                   "",
-                                   false,
-                                   false,
-                                   fake_param_history_vector);
+    schemaMembersMap["fakeParam"] = SMember(fake_param_SchemaItem,
+                                            false,
+                                            "4.5.0",
+                                            "",
+                                            false,
+                                            false,
+                                            fake_param_history_vector);
 
-    CObjectSchemaItem::Members rootMembersMap;
-    rootMembersMap[S_PARAMS] = CObjectSchemaItem::SMember(
-        CObjectSchemaItem::create(paramsMembersMap), true);
-    rootMembersMap[S_MSG_PARAMS] = CObjectSchemaItem::SMember(
-        CObjectSchemaItem::create(schemaMembersMap), true);
+    Members rootMembersMap;
+    rootMembersMap[S_PARAMS] =
+        SMember(CObjectSchemaItem::create(paramsMembersMap), true);
+    rootMembersMap[S_MSG_PARAMS] =
+        SMember(CObjectSchemaItem::create(schemaMembersMap), true);
 
     schema_item = CObjectSchemaItem::create(rootMembersMap);
   }

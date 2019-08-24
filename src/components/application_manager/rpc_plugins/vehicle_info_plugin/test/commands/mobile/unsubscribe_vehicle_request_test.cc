@@ -42,6 +42,8 @@
 #include "vehicle_info_plugin/vehicle_info_app_extension.h"
 #include "vehicle_info_plugin/vehicle_info_plugin.h"
 
+#include "application_manager/mock_rpc_handler.h"
+
 namespace test {
 namespace components {
 namespace commands_test {
@@ -79,6 +81,9 @@ class UnsubscribeVehicleRequestTest
  protected:
   void UnsubscribeSuccessfully();
   void SetUp() OVERRIDE {
+    ON_CALL(app_mngr_, GetRPCHandler())
+        .WillByDefault(ReturnRef(mock_rpc_handler_));
+
     vi_plugin_.Init(app_mngr_,
                     mock_rpc_service_,
                     mock_hmi_capabilities_,
@@ -98,6 +103,7 @@ class UnsubscribeVehicleRequestTest
   application_manager::AppExtensionPtr vi_app_extension_ptr_;
   std::shared_ptr<sync_primitives::Lock> app_set_lock_ptr_;
   vehicle_info_plugin::VehicleInfoPlugin vi_plugin_;
+  application_manager_test::MockRPCHandler mock_rpc_handler_;
 };
 
 TEST_F(UnsubscribeVehicleRequestTest, Run_AppNotRegistered_UNSUCCESS) {
@@ -156,8 +162,6 @@ TEST_F(UnsubscribeVehicleRequestTest,
 
   smart_objects::SmartObject hmi_custom_params(smart_objects::SmartType_Map);
   hmi_custom_params[kVehicleTypeStr] = true;
-  ON_CALL(mock_custom_vehicle_data_manager_, IsVehicleDataName(_))
-      .WillByDefault(Return(true));
 
   EXPECT_CALL(app_mngr_, application(kConnectionKey))
       .WillOnce(Return(mock_app_));
@@ -213,8 +217,6 @@ TEST_F(UnsubscribeVehicleRequestTest,
   smart_objects::SmartObject empty_hmi_custom_params;
   ON_CALL(mock_custom_vehicle_data_manager_, CreateHMIMessageParams(_))
       .WillByDefault(Return(empty_hmi_custom_params));
-  ON_CALL(mock_custom_vehicle_data_manager_, IsVehicleDataName(_))
-      .WillByDefault(Return(true));
 
   am::VehicleData vehicle_data;
   vehicle_data.insert(am::VehicleData::value_type(kMsgParamKey, kVehicleType));
@@ -244,8 +246,6 @@ TEST_F(UnsubscribeVehicleRequestTest, Run_UnsubscribeDataDisabled_UNSUCCESS) {
   smart_objects::SmartObject empty_hmi_custom_params;
   ON_CALL(mock_custom_vehicle_data_manager_, CreateHMIMessageParams(_))
       .WillByDefault(Return(empty_hmi_custom_params));
-  ON_CALL(mock_custom_vehicle_data_manager_, IsVehicleDataName(_))
-      .WillByDefault(Return(true));
 
   CommandPtr command(
       CreateCommandVI<UnsubscribeVehicleDataRequest>(command_msg));
@@ -283,8 +283,6 @@ TEST_F(UnsubscribeVehicleRequestTest, OnEvent_DataNotSubscribed_IGNORED) {
   smart_objects::SmartObject empty_hmi_custom_params;
   ON_CALL(mock_custom_vehicle_data_manager_, CreateHMIMessageParams(_))
       .WillByDefault(Return(empty_hmi_custom_params));
-  ON_CALL(mock_custom_vehicle_data_manager_, IsVehicleDataName(_))
-      .WillByDefault(Return(true));
 
   EXPECT_CALL(
       mock_rpc_service_,

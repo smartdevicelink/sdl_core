@@ -162,6 +162,14 @@ class SubscribeVehicleDataRequest
       smart_objects::SmartObject& msg_params) const;
 
   /**
+   * @brief Checks subscription status of certain vehicle_item
+   * @param vi_name name of vehicle item to be checked
+   * @param msg_params 'message_parameters' response section reference
+   */
+  bool CheckSubscriptionStatus(std::string vi_name,
+                               const smart_objects::SmartObject& msg_params);
+
+  /**
    * @brief VI parameters which had been already subscribed by another apps
    * befor particular app subscribed for these parameters
    */
@@ -178,9 +186,6 @@ class SubscribeVehicleDataRequest
   VehicleInfoSubscriptions vi_waiting_for_subscribe_;
 
   CustomVehicleDataManager& custom_vehicle_data_manager_;
-
-  bool CheckSubscriptionStatus(std::string vi_name,
-                               const smart_objects::SmartObject& msg_params);
 
   DISALLOW_COPY_AND_ASSIGN(SubscribeVehicleDataRequest);
 };

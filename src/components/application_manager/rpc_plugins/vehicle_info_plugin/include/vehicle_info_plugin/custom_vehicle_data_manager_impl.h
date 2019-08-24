@@ -18,6 +18,7 @@ class VehicleDataItemProvider;
 
 namespace vehicle_info_plugin {
 namespace policy_table = rpc::policy_table_interface_base;
+namespace plugin_manager = application_manager::plugin_manager;
 
 typedef boost::optional<const policy_table::VehicleDataItem> OptionalDataItem;
 typedef std::set<std::string> VehicleInfoSubscriptions;
@@ -25,9 +26,8 @@ typedef std::set<std::string> VehicleInfoSubscriptions;
 class CustomVehicleDataManagerImpl : public CustomVehicleDataManager {
  public:
   CustomVehicleDataManagerImpl(
-      policy::VehicleDataItemProvider& vehicle_data_provider);
-  bool ValidateVehicleDataItems(
-      const smart_objects::SmartObject& msg_params) OVERRIDE;
+      policy::VehicleDataItemProvider& vehicle_data_provider,
+      application_manager::rpc_service::RPCService& rpc_service);
 
   virtual smart_objects::SmartObject CreateHMIMessageParams(
       const std::set<std::string>& item_names) OVERRIDE;
@@ -38,39 +38,46 @@ class CustomVehicleDataManagerImpl : public CustomVehicleDataManager {
   virtual void CreateMobileMessageParams(
       smart_objects::SmartObject& msg_params) OVERRIDE;
 
-  bool IsVehicleDataName(const std::string& name) OVERRIDE;
-
-  bool IsVehicleDataKey(const std::string& key) OVERRIDE;
+  void OnPolicyEvent(plugin_manager::PolicyEvent policy_event) OVERRIDE;
 
  private:
-  bool ValidateVehicleDataItem(
-      const smart_objects::SmartObject& item,
-      const policy_table::VehicleDataItem& item_schema);
+  class RPCParams {
+   public:
+    RPCParams() {}
+    ~RPCParams() {}
+
+    void addBoolParam(
+        const std::pair<std::string, smart_objects::SMember>& param) {
+      rpc_params_bool_.insert(param);
+    }
+    void addVDRParam(
+        const std::pair<std::string, smart_objects::SMember>& param) {
+      rpc_params_vdr_.insert(param);
+    }
+    void addParam(const std::pair<std::string, smart_objects::SMember>& param) {
+      rpc_params_.insert(param);
+    }
+
+    const std::map<std::string, smart_objects::SMember>& getBoolParams() {
+      return rpc_params_bool_;
+    }
+    const std::map<std::string, smart_objects::SMember>& getVDRParams() {
+      return rpc_params_vdr_;
+    }
+    const std::map<std::string, smart_objects::SMember>& getParams() {
+      return rpc_params_;
+    }
+
+   private:
+    std::map<std::string, smart_objects::SMember> rpc_params_bool_;
+    std::map<std::string, smart_objects::SMember> rpc_params_vdr_;
+    std::map<std::string, smart_objects::SMember> rpc_params_;
+  };
 
   /**
-   * @brief ValidateRPCSpecEnumVehicleDataItem validate custom item in case it
-   * `type` of the item is enum from RPCspec
-   * @param item item to validate
-   * @param item_schema schema for item validation
-   * @return true if item is valid according schema, false if not
+   * @brief Updates vehicle data schemas according to policy update.
    */
-  bool ValidateRPCSpecEnumVehicleDataItem(
-      const smart_objects::SmartObject& item,
-      const policy_table::VehicleDataItem& item_schema);
-
-  /**
-   * @brief ValidatePODTypeItem validate custom item in case it
-   * `type` of the item Plain Old Data (POD)
-   * @param item item to validate
-   * @param item_schema schema for item validation
-   * @return true if item is valid according schema, false if not
-   */
-  bool ValidatePODTypeItem(const smart_objects::SmartObject& item,
-                           const policy_table::VehicleDataItem& item_schema);
-
-  bool ValidateStructTypeItem(
-      const ns_smart_device_link::ns_smart_objects::SmartObject& item,
-      const policy_table::VehicleDataItem& item_schema);
+  void UpdateVehicleDataItems();
 
   const OptionalDataItem FindSchemaByNameNonRecursive(
       const std::string& name) const;
@@ -82,6 +89,7 @@ class CustomVehicleDataManagerImpl : public CustomVehicleDataManager {
       const std::string& name) const;
 
   policy::VehicleDataItemProvider& vehicle_data_provider_;
+  application_manager::rpc_service::RPCService& rpc_service_;
 };
 
 }  // namespace vehicle_info_plugin

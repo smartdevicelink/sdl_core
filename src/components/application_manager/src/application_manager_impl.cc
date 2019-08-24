@@ -208,7 +208,8 @@ ApplicationManagerImpl::ApplicationManagerImpl(
   const uint32_t timeout_ms = 10000u;
   clearing_timer->Start(timeout_ms, timer::kSingleShot);
   timer_pool_.push_back(clearing_timer);
-  rpc_handler_.reset(new rpc_handler::RPCHandlerImpl(*this));
+  rpc_handler_.reset(new rpc_handler::RPCHandlerImpl(
+      *this, hmi_so_factory(), mobile_so_factory()));
   commands_holder_.reset(new CommandHolderImpl(*this));
   std::shared_ptr<RPCProtectionManager> rpc_protection_manager =
       std::make_shared<RPCProtectionManagerImpl>(*policy_handler_);
@@ -218,7 +219,9 @@ ApplicationManagerImpl::ApplicationManagerImpl(
                                                      protocol_handler_,
                                                      hmi_handler_,
                                                      *commands_holder_,
-                                                     rpc_protection_manager));
+                                                     rpc_protection_manager,
+                                                     hmi_so_factory(),
+                                                     mobile_so_factory()));
 }
 
 ApplicationManagerImpl::~ApplicationManagerImpl() {
@@ -2317,6 +2320,13 @@ bool ApplicationManagerImpl::Init(resumption::LastState& last_state,
 
   app_service_manager_.reset(
       new application_manager::AppServiceManager(*this, last_state));
+
+  auto on_app_policy_updated = [](plugin_manager::RPCPlugin& plugin) {
+    plugin.OnPolicyEvent(plugin_manager::kApplicationPolicyUpdated);
+  };
+
+  plugin_manager_->ForEachPlugin(on_app_policy_updated);
+
   return true;
 }
 

@@ -173,8 +173,6 @@
 #include "sdl_rpc_plugin/commands/hmi/basic_communication_system_response.h"
 #include "sdl_rpc_plugin/commands/hmi/dial_number_request.h"
 #include "sdl_rpc_plugin/commands/hmi/dial_number_response.h"
-#include "sdl_rpc_plugin/commands/hmi/get_urls.h"
-#include "sdl_rpc_plugin/commands/hmi/get_urls_response.h"
 #include "sdl_rpc_plugin/commands/hmi/navi_alert_maneuver_request.h"
 #include "sdl_rpc_plugin/commands/hmi/navi_alert_maneuver_response.h"
 #include "sdl_rpc_plugin/commands/hmi/navi_audio_start_stream_request.h"
@@ -359,11 +357,6 @@ CommandCreator& HMICommandFactory::get_creator_factory(
       return hmi_apis::messageType::request == message_type
                  ? factory.GetCreator<commands::SDLPolicyUpdate>()
                  : factory.GetCreator<commands::SDLPolicyUpdateResponse>();
-    }
-    case hmi_apis::FunctionID::SDL_GetURLS: {
-      return hmi_apis::messageType::request == message_type
-                 ? factory.GetCreator<commands::GetUrls>()
-                 : factory.GetCreator<commands::GetUrlsResponse>();
     }
     case hmi_apis::FunctionID::SDL_OnAppPermissionChanged: {
       return factory.GetCreator<commands::OnAppPermissionChangedNotification>();

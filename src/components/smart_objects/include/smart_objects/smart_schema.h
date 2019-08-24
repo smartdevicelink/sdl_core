@@ -86,6 +86,13 @@ class CSmartSchema FINAL {
   void setSchemaItem(const ISchemaItemPtr SchemaItem);
 
   /**
+   * @brief Set new root schema item.
+   *
+   * @param SchemaItem Root schema item.
+   */
+  ISchemaItemPtr getSchemaItem();
+
+  /**
    * @brief Apply schema.
    *
    * @param Object Object to apply schema.

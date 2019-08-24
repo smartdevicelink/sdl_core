@@ -109,7 +109,9 @@ class RCGetInteriorVehicleDataConsentTest
                      &mock_protocol_handler,
                      &mock_hmi_handler,
                      command_holder,
-                     rpc_protection_manager_)
+                     rpc_protection_manager_,
+                     hmi_so_factory_,
+                     mobile_so_factoy_)
       , rc_app_extention_(std::make_shared<RCAppExtension>(kPluginID))
       , mock_rpc_plugin_manager(
             std::make_shared<NiceMock<MockRPCPluginManager> >())
@@ -203,6 +205,8 @@ class RCGetInteriorVehicleDataConsentTest
       mock_rpc_plugin_manager;
   utils::Optional<RPCPlugin> rpc_plugin;
   utils::Optional<MockRPCPlugin> optional_mock_rpc_plugin;
+  hmi_apis::HMI_API hmi_so_factory_;
+  mobile_apis::MOBILE_API mobile_so_factoy_;
 };
 
 TEST_F(RCGetInteriorVehicleDataConsentTest,

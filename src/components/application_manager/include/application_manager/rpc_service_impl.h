@@ -113,7 +113,9 @@ class RPCServiceImpl : public RPCService,
                  protocol_handler::ProtocolHandler* protocol_handler,
                  hmi_message_handler::HMIMessageHandler* hmi_handler,
                  CommandHolder& commands_holder,
-                 RPCProtectionManagerSPtr rpc_protection_manager);
+                 RPCProtectionManagerSPtr rpc_protection_manager,
+                 hmi_apis::HMI_API& hmi_so_factory_,
+                 mobile_apis::MOBILE_API& mobile_so_factory_);
   ~RPCServiceImpl();
 
   bool ManageMobileCommand(const commands::MessageSharedPtr message,
@@ -134,13 +136,19 @@ class RPCServiceImpl : public RPCService,
   bool IsAppServiceRPC(int32_t function_id,
                        commands::Command::CommandSource source) OVERRIDE;
 
-  bool RPCSupportsCustomVDI(int32_t function_id,
-                            commands::Command::CommandSource source) OVERRIDE;
-
   void set_protocol_handler(
       protocol_handler::ProtocolHandler* handler) OVERRIDE;
   void set_hmi_message_handler(
       hmi_message_handler::HMIMessageHandler* handler) OVERRIDE;
+
+  void UpdateMobileRPCParams(
+      const mobile_apis::FunctionID::eType& function_id,
+      const mobile_apis::messageType::eType& message_type,
+      const std::map<std::string, SMember>& members) OVERRIDE;
+  void UpdateHMIRPCParams(
+      const hmi_apis::FunctionID::eType& function_id,
+      const hmi_apis::messageType::eType& message_type,
+      const std::map<std::string, SMember>& members) OVERRIDE;
 
  private:
   bool ConvertSOtoMessage(const smart_objects::SmartObject& message,
@@ -168,8 +176,8 @@ class RPCServiceImpl : public RPCService,
   // Thread that pumps messages being passed to HMI.
   impl::ToHmiQueue messages_to_hmi_;
 
-  hmi_apis::HMI_API hmi_so_factory_;
-  mobile_apis::MOBILE_API mobile_so_factory_;
+  hmi_apis::HMI_API& hmi_so_factory_;
+  mobile_apis::MOBILE_API& mobile_so_factory_;
 };
 }  // namespace rpc_service
 }  // namespace application_manager

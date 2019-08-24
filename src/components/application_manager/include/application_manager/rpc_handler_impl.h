@@ -93,7 +93,9 @@ class RPCHandlerImpl : public RPCHandler,
                        public impl::FromMobileQueue::Handler,
                        public impl::FromHmiQueue::Handler {
  public:
-  RPCHandlerImpl(ApplicationManager& app_manager);
+  RPCHandlerImpl(ApplicationManager& app_manager,
+                 hmi_apis::HMI_API& hmi_so_factory,
+                 mobile_apis::MOBILE_API& mobile_so_factory);
   ~RPCHandlerImpl();
 
   // CALLED ON messages_from_mobile_ thread!
@@ -177,8 +179,8 @@ class RPCHandlerImpl : public RPCHandler,
   // Thread that pumps messages coming from HMI.
   impl::FromHmiQueue messages_from_hmi_;
 
-  hmi_apis::HMI_API hmi_so_factory_;
-  mobile_apis::MOBILE_API mobile_so_factory_;
+  hmi_apis::HMI_API& hmi_so_factory_;
+  mobile_apis::MOBILE_API& mobile_so_factory_;
 #ifdef TELEMETRY_MONITOR
   AMTelemetryObserver* metric_observer_;
 #endif  // TELEMETRY_MONITOR

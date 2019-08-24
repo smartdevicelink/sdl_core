@@ -71,14 +71,6 @@ void OnVehicleDataNotification::Run() {
   const auto& param_names = (*message_)[strings::msg_params].enumerate();
   for (const auto& name : param_names) {
     LOG4CXX_DEBUG(logger_, "vehicle_data name: " << name);
-
-    smart_objects::SmartObject current_param;
-    current_param[name] = (*message_)[strings::msg_params][name];
-    if (!ValidateHMIMessageData(current_param)) {
-      LOG4CXX_WARN(logger_, "Unknown vehicle data: " << name);
-      continue;
-    }
-
     auto vehicle_data_value = (*message_)[strings::msg_params][name].asInt();
     application_manager_.IviInfoUpdated(name, vehicle_data_value);
 
@@ -122,21 +114,6 @@ void OnVehicleDataNotification::Run() {
     (*message_)[strings::msg_params] = appSO[idx];
     SendNotification();
   }
-}
-
-bool OnVehicleDataNotification::ValidateHMIMessageData(
-    const smart_objects::SmartObject& msg_params) {
-  const auto& rpc_spec_vehicle_data = MessageHelper::vehicle_data();
-
-  smart_objects::SmartObject custom_data;
-  for (const auto& name : msg_params.enumerate()) {
-    const auto& found_it = rpc_spec_vehicle_data.find(name);
-    if (rpc_spec_vehicle_data.end() == found_it) {
-      custom_data[name] = msg_params[name];
-    }
-  }
-
-  return custom_vehicle_data_manager_.ValidateVehicleDataItems(custom_data);
 }
 
 }  // namespace commands

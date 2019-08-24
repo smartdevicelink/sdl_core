@@ -532,6 +532,7 @@ struct VehicleDataItem : CompositeType {
   static const std::string kStruct;
   static const std::string kString;
   static const std::string kFloat;
+  static const std::string kDouble;
   static const std::string kBoolean;
   static const std::string kName;
   static const std::string kParams;
@@ -552,7 +553,7 @@ struct VehicleDataItem : CompositeType {
   Optional<Integer<uint32_t, 0, UINT32_MAX> > minsize;
   Optional<Integer<uint32_t, 0, UINT32_MAX> > maxsize;
   Optional<Integer<uint32_t, 0, UINT32_MAX> > minlength;
-  Optional<Integer<uint32_t, 0, UINT_MAX> > maxlength;
+  Optional<Integer<uint32_t, 0, UINT32_MAX> > maxlength;
 
   VehicleDataItem();
   VehicleDataItem(const VehicleDataItem& policy_table);

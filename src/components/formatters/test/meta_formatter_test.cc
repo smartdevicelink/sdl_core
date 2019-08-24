@@ -123,7 +123,7 @@ TEST_F(CMetaFormatterTestHelper,
 }
 
 TEST_F(CMetaFormatterTestHelper, ObjectWithEmptyMap) {
-  std::map<std::string, CObjectSchemaItem::SMember> schemaMembersMap;
+  std::map<std::string, SMember> schemaMembersMap;
   CSmartSchema map_schema =
       CSmartSchema(CObjectSchemaItem::create(schemaMembersMap));
 
@@ -211,67 +211,63 @@ TEST_F(CMetaFormatterTestHelper,
   SmartObject result_object;
   SmartObject object;
 
-  std::map<std::string, CObjectSchemaItem::SMember> paramsMembersMap;
+  std::map<std::string, SMember> paramsMembersMap;
 
-  paramsMembersMap[S_FUNCTION_ID] = CObjectSchemaItem::SMember(
+  paramsMembersMap[S_FUNCTION_ID] = SMember(
       TEnumSchemaItem<FunctionIDTest::eType>::create(function_id_items_), true);
 
-  paramsMembersMap[S_MESSAGE_TYPE] = CObjectSchemaItem::SMember(
+  paramsMembersMap[S_MESSAGE_TYPE] = SMember(
       TEnumSchemaItem<MessageTypeTest::eType>::create(message_type_items_),
       true);
 
-  paramsMembersMap[S_CORRELATION_ID] = CObjectSchemaItem::SMember(
-      TNumberSchemaItem<int>::create(TSchemaItemParameter<int>(0),
-                                     TSchemaItemParameter<int>(100),
-                                     TSchemaItemParameter<int>(55)),
-      true);
+  paramsMembersMap[S_CORRELATION_ID] =
+      SMember(TNumberSchemaItem<int>::create(TSchemaItemParameter<int>(0),
+                                             TSchemaItemParameter<int>(100),
+                                             TSchemaItemParameter<int>(55)),
+              true);
 
-  paramsMembersMap[S_PROTOCOL_VERSION] = CObjectSchemaItem::SMember(
-      TNumberSchemaItem<int>::create(TSchemaItemParameter<int>(1),
-                                     TSchemaItemParameter<int>(2)),
-      false);
+  paramsMembersMap[S_PROTOCOL_VERSION] =
+      SMember(TNumberSchemaItem<int>::create(TSchemaItemParameter<int>(1),
+                                             TSchemaItemParameter<int>(2)),
+              false);
   paramsMembersMap[S_PROTOCOL_TYPE] =
-      CObjectSchemaItem::SMember(TNumberSchemaItem<int>::create(), false);
+      SMember(TNumberSchemaItem<int>::create(), false);
 
-  std::map<std::string, CObjectSchemaItem::SMember> schemaMembersMap;
+  std::map<std::string, SMember> schemaMembersMap;
 
-  schemaMembersMap["mandatory_emptyMap1"] = CObjectSchemaItem::SMember(
-      CObjectSchemaItem::create(
-          std::map<std::string, CObjectSchemaItem::SMember>()),
-      true);
+  schemaMembersMap["mandatory_emptyMap1"] = SMember(
+      CObjectSchemaItem::create(std::map<std::string, SMember>()), true);
 
-  schemaMembersMap["mandatory_emptyMap2"] = CObjectSchemaItem::SMember(
-      CObjectSchemaItem::create(
-          std::map<std::string, CObjectSchemaItem::SMember>()),
-      true);
+  schemaMembersMap["mandatory_emptyMap2"] = SMember(
+      CObjectSchemaItem::create(std::map<std::string, SMember>()), true);
 
-  schemaMembersMap["mandatory_emptyAray"] = CObjectSchemaItem::SMember(
-      CArraySchemaItem::create(TNumberSchemaItem<int>::create()), true);
+  schemaMembersMap["mandatory_emptyAray"] =
+      SMember(CArraySchemaItem::create(TNumberSchemaItem<int>::create()), true);
 
-  schemaMembersMap["non_mandatory_Array"] = CObjectSchemaItem::SMember(
-      CArraySchemaItem::create(TNumberSchemaItem<int>::create(),
-                               TSchemaItemParameter<size_t>(1),
-                               TSchemaItemParameter<size_t>(2)),
-      false);
+  schemaMembersMap["non_mandatory_Array"] =
+      SMember(CArraySchemaItem::create(TNumberSchemaItem<int>::create(),
+                                       TSchemaItemParameter<size_t>(1),
+                                       TSchemaItemParameter<size_t>(2)),
+              false);
 
-  schemaMembersMap["mandatory_string"] = CObjectSchemaItem::SMember(
+  schemaMembersMap["mandatory_string"] = SMember(
       CStringSchemaItem::create(TSchemaItemParameter<size_t>(0),
                                 TSchemaItemParameter<size_t>(500),
                                 TSchemaItemParameter<std::string>("defValue")),
       true);
 
-  schemaMembersMap["non_mandatory_string"] = CObjectSchemaItem::SMember(
-      CStringSchemaItem::create(
-          TSchemaItemParameter<size_t>(0),
-          TSchemaItemParameter<size_t>(500),
-          TSchemaItemParameter<std::string>("ignoredDefValue")),
-      false);
+  schemaMembersMap["non_mandatory_string"] =
+      SMember(CStringSchemaItem::create(
+                  TSchemaItemParameter<size_t>(0),
+                  TSchemaItemParameter<size_t>(500),
+                  TSchemaItemParameter<std::string>("ignoredDefValue")),
+              false);
 
-  std::map<std::string, CObjectSchemaItem::SMember> rootMembersMap;
-  rootMembersMap[S_MSG_PARAMS] = CObjectSchemaItem::SMember(
-      CObjectSchemaItem::create(schemaMembersMap), true);
-  rootMembersMap[S_PARAMS] = CObjectSchemaItem::SMember(
-      CObjectSchemaItem::create(paramsMembersMap), true);
+  std::map<std::string, SMember> rootMembersMap;
+  rootMembersMap[S_MSG_PARAMS] =
+      SMember(CObjectSchemaItem::create(schemaMembersMap), true);
+  rootMembersMap[S_PARAMS] =
+      SMember(CObjectSchemaItem::create(paramsMembersMap), true);
 
   CSmartSchema schema = CSmartSchema(CObjectSchemaItem::create(rootMembersMap));
 

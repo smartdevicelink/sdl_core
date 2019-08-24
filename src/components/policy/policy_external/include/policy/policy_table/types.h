@@ -636,6 +636,7 @@ struct VehicleDataItem : CompositeType {
   static const std::string kStruct;
   static const std::string kString;
   static const std::string kFloat;
+  static const std::string kDouble;
   static const std::string kBoolean;
   static const std::string kName;
   static const std::string kParams;

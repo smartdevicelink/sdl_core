@@ -43,12 +43,14 @@ namespace formatters = ns_smart_device_link::ns_json_handler::formatters;
 namespace jhs = ns_smart_device_link::ns_json_handler::strings;
 namespace plugin_names = application_manager::plugin_manager::plugin_names;
 
-RPCHandlerImpl::RPCHandlerImpl(ApplicationManager& app_manager)
+RPCHandlerImpl::RPCHandlerImpl(ApplicationManager& app_manager,
+                               hmi_apis::HMI_API& hmi_so_factory,
+                               mobile_apis::MOBILE_API& mobile_so_factory)
     : app_manager_(app_manager)
     , messages_from_mobile_("AM FromMobile", this)
     , messages_from_hmi_("AM FromHMI", this)
-    , hmi_so_factory_(hmi_apis::HMI_API())
-    , mobile_so_factory_(mobile_apis::MOBILE_API())
+    , hmi_so_factory_(hmi_so_factory)
+    , mobile_so_factory_(mobile_so_factory)
 #ifdef TELEMETRY_MONITOR
     , metric_observer_(NULL)
 #endif  // TELEMETRY_MONITOR
@@ -99,8 +101,6 @@ void RPCHandlerImpl::ProcessMessageFromMobile(
                          .GetRPCPassingHandler()
                          .CanHandleFunctionID(message->function_id());
   if (app_manager_.GetRPCService().IsAppServiceRPC(
-          message->function_id(), commands::Command::SOURCE_MOBILE) ||
-      app_manager_.GetRPCService().RPCSupportsCustomVDI(
           message->function_id(), commands::Command::SOURCE_MOBILE) ||
       rpc_passing) {
     LOG4CXX_DEBUG(logger_,
@@ -170,8 +170,6 @@ void RPCHandlerImpl::ProcessMessageFromHMI(
   const auto function_id = static_cast<int32_t>(
       converted_result[jhs::S_PARAMS][jhs::S_FUNCTION_ID].asInt());
   if (app_manager_.GetRPCService().IsAppServiceRPC(
-          function_id, commands::Command::SOURCE_HMI) ||
-      app_manager_.GetRPCService().RPCSupportsCustomVDI(
           function_id, commands::Command::SOURCE_HMI)) {
     LOG4CXX_DEBUG(
         logger_,

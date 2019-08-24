@@ -3,20 +3,16 @@
 #include <set>
 #include <string>
 
+#include "application_manager/plugin_manager/rpc_plugin.h"
+#include "application_manager/rpc_handler.h"
 #include "smart_objects/smart_object.h"
 
 namespace vehicle_info_plugin {
+
+namespace plugin_manager = application_manager::plugin_manager;
+
 class CustomVehicleDataManager {
  public:
-  /**
-   * @brief Validates vehicle data items
-   * @param msg_params received message params (msg_params key)
-   * @return true, if vehicle data items within msg_params are valid,
-   * otherwise - false
-   */
-  virtual bool ValidateVehicleDataItems(
-      const smart_objects::SmartObject& msg_params) = 0;
-
   /**
    * @brief Creates message params (nested if needed) to be sent to HMI
    * according to vehicle data item schema
@@ -42,17 +38,7 @@ class CustomVehicleDataManager {
   virtual void CreateMobileMessageParams(
       smart_objects::SmartObject& msg_params) = 0;
 
-  /**
-   * @brief Checks whether name stands for valid custom vehicle data item
-   * @param name for custom vehicle data item
-   */
-  virtual bool IsVehicleDataName(const std::string& name) = 0;
-
-  /**
-   * @brief Checks whether key stands for valid custom vehicle data item
-   * @param key for custom vehicle data item
-   */
-  virtual bool IsVehicleDataKey(const std::string& key) = 0;
+  virtual void OnPolicyEvent(plugin_manager::PolicyEvent policy_event) = 0;
 };
 }  // namespace vehicle_info_plugin
 #endif  // SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_VEHICLE_INFO_PLUGIN_INCLUDE_VEHICLE_INFO_PLUGIN_CUSTOM_VEHICLE_DATA_MANAGER_H_

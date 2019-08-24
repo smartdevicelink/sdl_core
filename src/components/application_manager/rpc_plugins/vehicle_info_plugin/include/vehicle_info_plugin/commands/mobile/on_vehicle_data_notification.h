@@ -78,13 +78,6 @@ class OnVehicleDataNotification
    */
   void SendVehicleData(app_mngr::ApplicationConstSharedPtr app);
 
-  /**
-   * @brief Checks whether vehicle data in message params valid
-   * @param msg_params message parameters of HMI response
-   * @return true if vehicle data is valid, otherwise false
-   */
-  bool ValidateHMIMessageData(const smart_objects::SmartObject& msg_params);
-
   CustomVehicleDataManager& custom_vehicle_data_manager_;
 
   DISALLOW_COPY_AND_ASSIGN(OnVehicleDataNotification);

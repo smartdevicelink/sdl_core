@@ -109,27 +109,6 @@ class UnsubscribeVehicleDataRequest
       app_mngr::ApplicationSharedPtr app,
       const smart_objects::SmartObject& msg_params);
 
-  smart_objects::SmartObject response_params_;
-
-  /**
-   * @brief VI parameters which still being subscribed by another apps after
-   * particular app had been unsubscribed from these parameters
-   */
-  VehicleInfoSubscriptions vi_still_subscribed_by_another_apps_;
-
-  /**
-   * @brief VI parameters which had been unsubscribed already by particular
-   * app
-   */
-  VehicleInfoSubscriptions vi_already_unsubscribed_by_this_app_;
-
-  /**
-   * @brief VI parameters to be unsubscribed after HMI response
-   */
-  VehicleInfoSubscriptions vi_waiting_for_unsubscribe_;
-
-  CustomVehicleDataManager& custom_vehicle_data_manager_;
-
   /**
    * @brief ConvertRequestToResponseName convert RPCSpec vehicle data names
    * from hmi api to mobile api
@@ -153,8 +132,34 @@ class UnsubscribeVehicleDataRequest
   void AppendDataTypesToMobileResponse(
       smart_objects::SmartObject& msg_params) const;
 
+  /**
+   * @brief Checks subscription status of certain vehicle_item
+   * @param key name of vehicle item to be checked
+   * @param msg_params 'message_parameters' response section reference
+   */
   bool CheckSubscriptionStatus(std::string key,
                                const smart_objects::SmartObject& msg_params);
+
+  smart_objects::SmartObject response_params_;
+
+  /**
+   * @brief VI parameters which still being subscribed by another apps after
+   * particular app had been unsubscribed from these parameters
+   */
+  VehicleInfoSubscriptions vi_still_subscribed_by_another_apps_;
+
+  /**
+   * @brief VI parameters which had been unsubscribed already by particular
+   * app
+   */
+  VehicleInfoSubscriptions vi_already_unsubscribed_by_this_app_;
+
+  /**
+   * @brief VI parameters to be unsubscribed after HMI response
+   */
+  VehicleInfoSubscriptions vi_waiting_for_unsubscribe_;
+
+  CustomVehicleDataManager& custom_vehicle_data_manager_;
 
   DISALLOW_COPY_AND_ASSIGN(UnsubscribeVehicleDataRequest);
 };

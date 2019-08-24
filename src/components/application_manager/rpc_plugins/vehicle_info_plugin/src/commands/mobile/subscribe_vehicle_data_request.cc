@@ -318,11 +318,6 @@ void SubscribeVehicleDataRequest::CheckVISubscriptions(
 
   auto first_subscription = [this, &out_request_params, &subscribed_items](
                                 const std::string& vi_name) {
-    if (!custom_vehicle_data_manager_.IsVehicleDataName(vi_name)) {
-      LOG4CXX_DEBUG(logger_, vi_name << " is not found in custom VD items.");
-      return false;
-    }
-
     out_request_params[vi_name] = (*message_)[strings::msg_params][vi_name];
 
     vi_waiting_for_subscribe_.insert(vi_name);
@@ -368,17 +363,8 @@ void SubscribeVehicleDataRequest::CheckVISubscriptions(
       items_to_subscribe == vi_already_subscribed_by_another_apps_.size() +
                                 vi_already_subscribed_by_this_app_.size();
 
-  auto undefined_params_valid = [this]() {
-    for (const auto& item : removed_parameters_permissions_.undefined_params) {
-      if (!custom_vehicle_data_manager_.IsVehicleDataName(item)) {
-        return false;
-      }
-    }
-    return true;
-  };
-
   if (0 == items_to_subscribe) {
-    if (HasDisallowedParams() && undefined_params_valid()) {
+    if (HasDisallowedParams()) {
       out_result_code = mobile_apis::Result::DISALLOWED;
     } else {
       out_result_code = mobile_apis::Result::INVALID_DATA;

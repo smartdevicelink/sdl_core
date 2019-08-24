@@ -34,6 +34,7 @@
 #include <strings.h>
 #include <limits>
 #include "policy/policy_table/types.h"
+#include "vehicle_info_plugin/vehicle_data_item_schema.h"
 
 #include "application_manager/application_manager.h"
 #include "application_manager/message_helper.h"
@@ -56,28 +57,10 @@ U GetOptional(const rpc::Optional<T>& optional, U def_val) {
 enum SearchMethod { RECURSIVE = 0, NON_RECURSIVE };
 
 CustomVehicleDataManagerImpl::CustomVehicleDataManagerImpl(
-    policy::VehicleDataItemProvider& vehicle_data_provider)
-    : vehicle_data_provider_(vehicle_data_provider) {}
-
-bool CustomVehicleDataManagerImpl::ValidateVehicleDataItems(
-    const smart_objects::SmartObject& msg_params) {
-  LOG4CXX_AUTO_TRACE(logger_);
-  const auto names = msg_params.enumerate();
-  for (const auto& param_name : names) {
-    auto param = msg_params[param_name];
-    const auto& param_schema = FindSchemaByNameNonRecursive(param_name);
-    if (!param_schema.is_initialized()) {
-      LOG4CXX_ERROR(logger_,
-                    "Unable to find schema for param : " << param_name);
-      return false;
-    }
-    if (!ValidateVehicleDataItem(param, *param_schema)) {
-      LOG4CXX_ERROR(logger_, "Item validation failed: " << param_name);
-      return false;
-    }
-  }
-  return true;
-}
+    policy::VehicleDataItemProvider& vehicle_data_provider,
+    application_manager::rpc_service::RPCService& rpc_service)
+    : vehicle_data_provider_(vehicle_data_provider)
+    , rpc_service_(rpc_service) {}
 
 std::string CustomVehicleDataManagerImpl::GetVehicleDataItemType(
     const std::string& vehicle_data_item_name) const {
@@ -191,247 +174,6 @@ smart_objects::SmartObject CustomVehicleDataManagerImpl::CreateHMIMessageParams(
   return out_params;
 }
 
-bool CustomVehicleDataManagerImpl::IsVehicleDataName(const std::string& name) {
-  LOG4CXX_AUTO_TRACE(logger_);
-  using namespace application_manager;
-
-  const auto& rpc_spec_vehicle_data = MessageHelper::vehicle_data();
-  const auto& item_is_rpc_spec = rpc_spec_vehicle_data.find(name);
-  if (item_is_rpc_spec != rpc_spec_vehicle_data.end()) {
-    return true;
-  }
-
-  const auto& schema = FindSchemaByNameNonRecursive(name);
-  if (!schema) {
-    return false;
-  }
-  return schema->is_initialized();
-}
-
-bool CustomVehicleDataManagerImpl::IsVehicleDataKey(const std::string& key) {
-  LOG4CXX_AUTO_TRACE(logger_);
-  const auto& schema = FindSchemaByKeyNonRecursive(key);
-  if (!schema) {
-    return false;
-  }
-  return schema->is_initialized();
-}
-
-bool CustomVehicleDataManagerImpl::ValidateVehicleDataItem(
-    const smart_objects::SmartObject& item,
-    const policy_table::VehicleDataItem& item_schema) {
-  LOG4CXX_AUTO_TRACE(logger_);
-  auto validate_array = [this, &item, &item_schema]() -> bool {
-    const auto minsize = GetOptional(item_schema.minsize, size_t(0));
-    const auto maxsize =
-        GetOptional(item_schema.maxsize, std::numeric_limits<size_t>::max());
-
-    const auto items_array = item.asArray();
-    if (!items_array) {
-      auto allowed_types = {smart_objects::SmartType::SmartType_Array,
-                            smart_objects::SmartType::SmartType_Map};
-      if (!helpers::in_range(allowed_types, item.getType())) {
-        LOG4CXX_WARN(
-            logger_,
-            "Type mismatch. Expected: array, actual: " << item.getType());
-        return false;
-      }
-    }
-
-    const auto array_size = NULL == items_array ? 0 : (*items_array).size();
-    if (array_size < minsize || array_size > maxsize) {
-      LOG4CXX_WARN(logger_,
-                   "array size : " << array_size
-                                   << " does not fit into boundaries : ("
-                                   << minsize << " , " << maxsize << ")");
-      return false;
-    }
-
-    for (uint64_t i = 0; i < array_size; ++i) {
-      policy_table::VehicleDataItem not_array_schema(item_schema);
-      not_array_schema.array = rpc::Optional<rpc::Boolean>(false);
-      if (!ValidateVehicleDataItem((*items_array)[i], not_array_schema)) {
-        LOG4CXX_WARN(
-            logger_,
-            "Param validation failed : " << std::string(item_schema.name));
-        return false;
-      }
-    }
-    return true;
-  };
-
-  if (item_schema.mandatory &&
-      smart_objects::SmartType::SmartType_Null == item.getType()) {
-    LOG4CXX_WARN(
-        logger_,
-        "Mandatory item does not exist : " << std::string(item_schema.name));
-    return false;
-  }
-
-  if (item_schema.array.is_initialized() && *item_schema.array) {
-    return validate_array();
-  }
-
-  const std::string type = std::string(item_schema.type);
-  if (policy_table::VehicleDataItem::kStruct == type) {
-    return ValidateStructTypeItem(item, item_schema);
-  }
-  if (helpers::in_range(policy_table::VehicleDataItem::kPODTypes, type)) {
-    return ValidatePODTypeItem(item, item_schema);
-  }
-  return ValidateRPCSpecEnumVehicleDataItem(item, item_schema);
-}
-
-bool CustomVehicleDataManagerImpl::ValidateRPCSpecEnumVehicleDataItem(
-    const smart_objects::SmartObject& item,
-    const policy_table::VehicleDataItem& item_schema) {
-  LOG4CXX_AUTO_TRACE(logger_);
-  using namespace ns_smart_device_link::ns_smart_objects;
-  using rpc::policy_table_interface_base::EnumSchemaItemFactory;
-
-  auto type = std::string(item_schema.type);
-  const auto schema_item = EnumSchemaItemFactory::Get(type);
-  if (!schema_item) {
-    LOG4CXX_WARN(logger_, "Unable to find schema item for" << type);
-    return false;
-  }
-  rpc::ValidationReport report(type);
-  smart_objects::SmartObject item_copy = item;
-  schema_item->applySchema(item_copy, false);
-  if (-1 == item_copy.asInt()) {
-    LOG4CXX_WARN(
-        logger_,
-        "Enum <" << std::string(item_schema.name)
-                 << "> schema application failed : " << item.asString());
-    return false;
-  }
-
-  errors::eType validation_result = schema_item->validate(item_copy, &report);
-  if (errors::OK != validation_result) {
-    LOG4CXX_WARN(logger_,
-                 "Enum <" << std::string(item_schema.name)
-                          << "> validation failed : " << item.asString());
-    return false;
-  }
-  return true;
-}
-
-bool CustomVehicleDataManagerImpl::ValidatePODTypeItem(
-    const smart_objects::SmartObject& item,
-    const policy_table::VehicleDataItem& item_schema) {
-  LOG4CXX_AUTO_TRACE(logger_);
-  const std::string item_type = std::string(item_schema.type);
-  DCHECK_OR_RETURN(
-      helpers::in_range(policy_table::VehicleDataItem::kPODTypes, item_type),
-      false);
-  bool result = true;
-  if (item_type == policy_table::VehicleDataItem::kString) {
-    if (smart_objects::SmartType::SmartType_String != item.getType()) {
-      LOG4CXX_WARN(logger_,
-                   "Parameter type mismatch. Expected: "
-                       << policy_table::VehicleDataItem::kString
-                       << ", actual: " << item.getType());
-      return false;
-    }
-
-    auto value = item.asString();
-    const auto length = value.size();
-    const auto minlength = GetOptional(item_schema.minlength, size_t(0));
-    const auto maxlength =
-        GetOptional(item_schema.maxlength, std::numeric_limits<size_t>::max());
-    result = (minlength <= length) && (maxlength >= length);
-    if (!result) {
-      LOG4CXX_WARN(logger_,
-                   "String size : " << length
-                                    << " does not fit into boundaries : ("
-                                    << minlength << " , " << maxlength << ")");
-    }
-  } else if (item_type == policy_table::VehicleDataItem::kInteger) {
-    auto numeric_types = {smart_objects::SmartType::SmartType_Integer,
-                          smart_objects::SmartType::SmartType_UInteger};
-    if (!helpers::in_range(numeric_types, item.getType())) {
-      LOG4CXX_WARN(logger_,
-                   "Parameter type mismatch. Expected: "
-                       << policy_table::VehicleDataItem::kInteger
-                       << ", actual: " << item.getType());
-      return false;
-    }
-    auto value = item.asInt();
-    const auto minval =
-        GetOptional(item_schema.minvalue, std::numeric_limits<int64_t>::min());
-    const auto maxval =
-        GetOptional(item_schema.maxvalue, std::numeric_limits<int64_t>::max());
-    result = (minval <= value) && (maxval >= value);
-    if (!result) {
-      LOG4CXX_WARN(logger_,
-                   "Integer value: " << value
-                                     << " does not fit into boundaries : ("
-                                     << minval << " , " << maxval << ")");
-    }
-  } else if (item_type == policy_table::VehicleDataItem::kFloat) {
-    auto numeric_types = {smart_objects::SmartType::SmartType_Double,
-                          smart_objects::SmartType::SmartType_Integer,
-                          smart_objects::SmartType::SmartType_UInteger};
-    if (!helpers::in_range(numeric_types, item.getType())) {
-      LOG4CXX_WARN(logger_,
-                   "Parameter type mismatch. Expected: "
-                       << policy_table::VehicleDataItem::kFloat
-                       << ", actual: " << item.getType());
-      return false;
-    }
-    auto value = item.asDouble();
-    const auto minval =
-        GetOptional(item_schema.minvalue, std::numeric_limits<double>::min());
-    const auto maxval =
-        GetOptional(item_schema.maxvalue, std::numeric_limits<double>::max());
-    result = (minval <= value) && (maxval >= value);
-    if (!result) {
-      LOG4CXX_WARN(logger_,
-                   "Float value: " << value
-                                   << " does not fit into boundaries : ("
-                                   << minval << " , " << maxval << ")");
-    }
-  } else if (item_type == policy_table::VehicleDataItem::kBoolean) {
-    if (smart_objects::SmartType::SmartType_Boolean != item.getType()) {
-      LOG4CXX_WARN(logger_,
-                   "Parameter type mismatch. Expected: "
-                       << policy_table::VehicleDataItem::kBoolean
-                       << ", actual: " << item.getType());
-      return false;
-    }
-  }
-  return result;
-}
-
-bool CustomVehicleDataManagerImpl::ValidateStructTypeItem(
-    const ns_smart_device_link::ns_smart_objects::SmartObject& item,
-    const policy_table::VehicleDataItem& item_schema) {
-  LOG4CXX_AUTO_TRACE(logger_);
-
-  // Check for redundant parameters
-  for (const auto& param : item.enumerate()) {
-    auto param_schema = FindSchemaByNameRecursive(param);
-    if (!param_schema.is_initialized()) {
-      return false;
-    }
-  }
-
-  auto params_schemas = *(item_schema.params);
-  for (const auto& param_schema : params_schemas) {
-    if (!item.keyExists(param_schema.name)) {
-      if (param_schema.mandatory) {
-        return false;
-      }
-      continue;
-    }
-
-    if (!ValidateVehicleDataItem(item[param_schema.name], param_schema)) {
-      return false;
-    }
-  }
-  return true;
-}
-
 template <typename Comparer>
 const OptionalDataItem FindSchema(
     const std::vector<policy_table::VehicleDataItem>& oem_items,
@@ -473,6 +215,267 @@ const OptionalDataItem FindSchema(
   }
 
   return OptionalDataItem();
+}
+
+void CustomVehicleDataManagerImpl::UpdateVehicleDataItems() {
+  using namespace ns_smart_device_link::ns_smart_objects;
+  using namespace policy_table;
+
+  enum class SMemberType {
+    SMEMBER_MOBILE,
+    SMEMBER_HMI,
+    SMEMBER_BOOL_MOBILE,
+    SMEMBER_BOOL_HMI,
+    SMEMBER_VDR_MOBILE,
+    SMEMBER_VDR_HMI
+  };
+
+  auto get_custom_vdi = [this]()
+      -> std::vector<rpc::policy_table_interface_base::VehicleDataItem> {
+    using namespace rpc::policy_table_interface_base;
+    std::vector<VehicleDataItem> custom_vehicle_data_items;
+    auto vehicle_data_items = vehicle_data_provider_.GetVehicleDataItems();
+    for (const auto& item : vehicle_data_items) {
+      policy_table::Parameter parameter_enum;
+      if (!policy_table::EnumFromJsonString(item.name, &parameter_enum)) {
+        custom_vehicle_data_items.push_back(item);
+      }
+    }
+    return custom_vehicle_data_items;
+  };
+
+  auto vehicle_data_items = get_custom_vdi();
+
+  auto get_ischema_item = [](VehicleDataItem item,
+                             SMemberType type,
+                             std::vector<SMember> history = {}) -> SMember {
+    switch (type) {
+      case SMemberType::SMEMBER_BOOL_MOBILE: {
+        auto member_schema =
+            CBoolSchemaItem::create(TSchemaItemParameter<bool>());
+        return SMember(
+            member_schema,
+            false,  // root level items should not be mandatory
+            item.since.is_initialized() ? std::string(*item.since) : "",
+            item.until.is_initialized() ? std::string(*item.until) : "",
+            bool(*item.deprecated),
+            bool(*item.removed),
+            history);
+      }
+      case SMemberType::SMEMBER_VDR_MOBILE: {
+        // valid since struct_schema_items is not used in
+        // InitStructSchemaItem_VehicleDataResult
+        mobile_apis::MOBILE_API::TStructsSchemaItems mobile_struct_schema_items;
+        auto member_schema =
+            mobile_apis::MOBILE_API::InitStructSchemaItem_VehicleDataResult(
+                mobile_struct_schema_items);
+        return SMember(
+            member_schema,
+            false,  // root level items should not be mandatory
+            item.since.is_initialized() ? std::string(*item.since) : "",
+            item.until.is_initialized() ? std::string(*item.until) : "",
+            bool(*item.deprecated),
+            bool(*item.removed),
+            history);
+      }
+      case SMemberType::SMEMBER_MOBILE: {
+        TSchemaItemParameter<VehicleDataItem> tschema_item(item);
+        auto member_schema = VehicleDataItemSchema::create(
+            tschema_item, VehicleDataItemSchema::SchemaType::MOBILE);
+        return SMember(
+            member_schema,
+            false,  // root level items should not be mandatory
+            item.since.is_initialized() ? std::string(*item.since) : "",
+            item.until.is_initialized() ? std::string(*item.until) : "",
+            bool(*item.deprecated),
+            bool(*item.removed),
+            history);
+      }
+      case SMemberType::SMEMBER_BOOL_HMI: {
+        auto member_schema =
+            CBoolSchemaItem::create(TSchemaItemParameter<bool>());
+        return SMember(member_schema,
+                       false  // root level items should not be mandatory
+        );
+      }
+      case SMemberType::SMEMBER_VDR_HMI: {
+        // valid since struct_schema_items is not used in
+        // InitStructSchemaItem_Common_VehicleDataResult
+        hmi_apis::HMI_API::TStructsSchemaItems hmi_struct_schema_items;
+        auto member_schema =
+            hmi_apis::HMI_API::InitStructSchemaItem_Common_VehicleDataResult(
+                hmi_struct_schema_items);
+        return SMember(
+            member_schema, false  // root level items should not be mandatory
+        );
+      }
+      case SMemberType::SMEMBER_HMI: {
+        TSchemaItemParameter<VehicleDataItem> tschema_item(item);
+        auto member_schema = VehicleDataItemSchema::create(
+            tschema_item, VehicleDataItemSchema::SchemaType::HMI);
+        return SMember(
+            member_schema, false  // root level items should not be mandatory
+        );
+      }
+      default: {
+        auto member_schema = CAlwaysFalseSchemaItem::create();
+        return SMember(member_schema, false);
+      }
+    }
+  };
+
+  auto get_vehicle_data_history =
+      [&vehicle_data_items](std::string name) -> std::vector<VehicleDataItem> {
+    std::vector<VehicleDataItem> result;
+    std::copy_if(vehicle_data_items.begin(),
+                 vehicle_data_items.end(),
+                 std::back_inserter(result),
+                 [&name](VehicleDataItem item) { return item.name == name; });
+
+    std::sort(result.begin(),
+              result.end(),
+              [](const policy_table::VehicleDataItem& left,
+                 const policy_table::VehicleDataItem& right) {
+                if (!right.since.is_initialized()) {
+                  return false;
+                }
+                if (!left.since.is_initialized()) {
+                  return true;
+                }
+                const std::string l = *left.since;
+                const std::string r = *right.since;
+                return std::stof(l.c_str()) > std::stof(r.c_str());
+              });
+
+    return result;
+  };
+
+  auto get_member_with_history = [&get_ischema_item](
+                                     std::vector<VehicleDataItem> items,
+                                     SMemberType type) -> SMember {
+    std::vector<SMember> history = {};
+    std::vector<SMemberType> types{SMemberType::SMEMBER_MOBILE,
+                                   SMemberType::SMEMBER_VDR_MOBILE,
+                                   SMemberType::SMEMBER_BOOL_MOBILE};
+    if (helpers::in_range(types, type) && items.size() > 1) {
+      auto history_iterator = items.begin() + 1;
+      for (; history_iterator < items.end(); ++history_iterator) {
+        const auto& item = (*history_iterator);
+        history.push_back(get_ischema_item(item, type));
+      }
+    }
+
+    auto latest_item = (*items.begin());
+    return get_ischema_item(latest_item, type, history);
+  };
+
+  CustomVehicleDataManagerImpl::RPCParams mobile_params;
+  CustomVehicleDataManagerImpl::RPCParams hmi_params;
+
+  std::set<std::string> vehicle_data_names;
+  for (const auto& item : vehicle_data_items) {
+    vehicle_data_names.insert(item.name);
+  }
+
+  for (const auto& name : vehicle_data_names) {
+    auto vehicle_data_history = get_vehicle_data_history(name);
+    const auto& vdi = vehicle_data_history.begin();
+
+    SMember member_bool_hmi = get_member_with_history(
+        vehicle_data_history, SMemberType::SMEMBER_BOOL_HMI);
+    SMember member_bool_mobile = get_member_with_history(
+        vehicle_data_history, SMemberType::SMEMBER_BOOL_MOBILE);
+
+    SMember member_vdr_hmi = get_member_with_history(
+        vehicle_data_history, SMemberType::SMEMBER_VDR_HMI);
+    SMember member_vdr_mobile = get_member_with_history(
+        vehicle_data_history, SMemberType::SMEMBER_VDR_MOBILE);
+    SMember member_hmi =
+        get_member_with_history(vehicle_data_history, SMemberType::SMEMBER_HMI);
+    SMember member_mobile = get_member_with_history(
+        vehicle_data_history, SMemberType::SMEMBER_MOBILE);
+
+    mobile_params.addBoolParam(
+        std::pair<std::string, SMember>(vdi->name, member_bool_mobile));
+    mobile_params.addVDRParam(
+        std::pair<std::string, SMember>(vdi->name, member_vdr_mobile));
+    mobile_params.addParam(
+        std::pair<std::string, SMember>(vdi->name, member_mobile));
+
+    hmi_params.addBoolParam(
+        std::pair<std::string, SMember>(vdi->key, member_bool_hmi));
+    hmi_params.addVDRParam(
+        std::pair<std::string, SMember>(vdi->key, member_vdr_hmi));
+    hmi_params.addParam(std::pair<std::string, SMember>(vdi->key, member_hmi));
+  }
+
+  std::vector<mobile_apis::FunctionID::eType> mobile_subscribe_functions{
+      mobile_apis::FunctionID::SubscribeVehicleDataID,
+      mobile_apis::FunctionID::UnsubscribeVehicleDataID};
+
+  for (const auto& function_id : mobile_subscribe_functions) {
+    rpc_service_.UpdateMobileRPCParams(function_id,
+                                       mobile_apis::messageType::request,
+                                       mobile_params.getBoolParams());
+    rpc_service_.UpdateMobileRPCParams(function_id,
+                                       mobile_apis::messageType::response,
+                                       mobile_params.getVDRParams());
+  }
+
+  std::vector<hmi_apis::FunctionID::eType> hmi_subscribe_functions{
+      hmi_apis::FunctionID::VehicleInfo_SubscribeVehicleData,
+      hmi_apis::FunctionID::VehicleInfo_UnsubscribeVehicleData};
+
+  for (const auto& function_id : hmi_subscribe_functions) {
+    rpc_service_.UpdateHMIRPCParams(function_id,
+                                    hmi_apis::messageType::request,
+                                    hmi_params.getBoolParams());
+    rpc_service_.UpdateHMIRPCParams(function_id,
+                                    hmi_apis::messageType::response,
+                                    hmi_params.getVDRParams());
+  }
+
+  rpc_service_.UpdateMobileRPCParams(mobile_apis::FunctionID::GetVehicleDataID,
+                                     mobile_apis::messageType::request,
+                                     mobile_params.getBoolParams());
+
+  rpc_service_.UpdateMobileRPCParams(mobile_apis::FunctionID::GetVehicleDataID,
+                                     mobile_apis::messageType::response,
+                                     mobile_params.getParams());
+
+  rpc_service_.UpdateMobileRPCParams(mobile_apis::FunctionID::OnVehicleDataID,
+                                     mobile_apis::messageType::notification,
+                                     mobile_params.getParams());
+
+  rpc_service_.UpdateHMIRPCParams(
+      hmi_apis::FunctionID::VehicleInfo_GetVehicleData,
+      hmi_apis::messageType::request,
+      hmi_params.getBoolParams());
+
+  rpc_service_.UpdateHMIRPCParams(
+      hmi_apis::FunctionID::VehicleInfo_GetVehicleData,
+      hmi_apis::messageType::response,
+      hmi_params.getParams());
+
+  rpc_service_.UpdateHMIRPCParams(
+      hmi_apis::FunctionID::VehicleInfo_OnVehicleData,
+      hmi_apis::messageType::notification,
+      hmi_params.getParams());
+}
+
+void CustomVehicleDataManagerImpl::OnPolicyEvent(
+    plugin_manager::PolicyEvent policy_event) {
+  using namespace plugin_manager;
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  switch (policy_event) {
+    case kApplicationPolicyUpdated:
+      UpdateVehicleDataItems();
+      break;
+    case kApplicationsDisabled:
+    default:
+      return;
+  }
 }
 
 const OptionalDataItem

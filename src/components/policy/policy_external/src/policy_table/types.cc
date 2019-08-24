@@ -2230,10 +2230,11 @@ const std::string VehicleDataItem::kInteger = "Integer";
 const std::string VehicleDataItem::kStruct = "Struct";
 const std::string VehicleDataItem::kString = "String";
 const std::string VehicleDataItem::kFloat = "Float";
+const std::string VehicleDataItem::kDouble = "Double";
 const std::string VehicleDataItem::kBoolean = "Boolean";
 
 const std::vector<std::string> VehicleDataItem::kPODTypes = {
-    kInteger, kFloat, kString, kBoolean};
+    kInteger, kFloat, kDouble, kString, kBoolean};
 
 Json::Value VehicleDataItem::ToJsonValue() const {
   Json::Value ret(Json::objectValue);

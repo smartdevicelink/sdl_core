@@ -5,11 +5,9 @@
 #include "vehicle_info_plugin/custom_vehicle_data_manager.h"
 
 namespace vehicle_info_plugin {
-
+namespace plugin_manager = application_manager::plugin_manager;
 class MockCustomVehicleDataManager : public CustomVehicleDataManager {
  public:
-  MOCK_METHOD1(ValidateVehicleDataItems,
-               bool(const smart_objects::SmartObject& msg_params));
   MOCK_METHOD1(
       CreateHMIMessageParams,
       smart_objects::SmartObject(const std::set<std::string>& msg_params));
@@ -17,8 +15,7 @@ class MockCustomVehicleDataManager : public CustomVehicleDataManager {
                void(smart_objects::SmartObject& msg_params));
   MOCK_CONST_METHOD1(GetVehicleDataItemType,
                      std::string(const std::string& vehicle_data_item_name));
-  MOCK_METHOD1(IsVehicleDataName, bool(const std::string& name));
-  MOCK_METHOD1(IsVehicleDataKey, bool(const std::string& key));
+  MOCK_METHOD1(OnPolicyEvent, void(plugin_manager::PolicyEvent policy_event));
 };
 
 }  // namespace vehicle_info_plugin
