@@ -6490,6 +6490,9 @@
     <param name="cloudAppVehicleID" type="String" mandatory="false">
       <description>Parameter used by cloud apps to identify a head unit</description>
     </param>
+    <param name="engineOilLife" type="Float" minvalue="0" maxvalue="100" mandatory="false">
+      <description>The estimated percentage of remaining oil life of the engine.</description>
+    </param>
 
         <!-- Ford Specific Data Items -->
     <param name="eCallInfo" type="Common.ECallInfo" mandatory="false">
@@ -6672,13 +6675,6 @@
       <param name="statisticType" type="Common.StatisticsType" mandatory="true"/>
     </function>
 
-    <function name="GetURLS" messagetype="request" scope="internal">
-      <description>Sent by system to SDL to get list of URL for specified service type and optionally policy's application id.</description>
-      <param name="service" type="Integer" minvalue="0" maxvalue="100" mandatory="true"/>
-    </function>
-    <function name="GetURLS" messagetype="response" scope="internal">
-      <param name="urls" type="Common.ServiceInfo" array="true" mandatory="false" minsize="1" maxsize="100"/>
-    </function>
     <function name="OnDeviceStateChanged" messagetype="notification" scope="internal">
       <param name="deviceState" type="Common.DeviceState" mandatory="true" />
       <param name="deviceInternalId" type="String" mandatory="true" minlength="0" maxlength="500" />
