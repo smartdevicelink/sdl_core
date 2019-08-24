@@ -80,9 +80,6 @@ class Parser(object):
             [("FunctionID", Model.Enum(name="FunctionID")),
              ("messageType", Model.Enum(name="messageType"))])
 
-    def _check_function(self, enum):
-        pass
-
     def _check_enum_name(self, enum):
         """Check enum name.
 
@@ -160,7 +157,6 @@ class Parser(object):
                 self._add_item(self._structs, struct)
                 self._add_type(struct)
             elif element.tag == "function":
-                self._check_function(element)
                 function = self._parse_function(element, prefix)
                 self._add_item(self._functions, function,
                                (function.function_id, function.message_type))

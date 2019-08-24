@@ -54,32 +54,6 @@ class Parser(RPCBase.Parser):
 
         pass
 
-    def _check_function(self, struct):
-        custom_vdi_subs = [
-            "SubscribeVehicleData",
-            "UnsubscribeVehicleData"]
-
-        custom_vdi_data = [
-            "GetVehicleData"]
-
-        oem_specific = ET.Element('param')
-
-        name = struct.attrib['name']
-        msg_type = struct.attrib['messagetype']
-        if (name in custom_vdi_subs or name in custom_vdi_data) and msg_type == 'request':
-            oem_specific.attrib['name'] = 'oemSpecific'
-            oem_specific.attrib['type'] = 'Boolean'
-            oem_specific.attrib['mandatory'] = 'false'
-
-            struct.append(oem_specific)
-
-        if name in custom_vdi_subs and msg_type == 'response':
-            oem_specific.attrib['name'] = 'oemSpecific'
-            oem_specific.attrib['type'] = 'Common.VehicleDataResult'
-            oem_specific.attrib['mandatory'] = 'false'
-
-            struct.append(oem_specific)
-
     def _provide_enum_element_for_function(self, enum_name, element_name):
         """Provide enum element for functions.
 

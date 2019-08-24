@@ -18,23 +18,23 @@ from generator import Model
 
 EXPECTED_NOTIFICATION_RESULT = (
     u"""params_members[ns_smart_device_link::ns_json_handler::"""
-    u"""strings::S_FUNCTION_ID] = CObjectSchemaItem::SMember("""
+    u"""strings::S_FUNCTION_ID] = SMember("""
     u"""TEnumSchemaItem<FunctionID::eType>::create("""
     u"""function_id_items), true);\n"""
     u"""params_members[ns_smart_device_link::ns_json_handler::"""
-    u"""strings::S_MESSAGE_TYPE] = CObjectSchemaItem::SMember("""
+    u"""strings::S_MESSAGE_TYPE] = SMember("""
     u"""TEnumSchemaItem<messageType::eType>::create("""
     u"""message_type_items), true);\n"""
     u"""params_members[ns_smart_device_link::ns_json_handler::"""
-    u"""strings::S_PROTOCOL_VERSION] = CObjectSchemaItem::SMember("""
+    u"""strings::S_PROTOCOL_VERSION] = SMember("""
     u"""TNumberSchemaItem<int>::create(), true);\n"""
     u"""params_members[ns_smart_device_link::ns_json_handler::"""
-    u"""strings::S_PROTOCOL_TYPE] = CObjectSchemaItem::SMember("""
+    u"""strings::S_PROTOCOL_TYPE] = SMember("""
     u"""TNumberSchemaItem<int>::create(), true);\n""")
 
 EXPECTED_REQ_RESP_RESULT = "".join([EXPECTED_NOTIFICATION_RESULT, (
     u"""params_members[ns_smart_device_link::ns_json_handler::"""
-    u"""strings::S_CORRELATION_ID] = CObjectSchemaItem::SMember("""
+    u"""strings::S_CORRELATION_ID] = SMember("""
     u"""TNumberSchemaItem<int>::create(), true);\n""")])
 
 DESCRIPTION = [u"Description Line1", u"Description Line2"]
