@@ -106,10 +106,11 @@ class CodeGenerator(object):
         for func in interface.functions.values():
             for param in func.params:
                 params_set.add(param)
-
         parameter_enum = Model.Enum('Parameter')
+        
         for item in params_set:
-            parameter_enum.elements[item] = Model.EnumElement(item)
+            parameter_enum.elements[item.upper()] = Model.EnumElement(item)
+                
 
         required_enums_for_policy = [
             "HMILevel",
@@ -136,7 +137,7 @@ class CodeGenerator(object):
             "RequestType" : lambda item_name : "RT_" + item_name,
             "ModuleType" : lambda item_name : "MT_" + item_name,
             "Common_AppPriority" :  lambda item_name : "P_" + item_name if not item_name == "VOICE_COMMUNICATION" else "P_VOICECOM",
-            "Parameter" :  lambda item_name : "P_" + to_snake_case(item_name)
+            "Parameter" :  lambda item_name : "P_" + to_snake_case(item_name).upper()
         }
 
         self.enum_items_string_naming_conversion_ = {
@@ -304,7 +305,6 @@ class CodeGenerator(object):
         """
 
         enum_elements = enum.elements.values()
-
         return self._enum_template.substitute(
             comment=self._gen_comment(enum),
             name=self.enum_naming_conversion_[enum.name],
