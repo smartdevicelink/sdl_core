@@ -113,6 +113,7 @@ ApplicationImpl::ApplicationImpl(
     , video_streaming_suspended_(true)
     , audio_streaming_suspended_(true)
     , is_app_allowed_(true)
+    , is_app_data_resumption_allowed_(false)
     , has_been_activated_(false)
     , tts_properties_in_none_(false)
     , tts_properties_in_full_(false)
@@ -718,6 +719,14 @@ bool ApplicationImpl::set_app_icon_path(const std::string& path) {
 
 void ApplicationImpl::set_app_allowed(const bool allowed) {
   is_app_allowed_ = allowed;
+}
+
+bool ApplicationImpl::is_app_data_resumption_allowed() const {
+  return is_app_data_resumption_allowed_;
+}
+
+void ApplicationImpl::set_app_data_resumption_allowance(const bool allowed) {
+  is_app_data_resumption_allowed_ = allowed;
 }
 
 void ApplicationImpl::set_secondary_device(

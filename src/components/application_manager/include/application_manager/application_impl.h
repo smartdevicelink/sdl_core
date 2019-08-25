@@ -283,6 +283,9 @@ class ApplicationImpl : public virtual Application,
 
   virtual bool is_application_data_changed() const;
 
+  bool is_app_data_resumption_allowed() const OVERRIDE;
+  void set_app_data_resumption_allowance(const bool allowed) OVERRIDE;
+
   virtual void set_is_application_data_changed(bool state_application_data);
 
   /**
@@ -568,6 +571,7 @@ class ApplicationImpl : public virtual Application,
   sync_primitives::Lock streaming_stop_lock_;
 
   bool is_app_allowed_;
+  bool is_app_data_resumption_allowed_;
   bool has_been_activated_;
   bool tts_properties_in_none_;
   bool tts_properties_in_full_;

@@ -87,7 +87,7 @@ OnBCSystemCapabilityUpdatedNotificationFromHMI::
   (*message_)[strings::params][strings::connection_key] =
       (*message_)[strings::msg_params][strings::app_id];
   (*message_)[strings::msg_params].erase(strings::app_id);
-  if (app->is_resuming()) {
+  if (app->is_resuming() && app->is_app_data_resumption_allowed()) {
     LOG4CXX_DEBUG(logger_, "Application is resuming");
     app->display_capabilities_builder().UpdateDisplayCapabilities(
         display_capabilities);

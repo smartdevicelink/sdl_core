@@ -208,7 +208,7 @@ void OnSystemCapabilityUpdatedNotification::Run() {
     if (mobile_apis::SystemCapabilityType::DISPLAYS == system_capability_type) {
       LOG4CXX_DEBUG(logger_, "Using common display capabilities");
       auto capabilities = hmi_capabilities_.system_display_capabilities();
-      if (app->is_resuming()) {
+      if (app->is_resuming() && app->is_app_data_resumption_allowed()) {
         LOG4CXX_DEBUG(logger_,
                       "Application "
                           << app->app_id()

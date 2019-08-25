@@ -217,7 +217,8 @@ bool ResumeCtrlImpl::RestoreAppHMIState(ApplicationSharedPtr application) {
 
       const bool app_hmi_state_is_set =
           SetAppHMIState(application, saved_hmi_level, true);
-      if (app_hmi_state_is_set) {
+      if (app_hmi_state_is_set &&
+          application->is_app_data_resumption_allowed()) {
         RestoreAppWidgets(application, saved_app);
       }
     } else {
@@ -681,9 +682,14 @@ bool ResumeCtrlImpl::CheckApplicationHash(ApplicationSharedPtr application,
                 "app_id : " << application->app_id() << " hash : " << hash);
   smart_objects::SmartObject saved_app;
   const std::string& device_mac = application->mac_address();
-  bool result = resumption_storage_->GetSavedApplication(
+  const bool get_app_result = resumption_storage_->GetSavedApplication(
       application->policy_app_id(), device_mac, saved_app);
-  return result ? saved_app[strings::hash_id].asString() == hash : false;
+  const bool check_result =
+      get_app_result ? saved_app[strings::hash_id].asString() == hash : false;
+  if (check_result) {
+    application->set_app_data_resumption_allowance(true);
+  }
+  return check_result;
 }
 
 void ResumeCtrlImpl::SaveDataOnTimer() {

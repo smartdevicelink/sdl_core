@@ -58,6 +58,8 @@ class MockApplication : public ::application_manager::Application {
   MOCK_CONST_METHOD0(is_application_data_changed, bool());
   MOCK_METHOD1(set_is_application_data_changed,
                void(bool state_application_data));
+  MOCK_CONST_METHOD0(is_app_data_resumption_allowed, bool());
+  MOCK_METHOD1(set_app_data_resumption_allowance, void(bool allowed));
   MOCK_METHOD0(CloseActiveMessage, void());
   MOCK_CONST_METHOD0(IsFullscreen, bool());
   MOCK_METHOD0(ChangeSupportingAppHMIType, void());

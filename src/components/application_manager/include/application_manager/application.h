@@ -564,6 +564,20 @@ class Application : public virtual InitialApplicationData,
    */
   virtual void set_is_application_data_changed(bool state_application_data) = 0;
 
+  /**
+   * @brief Checks if application data is allowed to be resumed
+   * @return TRUE if data of application is allowed to be resumed, otherwise
+   * return FALSE
+   */
+  virtual bool is_app_data_resumption_allowed() const = 0;
+
+  /**
+   * @brief Sets resumption allowance for application data
+   * @param allowed - true if app data allowed to be resumed,
+   * false value means that app data is disallowed for resumption
+   */
+  virtual void set_app_data_resumption_allowance(const bool allowed) = 0;
+
   virtual void CloseActiveMessage() = 0;
   virtual bool IsFullscreen() const = 0;
   virtual void ChangeSupportingAppHMIType() = 0;
