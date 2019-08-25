@@ -1,4 +1,4 @@
-# Copyright (c) 2018, Ford Motor Company
+# Copyright (c) 2019, Ford Motor Company
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
@@ -32,32 +32,42 @@ include(${CMAKE_SOURCE_DIR}/tools/cmake/helpers/sources.cmake)
 
 include_directories (
   ${GMOCK_INCLUDE_DIRECTORY}
-  ${CMAKE_CURRENT_SOURCE_DIR}/include
   ${COMPONENTS_DIR}/application_manager/test/include
+  ${COMPONENTS_DIR}/application_manager/rpc_plugins/rc_rpc_plugin/include
   ${COMPONENTS_DIR}/application_manager/rpc_plugins/rc_rpc_plugin/test/include/
   ${COMPONENTS_DIR}/include/test/application_manager/
   ${COMPONENTS_DIR}/rc_rpc_plugin/test/include
-  ${COMPONENTS_DIR}/resumption/include
-  )
-
-set (RC_TEST_SOURCES
-${CMAKE_CURRENT_SOURCE_DIR}/interior_data_cache_test.cc
-${CMAKE_CURRENT_SOURCE_DIR}/rc_consent_manager_impl_test.cc
-${CMAKE_CURRENT_SOURCE_DIR}/grid_test.cc
-${CMAKE_CURRENT_SOURCE_DIR}/rc_helpers_test.cc
 )
 
-set(RC_COMMANDS_TEST_DIR ${CMAKE_CURRENT_SOURCE_DIR}/commands)
-
-file(GLOB SOURCES
-  ${COMPONENTS_DIR}/application_manager/test/mock_message_helper.cc
-  ${RC_COMMANDS_TEST_DIR}/*
+set (RESOURCE_ALLOC_MANAGER_TEST_SOURCES
+${COMPONENTS_DIR}/application_manager/rpc_plugins/rc_rpc_plugin/src/interior_data_manager_impl.cc
+${COMPONENTS_DIR}/application_manager/rpc_plugins/rc_rpc_plugin/src/interior_data_cache_impl.cc
+${COMPONENTS_DIR}/application_manager/rpc_plugins/rc_rpc_plugin/src/resource_allocation_manager_impl.cc
+${COMPONENTS_DIR}/application_manager/rpc_plugins/rc_rpc_plugin/src/rc_rpc_plugin.cc
+${COMPONENTS_DIR}/application_manager/rpc_plugins/rc_rpc_plugin/src/rc_app_extension.cc
+${COMPONENTS_DIR}/application_manager/rpc_plugins/rc_rpc_plugin/src/rc_consent_manager_impl.cc
+${COMPONENTS_DIR}/application_manager/rpc_plugins/rc_rpc_plugin/src/rc_capabilities_manager_impl.cc
+${COMPONENTS_DIR}/application_manager/rpc_plugins/rc_rpc_plugin/src/rc_command_factory.cc
+${COMPONENTS_DIR}/application_manager/rpc_plugins/rc_rpc_plugin/test/mock_rc_helpers.cc
+${CMAKE_CURRENT_SOURCE_DIR}/resource_allocation_manager_impl_test.cc
 )
+
+set(RC_COMMANDS_TEST_SOURCE_DIR ${COMPONENTS_DIR}/application_manager/rpc_plugins/rc_rpc_plugin/test/commands)
+set(RC_COMMANDS_SOURCE_DIR ${COMPONENTS_DIR}/application_manager/rpc_plugins/rc_rpc_plugin/src/commands)
+collect_sources(COMMANDS_SOURCES "${RC_COMMANDS_TEST_DIR}" "${RC_COMMANDS_TEST_SOURCE_DIR}")
 
 set(LIBRARIES
-  rc_rpc_plugin_static
+  ApplicationManager
+  connectionHandler
+  SmartObjects
+  ProtocolHandler
+  MessageHelper
+  connectionHandler
+  Utils
   Resumption
+  jsoncpp
   gmock_main
+  dl
 )
 
 if(ENABLE_LOG)
@@ -67,7 +77,5 @@ if(ENABLE_LOG)
   list(APPEND LIBRARIES expat -L${EXPAT_LIBS_DIRECTORY})
 endif()
 
-create_test("rc_commands_test" "${SOURCES}" "${LIBRARIES}" )
-create_test("rc_plugin_test" "${RC_TEST_SOURCES}" "${LIBRARIES}")
+create_test("resource_allocation_manager_test" "${COMMANDS_SOURCES}" "${LIBRARIES}" "${RESOURCE_ALLOC_MANAGER_TEST_SOURCES}")
 
-add_subdirectory(resource_allocation_manager)
