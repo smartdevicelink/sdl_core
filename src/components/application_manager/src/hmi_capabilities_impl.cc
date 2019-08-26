@@ -616,6 +616,12 @@ void HMICapabilitiesImpl::set_display_capabilities(
   }
 }
 
+void HMICapabilitiesImpl::set_system_display_capabilities(
+    const smart_objects::SmartObject& display_capabilities) {
+  system_display_capabilities_.reset(
+      new smart_objects::SmartObject(display_capabilities));
+}
+
 void HMICapabilitiesImpl::set_hmi_zone_capabilities(
     const smart_objects::SmartObject& hmi_zone_capabilities) {
   if (hmi_zone_capabilities_) {
@@ -804,6 +810,11 @@ const smart_objects::SmartObject* HMICapabilitiesImpl::tts_supported_languages()
 const smart_objects::SmartObject* HMICapabilitiesImpl::display_capabilities()
     const {
   return display_capabilities_;
+}
+
+const smart_objects::SmartObjectSPtr
+HMICapabilitiesImpl::system_display_capabilities() const {
+  return system_display_capabilities_;
 }
 
 const smart_objects::SmartObject* HMICapabilitiesImpl::hmi_zone_capabilities()

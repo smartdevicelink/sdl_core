@@ -70,8 +70,14 @@ void SDLRPCPlugin::OnApplicationEvent(
     plugins::ApplicationEvent event,
     app_mngr::ApplicationSharedPtr application) {
   if (plugins::ApplicationEvent::kApplicationRegistered == event) {
-    application->AddExtension(
-        std::make_shared<SystemCapabilityAppExtension>(*this, *application));
+    auto sys_cap_ext_ptr =
+        std::make_shared<SystemCapabilityAppExtension>(*this, *application);
+    application->AddExtension(sys_cap_ext_ptr);
+    // Processing automatic subscription to SystemCapabilities for DISPLAY type
+    const auto capability_type =
+        mobile_apis::SystemCapabilityType::eType::DISPLAYS;
+    LOG4CXX_DEBUG(logger_, "Subscription to DISPLAYS capability is enabled");
+    sys_cap_ext_ptr->SubscribeTo(capability_type);
   } else if (plugins::ApplicationEvent::kDeleteApplicationData == event) {
     ClearSubscriptions(application);
   }

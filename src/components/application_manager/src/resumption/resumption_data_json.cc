@@ -64,7 +64,8 @@ void ResumptionDataJson::SaveApplication(
   const uint32_t grammar_id = application->get_grammar_id();
   const uint32_t time_stamp = (uint32_t)time(NULL);
   const std::string device_mac = application->mac_address();
-  const mobile_apis::HMILevel::eType hmi_level = application->hmi_level();
+  const mobile_apis::HMILevel::eType hmi_level =
+      application->hmi_level(mobile_apis::PredefinedWindows::DEFAULT_WINDOW);
   const bool is_subscribed_for_way_points =
       application_manager_.IsAppSubscribedForWayPoints(application);
 
@@ -99,6 +100,9 @@ void ResumptionDataJson::SaveApplication(
   formatters::CFormatterJsonBase::objToJsonValue(
       GetApplicationFiles(application), tmp);
   json_app[strings::application_files] = tmp;
+  formatters::CFormatterJsonBase::objToJsonValue(
+      GetApplicationWidgetsInfo(application), tmp);
+  json_app[strings::windows_info] = tmp;
   json_app[strings::time_stamp] = time_stamp;
   json_app[strings::subscribed_for_way_points] = is_subscribed_for_way_points;
 

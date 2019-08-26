@@ -87,7 +87,8 @@ void PerformAudioPassThruRequest::Run() {
     return;
   }
 
-  if (mobile_api::HMILevel::HMI_NONE == app->hmi_level()) {
+  if (mobile_api::HMILevel::HMI_NONE ==
+      app->hmi_level(mobile_apis::PredefinedWindows::DEFAULT_WINDOW)) {
     LOG4CXX_ERROR(logger_, "application isn't activated");
     SendResponse(false, mobile_apis::Result::REJECTED);
     return;

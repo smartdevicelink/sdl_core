@@ -94,12 +94,22 @@ class MockResumeCtrl : public resumption::ResumeCtrl {
   MOCK_METHOD1(SetupDefaultHMILevel,
                bool(application_manager::ApplicationSharedPtr application));
   MOCK_METHOD1(StartAppHmiStateResumption,
-               void(application_manager::ApplicationSharedPtr application));
+               bool(application_manager::ApplicationSharedPtr application));
   MOCK_METHOD3(SetAppHMIState,
                bool(application_manager::ApplicationSharedPtr application,
                     const mobile_apis::HMILevel::eType hmi_level,
                     bool check_policy));
   MOCK_CONST_METHOD0(LaunchTime, time_t());
+
+  MOCK_METHOD2(RestoreAppWidgets,
+               void(app_mngr::ApplicationSharedPtr application,
+                    const smart_objects::SmartObject& saved_app));
+
+  MOCK_METHOD1(RestoreWidgetsHMIState,
+               void(const smart_objects::SmartObject& response_message));
+
+  MOCK_METHOD1(StartWaitingForDisplayCapabilitiesUpdate,
+               void(application_manager::ApplicationSharedPtr application));
 
 #ifdef BUILD_TESTS
   MOCK_METHOD1(set_resumption_storage,

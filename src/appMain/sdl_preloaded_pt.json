@@ -1201,6 +1201,31 @@
                         "hmi_levels": ["FULL"]
                     }
                 }
+            },
+            "WidgetSupport": {
+                "rpcs": {
+                    "CreateWindow": {
+                        "hmi_levels": ["BACKGROUND",
+                            "FULL",
+                            "LIMITED"]
+                    },
+                    "DeleteWindow": {
+                        "hmi_levels": ["BACKGROUND",
+                            "FULL",
+                            "LIMITED"]
+                    },
+                    "Show": {
+                        "hmi_levels": ["BACKGROUND",
+                        "FULL",
+                        "LIMITED"]
+                    },
+                    "OnSystemCapabilityUpdated": {
+                        "hmi_levels": ["BACKGROUND",
+                        "FULL",
+                        "LIMITED",
+                        "NONE"]
+                    }
+                }
             }
         },
         "consumer_friendly_messages": {

@@ -33,6 +33,7 @@
 #ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_COMMAND_H_
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_COMMAND_H_
 #include <stdint.h>
+#include "application_manager/hmi_state.h"
 #include "smart_objects/smart_object.h"
 
 namespace application_manager {
@@ -91,6 +92,11 @@ class Command {
    * @brief Retrieves request ID
    */
   virtual int32_t function_id() const = 0;
+
+  /*
+   * @brief Retrieves Window ID
+   */
+  virtual WindowID window_id() const = 0;
 
   /*
    * @brief Function is called by RequestController when request execution time

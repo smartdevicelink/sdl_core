@@ -2731,7 +2731,8 @@ bool ResumptionDataDB::UpdateApplicationData(
   utils::dbms::SQLQuery query(db());
 
   const int64_t time_stamp = static_cast<int64_t>(time(NULL));
-  const mobile_apis::HMILevel::eType hmi_level = application->hmi_level();
+  const mobile_apis::HMILevel::eType hmi_level =
+      application->hmi_level(mobile_apis::PredefinedWindows::DEFAULT_WINDOW);
 
   if (!query.Prepare(kUpdateApplicationData)) {
     LOG4CXX_WARN(logger_,
@@ -2843,7 +2844,8 @@ ApplicationParams::ApplicationParams(app_mngr::ApplicationSharedPtr application)
     m_grammar_id = application->get_grammar_id();
     m_connection_key = application->app_id();
     m_hmi_app_id = application->hmi_app_id();
-    m_hmi_level = application->hmi_level();
+    m_hmi_level =
+        application->hmi_level(mobile_apis::PredefinedWindows::DEFAULT_WINDOW);
     m_is_media_application = application->IsAudioApplication();
     app_ptr = application;
   }

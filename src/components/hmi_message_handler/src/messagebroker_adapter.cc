@@ -139,7 +139,7 @@ void MessageBrokerAdapter::SubscribeTo() {
   MessageBrokerController::subscribeTo("RC.OnInteriorVehicleData");
   MessageBrokerController::subscribeTo("RC.OnRemoteControlSettings");
   MessageBrokerController::subscribeTo(
-      "SystemCapability.OnSystemCapabilityUpdated");
+      "BasicCommunication.OnSystemCapabilityUpdated");
 
   LOG4CXX_INFO(logger_, "Subscribed to notifications.");
 }

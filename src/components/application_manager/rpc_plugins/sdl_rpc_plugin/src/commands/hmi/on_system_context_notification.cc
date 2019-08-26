@@ -62,13 +62,27 @@ void OnSystemContextNotification::Run() {
           (*message_)[strings::msg_params][hmi_notification::system_context]
               .asInt());
 
+  WindowID window_id = mobile_apis::PredefinedWindows::DEFAULT_WINDOW;
+  if ((*message_)[strings::msg_params].keyExists(strings::window_id)) {
+    window_id = (*message_)[strings::msg_params][strings::window_id].asInt();
+  }
+
   ApplicationSharedPtr app;
-  if ((mobile_api::SystemContext::SYSCTXT_VRSESSION == system_context) ||
-      (mobile_api::SystemContext::SYSCTXT_MENU == system_context) ||
-      (mobile_api::SystemContext::SYSCTXT_HMI_OBSCURED == system_context)) {
+  if (helpers::
+          Compare<mobile_api::SystemContext::eType, helpers::EQ, helpers::ONE>(
+              system_context,
+              mobile_api::SystemContext::SYSCTXT_VRSESSION,
+              mobile_api::SystemContext::SYSCTXT_MENU,
+              mobile_api::SystemContext::SYSCTXT_HMI_OBSCURED)) {
     app = application_manager_.active_application();
-  } else if ((mobile_api::SystemContext::SYSCTXT_ALERT == system_context) ||
-             (mobile_api::SystemContext::SYSCTXT_MAIN == system_context)) {
+  }
+
+  if (mobile_apis::PredefinedWindows::DEFAULT_WINDOW != window_id ||
+      helpers::Compare<mobile_api::SystemContext::eType,
+                       helpers::EQ,
+                       helpers::ONE>(system_context,
+                                     mobile_api::SystemContext::SYSCTXT_ALERT,
+                                     mobile_api::SystemContext::SYSCTXT_MAIN)) {
     if ((*message_)[strings::msg_params].keyExists(strings::app_id)) {
       app = application_manager_.application(
           (*message_)[strings::msg_params][strings::app_id].asUInt());
@@ -76,8 +90,8 @@ void OnSystemContextNotification::Run() {
   }
 
   if (app && mobile_api::SystemContext::INVALID_ENUM != system_context) {
-    application_manager_.state_controller().SetRegularState(app,
-                                                            system_context);
+    application_manager_.state_controller().SetRegularState(
+        app, window_id, system_context);
   } else {
     LOG4CXX_ERROR(logger_, "Application does not exist");
   }

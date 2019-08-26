@@ -177,7 +177,8 @@ bool RPCServiceImpl::ManageMobileCommand(
     mobile_apis::HMILevel::eType app_hmi_level =
         mobile_apis::HMILevel::INVALID_ENUM;
     if (app) {
-      app_hmi_level = app->hmi_level();
+      app_hmi_level =
+          app->hmi_level(mobile_apis::PredefinedWindows::DEFAULT_WINDOW);
     }
 
     // commands will be launched from request_ctrl
@@ -466,9 +467,12 @@ void RPCServiceImpl::SendMessageToMobile(
     mobile_apis::FunctionID::eType function_id =
         static_cast<mobile_apis::FunctionID::eType>(
             (*message)[strings::params][strings::function_id].asUInt());
+
     RPCParams params;
 
     const smart_objects::SmartObject& s_map = (*message)[strings::msg_params];
+    const WindowID window_id =
+        MessageHelper::ExtractWindowIdFromSmartObject(s_map);
     if (smart_objects::SmartType_Map == s_map.getType()) {
       smart_objects::SmartMap::iterator iter = s_map.map_begin();
       smart_objects::SmartMap::iterator iter_end = s_map.map_end();
@@ -483,7 +487,8 @@ void RPCServiceImpl::SendMessageToMobile(
     const std::string string_functionID =
         MessageHelper::StringifiedFunctionID(function_id);
     const mobile_apis::Result::eType check_result =
-        app_manager_.CheckPolicyPermissions(app, string_functionID, params);
+        app_manager_.CheckPolicyPermissions(
+            app, window_id, string_functionID, params);
     if (mobile_apis::Result::SUCCESS != check_result) {
       LOG4CXX_WARN(logger_,
                    "Function \"" << string_functionID << "\" (#" << function_id

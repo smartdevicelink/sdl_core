@@ -304,7 +304,9 @@ ApplicationSharedPtr ApplicationManagerImpl::active_application() const {
 }
 
 bool LimitedAppPredicate(const ApplicationSharedPtr app) {
-  return app ? app->hmi_level() == mobile_api::HMILevel::HMI_LIMITED : false;
+  return app ? app->hmi_level(mobile_api::PredefinedWindows::DEFAULT_WINDOW) ==
+                   mobile_api::HMILevel::HMI_LIMITED
+             : false;
 }
 
 ApplicationSharedPtr ApplicationManagerImpl::get_limited_media_application()
@@ -315,7 +317,8 @@ ApplicationSharedPtr ApplicationManagerImpl::get_limited_media_application()
 
 bool LimitedNaviAppPredicate(const ApplicationSharedPtr app) {
   return app ? (app->is_navi() &&
-                app->hmi_level() == mobile_api::HMILevel::HMI_LIMITED)
+                app->hmi_level(mobile_api::PredefinedWindows::DEFAULT_WINDOW) ==
+                    mobile_api::HMILevel::HMI_LIMITED)
              : false;
 }
 
@@ -327,7 +330,8 @@ ApplicationSharedPtr ApplicationManagerImpl::get_limited_navi_application()
 
 bool LimitedVoiceAppPredicate(const ApplicationSharedPtr app) {
   return app ? (app->is_voice_communication_supported() &&
-                app->hmi_level() == mobile_api::HMILevel::HMI_LIMITED)
+                app->hmi_level(mobile_api::PredefinedWindows::DEFAULT_WINDOW) ==
+                    mobile_api::HMILevel::HMI_LIMITED)
              : false;
 }
 
@@ -349,7 +353,8 @@ ApplicationManagerImpl::applications_with_navi() {
 
 bool LimitedMobileProjectionPredicate(const ApplicationSharedPtr app) {
   return app ? (app->mobile_projection_enabled() &&
-                app->hmi_level() == mobile_api::HMILevel::HMI_LIMITED)
+                app->hmi_level(mobile_api::PredefinedWindows::DEFAULT_WINDOW) ==
+                    mobile_api::HMILevel::HMI_LIMITED)
              : false;
 }
 
@@ -574,12 +579,16 @@ ApplicationSharedPtr ApplicationManagerImpl::RegisterApplication(
 
   HmiStatePtr initial_state =
       CreateRegularState(std::shared_ptr<Application>(application),
+                         mobile_apis::WindowType::MAIN,
                          mobile_apis::HMILevel::INVALID_ENUM,
                          mobile_apis::AudioStreamingState::INVALID_ENUM,
                          mobile_apis::VideoStreamingState::INVALID_ENUM,
                          mobile_api::SystemContext::SYSCTXT_MAIN);
 
-  application->SetInitialState(initial_state);
+  application->SetInitialState(
+      mobile_apis::PredefinedWindows::DEFAULT_WINDOW,
+      std::string(),  // should not be tracked for main window
+      initial_state);
 
   application->set_folder_name(policy_app_id + "_" +
                                application->mac_address());
@@ -735,18 +744,15 @@ bool ApplicationManagerImpl::ActivateApplication(ApplicationSharedPtr app) {
 
   LOG4CXX_DEBUG(logger_, "Activating application with id:" << app->app_id());
 
-  // remove from resumption if app was activated by user
+  // Remove from resumption if app was activated by user
   resume_controller().OnAppActivated(app);
+
   // Activate any app services published by the app
   GetAppServiceManager().OnAppActivated(app);
-  const HMILevel::eType hmi_level = HMILevel::HMI_FULL;
-  const AudioStreamingState::eType audio_state =
-      app->IsAudioApplication() ? AudioStreamingState::AUDIBLE
-                                : AudioStreamingState::NOT_AUDIBLE;
-  const VideoStreamingState::eType video_state =
-      app->IsVideoApplication() ? VideoStreamingState::STREAMABLE
-                                : VideoStreamingState::NOT_STREAMABLE;
-  state_ctrl_.SetRegularState(app, hmi_level, audio_state, video_state, false);
+
+  // Activate main window in state controller
+  state_ctrl_.ActivateDefaultWindow(app);
+
   return true;
 }
 
@@ -1314,11 +1320,13 @@ void ApplicationManagerImpl::SetAllAppsAllowed(const bool allowed) {
 
 HmiStatePtr ApplicationManagerImpl::CreateRegularState(
     std::shared_ptr<Application> app,
-    mobile_apis::HMILevel::eType hmi_level,
-    mobile_apis::AudioStreamingState::eType audio_state,
-    mobile_apis::VideoStreamingState::eType video_state,
-    mobile_apis::SystemContext::eType system_context) const {
+    const mobile_apis::WindowType::eType window_type,
+    const mobile_apis::HMILevel::eType hmi_level,
+    const mobile_apis::AudioStreamingState::eType audio_state,
+    const mobile_apis::VideoStreamingState::eType video_state,
+    const mobile_apis::SystemContext::eType system_context) const {
   HmiStatePtr state(new HmiState(app, *this));
+  state->set_window_type(window_type);
   state->set_hmi_level(hmi_level);
   state->set_audio_streaming_state(audio_state);
   state->set_video_streaming_state(video_state);
@@ -3043,6 +3051,7 @@ void ApplicationManagerImpl::OnAppUnauthorized(const uint32_t& app_id) {
 
 mobile_apis::Result::eType ApplicationManagerImpl::CheckPolicyPermissions(
     const ApplicationSharedPtr app,
+    const WindowID window_id,
     const std::string& function_id,
     const RPCParams& rpc_params,
     CommandParametersPermissions* params_permissions) {
@@ -3055,7 +3064,8 @@ mobile_apis::Result::eType ApplicationManagerImpl::CheckPolicyPermissions(
 
   DCHECK(app);
   policy::CheckPermissionResult result;
-  GetPolicyHandler().CheckPermissions(app, function_id, rpc_params, result);
+  GetPolicyHandler().CheckPermissions(
+      app, window_id, function_id, rpc_params, result);
 
   if (NULL != params_permissions) {
     params_permissions->allowed_params = result.list_of_allowed_params;
@@ -3063,7 +3073,9 @@ mobile_apis::Result::eType ApplicationManagerImpl::CheckPolicyPermissions(
     params_permissions->undefined_params = result.list_of_undefined_params;
   }
 
-  if (app->hmi_level() == mobile_apis::HMILevel::HMI_NONE &&
+  // Record statistics for default window only
+  if (app->hmi_level(mobile_apis::PredefinedWindows::DEFAULT_WINDOW) ==
+          mobile_apis::HMILevel::HMI_NONE &&
       function_id != MessageHelper::StringifiedFunctionID(
                          mobile_apis::FunctionID::UnregisterAppInterfaceID)) {
     if (result.hmi_level_permitted != policy::kRpcAllowed) {
@@ -3074,7 +3086,8 @@ mobile_apis::Result::eType ApplicationManagerImpl::CheckPolicyPermissions(
 #ifdef ENABLE_LOG
   const std::string log_msg =
       "Application: " + app->policy_app_id() + ", RPC: " + function_id +
-      ", HMI status: " + MessageHelper::StringifiedHMILevel(app->hmi_level());
+      ", window_id: " + std::to_string(window_id) + ", HMI status: " +
+      MessageHelper::StringifiedHMILevel(app->hmi_level(window_id));
 #endif  // ENABLE_LOG
   if (result.hmi_level_permitted != policy::kRpcAllowed) {
     LOG4CXX_WARN(logger_, "Request is blocked by policies. " << log_msg);
@@ -3147,7 +3160,10 @@ bool ApplicationManagerImpl::HMILevelAllowsStreaming(
     LOG4CXX_WARN(logger_, "An application is not registered.");
     return false;
   }
-  return Compare<eType, EQ, ONE>(app->hmi_level(), HMI_FULL, HMI_LIMITED);
+  return Compare<eType, EQ, ONE>(
+      app->hmi_level(mobile_api::PredefinedWindows::DEFAULT_WINDOW),
+      HMI_FULL,
+      HMI_LIMITED);
 }
 
 bool ApplicationManagerImpl::CanAppStream(
@@ -3316,9 +3332,11 @@ void ApplicationManagerImpl::ProcessPostponedMessages(const uint32_t app_id) {
     const std::string function_id = MessageHelper::StringifiedFunctionID(
         static_cast<mobile_apis::FunctionID::eType>(
             (*message)[strings::params][strings::function_id].asUInt()));
+    const WindowID window_id = MessageHelper::ExtractWindowIdFromSmartObject(
+        (*message)[strings::msg_params]);
     const RPCParams params;
     const mobile_apis::Result::eType check_result =
-        CheckPolicyPermissions(app, function_id, params);
+        CheckPolicyPermissions(app, window_id, function_id, params);
     if (mobile_api::Result::SUCCESS == check_result) {
       rpc_service_->ManageMobileCommand(message, commands::Command::SOURCE_SDL);
     } else {
@@ -3371,39 +3389,6 @@ void ApplicationManagerImpl::ProcessApp(const uint32_t app_id,
       EndNaviServices(app_id);
     }
   }
-}
-
-void ApplicationManagerImpl::SendHMIStatusNotification(
-    const std::shared_ptr<Application> app) {
-  LOG4CXX_AUTO_TRACE(logger_);
-  DCHECK_OR_RETURN_VOID(app);
-  smart_objects::SmartObjectSPtr notification =
-      std::make_shared<smart_objects::SmartObject>();
-  smart_objects::SmartObject& message = *notification;
-
-  message[strings::params][strings::function_id] =
-      static_cast<int32_t>(mobile_api::FunctionID::OnHMIStatusID);
-
-  message[strings::params][strings::message_type] =
-      static_cast<int32_t>(application_manager::MessageType::kNotification);
-
-  message[strings::params][strings::connection_key] =
-      static_cast<int32_t>(app->app_id());
-
-  message[strings::msg_params][strings::hmi_level] =
-      static_cast<int32_t>(app->hmi_level());
-
-  message[strings::msg_params][strings::audio_streaming_state] =
-      static_cast<int32_t>(app->audio_streaming_state());
-
-  message[strings::msg_params][strings::video_streaming_state] =
-      static_cast<int32_t>(app->video_streaming_state());
-
-  message[strings::msg_params][strings::system_context] =
-      static_cast<int32_t>(app->system_context());
-
-  rpc_service_->ManageMobileCommand(notification,
-                                    commands::Command::SOURCE_SDL);
 }
 
 void ApplicationManagerImpl::ClearTimerPool() {
@@ -3836,13 +3821,18 @@ void ApplicationManagerImpl::OnUpdateHMIAppType(
       if (flag_diffirence_app_hmi_type) {
         (*it)->set_app_types(transform_app_hmi_types);
         (*it)->ChangeSupportingAppHMIType();
-        if ((*it)->hmi_level() == mobile_api::HMILevel::HMI_BACKGROUND) {
+        const mobile_apis::HMILevel::eType app_hmi_level =
+            (*it)->hmi_level(mobile_apis::PredefinedWindows::DEFAULT_WINDOW);
+        if (app_hmi_level == mobile_api::HMILevel::HMI_BACKGROUND) {
           MessageHelper::SendUIChangeRegistrationRequestToHMI(*it, *this);
-        } else if (((*it)->hmi_level() == mobile_api::HMILevel::HMI_FULL) ||
-                   ((*it)->hmi_level() == mobile_api::HMILevel::HMI_LIMITED)) {
+        } else if ((app_hmi_level == mobile_api::HMILevel::HMI_FULL) ||
+                   (app_hmi_level == mobile_api::HMILevel::HMI_LIMITED)) {
           MessageHelper::SendUIChangeRegistrationRequestToHMI(*it, *this);
           state_controller().SetRegularState(
-              *it, mobile_apis::HMILevel::HMI_BACKGROUND, true);
+              *it,
+              mobile_apis::PredefinedWindows::DEFAULT_WINDOW,
+              mobile_apis::HMILevel::HMI_BACKGROUND,
+              true);
         }
       }
     }
@@ -3964,7 +3954,10 @@ void ApplicationManagerImpl::SendDriverDistractionState(
   const std::string function_id = MessageHelper::StringifiedFunctionID(
       mobile_api::FunctionID::OnDriverDistractionID);
   const mobile_apis::Result::eType check_result =
-      CheckPolicyPermissions(application, function_id, params);
+      CheckPolicyPermissions(application,
+                             mobile_apis::PredefinedWindows::DEFAULT_WINDOW,
+                             function_id,
+                             params);
   if (mobile_api::Result::SUCCESS == check_result) {
     rpc_service_->ManageMobileCommand(create_notification(),
                                       commands::Command::SOURCE_SDL);
@@ -4342,9 +4335,10 @@ void ApplicationManagerImpl::ChangeAppsHMILevel(
     LOG4CXX_ERROR(logger_, "There is no app with id: " << app_id);
     return;
   }
-  const mobile_apis::HMILevel::eType old_level = app->hmi_level();
+  const mobile_apis::HMILevel::eType old_level =
+      app->hmi_level(mobile_api::PredefinedWindows::DEFAULT_WINDOW);
   if (old_level != level) {
-    app->set_hmi_level(level);
+    app->set_hmi_level(mobile_apis::PredefinedWindows::DEFAULT_WINDOW, level);
     OnHMILevelChanged(app_id, old_level, level);
   } else {
     LOG4CXX_WARN(logger_, "Redundant changing HMI level: " << level);

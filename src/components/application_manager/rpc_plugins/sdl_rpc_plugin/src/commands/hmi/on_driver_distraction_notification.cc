@@ -65,7 +65,11 @@ struct OnDriverDistractionProcessor {
       const RPCParams params;
       policy::CheckPermissionResult result;
       application_manager_.GetPolicyHandler().CheckPermissions(
-          application, stringified_function_id_, params, result);
+          application,
+          mobile_apis::PredefinedWindows::DEFAULT_WINDOW,
+          stringified_function_id_,
+          params,
+          result);
       auto& msg_params = message[strings::msg_params];
       const bool is_lock_screen_dismissal_exists = msg_params.keyExists(
           mobile_notification::lock_screen_dismissal_enabled);

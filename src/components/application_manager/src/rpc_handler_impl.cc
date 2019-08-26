@@ -159,10 +159,6 @@ void RPCHandlerImpl::ProcessMessageFromHMI(
   smart_objects::SmartObjectSPtr smart_object =
       std::make_shared<smart_objects::SmartObject>();
   bool allow_unknown_parameters = false;
-  if (!smart_object) {
-    LOG4CXX_ERROR(logger_, "Null pointer");
-    return;
-  }
 
   smart_objects::SmartObject converted_result;
   formatters::FormatterJsonRpc::FromString<hmi_apis::FunctionID::eType,
@@ -198,6 +194,7 @@ void RPCHandlerImpl::ProcessMessageFromHMI(
     LOG4CXX_ERROR(logger_, "Received command didn't run successfully");
   }
 }
+
 void RPCHandlerImpl::Handle(const impl::MessageFromMobile message) {
   LOG4CXX_AUTO_TRACE(logger_);
 

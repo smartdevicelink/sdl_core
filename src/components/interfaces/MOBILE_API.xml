@@ -346,7 +346,29 @@
             <description>This mode causes the interaction to immediately display a keyboard entry through the HMI.</description>
         </element>
     </enum>
-    
+
+    <enum name="WindowType" since="6.0">
+        <element name="MAIN">
+            <description>
+                This window type describes the main window on a display.
+            </description>
+        </element>
+        <element name="WIDGET">
+            <description>
+                A widget is a small window that the app can create to provide information and soft buttons for quick app control.
+            </description>
+        </element>
+    </enum>
+
+    <enum name="PredefinedWindows" since="6.0">
+        <element name="DEFAULT_WINDOW" value="0">
+            <description>The default window is a main window pre-created on behalf of the app.</description>
+        </element>
+        <element name="PRIMARY_WIDGET" value="1">
+            <description>The primary widget of the app.</description>
+        </element>
+    </enum>
+
     <enum name="HMILevel" since="1.0">
         <description>Enumeration that describes current levels of HMI.</description>
         <element name="FULL" internal_name="HMI_FULL" />
@@ -2215,7 +2237,10 @@
         <param name="parameterPermissions" type="ParameterPermissions"  mandatory="true"/>
     </struct>
     
-    <struct name="DisplayCapabilities" since="1.0">
+    <struct name="DisplayCapabilities" deprecated="true" since="6.0">
+        <history>
+            <struct name="DisplayCapabilities" since="1.0" until="6.0"/>
+        </history>
         <description>Contains information about the display capabilities.</description>
         <param name="displayType" type="DisplayType" mandatory="true" deprecated="true" since="5.0">
             <description>The type of the display. See DisplayType</description>
@@ -2303,6 +2328,12 @@
         <param name="imageSupported" type="Boolean" mandatory="true">
             <description>The button supports referencing a static or dynamic image.</description>
         </param>
+        <param name="textSupported" type="Boolean" mandatory="false"  since="6.0">
+            <description>
+                The button supports the use of text.
+                If not included, the default value should be considered true that the button will support text.
+           </description>
+        </param>
     </struct>         
 
     <struct name="PresetBankCapabilities" since="2.0">
@@ -2311,6 +2342,60 @@
             <description>Onscreen custom presets are available.</description>
         </param>
     </struct>         
+
+    <struct name="WindowCapability" since="6.0">
+        <param name="windowID" type="Integer" mandatory="false">
+            <description>
+                The specified ID of the window. Can be set to a predefined window,
+                or omitted for the main window on the main display.
+            </description>
+        </param>
+        <param name="textFields" type="TextField" minsize="1" maxsize="100" array="true" mandatory="false">
+            <description>A set of all fields that support text data. See TextField</description>
+        </param>
+        <param name="imageFields" type="ImageField" minsize="1" maxsize="100" array="true" mandatory="false">
+            <description>A set of all fields that support images. See ImageField</description>
+        </param>
+        <param name="imageTypeSupported" type="ImageType" array="true" minsize="0" maxsize="1000" mandatory="false">
+            <description>Provides information about image types supported by the system.</description>
+        </param>
+        <param name="templatesAvailable" type="String" minsize="0" maxsize="100" maxlength="100" array="true" mandatory="false">
+            <description>A set of all window templates available on the head unit.</description>
+        </param>
+        <param name="numCustomPresetsAvailable" type="Integer" minvalue="1" maxvalue="100" mandatory="false">
+            <description>The number of on-window custom presets available (if any); otherwise omitted.</description>
+        </param>
+        <param name="buttonCapabilities" type="ButtonCapabilities" minsize="1" maxsize="100" array="true" mandatory="false">
+            <description>The number of buttons and the capabilities of each on-window button.</description>
+        </param>
+        <param name="softButtonCapabilities" type="SoftButtonCapabilities" minsize="1" maxsize="100" array="true" mandatory="false">
+            <description>The number of soft buttons available on-window and the capabilities for each button.</description>
+        </param>
+    </struct>
+
+    <struct name="WindowTypeCapabilities" since="6.0">
+        <param name="type" type="WindowType" mandatory="true" />
+        <param name="maximumNumberOfWindows" type="Integer" mandatory="true" />
+    </struct>
+
+    <struct name="DisplayCapability" since="6.0">
+        <param name="displayName" type="String" mandatory="false" />
+        <param name="windowTypeSupported" type="WindowTypeCapabilities" array="true" minsize="1" mandatory="false">
+            <description>
+              Informs the application how many windows the app is allowed to create per type.
+            </description>
+        </param>
+        <param name="windowCapabilities" type="WindowCapability" array="true" minsize="1" maxsize="1000" mandatory="false">
+            <description>
+              Contains a list of capabilities of all windows related to the app.
+              Once the app has registered the capabilities of all windows are provided.
+              GetSystemCapability still allows requesting window capabilities of all windows.
+              After registration, only windows with capabilities changed will be included. Following cases will cause only affected windows to be included:
+              1. App creates a new window. After the window is created, a system capability notification will be sent related only to the created window.
+              2. App sets a new layout to the window. The new layout changes window capabilties. The notification will reflect those changes to the single window.
+            </description>
+        </param>
+    </struct>
 
     <struct name="HMICapabilities" since="3.0">
         <param name="navigation" type="Boolean" mandatory="false">
@@ -2701,6 +2786,8 @@
         <element name="CancelInteractionID" value="57" hexvalue="39" since="6.0" />
         <element name="CloseApplicationID" value="58" hexvalue="3A" since="6.0" />
         <element name="ShowAppMenuID" value="59" hexvalue="3B" since="6.0" />
+        <element name="CreateWindowID" value="60" hexvalue="3C" since="6.0" />
+        <element name="DeleteWindowID" value="61" hexvalue="3D" since="6.0" />
         
         <!--
          Base Notifications
@@ -2885,6 +2972,7 @@
         <element name="VIDEO_STREAMING"/>
         <element name="REMOTE_CONTROL"/>
         <element name="APP_SERVICES" since="5.1"/>
+        <element name="DISPLAYS" since="6.0"/>
     </enum>
     
     <struct name="NavigationCapability" since="4.5">
@@ -2959,7 +3047,18 @@
             <description>The color of the background</description>
         </param>
     </struct>
-    
+
+    <struct name="TemplateConfiguration" since="6.0">
+        <param name="template" type="String" maxlength="500" mandatory="true">
+          <description>
+              Predefined or dynamically created window template.
+              Currently only predefined window template layouts are defined.
+          </description>
+        </param>
+        <param name="dayColorScheme" type="TemplateColorScheme" mandatory="false" />
+        <param name="nightColorScheme" type="TemplateColorScheme" mandatory="false" />
+    </struct>
+
     <!---Remote control  -->
 
     <enum name="MassageZone" since="5.0">
@@ -4235,6 +4334,7 @@
         <param name="appServicesCapabilities" type="AppServicesCapabilities" mandatory="false" since="5.1">
             <description>An array of currently available services. If this is an update to the capability the affected services will include an update reason in that item</description>
         </param>
+        <param name="displayCapabilities" type="DisplayCapability" array="true" minsize="1" maxsize="1000" mandatory="false" since="6.0"/>
     </struct>
 
     <!-- Requests/Responses -->
@@ -4383,22 +4483,45 @@
         <param name="hmiDisplayLanguage" type="Language" mandatory="false" since="2.0">
             <description>The currently active display language on the module. See "Language" for options.</description>
         </param>
-        
-        <param name="displayCapabilities" type="DisplayCapabilities" mandatory="false">
-            <description>See DisplayCapabilities</description>
+
+        <param name="displayCapabilities" type="DisplayCapabilities" mandatory="false" deprecated="true" since="6.0">
+            <description>
+                See DisplayCapabilities. This parameter is deprecated and replaced by SystemCapability using DISPLAYS.
+            </description>
+            <history>
+                <param name="displayCapabilities" type="DisplayCapabilities" mandatory="false" since="2.0" until="6.0"/>
+            </history>
         </param>
-        
-        <param name="buttonCapabilities" type="ButtonCapabilities" minsize="1" maxsize="100" array="true" mandatory="false">
-            <description>See ButtonCapabilities</description >
+
+        <param name="buttonCapabilities" type="ButtonCapabilities" minsize="1" maxsize="100" array="true" mandatory="false" deprecated="true" since="6.0">
+            <description>
+                See ButtonCapabilities. This parameter is deprecated and replaced by  SystemCapability using DISPLAYS.
+            </description>
+            <history>
+                <param name="buttonCapabilities" type="ButtonCapabilities" minsize="1" maxsize="100" array="true" mandatory="false" since="2.0" until="6.0"/>
+            </history>
         </param>
-        
-        <param name="softButtonCapabilities" type="SoftButtonCapabilities" minsize="1" maxsize="100" array="true" mandatory="false" since="2.0">
-            <description>If returned, the platform supports on-screen SoftButtons; see SoftButtonCapabilities.</description >
+
+        <param name="softButtonCapabilities" type="SoftButtonCapabilities" minsize="1" maxsize="100" array="true" mandatory="false" deprecated="true" since="6.0">
+            <description>
+                If returned, the platform supports on-screen SoftButtons; see SoftButtonCapabilities.
+                This parameter is deprecated and replaced by  SystemCapability using DISPLAYS.
+            </description>
+            <history>
+                <param name="softButtonCapabilities" type="SoftButtonCapabilities" minsize="1" maxsize="100" array="true" mandatory="false" since="2.0" until="6.0"/>
+            </history>
         </param>
-        
-        <param name="presetBankCapabilities" type="PresetBankCapabilities" mandatory="false" since="2.0">
-            <description>If returned, the platform supports custom on-screen Presets; see PresetBankCapabilities.</description >
+
+        <param name="presetBankCapabilities" type="PresetBankCapabilities" mandatory="false" deprecated="true" since="6.0">
+            <description>
+                If returned, the platform supports custom on-screen Presets; see PresetBankCapabilities.
+                This parameter is deprecated and replaced by  SystemCapability using DISPLAYS.
+            </description>
+            <history>
+                <param name="presetBankCapabilities" type="PresetBankCapabilities" mandatory="false" since="2.0" until="6.0"/>
+            </history>
         </param>
+
         <param name="hmiZoneCapabilities" type="HmiZoneCapabilities" minsize="1" maxsize="100" array="true" mandatory="false" since="1.0">
             <description>See HmiZoneCapabilities</description>
         </param>
@@ -4483,6 +4606,108 @@
         
     </function>
     
+    <function name="CreateWindow" functionID="CreateWindowID" messagetype="request" since="6.0">
+        <description>
+          Create a new window on the display with the specified window type.
+        </description>
+        <param name="windowID" type="Integer" mandatory="true">
+            <description>
+                A unique ID to identify the window. The value of '0' will always be the default main window on the main display and should not be used in this context as it will already be created for the app. See PredefinedWindows enum. Creating a window with an ID that is already in use will be rejected with `INVALID_ID`.
+            </description>
+        </param>
+
+        <param name="windowName" type="String" maxlength="100" mandatory="true">
+            <description>
+                The window name to be used by the HMI. The name of the pre-created default window will match the app name.
+                Multiple apps can share the same window name except for the default main window.
+                Creating a window with a name which is already in use by the app will result in `DUPLICATE_NAME`.
+            </description>
+        </param>
+
+        <param name="type" type="WindowType" mandatory="true">
+            <description>The type of the window to be created. Main window or widget.</description>
+        </param>
+
+        <param name="associatedServiceType" type="String" mandatory="false">
+            <description>
+              Allows an app to create a widget related to a specific service type.
+              As an example if a `MEDIA` app becomes active, this app becomes audible and is allowed to play audio. Actions such as skip or play/pause will be
+              directed to this active media app. In case of widgets, the system can provide a single "media" widget which will act as a placeholder for the active media app.
+
+              It is only allowed to have one window per service type. This means that a media app can only have a single MEDIA widget. Still the app can create widgets omitting this parameter. Those widgets would be available as app specific widgets that are permanently included in the HMI.
+
+              This parameter is related to widgets only. The default main window, which is pre-created during app registration, will be created based on the HMI types specified in the app registration request.
+            </description>
+        </param>
+        <param name="duplicateUpdatesFromWindowID" type="Integer" mandatory="false">
+            <description>
+              Optional parameter. Specify whether the content sent to an existing window
+              should be duplicated to the created window.
+              If there isn't a window with the ID, the request will be rejected with `INVALID_DATA`.
+            </description>
+        </param>
+    </function>
+
+    <function name="CreateWindow" functionID="CreateWindowID" messagetype="response" since="6.0">
+        <param name="success" type="Boolean" platform="documentation" mandatory="true">
+            <description> true if successful; false, if failed.</description>
+        </param>
+
+        <param name="info" type="String" maxlength="1000" mandatory="false" platform="documentation">
+            <description>Provides additional human readable info regarding the result.</description>
+        </param>
+
+        <param name="resultCode" type="Result" platform="documentation" mandatory="true">
+            <description>See Result</description>
+            <element name="SUCCESS"/>
+            <element name="REJECTED"/>
+            <element name="INVALID_DATA"/>
+            <element name="INVALID_ID"/>
+            <element name="DUPLICATE_NAME"/>
+            <element name="DISALLOWED"/>
+            <element name="OUT_OF_MEMORY"/>
+            <element name="TOO_MANY_PENDING_REQUESTS"/>
+            <element name="APPLICATION_NOT_REGISTERED"/>
+            <element name="GENERIC_ERROR"/>
+        </param>
+    </function>
+
+    <function name="DeleteWindow" functionID="DeleteWindowID" messagetype="request" since="6.0">
+        <description>
+            Deletes previously created window of the SDL application.
+        </description>
+        <param name="windowID" type="Integer" mandatory="true">
+            <description>
+                A unique ID to identify the window. The value of '0' will always be the default main window on the main display and cannot be deleted.
+                See PredefinedWindows enum.
+            </description>
+        </param>
+    </function>
+
+    <function name="DeleteWindow" functionID="DeleteWindowID" messagetype="response" since="6.0">
+        <param name="success" type="Boolean" platform="documentation" mandatory="true">
+            <description> true if successful; false, if failed.</description>
+        </param>
+
+        <param name="info" type="String" maxlength="1000" mandatory="false" platform="documentation">
+            <description>Provides additional human readable info regarding the result.</description>
+        </param>
+
+        <param name="resultCode" type="Result" platform="documentation" mandatory="true">
+            <description>See Result</description>
+            <element name="SUCCESS"/>
+            <element name="REJECTED"/>
+            <element name="INVALID_DATA"/>
+            <element name="INVALID_ID"/>
+            <element name="DUPLICATE_NAME"/>
+            <element name="DISALLOWED"/>
+            <element name="OUT_OF_MEMORY"/>
+            <element name="TOO_MANY_PENDING_REQUESTS"/>
+            <element name="APPLICATION_NOT_REGISTERED"/>
+            <element name="GENERIC_ERROR"/>
+        </param>
+    </function>
+
     <function name="SetGlobalProperties" functionID="SetGlobalPropertiesID" messagetype="request" since="1.0">
         <description>Allows setting global properties.</description>
         
@@ -5176,17 +5401,29 @@
         </param>
         
         <param name="metadataTags" type="MetadataTags" mandatory="false" since="4.5">
-            <description>
-                App defined metadata information. See MetadataStruct. Uses mainField1, mainField2, mainField3, mainField4.
+            <description>App defined metadata information. See MetadataStruct. Uses mainField1, mainField2, mainField3, mainField4.
                 If omitted on supported displays, the currently set metadata tags will not change.
-                If any text field contains no tags or the none tag, the metadata tag for that textfield should be removed.
+                If any text field contains no tags or the none tag, the metadata tag for that textfield should be removed.</description>
+        </param>
+
+        <param name="templateTitle" type="String" maxlength="100" mandatory="false" since="6.0">
+            <description>
+                The title of the new template that will be displayed.
+                How this will be displayed is dependent on the OEM design and implementation of the template.
             </description>
         </param>
 
-        <param name="templateTitle" type="String" minlength="0" maxlength="100" mandatory="false" since="6.0">
+        <param name="windowID" type="Integer" mandatory="false" since="6.0" >
             <description>
-                The title of the new template that will be displayed. 
-                How this will be displayed is dependent on the OEM design and implementation of the template.
+                This is the unique ID assigned to the window that this RPC is intended. If this param is not included,
+                it will be assumed that this request is specifically for the main window on the main display.
+                See PredefinedWindows enum.
+            </description>
+        </param>
+
+        <param name="templateConfiguration" type="TemplateConfiguration" mandatory="false" since="6.0">
+            <description>
+                Used to set an alternate template layout to a window.
             </description>
         </param>
     </function>
@@ -6841,12 +7078,8 @@
         
     </function>
     
-    <function name="SetDisplayLayout" functionID="SetDisplayLayoutID" messagetype="request" since="3.0">
-        <description>
-            Used to set an alternate display layout.
-            If not sent, default screen for given platform will be shown
-        </description>
-        
+    <function name="SetDisplayLayout" functionID="SetDisplayLayoutID" messagetype="request" deprecated="true" since="6.0">
+        <description>This RPC is deprecated. Use Show RPC to change layout.</description>
         <param name="displayLayout" type="String" maxlength="500" mandatory="true">
             <description>
                 Predefined or dynamically created screen layout.
@@ -6859,12 +7092,12 @@
         <param name="nightColorScheme" type="TemplateColorScheme" mandatory="false" since="5.0"/>
     </function>
     
-    <function name="SetDisplayLayout" functionID="SetDisplayLayoutID" messagetype="response" since="3.0">
-        
+    <function name="SetDisplayLayout" functionID="SetDisplayLayoutID" messagetype="response" deprecated="true" since="6.0">
+        <description>This RPC is deprecated. Use Show RPC to change layout.</description>
         <param name="success" type="Boolean" platform="documentation" mandatory="true">
             <description> true, if successful; false, if failed </description>
         </param>
-        
+
         <param name="resultCode" type="Result" platform="documentation" mandatory="true">
             <description>See Result</description>
             <element name="SUCCESS"/>
@@ -6876,23 +7109,23 @@
             <element name="REJECTED"/>
             <element name="UNSUPPORTED_REQUEST"/>
         </param>
-        
+
         <param name="displayCapabilities" type="DisplayCapabilities" mandatory="false">
             <description>See DisplayCapabilities</description>
         </param>
-        
+
         <param name="buttonCapabilities" type="ButtonCapabilities" minsize="1" maxsize="100" array="true" mandatory="false">
             <description>See ButtonCapabilities</description >
         </param>
-        
+
         <param name="softButtonCapabilities" type="SoftButtonCapabilities" minsize="1" maxsize="100" array="true" mandatory="false">
             <description>If returned, the platform supports on-screen SoftButtons; see SoftButtonCapabilities.</description>
         </param>
-        
+
         <param name="presetBankCapabilities" type="PresetBankCapabilities" mandatory="false">
             <description>If returned, the platform supports custom on-screen Presets; see PresetBankCapabilities.</description>
         </param>
-        
+
         <param name="info" type="String" maxlength="1000" mandatory="false" platform="documentation">
             <description>Provides additional human readable info regarding the result.</description>
         </param>
@@ -7598,6 +7831,11 @@
             <description>
                 See VideoStreamingState. 
                 If it is NOT_STREAMABLE, the app must stop streaming video to SDL Core(stop service).
+            </description>
+        </param>
+        <param name="windowID" type="Integer" mandatory="false" since="6.0">
+            <description>
+              This is the unique ID assigned to the window that this RPC is intended. If this param is not included, it will be assumed that this request is specifically for the main window on the main display. See PredefinedWindows enum.
             </description>
         </param>
     </function>
