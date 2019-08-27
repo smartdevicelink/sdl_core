@@ -38,7 +38,7 @@
 namespace rc_rpc_plugin {
 
 enum capabilitiesStatus { success, missedLightName, missedParam, readOnly };
-typedef std::pair<std::string, capabilitiesStatus> ModuleCapability;
+typedef std::pair<std::string, capabilitiesStatus> ModuleTypeCapability;
 
 class RCCapabilitiesManager {
  public:
@@ -77,7 +77,7 @@ class RCCapabilitiesManager {
    * @param smart object of module_data
    * @return pair of state and capability status - ModuleCapability
    */
-  virtual ModuleCapability GetModuleDataCapabilities(
+  virtual ModuleTypeCapability GetModuleDataCapabilities(
       const smart_objects::SmartObject& module_data,
       const std::string& module_id) const = 0;
 
@@ -103,7 +103,7 @@ class RCCapabilitiesManager {
   virtual bool AreReadOnlyParamsPresent(
       const smart_objects::SmartObject& module_data,
       const std::string& module_type,
-      ModuleCapability& module_data_capabilities) const = 0;
+      ModuleTypeCapability& module_data_capabilities) const = 0;
 
   /**
    * @brief AreAllParamsReadOnly checks that all params from module

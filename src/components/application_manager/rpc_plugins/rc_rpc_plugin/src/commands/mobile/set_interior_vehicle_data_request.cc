@@ -79,7 +79,7 @@ bool ClearUnrelatedModuleData(const std::string& module_type,
 }
 
 mobile_apis::Result::eType PrepareResultCodeAndInfo(
-    const ModuleCapability module_data_capabilities, std::string& info) {
+    const ModuleTypeCapability module_data_capabilities, std::string& info) {
   mobile_apis::Result::eType result_code =
       mobile_apis::Result::UNSUPPORTED_RESOURCE;
   if (message_params::kLightState == module_data_capabilities.first) {
@@ -128,7 +128,7 @@ void SetInteriorVehicleDataRequest::Execute() {
       return;
     }
 
-    ModuleCapability module_data_capabilities;
+    ModuleTypeCapability module_data_capabilities;
     module_data_capabilities =
         rc_capabilities_manager_.GetModuleDataCapabilities(module_data,
                                                            module_id);

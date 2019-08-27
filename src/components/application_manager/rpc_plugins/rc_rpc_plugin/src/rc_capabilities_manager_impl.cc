@@ -449,7 +449,7 @@ RCCapabilitiesManagerImpl::GetModuleDataToCapabilitiesMapping() const {
   return mapping;
 }
 
-ModuleCapability RCCapabilitiesManagerImpl::GetModuleDataCapabilities(
+ModuleTypeCapability RCCapabilitiesManagerImpl::GetModuleDataCapabilities(
     const smart_objects::SmartObject& module_data,
     const std::string& module_id) const {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -459,7 +459,7 @@ ModuleCapability RCCapabilitiesManagerImpl::GetModuleDataCapabilities(
   const auto& get_module_data_key = RCHelpers::GetModuleTypeToDataMapping();
   const auto& get_capabilities_key =
       RCHelpers::GetModuleTypeToCapabilitiesMapping();
-  ModuleCapability module_data_capabilities =
+  ModuleTypeCapability module_data_capabilities =
       std::make_pair("", capabilitiesStatus::missedParam);
 
   for (const auto& module_type : all_module_types) {
@@ -487,7 +487,7 @@ ModuleCapability RCCapabilitiesManagerImpl::GetModuleDataCapabilities(
   return module_data_capabilities;
 }
 
-ModuleCapability RCCapabilitiesManagerImpl::GetControlDataCapabilities(
+ModuleTypeCapability RCCapabilitiesManagerImpl::GetControlDataCapabilities(
     const smart_objects::SmartObject& capabilities,
     const smart_objects::SmartObject& control_data) const {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -500,7 +500,7 @@ ModuleCapability RCCapabilitiesManagerImpl::GetControlDataCapabilities(
       continue;
     }
     if (message_params::kLightState == request_parameter) {
-      ModuleCapability light_capability =
+      ModuleTypeCapability light_capability =
           std::make_pair("", capabilitiesStatus::success);
 
       for (auto& light_data : *(control_data[request_parameter].asArray())) {
@@ -515,7 +515,7 @@ ModuleCapability RCCapabilitiesManagerImpl::GetControlDataCapabilities(
       return light_capability;
     }
     if (message_params::kBand == request_parameter) {
-      ModuleCapability radio_capability = GetRadioBandByCapabilities(
+      ModuleTypeCapability radio_capability = GetRadioBandByCapabilities(
           capabilities, control_data[request_parameter]);
       if (capabilitiesStatus::success != radio_capability.second) {
         return radio_capability;
@@ -579,7 +579,7 @@ capabilitiesStatus RCCapabilitiesManagerImpl::GetItemCapability(
   return capabilitiesStatus::success;
 }
 
-ModuleCapability RCCapabilitiesManagerImpl::GetLightDataCapabilities(
+ModuleTypeCapability RCCapabilitiesManagerImpl::GetLightDataCapabilities(
     const smart_objects::SmartObject& capabilities,
     const smart_objects::SmartObject& control_data) const {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -607,7 +607,7 @@ ModuleCapability RCCapabilitiesManagerImpl::GetLightDataCapabilities(
   return std::make_pair("", capabilitiesStatus::success);
 }
 
-ModuleCapability RCCapabilitiesManagerImpl::GetLightNameCapabilities(
+ModuleTypeCapability RCCapabilitiesManagerImpl::GetLightNameCapabilities(
     const smart_objects::SmartObject& capabilities_status,
     const smart_objects::SmartObject& light_data) const {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -622,7 +622,7 @@ ModuleCapability RCCapabilitiesManagerImpl::GetLightNameCapabilities(
                         capabilitiesStatus::missedLightName);
 }
 
-ModuleCapability RCCapabilitiesManagerImpl::GetRadioBandByCapabilities(
+ModuleTypeCapability RCCapabilitiesManagerImpl::GetRadioBandByCapabilities(
     const smart_objects::SmartObject& capabilities_status,
     const smart_objects::SmartObject& request_parameter) const {
   mobile_apis::RadioBand::eType radio_band =
@@ -715,7 +715,7 @@ bool RCCapabilitiesManagerImpl::CheckReadOnlyParamsForLight(
 bool RCCapabilitiesManagerImpl::AreReadOnlyParamsPresent(
     const smart_objects::SmartObject& module_data,
     const std::string& module_type,
-    ModuleCapability& module_data_capabilities) const {
+    ModuleTypeCapability& module_data_capabilities) const {
   LOG4CXX_AUTO_TRACE(logger_);
   const smart_objects::SmartObject& module_type_params =
       ControlData(module_data, module_type);

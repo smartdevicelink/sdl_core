@@ -49,7 +49,7 @@ class RCCapabilitiesManagerImpl : public RCCapabilitiesManager {
 
   bool CheckIfModuleExistInCapabilities(const ModuleUid& module) const FINAL;
 
-  ModuleCapability GetModuleDataCapabilities(
+  ModuleTypeCapability GetModuleDataCapabilities(
       const smart_objects::SmartObject& module_data,
       const std::string& module_id) const FINAL;
 
@@ -60,7 +60,7 @@ class RCCapabilitiesManagerImpl : public RCCapabilitiesManager {
   bool AreReadOnlyParamsPresent(
       const smart_objects::SmartObject& module_data,
       const std::string& module_type,
-      ModuleCapability& module_data_capabilities) const FINAL;
+      ModuleTypeCapability& module_data_capabilities) const FINAL;
 
   bool AreAllParamsReadOnly(const smart_objects::SmartObject& module_data,
                             const std::string& module_type) const FINAL;
@@ -92,9 +92,9 @@ class RCCapabilitiesManagerImpl : public RCCapabilitiesManager {
    * capabilities
    * @param smart object of capabilities
    * @param smart object of control_data
-   * @return pair of state and capability status - ModuleCapability
+   * @return pair of state and capability status - ModuleTypeCapability
    */
-  ModuleCapability GetControlDataCapabilities(
+  ModuleTypeCapability GetControlDataCapabilities(
       const smart_objects::SmartObject& capabilities,
       const smart_objects::SmartObject& control_data) const;
 
@@ -116,9 +116,9 @@ class RCCapabilitiesManagerImpl : public RCCapabilitiesManager {
    * @brief Check whether the cpabilities for light allowed
    * @param smart object of capabilities
    * @param smart object of control_data
-   * @return pair of state and capability status - ModuleCapability
+   * @return pair of state and capability status - ModuleTypeCapability
    */
-  ModuleCapability GetLightDataCapabilities(
+  ModuleTypeCapability GetLightDataCapabilities(
       const smart_objects::SmartObject& capabilities,
       const smart_objects::SmartObject& control_data) const;
 
@@ -126,13 +126,13 @@ class RCCapabilitiesManagerImpl : public RCCapabilitiesManager {
    * @brief Check whether the light name exists in capabilities
    * @param smart object of capabilities_status
    * @param smart object of light_data
-   * @return pair of state and capability status - ModuleCapability
+   * @return pair of state and capability status - ModuleTypeCapability
    */
-  ModuleCapability GetLightNameCapabilities(
+  ModuleTypeCapability GetLightNameCapabilities(
       const smart_objects::SmartObject& capabilities_status,
       const smart_objects::SmartObject& light_data) const;
 
-  ModuleCapability GetRadioBandByCapabilities(
+  ModuleTypeCapability GetRadioBandByCapabilities(
       const smart_objects::SmartObject& capabilities_status,
       const smart_objects::SmartObject& request_parameter) const;
 

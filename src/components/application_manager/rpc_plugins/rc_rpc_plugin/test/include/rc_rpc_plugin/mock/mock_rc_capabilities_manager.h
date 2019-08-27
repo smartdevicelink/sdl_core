@@ -46,7 +46,7 @@ class MockRCCapabilitiesManager : public rc_rpc_plugin::RCCapabilitiesManager {
                      bool(const rc_rpc_plugin::ModuleUid& module_type));
 
   MOCK_CONST_METHOD2(GetModuleDataCapabilities,
-                     rc_rpc_plugin::ModuleCapability(
+                     rc_rpc_plugin::ModuleTypeCapability(
                          const smart_objects::SmartObject& module_data,
                          const std::string& module_id));
 
@@ -59,7 +59,7 @@ class MockRCCapabilitiesManager : public rc_rpc_plugin::RCCapabilitiesManager {
       AreReadOnlyParamsPresent,
       bool(const smart_objects::SmartObject& module_data,
            const std::string& module_type,
-           rc_rpc_plugin::ModuleCapability& module_data_capabilities));
+           rc_rpc_plugin::ModuleTypeCapability& module_data_capabilities));
 
   MOCK_CONST_METHOD2(AreAllParamsReadOnly,
                      bool(const smart_objects::SmartObject& module_data,
