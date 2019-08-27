@@ -309,18 +309,13 @@ bool CacheManager::ApplyUpdate(const policy_table::Table& update_pt) {
       pt_->policy_table.vehicle_data->schema_items =
           rpc::Optional<policy_table::VehicleDataItems>();
     } else {
-      auto rpc_spec_items =
-          CollectRPCSpecVDItems(*pt_->policy_table.vehicle_data->schema_items);
-      auto custom_items = CollectCustomVDItems(
+      policy_table::VehicleDataItems custom_items = CollectCustomVDItems(
           *update_pt.policy_table.vehicle_data->schema_items);
-      policy_table::VehicleDataItems vd_to_update(rpc_spec_items);
-      vd_to_update.insert(
-          vd_to_update.end(), custom_items.begin(), custom_items.end());
 
       pt_->policy_table.vehicle_data->schema_version =
           update_pt.policy_table.vehicle_data->schema_version;
       pt_->policy_table.vehicle_data->schema_items =
-          rpc::Optional<policy_table::VehicleDataItems>(vd_to_update);
+          rpc::Optional<policy_table::VehicleDataItems>(custom_items);
     }
     if (update_pt.policy_table.vehicle_data->schema_version.is_initialized() &&
         update_pt.policy_table.vehicle_data->schema_items.is_initialized()) {
@@ -330,21 +325,6 @@ bool CacheManager::ApplyUpdate(const policy_table::Table& update_pt) {
   ResetCalculatedPermissions();
   Backup();
   return true;
-}
-
-policy_table::VehicleDataItems CacheManager::CollectRPCSpecVDItems(
-    const policy_table::VehicleDataItems& vd_items) {
-  policy_table::VehicleDataItems result_items;
-  for (auto& item : vd_items) {
-    const std::string i_name = "VEHICLEDATA_" + std::string(item.name);
-    const std::string vd_name = boost::to_upper_copy<std::string>(i_name);
-    const bool is_rpc_spec =
-        policy_table::EnumSchemaItemFactory::IsRPCSpecVehicleDataType(vd_name);
-    if (is_rpc_spec) {
-      result_items.push_back(item);
-    }
-  }
-  return result_items;
 }
 
 policy_table::VehicleDataItems CacheManager::CollectCustomVDItems(

@@ -895,14 +895,6 @@ class CacheManager : public CacheManagerInterface {
   /**
    * @brief Method for separate RPCSpec vehicle data items from custom
    * @param full vehicle data items during PTU
-   * @return array with only RPCSpec vehicle items
-   */
-  static policy_table::VehicleDataItems CollectRPCSpecVDItems(
-      const policy_table::VehicleDataItems& vd_items);
-
-  /**
-   * @brief Method for separate RPCSpec vehicle data items from custom
-   * @param full vehicle data items during PTU
    * @return array with only custom vehicle items
    */
   static policy_table::VehicleDataItems CollectCustomVDItems(

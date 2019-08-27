@@ -1900,24 +1900,13 @@ TEST_F(PolicyManagerImplTest2, CacheManager_RemainCustomVehicleDataItems) {
 
   EXPECT_EQ(1u, init.size());
 
-  const auto ret = CacheManager::CollectCustomVDItems(init);
+  const auto& ret = CacheManager::CollectCustomVDItems(init);
 
   EXPECT_EQ(1u, ret.size());
 }
 
-TEST_F(PolicyManagerImplTest2, CacheManager_RemoveCustomVehicleDataItems) {
-  policy_table::VehicleDataItems init;
-  policy_table::VehicleDataItem test_item;
-  test_item.name = "Custom";
-  init.push_back(test_item);
-
-  const auto ret = CacheManager::CollectRPCSpecVDItems(init);
-
-  EXPECT_EQ(0u, ret.size());
-}
-
 TEST_F(PolicyManagerImplTest2,
-       CacheManager_RemoveCustomVehicleDataItemsAndRemainRPCSpec) {
+       CacheManager_CollectCustomItemWithRemainingRPCSpecItem) {
   policy_table::VehicleDataItems init;
   policy_table::VehicleDataItem rpc_spec_item;
   rpc_spec_item.name = "headLampStatus";
@@ -1928,13 +1917,14 @@ TEST_F(PolicyManagerImplTest2,
 
   EXPECT_EQ(2u, init.size());
 
-  const auto ret = CacheManager::CollectRPCSpecVDItems(init);
+  const auto& ret = CacheManager::CollectCustomVDItems(init);
 
   EXPECT_EQ(1u, ret.size());
-  EXPECT_EQ(ret.at(0).name, "headLampStatus");
+  EXPECT_EQ(ret.at(0).name, custom_item.name);
 }
 
-TEST_F(PolicyManagerImplTest2, CacheManager_RemainRPCSpecVehicleDataItems) {
+TEST_F(PolicyManagerImplTest2,
+       CacheManager_RemainRPCSpecVehicleDataItemsNoCustomItems) {
   policy_table::VehicleDataItems init;
   policy_table::VehicleDataItem custom_item;
   custom_item.name = "headLampStatus";
@@ -1942,9 +1932,9 @@ TEST_F(PolicyManagerImplTest2, CacheManager_RemainRPCSpecVehicleDataItems) {
 
   EXPECT_EQ(1u, init.size());
 
-  const auto ret = CacheManager::CollectRPCSpecVDItems(init);
+  const auto& ret = CacheManager::CollectCustomVDItems(init);
 
-  EXPECT_EQ(1u, ret.size());
+  EXPECT_EQ(0u, ret.size());
 }
 
 }  // namespace policy_test
