@@ -73,8 +73,8 @@ class RCCapabilitiesManager {
   /**
    * @brief GetModuleDataCapabilities checks whether rc module data
    * capabilities are presented
-   * @param smart object of rc_capabilities
-   * @param smart object of module_data
+   * @param module_data smart object of module_data
+   * @param module_id module id
    * @return pair of state and capability status - ModuleCapability
    */
   virtual ModuleTypeCapability GetModuleDataCapabilities(

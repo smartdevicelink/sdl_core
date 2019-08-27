@@ -90,8 +90,8 @@ class RCCapabilitiesManagerImpl : public RCCapabilitiesManager {
   /**
    * @brief Check whether the exists light data related to correspondent
    * capabilities
-   * @param smart object of capabilities
-   * @param smart object of control_data
+   * @param capabilities smart object of capabilities
+   * @param control_data smart object of control_data
    * @return pair of state and capability status - ModuleTypeCapability
    */
   ModuleTypeCapability GetControlDataCapabilities(
@@ -100,11 +100,12 @@ class RCCapabilitiesManagerImpl : public RCCapabilitiesManager {
 
   /**
    * @brief Check whether the parameter exist in capabilities
-   * @param smart object of capabilities
+   * @param capabilities smart object of capabilities
    * @param mapping - map of module data and capabilities
    * @param request_parameter - string
    * @param switched_off_result - ref of mobile_apis::Result
-   * @return success if parameter exist in capabilities missedParam otherwise
+   * @return success if the parameter exists in capabilities,
+   * otherwise - missedParam
    */
   capabilitiesStatus GetItemCapability(
       const smart_objects::SmartObject& capabilities,
@@ -113,9 +114,9 @@ class RCCapabilitiesManagerImpl : public RCCapabilitiesManager {
       const mobile_apis::Result::eType& switched_off_result) const;
 
   /**
-   * @brief Check whether the cpabilities for light allowed
-   * @param smart object of capabilities
-   * @param smart object of control_data
+   * @brief Check whether the capabilities for light are allowed
+   * @param capabilities smart object of capabilities
+   * @param control_data smart object of control_data
    * @return pair of state and capability status - ModuleTypeCapability
    */
   ModuleTypeCapability GetLightDataCapabilities(
@@ -124,8 +125,8 @@ class RCCapabilitiesManagerImpl : public RCCapabilitiesManager {
 
   /**
    * @brief Check whether the light name exists in capabilities
-   * @param smart object of capabilities_status
-   * @param smart object of light_data
+   * @param capabilities_status smart object of capabilities_status
+   * @param light_data smart object of light_data
    * @return pair of state and capability status - ModuleTypeCapability
    */
   ModuleTypeCapability GetLightNameCapabilities(
