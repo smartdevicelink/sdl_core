@@ -168,7 +168,7 @@ RCHelpers::GetModuleTypeToCapabilitiesMapping() {
   return mapping_lambda;
 }
 
-const std::vector<std::string> RCHelpers::GetModulesList() {
+const std::vector<std::string> RCHelpers::GetModuleTypesList() {
   using namespace enums_value;
   return {kClimate, kRadio, kSeat, kAudio, kLight, kHmiSettings};
 }

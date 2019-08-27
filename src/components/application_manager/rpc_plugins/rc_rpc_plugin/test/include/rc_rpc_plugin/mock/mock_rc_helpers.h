@@ -50,7 +50,7 @@ class MockRCHelpers {
                std::function<std::string(const std::string&)>());
   MOCK_METHOD0(GetModuleTypeToCapabilitiesMapping,
                std::function<std::string(const std::string&)>());
-  MOCK_METHOD0(GetModulesList, const std::vector<std::string>());
+  MOCK_METHOD0(GetModuleTypesList, const std::vector<std::string>());
   MOCK_METHOD1(
       GetRCExtension,
       rc_rpc_plugin::RCAppExtensionPtr(application_manager::Application&));

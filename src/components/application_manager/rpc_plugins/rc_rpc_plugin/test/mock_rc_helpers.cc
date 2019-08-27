@@ -44,8 +44,8 @@ rc_rpc_plugin::RCHelpers::GetModuleTypeToCapabilitiesMapping() {
   return MockRCHelpers::rc_helpers_mock()->GetModuleTypeToCapabilitiesMapping();
 }
 
-const std::vector<std::string> rc_rpc_plugin::RCHelpers::GetModulesList() {
-  return MockRCHelpers::rc_helpers_mock()->GetModulesList();
+const std::vector<std::string> rc_rpc_plugin::RCHelpers::GetModuleTypesList() {
+  return MockRCHelpers::rc_helpers_mock()->GetModuleTypesList();
 }
 
 rc_rpc_plugin::RCAppExtensionPtr rc_rpc_plugin::RCHelpers::GetRCExtension(

@@ -63,7 +63,7 @@ SetInteriorVehicleDataRequest::~SetInteriorVehicleDataRequest() {}
 bool ClearUnrelatedModuleData(const std::string& module_type,
                               smart_objects::SmartObject& module_data) {
   LOG4CXX_AUTO_TRACE(logger_);
-  const auto& all_module_types = RCHelpers::GetModulesList();
+  const auto& all_module_types = RCHelpers::GetModuleTypesList();
   const auto& data_mapping = RCHelpers::GetModuleTypeToDataMapping();
   bool module_type_and_data_match = false;
   for (const auto& type : all_module_types) {

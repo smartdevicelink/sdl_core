@@ -66,10 +66,10 @@ class RCHelpers {
   GetModuleTypeToCapabilitiesMapping();
 
   /**
-   * @brief GetModulesList get list of all known module types
+   * @brief GetModuleTypesList get list of all known module types
    * @return vector contains all known module types
    */
-  static const std::vector<std::string> GetModulesList();
+  static const std::vector<std::string> GetModuleTypesList();
 
   /**
    * @brief GetRCExtension extract RC extension from application

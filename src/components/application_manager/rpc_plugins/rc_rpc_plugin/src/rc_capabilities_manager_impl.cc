@@ -455,7 +455,7 @@ ModuleCapability RCCapabilitiesManagerImpl::GetModuleDataCapabilities(
   LOG4CXX_AUTO_TRACE(logger_);
   auto rc_capabilities = *(hmi_capabilities_.rc_capability());
 
-  const auto& all_module_types = RCHelpers::GetModulesList();
+  const auto& all_module_types = RCHelpers::GetModuleTypesList();
   const auto& get_module_data_key = RCHelpers::GetModuleTypeToDataMapping();
   const auto& get_capabilities_key =
       RCHelpers::GetModuleTypeToCapabilitiesMapping();
@@ -651,7 +651,7 @@ ModuleCapability RCCapabilitiesManagerImpl::GetRadioBandByCapabilities(
 const smart_objects::SmartObject& RCCapabilitiesManagerImpl::ControlData(
     const smart_objects::SmartObject& module_data,
     const std::string& module_type) const {
-  const auto& all_module_types = RCHelpers::GetModulesList();
+  const auto& all_module_types = RCHelpers::GetModuleTypesList();
   const auto& data_mapping = RCHelpers::GetModuleTypeToDataMapping();
   for (const auto& type : all_module_types) {
     if (type == module_type) {
