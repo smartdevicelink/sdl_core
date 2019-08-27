@@ -162,7 +162,7 @@ const bool RCCapabilitiesManagerImpl::CheckModuleIdWithCapabilities(
       rc_capabilities[mapping(module.first)], module.second);
 }
 
-bool RCCapabilitiesManagerImpl::CheckIfModuleExistInCapabilities(
+bool RCCapabilitiesManagerImpl::CheckIfModuleExistsInCapabilities(
     const ModuleUid& module) const {
   LOG4CXX_AUTO_TRACE(logger_);
   auto rc_capabilities = *(hmi_capabilities_.rc_capability());

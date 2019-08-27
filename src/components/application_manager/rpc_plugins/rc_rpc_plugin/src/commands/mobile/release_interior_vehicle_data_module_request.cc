@@ -98,7 +98,7 @@ bool ReleaseInteriorVehicleDataModuleRequest::ProcessCapabilities() {
   const std::string module_id = ModuleId();
   const ModuleUid module(module_type, module_id);
   if (rc_capabilities &&
-      !rc_capabilities_manager_.CheckIfModuleExistInCapabilities(module)) {
+      !rc_capabilities_manager_.CheckIfModuleExistsInCapabilities(module)) {
     LOG4CXX_WARN(
         logger_,
         "Accessing not supported module: " << module_type << " " << module_id);

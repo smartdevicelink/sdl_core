@@ -79,7 +79,7 @@ void GetInteriorVehicleDataConsentRequest::Execute() {
   for (const auto module_id :
        *(msg_params[message_params::kModuleIds].asArray())) {
     const ModuleUid module(module_type, module_id.asString());
-    if (!rc_capabilities_manager_.CheckIfModuleExistInCapabilities(module)) {
+    if (!rc_capabilities_manager_.CheckIfModuleExistsInCapabilities(module)) {
       LOG4CXX_WARN(logger_,
                    "Accessing not supported module: " << module_type << " "
                                                       << module_id.asString());

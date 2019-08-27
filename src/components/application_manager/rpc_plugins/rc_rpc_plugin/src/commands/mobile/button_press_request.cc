@@ -87,7 +87,7 @@ void ButtonPressRequest::Execute() {
   const std::string module_id = ModuleId();
   const ModuleUid module(module_type, module_id);
   const bool is_module_exists =
-      rc_capabilities_manager_.CheckIfModuleExistInCapabilities(module);
+      rc_capabilities_manager_.CheckIfModuleExistsInCapabilities(module);
 
   const bool button_valid_by_caps =
       is_module_exists &&

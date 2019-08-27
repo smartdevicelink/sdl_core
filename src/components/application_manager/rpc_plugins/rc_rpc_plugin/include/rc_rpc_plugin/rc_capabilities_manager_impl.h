@@ -47,7 +47,7 @@ class RCCapabilitiesManagerImpl : public RCCapabilitiesManager {
   bool CheckButtonName(const std::string& module_type,
                        const std::string& button_name) const FINAL;
 
-  bool CheckIfModuleExistInCapabilities(const ModuleUid& module) const FINAL;
+  bool CheckIfModuleExistsInCapabilities(const ModuleUid& module) const FINAL;
 
   ModuleTypeCapability GetModuleDataCapabilities(
       const smart_objects::SmartObject& module_data,

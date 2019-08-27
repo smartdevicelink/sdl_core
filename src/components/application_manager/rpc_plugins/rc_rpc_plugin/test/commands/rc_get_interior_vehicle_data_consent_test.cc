@@ -162,7 +162,7 @@ class RCGetInteriorVehicleDataConsentTest
         .WillByDefault(Return(false));
     ON_CALL(*rpc_protection_manager_, CheckPolicyEncryptionFlag(_, _, _))
         .WillByDefault(Return(false));
-    ON_CALL(mock_rc_capabilities_manager_, CheckIfModuleExistInCapabilities(_))
+    ON_CALL(mock_rc_capabilities_manager_, CheckIfModuleExistsInCapabilities(_))
         .WillByDefault(Return(true));
   }
 

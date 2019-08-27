@@ -106,7 +106,7 @@ class ButtonPressRequestTest
         .WillByDefault(Return(true));
     ON_CALL(mock_rc_capabilities_manager_, CheckButtonName(_, _))
         .WillByDefault(Return(true));
-    ON_CALL(mock_rc_capabilities_manager_, CheckIfModuleExistInCapabilities(_))
+    ON_CALL(mock_rc_capabilities_manager_, CheckIfModuleExistsInCapabilities(_))
         .WillByDefault(Return(true));
     ON_CALL(mock_rc_capabilities_manager_, CheckIfButtonExistInRCCaps(_))
         .WillByDefault(Return(true));

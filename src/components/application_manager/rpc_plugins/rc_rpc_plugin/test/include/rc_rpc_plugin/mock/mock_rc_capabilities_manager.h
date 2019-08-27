@@ -42,7 +42,7 @@ class MockRCCapabilitiesManager : public rc_rpc_plugin::RCCapabilitiesManager {
                      bool(const std::string& module_type,
                           const std::string& button_name));
 
-  MOCK_CONST_METHOD1(CheckIfModuleExistInCapabilities,
+  MOCK_CONST_METHOD1(CheckIfModuleExistsInCapabilities,
                      bool(const rc_rpc_plugin::ModuleUid& module_type));
 
   MOCK_CONST_METHOD2(GetModuleDataCapabilities,

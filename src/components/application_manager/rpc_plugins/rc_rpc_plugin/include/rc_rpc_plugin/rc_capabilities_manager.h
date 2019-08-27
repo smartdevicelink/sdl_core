@@ -62,12 +62,12 @@ class RCCapabilitiesManager {
                                const std::string& button_name) const = 0;
 
   /**
-   * @brief CheckIfModuleExistInCapabilities checks
+   * @brief CheckIfModuleExistsInCapabilities checks
    * if the specified module exists in rc_capabilities
    * @param module moduleType + moduleId
    * @return true if exists, otherwise - false
    */
-  virtual bool CheckIfModuleExistInCapabilities(
+  virtual bool CheckIfModuleExistsInCapabilities(
       const ModuleUid& module) const = 0;
 
   /**
