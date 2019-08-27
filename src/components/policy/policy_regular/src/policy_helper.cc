@@ -163,9 +163,9 @@ bool policy::CheckAppPolicy::HasRevokedGroups(
   return !revoked_group_list.empty();
 }
 
-bool policy::CheckAppPolicy::HasNewGroups(
+bool policy::CheckAppPolicy::HasUpdatedGroups(
     const policy::AppPoliciesValueType& app_policy,
-    policy_table::Strings* new_groups) const {
+    policy_table::Strings* updated_groups) const {
   AppPoliciesConstItr it =
       snapshot_->policy_table.app_policies_section.apps.find(app_policy.first);
 
@@ -175,23 +175,19 @@ bool policy::CheckAppPolicy::HasNewGroups(
   policy_table::Strings groups_curr = (*it).second.groups;
   std::sort(groups_curr.begin(), groups_curr.end(), CompareStrings);
 
-  StringsConstItr it_groups_new = groups_new.begin();
-  StringsConstItr it_groups_new_end = groups_new.end();
+  policy_table::Strings intersection_list;
+  std::set_intersection(groups_new.begin(),
+                        groups_new.end(),
+                        groups_curr.begin(),
+                        groups_curr.end(),
+                        std::back_inserter(intersection_list));
 
-  StringsConstItr it_groups_curr = groups_curr.begin();
-  StringsConstItr it_groups_curr_end = groups_curr.end();
-
-  auto CompareGroupContent =
-      [this](const StringsValueType& update_group_name,
-             const StringsValueType& snapshot_group_name) -> bool {
-    if (CompareStrings(update_group_name, snapshot_group_name)) {
-      return true;
-    }
-
+  auto IsGroupContentUpdated =
+      [this](const StringsValueType& groupName) -> bool {
     const auto& func_group_from_update =
-        update_->policy_table.functional_groupings.find(update_group_name);
+        update_->policy_table.functional_groupings.find(groupName);
     const auto& func_group_from_snapshot =
-        snapshot_->policy_table.functional_groupings.find(snapshot_group_name);
+        snapshot_->policy_table.functional_groupings.find(groupName);
 
     const auto& update_fg_rpcs = func_group_from_update->second.rpcs;
     const auto& snapshot_fg_rpcs = func_group_from_snapshot->second.rpcs;
@@ -223,13 +219,45 @@ bool policy::CheckAppPolicy::HasNewGroups(
     return false;
   };
 
+  policy_table::Strings updated_group_list;
+  for (const auto& item : intersection_list) {
+    if (IsGroupContentUpdated(item)) {
+      updated_group_list.push_back(item);
+    }
+  }
+
+  if (updated_groups) {
+    *updated_groups = updated_group_list;
+  }
+
+  return !updated_group_list.empty();
+}
+
+bool policy::CheckAppPolicy::HasNewGroups(
+    const policy::AppPoliciesValueType& app_policy,
+    policy_table::Strings* new_groups) const {
+  AppPoliciesConstItr it =
+      snapshot_->policy_table.app_policies_section.apps.find(app_policy.first);
+
+  policy_table::Strings groups_new = app_policy.second.groups;
+  std::sort(groups_new.begin(), groups_new.end(), CompareStrings);
+
+  policy_table::Strings groups_curr = (*it).second.groups;
+  std::sort(groups_curr.begin(), groups_curr.end(), CompareStrings);
+
+  StringsConstItr it_groups_new = groups_new.begin();
+  StringsConstItr it_groups_new_end = groups_new.end();
+
+  StringsConstItr it_groups_curr = groups_curr.begin();
+  StringsConstItr it_groups_curr_end = groups_curr.end();
+
   policy_table::Strings new_group_list;
   std::set_difference(it_groups_new,
                       it_groups_new_end,
                       it_groups_curr,
                       it_groups_curr_end,
                       std::back_inserter(new_group_list),
-                      CompareGroupContent);
+                      CompareStrings);
 
   if (new_groups) {
     *new_groups = new_group_list;
@@ -241,14 +269,23 @@ bool policy::CheckAppPolicy::HasNewGroups(
 bool policy::CheckAppPolicy::HasConsentNeededGroups(
     const policy::AppPoliciesValueType& app_policy) const {
   policy_table::Strings new_groups;
-  if (!HasNewGroups(app_policy, &new_groups)) {
+  policy_table::Strings updated_groups;
+  if (!HasNewGroups(app_policy, &new_groups) &&
+      !HasUpdatedGroups(app_policy, &updated_groups)) {
     return false;
   }
 
-  StringsConstItr it_new = new_groups.begin();
-  StringsConstItr it_new_end = new_groups.end();
-  for (; it_new != it_new_end; ++it_new) {
-    if (IsConsentRequired(app_policy.first, *it_new)) {
+  policy_table::Strings groups_to_check_consent;
+  std::set_union(new_groups.begin(),
+                 new_groups.end(),
+                 updated_groups.begin(),
+                 updated_groups.end(),
+                 std::back_inserter(groups_to_check_consent));
+
+  StringsConstItr it = groups_to_check_consent.begin();
+  StringsConstItr it_end = groups_to_check_consent.end();
+  for (; it != it_end; ++it) {
+    if (IsConsentRequired(app_policy.first, *it)) {
       return true;
     }
   }
@@ -517,13 +554,15 @@ policy::PermissionsCheckResult policy::CheckAppPolicy::CheckPermissionsChanges(
   const bool encryption_required_flag_changed =
       IsEncryptionRequiredFlagChanged(app_policy);
 
+  bool has_updated_groups = HasUpdatedGroups(app_policy);
+
   if (has_revoked_groups && has_consent_needed_groups) {
     return RESULT_PERMISSIONS_REVOKED_AND_CONSENT_NEEDED;
   } else if (has_revoked_groups) {
     return RESULT_PERMISSIONS_REVOKED;
   } else if (has_consent_needed_groups) {
     return RESULT_CONSENT_NEEDED;
-  } else if (has_new_groups) {
+  } else if (has_new_groups || has_updated_groups) {
     return RESULT_CONSENT_NOT_REQUIRED;
   } else if (encryption_required_flag_changed) {
     return RESULT_ENCRYPTION_REQUIRED_FLAG_CHANGED;
