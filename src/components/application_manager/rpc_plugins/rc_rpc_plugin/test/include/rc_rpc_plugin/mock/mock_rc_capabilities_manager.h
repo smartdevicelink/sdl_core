@@ -50,7 +50,7 @@ class MockRCCapabilitiesManager : public rc_rpc_plugin::RCCapabilitiesManager {
                          const smart_objects::SmartObject& module_data,
                          const std::string& module_id));
 
-  MOCK_CONST_METHOD2(ControlData,
+  MOCK_CONST_METHOD2(ControlDataForType,
                      const smart_objects::SmartObject&(
                          const smart_objects::SmartObject& module_data,
                          const std::string& module_type));

@@ -308,7 +308,7 @@ void SetInteriorVehicleDataRequest::CutOffReadOnlyParams(
   LOG4CXX_AUTO_TRACE(logger_);
   const std::string module_type = ModuleType();
   const auto& module_type_params =
-      rc_capabilities_manager_.ControlData(module_data, module_type);
+      rc_capabilities_manager_.ControlDataForType(module_data, module_type);
 
   if (enums_value::kAudio == module_type) {
     auto& equalizer_settings = module_data[message_params::kAudioControlData]

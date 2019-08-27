@@ -648,7 +648,7 @@ ModuleTypeCapability RCCapabilitiesManagerImpl::GetRadioBandByCapabilities(
   return std::make_pair("", capabilitiesStatus::success);
 }
 
-const smart_objects::SmartObject& RCCapabilitiesManagerImpl::ControlData(
+const smart_objects::SmartObject& RCCapabilitiesManagerImpl::ControlDataForType(
     const smart_objects::SmartObject& module_data,
     const std::string& module_type) const {
   const auto& all_module_types = RCHelpers::GetModuleTypesList();
@@ -718,7 +718,7 @@ bool RCCapabilitiesManagerImpl::AreReadOnlyParamsPresent(
     ModuleTypeCapability& module_data_capabilities) const {
   LOG4CXX_AUTO_TRACE(logger_);
   const smart_objects::SmartObject& module_type_params =
-      ControlData(module_data, module_type);
+      ControlDataForType(module_data, module_type);
 
   if (enums_value::kAudio == module_type) {
     return CheckReadOnlyParamsForAudio(module_type_params);
@@ -751,7 +751,7 @@ bool RCCapabilitiesManagerImpl::AreAllParamsReadOnly(
     const std::string& module_type) const {
   LOG4CXX_AUTO_TRACE(logger_);
   const smart_objects::SmartObject& module_type_params =
-      ControlData(module_data, module_type);
+      ControlDataForType(module_data, module_type);
   auto it = module_type_params.map_begin();
   std::vector<std::string> ro_params =
       RCHelpers::GetModuleReadOnlyParams(module_type);

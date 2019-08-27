@@ -53,7 +53,7 @@ class RCCapabilitiesManagerImpl : public RCCapabilitiesManager {
       const smart_objects::SmartObject& module_data,
       const std::string& module_id) const FINAL;
 
-  const smart_objects::SmartObject& ControlData(
+  const smart_objects::SmartObject& ControlDataForType(
       const smart_objects::SmartObject& module_data,
       const std::string& module_type) const FINAL;
 

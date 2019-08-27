@@ -88,7 +88,7 @@ class RCCapabilitiesManager {
    * @param module_type resource name
    * @return smart object of control data
    */
-  virtual const smart_objects::SmartObject& ControlData(
+  virtual const smart_objects::SmartObject& ControlDataForType(
       const smart_objects::SmartObject& module_data,
       const std::string& module_type) const = 0;
 
