@@ -251,7 +251,8 @@ bool AlertRequest::Validate(uint32_t app_id) {
     return false;
   }
 
-  if (mobile_apis::HMILevel::HMI_BACKGROUND == app->hmi_level() &&
+  if (mobile_apis::HMILevel::HMI_BACKGROUND ==
+          app->hmi_level(mobile_apis::PredefinedWindows::DEFAULT_WINDOW) &&
       app->AreCommandLimitsExceeded(
           static_cast<mobile_apis::FunctionID::eType>(function_id()),
           application_manager::TLimitSource::POLICY_TABLE)) {
@@ -321,6 +322,11 @@ void AlertRequest::SendAlertRequest(int32_t app_id) {
   msg_params[hmi_request::alert_strings] =
       smart_objects::SmartObject(smart_objects::SmartType_Array);
 
+  if ((*message_)[strings::msg_params].keyExists(strings::cancel_id)) {
+    msg_params[strings::cancel_id] =
+        (*message_)[strings::msg_params][strings::cancel_id].asInt();
+  }
+
   int32_t index = 0;
   if ((*message_)[strings::msg_params].keyExists(strings::alert_text1)) {
     msg_params[hmi_request::alert_strings][index][hmi_request::field_name] =
@@ -350,6 +356,23 @@ void AlertRequest::SendAlertRequest(int32_t app_id) {
     MessageHelper::SubscribeApplicationToSoftButton(
         (*message_)[strings::msg_params], app, function_id());
   }
+
+  if ((*message_)[strings::msg_params].keyExists(strings::alert_icon)) {
+    auto verification_result = MessageHelper::VerifyImage(
+        (*message_)[strings::msg_params][strings::alert_icon],
+        app,
+        application_manager_);
+
+    if (mobile_apis::Result::INVALID_DATA == verification_result) {
+      LOG4CXX_ERROR(logger_, "Image verification failed.");
+      SendResponse(false, verification_result);
+      return;
+    }
+
+    msg_params[strings::alert_icon] =
+        (*message_)[strings::msg_params][strings::alert_icon];
+  }
+
   // app_id
   msg_params[strings::app_id] = app_id;
   msg_params[strings::duration] = default_timeout_;

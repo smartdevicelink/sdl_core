@@ -203,9 +203,6 @@ class ApplicationManagerImpl
                          mobile_apis::HMILevel::eType from,
                          mobile_apis::HMILevel::eType to) OVERRIDE;
 
-  void SendHMIStatusNotification(
-      const std::shared_ptr<Application> app) OVERRIDE;
-
   void SendDriverDistractionState(ApplicationSharedPtr application);
 
   void SendGetIconUrlNotifications(const uint32_t connection_key,
@@ -476,6 +473,7 @@ class ApplicationManagerImpl
   /**
    * @brief CreateRegularState create regular HMI state for application
    * @param app Application
+   * @param window_type type of window
    * @param hmi_level of returned state
    * @param audio_state of returned state
    * @param system_context of returned state
@@ -483,16 +481,17 @@ class ApplicationManagerImpl
    */
   HmiStatePtr CreateRegularState(
       std::shared_ptr<Application> app,
-      mobile_apis::HMILevel::eType hmi_level,
-      mobile_apis::AudioStreamingState::eType audio_state,
-      mobile_apis::VideoStreamingState::eType video_state,
-      mobile_apis::SystemContext::eType system_context) const OVERRIDE;
+      const mobile_apis::WindowType::eType window_type,
+      const mobile_apis::HMILevel::eType hmi_level,
+      const mobile_apis::AudioStreamingState::eType audio_state,
+      const mobile_apis::VideoStreamingState::eType video_state,
+      const mobile_apis::SystemContext::eType system_context) const OVERRIDE;
 
   /**
    * @brief Checks, if given RPC is allowed at current HMI level for specific
    * application in policy table
    * @param app Application
-   * @param hmi_level Current HMI level of application
+   * @param window_id id of application's window
    * @param function_id FunctionID of RPC
    * @param params_permissions Permissions for RPC parameters (e.g.
    * SubscribeVehicleData) defined in policy table
@@ -500,6 +499,7 @@ class ApplicationManagerImpl
    */
   mobile_apis::Result::eType CheckPolicyPermissions(
       const ApplicationSharedPtr app,
+      const WindowID window_id,
       const std::string& function_id,
       const RPCParams& rpc_params,
       CommandParametersPermissions* params_permissions = NULL) OVERRIDE;
@@ -516,32 +516,6 @@ class ApplicationManagerImpl
    */
   bool IsApplicationForbidden(uint32_t connection_key,
                               const std::string& mobile_app_id);
-
-  struct ApplicationsAppIdSorter {
-    bool operator()(const ApplicationSharedPtr lhs,
-                    const ApplicationSharedPtr rhs) {
-      return lhs->app_id() < rhs->app_id();
-    }
-  };
-
-  struct ApplicationsMobileAppIdSorter {
-    bool operator()(const ApplicationSharedPtr lhs,
-                    const ApplicationSharedPtr rhs) {
-      if (lhs->policy_app_id() == rhs->policy_app_id()) {
-        return lhs->device() < rhs->device();
-      }
-      return lhs->policy_app_id() < rhs->policy_app_id();
-    }
-  };
-
-  // typedef for Applications list
-  typedef std::set<ApplicationSharedPtr, ApplicationsAppIdSorter> ApplictionSet;
-
-  // typedef for Applications list iterator
-  typedef ApplictionSet::iterator ApplictionSetIt;
-
-  // typedef for Applications list const iterator
-  typedef ApplictionSet::const_iterator ApplictionSetConstIt;
 
   /**
    * @brief Notification from PolicyHandler about PTU.
@@ -1065,10 +1039,12 @@ class ApplicationManagerImpl
    * @brief IsAppInReconnectMode check if application belongs to session
    * affected by transport switching at the moment by checking internal
    * waiting list prepared on switching start
+   * @param device_id device identifier
    * @param policy_app_id Application id
    * @return True if application is in the waiting list, otherwise - false
    */
-  bool IsAppInReconnectMode(const std::string& policy_app_id) const FINAL;
+  bool IsAppInReconnectMode(const connection_handler::DeviceHandle& device_id,
+                            const std::string& policy_app_id) const FINAL;
 
   bool IsStopping() const OVERRIDE {
     return is_stopping_;
@@ -1452,8 +1428,8 @@ class ApplicationManagerImpl
   connection_handler::ConnectionHandler* connection_handler_;
   std::unique_ptr<policy::PolicyHandlerInterface> policy_handler_;
   protocol_handler::ProtocolHandler* protocol_handler_;
-  request_controller::RequestController request_ctrl_;
   std::unique_ptr<plugin_manager::RPCPluginManager> plugin_manager_;
+  request_controller::RequestController request_ctrl_;
   std::unique_ptr<application_manager::AppServiceManager> app_service_manager_;
 
   /**

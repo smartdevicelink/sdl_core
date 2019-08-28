@@ -102,6 +102,8 @@ connection_handler::DeviceHandle kDeviceId = 12345u;
 const std::string kAppId = "someID";
 const uint32_t kConnectionKey = 1232u;
 const std::string kAppName = "appName";
+const WindowID kDefaultWindowId =
+    mobile_apis::PredefinedWindows::DEFAULT_WINDOW;
 
 #if defined(CLOUD_APP_WEBSOCKET_TRANSPORT_SUPPORT)
 // Cloud application params
@@ -145,8 +147,10 @@ class ApplicationManagerImplTest : public ::testing::Test {
  protected:
   void SetUp() OVERRIDE {
     CreateAppManager();
-    ON_CALL(mock_session_observer_, GetDataOnSessionKey(_, _, _, _))
-        .WillByDefault(DoAll(SetArgPointee<3u>(kDeviceId), Return(0)));
+    ON_CALL(*mock_app_ptr_, app_id()).WillByDefault(Return(kConnectionKey));
+    ON_CALL(*mock_app_ptr_, device()).WillByDefault(Return(kDeviceId));
+    ON_CALL(mock_connection_handler_, GetDataOnSessionKey(_, _, _, &kDeviceId))
+        .WillByDefault(DoAll(SetArgPointee<3u>(app_id_), Return(0)));
     ON_CALL(mock_connection_handler_, get_session_observer())
         .WillByDefault(ReturnRef(mock_session_observer_));
     app_manager_impl_->SetMockRPCService(mock_rpc_service_);
@@ -384,7 +388,7 @@ TEST_F(ApplicationManagerImplTest, OnServiceStartedCallback_VideoServiceStart) {
   const int32_t session_key = 123;
   EXPECT_CALL(*mock_app_ptr_, app_id()).WillRepeatedly(Return(session_key));
   EXPECT_CALL(*mock_app_ptr_, is_navi()).WillRepeatedly(Return(true));
-  EXPECT_CALL(*mock_app_ptr_, hmi_level())
+  EXPECT_CALL(*mock_app_ptr_, hmi_level(kDefaultWindowId))
       .WillRepeatedly(Return(mobile_apis::HMILevel::HMI_FULL));
 
   bool result = false;
@@ -415,7 +419,7 @@ TEST_F(ApplicationManagerImplTest,
   EXPECT_CALL(*mock_app_ptr_, app_id()).WillRepeatedly(Return(session_key));
   // is_navi() is false
   EXPECT_CALL(*mock_app_ptr_, is_navi()).WillRepeatedly(Return(false));
-  EXPECT_CALL(*mock_app_ptr_, hmi_level())
+  EXPECT_CALL(*mock_app_ptr_, hmi_level(kDefaultWindowId))
       .WillRepeatedly(Return(mobile_apis::HMILevel::HMI_FULL));
 
   bool result = false;
@@ -446,7 +450,7 @@ TEST_F(ApplicationManagerImplTest,
   EXPECT_CALL(*mock_app_ptr_, app_id()).WillRepeatedly(Return(session_key));
   EXPECT_CALL(*mock_app_ptr_, is_navi()).WillRepeatedly(Return(true));
   // HMI level is not FULL nor LIMITED
-  EXPECT_CALL(*mock_app_ptr_, hmi_level())
+  EXPECT_CALL(*mock_app_ptr_, hmi_level(kDefaultWindowId))
       .WillRepeatedly(Return(mobile_apis::HMILevel::HMI_BACKGROUND));
 
   bool result = false;
@@ -476,7 +480,7 @@ TEST_F(ApplicationManagerImplTest,
   const int32_t session_key = 123;
   EXPECT_CALL(*mock_app_ptr_, app_id()).WillRepeatedly(Return(session_key));
   EXPECT_CALL(*mock_app_ptr_, is_navi()).WillRepeatedly(Return(true));
-  EXPECT_CALL(*mock_app_ptr_, hmi_level())
+  EXPECT_CALL(*mock_app_ptr_, hmi_level(kDefaultWindowId))
       .WillRepeatedly(Return(mobile_apis::HMILevel::HMI_LIMITED));
 
   bool result = false;
@@ -560,7 +564,7 @@ TEST_F(ApplicationManagerImplTest,
   const int32_t session_key = 123;
   EXPECT_CALL(*mock_app_ptr_, app_id()).WillRepeatedly(Return(session_key));
   EXPECT_CALL(*mock_app_ptr_, is_navi()).WillRepeatedly(Return(true));
-  EXPECT_CALL(*mock_app_ptr_, hmi_level())
+  EXPECT_CALL(*mock_app_ptr_, hmi_level(kDefaultWindowId))
       .WillRepeatedly(Return(mobile_apis::HMILevel::HMI_FULL));
 
   bool result = false;
@@ -634,7 +638,7 @@ TEST_F(ApplicationManagerImplTest,
   const int32_t session_key = 123;
   EXPECT_CALL(*mock_app_ptr_, app_id()).WillRepeatedly(Return(session_key));
   EXPECT_CALL(*mock_app_ptr_, is_navi()).WillRepeatedly(Return(true));
-  EXPECT_CALL(*mock_app_ptr_, hmi_level())
+  EXPECT_CALL(*mock_app_ptr_, hmi_level(kDefaultWindowId))
       .WillRepeatedly(Return(mobile_apis::HMILevel::HMI_FULL));
 
   bool result = false;
@@ -669,7 +673,7 @@ TEST_F(ApplicationManagerImplTest, OnServiceStartedCallback_AudioServiceStart) {
   const int32_t session_key = 123;
   EXPECT_CALL(*mock_app_ptr_, app_id()).WillRepeatedly(Return(session_key));
   EXPECT_CALL(*mock_app_ptr_, is_navi()).WillRepeatedly(Return(true));
-  EXPECT_CALL(*mock_app_ptr_, hmi_level())
+  EXPECT_CALL(*mock_app_ptr_, hmi_level(kDefaultWindowId))
       .WillRepeatedly(Return(mobile_apis::HMILevel::HMI_FULL));
 
   bool result = false;
@@ -699,7 +703,7 @@ TEST_F(ApplicationManagerImplTest,
   const int32_t session_key = 123;
   EXPECT_CALL(*mock_app_ptr_, app_id()).WillRepeatedly(Return(session_key));
   EXPECT_CALL(*mock_app_ptr_, is_navi()).WillRepeatedly(Return(true));
-  EXPECT_CALL(*mock_app_ptr_, hmi_level())
+  EXPECT_CALL(*mock_app_ptr_, hmi_level(kDefaultWindowId))
       .WillRepeatedly(Return(mobile_apis::HMILevel::HMI_FULL));
 
   bool result = false;
@@ -820,6 +824,9 @@ TEST_F(ApplicationManagerImplTest,
   std::shared_ptr<MockApplication> switching_app_ptr =
       std::make_shared<MockApplication>();
 
+  ON_CALL(*switching_app_ptr, app_id()).WillByDefault(Return(kConnectionKey));
+  ON_CALL(*switching_app_ptr, device()).WillByDefault(Return(kDeviceId));
+
   const std::string switching_device_id = "switching";
   const std::string switching_device_id_hash =
       encryption::MakeHash(switching_device_id);
@@ -832,12 +839,11 @@ TEST_F(ApplicationManagerImplTest,
       .WillRepeatedly(Return(policy_app_id_switch));
 
   const auto hmi_level_switching_app = mobile_apis::HMILevel::HMI_FULL;
-  EXPECT_CALL(*switching_app_ptr, hmi_level())
+  EXPECT_CALL(*switching_app_ptr, hmi_level(kDefaultWindowId))
       .WillRepeatedly(Return(hmi_level_switching_app));
 
   std::shared_ptr<MockApplication> nonswitching_app_ptr =
       std::make_shared<MockApplication>();
-
   const std::string nonswitching_device_id = "nonswitching";
   const std::string nonswitching_device_id_hash =
       encryption::MakeHash(nonswitching_device_id);
@@ -850,7 +856,7 @@ TEST_F(ApplicationManagerImplTest,
       .WillRepeatedly(Return(policy_app_id_nonswitch));
 
   const auto hmi_level_nonswitching_app = mobile_apis::HMILevel::HMI_LIMITED;
-  EXPECT_CALL(*nonswitching_app_ptr, hmi_level())
+  EXPECT_CALL(*nonswitching_app_ptr, hmi_level(kDefaultWindowId))
       .WillRepeatedly(Return(hmi_level_nonswitching_app));
 
   // Act
@@ -868,15 +874,18 @@ TEST_F(ApplicationManagerImplTest,
       .WillOnce(Return(smart_objects::SmartObjectSPtr()));
   app_manager_impl_->OnDeviceSwitchingStart(switching_device,
                                             non_switching_device);
-  EXPECT_TRUE(app_manager_impl_->IsAppInReconnectMode(policy_app_id_switch));
-  EXPECT_FALSE(
-      app_manager_impl_->IsAppInReconnectMode(policy_app_id_nonswitch));
+  EXPECT_TRUE(
+      app_manager_impl_->IsAppInReconnectMode(kDeviceId, policy_app_id_switch));
+  EXPECT_FALSE(app_manager_impl_->IsAppInReconnectMode(
+      kDeviceId, policy_app_id_nonswitch));
 }
 
 TEST_F(ApplicationManagerImplTest,
        OnDeviceSwitchingFinish_ExpectUnregisterAppsInWaitList) {
   std::shared_ptr<MockApplication> switching_app_ptr =
       std::make_shared<MockApplication>();
+  ON_CALL(*switching_app_ptr, app_id()).WillByDefault(Return(kConnectionKey));
+  ON_CALL(*switching_app_ptr, device()).WillByDefault(Return(kDeviceId));
 
   plugin_manager::MockRPCPluginManager* mock_rpc_plugin_manager =
       new plugin_manager::MockRPCPluginManager;
@@ -896,7 +905,7 @@ TEST_F(ApplicationManagerImplTest,
       .WillRepeatedly(Return(policy_app_id_switch));
 
   const auto hmi_level_switching_app = mobile_apis::HMILevel::HMI_FULL;
-  EXPECT_CALL(*switching_app_ptr, hmi_level())
+  EXPECT_CALL(*switching_app_ptr, hmi_level(kDefaultWindowId))
       .WillRepeatedly(Return(hmi_level_switching_app));
 
   std::shared_ptr<MockApplication> nonswitching_app_ptr =
@@ -913,8 +922,12 @@ TEST_F(ApplicationManagerImplTest,
   EXPECT_CALL(*nonswitching_app_ptr, policy_app_id())
       .WillRepeatedly(Return(policy_app_id_nonswitch));
 
+  ON_CALL(*nonswitching_app_ptr, protocol_version())
+      .WillByDefault(
+          Return(protocol_handler::MajorProtocolVersion::PROTOCOL_VERSION_4));
+
   const auto hmi_level_nonswitching_app = mobile_apis::HMILevel::HMI_LIMITED;
-  EXPECT_CALL(*nonswitching_app_ptr, hmi_level())
+  EXPECT_CALL(*nonswitching_app_ptr, hmi_level(kDefaultWindowId))
       .WillRepeatedly(Return(hmi_level_nonswitching_app));
 
   // Act
@@ -933,7 +946,8 @@ TEST_F(ApplicationManagerImplTest,
   app_manager_impl_->OnDeviceSwitchingStart(switching_device,
                                             non_switching_device);
 
-  EXPECT_TRUE(app_manager_impl_->IsAppInReconnectMode(policy_app_id_switch));
+  EXPECT_TRUE(
+      app_manager_impl_->IsAppInReconnectMode(kDeviceId, policy_app_id_switch));
 
   app_manager_impl_->OnDeviceSwitchingFinish(switching_device_id);
   EXPECT_FALSE(

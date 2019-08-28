@@ -48,7 +48,8 @@ namespace transport_adapter {
 
 class UsbDeviceScanner : public DeviceScanner, public UsbDeviceListener {
  public:
-  UsbDeviceScanner(class TransportAdapterController* controller);
+  UsbDeviceScanner(class TransportAdapterController* controller,
+                   const TransportManagerSettings& settings);
   virtual ~UsbDeviceScanner();
 
  protected:
@@ -65,6 +66,7 @@ class UsbDeviceScanner : public DeviceScanner, public UsbDeviceListener {
   void SupportedDeviceFound(PlatformUsbDevice* device);
 
   TransportAdapterController* controller_;
+  const TransportManagerSettings& settings_;
 
   typedef std::list<PlatformUsbDevice*> Devices;
   Devices devices_;

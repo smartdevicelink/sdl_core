@@ -336,15 +336,18 @@ TEST_F(HMICapabilitiesTest, LoadCapabilitiesFromFile) {
   // Check audio pass thru
   const smart_objects::SmartObject audio_pass_thru_capabilities_so =
       *(hmi_capabilities_test->audio_pass_thru_capabilities());
+  EXPECT_EQ(smart_objects::SmartType_Array,
+            audio_pass_thru_capabilities_so.getType());
+  EXPECT_EQ(1u, audio_pass_thru_capabilities_so.length());
   EXPECT_EQ(hmi_apis::Common_SamplingRate::RATE_44KHZ,
             static_cast<hmi_apis::Common_SamplingRate::eType>(
-                audio_pass_thru_capabilities_so["samplingRate"].asInt()));
+                audio_pass_thru_capabilities_so[0]["samplingRate"].asInt()));
   EXPECT_EQ(hmi_apis::Common_BitsPerSample::RATE_8_BIT,
             static_cast<hmi_apis::Common_BitsPerSample::eType>(
-                audio_pass_thru_capabilities_so["bitsPerSample"].asInt()));
+                audio_pass_thru_capabilities_so[0]["bitsPerSample"].asInt()));
   EXPECT_EQ(hmi_apis::Common_AudioType::PCM,
             static_cast<hmi_apis::Common_AudioType::eType>(
-                audio_pass_thru_capabilities_so["audioType"].asInt()));
+                audio_pass_thru_capabilities_so[0]["audioType"].asInt()));
 
   // Check hmi zone capabilities
   const smart_objects::SmartObject hmi_zone_capabilities_so =
@@ -567,6 +570,57 @@ TEST_F(HMICapabilitiesTest,
   EXPECT_TRUE(navigation_capability_so.keyExists("getWayPointsEnabled"));
   EXPECT_TRUE(navigation_capability_so["sendLocationEnabled"].asBool());
   EXPECT_FALSE(navigation_capability_so["getWayPointsEnabled"].asBool());
+}
+
+TEST_F(HMICapabilitiesTest,
+       LoadCapabilitiesFromFileAndVerifyOldAudioPassThruCapabilities) {
+  MockApplicationManager mock_app_mngr;
+  event_engine_test::MockEventDispatcher mock_dispatcher;
+  MockApplicationManagerSettings mock_application_manager_settings;
+
+  const std::string hmi_capabilities_file = "hmi_capabilities_old_apt.json";
+
+  EXPECT_CALL(mock_app_mngr, event_dispatcher())
+      .WillOnce(ReturnRef(mock_dispatcher));
+  EXPECT_CALL(mock_app_mngr, get_settings())
+      .WillRepeatedly(ReturnRef(mock_application_manager_settings));
+  EXPECT_CALL(mock_application_manager_settings, hmi_capabilities_file_name())
+      .WillOnce(ReturnRef(hmi_capabilities_file));
+  EXPECT_CALL(mock_dispatcher, add_observer(_, _, _)).Times(1);
+  EXPECT_CALL(mock_dispatcher, remove_observer(_)).Times(1);
+  EXPECT_CALL(mock_application_manager_settings, launch_hmi())
+      .WillOnce(Return(false));
+  EXPECT_CALL(*(MockMessageHelper::message_helper_mock()),
+              CommonLanguageFromString(_))
+      .WillRepeatedly(Invoke(TestCommonLanguageFromString));
+
+  if (file_system::FileExists("./app_info_data")) {
+    EXPECT_TRUE(::file_system::DeleteFile("./app_info_data"));
+  }
+
+  std::shared_ptr<HMICapabilitiesForTesting> hmi_capabilities =
+      std::make_shared<HMICapabilitiesForTesting>(mock_app_mngr);
+  hmi_capabilities->Init(&last_state_);
+
+  // with old audio pass thru format, the object is an array containing a single
+  // object
+  smart_objects::SmartObject audio_pass_thru_capabilities_so =
+      *(hmi_capabilities->audio_pass_thru_capabilities());
+  EXPECT_EQ(smart_objects::SmartType_Array,
+            audio_pass_thru_capabilities_so.getType());
+  EXPECT_EQ(1u, audio_pass_thru_capabilities_so.length());
+  EXPECT_TRUE(audio_pass_thru_capabilities_so[0].keyExists("samplingRate"));
+  EXPECT_EQ(hmi_apis::Common_SamplingRate::RATE_22KHZ,
+            static_cast<hmi_apis::Common_SamplingRate::eType>(
+                audio_pass_thru_capabilities_so[0]["samplingRate"].asInt()));
+  EXPECT_TRUE(audio_pass_thru_capabilities_so[0].keyExists("bitsPerSample"));
+  EXPECT_EQ(hmi_apis::Common_BitsPerSample::RATE_16_BIT,
+            static_cast<hmi_apis::Common_BitsPerSample::eType>(
+                audio_pass_thru_capabilities_so[0]["bitsPerSample"].asInt()));
+  EXPECT_TRUE(audio_pass_thru_capabilities_so[0].keyExists("audioType"));
+  EXPECT_EQ(hmi_apis::Common_AudioType::PCM,
+            static_cast<hmi_apis::Common_AudioType::eType>(
+                audio_pass_thru_capabilities_so[0]["audioType"].asInt()));
 }
 
 TEST_F(HMICapabilitiesTest, VerifyImageType) {

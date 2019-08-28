@@ -38,6 +38,7 @@
 #include <vector>
 
 #include "gmock/gmock.h"
+#include "utils/macro.h"
 
 #include "policy/policy_listener.h"
 #include "policy/policy_table/types.h"
@@ -54,18 +55,22 @@ namespace custom_str = utils::custom_string;
 
 class MockPolicyListener : public ::policy::PolicyListener {
  public:
-  MOCK_METHOD3(OnPermissionsUpdated,
-               void(const std::string& policy_app_id,
+  MOCK_METHOD4(OnPermissionsUpdated,
+               void(const std::string& device_id,
+                    const std::string& policy_app_id,
                     const policy::Permissions& permissions,
                     const policy::HMILevel& default_hmi));
-  MOCK_METHOD2(OnPermissionsUpdated,
-               void(const std::string& policy_app_id,
+  MOCK_METHOD3(OnPermissionsUpdated,
+               void(const std::string& device_id,
+                    const std::string& policy_app_id,
                     const policy::Permissions& permissions));
-  MOCK_METHOD1(OnPendingPermissionChange,
-               void(const std::string& policy_app_id));
+  MOCK_METHOD2(OnPendingPermissionChange,
+               void(const std::string& device_id,
+                    const std::string& policy_app_id));
   MOCK_METHOD1(OnUpdateStatusChanged, void(const std::string& status));
-  MOCK_METHOD1(OnCurrentDeviceIdUpdateRequired,
-               std::string(const std::string& policy_app_id));
+  MOCK_METHOD2(OnCurrentDeviceIdUpdateRequired,
+               std::string(const transport_manager::DeviceHandle& device_handle,
+                           const std::string& policy_app_id));
   MOCK_METHOD0(OnSystemInfoUpdateRequired, void());
   MOCK_METHOD1(GetAppName,
                custom_str::CustomString(const std::string& policy_app_id));
@@ -85,10 +90,13 @@ class MockPolicyListener : public ::policy::PolicyListener {
                void(const std::string& policy_app_id,
                     const std::string& auth_token));
   MOCK_METHOD1(OnPTUFinished, void(const bool ptu_result));
-  MOCK_CONST_METHOD2(SendOnAppPermissionsChanged,
-                     void(const policy::AppPermissions&, const std::string&));
-  MOCK_METHOD1(GetDevicesIds,
-               std::vector<std::string>(const std::string& policy_app_id));
+  MOCK_CONST_METHOD3(SendOnAppPermissionsChanged,
+                     void(const policy::AppPermissions& permissions,
+                          const std::string& device_id,
+                          const std::string& policy_app_id));
+  MOCK_CONST_METHOD1(
+      GetDevicesIds,
+      std::vector<std::string>(const std::string& policy_app_id));
   MOCK_METHOD3(OnUpdateHMILevel,
                void(const std::string& device_id,
                     const std::string& policy_app_id,
@@ -103,6 +111,7 @@ class MockPolicyListener : public ::policy::PolicyListener {
                void(const std::string& device_id,
                     const std::string& policy_app_id,
                     const std::string& hmi_level));
+  MOCK_METHOD0(OnLockScreenDismissalStateChanged, void());
 };
 
 }  // namespace policy_test

@@ -118,6 +118,11 @@ class CommandImpl : public Command {
   int32_t function_id() const OVERRIDE;
 
   /*
+   * @brief Retrieves Window ID
+   */
+  WindowID window_id() const OVERRIDE;
+
+  /*
    * @brief Function is called by RequestController when request execution time
    * has exceed it's limit
    *

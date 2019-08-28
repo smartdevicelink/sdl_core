@@ -332,6 +332,15 @@ std::string MessageHelper::CommonLanguageToString(
   return std::string();
 }
 
+std::string MessageHelper::MobileLanguageToString(
+    mobile_apis::Language::eType language) {
+  using namespace ns_smart_device_link::ns_smart_objects;
+  const char* str = 0;
+  EnumConversionHelper<mobile_apis::Language::eType>::EnumToCString(language,
+                                                                    &str);
+  return str ? str : std::string();
+}
+
 smart_objects::SmartObjectSPtr MessageHelper::CreateMessageForHMI(
     hmi_apis::messageType::eType message_type, const uint32_t correlation_id) {
   using namespace smart_objects;
@@ -345,6 +354,33 @@ smart_objects::SmartObjectSPtr MessageHelper::CreateMessageForHMI(
   ref[strings::params][strings::protocol_type] =
       commands::CommandImpl::hmi_protocol_type_;
   ref[strings::params][strings::correlation_id] = correlation_id;
+  return message;
+}
+
+smart_objects::SmartObjectSPtr
+MessageHelper::CreateDisplayCapabilityUpdateToMobile(
+    const smart_objects::SmartObject& display_capabilities, Application& app) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  auto message = std::make_shared<smart_objects::SmartObject>(
+      smart_objects::SmartType_Map);
+
+  (*message)[strings::params][strings::message_type] =
+      MessageType::kNotification;
+  (*message)[strings::params][strings::function_id] =
+      mobile_apis::FunctionID::OnSystemCapabilityUpdatedID;
+  (*message)[strings::params][strings::connection_key] = app.app_id();
+  (*message)[strings::params][strings::protocol_type] =
+      commands::CommandImpl::mobile_protocol_type_;
+  (*message)[strings::params][strings::protocol_version] =
+      commands::CommandImpl::protocol_version_;
+
+  smart_objects::SmartObject system_capability(smart_objects::SmartType_Map);
+  system_capability[strings::system_capability_type] =
+      static_cast<int32_t>(mobile_apis::SystemCapabilityType::DISPLAYS);
+  system_capability[strings::display_capabilities] = display_capabilities;
+  (*message)[strings::msg_params][strings::system_capability] =
+      system_capability;
+
   return message;
 }
 
@@ -369,7 +405,8 @@ void MessageHelper::BroadcastCapabilityUpdate(
       hmi_apis::FunctionID::BasicCommunication_OnSystemCapabilityUpdated;
   smart_objects::SmartObjectSPtr hmi_notification =
       std::make_shared<smart_objects::SmartObject>(message);
-  app_mngr.GetRPCService().ManageHMICommand(hmi_notification);
+  app_mngr.GetRPCService().ManageHMICommand(
+      hmi_notification, commands::Command::CommandSource::SOURCE_SDL_TO_HMI);
 }
 
 smart_objects::SmartObject MessageHelper::CreateAppServiceCapabilities(
@@ -623,15 +660,16 @@ void MessageHelper::SendResetPropertiesRequest(ApplicationSharedPtr application,
     msg_params = *MessageHelper::CreateAppVrHelp(application);
     msg_params[hmi_request::menu_title] = "";
 
-    smart_objects::SmartObject key_board_properties =
+    smart_objects::SmartObject keyboard_properties =
         smart_objects::SmartObject(smart_objects::SmartType_Map);
-    key_board_properties[strings::language] =
+    keyboard_properties[strings::language] =
         static_cast<int32_t>(hmi_apis::Common_Language::EN_US);
-    key_board_properties[hmi_request::keyboard_layout] =
+    keyboard_properties[hmi_request::keyboard_layout] =
         static_cast<int32_t>(hmi_apis::Common_KeyboardLayout::QWERTY);
 
-    key_board_properties[hmi_request::auto_complete_text] = "";
-    msg_params[hmi_request::keyboard_properties] = key_board_properties;
+    keyboard_properties[hmi_request::auto_complete_list] =
+        smart_objects::SmartObject(smart_objects::SmartType_Array);
+    msg_params[hmi_request::keyboard_properties] = keyboard_properties;
 
     msg_params[strings::app_id] = application->app_id();
 
@@ -761,7 +799,8 @@ hmi_apis::Common_Result::eType MessageHelper::MobileToHMIResult(
 }
 
 void MessageHelper::SendHMIStatusNotification(
-    const Application& application_impl,
+    ApplicationSharedPtr application,
+    const WindowID window_id,
     ApplicationManager& application_manager) {
   LOG4CXX_AUTO_TRACE(logger_);
   smart_objects::SmartObjectSPtr notification =
@@ -779,16 +818,21 @@ void MessageHelper::SendHMIStatusNotification(
       static_cast<int32_t>(application_manager::MessageType::kNotification);
 
   message[strings::params][strings::connection_key] =
-      static_cast<int32_t>(application_impl.app_id());
+      static_cast<int32_t>(application->app_id());
+
+  message[strings::msg_params][strings::window_id] = window_id;
 
   message[strings::msg_params][strings::hmi_level] =
-      static_cast<int32_t>(application_impl.hmi_level());
+      static_cast<int32_t>(application->hmi_level(window_id));
 
   message[strings::msg_params][strings::audio_streaming_state] =
-      static_cast<int32_t>(application_impl.audio_streaming_state());
+      static_cast<int32_t>(application->audio_streaming_state());
+
+  message[strings::msg_params][strings::video_streaming_state] =
+      static_cast<int32_t>(application->video_streaming_state());
 
   message[strings::msg_params][strings::system_context] =
-      static_cast<int32_t>(application_impl.system_context());
+      static_cast<int32_t>(application->system_context(window_id));
 
   application_manager.GetRPCService().ManageMobileCommand(
       notification, commands::Command::SOURCE_SDL);
@@ -1547,6 +1591,67 @@ smart_objects::SmartObjectSPtr MessageHelper::CreateAddVRCommandToHMI(
   return vr_command;
 }
 
+smart_objects::SmartObjectSPtr MessageHelper::CreateUICreateWindowRequestToHMI(
+    ApplicationSharedPtr application,
+    ApplicationManager& app_mngr,
+    const smart_objects::SmartObject& window_info) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  auto ui_request = CreateMessageForHMI(hmi_apis::messageType::request,
+                                        app_mngr.GetNextHMICorrelationID());
+
+  (*ui_request)[strings::params][strings::function_id] =
+      static_cast<int>(hmi_apis::FunctionID::UI_CreateWindow);
+
+  (*ui_request)[strings::correlation_id] =
+      (*ui_request)[strings::params][strings::correlation_id];
+  (*ui_request)[strings::function_id] =
+      (*ui_request)[strings::params][strings::function_id];
+
+  smart_objects::SmartObject msg_params(
+      smart_objects::SmartObject(smart_objects::SmartType_Map));
+
+  msg_params[strings::window_id] = window_info[strings::window_id].asInt();
+  msg_params[strings::window_type] = window_info[strings::window_type].asInt();
+  msg_params[strings::window_name] =
+      window_info[strings::window_name].asString();
+
+  if (window_info.keyExists(strings::associated_service_type)) {
+    msg_params[strings::associated_service_type] =
+        window_info[strings::associated_service_type].asString();
+  }
+  if (window_info.keyExists(strings::duplicate_updates_from_window_id)) {
+    msg_params[strings::duplicate_updates_from_window_id] =
+        window_info[strings::duplicate_updates_from_window_id].asInt();
+  }
+
+  msg_params[strings::app_id] = application->hmi_app_id();
+
+  (*ui_request)[strings::msg_params] = msg_params;
+
+  return ui_request;
+}
+
+smart_objects::SmartObjectList MessageHelper::CreateUICreateWindowRequestsToHMI(
+    application_manager::ApplicationSharedPtr application,
+    ApplicationManager& app_mngr,
+    const smart_objects::SmartObject& windows_info) {
+  smart_objects::SmartObjectList requests;
+  DCHECK_OR_RETURN(application, requests);
+
+  for (size_t i = 0; i < windows_info.length(); ++i) {
+    const auto& info = windows_info[i];
+
+    const auto ui_request =
+        CreateUICreateWindowRequestToHMI(application, app_mngr, info);
+
+    DCHECK_OR_RETURN(ui_request, requests);
+
+    requests.push_back(ui_request);
+  }
+
+  return requests;
+}
+
 bool MessageHelper::CreateDeviceInfo(
     connection_handler::DeviceHandle device_handle,
     const protocol_handler::SessionObserver& session_observer,
@@ -1599,8 +1704,8 @@ bool MessageHelper::CreateHMIApplicationStruct(
   const smart_objects::SmartObject* app_types = app->app_types();
   const smart_objects::SmartObject* ngn_media_screen_name =
       app->ngn_media_screen_name();
-  const smart_objects::SmartObject* day_color_scheme = app->day_color_scheme();
-  const smart_objects::SmartObject* night_color_scheme =
+  const smart_objects::SmartObject day_color_scheme = app->day_color_scheme();
+  const smart_objects::SmartObject night_color_scheme =
       app->night_color_scheme();
 
   message = smart_objects::SmartObject(smart_objects::SmartType_Map);
@@ -1638,7 +1743,8 @@ bool MessageHelper::CreateHMIApplicationStruct(
   const policy::RequestType::State app_request_types_state =
       policy_handler.GetAppRequestTypeState(policy_app_id);
   if (policy::RequestType::State::AVAILABLE == app_request_types_state) {
-    const auto request_types = policy_handler.GetAppRequestTypes(policy_app_id);
+    const auto request_types =
+        policy_handler.GetAppRequestTypes(app->device(), policy_app_id);
     message[strings::request_type] =
         SmartObject(smart_objects::SmartType_Array);
     smart_objects::SmartObject& request_types_array =
@@ -1675,12 +1781,12 @@ bool MessageHelper::CreateHMIApplicationStruct(
         SmartObject(smart_objects::SmartType_Array);
   }
 
-  if (day_color_scheme) {
-    message[strings::day_color_scheme] = *day_color_scheme;
+  if (day_color_scheme.getType() == smart_objects::SmartType_Map) {
+    message[strings::day_color_scheme] = day_color_scheme;
   }
 
-  if (night_color_scheme) {
-    message[strings::night_color_scheme] = *night_color_scheme;
+  if (night_color_scheme.getType() == smart_objects::SmartType_Map) {
+    message[strings::night_color_scheme] = night_color_scheme;
   }
 
   message[strings::device_info] =
@@ -1789,12 +1895,16 @@ void MessageHelper::SendOnAppUnregNotificationToHMI(
 
 smart_objects::SmartObjectSPtr MessageHelper::GetBCActivateAppRequestToHMI(
     ApplicationConstSharedPtr app,
-    const protocol_handler::SessionObserver& session_observer,
     const policy::PolicyHandlerInterface& policy_handler,
     hmi_apis::Common_HMILevel::eType level,
     bool send_policy_priority,
     ApplicationManager& app_mngr) {
   DCHECK_OR_RETURN(app, smart_objects::SmartObjectSPtr());
+  if (hmi_apis::Common_HMILevel::NONE == level) {
+    LOG4CXX_WARN(logger_,
+                 "BC.ActivateApp cannot be used to deactivate an application");
+    return NULL;
+  }
 
   const uint32_t correlation_id = app_mngr.GetNextHMICorrelationID();
   smart_objects::SmartObjectSPtr message =
@@ -1828,6 +1938,23 @@ smart_objects::SmartObjectSPtr MessageHelper::GetBCActivateAppRequestToHMI(
       hmi_apis::Common_HMILevel::FULL != level) {
     (*message)[strings::msg_params][strings::activate_app_hmi_level] = level;
   }
+  return message;
+}
+
+smart_objects::SmartObjectSPtr MessageHelper::GetBCCloseApplicationRequestToHMI(
+    ApplicationConstSharedPtr app, ApplicationManager& app_mngr) {
+  DCHECK_OR_RETURN(app, smart_objects::SmartObjectSPtr());
+
+  const uint32_t correlation_id = app_mngr.GetNextHMICorrelationID();
+  smart_objects::SmartObjectSPtr message =
+      std::make_shared<smart_objects::SmartObject>(
+          smart_objects::SmartType_Map);
+  (*message)[strings::params][strings::function_id] =
+      hmi_apis::FunctionID::BasicCommunication_CloseApplication;
+  (*message)[strings::params][strings::message_type] = MessageType::kRequest;
+  (*message)[strings::params][strings::correlation_id] = correlation_id;
+  (*message)[strings::msg_params][strings::app_id] = app->app_id();
+
   return message;
 }
 
@@ -2979,15 +3106,30 @@ mobile_apis::Result::eType MessageHelper::ProcessSoftButtons(
 void MessageHelper::SubscribeApplicationToSoftButton(
     smart_objects::SmartObject& message_params,
     ApplicationSharedPtr app,
-    int32_t function_id) {
+    int32_t function_id,
+    const WindowID window_id) {
   SoftButtonID softbuttons_id;
   smart_objects::SmartObject& soft_buttons =
       message_params[strings::soft_buttons];
   unsigned int length = soft_buttons.length();
   for (unsigned int i = 0; i < length; ++i) {
-    softbuttons_id.insert(soft_buttons[i][strings::soft_button_id].asUInt());
+    const auto button_id = std::make_pair(
+        soft_buttons[i][strings::soft_button_id].asUInt(), window_id);
+    softbuttons_id.insert(button_id);
   }
   app->SubscribeToSoftButtons(function_id, softbuttons_id);
+}
+
+void MessageHelper::SubscribeApplicationToSoftButton(
+    smart_objects::SmartObject& message_params,
+    ApplicationSharedPtr app,
+    int32_t function_id) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  SubscribeApplicationToSoftButton(
+      message_params,
+      app,
+      function_id,
+      mobile_apis::PredefinedWindows::DEFAULT_WINDOW);
 }
 
 bool MessageHelper::PrintSmartObject(const smart_objects::SmartObject& object) {
@@ -2998,6 +3140,16 @@ bool MessageHelper::PrintSmartObject(const smart_objects::SmartObject& object) {
   LOG4CXX_DEBUG(logger_, "SMART OBJECT: " << tmp.toStyledString());
 #endif
   return true;
+}
+
+WindowID MessageHelper::ExtractWindowIdFromSmartObject(
+    const smart_objects::SmartObject& s_map) {
+  if (smart_objects::SmartType_Map == s_map.getType()) {
+    if (s_map.keyExists(strings::window_id)) {
+      return s_map[strings::window_id].asInt();
+    }
+  }
+  return mobile_apis::PredefinedWindows::DEFAULT_WINDOW;
 }
 
 }  //  namespace application_manager

@@ -94,7 +94,9 @@ void PutFileRequest::Run() {
     return;
   }
 
-  if (mobile_api::HMILevel::HMI_NONE == application->hmi_level() &&
+  if (mobile_api::HMILevel::HMI_NONE ==
+          application->hmi_level(
+              mobile_apis::PredefinedWindows::DEFAULT_WINDOW) &&
       application_manager_.get_settings().put_file_in_none() <=
           application->put_file_in_none_count()) {
     // If application is in the HMI_NONE level the quantity of allowed
@@ -284,9 +286,7 @@ void PutFileRequest::Run() {
       }
 
       SendResponse(true, save_result, "File was downloaded", &response_params);
-      if (is_system_file) {
-        SendOnPutFileNotification();
-      }
+      SendOnPutFileNotification(is_system_file);
       break;
     }
     default:
@@ -297,7 +297,7 @@ void PutFileRequest::Run() {
   }
 }
 
-void PutFileRequest::SendOnPutFileNotification() {
+void PutFileRequest::SendOnPutFileNotification(bool is_system_file) {
   LOG4CXX_INFO(logger_, "SendOnPutFileNotification");
   smart_objects::SmartObjectSPtr notification =
       std::make_shared<smart_objects::SmartObject>(
@@ -316,6 +316,7 @@ void PutFileRequest::SendOnPutFileNotification() {
   message[strings::msg_params][strings::length] = length_;
   message[strings::msg_params][strings::persistent_file] = is_persistent_file_;
   message[strings::msg_params][strings::file_type] = file_type_;
+  message[strings::msg_params][strings::is_system_file] = is_system_file;
   rpc_service_.ManageHMICommand(notification);
 }
 

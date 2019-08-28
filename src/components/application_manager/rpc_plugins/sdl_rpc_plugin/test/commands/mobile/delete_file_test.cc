@@ -98,6 +98,8 @@ namespace {
 const uint32_t kConnectionKey = 1u;
 const uint32_t kCorrelationId = 10u;
 const int32_t kMenuId = 5;
+const am::WindowID kDefaultWindowId =
+    mobile_apis::PredefinedWindows::DEFAULT_WINDOW;
 }  // namespace
 
 class DeleteFileRequestTest
@@ -134,7 +136,7 @@ TEST_F(DeleteFileRequestTest, Run_HMILevelNone_UNSUCCESS) {
 
   EXPECT_CALL(app_mngr_, application(kConnectionKey))
       .WillOnce(Return(mock_app_));
-  EXPECT_CALL(*mock_app_, hmi_level())
+  EXPECT_CALL(*mock_app_, hmi_level(kDefaultWindowId))
       .WillOnce(Return(am::mobile_api::HMILevel::HMI_NONE));
 
   EXPECT_CALL(app_mngr_, get_settings())
@@ -161,7 +163,7 @@ TEST_F(DeleteFileRequestTest, Run_ValidFileName_SUCCESS) {
 
   EXPECT_CALL(app_mngr_, application(kConnectionKey))
       .WillRepeatedly(Return(mock_app_));
-  EXPECT_CALL(*mock_app_, hmi_level())
+  EXPECT_CALL(*mock_app_, hmi_level(kDefaultWindowId))
       .WillOnce(Return(am::mobile_api::HMILevel::HMI_FULL));
 
   EXPECT_CALL(app_mngr_, get_settings())
@@ -191,7 +193,7 @@ TEST_F(DeleteFileRequestTest, Run_InvalidFile_UNSUCCESS) {
   (*message_)[am::strings::msg_params][am::strings::sync_file_name] = file_name;
 
   EXPECT_CALL(app_mngr_, application(_)).WillOnce(Return(mock_app_));
-  EXPECT_CALL(*mock_app_, hmi_level())
+  EXPECT_CALL(*mock_app_, hmi_level(kDefaultWindowId))
       .WillOnce(Return(am::mobile_api::HMILevel::HMI_FULL));
 
   EXPECT_CALL(app_mngr_, get_settings())

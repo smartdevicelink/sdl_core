@@ -44,6 +44,10 @@ namespace application_manager {
 namespace plugin_manager {
 
 class RPCPluginManager {
+ protected:
+  typedef std::unique_ptr<RPCPlugin, std::function<void(RPCPlugin*)> >
+      RPCPluginPtr;
+
  public:
   virtual ~RPCPluginManager() {}
   /**
@@ -59,6 +63,7 @@ class RPCPluginManager {
    * @brief GetPlugins get list of plugins
    * @return list of loaded plugins
    */
+  DEPRECATED
   virtual std::vector<RPCPluginPtr>& GetPlugins() = 0;
 
   /**

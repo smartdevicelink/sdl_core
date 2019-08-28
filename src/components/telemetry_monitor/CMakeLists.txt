@@ -63,7 +63,7 @@ set(LIBRARIES
   HMI_API
   MOBILE_API
   Utils
-  Policy
+  PolicyStatic
 )
 
 add_library("TelemetryMonitor" ${SOURCES})

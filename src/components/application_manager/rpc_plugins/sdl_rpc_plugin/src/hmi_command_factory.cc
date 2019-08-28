@@ -99,10 +99,14 @@
 #include "sdl_rpc_plugin/commands/hmi/ui_alert_response.h"
 #include "sdl_rpc_plugin/commands/hmi/ui_change_registration_request.h"
 #include "sdl_rpc_plugin/commands/hmi/ui_change_registration_response.h"
+#include "sdl_rpc_plugin/commands/hmi/ui_create_window_request.h"
+#include "sdl_rpc_plugin/commands/hmi/ui_create_window_response.h"
 #include "sdl_rpc_plugin/commands/hmi/ui_delete_command_request.h"
 #include "sdl_rpc_plugin/commands/hmi/ui_delete_command_response.h"
 #include "sdl_rpc_plugin/commands/hmi/ui_delete_submenu_request.h"
 #include "sdl_rpc_plugin/commands/hmi/ui_delete_submenu_response.h"
+#include "sdl_rpc_plugin/commands/hmi/ui_delete_window_request.h"
+#include "sdl_rpc_plugin/commands/hmi/ui_delete_window_response.h"
 #include "sdl_rpc_plugin/commands/hmi/ui_end_audio_pass_thru_request.h"
 #include "sdl_rpc_plugin/commands/hmi/ui_end_audio_pass_thru_response.h"
 #include "sdl_rpc_plugin/commands/hmi/ui_get_capabilities_request.h"
@@ -158,6 +162,8 @@
 #endif  // EXTERNAL_PROPRIETARY_MODE
 
 #include "sdl_rpc_plugin/commands/hmi/add_statistics_info_notification.h"
+#include "sdl_rpc_plugin/commands/hmi/basic_communication_close_application_request.h"
+#include "sdl_rpc_plugin/commands/hmi/basic_communication_close_application_response.h"
 #include "sdl_rpc_plugin/commands/hmi/basic_communication_get_system_time_request.h"
 #include "sdl_rpc_plugin/commands/hmi/basic_communication_get_system_time_response.h"
 #include "sdl_rpc_plugin/commands/hmi/basic_communication_on_awake_sdl.h"
@@ -230,10 +236,14 @@
 #include "sdl_rpc_plugin/commands/hmi/on_vr_stopped_notification.h"
 #include "sdl_rpc_plugin/commands/hmi/sdl_policy_update.h"
 #include "sdl_rpc_plugin/commands/hmi/sdl_policy_update_response.h"
+#include "sdl_rpc_plugin/commands/hmi/ui_cancel_interaction_request.h"
+#include "sdl_rpc_plugin/commands/hmi/ui_cancel_interaction_response.h"
 #include "sdl_rpc_plugin/commands/hmi/ui_send_haptic_data_request.h"
 #include "sdl_rpc_plugin/commands/hmi/ui_send_haptic_data_response.h"
 #include "sdl_rpc_plugin/commands/hmi/ui_set_display_layout_request.h"
 #include "sdl_rpc_plugin/commands/hmi/ui_set_display_layout_response.h"
+#include "sdl_rpc_plugin/commands/hmi/ui_show_app_menu_request.h"
+#include "sdl_rpc_plugin/commands/hmi/ui_show_app_menu_response.h"
 
 #include "sdl_rpc_plugin/commands/hmi/bc_get_file_path_request.h"
 #include "sdl_rpc_plugin/commands/hmi/bc_get_file_path_response.h"
@@ -243,6 +253,7 @@
 #include "sdl_rpc_plugin/commands/hmi/rc_is_ready_response.h"
 
 #include "sdl_rpc_plugin/commands/hmi/on_bc_system_capability_updated_notification.h"
+#include "sdl_rpc_plugin/commands/hmi/on_bc_system_capability_updated_notification_from_hmi.h"
 
 namespace sdl_rpc_plugin {
 using namespace application_manager;
@@ -317,6 +328,13 @@ CommandCreator& HMICommandFactory::get_creator_factory(
                  ? factory.GetCreator<commands::ActivateAppRequest>()
                  : factory.GetCreator<commands::ActivateAppResponse>();
     }
+    case hmi_apis::FunctionID::BasicCommunication_CloseApplication: {
+      return hmi_apis::messageType::request == message_type
+                 ? factory.GetCreator<
+                       commands::BasicCommunicationCloseApplicationRequest>()
+                 : factory.GetCreator<
+                       commands::BasicCommunicationCloseApplicationResponse>();
+    }
 #ifdef EXTERNAL_PROPRIETARY_MODE
     case hmi_apis::FunctionID::BasicCommunication_DecryptCertificate: {
       return hmi_apis::messageType::request == message_type
@@ -385,6 +403,11 @@ CommandCreator& HMICommandFactory::get_creator_factory(
                  ? factory.GetCreator<commands::UIAddCommandRequest>()
                  : factory.GetCreator<commands::UIAddCommandResponse>();
     }
+    case hmi_apis::FunctionID::UI_CancelInteraction: {
+      return hmi_apis::messageType::request == message_type
+                 ? factory.GetCreator<commands::UICancelInteractionRequest>()
+                 : factory.GetCreator<commands::UICancelInteractionResponse>();
+    }
     case hmi_apis::FunctionID::UI_DeleteCommand: {
       return hmi_apis::messageType::request == message_type
                  ? factory.GetCreator<commands::UIDeleteCommandRequest>()
@@ -399,6 +422,16 @@ CommandCreator& HMICommandFactory::get_creator_factory(
       return hmi_apis::messageType::request == message_type
                  ? factory.GetCreator<commands::UIDeleteSubmenuRequest>()
                  : factory.GetCreator<commands::UIDeleteSubmenuResponse>();
+    }
+    case hmi_apis::FunctionID::UI_ShowAppMenu: {
+      return hmi_apis::messageType::request == message_type
+                 ? factory.GetCreator<commands::UIShowAppMenuRequest>()
+                 : factory.GetCreator<commands::UIShowAppMenuResponse>();
+    }
+    case hmi_apis::FunctionID::UI_DeleteWindow: {
+      return hmi_apis::messageType::request == message_type
+                 ? factory.GetCreator<commands::UIDeleteWindowRequest>()
+                 : factory.GetCreator<commands::UIDeleteWindowResponse>();
     }
     case hmi_apis::FunctionID::UI_SetMediaClockTimer: {
       return hmi_apis::messageType::request == message_type
@@ -447,6 +480,11 @@ CommandCreator& HMICommandFactory::get_creator_factory(
       return hmi_apis::messageType::request == message_type
                  ? factory.GetCreator<commands::UIChangeRegistrationRequest>()
                  : factory.GetCreator<commands::UIChangeRegistratioResponse>();
+    }
+    case hmi_apis::FunctionID::UI_CreateWindow: {
+      return hmi_apis::messageType::request == message_type
+                 ? factory.GetCreator<commands::UICreateWindowRequest>()
+                 : factory.GetCreator<commands::UICreateWindowResponse>();
     }
     case hmi_apis::FunctionID::UI_PerformAudioPassThru: {
       return hmi_apis::messageType::request == message_type
@@ -852,8 +890,13 @@ CommandCreator& HMICommandFactory::get_creator_factory(
                  : factory.GetCreator<commands::BCGetFilePathResponse>();
     }
     case hmi_apis::FunctionID::BasicCommunication_OnSystemCapabilityUpdated: {
-      return factory
-          .GetCreator<commands::OnBCSystemCapabilityUpdatedNotification>();
+      return (application_manager::commands::Command::CommandSource::
+                  SOURCE_HMI == source)
+                 ? factory.GetCreator<
+                       commands::
+                           OnBCSystemCapabilityUpdatedNotificationFromHMI>()
+                 : factory.GetCreator<
+                       commands::OnBCSystemCapabilityUpdatedNotification>();
     }
     default: { return factory.GetCreator<InvalidCommand>(); }
   }

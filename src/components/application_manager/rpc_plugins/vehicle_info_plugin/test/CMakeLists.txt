@@ -51,14 +51,8 @@ file(GLOB SOURCES
 )
 
 set(LIBRARIES
-  gmock
-  Utils
-  SmartObjects
-  HMI_API
-  MOBILE_API
-  connectionHandler
-  vehicle_info_plugin
-  jsoncpp
+  gmock  
+  vehicle_info_plugin_static
 )
 
 create_cotired_test("vi_commands_test" "${SOURCES}" "${LIBRARIES}" )

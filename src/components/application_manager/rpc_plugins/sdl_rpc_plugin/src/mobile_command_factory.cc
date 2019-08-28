@@ -40,10 +40,16 @@
 #include "sdl_rpc_plugin/commands/mobile/alert_maneuver_response.h"
 #include "sdl_rpc_plugin/commands/mobile/alert_request.h"
 #include "sdl_rpc_plugin/commands/mobile/alert_response.h"
+#include "sdl_rpc_plugin/commands/mobile/cancel_interaction_request.h"
+#include "sdl_rpc_plugin/commands/mobile/cancel_interaction_response.h"
 #include "sdl_rpc_plugin/commands/mobile/change_registration_request.h"
 #include "sdl_rpc_plugin/commands/mobile/change_registration_response.h"
+#include "sdl_rpc_plugin/commands/mobile/close_application_request.h"
+#include "sdl_rpc_plugin/commands/mobile/close_application_response.h"
 #include "sdl_rpc_plugin/commands/mobile/create_interaction_choice_set_request.h"
 #include "sdl_rpc_plugin/commands/mobile/create_interaction_choice_set_response.h"
+#include "sdl_rpc_plugin/commands/mobile/create_window_request.h"
+#include "sdl_rpc_plugin/commands/mobile/create_window_response.h"
 #include "sdl_rpc_plugin/commands/mobile/delete_command_request.h"
 #include "sdl_rpc_plugin/commands/mobile/delete_command_response.h"
 #include "sdl_rpc_plugin/commands/mobile/delete_file_request.h"
@@ -52,6 +58,8 @@
 #include "sdl_rpc_plugin/commands/mobile/delete_interaction_choice_set_response.h"
 #include "sdl_rpc_plugin/commands/mobile/delete_sub_menu_request.h"
 #include "sdl_rpc_plugin/commands/mobile/delete_sub_menu_response.h"
+#include "sdl_rpc_plugin/commands/mobile/delete_window_request.h"
+#include "sdl_rpc_plugin/commands/mobile/delete_window_response.h"
 #include "sdl_rpc_plugin/commands/mobile/dial_number_request.h"
 #include "sdl_rpc_plugin/commands/mobile/dial_number_response.h"
 #include "sdl_rpc_plugin/commands/mobile/end_audio_pass_thru_request.h"
@@ -110,6 +118,8 @@
 #include "sdl_rpc_plugin/commands/mobile/set_global_properties_response.h"
 #include "sdl_rpc_plugin/commands/mobile/set_media_clock_timer_request.h"
 #include "sdl_rpc_plugin/commands/mobile/set_media_clock_timer_response.h"
+#include "sdl_rpc_plugin/commands/mobile/show_app_menu_request.h"
+#include "sdl_rpc_plugin/commands/mobile/show_app_menu_response.h"
 #include "sdl_rpc_plugin/commands/mobile/show_constant_tbt_request.h"
 #include "sdl_rpc_plugin/commands/mobile/show_constant_tbt_response.h"
 #include "sdl_rpc_plugin/commands/mobile/show_request.h"
@@ -170,6 +180,11 @@ CommandCreator& MobileCommandFactory::get_command_creator(
                  ? factory.GetCreator<commands::AddCommandRequest>()
                  : factory.GetCreator<commands::AddCommandResponse>();
     }
+    case mobile_apis::FunctionID::CreateWindowID: {
+      return mobile_api::messageType::request == message_type
+                 ? factory.GetCreator<commands::CreateWindowRequest>()
+                 : factory.GetCreator<commands::CreateWindowResponse>();
+    }
     case mobile_apis::FunctionID::DeleteCommandID: {
       return mobile_api::messageType::request == message_type
                  ? factory.GetCreator<commands::DeleteCommandRequest>()
@@ -184,6 +199,16 @@ CommandCreator& MobileCommandFactory::get_command_creator(
       return mobile_api::messageType::request == message_type
                  ? factory.GetCreator<commands::DeleteSubMenuRequest>()
                  : factory.GetCreator<commands::DeleteSubMenuResponse>();
+    }
+    case mobile_apis::FunctionID::ShowAppMenuID: {
+      return mobile_api::messageType::request == message_type
+                 ? factory.GetCreator<commands::ShowAppMenuRequest>()
+                 : factory.GetCreator<commands::ShowAppMenuResponse>();
+    }
+    case mobile_apis::FunctionID::DeleteWindowID: {
+      return mobile_api::messageType::request == message_type
+                 ? factory.GetCreator<commands::DeleteWindowRequest>()
+                 : factory.GetCreator<commands::DeleteWindowResponse>();
     }
     case mobile_apis::FunctionID::DeleteInteractionChoiceSetID: {
       return mobile_api::messageType::request == message_type
@@ -211,6 +236,11 @@ CommandCreator& MobileCommandFactory::get_command_creator(
       return mobile_api::messageType::request == message_type
                  ? factory.GetCreator<commands::PerformAudioPassThruRequest>()
                  : factory.GetCreator<commands::PerformAudioPassThruResponse>();
+    }
+    case mobile_apis::FunctionID::CancelInteractionID: {
+      return mobile_api::messageType::request == message_type
+                 ? factory.GetCreator<commands::CancelInteractionRequest>()
+                 : factory.GetCreator<commands::CancelInteractionResponse>();
     }
     case mobile_apis::FunctionID::CreateInteractionChoiceSetID: {
       return mobile_api::messageType::request == message_type
@@ -355,6 +385,11 @@ CommandCreator& MobileCommandFactory::get_command_creator(
                  ? factory.GetCreator<commands::GetCloudAppPropertiesRequest>()
                  : factory
                        .GetCreator<commands::GetCloudAppPropertiesResponse>();
+    }
+    case mobile_apis::FunctionID::CloseApplicationID: {
+      return mobile_api::messageType::request == message_type
+                 ? factory.GetCreator<commands::CloseApplicationRequest>()
+                 : factory.GetCreator<commands::CloseApplicationResponse>();
     }
     case mobile_apis::FunctionID::GenericResponseID: {
       using app_mngr::commands::Command;

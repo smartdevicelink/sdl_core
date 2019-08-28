@@ -185,6 +185,12 @@ const char* kPendingRequestsAmoundKey = "PendingRequestsAmount";
 const char* kSupportedDiagModesKey = "SupportedDiagModes";
 const char* kTransportManagerDisconnectTimeoutKey = "DisconnectTimeout";
 const char* kBluetoothUUIDKey = "BluetoothUUID";
+const char* kAOAFilterManufacturerKey = "AOAFilterManufacturer";
+const char* kAOAFilterModelNameKey = "AOAFilterModelName";
+const char* kAOAFilterDescriptionKey = "AOAFilterDescription";
+const char* kAOAFilterVersionKey = "AOAFilterVersion";
+const char* kAOAFilterURIKey = "AOAFilterURI";
+const char* kAOAFilterSerialNumber = "AOAFilterSerialNumber";
 const char* kTTSDelimiterKey = "TTSDelimiter";
 const char* kRecordingFileNameKey = "RecordingFileName";
 const char* kRecordingFileSourceKey = "RecordingFileSource";
@@ -414,6 +420,12 @@ const std::vector<uint8_t> kDefaultBluetoothUUID = {0x93,
                                                     0xC8,
                                                     0x22,
                                                     0xA8};
+const char* kDefaultAOAFilterManufacturer = "SDL";
+const char* kDefaultAOAFilterModelName = "Core";
+const char* kDefaultAOAFilterDescription = "SmartDeviceLink Core Component USB";
+const char* kDefaultAOAFilterVersion = "1.0";
+const char* kDefaultAOAFilterURI = "http://www.smartdevicelink.org";
+const char* kDefaultAOAFilterSerialNumber = "N000000";
 }  // namespace
 
 namespace profile {
@@ -825,6 +837,30 @@ uint16_t Profile::cloud_app_max_retry_attempts() const {
 
 const uint8_t* Profile::bluetooth_uuid() const {
   return bluetooth_uuid_.data();
+}
+
+const std::string& Profile::aoa_filter_manufacturer() const {
+  return aoa_filter_manufacturer_;
+}
+
+const std::string& Profile::aoa_filter_model_name() const {
+  return aoa_filter_model_name_;
+}
+
+const std::string& Profile::aoa_filter_description() const {
+  return aoa_filter_description_;
+}
+
+const std::string& Profile::aoa_filter_version() const {
+  return aoa_filter_version_;
+}
+
+const std::string& Profile::aoa_filter_uri() const {
+  return aoa_filter_uri_;
+}
+
+const std::string& Profile::aoa_filter_serial_number() const {
+  return aoa_filter_serial_number_;
 }
 
 const std::string& Profile::tts_delimiter() const {
@@ -1848,6 +1884,57 @@ void Profile::UpdateValues() {
   if (!read_result || bluetooth_uuid_.size() != 16) {
     bluetooth_uuid_ = kDefaultBluetoothUUID;
   }
+
+  ReadStringValue(&aoa_filter_manufacturer_,
+                  kDefaultAOAFilterManufacturer,
+                  kTransportManagerSection,
+                  kAOAFilterManufacturerKey);
+
+  LOG_UPDATED_VALUE(aoa_filter_manufacturer_,
+                    kAOAFilterManufacturerKey,
+                    kTransportManagerSection);
+
+  ReadStringValue(&aoa_filter_model_name_,
+                  kDefaultAOAFilterModelName,
+                  kTransportManagerSection,
+                  kAOAFilterModelNameKey);
+
+  LOG_UPDATED_VALUE(
+      aoa_filter_model_name_, kAOAFilterModelNameKey, kTransportManagerSection);
+
+  ReadStringValue(&aoa_filter_description_,
+                  kDefaultAOAFilterDescription,
+                  kTransportManagerSection,
+                  kAOAFilterDescriptionKey);
+
+  LOG_UPDATED_VALUE(aoa_filter_description_,
+                    kAOAFilterDescriptionKey,
+                    kTransportManagerSection);
+
+  ReadStringValue(&aoa_filter_version_,
+                  kDefaultAOAFilterVersion,
+                  kTransportManagerSection,
+                  kAOAFilterVersionKey);
+
+  LOG_UPDATED_VALUE(
+      aoa_filter_version_, kAOAFilterVersionKey, kTransportManagerSection);
+
+  ReadStringValue(&aoa_filter_uri_,
+                  kDefaultAOAFilterURI,
+                  kTransportManagerSection,
+                  kAOAFilterURIKey);
+
+  LOG_UPDATED_VALUE(
+      aoa_filter_uri_, kAOAFilterURIKey, kTransportManagerSection);
+
+  ReadStringValue(&aoa_filter_serial_number_,
+                  kDefaultAOAFilterSerialNumber,
+                  kTransportManagerSection,
+                  kAOAFilterSerialNumber);
+
+  LOG_UPDATED_VALUE(aoa_filter_serial_number_,
+                    kAOAFilterSerialNumber,
+                    kTransportManagerSection);
 
   // Event MQ
   ReadStringValue(

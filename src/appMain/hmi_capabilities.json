@@ -242,6 +242,16 @@
                         "resolutionWidth": 35,
                         "resolutionHeight": 35
                     }
+                },
+                {
+                    "name": "alertIcon",
+                    "imageTypeSupported": [
+                        "GRAPHIC_PNG"
+                    ],
+                    "imageResolution": {
+                        "resolutionWidth": 225,
+                        "resolutionHeight": 225
+                    }
                 }
 
             ],
@@ -249,6 +259,7 @@
                 "CLOCK1", "CLOCK2", "CLOCK3", "CLOCKTEXT1", "CLOCKTEXT2", "CLOCKTEXT3", "CLOCKTEXT4"
             ],
             "graphicSupported": true,
+            "menuLayoutsAvailable": [ "LIST", "TILES" ],
             "templatesAvailable": [
                 "DEFAULT", "MEDIA", "NON-MEDIA", "ONSCREEN_PRESETS", "NAV_FULLSCREEN_MAP", "NAV_KEYBOARD",
                 "GRAPHIC_WITH_TEXT", "TEXT_WITH_GRAPHIC", "TILES_ONLY", "TEXTBUTTONS_ONLY",
@@ -274,11 +285,11 @@
                 "STATIC"
             ]
         },
-        "audioPassThruCapabilities": {
+        "audioPassThruCapabilities": [{
             "samplingRate": "44KHZ",
             "bitsPerSample": "RATE_8_BIT",
             "audioType": "PCM"
-        },
+        }],
         "pcmStreamCapabilities": {
             "samplingRate": "16KHZ",
             "bitsPerSample": "RATE_16_BIT",
@@ -309,7 +320,10 @@
                     "protocol": "RAW",
                     "codec": "H264"
                 }],
-                "hapticSpatialDataSupported": false
+                "hapticSpatialDataSupported": false,
+                "diagonalScreenSize": 8,
+                "pixelPerInch": 117,
+                "scale": 1
             },
             "remoteControlCapability": {
                 "buttonCapabilities": [
@@ -428,6 +442,7 @@
                         "acMaxEnableAvailable": true,
                         "autoModeEnableAvailable": true,
                         "circulateAirEnableAvailable": true,
+                        "climateEnableAvailable": true,
                         "currentTemperatureAvailable": true,
                         "defrostZone": [
                             "FRONT",
@@ -455,7 +470,7 @@
                 ],
                 "radioControlCapabilities": [
                     {
-                        "availableHDsAvailable": true,
+                        "availableHdChannelsAvailable": true,
                         "hdChannelAvailable": true,
                         "moduleName": "radio",
                         "radioBandAvailable": true,

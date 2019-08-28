@@ -1159,6 +1159,36 @@ bool EnumFromJsonString(const std::string& literal, FunctionID* result) {
     return true;
   }
 
+  if ("UnpublishAppService" == literal) {
+    *result = UnpublishAppServiceID;
+    return true;
+  }
+
+  if ("CancelInteraction" == literal) {
+    *result = CancelInteractionID;
+    return true;
+  }
+
+  if ("CreateWindow" == literal) {
+    *result = CreateWindowID;
+    return true;
+  }
+
+  if ("DeleteWindow" == literal) {
+    *result = DeleteWindowID;
+    return true;
+  }
+
+  if ("CloseApplication" == literal) {
+    *result = CloseApplicationID;
+    return true;
+  }
+
+  if ("ShowAppMenu" == literal) {
+    *result = ShowAppMenuID;
+    return true;
+  }
+
   if ("OnHMIStatus" == literal) {
     *result = OnHMIStatusID;
     return true;

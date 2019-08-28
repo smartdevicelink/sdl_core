@@ -73,9 +73,17 @@ void UIGetCapabilitiesResponse::Run() {
         msg_params[hmi_response::soft_button_capabilities]);
   }
 
-  if (msg_params.keyExists(strings::audio_pass_thru_capabilities)) {
+  // use newer parameter "audioPassThruCapabilitiesList" when available
+  if (msg_params.keyExists(strings::audio_pass_thru_capabilities_list)) {
     hmi_capabilities.set_audio_pass_thru_capabilities(
-        msg_params[strings::audio_pass_thru_capabilities]);
+        msg_params[strings::audio_pass_thru_capabilities_list]);
+  } else if (msg_params.keyExists(strings::audio_pass_thru_capabilities)) {
+    smart_objects::SmartObject audio_pass_thru_capabilities_list(
+        smart_objects::SmartType_Array);
+    audio_pass_thru_capabilities_list[0] =
+        msg_params[strings::audio_pass_thru_capabilities];
+    hmi_capabilities.set_audio_pass_thru_capabilities(
+        audio_pass_thru_capabilities_list);
   }
 
   if (msg_params.keyExists(strings::hmi_capabilities)) {
@@ -112,6 +120,12 @@ void UIGetCapabilitiesResponse::Run() {
       hmi_capabilities.set_video_streaming_capability(
           msg_params[strings::system_capabilities]
                     [strings::video_streaming_capability]);
+    }
+    if (msg_params[strings::system_capabilities].keyExists(
+            strings::display_capabilities)) {
+      hmi_capabilities.set_system_display_capabilities(
+          msg_params[strings::system_capabilities]
+                    [strings::display_capabilities]);
     }
   }
 }

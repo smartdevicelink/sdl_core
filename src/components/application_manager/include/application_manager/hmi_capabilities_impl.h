@@ -230,6 +230,20 @@ class HMICapabilitiesImpl : public HMICapabilities {
       const smart_objects::SmartObject& display_capabilities) OVERRIDE;
 
   /*
+   * @brief Retrieves information about the display capability
+   * @return Currently supported display capability
+   */
+  const smart_objects::SmartObjectSPtr system_display_capabilities()
+      const OVERRIDE;
+
+  /*
+   * @brief Sets supported display capability
+   * @param display_capabilities supported display capability
+   */
+  void set_system_display_capabilities(
+      const smart_objects::SmartObject& display_capabilities);
+
+  /*
    * @brief Retrieves information about the HMI zone capabilities
    *
    * @return Currently supported HMI zone capabilities
@@ -439,6 +453,14 @@ class HMICapabilitiesImpl : public HMICapabilities {
   bool rc_supported() const OVERRIDE;
 
   /*
+   * @brief Retrieves whether HMI supports passed Menu Layout
+   *
+   * @return TRUE if it supported, otherwise FALSE
+   */
+  bool menu_layout_supported(
+      mobile_apis::MenuLayout::eType layout) const OVERRIDE;
+
+  /*
    * @brief Interface used to store information regarding
    * the navigation "System Capability"
    *
@@ -542,6 +564,18 @@ class HMICapabilitiesImpl : public HMICapabilities {
       const Json::Value& json_languages,
       smart_objects::SmartObject& languages) const OVERRIDE;
 
+  /*
+   * @brief function that converts a single entry of audio pass thru capability
+   *        to smart object
+   *
+   * @param capability json object that represents a single entry of audio pass
+   *        thru capability
+   * @param output_so the converted object
+   */
+  void convert_audio_capability_to_obj(
+      const Json::Value& capability,
+      smart_objects::SmartObject& output_so) const OVERRIDE;
+
  private:
   bool is_vr_cooperating_;
   bool is_tts_cooperating_;
@@ -558,7 +592,13 @@ class HMICapabilitiesImpl : public HMICapabilities {
   smart_objects::SmartObject* ui_supported_languages_;
   smart_objects::SmartObject* tts_supported_languages_;
   smart_objects::SmartObject* vr_supported_languages_;
+  /*
+   * display_capabilities_ is deprecated and replaced by
+   * system_display_capabilities_. For backward compatibility
+   * display_capabilities_ is not removed.
+   */
   smart_objects::SmartObject* display_capabilities_;
+  smart_objects::SmartObjectSPtr system_display_capabilities_;
   smart_objects::SmartObject* hmi_zone_capabilities_;
   smart_objects::SmartObject* soft_buttons_capabilities_;
   smart_objects::SmartObject* button_capabilities_;

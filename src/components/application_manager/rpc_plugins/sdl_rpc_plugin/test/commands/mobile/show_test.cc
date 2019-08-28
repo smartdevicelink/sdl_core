@@ -31,6 +31,7 @@
  */
 
 #include <stdint.h>
+#include <array>
 #include <memory>
 #include <set>
 #include <string>
@@ -68,7 +69,27 @@ const uint32_t kAppId = 1u;
 const uint32_t kCmdId = 1u;
 const uint32_t kConnectionKey = 2u;
 const uint32_t kFunctionID = 3u;
+const std::string kCurrentTemplatelayout = "current_template_layout";
+const std::string kNewTemplateLayout = "new_template_layout";
+const app_mngr::WindowID kCurrentWindowID = 1;
+typedef std::array<int, 3> rgb_color_scheme;
+const rgb_color_scheme kCurrentDayColorRGB = {75, 75, 75};
+const rgb_color_scheme kCurrentNightColorRGB = {200, 200, 200};
+const rgb_color_scheme kNewDayColorRGB = {80, 80, 80};
+const rgb_color_scheme kNewNightColorRGB = {222, 222, 222};
+const am::WindowID kDefaultWindowId =
+    mobile_apis::PredefinedWindows::DEFAULT_WINDOW;
 }  // namespace
+
+MATCHER_P2(CheckMessageToMobile, result_code, success, "") {
+  const bool is_success =
+      (*arg)[am::strings::msg_params][am::strings::success].asBool() == success;
+
+  const bool is_result_code_correct =
+      (*arg)[am::strings::msg_params][am::strings::result_code].asInt() ==
+      static_cast<int32_t>(result_code);
+  return is_success && is_result_code_correct;
+}
 
 class ShowRequestTest : public CommandRequestTest<CommandsTestMocks::kIsNice> {
  public:
@@ -102,6 +123,101 @@ class ShowRequestTest : public CommandRequestTest<CommandsTestMocks::kIsNice> {
     (*msg)[am::strings::params][am::strings::connection_key] = kConnectionKey;
     (*msg)[am::strings::params][am::strings::function_id] = kFunctionID;
     return msg;
+  }
+
+ protected:
+  void SetUp() OVERRIDE {
+    ON_CALL(app_mngr_, application(kConnectionKey))
+        .WillByDefault(Return(mock_app_));
+    ON_CALL(*mock_app_, app_id()).WillByDefault(Return(kConnectionKey));
+    ON_CALL(*mock_app_, WindowIdExists(kCurrentWindowID))
+        .WillByDefault(Return(true));
+    ON_CALL(*mock_app_, window_layout(kCurrentWindowID))
+        .WillByDefault(Return(kCurrentTemplatelayout));
+  }
+
+  smart_objects::SmartObject CreateColorScheme(
+      const rgb_color_scheme& rgb_color_scheme) {
+    using namespace application_manager;
+
+    smart_objects::SmartObject primary_color(smart_objects::SmartType_Map);
+    smart_objects::SmartObject secondary_color(smart_objects::SmartType_Map);
+    smart_objects::SmartObject background_color(smart_objects::SmartType_Map);
+
+    primary_color[strings::red] = rgb_color_scheme[0];
+    primary_color[strings::green] = rgb_color_scheme[1];
+    primary_color[strings::blue] = rgb_color_scheme[2];
+
+    secondary_color[strings::red] = rgb_color_scheme[0];
+    secondary_color[strings::green] = rgb_color_scheme[1];
+    secondary_color[strings::blue] = rgb_color_scheme[2];
+
+    background_color[strings::red] = rgb_color_scheme[0];
+    background_color[strings::green] = rgb_color_scheme[1];
+    background_color[strings::blue] = rgb_color_scheme[2];
+
+    smart_objects::SmartObject color_scheme(smart_objects::SmartType_Map);
+    color_scheme[strings::primary_color] = primary_color;
+    color_scheme[strings::secondary_color] = secondary_color;
+    color_scheme[strings::background_color] = background_color;
+
+    return color_scheme;
+  }
+
+  smart_objects::SmartObject CreateTemplateConfiguration(
+      const std::string& layout) {
+    using namespace application_manager;
+
+    smart_objects::SmartObject template_configuration(
+        smart_objects::SmartType_Map);
+
+    template_configuration[strings::template_layout] = layout;
+
+    template_configuration[strings::day_color_scheme] =
+        CreateColorScheme(kCurrentDayColorRGB);
+
+    template_configuration[strings::night_color_scheme] =
+        CreateColorScheme(kCurrentNightColorRGB);
+
+    return template_configuration;
+  }
+
+  MessageSharedPtr CreateMessageWithTemplateLayout(const std::string& layout) {
+    auto msg = CreateMsgParams();
+    (*msg)[app_mngr::strings::msg_params][app_mngr::strings::window_id] =
+        kCurrentWindowID;
+    (*msg)[am::strings::msg_params][am::strings::template_configuration] =
+        CreateTemplateConfiguration(layout);
+
+    return msg;
+  }
+
+  std::shared_ptr<ShowRequest> SetupHelperLayout(
+      const std::string& layout,
+      const rgb_color_scheme& day_colors,
+      const rgb_color_scheme& night_colors) {
+    EXPECT_CALL(mock_rpc_service_,
+                ManageHMICommand(HMIResultCodeIs(hmi_apis::FunctionID::UI_Show),
+                                 Command::CommandSource::SOURCE_SDL_TO_HMI))
+        .WillOnce(Return(true));
+    EXPECT_CALL(*mock_app_, app_id()).WillOnce(Return(kConnectionKey));
+    EXPECT_CALL(*mock_app_, WindowIdExists(kCurrentWindowID))
+        .WillOnce(Return(true));
+    EXPECT_CALL(app_mngr_, application(kConnectionKey))
+        .WillOnce(Return(mock_app_));
+    const auto current_day_color_scheme = CreateColorScheme(day_colors);
+    ON_CALL(*mock_app_, day_color_scheme(kCurrentWindowID))
+        .WillByDefault(Return(current_day_color_scheme));
+    const auto current_night_color_scheme = CreateColorScheme(night_colors);
+    ON_CALL(*mock_app_, night_color_scheme(kCurrentWindowID))
+        .WillByDefault(Return(current_night_color_scheme));
+    ON_CALL(*mock_app_, window_layout(kCurrentWindowID))
+        .WillByDefault(Return(kCurrentTemplatelayout));
+
+    auto msg = CreateMessageWithTemplateLayout(layout);
+
+    auto command(CreateCommand<ShowRequest>(msg));
+    return command;
   }
 
   void TestSetupHelper(MessageSharedPtr msg,
@@ -269,9 +385,9 @@ TEST_F(ShowRequestTest, Run_SoftButtonExists_SUCCESS) {
   msg_params[am::hmi_request::show_strings] =
       smart_objects::SmartObject(smart_objects::SmartType_Array);
 
-  EXPECT_CALL(
-      mock_message_helper_,
-      SubscribeApplicationToSoftButton(creation_msg_params, _, kFunctionID));
+  EXPECT_CALL(mock_message_helper_,
+              SubscribeApplicationToSoftButton(
+                  creation_msg_params, _, kFunctionID, kDefaultWindowId));
   EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_, _));
   EXPECT_CALL(*mock_app_, set_show_command(msg_params));
 
@@ -319,7 +435,8 @@ TEST_F(ShowRequestTest, Run_SoftButtonExists_Canceled) {
 
   EXPECT_CALL(*mock_app_, app_id()).Times(0);
 
-  EXPECT_CALL(mock_message_helper_, SubscribeApplicationToSoftButton(_, _, _))
+  EXPECT_CALL(mock_message_helper_,
+              SubscribeApplicationToSoftButton(_, _, _, kDefaultWindowId))
       .Times(0);
   EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_, _)).Times(0);
   EXPECT_CALL(*mock_app_, set_show_command(_)).Times(0);
@@ -729,9 +846,13 @@ TEST_F(ShowRequestTest, Run_MainField1_MetadataTagWithNoFieldData) {
       hmi_apis::Common_Result::SUCCESS;
   (*ev_msg)[am::strings::msg_params][am::strings::app_id] = kConnectionKey;
   (*ev_msg)[am::strings::msg_params][am::strings::info] = "";
+  (*ev_msg)[am::strings::params][am::strings::connection_key] = kConnectionKey;
 
   Event event(hmi_apis::FunctionID::UI_Show);
   event.set_smart_object(*ev_msg);
+
+  EXPECT_CALL(app_mngr_, application(kConnectionKey))
+      .WillOnce(Return(mock_app_));
 
   MessageSharedPtr ui_command_result;
   EXPECT_CALL(
@@ -886,18 +1007,18 @@ TEST_F(ShowRequestTest, Run_CustomPresets_WrongSyntax) {
   command->Run();
 }
 
-TEST_F(ShowRequestTest, Run_InvalidApp_Canceled) {
-  MessageSharedPtr msg = CreateMsgParams();
+TEST_F(ShowRequestTest,
+       Run_AppDoesNotExist_ExpectAppNotRegisteredResponseToMobile) {
+  const auto result_code = mobile_apis::Result::APPLICATION_NOT_REGISTERED;
+  EXPECT_CALL(mock_rpc_service_,
+              ManageMobileCommand(CheckMessageToMobile(result_code, false),
+                                  Command::CommandSource::SOURCE_SDL))
+      .WillOnce(Return(true));
+  EXPECT_CALL(app_mngr_, application(kConnectionKey)).WillOnce(Return(nullptr));
 
-  std::shared_ptr<ShowRequest> command(CreateCommand<ShowRequest>(msg));
-
-  EXPECT_CALL(app_mngr_, application(kConnectionKey))
-      .WillOnce(Return(MockAppPtr()));
-  EXPECT_CALL(mock_rpc_service_, ManageMobileCommand(_, _));
-  EXPECT_CALL(*mock_app_, app_id()).Times(0);
-  EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_, _)).Times(0);
-  EXPECT_CALL(*mock_app_, set_show_command(_)).Times(0);
-
+  auto msg = CreateMsgParams();
+  auto command = CreateCommand<ShowRequest>(msg);
+  ASSERT_TRUE(command->Init());
   command->Run();
 }
 
@@ -913,7 +1034,301 @@ TEST_F(ShowRequestTest, Run_EmptyParams_Canceled) {
   EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_, _)).Times(0);
   EXPECT_CALL(*mock_app_, set_show_command(_)).Times(0);
 
+  ASSERT_TRUE(command->Init());
   command->Run();
+}
+
+TEST_F(ShowRequestTest,
+       Run_WindowWithIDDoesNotExist_ExpectInvalidIDResponseToMobile) {
+  const auto result_code = mobile_apis::Result::INVALID_ID;
+  EXPECT_CALL(mock_rpc_service_,
+              ManageMobileCommand(CheckMessageToMobile(result_code, false),
+                                  Command::CommandSource::SOURCE_SDL))
+      .WillOnce(Return(true));
+  EXPECT_CALL(app_mngr_, application(kConnectionKey))
+      .WillOnce(Return(mock_app_));
+  ON_CALL(*mock_app_, WindowIdExists(kCurrentWindowID))
+      .WillByDefault(Return(false));
+
+  auto msg = CreateMsgParams();
+  (*msg)[am::strings::msg_params][am::strings::window_id] = kCurrentWindowID;
+
+  auto command = CreateCommand<ShowRequest>(msg);
+  ASSERT_TRUE(command->Init());
+  command->Run();
+}
+
+TEST_F(ShowRequestTest,
+       Run_NoLayoutChangeWithoutBothColorScheme_SendRequestToHMI_SUCCESS) {
+  auto msg = CreateMsgParams();
+  (*msg)[app_mngr::strings::msg_params][app_mngr::strings::window_id] =
+      kCurrentWindowID;
+  (*msg)[am::strings::msg_params][am::strings::template_configuration]
+        [am::strings::template_layout] = kCurrentTemplatelayout;
+
+  auto command(CreateCommand<ShowRequest>(msg));
+
+  auto message_to_hmi = CreateMessage();
+
+  EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_, _))
+      .WillOnce(DoAll(SaveArg<0>(&message_to_hmi), Return(true)));
+
+  ASSERT_TRUE(command->Init());
+  command->Run();
+
+  const auto template_layout =
+      (*message_to_hmi)[am::strings::msg_params]
+                       [am::strings::template_configuration]
+                       [am::strings::template_layout]
+                           .asString();
+  EXPECT_EQ(kCurrentTemplatelayout, template_layout);
+}
+
+TEST_F(ShowRequestTest,
+       Run_NoLayoutChangeDayColorSchemesNotEqual_Response_REJECTED) {
+  auto msg = CreateMessageWithTemplateLayout(kCurrentTemplatelayout);
+
+  const auto current_day_color_scheme = CreateColorScheme(kNewDayColorRGB);
+
+  auto command(CreateCommand<ShowRequest>(msg));
+
+  ON_CALL(*mock_app_, day_color_scheme(kCurrentWindowID))
+      .WillByDefault(Return(current_day_color_scheme));
+
+  auto message_to_mobile = CreateMessage();
+  EXPECT_CALL(
+      mock_rpc_service_,
+      ManageMobileCommand(_, am::commands::Command::CommandSource::SOURCE_SDL))
+      .WillOnce(DoAll(SaveArg<0>(&message_to_mobile), Return(true)));
+
+  ASSERT_TRUE(command->Init());
+  command->Run();
+
+  const bool success =
+      (*message_to_mobile)[am::strings::msg_params][am::strings::success]
+          .asBool();
+  EXPECT_FALSE(success);
+
+  const auto result_code = static_cast<mobile_apis::Result::eType>(
+      (*message_to_mobile)[am::strings::msg_params][am::strings::result_code]
+          .asUInt());
+
+  EXPECT_EQ(mobile_apis::Result::REJECTED, result_code);
+}
+
+TEST_F(ShowRequestTest,
+       Run_NoLayoutChangeNightColorSchemesNotEqual_Response_REJECTED) {
+  auto msg = CreateMessageWithTemplateLayout(kCurrentTemplatelayout);
+
+  const auto current_night_color_scheme = CreateColorScheme(kNewNightColorRGB);
+
+  auto command(CreateCommand<ShowRequest>(msg));
+
+  ON_CALL(*mock_app_, day_color_scheme(kCurrentWindowID))
+      .WillByDefault(Return(current_night_color_scheme));
+
+  auto message_to_mobile = CreateMessage();
+  EXPECT_CALL(
+      mock_rpc_service_,
+      ManageMobileCommand(_, am::commands::Command::CommandSource::SOURCE_SDL))
+      .WillOnce(DoAll(SaveArg<0>(&message_to_mobile), Return(true)));
+
+  ASSERT_TRUE(command->Init());
+  command->Run();
+
+  const bool success =
+      (*message_to_mobile)[am::strings::msg_params][am::strings::success]
+          .asBool();
+  EXPECT_FALSE(success);
+
+  const auto result_code = static_cast<mobile_apis::Result::eType>(
+      (*message_to_mobile)[am::strings::msg_params][am::strings::result_code]
+          .asUInt());
+
+  EXPECT_EQ(mobile_apis::Result::REJECTED, result_code);
+}
+
+TEST_F(ShowRequestTest,
+       Run_LayoutNotChangeBothColorSchemeEqual_SendRequestToHMI_SUCCESS) {
+  EXPECT_CALL(mock_rpc_service_,
+              ManageHMICommand(HMIResultCodeIs(hmi_apis::FunctionID::UI_Show),
+                               Command::CommandSource::SOURCE_SDL_TO_HMI))
+      .WillOnce(Return(true));
+  EXPECT_CALL(*mock_app_, app_id()).WillOnce(Return(kConnectionKey));
+  EXPECT_CALL(*mock_app_, WindowIdExists(kCurrentWindowID))
+      .WillOnce(Return(true));
+  EXPECT_CALL(app_mngr_, application(kConnectionKey))
+      .WillOnce(Return(mock_app_));
+  const auto current_day_color_scheme = CreateColorScheme(kCurrentDayColorRGB);
+  ON_CALL(*mock_app_, day_color_scheme(kCurrentWindowID))
+      .WillByDefault(Return(current_day_color_scheme));
+  const auto current_night_color_scheme =
+      CreateColorScheme(kCurrentNightColorRGB);
+  ON_CALL(*mock_app_, night_color_scheme(kCurrentWindowID))
+      .WillByDefault(Return(current_night_color_scheme));
+  ON_CALL(*mock_app_, window_layout(kCurrentWindowID))
+      .WillByDefault(Return(kCurrentTemplatelayout));
+
+  auto msg = CreateMessageWithTemplateLayout(kCurrentTemplatelayout);
+
+  auto command(CreateCommand<ShowRequest>(msg));
+  ASSERT_TRUE(command->Init());
+  command->Run();
+}
+
+TEST_F(ShowRequestTest,
+       Run_LayoutChangeBothColorSchemeNotEqual_SendRequestToHMI_SUCCESS) {
+  EXPECT_CALL(mock_rpc_service_,
+              ManageHMICommand(HMIResultCodeIs(hmi_apis::FunctionID::UI_Show),
+                               Command::CommandSource::SOURCE_SDL_TO_HMI))
+      .WillOnce(Return(true));
+  EXPECT_CALL(*mock_app_, app_id()).WillOnce(Return(kConnectionKey));
+  EXPECT_CALL(*mock_app_, WindowIdExists(kCurrentWindowID))
+      .WillOnce(Return(true));
+  EXPECT_CALL(app_mngr_, application(kConnectionKey))
+      .WillOnce(Return(mock_app_));
+  const auto current_day_color_scheme = CreateColorScheme(kNewDayColorRGB);
+  ON_CALL(*mock_app_, day_color_scheme(kCurrentWindowID))
+      .WillByDefault(Return(current_day_color_scheme));
+  const auto current_night_color_scheme = CreateColorScheme(kNewNightColorRGB);
+  ON_CALL(*mock_app_, night_color_scheme(kCurrentWindowID))
+      .WillByDefault(Return(current_night_color_scheme));
+  ON_CALL(*mock_app_, window_layout(kCurrentWindowID))
+      .WillByDefault(Return(kCurrentTemplatelayout));
+
+  auto msg = CreateMessageWithTemplateLayout(kNewTemplateLayout);
+
+  auto command(CreateCommand<ShowRequest>(msg));
+  ASSERT_TRUE(command->Init());
+  command->Run();
+}
+
+TEST_F(ShowRequestTest, OnEvent_SuccessResultCode_ExpectSetWindowLayoutOnly) {
+  // Precondition
+  auto command =
+      SetupHelperLayout(kNewTemplateLayout, kNewDayColorRGB, kNewNightColorRGB);
+  ASSERT_TRUE(command->Init());
+  command->Run();
+  // Expectation
+  EXPECT_CALL(*mock_app_,
+              set_window_layout(kCurrentWindowID, kNewTemplateLayout));
+  EXPECT_CALL(*mock_app_, set_day_color_scheme(_, _));
+  EXPECT_CALL(*mock_app_, set_night_color_scheme(_, _));
+  EXPECT_CALL(mock_rpc_service_,
+              ManageMobileCommand(
+                  CheckMessageToMobile(mobile_apis::Result::SUCCESS, true),
+                  Command::CommandSource::SOURCE_SDL));
+  EXPECT_CALL(app_mngr_, application(kConnectionKey))
+      .WillOnce(Return(mock_app_));
+
+  auto msg = CreateMessage();
+  (*msg)[am::strings::params][am::hmi_response::code] =
+      hmi_apis::Common_Result::eType::SUCCESS;
+  (*msg)[am::strings::msg_params] = SmartObject(smart_objects::SmartType_Map);
+
+  Event event(hmi_apis::FunctionID::UI_Show);
+  event.set_smart_object(*msg);
+
+  command->on_event(event);
+}
+
+TEST_F(ShowRequestTest,
+       OnEvent_SuccessResultCode_ExpectSetWindowLayoutAndSetDayColorScheme) {
+  // Precondition
+  auto command = SetupHelperLayout(
+      kNewTemplateLayout, kCurrentDayColorRGB, kNewNightColorRGB);
+  ASSERT_TRUE(command->Init());
+  command->Run();
+  // Expectation
+  EXPECT_CALL(*mock_app_,
+              set_window_layout(kCurrentWindowID, kNewTemplateLayout));
+  EXPECT_CALL(*mock_app_,
+              set_day_color_scheme(kCurrentWindowID,
+                                   CreateColorScheme(kCurrentDayColorRGB)));
+  EXPECT_CALL(*mock_app_, set_night_color_scheme(_, _));
+  EXPECT_CALL(mock_rpc_service_,
+              ManageMobileCommand(
+                  CheckMessageToMobile(mobile_apis::Result::SUCCESS, true),
+                  Command::CommandSource::SOURCE_SDL));
+  EXPECT_CALL(app_mngr_, application(kConnectionKey))
+      .WillOnce(Return(mock_app_));
+
+  auto msg = CreateMessage();
+  (*msg)[am::strings::params][am::hmi_response::code] =
+      hmi_apis::Common_Result::eType::SUCCESS;
+  (*msg)[am::strings::msg_params] = SmartObject(smart_objects::SmartType_Map);
+
+  Event event(hmi_apis::FunctionID::UI_Show);
+  event.set_smart_object(*msg);
+
+  command->on_event(event);
+}
+
+TEST_F(ShowRequestTest,
+       OnEvent_SuccessResultCode_ExpectSetWindowLayoutAndBothColorScheme) {
+  // Precondition
+  auto command = SetupHelperLayout(
+      kNewTemplateLayout, kCurrentDayColorRGB, kCurrentNightColorRGB);
+  ASSERT_TRUE(command->Init());
+  command->Run();
+  // Expectation
+  EXPECT_CALL(*mock_app_,
+              set_window_layout(kCurrentWindowID, kNewTemplateLayout));
+  EXPECT_CALL(*mock_app_,
+              set_day_color_scheme(kCurrentWindowID,
+                                   CreateColorScheme(kCurrentDayColorRGB)));
+  EXPECT_CALL(*mock_app_,
+              set_night_color_scheme(kCurrentWindowID,
+                                     CreateColorScheme(kCurrentNightColorRGB)));
+  EXPECT_CALL(mock_rpc_service_,
+              ManageMobileCommand(
+                  CheckMessageToMobile(mobile_apis::Result::SUCCESS, true),
+                  Command::CommandSource::SOURCE_SDL));
+  EXPECT_CALL(app_mngr_, application(kConnectionKey))
+      .WillOnce(Return(mock_app_));
+
+  auto msg = CreateMessage();
+  (*msg)[am::strings::params][am::hmi_response::code] =
+      hmi_apis::Common_Result::eType::SUCCESS;
+  (*msg)[am::strings::msg_params] = SmartObject(smart_objects::SmartType_Map);
+
+  Event event(hmi_apis::FunctionID::UI_Show);
+  event.set_smart_object(*msg);
+
+  command->on_event(event);
+}
+
+TEST_F(ShowRequestTest,
+       OnEvent_SuccessResultCode_ExpectBothColorSchemeWithoutSetWindowLayout) {
+  // Precondition
+  auto command = SetupHelperLayout(
+      kCurrentTemplatelayout, kCurrentDayColorRGB, kCurrentNightColorRGB);
+  ASSERT_TRUE(command->Init());
+  command->Run();
+  // Expectation
+  EXPECT_CALL(*mock_app_, set_window_layout(_, _)).Times(0);
+  EXPECT_CALL(*mock_app_,
+              set_day_color_scheme(kCurrentWindowID,
+                                   CreateColorScheme(kCurrentDayColorRGB)));
+  EXPECT_CALL(*mock_app_,
+              set_night_color_scheme(kCurrentWindowID,
+                                     CreateColorScheme(kCurrentNightColorRGB)));
+  EXPECT_CALL(mock_rpc_service_,
+              ManageMobileCommand(
+                  CheckMessageToMobile(mobile_apis::Result::SUCCESS, true),
+                  Command::CommandSource::SOURCE_SDL));
+  EXPECT_CALL(app_mngr_, application(kConnectionKey))
+      .WillOnce(Return(mock_app_));
+
+  auto msg = CreateMessage();
+  (*msg)[am::strings::params][am::hmi_response::code] =
+      hmi_apis::Common_Result::eType::SUCCESS;
+  (*msg)[am::strings::msg_params] = SmartObject(smart_objects::SmartType_Map);
+
+  Event event(hmi_apis::FunctionID::UI_Show);
+  event.set_smart_object(*msg);
+
+  command->on_event(event);
 }
 
 TEST_F(ShowRequestTest, OnEvent_SuccessResultCode_SUCCESS) {
@@ -931,7 +1346,7 @@ TEST_F(ShowRequestTest, OnEvent_SuccessResultCode_SUCCESS) {
   event.set_smart_object(*msg);
 
   EXPECT_CALL(app_mngr_, application(_)).WillRepeatedly(Return(mock_app_));
-
+  ASSERT_TRUE(command->Init());
   command->on_event(event);
 }
 
@@ -957,6 +1372,10 @@ TEST_F(ShowRequestTest, OnEvent_WrongFunctionID_Canceled) {
   MessageSharedPtr msg = CreateMessage();
   (*msg)[am::strings::params][am::hmi_response::code] =
       mobile_apis::Result::SUCCESS;
+  (*msg)[am::strings::params][am::strings::connection_key] = kConnectionKey;
+
+  ON_CALL(app_mngr_, application(kConnectionKey))
+      .WillByDefault(Return(mock_app_));
 
   std::shared_ptr<ShowRequest> command(CreateCommand<ShowRequest>(msg));
   EXPECT_CALL(mock_rpc_service_, ManageMobileCommand(_, _)).Times(0);

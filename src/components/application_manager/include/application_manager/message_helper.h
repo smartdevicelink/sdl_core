@@ -42,6 +42,7 @@
 
 #include <application_manager/smart_object_keys.h>
 #include "application_manager/application.h"
+#include "application_manager/hmi_capabilities.h"
 #include "application_manager/policies/policy_handler_interface.h"
 #include "connection_handler/device.h"
 #include "interfaces/HMI_API.h"
@@ -302,6 +303,30 @@ class MessageHelper {
       const uint32_t app_id,
       ApplicationManager& app_mngr);
 
+  /**
+   * @brief Creates UI.CreateWindow request
+   * @param application application instance
+   * @param app_mngr reference to application manager
+   * @param windows_info smart object containing saved windows info
+   * @return smart object with UI.CreateWindow request
+   */
+  static smart_objects::SmartObjectSPtr CreateUICreateWindowRequestToHMI(
+      ApplicationSharedPtr application,
+      ApplicationManager& app_mngr,
+      const smart_objects::SmartObject& window_info);
+
+  /**
+   * @brief Creates UI.CreateWindow requests
+   * @param application application instance
+   * @param app_mngr reference to application manager
+   * @param windows_info smart object containing saved windows info
+   * @return list of smart objects with UI.CreateWindow requests
+   */
+  static smart_objects::SmartObjectList CreateUICreateWindowRequestsToHMI(
+      application_manager::ApplicationSharedPtr application,
+      ApplicationManager& app_mngr,
+      const smart_objects::SmartObject& windows_info);
+
   /*
    * @brief Create Common.DeviceInfo struct from device handle
    * @param device_handle device handle of the app
@@ -348,14 +373,15 @@ class MessageHelper {
                                               bool is_unexpected_disconnect,
                                               ApplicationManager& app_mngr);
 
-  static ns_smart_device_link::ns_smart_objects::SmartObjectSPtr
-  GetBCActivateAppRequestToHMI(
+  static smart_objects::SmartObjectSPtr GetBCActivateAppRequestToHMI(
       ApplicationConstSharedPtr app,
-      const protocol_handler::SessionObserver& session_observer,
       const policy::PolicyHandlerInterface& policy_handler,
       hmi_apis::Common_HMILevel::eType level,
       bool send_policy_priority,
       ApplicationManager& app_mngr);
+
+  static smart_objects::SmartObjectSPtr GetBCCloseApplicationRequestToHMI(
+      ApplicationConstSharedPtr app, ApplicationManager& app_mngr);
 
   static void SendOnResumeAudioSourceToHMI(const uint32_t app_id,
                                            ApplicationManager& app_mngr);
@@ -694,6 +720,23 @@ class MessageHelper {
    * @param app current application
    *
    * @param function_id Unique command id from mobile API
+   *
+   * @param window_id window id containing soft buttons
+   */
+  static void SubscribeApplicationToSoftButton(
+      smart_objects::SmartObject& message_params,
+      ApplicationSharedPtr app,
+      int32_t function_id,
+      const WindowID window_id);
+
+  /*
+   * @brief subscribe application to softbutton
+   *
+   * @param message_params contains data of request
+   *
+   * @param app current application
+   *
+   * @param function_id Unique command id from mobile API
    */
   static void SubscribeApplicationToSoftButton(
       smart_objects::SmartObject& message_params,
@@ -710,6 +753,15 @@ class MessageHelper {
    */
   static bool PrintSmartObject(const smart_objects::SmartObject& object);
 
+  /**
+   * @brief Extract window unique ID from message, this id is used for identify
+   * the window
+   * @param s_map contains application's window id
+   * @return window id from current message
+   */
+  static WindowID ExtractWindowIdFromSmartObject(
+      const smart_objects::SmartObject& s_map);
+
   template <typename From, typename To>
   static To ConvertEnumAPINoCheck(const From& input) {
     return static_cast<To>(input);
@@ -723,6 +775,14 @@ class MessageHelper {
    */
   static std::string CommonLanguageToString(
       hmi_apis::Common_Language::eType language);
+
+  /**
+   * @brief Converts mobile language to string representation
+   * @param language Mobile UI language
+   * @return Mobile language string representation
+   */
+  static std::string MobileLanguageToString(
+      mobile_apis::Language::eType language);
 
   /**
    * @brief Converts string to mobile language enum value
@@ -855,10 +915,13 @@ class MessageHelper {
 
   /**
    * @brief Sends HMI status notification to mobile
-   * @param application_impl application with changed HMI status
+   * @param application application with changed HMI status
+   * @param window_id id of affected window
+   * @param application_manager reference to application manager
    **/
   static void SendHMIStatusNotification(
-      const Application& application_impl,
+      ApplicationSharedPtr application,
+      const WindowID window_id,
       ApplicationManager& application_manager);
 
   /**
@@ -891,6 +954,16 @@ class MessageHelper {
 
   static void BroadcastCapabilityUpdate(smart_objects::SmartObject& msg_params,
                                         ApplicationManager& app_mngr);
+
+  /**
+   * @brief CreateDisplayCapabilityUpdateToMobile creates notification with
+   * updated display capabilities acccoring to message type
+   * @param system_capabilities SO containing notification data
+   * @param app reference to application
+   * @return shared ptr to notification SO
+   */
+  static smart_objects::SmartObjectSPtr CreateDisplayCapabilityUpdateToMobile(
+      const smart_objects::SmartObject& system_capabilities, Application& app);
 
  private:
   /**

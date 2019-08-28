@@ -74,6 +74,7 @@ const std::string kAppStorageFolder = "fake-storage";
 const std::string kSystemFilesPath = "/fake/system/files";
 const std::string kFileName = "Filename";
 const uint32_t kHmiAppId = 3u;
+const connection_handler::DeviceHandle kDeviceId = 1u;
 }  // namespace
 
 class SystemRequestTest
@@ -99,13 +100,15 @@ class SystemRequestTest
     ON_CALL(*mock_app_, policy_app_id()).WillByDefault(Return(kAppPolicyId));
     ON_CALL(*mock_app_, folder_name()).WillByDefault(Return(kAppFolderName));
     ON_CALL(*mock_app_, hmi_app_id()).WillByDefault(Return(kHmiAppId));
+    ON_CALL(*mock_app_, device()).WillByDefault(Return(kDeviceId));
 
     ON_CALL(app_mngr_settings_, system_files_path())
         .WillByDefault(ReturnRef(kSystemFilesPath));
     ON_CALL(app_mngr_settings_, app_storage_folder())
         .WillByDefault(ReturnRef(kAppStorageFolder));
 
-    ON_CALL(mock_policy_handler_, IsRequestTypeAllowed(kAppPolicyId, _))
+    ON_CALL(mock_policy_handler_,
+            IsRequestTypeAllowed(kDeviceId, kAppPolicyId, _))
         .WillByDefault(Return(true));
   }
 
@@ -146,9 +149,10 @@ TEST_F(SystemRequestTest,
 
   PreConditions();
 
-  EXPECT_CALL(mock_policy_handler_,
-              IsRequestTypeAllowed(kAppPolicyId,
-                                   mobile_apis::RequestType::OEM_SPECIFIC))
+  EXPECT_CALL(
+      mock_policy_handler_,
+      IsRequestTypeAllowed(
+          kDeviceId, kAppPolicyId, mobile_apis::RequestType::OEM_SPECIFIC))
       .WillOnce(Return(true));
 
   EXPECT_CALL(mock_policy_handler_,
@@ -191,9 +195,10 @@ TEST_F(
 
   PreConditions();
 
-  EXPECT_CALL(mock_policy_handler_,
-              IsRequestTypeAllowed(kAppPolicyId,
-                                   mobile_apis::RequestType::OEM_SPECIFIC))
+  EXPECT_CALL(
+      mock_policy_handler_,
+      IsRequestTypeAllowed(
+          kDeviceId, kAppPolicyId, mobile_apis::RequestType::OEM_SPECIFIC))
       .WillOnce(Return(true));
 
   EXPECT_CALL(mock_policy_handler_,
@@ -216,9 +221,10 @@ TEST_F(SystemRequestTest, Run_RequestTypeDisallowed_SendDisallowedResponse) {
 
   PreConditions();
 
-  EXPECT_CALL(mock_policy_handler_,
-              IsRequestTypeAllowed(kAppPolicyId,
-                                   mobile_apis::RequestType::OEM_SPECIFIC))
+  EXPECT_CALL(
+      mock_policy_handler_,
+      IsRequestTypeAllowed(
+          kDeviceId, kAppPolicyId, mobile_apis::RequestType::OEM_SPECIFIC))
       .WillOnce(Return(false));
 
   ExpectManageMobileCommandWithResultCode(mobile_apis::Result::DISALLOWED);
@@ -241,9 +247,9 @@ TEST_F(SystemRequestTest, Run_RequestType_IconURL_Success) {
   const std::vector<uint8_t> binary_data = {1u, 2u};
   (*msg)[am::strings::params][am::strings::binary_data] = binary_data;
 
-  EXPECT_CALL(
-      mock_policy_handler_,
-      IsRequestTypeAllowed(kAppPolicyId, mobile_apis::RequestType::ICON_URL))
+  EXPECT_CALL(mock_policy_handler_,
+              IsRequestTypeAllowed(
+                  kDeviceId, kAppPolicyId, mobile_apis::RequestType::ICON_URL))
       .WillOnce(Return(true));
   EXPECT_CALL(app_mngr_settings_, app_icons_folder())
       .WillOnce(ReturnRef(kAppStorageFolder));

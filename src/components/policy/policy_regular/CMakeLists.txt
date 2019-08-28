@@ -38,6 +38,8 @@ include_directories (
   ${JSONCPP_INCLUDE_DIRECTORY}
   ${COMPONENTS_DIR}/utils/include/
   ${COMPONENTS_DIR}/config_profile/include
+  ${COMPONENTS_DIR}/connection_handler/include/
+  ${COMPONENTS_DIR}/protocol_handler/include/
   ${LOG4CXX_INCLUDE_DIRECTORY}
   ${BOOST_INCLUDE_DIR}
 )
@@ -87,8 +89,13 @@ else ()
   list(APPEND LIBRARIES sqlite3)
 endif ()
 
-add_library(Policy SHARED ${SOURCES})
-target_link_libraries(Policy ${LIBRARIES})
+
+add_library(PolicyStatic ${SOURCES})
+target_link_libraries(PolicyStatic ${LIBRARIES})
+
+
+add_library(Policy SHARED "src/policy_manager_impl.cc")
+target_link_libraries(Policy PolicyStatic)
 
 if(ENABLE_LOG)
   target_link_libraries(Policy log4cxx -L${LOG4CXX_LIBS_DIRECTORY})

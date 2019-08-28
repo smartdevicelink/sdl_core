@@ -97,6 +97,7 @@ There are several RPCs that are "required" to be implemented in order for SDL to
   * DeleteCommand
   * AddSubMenu
   * DeleteSubMenu
+  * ShowAppMenu
   * CreateInteractionChoiceSet
   * PerformInteraction
   * DeleteInteractionChoiceSet

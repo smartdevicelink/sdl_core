@@ -60,6 +60,7 @@ const std::string kServiceType = "MEDIA";
 const std::string kServiceName = "service_name";
 const std::string kServiceId = "service_id";
 const std::string kPolicyAppId = "p_app_id";
+const std::string kPolicyAppId2 = "p_app_id2";
 const uint32_t kConnectionKey = 43629;
 const uint32_t kHMIConnectionKey = 0;
 
@@ -83,6 +84,7 @@ class AppServiceManagerTest : public testing::Test {
  public:
   AppServiceManagerTest()
       : mock_app_ptr_(new MockApplication)
+      , mock_app_ptr2_(new MockApplication)
       , app_service_manager_(mock_app_manager_, mock_last_state_)
       , mock_message_helper_(
             application_manager::MockMessageHelper::message_helper_mock()) {
@@ -101,10 +103,15 @@ class AppServiceManagerTest : public testing::Test {
         .WillByDefault(ReturnRef(mock_settings_));
     ON_CALL(*mock_app_ptr_, policy_app_id())
         .WillByDefault(Return(kPolicyAppId));
+    ON_CALL(*mock_app_ptr2_, policy_app_id())
+        .WillByDefault(Return(kPolicyAppId2));
     ON_CALL(mock_last_state_, get_dictionary()).WillByDefault(ReturnRef(dict_));
     auto app_ptr = std::static_pointer_cast<am::Application>(mock_app_ptr_);
+    auto app_ptr2 = std::static_pointer_cast<am::Application>(mock_app_ptr2_);
     ON_CALL(mock_app_manager_, application(kConnectionKey))
         .WillByDefault(Return(app_ptr));
+    ON_CALL(mock_app_manager_, application(kConnectionKey + 1))
+        .WillByDefault(Return(app_ptr2));
   }
 
  protected:
@@ -192,6 +199,7 @@ class AppServiceManagerTest : public testing::Test {
   Json::Value dict_;
   std::vector<std::string> embedded_services_;
   std::shared_ptr<MockApplication> mock_app_ptr_;
+  std::shared_ptr<MockApplication> mock_app_ptr2_;
   MockApplicationManager mock_app_manager_;
   resumption_test::MockLastState mock_last_state_;
   MockApplicationManagerSettings mock_settings_;

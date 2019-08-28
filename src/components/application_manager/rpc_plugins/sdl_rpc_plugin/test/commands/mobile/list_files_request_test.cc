@@ -60,6 +60,11 @@ namespace am = ::application_manager;
 using am::commands::MessageSharedPtr;
 using sdl_rpc_plugin::commands::ListFilesRequest;
 
+namespace {
+const am::WindowID kDefaultWindowId =
+    mobile_apis::PredefinedWindows::DEFAULT_WINDOW;
+}
+
 class ListFilesRequestTest
     : public CommandRequestTest<CommandsTestMocks::kIsNice> {
  public:
@@ -86,7 +91,7 @@ TEST_F(ListFilesRequestTest, Run_TooManyHmiNone_UNSUCCESS) {
   std::shared_ptr<ListFilesRequest> command(CreateCommand<ListFilesRequest>());
 
   ON_CALL(app_mngr_, application(_)).WillByDefault(Return(app));
-  ON_CALL(*app, hmi_level())
+  ON_CALL(*app, hmi_level(kDefaultWindowId))
       .WillByDefault(Return(mobile_apis::HMILevel::HMI_NONE));
 
   const uint32_t kListFilesInNoneAllowed = 1u;
@@ -121,7 +126,7 @@ TEST_F(ListFilesRequestTest, Run_SUCCESS) {
 
   ON_CALL(app_mngr_, application(_)).WillByDefault(Return(app));
 
-  ON_CALL(*app, hmi_level())
+  ON_CALL(*app, hmi_level(kDefaultWindowId))
       .WillByDefault(Return(mobile_apis::HMILevel::HMI_FULL));
 
   ON_CALL(*app, increment_list_files_in_none_count()).WillByDefault(Return());

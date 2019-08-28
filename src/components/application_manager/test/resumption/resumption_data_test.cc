@@ -74,6 +74,7 @@ void ResumptionDataTest::CheckSavedApp(sm::SmartObject& resume_app_list) {
   CheckGlobalProporties(
       resume_app_list[am::strings::application_global_properties]);
   CheckSubscriptions(resume_app_list[am::strings::application_subscriptions]);
+  CheckWindowsInfo(resume_app_list[am::strings::windows_info]);
 }
 
 void ResumptionDataTest::CheckCommands(sm::SmartObject& res_list) {
@@ -327,6 +328,33 @@ void ResumptionDataTest::CheckVRTitle(
   EXPECT_EQ(vtitle, res_list[am::strings::vr_help_title].asString());
 }
 
+void ResumptionDataTest::CheckWindowsInfo(sm::SmartObject& res_list) {
+  using namespace application_manager;
+  auto check_window_info = [this](
+                               const smart_objects::SmartObject& window_info) {
+    using namespace application_manager;
+    const WindowID saved_window_id = window_info[strings::window_id].asInt();
+    const auto test_window_info = test_window_params_map_[saved_window_id];
+    const auto& saved_window_name =
+        window_info[strings::window_name].asString();
+    ASSERT_TRUE(0 != test_window_info.use_count());
+    const auto& window_name =
+        (*test_window_info)[strings::window_name].asString();
+    const auto& saved_duplicate_window_id =
+        window_info[strings::duplicate_updates_from_window_id].asInt();
+    const auto& saved_associated_service_type =
+        window_info[strings::associated_service_type].asString();
+    EXPECT_EQ(saved_window_name, window_name);
+    EXPECT_EQ("ServiceType", saved_associated_service_type);
+    EXPECT_EQ(0, saved_duplicate_window_id);
+  };
+
+  for (size_t i = 0; i < res_list.length(); ++i) {
+    const auto& saved_window_info = res_list[i];
+    check_window_info(saved_window_info);
+  }
+}
+
 void ResumptionDataTest::PrepareData() {
   mock_app_extension_ =
       std::make_shared<NiceMock<application_manager_test::MockAppExtension> >();
@@ -341,9 +369,14 @@ void ResumptionDataTest::PrepareData() {
   DataAccessor<am::SubMenuMap> sub_menu_m(test_submenu_map, sublock_ptr_);
   DataAccessor<am::CommandsMap> commands_m(test_commands_map, comlock_ptr_);
   DataAccessor<am::ChoiceSetMap> choice_set_m(test_choiceset_map, setlock_ptr_);
+  DataAccessor<am::WindowParamsMap> window_params_map(
+      test_window_params_map_, window_params_map_lock_ptr_);
 
   SetSubscriptions();
   DataAccessor<am::ButtonSubscriptions> btn_sub(btn_subscr, btnlock_ptr_);
+  SetWindowsInfo();
+  SetDefaultCurrentHmiState();
+  SetDefaultWindowIds();
 
   ON_CALL(*app_mock, is_application_data_changed()).WillByDefault(Return(true));
 
@@ -352,7 +385,8 @@ void ResumptionDataTest::PrepareData() {
   ON_CALL(*app_mock, curHash()).WillByDefault(ReturnRef(hash_));
   ON_CALL(*app_mock, get_grammar_id()).WillByDefault(Return(grammar_id_));
   ON_CALL(*app_mock, device()).WillByDefault(Return(device_handle_));
-  ON_CALL(*app_mock, hmi_level()).WillByDefault(Return(hmi_level_));
+  ON_CALL(*app_mock, hmi_level(mobile_apis::PredefinedWindows::DEFAULT_WINDOW))
+      .WillByDefault(Return(hmi_level_));
   ON_CALL(*app_mock, app_id()).WillByDefault(Return(app_id_));
   ON_CALL(*app_mock, hmi_app_id()).WillByDefault(Return(hmi_app_id_));
   ON_CALL(*app_mock, IsAudioApplication()).WillByDefault(Return(is_audio_));
@@ -375,6 +409,21 @@ void ResumptionDataTest::PrepareData() {
   ON_CALL(*app_mock, SubscribedButtons()).WillByDefault(Return(btn_sub));
 
   ON_CALL(*app_mock, getAppFiles()).WillByDefault(ReturnRef(app_files_map_));
+  ON_CALL(*app_mock, window_optional_params_map())
+      .WillByDefault(Return(window_params_map));
+}
+
+void ResumptionDataTest::SetDefaultCurrentHmiState() {
+  am::HmiStatePtr hmi_state =
+      std::make_shared<am::HmiState>(app_mock, mock_application_manager_);
+  hmi_state->set_window_type(mobile_apis::WindowType::WIDGET);
+
+  ON_CALL(*app_mock, CurrentHmiState(_)).WillByDefault(Return(hmi_state));
+}
+
+void ResumptionDataTest::SetDefaultWindowIds() {
+  const am::WindowIds window_ids{1, 2, 3, 4, 5};
+  ON_CALL(*app_mock, GetWindowIds()).WillByDefault(Return(window_ids));
 }
 
 void ResumptionDataTest::SetGlobalProporties() {
@@ -548,6 +597,21 @@ void ResumptionDataTest::SetKeyboardProperties() {
 void ResumptionDataTest::SetSubscriptions() {
   btn_subscr.insert(ButtonName::eType::CUSTOM_BUTTON);
   btn_subscr.insert(ButtonName::eType::OK);
+}
+
+void ResumptionDataTest::SetWindowsInfo() {
+  using namespace application_manager;
+  const uint32_t number_of_widgets = 5;
+  for (uint32_t i = 0; i < number_of_widgets; ++i) {
+    auto window_info = std::make_shared<smart_objects::SmartObject>(
+        smart_objects::SmartType_Map);
+    const WindowID window_id = i + 1;
+    (*window_info)[strings::window_name] =
+        std::string("Widget ") + std::to_string(window_id);
+    (*window_info)[strings::associated_service_type] = "ServiceType";
+    (*window_info)[strings::duplicate_updates_from_window_id] = 0;
+    test_window_params_map_[window_id] = window_info;
+  }
 }
 
 }  // namespace resumption_test

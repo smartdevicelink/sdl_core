@@ -60,6 +60,8 @@ typedef std::shared_ptr<OnTBTClientStateNotification> NotificationPtr;
 
 namespace {
 const uint32_t kAppId = 1u;
+const am::WindowID kDefaultWindowId =
+    mobile_apis::PredefinedWindows::DEFAULT_WINDOW;
 }  // namespace
 
 class OnTBTClientStateNotificationTest
@@ -79,7 +81,7 @@ TEST_F(OnTBTClientStateNotificationTest, Run_HmiLevelNone_UNSUCCESS) {
   EXPECT_CALL(app_mngr_, applications_with_navi())
       .WillOnce(Return(applications_with_navi));
 
-  EXPECT_CALL(*mock_app, hmi_level())
+  EXPECT_CALL(*mock_app, hmi_level(kDefaultWindowId))
       .WillOnce(Return(mobile_apis::HMILevel::HMI_NONE));
 
   EXPECT_CALL(*mock_app, app_id()).Times(0);
@@ -122,7 +124,7 @@ TEST_F(OnTBTClientStateNotificationTest,
   EXPECT_CALL(app_mngr_, applications_with_navi())
       .WillOnce(Return(applications_with_navi));
 
-  EXPECT_CALL(*mock_app, hmi_level())
+  EXPECT_CALL(*mock_app, hmi_level(kDefaultWindowId))
       .WillOnce(Return(mobile_apis::HMILevel::HMI_FULL));
 
   EXPECT_CALL(*mock_app, app_id()).WillOnce(Return(kAppId));

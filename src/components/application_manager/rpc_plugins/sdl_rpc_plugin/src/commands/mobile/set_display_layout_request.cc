@@ -75,8 +75,8 @@ void SetDisplayLayoutRequest::Run() {
     new_layout = msg_params[strings::display_layout].asString();
   }
 
-  if (new_layout != old_layout &&
-      !new_layout.empty()) {  // Template switched, allow any color change
+  if (new_layout != old_layout && !new_layout.empty()) {
+    // Template switched, hence allow any color change
     LOG4CXX_DEBUG(logger_,
                   "SetDisplayLayoutRequest New Layout: " << new_layout);
     app->set_display_layout(new_layout);
@@ -85,22 +85,20 @@ void SetDisplayLayoutRequest::Run() {
     // Template layout is the same as previous layout
     // Reject message if colors are set
     if (msg_params.keyExists(strings::day_color_scheme) &&
-        app->day_color_scheme() != NULL &&
-        !(msg_params[strings::day_color_scheme] ==
-          *(app->day_color_scheme()))) {
-      // Color scheme param exists and has been previously set, do not allow
-      // color change
+        app->day_color_scheme().getType() != smart_objects::SmartType_Null &&
+        msg_params[strings::day_color_scheme] != app->day_color_scheme()) {
+      // Color scheme param exists and has been previously set,
+      // hence do not allow color change
       LOG4CXX_DEBUG(logger_, "Reject Day Color Scheme Change");
       SendResponse(false, mobile_apis::Result::REJECTED);
       return;
     }
 
     if (msg_params.keyExists(strings::night_color_scheme) &&
-        app->night_color_scheme() != NULL &&
-        !(msg_params[strings::night_color_scheme] ==
-          *(app->night_color_scheme()))) {
-      // Color scheme param exists and has been previously set, do not allow
-      // color change
+        app->night_color_scheme().getType() != smart_objects::SmartType_Null &&
+        msg_params[strings::night_color_scheme] != app->night_color_scheme()) {
+      // Color scheme param exists and has been previously set,
+      // hence do not allow color change
       LOG4CXX_DEBUG(logger_, "Reject Night Color Scheme Change");
       SendResponse(false, mobile_apis::Result::REJECTED);
       return;
@@ -127,6 +125,14 @@ void SetDisplayLayoutRequest::Run() {
 void SetDisplayLayoutRequest::on_event(const event_engine::Event& event) {
   LOG4CXX_AUTO_TRACE(logger_);
 
+  ApplicationSharedPtr app = application_manager_.application(connection_key());
+
+  if (!app) {
+    LOG4CXX_ERROR(logger_, "Application is not registered");
+    SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
+    return;
+  }
+
   const smart_objects::SmartObject& message = event.smart_object();
   switch (event.id()) {
     case hmi_apis::FunctionID::UI_SetDisplayLayout: {
@@ -143,7 +149,7 @@ void SetDisplayLayoutRequest::on_event(const event_engine::Event& event) {
       if (response_success) {
         HMICapabilities& hmi_capabilities = hmi_capabilities_;
 
-        // in case templates_available is empty copy from hmi capabilities
+        // In case templates_available is empty copy from hmi capabilities
         if (msg_params.keyExists(hmi_response::display_capabilities)) {
           if (0 == msg_params[hmi_response::display_capabilities]
                              [hmi_response::templates_available]
@@ -154,10 +160,21 @@ void SetDisplayLayoutRequest::on_event(const event_engine::Event& event) {
                               hmi_response::templates_available);
           }
         }
+        const Version& app_version = app->version();
+        if (app_version.max_supported_api_version >= APIVersion::kAPIV6) {
+          // In case of successful response warn user that this RPC is
+          // deprecated from 6.0 and higher API versions
+          result_code = hmi_apis::Common_Result::WARNINGS;
+          info =
+              "The RPC is deprecated and will be removed in a future version. "
+              "The requested display layout is set to the main window. Please "
+              "use `Show.templateConfiguration` instead.";
+        }
       }
+
       SendResponse(response_success,
                    MessageHelper::HMIToMobileResult(result_code),
-                   info.empty() ? NULL : info.c_str(),
+                   info.empty() ? nullptr : info.c_str(),
                    &msg_params);
       break;
     }

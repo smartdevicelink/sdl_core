@@ -149,6 +149,8 @@ class SetGlobalPropertiesRequest
   std::string ui_response_info_;
   std::string tts_response_info_;
 
+  bool is_menu_layout_available_ = true;
+
   DISALLOW_COPY_AND_ASSIGN(SetGlobalPropertiesRequest);
 };
 

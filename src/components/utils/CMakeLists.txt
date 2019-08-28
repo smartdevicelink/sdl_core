@@ -58,7 +58,10 @@ set(EXCLUDE_PATHS
   ${DBMS_PATHS}
 )
 
-set(LIBRARIES)
+set(LIBRARIES
+  encryption
+  jsoncpp
+)
 
 if(NOT BUILD_BACKTRACE_SUPPORT)
   list(APPEND EXCLUDE_PATHS

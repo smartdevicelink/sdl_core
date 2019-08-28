@@ -105,6 +105,8 @@ generate_function_to_interface_convert_map() {
       HmiInterfaces::HMI_INTERFACE_BasicCommunication;
   convert_map[BasicCommunication_GetFilePath] =
       HmiInterfaces::HMI_INTERFACE_BasicCommunication;
+  convert_map[BasicCommunication_CloseApplication] =
+      HmiInterfaces::HMI_INTERFACE_BasicCommunication;
   convert_map[VR_IsReady] = HmiInterfaces::HMI_INTERFACE_VR;
   convert_map[VR_Started] = HmiInterfaces::HMI_INTERFACE_VR;
   convert_map[VR_Stopped] = HmiInterfaces::HMI_INTERFACE_VR;
@@ -135,12 +137,16 @@ generate_function_to_interface_convert_map() {
   convert_map[UI_DeleteCommand] = HmiInterfaces::HMI_INTERFACE_UI;
   convert_map[UI_AddSubMenu] = HmiInterfaces::HMI_INTERFACE_UI;
   convert_map[UI_DeleteSubMenu] = HmiInterfaces::HMI_INTERFACE_UI;
+  convert_map[UI_ShowAppMenu] = HmiInterfaces::HMI_INTERFACE_UI;
+  convert_map[UI_CreateWindow] = HmiInterfaces::HMI_INTERFACE_UI;
+  convert_map[UI_DeleteWindow] = HmiInterfaces::HMI_INTERFACE_UI;
   convert_map[UI_PerformInteraction] = HmiInterfaces::HMI_INTERFACE_UI;
   convert_map[UI_SetMediaClockTimer] = HmiInterfaces::HMI_INTERFACE_UI;
   convert_map[UI_SetGlobalProperties] = HmiInterfaces::HMI_INTERFACE_UI;
   convert_map[UI_OnCommand] = HmiInterfaces::HMI_INTERFACE_UI;
   convert_map[UI_OnSystemContext] = HmiInterfaces::HMI_INTERFACE_UI;
   convert_map[UI_GetCapabilities] = HmiInterfaces::HMI_INTERFACE_UI;
+  convert_map[UI_CancelInteraction] = HmiInterfaces::HMI_INTERFACE_UI;
   convert_map[UI_ChangeRegistration] = HmiInterfaces::HMI_INTERFACE_UI;
   convert_map[UI_OnLanguageChange] = HmiInterfaces::HMI_INTERFACE_UI;
   convert_map[UI_GetSupportedLanguages] = HmiInterfaces::HMI_INTERFACE_UI;
@@ -230,6 +236,8 @@ generate_function_to_interface_convert_map() {
   convert_map[RC_OnInteriorVehicleData] = HmiInterfaces::HMI_INTERFACE_RC;
   convert_map[RC_OnRemoteControlSettings] = HmiInterfaces::HMI_INTERFACE_RC;
   convert_map[AppService_PublishAppService] =
+      HmiInterfaces::HMI_INTERFACE_AppService;
+  convert_map[AppService_UnpublishAppService] =
       HmiInterfaces::HMI_INTERFACE_AppService;
   convert_map[AppService_GetAppServiceData] =
       HmiInterfaces::HMI_INTERFACE_AppService;

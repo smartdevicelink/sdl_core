@@ -103,6 +103,11 @@ class MockHMICapabilities : public ::application_manager::HMICapabilities {
   MOCK_METHOD1(set_display_capabilities,
                void(const smart_objects::SmartObject& display_capabilities));
 
+  MOCK_CONST_METHOD0(system_display_capabilities,
+                     const smart_objects::SmartObjectSPtr());
+  MOCK_METHOD1(set_system_display_capabilities,
+               void(const smart_objects::SmartObject& display_capabilities));
+
   MOCK_CONST_METHOD0(hmi_zone_capabilities,
                      const smart_objects::SmartObject*());
   MOCK_METHOD1(set_hmi_zone_capabilities,
@@ -163,6 +168,9 @@ class MockHMICapabilities : public ::application_manager::HMICapabilities {
   MOCK_CONST_METHOD0(rc_supported, bool());
   MOCK_METHOD1(set_rc_supported, void(const bool supported));
 
+  MOCK_CONST_METHOD1(menu_layout_supported,
+                     bool(mobile_apis::MenuLayout::eType layout));
+
   MOCK_CONST_METHOD0(navigation_capability,
                      const smart_objects::SmartObject*());
   MOCK_METHOD1(set_navigation_capability,
@@ -198,6 +206,9 @@ class MockHMICapabilities : public ::application_manager::HMICapabilities {
   MOCK_CONST_METHOD2(convert_json_languages_to_obj,
                      void(const Json::Value& json_languages,
                           smart_objects::SmartObject& languages));
+  MOCK_CONST_METHOD2(convert_audio_capability_to_obj,
+                     void(const Json::Value& capability,
+                          smart_objects::SmartObject& output_so));
 };
 
 }  // namespace application_manager_test
